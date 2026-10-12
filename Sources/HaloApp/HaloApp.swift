@@ -2,7 +2,8 @@
 // with the project's compositions in the sidebar, HaloViewer as content and
 // the selected composition's settings and layers in the inspector. New
 // Composition opens NewCompositionSheet; a double-click on a sidebar row
-// renames it. The Composition menu (HaloCompositionCommands) and Layer > New
+// renames it; a refused rename opens RenameRefusalAlert with the typed name
+// kept. The Composition menu (HaloCompositionCommands) and Layer > New
 // (HaloCommands) reach the window through focused scene values. Views only
 // read HaloProject and call its methods; all state lives in HaloModel
 // (scripts/ci checks this).
@@ -55,6 +56,11 @@ struct HaloWindow: View {
                 onCreate: { settings in if model.newComposition(settings) { showsNewComposition = false } },
                 onCancel: { showsNewComposition = false })
         }
+        .modifier(RenameRefusalAlert(
+            refusal: model.refusedRename,
+            problem: { model.renameProblem($0.id, to: $1) },
+            onRename: { _ = model.renameComposition($0.id, to: $1) },
+            onDismiss: { model.dismissRefusedRename() }))
         .focusedSceneValue(\.haloCompositionActions, compositionActions)
         .focusedSceneValue(\.haloNewLayer, newLayer)
     }
