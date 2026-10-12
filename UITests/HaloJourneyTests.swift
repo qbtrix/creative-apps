@@ -22,7 +22,7 @@ final class HaloJourneyTests: XCTestCase {
         halo.openEachMenu()
     }
 
-    @MainActor func testBuildCompositionAndRender() throws {
-        throw XCTSkip("journey arrives with its line:halo issue")
+    @MainActor func testKeyLayerAndSave() throws {
+        throw XCTSkip("journey arrives with #207 (key), #208 (undo) and #209 (save)")
     }
 }

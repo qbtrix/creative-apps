@@ -22,6 +22,6 @@ final class PhotoJourneyTests: XCTestCase {
     }
 
     @MainActor func testOpenImagePaintAndSave() throws {
-        throw XCTSkip("journey arrives with its line:photo issue")
+        throw XCTSkip("journey arrives with #190 (open), #192 (paint) and #196 (export)")
     }
 }

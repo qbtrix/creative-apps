@@ -20,7 +20,7 @@ final class LibraryJourneyTests: XCTestCase {
         library.openEachMenu()
     }
 
-    @MainActor func testImportRateAndFilter() throws {
-        throw XCTSkip("journey arrives with its line:library issue")
+    @MainActor func testImportRateAndRelaunch() throws {
+        throw XCTSkip("journey arrives with #210 (import), #211 (rate) and #212 (relaunch)")
     }
 }

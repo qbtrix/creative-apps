@@ -21,7 +21,7 @@ final class DesignJourneyTests: XCTestCase {
         design.openEachMenu()
     }
 
-    @MainActor func testDrawFrameAddTextAndExport() throws {
-        throw XCTSkip("journey arrives with its line:design issue")
+    @MainActor func testDrawShapesAddTextAndSave() throws {
+        throw XCTSkip("journey arrives with #198 (draw), #199 (text) and #202 (save)")
     }
 }

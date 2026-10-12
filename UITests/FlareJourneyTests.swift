@@ -21,7 +21,7 @@ final class FlareJourneyTests: XCTestCase {
         flare.openEachMenu()
     }
 
-    @MainActor func testDrawAnimateAndExport() throws {
-        throw XCTSkip("journey arrives with its line:flare issue")
+    @MainActor func testDrawKeyAndSave() throws {
+        throw XCTSkip("journey arrives with #203 (draw), #204 (key) and #205 (save)")
     }
 }
