@@ -13,7 +13,8 @@ import Testing
         undoManager.groupsByEvent = false
         for _ in 0..<2 {
             undoManager.beginUndoGrouping()
-            undoManager.registerUndo(withTarget: undoManager) { _ in }
+            // Like the window's Delete Page, undoing registers the redo step.
+            undoManager.registerUndo(withTarget: undoManager) { $0.registerUndo(withTarget: $0) { _ in } }
             undoManager.setActionName("Delete Page")
             undoManager.endUndoGrouping()
         }
