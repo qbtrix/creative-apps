@@ -1,6 +1,8 @@
 # CI: runs scripts/ci on Linux (Model targets only; Package.swift declares the
 # UI targets on macOS only) and on macOS 26 (everything, plus the snapshot
-# PNGs uploaded as the `snapshots` artifact). The fast lane only merges a PR
+# PNGs uploaded as the `snapshots` artifact and the five release .app bundles
+# from scripts/bundle-apps as the `app-builds` artifact, a tarball inside so
+# the executables keep their +x bit). The fast lane only merges a PR
 # once a check from this workflow ("CI") has passed and reads the job names
 # "Linux" and "macOS", so keep both names stable. workflow_dispatch lets the
 # fast lane run CI on main after its merges and on refreshed PR heads:
@@ -55,3 +57,13 @@ jobs:
           name: snapshots
           path: .build/snapshots
           if-no-files-found: warn
+      # Release builds wrapped in signed .app bundles, for "Open on this Mac".
+      # Runs only after scripts/ci passed, so a red build never ships bundles.
+      - run: scripts/bundle-apps
+      - name: Upload app builds
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-builds
+          path: .build/app-builds.tar.gz
+          retention-days: 7
+          if-no-files-found: error
