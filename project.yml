@@ -1,0 +1,43 @@
+# project.yml: the XcodeGen spec for the human-like UI tests, and nothing else.
+# SwiftPM cannot host UI test bundles, so this generates CreativeApps.xcodeproj
+# (gitignored; never commit or hand-edit it) with one UI test bundle per app
+# and the Journeys scheme that runs them all. The apps are not Xcode targets:
+# scripts/bundle-apps builds them from the SwiftPM targets in Package.swift,
+# and each journey launches .build/apps/<X>App.app by path. scripts/ui-test
+# runs the whole thing. To add an app, add a <X>JourneyTests target below and
+# list it in the scheme.
+name: CreativeApps
+options:
+  bundleIdPrefix: org.creativesuite
+  deploymentTarget:
+    macOS: "26.0"
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+    GENERATE_INFOPLIST_FILE: YES
+    CODE_SIGN_STYLE: Manual
+    CODE_SIGN_IDENTITY: "-"
+targetTemplates:
+  Journey:
+    type: bundle.ui-testing
+    platform: macOS
+    sources:
+      - UITests/Journey.swift
+      - UITests/${target_name}.swift
+targets:
+  FlareJourneyTests: { templates: [Journey] }
+  DesignJourneyTests: { templates: [Journey] }
+  PhotoJourneyTests: { templates: [Journey] }
+  LibraryJourneyTests: { templates: [Journey] }
+  HaloJourneyTests: { templates: [Journey] }
+schemes:
+  Journeys:
+    build:
+      targets:
+        FlareJourneyTests: [test]
+        DesignJourneyTests: [test]
+        PhotoJourneyTests: [test]
+        LibraryJourneyTests: [test]
+        HaloJourneyTests: [test]
+    test:
+      targets: [FlareJourneyTests, DesignJourneyTests, PhotoJourneyTests, LibraryJourneyTests, HaloJourneyTests]

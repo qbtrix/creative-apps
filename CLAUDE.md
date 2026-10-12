@@ -20,6 +20,11 @@ compiled only by the `macOS` CI job. So:
 - Look at what you built: the `macOS` job uploads the `snapshots` artifact
   (`gh run download <id> -n snapshots`), PNGs written by
   `Tests/AppSnapshotTests`. Open the ones your change touched.
+- Watch it run: the `macOS` job also clicks through every app
+  (`UITests/<X>JourneyTests.swift`) and uploads whole-window screenshots as
+  `ui-screens` (`gh run download <id> -n ui-screens`). A user-facing feature
+  adds or extends its app's journey test (docs/engineering.md, Human-like UI
+  tests).
 
 ## Targets and lines
 
@@ -175,5 +180,7 @@ scripts/ci                                   # lint + app-state rule + design li
 swift test --filter FlareModelTests          # one suite while iterating
 bash Tests/fast_lane/test_fast_lane.sh       # fast-lane decision tests (needs jq)
 gh run download <run-id> -n snapshots        # the PNGs from a macOS CI run
+gh run download <run-id> -n ui-screens       # whole-window PNGs from the UI journeys
+scripts/ui-test                              # macOS + Xcode + xcodegen: run the UI journeys locally
 scripts/bundle-apps                          # macOS: release builds as signed FlareApp.app ... HaloApp.app in .build/apps; CI uploads them as `app-builds` (app-builds.tar.gz)
 ```
