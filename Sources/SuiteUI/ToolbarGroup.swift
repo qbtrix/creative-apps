@@ -6,7 +6,9 @@
 // through SuiteWindow. An action can only be disabled by saying why: its
 // `unavailableHelp` is the tooltip, so no shown control is silently dead.
 // Apps build their canvas palette from their Model's tool enum through
-// PaletteTool, which carries that reason for every tool.
+// PaletteTool, which carries that reason for every tool. The palette is one
+// accessibility container, `suite.tools`, so the UI journeys in UITests/ can
+// click every tool in it without listing them.
 import SwiftUI
 
 public struct ToolbarAction: Identifiable {
@@ -89,6 +91,8 @@ public struct ToolbarGroup: View {
                 .accessibilityAddTraits(isSelected ? .isSelected : [])
             }
         }
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier("suite.tools")
         .padding(SuiteSpacing.xs)
         .suiteGlass(in: Capsule())
     }
