@@ -21,6 +21,20 @@ import Testing
     #expect(workspace.layers.isEmpty)
 }
 
+@Test func newImageNeverReusesLayerIDs() throws {
+    var workspace = PhotoWorkspace()
+    try workspace.newCanvas(width: 2, height: 2)
+    workspace.addLayer()
+    workspace.addLayer()
+    let firstIDs = workspace.layers.map(\.id)
+    try workspace.newCanvas(width: 2, height: 2)
+    workspace.addLayer()
+    let secondIDs = workspace.layers.map(\.id)
+    let allIDs = firstIDs + secondIDs
+    #expect(Set(allIDs).count == allIDs.count)
+    #expect(workspace.layers.map(\.name).contains("Background"))
+}
+
 @Test func layerAndToolSelection() throws {
     var workspace = PhotoWorkspace()
     try workspace.newCanvas(width: 1, height: 1)
