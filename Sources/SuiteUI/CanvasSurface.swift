@@ -28,7 +28,7 @@ public struct CanvasSurface<Overlay: View>: View {
                 .aspectRatio(artboard, contentMode: .fit)
                 .frame(maxWidth: artboard.width, maxHeight: artboard.height)
                 .shadow(color: .black.opacity(0.18), radius: 8, y: 2)
-                .padding(SuiteSpacing.xxl * 2)
+                .padding(SuiteSize.canvasInset)
         }
         .overlay(alignment: overlayAlignment) {
             overlay.padding(SuiteSpacing.l)

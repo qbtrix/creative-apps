@@ -1,5 +1,5 @@
 // AdjustmentsInspector.swift: the inspector's adjustment sections (Exposure,
-// Levels, Blur, Hue and Saturation), each with an enable switch, a Reset
+// Levels, Blur, Hue and Saturation), each with an enable checkbox, a Reset
 // button and SuiteUI slider rows. Values in, one closure out: every change
 // goes out as an AdjustmentEdit, and AdjustmentSettings clamps and validates
 // it. A disabled section dims its rows; Reset is off while a section is at
@@ -45,14 +45,14 @@ struct AdjustmentsInspector: View {
         }
     }
 
-    /// One section: its switch and Reset button above its rows.
+    /// One section: its checkbox and Reset button above its rows.
     private func section(_ kind: AdjustmentKind, @ViewBuilder rows: () -> some View) -> some View {
         InspectorSection(kind.title) {
             HStack {
                 Toggle(
                     "Enabled",
                     isOn: Binding(get: { settings.isEnabled(kind) }, set: { onEdit(.setEnabled(kind, $0)) }))
-                .toggleStyle(.switch)
+                .toggleStyle(.checkbox)
                 .controlSize(.small)
                 Spacer()
                 Button("Reset") { onEdit(.reset(kind)) }
