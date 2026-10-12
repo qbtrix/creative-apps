@@ -14,6 +14,9 @@ explains it. The rules behind each question are in `docs/engineering.md` and
 - [ ] Engine work goes through creative-core (and its commands for document
       edits), not a copy inside the Model?
 - [ ] Names match the ones already used for the same idea?
+- [ ] New files are owned by a C4 component: each new `Sources/` file is in
+      exactly one component's `paths` in `docs/c4/model.json`, and that
+      component's description still says what it holds?
 - [ ] If the line's core loop (open or create, see, edit with each shown tool,
       undo, save) doesn't work end to end yet, does this PR build a missing
       step of it rather than polish or a panel (CLAUDE.md, Journeys first)?

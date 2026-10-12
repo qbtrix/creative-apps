@@ -52,12 +52,16 @@ public enum SuiteSize {
     public static let contentMinimum = CGSize(width: 480, height: 360)
     public static let windowMinimum = CGSize(width: 900, height: 560)
     /// The timeline's fixed track-name column, ruler, one lane, a keyframe
-    /// diamond, and the least room between two ruler labels.
+    /// diamond, the least room between two ruler labels and between two ruler
+    /// ticks, and how much ruler is drawn before the scroll view says which
+    /// stretch is visible.
     public static let timelineLabelColumn: CGFloat = 160
     public static let timelineRuler: CGFloat = 24
     public static let timelineLane: CGFloat = 28
     public static let timelineKeyframe: CGFloat = 10
     public static let timelineLabelSpacing: CGFloat = 48
+    public static let timelineTickSpacing: CGFloat = 6
+    public static let timelineRulerSpan: CGFloat = 4096
 }
 
 /// Text styles. macOS has no Dynamic Type; these are the system text styles,

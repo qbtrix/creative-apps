@@ -1,5 +1,7 @@
 // FrameMapping.swift: the arithmetic behind TimelineStrip: frame to x, x to
-// frame, the ruler's label interval and keyframe hit-testing. Plain Swift with
+// frame, the ruler's tick and label steps, the ruler marks inside a visible
+// stretch (bounded by its width, never by the duration) and keyframe
+// hit-testing. Plain Swift with
 // no SwiftUI, so the rules are unit-tested on their own. Invariants: frames
 // always come back inside 0...duration, a duration below 0 counts as 0, and a
 // frame width of 0 (or below, or NaN) never divides: every x maps to frame 0.
@@ -55,6 +57,45 @@ public struct FrameMapping: Equatable, Sendable {
         return max(duration, 1)
     }
 
+    /// The ruler's ticks and labels whose x lies inside `visibleX`. Ticks sit
+    /// at least `tickSpacing` points apart and labels at least `labelSpacing`
+    /// (each at least 1), so neither count grows past the visible width over
+    /// that spacing, plus one, however long the duration is.
+    public func rulerMarks(visibleX: ClosedRange<Double>, tickSpacing: Double, labelSpacing: Double) -> RulerMarks {
+        RulerMarks(
+            ticks: frames(every: max(tickSpacing, 1), in: visibleX),
+            labels: frames(every: max(labelSpacing, 1), in: visibleX)
+        )
+    }
+
+    /// The multiples of the step for `spacing` whose ticks lie inside `range`.
+    private func frames(every spacing: Double, in range: ClosedRange<Double>) -> [Int] {
+        guard range.upperBound >= 0, range.lowerBound <= contentWidth else { return [] }
+        guard frameWidth > 0 else { return [0] }
+        let step = labelInterval(minimumSpacing: spacing)
+        let low = frame(nearest: (range.lowerBound / frameWidth).rounded(.up))
+        let high = frame(nearest: (range.upperBound / frameWidth).rounded(.down))
+        guard low <= high else { return [] }
+        let remainder = low % step
+        var (frame, overflow) = low.addingReportingOverflow(remainder == 0 ? 0 : step - remainder)
+        // Double rounding far from 0 can widen low...high; the width caps it.
+        let width = range.upperBound - range.lowerBound
+        let limit = width.isFinite ? Int(min(width / spacing, maximumMarks)) + 1 : 0
+        var frames: [Int] = []
+        while !overflow, frame <= high, frames.count <= limit {
+            frames.append(frame)
+            (frame, overflow) = frame.addingReportingOverflow(step)
+        }
+        return frames
+    }
+
+    /// A frame count from a whole Double, clamped to 0...duration.
+    private func frame(nearest value: Double) -> Int {
+        guard value > 0 else { return 0 }
+        guard value < Double(duration) else { return duration }
+        return min(Int(value), duration)
+    }
+
     /// The keyframe whose tick is nearest `x`, if it lies within `tolerance`
     /// points of it.
     public func keyframe(nearX x: Double, in keyframes: [Int], tolerance: Double) -> Int? {
@@ -62,4 +103,14 @@ public struct FrameMapping: Equatable, Sendable {
             .filter { $0.distance <= tolerance }
         return near.min { $0.distance < $1.distance }?.frame
     }
+}
+
+/// More marks than any screen could show; keeps the Int conversion safe.
+private let maximumMarks = 1_000_000.0
+
+/// What the ruler draws in a visible stretch: the frames that get a tick and
+/// the frames that get a label, both ascending.
+public struct RulerMarks: Equatable, Sendable {
+    public let ticks: [Int]
+    public let labels: [Int]
 }
