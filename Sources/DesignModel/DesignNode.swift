@@ -59,7 +59,7 @@ public struct DesignRow: Identifiable, Sendable, Hashable {
 /// Why a tree or page edit was refused.
 public enum DesignTreeError: Error, Equatable, Sendable {
     case unknownID(String), notAContainer(String), intoItself(String)
-    case emptyName, lastPage
+    case emptyName, lastPage, alreadyExists(String)
 }
 
 extension [DesignNode] {
