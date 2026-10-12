@@ -3,11 +3,19 @@
 // first), the selected layer, the active tool and the image adjustments. Linux-safe: no UI imports.
 // PhotoApp changes it only through the methods here. Invariants: with a canvas
 // open there is at least one layer, and the selection names one of them.
+// Every palette tool acts through `drag(from:to:)`; a tool that does nothing
+// there stays disabled with `unavailableHelp` (PhotoToolsTests checks this).
 import CoreRaster
 
 /// The tools on Photo's tool palette.
 public enum PhotoTool: String, CaseIterable, Sendable {
     case move, marquee, brush, eraser, crop
+
+    /// Why the palette shows this tool disabled, as its tooltip; nil once the
+    /// tool works. Set it to nil in the change that makes `drag` do something.
+    public var unavailableHelp: String? { nil }
+
+    public var isEnabled: Bool { unavailableHelp == nil }
 }
 
 public struct PhotoWorkspace: Sendable, Equatable {
@@ -46,6 +54,15 @@ public struct PhotoWorkspace: Sendable, Equatable {
 
     public mutating func selectTool(_ tool: PhotoTool) {
         self.tool = tool
+    }
+
+    /// The active tool's drag across the canvas from `start` to `end`, in image
+    /// pixels; a click is a drag that doesn't move. The canvas sends every
+    /// tool gesture here, so each case is where that tool's work goes.
+    public mutating func drag(from start: Mask.Point, to end: Mask.Point) {
+        switch tool {
+        case .move, .marquee, .brush, .eraser, .crop: break
+        }
     }
 
     /// Changes one adjustment; AdjustmentSettings clamps and validates it.
