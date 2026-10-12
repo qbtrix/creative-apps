@@ -126,7 +126,7 @@ struct PhotoCanvas: View {
 }
 
 extension PhotoTool: PaletteTool {
-    var title: String {
+    public var title: String {
         switch self {
         case .move: "Move"
         case .marquee: "Marquee"
@@ -136,7 +136,7 @@ extension PhotoTool: PaletteTool {
         }
     }
 
-    var systemImage: String {
+    public var systemImage: String {
         switch self {
         case .move: "arrow.up.and.down.and.arrow.left.and.right"
         case .marquee: "rectangle.dashed"

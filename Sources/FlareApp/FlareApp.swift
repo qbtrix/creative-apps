@@ -58,7 +58,7 @@ struct FlareCanvas: View {
 }
 
 extension FlareTool: PaletteTool {
-    var title: String {
+    public var title: String {
         switch self {
         case .select: "Select"
         case .pen: "Pen"
@@ -67,7 +67,7 @@ extension FlareTool: PaletteTool {
         }
     }
 
-    var systemImage: String {
+    public var systemImage: String {
         switch self {
         case .select: "cursorarrow"
         case .pen: "pencil.tip"

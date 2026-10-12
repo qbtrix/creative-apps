@@ -139,7 +139,7 @@ struct DesignCanvas: View {
 }
 
 extension DesignTool: PaletteTool {
-    var title: String {
+    public var title: String {
         switch self {
         case .move: "Move"
         case .frame: "Frame"
@@ -149,7 +149,7 @@ extension DesignTool: PaletteTool {
         }
     }
 
-    var systemImage: String {
+    public var systemImage: String {
         switch self {
         case .move: "cursorarrow"
         case .frame: "number"
