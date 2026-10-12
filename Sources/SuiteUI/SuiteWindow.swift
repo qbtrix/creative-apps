@@ -1,44 +1,71 @@
 // SuiteWindow.swift: the one window shell every app uses. A NavigationSplitView
-// with a sidebar list of SidebarItems, the app's content as the detail, and a
+// with a sidebar list of SidebarSections, the app's content as the detail, and a
 // trailing inspector the user can hide (toolbar button, Option-Command-I).
 // The window chrome (toolbar, sidebar, inspector) is system Liquid Glass; the
 // content stays flat. Apps pass state in and get selection out through
-// `onSelect`; the shell owns only presentation state (inspector visibility).
+// `onSelect`, `onToggle`, `onMove` and `onRename`; a nil closure turns that
+// gesture off. The shell owns only presentation state (inspector visibility).
 import SwiftUI
 
 public struct SuiteWindow<Content: View, Inspector: View>: View {
     private let title: String
-    private let sidebarTitle: String
-    private let items: [SidebarItem]
+    private let sections: [SidebarSection]
     private let selection: SidebarItem.ID?
     private let onSelect: @MainActor (SidebarItem.ID) -> Void
+    private let onToggle: (@MainActor (SidebarItem.ID, SidebarToggle.ID) -> Void)?
+    private let onMove: (@MainActor (SidebarSection.ID, IndexSet, Int) -> Void)?
+    private let onRename: (@MainActor (SidebarItem.ID, String) -> Void)?
     private let actions: [ToolbarAction]
     private let content: Content
     private let inspector: Inspector
     @State private var showsInspector = true
 
     /// `title` names the open document (or the app when none is open).
-    /// `actions` become the window's trailing toolbar items.
+    /// `actions` become the window's trailing toolbar items. `onToggle` gets a
+    /// row toggle click, `onMove` a drag reorder within a section's top-level
+    /// rows, `onRename` a double-click rename.
     public init(
-        title: String, sidebarTitle: String, items: [SidebarItem], selection: SidebarItem.ID?,
-        onSelect: @escaping @MainActor (SidebarItem.ID) -> Void, actions: [ToolbarAction] = [],
+        title: String, sections: [SidebarSection], selection: SidebarItem.ID?,
+        onSelect: @escaping @MainActor (SidebarItem.ID) -> Void,
+        onToggle: (@MainActor (SidebarItem.ID, SidebarToggle.ID) -> Void)? = nil,
+        onMove: (@MainActor (SidebarSection.ID, IndexSet, Int) -> Void)? = nil,
+        onRename: (@MainActor (SidebarItem.ID, String) -> Void)? = nil,
+        actions: [ToolbarAction] = [],
         @ViewBuilder content: () -> Content, @ViewBuilder inspector: () -> Inspector
     ) {
         self.title = title
-        self.sidebarTitle = sidebarTitle
-        self.items = items
+        self.sections = sections
         self.selection = selection
         self.onSelect = onSelect
+        self.onToggle = onToggle
+        self.onMove = onMove
+        self.onRename = onRename
         self.actions = actions
         self.content = content()
         self.inspector = inspector()
     }
 
+    /// One sidebar section titled `sidebarTitle`.
+    public init(
+        title: String, sidebarTitle: String, items: [SidebarItem], selection: SidebarItem.ID?,
+        onSelect: @escaping @MainActor (SidebarItem.ID) -> Void, actions: [ToolbarAction] = [],
+        @ViewBuilder content: () -> Content, @ViewBuilder inspector: () -> Inspector
+    ) {
+        self.init(
+            title: title, sections: [SidebarSection(id: sidebarTitle, title: sidebarTitle, items: items)],
+            selection: selection, onSelect: onSelect, actions: actions, content: content, inspector: inspector)
+    }
+
     public var body: some View {
         NavigationSplitView {
             List(selection: Binding(get: { selection }, set: { id in if let id { onSelect(id) } })) {
-                Section(sidebarTitle) {
-                    ForEach(items) { SidebarRow($0) }
+                ForEach(sections) { section in
+                    Section {
+                        ForEach(section.items) { SidebarNode(item: $0, onToggle: onToggle, onRename: onRename) }
+                            .onMove(perform: onMove == nil ? nil : { from, to in onMove?(section.id, from, to) })
+                    } header: {
+                        SidebarSectionHeader(section: section)
+                    }
                 }
             }
             .navigationSplitViewColumnWidth(
