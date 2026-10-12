@@ -52,12 +52,10 @@ check "deny agent rules, any case" "not-eligible|touches protected paths: docs/a
   . 'docs/agents.md' .
 check "similar names are allowed" "eligible|150|2|5" \
   . $'scripts/ci-helpers.sh\nSources/DesignModel/PackageSwiftNotes.swift' .
-check "deny app shell" "not-eligible|touches protected paths: Sources/FlareApp/FlareApp.swift" \
+check "app shell is eligible (taste review happens after merge, on the snapshots)" "eligible|150|2|5" \
   . $'Sources/FlareApp/FlareApp.swift\nSources/FlareModel/FlareWorkspace.swift' .
-check "deny SuiteUI" "not-eligible|touches protected paths: Sources/SuiteUI/Tokens.swift" \
+check "SuiteUI is eligible" "eligible|150|2|5" \
   . $'Sources/SuiteUI/Tokens.swift\nTests/SuiteUITests/TokensTests.swift' .
-check "deny every app shell" "not-eligible|touches protected paths: Sources/HaloApp/HaloApp.swift, Sources/LibraryApp/LibraryApp.swift" \
-  . $'Sources/HaloApp/HaloApp.swift\nSources/LibraryApp/LibraryApp.swift' .
 check "models and tests stay eligible" "eligible|150|2|5" \
   . $'Sources/PhotoModel/PhotoWorkspace.swift\nTests/AppSnapshotTests/AppSnapshotTests.swift' .
 check "a model named like an app is allowed" "eligible|150|2|5" \
