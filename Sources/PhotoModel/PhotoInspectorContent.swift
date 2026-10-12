@@ -17,3 +17,15 @@ extension PhotoWorkspace {
         return .layer(layer, width: canvas.width, height: canvas.height)
     }
 }
+
+extension PhotoInspectorContent {
+    /// The empty state's message, naming only actions Photo has, or nil when
+    /// the inspector shows a layer.
+    public var emptyStateMessage: String? {
+        switch self {
+        case .noImage: "Create a new image to adjust it."
+        case .noSelection: "Select a layer to adjust it."
+        case .layer: nil
+        }
+    }
+}

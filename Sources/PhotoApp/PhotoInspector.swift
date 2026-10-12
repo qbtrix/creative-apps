@@ -1,6 +1,7 @@
 // PhotoInspector.swift: Photo's inspector pane. Shows the selected layer and
 // the image adjustments, or an empty state from PhotoWorkspace.inspectorContent:
 // "No Image" with no image open, "No Selection" with no layer selected.
+// Messages come from PhotoInspectorContent.emptyStateMessage.
 // Reads the model and calls back; never changes it.
 import CoreRaster
 import PhotoModel
@@ -16,9 +17,9 @@ struct PhotoInspector: View {
     var body: some View {
         switch model.inspectorContent {
         case .noImage:
-            EmptyStateView("No Image", systemImage: "photo", message: "Open or create an image to adjust it.")
+            EmptyStateView("No Image", systemImage: "photo", message: model.inspectorContent.emptyStateMessage ?? "")
         case .noSelection:
-            EmptyStateView("No Selection", systemImage: "photo", message: "Select a layer to adjust it.")
+            EmptyStateView("No Selection", systemImage: "photo", message: model.inspectorContent.emptyStateMessage ?? "")
         case .layer(let layer, let width, let height):
             ScrollView {
                 VStack(alignment: .leading, spacing: SuiteSpacing.l) {
