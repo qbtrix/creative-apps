@@ -46,11 +46,12 @@ private struct MenuStates: View {
     }
 
     private func actions(_ model: PhotoWorkspace) -> PhotoLayerActions {
-        PhotoLayerActions(
-            newLayer: model.canAddLayer ? {} : nil,
-            deleteLayer: model.canDeleteSelectedLayer ? {} : nil,
-            renameLayer: model.canEditSelectedLayer ? {} : nil,
-            toggleVisibility: model.canEditSelectedLayer ? {} : nil,
+        let run: @MainActor () -> Void = {}
+        return PhotoLayerActions(
+            newLayer: model.canAddLayer ? run : nil,
+            deleteLayer: model.canDeleteSelectedLayer ? run : nil,
+            renameLayer: model.canEditSelectedLayer ? run : nil,
+            toggleVisibility: model.canEditSelectedLayer ? run : nil,
             visibilityTitle: model.visibilityCommandTitle)
     }
 }
