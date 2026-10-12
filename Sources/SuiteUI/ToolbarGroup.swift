@@ -42,9 +42,9 @@ public struct ToolbarGroup: View {
                 Button(action: action.perform) {
                     Image(systemName: action.systemImage)
                         .symbolVariant(action.isSelected ? .fill : .none)
-                        .foregroundStyle(action.isSelected ? Color.accentColor : Color.primary)
+                        .foregroundStyle(action.isSelected ? SuiteColor.accent : Color.primary)
                         .frame(width: SuiteSize.toolButton, height: SuiteSize.toolButton)
-                        .background(action.isSelected ? Color.accentColor.opacity(0.15) : .clear, in: Circle())
+                        .background(action.isSelected ? SuiteColor.accent.opacity(0.15) : .clear, in: Circle())
                         .contentShape(.rect)
                 }
                 .buttonStyle(.plain)
