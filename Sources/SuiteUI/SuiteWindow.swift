@@ -7,7 +7,9 @@
 // gesture off. Toolbar actions with `unavailableHelp` show disabled, with the
 // reason as their tooltip. The shell owns only presentation state (inspector
 // visibility) and tints the whole window with the suite's one accent
-// (SuiteColor.accent).
+// (SuiteColor.accent). The sidebar and inspector carry the accessibility
+// identifiers `suite.sidebar` and `suite.inspector`; the UI journeys in
+// UITests/ find them by those names.
 import SwiftUI
 
 public struct SuiteWindow<Content: View, Inspector: View>: View {
@@ -71,6 +73,7 @@ public struct SuiteWindow<Content: View, Inspector: View>: View {
                     }
                 }
             }
+            .accessibilityIdentifier("suite.sidebar")
             .navigationSplitViewColumnWidth(
                 min: SuiteSize.sidebarWidth.min, ideal: SuiteSize.sidebarWidth.ideal, max: SuiteSize.sidebarWidth.max)
         } detail: {
@@ -80,6 +83,8 @@ public struct SuiteWindow<Content: View, Inspector: View>: View {
                     inspector
                         .padding(SuiteSpacing.m)
                         .frame(maxHeight: .infinity, alignment: .top)
+                        .accessibilityElement(children: .contain)
+                        .accessibilityIdentifier("suite.inspector")
                         .inspectorColumnWidth(
                             min: SuiteSize.inspectorWidth.min, ideal: SuiteSize.inspectorWidth.ideal,
                             max: SuiteSize.inspectorWidth.max)
