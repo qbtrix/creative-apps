@@ -45,7 +45,7 @@ extension FlareWorkspace {
         while taken.contains("layer-\(n)") || taken.contains("Layer \(n)") { n += 1 }
         let layer = Layer(id: "layer-\(n)", name: "Layer \(n)")
         let below = scene.layers.firstIndex { $0.id == selectedLayerID }
-        apply(AddLayer(sceneID: scene.id, layer: layer, index: below.map { $0 + 1 }), selection: .layer(layer.id))
+        apply(AddLayer(owner: .scene(scene.id), layer: layer, index: below.map { $0 + 1 }), selection: .layer(layer.id))
     }
 
     /// Removes a layer. Removing the selected layer selects the one below it in
@@ -58,7 +58,7 @@ extension FlareWorkspace {
             let neighbor = i > 0 ? i - 1 : 0
             selection = .layer(rest.indices.contains(neighbor) ? rest[neighbor].id : nil)
         }
-        apply(RemoveLayer(sceneID: scene.id, layerID: id), selection: selection)
+        apply(RemoveLayer(owner: .scene(scene.id), layerID: id), selection: selection)
     }
 
     /// Renames a layer. Surrounding whitespace is dropped; a name with nothing
@@ -67,7 +67,7 @@ extension FlareWorkspace {
         guard let scene = selectedScene else { return refuse(.noDocument) }
         let trimmed = String(name.drop(while: \.isWhitespace).reversed().drop(while: \.isWhitespace).reversed())
         guard !trimmed.isEmpty else { return refuse(.emptyName) }
-        apply(RenameLayer(sceneID: scene.id, layerID: id, name: trimmed))
+        apply(RenameLayer(owner: .scene(scene.id), layerID: id, name: trimmed))
     }
 
     /// Flips one flag of one layer.
@@ -76,7 +76,7 @@ extension FlareWorkspace {
         let layer = scene.layers.first { $0.id == id }
         let visible = flag == .visible ? layer.map { !$0.isVisible } : nil
         let locked = flag == .locked ? layer.map { !$0.isLocked } : nil
-        apply(SetLayerFlags(sceneID: scene.id, layerID: id, isVisible: visible, isLocked: locked))
+        apply(SetLayerFlags(owner: .scene(scene.id), layerID: id, isVisible: visible, isLocked: locked))
     }
 
     /// Moves the layer at panel row `source` so it sits before row
@@ -90,6 +90,6 @@ extension FlareWorkspace {
         }
         let row = destination > source ? destination - 1 : destination
         guard row != source else { return }
-        apply(ReorderLayer(sceneID: scene.id, layerID: rows[source].id, toIndex: rows.count - 1 - row))
+        apply(ReorderLayer(owner: .scene(scene.id), layerID: rows[source].id, toIndex: rows.count - 1 - row))
     }
 }
