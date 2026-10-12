@@ -1,7 +1,7 @@
 // InspectorRows.swift: the rows apps put in SuiteWindow's inspector, in the
 // dense "Pro density" layout of docs/design.md. InspectorSection is a system
-// DisclosureGroup with a flush 11 pt header and a hairline above it, never a
-// card. InspectorRow is the two-column row: a right-aligned secondary label in
+// DisclosureGroup with a flush 11 pt header, a hairline above it and an
+// optional Reset icon, never a card. InspectorRow is the two-column row: a right-aligned secondary label in
 // the shared label column, then the value at the compact control size. The
 // slider, stepper, color and picker rows are InspectorRows around a system
 // control; their numbers are ScrubFields. Rows take the current value and an
@@ -11,15 +11,22 @@
 import SwiftUI
 
 /// A titled group of inspector rows the user can collapse: a hairline, then
-/// a 22 pt header row (chevron and small semibold secondary title), then the
-/// rows with no gaps between them.
+/// a 22 pt header row (chevron and small semibold secondary title, plus a
+/// small Reset icon while `onReset` is given), then the rows with no gaps
+/// between them. Pass `onReset` only while the section differs from its
+/// defaults, so the icon shows exactly when it would change something.
 public struct InspectorSection<Content: View>: View {
     private let title: String
+    private let onReset: (@MainActor () -> Void)?
     private let content: Content
     @State private var isExpanded: Bool
 
-    public init(_ title: String, isExpanded: Bool = true, @ViewBuilder content: () -> Content) {
+    public init(
+        _ title: String, isExpanded: Bool = true, onReset: (@MainActor () -> Void)? = nil,
+        @ViewBuilder content: () -> Content
+    ) {
         self.title = title
+        self.onReset = onReset
         self._isExpanded = State(initialValue: isExpanded)
         self.content = content()
     }
@@ -27,13 +34,27 @@ public struct InspectorSection<Content: View>: View {
     public var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             Divider()
-            DisclosureGroup(isExpanded: $isExpanded) {
-                VStack(alignment: .leading, spacing: 0) { content }
-                    .padding(.bottom, SuiteSpacing.s)
-            } label: {
-                Text(title).font(SuiteFont.inspectorSection).foregroundStyle(SuiteColor.secondaryText)
+            ZStack(alignment: .topTrailing) {
+                DisclosureGroup(isExpanded: $isExpanded) {
+                    VStack(alignment: .leading, spacing: 0) { content }
+                        .padding(.bottom, SuiteSpacing.s)
+                } label: {
+                    Text(title).font(SuiteFont.inspectorSection).foregroundStyle(SuiteColor.secondaryText)
+                }
+                .disclosureGroupStyle(InspectorDisclosureStyle())
+                if let onReset {
+                    Button(action: onReset) {
+                        Image(systemName: "arrow.counterclockwise")
+                            .font(SuiteFont.inspectorSection)
+                            .foregroundStyle(SuiteColor.secondaryText)
+                            .frame(height: SuiteSize.inspectorRow)
+                            .contentShape(.rect)
+                    }
+                    .buttonStyle(.plain)
+                    .help("Reset \(title)")
+                    .accessibilityLabel("Reset \(title)")
+                }
             }
-            .disclosureGroupStyle(InspectorDisclosureStyle())
         }
     }
 }
@@ -97,22 +118,25 @@ public struct InspectorRow<Value: View>: View {
     }
 }
 
-/// Label, Slider and a ScrubField with an optional unit.
+/// Label, Slider and a ScrubField with an optional unit, showing `decimals`
+/// places (whole for percent and degrees, one for pixels and EV).
 public struct InspectorSliderRow: View {
     private let label: String
     private let value: Double
     private let range: ClosedRange<Double>
     private let unit: String
+    private let decimals: Int
     private let onChange: @MainActor (Double) -> Void
 
     public init(
-        _ label: String, value: Double, in range: ClosedRange<Double>, unit: String = "",
+        _ label: String, value: Double, in range: ClosedRange<Double>, unit: String = "", decimals: Int = 2,
         onChange: @escaping @MainActor (Double) -> Void
     ) {
         self.label = label
         self.value = value
         self.range = range
         self.unit = unit
+        self.decimals = decimals
         self.onChange = onChange
     }
 
@@ -124,7 +148,7 @@ public struct InspectorSliderRow: View {
                     in: range
                 )
                 .accessibilityLabel(label)
-                ScrubField(label, value: value, in: range, unit: unit, onChange: onChange)
+                ScrubField(label, value: value, in: range, unit: unit, decimals: decimals, onChange: onChange)
             }
         }
     }

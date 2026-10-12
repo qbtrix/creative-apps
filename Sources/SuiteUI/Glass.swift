@@ -7,8 +7,17 @@
 import SwiftUI
 
 extension EnvironmentValues {
-    /// True while rendering snapshots: glass draws as a flat stand-in.
-    @Entry public var suiteSnapshotRendering = false
+    /// True while rendering snapshots: glass draws as a flat stand-in. A plain
+    /// key rather than `@Entry`, so SuiteUI builds where the SwiftUI macro
+    /// plugin is missing (Command Line Tools without Xcode).
+    public var suiteSnapshotRendering: Bool {
+        get { self[SnapshotRenderingKey.self] }
+        set { self[SnapshotRenderingKey.self] = newValue }
+    }
+}
+
+private struct SnapshotRenderingKey: EnvironmentKey {
+    static let defaultValue = false
 }
 
 extension View {
