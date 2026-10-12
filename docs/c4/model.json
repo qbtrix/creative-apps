@@ -18,7 +18,7 @@
           {
             "id": "suiteui",
             "name": "SuiteUI",
-            "description": "The shared design system (Sources/SuiteUI): spacing, radius, type and color tokens; Liquid Glass primitives applied through one snapshot-aware modifier; the SuiteWindow shell (sidebar, content, inspector), ToolbarGroup palette, SidebarRow, SurfaceCard, GlassPanel, CanvasSurface and EmptyStateView. macOS only; knows no Model or engine.",
+            "description": "The shared design system (Sources/SuiteUI): tokens, Liquid Glass primitives, the SuiteWindow shell, toolbar palette, sidebar rows and sections, content-layer surfaces, pro inspector rows and scrub fields, a thumbnail grid and a timeline strip. macOS only; knows no Model or engine.",
             "technology": "Swift 6, SwiftUI, macOS 26",
             "tags": [
               "internal",
@@ -28,7 +28,7 @@
               {
                 "id": "suiteui-sources",
                 "name": "SuiteUI sources",
-                "description": "The shared design system (Sources/SuiteUI): spacing, radius, type and color tokens; Liquid Glass primitives applied through one snapshot-aware modifier; the SuiteWindow shell (sidebar, content, inspector), ToolbarGroup palette, SidebarRow, SurfaceCard, GlassPanel, CanvasSurface and EmptyStateView.",
+                "description": "The shared design system (Sources/SuiteUI): spacing, radius, size, type and color tokens; Liquid Glass applied in one snapshot-aware place (Glass) and GlassPanel; the SuiteWindow shell (sidebar, content, inspector) with SidebarSection and SidebarRow; ToolbarGroup palette actions; the content layer (CanvasSurface, SurfaceCard, EmptyStateView, ViewerStatusBar); pro inspector parts (InspectorHeader, InspectorRows, ScrubField and NumericInput number entry); ThumbnailGrid with its selection math; and TimelineStrip with its frame mapping, shared by Flare and Halo.",
                 "technology": "Swift 6, SwiftUI, macOS 26",
                 "paths": [
                   "Sources/SuiteUI/"
@@ -69,7 +69,7 @@
               {
                 "id": "flare-model-sources",
                 "name": "FlareModel sources",
-                "description": "Linux-safe state and logic behind Flare's window.",
+                "description": "Linux-safe state and logic behind Flare's window: FlareWorkspace holds the open FlareCore document, the selected scene and the drawing tool.",
                 "technology": "Swift 6, Foundation",
                 "paths": [
                   "Sources/FlareModel/"
@@ -90,7 +90,7 @@
               {
                 "id": "design-app-sources",
                 "name": "DesignApp sources",
-                "description": "The Design app (vector and UI design): the SwiftUI App scene and views in Sources/DesignApp, built from SuiteUI.",
+                "description": "The Design app (vector and UI design): the SwiftUI App scene and views in Sources/DesignApp, built from SuiteUI: the window, the Page menu, File > New File, and sidebar items for pages and Layers rows.",
                 "technology": "Swift 6, SwiftUI, macOS 26",
                 "paths": [
                   "Sources/DesignApp/"
@@ -101,7 +101,7 @@
           {
             "id": "design-model",
             "name": "DesignModel",
-            "description": "Linux-safe state and logic behind Design's window. DesignWorkspace: the open file's pages, selected page and tool. Foundation only, value types.",
+            "description": "Linux-safe state and logic behind Design's window: pages, the node tree on each page and its Layers rows, the selected page and tool. Foundation only, value types.",
             "technology": "Swift 6, Foundation",
             "tags": [
               "internal"
@@ -110,7 +110,7 @@
               {
                 "id": "design-model-sources",
                 "name": "DesignModel sources",
-                "description": "Linux-safe state and logic behind Design's window.",
+                "description": "Linux-safe state and logic behind Design's window: DesignWorkspace (pages, selected page, tool) and DesignNode, the node tree on a page and the flattened rows the Layers sidebar draws.",
                 "technology": "Swift 6, Foundation",
                 "paths": [
                   "Sources/DesignModel/"
@@ -131,7 +131,7 @@
               {
                 "id": "photo-app-sources",
                 "name": "PhotoApp sources",
-                "description": "The Photo app (raster editing): the SwiftUI App scene and views in Sources/PhotoApp, built from SuiteUI.",
+                "description": "The Photo app (raster editing): the SwiftUI App scene and views in Sources/PhotoApp, built from SuiteUI: the window, the Layer menu and Delete Layer toolbar item, Layers sidebar items, and the inspector (selected layer, adjustment sections, the Levels gamma field).",
                 "technology": "Swift 6, SwiftUI, macOS 26",
                 "paths": [
                   "Sources/PhotoApp/"
@@ -142,7 +142,7 @@
           {
             "id": "photo-model",
             "name": "PhotoModel",
-            "description": "Linux-safe state and logic behind Photo's window. PhotoWorkspace: the open canvas as a CoreRaster PixelBuffer, its layers, selected layer and tool. Foundation only, value types.",
+            "description": "Linux-safe state and logic behind Photo's window: the canvas as a CoreRaster PixelBuffer, its layer stack, selected layer and tool, adjustment settings, and inspector and Layer menu state. Foundation only, value types.",
             "technology": "Swift 6, Foundation",
             "tags": [
               "internal"
@@ -151,7 +151,7 @@
               {
                 "id": "photo-model-sources",
                 "name": "PhotoModel sources",
-                "description": "Linux-safe state and logic behind Photo's window.",
+                "description": "Linux-safe state and logic behind Photo's window: PhotoWorkspace (the canvas as a CoreRaster PixelBuffer, the layer stack, selection and tool), PhotoLayer, the adjustment settings and logarithmic gamma track behind the inspector, what the inspector shows, and when each Layer menu item can run.",
                 "technology": "Swift 6, Foundation",
                 "paths": [
                   "Sources/PhotoModel/"
@@ -172,7 +172,7 @@
               {
                 "id": "library-app-sources",
                 "name": "LibraryApp sources",
-                "description": "The Library app (photo catalog): the SwiftUI App scene and views in Sources/LibraryApp, built from SuiteUI.",
+                "description": "The Library app (photo catalog): the SwiftUI App scene and views in Sources/LibraryApp, built from SuiteUI: the window with its thumbnail grid, and the File > Load Sample Photos, View > Sort By and thumbnail size commands.",
                 "technology": "Swift 6, SwiftUI, macOS 26",
                 "paths": [
                   "Sources/LibraryApp/"
@@ -183,7 +183,7 @@
           {
             "id": "library-model",
             "name": "LibraryModel",
-            "description": "Linux-safe state and logic behind Library's window. LibraryCatalog: the sidebar collections with counts and the selected collection. Foundation only, value types.",
+            "description": "Linux-safe state and logic behind Library's window: the catalog's photos, sidebar collections with counts, the selected collection and sort order, and seeded sample photos. Foundation only, value types.",
             "technology": "Swift 6, Foundation",
             "tags": [
               "internal"
@@ -192,7 +192,7 @@
               {
                 "id": "library-model-sources",
                 "name": "LibraryModel sources",
-                "description": "Linux-safe state and logic behind Library's window.",
+                "description": "Linux-safe state and logic behind Library's window: LibraryCatalog (photos, collections with counts, the selected collection, sort order), PhotoItem with its sort orders, and 60 seeded sample photos.",
                 "technology": "Swift 6, Foundation",
                 "paths": [
                   "Sources/LibraryModel/"
@@ -213,7 +213,7 @@
               {
                 "id": "halo-app-sources",
                 "name": "HaloApp sources",
-                "description": "The Halo app (motion graphics): the SwiftUI App scene and views in Sources/HaloApp, built from SuiteUI.",
+                "description": "The Halo app (motion graphics): the SwiftUI App scene and views in Sources/HaloApp, built from SuiteUI: the window, the Layer and Composition menus, the selected composition's layer list, the New Composition sheet, and the alert for a refused rename.",
                 "technology": "Swift 6, SwiftUI, macOS 26",
                 "paths": [
                   "Sources/HaloApp/"
@@ -224,7 +224,7 @@
           {
             "id": "halo-model",
             "name": "HaloModel",
-            "description": "Linux-safe state and logic behind Halo's window. HaloProject: the project's compositions and the selected one. Foundation only, value types.",
+            "description": "Linux-safe state and logic behind Halo's window: the project's compositions and their layers, the selected composition, New Composition settings, and refused renames. Foundation only, value types.",
             "technology": "Swift 6, Foundation",
             "tags": [
               "internal"
@@ -233,7 +233,7 @@
               {
                 "id": "halo-model-sources",
                 "name": "HaloModel sources",
-                "description": "Linux-safe state and logic behind Halo's window.",
+                "description": "Linux-safe state and logic behind Halo's window: HaloProject (compositions, the selected one, unique names), HaloLayer, the New Composition draft and its validated settings, and RefusedRename, which keeps a refused composition rename for the alert.",
                 "technology": "Swift 6, Foundation",
                 "paths": [
                   "Sources/HaloModel/"
