@@ -2,6 +2,8 @@
 // the project's compositions, the selected one and the selected layer in it.
 // Linux-safe: no UI imports. HaloApp changes it only through the methods here.
 // The selected layer, when set, is always a layer of the selected composition.
+// Composition ids are never reused and names stay unique; once a project has a
+// composition it always keeps at least one.
 
 /// A composition: a sized, timed canvas that layers play in.
 public struct HaloComposition: Identifiable, Sendable, Hashable {
@@ -46,6 +48,8 @@ public struct HaloProject: Sendable, Equatable {
     public private(set) var compositions: [HaloComposition] = []
     public private(set) var selectedCompositionID: String?
     public private(set) var selectedLayerID: String?
+    /// The number in the next composition's id ("comp-3"); only goes up.
+    private var nextCompositionNumber = 1
 
     public init() {}
 
@@ -60,15 +64,93 @@ public struct HaloProject: Sendable, Equatable {
     /// Whether Layer > New can add a layer: only with a composition selected.
     public var canAddLayer: Bool { selectedComposition != nil }
 
-    /// Adds a 1080p, 30 fps, 10 second composition named after its position
-    /// and selects it.
+    /// What the New Composition sheet starts with: 1080p, 30 fps, 10 seconds,
+    /// named after the next id ("Comp 3").
+    public var suggestedSettings: CompositionSettings {
+        CompositionSettings(name: uniqueName("Comp \(nextCompositionNumber)"))
+    }
+
+    /// Whether Delete can remove a composition: never the last one.
+    public var canDeleteComposition: Bool { compositions.count > 1 }
+
+    /// Adds a composition with the suggested settings and selects it.
     public mutating func newComposition() {
-        let n = compositions.count + 1
-        compositions.append(HaloComposition(
-            id: "comp-\(n)", name: "Comp \(n)", width: 1920, height: 1080,
-            framesPerSecond: 30, durationFrames: 300))
-        selectedCompositionID = "comp-\(n)"
+        newComposition(suggestedSettings)
+    }
+
+    /// Adds a composition from valid `settings` and selects it; a taken name gets a number.
+    @discardableResult
+    public mutating func newComposition(_ settings: CompositionSettings) -> Bool {
+        guard let frames = settings.durationFrames else { return false }
+        let comp = HaloComposition(
+            id: takeCompositionID(), name: uniqueName(settings.name.trimmed), width: settings.width,
+            height: settings.height, framesPerSecond: settings.framesPerSecond, durationFrames: frames)
+        compositions.append(comp)
+        selectedCompositionID = comp.id
         selectedLayerID = nil
+        return true
+    }
+
+    /// Copies a composition and its layers in under the original, named
+    /// "<name> copy" ("<name> copy 2", ...), and selects the copy. An unknown
+    /// id is refused.
+    @discardableResult
+    public mutating func duplicateComposition(_ id: String) -> Bool {
+        guard let index = compositions.firstIndex(where: { $0.id == id }) else { return false }
+        let original = compositions[index]
+        let newID = takeCompositionID()
+        let layers = original.layers.map { layer in
+            let suffix = layer.id.hasPrefix(original.id) ? String(layer.id.dropFirst(original.id.count)) : "-\(layer.id)"
+            return HaloLayer(
+                id: newID + suffix, name: layer.name, kind: layer.kind, inFrame: layer.inFrame,
+                outFrame: layer.outFrame, color: layer.color)
+        }
+        let copy = HaloComposition(
+            id: newID, name: uniqueName("\(original.name) copy"), width: original.width, height: original.height,
+            framesPerSecond: original.framesPerSecond, durationFrames: original.durationFrames, layers: layers)
+        compositions.insert(copy, at: index + 1)
+        selectedCompositionID = newID
+        selectedLayerID = nil
+        return true
+    }
+
+    /// Renames a composition; an empty or taken name, or an unknown id, is refused.
+    @discardableResult
+    public mutating func renameComposition(_ id: String, to name: String) -> Bool {
+        let name = name.trimmed
+        guard !name.isEmpty, let index = compositions.firstIndex(where: { $0.id == id }),
+            !compositions.contains(where: { $0.id != id && $0.name == name })
+        else { return false }
+        compositions[index].name = name
+        return true
+    }
+
+    /// Deletes a composition, never the last one; deleting the selected one
+    /// selects its neighbor below (or above, at the end).
+    @discardableResult
+    public mutating func deleteComposition(_ id: String) -> Bool {
+        guard canDeleteComposition, let index = compositions.firstIndex(where: { $0.id == id }) else { return false }
+        compositions.remove(at: index)
+        if selectedCompositionID == id {
+            selectedCompositionID = compositions[min(index, compositions.count - 1)].id
+            selectedLayerID = nil
+        }
+        return true
+    }
+
+    /// The next unused composition id.
+    private mutating func takeCompositionID() -> String {
+        defer { nextCompositionNumber += 1 }
+        return "comp-\(nextCompositionNumber)"
+    }
+
+    /// `base`, or `base` with the first free number after it ("Comp 1 copy 2").
+    private func uniqueName(_ base: String) -> String {
+        let names = Set(compositions.map(\.name))
+        guard names.contains(base) else { return base }
+        var number = 2
+        while names.contains("\(base) \(number)") { number += 1 }
+        return "\(base) \(number)"
     }
 
     /// Selects a composition by id. An unknown id is ignored; selecting
