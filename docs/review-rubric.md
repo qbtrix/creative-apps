@@ -32,6 +32,10 @@ explains it. The rules behind each question are in `docs/engineering.md` and
 
 - [ ] Glass only on controls that float over content; content surfaces flat;
       no glass on glass?
+- [ ] Uses the system component when one exists (docs/design.md, Component
+      order), and SuiteUI before anything custom?
+- [ ] No hand-rolled look-alike of a system control or a SuiteUI component,
+      and `scripts/ci` printed no design lint failure?
 - [ ] Semantic colors and text styles from SuiteUI tokens; no hard-coded
       color for a system role?
 - [ ] Every icon-only control has a tooltip and an accessibility label?

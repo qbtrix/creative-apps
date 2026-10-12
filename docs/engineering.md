@@ -49,7 +49,9 @@ SuiteUI sits beside the apps: it knows nothing about any Model or engine.
   empty states, spacing, type and color come from SuiteUI. Plain `Text`,
   `Image` and stacks are fine for content. A missing component is a
   `needs-ui` issue plus a plain placeholder, never a private copy in an app.
-  Review-only; jscpd catches the copies.
+  Gate: the design lint in `scripts/ci` (raw colors, fonts and sizes,
+  hand-made glass, look-alike controls; docs/design.md, Component order), and
+  jscpd catches the copies.
 
 ## Reuse before you write
 

@@ -81,6 +81,9 @@ X is Flare, Design, Photo, Library or Halo. Each app is one **line** (label
   methods; they never assign its state, bind to it, or mutate its collections.
   `scripts/ci` fails on that (the app-state rule). Model state is
   `public private(set)`; add a method when a view needs a new change.
+- **System components first, then SuiteUI, never a look-alike.** Follow the
+  Component order in `docs/design.md`; the design lint in `scripts/ci` fails
+  on raw colors, fonts and sizes, hand-made glass and look-alike controls.
 - **Every UI PR lists the snapshot PNGs it changed** in the PR body (for
   example `flare-open-light.png, flare-open-dark.png`), so the reviewer opens
   exactly those from the artifact.
@@ -140,7 +143,7 @@ removed with a comment saying why, and the PR waits for review.
 ## Commands
 
 ```bash
-scripts/ci                                   # lint + app-state rule + jscpd + build + test: the gate
+scripts/ci                                   # lint + app-state rule + design lint + jscpd + build + test: the gate
 swift test --filter FlareModelTests          # one suite while iterating
 bash Tests/fast_lane/test_fast_lane.sh       # fast-lane decision tests (needs jq)
 gh run download <run-id> -n snapshots        # the PNGs from a macOS CI run
