@@ -1,7 +1,8 @@
 // DesignApp.swift: Design, the vector and UI design app. The window is
 // SuiteWindow with pages and layers in the sidebar, DesignCanvas as content
-// and the selected layer or page in the inspector. The Page menu (DesignCommands)
-// reaches the window through focused scene values. Views only read DesignWorkspace and
+// and the selected layer or page in the inspector. File > New File
+// (DesignFileCommands) and the Page menu (DesignCommands) reach the window
+// through focused scene values. Views only read DesignWorkspace and
 // call its methods; all state lives in DesignModel (scripts/ci checks this).
 import DesignModel
 import SuiteUI
@@ -11,7 +12,10 @@ import SwiftUI
 struct DesignApp: App {
     var body: some Scene {
         WindowGroup { DesignWindow() }
-            .commands { DesignCommands() }
+            .commands {
+                DesignFileCommands()
+                DesignCommands()
+            }
     }
 }
 
@@ -48,6 +52,7 @@ struct DesignWindow: View {
                 EmptyStateView("No Selection", systemImage: "square.dashed", message: "Select a page or layer to edit it.")
             }
         }
+        .focusedSceneValue(\.designNewFile, { model.newFile() })
         .focusedSceneValue(\.designAddPage, addPage)
         .focusedSceneValue(\.designDeletePage, deletePage)
     }
