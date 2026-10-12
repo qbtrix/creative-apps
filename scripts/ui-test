@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+# scripts/ui-test: the human-like UI tests. macOS with Xcode and XcodeGen only.
+# Builds the five app bundles (scripts/bundle-apps), generates
+# CreativeApps.xcodeproj from project.yml, runs the Journeys scheme (real
+# launches and clicks, UITests/), then exports every screenshot from the result
+# bundle as .build/ui-screens/<app>-<step>.png. Exits with xcodebuild's status,
+# so a failed journey fails the run; the screenshots are exported either way.
+# Extra arguments go to xcodebuild, so one app's journeys run with
+#   scripts/ui-test -only-testing:PhotoJourneyTests
+#
+#   .build/ui-tests.xcresult   the result bundle (open it in Xcode)
+#   .build/ui-screens/         <app>-<step>.png per journey step; CI uploads it as `ui-screens`
+#
+# The first run on a Mac asks to let the test runner control the computer;
+# CI turns that prompt off with automationmodetool. bash 3.2 compatible.
+set -uo pipefail
+cd "$(dirname "$0")/.." || exit 1
+
+command -v xcodegen >/dev/null || { echo "ui-test: install xcodegen (see .github/workflows/ci.yml)"; exit 1; }
+scripts/bundle-apps || exit 1
+xcodegen generate --quiet || exit 1
+
+result=.build/ui-tests.xcresult
+screens=.build/ui-screens
+rm -rf "$result" "$screens"
+xcodebuild test -project CreativeApps.xcodeproj -scheme Journeys -destination platform=macOS \
+  -resultBundlePath "$result" "$@"
+status=$?
+
+# Each attachment exports under a generated file name; manifest.json maps it to
+# "<attachment name>_<n>_<uuid>.png", which loses the suffix here. Only PNGs are
+# kept: a failure also attaches a UI hierarchy and a screen recording, which
+# stay in the result bundle.
+raw=$(mktemp -d)
+trap 'rm -rf "$raw"' EXIT
+mkdir -p "$screens"
+if [[ -d "$result" ]] && xcrun xcresulttool export attachments --path "$result" --output-path "$raw"; then
+  jq -r '.[].attachments[]? | select(.suggestedHumanReadableName | endswith(".png"))
+         | [.exportedFileName, .suggestedHumanReadableName] | @tsv' "$raw/manifest.json" \
+    | while IFS=$'\t' read -r file name; do
+        cp "$raw/$file" "$screens/$(echo "$name" | sed -E 's/_[0-9]+_[0-9A-Fa-f-]+(\.[a-z]+)$/\1/')"
+      done
+fi
+echo "ui-test: $(ls "$screens" | wc -l | tr -d ' ') screenshots in $screens"
+exit $status

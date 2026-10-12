@@ -3,7 +3,9 @@
 // five apps stay consistent; the design lint in scripts/ci fails on a raw
 // color, font or size anywhere else in Sources/SuiteUI or an app. Colors are
 // system semantic colors (they adapt to Light, Dark and Increase Contrast);
-// never hard-code a hex value for a system role.
+// never hard-code a hex value for a system role. The one brand value is the
+// accent blue. The inspector tokens are the "Pro density" rules in
+// docs/design.md: small controls, the 11 pt scale, 22 pt rows.
 import AppKit
 import SwiftUI
 
@@ -23,6 +25,8 @@ public enum SuiteSpacing {
 
 /// Corner radii. Nested shapes step down one size so corners stay concentric.
 public enum SuiteRadius {
+    /// A field well inside a dense inspector row.
+    public static let field: CGFloat = 4
     public static let small: CGFloat = 6
     public static let medium: CGFloat = 10
     public static let large: CGFloat = 16
@@ -35,27 +39,47 @@ public enum SuiteSize {
     public static let toolButton: CGFloat = 32
     /// The numeric field beside an inspector slider or stepper.
     public static let inspectorField: CGFloat = 56
+    /// One inspector row, and the viewer status line.
+    public static let inspectorRow: CGFloat = 22
+    /// The shared label column of InspectorRow; labels sit right-aligned in it.
+    public static let inspectorLabelColumn: CGFloat = 88
+    /// Control size inside inspectors and viewer chrome.
+    public static let compactControl: ControlSize = .small
+    /// Room CanvasSurface leaves around the artboard on every side.
+    public static let canvasInset: CGFloat = 64
     public static let sidebarWidth: (min: CGFloat, ideal: CGFloat, max: CGFloat) = (180, 220, 320)
     public static let inspectorWidth: (min: CGFloat, ideal: CGFloat, max: CGFloat) = (220, 260, 360)
     public static let contentMinimum = CGSize(width: 480, height: 360)
     public static let windowMinimum = CGSize(width: 900, height: 560)
     /// The timeline's fixed track-name column, ruler, one lane, a keyframe
-    /// diamond, and the least room between two ruler labels.
+    /// diamond, the least room between two ruler labels and between two ruler
+    /// ticks, and how much ruler is drawn before the scroll view says which
+    /// stretch is visible.
     public static let timelineLabelColumn: CGFloat = 160
     public static let timelineRuler: CGFloat = 24
     public static let timelineLane: CGFloat = 28
     public static let timelineKeyframe: CGFloat = 10
     public static let timelineLabelSpacing: CGFloat = 48
+    public static let timelineTickSpacing: CGFloat = 6
+    public static let timelineRulerSpan: CGFloat = 4096
 }
 
 /// Text styles. macOS has no Dynamic Type; these are the system text styles,
-/// so they track the system's sizes (13 pt body).
+/// so they track the system's sizes (13 pt body, 12 callout, 11 subheadline,
+/// 10 caption: the same scale as the Ripple tokens).
 public enum SuiteFont {
     public static let title = Font.title2.weight(.semibold)
     public static let headline = Font.headline
     public static let body = Font.body
     public static let caption = Font.caption
     public static let monospacedDigits = Font.body.monospacedDigit()
+    /// Inspector and viewer chrome: 11 pt labels, values and section titles.
+    public static let inspectorLabel = Font.subheadline
+    public static let inspectorValue = Font.subheadline.monospacedDigit()
+    public static let inspectorSection = Font.subheadline.weight(.semibold)
+    /// InspectorHeader: 12 pt semibold name over 10 pt metadata lines.
+    public static let inspectorTitle = Font.callout.weight(.semibold)
+    public static let inspectorMeta = Font.caption.monospacedDigit()
 }
 
 /// Semantic colors by role.
@@ -68,8 +92,29 @@ public enum SuiteColor {
     public static var surface: Color { Color(nsColor: .controlBackgroundColor) }
     public static var separator: Color { Color(nsColor: .separatorColor) }
     public static var secondaryText: Color { .secondary }
-    /// The system accent: marks selection and the playhead.
-    public static var accent: Color { .accentColor }
+    /// The grey ramp for flush panels: the window background with 0, 6, 10
+    /// and 14 percent of the label color mixed in (the Ripple surface ladder),
+    /// so each step adapts to Light, Dark and Increase Contrast.
+    /// A flat panel: inspector bands, the viewer status line.
+    public static var panel: Color { windowBackground }
+    /// A raised band on a panel: InspectorHeader.
+    public static var panelRaised: Color { windowBackground.mix(with: .primary, by: 0.06) }
+    /// A field well at rest (ScrubField).
+    public static var field: Color { windowBackground.mix(with: .primary, by: 0.10) }
+    /// A field well while it is dragged or edited.
+    public static var fieldActive: Color { windowBackground.mix(with: .primary, by: 0.14) }
+    /// The suite's one accent, brand blue #1877F2: selection, the playhead,
+    /// the active tool, control fills. SuiteWindow applies it as the tint.
+    public static let accent = Color(red: 0x18 / 255, green: 0x77 / 255, blue: 0xF2 / 255)
+    /// Accent for text: a darker shade in Light (#1260C9) and a lighter tint
+    /// in Dark (#5A9DF6), so small text clears 4.5:1 on the panel greys.
+    public static var accentText: Color {
+        Color(nsColor: NSColor(name: nil) { appearance in
+            appearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua
+                ? NSColor(srgbRed: 0x5A / 255, green: 0x9D / 255, blue: 0xF6 / 255, alpha: 1)
+                : NSColor(srgbRed: 0x12 / 255, green: 0x60 / 255, blue: 0xC9 / 255, alpha: 1)
+        })
+    }
     /// A new document's artboard. Document content, not a system role.
     public static let artboard = Color.white
 }

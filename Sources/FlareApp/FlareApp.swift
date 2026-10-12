@@ -1,6 +1,7 @@
 // FlareApp.swift: Flare, the 2D animation app. The window is SuiteWindow with
 // the scenes in the sidebar, FlareCanvas as content and the selected scene's
-// summary in the inspector. Views only read FlareWorkspace and call its
+// summary in the inspector. A palette tool that doesn't work yet shows disabled
+// with FlareTool.unavailableHelp as its tooltip. Views only read FlareWorkspace and call its
 // methods; all state lives in FlareModel (scripts/ci checks this).
 import FlareModel
 import SuiteUI
@@ -45,9 +46,7 @@ struct FlareCanvas: View {
     var body: some View {
         if let scene = model.selectedScene {
             CanvasSurface(artboard: CGSize(width: scene.width, height: scene.height)) {
-                ToolbarGroup(FlareTool.allCases.map { tool in
-                    ToolbarAction(tool.title, systemImage: tool.systemImage, isSelected: tool == model.tool) { onTool(tool) }
-                }, axis: .vertical)
+                ToolbarGroup(tools: FlareTool.allCases, selected: model.tool, onSelect: onTool)
             }
         } else {
             EmptyStateView(
@@ -58,8 +57,8 @@ struct FlareCanvas: View {
     }
 }
 
-extension FlareTool {
-    var title: String {
+extension FlareTool: PaletteTool {
+    public var title: String {
         switch self {
         case .select: "Select"
         case .pen: "Pen"
@@ -68,7 +67,7 @@ extension FlareTool {
         }
     }
 
-    var systemImage: String {
+    public var systemImage: String {
         switch self {
         case .select: "cursorarrow"
         case .pen: "pencil.tip"
