@@ -1,6 +1,7 @@
 // DesignApp.swift: Design, the vector and UI design app. The window is
 // SuiteWindow with pages and layers in the sidebar, DesignCanvas as content
-// and the selected layer or page in the inspector. File > New File
+// and the selected layer or page in the inspector. The page toolbar buttons
+// and palette tools disable, saying why, when they can't act. File > New File
 // (DesignFileCommands) and the Page menu (DesignCommands) reach the window
 // through focused scene values; New File also clears the window's undo stack. Views only read DesignWorkspace and
 // call its methods; all state lives in DesignModel (scripts/ci checks this).
@@ -33,10 +34,11 @@ struct DesignWindow: View {
             onToggle: { id, toggle in if toggle == SidebarItem.designExpand { try? model.toggleExpanded(id) } },
             actions: [
                 ToolbarAction("New File", systemImage: "plus") { newFile() },
-                ToolbarAction("Add Page", systemImage: "doc.badge.plus") { model.addPage() },
-                // Page > Delete Page disables on the last page; this button cannot until
-                // ToolbarAction has a disabled state (#85), so it acts only when allowed.
-                ToolbarAction("Delete Page", systemImage: "trash") { deletePage?() },
+                ToolbarAction("Add Page", systemImage: "doc.badge.plus", unavailableHelp: noFileHelp) { model.addPage() },
+                ToolbarAction(
+                    "Delete Page", systemImage: "trash",
+                    unavailableHelp: noFileHelp ?? (model.canDeletePage ? nil : "A file keeps at least one page.")
+                ) { deletePage?() },
             ]
         ) {
             DesignCanvas(model: model, onNew: { newFile() }, onTool: { model.selectTool($0) })
@@ -67,6 +69,9 @@ struct DesignWindow: View {
     private func newFile() {
         DesignUndo.startNewFile(undoManager) { model.newFile() }
     }
+
+    /// Why the page buttons can't act: no file is open.
+    private var noFileHelp: String? { model.isOpen ? nil : "Create a file first." }
 
     /// Page > Add Page's action, nil with no file open.
     private var addPage: (@MainActor () -> Void)? {
@@ -122,9 +127,7 @@ struct DesignCanvas: View {
     var body: some View {
         if let page = model.selectedPage {
             CanvasSurface(artboard: CGSize(width: page.frameWidth, height: page.frameHeight)) {
-                ToolbarGroup(DesignTool.allCases.map { tool in
-                    ToolbarAction(tool.title, systemImage: tool.systemImage, isSelected: tool == model.tool) { onTool(tool) }
-                }, axis: .vertical)
+                ToolbarGroup(tools: DesignTool.allCases, selected: model.tool, onSelect: onTool)
             }
         } else {
             EmptyStateView(
@@ -135,8 +138,8 @@ struct DesignCanvas: View {
     }
 }
 
-extension DesignTool {
-    var title: String {
+extension DesignTool: PaletteTool {
+    public var title: String {
         switch self {
         case .move: "Move"
         case .frame: "Frame"
@@ -146,7 +149,7 @@ extension DesignTool {
         }
     }
 
-    var systemImage: String {
+    public var systemImage: String {
         switch self {
         case .move: "cursorarrow"
         case .frame: "number"

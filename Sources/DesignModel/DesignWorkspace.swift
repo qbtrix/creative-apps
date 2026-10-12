@@ -2,7 +2,9 @@
 // node trees, the selected page and node, the expanded Layers rows and the
 // tool. Linux-safe. DesignApp changes it only through the methods here.
 // Invariants: an open file keeps a page; a selected node is on the selected
-// page; ids are never reused within a file.
+// page; ids are never reused within a file. Every palette tool acts through
+// `drag(from:to:)`; a tool that does nothing there stays disabled with
+// `unavailableHelp` (DesignToolsTests checks this).
 
 /// A page of a design file: one canvas holding a tree of nodes.
 public struct DesignPage: Identifiable, Sendable, Hashable {
@@ -23,6 +25,30 @@ public struct DesignPage: Identifiable, Sendable, Hashable {
 /// The tools on Design's tool palette.
 public enum DesignTool: String, CaseIterable, Sendable {
     case move, frame, rectangle, text, pen
+
+    /// Why the palette shows this tool disabled, as its tooltip; nil once the
+    /// tool works. Set it to nil in the change that makes `drag` do something.
+    public var unavailableHelp: String? {
+        switch self {
+        case .move: "Selecting and moving on the canvas isn't built yet (#17)."
+        case .frame: "Drawing frames isn't built yet."
+        case .rectangle: "Drawing rectangles isn't built yet."
+        case .text: "Placing text isn't built yet."
+        case .pen: "Drawing paths isn't built yet."
+        }
+    }
+
+    public var isEnabled: Bool { unavailableHelp == nil }
+}
+
+/// A point on a page, in points from its top-left corner.
+public struct DesignPoint: Sendable, Hashable {
+    public var x: Double
+    public var y: Double
+
+    public init(x: Double, y: Double) {
+        (self.x, self.y) = (x, y)
+    }
 }
 
 /// A page `deletePage` removed, with where it sat and the selection before the delete;
@@ -209,6 +235,15 @@ public struct DesignWorkspace: Sendable, Equatable {
 
     public mutating func selectTool(_ tool: DesignTool) {
         self.tool = tool
+    }
+
+    /// The active tool's drag across the page from `start` to `end`; a click is
+    /// a drag that doesn't move. The canvas sends every tool gesture here, so
+    /// each case is where that tool's work goes.
+    public mutating func drag(from start: DesignPoint, to end: DesignPoint) {
+        switch tool {
+        case .move, .frame, .rectangle, .text, .pen: break
+        }
     }
 
     private mutating func updateNode(_ id: String, _ change: (inout DesignNode) -> Void) throws(DesignTreeError) {

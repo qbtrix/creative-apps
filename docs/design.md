@@ -19,6 +19,16 @@ every June.
   tool palette. SuiteUI holds all of it; an app that needs something different
   asks for it there (`needs-ui`).
 
+## Journeys first, no dead controls
+
+- **The core loop comes first.** For each app: open or create a document, see
+  it, edit it with each tool shown, undo, save. Panels and polish come after
+  that loop works end to end.
+- **No dead controls.** Every button, tool and menu item on screen does
+  something. One that can't act yet is disabled, and its tooltip says why
+  (`ToolbarAction`'s `unavailableHelp`; a menu item gets a nil action). A
+  control that looks live and does nothing is a bug.
+
 ## Component order
 
 Every view is built from, in this order:
@@ -267,6 +277,7 @@ what fails, and walk it again.
 [ ] At most one prominent action per view; never a destructive one
 [ ] SuiteColor / SuiteFont / SuiteSpacing only; Light and Dark both right
 [ ] Every icon-only control has a tooltip and an accessibility label
+[ ] Every shown button, tool and menu item acts, or is disabled saying why
 [ ] Every new command is (or has an issue to be) in the menu bar
 [ ] Edits are undoable with named actions
 [ ] Empty states say what to do next
