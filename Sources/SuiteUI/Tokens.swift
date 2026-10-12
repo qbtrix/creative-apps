@@ -33,6 +33,8 @@ public enum SuiteRadius {
 public enum SuiteSize {
     /// One tool palette button; the HIG asks for hit targets of at least 28.
     public static let toolButton: CGFloat = 32
+    /// The numeric field beside an inspector slider or stepper.
+    public static let inspectorField: CGFloat = 56
     public static let sidebarWidth: (min: CGFloat, ideal: CGFloat, max: CGFloat) = (180, 220, 320)
     public static let inspectorWidth: (min: CGFloat, ideal: CGFloat, max: CGFloat) = (220, 260, 360)
     public static let contentMinimum = CGSize(width: 480, height: 360)
