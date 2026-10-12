@@ -6,7 +6,9 @@
 //
 // ImageRenderer draws SwiftUI only: AppKit-backed chrome (split view, toolbar,
 // inspector, lists) does not render, so these are content views, not whole
-// windows. Liquid Glass may render flat here; judge glass on a real Mac.
+// windows. It also drops glass views entirely, so the renderer sets
+// `suiteSnapshotRendering` and SuiteUI draws glass as a flat bordered stand-in;
+// judge real glass on a Mac.
 import AppKit
 import SuiteUI
 import SwiftUI
@@ -130,7 +132,8 @@ func snapshot(_ view: some View, name: String, scheme: ColorScheme) throws {
     let renderer = ImageRenderer(content: view
         .frame(width: size.width, height: size.height)
         .background(SuiteColor.windowBackground)
-        .environment(\.colorScheme, scheme))
+        .environment(\.colorScheme, scheme)
+        .environment(\.suiteSnapshotRendering, true))
     renderer.scale = 1
     renderer.proposedSize = ProposedViewSize(size)
     guard let image = renderer.cgImage else { throw SnapshotError.render(name) }

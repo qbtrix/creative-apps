@@ -1,8 +1,8 @@
 // ToolbarGroup.swift: ToolbarAction (one command: title, SF Symbol, selected
 // state, handler) and ToolbarGroup, a floating tool palette of icon buttons
-// over a canvas. The buttons share one GlassEffectContainer so their glass
-// merges into a single capsule: one glass group, no glass on glass. Window
-// toolbar items use the same ToolbarAction through SuiteWindow.
+// over a canvas. The whole group sits in one glass capsule (one glass shape,
+// no glass on glass); the selected tool is a flat accent tint inside it.
+// Window toolbar items use the same ToolbarAction through SuiteWindow.
 import SwiftUI
 
 public struct ToolbarAction: Identifiable {
@@ -37,23 +37,23 @@ public struct ToolbarGroup: View {
 
     public var body: some View {
         let stack = axis == .horizontal ? AnyLayout(HStackLayout(spacing: 0)) : AnyLayout(VStackLayout(spacing: 0))
-        GlassEffectContainer(spacing: SuiteSpacing.s) {
-            stack {
-                ForEach(actions) { action in
-                    Button(action: action.perform) {
-                        Image(systemName: action.systemImage)
-                            .symbolVariant(action.isSelected ? .fill : .none)
-                            .foregroundStyle(action.isSelected ? Color.accentColor : Color.primary)
-                            .frame(width: 32, height: 32)
-                            .contentShape(.rect)
-                    }
-                    .buttonStyle(.plain)
-                    .help(action.title)
-                    .accessibilityLabel(action.title)
-                    .accessibilityAddTraits(action.isSelected ? .isSelected : [])
-                    .glassEffect(.regular.interactive(), in: .capsule)
+        stack {
+            ForEach(actions) { action in
+                Button(action: action.perform) {
+                    Image(systemName: action.systemImage)
+                        .symbolVariant(action.isSelected ? .fill : .none)
+                        .foregroundStyle(action.isSelected ? Color.accentColor : Color.primary)
+                        .frame(width: 32, height: 32)
+                        .background(action.isSelected ? Color.accentColor.opacity(0.15) : .clear, in: Circle())
+                        .contentShape(.rect)
                 }
+                .buttonStyle(.plain)
+                .help(action.title)
+                .accessibilityLabel(action.title)
+                .accessibilityAddTraits(action.isSelected ? .isSelected : [])
             }
         }
+        .padding(SuiteSpacing.xs)
+        .suiteGlass(in: Capsule())
     }
 }

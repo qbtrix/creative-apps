@@ -14,6 +14,6 @@ public struct GlassPanel<Content: View>: View {
         content
             .padding(.horizontal, SuiteSpacing.l)
             .padding(.vertical, SuiteSpacing.s)
-            .glassEffect(.regular, in: .rect(cornerRadius: SuiteRadius.large))
+            .suiteGlass(in: RoundedRectangle(cornerRadius: SuiteRadius.large))
     }
 }
