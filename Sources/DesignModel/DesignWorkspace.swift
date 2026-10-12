@@ -71,6 +71,9 @@ public struct DesignWorkspace: Sendable, Equatable {
         pages[index].name = name
     }
 
+    /// Whether Delete Page can act: a page is selected and it is not the file's last one.
+    public var canDeletePage: Bool { selectedPage != nil && pages.count > 1 }
+
     /// Deletes a page; the last page is refused. Deleting the selected page selects its neighbor.
     public mutating func deletePage(_ id: String) throws(DesignTreeError) {
         guard let index = pages.firstIndex(where: { $0.id == id }) else { throw .unknownID(id) }
