@@ -131,9 +131,8 @@ something. One that can't act yet is disabled and says why:
 - **No AI attribution anywhere.** Commits, PR titles and bodies, and issue
   comments carry no `Co-Authored-By: Claude`, no `Claude-Session:` link and no
   "Generated with Claude Code" line. `.claude/settings.json` turns these off;
-  if your tooling adds one anyway, delete it before you push. The merge queue
-  squashes your commit messages into `main`, so the fast lane refuses a PR
-  whose commits carry one, and strips them from the PR body.
+  if your tooling adds one anyway, delete it before you push. The fast lane
+  also strips them from the squash commit.
 - **No product names.** Don't name other companies' creative apps in code,
   docs or UI; describe the behavior instead.
 - **Clean-room.** Never copy code, files, text or artwork from proprietary
@@ -160,25 +159,14 @@ something. One that can't act yet is disabled and says why:
 
 ## Fast lane
 
-A PR labelled `fast-lane` is added to the merge queue on `main` by
+A PR labelled `fast-lane` is merged automatically by
 `.github/workflows/fast-lane.yml` when all of these hold: base `main`, author
 on the allowlist in `scripts/fast-lane.sh`, at most 400 changed lines and 15
-files, no protected path touched (the files above), no AI attribution in its
-commit messages, mergeable, and every check green including both CI jobs. UI
-code can take the lane once both CI jobs are green; a human reviews the
-snapshots after merge and files fixes as new issues. Otherwise the label is
+files, no protected path touched, mergeable, and every check green including
+both CI jobs. Protected paths are the files above. UI code can take the lane once both CI
+jobs are green; a human reviews the snapshots after merge and files fixes as
+new issues. Otherwise the label is
 removed with a comment saying why, and the PR waits for review.
-
-The queue runs `Linux` and `macOS` on each queued PR on top of `main` (up to 5
-groups at once) and squash-merges the ones that pass, so you never need to
-rebase a green PR again. If the queue removes your PR because its group failed,
-the lane comments and keeps it out until you push a fix. The lane closes the
-linked issues after the merge.
-
-Merging a PR outside the lane (protected paths, after review): `main` requires
-the merge queue and repo auto-merge is off, so plain `gh pr merge` cannot queue
-it. A repo admin runs `gh pr merge <n> --squash --admin`, which bypasses the
-queue and merges directly.
 
 ## Commands
 
