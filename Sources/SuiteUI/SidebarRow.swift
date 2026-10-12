@@ -51,6 +51,11 @@ public struct SidebarToggle: Identifiable, Hashable, Sendable {
     public var systemImage: String { isOn ? onSymbol : offSymbol }
 }
 
+/// Where a click lands in a row: the title area, or one of its toggles.
+public enum SidebarRowPart: Sendable {
+    case title, toggle
+}
+
 public struct SidebarRow: View {
     private let item: SidebarItem
     private let onToggle: (@MainActor (SidebarToggle.ID) -> Void)?
@@ -71,16 +76,7 @@ public struct SidebarRow: View {
 
     public var body: some View {
         HStack(spacing: SuiteSpacing.xs) {
-            if draft != nil {
-                TextField(item.title, text: Binding(get: { draft ?? item.title }, set: { draft = $0 }))
-                    .focused($editing)
-                    .onSubmit(commitRename)
-                    .onExitCommand { draft = nil }
-                    .onChange(of: editing) { _, focused in if !focused { commitRename() } }
-            } else {
-                Label(item.title, systemImage: item.systemImage)
-            }
-            Spacer(minLength: SuiteSpacing.s)
+            title
             ForEach(item.toggles) { toggle in
                 Toggle(isOn: Binding(get: { toggle.isOn }, set: { _ in onToggle?(toggle.id) })) {
                     Label(toggle.title, systemImage: toggle.systemImage)
@@ -95,11 +91,36 @@ public struct SidebarRow: View {
             }
         }
         .badge(item.count ?? 0)
-        .simultaneousGesture(TapGesture(count: 2).onEnded { beginRename() })
     }
 
-    private func beginRename() {
-        guard onRename != nil, draft == nil else { return }
+    /// The title and the space up to the toggles. The rename double-click
+    /// lives here, not on the whole row, so a double-click on a toggle is two
+    /// plain clicks that flip it twice and never opens the rename field.
+    private var title: some View {
+        HStack(spacing: SuiteSpacing.xs) {
+            if draft != nil {
+                TextField(item.title, text: Binding(get: { draft ?? item.title }, set: { draft = $0 }))
+                    .focused($editing)
+                    .onSubmit(commitRename)
+                    .onExitCommand { draft = nil }
+                    .onChange(of: editing) { _, focused in if !focused { commitRename() } }
+            } else {
+                Label(item.title, systemImage: item.systemImage)
+            }
+            Spacer(minLength: SuiteSpacing.s)
+        }
+        .contentShape(Rectangle())
+        .simultaneousGesture(TapGesture(count: 2).onEnded { beginRename(on: .title) })
+    }
+
+    /// Whether a double-click on `part` opens the rename field: only on the
+    /// title, only when the row can be renamed and is not being renamed.
+    nonisolated public static func doubleClickRenames(_ part: SidebarRowPart, renamable: Bool, renaming: Bool) -> Bool {
+        part == .title && renamable && !renaming
+    }
+
+    private func beginRename(on part: SidebarRowPart) {
+        guard Self.doubleClickRenames(part, renamable: onRename != nil, renaming: draft != nil) else { return }
         draft = item.title
         editing = true
     }
