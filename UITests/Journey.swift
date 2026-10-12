@@ -68,12 +68,15 @@ struct Journey {
         if let step { shot(step) }
     }
 
-    /// Clicks every tool in the canvas palette in order; shoots "tool-<title>" after each.
+    /// Clicks every enabled tool in the canvas palette in order; shoots
+    /// "tool-<title>" after each. A disabled tool (it can't act yet and says
+    /// why in its tooltip) is skipped until it is enabled.
     func clickEachTool() {
         let tools = element("suite.tools").buttons
         XCTAssert(tools.firstMatch.waitForExistence(timeout: 10), "no tool palette (suite.tools)")
         for index in 0..<tools.count {
             let tool = tools.element(boundBy: index)
+            guard tool.isEnabled else { continue }
             let title = tool.label
             tool.click()
             shot("tool-\(slug(title))")

@@ -119,8 +119,8 @@ every step.
 - **How to write a step.** Use `Journey`: `click("Title", step: "name")`
   clicks the button with that title in the window's content (`in: .toolbar` or
   `in: .sheet` for the others) and shoots `<app>-name`; `shot("name")` shoots
-  the window as it is; `clickEachTool()` and `openEachMenu()` cover the canvas
-  palette and the menu bar. Find things by the title a person reads. When a control has no title, give it an
+  the window as it is; `clickEachTool()` (enabled tools only) and
+  `openEachMenu()` cover the canvas palette and the menu bar. Find things by the title a person reads. When a control has no title, give it an
   `.accessibilityIdentifier` in the view (SuiteUI's use a `suite.` prefix:
   `suite.sidebar`, `suite.inspector`, `suite.tools`) and find it with
   `app.descendants(matching: .any)["id"]`. Step names are unique within an
