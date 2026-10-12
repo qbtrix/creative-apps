@@ -60,6 +60,10 @@ import PhotoModel
     }
 
     @Test func suiteGallery() throws {
+        // An action is disabled exactly when it says why (the gallery shows one).
+        #expect(ToolbarAction("Pen", systemImage: "pencil.tip").isEnabled)
+        let ellipse = ToolbarAction("Ellipse", systemImage: "circle", unavailableHelp: "Not built yet.")
+        #expect(!ellipse.isEnabled && ellipse.help == "Not built yet.")
         for scheme in [ColorScheme.light, .dark] {
             try snapshot(Gallery(), name: "suiteui-gallery-\(scheme.name)", scheme: scheme)
         }
@@ -85,6 +89,7 @@ private struct Gallery: View {
                         ToolbarAction("Select", systemImage: "cursorarrow", isSelected: true),
                         ToolbarAction("Pen", systemImage: "pencil.tip"),
                         ToolbarAction("Rectangle", systemImage: "rectangle"),
+                        ToolbarAction("Ellipse", systemImage: "circle", unavailableHelp: "Not built yet."),
                     ])
                     GlassPanel { Text("00:00:01:12").font(SuiteFont.monospacedDigits) }
                 }
