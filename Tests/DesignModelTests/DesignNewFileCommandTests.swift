@@ -11,7 +11,9 @@ import Testing
     try workspace.addNode(.rectangle, frame: box, in: "node-1")
     workspace.addPage()
     workspace.newFile()
-    #expect(workspace == fresh)
+    // Compare the document, not the whole workspace: newFile() also bumps the file generation.
+    #expect(workspace.pages == fresh.pages)
+    #expect(workspace.layerRows == fresh.layerRows)
     #expect(workspace.pages.map(\.id) == ["page-1"])
     #expect(workspace.selectedPageID == "page-1")
     #expect(workspace.selectedNodeID == nil)
