@@ -59,7 +59,7 @@ public struct DesignRow: Identifiable, Sendable, Hashable {
 /// Why a tree or page edit was refused.
 public enum DesignTreeError: Error, Equatable, Sendable {
     case unknownID(String), notAContainer(String), intoItself(String)
-    case emptyName, lastPage
+    case emptyName, lastPage, alreadyExists(String)
 }
 
 extension [DesignNode] {
@@ -75,6 +75,15 @@ extension [DesignNode] {
         for node in self {
             if node.id == id { return node }
             if let found = node.children.node(id) { return found }
+        }
+        return nil
+    }
+
+    /// The ids of the nodes enclosing `id`, outermost first; nil when `id` is not in the tree.
+    func ancestors(of id: String) -> [String]? {
+        for node in self {
+            if node.id == id { return [] }
+            if let path = node.children.ancestors(of: id) { return [node.id] + path }
         }
         return nil
     }
