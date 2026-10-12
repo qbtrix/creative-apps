@@ -1,5 +1,6 @@
 // DesignLayersSnapshots.swift: Design's Pages and Layers rows (a Desktop frame holding a group of two
-// shapes) as SidebarRows in a VStack, indented by depth, since the sidebar List does not render here.
+// shapes), expanded and with the group collapsed, as SidebarRows in a VStack, indented by depth, since
+// the sidebar List does not render here.
 import DesignModel
 import SuiteUI
 import SwiftUI
@@ -21,6 +22,13 @@ import Testing
         for scheme in [ColorScheme.light, .dark] {
             try snapshot(LayersRows(model: model), name: "design-layers-\(scheme == .dark ? "dark" : "light")", scheme: scheme)
         }
+        // Collapsing the group hides its two shapes; its toggle turns to a right chevron.
+        try model.setExpanded(group, false)
+        for scheme in [ColorScheme.light, .dark] {
+            try snapshot(
+                LayersRows(model: model), name: "design-layers-collapsed-\(scheme == .dark ? "dark" : "light")",
+                scheme: scheme)
+        }
     }
 }
 
@@ -32,7 +40,7 @@ private struct LayersRows: View {
             ForEach(model.pages) { SidebarRow(SidebarItem(page: $0)) }
             Text("Layers").font(SuiteFont.headline)
             ForEach(model.layerRows) { row in
-                SidebarRow(SidebarItem(row: row)).padding(.leading, SuiteSpacing.l * CGFloat(row.depth))
+                SidebarRow(SidebarItem(row: row, isExpanded: model.isExpanded(row.id))).padding(.leading, SuiteSpacing.l * CGFloat(row.depth))
             }
         }
         .padding(SuiteSpacing.m)
