@@ -57,6 +57,18 @@ private func photo(_ name: String, minute: Double, rating: Int = 0, color: Color
     #expect(catalog.cellSize == 80 && !catalog.canShowSmallerThumbnails)
 }
 
+@Test func cellSizeStepClampsExtremeCountsWithoutOverflow() {
+    var catalog = LibraryCatalog()
+    catalog.stepCellSize(by: Int.max)
+    #expect(catalog.cellSize == 320)
+    catalog.stepCellSize(by: Int.min)
+    #expect(catalog.cellSize == 80)
+    catalog.stepCellSize(by: 2)
+    #expect(catalog.cellSize == 160)
+    catalog.stepCellSize(by: -1)
+    #expect(catalog.cellSize == 120)
+}
+
 @Test func openingSetsLoupeModeWithThatItemFocused() {
     var catalog = LibraryCatalog()
     catalog.loadSamples()
