@@ -1,0 +1,57 @@
+# CI: runs scripts/ci on Linux (Model targets only; Package.swift declares the
+# UI targets on macOS only) and on macOS 26 (everything, plus the snapshot
+# PNGs uploaded as the `snapshots` artifact). The fast lane only merges a PR
+# once a check from this workflow ("CI") has passed and reads the job names
+# "Linux" and "macOS", so keep both names stable. workflow_dispatch lets the
+# fast lane run CI on main after its merges and on refreshed PR heads:
+# GITHUB_TOKEN pushes and merges fire no other triggers.
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# One run per branch: a new push cancels the superseded run (macOS runners are
+# a small shared pool). Runs on main always finish.
+concurrency:
+  group: ci-${{ github.head_ref || github.ref_name }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+jobs:
+  linux:
+    name: Linux
+    runs-on: ubuntu-latest
+    # Official image; 6.3.3-noble is Ubuntu 24.04, the same OS as the cloud agents.
+    container: swift:6.3.3-noble
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - { uses: actions/setup-node@v4, with: { node-version: 22 } } # jscpd duplicate check; the swift image has no node
+      - run: swift --version
+      - run: scripts/ci
+      # The fast lane's decision tests need jq, which the swift image lacks.
+      - run: apt-get update -q && apt-get install -y -q jq
+      - run: bash Tests/fast_lane/test_fast_lane.sh
+
+  macos:
+    name: macOS
+    runs-on: macos-26
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      # Pin Xcode: the image's default moves. 26.6 ships the macOS 26.5 SDK.
+      - run: sudo xcode-select -s /Applications/Xcode_26.6.app
+      - run: swift --version
+      - run: scripts/ci
+      - name: Upload snapshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: snapshots
+          path: .build/snapshots
+          if-no-files-found: warn

@@ -1,0 +1,398 @@
+{
+  "version": "1.0",
+  "scope": "creative-apps",
+  "generated_at": "2026-10-12T00:00:00Z",
+  "source_path": ".",
+  "authored": true,
+  "model": {
+    "people": [],
+    "systems": [
+      {
+        "id": "creative-apps",
+        "name": "creative-apps",
+        "description": "The macOS app shells of the creative suite: five SwiftUI apps (Flare, Design, Photo, Library, Halo), each over a Linux-safe Model target, plus the SuiteUI design system.",
+        "tags": [
+          "internal"
+        ],
+        "containers": [
+          {
+            "id": "suiteui",
+            "name": "SuiteUI",
+            "description": "The shared design system (Sources/SuiteUI): spacing, radius, type and color tokens; Liquid Glass primitives applied through one snapshot-aware modifier; the SuiteWindow shell (sidebar, content, inspector), ToolbarGroup palette, SidebarRow, SurfaceCard, GlassPanel, CanvasSurface and EmptyStateView. macOS only; knows no Model or engine.",
+            "technology": "Swift 6, SwiftUI, macOS 26",
+            "tags": [
+              "internal",
+              "macos-only"
+            ],
+            "components": [
+              {
+                "id": "suiteui-sources",
+                "name": "SuiteUI sources",
+                "description": "The shared design system (Sources/SuiteUI): spacing, radius, type and color tokens; Liquid Glass primitives applied through one snapshot-aware modifier; the SuiteWindow shell (sidebar, content, inspector), ToolbarGroup palette, SidebarRow, SurfaceCard, GlassPanel, CanvasSurface and EmptyStateView.",
+                "technology": "Swift 6, SwiftUI, macOS 26",
+                "paths": [
+                  "Sources/SuiteUI/"
+                ]
+              }
+            ]
+          },
+          {
+            "id": "flare-app",
+            "name": "FlareApp",
+            "description": "The Flare app (2D animation): the SwiftUI App scene and views in Sources/FlareApp, built from SuiteUI. Reads FlareModel and calls its methods; never writes its state (scripts/ci app-state rule).",
+            "technology": "Swift 6, SwiftUI, macOS 26",
+            "tags": [
+              "internal",
+              "macos-only"
+            ],
+            "components": [
+              {
+                "id": "flare-app-sources",
+                "name": "FlareApp sources",
+                "description": "The Flare app (2D animation): the SwiftUI App scene and views in Sources/FlareApp, built from SuiteUI.",
+                "technology": "Swift 6, SwiftUI, macOS 26",
+                "paths": [
+                  "Sources/FlareApp/"
+                ]
+              }
+            ]
+          },
+          {
+            "id": "flare-model",
+            "name": "FlareModel",
+            "description": "Linux-safe state and logic behind Flare's window. FlareWorkspace: the open FlareCore document, selected scene and drawing tool. Foundation only, value types.",
+            "technology": "Swift 6, Foundation",
+            "tags": [
+              "internal"
+            ],
+            "components": [
+              {
+                "id": "flare-model-sources",
+                "name": "FlareModel sources",
+                "description": "Linux-safe state and logic behind Flare's window.",
+                "technology": "Swift 6, Foundation",
+                "paths": [
+                  "Sources/FlareModel/"
+                ]
+              }
+            ]
+          },
+          {
+            "id": "design-app",
+            "name": "DesignApp",
+            "description": "The Design app (vector and UI design): the SwiftUI App scene and views in Sources/DesignApp, built from SuiteUI. Reads DesignModel and calls its methods; never writes its state (scripts/ci app-state rule).",
+            "technology": "Swift 6, SwiftUI, macOS 26",
+            "tags": [
+              "internal",
+              "macos-only"
+            ],
+            "components": [
+              {
+                "id": "design-app-sources",
+                "name": "DesignApp sources",
+                "description": "The Design app (vector and UI design): the SwiftUI App scene and views in Sources/DesignApp, built from SuiteUI.",
+                "technology": "Swift 6, SwiftUI, macOS 26",
+                "paths": [
+                  "Sources/DesignApp/"
+                ]
+              }
+            ]
+          },
+          {
+            "id": "design-model",
+            "name": "DesignModel",
+            "description": "Linux-safe state and logic behind Design's window. DesignWorkspace: the open file's pages, selected page and tool. Foundation only, value types.",
+            "technology": "Swift 6, Foundation",
+            "tags": [
+              "internal"
+            ],
+            "components": [
+              {
+                "id": "design-model-sources",
+                "name": "DesignModel sources",
+                "description": "Linux-safe state and logic behind Design's window.",
+                "technology": "Swift 6, Foundation",
+                "paths": [
+                  "Sources/DesignModel/"
+                ]
+              }
+            ]
+          },
+          {
+            "id": "photo-app",
+            "name": "PhotoApp",
+            "description": "The Photo app (raster editing): the SwiftUI App scene and views in Sources/PhotoApp, built from SuiteUI. Reads PhotoModel and calls its methods; never writes its state (scripts/ci app-state rule).",
+            "technology": "Swift 6, SwiftUI, macOS 26",
+            "tags": [
+              "internal",
+              "macos-only"
+            ],
+            "components": [
+              {
+                "id": "photo-app-sources",
+                "name": "PhotoApp sources",
+                "description": "The Photo app (raster editing): the SwiftUI App scene and views in Sources/PhotoApp, built from SuiteUI.",
+                "technology": "Swift 6, SwiftUI, macOS 26",
+                "paths": [
+                  "Sources/PhotoApp/"
+                ]
+              }
+            ]
+          },
+          {
+            "id": "photo-model",
+            "name": "PhotoModel",
+            "description": "Linux-safe state and logic behind Photo's window. PhotoWorkspace: the open canvas as a CoreRaster PixelBuffer, its layers, selected layer and tool. Foundation only, value types.",
+            "technology": "Swift 6, Foundation",
+            "tags": [
+              "internal"
+            ],
+            "components": [
+              {
+                "id": "photo-model-sources",
+                "name": "PhotoModel sources",
+                "description": "Linux-safe state and logic behind Photo's window.",
+                "technology": "Swift 6, Foundation",
+                "paths": [
+                  "Sources/PhotoModel/"
+                ]
+              }
+            ]
+          },
+          {
+            "id": "library-app",
+            "name": "LibraryApp",
+            "description": "The Library app (photo catalog): the SwiftUI App scene and views in Sources/LibraryApp, built from SuiteUI. Reads LibraryModel and calls its methods; never writes its state (scripts/ci app-state rule).",
+            "technology": "Swift 6, SwiftUI, macOS 26",
+            "tags": [
+              "internal",
+              "macos-only"
+            ],
+            "components": [
+              {
+                "id": "library-app-sources",
+                "name": "LibraryApp sources",
+                "description": "The Library app (photo catalog): the SwiftUI App scene and views in Sources/LibraryApp, built from SuiteUI.",
+                "technology": "Swift 6, SwiftUI, macOS 26",
+                "paths": [
+                  "Sources/LibraryApp/"
+                ]
+              }
+            ]
+          },
+          {
+            "id": "library-model",
+            "name": "LibraryModel",
+            "description": "Linux-safe state and logic behind Library's window. LibraryCatalog: the sidebar collections with counts and the selected collection. Foundation only, value types.",
+            "technology": "Swift 6, Foundation",
+            "tags": [
+              "internal"
+            ],
+            "components": [
+              {
+                "id": "library-model-sources",
+                "name": "LibraryModel sources",
+                "description": "Linux-safe state and logic behind Library's window.",
+                "technology": "Swift 6, Foundation",
+                "paths": [
+                  "Sources/LibraryModel/"
+                ]
+              }
+            ]
+          },
+          {
+            "id": "halo-app",
+            "name": "HaloApp",
+            "description": "The Halo app (motion graphics): the SwiftUI App scene and views in Sources/HaloApp, built from SuiteUI. Reads HaloModel and calls its methods; never writes its state (scripts/ci app-state rule).",
+            "technology": "Swift 6, SwiftUI, macOS 26",
+            "tags": [
+              "internal",
+              "macos-only"
+            ],
+            "components": [
+              {
+                "id": "halo-app-sources",
+                "name": "HaloApp sources",
+                "description": "The Halo app (motion graphics): the SwiftUI App scene and views in Sources/HaloApp, built from SuiteUI.",
+                "technology": "Swift 6, SwiftUI, macOS 26",
+                "paths": [
+                  "Sources/HaloApp/"
+                ]
+              }
+            ]
+          },
+          {
+            "id": "halo-model",
+            "name": "HaloModel",
+            "description": "Linux-safe state and logic behind Halo's window. HaloProject: the project's compositions and the selected one. Foundation only, value types.",
+            "technology": "Swift 6, Foundation",
+            "tags": [
+              "internal"
+            ],
+            "components": [
+              {
+                "id": "halo-model-sources",
+                "name": "HaloModel sources",
+                "description": "Linux-safe state and logic behind Halo's window.",
+                "technology": "Swift 6, Foundation",
+                "paths": [
+                  "Sources/HaloModel/"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "creative-core",
+        "name": "creative-core",
+        "description": "The pure-Swift engines the Models call (github.com/qbtrix/creative-core), tracked on its main branch until it tags releases.",
+        "tags": [
+          "external"
+        ],
+        "containers": [
+          {
+            "id": "flarecore",
+            "name": "FlareCore library",
+            "description": "Animation document model, commands with undo, timeline, file format and export.",
+            "technology": "Swift 6, SwiftPM",
+            "tags": [
+              "external"
+            ],
+            "components": []
+          },
+          {
+            "id": "corecolor",
+            "name": "CoreColor library",
+            "description": "Color spaces and conversions.",
+            "technology": "Swift 6, SwiftPM",
+            "tags": [
+              "external"
+            ],
+            "components": []
+          },
+          {
+            "id": "coreraster",
+            "name": "CoreRaster library",
+            "description": "Pixel buffers, compositing and image operations.",
+            "technology": "Swift 6, SwiftPM",
+            "tags": [
+              "external"
+            ],
+            "components": []
+          }
+        ]
+      }
+    ],
+    "relationships": [
+      {
+        "source": "flare-app",
+        "target": "suiteui",
+        "description": "builds its window from SuiteUI components",
+        "style": "sync"
+      },
+      {
+        "source": "flare-app",
+        "target": "flare-model",
+        "description": "reads state and calls its methods",
+        "style": "sync"
+      },
+      {
+        "source": "flare-model",
+        "target": "flarecore",
+        "description": "uses FlareCore from creative-core",
+        "style": "sync"
+      },
+      {
+        "source": "design-app",
+        "target": "suiteui",
+        "description": "builds its window from SuiteUI components",
+        "style": "sync"
+      },
+      {
+        "source": "design-app",
+        "target": "design-model",
+        "description": "reads state and calls its methods",
+        "style": "sync"
+      },
+      {
+        "source": "design-model",
+        "target": "corecolor",
+        "description": "uses CoreColor from creative-core",
+        "style": "sync"
+      },
+      {
+        "source": "photo-app",
+        "target": "suiteui",
+        "description": "builds its window from SuiteUI components",
+        "style": "sync"
+      },
+      {
+        "source": "photo-app",
+        "target": "photo-model",
+        "description": "reads state and calls its methods",
+        "style": "sync"
+      },
+      {
+        "source": "photo-model",
+        "target": "coreraster",
+        "description": "uses CoreRaster from creative-core",
+        "style": "sync"
+      },
+      {
+        "source": "photo-model",
+        "target": "corecolor",
+        "description": "uses CoreColor from creative-core",
+        "style": "sync"
+      },
+      {
+        "source": "library-app",
+        "target": "suiteui",
+        "description": "builds its window from SuiteUI components",
+        "style": "sync"
+      },
+      {
+        "source": "library-app",
+        "target": "library-model",
+        "description": "reads state and calls its methods",
+        "style": "sync"
+      },
+      {
+        "source": "library-model",
+        "target": "coreraster",
+        "description": "uses CoreRaster from creative-core",
+        "style": "sync"
+      },
+      {
+        "source": "library-model",
+        "target": "corecolor",
+        "description": "uses CoreColor from creative-core",
+        "style": "sync"
+      },
+      {
+        "source": "halo-app",
+        "target": "suiteui",
+        "description": "builds its window from SuiteUI components",
+        "style": "sync"
+      },
+      {
+        "source": "halo-app",
+        "target": "halo-model",
+        "description": "reads state and calls its methods",
+        "style": "sync"
+      },
+      {
+        "source": "halo-model",
+        "target": "flarecore",
+        "description": "uses FlareCore from creative-core",
+        "style": "sync"
+      },
+      {
+        "source": "halo-model",
+        "target": "coreraster",
+        "description": "uses CoreRaster from creative-core",
+        "style": "sync"
+      }
+    ]
+  }
+}
