@@ -42,8 +42,14 @@ struct LibraryWindow: View {
     private var menu: LibraryMenu {
         LibraryMenu(
             sort: model.sort, loadSamples: { model.loadSamples() }, setSort: { model.setSort($0) },
-            larger: model.canShowLargerThumbnails ? { model.stepCellSize(by: 1) } : nil,
-            smaller: model.canShowSmallerThumbnails ? { model.stepCellSize(by: -1) } : nil)
+            larger: stepCellSize(1, allowed: model.canShowLargerThumbnails),
+            smaller: stepCellSize(-1, allowed: model.canShowSmallerThumbnails))
+    }
+
+    /// A thumbnail size step for the View menu, nil at the size limit.
+    private func stepCellSize(_ steps: Int, allowed: Bool) -> (@MainActor () -> Void)? {
+        guard allowed else { return nil }
+        return { model.stepCellSize(by: steps) }
     }
 
     static func symbol(for collectionID: String) -> String {
