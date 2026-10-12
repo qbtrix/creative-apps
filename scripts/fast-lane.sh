@@ -43,9 +43,9 @@ CI_WORKFLOWS=("CI")
 CI_CHECKS=("Linux" "macOS")
 CI_FILE="ci.yml"  # the CI workflow file, for run lookups and dispatch
 SELF_WORKFLOW="Fast Lane"
-# UI code (app shells and SuiteUI) always waits for a human to look at the
-# snapshot PNGs; Model targets and tests stay eligible.
-DENY_RE='^\.github/|^\.claude/|(^|/)(CLAUDE|AGENTS)\.md$|^scripts/(ci|cloud-setup\.sh|fast-lane\.sh)$|(^|/)Package\.(swift|resolved)$|^LICENSE|^Sources/[A-Za-z]+App/|^Sources/SuiteUI/'
+# UI code is eligible: a green macOS CI job is the gate, and taste review happens
+# after merge on the snapshot PNGs (fixes come back as new issues).
+DENY_RE='^\.github/|^\.claude/|(^|/)(CLAUDE|AGENTS)\.md$|^scripts/(ci|cloud-setup\.sh|fast-lane\.sh)$|(^|/)Package\.(swift|resolved)$|^LICENSE'
 
 REPO="${GH_REPO:-qbtrix/creative-apps}"
 DRY_RUN=0

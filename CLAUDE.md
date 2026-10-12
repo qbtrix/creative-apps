@@ -68,8 +68,8 @@ X is Flare, Design, Photo, Library or Halo. Each app is one **line** (label
    `CI: PASS`. Then push and get both CI jobs green.
 4. **Ship.** `git fetch origin && git rebase origin/main`, rerun `scripts/ci`,
    then open ONE small PR to `main` that closes the issue (`Closes #<n>`). Add
-   the `fast-lane` label. UI PRs are refused by the lane and wait for a human;
-   that is expected. Then stop.
+   the `fast-lane` label. List the snapshot PNGs your change touched in the PR
+   body. Then stop.
 5. Don't ask questions. If the issue is impossible as written, comment on the
    issue saying why, remove `in-progress`, and stop.
 
@@ -135,9 +135,9 @@ A PR labelled `fast-lane` is merged automatically by
 `.github/workflows/fast-lane.yml` when all of these hold: base `main`, author
 on the allowlist in `scripts/fast-lane.sh`, at most 400 changed lines and 15
 files, no protected path touched, mergeable, and every check green including
-both CI jobs. Protected paths are the files above plus all UI code:
-`Sources/*App/` and `Sources/SuiteUI/`, because a human must look at the
-snapshots. Model and test PRs can take the lane. Otherwise the label is
+both CI jobs. Protected paths are the files above. UI code can take the lane once both CI
+jobs are green; a human reviews the snapshots after merge and files fixes as
+new issues. Otherwise the label is
 removed with a comment saying why, and the PR waits for review.
 
 ## Commands
