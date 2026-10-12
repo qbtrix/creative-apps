@@ -1,7 +1,7 @@
 // PhotoApp.swift: Photo, the raster editing app. The window is SuiteWindow
 // with the layer stack in the sidebar (add, rename, reorder, show and hide),
-// PhotoCanvas as content and the selected layer, then the image adjustments,
-// in the inspector. Views only
+// PhotoCanvas as content and PhotoInspector (the selected layer, then the
+// image adjustments, or an empty state) in the inspector. Views only
 // read PhotoWorkspace and call its methods; all state lives in PhotoModel
 // (scripts/ci checks this).
 import PhotoModel
@@ -35,19 +35,11 @@ struct PhotoWindow: View {
         ) {
             PhotoCanvas(model: model, onNew: newImage, onTool: { model.selectTool($0) })
         } inspector: {
-            if let canvas = model.canvas, let layer = model.selectedLayer {
-                ScrollView {
-                    VStack(alignment: .leading, spacing: SuiteSpacing.l) {
-                        PhotoLayerInspector(
-                            layer: layer, canvasSize: "\(canvas.width) × \(canvas.height) px",
-                            onBlendMode: { model.setBlendMode(layer.id, $0) },
-                            onOpacity: { model.setOpacity(layer.id, percent: $0) })
-                        AdjustmentsInspector(settings: model.adjustments, onEdit: { model.adjust($0) })
-                    }
-                }
-            } else {
-                EmptyStateView("No Selection", systemImage: "photo", message: "Select a layer to adjust it.")
-            }
+            PhotoInspector(
+                model: model,
+                onBlendMode: { model.setBlendMode($0, $1) },
+                onOpacity: { model.setOpacity($0, percent: $1) },
+                onAdjust: { model.adjust($0) })
         }
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
