@@ -78,8 +78,11 @@ public struct LibraryCatalog: Sendable, Equatable {
     public mutating func setSort(_ newSort: LibrarySort) { sort = newSort }
 
     /// One step larger (positive) or smaller (negative), clamped to 80...320.
+    /// The step count is clamped first so a huge count cannot overflow `Int`.
     public mutating func stepCellSize(by steps: Int) {
-        cellSize = min(max(cellSize + steps * Self.cellSizeStep, 80), 320)
+        let span = (320 - 80) / Self.cellSizeStep
+        let clampedSteps = min(max(steps, -span), span)
+        cellSize = min(max(cellSize + clampedSteps * Self.cellSizeStep, 80), 320)
     }
 
     /// Sets the grid selection; ids not shown in the selected collection are dropped.
