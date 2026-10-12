@@ -26,9 +26,7 @@ struct AdjustmentsInspector: View {
                 InspectorSliderRow("White", value: Double(settings.whitePoint), in: Self.doubles(AdjustmentSettings.levelsRange)) {
                     onEdit(.whitePoint(Float($0)))
                 }
-                InspectorSliderRow("Gamma", value: Double(settings.gamma), in: Self.doubles(AdjustmentSettings.gammaRange)) {
-                    onEdit(.gamma(Float($0)))
-                }
+                gammaRow
             }
             section(.blur) {
                 InspectorSliderRow("Radius", value: settings.blurSigma, in: AdjustmentSettings.sigmaRange, unit: "px") {
@@ -63,6 +61,32 @@ struct AdjustmentsInspector: View {
                     .help("Reset \(kind.title)")
             }
             rows().disabled(!settings.isEnabled(kind))
+        }
+    }
+
+    /// Gamma on a log10 track (GammaTrack), so 1 sits mid-track; the field
+    /// shows and takes gamma itself. A plain stand-in for InspectorSliderRow
+    /// until it can map its track (#88).
+    private var gammaRow: some View {
+        LabeledContent("Gamma") {
+            HStack(spacing: SuiteSpacing.s) {
+                Slider(
+                    value: Binding(
+                        get: { GammaTrack.position(ofGamma: Double(settings.gamma)) },
+                        set: { onEdit(.gamma(Float(GammaTrack.gamma(atPosition: $0)))) }),
+                    in: GammaTrack.positionRange
+                )
+                .accessibilityLabel("Gamma")
+                .accessibilityValue(NumericInput.format(Double(settings.gamma)))
+                TextField(
+                    "Gamma", value: Binding(get: { Double(settings.gamma) }, set: { onEdit(.gamma(Float($0))) }),
+                    format: .number.precision(.fractionLength(0...2))
+                )
+                .labelsHidden()
+                .multilineTextAlignment(.trailing)
+                .font(SuiteFont.monospacedDigits)
+                .frame(width: SuiteSize.inspectorField)
+            }
         }
     }
 
