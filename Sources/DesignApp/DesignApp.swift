@@ -21,10 +21,11 @@ struct DesignWindow: View {
     var body: some View {
         SuiteWindow(
             title: model.isOpen ? "Untitled Design" : "Design",
-            sidebarTitle: "Pages and Layers",
-            items: model.pages.map { SidebarItem(page: $0) } + model.layerRows.map { SidebarItem(row: $0) },
+            sections: [SidebarSection(id: "pages-and-layers", title: "Pages and Layers", items: sidebarItems)],
             selection: model.selectedNodeID ?? model.selectedPageID,
             onSelect: { model.selectItem($0) },
+            // The row comes from the model, so the toggle cannot hit an unknown id.
+            onToggle: { id, toggle in if toggle == SidebarItem.designExpand { try? model.toggleExpanded(id) } },
             actions: [
                 ToolbarAction("New File", systemImage: "plus") { model.newFile() },
                 ToolbarAction("Add Page", systemImage: "doc.badge.plus") { model.addPage() },
@@ -48,6 +49,11 @@ struct DesignWindow: View {
         }
         .focusedSceneValue(\.designAddPage, addPage)
         .focusedSceneValue(\.designDeletePage, deletePage)
+    }
+
+    private var sidebarItems: [SidebarItem] {
+        model.pages.map { SidebarItem(page: $0) }
+            + model.layerRows.map { SidebarItem(row: $0, isExpanded: model.isExpanded($0.id)) }
     }
 
     /// Page > Add Page's action, nil with no file open.

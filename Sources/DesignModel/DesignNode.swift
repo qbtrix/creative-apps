@@ -79,6 +79,15 @@ extension [DesignNode] {
         return nil
     }
 
+    /// The ids of the nodes enclosing `id`, outermost first; nil when `id` is not in the tree.
+    func ancestors(of id: String) -> [String]? {
+        for node in self {
+            if node.id == id { return [] }
+            if let path = node.children.ancestors(of: id) { return [node.id] + path }
+        }
+        return nil
+    }
+
     /// Applies `change` to the node with `id`; returns whether it was found.
     mutating func update(_ id: String, _ change: (inout DesignNode) -> Void) -> Bool {
         for index in indices {
