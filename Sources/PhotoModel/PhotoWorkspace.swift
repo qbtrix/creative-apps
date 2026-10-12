@@ -1,6 +1,6 @@
 // PhotoWorkspace.swift: the state behind Photo's window (raster editing).
 // Holds the open canvas as a CoreRaster PixelBuffer, its layer stack (top
-// first), the selected layer and the active tool. Linux-safe: no UI imports.
+// first), the selected layer, the active tool and the image adjustments. Linux-safe: no UI imports.
 // PhotoApp changes it only through the methods here. Invariants: with a canvas
 // open there is at least one layer, and the selection names one of them.
 import CoreRaster
@@ -16,6 +16,7 @@ public struct PhotoWorkspace: Sendable, Equatable {
     public private(set) var layers: [PhotoLayer] = []
     public private(set) var selectedLayerID: PhotoLayer.ID?
     public private(set) var tool: PhotoTool = .move
+    public private(set) var adjustments = AdjustmentSettings()
     /// The number in the next layer's id; ids are never reused.
     private var nextLayerNumber = 1
 
@@ -28,11 +29,13 @@ public struct PhotoWorkspace: Sendable, Equatable {
     /// Whether Delete Layer can run: the last layer can't be removed.
     public var canRemoveLayer: Bool { layers.count > 1 }
 
-    /// Opens a new white canvas with one "Background" layer. Throws
+    /// Opens a new white canvas with one "Background" layer and default
+    /// adjustments. Throws
     /// `RasterError` for a size CoreRaster rejects; the workspace is unchanged.
     public mutating func newCanvas(width: Int, height: Int) throws {
         canvas = try PixelBuffer(width: width, height: height, fill: RGBA(r: 1, g: 1, b: 1, a: 1))
         layers = []
+        adjustments = AdjustmentSettings()
         nextLayerNumber = 1
         selectedLayerID = insertLayer(named: "Background", at: 0)
     }
@@ -44,6 +47,11 @@ public struct PhotoWorkspace: Sendable, Equatable {
 
     public mutating func selectTool(_ tool: PhotoTool) {
         self.tool = tool
+    }
+
+    /// Changes one adjustment; AdjustmentSettings clamps and validates it.
+    public mutating func adjust(_ edit: AdjustmentEdit) {
+        adjustments.apply(edit)
     }
 
     /// Adds a visible, opaque, normal-blend layer named "Layer N" (the lowest
