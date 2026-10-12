@@ -1,36 +1,24 @@
-// ThumbnailGrid.swift: ThumbnailItem (id, optional image, caption, badges) and
-// ThumbnailGrid, a LazyVGrid of image thumbnails with adaptive columns for
-// Library and any asset browser. Content layer, so flat: no glass. The app owns
-// the selection: the grid takes it as a value and reports every change through
-// `onSelectionChange`; it keeps only presentation state (the click anchor,
-// focus, its width). The selection rules live in GridSelection, where they are
-// tested. While snapshots render, the grid drops its ScrollView, which
-// ImageRenderer does not draw.
+// ThumbnailGrid.swift: ThumbnailItem and ThumbnailGrid, a LazyVGrid of image
+// thumbnails with adaptive columns for Library and any asset browser. Content,
+// so flat: no glass. The app owns the selection and gets every change through
+// `onSelectionChange`; the grid keeps only presentation state (click anchor,
+// focus, width). The selection rules live in GridSelection, where they are
+// tested. Snapshots drop the ScrollView, which ImageRenderer does not draw.
 import AppKit
 import SwiftUI
 
-/// Small symbols over a thumbnail. `rating` is clamped to 0...5 stars.
+/// Small symbols over a thumbnail. `rating` is clamped to 0...5 stars. The
+/// color label's `name` is its accessibility label, so color never carries
+/// the meaning alone.
 public struct ThumbnailBadges: Sendable {
     public let rating: Int
     public let isFlagged: Bool
-    public let colorLabel: ThumbnailColorLabel?
+    public let colorLabel: (name: String, color: Color)?
 
-    public init(rating: Int = 0, isFlagged: Bool = false, colorLabel: ThumbnailColorLabel? = nil) {
+    public init(rating: Int = 0, isFlagged: Bool = false, colorLabel: (name: String, color: Color)? = nil) {
         self.rating = min(max(rating, 0), 5)
         self.isFlagged = isFlagged
         self.colorLabel = colorLabel
-    }
-}
-
-/// A color label dot. `name` is its accessibility label, so the color never
-/// carries the meaning alone.
-public struct ThumbnailColorLabel: Sendable {
-    public let name: String
-    public let color: Color
-
-    public init(_ name: String, color: Color) {
-        self.name = name
-        self.color = color
     }
 }
 
@@ -80,15 +68,12 @@ public struct ThumbnailGrid<ID: Hashable>: View {
             grid
         } else {
             ScrollViewReader { proxy in
-                ScrollView { grid }
-                    .onChange(of: anchor) { _, id in
-                        if let id { proxy.scrollTo(id) }
-                    }
+                ScrollView { grid }.onChange(of: anchor) { _, id in if let id { proxy.scrollTo(id) } }
             }
         }
     }
 
-    /// One column's width: the image plus the cell's padding on both sides.
+    /// The image plus the cell's padding on both sides.
     private var columnWidth: CGFloat { cellSize.width + SuiteSpacing.xs * 2 }
 
     private var grid: some View {
@@ -113,9 +98,8 @@ public struct ThumbnailGrid<ID: Hashable>: View {
         .onKeyPress(.upArrow) { move(.up) }
         .onKeyPress(.downArrow) { move(.down) }
         .onKeyPress(.return) {
-            guard let id = currentAnchor else { return .ignored }
-            onOpen(id)
-            return .handled
+            if let id = currentAnchor { onOpen(id) }
+            return currentAnchor == nil ? .ignored : .handled
         }
     }
 
@@ -206,9 +190,7 @@ private struct ThumbnailCell<ID: Hashable>: View {
                     .accessibilityElement(children: .ignore)
                     .accessibilityLabel(Text(verbatim: marks.rating == 1 ? "1 star" : "\(marks.rating) stars"))
                 }
-                if marks.isFlagged {
-                    Image(systemName: "flag.fill").accessibilityLabel("Flagged")
-                }
+                if marks.isFlagged { Image(systemName: "flag.fill").accessibilityLabel("Flagged") }
                 if let label = marks.colorLabel {
                     Image(systemName: "circle.fill").foregroundStyle(label.color).accessibilityLabel(label.name)
                 }

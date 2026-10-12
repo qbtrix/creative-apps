@@ -8,41 +8,32 @@ private let order = ["a", "b", "c", "d", "e", "f", "g"]
 
 @Test func plainClickSelectsOnlyThatItem() {
     let result = GridSelection.click("c", .plain, order: order, selection: ["a", "b"], anchor: "a")
-    #expect(result.selection == ["c"])
-    #expect(result.anchor == "c")
+    #expect(result.selection == ["c"] && result.anchor == "c")
 }
 
 @Test func commandClickTogglesOneItemAndKeepsTheRest() {
     let added = GridSelection.click("d", .toggle, order: order, selection: ["a"], anchor: "a")
-    #expect(added.selection == ["a", "d"])
-    #expect(added.anchor == "d")
+    #expect(added.selection == ["a", "d"] && added.anchor == "d")
     let removed = GridSelection.click("a", .toggle, order: order, selection: added.selection, anchor: added.anchor)
     #expect(removed.selection == ["d"])
 }
 
 @Test func shiftClickSelectsTheRangeForward() {
     let result = GridSelection.click("e", .extend, order: order, selection: ["b"], anchor: "b")
-    #expect(result.selection == ["b", "c", "d", "e"])
-    #expect(result.anchor == "b")
+    #expect(result.selection == ["b", "c", "d", "e"] && result.anchor == "b")
 }
 
 @Test func shiftClickSelectsTheRangeBackwardAndKeepsTheAnchor() {
     let first = GridSelection.click("f", .extend, order: order, selection: ["d"], anchor: "d")
     let back = GridSelection.click("b", .extend, order: order, selection: first.selection, anchor: first.anchor)
-    #expect(back.selection == ["b", "c", "d"])
-    #expect(back.anchor == "d")
+    #expect(back.selection == ["b", "c", "d"] && back.anchor == "d")
 }
 
-@Test func shiftClickWithNoAnchorSelectsJustThatItem() {
-    let result = GridSelection.click("c", .extend, order: order, selection: [], anchor: nil)
-    #expect(result.selection == ["c"])
-    #expect(result.anchor == "c")
-}
-
-@Test func clickOnAnUnknownIdChangesNothing() {
-    let result = GridSelection.click("z", .plain, order: order, selection: ["a"], anchor: "a")
-    #expect(result.selection == ["a"])
-    #expect(result.anchor == "a")
+@Test func shiftClickWithNoAnchorSelectsJustThatItemAndAnUnknownIdChangesNothing() {
+    let fresh = GridSelection.click("c", .extend, order: order, selection: [], anchor: nil)
+    #expect(fresh.selection == ["c"] && fresh.anchor == "c")
+    let unknown = GridSelection.click("z", .plain, order: order, selection: ["a"], anchor: "a")
+    #expect(unknown.selection == ["a"] && unknown.anchor == "a")
 }
 
 @Test func arrowsMoveByOneAcrossAndByARowDown() {
@@ -53,19 +44,15 @@ private let order = ["a", "b", "c", "d", "e", "f", "g"]
     #expect(GridSelection.move(.up, order: order, columns: 3, anchor: "e").anchor == "b")
 }
 
-@Test func arrowsAtTheGridEdgesStayInBounds() {
+@Test func arrowsAtTheGridEdgesStayInBoundsAndWithNoAnchorPickTheFirstItem() {
     #expect(GridSelection.move(.left, order: order, columns: 3, anchor: "a").selection == ["a"])
     #expect(GridSelection.move(.up, order: order, columns: 3, anchor: "c").selection == ["c"])
     #expect(GridSelection.move(.right, order: order, columns: 3, anchor: "g").selection == ["g"])
     #expect(GridSelection.move(.down, order: order, columns: 3, anchor: "f").selection == ["f"])
     #expect(GridSelection.move(.down, order: order, columns: 0, anchor: "a").selection == ["b"])
-}
-
-@Test func arrowWithNoAnchorPicksTheFirstItemAndAnEmptyGridPicksNothing() {
     #expect(GridSelection.move(.down, order: order, columns: 3, anchor: nil).selection == ["a"])
     let empty = GridSelection.move(.down, order: [String](), columns: 3, anchor: nil)
-    #expect(empty.selection.isEmpty)
-    #expect(empty.anchor == nil)
+    #expect(empty.selection.isEmpty && empty.anchor == nil)
 }
 
 @Test func columnsFitAdaptiveCellsAndNeverDropBelowOne() {

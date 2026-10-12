@@ -7,17 +7,12 @@
 public enum GridSelection {
     /// The modifier held during a click.
     public enum Click: Sendable {
-        /// Select only this item.
-        case plain
-        /// Command: add or remove this item, keep the rest.
-        case toggle
-        /// Shift: select the range from the anchor to this item.
-        case extend
+        case plain  // select only this item
+        case toggle  // Command: add or remove this item, keep the rest
+        case extend  // Shift: select the range from the anchor to this item
     }
 
-    public enum Direction: Sendable {
-        case left, right, up, down
-    }
+    public enum Direction: Sendable { case left, right, up, down }
 
     /// A new selection and the anchor that goes with it.
     public struct Result<ID: Hashable> {

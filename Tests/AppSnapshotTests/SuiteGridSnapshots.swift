@@ -21,16 +21,13 @@ import Testing
 
     /// Twelve cells: every third has no image, the rest are gradients.
     private static func sampleItems() -> [ThumbnailItem<String>] {
-        let palettes: [[Color]] = [
-            [.orange, .pink], [.teal, .blue], [.yellow, .green], [.indigo, .purple],
-            [.red, .orange], [.mint, .cyan], [.brown, .yellow], [.blue, .indigo],
-        ]
-        var palette = palettes.makeIterator()
+        var palette = [[Color.orange, .pink], [.teal, .blue], [.yellow, .green], [.indigo, .purple],
+                       [.red, .orange], [.mint, .cyan], [.brown, .yellow], [.blue, .indigo]].makeIterator()
         return (1...12).map { index in
             let image = index % 3 == 0 ? nil : palette.next().flatMap(swatch)
             let badges = ThumbnailBadges(
                 rating: index % 6, isFlagged: index % 4 == 1,
-                colorLabel: index % 5 == 2 ? ThumbnailColorLabel("Red", color: .red) : nil)
+                colorLabel: index % 5 == 2 ? (name: "Red", color: .red) : nil)
             return ThumbnailItem(id: "\(index)", image: image, caption: "IMG_\(4800 + index).heic", badges: badges)
         }
     }
