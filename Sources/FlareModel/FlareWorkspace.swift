@@ -13,7 +13,14 @@ public enum FlareTool: String, CaseIterable, Sendable {
 
     /// Why the palette shows this tool disabled, as its tooltip; nil once the
     /// tool works. Set it to nil in the change that makes `drag` do something.
-    public var unavailableHelp: String? { nil }
+    public var unavailableHelp: String? {
+        switch self {
+        case .select: "Selecting on the stage isn't built yet (#12)."
+        case .pen: "Drawing paths isn't built yet."
+        case .rectangle: "Drawing rectangles isn't built yet."
+        case .ellipse: "Drawing ellipses isn't built yet."
+        }
+    }
 
     public var isEnabled: Bool { unavailableHelp == nil }
 }

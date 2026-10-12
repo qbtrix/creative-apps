@@ -13,7 +13,15 @@ public enum PhotoTool: String, CaseIterable, Sendable {
 
     /// Why the palette shows this tool disabled, as its tooltip; nil once the
     /// tool works. Set it to nil in the change that makes `drag` do something.
-    public var unavailableHelp: String? { nil }
+    public var unavailableHelp: String? {
+        switch self {
+        case .move: "Moving a layer isn't built yet."
+        case .marquee: "Selecting part of the image isn't built yet."
+        case .brush: "Painting isn't built yet."
+        case .eraser: "Erasing isn't built yet."
+        case .crop: "Cropping isn't built yet."
+        }
+    }
 
     public var isEnabled: Bool { unavailableHelp == nil }
 }

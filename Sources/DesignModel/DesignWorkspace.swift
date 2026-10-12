@@ -28,7 +28,15 @@ public enum DesignTool: String, CaseIterable, Sendable {
 
     /// Why the palette shows this tool disabled, as its tooltip; nil once the
     /// tool works. Set it to nil in the change that makes `drag` do something.
-    public var unavailableHelp: String? { nil }
+    public var unavailableHelp: String? {
+        switch self {
+        case .move: "Selecting and moving on the canvas isn't built yet (#17)."
+        case .frame: "Drawing frames isn't built yet."
+        case .rectangle: "Drawing rectangles isn't built yet."
+        case .text: "Placing text isn't built yet."
+        case .pen: "Drawing paths isn't built yet."
+        }
+    }
 
     public var isEnabled: Bool { unavailableHelp == nil }
 }
