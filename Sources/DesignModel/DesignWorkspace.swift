@@ -25,6 +25,16 @@ public enum DesignTool: String, CaseIterable, Sendable {
     case move, frame, rectangle, text, pen
 }
 
+/// A page `deletePage` removed, with where it sat and the selection before the delete;
+/// `restorePage` takes it back.
+public struct DeletedPage: Sendable, Equatable {
+    public let page: DesignPage
+    public let index: Int
+    public let selectedPageID: String?
+    public let selectedNodeID: String?
+    let file: Int
+}
+
 public struct DesignWorkspace: Sendable, Equatable {
     /// Pages of the open file; empty when no file is open.
     public private(set) var pages: [DesignPage] = []
@@ -34,6 +44,8 @@ public struct DesignWorkspace: Sendable, Equatable {
     public private(set) var tool: DesignTool = .move
     private var pageCount = 0
     private var nodeCount = 0
+    /// Bumped by each New File, so a page deleted from an earlier file cannot come back into this one.
+    private var fileGeneration = 0
 
     public init() {}
 
@@ -51,6 +63,7 @@ public struct DesignWorkspace: Sendable, Equatable {
     /// Opens a new file with one desktop-sized page holding a "Desktop" frame the size of the page.
     public mutating func newFile() {
         (pageCount, nodeCount) = (0, 0)
+        fileGeneration += 1
         var page = nextPage()
         let size = DesignRect(x: 0, y: 0, width: page.frameWidth, height: page.frameHeight)
         page.nodes = [DesignNode(id: nextNodeID(), name: "Desktop", kind: .frame, frame: size)]
@@ -75,11 +88,33 @@ public struct DesignWorkspace: Sendable, Equatable {
     public var canDeletePage: Bool { selectedPage != nil && pages.count > 1 }
 
     /// Deletes a page; the last page is refused. Deleting the selected page selects its neighbor.
-    public mutating func deletePage(_ id: String) throws(DesignTreeError) {
+    /// Returns what `restorePage` needs to undo the delete.
+    @discardableResult
+    public mutating func deletePage(_ id: String) throws(DesignTreeError) -> DeletedPage {
         guard let index = pages.firstIndex(where: { $0.id == id }) else { throw .unknownID(id) }
         guard pages.count > 1 else { throw .lastPage }
+        let deleted = DeletedPage(
+            page: pages[index], index: index, selectedPageID: selectedPageID,
+            selectedNodeID: selectedNodeID, file: fileGeneration)
         pages.remove(at: index)
         if selectedPageID == id { selectPage(pages[Swift.min(index, pages.count - 1)].id) }
+        return deleted
+    }
+
+    /// Undoes `deletePage`: puts the page back at its index (clamped to the page count) with
+    /// its nodes and ids, and restores the selection the delete changed. Refused once another
+    /// file is opened, or when the page is already back.
+    public mutating func restorePage(_ deleted: DeletedPage) throws(DesignTreeError) {
+        let id = deleted.page.id
+        guard isOpen, deleted.file == fileGeneration else { throw .unknownID(id) }
+        guard !pages.contains(where: { $0.id == id }) else { throw .alreadyExists(id) }
+        pages.insert(deleted.page, at: Swift.min(deleted.index, pages.count))
+        if let pageID = deleted.selectedPageID, pages.contains(where: { $0.id == pageID }) {
+            selectPage(pageID)
+            if let nodeID = deleted.selectedNodeID, selectedPage?.nodes.node(nodeID) != nil {
+                selectedNodeID = nodeID
+            }
+        }
     }
 
     /// Selects a page by id and clears the node selection, even when the page is already

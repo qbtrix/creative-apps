@@ -21,6 +21,7 @@ struct DesignApp: App {
 
 struct DesignWindow: View {
     @State private var model = DesignWorkspace()
+    @Environment(\.undoManager) private var undoManager
 
     var body: some View {
         SuiteWindow(
@@ -70,8 +71,24 @@ struct DesignWindow: View {
     /// Page > Delete Page's action, nil when the selected page is the last one.
     private var deletePage: (@MainActor () -> Void)? {
         guard model.canDeletePage, let id = model.selectedPageID else { return nil }
-        // canDeletePage holds, so the delete cannot be refused.
-        return { try? model.deletePage(id) }
+        return { deletePage(id) }
+    }
+
+    /// Deletes a page as the undo step "Delete Page": undo restores it, redo deletes it again.
+    private func deletePage(_ id: String) {
+        guard let deleted = try? model.deletePage(id) else { return }
+        registerUndo { restorePage(deleted) }
+    }
+
+    private func restorePage(_ deleted: DeletedPage) {
+        guard (try? model.restorePage(deleted)) != nil else { return }
+        registerUndo { deletePage(deleted.page.id) }
+    }
+
+    private func registerUndo(_ action: @escaping @MainActor @Sendable () -> Void) {
+        guard let undoManager else { return }
+        undoManager.registerUndo(withTarget: undoManager) { _ in MainActor.assumeIsolated { action() } }
+        undoManager.setActionName("Delete Page")
     }
 }
 
