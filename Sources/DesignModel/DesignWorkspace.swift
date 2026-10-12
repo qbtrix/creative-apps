@@ -117,6 +117,14 @@ public struct DesignWorkspace: Sendable, Equatable {
         }
     }
 
+    /// Redoes a Delete Page that `restorePage` undid. Refused once another file is opened, so
+    /// a stale redo cannot delete the new file's page that reuses the id.
+    @discardableResult
+    public mutating func redoDeletePage(_ deleted: DeletedPage) throws(DesignTreeError) -> DeletedPage {
+        guard deleted.file == fileGeneration else { throw .unknownID(deleted.page.id) }
+        return try deletePage(deleted.page.id)
+    }
+
     /// Selects a page by id and clears the node selection, even when the page is already
     /// selected, so clicking its row deselects the layer. An unknown id is ignored.
     public mutating func selectPage(_ id: String) {
@@ -131,7 +139,12 @@ public struct DesignWorkspace: Sendable, Equatable {
         guard let page = pages.first(where: { $0.nodes.node(id) != nil }) else { return }
         selectedPageID = page.id
         selectedNodeID = id
-        expandedNodeIDs.formUnion(page.nodes.ancestors(of: id) ?? [])
+        expandAncestors(of: id, in: page.nodes)
+    }
+
+    /// Expands every node that encloses `id` in `nodes`, so `id`'s own Layers row shows.
+    private mutating func expandAncestors(of id: String, in nodes: [DesignNode]) {
+        expandedNodeIDs.formUnion(nodes.ancestors(of: id) ?? [])
     }
 
     /// Whether `id`'s Layers row shows its children.
@@ -149,6 +162,7 @@ public struct DesignWorkspace: Sendable, Equatable {
     }
 
     /// Adds a node of `kind` to the selected page, inside `parentID` or at the top, and selects it.
+    /// Every enclosing row expands, so the new node's row shows.
     @discardableResult
     public mutating func addNode(
         _ kind: DesignNodeKind, frame: DesignRect, in parentID: String? = nil
@@ -160,12 +174,13 @@ public struct DesignWorkspace: Sendable, Equatable {
         let node = DesignNode(id: "node-\(nodeCount + 1)", name: kind.defaultName, kind: kind, frame: frame)
         try pages[pageIndex].nodes.add(node, to: parentID)
         _ = nextNodeID()
-        if let parentID { expandedNodeIDs.insert(parentID) }
+        expandAncestors(of: node.id, in: pages[pageIndex].nodes)
         selectedNodeID = node.id
         return node.id
     }
 
     /// Moves a node to the end of `parentID`'s children (nil: its page's top). Refused into a non-container or its own subtree.
+    /// Every enclosing row expands, so the moved node's row shows.
     public mutating func moveNode(_ id: String, into parentID: String?) throws(DesignTreeError) {
         guard let pageIndex = pages.firstIndex(where: { $0.nodes.node(id) != nil }),
             let node = pages[pageIndex].nodes.node(id)
@@ -176,7 +191,7 @@ public struct DesignWorkspace: Sendable, Equatable {
         _ = nodes.remove(id)
         try nodes.add(node, to: parentID)
         pages[pageIndex].nodes = nodes
-        if let parentID { expandedNodeIDs.insert(parentID) }
+        expandAncestors(of: id, in: nodes)
     }
 
     public mutating func renameNode(_ id: String, to name: String) throws(DesignTreeError) {
