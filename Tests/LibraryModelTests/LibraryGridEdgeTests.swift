@@ -20,7 +20,13 @@ private func photo(_ name: String, minute: Double, rating: Int = 0, flagged: Boo
 @Test(arguments: [0, 1, 2026, UInt64.max])
 func samplesAreWellFormedForAnySeed(seed: UInt64) {
     let items = LibrarySample.items(seed: seed)
-    #expect(items.map(\.name) == (1...60).map { "IMG_" + String(repeating: "0", count: 4 - String($0).count) + String($0) })
+    let expectedNames: [String] = (1...60).map { (n: Int) -> String in
+        let digits = String(n)
+        let padding = String(repeating: "0", count: 4 - digits.count)
+        return "IMG_" + padding + digits
+    }
+    let names: [String] = items.map(\.name)
+    #expect(names == expectedNames)
     let start = Date(timeIntervalSince1970: 1_767_225_600)
     let end = start.addingTimeInterval(365 * 24 * 60 * 60)
     #expect(items.allSatisfy { (0...5).contains($0.rating) && $0.captureDate >= start && $0.captureDate < end })
