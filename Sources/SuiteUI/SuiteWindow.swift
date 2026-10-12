@@ -62,7 +62,7 @@ public struct SuiteWindow<Content: View, Inspector: View>: View {
                 ForEach(sections) { section in
                     Section {
                         ForEach(section.items) { SidebarNode(item: $0, onToggle: onToggle, onRename: onRename) }
-                            .onMove(perform: onMove == nil ? nil : { from, to in onMove?(section.id, from, to) })
+                            .onMove(perform: moveAction(in: section.id))
                     } header: {
                         SidebarSectionHeader(section: section)
                     }
@@ -103,5 +103,11 @@ public struct SuiteWindow<Content: View, Inspector: View>: View {
             }
         }
         .frame(minWidth: SuiteSize.windowMinimum.width, minHeight: SuiteSize.windowMinimum.height)
+    }
+
+    /// Drag reorder for one section's rows; nil (reorder off) without `onMove`.
+    private func moveAction(in sectionID: SidebarSection.ID) -> ((IndexSet, Int) -> Void)? {
+        guard let onMove else { return nil }
+        return { from, to in onMove(sectionID, from, to) }
     }
 }

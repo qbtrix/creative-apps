@@ -60,8 +60,10 @@ struct SidebarNode: View {
 
     private var row: some View {
         let id = item.id
-        let toggle: (@MainActor (SidebarToggle.ID) -> Void)? = onToggle == nil ? nil : { onToggle?(id, $0) }
-        let rename: (@MainActor (String) -> Void)? = onRename == nil ? nil : { onRename?(id, $0) }
+        var toggle: (@MainActor (SidebarToggle.ID) -> Void)?
+        if let onToggle { toggle = { onToggle(id, $0) } }
+        var rename: (@MainActor (String) -> Void)?
+        if let onRename { rename = { onRename(id, $0) } }
         return SidebarRow(item, onToggle: toggle, onRename: rename).tag(id)
     }
 }
