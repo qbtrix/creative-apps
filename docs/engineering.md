@@ -119,13 +119,13 @@ every step.
 - **How to write a step.** Use `Journey`: `click("Title", step: "name")`
   clicks the button with that title in the window's content (`in: .toolbar` or
   `in: .sheet` for the others) and shoots `<app>-name`; `shot("name")` shoots
-  the window as it is; `clickEachTool()` (clicks each enabled tool,
-  hovers a disabled one so the shot shows why) and `openEachMenu()` cover the
-  canvas palette and the menu bar. Find things by the title a person reads. When a control has no title, give it an
-  `.accessibilityIdentifier` in the view (SuiteUI's use a `suite.` prefix:
-  `suite.sidebar`, `suite.inspector`, `suite.tools`) and find it with
-  `app.descendants(matching: .any)["id"]`. Step names are unique within an
-  app, because they become the PNG names.
+  the window as it is; `clickEachTool()` (shoots the palette, then clicks
+  each enabled tool) and `openEachMenu()` cover the canvas palette and the
+  menu bar. Find things by the title a person reads. When a
+  control has no title, give it an `.accessibilityIdentifier` in the view
+  (SuiteUI's use a `suite.` prefix: `suite.sidebar`, `suite.inspector`,
+  `suite.tools`) and find it with `app.descendants(matching: .any)["id"]`.
+  Step names are unique within an app, because they become the PNG names.
 - **Look at the shots.** Open the `<app>-*.png` files your change touched from
   `ui-screens`, the same way you check snapshots, and name them in the PR
   body. Review-only.

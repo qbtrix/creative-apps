@@ -68,22 +68,18 @@ struct Journey {
         if let step { shot(step) }
     }
 
-    /// Goes through the canvas palette in order and shoots "tool-<title>" for
-    /// each tool: an enabled tool gets clicked; a disabled one (it can't act
-    /// yet) gets hovered, so the shot shows the tooltip saying why.
+    /// Shoots the canvas palette as "tools", then clicks each enabled tool in
+    /// order and shoots "tool-<title>". A disabled tool (it can't act yet)
+    /// shows only in "tools"; it gets clicked once it is enabled.
     func clickEachTool() {
         let tools = element("suite.tools").buttons
         XCTAssert(tools.firstMatch.waitForExistence(timeout: 10), "no tool palette (suite.tools)")
+        shot("tools")
         for index in 0..<tools.count {
             let tool = tools.element(boundBy: index)
+            guard tool.isEnabled else { continue }
             let title = tool.label
-            if tool.isEnabled {
-                tool.click()
-            } else {
-                tool.hover()
-                // ponytail: fixed wait for the system tooltip delay; no query sees tooltips.
-                Thread.sleep(forTimeInterval: 2)
-            }
+            tool.click()
             shot("tool-\(slug(title))")
         }
     }
