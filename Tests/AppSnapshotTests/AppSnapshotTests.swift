@@ -125,12 +125,14 @@ enum SnapshotError: Error {
 }
 
 /// Renders `view` at 1440x900 (scale 1) over the window background and writes
-/// `<package root>/.build/snapshots/<name>.png`.
+/// `<package root>/.build/snapshots/<name>.png`. A view taller than the frame
+/// (a grid whose ScrollView the renderer drops) passes `.top` so the capture
+/// starts where the scroll view would.
 @MainActor
-func snapshot(_ view: some View, name: String, scheme: ColorScheme) throws {
+func snapshot(_ view: some View, name: String, scheme: ColorScheme, alignment: Alignment = .center) throws {
     let size = CGSize(width: 1440, height: 900)
     let renderer = ImageRenderer(content: view
-        .frame(width: size.width, height: size.height)
+        .frame(width: size.width, height: size.height, alignment: alignment)
         .background(SuiteColor.windowBackground)
         .environment(\.colorScheme, scheme)
         .environment(\.suiteSnapshotRendering, true))
