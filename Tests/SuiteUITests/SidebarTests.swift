@@ -31,3 +31,14 @@ import Testing
     let withAdd = SidebarSection(id: "layers", title: "Layers", items: [], addAction: ToolbarAction("New Layer", systemImage: "plus"))
     #expect(withAdd.addAction?.title == "New Layer")
 }
+
+@Test func doubleClickOnAToggleNeverStartsARename() {
+    #expect(!SidebarRow.doubleClickRenames(.toggle, renamable: true, renaming: false))
+    #expect(!SidebarRow.doubleClickRenames(.toggle, renamable: false, renaming: false))
+}
+
+@Test func doubleClickOnTheTitleRenamesOnlyARenamableRowNotAlreadyRenaming() {
+    #expect(SidebarRow.doubleClickRenames(.title, renamable: true, renaming: false))
+    #expect(!SidebarRow.doubleClickRenames(.title, renamable: false, renaming: false))
+    #expect(!SidebarRow.doubleClickRenames(.title, renamable: true, renaming: true))
+}
