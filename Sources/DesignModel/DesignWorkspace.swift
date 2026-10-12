@@ -180,6 +180,7 @@ public struct DesignWorkspace: Sendable, Equatable {
     }
 
     /// Moves a node to the end of `parentID`'s children (nil: its page's top). Refused into a non-container or its own subtree.
+    /// Every enclosing row expands, so the moved node's row shows.
     public mutating func moveNode(_ id: String, into parentID: String?) throws(DesignTreeError) {
         guard let pageIndex = pages.firstIndex(where: { $0.nodes.node(id) != nil }),
             let node = pages[pageIndex].nodes.node(id)
@@ -190,7 +191,7 @@ public struct DesignWorkspace: Sendable, Equatable {
         _ = nodes.remove(id)
         try nodes.add(node, to: parentID)
         pages[pageIndex].nodes = nodes
-        if let parentID { expandedNodeIDs.insert(parentID) }
+        expandAncestors(of: id, in: nodes)
     }
 
     public mutating func renameNode(_ id: String, to name: String) throws(DesignTreeError) {
