@@ -1,7 +1,8 @@
 // LibraryCatalog.swift: the state behind Library's window: photos, collections
 // with counts, the grid's sort, cell size and selection, and the browse mode.
 // Linux-safe; LibraryApp changes it only through the methods here. Invariants:
-// counts follow `items`; the selection holds only ids the collection shows.
+// counts follow `items`; the selection and the loupe's photo are only ids the
+// collection shows.
 
 /// A sidebar collection: a fixed source of photos.
 public struct LibraryCollection: Identifiable, Sendable, Hashable {
@@ -49,11 +50,16 @@ public struct LibraryCatalog: Sendable, Equatable {
     public var canShowLargerThumbnails: Bool { cellSize < 320 }
     public var canShowSmallerThumbnails: Bool { cellSize > 80 }
 
-    /// Selects a collection by id and clears the selection. An unknown id is ignored.
+    /// Selects a collection by id and clears the selection. If the new collection
+    /// doesn't show the loupe's photo, returns to the grid. An unknown id is ignored.
     public mutating func selectCollection(_ id: String) {
         guard collections.contains(where: { $0.id == id }) else { return }
         selectedCollectionID = id
         selection = []
+        if let focused = focusedItemID, !shownItems.contains(where: { $0.id == focused }) {
+            focusedItemID = nil
+            mode = .grid
+        }
     }
 
     public mutating func loadSamples(seed: UInt64 = LibrarySample.defaultSeed) {
