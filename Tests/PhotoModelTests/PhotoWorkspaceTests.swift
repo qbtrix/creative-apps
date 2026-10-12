@@ -10,15 +10,15 @@ import Testing
     #expect(workspace.canvas?.width == 4)
     #expect(workspace.canvas?.height == 3)
     #expect(try workspace.canvas?.pixel(x: 3, y: 2) == RGBA(r: 1, g: 1, b: 1, a: 1))
-    #expect(workspace.layerNames == ["Background"])
-    #expect(workspace.selectedLayer == "Background")
+    #expect(workspace.layers.map(\.name) == ["Background"])
+    #expect(workspace.selectedLayer?.name == "Background")
 }
 
 @Test func invalidSizeThrowsAndLeavesTheWorkspaceEmpty() {
     var workspace = PhotoWorkspace()
     #expect(throws: RasterError.self) { try workspace.newCanvas(width: 0, height: 10) }
     #expect(workspace.canvas == nil)
-    #expect(workspace.layerNames.isEmpty)
+    #expect(workspace.layers.isEmpty)
 }
 
 @Test func layerAndToolSelection() throws {
@@ -26,6 +26,6 @@ import Testing
     try workspace.newCanvas(width: 1, height: 1)
     workspace.selectLayer("Missing")
     workspace.selectTool(.brush)
-    #expect(workspace.selectedLayer == "Background")
+    #expect(workspace.selectedLayer?.name == "Background")
     #expect(workspace.tool == .brush)
 }
