@@ -12,11 +12,12 @@ public struct PhotoLayer: Identifiable, Sendable, Hashable {
     public internal(set) var opacity: Double
     public internal(set) var blendMode: BlendMode
 
+    /// Clamps `opacity` to 0...1; a NaN opacity falls back to 1, the default.
     public init(id: String, name: String, isVisible: Bool = true, opacity: Double = 1, blendMode: BlendMode = .normal) {
         self.id = id
         self.name = name
         self.isVisible = isVisible
-        self.opacity = min(max(opacity, 0), 1)
+        self.opacity = opacity.isNaN ? 1 : min(max(opacity, 0), 1)
         self.blendMode = blendMode
     }
 
