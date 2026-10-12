@@ -88,14 +88,3 @@ struct AdjustmentsInspector: View {
         Double(range.lowerBound)...Double(range.upperBound)
     }
 }
-
-extension AdjustmentKind {
-    var title: String {
-        switch self {
-        case .exposure: "Exposure"
-        case .levels: "Levels"
-        case .blur: "Blur"
-        case .hueSaturation: "Hue and Saturation"
-        }
-    }
-}

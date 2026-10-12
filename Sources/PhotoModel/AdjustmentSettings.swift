@@ -3,8 +3,8 @@
 // Exposure and levels are Float like CoreRaster's parameters; sigma is Double.
 // Every change arrives as one AdjustmentEdit: values clamp to their range, NaN
 // is ignored, and a black point at or above the white point (or the reverse)
-// is refused, keeping the old value. The canvas doesn't read these yet; the
-// CoreRaster wiring comes later. Linux-safe.
+// is refused, keeping the old value. PhotoRender applies the enabled sections
+// to the canvas (exposure, levels, hue/saturation, then blur). Linux-safe.
 
 /// One adjustment section in the inspector.
 public enum AdjustmentKind: String, CaseIterable, Sendable {
@@ -30,7 +30,9 @@ public struct AdjustmentSettings: Sendable, Equatable {
     public static let exposureRange: ClosedRange<Float> = -5...5
     public static let levelsRange: ClosedRange<Float> = 0...1
     public static let gammaRange: ClosedRange<Float> = 0.1...10
-    public static let sigmaRange: ClosedRange<Double> = 0...100
+    /// Up to 20 px: the canvas renders a blur tile by tile with a 3-sigma
+    /// margin, and past 20 that margin costs more than the tile.
+    public static let sigmaRange: ClosedRange<Double> = 0...20
     public static let hueRange: ClosedRange<Double> = -180...180
     /// Saturation and lightness.
     public static let percentRange: ClosedRange<Double> = -100...100
