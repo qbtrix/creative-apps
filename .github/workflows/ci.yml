@@ -2,30 +2,27 @@
 # UI targets on macOS only) and on macOS 26 (everything, plus the snapshot
 # PNGs uploaded as the `snapshots` artifact and the five release .app bundles
 # from scripts/bundle-apps as the `app-builds` artifact, a tarball inside so
-# the executables keep their +x bit). The main ruleset requires the job
-# names "Linux" and "macOS" and the fast lane reads them, so keep both stable.
-# merge_group runs CI on merge-queue groups. The fast lane enqueues with
-# GITHUB_TOKEN, which fires no merge_group event, so it starts CI on its
-# groups with workflow_dispatch instead.
+# the executables keep their +x bit). The fast lane only merges a PR
+# once a check from this workflow ("CI") has passed and reads the job names
+# "Linux" and "macOS", so keep both names stable. workflow_dispatch lets the
+# fast lane run CI on main after its merges and on refreshed PR heads:
+# GITHUB_TOKEN pushes and merges fire no other triggers.
 name: CI
 
 on:
   pull_request:
   push:
     branches: [main]
-  merge_group:
   workflow_dispatch:
 
 permissions:
   contents: read
 
-# One run per branch: a new push to a PR cancels the superseded run (macOS
-# runners are a small shared pool). Runs on main and on merge-queue groups
-# (gh-readonly-queue/main/pr-<n>-<sha>, one ref per group) always finish: the
-# queue waits on them.
+# One run per branch: a new push cancels the superseded run (macOS runners are
+# a small shared pool). Runs on main always finish.
 concurrency:
   group: ci-${{ github.head_ref || github.ref_name }}
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:
   linux:
