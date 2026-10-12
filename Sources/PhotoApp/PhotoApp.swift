@@ -49,15 +49,20 @@ struct PhotoWindow: View {
                 EmptyStateView("No Selection", systemImage: "photo", message: "Select a layer to adjust it.")
             }
         }
+        .toolbar {
+            ToolbarItem(placement: .primaryAction) {
+                DeleteLayerCommand(isEnabled: model.canRemoveLayer && model.selectedLayerID != nil, perform: deleteLayer)
+            }
+        }
     }
 
-    /// New Image always; Delete Layer only while more than one layer is left.
     private var actions: [ToolbarAction] {
-        var list = [ToolbarAction("New Image", systemImage: "plus") { newImage() }]
-        if model.canRemoveLayer, let id = model.selectedLayerID {
-            list.append(ToolbarAction("Delete Layer", systemImage: "trash") { model.removeLayer(id) })
-        }
-        return list
+        [ToolbarAction("New Image", systemImage: "plus") { newImage() }]
+    }
+
+    private func deleteLayer() {
+        guard let id = model.selectedLayerID else { return }
+        model.removeLayer(id)
     }
 
     private func addLayer() {
