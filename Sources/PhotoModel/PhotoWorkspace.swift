@@ -21,16 +21,8 @@ public enum PhotoTool: String, CaseIterable, Sendable {
     case move, marquee, brush, eraser, crop
 
     /// Why the rail shows this tool disabled, as its tooltip; nil once the
-    /// tool works. Set it to nil in the change that wires the canvas to `drag`.
-    public var unavailableHelp: String? {
-        switch self {
-        case .move: "Moving a layer isn't built yet."
-        case .marquee: "Selecting part of the image isn't built yet."
-        case .brush: "Painting isn't built yet."
-        case .eraser: "Erasing isn't built yet."
-        case .crop: "Cropping isn't built yet."
-        }
-    }
+    /// tool works. Every tool works: the canvas sends its drags to `drag`.
+    public var unavailableHelp: String? { nil }
 
     public var isEnabled: Bool { unavailableHelp == nil }
 }
