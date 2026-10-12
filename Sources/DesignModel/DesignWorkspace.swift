@@ -131,7 +131,12 @@ public struct DesignWorkspace: Sendable, Equatable {
         guard let page = pages.first(where: { $0.nodes.node(id) != nil }) else { return }
         selectedPageID = page.id
         selectedNodeID = id
-        expandedNodeIDs.formUnion(page.nodes.ancestors(of: id) ?? [])
+        expandAncestors(of: id, in: page.nodes)
+    }
+
+    /// Expands every node that encloses `id` in `nodes`, so `id`'s own Layers row shows.
+    private mutating func expandAncestors(of id: String, in nodes: [DesignNode]) {
+        expandedNodeIDs.formUnion(nodes.ancestors(of: id) ?? [])
     }
 
     /// Whether `id`'s Layers row shows its children.
@@ -149,6 +154,7 @@ public struct DesignWorkspace: Sendable, Equatable {
     }
 
     /// Adds a node of `kind` to the selected page, inside `parentID` or at the top, and selects it.
+    /// Every enclosing row expands, so the new node's row shows.
     @discardableResult
     public mutating func addNode(
         _ kind: DesignNodeKind, frame: DesignRect, in parentID: String? = nil
@@ -160,7 +166,7 @@ public struct DesignWorkspace: Sendable, Equatable {
         let node = DesignNode(id: "node-\(nodeCount + 1)", name: kind.defaultName, kind: kind, frame: frame)
         try pages[pageIndex].nodes.add(node, to: parentID)
         _ = nextNodeID()
-        if let parentID { expandedNodeIDs.insert(parentID) }
+        expandAncestors(of: node.id, in: pages[pageIndex].nodes)
         selectedNodeID = node.id
         return node.id
     }
