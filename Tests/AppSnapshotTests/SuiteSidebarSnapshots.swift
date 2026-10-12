@@ -1,7 +1,8 @@
-// SuiteSidebarSnapshots.swift: SidebarRows with toggles, a count and one
-// nested row, Light and Dark. The sidebar List is AppKit-backed and does not
-// render in ImageRenderer, so the rows sit in a VStack with the child indented
-// the way the list's disclosure group nests it. macOS only.
+// SuiteSidebarSnapshots.swift: SidebarRows with toggles, a count, one
+// nested row and a renamable row with no rename active, Light and Dark. The
+// sidebar List is AppKit-backed and does not render in ImageRenderer, so the
+// rows sit in a VStack with the child indented the way the list's disclosure
+// group nests it. macOS only.
 import SuiteUI
 import SwiftUI
 import Testing
@@ -39,6 +40,11 @@ private struct SidebarSample: View {
             SidebarRow(
                 SidebarItem(id: "bg", title: "Background", systemImage: "rectangle", toggles: Self.toggles(visible: false, locked: true)),
                 onToggle: { _ in })
+            // A renamable row after a double-click on its Visible toggle: two
+            // clicks leave it on, and the title is a label, not a rename field.
+            SidebarRow(
+                SidebarItem(id: "shape", title: "Shape", systemImage: "square.on.circle", toggles: Self.toggles(visible: true, locked: false)),
+                onToggle: { _ in }, onRename: { _ in })
             SidebarRow(SidebarItem(id: "all", title: "All Photos", systemImage: "photo.on.rectangle.angled", count: 12))
         }
         .padding(SuiteSpacing.m)
