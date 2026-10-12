@@ -51,14 +51,16 @@ public enum GridSelection {
             return Result(selection: [first], anchor: first)
         }
         let step = max(columns, 1)
-        let next: Int
+        // Overflow-reporting math: a huge `columns` must not trap. An
+        // overflowed step lands past the grid's ends, so the move stays put.
+        let (next, overflow): (Int, Bool)
         switch direction {
-        case .left: next = index - 1
-        case .right: next = index + 1
-        case .up: next = index - step
-        case .down: next = index + step
+        case .left: (next, overflow) = index.subtractingReportingOverflow(1)
+        case .right: (next, overflow) = index.addingReportingOverflow(1)
+        case .up: (next, overflow) = index.subtractingReportingOverflow(step)
+        case .down: (next, overflow) = index.addingReportingOverflow(step)
         }
-        let landed = order.indices.contains(next) ? order[next] : anchor
+        let landed = !overflow && order.indices.contains(next) ? order[next] : anchor
         return Result(selection: [landed], anchor: landed)
     }
 
