@@ -1,7 +1,8 @@
 // PhotoApp.swift: Photo, the raster editing app. The window is SuiteWindow
-// with the canvas's layers in the sidebar, PhotoCanvas as content and the
-// canvas size in the inspector. Views only read PhotoWorkspace and call its
-// methods; all state lives in PhotoModel (scripts/ci checks this).
+// with the layer stack in the sidebar (add, rename, reorder, show and hide),
+// PhotoCanvas as content and the selected layer in the inspector. Views only
+// read PhotoWorkspace and call its methods; all state lives in PhotoModel
+// (scripts/ci checks this).
 import PhotoModel
 import SuiteUI
 import SwiftUI
@@ -19,20 +20,42 @@ struct PhotoWindow: View {
     var body: some View {
         SuiteWindow(
             title: model.canvas == nil ? "Photo" : "Untitled Image",
-            sidebarTitle: "Layers",
-            items: model.layerNames.map { SidebarItem(id: $0, title: $0, systemImage: "square.3.layers.3d") },
-            selection: model.selectedLayer,
+            sections: [
+                SidebarSection(
+                    id: PhotoLayerItems.sectionID, title: "Layers", items: PhotoLayerItems.items(model.layers),
+                    addAction: model.canvas == nil ? nil : ToolbarAction("New Layer", systemImage: "plus", perform: addLayer))
+            ],
+            selection: model.selectedLayerID,
             onSelect: { model.selectLayer($0) },
-            actions: [ToolbarAction("New Image", systemImage: "plus") { newImage() }]
+            onToggle: { id, _ in model.toggleVisibility(id) },
+            onMove: { _, from, to in model.moveLayers(fromOffsets: Array(from), toOffset: to) },
+            onRename: { model.renameLayer($0, to: $1) },
+            actions: actions
         ) {
             PhotoCanvas(model: model, onNew: newImage, onTool: { model.selectTool($0) })
         } inspector: {
             if let canvas = model.canvas, let layer = model.selectedLayer {
-                SurfaceCard(title: layer, detail: "\(canvas.width) × \(canvas.height) px")
+                PhotoLayerInspector(
+                    layer: layer, canvasSize: "\(canvas.width) × \(canvas.height) px",
+                    onBlendMode: { model.setBlendMode(layer.id, $0) },
+                    onOpacity: { model.setOpacity(layer.id, percent: $0) })
             } else {
                 EmptyStateView("No Selection", systemImage: "photo", message: "Select a layer to adjust it.")
             }
         }
+    }
+
+    /// New Image always; Delete Layer only while more than one layer is left.
+    private var actions: [ToolbarAction] {
+        var list = [ToolbarAction("New Image", systemImage: "plus") { newImage() }]
+        if model.canRemoveLayer, let id = model.selectedLayerID {
+            list.append(ToolbarAction("Delete Layer", systemImage: "trash") { model.removeLayer(id) })
+        }
+        return list
+    }
+
+    private func addLayer() {
+        model.addLayer()
     }
 
     /// 1920x1080 is a size CoreRaster always accepts, so this never throws.
