@@ -3,7 +3,9 @@
 // Linux-safe: no UI imports. HaloApp changes it only through the methods here.
 // The selected layer, when set, is always a layer of the selected composition.
 // Composition ids are never reused and names stay unique; once a project has a
-// composition it always keeps at least one.
+// composition it always keeps at least one. A refused rename of a known
+// composition stays in `refusedRename` until a rename succeeds or it is
+// dismissed.
 
 /// A composition: a sized, timed canvas that layers play in.
 public struct HaloComposition: Identifiable, Sendable, Hashable {
@@ -48,6 +50,8 @@ public struct HaloProject: Sendable, Equatable {
     public private(set) var compositions: [HaloComposition] = []
     public private(set) var selectedCompositionID: String?
     public private(set) var selectedLayerID: String?
+    /// The last refused rename, so the window can show why; nil once handled.
+    public private(set) var refusedRename: RefusedRename?
     /// The number in the next composition's id ("comp-3"); only goes up.
     private var nextCompositionNumber = 1
 
@@ -114,15 +118,36 @@ public struct HaloProject: Sendable, Equatable {
         return true
     }
 
-    /// Renames a composition; an empty or taken name, or an unknown id, is refused.
+    /// Renames a composition; an empty or taken name, or an unknown id, is
+    /// refused. Refusing a known composition keeps the typed name and the
+    /// reason in `refusedRename`; a rename that succeeds clears it.
     @discardableResult
     public mutating func renameComposition(_ id: String, to name: String) -> Bool {
-        let name = name.trimmed
-        guard !name.isEmpty, let index = compositions.firstIndex(where: { $0.id == id }),
-            !compositions.contains(where: { $0.id != id && $0.name == name })
-        else { return false }
-        compositions[index].name = name
+        guard let index = compositions.firstIndex(where: { $0.id == id }) else { return false }
+        if let problem = renameProblem(id, to: name) {
+            refusedRename = RefusedRename(id: id, name: name, problem: problem)
+            return false
+        }
+        compositions[index].name = name.trimmed
+        refusedRename = nil
         return true
+    }
+
+    /// Why renaming composition `id` to `name` would be refused, as the alert
+    /// says it; nil when the rename would succeed.
+    public func renameProblem(_ id: String, to name: String) -> String? {
+        let name = name.trimmed
+        guard compositions.contains(where: { $0.id == id }) else { return "The composition no longer exists." }
+        if name.isEmpty { return "Enter a name for the composition." }
+        if compositions.contains(where: { $0.id != id && $0.name == name }) {
+            return "“\(name)” is already used by another composition. Choose a different name."
+        }
+        return nil
+    }
+
+    /// Forgets the refused rename, as when the user cancels it.
+    public mutating func dismissRefusedRename() {
+        refusedRename = nil
     }
 
     /// Deletes a composition, never the last one; deleting the selected one
@@ -131,6 +156,7 @@ public struct HaloProject: Sendable, Equatable {
     public mutating func deleteComposition(_ id: String) -> Bool {
         guard canDeleteComposition, let index = compositions.firstIndex(where: { $0.id == id }) else { return false }
         compositions.remove(at: index)
+        if refusedRename?.id == id { refusedRename = nil }
         if selectedCompositionID == id {
             selectedCompositionID = compositions[min(index, compositions.count - 1)].id
             selectedLayerID = nil
