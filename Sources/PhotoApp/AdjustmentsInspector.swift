@@ -65,8 +65,8 @@ struct AdjustmentsInspector: View {
     }
 
     /// Gamma on a log10 track (GammaTrack), so 1 sits mid-track; the field
-    /// shows and takes gamma itself. A plain stand-in for InspectorSliderRow
-    /// until it can map its track (#88).
+    /// (GammaField) shows and takes gamma itself through NumericInput. A plain
+    /// stand-in for InspectorSliderRow until it can map its track (#88).
     private var gammaRow: some View {
         LabeledContent("Gamma") {
             HStack(spacing: SuiteSpacing.s) {
@@ -77,15 +77,8 @@ struct AdjustmentsInspector: View {
                     in: GammaTrack.positionRange
                 )
                 .accessibilityLabel("Gamma")
-                .accessibilityValue(NumericInput.format(Double(settings.gamma)))
-                TextField(
-                    "Gamma", value: Binding(get: { Double(settings.gamma) }, set: { onEdit(.gamma(Float($0))) }),
-                    format: .number.precision(.fractionLength(0...2))
-                )
-                .labelsHidden()
-                .multilineTextAlignment(.trailing)
-                .font(SuiteFont.monospacedDigits)
-                .frame(width: SuiteSize.inspectorField)
+                .accessibilityValue(GammaField.text(for: settings.gamma))
+                GammaField(gamma: settings.gamma) { onEdit(.gamma($0)) }
             }
         }
     }

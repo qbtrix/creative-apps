@@ -134,12 +134,15 @@ public struct HaloProject: Sendable, Equatable {
     }
 
     /// Why renaming composition `id` to `name` would be refused, as the alert
-    /// says it; nil when the rename would succeed.
+    /// says it; nil when the rename would succeed. Names that look the same
+    /// (surrounding whitespace, letter case, composed or decomposed accents)
+    /// count as taken.
     public func renameProblem(_ id: String, to name: String) -> String? {
         let name = name.trimmed
         guard compositions.contains(where: { $0.id == id }) else { return "The composition no longer exists." }
         if name.isEmpty { return "Enter a name for the composition." }
-        if compositions.contains(where: { $0.id != id && $0.name == name }) {
+        let key = name.nameKey
+        if compositions.contains(where: { $0.id != id && $0.name.nameKey == key }) {
             return "“\(name)” is already used by another composition. Choose a different name."
         }
         return nil
