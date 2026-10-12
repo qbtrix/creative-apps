@@ -1,6 +1,7 @@
 // DesignApp.swift: Design, the vector and UI design app. The window is
 // SuiteWindow with pages and layers in the sidebar, DesignCanvas as content
-// and the selected layer or page in the inspector. Views only read DesignWorkspace and
+// and the selected layer or page in the inspector. The Page menu (DesignCommands)
+// reaches the window through focused scene values. Views only read DesignWorkspace and
 // call its methods; all state lives in DesignModel (scripts/ci checks this).
 import DesignModel
 import SuiteUI
@@ -10,6 +11,7 @@ import SwiftUI
 struct DesignApp: App {
     var body: some Scene {
         WindowGroup { DesignWindow() }
+            .commands { DesignCommands() }
     }
 }
 
@@ -26,10 +28,9 @@ struct DesignWindow: View {
             actions: [
                 ToolbarAction("New File", systemImage: "plus") { model.newFile() },
                 ToolbarAction("Add Page", systemImage: "doc.badge.plus") { model.addPage() },
-                ToolbarAction("Delete Page", systemImage: "trash") {
-                    // The last page is refused and stays; there is nothing more to show for that.
-                    if let id = model.selectedPageID { try? model.deletePage(id) }
-                },
+                // Page > Delete Page disables on the last page; this button cannot until
+                // ToolbarAction has a disabled state (#85), so it acts only when allowed.
+                ToolbarAction("Delete Page", systemImage: "trash") { deletePage?() },
             ]
         ) {
             DesignCanvas(model: model, onNew: { model.newFile() }, onTool: { model.selectTool($0) })
@@ -45,6 +46,21 @@ struct DesignWindow: View {
                 EmptyStateView("No Selection", systemImage: "square.dashed", message: "Select a page or layer to edit it.")
             }
         }
+        .focusedSceneValue(\.designAddPage, addPage)
+        .focusedSceneValue(\.designDeletePage, deletePage)
+    }
+
+    /// Page > Add Page's action, nil with no file open.
+    private var addPage: (@MainActor () -> Void)? {
+        guard model.isOpen else { return nil }
+        return { model.addPage() }
+    }
+
+    /// Page > Delete Page's action, nil when the selected page is the last one.
+    private var deletePage: (@MainActor () -> Void)? {
+        guard model.canDeletePage, let id = model.selectedPageID else { return nil }
+        // canDeletePage holds, so the delete cannot be refused.
+        return { try? model.deletePage(id) }
     }
 }
 

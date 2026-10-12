@@ -71,6 +71,9 @@ public struct DesignWorkspace: Sendable, Equatable {
         pages[index].name = name
     }
 
+    /// Whether Delete Page can act: a page is selected and it is not the file's last one.
+    public var canDeletePage: Bool { selectedPage != nil && pages.count > 1 }
+
     /// Deletes a page; the last page is refused. Deleting the selected page selects its neighbor.
     public mutating func deletePage(_ id: String) throws(DesignTreeError) {
         guard let index = pages.firstIndex(where: { $0.id == id }) else { throw .unknownID(id) }
@@ -79,11 +82,11 @@ public struct DesignWorkspace: Sendable, Equatable {
         if selectedPageID == id { selectPage(pages[Swift.min(index, pages.count - 1)].id) }
     }
 
-    /// Selects a page by id and clears the node selection. An unknown id is ignored.
+    /// Selects a page by id and clears the node selection, even when the page is already
+    /// selected, so clicking its row deselects the layer. An unknown id is ignored.
     public mutating func selectPage(_ id: String) {
         guard pages.contains(where: { $0.id == id }) else { return }
-        if selectedPageID != id { selectedNodeID = nil }
-        selectedPageID = id
+        (selectedPageID, selectedNodeID) = (id, nil)
     }
 
     /// Selects the page or node `id` names; a node on another page switches to that page.
