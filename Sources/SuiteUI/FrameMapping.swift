@@ -28,7 +28,11 @@ public struct FrameMapping: Equatable, Sendable {
     public func frame(atX x: Double) -> Int {
         guard frameWidth > 0, !x.isNaN else { return 0 }
         let frame = (x / frameWidth).rounded()
-        return Int(min(max(frame, 0), Double(duration)))
+        guard frame > 0 else { return 0 }
+        // Double(duration) can round up past Int.max, so convert only below it
+        // and clamp again in integer space.
+        guard frame < Double(duration) else { return duration }
+        return min(Int(frame), duration)
     }
 
     /// The width that holds every frame's tick.
