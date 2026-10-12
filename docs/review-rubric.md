@@ -14,6 +14,9 @@ explains it. The rules behind each question are in `docs/engineering.md` and
 - [ ] Engine work goes through creative-core (and its commands for document
       edits), not a copy inside the Model?
 - [ ] Names match the ones already used for the same idea?
+- [ ] If the line's core loop (open or create, see, edit with each shown tool,
+      undo, save) doesn't work end to end yet, does this PR build a missing
+      step of it rather than polish or a panel (CLAUDE.md, Journeys first)?
 
 ## 2. Duplication: does it reuse what exists?
 
@@ -39,6 +42,9 @@ explains it. The rules behind each question are in `docs/engineering.md` and
 - [ ] Semantic colors and text styles from SuiteUI tokens; no hard-coded
       color for a system role?
 - [ ] Every icon-only control has a tooltip and an accessibility label?
+- [ ] Every button, tool and menu item the PR shows does something, or is
+      disabled with a tooltip saying why (`unavailableHelp`), and the line's
+      `<X>ToolsTests` passes?
 - [ ] The new action is reachable from the menu bar or a shortcut, not only a
       toolbar button (or the PR says why not yet)?
 - [ ] Both Light and Dark snapshots look right?

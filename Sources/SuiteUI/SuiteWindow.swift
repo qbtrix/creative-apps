@@ -4,7 +4,10 @@
 // The window chrome (toolbar, sidebar, inspector) is system Liquid Glass; the
 // content stays flat. Apps pass state in and get selection out through
 // `onSelect`, `onToggle`, `onMove` and `onRename`; a nil closure turns that
-// gesture off. The shell owns only presentation state (inspector visibility).
+// gesture off. Toolbar actions with `unavailableHelp` show disabled, with the
+// reason as their tooltip. The shell owns only presentation state (inspector
+// visibility) and tints the whole window with the suite's one accent
+// (SuiteColor.accent).
 import SwiftUI
 
 public struct SuiteWindow<Content: View, Inspector: View>: View {
@@ -89,7 +92,8 @@ public struct SuiteWindow<Content: View, Inspector: View>: View {
                     Button(action: action.perform) {
                         Label(action.title, systemImage: action.systemImage)
                     }
-                    .help(action.title)
+                    .disabled(!action.isEnabled)
+                    .help(action.help)
                 }
             }
             ToolbarItem(placement: .primaryAction) {
@@ -103,6 +107,7 @@ public struct SuiteWindow<Content: View, Inspector: View>: View {
             }
         }
         .frame(minWidth: SuiteSize.windowMinimum.width, minHeight: SuiteSize.windowMinimum.height)
+        .tint(SuiteColor.accent)
     }
 
     /// Drag reorder for one section's rows; nil (reorder off) without `onMove`.

@@ -17,3 +17,17 @@ import Testing
     catalog.selectCollection("trash")
     #expect(catalog.selectedCollectionID == "favorites")
 }
+
+@Test func anEmptyCollectionIsEmptyWhileTheCatalogIsNot() {
+    var catalog = LibraryCatalog()
+    #expect(catalog.isSelectedCollectionEmpty)
+    catalog.load(LibrarySample.items().filter { !$0.isFlagged })
+    #expect(!catalog.isEmpty && !catalog.isSelectedCollectionEmpty)
+    catalog.selectCollection("favorites")
+    #expect(!catalog.isEmpty && catalog.isSelectedCollectionEmpty && catalog.sortedItems.isEmpty)
+    catalog.selectCollection("recent")
+    #expect(!catalog.isSelectedCollectionEmpty)
+    catalog.loadSamples()
+    catalog.selectCollection("favorites")
+    #expect(!catalog.isSelectedCollectionEmpty)
+}
