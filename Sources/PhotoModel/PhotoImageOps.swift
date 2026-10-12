@@ -60,3 +60,17 @@ extension PhotoWorkspace {
         touch(.all)
     }
 }
+
+extension CanvasSize {
+    /// The height that keeps these proportions at `width`, at least 1.
+    public func height(forWidth width: Int) -> Int {
+        guard self.width > 0 else { return max(height, 1) }
+        return max(Int((Double(width) * Double(height) / Double(self.width)).rounded()), 1)
+    }
+
+    /// The width that keeps these proportions at `height`, at least 1.
+    public func width(forHeight height: Int) -> Int {
+        guard self.height > 0 else { return max(width, 1) }
+        return max(Int((Double(height) * Double(width) / Double(self.height)).rounded()), 1)
+    }
+}

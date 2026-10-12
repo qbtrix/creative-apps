@@ -9,8 +9,10 @@
 // each step name unique within an app.
 //
 // It finds the window shell by SuiteUI's accessibility identifiers
-// (`suite.sidebar`, `suite.inspector`, the `suite.tools` palette) and
-// everything else by the titles a person reads: button labels, menu names.
+// (`suite.sidebar`, `suite.inspector`, the `suite.tools` palette, the
+// `suite.canvas` of an editor shell) and everything else by the titles a
+// person reads: button labels, menu names. Launch arguments let a journey skip
+// system panels (Photo's `-PhotoOpenFile` and `-PhotoExportTo`).
 // The first failed step stops the test, so later shots never show a wrong state.
 import XCTest
 
@@ -20,15 +22,16 @@ struct Journey {
     private let name: String
     private let test: XCTestCase
 
-    /// Launches `.build/apps/<appName>App.app` fresh, with no restored windows.
-    init(_ appName: String, _ test: XCTestCase) {
+    /// Launches `.build/apps/<appName>App.app` fresh, with no restored windows
+    /// and `arguments` added to its launch arguments.
+    init(_ appName: String, _ test: XCTestCase, arguments: [String] = []) {
         // This file is UITests/Journey.swift, so its grandparent is the repo root.
         let root = URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent()
         app = XCUIApplication(url: root.appending(path: ".build/apps/\(appName)App.app"))
         name = appName.lowercased()
         self.test = test
         test.continueAfterFailure = false
-        app.launchArguments = ["-ApplePersistenceIgnoreState", "YES"]
+        app.launchArguments = ["-ApplePersistenceIgnoreState", "YES"] + arguments
         app.launch()
         app.activate()
     }
@@ -52,8 +55,18 @@ struct Journey {
         shot("launch")
     }
 
-    /// Where a button sits in the window.
-    enum Place { case content, toolbar, sheet }
+    /// The editor shell is up with its tool rail, canvas area and right
+    /// panel; shoots "launch".
+    func expectEditorShell() {
+        XCTAssert(app.windows.firstMatch.waitForExistence(timeout: 30), "no window opened")
+        XCTAssert(element("suite.tools").waitForExistence(timeout: 5), "no tool rail (suite.tools)")
+        XCTAssert(element("suite.inspector").exists, "no right panel (suite.inspector)")
+        shot("launch")
+    }
+
+    /// Where a button sits: a split view's content, the toolbar, a sheet, or
+    /// anywhere in the window (an editor shell has no split view).
+    enum Place { case content, toolbar, sheet, window }
 
     /// Clicks the button titled `title` in `place`; shoots `step` when given one.
     func click(_ title: String, in place: Place = .content, step: String? = nil) {
@@ -61,6 +74,7 @@ struct Journey {
         case .content: app.splitGroups.buttons
         case .toolbar: app.toolbars.buttons
         case .sheet: app.sheets.buttons
+        case .window: app.windows.firstMatch.buttons
         }
         let button = buttons[title].firstMatch
         XCTAssert(button.waitForExistence(timeout: 10), "no button titled \(title) in the \(place)")
@@ -99,7 +113,17 @@ struct Journey {
         }
     }
 
-    private func element(_ identifier: String) -> XCUIElement {
+    /// Drags across the element `identifier` between two points given as
+    /// fractions of its size; shoots `step` when given one.
+    func drag(on identifier: String, from start: CGVector, to end: CGVector, step: String? = nil) {
+        let target = element(identifier)
+        XCTAssert(target.waitForExistence(timeout: 10), "no \(identifier) to drag on")
+        target.coordinate(withNormalizedOffset: start)
+            .press(forDuration: 0.1, thenDragTo: target.coordinate(withNormalizedOffset: end))
+        if let step { shot(step) }
+    }
+
+    func element(_ identifier: String) -> XCUIElement {
         app.descendants(matching: .any)[identifier].firstMatch
     }
 
