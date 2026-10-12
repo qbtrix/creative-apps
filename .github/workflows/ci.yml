@@ -2,30 +2,28 @@
 # UI targets on macOS only) and on macOS 26 (everything, plus the snapshot
 # PNGs uploaded as the `snapshots` artifact and the five release .app bundles
 # from scripts/bundle-apps as the `app-builds` artifact, a tarball inside so
-# the executables keep their +x bit). The main ruleset requires the job
-# names "Linux" and "macOS" and the fast lane reads them, so keep both stable.
-# merge_group runs CI on merge-queue groups. The fast lane enqueues with
-# GITHUB_TOKEN, which fires no merge_group event, so it starts CI on its
-# groups with workflow_dispatch instead.
+# the executables keep their +x bit, then the UI journeys on those bundles with
+# their whole-window PNGs as the `ui-screens` artifact). The fast lane only
+# merges a PR once a check from this workflow ("CI") has passed and reads the
+# job names "Linux" and "macOS", so keep both names stable. workflow_dispatch
+# lets the fast lane run CI on main after its merges and on refreshed PR heads:
+# GITHUB_TOKEN pushes and merges fire no other triggers.
 name: CI
 
 on:
   pull_request:
   push:
     branches: [main]
-  merge_group:
   workflow_dispatch:
 
 permissions:
   contents: read
 
-# One run per branch: a new push to a PR cancels the superseded run (macOS
-# runners are a small shared pool). Runs on main and on merge-queue groups
-# (gh-readonly-queue/main/pr-<n>-<sha>, one ref per group) always finish: the
-# queue waits on them.
+# One run per branch: a new push cancels the superseded run (macOS runners are
+# a small shared pool). Runs on main always finish.
 concurrency:
   group: ci-${{ github.head_ref || github.ref_name }}
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:
   linux:
@@ -70,3 +68,34 @@ jobs:
           path: .build/app-builds.tar.gz
           retention-days: 7
           if-no-files-found: error
+      # The human-like UI tests: scripts/ui-test launches the bundles above,
+      # clicks through each app (UITests/) and exports a whole-window PNG per
+      # step, uploaded as `ui-screens`. A failed journey fails this job.
+      # XcodeGen is a pinned release, checked against its sha256 (Homebrew
+      # can't pin a version). automationmodetool lets the test runner drive
+      # the UI without a password prompt.
+      - name: Install XcodeGen 2.46.0
+        run: |
+          curl -fsSL -o "$RUNNER_TEMP/xcodegen.zip" https://github.com/yonaskolb/XcodeGen/releases/download/2.46.0/xcodegen.zip
+          echo "4d9e34b62172d645eed6457cac13fc222569974098ef4ee9c3368bedf0196806  $RUNNER_TEMP/xcodegen.zip" | shasum -a 256 -c -
+          unzip -q "$RUNNER_TEMP/xcodegen.zip" -d "$RUNNER_TEMP"
+          echo "$RUNNER_TEMP/xcodegen/bin" >> "$GITHUB_PATH"
+      - run: sudo automationmodetool enable-automationmode-without-authentication
+      - id: ui
+        run: scripts/ui-test
+      - name: Upload UI screens
+        if: always() && steps.ui.outcome != 'skipped'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ui-screens
+          path: .build/ui-screens
+          if-no-files-found: warn
+      # On a failed journey, the result bundle: the UI hierarchy and a screen
+      # recording at the failure (open in Xcode or `xcrun xcresulttool`).
+      - name: Upload UI test results
+        if: failure() && steps.ui.outcome == 'failure'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ui-tests-xcresult
+          path: .build/ui-tests.xcresult
+          retention-days: 7

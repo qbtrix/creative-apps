@@ -56,4 +56,7 @@ explains it. The rules behind each question are in `docs/engineering.md` and
 - [ ] A bug fix comes with a test that failed before the fix?
 - [ ] New visible state has a snapshot, and the PR body lists the PNGs it
       changed?
+- [ ] A user-facing feature adds or extends its app's journey test in
+      `UITests/<X>JourneyTests.swift`, and the PR body lists the `ui-screens`
+      PNGs that show it?
 - [ ] Both CI jobs (`Linux`, `macOS`) are green on the rebased branch?
