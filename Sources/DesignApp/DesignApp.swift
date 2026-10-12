@@ -1,6 +1,6 @@
 // DesignApp.swift: Design, the vector and UI design app. The window is
-// SuiteWindow with the file's pages in the sidebar, DesignCanvas as content
-// and the selected page in the inspector. Views only read DesignWorkspace and
+// SuiteWindow with pages and layers in the sidebar, DesignCanvas as content
+// and the selected layer or page in the inspector. Views only read DesignWorkspace and
 // call its methods; all state lives in DesignModel (scripts/ci checks this).
 import DesignModel
 import SuiteUI
@@ -19,18 +19,27 @@ struct DesignWindow: View {
     var body: some View {
         SuiteWindow(
             title: model.isOpen ? "Untitled Design" : "Design",
-            sidebarTitle: "Pages",
-            items: model.pages.map { SidebarItem(id: $0.id, title: $0.name, systemImage: "doc") },
-            selection: model.selectedPageID,
-            onSelect: { model.selectPage($0) },
+            sidebarTitle: "Pages and Layers",
+            items: model.pages.map { SidebarItem(page: $0) } + model.layerRows.map { SidebarItem(row: $0) },
+            selection: model.selectedNodeID ?? model.selectedPageID,
+            onSelect: { model.selectItem($0) },
             actions: [
                 ToolbarAction("New File", systemImage: "plus") { model.newFile() },
                 ToolbarAction("Add Page", systemImage: "doc.badge.plus") { model.addPage() },
+                ToolbarAction("Delete Page", systemImage: "trash") {
+                    // The last page is refused and stays; there is nothing more to show for that.
+                    if let id = model.selectedPageID { try? model.deletePage(id) }
+                },
             ]
         ) {
             DesignCanvas(model: model, onNew: { model.newFile() }, onTool: { model.selectTool($0) })
         } inspector: {
-            if let page = model.selectedPage {
+            if let node = model.selectedNode {
+                // The node comes from the model, so these setters cannot hit an unknown id.
+                SurfaceCard(title: node.name, detail: node.kind.defaultName)
+                Toggle("Hidden", isOn: Binding(get: { node.isHidden }, set: { try? model.setNodeHidden(node.id, $0) }))
+                Toggle("Locked", isOn: Binding(get: { node.isLocked }, set: { try? model.setNodeLocked(node.id, $0) }))
+            } else if let page = model.selectedPage {
                 SurfaceCard(title: page.name, detail: "Frame \(Int(page.frameWidth)) × \(Int(page.frameHeight)) pt")
             } else {
                 EmptyStateView("No Selection", systemImage: "square.dashed", message: "Select a page or layer to edit it.")
