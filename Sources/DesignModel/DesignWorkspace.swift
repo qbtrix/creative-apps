@@ -90,12 +90,27 @@ public struct DesignWorkspace: Sendable, Equatable {
     }
 
     /// Selects the page or node `id` names; a node on another page switches to that page.
-    /// An unknown id is ignored.
+    /// A selected node's enclosing rows expand so its own row shows. An unknown id is ignored.
     public mutating func selectItem(_ id: String) {
         if pages.contains(where: { $0.id == id }) { return selectPage(id) }
         guard let page = pages.first(where: { $0.nodes.node(id) != nil }) else { return }
         selectedPageID = page.id
         selectedNodeID = id
+        expandedNodeIDs.formUnion(page.nodes.ancestors(of: id) ?? [])
+    }
+
+    /// Whether `id`'s Layers row shows its children.
+    public func isExpanded(_ id: String) -> Bool { expandedNodeIDs.contains(id) }
+
+    /// Shows or hides a node's children in Layers. Refused for an id on no page.
+    public mutating func setExpanded(_ id: String, _ isExpanded: Bool) throws(DesignTreeError) {
+        guard pages.contains(where: { $0.nodes.node(id) != nil }) else { throw .unknownID(id) }
+        if isExpanded { expandedNodeIDs.insert(id) } else { expandedNodeIDs.remove(id) }
+    }
+
+    /// Flips a node's Layers disclosure. Refused for an id on no page.
+    public mutating func toggleExpanded(_ id: String) throws(DesignTreeError) {
+        try setExpanded(id, !isExpanded(id))
     }
 
     /// Adds a node of `kind` to the selected page, inside `parentID` or at the top, and selects it.
