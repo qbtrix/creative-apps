@@ -103,8 +103,10 @@ public struct DesignWorkspace: Sendable, Equatable {
         guard let pageIndex = pages.firstIndex(where: { $0.id == selectedPageID }) else {
             throw .unknownID(selectedPageID ?? "")
         }
-        let node = DesignNode(id: nextNodeID(), name: kind.defaultName, kind: kind, frame: frame)
+        // Take the id only once the parent accepts the node, so a refused add changes nothing.
+        let node = DesignNode(id: "node-\(nodeCount + 1)", name: kind.defaultName, kind: kind, frame: frame)
         try pages[pageIndex].nodes.add(node, to: parentID)
+        _ = nextNodeID()
         if let parentID { expandedNodeIDs.insert(parentID) }
         selectedNodeID = node.id
         return node.id
