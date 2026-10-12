@@ -26,6 +26,9 @@
 #                    .frame(...: <number>)  ...ColumnWidth(<number>)
 #     hand-made glass  .blur(radius:  NSVisualEffectView  any Material
 #     look-alike     a struct named *Button, *Slider, *Toggle, *Picker, *Stepper, *Sidebar
+#     inspector switch  in an inspector file (named *Inspector*, or using an
+#                    Inspector...Row), more Toggle( than .toggleStyle(.checkbox):
+#                    inspectors use checkboxes, never switches (Pro density)
 #   SuiteUI fails on the raw color, custom font and literal size rules outside
 #   Tokens.swift, and on .blur(radius: / .background(.ultraThin /
 #   NSVisualEffectView outside Glass.swift. Before scanning, the step runs a
@@ -70,10 +73,25 @@ custom_font='\.font\(\.custom\(|Font\.custom\(|(\.font\(\.|Font\.)system\(size:[
 literal_size='cornerRadius[:(][[:space:]]*[0-9]|\.padding\(([^)]*,)?[[:space:]]*[0-9]|\.frame\([^)]*:[[:space:]]*[0-9]|ColumnWidth\(([^)]*[:,])?[[:space:]]*[0-9]'
 handmade_glass='\.blur\(radius:|\.background\(\.ultraThin|NSVisualEffectView'
 lookalike='struct[[:space:]]+[A-Za-z0-9_]*(Button|Slider|Toggle|Picker|Stepper|Sidebar)([^A-Za-z0-9_]|$)'
+toggle='(^|[^A-Za-z0-9_])Toggle\('
+checkbox='\.toggleStyle\(\.checkbox\)'
 # hits RULE REGEX DIR [grep args]: "path:line: content (RULE)" per non-comment hit.
 hits() {
   grep -rnHE --include='*.swift' "${@:4}" -e "$2" "$3" 2>/dev/null \
     | grep -vE '^[^:]*:[0-9]+:[[:space:]]*(//|/?\*)' | sed "s/\$/  ($1)/"
+}
+# inspector_switches APP: every Toggle( in APP's inspector files (named
+# *Inspector*, or using an Inspector...Row) whose file has more Toggles than
+# .toggleStyle(.checkbox). Counting per file catches a style on the next line.
+inspector_switches() {
+  local f code
+  { find "$1" -name '*Inspector*.swift'; grep -rlE --include='*.swift' 'Inspector[A-Za-z]*Row' "$1"; } 2>/dev/null \
+    | sort -u | while IFS= read -r f; do
+      code=$(grep -vE '^[[:space:]]*(//|/?\*)' "$f")
+      if (( $(grep -cE "$toggle" <<<"$code") > $(grep -cE "$checkbox" <<<"$code") )); then
+        hits "switch in an inspector: add .toggleStyle(.checkbox)" "$toggle" "$f"
+      fi
+    done
 }
 # design_lint ROOT: every design-rule hit under ROOT/Sources; nothing when clean.
 design_lint() {
@@ -84,6 +102,7 @@ design_lint() {
     hits "literal size: use SuiteSpacing, SuiteRadius or SuiteSize" "$literal_size" "$app"
     hits "hand-made glass: use SuiteUI's GlassPanel or ToolbarGroup" "$handmade_glass|Material" "$app"
     hits "look-alike control: use the system control" "$lookalike" "$app"
+    inspector_switches "$app"
   done
   hits "raw value outside Tokens.swift" "$raw_color|$custom_font|$literal_size" "$s/SuiteUI" --exclude=Tokens.swift
   hits "glass outside Glass.swift" "$handmade_glass" "$s/SuiteUI" --exclude=Glass.swift
@@ -114,6 +133,9 @@ must_catch=(
   'XApp/V.swift|struct PlayButton: View {'
   'XApp/V.swift|private struct LayerSidebar<Row: View>: View {'
   'XApp/V.swift|struct OpacityStepper: View {'
+  'XApp/LayerInspector.swift|Toggle("Enabled", isOn: on).toggleStyle(.switch)'
+  'XApp/LayerInspector.swift|Toggle("Enabled", isOn: on)'
+  'XApp/V.swift|InspectorRow("") { Toggle("Locked", isOn: on) }'
   'SuiteUI/Panel.swift|.frame(width: 32, height: 32)'
   'SuiteUI/Panel.swift|.fill(Color(red: 1, green: 0, blue: 0))'
   'SuiteUI/Panel.swift|.background(.ultraThinMaterial)'
@@ -127,6 +149,9 @@ must_pass=(
   'XApp/V.swift|.font(.system(.body, design: .monospaced))'
   'XApp/V.swift|Color(nsColor: .separatorColor)'
   'XApp/V.swift|struct ButtonBarHost: View {'
+  'XApp/LayerInspector.swift|Toggle("Enabled", isOn: on).toggleStyle(.checkbox)'
+  'XApp/LayerInspector.swift|SidebarToggle(id: "v", title: "Visible", onSymbol: "eye", offSymbol: "eye", isOn: on)'
+  'XApp/V.swift|Toggle("Hidden", isOn: on)'
   'XApp/V.swift|// Never write Color(red: 1, green: 0, blue: 0) or .ultraThinMaterial here.'
   'SuiteUI/Tokens.swift|public static let artboard = Color(red: 1, green: 1, blue: 1)'
   'SuiteUI/Glass.swift|content.background(.ultraThinMaterial, in: shape)'
