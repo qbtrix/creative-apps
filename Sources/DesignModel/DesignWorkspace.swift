@@ -2,7 +2,9 @@
 // node trees, the selected page and node, the expanded Layers rows and the
 // tool. Linux-safe. DesignApp changes it only through the methods here.
 // Invariants: an open file keeps a page; a selected node is on the selected
-// page; ids are never reused within a file.
+// page; ids are never reused within a file. Every palette tool acts through
+// `drag(from:to:)`; a tool that does nothing there stays disabled with
+// `unavailableHelp` (DesignToolsTests checks this).
 
 /// A page of a design file: one canvas holding a tree of nodes.
 public struct DesignPage: Identifiable, Sendable, Hashable {
@@ -23,6 +25,30 @@ public struct DesignPage: Identifiable, Sendable, Hashable {
 /// The tools on Design's tool palette.
 public enum DesignTool: String, CaseIterable, Sendable {
     case move, frame, rectangle, text, pen
+
+    /// Why the palette shows this tool disabled, as its tooltip; nil once the
+    /// tool works. Set it to nil in the change that makes `drag` do something.
+    public var unavailableHelp: String? {
+        switch self {
+        case .move: "Selecting and moving on the canvas isn't built yet (#17)."
+        case .frame: "Drawing frames isn't built yet."
+        case .rectangle: "Drawing rectangles isn't built yet."
+        case .text: "Placing text isn't built yet."
+        case .pen: "Drawing paths isn't built yet."
+        }
+    }
+
+    public var isEnabled: Bool { unavailableHelp == nil }
+}
+
+/// A point on a page, in points from its top-left corner.
+public struct DesignPoint: Sendable, Hashable {
+    public var x: Double
+    public var y: Double
+
+    public init(x: Double, y: Double) {
+        (self.x, self.y) = (x, y)
+    }
 }
 
 /// A page `deletePage` removed, with where it sat and the selection before the delete;
@@ -117,6 +143,14 @@ public struct DesignWorkspace: Sendable, Equatable {
         }
     }
 
+    /// Redoes a Delete Page that `restorePage` undid. Refused once another file is opened, so
+    /// a stale redo cannot delete the new file's page that reuses the id.
+    @discardableResult
+    public mutating func redoDeletePage(_ deleted: DeletedPage) throws(DesignTreeError) -> DeletedPage {
+        guard deleted.file == fileGeneration else { throw .unknownID(deleted.page.id) }
+        return try deletePage(deleted.page.id)
+    }
+
     /// Selects a page by id and clears the node selection, even when the page is already
     /// selected, so clicking its row deselects the layer. An unknown id is ignored.
     public mutating func selectPage(_ id: String) {
@@ -131,7 +165,12 @@ public struct DesignWorkspace: Sendable, Equatable {
         guard let page = pages.first(where: { $0.nodes.node(id) != nil }) else { return }
         selectedPageID = page.id
         selectedNodeID = id
-        expandedNodeIDs.formUnion(page.nodes.ancestors(of: id) ?? [])
+        expandAncestors(of: id, in: page.nodes)
+    }
+
+    /// Expands every node that encloses `id` in `nodes`, so `id`'s own Layers row shows.
+    private mutating func expandAncestors(of id: String, in nodes: [DesignNode]) {
+        expandedNodeIDs.formUnion(nodes.ancestors(of: id) ?? [])
     }
 
     /// Whether `id`'s Layers row shows its children.
@@ -149,6 +188,7 @@ public struct DesignWorkspace: Sendable, Equatable {
     }
 
     /// Adds a node of `kind` to the selected page, inside `parentID` or at the top, and selects it.
+    /// Every enclosing row expands, so the new node's row shows.
     @discardableResult
     public mutating func addNode(
         _ kind: DesignNodeKind, frame: DesignRect, in parentID: String? = nil
@@ -160,12 +200,13 @@ public struct DesignWorkspace: Sendable, Equatable {
         let node = DesignNode(id: "node-\(nodeCount + 1)", name: kind.defaultName, kind: kind, frame: frame)
         try pages[pageIndex].nodes.add(node, to: parentID)
         _ = nextNodeID()
-        if let parentID { expandedNodeIDs.insert(parentID) }
+        expandAncestors(of: node.id, in: pages[pageIndex].nodes)
         selectedNodeID = node.id
         return node.id
     }
 
     /// Moves a node to the end of `parentID`'s children (nil: its page's top). Refused into a non-container or its own subtree.
+    /// Every enclosing row expands, so the moved node's row shows.
     public mutating func moveNode(_ id: String, into parentID: String?) throws(DesignTreeError) {
         guard let pageIndex = pages.firstIndex(where: { $0.nodes.node(id) != nil }),
             let node = pages[pageIndex].nodes.node(id)
@@ -176,7 +217,7 @@ public struct DesignWorkspace: Sendable, Equatable {
         _ = nodes.remove(id)
         try nodes.add(node, to: parentID)
         pages[pageIndex].nodes = nodes
-        if let parentID { expandedNodeIDs.insert(parentID) }
+        expandAncestors(of: id, in: nodes)
     }
 
     public mutating func renameNode(_ id: String, to name: String) throws(DesignTreeError) {
@@ -194,6 +235,15 @@ public struct DesignWorkspace: Sendable, Equatable {
 
     public mutating func selectTool(_ tool: DesignTool) {
         self.tool = tool
+    }
+
+    /// The active tool's drag across the page from `start` to `end`; a click is
+    /// a drag that doesn't move. The canvas sends every tool gesture here, so
+    /// each case is where that tool's work goes.
+    public mutating func drag(from start: DesignPoint, to end: DesignPoint) {
+        switch tool {
+        case .move, .frame, .rectangle, .text, .pen: break
+        }
     }
 
     private mutating func updateNode(_ id: String, _ change: (inout DesignNode) -> Void) throws(DesignTreeError) {

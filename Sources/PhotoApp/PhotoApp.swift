@@ -1,7 +1,10 @@
 // PhotoApp.swift: Photo, the raster editing app. The window is SuiteWindow
 // with the layer stack in the sidebar (add, rename, reorder, show and hide),
 // PhotoCanvas as content and PhotoInspector (the selected layer, then the
-// image adjustments, or an empty state) in the inspector. Views only
+// image adjustments, or an empty state) in the inspector. The Layer menu
+// (PhotoCommands) reaches the window through a focused scene value. A palette
+// tool that doesn't work yet shows disabled with PhotoTool.unavailableHelp as
+// its tooltip. Views only
 // read PhotoWorkspace and call its methods; all state lives in PhotoModel
 // (scripts/ci checks this).
 import PhotoModel
@@ -12,11 +15,14 @@ import SwiftUI
 struct PhotoApp: App {
     var body: some Scene {
         WindowGroup { PhotoWindow() }
+            .commands { PhotoCommands() }
     }
 }
 
 struct PhotoWindow: View {
     @State private var model = PhotoWorkspace()
+    @State private var isRenaming = false
+    @State private var renameText = ""
 
     var body: some View {
         SuiteWindow(
@@ -43,9 +49,25 @@ struct PhotoWindow: View {
         }
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
-                DeleteLayerCommand(isEnabled: model.canRemoveLayer && model.selectedLayerID != nil, perform: deleteLayer)
+                DeleteLayerCommand(isEnabled: model.canDeleteSelectedLayer, perform: deleteLayer)
             }
         }
+        .focusedSceneValue(\.photoLayerActions, layerActions)
+        .alert("Rename Layer", isPresented: $isRenaming) {
+            TextField("Name", text: $renameText)
+            Button("Rename", action: commitRename)
+            Button("Cancel", role: .cancel) {}
+        }
+    }
+
+    /// The Layer menu's actions, each nil while it can't run.
+    private var layerActions: PhotoLayerActions {
+        PhotoLayerActions(
+            newLayer: model.canAddLayer ? addLayer : nil,
+            deleteLayer: model.canDeleteSelectedLayer ? deleteLayer : nil,
+            renameLayer: model.canEditSelectedLayer ? beginRename : nil,
+            toggleVisibility: model.canEditSelectedLayer ? toggleSelectedVisibility : nil,
+            visibilityTitle: model.visibilityCommandTitle)
     }
 
     private var actions: [ToolbarAction] {
@@ -55,6 +77,22 @@ struct PhotoWindow: View {
     private func deleteLayer() {
         guard let id = model.selectedLayerID else { return }
         model.removeLayer(id)
+    }
+
+    private func beginRename() {
+        guard let layer = model.selectedLayer else { return }
+        renameText = layer.name
+        isRenaming = true
+    }
+
+    private func commitRename() {
+        guard let id = model.selectedLayerID else { return }
+        model.renameLayer(id, to: renameText)
+    }
+
+    private func toggleSelectedVisibility() {
+        guard let id = model.selectedLayerID else { return }
+        model.toggleVisibility(id)
     }
 
     private func addLayer() {
@@ -76,9 +114,7 @@ struct PhotoCanvas: View {
     var body: some View {
         if let canvas = model.canvas {
             CanvasSurface(artboard: CGSize(width: canvas.width, height: canvas.height)) {
-                ToolbarGroup(PhotoTool.allCases.map { tool in
-                    ToolbarAction(tool.title, systemImage: tool.systemImage, isSelected: tool == model.tool) { onTool(tool) }
-                }, axis: .vertical)
+                ToolbarGroup(tools: PhotoTool.allCases, selected: model.tool, onSelect: onTool)
             }
         } else {
             EmptyStateView(
@@ -89,8 +125,8 @@ struct PhotoCanvas: View {
     }
 }
 
-extension PhotoTool {
-    var title: String {
+extension PhotoTool: PaletteTool {
+    public var title: String {
         switch self {
         case .move: "Move"
         case .marquee: "Marquee"
@@ -100,7 +136,7 @@ extension PhotoTool {
         }
     }
 
-    var systemImage: String {
+    public var systemImage: String {
         switch self {
         case .move: "arrow.up.and.down.and.arrow.left.and.right"
         case .marquee: "rectangle.dashed"
