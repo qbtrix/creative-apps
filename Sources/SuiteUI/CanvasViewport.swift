@@ -180,19 +180,3 @@ public struct CanvasViewport<Content: View, Overlay: View>: View {
         }
     }
 }
-
-extension CanvasViewport where Overlay == EmptyView {
-    public init(
-        documentSize: CGSize, zoom: Double, pointer: PointerStyle? = nil,
-        onSize: @escaping @MainActor (CGSize) -> Void = { _ in },
-        onZoom: (@MainActor (Double) -> Void)? = nil,
-        onDrag: (@MainActor (CGPoint, CGPoint) -> Void)? = nil,
-        onDragEnd: (@MainActor () -> Void)? = nil,
-        onKey: (@MainActor (KeyPress) -> KeyPress.Result)? = nil,
-        @ViewBuilder content: () -> Content
-    ) {
-        self.init(
-            documentSize: documentSize, zoom: zoom, pointer: pointer, onSize: onSize, onZoom: onZoom,
-            onDrag: onDrag, onDragEnd: onDragEnd, onKey: onKey, content: content) { EmptyView() }
-    }
-}

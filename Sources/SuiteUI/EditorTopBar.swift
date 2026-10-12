@@ -15,8 +15,8 @@ public struct EditorTopBar<Menu: View, Content: View>: View {
     private let menu: Menu
     private let content: Content
 
-    /// The bar reads "`app` / `document`"; the document name opens `menu`
-    /// ("Untitled" with no document open).
+    /// The bar reads "`app` / `document`" and the document name opens `menu`;
+    /// with no document open the app name opens it.
     public init(
         app: String, document: String?, @ViewBuilder menu: () -> Menu, @ViewBuilder content: () -> Content
     ) {
@@ -28,21 +28,13 @@ public struct EditorTopBar<Menu: View, Content: View>: View {
 
     public var body: some View {
         HStack(spacing: SuiteSpacing.xs) {
-            Text(app).font(SuiteFont.editorTitle)
-            Text("/").foregroundStyle(SuiteColor.secondaryText)
-            SwiftUI.Menu {
-                menu
-            } label: {
-                HStack(spacing: SuiteSpacing.xs) {
-                    Text(document ?? "Untitled").font(SuiteFont.editorTitle).foregroundStyle(SuiteColor.accentText)
-                    Image(systemName: "chevron.down").font(SuiteFont.caption).foregroundStyle(SuiteColor.secondaryText)
-                }
+            if let document {
+                Text(app).font(SuiteFont.editorTitle)
+                Text("/").foregroundStyle(SuiteColor.secondaryText)
+                titleMenu(document, color: SuiteColor.accentText)
+            } else {
+                titleMenu(app, color: Color.primary)
             }
-            .menuStyle(.button)
-            .buttonStyle(.accessoryBar)
-            .menuIndicator(.hidden)
-            .fixedSize()
-            .help("Document")
             EditorBarDivider()
             content
         }
@@ -57,6 +49,24 @@ public struct EditorTopBar<Menu: View, Content: View>: View {
                 .contentShape(.rect)
                 .gesture(WindowDragGesture())
         }
+    }
+}
+
+extension EditorTopBar {
+    private func titleMenu(_ title: String, color: Color) -> some View {
+        SwiftUI.Menu {
+            menu
+        } label: {
+            HStack(spacing: SuiteSpacing.xs) {
+                Text(title).font(SuiteFont.editorTitle).foregroundStyle(color)
+                Image(systemName: "chevron.down").font(SuiteFont.caption).foregroundStyle(SuiteColor.secondaryText)
+            }
+        }
+        .menuStyle(.button)
+        .buttonStyle(.accessoryBar)
+        .menuIndicator(.hidden)
+        .fixedSize()
+        .help(title)
     }
 }
 
