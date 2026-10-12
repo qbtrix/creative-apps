@@ -38,15 +38,12 @@ public struct LibraryCatalog: Sendable, Equatable {
     /// True when the catalog holds no photos at all.
     public var isEmpty: Bool { items.isEmpty }
 
+    /// True when the selected collection shows no photos, even if the catalog has some.
+    public var isSelectedCollectionEmpty: Bool { shownItems.isEmpty }
+
     /// The selected collection's photos in the current sort order.
     public var sortedItems: [PhotoItem] {
-        let shown: [PhotoItem]
-        switch selectedCollectionID {
-        case "favorites": shown = items.filter(\.isFlagged)
-        case "recent": shown = recentItems
-        default: shown = items
-        }
-        return shown.sorted { sort.orders($0, before: $1) }
+        shownItems.sorted { sort.orders($0, before: $1) }
     }
 
     public var canShowLargerThumbnails: Bool { cellSize < 320 }
@@ -95,6 +92,15 @@ public struct LibraryCatalog: Sendable, Equatable {
         guard sortedItems.contains(where: { $0.id == id }) else { return }
         focusedItemID = id
         mode = .loupe
+    }
+
+    /// The selected collection's photos, unsorted.
+    private var shownItems: [PhotoItem] {
+        switch selectedCollectionID {
+        case "favorites": items.filter(\.isFlagged)
+        case "recent": recentItems
+        default: items
+        }
     }
 
     /// The newest `recentLimit` photos by capture date.
