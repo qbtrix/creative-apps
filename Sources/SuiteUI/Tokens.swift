@@ -1,0 +1,51 @@
+// Tokens.swift: the suite's spacing, corner radius, type and color tokens.
+// Every app view takes its numbers, fonts and colors from here so the five
+// apps stay consistent. Colors are system semantic colors (they adapt to Light,
+// Dark and Increase Contrast); never hard-code a hex value for a system role.
+import AppKit
+import SwiftUI
+
+/// Spacing on a 4-point grid, smallest to largest.
+public enum SuiteSpacing {
+    public static let xxs: CGFloat = 2
+    public static let xs: CGFloat = 4
+    public static let s: CGFloat = 8
+    public static let m: CGFloat = 12
+    public static let l: CGFloat = 16
+    public static let xl: CGFloat = 24
+    public static let xxl: CGFloat = 32
+
+    /// The whole scale in order, for tests and the gallery.
+    public static let scale: [CGFloat] = [xxs, xs, s, m, l, xl, xxl]
+}
+
+/// Corner radii. Nested shapes step down one size so corners stay concentric.
+public enum SuiteRadius {
+    public static let small: CGFloat = 6
+    public static let medium: CGFloat = 10
+    public static let large: CGFloat = 16
+}
+
+/// Text styles. macOS has no Dynamic Type; these are the system text styles,
+/// so they track the system's sizes (13 pt body).
+public enum SuiteFont {
+    public static let title = Font.title2.weight(.semibold)
+    public static let headline = Font.headline
+    public static let body = Font.body
+    public static let caption = Font.caption
+    public static let monospacedDigits = Font.body.monospacedDigit()
+}
+
+/// Semantic colors by role.
+public enum SuiteColor {
+    /// The window's own background, behind empty states and lists.
+    public static var windowBackground: Color { Color(nsColor: .windowBackgroundColor) }
+    /// The neutral surround around a canvas, so artwork color reads true.
+    public static var canvasSurround: Color { Color(nsColor: .underPageBackgroundColor) }
+    /// Flat fill for cards in the content layer (never glass).
+    public static var surface: Color { Color(nsColor: .controlBackgroundColor) }
+    public static var separator: Color { Color(nsColor: .separatorColor) }
+    public static var secondaryText: Color { .secondary }
+    /// A new document's artboard. Document content, not a system role.
+    public static let artboard = Color.white
+}

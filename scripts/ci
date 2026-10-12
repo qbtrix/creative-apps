@@ -1,0 +1,87 @@
+#!/usr/bin/env bash
+# scripts/ci: the one gate. Runs the no-crash lint, the app-state rule, the
+# duplicate-code check, swift build and swift test, then prints PASS or FAIL
+# and exits with the real status. CI runs exactly this on Linux and macOS; run
+# it before every PR. On Linux, Package.swift declares only the Model targets,
+# so build and test cover those; on macOS they cover everything.
+#
+# The no-crash lint fails on crash-prone constructs in Sources/ (tests exempt):
+#   try!  as!  fatalError(  preconditionFailure(  precondition(  unowned  .first!  .last!
+#
+# The app-state rule keeps views dumb: files under Sources/*App/ may read their
+# Model and call its methods, never write its state. Each App names its Model
+# value `model`, and the rule fails on any line there that
+#   - assigns through it:        model.x = ...   model.x += ...   model = ...
+#   - binds to it:               $model   $model.x
+#   - mutates a collection in it: model.items.append(...) / insert / remove... / toggle / sort
+# (the `@State private var model = ...` declaration is allowed). The Model
+# targets also keep stored state `private(set)`, so the compiler backs this up.
+#
+# The duplicate check runs jscpd (pinned) over Sources/ and fails when duplicated
+# lines exceed JSCPD_THRESHOLD percent. It starts at creative-core's threshold
+# and only ever goes down: lower it when you remove a clone, never raise it.
+# Without npx, or when npm can't fetch jscpd, the check prints SKIP and the gate
+# goes on; CI enforces it.
+#
+# On a Mac with only the Command Line Tools (no Xcode), Swift Testing lives in
+# a framework directory swift does not search by default, so we add it.
+# bash 3.2 compatible (macOS /bin/bash).
+set -uo pipefail
+cd "$(dirname "$0")/.." || exit 1
+
+fail() { echo; echo "CI: FAIL ($1)"; exit 1; }
+
+echo "== no-crash lint (Sources/)"
+pattern='try!|as!|fatalError\(|preconditionFailure\(|precondition\(|unowned |\.first!|\.last!'
+if grep -rnE "$pattern" Sources/; then
+  fail "no-crash lint: replace the lines above with throwing code"
+fi
+echo "ok"
+
+echo "== app-state rule (Sources/*App/)"
+id='[A-Za-z_][A-Za-z0-9_]*'
+writes="(^|[^A-Za-z0-9_.\$])(self\.)?model(\.$id)*[[:space:]]*[-+*/%]?=([^=]|\$)"
+binds='\$model([^A-Za-z0-9_]|$)'
+mutators="(^|[^A-Za-z0-9_.])(self\.)?model(\.$id)+\.(append|insert|remove$id|removeAll|toggle|sort|reverse)\("
+if hits=$(grep -rnE "$writes|$binds|$mutators" Sources/*App/ 2>/dev/null \
+    | grep -vE "(var|let)[[:space:]]+model[[:space:]]*(:|=)"); then
+  echo "$hits"
+  fail "app-state rule: views must change state through their Model's methods; add one there"
+fi
+echo "ok"
+
+echo "== duplicate code (jscpd, Sources/)"
+JSCPD_VERSION=5.3.2
+JSCPD_THRESHOLD=0.8
+if ! command -v npx >/dev/null 2>&1; then
+  echo "SKIP (npx not found; install Node 18+ to run this check)"
+elif ! npx --yes "jscpd@$JSCPD_VERSION" --version >/dev/null 2>&1; then
+  echo "SKIP (npx could not fetch jscpd@$JSCPD_VERSION from the npm registry)"
+else
+  JSCPD_NO_TIPS=1 npx --yes "jscpd@$JSCPD_VERSION" --format swift --reporters console \
+    --threshold "$JSCPD_THRESHOLD" Sources/ \
+    || fail "jscpd: duplicated lines over $JSCPD_THRESHOLD%; move the shared code into SuiteUI or a Model instead of copying it"
+fi
+
+flags=()
+if [[ "$(uname)" == Darwin ]]; then
+  clt=/Library/Developer/CommandLineTools/Library/Developer
+  if [[ "$(xcode-select -p 2>/dev/null)" == /Library/Developer/CommandLineTools* && -d "$clt/Frameworks/Testing.framework" ]]; then
+    flags=(-Xswiftc -F -Xswiftc "$clt/Frameworks" -Xlinker -F -Xlinker "$clt/Frameworks"
+           -Xlinker -rpath -Xlinker "$clt/Frameworks" -Xlinker -rpath -Xlinker "$clt/usr/lib")
+  fi
+fi
+
+echo "== swift build"
+swift build ${flags[@]+"${flags[@]}"} || fail "swift build"
+
+echo "== swift test"
+log="$(mktemp)"
+trap 'rm -f "$log"' EXIT
+swift test ${flags[@]+"${flags[@]}"} 2>&1 | tee "$log"
+status=${PIPESTATUS[0]}
+(( status == 0 )) || fail "swift test exited $status"
+
+echo
+grep -E "Test run with [0-9]+ tests?" "$log" | tail -1
+echo "CI: PASS"
