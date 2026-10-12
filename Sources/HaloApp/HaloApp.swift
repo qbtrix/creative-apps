@@ -1,7 +1,9 @@
 // HaloApp.swift: Halo, the motion graphics app. The window is SuiteWindow
 // with the project's compositions in the sidebar, HaloViewer as content and
-// the selected composition's settings and layers in the inspector. Layer > New
-// (HaloCommands) reaches the window through a focused scene value. Views only
+// the selected composition's settings and layers in the inspector. New
+// Composition opens NewCompositionSheet; a double-click on a sidebar row
+// renames it. The Composition menu (HaloCompositionCommands) and Layer > New
+// (HaloCommands) reach the window through focused scene values. Views only
 // read HaloProject and call its methods; all state lives in HaloModel
 // (scripts/ci checks this).
 import HaloModel
@@ -12,23 +14,31 @@ import SwiftUI
 struct HaloApp: App {
     var body: some Scene {
         WindowGroup { HaloWindow() }
-            .commands { HaloCommands() }
+            .commands {
+                HaloCompositionCommands()
+                HaloCommands()
+            }
     }
 }
 
 struct HaloWindow: View {
     @State private var model = HaloProject()
+    @State private var showsNewComposition = false
 
     var body: some View {
+        let newComposition = ToolbarAction("New Composition…", systemImage: "plus") { showsNewComposition = true }
         SuiteWindow(
             title: model.compositions.isEmpty ? "Halo" : "Untitled Project",
-            sidebarTitle: "Compositions",
-            items: model.compositions.map { SidebarItem(id: $0.id, title: $0.name, systemImage: "rectangle.stack") },
+            sections: [SidebarSection(
+                id: "compositions", title: "Compositions",
+                items: model.compositions.map { SidebarItem(id: $0.id, title: $0.name, systemImage: "rectangle.stack") },
+                addAction: newComposition)],
             selection: model.selectedCompositionID,
             onSelect: { model.selectComposition($0) },
-            actions: [ToolbarAction("New Composition", systemImage: "plus") { model.newComposition() }]
+            onRename: { id, name in _ = model.renameComposition(id, to: name) },
+            actions: [newComposition]
         ) {
-            HaloViewer(model: model, onNew: { model.newComposition() })
+            HaloViewer(model: model, onNew: { showsNewComposition = true })
         } inspector: {
             if let comp = model.selectedComposition {
                 VStack(alignment: .leading, spacing: SuiteSpacing.m) {
@@ -39,7 +49,24 @@ struct HaloWindow: View {
                 EmptyStateView("No Selection", systemImage: "rectangle.stack", message: "Select a composition to see its settings.")
             }
         }
+        .sheet(isPresented: $showsNewComposition) {
+            NewCompositionSheet(
+                settings: model.suggestedSettings,
+                onCreate: { settings in if model.newComposition(settings) { showsNewComposition = false } },
+                onCancel: { showsNewComposition = false })
+        }
+        .focusedSceneValue(\.haloCompositionActions, compositionActions)
         .focusedSceneValue(\.haloNewLayer, newLayer)
+    }
+
+    /// The Composition menu's actions for the selected composition.
+    private var compositionActions: HaloCompositionActions {
+        var actions = HaloCompositionActions(new: { showsNewComposition = true })
+        if let id = model.selectedCompositionID {
+            actions.duplicate = { _ = model.duplicateComposition(id) }
+            if model.canDeleteComposition { actions.delete = { _ = model.deleteComposition(id) } }
+        }
+        return actions
     }
 
     /// Layer > New's action, nil when no composition is selected.
@@ -67,7 +94,7 @@ struct HaloViewer: View {
             EmptyStateView(
                 "No Composition", systemImage: "sparkles.rectangle.stack",
                 message: "Create a composition to layer and animate footage, shapes and text.",
-                action: ToolbarAction("New Composition", systemImage: "plus", perform: onNew))
+                action: ToolbarAction("New Composition…", systemImage: "plus", perform: onNew))
         }
     }
 }
