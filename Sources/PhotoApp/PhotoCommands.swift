@@ -18,7 +18,16 @@ struct PhotoLayerActions {
 
 extension FocusedValues {
     /// The focused Photo window's layer actions; nil with no Photo window focused.
-    @Entry var photoLayerActions: PhotoLayerActions?
+    var photoLayerActions: PhotoLayerActions? {
+        get { self[PhotoLayerActionsKey.self] }
+        set { self[PhotoLayerActionsKey.self] = newValue }
+    }
+}
+
+/// A plain key rather than `@Entry`, so PhotoApp builds without the SwiftUI
+/// macro plugin (Command Line Tools).
+private struct PhotoLayerActionsKey: FocusedValueKey {
+    typealias Value = PhotoLayerActions
 }
 
 struct PhotoCommands: Commands {
