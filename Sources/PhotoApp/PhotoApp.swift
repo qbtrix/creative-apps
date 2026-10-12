@@ -2,7 +2,9 @@
 // with the layer stack in the sidebar (add, rename, reorder, show and hide),
 // PhotoCanvas as content and PhotoInspector (the selected layer, then the
 // image adjustments, or an empty state) in the inspector. The Layer menu
-// (PhotoCommands) reaches the window through a focused scene value. Views only
+// (PhotoCommands) reaches the window through a focused scene value. A palette
+// tool that doesn't work yet shows disabled with PhotoTool.unavailableHelp as
+// its tooltip. Views only
 // read PhotoWorkspace and call its methods; all state lives in PhotoModel
 // (scripts/ci checks this).
 import PhotoModel
@@ -112,9 +114,7 @@ struct PhotoCanvas: View {
     var body: some View {
         if let canvas = model.canvas {
             CanvasSurface(artboard: CGSize(width: canvas.width, height: canvas.height)) {
-                ToolbarGroup(PhotoTool.allCases.map { tool in
-                    ToolbarAction(tool.title, systemImage: tool.systemImage, isSelected: tool == model.tool) { onTool(tool) }
-                }, axis: .vertical)
+                ToolbarGroup(tools: PhotoTool.allCases, selected: model.tool, onSelect: onTool)
             }
         } else {
             EmptyStateView(
@@ -125,8 +125,8 @@ struct PhotoCanvas: View {
     }
 }
 
-extension PhotoTool {
-    var title: String {
+extension PhotoTool: PaletteTool {
+    public var title: String {
         switch self {
         case .move: "Move"
         case .marquee: "Marquee"
@@ -136,7 +136,7 @@ extension PhotoTool {
         }
     }
 
-    var systemImage: String {
+    public var systemImage: String {
         switch self {
         case .move: "arrow.up.and.down.and.arrow.left.and.right"
         case .marquee: "rectangle.dashed"

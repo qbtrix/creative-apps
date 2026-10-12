@@ -73,6 +73,34 @@ X is Flare, Design, Photo, Library or Halo. Each app is one **line** (label
 5. Don't ask questions. If the issue is impossible as written, comment on the
    issue saying why, remove `in-progress`, and stop.
 
+## Journeys first
+
+An app is only useful once someone can do its core job from start to finish.
+Each line's first `p1` issues make that loop work end to end:
+
+1. Open a file or create a document.
+2. See it on the canvas.
+3. Edit it with each tool the palette shows.
+4. Undo the edit.
+5. Save it.
+
+Polish and panels (layers, adjustments, history, effects, extra menus) come
+after the loop works. When you file or rank issues for a line whose loop is
+broken, the missing step goes first.
+
+**No dead controls.** Every button, tool and menu item on screen does
+something. One that can't act yet is disabled and says why:
+
+- A toolbar or palette item gets `unavailableHelp` on its `ToolbarAction`.
+  That text is its tooltip, and an action can't be disabled without it.
+- A menu item that can't run gets a nil action, so the menu disables it.
+- A palette tool acts through its Model's `drag(from:to:)`. Until that case
+  does something, the tool's `unavailableHelp` says why. The PR that makes a
+  tool work sets it to nil and wires the canvas gesture to `drag`.
+- `<X>ToolsTests` in Photo's, Flare's and Design's Model tests fails when an
+  enabled tool's drag on an open document changes nothing, or a disabled tool
+  has no help. A new tool enum gets the same test.
+
 ## Rules
 
 - **One behavior per PR.** Ideally under 200 changed lines, hard cap 400, at
