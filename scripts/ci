@@ -17,6 +17,20 @@
 # (the `@State private var model = ...` declaration is allowed). The Model
 # targets also keep stored state `private(set)`, so the compiler backs this up.
 #
+# The design lint enforces docs/design.md "Component order": system components
+# first, then SuiteUI, never a hand-rolled look-alike. Comment lines are skipped.
+#   apps (Sources/*App/) fail on
+#     raw color      Color(red: / hue: / white:  Color(.sRGB / .displayP3  Color(#  #colorLiteral  NSColor(  UIColor(
+#     custom font    .font(.custom(  Font.custom(  .system(size: <number>
+#     literal size   cornerRadius: <number>  .cornerRadius(<number>)  .padding([edges,] <number>)
+#                    .frame(...: <number>)  ...ColumnWidth(<number>)
+#     hand-made glass  .blur(radius:  NSVisualEffectView  any Material
+#     look-alike     a struct named *Button, *Slider, *Toggle, *Picker, *Stepper, *Sidebar
+#   SuiteUI fails on the raw color, custom font and literal size rules outside
+#   Tokens.swift, and on .blur(radius: / .background(.ultraThin /
+#   NSVisualEffectView outside Glass.swift. Before scanning, the step runs a
+#   self-test: fixture lines it must catch and token lines it must let pass.
+#
 # The duplicate check runs jscpd (pinned) over Sources/ and fails when duplicated
 # lines exceed JSCPD_THRESHOLD percent. It starts at creative-core's threshold
 # and only ever goes down: lower it when you remove a clone, never raise it.
@@ -47,6 +61,91 @@ if hits=$(grep -rnE "$writes|$binds|$mutators" Sources/*App/ 2>/dev/null \
     | grep -vE "(var|let)[[:space:]]+model[[:space:]]*(:|=)"); then
   echo "$hits"
   fail "app-state rule: views must change state through their Model's methods; add one there"
+fi
+echo "ok"
+
+echo "== design lint (Sources/*App/, Sources/SuiteUI/)"
+raw_color='Color\((red|hue|white):|Color\(\.(sRGB|displayP3)|Color\(#|#colorLiteral|(NS|UI)Color\('
+custom_font='\.font\(\.custom\(|Font\.custom\(|(\.font\(\.|Font\.)system\(size:[[:space:]]*[0-9]'
+literal_size='cornerRadius[:(][[:space:]]*[0-9]|\.padding\(([^)]*,)?[[:space:]]*[0-9]|\.frame\([^)]*:[[:space:]]*[0-9]|ColumnWidth\(([^)]*[:,])?[[:space:]]*[0-9]'
+handmade_glass='\.blur\(radius:|\.background\(\.ultraThin|NSVisualEffectView'
+lookalike='struct[[:space:]]+[A-Za-z0-9_]*(Button|Slider|Toggle|Picker|Stepper|Sidebar)([^A-Za-z0-9_]|$)'
+# hits RULE REGEX DIR [grep args]: "path:line: content (RULE)" per non-comment hit.
+hits() {
+  grep -rnHE --include='*.swift' "${@:4}" -e "$2" "$3" 2>/dev/null \
+    | grep -vE '^[^:]*:[0-9]+:[[:space:]]*(//|/?\*)' | sed "s/\$/  ($1)/"
+}
+# design_lint ROOT: every design-rule hit under ROOT/Sources; nothing when clean.
+design_lint() {
+  local app s="$1/Sources"
+  for app in "$s"/*App; do
+    hits "raw color: use SuiteColor" "$raw_color" "$app"
+    hits "custom font: use SuiteFont or a system text style" "$custom_font" "$app"
+    hits "literal size: use SuiteSpacing, SuiteRadius or SuiteSize" "$literal_size" "$app"
+    hits "hand-made glass: use SuiteUI's GlassPanel or ToolbarGroup" "$handmade_glass|Material" "$app"
+    hits "look-alike control: use the system control" "$lookalike" "$app"
+  done
+  hits "raw value outside Tokens.swift" "$raw_color|$custom_font|$literal_size" "$s/SuiteUI" --exclude=Tokens.swift
+  hits "glass outside Glass.swift" "$handmade_glass" "$s/SuiteUI" --exclude=Glass.swift
+}
+# Self-test: each "dir/file|line" fixture alone in a scratch tree.
+must_catch=(
+  'XApp/V.swift|.foregroundStyle(Color(red: 1, green: 0.5, blue: 0))'
+  'XApp/V.swift|Color(hue: 0.5, saturation: 1, brightness: 1)'
+  'XApp/V.swift|.fill(Color(white: 0.2))'
+  'XApp/V.swift|Color(.sRGB, red: 1, green: 1, blue: 1)'
+  'XApp/V.swift|Color(#colorLiteral(red: 1, green: 0, blue: 0, alpha: 1))'
+  'XApp/V.swift|Color(nsColor: NSColor(calibratedRed: 1, green: 0, blue: 0, alpha: 1))'
+  'XApp/V.swift|let c = UIColor(red: 1, green: 0, blue: 0, alpha: 1)'
+  'XApp/V.swift|.font(.custom("Avenir", size: 13))'
+  'XApp/V.swift|Text("x").font(Font.custom("Avenir", size: 13))'
+  'XApp/V.swift|.font(.system(size: 13, weight: .bold))'
+  'XApp/V.swift|.cornerRadius(8)'
+  'XApp/V.swift|.background(.red, in: RoundedRectangle(cornerRadius: 12))'
+  'XApp/V.swift|.clipShape(.rect(cornerRadius: 6))'
+  'XApp/V.swift|.padding(8)'
+  'XApp/V.swift|.padding(.horizontal, 10)'
+  'XApp/V.swift|.frame(width: 32, height: 32)'
+  'XApp/V.swift|.frame(maxWidth: .infinity, minHeight: 300)'
+  'XApp/V.swift|.inspectorColumnWidth(min: 220, ideal: 260)'
+  'XApp/V.swift|.blur(radius: 20)'
+  'XApp/V.swift|.background(.ultraThinMaterial)'
+  'XApp/V.swift|.background(.regularMaterial, in: Capsule())'
+  'XApp/V.swift|struct PlayButton: View {'
+  'XApp/V.swift|private struct LayerSidebar<Row: View>: View {'
+  'XApp/V.swift|struct OpacityStepper: View {'
+  'SuiteUI/Panel.swift|.frame(width: 32, height: 32)'
+  'SuiteUI/Panel.swift|.fill(Color(red: 1, green: 0, blue: 0))'
+  'SuiteUI/Panel.swift|.background(.ultraThinMaterial)'
+)
+must_pass=(
+  'XApp/V.swift|.padding(SuiteSpacing.m)'
+  'XApp/V.swift|.padding(.horizontal, SuiteSpacing.l)'
+  'XApp/V.swift|.padding(SuiteSpacing.xxl * 2)'
+  'XApp/V.swift|.background(SuiteColor.surface, in: RoundedRectangle(cornerRadius: SuiteRadius.medium))'
+  'XApp/V.swift|.frame(maxWidth: .infinity, alignment: .leading)'
+  'XApp/V.swift|.font(.system(.body, design: .monospaced))'
+  'XApp/V.swift|Color(nsColor: .separatorColor)'
+  'XApp/V.swift|struct ButtonBarHost: View {'
+  'XApp/V.swift|// Never write Color(red: 1, green: 0, blue: 0) or .ultraThinMaterial here.'
+  'SuiteUI/Tokens.swift|public static let artboard = Color(red: 1, green: 1, blue: 1)'
+  'SuiteUI/Glass.swift|content.background(.ultraThinMaterial, in: shape)'
+)
+missed=$(
+  t="$(mktemp -d)"
+  trap 'rm -rf "$t"' EXIT
+  fixture() {
+    rm -rf "$t/Sources" && mkdir -p "$t/Sources/${1%%/*}" && printf '%s\n' "${1#*|}" >"$t/Sources/${1%%|*}"
+    design_lint "$t"
+  }
+  for f in "${must_catch[@]}"; do [[ -n "$(fixture "$f")" ]] || echo "not caught: $f"; done
+  for f in "${must_pass[@]}"; do got=$(fixture "$f"); [[ -z "$got" ]] || echo "false hit: $got"; done
+)
+[[ -z "$missed" ]] || { echo "$missed"; fail "design lint self-test: fix the patterns in scripts/ci"; }
+found=$(design_lint .)
+if [[ -n "$found" ]]; then
+  echo "$found"
+  fail "design lint: use the system component or a SuiteUI token (docs/design.md, Component order)"
 fi
 echo "ok"
 

@@ -43,7 +43,7 @@ public struct ToolbarGroup: View {
                     Image(systemName: action.systemImage)
                         .symbolVariant(action.isSelected ? .fill : .none)
                         .foregroundStyle(action.isSelected ? Color.accentColor : Color.primary)
-                        .frame(width: 32, height: 32)
+                        .frame(width: SuiteSize.toolButton, height: SuiteSize.toolButton)
                         .background(action.isSelected ? Color.accentColor.opacity(0.15) : .clear, in: Circle())
                         .contentShape(.rect)
                 }

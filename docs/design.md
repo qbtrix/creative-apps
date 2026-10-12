@@ -19,13 +19,57 @@ every June.
   tool palette. SuiteUI holds all of it; an app that needs something different
   asks for it there (`needs-ui`).
 
+## Component order
+
+Every view is built from, in this order:
+
+1. **Apple's own SwiftUI and system components and design resources.** Native
+   controls (`Button`, `Toggle`, `Slider`, `Stepper`, `Picker`, `ColorPicker`,
+   `List`, `Table`, `OutlineGroup`, `Form`, `.inspector`,
+   `NavigationSplitView`, toolbar items, `Menu`, `.searchable`), SF Symbols,
+   system fonts and text styles, semantic system colors, system materials and
+   glass.
+2. **Then SuiteUI** components and tokens.
+3. **Never a hand-rolled look-alike** of either.
+
+Apple's design resources are the source of truth: SF Symbols for icons, the
+macOS 26 Human Interface Guidelines for behavior and layout. This file only
+restates them for the suite.
+
+| Need | Use |
+|---|---|
+| Window with sidebar, content, inspector | `SuiteWindow` (a `NavigationSplitView` with `.inspector`) |
+| Selection properties | `.inspector`, through `SuiteWindow`'s inspector slot |
+| List of items, rows with columns, a tree | `List`, `Table`, `OutlineGroup` (sidebar rows: `SidebarItem`) |
+| Settings or a group of options | `Form` (app settings in a `Settings` scene) |
+| On/off | `Toggle` |
+| A value in a range | `Slider`; exact numbers: `TextField` plus `Stepper` |
+| One of a few choices | `Picker` (segmented, menu or radio style) |
+| A color | `ColorPicker` |
+| Commands | `Menu`, menu bar commands, toolbar items (`ToolbarAction`) |
+| Search and filter | `.searchable` |
+| Timeline scrubber | `Slider`, then SuiteUI's timeline once it exists |
+| Tool palette over a canvas | `ToolbarGroup` |
+| Floating readout or transport bar | `GlassPanel` |
+| Card in the content layer | `SurfaceCard` |
+| Empty pane | `EmptyStateView` (`ContentUnavailableView`) |
+| Icon | SF Symbols by name (`systemImage:`) |
+| Color, type, spacing, radius, size | `SuiteColor`, `SuiteFont`, `SuiteSpacing`, `SuiteRadius`, `SuiteSize` |
+
+Gate: the design lint in `scripts/ci` fails on raw colors, custom fonts,
+literal radii, paddings and frame sizes, hand-made blur or materials, and a
+`struct` in an app named like a system control (`...Button`, `...Slider`,
+`...Toggle`, `...Picker`, `...Stepper`, `...Sidebar`). Raw values live only in
+SuiteUI's `Tokens.swift`; glass only in its `Glass.swift`.
+
 ## Layers: content vs. control
 
 For every screen, name what is content and what is control before you build.
 
 - **Content** (the document, canvas, artboard, photo grid, timeline tracks,
   cards, the app background): no glass. Use flat fills and, when you need
-  structure, the standard materials (blur, vibrancy).
+  structure, the standard materials (blur, vibrancy) through a SuiteUI
+  component; apps never apply a material themselves.
 - **Control** (toolbars, sidebars, inspectors, floating palettes, popovers,
   sheets, menus): system components, which bring their own glass.
 - **No glass on glass.** Never put a glass view inside another glass view or
@@ -105,7 +149,8 @@ For every screen, name what is content and what is control before you build.
   10 pt. Build hierarchy with weight and color, not many sizes. No light or
   thin weights at small sizes. Monospaced digits for timecode and counters.
 - **Spacing on the 4-point grid** (`SuiteSpacing`). Corners nest concentric:
-  an inner shape uses the next smaller radius (`SuiteRadius`).
+  an inner shape uses the next smaller radius (`SuiteRadius`). Fixed sizes
+  (window minimums, column widths, palette buttons) come from `SuiteSize`.
 - Follow the system's Light/Dark setting; no in-app appearance switch. A
   fixed dark canvas surround is allowed for a media app if chosen on purpose,
   but standard controls still follow the system.
