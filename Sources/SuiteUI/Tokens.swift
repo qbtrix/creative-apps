@@ -1,7 +1,9 @@
-// Tokens.swift: the suite's spacing, corner radius, type and color tokens.
-// Every app view takes its numbers, fonts and colors from here so the five
-// apps stay consistent. Colors are system semantic colors (they adapt to Light,
-// Dark and Increase Contrast); never hard-code a hex value for a system role.
+// Tokens.swift: the suite's spacing, corner radius, size, type and color
+// tokens. Every app view takes its numbers, fonts and colors from here so the
+// five apps stay consistent; the design lint in scripts/ci fails on a raw
+// color, font or size anywhere else in Sources/SuiteUI or an app. Colors are
+// system semantic colors (they adapt to Light, Dark and Increase Contrast);
+// never hard-code a hex value for a system role.
 import AppKit
 import SwiftUI
 
@@ -24,6 +26,17 @@ public enum SuiteRadius {
     public static let small: CGFloat = 6
     public static let medium: CGFloat = 10
     public static let large: CGFloat = 16
+}
+
+/// Fixed sizes in points: the window shell's minimums and column widths, and
+/// the tool palette's buttons.
+public enum SuiteSize {
+    /// One tool palette button; the HIG asks for hit targets of at least 28.
+    public static let toolButton: CGFloat = 32
+    public static let sidebarWidth: (min: CGFloat, ideal: CGFloat, max: CGFloat) = (180, 220, 320)
+    public static let inspectorWidth: (min: CGFloat, ideal: CGFloat, max: CGFloat) = (220, 260, 360)
+    public static let contentMinimum = CGSize(width: 480, height: 360)
+    public static let windowMinimum = CGSize(width: 900, height: 560)
 }
 
 /// Text styles. macOS has no Dynamic Type; these are the system text styles,

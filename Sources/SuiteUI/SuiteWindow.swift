@@ -41,15 +41,18 @@ public struct SuiteWindow<Content: View, Inspector: View>: View {
                     ForEach(items) { SidebarRow($0) }
                 }
             }
-            .navigationSplitViewColumnWidth(min: 180, ideal: 220, max: 320)
+            .navigationSplitViewColumnWidth(
+                min: SuiteSize.sidebarWidth.min, ideal: SuiteSize.sidebarWidth.ideal, max: SuiteSize.sidebarWidth.max)
         } detail: {
             content
-                .frame(minWidth: 480, minHeight: 360)
+                .frame(minWidth: SuiteSize.contentMinimum.width, minHeight: SuiteSize.contentMinimum.height)
                 .inspector(isPresented: $showsInspector) {
                     inspector
                         .padding(SuiteSpacing.m)
                         .frame(maxHeight: .infinity, alignment: .top)
-                        .inspectorColumnWidth(min: 220, ideal: 260, max: 360)
+                        .inspectorColumnWidth(
+                            min: SuiteSize.inspectorWidth.min, ideal: SuiteSize.inspectorWidth.ideal,
+                            max: SuiteSize.inspectorWidth.max)
                 }
         }
         .navigationTitle(title)
@@ -72,6 +75,6 @@ public struct SuiteWindow<Content: View, Inspector: View>: View {
                 .help(showsInspector ? "Hide Inspector" : "Show Inspector")
             }
         }
-        .frame(minWidth: 900, minHeight: 560)
+        .frame(minWidth: SuiteSize.windowMinimum.width, minHeight: SuiteSize.windowMinimum.height)
     }
 }

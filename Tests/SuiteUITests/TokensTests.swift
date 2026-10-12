@@ -13,6 +13,15 @@ import Testing
     #expect(SuiteRadius.medium < SuiteRadius.large)
 }
 
+@Test func sizesMeetTheHitTargetAndNestInTheWindow() {
+    #expect(SuiteSize.toolButton >= 28)
+    for width in [SuiteSize.sidebarWidth, SuiteSize.inspectorWidth] {
+        #expect(width.min <= width.ideal && width.ideal <= width.max)
+    }
+    let shell = SuiteSize.sidebarWidth.min + SuiteSize.contentMinimum.width + SuiteSize.inspectorWidth.min
+    #expect(shell <= SuiteSize.windowMinimum.width)
+}
+
 @Test func toolbarActionUsesItsTitleAsId() {
     let action = ToolbarAction("New Animation", systemImage: "plus")
     #expect(action.id == "New Animation")
