@@ -1,0 +1,62 @@
+#!/usr/bin/env bash
+# scripts/bundle-apps: builds the five apps in release and wraps each one in a
+# minimal, ad-hoc signed app bundle a reviewer can open on a Mac. macOS only.
+# CI runs it after scripts/ci passes and uploads the tarball as `app-builds`.
+#
+#   .build/apps/<X>App.app/Contents/MacOS/<X>App   the release executable
+#   .build/apps/<X>App.app/Contents/Info.plist     id <prefix>.<x>, macOS 26.0
+#   .build/apps/<X>App.app/Contents/Resources/     SwiftPM resource bundles
+#   .build/app-builds.tar.gz                       the five .app folders
+#
+# for X in Flare, Design, Photo, Library and Halo. The bundles ship as a
+# tarball because actions/upload-artifact drops file modes: a bundle whose
+# executable lost its +x bit does not launch. To open one after download:
+#   tar xzf app-builds.tar.gz && open FlareApp.app
+#
+# Before tarring, each bundle must pass `plutil -lint` and
+# `codesign --verify --deep --strict`, so a broken bundle fails the job.
+# bash 3.2 compatible (macOS /bin/bash).
+set -euo pipefail
+cd "$(dirname "$0")/.." || exit 1
+
+id_prefix="org.creativesuite" # placeholder until the suite has a real one
+apps="Flare Design Photo Library Halo"
+out=.build/apps
+
+# One release build covers all five executable products and shares their deps.
+swift build -c release
+bin=$(swift build -c release --show-bin-path)
+
+rm -rf "$out" .build/app-builds.tar.gz
+mkdir -p "$out"
+for x in $apps; do
+  exe="${x}App"
+  app="$out/$exe.app"
+  lower=$(echo "$x" | tr '[:upper:]' '[:lower:]')
+  mkdir -p "$app/Contents/MacOS" "$app/Contents/Resources"
+  cp "$bin/$exe" "$app/Contents/MacOS/$exe"
+  for b in "$bin"/*.bundle; do
+    if [ -e "$b" ]; then cp -R "$b" "$app/Contents/Resources/"; fi
+  done
+  cat > "$app/Contents/Info.plist" <<EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>CFBundleExecutable</key><string>$exe</string>
+  <key>CFBundleIdentifier</key><string>$id_prefix.$lower</string>
+  <key>CFBundleName</key><string>$x</string>
+  <key>CFBundlePackageType</key><string>APPL</string>
+  <key>LSMinimumSystemVersion</key><string>26.0</string>
+  <key>NSPrincipalClass</key><string>NSApplication</string>
+</dict>
+</plist>
+EOF
+  codesign --force --deep -s - "$app"
+  plutil -lint "$app/Contents/Info.plist"
+  codesign --verify --deep --strict "$app"
+done
+
+# COPYFILE_DISABLE keeps macOS tar from adding ._ metadata files.
+(cd "$out" && COPYFILE_DISABLE=1 tar -czf ../app-builds.tar.gz ./*.app)
+echo "bundle-apps: wrote" "$out"/*.app .build/app-builds.tar.gz

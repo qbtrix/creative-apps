@@ -147,4 +147,5 @@ scripts/ci                                   # lint + app-state rule + design li
 swift test --filter FlareModelTests          # one suite while iterating
 bash Tests/fast_lane/test_fast_lane.sh       # fast-lane decision tests (needs jq)
 gh run download <run-id> -n snapshots        # the PNGs from a macOS CI run
+scripts/bundle-apps                          # macOS: release builds as signed FlareApp.app ... HaloApp.app in .build/apps; CI uploads them as `app-builds` (app-builds.tar.gz)
 ```
