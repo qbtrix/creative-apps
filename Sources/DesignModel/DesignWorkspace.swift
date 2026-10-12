@@ -117,6 +117,14 @@ public struct DesignWorkspace: Sendable, Equatable {
         }
     }
 
+    /// Redoes a Delete Page that `restorePage` undid. Refused once another file is opened, so
+    /// a stale redo cannot delete the new file's page that reuses the id.
+    @discardableResult
+    public mutating func redoDeletePage(_ deleted: DeletedPage) throws(DesignTreeError) -> DeletedPage {
+        guard deleted.file == fileGeneration else { throw .unknownID(deleted.page.id) }
+        return try deletePage(deleted.page.id)
+    }
+
     /// Selects a page by id and clears the node selection, even when the page is already
     /// selected, so clicking its row deselects the layer. An unknown id is ignored.
     public mutating func selectPage(_ id: String) {
