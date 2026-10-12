@@ -18,6 +18,8 @@ struct PhotoWindow: View {
     @State private var renderer = CanvasRenderer()
     @State private var zoom = 1.0
     @State private var viewport = CGSize.zero
+    /// A new image waits to be fitted until the canvas has a size.
+    @State private var fitPending = false
     @State private var tab = PhotoPanelTab.adjust
     @State private var documentURL: URL?
     @State private var note: String?
@@ -36,11 +38,14 @@ struct PhotoWindow: View {
         PhotoEditor(
             model: model, image: renderer.image, renderMilliseconds: renderer.milliseconds,
             note: renderer.failure ?? note, zoom: zoom, tab: tab,
-            onTab: { tab = $0 }, onViewport: { viewport = $0 }, onZoom: setZoom, perform: perform)
+            onTab: { tab = $0 }, onViewport: viewportChanged, onZoom: setZoom, perform: perform)
             .navigationTitle(model.documentName ?? (model.canvas == nil ? "Photo" : "Untitled"))
             .focusedSceneValue(\.photoMenu, PhotoMenu(model: model, perform: perform))
             .onChange(of: model.revision) { renderer.show(model) }
-            .onChange(of: model.canvas) { fit() }
+            .onChange(of: model.canvas) {
+                fitPending = true
+                fit()
+            }
             .sheet(isPresented: $isExporting) {
                 ExportSheet(
                     format: exportFormat, quality: exportQuality, onFormat: { exportFormat = $0 },
@@ -107,11 +112,18 @@ struct PhotoWindow: View {
         zoom = min(max(scale.isFinite ? scale : 1, ViewerZoom.stops[0]), ViewerZoom.stops[ViewerZoom.stops.count - 1])
     }
 
+    /// Fits the image in the canvas, once the canvas has been laid out.
     private func fit() {
-        guard let canvas = model.canvas else { return }
+        guard let canvas = model.canvas, viewport.width > 0, viewport.height > 0 else { return }
+        fitPending = false
         let fitted = ViewerZoom.fitScale(
             artboard: CGSize(width: canvas.width, height: canvas.height), in: viewport, inset: SuiteSpacing.xxl)
         setZoom(fitted > 0 ? fitted : 1)
+    }
+
+    private func viewportChanged(_ size: CGSize) {
+        viewport = size
+        if fitPending { fit() }
     }
 
     // MARK: Files
