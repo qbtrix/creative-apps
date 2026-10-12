@@ -30,13 +30,12 @@ public struct PhotoWorkspace: Sendable, Equatable {
     public var canRemoveLayer: Bool { layers.count > 1 }
 
     /// Opens a new white canvas with one "Background" layer and default
-    /// adjustments. Throws
+    /// adjustments. Layer ids keep counting from the previous canvas. Throws
     /// `RasterError` for a size CoreRaster rejects; the workspace is unchanged.
     public mutating func newCanvas(width: Int, height: Int) throws {
         canvas = try PixelBuffer(width: width, height: height, fill: RGBA(r: 1, g: 1, b: 1, a: 1))
         layers = []
         adjustments = AdjustmentSettings()
-        nextLayerNumber = 1
         selectedLayerID = insertLayer(named: "Background", at: 0)
     }
 
