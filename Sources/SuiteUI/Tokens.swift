@@ -39,6 +39,13 @@ public enum SuiteSize {
     public static let inspectorWidth: (min: CGFloat, ideal: CGFloat, max: CGFloat) = (220, 260, 360)
     public static let contentMinimum = CGSize(width: 480, height: 360)
     public static let windowMinimum = CGSize(width: 900, height: 560)
+    /// The timeline's fixed track-name column, ruler, one lane, a keyframe
+    /// diamond, and the least room between two ruler labels.
+    public static let timelineLabelColumn: CGFloat = 160
+    public static let timelineRuler: CGFloat = 24
+    public static let timelineLane: CGFloat = 28
+    public static let timelineKeyframe: CGFloat = 10
+    public static let timelineLabelSpacing: CGFloat = 48
 }
 
 /// Text styles. macOS has no Dynamic Type; these are the system text styles,
@@ -61,6 +68,8 @@ public enum SuiteColor {
     public static var surface: Color { Color(nsColor: .controlBackgroundColor) }
     public static var separator: Color { Color(nsColor: .separatorColor) }
     public static var secondaryText: Color { .secondary }
+    /// The system accent: marks selection and the playhead.
+    public static var accent: Color { .accentColor }
     /// A new document's artboard. Document content, not a system role.
     public static let artboard = Color.white
 }
