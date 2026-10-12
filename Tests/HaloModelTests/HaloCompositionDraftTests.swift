@@ -29,11 +29,11 @@ import Testing
 }
 
 @Test(arguments: [
-    ("abc", "1080", "10", "Width must be 1 to 8192 pixels."), ("", "1080", "10", "Width must be 1 to 8192 pixels."),
-    ("1920.5", "1080", "10", "Width must be 1 to 8192 pixels."), ("1920", "99999999999999999999", "10", "Height must be 1 to 8192 pixels."),
-    ("1920", "1080", "", "Duration must be more than 0 seconds and at most 24 hours."),
+    ("abc", "1080", "10", "Width must be a whole number of pixels."), ("", "1080", "10", "Width must be a whole number of pixels."),
+    ("1920.5", "1080", "10", "Width must be a whole number of pixels."), ("1920", "99999999999999999999", "10", "Height must be 1 to 8192 pixels."),
+    ("1920", "1080", "", "Duration must be a number of seconds."),
     ("1920", "1080", "nan", "Duration must be more than 0 seconds and at most 24 hours."),
-    ("1920", "1080", "ten", "Duration must be more than 0 seconds and at most 24 hours."),
+    ("1920", "1080", "ten", "Duration must be a number of seconds."),
 ])
 func textThatIsNotANumberIsInvalid(width: String, height: String, duration: String, problem: String) {
     var draft = CompositionDraft(CompositionSettings(name: "Intro"))
