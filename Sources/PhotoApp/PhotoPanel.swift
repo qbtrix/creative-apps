@@ -87,7 +87,7 @@ struct ToolOptionsSection: View {
                 InspectorRow("") {
                     HStack(spacing: SuiteSpacing.xs) {
                         let why = model.canApplyCrop ? nil : "Drag over the image to choose a crop first."
-                        command("Apply Crop", help: why, .applyCrop).keyboardShortcut(.defaultAction)
+                        command("Apply Crop", help: why, .applyCrop, prominent: true).keyboardShortcut(.defaultAction)
                         command("Cancel", help: why, .cancelCrop).keyboardShortcut(.cancelAction)
                     }
                 }
@@ -112,11 +112,16 @@ struct ToolOptionsSection: View {
             .padding(.bottom, SuiteSpacing.xs)
     }
 
-    /// A small button for `intent`; disabled, saying why, while `help` is set.
-    private func command(_ title: String, help: String?, _ intent: PhotoIntent) -> some View {
-        Button(title) { perform(intent) }
-            .disabled(help != nil)
-            .help(help ?? title)
+    /// A small bordered button for `intent`; disabled, saying why, while
+    /// `help` is set.
+    @ViewBuilder
+    private func command(_ title: String, help: String?, _ intent: PhotoIntent, prominent: Bool = false) -> some View {
+        let button = Button(title) { perform(intent) }.disabled(help != nil).help(help ?? title)
+        if prominent {
+            button.buttonStyle(.borderedProminent)
+        } else {
+            button.buttonStyle(.bordered)
+        }
     }
 }
 
