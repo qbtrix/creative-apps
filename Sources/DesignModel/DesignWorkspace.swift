@@ -82,11 +82,11 @@ public struct DesignWorkspace: Sendable, Equatable {
         if selectedPageID == id { selectPage(pages[Swift.min(index, pages.count - 1)].id) }
     }
 
-    /// Selects a page by id and clears the node selection. An unknown id is ignored.
+    /// Selects a page by id and clears the node selection, even when the page is already
+    /// selected, so clicking its row deselects the layer. An unknown id is ignored.
     public mutating func selectPage(_ id: String) {
         guard pages.contains(where: { $0.id == id }) else { return }
-        if selectedPageID != id { selectedNodeID = nil }
-        selectedPageID = id
+        (selectedPageID, selectedNodeID) = (id, nil)
     }
 
     /// Selects the page or node `id` names; a node on another page switches to that page.
