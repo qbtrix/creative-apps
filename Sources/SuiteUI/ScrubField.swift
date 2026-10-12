@@ -43,6 +43,7 @@ public struct ScrubField: View {
                     .textFieldStyle(.plain)
                     .labelsHidden()
                     .focused($isTyping)
+                    .onAppear { isTyping = true }
                     .onSubmit(commit)
                     .onExitCommand { draft = nil }
                     .onChange(of: isTyping) { _, typing in if !typing { commit() } }
@@ -70,7 +71,11 @@ public struct ScrubField: View {
         .focusable(draft == nil, interactions: .activate)
         .onKeyPress(.upArrow) { nudge(1) }
         .onKeyPress(.downArrow) { nudge(-1) }
-        .onKeyPress(.return) { beginTyping(); return .handled }
+        .onKeyPress(.return) {
+            guard draft == nil else { return .ignored }
+            beginTyping()
+            return .handled
+        }
         .help(label)
         .accessibilityElement(children: draft == nil ? .ignore : .contain)
         .accessibilityLabel(label)
@@ -111,10 +116,10 @@ public struct ScrubField: View {
         return .handled
     }
 
+    /// Swaps in the typing field; it takes focus as it appears.
     private func beginTyping() {
         guard isEnabled else { return }
         draft = NumericInput.format(value)
-        isTyping = true
     }
 
     private func commit() {
