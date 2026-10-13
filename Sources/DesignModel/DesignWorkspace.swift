@@ -107,7 +107,7 @@ public struct DesignWorkspace: Sendable, Equatable {
         commitTextEdit()
         let before = snapshot
         let wasOpen = isOpen
-        (pageCount, nodeCount) = (0, 0)
+        (pages, pageCount, nodeCount) = ([], 0, 0)
         let page = nextPage()
         (pages, selectedPageID, selectedNodeID, expandedNodeIDs) = ([page], page.id, nil, [])
         if wasOpen { record("New File", before: before) }
@@ -115,7 +115,8 @@ public struct DesignWorkspace: Sendable, Equatable {
 
     /// Replaces the document with `pages` (the file codec opens a file through this): selects the
     /// first page, clears the history, any drag or inline edit and the expanded rows, and starts
-    /// the id counters past the highest "page-N" and "node-N" in the file.
+    /// the id counters past the highest "page-N" and "node-N" in the file. Ids at or past the cap
+    /// don't move the counters, but minting skips them, so a new id never repeats one (#296).
     mutating func load(_ pages: [DesignPage]) {
         self.pages = pages
         (selectedPageID, selectedNodeID, expandedNodeIDs) = (pages.first?.id, nil, [])
@@ -235,10 +236,11 @@ public struct DesignWorkspace: Sendable, Equatable {
             throw .unknownID(selectedPageID ?? "")
         }
         // Take the id only once the parent accepts the node, so a refused add changes nothing.
+        let number = nextNodeNumber()
         let node = DesignNode(
-            id: "node-\(nodeCount + 1)", name: kind.defaultName, kind: kind, frame: frame, text: kind == .text ? "Text" : "")
+            id: "node-\(number)", name: kind.defaultName, kind: kind, frame: frame, text: kind == .text ? "Text" : "")
         try pages[pageIndex].nodes.add(node, to: parentID)
-        _ = nextNodeID()
+        nodeCount = number
         expandAncestors(of: node.id, in: pages[pageIndex].nodes)
         selectedNodeID = node.id
         return node.id
@@ -336,6 +338,7 @@ public struct DesignWorkspace: Sendable, Equatable {
     /// New File and Add Page both start their page here.
     private mutating func nextPage() -> DesignPage {
         pageCount += 1
+        while pages.contains(where: { $0.id == "page-\(pageCount)" }) { pageCount += 1 }
         var page = DesignPage(id: "page-\(pageCount)", name: "Page \(pageCount)", frameWidth: 1440, frameHeight: 1024)
         let size = DesignRect(x: 0, y: 0, width: page.frameWidth, height: page.frameHeight)
         page.nodes = [DesignNode(id: nextNodeID(), name: "Desktop", kind: .frame, frame: size)]
@@ -343,8 +346,15 @@ public struct DesignWorkspace: Sendable, Equatable {
     }
 
     private mutating func nextNodeID() -> String {
-        nodeCount += 1
+        nodeCount = nextNodeNumber()
         return "node-\(nodeCount)"
+    }
+
+    /// The first number past the node counter whose "node-N" no page holds yet.
+    private func nextNodeNumber() -> Int {
+        var number = nodeCount + 1
+        while findNode("node-\(number)") != nil { number += 1 }
+        return number
     }
 }
 
