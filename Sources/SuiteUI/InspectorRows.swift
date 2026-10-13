@@ -8,9 +8,11 @@
 // shares: the label inside on the left in secondary text,
 // the value on the right, the hover fill; an empty label puts a checkbox and
 // its title on the left. InspectorSliderRow is the bar slider (ScrubField's
-// bar look); the stepper, color and picker rows are InspectorRows around a
-// system control. Rows take the current value and an `onChange` closure,
-// never a binding: apps can't bind to their Model. No glass. Components own presentation state only (a section's
+// bar look), InspectorStepperRow a bar slider with a step, and
+// InspectorPickerRow a real Menu showing its choice on the right with a
+// chevron. The one color row is in ColorWell.swift. Rows take the current
+// value and an `onChange` closure, never a binding: apps can't bind to their
+// Model. No glass. Components own presentation state only (a section's
 // expansion, hover, a field's draft text).
 import SwiftUI
 
@@ -172,67 +174,20 @@ public struct InspectorSliderRow: View {
     public var body: some View { field }
 }
 
-/// Label, a ScrubField and a Stepper that move by `step` within `range`.
+/// A bar slider that moves by `step` within `range`, showing as many places
+/// as the step needs. (Inspectors use no Stepper.)
 public struct InspectorStepperRow: View {
-    private let label: String
-    private let value: Double
-    private let range: ClosedRange<Double>
-    private let step: Double
-    private let unit: String
-    private let onChange: @MainActor (Double) -> Void
+    private let row: InspectorSliderRow
 
     public init(
         _ label: String, value: Double, in range: ClosedRange<Double>, step: Double = 1, unit: String = "",
         onChange: @escaping @MainActor (Double) -> Void
     ) {
-        self.label = label
-        self.value = value
-        self.range = range
-        self.step = step
-        self.unit = unit
-        self.onChange = onChange
+        let places = step > 0 && step < 1 ? Int((-log10(step)).rounded(.up)) : 0
+        row = InspectorSliderRow(label, value: value, in: range, step: step, unit: unit, decimals: places, onChange: onChange)
     }
 
-    public var body: some View {
-        InspectorRow(label) {
-            HStack(spacing: SuiteSpacing.xs) {
-                ScrubField(label, value: value, in: range, step: step, unit: unit, onChange: onChange)
-                Stepper(
-                    label,
-                    value: Binding(get: { value }, set: { onChange(NumericInput.clamp($0, to: range)) }),
-                    in: range, step: step
-                )
-                .labelsHidden()
-            }
-        }
-    }
-}
-
-/// Label and a ColorPicker.
-public struct InspectorColorRow: View {
-    private let label: String
-    private let color: Color
-    private let supportsOpacity: Bool
-    private let onChange: @MainActor (Color) -> Void
-
-    public init(
-        _ label: String, color: Color, supportsOpacity: Bool = true,
-        onChange: @escaping @MainActor (Color) -> Void
-    ) {
-        self.label = label
-        self.color = color
-        self.supportsOpacity = supportsOpacity
-        self.onChange = onChange
-    }
-
-    public var body: some View {
-        InspectorRow(label) {
-            ColorPicker(
-                label, selection: Binding(get: { color }, set: { onChange($0) }), supportsOpacity: supportsOpacity
-            )
-            .labelsHidden()
-        }
-    }
+    public var body: some View { row }
 }
 
 /// One choice in an InspectorPickerRow.
@@ -246,7 +201,8 @@ public struct InspectorOption<ID: Hashable & Sendable>: Identifiable, Hashable, 
     }
 }
 
-/// Label and a menu Picker over titled options.
+/// A filled row whose value is a real Menu: the choice on the right in
+/// semibold with a chevron; the menu checks the current one.
 public struct InspectorPickerRow<ID: Hashable & Sendable>: View {
     private let label: String
     private let options: [InspectorOption<ID>]
@@ -265,11 +221,25 @@ public struct InspectorPickerRow<ID: Hashable & Sendable>: View {
 
     public var body: some View {
         InspectorRow(label) {
-            Picker(label, selection: Binding(get: { selection }, set: { onChange($0) })) {
-                ForEach(options) { Text($0.title).tag($0.id) }
+            Menu {
+                Picker(label, selection: Binding(get: { selection }, set: { onChange($0) })) {
+                    ForEach(options) { Text($0.title).tag($0.id) }
+                }
+                .pickerStyle(.inline)
+                .labelsHidden()
+            } label: {
+                HStack(spacing: SuiteSpacing.xs) {
+                    Text(options.first { $0.id == selection }?.title ?? "")
+                        .font(SuiteFont.inspectorValue)
+                    Image(systemName: "chevron.up.chevron.down").imageScale(.small).foregroundStyle(SuiteColor.textSecondary)
+                }
+                .contentShape(.rect)
             }
-            .pickerStyle(.menu)
-            .labelsHidden()
+            .menuStyle(.button)
+            .buttonStyle(.plain)
+            .menuIndicator(.hidden)
+            .fixedSize()
+            .accessibilityLabel(label)
         }
     }
 }
