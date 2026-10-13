@@ -19,8 +19,7 @@
 # tested SHAs, and a push trigger on dev would fire per merge. pull_request
 # runs only for rare hotfix PRs to main. The app audit only fails a count that
 # rose; when the journeys measure counts under the baseline, `audit-lower`
-# opens (or updates) one data-only PR to dev that lowers it, and the fast lane
-# merges it.
+# pushes one commit to dev that lowers it.
 #
 # Trade-off: SwiftUI breakage, snapshot and UI journey failures sit on dev
 # until the next feature run, so a dev-red culprit range can span several PRs.
@@ -131,7 +130,8 @@ jobs:
           retention-days: 7
 
   # Fast-forward main to this dev SHA once every job above passed. The only
-  # job that writes contents besides audit-lower, which pushes only its own branch.
+  # job besides audit-lower (which pushes one baseline commit to dev) that
+  # writes contents.
   promote:
     name: Promote
     needs: [linux, macos]
@@ -213,16 +213,14 @@ jobs:
   # The app audit's way down (docs/blueprints/app-audit.md, "The ratchet"): a
   # count under its baseline doesn't fail the journeys, so on dev this writes
   # the counts the run measured (audit-counts.json in ui-screens) into
-  # UITests/audit-baseline.json with scripts/audit-lower and opens, or updates,
-  # one PR to dev. A count over its baseline fails here too, with no PR. It
-  # runs only after a green macOS job: a failed journey leaves its later
-  # screens unaudited, so its counts are too low to trust. When nothing is
-  # under, it closes a leftover PR from an earlier run. The PR carries the
-  # Fast-Check marker (it changes data only, no code) and the fast-lane label;
-  # its author is the github-actions bot, which the lane takes for a
-  # baseline-only PR. GITHUB_TOKEN events start no workflow, so the lane's
-  # 5-minute sweep picks it up. Needs the repo setting "Allow GitHub Actions to
-  # create and approve pull requests".
+  # UITests/audit-baseline.json with scripts/audit-lower and pushes that one
+  # commit straight to dev, the way promote pushes main. scripts/audit-lower
+  # refuses any count over its baseline, so this can only tighten the audit.
+  # It runs only after a green macOS job: a failed journey leaves its later
+  # screens unaudited, so its counts are too low to trust. When dev moved
+  # during the run the push is refused; it fetches dev and lowers again on top,
+  # judging only checks still at the number they were measured against (the
+  # third argument), up to 3 retries. GITHUB_TOKEN pushes start no workflow.
   audit-lower:
     name: Audit lower
     needs: [macos]
@@ -230,51 +228,34 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions:
-      contents: write       # push the test/audit-lower-baselines branch
-      pull-requests: write  # open or update its PR
+      contents: write  # push the lowered baseline to dev
     steps:
       - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
         with: { name: ui-screens, path: ui-screens }
       - name: Lower the baselines to the measured counts
-        env:
-          GH_TOKEN: ${{ github.token }}
-          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
-          branch=test/audit-lower-baselines
           title="test(audit): lower baselines to the measured counts"
-          open=$(gh pr list --base dev --head "$branch" --state open --json number --jq '.[0].number // empty')
-          rows=$(scripts/audit-lower UITests/audit-baseline.json ui-screens/audit-counts.json)
-          if [[ -z "$rows" ]]; then
-            echo "Audit: every measured count is on its baseline." >>"$GITHUB_STEP_SUMMARY"
-            if [[ -n "$open" ]]; then
-              gh pr close "$open" --comment "Run $RUN_URL measured every count on its baseline, so there is nothing left to lower."
-            fi
-            exit 0
-          fi
+          run_url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          measured="$RUNNER_TEMP/measured-baseline.json"
+          cp UITests/audit-baseline.json "$measured"  # the checkout is $GITHUB_SHA, what the journeys ran
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git switch -c "$branch"
-          git commit -q -m "$title" -m "Counts measured by the macOS journeys in $RUN_URL." UITests/audit-baseline.json
-          # The branch is this job's alone: replace it, unless it moved since we looked.
-          old=$(git ls-remote origin "refs/heads/$branch" | cut -f1)
-          git push --force-with-lease="refs/heads/$branch:$old" origin "HEAD:refs/heads/$branch"
-          table=$(printf '| app | check | old | new |\n|---|---|---:|---:|\n%s\n' "$rows")
-          {
-            echo "The macOS journeys in $RUN_URL found fewer app audit violations than \`UITests/audit-baseline.json\` allows, and none over it. This lowers the baseline to what they measured (docs/blueprints/app-audit.md, \"The ratchet\")."
-            echo
-            echo "$table"
-            echo
-            echo "Data only: one JSON file changes and no code does. Only the macOS journeys read this file, and these numbers are theirs at $GITHUB_SHA."
-            echo
-            echo "Fast-Check: pass"
-            echo "Head: $(git rev-parse HEAD)"
-          } >"$RUNNER_TEMP/body.md"
-          if [[ -n "$open" ]]; then
-            gh pr edit "$open" --title "$title" --add-label fast-lane --body-file "$RUNNER_TEMP/body.md"
-            url=$(gh pr view "$open" --json url --jq .url)
-          elif ! url=$(gh pr create --base dev --head "$branch" --title "$title" --label fast-lane --body-file "$RUNNER_TEMP/body.md"); then
-            echo "::error::Pushed $branch but could not open its PR. If GitHub said Actions may not create pull requests, turn on Settings > Actions > General > Allow GitHub Actions to create and approve pull requests."
-            exit 1
-          fi
-          printf 'Audit: lowered the baseline in %s\n\n%s\n' "$url" "$table" >>"$GITHUB_STEP_SUMMARY"
+          for attempt in 1 2 3 4; do
+            rows=$(scripts/audit-lower UITests/audit-baseline.json ui-screens/audit-counts.json "$measured")
+            if [[ -z "$rows" ]]; then
+              echo "Audit: nothing to lower." >>"$GITHUB_STEP_SUMMARY"
+              exit 0
+            fi
+            table=$(printf '| app | check | old | new |\n|---|---|---:|---:|\n%s\n' "$rows")
+            git commit -q -m "$title" -m "Measured by the macOS journeys in $run_url at $GITHUB_SHA." -m "$table" UITests/audit-baseline.json
+            if git push origin HEAD:refs/heads/dev; then
+              printf 'Audit: pushed %s to dev, lowering the baseline.\n\n%s\n' "$(git rev-parse --short HEAD)" "$table" >>"$GITHUB_STEP_SUMMARY"
+              exit 0
+            fi
+            echo "Push $attempt refused (dev moved); lowering again on top of the new dev."
+            git fetch -q origin dev
+            git checkout -q --detach FETCH_HEAD
+          done
+          echo "::error::Could not push the lowered baseline to dev after 3 retries."
+          exit 1

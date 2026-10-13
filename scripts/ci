@@ -42,7 +42,7 @@
 #
 # The contact sheet check runs Tests/contact_sheet, the fixture test for
 # scripts/contact-sheet (the macOS job's review page), and Tests/audit_lower,
-# the decision tests for scripts/audit-lower (the auto-lower PR). Both need jq.
+# the decision tests for scripts/audit-lower (CI's baseline lowering). Both need jq.
 #
 # The duplicate check runs jscpd (pinned) over Sources/ and fails when duplicated
 # lines exceed JSCPD_THRESHOLD percent. It starts at creative-core's threshold

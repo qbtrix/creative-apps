@@ -46,8 +46,6 @@ check() {
 
 check "happy path" "eligible|150|2|5 checks green" . "$BASE_FILES" .
 check "claude app bot author is not allowlisted" "not-eligible|author app/claude is not on the fast-lane allowlist" '.author.login = "app/claude"' "$BASE_FILES" .
-check "the audit bot is not allowlisted for code" "not-eligible|author app/github-actions is not on the fast-lane allowlist" \
-  '.author.login = "app/github-actions"' "$BASE_FILES" .
 check "deny path hit" "not-eligible|touches protected paths: .github/workflows/ci.yml" \
   . $'.github/workflows/ci.yml\nsrc/x.py' .
 check "deny Package.swift" "not-eligible|touches protected paths: Package.swift" \
@@ -304,24 +302,6 @@ audit_decide "decide: #292-style, new check baselines pass, the script doesn't" 
   "$(printf '%s\n' "$AUDIT_BASELINE" "$AD/AuditCore.swift" "$AD/Checks/Focus.swift" scripts/ui-test)"
 audit_decide "decide: the same without the script is eligible" "eligible|150|2|5 checks green" \
   "$(printf '%s\n' "$AUDIT_BASELINE" "$AD/AuditCore.swift" "$AD/Checks/Focus.swift")"
-
-# ci.yml's audit-lower PR: the bot, the baseline alone, the marker, no checks.
-bot_decide() {  # bot_decide <name> <exact want> <changed files>
-  local got
-  jq --arg h "$HEAD_SHA" '.author.login = "app/github-actions" | .additions = 1 | .deletions = 1 | .changedFiles = 1
-    | .body = "Data only.\n\nFast-Check: pass\nHead: \($h)"' <<<"$BASE_PR" >"$tmp/pr.json"
-  printf '%s\n' "$3" >"$tmp/files.txt"; echo '[]' >"$tmp/checks.json"
-  got=$(decide "$tmp/pr.json" "$tmp/files.txt" "$tmp/checks.json" "$b" "$a" 2>/dev/null)
-  if [[ "$got" == "$2" ]]; then echo "ok   $1 -> $got"; else echo "FAIL $1: want '$2', got '$got'"; fail=1; fi
-}
-same '{ "photo": { "identifier": 53, "overlap": 1 }, "halo": { "contrast": 2 } }'
-bot_decide "decide: the audit-lower PR takes the lane" "eligible|2|1|Fast-Check marker" "$AUDIT_BASELINE"
-bot_decide "decide: the audit bot touching more than the baseline is not allowlisted" \
-  "not-eligible|author app/github-actions is not on the fast-lane allowlist" \
-  "$(printf '%s\n' "$AUDIT_BASELINE" "$AD/Checks/Overlap.swift")"
-same '{ "photo": { "identifier": 55, "overlap": 1 }, "halo": { "contrast": 2 } }'
-bot_decide "decide: the audit bot raising a count is refused" \
-  "not-eligible|loosens the app audit: needs the captain's review (photo identifier 54 -> 55)" "$AUDIT_BASELINE"
 
 # A whole sweep against a stub `gh` that answers from per-PR fixtures and logs
 # every write: #4 and #7 are eligible, #5 is based on main, #6 conflicts.

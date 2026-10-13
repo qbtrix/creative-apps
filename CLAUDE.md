@@ -242,10 +242,9 @@ Crew PRs merge into `dev` at once; `main` moves only when full CI passes on
   its file and registry entry.
 - A count that falls doesn't fail the journeys, and you don't lower the
   baseline by hand: after a green macOS run on `dev`, CI's `Audit lower` job
-  opens (or updates) one PR, "test(audit): lower baselines to the measured
-  counts", that changes only `UITests/audit-baseline.json`. Its author is the
-  `github-actions` bot, which the lane takes only for a PR whose one file is
-  that baseline.
+  commits the measured counts to `UITests/audit-baseline.json` ("test(audit):
+  lower baselines to the measured counts") straight onto `dev`. It only ever
+  lowers; a count over its baseline fails instead.
 - A PR that breaks a hard rule (author, size, protected path, a looser app
   audit) loses the label with a comment saying why and waits for review.
 - Full CI (`Linux`, `macOS` with snapshots and the UI journeys) runs on `dev`
@@ -263,7 +262,7 @@ Crew PRs merge into `dev` at once; `main` moves only when full CI passes on
 scripts/ci                                   # lint + app-state rule + design lint + C4 ownership + jscpd + build + test: the gate
 swift test --filter FlareModelTests          # one suite while iterating
 bash Tests/fast_lane/test_fast_lane.sh       # fast-lane decision tests (needs jq)
-bash Tests/audit_lower/test_audit_lower.sh   # auto-lower decision tests for scripts/audit-lower (needs jq)
+bash Tests/audit_lower/test_audit_lower.sh   # decision tests for scripts/audit-lower, CI's baseline lowering (needs jq)
 gh run list --workflow ci.yml --branch dev    # feature CI runs on dev
 gh run download <run-id> -n snapshots        # the PNGs from a macOS CI run
 gh run download <run-id> -n ui-screens       # whole-window PNGs from the UI journeys

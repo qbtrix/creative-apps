@@ -6,7 +6,7 @@
 # capture order, show and escape the violation,
 # count distinct violations the way AppAudit.Tally does (one ↑, one ↓, one =),
 # skip audit-counts.json, inline the perf line, and write the step summary. A
-# run on dev with only ↓ notes the auto-lower PR. A last run without the
+# run on dev with only ↓ notes the auto-lower commit. A last run without the
 # manifest falls back to name order. No network; needs bash and jq.
 #
 # Run: bash Tests/contact_sheet/test_contact_sheet.sh   (exit 0 = all pass)
@@ -75,8 +75,8 @@ hasnt "no auto-lower note off dev, or with a count over" "$page" 'Audit lower jo
 echo '{ "photo": { "identifier": 3, "overlap": 1, "unnamed": 1 } }' >"$tmp/baseline.json"
 GITHUB_STEP_SUMMARY="$tmp/summary-dev.md" GITHUB_REF_NAME=dev \
   "$here/../../scripts/contact-sheet" "$s" "$tmp/baseline.json" "$tmp/snaps" >/dev/null || { echo "FAIL dev run exited $?"; exit 1; }
-has "auto-lower note on the page" "$page" '<p class="note">↓ only: once this macOS job is green, the Audit lower job opens (or updates) the PR “test(audit): lower baselines to the measured counts”'
-has "auto-lower note in the summary" "$tmp/summary-dev.md" '↓ only: once this macOS job is green, the Audit lower job opens'
+has "auto-lower note on the page" "$page" '<p class="note">↓ only: once this macOS job is green, the Audit lower job pushes the lower baseline to dev as “test(audit): lower baselines to the measured counts”'
+has "auto-lower note in the summary" "$tmp/summary-dev.md" '↓ only: once this macOS job is green, the Audit lower job pushes the lower baseline'
 has "dev cells" "$tmp/summary-dev.md" '| photo | 2 | 1 | 2 ↓ 3 | 0 ↓ 1 | 1 = 1 |'
 
 rm "$s/manifest.json"

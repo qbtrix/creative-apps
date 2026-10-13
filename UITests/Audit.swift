@@ -8,7 +8,7 @@
 // that rises fails at the screen that raised it. A count that fell doesn't
 // fail: the bundle's last test attaches the app's counts as "counts-<app>"
 // (see `Journey.init`), scripts/ui-test merges them into audit-counts.json,
-// and CI on dev opens a PR lowering the baseline to them.
+// and CI on dev pushes the baseline down to them.
 //
 // The test runner is sandboxed with read-only access to "/": it reads the
 // baseline from the repo, and the reports and counts leave only as

@@ -108,20 +108,22 @@ frame. Then:
   test must launch a Journey. On dev, after a green macOS job, the `Audit
   lower` job in `.github/workflows/ci.yml` runs `scripts/audit-lower`: when
   some count is under its baseline and none is over, it writes the measured
-  numbers into the baseline (a check at 0 leaves its app's line) and opens, or
-  updates, one PR to dev titled "test(audit): lower baselines to the measured
-  counts". The PR changes only the baseline, carries the `fast-lane` label
-  and the `Fast-Check: pass` / `Head:` marker, and the lane merges it on its
-  next sweep. When a later run measures nothing under, the job closes that PR.
-  A red macOS job lowers nothing: a failed journey leaves its later screens
-  unaudited, so its counts would be too low.
+  numbers into the baseline (a check at 0 leaves its app's line) and pushes
+  that one commit, "test(audit): lower baselines to the measured counts" with
+  an old → new table, straight to dev. If dev moved during the run, it fetches
+  dev and lowers again on top, up to 3 retries, judging only the checks whose
+  baseline is still the number the run measured against; one raised, lowered
+  or added since is left for the next run. `scripts/audit-lower` refuses any
+  count over its baseline, so the job can only tighten the audit. A red macOS
+  job lowers nothing: a failed journey leaves its later screens unaudited, so
+  its counts would be too low.
 - A check missing from a listed app has baseline 0. An app missing from the
   file is recorded, not judged, and never added.
 
 A rise fails at once, so a new fault can't land quietly. A fall needs no
 one: the Linux workers can't run the journeys, so they couldn't lower the
-file themselves, and before the auto-lower job every real improvement turned
-dev red until someone hand-lowered it. A measurement that flickers can still
+file themselves, and before the `Audit lower` job every real improvement
+turned dev red until someone hand-lowered it. A measurement that flickers can still
 bite: a lowered count that comes back fails the next run as a rise. That is
 why the limits have wide margins; the report's `samples` show how far each
 measurement sits from its limit.
@@ -138,7 +140,7 @@ The audit grows with the apps. Agents:
   on its own seed on Linux, and a check that can't fail can't land. Edge
   cases it must let pass go in `AuditChecksTests`.
 - **let CI lower baselines.** A fix needn't touch the baseline: the next dev
-  run measures the lower count and opens the auto-lower PR. Lowering it in
+  run measures the lower count and pushes the lower baseline. Lowering it in
   the fix's own PR is still fine, and the lane takes it.
 - **audit every journey step.** `shot` does it already; a step that doesn't
   shoot calls `audit("step")`.
@@ -156,11 +158,7 @@ merge base and head. These loosen it:
 
 Such a PR gets one comment, "loosens the app audit: needs the captain's
 review", and loses its `fast-lane` label. Lowering a count, dropping a check
-key from an app (its baseline becomes 0) and adding a check stay eligible.
-The auto-lower PR's author is the `github-actions` bot, which is not on the
-lane's allowlist; the lane takes it (`AUDIT_BOT` in `scripts/fast-lane.sh`)
-only when the baseline is its one changed file, and judges it like any
-other. A
+key from an app (its baseline becomes 0) and adding a check stay eligible. A
 new check's keys may start at any count in apps already in the file, as long
 as the same PR adds its file and its registry entry. The lane matches a key
 to the new file's `let id` and refuses an id that an existing check already
