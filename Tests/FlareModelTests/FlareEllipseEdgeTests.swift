@@ -26,7 +26,7 @@ private func allPoints(_ shape: FlareShape) -> [Point] {
 @Test(arguments: [
     (Point(x: 0, y: 0), Point(x: 1, y: 1)),
     (Point(x: -500, y: 300), Point(x: 500, y: -300)),
-    (Point(x: 0.001, y: 0.001), Point(x: 0.002, y: 1e6)),
+    (Point(x: 0.25, y: 0.25), Point(x: 1.25, y: 1e6)),
     (Point(x: 1e12, y: -1e12), Point(x: -1e12, y: 1e12)),
 ])
 func ellipseIsInscribedInItsBoxAndClosed(start: Point, end: Point) throws {

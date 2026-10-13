@@ -1,19 +1,29 @@
 // FlareDrawing.swift: the Ellipse tool on FlareWorkspace. A drag spans a box
 // from its start to the pointer; `draft` is the ellipse inscribed in that box
 // while the drag runs, and the drag's end commits it as a new "Ellipse N"
-// layer above the selected one, in one "Add Ellipse" undo step. A drag with
-// no width or no height adds nothing.
+// layer above the selected one, in one "Add Ellipse" undo step. A drag whose
+// box is narrower or shorter than `minimumEllipseExtent` (a click with pointer
+// jitter) adds nothing.
 import FlareCore
 
 extension FlareWorkspace {
+    /// The smallest width and height, in scene points, a drag's box needs to
+    /// make an ellipse. A click's sub-point pointer jitter stays below it, so
+    /// it adds no invisible layer and no undo step.
+    public static let minimumEllipseExtent = 1.0
+
     /// The ellipse inscribed in the box from `start` to `end`, as four cubic
     /// quarters with the box's edge midpoints as the polyline fallback; nil
-    /// when the box has no area or a coordinate is not finite.
+    /// when the box is narrower or shorter than `minimumEllipseExtent` or a
+    /// coordinate is not finite.
     /// Stopgap until FlareCore's `Shape.ellipse(in:)` (qbtrix/creative-core#182)
     /// lands; then this returns that builder's shape.
     public static func ellipse(from start: Point, to end: Point) -> FlareShape? {
-        let rx = abs(end.x - start.x) / 2, ry = abs(end.y - start.y) / 2
-        guard rx.isFinite, ry.isFinite, rx > 0, ry > 0 else { return nil }
+        let width = abs(end.x - start.x), height = abs(end.y - start.y)
+        guard width.isFinite, height.isFinite,
+            width >= minimumEllipseExtent, height >= minimumEllipseExtent
+        else { return nil }
+        let rx = width / 2, ry = height / 2
         let c = Point(x: (start.x + end.x) / 2, y: (start.y + end.y) / 2)
         let k = 0.5522847498  // a quarter circle's control distance, as a fraction of the radius
         // The unit circle at 0°, 90°, 180°, 270° and back to 0°.
