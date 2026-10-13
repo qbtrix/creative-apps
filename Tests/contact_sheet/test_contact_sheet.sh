@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 # Tests/contact_sheet/test_contact_sheet.sh: fixture test for
 # scripts/contact-sheet. A fake ui-screens folder (two empty step PNGs, one
-# audit report, an xcresult manifest), a baseline and a perf report go in; the
-# page must list both steps in journey order, show and escape the violation,
+# audit report, an xcresult manifest listing newest first, as the real one
+# does), a baseline and a perf report go in; the page must list both steps in
+# capture order, show and escape the violation,
 # count distinct violations the way AppAudit.Tally does (one ↑, one ↓, one =),
 # inline the perf line, and write the step summary. A second run without the
 # manifest falls back to name order. No network; needs bash and jq.
@@ -32,9 +33,9 @@ cat >"$s/audit-photo-opened.json" <<'JSON'
 JSON
 cat >"$s/manifest.json" <<'JSON'
 [ { "testIdentifier": "PhotoJourneyTests/testOpenImage()", "attachments": [
-      { "exportedFileName": "a.png", "suggestedHumanReadableName": "photo-opened_0_0A1B-2C.png" },
-      { "exportedFileName": "b.json", "suggestedHumanReadableName": "audit-photo-opened_0_3D.json" },
-      { "exportedFileName": "c.png", "suggestedHumanReadableName": "photo-launch_1_4E5F.png" } ] } ]
+      { "exportedFileName": "c.png", "suggestedHumanReadableName": "photo-launch_1_4E5F.png", "timestamp": 20.5 },
+      { "exportedFileName": "b.json", "suggestedHumanReadableName": "audit-photo-opened_0_3D.json", "timestamp": 10.5 },
+      { "exportedFileName": "a.png", "suggestedHumanReadableName": "photo-opened_0_0A1B-2C.png", "timestamp": 10 } ] } ]
 JSON
 echo '{ "photo": { "identifier": 2, "overlap": 1 } }' >"$tmp/baseline.json"
 echo 'BRUSH-LATENCY config=debug drag p50 0.6 p95 2.3 | budget p50 drag <= 3.0' >"$tmp/snaps/photo-brush-latency.txt"
@@ -49,7 +50,7 @@ GITHUB_STEP_SUMMARY="$tmp/summary.md" GITHUB_RUN_ID=42 GITHUB_SHA=0123456789abcd
 page="$s/contact-sheet.html"
 has "first step, relative image" "$page" '<a href="photo-opened.png"><img src="photo-opened.png"'
 has "second step" "$page" '<img src="photo-launch.png"'
-has "journey order from the manifest" "$page" '<h3>PhotoJourneyTests/testOpenImage()</h3><div class="grid"><figure class="flag"><a href="photo-opened.png">'
+has "steps in timestamp order (the manifest lists newest first)" "$page" '<h3>PhotoJourneyTests/testOpenImage()</h3><div class="grid"><figure class="flag"><a href="photo-opened.png">'
 has "violation shown" "$page" '<li><b>identifier</b> button '
 has "violation escaped" "$page" 'Undo &lt;all&gt;'  # the quotes become &apos; or &#39; by jq version
 has "violation summary" "$page" '4 violations: identifier 3, unnamed 1'

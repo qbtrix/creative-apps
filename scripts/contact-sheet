@@ -59,13 +59,14 @@ def h: tostring | @html;
 | ([$pngs[] | app] + [$audits[].app] + ($base | keys) | unique) as $apps
 | ([$base[] | keys[]] + [$audits[] | (.counts // {} | keys[]), .violations[]?.check] | unique) as $checks
 | (if ($manifest[0] | type) == "array" then $manifest[0] else null end) as $m
-# Journeys: one per test in the manifest, its PNG steps in capture order.
-| [ ($m // [])[]
-    | {test: (.testIdentifier // .testName // .identifier // "journey" | tostring),
-       steps: ([.attachments[]? | .suggestedHumanReadableName // "" | select(endswith(".png"))
+# Journeys: one per test in the manifest, its PNG steps in capture order. The
+# manifest lists attachments newest first, so both sort by timestamp.
+| ([ ($m // [])[] | (.attachments // [] | sort_by(.timestamp // 0)) as $shots
+    | {test: (.testIdentifier // "journey" | tostring), t: ($shots[0].timestamp // 0),
+       steps: ([$shots[] | .suggestedHumanReadableName // "" | select(endswith(".png"))
                 | sub("_[0-9]+_[0-9A-Fa-f-]+\\.png$"; "") | sub("\\.png$"; "")
                 | select(IN($pngs[]))] | uniq)}
-    | select(.steps | length > 0) ] as $journeys
+    | select(.steps | length > 0) ] | sort_by(.t)) as $journeys
 | def tally($a): [$audits[] | select(.app == $a) | .violations[]? | {check, k: key}] | unique
     | group_by(.check) | map({key: .[0].check, value: length}) | from_entries;
   def cells($a): tally($a) as $t | $checks | map(
@@ -132,7 +133,7 @@ css=':root{color-scheme:light dark;--bg:#fff;--fg:#1d1d1f;--muted:#6e6e73;--line
 @media (prefers-color-scheme:dark){:root{--bg:#161618;--fg:#f5f5f7;--muted:#98989d;--line:#3a3a3c;--card:#232326;--bad:#ff8a80;--badbg:#3a1f1d;--ok:#7ee2a8}}
 body{margin:0 auto;max-width:1440px;padding:16px;background:var(--bg);color:var(--fg);font:14px/1.45 -apple-system,BlinkMacSystemFont,system-ui,sans-serif}
 a{color:inherit}h1{margin:0 0 4px}h2{margin:32px 0 8px;padding-bottom:4px;border-bottom:1px solid var(--line);text-transform:capitalize}
-h3{margin:16px 0 8px;font-size:14px;color:var(--muted);font-weight:600}.meta,.muted,caption{color:var(--muted)}
+h3{margin:16px 0 8px;font-size:14px;color:var(--muted);font-weight:600}.meta,.muted,caption{color:var(--muted)}.meta{overflow-wrap:anywhere}
 table{border-collapse:collapse;margin:8px 0;display:block;overflow-x:auto}caption{text-align:left;padding-bottom:4px}
 th,td{border:1px solid var(--line);padding:4px 8px;text-align:right;white-space:nowrap}th{text-align:left}
 .budgets td{text-align:left;white-space:normal}.up{color:var(--bad);background:var(--badbg)}.down{color:var(--ok)}.new{color:var(--muted)}
