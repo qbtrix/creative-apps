@@ -24,6 +24,8 @@ struct PhotoEditor: View {
     var onViewport: @MainActor (CGSize) -> Void = { _ in }
     var onZoom: @MainActor (Double) -> Void = { _ in }
     var perform: PhotoPerform = { _ in }
+    /// The Straighten sheet's choices while it is open, previewed on the canvas.
+    var straighten: StraightenDraft?
 
     var body: some View {
         EditorShell {
@@ -31,7 +33,9 @@ struct PhotoEditor: View {
         } rail: {
             ToolbarGroup(tools: PhotoTool.allCases, selected: model.tool, style: .rail) { perform(.tool($0)) }
         } canvas: {
-            PhotoCanvas(model: model, image: image, zoom: zoom, onViewport: onViewport, onZoom: onZoom, perform: perform)
+            PhotoCanvas(
+                model: model, image: image, zoom: zoom, onViewport: onViewport, onZoom: onZoom, perform: perform,
+                straighten: straighten)
                 .scrollIndicators(.never)
         } panel: {
             PhotoPanel(model: model, tab: tab, onTab: onTab, perform: perform)
@@ -117,6 +121,7 @@ struct PhotoImageMenu: View {
         Button("Rotate 90° Clockwise") { perform(.rotate(.degrees90)) }
         Button("Rotate 90° Counterclockwise") { perform(.rotate(.degrees270)) }
         Button("Rotate 180°") { perform(.rotate(.degrees180)) }
+        Button("Straighten…") { perform(.straighten) }
     }
 }
 
@@ -124,7 +129,8 @@ struct PhotoImageMenu: View {
 /// a pending crop over it, or the empty state. Drags go to the active tool;
 /// with the canvas focused, V M B E C pick tools, Delete clears the selection
 /// (Shift-Delete fills it), Return applies a crop and Escape cancels it or
-/// deselects. Dropping an image file opens it.
+/// deselects. Dropping an image file opens it. While the Straighten sheet is
+/// open the picture turns by its angle under StraightenMarks.
 struct PhotoCanvas: View {
     let model: PhotoWorkspace
     let image: CGImage?
@@ -132,6 +138,7 @@ struct PhotoCanvas: View {
     var onViewport: @MainActor (CGSize) -> Void = { _ in }
     var onZoom: @MainActor (Double) -> Void = { _ in }
     var perform: PhotoPerform = { _ in }
+    var straighten: StraightenDraft?
 
     var body: some View {
         Group {
@@ -143,10 +150,16 @@ struct PhotoCanvas: View {
                 ) {
                     if let image {
                         Image(decorative: image, scale: 1).resizable().interpolation(zoom >= 2 ? .none : .high)
+                            .rotationEffect(.degrees(straighten?.degrees ?? 0))
                     }
                 } overlay: {
                     if let selection = model.selection { SelectionOutline(rect: selection.cgRect, zoom: zoom) }
                     if let crop = model.pendingCrop { CropShade(rect: crop.cgRect, documentSize: size, zoom: zoom) }
+                    if let straighten,
+                        let frame = model.straightenFrame(degrees: straighten.degrees, cropToFit: straighten.cropToFit)
+                    {
+                        StraightenMarks(frame: frame, cropToFit: straighten.cropToFit, zoom: zoom)
+                    }
                 }
             } else {
                 EmptyStateView(

@@ -1,6 +1,7 @@
 // PhotoStraightenTests.swift: Image > Straighten, turning every layer by a
 // small angle with or without Crop to Fit, its one undo step, the angles it
-// ignores, and the frame the sheet previews. Runs on Linux and macOS.
+// ignores, a stale result it refuses to commit, and the frame the sheet
+// previews. Runs on Linux and macOS.
 import CoreRaster
 import PhotoModel
 import Testing
@@ -72,6 +73,30 @@ import Testing
         #expect(workspace.layers == before.layers)
         #expect(workspace.pixels == before.pixels)
         #expect(workspace.undoActionName == before.undoActionName)
+    }
+
+    @Test func aResultWorkedOutBeforeAnotherEditIsIgnored() throws {
+        var workspace = try whiteImage(64, 48)
+        let early = try #require(try workspace.straightened(degrees: 5, cropToFit: true))
+        workspace.addLayer()
+        let before = workspace
+        let earlyCommitted = workspace.commitStraighten(early)
+        #expect(!earlyCommitted)
+        #expect(workspace == before)
+
+        // A rename moves no revision, so the layer list catches it.
+        let renamed = try #require(try workspace.straightened(degrees: 5, cropToFit: true))
+        workspace.renameLayer(try #require(workspace.selectedLayerID), to: "Sky")
+        let renamedCommitted = workspace.commitStraighten(renamed)
+        #expect(!renamedCommitted)
+        #expect(workspace.canvas == CanvasSize(width: 64, height: 48))
+        #expect(workspace.undoActionName == "Undo Rename Layer")
+
+        let fresh = try #require(try workspace.straightened(degrees: 5, cropToFit: true))
+        let freshCommitted = workspace.commitStraighten(fresh)
+        #expect(freshCommitted)
+        #expect(workspace.canvas == CanvasSize(width: 51, height: 38))
+        #expect(workspace.undoActionName == "Undo Straighten")
     }
 
     @Test(arguments: [0, Double.nan, Double.infinity, 45.5, -60])

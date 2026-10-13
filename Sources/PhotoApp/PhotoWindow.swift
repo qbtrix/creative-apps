@@ -1,8 +1,9 @@
 // PhotoWindow.swift: the root of a Photo window. It holds the one
 // PhotoWorkspace (`model`) and the window's presentation state (zoom, the
-// panel tab, the open file's URL, sheets and alerts), turns every PhotoIntent
-// into a workspace method or a panel, and keeps the picture rendered
-// (CanvasRenderer) whenever the workspace's revision moves. Canvas drags carry
+// panel tab, the open file's URL, sheets and alerts, the Straighten draft the
+// canvas previews), turns every PhotoIntent into a workspace method or a
+// panel, and keeps the picture rendered (CanvasRenderer) whenever the
+// workspace's revision moves. Canvas drags carry
 // the pen's pressure (PointerPressure) and, while they last, AppKit's mouse
 // event coalescing is off so every pointer sample arrives. Files go through
 // ImageIOCodec; the open and save panels are AppKit's. Two launch arguments
@@ -30,6 +31,8 @@ struct PhotoWindow: View {
     @State private var exportFormat = ImageFormat.png
     @State private var exportQuality = 0.9
     @State private var isResizing = false
+    /// The Straighten sheet's choices; nil while it is closed.
+    @State private var straightenDraft: StraightenDraft?
     @State private var isRenaming = false
     @State private var renameText = ""
 
@@ -40,7 +43,7 @@ struct PhotoWindow: View {
         PhotoEditor(
             model: model, image: renderer.image, renderMilliseconds: renderer.milliseconds,
             note: renderer.failure ?? note, zoom: zoom, tab: tab,
-            onTab: { tab = $0 }, onViewport: viewportChanged, onZoom: setZoom, perform: perform)
+            onTab: { tab = $0 }, onViewport: viewportChanged, onZoom: setZoom, perform: perform, straighten: straightenDraft)
             .navigationTitle(model.documentName ?? (model.canvas == nil ? "Photo" : "Untitled"))
             .focusedSceneValue(\.photoMenu, PhotoMenu(model: model, perform: perform))
             .onChange(of: model.revision) { renderer.show(model) }
@@ -56,6 +59,15 @@ struct PhotoWindow: View {
             .sheet(isPresented: $isResizing) {
                 if let canvas = model.canvas {
                     ImageSizeSheet(size: canvas, onResize: resize, onCancel: { isResizing = false })
+                }
+            }
+            .sheet(isPresented: Binding(get: { straightenDraft != nil }, set: { if !$0 { straightenDraft = nil } })) {
+                if let draft = straightenDraft {
+                    StraightenSheet(
+                        draft: draft, frame: model.straightenFrame(degrees: draft.degrees, cropToFit: draft.cropToFit),
+                        onDraft: { straightenDraft = $0 },
+                        onApply: { perform(.applyStraighten(degrees: draft.degrees, cropToFit: draft.cropToFit)) },
+                        onCancel: { straightenDraft = nil })
                 }
             }
             .alert("Rename Layer", isPresented: $isRenaming) {
@@ -84,6 +96,8 @@ struct PhotoWindow: View {
         case .export: isExporting = model.canvas != nil
         case .imageSize: isResizing = model.canvas != nil
         case .rotate(let turn): model.rotateImage(turn)
+        case .straighten: straightenDraft = model.canvas == nil ? nil : StraightenDraft()
+        case .applyStraighten(let degrees, let cropToFit): straighten(degrees: degrees, cropToFit: cropToFit)
         case .undo: model.undo()
         case .redo: model.redo()
         case .tool(let tool): model.selectTool(tool)
@@ -220,6 +234,28 @@ struct PhotoWindow: View {
             try model.resizeImage(width: width, height: height)
         } catch {
             problem = "The image can't be resized to \(width) × \(height). \(Self.reason(error))"
+        }
+    }
+
+    /// Turns the layers off the main actor (seconds on a big photo), then
+    /// commits them unless the image changed meanwhile.
+    private func straighten(degrees: Double, cropToFit: Bool) {
+        straightenDraft = nil
+        let workspace = model
+        note = "Straightening…"
+        Task {
+            do {
+                let result = try await Task.detached(priority: .userInitiated) {
+                    try workspace.straightened(degrees: degrees, cropToFit: cropToFit)
+                }.value
+                note = nil
+                if let result, !model.commitStraighten(result) {
+                    note = "The image changed while straightening, so it wasn't turned."
+                }
+            } catch {
+                note = nil
+                problem = "The image can't be straightened by \(degrees)°. \(Self.reason(error))"
+            }
         }
     }
 

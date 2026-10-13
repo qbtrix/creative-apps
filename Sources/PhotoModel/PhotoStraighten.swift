@@ -6,7 +6,10 @@
 // corners); without it the canvas grows to the turned bounds. Like Rotate and
 // Image Size, it keeps every layer pixel, including those now off the canvas.
 // One undo step keeping the whole stack; it drops the selection and a pending
-// crop. Angle 0, a non-finite angle or one out of range changes nothing.
+// crop. Angle 0, a non-finite angle or one out of range changes nothing. The
+// turn is slow on a big photo (seconds with lanczos3), so `straightened` works
+// it out without changing anything, off the main actor, and
+// `commitStraighten` applies it unless the image changed meanwhile.
 // `straightenFrame` is the same arithmetic without the pixels, for the sheet's
 // preview and its "new size" line.
 // Invariant: `turnedSize` computes exactly what rotated(degrees:filter:) gives
@@ -39,6 +42,16 @@ public struct StraightenFrame: Sendable, Hashable {
     }
 }
 
+/// A straighten worked out by `PhotoWorkspace.straightened`, waiting for
+/// `commitStraighten`.
+public struct StraightenResult: Sendable {
+    /// The workspace's revision and layer list it was worked out from.
+    let revision: Int
+    let layers: [PhotoLayer]
+    /// The turned image.
+    let stack: PhotoStack
+}
+
 extension PhotoWorkspace {
     /// The angles Straighten accepts, in degrees clockwise.
     public static let straightenRange: ClosedRange<Double> = -45...45
@@ -56,12 +69,20 @@ extension PhotoWorkspace {
             canvas: canvas, turned: turned, crop: PixelRect(x: crop.x, y: crop.y, width: crop.width, height: crop.height))
     }
 
-    /// Turns the whole image clockwise by `degrees`. Ignores no image, 0, or an
-    /// angle `straightenFrame` rejects. Throws `RasterError` when CoreRaster
-    /// can't turn a layer (a turned size over its pixel limit); the workspace
-    /// is then unchanged.
+    /// Turns the whole image clockwise by `degrees` at once: `straightened`,
+    /// then `commitStraighten`. Ignores no image, 0, or an angle
+    /// `straightenFrame` rejects. Throws `RasterError` when CoreRaster can't
+    /// turn a layer (a turned size over its pixel limit); the workspace is
+    /// then unchanged.
     public mutating func straighten(degrees: Double, cropToFit: Bool) throws {
-        guard degrees != 0, let canvas, let frame = straightenFrame(degrees: degrees, cropToFit: cropToFit) else { return }
+        guard let result = try straightened(degrees: degrees, cropToFit: cropToFit) else { return }
+        commitStraighten(result)
+    }
+
+    /// The image turned by `degrees`, worked out without changing anything,
+    /// so it can run off the main actor; nil where `straighten` does nothing.
+    public func straightened(degrees: Double, cropToFit: Bool) throws -> StraightenResult? {
+        guard degrees != 0, let canvas, let frame = straightenFrame(degrees: degrees, cropToFit: cropToFit) else { return nil }
         let radians = degrees * Double.pi / 180
         let (c, s) = (cos(radians), sin(radians))
         var turned = stackState
@@ -80,9 +101,22 @@ extension PhotoWorkspace {
         }
         turned.canvas = frame.size
         turned.selection = nil
+        return StraightenResult(revision: revision, layers: layers, stack: turned)
+    }
+
+    /// Makes `result` the image, as one "Straighten" undo step, and returns
+    /// true. A result worked out before another change (the revision or the
+    /// layer list moved since) or arriving mid-drag is stale: it returns
+    /// false and changes nothing.
+    @discardableResult
+    public mutating func commitStraighten(_ result: StraightenResult) -> Bool {
+        guard stroke == nil, result.revision == revision, result.layers == layers else { return false }
+        var stack = result.stack
+        stack.selectedLayerID = selectedLayerID
         record(.stack(stackState), named: "Straighten")
-        restore(turned)
+        restore(stack)
         touch(.all)
+        return true
     }
 
     /// The size rotated(degrees:filter:) gives a `canvas`-sized buffer: its

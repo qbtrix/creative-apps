@@ -1,8 +1,8 @@
 // PhotoCommands.swift: Photo's menu bar. File: New Image, Open…, Save,
 // Export…; Edit: Undo and Redo named for the edit, Delete Selection, Fill
-// Selection; Select: All, Deselect; Image: Image Size… and Rotate; Layer:
-// New, Delete, Rename…, Show/Hide, Bring Forward, Send Backward, Select Layer
-// Above and Below; View: Zoom In, Zoom Out, Fit on Screen.
+// Selection; Select: All, Deselect; Image: Image Size…, Rotate, Straighten…;
+// Layer: New, Delete, Rename…, Show/Hide, Bring Forward, Send Backward, Select
+// Layer Above and Below; View: Zoom In, Zoom Out, Fit on Screen.
 // The focused window publishes a PhotoMenu (what can run now, and where to
 // send it) as a focused scene value; an item that can't run is disabled, never
 // hidden. Every top bar command is here too.
