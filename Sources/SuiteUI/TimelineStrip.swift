@@ -126,10 +126,19 @@ public struct TimelineStrip<ID: Hashable & Sendable>: View {
                 ticks.move(to: CGPoint(x: x, y: size.height * (labels.contains(frame) ? 0.4 : 0.7)))
                 ticks.addLine(to: CGPoint(x: x, y: size.height))
             }
-            for frame in marks.labels {
-                let x = tickX(mapping, frame)
-                let label = Text("\(frame)").font(SuiteFont.caption).foregroundStyle(SuiteColor.secondaryText)
-                context.draw(label, at: CGPoint(x: x + SuiteSpacing.xxs, y: 0), anchor: .topLeading)
+            // A label past the strip's trailing edge ends at its tick instead (#61).
+            let placed = mapping.rulerLabels(
+                marks.labels, digitWidth: Double(SuiteSize.timelineLabelDigit),
+                padding: Double(SuiteSpacing.xxs), trailingRoom: Double(SuiteSpacing.xl - timelineInset)
+            )
+            for placement in placed {
+                let x = tickX(mapping, placement.frame)
+                let label = Text("\(placement.frame)").font(SuiteFont.caption).foregroundStyle(SuiteColor.secondaryText)
+                if placement.endsAtTick {
+                    context.draw(label, at: CGPoint(x: x - SuiteSpacing.xxs, y: 0), anchor: .topTrailing)
+                } else {
+                    context.draw(label, at: CGPoint(x: x + SuiteSpacing.xxs, y: 0), anchor: .topLeading)
+                }
             }
             ticks.move(to: CGPoint(x: 0, y: size.height))
             ticks.addLine(to: CGPoint(x: size.width, y: size.height))
