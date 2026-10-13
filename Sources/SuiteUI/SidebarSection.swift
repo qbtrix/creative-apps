@@ -2,7 +2,9 @@
 // an optional add button in its header, and SidebarNode, the row SuiteWindow
 // draws for an item: a SidebarRow, nested in a disclosure group when the item
 // has children. Nesting stops at two levels: deeper rows draw flat at the
-// second. Selection stays one SidebarItem.ID across every section.
+// second. Selection stays one SidebarItem.ID across every section. A header's
+// title is SuiteColor.textSecondary: the sidebar style's own header gray is
+// about 2.2:1 on the sidebar, under the 4.5:1 the app audit asks for.
 import SwiftUI
 
 public struct SidebarSection: Identifiable {
@@ -26,7 +28,7 @@ struct SidebarSectionHeader: View {
 
     var body: some View {
         HStack {
-            Text(section.title)
+            Text(section.title).foregroundStyle(SuiteColor.textSecondary)
             Spacer(minLength: SuiteSpacing.s)
             if let add = section.addAction {
                 Button(action: add.perform) {
