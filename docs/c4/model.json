@@ -49,7 +49,7 @@
               {
                 "id": "flare-app-sources",
                 "name": "FlareApp sources",
-                "description": "The Flare app (2D animation): the SwiftUI App scene and views in Sources/FlareApp, built from SuiteUI.",
+                "description": "The Flare app (2D animation): the SwiftUI App scene, its menu bar (FlareCommands) and views in Sources/FlareApp, including the easing inspector on the live FlareWorkspace, built from SuiteUI.",
                 "technology": "Swift 6, SwiftUI, macOS 26",
                 "paths": [
                   "Sources/FlareApp/"

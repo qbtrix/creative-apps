@@ -1,8 +1,12 @@
 // FlareApp.swift: Flare, the 2D animation app. The window is SuiteWindow with
-// scenes and layers in the sidebar, FlareCanvas as content and the selected
-// scene's summary in the inspector. A palette tool that doesn't work yet shows
-// disabled with FlareTool.unavailableHelp as its tooltip. Views only read FlareWorkspace and call its
-// methods; all state lives in FlareModel (scripts/ci checks this).
+// scenes and layers in the sidebar, FlareCanvas as content and, in the
+// inspector, the selected scene's summary and, while a layer is selected, the
+// easing editor (FlareEasingInspector on the live FlareWorkspace). New Sample
+// Animation (toolbar and File menu) opens a keyed document to edit; the menus
+// in FlareCommands reach the window through a focused scene value. A palette
+// tool that doesn't work yet shows disabled with FlareTool.unavailableHelp as
+// its tooltip. Views only read FlareWorkspace and call its methods; all state
+// lives in FlareModel (scripts/ci checks this).
 import FlareModel
 import SuiteUI
 import SwiftUI
@@ -11,6 +15,8 @@ import SwiftUI
 struct FlareApp: App {
     var body: some Scene {
         WindowGroup { FlareWindow() }
+            .defaultSize(width: 1280, height: 820)
+            .commands { FlareCommands() }
     }
 }
 
@@ -33,6 +39,7 @@ struct FlareWindow: View {
             onRename: { id, name in model.renameLayer(id, to: name) },
             actions: [
                 ToolbarAction("New Animation", systemImage: "plus") { model.newDocument() },
+                ToolbarAction("New Sample Animation", systemImage: "wand.and.stars") { model.newSampleAnimation() },
                 // Acts only with a layer selected; ToolbarAction has no disabled state yet (#85).
                 ToolbarAction("Delete Layer", systemImage: "trash") {
                     if let id = model.selectedLayerID { model.removeLayer(id) }
@@ -41,16 +48,29 @@ struct FlareWindow: View {
         ) {
             FlareCanvas(model: model, onNew: { model.newDocument() }, onTool: { model.selectTool($0) })
         } inspector: {
-            if let error = model.layerError {
-                Label(error.message, systemImage: "exclamationmark.triangle")
-                    .foregroundStyle(SuiteColor.secondaryText)
-            }
-            if let scene = model.selectedScene {
-                SurfaceCard(title: scene.name, detail: "\(Int(scene.width)) × \(Int(scene.height)) pt · \(scene.fps) fps")
-            } else {
-                EmptyStateView("No Selection", systemImage: "film", message: "Select a scene to see its properties.")
+            VStack(alignment: .leading, spacing: SuiteSpacing.s) {
+                if let error = model.layerError {
+                    Label(error.message, systemImage: "exclamationmark.triangle")
+                        .foregroundStyle(SuiteColor.secondaryText)
+                }
+                if let scene = model.selectedScene {
+                    SurfaceCard(title: scene.name, detail: "\(Int(scene.width)) × \(Int(scene.height)) pt · \(scene.fps) fps")
+                    if model.selectedLayerID != nil {
+                        FlareEasingInspector(
+                            editor: model, onSelect: { model.selectEasingSegment($0) },
+                            onPreset: { model.setEasingPreset($0) }, onMoveHandle: { model.moveEasingHandle($0, to: $1) },
+                            onEndDrag: { model.endEasingHandleDrag() })
+                    }
+                } else {
+                    EmptyStateView("No Selection", systemImage: "film", message: "Select a scene to see its properties.")
+                }
             }
         }
+        .focusedSceneValue(
+            \.flareMenu,
+            FlareMenu(
+                model: model, newSample: { model.newSampleAnimation() }, undo: { model.undo() },
+                redo: { model.redo() }))
     }
 }
 
