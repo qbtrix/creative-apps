@@ -2,8 +2,9 @@
 // sideways to change the value (one step per point; Shift is ten steps,
 // Option a tenth), click it to type an exact number, Return or a click away to
 // commit, Escape to cancel. Up and Down arrows nudge by one step when it has
-// keyboard focus. At rest it is a Text on a flat field well, so snapshots draw
-// it. Values out through `onChange` only, already clamped (ScrubValue,
+// keyboard focus. It shows `decimals` places (NumericInput.format): whole for
+// percent and degrees, one for pixels and EV. At rest it is a Text on a flat
+// field well, so snapshots draw it. Values out through `onChange` only, already clamped (ScrubValue,
 // NumericInput); the Model clamps again. Owns presentation state only: the
 // typed draft and the drag anchor.
 import AppKit
@@ -15,6 +16,7 @@ public struct ScrubField: View {
     private let range: ClosedRange<Double>
     private let step: Double
     private let unit: String
+    private let decimals: Int
     private let onChange: @MainActor (Double) -> Void
     @State private var draft: String?
     @State private var anchor: (value: Double, x: CGFloat, multiplier: Double)?
@@ -23,16 +25,18 @@ public struct ScrubField: View {
 
     /// `label` names the field for VoiceOver and the typing field; it is not
     /// drawn (InspectorRow draws the label). `step` defaults to
-    /// ScrubValue.defaultStep(for: range).
+    /// ScrubValue.defaultStep(for: range). `decimals` is how many places it
+    /// shows; typing may still give more.
     public init(
         _ label: String, value: Double, in range: ClosedRange<Double>, step: Double? = nil, unit: String = "",
-        onChange: @escaping @MainActor (Double) -> Void
+        decimals: Int = 2, onChange: @escaping @MainActor (Double) -> Void
     ) {
         self.label = label
         self.value = value
         self.range = range
         self.step = step ?? ScrubValue.defaultStep(for: range)
         self.unit = unit
+        self.decimals = decimals
         self.onChange = onChange
     }
 
@@ -48,7 +52,7 @@ public struct ScrubField: View {
                     .onExitCommand { draft = nil }
                     .onChange(of: isTyping) { _, typing in if !typing { commit() } }
             } else {
-                Text(NumericInput.format(value)).frame(maxWidth: .infinity, alignment: .trailing)
+                Text(NumericInput.format(value, decimals: decimals)).frame(maxWidth: .infinity, alignment: .trailing)
             }
             if !unit.isEmpty {
                 Text(unit).foregroundStyle(SuiteColor.secondaryText)
@@ -79,11 +83,13 @@ public struct ScrubField: View {
         .help(label)
         .accessibilityElement(children: draft == nil ? .ignore : .contain)
         .accessibilityLabel(label)
-        .accessibilityValue(unit.isEmpty ? NumericInput.format(value) : "\(NumericInput.format(value)) \(unit)")
+        .accessibilityValue(unit.isEmpty ? shown : "\(shown) \(unit)")
         .accessibilityAdjustableAction { direction in
             _ = nudge(direction == .increment ? 1 : direction == .decrement ? -1 : 0)
         }
     }
+
+    private var shown: String { NumericInput.format(value, decimals: decimals) }
 
     /// A press that moves 2 points sideways starts a scrub from there; one
     /// that doesn't is a click and opens the typing field. A modifier change

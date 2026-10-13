@@ -1,8 +1,7 @@
 // SuiteSidebarSnapshots.swift: SidebarRows with toggles, a count, one
 // nested row and a renamable row with no rename active, Light and Dark. The
-// sidebar List is AppKit-backed and does not render in ImageRenderer, so the
 // rows sit in a VStack with the child indented the way the list's disclosure
-// group nests it. macOS only.
+// group nests it, so the shot shows the rows themselves. macOS only.
 import SuiteUI
 import SwiftUI
 import Testing

@@ -1,8 +1,7 @@
 // PhotoAdjustmentsSnapshots.swift: Photo's adjustments inspector with
 // Exposure at +1 and the other sections at their defaults, at the inspector's
 // ideal width, in Light and Dark. Writes photo-adjustments-light.png and
-// photo-adjustments-dark.png. ImageRenderer may draw the sliders and switches
-// as placeholders; the labels and layout still show. macOS only.
+// photo-adjustments-dark.png. macOS only.
 import PhotoModel
 import SuiteUI
 import SwiftUI
