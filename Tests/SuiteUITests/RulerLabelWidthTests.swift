@@ -43,7 +43,7 @@ private func smallestGap(_ mapping: FrameMapping, _ labels: [Int]) -> Double {
 
 /// The step between consecutive labels, or nil with fewer than two.
 private func labelStep(_ labels: [Int]) -> Int? {
-    zip(labels, labels.dropFirst()).first.map { $1 - $0 }
+    labels.count < 2 ? nil : labels[1] - labels[0]
 }
 
 @Test func rulerLabelStepHoldsWhileScrollingPastADigitBoundary() {
