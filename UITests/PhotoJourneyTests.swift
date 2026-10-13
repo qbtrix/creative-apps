@@ -10,9 +10,9 @@
 // the audit knows. Another journey edits with every other tool,
 // one straightens the image by 3 degrees from the Image menu, and the Curves
 // journey drags the curve up and nudges it with an arrow key, each one
-// "Undo Curves" step that changes the canvas. A section off its defaults shows
-// Reset over its header (the audit's overlap check), so Curves, Levels and
-// Hue/Saturation edits are undone before their shots. The Save As journey (to the
+// "Undo Curves" step that changes the canvas. Curves, Levels and
+// Hue/Saturation are shot right after their edits, then undone back to their
+// defaults. The Save As journey (to the
 // folder given with -PhotoSaveTo, so no save panel) checks the window then
 // holds the copy and Save writes it, and that Command-1 shows 100%. The
 // history journey pans by scroll and by arrow key, and checks a brush drag
@@ -45,14 +45,13 @@ final class PhotoJourneyTests: XCTestCase {
         let canvas = photo.element("suite.canvas")
         let before = canvas.screenshot().pngRepresentation
 
-        // No shot while Curves is off its defaults: its Reset icon sits over the
-        // section header (the audit's overlap check), so Command-Z comes first.
-        photo.drag(on: "photo.curves", from: CGVector(dx: 0.5, dy: 0.5), to: CGVector(dx: 0.5, dy: 0.25))
+        photo.drag(on: "photo.curves", from: CGVector(dx: 0.5, dy: 0.5), to: CGVector(dx: 0.5, dy: 0.25), step: "curves-dragged")
         XCTAssert(photo.app.buttons["Undo Curves"].waitForExistence(timeout: 5), "the curve drag made no Curves step")
         XCTAssert(Self.waitUntil { canvas.screenshot().pngRepresentation != before }, "the curve didn't change the canvas")
 
         // The drag left the curve focused on its new point: an arrow nudges it, as its own step.
         photo.app.typeKey(.upArrow, modifierFlags: [])
+        photo.shot("curves-nudged")
         photo.click("Undo Curves", in: .window)
         XCTAssert(photo.app.buttons["Redo Curves"].waitForExistence(timeout: 5), "the nudge made no Curves step")
         XCTAssert(photo.app.buttons["Undo Curves"].exists, "the nudge and the drag were one undo step")
@@ -345,11 +344,11 @@ final class PhotoJourneyTests: XCTestCase {
         expect("Undo Exposure", photo, "typing 1 into Exposure made no Exposure step")
         photo.shot("tone-exposure-typed")
 
-        // A section off its defaults shows Reset over its header (audit overlap), so Levels and Hue/Saturation undo before their shots.
         var before = canvasPixels(photo)
         drag("Black", by: 0.25, photo)
         expect("Undo Levels", photo, "dragging Black made no Levels step")
         XCTAssert(canvasChanged(from: before, photo), "dragging Black didn't change the picture")
+        photo.shot("tone-levels")
         undoToDefaults("Levels", photo)
         photo.shot("tone-levels-undone")
 
@@ -363,6 +362,7 @@ final class PhotoJourneyTests: XCTestCase {
         before = canvasPixels(photo)
         typeValue("-80", into: "Saturation", photo)
         XCTAssert(canvasChanged(from: before, photo), "typing -80 into Saturation didn't change the picture")
+        photo.shot("tone-hue-saturation")
         undoToDefaults("Hue/Saturation", photo)
         photo.shot("tone-hue-saturation-undone")
     }
