@@ -3,7 +3,8 @@
 # PNGs uploaded as the `snapshots` artifact and the five release .app bundles
 # from scripts/bundle-apps as the `app-builds` artifact, a tarball inside so
 # the executables keep their +x bit, then the UI journeys on those bundles with
-# their whole-window PNGs as the `ui-screens` artifact).
+# their whole-window PNGs as the `ui-screens` artifact, with contact-sheet.html,
+# the one page to review per run, inside it).
 #
 # Branch model: crew PRs merge into dev through the fast lane with no CI of
 # their own; the worker's local scripts/ci (Models and lint, since SwiftUI
@@ -102,6 +103,13 @@ jobs:
       - run: sudo automationmodetool enable-automationmode-without-authentication
       - id: ui
         run: scripts/ui-test
+      # The page to review: every journey step with its audit, each app's
+      # audit counts against the baseline and the perf reports, written into
+      # ui-screens, plus a short table in the job summary. Runs when a journey
+      # failed too, since that's when the sheet matters most.
+      - name: Contact sheet
+        if: always() && steps.ui.outcome != 'skipped'
+        run: scripts/contact-sheet
       - name: Upload UI screens
         if: always() && steps.ui.outcome != 'skipped'
         uses: actions/upload-artifact@v4
