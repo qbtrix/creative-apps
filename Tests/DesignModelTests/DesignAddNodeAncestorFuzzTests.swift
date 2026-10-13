@@ -78,7 +78,7 @@ private func ids(_ nodes: [DesignNode]) -> [String] { nodes.flatMap { [$0.id] + 
     #expect(workspace.expandedNodeIDs == [frame, group])
     #expect(!workspace.isExpanded("node-1"))
     #expect(!workspace.isExpanded(firstGroup))
-    #expect(workspace.layerRows.map(\.id) == [frame, group, added])
+    #expect(workspace.layerRows.map(\.id) == [frame, group, added, "node-3"])
 }
 
 @Test func addingUnderAHiddenCollapsedContainerStillShowsTheRow() throws {

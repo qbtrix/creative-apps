@@ -47,8 +47,8 @@ public struct PhotoWorkspace: Sendable {
     public internal(set) var documentName: String?
     /// The layer stack, top first.
     public internal(set) var layers: [PhotoLayer] = []
-    /// Each layer's pixels, by layer id.
-    public internal(set) var pixels: [PhotoLayer.ID: PixelBuffer] = [:]
+    /// Each layer's pixels, by layer id, in tiles (TiledPixels).
+    public internal(set) var pixels: [PhotoLayer.ID: TiledPixels] = [:]
     public internal(set) var selectedLayerID: PhotoLayer.ID?
     public private(set) var tool: PhotoTool = .move
     public private(set) var toolOptions = ToolOptions()
@@ -83,12 +83,12 @@ public struct PhotoWorkspace: Sendable {
     /// adjustments and an empty history. Layer ids keep counting. Throws
     /// `RasterError` for a size CoreRaster rejects; the workspace is unchanged.
     public mutating func newCanvas(width: Int, height: Int) throws {
-        let white = try PixelBuffer(width: width, height: height, fill: RGBA(r: 1, g: 1, b: 1, a: 1))
+        let white = try TiledPixels(width: width, height: height, fill: RGBA(r: 1, g: 1, b: 1, a: 1))
         start(with: white, name: nil)
     }
 
     /// Replaces the open image with `background` as its one layer.
-    mutating func start(with background: PixelBuffer, name: String?) {
+    mutating func start(with background: TiledPixels, name: String?) {
         canvas = CanvasSize(width: background.width, height: background.height)
         documentName = name
         layers = []
@@ -133,7 +133,7 @@ public struct PhotoWorkspace: Sendable {
     /// lowest N no layer uses) above the selected layer, and selects it.
     /// Ignored with no image open.
     public mutating func addLayer() {
-        guard let canvas, let clear = try? PixelBuffer(width: canvas.width, height: canvas.height) else { return }
+        guard let canvas, let clear = try? TiledPixels(width: canvas.width, height: canvas.height) else { return }
         var number = 1
         while layers.contains(where: { $0.name == "Layer \(number)" }) { number += 1 }
         record(.stack(stackState), named: "New Layer")
@@ -233,7 +233,7 @@ public struct PhotoWorkspace: Sendable {
     }
 
     /// Inserts a new default layer holding `pixels` at `position` and returns its id.
-    private mutating func insertLayer(named name: String, pixels buffer: PixelBuffer, at position: Int) -> PhotoLayer.ID {
+    private mutating func insertLayer(named name: String, pixels buffer: TiledPixels, at position: Int) -> PhotoLayer.ID {
         let layer = PhotoLayer(id: "layer-\(nextLayerNumber)", name: name)
         nextLayerNumber += 1
         layers.insert(layer, at: min(max(position, 0), layers.count))

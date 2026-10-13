@@ -28,7 +28,7 @@
               {
                 "id": "suiteui-sources",
                 "name": "SuiteUI sources",
-                "description": "The shared design system (Sources/SuiteUI): spacing, radius, size, type and color tokens; Liquid Glass applied in one snapshot-aware place (Glass) and GlassPanel; the SuiteWindow shell (sidebar, content, inspector) with SidebarSection and SidebarRow; ToolbarGroup palette actions; the content layer (CanvasSurface, SurfaceCard, EmptyStateView, ViewerStatusBar); the editor shell after the Ripple editor (EditorShell, EditorTopBar and its bar items, the docked ToolbarGroup rail, CanvasViewport with its Ruler, checkerboard and CanvasMarks, SegmentedTabs and the ColorWell hex row); pro inspector parts (InspectorHeader, InspectorRows, ScrubField and NumericInput number entry); ThumbnailGrid with its selection math; and TimelineStrip with its frame mapping, shared by Flare and Halo.",
+                "description": "The shared design system (Sources/SuiteUI): spacing, radius, size, type and color tokens; Liquid Glass applied in one snapshot-aware place (Glass) and GlassPanel; the SuiteWindow shell (sidebar, content, inspector) with SidebarSection and SidebarRow; ToolbarGroup palette actions; the content layer (CanvasSurface, SurfaceCard, EmptyStateView, ViewerStatusBar); the editor shell after the Ripple editor (EditorShell, EditorTopBar and its bar items, the docked ToolbarGroup rail, CanvasViewport with its Ruler, checkerboard and CanvasMarks, SegmentedTabs and the ColorWell hex row); pro inspector parts (InspectorHeader, InspectorRows, ScrubField and NumericInput number entry); the Studio easing parts (CurveEditor, StudioScrubRow, ChoiceChips); ThumbnailGrid with its selection math; and TimelineStrip with its frame mapping, shared by Flare and Halo.",
                 "technology": "Swift 6, SwiftUI, macOS 26",
                 "paths": [
                   "Sources/SuiteUI/"
@@ -49,7 +49,7 @@
               {
                 "id": "flare-app-sources",
                 "name": "FlareApp sources",
-                "description": "The Flare app (2D animation): the SwiftUI App scene and views in Sources/FlareApp, built from SuiteUI.",
+                "description": "The Flare app (2D animation): the SwiftUI App scene, its menu bar (FlareCommands) and views in Sources/FlareApp, including the easing inspector on the live FlareWorkspace, built from SuiteUI.",
                 "technology": "Swift 6, SwiftUI, macOS 26",
                 "paths": [
                   "Sources/FlareApp/"
@@ -69,7 +69,7 @@
               {
                 "id": "flare-model-sources",
                 "name": "FlareModel sources",
-                "description": "Linux-safe state and logic behind Flare's window: FlareWorkspace holds the open FlareCore document, the selected scene and the drawing tool.",
+                "description": "Linux-safe state and logic behind Flare's window: FlareWorkspace holds the open FlareCore document, the selected scene and the drawing tool; EasingEditing is the easing editor's contract, which FlareWorkspace conforms to over FlareCore's SetKeyframeEasing, with FakeEasingEditing as its in-memory stand-in for UI work.",
                 "technology": "Swift 6, Foundation",
                 "paths": [
                   "Sources/FlareModel/"
@@ -80,7 +80,7 @@
           {
             "id": "design-app",
             "name": "DesignApp",
-            "description": "The Design app (vector and UI design): the SwiftUI App scene and views in Sources/DesignApp, built from SuiteUI. Reads DesignModel and calls its methods; never writes its state (scripts/ci app-state rule).",
+            "description": "The Design app (vector and UI design): the SwiftUI App scene and views in Sources/DesignApp, built from SuiteUI's EditorShell. Reads DesignModel and sends it intents through DesignWindow; never writes its state (scripts/ci app-state rule).",
             "technology": "Swift 6, SwiftUI, macOS 26",
             "tags": [
               "internal",
@@ -90,7 +90,7 @@
               {
                 "id": "design-app-sources",
                 "name": "DesignApp sources",
-                "description": "The Design app (vector and UI design): the SwiftUI App scene and views in Sources/DesignApp, built from SuiteUI: the window, the Page menu, File > New File, and sidebar items for pages and Layers rows.",
+                "description": "The Design app (vector and UI design): the SwiftUI App scene and views in Sources/DesignApp, built from SuiteUI's EditorShell: the window and its intents (DesignWindow, DesignIntent), the top bar, the tool rail, the canvas with selection handles (drawn above the page clip) and the inline text editor, the Properties | Layers panel (a List of the pages and the layer tree), the File, Edit, Page and View menus, and the open and save panels.",
                 "technology": "Swift 6, SwiftUI, macOS 26",
                 "paths": [
                   "Sources/DesignApp/"
@@ -101,7 +101,7 @@
           {
             "id": "design-model",
             "name": "DesignModel",
-            "description": "Linux-safe state and logic behind Design's window: pages, the node tree on each page and its Layers rows, the selected page and tool. Foundation only, value types.",
+            "description": "Linux-safe state and logic behind Design's window: pages, the node tree on each page (with fills and text) and which Layers rows are expanded, the selection, the tool, the model-owned undo history, the canvas gestures and the file codec. Foundation only, value types.",
             "technology": "Swift 6, Foundation",
             "tags": [
               "internal"
@@ -110,7 +110,7 @@
               {
                 "id": "design-model-sources",
                 "name": "DesignModel sources",
-                "description": "Linux-safe state and logic behind Design's window: DesignWorkspace (pages, selected page, tool) and DesignNode, the node tree on a page and the flattened rows the Layers sidebar draws.",
+                "description": "Linux-safe state and logic behind Design's window: DesignWorkspace (pages, the selected page and node, the tool), DesignNode (the node tree on a page, each node with a fill and text, in absolute page points) and the tree flattened into rows under the expanded set, DesignHistory (the model-owned undo and redo, one named step per edit), the canvas gestures (hit testing, the handles a selection shows, draw, move, resize, nudge, delete, in DesignCanvasEditing and DesignDrawing), the inline text edit (DesignText), the inspector's header lines (DesignInspectorContent), and the file codec (DesignFile).",
                 "technology": "Swift 6, Foundation",
                 "paths": [
                   "Sources/DesignModel/"
@@ -131,7 +131,7 @@
               {
                 "id": "photo-app-sources",
                 "name": "PhotoApp sources",
-                "description": "The Photo app (raster editing): the SwiftUI App scene and views in Sources/PhotoApp, built from SuiteUI's EditorShell: the window and its intents, the top bar, tool rail and canvas, the Adjust | Layers panel (tool options, adjustment sections with the Levels gamma field, the layer list), the export and image size sheets, the File, Edit, Select, Image, Layer and View menus, the coalescing canvas renderer, and the ImageIO codec behind PhotoModel's PhotoImageCodec.",
+                "description": "The Photo app (raster editing): the SwiftUI App scene and views in Sources/PhotoApp, built from SuiteUI's EditorShell: the window and its intents, the top bar, tool rail and canvas, the Adjust | Layers panel (tool options, adjustment sections with the Levels gamma field, the layer list), the export and image size sheets, the File, Edit, Select, Image, Layer and View menus, the coalescing canvas renderer, the pen pressure read from AppKit mouse events for brush drags, and the ImageIO codec behind PhotoModel's PhotoImageCodec.",
                 "technology": "Swift 6, SwiftUI, macOS 26",
                 "paths": [
                   "Sources/PhotoApp/"
@@ -151,7 +151,7 @@
               {
                 "id": "photo-model-sources",
                 "name": "PhotoModel sources",
-                "description": "Linux-safe state and logic behind Photo's window: PhotoWorkspace (the open image's size and name, the layer stack with each layer's CoreRaster pixels and offset, the selected layer, tool and tool options, the marquee selection and pending crop), the tools' drags (brush and eraser dabs, marquee, crop, move), selection edits and crop, Image Size and Rotate, the undo history (tile diffs, layer lists and whole stacks), the tile-parallel renderer with damage tracking and the adjustments it applies (exposure, levels, hue/saturation, blur), opening and exporting through the PhotoImageCodec protocol, the adjustment settings and logarithmic gamma track, what the inspector shows, and when each Layer menu item can run.",
+                "description": "Linux-safe state and logic behind Photo's window: PhotoWorkspace (the open image's size and name, the layer stack with each layer's offset and its pixels as copy-on-write CoreRaster tiles (TiledPixels), so an edit copies only the tiles it touches, the selected layer, tool and tool options, the marquee selection and pending crop), the tools' drags (brush and eraser dabs, marquee, crop, move), selection edits and crop, Image Size and Rotate, the undo history (the tiles an edit changed, layer lists and whole stacks), the tile-parallel renderer with damage tracking and the adjustments it applies (exposure, levels, hue/saturation, blur), opening and exporting through the PhotoImageCodec protocol, the adjustment settings and logarithmic gamma track, what the inspector shows, and when each Layer menu item can run.",
                 "technology": "Swift 6, Foundation",
                 "paths": [
                   "Sources/PhotoModel/"

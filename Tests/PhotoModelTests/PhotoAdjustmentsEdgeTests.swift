@@ -82,9 +82,13 @@ private func checkInvariants(_ settings: AdjustmentSettings) {
 
     @Test func blackAndWhiteMayBeOneStepApart() {
         var settings = AdjustmentSettings()
+        let step = Float(AdjustmentSettings.levelsStep)
         settings.apply(.whitePoint(0.5))
+        // One Float step below white snaps onto white: refused.
         settings.apply(.blackPoint(Float(0.5).nextDown))
-        #expect(settings.blackPoint == Float(0.5).nextDown)
+        #expect(settings.blackPoint == 0)
+        settings.apply(.blackPoint(0.5 - step))
+        #expect(settings.blackPoint == 0.5 - step)
         settings.apply(.whitePoint(settings.blackPoint))
         #expect(settings.whitePoint == 0.5)
         checkInvariants(settings)

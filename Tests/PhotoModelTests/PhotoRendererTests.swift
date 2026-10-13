@@ -32,6 +32,24 @@ import Testing
         #expect(next.rgba8 == (try await PhotoRenderer.render(workspace)).rgba8)
     }
 
+    @Test func aStrokeOnAMovedLayerRendersEventByEventAsTheReference() async throws {
+        // A moved layer's tiles straddle the canvas tiles; the stroke crosses tile edges.
+        var workspace = try whiteImage(600, 520)
+        addFilledLayer(&workspace, red: 30, green: 90, blue: 200)
+        stroke(&workspace, .move, from: point(0, 0), to: point(37, 23))
+        var frame = try await PhotoRenderer.render(workspace)
+        workspace.selectTool(.brush)
+        for x in stride(from: 200.0, through: 500, by: 12) {
+            workspace.drag(from: point(x, x), to: point(x + 12, x + 3))
+            frame = try await PhotoRenderer.render(workspace, after: frame)
+        }
+        workspace.endDrag()
+        #expect(frame.rgba8 == (try workspace.composite().rgba8()))
+        workspace.undo()
+        frame = try await PhotoRenderer.render(workspace, after: frame)
+        #expect(frame.rgba8 == (try workspace.composite().rgba8()))
+    }
+
     @Test func adjustmentsAndLayerChangesRedrawEverything() throws {
         var workspace = try whiteImage(8, 8)
         let since = workspace.revision

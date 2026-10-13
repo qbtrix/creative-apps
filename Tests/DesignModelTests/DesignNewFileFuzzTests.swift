@@ -67,17 +67,21 @@ private func freshDocument() -> Document {
     #expect(Document(edited) == Document(fresh))
 }
 
-@Test func aPageDeletedBeforeNewFileCannotBeRestoredIntoTheNewFile() throws {
+@Test func undoAfterNewFileRestoresTheOldPages() throws {
     var workspace = DesignWorkspace()
     workspace.newFile()
     workspace.addPage()
-    let deleted = try workspace.deletePage("page-2")
-    workspace.newFile()
+    try workspace.deletePage("page-2")
     workspace.addPage()
-    // The new file has its own page-2; the old one must not come back next to it.
-    let before = workspace
-    #expect(throws: DesignTreeError.self) { try workspace.restorePage(deleted) }
-    #expect(workspace == before)
+    let old = Document(workspace)
+    workspace.newFile()
+    #expect(Document(workspace) == freshDocument())
+    workspace.undo()
+    #expect(Document(workspace) == old)
+    #expect(workspace.pages.map(\.id) == ["page-1", "page-3"])
+    // The page deleted before New File stays deleted; the next step back is the add of page-3.
+    workspace.undo()
+    #expect(workspace.pages.map(\.id) == ["page-1"])
 }
 
 @Test(arguments: [3, 17, 99, 512, 2026] as [UInt64])

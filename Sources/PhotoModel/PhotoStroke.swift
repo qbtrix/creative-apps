@@ -1,15 +1,21 @@
 // PhotoStroke.swift: what each tool does with a drag on the canvas. The canvas
-// sends every pointer move as `drag(from:to:)` in canvas pixels (a click is a
-// drag that doesn't move) and `endDrag()` when the pointer lifts; one drag is
-// one undo step.
+// sends every pointer move as `drag(from:to:pressure:)` in canvas pixels (a
+// click is a drag that doesn't move) and `endDrag()` when the pointer lifts;
+// one drag is one undo step.
 //
-//   brush, eraser  round dabs along the drag, spaced a quarter of the size
-//                  apart, on the selected layer. Each pixel keeps the most
-//                  coverage any dab of the stroke gave it, so overlapping dabs
-//                  never build past the stroke's opacity. The brush lays the
-//                  paint color over the pixels as they were before the stroke;
-//                  the eraser scales them (color and alpha) toward transparent.
-//                  Undo keeps the changed tiles ("Paint", "Erase").
+//   brush, eraser  a round stroke through the pointer samples on the selected
+//                  layer: a centripetal Catmull-Rom curve, so sparse samples
+//                  from a fast hand still paint a curve. A segment is painted
+//                  once the sample after it arrives (the last one on mouse-up),
+//                  cut into pieces flat to a quarter pixel, each a capsule
+//                  whose width follows the pressure (size x pressure), so the
+//                  edge is continuous, never scalloped. Each pixel keeps the
+//                  most coverage the stroke gave it, so overlaps never build
+//                  past the stroke's opacity. The brush lays the paint color
+//                  over the pixels as they were before the stroke; the eraser
+//                  scales them (color and alpha) toward transparent. Undo keeps
+//                  the tiles the stroke painted, as they were, so no event
+//                  walks the whole layer ("Paint", "Erase").
 //   marquee        the rectangle from the press to the pointer is the
 //                  selection; a click deselects.
 //   crop           the same rectangle is the pending crop (Apply Crop commits
@@ -17,37 +23,44 @@
 //   move           shifts the selected layer by the drag, in whole pixels
 //                  ("Move Layer").
 //
-// ponytail: dabs write through PixelBuffer.pixel/setPixel one pixel at a time,
-// with source-over and the eraser's scaling inline; a CoreRaster dab or
-// stamp op is the upgrade once brushes get textures. Linux-safe.
+// ponytail: capsules write through PixelBuffer.pixel/setPixel one pixel at a
+// time, with source-over and the eraser's scaling inline, and visit each
+// piece's whole box, so very large brushes on tight curves cost more; a
+// CoreRaster stamp op is the upgrade once brushes get textures. Linux-safe.
 import CoreRaster
 
 /// A drag in progress, from its first `drag` to `endDrag`.
 struct PhotoStroke: Sendable, Equatable {
     var tool: PhotoTool
     var start: Mask.Point
-    var last: Mask.Point
-    /// Brush and eraser: the layer, its pixels before the stroke, each pixel's
-    /// coverage so far (row-major, the layer's size), and the distance walked
-    /// since the last dab.
+    /// Brush and eraser: the layer; by tile index, each painted tile as it
+    /// was before the stroke and its pixels' coverage so far (row-major, the
+    /// tile's size); and the last four pointer samples and their pressures.
     var layerID: PhotoLayer.ID?
-    var base: PixelBuffer?
-    var coverage: [Float] = []
-    var walked: Double = 0
+    var before: [Int: PixelBuffer] = [:]
+    var coverage: [Int: [Float]] = [:]
+    var samples: [Sample] = []
     /// Move: the layer list before the drag.
     var layersBefore: [PhotoLayer] = []
+
+    struct Sample: Sendable, Equatable {
+        var point: Mask.Point
+        var pressure: Double
+    }
 }
 
 extension PhotoWorkspace {
     /// The active tool's drag from `start` to `end`, in canvas pixels.
-    public mutating func drag(from start: Mask.Point, to end: Mask.Point) {
+    /// `pressure` (0...1, a tablet's; a mouse sends 1) scales the brush.
+    public mutating func drag(from start: Mask.Point, to end: Mask.Point, pressure: Double = 1) {
         guard let canvas else { return }
         let begun = stroke == nil
-        var current = stroke ?? PhotoStroke(tool: tool, start: start, last: start, layerID: selectedLayerID)
+        var current = stroke ?? PhotoStroke(tool: tool, start: start, layerID: selectedLayerID)
         stroke = nil
         switch current.tool {
         case .brush, .eraser:
-            paint(&current, to: end, begun: begun)
+            if begun { paint(&current, adding: start, pressure: pressure) }
+            paint(&current, adding: end, pressure: pressure)
         case .marquee:
             selection = Self.dragRect(current.start, end, in: canvas)
         case .crop:
@@ -56,21 +69,19 @@ extension PhotoWorkspace {
             if begun { current.layersBefore = layers }
             moveSelectedLayer(current, to: end)
         }
-        current.last = end
         stroke = current
     }
 
     /// Ends the drag: records its undo step, or for a click, clears what a
     /// click clears.
     public mutating func endDrag() {
-        guard let done = stroke else { return }
+        guard var done = stroke else { return }
         stroke = nil
         switch done.tool {
         case .brush, .eraser:
-            guard let id = done.layerID, let base = done.base, let after = pixels[id],
-                let diff = try? TileDiff(before: base, after: after), diff.tileCount > 0
-            else { return }
-            record(.pixels(layer: id, diff: diff, forward: false), named: done.tool == .brush ? "Paint" : "Erase")
+            paint(&done, adding: nil, pressure: 1)
+            guard let id = done.layerID, !done.before.isEmpty else { return }
+            record(.tiles(layer: id, done.before), named: done.tool == .brush ? "Paint" : "Erase")
         case .marquee, .crop:
             break
         case .move:
@@ -80,23 +91,36 @@ extension PhotoWorkspace {
         }
     }
 
-    /// The dab centers along `a` to `b`, `spacing` apart, carrying on from
-    /// `walked` (the distance since the last dab), and the distance walked
-    /// past the last one. A spacing under one pixel counts as one.
-    public static func dabCenters(
-        from a: Mask.Point, to b: Mask.Point, spacing: Double, walked: Double
-    ) -> (centers: [Mask.Point], walked: Double) {
-        let step = spacing.isFinite ? max(spacing, 1) : 1
-        let dx = b.x - a.x, dy = b.y - a.y
-        let length = (dx * dx + dy * dy).squareRoot()
-        guard length.isFinite, length > 0 else { return ([], walked) }
-        var centers: [Mask.Point] = []
-        var at = step - min(max(walked, 0), step)
-        while at <= length + 1e-9 {
-            centers.append(Mask.Point(x: a.x + dx * at / length, y: a.y + dy * at / length))
-            at += step
+    /// The centripetal Catmull-Rom curve from `p1` to `p2`, with `p0` before
+    /// and `p3` after, as points from `p1` to `p2` whose chords stay within a
+    /// quarter pixel of it.
+    static func curve(_ p0: Mask.Point, _ p1: Mask.Point, _ p2: Mask.Point, _ p3: Mask.Point) -> [Mask.Point] {
+        // Knot spacing is the square root of each chord; tiny chords count as 1e-6.
+        func knot(_ a: Mask.Point, _ b: Mask.Point) -> Double {
+            max(((b.x - a.x) * (b.x - a.x) + (b.y - a.y) * (b.y - a.y)).squareRoot().squareRoot(), 1e-6)
         }
-        return (centers, length - (at - step))
+        let (t01, t12, t23) = (knot(p0, p1), knot(p1, p2), knot(p2, p3))
+        // The tangents at p1 and p2 over this segment, as Bezier handles.
+        func handle(_ a: Mask.Point, _ b: Mask.Point, _ c: Mask.Point, _ ab: Double, _ bc: Double, _ sign: Double)
+            -> Mask.Point
+        {
+            let m = { (u: Double, v: Double, w: Double) in (v - u) / ab - (w - u) / (ab + bc) + (w - v) / bc }
+            return Mask.Point(x: b.x + sign * t12 * m(a.x, b.x, c.x) / 3, y: b.y + sign * t12 * m(a.y, b.y, c.y) / 3)
+        }
+        let (b1, b2) = (handle(p0, p1, p2, t01, t12, 1), handle(p1, p2, p3, t12, t23, -1))
+        // How far the curve bends from its chord bounds the pieces it needs.
+        func bend(_ a: Mask.Point, _ b: Mask.Point, _ c: Mask.Point) -> Double {
+            let (x, y) = (a.x - 2 * b.x + c.x, a.y - 2 * b.y + c.y)
+            return (x * x + y * y).squareRoot()
+        }
+        let most = max(bend(p1, b1, b2), bend(b1, b2, p2))
+        let n = most.isFinite ? min(max(Int((3 * most).squareRoot().rounded(.up)), 1), 64) : 1
+        return (0...n).map { k in
+            let t = Double(k) / Double(n), u = 1 - t
+            let (w0, w1, w2, w3) = (u * u * u, 3 * u * u * t, 3 * u * t * t, t * t * t)
+            return Mask.Point(
+                x: w0 * p1.x + w1 * b1.x + w2 * b2.x + w3 * p2.x, y: w0 * p1.y + w1 * b1.y + w2 * b2.y + w3 * p2.y)
+        }
     }
 
     /// A drag's rectangle clipped to the canvas; nil for a click or a drag
@@ -120,67 +144,114 @@ extension PhotoWorkspace {
         touch(.all)
     }
 
-    /// Lays the dabs from the stroke's last point to `end` (and the first dab,
-    /// when the stroke has just begun) on the stroke's layer.
-    private mutating func paint(_ current: inout PhotoStroke, to end: Mask.Point, begun: Bool) {
-        guard let id = current.layerID, let at = index(of: id), var buffer = pixels.removeValue(forKey: id) else {
-            return
+    /// Adds a pointer sample to the stroke (nil: the stroke ends) and paints
+    /// what that makes paintable: the first sample's dab, then the segment
+    /// before the newest sample, or on the end the last segment.
+    private mutating func paint(_ current: inout PhotoStroke, adding point: Mask.Point?, pressure: Double) {
+        if let point {
+            guard point.x.isFinite, point.y.isFinite, abs(point.x) < 1e7, abs(point.y) < 1e7,
+                current.samples.last?.point != point
+            else { return }
+            let clamped = pressure.isNaN ? 1 : min(max(pressure, 0), 1)
+            current.samples = current.samples.suffix(3) + [PhotoStroke.Sample(point: point, pressure: clamped)]
         }
-        if begun {
-            current.base = buffer
-            current.coverage = [Float](repeating: 0, count: buffer.width * buffer.height)
+        let s = current.samples, n = s.count
+        if point != nil, n == 1 { return lay([s[0].point], from: s[0].pressure, to: s[0].pressure, &current) }
+        // The segment ends at sample `last`: the one before the newest, or on the end the newest.
+        let last = point == nil ? n - 1 : n - 2
+        guard last >= 1 else { return }
+        // Past either end the curve runs on straight: sample i's neighbor j, mirrored through it.
+        func mirror(_ i: Int, _ j: Int) -> Mask.Point {
+            Mask.Point(x: 2 * s[i].point.x - s[j].point.x, y: 2 * s[i].point.y - s[j].point.y)
         }
-        var centers: [Mask.Point] = begun ? [current.start] : []
-        let along = Self.dabCenters(
-            from: current.last, to: end, spacing: toolOptions.size / 4, walked: begun ? 0 : current.walked)
-        centers += along.centers
-        current.walked = along.walked
+        let before = last >= 2 ? s[last - 2].point : mirror(last - 1, last)
+        let after = last + 1 < n ? s[last + 1].point : mirror(last, last - 1)
+        lay(Self.curve(before, s[last - 1].point, s[last].point, after), from: s[last - 1].pressure,
+            to: s[last].pressure, &current)
+    }
+
+    /// Paints capsules along `points` (canvas pixels) on the stroke's layer,
+    /// the pressure going from `start` to `end`; one point paints a dab.
+    private mutating func lay(
+        _ points: [Mask.Point], from start: Double, to end: Double, _ current: inout PhotoStroke
+    ) {
+        guard !points.isEmpty, let id = current.layerID, let at = index(of: id),
+            var tiled = pixels.removeValue(forKey: id)
+        else { return }
+        let pieces = max(points.count - 1, 1)
         var touched = PixelRect(x: 0, y: 0, width: 0, height: 0)
-        for center in centers {
-            // Every index is inside the buffer and every value finite, so a dab can't throw.
-            if let area = try? dab(at: center, on: &buffer, layer: layers[at], stroke: &current) {
+        for k in 0..<pieces {
+            let (a, b) = (Double(k) / Double(pieces), Double(k + 1) / Double(pieces))
+            // Every index is inside the buffer and every value finite, so a capsule can't throw.
+            let ends = (points[k], points[min(k + 1, points.count - 1)])
+            if let area = try? capsule(
+                ends.0, ends.1, pressures: (start + (end - start) * a, start + (end - start) * b), on: &tiled,
+                layer: layers[at], stroke: &current)
+            {
                 touched = touched.union(area)
             }
         }
-        pixels[id] = buffer
+        pixels[id] = tiled
         if !touched.isEmpty { touch(.region(touched)) }
     }
 
-    /// One dab centered at `center` (canvas pixels). Returns the canvas region
-    /// it changed, or nil when it missed the layer.
-    private func dab(
-        at center: Mask.Point, on buffer: inout PixelBuffer, layer: PhotoLayer, stroke: inout PhotoStroke
+    /// One capsule from `a` to `b` (canvas pixels), its radius following the
+    /// pressure from one end to the other. Returns the canvas region it
+    /// covers, or nil when it missed the layer.
+    private func capsule(
+        _ a: Mask.Point, _ b: Mask.Point, pressures: (Double, Double), on tiled: inout TiledPixels, layer: PhotoLayer,
+        stroke: inout PhotoStroke
     ) throws -> PixelRect? {
-        guard let base = stroke.base else { return nil }
-        let radius = toolOptions.size / 2
-        let cx = center.x - Double(layer.offsetX), cy = center.y - Double(layer.offsetY)
+        // Half a pixel at the least, so the soft edge below is never zero wide.
+        let ra = max(toolOptions.size / 2 * pressures.0, 0.5), rb = max(toolOptions.size / 2 * pressures.1, 0.5)
+        let ax = a.x - Double(layer.offsetX), ay = a.y - Double(layer.offsetY)
+        let dx = b.x - a.x, dy = b.y - a.y, length2 = dx * dx + dy * dy, r = max(ra, rb)
         let box = PixelRect(
-            from: Mask.Point(x: cx - radius, y: cy - radius), to: Mask.Point(x: cx + radius, y: cy + radius))
-        guard let area = box.intersection(PixelRect(x: 0, y: 0, width: buffer.width, height: buffer.height)) else {
+            from: Mask.Point(x: min(ax, ax + dx) - r, y: min(ay, ay + dy) - r),
+            to: Mask.Point(x: max(ax, ax + dx) + r, y: max(ay, ay + dy) + r))
+        guard let area = box.intersection(PixelRect(x: 0, y: 0, width: tiled.width, height: tiled.height)) else {
             return nil
         }
-        // Coverage falls from 1 to 0 over the soft edge: the outer (1 - hardness)
-        // of the radius, and never less than a pixel, so hard edges antialias.
-        let softness = max((1 - toolOptions.hardnessPercent / 100) * radius, min(1, radius))
+        let hardness = toolOptions.hardnessPercent / 100
         let opacity = Float(toolOptions.opacityPercent / 100)
         let paint = toolOptions.linearColor
         let erasing = stroke.tool == .eraser
-        for y in area.y..<area.maxY {
-            for x in area.x..<area.maxX {
-                let dx = Double(x) + 0.5 - cx, dy = Double(y) + 0.5 - cy
-                let t = min(max((radius - (dx * dx + dy * dy).squareRoot()) / softness, 0), 1)
-                let coverage = Float(t * t * (3 - 2 * t))
-                let i = y * buffer.width + x
-                guard coverage > stroke.coverage[i] else { continue }
-                stroke.coverage[i] = coverage
-                let a = coverage * opacity, keep = 1 - coverage * opacity
-                let p = try base.pixel(x: x, y: y)
-                let out = erasing
-                    ? RGBA(r: p.r * keep, g: p.g * keep, b: p.b * keep, a: p.a * keep)
-                    : RGBA(r: paint.r * a + p.r * keep, g: paint.g * a + p.g * keep, b: paint.b * a + p.b * keep,
-                           a: a + p.a * keep)
-                try buffer.setPixel(x: x, y: y, out)
+        for i in tiled.tileIndices(in: area) where tiled.tiles.indices.contains(i) {
+            let rect = tiled.tileRect(i)
+            guard let part = area.intersection(rect) else { continue }
+            // The tile as it was before the stroke: kept from the first paint in it on.
+            let base = stroke.before[i] ?? tiled.tiles[i]
+            var coverage =
+                stroke.coverage.removeValue(forKey: i) ?? [Float](repeating: 0, count: rect.width * rect.height)
+            var painted = false
+            for y in part.y..<part.maxY {
+                for x in part.x..<part.maxX {
+                    // The nearest point of the piece, and the radius there.
+                    let px = Double(x) + 0.5 - ax, py = Double(y) + 0.5 - ay
+                    let along = length2 > 0 ? min(max((px * dx + py * dy) / length2, 0), 1) : 0
+                    let ex = px - along * dx, ey = py - along * dy, radius = ra + (rb - ra) * along
+                    // Coverage falls from 1 to 0 over the soft edge: the outer (1 - hardness)
+                    // of the radius, and never less than a pixel, so hard edges antialias.
+                    let softness = max((1 - hardness) * radius, min(1, radius))
+                    let t = min(max((radius - (ex * ex + ey * ey).squareRoot()) / softness, 0), 1)
+                    let cover = Float(t * t * (3 - 2 * t))
+                    let (tx, ty) = (x - rect.x, y - rect.y)
+                    let j = ty * rect.width + tx
+                    guard cover > coverage[j] else { continue }
+                    coverage[j] = cover
+                    let a = cover * opacity, keep = 1 - cover * opacity
+                    let p = try base.pixel(x: tx, y: ty)
+                    let out = erasing
+                        ? RGBA(r: p.r * keep, g: p.g * keep, b: p.b * keep, a: p.a * keep)
+                        : RGBA(r: paint.r * a + p.r * keep, g: paint.g * a + p.g * keep, b: paint.b * a + p.b * keep,
+                               a: a + p.a * keep)
+                    try tiled.tiles[i].setPixel(x: tx, y: ty, out)
+                    painted = true
+                }
             }
+            guard painted || stroke.before[i] != nil else { continue }
+            stroke.before[i] = base
+            stroke.coverage[i] = coverage
         }
         return area.offsetBy(layer.offsetX, layer.offsetY)
     }

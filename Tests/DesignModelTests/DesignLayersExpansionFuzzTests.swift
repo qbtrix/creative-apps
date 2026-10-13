@@ -28,10 +28,10 @@ private func allNodes(_ workspace: DesignWorkspace) -> [DesignNode] {
     return workspace.pages.flatMap { walk($0.nodes) }
 }
 
-/// The rows the selected page should show, rebuilt from isExpanded alone.
+/// The rows the selected page should show, frontmost first, rebuilt from isExpanded alone.
 private func expectedRows(_ workspace: DesignWorkspace) -> [String] {
     func walk(_ nodes: [DesignNode], _ depth: Int) -> [String] {
-        nodes.flatMap { node in
+        nodes.reversed().flatMap { node in
             ["\(node.id)@\(depth)"] + (workspace.isExpanded(node.id) ? walk(node.children, depth + 1) : [])
         }
     }
@@ -46,7 +46,7 @@ private func rows(_ workspace: DesignWorkspace) -> [String] { workspace.layerRow
     try workspace.addNode(.rectangle, frame: box, in: "node-1")
     try workspace.setExpanded("node-1", false)
     workspace.addPage()
-    #expect(workspace.layerRows.isEmpty)
+    #expect(workspace.layerRows.map(\.id) == ["node-3"])
     // A node on another page can still be collapsed or expanded by id.
     try workspace.setExpanded("node-1", true)
     workspace.selectPage("page-1")
@@ -64,7 +64,7 @@ private func rows(_ workspace: DesignWorkspace) -> [String] { workspace.layerRow
     // A container in the new file is collapsed until something expands it.
     let group = try workspace.addNode(.group, frame: box)
     try workspace.addNode(.text, frame: box)
-    #expect(workspace.layerRows.map(\.id) == ["node-1", group, "node-3"])
+    #expect(workspace.layerRows.map(\.id) == ["node-3", group, "node-1"])
 }
 
 @Test func expandingIsRefusedWithNoFileOpenAndAfterAPageIsDeleted() throws {
@@ -114,11 +114,12 @@ func seededFuzzRowsFollowTheExpandedSet(seed: UInt64) throws {
             try workspace.setExpanded(pick, !wasExpanded)
             #expect(workspace.isExpanded(pick) == !wasExpanded)
         case 2:
-            // Two toggles put the workspace back exactly.
+            // Two toggles put the expanded set and the pages back. The selection too, unless the
+            // collapse moved it onto the collapsed row (#121).
             let before = workspace
             try workspace.toggleExpanded(pick)
             try workspace.toggleExpanded(pick)
-            #expect(workspace == before)
+            #expect(workspace.expandedNodeIDs == before.expandedNodeIDs && workspace.pages == before.pages)
         case 3:
             let before = workspace
             #expect(throws: DesignTreeError.unknownID("ghost")) { try workspace.setExpanded("ghost", true) }

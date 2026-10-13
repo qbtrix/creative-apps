@@ -7,7 +7,9 @@
 // accent blue. The inspector tokens are the "Pro density" rules in
 // docs/design.md: small controls, the 11 pt scale, 22 pt rows. The editor
 // shell tokens (top bar, rail, rulers, right panel, checkerboard) are the
-// "Editor shell" rules in docs/design.md, sized after the Ripple editor.
+// "Editor shell" rules in docs/design.md, sized after the Ripple editor. The
+// Studio tokens (caps headers, 28 pt filled rows, chips, the curve editor)
+// are the "Studio rows and chips" rules in docs/design.md.
 import AppKit
 import SwiftUI
 
@@ -32,6 +34,8 @@ public enum SuiteRadius {
     public static let small: CGFloat = 6
     public static let medium: CGFloat = 10
     public static let large: CGFloat = 16
+    /// A Studio row or chip (StudioScrubRow, ChoiceChips).
+    public static let row: CGFloat = 8
 }
 
 /// Fixed sizes in points: the window shell's minimums and column widths, and
@@ -55,14 +59,15 @@ public enum SuiteSize {
     public static let windowMinimum = CGSize(width: 900, height: 560)
     /// The timeline's fixed track-name column, ruler, one lane, a keyframe
     /// diamond, the least room between two ruler labels and between two ruler
-    /// ticks, and how much ruler is drawn before the scroll view says which
-    /// stretch is visible.
+    /// ticks, the room one caption digit of a ruler label takes, and how much
+    /// ruler is drawn before the scroll view says which stretch is visible.
     public static let timelineLabelColumn: CGFloat = 160
     public static let timelineRuler: CGFloat = 24
     public static let timelineLane: CGFloat = 28
     public static let timelineKeyframe: CGFloat = 10
     public static let timelineLabelSpacing: CGFloat = 48
     public static let timelineTickSpacing: CGFloat = 6
+    public static let timelineLabelDigit: CGFloat = 7
     public static let timelineRulerSpan: CGFloat = 4096
     /// The editor shell (EditorShell): the top bar's height, the room the
     /// window's close, minimize and zoom buttons take at its leading edge, a
@@ -80,6 +85,18 @@ public enum SuiteSize {
     public static let checkerSquare: CGFloat = 8
     /// The hex text field beside a color well.
     public static let hexField: CGFloat = 76
+    /// Studio controls: the letter spacing of a caps header, a filled scrub
+    /// row, a preset chip, and its tick dots and value marker.
+    public static let capsTracking: CGFloat = 0.7
+    public static let studioRow: CGFloat = 28
+    public static let chip: CGFloat = 24
+    public static let studioTick: CGFloat = 2
+    /// The curve editor (CurveEditor): its height, a handle, the handle's hit
+    /// target and the preview dot.
+    public static let curveEditor: CGFloat = 180
+    public static let curveHandle: CGFloat = 10
+    public static let curveHandleHit: CGFloat = 28
+    public static let curvePreviewDot: CGFloat = 6
 }
 
 /// Text styles. macOS has no Dynamic Type; these are the system text styles,
@@ -98,6 +115,9 @@ public enum SuiteFont {
     /// InspectorHeader: 12 pt semibold name over 10 pt metadata lines.
     public static let inspectorTitle = Font.callout.weight(.semibold)
     public static let inspectorMeta = Font.caption.monospacedDigit()
+    /// A Studio group header (KEYFRAMES, EASING): 10 pt semibold, set in caps
+    /// with SuiteSize.capsTracking.
+    public static let sectionCaps = Font.caption.weight(.semibold)
     /// The editor shell: top bar items and the document title, and ruler labels.
     public static let editorBar = Font.callout
     public static let editorTitle = Font.callout.weight(.semibold)
@@ -147,6 +167,13 @@ public enum SuiteColor {
     public static var rulerTick: Color { Color.primary.opacity(0.4) }
     /// The selected tool's well in a docked tool rail.
     public static var selectedWell: Color { accent.opacity(0.18) }
+    /// "This is a keyframe": the system orange, used for nothing else.
+    public static var keyframed: Color { .orange }
+    /// A Studio row's fill up to its value: the ramp's next step past
+    /// `.fieldActive` (18%), so it reads on the raised track in Dark too.
+    public static var studioFill: Color { windowBackground.mix(with: .primary, by: 0.18) }
+    /// A Studio row's fill while it is dragged: the accent at 26%.
+    public static var studioFillActive: Color { accent.opacity(0.26) }
     /// Marks drawn over document content (a selection's marching ants, a
     /// crop frame): black and white so they read on any pixels, and the dim
     /// outside a pending crop.

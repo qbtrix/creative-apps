@@ -54,8 +54,4 @@ public struct CompositionSettings: Sendable, Hashable {
 extension String {
     /// The string without leading and trailing whitespace.
     var trimmed: String { String(drop(while: \.isWhitespace).reversed().drop(while: \.isWhitespace).reversed()) }
-
-    /// The string as names compare: trimmed and lowercased. String equality
-    /// is already Unicode-canonical, so composed and decomposed forms match.
-    var nameKey: String { trimmed.lowercased() }
 }

@@ -11,20 +11,22 @@ points here.
 
 Cloud workers run on Ubuntu and cannot build SwiftUI. On Linux, Package.swift
 declares only the Model targets, so `scripts/ci` there builds and tests the
-Models alone. Everything under `Sources/*App/` and `Sources/SuiteUI/` is
-compiled only by the `macOS` CI job. So:
+Models and runs the lints (app-state rule, design lint, C4, jscpd). Everything
+under `Sources/*App/` and `Sources/SuiteUI/` is compiled only by the `macOS`
+CI job, and that job runs on `dev` once a feature is built, not on your PR.
+You never start it yourself for routine work. So:
 
 - Put every bit of logic you can in the Model target, where you can test it.
-- For UI, push and read the macOS job: `gh run list --branch <branch>` and
-  `gh run view <id> --log-failed`. Fix, push, repeat.
-- Look at what you built: the `macOS` job uploads the `snapshots` artifact
-  (`gh run download <id> -n snapshots`), PNGs written by
-  `Tests/AppSnapshotTests`. Open the ones your change touched.
-- Watch it run: the `macOS` job also clicks through every app
-  (`UITests/<X>JourneyTests.swift`) and uploads whole-window screenshots as
-  `ui-screens` (`gh run download <id> -n ui-screens`). A user-facing feature
-  adds or extends its app's journey test (docs/engineering.md, Human-like UI
-  tests).
+- Keep view code small, follow `docs/design.md`, and copy the shape of a view
+  that already builds. A UI mistake shows up in the next feature CI as a
+  "dev is red" issue whose culprit range names your PR.
+- The `macOS` job uploads the `snapshots` artifact (PNGs written by
+  `Tests/AppSnapshotTests`) and clicks through every app
+  (`UITests/<X>JourneyTests.swift`), uploading whole-window screenshots as
+  `ui-screens`. Find a run with `gh run list --workflow ci.yml --branch dev`,
+  then `gh run download <id> -n snapshots` or `-n ui-screens`. A user-facing
+  feature adds or extends its app's journey test (docs/engineering.md,
+  Human-like UI tests).
 
 ## Targets and lines
 
@@ -35,6 +37,7 @@ compiled only by the `macOS` CI job. So:
 | `SuiteUI` | macOS | The shared design system: tokens, Liquid Glass primitives, the window shell. |
 | `<X>ModelTests` | Linux + macOS | Model tests. |
 | `SuiteUITests`, `AppSnapshotTests` | macOS | SuiteUI tests; the snapshot PNGs. |
+| `AppAuditTests` | Linux + macOS | The app audit's checks and their tests (docs/blueprints/app-audit.md). |
 
 X is Flare, Design, Photo, Library or Halo. Each app is one **line** (label
 `line:flare`, ...) and SuiteUI is its own line (`line:suiteui`).
@@ -66,16 +69,35 @@ X is Flare, Design, Photo, Library or Halo. Each app is one **line** (label
 1. **Orient.** Read this file, `docs/engineering.md`, the issue, and the code
    it touches. For UI work also read `docs/design.md`. If the issue depends on
    one that has not merged, pick another.
-2. **Implement with tests.** Model behavior gets a Swift Testing test first. A
+2. **Branch from dev.** `git fetch origin && git switch -c <branch> origin/dev`.
+   Never branch from or target `main`: it only takes `dev` SHAs that passed
+   full CI.
+3. **Implement with tests.** Model behavior gets a Swift Testing test first. A
    view change gets its state into a snapshot in `AppSnapshotTests` if no
    existing snapshot shows it.
-3. **Gate.** Run `scripts/ci` (on Linux it covers the Models). It must print
-   `CI: PASS`. Then push and get both CI jobs green.
-4. **Ship.** `git fetch origin && git rebase origin/main`, rerun `scripts/ci`,
-   then open ONE small PR to `main` that closes the issue (`Closes #<n>`). Add
-   the `fast-lane` label. List the snapshot PNGs your change touched in the PR
-   body. Then stop.
-5. Don't ask questions. If the issue is impossible as written, comment on the
+4. **Gate.** Run `scripts/ci`. It must print `CI: PASS`. On Linux it covers
+   the Model targets and the lints; the macOS job on `dev` catches the rest.
+   It is your whole check: no CI runs on your PR, and you never start CI
+   yourself for routine work (no `gh workflow run`).
+5. **Ship.** `git fetch origin && git rebase origin/dev`, rerun `scripts/ci`
+   (it must print `CI: PASS` again), push, then open ONE small PR to `dev`
+   with `Closes #<n>`, the `fast-lane` label, the snapshot PNGs your change
+   touches, and these two lines at the end of the body for the head you
+   pushed:
+   ```
+   Fast-Check: pass
+   Head: <full sha from git rev-parse HEAD>
+   ```
+   After every later push, rerun `scripts/ci` and update the `Head:` line to
+   the new head; the lane ignores a marker for an older head. Then stop.
+   ```bash
+   # body.md: what and why, Closes #<n>, the PNGs, then the two lines for $(git rev-parse HEAD)
+   gh pr create --base dev --label fast-lane --title "<type(scope): what>" --body-file body.md
+   # after a later push, once scripts/ci passed on it: move the marker to the new head
+   gh pr view <n> --json body --jq .body | sed "s/^Head: .*/Head: $(git rev-parse HEAD)/" >body.md
+   gh pr edit <n> --body-file body.md
+   ```
+6. Don't ask questions. If the issue is impossible as written, comment on the
    issue saying why, remove `in-progress`, and stop.
 
 ## Journeys first
@@ -169,26 +191,53 @@ something. One that can't act yet is disabled and says why:
 
 - Keep to your line and your issue's files. Prefer a new file over appending to
   a shared one.
-- Rebase on `main` before opening the PR, and rerun `scripts/ci` after.
-- If `main` is red because of someone else's merge, do not fix it in your PR.
-  Comment on your issue with the failing test name and stop.
-- **Never edit** `Package.swift`, `.github/`, `scripts/` (including
-  `scripts/ci`), `CLAUDE.md`, `AGENTS.md` or `LICENSE`. Every target already
-  exists. If you think one of these must change, say so in an issue.
+- Rebase on `origin/dev` before opening the PR, and rerun `scripts/ci` after.
+- If `scripts/ci` fails on `origin/dev` itself because of someone else's merge
+  (look for the open `dev-red` issue), do not fix it in your PR. Comment on
+  your issue with the failing test name and stop.
+- **Never edit** `Package.swift`, `Package.resolved`, `.github/`, `.claude/`,
+  `scripts/`, `CLAUDE.md`, `AGENTS.md` or `LICENSE` unless your issue says to.
+  `scripts/` means all of it, the gate included. Every target already exists.
+  If you think one of these must change, say so in an issue. The fast lane
+  refuses exactly this list (PROTECTED in scripts/fast-lane.sh; its tests
+  read this bullet), so every path here goes in backticks and nothing else.
 
 ## Fast lane
 
-A PR labelled `fast-lane` is merged automatically by
-`.github/workflows/fast-lane.yml` when all of these hold: base `main`, author
-on the allowlist in `scripts/fast-lane.sh`, at most 400 changed lines and 15
-files, no protected path touched, mergeable, and every check green including
-both CI jobs. Protected paths are the files above. UI code can take the lane
-once both CI jobs are green; a human reviews the snapshots after merge and
-files fixes as new issues. A Belt PR (its body has a `Belt-Run:` or
-`Belt-Test:` line) also waits for Belt's `belt/review` commit status to be
-success on its head; `REQUIRE_BELT_REVIEW` in `scripts/fast-lane.sh` turns
-that off. Otherwise the label is removed with a comment saying why, and the PR
-waits for review.
+Crew PRs merge into `dev` at once; `main` moves only when full CI passes on
+`dev`.
+
+- `.github/workflows/fast-lane.yml` squash-merges a PR labelled `fast-lane`
+  into `dev` when all of these hold: base `dev`, author on the allowlist in
+  `scripts/fast-lane.sh`, at most 400 changed lines and 15 files, no protected
+  path touched (the files above), mergeable, no red or running check on the
+  head, and proof the head passed the gate: the `Fast-Check: pass` /
+  `Head: <sha>` lines for the current head, or a passing CI check on it.
+- UI code takes the lane on the Linux check alone. A human reviews the
+  snapshots after the next feature CI and files fixes as new issues.
+- Each lane run merges every eligible PR, oldest first. A PR that conflicts
+  after an earlier merge gets one comment and waits for a rebase. A fast-lane
+  PR opened against `main` is retargeted to `dev`.
+- A Belt PR (its body has a `Belt-Run:` or `Belt-Test:` line) also waits for
+  Belt's `belt/review` commit status to be success on its head;
+  `REQUIRE_BELT_REVIEW` in `scripts/fast-lane.sh` turns that off.
+- A PR that loosens the app audit (docs/blueprints/app-audit.md) raises a
+  count in `UITests/audit-baseline.json` (an existing check's key that is new
+  to an app counts as a raise from 0), adds an app there above 0, drops an
+  app from it, removes or moves a file in `Checks/`, or drops an entry from
+  `AppAudit.checks`. Lowering a count is fine, and so is adding a check with
+  its starting counts in existing apps, at any count, when the same PR adds
+  its file and registry entry.
+- A PR that breaks a hard rule (author, size, protected path, a looser app
+  audit) loses the label with a comment saying why and waits for review.
+- Full CI (`Linux`, `macOS` with snapshots and the UI journeys) runs on `dev`
+  once a feature is built, not per merge: when the supervisor or Belt
+  dispatches it, when the lane merges a PR labelled `feature-done`, and once a
+  day. Green: `main` fast-forwards to that exact SHA. Red: one issue titled
+  "dev is red" (label `dev-red`) names the failing jobs and the culprit range
+  `main..<sha>`. SwiftUI breakage can sit on `dev` until that run, so the range
+  can span several PRs. The lane keeps merging while the issue is open; the
+  next green run moves `main` and closes it.
 
 ## Commands
 
@@ -196,8 +245,10 @@ waits for review.
 scripts/ci                                   # lint + app-state rule + design lint + C4 ownership + jscpd + build + test: the gate
 swift test --filter FlareModelTests          # one suite while iterating
 bash Tests/fast_lane/test_fast_lane.sh       # fast-lane decision tests (needs jq)
+gh run list --workflow ci.yml --branch dev    # feature CI runs on dev
 gh run download <run-id> -n snapshots        # the PNGs from a macOS CI run
 gh run download <run-id> -n ui-screens       # whole-window PNGs from the UI journeys
 scripts/ui-test                              # macOS + Xcode + xcodegen: run the UI journeys locally
+scripts/contact-sheet                        # after ui-test: .build/ui-screens/contact-sheet.html, the page to review per run
 scripts/bundle-apps                          # macOS: release builds as signed FlareApp.app ... HaloApp.app in .build/apps; CI uploads them as `app-builds` (app-builds.tar.gz)
 ```

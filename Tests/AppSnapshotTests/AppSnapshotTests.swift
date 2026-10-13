@@ -38,7 +38,7 @@ import PhotoModel
     @Test func design() throws {
         var open = DesignWorkspace()
         open.newFile()
-        try snapshotStates("design", empty: DesignCanvas(model: DesignWorkspace()), open: DesignCanvas(model: open))
+        try snapshotStates("design", empty: DesignEditor(model: DesignWorkspace()), open: DesignEditor(model: open, zoom: 0.5))
     }
 
     @Test func photo() throws {

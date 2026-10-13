@@ -45,15 +45,15 @@ extension PhotoWorkspace {
         guard let crop = pendingCrop else { return }
         record(.stack(stackState), named: "Crop")
         for (at, layer) in layers.enumerated() {
-            guard let buffer = pixels[layer.id], let bounds = bounds(of: layer) else { continue }
+            guard let tiled = pixels[layer.id], let bounds = bounds(of: layer) else { continue }
             if let kept = bounds.intersection(crop),
-                let cut = try? buffer.cropped(
+                let cut = try? tiled.flattened().cropped(
                     x: kept.x - layer.offsetX, y: kept.y - layer.offsetY, width: kept.width, height: kept.height)
             {
-                pixels[layer.id] = cut
+                pixels[layer.id] = TiledPixels(cut)
                 layers[at].offsetX = kept.x - crop.x
                 layers[at].offsetY = kept.y - crop.y
-            } else if let empty = try? PixelBuffer(width: 1, height: 1) {
+            } else if let empty = try? TiledPixels(width: 1, height: 1) {
                 // A layer wholly outside the crop keeps one transparent pixel.
                 pixels[layer.id] = empty
                 layers[at].offsetX = 0
@@ -71,22 +71,27 @@ extension PhotoWorkspace {
     }
 
     /// Replaces each selected pixel of the selected layer with `pixel(old)`,
-    /// as one undo step named `name`.
+    /// as one undo step named `name` that keeps the tiles it changed.
     private mutating func editSelection(named name: String, _ pixel: (RGBA) -> RGBA) {
         guard let selection, let id = selectedLayerID, let at = index(of: id), let bounds = bounds(of: layers[at]),
-            let area = selection.intersection(bounds), let before = pixels[id]
+            let area = selection.intersection(bounds), var tiled = pixels[id]
         else { return }
-        var after = before
         let local = area.offsetBy(-layers[at].offsetX, -layers[at].offsetY)
-        for y in local.y..<local.maxY {
-            for x in local.x..<local.maxX {
-                // Inside the layer by construction, and the new pixels are finite.
-                if let old = try? before.pixel(x: x, y: y) { try? after.setPixel(x: x, y: y, pixel(old)) }
+        var before: [Int: PixelBuffer] = [:]
+        for i in tiled.tileIndices(in: local) where tiled.tiles.indices.contains(i) {
+            let rect = tiled.tileRect(i), old = tiled.tiles[i]
+            guard let part = local.intersection(rect) else { continue }
+            for y in (part.y - rect.y)..<(part.maxY - rect.y) {
+                for x in (part.x - rect.x)..<(part.maxX - rect.x) {
+                    // Inside the tile by construction, and the new pixels are finite.
+                    if let p = try? old.pixel(x: x, y: y) { try? tiled.tiles[i].setPixel(x: x, y: y, pixel(p)) }
+                }
             }
+            if tiled.tiles[i] != old { before[i] = old }
         }
-        guard let diff = try? TileDiff(before: before, after: after), diff.tileCount > 0 else { return }
-        record(.pixels(layer: id, diff: diff, forward: false), named: name)
-        pixels[id] = after
+        guard !before.isEmpty else { return }
+        record(.tiles(layer: id, before), named: name)
+        pixels[id] = tiled
         touch(.region(area))
     }
 }

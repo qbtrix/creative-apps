@@ -39,7 +39,9 @@ struct PhotoPanel: View {
                     PhotoLayersPanel(model: model, perform: perform)
                 }
             } else {
-                EmptyStateView("No Image", systemImage: "photo", message: "Open or create an image to adjust it.")
+                EmptyStateView(
+                    PhotoInspectorContent.noImageTitle, systemImage: PhotoInspectorContent.noImageSymbol,
+                    message: PhotoInspectorContent.noImageMessage)
             }
         }
     }

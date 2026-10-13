@@ -2,7 +2,9 @@
 // PhotoWorkspace (`model`) and the window's presentation state (zoom, the
 // panel tab, the open file's URL, sheets and alerts), turns every PhotoIntent
 // into a workspace method or a panel, and keeps the picture rendered
-// (CanvasRenderer) whenever the workspace's revision moves. Files go through
+// (CanvasRenderer) whenever the workspace's revision moves. Canvas drags carry
+// the pen's pressure (PointerPressure) and, while they last, AppKit's mouse
+// event coalescing is off so every pointer sample arrives. Files go through
 // ImageIOCodec; the open and save panels are AppKit's. Two launch arguments
 // let the UI journeys skip those panels: `-PhotoOpenFile <path>` opens a file
 // at launch and `-PhotoExportTo <folder>` makes Export write there directly.
@@ -64,7 +66,10 @@ struct PhotoWindow: View {
             .alert(problem ?? "", isPresented: Binding(get: { problem != nil }, set: { if !$0 { problem = nil } })) {
                 Button("OK", role: .cancel) {}
             }
-            .task { openLaunchFile() }
+            .task {
+                PointerPressure.watch()
+                openLaunchFile()
+            }
     }
 
     private func perform(_ intent: PhotoIntent) {
@@ -82,8 +87,15 @@ struct PhotoWindow: View {
         case .undo: model.undo()
         case .redo: model.redo()
         case .tool(let tool): model.selectTool(tool)
-        case .drag(let from, let to): model.drag(from: Mask.Point(x: from.x, y: from.y), to: Mask.Point(x: to.x, y: to.y))
-        case .endDrag: model.endDrag()
+        case .drag(let from, let to):
+            // Every pointer sample while drawing, not AppKit's merged ones; the drag's end turns merging back on.
+            NSEvent.isMouseCoalescingEnabled = false
+            model.drag(
+                from: Mask.Point(x: from.x, y: from.y), to: Mask.Point(x: to.x, y: to.y),
+                pressure: PointerPressure.current)
+        case .endDrag:
+            NSEvent.isMouseCoalescingEnabled = true
+            model.endDrag()
         case .toolOption(let edit): model.setToolOption(edit)
         case .adjust(let edit): model.adjust(edit)
         case .selectAll: model.selectAll()

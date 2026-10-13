@@ -26,8 +26,9 @@ import Testing
         addFilledLayer(&workspace, red: 0, green: 128, blue: 255)
         let top = try #require(workspace.selectedLayerID)
         workspace.setBlendMode(top, .multiply)
-        let bottom = try #require(workspace.pixels[workspace.layers[1].id])
-        let expected = try composite(try #require(workspace.pixels[top]), onto: bottom, mode: .multiply, opacity: 1)
+        let bottom = try #require(workspace.pixels[workspace.layers[1].id]).flattened()
+        let expected = try composite(
+            try #require(workspace.pixels[top]).flattened(), onto: bottom, mode: .multiply, opacity: 1)
         #expect(try workspace.composite() == expected)
     }
 

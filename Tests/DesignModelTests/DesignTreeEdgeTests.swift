@@ -65,13 +65,13 @@ private let box = DesignRect(x: 0, y: 0, width: 10, height: 10)
 @Test func aNodeMovesToTheTopAndBackIntoAnAncestor() throws {
     var workspace = try sampleFile()
     try workspace.moveNode("node-3", into: nil)
-    #expect(workspace.layerRows.map(\.id) == ["node-1", "node-2", "node-4", "node-3"])
-    #expect(workspace.layerRows.map(\.depth) == [0, 1, 2, 0])
+    #expect(workspace.layerRows.map(\.id) == ["node-3", "node-1", "node-2", "node-4"])
+    #expect(workspace.layerRows.map(\.depth) == [0, 0, 1, 2])
     // A parent moves into a former child's old ancestor; its subtree comes with it.
     try workspace.moveNode("node-2", into: nil)
     try workspace.moveNode("node-1", into: "node-2")
-    #expect(workspace.layerRows.map(\.id) == ["node-3", "node-2", "node-4", "node-1"])
-    #expect(workspace.layerRows.map(\.depth) == [0, 0, 1, 1])
+    #expect(workspace.layerRows.map(\.id) == ["node-2", "node-1", "node-4", "node-3"])
+    #expect(workspace.layerRows.map(\.depth) == [0, 1, 1, 0])
 }
 
 @Test func aNodeCannotMoveIntoANodeOnAnotherPage() throws {
@@ -107,12 +107,12 @@ private let box = DesignRect(x: 0, y: 0, width: 10, height: 10)
     try workspace.addNode(.text, frame: box)
     try workspace.deletePage("page-1")
     let id = try workspace.addNode(.instance, frame: box)
-    #expect(id == "node-6")
-    #expect(workspace.layerRows.map(\.id) == ["node-5", "node-6"])
+    #expect(id == "node-7")
+    #expect(workspace.layerRows.map(\.id) == ["node-7", "node-6", "node-5"])
     // node-3 went with its page, so selecting it is ignored.
     workspace.selectItem("node-3")
     #expect(workspace.selectedPageID == "page-2")
-    #expect(workspace.selectedNodeID == "node-6")
+    #expect(workspace.selectedNodeID == "node-7")
 }
 
 @Test func deletingTheSelectedPageSelectsItsNeighborAndClearsTheNode() throws {

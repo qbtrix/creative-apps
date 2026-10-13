@@ -126,9 +126,23 @@ every step.
   (SuiteUI's use a `suite.` prefix: `suite.sidebar`, `suite.inspector`,
   `suite.tools`) and find it with `app.descendants(matching: .any)["id"]`.
   Step names are unique within an app, because they become the PNG names.
-- **Look at the shots.** Open the `<app>-*.png` files your change touched from
-  `ui-screens`, the same way you check snapshots, and name them in the PR
-  body. Review-only.
+- **Look at the shots.** Name the `<app>-*.png` files your change touches in
+  the PR body. The reviewer opens them from the `ui-screens` artifact of the
+  next feature CI run on `dev`, the same way as snapshots. Review-only.
+- **The app audit checks every shot.** Each window shot runs the audit's
+  checks (disabled controls look dimmer, no overlapping controls, text
+  contrast, identifiers, nothing off the window, every control named) and
+  counts each app's distinct violations against `UITests/audit-baseline.json`.
+  A count may only go down: a fix lowers it in the same PR, and raising one
+  needs the captain's review. New checks come from faults
+  (docs/blueprints/app-audit.md, Growing the audit). Gate: the `macOS` job.
+- **One page per run: the contact sheet.** After the journeys, the `macOS`
+  job runs `scripts/contact-sheet`, which writes `contact-sheet.html` into
+  `ui-screens`: the commit, each app's audit counts against the baseline,
+  every journey's steps in order with each screen's violations, and the perf
+  reports (`BRUSH-LATENCY` and the like) from `.build/snapshots`. Download
+  `ui-screens` and open the page; the job summary carries the audit table.
+  Tested by `Tests/contact_sheet` in `scripts/ci`.
 
 ## Tests
 
@@ -138,7 +152,9 @@ every step.
 - **Bug fixes start red.** Write the test that reproduces the bug, see it fail,
   then fix the cause. Review-only.
 - **Proof is the gate.** "It compiles" is not done. Gate: `scripts/ci` prints
-  `CI: PASS`, and both CI jobs are green on the PR.
+  `CI: PASS` on your branch rebased on `origin/dev`, and the PR body carries
+  the `Fast-Check: pass` / `Head: <sha>` marker for that head. Both CI jobs
+  run on `dev` once a feature is built; `main` only takes a green `dev` SHA.
 
 ## Reading cost
 

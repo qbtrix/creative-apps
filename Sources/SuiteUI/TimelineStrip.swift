@@ -116,7 +116,8 @@ public struct TimelineStrip<ID: Hashable & Sendable>: View {
             let shown = visibleX ?? 0...Double(min(size.width, SuiteSize.timelineRulerSpan))
             let marks = mapping.rulerMarks(
                 visibleX: shown, tickSpacing: Double(SuiteSize.timelineTickSpacing),
-                labelSpacing: Double(SuiteSize.timelineLabelSpacing)
+                labelSpacing: Double(SuiteSize.timelineLabelSpacing),
+                digitWidth: Double(SuiteSize.timelineLabelDigit)
             )
             let labels = Set(marks.labels)
             var ticks = Path()

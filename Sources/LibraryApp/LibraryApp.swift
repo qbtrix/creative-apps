@@ -63,12 +63,14 @@ struct LibraryWindow: View {
 
 /// The photo grid, or the empty state whose button loads the samples until
 /// import lands (L2); an empty collection in a non-empty catalog gets an empty
-/// state without that button. Opening sets loupe mode; the loupe view is library-03.
+/// state that says how to fill it, with a button back to All Photos. Opening
+/// sets loupe mode; the loupe view is library-03.
 struct LibraryBrowser: View {
     let model: LibraryCatalog
     var onLoadSamples: @MainActor () -> Void = {}
     var onSelect: @MainActor (Set<String>) -> Void = { _ in }
     var onOpen: @MainActor (String) -> Void = { _ in }
+    var onShowAll: @MainActor () -> Void = {}
 
     var body: some View {
         if model.isEmpty {
@@ -76,10 +78,12 @@ struct LibraryBrowser: View {
                 "No Photos", systemImage: "photo.stack",
                 message: "Photos you import appear here, sorted by the date they were taken.",
                 action: ToolbarAction("Load Sample Photos", systemImage: "photo.badge.plus", perform: onLoadSamples))
-        } else if model.isSelectedCollectionEmpty {
+        } else if model.isSelectedCollectionEmpty, let collection = model.selectedCollection {
             EmptyStateView(
-                "No Photos in \(model.selectedCollection?.name ?? "This Collection")", systemImage: "photo.stack",
-                message: "Photos in this collection appear here.")
+                "No Photos in \(collection.name)", systemImage: "photo.stack", message: collection.emptyMessage,
+                action: collection.emptyActionTitle.map {
+                    ToolbarAction($0, systemImage: "photo.on.rectangle.angled", perform: onShowAll)
+                })
         } else {
             let side = CGFloat(model.cellSize)
             ThumbnailGrid(

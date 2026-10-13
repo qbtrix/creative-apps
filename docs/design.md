@@ -531,13 +531,13 @@ of settings. Those are flat fills from the graphite ladder.
 
 A canvas editor may use `EditorShell` instead of `SuiteWindow`. It is the
 layout of our Studio photo editor (Ripple's editor parts), rebuilt as native
-SwiftUI in SuiteUI. Photo uses it.
+SwiftUI in SuiteUI. Photo and Design use it.
 
 | Region | Component | Rules |
 |---|---|---|
 | Top bar | `EditorTopBar`, `EditorBarItem`, `EditorBarMenu`, `EditorBarDivider` | 48 pt. The app name, then the document name as a menu. Outlined icon-and-label commands and one filled primary (Export); undo and redo as icons; the save status. Every command here is also in the menu bar. |
 | Tool rail | `ToolbarGroup(style: .rail)` | Docked, flat, vertical. The selected tool sits on an accent well. Tooltips name the one-key shortcut ("Brush (B)"), which works while the canvas has focus. |
-| Canvas | `CanvasViewport`, `SelectionOutline`, `CropShade` | Rulers in document pixels along the top and left, a checkerboard behind the image, centered while it fits, scrolling with a 32 pt margin once it doesn't. Drags arrive in document pixels. |
+| Canvas | `CanvasViewport`, `SelectionOutline`, `CropShade` | Rulers in document pixels along the top and left, a checkerboard behind the image, centered while it fits, scrolling with a 32 pt margin once it doesn't. Drags arrive in document pixels. The image is clipped to the artboard; selection marks and handles in the overlay are not, so they show past its edge. |
 | Right panel | `SegmentedTabs`, then `InspectorSection`s | 280 pt, the tabs (Adjust, Layers) on top. A section's Reset icon shows only while the section differs from its defaults. A color is `InspectorColorRow`: the swatch plus its hex code, opening the system color panel. |
 | Status line | `ViewerStatusBar` | Status pills: zoom, document size, and the trailing slot for the render time. |
 | Timeline (optional) | `EditorShell(timeline:)`, `TimelineStrip`, `TransportCapsule` | A resizable, collapsible bottom slot. |
@@ -557,6 +557,24 @@ SwiftUI in SuiteUI. Photo uses it.
   decimal for pixels and EV (`decimals:` on `ScrubField` and the slider row).
 - **Fits the window minimum.** Rail, content minimum and panel add up to no
   more than `SuiteSize.windowMinimum` (TokensTests checks it).
+
+## Studio rows and chips
+
+Some editors (Flare's easing editor first) use the Studio look in their
+inspector: rounded, filled controls instead of the Pro density rows. They are
+flat controls, never glass, and their rounding is a deliberate exception to
+"no rounded cards inside an inspector".
+
+| Part | Component | Rules |
+|---|---|---|
+| Group header | `Text` in `SuiteFont.sectionCaps`, `.textCase(.uppercase)`, `.tracking(SuiteSize.capsTracking)` | Secondary color; 12 pt above, 4 pt below. |
+| Number row | `StudioScrubRow` | 28 pt, full width, radius `SuiteRadius.row`. Label inside on the left, value right in two-decimal tabular figures. The fill runs to the value; it turns accent while dragged. Drag, click to type, Up and Down nudge. |
+| Presets | `ChoiceChips` | Three columns of 24 pt chips. One active chip at most: selected well plus an accent border. |
+| Curve | `CurveEditor` | 180 pt well. Handles are 10 pt with a 28 pt hit target; the focused or dragged one is accent with a ring 2 pt out. Arrow keys nudge 0.01, Shift 0.1; Tab moves between handles; a drag focuses the handle it moved. |
+
+Color carries meaning only: accent is selected or active, `SuiteColor.keyframed`
+(amber) is a keyframe. Each drag, nudge or typed value ends in one `onEnd`, so
+the host makes it one undo step.
 
 ## Layers: content vs. control
 

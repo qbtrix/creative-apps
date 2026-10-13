@@ -8,8 +8,11 @@
 // reach `onKey` while the canvas has focus, which a drag on it gives it. The
 // host owns the zoom (the top bar and status bar show it) and learns the
 // viewport's size from `onSize` to work out a fit. CanvasLayout is the
-// placement math, plain and tested on its own. Content, not chrome: flat, no
-// glass. The artboard is the accessibility element `suite.canvas`.
+// placement math, plain and tested on its own. The content is clipped to the
+// artboard; the overlay (selection outlines and handles, inline editors) is
+// laid out on the artboard but not clipped, so marks on a shape that crosses
+// the document's edge still show. Content, not chrome: flat, no glass. The
+// artboard is the accessibility element `suite.canvas`.
 import SwiftUI
 
 /// Where the artboard sits in the scrollable canvas, in points.
@@ -61,7 +64,8 @@ public struct CanvasViewport<Content: View, Overlay: View>: View {
     @FocusState private var isFocused: Bool
 
     /// `documentSize` in pixels; `content` and `overlay` are laid out at the
-    /// artboard's size (the document at `zoom`), overlay on top.
+    /// artboard's size (the document at `zoom`), overlay on top. Only the
+    /// content is clipped to the artboard.
     public init(
         documentSize: CGSize, zoom: Double, pointer: PointerStyle? = nil,
         onSize: @escaping @MainActor (CGSize) -> Void = { _ in },
@@ -121,10 +125,11 @@ public struct CanvasViewport<Content: View, Overlay: View>: View {
                 ZStack(alignment: .topLeading) {
                     Rectangle().fill(ImagePaint(image: Self.checkerboard))
                     content
-                    overlay
                 }
                 .frame(width: layout.artboard.width, height: layout.artboard.height, alignment: .topLeading)
                 .clipped()
+                // Above the clip, so a selection's handles past the document's edge still show.
+                .overlay(alignment: .topLeading) { overlay }
                 .accessibilityElement(children: .contain)
                 .accessibilityIdentifier("suite.canvas")
                 .padding(.leading, layout.origin.x)

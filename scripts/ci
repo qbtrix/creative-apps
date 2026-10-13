@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # scripts/ci: the one gate. Runs the no-crash lint, the app-state rule, the
-# design lint, the C4 ownership check, the duplicate-code check, swift build
-# and swift test, then prints PASS or FAIL and exits with the real status. CI
+# design lint, the C4 ownership check, the duplicate-code check, the contact
+# sheet test, swift build and swift test, then prints PASS or FAIL and exits with the real status. CI
 # runs exactly this on Linux and macOS; run it before every PR. On Linux,
 # Package.swift declares only the Model targets, so build and test cover those;
 # on macOS they cover everything.
@@ -39,6 +39,9 @@
 # every Sources/**/*.swift file must be owned by exactly one component's
 # `paths` entry (a file, a folder prefix or a glob). Tests/ is not scanned. It
 # needs jq and runs a self-test on a scratch tree first.
+#
+# The contact sheet check runs Tests/contact_sheet, the fixture test for
+# scripts/contact-sheet (the macOS job's review page). It needs jq.
 #
 # The duplicate check runs jscpd (pinned) over Sources/ and fails when duplicated
 # lines exceed JSCPD_THRESHOLD percent. It starts at creative-core's threshold
@@ -238,6 +241,9 @@ else
     --threshold "$JSCPD_THRESHOLD" Sources/ \
     || fail "jscpd: duplicated lines over $JSCPD_THRESHOLD%; move the shared code into SuiteUI or a Model instead of copying it"
 fi
+
+echo "== contact sheet (Tests/contact_sheet)"
+bash Tests/contact_sheet/test_contact_sheet.sh || fail "contact sheet: scripts/contact-sheet broke its fixture test"
 
 flags=()
 if [[ "$(uname)" == Darwin ]]; then
