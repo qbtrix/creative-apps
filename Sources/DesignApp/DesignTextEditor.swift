@@ -9,8 +9,9 @@
 // size x zoom, not a scaled view: AppKit's text field and its field editor do not hit-test
 // or edit correctly under a scale transform. The draft goes out as `.textDraft`; Return and
 // losing focus send `.commitText`, Escape sends `.cancelText`. It must take keyboard focus as
-// it appears, or typed letters reach the canvas as tool shortcuts. The canvas does not paint
-// the edited node's text, so nothing here repeats it. Presentation state only: focus.
+// it appears, which it can only because the canvas stops being focusable during the edit
+// (DesignCanvas). The canvas does not paint the edited node's text, so nothing here
+// repeats it. Presentation state only: focus.
 import AppKit
 import DesignModel
 import SuiteUI
@@ -60,8 +61,7 @@ private struct DesignTextField: View {
             .font(.system(size: Self.bodyPoints * scale))
             .foregroundStyle(node.fill.color)
             .focused($focused)
-            // Not a bare `focused = true` in onAppear: on macOS a focus set in the update that
-            // adds the field doesn't take, and typed keys would go nowhere. `.task` sets it a turn later.
+            // A turn after the field appears, once the canvas has stopped being focusable.
             .task { focused = true }
             .onSubmit { perform(.commitText) }
             .onExitCommand { perform(.cancelText) }

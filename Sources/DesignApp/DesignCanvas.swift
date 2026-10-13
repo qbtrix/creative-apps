@@ -5,7 +5,9 @@
 // the workspace as `.drag` with the modifier keys held, and the release as
 // `.endDrag`; the workspace decides what a press hits and which tool acts. The
 // overlay ends with DesignTextOverlay, the inline text editor. Keys reach the
-// canvas while it has focus, except during an inline text edit, which owns them.
+// canvas while it has focus. During an inline text edit the canvas passes no key
+// handler, so CanvasViewport stops being focusable: a focusable view around the
+// text field would keep the field from taking the keyboard.
 // Content, not chrome: flat, no glass.
 import DesignModel
 import SuiteUI
@@ -36,7 +38,8 @@ struct DesignCanvas: View {
         return CanvasViewport(
             documentSize: CGSize(width: page.frameWidth, height: page.frameHeight), zoom: zoom,
             pointer: model.tool.pointer, onSize: onViewport, onZoom: onZoom,
-            onDrag: { perform(.drag($0, $1, .current)) }, onDragEnd: { perform(.endDrag) }, onKey: key
+            onDrag: { perform(.drag($0, $1, .current)) }, onDragEnd: { perform(.endDrag) },
+            onKey: model.editingTextID == nil ? { key($0) } : nil
         ) {
             DesignArtwork(painted: painted, zoom: zoom, editingTextID: model.editingTextID)
         } overlay: {
@@ -48,10 +51,9 @@ struct DesignCanvas: View {
     }
 
     /// Arrows nudge the selection (Shift: ten points), Delete removes it, Escape deselects, Return
-    /// edits a selected text node, and a tool's letter picks that tool. Anything else, and every
-    /// key while a text edit is open, is left to the system.
+    /// edits a selected text node, and a tool's letter picks that tool. Anything else is left to the system.
     private func key(_ press: KeyPress) -> KeyPress.Result {
-        guard model.editingTextID == nil, press.modifiers.subtracting(.shift).isEmpty else { return .ignored }
+        guard press.modifiers.subtracting(.shift).isEmpty else { return .ignored }
         let shift = press.modifiers.contains(.shift)
         let selection = model.selectedNode
         switch press.key {
