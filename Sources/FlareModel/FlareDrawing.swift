@@ -2,28 +2,39 @@
 // from its start to the pointer; `draft` is the ellipse inscribed in that box
 // while the drag runs, and the drag's end commits it as a new "Ellipse N"
 // layer above the selected one, in one "Add Ellipse" undo step. A drag whose
-// box is narrower or shorter than `minimumEllipseExtent` (a click with pointer
-// jitter) adds nothing.
+// box is narrower or shorter than `minimumEllipseExtent` stage points (a click
+// with pointer jitter) adds nothing, at whatever scale the stage is fit to.
 import FlareCore
 
 extension FlareWorkspace {
-    /// The smallest width and height, in scene points, a drag's box needs to
-    /// make an ellipse. A click's sub-point pointer jitter stays below it, so
-    /// it adds no invisible layer and no undo step.
+    /// The smallest width and height, in stage (view) points, a drag's box
+    /// needs to make an ellipse. A click's sub-point pointer jitter stays below
+    /// it, so it adds no invisible layer and no undo step.
     public static let minimumEllipseExtent = 1.0
+
+    /// `minimumEllipseExtent` in scene points on a stage drawn at `stageScale`
+    /// stage points per scene point (its fit scale). A scale that is not
+    /// finite and positive, or one so small the minimum overflows, falls back
+    /// to scale 1.
+    public static func minimumEllipseExtent(atStageScale stageScale: Double) -> Double {
+        guard stageScale.isFinite, stageScale > 0 else { return minimumEllipseExtent }
+        let extent = minimumEllipseExtent / stageScale
+        return extent.isFinite ? extent : minimumEllipseExtent
+    }
 
     /// The ellipse inscribed in the box from `start` to `end`, as four cubic
     /// quarters with the box's edge midpoints as the polyline fallback; nil
-    /// when the box is narrower or shorter than `minimumEllipseExtent`, or a
+    /// when the box is narrower or shorter than `minimumEllipseExtent` stage
+    /// points at `stageScale` (see `minimumEllipseExtent(atStageScale:)`), or a
     /// coordinate, the centre or a radius is not finite. The centre is the
     /// box's min corner plus half its size, so corners near the largest finite
     /// value don't overflow their sum.
     /// Stopgap until FlareCore's `Shape.ellipse(in:)` (qbtrix/creative-core#182)
     /// lands; then this returns that builder's shape.
-    public static func ellipse(from start: Point, to end: Point) -> FlareShape? {
+    public static func ellipse(from start: Point, to end: Point, stageScale: Double = 1) -> FlareShape? {
         let width = abs(end.x - start.x), height = abs(end.y - start.y)
-        guard width.isFinite, height.isFinite,
-            width >= minimumEllipseExtent, height >= minimumEllipseExtent
+        let minimum = minimumEllipseExtent(atStageScale: stageScale)
+        guard width.isFinite, height.isFinite, width >= minimum, height >= minimum
         else { return nil }
         let rx = width / 2, ry = height / 2
         let c = Point(x: min(start.x, end.x) + rx, y: min(start.y, end.y) + ry)
@@ -48,8 +59,8 @@ extension FlareWorkspace {
     /// Adds the ellipse from `start` to `end` as a new "Ellipse N" layer (the
     /// smallest N no layer uses as a name or id) above the selected layer, on
     /// top without one, and selects it. One "Add Ellipse" undo step.
-    mutating func commitEllipse(from start: Point, to end: Point) {
-        guard let shape = Self.ellipse(from: start, to: end) else { return }
+    mutating func commitEllipse(from start: Point, to end: Point, stageScale: Double) {
+        guard let shape = Self.ellipse(from: start, to: end, stageScale: stageScale) else { return }
         guard let scene = selectedScene else { return refuse(.noDocument) }
         let taken = Set(scenes.flatMap { $0.layers.flatMap { [$0.id, $0.name] } })
         var n = 1
