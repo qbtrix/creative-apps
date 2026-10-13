@@ -127,10 +127,10 @@ extension DesignWorkspace {
         let delta = DesignPoint(x: end.x - current.start.x, y: end.y - current.start.y)
         switch current.route {
         case .move(let id):
-            pages = current.before.pages
+            restorePages(current.before)
             _ = pages.update(id) { $0.translate(by: delta) }
         case .resize(let id, let handle, let original):
-            pages = current.before.pages
+            restorePages(current.before)
             let frame = original.resized(
                 handle, by: delta, keepAspect: modifiers.contains(.shift), fromCenter: modifiers.contains(.option))
             _ = pages.update(id) { $0.frame = frame }
@@ -142,6 +142,13 @@ extension DesignWorkspace {
             break
         }
         gesture = current
+    }
+
+    /// Puts back the gesture's starting pages and their held-id index together, so an edit
+    /// made mid-drag can't leave `held` out of step with the pages (#443).
+    private mutating func restorePages(_ before: DesignSnapshot) {
+        pages = before.pages
+        held.replace(with: before.heldIDs)
     }
 
     /// Ends the gesture: records its undo step when it changed the document, starts the
