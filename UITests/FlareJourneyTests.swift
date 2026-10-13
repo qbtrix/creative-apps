@@ -37,11 +37,9 @@ final class FlareJourneyTests: XCTestCase {
         }
         XCTAssert(flare.app.staticTexts["Pick a keyframe above."].exists, "no hint to pick a keyframe")
 
-        // On the runner's 1024-wide screen the inspector fits only with the sidebar hidden.
-        flare.app.menuBars.menuBarItems["View"].click()
-        let hide = flare.app.menuBars.menuItems["Hide Sidebar"]
-        XCTAssert(hide.waitForExistence(timeout: 5), "no View > Hide Sidebar")
-        hide.click()
+        // On the runner's 1024-wide screen the inspector fits only with the
+        // sidebar hidden: View > Hide Sidebar, by its shortcut.
+        flare.app.typeKey("s", modifierFlags: [.control, .command])
 
         flare.click("x 0 → 24", in: .window, step: "easing-segment")
         XCTAssert(flare.element("flare.easing.row.x1").waitForExistence(timeout: 10), "no X1 row")
@@ -75,9 +73,13 @@ final class FlareJourneyTests: XCTestCase {
 
         // Five nudges and one drag are six undo steps, each named for the edit.
         for undo in 1...6 {
-            flare.app.menuBars.menuBarItems["Edit"].click()
+            let edit = flare.app.menuBars.menuBarItems["Edit"]
+            edit.click()
             let item = flare.app.menuBars.menuItems["Undo Set Keyframe Easing"]
-            XCTAssert(item.waitForExistence(timeout: 5), "Edit > Undo isn't named Undo Set Keyframe Easing")
+            if !item.waitForExistence(timeout: 5) {
+                let titles = edit.menuItems.allElementsBoundByIndex.map(\.title)
+                XCTFail("Edit > Undo isn't named Undo Set Keyframe Easing: \(titles)")
+            }
             if undo == 1 { flare.shot("easing-undo-menu", screen: true) }
             item.click()
         }
