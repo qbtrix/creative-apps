@@ -6,7 +6,9 @@
 // view draws the live window and the snapshots. A control that can't act now is
 // disabled with a tooltip saying why, and every top bar command is also in the
 // menu bar (DesignCommands). `documentName` is the file's name; an open file with
-// none is "Untitled".
+// none is "Untitled". Undo and Redo carry `design.bar.undo` / `design.bar.redo`:
+// their titles name the edit, so the identifier is what stays put for the UI
+// journeys and the app audit.
 import DesignModel
 import SuiteUI
 import SwiftUI
@@ -65,10 +67,12 @@ struct DesignTopBar: View {
                 ToolbarAction(menu.undoTitle, systemImage: "arrow.uturn.backward", unavailableHelp: menu.undoHelp) {
                     perform(.undo)
                 }, showsTitle: false)
+            .accessibilityIdentifier("design.bar.undo")
             EditorBarItem(
                 ToolbarAction(menu.redoTitle, systemImage: "arrow.uturn.forward", unavailableHelp: menu.redoHelp) {
                     perform(.redo)
                 }, showsTitle: false)
+            .accessibilityIdentifier("design.bar.redo")
             Spacer(minLength: SuiteSpacing.s)
             ForEach(zoomActions(unavailableHelp: closed)) { EditorBarItem($0, showsTitle: false) }
         }
