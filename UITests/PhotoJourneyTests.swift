@@ -1,8 +1,9 @@
 // PhotoJourneyTests.swift: Photo driven like a person would, with a
 // whole-window screenshot after every step (see Journey.swift). Journeys open
 // a PNG the test writes (-PhotoOpenFile) and export to -PhotoExportTo, so no
-// panel opens. Tier 1 (docs/priorities.md): testOpenImagePaintAndSave (Save,
-// PNG and JPEG export, reopen), testTier1CropResize, testTier1Tone,
+// panel opens. Tier 1 (docs/priorities.md): testOpenImagePaintAndSave (two
+// Exposure drags as two undo steps, Save, PNG and JPEG export, reopen),
+// testTier1CropResize, testTier1Tone,
 // testTier1UndoRedoZoomPan and testTier1Layers. Edits are checked by their
 // undo names, sizes and layer counts by the panel header, values XCUITest
 // can't read by the canvas pixels; tier-1 files are named tools.png, a name
@@ -78,6 +79,14 @@ final class PhotoJourneyTests: XCTestCase {
         typeValue("1.5", into: "Exposure", photo)
         expect("Undo Exposure", photo, "typing 1.5 into Exposure made no Exposure step")
         photo.shot("exposure")
+
+        // Two drags of one slider are two undo steps (#539): undoing the second
+        // leaves the first, still "Undo Exposure".
+        drag("Exposure", by: 0.35, photo)
+        drag("Exposure", by: -0.35, photo)
+        photo.click("Undo Exposure", in: .window, step: "exposure-two-drags-undone")
+        expect("Redo Exposure", photo, "Undo didn't undo the second drag")
+        XCTAssert(photo.app.buttons["Undo Exposure"].exists, "the two drags were one undo step")
 
         // Save (Command-S) writes over the opened file, in its own format.
         photo.app.typeKey("s", modifierFlags: .command)

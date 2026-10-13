@@ -1,12 +1,14 @@
 // AdjustmentsInspector.swift: the Adjust tab's adjustment sections (Exposure,
-// Levels, Hue/Saturation, Blur), each with an enable checkbox, slider rows
-// and a Reset icon that shows while the section differs from its defaults.
+// Levels, Hue/Saturation, Blur), each with an enable checkbox, bar sliders
+// (Gamma on its log track) and a Reset icon that shows while the section
+// differs from its defaults.
 // Values in, one closure out: every change goes out as an AdjustmentEdit, and
 // AdjustmentSettings clamps and validates it. A disabled section dims its
 // rows. Numbers show whole degrees and percents, one decimal for EV and px,
 // and levelsDecimals for Black and White, so distinct points read distinct.
 // Curves (CurvesEditor) sits between Levels and Hue/Saturation, over
-// `histogram`; its gesture's end goes out as onEditEnd (one undo step).
+// `histogram`. The end of every gesture, a curve drag or a bar slider's drag,
+// key step or typed value, goes out as onEditEnd, so each is one undo step.
 import PhotoModel
 import SuiteUI
 import SwiftUI
@@ -20,37 +22,27 @@ struct AdjustmentsInspector: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             section(.exposure) {
-                InspectorSliderRow(
-                    "Exposure", value: Double(settings.exposure), in: Self.doubles(AdjustmentSettings.exposureRange),
-                    unit: "EV", decimals: 1) { onEdit(.exposure(Float($0))) }
+                slider("Exposure", Double(settings.exposure), Self.doubles(AdjustmentSettings.exposureRange), unit: "EV", decimals: 1) {
+                    .exposure(Float($0))
+                }
             }
             section(.levels) {
-                InspectorSliderRow(
-                    "Black", value: Double(settings.blackPoint), in: Self.doubles(AdjustmentSettings.levelsRange),
-                    decimals: AdjustmentSettings.levelsDecimals) { onEdit(.blackPoint(Float($0))) }
-                InspectorSliderRow(
-                    "White", value: Double(settings.whitePoint), in: Self.doubles(AdjustmentSettings.levelsRange),
-                    decimals: AdjustmentSettings.levelsDecimals) { onEdit(.whitePoint(Float($0))) }
+                slider("Black", Double(settings.blackPoint), Self.doubles(AdjustmentSettings.levelsRange),
+                       decimals: AdjustmentSettings.levelsDecimals) { .blackPoint(Float($0)) }
+                slider("White", Double(settings.whitePoint), Self.doubles(AdjustmentSettings.levelsRange),
+                       decimals: AdjustmentSettings.levelsDecimals) { .whitePoint(Float($0)) }
                 gammaRow
             }
             section(.curves) {
                 CurvesEditor(settings: settings, histogram: histogram, onEdit: onEdit, onEnd: onEditEnd)
             }
             section(.hueSaturation) {
-                InspectorSliderRow("Hue", value: settings.hue, in: AdjustmentSettings.hueRange, unit: "°", decimals: 0) {
-                    onEdit(.hue($0))
-                }
-                InspectorSliderRow(
-                    "Saturation", value: settings.saturation, in: AdjustmentSettings.percentRange, unit: "%", decimals: 0
-                ) { onEdit(.saturation($0)) }
-                InspectorSliderRow(
-                    "Lightness", value: settings.lightness, in: AdjustmentSettings.percentRange, unit: "%", decimals: 0
-                ) { onEdit(.lightness($0)) }
+                slider("Hue", settings.hue, AdjustmentSettings.hueRange, unit: "°", decimals: 0) { .hue($0) }
+                slider("Saturation", settings.saturation, AdjustmentSettings.percentRange, unit: "%", decimals: 0) { .saturation($0) }
+                slider("Lightness", settings.lightness, AdjustmentSettings.percentRange, unit: "%", decimals: 0) { .lightness($0) }
             }
             section(.blur) {
-                InspectorSliderRow("Radius", value: settings.blurSigma, in: AdjustmentSettings.sigmaRange, unit: "px", decimals: 1) {
-                    onEdit(.blurSigma($0))
-                }
+                slider("Radius", settings.blurSigma, AdjustmentSettings.sigmaRange, unit: "px", decimals: 1) { .blurSigma($0) }
             }
         }
     }
@@ -74,28 +66,30 @@ struct AdjustmentsInspector: View {
         { onEdit(.reset(kind)) }
     }
 
-    /// Gamma on a log10 track (GammaTrack), so 1 sits mid-track and a drag
-    /// into the midpoint detent snaps to exactly 1 (until #88); the
-    /// ScrubField shows and takes gamma itself, in hundredths, and commits as
-    /// .gammaField, so a click and click away (which re-sends the shown,
-    /// rounded text) leaves gamma as it was.
+    /// Gamma as a bar slider on a log10 track (GammaTrack), so 1 sits mid-row
+    /// and a drag or key into the midpoint detent snaps to exactly 1 (until
+    /// #88); typing takes gamma itself, in hundredths, and a click and click
+    /// away changes nothing (NumericInput.committed).
     private var gammaRow: some View {
-        InspectorRow("Gamma") {
-            HStack(spacing: SuiteSpacing.s) {
-                Slider(
-                    value: Binding(
-                        get: { GammaTrack.position(ofGamma: Double(settings.gamma)) },
-                        set: { onEdit(.gamma(Float(GammaTrack.snappedGamma(atPosition: $0)))) }),
-                    in: GammaTrack.positionRange
-                )
-                .accessibilityLabel("Gamma")
-                .accessibilityValue(NumericInput.format(Double(settings.gamma)))
-                ScrubField(
-                    "Gamma", value: Double(settings.gamma), in: Self.doubles(AdjustmentSettings.gammaRange), step: 0.01,
-                    decimals: AdjustmentSettings.gammaDecimals
-                ) { onEdit(.gammaField($0)) }
-            }
-        }
+        slider(
+            "Gamma", Double(settings.gamma), Self.doubles(AdjustmentSettings.gammaRange), step: 0.01,
+            decimals: AdjustmentSettings.gammaDecimals,
+            track: ScrubTrack(
+                positions: GammaTrack.positionRange, step: 0.01, position: { GammaTrack.position(ofGamma: $0) },
+                value: { GammaTrack.snappedGamma(atPosition: $0) })
+        ) { .gamma(Float($0)) }
+    }
+
+    /// A bar slider whose changes go out as `edit`, and whose gesture's end
+    /// (a drag, a key step, a typed value) goes out as onEditEnd, so each
+    /// gesture is its own undo step.
+    private func slider(
+        _ label: String, _ value: Double, _ range: ClosedRange<Double>, step: Double? = nil, unit: String = "",
+        decimals: Int, track: ScrubTrack? = nil, _ edit: @escaping (Double) -> AdjustmentEdit
+    ) -> some View {
+        InspectorSliderRow(
+            label, value: value, in: range, step: step, unit: unit, decimals: decimals, track: track,
+            onChange: { onEdit(edit($0)) }, onEnd: onEditEnd)
     }
 
     /// The slider rows take Double; exposure and levels are Float.
