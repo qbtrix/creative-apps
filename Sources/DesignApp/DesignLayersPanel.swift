@@ -1,6 +1,7 @@
 // DesignLayersPanel.swift: the Layers tab of Design's panel. One List in the
 // small source-list style: the file's pages, with Add Page and Delete Page in
-// a row under them, then the current page's layer tree. Selection runs through
+// a row under them, then the current page's layer tree, frontmost layer at the
+// top (`frontToBack`; the document keeps paint order). Selection runs through
 // the List, so arrow keys and type-select move through pages and layers; the
 // highlighted row is the selected layer, or the current page when no layer is.
 // The current page always carries a checkmark, so the page you are editing,
@@ -91,14 +92,14 @@ private struct DesignPageLabel: View {
     }
 }
 
-/// The rows of `nodes`, back to front, each with its children under a disclosure the workspace expands.
+/// The rows of `nodes`, frontmost first, each with its children under a disclosure the workspace expands.
 private struct DesignLayerTree: View {
     let nodes: [DesignNode]
     let model: DesignWorkspace
     let perform: DesignPerform
 
     var body: some View {
-        ForEach(nodes) { node in
+        ForEach(nodes.frontToBack) { node in
             if node.children.isEmpty {
                 DesignLayerLabel(node: node).tag(node.id)
             } else {

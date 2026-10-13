@@ -27,7 +27,8 @@ public struct DesignPage: Identifiable, Sendable, Hashable, Codable {
     /// Top-level nodes, back to front.
     public var nodes: [DesignNode] = []
 
-    /// The tree as rows: each node, then its children when its id is in `expanded`.
+    /// The tree as rows, frontmost first among siblings: each node, then its children when its id
+    /// is in `expanded`.
     public func visibleRows(expanded: Set<String>) -> [DesignRow] {
         nodes.rows(expanded: expanded)
     }

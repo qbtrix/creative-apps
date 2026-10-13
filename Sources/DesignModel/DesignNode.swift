@@ -1,15 +1,16 @@
 // DesignNode.swift: the node tree on a Design page, the plain geometry and color
 // types it is made of, and the tree flattened into rows under an expanded set
 // (DesignRow; the tests read the tree through it, the Layers panel walks
-// `children` itself). Linux-safe value types. Node ids are unique across the file; only frames and groups hold
-// children.
+// `children` itself, both in `frontToBack` order). Linux-safe value types. Node
+// ids are unique across the file; only frames and groups hold children.
 //
 // Coordinates: every node's frame is in absolute page points with a top-left
 // origin, children included. Moving a container shifts its whole subtree by the
 // same delta; resizing one never touches its children.
 // Order: paint order is depth first (a node, then its children, siblings back to
 // front in array order); hit order is the reverse. Hit testing skips a node that
-// is hidden or locked together with its subtree.
+// is hidden or locked together with its subtree. The Layers list runs front to
+// back: the frontmost sibling on top, each node's children under it.
 
 /// A point on a page, in points from its top-left corner.
 public struct DesignPoint: Sendable, Hashable, Codable {
@@ -233,9 +234,13 @@ public struct DesignModifiers: OptionSet, Sendable, Hashable {
 public enum DesignDirection: Sendable, CaseIterable { case up, down, left, right }
 
 extension [DesignNode] {
-    /// Rows in display order. A node's children show only when its id is in `expanded`.
+    /// These siblings as the Layers panel lists them: frontmost first, the reverse of paint order.
+    public var frontToBack: [DesignNode] { reversed() }
+
+    /// Rows in display order: siblings frontmost first, each node's children under it, shown only
+    /// when its id is in `expanded`.
     func rows(expanded: Set<String>, depth: Int = 0) -> [DesignRow] {
-        flatMap { node -> [DesignRow] in
+        frontToBack.flatMap { node -> [DesignRow] in
             let children = expanded.contains(node.id) ? node.children.rows(expanded: expanded, depth: depth + 1) : []
             return [DesignRow(node: node, depth: depth)] + children
         }

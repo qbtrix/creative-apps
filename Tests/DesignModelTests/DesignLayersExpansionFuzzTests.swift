@@ -28,10 +28,10 @@ private func allNodes(_ workspace: DesignWorkspace) -> [DesignNode] {
     return workspace.pages.flatMap { walk($0.nodes) }
 }
 
-/// The rows the selected page should show, rebuilt from isExpanded alone.
+/// The rows the selected page should show, frontmost first, rebuilt from isExpanded alone.
 private func expectedRows(_ workspace: DesignWorkspace) -> [String] {
     func walk(_ nodes: [DesignNode], _ depth: Int) -> [String] {
-        nodes.flatMap { node in
+        nodes.reversed().flatMap { node in
             ["\(node.id)@\(depth)"] + (workspace.isExpanded(node.id) ? walk(node.children, depth + 1) : [])
         }
     }
@@ -64,7 +64,7 @@ private func rows(_ workspace: DesignWorkspace) -> [String] { workspace.layerRow
     // A container in the new file is collapsed until something expands it.
     let group = try workspace.addNode(.group, frame: box)
     try workspace.addNode(.text, frame: box)
-    #expect(workspace.layerRows.map(\.id) == ["node-1", group, "node-3"])
+    #expect(workspace.layerRows.map(\.id) == ["node-3", group, "node-1"])
 }
 
 @Test func expandingIsRefusedWithNoFileOpenAndAfterAPageIsDeleted() throws {

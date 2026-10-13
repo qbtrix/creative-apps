@@ -46,5 +46,5 @@ private func fileWithRectangle() throws -> DesignWorkspace {
     #expect((group, child) == ("node-3", "node-4"))
     #expect(workspace.selectedNodeID == child)
     #expect(workspace.expandedNodeIDs.contains(group))
-    #expect(workspace.layerRows.map(\.node.id) == ["node-1", "node-2", "node-3", "node-4"])
+    #expect(workspace.layerRows.map(\.node.id) == ["node-3", "node-4", "node-1", "node-2"])
 }
