@@ -28,7 +28,7 @@ private struct SplitMix: RandomNumberGenerator {
         guard !a.isNaN, !b.isNaN else { continue }
         let (low, high) = a < b ? (a, b) : (b, a)
         #expect(minimum(low) >= minimum(high), "scales \(low) < \(high)")
-        #expect(minimum(a).isFinite && minimum(a) > 0, "scale \(a)")
+        #expect(minimum(a) > 0, "scale \(a)")
     }
 }
 
@@ -45,7 +45,7 @@ private struct SplitMix: RandomNumberGenerator {
     for _ in 0..<16 {
         scale = scale.nextUp
         let current = minimum(scale)
-        #expect(current <= previous && current.isFinite && current >= 1, "scale \(scale)")
+        #expect(current <= previous && current >= 1, "scale \(scale)")
         previous = current
     }
 }

@@ -1,7 +1,6 @@
 // FlareEllipseTinyScaleTests.swift: the Ellipse minimum never shrinks as the
 // stage scale does (#496). Down to the smallest positive scales it stays at
-// least 1 / scale scene points (or the largest finite extent once that
-// overflows), so a jittery click on a heavily zoomed-out stage adds no layer,
+// least 1 / scale scene points (or +infinity once that overflows, #502), so a jittery click on a heavily zoomed-out stage adds no layer,
 // no draft and no undo step. Zero, negative and infinite scales keep that
 // order. Runs on Linux and macOS.
 import FlareCore
@@ -23,7 +22,7 @@ private let m = FlareWorkspace.minimumEllipseExtent
     while let last = scales.last, last > .leastNonzeroMagnitude { scales.append(last / 3) }
     scales.append(.leastNonzeroMagnitude)
     let minimums = scales.map { FlareWorkspace.minimumEllipseExtent(atStageScale: $0) }
-    #expect(minimums.allSatisfy { $0.isFinite && $0 >= m })
+    #expect(minimums.allSatisfy { $0 >= m })
     #expect(zip(minimums, minimums.dropFirst()).allSatisfy { $0 <= $1 })
     for (scale, minimum) in zip(scales, minimums) where (m / scale).isFinite {
         #expect(minimum >= m / scale)
@@ -36,10 +35,10 @@ private let m = FlareWorkspace.minimumEllipseExtent
         .leastNormalMagnitude, .leastNonzeroMagnitude, 0, -0.0, -1, -.infinity,
     ]
     let minimums = ordered.map { FlareWorkspace.minimumEllipseExtent(atStageScale: $0) }
-    #expect(minimums.allSatisfy { $0.isFinite && $0 > 0 })
+    #expect(minimums.allSatisfy { $0 > 0 })
     #expect(zip(minimums, minimums.dropFirst()).allSatisfy { $0 <= $1 })
     for scale in [0.0, -0.0, -1, -.infinity, .leastNonzeroMagnitude] {
-        #expect(FlareWorkspace.minimumEllipseExtent(atStageScale: scale) == .greatestFiniteMagnitude)
+        #expect(FlareWorkspace.minimumEllipseExtent(atStageScale: scale) == .infinity)
     }
 }
 
