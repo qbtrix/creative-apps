@@ -113,6 +113,7 @@ extension DesignWorkspace {
         else { return }
         let before = snapshot
         _ = pages[page].nodes.remove(node.id)
+        held.remove([node])
         selectedNodeID = nil
         record("Delete \(node.kind.defaultName)", before: before)
     }

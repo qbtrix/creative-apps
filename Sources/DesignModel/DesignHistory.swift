@@ -1,10 +1,11 @@
 // DesignHistory.swift: Design's undo and redo. Every document edit records one
 // step: its name ("Add Rectangle") and the snapshot of the document just before
 // it. Undo swaps the current snapshot for the step's and keeps the current one
-// for Redo, and the reverse. A snapshot holds the pages, both selections and
-// the id counters. A restore sets each counter to the larger of the current and
-// the snapshot's, so an undone add never gives its id away again (a redo of New
-// File therefore doesn't restart the ids). The restored selection's enclosing
+// for Redo, and the reverse. A snapshot holds the pages, both selections, the
+// id counters and the held-id index (DesignHeldIDs). A restore sets each
+// counter to the larger of the current and the snapshot's, so an undone add
+// never gives its id away again (a redo of New File therefore doesn't restart
+// the ids). The restored selection's enclosing
 // rows expand; expansion is otherwise view state and is not undone. A step that
 // replaces the whole document (New File) is marked so, and the window asks
 // undoSwapsDocument / redoSwapsDocument instead of matching its name.
@@ -24,6 +25,8 @@ struct DesignSnapshot: Sendable, Equatable {
     var expandedNodeIDs: Set<String>
     var pageCount: Int
     var nodeCount: Int
+    /// Every page and node id in `pages` (DesignHeldIDs).
+    var heldIDs: Set<String>
 }
 
 struct DesignHistory: Sendable, Equatable {
@@ -73,7 +76,7 @@ extension DesignWorkspace {
     var snapshot: DesignSnapshot {
         DesignSnapshot(
             pages: pages, selectedPageID: selectedPageID, selectedNodeID: selectedNodeID,
-            expandedNodeIDs: expandedNodeIDs, pageCount: pageCount, nodeCount: nodeCount)
+            expandedNodeIDs: expandedNodeIDs, pageCount: pageCount, nodeCount: nodeCount, heldIDs: held.ids)
     }
 
     /// Records the edit just made as one step named `name`, undone by putting back `before`. Does
@@ -97,6 +100,7 @@ extension DesignWorkspace {
     /// Undo and redo: the document goes back to `snapshot`, the counters never go back.
     private mutating func restore(_ snapshot: DesignSnapshot) {
         pages = snapshot.pages
+        held.replace(with: snapshot.heldIDs)
         (selectedPageID, selectedNodeID) = (snapshot.selectedPageID, snapshot.selectedNodeID)
         (pageCount, nodeCount) = (Swift.max(pageCount, snapshot.pageCount), Swift.max(nodeCount, snapshot.nodeCount))
         if let page = selectedPage, let id = selectedNodeID { expandAncestors(of: id, in: page.nodes) }
@@ -106,6 +110,7 @@ extension DesignWorkspace {
     /// and expansion included, because nothing it made was ever recorded.
     mutating func rewind(to snapshot: DesignSnapshot) {
         pages = snapshot.pages
+        held.replace(with: snapshot.heldIDs)
         (selectedPageID, selectedNodeID, expandedNodeIDs) = (snapshot.selectedPageID, snapshot.selectedNodeID, snapshot.expandedNodeIDs)
         (pageCount, nodeCount) = (snapshot.pageCount, snapshot.nodeCount)
     }
