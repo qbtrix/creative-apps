@@ -17,6 +17,9 @@
 //   frame, rectangle, ellipse, text   DesignDrawing.
 //   pen     nothing.
 //
+// A drawing tool is good for one shape: once its gesture adds a node (a Text
+// click its node, whose edit then opens), the tool goes back to Move.
+//
 // Locked nodes never move, resize, change or delete, and neither hidden nor
 // locked nodes are hit. Linux-safe.
 
@@ -140,8 +143,9 @@ extension DesignWorkspace {
         gesture = current
     }
 
-    /// Ends the gesture: records its undo step when it changed the document, and starts the
-    /// inline edit of a text node the gesture placed or clicked.
+    /// Ends the gesture: records its undo step when it changed the document, starts the
+    /// inline edit of a text node the gesture placed or clicked, and puts a drawing tool that
+    /// added a node back to Move.
     public mutating func endDrag() {
         guard let done = gesture else { return }
         gesture = nil
@@ -153,10 +157,12 @@ extension DesignWorkspace {
             record("Resize", before: done.before)
         case .draw(let kind):
             record("Add \(kind.defaultName)", before: done.before)
+            tool = .move
         case .text:
             if let id = selectedNodeID, findNode(id)?.kind == .text {
                 (editingTextID, textDraft) = (id, "Text")
                 placedText = DesignPlacedText(id: id, before: done.before)
+                tool = .move
             }
         case .none:
             break
