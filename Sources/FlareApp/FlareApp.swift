@@ -3,7 +3,8 @@
 // inspector, the selected scene's summary and, while a layer is selected, the
 // easing editor (FlareEasingInspector on the live FlareWorkspace). New Sample
 // Animation (toolbar and File menu) opens a keyed document to edit; the menus
-// in FlareCommands reach the window through a focused scene value. A palette
+// in FlareCommands reach the window through a focused scene value, and View >
+// Hide Sidebar makes room for the inspector on a small screen. A palette
 // tool that doesn't work yet shows disabled with FlareTool.unavailableHelp as
 // its tooltip. Views only read FlareWorkspace and call its methods; all state
 // lives in FlareModel (scripts/ci checks this).
@@ -15,8 +16,12 @@ import SwiftUI
 struct FlareApp: App {
     var body: some Scene {
         WindowGroup { FlareWindow() }
-            .defaultSize(width: 1280, height: 820)
-            .commands { FlareCommands() }
+            // Fits a 1024 x 768 screen (the CI runner's) with the inspector in full.
+            .defaultSize(width: 1000, height: 700)
+            .commands {
+                SidebarCommands()
+                FlareCommands()
+            }
     }
 }
 

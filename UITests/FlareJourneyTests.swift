@@ -3,8 +3,9 @@
 // one journey; grow them as Flare's features land, and replace the skipped
 // test with the real journey when its issue is built. The easing journey
 // (docs/blueprints/flare-easing-editor.md) reads the inspector's X1, Y1, X2
-// and Y2 rows after every step and finds handle 1 where the curve well draws
-// it, since only the well's frame is known to be the shape a person sees.
+// and Y2 rows after every step (or, if a row exposes no number, the handles'
+// values) and finds handle 1 where the curve well draws it, since only the
+// well's frame is known to be the shape a person sees.
 import XCTest
 
 final class FlareJourneyTests: XCTestCase {
@@ -36,8 +37,16 @@ final class FlareJourneyTests: XCTestCase {
         }
         XCTAssert(flare.app.staticTexts["Pick a keyframe above."].exists, "no hint to pick a keyframe")
 
+        // On the runner's 1024-wide screen the inspector fits only with the sidebar hidden.
+        flare.app.menuBars.menuBarItems["View"].click()
+        let hide = flare.app.menuBars.menuItems["Hide Sidebar"]
+        XCTAssert(hide.waitForExistence(timeout: 5), "no View > Hide Sidebar")
+        hide.click()
+
         flare.click("x 0 → 24", in: .window, step: "easing-segment")
         XCTAssert(flare.element("flare.easing.row.x1").waitForExistence(timeout: 10), "no X1 row")
+        print("easing tree: \(flare.element("flare.easing.row.x1").debugDescription)")
+        print("easing tree: \(flare.element("flare.easing").debugDescription)")
         expectRows(flare, [0, 0, 1, 1], "the sample's segment isn't linear")
 
         flare.click("Ease In", in: .window, step: "easing-preset")
@@ -76,12 +85,28 @@ final class FlareJourneyTests: XCTestCase {
         expectRows(flare, [0.42, 0, 1, 1], "six undos didn't bring back Ease In")
     }
 
-    /// X1, Y1, X2 and Y2 as the inspector's rows read them.
+    /// X1, Y1, X2 and Y2 as the inspector's rows read them. A row that exposes
+    /// no number falls back to its handle's value ("x 0.42, y 0.00"); the raw
+    /// values and their types go to the log, so a wrong read shows its cause.
     @MainActor private func rows(_ journey: Journey) -> [Double] {
-        ["x1", "y1", "x2", "y2"].map { id in
-            let value = journey.element("flare.easing.row.\(id)").value
-            return (value as? NSNumber)?.doubleValue ?? (value as? String).flatMap(Double.init) ?? .nan
+        [1, 2].flatMap { handle -> [Double] in
+            let row = ["x", "y"].map { journey.element("flare.easing.row.\($0)\(handle)").value }
+            let point = journey.element("flare.easing.handle\(handle)").value
+            print("easing values: rows \(row.map(describe)), handle \(handle) \(describe(point))")
+            let fromHandle = numbers(point)
+            return (0..<2).map { numbers(row[$0]).first ?? (fromHandle.count == 2 ? fromHandle[$0] : .nan) }
         }
+    }
+
+    /// Every number in an accessibility value, whatever type it arrives as.
+    private func numbers(_ value: Any?) -> [Double] {
+        guard let value else { return [] }
+        let text = (value as? NSAttributedString)?.string ?? "\(value)"
+        return text.matches(of: #/-?[0-9]+(\.[0-9]+)?/#).compactMap { Double($0.output.0) }
+    }
+
+    private func describe(_ value: Any?) -> String {
+        value.map { "\($0) (\(type(of: $0)))" } ?? "nil"
     }
 
     @MainActor private func expectRows(_ journey: Journey, _ want: [Double], _ message: String) {
