@@ -1,21 +1,22 @@
-// InspectorRows.swift: the rows apps put in SuiteWindow's inspector, in the
-// dense "Pro density" layout of docs/design.md. InspectorSection is a system
-// DisclosureGroup with a flush header, a hairline above it and an optional
-// Reset icon, never a card. InspectorRow is the two-column row: a right-aligned
-// secondary label in the shared label column, then the value at the compact
-// control size. InspectorSliderRow is the bar slider (ScrubField's bar look),
-// a whole row on its own. The stepper, color and picker rows are InspectorRows
-// around a system control; their numbers are ScrubFields. Rows take the current value and an
-// `onChange` closure, never a binding: apps can't bind to their Model. No
-// glass: the inspector column is system chrome already. Components own
-// presentation state only (a section's expansion, a field's draft text).
+// InspectorRows.swift: the rows apps put in an inspector, in the filled
+// Studio look of docs/design.md (Studio rows and chips, the look of Flare's
+// easing editor). InspectorSection is a system DisclosureGroup under a small
+// caps header (12 pt above, 4 below, no hairline): the whole header toggles
+// it, the chevron shows on hover or while collapsed, and a Reset icon shows
+// while `onReset` is given. Its rows sit 4 pt apart, inset 12 pt from the
+// panel's edges. InspectorRow is the filled 28 pt Studio row every other row
+// shares: the label inside on the left in secondary text,
+// the value on the right, the hover fill; an empty label puts a checkbox and
+// its title on the left. InspectorSliderRow is the bar slider (ScrubField's
+// bar look); the stepper, color and picker rows are InspectorRows around a
+// system control. Rows take the current value and an `onChange` closure,
+// never a binding: apps can't bind to their Model. No glass. Components own presentation state only (a section's
+// expansion, hover, a field's draft text).
 import SwiftUI
 
-/// A titled group of inspector rows the user can collapse: a hairline, then
-/// a 22 pt header row (chevron and small semibold secondary title, plus a
-/// small Reset icon while `onReset` is given), then the rows with no gaps
-/// between them. Pass `onReset` only while the section differs from its
-/// defaults, so the icon shows exactly when it would change something.
+/// A titled group of inspector rows the user can collapse. Pass `onReset`
+/// only while the section differs from its defaults, so the icon shows
+/// exactly when it would change something.
 public struct InspectorSection<Content: View>: View {
     private let title: String
     private let onReset: (@MainActor () -> Void)?
@@ -33,69 +34,82 @@ public struct InspectorSection<Content: View>: View {
     }
 
     public var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            Divider()
-            ZStack(alignment: .topTrailing) {
-                DisclosureGroup(isExpanded: $isExpanded) {
-                    VStack(alignment: .leading, spacing: 0) { content }
-                        .padding(.bottom, SuiteSpacing.s)
-                } label: {
-                    Text(title).font(SuiteFont.inspectorSection).foregroundStyle(SuiteColor.secondaryText)
-                }
-                .disclosureGroupStyle(InspectorDisclosureStyle())
-                if let onReset {
-                    Button(action: onReset) {
-                        Image(systemName: "arrow.counterclockwise")
-                            .font(SuiteFont.inspectorSection)
-                            .foregroundStyle(SuiteColor.secondaryText)
-                            .frame(height: SuiteSize.inspectorRow)
-                            .contentShape(.rect)
-                    }
-                    .buttonStyle(.plain)
-                    .help("Reset \(title)")
-                    .accessibilityLabel("Reset \(title)")
-                }
-            }
+        DisclosureGroup(isExpanded: $isExpanded) {
+            VStack(alignment: .leading, spacing: SuiteSpacing.xs) { content }
+        } label: {
+            Text(title)
         }
+        .disclosureGroupStyle(InspectorDisclosureStyle(title: title, onReset: onReset))
+        .padding(.horizontal, SuiteSpacing.m)
     }
 }
 
-/// The section header: the whole row toggles, the chevron turns, and the
-/// content sits flush under it with no indent, so every row keeps the shared
-/// label column.
+/// The section's rows flush under its header.
 private struct InspectorDisclosureStyle: DisclosureGroupStyle {
+    let title: String
+    let onReset: (@MainActor () -> Void)?
+
     func makeBody(configuration: Configuration) -> some View {
         VStack(alignment: .leading, spacing: 0) {
-            Button {
-                configuration.isExpanded.toggle()
-            } label: {
-                HStack(spacing: SuiteSpacing.xs) {
-                    Image(systemName: "chevron.right")
-                        .font(SuiteFont.inspectorSection)
-                        .foregroundStyle(SuiteColor.secondaryText)
-                        .rotationEffect(.degrees(configuration.isExpanded ? 90 : 0))
-                    configuration.label
-                    Spacer(minLength: 0)
-                }
-                .frame(height: SuiteSize.inspectorRow)
-                .contentShape(.rect)
-            }
-            .buttonStyle(.plain)
-            .accessibilityAddTraits(.isHeader)
-            .accessibilityValue(configuration.isExpanded ? "Expanded" : "Collapsed")
+            InspectorSectionHeader(title: title, isExpanded: configuration.$isExpanded, onReset: onReset)
             if configuration.isExpanded { configuration.content }
         }
     }
 }
 
-/// One two-column inspector row: `label` right-aligned in secondary text in
-/// the shared label column (SuiteSize.inspectorLabelColumn), then `value`
-/// filling the rest, at least SuiteSize.inspectorRow tall, with controls at
-/// SuiteSize.compactControl. An empty label leaves the column blank, for a
-/// checkbox that carries its own title.
+/// The caps title and chevron (shown on hover or while collapsed) toggle the
+/// section; the Reset icon sits after them.
+private struct InspectorSectionHeader: View {
+    let title: String
+    @Binding var isExpanded: Bool
+    let onReset: (@MainActor () -> Void)?
+    @State private var hovering = false
+
+    var body: some View {
+        HStack(spacing: SuiteSpacing.xs) {
+            Button {
+                isExpanded.toggle()
+            } label: {
+                HStack(spacing: SuiteSpacing.xs) {
+                    Text(title).textCase(.uppercase).tracking(SuiteSize.capsTracking)
+                    Spacer(minLength: 0)
+                    Image(systemName: "chevron.right")
+                        .imageScale(.small)
+                        .rotationEffect(.degrees(isExpanded ? 90 : 0))
+                        .opacity(hovering || !isExpanded ? 1 : 0)
+                }
+                .contentShape(.rect)
+            }
+            .buttonStyle(.plain)
+            .accessibilityAddTraits(.isHeader)
+            .accessibilityValue(isExpanded ? "Expanded" : "Collapsed")
+            if let onReset {
+                Button(action: onReset) {
+                    Image(systemName: "arrow.counterclockwise").imageScale(.small).contentShape(.rect)
+                }
+                .buttonStyle(.plain)
+                .help("Reset \(title)")
+                .accessibilityLabel("Reset \(title)")
+            }
+        }
+        .font(SuiteFont.sectionCaps)
+        .foregroundStyle(SuiteColor.secondaryText)
+        .padding(.top, SuiteSpacing.m)
+        .padding(.bottom, SuiteSpacing.xs)
+        .onHover { hovering = $0 }
+    }
+}
+
+/// One filled inspector row, the Studio row's 28 pt: `label` inside on
+/// the left in secondary text, `value` on the right at SuiteSize.compactControl,
+/// the hover fill. Disabled, the label dims to 40% with its control. An empty
+/// label leaves `value` on the left, for a checkbox that carries its own title.
 public struct InspectorRow<Value: View>: View {
     private let label: String
     private let value: Value
+    @State private var hovering = false
+    @Environment(\.isEnabled) private var isEnabled
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     public init(_ label: String, @ViewBuilder value: () -> Value) {
         self.label = label
@@ -104,17 +118,24 @@ public struct InspectorRow<Value: View>: View {
 
     public var body: some View {
         HStack(spacing: SuiteSpacing.s) {
-            Text(label)
-                .font(SuiteFont.inspectorLabel)
-                .foregroundStyle(SuiteColor.secondaryText)
-                .lineLimit(1)
-                .truncationMode(.middle)
-                .frame(width: SuiteSize.inspectorLabelColumn, alignment: .trailing)
+            if !label.isEmpty {
+                Text(label)
+                    .font(SuiteFont.inspectorLabel)
+                    .foregroundStyle(SuiteColor.secondaryText)
+                    .lineLimit(1)
+                    .truncationMode(.middle)
+                    .layoutPriority(1)
+                    .opacity(isEnabled ? 1 : SuiteColor.disabledOpacity)
+            }
             value
                 .font(SuiteFont.inspectorLabel)
-                .frame(maxWidth: .infinity, alignment: .leading)
+                .frame(maxWidth: .infinity, alignment: label.isEmpty ? .leading : .trailing)
         }
-        .frame(minHeight: SuiteSize.inspectorRow)
+        .padding(.horizontal, SuiteSpacing.m)
+        .frame(minHeight: SuiteSize.studioRow)
+        .background(hovering && isEnabled ? SuiteColor.field : SuiteColor.panelRaised, in: .rect(cornerRadius: SuiteRadius.row))
+        .onHover { hovering = $0 }
+        .animation(SuiteMotion.state(reduceMotion: reduceMotion), value: hovering)
         .controlSize(SuiteSize.compactControl)
     }
 }
