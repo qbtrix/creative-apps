@@ -12,10 +12,11 @@
 // SidebarRow with an eye and a lock toggle (`layerToggles`); a click flips
 // that layer's own flag, one undo step (#45). A layer hidden by itself or by
 // a group around it reads dimmed, and a child of a hidden or locked group
-// shows the group's state in its toggles. Each row is an accessibility
-// container with the identifier `design.layer.<id>` and its toggles inside it,
-// so a group's row, which is also its disclosure's label, isn't read as one
-// unnamed control. Values in, intents out.
+// shows the group's state in its toggles. Each row carries the identifier
+// `design.layer.<id>`: a leaf row is a container with its toggles inside, and a
+// group's row, its disclosure's label, reads as one checkbox, so the identifier
+// is what names it. The section headers use SuiteColor.textSecondary; the
+// sidebar style's own header gray is under 4.5:1. Values in, intents out.
 import DesignModel
 import SuiteUI
 import SwiftUI
@@ -26,19 +27,23 @@ struct DesignLayersPanel: View {
 
     var body: some View {
         List(selection: selection) {
-            Section("Pages") {
+            Section {
                 ForEach(model.pages) { page in
                     DesignPageLabel(page: page, isCurrent: page.id == model.selectedPageID).tag(page.id)
                 }
                 // A row, not the section header: a sidebar header hides its buttons from accessibility.
                 pageActions
+            } header: {
+                header("Pages")
             }
-            Section("Layers") {
+            Section {
                 if let nodes = model.selectedPage?.nodes, !nodes.isEmpty {
                     DesignLayerTree(nodes: nodes, model: model, perform: perform)
                 } else {
                     DesignPanelHint("Nothing on this page yet.")
                 }
+            } header: {
+                header("Layers")
             }
         }
         // The source-list style draws the selection on a row inside a disclosure; the plain one doesn't.
@@ -47,6 +52,10 @@ struct DesignLayersPanel: View {
         .scrollContentBackground(.hidden)
         .font(SuiteFont.inspectorLabel)
         .accessibilityIdentifier("design.layers")
+    }
+
+    private func header(_ title: String) -> some View {
+        Text(title).foregroundStyle(SuiteColor.textSecondary)
     }
 
     /// Picking a row selects that page or layer; clicking empty space deselects the layer.
