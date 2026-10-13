@@ -26,12 +26,15 @@ public enum GridSelection {
     public static func click<ID: Hashable>(
         _ id: ID, _ kind: Click, order: [ID], selection: Set<ID>, anchor: ID?
     ) -> Result<ID> {
-        guard let target = order.firstIndex(of: id) else { return Result(selection: selection, anchor: anchor) }
+        guard let target = order.firstIndex(of: id) else {
+            return Result(selection: selection.intersection(order), anchor: anchor)
+        }
         switch kind {
         case .plain:
             return Result(selection: [id], anchor: id)
         case .toggle:
-            var next = selection
+            // Ids the grid no longer shows drop out, as Shift-click's do.
+            var next = selection.intersection(order)
             if next.remove(id) == nil { next.insert(id) }
             return Result(selection: next, anchor: id)
         case .extend:
