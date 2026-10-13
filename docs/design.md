@@ -149,7 +149,7 @@ of settings. Those are flat greys from the ramp above.
 
 A canvas editor may use `EditorShell` instead of `SuiteWindow`. It is the
 layout of our Studio photo editor (Ripple's editor parts), rebuilt as native
-SwiftUI in SuiteUI. Photo uses it.
+SwiftUI in SuiteUI. Photo and Design use it.
 
 | Region | Component | Rules |
 |---|---|---|

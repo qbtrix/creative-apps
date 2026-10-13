@@ -80,7 +80,7 @@
           {
             "id": "design-app",
             "name": "DesignApp",
-            "description": "The Design app (vector and UI design): the SwiftUI App scene and views in Sources/DesignApp, built from SuiteUI. Reads DesignModel and calls its methods; never writes its state (scripts/ci app-state rule).",
+            "description": "The Design app (vector and UI design): the SwiftUI App scene and views in Sources/DesignApp, built from SuiteUI's EditorShell. Reads DesignModel and sends it intents through DesignWindow; never writes its state (scripts/ci app-state rule).",
             "technology": "Swift 6, SwiftUI, macOS 26",
             "tags": [
               "internal",
@@ -90,7 +90,7 @@
               {
                 "id": "design-app-sources",
                 "name": "DesignApp sources",
-                "description": "The Design app (vector and UI design): the SwiftUI App scene and views in Sources/DesignApp, built from SuiteUI: the window, the Page menu, File > New File, and sidebar items for pages and Layers rows.",
+                "description": "The Design app (vector and UI design): the SwiftUI App scene and views in Sources/DesignApp, built from SuiteUI's EditorShell: the window and its intents (DesignWindow, DesignIntent), the top bar, the tool rail, the canvas with selection handles and the inline text editor, the Properties | Layers panel, the Page and File menus, the file panels, and sidebar items for pages and Layers rows.",
                 "technology": "Swift 6, SwiftUI, macOS 26",
                 "paths": [
                   "Sources/DesignApp/"
@@ -101,7 +101,7 @@
           {
             "id": "design-model",
             "name": "DesignModel",
-            "description": "Linux-safe state and logic behind Design's window: pages, the node tree on each page and its Layers rows, the selected page and tool. Foundation only, value types.",
+            "description": "Linux-safe state and logic behind Design's window: pages, the node tree on each page (with fills and text) and its Layers rows, the selection, the tool, the model-owned undo history, the canvas gestures and the file codec. Foundation only, value types.",
             "technology": "Swift 6, Foundation",
             "tags": [
               "internal"
@@ -110,7 +110,7 @@
               {
                 "id": "design-model-sources",
                 "name": "DesignModel sources",
-                "description": "Linux-safe state and logic behind Design's window: DesignWorkspace (pages, selected page, tool) and DesignNode, the node tree on a page and the flattened rows the Layers sidebar draws.",
+                "description": "Linux-safe state and logic behind Design's window: DesignWorkspace (pages, the selected page and node, the tool), DesignNode (the node tree on a page, each node with a fill and text, in absolute page points) and the flattened rows the Layers sidebar draws, DesignHistory (the model-owned undo and redo, one named step per edit), the canvas gestures (hit testing, draw, move, resize, nudge, delete, in DesignCanvasEditing and DesignDrawing), the inline text edit (DesignText), and the file codec (DesignFile).",
                 "technology": "Swift 6, Foundation",
                 "paths": [
                   "Sources/DesignModel/"
