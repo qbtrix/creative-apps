@@ -8,7 +8,10 @@
 // the ids). The restored selection's enclosing
 // rows expand; expansion is otherwise view state and is not undone. A step that
 // replaces the whole document (New File) is marked so, and the window asks
-// undoSwapsDocument / redoSwapsDocument instead of matching its name.
+// undoSwapsDocument / redoSwapsDocument instead of matching its name. Such a
+// step also carries the documentURL its snapshot belongs to, so Undo New File
+// puts the old file's location back with its document and Redo puts the new
+// document's back (nil until it is saved), and Save writes the right file (#436).
 //
 // A run of edits with the same coalescing key (one node's frame, nudges) is one
 // step; an undo or redo ends the run. A new edit clears Redo. The history keeps
@@ -16,6 +19,11 @@
 // ponytail: one whole-document snapshot per step (copy-on-write, so edits share
 // the nodes they didn't touch); switch to per-node diffs if files get large.
 // Linux-safe.
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
+import Foundation
+#endif
 
 /// The document as an undo step restores it.
 struct DesignSnapshot: Sendable, Equatable {
@@ -36,6 +44,8 @@ struct DesignHistory: Sendable, Equatable {
         var coalescing: String?
         /// Undoing or redoing it replaces the whole document (New File over an open file).
         var swapsDocument = false
+        /// The file the snapshot's document was at; a swap step restores it.
+        var documentURL: URL?
     }
 
     static let limit = 100
@@ -50,10 +60,10 @@ extension DesignWorkspace {
     public var undoActionName: String { history.undo.last.map { "Undo \($0.name)" } ?? "Undo" }
     /// "Redo Add Rectangle", or plain "Redo" with nothing to redo.
     public var redoActionName: String { history.redo.last.map { "Redo \($0.name)" } ?? "Redo" }
-    /// The next Undo replaces the whole document, so the window forgets its file's location.
+    /// The next Undo replaces the whole document, and with it `documentURL`.
     /// False mid-drag and while editing text, where Undo is ignored.
     public var undoSwapsDocument: Bool { historyIsLive && history.undo.last?.swapsDocument == true }
-    /// The next Redo replaces the whole document, so the window forgets its file's location.
+    /// The next Redo replaces the whole document, and with it `documentURL`.
     /// False mid-drag and while editing text, where Redo is ignored.
     public var redoSwapsDocument: Bool { historyIsLive && history.redo.last?.swapsDocument == true }
 
@@ -63,18 +73,18 @@ extension DesignWorkspace {
     /// Puts back the last edit. Ignored with nothing to undo, mid-drag and while editing text.
     public mutating func undo() {
         guard historyIsLive, let step = history.undo.popLast() else { return }
-        history.redo.append(
-            DesignHistory.Step(name: step.name, snapshot: snapshot, swapsDocument: step.swapsDocument))
-        restore(step.snapshot)
+        history.redo.append(DesignHistory.Step(
+            name: step.name, snapshot: snapshot, swapsDocument: step.swapsDocument, documentURL: documentURL))
+        restore(step)
         endRun()
     }
 
     /// Makes the last undone edit again. Ignored with nothing to redo, mid-drag and while editing text.
     public mutating func redo() {
         guard historyIsLive, let step = history.redo.popLast() else { return }
-        history.undo.append(
-            DesignHistory.Step(name: step.name, snapshot: snapshot, swapsDocument: step.swapsDocument))
-        restore(step.snapshot)
+        history.undo.append(DesignHistory.Step(
+            name: step.name, snapshot: snapshot, swapsDocument: step.swapsDocument, documentURL: documentURL))
+        restore(step)
         endRun()
     }
 
@@ -96,14 +106,18 @@ extension DesignWorkspace {
         history.redo.removeAll()
         if let coalescing, history.undo.last?.coalescing == coalescing { return }
         history.undo.append(DesignHistory.Step(
-            name: name, snapshot: before, coalescing: coalescing, swapsDocument: swapsDocument))
+            name: name, snapshot: before, coalescing: coalescing, swapsDocument: swapsDocument,
+            documentURL: documentURL))
         if history.undo.count > DesignHistory.limit {
             history.undo.removeFirst(history.undo.count - DesignHistory.limit)
         }
     }
 
-    /// Undo and redo: the document goes back to `snapshot`, the counters never go back.
-    private mutating func restore(_ snapshot: DesignSnapshot) {
+    /// Undo and redo: the document goes back to the step's snapshot, the counters never go back.
+    /// A swap step also puts back the file location that document had.
+    private mutating func restore(_ step: DesignHistory.Step) {
+        let snapshot = step.snapshot
+        if step.swapsDocument { documentURL = step.documentURL }
         pages = snapshot.pages
         held.replace(with: snapshot.heldIDs)
         (selectedPageID, selectedNodeID) = (snapshot.selectedPageID, snapshot.selectedNodeID)

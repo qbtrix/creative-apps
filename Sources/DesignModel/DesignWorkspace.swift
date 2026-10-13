@@ -18,6 +18,11 @@
 // - Every palette tool acts through `drag(from:to:modifiers:)` and `endDrag()`; a
 //   tool that does nothing there stays disabled with `unavailableHelp`
 //   (DesignToolsTests checks this).
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
+import Foundation
+#endif
 
 /// A page of a design file: one canvas holding a tree of nodes.
 public struct DesignPage: Identifiable, Sendable, Hashable, Codable {
@@ -81,6 +86,9 @@ public struct DesignWorkspace: Sendable, Equatable {
     public internal(set) var textDraft = ""
     /// How far from a selection handle, in document points, still grabs it.
     public private(set) var handleTolerance = 6.0
+    /// The file the document was opened from or last saved to; nil for a new, unsaved file.
+    /// Undo and Redo of New File swap it with the document (DesignHistory).
+    public internal(set) var documentURL: URL?
     var pageCount = 0
     var nodeCount = 0
     /// Every page and node id, kept current with the pages (DesignHeldIDs).
@@ -105,7 +113,8 @@ public struct DesignWorkspace: Sendable, Equatable {
     public var layerRows: [DesignRow] { selectedPage?.visibleRows(expanded: expandedNodeIDs) ?? [] }
 
     /// Opens a new file with one desktop-sized page holding a "Desktop" frame the size of the page.
-    /// Over an open file it is the undo step "New File", so Undo brings the old file back.
+    /// Over an open file it is the undo step "New File", so Undo brings the old file back, location
+    /// included. The new file has no location until it is saved.
     public mutating func newFile() {
         endDrag()
         commitTextEdit()
@@ -116,6 +125,7 @@ public struct DesignWorkspace: Sendable, Equatable {
         let page = nextPage()
         (pages, selectedPageID, selectedNodeID, expandedNodeIDs) = ([page], page.id, nil, [])
         if wasOpen { record("New File", before: before, swapsDocument: true) }
+        documentURL = nil
     }
 
     /// Replaces the document with `pages` (the file codec opens a file through this): selects the
