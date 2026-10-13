@@ -1,6 +1,7 @@
 // FrameMapping.swift: the arithmetic behind TimelineStrip: frame to x, x to
 // frame, the ruler's tick and label steps (labels spaced for their width), the ruler marks inside a visible
-// stretch (bounded by its width, never by the duration) and keyframe
+// stretch (bounded by its width, never by the duration), which labels end at
+// their tick so the last one stays inside the strip, and keyframe
 // hit-testing. Plain Swift with
 // no SwiftUI, so the rules are unit-tested on their own. Invariants: frames
 // always come back inside 0...duration, a duration below 0 counts as 0, and a
@@ -84,6 +85,33 @@ public struct FrameMapping: Equatable, Sendable {
         return Double(String(duration).count + 1) * digitWidth
     }
 
+    /// Where each of `labels` sits against its tick (#61). A label starts
+    /// `padding` points after its tick, unless it would then run past
+    /// `trailingRoom` points beyond the last frame's tick: that one ends
+    /// `padding` points before its tick instead, so the strip never clips it.
+    /// A label is `digitWidth` points per digit. A label that would run into a
+    /// following label that ends at its tick is dropped. Order is kept.
+    public func rulerLabels(
+        _ labels: [Int], digitWidth: Double, padding: Double, trailingRoom: Double
+    ) -> [RulerLabel] {
+        let digit = digitWidth.isFinite ? max(digitWidth, 0) : 0
+        func width(_ frame: Int) -> Double { Double(String(clamp(frame)).count) * digit }
+        let placed = labels.map { frame in
+            RulerLabel(
+                frame: frame,
+                endsAtTick: x(forFrame: frame) + padding + width(frame) > contentWidth + trailingRoom
+            )
+        }
+        return placed.indices.compactMap { index in
+            let label = placed[index]
+            let next = placed.index(after: index)
+            guard !label.endsAtTick, next < placed.endIndex, placed[next].endsAtTick else { return label }
+            let end = x(forFrame: label.frame) + padding + width(label.frame)
+            let nextStart = x(forFrame: placed[next].frame) - padding - width(placed[next].frame)
+            return end > nextStart ? nil : label
+        }
+    }
+
     /// The multiples of the step for `spacing` whose ticks lie inside `range`.
     private func frames(every spacing: Double, in range: ClosedRange<Double>) -> [Int] {
         guard range.upperBound >= 0, range.lowerBound <= contentWidth else { return [] }
@@ -131,4 +159,16 @@ private let maximumMarks = 1_000_000.0
 public struct RulerMarks: Equatable, Sendable {
     public let ticks: [Int]
     public let labels: [Int]
+}
+
+/// A ruler label's frame, and whether it ends at its tick (trailing-aligned)
+/// rather than starting there.
+public struct RulerLabel: Equatable, Sendable {
+    public let frame: Int
+    public let endsAtTick: Bool
+
+    public init(frame: Int, endsAtTick: Bool) {
+        self.frame = frame
+        self.endsAtTick = endsAtTick
+    }
 }
