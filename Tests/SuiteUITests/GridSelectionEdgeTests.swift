@@ -32,9 +32,9 @@ private let order = ["a", "b", "c", "d", "e", "f", "g"]  // 3 columns: a b c / d
     #expect(extended.selection == ["c"] && extended.anchor == "c")
 }
 
-@Test func shiftClickOnTheAnchorSelectsJustTheAnchor() {
+@Test func shiftClickOnTheAnchorKeepsTheAnchorAndTheOtherPicks() {
     let result = GridSelection.click("d", .extend, order: order, selection: ["a", "d"], anchor: "d")
-    #expect(result.selection == ["d"] && result.anchor == "d")
+    #expect(result.selection == ["a", "d"] && result.anchor == "d")
 }
 
 @Test func aSingleItemGridKeepsEveryArrowOnIt() {
@@ -89,9 +89,15 @@ private struct SeededGenerator: RandomNumberGenerator {
         #expect(plain.selection == [id] && plain.anchor == id)
         let range = GridSelection.click(id, .extend, order: items, selection: selection, anchor: anchor)
         #expect(range.selection.contains(id) && range.selection.isSubset(of: items))
-        // The range is contiguous in display order.
-        let picked = items.indices.filter { range.selection.contains(items[$0]) }
-        #expect(picked.count == (picked.last ?? 0) - (picked.first ?? 0) + 1)
+        // The anchor-to-target range is all selected, and anything else in the
+        // result was already selected before the click.
+        if let anchor, let start = items.firstIndex(of: anchor), let end = items.firstIndex(of: id) {
+            let span = items[min(start, end)...max(start, end)]
+            #expect(span.allSatisfy(range.selection.contains))
+            #expect(range.selection.subtracting(span).isSubset(of: selection))
+        } else {
+            #expect(range.selection == [id])
+        }
         let toggled = GridSelection.click(id, .toggle, order: items, selection: selection, anchor: anchor)
         #expect(toggled.selection.contains(id) != selection.contains(id) && toggled.anchor == id)
     }
