@@ -5,6 +5,8 @@
 // AdjustmentSettings clamps and validates it. A disabled section dims its
 // rows. Numbers show whole degrees and percents, one decimal for EV and px,
 // and levelsDecimals for Black and White, so distinct points read distinct.
+// Curves (CurvesEditor) sits between Levels and Hue/Saturation, over
+// `histogram`; its gesture's end goes out as onEditEnd (one undo step).
 import PhotoModel
 import SuiteUI
 import SwiftUI
@@ -12,6 +14,8 @@ import SwiftUI
 struct AdjustmentsInspector: View {
     let settings: AdjustmentSettings
     var onEdit: @MainActor (AdjustmentEdit) -> Void = { _ in }
+    var histogram: [Double] = []
+    var onEditEnd: @MainActor () -> Void = {}
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -28,6 +32,9 @@ struct AdjustmentsInspector: View {
                     "White", value: Double(settings.whitePoint), in: Self.doubles(AdjustmentSettings.levelsRange),
                     decimals: AdjustmentSettings.levelsDecimals) { onEdit(.whitePoint(Float($0))) }
                 gammaRow
+            }
+            section(.curves) {
+                CurvesEditor(settings: settings, histogram: histogram, onEdit: onEdit, onEnd: onEditEnd)
             }
             section(.hueSaturation) {
                 InspectorSliderRow("Hue", value: settings.hue, in: AdjustmentSettings.hueRange, unit: "°", decimals: 0) {

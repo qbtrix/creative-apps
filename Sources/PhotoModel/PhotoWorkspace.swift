@@ -59,6 +59,8 @@ public struct PhotoWorkspace: Sendable {
     public internal(set) var pendingCrop: PixelRect?
     /// Goes up with every change to what the canvas shows.
     public private(set) var revision = 0
+    /// Goes up with every such change except an adjustment's (curvesHistogramKey).
+    private(set) var contentRevision = 0
     var history = PhotoHistory()
     /// The drag in progress, between its first `drag` and `endDrag`.
     var stroke: PhotoStroke?
@@ -126,7 +128,7 @@ public struct PhotoWorkspace: Sendable {
         guard next != adjustments else { return }
         record(.adjustments(adjustments), named: edit.kind.title, coalescing: "adjust-\(edit.kind.rawValue)")
         adjustments = next
-        touch(.all)
+        touch(.all, adjustmentsOnly: true)
     }
 
     /// Adds a transparent, visible, normal-blend layer named "Layer N" (the
@@ -214,9 +216,11 @@ public struct PhotoWorkspace: Sendable {
         return damageLog.filter { $0.revision > old }.reduce(PhotoDamage.none) { $0.union($1.damage) }
     }
 
-    /// Records a change to what the canvas shows.
-    mutating func touch(_ damage: PhotoDamage) {
+    /// Records a change to what the canvas shows; `adjustmentsOnly` when only
+    /// the adjustments changed, not the layers or their pixels.
+    mutating func touch(_ damage: PhotoDamage, adjustmentsOnly: Bool = false) {
         revision += 1
+        if !adjustmentsOnly { contentRevision += 1 }
         damageLog.append((revision, damage))
         if damageLog.count > Self.damageLogLimit { damageLog.removeFirst(damageLog.count - Self.damageLogLimit) }
     }

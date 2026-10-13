@@ -112,6 +112,7 @@ struct PhotoWindow: View {
             model.endDrag()
         case .toolOption(let edit): model.setToolOption(edit)
         case .adjust(let edit): model.adjust(edit)
+        case .endAdjust: model.endAdjust()
         case .selectAll: model.selectAll()
         case .deselect: model.deselect()
         case .deleteSelection: model.deleteSelection()

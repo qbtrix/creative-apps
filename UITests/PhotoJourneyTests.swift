@@ -4,7 +4,9 @@
 // -PhotoOpenFile), paints a stroke, undoes it, raises the exposure and
 // exports a PNG (to the folder given with -PhotoExportTo, so no save panel),
 // then checks the file is a PNG. Another journey edits with every other tool,
-// and one straightens the image by 3 degrees from the Image menu.
+// one straightens the image by 3 degrees from the Image menu, and the Curves
+// journey drags the curve up and nudges it with an arrow key, each one
+// "Undo Curves" step that changes the canvas.
 import CoreGraphics
 import ImageIO
 import UniformTypeIdentifiers
@@ -20,6 +22,27 @@ final class PhotoJourneyTests: XCTestCase {
         photo.app.typeKey("n", modifierFlags: .command)
         photo.shot("new-image")
         photo.clickEachTool()
+    }
+
+    @MainActor func testCurvesDragAndNudge() throws {
+        let file = try Self.folder().appending(path: "curves.png")
+        try Self.writeTestPhoto(to: file)
+        let photo = Journey("Photo", self, arguments: ["-PhotoOpenFile", file.path])
+        XCTAssert(photo.app.windows["curves.png"].waitForExistence(timeout: 30), "curves.png didn't open")
+        photo.shot("curves-opened")
+        let canvas = photo.element("suite.canvas")
+        let before = canvas.screenshot().pngRepresentation
+
+        photo.drag(on: "photo.curves", from: CGVector(dx: 0.5, dy: 0.5), to: CGVector(dx: 0.5, dy: 0.25), step: "curves-dragged")
+        XCTAssert(photo.app.buttons["Undo Curves"].waitForExistence(timeout: 5), "the curve drag made no Curves step")
+        XCTAssert(Self.waitUntil { canvas.screenshot().pngRepresentation != before }, "the curve didn't change the canvas")
+
+        // The drag left the curve focused on its new point: an arrow nudges it, as its own step.
+        photo.app.typeKey(.upArrow, modifierFlags: [])
+        photo.shot("curves-nudged")
+        photo.click("Undo Curves", in: .window, step: "curves-nudge-undone")
+        XCTAssert(photo.app.buttons["Redo Curves"].waitForExistence(timeout: 5), "the nudge made no Curves step")
+        XCTAssert(photo.app.buttons["Undo Curves"].exists, "the nudge and the drag were one undo step")
     }
 
     @MainActor func testEveryMenuOpens() {
@@ -137,6 +160,15 @@ final class PhotoJourneyTests: XCTestCase {
         else { throw CocoaError(.fileWriteUnknown) }
         CGImageDestinationAddImage(destination, image, nil)
         guard CGImageDestinationFinalize(destination) else { throw CocoaError(.fileWriteUnknown) }
+    }
+
+    /// Waits up to 5 seconds for `condition` to hold.
+    private static func waitUntil(_ condition: () -> Bool) -> Bool {
+        for _ in 0..<10 {
+            if condition() { return true }
+            Thread.sleep(forTimeInterval: 0.5)
+        }
+        return false
     }
 
     /// Waits up to 15 seconds for `url` to exist.

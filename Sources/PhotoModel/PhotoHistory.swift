@@ -5,7 +5,7 @@
 // (undo swaps them back); layer property and order changes keep the layer list, which
 // holds no pixels; edits that add, remove or resize layers keep the whole
 // stack. A run of edits with the same coalescing key (one slider's drag, one
-// layer's opacity) is one step. A new edit clears Redo; the history keeps the
+// layer's opacity) is one step, until endAdjust closes it at the gesture's end. A new edit clears Redo; the history keeps the
 // last `limit` steps. Linux-safe.
 import CoreRaster
 
@@ -62,6 +62,13 @@ extension PhotoWorkspace {
         history.undo.append(Step(name: step.name, edit: apply(step.edit), coalescing: nil))
     }
 
+    /// Ends the run the last undo step is coalescing (a slider's or a curve's
+    /// drag), so the next edit, even to the same section, is a new step. The
+    /// inspector calls it when a gesture ends: one gesture, one undo step.
+    public mutating func endAdjust() {
+        if let last = history.undo.indices.last { history.undo[last].coalescing = nil }
+    }
+
     private typealias Step = PhotoHistory.Step
 
     /// Records `edit`, the change that undoes what is about to happen. With a
@@ -114,7 +121,7 @@ extension PhotoWorkspace {
         case .adjustments(let settings):
             let inverse = PhotoEdit.adjustments(adjustments)
             adjustments = settings
-            touch(.all)
+            touch(.all, adjustmentsOnly: true)
             return inverse
         }
     }
