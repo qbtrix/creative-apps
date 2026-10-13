@@ -76,7 +76,7 @@ extension PhotoWorkspace {
     /// unchanged.
     public mutating func open(rgba8 bytes: [UInt8], width: Int, height: Int, name: String) throws {
         let background = try PixelBuffer(rgba8: bytes, width: width, height: height)
-        start(with: background, name: name)
+        start(with: TiledPixels(background), name: name)
     }
 
     /// Opens a file's `data` through `codec`. Throws what the codec or
