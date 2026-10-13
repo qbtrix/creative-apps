@@ -2,8 +2,7 @@
 // index (#433). After every step the index must equal a fresh scan of the pages
 // and no id may appear twice, whatever order adds, deletes, undo, redo, New
 // File, reopen, reparenting, Move strokes and drawing strokes (also interrupted
-// mid-stroke by other edits) come in. An edit in the middle of a Move or Resize
-// drag desyncs the index today (#443); that case is pinned as a known issue.
+// mid-stroke by other edits, Move strokes included since #443) come in.
 // Runs on Linux and macOS.
 @testable import DesignModel
 import Testing
@@ -85,8 +84,7 @@ private func step(_ workspace: inout DesignWorkspace, _ random: inout SeededGene
         for _ in 0..<Int.random(in: 1...6, using: &random) {
             workspace.drag(from: start, to: point())
             expectExact(workspace, "mid-stroke")
-            // An edit that lands while a drawing stroke is still going (Move: #443).
-            guard tool != .move else { continue }
+            // An edit that lands while a stroke is still going, Move included (#443).
             switch Int.random(in: 0..<8, using: &random) {
             case 0: workspace.addPage()
             case 1: workspace.deleteSelection()
@@ -134,7 +132,6 @@ func randomEditRunsKeepTheIndexExact(seed: Int) throws {
     workspace.deleteSelection()
     workspace.drag(from: pt(20, 20), to: pt(40, 40))
     workspace.endDrag()
-    withKnownIssue("#443: a Move drag rewinds the pages but not the held-id index") {
-        #expect(workspace.held.ids.contains(id))
-    }
+    #expect(workspace.held.ids.contains(id))
+    expectExact(workspace, "after the move")
 }
