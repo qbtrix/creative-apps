@@ -88,10 +88,19 @@ public struct FakeShapes: ShapeBuilding {
             case .move(let dx, let dy): values = ["x": t.x + dx, "y": t.y + dy]
             case .scale(let h, let to):
                 let handle = ((h % 8) + 8) % 8, grip = Self.handle(handle, on: box), fixed = Self.handle(handle + 4, on: box)
-                let sx = handle % 4 == 1 ? 1 : Self.ratio(to.x - fixed.x, grip.x - fixed.x)
-                let sy = handle % 4 == 3 ? 1 : Self.ratio(to.y - fixed.y, grip.y - fixed.y)
-                values = ["x": fixed.x + (t.x - fixed.x) * sx, "y": fixed.y + (t.y - fixed.y) * sy,
-                          "scaleX": t.scaleX * sx, "scaleY": t.scaleY * sy]
+                // An edge handle drags one world axis; drop the other part of the pointer.
+                let pointer = Point(x: handle % 4 == 1 ? grip.x : to.x, y: handle % 4 == 3 ? grip.y : to.y)
+                // Work in the layer's own axes, so a rotated layer stretches along its sides about the fixed handle.
+                let (turn, back) = (Matrix.rotation(degrees: t.rotation), Matrix.rotation(degrees: -t.rotation))
+                let from = back.apply(Point(x: grip.x - fixed.x, y: grip.y - fixed.y))
+                let onto = back.apply(Point(x: pointer.x - fixed.x, y: pointer.y - fixed.y))
+                // An edge stretches only the local axis nearest its world axis.
+                let alongX = abs(turn.a) >= abs(turn.b), edge = handle % 2 == 1
+                let sx = edge && (handle % 4 == 1) == alongX ? 1 : Self.ratio(onto.x, from.x)
+                let sy = edge && (handle % 4 == 3) == alongX ? 1 : Self.ratio(onto.y, from.y)
+                let o = back.apply(Point(x: t.x - fixed.x, y: t.y - fixed.y))
+                let p = turn.apply(Point(x: o.x * sx, y: o.y * sy))
+                values = ["x": fixed.x + p.x, "y": fixed.y + p.y, "scaleX": t.scaleX * sx, "scaleY": t.scaleY * sy]
             case .rotate(let degrees):
                 let c = Point(x: (box.minX + box.maxX) / 2, y: (box.minY + box.maxY) / 2)
                 let p = Matrix.rotation(degrees: degrees).apply(Point(x: t.x - c.x, y: t.y - c.y))
