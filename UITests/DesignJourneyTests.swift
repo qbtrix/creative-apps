@@ -1,9 +1,12 @@
 // DesignJourneyTests.swift: Design driven like a person would, with a
 // whole-window screenshot after every step (see Journey.swift). Design is an
-// EditorShell window. The core journey draws a frame, a rectangle and an
-// ellipse, moves and resizes the ellipse, places and types text, undoes and
-// redoes, saves with -DesignSaveTo (no panel), then relaunches with
-// -DesignOpenFile and checks the saved file reopens.
+// EditorShell window. The core journey draws a frame (crossing the page's top
+// edge, so its handles show past it), a rectangle and an ellipse, moves and
+// resizes the ellipse, places and types text (shot while typing, when the editor
+// draws at full size, and once committed, with a small box's corner handles
+// outside it), undoes and redoes, saves with -DesignSaveTo (no panel), then
+// relaunches with -DesignOpenFile and checks the saved file reopens. The menu
+// journey checks each menu really opens, and adds a page from the Page menu.
 import XCTest
 
 final class DesignJourneyTests: XCTestCase {
@@ -21,7 +24,11 @@ final class DesignJourneyTests: XCTestCase {
     @MainActor func testEveryMenuOpens() {
         let design = Journey("Design", self)
         design.app.typeKey("n", modifierFlags: .command)
-        design.openEachMenu()
+        design.openEachMenu(expecting: ["Page": "Add Page"])
+        design.app.menuBars.firstMatch.menuBarItems["Page"].click()
+        design.app.menuItems["Add Page"].click()
+        XCTAssert(design.app.buttons["Undo Add Page"].waitForExistence(timeout: 5), "Page > Add Page added no page")
+        design.shot("added-page")
     }
 
     @MainActor func testDrawShapesAddTextAndSave() throws {
@@ -55,9 +62,11 @@ final class DesignJourneyTests: XCTestCase {
         tools["Text"].click()
         design.drag(on: "suite.canvas", from: CGVector(dx: 0.2, dy: 0.75), to: CGVector(dx: 0.2, dy: 0.75), step: "text-placed")
         design.app.typeKey("a", modifierFlags: .command)
-        design.app.typeText("Hello\r")
-        XCTAssert(design.app.buttons["Undo Add Text"].waitForExistence(timeout: 5), "typing text made no undo step")
+        design.app.typeText("Hello")
         design.shot("text-typed")
+        design.app.typeText("\r")
+        XCTAssert(design.app.buttons["Undo Add Text"].waitForExistence(timeout: 5), "typing text made no undo step")
+        design.shot("text-committed")
 
         design.click("Undo Add Text", in: .window, step: "undone")
         XCTAssert(design.app.buttons["Redo Add Text"].waitForExistence(timeout: 5), "Undo didn't undo the text")
