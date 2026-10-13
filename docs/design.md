@@ -560,15 +560,18 @@ SwiftUI in SuiteUI. Photo and Design use it.
 
 ## Studio rows and chips
 
-Some editors (Flare's easing editor first) use the Studio look in their
-inspector: rounded, filled controls instead of the Pro density rows. They are
-flat controls, never glass, and their rounding is a deliberate exception to
-"no rounded cards inside an inspector".
+Every inspector in the suite uses the Studio look of Flare's easing editor:
+rounded, filled controls instead of the Pro density rows. The bar slider,
+`InspectorRow` and the rows built on it, section headers and preset chips
+all draw as this table says; where Visual language gives them another size,
+radius or fill (34 pt bars, 6 pt gaps, outlined presets), this section wins.
+They are flat controls, never glass, and their rounding is a deliberate
+exception to "no rounded cards inside an inspector".
 
 | Part | Component | Rules |
 |---|---|---|
 | Group header | `Text` in `SuiteFont.sectionCaps`, `.textCase(.uppercase)`, `.tracking(SuiteSize.capsTracking)` | Secondary color; 12 pt above, 4 pt below. |
-| Number row | `StudioScrubRow` | 28 pt, full width, radius `SuiteRadius.row`. Label inside on the left, value right in two-decimal tabular figures. The fill runs to the value; it turns accent while dragged. Drag, click to type, Up and Down nudge. |
+| Number row | `StudioScrubRow` | The bar slider (`InspectorSliderRow`) showing two decimals: 28 pt, full width, radius `SuiteRadius.row`. Label inside on the left, value right in tabular figures. The fill runs to the value over five faint ticks; the marker turns accent while dragged. Drag, click to type, arrows step, Home and End. |
 | Presets | `ChoiceChips` | Three columns of 24 pt chips. One active chip at most: selected well plus an accent border. |
 | Curve | `CurveEditor` | 180 pt well. Handles are 10 pt with a 28 pt hit target; the focused or dragged one is accent with a ring 2 pt out. Arrow keys nudge 0.01, Shift 0.1; Tab moves between handles; a drag focuses the handle it moved. |
 
