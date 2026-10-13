@@ -122,9 +122,11 @@ public struct FlareWorkspace: Sendable, Equatable {
     }
 
     /// The active tool's drag is under way from `start` to `end`: sets `draft`
-    /// to the shape it would add, for the stage's live preview.
+    /// to the shape it would add, for the stage's live preview. With no
+    /// selected scene `drag` would refuse the commit, so there is no draft.
     public mutating func dragChanged(from start: Point, to end: Point) {
-        draft = tool == .ellipse ? Self.ellipse(from: start, to: end) : nil
+        guard tool == .ellipse, selectedScene != nil else { return draft = nil }
+        draft = Self.ellipse(from: start, to: end)
     }
 
     /// Undoes or redoes the last change; nothing to undo or redo is a no-op.
