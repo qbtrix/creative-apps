@@ -35,16 +35,34 @@ private func smallestGap(_ mapping: FrameMapping, _ labels: [Int]) -> Double {
     #expect(marks.labels == Array(stride(from: 0, through: 120, by: 5)))
 }
 
-@Test func labelWidthCountsTheLastVisibleFrame() {
-    let mapping = FrameMapping(duration: 1_000_000, frameWidth: 1)
-    #expect(mapping.labelWidth(in: 0...99, digitWidth: 7) == 3 * 7)
-    #expect(mapping.labelWidth(in: 0...5_000_000, digitWidth: 7) == 8 * 7)
+@Test func labelWidthCountsTheLastFrame() {
+    #expect(FrameMapping(duration: 99, frameWidth: 1).labelWidth(digitWidth: 7) == 3 * 7)
+    #expect(FrameMapping(duration: 1_000_000, frameWidth: 1).labelWidth(digitWidth: 7) == 8 * 7)
+    #expect(FrameMapping(duration: 0, frameWidth: 1).labelWidth(digitWidth: 7) == 2 * 7)
+}
+
+/// The step between consecutive labels, or nil with fewer than two.
+private func labelStep(_ labels: [Int]) -> Int? {
+    zip(labels, labels.dropFirst()).first.map { $1 - $0 }
+}
+
+@Test func rulerLabelStepHoldsWhileScrollingPastADigitBoundary() {
+    // At 0.48 pt per frame, a 200 pt window ending before x = 48_000 shows
+    // 5-digit frames; one ending after it shows 6-digit frames.
+    let mapping = FrameMapping(duration: 1_000_000, frameWidth: 0.48)
+    let steps = stride(from: 47_000.0, through: 49_000, by: 50).map { left in
+        labelStep(mapping.rulerMarks(
+            visibleX: left...(left + 200), tickSpacing: 6, labelSpacing: 48, digitWidth: 7
+        ).labels)
+    }
+    #expect(steps.allSatisfy { $0 != nil })
+    #expect(Set(steps).count == 1)
 }
 
 @Test func labelWidthIgnoresSillyDigitWidths() {
     let mapping = FrameMapping(duration: .max, frameWidth: 1)
     for digit in [0, -7, .nan, .infinity] {
-        #expect(mapping.labelWidth(in: 0...9000, digitWidth: digit) == 0)
+        #expect(mapping.labelWidth(digitWidth: digit) == 0)
     }
-    #expect(FrameMapping(duration: .max, frameWidth: 0).labelWidth(in: 0...9000, digitWidth: 7) == 2 * 7)
+    #expect(FrameMapping(duration: .max, frameWidth: 0).labelWidth(digitWidth: 7) == 20 * 7)
 }
