@@ -1,7 +1,8 @@
 // DesignFile.swift: Design's file format and the codec between it and the
 // workspace. A file is JSON, `{"pages":[...],"version":1}` with sorted keys, so
 // the same document always writes the same bytes. `fileData()` writes the open
-// document; `open(_:)` replaces it with a file's pages. Linux-safe.
+// document; `open(_:at:)` replaces it with a file's pages and remembers where it
+// came from (`documentURL`, which `didSave(to:)` moves after a save). Linux-safe.
 //
 // Opening is all or nothing: the whole file is checked first and the workspace
 // is touched only by the final `load`, so a refused file leaves it exactly as it
@@ -80,8 +81,8 @@ extension DesignWorkspace {
     }
 
     /// Replaces the document with the file's pages, selects the first page and clears the undo
-    /// history. A refused file throws and changes nothing.
-    public mutating func open(_ data: Data) throws(DesignFileError) {
+    /// history; `url` becomes `documentURL`. A refused file throws and changes nothing.
+    public mutating func open(_ data: Data, at url: URL? = nil) throws(DesignFileError) {
         let content: DesignFileContent
         do {
             let header = try JSONDecoder().decode(DesignFileHeader.self, from: data)
@@ -94,6 +95,12 @@ extension DesignWorkspace {
         }
         try Self.check(content.pages)
         load(content.pages)
+        documentURL = url
+    }
+
+    /// Records that the document was just written to `url`, so Save writes there next. Not an edit.
+    public mutating func didSave(to url: URL) {
+        documentURL = url
     }
 
     /// Throws the first problem in `pages` that would make the document unusable.

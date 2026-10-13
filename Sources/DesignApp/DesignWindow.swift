@@ -1,7 +1,7 @@
 // DesignWindow.swift: the root of a Design window. It holds the one
 // DesignWorkspace (`model`) and the window's presentation state (zoom, the
-// viewport, the panel tab, the open file's URL, the status note and the
-// alert), turns every DesignIntent into a workspace method or a file panel, and
+// viewport, the panel tab, the status note and the alert; the open file's URL
+// lives in the workspace), turns every DesignIntent into a workspace method or a file panel, and
 // publishes a DesignMenu to the menu bar. Only this file calls the workspace's
 // methods. The zoom keeps the handle tolerance a constant size on screen, and
 // the page is fitted whenever the selected page changes or a file opens.
@@ -9,10 +9,10 @@
 // Files: Open and Save As use AppKit's panels. Open fills this window only while
 // it holds no file (DesignWorkspace.takesOpenedFile); otherwise the chosen file
 // opens in a new window, so Open never loses work. Save writes to the file the
-// window opened or last saved, after finishing any text being typed. New File,
-// and Undo or Redo of it (they swap the whole document), clear that URL, so
-// Save then asks for a name and never writes a document over a file it doesn't
-// match. Two launch arguments let the UI journeys skip the panels:
+// window opened or last saved (DesignWorkspace.documentURL), after finishing any
+// text being typed. New File clears that URL, so Save then asks for a name; Undo
+// and Redo of New File swap it back with the document they restore, so Save
+// always writes the file that document belongs to (#436). Two launch arguments let the UI journeys skip the panels:
 // `-DesignOpenFile <file path>` opens that file once, in the first window, and
 // `-DesignSaveTo <file path>` makes Save and Save As write exactly that path.
 import AppKit
@@ -31,7 +31,6 @@ struct DesignWindow: View {
     /// A new page waits to be fitted until the canvas has a size.
     @State private var fitPending = false
     @State private var tab = DesignPanelTab.properties
-    @State private var documentURL: URL?
     /// The status line's message ("Saved sample.design"); it goes at the next edit.
     @State private var note: String?
     @State private var problem: String?
@@ -47,10 +46,10 @@ struct DesignWindow: View {
 
     var body: some View {
         DesignEditor(
-            model: model, documentName: documentURL?.lastPathComponent, note: note, zoom: zoom, tab: tab,
+            model: model, documentName: model.documentURL?.lastPathComponent, note: note, zoom: zoom, tab: tab,
             onTab: { tab = $0 }, onViewport: viewportChanged, onZoom: setZoom, perform: perform
         )
-        .navigationTitle(documentURL?.lastPathComponent ?? (model.isOpen ? "Untitled" : "Design"))
+        .navigationTitle(model.documentURL?.lastPathComponent ?? (model.isOpen ? "Untitled" : "Design"))
         .focusedSceneValue(\.designMenu, DesignMenu(model: model, perform: perform))
         .onChange(of: model.selectedPageID) {
             fitPending = true
@@ -65,20 +64,12 @@ struct DesignWindow: View {
 
     private func perform(_ intent: DesignIntent) {
         switch intent {
-        case .newFile:
-            model.newFile()
-            documentURL = nil
+        case .newFile: model.newFile()
         case .open: chooseFile()
         case .save: save()
         case .saveAs: saveAs()
-        case .undo:
-            let swapsDocument = model.undoSwapsDocument
-            model.undo()
-            if swapsDocument { documentURL = nil }
-        case .redo:
-            let swapsDocument = model.redoSwapsDocument
-            model.redo()
-            if swapsDocument { documentURL = nil }
+        case .undo: model.undo()
+        case .redo: model.redo()
         case .tool(let tool): model.selectTool(tool)
         case .drag(let from, let to, let modifiers):
             model.drag(from: DesignPoint(from), to: DesignPoint(to), modifiers: modifiers)
@@ -167,8 +158,7 @@ struct DesignWindow: View {
     /// Replaces the window's document with the file's. A file that can't open leaves it as it was.
     private func open(_ url: URL) {
         do {
-            try model.open(Data(contentsOf: url))
-            documentURL = url
+            try model.open(Data(contentsOf: url), at: url)
             fitPending = true
             fit()
         } catch {
@@ -179,7 +169,7 @@ struct DesignWindow: View {
     /// Writes over the file the window opened or last saved; with none, it is Save As.
     private func save() {
         guard model.isOpen else { return }
-        guard let url = Self.launchSaveURL ?? documentURL else { return saveAs() }
+        guard let url = Self.launchSaveURL ?? model.documentURL else { return saveAs() }
         write(to: url)
     }
 
@@ -188,7 +178,7 @@ struct DesignWindow: View {
         if let url = Self.launchSaveURL { return write(to: url) }
         let panel = NSSavePanel()
         panel.allowedContentTypes = [Self.fileType]
-        panel.nameFieldStringValue = documentURL?.lastPathComponent ?? "Untitled.design"
+        panel.nameFieldStringValue = model.documentURL?.lastPathComponent ?? "Untitled.design"
         guard panel.runModal() == .OK, let url = panel.url else { return }
         write(to: url)
     }
@@ -198,7 +188,7 @@ struct DesignWindow: View {
         model.commitTextEdit()
         do {
             try model.fileData().write(to: url, options: .atomic)
-            documentURL = url
+            model.didSave(to: url)
             note = "Saved \(url.lastPathComponent)"
         } catch {
             problem = "\(url.lastPathComponent) can't be saved. \(Self.reason(error))"

@@ -110,7 +110,7 @@
               {
                 "id": "design-model-sources",
                 "name": "DesignModel sources",
-                "description": "Linux-safe state and logic behind Design's window: DesignWorkspace (pages, the selected page and node, the tool), DesignNode (the node tree on a page, each node with a fill and text, in absolute page points) and the tree flattened into rows under the expanded set, DesignHistory (the model-owned undo and redo, one named step per edit), the canvas gestures (hit testing, the handles a selection shows, draw, move, resize, nudge, delete, in DesignCanvasEditing and DesignDrawing), the inline text edit (DesignText), the inspector's header lines (DesignInspectorContent),, the held-id index id minting reads (DesignHeldIDs), and the file codec (DesignFile).",
+                "description": "Linux-safe state and logic behind Design's window: DesignWorkspace (pages, the selected page and node, the tool, the open file's URL), DesignNode (the node tree on a page, each node with a fill and text, in absolute page points) and the tree flattened into rows under the expanded set, DesignHistory (the model-owned undo and redo, one named step per edit; New File's step carries the replaced document's file URL, which Undo puts back), the canvas gestures (hit testing, the handles a selection shows, draw, move, resize, nudge, delete, in DesignCanvasEditing and DesignDrawing), the inline text edit (DesignText), the inspector's header lines (DesignInspectorContent),, the held-id index id minting reads (DesignHeldIDs), and the file codec (DesignFile).",
                 "technology": "Swift 6, Foundation",
                 "paths": [
                   "Sources/DesignModel/"
