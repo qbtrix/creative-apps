@@ -249,5 +249,6 @@ gh run list --workflow ci.yml --branch dev    # feature CI runs on dev
 gh run download <run-id> -n snapshots        # the PNGs from a macOS CI run
 gh run download <run-id> -n ui-screens       # whole-window PNGs from the UI journeys
 scripts/ui-test                              # macOS + Xcode + xcodegen: run the UI journeys locally
+scripts/contact-sheet                        # after ui-test: .build/ui-screens/contact-sheet.html, the page to review per run
 scripts/bundle-apps                          # macOS: release builds as signed FlareApp.app ... HaloApp.app in .build/apps; CI uploads them as `app-builds` (app-builds.tar.gz)
 ```

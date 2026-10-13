@@ -1,0 +1,157 @@
+#!/usr/bin/env bash
+# scripts/contact-sheet: the one page to review per CI run. Reads the UI
+# journeys' output in SCREENS (<app>-<step>.png per step, audit-<app>-<step>.json
+# per audited screen, and the xcresult manifest.json that scripts/ui-test keeps)
+# and writes SCREENS/contact-sheet.html:
+#   - a header: commit, branch, run, date, and each app's distinct audit
+#     violations per check against BASELINE, counted the way AppAudit.Tally
+#     counts them (docs/blueprints/app-audit.md), with arrows: ↑ over, ↓ under,
+#     = on the baseline;
+#   - per app, per journey (one XCUITest method), the step shots in run order
+#     as thumbnails that link to the full PNG, each captioned with its screen's
+#     audit violations;
+#   - budgets: every line of the perf reports (*.txt) in SNAPSHOTS and SCREENS,
+#     such as photo-brush-latency.txt, inlined since they ship in another artifact.
+# Images are relative links, so the downloaded ui-screens folder works offline.
+# Without manifest.json the steps group by app in name order. With
+# GITHUB_STEP_SUMMARY set, it also appends the audit table and step counts there.
+#
+#   scripts/contact-sheet [SCREENS [BASELINE [SNAPSHOTS]]]
+#   defaults: .build/ui-screens  UITests/audit-baseline.json  .build/snapshots
+#
+# CI runs it after scripts/ui-test; Tests/contact_sheet tests it on a fixture.
+# Needs jq. bash 3.2 compatible.
+set -uo pipefail
+cd "$(dirname "$0")/.." || exit 1
+command -v jq >/dev/null || { echo "contact-sheet: install jq"; exit 1; }
+
+screens=${1:-.build/ui-screens} baseline=${2:-UITests/audit-baseline.json} snapshots=${3:-.build/snapshots}
+[[ -d "$screens" ]] || { echo "contact-sheet: no folder $screens"; exit 1; }
+sha=${GITHUB_SHA:-$(git rev-parse HEAD 2>/dev/null)}
+branch=${GITHUB_REF_NAME:-$(git branch --show-current 2>/dev/null)}
+repo=""
+[[ -n "${GITHUB_REPOSITORY:-}" ]] && repo="${GITHUB_SERVER_URL:-https://github.com}/$GITHUB_REPOSITORY"
+
+tmp=$(mktemp -d)
+trap 'rm -rf "$tmp"' EXIT
+shopt -s nullglob
+for f in "$screens"/*.png; do basename "$f" .png; done | jq -R . >"$tmp/pngs"
+cat /dev/null "$screens"/audit-*.json >"$tmp/audits"
+if_file() { if [[ -f "$1" ]]; then cat "$1"; fi; }
+if_file "$screens/manifest.json" >"$tmp/manifest"
+if_file "$baseline" >"$tmp/baseline"
+for f in "$snapshots"/*.txt "$screens"/*.txt; do
+  jq -R --arg file "${f##*/}" 'select(test("\\S")) | {file: $file, line: .}' "$f"
+done >"$tmp/perf"
+
+read -r -d '' program <<'JQ'
+def app: split("-")[0];
+def trunc0: if . < 0 then -(-. | floor) else floor end;
+# AppAudit.Tally's key: the element, or for a nameless one its frame too.
+def key: if (.element | endswith("''"))
+  then "\(.element) at [\([.frame.x, .frame.y, .frame.width, .frame.height] | map(trunc0 | tostring) | join(","))]"
+  else .element end;
+def uniq: reduce .[] as $s ([]; if any(.[]; . == $s) then . else . + [$s] end);
+def h: tostring | @html;
+
+($baseline[0] // {}) as $base
+| ($audits | map({key: .screen, value: .}) | from_entries) as $report
+| ([$pngs[] | app] + [$audits[].app] + ($base | keys) | unique) as $apps
+| ([$base[] | keys[]] + [$audits[] | (.counts // {} | keys[]), .violations[]?.check] | unique) as $checks
+| (if ($manifest[0] | type) == "array" then $manifest[0] else null end) as $m
+# Journeys: one per test in the manifest, its PNG steps in capture order.
+| [ ($m // [])[]
+    | {test: (.testIdentifier // .testName // .identifier // "journey" | tostring),
+       steps: ([.attachments[]? | .suggestedHumanReadableName // "" | select(endswith(".png"))
+                | sub("_[0-9]+_[0-9A-Fa-f-]+\\.png$"; "") | sub("\\.png$"; "")
+                | select(IN($pngs[]))] | uniq)}
+    | select(.steps | length > 0) ] as $journeys
+| def tally($a): [$audits[] | select(.app == $a) | .violations[]? | {check, k: key}] | unique
+    | group_by(.check) | map({key: .[0].check, value: length}) | from_entries;
+  def cells($a): tally($a) as $t | $checks | map(
+    ($t[.] // 0) as $n
+    | if $base[$a] == null then {n: $n, b: "", arrow: "·", class: "new"}
+      else ($base[$a][.] // 0) as $b
+        | {n: $n, b: $b, arrow: (if $n > $b then "↑" elif $n < $b then "↓" else "=" end),
+           class: (if $n > $b then "up" elif $n < $b then "down" else "same" end)} end);
+  def steps($a): [$pngs[] | select(app == $a)];
+  def audited($a): [$audits[] | select(.app == $a)] | length;
+  def card($s): $report[$s] as $r
+    | "<figure" + (if ($r.violations // []) | length > 0 then " class=\"flag\"" else "" end) + ">"
+    + "<a href=\"\($s | @uri).png\"><img src=\"\($s | @uri).png\" alt=\"\($s | h)\" loading=\"lazy\"></a>"
+    + "<figcaption><span class=\"step\">\($s | sub("^[^-]*-"; "") | h)</span> "
+    + (if $r == null then "<span class=\"muted\">not audited</span>"
+       elif ($r.violations // []) | length == 0 then "<span class=\"ok\">no violations</span>"
+       else "<details><summary class=\"bad\">\($r.violations | length) violations: "
+         + ($r.violations | group_by(.check) | map("\(.[0].check) \(length)") | join(", ") | h) + "</summary><ul>"
+         + ($r.violations | map("<li><b>\(.check | h)</b> \(.element | h): \(.detail | h)</li>") | join(""))
+         + "</ul></details>" end)
+    + "</figcaption></figure>";
+  def group($title; $list): "<h3>\($title | h)</h3><div class=\"grid\">" + ($list | map(card(.)) | join("")) + "</div>";
+
+if $mode == "md" then
+  "### Contact sheet\n\nDownload **ui-screens** → open `contact-sheet.html`. Cells: distinct audit violations, arrow, baseline.\n\n"
+  + "| app | steps | audited | " + ($checks | join(" | ")) + " |\n|---|---:|---:|" + ($checks | map("---:|") | join("")) + "\n"
+  + ($apps | map(. as $a | "| \($a) | \(steps($a) | length) | \(audited($a)) | "
+      + (cells($a) | map("\(.n) \(.arrow) \(.b)") | join(" | ")) + " |\n") | join(""))
+else
+  "<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\">"
+  + "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">"
+  + "<title>Contact sheet \($sha[0:7] | h)</title><style>\($css)</style></head><body>"
+  + "<header><h1>Contact sheet</h1><p class=\"meta\">"
+  + "commit " + (if $repo != "" then "<a href=\"\($repo)/commit/\($sha | h)\"><code>\($sha | h)</code></a>" else "<code>\($sha | h)</code>" end)
+  + " · branch <code>\($branch | h)</code> · run "
+  + (if $repo != "" and $run != "local" then "<a href=\"\($repo)/actions/runs/\($run | h)\">\($run | h)</a>" else ($run | h) end)
+  + " · \($date | h)</p>"
+  + "<table class=\"audit\"><caption>Audit: distinct violations per check, arrow, baseline (UITests/audit-baseline.json)</caption>"
+  + "<tr><th>app</th><th>steps</th><th>audited</th>" + ($checks | map("<th>\(h)</th>") | join("")) + "</tr>"
+  + ($apps | map(. as $a | "<tr><th><a href=\"#app-\($a | h)\">\($a | h)</a></th><td>\(steps($a) | length)</td><td>\(audited($a))</td>"
+      + (cells($a) | map("<td class=\"\(.class)\"><b>\(.n)</b> \(.arrow) \(.b)</td>") | join("")) + "</tr>") | join(""))
+  + "</table></header><main>"
+  + ($apps | map(. as $a | ([$journeys[] | select(.steps[0] | app == $a)]) as $js
+      | ([$js[].steps[]]) as $seen
+      | [steps($a)[] | select(IN($seen[]) | not)] as $rest
+      | "<section id=\"app-\($a | h)\"><h2>\($a | h)</h2>"
+      + ($js | map(group(.test; .steps)) | join(""))
+      + (if $rest | length == 0 then ""
+         elif $m == null then group("Steps, by name (no manifest.json from scripts/ui-test)"; $rest)
+         else group("Steps in no journey"; $rest) end)
+      + "</section>") | join(""))
+  + "<section id=\"budgets\"><h2>Budgets</h2>"
+  + (if $perf | length == 0 then "<p class=\"muted\">None reported.</p>"
+     else "<table class=\"budgets\"><tr><th>report</th><th>file</th><th>values</th></tr>"
+       + ($perf | map((.line | capture("^(?<name>[A-Z][A-Z0-9_-]+) (?<rest>.*)$") // {name: "", rest: .line}) as $l
+           | "<tr><th>\($l.name | h)</th><td>\(.file | h)</td><td>"
+           + ($l.rest | split(" | ") | map(h) | join("<br>")) + "</td></tr>") | join(""))
+       + "</table>" end)
+  + "</section></main></body></html>"
+end
+JQ
+
+css=':root{color-scheme:light dark;--bg:#fff;--fg:#1d1d1f;--muted:#6e6e73;--line:#d2d2d7;--card:#f5f5f7;--bad:#b3261e;--badbg:#fdecea;--ok:#1b7f3b}
+@media (prefers-color-scheme:dark){:root{--bg:#161618;--fg:#f5f5f7;--muted:#98989d;--line:#3a3a3c;--card:#232326;--bad:#ff8a80;--badbg:#3a1f1d;--ok:#7ee2a8}}
+body{margin:0 auto;max-width:1440px;padding:16px;background:var(--bg);color:var(--fg);font:14px/1.45 -apple-system,BlinkMacSystemFont,system-ui,sans-serif}
+a{color:inherit}h1{margin:0 0 4px}h2{margin:32px 0 8px;padding-bottom:4px;border-bottom:1px solid var(--line);text-transform:capitalize}
+h3{margin:16px 0 8px;font-size:14px;color:var(--muted);font-weight:600}.meta,.muted,caption{color:var(--muted)}
+table{border-collapse:collapse;margin:8px 0;display:block;overflow-x:auto}caption{text-align:left;padding-bottom:4px}
+th,td{border:1px solid var(--line);padding:4px 8px;text-align:right;white-space:nowrap}th{text-align:left}
+.budgets td{text-align:left;white-space:normal}.up{color:var(--bad);background:var(--badbg)}.down{color:var(--ok)}.new{color:var(--muted)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
+figure{margin:0;background:var(--card);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+figure.flag{border-color:var(--bad)}figure img{display:block;width:100%;height:auto;border-bottom:1px solid var(--line)}
+figcaption{padding:6px 8px;overflow-wrap:anywhere}.step{font-weight:600}.ok{color:var(--ok)}
+.bad{color:var(--bad);background:var(--badbg);border-radius:4px;padding:0 4px;cursor:pointer}
+details ul{margin:4px 0 0;padding-left:18px;font-size:12px}'
+
+render() {
+  jq -n -r --arg mode "$1" --arg css "$css" --arg sha "$sha" --arg branch "$branch" --arg repo "$repo" \
+    --arg run "${GITHUB_RUN_ID:-local}" --arg date "$(date -u '+%Y-%m-%d %H:%M UTC')" \
+    --slurpfile pngs "$tmp/pngs" --slurpfile audits "$tmp/audits" --slurpfile manifest "$tmp/manifest" \
+    --slurpfile baseline "$tmp/baseline" --slurpfile perf "$tmp/perf" "$program"
+}
+render html >"$tmp/sheet.html" || { echo "contact-sheet: could not render (see jq's error above)"; exit 1; }
+mv "$tmp/sheet.html" "$screens/contact-sheet.html"
+if [[ -n "${GITHUB_STEP_SUMMARY:-}" ]]; then
+  render md >>"$GITHUB_STEP_SUMMARY" || exit 1
+fi
+echo "contact-sheet: $screens/contact-sheet.html ($(jq -s length "$tmp/pngs") steps, $(jq -s length "$tmp/audits") audited)"

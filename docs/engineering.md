@@ -136,6 +136,13 @@ every step.
   A count may only go down: a fix lowers it in the same PR, and raising one
   needs the captain's review. New checks come from faults
   (docs/blueprints/app-audit.md, Growing the audit). Gate: the `macOS` job.
+- **One page per run: the contact sheet.** After the journeys, the `macOS`
+  job runs `scripts/contact-sheet`, which writes `contact-sheet.html` into
+  `ui-screens`: the commit, each app's audit counts against the baseline,
+  every journey's steps in order with each screen's violations, and the perf
+  reports (`BRUSH-LATENCY` and the like) from `.build/snapshots`. Download
+  `ui-screens` and open the page; the job summary carries the audit table.
+  Tested by `Tests/contact_sheet` in `scripts/ci`.
 
 ## Tests
 
