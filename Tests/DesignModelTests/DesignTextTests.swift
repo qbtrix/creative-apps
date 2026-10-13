@@ -48,7 +48,7 @@ private func withHello() -> DesignWorkspace {
         #expect(workspace.treeNode("node-2") == nil)
         #expect(workspace.selectedNodeID == nil && workspace.editingTextID == nil)
         #expect(!workspace.canUndo && !workspace.canRedo)
-        #expect(workspace == openDesign().afterSelecting(.text))
+        #expect(workspace == openDesign())
     }
 }
 
@@ -183,14 +183,12 @@ private func withHello() -> DesignWorkspace {
     var workspace = openDesign()
     workspace.gesture(.text, pt(100, 100), pt(100, 100))
     workspace.setTextDraft("One")
-    // The tool is still Text, so this press places a second node; it settles the first edit first.
+    // The tool is back on Move, so this press selects the Desktop frame; it settles the edit first.
     workspace.drag(from: pt(400, 400), to: pt(400, 400))
     workspace.endDrag()
     #expect(workspace.treeNode("node-2")?.text == "One")
-    #expect(workspace.editingTextID == "node-3" && workspace.selectedNodeID == "node-3")
-    workspace.setTextDraft(" ")
-    workspace.selectTool(.move)
-    #expect(workspace.treeNode("node-3") == nil && workspace.selectedNodeID == "node-2")
+    #expect(workspace.editingTextID == nil && workspace.selectedNodeID == "node-1")
+    #expect(workspace.treeNode("node-3") == nil)
 }
 
 @Test func selectingAnotherRowCommitsTheEdit() {
@@ -200,13 +198,4 @@ private func withHello() -> DesignWorkspace {
     workspace.selectItem("node-1")
     #expect(workspace.editingTextID == nil && workspace.treeNode("node-2")?.text == "Row")
     #expect(workspace.selectedNodeID == "node-1")
-}
-
-extension DesignWorkspace {
-    /// The same workspace with `tool` picked, which is all a cancelled placement leaves behind.
-    fileprivate func afterSelecting(_ tool: DesignTool) -> DesignWorkspace {
-        var copy = self
-        copy.selectTool(tool)
-        return copy
-    }
 }

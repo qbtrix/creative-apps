@@ -73,7 +73,7 @@ public struct DesignWorkspace: Sendable, Equatable {
     public internal(set) var selectedPageID: String?
     public internal(set) var selectedNodeID: String?
     public internal(set) var expandedNodeIDs: Set<String> = []
-    public private(set) var tool: DesignTool = .move
+    public internal(set) var tool: DesignTool = .move
     /// The text node being edited inline, and its live text (DesignText).
     public internal(set) var editingTextID: String?
     public internal(set) var textDraft = ""
