@@ -32,7 +32,9 @@ extension FlareWorkspace {
     /// when the box is narrower or shorter than `minimumEllipseExtent` stage
     /// points at `stageScale` (see `minimumEllipseExtent(atStageScale:)`), or a
     /// coordinate, the centre or a radius is not finite, or a radius rounds to
-    /// zero (a box one smallest subnormal wide at an infinite scale). The centre is the
+    /// zero (a box one smallest subnormal wide at an infinite scale), or the
+    /// ellipse has zero width or height once placed (a box far from the origin
+    /// whose radius the centre absorbs). The centre is the
     /// box's min corner plus half its size, so corners near the largest finite
     /// value don't overflow their sum.
     /// Stopgap until FlareCore's `Shape.ellipse(in:)` (qbtrix/creative-core#182)
@@ -60,6 +62,12 @@ extension FlareWorkspace {
         let points = units.dropLast().map { at($0, along: 0) }
         // The edge midpoints are the box's extremes; every control point lies inside.
         guard points.allSatisfy({ $0.x.isFinite && $0.y.isFinite }) else { return nil }
+        // Far from the origin a radius below the coordinate spacing is absorbed by
+        // the centre (#553): judge the ellipse by its scene extent, not its radii.
+        let xs = points.map(\.x), ys = points.map(\.y)
+        guard let left = xs.min(), let right = xs.max(), let bottom = ys.min(), let top = ys.max(),
+              right > left, top > bottom
+        else { return nil }
         return FlareShape(points: points, path: FlarePath(elements: elements + [.close]))
     }
 
