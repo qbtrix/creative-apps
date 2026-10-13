@@ -97,9 +97,11 @@ public struct FrameMapping: Equatable, Sendable {
     }
 
     /// The keyframe whose tick is nearest `x`, if it lies within `tolerance`
-    /// points of it.
+    /// points of it, clamped to 0...duration. A keyframe outside the duration
+    /// is drawn pinned to the nearest end, so it is hit there and comes back
+    /// as that end's frame.
     public func keyframe(nearX x: Double, in keyframes: [Int], tolerance: Double) -> Int? {
-        let near = keyframes.map { (frame: $0, distance: abs(self.x(forFrame: $0) - x)) }
+        let near = keyframes.map { (frame: clamp($0), distance: abs(self.x(forFrame: $0) - x)) }
             .filter { $0.distance <= tolerance }
         return near.min { $0.distance < $1.distance }?.frame
     }
