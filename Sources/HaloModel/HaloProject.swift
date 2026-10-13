@@ -6,6 +6,7 @@
 // composition it always keeps at least one. A refused rename of a known
 // composition stays in `refusedRename` until a rename succeeds or it is
 // dismissed.
+import CoreRaster
 
 /// A composition: a sized, timed canvas that layers play in.
 public struct HaloComposition: Identifiable, Sendable, Hashable {
@@ -105,9 +106,7 @@ public struct HaloProject: Sendable, Equatable {
         let newID = takeCompositionID()
         let layers = original.layers.map { layer in
             let suffix = layer.id.hasPrefix(original.id) ? String(layer.id.dropFirst(original.id.count)) : "-\(layer.id)"
-            return HaloLayer(
-                id: newID + suffix, name: layer.name, kind: layer.kind, inFrame: layer.inFrame,
-                outFrame: layer.outFrame, color: layer.color)
+            return layer.withID(newID + suffix)
         }
         let copy = HaloComposition(
             id: newID, name: uniqueName("\(original.name) copy"), width: original.width, height: original.height,
@@ -209,5 +208,23 @@ public struct HaloProject: Sendable, Equatable {
     /// ignored.
     public mutating func selectLayer(_ id: String) {
         if selectedComposition?.layers.contains(where: { $0.id == id }) == true { selectedLayerID = id }
+    }
+
+    /// Sets the selected layer's opacity, clamped to 0...1; NaN is ignored.
+    public mutating func setSelectedLayerOpacity(_ opacity: Double) {
+        guard !opacity.isNaN else { return }
+        updateSelectedLayer { $0.opacity = min(max(opacity, 0), 1) }
+    }
+
+    /// Sets how the selected layer blends with the layers under it.
+    public mutating func setSelectedLayerBlendMode(_ mode: BlendMode) {
+        updateSelectedLayer { $0.blendMode = mode }
+    }
+
+    private mutating func updateSelectedLayer(_ change: (inout HaloLayer) -> Void) {
+        guard let c = compositions.firstIndex(where: { $0.id == selectedCompositionID }),
+            let l = compositions[c].layers.firstIndex(where: { $0.id == selectedLayerID })
+        else { return }
+        change(&compositions[c].layers[l])
     }
 }

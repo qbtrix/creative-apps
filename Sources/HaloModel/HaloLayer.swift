@@ -1,6 +1,9 @@
 // HaloLayer.swift: one layer in a Halo composition: what kind it is, the frames
-// it is visible for and its color. Linux-safe: no UI imports. Layers live in
-// `HaloComposition.layers`, top first; HaloProject adds and selects them.
+// it is visible for, its color, opacity, blend mode and the rectangle a solid
+// fills. Linux-safe: no UI imports. Layers live in `HaloComposition.layers`,
+// top first; HaloProject adds and selects them. `blendMode` is CoreRaster's
+// BlendMode, never a mirror of it.
+import CoreRaster
 
 /// What a layer draws: a solid fill, a shape, text, or nothing (a null that
 /// other layers can follow).
@@ -41,6 +44,21 @@ public struct HaloLayerColor: Sendable, Hashable {
     }
 }
 
+/// An axis-aligned rectangle in composition pixels, top-left origin.
+public struct HaloLayerRect: Sendable, Hashable {
+    public var x: Double
+    public var y: Double
+    public var width: Double
+    public var height: Double
+
+    public init(x: Double, y: Double, width: Double, height: Double) {
+        self.x = x
+        self.y = y
+        self.width = width
+        self.height = height
+    }
+}
+
 /// A layer, visible from `inFrame` up to (not including) `outFrame`.
 public struct HaloLayer: Identifiable, Sendable, Hashable {
     public let id: String
@@ -49,13 +67,35 @@ public struct HaloLayer: Identifiable, Sendable, Hashable {
     public var inFrame: Int
     public var outFrame: Int
     public var color: HaloLayerColor
+    /// 0 (transparent) to 1 (opaque); the init clamps it.
+    public var opacity: Double
+    public var blendMode: BlendMode
+    /// The area a solid fills, in composition pixels; nil fills the whole frame.
+    public var rect: HaloLayerRect?
 
-    public init(id: String, name: String, kind: HaloLayerKind, inFrame: Int, outFrame: Int, color: HaloLayerColor) {
+    /// Clamps `opacity` to 0...1; a NaN opacity falls back to 1, the default.
+    public init(
+        id: String, name: String, kind: HaloLayerKind, inFrame: Int, outFrame: Int, color: HaloLayerColor,
+        opacity: Double = 1, blendMode: BlendMode = .normal, rect: HaloLayerRect? = nil
+    ) {
         self.id = id
         self.name = name
         self.kind = kind
         self.inFrame = inFrame
         self.outFrame = outFrame
         self.color = color
+        self.opacity = opacity.isNaN ? 1 : min(max(opacity, 0), 1)
+        self.blendMode = blendMode
+        self.rect = rect
+    }
+
+    /// Whether the layer shows at `frame`: from `inFrame` up to, not including, `outFrame`.
+    public func isVisible(at frame: Int) -> Bool { frame >= inFrame && frame < outFrame }
+
+    /// This layer under another id, everything else kept.
+    func withID(_ id: String) -> HaloLayer {
+        HaloLayer(
+            id: id, name: name, kind: kind, inFrame: inFrame, outFrame: outFrame, color: color, opacity: opacity,
+            blendMode: blendMode, rect: rect)
     }
 }

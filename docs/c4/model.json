@@ -233,7 +233,7 @@
               {
                 "id": "halo-model-sources",
                 "name": "HaloModel sources",
-                "description": "Linux-safe state and logic behind Halo's window: HaloProject (compositions, the selected one, unique names), HaloLayer, the New Composition draft and its validated settings, and RefusedRename, which keeps a refused composition rename for the alert.",
+                "description": "Linux-safe state and logic behind Halo's window: HaloProject (compositions, the selected one, unique names), HaloLayer (kind, span, color, opacity, CoreRaster blend mode, solid rectangle), FrameRenderer (composites a composition's solids into one preview frame with CoreRaster), the New Composition draft and its validated settings, and RefusedRename, which keeps a refused composition rename for the alert.",
                 "technology": "Swift 6, Foundation",
                 "paths": [
                   "Sources/HaloModel/"
