@@ -79,27 +79,21 @@ struct ToolOptionsSection: View {
             case .marquee:
                 hint("Drag over the image to select. Delete clears the selection; Fill paints it.")
                 colorRow(options)
-                InspectorRow("") {
-                    HStack(spacing: SuiteSpacing.xs) {
-                        command("Select All", help: nil, .selectAll)
-                        command("Deselect", help: model.canDeselect ? nil : "Nothing is selected.", .deselect)
-                    }
+                HStack(spacing: SuiteSpacing.xs) {
+                    command("Select All", "checkmark.rectangle", help: nil, .selectAll)
+                    command("Deselect", "rectangle.dashed", help: model.canDeselect ? nil : "Nothing is selected.", .deselect)
                 }
-                InspectorRow("") {
-                    HStack(spacing: SuiteSpacing.xs) {
-                        let why = model.canEditSelection ? nil : "Select part of the selected layer first."
-                        command("Delete", help: why, .deleteSelection)
-                        command("Fill", help: why, .fillSelection)
-                    }
+                HStack(spacing: SuiteSpacing.xs) {
+                    let why = model.canEditSelection ? nil : "Select part of the selected layer first."
+                    command("Delete", "trash", help: why, .deleteSelection)
+                    command("Fill", "paintbrush.fill", help: why, .fillSelection)
                 }
             case .crop:
                 hint("Drag over the image to choose the crop, then apply it.")
-                InspectorRow("") {
-                    HStack(spacing: SuiteSpacing.xs) {
-                        let why = model.canApplyCrop ? nil : "Drag over the image to choose a crop first."
-                        command("Apply Crop", help: why, .applyCrop, prominent: true).keyboardShortcut(.defaultAction)
-                        command("Cancel", help: why, .cancelCrop).keyboardShortcut(.cancelAction)
-                    }
+                HStack(spacing: SuiteSpacing.xs) {
+                    let why = model.canApplyCrop ? nil : "Drag over the image to choose a crop first."
+                    command("Apply Crop", "crop", help: why, .applyCrop).keyboardShortcut(.defaultAction)
+                    command("Cancel", "xmark", help: why, .cancelCrop).keyboardShortcut(.cancelAction)
                 }
             case .move:
                 hint("Drag over the image to move the selected layer.")
@@ -117,23 +111,15 @@ struct ToolOptionsSection: View {
     private func hint(_ text: String) -> some View {
         Text(text)
             .font(SuiteFont.inspectorMeta)
-            .foregroundStyle(SuiteColor.secondaryText)
+            .foregroundStyle(SuiteColor.textSecondary)
             .fixedSize(horizontal: false, vertical: true)
-            .padding(.horizontal, SuiteSpacing.s)
-            .padding(.bottom, SuiteSpacing.xs)
     }
 
-    /// A small bordered button for `intent`, identified as
+    /// The outlined inspector action for `intent`, identified as
     /// "photo.tool.<title-in-kebab-case>"; disabled, saying why, while `help` is set.
-    @ViewBuilder
-    private func command(_ title: String, help: String?, _ intent: PhotoIntent, prominent: Bool = false) -> some View {
-        let button = Button(title) { perform(intent) }.disabled(help != nil).help(help ?? title)
+    private func command(_ title: String, _ symbol: String, help: String?, _ intent: PhotoIntent) -> some View {
+        InspectorAction(ToolbarAction(title, systemImage: symbol, unavailableHelp: help) { perform(intent) })
             .accessibilityIdentifier("photo.tool." + title.lowercased().replacingOccurrences(of: " ", with: "-"))
-        if prominent {
-            button.buttonStyle(.borderedProminent)
-        } else {
-            button.buttonStyle(.bordered)
-        }
     }
 }
 
@@ -176,6 +162,8 @@ struct PhotoLayersPanel: View {
                     .accessibilityIdentifier("photo.layer.blend")
                     InspectorSliderRow("Opacity", value: layer.opacityPercent, in: 0...100, unit: "%", decimals: 0) {
                         perform(.opacity(layer.id, $0))
+                    } onEnd: {
+                        perform(.endAdjust)
                     }
                     .accessibilityIdentifier("photo.layer.opacity")
                 }

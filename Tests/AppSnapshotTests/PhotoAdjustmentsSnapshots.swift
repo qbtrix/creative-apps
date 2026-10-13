@@ -1,7 +1,7 @@
 // PhotoAdjustmentsSnapshots.swift: Photo's adjustments inspector with
 // Exposure at +1, Levels Black 0.998 and White 0.999 (one step apart, read
-// apart), and the other sections at their defaults, at the inspector's
-// ideal width, in Light and Dark. Writes photo-adjustments-light.png and
+// apart), Gamma 2.2 on its log track, Blur turned off (dimmed), and the other
+// sections at their defaults, at the inspector's ideal width, in Light and Dark. Writes photo-adjustments-light.png and
 // photo-adjustments-dark.png. macOS only.
 import PhotoModel
 import SuiteUI
@@ -17,6 +17,8 @@ import Testing
         settings.apply(.exposure(1))
         settings.apply(.whitePoint(0.999))
         settings.apply(.blackPoint(0.998))
+        settings.apply(.gamma(2.2))
+        settings.apply(.setEnabled(.blur, false))
         for scheme in [ColorScheme.light, .dark] {
             try snapshot(
                 AdjustmentsSample(settings: settings), name: "photo-adjustments-\(scheme == .dark ? "dark" : "light")",
