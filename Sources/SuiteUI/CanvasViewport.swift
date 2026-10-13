@@ -5,10 +5,16 @@
 // (Ruler). Pointer drags arrive in document pixels: `onDrag(from:to:)` once
 // per move with the previous and current point (a click is a drag that
 // doesn't move), then `onDragEnd`. Pinch zooms through `onZoom`. Key presses
-// reach `onKey` while the canvas has focus, which a drag on it gives it. The
-// host owns the zoom (the top bar and status bar show it) and learns the
-// viewport's size from `onSize` to work out a fit. CanvasLayout is the
-// placement math, plain and tested on its own. The content is clipped to the
+// reach `onKey` while the canvas has focus, which a drag on it gives it.
+// While it has focus the canvas also pans without a scroll wheel: a drag that
+// starts with Space held scrolls it with the pointer (the grab pointer) and
+// never reaches `onDrag` or `onDragEnd`, and Space never reaches `onKey`; an
+// arrow key `onKey` ignores scrolls a tenth of the viewport, Shift a whole
+// one. Whether a drag pans is decided when it starts, so a tool drag always
+// gets its `onDragEnd`. The host owns the zoom (the top bar and status bar
+// show it) and learns the viewport's size from `onSize` to work out a fit.
+// CanvasLayout is the placement and pan math, plain and tested on its own;
+// every pan is clamped to its scrollable area. The content is clipped to the
 // artboard; the overlay (selection outlines and handles, inline editors) is
 // laid out on the artboard but not clipped, so marks on a shape that crosses
 // the document's edge still show. Content, not chrome: flat, no glass. The
@@ -26,6 +32,8 @@ public struct CanvasLayout: Equatable, Sendable {
     public let content: CGSize
     /// The artboard's top-left corner in the scrollable area.
     public let origin: CGPoint
+    /// The visible part of the scrollable area.
+    public let viewport: CGSize
 
     /// Non-positive document sides count as one pixel, as CanvasSurface does.
     public init(document: CGSize, zoom: Double, viewport: CGSize, margin: CGFloat = SuiteSpacing.xxl) {
@@ -38,12 +46,41 @@ public struct CanvasLayout: Equatable, Sendable {
         self.scale = scale
         self.artboard = artboard
         self.content = content
+        self.viewport = viewport
         origin = CGPoint(x: (content.width - artboard.width) / 2, y: (content.height - artboard.height) / 2)
     }
 
     /// The document point under `point` in the scrollable area.
     public func documentPoint(_ point: CGPoint) -> CGPoint {
         CGPoint(x: (point.x - origin.x) / scale, y: (point.y - origin.y) / scale)
+    }
+
+    /// `offset` kept inside the scrollable area, so the viewport never shows past its edges.
+    public func clamped(_ offset: CGPoint) -> CGPoint {
+        CGPoint(
+            x: min(max(offset.x, 0), max(content.width - viewport.width, 0)),
+            y: min(max(offset.y, 0), max(content.height - viewport.height, 0)))
+    }
+
+    /// The scroll offset once a pan that began at `start` has moved the pointer by
+    /// `translation`: the content follows the pointer.
+    public func panned(from start: CGPoint, by translation: CGSize) -> CGPoint {
+        clamped(CGPoint(x: start.x - translation.width, y: start.y - translation.height))
+    }
+
+    /// The scroll offset after `key`: an arrow scrolls a tenth of the viewport its way,
+    /// a whole viewport with `page` (Shift). Nil for any other key.
+    public func panned(from offset: CGPoint, key: KeyEquivalent, page: Bool) -> CGPoint? {
+        let step = page ? viewport : CGSize(width: viewport.width / 10, height: viewport.height / 10)
+        let moved: CGPoint
+        switch key {
+        case .leftArrow: moved = CGPoint(x: offset.x - step.width, y: offset.y)
+        case .rightArrow: moved = CGPoint(x: offset.x + step.width, y: offset.y)
+        case .upArrow: moved = CGPoint(x: offset.x, y: offset.y - step.height)
+        case .downArrow: moved = CGPoint(x: offset.x, y: offset.y + step.height)
+        default: return nil
+        }
+        return clamped(moved)
     }
 }
 
@@ -61,6 +98,10 @@ public struct CanvasViewport<Content: View, Overlay: View>: View {
     @State private var scrolled: CGPoint = .zero
     @State private var last: CGPoint?
     @State private var pinchBase: Double?
+    @State private var position = ScrollPosition()
+    @State private var spaceHeld = false
+    /// The scroll offset where the pan under way began; nil while no pan is.
+    @State private var panStart: CGPoint?
     @FocusState private var isFocused: Bool
 
     /// `documentSize` in pixels; `content` and `overlay` are laid out at the
@@ -138,26 +179,61 @@ public struct CanvasViewport<Content: View, Overlay: View>: View {
             .frame(width: layout.content.width, height: layout.content.height, alignment: .topLeading)
             .contentShape(.rect)
             .gesture(drag(layout), isEnabled: onDrag != nil)
+            .simultaneousGesture(pan(layout), isEnabled: onKey != nil)
             .simultaneousGesture(pinch, isEnabled: onZoom != nil)
-            .pointerStyle(pointer)
+            .pointerStyle(panStart != nil ? .grabActive : spaceHeld ? .grabIdle : pointer)
         }
+        .scrollPosition($position)
         .onScrollGeometryChange(for: CGPoint.self) { $0.contentOffset } action: { _, offset in scrolled = offset }
         .background(SuiteColor.canvasSurround)
         .focusable(onKey != nil)
         .focused($isFocused)
         .focusEffectDisabled()
-        .onKeyPress(phases: .down) { press in onKey?(press) ?? .ignored }
+        // Space let go while focus was elsewhere never arrives here.
+        .onChange(of: isFocused) { _, focused in if !focused { spaceHeld = false } }
+        .onKeyPress(phases: .all) { press in key(press, layout) }
+    }
+
+    /// Space (all its phases) arms the pan and stays here. Every other key reaches `onKey`
+    /// going down, as before; an arrow it ignores pans the canvas.
+    private func key(_ press: KeyPress, _ layout: CanvasLayout) -> KeyPress.Result {
+        if press.key == .space {
+            spaceHeld = press.phase != .up
+            return .handled
+        }
+        guard press.phase == .down else { return .ignored }
+        if case .handled? = onKey?(press) { return .handled }
+        guard press.modifiers.isDisjoint(with: [.command, .option, .control]),
+            let offset = layout.panned(from: scrolled, key: press.key, page: press.modifiers.contains(.shift))
+        else { return .ignored }
+        position.scrollTo(point: offset)
+        return .handled
+    }
+
+    /// A drag that starts with Space held scrolls with the pointer. It reads the pointer in
+    /// window coordinates: the content's own coordinates move as it scrolls.
+    private func pan(_ layout: CanvasLayout) -> some Gesture {
+        DragGesture(minimumDistance: 0, coordinateSpace: .global)
+            .onChanged { value in
+                guard let start = panStart ?? (spaceHeld && last == nil ? scrolled : nil) else { return }
+                panStart = start
+                position.scrollTo(point: layout.panned(from: start, by: value.translation))
+            }
+            .onEnded { _ in panStart = nil }
     }
 
     private func drag(_ layout: CanvasLayout) -> some Gesture {
         DragGesture(minimumDistance: 0)
             .onChanged { value in
+                // A drag that starts with Space held is a pan; a tool drag under way keeps going.
+                guard panStart == nil, last != nil || !spaceHeld else { return }
                 if onKey != nil { isFocused = true }
                 let point = layout.documentPoint(value.location)
                 onDrag?(last ?? layout.documentPoint(value.startLocation), point)
                 last = point
             }
             .onEnded { _ in
+                guard last != nil else { return }
                 last = nil
                 onDragEnd?()
             }
