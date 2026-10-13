@@ -6,7 +6,9 @@
 // methods. The zoom keeps the handle tolerance a constant size on screen, and
 // the page is fitted whenever the selected page changes or a file opens.
 //
-// Files: Open and Save As use AppKit's panels. Save writes to the file the
+// Files: Open and Save As use AppKit's panels. Open fills this window only while
+// it holds no file (DesignWorkspace.takesOpenedFile); otherwise the chosen file
+// opens in a new window, so Open never loses work. Save writes to the file the
 // window opened or last saved, after finishing any text being typed. New File,
 // and Undo or Redo of it (they swap the whole document), clear that URL, so
 // Save then asks for a name and never writes a document over a file it doesn't
@@ -34,6 +36,7 @@ struct DesignWindow: View {
     @State private var note: String?
     @State private var problem: String?
     @State private var started = false
+    @Environment(\.openWindow) private var openWindow
 
     /// The launch file opens in the first window only.
     @MainActor private static var launchFileOpened = false
@@ -66,7 +69,6 @@ struct DesignWindow: View {
             model.newFile()
             documentURL = nil
         case .open: chooseFile()
-        case .openFile(let url): open(url)
         case .save: save()
         case .saveAs: saveAs()
         case .undo:
@@ -86,7 +88,7 @@ struct DesignWindow: View {
         case .deselect: model.deselect()
         case .select(let id): model.selectItem(id)
         // The ids below come from the model's own rows, so a refused call can't happen.
-        case .toggleExpanded(let id): try? model.toggleExpanded(id)
+        case .setExpanded(let id, let isExpanded): try? model.setExpanded(id, isExpanded)
         case .addPage: model.addPage()
         case .deletePage: if let id = model.selectedPageID { try? model.deletePage(id) }
         case .setFrame(let id, let x, let y, let width, let height):
@@ -129,12 +131,14 @@ struct DesignWindow: View {
 
     // MARK: Files
 
-    /// A window opened by File > New File with no window focused starts with a new file; the
-    /// first window opens the launch file when there is one.
+    /// A window opened by File > New File with no window focused starts with a new file, one
+    /// opened for a file opens it, and the first window opens the launch file when there is one.
     private func start() {
         guard !started else { return }
         started = true
-        if launch?.startsNewFile == true {
+        if let file = launch?.file {
+            open(file)
+        } else if launch?.startsNewFile == true {
             perform(.newFile)
         } else {
             openLaunchFile()
@@ -152,7 +156,12 @@ struct DesignWindow: View {
         panel.allowedContentTypes = [Self.fileType]
         panel.allowsMultipleSelection = false
         guard panel.runModal() == .OK, let url = panel.url else { return }
-        open(url)
+        // A window that holds a file keeps it, edited or not; the chosen file gets its own window.
+        if model.takesOpenedFile {
+            open(url)
+        } else {
+            openWindow(id: DesignLaunch.windowID, value: DesignLaunch(file: url))
+        }
     }
 
     /// Replaces the window's document with the file's. A file that can't open leaves it as it was.

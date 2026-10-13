@@ -10,7 +10,8 @@
 // `selectItem` looks them up together), nests children under a node that cannot
 // hold them, or has a page or node whose size is under 1 point or whose numbers
 // are not finite. Saving runs the same number check, so a file written here
-// always opens again. Opening clears the undo history and the selection.
+// always opens again. Opening clears the undo history and the selection, so Open
+// only fills a workspace with nothing open (`takesOpenedFile`).
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -59,6 +60,10 @@ private struct DesignFileHeader: Decodable {
 
 extension DesignWorkspace {
     private static let fileVersion = 1
+
+    /// Whether Open may put a file in this workspace: only while it holds none. A workspace that
+    /// holds a file, saved or not, is never replaced; the window opens the file in a new window.
+    public var takesOpenedFile: Bool { !isOpen }
 
     /// The open document as file bytes. Throws `.noFile` with nothing open.
     public func fileData() throws(DesignFileError) -> Data {
