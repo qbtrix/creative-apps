@@ -2,7 +2,9 @@
 // a value, and a value back into that text. Plain Swift with no SwiftUI, so the
 // rules are unit-tested on their own. Invariants: parse never returns a value
 // outside its range (unless it keeps the old one), never returns NaN, and keeps
-// the old value for text that isn't a number; format writes text parse reads.
+// the old value for text that isn't a number; format writes text parse reads,
+// rounded to the field's decimals (whole for percent and degrees, one for
+// pixels and EV, two by default), halves away from zero.
 public enum NumericInput {
     /// The value `text` names, clamped to `range`. Text that isn't a number,
     /// and NaN, give back `old`. Surrounding whitespace is ignored.
@@ -17,12 +19,16 @@ public enum NumericInput {
         value.isNaN ? range.lowerBound : min(max(value, range.lowerBound), range.upperBound)
     }
 
-    /// `value` rounded to two decimals, without trailing zeros ("12", "0.5").
-    /// Locale-free, so `parse` reads it back.
-    public static func format(_ value: Double) -> String {
-        // Past 1e15 every Double is whole, and Int64 and the * 100 could overflow.
+    /// `value` rounded to `decimals` places (0 to 6; two by default), without
+    /// trailing zeros ("12", "0.5"). Halves round away from zero, so 0.5 at no
+    /// decimals reads "1" and -2.5 reads "-3". Locale-free, so `parse` reads it back.
+    public static func format(_ value: Double, decimals: Int = 2) -> String {
+        // Past 1e15 every Double is whole, and Int64 and the scaling could overflow.
         guard value.isFinite, abs(value) < 1e15 else { return String(value) }
-        let rounded = (value * 100).rounded() / 100
-        return rounded == rounded.rounded() ? String(Int64(rounded)) : String(rounded)
+        var scale = 1.0
+        for _ in 0..<min(max(decimals, 0), 6) { scale *= 10 }
+        let rounded = (value * scale).rounded() / scale
+        guard rounded != rounded.rounded() else { return String(Int64(rounded)) }
+        return String(rounded)
     }
 }

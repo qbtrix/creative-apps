@@ -145,6 +145,36 @@ of settings. Those are flat greys from the ramp above.
 [ ] Greys from the ramp; one accent; glass only on the outer chrome and palettes
 ```
 
+## Editor shell
+
+A canvas editor may use `EditorShell` instead of `SuiteWindow`. It is the
+layout of our Studio photo editor (Ripple's editor parts), rebuilt as native
+SwiftUI in SuiteUI. Photo uses it.
+
+| Region | Component | Rules |
+|---|---|---|
+| Top bar | `EditorTopBar`, `EditorBarItem`, `EditorBarMenu`, `EditorBarDivider` | 40 pt. The app name, then the document name as a menu. Flat icon-and-label commands in the accessory-bar style (flat until hovered); undo, redo and zoom trail as icons. Every command here is also in the menu bar. |
+| Tool rail | `ToolbarGroup(style: .rail)` | Docked, flat, vertical. The selected tool sits on an accent well. Tooltips name the one-key shortcut ("Brush (B)"), which works while the canvas has focus. |
+| Canvas | `CanvasViewport`, `SelectionOutline`, `CropShade` | Rulers in document pixels along the top and left, a checkerboard behind the image, centered while it fits, scrolling with a 32 pt margin once it doesn't. Drags arrive in document pixels. |
+| Right panel | `SegmentedTabs`, then `InspectorSection`s | 280 pt, the tabs (Adjust, Layers) on top. A section's Reset icon shows only while the section differs from its defaults. A color is `InspectorColorWellRow`: the system well plus its hex code. |
+| Status line | `ViewerStatusBar` | Zoom, document size, and the trailing slot for the render time. |
+
+- **Dark in both appearances, on purpose.** The shell sets the dark scheme on
+  its window, like the Studio editor, so the image is the brightest thing on
+  screen. Colors still come from the grey ramp (`SuiteColor.panel` for bars
+  and panels, `.canvasSurround` around the image, `.field` for wells), which
+  resolve to their dark values.
+- **Hidden title bar.** The scene uses `.windowStyle(.hiddenTitleBar)`; the top
+  bar leaves `SuiteSize.windowControlsInset` for the window's buttons and drags
+  the window from its empty stretches. Still set `.navigationTitle` to the
+  document name for the Window menu.
+- **No glass inside.** Bars, rail, rulers and panel are flat bands with
+  hairlines between them.
+- **Numbers show their field's precision:** whole for percent and degrees, one
+  decimal for pixels and EV (`decimals:` on `ScrubField` and the slider row).
+- **Fits the window minimum.** Rail, content minimum and panel add up to no
+  more than `SuiteSize.windowMinimum` (TokensTests checks it).
+
 ## Layers: content vs. control
 
 For every screen, name what is content and what is control before you build.
@@ -171,9 +201,9 @@ For every screen, name what is content and what is control before you build.
 ## Window structure
 
 - One `WindowGroup` (or `DocumentGroup` once files open and save) per app,
-  showing `SuiteWindow`: a `NavigationSplitView` with the sidebar on the
-  leading edge, the content in the middle and an inspector on the trailing
-  edge.
+  showing `SuiteWindow` (a canvas editor may show `EditorShell` instead; see
+  Editor shell): a `NavigationSplitView` with the sidebar on the leading
+  edge, the content in the middle and an inspector on the trailing edge.
 - **Title** names the open document, not the app. Show the app name only when
   nothing is open.
 - **Sidebar**: top-level places or the document's structure (scenes, pages,

@@ -8,6 +8,7 @@
 #   download.swift.org                              the toolchain tarball (~1.1 GB)
 #   archive.ubuntu.com, security.ubuntu.com         apt packages Swift needs
 #   (ports.ubuntu.com instead on aarch64)
+#   sosumi.ai, mcp.context7.com                     the docs MCP servers in .mcp.json
 #
 # The tarball's GPG signature is not checked; it comes over HTTPS from
 # swift.org. Bump SWIFT_VERSION together with the container tag in
