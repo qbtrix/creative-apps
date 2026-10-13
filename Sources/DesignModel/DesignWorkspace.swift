@@ -27,7 +27,7 @@ public struct DesignPage: Identifiable, Sendable, Hashable, Codable {
     /// Top-level nodes, back to front.
     public var nodes: [DesignNode] = []
 
-    /// The Layers rows: each node, then its children when its id is in `expanded`.
+    /// The tree as rows: each node, then its children when its id is in `expanded`.
     public func visibleRows(expanded: Set<String>) -> [DesignRow] {
         nodes.rows(expanded: expanded)
     }
@@ -96,7 +96,7 @@ public struct DesignWorkspace: Sendable, Equatable {
 
     public var selectedNode: DesignNode? { selectedNodeID.flatMap { selectedPage?.nodes.node($0) } }
 
-    /// The selected page's Layers rows under the current expanded set.
+    /// The selected page's tree as rows under the current expanded set, as the Layers panel shows it.
     public var layerRows: [DesignRow] { selectedPage?.visibleRows(expanded: expandedNodeIDs) ?? [] }
 
     /// Opens a new file with one desktop-sized page holding a "Desktop" frame the size of the page.

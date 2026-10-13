@@ -101,7 +101,7 @@
           {
             "id": "design-model",
             "name": "DesignModel",
-            "description": "Linux-safe state and logic behind Design's window: pages, the node tree on each page (with fills and text) and its Layers rows, the selection, the tool, the model-owned undo history, the canvas gestures and the file codec. Foundation only, value types.",
+            "description": "Linux-safe state and logic behind Design's window: pages, the node tree on each page (with fills and text) and which Layers rows are expanded, the selection, the tool, the model-owned undo history, the canvas gestures and the file codec. Foundation only, value types.",
             "technology": "Swift 6, Foundation",
             "tags": [
               "internal"
@@ -110,7 +110,7 @@
               {
                 "id": "design-model-sources",
                 "name": "DesignModel sources",
-                "description": "Linux-safe state and logic behind Design's window: DesignWorkspace (pages, the selected page and node, the tool), DesignNode (the node tree on a page, each node with a fill and text, in absolute page points) and the flattened rows the Layers sidebar draws, DesignHistory (the model-owned undo and redo, one named step per edit), the canvas gestures (hit testing, the handles a selection shows, draw, move, resize, nudge, delete, in DesignCanvasEditing and DesignDrawing), the inline text edit (DesignText), the inspector's header lines (DesignInspectorContent), and the file codec (DesignFile).",
+                "description": "Linux-safe state and logic behind Design's window: DesignWorkspace (pages, the selected page and node, the tool), DesignNode (the node tree on a page, each node with a fill and text, in absolute page points) and the tree flattened into rows under the expanded set, DesignHistory (the model-owned undo and redo, one named step per edit), the canvas gestures (hit testing, the handles a selection shows, draw, move, resize, nudge, delete, in DesignCanvasEditing and DesignDrawing), the inline text edit (DesignText), the inspector's header lines (DesignInspectorContent), and the file codec (DesignFile).",
                 "technology": "Swift 6, Foundation",
                 "paths": [
                   "Sources/DesignModel/"

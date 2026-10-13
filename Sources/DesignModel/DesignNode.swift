@@ -1,6 +1,7 @@
 // DesignNode.swift: the node tree on a Design page, the plain geometry and color
-// types it is made of, and the flattened rows the Layers sidebar draws. Linux-safe
-// value types. Node ids are unique across the file; only frames and groups hold
+// types it is made of, and the tree flattened into rows under an expanded set
+// (DesignRow; the tests read the tree through it, the Layers panel walks
+// `children` itself). Linux-safe value types. Node ids are unique across the file; only frames and groups hold
 // children.
 //
 // Coordinates: every node's frame is in absolute page points with a top-left
@@ -202,7 +203,7 @@ public struct DesignNode: Identifiable, Sendable, Hashable, Codable {
     }
 }
 
-/// One visible row of the Layers tree: a node at its nesting depth.
+/// One row of the tree flattened under an expanded set: a node at its nesting depth.
 public struct DesignRow: Identifiable, Sendable, Hashable {
     public let node: DesignNode
     public let depth: Int  // 0 at the top level, one more per enclosing parent
