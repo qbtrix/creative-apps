@@ -3,22 +3,23 @@
 // and the active tool. Linux-safe. Every document edit goes through `apply`, so
 // it is one undo step; a command that throws changes neither the document nor
 // the selection and leaves its error in `layerError`. Every palette tool acts
-// through `drag(from:to:)`; a tool that does nothing there stays disabled with
-// `unavailableHelp` (FlareToolsTests checks this). The easing editor's segment
+// through `drag`, then `endDrag`; a tool that does nothing there has `toolHelp`
+// saying why (FlareToolsTests checks this). The easing editor's segment
 // selection and drag serial live here too (FlareEasing.swift uses them); a
-// change of layer selection drops the segment. The Ellipse tool's draft and
-// commit are in FlareDrawing.swift.
+// change of layer selection drops the segment. Stored state is `internal(set)`
+// so each area's extension file (docs/blueprints/flare.md, section 2) can set it.
 import FlareCore
 
 /// The drawing tools on Flare's tool palette.
 public enum FlareTool: String, CaseIterable, Sendable {
-    case select, pen, rectangle, ellipse
+    case select, directSelect, pen, rectangle, ellipse
 
     /// Why the palette shows this tool disabled, as its tooltip; nil once the
-    /// tool works. Set it to nil in the change that makes `drag` do something.
+    /// stage sends it drags. `FlareWorkspace.toolHelp(_:)` falls back to it.
     public var unavailableHelp: String? {
         switch self {
         case .select: "Selecting on the stage isn't built yet (#12)."
+        case .directSelect: "Direct selection on the stage isn't wired up yet."
         case .pen: "Drawing paths isn't built yet."
         case .rectangle: "Drawing rectangles isn't built yet."
         // The ellipse logic works (`drag`, `dragChanged`), but the stage
@@ -31,24 +32,38 @@ public enum FlareTool: String, CaseIterable, Sendable {
 }
 
 public struct FlareWorkspace: Sendable, Equatable {
-    private var engine: CommandEngine?
-    public private(set) var selectedSceneID: String?
-    public private(set) var selectedLayerID: String? {
+    var engine: CommandEngine?
+    /// The use cases the workspace edits through; `.live` or `.fake()`.
+    public internal(set) var services: FlareServices
+    public internal(set) var selectedSceneID: String?
+    public internal(set) var selectedLayerID: String? {
         didSet { if oldValue != selectedLayerID { easingSelection = nil; easingDragSerial &+= 1 } }
     }
-    public private(set) var tool: FlareTool = .select
+    public internal(set) var tool: FlareTool = .select
+    /// The stage selection (FlareSelection.swift).
+    public internal(set) var selection: [StageAddress] = []
+    /// The marquee under way, in scene points; nil when none is.
+    public internal(set) var marquee: Rect?
     /// The shape the drag under way would add, for the live preview; nil
     /// when no drag is running or the active tool draws nothing.
-    public private(set) var draft: FlareShape?
+    public internal(set) var draft: ShapeDraft?
+    /// The stage with the move under way applied; nil when none is.
+    public internal(set) var dragPreview: StageDrawList?
+    /// The pointer gesture under way (FlareDrag.swift).
+    var gesture: StageGesture?
+    /// The playhead (FlarePlayback.swift).
+    public internal(set) var currentFrame = 0
     /// Why the last layer change or undo was refused; nil after one succeeds.
-    public private(set) var layerError: FlareLayerError?
+    public internal(set) var layerError: FlareLayerError?
     /// The easing editor's segment, as last picked; `selectedEasingSegment`
     /// reads it only while the selected layer still has that segment.
     var easingSelection: EasingSegment?
     /// Part of a handle drag's coalesce key; bumped to end the drag.
     var easingDragSerial = 0
 
-    public init() {}
+    public init(services: FlareServices = .live) {
+        self.services = services
+    }
 
     public var document: Document? { engine?.document }
 
@@ -71,14 +86,14 @@ public struct FlareWorkspace: Sendable, Equatable {
     }
 
     /// Opens `document` in a fresh engine (no undo history), selects its
-    /// first scene and clears the layer selection.
+    /// first scene, and clears the selections, drafts, playhead and previews.
     mutating func load(_ document: Document) {
         engine = CommandEngine(document: document)
         selectedSceneID = document.scenes.first?.id
         selectedLayerID = nil
         easingSelection = nil
         layerError = nil
-        draft = nil
+        cancelDrag(); selection = []; currentFrame = 0
     }
 
     /// Selects a scene by id. An id not in the document is ignored. Selecting
@@ -87,6 +102,7 @@ public struct FlareWorkspace: Sendable, Equatable {
         guard scenes.contains(where: { $0.id == id }), id != selectedSceneID else { return }
         selectedSceneID = id
         selectedLayerID = nil
+        cancelDrag(); selection = []
     }
 
     /// Selects a layer of the selected scene by id. An unknown id is ignored.
@@ -107,29 +123,7 @@ public struct FlareWorkspace: Sendable, Equatable {
 
     public mutating func selectTool(_ tool: FlareTool) {
         self.tool = tool
-        draft = nil
-    }
-
-    /// The active tool's drag across the stage from `start` to `end`, in scene
-    /// points; a click is a drag that doesn't move. `stageScale` is the stage's
-    /// fit scale (stage points per scene point), so size minimums apply on
-    /// screen. The stage sends every tool gesture here, so each case is where
-    /// that tool's work goes.
-    public mutating func drag(from start: Point, to end: Point, stageScale: Double = 1) {
-        draft = nil
-        switch tool {
-        case .ellipse: commitEllipse(from: start, to: end, stageScale: stageScale)
-        case .select, .pen, .rectangle: break
-        }
-    }
-
-    /// The active tool's drag is under way from `start` to `end`: sets `draft`
-    /// to the shape it would add, for the stage's live preview. With no
-    /// selected scene `drag` would refuse the commit, so there is no draft.
-    /// `stageScale` is as for `drag`, so the draft matches what `drag` adds.
-    public mutating func dragChanged(from start: Point, to end: Point, stageScale: Double = 1) {
-        guard tool == .ellipse, selectedScene != nil else { return draft = nil }
-        draft = Self.ellipse(from: start, to: end, stageScale: stageScale)
+        cancelDrag()
     }
 
     /// Undoes or redoes the last change; nothing to undo or redo is a no-op.
@@ -152,7 +146,7 @@ public struct FlareWorkspace: Sendable, Equatable {
     mutating func applyGroup(
         _ label: String, selection: FlareLayerSelection = .keep, _ body: (inout CommandEngine) throws -> Void
     ) {
-        step { try $0.group(label, body) }
+        step(label, body)
         guard layerError == nil, case .layer(let id) = selection else { return }
         selectedLayerID = id
     }
@@ -163,11 +157,13 @@ public struct FlareWorkspace: Sendable, Equatable {
     }
 
     /// Runs `body` on a copy of the engine and commits it only if it succeeds.
-    /// Afterwards a selected layer that no longer exists is deselected.
-    private mutating func step(_ body: (inout CommandEngine) throws -> Void) {
+    /// With a `label`, `body` runs inside `engine.group(label)`: only for
+    /// workspace-level compositions such as Cut, since a contract opens its
+    /// own group. Afterwards a selected layer that no longer exists is deselected.
+    mutating func step(_ label: String? = nil, _ body: (inout CommandEngine) throws -> Void) {
         guard var next = engine else { return refuse(.noDocument) }
         do {
-            try body(&next)
+            if let label { try next.group(label, body) } else { try body(&next) }
         } catch let error as CommandError {
             return refuse(.command(error))
         } catch {
@@ -185,5 +181,7 @@ public struct FlareWorkspace: Sendable, Equatable {
             && lhs.selectedLayerID == rhs.selectedLayerID && lhs.tool == rhs.tool
             && lhs.draft == rhs.draft
             && lhs.layerError == rhs.layerError && lhs.selectedEasingSegment == rhs.selectedEasingSegment && lhs.canUndo == rhs.canUndo && lhs.canRedo == rhs.canRedo
+            && lhs.services.isPreview == rhs.services.isPreview && lhs.selection == rhs.selection
+            && lhs.marquee == rhs.marquee && lhs.dragPreview == rhs.dragPreview && lhs.gesture == rhs.gesture && lhs.currentFrame == rhs.currentFrame
     }
 }

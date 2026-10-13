@@ -69,7 +69,7 @@ func ellipseRefusesNonFiniteCoordinates(bad: Double) {
     let start = Point(x: 12.5, y: -7), end = Point(x: -80, y: 33.25)
     workspace.dragChanged(from: start, to: Point(x: 0, y: 0))
     workspace.dragChanged(from: start, to: end)
-    let draft = workspace.draft
+    let draft = workspace.draft?.shape
     workspace.drag(from: start, to: end)
     #expect(draft != nil)
     #expect(workspace.layers.first?.shapes.first == draft)

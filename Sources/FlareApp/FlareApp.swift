@@ -103,6 +103,7 @@ extension FlareTool: PaletteTool {
     public var title: String {
         switch self {
         case .select: "Select"
+        case .directSelect: "Direct Select"
         case .pen: "Pen"
         case .rectangle: "Rectangle"
         case .ellipse: "Ellipse"
@@ -112,6 +113,7 @@ extension FlareTool: PaletteTool {
     public var systemImage: String {
         switch self {
         case .select: "cursorarrow"
+        case .directSelect: "cursorarrow.rays"
         case .pen: "pencil.tip"
         case .rectangle: "rectangle"
         case .ellipse: "circle"
