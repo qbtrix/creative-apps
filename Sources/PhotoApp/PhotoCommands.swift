@@ -1,8 +1,8 @@
-// PhotoCommands.swift: Photo's menu bar. File: New Image, Open…, Save,
-// Export…; Edit: Undo and Redo named for the edit, Delete Selection, Fill
+// PhotoCommands.swift: Photo's menu bar. File: New Image, Open…, Save, Save
+// As…, Export…; Edit: Undo and Redo named for the edit, Delete Selection, Fill
 // Selection; Select: All, Deselect; Image: Image Size…, Rotate, Straighten…;
 // Layer: New, Delete, Rename…, Show/Hide, Bring Forward, Send Backward, Select
-// Layer Above and Below; View: Zoom In, Zoom Out, Fit on Screen.
+// Layer Above and Below; View: Zoom In, Zoom Out, Actual Size, Fit on Screen.
 // The focused window publishes a PhotoMenu (what can run now, and where to
 // send it) as a focused scene value; an item that can't run is disabled, never
 // hidden. Every top bar command is here too.
@@ -74,6 +74,8 @@ struct PhotoCommands: Commands {
         }
         CommandGroup(replacing: .saveItem) {
             Button("Save") { menu.perform(.save) }.keyboardShortcut("s").disabled(!menu.hasImage)
+            Button("Save As…") { menu.perform(.saveAs) }.keyboardShortcut("s", modifiers: [.command, .shift])
+                .disabled(!menu.hasImage)
             Button("Export…") { menu.perform(.export) }.keyboardShortcut("e", modifiers: [.command, .shift])
                 .disabled(!menu.hasImage)
         }
@@ -100,6 +102,7 @@ struct PhotoCommands: Commands {
         CommandGroup(after: .toolbar) {
             Button("Zoom In") { menu.perform(.zoomIn) }.keyboardShortcut("=").disabled(!menu.hasImage)
             Button("Zoom Out") { menu.perform(.zoomOut) }.keyboardShortcut("-").disabled(!menu.hasImage)
+            Button("Actual Size") { menu.perform(.actualSize) }.keyboardShortcut("1").disabled(!menu.hasImage)
             Button("Fit on Screen") { menu.perform(.fit) }.keyboardShortcut("0").disabled(!menu.hasImage)
             Divider()
         }

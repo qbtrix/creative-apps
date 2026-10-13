@@ -9,7 +9,7 @@ import SuiteUI
 import SwiftUI
 
 enum PhotoIntent {
-    case newImage, open, save, export, imageSize
+    case newImage, open, save, saveAs, export, imageSize
     case openFile(URL)
     case rotate(QuarterTurn)
     /// Opens the Straighten sheet; `applyStraighten` turns the image by its choices.
@@ -30,7 +30,7 @@ enum PhotoIntent {
     case blendMode(PhotoLayer.ID, CoreRaster.BlendMode)
     case moveLayers(IndexSet, Int)
     case addLayer, deleteLayer, renameLayer, bringForward, sendBackward, selectLayerAbove, selectLayerBelow
-    case zoomIn, zoomOut, fit
+    case zoomIn, zoomOut, actualSize, fit
 }
 
 /// Where a view sends its intents.

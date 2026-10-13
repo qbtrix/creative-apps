@@ -1,6 +1,7 @@
 // PhotoEditor.swift: what a Photo window shows, laid out on SuiteUI's
-// EditorShell: the top bar (file commands, the Image menu, undo and redo,
-// zoom), the tool rail, the canvas with its rulers, the Adjust | Layers panel
+// EditorShell: the top bar (the document menu with New Image, Open…, Save,
+// Save As… and Export…; file commands, the Image menu, undo and redo, zoom),
+// the tool rail, the canvas with its rulers, the Adjust | Layers panel
 // and the status line (zoom, image size, the active tool, render time). Values in, intents
 // out: it reads the workspace and sends every action to `perform`, so the
 // same view draws the live window and the snapshots. A control that can't act
@@ -62,6 +63,7 @@ struct PhotoTopBar: View {
             Button("Open…") { perform(.open) }
             Divider()
             Button("Save") { perform(.save) }.disabled(noImage != nil)
+            Button("Save As…") { perform(.saveAs) }.disabled(noImage != nil).accessibilityIdentifier("photo.bar.save-as")
             Button("Export…") { perform(.export) }.disabled(noImage != nil)
         } content: {
             EditorBarItem(ToolbarAction("Open", systemImage: "folder") { perform(.open) })

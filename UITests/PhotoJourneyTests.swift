@@ -9,8 +9,11 @@
 // the audit knows. Another journey edits with every other tool,
 // one straightens the image by 3 degrees from the Image menu, and the Curves
 // journey drags the curve up and nudges it with an arrow key, each one
-// "Undo Curves" step that changes the canvas. Run order is by name, so
-// testTier1UndoRedoZoomPan runs last and attaches the audit counts.
+// "Undo Curves" step that changes the canvas. The Save As journey (to the
+// folder given with -PhotoSaveTo, so no save panel) checks the window then
+// holds the copy and Save writes it, and that Command-1 shows 100%. Run order
+// is by name, so testTier1UndoRedoZoomPan runs last and attaches the audit
+// counts.
 import CoreGraphics
 import ImageIO
 import UniformTypeIdentifiers
@@ -128,6 +131,49 @@ final class PhotoJourneyTests: XCTestCase {
         expect("photo.bar.undo", reopened, "the reopened window has no Undo button")
         XCTAssertFalse(reopened.app.buttons["photo.bar.undo"].isEnabled, "the reopened file came with undo history")
         reopened.shot("reopened")
+    }
+
+    @MainActor func testSaveAsAndActualSize() throws {
+        // tools.PNG becomes tools.png, a name the app audit already knows (the
+        // document menu has no identifier), so the first shot comes after Save
+        // As. The copy goes in its own folder: the disk may not tell the two apart.
+        let folder = try Self.folder()
+        let saves = folder.appending(path: "saves")
+        try FileManager.default.createDirectory(at: saves, withIntermediateDirectories: true)
+        let file = folder.appending(path: "tools.PNG")
+        try Self.writeTestPhoto(to: file)
+        let original = try Data(contentsOf: file)
+        let photo = Journey("Photo", self, arguments: ["-PhotoOpenFile", file.path, "-PhotoSaveTo", saves.path])
+        XCTAssert(photo.app.windows["tools.PNG"].waitForExistence(timeout: 30), "tools.PNG didn't open")
+
+        // Shift-Command-S writes a PNG copy, and the window and panel header now name it.
+        photo.app.typeKey("s", modifierFlags: [.command, .shift])
+        let copy = saves.appending(path: "tools.png")
+        XCTAssert(Self.waitForFile(copy), "Save As wrote no tools.png")
+        XCTAssertEqual(try Data(contentsOf: copy).prefix(4), Data([0x89, 0x50, 0x4E, 0x47]), "the Save As copy isn't a PNG")
+        XCTAssert(photo.app.windows["tools.png"].waitForExistence(timeout: 5), "the window isn't titled tools.png")
+        expectHeader("tools.png, ", photo, "the panel header doesn't name tools.png")
+        photo.shot("saved-as")
+
+        // From now on Save writes the copy, never the opened file.
+        let saved = try Data(contentsOf: copy)
+        choose("Rotate 90° Clockwise", from: "Image", photo)
+        expect("Undo Rotate", photo, "Rotate made no undo step")
+        photo.app.typeKey("s", modifierFlags: .command)
+        XCTAssert(Self.waitUntil { (try? Data(contentsOf: copy)).map { $0 != saved } ?? false }, "Save didn't rewrite the copy")
+        XCTAssertEqual(try Data(contentsOf: file), original, "Save after Save As wrote over the opened tools.PNG")
+        photo.shot("saved-copy")
+
+        // At 100% the 600 x 800 px image is 600 x 800 points. The status line's
+        // "Zoom N%" is no query: XCUITest reads that SwiftUI text as empty.
+        let canvas = photo.element("suite.canvas")
+        photo.app.typeKey("-", modifierFlags: .command)
+        XCTAssert(Self.waitUntil { canvas.frame.width < 599 }, "Command-- didn't zoom out below 100% (\(canvas.frame.size))")
+        photo.shot("zoomed-out")
+        photo.app.typeKey("1", modifierFlags: .command)
+        let actual = { abs(canvas.frame.width - 600) < 1 && abs(canvas.frame.height - 800) < 1 }
+        XCTAssert(Self.waitUntil(actual), "Command-1 didn't show the image at 100% (\(canvas.frame.size))")
+        photo.shot("actual-size")
     }
 
     @MainActor func testEveryToolEditsTheImage() throws {
