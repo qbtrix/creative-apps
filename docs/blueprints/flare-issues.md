@@ -203,13 +203,13 @@ a second copy:
 - LM-6 (#359): `LiveEasing` conforms to `KeyframeEasing`. It may wrap or
   share `FlareWorkspace`'s `SetKeyframeEasing` code; `FlareWorkspace` keeps
   its `EasingEditing` conformance.
-
-No script regenerates issue bodies from this file. When an entry here
-changes, edit the issue body by hand in the same change: the LM-0b2 and LM-6
-entries above were copied into #321 and #359 on 2026-10-13 (#454).
 - F9 (#378): build the popover from `FlareEasingInspector`, and keep one
   easing editor, not two.
 - S1 (#334), S5 (#338), S13 (#343): `StudioScrubRow`, `ChoiceChips` and
   `CurveEditor` already exist.
 - F1a (#346), F2 (#15), LM-0a2 (#316): keep New Sample Animation working and
   extend `FlareCommands.swift`.
+
+No script regenerates issue bodies from this file. When an entry here
+changes, edit the issue body by hand in the same change: the LM-0b2 and LM-6
+entries above were copied into #321 and #359 on 2026-10-13 (#454).
