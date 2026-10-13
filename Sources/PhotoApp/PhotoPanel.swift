@@ -31,7 +31,7 @@ struct PhotoPanel: View {
                     ScrollView {
                         VStack(alignment: .leading, spacing: 0) {
                             ToolOptionsSection(model: model, perform: perform)
-                            AdjustmentsInspector(settings: model.adjustments) { perform(.adjust($0)) }
+                            AdjustmentsPanel(model: model, perform: perform)
                         }
                     }
                 } else {

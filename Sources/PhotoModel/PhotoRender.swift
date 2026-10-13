@@ -10,7 +10,8 @@
 // (PhotoWorkspace.damage(since:)) and timing itself for the status line. The
 // curve editor's line (`curveSamples`) runs the same CoreRaster curve over a
 // ramp, and its histogram (`curvesHistogram`) counts the image as it enters
-// Curves, so both show what the render does. Linux-safe.
+// Curves, so both show what the render does; `curvesHistogramKey` changes
+// exactly when that count can. Linux-safe.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -104,6 +105,18 @@ extension PhotoWorkspace {
         return counts.map { tallest > 0 ? Double($0) / tallest : 0 }
     }
 
+    /// A value that changes exactly when `curvesHistogram()` can: with any
+    /// change to the layers or their pixels, and with exposure or levels as
+    /// they apply (a switched-off section counts as its defaults). A Curves,
+    /// Hue/Saturation or Blur edit leaves it as it was, so the inspector
+    /// recounts only when it must, never during a curve drag.
+    public var curvesHistogramKey: CurvesHistogramKey {
+        let defaults = AdjustmentSettings(), on = adjustments
+        let exposure = on.isEnabled(.exposure) ? on : defaults, levels = on.isEnabled(.levels) ? on : defaults
+        return CurvesHistogramKey(
+            content: contentRevision, tone: [exposure.exposure, levels.blackPoint, levels.whitePoint, levels.gamma])
+    }
+
     /// `rect` of the canvas, composited and adjusted.
     func rendered(_ rect: PixelRect) throws -> PixelBuffer {
         guard let canvas, let outer = rect.expanded(by: adjustments.blurMargin).intersection(canvas.rect),
@@ -132,6 +145,12 @@ extension PhotoWorkspace {
         }
         return result
     }
+}
+
+/// See `PhotoWorkspace.curvesHistogramKey`.
+public struct CurvesHistogramKey: Equatable, Sendable {
+    let content: Int
+    let tone: [Float]
 }
 
 public enum PhotoRenderer {

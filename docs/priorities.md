@@ -161,9 +161,10 @@ beyond one step (#25), transform.
 Tier 3: blend modes and layer styles, text, paths, print setup, specialist
 controls (#231).
 
-`p1`: #255 (Levels click-away changes the image), #419, #420. Open, save, export with
-quality, crop, resize, rotate, layers, exposure, levels and hue/saturation
-already exist on dev, so most of tier 1 is done. Photo's low `p1` count means
+`p1`: #255 (Levels click-away changes the image), #419 (straighten's UI). Open,
+save, export with quality, crop, resize, rotate, straighten (in the model),
+layers, exposure, levels, curves and hue/saturation already exist on dev, so
+most of tier 1 is done. Photo's low `p1` count means
 its remaining tier-1 gaps are unfiled, not that its issues were demoted.
 
 Filed: straighten by any angle (#419, after creative-core#230) and Curves

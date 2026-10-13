@@ -1,7 +1,8 @@
 // PhotoCurvesTests.swift: the Curves adjustment: its default end points, the
 // point lists it refuses, the enable switch, Reset, its place after Levels in
-// the render, its undo name, and the samples and histogram the curve editor
-// draws. Runs on Linux and macOS.
+// the render, its undo name, one undo step per gesture (endAdjust), and the
+// samples, histogram and histogram key the curve editor uses. Runs on Linux
+// and macOS.
 import CoreRaster
 import PhotoModel
 import Testing
@@ -132,5 +133,56 @@ import Testing
         #expect(heights == counts.map { Double($0) / tallest })
         #expect(heights.firstIndex(of: 1) != plainBin)
         #expect(PhotoWorkspace().curvesHistogram().isEmpty)
+    }
+
+    @Test func endAdjustMakesEachCurveGestureItsOwnUndoStep() throws {
+        var workspace = try grey()
+        let first = [CurvePoint(x: 0, y: 0), CurvePoint(x: 0.5, y: 0.6), CurvePoint(x: 1, y: 1)]
+        workspace.adjust(.curvePoints(first))
+        workspace.adjust(.curvePoints(Self.lift))
+        workspace.endAdjust()
+        workspace.adjust(.curvePoints([CurvePoint(x: 0, y: 0), CurvePoint(x: 0.5, y: 0.8), CurvePoint(x: 1, y: 1)]))
+        workspace.endAdjust()
+        workspace.undo()
+        #expect(workspace.adjustments.curvePoints == Self.lift)
+        #expect(workspace.undoActionName == "Undo Curves")
+        workspace.undo()
+        #expect(workspace.adjustments.curvePoints == Self.ends)
+        #expect(workspace.undoActionName != "Undo Curves")
+    }
+
+    @Test func endAdjustMakesEachSliderRunItsOwnUndoStep() throws {
+        var workspace = try grey()
+        workspace.adjust(.exposure(0.5))
+        workspace.adjust(.exposure(1))
+        workspace.endAdjust()
+        workspace.adjust(.exposure(2))
+        workspace.undo()
+        #expect(workspace.adjustments.exposure == 1)
+        #expect(workspace.undoActionName == "Undo Exposure")
+        workspace.undo()
+        #expect(workspace.adjustments.exposure == 0)
+    }
+
+    @Test func histogramKeyMovesOnlyWithTheHistogramsInput() throws {
+        var workspace = try grey()
+        let key = workspace.curvesHistogramKey
+        workspace.adjust(.curvePoints(Self.lift))
+        workspace.adjust(.hue(40))
+        workspace.adjust(.blurSigma(2))
+        workspace.undo()
+        #expect(workspace.curvesHistogramKey == key)
+        workspace.adjust(.exposure(1))
+        let exposed = workspace.curvesHistogramKey
+        #expect(exposed != key)
+        workspace.adjust(.setEnabled(.levels, false))
+        #expect(workspace.curvesHistogramKey == exposed)
+        workspace.adjust(.whitePoint(0.8))
+        #expect(workspace.curvesHistogramKey == exposed)
+        workspace.adjust(.setEnabled(.levels, true))
+        #expect(workspace.curvesHistogramKey != exposed)
+        let levelled = workspace.curvesHistogramKey
+        addFilledLayer(&workspace, red: 10, green: 200, blue: 30)
+        #expect(workspace.curvesHistogramKey != levelled)
     }
 }

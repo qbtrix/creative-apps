@@ -21,6 +21,8 @@ enum PhotoIntent {
     case endDrag
     case toolOption(ToolOptionEdit)
     case adjust(AdjustmentEdit)
+    /// A slider's or the curve's gesture ended: the next adjustment is a new undo step.
+    case endAdjust
     case selectAll, deselect, deleteSelection, fillSelection, applyCrop, cancelCrop
     case selectLayer(PhotoLayer.ID)
     case toggleVisibility(PhotoLayer.ID)

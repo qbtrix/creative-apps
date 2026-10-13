@@ -131,7 +131,7 @@
               {
                 "id": "photo-app-sources",
                 "name": "PhotoApp sources",
-                "description": "The Photo app (raster editing): the SwiftUI App scene and views in Sources/PhotoApp, built from SuiteUI's EditorShell: the window and its intents, the top bar, tool rail and canvas, the Adjust | Layers panel (tool options, adjustment sections with the Levels gamma ScrubField, the layer list), the export and image size sheets, the File, Edit, Select, Image, Layer and View menus, the coalescing canvas renderer, the pen pressure read from AppKit mouse events for brush drags, and the ImageIO codec behind PhotoModel's PhotoImageCodec.",
+                "description": "The Photo app (raster editing): the SwiftUI App scene and views in Sources/PhotoApp, built from SuiteUI's EditorShell: the window and its intents, the top bar, tool rail and canvas, the Adjust | Layers panel (tool options, adjustment sections with the Levels gamma ScrubField and the Curves tone curve over its histogram, the layer list), the export and image size sheets, the File, Edit, Select, Image, Layer and View menus, the coalescing canvas renderer, the pen pressure read from AppKit mouse events for brush drags, and the ImageIO codec behind PhotoModel's PhotoImageCodec.",
                 "technology": "Swift 6, SwiftUI, macOS 26",
                 "paths": [
                   "Sources/PhotoApp/"
