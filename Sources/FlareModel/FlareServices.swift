@@ -34,7 +34,7 @@ public struct FlareServices: Sendable {
             stage: FakeStage(),
             hits: FakeHits(),
             shapes: FakeShapes(),
-            properties: NotBuilt(reason: "Not built yet (LM-0b1)."),
+            properties: FakeProperties(),
             keyframes: NotBuilt(reason: "Not built yet (LM-0b2)."),
             easing: NotBuilt(reason: "Not built yet (LM-0b2)."),
             onion: NotBuilt(reason: "Not built yet (LM-0b2)."),
