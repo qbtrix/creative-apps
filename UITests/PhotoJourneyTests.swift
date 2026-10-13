@@ -13,7 +13,9 @@
 // Reset over its header (the audit's overlap check), so Curves, Levels and
 // Hue/Saturation edits are undone before their shots. The Save As journey (to the
 // folder given with -PhotoSaveTo, so no save panel) checks the window then
-// holds the copy and Save writes it, and that Command-1 shows 100%. Run order
+// holds the copy and Save writes it, and that Command-1 shows 100%. The
+// history journey pans by scroll and by arrow key, and checks a brush drag
+// paints after Space is let go (Space is pan mode only while held). Run order
 // is by name, so testTier1UndoRedoZoomPan runs last and attaches the audit
 // counts.
 import CoreGraphics
@@ -400,6 +402,8 @@ final class PhotoJourneyTests: XCTestCase {
         // picture, and past the viewport the area grows.
         let canvas = photo.element("suite.canvas")
         XCTAssert(canvas.waitForExistence(timeout: 5), "no canvas (suite.canvas)")
+        // A click gives the canvas the keyboard for the arrow and Space steps (a Move click moves nothing).
+        canvas.click()
         let fit = canvas.frame.size
         zoom({ photo.app.typeKey("=", modifierFlags: .command) }, photo, "Command-= didn't zoom in")
         photo.shot("zoom-in-key")
@@ -418,6 +422,14 @@ final class PhotoJourneyTests: XCTestCase {
         XCTAssert(photo.app.buttons["Undo New Layer"].exists, "panning changed the undo history")
         photo.shot("panned")
 
+        // The arrow keys pan too (the canvas still has the keyboard); at an edge, the other way.
+        let scrolled = canvas.frame
+        photo.app.typeKey(.rightArrow, modifierFlags: [])
+        if !Self.waitUntil({ canvas.frame != scrolled }) { photo.app.typeKey(.leftArrow, modifierFlags: []) }
+        XCTAssert(Self.waitUntil { canvas.frame != scrolled }, "the arrow keys didn't pan the zoomed image")
+        XCTAssert(photo.app.buttons["Undo New Layer"].exists, "an arrow-key pan changed the undo history")
+        photo.shot("panned-by-key")
+
         let zoomedIn = canvas.frame.height
         zoom({ photo.click("Zoom Out", in: .window) }, photo, "the top bar's Zoom Out didn't zoom out")
         XCTAssert(Self.waitUntil { canvas.frame.height < zoomedIn - 1 }, "Zoom Out didn't make the image smaller")
@@ -426,6 +438,14 @@ final class PhotoJourneyTests: XCTestCase {
         let fitted = { abs(canvas.frame.width - fit.width) <= 1 && abs(canvas.frame.height - fit.height) <= 1 }
         XCTAssert(Self.waitUntil(fitted), "Command-0 didn't fit the image again (\(canvas.frame.size), fit was \(fit))")
         photo.shot("zoom-fit")
+
+        // Space is pan mode only while held: after a press and release, a drag
+        // reaches the tool again and paints.
+        photo.app.typeKey(" ", modifierFlags: [])
+        photo.app.typeKey("b", modifierFlags: [])
+        photo.drag(on: "suite.canvas", from: CGVector(dx: 0.45, dy: 0.4), to: CGVector(dx: 0.55, dy: 0.6))
+        expect("Undo Paint", photo, "after Space was pressed and let go, a brush drag didn't paint (still in pan mode?)")
+        photo.shot("space-then-paint")
     }
 
     // MARK: Steps
