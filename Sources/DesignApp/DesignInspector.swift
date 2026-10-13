@@ -53,7 +53,7 @@ private struct DesignNodeProperties: View {
                 if let lockHelp { DesignPanelHint(lockHelp) }
             }
             InspectorSection("Frame") {
-                VStack(alignment: .leading, spacing: 0) {
+                VStack(alignment: .leading, spacing: SuiteSpacing.xs) {
                     frameRow("X", "X position", \.x, Self.positionRange)
                     frameRow("Y", "Y position", \.y, Self.positionRange)
                     frameRow("W", "Width", \.width, Self.sizeRange)
