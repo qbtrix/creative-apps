@@ -5,9 +5,11 @@
 // The box has no fill, only an accent hairline: the text keeps the colour it will have on
 // the page (black text on a field well is unreadable in the shell's dark scheme).
 //
-// The field is sized in screen points (frame x zoom) and its font is the body text style's
-// size x zoom, not a scaled view: AppKit's text field and its field editor do not hit-test
-// or edit correctly under a scale transform. The draft goes out as `.textDraft`; Return and
+// The field sits at the node's top-left at the canvas zoom, but its size (frame x scale) and
+// font (the body text style's size x scale) use DesignWorkspace.textEditScale, the zoom but
+// never under 1, so the text being typed reads even on a zoomed-out page. Sized, not a
+// scaled view: AppKit's text field and its field editor do not hit-test or edit correctly
+// under a scale transform. The draft goes out as `.textDraft`; Return and
 // losing focus send `.commitText`, Escape sends `.cancelText`. It asks for keyboard focus as
 // it appears (takeFocus), and the canvas stops being focusable during the edit so it can't
 // hold the keys (DesignCanvas). The canvas does not paint the edited node's text, so nothing here
@@ -25,7 +27,9 @@ struct DesignTextOverlay: View {
     var body: some View {
         ZStack(alignment: .topLeading) {
             if let node = editing {
-                DesignTextField(node: node, draft: model.textDraft, scale: scale, perform: perform)
+                DesignTextField(
+                    node: node, draft: model.textDraft, zoom: zoom, scale: DesignWorkspace.textEditScale(zoom: zoom),
+                    perform: perform)
                     .id(node.id)
             }
         }
@@ -39,15 +43,14 @@ struct DesignTextOverlay: View {
         guard let id = model.editingTextID, let node = model.selectedNode, node.id == id else { return nil }
         return node
     }
-
-    /// Screen points per document point, as CanvasLayout reads the zoom.
-    private var scale: Double { zoom.isFinite && zoom > 0 ? zoom : 1 }
 }
 
-/// The text field over one node. A new node gets a new field (`.id`), which takes focus.
+/// The text field over one node, at `zoom` and drawn at `scale`. A new node gets a new field
+/// (`.id`), which takes focus.
 private struct DesignTextField: View {
     let node: DesignNode
     let draft: String
+    let zoom: Double
     let scale: Double
     let perform: DesignPerform
     @FocusState private var focused: Bool
@@ -72,9 +75,12 @@ private struct DesignTextField: View {
             // would place another text node. The field itself takes its own clicks.
             .contentShape(.rect)
             .gesture(DragGesture(minimumDistance: 0))
-            .offset(x: node.frame.x * scale, y: node.frame.y * scale)
+            .offset(x: node.frame.x * origin, y: node.frame.y * origin)
             .accessibilityIdentifier("design.text")
     }
+
+    /// Screen points per document point for the field's position, as CanvasLayout reads the zoom.
+    private var origin: Double { zoom.isFinite && zoom > 0 ? zoom : 1 }
 
     /// Asks for the keyboard until the field has it. A request made as the field appears is
     /// refused (the journey's typing went nowhere until it clicked the box), so it asks again.

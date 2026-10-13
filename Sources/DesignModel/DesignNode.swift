@@ -55,6 +55,26 @@ public struct DesignRect: Sendable, Hashable, Codable {
         return DesignPoint(x: x + width * Double(h + 1) / 2, y: y + height * Double(v + 1) / 2)
     }
 
+    /// Whether this rectangle is under three handles across on either side, for handles `size`
+    /// points across. Then the side handles would pile onto the corners and onto each other.
+    public func isCompact(handleSize size: Double) -> Bool {
+        width < 3 * size || height < 3 * size
+    }
+
+    /// The handles a selection of this rectangle shows, each with its center, for handles `size`
+    /// points across: all eight on the corners and side midpoints, or for a compact rectangle only
+    /// the corners, each pushed out by half a handle so it sits outside and leaves the inside readable.
+    public func handles(size: Double) -> [DesignHandle: DesignPoint] {
+        guard isCompact(handleSize: size) else {
+            return Dictionary(uniqueKeysWithValues: DesignHandle.allCases.map { ($0, point(of: $0)) })
+        }
+        return Dictionary(
+            uniqueKeysWithValues: DesignHandle.allCases.filter(\.isCorner).map { handle in
+                let ((h, v), at) = (handle.direction, point(of: handle))
+                return (handle, DesignPoint(x: at.x + Double(h) * size / 2, y: at.y + Double(v) * size / 2))
+            })
+    }
+
     /// This rectangle with `handle` dragged by `delta`: a corner moves its two edges, a side one.
     /// `keepAspect` (corners only) keeps width:height and follows the axis that changed more in
     /// relative terms; `fromCenter` moves the opposite edges by the negative delta, so the center

@@ -10,7 +10,8 @@
 // one undo step. A click is a drag that never moves.
 //
 //   move    a press on a handle of the selected node resizes it (Shift keeps the
-//           aspect, Option works from the center); otherwise it selects the node
+//           aspect, Option works from the center; a small node shows only its
+//           corners, outside it, and a press inside it moves it); otherwise it selects the node
 //           under the pointer (none deselects) and a drag moves it with its
 //           subtree. A click on an already selected text node edits it.
 //   frame, rectangle, ellipse, text   DesignDrawing.
@@ -50,15 +51,22 @@ extension DesignWorkspace {
     }
 
     /// The handle of the selected, unlocked, visible node nearest `point` and within
-    /// `handleTolerance` (Chebyshev distance); corners win a tie.
+    /// `handleTolerance` (Chebyshev distance) of where it shows (DesignRect.handles, a handle
+    /// being `handleTolerance` across); corners win a tie. A press inside a compact node is never
+    /// a handle: its handles sit outside it, so the press moves it.
     public func handle(at point: DesignPoint) -> DesignHandle? {
         guard let node = selectedNode, !node.isLocked, !node.isHidden else { return nil }
-        func distance(_ handle: DesignHandle) -> Double {
-            let at = node.frame.point(of: handle)
-            return Swift.max((at.x - point.x).magnitude, (at.y - point.y).magnitude)
+        let frame = node.frame
+        let inside = point.x > frame.x && point.x < frame.maxX && point.y > frame.y && point.y < frame.maxY
+        if inside, frame.isCompact(handleSize: handleTolerance) { return nil }
+        let shown = frame.handles(size: handleTolerance)
+        let order = DesignHandle.allCases.filter(\.isCorner) + DesignHandle.allCases.filter { !$0.isCorner }
+        let hits = order.compactMap { handle -> (handle: DesignHandle, distance: Double)? in
+            guard let at = shown[handle] else { return nil }
+            let distance = Swift.max((at.x - point.x).magnitude, (at.y - point.y).magnitude)
+            return distance <= handleTolerance ? (handle, distance) : nil
         }
-        let corners = DesignHandle.allCases.filter(\.isCorner), sides = DesignHandle.allCases.filter { !$0.isCorner }
-        return (corners + sides).filter { distance($0) <= handleTolerance }.min { distance($0) < distance($1) }
+        return hits.min { $0.distance < $1.distance }?.handle
     }
 
     /// Moves a node and its subtree by `delta`. Refused for an unknown or locked node; a

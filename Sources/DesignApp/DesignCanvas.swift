@@ -4,7 +4,8 @@
 // empty state with a New File button when nothing is open. Pointer drags go to
 // the workspace as `.drag` with the modifier keys held, and the release as
 // `.endDrag`; the workspace decides what a press hits and which tool acts. The
-// overlay ends with DesignTextOverlay, the inline text editor. Keys reach the
+// overlay (not clipped to the page) is the selection's marks, left out for the
+// text node being edited, then DesignTextOverlay, the inline text editor. Keys reach the
 // canvas while it has focus. During an inline text edit the canvas passes no key
 // handler, so CanvasViewport stops being focusable: a focusable view around the
 // text field would keep the field from taking the keyboard.
@@ -43,7 +44,8 @@ struct DesignCanvas: View {
         ) {
             DesignArtwork(painted: painted, zoom: zoom, editingTextID: model.editingTextID)
         } overlay: {
-            if let selected {
+            // The text being edited shows its editor's box instead of handles.
+            if let selected, selected.id != model.editingTextID {
                 DesignSelectionMarks(rect: selected.frame, zoom: zoom, handles: !selected.isLocked)
             }
             DesignTextOverlay(model: model, zoom: zoom, perform: perform)

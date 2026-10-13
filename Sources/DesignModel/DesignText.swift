@@ -9,7 +9,8 @@
 // the click and records nothing. An existing node's commit records "Edit Text"
 // only for a changed, non-empty draft. Undo and redo wait while editing, and so
 // do nudge and delete; anything that moves the selection or the tool commits the
-// edit first. Linux-safe.
+// edit first. The editor draws at `textEditScale`, never under 100%, so the
+// text being typed reads even when the page is zoomed out. Linux-safe.
 
 /// A text node placed by a Text click and the document before that click.
 struct DesignPlacedText: Sendable, Equatable {
@@ -63,6 +64,13 @@ extension DesignWorkspace {
         _ = try textNode(id)
         guard !text.allSatisfy(\.isWhitespace) else { throw .emptyText }
         try editNode(id, named: "Edit Text") { $0.text = text }
+    }
+
+    /// Screen points per document point for the inline editor at canvas `zoom`: the zoom, but
+    /// never under 1, so the text being typed reads at any zoom. A zoom that isn't a positive
+    /// finite number counts as 1.
+    public static func textEditScale(zoom: Double) -> Double {
+        zoom.isFinite && zoom > 0 ? Swift.max(zoom, 1) : 1
     }
 
     private func textNode(_ id: String) throws(DesignTreeError) -> DesignNode {
