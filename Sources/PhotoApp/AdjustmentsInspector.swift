@@ -3,7 +3,8 @@
 // and a Reset icon that shows while the section differs from its defaults.
 // Values in, one closure out: every change goes out as an AdjustmentEdit, and
 // AdjustmentSettings clamps and validates it. A disabled section dims its
-// rows. Numbers show whole degrees and percents and one decimal for EV and px.
+// rows. Numbers show whole degrees and percents, one decimal for EV and px,
+// and levelsDecimals for Black and White, so distinct points read distinct.
 import PhotoModel
 import SuiteUI
 import SwiftUI
@@ -20,12 +21,12 @@ struct AdjustmentsInspector: View {
                     unit: "EV", decimals: 1) { onEdit(.exposure(Float($0))) }
             }
             section(.levels) {
-                InspectorSliderRow("Black", value: Double(settings.blackPoint), in: Self.doubles(AdjustmentSettings.levelsRange)) {
-                    onEdit(.blackPoint(Float($0)))
-                }
-                InspectorSliderRow("White", value: Double(settings.whitePoint), in: Self.doubles(AdjustmentSettings.levelsRange)) {
-                    onEdit(.whitePoint(Float($0)))
-                }
+                InspectorSliderRow(
+                    "Black", value: Double(settings.blackPoint), in: Self.doubles(AdjustmentSettings.levelsRange),
+                    decimals: AdjustmentSettings.levelsDecimals) { onEdit(.blackPoint(Float($0))) }
+                InspectorSliderRow(
+                    "White", value: Double(settings.whitePoint), in: Self.doubles(AdjustmentSettings.levelsRange),
+                    decimals: AdjustmentSettings.levelsDecimals) { onEdit(.whitePoint(Float($0))) }
                 gammaRow
             }
             section(.hueSaturation) {
