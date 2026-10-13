@@ -339,13 +339,13 @@ public struct DesignWorkspace: Sendable, Equatable {
         record(name, before: before)
     }
 
-    /// Changes the unlocked node `id` as one named step; an unknown or locked id throws first.
-    /// With a `coalescing` key a run of calls with the same key is one step.
+    /// Changes the unlocked node `id` as one named step; an unknown id, or one that is locked or
+    /// inside a locked node, throws first. With a `coalescing` key a run of calls with the same key is one step.
     mutating func editNode(
         _ id: String, named name: String, coalescing: String? = nil, _ change: (inout DesignNode) -> Void
     ) throws(DesignTreeError) {
-        guard let node = findNode(id) else { throw .unknownID(id) }
-        guard !node.isLocked else { throw .locked(id) }
+        guard findNode(id) != nil else { throw .unknownID(id) }
+        guard !isLockedInTree(id) else { throw .locked(id) }
         let before = snapshot
         _ = pages.update(id, change)
         record(name, before: before, coalescing: coalescing)

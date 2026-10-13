@@ -1,8 +1,9 @@
 // DesignInspectorSnapshots.swift: Design's panel on the Properties tab at the
 // editor's panel width: a page with no layer selected, a rectangle selected
-// (Layer, Frame and Fill), and a locked rectangle (Frame and Fill disabled,
-// with the line saying why). Writes design-inspector-page-, -node- and
-// -locked-{light,dark}.png. macOS only.
+// (Layer, Frame and Fill), a locked rectangle (Frame and Fill disabled,
+// with the line saying why), and a rectangle inside a locked group (disabled
+// the same way). Writes design-inspector-page-, -node-, -locked- and
+// -locked-group-{light,dark}.png. macOS only.
 import DesignModel
 import SuiteUI
 import SwiftUI
@@ -30,6 +31,16 @@ import Testing
         try shoot("node", model)
         try model.setNodeLocked(rectangle, true)
         try shoot("locked", model)
+    }
+
+    @Test func layerInsideALockedGroup() throws {
+        var model = DesignWorkspace()
+        model.newFile()
+        let group = try model.addNode(.group, frame: DesignRect(x: 40, y: 40, width: 240, height: 180), in: "node-1")
+        let rectangle = try model.addNode(.rectangle, frame: DesignRect(x: 60, y: 64, width: 120, height: 90), in: group)
+        try model.setNodeLocked(group, true)
+        model.selectItem(rectangle)
+        try shoot("locked-group", model)
     }
 }
 
