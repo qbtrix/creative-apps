@@ -5,8 +5,9 @@
 // content, so nothing here is glass. Values in, closures out: dragging on the
 // ruler calls onScrub, clicking a diamond onSelectKeyframe, clicking a name
 // onSelectTrack. All frame arithmetic lives in FrameMapping, which clamps, so
-// a closure only ever gets a frame inside 0...duration. Moving keyframes by
-// drag is not here yet.
+// a closure only ever gets a frame inside 0...duration. The ruler draws only
+// the ticks and labels inside the scrolled-to stretch, so a long duration
+// costs no more than a short one. Moving keyframes by drag is not here yet.
 import SwiftUI
 
 /// One row of the timeline: its name, keyframe frames and spans of frames.
@@ -36,6 +37,9 @@ public struct TimelineStrip<ID: Hashable & Sendable>: View {
     private let onSelectKeyframe: @MainActor (ID, Int) -> Void
     private let onSelectTrack: @MainActor (ID) -> Void
     @Environment(\.suiteSnapshotRendering) private var snapshot
+    /// The stretch of the lanes the scroll view shows, in mapping x; nil until
+    /// it first reports.
+    @State private var visibleX: ClosedRange<Double>?
 
     /// `duration` is the last frame and `frameWidth` the points per frame;
     /// `playhead` is the current frame.
@@ -63,6 +67,13 @@ public struct TimelineStrip<ID: Hashable & Sendable>: View {
                 lanes.frame(maxWidth: .infinity, alignment: .leading).clipped()
             } else {
                 ScrollView(.horizontal) { lanes }
+                    .onScrollGeometryChange(for: ClosedRange<Double>.self) { geometry in
+                        let rect = geometry.visibleRect
+                        let low = Double(rect.minX - timelineInset)
+                        return low...max(low, Double(rect.maxX - timelineInset))
+                    } action: { _, visible in
+                        visibleX = visible
+                    }
             }
         }
         .frame(height: SuiteSize.timelineRuler + SuiteSize.timelineLane * CGFloat(tracks.count), alignment: .top)
@@ -100,18 +111,24 @@ public struct TimelineStrip<ID: Hashable & Sendable>: View {
 
     private var ruler: some View {
         let mapping = mapping
-        let interval = mapping.labelInterval(minimumSpacing: Double(SuiteSize.timelineLabelSpacing))
+        let visibleX = visibleX
         return Canvas { context, size in
+            let shown = visibleX ?? 0...Double(min(size.width, SuiteSize.timelineRulerSpan))
+            let marks = mapping.rulerMarks(
+                visibleX: shown, tickSpacing: Double(SuiteSize.timelineTickSpacing),
+                labelSpacing: Double(SuiteSize.timelineLabelSpacing)
+            )
+            let labels = Set(marks.labels)
             var ticks = Path()
-            for frame in 0...mapping.duration {
+            for frame in Set(marks.ticks).union(labels) {
                 let x = tickX(mapping, frame)
-                let labelled = frame % interval == 0
-                ticks.move(to: CGPoint(x: x, y: size.height * (labelled ? 0.4 : 0.7)))
+                ticks.move(to: CGPoint(x: x, y: size.height * (labels.contains(frame) ? 0.4 : 0.7)))
                 ticks.addLine(to: CGPoint(x: x, y: size.height))
-                if labelled {
-                    let label = Text("\(frame)").font(SuiteFont.caption).foregroundStyle(SuiteColor.secondaryText)
-                    context.draw(label, at: CGPoint(x: x + SuiteSpacing.xxs, y: 0), anchor: .topLeading)
-                }
+            }
+            for frame in marks.labels {
+                let x = tickX(mapping, frame)
+                let label = Text("\(frame)").font(SuiteFont.caption).foregroundStyle(SuiteColor.secondaryText)
+                context.draw(label, at: CGPoint(x: x + SuiteSpacing.xxs, y: 0), anchor: .topLeading)
             }
             ticks.move(to: CGPoint(x: 0, y: size.height))
             ticks.addLine(to: CGPoint(x: size.width, y: size.height))

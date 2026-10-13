@@ -4,11 +4,12 @@
 // a Mac can still see what they built. CI uploads that folder as the
 // `snapshots` artifact on every run. macOS only.
 //
-// ImageRenderer draws SwiftUI only: AppKit-backed chrome (split view, toolbar,
-// inspector, lists) does not render, so these are content views, not whole
-// windows. It also drops glass views entirely, so the renderer sets
-// `suiteSnapshotRendering` and SuiteUI draws glass as a flat bordered stand-in;
-// judge real glass on a Mac.
+// Each view is hosted in an NSHostingView inside an offscreen borderless
+// window with the Light or Dark appearance and drawn with cacheDisplay, so
+// AppKit-backed controls (sliders, fields, pickers, color wells, lists, scroll
+// views) render for real, not as ImageRenderer's placeholders. Glass still
+// draws as SuiteUI's flat bordered stand-in (`suiteSnapshotRendering`), since
+// an offscreen window has no backdrop for it; judge real glass on a Mac.
 import AppKit
 import SuiteUI
 import SwiftUI
@@ -43,7 +44,9 @@ import PhotoModel
     @Test func photo() throws {
         var open = PhotoWorkspace()
         try open.newCanvas(width: 1920, height: 1080)
-        try snapshotStates("photo", empty: PhotoCanvas(model: PhotoWorkspace()), open: PhotoCanvas(model: open))
+        try snapshotStates(
+            "photo", empty: PhotoEditor(model: PhotoWorkspace()),
+            open: PhotoEditor(model: open, image: try photoImage(open), zoom: 0.5))
     }
 
     @Test func library() throws {
@@ -60,6 +63,10 @@ import PhotoModel
     }
 
     @Test func suiteGallery() throws {
+        // An action is disabled exactly when it says why (the gallery shows one).
+        #expect(ToolbarAction("Pen", systemImage: "pencil.tip").isEnabled)
+        let ellipse = ToolbarAction("Ellipse", systemImage: "circle", unavailableHelp: "Not built yet.")
+        #expect(!ellipse.isEnabled && ellipse.help == "Not built yet.")
         for scheme in [ColorScheme.light, .dark] {
             try snapshot(Gallery(), name: "suiteui-gallery-\(scheme.name)", scheme: scheme)
         }
@@ -85,6 +92,7 @@ private struct Gallery: View {
                         ToolbarAction("Select", systemImage: "cursorarrow", isSelected: true),
                         ToolbarAction("Pen", systemImage: "pencil.tip"),
                         ToolbarAction("Rectangle", systemImage: "rectangle"),
+                        ToolbarAction("Ellipse", systemImage: "circle", unavailableHelp: "Not built yet."),
                     ])
                     GlassPanel { Text("00:00:01:12").font(SuiteFont.monospacedDigits) }
                 }
@@ -128,22 +136,38 @@ enum SnapshotError: Error {
 /// `<package root>/.build/snapshots/<name>.png`.
 @MainActor
 func snapshot(_ view: some View, name: String, scheme: ColorScheme) throws {
+    guard let image = render(view, scheme: scheme) else { throw SnapshotError.render(name) }
+    #expect(image.pixelsWide == 1440 && image.pixelsHigh == 900, "\(name) is \(image.pixelsWide)x\(image.pixelsHigh)")
+    guard let png = image.representation(using: .png, properties: [:]) else { throw SnapshotError.encode(name) }
+    let folder = try packageRoot().appending(path: ".build/snapshots")
+    try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+    try png.write(to: folder.appending(path: "\(name).png"))
+}
+
+/// `view` drawn at 1440x900 points, one pixel per point, through AppKit.
+@MainActor
+func render(_ view: some View, scheme: ColorScheme) -> NSBitmapImageRep? {
     let size = CGSize(width: 1440, height: 900)
-    let renderer = ImageRenderer(content: view
+    let host = NSHostingView(rootView: view
         .frame(width: size.width, height: size.height)
         .background(SuiteColor.windowBackground)
         .environment(\.colorScheme, scheme)
         .environment(\.suiteSnapshotRendering, true))
-    renderer.scale = 1
-    renderer.proposedSize = ProposedViewSize(size)
-    guard let image = renderer.cgImage else { throw SnapshotError.render(name) }
-    #expect(image.width == 1440 && image.height == 900, "\(name) is \(image.width)x\(image.height)")
-    guard let png = NSBitmapImageRep(cgImage: image).representation(using: .png, properties: [:]) else {
-        throw SnapshotError.encode(name)
-    }
-    let folder = try packageRoot().appending(path: ".build/snapshots")
-    try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
-    try png.write(to: folder.appending(path: "\(name).png"))
+    host.frame = CGRect(origin: .zero, size: size)
+    let window = NSWindow(contentRect: host.frame, styleMask: [.borderless], backing: .buffered, defer: false)
+    window.appearance = NSAppearance(named: scheme == .dark ? .darkAqua : .aqua)
+    window.contentView = host
+    // Two layout passes around a short run loop turn, so lists and scroll views settle.
+    host.layoutSubtreeIfNeeded()
+    RunLoop.main.run(until: Date().addingTimeInterval(0.2))
+    host.layoutSubtreeIfNeeded()
+    guard let image = NSBitmapImageRep(
+        bitmapDataPlanes: nil, pixelsWide: Int(size.width), pixelsHigh: Int(size.height), bitsPerSample: 8,
+        samplesPerPixel: 4, hasAlpha: true, isPlanar: false, colorSpaceName: .deviceRGB, bytesPerRow: 0, bitsPerPixel: 0)
+    else { return nil }
+    image.size = size
+    host.cacheDisplay(in: host.bounds, to: image)
+    return image
 }
 
 /// The directory holding Package.swift, found by walking up from this file.

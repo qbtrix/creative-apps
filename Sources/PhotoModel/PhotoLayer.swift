@@ -1,7 +1,9 @@
 // PhotoLayer.swift: one layer in Photo's layer stack: its name, whether it
-// shows, its opacity (0...1) and how it blends with the layers under it.
-// `blendMode` is CoreRaster's BlendMode, never a mirror of it. Layers hold no
-// pixels yet; the canvas is still PhotoWorkspace's one PixelBuffer. Linux-safe.
+// shows, its opacity (0...1), how it blends with the layers under it, and
+// where its pixels sit on the canvas (a whole-pixel offset, so moving is
+// non-destructive). `blendMode` is CoreRaster's BlendMode, never a mirror of
+// it. The pixels themselves live in PhotoWorkspace.pixels under the layer's
+// id, so a layer stays a small Hashable value. Linux-safe.
 import CoreRaster
 
 public struct PhotoLayer: Identifiable, Sendable, Hashable {
@@ -11,6 +13,9 @@ public struct PhotoLayer: Identifiable, Sendable, Hashable {
     /// 0 (transparent) to 1 (opaque). PhotoWorkspace clamps every change.
     public internal(set) var opacity: Double
     public internal(set) var blendMode: BlendMode
+    /// Where the layer's top-left pixel sits on the canvas.
+    public internal(set) var offsetX = 0
+    public internal(set) var offsetY = 0
 
     /// Clamps `opacity` to 0...1; a NaN opacity falls back to 1, the default.
     public init(id: String, name: String, isVisible: Bool = true, opacity: Double = 1, blendMode: BlendMode = .normal) {

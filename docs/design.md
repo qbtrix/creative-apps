@@ -19,6 +19,16 @@ every June.
   tool palette. SuiteUI holds all of it; an app that needs something different
   asks for it there (`needs-ui`).
 
+## Journeys first, no dead controls
+
+- **The core loop comes first.** For each app: open or create a document, see
+  it, edit it with each tool shown, undo, save. Panels and polish come after
+  that loop works end to end.
+- **No dead controls.** Every button, tool and menu item on screen does
+  something. One that can't act yet is disabled, and its tooltip says why
+  (`ToolbarAction`'s `unavailableHelp`; a menu item gets a nil action). A
+  control that looks live and does nothing is a bug.
+
 ## Component order
 
 Every view is built from, in this order:
@@ -42,8 +52,10 @@ restates them for the suite.
 | Selection properties | `.inspector`, through `SuiteWindow`'s inspector slot |
 | List of items, rows with columns, a tree | `List`, `Table`, `OutlineGroup` (sidebar rows: `SidebarItem`) |
 | Settings or a group of options | `Form` (app settings in a `Settings` scene) |
-| On/off | `Toggle` |
-| A value in a range | `Slider`; exact numbers: `TextField` plus `Stepper` |
+| On/off | `Toggle` (`.toggleStyle(.checkbox)` in inspectors) |
+| A value in a range | `Slider`; exact numbers: `ScrubField` (plus `Stepper`) |
+| Inspector layout | `InspectorHeader`, `InspectorSection`, `InspectorRow` and the `Inspector…Row`s |
+| Zoom, size and status under a viewer | `ViewerStatusBar` |
 | One of a few choices | `Picker` (segmented, menu or radio style) |
 | A color | `ColorPicker` |
 | Commands | `Menu`, menu bar commands, toolbar items (`ToolbarAction`) |
@@ -51,7 +63,7 @@ restates them for the suite.
 | Timeline scrubber | `Slider`, then SuiteUI's timeline once it exists |
 | Tool palette over a canvas | `ToolbarGroup` |
 | Floating readout or transport bar | `GlassPanel` |
-| Card in the content layer | `SurfaceCard` |
+| Card in the content layer | `SurfaceCard` (never in an inspector) |
 | Empty pane | `EmptyStateView` (`ContentUnavailableView`) |
 | Icon | SF Symbols by name (`systemImage:`) |
 | Color, type, spacing, radius, size | `SuiteColor`, `SuiteFont`, `SuiteSpacing`, `SuiteRadius`, `SuiteSize` |
@@ -61,6 +73,107 @@ literal radii, paddings and frame sizes, hand-made blur or materials, and a
 `struct` in an app named like a system control (`...Button`, `...Slider`,
 `...Toggle`, `...Picker`, `...Stepper`, `...Sidebar`). Raw values live only in
 SuiteUI's `Tokens.swift`; glass only in its `Glass.swift`.
+
+## Pro density
+
+Inspectors, panels and viewer chrome follow the dense layout of professional
+Mac editors, not the airy layout of a phone or tablet app. The canvas is the
+loud part; the chrome around it is small, grey and exact. Values live in
+`Tokens.swift` and the SuiteUI components below; the type scale and grey
+ladder match the Ripple tokens.
+
+| Rule | Value |
+|---|---|
+| Control size | `.small` (`SuiteSize.compactControl`), set once by `InspectorRow` and `ViewerStatusBar`. Never `.regular` or `.large` in an inspector. |
+| Type | 11 pt for labels, values and section titles (`SuiteFont.inspectorLabel`, `.inspectorValue`, `.inspectorSection`, semibold); 12 pt semibold for the inspector title (`.inspectorTitle`); 10 pt for metadata and the status line (`.inspectorMeta`). System text styles, never `.system(size:)`. Every number uses `.monospacedDigit()`. |
+| Row height | 22 pt (`SuiteSize.inspectorRow`), no gap between rows. A section ends with 8 pt of space. |
+| Labels | Right-aligned, secondary color, in one 88 pt label column shared by every row (`SuiteSize.inspectorLabelColumn`), truncated in the middle. The value starts at the same x on every row. |
+| Grey ramp | Panel: the window background (`SuiteColor.panel`). Raised band: plus 6% of the label color (`.panelRaised`). Field well: plus 10% (`.field`). Field while dragged or typed in: plus 14% (`.fieldActive`). Canvas surround: `.canvasSurround`. All mixed from system colors, so they follow Light, Dark and Increase Contrast. No near-black fills. |
+| Separators | One hairline (`Divider()`) above each section, under the inspector header and on top of the status line. No borders, no rounded cards, no drop shadows inside an inspector. |
+| Accent | One accent, brand blue #1877F2 (`SuiteColor.accent`), applied once as `SuiteWindow`'s tint: selection, the active tool, the playhead, control fills. Accent text uses `SuiteColor.accentText` (#1260C9 in Light, #5A9DF6 in Dark) so small text clears 4.5:1. |
+
+**The inspector pattern.** From the top: an `InspectorHeader` (the
+selection's name, then one 10 pt line per fact such as size, color space or
+frame rate, on the raised band), then `InspectorSection`s. A section is a
+hairline, a 22 pt header row (chevron plus the title in small semibold
+secondary text; the whole row toggles it) and its rows. Every row is an
+`InspectorRow`: label column, then the value. Use the ready rows
+(`InspectorSliderRow`, `InspectorStepperRow`, `InspectorColorRow`,
+`InspectorPickerRow`) where they fit. With nothing selected the inspector
+says so (`EmptyStateView`).
+
+**Checkbox, not switch.** On/off in an inspector is a `Toggle` with
+`.toggleStyle(.checkbox)`, its title beside the box in the value column (pass
+`""` as the row label). A section's enable box sits in its first row. Switches
+are for settings that act at once on a whole mode, never for a property.
+Gate: the design lint fails on a `Toggle` without the checkbox style in any
+app file named `*Inspector*` or using an `Inspector…Row`.
+
+**Scrub fields.** Every number in an inspector is a `ScrubField`: the value
+right-aligned in monospaced digits on a field well, the unit after it in
+secondary text.
+
+- Drag sideways to change it: one step per point, Shift for ten steps, Option
+  for a tenth. Changing a key mid-drag continues from the current value. The
+  pointer is the column-resize cursor.
+- Click to type an exact value; Return or clicking away commits, Escape
+  cancels. Typed text that isn't a number keeps the old value.
+- With keyboard focus, Up and Down arrows nudge by one step; VoiceOver can
+  adjust it the same way.
+- Values always arrive clamped to the range and snapped to the step
+  (`ScrubValue`); the Model clamps again. A field without a step uses the
+  largest power of ten not above a hundredth of its range.
+
+**Viewer chrome.** A canvas or viewer ends in a `ViewerStatusBar`: the zoom
+percent (`ViewerZoom.percentText`, from `ViewerZoom.fitScale` while the
+canvas fits the window), the document size, and a trailing slot for a View
+menu, timecode or a selection count. It is 22 pt tall, flat, with a hairline
+on top. A bare canvas with no readout is not finished.
+
+**Where glass goes.** Only on the outer window chrome (toolbar, sidebar and
+inspector columns, which the system draws) and on the floating tool palette
+or transport over the canvas (`ToolbarGroup`, `GlassPanel`). Never inside an
+inspector, on a section, a header band, a field, the status line or any panel
+of settings. Those are flat greys from the ramp above.
+
+```
+[ ] Small controls, 11 pt type, 22 pt rows, monospaced numbers
+[ ] Labels right-aligned and secondary in the shared column
+[ ] Hairlines between sections; no cards, borders or shadows inside panels
+[ ] Checkboxes, not switches; numbers are ScrubFields
+[ ] Inspector starts with an InspectorHeader; the canvas ends in a ViewerStatusBar
+[ ] Greys from the ramp; one accent; glass only on the outer chrome and palettes
+```
+
+## Editor shell
+
+A canvas editor may use `EditorShell` instead of `SuiteWindow`. It is the
+layout of our Studio photo editor (Ripple's editor parts), rebuilt as native
+SwiftUI in SuiteUI. Photo uses it.
+
+| Region | Component | Rules |
+|---|---|---|
+| Top bar | `EditorTopBar`, `EditorBarItem`, `EditorBarMenu`, `EditorBarDivider` | 40 pt. The app name, then the document name as a menu. Flat icon-and-label commands in the accessory-bar style (flat until hovered); undo, redo and zoom trail as icons. Every command here is also in the menu bar. |
+| Tool rail | `ToolbarGroup(style: .rail)` | Docked, flat, vertical. The selected tool sits on an accent well. Tooltips name the one-key shortcut ("Brush (B)"), which works while the canvas has focus. |
+| Canvas | `CanvasViewport`, `SelectionOutline`, `CropShade` | Rulers in document pixels along the top and left, a checkerboard behind the image, centered while it fits, scrolling with a 32 pt margin once it doesn't. Drags arrive in document pixels. |
+| Right panel | `SegmentedTabs`, then `InspectorSection`s | 280 pt, the tabs (Adjust, Layers) on top. A section's Reset icon shows only while the section differs from its defaults. A color is `InspectorColorWellRow`: the system well plus its hex code. |
+| Status line | `ViewerStatusBar` | Zoom, document size, and the trailing slot for the render time. |
+
+- **Dark in both appearances, on purpose.** The shell sets the dark scheme on
+  its window, like the Studio editor, so the image is the brightest thing on
+  screen. Colors still come from the grey ramp (`SuiteColor.panel` for bars
+  and panels, `.canvasSurround` around the image, `.field` for wells), which
+  resolve to their dark values.
+- **Hidden title bar.** The scene uses `.windowStyle(.hiddenTitleBar)`; the top
+  bar leaves `SuiteSize.windowControlsInset` for the window's buttons and drags
+  the window from its empty stretches. Still set `.navigationTitle` to the
+  document name for the Window menu.
+- **No glass inside.** Bars, rail, rulers and panel are flat bands with
+  hairlines between them.
+- **Numbers show their field's precision:** whole for percent and degrees, one
+  decimal for pixels and EV (`decimals:` on `ScrubField` and the slider row).
+- **Fits the window minimum.** Rail, content minimum and panel add up to no
+  more than `SuiteSize.windowMinimum` (TokensTests checks it).
 
 ## Layers: content vs. control
 
@@ -88,9 +201,9 @@ For every screen, name what is content and what is control before you build.
 ## Window structure
 
 - One `WindowGroup` (or `DocumentGroup` once files open and save) per app,
-  showing `SuiteWindow`: a `NavigationSplitView` with the sidebar on the
-  leading edge, the content in the middle and an inspector on the trailing
-  edge.
+  showing `SuiteWindow` (a canvas editor may show `EditorShell` instead; see
+  Editor shell): a `NavigationSplitView` with the sidebar on the leading
+  edge, the content in the middle and an inspector on the trailing edge.
 - **Title** names the open document, not the app. Show the app name only when
   nothing is open.
 - **Sidebar**: top-level places or the document's structure (scenes, pages,
@@ -142,11 +255,12 @@ For every screen, name what is content and what is control before you build.
 - **Semantic colors only** (`SuiteColor`, which wraps the system's label,
   separator, window and control colors). They adapt to Light, Dark and Increase
   Contrast. Never hard-code a hex value for a system role. Document content
-  (an artboard, a swatch) is the exception.
+  (an artboard, a swatch) and the brand accent (`SuiteColor.accent`, see Pro
+  density) are the exceptions.
 - Never carry meaning with color alone; pair it with a symbol, a shape or a
   label. Text contrast at least 4.5:1 (3:1 for large or bold text).
-- **System text styles** (`SuiteFont`): macOS body is 13 pt; don't go under
-  10 pt. Build hierarchy with weight and color, not many sizes. No light or
+- **System text styles** (`SuiteFont`): macOS body is 13 pt; inspectors and
+  viewer chrome use 11 pt (Pro density); don't go under 10 pt. Build hierarchy with weight and color, not many sizes. No light or
   thin weights at small sizes. Monospaced digits for timecode and counters.
 - **Spacing on the 4-point grid** (`SuiteSpacing`). Corners nest concentric:
   an inner shape uses the next smaller radius (`SuiteRadius`). Fixed sizes
@@ -193,6 +307,7 @@ what fails, and walk it again.
 [ ] At most one prominent action per view; never a destructive one
 [ ] SuiteColor / SuiteFont / SuiteSpacing only; Light and Dark both right
 [ ] Every icon-only control has a tooltip and an accessibility label
+[ ] Every shown button, tool and menu item acts, or is disabled saying why
 [ ] Every new command is (or has an issue to be) in the menu bar
 [ ] Edits are undoable with named actions
 [ ] Empty states say what to do next

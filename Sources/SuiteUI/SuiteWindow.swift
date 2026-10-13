@@ -4,7 +4,13 @@
 // The window chrome (toolbar, sidebar, inspector) is system Liquid Glass; the
 // content stays flat. Apps pass state in and get selection out through
 // `onSelect`, `onToggle`, `onMove` and `onRename`; a nil closure turns that
-// gesture off. The shell owns only presentation state (inspector visibility).
+// gesture off. Toolbar actions with `unavailableHelp` show disabled, with the
+// reason as their tooltip. The shell owns only presentation state (inspector
+// visibility) and tints the content and inspector with the suite's one accent
+// (SuiteColor.accent); the sidebar keeps the system's selection style, which
+// dims when the window isn't key. The sidebar and inspector carry the accessibility
+// identifiers `suite.sidebar` and `suite.inspector`; the UI journeys in
+// UITests/ find them by those names.
 import SwiftUI
 
 public struct SuiteWindow<Content: View, Inspector: View>: View {
@@ -68,15 +74,21 @@ public struct SuiteWindow<Content: View, Inspector: View>: View {
                     }
                 }
             }
+            .listStyle(.sidebar)
+            .accessibilityIdentifier("suite.sidebar")
             .navigationSplitViewColumnWidth(
                 min: SuiteSize.sidebarWidth.min, ideal: SuiteSize.sidebarWidth.ideal, max: SuiteSize.sidebarWidth.max)
         } detail: {
             content
                 .frame(minWidth: SuiteSize.contentMinimum.width, minHeight: SuiteSize.contentMinimum.height)
+                .tint(SuiteColor.accent)
                 .inspector(isPresented: $showsInspector) {
                     inspector
                         .padding(SuiteSpacing.m)
                         .frame(maxHeight: .infinity, alignment: .top)
+                        .accessibilityElement(children: .contain)
+                        .accessibilityIdentifier("suite.inspector")
+                        .tint(SuiteColor.accent)
                         .inspectorColumnWidth(
                             min: SuiteSize.inspectorWidth.min, ideal: SuiteSize.inspectorWidth.ideal,
                             max: SuiteSize.inspectorWidth.max)
@@ -89,7 +101,8 @@ public struct SuiteWindow<Content: View, Inspector: View>: View {
                     Button(action: action.perform) {
                         Label(action.title, systemImage: action.systemImage)
                     }
-                    .help(action.title)
+                    .disabled(!action.isEnabled)
+                    .help(action.help)
                 }
             }
             ToolbarItem(placement: .primaryAction) {
