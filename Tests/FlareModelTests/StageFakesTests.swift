@@ -12,7 +12,7 @@ private func address(_ layerID: String, _ item: StageAddress.Item = .shape(0)) -
 }
 
 @Test func fixturesAreNamedAndValid() throws {
-    #expect(FlareFixtures.all.map(\.name) == ["empty", "bounce"] && FlareFixtures.named("nope") == nil)
+    #expect(FlareFixtures.all.map(\.name) == ["empty", "bounce", "character"] && FlareFixtures.named("nope") == nil)
     #expect(FlareFixtures.named("empty")?.scenes.map(\.layers.isEmpty) == [true])
     for fixture in FlareFixtures.all { try FlareFormat.validate(fixture.document) }
     let scene = try #require(bounce.scenes.first)

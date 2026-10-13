@@ -38,7 +38,7 @@ public struct FlareServices: Sendable {
             keyframes: FakeKeyframes(),
             easing: FakeEasing(),
             onion: FakeOnion(),
-            library: NotBuilt(reason: "Not built yet (LM-0c1)."),
+            library: FakeLibrary(),
             machines: NotBuilt(reason: "Not built yet (LM-0c2)."),
             preview: NotBuilt(reason: "Not built yet (LM-0c2)."),
             export: NotBuilt(reason: "Not built yet (LM-0c3)."),

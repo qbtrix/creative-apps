@@ -65,6 +65,8 @@ public struct FlareWorkspace: Sendable, Equatable {
     public internal(set) var showsMotionPath = false
     /// The symbol being edited in place; nil edits the scene (FlareSymbols.swift).
     public internal(set) var editingSymbolID: String?
+    /// The scene frame to return to when the symbol edit ends.
+    var symbolReturnFrame = 0
     /// The Interactions editor's machine, its live preview, and why the last
     /// machine edit or preview failed (FlareMachines.swift).
     public internal(set) var machineID: String?
@@ -124,7 +126,7 @@ public struct FlareWorkspace: Sendable, Equatable {
         easingSelection = nil
         layerError = nil
         cancelDrag(); selection = []; currentFrame = 0
-        (isPlaying, playClock, editingSymbolID) = (false, 0, nil)
+        (isPlaying, playClock, editingSymbolID, symbolReturnFrame) = (false, 0, nil, 0)
         (machineID, machinePreview, machineError) = (nil, nil, nil)
         (exportState, assist) = (.idle, AssistState())
         (fileName, isDirty, saveError, loadState) = (nil, false, nil, .idle)
@@ -219,7 +221,7 @@ public struct FlareWorkspace: Sendable, Equatable {
             && lhs.marquee == rhs.marquee && lhs.dragPreview == rhs.dragPreview && lhs.gesture == rhs.gesture && lhs.currentFrame == rhs.currentFrame
         let animating = lhs.isPlaying == rhs.isPlaying && lhs.loops == rhs.loops && lhs.playClock == rhs.playClock
             && lhs.autoKey == rhs.autoKey && lhs.onion == rhs.onion && lhs.showsMotionPath == rhs.showsMotionPath
-            && lhs.editingSymbolID == rhs.editingSymbolID
+            && lhs.editingSymbolID == rhs.editingSymbolID && lhs.symbolReturnFrame == rhs.symbolReturnFrame
         let panels = lhs.machineID == rhs.machineID && lhs.machinePreview == rhs.machinePreview
             && lhs.machineError == rhs.machineError && lhs.exportState == rhs.exportState && lhs.assist == rhs.assist
         let files = lhs.fileName == rhs.fileName && lhs.isDirty == rhs.isDirty && lhs.saveError == rhs.saveError
