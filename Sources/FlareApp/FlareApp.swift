@@ -1,7 +1,7 @@
 // FlareApp.swift: Flare, the 2D animation app. The window is SuiteWindow with
-// the scenes in the sidebar, FlareCanvas as content and the selected scene's
-// summary in the inspector. A palette tool that doesn't work yet shows disabled
-// with FlareTool.unavailableHelp as its tooltip. Views only read FlareWorkspace and call its
+// scenes and layers in the sidebar, FlareCanvas as content and the selected
+// scene's summary in the inspector. A palette tool that doesn't work yet shows
+// disabled with FlareTool.unavailableHelp as its tooltip. Views only read FlareWorkspace and call its
 // methods; all state lives in FlareModel (scripts/ci checks this).
 import FlareModel
 import SuiteUI
@@ -20,14 +20,31 @@ struct FlareWindow: View {
     var body: some View {
         SuiteWindow(
             title: model.document == nil ? "Flare" : "Untitled Animation",
-            sidebarTitle: "Scenes",
-            items: model.scenes.map { SidebarItem(id: $0.id, title: $0.name, systemImage: "film") },
-            selection: model.selectedSceneID,
-            onSelect: { model.selectScene($0) },
-            actions: [ToolbarAction("New Animation", systemImage: "plus") { model.newDocument() }]
+            sections: SidebarSection.flare(model, onAddLayer: { model.addLayer() }),
+            selection: model.selectedLayerID ?? model.selectedSceneID,
+            onSelect: { model.selectItem($0) },
+            onToggle: { id, toggle in
+                if let flag = FlareLayerFlag(rawValue: toggle) { model.toggleLayerFlag(id, flag) }
+            },
+            onMove: { section, rows, destination in
+                // The sidebar selects one row at a time, so a drag moves one layer.
+                if section == "layers", let row = rows.first { model.moveLayer(from: row, to: destination) }
+            },
+            onRename: { id, name in model.renameLayer(id, to: name) },
+            actions: [
+                ToolbarAction("New Animation", systemImage: "plus") { model.newDocument() },
+                // Acts only with a layer selected; ToolbarAction has no disabled state yet (#85).
+                ToolbarAction("Delete Layer", systemImage: "trash") {
+                    if let id = model.selectedLayerID { model.removeLayer(id) }
+                },
+            ]
         ) {
             FlareCanvas(model: model, onNew: { model.newDocument() }, onTool: { model.selectTool($0) })
         } inspector: {
+            if let error = model.layerError {
+                Label(error.message, systemImage: "exclamationmark.triangle")
+                    .foregroundStyle(SuiteColor.secondaryText)
+            }
             if let scene = model.selectedScene {
                 SurfaceCard(title: scene.name, detail: "\(Int(scene.width)) × \(Int(scene.height)) pt · \(scene.fps) fps")
             } else {
