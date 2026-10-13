@@ -1,9 +1,9 @@
 // DesignJourneyTests.swift: Design driven like a person would, with a
-// whole-window screenshot after every step (see Journey.swift). Each test is
-// one journey; grow them as Design's features land, and replace the skipped
-// test with the real journey when its issue is built. Design's window is an
-// editor shell, so it is found by its tool rail and panel, and the buttons by
-// the whole window.
+// whole-window screenshot after every step (see Journey.swift). Design is an
+// EditorShell window. The core journey draws a frame, a rectangle and an
+// ellipse, moves and resizes the ellipse, places and types text, undoes and
+// redoes, saves with -DesignSaveTo (no panel), then relaunches with
+// -DesignOpenFile and checks the saved file reopens.
 import XCTest
 
 final class DesignJourneyTests: XCTestCase {
@@ -13,7 +13,8 @@ final class DesignJourneyTests: XCTestCase {
 
     @MainActor func testNewFileAndEveryTool() {
         let design = Journey("Design", self)
-        design.click("New File", in: .window, step: "new-file")
+        design.app.typeKey("n", modifierFlags: .command)
+        design.shot("new-file")
         design.clickEachTool()
     }
 
@@ -24,6 +25,64 @@ final class DesignJourneyTests: XCTestCase {
     }
 
     @MainActor func testDrawShapesAddTextAndSave() throws {
-        throw XCTSkip("journey arrives with #198 (draw), #199 (text) and #202 (save)")
+        let folder = FileManager.default.temporaryDirectory.appending(path: "design-journey-\(UUID().uuidString)")
+        try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        let file = folder.appending(path: "journey.design")
+        let design = Journey("Design", self, arguments: ["-DesignSaveTo", file.path])
+        design.app.typeKey("n", modifierFlags: .command)
+        XCTAssert(design.element("suite.canvas").waitForExistence(timeout: 10), "New File showed no canvas")
+        design.shot("drawing-new-file")
+        let tools = design.element("suite.tools").buttons
+
+        tools["Frame"].click()
+        design.drag(on: "suite.canvas", from: CGVector(dx: 0.1, dy: 0.1), to: CGVector(dx: 0.45, dy: 0.5), step: "drew-frame")
+        XCTAssert(design.app.buttons["Undo Add Frame"].waitForExistence(timeout: 5), "drawing a frame made no undo step")
+        tools["Rectangle"].click()
+        design.drag(on: "suite.canvas", from: CGVector(dx: 0.15, dy: 0.15), to: CGVector(dx: 0.3, dy: 0.3), step: "drew-rectangle")
+        tools["Ellipse"].click()
+        design.drag(on: "suite.canvas", from: CGVector(dx: 0.55, dy: 0.2), to: CGVector(dx: 0.75, dy: 0.45), step: "drew-ellipse")
+        XCTAssert(design.app.buttons["Undo Add Ellipse"].waitForExistence(timeout: 5), "drawing an ellipse made no undo step")
+
+        tools["Move"].click()
+        // Grab the ellipse's middle and drag it down: it now spans (0.55, 0.475)-(0.75, 0.725).
+        design.drag(on: "suite.canvas", from: CGVector(dx: 0.65, dy: 0.325), to: CGVector(dx: 0.65, dy: 0.6), step: "moved")
+        XCTAssert(design.app.buttons["Undo Move"].waitForExistence(timeout: 5), "the move made no undo step")
+        // Its bottom-right handle sits on that corner.
+        design.drag(on: "suite.canvas", from: CGVector(dx: 0.75, dy: 0.725), to: CGVector(dx: 0.85, dy: 0.8), step: "resized")
+        XCTAssert(design.app.buttons["Undo Resize"].waitForExistence(timeout: 5), "the handle drag didn't resize")
+        design.shot("inspector")
+
+        tools["Text"].click()
+        design.drag(on: "suite.canvas", from: CGVector(dx: 0.2, dy: 0.75), to: CGVector(dx: 0.2, dy: 0.75), step: "text-placed")
+        design.app.typeKey("a", modifierFlags: .command)
+        design.app.typeText("Hello\r")
+        XCTAssert(design.app.buttons["Undo Add Text"].waitForExistence(timeout: 5), "typing text made no undo step")
+        design.shot("text-typed")
+
+        design.click("Undo Add Text", in: .window, step: "undone")
+        XCTAssert(design.app.buttons["Redo Add Text"].waitForExistence(timeout: 5), "Undo didn't undo the text")
+        design.click("Redo Add Text", in: .window, step: "redone")
+
+        design.app.typeKey("s", modifierFlags: .command)
+        XCTAssert(Self.waitForFile(file), "Save wrote no file")
+        let data = try Data(contentsOf: file)
+        let json = try JSONSerialization.jsonObject(with: data) as? [String: Any]
+        XCTAssertEqual(json?["version"] as? Int, 1, "the saved file has no version 1")
+        XCTAssert(String(decoding: data, as: UTF8.self).contains("Hello"), "the saved file lost the text")
+        design.shot("saved")
+        design.app.terminate()
+
+        let reopened = Journey("Design", self, arguments: ["-DesignOpenFile", file.path])
+        XCTAssert(reopened.app.windows["journey.design"].waitForExistence(timeout: 30), "journey.design didn't reopen")
+        reopened.shot("reopened")
+    }
+
+    /// Waits up to 15 seconds for `url` to exist.
+    private static func waitForFile(_ url: URL) -> Bool {
+        for _ in 0..<30 {
+            if FileManager.default.fileExists(atPath: url.path) { return true }
+            Thread.sleep(forTimeInterval: 0.5)
+        }
+        return false
     }
 }
