@@ -60,7 +60,9 @@ private struct DesignTextField: View {
             .font(.system(size: Self.bodyPoints * scale))
             .foregroundStyle(node.fill.color)
             .focused($focused)
-            .onAppear { focused = true }
+            // Not a bare `focused = true` in onAppear: on macOS a focus set in the update that
+            // adds the field doesn't take, and typed keys would go nowhere. `.task` sets it a turn later.
+            .task { focused = true }
             .onSubmit { perform(.commitText) }
             .onExitCommand { perform(.cancelText) }
             .onChange(of: focused) { _, isFocused in if !isFocused { perform(.commitText) } }
