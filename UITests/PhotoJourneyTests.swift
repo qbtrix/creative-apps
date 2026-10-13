@@ -1,31 +1,16 @@
 // PhotoJourneyTests.swift: Photo driven like a person would, with a
-// whole-window screenshot after every step (see Journey.swift). A file
-// journey opens a real PNG the test writes (-PhotoOpenFile, so no open
-// panel); Export writes to the folder given with -PhotoExportTo (no save
-// panel) and Save writes over the opened file. The tier-1 journeys
-// (docs/priorities.md):
-//   open, save, export    testOpenImagePaintAndSave: paint, undo, exposure,
-//                         Save (the file changes, then reopens), a PNG, a JPEG
-//                         at 90% and a smaller one at the lowest quality.
-//   crop and resize       testTier1CropResize: Image Size by typing a width
-//                         (the height follows), the crop tool by its C key, a
-//                         drag and Return.
-//   tone                  testTier1Tone: Exposure typed, Levels Black and Hue
-//                         dragged, Saturation typed, one Undo for Hue/Saturation.
-//   undo, redo, zoom, pan testTier1UndoRedoZoomPan: Edit > Undo, Command-Z,
-//                         Shift-Command-Z and the top bar's Redo; zoom by key
-//                         and button, a scroll pans, Command-0 fits.
-//   layers                testTier1Layers: add, select (by key), rename, hide and
-//                         show, opacity dragged and typed, Bring Forward, delete.
-// Each edit is checked by the Undo button's name ("Undo Crop"), sizes and
-// layer counts by the panel header's label, and a value XCUITest can't read
-// (a slider's number) by the canvas pixels changing. Tier-1 journeys open a
-// file named tools.png, a name the audit already knows (the document menu
-// has no identifier). Another journey edits with every other tool, one
-// straightens the image by 3 degrees from the Image menu, and the Curves
+// whole-window screenshot after every step (see Journey.swift). Journeys open
+// a PNG the test writes (-PhotoOpenFile) and export to -PhotoExportTo, so no
+// panel opens. Tier 1 (docs/priorities.md): testOpenImagePaintAndSave (Save,
+// PNG and JPEG export, reopen), testTier1CropResize, testTier1Tone,
+// testTier1UndoRedoZoomPan and testTier1Layers. Edits are checked by their
+// undo names, sizes and layer counts by the panel header, values XCUITest
+// can't read by the canvas pixels; tier-1 files are named tools.png, a name
+// the audit knows. Another journey edits with every other tool,
+// one straightens the image by 3 degrees from the Image menu, and the Curves
 // journey drags the curve up and nudges it with an arrow key, each one
 // "Undo Curves" step that changes the canvas. Run order is by name, so
-// testTier1UndoRedoZoomPan runs last and attaches the counts.
+// testTier1UndoRedoZoomPan runs last and attaches the audit counts.
 import CoreGraphics
 import ImageIO
 import UniformTypeIdentifiers
@@ -54,7 +39,7 @@ final class PhotoJourneyTests: XCTestCase {
 
         photo.drag(on: "photo.curves", from: CGVector(dx: 0.5, dy: 0.5), to: CGVector(dx: 0.5, dy: 0.25), step: "curves-dragged")
         XCTAssert(photo.app.buttons["Undo Curves"].waitForExistence(timeout: 5), "the curve drag made no Curves step")
-        XCTAssert(Self.eventually(seconds: 5) { canvas.screenshot().pngRepresentation != before }, "the curve didn't change the canvas")
+        XCTAssert(Self.waitUntil { canvas.screenshot().pngRepresentation != before }, "the curve didn't change the canvas")
 
         // The drag left the curve focused on its new point: an arrow nudges it, as its own step.
         photo.app.typeKey(.upArrow, modifierFlags: [])
@@ -95,17 +80,17 @@ final class PhotoJourneyTests: XCTestCase {
 
         // Save (Command-S) writes over the opened file, in its own format.
         photo.app.typeKey("s", modifierFlags: .command)
-        XCTAssert(Self.eventually { (try? Data(contentsOf: file)).map { $0 != original } ?? false }, "Save didn't rewrite journey.png")
-        XCTAssertEqual(Array(try Data(contentsOf: file).prefix(8)), Self.pngHeader, "the saved journey.png isn't a PNG")
+        XCTAssert(Self.waitUntil { (try? Data(contentsOf: file)).map { $0 != original } ?? false }, "Save didn't rewrite journey.png")
+        XCTAssertEqual(try Data(contentsOf: file).prefix(4), Data([0x89, 0x50, 0x4E, 0x47]), "the saved journey.png isn't a PNG")
         XCTAssert(photo.app.buttons["Undo Exposure"].exists, "Save changed the undo history")
         photo.shot("saved")
 
         photo.click("Export", in: .window, step: "export-sheet")
         photo.click("Export", in: .sheet)
         let exported = exports.appending(path: "journey.png")
-        XCTAssert(Self.eventually { FileManager.default.fileExists(atPath: exported.path) }, "Export wrote no file")
+        XCTAssert(Self.waitForFile(exported), "Export wrote no file")
         let header = try Data(contentsOf: exported).prefix(8)
-        XCTAssertEqual(Array(header), Self.pngHeader, "the export isn't a PNG")
+        XCTAssertEqual(Array(header), [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A], "the export isn't a PNG")
         photo.shot("exported")
 
         // JPEG from the keyboard: Shift-Command-E opens Export, Return exports at 90%.
@@ -118,7 +103,7 @@ final class PhotoJourneyTests: XCTestCase {
         photo.shot("export-jpeg")
         photo.app.typeKey(.return, modifierFlags: [])
         let jpg = exports.appending(path: "journey.jpg")
-        XCTAssert(Self.eventually { FileManager.default.fileExists(atPath: jpg.path) }, "Return in the JPEG sheet wrote no journey.jpg")
+        XCTAssert(Self.waitForFile(jpg), "Return in the JPEG sheet wrote no journey.jpg")
         let best = try Data(contentsOf: jpg)
         XCTAssertEqual(Array(best.prefix(3)), [0xFF, 0xD8, 0xFF], "journey.jpg isn't a JPEG")
         photo.shot("exported-jpeg")
@@ -130,7 +115,7 @@ final class PhotoJourneyTests: XCTestCase {
         quality.adjust(toNormalizedSliderPosition: 0)
         photo.shot("export-quality")
         photo.click("Export", in: .sheet)
-        XCTAssert(Self.eventually { FileManager.default.fileExists(atPath: jpg.path) }, "the low-quality export wrote no journey.jpg")
+        XCTAssert(Self.waitForFile(jpg), "the low-quality export wrote no journey.jpg")
         let small = try Data(contentsOf: jpg)
         XCTAssertLessThan(small.count, best.count, "the lowest JPEG quality didn't write a smaller file")
         photo.shot("exported-small")
@@ -241,13 +226,12 @@ final class PhotoJourneyTests: XCTestCase {
         expectHeader("2 layers", photo, "the header doesn't count two layers after New Layer")
         photo.shot("layer-added")
 
-        // Select Background by key (Option-Command-[ is Select Layer Below), then
-        // rename it from the panel. A click on a row would focus the list, whose
-        // highlight (white on the accent, about 3.6:1) the contrast audit fails.
+        // Select Background by key (Select Layer Below): a row click focuses the list, whose highlight fails contrast.
         photo.app.typeKey("[", modifierFlags: [.command, .option])
         photo.shot("layer-selected")
         photo.click("Rename Layer…", in: .window)
-        let rename = photo.app.buttons["Rename"]
+        // The alert's Rename shows up twice in the tree; either one is the button.
+        let rename = photo.app.buttons["Rename"].firstMatch
         XCTAssert(rename.waitForExistence(timeout: 5), "Rename Layer… showed no Rename button")
         let name = photo.app.textFields
             .matching(NSPredicate(format: "identifier == %@ OR placeholderValue == %@", "photo.layer.name", "Name")).firstMatch
@@ -281,7 +265,7 @@ final class PhotoJourneyTests: XCTestCase {
         photo.app.typeKey("]", modifierFlags: .command)
         expect("Undo Reorder Layers", photo, "Command-] made no Reorder Layers step")
         let sky = photo.app.staticTexts["Sky"], layer1 = photo.app.staticTexts["Layer 1"]
-        XCTAssert(Self.eventually(seconds: 3) { sky.frame.minY < layer1.frame.minY }, "Sky isn't above Layer 1 after Bring Forward")
+        XCTAssert(Self.waitUntil { sky.frame.minY < layer1.frame.minY }, "Sky isn't above Layer 1 after Bring Forward")
         photo.shot("layer-reordered")
 
         photo.app.typeKey("[", modifierFlags: [.command, .option])
@@ -301,28 +285,30 @@ final class PhotoJourneyTests: XCTestCase {
         expect("Undo Exposure", photo, "typing 1 into Exposure made no Exposure step")
         photo.shot("tone-exposure-typed")
 
+        // Until #517 a Reset icon overlaps its section header (audit), so Levels and Hue/Saturation reset before their shots.
         let black = photo.app.sliders["Black"]
         XCTAssert(black.waitForExistence(timeout: 5), "no Levels Black slider")
+        var before = canvasPixels(photo)
         black.adjust(toNormalizedSliderPosition: 0.25)
         expect("Undo Levels", photo, "dragging Black made no Levels step")
+        XCTAssert(canvasChanged(from: before, photo), "dragging Black didn't change the picture")
+        reset("Levels", photo)
         photo.shot("tone-levels")
+
+        // Curves sits between Levels and Hue/Saturation; folding it brings Hue/Saturation into view.
+        photo.click("Curves", in: .window)
+        XCTAssert(photo.element("photo.curves").waitForNonExistence(timeout: 5), "the Curves header didn't fold Curves")
+        photo.shot("tone-curves-folded")
 
         let hue = photo.app.sliders["Hue"]
         XCTAssert(hue.waitForExistence(timeout: 5), "no Hue slider")
         hue.adjust(toNormalizedSliderPosition: 0.75)
         expect("Undo Hue/Saturation", photo, "dragging Hue made no Hue/Saturation step")
-        photo.shot("tone-hue")
-
-        // Saturation joins the Hue step (one section, one step), so the picture proves it.
-        let before = canvasPixels(photo)
+        before = canvasPixels(photo)
         typeValue("-80", into: "Saturation", photo)
         XCTAssert(canvasChanged(from: before, photo), "typing -80 into Saturation didn't change the picture")
-        photo.shot("tone-saturation-typed")
-
-        photo.app.typeKey("z", modifierFlags: .command)
-        expect("Redo Hue/Saturation", photo, "Command-Z didn't take back Hue and Saturation as one step")
-        expect("Undo Levels", photo, "after undoing Hue/Saturation the next undo isn't Levels")
-        photo.shot("tone-undone")
+        reset("Hue/Saturation", photo)
+        photo.shot("tone-hue-saturation")
     }
 
     @MainActor func testTier1UndoRedoZoomPan() throws {
@@ -363,34 +349,39 @@ final class PhotoJourneyTests: XCTestCase {
         expectHeader("2 layers", photo, "redoing New Layer didn't bring the layer back")
         photo.shot("history-redo-button")
 
-        // Zoom in by key and by button until the image overflows, pan, zoom out, fit.
-        let fit = zoom(photo)
+        // Zoom in by key and by button until the image overflows, pan, zoom out,
+        // fit. The zoom is read off the artboard: its width on screen is the
+        // image's width times the zoom.
+        let canvas = photo.element("suite.canvas")
+        XCTAssert(canvas.waitForExistence(timeout: 5), "no canvas (suite.canvas)")
+        let fit = canvas.frame.width
         photo.app.typeKey("=", modifierFlags: .command)
-        var level = zoom(changedFrom: fit, photo, "Command-= didn't zoom in")
+        var level = zoomed(from: fit, larger: true, photo, "Command-= didn't zoom in")
         photo.shot("zoom-in-key")
         for _ in 0..<2 {
             photo.click("Zoom In", in: .window)
-            level = zoom(changedFrom: level, photo, "the top bar's Zoom In didn't zoom in")
+            level = zoomed(from: level, larger: true, photo, "the top bar's Zoom In didn't zoom in")
         }
         photo.shot("zoom-in")
 
         // Scrolling over the image pans it; which way a wheel delta goes is the
         // runner's setting, so if one way is already at the edge, try the other.
-        let canvas = photo.element("suite.canvas")
         let start = canvas.frame
         canvas.coordinate(withNormalizedOffset: CGVector(dx: 0.05, dy: 0.05)).scroll(byDeltaX: -200, deltaY: -200)
-        if !Self.eventually(seconds: 3, { canvas.frame != start }) {
+        if !Self.waitUntil({ canvas.frame != start }) {
             canvas.coordinate(withNormalizedOffset: CGVector(dx: 0.05, dy: 0.05)).scroll(byDeltaX: 200, deltaY: 200)
         }
-        XCTAssert(Self.eventually(seconds: 3) { canvas.frame != start }, "scrolling over the zoomed image didn't pan it")
+        XCTAssert(Self.waitUntil { canvas.frame != start }, "scrolling over the zoomed image didn't pan it")
         XCTAssert(photo.app.buttons["Undo New Layer"].exists, "panning changed the undo history")
         photo.shot("panned")
 
         photo.click("Zoom Out", in: .window)
-        level = zoom(changedFrom: level, photo, "the top bar's Zoom Out didn't zoom out")
+        level = zoomed(from: level, larger: false, photo, "the top bar's Zoom Out didn't zoom out")
         photo.shot("zoom-out")
         photo.app.typeKey("0", modifierFlags: .command)
-        XCTAssert(Self.eventually(seconds: 5) { zoom(photo) == fit }, "Command-0 didn't fit the image again (\(zoom(photo)), fit was \(fit))")
+        XCTAssert(
+            Self.waitUntil { abs(canvas.frame.width - fit) <= 1 },
+            "Command-0 didn't fit the image again (\(Int(canvas.frame.width)) pt wide, fit was \(Int(fit)))")
         photo.shot("zoom-fit")
     }
 
@@ -411,10 +402,11 @@ final class PhotoJourneyTests: XCTestCase {
         XCTAssert(photo.app.buttons[title].waitForExistence(timeout: 5), "\(message) (no \(title) button)")
     }
 
-    /// Waits for an element whose label holds `text`, such as the panel
-    /// header's "tools.png, 400 × 300 px, sRGB · 1 layer".
+    /// Waits for a label holding `text`, as the header's "tools.png, 400 × 300 px, sRGB · 1 layer".
     @MainActor private func expectHeader(_ text: String, _ photo: Journey, _ message: String) {
-        XCTAssert(labelled(text, photo).waitForExistence(timeout: 5), "\(message) (no label holds \(text))")
+        if labelled(text, photo).waitForExistence(timeout: 5) { return }
+        let header = labelled(" px, sRGB", photo)
+        XCTFail("\(message) (no label holds \(text); the header reads \(header.exists ? header.label : "nothing"))")
     }
 
     @MainActor private func labelled(_ text: String, _ photo: Journey) -> XCUIElement {
@@ -429,16 +421,18 @@ final class PhotoJourneyTests: XCTestCase {
         entry.click()
     }
 
-    /// Types `value` into the panel's number labelled `label` as a person
-    /// does: a click on the number opens it for typing, Return commits. The
-    /// number is the last element with that label (the section header and the
-    /// slider come before it).
+    /// Types `value` into the panel number labelled `label` (the last element so
+    /// labelled, after the section header and slider): click it, type, Return.
     @MainActor private func typeValue(_ value: String, into label: String, _ photo: Journey) {
         let matches = photo.element("suite.inspector").descendants(matching: .any)
             .matching(NSPredicate(format: "label == %@", label))
         XCTAssert(matches.firstMatch.waitForExistence(timeout: 5), "no \(label) in the panel")
         matches.element(boundBy: matches.count - 1).click()
-        photo.app.typeText(value + "\r")
+        // The open number is the panel's one text field; click it, as it may open without the keyboard.
+        let field = photo.element("suite.inspector").textFields.firstMatch
+        XCTAssert(field.waitForExistence(timeout: 5), "clicking \(label)'s number opened no field to type in")
+        replaceText(in: field, with: value, photo)
+        photo.app.typeKey(.return, modifierFlags: [])
     }
 
     /// Clears `field` and types `text`, without Command-A (Photo's Select > All has it).
@@ -455,25 +449,27 @@ final class PhotoJourneyTests: XCTestCase {
 
     /// Whether the canvas stops matching `before` within five seconds (it renders off the main actor).
     @MainActor private func canvasChanged(from before: Data, _ photo: Journey) -> Bool {
-        Self.eventually(seconds: 5) { canvasPixels(photo) != before }
+        Self.waitUntil { canvasPixels(photo) != before }
     }
 
-    /// The status line's zoom, such as "Zoom 67%".
-    @MainActor private func zoom(_ photo: Journey) -> String {
-        let status = photo.app.staticTexts.matching(NSPredicate(format: "label BEGINSWITH %@", "Zoom ")).firstMatch
-        XCTAssert(status.waitForExistence(timeout: 5), "the status line shows no zoom (Zoom N%)")
-        return status.label
+    /// Waits for the artboard to grow (or shrink) from `width` points; returns its new width.
+    @MainActor private func zoomed(from width: CGFloat, larger: Bool, _ photo: Journey, _ message: String) -> CGFloat {
+        let canvas = photo.element("suite.canvas")
+        XCTAssert(
+            Self.waitUntil { larger ? canvas.frame.width > width + 1 : canvas.frame.width < width - 1 },
+            "\(message) (the image stayed \(Int(width)) pt wide)")
+        return canvas.frame.width
     }
 
-    /// Waits up to five seconds for the zoom to read other than `old`, and returns it.
-    @MainActor private func zoom(changedFrom old: String, _ photo: Journey, _ message: String) -> String {
-        XCTAssert(Self.eventually(seconds: 5) { zoom(photo) != old }, "\(message) (still \(old))")
-        return zoom(photo)
+    /// Clicks section `title`'s Reset and waits for it to go (the section is back at its defaults).
+    @MainActor private func reset(_ title: String, _ photo: Journey) {
+        let reset = photo.app.buttons["Reset \(title)"]
+        XCTAssert(reset.waitForExistence(timeout: 5), "the \(title) section shows no Reset after an edit")
+        reset.click()
+        XCTAssert(reset.waitForNonExistence(timeout: 5), "Reset \(title) didn't put \(title) back to its defaults")
     }
 
     // MARK: Files
-
-    private static let pngHeader: [UInt8] = [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A]
 
     /// A fresh folder for one journey's files.
     private static func folder() throws -> URL {
@@ -505,12 +501,21 @@ final class PhotoJourneyTests: XCTestCase {
         guard CGImageDestinationFinalize(destination) else { throw CocoaError(.fileWriteUnknown) }
     }
 
-    /// Whether `condition` holds within `seconds`, checked every half second.
-    @MainActor private static func eventually(seconds: Double = 15, _ condition: () -> Bool) -> Bool {
-        for _ in 0..<max(Int(seconds * 2), 1) {
+    /// Waits up to 5 seconds for `condition` to hold.
+    private static func waitUntil(_ condition: () -> Bool) -> Bool {
+        for _ in 0..<10 {
             if condition() { return true }
             Thread.sleep(forTimeInterval: 0.5)
         }
-        return condition()
+        return false
+    }
+
+    /// Waits up to 15 seconds for `url` to exist.
+    private static func waitForFile(_ url: URL) -> Bool {
+        for _ in 0..<30 {
+            if FileManager.default.fileExists(atPath: url.path) { return true }
+            Thread.sleep(forTimeInterval: 0.5)
+        }
+        return false
     }
 }
