@@ -3,13 +3,15 @@
 // selection: each call takes the app's current selection and the anchor (the
 // item the last click or arrow move landed on) and returns the new ones.
 // Invariants: the result only names ids in `order`, never indexes past its
-// ends, and an arrow move at an edge stays put.
+// ends, and an arrow move at an edge stays put. Shift-click replaces only the
+// anchor's own run (the contiguous selected items around it, which the last
+// Shift-click made) and keeps every other selected item, as a platform list does.
 public enum GridSelection {
     /// The modifier held during a click.
     public enum Click: Sendable {
         case plain  // select only this item
         case toggle  // Command: add or remove this item, keep the rest
-        case extend  // Shift: select the range from the anchor to this item
+        case extend  // Shift: the anchor's range now ends at this item, keep the rest
     }
 
     public enum Direction: Sendable { case left, right, up, down }
@@ -36,9 +38,22 @@ public enum GridSelection {
             guard let anchor, let start = order.firstIndex(of: anchor) else {
                 return Result(selection: [id], anchor: id)
             }
+            let previous = run(around: start, order: order, selection: selection)
             let range = min(start, target)...max(start, target)
-            return Result(selection: Set(order[range]), anchor: anchor)
+            let kept = order.indices.filter { previous?.contains($0) != true && selection.contains(order[$0]) }
+            return Result(selection: Set(kept.map { order[$0] }).union(order[range]), anchor: anchor)
         }
+    }
+
+    /// The indexes of the contiguous selected items around `index`, nil
+    /// when the item there is not selected.
+    private static func run<ID: Hashable>(around index: Int, order: [ID], selection: Set<ID>) -> ClosedRange<Int>? {
+        guard order.indices.contains(index), selection.contains(order[index]) else { return nil }
+        var low = index
+        var high = index
+        while low > order.startIndex, selection.contains(order[low - 1]) { low -= 1 }
+        while high < order.endIndex - 1, selection.contains(order[high + 1]) { high += 1 }
+        return low...high
     }
 
     /// The selection after an arrow key in a grid of `columns` columns: the
