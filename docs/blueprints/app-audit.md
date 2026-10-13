@@ -116,7 +116,8 @@ The audit grows with the apps. Agents:
 
 - **add checks freely.** A new rule needs a fault (the PR or issue where it
   went wrong), one file in `Checks/`, one entry in `AppAudit.checks`, and its
-  starting counts in the baseline from the first macOS run. Its `seeded`
+  starting counts in the baseline from the first macOS run (non-zero starting
+  counts take the captain's review, below). Its `seeded`
   screen must fail it: `everyCheckFlagsItsSeed` runs every registered check
   on its own seed on Linux, and a check that can't fail can't land. Edge
   cases it must let pass go in `AuditChecksTests`.
@@ -124,8 +125,15 @@ The audit grows with the apps. Agents:
 - **audit every journey step.** `shot` does it already; a step that doesn't
   shoot calls `audit("step")`.
 
-Raising a count or removing a check needs the captain's review. The lane
-will enforce that later; until then the reviewer checks the baseline diff.
+Anything that loosens the audit needs the captain's review, and the fast
+lane enforces it. `audit_loosens` in `scripts/fast-lane.sh` compares the
+baseline, the `Checks/` files and the `AppAudit.checks` entries at the PR's
+merge base and head. A PR that raises a count, adds an app or check key above
+0, drops an app (an app missing from the file isn't judged), removes a check
+file or drops a registry entry gets one comment, "loosens the app audit:
+needs the captain's review", and loses its `fast-lane` label. Lowering a count,
+dropping a check key from an app (its baseline becomes 0) and adding a check
+that starts at 0 stay eligible.
 
 ## The report
 

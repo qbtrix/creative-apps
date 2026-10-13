@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 # Tests/fast_lane/test_fast_lane.sh: fixture tests for the pure `decide`
-# function in scripts/fast-lane.sh. No network, needs bash and jq.
+# function in scripts/fast-lane.sh, its PROTECTED list against CLAUDE.md's
+# "Never edit" bullet, the app audit guard (audit_loosens on before/after
+# trees) and whole sweeps against a stub `gh`. No network, needs bash and jq.
 #
 # checks-green.json is a check rollup shaped like a green flare-core PR: the CI
 # workflow's Linux and macOS jobs plus one SKIPPED CI job, a non-CI workflow
@@ -53,7 +55,12 @@ check "deny gate scripts" "not-eligible|touches protected paths: scripts/ci, scr
 check "deny agent rules, any case" "not-eligible|touches protected paths: docs/agents.md" \
   . 'docs/agents.md' .
 check "similar names are allowed" "eligible|150|2|5 checks green" \
-  . $'scripts/ci-helpers.sh\nSources/DesignModel/PackageSwiftNotes.swift' .
+  . $'docs/scripts/ci.md\nSources/DesignModel/PackageSwiftNotes.swift' .
+check "every script is protected (#292 changed scripts/ui-test)" "not-eligible|touches protected paths: scripts/ui-test" \
+  . $'scripts/ui-test\nUITests/Audit.swift' .
+check "deny .claude, Package.resolved and a nested CLAUDE.md" \
+  "not-eligible|touches protected paths: .claude/settings.json, Package.resolved, Sources/FlareApp/CLAUDE.md" \
+  . $'.claude/settings.json\nPackage.resolved\nSources/FlareApp/CLAUDE.md' .
 check "app shell is eligible (taste review happens after merge, on the snapshots)" "eligible|150|2|5 checks green" \
   . $'Sources/FlareApp/FlareApp.swift\nSources/FlareModel/FlareWorkspace.swift' .
 check "SuiteUI is eligible" "eligible|150|2|5 checks green" \
@@ -97,6 +104,22 @@ check "behind dev is still eligible (no freshness rule)" "eligible|150|2|5 check
 check "red CI outranks a conflict" "red|Linux" \
   '.mergeable = "CONFLICTING" | .mergeStateStatus = "DIRTY"' "$BASE_FILES" \
   'map(if .name == "Linux" then .conclusion = "FAILURE" else . end)'
+
+# PROTECTED is exactly the backticked paths in CLAUDE.md's "**Never edit**"
+# bullet, and decide refuses a file under each one.
+# shellcheck disable=SC2016 # the backticks are literal markdown
+claude_list=$(awk '/^- \*\*Never edit\*\*/ {on = 1} on && /^$/ {exit} on' "$here/../../CLAUDE.md" \
+  | grep -oE '`[^`]+`' | tr -d '`' | sort -u)
+lane_list=$(printf '%s\n' "${PROTECTED[@]}" | sort -u)
+if [[ -n "$claude_list" && "$claude_list" == "$lane_list" ]]; then
+  echo "ok   PROTECTED matches CLAUDE.md's Never edit list"
+else
+  echo "FAIL PROTECTED vs CLAUDE.md: $(diff <(echo "$claude_list") <(echo "$lane_list") | grep '^[<>]' | paste -sd' ' -)"; fail=1
+fi
+for p in "${PROTECTED[@]}"; do
+  f="$p"; [[ "$p" == */ ]] && f="${p}x.swift"
+  check "refuses $f" "not-eligible|touches protected paths: $f" . "$f" .
+done
 
 # The worker's marker: a line `Fast-Check: pass`, then `Head: <full head sha>`.
 mark() { printf '.body = "Closes #1\n\n%s\n%s"' "$1" "$2"; }
@@ -161,24 +184,126 @@ fi
 REQUIRE_BELT_REVIEW=0
 check "gate off: belt PR without review is eligible" "eligible|150|2|5 checks green" '.body = "x\nBelt-Run: act-1"' "$BASE_FILES" .
 
+# The app audit guard. audit_tree <dir> <baseline> <registry entries> <check
+# files...> writes an audit_snapshot-shaped tree; "-" leaves the baseline or
+# AuditCore.swift out. Each case builds a before tree $b and an after tree $a.
+AD="Tests/PhotoModelTests/AppAudit"
+BL='{ "photo": { "identifier": 54, "overlap": 1 }, "halo": { "contrast": 2 } }'
+REG="DisabledDim(), Overlap(), TextContrast(), Identifier(), Offscreen(), Unnamed()"
+CHECKS=(DisabledDim Overlap TextContrast Identifier Offscreen Unnamed)
+b="$tmp/before" a="$tmp/after"
+audit_tree() {
+  local d="$1" bl="$2" reg="$3" dir="${AUDIT_DIR:-$AD}" f; shift 3
+  rm -rf "$d"; mkdir -p "$d/UITests" "$d/$dir/Checks"
+  [[ "$bl" == - ]] || printf '%s\n' "$bl" >"$d/$AUDIT_BASELINE"
+  [[ "$reg" == - ]] || printf 'extension AppAudit {\n    static let checks: [any Check] = [%s]\n}\n' "$reg" >"$d/$dir/AuditCore.swift"
+  for f; do : >"$d/$dir/Checks/$f.swift"; done
+}
+loosens() {  # loosens <name> <want: lines joined by ", ", empty = not looser>
+  local got
+  got=$(audit_loosens "$b" "$a" | paste -sd, - | sed 's/,/, /g')
+  if [[ "$got" == "$2" ]]; then echo "ok   audit: $1"; else echo "FAIL audit: $1: want '$2', got '$got'"; fail=1; fi
+}
+same() { audit_tree "$b" "$BL" "$REG" "${CHECKS[@]}"; audit_tree "$a" "$1" "${2:-$REG}" "${CHECKS[@]}"; }
+
+same "$BL"; loosens "nothing changed" ""
+same '{ "photo": { "identifier": 55, "overlap": 1 }, "halo": { "contrast": 2 } }'
+loosens "a raised count" "photo identifier 54 -> 55"
+same '{ "photo": { "identifier": 53, "overlap": 0 }, "halo": { "contrast": 1 } }'
+loosens "lowered counts" ""
+same '{ "photo": { "identifier": 54 }, "halo": { "contrast": 2 } }'
+loosens "a check key left out of an app is 0, so lower" ""
+same '{ "photo": { "identifier": 54, "overlap": 1, "contrast": 3 }, "halo": { "contrast": 2 } }'
+loosens "a new check key above 0" "photo contrast new -> 3"
+same '{ "photo": { "identifier": 54, "overlap": 1, "contrast": 0 }, "halo": { "contrast": 2 } }'
+loosens "a new check key at 0" ""
+same '{ "photo": { "identifier": 54, "overlap": 1 }, "halo": { "contrast": 2 }, "suite": { "identifier": 4 } }'
+loosens "a new app above 0" "suite identifier new -> 4"
+same '{ "photo": { "identifier": 54, "overlap": 1 }, "halo": { "contrast": 2 }, "suite": { "identifier": 0 } }'
+loosens "a new app at 0" ""
+same '{ "photo": { "identifier": 54, "overlap": 1 } }'
+loosens "a dropped app is no longer judged" "drops halo from the baseline"
+audit_tree "$b" "$BL" "$REG" "${CHECKS[@]}"; audit_tree "$a" - "$REG" "${CHECKS[@]}"
+loosens "a deleted baseline drops every app" "drops halo from the baseline, drops photo from the baseline"
+same '{ "photo": { "identifier": 54, '
+loosens "a broken baseline" "the baseline is not valid JSON"
+same '{ "photo": { "identifier": "99" }, "halo": { "contrast": 2 } }'
+loosens "a count that is not a number" "the baseline is not app -> check -> count"
+audit_tree "$b" "$BL" "$REG" "${CHECKS[@]}"; audit_tree "$a" "$BL" "$REG" DisabledDim TextContrast Identifier Offscreen Unnamed
+loosens "a removed check file" "removes $AD/Checks/Overlap.swift"
+audit_tree "$b" "$BL" "$REG" "${CHECKS[@]}"; audit_tree "$a" "$BL" "$REG, Focus()" "${CHECKS[@]}" Focus
+loosens "an added check" ""
+same "$BL" "DisabledDim(), TextContrast(), Identifier(), Offscreen(), Unnamed()"
+loosens "an entry dropped from AppAudit.checks" "drops Overlap from AppAudit.checks"
+same "$BL" $'\n        DisabledDim(),\n        // Overlap(),\n        TextContrast(), Identifier(), /* Offscreen(), */ Unnamed(),\n    '
+loosens "entries commented out" "drops Offscreen from AppAudit.checks, drops Overlap from AppAudit.checks"
+same "$BL" $'\n        DisabledDim(), Overlap(),\n        TextContrast(), Identifier(), Offscreen(), Unnamed(),\n    '
+loosens "the same registry over several lines" ""
+same "$BL" -
+loosens "AuditCore.swift deleted" "$(printf '%s\n' "${CHECKS[@]}" | sort | sed 's/.*/drops & from AppAudit.checks/' | paste -sd, - | sed 's/,/, /g')"
+same "$BL" "$REG] + [Overlap(), TextContrast()]; let decoy: [any Check] = [] ; static let checks: [any Check] = [DisabledDim()"
+loosens "a second list in AuditCore.swift" "AppAudit.checks is declared 2 times"
+audit_tree "$b" "$BL" "$REG" "${CHECKS[@]}"; AUDIT_DIR=Tests/AppAuditTests audit_tree "$a" "$BL" "$REG" "${CHECKS[@]}"
+loosens "moving a check file counts as removing it (the target move is captain-reviewed)" \
+  "$(printf "removes $AD/Checks/%s.swift\n" "${CHECKS[@]}" | sort | paste -sd, - | sed 's/,/, /g')"
+AUDIT_DIR=Tests/AppAuditTests audit_tree "$b" "$BL" "$REG" "${CHECKS[@]}"; AUDIT_DIR=Tests/AppAuditTests audit_tree "$a" "$BL" "$REG" Focus "${CHECKS[@]}"
+loosens "the new home is guarded the same way" ""
+
+# The repo's own registry must parse, or the guard can't see a dropped entry.
+if [[ $(audit_registry "$here/../../Tests" | wc -l) -ge 6 ]]; then
+  echo "ok   audit: the repo's AppAudit.checks parses"
+else
+  echo "FAIL audit: audit_registry finds no AppAudit.checks list under Tests/; fix its pattern"; fail=1
+fi
+
+# decide takes the two trees as its 4th and 5th arguments.
+audit_decide() {  # audit_decide <name> <want prefix>
+  local got
+  jq . <<<"$BASE_PR" >"$tmp/pr.json"; printf '%s\n' "$AUDIT_BASELINE" >"$tmp/files.txt"
+  got=$(decide "$tmp/pr.json" "$tmp/files.txt" "$here/checks-green.json" "$b" "$a" 2>/dev/null)
+  if [[ "$got" == "$2"* ]]; then echo "ok   $1 -> $got"; else echo "FAIL $1: want '$2*', got '$got'"; fail=1; fi
+}
+same '{ "photo": { "identifier": 55, "overlap": 0 }, "halo": { "contrast": 2 } }'
+audit_decide "decide: a looser audit is not eligible" \
+  "not-eligible|loosens the app audit: needs the captain's review (photo identifier 54 -> 55)"
+same '{ "photo": { "identifier": 50, "overlap": 0 }, "halo": { "contrast": 2 } }'
+audit_decide "decide: a lowered baseline is eligible" "eligible|150|2|5 checks green"
+
 # A whole sweep against a stub `gh` that answers from per-PR fixtures and logs
 # every write: #4 and #7 are eligible, #5 is based on main, #6 conflicts.
 # sweep <PRs labelled feature-done> runs main() and leaves the writes in $sw/calls.
+# Files come from $sw/files.<n>.json (raw API shape, the lane's --jq applied),
+# the merge base is `mb` (`bad` for a head whose compare fails), and the trees
+# and contents for a commit are the files under $sw/refs/<sha>.
 sw="$tmp/sweep"
 gh() {
-  local a="$*" n
+  local a="$*" n u
   case "$a" in
-    "pr list "*) for n in 7 6 5 4; do [[ -e "$sw/$n.merged" ]] || echo "$n"; done ;;
+    "pr list "*)
+      for n in "$sw"/[0-9]*.json; do
+        jq -e '[.labels[].name] | index("fast-lane")' "$n" >/dev/null || continue
+        n="${n##*/}"; n="${n%.json}"; [[ -e "$sw/$n.merged" ]] || echo "$n"
+      done ;;
     "pr view "*"--json title "*) echo "title $2" ;;
     "pr view "*"--json body "*) jq -r .body "$sw/$3.json" ;;
     "pr view "*"--json closingIssuesReferences "*) ;;
     "pr view "*) cat "$sw/$3.json" ;;
     "api "*"/check-runs"*|"api "*"/status "*) echo '[]' ;;
-    "api "*"/pulls/"*"/files "*) echo "Sources/FlareModel/FlareWorkspace.swift" ;;
+    "api "*"/pulls/"*"/files "*)
+      n="${2#*/pulls/}"; n="${n%%/*}"
+      if [[ -e "$sw/files.$n.json" ]]; then jq -r "${!#}" "$sw/files.$n.json"
+      else jq -rn '[{filename: "Sources/FlareModel/FlareWorkspace.swift", status: "modified"}]' | jq -r "${!#}"; fi ;;
+    "api "*"/compare/"*) [[ "$2" != *bad ]] || return 1; echo mb ;;
+    "api "*"/git/trees/"*)
+      u="${2#*/git/trees/}"; u="${u%%\?*}"
+      (cd "$sw/refs/$u" 2>/dev/null && find . -type f | sed 's:^\./::') | jq -R '{path: ., type: "blob"}' | jq -s '{truncated: false, tree: .}' ;;
+    "api "*"/contents/"*) u="${!#}"; u="${u#*/contents/}"; cat "$sw/refs/${u##*\?ref=}/${u%%\?*}" ;;
     "api "*"/issues/"*"/comments "*) n="${2#*/issues/}"; cat "$sw/${n%%/*}.comments" 2>/dev/null || true ;;
     "pr comment "*) echo "$a" >>"$sw/calls"; printf '%s\n' "${!#}" >>"$sw/$3.comments" ;;
     "pr merge "*) echo "$a" >>"$sw/calls"; touch "$sw/$3.merged" ;;
     "pr edit "*"--base "*) echo "$a" >>"$sw/calls"; jq '.baseRefName = "dev"' "$sw/$3.json" >"$sw/x" && mv "$sw/x" "$sw/$3.json" ;;
+    "pr edit "*"--remove-label fast-lane"*) echo "$a" >>"$sw/calls"
+      jq '.labels |= map(select(.name != "fast-lane"))' "$sw/$3.json" >"$sw/x" && mv "$sw/x" "$sw/$3.json" ;;
     *) echo "$a" >>"$sw/calls" ;;
   esac
 }
@@ -203,4 +328,33 @@ expect "never merges the conflicting PR" "$(grep -c '^pr merge 6' "$sw/calls")" 
 expect "routine merges start no CI" "$(grep -c '^workflow run' "$sw/calls")" 0
 sweep 4 7
 expect "feature-done merges dispatch CI on dev once" "$(grep -c '^workflow run ci.yml .*--ref dev' "$sw/calls")" 1
+
+# The audit through a sweep: #8 raises a count, #9 lowers one, #10 renames
+# scripts/ci away, #11's merge base can't be read, #12 drops Overlap() and
+# hides it behind a stray AuditCore.swift. Each has its own head.
+pr_at() {  # pr_at <n> <head sha> <files json>
+  jq --argjson n "$1" --arg h "$2" '.number = $n | .headRefOid = $h
+    | .body = "Closes #1\n\nFast-Check: pass\nHead: \($h)"' <<<"$BASE_PR" >"$sw/$1.json"
+  printf '%s\n' "$3" >"$sw/files.$1.json"
+}
+rm -rf "$sw"; mkdir -p "$sw/refs"; : >"$sw/calls"
+BLF='[{"filename": "UITests/audit-baseline.json", "status": "modified"}]'
+audit_tree "$sw/refs/mb" "$BL" "$REG" "${CHECKS[@]}"
+pr_at 8 h8 "$BLF"; audit_tree "$sw/refs/h8" '{ "photo": { "identifier": 55, "overlap": 1 }, "halo": { "contrast": 2 } }' "$REG" "${CHECKS[@]}"
+pr_at 9 h9 "$BLF"; audit_tree "$sw/refs/h9" '{ "photo": { "identifier": 50, "overlap": 1 }, "halo": { "contrast": 2 } }' "$REG" "${CHECKS[@]}"
+pr_at 10 h10 '[{"filename": "tools/ci", "previous_filename": "scripts/ci", "status": "renamed"}]'
+pr_at 11 bad "$BLF"
+pr_at 12 h12 '[{"filename": "Tests/PhotoModelTests/AppAudit/AuditCore.swift", "status": "modified"}]'
+audit_tree "$sw/refs/h12" "$BL" "DisabledDim(), TextContrast(), Identifier(), Offscreen(), Unnamed()" "${CHECKS[@]}"
+mkdir -p "$sw/refs/h12/$AD/Old"; cp "$sw/refs/mb/$AD/AuditCore.swift" "$sw/refs/h12/$AD/Old/AuditCore.swift"
+( main ) >/dev/null 2>&1 || { echo "FAIL sweep: main exited non-zero"; fail=1; }
+expect "audit: merges only the PR that lowers a count" "$(grep -oE '^pr merge [0-9]+' "$sw/calls" | paste -sd, -)" "pr merge 9"
+expect "audit: one comment on the looser PR" \
+  "$(grep -c "^pr comment 8 .*not eligible. loosens the app audit: needs the captain's review (photo identifier 54 -> 55)" "$sw/calls")" 1
+expect "audit: the looser PR loses its label" "$(grep -c '^pr edit 8 .*--remove-label fast-lane' "$sw/calls")" 1
+expect "a rename away from a protected path is refused" \
+  "$(grep -c '^pr comment 10 .*touches protected paths: scripts/ci\.' "$sw/calls")" 1
+expect "audit: an unreadable merge base skips the PR, no writes" "$(grep -c '^pr [a-z]* 11 ' "$sw/calls")" 0
+expect "audit: a stray AuditCore.swift can't hide a dropped entry" \
+  "$(grep -c "^pr comment 12 .*loosens the app audit: needs the captain's review (drops Overlap from AppAudit.checks)" "$sw/calls")" 1
 exit "$fail"
