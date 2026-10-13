@@ -47,3 +47,17 @@ import Testing
         #expect(NumericInput.parse(NumericInput.format(value), in: -100...100, keeping: 1) == value)
     }
 }
+
+@Test func closingOnTheOpeningTextKeepsTheUnroundedValue() {
+    let gamma = 1.2345253
+    #expect(NumericInput.committed(NumericInput.format(gamma), in: 0.1...9.99, keeping: gamma) == gamma)
+    #expect(NumericInput.committed(" 1.23 ", in: 0.1...9.99, keeping: gamma) == gamma)
+    #expect(NumericInput.committed("-12.35", in: -100...100, keeping: -12.345) == -12.345)
+}
+
+@Test func typingANewNumberStillCommitsIt() {
+    #expect(NumericInput.committed("1.2", in: 0.1...9.99, keeping: 1.2345) == 1.2)
+    #expect(NumericInput.committed("60.391", in: 0...100, keeping: 60.39) == 60.391)
+    #expect(NumericInput.committed("200", in: 0...100, keeping: 60.39) == 100)
+    #expect(NumericInput.committed("abc", in: 0...100, keeping: 60.39) == 60.39)
+}

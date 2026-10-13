@@ -6,7 +6,8 @@
 // percent and degrees, one for pixels and EV. At rest it is a Text on a flat
 // field well, so snapshots draw it. Values out through `onChange` only, already clamped (ScrubValue,
 // NumericInput); the Model clamps again. Owns presentation state only: the
-// typed draft and the drag anchor.
+// typed draft and the drag anchor. Closing the typing field on the text it
+// opened with changes nothing (NumericInput.committed).
 import AppKit
 import SwiftUI
 
@@ -131,7 +132,7 @@ public struct ScrubField: View {
     private func commit() {
         guard let text = draft else { return }
         draft = nil
-        let parsed = NumericInput.parse(text, in: range, keeping: value)
+        let parsed = NumericInput.committed(text, in: range, keeping: value)
         if parsed != value { onChange(parsed) }
     }
 }

@@ -6,7 +6,8 @@
 // rounded to the field's decimals (whole for percent and degrees, one for
 // pixels and EV, two by default), halves away from zero. `text` is what a row
 // shows (fixed decimals and the unit, "45°", "0.0 pt") and `spoken` what
-// VoiceOver reads ("45 degrees").
+// VoiceOver reads ("45 degrees"). `committed` keeps the value when the
+// typed text is still the text the field opened with.
 public enum NumericInput {
     /// The value `text` names, clamped to `range`. Text that isn't a number,
     /// and NaN, give back `old`. Surrounding whitespace is ignored.
@@ -14,6 +15,15 @@ public enum NumericInput {
         let trimmed = String(text.drop(while: \.isWhitespace).reversed().drop(while: \.isWhitespace).reversed())
         guard let value = Double(trimmed), !value.isNaN else { return old }
         return clamp(value, to: range)
+    }
+
+    /// What a typing field commits when it closes on `text`, having opened on
+    /// `format(old)`: `old` itself while the text is still that, so a click
+    /// and click away never rounds a value the field only showed rounded;
+    /// otherwise `parse`.
+    public static func committed(_ text: String, in range: ClosedRange<Double>, keeping old: Double) -> Double {
+        let trimmed = String(text.drop(while: \.isWhitespace).reversed().drop(while: \.isWhitespace).reversed())
+        return trimmed == format(old) ? old : parse(text, in: range, keeping: old)
     }
 
     /// `value` moved into `range`; NaN gives the range's lower bound.

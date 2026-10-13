@@ -139,7 +139,7 @@ public struct StudioScrubRow: View {
     private func commit() {
         guard let text = draft else { return }
         draft = nil
-        let typed = NumericInput.parse(text, in: range, keeping: value)
+        let typed = NumericInput.committed(text, in: range, keeping: value)
         guard typed != value else { return }
         onChange(typed)
         onEnd()
