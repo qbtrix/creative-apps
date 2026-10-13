@@ -190,10 +190,19 @@ The blueprint read `main` at d1e57a3. Dev has since gained the easing editor
 and its SuiteUI parts, so these issues say what to reuse instead of building
 a second copy:
 
-- LM-0a1 (#314): dev's `EasingEditing` protocol and `EasingPreset` enum
-  clash by name with the ones section 6.2 adds; the task reconciles them.
-- LM-0b2 (#321) and LM-6 (#359): grow `FakeEasingEditing` and the
-  `FlareWorkspace` easing conformance instead of writing new ones.
+- LM-0a1 (#314): the name clash is resolved. Section 6.2's per-keyframe
+  protocol is `KeyframeEasing` (#368); dev's `EasingEditing` stays the
+  window-level editor protocol, and both use dev's `EasingPreset`.
+- LM-0b2 (#321): `FakeEasing` is a new `KeyframeEasing` fake in
+  `Sources/FlareModel/Fakes/FakeEasing.swift`, the one `FlareServices.easing`
+  holds (section 6.3). It may reuse `EasingPreset` and sample
+  `Easing.value(at:)` as `FakeEasingEditing` does, but
+  `Sources/FlareModel/FakeEasingEditing.swift` stays as it is: it is the
+  `EasingEditing` stand-in for `FlareEasingInspector` and
+  `EasingEditingContractTests`, not the services fake.
+- LM-6 (#359): `LiveEasing` conforms to `KeyframeEasing`. It may wrap or
+  share `FlareWorkspace`'s `SetKeyframeEasing` code; `FlareWorkspace` keeps
+  its `EasingEditing` conformance.
 - F9 (#378): build the popover from `FlareEasingInspector`, and keep one
   easing editor, not two.
 - S1 (#334), S5 (#338), S13 (#343): `StudioScrubRow`, `ChoiceChips` and
