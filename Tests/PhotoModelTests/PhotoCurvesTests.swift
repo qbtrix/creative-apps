@@ -34,7 +34,7 @@ import Testing
         workspace.adjust(.curvePoints(Self.lift))
         #expect(workspace.adjustments.curvePoints == Self.lift)
         let after = try workspace.composite()
-        let expected = try before.curves(points: Self.lift)
+        let expected = try before.curves(points: Self.lift, encoding: .sRGB)
         #expect(after == expected)
         #expect(try after.pixel(x: 4, y: 4).r > before.pixel(x: 4, y: 4).r)
     }
@@ -90,10 +90,10 @@ import Testing
         workspace.adjust(.blackPoint(0.1))
         workspace.adjust(.curvePoints(Self.lift))
         let black = workspace.adjustments.blackPoint
-        let levelsThenCurves = try plain.levels(inBlack: black, inWhite: 1, gamma: 1, outBlack: 0, outWhite: 1)
-            .curves(points: Self.lift)
-        let curvesThenLevels = try plain.curves(points: Self.lift)
-            .levels(inBlack: black, inWhite: 1, gamma: 1, outBlack: 0, outWhite: 1)
+        let levelsThenCurves = try plain.levels(inBlack: black, inWhite: 1, gamma: 1, outBlack: 0, outWhite: 1, encoding: .sRGB)
+            .curves(points: Self.lift, encoding: .sRGB)
+        let curvesThenLevels = try plain.curves(points: Self.lift, encoding: .sRGB)
+            .levels(inBlack: black, inWhite: 1, gamma: 1, outBlack: 0, outWhite: 1, encoding: .sRGB)
         #expect(levelsThenCurves != curvesThenLevels)
         #expect(try workspace.composite() == levelsThenCurves)
     }
@@ -122,13 +122,13 @@ import Testing
 
     @Test func histogramIsTheLuminanceCurvesMaps() throws {
         var workspace = try grey()
-        let plainBin = try Histogram(of: workspace.composite()).luminance.firstIndex { $0 > 0 }
+        let plainBin = try Histogram(of: workspace.composite(), encoding: .sRGB).luminance.firstIndex { $0 > 0 }
         workspace.adjust(.exposure(1))
         workspace.adjust(.curvePoints(Self.lift))
         let heights = workspace.curvesHistogram()
         var input = workspace
         input.adjust(.setEnabled(.curves, false))
-        let counts = try Histogram(of: input.composite()).luminance
+        let counts = try Histogram(of: input.composite(), encoding: .sRGB).luminance
         let tallest = Double(counts.max() ?? 0)
         #expect(heights == counts.map { Double($0) / tallest })
         #expect(heights.firstIndex(of: 1) != plainBin)
