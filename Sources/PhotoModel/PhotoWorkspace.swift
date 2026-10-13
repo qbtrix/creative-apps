@@ -260,7 +260,7 @@ extension AdjustmentEdit {
     var kind: AdjustmentKind {
         switch self {
         case .exposure: .exposure
-        case .blackPoint, .whitePoint, .gamma: .levels
+        case .blackPoint, .whitePoint, .gamma, .gammaField: .levels
         case .blurSigma: .blur
         case .hue, .saturation, .lightness: .hueSaturation
         case .setEnabled(let kind, _), .reset(let kind): kind
