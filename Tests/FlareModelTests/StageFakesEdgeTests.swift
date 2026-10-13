@@ -46,11 +46,11 @@ private let ball = StageAddress(owner: .scene("scene-1"), layerID: "ball", item:
 
 @Test func oddHitInputsNeverReachPastTheBox() {
     let hits = services.hits
-    // Ball's box at frame 0 is 50...110 by 70...130; just outside it the Background is under the point.
+    // Ball's box at frame 0 is 50...110 by 70...130; just outside it only the locked Background is under the point.
     let outside = Point(x: 111, y: 100)
-    #expect(hits.hit(bounce, sceneID: "scene-1", frame: 0, at: outside, tolerance: -5)?.layerID == "background")
-    #expect(hits.hit(bounce, sceneID: "scene-1", frame: 0, at: outside, tolerance: .infinity)?.layerID == "background")
-    #expect(hits.hit(bounce, sceneID: "scene-1", frame: 0, at: outside, tolerance: .nan)?.layerID == "background")
+    #expect(hits.hit(bounce, sceneID: "scene-1", frame: 0, at: outside, tolerance: -5) == nil)
+    #expect(hits.hit(bounce, sceneID: "scene-1", frame: 0, at: outside, tolerance: .infinity) == nil)
+    #expect(hits.hit(bounce, sceneID: "scene-1", frame: 0, at: outside, tolerance: .nan) == nil)
     #expect(hits.hit(bounce, sceneID: "scene-1", frame: 0, at: outside, tolerance: 2) == ball)
     #expect(hits.hit(bounce, sceneID: "scene-1", frame: 0, at: Point(x: .nan, y: 100), tolerance: 0) == nil)
     #expect(hits.bounds(bounce, sceneID: "scene-1", frame: 0, of: [StageAddress(owner: .scene("scene-1"), layerID: "nope", item: .shape(0))]) == nil)
