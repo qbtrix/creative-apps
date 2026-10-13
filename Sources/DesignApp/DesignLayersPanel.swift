@@ -1,6 +1,6 @@
-// DesignLayersPanel.swift: the Layers tab of Design's panel. One List: the
-// file's pages, then the selected page's layer tree, with an Add Page / Delete
-// Page bar under it. Selection runs through the List, so arrow keys and
+// DesignLayersPanel.swift: the Layers tab of Design's panel. One List in the
+// small source-list style: the file's pages, then the selected page's layer
+// tree, with an Add Page / Delete Page bar under it. Selection runs through the List, so arrow keys and
 // type-select move through pages and layers; the highlighted row is the selected
 // layer, or the selected page when no layer is. A layer with children is a
 // DisclosureGroup whose expanded state is the workspace's (`isExpanded`), sent
@@ -21,6 +21,7 @@ struct DesignLayersPanel: View {
                 Section("Pages") {
                     ForEach(model.pages) { page in
                         Label(page.name, systemImage: "doc")
+                            .foregroundStyle(Color.primary)
                             .lineLimit(1)
                             .truncationMode(.middle)
                             .tag(page.id)
@@ -34,7 +35,9 @@ struct DesignLayersPanel: View {
                     }
                 }
             }
-            .listStyle(.plain)
+            // The source-list style draws the selection on a row inside a disclosure; the plain one doesn't.
+            .listStyle(.sidebar)
+            .environment(\.sidebarRowSize, .small)
             .scrollContentBackground(.hidden)
             .font(SuiteFont.inspectorLabel)
             .accessibilityIdentifier("design.layers")
