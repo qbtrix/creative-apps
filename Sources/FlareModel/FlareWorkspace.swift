@@ -21,7 +21,9 @@ public enum FlareTool: String, CaseIterable, Sendable {
         case .select: "Selecting on the stage isn't built yet (#12)."
         case .pen: "Drawing paths isn't built yet."
         case .rectangle: "Drawing rectangles isn't built yet."
-        case .ellipse: nil
+        // The ellipse logic works (`drag`, `dragChanged`), but the stage
+        // doesn't send drags yet; set this to nil when it does.
+        case .ellipse: "Drawing ellipses on the stage isn't wired up yet."
         }
     }
 
