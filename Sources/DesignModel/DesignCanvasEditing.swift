@@ -152,7 +152,8 @@ extension DesignWorkspace {
         gesture = nil
         switch done.route {
         case .move(let id):
-            record("Move", before: done.before)
+            // A click only selects, like a click on nothing deselects: no undo step.
+            if done.moved { record("Move", before: done.before) }
             if !done.moved, done.wasSelected, findNode(id)?.kind == .text { try? beginTextEdit(id) }
         case .resize:
             record("Resize", before: done.before)
