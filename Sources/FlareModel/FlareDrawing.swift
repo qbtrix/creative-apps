@@ -19,7 +19,7 @@ extension FlareWorkspace {
     /// scale does: a scale so small the minimum overflows, a zero, negative,
     /// -infinity or NaN scale give +infinity, which no box can meet, so no
     /// drag commits; +infinity gives the smallest positive one, so an empty
-    /// box still doesn't.
+    /// box still doesn't (and `ellipse` refuses a box whose half is zero).
     public static func minimumEllipseExtent(atStageScale stageScale: Double) -> Double {
         guard stageScale > 0 else { return .infinity }  // also NaN
         let extent = minimumEllipseExtent / stageScale
@@ -31,7 +31,8 @@ extension FlareWorkspace {
     /// quarters with the box's edge midpoints as the polyline fallback; nil
     /// when the box is narrower or shorter than `minimumEllipseExtent` stage
     /// points at `stageScale` (see `minimumEllipseExtent(atStageScale:)`), or a
-    /// coordinate, the centre or a radius is not finite. The centre is the
+    /// coordinate, the centre or a radius is not finite, or a radius rounds to
+    /// zero (a box one smallest subnormal wide at an infinite scale). The centre is the
     /// box's min corner plus half its size, so corners near the largest finite
     /// value don't overflow their sum.
     /// Stopgap until FlareCore's `Shape.ellipse(in:)` (qbtrix/creative-core#182)
@@ -43,7 +44,8 @@ extension FlareWorkspace {
         else { return nil }
         let rx = width / 2, ry = height / 2
         let c = Point(x: min(start.x, end.x) + rx, y: min(start.y, end.y) + ry)
-        guard c.x.isFinite, c.y.isFinite, rx.isFinite, ry.isFinite else { return nil }
+        // A radius that rounds to zero (half the smallest subnormal) makes an invisible ellipse.
+        guard c.x.isFinite, c.y.isFinite, rx.isFinite, ry.isFinite, rx > 0, ry > 0 else { return nil }
         let k = 0.5522847498  // a quarter circle's control distance, as a fraction of the radius
         // The unit circle at 0°, 90°, 180°, 270° and back to 0°.
         let units: [(cos: Double, sin: Double)] = [(1, 0), (0, 1), (-1, 0), (0, -1), (1, 0)]
