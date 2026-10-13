@@ -30,9 +30,9 @@ public struct FlareServices: Sendable {
     /// Every member a fake. `assistMode` comes from `-FlareAssistMode` (read by LM-0c4's fake).
     public static func fake(assistMode: FakeAssistMode = .ok) -> FlareServices {
         FlareServices(
-            scenes: NotBuilt(reason: "Not built yet (LM-0a2)."),
-            stage: NotBuilt(reason: "Not built yet (LM-0a2)."),
-            hits: NotBuilt(reason: "Not built yet (LM-0a2)."),
+            scenes: FakeScenes(),
+            stage: FakeStage(),
+            hits: FakeHits(),
             shapes: NotBuilt(reason: "Not built yet (LM-0a2b)."),
             properties: NotBuilt(reason: "Not built yet (LM-0b1)."),
             keyframes: NotBuilt(reason: "Not built yet (LM-0b2)."),
