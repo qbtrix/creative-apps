@@ -2,7 +2,7 @@
 // `shot` audits every window shot, and `audit("step")` audits the window as
 // it is now as screen "<app>-<step>": one snapshot of the first window's
 // element tree, the main screen's pixels, every registered check
-// (Tests/PhotoModelTests/AppAudit/, compiled in by project.yml), the report
+// (Tests/AppAuditTests/, compiled in by project.yml), the report
 // attached as "audit-<app>-<step>.json", and the app's tally of distinct
 // violations held against its line in UITests/audit-baseline.json. A count
 // that rises fails at the screen that raised it; the bundle's last test

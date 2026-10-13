@@ -10,6 +10,11 @@
 // for X in Flare (2D animation), Design (vector and UI design), Photo (raster
 // editing), Library (photo catalog) and Halo (motion graphics).
 //
+//   AppAuditTests  the app audit's pure code (pixel math, engine, checks) and
+//             its tests, Foundation only, on Linux and macOS. project.yml
+//             also compiles its non-test files into every UI journey bundle
+//             (docs/blueprints/app-audit.md).
+//
 // The macOS-only targets are appended under `#if os(macOS)`. The manifest is
 // evaluated on the host, so on Linux they do not exist at all: `swift build`
 // and `swift test` there cover exactly the Model targets and their tests.
@@ -36,6 +41,7 @@ var targets: [Target] =
     + model("Photo", ["CoreRaster", "CoreColor"])
     + model("Library", ["CoreRaster", "CoreColor"])
     + model("Halo", ["FlareCore", "CoreRaster"])
+    + [.testTarget(name: "AppAuditTests")]
 
 #if os(macOS)
 products += apps.map { .executable(name: "\($0)App", targets: ["\($0)App"]) }
