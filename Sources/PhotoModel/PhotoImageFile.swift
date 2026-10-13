@@ -7,7 +7,9 @@
 // is told the longest side to fit, `decodeLongestSide`), which keeps a layer
 // under 256 MB. Exporting flattens the visible layers with the adjustments:
 // PNG keeps transparency, JPEG is laid on opaque white first. A failed open
-// or export leaves the workspace as it was. Linux-safe.
+// or export leaves the workspace as it was. Export and Save As offer the
+// document's name with the format's extension (`fileName(for:)`); Save As
+// renames the document to the file it wrote (`didSave(as:)`). Linux-safe.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -92,6 +94,21 @@ extension PhotoWorkspace {
         var flat = try composite()
         if format == .jpeg { flat = try flat.onWhite() }
         return DecodedImage(rgba8: try flat.rgba8(), width: flat.width, height: flat.height)
+    }
+
+    /// The name Export and Save As offer: the document's name with `format`'s
+    /// extension ("beach.HEIC" as PNG is "beach.png"); "Untitled.png" for a new image.
+    public func fileName(for format: ImageFormat) -> String {
+        let name = documentName ?? "Untitled"
+        let base = name.lastIndex(of: ".").map { String(name[..<$0]) } ?? name
+        return (base.isEmpty ? name : base) + "." + format.fileExtension
+    }
+
+    /// Save As wrote the image to a file named `name`: the window, top bar and
+    /// panel header name it from now on. Not an undo step; ignored with no image open.
+    public mutating func didSave(as name: String) {
+        guard canvas != nil else { return }
+        documentName = name
     }
 
     /// The flattened image as a `format` file through `codec`, rendered tile by
