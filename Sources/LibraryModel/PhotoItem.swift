@@ -14,7 +14,8 @@ public enum PhotoLabel: String, CaseIterable, Sendable, Hashable {
 }
 
 public struct PhotoItem: Identifiable, Sendable, Hashable {
-    public var id: String { name }
+    /// Unique within a catalog; `LibraryCatalog.load(_:)` renames clashes.
+    public let id: String
     /// The file name without extension, e.g. "IMG_0001".
     public let name: String
     public let captureDate: Date
@@ -23,10 +24,12 @@ public struct PhotoItem: Identifiable, Sendable, Hashable {
     public let isFlagged: Bool  // a pick: Favorites shows these
     public let label: PhotoLabel?
 
+    /// `id` defaults to the name; two photos may share a name but not an id.
     public init(
-        name: String, captureDate: Date, color: Color3, rating: Int = 0, isFlagged: Bool = false,
-        label: PhotoLabel? = nil
+        id: String? = nil, name: String, captureDate: Date, color: Color3, rating: Int = 0,
+        isFlagged: Bool = false, label: PhotoLabel? = nil
     ) {
+        self.id = id ?? name
         self.name = name
         self.captureDate = captureDate
         self.color = color.clampedToUnit()
@@ -39,9 +42,16 @@ public struct PhotoItem: Identifiable, Sendable, Hashable {
     public var pixel: [UInt8] {
         [color.c0, color.c1, color.c2].map { UInt8(($0 * 255).rounded()) } + [255]
     }
+
+    /// The same photo under another id.
+    func withID(_ newID: String) -> PhotoItem {
+        PhotoItem(
+            id: newID, name: name, captureDate: captureDate, color: color, rating: rating,
+            isFlagged: isFlagged, label: label)
+    }
 }
 
-/// View > Sort By. Ties fall back to the name, so every order is stable.
+/// View > Sort By. Ties fall back to the name, then the id, so every order is total.
 /// The raw value is the menu title.
 public enum LibrarySort: String, CaseIterable, Sendable, Hashable {
     case captureDate = "Capture Date", name = "Name", rating = "Rating"  // oldest, A to Z, most stars first
@@ -51,7 +61,7 @@ public enum LibrarySort: String, CaseIterable, Sendable, Hashable {
         switch self {
         case .captureDate where a.captureDate != b.captureDate: a.captureDate < b.captureDate
         case .rating where a.rating != b.rating: a.rating > b.rating
-        default: a.name < b.name
+        default: a.name != b.name ? a.name < b.name : a.id < b.id
         }
     }
 }
