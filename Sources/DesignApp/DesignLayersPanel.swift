@@ -1,6 +1,6 @@
 // DesignLayersPanel.swift: the Layers tab of Design's panel. One List in the
 // small source-list style: the file's pages, with Add Page and Delete Page in
-// the Pages header, then the current page's layer tree. Selection runs through
+// a row under them, then the current page's layer tree. Selection runs through
 // the List, so arrow keys and type-select move through pages and layers; the
 // highlighted row is the selected layer, or the current page when no layer is.
 // The current page always carries a checkmark, so the page you are editing,
@@ -20,16 +20,12 @@ struct DesignLayersPanel: View {
 
     var body: some View {
         List(selection: selection) {
-            Section {
+            Section("Pages") {
                 ForEach(model.pages) { page in
                     DesignPageLabel(page: page, isCurrent: page.id == model.selectedPageID).tag(page.id)
                 }
-            } header: {
-                HStack(spacing: 0) {
-                    Text("Pages")
-                    Spacer(minLength: 0)
-                    pageActions
-                }
+                // A row, not the section header: a sidebar header hides its buttons from accessibility.
+                pageActions
             }
             Section("Layers") {
                 if let nodes = model.selectedPage?.nodes, !nodes.isEmpty {
@@ -56,7 +52,7 @@ struct DesignLayersPanel: View {
             })
     }
 
-    /// Add Page and Delete Page (the checked page); the last page can't be deleted.
+    /// Add Page and Delete Page (the checked page); the last page can't be deleted. Untagged, so not selectable.
     private var pageActions: some View {
         HStack(spacing: 0) {
             EditorBarItem(ToolbarAction("Add Page", systemImage: "plus") { perform(.addPage) }, showsTitle: false)
@@ -66,6 +62,7 @@ struct DesignLayersPanel: View {
                     unavailableHelp: model.canDeletePage ? nil : "A file keeps at least one page.") {
                     perform(.deletePage)
                 }, showsTitle: false)
+            Spacer(minLength: 0)
         }
     }
 }
