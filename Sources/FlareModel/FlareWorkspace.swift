@@ -49,9 +49,14 @@ public struct FlareWorkspace: Sendable, Equatable {
     /// Replaces the open document with a new one holding one default scene in
     /// a fresh engine (no undo history), and selects that scene.
     public mutating func newDocument() {
-        let scene = Scene(id: "scene-1", name: "Scene 1")
-        engine = CommandEngine(document: Document(scenes: [scene]))
-        selectedSceneID = scene.id
+        load(Document(scenes: [Scene(id: "scene-1", name: "Scene 1")]))
+    }
+
+    /// Opens `document` in a fresh engine (no undo history), selects its
+    /// first scene and clears the layer selection.
+    mutating func load(_ document: Document) {
+        engine = CommandEngine(document: document)
+        selectedSceneID = document.scenes.first?.id
         selectedLayerID = nil
         layerError = nil
     }
