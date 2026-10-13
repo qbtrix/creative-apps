@@ -9,6 +9,7 @@ import Testing
 }
 
 @Test func radiiStepDownForConcentricNesting() {
+    #expect(SuiteRadius.field < SuiteRadius.small)
     #expect(SuiteRadius.small < SuiteRadius.medium)
     #expect(SuiteRadius.medium < SuiteRadius.large)
 }
@@ -20,6 +21,14 @@ import Testing
     }
     let shell = SuiteSize.sidebarWidth.min + SuiteSize.contentMinimum.width + SuiteSize.inspectorWidth.min
     #expect(shell <= SuiteSize.windowMinimum.width)
+}
+
+@Test func proDensityRowsAreTightAndFitTheInspector() {
+    #expect((20...22).contains(SuiteSize.inspectorRow))
+    #expect(SuiteSize.compactControl == .small)
+    // Label column, gap and a field still fit the narrowest inspector inside its inset.
+    let row = SuiteSize.inspectorLabelColumn + SuiteSpacing.s + SuiteSize.inspectorField
+    #expect(row <= SuiteSize.inspectorWidth.min - 2 * SuiteSpacing.m)
 }
 
 @Test func toolbarActionUsesItsTitleAsId() {

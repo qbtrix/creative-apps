@@ -1,69 +1,160 @@
-// InspectorRows.swift: the rows apps put in SuiteWindow's inspector, grouped in
-// collapsible InspectorSections. Each row is one LabeledContent around a system
-// control (Slider, Stepper, ColorPicker, menu Picker). Rows take the current
-// value and an `onChange` closure, never a binding: apps can't bind to their
-// Model. Typed numbers go through NumericInput, so they reach `onChange`
-// clamped, and text that isn't a number keeps the old value; the Model clamps
-// again. No glass: the inspector column is system chrome already. Components
-// own presentation state only (a section's expansion, a field's draft text).
+// InspectorRows.swift: the rows apps put in SuiteWindow's inspector, in the
+// dense "Pro density" layout of docs/design.md. InspectorSection is a system
+// DisclosureGroup with a flush 11 pt header, a hairline above it and an
+// optional Reset icon, never a card. InspectorRow is the two-column row: a right-aligned secondary label in
+// the shared label column, then the value at the compact control size. The
+// slider, stepper, color and picker rows are InspectorRows around a system
+// control; their numbers are ScrubFields. Rows take the current value and an
+// `onChange` closure, never a binding: apps can't bind to their Model. No
+// glass: the inspector column is system chrome already. Components own
+// presentation state only (a section's expansion, a field's draft text).
 import SwiftUI
 
-/// A titled group of inspector rows the user can collapse.
+/// A titled group of inspector rows the user can collapse: a hairline, then
+/// a 22 pt header row (chevron and small semibold secondary title, plus a
+/// small Reset icon while `onReset` is given), then the rows with no gaps
+/// between them. Pass `onReset` only while the section differs from its
+/// defaults, so the icon shows exactly when it would change something.
 public struct InspectorSection<Content: View>: View {
     private let title: String
+    private let onReset: (@MainActor () -> Void)?
     private let content: Content
     @State private var isExpanded: Bool
 
-    public init(_ title: String, isExpanded: Bool = true, @ViewBuilder content: () -> Content) {
+    public init(
+        _ title: String, isExpanded: Bool = true, onReset: (@MainActor () -> Void)? = nil,
+        @ViewBuilder content: () -> Content
+    ) {
         self.title = title
+        self.onReset = onReset
         self._isExpanded = State(initialValue: isExpanded)
         self.content = content()
     }
 
     public var body: some View {
-        DisclosureGroup(isExpanded: $isExpanded) {
-            VStack(alignment: .leading, spacing: SuiteSpacing.s) { content }
-                .padding(.top, SuiteSpacing.xs)
-        } label: {
-            Text(title).font(SuiteFont.headline)
+        VStack(alignment: .leading, spacing: 0) {
+            Divider()
+            ZStack(alignment: .topTrailing) {
+                DisclosureGroup(isExpanded: $isExpanded) {
+                    VStack(alignment: .leading, spacing: 0) { content }
+                        .padding(.bottom, SuiteSpacing.s)
+                } label: {
+                    Text(title).font(SuiteFont.inspectorSection).foregroundStyle(SuiteColor.secondaryText)
+                }
+                .disclosureGroupStyle(InspectorDisclosureStyle())
+                if let onReset {
+                    Button(action: onReset) {
+                        Image(systemName: "arrow.counterclockwise")
+                            .font(SuiteFont.inspectorSection)
+                            .foregroundStyle(SuiteColor.secondaryText)
+                            .frame(height: SuiteSize.inspectorRow)
+                            .contentShape(.rect)
+                    }
+                    .buttonStyle(.plain)
+                    .help("Reset \(title)")
+                    .accessibilityLabel("Reset \(title)")
+                }
+            }
         }
     }
 }
 
-/// Label, Slider and a numeric field with an optional unit.
+/// The section header: the whole row toggles, the chevron turns, and the
+/// content sits flush under it with no indent, so every row keeps the shared
+/// label column.
+private struct InspectorDisclosureStyle: DisclosureGroupStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        VStack(alignment: .leading, spacing: 0) {
+            Button {
+                configuration.isExpanded.toggle()
+            } label: {
+                HStack(spacing: SuiteSpacing.xs) {
+                    Image(systemName: "chevron.right")
+                        .font(SuiteFont.inspectorSection)
+                        .foregroundStyle(SuiteColor.secondaryText)
+                        .rotationEffect(.degrees(configuration.isExpanded ? 90 : 0))
+                    configuration.label
+                    Spacer(minLength: 0)
+                }
+                .frame(height: SuiteSize.inspectorRow)
+                .contentShape(.rect)
+            }
+            .buttonStyle(.plain)
+            .accessibilityAddTraits(.isHeader)
+            .accessibilityValue(configuration.isExpanded ? "Expanded" : "Collapsed")
+            if configuration.isExpanded { configuration.content }
+        }
+    }
+}
+
+/// One two-column inspector row: `label` right-aligned in secondary text in
+/// the shared label column (SuiteSize.inspectorLabelColumn), then `value`
+/// filling the rest, at least SuiteSize.inspectorRow tall, with controls at
+/// SuiteSize.compactControl. An empty label leaves the column blank, for a
+/// checkbox that carries its own title.
+public struct InspectorRow<Value: View>: View {
+    private let label: String
+    private let value: Value
+
+    public init(_ label: String, @ViewBuilder value: () -> Value) {
+        self.label = label
+        self.value = value()
+    }
+
+    public var body: some View {
+        HStack(spacing: SuiteSpacing.s) {
+            Text(label)
+                .font(SuiteFont.inspectorLabel)
+                .foregroundStyle(SuiteColor.secondaryText)
+                .lineLimit(1)
+                .truncationMode(.middle)
+                .frame(width: SuiteSize.inspectorLabelColumn, alignment: .trailing)
+            value
+                .font(SuiteFont.inspectorLabel)
+                .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .frame(minHeight: SuiteSize.inspectorRow)
+        .controlSize(SuiteSize.compactControl)
+    }
+}
+
+/// Label, Slider and a ScrubField with an optional unit, showing `decimals`
+/// places (whole for percent and degrees, one for pixels and EV).
 public struct InspectorSliderRow: View {
     private let label: String
     private let value: Double
     private let range: ClosedRange<Double>
     private let unit: String
+    private let decimals: Int
     private let onChange: @MainActor (Double) -> Void
 
     public init(
-        _ label: String, value: Double, in range: ClosedRange<Double>, unit: String = "",
+        _ label: String, value: Double, in range: ClosedRange<Double>, unit: String = "", decimals: Int = 2,
         onChange: @escaping @MainActor (Double) -> Void
     ) {
         self.label = label
         self.value = value
         self.range = range
         self.unit = unit
+        self.decimals = decimals
         self.onChange = onChange
     }
 
     public var body: some View {
-        LabeledContent(label) {
+        InspectorRow(label) {
             HStack(spacing: SuiteSpacing.s) {
                 Slider(
                     value: Binding(get: { value }, set: { onChange(NumericInput.clamp($0, to: range)) }),
                     in: range
                 )
                 .accessibilityLabel(label)
-                InspectorNumberField(label: label, value: value, range: range, unit: unit, onChange: onChange)
+                ScrubField(label, value: value, in: range, unit: unit, decimals: decimals, onChange: onChange)
             }
         }
     }
 }
 
-/// Label, a numeric field and a Stepper that moves by `step` within `range`.
+/// Label, a ScrubField and a Stepper that move by `step` within `range`.
 public struct InspectorStepperRow: View {
     private let label: String
     private let value: Double
@@ -85,9 +176,9 @@ public struct InspectorStepperRow: View {
     }
 
     public var body: some View {
-        LabeledContent(label) {
+        InspectorRow(label) {
             HStack(spacing: SuiteSpacing.xs) {
-                InspectorNumberField(label: label, value: value, range: range, unit: unit, onChange: onChange)
+                ScrubField(label, value: value, in: range, step: step, unit: unit, onChange: onChange)
                 Stepper(
                     label,
                     value: Binding(get: { value }, set: { onChange(NumericInput.clamp($0, to: range)) }),
@@ -117,7 +208,7 @@ public struct InspectorColorRow: View {
     }
 
     public var body: some View {
-        LabeledContent(label) {
+        InspectorRow(label) {
             ColorPicker(
                 label, selection: Binding(get: { color }, set: { onChange($0) }), supportsOpacity: supportsOpacity
             )
@@ -155,50 +246,12 @@ public struct InspectorPickerRow<ID: Hashable & Sendable>: View {
     }
 
     public var body: some View {
-        LabeledContent(label) {
+        InspectorRow(label) {
             Picker(label, selection: Binding(get: { selection }, set: { onChange($0) })) {
                 ForEach(options) { Text($0.title).tag($0.id) }
             }
             .pickerStyle(.menu)
             .labelsHidden()
         }
-    }
-}
-
-/// The numeric field the slider and stepper rows share. While the user types
-/// it shows their draft; on Return or losing focus the draft goes through
-/// NumericInput and, if that changes the value, out through `onChange`.
-private struct InspectorNumberField: View {
-    let label: String
-    let value: Double
-    let range: ClosedRange<Double>
-    let unit: String
-    let onChange: @MainActor (Double) -> Void
-    @State private var draft: String?
-    @FocusState private var isFocused: Bool
-
-    var body: some View {
-        HStack(spacing: SuiteSpacing.xxs) {
-            TextField(label, text: Binding(get: { draft ?? NumericInput.format(value) }, set: { draft = $0 }))
-                .labelsHidden()
-                .multilineTextAlignment(.trailing)
-                .font(SuiteFont.monospacedDigits)
-                .frame(width: SuiteSize.inspectorField)
-                .focused($isFocused)
-                .onSubmit(commit)
-                .onChange(of: isFocused) { _, focused in
-                    if !focused { commit() }
-                }
-            if !unit.isEmpty {
-                Text(unit).font(SuiteFont.caption).foregroundStyle(SuiteColor.secondaryText)
-            }
-        }
-    }
-
-    private func commit() {
-        guard let text = draft else { return }
-        draft = nil
-        let parsed = NumericInput.parse(text, in: range, keeping: value)
-        if parsed != value { onChange(parsed) }
     }
 }

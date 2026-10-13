@@ -174,11 +174,12 @@ public struct HaloProject: Sendable, Equatable {
     }
 
     /// `base`, or `base` with the first free number after it ("Comp 1 copy 2").
+    /// Names compare as `renameProblem` compares them, so a look-alike is taken.
     private func uniqueName(_ base: String) -> String {
-        let names = Set(compositions.map(\.name))
-        guard names.contains(base) else { return base }
+        let keys = Set(compositions.map(\.name.nameKey))
+        guard keys.contains(base.nameKey) else { return base }
         var number = 2
-        while names.contains("\(base) \(number)") { number += 1 }
+        while keys.contains("\(base) \(number)".nameKey) { number += 1 }
         return "\(base) \(number)"
     }
 

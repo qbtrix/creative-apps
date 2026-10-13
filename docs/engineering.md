@@ -92,6 +92,44 @@ SuiteUI sits beside the apps: it knows nothing about any Model or engine.
   Review-only.
 - **The PR names the PNGs it changed.** Review-only.
 
+## Human-like UI tests
+
+Snapshots show a content view. The UI tests show the real app: each one
+launches an app's window, clicks through it the way a person would, and
+screenshots the whole window, chrome and system controls included, after
+every step.
+
+- **Where they live.** `UITests/<X>JourneyTests.swift`, one file per app, plus
+  the shared steps in `UITests/Journey.swift`. They are XCUITest bundles, which
+  SwiftPM cannot host, so `project.yml` describes them and XcodeGen generates
+  `CreativeApps.xcodeproj` on demand. Never commit or hand-edit the project.
+  The apps themselves stay SwiftPM targets: the tests launch the bundles that
+  `scripts/bundle-apps` writes to `.build/apps`.
+- **How they run.** `scripts/ui-test` builds the bundles, generates the
+  project, runs the `Journeys` scheme and exports every screenshot to
+  `.build/ui-screens/<app>-<step>.png`. The `macOS` CI job runs it after the
+  bundles are built and uploads the folder as the `ui-screens` artifact
+  (`gh run download <id> -n ui-screens`). A failed step fails the job. Gate:
+  the `macOS` job.
+- **Every user-facing feature extends its app's journey.** When a PR adds
+  something a person can see or do, it adds the steps that do it to
+  `<X>JourneyTests`: a new `test...` method for a new journey, or more steps in
+  an existing one. When a feature completes a journey that is still an
+  `XCTSkip` placeholder, replace the skip with the real steps. Review-only.
+- **How to write a step.** Use `Journey`: `click("Title", step: "name")`
+  clicks the button with that title in the window's content (`in: .toolbar` or
+  `in: .sheet` for the others) and shoots `<app>-name`; `shot("name")` shoots
+  the window as it is; `clickEachTool()` (shoots the palette, then clicks
+  each enabled tool) and `openEachMenu()` cover the canvas palette and the
+  menu bar. Find things by the title a person reads. When a
+  control has no title, give it an `.accessibilityIdentifier` in the view
+  (SuiteUI's use a `suite.` prefix: `suite.sidebar`, `suite.inspector`,
+  `suite.tools`) and find it with `app.descendants(matching: .any)["id"]`.
+  Step names are unique within an app, because they become the PNG names.
+- **Look at the shots.** Open the `<app>-*.png` files your change touched from
+  `ui-screens`, the same way you check snapshots, and name them in the PR
+  body. Review-only.
+
 ## Tests
 
 - **Test behavior, not wiring.** Call the Model's public API with one concrete

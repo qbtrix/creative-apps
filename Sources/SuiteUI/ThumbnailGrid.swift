@@ -151,7 +151,7 @@ private struct ThumbnailCell<ID: Hashable>: View {
                 .overlay(alignment: .bottomLeading) { badges }
                 .overlay(
                     RoundedRectangle(cornerRadius: SuiteRadius.small)
-                        .strokeBorder(isSelected ? Color.accentColor : SuiteColor.separator, lineWidth: isSelected ? 2 : 1))
+                        .strokeBorder(isSelected ? SuiteColor.accent : SuiteColor.separator, lineWidth: isSelected ? 2 : 1))
             Text(item.caption)
                 .font(SuiteFont.caption)
                 .foregroundStyle(isSelected ? Color.primary : SuiteColor.secondaryText)
@@ -160,7 +160,7 @@ private struct ThumbnailCell<ID: Hashable>: View {
                 .frame(width: size.width)
         }
         .padding(SuiteSpacing.xs)
-        .background(isSelected ? Color.accentColor.opacity(0.15) : .clear, in: RoundedRectangle(cornerRadius: SuiteRadius.medium))
+        .background(isSelected ? SuiteColor.accent.opacity(0.15) : .clear, in: RoundedRectangle(cornerRadius: SuiteRadius.medium))
         .help(item.caption)
         .accessibilityElement(children: .combine)
         .accessibilityAddTraits(isSelected ? .isSelected : [])

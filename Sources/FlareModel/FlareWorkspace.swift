@@ -2,12 +2,27 @@
 // the open FlareCore document, the selected scene and the active drawing tool.
 // Linux-safe: no UI imports. FlareApp reads it and changes it only through the
 // mutating methods here; stored state stays `private(set)`. Document edits go
-// through FlareCore commands once the canvas lands.
+// through FlareCore commands once the canvas lands. Every palette tool acts
+// through `drag(from:to:)`; a tool that does nothing there stays disabled with
+// `unavailableHelp` (FlareToolsTests checks this).
 import FlareCore
 
 /// The drawing tools on Flare's tool palette.
 public enum FlareTool: String, CaseIterable, Sendable {
     case select, pen, rectangle, ellipse
+
+    /// Why the palette shows this tool disabled, as its tooltip; nil once the
+    /// tool works. Set it to nil in the change that makes `drag` do something.
+    public var unavailableHelp: String? {
+        switch self {
+        case .select: "Selecting on the stage isn't built yet (#12)."
+        case .pen: "Drawing paths isn't built yet."
+        case .rectangle: "Drawing rectangles isn't built yet."
+        case .ellipse: "Drawing ellipses isn't built yet."
+        }
+    }
+
+    public var isEnabled: Bool { unavailableHelp == nil }
 }
 
 public struct FlareWorkspace: Sendable, Equatable {
@@ -39,5 +54,14 @@ public struct FlareWorkspace: Sendable, Equatable {
 
     public mutating func selectTool(_ tool: FlareTool) {
         self.tool = tool
+    }
+
+    /// The active tool's drag across the stage from `start` to `end`, in scene
+    /// points; a click is a drag that doesn't move. The stage sends every tool
+    /// gesture here, so each case is where that tool's work goes.
+    public mutating func drag(from start: Point, to end: Point) {
+        switch tool {
+        case .select, .pen, .rectangle, .ellipse: break
+        }
     }
 }
