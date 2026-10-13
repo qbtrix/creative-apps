@@ -1,6 +1,5 @@
-// FlareFixtures.swift: the fixture documents fakes, journeys and snapshots open (docs/blueprints/flare.md,
-// section 4, Fixtures). Built in code, never read from disk. Each fixture past `empty` has its own file
-// under `Fixtures/`.
+// FlareFixtures.swift: the fixture documents fakes, journeys and snapshots open (docs/blueprints/flare.md, section 4,
+// Fixtures). Built in code, never read from disk; each fixture past `empty` has its own file under `Fixtures/`.
 import FlareCore
 
 public enum FlareFixtures {

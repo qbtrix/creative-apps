@@ -11,9 +11,7 @@ public struct FakeScenes: SceneEditing {
     /// What `removeScene` throws for the only scene left.
     public static let lastSceneMessage = "An animation needs at least one scene."
 
-    private func available() throws {
-        if let unavailable { throw NotBuilt(reason: unavailable) }
-    }
+    private func available() throws { if let unavailable { throw NotBuilt(reason: unavailable) } }
 
     private static func scene(_ id: String, _ name: String, _ preset: CanvasPreset) -> FlareScene {
         FlareScene(id: id, name: name, fps: preset.fps, durationFrames: preset.durationFrames,
@@ -21,8 +19,7 @@ public struct FakeScenes: SceneEditing {
     }
 
     public func newDocument(_ preset: CanvasPreset) -> Document {
-        guard unavailable == nil else { return Document() }
-        return Document(scenes: [Self.scene("scene-1", "Scene 1", preset)])
+        unavailable == nil ? Document(scenes: [Self.scene("scene-1", "Scene 1", preset)]) : Document()
     }
 
     public func addScene(_ preset: CanvasPreset, in engine: inout CommandEngine) throws -> String {

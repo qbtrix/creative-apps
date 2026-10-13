@@ -1,7 +1,6 @@
-// FakeHits.swift: StageHitTesting by bounding box on FakeStage's draw list, instances included
-// (docs/blueprints/flare.md, 6.3). An item's world box is its path's box through its transform, grown by
-// half its stroke width. Text items and locked layers are never hit; hidden layers are not on the list.
-// With `unavailable` set, nothing is hit and there are no bounds.
+// FakeHits.swift: StageHitTesting by bounding box on FakeStage's draw list, instances included (blueprint 6.3).
+// A world box is the path's box through the item's transform, grown by half its stroke width. Text items and
+// locked layers are never hit nor bounded (hidden ones are not listed); with `unavailable` set, nothing is.
 import FlareCore
 
 public struct FakeHits: StageHitTesting {
@@ -12,26 +11,25 @@ public struct FakeHits: StageHitTesting {
     public func hit(_ document: Document, sceneID: String, frame: Int, at point: Point,
                     tolerance: Double) -> StageAddress? {
         let pad = tolerance.isFinite ? max(tolerance, 0) : 0
-        return hittable(document, sceneID, frame).last { box in
-            point.x >= box.rect.minX - pad && point.x <= box.rect.maxX + pad
-                && point.y >= box.rect.minY - pad && point.y <= box.rect.maxY + pad
-        }?.address
+        let probe = Rect(minX: point.x - pad, minY: point.y - pad, maxX: point.x + pad, maxY: point.y + pad)
+        return hittable(document, sceneID, frame).last { Self.overlap($0.rect, probe) }?.address
     }
 
     public func marquee(_ document: Document, sceneID: String, frame: Int, rect: Rect) -> [StageAddress] {
         var found: [StageAddress] = []
-        for box in hittable(document, sceneID, frame) where !found.contains(box.address)
-            && box.rect.minX <= rect.maxX && box.rect.maxX >= rect.minX
-            && box.rect.minY <= rect.maxY && box.rect.maxY >= rect.minY {
+        for box in hittable(document, sceneID, frame) where !found.contains(box.address) && Self.overlap(box.rect, rect) {
             found.append(box.address)
         }
         return found
     }
 
+    /// Whether `a` and `b` share a point, edges included.
+    private static func overlap(_ a: Rect, _ b: Rect) -> Bool {
+        a.minX <= b.maxX && a.maxX >= b.minX && a.minY <= b.maxY && a.maxY >= b.minY
+    }
+
     public func bounds(_ document: Document, sceneID: String, frame: Int, of items: [StageAddress]) -> Rect? {
-        guard unavailable == nil else { return nil }
-        let boxes = FakeStage().drawList(document, sceneID: sceneID, frame: frame, editing: nil).items
-            .filter { items.contains($0.address) }.compactMap(Self.worldBox)
+        let boxes = hittable(document, sceneID, frame).filter { items.contains($0.address) }.map(\.rect)
         return Rect(enclosing: boxes.flatMap { [Point(x: $0.minX, y: $0.minY), Point(x: $0.maxX, y: $0.maxY)] })
     }
 

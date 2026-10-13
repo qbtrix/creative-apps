@@ -1,15 +1,11 @@
-// BounceFixture.swift: `bounce`, the fixture most journeys open. One 550 × 400 scene, 48 frames at 24 fps,
-// layers bottom first: Background (the whole canvas), Shadow (a flat ellipse on the floor, not animated)
-// and Ball (a circle of radius 30 about its origin) keyed on x, y, scaleX and scaleY at 0, 12, 24, 36
-// and 47: it lands at 12 and 36, squashed, and is back up at 24 and 47.
+// BounceFixture.swift: `bounce`, the fixture most journeys open. One 550 × 400 scene, 48 frames at 24 fps, layers
+// bottom first: Background (the whole canvas), Shadow (a flat ellipse on the floor, not animated) and Ball (a circle
+// of radius 30 about its origin) keyed on x, y, scaleX and scaleY at 0, 12, 24, 36 and 47, landing squashed at 12 and 36.
 import FlareCore
 
 extension FlareFixtures {
     public static let bounce: Document = {
-        let frames = [0, 12, 24, 36, 47]
-        func track(_ values: [Double]) -> [Keyframe] {
-            zip(frames, values).map { Keyframe(frame: $0, value: $1) }
-        }
+        func track(_ values: [Double]) -> [Keyframe] { zip([0, 12, 24, 36, 47], values).map { Keyframe(frame: $0, value: $1) } }
         let background = Layer(id: "background", name: "Background", shapes: [
             FlareShape(points: [Point(x: 0, y: 0), Point(x: 550, y: 0), Point(x: 550, y: 400), Point(x: 0, y: 400)],
                        fill: .solid(FlareColor(r: 0.94, g: 0.95, b: 0.97))),
