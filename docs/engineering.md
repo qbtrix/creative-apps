@@ -129,6 +129,13 @@ every step.
 - **Look at the shots.** Name the `<app>-*.png` files your change touches in
   the PR body. The reviewer opens them from the `ui-screens` artifact of the
   next feature CI run on `dev`, the same way as snapshots. Review-only.
+- **The app audit checks every shot.** Each window shot runs the audit's
+  checks (disabled controls look dimmer, no overlapping controls, text
+  contrast, identifiers, nothing off the window, every control named) and
+  counts each app's distinct violations against `UITests/audit-baseline.json`.
+  A count may only go down: a fix lowers it in the same PR, and raising one
+  needs the captain's review. New checks come from faults
+  (docs/blueprints/app-audit.md, Growing the audit). Gate: the `macOS` job.
 
 ## Tests
 

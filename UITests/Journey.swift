@@ -14,13 +14,16 @@
 // person reads: button labels, menu names. Launch arguments let a journey skip
 // system panels (Photo's `-PhotoOpenFile` and `-PhotoExportTo`).
 // The first failed step stops the test, so later shots never show a wrong state.
+// Every window shot is also audited (Audit.swift); an audit failure doesn't
+// stop the journey. The class's last test (in run order, which is by name)
+// must launch a Journey: its teardown closes the app's audit tally.
 import XCTest
 
 @MainActor
 struct Journey {
     let app: XCUIApplication
-    private let name: String
-    private let test: XCTestCase
+    let name: String
+    let test: XCTestCase
 
     /// Launches `.build/apps/<appName>App.app` fresh, with no restored windows
     /// and `arguments` added to its launch arguments.
@@ -34,16 +37,22 @@ struct Journey {
         app.launchArguments = ["-ApplePersistenceIgnoreState", "YES"] + arguments
         app.launch()
         app.activate()
+        if test.name == type(of: test).defaultTestSuite.tests.last?.name {
+            nonisolated(unsafe) let journey = self
+            test.addTeardownBlock { @MainActor () async -> Void in journey.auditLower() }
+        }
     }
 
-    /// Attaches the whole window as "<app>-<step>"; `screen` takes the whole
-    /// screen instead, for a menu that hangs outside the window.
+    /// Attaches the whole window as "<app>-<step>" and audits it; `screen`
+    /// takes the whole screen instead, for a menu that hangs outside the
+    /// window, and skips the audit (the menu covers the window's pixels).
     func shot(_ step: String, screen: Bool = false) {
         let image = screen ? XCUIScreen.main.screenshot() : app.windows.firstMatch.screenshot()
         let attachment = XCTAttachment(screenshot: image)
         attachment.name = "\(name)-\(step)"
         attachment.lifetime = .keepAlways
         test.add(attachment)
+        if !screen { audit(step) }
     }
 
     /// The window is up with its sidebar, inspector and toolbar; shoots "launch".
