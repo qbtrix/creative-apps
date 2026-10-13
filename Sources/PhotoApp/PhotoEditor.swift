@@ -1,7 +1,7 @@
 // PhotoEditor.swift: what a Photo window shows, laid out on SuiteUI's
 // EditorShell: the top bar (file commands, the Image menu, undo and redo,
 // zoom), the tool rail, the canvas with its rulers, the Adjust | Layers panel
-// and the status line (zoom, image size, render time). Values in, intents
+// and the status line (zoom, image size, the active tool, render time). Values in, intents
 // out: it reads the workspace and sends every action to `perform`, so the
 // same view draws the live window and the snapshots. A control that can't act
 // now is disabled with a tooltip saying why.
@@ -31,17 +31,12 @@ struct PhotoEditor: View {
         } panel: {
             PhotoPanel(model: model, tab: tab, onTab: onTab, perform: perform)
         } status: {
-            ViewerStatusBar(zoom: model.canvas == nil ? 0 : zoom, size: sizeText) {
+            ViewerStatusBar(zoom: model.canvas == nil ? 0 : zoom, size: model.viewerSizeText) {
                 if let note { Text(note) }
+                if model.canvas != nil { Text(model.tool.title) }
                 if let renderMilliseconds { Text("\(Int(renderMilliseconds.rounded())) ms render") }
             }
         }
-    }
-
-    private var sizeText: String {
-        guard let canvas = model.canvas else { return "No image" }
-        let selection = model.selection.map { "  ·  Selection \($0.width) × \($0.height)" } ?? ""
-        return "\(canvas.width) × \(canvas.height) px\(selection)"
     }
 }
 
