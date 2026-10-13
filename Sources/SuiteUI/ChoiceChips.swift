@@ -28,7 +28,7 @@ public struct ChoiceChips<ID: Hashable & Sendable>: View {
                     .font(SuiteFont.caption.weight(.semibold))
                     .lineLimit(1)
                     .foregroundStyle(lit ? Color.primary : SuiteColor.secondaryText)
-                    .frame(maxWidth: .infinity, minHeight: SuiteSize.chip, maxHeight: SuiteSize.chip)
+                    .frame(maxWidth: .infinity, minHeight: SuiteSize.preset, maxHeight: SuiteSize.preset)
                     .background(
                         active ? SuiteColor.selectedWell : option.id == hovered ? SuiteColor.field : SuiteColor.panelRaised,
                         in: RoundedRectangle(cornerRadius: SuiteRadius.row))

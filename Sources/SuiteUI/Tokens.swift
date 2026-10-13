@@ -1,19 +1,20 @@
-// Tokens.swift: the suite's spacing, corner radius, size, type and color
-// tokens. Every app view takes its numbers, fonts and colors from here so the
-// five apps stay consistent; the design lint in scripts/ci fails on a raw
-// color, font or size anywhere else in Sources/SuiteUI or an app. Colors are
-// system semantic colors (they adapt to Light, Dark and Increase Contrast);
-// never hard-code a hex value for a system role. The one brand value is the
-// accent blue. The inspector tokens are the "Pro density" rules in
-// docs/design.md: small controls, the 11 pt scale, 22 pt rows. The editor
-// shell tokens (top bar, rail, rulers, right panel, checkerboard) are the
-// "Editor shell" rules in docs/design.md, sized after the Ripple editor. The
-// Studio tokens (caps headers, 28 pt filled rows, chips, the curve editor)
-// are the "Studio rows and chips" rules in docs/design.md.
+// Tokens.swift: the suite's spacing, inset, corner radius, size, type, motion
+// and color tokens. Every app view takes its numbers, fonts and colors from
+// here so the five apps stay consistent; the design lint in scripts/ci fails
+// on a raw color, font or size anywhere else in Sources/SuiteUI or an app.
+// Sizes, insets, radii, type and motion are the "Visual language" section of
+// docs/design.md (34 pt inspector bars, 6 pt row gaps, 10 pt caps headers).
+// Colors are system semantic colors (they adapt to Light, Dark and Increase
+// Contrast); never hard-code a hex value for a system role. The one brand
+// value is the accent blue. The editor shell tokens (top bar, rail, rulers,
+// right panel, checkerboard) are the "Editor shell" rules, and the Studio
+// tokens (caps headers, filled scrub rows, chips, the curve editor) the
+// "Studio rows and chips" rules in docs/design.md.
 import AppKit
 import SwiftUI
 
-/// Spacing on a 4-point grid, smallest to largest.
+/// Spacing on a 4-point grid, smallest to largest, plus the named gaps of the
+/// inspector and the status pills.
 public enum SuiteSpacing {
     public static let xxs: CGFloat = 2
     public static let xs: CGFloat = 4
@@ -22,32 +23,82 @@ public enum SuiteSpacing {
     public static let l: CGFloat = 16
     public static let xl: CGFloat = 24
     public static let xxl: CGFloat = 32
+    /// The gap between two inspector rows.
+    public static let row: CGFloat = 6
+    /// The gap between two status pills.
+    public static let pillGap: CGFloat = 4
+    /// How far a bar slider's value marker stays off the row's top and bottom.
+    public static let markerInset: CGFloat = 6
 
     /// The whole scale in order, for tests and the gallery.
     public static let scale: [CGFloat] = [xxs, xs, s, m, l, xl, xxl]
 }
 
+/// Padding inside the filled controls: vertical by horizontal.
+public enum SuiteInset {
+    public static let barButton = EdgeInsets(top: 4, leading: 8, bottom: 4, trailing: 8)
+    public static let pill = EdgeInsets(top: 2, leading: 8, bottom: 2, trailing: 8)
+    public static let card = EdgeInsets(top: 8, leading: 12, bottom: 8, trailing: 12)
+}
+
 /// Corner radii. Nested shapes step down one size so corners stay concentric.
 public enum SuiteRadius {
-    /// A field well inside a dense inspector row.
+    /// A field inside a row, a swatch inset.
     public static let field: CGFloat = 4
+    /// Top-bar buttons.
     public static let small: CGFloat = 6
+    /// Presets and chips.
+    public static let control: CGFloat = 8
+    /// Inspector rows, the info card, the action button.
     public static let medium: CGFloat = 10
+    /// Timeline lane beds and clip blocks.
+    public static let lane: CGFloat = 12
+    /// The stage frame and sheets.
     public static let large: CGFloat = 16
     /// A Studio row or chip (StudioScrubRow, ChoiceChips).
     public static let row: CGFloat = 8
 }
 
 /// Fixed sizes in points: the window shell's minimums and column widths, and
-/// the tool palette's buttons.
+/// the controls' visual and hit sizes (hits at least 28 where the layout
+/// allows, never under 20).
 public enum SuiteSize {
     /// One tool palette button; the HIG asks for hit targets of at least 28.
     public static let toolButton: CGFloat = 32
+    /// Every inspector row, bar slider, dropdown and toggle row.
+    public static let inspectorBar: CGFloat = 34
+    /// The keyframe button (a circle) and the key-here diamond slot beside it.
+    public static let keyframeButton: CGFloat = 28
+    /// Chips and timeline toggle chips.
+    public static let chip: CGFloat = 28
+    /// Preset buttons: 24 drawn, 28 to hit.
+    public static let preset: CGFloat = 24
+    public static let presetHit: CGFloat = 28
+    /// The full-width outlined action.
+    public static let actionButton: CGFloat = 32
+    /// Status pills: 20 drawn, 24 to hit.
+    public static let pill: CGFloat = 20
+    public static let pillHit: CGFloat = 24
+    /// The transport capsule's buttons and its larger play button.
+    public static let transportButton: CGFloat = 32
+    public static let playButton: CGFloat = 36
+    /// The swatch inside a color row.
+    public static let swatch = CGSize(width: 24, height: 16)
+    /// Stage selection handles and pen anchors: drawn, then hit.
+    public static let selectionHandle: CGFloat = 8
+    public static let selectionHandleHit: CGFloat = 12
+    public static let anchor: CGFloat = 6
+    public static let anchorHit: CGFloat = 12
+    /// The unsaved and recording dots.
+    public static let statusDot: CGFloat = 6
+    /// The keyboard focus ring: its width and its gap outside the shape.
+    public static let focusRing: CGFloat = 2
+    public static let focusRingGap: CGFloat = 1
     /// The numeric field beside an inspector slider or stepper.
     public static let inspectorField: CGFloat = 56
-    /// One inspector row, and the viewer status line.
+    /// The older dense row, still used by the viewer status line.
     public static let inspectorRow: CGFloat = 22
-    /// The shared label column of InspectorRow; labels sit right-aligned in it.
+    /// The older label column of InspectorRow; labels sit right-aligned in it.
     public static let inspectorLabelColumn: CGFloat = 88
     /// Control size inside inspectors and viewer chrome.
     public static let compactControl: ControlSize = .small
@@ -58,13 +109,15 @@ public enum SuiteSize {
     public static let contentMinimum = CGSize(width: 480, height: 360)
     public static let windowMinimum = CGSize(width: 900, height: 560)
     /// The timeline's fixed track-name column, ruler, one lane, a keyframe
-    /// diamond, the least room between two ruler labels and between two ruler
-    /// ticks, the room one caption digit of a ruler label takes, and how much
-    /// ruler is drawn before the scroll view says which stretch is visible.
+    /// diamond and its hit, the least room between two ruler labels and
+    /// between two ruler ticks, the room one caption digit of a ruler label
+    /// takes, and how much ruler is drawn before the scroll view says which
+    /// stretch is visible.
     public static let timelineLabelColumn: CGFloat = 160
     public static let timelineRuler: CGFloat = 24
-    public static let timelineLane: CGFloat = 28
+    public static let timelineLane: CGFloat = 32
     public static let timelineKeyframe: CGFloat = 10
+    public static let timelineKeyframeHit: CGFloat = 16
     public static let timelineLabelSpacing: CGFloat = 48
     public static let timelineTickSpacing: CGFloat = 6
     public static let timelineLabelDigit: CGFloat = 7
@@ -72,7 +125,7 @@ public enum SuiteSize {
     /// The editor shell (EditorShell): the top bar's height, the room the
     /// window's close, minimize and zoom buttons take at its leading edge, a
     /// divider between top bar groups, and the right panel's width.
-    public static let editorTopBar: CGFloat = 40
+    public static let editorTopBar: CGFloat = 48
     public static let windowControlsInset: CGFloat = 76
     public static let editorBarDivider: CGFloat = 20
     public static let editorPanelWidth: CGFloat = 280
@@ -86,10 +139,9 @@ public enum SuiteSize {
     /// The hex text field beside a color well.
     public static let hexField: CGFloat = 76
     /// Studio controls: the letter spacing of a caps header, a filled scrub
-    /// row, a preset chip, and its tick dots and value marker.
+    /// row, and the 2 pt tick dots and value marker of a bar slider.
     public static let capsTracking: CGFloat = 0.7
     public static let studioRow: CGFloat = 28
-    public static let chip: CGFloat = 24
     public static let studioTick: CGFloat = 2
     /// The curve editor (CurveEditor): its height, a handle, the handle's hit
     /// target and the preview dot.
@@ -101,20 +153,25 @@ public enum SuiteSize {
 
 /// Text styles. macOS has no Dynamic Type; these are the system text styles,
 /// so they track the system's sizes (13 pt body, 12 callout, 11 subheadline,
-/// 10 caption: the same scale as the Ripple tokens).
+/// 10 caption and caption2 on macOS). Nothing goes below 10 pt.
 public enum SuiteFont {
     public static let title = Font.title2.weight(.semibold)
     public static let headline = Font.headline
     public static let body = Font.body
     public static let caption = Font.caption
     public static let monospacedDigits = Font.body.monospacedDigit()
-    /// Inspector and viewer chrome: 11 pt labels, values and section titles.
+    /// Inspector rows: 11 pt labels, 11 pt semibold tabular values (units in
+    /// the same string), 10 pt semibold section headers set in caps.
     public static let inspectorLabel = Font.subheadline
-    public static let inspectorValue = Font.subheadline.monospacedDigit()
-    public static let inspectorSection = Font.subheadline.weight(.semibold)
-    /// InspectorHeader: 12 pt semibold name over 10 pt metadata lines.
+    public static let inspectorValue = Font.subheadline.weight(.semibold).monospacedDigit()
+    public static let inspectorSection = Font.caption2.weight(.semibold)
+    /// InspectorHeader: the 12 pt semibold name, and its older metadata lines.
     public static let inspectorTitle = Font.callout.weight(.semibold)
     public static let inspectorMeta = Font.caption.monospacedDigit()
+    /// Status pills, chips and preset labels.
+    public static let pill = Font.caption2.weight(.semibold).monospacedDigit()
+    /// Timecode and frame readouts.
+    public static let timecode = Font.caption.monospaced()
     /// A Studio group header (KEYFRAMES, EASING): 10 pt semibold, set in caps
     /// with SuiteSize.capsTracking.
     public static let sectionCaps = Font.caption.weight(.semibold)
@@ -122,6 +179,17 @@ public enum SuiteFont {
     public static let editorBar = Font.callout
     public static let editorTitle = Font.callout.weight(.semibold)
     public static let rulerLabel = Font.caption2.monospacedDigit()
+}
+
+/// Hover and state changes fade background, color and border over 0.14 s;
+/// under Reduce Motion they change at once. Nothing else in the chrome moves.
+public enum SuiteMotion {
+    public static let state = Animation.easeInOut(duration: 0.14)
+
+    /// `state`, or nil (no animation) under Reduce Motion.
+    public static func state(reduceMotion: Bool) -> Animation? {
+        reduceMotion ? nil : state
+    }
 }
 
 /// Semantic colors by role.
