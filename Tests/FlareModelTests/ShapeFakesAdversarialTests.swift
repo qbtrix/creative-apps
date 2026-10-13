@@ -88,7 +88,19 @@ func aScaleOnAStillLayerKeepsTheOppositeHandleOnEveryHandle(_ handle: Int) throw
     let data = try shapes.copy(layers: ["ball", "shadow"], owner: scene, from: engine.document)
     #expect(throws: (any Error).self) { try shapes.paste(data, owner: scene, aboveLayerID: nil, offset: .nan, in: &engine) }
     #expect(!engine.canUndo && engine.document == FlareFixtures.bounce)
-    #expect(try shapes.paste(data, owner: scene, aboveLayerID: "background", offset: 10, in: &engine) == ["shadow-copy-1", "ball-copy-1"])
-    #expect(layers(engine).map(\.name) == ["Background", "Shadow copy", "Ball copy", "Shadow", "Ball"])
-    #expect(layers(engine)[1].tracks["x"] == [Keyframe(frame: 0, value: 10)] && engine.undoActionName == "Undo Paste")
+    #expect(try shapes.paste(data, owner: scene, aboveLayerID: "shadow", offset: 10, in: &engine) == ["shadow-copy-1", "ball-copy-1"])
+    #expect(layers(engine).map(\.name) == ["Background", "Shadow", "Shadow copy", "Ball copy", "Ball"])
+    #expect(layers(engine)[2].tracks["x"] == [Keyframe(frame: 0, value: 10)] && engine.undoActionName == "Undo Paste")
+}
+
+@Test func pastingAboveAMissingOrLockedLayerThrowsLikeCommitAndLeavesNoEntry() throws {
+    var engine = CommandEngine(document: FlareFixtures.bounce)
+    let data = try shapes.copy(layers: ["ball"], owner: scene, from: engine.document)
+    #expect(throws: CommandError.layerNotFound("nope")) {
+        try shapes.paste(data, owner: scene, aboveLayerID: "nope", offset: 10, in: &engine)
+    }
+    #expect(throws: CommandError.layerLocked("background")) {
+        try shapes.paste(data, owner: scene, aboveLayerID: "background", offset: 10, in: &engine)
+    }
+    #expect(!engine.canUndo && engine.document == FlareFixtures.bounce)
 }

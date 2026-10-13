@@ -66,10 +66,7 @@ public struct FakeShapes: ShapeBuilding {
         case .select, .directSelect: throw CommandError.invalidDocument("Select doesn't draw.")
         }
         let owner = LayerOwner.scene(sceneID)
-        let layers = engine.document.layers(of: owner) ?? []
-        let above = layers.firstIndex { $0.id == aboveLayerID }
-        if let aboveLayerID, above == nil { throw CommandError.layerNotFound(aboveLayerID) }
-        if let above, layers[above].isLocked { throw CommandError.layerLocked(layers[above].id) }
+        let above = try Self.anchor(aboveLayerID, owner: owner, in: engine.document)
         let taken = Self.taken(engine.document)
         var n = 1
         while taken.contains("\(kind.lowercased())-\(n)") || taken.contains("\(kind) \(n)") { n += 1 }
@@ -214,7 +211,7 @@ public struct FakeShapes: ShapeBuilding {
               let adds = try? envelopes.map({ try CommandRegistry.builtIn.decode($0) as? AddLayer }),
               case let layers = adds.compactMap({ $0?.layer }), layers.count == adds.count
         else { throw CommandError.invalidDocument(Self.nothingToPaste) }
-        var index = (engine.document.layers(of: owner) ?? []).firstIndex { $0.id == aboveLayerID }.map { $0 + 1 }
+        var index = try Self.anchor(aboveLayerID, owner: owner, in: engine.document).map { $0 + 1 }
         var added: [String] = []
         try engine.group("Paste") { engine in
             for layer in layers {
@@ -229,6 +226,14 @@ public struct FakeShapes: ShapeBuilding {
         return added
     }
 
+    /// The index of `aboveLayerID` in the owner's layers, or nil for none; throws when that layer is missing or locked.
+    private static func anchor(_ aboveLayerID: String?, owner: LayerOwner, in document: Document) throws -> Int? {
+        guard let aboveLayerID else { return nil }
+        let layers = document.layers(of: owner) ?? []
+        guard let i = layers.firstIndex(where: { $0.id == aboveLayerID }) else { throw CommandError.layerNotFound(aboveLayerID) }
+        guard !layers[i].isLocked else { throw CommandError.layerLocked(aboveLayerID) }
+        return i
+    }
     /// Every layer id and name in the document, scenes and symbols alike.
     private static func taken(_ document: Document) -> Set<String> {
         Set((document.scenes.flatMap(\.layers) + document.symbols.flatMap(\.layers)).flatMap { [$0.id, $0.name] })
