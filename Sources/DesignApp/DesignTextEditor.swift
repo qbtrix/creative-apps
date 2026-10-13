@@ -2,6 +2,8 @@
 // laid out at the artboard's size (the document at `zoom`, top-left origin) as the last
 // child of the canvas overlay. While the workspace is editing a text node it shows one
 // plain TextField over that node's frame; otherwise it draws nothing and takes no clicks.
+// The box has no fill, only an accent hairline: the text keeps the colour it will have on
+// the page (black text on a field well is unreadable in the shell's dark scheme).
 //
 // The field is sized in screen points (frame x zoom) and its font is the body text style's
 // size x zoom, not a scaled view: AppKit's text field and its field editor do not hit-test
@@ -64,7 +66,6 @@ private struct DesignTextField: View {
             .onChange(of: focused) { _, isFocused in if !isFocused { perform(.commitText) } }
             .padding(.horizontal, SuiteSpacing.xxs)
             .frame(width: node.frame.width * scale, height: node.frame.height * scale, alignment: .topLeading)
-            .background(SuiteColor.field)
             .border(SuiteColor.accent)
             // A press on the box beside the text must not reach the canvas drag beneath, which
             // would place another text node. The field itself takes its own clicks.
