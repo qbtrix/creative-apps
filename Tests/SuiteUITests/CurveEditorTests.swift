@@ -1,0 +1,63 @@
+// CurveEditorTests.swift: the math behind SuiteUI's CurveEditor: the curve is
+// one vector path, the plot range widens for overshoot, the preview dot never
+// leaves the samples, and arrow-key nudges step by 0.01 (0.1 with Shift).
+// No rendering here. macOS only.
+import CoreGraphics
+import SuiteUI
+import SwiftUI
+import Testing
+
+@Test func curveIsOneVectorPath() {
+    let samples = (0...128).map { CGPoint(x: Double($0) / 128, y: Double($0) / 128) }
+    let path = CurveEditor.curvePath(samples, in: CGRect(x: 12, y: 12, width: 212, height: 156), range: -0.25...1.25)
+    var moves = 0, lines = 0, other = 0
+    path.forEach { element in
+        switch element {
+        case .move: moves += 1
+        case .line: lines += 1
+        default: other += 1
+        }
+    }
+    #expect(moves == 1 && lines == 128 && other == 0)
+    #expect(CurveEditor.curvePath([], in: .zero, range: 0...1).isEmpty)
+}
+
+@Test func plotRangeWidensForOvershoot() {
+    #expect(CurveEditor.plotRange(including: []) == -0.25...1.25)
+    #expect(CurveEditor.plotRange(including: [CGPoint(x: 0.4, y: 0), CGPoint(x: 0.2, y: 1)]) == -0.25...1.25)
+    #expect(CurveEditor.plotRange(including: [CGPoint(x: 0.4, y: 1.6), CGPoint(x: 0.2, y: -0.5)]) == -0.5...1.6)
+    #expect(CurveEditor.plotRange(including: [CGPoint(x: 0, y: CGFloat.nan), CGPoint(x: 0, y: CGFloat.infinity)]) == -0.25...1.25)
+    // The top of the range maps to the top of the plot, and back.
+    let plot = CGRect(x: 12, y: 12, width: 212, height: 156)
+    let top = CurveEditor.viewPoint(CGPoint(x: 1, y: 1.6), in: plot, range: -0.5...1.6)
+    #expect(top == CGPoint(x: 224, y: 12))
+    let back = CurveEditor.unitPoint(top, in: plot, range: -0.5...1.6)
+    #expect(abs(back.x - 1) < 1e-9 && abs(back.y - 1.6) < 1e-9)
+    #expect(CurveEditor.unitPoint(top, in: .zero, range: 0...1) == .zero)
+}
+
+@Test func previewPointStaysInsideTheSamples() {
+    let samples = [CGPoint(x: 0, y: 0), CGPoint(x: 0.5, y: 0.2), CGPoint(x: 1, y: 1)]
+    #expect(CurveEditor.previewPoint(samples: samples, phase: -3) == samples[0])
+    #expect(CurveEditor.previewPoint(samples: samples, phase: 7) == samples[2])
+    #expect(CurveEditor.previewPoint(samples: samples, phase: .nan) == samples[0])
+    #expect(CurveEditor.previewPoint(samples: samples, phase: 0.25) == CGPoint(x: 0.25, y: 0.1))
+    #expect(CurveEditor.previewPoint(samples: [], phase: 0.5) == .zero)
+    #expect(CurveEditor.previewPoint(samples: [samples[1]], phase: 0.5) == samples[1])
+    // 1.2 s along the curve, then 0.4 s resting at its end.
+    #expect(CurveEditor.previewPhase(at: 0.6) == 0.5)
+    #expect(CurveEditor.previewPhase(at: 1.4) == 1)
+    #expect(CurveEditor.previewPhase(at: .infinity) == 0)
+}
+
+@Test func nudgeSteps() {
+    let p = CGPoint(x: 0.42, y: 0)
+    #expect(CurveEditor.nudged(p, dx: 1, dy: 0, coarse: false) == CGPoint(x: 0.43, y: 0))
+    #expect(CurveEditor.nudged(p, dx: 0, dy: -1, coarse: true) == CGPoint(x: 0.42, y: -0.1))
+    #expect(CurveEditor.nudged(CGPoint(x: 0.95, y: 1.3), dx: 1, dy: 1, coarse: true) == CGPoint(x: 1, y: 1.4))
+    // Five nudges right from 0.42 land on 0.47 exactly.
+    var q = p
+    for _ in 0..<5 { q = CurveEditor.nudged(q, dx: 1, dy: 0, coarse: false) }
+    #expect(q.x == 0.47)
+    #expect(CurveEditor.describe(CGPoint(x: 0.42, y: 0)) == "x 0.42, y 0.00")
+}
