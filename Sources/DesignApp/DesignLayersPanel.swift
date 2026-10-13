@@ -8,9 +8,11 @@
 // the one Delete Page removes, stays marked while a layer holds the highlight.
 // A layer with children is a DisclosureGroup whose expanded state is the
 // workspace's (`isExpanded`), sent back as `.setExpanded`, so collapsing the
-// parent of the selection selects the parent (#121). A hidden layer reads
-// dimmed with an eye-slash mark and a locked one carries a lock. Values in,
-// intents out.
+// parent of the selection selects the parent (#121). Each layer is SuiteUI's
+// SidebarRow with an eye and a lock toggle (`layerToggles`); a click flips
+// that layer's own flag, one undo step (#45). A layer hidden by itself or by
+// a group around it reads dimmed, and a child of a hidden or locked group
+// shows the group's state in its toggles. Values in, intents out.
 import DesignModel
 import SuiteUI
 import SwiftUI
@@ -101,7 +103,7 @@ private struct DesignLayerTree: View {
     var body: some View {
         ForEach(nodes.frontToBack) { node in
             if node.children.isEmpty {
-                DesignLayerLabel(node: node).tag(node.id)
+                DesignLayerRow(node: node, model: model, perform: perform).tag(node.id)
             } else {
                 DisclosureGroup(
                     isExpanded: Binding(
@@ -109,7 +111,7 @@ private struct DesignLayerTree: View {
                 ) {
                     DesignLayerTree(nodes: node.children, model: model, perform: perform)
                 } label: {
-                    DesignLayerLabel(node: node).tag(node.id)
+                    DesignLayerRow(node: node, model: model, perform: perform).tag(node.id)
                 }
                 .tag(node.id)
             }
@@ -117,30 +119,29 @@ private struct DesignLayerTree: View {
     }
 }
 
-/// One layer: the kind's symbol, the name and the hidden and locked marks.
-private struct DesignLayerLabel: View {
+/// One layer: SuiteUI's sidebar row with the kind's symbol, the name, and the eye and lock toggles.
+private struct DesignLayerRow: View {
     let node: DesignNode
+    let model: DesignWorkspace
+    let perform: DesignPerform
 
     var body: some View {
-        HStack(spacing: SuiteSpacing.xs) {
-            Label(node.name, systemImage: node.kind.systemImage)
-                .lineLimit(1)
-                .truncationMode(.middle)
-                .foregroundStyle(node.isHidden ? SuiteColor.secondaryText : Color.primary)
-            Spacer(minLength: 0)
-            if node.isHidden { mark("eye.slash", "Hidden") }
-            if node.isLocked { mark("lock", "Locked") }
-        }
-        .accessibilityElement(children: .combine)
-        .accessibilityValue(
-            [node.isHidden ? "Hidden" : nil, node.isLocked ? "Locked" : nil].compactMap { $0 }.joined(separator: ", "))
-    }
-
-    private func mark(_ systemImage: String, _ title: String) -> some View {
-        Image(systemName: systemImage)
-            .font(SuiteFont.inspectorMeta)
-            .foregroundStyle(SuiteColor.secondaryText)
-            .help(title)
-            .accessibilityLabel(title)
+        let id = node.id
+        let toggles = model.layerToggles(id)
+        SidebarRow(
+            SidebarItem(
+                id: id, title: node.name, systemImage: node.kind.systemImage,
+                toggles: toggles.map {
+                    SidebarToggle(
+                        id: $0.flag.rawValue, title: $0.title, onSymbol: $0.onSymbol, offSymbol: $0.offSymbol,
+                        isOn: $0.isOn)
+                }),
+            onToggle: { flag in
+                if let flag = DesignLayerFlag(rawValue: flag) { perform(.toggleFlag(id, flag)) }
+            }
+        )
+        .lineLimit(1)
+        .truncationMode(.middle)
+        .foregroundStyle(model.isHiddenInTree(id) ? SuiteColor.secondaryText : Color.primary)
     }
 }

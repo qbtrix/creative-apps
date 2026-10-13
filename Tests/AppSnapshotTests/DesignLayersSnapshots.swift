@@ -1,11 +1,13 @@
 // DesignLayersSnapshots.swift: Design's panel on the Layers tab at the editor's
 // panel width: a Desktop frame holding a group of two shapes (one hidden, one
-// locked and selected), the group collapsed, an expanded and a collapsed group
+// locked and selected), each row with its eye and lock toggles (#45), the group
+// collapsed, the group itself hidden and locked (its shapes' rows dim and show
+// the group's state), an expanded and a collapsed group
 // side by side (the chevrons look alike), and a shape selected whose parent is
 // then collapsed, which selects the parent (#121). Each has two pages with
 // Page 1 current, so Page 1 keeps its checkmark even while a layer is highlighted,
 // with Add Page and Delete Page in a row under the pages. Writes design-layers-,
-// -collapsed-, -chevrons- and -collapsed-selection-{light,dark}.png. macOS only.
+// -group-hidden-, -collapsed-, -chevrons- and -collapsed-selection-{light,dark}.png. macOS only.
 import DesignModel
 import SuiteUI
 import SwiftUI
@@ -42,6 +44,12 @@ import Testing
         try model.setNodeHidden(rectangle, true)
         try model.setNodeLocked(ellipse, true)
         try shoot("", model)
+        // Hiding and locking the group shows on its shapes' rows.
+        var grouped = model
+        try grouped.toggleNodeFlag(group, .hidden)
+        try grouped.toggleNodeFlag(group, .locked)
+        #expect(grouped.isHiddenInTree(rectangle) && grouped.isLockedInTree(ellipse))
+        try shoot("-group-hidden", grouped)
         // Collapsing the group hides its two shapes; its chevron turns to point right.
         model.deselect()
         try model.setExpanded(group, false)
