@@ -1,6 +1,8 @@
-// ScrubValue.swift: the number rules behind ScrubField (drag sideways to
-// change a value) and ViewerStatusBar and the editor's zoom commands (the zoom
-// readout, fit, and the zoom in and out stops). No SwiftUI, like
+// ScrubValue.swift: the number rules behind ScrubField and the bar slider
+// (drag sideways to change a value, step it from the keyboard, how far the
+// fill reaches) and ViewerStatusBar and the editor's zoom commands (the zoom
+// readout, fit, and the zoom in and out stops), plus ScrubTrack, the
+// non-linear track a bar slider can move along. No SwiftUI, like
 // NumericInput, so the rules are unit-tested on their own. Invariants: every
 // result is inside its range and never NaN, whatever the drag distance, step
 // or modifier; a step that is zero, negative or not finite means "no
@@ -35,6 +37,37 @@ public enum ScrubValue {
         option ? 0.1 : shift ? 10 : 1
     }
 
+    /// The value after pressing `key` with focus: one step up or down (Shift
+    /// ten, Option a tenth), or the range's ends for Home and End.
+    public static func pressed(
+        _ key: ScrubKey, from value: Double, step: Double, shift: Bool = false, option: Bool = false,
+        in range: ClosedRange<Double>
+    ) -> Double {
+        switch key {
+        case .home: range.lowerBound
+        case .end: range.upperBound
+        case .increment, .decrement:
+            // Ten steps from where it is (45 to 55), snapped to the step, or a
+            // tenth of one snapped to that finer grid.
+            stepped(value, by: key == .increment ? 1 : -1, unit: step * multiplier(shift: shift, option: option), step: step, in: range)
+        }
+    }
+
+    private static func stepped(
+        _ value: Double, by direction: Double, unit: Double, step: Double, in range: ClosedRange<Double>
+    ) -> Double {
+        guard unit.isFinite, unit > 0 else { return NumericInput.clamp(value, to: range) }
+        return snapped(value + direction * unit, to: min(unit, step), in: range)
+    }
+
+    /// How far along `range` a bar slider's fill reaches, 0...1; 0 for an
+    /// empty range or a value that isn't finite.
+    public static func fraction(_ value: Double, in range: ClosedRange<Double>) -> Double {
+        let span = range.upperBound - range.lowerBound
+        guard span > 0, span.isFinite, value.isFinite else { return 0 }
+        return min(max((value - range.lowerBound) / span, 0), 1)
+    }
+
     /// The step for a field that names none: the largest power of ten not
     /// above a hundredth of the range, so 0...100 steps by 1, -180...180 by 1,
     /// -5...5 by 0.1 and 0...1 by 0.01. An empty or infinite range steps by 1.
@@ -43,6 +76,32 @@ public enum ScrubValue {
         guard span.isFinite, span > 0 else { return 1 }
         let step = pow(10, log10(span / 100).rounded(.down))
         return step.isFinite && step > 0 ? step : 1
+    }
+}
+
+/// A key a focused scrub field or bar slider takes: the arrows step, Home and
+/// End jump to the ends.
+public enum ScrubKey: Sendable {
+    case increment, decrement, home, end
+}
+
+/// The track a bar slider moves along when it isn't its value's range: drags,
+/// keys and the fill move through `positions` in `step`s, and `value` turns a
+/// position back into the value it sets (which may snap, as a detent does).
+public struct ScrubTrack: Sendable {
+    public let positions: ClosedRange<Double>
+    public let step: Double
+    public let position: @Sendable (Double) -> Double
+    public let value: @Sendable (Double) -> Double
+
+    public init(
+        positions: ClosedRange<Double>, step: Double, position: @escaping @Sendable (Double) -> Double,
+        value: @escaping @Sendable (Double) -> Double
+    ) {
+        self.positions = positions
+        self.step = step
+        self.position = position
+        self.value = value
     }
 }
 
