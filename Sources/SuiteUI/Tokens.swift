@@ -100,10 +100,6 @@ public enum SuiteSize {
     public static let focusRingGap: CGFloat = 1
     /// The numeric field beside an inspector slider or stepper.
     public static let inspectorField: CGFloat = 56
-    /// The older dense row, still used by the viewer status line.
-    public static let inspectorRow: CGFloat = 22
-    /// The older label column of InspectorRow; labels sit right-aligned in it.
-    public static let inspectorLabelColumn: CGFloat = 88
     /// Control size inside inspectors and viewer chrome.
     public static let compactControl: ControlSize = .small
     /// Room CanvasSurface leaves around the artboard on every side.
