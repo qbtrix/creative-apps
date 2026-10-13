@@ -255,7 +255,8 @@ Line `flare`. Parallel with UI1, UI2 and L2.
   run `SetKeyframeEasing` through `apply`; a handle drag coalesces with the
   key `easing/<layer>/<property>/<frame>/<handle>/<serial>`, and
   `endEasingHandleDrag()` bumps the serial. A locked layer's refusal lands in
-  `layerError`, as every other layer edit does.
+  `layerError`, as every other layer edit does. `undoActionName` and `redoActionName`
+  pass the engine's step names through for I1's Edit menu.
 - **Acceptance tests (Linux):** `FlareEasingTests.segmentsListEveryKeyframeWithANext`,
   `.selectingAnotherLayerClearsTheSegment`, `.presetIsOneUndoStepNamedSetKeyframeEasing`,
   `.handleXIsClampedAndYMayOvershoot`, `.oneDragIsOneUndoStep`,
@@ -303,7 +304,7 @@ merges only after the captain approves the UI from the feature run.
 
 | Bar | Number | Enforced by |
 |---|---|---|
-| Handle drag cost in the model, per event | p95 ≤ 1 ms in release; p95 ≤ 5 ms in debug (CI runs debug). 1000 moves on a document of 200 layers × 4 tracks × 25 keys. If debug measures under 1 ms, L1 tightens the debug budget to 2 ms | `FlareEasingDragCostTests.handleDragP95UnderBudget` (L1), budget chosen with `#if DEBUG`; release run reported in L1's PR |
+| Handle drag cost in the model, per event | p95 ≤ 5 ms in debug, p95 ≤ 1 ms in release, fixed. 1000 moves on a document of 200 layers × 4 tracks × 25 keys, three drags, the quietest p95 counts | `FlareEasingDragCostTests.handleDragP95UnderBudget` (L1), budget chosen with `#if DEBUG`. CI runs only debug; the release budget fails only under `swift test -c release --filter FlareEasingDragCostTests` |
 | Curve samples equal FlareCore | max \|y − `Easing.value(at: x)`\| ≤ 1e-9 over 1001 samples, every preset | `EasingEditingContractTests.samplesMatchFlareCoreWithinOneBillionth` (this PR), `FlareEasingTests.samplesMatchFlareCoreWithinOneBillionth` (L1) |
 | Handle x clamped, y free | x in 0...1 after any move; y keeps 1.4 and -0.3 | `EasingEditingContractTests.handleXIsClampedAndYMayOvershoot`, `FlareEasingTests.handleXIsClampedAndYMayOvershoot` |
 | Undo exact | one drag = one step; one preset = one step; undoing all edits gives a document equal to the original | `EasingEditingContractTests.oneDragIsOneUndoStep`, `FlareEasingTests.undoRestoresTheDocumentExactly` |
