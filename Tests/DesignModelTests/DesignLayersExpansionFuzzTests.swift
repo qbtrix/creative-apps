@@ -114,11 +114,12 @@ func seededFuzzRowsFollowTheExpandedSet(seed: UInt64) throws {
             try workspace.setExpanded(pick, !wasExpanded)
             #expect(workspace.isExpanded(pick) == !wasExpanded)
         case 2:
-            // Two toggles put the workspace back exactly.
+            // Two toggles put the expanded set and the pages back. The selection too, unless the
+            // collapse moved it onto the collapsed row (#121).
             let before = workspace
             try workspace.toggleExpanded(pick)
             try workspace.toggleExpanded(pick)
-            #expect(workspace == before)
+            #expect(workspace.expandedNodeIDs == before.expandedNodeIDs && workspace.pages == before.pages)
         case 3:
             let before = workspace
             #expect(throws: DesignTreeError.unknownID("ghost")) { try workspace.setExpanded("ghost", true) }

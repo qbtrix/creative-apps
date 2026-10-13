@@ -1,13 +1,24 @@
-// DesignWorkspace.swift: the state behind Design's window: pages with their
-// node trees, the selected page and node, the expanded Layers rows and the
-// tool. Linux-safe. DesignApp changes it only through the methods here.
-// Invariants: an open file keeps a page; a selected node is on the selected
-// page; ids are never reused within a file. Every palette tool acts through
-// `drag(from:to:)`; a tool that does nothing there stays disabled with
-// `unavailableHelp` (DesignToolsTests checks this).
+// DesignWorkspace.swift: the state behind Design's window: pages with their node
+// trees, the selected page and node, the expanded Layers rows, the tool, the
+// inline text edit and the undo history. Linux-safe. DesignApp changes it only
+// through the methods here and in the extensions beside it (DesignHistory,
+// DesignCanvasEditing, DesignDrawing, DesignText, DesignFile).
+//
+// Invariants:
+// - An open file keeps a page; a selected node is on the selected page; ids are
+//   never reused within a file (undo restores the id counters as a max).
+// - Every node frame is absolute page points, children included (DesignNode).
+// - Every document edit records exactly one named undo step (DesignHistory). A
+//   refused call (it throws, names an unknown id, hits a locked node, or changes
+//   nothing) records nothing and leaves the workspace as it was.
+// - Selection, expansion, tool and zoom are not edits. Undo restores the
+//   selection an edit had, but not the expanded rows.
+// - Every palette tool acts through `drag(from:to:modifiers:)` and `endDrag()`; a
+//   tool that does nothing there stays disabled with `unavailableHelp`
+//   (DesignToolsTests checks this).
 
 /// A page of a design file: one canvas holding a tree of nodes.
-public struct DesignPage: Identifiable, Sendable, Hashable {
+public struct DesignPage: Identifiable, Sendable, Hashable, Codable {
     public let id: String
     public var name: String
     /// The page's default frame size in points.
@@ -20,58 +31,60 @@ public struct DesignPage: Identifiable, Sendable, Hashable {
     public func visibleRows(expanded: Set<String>) -> [DesignRow] {
         nodes.rows(expanded: expanded)
     }
+
+    /// "1440 × 1024 pt": the frame size in whole points.
+    public var sizeText: String {
+        func whole(_ value: Double) -> Int { value.isFinite ? Int(Swift.max(Swift.min(value, 1e9), -1e9).rounded()) : 0 }
+        return "\(whole(frameWidth)) × \(whole(frameHeight)) pt"
+    }
 }
 
 /// The tools on Design's tool palette.
 public enum DesignTool: String, CaseIterable, Sendable {
-    case move, frame, rectangle, text, pen
+    case move, frame, rectangle, ellipse, text, pen
 
     /// Why the palette shows this tool disabled, as its tooltip; nil once the
     /// tool works. Set it to nil in the change that makes `drag` do something.
     public var unavailableHelp: String? {
         switch self {
-        case .move: "Selecting and moving on the canvas isn't built yet (#17)."
-        case .frame: "Drawing frames isn't built yet."
-        case .rectangle: "Drawing rectangles isn't built yet."
-        case .text: "Placing text isn't built yet."
+        case .move, .frame, .rectangle, .ellipse, .text: nil
         case .pen: "Drawing paths isn't built yet."
         }
     }
 
     public var isEnabled: Bool { unavailableHelp == nil }
-}
 
-/// A point on a page, in points from its top-left corner.
-public struct DesignPoint: Sendable, Hashable {
-    public var x: Double
-    public var y: Double
-
-    public init(x: Double, y: Double) {
-        (self.x, self.y) = (x, y)
+    /// The kind of node this tool draws; nil for Move and Pen.
+    public var nodeKind: DesignNodeKind? {
+        switch self {
+        case .frame: .frame
+        case .rectangle: .rectangle
+        case .ellipse: .ellipse
+        case .text: .text
+        case .move, .pen: nil
+        }
     }
-}
-
-/// A page `deletePage` removed, with where it sat and the selection before the delete;
-/// `restorePage` takes it back.
-public struct DeletedPage: Sendable, Equatable {
-    public let page: DesignPage
-    public let index: Int
-    public let selectedPageID: String?
-    public let selectedNodeID: String?
-    let file: Int
 }
 
 public struct DesignWorkspace: Sendable, Equatable {
     /// Pages of the open file; empty when no file is open.
-    public private(set) var pages: [DesignPage] = []
-    public private(set) var selectedPageID: String?
-    public private(set) var selectedNodeID: String?
-    public private(set) var expandedNodeIDs: Set<String> = []
+    public internal(set) var pages: [DesignPage] = []
+    public internal(set) var selectedPageID: String?
+    public internal(set) var selectedNodeID: String?
+    public internal(set) var expandedNodeIDs: Set<String> = []
     public private(set) var tool: DesignTool = .move
-    private var pageCount = 0
-    private var nodeCount = 0
-    /// Bumped by each New File, so a page deleted from an earlier file cannot come back into this one.
-    private var fileGeneration = 0
+    /// The text node being edited inline, and its live text (DesignText).
+    public internal(set) var editingTextID: String?
+    public internal(set) var textDraft = ""
+    /// How far from a selection handle, in document points, still grabs it.
+    public private(set) var handleTolerance = 6.0
+    var pageCount = 0
+    var nodeCount = 0
+    var history = DesignHistory()
+    /// The pointer gesture between its first `drag` and `endDrag`.
+    var gesture: DesignGesture?
+    /// A text node placed by a Text click, until its edit commits or cancels.
+    var placedText: DesignPlacedText?
 
     public init() {}
 
@@ -87,74 +100,76 @@ public struct DesignWorkspace: Sendable, Equatable {
     public var layerRows: [DesignRow] { selectedPage?.visibleRows(expanded: expandedNodeIDs) ?? [] }
 
     /// Opens a new file with one desktop-sized page holding a "Desktop" frame the size of the page.
+    /// Over an open file it is the undo step "New File", so Undo brings the old file back.
     public mutating func newFile() {
+        endDrag()
+        commitTextEdit()
+        let before = snapshot
+        let wasOpen = isOpen
         (pageCount, nodeCount) = (0, 0)
-        fileGeneration += 1
         var page = nextPage()
         let size = DesignRect(x: 0, y: 0, width: page.frameWidth, height: page.frameHeight)
         page.nodes = [DesignNode(id: nextNodeID(), name: "Desktop", kind: .frame, frame: size)]
         (pages, selectedPageID, selectedNodeID, expandedNodeIDs) = ([page], page.id, nil, [])
+        if wasOpen { record("New File", before: before) }
+    }
+
+    /// Replaces the document with `pages` (the file codec opens a file through this): selects the
+    /// first page, clears the history, any drag or inline edit and the expanded rows, and starts
+    /// the id counters past the highest "page-N" and "node-N" in the file.
+    mutating func load(_ pages: [DesignPage]) {
+        self.pages = pages
+        (selectedPageID, selectedNodeID, expandedNodeIDs) = (pages.first?.id, nil, [])
+        (history, gesture, placedText) = (DesignHistory(), nil, nil)
+        (editingTextID, textDraft) = (nil, "")
+        func highest(_ prefix: String, _ ids: [String]) -> Int {
+            // Numbers this large never come from a counter, and +1 on them would overflow.
+            ids.compactMap { $0.hasPrefix(prefix) ? Int($0.dropFirst(prefix.count)) : nil }.filter { (0..<1_000_000_000).contains($0) }.max() ?? 0
+        }
+        func nodeIDs(_ nodes: [DesignNode]) -> [String] { nodes.flatMap { [$0.id] + nodeIDs($0.children) } }
+        pageCount = highest("page-", pages.map(\.id))
+        nodeCount = highest("node-", pages.flatMap { nodeIDs($0.nodes) })
     }
 
     /// Appends an empty page named after its number and selects it. No-op with no file open.
     public mutating func addPage() {
         guard isOpen else { return }
+        commitTextEdit()
+        let before = snapshot
         let page = nextPage()
         pages.append(page)
         selectPage(page.id)
+        record("Add Page", before: before)
     }
 
     public mutating func renamePage(_ id: String, to name: String) throws(DesignTreeError) {
         guard !name.allSatisfy(\.isWhitespace) else { throw .emptyName }
         guard let index = pages.firstIndex(where: { $0.id == id }) else { throw .unknownID(id) }
+        let before = snapshot
         pages[index].name = name
+        record("Rename Page", before: before)
     }
 
     /// Whether Delete Page can act: a page is selected and it is not the file's last one.
     public var canDeletePage: Bool { selectedPage != nil && pages.count > 1 }
 
     /// Deletes a page; the last page is refused. Deleting the selected page selects its neighbor.
-    /// Returns what `restorePage` needs to undo the delete.
-    @discardableResult
-    public mutating func deletePage(_ id: String) throws(DesignTreeError) -> DeletedPage {
+    /// Undo brings the page back with its nodes and the selection it had.
+    public mutating func deletePage(_ id: String) throws(DesignTreeError) {
         guard let index = pages.firstIndex(where: { $0.id == id }) else { throw .unknownID(id) }
         guard pages.count > 1 else { throw .lastPage }
-        let deleted = DeletedPage(
-            page: pages[index], index: index, selectedPageID: selectedPageID,
-            selectedNodeID: selectedNodeID, file: fileGeneration)
+        commitTextEdit()
+        let before = snapshot
         pages.remove(at: index)
         if selectedPageID == id { selectPage(pages[Swift.min(index, pages.count - 1)].id) }
-        return deleted
-    }
-
-    /// Undoes `deletePage`: puts the page back at its index (clamped to the page count) with
-    /// its nodes and ids, and restores the selection the delete changed. Refused once another
-    /// file is opened, or when the page is already back.
-    public mutating func restorePage(_ deleted: DeletedPage) throws(DesignTreeError) {
-        let id = deleted.page.id
-        guard isOpen, deleted.file == fileGeneration else { throw .unknownID(id) }
-        guard !pages.contains(where: { $0.id == id }) else { throw .alreadyExists(id) }
-        pages.insert(deleted.page, at: Swift.min(deleted.index, pages.count))
-        if let pageID = deleted.selectedPageID, pages.contains(where: { $0.id == pageID }) {
-            selectPage(pageID)
-            if let nodeID = deleted.selectedNodeID, selectedPage?.nodes.node(nodeID) != nil {
-                selectedNodeID = nodeID
-            }
-        }
-    }
-
-    /// Redoes a Delete Page that `restorePage` undid. Refused once another file is opened, so
-    /// a stale redo cannot delete the new file's page that reuses the id.
-    @discardableResult
-    public mutating func redoDeletePage(_ deleted: DeletedPage) throws(DesignTreeError) -> DeletedPage {
-        guard deleted.file == fileGeneration else { throw .unknownID(deleted.page.id) }
-        return try deletePage(deleted.page.id)
+        record("Delete Page", before: before)
     }
 
     /// Selects a page by id and clears the node selection, even when the page is already
     /// selected, so clicking its row deselects the layer. An unknown id is ignored.
     public mutating func selectPage(_ id: String) {
         guard pages.contains(where: { $0.id == id }) else { return }
+        commitTextEdit()
         (selectedPageID, selectedNodeID) = (id, nil)
     }
 
@@ -163,23 +178,38 @@ public struct DesignWorkspace: Sendable, Equatable {
     public mutating func selectItem(_ id: String) {
         if pages.contains(where: { $0.id == id }) { return selectPage(id) }
         guard let page = pages.first(where: { $0.nodes.node(id) != nil }) else { return }
+        commitTextEdit()
         selectedPageID = page.id
         selectedNodeID = id
         expandAncestors(of: id, in: page.nodes)
     }
 
+    /// Clears the node selection; the page stays selected.
+    public mutating func deselect() {
+        commitTextEdit()
+        selectedNodeID = nil
+    }
+
     /// Expands every node that encloses `id` in `nodes`, so `id`'s own Layers row shows.
-    private mutating func expandAncestors(of id: String, in nodes: [DesignNode]) {
+    mutating func expandAncestors(of id: String, in nodes: [DesignNode]) {
         expandedNodeIDs.formUnion(nodes.ancestors(of: id) ?? [])
     }
 
     /// Whether `id`'s Layers row shows its children.
     public func isExpanded(_ id: String) -> Bool { expandedNodeIDs.contains(id) }
 
-    /// Shows or hides a node's children in Layers. Refused for an id on no page.
+    /// Shows or hides a node's children in Layers. Refused for an id on no page. Collapsing a
+    /// row that encloses the selection selects that row, so the selection never hides (#121).
     public mutating func setExpanded(_ id: String, _ isExpanded: Bool) throws(DesignTreeError) {
         guard pages.contains(where: { $0.nodes.node(id) != nil }) else { throw .unknownID(id) }
-        if isExpanded { expandedNodeIDs.insert(id) } else { expandedNodeIDs.remove(id) }
+        guard !isExpanded else {
+            expandedNodeIDs.insert(id)
+            return
+        }
+        expandedNodeIDs.remove(id)
+        if let selected = selectedNodeID, selectedPage?.nodes.ancestors(of: selected)?.contains(id) == true {
+            selectItem(id)
+        }
     }
 
     /// Flips a node's Layers disclosure. Refused for an id on no page.
@@ -188,16 +218,25 @@ public struct DesignWorkspace: Sendable, Equatable {
     }
 
     /// Adds a node of `kind` to the selected page, inside `parentID` or at the top, and selects it.
-    /// Every enclosing row expands, so the new node's row shows.
+    /// Every enclosing row expands, so the new node's row shows. A text node starts as "Text".
     @discardableResult
     public mutating func addNode(
         _ kind: DesignNodeKind, frame: DesignRect, in parentID: String? = nil
     ) throws(DesignTreeError) -> String {
+        let before = snapshot
+        let id = try insertNode(kind, frame: frame, in: parentID)
+        record("Add \(kind.defaultName)", before: before)
+        return id
+    }
+
+    /// `addNode` without the undo step: the gestures use it, and record their own.
+    mutating func insertNode(_ kind: DesignNodeKind, frame: DesignRect, in parentID: String?) throws(DesignTreeError) -> String {
         guard let pageIndex = pages.firstIndex(where: { $0.id == selectedPageID }) else {
             throw .unknownID(selectedPageID ?? "")
         }
         // Take the id only once the parent accepts the node, so a refused add changes nothing.
-        let node = DesignNode(id: "node-\(nodeCount + 1)", name: kind.defaultName, kind: kind, frame: frame)
+        let node = DesignNode(
+            id: "node-\(nodeCount + 1)", name: kind.defaultName, kind: kind, frame: frame, text: kind == .text ? "Text" : "")
         try pages[pageIndex].nodes.add(node, to: parentID)
         _ = nextNodeID()
         expandAncestors(of: node.id, in: pages[pageIndex].nodes)
@@ -216,39 +255,81 @@ public struct DesignWorkspace: Sendable, Equatable {
         var nodes = pages[pageIndex].nodes
         _ = nodes.remove(id)
         try nodes.add(node, to: parentID)
+        let before = snapshot
         pages[pageIndex].nodes = nodes
         expandAncestors(of: id, in: nodes)
+        record("Move Layer", before: before)
     }
 
     public mutating func renameNode(_ id: String, to name: String) throws(DesignTreeError) {
         guard !name.allSatisfy(\.isWhitespace) else { throw .emptyName }
-        try updateNode(id) { $0.name = name }
+        try updateNode(id, named: "Rename Layer") { $0.name = name }
     }
 
     public mutating func setNodeHidden(_ id: String, _ isHidden: Bool) throws(DesignTreeError) {
-        try updateNode(id) { $0.isHidden = isHidden }
+        try updateNode(id, named: isHidden ? "Hide Layer" : "Show Layer") { $0.isHidden = isHidden }
     }
 
     public mutating func setNodeLocked(_ id: String, _ isLocked: Bool) throws(DesignTreeError) {
-        try updateNode(id) { $0.isLocked = isLocked }
+        try updateNode(id, named: isLocked ? "Lock Layer" : "Unlock Layer") { $0.isLocked = isLocked }
     }
 
-    public mutating func selectTool(_ tool: DesignTool) {
-        self.tool = tool
-    }
-
-    /// The active tool's drag across the page from `start` to `end`; a click is
-    /// a drag that doesn't move. The canvas sends every tool gesture here, so
-    /// each case is where that tool's work goes.
-    public mutating func drag(from start: DesignPoint, to end: DesignPoint) {
-        switch tool {
-        case .move, .frame, .rectangle, .text, .pen: break
+    /// Sets a node's frame, as the inspector's X, Y, W and H do. A non-finite part keeps its old
+    /// value and width and height stay at least 1. Changing x or y moves the node's subtree with
+    /// it; changing the size leaves its children. A run of changes to one node is one step.
+    public mutating func setNodeFrame(_ id: String, x: Double, y: Double, width: Double, height: Double) throws(DesignTreeError) {
+        guard let old = findNode(id)?.frame else { throw .unknownID(id) }
+        let new = DesignRect(
+            x: x.isFinite ? x : old.x, y: y.isFinite ? y : old.y,
+            width: width.isFinite ? Swift.max(width, 1) : old.width, height: height.isFinite ? Swift.max(height, 1) : old.height)
+        try editNode(id, named: "Change Frame", coalescing: "frame-\(id)") { node in
+            node.translate(by: DesignPoint(x: new.x - old.x, y: new.y - old.y))
+            node.frame = new
         }
     }
 
-    private mutating func updateNode(_ id: String, _ change: (inout DesignNode) -> Void) throws(DesignTreeError) {
-        guard let index = pages.firstIndex(where: { $0.nodes.node(id) != nil }) else { throw .unknownID(id) }
-        _ = pages[index].nodes.update(id, change)
+    /// Sets a node's fill (a text node's color). Refused for a locked node. A run is one step.
+    public mutating func setFill(_ id: String, _ color: DesignColor) throws(DesignTreeError) {
+        try editNode(id, named: "Change Fill", coalescing: "fill-\(id)") { $0.fill = color }
+    }
+
+    public mutating func selectTool(_ tool: DesignTool) {
+        endDrag()
+        commitTextEdit()
+        self.tool = tool
+    }
+
+    /// Sets how far from a handle a press still grabs it, in document points. The window keeps it
+    /// at a constant screen size by dividing by the zoom. Ignores non-finite or non-positive values.
+    public mutating func setHandleTolerance(_ points: Double) {
+        if points.isFinite, points > 0 { handleTolerance = points }
+    }
+
+    // MARK: Editing helpers
+
+    /// The node `id` on any page.
+    func findNode(_ id: String) -> DesignNode? {
+        pages.lazy.compactMap { $0.nodes.node(id) }.first
+    }
+
+    /// Changes node `id` as one named step; unlike `editNode`, a locked node can change.
+    private mutating func updateNode(_ id: String, named name: String, _ change: (inout DesignNode) -> Void) throws(DesignTreeError) {
+        guard findNode(id) != nil else { throw .unknownID(id) }
+        let before = snapshot
+        _ = pages.update(id, change)
+        record(name, before: before)
+    }
+
+    /// Changes the unlocked node `id` as one named step; an unknown or locked id throws first.
+    /// With a `coalescing` key a run of calls with the same key is one step.
+    mutating func editNode(
+        _ id: String, named name: String, coalescing: String? = nil, _ change: (inout DesignNode) -> Void
+    ) throws(DesignTreeError) {
+        guard let node = findNode(id) else { throw .unknownID(id) }
+        guard !node.isLocked else { throw .locked(id) }
+        let before = snapshot
+        _ = pages.update(id, change)
+        record(name, before: before, coalescing: coalescing)
     }
 
     private mutating func nextPage() -> DesignPage {
@@ -259,5 +340,15 @@ public struct DesignWorkspace: Sendable, Equatable {
     private mutating func nextNodeID() -> String {
         nodeCount += 1
         return "node-\(nodeCount)"
+    }
+}
+
+extension [DesignPage] {
+    /// Applies `change` to the node `id` on whichever page holds it; returns whether it was found.
+    mutating func update(_ id: String, _ change: (inout DesignNode) -> Void) -> Bool {
+        for index in indices {
+            if self[index].nodes.update(id, change) { return true }
+        }
+        return false
     }
 }
