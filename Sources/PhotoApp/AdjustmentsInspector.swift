@@ -75,7 +75,7 @@ struct AdjustmentsInspector: View {
             "Gamma", Double(settings.gamma), Self.doubles(AdjustmentSettings.gammaRange), step: 0.01,
             decimals: AdjustmentSettings.gammaDecimals,
             track: ScrubTrack(
-                positions: GammaTrack.positionRange, step: 0.01, position: { GammaTrack.position(ofGamma: $0) },
+                positions: GammaTrack.positionRange, step: GammaTrack.step, position: { GammaTrack.position(ofGamma: $0) },
                 value: { GammaTrack.snappedGamma(atPosition: $0) })
         ) { .gamma(Float($0)) }
     }

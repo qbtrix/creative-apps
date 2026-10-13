@@ -4,6 +4,8 @@
 // logarithmic: AdjustmentSettings still stores gamma itself over gammaRange.
 // The slider drags through snappedGamma, whose detent band around the
 // midpoint gives exactly 1, so a drag back to the middle undoes the edit.
+// The band is a fixed number of drag points wide (detentPoints), not a share
+// of the track, so it is as easy to hit at any inspector width.
 // Invariants: both directions clamp to their range, NaN gives the identity,
 // and the endpoints and midpoint map exactly. Linux-safe.
 #if canImport(FoundationEssentials)
@@ -43,9 +45,18 @@ public enum GammaTrack {
         }
     }
 
-    /// Half the width of the midpoint detent: a dragged position within this
-    /// of 0 is gamma 1. About one pixel of track at the inspector's width.
-    public static let detent = 0.02
+    /// How far the track moves per point of sideways drag (the bar slider's
+    /// step: a scrub moves one step per point), and per arrow key.
+    public static let step = 0.01
+
+    /// Half the width of the midpoint detent in points of drag: a release
+    /// within this many points of the centre is gamma 1. Wide enough to hit on
+    /// purpose; the gammas it hides (about 0.91 to 1.10) are still typeable.
+    public static let detentPoints = 4.0
+
+    /// Half the width of the midpoint detent in track units: detentPoints of
+    /// drag at `step` per point.
+    public static let detent = detentPoints * step
 
     /// The gamma a drag to `position` sets: exactly 1 inside the detent
     /// (|position| <= detent), otherwise gamma(atPosition:).
