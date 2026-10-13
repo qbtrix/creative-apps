@@ -23,6 +23,7 @@ enum DesignIntent {
     case setFrame(String, x: Double, y: Double, width: Double, height: Double)
     case setFill(String, DesignColor)
     case setHidden(String, Bool), setLocked(String, Bool)
+    case toggleFlag(String, DesignLayerFlag)
     case editText(String)
     case textDraft(String), commitText, cancelText
     case zoomIn, zoomOut, fit

@@ -3,7 +3,8 @@
 // EditorShell window. The core journey draws a frame (crossing the page's top
 // edge, so its handles show past it), a rectangle and an ellipse, moves and
 // resizes the ellipse, checks Layers still marks the current page while the
-// ellipse is selected, places and types text (shot while typing, when the editor
+// ellipse is selected, hides a layer from its row's eye and undoes that,
+// places and types text (shot while typing, when the editor
 // draws at full size, and once committed, with a small box's corner handles
 // outside it), undoes and redoes, saves with -DesignSaveTo (no panel), then
 // relaunches with -DesignOpenFile and checks the saved file reopens. The menu
@@ -65,6 +66,13 @@ final class DesignJourneyTests: XCTestCase {
         let window = design.app.windows.firstMatch
         XCTAssert(window.buttons["Delete Page"].waitForExistence(timeout: 3), "no Delete Page button by the pages:\n\(window.debugDescription)")
         design.shot("layers")
+        // A row's eye hides that layer as one undo step, and Undo shows it again.
+        let eye = window.descendants(matching: .any).matching(NSPredicate(format: "label == %@", "Hide Layer")).firstMatch
+        XCTAssert(eye.waitForExistence(timeout: 3), "no eye toggle on the layer rows:\n\(window.debugDescription)")
+        eye.click()
+        XCTAssert(design.app.buttons["Undo Hide Layer"].waitForExistence(timeout: 5), "the eye toggle made no undo step")
+        design.shot("layer-hidden")
+        design.click("Undo Hide Layer", in: .window, step: "layer-shown")
         tab("Properties", in: design)
 
         tools["Text"].click()

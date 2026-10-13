@@ -6,9 +6,14 @@
 extension DesignWorkspace {
     /// Whether node `id` or any node enclosing it is locked; false for an unknown id.
     public func isLockedInTree(_ id: String) -> Bool {
+        anyInTree(id) { $0.isLocked }
+    }
+
+    /// Whether node `id` or any node enclosing it passes `test`; false for an unknown id.
+    func anyInTree(_ id: String, _ test: (DesignNode) -> Bool) -> Bool {
         for page in pages {
             guard let path = page.nodes.ancestors(of: id) else { continue }
-            return (path + [id]).contains { page.nodes.node($0)?.isLocked == true }
+            return (path + [id]).contains { page.nodes.node($0).map(test) == true }
         }
         return false
     }

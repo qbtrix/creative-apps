@@ -87,6 +87,7 @@ struct DesignWindow: View {
         case .setFill(let id, let color): try? model.setFill(id, color)
         case .setHidden(let id, let hidden): try? model.setNodeHidden(id, hidden)
         case .setLocked(let id, let locked): try? model.setNodeLocked(id, locked)
+        case .toggleFlag(let id, let flag): try? model.toggleNodeFlag(id, flag)
         case .editText(let id): try? model.beginTextEdit(id)
         case .textDraft(let text): model.setTextDraft(text)
         case .commitText: model.commitTextEdit()
