@@ -18,10 +18,11 @@ or empty state, and inspector; the features come next.
 ## How it is built
 
 A crew of AI coding agents builds it in the open from GitHub issues. They run
-on Linux, so they test the Models locally and see the UI through CI: the macOS
-job renders every app's main view to PNG and attaches them to each run. Model
-changes that pass CI can merge on their own; UI changes wait for a human to
-look at the pictures. Agent rules are in [CLAUDE.md](CLAUDE.md).
+on Linux, so they test the Models locally. Small PRs that pass that check
+merge into the `dev` branch on their own. Once a feature is built, CI on
+`dev` builds the UI on macOS, renders every app's main view to PNG and clicks
+through each app, and `main` only takes `dev` commits whose CI passed. A human
+reviews the pictures after merge. Agent rules are in [CLAUDE.md](CLAUDE.md).
 
 ## Running it
 

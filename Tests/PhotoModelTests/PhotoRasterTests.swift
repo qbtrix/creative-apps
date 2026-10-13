@@ -43,7 +43,10 @@ import Testing
         var workspace = try gray()
         let before = try canvasPixel(workspace, 0, 0).r
         workspace.adjust(.whitePoint(before))
-        #expect(abs(try canvasPixel(workspace, 0, 0).r - 1) < 1e-4)
+        // White snaps to levelsStep, so the pixel lands within a step of 1.
+        let white = workspace.adjustments.whitePoint
+        #expect(abs(white - before) <= Float(AdjustmentSettings.levelsStep) / 2)
+        #expect(abs(try canvasPixel(workspace, 0, 0).r - min(1, before / white)) < 1e-4)
     }
 
     @Test func saturationToGrayAndLightnessToWhite() throws {

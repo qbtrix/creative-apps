@@ -13,15 +13,30 @@ import Testing
         #expect(workspace.undoActionName == "Undo Paint")
     }
 
-    @Test func dabsSitAQuarterOfTheSizeApart() {
-        // Size 20: a dab every 5 px, so a 100 px segment adds 20 to the one at its start.
-        let along = PhotoWorkspace.dabCenters(from: point(0, 0), to: point(100, 0), spacing: 5, walked: 0)
-        #expect(along.centers.count + 1 == 21)
-        #expect(along.centers.first == point(5, 0) && along.centers.last == point(100, 0))
-        // The spacing carries across segments.
-        let next = PhotoWorkspace.dabCenters(from: point(0, 0), to: point(7, 0), spacing: 5, walked: 3)
-        #expect(next.centers == [point(2, 0), point(7, 0)])
-        #expect(next.walked == 0)
+    @Test func aBigBrushLeavesAStraightEdgeNotScallops() throws {
+        // Size 200 with samples 60 px apart: round dabs a quarter of the size
+        // apart left a 3 px ripple along this edge.
+        var workspace = try whiteImage(800, 400)
+        workspace.setToolOption(.size(200))
+        workspace.selectTool(.brush)
+        for x in stride(from: 100.0, through: 700, by: 60) { workspace.drag(from: point(x, 200), to: point(x, 200)) }
+        workspace.endDrag()
+        for x in 150..<650 {
+            // Row 101's centers sit 98.5 px from the stroke's middle, row 98's 101.5.
+            #expect(try layerPixel(workspace, x, 101)?.r == 0 && layerPixel(workspace, x, 98)?.r == 1, "column \(x)")
+        }
+    }
+
+    @Test func pressureScalesTheBrush() throws {
+        var workspace = try whiteImage()
+        workspace.selectTool(.brush)
+        for (y, pressure) in [(16.0, 0.5), (48.0, 1)] {
+            workspace.drag(from: point(8, y), to: point(56, y), pressure: pressure)
+            workspace.endDrag()
+        }
+        // Size 20 at half pressure is 10 wide: 7 px off its line stays white; at full pressure it is painted.
+        #expect(try layerPixel(workspace, 32, 23) == RGBA(r: 1, g: 1, b: 1, a: 1))
+        #expect(try layerPixel(workspace, 32, 19)?.r == 0 && layerPixel(workspace, 32, 55)?.r == 0)
     }
 
     @Test func undoGivesTheLayerBackBitForBitAndRedoPaintsAgain() throws {

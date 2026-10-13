@@ -23,10 +23,10 @@ extension PhotoWorkspace {
         let sx = Double(width) / Double(canvas.width), sy = Double(height) / Double(canvas.height)
         var resized = stackState
         for (at, layer) in layers.enumerated() {
-            guard let buffer = pixels[layer.id] else { continue }
+            guard let buffer = try pixels[layer.id]?.flattened() else { continue }
             let w = max(Int((Double(buffer.width) * sx).rounded()), 1)
             let h = max(Int((Double(buffer.height) * sy).rounded()), 1)
-            resized.pixels[layer.id] = try buffer.resized(width: w, height: h, filter: .bilinear)
+            resized.pixels[layer.id] = TiledPixels(try buffer.resized(width: w, height: h, filter: .bilinear))
             resized.layers[at].offsetX = Int((Double(layer.offsetX) * sx).rounded())
             resized.layers[at].offsetY = Int((Double(layer.offsetY) * sy).rounded())
         }
@@ -43,14 +43,15 @@ extension PhotoWorkspace {
         record(.stack(stackState), named: "Rotate")
         let (w, h) = (canvas.width, canvas.height)
         for (at, layer) in layers.enumerated() {
-            guard let buffer = pixels[layer.id] else { continue }
+            // A layer's own size always flattens, so this never skips one.
+            guard let buffer = try? pixels[layer.id]?.flattened() else { continue }
             let (x, y, lw, lh) = (layer.offsetX, layer.offsetY, buffer.width, buffer.height)
             let offset = switch turn {
             case .degrees90: (h - (y + lh), x)
             case .degrees180: (w - (x + lw), h - (y + lh))
             case .degrees270: (y, w - (x + lw))
             }
-            pixels[layer.id] = buffer.rotated(turn)
+            pixels[layer.id] = TiledPixels(buffer.rotated(turn))
             layers[at].offsetX = offset.0
             layers[at].offsetY = offset.1
         }

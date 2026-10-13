@@ -68,19 +68,20 @@ extension PhotoWorkspace {
             x: inner.x - outer.x, y: inner.y - outer.y, width: inner.width, height: inner.height)
     }
 
-    /// The visible layers over transparency, bottom first, in `rect`.
+    /// The visible layers over transparency, bottom first, in `rect`. Each
+    /// layer tile under `rect` composites in place (composite clips it), so
+    /// every pixel blends exactly as it would from the whole layer.
     func composited(_ rect: PixelRect) throws -> PixelBuffer {
         var result = try PixelBuffer(width: rect.width, height: rect.height)
         for layer in layers.reversed() where layer.isVisible && layer.opacity > 0 {
-            guard let buffer = pixels[layer.id], let bounds = bounds(of: layer),
-                let overlap = bounds.intersection(rect)
-            else { continue }
-            let part = try buffer.cropped(
-                x: overlap.x - layer.offsetX, y: overlap.y - layer.offsetY, width: overlap.width,
-                height: overlap.height)
-            result = try CoreRaster.composite(
-                part, onto: result, x: overlap.x - rect.x, y: overlap.y - rect.y, mode: layer.blendMode,
-                opacity: Float(layer.opacity))
+            guard let tiled = pixels[layer.id] else { continue }
+            for i in tiled.tileIndices(in: rect.offsetBy(-layer.offsetX, -layer.offsetY))
+            where tiled.tiles.indices.contains(i) {
+                let tile = tiled.tileRect(i).offsetBy(layer.offsetX - rect.x, layer.offsetY - rect.y)
+                result = try CoreRaster.composite(
+                    tiled.tiles[i], onto: result, x: tile.x, y: tile.y, mode: layer.blendMode,
+                    opacity: Float(layer.opacity))
+            }
         }
         return result
     }

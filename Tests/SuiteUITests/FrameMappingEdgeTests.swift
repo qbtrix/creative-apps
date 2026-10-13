@@ -1,6 +1,7 @@
 // FrameMappingEdgeTests.swift: edge cases for the frame arithmetic behind
 // TimelineStrip: round trips across widths, non-finite x, the label interval
-// over a sweep of widths, and keyframe hit-testing ties. No SwiftUI. macOS only.
+// over a sweep of widths, and keyframe hit-testing ties and out-of-range
+// keyframes. No SwiftUI. macOS only.
 import SuiteUI
 import Testing
 
@@ -69,6 +70,30 @@ func everyFrameRoundTripsThroughItsX(frameWidth: Double) {
     #expect(mapping.keyframe(nearX: 106, in: [10], tolerance: 6) == 10)
     #expect(mapping.keyframe(nearX: 106.01, in: [10], tolerance: 6) == nil)
     #expect(mapping.keyframe(nearX: 100, in: [10], tolerance: -1) == nil)
+}
+
+@Test func keyframeBelowZeroComesBackAsFrameZero() {
+    let mapping = FrameMapping(duration: 100, frameWidth: 10)
+    #expect(mapping.keyframe(nearX: 0, in: [-5], tolerance: 6) == 0)
+    #expect(mapping.keyframe(nearX: 3, in: [Int.min], tolerance: 6) == 0)
+    #expect(mapping.keyframe(nearX: 50, in: [-5], tolerance: 6) == nil)
+}
+
+@Test func keyframeAboveTheDurationComesBackAsTheDuration() {
+    let mapping = FrameMapping(duration: 100, frameWidth: 10)
+    #expect(mapping.keyframe(nearX: 1000, in: [250], tolerance: 6) == 100)
+    #expect(mapping.keyframe(nearX: 997, in: [Int.max], tolerance: 6) == 100)
+    #expect(mapping.keyframe(nearX: 900, in: [250], tolerance: 6) == nil)
+}
+
+@Test func keyframeHitIsAlwaysInsideTheDuration() {
+    let mapping = FrameMapping(duration: 48, frameWidth: 10)
+    let keyframes = [-1_000, -1, 0, 24, 48, 49, 10_000]
+    for x in stride(from: -100.0, through: 600, by: 2.5) {
+        if let frame = mapping.keyframe(nearX: x, in: keyframes, tolerance: 6) {
+            #expect((0...48).contains(frame))
+        }
+    }
 }
 
 /// The largest power of ten at or below `n`.
