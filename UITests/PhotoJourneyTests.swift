@@ -216,9 +216,8 @@ final class PhotoJourneyTests: XCTestCase {
         let angle = photo.element("photo.straighten.angle")
         XCTAssert(angle.waitForExistence(timeout: 5), "no Angle field in the Straighten sheet")
         photo.shot("straighten-sheet")
-        angle.click()
-        angle.typeKey("a", modifierFlags: .command)
-        angle.typeText("3")
+        // Not Command-A: Select > All takes it from the field (#575).
+        replaceText(in: angle, with: "3", photo)
         // XCUITest reads a SwiftUI Text's words as its value, not its label.
         let newSize = photo.app.sheets.staticTexts.matching(NSPredicate(format: "value BEGINSWITH 'New size '")).firstMatch
         XCTAssert(newSize.waitForExistence(timeout: 5), "the sheet doesn't say the new size")

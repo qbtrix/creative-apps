@@ -7,8 +7,8 @@
 // and draws StraightenMarks over it. Apply hands the draft to the window;
 // Cancel drops it. Values in, closures out. The field is a text field whose
 // every keystroke updates the draft, as in ImageSizeSheet: a number field
-// can wait for Return to commit, and Return is Apply, so "type 3, press
-// Return" must turn by 3. Controls carry `photo.straighten.*` identifiers.
+// can wait for Return to commit, and Return is Apply (the field submits it
+// itself, since it takes Return first), so "type 3, press Return" turns by 3. Controls carry `photo.straighten.*` identifiers.
 import PhotoModel
 import SuiteUI
 import SwiftUI
@@ -47,6 +47,8 @@ struct StraightenSheet: View {
                         )
                         .labelsHidden()
                         .frame(width: SuiteSize.inspectorField)
+                        // The field takes Return before the default button does.
+                        .onSubmit { if frame != nil { onApply() } }
                         .accessibilityLabel("Angle")
                         .accessibilityIdentifier("photo.straighten.angle")
                         Text("°")
