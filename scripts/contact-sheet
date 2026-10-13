@@ -7,7 +7,8 @@
 #     violations per check against BASELINE, counted the way AppAudit.Tally
 #     counts them (docs/blueprints/app-audit.md), with arrows: ↑ over, ↓ under,
 #     = on the baseline, and on dev, when something is ↓ and nothing ↑, a note
-#     that the Audit lower job opens the PR lowering the baseline;
+#     that the Audit lower job opens the PR lowering the baseline once the
+#     macOS job is green;
 #   - per app, per journey (one XCUITest method), the step shots in run order
 #     as thumbnails that link to the full PNG, each captioned with its screen's
 #     audit violations;
@@ -93,7 +94,7 @@ def h: tostring | @html;
 # On dev, counts only under the baseline: ci.yml's audit-lower job, after this one, opens the PR.
 ([$apps[] as $a | cells($a)[].class]) as $classes
 | (if $branch == "dev" and any($classes[]; . == "down") and all($classes[]; . != "up")
-   then "↓ only, so the Audit lower job opens (or updates) the PR “test(audit): lower baselines to the measured counts”; its link is in that job's summary."
+   then "↓ only: once this macOS job is green, the Audit lower job opens (or updates) the PR “test(audit): lower baselines to the measured counts”; its link is in that job's summary."
    else "" end) as $note
 |
 

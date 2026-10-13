@@ -131,7 +131,7 @@ jobs:
           retention-days: 7
 
   # Fast-forward main to this dev SHA once every job above passed. The only
-  # job that may write contents.
+  # job that writes contents besides audit-lower, which pushes only its own branch.
   promote:
     name: Promote
     needs: [linux, macos]

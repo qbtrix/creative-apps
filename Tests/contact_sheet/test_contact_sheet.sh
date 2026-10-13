@@ -75,8 +75,8 @@ hasnt "no auto-lower note off dev, or with a count over" "$page" 'Audit lower jo
 echo '{ "photo": { "identifier": 3, "overlap": 1, "unnamed": 1 } }' >"$tmp/baseline.json"
 GITHUB_STEP_SUMMARY="$tmp/summary-dev.md" GITHUB_REF_NAME=dev \
   "$here/../../scripts/contact-sheet" "$s" "$tmp/baseline.json" "$tmp/snaps" >/dev/null || { echo "FAIL dev run exited $?"; exit 1; }
-has "auto-lower note on the page" "$page" '<p class="note">↓ only, so the Audit lower job opens (or updates) the PR “test(audit): lower baselines to the measured counts”'
-has "auto-lower note in the summary" "$tmp/summary-dev.md" '↓ only, so the Audit lower job opens'
+has "auto-lower note on the page" "$page" '<p class="note">↓ only: once this macOS job is green, the Audit lower job opens (or updates) the PR “test(audit): lower baselines to the measured counts”'
+has "auto-lower note in the summary" "$tmp/summary-dev.md" '↓ only: once this macOS job is green, the Audit lower job opens'
 has "dev cells" "$tmp/summary-dev.md" '| photo | 2 | 1 | 2 ↓ 3 | 0 ↓ 1 | 1 = 1 |'
 
 rm "$s/manifest.json"

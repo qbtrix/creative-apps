@@ -263,6 +263,7 @@ Crew PRs merge into `dev` at once; `main` moves only when full CI passes on
 scripts/ci                                   # lint + app-state rule + design lint + C4 ownership + jscpd + build + test: the gate
 swift test --filter FlareModelTests          # one suite while iterating
 bash Tests/fast_lane/test_fast_lane.sh       # fast-lane decision tests (needs jq)
+bash Tests/audit_lower/test_audit_lower.sh   # auto-lower decision tests for scripts/audit-lower (needs jq)
 gh run list --workflow ci.yml --branch dev    # feature CI runs on dev
 gh run download <run-id> -n snapshots        # the PNGs from a macOS CI run
 gh run download <run-id> -n ui-screens       # whole-window PNGs from the UI journeys
