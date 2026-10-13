@@ -63,24 +63,25 @@ public struct FrameMapping: Equatable, Sendable {
     /// at least `tickSpacing` points apart and labels at least `labelSpacing`
     /// (each at least 1), so neither count grows past the visible width over
     /// that spacing, plus one, however long the duration is. Labels also sit
-    /// at least `labelWidth(in:digitWidth:)` apart, so long frame numbers
-    /// never overlap.
+    /// at least `labelWidth(digitWidth:)` apart, so long frame numbers
+    /// never overlap and the label step holds still while scrolling.
     public func rulerMarks(
         visibleX: ClosedRange<Double>, tickSpacing: Double, labelSpacing: Double, digitWidth: Double = 0
     ) -> RulerMarks {
         RulerMarks(
             ticks: frames(every: max(tickSpacing, 1), in: visibleX),
-            labels: frames(every: max(labelSpacing, labelWidth(in: visibleX, digitWidth: digitWidth), 1), in: visibleX)
+            labels: frames(every: max(labelSpacing, labelWidth(digitWidth: digitWidth), 1), in: visibleX)
         )
     }
 
-    /// The room the widest label in `visibleX` needs: the digits of the last
-    /// frame in view, plus one digit of gap, at `digitWidth` points each. 0
-    /// when `digitWidth` is 0, below 0 or not finite.
-    public func labelWidth(in visibleX: ClosedRange<Double>, digitWidth: Double) -> Double {
+    /// The room the widest label anywhere in 0...duration needs: the digits
+    /// of the last frame, plus one digit of gap, at `digitWidth` points each.
+    /// It sizes from the whole duration, not the visible stretch, so the label
+    /// step does not jump when scrolling brings a frame with one more digit
+    /// into view (#299). 0 when `digitWidth` is 0, below 0 or not finite.
+    public func labelWidth(digitWidth: Double) -> Double {
         guard digitWidth.isFinite, digitWidth > 0 else { return 0 }
-        let last = frameWidth > 0 ? frame(nearest: (visibleX.upperBound / frameWidth).rounded(.down)) : 0
-        return Double(String(last).count + 1) * digitWidth
+        return Double(String(duration).count + 1) * digitWidth
     }
 
     /// The multiples of the step for `spacing` whose ticks lie inside `range`.
