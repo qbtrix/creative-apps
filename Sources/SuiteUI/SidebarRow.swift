@@ -14,7 +14,10 @@ public struct SidebarItem: Identifiable, Hashable, Sendable {
     public let count: Int?
     /// Small icon toggles after the title (visibility, lock, ...).
     public let toggles: [SidebarToggle]
-    /// Rows nested under this one in the window's list.
+    /// Rows nested under this one in the window's list. The sidebar shows at
+    /// most two levels (docs/design.md): a top-level item's children sit one
+    /// level in, and their own descendants are drawn flat at that same level,
+    /// in depth-first order, right after their parent (`secondLevelRows`).
     public let children: [SidebarItem]
 
     public init(
@@ -27,6 +30,17 @@ public struct SidebarItem: Identifiable, Hashable, Sendable {
         self.count = count
         self.toggles = toggles
         self.children = children
+    }
+
+    /// The rows the sidebar draws under this item at the second level: every
+    /// descendant in depth-first order, each without children, so nothing
+    /// nests a third level deep.
+    public var secondLevelRows: [SidebarItem] {
+        children.flatMap { child in
+            [SidebarItem(
+                id: child.id, title: child.title, systemImage: child.systemImage, count: child.count,
+                toggles: child.toggles)] + child.secondLevelRows
+        }
     }
 }
 
