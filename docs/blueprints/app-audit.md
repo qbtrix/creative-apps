@@ -29,7 +29,7 @@ mode, menus in the menu bar, keyboard focus order.
 
 ## The checks
 
-Each check is a type in `Tests/PhotoModelTests/AppAudit/Checks/` conforming to
+Each check is a type in `Tests/AppAuditTests/Checks/` conforming to
 `AppAudit.Check`: an `id` (the baseline key), its `fault`, a `scope` (all
 apps, or one), a one-line `summary`, a `seeded` screen it must flag, and
 `run(_:)`. `AppAudit.checks` lists them.
@@ -80,11 +80,11 @@ into `ui-screens`. Audit failures don't stop a journey, so one run reports
 every screen. An audit costs well under a second; on the first run the
 journeys took as long as without it.
 
-The pure code (`AuditPixels.swift`, `AuditCore.swift`, `Checks/`) sits in
-`Tests/PhotoModelTests/AppAudit/` because `Package.swift` is frozen and only
-the Model test targets build on Linux. `project.yml` compiles that folder,
+The pure code (`AuditPixels.swift`, `AuditCore.swift`, `Checks/`) and its
+tests are the `AppAuditTests` target in `Tests/AppAuditTests/`, Foundation
+only, so Linux builds and tests them. `project.yml` compiles that folder,
 minus its `*Tests.swift`, into every journey bundle. Every name nests under
-`enum AppAudit`, so nothing shadows a PhotoModel type.
+`enum AppAudit`, so nothing shadows a type in a journey bundle.
 
 ## The ratchet
 

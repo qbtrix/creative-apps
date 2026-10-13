@@ -37,6 +37,7 @@ You never start it yourself for routine work. So:
 | `SuiteUI` | macOS | The shared design system: tokens, Liquid Glass primitives, the window shell. |
 | `<X>ModelTests` | Linux + macOS | Model tests. |
 | `SuiteUITests`, `AppSnapshotTests` | macOS | SuiteUI tests; the snapshot PNGs. |
+| `AppAuditTests` | Linux + macOS | The app audit's checks and their tests (docs/blueprints/app-audit.md). |
 
 X is Flare, Design, Photo, Library or Halo. Each app is one **line** (label
 `line:flare`, ...) and SuiteUI is its own line (`line:suiteui`).

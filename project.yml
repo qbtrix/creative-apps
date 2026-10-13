@@ -6,9 +6,9 @@
 # and each journey launches .build/apps/<X>App.app by path. scripts/ui-test
 # runs the whole thing. To add an app, add a <X>JourneyTests target below and
 # list it in the scheme. Every bundle also compiles the app audit
-# (UITests/Audit.swift, and the engine and checks in
-# Tests/PhotoModelTests/AppAudit, where Linux tests them; a new check file
-# there is picked up without touching this file; docs/blueprints/app-audit.md).
+# (UITests/Audit.swift, and the engine and checks in Tests/AppAuditTests, the
+# Linux test target that tests them; a new check file there is picked up
+# without touching this file; docs/blueprints/app-audit.md).
 name: CreativeApps
 options:
   bundleIdPrefix: org.creativesuite
@@ -27,7 +27,7 @@ targetTemplates:
     sources:
       - UITests/Journey.swift
       - UITests/Audit.swift
-      - path: Tests/PhotoModelTests/AppAudit
+      - path: Tests/AppAuditTests
         excludes: ["*Tests.swift", "**/*Tests.swift"]
       - UITests/${target_name}.swift
 targets:

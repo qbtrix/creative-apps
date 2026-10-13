@@ -3,11 +3,10 @@
 // ratio, and the "ink" of a frame in a screenshot: how strongly whatever is
 // drawn there stands off its background.
 //
-// It sits in PhotoModelTests only because Package.swift is frozen and the
-// Model test targets are the only ones that build on Linux; project.yml
-// compiles it into every UI journey bundle, where UITests/Audit.swift calls
-// it. Plain Swift and Foundation, nothing from PhotoModel, and every name nests
-// under `AppAudit`, so nothing here shadows a PhotoModel type in this target.
+// It lives in the AppAuditTests target, which builds and tests on Linux;
+// project.yml compiles it into every UI journey bundle, where
+// UITests/Audit.swift calls it. Plain Swift and Foundation, and every name
+// nests under `AppAudit`, so nothing here shadows a type in a journey bundle.
 import Foundation
 
 enum AppAudit {}
