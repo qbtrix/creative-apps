@@ -28,11 +28,10 @@ import Testing
         }
         workspace.endDrag()
         let (a, h) = (median(alone), median(held))
+        let (a2, h2) = ((a * 100).rounded() / 100, (h * 100).rounded() / 100)
         // A 1 ms floor keeps a sub-millisecond optimized dab from turning a
         // few copied tiles into a large ratio.
-        #expect(
-            h <= 2 * max(a, 1),
-            "a drag event took \(h.rounded()) ms with a copy alive vs \(a.rounded()) ms without (median of \(held.count))")
+        #expect(h <= 2 * max(a, 1), "median drag event: \(h2) ms with a copy alive, \(a2) ms without")
     }
 }
 
