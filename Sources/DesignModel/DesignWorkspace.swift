@@ -337,30 +337,40 @@ public struct DesignWorkspace: Sendable, Equatable {
     /// The next desktop-sized page, seeded with a "Desktop" frame the size of the page.
     /// New File and Add Page both start their page here.
     private mutating func nextPage() -> DesignPage {
-        pageCount += 1
-        while holds("page-\(pageCount)") { pageCount += 1 }
+        let held = heldIDs()
+        pageCount = firstFree("page-", after: pageCount, in: held)
         var page = DesignPage(id: "page-\(pageCount)", name: "Page \(pageCount)", frameWidth: 1440, frameHeight: 1024)
         let size = DesignRect(x: 0, y: 0, width: page.frameWidth, height: page.frameHeight)
-        page.nodes = [DesignNode(id: nextNodeID(), name: "Desktop", kind: .frame, frame: size)]
+        nodeCount = firstFree("node-", after: nodeCount, in: held)
+        page.nodes = [DesignNode(id: "node-\(nodeCount)", name: "Desktop", kind: .frame, frame: size)]
         return page
-    }
-
-    private mutating func nextNodeID() -> String {
-        nodeCount = nextNodeNumber()
-        return "node-\(nodeCount)"
     }
 
     /// The first number past the node counter whose "node-N" no page or node holds yet.
     private func nextNodeNumber() -> Int {
-        var number = nodeCount + 1
-        while holds("node-\(number)") { number += 1 }
+        firstFree("node-", after: nodeCount, in: heldIDs())
+    }
+
+    /// The first number past `counter` whose `prefix`N isn't in `held`. One set lookup per
+    /// step, so a long run of held ids past the cap costs one pass, not one rescan each (#304).
+    private func firstFree(_ prefix: String, after counter: Int, in held: Set<String>) -> Int {
+        var number = counter + 1
+        while held.contains("\(prefix)\(number)") { number += 1 }
         return number
     }
 
-    /// Whether a page or a node already uses `id`. Page and node ids share one namespace, as
+    /// Every page and node id in the document. Page and node ids share one namespace, as
     /// `DesignFile.check` reads them, so a minted id must avoid both kinds (#303).
-    private func holds(_ id: String) -> Bool {
-        pages.contains { $0.id == id } || findNode(id) != nil
+    private func heldIDs() -> Set<String> {
+        var held = Set(pages.map(\.id))
+        func collect(_ nodes: [DesignNode]) {
+            for node in nodes {
+                held.insert(node.id)
+                collect(node.children)
+            }
+        }
+        for page in pages { collect(page.nodes) }
+        return held
     }
 }
 
