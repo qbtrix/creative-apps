@@ -9,6 +9,8 @@
 #
 # Run: bash Tests/contact_sheet/test_contact_sheet.sh   (exit 0 = all pass)
 set -uo pipefail
+# CI sets these; the fixture sets its own, and must not write the job's summary.
+unset GITHUB_REPOSITORY GITHUB_SERVER_URL GITHUB_STEP_SUMMARY GITHUB_RUN_ID GITHUB_SHA GITHUB_REF_NAME
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 tmp=$(mktemp -d)
 trap 'rm -rf "$tmp"' EXIT
@@ -42,7 +44,7 @@ has() {
   if grep -qF -- "$3" "$2"; then echo "ok   $1"; else echo "FAIL $1: no '$3' in ${2##*/}"; fail=1; fi
 }
 
-GITHUB_STEP_SUMMARY="$tmp/summary.md" GITHUB_RUN_ID=42 GITHUB_SHA=0123456789abcdef GITHUB_REF_NAME=feat/x \
+GITHUB_STEP_SUMMARY="$tmp/summary.md" GITHUB_RUN_ID=42 GITHUB_SHA=0123456789abcdef GITHUB_REF_NAME=feat/x GITHUB_REPOSITORY=o/r \
   "$here/../../scripts/contact-sheet" "$s" "$tmp/baseline.json" "$tmp/snaps" >/dev/null || { echo "FAIL script exited $?"; exit 1; }
 page="$s/contact-sheet.html"
 has "first step, relative image" "$page" '<a href="photo-opened.png"><img src="photo-opened.png"'
@@ -52,7 +54,7 @@ has "violation shown" "$page" '<li><b>identifier</b> button '
 has "violation escaped" "$page" 'Undo &lt;all&gt;'  # the quotes become &apos; or &#39; by jq version
 has "violation summary" "$page" '4 violations: identifier 3, unnamed 1'
 has "unaudited step" "$page" 'launch</span> <span class="muted">not audited'
-has "header" "$page" 'branch <code>feat/x</code> · run 42'
+has "header" "$page" 'branch <code>feat/x</code> · run <a href="https://github.com/o/r/actions/runs/42">42</a>'
 has "distinct count on the baseline" "$page" '<td class="same"><b>2</b> = 2</td>'
 has "under the baseline" "$page" '<td class="down"><b>0</b> ↓ 1</td>'
 has "over the baseline" "$page" '<td class="up"><b>1</b> ↑ 0</td>'
