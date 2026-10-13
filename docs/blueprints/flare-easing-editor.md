@@ -81,7 +81,7 @@ focused handle by 0.01, Shift-arrow by 0.1. Each nudge is one move followed by
 with Tab in reading order and act with Space.
 
 **Accessibility identifiers** (the journey finds controls by these):
-`flare.easing.curve`, `flare.easing.handle1`, `flare.easing.handle2`,
+`flare.easing` (the curve well), `flare.easing.handle1`, `flare.easing.handle2`,
 `flare.easing.row.x1` ... `flare.easing.row.y2`. Chips and segment rows are
 found by their titles ("Ease In", "x 0 → 24"). Handles carry the labels
 "Handle 1" and "Handle 2" and their value as "x 0.42, y 0.00".
