@@ -1,7 +1,8 @@
 // LibraryCatalog.swift: the state behind Library's window: photos, collections
 // with counts, the grid's sort, cell size and selection, and the browse mode.
 // Linux-safe; LibraryApp changes it only through the methods here. Invariants:
-// counts follow `items`; the selection holds only ids the collection shows.
+// counts follow `items`; ids in `items` are unique; the selection holds only ids
+// the collection shows.
 
 /// A sidebar collection: a fixed source of photos.
 public struct LibraryCollection: Identifiable, Sendable, Hashable {
@@ -61,8 +62,9 @@ public struct LibraryCatalog: Sendable, Equatable {
     }
 
     /// Replaces the photos, clears the selection and returns to the grid.
+    /// A photo whose id is already taken gets the next free "<id>#2", "<id>#3", ...
     public mutating func load(_ photos: [PhotoItem]) {
-        items = photos
+        items = Self.uniquingIDs(photos)
         selection = []
         mode = .grid
         focusedItemID = nil
@@ -92,6 +94,23 @@ public struct LibraryCatalog: Sendable, Equatable {
         guard sortedItems.contains(where: { $0.id == id }) else { return }
         focusedItemID = id
         mode = .loupe
+    }
+
+    /// The photos with every id unique; the first photo with an id keeps it.
+    private static func uniquingIDs(_ photos: [PhotoItem]) -> [PhotoItem] {
+        var taken = Set<String>()
+        var nextSuffix: [String: Int] = [:]
+        return photos.map { photo in
+            var id = photo.id
+            var suffix = nextSuffix[photo.id] ?? 2
+            while taken.contains(id) {
+                id = photo.id + "#" + String(suffix)
+                suffix += 1
+            }
+            nextSuffix[photo.id] = suffix
+            taken.insert(id)
+            return id == photo.id ? photo : photo.withID(id)
+        }
     }
 
     /// The selected collection's photos, unsorted.
