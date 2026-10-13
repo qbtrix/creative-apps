@@ -3,7 +3,8 @@
 // Exposure and levels are Float like CoreRaster's parameters; sigma is Double.
 // Every change arrives as one AdjustmentEdit: values clamp to their range, NaN
 // is ignored, and a black point at or above the white point (or the reverse)
-// is refused, keeping the old value. Black and white snap to levelsStep, and
+// is refused, keeping the old value. A Gamma field commit of the value it
+// shows changes nothing. Black and white snap to levelsStep, and
 // the inspector shows them at levelsDecimals, so two distinct points never
 // read the same and a shown value types back in as itself. PhotoRender applies the enabled sections
 // to the canvas (exposure, levels, hue/saturation, then blur). Linux-safe.
@@ -19,6 +20,10 @@ public enum AdjustmentEdit: Sendable, Equatable {
     case blackPoint(Float)
     case whitePoint(Float)
     case gamma(Float)
+    /// The Gamma field's commit: a value equal to gamma as the field shows it
+    /// (gammaDecimals places) is the field re-sending its own text, so gamma
+    /// keeps its full precision and nothing is recorded.
+    case gammaField(Double)
     case blurSigma(Double)
     case hue(Double)
     case saturation(Double)
@@ -36,6 +41,8 @@ public struct AdjustmentSettings: Sendable, Equatable {
     /// The places that show every levelsStep value exactly.
     public static let levelsDecimals = 3
     public static let gammaRange: ClosedRange<Float> = 0.1...10
+    /// The places the Gamma field shows.
+    public static let gammaDecimals = 2
     /// Up to 20 px: the canvas renders a blur tile by tile with a 3-sigma
     /// margin, and past 20 that margin costs more than the tile.
     public static let sigmaRange: ClosedRange<Double> = 0...20
@@ -82,6 +89,8 @@ public struct AdjustmentSettings: Sendable, Equatable {
             if let value = Self.levelsValue(value), value > blackPoint { whitePoint = value }
         case .gamma(let value):
             gamma = Self.clamp(value, to: Self.gammaRange) ?? gamma
+        case .gammaField(let value):
+            if !Self.showsAs(value, gamma) { apply(.gamma(Float(value))) }
         case .blurSigma(let value):
             blurSigma = Self.clamp(value, to: Self.sigmaRange) ?? blurSigma
         case .hue(let value):
@@ -120,6 +129,14 @@ public struct AdjustmentSettings: Sendable, Equatable {
     private static func levelsValue(_ value: Float) -> Float? {
         guard let clamped = clamp(value, to: levelsRange) else { return nil }
         return Float((Double(clamped) / levelsStep).rounded() * levelsStep)
+    }
+
+    /// Whether `value` is `gamma` rounded to gammaDecimals, halves away from
+    /// zero as the field formats it. NaN never is.
+    private static func showsAs(_ value: Double, _ gamma: Float) -> Bool {
+        var scale = 1.0
+        for _ in 0..<gammaDecimals { scale *= 10 }
+        return abs(value - (Double(gamma) * scale).rounded() / scale) < 1e-9
     }
 
     /// `value` inside `range`, or nil for NaN.
