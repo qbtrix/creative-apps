@@ -31,3 +31,9 @@ import Testing
     }
     #expect(layer.name == "Background")
 }
+
+@Test func noImageMessageNamesOpenAndNewImage() {
+    let message = PhotoInspectorContent.noImageMessage
+    #expect(message.contains("Open"))
+    #expect(message.contains("File > New Image"))
+}
