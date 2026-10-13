@@ -37,3 +37,9 @@ import Testing
     #expect(message.contains("Open"))
     #expect(message.contains("File > New Image"))
 }
+
+@Test func noImageTitleAndSymbolMatchTheCanvasEmptyState() {
+    // The canvas and the inspector both show this pair; pin it so they can't drift apart.
+    #expect(PhotoInspectorContent.noImageTitle == "No Image Open")
+    #expect(PhotoInspectorContent.noImageSymbol == "photo.on.rectangle")
+}

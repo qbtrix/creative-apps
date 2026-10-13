@@ -141,7 +141,7 @@ struct PhotoCanvas: View {
                 }
             } else {
                 EmptyStateView(
-                    "No Image Open", systemImage: "photo.on.rectangle",
+                    PhotoInspectorContent.noImageTitle, systemImage: PhotoInspectorContent.noImageSymbol,
                     message: "Open a photo, drop one here, or make a new image with File > New Image.",
                     action: ToolbarAction("Open…", systemImage: "folder") { perform(.open) })
             }

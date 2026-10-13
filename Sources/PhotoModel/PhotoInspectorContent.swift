@@ -19,6 +19,11 @@ extension PhotoWorkspace {
 }
 
 extension PhotoInspectorContent {
+    /// The "No Image" empty state's title and SF Symbol, shared by the canvas
+    /// and the inspector so both panes name the same state the same way.
+    public static let noImageTitle = "No Image Open"
+    public static let noImageSymbol = "photo.on.rectangle"
+
     /// The "No Image" empty state's next step. It names only commands Photo
     /// has (Open and File > New Image), as the canvas beside it does.
     public static let noImageMessage = "Open a photo or make one with File > New Image to adjust it."
