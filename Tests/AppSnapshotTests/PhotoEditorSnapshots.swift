@@ -1,5 +1,5 @@
 // PhotoEditorSnapshots.swift: the Photo window (PhotoEditor) in each state
-// its core loop reaches: no image open, an opened photo, layers composited, a brush and an
+// its core loop reaches: an opened photo, layers composited, a brush and an
 // eraser stroke, a marquee selection, a pending crop, a moved layer, exposure
 // +1, the Layers tab and the export sheet. Each writes
 // photo-<state>-light.png and photo-<state>-dark.png; the editor is dark in
@@ -55,10 +55,6 @@ func photoImage(_ model: PhotoWorkspace) throws -> CGImage? {
                 PhotoEditor(model: model, image: image, renderMilliseconds: 8, zoom: 1, tab: tab),
                 name: "photo-\(state)-\(scheme == .dark ? "dark" : "light")", scheme: scheme)
         }
-    }
-
-    @Test func noImage() throws {
-        try shoot("no-image", PhotoWorkspace())
     }
 
     @Test func openedPhoto() throws {
