@@ -5,7 +5,9 @@
 // The slider drags through snappedGamma, whose detent band around the
 // midpoint gives exactly 1, so a drag back to the middle undoes the edit.
 // The band is a fixed number of drag points wide (detentPoints), not a share
-// of the track, so it is as easy to hit at any inspector width.
+// of the track, so it is as easy to hit at any inspector width. A discrete
+// step (arrow key, VoiceOver) goes through steppedPosition, which steps out of
+// the band in one press instead of landing back on 1 (#584).
 // Invariants: both directions clamp to their range, NaN gives the identity,
 // and the endpoints and midpoint map exactly. Linux-safe.
 #if canImport(FoundationEssentials)
@@ -62,6 +64,22 @@ public enum GammaTrack {
     /// (|position| <= detent), otherwise gamma(atPosition:).
     public static func snappedGamma(atPosition position: Double) -> Double {
         abs(position) <= detent ? 1 : gamma(atPosition: position)
+    }
+
+    /// The track position one discrete step (an arrow key or VoiceOver's
+    /// increment and decrement) of `delta` moves to from `position`. From
+    /// inside the detent (gamma 1) a step that would land inside it again
+    /// jumps to the first position on its grid past the band, so a press
+    /// always leaves 1; any other step is position + delta, clamped, so a
+    /// press into the band from outside still snaps to 1 (snappedGamma).
+    /// NaN, zero and infinite deltas leave the position where it is (clamped;
+    /// a NaN position is the midpoint).
+    public static func steppedPosition(from position: Double, by delta: Double) -> Double {
+        let start = position.isNaN ? 0 : clamp(position)
+        guard delta.isFinite, delta != 0 else { return start }
+        let next = clamp(start + delta)
+        guard abs(start) <= detent, abs(next) <= detent else { return next }
+        return clamp(delta > 0 ? detent + delta : -detent + delta)
     }
 
     private static func clamp(_ value: Double) -> Double {
