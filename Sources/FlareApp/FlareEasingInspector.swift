@@ -7,6 +7,7 @@
 // in the window. It only reads the editor and calls the closures; it never
 // mutates the editor. Every drag, nudge or typed value ends in `onEndDrag`,
 // so each is one undo step. Owns presentation state only: the hovered row.
+// It brings no side gutter of its own; the inspector it sits in supplies one.
 import FlareCore
 import FlareModel
 import SuiteUI
@@ -29,7 +30,6 @@ struct FlareEasingInspector<Editor: EasingEditing>: View {
             header("Easing")
             easing
         }
-        .padding(.horizontal, SuiteSpacing.m)
     }
 
     private func header(_ title: String) -> some View {

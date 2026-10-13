@@ -39,6 +39,7 @@ private struct EasingPanel: View {
         FlareEasingInspector(
             editor: editor, onSelect: { _ in }, onPreset: { _ in }, onMoveHandle: { _, _ in }, onEndDrag: {},
             focusedHandle: focus)
+            .padding(.horizontal, SuiteSpacing.m)
             .padding(.bottom, SuiteSpacing.m)
             .frame(width: SuiteSize.inspectorWidth.ideal, alignment: .topLeading)
             .background(SuiteColor.panel)
