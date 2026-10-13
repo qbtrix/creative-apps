@@ -8,8 +8,9 @@ greys and traced them to `EditorBarLabelStyle` in
 overrode the disabled dimming (#233 fixed it before merging). The app audit
 catches faults of that kind mechanically. At every journey step it walks the
 window's accessibility tree and the screen's pixels, counts violations per
-check, and fails when an app's count moves off a committed baseline. The
-baseline only goes down, and the goal is zero.
+check, and fails when an app's count rises past a committed baseline. When a
+count falls, CI on dev lowers the baseline to it. The baseline only goes
+down, and the goal is zero.
 
 The model is an illustration factory whose audit runs 13 checks that every
 figure must pass at zero. The rule carried over from it: **rules from
@@ -21,8 +22,8 @@ A check with no fault behind it doesn't get built.
 - A registry of checks, one file each, run on every window shot of every
   journey.
 - A JSON report per audited screen in the `ui-screens` artifact.
-- A baseline per app per check in `UITests/audit-baseline.json`, enforced in
-  both directions.
+- A baseline per app per check in `UITests/audit-baseline.json`: a rise fails,
+  a fall is written back by CI.
 
 **Non-goals.** Fixing the apps (each finding is a `needs-ui` issue). Dark
 mode, menus in the menu bar, keyboard focus order.
@@ -76,7 +77,10 @@ whole-screen shot (an open menu) isn't audited. Each audit:
 
 The runner is sandboxed with read-only `/`: it reads the baseline from the
 repo, and the report leaves as an attachment that `scripts/ui-test` exports
-into `ui-screens`. Audit failures don't stop a journey, so one run reports
+into `ui-screens`. So do the counts: each app's last journey attaches its
+tally as `counts-<app>`, and `scripts/ui-test` merges them into
+`audit-counts.json`, `{ "<app>": { "<check>": n } }` with every check of the
+app's baseline line listed, 0 included. Audit failures don't stop a journey, so one run reports
 every screen. An audit costs well under a second; on the first run the
 journeys took as long as without it.
 
@@ -99,16 +103,30 @@ frame. Then:
 
 - **Up.** When a new violation takes a check past the app's baseline, the
   audit at that screen fails, naming the check, its fault and the element.
-- **Down.** The class's last test (run order is by name) closes the tally in
-  its teardown; a check under its baseline fails there: "lower it to N".
-  That last test must launch a Journey. If an earlier journey failed, its
-  later screens weren't audited, so fix that first.
+- **Down.** A count under its baseline doesn't fail. The class's last test
+  (run order is by name) attaches the app's counts in its teardown, so that
+  test must launch a Journey. On dev, after a green macOS job, the `Audit
+  lower` job in `.github/workflows/ci.yml` runs `scripts/audit-lower`: when
+  some count is under its baseline and none is over, it writes the measured
+  numbers into the baseline (a check at 0 leaves its app's line) and pushes
+  that one commit, "test(audit): lower baselines to the measured counts" with
+  an old → new table, straight to dev. If dev moved during the run, it fetches
+  dev and lowers again on top, up to 3 retries, judging only the checks whose
+  baseline is still the number the run measured against; one raised, lowered
+  or added since is left for the next run. `scripts/audit-lower` refuses any
+  count over its baseline, so the job can only tighten the audit. A red macOS
+  job lowers nothing: a failed journey leaves its later screens unaudited, so
+  its counts would be too low.
 - A check missing from a listed app has baseline 0. An app missing from the
-  file is recorded, not judged.
+  file is recorded, not judged, and never added.
 
-Both directions fail, so the file always holds the truth, and a measurement
-that flickers fails too. That is why the limits have wide margins; the
-report's `samples` show how far each measurement sits from its limit.
+A rise fails at once, so a new fault can't land quietly. A fall needs no
+one: the Linux workers can't run the journeys, so they couldn't lower the
+file themselves, and before the `Audit lower` job every real improvement
+turned dev red until someone hand-lowered it. A measurement that flickers can still
+bite: a lowered count that comes back fails the next run as a rise. That is
+why the limits have wide margins; the report's `samples` show how far each
+measurement sits from its limit.
 
 ## Growing the audit
 
@@ -121,7 +139,9 @@ The audit grows with the apps. Agents:
   still stricter than no check. Its `seeded` screen must fail it: `everyCheckFlagsItsSeed` runs every registered check
   on its own seed on Linux, and a check that can't fail can't land. Edge
   cases it must let pass go in `AuditChecksTests`.
-- **lower baselines freely.** A fix lowers its count in the same PR.
+- **let CI lower baselines.** A fix needn't touch the baseline: the next dev
+  run measures the lower count and pushes the lower baseline. Lowering it in
+  the fix's own PR is still fine, and the lane takes it.
 - **audit every journey step.** `shot` does it already; a step that doesn't
   shoot calls `audit("step")`.
 

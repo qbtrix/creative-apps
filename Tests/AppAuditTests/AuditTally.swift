@@ -1,9 +1,10 @@
 // AuditTally.swift: the app audit's ratchet (docs/blueprints/app-audit.md).
 // One app's distinct violations per check across its audited screens, held
-// against the app's line in UITests/audit-baseline.json in both directions:
-// a count that rises fails at the screen that raised it, a count that fell
-// fails when the app's journeys end, until the baseline comes down with it.
-// Placement and naming: see AuditPixels.swift.
+// against the app's line in UITests/audit-baseline.json: a count that rises
+// fails at the screen that raised it. A count that fell doesn't fail; the
+// app's counts leave the run as audit-counts.json, and CI on dev lowers the
+// baseline to them (scripts/audit-lower). Placement and naming: see
+// AuditPixels.swift.
 extension AppAudit {
     /// The distinct violations of one app's audited screens, per check, held
     /// against the app's line in the baseline (nil: the app isn't listed, so
@@ -39,16 +40,12 @@ extension AppAudit {
             return failures
         }
 
-        /// After the app's last journey: one message per check now under its
-        /// baseline, which must come down to match.
-        func lower(checks: [any Check] = AppAudit.checks) -> [String] {
-            guard let baseline else { return [] }
-            return baseline.keys.sorted().compactMap { id in
-                let count = seen[id, default: []].count, allowed = baseline[id, default: 0]
-                guard count < allowed else { return nil }
-                return "\(app) \(id) (\(fault(id, checks))): \(count) violations, under the baseline \(allowed). "
-                    + "Lower it to \(count) in UITests/audit-baseline.json."
-            }
+        /// Distinct violations per check: every check seen, and every check
+        /// in the baseline (0 when none was seen), for audit-counts.json.
+        var counts: [String: Int] {
+            var counts = (baseline ?? [:]).mapValues { _ in 0 }
+            for (id, elements) in seen { counts[id] = elements.count }
+            return counts
         }
 
         private func fault(_ id: String, _ checks: [any Check]) -> String {

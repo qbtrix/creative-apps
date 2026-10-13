@@ -1,8 +1,8 @@
 // AuditTallyTests.swift: the app audit's ratchet. A violation counts once
 // per app however many screens show it; a new one past the baseline fails
-// and names its check and fault; a count that fell asks for a lower
-// baseline; an unlisted app is not judged. Runs on Linux and macOS
-// (docs/blueprints/app-audit.md).
+// and names its check and fault; a count that fell doesn't fail, and the
+// counts list every baseline check for scripts/audit-lower; an unlisted app
+// is not judged. Runs on Linux and macOS (docs/blueprints/app-audit.md).
 import Testing
 
 private func rect(_ x: Double, _ y: Double, _ w: Double, _ h: Double) -> AppAudit.Rect {
@@ -38,7 +38,7 @@ private func report(_ screen: String, _ check: String, _ names: [String]) -> App
     #expect(tally.add(report("photo-a", "identifier", ["Undo", "Redo"])).isEmpty)
     #expect(tally.add(report("photo-b", "identifier", ["Undo", "Redo"])).isEmpty)
     #expect(tally.seen["identifier"]?.count == 2)
-    #expect(tally.lower().isEmpty)
+    #expect(tally.counts == ["identifier": 2])
 }
 
 @Test func tallyFailsANewViolationPastTheBaselineAndNamesItsFault() throws {
@@ -50,19 +50,16 @@ private func report(_ screen: String, _ check: String, _ names: [String]) -> App
     #expect(failure.contains("2 violations, baseline 1. New on photo-a: button 'Redo' at [50,0,40,20], d."))
 }
 
-@Test func tallyAsksToLowerACountThatDropped() {
-    var tally = AppAudit.Tally(app: "photo", baseline: ["identifier": 3, "overlap": 0])
-    _ = tally.add(report("photo-a", "identifier", ["Undo"]))
-    #expect(tally.lower() == [
-        "photo identifier (fault \(AppAudit.Identifier().fault)): 1 violations, under the baseline 3. "
-            + "Lower it to 1 in UITests/audit-baseline.json.",
-    ])
+@Test func countThatDroppedDoesNotFailAndEveryBaselineCheckIsCounted() {
+    var tally = AppAudit.Tally(app: "photo", baseline: ["identifier": 3, "overlap": 1])
+    #expect(tally.add(report("photo-a", "identifier", ["Undo"])).isEmpty)
+    #expect(tally.counts == ["identifier": 1, "overlap": 0])
 }
 
 @Test func tallyJudgesNothingForAnUnlistedApp() {
     var tally = AppAudit.Tally(app: "photo", baseline: nil)
     #expect(tally.add(report("photo-a", "identifier", ["Undo"])).isEmpty)
-    #expect(tally.lower().isEmpty)
+    #expect(tally.counts == ["identifier": 1])
 }
 
 @Test func checkMissingFromTheBaselineHasBaselineZero() {

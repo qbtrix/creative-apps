@@ -133,8 +133,9 @@ every step.
   checks (disabled controls look dimmer, no overlapping controls, text
   contrast, identifiers, nothing off the window, every control named) and
   counts each app's distinct violations against `UITests/audit-baseline.json`.
-  A count may only go down: a fix lowers it in the same PR, and raising one
-  needs the captain's review. New checks come from faults
+  A count may only go down: a rise fails the journeys and raising the
+  baseline needs the captain's review; a fall is written back by CI, which
+  pushes the lower baseline to `dev`. New checks come from faults
   (docs/blueprints/app-audit.md, Growing the audit). Gate: the `macOS` job.
 - **One page per run: the contact sheet.** After the journeys, the `macOS`
   job runs `scripts/contact-sheet`, which writes `contact-sheet.html` into

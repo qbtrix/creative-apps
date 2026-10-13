@@ -5,13 +5,15 @@
 // (Tests/AppAuditTests/, compiled in by project.yml), the report
 // attached as "audit-<app>-<step>.json", and the app's tally of distinct
 // violations held against its line in UITests/audit-baseline.json. A count
-// that rises fails at the screen that raised it; the bundle's last test
-// fails for a count that fell (see `Journey.init`).
+// that rises fails at the screen that raised it. A count that fell doesn't
+// fail: the bundle's last test attaches the app's counts as "counts-<app>"
+// (see `Journey.init`), scripts/ui-test merges them into audit-counts.json,
+// and CI on dev pushes the baseline down to them.
 //
 // The test runner is sandboxed with read-only access to "/": it reads the
-// baseline from the repo, and the report leaves only as an attachment, which
-// scripts/ui-test exports into ui-screens. An audit failure doesn't stop the
-// journey, so one run reports every screen.
+// baseline from the repo, and the reports and counts leave only as
+// attachments, which scripts/ui-test exports into ui-screens. An audit
+// failure doesn't stop the journey, so one run reports every screen.
 import AppKit
 import XCTest
 
@@ -39,23 +41,27 @@ extension Journey {
             screen, app: name, window: node(tree), display: AppAudit.Rect(x: 0, y: 0, width: width, height: height),
             image: image, scale: image.map { Double($0.width) / width } ?? 1)
 
-        let encoder = JSONEncoder()
-        encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
-        if let json = try? encoder.encode(report) {
-            let attachment = XCTAttachment(data: json, uniformTypeIdentifier: "public.json")
-            attachment.name = "audit-\(screen)"
-            attachment.lifetime = .keepAlways
-            test.add(attachment)
-        }
+        attach(report, as: "audit-\(screen)")
         record(AuditRun.tallies[name]?.add(report) ?? [])
     }
 
-    /// After the app's last journey: fails for each check whose distinct
-    /// count fell under the baseline, so the baseline comes down with it.
-    func auditLower() {
+    /// After the app's last journey: attaches the app's distinct counts per
+    /// check as "counts-<app>", `{ "<app>": { "<check>": n } }`. A count under
+    /// the baseline doesn't fail; CI on dev lowers the baseline to it.
+    func auditCounts() {
         guard let tally = AuditRun.tallies[name] else { return }
-        print("audit \(name): \(tally.seen.mapValues(\.count).sorted { $0.key < $1.key })")
-        record(tally.lower())
+        print("audit \(name): \(tally.counts.sorted { $0.key < $1.key })")
+        attach([name: tally.counts], as: "counts-\(name)")
+    }
+
+    private func attach(_ value: some Encodable, as attachmentName: String) {
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
+        guard let json = try? encoder.encode(value) else { return }
+        let attachment = XCTAttachment(data: json, uniformTypeIdentifier: "public.json")
+        attachment.name = attachmentName
+        attachment.lifetime = .keepAlways
+        test.add(attachment)
     }
 
     /// The main screen once two shots a quarter second apart match (at most

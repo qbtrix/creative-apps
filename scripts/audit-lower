@@ -1,0 +1,66 @@
+#!/usr/bin/env bash
+# scripts/audit-lower: the app audit's way down (docs/blueprints/app-audit.md,
+# "The ratchet"). Holds the counts the macOS journeys measured (audit-counts.json
+# from scripts/ui-test: app -> check -> distinct violations) against the
+# baseline and decides:
+#   - a count over its baseline: prints each on stderr, exits 1, writes nothing
+#     (the journeys already failed at the screen that raised it);
+#   - counts under their baseline and none over: writes the lower numbers into
+#     BASELINE in place (a check that reaches 0 leaves its app's line, the
+#     file's way of writing 0) and prints one markdown row per change,
+#     `| app | check | old | new |`;
+#   - everything on its baseline: prints nothing and exits 0.
+# Only apps in both files are judged: an app the run didn't measure keeps its
+# line, and an app missing from the baseline stays unjudged. Within a measured
+# app, a check missing from either file counts as 0. The file keeps its
+# one-line-per-app layout and key order, so the diff shows only what moved.
+#
+# MEASURED is the baseline the counts were measured against (default:
+# BASELINE). When BASELINE has moved on since, only checks whose count is
+# still what it was in MEASURED are judged: a check raised, lowered or added
+# since then was never measured against its new number, so it's left for the
+# next run.
+#
+# ci.yml's audit-lower job runs it on dev after a green macOS job and pushes
+# the lower baseline to dev; Tests/audit_lower tests it. Needs jq. bash 3.2
+# compatible.
+#
+#   scripts/audit-lower [BASELINE [COUNTS [MEASURED]]]
+#   defaults: UITests/audit-baseline.json  .build/ui-screens/audit-counts.json  BASELINE
+set -euo pipefail
+command -v jq >/dev/null || { echo "audit-lower: install jq" >&2; exit 1; }
+baseline=${1:-UITests/audit-baseline.json} counts=${2:-.build/ui-screens/audit-counts.json} measured=${3:-${1:-UITests/audit-baseline.json}}
+[[ -f "$baseline" ]] || { echo "audit-lower: no baseline $baseline" >&2; exit 1; }
+[[ -f "$counts" ]] || { echo "audit-lower: no counts $counts (did the journeys run?)" >&2; exit 1; }
+[[ -f "$measured" ]] || { echo "audit-lower: no measured baseline $measured" >&2; exit 1; }
+
+shape='type == "object" and all(.[]; type == "object" and all(.[]; type == "number"))'
+for f in "$baseline" "$counts" "$measured"; do
+  jq -e "$shape" "$f" >/dev/null 2>&1 || { echo "audit-lower: $f is not app -> check -> count" >&2; exit 1; }
+done
+
+# Every judged (app, check) pair whose count moved: {app, check, was, now}.
+moves=$(jq -c --slurpfile c "$counts" --slurpfile m "$measured" '
+  . as $b | $c[0] as $c | $m[0] as $m
+  | [ keys_unsorted[] as $app | select($c[$app] != null and $m[$app] != null)
+      | ($b[$app] + $c[$app] | keys_unsorted | unique)[] as $check
+      | {app: $app, check: $check, was: ($b[$app][$check] // 0), now: ($c[$app][$check] // 0)}
+      | select(.was == ($m[$app][$check] // 0) and .was != .now) ]' "$baseline")
+
+raises=$(jq -r '.[] | select(.now > .was) | "\(.app) \(.check) \(.was) -> \(.now)"' <<<"$moves")
+if [[ -n "$raises" ]]; then
+  echo "audit-lower: counts over the baseline, nothing written:" >&2
+  echo "$raises" >&2
+  exit 1
+fi
+[[ "$moves" != "[]" ]] || exit 0
+
+tmp=$(mktemp)
+trap 'rm -f "$tmp"' EXIT
+jq -r --argjson moves "$moves" '
+  reduce $moves[] as $m (.; if $m.now == 0 then del(.[$m.app][$m.check]) else .[$m.app][$m.check] = $m.now end)
+  | "{\n" + ([to_entries[] | "  \(.key | tojson): "
+      + (if .value == {} then "{}" else "{ " + ([.value | to_entries[] | "\(.key | tojson): \(.value)"] | join(", ")) + " }" end)]
+      | join(",\n")) + "\n}"' "$baseline" >"$tmp"
+mv "$tmp" "$baseline"
+jq -r '.[] | "| \(.app) | \(.check) | \(.was) | \(.now) |"' <<<"$moves"
