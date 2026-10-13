@@ -1,6 +1,8 @@
 // FakeShapes.swift: ShapeBuilding by hand (docs/blueprints/flare.md, 6.3). Rectangles and ellipses are polygons, a pen
-// path is straight segments with dragged anchors marked smooth. Each write is one group named by section 2, of real
-// FlareCore commands or `FixtureEdit` where FlareCore has none (path edit, text and instance move, instance delete).
+// path is straight segments with dragged anchors marked smooth; a click on its last anchor adds nothing, it closes on
+// 3 distinct anchors, and one with fewer than 2 distinct points doesn't commit. Each write is one group named by
+// section 2, of real FlareCore commands or `FixtureEdit` where FlareCore has none (path edit, text and instance
+// move, instance delete).
 // Box gestures follow the not-animated / animated rule; a delete that empties a layer removes the layer. The pasteboard holds `AddLayer` envelopes from
 // `CommandRegistry.builtIn`. With `unavailable` set, reads are empty and every write throws it.
 #if canImport(FoundationEssentials)
@@ -21,6 +23,8 @@ public struct FakeShapes: ShapeBuilding {
     public static let ellipseSides = 32
     /// How near the first pen anchor a click closes the path, in scene points.
     public static let closeDistance = 4.0
+    /// What `commit` throws for a pen path with fewer than two distinct points, which has no extent.
+    public static let degeneratePath = "A path needs two distinct points."
 
     private func available() throws { if let unavailable { throw NotBuilt(reason: unavailable) } }
     public func unavailableHelp(for tool: FlareTool) -> String? { unavailable }
@@ -46,8 +50,9 @@ public struct FakeShapes: ShapeBuilding {
     private func pen(at point: Point, dragged: Bool, previous: ShapeDraft?) -> ShapeDraft {
         var draft = previous.flatMap { $0.tool == .pen && !$0.isClosed ? $0 : nil }
             ?? ShapeDraft(tool: .pen, shape: FlareShape(points: []))
+        if draft.anchors.last == point { return draft }  // a click on the last anchor adds no zero-length segment
         let (dx, dy) = (point.x - (draft.anchors.first?.x ?? .infinity), point.y - (draft.anchors.first?.y ?? 0))
-        if draft.anchors.count >= 3, (dx * dx + dy * dy).squareRoot() <= Self.closeDistance {
+        if Self.distinct(draft.anchors) >= 3, (dx * dx + dy * dy).squareRoot() <= Self.closeDistance {
             draft.isClosed = true
         } else {
             if dragged { draft.smoothAnchors.insert(draft.anchors.count) }
@@ -64,6 +69,9 @@ public struct FakeShapes: ShapeBuilding {
         let kind = switch draft.tool {
         case .rectangle: "Rectangle"; case .ellipse: "Ellipse"; case .pen: "Path"
         case .select, .directSelect: throw CommandError.invalidDocument("Select doesn't draw.")
+        }
+        if draft.tool == .pen, Self.distinct(draft.anchors) < 2 || Self.distinct(draft.shape.points) < 2 {
+            throw CommandError.invalidDocument(Self.degeneratePath)
         }
         let owner = LayerOwner.scene(sceneID)
         let above = try Self.anchor(aboveLayerID, owner: owner, in: engine.document)
@@ -277,6 +285,10 @@ public struct FakeShapes: ShapeBuilding {
     private static func index(_ a: StageAddress) -> Int { switch a.item { case .shape(let i), .text(let i), .instance(let i): i } }
     private static func end(_ e: PathElement) -> Point? {
         switch e { case .move(let p), .line(let p), .quad(_, let p), .cubic(_, _, let p): p; case .close: nil }
+    }
+    /// How many different points `points` holds.
+    private static func distinct(_ points: [Point]) -> Int {
+        points.enumerated().filter { !points.prefix($0.offset).contains($0.element) }.count
     }
     /// `a / b`, or 1 when that is not a finite number.
     private static func ratio(_ a: Double, _ b: Double) -> Double { b != 0 && (a / b).isFinite ? a / b : 1 }
