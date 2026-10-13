@@ -205,6 +205,7 @@ public struct FlareWorkspace: Sendable, Equatable {
         }
         engine = next
         layerError = nil
+        isDirty = true
         if let id = selectedLayerID, selectedScene?.layers.contains(where: { $0.id == id }) != true {
             selectedLayerID = nil
         }
