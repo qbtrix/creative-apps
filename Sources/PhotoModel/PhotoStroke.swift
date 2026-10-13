@@ -9,7 +9,8 @@
 //                  never build past the stroke's opacity. The brush lays the
 //                  paint color over the pixels as they were before the stroke;
 //                  the eraser scales them (color and alpha) toward transparent.
-//                  Undo keeps the changed tiles ("Paint", "Erase").
+//                  Undo keeps the tiles the stroke painted, as they were, so
+//                  no event walks the whole layer ("Paint", "Erase").
 //   marquee        the rectangle from the press to the pointer is the
 //                  selection; a click deselects.
 //   crop           the same rectangle is the pending crop (Apply Crop commits
@@ -27,12 +28,12 @@ struct PhotoStroke: Sendable, Equatable {
     var tool: PhotoTool
     var start: Mask.Point
     var last: Mask.Point
-    /// Brush and eraser: the layer, its pixels before the stroke, each pixel's
-    /// coverage so far (row-major, the layer's size), and the distance walked
-    /// since the last dab.
+    /// Brush and eraser: the layer; by tile index, each painted tile as it
+    /// was before the stroke and its pixels' coverage so far (row-major, the
+    /// tile's size); and the distance walked since the last dab.
     var layerID: PhotoLayer.ID?
-    var base: PixelBuffer?
-    var coverage: [Float] = []
+    var before: [Int: PixelBuffer] = [:]
+    var coverage: [Int: [Float]] = [:]
     var walked: Double = 0
     /// Move: the layer list before the drag.
     var layersBefore: [PhotoLayer] = []
@@ -67,10 +68,8 @@ extension PhotoWorkspace {
         stroke = nil
         switch done.tool {
         case .brush, .eraser:
-            guard let id = done.layerID, let base = done.base, let after = pixels[id],
-                let diff = try? TileDiff(before: base, after: after), diff.tileCount > 0
-            else { return }
-            record(.pixels(layer: id, diff: diff, forward: false), named: done.tool == .brush ? "Paint" : "Erase")
+            guard let id = done.layerID, !done.before.isEmpty else { return }
+            record(.tiles(layer: id, done.before), named: done.tool == .brush ? "Paint" : "Erase")
         case .marquee, .crop:
             break
         case .move:
@@ -123,12 +122,8 @@ extension PhotoWorkspace {
     /// Lays the dabs from the stroke's last point to `end` (and the first dab,
     /// when the stroke has just begun) on the stroke's layer.
     private mutating func paint(_ current: inout PhotoStroke, to end: Mask.Point, begun: Bool) {
-        guard let id = current.layerID, let at = index(of: id), var buffer = pixels.removeValue(forKey: id) else {
+        guard let id = current.layerID, let at = index(of: id), var tiled = pixels.removeValue(forKey: id) else {
             return
-        }
-        if begun {
-            current.base = buffer
-            current.coverage = [Float](repeating: 0, count: buffer.width * buffer.height)
         }
         var centers: [Mask.Point] = begun ? [current.start] : []
         let along = Self.dabCenters(
@@ -138,25 +133,24 @@ extension PhotoWorkspace {
         var touched = PixelRect(x: 0, y: 0, width: 0, height: 0)
         for center in centers {
             // Every index is inside the buffer and every value finite, so a dab can't throw.
-            if let area = try? dab(at: center, on: &buffer, layer: layers[at], stroke: &current) {
+            if let area = try? dab(at: center, on: &tiled, layer: layers[at], stroke: &current) {
                 touched = touched.union(area)
             }
         }
-        pixels[id] = buffer
+        pixels[id] = tiled
         if !touched.isEmpty { touch(.region(touched)) }
     }
 
     /// One dab centered at `center` (canvas pixels). Returns the canvas region
-    /// it changed, or nil when it missed the layer.
+    /// it covers, or nil when it missed the layer.
     private func dab(
-        at center: Mask.Point, on buffer: inout PixelBuffer, layer: PhotoLayer, stroke: inout PhotoStroke
+        at center: Mask.Point, on tiled: inout TiledPixels, layer: PhotoLayer, stroke: inout PhotoStroke
     ) throws -> PixelRect? {
-        guard let base = stroke.base else { return nil }
         let radius = toolOptions.size / 2
         let cx = center.x - Double(layer.offsetX), cy = center.y - Double(layer.offsetY)
         let box = PixelRect(
             from: Mask.Point(x: cx - radius, y: cy - radius), to: Mask.Point(x: cx + radius, y: cy + radius))
-        guard let area = box.intersection(PixelRect(x: 0, y: 0, width: buffer.width, height: buffer.height)) else {
+        guard let area = box.intersection(PixelRect(x: 0, y: 0, width: tiled.width, height: tiled.height)) else {
             return nil
         }
         // Coverage falls from 1 to 0 over the soft edge: the outer (1 - hardness)
@@ -165,22 +159,35 @@ extension PhotoWorkspace {
         let opacity = Float(toolOptions.opacityPercent / 100)
         let paint = toolOptions.linearColor
         let erasing = stroke.tool == .eraser
-        for y in area.y..<area.maxY {
-            for x in area.x..<area.maxX {
-                let dx = Double(x) + 0.5 - cx, dy = Double(y) + 0.5 - cy
-                let t = min(max((radius - (dx * dx + dy * dy).squareRoot()) / softness, 0), 1)
-                let coverage = Float(t * t * (3 - 2 * t))
-                let i = y * buffer.width + x
-                guard coverage > stroke.coverage[i] else { continue }
-                stroke.coverage[i] = coverage
-                let a = coverage * opacity, keep = 1 - coverage * opacity
-                let p = try base.pixel(x: x, y: y)
-                let out = erasing
-                    ? RGBA(r: p.r * keep, g: p.g * keep, b: p.b * keep, a: p.a * keep)
-                    : RGBA(r: paint.r * a + p.r * keep, g: paint.g * a + p.g * keep, b: paint.b * a + p.b * keep,
-                           a: a + p.a * keep)
-                try buffer.setPixel(x: x, y: y, out)
+        for i in tiled.tileIndices(in: area) where tiled.tiles.indices.contains(i) {
+            let rect = tiled.tileRect(i)
+            guard let part = area.intersection(rect) else { continue }
+            // The tile as it was before the stroke: kept from its first dab on.
+            let base = stroke.before[i] ?? tiled.tiles[i]
+            var coverage = stroke.coverage.removeValue(forKey: i) ?? [Float](repeating: 0, count: rect.width * rect.height)
+            var painted = false
+            for y in part.y..<part.maxY {
+                for x in part.x..<part.maxX {
+                    let dx = Double(x) + 0.5 - cx, dy = Double(y) + 0.5 - cy
+                    let t = min(max((radius - (dx * dx + dy * dy).squareRoot()) / softness, 0), 1)
+                    let cover = Float(t * t * (3 - 2 * t))
+                    let (tx, ty) = (x - rect.x, y - rect.y)
+                    let j = ty * rect.width + tx
+                    guard cover > coverage[j] else { continue }
+                    coverage[j] = cover
+                    let a = cover * opacity, keep = 1 - cover * opacity
+                    let p = try base.pixel(x: tx, y: ty)
+                    let out = erasing
+                        ? RGBA(r: p.r * keep, g: p.g * keep, b: p.b * keep, a: p.a * keep)
+                        : RGBA(r: paint.r * a + p.r * keep, g: paint.g * a + p.g * keep, b: paint.b * a + p.b * keep,
+                               a: a + p.a * keep)
+                    try tiled.tiles[i].setPixel(x: tx, y: ty, out)
+                    painted = true
+                }
             }
+            guard painted || stroke.before[i] != nil else { continue }
+            stroke.before[i] = base
+            stroke.coverage[i] = coverage
         }
         return area.offsetBy(layer.offsetX, layer.offsetY)
     }

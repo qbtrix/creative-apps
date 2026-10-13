@@ -1,8 +1,8 @@
 // PhotoHistory.swift: Photo's undo and redo. Every document edit records one
 // step: a name ("Paint", "Crop") and the change that puts the document back
 // (PhotoEdit). Undoing applies that change and keeps its inverse for Redo,
-// and the reverse. Pixel edits keep only the changed tiles (CoreRaster's
-// TileDiff); layer property and order changes keep the layer list, which
+// and the reverse. Pixel edits keep only the tiles they changed, as they were
+// (undo swaps them back); layer property and order changes keep the layer list, which
 // holds no pixels; edits that add, remove or resize layers keep the whole
 // stack. A run of edits with the same coalescing key (one slider's drag, one
 // layer's opacity) is one step. A new edit clears Redo; the history keeps the
@@ -11,8 +11,8 @@ import CoreRaster
 
 /// The state an edit puts back.
 enum PhotoEdit: Sendable, Equatable {
-    /// One layer's changed tiles, applied backward (undo) or forward (redo).
-    case pixels(layer: PhotoLayer.ID, diff: TileDiff, forward: Bool)
+    /// One layer's changed tiles as they were, by tile index (TiledPixels).
+    case tiles(layer: PhotoLayer.ID, [Int: PixelBuffer])
     /// The layer list (names, visibility, opacity, blend, offsets, order) and
     /// the selected layer; the same layers, so no pixels.
     case layers([PhotoLayer], selected: PhotoLayer.ID?)
@@ -25,7 +25,7 @@ enum PhotoEdit: Sendable, Equatable {
 struct PhotoStack: Sendable, Equatable {
     var canvas: CanvasSize?
     var layers: [PhotoLayer]
-    var pixels: [PhotoLayer.ID: PixelBuffer]
+    var pixels: [PhotoLayer.ID: TiledPixels]
     var selectedLayerID: PhotoLayer.ID?
     var selection: PixelRect?
 }
@@ -86,13 +86,18 @@ extension PhotoWorkspace {
     /// Applies `edit` and returns the edit that reverses it.
     private mutating func apply(_ edit: PhotoEdit) -> PhotoEdit {
         switch edit {
-        case .pixels(let id, let diff, let forward):
-            guard var buffer = pixels[id], let at = index(of: id) else { return edit }
-            // The diff was made from this layer's buffer, so the sizes match and it can't throw.
-            try? forward ? diff.redo(&buffer) : diff.undo(&buffer)
-            pixels[id] = buffer
-            touch(bounds(of: layers[at]).map { .region($0) } ?? .all)
-            return .pixels(layer: id, diff: diff, forward: !forward)
+        case .tiles(let id, let saved):
+            guard let at = index(of: id), var layer = pixels.removeValue(forKey: id) else { return edit }
+            var inverse: [Int: PixelBuffer] = [:], area = PixelRect(x: 0, y: 0, width: 0, height: 0)
+            // Kept from this layer at this size, so every index and size matches.
+            for (i, tile) in saved where layer.tiles.indices.contains(i) {
+                inverse[i] = layer.tiles[i]
+                layer.tiles[i] = tile
+                area = area.union(layer.tileRect(i))
+            }
+            pixels[id] = layer
+            touch(.region(area.offsetBy(layers[at].offsetX, layers[at].offsetY)))
+            return .tiles(layer: id, inverse)
         case .layers(let list, let selected):
             let inverse = PhotoEdit.layers(layers, selected: selectedLayerID)
             // Only ever recorded over the same ids; a mismatch would orphan pixels.
