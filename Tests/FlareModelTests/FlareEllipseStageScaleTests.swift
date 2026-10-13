@@ -1,9 +1,9 @@
 // FlareEllipseStageScaleTests.swift: the Ellipse tool's minimum box applies in
 // stage points. On a stage fit-scaled down, click jitter of a few stage points
 // spans more than one scene point, yet adds no layer, no draft and no undo
-// step; a real drag still adds one Ellipse; a NaN scale falls back to scale 1
-// (FlareEllipseTinyScaleTests covers zero, tiny and infinite scales). Runs on
-// Linux and macOS.
+// step; a real drag still adds one Ellipse; a NaN scale refuses every box
+// (FlareEllipseTinyScaleTests covers zero, tiny and infinite scales,
+// FlareEllipseDegenerateScaleTests the largest boxes). Runs on Linux and macOS.
 import FlareCore
 import FlareModel
 import Testing
@@ -68,17 +68,14 @@ private let jitter = Point(x: 10 + 2 * m, y: 10 + 2 * m)
     #expect(FlareWorkspace.minimumEllipseExtent(atStageScale: 4) == m / 4)
 }
 
-@Test func aNaNScaleFallsBackToScaleOne() throws {
+@Test func aNaNScaleRefusesEveryBox() {
     let scale = Double.nan
-    #expect(FlareWorkspace.minimumEllipseExtent(atStageScale: scale) == m)
+    #expect(FlareWorkspace.minimumEllipseExtent(atStageScale: scale) == .infinity)
     var workspace = ellipseWorkspace()
-    let below = Point(x: 10 + m / 2, y: 10 + m / 2)
-    workspace.drag(from: start, to: below, stageScale: scale)
+    #expect(FlareWorkspace.ellipse(from: start, to: jitter, stageScale: scale) == nil)
+    workspace.dragChanged(from: start, to: jitter, stageScale: scale)
+    #expect(workspace.draft == nil)
+    workspace.drag(from: start, to: jitter, stageScale: scale)
     #expect(workspace.layers.isEmpty)
     #expect(!workspace.canUndo)
-    let shape = try #require(FlareWorkspace.ellipse(from: start, to: jitter))
-    workspace.dragChanged(from: start, to: jitter, stageScale: scale)
-    #expect(workspace.draft == shape)
-    workspace.drag(from: start, to: jitter, stageScale: scale)
-    #expect(workspace.layers.first?.shapes == [shape])
 }

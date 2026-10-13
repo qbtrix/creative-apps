@@ -3,7 +3,9 @@
 // while the drag runs, and the drag's end commits it as a new "Ellipse N"
 // layer above the selected one, in one "Add Ellipse" undo step. A drag whose
 // box is narrower or shorter than `minimumEllipseExtent` stage points (a click
-// with pointer jitter) adds nothing, at whatever scale the stage is fit to.
+// with pointer jitter) adds nothing, at whatever scale the stage is fit to; a
+// degenerate scale (zero, negative, NaN, or one whose minimum overflows) adds
+// nothing at all.
 import FlareCore
 
 extension FlareWorkspace {
@@ -14,15 +16,14 @@ extension FlareWorkspace {
 
     /// `minimumEllipseExtent` in scene points on a stage drawn at `stageScale`
     /// stage points per scene point (its fit scale). It never shrinks as the
-    /// scale does: a scale so small the minimum overflows, a zero or negative
-    /// scale and -infinity give the largest finite extent, so no drag commits;
-    /// +infinity gives the smallest positive one, so an empty box still
-    /// doesn't. A NaN scale has no order and falls back to scale 1.
+    /// scale does: a scale so small the minimum overflows, a zero, negative,
+    /// -infinity or NaN scale give +infinity, which no box can meet, so no
+    /// drag commits; +infinity gives the smallest positive one, so an empty
+    /// box still doesn't.
     public static func minimumEllipseExtent(atStageScale stageScale: Double) -> Double {
-        if stageScale.isNaN { return minimumEllipseExtent }
-        guard stageScale > 0 else { return .greatestFiniteMagnitude }
+        guard stageScale > 0 else { return .infinity }  // also NaN
         let extent = minimumEllipseExtent / stageScale
-        guard extent.isFinite else { return .greatestFiniteMagnitude }
+        guard extent.isFinite else { return .infinity }
         return max(extent, .leastNonzeroMagnitude)
     }
 
