@@ -240,6 +240,12 @@ Crew PRs merge into `dev` at once; `main` moves only when full CI passes on
   `AppAudit.checks`. Lowering a count is fine, and so is adding a check with
   its starting counts in existing apps, at any count, when the same PR adds
   its file and registry entry.
+- A count that falls doesn't fail the journeys, and you don't lower the
+  baseline by hand: after a green macOS run on `dev`, CI's `Audit lower` job
+  opens (or updates) one PR, "test(audit): lower baselines to the measured
+  counts", that changes only `UITests/audit-baseline.json`. Its author is the
+  `github-actions` bot, which the lane takes only for a PR whose one file is
+  that baseline.
 - A PR that breaks a hard rule (author, size, protected path, a looser app
   audit) loses the label with a comment saying why and waits for review.
 - Full CI (`Linux`, `macOS` with snapshots and the UI journeys) runs on `dev`

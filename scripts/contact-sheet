@@ -6,7 +6,8 @@
 #   - a header: commit, branch, run, date, and each app's distinct audit
 #     violations per check against BASELINE, counted the way AppAudit.Tally
 #     counts them (docs/blueprints/app-audit.md), with arrows: ↑ over, ↓ under,
-#     = on the baseline;
+#     = on the baseline, and on dev, when something is ↓ and nothing ↑, a note
+#     that the Audit lower job opens the PR lowering the baseline;
 #   - per app, per journey (one XCUITest method), the step shots in run order
 #     as thumbnails that link to the full PNG, each captioned with its screen's
 #     audit violations;
@@ -36,7 +37,7 @@ tmp=$(mktemp -d)
 trap 'rm -rf "$tmp"' EXIT
 shopt -s nullglob
 for f in "$screens"/*.png; do basename "$f" .png; done | jq -R . >"$tmp/pngs"
-cat /dev/null "$screens"/audit-*.json >"$tmp/audits"
+for f in "$screens"/audit-*.json; do [[ "$f" == */audit-counts.json ]] || cat "$f"; done >"$tmp/audits"
 if_file() { if [[ -f "$1" ]]; then cat "$1"; fi; }
 if_file "$screens/manifest.json" >"$tmp/manifest"
 if_file "$baseline" >"$tmp/baseline"
@@ -89,9 +90,16 @@ def h: tostring | @html;
          + "</ul></details>" end)
     + "</figcaption></figure>";
   def group($title; $list): "<h3>\($title | h)</h3><div class=\"grid\">" + ($list | map(card(.)) | join("")) + "</div>";
+# On dev, counts only under the baseline: ci.yml's audit-lower job, after this one, opens the PR.
+([$apps[] as $a | cells($a)[].class]) as $classes
+| (if $branch == "dev" and any($classes[]; . == "down") and all($classes[]; . != "up")
+   then "↓ only, so the Audit lower job opens (or updates) the PR “test(audit): lower baselines to the measured counts”; its link is in that job's summary."
+   else "" end) as $note
+|
 
 if $mode == "md" then
   "### Contact sheet\n\nDownload **ui-screens** → open `contact-sheet.html`. Cells: distinct audit violations, arrow, baseline.\n\n"
+  + (if $note == "" then "" else "\($note)\n\n" end)
   + "| app | steps | audited | " + ($checks | join(" | ")) + " |\n|---|---:|---:|" + ($checks | map("---:|") | join("")) + "\n"
   + ($apps | map(. as $a | "| \($a) | \(steps($a) | length) | \(audited($a)) | "
       + (cells($a) | map("\(.n) \(.arrow) \(.b)") | join(" | ")) + " |\n") | join(""))
@@ -108,7 +116,7 @@ else
   + "<tr><th>app</th><th>steps</th><th>audited</th>" + ($checks | map("<th>\(h)</th>") | join("")) + "</tr>"
   + ($apps | map(. as $a | "<tr><th><a href=\"#app-\($a | h)\">\($a | h)</a></th><td>\(steps($a) | length)</td><td>\(audited($a))</td>"
       + (cells($a) | map("<td class=\"\(.class)\"><b>\(.n)</b> \(.arrow) \(.b)</td>") | join("")) + "</tr>") | join(""))
-  + "</table></header><main>"
+  + "</table>" + (if $note == "" then "" else "<p class=\"note\">\($note | h)</p>" end) + "</header><main>"
   + ($apps | map(. as $a | ([$journeys[] | select(.steps[0] | app == $a)]) as $js
       | ([$js[].steps[]]) as $seen
       | [steps($a)[] | select(IN($seen[]) | not)] as $rest
@@ -136,7 +144,7 @@ a{color:inherit}h1{margin:0 0 4px}h2{margin:32px 0 8px;padding-bottom:4px;border
 h3{margin:16px 0 8px;font-size:14px;color:var(--muted);font-weight:600}.meta,.muted,caption{color:var(--muted)}.meta{overflow-wrap:anywhere}
 table{border-collapse:collapse;margin:8px 0;display:block;overflow-x:auto}caption{text-align:left;padding-bottom:4px}
 th,td{border:1px solid var(--line);padding:4px 8px;text-align:right;white-space:nowrap}th{text-align:left}
-.budgets td{text-align:left;white-space:normal}.up{color:var(--bad);background:var(--badbg)}.down{color:var(--ok)}.new{color:var(--muted)}
+.budgets td{text-align:left;white-space:normal}.note{color:var(--ok)}.up{color:var(--bad);background:var(--badbg)}.down{color:var(--ok)}.new{color:var(--muted)}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
 figure{margin:0;background:var(--card);border:1px solid var(--line);border-radius:8px;overflow:hidden}
 figure.flag{border-color:var(--bad)}figure img{display:block;width:100%;height:auto;border-bottom:1px solid var(--line)}

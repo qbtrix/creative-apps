@@ -5,7 +5,8 @@
 # does), a baseline and a perf report go in; the page must list both steps in
 # capture order, show and escape the violation,
 # count distinct violations the way AppAudit.Tally does (one ↑, one ↓, one =),
-# inline the perf line, and write the step summary. A second run without the
+# skip audit-counts.json, inline the perf line, and write the step summary. A
+# run on dev with only ↓ notes the auto-lower PR. A last run without the
 # manifest falls back to name order. No network; needs bash and jq.
 #
 # Run: bash Tests/contact_sheet/test_contact_sheet.sh   (exit 0 = all pass)
@@ -31,6 +32,8 @@ cat >"$s/audit-photo-opened.json" <<'JSON'
     { "check": "identifier", "element": "button ''", "frame": { "x": -1.5, "y": 2, "width": 3, "height": 4 }, "detail": "no accessibility identifier" },
     { "check": "unnamed", "element": "button ''", "frame": { "x": -1.5, "y": 2, "width": 3, "height": 4 }, "detail": "no label, title or placeholder" } ] }
 JSON
+# scripts/ui-test's merged counts: not a screen report, so the sheet skips it.
+echo '{ "photo": { "identifier": 2 } }' >"$s/audit-counts.json"
 cat >"$s/manifest.json" <<'JSON'
 [ { "testIdentifier": "PhotoJourneyTests/testOpenImage()", "attachments": [
       { "exportedFileName": "c.png", "suggestedHumanReadableName": "photo-launch_1_4E5F.png", "timestamp": 20.5 },
@@ -62,6 +65,19 @@ has "over the baseline" "$page" '<td class="up"><b>1</b> ↑ 0</td>'
 has "perf report inlined" "$page" '<th>BRUSH-LATENCY</th><td>photo-brush-latency.txt</td><td>config=debug drag p50 0.6 p95 2.3<br>budget p50 drag &lt;= 3.0'
 has "summary reminder" "$tmp/summary.md" 'Download **ui-screens** → open `contact-sheet.html`'
 has "summary row" "$tmp/summary.md" '| photo | 2 | 1 | 2 = 2 | 0 ↓ 1 | 1 ↑ 0 |'
+# hasnt <name> <file> <fixed string>
+hasnt() {
+  if grep -qF -- "$3" "$2"; then echo "FAIL $1: '$3' in ${2##*/}"; fail=1; else echo "ok   $1"; fi
+}
+hasnt "no auto-lower note off dev, or with a count over" "$page" 'Audit lower job'
+
+# On dev, two counts under the baseline and none over: the note, on the page and in the summary.
+echo '{ "photo": { "identifier": 3, "overlap": 1, "unnamed": 1 } }' >"$tmp/baseline.json"
+GITHUB_STEP_SUMMARY="$tmp/summary-dev.md" GITHUB_REF_NAME=dev \
+  "$here/../../scripts/contact-sheet" "$s" "$tmp/baseline.json" "$tmp/snaps" >/dev/null || { echo "FAIL dev run exited $?"; exit 1; }
+has "auto-lower note on the page" "$page" '<p class="note">↓ only, so the Audit lower job opens (or updates) the PR “test(audit): lower baselines to the measured counts”'
+has "auto-lower note in the summary" "$tmp/summary-dev.md" '↓ only, so the Audit lower job opens'
+has "dev cells" "$tmp/summary-dev.md" '| photo | 2 | 1 | 2 ↓ 3 | 0 ↓ 1 | 1 = 1 |'
 
 rm "$s/manifest.json"
 "$here/../../scripts/contact-sheet" "$s" "$tmp/baseline.json" "$tmp/nowhere" >/dev/null || { echo "FAIL rerun exited $?"; exit 1; }

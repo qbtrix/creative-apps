@@ -10,9 +10,11 @@
 #
 #   .build/ui-tests.xcresult   the result bundle (open it in Xcode)
 #   .build/ui-screens/         <app>-<step>.png per journey step, and audit-<app>-<step>.json per
-#                              audited screen (docs/blueprints/app-audit.md), and the export's
-#                              manifest.json (each test's attachments in order, which
-#                              scripts/contact-sheet reads); CI uploads it as `ui-screens`
+#                              audited screen (docs/blueprints/app-audit.md), audit-counts.json
+#                              (each app's distinct violations per check, which CI's audit-lower
+#                              job reads on dev), and the export's manifest.json (each test's
+#                              attachments in order, which scripts/contact-sheet reads); CI
+#                              uploads it as `ui-screens`
 #
 # The first run on a Mac asks to let the test runner control the computer;
 # CI turns that prompt off with automationmodetool. bash 3.2 compatible.
@@ -44,6 +46,11 @@ if [[ -d "$result" ]] && xcrun xcresulttool export attachments --path "$result" 
         cp "$raw/$file" "$screens/$(echo "$name" | sed -E 's/_[0-9]+_[0-9A-Fa-f-]+(\.[a-z]+)$/\1/')"
       done
   cp "$raw/manifest.json" "$screens/manifest.json"
+  # Each app's last journey attaches its counts as counts-<app>.json; merge them.
+  counts=("$screens"/counts-*.json)
+  if [[ -e "${counts[0]}" ]]; then
+    jq -S -s add "${counts[@]}" >"$screens/audit-counts.json" && rm -f "${counts[@]}"
+  fi
 fi
 echo "ui-test: $(ls "$screens" | wc -l | tr -d ' ') screenshots in $screens"
 exit $status

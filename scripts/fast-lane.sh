@@ -15,7 +15,8 @@
 # while dev is red, on purpose: promotion is the guard that keeps main green.
 #
 # Eligibility (all must hold): open, not draft, label `fast-lane`, base
-# BASE_BRANCH, author in FAST_LANE_AUTHORS, size within MAX_LINES/MAX_FILES, no
+# BASE_BRANCH, author in FAST_LANE_AUTHORS (or AUDIT_BOT on a baseline-only
+# PR), size within MAX_LINES/MAX_FILES, no
 # changed or renamed-away path under PROTECTED (CLAUDE.md's "Never edit" list),
 # no looser app audit (audit_loosens), MERGEABLE, no red or running check on the
 # head, and proof the head passed the gate: a passing check from CI_WORKFLOWS on
@@ -47,6 +48,10 @@ set -euo pipefail
 # Logins as `gh pr view --json author` reports them. Cloud Claude Code sessions
 # open PRs with the captain's own GitHub token, so they appear as prakashUXtech.
 FAST_LANE_AUTHORS="prakashUXtech"
+# ci.yml's audit-lower job opens its PR with GITHUB_TOKEN, so it shows as this
+# bot. It takes the lane only when its one file is the audit baseline, which
+# audit_loosens then judges like any other.
+AUDIT_BOT="app/github-actions"
 MAX_LINES=400
 MAX_FILES=15
 # Belt PRs wait for Belt's pre-merge review: the `belt/review` commit status on
@@ -266,6 +271,8 @@ decide() {
 
   if [[ " $FAST_LANE_AUTHORS " == *" $author "* ]]; then
     log "author: ok ($author)"
+  elif [[ "$author" == "$AUDIT_BOT" && -n "${4:-}" && "$(cat "$files")" == "$AUDIT_BASELINE" ]]; then
+    log "author: ok ($author, the audit baseline only)"
   else
     log "author: FAIL ($author)"; reasons+=("author $author is not on the fast-lane allowlist")
   fi

@@ -16,7 +16,7 @@
 // The first failed step stops the test, so later shots never show a wrong state.
 // Every window shot is also audited (Audit.swift); an audit failure doesn't
 // stop the journey. The class's last test (in run order, which is by name)
-// must launch a Journey: its teardown closes the app's audit tally.
+// must launch a Journey: its teardown attaches the app's audit counts.
 import XCTest
 
 @MainActor
@@ -39,7 +39,7 @@ struct Journey {
         app.activate()
         if test.name == type(of: test).defaultTestSuite.tests.last?.name {
             nonisolated(unsafe) let journey = self
-            test.addTeardownBlock { @MainActor () async -> Void in journey.auditLower() }
+            test.addTeardownBlock { @MainActor () async -> Void in journey.auditCounts() }
         }
     }
 
