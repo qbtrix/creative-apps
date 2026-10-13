@@ -90,7 +90,7 @@
               {
                 "id": "design-app-sources",
                 "name": "DesignApp sources",
-                "description": "The Design app (vector and UI design): the SwiftUI App scene and views in Sources/DesignApp, built from SuiteUI's EditorShell: the window and its intents (DesignWindow, DesignIntent), the top bar, the tool rail, the canvas with selection handles and the inline text editor, the Properties | Layers panel, the File, Edit, Page and View menus, and the open and save panels.",
+                "description": "The Design app (vector and UI design): the SwiftUI App scene and views in Sources/DesignApp, built from SuiteUI's EditorShell: the window and its intents (DesignWindow, DesignIntent), the top bar, the tool rail, the canvas with selection handles (drawn above the page clip) and the inline text editor, the Properties | Layers panel (a List of the pages and the layer tree), the File, Edit, Page and View menus, and the open and save panels.",
                 "technology": "Swift 6, SwiftUI, macOS 26",
                 "paths": [
                   "Sources/DesignApp/"
@@ -110,7 +110,7 @@
               {
                 "id": "design-model-sources",
                 "name": "DesignModel sources",
-                "description": "Linux-safe state and logic behind Design's window: DesignWorkspace (pages, the selected page and node, the tool), DesignNode (the node tree on a page, each node with a fill and text, in absolute page points) and the flattened rows the Layers sidebar draws, DesignHistory (the model-owned undo and redo, one named step per edit), the canvas gestures (hit testing, draw, move, resize, nudge, delete, in DesignCanvasEditing and DesignDrawing), the inline text edit (DesignText), the inspector's header lines (DesignInspectorContent), and the file codec (DesignFile).",
+                "description": "Linux-safe state and logic behind Design's window: DesignWorkspace (pages, the selected page and node, the tool), DesignNode (the node tree on a page, each node with a fill and text, in absolute page points) and the flattened rows the Layers sidebar draws, DesignHistory (the model-owned undo and redo, one named step per edit), the canvas gestures (hit testing, the handles a selection shows, draw, move, resize, nudge, delete, in DesignCanvasEditing and DesignDrawing), the inline text edit (DesignText), the inspector's header lines (DesignInspectorContent), and the file codec (DesignFile).",
                 "technology": "Swift 6, Foundation",
                 "paths": [
                   "Sources/DesignModel/"

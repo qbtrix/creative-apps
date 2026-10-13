@@ -11,7 +11,6 @@ import SwiftUI
 
 enum DesignIntent {
     case newFile, open, save, saveAs
-    case openFile(URL)
     case undo, redo
     case tool(DesignTool)
     case drag(CGPoint, CGPoint, DesignModifiers)
@@ -19,7 +18,7 @@ enum DesignIntent {
     case nudge(DesignDirection, shift: Bool)
     case deleteSelection, deselect
     case select(String)
-    case toggleExpanded(String)
+    case setExpanded(String, Bool)
     case addPage, deletePage
     case setFrame(String, x: Double, y: Double, width: Double, height: Double)
     case setFill(String, DesignColor)
