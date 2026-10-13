@@ -68,7 +68,7 @@ private func grouped() throws -> DesignWorkspace {
 @Test func hitTestUsesTheSelectedPageOnly() throws {
     var workspace = try overlapping()
     workspace.addPage()
-    #expect(workspace.hitTest(pt(160, 130)) == nil)
+    #expect(workspace.hitTest(pt(160, 130)) == "node-4")
     workspace.selectPage("page-1")
     #expect(workspace.hitTest(pt(160, 130)) == "node-3")
     #expect(DesignWorkspace().hitTest(pt(1, 1)) == nil)

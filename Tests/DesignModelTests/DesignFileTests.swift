@@ -19,7 +19,7 @@ private func bytes(_ json: String) -> Data { Data(json.utf8) }
 private func text(_ data: Data) -> String { String(decoding: data, as: UTF8.self) }
 
 /// Two pages: Desktop with a group of a rectangle and an ellipse, a locked hidden
-/// recolored rectangle and a text node; and an empty second page.
+/// recolored rectangle and a text node; and a second page holding only its Desktop frame.
 private func sample() throws -> DesignWorkspace {
     var workspace = openDesign()
     let box = rc(40, 40, 200, 120)
@@ -74,8 +74,8 @@ private func sample() throws -> DesignWorkspace {
     let data = try sample().fileData()
     var workspace = DesignWorkspace()
     try workspace.open(data)
-    // The sample used node-1 to node-6 and page-1, page-2.
-    #expect(try workspace.addNode(.rectangle, frame: rc(0, 0, 10, 10)) == "node-7")
+    // The sample used node-1 to node-7 and page-1, page-2.
+    #expect(try workspace.addNode(.rectangle, frame: rc(0, 0, 10, 10)) == "node-8")
     workspace.addPage()
     #expect(workspace.pages.last?.id == "page-3")
 }

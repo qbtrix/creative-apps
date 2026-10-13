@@ -108,9 +108,7 @@ public struct DesignWorkspace: Sendable, Equatable {
         let before = snapshot
         let wasOpen = isOpen
         (pageCount, nodeCount) = (0, 0)
-        var page = nextPage()
-        let size = DesignRect(x: 0, y: 0, width: page.frameWidth, height: page.frameHeight)
-        page.nodes = [DesignNode(id: nextNodeID(), name: "Desktop", kind: .frame, frame: size)]
+        let page = nextPage()
         (pages, selectedPageID, selectedNodeID, expandedNodeIDs) = ([page], page.id, nil, [])
         if wasOpen { record("New File", before: before) }
     }
@@ -132,7 +130,8 @@ public struct DesignWorkspace: Sendable, Equatable {
         nodeCount = highest("node-", pages.flatMap { nodeIDs($0.nodes) })
     }
 
-    /// Appends an empty page named after its number and selects it. No-op with no file open.
+    /// Appends a page named after its number, holding the same "Desktop" frame New File seeds,
+    /// and selects it. No-op with no file open.
     public mutating func addPage() {
         guard isOpen else { return }
         commitTextEdit()
@@ -333,9 +332,14 @@ public struct DesignWorkspace: Sendable, Equatable {
         record(name, before: before, coalescing: coalescing)
     }
 
+    /// The next desktop-sized page, seeded with a "Desktop" frame the size of the page.
+    /// New File and Add Page both start their page here.
     private mutating func nextPage() -> DesignPage {
         pageCount += 1
-        return DesignPage(id: "page-\(pageCount)", name: "Page \(pageCount)", frameWidth: 1440, frameHeight: 1024)
+        var page = DesignPage(id: "page-\(pageCount)", name: "Page \(pageCount)", frameWidth: 1440, frameHeight: 1024)
+        let size = DesignRect(x: 0, y: 0, width: page.frameWidth, height: page.frameHeight)
+        page.nodes = [DesignNode(id: nextNodeID(), name: "Desktop", kind: .frame, frame: size)]
+        return page
     }
 
     private mutating func nextNodeID() -> String {
