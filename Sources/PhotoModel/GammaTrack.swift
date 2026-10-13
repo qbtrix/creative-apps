@@ -2,6 +2,8 @@
 // position t in -1...1 is gamma 10^t, so the identity gamma 1 sits at the
 // midpoint and 0.1...1 gets as much travel as 1...10. Only the track is
 // logarithmic: AdjustmentSettings still stores gamma itself over gammaRange.
+// The slider drags through snappedGamma, whose detent band around the
+// midpoint gives exactly 1, so a drag back to the middle undoes the edit.
 // Invariants: both directions clamp to their range, NaN gives the identity,
 // and the endpoints and midpoint map exactly. Linux-safe.
 #if canImport(FoundationEssentials)
@@ -39,6 +41,16 @@ public enum GammaTrack {
         case positionRange.upperBound: return 10
         default: return pow(10, t)
         }
+    }
+
+    /// Half the width of the midpoint detent: a dragged position within this
+    /// of 0 is gamma 1. About one pixel of track at the inspector's width.
+    public static let detent = 0.02
+
+    /// The gamma a drag to `position` sets: exactly 1 inside the detent
+    /// (|position| <= detent), otherwise gamma(atPosition:).
+    public static func snappedGamma(atPosition position: Double) -> Double {
+        abs(position) <= detent ? 1 : gamma(atPosition: position)
     }
 
     private static func clamp(_ value: Double) -> Double {
