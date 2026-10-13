@@ -221,10 +221,12 @@ Crew PRs merge into `dev` at once; `main` moves only when full CI passes on
   Belt's `belt/review` commit status to be success on its head;
   `REQUIRE_BELT_REVIEW` in `scripts/fast-lane.sh` turns that off.
 - A PR that loosens the app audit (docs/blueprints/app-audit.md) raises a
-  count in `UITests/audit-baseline.json`, adds an app or check key there above
-  0, drops an app from it, removes a file from `Checks/` or drops an entry
-  from `AppAudit.checks`. Lowering a count or adding a check that starts at 0
-  is fine.
+  count in `UITests/audit-baseline.json` (an existing check's key that is new
+  to an app counts as a raise from 0), adds an app there above 0, drops an
+  app from it, removes or moves a file in `Checks/`, or drops an entry from
+  `AppAudit.checks`. Lowering a count is fine, and so is adding a check with
+  its starting counts in existing apps, at any count, when the same PR adds
+  its file and registry entry.
 - A PR that breaks a hard rule (author, size, protected path, a looser app
   audit) loses the label with a comment saying why and waits for review.
 - Full CI (`Linux`, `macOS` with snapshots and the UI journeys) runs on `dev`

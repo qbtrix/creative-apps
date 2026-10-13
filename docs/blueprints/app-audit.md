@@ -116,9 +116,9 @@ The audit grows with the apps. Agents:
 
 - **add checks freely.** A new rule needs a fault (the PR or issue where it
   went wrong), one file in `Checks/`, one entry in `AppAudit.checks`, and its
-  starting counts in the baseline from the first macOS run (non-zero starting
-  counts take the captain's review, below). Its `seeded`
-  screen must fail it: `everyCheckFlagsItsSeed` runs every registered check
+  starting counts in the baseline from the first macOS run, all in one PR.
+  Any starting count is fine: a check that finds bugs nobody fixed yet is
+  still stricter than no check. Its `seeded` screen must fail it: `everyCheckFlagsItsSeed` runs every registered check
   on its own seed on Linux, and a check that can't fail can't land. Edge
   cases it must let pass go in `AuditChecksTests`.
 - **lower baselines freely.** A fix lowers its count in the same PR.
@@ -128,12 +128,21 @@ The audit grows with the apps. Agents:
 Anything that loosens the audit needs the captain's review, and the fast
 lane enforces it. `audit_loosens` in `scripts/fast-lane.sh` compares the
 baseline, the `Checks/` files and the `AppAudit.checks` entries at the PR's
-merge base and head. A PR that raises a count, adds an app or check key above
-0, drops an app (an app missing from the file isn't judged), removes a check
-file or drops a registry entry gets one comment, "loosens the app audit:
-needs the captain's review", and loses its `fast-lane` label. Lowering a count,
-dropping a check key from an app (its baseline becomes 0) and adding a check
-that starts at 0 stay eligible.
+merge base and head. These loosen it:
+
+- raising a count. A check missing from a listed app counts as 0, so giving
+  an existing check a new key above 0 is a raise.
+- adding an app above 0. Its counts have no anchor yet.
+- dropping an app. An app missing from the file isn't judged.
+- removing or moving a check file, or dropping a registry entry.
+
+Such a PR gets one comment, "loosens the app audit: needs the captain's
+review", and loses its `fast-lane` label. Lowering a count, dropping a check
+key from an app (its baseline becomes 0) and adding a check stay eligible. A
+new check's keys may start at any count in apps already in the file, as long
+as the same PR adds its file and its registry entry. The lane matches a key
+to the new file's `let id` and refuses an id that an existing check already
+uses.
 
 ## The report
 

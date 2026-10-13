@@ -184,20 +184,25 @@ fi
 REQUIRE_BELT_REVIEW=0
 check "gate off: belt PR without review is eligible" "eligible|150|2|5 checks green" '.body = "x\nBelt-Run: act-1"' "$BASE_FILES" .
 
-# The app audit guard. audit_tree <dir> <baseline> <registry entries> <check
-# files...> writes an audit_snapshot-shaped tree; "-" leaves the baseline or
-# AuditCore.swift out. Each case builds a before tree $b and an after tree $a.
+# The app audit guard. audit_tree <dir> <baseline> <registry entries> <checks...>
+# writes an audit tree; "-" leaves the baseline or AuditCore.swift out, and a
+# check `Name=id` becomes Checks/Name.swift declaring `struct Name: Check` with
+# that id. Each case builds a before tree $b and an after tree $a.
 AD="Tests/PhotoModelTests/AppAudit"
 BL='{ "photo": { "identifier": 54, "overlap": 1 }, "halo": { "contrast": 2 } }'
 REG="DisabledDim(), Overlap(), TextContrast(), Identifier(), Offscreen(), Unnamed()"
-CHECKS=(DisabledDim Overlap TextContrast Identifier Offscreen Unnamed)
+CHECKS=(DisabledDim=disabled-dim Overlap=overlap TextContrast=contrast Identifier=identifier Offscreen=offscreen Unnamed=unnamed)
 b="$tmp/before" a="$tmp/after"
 audit_tree() {
   local d="$1" bl="$2" reg="$3" dir="${AUDIT_DIR:-$AD}" f; shift 3
   rm -rf "$d"; mkdir -p "$d/UITests" "$d/$dir/Checks"
   [[ "$bl" == - ]] || printf '%s\n' "$bl" >"$d/$AUDIT_BASELINE"
   [[ "$reg" == - ]] || printf 'extension AppAudit {\n    static let checks: [any Check] = [%s]\n}\n' "$reg" >"$d/$dir/AuditCore.swift"
-  for f; do : >"$d/$dir/Checks/$f.swift"; done
+  for f; do
+    [[ -n "$f" ]] || continue
+    printf 'extension AppAudit {\n    struct %s: Check {\n        let id = "%s"\n    }\n}\n' "${f%%=*}" "${f#*=}" \
+      >"$d/$dir/Checks/${f%%=*}.swift"
+  done
 }
 loosens() {  # loosens <name> <want: lines joined by ", ", empty = not looser>
   local got
@@ -214,7 +219,7 @@ loosens "lowered counts" ""
 same '{ "photo": { "identifier": 54 }, "halo": { "contrast": 2 } }'
 loosens "a check key left out of an app is 0, so lower" ""
 same '{ "photo": { "identifier": 54, "overlap": 1, "contrast": 3 }, "halo": { "contrast": 2 } }'
-loosens "a new check key above 0" "photo contrast new -> 3"
+loosens "an existing check's key new to an app above 0 is a raise from 0" "photo contrast new -> 3"
 same '{ "photo": { "identifier": 54, "overlap": 1, "contrast": 0 }, "halo": { "contrast": 2 } }'
 loosens "a new check key at 0" ""
 same '{ "photo": { "identifier": 54, "overlap": 1 }, "halo": { "contrast": 2 }, "suite": { "identifier": 4 } }'
@@ -229,10 +234,31 @@ same '{ "photo": { "identifier": 54, '
 loosens "a broken baseline" "the baseline is not valid JSON"
 same '{ "photo": { "identifier": "99" }, "halo": { "contrast": 2 } }'
 loosens "a count that is not a number" "the baseline is not app -> check -> count"
-audit_tree "$b" "$BL" "$REG" "${CHECKS[@]}"; audit_tree "$a" "$BL" "$REG" DisabledDim TextContrast Identifier Offscreen Unnamed
+audit_tree "$b" "$BL" "$REG" "${CHECKS[@]}"; audit_tree "$a" "$BL" "$REG" "${CHECKS[@]/Overlap=overlap}"
 loosens "a removed check file" "removes $AD/Checks/Overlap.swift"
-audit_tree "$b" "$BL" "$REG" "${CHECKS[@]}"; audit_tree "$a" "$BL" "$REG, Focus()" "${CHECKS[@]}" Focus
+audit_tree "$b" "$BL" "$REG" "${CHECKS[@]}"; audit_tree "$a" "$BL" "$REG, Focus()" "${CHECKS[@]}" Focus=focus
 loosens "an added check" ""
+# A new check's keys may start at any count in existing apps, when the same PR
+# adds its file and its registry entry (any check is stricter than none).
+FOCUS_BL='{ "photo": { "identifier": 54, "overlap": 1, "focus": 7 }, "halo": { "contrast": 2, "focus": 2 } }'
+added() {  # added <after baseline> <after registry> <checks beyond CHECKS...>
+  local bl="$1" reg="$2"; shift 2
+  audit_tree "$b" "$BL" "$REG" "${CHECKS[@]}"; audit_tree "$a" "$bl" "$reg" "${CHECKS[@]}" "$@"
+}
+added "$FOCUS_BL" "$REG, Focus()" Focus=focus
+loosens "a new check with its keys above 0 in existing apps" ""
+added "$FOCUS_BL" "$REG" Focus=focus
+loosens "a new check file without a registry entry" "photo focus new -> 7, halo focus new -> 2"
+added "$FOCUS_BL" "$REG, Focus()"
+loosens "a registry entry without a new check file" "photo focus new -> 7, halo focus new -> 2"
+added '{ "photo": { "identifier": 54, "overlap": 1, "blur": 3 }, "halo": { "contrast": 2 } }' "$REG, Focus()" Focus=focus
+loosens "a new key that isn't the new check's id" "photo blur new -> 3"
+added '{ "photo": { "identifier": 54, "overlap": 1, "disabled-dim": 5 }, "halo": { "contrast": 2 } }' "$REG, Dim2()" Dim2=disabled-dim
+loosens "a new check reusing an existing check's id" "photo disabled-dim new -> 5"
+added '{ "photo": { "identifier": 54, "overlap": 1 }, "halo": { "contrast": 2 }, "suite": { "focus": 4 } }' "$REG, Focus()" Focus=focus
+loosens "a new app above 0 stays refused, even for a new check" "suite focus new -> 4"
+added '{ "photo": { "identifier": 55, "overlap": 1, "focus": 7 }, "halo": { "contrast": 2 } }' "$REG, Focus()" Focus=focus
+loosens "a new check doesn't cover a raise of an existing key" "photo identifier 54 -> 55"
 same "$BL" "DisabledDim(), TextContrast(), Identifier(), Offscreen(), Unnamed()"
 loosens "an entry dropped from AppAudit.checks" "drops Overlap from AppAudit.checks"
 same "$BL" $'\n        DisabledDim(),\n        // Overlap(),\n        TextContrast(), Identifier(), /* Offscreen(), */ Unnamed(),\n    '
@@ -240,13 +266,13 @@ loosens "entries commented out" "drops Offscreen from AppAudit.checks, drops Ove
 same "$BL" $'\n        DisabledDim(), Overlap(),\n        TextContrast(), Identifier(), Offscreen(), Unnamed(),\n    '
 loosens "the same registry over several lines" ""
 same "$BL" -
-loosens "AuditCore.swift deleted" "$(printf '%s\n' "${CHECKS[@]}" | sort | sed 's/.*/drops & from AppAudit.checks/' | paste -sd, - | sed 's/,/, /g')"
+loosens "AuditCore.swift deleted" "$(printf '%s\n' "${CHECKS[@]%%=*}" | sort | sed 's/.*/drops & from AppAudit.checks/' | paste -sd, - | sed 's/,/, /g')"
 same "$BL" "$REG] + [Overlap(), TextContrast()]; let decoy: [any Check] = [] ; static let checks: [any Check] = [DisabledDim()"
 loosens "a second list in AuditCore.swift" "AppAudit.checks is declared 2 times"
 audit_tree "$b" "$BL" "$REG" "${CHECKS[@]}"; AUDIT_DIR=Tests/AppAuditTests audit_tree "$a" "$BL" "$REG" "${CHECKS[@]}"
 loosens "moving a check file counts as removing it (the target move is captain-reviewed)" \
-  "$(printf "removes $AD/Checks/%s.swift\n" "${CHECKS[@]}" | sort | paste -sd, - | sed 's/,/, /g')"
-AUDIT_DIR=Tests/AppAuditTests audit_tree "$b" "$BL" "$REG" "${CHECKS[@]}"; AUDIT_DIR=Tests/AppAuditTests audit_tree "$a" "$BL" "$REG" Focus "${CHECKS[@]}"
+  "$(printf "removes $AD/Checks/%s.swift\n" "${CHECKS[@]%%=*}" | sort | paste -sd, - | sed 's/,/, /g')"
+AUDIT_DIR=Tests/AppAuditTests audit_tree "$b" "$BL" "$REG" "${CHECKS[@]}"; AUDIT_DIR=Tests/AppAuditTests audit_tree "$a" "$BL" "$REG" Focus=focus "${CHECKS[@]}"
 loosens "the new home is guarded the same way" ""
 
 # The repo's own registry must parse, or the guard can't see a dropped entry.
@@ -257,17 +283,25 @@ else
 fi
 
 # decide takes the two trees as its 4th and 5th arguments.
-audit_decide() {  # audit_decide <name> <want prefix>
+audit_decide() {  # audit_decide <name> <exact want> [<changed files>]
   local got
-  jq . <<<"$BASE_PR" >"$tmp/pr.json"; printf '%s\n' "$AUDIT_BASELINE" >"$tmp/files.txt"
+  jq . <<<"$BASE_PR" >"$tmp/pr.json"; printf '%s\n' "${3:-$AUDIT_BASELINE}" >"$tmp/files.txt"
   got=$(decide "$tmp/pr.json" "$tmp/files.txt" "$here/checks-green.json" "$b" "$a" 2>/dev/null)
-  if [[ "$got" == "$2"* ]]; then echo "ok   $1 -> $got"; else echo "FAIL $1: want '$2*', got '$got'"; fail=1; fi
+  if [[ "$got" == "$2" ]]; then echo "ok   $1 -> $got"; else echo "FAIL $1: want '$2', got '$got'"; fail=1; fi
 }
 same '{ "photo": { "identifier": 55, "overlap": 0 }, "halo": { "contrast": 2 } }'
 audit_decide "decide: a looser audit is not eligible" \
   "not-eligible|loosens the app audit: needs the captain's review (photo identifier 54 -> 55)"
 same '{ "photo": { "identifier": 50, "overlap": 0 }, "halo": { "contrast": 2 } }'
 audit_decide "decide: a lowered baseline is eligible" "eligible|150|2|5 checks green"
+# Like #292: baselines for checks it adds, plus a scripts/ui-test change. Only
+# the script keeps it off the lane.
+added "$FOCUS_BL" "$REG, Focus()" Focus=focus
+audit_decide "decide: #292-style, new check baselines pass, the script doesn't" \
+  "not-eligible|touches protected paths: scripts/ui-test" \
+  "$(printf '%s\n' "$AUDIT_BASELINE" "$AD/AuditCore.swift" "$AD/Checks/Focus.swift" scripts/ui-test)"
+audit_decide "decide: the same without the script is eligible" "eligible|150|2|5 checks green" \
+  "$(printf '%s\n' "$AUDIT_BASELINE" "$AD/AuditCore.swift" "$AD/Checks/Focus.swift")"
 
 # A whole sweep against a stub `gh` that answers from per-PR fixtures and logs
 # every write: #4 and #7 are eligible, #5 is based on main, #6 conflicts.
@@ -331,7 +365,8 @@ expect "feature-done merges dispatch CI on dev once" "$(grep -c '^workflow run c
 
 # The audit through a sweep: #8 raises a count, #9 lowers one, #10 renames
 # scripts/ci away, #11's merge base can't be read, #12 drops Overlap() and
-# hides it behind a stray AuditCore.swift. Each has its own head.
+# hides it behind a stray AuditCore.swift, #13 adds a check with its counts
+# (the lane must read the new check file to match its id). Each has its own head.
 pr_at() {  # pr_at <n> <head sha> <files json>
   jq --argjson n "$1" --arg h "$2" '.number = $n | .headRefOid = $h
     | .body = "Closes #1\n\nFast-Check: pass\nHead: \($h)"' <<<"$BASE_PR" >"$sw/$1.json"
@@ -347,8 +382,11 @@ pr_at 11 bad "$BLF"
 pr_at 12 h12 '[{"filename": "Tests/PhotoModelTests/AppAudit/AuditCore.swift", "status": "modified"}]'
 audit_tree "$sw/refs/h12" "$BL" "DisabledDim(), TextContrast(), Identifier(), Offscreen(), Unnamed()" "${CHECKS[@]}"
 mkdir -p "$sw/refs/h12/$AD/Old"; cp "$sw/refs/mb/$AD/AuditCore.swift" "$sw/refs/h12/$AD/Old/AuditCore.swift"
+pr_at 13 h13 '[{"filename": "Tests/PhotoModelTests/AppAudit/Checks/Focus.swift", "status": "added"}]'
+audit_tree "$sw/refs/h13" "$FOCUS_BL" "$REG, Focus()" "${CHECKS[@]}" Focus=focus
 ( main ) >/dev/null 2>&1 || { echo "FAIL sweep: main exited non-zero"; fail=1; }
-expect "audit: merges only the PR that lowers a count" "$(grep -oE '^pr merge [0-9]+' "$sw/calls" | paste -sd, -)" "pr merge 9"
+expect "audit: merges only the PRs that lower a count or add a check with its counts" \
+  "$(grep -oE '^pr merge [0-9]+' "$sw/calls" | paste -sd, -)" "pr merge 9,pr merge 13"
 expect "audit: one comment on the looser PR" \
   "$(grep -c "^pr comment 8 .*not eligible. loosens the app audit: needs the captain's review (photo identifier 54 -> 55)" "$sw/calls")" 1
 expect "audit: the looser PR loses its label" "$(grep -c '^pr edit 8 .*--remove-label fast-lane' "$sw/calls")" 1

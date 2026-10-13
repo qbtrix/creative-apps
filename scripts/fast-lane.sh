@@ -127,6 +127,11 @@ has_marker() {
     END { exit !found }'
 }
 
+# audit_fetch <sha> <dir> <path>: <path> at <sha> into <dir>/<path>.
+audit_fetch() {
+  gh api -H 'Accept: application/vnd.github.raw+json' "repos/$REPO/contents/$3?ref=$1" >"$2/$3"
+}
+
 # audit_snapshot <sha> <dir>: the app audit's files at <sha>, mirrored under
 # <dir>: the baseline and the registry's AuditCore.swift with their content,
 # every other file empty (only its path counts, and a stray AuditCore.swift
@@ -141,11 +146,22 @@ audit_snapshot() {
   while IFS= read -r p; do
     mkdir -p "$out/$(dirname "$p")" || return 1
     if [[ "$p" == "$AUDIT_BASELINE" || "$p" =~ $AUDIT_REGISTRY_RE ]]; then
-      gh api -H 'Accept: application/vnd.github.raw+json' "repos/$REPO/contents/$p?ref=$sha" >"$out/$p" || return 1
+      audit_fetch "$sha" "$out" "$p" || return 1
     else
       : >"$out/$p"
     fi
   done <"$out.paths"
+}
+
+# audit_read_checks <base sha> <head sha> <before dir> <after dir>: when the
+# head adds check files, reads them and every check file at the base, so
+# audit_new_ids can match new baseline keys to new checks. Nothing otherwise.
+audit_read_checks() {
+  local p added
+  added=$(comm -13 <(audit_checks "$3") <(audit_checks "$4"))
+  [[ -n "$added" ]] || return 0
+  while IFS= read -r p; do audit_fetch "$2" "$4" "$p" || return 1; done <<<"$added"
+  while IFS= read -r p; do audit_fetch "$1" "$3" "$p" || return 1; done < <(audit_checks "$3")
 }
 
 # audit_lists <dir>: each `static let checks: [any Check] = [...]` declaration
@@ -167,22 +183,50 @@ audit_checks() {
   (cd "$1" 2>/dev/null && find . -path '*/Checks/*.swift' -type f | sed 's:^\./::' | sort -u) || true
 }
 
+# audit_new_ids <before dir> <after dir>: the ids of the checks this PR adds:
+# a new file under Checks/ whose `struct X: Check` is new in AppAudit.checks
+# and whose `let id = "..."` no check at the base already uses.
+audit_new_ids() {
+  local new_types base_ids p f t i
+  new_types=$(comm -13 <(audit_registry "$1") <(audit_registry "$2"))
+  base_ids=$(audit_checks "$1" | while IFS= read -r p; do audit_check_id "$1/$p"; done)
+  while IFS= read -r p; do
+    [[ -n "$p" ]] || continue
+    f="$2/$p"
+    t=$(sed 's://.*$::' "$f" | grep -oE 'struct +[A-Za-z_][A-Za-z0-9_]* *: *(AppAudit\.)?Check([^A-Za-z0-9_]|$)' \
+      | head -1 | sed -E 's/struct +([A-Za-z0-9_]+).*/\1/' || true)
+    i=$(audit_check_id "$f")
+    if [[ -n "$t" && -n "$i" ]] && grep -qxF -- "$t" <<<"$new_types" && ! grep -qxF -- "$i" <<<"$base_ids"; then
+      echo "$i"
+    fi
+  done < <(comm -13 <(audit_checks "$1") <(audit_checks "$2"))
+}
+
+# audit_check_id <check file>: its `let id = "..."`, comments stripped.
+audit_check_id() {
+  sed 's://.*$::' "$1" 2>/dev/null | grep -oE 'let id *= *"[^"]+"' | head -1 | sed -E 's/.*"(.*)"/\1/' || true
+}
+
 # audit_loosens <before dir> <after dir>: one line per way the PR loosens the
-# app audit, nothing when it doesn't. Looser: a baseline count goes up, a new
-# app or check key arrives above 0, an app leaves the baseline (an app missing
-# from the file isn't judged), a check file goes (moving one counts), an entry
-# leaves AppAudit.checks, or a second list appears to hide that. Lowering a
-# count or adding a check is fine.
+# app audit, nothing when it doesn't. Looser: an existing count goes up (a
+# check missing from a listed app counts as 0), a new app arrives above 0 (its
+# counts aren't anchored), an app leaves the baseline (an app missing from the
+# file isn't judged), a check file goes (moving one counts), an entry leaves
+# AppAudit.checks, or a second list appears to hide that. Fine: lowering a
+# count, and a new check's key at any count in an existing app when the same
+# PR adds that check's file and registry entry (any check beats none).
 audit_loosens() {
   local before="$1" after="$2" lists
   jq -rn --slurpfile b <(cat "$before/$AUDIT_BASELINE" 2>/dev/null || echo '{}') \
-         --slurpfile a <(cat "$after/$AUDIT_BASELINE" 2>/dev/null || echo '{}') '
+         --slurpfile a <(cat "$after/$AUDIT_BASELINE" 2>/dev/null || echo '{}') \
+         --argjson new "$(audit_new_ids "$before" "$after" | jq -R . | jq -s .)" '
     def counts: type == "object" and all(.[]; type == "object" and all(.[]; type == "number"));
     ($b[0] // {}) as $b | ($a[0] // {}) as $a
     | if ($a | counts) and ($b | counts) then
         ( $a | to_entries[] | .key as $app | .value | to_entries[]
           | ($b[$app] // {})[.key] as $was
           | select(.value > ($was // 0))
+          | select($was != null or $b[$app] == null or (.key as $k | $new | any(. == $k) | not))
           | "\($app) \(.key) \($was // "new") -> \(.value)" ),
         ( $b | keys[] | select($a[.] == null) | "drops \(.) from the baseline" )
       else "the baseline is not app -> check -> count" end' 2>/dev/null \
@@ -371,7 +415,8 @@ evaluate() {
   if grep -qE "$AUDIT_RE" "$tmp/files.txt"; then
     local base_sha
     if ! base_sha=$(gh api "repos/$REPO/compare/$(jq -r .baseRefName "$tmp/pr.json")...$head" --jq .merge_base_commit.sha) \
-        || ! audit_snapshot "$base_sha" "$tmp/before" || ! audit_snapshot "$head" "$tmp/after"; then
+        || ! audit_snapshot "$base_sha" "$tmp/before" || ! audit_snapshot "$head" "$tmp/after" \
+        || ! audit_read_checks "$base_sha" "$head" "$tmp/before" "$tmp/after"; then
       log "PR #$n: could not read the app audit files; the next sweep looks again"; rm -rf "$tmp"; return
     fi
     audit=("$tmp/before" "$tmp/after")
