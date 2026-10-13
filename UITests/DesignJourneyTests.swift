@@ -54,17 +54,8 @@ final class DesignJourneyTests: XCTestCase {
 
         tools["Text"].click()
         design.drag(on: "suite.canvas", from: CGVector(dx: 0.2, dy: 0.75), to: CGVector(dx: 0.2, dy: 0.75), step: "text-placed")
-        let field = design.element("design.text")
-        XCTAssert(field.waitForExistence(timeout: 5), "the Text click opened no text field")
         design.app.typeKey("a", modifierFlags: .command)
         design.app.typeText("Hello\r")
-        // PROBE: when the keys didn't reach the field, click into it and type again.
-        if !design.app.buttons["Undo Add Text"].waitForExistence(timeout: 3) {
-            design.shot("text-unfocused")
-            field.click()
-            design.app.typeKey("a", modifierFlags: .command)
-            design.app.typeText("Hello\r")
-        }
         XCTAssert(design.app.buttons["Undo Add Text"].waitForExistence(timeout: 5), "typing text made no undo step")
         design.shot("text-typed")
 
