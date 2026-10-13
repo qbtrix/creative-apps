@@ -883,14 +883,11 @@ public protocol KeyframeEditing: Sendable {
     func setLabel(_ name: String?, at frame: Int, sceneID: String, in engine: inout CommandEngine) throws
 }
 
-// Easing on the segment that starts at a key.
-public struct EasingPreset: Hashable, Sendable {
-    public var title: String
-    public var easing: Easing
-    public init(title: String, easing: Easing) { self.title = title; self.easing = easing }
-}
-
-public protocol EasingEditing: Sendable {
+// Easing on the segment that starts at a key. Named `KeyframeEasing`, not
+// `EasingEditing`: `EasingEditing` (Sources/FlareModel/EasingEditing.swift) is
+// the window-level easing editor protocol FlareWorkspace conforms to. Both use
+// the `EasingPreset` enum declared there (`title`, `easing`, six cases).
+public protocol KeyframeEasing: Sendable {
     var presets: [EasingPreset] { get }
     /// `count` points of the curve in 0...1 time, for drawing the editor.
     func curve(_ easing: Easing, count: Int) -> [Point]
@@ -1116,7 +1113,7 @@ public struct FlareServices: Sendable {
     public var shapes: any ShapeBuilding
     public var properties: any PropertyAnimating
     public var keyframes: any KeyframeEditing
-    public var easing: any EasingEditing
+    public var easing: any KeyframeEasing
     public var onion: any OnionSkinning
     public var library: any LibraryManaging
     public var machines: any StateMachineEditing
@@ -1128,7 +1125,7 @@ public struct FlareServices: Sendable {
 
     public init(scenes: any SceneEditing, stage: any StageRendering, hits: any StageHitTesting,
                 shapes: any ShapeBuilding, properties: any PropertyAnimating,
-                keyframes: any KeyframeEditing, easing: any EasingEditing, onion: any OnionSkinning,
+                keyframes: any KeyframeEditing, easing: any KeyframeEasing, onion: any OnionSkinning,
                 library: any LibraryManaging, machines: any StateMachineEditing,
                 preview: any StateMachinePreviewing, export: any Exporting,
                 assist: any AnimationAssisting, isPreview: Bool) {
@@ -1176,6 +1173,11 @@ public enum AssistError: Error, Equatable, Sendable {
 }
 ```
 
+`FlareServices.easing` is the per-keyframe `KeyframeEasing` contract above.
+`EasingEditing` stays FlareWorkspace's window-level protocol (segment list,
+selection, presets, handles, undo) over `SetKeyframeEasing`, with
+`FakeEasingEditing` as its stand-in; FlareServices never holds it.
+
 Each fake's `init(unavailable: String? = nil)` (and `FakeAssist.init(mode:unavailable:)`)
 lives in its own file under `Fakes/`. IN-9 sets `isPreview` to false once no
 member is a fake, except Assist while it has no provider.
@@ -1188,7 +1190,7 @@ member is a fake, except Assist while it has no provider.
 | `ShapeBuilding` | `FakeShapes`: rectangle and ellipse as polygons, pen as straight segments with smooth anchors marked; commit, box gestures, delete, duplicate, copy and paste through real commands or `FixtureEdit` in the right groups | `LiveShapes` over LC-4 builders, pen curves, LC-7 |
 | `PropertyAnimating` | `FakeProperties`: real `SetKeyframe` on scene layers with the section 2 rule; stroke via `FixtureEdit` | `LiveProperties` (LM-4) |
 | `KeyframeEditing` | `FakeKeyframes`: rows from `Layer.tracks`; real move, remove, shift and labels | `LiveKeyframes` (LM-5) |
-| `EasingEditing` | `FakeEasing`: six presets, curve from `Easing.value(at:)`; real `SetKeyframeEasing` | `LiveEasing` (LM-6) |
+| `KeyframeEasing` | `FakeEasing`: six presets, curve from `Easing.value(at:)`; real `SetKeyframeEasing` | `LiveEasing` (LM-6) |
 | `OnionSkinning` | `FakeOnion`: ghosts from `FakeStage` at the requested before and after counts and falloff | `LiveOnion` over LC-9 |
 | `LibraryManaging` | `FakeLibrary`: real convert and swatch commands; `FixtureEdit` for place, playback and rename; usage counted by walking layers | `LiveLibrary` over LC-6, LC-12b |
 | `StateMachineEditing` | `FakeMachines`: `FixtureEdit` on `Document.stateMachines`, refusing the same rules the engine validates; issues: unreachable states | `LiveMachines` over LC-11a–c |
