@@ -110,7 +110,7 @@ public struct DesignWorkspace: Sendable, Equatable {
         (pages, pageCount, nodeCount) = ([], 0, 0)
         let page = nextPage()
         (pages, selectedPageID, selectedNodeID, expandedNodeIDs) = ([page], page.id, nil, [])
-        if wasOpen { record("New File", before: before) }
+        if wasOpen { record("New File", before: before, swapsDocument: true) }
     }
 
     /// Replaces the document with `pages` (the file codec opens a file through this): selects the

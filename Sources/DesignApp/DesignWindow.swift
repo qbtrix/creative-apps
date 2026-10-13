@@ -72,11 +72,11 @@ struct DesignWindow: View {
         case .save: save()
         case .saveAs: saveAs()
         case .undo:
-            let swapsDocument = model.undoActionName == "Undo New File"
+            let swapsDocument = model.undoSwapsDocument
             model.undo()
             if swapsDocument { documentURL = nil }
         case .redo:
-            let swapsDocument = model.redoActionName == "Redo New File"
+            let swapsDocument = model.redoSwapsDocument
             model.redo()
             if swapsDocument { documentURL = nil }
         case .tool(let tool): model.selectTool(tool)

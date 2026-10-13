@@ -5,7 +5,9 @@
 // the id counters. A restore sets each counter to the larger of the current and
 // the snapshot's, so an undone add never gives its id away again (a redo of New
 // File therefore doesn't restart the ids). The restored selection's enclosing
-// rows expand; expansion is otherwise view state and is not undone.
+// rows expand; expansion is otherwise view state and is not undone. A step that
+// replaces the whole document (New File) is marked so, and the window asks
+// undoSwapsDocument / redoSwapsDocument instead of matching its name.
 //
 // A run of edits with the same coalescing key (one node's frame, nudges) is one
 // step; an undo or redo ends the run. A new edit clears Redo. The history keeps
@@ -29,6 +31,8 @@ struct DesignHistory: Sendable, Equatable {
         var name: String
         var snapshot: DesignSnapshot
         var coalescing: String?
+        /// Undoing or redoing it replaces the whole document (New File over an open file).
+        var swapsDocument = false
     }
 
     static let limit = 100
@@ -43,11 +47,16 @@ extension DesignWorkspace {
     public var undoActionName: String { history.undo.last.map { "Undo \($0.name)" } ?? "Undo" }
     /// "Redo Add Rectangle", or plain "Redo" with nothing to redo.
     public var redoActionName: String { history.redo.last.map { "Redo \($0.name)" } ?? "Redo" }
+    /// The next Undo replaces the whole document, so the window forgets its file's location.
+    public var undoSwapsDocument: Bool { history.undo.last?.swapsDocument ?? false }
+    /// The next Redo replaces the whole document, so the window forgets its file's location.
+    public var redoSwapsDocument: Bool { history.redo.last?.swapsDocument ?? false }
 
     /// Puts back the last edit. Ignored with nothing to undo, mid-drag and while editing text.
     public mutating func undo() {
         guard gesture == nil, editingTextID == nil, let step = history.undo.popLast() else { return }
-        history.redo.append(DesignHistory.Step(name: step.name, snapshot: snapshot))
+        history.redo.append(
+            DesignHistory.Step(name: step.name, snapshot: snapshot, swapsDocument: step.swapsDocument))
         restore(step.snapshot)
         endRun()
     }
@@ -55,7 +64,8 @@ extension DesignWorkspace {
     /// Makes the last undone edit again. Ignored with nothing to redo, mid-drag and while editing text.
     public mutating func redo() {
         guard gesture == nil, editingTextID == nil, let step = history.redo.popLast() else { return }
-        history.undo.append(DesignHistory.Step(name: step.name, snapshot: snapshot))
+        history.undo.append(
+            DesignHistory.Step(name: step.name, snapshot: snapshot, swapsDocument: step.swapsDocument))
         restore(step.snapshot)
         endRun()
     }
@@ -69,12 +79,16 @@ extension DesignWorkspace {
     /// Records the edit just made as one step named `name`, undone by putting back `before`. Does
     /// nothing when the edit left the pages and selection as they were. With a `coalescing` key
     /// equal to the last step's, that step already puts back the state before this run.
-    mutating func record(_ name: String, before: DesignSnapshot, coalescing: String? = nil) {
+    /// `swapsDocument` marks a step that replaces the whole document.
+    mutating func record(
+        _ name: String, before: DesignSnapshot, coalescing: String? = nil, swapsDocument: Bool = false
+    ) {
         guard pages != before.pages || selectedPageID != before.selectedPageID || selectedNodeID != before.selectedNodeID
         else { return }
         history.redo.removeAll()
         if let coalescing, history.undo.last?.coalescing == coalescing { return }
-        history.undo.append(DesignHistory.Step(name: name, snapshot: before, coalescing: coalescing))
+        history.undo.append(DesignHistory.Step(
+            name: name, snapshot: before, coalescing: coalescing, swapsDocument: swapsDocument))
         if history.undo.count > DesignHistory.limit {
             history.undo.removeFirst(history.undo.count - DesignHistory.limit)
         }
