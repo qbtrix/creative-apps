@@ -53,7 +53,8 @@ public protocol ShapeBuilding: Sendable {
     func duplicate(layers: [String], owner: LayerOwner, in engine: inout CommandEngine) throws -> [String]
     /// The layers as a registry envelope list for the pasteboard (no engine change).
     func copy(layers: [String], owner: LayerOwner, from document: Document) throws -> Data
-    /// Grouped "Paste". Decodes only through `CommandRegistry.builtIn`; returns new layer ids.
+    /// Grouped "Paste". Decodes only through `CommandRegistry.builtIn`; returns new layer ids. Like `commit`,
+    /// throws on an `aboveLayerID` that is missing or locked.
     func paste(_ data: Data, owner: LayerOwner, aboveLayerID: String?, offset: Double,
                in engine: inout CommandEngine) throws -> [String]
 }
