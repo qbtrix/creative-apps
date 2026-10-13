@@ -97,3 +97,65 @@ private func ball(_ w: FlareWorkspace) -> Layer? { w.document?.scenes.first?.lay
     w.load(FlareFixtures.bounce)
     #expect(w == workspace(FlareFixtures.bounce, .select))
 }
+
+@Test func loadResetsThePerDocumentStateAndKeepsThePreferences() {
+    var w = workspace(FlareFixtures.bounce, .select)
+    (w.currentFrame, w.isPlaying, w.playClock, w.editingSymbolID) = (12, true, 0.5, "star")
+    w.machineID = "button"
+    w.machinePreview = MachinePreview(machineID: "button", stateID: "idle", frame: 3, inputs: [:])
+    (w.machineError, w.exportState, w.assist.prompt) = ("No machine.", .running(progress: 0.5), "bounce higher")
+    (w.fileName, w.isDirty, w.saveError, w.loadState) = ("bounce.flare", true, "Disk full.", .failed("Bad file."))
+    (w.loops, w.autoKey, w.onion.isOn, w.showsMotionPath, w.recent) = (false, true, true, true, ["a.flare"])
+    w.load(FlareFixtures.bounce)
+    var fresh = workspace(FlareFixtures.bounce, .select)
+    (fresh.loops, fresh.autoKey, fresh.onion.isOn, fresh.showsMotionPath, fresh.recent) = (false, true, true, true, ["a.flare"])
+    #expect(w == fresh && w.currentFrame == 0 && !w.isPlaying && w.editingSymbolID == nil && w.machinePreview == nil)
+}
+
+@Test func workspacesDifferingInOneNewPropertyAreUnequal() {
+    let base = workspace(FlareFixtures.bounce, .select)
+    let changes: [(inout FlareWorkspace) -> Void] = [
+        { $0.isPlaying = true }, { $0.loops = false }, { $0.playClock = 1 }, { $0.autoKey = true },
+        { $0.onion.before = 3 }, { $0.showsMotionPath = true }, { $0.editingSymbolID = "star" },
+        { $0.machineID = "button" }, { $0.machineError = "No machine." }, { $0.exportState = .failed("Disk full.") },
+        { $0.machinePreview = MachinePreview(machineID: "m", stateID: "idle", frame: 0, inputs: [:]) },
+        { $0.assist.error = .timedOut }, { $0.fileName = "bounce.flare" }, { $0.isDirty = true },
+        { $0.saveError = "Disk full." }, { $0.loadState = .loading }, { $0.recent = ["a.flare"] },
+    ]
+    for (i, change) in changes.enumerated() {
+        var other = base
+        change(&other)
+        #expect(other != base, "change \(i)")
+    }
+}
+
+@Test func selectionBoundsIsNilWithNoSelectionAndCoversJ5sMarquee() {
+    var w = workspace(FlareFixtures.bounce, .select)
+    #expect(w.selectionBounds == nil)
+    w.drag(from: p(1, 1), to: p(549, 399))
+    // Ball 50...110 × 70...130 and Shadow 235...315 × 344...360; the locked Background stays out.
+    #expect(w.selectionBounds == Rect(minX: 50, minY: 70, maxX: 315, maxY: 360))
+    w.drag(from: p(500, 30), to: p(500, 30))
+    #expect(w.selectionBounds == nil)
+}
+
+@Test func aMoveKeysThePlayheadOnlyWithAutoKey() {
+    for autoKey in [false, true] {
+        var w = workspace(FlareFixtures.bounce, .select)
+        (w.currentFrame, w.autoKey) = (6, autoKey)
+        w.drag(from: p(275, 352), to: p(285, 352))  // Shadow, not animated
+        let shadow = w.document?.scenes.first?.layers.first { $0.id == "shadow" }
+        #expect(shadow?.tracks["x"]?.map(\.frame) == [autoKey ? 6 : 0] && w.undoActionName == "Undo Move")
+    }
+}
+
+// Section 2's feel rule: a pointer move never performs a command, and mouse-up commits exactly one named step.
+@Test func aLongDragPerformsNothingUntilMouseUpThenOneStep() {
+    var w = workspace(FlareFixtures.bounce, .select)
+    for i in 1...120 { w.dragChanged(from: p(80, 100), to: p(80 + Double(i), 100)) }
+    #expect(w.document == FlareFixtures.bounce && !w.canUndo && w.dragPreview != nil)
+    w.endDrag()
+    #expect(w.undoActionName == "Undo Move")
+    w.undo()
+    #expect(w.document == FlareFixtures.bounce && !w.canUndo)
+}

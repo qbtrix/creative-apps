@@ -6,6 +6,12 @@ extension FlareWorkspace {
     /// The layers the stage selection touches, in selection order, each once.
     public var selectedLayerIDs: [String] { layerIDs(of: selection) }
 
+    /// The selection box: the selected items' world bounds at the playhead, strokes included; nil with no selection.
+    public var selectionBounds: Rect? {
+        guard let sceneID = selectedSceneID, let document, !selection.isEmpty else { return nil }
+        return services.hits.bounds(document, sceneID: sceneID, frame: currentFrame, of: selection)
+    }
+
     func layerIDs(of items: [StageAddress]) -> [String] {
         items.map(\.layerID).enumerated().filter { !items.prefix($0.offset).map(\.layerID).contains($0.element) }.map(\.element)
     }

@@ -84,12 +84,12 @@ extension FlareWorkspace {
     /// One "Move" by (`dx`, `dy`) scene points: Select writes the layers' x and y, Direct Select the items' geometry.
     mutating func commitMove(_ moving: [StageAddress], dx: Double, dy: Double) {
         guard let sceneID = selectedSceneID, let document, dx.isFinite, dy.isFinite else { return }
-        let shapes = services.shapes, frame = currentFrame, layers = layerIDs(of: moving), tool = tool
+        let shapes = services.shapes, frame = currentFrame, layers = layerIDs(of: moving), tool = tool, autoKey = autoKey
         let box = services.hits.bounds(document, sceneID: sceneID, frame: frame, of: moving)
         step { engine in
             guard tool == .select else { return try shapes.translate(moving, dx: dx, dy: dy, in: &engine) }
             try shapes.commitBox(.move(dx: dx, dy: dy), layers: layers, sceneID: sceneID, frame: frame,
-                                 box: box ?? Rect(minX: 0, minY: 0, maxX: 0, maxY: 0), autoKey: false, in: &engine)
+                                 box: box ?? Rect(minX: 0, minY: 0, maxX: 0, maxY: 0), autoKey: autoKey, in: &engine)
         }
         if layerError == nil { setSelection(moving) }
     }
@@ -97,7 +97,7 @@ extension FlareWorkspace {
     /// The stage at the playhead with `moving` shifted by (`dx`, `dy`).
     private func movePreview(_ moving: [StageAddress], dx: Double, dy: Double) -> StageDrawList? {
         guard let sceneID = selectedSceneID, let document else { return nil }
-        var list = services.stage.drawList(document, sceneID: sceneID, frame: currentFrame, editing: nil)
+        var list = services.stage.drawList(document, sceneID: sceneID, frame: currentFrame, editing: editingSymbolID)
         let layers = Set(moving.map(\.layerID)), tool = tool
         for (i, item) in list.items.enumerated() where tool == .select ? layers.contains(item.address.layerID) : moving.contains(item.address) {
             list.items[i].transform = .translation(x: dx, y: dy) * item.transform
