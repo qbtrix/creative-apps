@@ -183,7 +183,7 @@ the contract and the Fake. Logic tasks touch no SwiftUI.
 ```
         this PR (contract + Fake)
         ├── UI1 ── UI2 ──┐
-        ├── L1 ──────────┼── I1  (after the captain approves UI2's snapshots)
+        ├── L1 ──────────┼── I1  (one macOS feature run; merges after the captain approves the UI)
         └── L2 ──────────┘
 ```
 
@@ -216,7 +216,8 @@ keyframes later.
   `suite-curve-editor-dark.png`.
 - **Quality checks:** design lint (every size and color from `Tokens.swift`);
   every handle has a tooltip and accessibility label; focus rings visible in
-  both snapshots; `TokensTests` still pass; macOS CI job green.
+  both snapshots; `TokensTests` pass in the feature run (see below). No
+  macOS CI on this PR.
 
 ### UI2: Flare easing inspector on the Fake
 
@@ -236,8 +237,8 @@ Line `flare`. Base: UI1's branch until UI1 merges, then `dev`.
   step curve).
 - **Quality checks:** app-state rule (no assignment or binding to the
   editor); design lint; no dead controls (every chip, row and handle acts on
-  the Fake); the snapshot PNG names in the PR body; macOS CI job green. The
-  captain reviews these snapshots before I1 starts.
+  the Fake); the snapshot PNG names in the PR body. No macOS CI on this PR;
+  its snapshots come from the feature run.
 
 ### L1: FlareWorkspace conforms to EasingEditing
 
@@ -283,8 +284,8 @@ Line `flare`. Parallel with everything.
 
 ### I1: wire the editor to FlareWorkspace and walk the journey
 
-Line `flare`. Starts only after the captain approves UI2's snapshots and L1,
-L2 and UI2 have merged to `dev`.
+Line `flare`. Starts once L1, L2, UI1 and UI2 have merged to `dev`. It
+merges only after the captain approves the UI from the feature run.
 
 - **Owned:** `Sources/FlareApp/FlareApp.swift` (edit: the inspector shows
   `FlareEasingInspector(editor: model, ...)` with closures calling the model;
@@ -292,7 +293,7 @@ L2 and UI2 have merged to `dev`.
   (new: File > New Sample Animation; Edit > Undo and Redo on the model, named
   from the engine's action name), `UITests/FlareJourneyTests.swift` (edit:
   `testEditEasingOfAKeyframeSegment`).
-- **Acceptance tests:** the journey above passes in the macOS job and
+- **Acceptance tests:** the journey above passes in the feature run and
   uploads `flare-easing-sample.png` through `flare-easing-undo.png`;
   `FlareJourneyTests.testEveryMenuOpens` still passes with the new items.
 - **Quality checks:** app-state rule; every new command is in the menu bar;
@@ -306,17 +307,31 @@ L2 and UI2 have merged to `dev`.
 | Curve samples equal FlareCore | max \|y − `Easing.value(at: x)`\| ≤ 1e-9 over 1001 samples, every preset | `EasingEditingContractTests.samplesMatchFlareCoreWithinOneBillionth` (this PR), `FlareEasingTests.samplesMatchFlareCoreWithinOneBillionth` (L1) |
 | Handle x clamped, y free | x in 0...1 after any move; y keeps 1.4 and -0.3 | `EasingEditingContractTests.handleXIsClampedAndYMayOvershoot`, `FlareEasingTests.handleXIsClampedAndYMayOvershoot` |
 | Undo exact | one drag = one step; one preset = one step; undoing all edits gives a document equal to the original | `EasingEditingContractTests.oneDragIsOneUndoStep`, `FlareEasingTests.undoRestoresTheDocumentExactly` |
-| Snapshots in Light and Dark | 2 suite PNGs, 4 Flare PNGs, each opened and listed in its PR | `SuiteCurveEditorSnapshots` (UI1), `FlareEasingSnapshots` (UI2), macOS CI artifact |
-| The journey passes | 6 steps, 6 PNGs, two value assertions | `FlareJourneyTests.testEditEasingOfAKeyframeSegment` (I1), macOS CI job |
+| Snapshots in Light and Dark | 2 suite PNGs, 4 Flare PNGs, each opened and listed in its PR | `SuiteCurveEditorSnapshots` (UI1), `FlareEasingSnapshots` (UI2), the feature run's `snapshots` artifact |
+| The journey passes | 6 steps, 6 PNGs, two value assertions | `FlareJourneyTests.testEditEasingOfAKeyframeSegment` (I1), the feature run |
 | Curve is a vector Path | 1 move + 128 lines for 129 samples, sharp in the scale-2 snapshot | `CurveEditorTests.curveIsOneVectorPath` (UI1), `flare-easing-editor-2x-dark.png` (UI2) |
-| Every PR's gate | `scripts/ci` prints `CI: PASS`; both CI jobs green | the fast check, then GitHub CI |
+| Every PR's gate | `scripts/ci` prints `CI: PASS` on the worker's machine | the fast check |
+| The whole feature compiles and renders | one macOS run, green | the feature run |
 
 ## How every PR ships (pilot rules)
 
 - Branch from `origin/dev`; open the PR against `dev`, not `main`.
-- Run the fast check on your own machine first: `scripts/ci` must print
-  `CI: PASS` (on a Mac without Xcode, through the Linux-safe harness; UI
-  tasks also run `gh workflow run CI --ref <branch>` for the macOS job).
+- Run the fast check on your own machine: `scripts/ci` must print
+  `CI: PASS` (on a Mac without Xcode, through the Linux-safe harness). That is
+  the whole per-PR gate.
+- **No macOS CI per PR.** macOS CI runs once, after the whole feature is
+  built: the **feature run**. When I1 is open with everything else on `dev`,
+  the I1 worker dispatches `gh workflow run CI --ref <I1 branch>` once. That
+  run compiles every SwiftUI change in the feature, writes all the snapshots
+  and walks the journey. The captain approves the UI from it, and only then
+  does I1 merge. A fix pushed after it gets one more feature run, not one per
+  push.
+- `ci.yml` still starts both jobs on every `pull_request` event. Until that
+  trigger changes (a `.github/` change, so the captain's call), cancel the
+  automatic run on a task PR with `gh run cancel <id>` once the fast check
+  has passed.
+- The cost of this rule: UI1 and UI2 reach `dev` with their SwiftUI not yet
+  compiled. A compile error shows up in the feature run and is fixed in I1.
 - The PR body carries `Fast-Check: pass` and `Head: <full head sha>`, and the
   PR gets the `fast-lane` label.
 - Each task records its start and end time (from `date`), the PR's changed
