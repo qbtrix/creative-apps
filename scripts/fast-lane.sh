@@ -5,38 +5,37 @@
 # "Fast lane".
 #
 # Run by .github/workflows/fast-lane.yml with this file from the trusted main
-# branch. It only reads PR metadata through the GitHub API. It never checks out
-# or runs PR code.
+# branch. It only reads PR metadata and file contents through the GitHub API.
+# It never checks out or runs PR code.
 #
 # The branch model: workers run scripts/ci on their own machine, the lane merges
 # into dev at once, full CI runs on dev once a feature is built, and the
 # `promote` job in ci.yml fast-forwards main to a dev SHA only when that run is
 # green. A red dev run opens the "dev is red" issue. The lane keeps merging
-# while dev is red, on purpose: promotion is the guard that keeps main green,
-# and holding the lane would only stack the queue behind one bad merge.
+# while dev is red, on purpose: promotion is the guard that keeps main green.
 #
 # Eligibility (all must hold): open, not draft, label `fast-lane`, base
 # BASE_BRANCH, author in FAST_LANE_AUTHORS, size within MAX_LINES/MAX_FILES, no
-# changed path matching DENY_RE, MERGEABLE, no red or running check on the head,
-# and proof the head passed the gate: a passing check from CI_WORKFLOWS on the
-# head, or the worker's marker in the PR body, a line `Fast-Check: pass`
-# followed by the line `Head: <full head sha>` for the current head (the same
-# shape as Belt's `Belt-Review: pass` / `Head:` verdict). A Belt PR (a body line
-# starting `Belt-Run:` or `Belt-Test:`) also needs Belt's `belt/review` commit
-# status at success on its head while REQUIRE_BELT_REVIEW=1. A fast-lane PR
-# based on main is retargeted to BASE_BRANCH. A PR that conflicts with the base
-# gets one comment per head and keeps its label for Belt's fixer.
+# changed or renamed-away path under PROTECTED (CLAUDE.md's "Never edit" list),
+# no looser app audit (audit_loosens), MERGEABLE, no red or running check on the
+# head, and proof the head passed the gate: a passing check from CI_WORKFLOWS on
+# the head, or the worker's marker in the PR body, a line `Fast-Check: pass`
+# followed by the line `Head: <full head sha>` for the current head. A Belt PR
+# (a body line starting `Belt-Run:` or `Belt-Test:`) also needs Belt's
+# `belt/review` commit status at success on its head while REQUIRE_BELT_REVIEW=1.
+# A fast-lane PR based on main is retargeted to BASE_BRANCH. A PR that conflicts
+# with the base gets one comment per head and keeps its label for Belt's fixer.
 #
 # Every run sweeps all open fast-lane PRs, oldest first, and merges each
-# eligible one. A merge does not start CI; only merging a PR labelled
-# FEATURE_LABEL does: the lane then dispatches CI on BASE_BRANCH once per run.
-# Trade-off: SwiftUI can't compile on Linux, so UI breakage (the macOS build,
-# snapshots, UI journeys) sits on dev until the next feature run, and the
-# dev-red culprit range can span several PRs.
+# eligible one. Only merging a PR labelled FEATURE_LABEL starts CI: the lane
+# then dispatches CI on BASE_BRANCH once per run. Trade-off: SwiftUI can't
+# compile on Linux, so UI breakage (the macOS build, snapshots, UI journeys)
+# sits on dev until the next feature run, and the dev-red range can span PRs.
 #
 # `decide` is the pure decision function (no network). It reads a PR JSON file,
-# a file-list file (one path per line) and a check-rollup JSON file, logs each
-# rule to stderr, and prints one line to stdout:
+# a file-list file (one path per line), a check-rollup JSON file and, when the
+# PR touches the app audit, two audit_snapshot directories (merge base, head).
+# It logs each rule to stderr and prints one line to stdout:
 #   skip|<why>  retarget|<from base>  not-eligible|<reasons>  red|<checks>
 #   conflict|<head sha>  pending|<why>  eligible|<lines>|<files>|<proof>
 # Tests/fast_lane/test_fast_lane.sh sources this file and feeds `decide` fixtures.
@@ -71,7 +70,31 @@ SELF_CHECK="fast-lane"
 # UI code is eligible: the worker's Linux scripts/ci covers the Models, the
 # macOS job in the next feature CI on dev covers the UI, and taste review
 # happens after merge on the snapshot PNGs (fixes come back as new issues).
-DENY_RE='^\.github/|^\.claude/|(^|/)(CLAUDE|AGENTS)\.md$|^scripts/(ci|cloud-setup\.sh|fast-lane\.sh)$|(^|/)Package\.(swift|resolved)$|^LICENSE'
+# PROTECTED is exactly the backticked paths in CLAUDE.md's "**Never edit**"
+# bullet; Tests/fast_lane checks the two match. A path ending in / is that
+# folder at the root, a path with a / is that file, and a bare name is that
+# file in any folder (docs/AGENTS.md too). Matching ignores case.
+PROTECTED=(Package.swift Package.resolved .github/ .claude/ scripts/ CLAUDE.md AGENTS.md LICENSE)
+deny_re() {
+  local p re=""
+  for p in "${PROTECTED[@]}"; do
+    p="${p//./\\.}"
+    case "$p" in */) p="^$p" ;; */*) p="^$p\$" ;; *) p="(^|/)$p\$" ;; esac
+    re+="${re:+|}$p"
+  done
+  echo "$re"
+}
+DENY_RE=$(deny_re)
+
+# The app audit's ratchet (docs/blueprints/app-audit.md, "Growing the audit"):
+# its baseline, and the folder holding AuditCore.swift (the AppAudit.checks
+# registry) and Checks/. Both homes of the audit code are listed, so the guard
+# holds while the move into its own test target waits to reach main.
+AUDIT_BASELINE="UITests/audit-baseline.json"
+AUDIT_DIRS='(Tests/PhotoModelTests/AppAudit|Tests/AppAuditTests)'
+AUDIT_RE="^(UITests/audit-baseline\\.json\$|$AUDIT_DIRS/)"
+AUDIT_REGISTRY_RE="^$AUDIT_DIRS/AuditCore\\.swift\$"
+AUDIT_REASON="loosens the app audit: needs the captain's review"
 
 # The worker's proof that scripts/ci passed on the head: this line, then `Head: <sha>`.
 MARKER_LINE="Fast-Check: pass"
@@ -104,7 +127,117 @@ has_marker() {
     END { exit !found }'
 }
 
-# decide <pr.json> <files.txt> <checks.json>
+# audit_fetch <sha> <dir> <path>: <path> at <sha> into <dir>/<path>.
+audit_fetch() {
+  gh api -H 'Accept: application/vnd.github.raw+json' "repos/$REPO/contents/$3?ref=$1" >"$2/$3"
+}
+
+# audit_snapshot <sha> <dir>: the app audit's files at <sha>, mirrored under
+# <dir>: the baseline and the registry's AuditCore.swift with their content,
+# every other file empty (only its path counts, and a stray AuditCore.swift
+# elsewhere can't pad the registry). Returns non-zero when the API fails.
+audit_snapshot() {
+  local sha="$1" out="$2" p
+  mkdir -p "$out" || return 1
+  gh api "repos/$REPO/git/trees/$sha?recursive=1" >"$out.tree" || return 1
+  jq -e '.truncated | not' "$out.tree" >/dev/null || return 1
+  jq -r --arg re "$AUDIT_RE" '.tree[] | select(.type == "blob" and (.path | test($re))) | .path' \
+    "$out.tree" >"$out.paths" || return 1
+  while IFS= read -r p; do
+    mkdir -p "$out/$(dirname "$p")" || return 1
+    if [[ "$p" == "$AUDIT_BASELINE" || "$p" =~ $AUDIT_REGISTRY_RE ]]; then
+      audit_fetch "$sha" "$out" "$p" || return 1
+    else
+      : >"$out/$p"
+    fi
+  done <"$out.paths"
+}
+
+# audit_read_checks <base sha> <head sha> <before dir> <after dir>: when the
+# head adds check files, reads them and every check file at the base, so
+# audit_new_ids can match new baseline keys to new checks. Nothing otherwise.
+audit_read_checks() {
+  local p added
+  added=$(comm -13 <(audit_checks "$3") <(audit_checks "$4"))
+  [[ -n "$added" ]] || return 0
+  while IFS= read -r p; do audit_fetch "$2" "$4" "$p" || return 1; done <<<"$added"
+  while IFS= read -r p; do audit_fetch "$1" "$3" "$p" || return 1; done < <(audit_checks "$3")
+}
+
+# audit_lists <dir>: each `static let checks: [any Check] = [...]` declaration
+# in the AuditCore.swift files under <dir>, one per line, comments stripped.
+# ponytail: a text scan, not a parser; "//" inside a string or a `]` inside
+# the list fools it. Upgrade to a SwiftSyntax tool if that bites.
+audit_lists() {
+  find "$1" -name AuditCore.swift -type f -exec cat {} + 2>/dev/null | sed 's://.*$::' | tr '\n' ' ' \
+    | sed 's:/\*[^*]*\*/::g' | grep -oE 'static (let|var) checks *: *\[any Check\] *= *\[[^]]*\]' || true
+}
+
+# audit_registry <dir>: the check types in AppAudit.checks, one per line.
+audit_registry() {
+  audit_lists "$1" | sed 's/^.*= *\[//' | grep -oE '[A-Za-z_][A-Za-z0-9_]*\(' | tr -d '(' | sort -u || true
+}
+
+# audit_checks <dir>: the paths of the check files under <dir>.
+audit_checks() {
+  (cd "$1" 2>/dev/null && find . -path '*/Checks/*.swift' -type f | sed 's:^\./::' | sort -u) || true
+}
+
+# audit_new_ids <before dir> <after dir>: the ids of the checks this PR adds:
+# a new file under Checks/ whose `struct X: Check` is new in AppAudit.checks
+# and whose `let id = "..."` no check at the base already uses.
+audit_new_ids() {
+  local new_types base_ids p f t i
+  new_types=$(comm -13 <(audit_registry "$1") <(audit_registry "$2"))
+  base_ids=$(audit_checks "$1" | while IFS= read -r p; do audit_check_id "$1/$p"; done)
+  while IFS= read -r p; do
+    [[ -n "$p" ]] || continue
+    f="$2/$p"
+    t=$(sed 's://.*$::' "$f" | grep -oE 'struct +[A-Za-z_][A-Za-z0-9_]* *: *(AppAudit\.)?Check([^A-Za-z0-9_]|$)' \
+      | head -1 | sed -E 's/struct +([A-Za-z0-9_]+).*/\1/' || true)
+    i=$(audit_check_id "$f")
+    if [[ -n "$t" && -n "$i" ]] && grep -qxF -- "$t" <<<"$new_types" && ! grep -qxF -- "$i" <<<"$base_ids"; then
+      echo "$i"
+    fi
+  done < <(comm -13 <(audit_checks "$1") <(audit_checks "$2"))
+}
+
+# audit_check_id <check file>: its `let id = "..."`, comments stripped.
+audit_check_id() {
+  sed 's://.*$::' "$1" 2>/dev/null | grep -oE 'let id *= *"[^"]+"' | head -1 | sed -E 's/.*"(.*)"/\1/' || true
+}
+
+# audit_loosens <before dir> <after dir>: one line per way the PR loosens the
+# app audit, nothing when it doesn't. Looser: an existing count goes up (a
+# check missing from a listed app counts as 0), a new app arrives above 0 (its
+# counts aren't anchored), an app leaves the baseline (an app missing from the
+# file isn't judged), a check file goes (moving one counts), an entry leaves
+# AppAudit.checks, or a second list appears to hide that. Fine: lowering a
+# count, and a new check's key at any count in an existing app when the same
+# PR adds that check's file and registry entry (any check beats none).
+audit_loosens() {
+  local before="$1" after="$2" lists
+  jq -rn --slurpfile b <(cat "$before/$AUDIT_BASELINE" 2>/dev/null || echo '{}') \
+         --slurpfile a <(cat "$after/$AUDIT_BASELINE" 2>/dev/null || echo '{}') \
+         --argjson new "$(audit_new_ids "$before" "$after" | jq -R . | jq -s .)" '
+    def counts: type == "object" and all(.[]; type == "object" and all(.[]; type == "number"));
+    ($b[0] // {}) as $b | ($a[0] // {}) as $a
+    | if ($a | counts) and ($b | counts) then
+        ( $a | to_entries[] | .key as $app | .value | to_entries[]
+          | ($b[$app] // {})[.key] as $was
+          | select(.value > ($was // 0))
+          | select($was != null or $b[$app] == null or (.key as $k | $new | any(. == $k) | not))
+          | "\($app) \(.key) \($was // "new") -> \(.value)" ),
+        ( $b | keys[] | select($a[.] == null) | "drops \(.) from the baseline" )
+      else "the baseline is not app -> check -> count" end' 2>/dev/null \
+    || echo "the baseline is not valid JSON"
+  comm -23 <(audit_checks "$before") <(audit_checks "$after") | sed 's/^/removes /'
+  comm -23 <(audit_registry "$before") <(audit_registry "$after") | sed 's/^/drops /; s/$/ from AppAudit.checks/'
+  lists=$(audit_lists "$after" | wc -l | tr -d ' ')
+  (( lists <= 1 )) || echo "AppAudit.checks is declared $lists times"
+}
+
+# decide <pr.json> <files.txt> <checks.json> [<audit before dir> <audit after dir>]
 decide() {
   local pr="$1" files="$2" checks="$3"
   local state draft base has_label author adds dels nfiles lines mergeable mstate head
@@ -148,6 +281,15 @@ decide() {
     log "paths: ok"
   else
     log "paths: FAIL ($denied)"; reasons+=("touches protected paths: ${denied//,/, }")
+  fi
+  if [[ -n "${4:-}" ]]; then
+    local loose
+    loose=$(audit_loosens "$4" "$5" | paste -sd, -)
+    if [[ -z "$loose" ]]; then
+      log "audit: ok"
+    else
+      log "audit: FAIL ($loose)"; reasons+=("$AUDIT_REASON (${loose//,/, })")
+    fi
   fi
 
   local conflict=0
@@ -264,11 +406,25 @@ evaluate() {
   else
     jq '.statusCheckRollup // []' "$tmp/pr.json" >"$tmp/checks.json"
   fi
-  gh api "repos/$REPO/pulls/$n/files" --paginate --jq '.[].filename' >"$tmp/files.txt"
+  # A rename counts under both names, so moving a protected file away is caught.
+  gh api "repos/$REPO/pulls/$n/files" --paginate --jq '.[] | .filename, (.previous_filename // empty)' >"$tmp/files.txt"
+  # The app audit is judged on its files at the merge base and the head (the
+  # PR's own diff: a count dev lowered meanwhile isn't this PR's raise). An
+  # API failure skips the PR this sweep rather than judging it blind.
+  local audit=()
+  if grep -qE "$AUDIT_RE" "$tmp/files.txt"; then
+    local base_sha
+    if ! base_sha=$(gh api "repos/$REPO/compare/$(jq -r .baseRefName "$tmp/pr.json")...$head" --jq .merge_base_commit.sha) \
+        || ! audit_snapshot "$base_sha" "$tmp/before" || ! audit_snapshot "$head" "$tmp/after" \
+        || ! audit_read_checks "$base_sha" "$head" "$tmp/before" "$tmp/after"; then
+      log "PR #$n: could not read the app audit files; the next sweep looks again"; rm -rf "$tmp"; return
+    fi
+    audit=("$tmp/before" "$tmp/after")
+  fi
 
   echo "PR #$n:" >&2
   local decision kind rest
-  decision=$(decide "$tmp/pr.json" "$tmp/files.txt" "$tmp/checks.json")
+  decision=$(decide "$tmp/pr.json" "$tmp/files.txt" "$tmp/checks.json" ${audit[@]+"${audit[@]}"})
   echo "decision: $decision"
   kind="${decision%%|*}"; rest="${decision#*|}"
 
@@ -339,7 +495,7 @@ main() {
   while (( $# )); do
     case "$1" in
       --dry-run) DRY_RUN=1 ;;
-      -h|--help) sed -n '2,45p' "$0"; return 0 ;;
+      -h|--help) sed -n '2,44p' "$0"; return 0 ;;
       *) prs+=("$1") ;;
     esac
     shift

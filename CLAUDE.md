@@ -195,9 +195,12 @@ something. One that can't act yet is disabled and says why:
 - If `scripts/ci` fails on `origin/dev` itself because of someone else's merge
   (look for the open `dev-red` issue), do not fix it in your PR. Comment on
   your issue with the failing test name and stop.
-- **Never edit** `Package.swift`, `.github/`, `scripts/` (including
-  `scripts/ci`), `CLAUDE.md`, `AGENTS.md` or `LICENSE`. Every target already
-  exists. If you think one of these must change, say so in an issue.
+- **Never edit** `Package.swift`, `Package.resolved`, `.github/`, `.claude/`,
+  `scripts/`, `CLAUDE.md`, `AGENTS.md` or `LICENSE` unless your issue says to.
+  `scripts/` means all of it, the gate included. Every target already exists.
+  If you think one of these must change, say so in an issue. The fast lane
+  refuses exactly this list (PROTECTED in scripts/fast-lane.sh; its tests
+  read this bullet), so every path here goes in backticks and nothing else.
 
 ## Fast lane
 
@@ -218,8 +221,15 @@ Crew PRs merge into `dev` at once; `main` moves only when full CI passes on
 - A Belt PR (its body has a `Belt-Run:` or `Belt-Test:` line) also waits for
   Belt's `belt/review` commit status to be success on its head;
   `REQUIRE_BELT_REVIEW` in `scripts/fast-lane.sh` turns that off.
-- A PR that breaks a hard rule (author, size, protected path) loses the label
-  with a comment saying why and waits for review.
+- A PR that loosens the app audit (docs/blueprints/app-audit.md) raises a
+  count in `UITests/audit-baseline.json` (an existing check's key that is new
+  to an app counts as a raise from 0), adds an app there above 0, drops an
+  app from it, removes or moves a file in `Checks/`, or drops an entry from
+  `AppAudit.checks`. Lowering a count is fine, and so is adding a check with
+  its starting counts in existing apps, at any count, when the same PR adds
+  its file and registry entry.
+- A PR that breaks a hard rule (author, size, protected path, a looser app
+  audit) loses the label with a comment saying why and waits for review.
 - Full CI (`Linux`, `macOS` with snapshots and the UI journeys) runs on `dev`
   once a feature is built, not per merge: when the supervisor or Belt
   dispatches it, when the lane merges a PR labelled `feature-done`, and once a
