@@ -13,13 +13,17 @@ extension FlareWorkspace {
     public static let minimumEllipseExtent = 1.0
 
     /// `minimumEllipseExtent` in scene points on a stage drawn at `stageScale`
-    /// stage points per scene point (its fit scale). A scale that is not
-    /// finite and positive, or one so small the minimum overflows, falls back
-    /// to scale 1.
+    /// stage points per scene point (its fit scale). It never shrinks as the
+    /// scale does: a scale so small the minimum overflows, a zero or negative
+    /// scale and -infinity give the largest finite extent, so no drag commits;
+    /// +infinity gives the smallest positive one, so an empty box still
+    /// doesn't. A NaN scale has no order and falls back to scale 1.
     public static func minimumEllipseExtent(atStageScale stageScale: Double) -> Double {
-        guard stageScale.isFinite, stageScale > 0 else { return minimumEllipseExtent }
+        if stageScale.isNaN { return minimumEllipseExtent }
+        guard stageScale > 0 else { return .greatestFiniteMagnitude }
         let extent = minimumEllipseExtent / stageScale
-        return extent.isFinite ? extent : minimumEllipseExtent
+        guard extent.isFinite else { return .greatestFiniteMagnitude }
+        return max(extent, .leastNonzeroMagnitude)
     }
 
     /// The ellipse inscribed in the box from `start` to `end`, as four cubic
