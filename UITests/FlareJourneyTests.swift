@@ -2,10 +2,8 @@
 // whole-window screenshot after every step (see Journey.swift). Each test is
 // one journey; grow them as Flare's features land, and replace the skipped
 // test with the real journey when its issue is built. The easing journey
-// (docs/blueprints/flare-easing-editor.md) reads the inspector's X1, Y1, X2
-// and Y2 rows after every step (or, if a row exposes no number, the handles'
-// values) and finds handle 1 where the curve well draws it, since only the
-// well's frame is known to be the shape a person sees.
+// (docs/blueprints/flare-easing-editor.md) checks every step by the active
+// preset chip and by where the curve well draws handle 1.
 import XCTest
 
 final class FlareJourneyTests: XCTestCase {
@@ -38,20 +36,24 @@ final class FlareJourneyTests: XCTestCase {
         XCTAssert(flare.app.staticTexts["Pick a keyframe above."].exists, "no hint to pick a keyframe")
 
         // On the runner's 1024-wide screen the inspector fits only with the
-        // sidebar hidden: View > Hide Sidebar, by its shortcut.
+        // sidebar hidden (View > Hide Sidebar, by its shortcut). The app keeps
+        // that across launches, so it is shown again however the test ends.
         flare.app.typeKey("s", modifierFlags: [.control, .command])
+        nonisolated(unsafe) let app = flare.app
+        addTeardownBlock { @MainActor () async -> Void in
+            let show = app.buttons["Show Sidebar"]
+            if show.exists { show.click() }
+        }
 
         flare.click("x 0 → 24", in: .window, step: "easing-segment")
-        XCTAssert(flare.element("flare.easing.row.x1").waitForExistence(timeout: 10), "no X1 row")
-        print("easing tree: \(flare.element("flare.easing.row.x1").debugDescription)")
-        print("easing tree: \(flare.element("flare.easing").debugDescription)")
-        expectRows(flare, [0, 0, 1, 1], "the sample's segment isn't linear")
+        XCTAssert(flare.app.buttons["x 0 → 24"].isSelected, "x 0 → 24 isn't selected")
+        XCTAssertEqual(activePreset(flare), "Linear", "the sample's segment isn't linear")
 
         flare.click("Ease In", in: .window, step: "easing-preset")
-        expectRows(flare, [0.42, 0, 1, 1], "Ease In didn't set its curve")
+        XCTAssertEqual(activePreset(flare), "Ease In", "Ease In isn't the active preset")
+        expectHandle(1, at: CGPoint(x: 0.42, y: 0), flare, "Ease In's handle 1 isn't at (0.42, 0)")
+        let second = flare.element("flare.easing.handle2").frame
 
-        // The well insets its plot by 12 pt and, for these handles, shows y
-        // from -0.25 to 1.25 (CurveEditor.plotRange), so this maps a unit point.
         let well = flare.element("flare.easing")
         XCTAssert(well.waitForExistence(timeout: 10), "no easing curve (flare.easing)")
         let frame = well.frame
@@ -61,15 +63,14 @@ final class FlareJourneyTests: XCTestCase {
         }
         at(0.42, 0).press(forDuration: 0.2, thenDragTo: at(0.25, 0.45))
         flare.shot("easing-drag")
-        let dragged = rows(flare)
-        XCTAssert(dragged[0] < 0.4 && dragged[1] > 0.2, "handle 1 didn't follow the drag up and left: \(dragged)")
-        XCTAssertEqual(Array(dragged[2...]), [1, 1], "the drag moved handle 2")
+        XCTAssertNil(activePreset(flare), "a preset is still active after the drag")
+        expectHandle(1, at: CGPoint(x: 0.25, y: 0.45), flare, "handle 1 didn't follow the drag", accuracy: 0.03)
+        XCTAssertEqual(flare.element("flare.easing.handle2").frame, second, "the drag moved handle 2")
+        let dragged = handle(1, flare)
 
         for _ in 0..<5 { flare.app.typeKey(.rightArrow, modifierFlags: []) }
         flare.shot("easing-nudge")
-        let nudged = rows(flare)
-        XCTAssertEqual(nudged[0], dragged[0] + 0.05, accuracy: 0.011, "five Right presses didn't add 0.05 to X1")
-        XCTAssertEqual(nudged[1], dragged[1], accuracy: 0.005, "Right moved Y1")
+        expectHandle(1, at: CGPoint(x: dragged.x + 0.05, y: dragged.y), flare, "five Right presses didn't add 0.05 to x")
 
         // Five nudges and one drag are six undo steps, each named for the edit.
         for undo in 1...6 {
@@ -84,37 +85,34 @@ final class FlareJourneyTests: XCTestCase {
             item.click()
         }
         flare.shot("easing-undo")
-        expectRows(flare, [0.42, 0, 1, 1], "six undos didn't bring back Ease In")
+        XCTAssertEqual(activePreset(flare), "Ease In", "six undos didn't bring back Ease In")
+        expectHandle(1, at: CGPoint(x: 0.42, y: 0), flare, "six undos didn't put handle 1 back")
     }
 
-    /// X1, Y1, X2 and Y2 as the inspector's rows read them. A row that exposes
-    /// no number falls back to its handle's value ("x 0.42, y 0.00"); the raw
-    /// values and their types go to the log, so a wrong read shows its cause.
-    @MainActor private func rows(_ journey: Journey) -> [Double] {
-        [1, 2].flatMap { handle -> [Double] in
-            let row = ["x", "y"].map { journey.element("flare.easing.row.\($0)\(handle)").value }
-            let point = journey.element("flare.easing.handle\(handle)").value
-            print("easing values: rows \(row.map(describe)), handle \(handle) \(describe(point))")
-            let fromHandle = numbers(point)
-            return (0..<2).map { numbers(row[$0]).first ?? (fromHandle.count == 2 ? fromHandle[$0] : .nan) }
-        }
+    /// The preset chip shown as active, or nil when none is. Exact, unlike a
+    /// handle's position: a chip is active only when the curve equals it.
+    @MainActor private func activePreset(_ journey: Journey) -> String? {
+        ["Linear", "Ease", "Ease In", "Ease Out", "Ease In-Out", "Hold"]
+            .first { journey.app.windows.firstMatch.buttons[$0].isSelected }
     }
 
-    /// Every number in an accessibility value, whatever type it arrives as.
-    private func numbers(_ value: Any?) -> [Double] {
-        guard let value else { return [] }
-        let text = (value as? NSAttributedString)?.string ?? "\(value)"
-        return text.matches(of: #/-?[0-9]+(\.[0-9]+)?/#).compactMap { Double($0.output.0) }
+    /// Handle `n` in unit space, read from where the well draws it: the well
+    /// insets its plot by 12 pt and, for these curves, shows y from -0.25 to
+    /// 1.25 (CurveEditor.plotRange). The rows' values can't be read here: on
+    /// macOS XCUITest gets an empty value from them.
+    @MainActor private func handle(_ n: Int, _ journey: Journey) -> CGPoint {
+        let well = journey.element("flare.easing").frame
+        let dot = journey.element("flare.easing.handle\(n)").frame
+        return CGPoint(
+            x: (dot.midX - well.minX - 12) / (well.width - 24),
+            y: 1.25 - (dot.midY - well.minY - 12) / (well.height - 24) * 1.5)
     }
 
-    private func describe(_ value: Any?) -> String {
-        value.map { "\($0) (\(type(of: $0)))" } ?? "nil"
-    }
-
-    @MainActor private func expectRows(_ journey: Journey, _ want: [Double], _ message: String) {
-        let got = rows(journey)
-        for (value, expected) in zip(got, want) {
-            XCTAssertEqual(value, expected, accuracy: 0.005, "\(message): \(got)")
-        }
+    @MainActor private func expectHandle(
+        _ n: Int, at want: CGPoint, _ journey: Journey, _ message: String, accuracy: CGFloat = 0.015
+    ) {
+        let got = handle(n, journey)
+        XCTAssertEqual(got.x, want.x, accuracy: accuracy, "\(message): \(got)")
+        XCTAssertEqual(got.y, want.y, accuracy: accuracy, "\(message): \(got)")
     }
 }
