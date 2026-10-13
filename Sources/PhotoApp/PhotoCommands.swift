@@ -1,7 +1,8 @@
 // PhotoCommands.swift: Photo's menu bar. File: New Image, Open…, Save,
 // Export…; Edit: Undo and Redo named for the edit, Delete Selection, Fill
 // Selection; Select: All, Deselect; Image: Image Size… and Rotate; Layer:
-// New, Delete, Rename…, Show/Hide; View: Zoom In, Zoom Out, Fit on Screen.
+// New, Delete, Rename…, Show/Hide, Bring Forward, Send Backward, Select Layer
+// Above and Below; View: Zoom In, Zoom Out, Fit on Screen.
 // The focused window publishes a PhotoMenu (what can run now, and where to
 // send it) as a focused scene value; an item that can't run is disabled, never
 // hidden. Every top bar command is here too.
@@ -21,6 +22,10 @@ struct PhotoMenu {
     var canDeleteLayer = false
     var canEditLayer = false
     var visibilityTitle = "Hide Layer"
+    /// A layer sits above the selected one (Bring Forward, Select Layer Above).
+    var canBringForward = false
+    /// A layer sits below the selected one (Send Backward, Select Layer Below).
+    var canSendBackward = false
     var selectedLayer: PhotoLayer.ID?
 
     init() {}
@@ -37,6 +42,8 @@ struct PhotoMenu {
         canDeleteLayer = model.canDeleteSelectedLayer
         canEditLayer = model.canEditSelectedLayer
         visibilityTitle = model.visibilityCommandTitle
+        canBringForward = model.canBringSelectedLayerForward
+        canSendBackward = model.canSendSelectedLayerBackward
         selectedLayer = model.selectedLayerID
     }
 }
@@ -116,5 +123,18 @@ struct PhotoLayerMenu: View {
             if let selected = menu.selectedLayer { menu.perform(.toggleVisibility(selected)) }
         }
         .disabled(!menu.canEditLayer)
+        Divider()
+        Button("Bring Forward", systemImage: "square.2.layers.3d.top.filled") { menu.perform(.bringForward) }
+            .keyboardShortcut("]")
+            .disabled(!menu.canBringForward)
+        Button("Send Backward", systemImage: "square.2.layers.3d.bottom.filled") { menu.perform(.sendBackward) }
+            .keyboardShortcut("[")
+            .disabled(!menu.canSendBackward)
+        Button("Select Layer Above", systemImage: "arrow.up") { menu.perform(.selectLayerAbove) }
+            .keyboardShortcut("]", modifiers: [.command, .option])
+            .disabled(!menu.canBringForward)
+        Button("Select Layer Below", systemImage: "arrow.down") { menu.perform(.selectLayerBelow) }
+            .keyboardShortcut("[", modifiers: [.command, .option])
+            .disabled(!menu.canSendBackward)
     }
 }

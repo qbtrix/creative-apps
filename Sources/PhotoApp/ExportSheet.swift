@@ -1,7 +1,8 @@
 // ExportSheet.swift: File > Export… asks for the format (PNG keeps
 // transparency; JPEG lies on white) and, for JPEG, the quality, then Export
 // opens the save panel. The choices are the window's presentation state;
-// values in, closures out.
+// values in, closures out. Its controls carry `photo.export.*` accessibility
+// identifiers for the UI journeys and the app audit.
 import PhotoModel
 import SuiteUI
 import SwiftUI
@@ -22,11 +23,13 @@ struct ExportSheet: View {
                     ForEach(ImageFormat.allCases, id: \.self) { Text($0.title).tag($0) }
                 }
                 .pickerStyle(.segmented)
+                .accessibilityIdentifier("photo.export.format")
                 if format == .jpeg {
                     LabeledContent("Quality") {
                         HStack(spacing: SuiteSpacing.s) {
                             Slider(value: Binding(get: { quality }, set: { onQuality($0) }), in: 0.1...1)
                                 .accessibilityLabel("Quality")
+                                .accessibilityIdentifier("photo.export.quality")
                             Text("\(Int((quality * 100).rounded()))%").font(SuiteFont.monospacedDigits)
                         }
                     }
@@ -38,7 +41,9 @@ struct ExportSheet: View {
             HStack {
                 Spacer()
                 Button("Cancel", action: onCancel).keyboardShortcut(.cancelAction)
+                    .accessibilityIdentifier("photo.export.cancel")
                 Button("Export", action: onExport).keyboardShortcut(.defaultAction)
+                    .accessibilityIdentifier("photo.export.confirm")
             }
         }
         .padding(SuiteSpacing.l)

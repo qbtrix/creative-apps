@@ -3,7 +3,8 @@
 // adjustment sections) and Layers (the layer list with show/hide eyes and
 // drag to reorder, New, Delete and Rename, and the selected layer's blend
 // mode and opacity). With no image open it says how to start. Values in,
-// intents out.
+// intents out. Every control here carries a `photo.tool.*` or `photo.layer.*`
+// accessibility identifier for the UI journeys and the app audit.
 import CoreRaster
 import PhotoModel
 import SuiteUI
@@ -59,13 +60,16 @@ struct ToolOptionsSection: View {
                 InspectorSliderRow("Size", value: options.size, in: ToolOptions.sizeRange, unit: "px", decimals: 0) {
                     perform(.toolOption(.size($0)))
                 }
+                .accessibilityIdentifier("photo.tool.size")
                 InspectorSliderRow(
                     "Hardness", value: options.hardnessPercent, in: ToolOptions.hardnessRange, unit: "%", decimals: 0
                 ) { perform(.toolOption(.hardness(percent: $0))) }
+                .accessibilityIdentifier("photo.tool.hardness")
                 if model.tool == .brush { colorRow(options) }
                 InspectorSliderRow(
                     "Opacity", value: options.opacityPercent, in: ToolOptions.opacityRange, unit: "%", decimals: 0
                 ) { perform(.toolOption(.opacity(percent: $0))) }
+                .accessibilityIdentifier("photo.tool.opacity")
             case .marquee:
                 hint("Drag over the image to select. Delete clears the selection; Fill paints it.")
                 colorRow(options)
@@ -101,6 +105,7 @@ struct ToolOptionsSection: View {
         InspectorColorWellRow("Color", color: HexColor(options.red, options.green, options.blue)) {
             perform(.toolOption(.color(red: $0.red, green: $0.green, blue: $0.blue)))
         }
+        .accessibilityIdentifier("photo.tool.color")
     }
 
     private func hint(_ text: String) -> some View {
@@ -112,11 +117,12 @@ struct ToolOptionsSection: View {
             .padding(.bottom, SuiteSpacing.xs)
     }
 
-    /// A small bordered button for `intent`; disabled, saying why, while
-    /// `help` is set.
+    /// A small bordered button for `intent`, identified as
+    /// "photo.tool.<title-in-kebab-case>"; disabled, saying why, while `help` is set.
     @ViewBuilder
     private func command(_ title: String, help: String?, _ intent: PhotoIntent, prominent: Bool = false) -> some View {
         let button = Button(title) { perform(intent) }.disabled(help != nil).help(help ?? title)
+            .accessibilityIdentifier("photo.tool." + title.lowercased().replacingOccurrences(of: " ", with: "-"))
         if prominent {
             button.buttonStyle(.borderedProminent)
         } else {
@@ -143,13 +149,16 @@ struct PhotoLayersPanel: View {
             .accessibilityIdentifier("photo.layers")
             HStack(spacing: 0) {
                 EditorBarItem(ToolbarAction("New Layer", systemImage: "plus") { perform(.addLayer) }, showsTitle: false)
+                    .accessibilityIdentifier("photo.layer.new")
                 EditorBarItem(
                     ToolbarAction(
                         "Delete Layer", systemImage: "trash",
                         unavailableHelp: model.canDeleteSelectedLayer ? nil : "The last layer can't be deleted.") {
                         perform(.deleteLayer)
                     }, showsTitle: false)
+                .accessibilityIdentifier("photo.layer.delete")
                 EditorBarItem(ToolbarAction("Rename Layer…", systemImage: "pencil") { perform(.renameLayer) }, showsTitle: false)
+                    .accessibilityIdentifier("photo.layer.rename")
                 Spacer()
             }
             .padding(.horizontal, SuiteSpacing.xs)
@@ -158,9 +167,11 @@ struct PhotoLayersPanel: View {
                     InspectorPickerRow(
                         "Blend Mode", options: CoreRaster.BlendMode.allCases.map { InspectorOption(id: $0, title: $0.title) },
                         selection: layer.blendMode) { perform(.blendMode(layer.id, $0)) }
+                    .accessibilityIdentifier("photo.layer.blend")
                     InspectorSliderRow("Opacity", value: layer.opacityPercent, in: 0...100, unit: "%", decimals: 0) {
                         perform(.opacity(layer.id, $0))
                     }
+                    .accessibilityIdentifier("photo.layer.opacity")
                 }
             }
         }
@@ -177,12 +188,14 @@ struct PhotoLayersPanel: View {
             .buttonStyle(.borderless)
             .help(layer.isVisible ? "Hide Layer" : "Show Layer")
             .accessibilityLabel("\(layer.isVisible ? "Hide" : "Show") \(layer.name)")
+            .accessibilityIdentifier("photo.layer.visibility.\(layer.id)")
             Text(layer.name).lineLimit(1).truncationMode(.middle)
             Spacer(minLength: 0)
             if layer.blendMode != .normal || layer.opacity < 1 {
                 Text("\(layer.blendMode.title) \(Int(layer.opacityPercent.rounded()))%")
                     .font(SuiteFont.inspectorMeta)
-                    .foregroundStyle(SuiteColor.secondaryText)
+                    // The secondary grey reads 3:1 on the selection highlight; WCAG wants 4.5:1.
+                    .foregroundStyle(layer.id == model.selectedLayerID ? Color.primary : SuiteColor.secondaryText)
             }
         }
         .font(SuiteFont.inspectorLabel)
