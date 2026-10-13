@@ -155,7 +155,7 @@ SwiftUI in SuiteUI. Photo and Design use it.
 |---|---|---|
 | Top bar | `EditorTopBar`, `EditorBarItem`, `EditorBarMenu`, `EditorBarDivider` | 40 pt. The app name, then the document name as a menu. Flat icon-and-label commands in the accessory-bar style (flat until hovered); undo, redo and zoom trail as icons. Every command here is also in the menu bar. |
 | Tool rail | `ToolbarGroup(style: .rail)` | Docked, flat, vertical. The selected tool sits on an accent well. Tooltips name the one-key shortcut ("Brush (B)"), which works while the canvas has focus. |
-| Canvas | `CanvasViewport`, `SelectionOutline`, `CropShade` | Rulers in document pixels along the top and left, a checkerboard behind the image, centered while it fits, scrolling with a 32 pt margin once it doesn't. Drags arrive in document pixels. |
+| Canvas | `CanvasViewport`, `SelectionOutline`, `CropShade` | Rulers in document pixels along the top and left, a checkerboard behind the image, centered while it fits, scrolling with a 32 pt margin once it doesn't. Drags arrive in document pixels. The image is clipped to the artboard; selection marks and handles in the overlay are not, so they show past its edge. |
 | Right panel | `SegmentedTabs`, then `InspectorSection`s | 280 pt, the tabs (Adjust, Layers) on top. A section's Reset icon shows only while the section differs from its defaults. A color is `InspectorColorWellRow`: the system well plus its hex code. |
 | Status line | `ViewerStatusBar` | Zoom, document size, and the trailing slot for the render time. |
 

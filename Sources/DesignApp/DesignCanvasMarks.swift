@@ -1,16 +1,18 @@
 // DesignCanvasMarks.swift: what DesignCanvas paints, in two flat layers over the
 // page. DesignArtwork is the page's nodes in paint order (frames, rectangles,
-// ellipses and text, at the canvas zoom) plus each frame's name; DesignSelectionMarks
-// is the selected node's outline and its eight resize handles, in screen points.
-// Both are one SwiftUI Canvas that takes no clicks: the canvas gesture does, and
-// the model decides what a press hits (hitTest, handle(at:)).
+// ellipses and text, at the canvas zoom) plus each frame's name, in one SwiftUI
+// Canvas; DesignSelectionMarks is the selected node's outline and its resize
+// handles, in screen points, drawn as shapes so they show past the page's edge.
+// Neither takes clicks: the canvas gesture does, and the model decides what a
+// press hits (hitTest, handle(at:)), with the same handles the marks draw.
 //
 // Invariants:
 // - Frames are absolute page points; multiplying by the zoom is the only mapping.
 // - Paint order is DesignPage.painted: a node, then its children, siblings back to
 //   front; a hidden node takes its whole subtree with it, label and handles too.
 // - Frame names and handles stay one size on screen at any zoom. Text nodes scale
-//   with the zoom, like the artwork they sit in.
+//   with the zoom, like the artwork they sit in. A selection under three handles
+//   across shows only its corners, pushed outside it (DesignRect.handles).
 // - Colors come from SuiteColor, except the document's own fills (DesignColor).
 import DesignModel
 import SuiteUI
@@ -113,28 +115,29 @@ private func drawName(of item: DesignPainted, in context: GraphicsContext, scale
     }
 }
 
-/// The selection: an accent outline around `rect`, and with `handles` the eight resize handles,
-/// white squares with an accent edge, centered on the corners and side midpoints.
+/// The selection: an accent outline around `rect`, and with `handles` its resize handles, white
+/// squares with an accent edge where DesignRect.handles puts them (a small selection shows only its
+/// corners, outside the box). Shapes, not a Canvas, so marks past the page's edge still draw:
+/// CanvasViewport doesn't clip its overlay.
 struct DesignSelectionMarks: View {
     let rect: DesignRect
     let zoom: Double
     var handles = true
 
     var body: some View {
-        let rect = rect
         let scale = usable(zoom)
-        let handles = handles
-        Canvas { context, _ in
-            let box = rect.cgRect.applying(CGAffineTransform(scaleX: scale, y: scale))
-            context.stroke(Path(box), with: .color(SuiteColor.accent), lineWidth: 1)
-            guard handles else { return }
-            let side = SuiteSpacing.s
-            for handle in DesignHandle.allCases {
-                let at = rect.point(of: handle)
-                let square = CGRect(x: at.x * scale - side / 2, y: at.y * scale - side / 2, width: side, height: side)
-                context.fill(Path(square), with: .color(SuiteColor.overlayPaper))
-                context.stroke(Path(square), with: .color(SuiteColor.accent), lineWidth: 1)
+        let side = SuiteSpacing.s
+        let box = rect.cgRect.applying(CGAffineTransform(scaleX: scale, y: scale))
+        let centers = handles ? Array(rect.handles(size: Double(side) / scale).values) : []
+        let squares = Path { path in
+            for at in centers {
+                path.addRect(CGRect(x: at.x * scale - side / 2, y: at.y * scale - side / 2, width: side, height: side))
             }
+        }
+        ZStack(alignment: .topLeading) {
+            Path(box).stroke(SuiteColor.accent, lineWidth: 1)
+            squares.fill(SuiteColor.overlayPaper)
+            squares.stroke(SuiteColor.accent, lineWidth: 1)
         }
         .allowsHitTesting(false)
         .accessibilityHidden(true)
