@@ -126,9 +126,9 @@ every step.
   (SuiteUI's use a `suite.` prefix: `suite.sidebar`, `suite.inspector`,
   `suite.tools`) and find it with `app.descendants(matching: .any)["id"]`.
   Step names are unique within an app, because they become the PNG names.
-- **Look at the shots.** Open the `<app>-*.png` files your change touched from
-  `ui-screens`, the same way you check snapshots, and name them in the PR
-  body. Review-only.
+- **Look at the shots.** Name the `<app>-*.png` files your change touches in
+  the PR body. The reviewer opens them from the `ui-screens` artifact of the
+  next feature CI run on `dev`, the same way as snapshots. Review-only.
 
 ## Tests
 
@@ -138,7 +138,9 @@ every step.
 - **Bug fixes start red.** Write the test that reproduces the bug, see it fail,
   then fix the cause. Review-only.
 - **Proof is the gate.** "It compiles" is not done. Gate: `scripts/ci` prints
-  `CI: PASS`, and both CI jobs are green on the PR.
+  `CI: PASS` on your branch rebased on `origin/dev`, and the PR body carries
+  the `Fast-Check: pass` / `Head: <sha>` marker for that head. Both CI jobs
+  run on `dev` once a feature is built; `main` only takes a green `dev` SHA.
 
 ## Reading cost
 
