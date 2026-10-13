@@ -199,6 +199,11 @@ final class PhotoJourneyTests: XCTestCase {
         let tools = photo.element("suite.tools").buttons
 
         tools["Eraser"].click()
+        // The eraser shows its own size, hardness and opacity, and no color (#26).
+        for option in ["size", "hardness", "opacity"] {
+            XCTAssert(photo.element("photo.tool." + option).waitForExistence(timeout: 5), "the eraser shows no \(option)")
+        }
+        XCTAssertFalse(photo.element("photo.tool.color").exists, "the eraser shows a color")
         photo.drag(on: "suite.canvas", from: CGVector(dx: 0.1, dy: 0.8), to: CGVector(dx: 0.5, dy: 0.5), step: "erased")
 
         tools["Marquee"].click()

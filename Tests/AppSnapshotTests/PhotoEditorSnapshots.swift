@@ -80,6 +80,8 @@ func photoImage(_ model: PhotoWorkspace) throws -> CGImage? {
         model.setToolOption(.size(24))
         drag(&model, .brush, (60, 60), (580, 420))
         try shoot("brush-stroke", model)
+        model.selectTool(.eraser)
+        model.setToolOption(.size(24))
         drag(&model, .eraser, (60, 420), (580, 60))
         try shoot("eraser-stroke", model)
     }

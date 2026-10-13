@@ -34,9 +34,9 @@ extension PhotoWorkspace {
         editSelection(named: "Delete") { _ in .clear }
     }
 
-    /// Fills the selected pixels of the selected layer with the tool color.
+    /// Fills the selected pixels of the selected layer with the brush color.
     public mutating func fillSelection() {
-        let paint = toolOptions.linearColor
+        let paint = brushOptions.linearColor
         editSelection(named: "Fill") { _ in RGBA(r: paint.r, g: paint.g, b: paint.b, a: 1) }
     }
 
