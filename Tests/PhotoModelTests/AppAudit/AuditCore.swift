@@ -11,7 +11,7 @@ import Foundation
 
 extension AppAudit {
     /// Every check the audit runs. Add a check here and in its own file.
-    static let checks: [any Check] = [Identifier(), Unnamed()]
+    static let checks: [any Check] = [DisabledDim(), Overlap(), TextContrast(), Identifier(), Offscreen(), Unnamed()]
 
     /// One rule, born from one fault.
     protocol Check: Sendable {
