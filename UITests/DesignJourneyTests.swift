@@ -62,7 +62,10 @@ final class DesignJourneyTests: XCTestCase {
         // With the ellipse holding the selection, the Layers tab still checks the current page.
         tab("Layers", in: design)
         XCTAssert(design.element("design.current-page").waitForExistence(timeout: 5), "Layers lost the current page's mark")
-        XCTAssert(design.app.windows.firstMatch.buttons["Delete Page"].exists, "Delete Page isn't beside the pages")
+        // Any role: the Pages header is a section header, not a row. Menu items live outside the window.
+        let window = design.app.windows.firstMatch
+        let deletePage = window.descendants(matching: .any).matching(NSPredicate(format: "label == %@", "Delete Page"))
+        XCTAssert(deletePage.firstMatch.waitForExistence(timeout: 3), "Delete Page isn't beside the pages:\n\(window.debugDescription)")
         design.shot("layers")
         tab("Properties", in: design)
 
