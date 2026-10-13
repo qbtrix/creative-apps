@@ -14,8 +14,10 @@ extension FlareWorkspace {
 
     /// The ellipse inscribed in the box from `start` to `end`, as four cubic
     /// quarters with the box's edge midpoints as the polyline fallback; nil
-    /// when the box is narrower or shorter than `minimumEllipseExtent` or a
-    /// coordinate is not finite.
+    /// when the box is narrower or shorter than `minimumEllipseExtent`, or a
+    /// coordinate, the centre or a radius is not finite. The centre is the
+    /// box's min corner plus half its size, so corners near the largest finite
+    /// value don't overflow their sum.
     /// Stopgap until FlareCore's `Shape.ellipse(in:)` (qbtrix/creative-core#182)
     /// lands; then this returns that builder's shape.
     public static func ellipse(from start: Point, to end: Point) -> FlareShape? {
@@ -24,7 +26,8 @@ extension FlareWorkspace {
             width >= minimumEllipseExtent, height >= minimumEllipseExtent
         else { return nil }
         let rx = width / 2, ry = height / 2
-        let c = Point(x: (start.x + end.x) / 2, y: (start.y + end.y) / 2)
+        let c = Point(x: min(start.x, end.x) + rx, y: min(start.y, end.y) + ry)
+        guard c.x.isFinite, c.y.isFinite, rx.isFinite, ry.isFinite else { return nil }
         let k = 0.5522847498  // a quarter circle's control distance, as a fraction of the radius
         // The unit circle at 0°, 90°, 180°, 270° and back to 0°.
         let units: [(cos: Double, sin: Double)] = [(1, 0), (0, 1), (-1, 0), (0, -1), (1, 0)]
@@ -36,7 +39,10 @@ extension FlareWorkspace {
         for (from, to) in zip(units, units.dropFirst()) {
             elements.append(.cubic(control1: at(from, along: k), control2: at(to, along: -k), to: at(to, along: 0)))
         }
-        return FlareShape(points: units.dropLast().map { at($0, along: 0) }, path: FlarePath(elements: elements + [.close]))
+        let points = units.dropLast().map { at($0, along: 0) }
+        // The edge midpoints are the box's extremes; every control point lies inside.
+        guard points.allSatisfy({ $0.x.isFinite && $0.y.isFinite }) else { return nil }
+        return FlareShape(points: points, path: FlarePath(elements: elements + [.close]))
     }
 
     /// Adds the ellipse from `start` to `end` as a new "Ellipse N" layer (the
