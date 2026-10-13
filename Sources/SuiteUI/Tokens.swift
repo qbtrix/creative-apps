@@ -5,7 +5,9 @@
 // system semantic colors (they adapt to Light, Dark and Increase Contrast);
 // never hard-code a hex value for a system role. The one brand value is the
 // accent blue. The inspector tokens are the "Pro density" rules in
-// docs/design.md: small controls, the 11 pt scale, 22 pt rows.
+// docs/design.md: small controls, the 11 pt scale, 22 pt rows. The editor
+// shell tokens (top bar, rail, rulers, right panel, checkerboard) are the
+// "Editor shell" rules in docs/design.md, sized after the Ripple editor.
 import AppKit
 import SwiftUI
 
@@ -62,6 +64,22 @@ public enum SuiteSize {
     public static let timelineLabelSpacing: CGFloat = 48
     public static let timelineTickSpacing: CGFloat = 6
     public static let timelineRulerSpan: CGFloat = 4096
+    /// The editor shell (EditorShell): the top bar's height, the room the
+    /// window's close, minimize and zoom buttons take at its leading edge, a
+    /// divider between top bar groups, and the right panel's width.
+    public static let editorTopBar: CGFloat = 40
+    public static let windowControlsInset: CGFloat = 76
+    public static let editorBarDivider: CGFloat = 20
+    public static let editorPanelWidth: CGFloat = 280
+    /// The canvas rulers' thickness, a minor tick's length, and the least room
+    /// between two labelled ticks.
+    public static let ruler: CGFloat = 20
+    public static let rulerMinorTick: CGFloat = 4
+    public static let rulerLabelSpacing: CGFloat = 64
+    /// One square of the checkerboard behind transparent pixels.
+    public static let checkerSquare: CGFloat = 8
+    /// The hex text field beside a color well.
+    public static let hexField: CGFloat = 76
 }
 
 /// Text styles. macOS has no Dynamic Type; these are the system text styles,
@@ -80,6 +98,10 @@ public enum SuiteFont {
     /// InspectorHeader: 12 pt semibold name over 10 pt metadata lines.
     public static let inspectorTitle = Font.callout.weight(.semibold)
     public static let inspectorMeta = Font.caption.monospacedDigit()
+    /// The editor shell: top bar items and the document title, and ruler labels.
+    public static let editorBar = Font.callout
+    public static let editorTitle = Font.callout.weight(.semibold)
+    public static let rulerLabel = Font.caption2.monospacedDigit()
 }
 
 /// Semantic colors by role.
@@ -117,4 +139,18 @@ public enum SuiteColor {
     }
     /// A new document's artboard. Document content, not a system role.
     public static let artboard = Color.white
+    /// The two squares of the checkerboard behind transparent pixels: the
+    /// canvas surround with a little more and a little less of the label color.
+    public static var checkerLight: Color { canvasSurround.mix(with: .primary, by: 0.14) }
+    public static var checkerDark: Color { canvasSurround.mix(with: .primary, by: 0.05) }
+    /// Ruler ticks: the label color at 40%.
+    public static var rulerTick: Color { Color.primary.opacity(0.4) }
+    /// The selected tool's well in a docked tool rail.
+    public static var selectedWell: Color { accent.opacity(0.18) }
+    /// Marks drawn over document content (a selection's marching ants, a
+    /// crop frame): black and white so they read on any pixels, and the dim
+    /// outside a pending crop.
+    public static let overlayInk = Color.black
+    public static let overlayPaper = Color.white
+    public static let cropShade = Color.black.opacity(0.55)
 }

@@ -20,38 +20,29 @@ import Testing
         hidden.toggleVisibility(background)
         var two = hidden
         two.addLayer()
-        #expect(hidden.visibilityCommandTitle == "Show Layer" && !hidden.canDeleteSelectedLayer)
-        #expect(two.visibilityCommandTitle == "Hide Layer" && two.canDeleteSelectedLayer)
+        let menus = [PhotoWorkspace(), hidden, two].map { PhotoMenu(model: $0, perform: { _ in }) }
+        #expect(menus[1].visibilityTitle == "Show Layer" && !menus[1].canDeleteLayer && menus[1].canUndo)
+        #expect(menus[2].visibilityTitle == "Hide Layer" && menus[2].canDeleteLayer)
+        #expect(menus[2].undoTitle == "Undo New Layer" && !menus[0].hasImage)
         for scheme in [ColorScheme.light, .dark] {
             try snapshot(
-                MenuStates(models: [PhotoWorkspace(), hidden, two]),
-                name: "photo-layer-menu-\(scheme == .dark ? "dark" : "light")", scheme: scheme)
+                MenuStates(menus: menus), name: "photo-layer-menu-\(scheme == .dark ? "dark" : "light")", scheme: scheme)
         }
     }
 }
 
 private struct MenuStates: View {
-    let models: [PhotoWorkspace]
+    let menus: [PhotoMenu]
     var body: some View {
         HStack(alignment: .top, spacing: SuiteSpacing.xxl) {
-            ForEach(models.indices, id: \.self) { index in
+            ForEach(menus.indices, id: \.self) { index in
                 VStack(alignment: .leading, spacing: SuiteSpacing.s) {
-                    PhotoLayerMenu(actions: actions(models[index]))
+                    PhotoLayerMenu(menu: menus[index])
                 }
                 .labelStyle(.titleAndIcon)
             }
         }
         .padding(SuiteSpacing.xxl)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-    }
-
-    private func actions(_ model: PhotoWorkspace) -> PhotoLayerActions {
-        let run: @MainActor () -> Void = {}
-        return PhotoLayerActions(
-            newLayer: model.canAddLayer ? run : nil,
-            deleteLayer: model.canDeleteSelectedLayer ? run : nil,
-            renameLayer: model.canEditSelectedLayer ? run : nil,
-            toggleVisibility: model.canEditSelectedLayer ? run : nil,
-            visibilityTitle: model.visibilityCommandTitle)
     }
 }

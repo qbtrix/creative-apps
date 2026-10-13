@@ -9,7 +9,7 @@ import Testing
     try workspace.newCanvas(width: 4, height: 3)
     #expect(workspace.canvas?.width == 4)
     #expect(workspace.canvas?.height == 3)
-    #expect(try workspace.canvas?.pixel(x: 3, y: 2) == RGBA(r: 1, g: 1, b: 1, a: 1))
+    #expect(try workspace.composite().pixel(x: 3, y: 2) == RGBA(r: 1, g: 1, b: 1, a: 1))
     #expect(workspace.layers.map(\.name) == ["Background"])
     #expect(workspace.selectedLayer?.name == "Background")
 }

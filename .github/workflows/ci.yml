@@ -35,10 +35,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - { uses: actions/setup-node@v4, with: { node-version: 22 } } # jscpd duplicate check; the swift image has no node
+      # scripts/ci's C4 ownership check and the fast lane's decision tests need
+      # jq, which the swift image lacks.
+      - run: apt-get update -q && apt-get install -y -q jq
       - run: swift --version
       - run: scripts/ci
-      # The fast lane's decision tests need jq, which the swift image lacks.
-      - run: apt-get update -q && apt-get install -y -q jq
       - run: bash Tests/fast_lane/test_fast_lane.sh
 
   macos:

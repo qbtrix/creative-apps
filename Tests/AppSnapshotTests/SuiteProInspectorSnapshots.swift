@@ -3,9 +3,7 @@
 // InspectorSections of InspectorRows with ScrubFields, a checkbox row, a menu
 // picker, a slider row, and a ViewerStatusBar under a viewer. Light and Dark.
 // Writes suiteui-pro-inspector-light.png and suiteui-pro-inspector-dark.png.
-// Until #47 lands, ImageRenderer draws the AppKit controls (slider, checkbox,
-// picker, stepper) as placeholders; headers, labels, ScrubField values and the
-// status line render for real.
+// The AppKit controls (slider, checkbox, picker, stepper) render for real.
 import SuiteUI
 import SwiftUI
 import Testing
