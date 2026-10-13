@@ -12,7 +12,10 @@
 // SidebarRow with an eye and a lock toggle (`layerToggles`); a click flips
 // that layer's own flag, one undo step (#45). A layer hidden by itself or by
 // a group around it reads dimmed, and a child of a hidden or locked group
-// shows the group's state in its toggles. Values in, intents out.
+// shows the group's state in its toggles. Each row is an accessibility
+// container with the identifier `design.layer.<id>` and its toggles inside it,
+// so a group's row, which is also its disclosure's label, isn't read as one
+// unnamed control. Values in, intents out.
 import DesignModel
 import SuiteUI
 import SwiftUI
@@ -143,5 +146,7 @@ private struct DesignLayerRow: View {
         .lineLimit(1)
         .truncationMode(.middle)
         .foregroundStyle(model.isHiddenInTree(id) ? SuiteColor.secondaryText : Color.primary)
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier("design.layer.\(id)")
     }
 }
