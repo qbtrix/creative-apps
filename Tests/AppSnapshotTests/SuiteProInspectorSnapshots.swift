@@ -36,7 +36,7 @@ private struct ProInspectorSample: View {
                         options: [InspectorOption(id: "normal", title: "Normal"), InspectorOption(id: "multiply", title: "Multiply")],
                         selection: "normal"
                     ) { _ in }
-                    InspectorRow("Opacity") { ScrubField("Opacity", value: 100, in: 0...100, unit: "%") { _ in } }
+                    InspectorRow("Opacity") { ScrubField("Opacity", value: 100, in: 0...100, unit: "%", decimals: 0) { _ in } }
                     InspectorRow("") { Toggle("Visible", isOn: .constant(true)).toggleStyle(.checkbox) }
                 }
                 InspectorSection("Exposure") {
@@ -45,12 +45,12 @@ private struct ProInspectorSample: View {
                     InspectorSliderRow("Gamma", value: 1, in: 0.1...10) { _ in }
                 }
                 InspectorSection("Transform") {
-                    InspectorRow("Position X") { ScrubField("Position X", value: 960, in: -9999...9999, unit: "px") { _ in } }
-                    InspectorRow("Position Y") { ScrubField("Position Y", value: 540, in: -9999...9999, unit: "px") { _ in } }
+                    InspectorRow("Position X") { ScrubField("Position X", value: 960, in: -9999...9999, unit: "px", decimals: 1) { _ in } }
+                    InspectorRow("Position Y") { ScrubField("Position Y", value: 540, in: -9999...9999, unit: "px", decimals: 1) { _ in } }
                     InspectorStepperRow("Rotation", value: -12.5, in: -180...180, step: 0.5, unit: "°") { _ in }
                 }
                 InspectorSection("Blur", isExpanded: false) {
-                    InspectorRow("Radius") { ScrubField("Radius", value: 0, in: 0...100, unit: "px") { _ in } }
+                    InspectorRow("Radius") { ScrubField("Radius", value: 0, in: 0...100, unit: "px", decimals: 1) { _ in } }
                 }
             }
             .frame(width: SuiteSize.inspectorWidth.ideal, alignment: .topLeading)

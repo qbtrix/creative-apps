@@ -1,5 +1,6 @@
 // SuiteInspectorSnapshots.swift: SuiteUI's inspector rows, one section per row
-// kind, at the inspector's ideal width, in Light and Dark. Writes
+// kind (plus a checkbox row, a section with its Reset icon and a collapsed
+// one), at the inspector's ideal width, in Light and Dark. Writes
 // suiteui-inspector-light.png and suiteui-inspector-dark.png, with the system
 // controls drawn for real (the snapshot helper renders through AppKit).
 import SuiteUI
@@ -17,10 +18,11 @@ import Testing
 /// Sample data over every row kind, laid out like the inspector column.
 private struct InspectorSample: View {
     var body: some View {
-        VStack(alignment: .leading, spacing: SuiteSpacing.l) {
-            InspectorSection("Layer") {
-                InspectorSliderRow("Opacity", value: 80, in: 0...100, unit: "%") { _ in }
-                InspectorSliderRow("Rotation", value: -12.5, in: -180...180, unit: "°") { _ in }
+        VStack(alignment: .leading, spacing: 0) {
+            InspectorSection("Layer", onReset: {}) {
+                InspectorRow("") { Toggle("Visible", isOn: .constant(true)).toggleStyle(.checkbox) }
+                InspectorSliderRow("Opacity", value: 80, in: 0...100, unit: "%", decimals: 0) { _ in }
+                InspectorSliderRow("Rotation", value: -12.5, in: -180...180, unit: "°", decimals: 1) { _ in }
             }
             InspectorSection("Size") {
                 InspectorStepperRow("Width", value: 640, in: 1...4096, unit: "pt") { _ in }
@@ -41,8 +43,12 @@ private struct InspectorSample: View {
                     selection: "multiply"
                 ) { _ in }
             }
+            InspectorSection("Blur", isExpanded: false) {
+                InspectorSliderRow("Radius", value: 0, in: 0...100, unit: "px", decimals: 1) { _ in }
+            }
         }
-        .padding(SuiteSpacing.m)
+        .padding(.vertical, SuiteSpacing.m)
+        .background(SuiteColor.panel)
         .frame(width: SuiteSize.inspectorWidth.ideal, alignment: .topLeading)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .padding(SuiteSpacing.xxl)

@@ -186,11 +186,13 @@ public struct ScrubField: View {
                 .font(SuiteFont.inspectorValue)
                 .foregroundStyle(color)
                 .underline(hovering && isEnabled, pattern: .dot)
-                .padding(.horizontal, bar == nil ? SuiteSpacing.xs : 0)
-                .padding(.vertical, bar == nil ? SuiteSpacing.xxs : 0)
                 .frame(minWidth: bar == nil ? SuiteSize.inspectorField : nil, alignment: .trailing)
-                .background(
-                    bar == nil && anchor != nil ? SuiteColor.fieldActive : .clear, in: .rect(cornerRadius: SuiteRadius.field))
+                .background {
+                    // The well while scrubbing reaches past the text, so the value never moves.
+                    if bar == nil && anchor != nil {
+                        RoundedRectangle(cornerRadius: SuiteRadius.field).fill(SuiteColor.fieldActive).padding(-SuiteSpacing.xs)
+                    }
+                }
         }
     }
 
