@@ -4,7 +4,7 @@
 // adjustments, the marquee selection and a pending crop, and the undo history.
 // Linux-safe: no UI imports. PhotoApp changes it only through the methods here
 // and in the extensions beside it (PhotoStroke, PhotoSelection, PhotoHistory,
-// PhotoImageFile, PhotoImageOps).
+// PhotoImageFile, PhotoImageOps, PhotoStraighten).
 //
 // Invariants: with an image open there is at least one layer, the selection
 // names one of them, and `pixels` holds exactly one buffer per layer id.
