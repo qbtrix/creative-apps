@@ -2,7 +2,8 @@
 // whole-window screenshot after every step (see Journey.swift). Design is an
 // EditorShell window. The core journey draws a frame (crossing the page's top
 // edge, so its handles show past it), a rectangle and an ellipse, moves and
-// resizes the ellipse, places and types text (shot while typing, when the editor
+// resizes the ellipse, checks Layers still marks the current page while the
+// ellipse is selected, places and types text (shot while typing, when the editor
 // draws at full size, and once committed, with a small box's corner handles
 // outside it), undoes and redoes, saves with -DesignSaveTo (no panel), then
 // relaunches with -DesignOpenFile and checks the saved file reopens. The menu
@@ -58,6 +59,12 @@ final class DesignJourneyTests: XCTestCase {
         design.drag(on: "suite.canvas", from: CGVector(dx: 0.75, dy: 0.725), to: CGVector(dx: 0.85, dy: 0.8), step: "resized")
         XCTAssert(design.app.buttons["Undo Resize"].waitForExistence(timeout: 5), "the handle drag didn't resize")
         design.shot("inspector")
+        // With the ellipse holding the selection, the Layers tab still checks the current page.
+        tab("Layers", in: design)
+        XCTAssert(design.element("design.current-page").waitForExistence(timeout: 5), "Layers lost the current page's mark")
+        XCTAssert(design.app.windows.firstMatch.buttons["Delete Page"].exists, "Delete Page isn't beside the pages")
+        design.shot("layers")
+        tab("Properties", in: design)
 
         tools["Text"].click()
         design.drag(on: "suite.canvas", from: CGVector(dx: 0.2, dy: 0.75), to: CGVector(dx: 0.2, dy: 0.75), step: "text-placed")
@@ -84,6 +91,14 @@ final class DesignJourneyTests: XCTestCase {
         let reopened = Journey("Design", self, arguments: ["-DesignOpenFile", file.path])
         XCTAssert(reopened.app.windows["journey.design"].waitForExistence(timeout: 30), "journey.design didn't reopen")
         reopened.shot("reopened")
+    }
+
+    /// Clicks the panel tab titled `title` (a segment, whatever role the system gives it).
+    @MainActor private func tab(_ title: String, in design: Journey) {
+        let segment = design.app.windows.firstMatch.descendants(matching: .any)
+            .matching(NSPredicate(format: "label == %@", title)).firstMatch
+        XCTAssert(segment.waitForExistence(timeout: 5), "no \(title) tab")
+        segment.click()
     }
 
     /// Waits up to 15 seconds for `url` to exist.

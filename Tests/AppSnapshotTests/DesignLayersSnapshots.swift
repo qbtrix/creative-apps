@@ -2,7 +2,9 @@
 // panel width: a Desktop frame holding a group of two shapes (one hidden, one
 // locked and selected), the group collapsed, an expanded and a collapsed group
 // side by side (the chevrons look alike), and a shape selected whose parent is
-// then collapsed, which selects the parent (#121). Writes design-layers-,
+// then collapsed, which selects the parent (#121). Each has two pages with
+// Page 1 current, so Page 1 keeps its checkmark even while a layer is highlighted,
+// with Add Page and Delete Page in the Pages header. Writes design-layers-,
 // -collapsed-, -chevrons- and -collapsed-selection-{light,dark}.png. macOS only.
 import DesignModel
 import SuiteUI

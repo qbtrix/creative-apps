@@ -1,12 +1,15 @@
 // DesignLayersPanel.swift: the Layers tab of Design's panel. One List in the
-// small source-list style: the file's pages, then the selected page's layer
-// tree, with an Add Page / Delete Page bar under it. Selection runs through the List, so arrow keys and
-// type-select move through pages and layers; the highlighted row is the selected
-// layer, or the selected page when no layer is. A layer with children is a
-// DisclosureGroup whose expanded state is the workspace's (`isExpanded`), sent
-// back as `.setExpanded`, so collapsing the parent of the selection selects the
-// parent (#121). A hidden layer reads dimmed with an eye-slash mark and a locked
-// one carries a lock. Values in, intents out.
+// small source-list style: the file's pages, with Add Page and Delete Page in
+// the Pages header, then the current page's layer tree. Selection runs through
+// the List, so arrow keys and type-select move through pages and layers; the
+// highlighted row is the selected layer, or the current page when no layer is.
+// The current page always carries a checkmark, so the page you are editing,
+// the one Delete Page removes, stays marked while a layer holds the highlight.
+// A layer with children is a DisclosureGroup whose expanded state is the
+// workspace's (`isExpanded`), sent back as `.setExpanded`, so collapsing the
+// parent of the selection selects the parent (#121). A hidden layer reads
+// dimmed with an eye-slash mark and a locked one carries a lock. Values in,
+// intents out.
 import DesignModel
 import SuiteUI
 import SwiftUI
@@ -16,33 +19,32 @@ struct DesignLayersPanel: View {
     let perform: DesignPerform
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            List(selection: selection) {
-                Section("Pages") {
-                    ForEach(model.pages) { page in
-                        Label(page.name, systemImage: "doc")
-                            .foregroundStyle(Color.primary)
-                            .lineLimit(1)
-                            .truncationMode(.middle)
-                            .tag(page.id)
-                    }
+        List(selection: selection) {
+            Section {
+                ForEach(model.pages) { page in
+                    DesignPageLabel(page: page, isCurrent: page.id == model.selectedPageID).tag(page.id)
                 }
-                Section("Layers") {
-                    if let nodes = model.selectedPage?.nodes, !nodes.isEmpty {
-                        DesignLayerTree(nodes: nodes, model: model, perform: perform)
-                    } else {
-                        DesignPanelHint("Nothing on this page yet.")
-                    }
+            } header: {
+                HStack(spacing: 0) {
+                    Text("Pages")
+                    Spacer(minLength: 0)
+                    pageActions
                 }
             }
-            // The source-list style draws the selection on a row inside a disclosure; the plain one doesn't.
-            .listStyle(.sidebar)
-            .environment(\.sidebarRowSize, .small)
-            .scrollContentBackground(.hidden)
-            .font(SuiteFont.inspectorLabel)
-            .accessibilityIdentifier("design.layers")
-            pageActions
+            Section("Layers") {
+                if let nodes = model.selectedPage?.nodes, !nodes.isEmpty {
+                    DesignLayerTree(nodes: nodes, model: model, perform: perform)
+                } else {
+                    DesignPanelHint("Nothing on this page yet.")
+                }
+            }
         }
+        // The source-list style draws the selection on a row inside a disclosure; the plain one doesn't.
+        .listStyle(.sidebar)
+        .environment(\.sidebarRowSize, .small)
+        .scrollContentBackground(.hidden)
+        .font(SuiteFont.inspectorLabel)
+        .accessibilityIdentifier("design.layers")
     }
 
     /// Picking a row selects that page or layer; clicking empty space deselects the layer.
@@ -54,7 +56,7 @@ struct DesignLayersPanel: View {
             })
     }
 
-    /// Add Page and Delete Page; the last page can't be deleted.
+    /// Add Page and Delete Page (the checked page); the last page can't be deleted.
     private var pageActions: some View {
         HStack(spacing: 0) {
             EditorBarItem(ToolbarAction("Add Page", systemImage: "plus") { perform(.addPage) }, showsTitle: false)
@@ -64,9 +66,31 @@ struct DesignLayersPanel: View {
                     unavailableHelp: model.canDeletePage ? nil : "A file keeps at least one page.") {
                     perform(.deletePage)
                 }, showsTitle: false)
-            Spacer(minLength: 0)
         }
-        .padding(.horizontal, SuiteSpacing.xs)
+    }
+}
+
+/// One page: its symbol and name, with a checkmark on the current page.
+private struct DesignPageLabel: View {
+    let page: DesignPage
+    let isCurrent: Bool
+
+    var body: some View {
+        HStack(spacing: SuiteSpacing.xs) {
+            Label(page.name, systemImage: "doc")
+                .foregroundStyle(Color.primary)
+                .lineLimit(1)
+                .truncationMode(.middle)
+            Spacer(minLength: 0)
+            if isCurrent {
+                Image(systemName: "checkmark")
+                    .font(SuiteFont.inspectorMeta)
+                    .foregroundStyle(SuiteColor.secondaryText)
+                    .help("Current page")
+                    .accessibilityLabel("Current page")
+                    .accessibilityIdentifier("design.current-page")
+            }
+        }
     }
 }
 
