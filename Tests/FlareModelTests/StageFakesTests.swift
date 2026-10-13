@@ -59,17 +59,29 @@ private func address(_ layerID: String, _ item: StageAddress.Item = .shape(0)) -
 @Test func aHitAtBallsCenterReturnsBallAndTheMarqueeAndBoundsCoverIt() throws {
     let hits = services.hits
     #expect(hits.hit(bounce, sceneID: "scene-1", frame: 0, at: Point(x: 80, y: 100), tolerance: 0) == address("ball"))
-    #expect(hits.hit(bounce, sceneID: "scene-1", frame: 0, at: Point(x: 500, y: 20), tolerance: 0) == address("background"))
-    #expect(hits.hit(bounce, sceneID: "scene-1", frame: 0, at: Point(x: 600, y: 20), tolerance: 0) == nil)
-    #expect(hits.hit(bounce, sceneID: "scene-1", frame: 0, at: Point(x: 553, y: 20), tolerance: 4) == address("background"))
-    var locked = bounce
-    locked.scenes[0].layers[2].isLocked = true
-    #expect(hits.hit(locked, sceneID: "scene-1", frame: 0, at: Point(x: 80, y: 100), tolerance: 0) == address("background"))
+    // Background is locked, so an empty spot on the artboard hits nothing; unlocked, it is hit edges and tolerance included.
+    #expect(hits.hit(bounce, sceneID: "scene-1", frame: 0, at: Point(x: 500, y: 20), tolerance: 0) == nil)
+    var unlocked = bounce
+    unlocked.scenes[0].layers[0].isLocked = false
+    #expect(hits.hit(unlocked, sceneID: "scene-1", frame: 0, at: Point(x: 500, y: 20), tolerance: 0) == address("background"))
+    #expect(hits.hit(unlocked, sceneID: "scene-1", frame: 0, at: Point(x: 600, y: 20), tolerance: 0) == nil)
+    #expect(hits.hit(unlocked, sceneID: "scene-1", frame: 0, at: Point(x: 553, y: 20), tolerance: 4) == address("background"))
+    unlocked.scenes[0].layers[2].isLocked = true
+    #expect(hits.hit(unlocked, sceneID: "scene-1", frame: 0, at: Point(x: 80, y: 100), tolerance: 0) == address("background"))
     let rect = Rect(minX: 40, minY: 60, maxX: 120, maxY: 140)
-    #expect(hits.marquee(bounce, sceneID: "scene-1", frame: 0, rect: rect) == [address("background"), address("ball")])
+    #expect(hits.marquee(bounce, sceneID: "scene-1", frame: 0, rect: rect) == [address("ball")])
     let box = try #require(hits.bounds(bounce, sceneID: "scene-1", frame: 0, of: [address("ball")]))
     #expect(abs(box.minX - 50) < 1e-9 && abs(box.maxX - 110) < 1e-9 && abs(box.minY - 70) < 1e-9 && abs(box.maxY - 130) < 1e-9)
     #expect(hits.bounds(bounce, sceneID: "scene-1", frame: 0, of: []) == nil)
+}
+
+@Test func j5MarqueeAroundBallAndShadowSelectsExactlyThoseTwo() {
+    // J5 (docs/blueprints/flare.md, section 5): on bounce, a marquee around Ball and Shadow gives 2, and a click on the
+    // empty stage gives 0, because the full-canvas Background is locked.
+    let rect = Rect(minX: 30, minY: 40, maxX: 330, maxY: 370)
+    #expect(services.hits.marquee(bounce, sceneID: "scene-1", frame: 0, rect: rect) == [address("shadow"), address("ball")])
+    #expect(services.hits.hit(bounce, sceneID: "scene-1", frame: 0, at: Point(x: 500, y: 30), tolerance: 0) == nil)
+    #expect(bounce.scenes.first?.layers.first.map { $0.name == "Background" && $0.isLocked && $0.isVisible } == true)
 }
 
 @Test func removingTheLastSceneThrows() throws {

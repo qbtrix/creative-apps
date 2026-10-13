@@ -521,7 +521,7 @@ disk, so the UI test target never has to build a `.flare` file:
 | Fixture | Contents | Used by |
 |---|---|---|
 | `empty` | one scene, no layers | J3, J4, J26 |
-| `bounce` | Background, Ball, Shadow; Ball X, Y and scale keys at 0, 12, 24, 36, 47; Shadow not animated; 48 frames at 24 fps | most journeys |
+| `bounce` | Background (locked, so stage clicks and marquees skip it), Ball, Shadow; Ball X, Y and scale keys at 0, 12, 24, 36, 47; Shadow not animated; 48 frames at 24 fps | most journeys |
 | `character` | Head, Body, Arms (an instance of an animated "Wave" symbol), Legs, each on its own layer | J17, J18 |
 | `button` | labels idle, hover and pressed; no machine (J19 builds it). `button with machine` adds the J19 result | J19–J21 |
 | `showcase` | bounce plus a text layer "Title", an instance of an animated "Spin" symbol, and one machine | J22, J27 |
