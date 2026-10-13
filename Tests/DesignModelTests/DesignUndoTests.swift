@@ -85,7 +85,7 @@ import Testing
     #expect(workspace.undoActionName == "Undo Delete Page" && workspace.selectedPageID == "page-1")
     workspace.undo()
     #expect(workspace.pages == before)
-    #expect(workspace.selectedPageID == "page-2" && workspace.selectedNodeID == "node-2")
+    #expect(workspace.selectedPageID == "page-2" && workspace.selectedNodeID == "node-3")
     workspace.redo()
     #expect(workspace.pages.map(\.id) == ["page-1"] && workspace.selectedPageID == "page-1")
 }
@@ -236,5 +236,5 @@ import Testing
     #expect(workspace == mid)
     workspace.endDrag()
     workspace.undo()
-    #expect(workspace.treeNode("node-2") == nil)
+    #expect(workspace.treeNode("node-3") == nil)
 }

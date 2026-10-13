@@ -36,7 +36,7 @@ private func allIDs(_ workspace: DesignWorkspace) -> [String] {
     #expect(workspace.selectedPageID == "page-2")
     #expect(throws: DesignTreeError.unknownID("node-1")) { try workspace.addNode(.text, frame: box, in: "node-1") }
     #expect(workspace == before)
-    #expect(try workspace.addNode(.text, frame: box) == "node-2")
+    #expect(try workspace.addNode(.text, frame: box) == "node-3")
 }
 
 @Test func aRefusedAddKeepsTheSelectionAndExpandedRows() throws {
@@ -62,7 +62,7 @@ private func allIDs(_ workspace: DesignWorkspace) -> [String] {
     try workspace.deletePage("page-2")
     let next = try workspace.addNode(.text, frame: box, in: "node-1")
     #expect(next != onPage2)
-    #expect(next == "node-3")
+    #expect(next == "node-4")
 }
 
 @Test(arguments: [UInt64(1), 7, 42, 2026, 0xDEAD_BEEF])
@@ -73,7 +73,9 @@ func fuzzedAddsMatchASequentialCounter(seed: UInt64) throws {
     var accepted = 1  // the Desktop frame
     for _ in 0..<300 {
         switch rng.next(below: 10) {
-        case 0: workspace.addPage()
+        case 0:
+            workspace.addPage()
+            accepted += 1  // its Desktop frame
         case 1:
             if let page = workspace.pages.randomElement(using: &rng) { workspace.selectPage(page.id) }
         default:

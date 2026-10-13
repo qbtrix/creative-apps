@@ -46,7 +46,7 @@ private func rows(_ workspace: DesignWorkspace) -> [String] { workspace.layerRow
     try workspace.addNode(.rectangle, frame: box, in: "node-1")
     try workspace.setExpanded("node-1", false)
     workspace.addPage()
-    #expect(workspace.layerRows.isEmpty)
+    #expect(workspace.layerRows.map(\.id) == ["node-3"])
     // A node on another page can still be collapsed or expanded by id.
     try workspace.setExpanded("node-1", true)
     workspace.selectPage("page-1")

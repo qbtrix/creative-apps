@@ -23,7 +23,7 @@ import Testing
         }
     }
 
-    /// Page 1 holds the Desktop frame (node-1); page 2 is empty. Returns the model.
+    /// Page 1 holds the Desktop frame (node-1); page 2 holds its own (node-2). Returns the model.
     private func twoPages() -> DesignWorkspace {
         var model = DesignWorkspace()
         model.newFile()

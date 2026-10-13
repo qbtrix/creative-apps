@@ -36,8 +36,9 @@ private func page(_ id: String, _ nodes: [DesignNode] = []) -> DesignPage {
     workspace.load([page("page-7", [group]), page("page-2"), page("custom"), page("page-x")])
     workspace.addPage()
     #expect(workspace.pages.last?.id == "page-8")
+    #expect(workspace.pages.last?.nodes.map(\.id) == ["node-13"])
     workspace.selectPage("page-7")
-    #expect(try workspace.addNode(.ellipse, frame: rc(0, 0, 1, 1)) == "node-13")
+    #expect(try workspace.addNode(.ellipse, frame: rc(0, 0, 1, 1)) == "node-14")
 }
 
 @Test func absurdlyLargeIDsDoNotOverflowTheCounters() throws {
@@ -45,7 +46,8 @@ private func page(_ id: String, _ nodes: [DesignNode] = []) -> DesignPage {
     let huge = DesignNode(id: "node-9223372036854775807", name: "H", kind: .rectangle, frame: rc(0, 0, 1, 1))
     workspace.load([page("page-9223372036854775807", [huge])])
     workspace.addPage()
-    #expect(try workspace.addNode(.ellipse, frame: rc(0, 0, 1, 1)) == "node-1")
+    #expect(workspace.pages.last?.nodes.map(\.id) == ["node-1"])
+    #expect(try workspace.addNode(.ellipse, frame: rc(0, 0, 1, 1)) == "node-2")
     #expect(workspace.pages.count == 2)
 }
 
