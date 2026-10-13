@@ -1,12 +1,15 @@
 // ImageSizeSheet.swift: Image > Image Size… asks for the new width and height
 // in pixels, keeping the proportions while the box is checked
-// (CanvasSize.height(forWidth:) and width(forHeight:)), then Resize resamples
-// every layer. The typed sides are presentation state until Resize, kept as
-// text: a text field's binding follows every keystroke, while a number field
-// on macOS may wait for Return or Tab to commit, and Return is Resize's own
-// shortcut, so "type 400, press Return" must never resize with the old
-// number. Resize stays disabled, saying why, until both sides are whole
-// numbers. Its controls carry `photo.size.*` accessibility identifiers.
+// (CanvasSize.height(forWidth:) and width(forHeight:)); checking the box again
+// re-derives the height from the width. Resize resamples every layer. The
+// typed sides are presentation state until Resize, kept as text: a text
+// field's binding follows every keystroke, while a number field on macOS may
+// wait for Return or Tab to commit, and Return is Resize's own shortcut.
+// Resize reads the sides when it runs, not as the view last drew them, so
+// "type 400, press Return" never resizes with an older number; it stays
+// disabled, saying why, until both are whole numbers. Its controls carry
+// `photo.size.*` accessibility identifiers, and the Form's fields are named
+// for VoiceOver (a Form row's title doesn't name its field).
 import PhotoModel
 import SuiteUI
 import SwiftUI
@@ -28,15 +31,18 @@ struct ImageSizeSheet: View {
     }
 
     var body: some View {
-        let sides = Self.side(width).flatMap { w in Self.side(height).map { (w, $0) } }
+        let typed = Self.side(width) != nil && Self.side(height) != nil
         VStack(alignment: .leading, spacing: SuiteSpacing.m) {
             Text("Image Size").font(SuiteFont.headline)
             Form {
                 TextField("Width", text: Binding(get: { width }, set: { setWidth($0) }))
+                    .accessibilityLabel("Width")
                     .accessibilityIdentifier("photo.size.width")
                 TextField("Height", text: Binding(get: { height }, set: { setHeight($0) }))
+                    .accessibilityLabel("Height")
                     .accessibilityIdentifier("photo.size.height")
-                Toggle("Keep proportions", isOn: $keepsProportions).toggleStyle(.checkbox)
+                Toggle("Keep proportions", isOn: Binding(get: { keepsProportions }, set: { setKeepsProportions($0) }))
+                    .toggleStyle(.checkbox)
                     .accessibilityIdentifier("photo.size.keep-proportions")
             }
             Text("Now \(size.width) × \(size.height) px. Each side can be 1 to \(PhotoWorkspace.maxSide) px.")
@@ -46,10 +52,10 @@ struct ImageSizeSheet: View {
                 Spacer()
                 Button("Cancel", action: onCancel).keyboardShortcut(.cancelAction)
                     .accessibilityIdentifier("photo.size.cancel")
-                Button("Resize") { if let sides { onResize(sides.0, sides.1) } }
+                Button("Resize", action: resize)
                     .keyboardShortcut(.defaultAction)
-                    .disabled(sides == nil)
-                    .help(sides == nil ? "Type each side as a whole number of pixels." : "Resize")
+                    .disabled(!typed)
+                    .help(typed ? "Resize" : "Type each side as a whole number of pixels.")
                     .accessibilityIdentifier("photo.size.resize")
             }
         }
@@ -62,6 +68,11 @@ struct ImageSizeSheet: View {
         Int(text.trimmingCharacters(in: .whitespaces))
     }
 
+    private func resize() {
+        guard let w = Self.side(width), let h = Self.side(height) else { return }
+        onResize(w, h)
+    }
+
     private func setWidth(_ text: String) {
         width = text
         if keepsProportions, let value = Self.side(text) { height = String(size.height(forWidth: value)) }
@@ -70,5 +81,10 @@ struct ImageSizeSheet: View {
     private func setHeight(_ text: String) {
         height = text
         if keepsProportions, let value = Self.side(text) { width = String(size.width(forHeight: value)) }
+    }
+
+    private func setKeepsProportions(_ keeps: Bool) {
+        keepsProportions = keeps
+        if keeps, let value = Self.side(width) { height = String(size.height(forWidth: value)) }
     }
 }
