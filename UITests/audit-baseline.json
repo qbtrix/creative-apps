@@ -1,0 +1,7 @@
+{
+  "design": { "contrast": 2, "identifier": 33 },
+  "flare": { "contrast": 4, "identifier": 16, "offscreen": 15 },
+  "halo": { "contrast": 2, "identifier": 10, "offscreen": 8, "unnamed": 5 },
+  "library": { "contrast": 3, "identifier": 16, "offscreen": 16, "unnamed": 1 },
+  "photo": { "identifier": 54, "overlap": 1 }
+}

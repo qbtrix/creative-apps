@@ -1,6 +1,7 @@
 // AuditCore.swift: the app audit's engine (docs/blueprints/app-audit.md): the
 // registry of checks, the plain element tree they read, the screen they run
-// on and the per-screen report.
+// on and the per-screen report. AuditTally.swift holds the counts against the
+// baseline.
 //
 // A check is one file in Checks/ conforming to `AppAudit.Check` plus one entry
 // in `AppAudit.checks`; nothing else changes. Every check carries the fault
