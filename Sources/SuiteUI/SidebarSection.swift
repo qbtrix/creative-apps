@@ -1,7 +1,8 @@
 // SidebarSection.swift: one titled group of sidebar rows in SuiteWindow, with
 // an optional add button in its header, and SidebarNode, the row SuiteWindow
 // draws for an item: a SidebarRow, nested in a disclosure group when the item
-// has children. Selection stays one SidebarItem.ID across every section.
+// has children. Nesting stops at two levels: deeper rows draw flat at the
+// second. Selection stays one SidebarItem.ID across every section.
 import SwiftUI
 
 public struct SidebarSection: Identifiable {
@@ -40,7 +41,8 @@ struct SidebarSectionHeader: View {
     }
 }
 
-/// One item and, through a system disclosure group, its children.
+/// One top-level item and, through a system disclosure group, its
+/// `secondLevelRows`: the two-level cap from docs/design.md.
 struct SidebarNode: View {
     let item: SidebarItem
     let onToggle: (@MainActor (SidebarItem.ID, SidebarToggle.ID) -> Void)?
@@ -51,7 +53,7 @@ struct SidebarNode: View {
             row
         } else {
             DisclosureGroup {
-                ForEach(item.children) { SidebarNode(item: $0, onToggle: onToggle, onRename: onRename) }
+                ForEach(item.secondLevelRows) { SidebarNode(item: $0, onToggle: onToggle, onRename: onRename) }
             } label: {
                 row
             }
