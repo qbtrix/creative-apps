@@ -12,6 +12,9 @@ enum PhotoIntent {
     case newImage, open, save, export, imageSize
     case openFile(URL)
     case rotate(QuarterTurn)
+    /// Opens the Straighten sheet; `applyStraighten` turns the image by its choices.
+    case straighten
+    case applyStraighten(degrees: Double, cropToFit: Bool)
     case undo, redo
     case tool(PhotoTool)
     case drag(CGPoint, CGPoint)

@@ -3,7 +3,8 @@
 // journey opens a real PNG (written by the test, passed with
 // -PhotoOpenFile), paints a stroke, undoes it, raises the exposure and
 // exports a PNG (to the folder given with -PhotoExportTo, so no save panel),
-// then checks the file is a PNG. Another journey edits with every other tool.
+// then checks the file is a PNG. Another journey edits with every other tool,
+// and one straightens the image by 3 degrees from the Image menu.
 import CoreGraphics
 import ImageIO
 import UniformTypeIdentifiers
@@ -77,6 +78,35 @@ final class PhotoJourneyTests: XCTestCase {
         photo.drag(on: "suite.canvas", from: CGVector(dx: 0.1, dy: 0.1), to: CGVector(dx: 0.9, dy: 0.9), step: "crop-pending")
         photo.click("Apply Crop", in: .window, step: "cropped")
         XCTAssert(photo.app.buttons["Undo Crop"].waitForExistence(timeout: 5), "the crop wasn't applied")
+    }
+
+    @MainActor func testStraighten() throws {
+        let file = try Self.folder().appending(path: "straighten.png")
+        try Self.writeTestPhoto(to: file)
+        let photo = Journey("Photo", self, arguments: ["-PhotoOpenFile", file.path])
+        XCTAssert(photo.app.windows["straighten.png"].waitForExistence(timeout: 30), "straighten.png didn't open")
+        XCTAssert(photo.app.staticTexts["800 × 600 px"].waitForExistence(timeout: 5), "the status bar shows no image size")
+
+        photo.app.menuBars.menuBarItems["Image"].click()
+        photo.app.menuBars.menuItems["Straighten…"].click()
+        let angle = photo.element("photo.straighten.angle")
+        XCTAssert(angle.waitForExistence(timeout: 5), "no Angle field in the Straighten sheet")
+        photo.shot("straighten-sheet")
+        angle.click()
+        angle.typeKey("a", modifierFlags: .command)
+        angle.typeText("3")
+        let newSize = photo.app.sheets.staticTexts.matching(NSPredicate(format: "label BEGINSWITH 'New size '")).firstMatch
+        XCTAssert(newSize.waitForExistence(timeout: 5), "the sheet doesn't say the new size")
+        let size = String(newSize.label.dropFirst("New size ".count))
+        XCTAssertNotEqual(size, "800 × 600 px", "3 degrees didn't change the new size")
+        photo.shot("straighten-preview")
+
+        // Return is Apply, and it must turn by the 3 just typed.
+        angle.typeKey(.return, modifierFlags: [])
+        XCTAssert(photo.app.buttons["Undo Straighten"].waitForExistence(timeout: 15), "Straighten made no undo step")
+        XCTAssert(photo.app.staticTexts[size].waitForExistence(timeout: 5), "the canvas isn't \(size) after Straighten")
+        XCTAssertFalse(photo.app.staticTexts["800 × 600 px"].exists, "the canvas size didn't change")
+        photo.shot("straightened")
     }
 
     /// A fresh folder for one journey's files.
