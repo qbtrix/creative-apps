@@ -1,7 +1,7 @@
 // EditorTopBar.swift: the top bar of an EditorShell, after the Ripple editor's:
 // the app name and the document name as a menu, then flat icon-and-label commands, a
 // hairline between groups, and whatever trails (undo, zoom). Commands are
-// ToolbarActions drawn by EditorBarItem (an action that can't run is disabled
+// ToolbarActions drawn by EditorBarItem (an action that can't run is disabled, its symbol dimmed,
 // and its tooltip says why) or EditorBarMenu for a command that opens a menu.
 // Both are native buttons and menus in the accessory-bar style: flat until
 // hovered. The bar starts after the window's close, minimize and zoom buttons
@@ -140,8 +140,21 @@ private struct EditorBarLabelStyle: LabelStyle {
     let showsTitle: Bool
 
     func makeBody(configuration: Configuration) -> some View {
+        EditorBarLabel(configuration: configuration, showsTitle: showsTitle)
+    }
+}
+
+/// The label EditorBarLabelStyle draws. Setting the symbol's color overrides the
+/// system's disabled dimming, so a disabled command's symbol is tertiary here.
+private struct EditorBarLabel: View {
+    let configuration: LabelStyleConfiguration
+    let showsTitle: Bool
+    @Environment(\.isEnabled) private var isEnabled
+
+    var body: some View {
         HStack(spacing: SuiteSpacing.xs) {
-            configuration.icon.foregroundStyle(SuiteColor.secondaryText)
+            configuration.icon.foregroundStyle(
+                isEnabled ? AnyShapeStyle(SuiteColor.secondaryText) : AnyShapeStyle(HierarchicalShapeStyle.tertiary))
             if showsTitle { configuration.title }
         }
     }
