@@ -1,5 +1,6 @@
 // ScrubValue.swift: the number rules behind ScrubField (drag sideways to
-// change a value) and ViewerStatusBar (the zoom readout). No SwiftUI, like
+// change a value) and ViewerStatusBar and the editor's zoom commands (the zoom
+// readout, fit, and the zoom in and out stops). No SwiftUI, like
 // NumericInput, so the rules are unit-tested on their own. Invariants: every
 // result is inside its range and never NaN, whatever the drag distance, step
 // or modifier; a step that is zero, negative or not finite means "no
@@ -63,5 +64,22 @@ public enum ViewerZoom {
         guard room.width > 0, room.height > 0, room.width.isFinite, room.height.isFinite else { return 0 }
         let scale = min(room.width / max(artboard.width, 1), room.height / max(artboard.height, 1), 1)
         return scale.isFinite ? Double(scale) : 0
+    }
+
+    /// The stops Zoom In and Zoom Out step through, smallest first.
+    public static let stops: [Double] = [0.05, 0.1, 0.25, 1.0 / 3, 0.5, 2.0 / 3, 1, 1.5, 2, 3, 4, 6, 8, 12, 16, 32]
+
+    /// The next stop above `scale`, or the largest; 100% for a scale that
+    /// isn't a positive finite number.
+    public static func zoomedIn(from scale: Double) -> Double {
+        guard scale.isFinite, scale > 0 else { return 1 }
+        return stops.first { $0 > scale * 1.001 } ?? stops[stops.count - 1]
+    }
+
+    /// The next stop below `scale`, or the smallest; 100% for a scale that
+    /// isn't a positive finite number.
+    public static func zoomedOut(from scale: Double) -> Double {
+        guard scale.isFinite, scale > 0 else { return 1 }
+        return stops.last { $0 < scale / 1.001 } ?? stops[0]
     }
 }

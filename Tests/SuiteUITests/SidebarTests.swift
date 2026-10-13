@@ -42,3 +42,9 @@ import Testing
     #expect(!SidebarRow.doubleClickRenames(.title, renamable: false, renaming: false))
     #expect(!SidebarRow.doubleClickRenames(.title, renamable: true, renaming: true))
 }
+
+@Test func doubleClickOnBlankSpaceBesideTheTogglesNeverStartsARename() {
+    #expect(!SidebarRow.doubleClickRenames(.blank, renamable: true, renaming: false))
+    #expect(!SidebarRow.doubleClickRenames(.blank, renamable: false, renaming: false))
+    #expect(!SidebarRow.doubleClickRenames(.blank, renamable: true, renaming: true))
+}

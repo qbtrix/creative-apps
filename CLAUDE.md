@@ -20,6 +20,11 @@ compiled only by the `macOS` CI job. So:
 - Look at what you built: the `macOS` job uploads the `snapshots` artifact
   (`gh run download <id> -n snapshots`), PNGs written by
   `Tests/AppSnapshotTests`. Open the ones your change touched.
+- Watch it run: the `macOS` job also clicks through every app
+  (`UITests/<X>JourneyTests.swift`) and uploads whole-window screenshots as
+  `ui-screens` (`gh run download <id> -n ui-screens`). A user-facing feature
+  adds or extends its app's journey test (docs/engineering.md, Human-like UI
+  tests).
 
 ## Targets and lines
 
@@ -105,6 +110,20 @@ something. One that can't act yet is disabled and says why:
 
 - **One behavior per PR.** Ideally under 200 changed lines, hard cap 400, at
   most 15 files.
+- **Check current docs, not memory.** Before using any platform or library
+  API (SwiftUI, AppKit, macOS 26 APIs, GRDB, Swift stdlib), check current docs
+  with the docs MCP tools; don't rely on memory. If the tools are unavailable,
+  say so in the PR body. `.mcp.json` provides them: `apple-docs`
+  (`searchAppleDocumentation`, then `fetchAppleDocumentation`; Apple's
+  developer docs, Swift stdlib and HIG, read live from developer.apple.com)
+  and `context7` (`resolve-library-id`, then `query-docs`; SwiftUI is
+  `/websites/developer_apple_swiftui`, AppKit `/websites/developer_apple_appkit`,
+  GRDB `/groue/grdb.swift` and Swift `/swiftlang/swift`).
+- **Every source file has a C4 owner.** `scripts/ci` fails when a file under
+  `Sources/` is not in exactly one component's `paths` in `docs/c4/model.json`.
+  Each target's folder is a component, so a new file in a target is covered;
+  if it adds something that component's description doesn't mention, update
+  the description in the same PR.
 - **Views are dumb.** Files under `Sources/*App/` read their Model and call its
   methods; they never assign its state, bind to it, or mutate its collections.
   `scripts/ci` fails on that (the app-state rule). Model state is
@@ -163,17 +182,22 @@ A PR labelled `fast-lane` is merged automatically by
 `.github/workflows/fast-lane.yml` when all of these hold: base `main`, author
 on the allowlist in `scripts/fast-lane.sh`, at most 400 changed lines and 15
 files, no protected path touched, mergeable, and every check green including
-both CI jobs. Protected paths are the files above. UI code can take the lane once both CI
-jobs are green; a human reviews the snapshots after merge and files fixes as
-new issues. Otherwise the label is
-removed with a comment saying why, and the PR waits for review.
+both CI jobs. Protected paths are the files above. UI code can take the lane
+once both CI jobs are green; a human reviews the snapshots after merge and
+files fixes as new issues. A Belt PR (its body has a `Belt-Run:` or
+`Belt-Test:` line) also waits for Belt's `belt/review` commit status to be
+success on its head; `REQUIRE_BELT_REVIEW` in `scripts/fast-lane.sh` turns
+that off. Otherwise the label is removed with a comment saying why, and the PR
+waits for review.
 
 ## Commands
 
 ```bash
-scripts/ci                                   # lint + app-state rule + design lint + jscpd + build + test: the gate
+scripts/ci                                   # lint + app-state rule + design lint + C4 ownership + jscpd + build + test: the gate
 swift test --filter FlareModelTests          # one suite while iterating
 bash Tests/fast_lane/test_fast_lane.sh       # fast-lane decision tests (needs jq)
 gh run download <run-id> -n snapshots        # the PNGs from a macOS CI run
+gh run download <run-id> -n ui-screens       # whole-window PNGs from the UI journeys
+scripts/ui-test                              # macOS + Xcode + xcodegen: run the UI journeys locally
 scripts/bundle-apps                          # macOS: release builds as signed FlareApp.app ... HaloApp.app in .build/apps; CI uploads them as `app-builds` (app-builds.tar.gz)
 ```

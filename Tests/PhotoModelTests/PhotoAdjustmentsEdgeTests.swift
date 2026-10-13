@@ -42,7 +42,7 @@ private func checkInvariants(_ settings: AdjustmentSettings) {
         settings.apply(.lightness(-.infinity))
         #expect(settings.exposure == 5)
         #expect(settings.gamma == 0.1)
-        #expect(settings.blurSigma == 100)
+        #expect(settings.blurSigma == 20)
         #expect(settings.hue == -180)
         #expect(settings.saturation == 100)
         #expect(settings.lightness == -100)
@@ -66,10 +66,10 @@ private func checkInvariants(_ settings: AdjustmentSettings) {
         var settings = AdjustmentSettings()
         settings.apply(.exposure(-5))
         settings.apply(.gamma(10))
-        settings.apply(.blurSigma(100))
+        settings.apply(.blurSigma(20))
         settings.apply(.hue(180))
         #expect(settings.exposure == -5 && settings.gamma == 10)
-        #expect(settings.blurSigma == 100 && settings.hue == 180)
+        #expect(settings.blurSigma == 20 && settings.hue == 180)
     }
 
     @Test func negativeZeroStillCountsAsIdentity() {

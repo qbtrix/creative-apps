@@ -1,7 +1,7 @@
 // SuiteInspectorSnapshots.swift: SuiteUI's inspector rows, one section per row
 // kind, at the inspector's ideal width, in Light and Dark. Writes
-// suiteui-inspector-light.png and suiteui-inspector-dark.png. ImageRenderer may
-// draw the system controls as placeholders; the labels and layout still show.
+// suiteui-inspector-light.png and suiteui-inspector-dark.png, with the system
+// controls drawn for real (the snapshot helper renders through AppKit).
 import SuiteUI
 import SwiftUI
 import Testing

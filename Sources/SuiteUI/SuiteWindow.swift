@@ -6,8 +6,11 @@
 // `onSelect`, `onToggle`, `onMove` and `onRename`; a nil closure turns that
 // gesture off. Toolbar actions with `unavailableHelp` show disabled, with the
 // reason as their tooltip. The shell owns only presentation state (inspector
-// visibility) and tints the whole window with the suite's one accent
-// (SuiteColor.accent).
+// visibility) and tints the content and inspector with the suite's one accent
+// (SuiteColor.accent); the sidebar keeps the system's selection style, which
+// dims when the window isn't key. The sidebar and inspector carry the accessibility
+// identifiers `suite.sidebar` and `suite.inspector`; the UI journeys in
+// UITests/ find them by those names.
 import SwiftUI
 
 public struct SuiteWindow<Content: View, Inspector: View>: View {
@@ -71,15 +74,21 @@ public struct SuiteWindow<Content: View, Inspector: View>: View {
                     }
                 }
             }
+            .listStyle(.sidebar)
+            .accessibilityIdentifier("suite.sidebar")
             .navigationSplitViewColumnWidth(
                 min: SuiteSize.sidebarWidth.min, ideal: SuiteSize.sidebarWidth.ideal, max: SuiteSize.sidebarWidth.max)
         } detail: {
             content
                 .frame(minWidth: SuiteSize.contentMinimum.width, minHeight: SuiteSize.contentMinimum.height)
+                .tint(SuiteColor.accent)
                 .inspector(isPresented: $showsInspector) {
                     inspector
                         .padding(SuiteSpacing.m)
                         .frame(maxHeight: .infinity, alignment: .top)
+                        .accessibilityElement(children: .contain)
+                        .accessibilityIdentifier("suite.inspector")
+                        .tint(SuiteColor.accent)
                         .inspectorColumnWidth(
                             min: SuiteSize.inspectorWidth.min, ideal: SuiteSize.inspectorWidth.ideal,
                             max: SuiteSize.inspectorWidth.max)
@@ -107,7 +116,6 @@ public struct SuiteWindow<Content: View, Inspector: View>: View {
             }
         }
         .frame(minWidth: SuiteSize.windowMinimum.width, minHeight: SuiteSize.windowMinimum.height)
-        .tint(SuiteColor.accent)
     }
 
     /// Drag reorder for one section's rows; nil (reorder off) without `onMove`.

@@ -25,7 +25,7 @@ import Testing
         settings.apply(.lightness(-101))
         #expect(settings.exposure == 5)
         #expect(settings.gamma == 0.1)
-        #expect(settings.blurSigma == 100)
+        #expect(settings.blurSigma == 20)
         #expect(settings.hue == -180)
         #expect(settings.saturation == 100)
         #expect(settings.lightness == -100)
