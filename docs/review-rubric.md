@@ -62,4 +62,5 @@ explains it. The rules behind each question are in `docs/engineering.md` and
 - [ ] A user-facing feature adds or extends its app's journey test in
       `UITests/<X>JourneyTests.swift`, and the PR body lists the `ui-screens`
       PNGs that show it?
-- [ ] Both CI jobs (`Linux`, `macOS`) are green on the rebased branch?
+- [ ] `scripts/ci` printed `CI: PASS` on the branch rebased on `origin/dev`,
+      and the PR body's `Head:` line names that head?
