@@ -338,7 +338,7 @@ public struct DesignWorkspace: Sendable, Equatable {
     /// New File and Add Page both start their page here.
     private mutating func nextPage() -> DesignPage {
         pageCount += 1
-        while pages.contains(where: { $0.id == "page-\(pageCount)" }) { pageCount += 1 }
+        while holds("page-\(pageCount)") { pageCount += 1 }
         var page = DesignPage(id: "page-\(pageCount)", name: "Page \(pageCount)", frameWidth: 1440, frameHeight: 1024)
         let size = DesignRect(x: 0, y: 0, width: page.frameWidth, height: page.frameHeight)
         page.nodes = [DesignNode(id: nextNodeID(), name: "Desktop", kind: .frame, frame: size)]
@@ -350,11 +350,17 @@ public struct DesignWorkspace: Sendable, Equatable {
         return "node-\(nodeCount)"
     }
 
-    /// The first number past the node counter whose "node-N" no page holds yet.
+    /// The first number past the node counter whose "node-N" no page or node holds yet.
     private func nextNodeNumber() -> Int {
         var number = nodeCount + 1
-        while findNode("node-\(number)") != nil { number += 1 }
+        while holds("node-\(number)") { number += 1 }
         return number
+    }
+
+    /// Whether a page or a node already uses `id`. Page and node ids share one namespace, as
+    /// `DesignFile.check` reads them, so a minted id must avoid both kinds (#303).
+    private func holds(_ id: String) -> Bool {
+        pages.contains { $0.id == id } || findNode(id) != nil
     }
 }
 
