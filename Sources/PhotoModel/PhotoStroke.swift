@@ -202,8 +202,9 @@ extension PhotoWorkspace {
         _ a: Mask.Point, _ b: Mask.Point, pressures: (Double, Double), on tiled: inout TiledPixels, layer: PhotoLayer,
         stroke: inout PhotoStroke
     ) throws -> PixelRect? {
+        let options = stroke.tool == .eraser ? eraserOptions : brushOptions
         // Half a pixel at the least, so the soft edge below is never zero wide.
-        let ra = max(toolOptions.size / 2 * pressures.0, 0.5), rb = max(toolOptions.size / 2 * pressures.1, 0.5)
+        let ra = max(options.size / 2 * pressures.0, 0.5), rb = max(options.size / 2 * pressures.1, 0.5)
         let ax = a.x - Double(layer.offsetX), ay = a.y - Double(layer.offsetY)
         let dx = b.x - a.x, dy = b.y - a.y, length2 = dx * dx + dy * dy, r = max(ra, rb)
         let box = PixelRect(
@@ -212,9 +213,9 @@ extension PhotoWorkspace {
         guard let area = box.intersection(PixelRect(x: 0, y: 0, width: tiled.width, height: tiled.height)) else {
             return nil
         }
-        let hardness = toolOptions.hardnessPercent / 100
-        let opacity = Float(toolOptions.opacityPercent / 100)
-        let paint = toolOptions.linearColor
+        let hardness = options.hardnessPercent / 100
+        let opacity = Float(options.opacityPercent / 100)
+        let paint = options.linearColor
         let erasing = stroke.tool == .eraser
         for i in tiled.tileIndices(in: area) where tiled.tiles.indices.contains(i) {
             let rect = tiled.tileRect(i)

@@ -1,5 +1,5 @@
-// ToolOptions.swift: the brush and eraser settings in the Adjust tab's Tool
-// options: size in pixels, hardness and opacity as percentages, and the paint
+// ToolOptions.swift: the brush's or the eraser's settings in the Adjust tab's
+// Tool options (PhotoWorkspace keeps one set per tool): size in pixels, hardness and opacity as percentages, and the paint
 // color as 8-bit sRGB. Every change arrives as one ToolOptionEdit and clamps
 // to its range; NaN is ignored. Choosing options is not a document edit, so
 // it is not undoable. Linux-safe.

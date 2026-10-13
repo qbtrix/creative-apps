@@ -1,6 +1,7 @@
 // PhotoWorkspace.swift: the state behind Photo's window (raster editing): the
 // open image's size and name, its layer stack (top first) with each layer's
-// pixels, the selected layer, the active tool and its options, the image
+// pixels, the selected layer, the active tool, the brush's and the eraser's
+// options (each tool keeps its own), the image
 // adjustments, the marquee selection and a pending crop, and the undo history.
 // Linux-safe: no UI imports. PhotoApp changes it only through the methods here
 // and in the extensions beside it (PhotoStroke, PhotoSelection, PhotoHistory,
@@ -51,7 +52,10 @@ public struct PhotoWorkspace: Sendable {
     public internal(set) var pixels: [PhotoLayer.ID: TiledPixels] = [:]
     public internal(set) var selectedLayerID: PhotoLayer.ID?
     public private(set) var tool: PhotoTool = .move
-    public private(set) var toolOptions = ToolOptions()
+    /// The brush's options; its color is also the marquee's Fill color.
+    public private(set) var brushOptions = ToolOptions()
+    /// The eraser's own size, hardness and opacity; it has no color.
+    public private(set) var eraserOptions = ToolOptions()
     public internal(set) var adjustments = AdjustmentSettings()
     /// The marquee selection in canvas pixels; nil for none.
     public internal(set) var selection: PixelRect?
@@ -116,8 +120,27 @@ public struct PhotoWorkspace: Sendable {
         if tool != .crop, pendingCrop != nil { pendingCrop = nil }
     }
 
+    /// The options the panel shows: the eraser's while it is selected,
+    /// otherwise the brush's.
+    public var toolOptions: ToolOptions { tool == .eraser ? eraserOptions : brushOptions }
+
+    /// The brush cursor's diameter in canvas pixels: the size of the selected
+    /// brush or eraser. Nil with no image open or another tool selected.
+    public var brushCursorDiameter: Double? {
+        guard canvas != nil, tool == .brush || tool == .eraser else { return nil }
+        return toolOptions.size
+    }
+
+    /// Changes one option of the tool the panel shows. A color always goes to
+    /// the brush, since the eraser has none.
     public mutating func setToolOption(_ edit: ToolOptionEdit) {
-        toolOptions.apply(edit)
+        if case .color = edit {
+            brushOptions.apply(edit)
+        } else if tool == .eraser {
+            eraserOptions.apply(edit)
+        } else {
+            brushOptions.apply(edit)
+        }
     }
 
     /// Changes one adjustment; AdjustmentSettings clamps and validates it.
@@ -253,7 +276,8 @@ extension PhotoWorkspace: Equatable {
     public static func == (lhs: PhotoWorkspace, rhs: PhotoWorkspace) -> Bool {
         lhs.revision == rhs.revision && lhs.canvas == rhs.canvas && lhs.documentName == rhs.documentName
             && lhs.layers == rhs.layers && lhs.selectedLayerID == rhs.selectedLayerID && lhs.tool == rhs.tool
-            && lhs.toolOptions == rhs.toolOptions && lhs.adjustments == rhs.adjustments
+            && lhs.brushOptions == rhs.brushOptions
+            && lhs.eraserOptions == rhs.eraserOptions && lhs.adjustments == rhs.adjustments
             && lhs.selection == rhs.selection && lhs.pendingCrop == rhs.pendingCrop && lhs.stroke == rhs.stroke
             && lhs.history == rhs.history && lhs.pixels == rhs.pixels
     }

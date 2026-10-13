@@ -49,8 +49,9 @@ struct PhotoPanel: View {
     }
 }
 
-/// The active tool's options: size, hardness, color and opacity for the brush
-/// and eraser; what to do with a selection; applying a crop.
+/// The active tool's options: size, hardness and opacity for the brush (plus
+/// its color) and the eraser, each tool's own; what to do with a selection;
+/// applying a crop.
 struct ToolOptionsSection: View {
     let model: PhotoWorkspace
     let perform: PhotoPerform

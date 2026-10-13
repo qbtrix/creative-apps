@@ -1,5 +1,6 @@
 // PhotoBrushTests.swift: the brush paints on the selected layer, with undo
-// (#192). Runs on Linux and macOS.
+// (#192); the brush and the eraser keep their own options (#26). Runs on
+// Linux and macOS.
 import CoreRaster
 import PhotoModel
 import Testing
@@ -93,5 +94,72 @@ import Testing
         #expect(workspace.toolOptions.size == 500)
         #expect(workspace.toolOptions.opacityPercent == 1)
         #expect(workspace.toolOptions.hardnessPercent == 100)
+    }
+
+    @Test func eachEraserOptionClamps() {
+        var workspace = PhotoWorkspace()
+        workspace.selectTool(.eraser)
+        workspace.setToolOption(.size(0))
+        workspace.setToolOption(.hardness(percent: -5))
+        workspace.setToolOption(.opacity(percent: 250))
+        #expect(workspace.eraserOptions.size == 1)
+        #expect(workspace.eraserOptions.hardnessPercent == 0)
+        #expect(workspace.eraserOptions.opacityPercent == 100)
+        #expect(workspace.brushOptions == ToolOptions(), "the eraser's edits reached the brush")
+    }
+
+    @Test func brushAndEraserKeepTheirOwnOptions() {
+        var workspace = PhotoWorkspace()
+        workspace.selectTool(.brush)
+        workspace.setToolOption(.size(40))
+        workspace.setToolOption(.hardness(percent: 30))
+        workspace.setToolOption(.opacity(percent: 60))
+        workspace.selectTool(.eraser)
+        #expect(workspace.toolOptions == ToolOptions(), "the eraser took the brush's options")
+        workspace.setToolOption(.size(120))
+        workspace.setToolOption(.opacity(percent: 25))
+        workspace.selectTool(.brush)
+        #expect(workspace.toolOptions.size == 40)
+        #expect(workspace.toolOptions.hardnessPercent == 30)
+        #expect(workspace.toolOptions.opacityPercent == 60)
+        workspace.selectTool(.eraser)
+        #expect(workspace.toolOptions.size == 120)
+        #expect(workspace.toolOptions.hardnessPercent == 100)
+        #expect(workspace.toolOptions.opacityPercent == 25)
+    }
+
+    @Test func aColorPickedWithTheEraserIsTheBrushColor() {
+        var workspace = PhotoWorkspace()
+        workspace.selectTool(.eraser)
+        workspace.setToolOption(.color(red: 10, green: 20, blue: 30))
+        workspace.selectTool(.brush)
+        #expect(workspace.toolOptions.red == 10 && workspace.toolOptions.green == 20 && workspace.toolOptions.blue == 30)
+    }
+
+    @Test func theEraserPaintsWithItsOwnSize() throws {
+        var workspace = try whiteImage()
+        workspace.selectTool(.brush)
+        workspace.setToolOption(.size(40))
+        workspace.selectTool(.eraser)
+        workspace.setToolOption(.size(4))
+        stroke(&workspace, .eraser, from: point(32, 32), to: point(32, 32))
+        #expect(try layerPixel(workspace, 32, 32)?.a == 0)
+        // 8 px from the middle: inside a 40 px brush, outside the 4 px eraser.
+        #expect(try layerPixel(workspace, 40, 32)?.a == 1)
+    }
+
+    @Test func theCursorDiameterInCanvasPixelsIsTheSize() throws {
+        var workspace = try whiteImage()
+        workspace.selectTool(.brush)
+        workspace.setToolOption(.size(64))
+        #expect(workspace.brushCursorDiameter == 64)
+        workspace.selectTool(.eraser)
+        workspace.setToolOption(.size(7))
+        #expect(workspace.brushCursorDiameter == 7)
+        workspace.selectTool(.marquee)
+        #expect(workspace.brushCursorDiameter == nil)
+        var empty = PhotoWorkspace()
+        empty.selectTool(.brush)
+        #expect(empty.brushCursorDiameter == nil, "no image, no cursor")
     }
 }
