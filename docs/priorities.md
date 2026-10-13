@@ -161,16 +161,17 @@ beyond one step (#25), transform.
 Tier 3: blend modes and layer styles, text, paths, print setup, specialist
 controls (#231).
 
-`p1`: #255 (Levels click-away changes the image), #419 (straighten's UI). Open,
-save, export with quality, crop, resize, rotate, straighten (in the model),
-layers, exposure, levels, curves and hue/saturation already exist on dev, so
-most of tier 1 is done. Photo's low `p1` count means
-its remaining tier-1 gaps are unfiled, not that its issues were demoted.
+Tier 1 is built: open, save and Save As, export with quality, crop, resize,
+rotate, straighten, basic layers, exposure, levels, curves (levels and curves
+on display values) and hue/saturation, each with a UI journey;
+`docs/photo-v1.md` lists what v1 covers and what it leaves out (adjustment
+layers, #580, among them). #255's value change was fixed by #525; what is left of it
+is cosmetic.
 
-Filed: straighten by any angle (#419, after creative-core#230) and Curves
-(#420, after the SuiteUI tone curve editor #412) are `p1`; ellipse and lasso
-selections with layer masks (#421) and Clone and Heal (#422, after
-creative-core#232) are `p2`.
+Done for v1: straighten by any angle (#419) and Curves (#420). `p2`: ellipse
+and lasso selections with layer masks (#421), Clone and Heal (#422, after
+creative-core#232), a typed crop size and ratio lock (#544), the layer row's
+focused highlight (#545) and Command-A in sheet fields (#575).
 
 ## Library (photo catalog and develop)
 
