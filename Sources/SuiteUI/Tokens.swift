@@ -59,14 +59,15 @@ public enum SuiteSize {
     public static let windowMinimum = CGSize(width: 900, height: 560)
     /// The timeline's fixed track-name column, ruler, one lane, a keyframe
     /// diamond, the least room between two ruler labels and between two ruler
-    /// ticks, and how much ruler is drawn before the scroll view says which
-    /// stretch is visible.
+    /// ticks, the room one caption digit of a ruler label takes, and how much
+    /// ruler is drawn before the scroll view says which stretch is visible.
     public static let timelineLabelColumn: CGFloat = 160
     public static let timelineRuler: CGFloat = 24
     public static let timelineLane: CGFloat = 28
     public static let timelineKeyframe: CGFloat = 10
     public static let timelineLabelSpacing: CGFloat = 48
     public static let timelineTickSpacing: CGFloat = 6
+    public static let timelineLabelDigit: CGFloat = 7
     public static let timelineRulerSpan: CGFloat = 4096
     /// The editor shell (EditorShell): the top bar's height, the room the
     /// window's close, minimize and zoom buttons take at its leading edge, a

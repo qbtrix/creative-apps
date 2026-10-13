@@ -1,5 +1,5 @@
 // FrameMapping.swift: the arithmetic behind TimelineStrip: frame to x, x to
-// frame, the ruler's tick and label steps, the ruler marks inside a visible
+// frame, the ruler's tick and label steps (labels spaced for their width), the ruler marks inside a visible
 // stretch (bounded by its width, never by the duration) and keyframe
 // hit-testing. Plain Swift with
 // no SwiftUI, so the rules are unit-tested on their own. Invariants: frames
@@ -46,26 +46,41 @@ public struct FrameMapping: Equatable, Sendable {
     /// labels frame 0 alone.
     public func labelInterval(minimumSpacing: Double) -> Int {
         var magnitude = 1
-        // Stops before 5 * magnitude * 10 could overflow Int.
-        while magnitude <= Int.max / 100 {
+        // Stops at the first interval that would overflow Int.
+        while true {
             for step in [1, 2, 5] {
-                let interval = step * magnitude
+                let (interval, overflow) = step.multipliedReportingOverflow(by: magnitude)
+                if overflow { return max(duration, 1) }
                 if Double(interval) * frameWidth >= minimumSpacing || interval > duration { return interval }
             }
-            magnitude *= 10
+            let (next, overflow) = magnitude.multipliedReportingOverflow(by: 10)
+            if overflow { return max(duration, 1) }
+            magnitude = next
         }
-        return max(duration, 1)
     }
 
     /// The ruler's ticks and labels whose x lies inside `visibleX`. Ticks sit
     /// at least `tickSpacing` points apart and labels at least `labelSpacing`
     /// (each at least 1), so neither count grows past the visible width over
-    /// that spacing, plus one, however long the duration is.
-    public func rulerMarks(visibleX: ClosedRange<Double>, tickSpacing: Double, labelSpacing: Double) -> RulerMarks {
+    /// that spacing, plus one, however long the duration is. Labels also sit
+    /// at least `labelWidth(in:digitWidth:)` apart, so long frame numbers
+    /// never overlap.
+    public func rulerMarks(
+        visibleX: ClosedRange<Double>, tickSpacing: Double, labelSpacing: Double, digitWidth: Double = 0
+    ) -> RulerMarks {
         RulerMarks(
             ticks: frames(every: max(tickSpacing, 1), in: visibleX),
-            labels: frames(every: max(labelSpacing, 1), in: visibleX)
+            labels: frames(every: max(labelSpacing, labelWidth(in: visibleX, digitWidth: digitWidth), 1), in: visibleX)
         )
+    }
+
+    /// The room the widest label in `visibleX` needs: the digits of the last
+    /// frame in view, plus one digit of gap, at `digitWidth` points each. 0
+    /// when `digitWidth` is 0, below 0 or not finite.
+    public func labelWidth(in visibleX: ClosedRange<Double>, digitWidth: Double) -> Double {
+        guard digitWidth.isFinite, digitWidth > 0 else { return 0 }
+        let last = frameWidth > 0 ? frame(nearest: (visibleX.upperBound / frameWidth).rounded(.down)) : 0
+        return Double(String(last).count + 1) * digitWidth
     }
 
     /// The multiples of the step for `spacing` whose ticks lie inside `range`.
