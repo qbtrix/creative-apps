@@ -80,7 +80,7 @@ private struct StageScaleRandom: RandomNumberGenerator {
         let end = Point(x: start.x - dx, y: start.y + dy)
         var real = ellipseWorkspace()
         real.dragChanged(from: start, to: end, stageScale: scale)
-        let draft = real.draft
+        let draft = real.draft?.shape
         real.drag(from: start, to: end, stageScale: scale)
         if draft == nil || real.layers.flatMap(\.shapes) != [draft].compactMap({ $0 }) {
             failures.append("real drag at scale \(scale) did not commit its draft once")

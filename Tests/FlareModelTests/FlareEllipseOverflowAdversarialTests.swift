@@ -26,7 +26,7 @@ private func check(_ start: Point, _ end: Point) -> String? {
     workspace.selectTool(.ellipse)
     let expected = FlareWorkspace.ellipse(from: start, to: end)
     workspace.dragChanged(from: start, to: end)
-    if workspace.draft != expected { return "draft differs from ellipse(from:to:)" }
+    if workspace.draft?.shape != expected { return "draft differs from ellipse(from:to:)" }
     workspace.drag(from: start, to: end)
     if workspace.layerError != nil { return "layerError \(String(describing: workspace.layerError))" }
     let shapes = workspace.layers.flatMap(\.shapes)

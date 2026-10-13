@@ -50,8 +50,8 @@ private func expectBounds(_ shape: FlareShape?, _ expected: Rect) {
 @Test func draftFollowsTheBoxInAnyDirection() {
     var workspace = ellipseWorkspace()
     workspace.dragChanged(from: Point(x: 200, y: 160), to: Point(x: 40, y: 40))
-    expectBounds(workspace.draft, Rect(minX: 40, minY: 40, maxX: 200, maxY: 160))
-    #expect(cubicCount(workspace.draft) == 4)
+    expectBounds(workspace.draft?.shape, Rect(minX: 40, minY: 40, maxX: 200, maxY: 160))
+    #expect(cubicCount(workspace.draft?.shape) == 4)
     // The draft is only a preview: the document is untouched.
     #expect(workspace.layers.isEmpty)
     #expect(!workspace.canUndo)
