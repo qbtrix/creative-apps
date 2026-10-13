@@ -1,6 +1,7 @@
 // FakeHits.swift: StageHitTesting by bounding box on FakeStage's draw list, instances included (blueprint 6.3).
-// A world box is the path's box through the item's transform, grown by half its stroke width. Text items and
-// locked layers are never hit nor bounded (hidden ones are not listed); with `unavailable` set, nothing is.
+// A world box is the path's box grown by half its stroke width, then taken through the item's transform, so the
+// stroke scales with its shape. Text items and locked layers are never hit nor bounded (hidden ones are not listed);
+// with `unavailable` set, nothing is.
 import FlareCore
 
 public struct FakeHits: StageHitTesting {
@@ -43,13 +44,15 @@ public struct FakeHits: StageHitTesting {
         }
     }
 
-    /// The item's path box through its transform, grown by half its stroke width; nil for an empty path.
+    /// The item's path box grown by half its stroke width, then taken through its transform, so the stroke
+    /// scales with its shape (#466); nil for an empty path.
     private static func worldBox(_ item: StageItem) -> Rect? {
-        guard let local = item.path.bounds else { return nil }
+        guard let path = item.path.bounds else { return nil }
+        let width = item.stroke?.width ?? 0
+        let half = width.isFinite ? max(width, 0) / 2 : 0
+        let local = Rect(minX: path.minX - half, minY: path.minY - half, maxX: path.maxX + half, maxY: path.maxY + half)
         let corners = [Point(x: local.minX, y: local.minY), Point(x: local.maxX, y: local.minY),
                        Point(x: local.minX, y: local.maxY), Point(x: local.maxX, y: local.maxY)]
-        guard let box = Rect(enclosing: corners.map(item.transform.apply)) else { return nil }
-        let half = (item.stroke?.width ?? 0) / 2
-        return Rect(minX: box.minX - half, minY: box.minY - half, maxX: box.maxX + half, maxY: box.maxY + half)
+        return Rect(enclosing: corners.map(item.transform.apply))
     }
 }
