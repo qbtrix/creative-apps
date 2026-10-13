@@ -80,8 +80,8 @@ closed file format.
 ### Calls made against the domain read
 
 The domain read (public specs and common practice for 2D animation tools)
-lists a must-ship cut. Where this blueprint differs, it says so here, and the
-debatable ones are captain decisions in section 9.
+lists a must-ship cut. Where this blueprint differs, it says so here; the
+captain settled the debatable ones in section 9.
 
 | Item | Call | Why |
 |---|---|---|
@@ -1496,27 +1496,29 @@ concurrency and the captain's review gates, not by workers.
 
 ---
 
-## 9. Decisions for the captain at G0
+## 9. Decisions (captain, G0, 2026-10-13)
 
-The blueprint assumes the first option in each row. The first six change what
-gets built; the rest are look and policy.
+The captain approved this blueprint at G0 on 2026-10-13 and took the
+recommended option in every row. Rows 1 to 6 change what gets built; the rest
+are look and policy. The alternatives are kept as a record of what was
+weighed, not as open options.
 
-| # | Decision | Assumed | Alternative and cost |
+| # | Decision | Decided (captain, 2026-10-13) | Alternative not taken |
 |---|---|---|---|
-| 1 | Where a not-animated value lives | A one-key track is "not animated" (section 2). No format change; the stopwatch at the key's own frame also keys the last frame so the person sees two diamonds | An LC task adds static layer values to the format (an optional field, older files still open); cleaner, about 2 more PRs in core plus exporter updates |
-| 2 | What Select moves | Select moves layers; Direct Select edits shapes inside a layer; parts that animate apart go on their own layers or into a symbol | Per-shape transforms, which needs a transform on `Shape` in the format and in every exporter |
-| 3 | Scope of v1 | Anchor editing, cut, copy, paste, duplicate, autosave and Open Recent are in v1; group, snapping, align and play range are Later; state machines and Assist stay in v1 but are last in the order | Cut state machines or Assist from v1 to ship the core loop sooner (nothing built before them is lost) |
-| 4 | Autosave | `WindowGroup` plus a recovery file and a restore offer | Move to `DocumentGroup` for system autosave, versions, Open Recent and one window per document; it changes the launch (an open panel at start), the journeys' launch arguments and the Photo and Design pattern |
-| 5 | Inspector numbers | The bar slider replaces the system `Slider` and `Stepper` in inspectors, with full keyboard and VoiceOver parity; exact coordinates stay ScrubFields | Keep the system controls and restyle only around them; less premium, closer to stock |
-| 6 | Interactions | A mode inside the main window, because a second window can't share the one model | A real second window, which needs the model moved into a shared reference type first |
-| 7 | Primary button blue | `#156BDB` fill under white text (5.05:1). It is visibly darker than the brand blue, so the Export button reads a shade deeper than the selection and playhead | Brand `#1877F2` fill at 4.23:1, which fails the 4.5:1 text rule for the 12 pt label (the icon helps but does not count) |
-| 8 | Keyframe button shape | A 28 pt circle (your word was "round") | The web reference's rounded square |
-| 9 | Slider drag | Relative scrub from the current value (Option fine, Shift coarse); click the value to type | The web reference jumps to the pointer on press |
-| 10 | GIF export | Later, with video | In v1; one more exporter task and a size budget |
-| 11 | Toggle rows | A checkbox inside the filled row; the design lint enforces checkboxes and `scripts/` is protected | A switch, which needs a captain PR to the lint |
-| 12 | Editor appearance | Dark in both system appearances, as today; Light tokens exist for `SuiteWindow` apps | Follow the system (one line in `EditorShell`) |
-| 13 | Assist in v1 | Ships on the fake, disabled with a reason in live until the suite model provider exists (Phase 3) | Hold the UI until then |
-| 14 | Protocols where the engine already works | Layers, files, playback timing and graph layout have no protocol (one conformer each) | A protocol and fake for each, about 200 more lines |
+| 1 | Where a not-animated value lives | **Decided:** a property with one key or none counts as not animated (section 2); the format does not change. The stopwatch at the key's own frame also keys the last frame, so the person sees two diamonds | An LC task adding static layer values to the format (an optional field, older files still open); cleaner, about 2 more PRs in core plus exporter updates |
+| 2 | What Select moves | **Decided:** Select moves whole layers; Direct Select edits the shapes inside a layer. Parts that animate apart go on their own layers or into a symbol | Per-shape transforms, which needs a transform on `Shape` in the format and in every exporter |
+| 3 | Scope of v1 | **Decided:** anchor editing, cut, copy, paste, duplicate, autosave with recovery and Open Recent are in v1. Group, snapping, align, play range and GIF come later. State machines and Assist stay in v1 and are last in the order | Cutting state machines or Assist from v1 to ship the core loop sooner |
+| 4 | Autosave | **Decided:** a recovery file in a `WindowGroup`, with a restore offer | `DocumentGroup` for system autosave, versions, Open Recent and one window per document; it changes the launch (an open panel at start), the journeys' launch arguments and the Photo and Design pattern |
+| 5 | Inspector numbers | **Decided:** the bar slider replaces the system `Slider` and `Stepper` in inspectors, with full keyboard and VoiceOver parity; exact coordinates stay ScrubFields | Keeping the system controls and restyling only around them; less premium, closer to stock |
+| 6 | Interactions | **Decided:** a mode inside the main window, because a second window can't share the one model | A real second window, which needs the model moved into a shared reference type first |
+| 7 | Primary button blue | **Decided:** `#156BDB` fill under white text (5.05:1). It is visibly darker than the brand blue, so the Export button reads a shade deeper than the selection and playhead | Brand `#1877F2` fill at 4.23:1, which fails the 4.5:1 text rule for the 12 pt label (the icon helps but does not count) |
+| 8 | Keyframe button shape | **Decided:** a 28 pt circle | The web reference's rounded square |
+| 9 | Slider drag | **Decided:** relative scrub from the current value (Option fine, Shift coarse); click the value to type | Jumping to the pointer on press, as the web reference does |
+| 10 | GIF export | **Decided:** later, with video | In v1; one more exporter task and a size budget |
+| 11 | Toggle rows | **Decided:** a checkbox inside the filled row; the design lint enforces checkboxes and `scripts/` is protected | A switch, which needs a captain PR to the lint |
+| 12 | Editor appearance | **Decided:** dark in both system appearances, as today; Light tokens exist for `SuiteWindow` apps | Following the system (one line in `EditorShell`) |
+| 13 | Assist in v1 | **Decided:** ships on the fake, disabled with a reason in live until the suite model provider exists (Phase 3) | Holding the UI until then |
+| 14 | Protocols where the engine already works | **Decided:** layers, files, playback timing and graph layout have no protocol (one conformer each) | A protocol and fake for each, about 200 more lines |
 
 ---
 
