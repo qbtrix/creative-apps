@@ -7,7 +7,8 @@
 // The band is a fixed number of drag points wide (detentPoints), not a share
 // of the track, so it is as easy to hit at any inspector width. A discrete
 // step (arrow key, VoiceOver) goes through steppedPosition, which steps out of
-// the band in one press instead of landing back on 1 (#584).
+// the band in one press instead of landing back on 1 (#584), and from a typed
+// gamma inside the band steps from that value, never across 1 (#593).
 // Invariants: both directions clamp to their range, NaN gives the identity,
 // and the endpoints and midpoint map exactly. Linux-safe.
 #if canImport(FoundationEssentials)
@@ -67,19 +68,37 @@ public enum GammaTrack {
     }
 
     /// The track position one discrete step (an arrow key or VoiceOver's
-    /// increment and decrement) of `delta` moves to from `position`. From
-    /// inside the detent (gamma 1) a step that would land inside it again
+    /// increment and decrement) of `delta` moves to from `position`. From the
+    /// midpoint (gamma exactly 1) a step that would land inside the detent
     /// jumps to the first position on its grid past the band, so a press
-    /// always leaves 1; any other step is position + delta, clamped, so a
-    /// press into the band from outside still snaps to 1 (snappedGamma).
-    /// NaN, zero and infinite deltas leave the position where it is (clamped;
-    /// a NaN position is the midpoint).
+    /// always leaves 1. From a typed gamma inside the band but off 1 (1.05),
+    /// a step that stays in the band goes to 1 when it heads toward the
+    /// midpoint, since 1 is the nearest step that way, and otherwise to the
+    /// first whole step from the typed position past the band, so a press
+    /// never crosses 1 to the far side (#593). Any other step is
+    /// position + delta, clamped, so a press into the band from outside still
+    /// snaps to 1 (snappedGamma). NaN, zero and infinite deltas leave the
+    /// position where it is (clamped; a NaN position is the midpoint).
     public static func steppedPosition(from position: Double, by delta: Double) -> Double {
         let start = position.isNaN ? 0 : clamp(position)
         guard delta.isFinite, delta != 0 else { return start }
         let next = clamp(start + delta)
         guard abs(start) <= detent, abs(next) <= detent else { return next }
-        return clamp(delta > 0 ? detent + delta : -detent + delta)
+        let pastBand = clamp(delta > 0 ? detent + delta : -detent + delta)
+        guard start != 0 else { return pastBand }
+        guard (delta > 0) == (start > 0) else { return 0 }
+        return steppedPastDetent(from: start, by: delta) ?? pastBand
+    }
+
+    /// start + k * delta for the fewest whole steps k that leave the detent,
+    /// clamped; nil when a vanishing delta makes k overflow.
+    private static func steppedPastDetent(from start: Double, by delta: Double) -> Double? {
+        let steps = ((detent - abs(start)) / abs(delta)).rounded(.down) + 1
+        guard steps.isFinite else { return nil }
+        var candidate = start + steps * delta
+        if abs(candidate) <= detent { candidate += delta }
+        guard candidate.isFinite, abs(candidate) > detent else { return nil }
+        return clamp(candidate)
     }
 
     private static func clamp(_ value: Double) -> Double {
