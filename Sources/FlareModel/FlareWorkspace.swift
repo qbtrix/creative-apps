@@ -111,12 +111,14 @@ public struct FlareWorkspace: Sendable, Equatable {
     }
 
     /// The active tool's drag across the stage from `start` to `end`, in scene
-    /// points; a click is a drag that doesn't move. The stage sends every tool
-    /// gesture here, so each case is where that tool's work goes.
-    public mutating func drag(from start: Point, to end: Point) {
+    /// points; a click is a drag that doesn't move. `stageScale` is the stage's
+    /// fit scale (stage points per scene point), so size minimums apply on
+    /// screen. The stage sends every tool gesture here, so each case is where
+    /// that tool's work goes.
+    public mutating func drag(from start: Point, to end: Point, stageScale: Double = 1) {
         draft = nil
         switch tool {
-        case .ellipse: commitEllipse(from: start, to: end)
+        case .ellipse: commitEllipse(from: start, to: end, stageScale: stageScale)
         case .select, .pen, .rectangle: break
         }
     }
@@ -124,9 +126,10 @@ public struct FlareWorkspace: Sendable, Equatable {
     /// The active tool's drag is under way from `start` to `end`: sets `draft`
     /// to the shape it would add, for the stage's live preview. With no
     /// selected scene `drag` would refuse the commit, so there is no draft.
-    public mutating func dragChanged(from start: Point, to end: Point) {
+    /// `stageScale` is as for `drag`, so the draft matches what `drag` adds.
+    public mutating func dragChanged(from start: Point, to end: Point, stageScale: Double = 1) {
         guard tool == .ellipse, selectedScene != nil else { return draft = nil }
-        draft = Self.ellipse(from: start, to: end)
+        draft = Self.ellipse(from: start, to: end, stageScale: stageScale)
     }
 
     /// Undoes or redoes the last change; nothing to undo or redo is a no-op.
