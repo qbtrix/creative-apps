@@ -1,15 +1,19 @@
 // Tokens.swift: the suite's spacing, inset, corner radius, size, type, motion
-// and color tokens. Every app view takes its numbers, fonts and colors from
-// here so the five apps stay consistent; the design lint in scripts/ci fails
-// on a raw color, font or size anywhere else in Sources/SuiteUI or an app.
-// Sizes, insets, radii, type and motion are the "Visual language" section of
-// docs/design.md (34 pt inspector bars, 6 pt row gaps, 10 pt caps headers).
-// Colors are system semantic colors (they adapt to Light, Dark and Increase
-// Contrast); never hard-code a hex value for a system role. The one brand
-// value is the accent blue. The editor shell tokens (top bar, rail, rulers,
-// right panel, checkerboard) are the "Editor shell" rules, and the Studio
-// tokens (caps headers, filled scrub rows, chips, the curve editor) the
-// "Studio rows and chips" rules in docs/design.md.
+// and color tokens, the "Visual language" section of docs/design.md. Every
+// app view takes its numbers, fonts and colors from here so the five apps
+// stay consistent; the design lint in scripts/ci fails on a raw color, font or
+// size anywhere else in Sources/SuiteUI or an app.
+//
+// Colors: the graphite ladder (panels, rows, fills, lines), the text colors
+// and the state colors are literal sRGB hex per appearance in SuitePalette
+// (Dark, Light, Dark + Increase Contrast, Light + Increase Contrast), resolved
+// at draw time through NSColor(name:dynamicProvider:). The steps are written
+// out, never mixed at run time, so TokensTests.contrast can check every pair
+// the design table promises. Editors (EditorShell) force Dark, so they
+// resolve the Dark columns in both system appearances. A few roles stay
+// system colors (window background, separators, `.secondary` for SuiteWindow
+// apps' lists), and the older names (`panelRaised`, `field`, `studioFill`,
+// `selectedWell`, `keyframed`) now read the ladder until their callers move.
 import AppKit
 import SwiftUI
 
@@ -192,39 +196,169 @@ public enum SuiteMotion {
     }
 }
 
-/// Semantic colors by role.
+/// One color as literal sRGB hex (0xRRGGBB) in each appearance, in the order
+/// of docs/design.md's tables: Dark, Light, Dark + Increase Contrast, Light +
+/// Increase Contrast.
+public struct SuiteHex: Hashable, Sendable {
+    public let dark: UInt32
+    public let light: UInt32
+    public let darkContrast: UInt32
+    public let lightContrast: UInt32
+
+    public init(_ dark: UInt32, _ light: UInt32, _ darkContrast: UInt32, _ lightContrast: UInt32) {
+        self.dark = dark
+        self.light = light
+        self.darkContrast = darkContrast
+        self.lightContrast = lightContrast
+    }
+
+    /// The four values in table order.
+    public var values: [UInt32] { [dark, light, darkContrast, lightContrast] }
+
+    /// The value for `appearance`: the closest of the four, so a vibrant dark
+    /// appearance reads Dark and anything unknown reads Light.
+    public func value(for appearance: NSAppearance) -> UInt32 {
+        switch Self.match(appearance) {
+        case .darkAqua: dark
+        case .accessibilityHighContrastDarkAqua: darkContrast
+        case .accessibilityHighContrastAqua: lightContrast
+        default: light
+        }
+    }
+
+    private static func match(_ appearance: NSAppearance) -> NSAppearance.Name? {
+        appearance.bestMatch(from: [.aqua, .darkAqua, .accessibilityHighContrastAqua, .accessibilityHighContrastDarkAqua])
+    }
+
+    /// This color at `alpha`, or at `darkAlpha` in the dark appearances.
+    func color(alpha: CGFloat = 1, darkAlpha: CGFloat? = nil) -> Color {
+        Color(nsColor: NSColor(name: nil) { appearance in
+            let hex = value(for: appearance)
+            let match = Self.match(appearance)
+            let isDark = match == .darkAqua || match == .accessibilityHighContrastDarkAqua
+            return NSColor(
+                srgbRed: CGFloat(hex >> 16 & 0xFF) / 255, green: CGFloat(hex >> 8 & 0xFF) / 255,
+                blue: CGFloat(hex & 0xFF) / 255, alpha: isDark ? darkAlpha ?? alpha : alpha)
+        })
+    }
+}
+
+/// The literal hex behind SuiteColor, exactly docs/design.md's Visual language
+/// tables. TokensTests checks the contrast between them.
+public enum SuitePalette {
+    // The graphite ladder.
+    public static let canvasSurround = SuiteHex(0x18191B, 0xE4E5E8, 0x121314, 0xDCDDE0)
+    public static let ground = SuiteHex(0x1E1F22, 0xEDEEF0, 0x18191B, 0xF2F2F3)
+    public static let panel = SuiteHex(0x26272B, 0xF6F6F7, 0x202124, 0xFFFFFF)
+    public static let card = SuiteHex(0x2F3033, 0xECECED, 0x323336, 0xEBEBEB)
+    public static let row = SuiteHex(0x313236, 0xEAEAEB, 0x36373A, 0xE6E6E6)
+    public static let rowHover = SuiteHex(0x3C3D40, 0xDDDDDE, 0x444547, 0xD6D6D6)
+    public static let valueFill = SuiteHex(0x3F4044, 0xDADADB, 0x4E4F52, 0xCACACA)
+    public static let dragFill = SuiteHex(0x2D3E58, 0xCDDAEC, 0x3A485C, 0xC7D3E3)
+    public static let fieldActive = SuiteHex(0x1B1B1E, 0xFFFFFF, 0x161719, 0xFFFFFF)
+    public static let hairline = SuiteHex(0x333438, 0xE7E7E8, 0x3B3C3E, 0xE0E0E0)
+    public static let outline = SuiteHex(0x404144, 0xD8D8D9, 0x636466, 0xB2B2B2)
+    public static let tick = SuiteHex(0x56575A, 0xC0C0C1, 0x6A6A6C, 0xABABAB)
+    public static let marker = SuiteHex(0x9D9EA0, 0x6F6F6F, 0xC7C8C8, 0x404040)
+    /// The bar slider's marker while dragging: white in Dark, accentText in Light.
+    public static let markerDragging = SuiteHex(0xFFFFFF, 0x0A4FA6, 0xFFFFFF, 0x08408A)
+    public static let laneBed = SuiteHex(0x2D2D31, 0xEFEFF0, 0x2D2E31, 0xF0F0F0)
+    public static let accent = SuiteHex(0x1877F2, 0x1877F2, 0x4A94F7, 0x0A5FD0)
+    /// The one primary button and the playhead pill, under white text (5.05:1).
+    public static let accentFill = SuiteHex(0x156BDB, 0x156BDB, 0x156BDB, 0x156BDB)
+    // Text.
+    public static let textPrimary = SuiteHex(0xEDEEF0, 0x1D1D1F, 0xFFFFFF, 0x000000)
+    public static let textSecondary = SuiteHex(0xB4B8BF, 0x50545C, 0xD2D5DA, 0x3A3D43)
+    public static let textTertiary = SuiteHex(0x80848C, 0x7C8088, 0x9A9EA6, 0x5E626A)
+    public static let accentText = SuiteHex(0x8DBDFF, 0x0A4FA6, 0xA8CCFF, 0x08408A)
+    // States.
+    public static let stateKeyed = SuiteHex(0xF4C542, 0x664900, 0xFFD666, 0x4F3800)
+    public static let stateSelected = SuiteHex(0x8DBDFF, 0x0A4FA6, 0xA8CCFF, 0x08408A)
+    public static let stateRecording = SuiteHex(0xFF8A82, 0xA3110B, 0xFFA39C, 0x870E09)
+    public static let stateSuggested = SuiteHex(0xC4A8FF, 0x5C31B3, 0xD2BCFF, 0x4A2694)
+    public static let stateWarning = SuiteHex(0xFFA552, 0x7F3E00, 0xFFB673, 0x663100)
+    public static let stateError = SuiteHex(0xFF8F8F, 0x9E1F1F, 0xFFA3A3, 0x821818)
+    public static let stateSuccess = SuiteHex(0x3DD68C, 0x105C35, 0x5CE0A0, 0x0B4A2A)
+    public static let onionBefore = SuiteHex(0xF7A0AD, 0x9A2A40, 0xFAB3BE, 0x7E2134)
+    public static let onionAfter = SuiteHex(0x4CC9A0, 0x0F5E47, 0x6BD6B2, 0x0B4C39)
+
+    /// A state's tint is its strong color at 16% over the panel in Dark and 12% in Light.
+    public static let tintDark: CGFloat = 0.16
+    public static let tintLight: CGFloat = 0.12
+}
+
+/// Colors by role.
 public enum SuiteColor {
     /// The window's own background, behind empty states and lists.
     public static var windowBackground: Color { Color(nsColor: .windowBackgroundColor) }
-    /// The neutral surround around a canvas, so artwork color reads true.
-    public static var canvasSurround: Color { Color(nsColor: .underPageBackgroundColor) }
     /// Flat fill for cards in the content layer (never glass).
     public static var surface: Color { Color(nsColor: .controlBackgroundColor) }
     public static var separator: Color { Color(nsColor: .separatorColor) }
+    /// Secondary text in SuiteWindow apps' lists; inspector rows use textSecondary.
     public static var secondaryText: Color { .secondary }
-    /// The grey ramp for flush panels: the window background with 0, 6, 10
-    /// and 14 percent of the label color mixed in (the Ripple surface ladder),
-    /// so each step adapts to Light, Dark and Increase Contrast.
-    /// A flat panel: inspector bands, the viewer status line.
-    public static var panel: Color { windowBackground }
-    /// A raised band on a panel: InspectorHeader.
-    public static var panelRaised: Color { windowBackground.mix(with: .primary, by: 0.06) }
-    /// A field well at rest (ScrubField).
-    public static var field: Color { windowBackground.mix(with: .primary, by: 0.10) }
-    /// A field well while it is dragged or edited.
-    public static var fieldActive: Color { windowBackground.mix(with: .primary, by: 0.14) }
-    /// The suite's one accent, brand blue #1877F2: selection, the playhead,
-    /// the active tool, control fills. SuiteWindow applies it as the tint.
-    public static let accent = Color(red: 0x18 / 255, green: 0x77 / 255, blue: 0xF2 / 255)
-    /// Accent for text: a darker shade in Light (#1260C9) and a lighter tint
-    /// in Dark (#5A9DF6), so small text clears 4.5:1 on the panel greys.
-    public static var accentText: Color {
-        Color(nsColor: NSColor(name: nil) { appearance in
-            appearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua
-                ? NSColor(srgbRed: 0x5A / 255, green: 0x9D / 255, blue: 0xF6 / 255, alpha: 1)
-                : NSColor(srgbRed: 0x12 / 255, green: 0x60 / 255, blue: 0xC9 / 255, alpha: 1)
-        })
-    }
+
+    // The graphite ladder: around the canvas, bars, panels, the info card,
+    // rows, their hover, a bar slider's fill at rest and while dragged, a
+    // field being typed in, lines between bars, outlines, decoration.
+    public static let canvasSurround = SuitePalette.canvasSurround.color()
+    public static let ground = SuitePalette.ground.color()
+    public static let panel = SuitePalette.panel.color()
+    public static let card = SuitePalette.card.color()
+    public static let row = SuitePalette.row.color()
+    public static let rowHover = SuitePalette.rowHover.color()
+    public static let valueFill = SuitePalette.valueFill.color()
+    public static let dragFill = SuitePalette.dragFill.color()
+    public static let fieldActive = SuitePalette.fieldActive.color()
+    /// Between bars and panels only, never inside a panel.
+    public static let hairline = SuitePalette.hairline.color()
+    /// The 1 pt edge of outlined buttons and presets.
+    public static let outline = SuitePalette.outline.color()
+    public static let tick = SuitePalette.tick.color()
+    public static let marker = SuitePalette.marker.color()
+    public static let markerDragging = SuitePalette.markerDragging.color()
+    public static let laneBed = SuitePalette.laneBed.color()
+
+    /// The suite's one accent, brand blue #1877F2: selection, focus, the
+    /// playhead, the active tool. SuiteWindow applies it as the tint.
+    public static let accent = SuitePalette.accent.color()
+    public static let accentFill = SuitePalette.accentFill.color()
+    public static let textPrimary = SuitePalette.textPrimary.color()
+    public static let textSecondary = SuitePalette.textSecondary.color()
+    /// Placeholders and disabled text only; never information a person needs.
+    public static let textTertiary = SuitePalette.textTertiary.color()
+    public static let accentText = SuitePalette.accentText.color()
+
+    // State colors: each pairs with a shape cue (docs/design.md, State colors).
+    public static let stateKeyed = SuitePalette.stateKeyed.color()
+    public static let stateSelected = SuitePalette.stateSelected.color()
+    public static let stateRecording = SuitePalette.stateRecording.color()
+    public static let stateSuggested = SuitePalette.stateSuggested.color()
+    public static let stateWarning = SuitePalette.stateWarning.color()
+    public static let stateError = SuitePalette.stateError.color()
+    public static let stateSuccess = SuitePalette.stateSuccess.color()
+    public static let onionBefore = SuitePalette.onionBefore.color()
+    public static let onionAfter = SuitePalette.onionAfter.color()
+    /// The tints behind a selected chip or preset, a key at the playhead and a
+    /// warning pill.
+    public static let selectedTint = tint(SuitePalette.stateSelected)
+    public static let keyedTint = tint(SuitePalette.stateKeyed)
+    public static let warningTint = tint(SuitePalette.stateWarning)
+    /// A disabled control draws at this opacity, and its tooltip says why.
+    public static let disabledOpacity: Double = 0.4
+
+    // Older names, now on the ladder, until their callers move.
+    /// A raised band on a panel: the info card.
+    public static let panelRaised = card
+    /// A field well at rest.
+    public static let field = row
+    /// The selected tool's well in a docked tool rail.
+    public static let selectedWell = selectedTint
+    /// "This is a keyframe".
+    public static let keyframed = stateKeyed
+    /// A Studio row's fill up to its value, and while it is dragged.
+    public static let studioFill = valueFill
+    public static let studioFillActive = dragFill
+
     /// A new document's artboard. Document content, not a system role.
     public static let artboard = Color.white
     /// The two squares of the checkerboard behind transparent pixels: the
@@ -233,19 +367,14 @@ public enum SuiteColor {
     public static var checkerDark: Color { canvasSurround.mix(with: .primary, by: 0.05) }
     /// Ruler ticks: the label color at 40%.
     public static var rulerTick: Color { Color.primary.opacity(0.4) }
-    /// The selected tool's well in a docked tool rail.
-    public static var selectedWell: Color { accent.opacity(0.18) }
-    /// "This is a keyframe": the system orange, used for nothing else.
-    public static var keyframed: Color { .orange }
-    /// A Studio row's fill up to its value: the ramp's next step past
-    /// `.fieldActive` (18%), so it reads on the raised track in Dark too.
-    public static var studioFill: Color { windowBackground.mix(with: .primary, by: 0.18) }
-    /// A Studio row's fill while it is dragged: the accent at 26%.
-    public static var studioFillActive: Color { accent.opacity(0.26) }
     /// Marks drawn over document content (a selection's marching ants, a
     /// crop frame): black and white so they read on any pixels, and the dim
     /// outside a pending crop.
     public static let overlayInk = Color.black
     public static let overlayPaper = Color.white
     public static let cropShade = Color.black.opacity(0.55)
+
+    private static func tint(_ state: SuiteHex) -> Color {
+        state.color(alpha: SuitePalette.tintLight, darkAlpha: SuitePalette.tintDark)
+    }
 }

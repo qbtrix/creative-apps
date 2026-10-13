@@ -1,5 +1,6 @@
-// TokensTests.swift: checks on SuiteUI's tokens and value types, including
-// the Visual language geometry (QB-F6). macOS only.
+// TokensTests.swift: checks on SuiteUI's tokens and value types: the
+// Visual language geometry (QB-F6) and, in ContrastTests.swift, the color
+// table's contrast (QB-V6). macOS only.
 import SuiteUI
 import SwiftUI
 import Testing
@@ -62,6 +63,7 @@ import Testing
     for hit in [SuiteSize.pillHit, SuiteSize.timelineKeyframeHit, SuiteSize.selectionHandleHit, SuiteSize.anchorHit] {
         #expect(hit >= 12)
     }
+    #expect(SuiteColor.disabledOpacity == 0.4)
     #expect(SuiteMotion.state(reduceMotion: true) == nil && SuiteMotion.state(reduceMotion: false) != nil)
 }
 
@@ -74,4 +76,95 @@ import Testing
 @Test func sidebarItemDefaultsToNoCount() {
     let item = SidebarItem(id: "a", title: "All", systemImage: "photo")
     #expect(item.count == nil)
+}
+
+/// QB-V6: the color table's promises, computed from SuitePalette's literal hex
+/// in all four appearances, and the table in docs/design.md matched value for value.
+@Suite struct TokensTests {
+    /// WCAG 2.x contrast between two sRGB colors (0xRRGGBB).
+    static func contrast(_ a: UInt32, _ b: UInt32) -> Double {
+        func luminance(_ hex: UInt32) -> Double {
+            func channel(_ shift: UInt32) -> Double {
+                let c = Double(hex >> shift & 0xFF) / 255
+                return c <= 0.04045 ? c / 12.92 : pow((c + 0.055) / 1.055, 2.4)
+            }
+            return 0.2126 * channel(16) + 0.7152 * channel(8) + 0.0722 * channel(0)
+        }
+        let (x, y) = (luminance(a), luminance(b))
+        return (max(x, y) + 0.05) / (min(x, y) + 0.05)
+    }
+
+    /// `color` laid over `background` at `alpha`, rounded to 8 bits.
+    static func over(_ color: UInt32, _ background: UInt32, alpha: Double) -> UInt32 {
+        [16, 8, 0].reduce(0) { hex, shift in
+            let mixed = Double(color >> shift & 0xFF) * alpha + Double(background >> shift & 0xFF) * (1 - alpha)
+            return hex | UInt32(mixed.rounded()) << shift
+        }
+    }
+
+    typealias P = SuitePalette
+    static let surfaces = [P.panel, P.card, P.row, P.rowHover]
+    static let sliderText = [P.textPrimary, P.textSecondary, P.accentText, P.stateKeyed]
+    static let states = [
+        P.stateKeyed, P.stateSelected, P.stateRecording, P.stateSuggested, P.stateWarning, P.stateError,
+        P.stateSuccess, P.onionBefore, P.onionAfter,
+    ]
+
+    @Test func textAndStateColorsClearFourPointFive() {
+        for color in [P.textPrimary, P.textSecondary, P.accentText] + Self.states {
+            for look in 0..<4 {
+                var backgrounds = Self.surfaces.map { $0.values[look] }
+                if Self.sliderText.contains(color) { backgrounds += [P.valueFill.values[look], P.dragFill.values[look]] }
+                if Self.states.contains(color) {
+                    let alpha = look % 2 == 0 ? Double(P.tintDark) : Double(P.tintLight)
+                    backgrounds.append(Self.over(color.values[look], P.panel.values[look], alpha: alpha))
+                }
+                for background in backgrounds {
+                    #expect(Self.contrast(color.values[look], background) >= 4.5, "\(color) on \(background) in \(look)")
+                }
+            }
+        }
+    }
+
+    @Test func marksClearThreeAndWhiteOnTheFillClearsFourPointFive() {
+        for look in 0..<4 {
+            for background in [P.panel, P.row] {
+                #expect(Self.contrast(P.accent.values[look], background.values[look]) >= 3)
+            }
+            #expect(Self.contrast(P.marker.values[look], P.valueFill.values[look]) >= 3)
+            #expect(Self.contrast(P.markerDragging.values[look], P.dragFill.values[look]) >= 4.5)
+            #expect(Self.contrast(0xFFFFFF, P.accentFill.values[look]) >= 4.5)
+        }
+        // The figures docs/design.md quotes.
+        #expect(abs(Self.contrast(P.accent.dark, P.row.dark) - 3.02) < 0.01)
+        #expect(abs(Self.contrast(P.marker.dark, P.valueFill.dark) - 3.86) < 0.01)
+        #expect(abs(Self.contrast(0xFFFFFF, P.accentFill.dark) - 5.05) < 0.01)
+    }
+
+    /// Every hex row in docs/design.md's Visual language tables is in SuitePalette with those values.
+    @Test func paletteMatchesTheDesignDoc() throws {
+        let doc = URL(fileURLWithPath: #filePath).deletingLastPathComponent()
+            .appending(path: "../../docs/design.md").standardizedFileURL
+        let palette: [String: SuiteHex] = [
+            "canvasSurround": P.canvasSurround, "ground": P.ground, "panel": P.panel, "card": P.card, "row": P.row,
+            "rowHover": P.rowHover, "valueFill": P.valueFill, "dragFill": P.dragFill, "fieldActive": P.fieldActive,
+            "hairline": P.hairline, "outline": P.outline, "tick": P.tick, "marker": P.marker, "laneBed": P.laneBed,
+            "accent": P.accent, "textPrimary": P.textPrimary, "textSecondary": P.textSecondary,
+            "textTertiary": P.textTertiary, "accentText": P.accentText, "stateKeyed": P.stateKeyed,
+            "stateSelected": P.stateSelected, "stateRecording": P.stateRecording, "stateSuggested": P.stateSuggested,
+            "stateWarning": P.stateWarning, "stateError": P.stateError, "stateSuccess": P.stateSuccess,
+            "onionBefore": P.onionBefore, "onionAfter": P.onionAfter,
+        ]
+        var seen: Set<String> = []
+        for line in try String(contentsOf: doc, encoding: .utf8).split(separator: "\n") {
+            let cells = line.split(separator: "|").map { $0.trimmingCharacters(in: .whitespaces) }
+            guard cells.count >= 5, cells[0].hasPrefix("`"), cells[1].hasPrefix("`#") else { continue }
+            let name = cells[0].trimmingCharacters(in: CharacterSet(charactersIn: "`"))
+            let hex = cells[1...4].compactMap { UInt32($0.trimmingCharacters(in: CharacterSet(charactersIn: "`#")), radix: 16) }
+            #expect(palette[name]?.values == hex, "\(name) in docs/design.md")
+            seen.insert(name)
+        }
+        #expect(seen == Set(palette.keys))
+        #expect(P.accentFill.dark == 0x156BDB)
+    }
 }
