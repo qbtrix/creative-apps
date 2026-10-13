@@ -40,13 +40,18 @@ import Testing
     }
 
     @Test func levelsStretchBetweenBlackAndWhite() throws {
+        // Levels' points are display values: the gray shows as 188/255.
         var workspace = try gray()
-        let before = try canvasPixel(workspace, 0, 0).r
-        workspace.adjust(.whitePoint(before))
-        // White snaps to levelsStep, so the pixel lands within a step of 1.
+        let shown = Float(188) / 255
+        workspace.adjust(.whitePoint(shown))
+        // White snaps to levelsStep, so the pixel lands within a step of white.
         let white = workspace.adjustments.whitePoint
-        #expect(abs(white - before) <= Float(AdjustmentSettings.levelsStep) / 2)
-        #expect(abs(try canvasPixel(workspace, 0, 0).r - min(1, before / white)) < 1e-4)
+        #expect(abs(white - shown) <= Float(AdjustmentSettings.levelsStep) / 2)
+        #expect(try workspace.composite().rgba8()[0] >= 254)
+        // Black at 0.5 and white back at 1: (0.737 - 0.5) / 0.5 = 0.475 on screen, byte 121.
+        workspace.adjust(.whitePoint(1))
+        workspace.adjust(.blackPoint(0.5))
+        #expect((120...122).contains(try workspace.composite().rgba8()[0]))
     }
 
     @Test func saturationToGrayAndLightnessToWhite() throws {

@@ -9,7 +9,9 @@
 // the same and a shown value types back in as itself. Curves holds 2 to 16
 // points (curvePointCount), x strictly increasing in 0...1 and y clamped to
 // 0...1; any other list, or a non-finite value, is refused whole. The default
-// end points (0, 0) and (1, 1) are identity. PhotoRender applies the enabled
+// end points (0, 0) and (1, 1) are identity. Levels' points and the curve's
+// coordinates are display (sRGB-encoded) values, so 0.5 is the grey a screen
+// shows halfway between black and white. PhotoRender applies the enabled
 // sections to the canvas (exposure, levels, curves, hue/saturation, then
 // blur). Linux-safe.
 import CoreRaster
