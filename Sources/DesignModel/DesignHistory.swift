@@ -54,8 +54,10 @@ struct DesignHistory: Sendable, Equatable {
 }
 
 extension DesignWorkspace {
-    public var canUndo: Bool { !history.undo.isEmpty }
-    public var canRedo: Bool { !history.redo.isEmpty }
+    /// Undo would run: there is a step, no drag is open and no text is being edited (#442).
+    public var canUndo: Bool { historyIsLive && !history.undo.isEmpty }
+    /// Redo would run: there is a step, no drag is open and no text is being edited (#442).
+    public var canRedo: Bool { historyIsLive && !history.redo.isEmpty }
     /// "Undo Add Rectangle", or plain "Undo" with nothing to undo.
     public var undoActionName: String { history.undo.last.map { "Undo \($0.name)" } ?? "Undo" }
     /// "Redo Add Rectangle", or plain "Redo" with nothing to redo.
