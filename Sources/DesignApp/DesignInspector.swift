@@ -2,8 +2,8 @@
 // layer shows its header (name, then kind unless the name says it, then size),
 // then Layer (Hidden and Locked checkboxes), Frame (X, Y, W and H as scrub
 // fields) and Fill (the color well; a text layer's is its text color, a group
-// has none). A locked layer can't be edited, so Frame and Fill are disabled
-// and a line says why. With only a page selected it shows the page's size,
+// has none). A locked layer, or one inside a locked group, can't be edited, so
+// Frame and Fill are disabled and a line says why. With only a page selected it shows the page's size,
 // read only. Values in, intents out; the model clamps and refuses what it must.
 import DesignModel
 import SuiteUI
@@ -17,7 +17,7 @@ struct DesignInspector: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 0) {
                 if let node = model.selectedNode {
-                    DesignNodeProperties(node: node, perform: perform).id(node.id)
+                    DesignNodeProperties(node: node, lockHelp: model.lockHelp(node.id), perform: perform).id(node.id)
                 } else if let page = model.selectedPage {
                     DesignPageProperties(page: page).id(page.id)
                 }
@@ -30,9 +30,9 @@ struct DesignInspector: View {
 /// The selected layer's header and sections.
 private struct DesignNodeProperties: View {
     let node: DesignNode
+    /// Why the layer can't be edited (it or a group around it is locked), or nil.
+    let lockHelp: String?
     let perform: DesignPerform
-
-    private static let lockedHelp = "Unlock the layer to edit it."
 
     /// How far X and Y can be set, and the most W and H can be, in points.
     private static let positionRange = -100_000.0...100_000.0
@@ -50,7 +50,7 @@ private struct DesignNodeProperties: View {
                     Toggle("Locked", isOn: Binding(get: { node.isLocked }, set: { perform(.setLocked(node.id, $0)) }))
                         .toggleStyle(.checkbox)
                 }
-                if node.isLocked { DesignPanelHint(Self.lockedHelp) }
+                if let lockHelp { DesignPanelHint(lockHelp) }
             }
             InspectorSection("Frame") {
                 VStack(alignment: .leading, spacing: 0) {
@@ -59,16 +59,16 @@ private struct DesignNodeProperties: View {
                     frameRow("W", "Width", \.width, Self.sizeRange)
                     frameRow("H", "Height", \.height, Self.sizeRange)
                 }
-                .disabled(node.isLocked)
-                .help(node.isLocked ? Self.lockedHelp : "")
+                .disabled(lockHelp != nil)
+                .help(lockHelp ?? "")
             }
             if let label = node.kind.fillLabel {
                 InspectorSection("Fill") {
                     InspectorColorWellRow(label, color: HexColor(node.fill.red, node.fill.green, node.fill.blue)) {
                         perform(.setFill(node.id, DesignColor($0.red, $0.green, $0.blue)))
                     }
-                    .disabled(node.isLocked)
-                    .help(node.isLocked ? Self.lockedHelp : "")
+                    .disabled(lockHelp != nil)
+                    .help(lockHelp ?? "")
                 }
             }
         }
