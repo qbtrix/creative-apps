@@ -1234,7 +1234,8 @@ Paths are repo-relative and complete; creative-core paths are marked (core).
 means those tasks are stacked, and the later one lists the earlier in its
 deps. The shared files are: `Sources/FlareModel/FlareServices.swift` and
 `Sources/FlareModel/Fakes/FlareFixtures.swift` (the LM-0 chain, stacked in
-order); `Sources/SuiteUI/InspectorRows.swift` (S1 then S3);
+order, except that LM-0c2 and LM-0c4 branch off it, so whichever of two
+siblings lands second rebases on the other); `Sources/SuiteUI/InspectorRows.swift` (S1 then S3);
 `Sources/SuiteUI/TimelineStrip.swift` (S10 then S11); each
 `Sources/FlareApp/FlareWindow+<Area>.swift`, created by F1b and then edited
 only by its area's tasks, stacked in this order: Stage F3a, F3b, F5; Tools
@@ -1272,9 +1273,9 @@ LC-1 edits creative-core's own file). Nothing else is shared.
 | LM-0b2 | Fake keyframes, easing, onion; onion and motion path state | `Sources/FlareModel/Fakes/FakeKeyframes.swift`, `Sources/FlareModel/Fakes/FakeEasing.swift`, `Sources/FlareModel/Fakes/FakeOnion.swift`, `Sources/FlareModel/FlareOnionState.swift`, `Sources/FlareModel/FlareServices.swift`, `Tests/FlareModelTests/TimelineFakesTests.swift` | LM-0b1 | moving key 24 onto 36 throws and changes nothing; onion 3 and 3 gives 6 ghosts with opacity falling by the falloff; `motionPath` has 48 points | – |
 | LM-0c1 | Fake library; editing in place (owner switch, symbol duration for the timeline, return frame); fixture `character` | `Sources/FlareModel/Fakes/FakeLibrary.swift`, `Sources/FlareModel/Fakes/Fixtures/CharacterFixture.swift`, `Sources/FlareModel/Fakes/FlareFixtures.swift`, `Sources/FlareModel/FlareSymbols.swift`, `Sources/FlareModel/FlareServices.swift`, `Tests/FlareModelTests/LibraryFakesTests.swift` | LM-0b2 | convert Legs: the fake draw list is equal before and after; usage 3 after two places; enter a symbol: owner `.symbol`, timeline length = the symbol's; exit returns to the frame left | – |
 | LM-0c2 | Fake machines and preview; machine state; fixture `button` | `Sources/FlareModel/Fakes/FakeMachines.swift`, `Sources/FlareModel/Fakes/FakePreview.swift`, `Sources/FlareModel/Fakes/Fixtures/ButtonFixture.swift`, `Sources/FlareModel/Fakes/FlareFixtures.swift`, `Sources/FlareModel/FlareMachines.swift`, `Sources/FlareModel/FlareServices.swift`, `Tests/FlareModelTests/MachineFakesTests.swift` | LM-0c1 | `addMachine` makes the first state initial; removing a state a transition uses throws a message naming the transition and changes nothing; an unreachable state is a warning on that state; preview goes idle to hover on `hover = true` | – |
-| LM-0c3 | Fake export and rasterizer; the shared warnings scan; export state; fixture `showcase` | `Sources/FlareModel/Fakes/FakeExport.swift`, `Sources/FlareModel/Fakes/FakeRasterizer.swift`, `Sources/FlareModel/ExportScan.swift`, `Sources/FlareModel/Fakes/Fixtures/ShowcaseFixture.swift`, `Sources/FlareModel/Fakes/FlareFixtures.swift`, `Sources/FlareModel/FlareExport.swift`, `Sources/FlareModel/FlareServices.swift`, `Tests/FlareModelTests/ExportScanTests.swift` | LM-0c2 | one test per warning: text layer, animated symbol instance, machine, background in Lottie; `bounce` 0–12 step 2 gives 7 PNGs; a cancelled export returns no files | never a silent drop |
+| LM-0c3 | Fake export and rasterizer; the shared warnings scan; export state; fixture `showcase` | `Sources/FlareModel/Fakes/FakeExport.swift`, `Sources/FlareModel/Fakes/FakeRasterizer.swift`, `Sources/FlareModel/ExportScan.swift`, `Sources/FlareModel/Fakes/Fixtures/ShowcaseFixture.swift`, `Sources/FlareModel/Fakes/FlareFixtures.swift`, `Sources/FlareModel/FlareExport.swift`, `Sources/FlareModel/FlareServices.swift`, `Tests/FlareModelTests/ExportScanTests.swift` | LM-0c1 | one test per warning: text layer, animated symbol instance, machine, background in Lottie; `bounce` 0–12 step 2 gives 7 PNGs; a cancelled export returns no files | never a silent drop |
 | LM-0c4 | Fake assist (modes ok, fail, timeout, empty, text); the shared assist apply | `Sources/FlareModel/Fakes/FakeAssist.swift`, `Sources/FlareModel/FlareAssist.swift`, `Sources/FlareModel/FlareServices.swift`, `Tests/FlareModelTests/AssistApplyTests.swift` | LM-0c3 | accept is exactly one entry "Undo Assist"; reject leaves the document and undo stack equal; a `text.add` or unknown envelope rejects the whole proposal with a reason; each failure mode sets its message | QB-F2 |
-| LM-0c5 | Large fixtures: `reference`, `crowd`, `limit` | `Sources/FlareModel/Fakes/Fixtures/ReferenceFixture.swift`, `Sources/FlareModel/Fakes/Fixtures/CrowdFixture.swift`, `Sources/FlareModel/Fakes/Fixtures/LimitFixture.swift`, `Sources/FlareModel/Fakes/FlareFixtures.swift`, `Tests/FlareModelTests/LargeFixtureTests.swift` | LM-0c4 | counts match section 4; `crowd` nests instances two deep; each builds in under 1 s in debug; `limit` has 9,999 layers and passes `FlareFormat.validate` | – |
+| LM-0c5 | Large fixtures: `reference`, `crowd`, `limit` | `Sources/FlareModel/Fakes/Fixtures/ReferenceFixture.swift`, `Sources/FlareModel/Fakes/Fixtures/CrowdFixture.swift`, `Sources/FlareModel/Fakes/Fixtures/LimitFixture.swift`, `Sources/FlareModel/Fakes/FlareFixtures.swift`, `Tests/FlareModelTests/LargeFixtureTests.swift` | LM-0c3 | counts match section 4; `crowd` nests instances two deep; each builds in under 1 s in debug; `limit` has 9,999 layers and passes `FlareFormat.validate` | – |
 | LM-15 | `MachineLayout`: columns by distance from the initial state | `Sources/FlareModel/MachineLayout.swift`, `Tests/FlareModelTests/MachineLayoutTests.swift` | LM-0a1b | the same machine gives the same layout; unreachable states sit in the last column; no two nodes overlap for 50 states | layout golden values |
 | QH-3 | Linux budget helper and model budgets | `Tests/FlareModelTests/Budget.swift`, `Tests/FlareModelTests/StageBudgetTests.swift`, `Tests/FlareModelTests/HugeDocumentBudgetTests.swift` | LM-0c5 | the helper reports median and p95 over N runs; QB-L7 and the model half of QB-L10 asserted now; QB-L5 and QB-L6 run on the fakes report-only (bounding boxes measure nothing real) and become asserts in IN-1 | QB-L5, QB-L6, QB-L7, QB-L10 |
 
@@ -1375,7 +1376,7 @@ on creative-core.
 | LC-11d | Transition commands: add, update, remove | `Sources/FlareCore/TransitionCommands.swift`, `Sources/FlareCore/CommandRegistry.swift`, `Tests/FlareCoreTests/TransitionCommandTests.swift` | LC-11c | an update to an unknown state throws; undo exact | – |
 | LC-11e | Input commands: add, update default, remove (refused while a condition uses it) | `Sources/FlareCore/MachineInputCommands.swift`, `Sources/FlareCore/CommandRegistry.swift`, `Tests/FlareCoreTests/MachineInputCommandTests.swift` | LC-11d | a kind change through update throws; undo exact | – |
 | LC-12 | State machine runtime player | `Sources/FlareCore/MachinePlayer.swift`, `Tests/FlareCoreTests/MachinePlayerTests.swift` | LC-11a | the same input script gives the same frame trace | deterministic replay |
-| LC-12b | `RenameSymbol` | `Sources/FlareCore/SymbolCommands.swift`, `Sources/FlareCore/CommandRegistry.swift`, `Tests/FlareCoreTests/RenameSymbolTests.swift` | LC-11e (registry line) | undo exact; empty name throws | – |
+| LC-12b | `RenameSymbol` | `Sources/FlareCore/SymbolCommands.swift`, `Sources/FlareCore/CommandRegistry.swift`, `Tests/FlareCoreTests/RenameSymbolTests.swift` | LC-8 (registry line; the LC-11 chain no longer blocks it) | undo exact; empty name throws | – |
 | LC-13 | Lottie opacity, scale, rotation tracks (G52); gradient stop alpha | `Sources/FlareCore/Export/LottieExporter.swift`, `Tests/FlareCoreTests/LottieTracksTests.swift` | – | golden JSON per track | QB-L8 |
 | LC-14 | Core budgets: render list per frame, hit per move, drag perform step, export of the reference scene | `Tests/FlareCoreTests/FlareBudgetTests.swift` | LC-1, LC-2, LC-6, LC-10 | budgets asserted with the debug factor in rubric section 6 | QB-L5–L8 |
 
@@ -1384,7 +1385,7 @@ on creative-core.
 | id | title | supersedes | owns | deps | acceptance | quality |
 |---|---|---|---|---|---|---|
 | LM-1 | Files: open through `load`, save data, file name, dirty flag, Open Recent list, autosave due time, a message per `FormatError` | #15, #205 (model) | `Sources/FlareModel/FlareFiles.swift`, `Tests/FlareModelTests/FlareFilesTests.swift` | LM-0a3 | bad data throws and keeps the document; each `FormatError` maps to section 3.3's text; save then open is byte-identical | – |
-| LM-2 | `LiveStage`, `LiveHits`; the `FixtureEdit` source scan | #12 (model) | `Sources/FlareModel/Live/LiveStage.swift`, `Sources/FlareModel/Live/LiveHits.swift`, `Tests/FlareModelTests/LiveStageTests.swift`, `Tests/FlareModelTests/LiveConformanceTests.swift` | LC-1, LC-2, LC-3, LM-0c5 | live and fake agree on `bounce`; `crowd` draws every instance; `noFixtureEditInLive` passes | QB-L5, QB-L6, QB-L11 (model) |
+| LM-2 | `LiveStage`, `LiveHits`; the `FixtureEdit` source scan | #12 (model) | `Sources/FlareModel/Live/LiveStage.swift`, `Sources/FlareModel/Live/LiveHits.swift`, `Tests/FlareModelTests/LiveStageTests.swift`, `Tests/FlareModelTests/LiveConformanceTests.swift` | LC-1, LC-2, LC-3 | live and fake agree on `bounce`; instances nested two deep all draw (`crowd` once LM-0c5 lands); `noFixtureEditInLive` passes | QB-L5, QB-L6, QB-L11 (model) |
 | LM-3 | `LiveShapes`: builders, pen curves, box gestures, path edit, duplicate, copy, paste | #203, #206 (model) | `Sources/FlareModel/Live/LiveShapes.swift`, `Tests/FlareModelTests/LiveShapesTests.swift` | LC-4, LC-7, LM-0a2b | Shift gives equal sides; a pen drag makes a smooth point with G1 continuity; a commit is one entry | QB-V1 |
 | LM-4 | `LiveProperties` with the section 2 rule and stroke | #13, #204 (model) | `Sources/FlareModel/Live/LiveProperties.swift`, `Tests/FlareModelTests/LivePropertiesTests.swift` | LC-5, LC-7, LC-10, LM-0b1 | keys at 0 and 24 give `placement(at: 12).x == 60`; 120 `setValue` calls give 1 entry holding 1 command; the LM-0b1 rule tests pass on live | QB-L7 |
 | LM-5 | `LiveKeyframes` | – | `Sources/FlareModel/Live/LiveKeyframes.swift`, `Tests/FlareModelTests/LiveKeyframesTests.swift` | LC-5, LM-0b2 | moving a key onto another throws and changes nothing | – |
@@ -1412,7 +1413,7 @@ the captain approves the UI (gate G2).
 
 | id | title | swaps | deps | acceptance | quality |
 |---|---|---|---|---|---|
-| IN-1 | Stage, hits, shapes, properties | `stage`, `hits`, `shapes`, `properties` | LM-2, LM-3, LM-4, F3a, F3b, F4a, F4b, F5, F6a, F6b, F18 | J3–J8, J15 green live | P1, P2; QB-L5 and QB-L6 model budgets now asserted |
+| IN-1 | Stage, hits, shapes, properties | `stage`, `hits`, `shapes`, `properties` | LM-2, LM-3, LM-4, F3a, F3b, F4a, F5, F6a, F6b, F18 | J3, J5–J8, J15 green live (J4 goes live with F4b) | P1, P2; QB-L5 and QB-L6 model budgets now asserted |
 | IN-2 | Timeline, easing, playback driver | `keyframes`, `easing` | LM-5, LM-6, LM-7, LA-2, F7a, F7b, F8, F9 | J9–J12 green live | P3, P4 |
 | IN-3 | Onion and motion path | `onion` | LM-8, F10 | J13 green live | P4 with ghosts |
 | IN-4 | Scenes, guides and files | `scenes` | LM-1, LM-9, LA-3, F3c, F11a, F11b, F17a, F17b, F17c | J2, J14, J16, J26–J28 green live | P6, P7 |
@@ -1420,7 +1421,7 @@ the captain approves the UI (gate G2).
 | IN-6 | Interactions | `machines`, `preview` | LM-11, LM-12, F13a, F13b, F14 | J19–J21 green live | switch on the next tick |
 | IN-7 | Export | `export`; `FlareWindow` picks `StageRasterizer` | LM-13a, LM-13b, LA-1, F15a, F15b | J22, J23 green live; SVG parses with Foundation's `XMLParser` and Lottie as JSON with its required keys (no new dependency) | QB-V4, QB-L8 |
 | IN-8 | Assist | `assist` | LM-14, the suite model provider, F16a, F16b | J24, J25 green live | QB-L9 |
-| IN-9 | No-argument launch on `.live`; the "Preview data" pill goes; fixtures only by flag and for snapshots | all | IN-1–IN-7, QH-7 | J0–J29 green without `-FlareFixture`; no `Fake*` reachable from `.live` except Assist while it has no provider (test) | P1–P7 at their gates |
+| IN-9 | No-argument launch on `.live`; the "Preview data" pill goes; fixtures only by flag and for snapshots | what IN-1, IN-2 and IN-4 made live | IN-1, IN-2, IN-4 | J0 and the IN-1, IN-2 and IN-4 journeys green without `-FlareFixture`; no `Fake*` reachable from `.live` except members whose IN task is still open (a test lists them and fails when one is already live) | P1–P7 at their gates, report-only until QH-7 |
 
 ---
 
@@ -1469,7 +1470,7 @@ Gate G0  captain approves this blueprint (this PR)
    │
 Gate G1  captain plays the fake build in the Review Room, per screen
 Gate G2  captain says "UI approved" → the integrate mandate is set active
-   IN-1 … IN-8 in matrix order, IN-9 last
+   IN-1 … IN-8 in matrix order; IN-9 once IN-1, IN-2 and IN-4 are live
 Gate G3  quality bar: J0–J29 and P1–P7 green on live at their gates, goldens
          recorded; captain signs off
 ```
