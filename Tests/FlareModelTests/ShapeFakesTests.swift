@@ -1,6 +1,7 @@
 // ShapeFakesTests.swift: the LM-0a2b fake shapes on the `empty` and `bounce` fixtures (docs/blueprints/flare.md, 7.1):
 // a rectangle commit is one "Undo Add Rectangle" entry, Shift gives equal sides, a scale keeps the opposite handle
-// within 1e-9, copy then paste adds "Ball copy" in one "Undo Paste", and garbage paste data throws "Nothing to paste.".
+// within 1e-9, copy then paste adds "Ball copy" in one "Undo Paste", and garbage paste data throws "Nothing to paste.";
+// and LM-0a2c's path edit, item move and delete.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -99,18 +100,65 @@ func garbagePasteDataThrowsNothingToPaste(_ text: String) {
     #expect(!engine.canUndo)
 }
 
-@Test func translateEditPathAndDeleteAreOneEntryEach() throws {
+// LM-0a2c: on `bounce`, edit path, move and delete are one entry each, and three undos give `bounce` back exactly.
+@Test func editPathMoveAndDeleteAreOneEntryEachAndUndoExactly() throws {
     var engine = CommandEngine(document: FlareFixtures.bounce)
-    try shapes.translate([item("shadow"), item("shadow")], dx: 5, dy: 0, in: &engine)
-    #expect(bounds(engine, "shadow")?.minX == 240 && engine.undoActionName == "Undo Move")
     let line = FlarePath(polyline: [Point(x: 0, y: 0), Point(x: 50, y: 0), Point(x: 50, y: 50)], closed: true)
     try shapes.setPath(line, of: item("shadow"), in: &engine)
-    #expect(layers(engine)[1].shapes[0].path == line && engine.undoActionName == "Undo Edit Path")
+    let edited = layers(engine)[1].shapes[0]
+    #expect(edited.path == line && edited.points.count == 3 && engine.undoActionName == "Undo Edit Path")
+    try shapes.translate([item("shadow"), item("shadow")], dx: 5, dy: 0, in: &engine)
+    #expect(layers(engine)[1].shapes[0].points.first?.x == 5 && engine.undoActionName == "Undo Move")
+    try shapes.delete([item("shadow"), item("shadow")], in: &engine)
+    #expect(layers(engine).map(\.id) == ["background", "ball"] && engine.undoActionName == "Undo Delete")
+    for _ in 0..<3 { try engine.undo() }
+    #expect(engine.document == FlareFixtures.bounce && !engine.canUndo)
+}
+
+// Texts move by position and instances by transform, in the same one "Move" entry as shapes.
+@Test func aMoveTakesTextsAndInstancesToo() throws {
+    var doc = FlareFixtures.bounce
+    doc.scenes[0].layers[1].texts = [TextShape(string: "Hi", fontFamily: "Helvetica", fontSize: 12, position: Point(x: 1, y: 2))]
+    doc.symbols = [Symbol(id: "s", name: "S", layers: [])]
+    doc.scenes[0].layers[1].instances = [Instance(symbolID: "s", transform: Transform(x: 10, y: 20))]
+    var engine = CommandEngine(document: doc)
+    let text = StageAddress(owner: scene, layerID: "shadow", item: .text(0))
+    let instance = StageAddress(owner: scene, layerID: "shadow", item: .instance(0))
+    try shapes.translate([item("shadow"), text, instance], dx: 3, dy: -4, in: &engine)
+    #expect(layers(engine)[1].texts[0].position == Point(x: 4, y: -2) && engine.undoActionName == "Undo Move")
+    #expect(layers(engine)[1].instances[0].transform == Transform(x: 13, y: 16))
+    // Deleting only the shape keeps the layer, since its text and instance remain.
     try shapes.delete([item("shadow")], in: &engine)
-    #expect(layers(engine)[1].shapes.isEmpty && engine.undoActionName == "Undo Delete")
-    try engine.undo()
-    #expect(layers(engine)[1].shapes[0].path == line)
-    #expect(throws: CommandError.layerLocked("background")) { try shapes.delete([item("background")], in: &engine) }
+    #expect(layers(engine).count == 3 && layers(engine)[1].shapes.isEmpty)
+    try shapes.delete([text, instance], in: &engine)
+    #expect(layers(engine).map(\.id) == ["background", "ball"])
+    for _ in 0..<3 { try engine.undo() }
+    #expect(engine.document == doc)
+}
+
+// Background is locked in `bounce`: each write throws `layerLocked` and leaves the document and undo stack alone.
+@Test func eachWriteOnALockedLayerThrowsAndChangesNothing() {
+    var engine = CommandEngine(document: FlareFixtures.bounce)
+    let locked = CommandError.layerLocked("background")
+    let path = FlarePath(polyline: [Point(x: 0, y: 0), Point(x: 9, y: 9)], closed: false)
+    #expect(throws: locked) { try shapes.setPath(path, of: item("background"), in: &engine) }
+    #expect(throws: locked) { try shapes.translate([item("background")], dx: 1, dy: 1, in: &engine) }
+    #expect(throws: locked) { try shapes.delete([item("background")], in: &engine) }
+    #expect(engine.document == FlareFixtures.bounce && !engine.canUndo)
+}
+
+// A path edit refuses a non-shape item, a bad index and a missing layer.
+@Test func anEditPathRefusesWhatHasNoPath() {
+    var engine = CommandEngine(document: FlareFixtures.bounce)
+    let path = FlarePath(polyline: [Point(x: 0, y: 0), Point(x: 9, y: 9)], closed: false)
+    #expect(throws: CommandError.self) {
+        try shapes.setPath(path, of: StageAddress(owner: scene, layerID: "ball", item: .text(0)), in: &engine)
+    }
+    #expect(throws: CommandError.shapeNotFound(3)) {
+        try shapes.setPath(path, of: StageAddress(owner: scene, layerID: "ball", item: .shape(3)), in: &engine)
+    }
+    #expect(throws: CommandError.layerNotFound("nope")) { try shapes.setPath(path, of: item("nope"), in: &engine) }
+    #expect(engine.document == FlareFixtures.bounce && !engine.canUndo)
 }
 
 @Test func anUnavailableFakeDrawsNothingAndThrowsItsReason() throws {

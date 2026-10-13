@@ -1,7 +1,7 @@
 // FakeShapes.swift: ShapeBuilding by hand (docs/blueprints/flare.md, 6.3). Rectangles and ellipses are polygons, a pen
 // path is straight segments with dragged anchors marked smooth. Each write is one group named by section 2, of real
-// FlareCore commands or `FixtureEdit` where FlareCore has none (path edit, instance delete). Box gestures follow the
-// not-animated / animated rule; only shapes move by `translate`. The pasteboard holds `AddLayer` envelopes from
+// FlareCore commands or `FixtureEdit` where FlareCore has none (path edit, text and instance move, instance delete).
+// Box gestures follow the not-animated / animated rule; a delete that empties a layer removes the layer. The pasteboard holds `AddLayer` envelopes from
 // `CommandRegistry.builtIn`. With `unavailable` set, reads are empty and every write throws it.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
@@ -137,17 +137,31 @@ public struct FakeShapes: ShapeBuilding {
         }
     }
 
+    /// Shapes move by `TranslateShape`; texts (position) and instances (transform x, y) by `FixtureEdit`, since
+    /// FlareCore has no command for them yet.
     public func translate(_ items: [StageAddress], dx: Double, dy: Double, in engine: inout CommandEngine) throws {
         try available()
         try engine.group("Move") { engine in
             for a in Self.unique(items) {
-                guard case .shape(let i) = a.item else { throw CommandError.invalidDocument("Only a shape moves here.") }
-                try engine.perform(TranslateShape(owner: a.owner, layerID: a.layerID, index: i, dx: dx, dy: dy))
+                switch a.item {
+                case .shape(let i):
+                    try engine.perform(TranslateShape(owner: a.owner, layerID: a.layerID, index: i, dx: dx, dy: dy))
+                case .text: try Self.editItem("Move", a, in: &engine) { layer, i in
+                    guard layer.texts.indices.contains(i) else { throw CommandError.invalidIndex(i) }
+                    layer.texts[i].position = Point(x: layer.texts[i].position.x + dx, y: layer.texts[i].position.y + dy)
+                }
+                case .instance: try Self.editItem("Move", a, in: &engine) { layer, i in
+                    guard layer.instances.indices.contains(i) else { throw CommandError.invalidIndex(i) }
+                    layer.instances[i].transform.x += dx
+                    layer.instances[i].transform.y += dy
+                }
+                }
             }
         }
     }
 
-    /// Removes the items, highest index first so the others keep theirs; their layers stay.
+    /// Removes the items, highest index first so the others keep theirs; a layer left with no shapes, texts or
+    /// instances goes too, in the same group.
     public func delete(_ items: [StageAddress], in engine: inout CommandEngine) throws {
         try available()
         let order = Self.unique(items).sorted { Self.index($0) > Self.index($1) }
@@ -161,6 +175,13 @@ public struct FakeShapes: ShapeBuilding {
                     layer.instances.remove(at: i)
                 }
                 }
+            }
+            var emptied: [(owner: LayerOwner, id: String)] = []
+            for a in order where !emptied.contains(where: { $0.owner == a.owner && $0.id == a.layerID }) {
+                guard let layer = engine.document.layers(of: a.owner)?.first(where: { $0.id == a.layerID }),
+                      layer.shapes.isEmpty, layer.texts.isEmpty, layer.instances.isEmpty else { continue }
+                emptied.append((a.owner, a.layerID))
+                try engine.perform(RemoveLayer(owner: a.owner, layerID: a.layerID))
             }
         }
     }
