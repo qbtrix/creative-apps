@@ -24,10 +24,8 @@ struct PhotoPanel: View {
             SegmentedTabs(
                 "Panel", tabs: [InspectorOption(id: .adjust, title: "Adjust"), InspectorOption(id: .layers, title: "Layers")],
                 selection: tab, onChange: onTab)
-            if let canvas = model.canvas {
-                InspectorHeader(
-                    model.documentName ?? "Untitled",
-                    details: ["\(canvas.width) × \(canvas.height) px", "sRGB · \(model.layers.count) \(model.layers.count == 1 ? "layer" : "layers")"])
+            if model.canvas != nil {
+                InspectorHeader(model.inspectorHeaderTitle, details: model.inspectorHeaderDetails)
                 if tab == .adjust {
                     ScrollView {
                         VStack(alignment: .leading, spacing: 0) {

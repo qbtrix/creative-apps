@@ -68,8 +68,8 @@ struct AdjustmentsInspector: View {
     }
 
     /// Gamma on a log10 track (GammaTrack), so 1 sits mid-track and a drag
-    /// into the midpoint detent snaps to exactly 1; the field
-    /// (GammaField) shows and takes gamma itself through NumericInput.
+    /// into the midpoint detent snaps to exactly 1 (until #88); the
+    /// ScrubField shows and takes gamma itself, in hundredths.
     private var gammaRow: some View {
         InspectorRow("Gamma") {
             HStack(spacing: SuiteSpacing.s) {
@@ -80,8 +80,10 @@ struct AdjustmentsInspector: View {
                     in: GammaTrack.positionRange
                 )
                 .accessibilityLabel("Gamma")
-                .accessibilityValue(GammaField.text(for: settings.gamma))
-                GammaField(gamma: settings.gamma) { onEdit(.gamma($0)) }
+                .accessibilityValue(NumericInput.format(Double(settings.gamma)))
+                ScrubField("Gamma", value: Double(settings.gamma), in: Self.doubles(AdjustmentSettings.gammaRange), step: 0.01) {
+                    onEdit(.gamma(Float($0)))
+                }
             }
         }
     }

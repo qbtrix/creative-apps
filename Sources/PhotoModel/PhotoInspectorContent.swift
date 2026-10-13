@@ -28,3 +28,34 @@ extension PhotoInspectorContent {
     /// has (Open and File > New Image), as the canvas beside it does.
     public static let noImageMessage = "Open a photo or make one with File > New Image to adjust it."
 }
+
+extension PhotoWorkspace {
+    /// The Adjust | Layers panel header's title: the document's name, or
+    /// "Untitled" for an image that hasn't been saved or opened from a file.
+    public var inspectorHeaderTitle: String { documentName ?? "Untitled" }
+
+    /// The panel header's fact lines under the title: the canvas size, then
+    /// the color space and the layer count. None with no canvas or no
+    /// selected layer.
+    public var inspectorHeaderDetails: [String] {
+        guard let canvas, selectedLayer != nil else { return [] }
+        return Self.headerDetails(width: canvas.width, height: canvas.height, layerCount: layers.count)
+    }
+
+    /// The header lines for a `width` × `height` image with `layerCount`
+    /// layers. Plain interpolation, so any Int formats without a trap.
+    public static func headerDetails(width: Int, height: Int, layerCount: Int) -> [String] {
+        [sizeText(width: width, height: height), "sRGB · \(layerCount) \(layerCount == 1 ? "layer" : "layers")"]
+    }
+
+    /// The viewer status bar's size text: the canvas size, plus the marquee
+    /// selection's size while there is one; "No image" with no canvas.
+    public var viewerSizeText: String {
+        guard let canvas else { return "No image" }
+        let size = Self.sizeText(width: canvas.width, height: canvas.height)
+        guard let selection else { return size }
+        return "\(size)  ·  Selection \(selection.width) × \(selection.height)"
+    }
+
+    static func sizeText(width: Int, height: Int) -> String { "\(width) × \(height) px" }
+}
