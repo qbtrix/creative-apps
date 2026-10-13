@@ -24,7 +24,7 @@ struct DesignMenu {
     var undoHelp: String? = "Nothing to undo."
     var redoHelp: String? = "Nothing to redo."
     var canDeletePage = false
-    /// A layer is selected and unlocked, the only kind Delete Layer can remove.
+    /// A layer is selected and unlocked, the only kind Delete Layer can remove, and no text is being edited.
     var canDeleteLayer = false
 
     var canUndo: Bool { undoHelp == nil }
@@ -48,7 +48,7 @@ struct DesignMenu {
         undoHelp = editing ? Self.finishEditing : model.canUndo ? nil : "Nothing to undo."
         redoHelp = editing ? Self.finishEditing : model.canRedo ? nil : "Nothing to redo."
         canDeletePage = model.canDeletePage
-        canDeleteLayer = model.selectedNode.map { !$0.isLocked } ?? false
+        canDeleteLayer = !editing && (model.selectedNode.map { !$0.isLocked } ?? false)
     }
 
     private static let finishEditing = "Finish editing the text first."

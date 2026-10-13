@@ -23,6 +23,14 @@ private func node(_ kind: DesignNodeKind = .rectangle, _ frame: DesignRect) -> D
     }
 }
 
+@Test func aNodeNamedAfterItsKindShowsOnlyItsSize() {
+    var drawn = node(.rectangle, rc(40, 40, 160, 120))
+    drawn.name = "Rectangle"
+    #expect(drawn.inspectorDetails == ["160 × 120 pt"])
+    drawn.name = "Rectangle 2"
+    #expect(drawn.inspectorDetails == ["Rectangle", "160 × 120 pt"])
+}
+
 @Test func aFractionalSizeRoundsToWholePointsLikeThePageSize() {
     #expect(node(.frame, rc(0, 0, 160.4, 119.6)).inspectorDetails == ["Frame", "160 × 120 pt"])
     #expect(node(.frame, rc(0, 0, 1.5, 2.5)).inspectorDetails == ["Frame", "2 × 3 pt"])

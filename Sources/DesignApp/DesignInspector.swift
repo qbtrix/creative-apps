@@ -1,10 +1,10 @@
 // DesignInspector.swift: the Properties tab of Design's panel. A selected
-// layer shows its header (name, kind, size), then Layer (Hidden and Locked
-// checkboxes), Frame (X, Y, W and H as scrub fields) and Fill (the color
-// well; a text layer's is its text color, a group has none). A locked layer
-// can't be edited, so Frame and Fill are disabled and a line says why. With
-// only a page selected it shows the page's size, read only. Values in,
-// intents out; the model clamps and refuses what it must.
+// layer shows its header (name, then kind unless the name says it, then size),
+// then Layer (Hidden and Locked checkboxes), Frame (X, Y, W and H as scrub
+// fields) and Fill (the color well; a text layer's is its text color, a group
+// has none). A locked layer can't be edited, so Frame and Fill are disabled
+// and a line says why. With only a page selected it shows the page's size,
+// read only. Values in, intents out; the model clamps and refuses what it must.
 import DesignModel
 import SuiteUI
 import SwiftUI

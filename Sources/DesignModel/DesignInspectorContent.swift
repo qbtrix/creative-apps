@@ -5,10 +5,10 @@
 // Linux-safe: no UI imports.
 
 extension DesignNode {
-    /// The header lines under the name: the kind ("Rectangle") and the size
-    /// in whole points ("160 × 120 pt").
+    /// The header lines under the name: the kind ("Rectangle"), left out when
+    /// the name already says it, and the size in whole points ("160 × 120 pt").
     public var inspectorDetails: [String] {
-        [kind.defaultName, "\(wholePoints(frame.width)) × \(wholePoints(frame.height)) pt"]
+        (name == kind.defaultName ? [] : [kind.defaultName]) + ["\(wholePoints(frame.width)) × \(wholePoints(frame.height)) pt"]
     }
 }
 

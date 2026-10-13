@@ -2,8 +2,8 @@
 // for the edit, Delete Layer) in four columns, since the menu bar does not
 // render here: a new file (nothing to undo or delete), after adding a
 // rectangle ("Undo Add Rectangle", Delete Layer on), after that Undo ("Redo
-// Add Rectangle"), and while a text layer is being typed into (both off, the
-// model ignores them then). Writes design-edit-menu-light.png and
+// Add Rectangle"), and while a text layer is being typed into (Undo, Redo and
+// Delete Layer off, the model ignores them then). Writes design-edit-menu-light.png and
 // design-edit-menu-dark.png. macOS only.
 import DesignModel
 import SuiteUI
@@ -31,7 +31,7 @@ import Testing
         #expect(menus[0].undoTitle == "Undo" && !menus[0].canUndo && !menus[0].canRedo && !menus[0].canDeleteLayer)
         #expect(menus[1].undoTitle == "Undo Add Rectangle" && menus[1].canUndo && !menus[1].canRedo && menus[1].canDeleteLayer)
         #expect(menus[2].redoTitle == "Redo Add Rectangle" && !menus[2].canUndo && menus[2].canRedo && !menus[2].canDeleteLayer)
-        #expect(typing.editingTextID != nil && !menus[3].canUndo && !menus[3].canRedo)
+        #expect(typing.editingTextID != nil && !menus[3].canUndo && !menus[3].canRedo && !menus[3].canDeleteLayer)
         #expect(menus[3].undoHelp == "Finish editing the text first.")
         for scheme in [ColorScheme.light, .dark] {
             try snapshot(EditMenuStates(menus: menus), name: "design-edit-menu-\(scheme == .dark ? "dark" : "light")", scheme: scheme)
