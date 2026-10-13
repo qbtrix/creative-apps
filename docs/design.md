@@ -175,6 +175,24 @@ SwiftUI in SuiteUI. Photo and Design use it.
 - **Fits the window minimum.** Rail, content minimum and panel add up to no
   more than `SuiteSize.windowMinimum` (TokensTests checks it).
 
+## Studio rows and chips
+
+Some editors (Flare's easing editor first) use the Studio look in their
+inspector: rounded, filled controls instead of the Pro density rows. They are
+flat controls, never glass, and their rounding is a deliberate exception to
+"no rounded cards inside an inspector".
+
+| Part | Component | Rules |
+|---|---|---|
+| Group header | `Text` in `SuiteFont.sectionCaps`, `.textCase(.uppercase)`, `.tracking(SuiteSize.capsTracking)` | Secondary color; 12 pt above, 4 pt below. |
+| Number row | `StudioScrubRow` | 28 pt, full width, radius `SuiteRadius.row`. Label inside on the left, value right in two-decimal tabular figures. The fill runs to the value; it turns accent while dragged. Drag, click to type, Up and Down nudge. |
+| Presets | `ChoiceChips` | Three columns of 24 pt chips. One active chip at most: selected well plus an accent border. |
+| Curve | `CurveEditor` | 180 pt well. Handles are 10 pt with a 28 pt hit target; the focused or dragged one is accent with a ring 2 pt out. Arrow keys nudge 0.01, Shift 0.1; Tab moves between handles; a drag focuses the handle it moved. |
+
+Color carries meaning only: accent is selected or active, `SuiteColor.keyframed`
+(amber) is a keyframe. Each drag, nudge or typed value ends in one `onEnd`, so
+the host makes it one undo step.
+
 ## Layers: content vs. control
 
 For every screen, name what is content and what is control before you build.
