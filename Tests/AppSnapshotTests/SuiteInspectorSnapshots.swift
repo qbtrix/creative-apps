@@ -31,6 +31,7 @@ private struct InspectorSample: View {
             InspectorSection("Color") {
                 InspectorColorRow("Fill", color: .orange) { _ in }
                 InspectorColorRow("Stroke", color: .indigo, supportsOpacity: false) { _ in }
+                InspectorColorWellRow("Text", color: HexColor(0x18, 0x77, 0xF2)) { _ in }
             }
             InspectorSection("Blending") {
                 InspectorPickerRow(
