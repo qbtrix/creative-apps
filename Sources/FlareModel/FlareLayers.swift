@@ -11,11 +11,14 @@ public enum FlareLayerError: Error, Equatable, Sendable {
     case emptyName
     /// The engine refused the command.
     case command(CommandError)
+    /// The workspace refused the change before running it, saying why.
+    case refused(String)
 
     public var message: String {
         switch self {
         case .noDocument: "Open an animation and select a scene first."
         case .emptyName: "Type a name for the layer."
+        case .refused(let reason): reason
         case .command(let error): "The layer could not be changed (\(error))."
         }
     }
