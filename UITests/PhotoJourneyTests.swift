@@ -75,10 +75,8 @@ final class PhotoJourneyTests: XCTestCase {
         photo.click("Undo Paint", in: .window, step: "undone")
         XCTAssert(photo.app.buttons["Redo Paint"].waitForExistence(timeout: 5), "Undo didn't undo the stroke")
 
-        let exposure = photo.app.sliders["Exposure"]
-        XCTAssert(exposure.waitForExistence(timeout: 5), "no Exposure slider")
-        exposure.adjust(toNormalizedSliderPosition: 0.65)
-        expect("Undo Exposure", photo, "dragging Exposure made no Exposure step")
+        typeValue("1.5", into: "Exposure", photo)
+        expect("Undo Exposure", photo, "typing 1.5 into Exposure made no Exposure step")
         photo.shot("exposure")
 
         // Save (Command-S) writes over the opened file, in its own format.
@@ -298,9 +296,7 @@ final class PhotoJourneyTests: XCTestCase {
         expect("Undo Show Layer", photo, "Layer > Show Layer didn't show Sky")
         photo.shot("layer-shown")
 
-        let opacity = photo.app.sliders["Opacity"]
-        XCTAssert(opacity.waitForExistence(timeout: 5), "no layer Opacity slider")
-        opacity.adjust(toNormalizedSliderPosition: 0.5)
+        drag("Opacity", by: -0.25, photo)
         expect("Undo Layer Opacity", photo, "dragging Opacity made no Layer Opacity step")
         photo.shot("layer-opacity")
         typeValue("25", into: "Opacity", photo)
@@ -332,10 +328,8 @@ final class PhotoJourneyTests: XCTestCase {
         photo.shot("tone-exposure-typed")
 
         // Until #517 a Reset icon overlaps its section header (audit), so Levels and Hue/Saturation reset before their shots.
-        let black = photo.app.sliders["Black"]
-        XCTAssert(black.waitForExistence(timeout: 5), "no Levels Black slider")
         var before = canvasPixels(photo)
-        black.adjust(toNormalizedSliderPosition: 0.25)
+        drag("Black", by: 0.25, photo)
         expect("Undo Levels", photo, "dragging Black made no Levels step")
         XCTAssert(canvasChanged(from: before, photo), "dragging Black didn't change the picture")
         reset("Levels", photo)
@@ -346,9 +340,7 @@ final class PhotoJourneyTests: XCTestCase {
         XCTAssert(photo.element("photo.curves").waitForNonExistence(timeout: 5), "the Curves header didn't fold Curves")
         photo.shot("tone-curves-folded")
 
-        let hue = photo.app.sliders["Hue"]
-        XCTAssert(hue.waitForExistence(timeout: 5), "no Hue slider")
-        hue.adjust(toNormalizedSliderPosition: 0.75)
+        drag("Hue", by: 0.25, photo)
         expect("Undo Hue/Saturation", photo, "dragging Hue made no Hue/Saturation step")
         before = canvasPixels(photo)
         typeValue("-80", into: "Saturation", photo)
@@ -467,6 +459,16 @@ final class PhotoJourneyTests: XCTestCase {
         entry.click()
     }
 
+    /// Drags the panel slider labelled `label` from its middle by `fraction` of
+    /// its width, as a person does; a bar slider scrubs from where it is, so
+    /// the journeys check the undo step and the picture, not a value.
+    @MainActor private func drag(_ label: String, by fraction: CGFloat, _ photo: Journey) {
+        let slider = photo.app.sliders[label]
+        XCTAssert(slider.waitForExistence(timeout: 5), "no \(label) slider")
+        slider.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
+            .press(forDuration: 0.1, thenDragTo: slider.coordinate(withNormalizedOffset: CGVector(dx: 0.5 + fraction, dy: 0.5)))
+    }
+
     /// Types `value` into the panel number labelled `label` (the last element so
     /// labelled, after the section header and slider): click it, type, Return.
     @MainActor private func typeValue(_ value: String, into label: String, _ photo: Journey) {
@@ -474,8 +476,10 @@ final class PhotoJourneyTests: XCTestCase {
             .matching(NSPredicate(format: "label == %@", label))
         XCTAssert(matches.firstMatch.waitForExistence(timeout: 5), "no \(label) in the panel")
         matches.element(boundBy: matches.count - 1).click()
-        // The open number is the panel's one text field; click it, as it may open without the keyboard.
-        let field = photo.element("suite.inspector").textFields.firstMatch
+        // The open number's field carries the label (the brush's hex field may sit above it);
+        // click it, as it may open without the keyboard.
+        let panel = photo.element("suite.inspector"), named = panel.textFields[label]
+        let field = named.waitForExistence(timeout: 3) ? named : panel.textFields.firstMatch
         XCTAssert(field.waitForExistence(timeout: 5), "clicking \(label)'s number opened no field to type in")
         replaceText(in: field, with: value, photo)
         photo.app.typeKey(.return, modifierFlags: [])
