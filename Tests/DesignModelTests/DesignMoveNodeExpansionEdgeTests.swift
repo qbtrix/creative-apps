@@ -71,7 +71,7 @@ private func ancestors(of id: String, in workspace: DesignWorkspace) -> [String]
     let second = try workspace.addNode(.rectangle, frame: box, in: "node-1")
     try workspace.setExpanded("node-1", false)
     try workspace.moveNode(first, into: "node-1")
-    #expect(workspace.layerRows.map(\.id) == ["node-1", second, first])
+    #expect(workspace.layerRows.map(\.id) == ["node-1", first, second])
 }
 
 @Test func movingOnAnotherPageExpandsThereAndLeavesTheSelectionAlone() throws {

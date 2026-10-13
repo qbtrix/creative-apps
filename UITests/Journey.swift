@@ -98,9 +98,10 @@ struct Journey {
         }
     }
 
-    /// Opens every menu in the menu bar but the Apple menu, shoots "menu-<title>"
-    /// with it open, and closes it again.
-    func openEachMenu() {
+    /// Opens every menu in the menu bar but the Apple menu, checks it really
+    /// opened (and, for a menu named in `expecting`, that it shows that item),
+    /// shoots "menu-<title>" with it open, and closes it again.
+    func openEachMenu(expecting: [String: String] = [:]) {
         let menus = app.menuBars.firstMatch.menuBarItems
         XCTAssert(menus.firstMatch.waitForExistence(timeout: 10), "no menu bar")
         // Index 0 is the Apple menu, which belongs to the system, not the app.
@@ -108,9 +109,25 @@ struct Journey {
             let menu = menus.element(boundBy: index)
             let title = menu.title
             menu.click()
+            // A click that lands while the last menu is still closing can leave this one shut.
+            if !isShowing(menu) { menu.click() }
+            XCTAssert(isShowing(menu), "the \(title) menu didn't open")
+            if let item = expecting[title] {
+                XCTAssert(menu.menuItems[item].isHittable, "the \(title) menu shows no \(item)")
+            }
             shot("menu-\(slug(title))", screen: true)
             app.typeKey(.escape, modifierFlags: [])
         }
+    }
+
+    /// Whether `menu` is open: its first item is on screen, checked for up to three seconds.
+    private func isShowing(_ menu: XCUIElement) -> Bool {
+        let item = menu.menuItems.firstMatch
+        for _ in 0..<10 {
+            if item.exists, item.isHittable { return true }
+            Thread.sleep(forTimeInterval: 0.3)
+        }
+        return false
     }
 
     /// Drags across the element `identifier` between two points given as
