@@ -1,10 +1,11 @@
 // InspectorRows.swift: the rows apps put in SuiteWindow's inspector, in the
 // dense "Pro density" layout of docs/design.md. InspectorSection is a system
-// DisclosureGroup with a flush 11 pt header, a hairline above it and an
-// optional Reset icon, never a card. InspectorRow is the two-column row: a right-aligned secondary label in
-// the shared label column, then the value at the compact control size. The
-// slider, stepper, color and picker rows are InspectorRows around a system
-// control; their numbers are ScrubFields. Rows take the current value and an
+// DisclosureGroup with a flush header, a hairline above it and an optional
+// Reset icon, never a card. InspectorRow is the two-column row: a right-aligned
+// secondary label in the shared label column, then the value at the compact
+// control size. InspectorSliderRow is the bar slider (ScrubField's bar look),
+// a whole row on its own. The stepper, color and picker rows are InspectorRows
+// around a system control; their numbers are ScrubFields. Rows take the current value and an
 // `onChange` closure, never a binding: apps can't bind to their Model. No
 // glass: the inspector column is system chrome already. Components own
 // presentation state only (a section's expansion, a field's draft text).
@@ -118,40 +119,36 @@ public struct InspectorRow<Value: View>: View {
     }
 }
 
-/// Label, Slider and a ScrubField with an optional unit, showing `decimals`
-/// places (whole for percent and degrees, one for pixels and EV).
+/// The bar slider: the whole 28 pt Studio row is the control, label inside on
+/// the left, the value with its unit on the right, a fill and marker at the
+/// value (ScrubField's bar look and rules, the look of Flare's easing rows). `decimals` places are shown (whole for
+/// percent and degrees, one for pixels and EV). `keyed` draws the marker and
+/// value in the keyed color, at the same width; `mixed` shows "Mixed" and no
+/// marker. `track` moves it along a non-linear track. `onEnd` fires once per
+/// drag, key or typed value.
 public struct InspectorSliderRow: View {
-    private let label: String
-    private let value: Double
-    private let range: ClosedRange<Double>
-    private let unit: String
-    private let decimals: Int
-    private let onChange: @MainActor (Double) -> Void
+    private let field: ScrubField
 
     public init(
-        _ label: String, value: Double, in range: ClosedRange<Double>, unit: String = "", decimals: Int = 2,
-        onChange: @escaping @MainActor (Double) -> Void
+        _ label: String, value: Double, in range: ClosedRange<Double>, step: Double? = nil, unit: String = "",
+        decimals: Int = 2, keyed: Bool = false, mixed: Bool = false, track: ScrubTrack? = nil,
+        onChange: @escaping @MainActor (Double) -> Void, onEnd: @escaping @MainActor () -> Void = {}
     ) {
-        self.label = label
-        self.value = value
-        self.range = range
-        self.unit = unit
-        self.decimals = decimals
-        self.onChange = onChange
+        self.init(
+            label, value: value, in: range, step: step, unit: unit, decimals: decimals,
+            bar: ScrubField.Bar(keyed: keyed, mixed: mixed, track: track), onChange: onChange, onEnd: onEnd)
     }
 
-    public var body: some View {
-        InspectorRow(label) {
-            HStack(spacing: SuiteSpacing.s) {
-                Slider(
-                    value: Binding(get: { value }, set: { onChange(NumericInput.clamp($0, to: range)) }),
-                    in: range
-                )
-                .accessibilityLabel(label)
-                ScrubField(label, value: value, in: range, unit: unit, decimals: decimals, onChange: onChange)
-            }
-        }
+    init(
+        _ label: String, value: Double, in range: ClosedRange<Double>, step: Double?, unit: String, decimals: Int,
+        bar: ScrubField.Bar, onChange: @escaping @MainActor (Double) -> Void, onEnd: @escaping @MainActor () -> Void
+    ) {
+        field = ScrubField(
+            label, value: value, in: range, step: step, unit: unit, decimals: decimals, bar: bar, onChange: onChange,
+            onEnd: onEnd)
     }
+
+    public var body: some View { field }
 }
 
 /// Label, a ScrubField and a Stepper that move by `step` within `range`.
