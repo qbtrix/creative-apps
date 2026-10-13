@@ -261,6 +261,7 @@ extension AdjustmentEdit {
         switch self {
         case .exposure: .exposure
         case .blackPoint, .whitePoint, .gamma, .gammaField: .levels
+        case .curvePoints: .curves
         case .blurSigma: .blur
         case .hue, .saturation, .lightness: .hueSaturation
         case .setEnabled(let kind, _), .reset(let kind): kind
@@ -274,6 +275,7 @@ extension AdjustmentKind {
         switch self {
         case .exposure: "Exposure"
         case .levels: "Levels"
+        case .curves: "Curves"
         case .blur: "Blur"
         case .hueSaturation: "Hue/Saturation"
         }

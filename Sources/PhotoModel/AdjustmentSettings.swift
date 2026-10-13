@@ -1,17 +1,22 @@
 // AdjustmentSettings.swift: the values behind Photo's adjustments inspector:
-// exposure, levels, blur and hue/saturation, each with an enable switch.
-// Exposure and levels are Float like CoreRaster's parameters; sigma is Double.
-// Every change arrives as one AdjustmentEdit: values clamp to their range, NaN
-// is ignored, and a black point at or above the white point (or the reverse)
-// is refused, keeping the old value. A Gamma field commit of the value it
-// shows changes nothing. Black and white snap to levelsStep, and
-// the inspector shows them at levelsDecimals, so two distinct points never
-// read the same and a shown value types back in as itself. PhotoRender applies the enabled sections
-// to the canvas (exposure, levels, hue/saturation, then blur). Linux-safe.
+// exposure, levels, curves, blur and hue/saturation, each with an enable
+// switch. Exposure and levels are Float like CoreRaster's parameters; sigma is
+// Double. Every change arrives as one AdjustmentEdit: values clamp to their
+// range, NaN is ignored, and a black point at or above the white point (or
+// the reverse) is refused, keeping the old value. A Gamma field commit of the
+// value it shows changes nothing. Black and white snap to levelsStep, and the
+// inspector shows them at levelsDecimals, so two distinct points never read
+// the same and a shown value types back in as itself. Curves holds 2 to 16
+// points (curvePointCount), x strictly increasing in 0...1 and y clamped to
+// 0...1; any other list, or a non-finite value, is refused whole. The default
+// end points (0, 0) and (1, 1) are identity. PhotoRender applies the enabled
+// sections to the canvas (exposure, levels, curves, hue/saturation, then
+// blur). Linux-safe.
+import CoreRaster
 
 /// One adjustment section in the inspector.
 public enum AdjustmentKind: String, CaseIterable, Sendable {
-    case exposure, levels, blur, hueSaturation
+    case exposure, levels, curves, blur, hueSaturation
 }
 
 /// One change the inspector can ask for.
@@ -24,6 +29,8 @@ public enum AdjustmentEdit: Sendable, Equatable {
     /// (gammaDecimals places) is the field re-sending its own text, so gamma
     /// keeps its full precision and nothing is recorded.
     case gammaField(Double)
+    /// The tone curve's whole point list, left to right.
+    case curvePoints([CurvePoint])
     case blurSigma(Double)
     case hue(Double)
     case saturation(Double)
@@ -43,6 +50,8 @@ public struct AdjustmentSettings: Sendable, Equatable {
     public static let gammaRange: ClosedRange<Float> = 0.1...10
     /// The places the Gamma field shows.
     public static let gammaDecimals = 2
+    /// How many points a tone curve takes.
+    public static let curvePointCount = 2...16
     /// Up to 20 px: the canvas renders a blur tile by tile with a 3-sigma
     /// margin, and past 20 that margin costs more than the tile.
     public static let sigmaRange: ClosedRange<Double> = 0...20
@@ -55,6 +64,8 @@ public struct AdjustmentSettings: Sendable, Equatable {
     public private(set) var blackPoint: Float = 0
     public private(set) var whitePoint: Float = 1
     public private(set) var gamma: Float = 1
+    /// The tone curve's control points, x strictly increasing.
+    public private(set) var curvePoints = [CurvePoint(x: 0, y: 0), CurvePoint(x: 1, y: 1)]
     /// Gaussian blur radius in pixels.
     public private(set) var blurSigma: Double = 0
     /// Degrees.
@@ -91,6 +102,8 @@ public struct AdjustmentSettings: Sendable, Equatable {
             gamma = Self.clamp(value, to: Self.gammaRange) ?? gamma
         case .gammaField(let value):
             if !Self.showsAs(value, gamma) { apply(.gamma(Float(value))) }
+        case .curvePoints(let points):
+            curvePoints = Self.curve(points) ?? curvePoints
         case .blurSigma(let value):
             blurSigma = Self.clamp(value, to: Self.sigmaRange) ?? blurSigma
         case .hue(let value):
@@ -115,6 +128,8 @@ public struct AdjustmentSettings: Sendable, Equatable {
             blackPoint = defaults.blackPoint
             whitePoint = defaults.whitePoint
             gamma = defaults.gamma
+        case .curves:
+            curvePoints = defaults.curvePoints
         case .blur:
             blurSigma = defaults.blurSigma
         case .hueSaturation:
@@ -137,6 +152,17 @@ public struct AdjustmentSettings: Sendable, Equatable {
         var scale = 1.0
         for _ in 0..<gammaDecimals { scale *= 10 }
         return abs(value - (Double(gamma) * scale).rounded() / scale) < 1e-9
+    }
+
+    /// `points` with each y clamped to 0...1, or nil for a list Curves refuses:
+    /// a count outside curvePointCount, a non-finite value, an x outside 0...1
+    /// or an x not above the one before.
+    private static func curve(_ points: [CurvePoint]) -> [CurvePoint]? {
+        guard curvePointCount.contains(points.count),
+            points.allSatisfy({ (0...1).contains($0.x) && $0.y.isFinite }),
+            zip(points, points.dropFirst()).allSatisfy({ $0.x < $1.x })
+        else { return nil }
+        return points.map { CurvePoint(x: $0.x, y: min(max($0.y, 0), 1)) }
     }
 
     /// `value` inside `range`, or nil for NaN.
