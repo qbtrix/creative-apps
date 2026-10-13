@@ -38,8 +38,9 @@ struct DesignWindow: View {
     /// The launch file opens in the first window only.
     @MainActor private static var launchFileOpened = false
 
-    /// Design files are JSON with the `.design` extension.
-    private static let fileType = UTType(filenameExtension: "design", conformingTo: .json) ?? .json
+    /// The `.design` extension, as the system types a file on disk. Not one that conforms to JSON: the
+    /// type a real `.design` file gets doesn't conform to that, so the open panel would grey it out.
+    private static let fileType = UTType(filenameExtension: "design") ?? .data
 
     var body: some View {
         DesignEditor(
