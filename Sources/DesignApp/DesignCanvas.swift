@@ -46,7 +46,7 @@ struct DesignCanvas: View {
         } overlay: {
             // The text being edited shows its editor's box instead of handles.
             if let selected, selected.id != model.editingTextID {
-                DesignSelectionMarks(rect: selected.frame, zoom: zoom, handles: !selected.isLocked)
+                DesignSelectionMarks(rect: selected.frame, zoom: zoom, handles: model.lockHelp(selected.id) == nil)
             }
             DesignTextOverlay(model: model, zoom: zoom, perform: perform)
         }

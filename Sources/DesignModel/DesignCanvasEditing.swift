@@ -21,7 +21,8 @@
 // click its node, whose edit then opens), the tool goes back to Move.
 //
 // Locked nodes never move, resize, change or delete, and neither hidden nor
-// locked nodes are hit. Linux-safe.
+// locked nodes are hit. A lock covers the node's whole subtree (DesignLocking),
+// so a layer inside a locked group is locked too (#450). Linux-safe.
 
 /// A pointer gesture in progress, from its first `drag` to `endDrag`.
 struct DesignGesture: Sendable, Equatable {
@@ -53,12 +54,12 @@ extension DesignWorkspace {
         selectedPage?.nodes.hit(at: point)
     }
 
-    /// The handle of the selected, unlocked, visible node nearest `point` and within
+    /// The handle of the selected, visible node outside any lock nearest `point` and within
     /// `handleTolerance` (Chebyshev distance) of where it shows (DesignRect.handles, a handle
     /// being `handleTolerance` across); corners win a tie. A press inside a compact node is never
     /// a handle: its handles sit outside it, so the press moves it.
     public func handle(at point: DesignPoint) -> DesignHandle? {
-        guard let node = selectedNode, !node.isLocked, !node.isHidden else { return nil }
+        guard let node = selectedNode, !isLockedInTree(node.id), !node.isHidden else { return nil }
         let frame = node.frame
         let inside = point.x > frame.x && point.x < frame.maxX && point.y > frame.y && point.y < frame.maxY
         if inside, frame.isCompact(handleSize: handleTolerance) { return nil }
@@ -105,10 +106,10 @@ extension DesignWorkspace {
         }
     }
 
-    /// Deletes the selected node and its subtree and deselects. Does nothing without an
-    /// unlocked selection, or while editing text.
+    /// Deletes the selected node and its subtree and deselects. Does nothing without a
+    /// selection outside any lock, or while editing text.
     public mutating func deleteSelection() {
-        guard editingTextID == nil, let node = selectedNode, !node.isLocked,
+        guard editingTextID == nil, let node = selectedNode, !isLockedInTree(node.id),
             let page = pages.firstIndex(where: { $0.id == selectedPageID })
         else { return }
         let before = snapshot
