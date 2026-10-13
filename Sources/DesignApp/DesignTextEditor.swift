@@ -8,9 +8,9 @@
 // The field is sized in screen points (frame x zoom) and its font is the body text style's
 // size x zoom, not a scaled view: AppKit's text field and its field editor do not hit-test
 // or edit correctly under a scale transform. The draft goes out as `.textDraft`; Return and
-// losing focus send `.commitText`, Escape sends `.cancelText`. It must take keyboard focus as
-// it appears, which it can only because the canvas stops being focusable during the edit
-// (DesignCanvas). The canvas does not paint the edited node's text, so nothing here
+// losing focus send `.commitText`, Escape sends `.cancelText`. It asks for keyboard focus as
+// it appears (takeFocus), and the canvas stops being focusable during the edit so it can't
+// hold the keys (DesignCanvas). The canvas does not paint the edited node's text, so nothing here
 // repeats it. Presentation state only: focus.
 import AppKit
 import DesignModel
@@ -61,8 +61,7 @@ private struct DesignTextField: View {
             .font(.system(size: Self.bodyPoints * scale))
             .foregroundStyle(node.fill.color)
             .focused($focused)
-            // A turn after the field appears, once the canvas has stopped being focusable.
-            .task { focused = true }
+            .task { await takeFocus() }
             .onSubmit { perform(.commitText) }
             .onExitCommand { perform(.cancelText) }
             .onChange(of: focused) { _, isFocused in if !isFocused { perform(.commitText) } }
@@ -75,5 +74,16 @@ private struct DesignTextField: View {
             .gesture(DragGesture(minimumDistance: 0))
             .offset(x: node.frame.x * scale, y: node.frame.y * scale)
             .accessibilityIdentifier("design.text")
+    }
+
+    /// Asks for the keyboard until the field has it. A request made as the field appears is
+    /// refused (the journey's typing went nowhere until it clicked the box), so it asks again.
+    /// ponytail: polls for up to a third of a second; replace with a focus API that waits for
+    /// the field once SwiftUI has one.
+    private func takeFocus() async {
+        for _ in 0..<10 where !focused && !Task.isCancelled {
+            focused = true
+            try? await Task.sleep(for: .milliseconds(30))
+        }
     }
 }
