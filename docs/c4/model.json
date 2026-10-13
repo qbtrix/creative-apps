@@ -69,7 +69,7 @@
               {
                 "id": "flare-model-sources",
                 "name": "FlareModel sources",
-                "description": "Linux-safe state and logic behind Flare's window: FlareWorkspace holds the open FlareCore document, the selected scene and the drawing tool.",
+                "description": "Linux-safe state and logic behind Flare's window: FlareWorkspace holds the open FlareCore document, the selected scene and the drawing tool; EasingEditing is the easing editor's contract, with FakeEasingEditing as its in-memory stand-in for UI work.",
                 "technology": "Swift 6, Foundation",
                 "paths": [
                   "Sources/FlareModel/"
