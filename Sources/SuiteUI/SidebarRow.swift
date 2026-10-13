@@ -51,9 +51,10 @@ public struct SidebarToggle: Identifiable, Hashable, Sendable {
     public var systemImage: String { isOn ? onSymbol : offSymbol }
 }
 
-/// Where a click lands in a row: the title area, or one of its toggles.
+/// Where a click lands in a row: the title label, the blank space between
+/// the title and the toggles, or one of the toggles.
 public enum SidebarRowPart: Sendable {
-    case title, toggle
+    case title, blank, toggle
 }
 
 public struct SidebarRow: View {
@@ -77,6 +78,7 @@ public struct SidebarRow: View {
     public var body: some View {
         HStack(spacing: SuiteSpacing.xs) {
             title
+            Spacer(minLength: SuiteSpacing.s)
             ForEach(item.toggles) { toggle in
                 Toggle(isOn: Binding(get: { toggle.isOn }, set: { _ in onToggle?(toggle.id) })) {
                     Label(toggle.title, systemImage: toggle.systemImage)
@@ -93,28 +95,27 @@ public struct SidebarRow: View {
         .badge(item.count ?? 0)
     }
 
-    /// The title and the space up to the toggles. The rename double-click
-    /// lives here, not on the whole row, so a double-click on a toggle is two
-    /// plain clicks that flip it twice and never opens the rename field.
-    private var title: some View {
-        HStack(spacing: SuiteSpacing.xs) {
-            if draft != nil {
-                TextField(item.title, text: Binding(get: { draft ?? item.title }, set: { draft = $0 }))
-                    .focused($editing)
-                    .onSubmit(commitRename)
-                    .onExitCommand { draft = nil }
-                    .onChange(of: editing) { _, focused in if !focused { commitRename() } }
-            } else {
-                Label(item.title, systemImage: item.systemImage)
-            }
-            Spacer(minLength: SuiteSpacing.s)
+    /// The title label, or the rename field while renaming. The rename
+    /// double-click lives on the label alone, not on the row or the blank
+    /// space after it, so a double-click on a toggle is two plain clicks that
+    /// flip it twice, and one on blank space selects the row and nothing more.
+    @ViewBuilder private var title: some View {
+        if draft != nil {
+            TextField(item.title, text: Binding(get: { draft ?? item.title }, set: { draft = $0 }))
+                .focused($editing)
+                .onSubmit(commitRename)
+                .onExitCommand { draft = nil }
+                .onChange(of: editing) { _, focused in if !focused { commitRename() } }
+        } else {
+            Label(item.title, systemImage: item.systemImage)
+                .contentShape(Rectangle())
+                .simultaneousGesture(TapGesture(count: 2).onEnded { beginRename(on: .title) })
         }
-        .contentShape(Rectangle())
-        .simultaneousGesture(TapGesture(count: 2).onEnded { beginRename(on: .title) })
     }
 
     /// Whether a double-click on `part` opens the rename field: only on the
-    /// title, only when the row can be renamed and is not being renamed.
+    /// title label, only when the row can be renamed and is not being
+    /// renamed. Blank space and toggles never rename.
     nonisolated public static func doubleClickRenames(_ part: SidebarRowPart, renamable: Bool, renaming: Bool) -> Bool {
         part == .title && renamable && !renaming
     }
