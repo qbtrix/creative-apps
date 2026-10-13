@@ -17,3 +17,9 @@ extension PhotoWorkspace {
         return .layer(layer, width: canvas.width, height: canvas.height)
     }
 }
+
+extension PhotoInspectorContent {
+    /// The "No Image" empty state's next step. It names only commands Photo
+    /// has (Open and File > New Image), as the canvas beside it does.
+    public static let noImageMessage = "Open a photo or make one with File > New Image to adjust it."
+}
