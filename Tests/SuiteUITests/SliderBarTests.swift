@@ -1,8 +1,8 @@
 // SliderBarTests.swift: the number rules of the bar slider (InspectorSliderRow)
 // and ScrubField: what the arrows, Shift, Option, Home and End give, how far the
 // fill reaches, the value text with its unit and the words VoiceOver reads, and
-// a non-linear track with a detent. No views. macOS only.
-import Foundation
+// a non-linear track with a detent, and that a keyed row keeps its size. macOS.
+import SwiftUI
 import SuiteUI
 import Testing
 
@@ -58,4 +58,15 @@ import Testing
     let far = ScrubValue.dragged(from: track.position(1), by: 100, step: track.step, in: track.positions)
     #expect(track.value(far) == 10)
     #expect(ScrubValue.fraction(track.position(1), in: track.positions) == 0.5)
+}
+
+/// One 28 pt row whatever it shows, so a row never resizes while the timeline scrubs.
+@MainActor @Test func keyedOrMixedRowKeepsItsSize() {
+    func size(keyed: Bool = false, mixed: Bool = false) -> CGSize {
+        let row = InspectorSliderRow("Rotation", value: 45, in: -180...180, unit: "°", decimals: 0, keyed: keyed, mixed: mixed) { _ in }
+        return NSHostingView(rootView: row.frame(width: SuiteSize.editorPanelWidth)).fittingSize
+    }
+    #expect(size().height == SuiteSize.studioRow)
+    #expect(size(keyed: true) == size())
+    #expect(size(mixed: true) == size())
 }
