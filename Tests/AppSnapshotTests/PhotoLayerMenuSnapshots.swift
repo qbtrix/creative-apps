@@ -1,6 +1,7 @@
 // PhotoLayerMenuSnapshots.swift: Photo's Layer menu items with no image open
-// (all disabled) beside an image with one hidden layer selected (Delete
-// disabled, "Show Layer"), and two layers (all enabled, "Hide Layer"), in
+// (all disabled) beside an image with one hidden layer selected (Delete and
+// the order and selection moves disabled, "Show Layer"), and two layers with
+// the top one selected (all but Bring Forward and Select Layer Above), in
 // Light and Dark. The menu bar doesn't render here, so the items are drawn in
 // columns. Writes photo-layer-menu-light.png and photo-layer-menu-dark.png.
 // macOS only.

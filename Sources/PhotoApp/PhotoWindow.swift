@@ -59,7 +59,7 @@ struct PhotoWindow: View {
                 }
             }
             .alert("Rename Layer", isPresented: $isRenaming) {
-                TextField("Name", text: $renameText)
+                TextField("Name", text: $renameText).accessibilityIdentifier("photo.layer.name")
                 Button("Rename", action: commitRename)
                 Button("Cancel", role: .cancel) {}
             }
@@ -112,6 +112,10 @@ struct PhotoWindow: View {
         case .addLayer: model.addLayer()
         case .deleteLayer: if let id = model.selectedLayerID { model.removeLayer(id) }
         case .renameLayer: beginRename()
+        case .bringForward: model.bringSelectedLayerForward()
+        case .sendBackward: model.sendSelectedLayerBackward()
+        case .selectLayerAbove: model.selectLayerAbove()
+        case .selectLayerBelow: model.selectLayerBelow()
         case .zoomIn: setZoom(ViewerZoom.zoomedIn(from: zoom))
         case .zoomOut: setZoom(ViewerZoom.zoomedOut(from: zoom))
         case .fit: fit()

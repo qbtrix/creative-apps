@@ -24,7 +24,7 @@ enum PhotoIntent {
     case opacity(PhotoLayer.ID, Double)
     case blendMode(PhotoLayer.ID, CoreRaster.BlendMode)
     case moveLayers(IndexSet, Int)
-    case addLayer, deleteLayer, renameLayer
+    case addLayer, deleteLayer, renameLayer, bringForward, sendBackward, selectLayerAbove, selectLayerBelow
     case zoomIn, zoomOut, fit
 }
 
