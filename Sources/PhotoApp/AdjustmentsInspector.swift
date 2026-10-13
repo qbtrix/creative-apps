@@ -66,7 +66,8 @@ struct AdjustmentsInspector: View {
         { onEdit(.reset(kind)) }
     }
 
-    /// Gamma on a log10 track (GammaTrack), so 1 sits mid-track; the field
+    /// Gamma on a log10 track (GammaTrack), so 1 sits mid-track and a drag
+    /// into the midpoint detent snaps to exactly 1; the field
     /// (GammaField) shows and takes gamma itself through NumericInput.
     private var gammaRow: some View {
         InspectorRow("Gamma") {
@@ -74,7 +75,7 @@ struct AdjustmentsInspector: View {
                 Slider(
                     value: Binding(
                         get: { GammaTrack.position(ofGamma: Double(settings.gamma)) },
-                        set: { onEdit(.gamma(Float(GammaTrack.gamma(atPosition: $0)))) }),
+                        set: { onEdit(.gamma(Float(GammaTrack.snappedGamma(atPosition: $0)))) }),
                     in: GammaTrack.positionRange
                 )
                 .accessibilityLabel("Gamma")

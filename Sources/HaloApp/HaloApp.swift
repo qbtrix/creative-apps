@@ -70,9 +70,19 @@ struct HaloWindow: View {
         var actions = HaloCompositionActions(new: { showsNewComposition = true })
         if let id = model.selectedCompositionID {
             actions.duplicate = { _ = model.duplicateComposition(id) }
-            if model.canDeleteComposition { actions.delete = { _ = model.deleteComposition(id) } }
+            if model.canDeleteComposition { actions.delete = { deleteComposition(editingText: $0) } }
         }
         return actions
+    }
+
+    /// Composition > Delete: deletes the selected composition, or, while a
+    /// text field such as the rename field has focus, edits its text instead.
+    private func deleteComposition(editingText: Bool) {
+        switch model.compositionDeleteCommand(editingText: editingText) {
+        case .editText: HaloTextFocus.deleteToStartOfLine()
+        case .delete(let id): _ = model.deleteComposition(id)
+        case .unavailable: break
+        }
     }
 
     /// Layer > New's action, nil when no composition is selected.
