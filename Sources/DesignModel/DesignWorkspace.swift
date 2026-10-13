@@ -7,6 +7,8 @@
 // Invariants:
 // - An open file keeps a page; a selected node is on the selected page; ids are
 //   never reused within a file (undo restores the id counters as a max).
+// - `held` holds exactly the page and node ids on the pages; every change that
+//   adds or removes an id updates it, so minting never walks the tree (#433).
 // - Every node frame is absolute page points, children included (DesignNode).
 // - Every document edit records exactly one named undo step (DesignHistory). A
 //   refused call (it throws, names an unknown id, hits a locked node, or changes
@@ -81,6 +83,8 @@ public struct DesignWorkspace: Sendable, Equatable {
     public private(set) var handleTolerance = 6.0
     var pageCount = 0
     var nodeCount = 0
+    /// Every page and node id, kept current with the pages (DesignHeldIDs).
+    var held = DesignHeldIDs()
     var history = DesignHistory()
     /// The pointer gesture between its first `drag` and `endDrag`.
     var gesture: DesignGesture?
@@ -108,6 +112,7 @@ public struct DesignWorkspace: Sendable, Equatable {
         let before = snapshot
         let wasOpen = isOpen
         (pages, pageCount, nodeCount) = ([], 0, 0)
+        held.replace(with: [])
         let page = nextPage()
         (pages, selectedPageID, selectedNodeID, expandedNodeIDs) = ([page], page.id, nil, [])
         if wasOpen { record("New File", before: before, swapsDocument: true) }
@@ -119,6 +124,7 @@ public struct DesignWorkspace: Sendable, Equatable {
     /// don't move the counters, but minting skips them, so a new id never repeats one (#296).
     mutating func load(_ pages: [DesignPage]) {
         self.pages = pages
+        held.scan(pages)
         (selectedPageID, selectedNodeID, expandedNodeIDs) = (pages.first?.id, nil, [])
         (history, gesture, placedText) = (DesignHistory(), nil, nil)
         (editingTextID, textDraft) = (nil, "")
@@ -161,7 +167,7 @@ public struct DesignWorkspace: Sendable, Equatable {
         guard pages.count > 1 else { throw .lastPage }
         commitTextEdit()
         let before = snapshot
-        pages.remove(at: index)
+        held.remove(pages.remove(at: index))
         if selectedPageID == id { selectPage(pages[Swift.min(index, pages.count - 1)].id) }
         record("Delete Page", before: before)
     }
@@ -241,6 +247,7 @@ public struct DesignWorkspace: Sendable, Equatable {
             id: "node-\(number)", name: kind.defaultName, kind: kind, frame: frame, text: kind == .text ? "Text" : "")
         try pages[pageIndex].nodes.add(node, to: parentID)
         nodeCount = number
+        held.insert(node.id)
         expandAncestors(of: node.id, in: pages[pageIndex].nodes)
         selectedNodeID = node.id
         return node.id
@@ -337,40 +344,19 @@ public struct DesignWorkspace: Sendable, Equatable {
     /// The next desktop-sized page, seeded with a "Desktop" frame the size of the page.
     /// New File and Add Page both start their page here.
     private mutating func nextPage() -> DesignPage {
-        let held = heldIDs()
-        pageCount = firstFree("page-", after: pageCount, in: held)
+        pageCount = held.firstFree("page-", after: pageCount)
         var page = DesignPage(id: "page-\(pageCount)", name: "Page \(pageCount)", frameWidth: 1440, frameHeight: 1024)
         let size = DesignRect(x: 0, y: 0, width: page.frameWidth, height: page.frameHeight)
-        nodeCount = firstFree("node-", after: nodeCount, in: held)
+        nodeCount = held.firstFree("node-", after: nodeCount)
         page.nodes = [DesignNode(id: "node-\(nodeCount)", name: "Desktop", kind: .frame, frame: size)]
+        held.insert(page.id)
+        held.insert("node-\(nodeCount)")
         return page
     }
 
     /// The first number past the node counter whose "node-N" no page or node holds yet.
     private func nextNodeNumber() -> Int {
-        firstFree("node-", after: nodeCount, in: heldIDs())
-    }
-
-    /// The first number past `counter` whose `prefix`N isn't in `held`. One set lookup per
-    /// step, so a long run of held ids past the cap costs one pass, not one rescan each (#304).
-    private func firstFree(_ prefix: String, after counter: Int, in held: Set<String>) -> Int {
-        var number = counter + 1
-        while held.contains("\(prefix)\(number)") { number += 1 }
-        return number
-    }
-
-    /// Every page and node id in the document. Page and node ids share one namespace, as
-    /// `DesignFile.check` reads them, so a minted id must avoid both kinds (#303).
-    private func heldIDs() -> Set<String> {
-        var held = Set(pages.map(\.id))
-        func collect(_ nodes: [DesignNode]) {
-            for node in nodes {
-                held.insert(node.id)
-                collect(node.children)
-            }
-        }
-        for page in pages { collect(page.nodes) }
-        return held
+        held.firstFree("node-", after: nodeCount)
     }
 }
 
