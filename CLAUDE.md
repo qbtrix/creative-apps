@@ -177,8 +177,20 @@ something. One that can't act yet is disabled and says why:
 - **No product names.** Don't name other companies' creative apps in code,
   docs or UI; describe the behavior instead.
 - **Clean-room.** Never copy code, files, text or artwork from proprietary
-  creative software or from GPL-incompatible sources. Behavior comes only from
-  public documentation and specs. This repo is GPL-3.0.
+  creative software or from GPL-incompatible sources. This repo is GPL-3.0.
+  Behavior comes only from public documentation, published specs (W3C,
+  Lottie, SVG, PDF, OpenRaster, XMP and the like) and code under a
+  GPL-3.0-compatible license. Permissive code (MIT, Apache-2.0) may be studied
+  and reused with attribution, after you read the license file of that exact
+  repo at that exact commit; storytold's craft apps were MIT OR Apache-2.0 on
+  2026-10-10. Record the source repo, commit and license in `NOTICE`, or in
+  the header of the copied file.
+- **Never reverse engineer an app we don't own.** No decompiling,
+  disassembling, or inspecting its binaries or bundles, and no
+  reverse-engineering tools or MCPs (REA, Hopper, Ghidra, IDA and the like).
+  Don't automate or scrape competitors' apps either. Reverse engineering a
+  file format so we can open users' files is a legal call: get the captain's
+  sign-off first.
 
 ## Quality
 
