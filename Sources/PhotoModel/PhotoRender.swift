@@ -1,14 +1,16 @@
 // PhotoRender.swift: how Photo turns its layers into the picture. A region of
 // the canvas renders by compositing the visible layers bottom-up at their
 // offsets with their blend mode and opacity (CoreRaster's composite), then
-// running the enabled adjustments in order: exposure, levels, hue/saturation,
-// blur. The blur reads a margin of 3 sigma around the region, so a region
-// renders exactly as the same pixels of the whole image would. `composite()`
-// is the whole image at full size (export, tests); PhotoRenderer turns a
-// workspace into display bytes (sRGB, straight alpha) tile by tile, in
+// running the enabled adjustments in order: exposure, levels, curves,
+// hue/saturation, blur. The blur reads a margin of 3 sigma around the region,
+// so a region renders exactly as the same pixels of the whole image would.
+// `composite()` is the whole image at full size (export, tests); PhotoRenderer
+// turns a workspace into display bytes (sRGB, straight alpha) tile by tile, in
 // parallel, redrawing only the tiles that changed since the frame before
-// (PhotoWorkspace.damage(since:)) and timing itself for the status line.
-// Linux-safe.
+// (PhotoWorkspace.damage(since:)) and timing itself for the status line. The
+// curve editor's line (`curveSamples`) runs the same CoreRaster curve over a
+// ramp, and its histogram (`curvesHistogram`) counts the image as it enters
+// Curves, so both show what the render does. Linux-safe.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -35,16 +37,38 @@ extension AdjustmentSettings {
 
     /// The enabled adjustments applied to `buffer`, in order.
     func applied(to buffer: PixelBuffer) throws -> PixelBuffer {
-        var result = buffer
-        if isEnabled(.exposure) { result = try result.exposure(stops: exposure) }
-        if isEnabled(.levels) {
-            result = try result.levels(inBlack: blackPoint, inWhite: whitePoint, gamma: gamma, outBlack: 0, outWhite: 1)
-        }
+        var result = try appliedBeforeCurves(to: buffer)
+        if isEnabled(.curves) { result = try result.curves(points: curvePoints) }
         if isEnabled(.hueSaturation) {
             result = try result.hueSaturation(hue: hue, saturation: saturation, lightness: lightness)
         }
         if blurMargin > 0 { result = try result.gaussianBlur(sigma: blurSigma) }
         return result
+    }
+
+    /// Exposure then levels, where enabled: the image Curves maps.
+    func appliedBeforeCurves(to buffer: PixelBuffer) throws -> PixelBuffer {
+        var result = buffer
+        if isEnabled(.exposure) { result = try result.exposure(stops: exposure) }
+        if isEnabled(.levels) {
+            result = try result.levels(inBlack: blackPoint, inWhite: whitePoint, gamma: gamma, outBlack: 0, outWhite: 1)
+        }
+        return result
+    }
+
+    /// The tone curve at `count` evenly spaced inputs from 0 through 1, worked
+    /// out by CoreRaster's `curves(points:)` on a `count`-pixel grey ramp, so
+    /// the editor draws exactly the curve the render applies. Empty for a
+    /// `count` under 2.
+    public func curveSamples(count: Int = 256) -> [CurvePoint] {
+        guard count >= 2, var ramp = try? PixelBuffer(width: count, height: 1) else { return [] }
+        let xs = (0..<count).map { Float($0) / Float(count - 1) }
+        // Every grey is finite and in the buffer, so setPixel can't fail. The
+        // curve fails only when steep enough to overflow a Float, and then the
+        // render fails too; the editor draws no line.
+        for (i, x) in xs.enumerated() { try? ramp.setPixel(x: i, y: 0, RGBA(r: x, g: x, b: x, a: 1)) }
+        guard let curved = try? ramp.curves(points: curvePoints) else { return [] }
+        return xs.enumerated().compactMap { i, x in (try? curved.pixel(x: i, y: 0)).map { CurvePoint(x: x, y: $0.r) } }
     }
 }
 
@@ -55,6 +79,29 @@ extension PhotoWorkspace {
     public func composite() throws -> PixelBuffer {
         guard let canvas else { throw RasterError.invalid("no image is open") }
         return try rendered(canvas.rect)
+    }
+
+    /// Rec. 709 luminance of the image as it enters Curves (the layers
+    /// composited, then exposure and levels), in 256 bins scaled so the
+    /// tallest is 1: the histogram the curve editor draws behind the curve.
+    /// Empty with no image open; all zeros when every pixel is transparent.
+    /// Cost: it reads at most 256 evenly spaced rows, so about 256 x width
+    /// pixels composited, adjusted and counted, whatever the image's height.
+    public func curvesHistogram() -> [Double] {
+        guard let canvas else { return [] }
+        var counts = [Int](repeating: 0, count: 256)
+        // ponytail: recounts every sampled row on each call; cache counts per
+        // tile by damage(since:) if it shows up in a drag profile.
+        for y in stride(from: 0, to: canvas.height, by: (canvas.height + 255) / 256) {
+            let row = PixelRect(x: 0, y: y, width: canvas.width, height: 1)
+            // Can't fail: the same pixels render on the canvas.
+            guard let pixels = try? adjustments.appliedBeforeCurves(to: composited(row)),
+                let histogram = try? Histogram(of: pixels, bins: counts.count)
+            else { continue }
+            counts = zip(counts, histogram.luminance).map(+)
+        }
+        let tallest = Double(counts.max() ?? 0)
+        return counts.map { tallest > 0 ? Double($0) / tallest : 0 }
     }
 
     /// `rect` of the canvas, composited and adjusted.
