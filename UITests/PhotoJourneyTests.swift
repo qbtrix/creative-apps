@@ -9,7 +9,9 @@
 // the audit knows. Another journey edits with every other tool,
 // one straightens the image by 3 degrees from the Image menu, and the Curves
 // journey drags the curve up and nudges it with an arrow key, each one
-// "Undo Curves" step that changes the canvas. The Save As journey (to the
+// "Undo Curves" step that changes the canvas. A section off its defaults shows
+// Reset over its header (the audit's overlap check), so Curves, Levels and
+// Hue/Saturation edits are undone before their shots. The Save As journey (to the
 // folder given with -PhotoSaveTo, so no save panel) checks the window then
 // holds the copy and Save writes it, and that Command-1 shows 100%. Run order
 // is by name, so testTier1UndoRedoZoomPan runs last and attaches the audit
@@ -40,16 +42,19 @@ final class PhotoJourneyTests: XCTestCase {
         let canvas = photo.element("suite.canvas")
         let before = canvas.screenshot().pngRepresentation
 
-        photo.drag(on: "photo.curves", from: CGVector(dx: 0.5, dy: 0.5), to: CGVector(dx: 0.5, dy: 0.25), step: "curves-dragged")
+        // No shot while Curves is off its defaults: its Reset icon sits over the
+        // section header (the audit's overlap check), so Command-Z comes first.
+        photo.drag(on: "photo.curves", from: CGVector(dx: 0.5, dy: 0.5), to: CGVector(dx: 0.5, dy: 0.25))
         XCTAssert(photo.app.buttons["Undo Curves"].waitForExistence(timeout: 5), "the curve drag made no Curves step")
         XCTAssert(Self.waitUntil { canvas.screenshot().pngRepresentation != before }, "the curve didn't change the canvas")
 
         // The drag left the curve focused on its new point: an arrow nudges it, as its own step.
         photo.app.typeKey(.upArrow, modifierFlags: [])
-        photo.shot("curves-nudged")
-        photo.click("Undo Curves", in: .window, step: "curves-nudge-undone")
+        photo.click("Undo Curves", in: .window)
         XCTAssert(photo.app.buttons["Redo Curves"].waitForExistence(timeout: 5), "the nudge made no Curves step")
         XCTAssert(photo.app.buttons["Undo Curves"].exists, "the nudge and the drag were one undo step")
+        undoToDefaults("Curves", photo)
+        photo.shot("curves-undone")
     }
 
     @MainActor func testEveryMenuOpens() {
@@ -162,15 +167,17 @@ final class PhotoJourneyTests: XCTestCase {
         XCTAssertEqual(try Data(contentsOf: file), original, "Save after Save As wrote over the opened tools.PNG")
         photo.shot("saved-copy")
 
-        // At 100% the 600 x 800 px image is 600 x 800 points. The status line's
-        // "Zoom N%" is no query: XCUITest reads that SwiftUI text as empty.
+        // suite.canvas is the scrollable area: the viewport, or the image plus a
+        // 32 pt margin each side once that is larger. At 100% the 600 x 800 px
+        // image makes it 864 pt tall, past the runner's viewport.
         let canvas = photo.element("suite.canvas")
+        let fitted = canvasPixels(photo)
         photo.app.typeKey("-", modifierFlags: .command)
-        XCTAssert(Self.waitUntil { canvas.frame.width < 599 }, "Command-- didn't zoom out below 100% (\(canvas.frame.size))")
+        XCTAssert(canvasChanged(from: fitted, photo), "Command-- didn't zoom out (the canvas looks the same)")
         photo.shot("zoomed-out")
         photo.app.typeKey("1", modifierFlags: .command)
-        let actual = { abs(canvas.frame.width - 600) < 1 && abs(canvas.frame.height - 800) < 1 }
-        XCTAssert(Self.waitUntil(actual), "Command-1 didn't show the image at 100% (\(canvas.frame.size))")
+        let actual = { abs(canvas.frame.height - 864) < 1 }
+        XCTAssert(Self.waitUntil(actual), "Command-1 didn't show the image at 100% (\(canvas.frame.size); 100% is 864 pt tall)")
         photo.shot("actual-size")
     }
 
@@ -212,9 +219,10 @@ final class PhotoJourneyTests: XCTestCase {
         angle.click()
         angle.typeKey("a", modifierFlags: .command)
         angle.typeText("3")
-        let newSize = photo.app.sheets.staticTexts.matching(NSPredicate(format: "label BEGINSWITH 'New size '")).firstMatch
+        // XCUITest reads a SwiftUI Text's words as its value, not its label.
+        let newSize = photo.app.sheets.staticTexts.matching(NSPredicate(format: "value BEGINSWITH 'New size '")).firstMatch
         XCTAssert(newSize.waitForExistence(timeout: 5), "the sheet doesn't say the new size")
-        let size = String(newSize.label.dropFirst("New size ".count))
+        let size = String(((newSize.value as? String) ?? "").dropFirst("New size ".count))
         XCTAssertNotEqual(size, "800 × 600 px", "3 degrees didn't change the new size")
         photo.shot("straighten-preview")
 
@@ -274,8 +282,8 @@ final class PhotoJourneyTests: XCTestCase {
         photo.app.typeKey("[", modifierFlags: [.command, .option])
         photo.shot("layer-selected")
         photo.click("Rename Layer…", in: .window)
-        // The alert's Rename shows up twice in the tree; either one is the button.
-        let rename = photo.app.buttons["Rename"].firstMatch
+        // In a window, not the alert's Touch Bar copy of the button.
+        let rename = photo.app.windows.buttons["Rename"].firstMatch
         XCTAssert(rename.waitForExistence(timeout: 5), "Rename Layer… showed no Rename button")
         let name = photo.app.textFields
             .matching(NSPredicate(format: "identifier == %@ OR placeholderValue == %@", "photo.layer.name", "Name")).firstMatch
@@ -327,13 +335,13 @@ final class PhotoJourneyTests: XCTestCase {
         expect("Undo Exposure", photo, "typing 1 into Exposure made no Exposure step")
         photo.shot("tone-exposure-typed")
 
-        // Until #517 a Reset icon overlaps its section header (audit), so Levels and Hue/Saturation reset before their shots.
+        // A section off its defaults shows Reset over its header (audit overlap), so Levels and Hue/Saturation undo before their shots.
         var before = canvasPixels(photo)
         drag("Black", by: 0.25, photo)
         expect("Undo Levels", photo, "dragging Black made no Levels step")
         XCTAssert(canvasChanged(from: before, photo), "dragging Black didn't change the picture")
-        reset("Levels", photo)
-        photo.shot("tone-levels")
+        undoToDefaults("Levels", photo)
+        photo.shot("tone-levels-undone")
 
         // Curves sits between Levels and Hue/Saturation; folding it brings Hue/Saturation into view.
         photo.click("Curves", in: .window)
@@ -345,8 +353,8 @@ final class PhotoJourneyTests: XCTestCase {
         before = canvasPixels(photo)
         typeValue("-80", into: "Saturation", photo)
         XCTAssert(canvasChanged(from: before, photo), "typing -80 into Saturation didn't change the picture")
-        reset("Hue/Saturation", photo)
-        photo.shot("tone-hue-saturation")
+        undoToDefaults("Hue/Saturation", photo)
+        photo.shot("tone-hue-saturation-undone")
     }
 
     @MainActor func testTier1UndoRedoZoomPan() throws {
@@ -388,18 +396,16 @@ final class PhotoJourneyTests: XCTestCase {
         photo.shot("history-redo-button")
 
         // Zoom in by key and by button until the image overflows, pan, zoom out,
-        // fit. The zoom is read off the artboard: its width on screen is the
-        // image's width times the zoom.
+        // fit. suite.canvas is the scrollable area: the viewport, or the image
+        // plus a 32 pt margin once that is larger. Every zoom step changes the
+        // picture, and past the viewport the area grows.
         let canvas = photo.element("suite.canvas")
         XCTAssert(canvas.waitForExistence(timeout: 5), "no canvas (suite.canvas)")
-        let fit = canvas.frame.width
-        photo.app.typeKey("=", modifierFlags: .command)
-        var level = zoomed(from: fit, larger: true, photo, "Command-= didn't zoom in")
+        let fit = canvas.frame.size
+        zoom({ photo.app.typeKey("=", modifierFlags: .command) }, photo, "Command-= didn't zoom in")
         photo.shot("zoom-in-key")
-        for _ in 0..<2 {
-            photo.click("Zoom In", in: .window)
-            level = zoomed(from: level, larger: true, photo, "the top bar's Zoom In didn't zoom in")
-        }
+        for _ in 0..<2 { zoom({ photo.click("Zoom In", in: .window) }, photo, "the top bar's Zoom In didn't zoom in") }
+        XCTAssert(canvas.frame.height > fit.height + 100, "zooming in didn't outgrow the viewport (\(canvas.frame.size), fit \(fit))")
         photo.shot("zoom-in")
 
         // Scrolling over the image pans it; which way a wheel delta goes is the
@@ -413,13 +419,13 @@ final class PhotoJourneyTests: XCTestCase {
         XCTAssert(photo.app.buttons["Undo New Layer"].exists, "panning changed the undo history")
         photo.shot("panned")
 
-        photo.click("Zoom Out", in: .window)
-        level = zoomed(from: level, larger: false, photo, "the top bar's Zoom Out didn't zoom out")
+        let zoomedIn = canvas.frame.height
+        zoom({ photo.click("Zoom Out", in: .window) }, photo, "the top bar's Zoom Out didn't zoom out")
+        XCTAssert(Self.waitUntil { canvas.frame.height < zoomedIn - 1 }, "Zoom Out didn't make the image smaller")
         photo.shot("zoom-out")
         photo.app.typeKey("0", modifierFlags: .command)
-        XCTAssert(
-            Self.waitUntil { abs(canvas.frame.width - fit) <= 1 },
-            "Command-0 didn't fit the image again (\(Int(canvas.frame.width)) pt wide, fit was \(Int(fit)))")
+        let fitted = { abs(canvas.frame.width - fit.width) <= 1 && abs(canvas.frame.height - fit.height) <= 1 }
+        XCTAssert(Self.waitUntil(fitted), "Command-0 didn't fit the image again (\(canvas.frame.size), fit was \(fit))")
         photo.shot("zoom-fit")
     }
 
@@ -502,21 +508,23 @@ final class PhotoJourneyTests: XCTestCase {
         Self.waitUntil { canvasPixels(photo) != before }
     }
 
-    /// Waits for the artboard to grow (or shrink) from `width` points; returns its new width.
-    @MainActor private func zoomed(from width: CGFloat, larger: Bool, _ photo: Journey, _ message: String) -> CGFloat {
-        let canvas = photo.element("suite.canvas")
-        XCTAssert(
-            Self.waitUntil { larger ? canvas.frame.width > width + 1 : canvas.frame.width < width - 1 },
-            "\(message) (the image stayed \(Int(width)) pt wide)")
-        return canvas.frame.width
+    /// Does `action` and waits for the canvas picture to change, as every zoom step does.
+    @MainActor private func zoom(_ action: () -> Void, _ photo: Journey, _ message: String) {
+        let before = canvasPixels(photo)
+        action()
+        XCTAssert(canvasChanged(from: before, photo), "\(message) (the canvas looks the same)")
     }
 
-    /// Clicks section `title`'s Reset and waits for it to go (the section is back at its defaults).
-    @MainActor private func reset(_ title: String, _ photo: Journey) {
+    /// Presses Command-Z until section `title` is back at its defaults (its Reset icon goes), at most three times.
+    @MainActor private func undoToDefaults(_ title: String, _ photo: Journey) {
         let reset = photo.app.buttons["Reset \(title)"]
         XCTAssert(reset.waitForExistence(timeout: 5), "the \(title) section shows no Reset after an edit")
-        reset.click()
-        XCTAssert(reset.waitForNonExistence(timeout: 5), "Reset \(title) didn't put \(title) back to its defaults")
+        for _ in 0..<3 where reset.exists {
+            photo.app.typeKey("z", modifierFlags: .command)
+            _ = reset.waitForNonExistence(timeout: 2)
+        }
+        XCTAssertFalse(reset.exists, "Command-Z didn't take \(title) back to its defaults")
+        expect("Redo \(title)", photo, "Command-Z didn't undo \(title)")
     }
 
     // MARK: Files
