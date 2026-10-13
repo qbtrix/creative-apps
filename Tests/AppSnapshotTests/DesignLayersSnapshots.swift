@@ -22,13 +22,25 @@ import Testing
         for scheme in [ColorScheme.light, .dark] {
             try snapshot(LayersRows(model: model), name: "design-layers-\(scheme == .dark ? "dark" : "light")", scheme: scheme)
         }
-        // Collapsing the group hides its two shapes; its toggle turns to a right chevron.
+        // Collapsing the group hides its two shapes; its toggle turns to a right chevron, drawn at the
+        // same emphasis and in the same column as the expanded Desktop's down chevron.
         try model.setExpanded(group, false)
         for scheme in [ColorScheme.light, .dark] {
             try snapshot(
                 LayersRows(model: model), name: "design-layers-collapsed-\(scheme == .dark ? "dark" : "light")",
                 scheme: scheme)
         }
+    }
+
+    /// Collapsed is not an inactive state: the expand toggle is on in both states, so SidebarRow never
+    /// dims it, and both symbols are circled chevrons of one width (#122).
+    @Test func expandToggleKeepsEmphasisWhenCollapsed() {
+        let expanded = SidebarItem.designExpandToggle(isExpanded: true)
+        let collapsed = SidebarItem.designExpandToggle(isExpanded: false)
+        #expect(expanded.isOn && collapsed.isOn)
+        #expect(expanded.systemImage == "chevron.down.circle")
+        #expect(collapsed.systemImage == "chevron.right.circle")
+        #expect(expanded.title == "Collapse" && collapsed.title == "Expand")
     }
 }
 
