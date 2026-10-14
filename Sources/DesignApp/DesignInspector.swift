@@ -4,7 +4,9 @@
 // fields) and Fill (the color well; a text layer's is its text color, a group
 // has none). A locked layer, or one inside a locked group, can't be edited, so
 // Frame and Fill are disabled and a line says why. With only a page selected it shows the page's size,
-// read only. Values in, intents out; the model clamps and refuses what it must.
+// read only. With several layers selected it shows "Multiple layers selected"
+// where Frame and Fill's values go, disabled with the reason, since editing
+// several layers at once comes later (#413). Values in, intents out; the model clamps and refuses what it must.
 import DesignModel
 import SuiteUI
 import SwiftUI
@@ -16,7 +18,9 @@ struct DesignInspector: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 0) {
-                if let node = model.selectedNode {
+                if let help = model.multipleSelectionHelp {
+                    DesignMultipleProperties(count: model.selectedNodeIDs.count, help: help)
+                } else if let node = model.selectedNode {
                     DesignNodeProperties(
                         node: node, lockHelp: model.lockHelp(node.id), alignHelp: model.alignHelps, perform: perform
                     ).id(node.id)
@@ -89,6 +93,29 @@ private struct DesignNodeProperties: View {
                 frame[keyPath: field] = value
                 perform(.setFrame(node.id, x: frame.x, y: frame.y, width: frame.width, height: frame.height))
             }
+        }
+    }
+}
+
+/// Several selected layers: how many, and Frame and Fill disabled with why.
+private struct DesignMultipleProperties: View {
+    let count: Int
+    /// Why the fields don't edit (DesignWorkspace.multipleSelectionHelp).
+    let help: String
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            InspectorHeader("\(count) Layers")
+            ForEach(["Frame", "Fill"], id: \.self) { title in
+                InspectorSection(title) {
+                    InspectorRow(title) {
+                        Text("Multiple layers selected").foregroundStyle(SuiteColor.secondaryText)
+                    }
+                    .disabled(true)
+                    .help(help)
+                }
+            }
+            DesignPanelHint(help)
         }
     }
 }

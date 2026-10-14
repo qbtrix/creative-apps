@@ -18,6 +18,8 @@ enum DesignIntent {
     case nudge(DesignDirection, shift: Bool)
     case deleteSelection, deselect
     case select(String)
+    /// Shift-click: add the layer to the selection or take it out.
+    case toggleSelect(String)
     case setExpanded(String, Bool)
     case addPage, deletePage
     case setFrame(String, x: Double, y: Double, width: Double, height: Double)

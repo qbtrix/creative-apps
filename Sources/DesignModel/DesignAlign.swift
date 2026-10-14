@@ -80,6 +80,7 @@ extension DesignWorkspace {
     /// Why `edge` can't align the selected layer now, or nil when it can.
     public func alignHelp(_ edge: DesignAlignEdge) -> String? {
         guard let node = selectedNode else { return "Select a layer to align it." }
+        if let multipleSelectionHelp { return multipleSelectionHelp }
         if editingTextID != nil { return "Finish editing the text first." }
         if let lockHelp = lockHelp(node.id) { return lockHelp }
         if hasHiddenAncestor(node.id) { return "Show the group around this layer to align it." }

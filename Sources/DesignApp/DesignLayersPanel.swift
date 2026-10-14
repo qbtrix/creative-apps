@@ -3,7 +3,8 @@
 // a row under them, then the current page's layer tree, frontmost layer at the
 // top (`frontToBack`; the document keeps paint order). Selection runs through
 // the List, so arrow keys and type-select move through pages and layers; the
-// highlighted row is the selected layer, or the current page when no layer is.
+// highlighted rows are the selected layers, or the current page when no layer is.
+// Shift-click on a layer row adds it to the selection or takes it out (#413).
 // The current page always carries a checkmark, so the page you are editing,
 // the one Delete Page removes, stays marked while a layer holds the highlight.
 // A layer with children is a DisclosureGroup whose expanded state is the
@@ -58,12 +59,26 @@ struct DesignLayersPanel: View {
         Text(title).foregroundStyle(SuiteColor.textSecondary)
     }
 
-    /// Picking a row selects that page or layer; clicking empty space deselects the layer.
-    private var selection: Binding<String?> {
+    /// The highlighted rows: every selected layer, or the current page when no layer is.
+    private var highlighted: Set<String> {
+        model.selectedNodeIDs.isEmpty ? Set([model.selectedPageID].compactMap { $0 }) : Set(model.selectedNodeIDs)
+    }
+
+    /// Picking a row selects that page or layer; clicking empty space deselects the layer. A
+    /// Command-click toggles the rows it changes. A Shift-click is the row's own gesture, which
+    /// toggles that one layer, so the List's range extension is ignored.
+    private var selection: Binding<Set<String>> {
         Binding(
-            get: { model.selectedNodeID ?? model.selectedPageID },
-            set: { id in
-                if let id { perform(.select(id)) } else { perform(.deselect) }
+            get: { highlighted },
+            set: { ids in
+                guard !DesignModifiers.current.contains(.shift) else { return }
+                if ids.count == 1, let id = ids.first {
+                    perform(.select(id))
+                } else if ids.isEmpty {
+                    perform(.deselect)
+                } else {
+                    for id in ids.symmetricDifference(highlighted) { perform(.toggleSelect(id)) }
+                }
             })
     }
 
@@ -155,6 +170,7 @@ private struct DesignLayerRow: View {
         .lineLimit(1)
         .truncationMode(.middle)
         .foregroundStyle(model.isHiddenInTree(id) ? SuiteColor.secondaryText : Color.primary)
+        .simultaneousGesture(TapGesture().modifiers(.shift).onEnded { perform(.toggleSelect(id)) })
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("design.layer.\(id)")
     }
