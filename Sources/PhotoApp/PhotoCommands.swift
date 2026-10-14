@@ -5,7 +5,8 @@
 // Layer Above and Below; View: Zoom In, Zoom Out, Actual Size, Fit on Screen.
 // The focused window publishes a PhotoMenu (what can run now, and where to
 // send it) as a focused scene value; an item that can't run is disabled, never
-// hidden. Every top bar command is here too.
+// hidden. Every top bar command is here too. Select > All is off while the
+// window shows a sheet, so Command-A reaches the sheet's text field (#575).
 import PhotoModel
 import SwiftUI
 
@@ -27,12 +28,15 @@ struct PhotoMenu {
     /// A layer sits below the selected one (Send Backward, Select Layer Below).
     var canSendBackward = false
     var selectedLayer: PhotoLayer.ID?
+    /// Select > All selects the canvas: an image is open and no sheet covers it.
+    var canSelectAll = false
 
     init() {}
 
-    init(model: PhotoWorkspace, perform: @escaping PhotoPerform) {
+    init(model: PhotoWorkspace, sheetPresented: Bool = false, perform: @escaping PhotoPerform) {
         self.perform = perform
         hasImage = model.canvas != nil
+        canSelectAll = hasImage && !sheetPresented
         canUndo = model.canUndo
         canRedo = model.canRedo
         undoTitle = model.undoActionName
@@ -90,7 +94,7 @@ struct PhotoCommands: Commands {
             Button("Fill Selection") { menu.perform(.fillSelection) }.disabled(!menu.canEditSelection)
         }
         CommandMenu("Select") {
-            Button("All") { menu.perform(.selectAll) }.keyboardShortcut("a").disabled(!menu.hasImage)
+            Button("All") { menu.perform(.selectAll) }.keyboardShortcut("a").disabled(!menu.canSelectAll)
             Button("Deselect") { menu.perform(.deselect) }.keyboardShortcut("d").disabled(!menu.canDeselect)
         }
         CommandMenu("Image") {

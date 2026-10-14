@@ -8,7 +8,8 @@
 // undo names, sizes and layer counts by the panel header, values XCUITest
 // can't read by the canvas pixels; tier-1 files are named tools.png, a name
 // the audit knows. Another journey edits with every other tool,
-// one straightens the image by 3 degrees from the Image menu, and the Curves
+// one straightens the image by 3 degrees from the Image menu (typed after
+// Command-A, which selects the canvas only while no sheet is up), and the Curves
 // journey drags the curve up and nudges it with an arrow key, each one
 // "Undo Curves" step that changes the canvas. Curves, Levels and
 // Hue/Saturation are shot right after their edits, then undone back to their
@@ -261,14 +262,28 @@ final class PhotoJourneyTests: XCTestCase {
         let photo = Journey("Photo", self, arguments: ["-PhotoOpenFile", file.path])
         XCTAssert(photo.app.windows["straighten.png"].waitForExistence(timeout: 30), "straighten.png didn't open")
         XCTAssert(photo.app.staticTexts["800 × 600 px"].waitForExistence(timeout: 5), "the status bar shows no image size")
+        // With no sheet up, Command-A selects the canvas.
+        let selection = photo.app.staticTexts.matching(
+            NSPredicate(format: "label CONTAINS 'Selection 800 × 600' OR value CONTAINS 'Selection 800 × 600'")
+        ).firstMatch
+        photo.app.typeKey("a", modifierFlags: .command)
+        XCTAssert(selection.waitForExistence(timeout: 5), "Command-A didn't select the canvas")
+        photo.app.typeKey("d", modifierFlags: .command)
+        XCTAssert(Self.waitUntil { !selection.exists }, "Command-D didn't deselect")
 
         photo.app.menuBars.menuBarItems["Image"].click()
         photo.app.menuBars.menuItems["Straighten…"].click()
         let angle = photo.element("photo.straighten.angle")
         XCTAssert(angle.waitForExistence(timeout: 5), "no Angle field in the Straighten sheet")
         photo.shot("straighten-sheet")
-        // Not Command-A: Select > All takes it from the field (#575).
-        replaceText(in: angle, with: "3", photo)
+        // Select > All is off while the sheet is up, so Command-A selects the field's text (#575).
+        photo.app.menuBars.menuBarItems["Select"].click()
+        XCTAssertFalse(photo.app.menuBars.menuItems["All"].isEnabled, "Select > All is on behind the Straighten sheet")
+        photo.app.typeKey(.escape, modifierFlags: [])
+        angle.click()
+        photo.app.typeKey("a", modifierFlags: .command)
+        photo.app.typeText("3")
+        XCTAssertFalse(selection.exists, "Command-A in the Angle field selected the canvas")
         // XCUITest reads a SwiftUI Text's words as its value, not its label.
         let newSize = photo.app.sheets.staticTexts.matching(NSPredicate(format: "value BEGINSWITH 'New size '")).firstMatch
         XCTAssert(newSize.waitForExistence(timeout: 5), "the sheet doesn't say the new size")
