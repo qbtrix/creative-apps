@@ -70,7 +70,10 @@ In `UITests/DesignJourneyTests+Style.swift`, class
 `StyleEditing` (blueprint 5.4) filled by `Sources/DesignModel/Live/LiveStyling.swift`.
 Rules beyond the fake's: locked or hidden-in-tree layers refuse with
 `.locked(name)` / `.hidden(name)`; `setCornerRadius` skips kinds without
-corners in a mixed selection and throws `.noCorners` when none take it;
+corners in a mixed selection and throws `.noCorners(name)` ("E2 has no
+corners to round.") when none take it; with one layer selected the row
+keeps #753's `setCornerRadius` and its per-kind help ("An ellipse has no
+corners to round."), as the "nothing that works today goes off" rule says;
 `setTextStyle` skips non-text layers and throws `.notText` when none are
 text; clamps are 5.4's. Model additions in `DesignInspectorContent.swift`:
 
@@ -96,7 +99,7 @@ LiveStyling.setX(value, ids, page):
 
 view row (DesignInspectorStyle):
   value = model.sharedValue(\.opacity)            # nil → mixed: true
-  InspectorSliderRow("Opacity", value: v ?? 1, in: 0...100, unit: "%", decimals: 0, mixed: v == nil,
+  InspectorSliderRow("Opacity", value: (v ?? 1) * 100, in: 0...100, unit: "%", decimals: 0, mixed: v == nil,
                      onChange: { perform(.setStyle(.opacity($0 / 100))) }, onEnd: { perform(.endEditRun) })
   .disabled(model.styleHelp(.opacity) != nil).help(model.styleHelp(.opacity) ?? "")
 
@@ -118,7 +121,7 @@ carries `feature-done`. Paths drop `Sources/DesignModel/` and
 |---|---|---|---|---|---|
 | ST-1 | #752 (Model part), #267 (Model part) | `LiveStyling`: every setter over ids with the refusals and clamps | `Live/LiveStyling.swift`, `DesignCorners.swift` (its help reused for several layers); tests `DesignStyleTests.swift` | – | ~330, 3 |
 | ST-2 | #276 (Model part) | Shared values and "Mixed", opacity text, the hint's text per row | `DesignInspectorContent.swift`; tests `DesignInspectorSharedValueTests.swift` | – | ~180, 2 |
-| ST-3 | #268 (Model part) | `textEditScale` follows the zoom; the editor's frame equals the committed frame | `DesignText.swift`; tests `DesignTextScaleModelTests.swift` | – | ~120, 2 |
+| ST-3 | #268 (Model part) | `textEditScale` follows the zoom; the editor's frame equals the committed frame | `DesignText.swift`; tests `DesignTextScaleModelTests.swift`, `DesignCompactSelectionTests.swift` (existing: its `textEditScale(zoom: 0.43) == 1` assert becomes 0.43) | – | ~130, 3 |
 | ST-4 | #752, #267, #276 (view part) | Style rows: Layer (Opacity), Corner radius, Stroke (add, color, width, remove), Text (family `Picker`, size, weight and alignment `ChoiceChips`); the hint in the value column; one `onEnd` per run | `DesignInspector.swift`, `DesignInspectorStyle.swift`; snapshots `DesignInspectorSnapshots.swift`, `DesignStyleSnapshots.swift` | ST-1, ST-2 | ~380, 4 |
 | ST-5 | #268 (closes), #266 (closes) | Artwork draws radius, stroke and opacity; the editor at canvas scale; frame names in `DesignFrameLabels` | `DesignCanvasMarks.swift`, `DesignFrameLabels.swift`, `DesignTextEditor.swift`; snapshots `DesignTextSnapshots.swift`, `Tests/AppSnapshotTests/DesignArtworkPathTests.swift`, `Tests/AppSnapshotTests/DesignTextScaleTests.swift` | ST-3 | ~330, 6 |
 | ST-6 | #752, #267, #276 (close all three) | J10, J11 | `UITests/DesignJourneyTests+Style.swift` | ST-4, ST-5 | ~250, 1 |

@@ -25,8 +25,10 @@ Model half does not, so it ships as two features in a chain: wave 0a
 | 2 | The tier-2 seam | `design-seams-2.md` | – | all five wave-1 features | file when ready |
 
 No Design feature issue is filed yet: every feature waits on an open
-dependency (below). #288 closes when the `identifier` count reaches 0,
-through the parts each feature carries.
+dependency (below). #288 closes when Design's `identifier` count reaches 0:
+each wave-1 lead reads the count on its `feature-done` run, and the one
+whose run reaches 0 carries `Closes #288` in its last PR (or files the
+remainder as a `gap` issue if wave 1 ends above 0).
 
 ## File when ready
 
@@ -49,15 +51,22 @@ contract below.
 | design-seams-2 | Feature: design-seams-2 | p2 (tier 2) | all five wave-1 feature issues closed | `Depends on: <files-history issue> (closed)`; the body lists the other four |
 
 Housekeeping before wave 0a (review of #766, blueprint Q6): close PR #719,
-whose fix shipped as #749, and rebase #753.
+whose fix shipped as #749, and rebase #753, dropping its `docs/c4/model.json`
+edit on the rebase (the supervisor folds it in with the rest), or keeping it
+as a captain-approved exception.
 
 ## Why this order
 
 - **Wave 0a takes every shared Model file once** (`DesignNode.swift`,
   `DesignWorkspace.swift`, `DesignServices.swift`, the contracts, the
   actions, the gesture routes) and backs each new slot with `NotBuilt`,
-  so nothing that works today goes off and no later feature edits those
-  seams. It needs no SuiteUI and no engine, so it can start as soon as
+  so nothing that works today goes off and no later feature has to add a
+  case, slot or stored field. Wave 1 still edits some of these files for
+  its own behavior, as a deliberate change from the blueprint's 8.2 table:
+  select-several takes `DesignActions.swift`, `DesignActions+Edit.swift`
+  and `DesignCanvasEditing.swift` (the #542 guard on the public entry
+  points), and layers-panel takes `DesignWorkspace.swift` (#613); no two
+  wave-1 features share one. It needs no SuiteUI and no engine, so it can start as soon as
   #753 merges.
 - **Wave 0b takes every shared window file once** (`DesignIntent.swift`,
   `DesignWindow.swift`, `DesignCommands.swift`, the menus) and puts every

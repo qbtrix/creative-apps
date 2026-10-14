@@ -46,10 +46,11 @@ Blueprint sections: 5.1 (D2-1's schema), 5.4 tier 2, 5.6, 5.7's
 1. **J1** `testEveryMenuOpens` (exists; D2-4b extends it): File holds
    Export… ⇧⌘E; Object holds Create Component ⌥⌘K; View holds Light / Dark
    preview and Variables…; each is disabled with its "isn't built yet."
-   reason (Export, Components, Variables) or "Select a frame first." help
-   where the fake would refuse.
+   reason on the live services ("Export isn't built yet.", "Components
+   isn't built yet.", "Variables isn't built yet.").
 2. **J2** `testNewFileAndEveryTool` (exists, unchanged): Pen stays disabled
-   with its reason, now "The Pen tool isn't built yet." from `NotBuilt`.
+   with its existing reason, "Drawing paths isn't built yet."
+   (`DesignTool.pen.unavailableHelp`); F7 clears it.
 3. **Model walk** `DesignSeams2JourneyTests` (D2-3b, Linux) on `.fake`:
    press, drag and finish a three-anchor pen path ("Add Path"); create a
    component from Desktop and insert it at the canvas center ("Create
@@ -147,7 +148,7 @@ carries `feature-done`. Paths drop `Sources/DesignModel/` and
 | id | issue | what | owned files | depends on | size |
 |---|---|---|---|---|---|
 | D2-1a | – | `case path` with every switch over the kind (a placeholder in the artwork); `path` on the node | `DesignNode.swift`, `DesignInspectorContent.swift`, `DesignCorners.swift`, `DesignCanvasMarks.swift`; tests `DesignPathKindTests.swift` | – | ~150, 5 |
-| D2-1b | – | `componentID`, `fillVariableID`; file `components` and `variables`; version 2 with version 1 still opening; snapshots carry the library | `DesignNode.swift`, `DesignFile.swift`, `Live/LiveFiling.swift`, `DesignHistory.swift`, `DesignWorkspace.swift`; tests `DesignTierTwoSchemaTests.swift` | D2-1a | ~300, 6 |
+| D2-1b | – | `componentID`, `fillVariableID`; file `components` and `variables`; version 2 with version 1 still opening; snapshots carry the library | `DesignNode.swift`, `DesignFile.swift`, `Live/LiveFiling.swift`, `DesignHistory.swift`, `DesignWorkspace.swift`; tests `DesignTierTwoSchemaTests.swift`, and the existing version-1 byte checks it moves to version 2: `DesignFilingTests.swift`, `DesignFileTests.swift`, `DesignFixturesTests.swift` | D2-1a | ~360, 9 |
 | D2-2 | – | Tier-2 fakes and live stubs; `.fake` and `.live` name them; the law over them | `Fakes/DesignTierTwoFakes.swift`, `Live/LiveExport.swift`, `Live/LivePen.swift`, `Live/LiveComponents.swift`, `Live/LiveVariables.swift`, `DesignServices.swift`; tests `DesignContractLawTierTwoTests.swift` | D2-1b | ~380, 7 |
 | D2-3a | – | Export, component and variable actions, `previewMode`, `displayFill`, `resolvedChildren` | `DesignActions+TierTwo.swift`; tests `DesignActionsTierTwoTests.swift` | D2-2 | ~360, 2 |
 | D2-3b | – | Pen press, drag, finish and cancel routes; the Linux model walk | `DesignCanvasEditing.swift`, `DesignActions+TierTwo.swift`; tests `DesignPenRouteTests.swift`, `DesignSeams2JourneyTests.swift` | D2-3a | ~300, 4 |
