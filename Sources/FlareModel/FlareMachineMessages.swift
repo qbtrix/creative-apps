@@ -1,7 +1,8 @@
 // FlareMachineMessages.swift: the plain words `machineError` shows for a refused machine edit (#659). Each engine
 // refusal gets a short reason; the engine's validation failures, which arrive as `invalidDocument` carrying the step
 // label and the format error's debug text, are read back into the broken rule. A message the fake wrote for a person
-// passes through, and anything else gets a generic line, so a raw debug description never reaches the Inspector.
+// passes through, and anything else gets a generic line, so a raw debug description never reaches the Inspector. The
+// rule is unescaped first, so a quote, backslash or tab in a label or input name reads as typed (#680).
 import FlareCore
 
 extension FlareWorkspace {
@@ -46,7 +47,7 @@ extension FlareWorkspace {
     /// a message without that shape was written for a person and passes through.
     private static func validationMessage(_ message: String) -> String {
         guard let open = message.firstRange(of: ": invalid(\""), message.hasSuffix("\")") else { return message }
-        var rule = message[open.upperBound...].dropLast(2)
+        var rule = unescaped(message[open.upperBound...].dropLast(2))
         guard rule.hasPrefix("state machine "), let colon = rule.firstRange(of: ": ") else { return machineRefused }
         rule = rule[colon.upperBound...]
         if let id = between(rule, "duplicate state id ", "") { return "\(id) is already a state." }
@@ -72,6 +73,34 @@ extension FlareWorkspace {
             return "\(name) is a true or false input, so its condition can only test equal."
         }
         return machineRefused
+    }
+
+    /// `text` with the escapes of a Swift string's debug description (`\\`, `\"`, `\'`, `\t`, `\n`, `\r`, `\0` and
+    /// `\u{…}`) turned back into the characters they stand for.
+    private static func unescaped(_ text: Substring) -> Substring {
+        var scalars = String.UnicodeScalarView()
+        var rest = text.unicodeScalars[...]
+        while let scalar = rest.popFirst() {
+            guard scalar == "\\", let code = rest.popFirst() else { scalars.append(scalar); continue }
+            switch code {
+            case "t": scalars.append("\t")
+            case "n": scalars.append("\n")
+            case "r": scalars.append("\r")
+            case "0": scalars.append("\0")
+            case "u":
+                if rest.first == "{", let close = rest.firstIndex(of: "}"),
+                   let value = UInt32(String(rest[rest.index(after: rest.startIndex)..<close]), radix: 16),
+                   let decoded = Unicode.Scalar(value) {
+                    scalars.append(decoded)
+                    rest = rest[rest.index(after: close)...]
+                } else {
+                    scalars.append(scalar)
+                    scalars.append(code)
+                }
+            default: scalars.append(code)
+            }
+        }
+        return Substring(String(scalars))
     }
 
     /// The text of `rule` between `prefix` and `suffix`, or, when `partial`, between `prefix` and the first `suffix`.
