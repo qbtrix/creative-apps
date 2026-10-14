@@ -10,7 +10,8 @@
 // from their Model's tool enum through PaletteTool, which carries that reason
 // and the shortcut for every tool. The palette is one accessibility
 // container, `suite.tools`, so the UI journeys in UITests/ can click every
-// tool in it without listing them.
+// tool in it without listing them. An action with an `identifier` carries it
+// as its accessibility identifier and lists itself in `suite.controls`.
 import SwiftUI
 
 public struct ToolbarAction: Identifiable {
@@ -23,13 +24,16 @@ public struct ToolbarAction: Identifiable {
     public let unavailableHelp: String?
     /// The key that picks it while the canvas has focus, shown in the tooltip.
     public let shortcut: Character?
+    /// The control's accessibility identifier and `suite.controls` id; nil
+    /// leaves it unidentified and unlisted.
+    public var identifier: String?
     public let perform: @MainActor () -> Void
 
     /// `title` is also the id, the tooltip and the accessibility label, so it
     /// must be unique within a group.
     public init(
         _ title: String, systemImage: String, isSelected: Bool = false, unavailableHelp: String? = nil,
-        shortcut: Character? = nil, perform: @escaping @MainActor () -> Void = {}
+        shortcut: Character? = nil, identifier: String? = nil, perform: @escaping @MainActor () -> Void = {}
     ) {
         self.id = title
         self.title = title
@@ -37,6 +41,7 @@ public struct ToolbarAction: Identifiable {
         self.isSelected = isSelected
         self.unavailableHelp = unavailableHelp
         self.shortcut = shortcut
+        self.identifier = identifier
         self.perform = perform
     }
 
@@ -114,6 +119,7 @@ public struct ToolbarGroup: View {
                 .help(action.help)
                 .accessibilityLabel(action.title)
                 .accessibilityAddTraits(isSelected ? .isSelected : [])
+                .suiteControl(action)
             }
         }
         .accessibilityElement(children: .contain)

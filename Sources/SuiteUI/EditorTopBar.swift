@@ -90,6 +90,7 @@ public struct EditorBarItem: View {
         .disabled(!action.isEnabled)
         .help(action.help)
         .accessibilityLabel(action.title)
+        .suiteControl(action)
     }
 }
 

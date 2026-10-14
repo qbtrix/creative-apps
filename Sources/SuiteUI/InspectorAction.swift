@@ -19,6 +19,7 @@ public struct InspectorAction: View {
         .buttonStyle(ActionStyle())
         .disabled(!action.isEnabled)
         .help(action.help)
+        .suiteControl(action)
     }
 
     private struct ActionStyle: ButtonStyle {
@@ -31,7 +32,7 @@ public struct InspectorAction: View {
         let configuration: ButtonStyleConfiguration
         @State private var hovering = false
         @Environment(\.isEnabled) private var isEnabled
-        @Environment(\.accessibilityReduceMotion) private var reduceMotion
+        @Environment(\.suiteReduceMotion) private var reduceMotion
 
         var body: some View {
             let shape = RoundedRectangle(cornerRadius: SuiteRadius.row)
