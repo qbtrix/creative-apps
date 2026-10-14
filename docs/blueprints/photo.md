@@ -137,17 +137,17 @@ circle is #588).
 
 | Issue | Labels | What it covers |
 |---|---|---|
-| #79 | bug, p3 | Adjustments inspector rows don't line up (ragged slider and field columns) |
-| #252 | bug, p3 | Inspector no-image message splits "File > New Image" across two lines |
-| #253 | bug, p3 | Status bar says "No image" while canvas and inspector say "No Image Open" |
-| #255 | bug, p1 | Levels typing draft opens at two decimals (value change fixed by #525; what's left is cosmetic, and the fix is in SuiteUI's `ScrubField`) |
+| #79 | bug, gap, p3 | Adjustments inspector rows don't line up (ragged slider and field columns) |
+| #252 | bug, gap, p3 | Inspector no-image message splits "File > New Image" across two lines |
+| #253 | bug, gap, p3 | Status bar says "No image" while canvas and inspector say "No Image Open" |
+| #255 | bug, gap, p1 | Levels typing draft opens at two decimals (value change fixed by #525; what's left is cosmetic, and the fix is in SuiteUI's `ScrubField`) |
 | #289 | p2, needs-ui | Controls with no accessibility identifier (the audit counts 23 now) |
-| #421 | p2 | Ellipse and lasso selections, layer masks |
-| #544 | p2 | Type the crop size and lock its aspect ratio |
-| #580 | p2, needs-spec | Adjustment layers in the layer stack |
-| #586 | bug, p3, needs-human | A tone section's Reset icon is a 9 pt hit target (fix in SuiteUI's `InspectorSectionHeader`) |
-| #588 | p2 | Draw the brush cursor circle on the canvas |
-| #644 | p2 | History list (view half of #25) |
+| #421 | gap, p2 | Ellipse and lasso selections, layer masks |
+| #544 | gap, p2 | Type the crop size and lock its aspect ratio |
+| #580 | gap, p2, needs-spec | Adjustment layers in the layer stack |
+| #586 | bug, gap, p3, needs-human | A tone section's Reset icon is a 9 pt hit target (fix in SuiteUI's `InspectorSectionHeader`) |
+| #588 | gap, p2 | Draw the brush cursor circle on the canvas |
+| #644 | gap, p2 | History list (view half of #25) |
 
 ### 0.5 What is missing
 
@@ -322,6 +322,13 @@ Flare's LM-0a3 and F1 did:
   makes `PhotoWindow`'s stored state `internal` so the area files can reach
   it, and declares every v2 presentation flag (recovery offer, paste
   refusal text, transform mode, export options draft).
+- **Return and Escape route by mode.** The canvas key handler in
+  `PhotoEditor.swift` sends `.confirm` and `.dismiss` instead of
+  `.applyCrop` and `.cancelCrop`. `PhotoWindow.perform` asks
+  `confirmTransform()` and `dismissTransform()` (in
+  `PhotoWindow+Transform.swift`, stubs returning false) first, then falls
+  back to today's crop and deselect behavior, so PV-7 never edits
+  `PhotoEditor.swift`.
 - **Availability comes from services.** A control that needs a use case
   reads `model.services.<use case>.unavailableHelp`. `.live` starts as
   `NotBuilt` for every v2 use case ("Not built yet (PV-n)."), so a v2 menu
@@ -419,7 +426,10 @@ takes each bug's own label (#255 `p1`, the rest `p3`, #289 `p2`). #580 and
   wave can't both add journeys, so section 8 makes every wave-1 feature wait
   on #333 for its journey task only (its model and view tasks don't).
 - **Launch.** Live journeys write their input with the existing
-  `writeTestPhoto(to:)` helper and open it with `-PhotoOpenFile`; saves go to
+  `writeTestPhoto(to:)` helper, which PV-0 moves out of `PhotoJourneyTests`
+  (where it is `private static`) into `UITests/PhotoJourney+Fixtures.swift`
+  as an internal function every Photo journey class can call (PV-0 owns
+  both files), and open it with `-PhotoOpenFile`; saves go to
   `-PhotoSaveTo <folder>`, exports to `-PhotoExportTo <folder>`. Two new
   arguments (PV-0): `-PhotoFixture <name>` runs `.fake` services on a fixture
   (section 5.4) and shows a "Preview data" pill; `-PhotoRecoveryDir <folder>`
@@ -500,7 +510,7 @@ missing `data/layer-2.png`; one with a 20 MP layer, over the limit. Open each wi
 
 Assert the alert text is `ArchiveError.message` for the case ("This file
 isn't a Photo document.", "…made by a newer Photo (format 2)…", "This
-document is damaged: layers/layer-2.png is missing.", "This document is
+document is damaged: data/layer-2.png is missing.", "This document is
 larger than Photo can open."), and the empty state stays (or the document
 that was open stays open).
 
@@ -581,8 +591,9 @@ non-number keeps the old value and beeps; covered by the model tests).
    and the Edit menu reads "Undo Curves".
 3. Hide the row's eye: the canvas equals step 1's shot. Show it again.
 4. New Layer above it, brush: the brush stroke is not affected (above the
-   adjustment). Send Backward the adjustment twice to the bottom: the canvas
-   equals step 1's (nothing below it).
+   adjustment). Select the adjustment and Send Backward once: it is now
+   the bottom row, Send Backward is disabled, and the canvas shows the
+   stroke on the unadjusted photo (nothing below the adjustment).
 5. Opacity 0 on the adjustment: canvas equals step 1. Command-Z restores
    the opacity.
 6. Select Background: the Adjust tab shows the whole-image sections again,
@@ -607,7 +618,7 @@ can point at them.
 | PJ-14 | `testFreeTransformAndFlip` (`+Transform`, PV-7) | Command-T; drag the bottom-right handle out by half; drag outside a corner a quarter turn with Shift; Return; Edit > Transform > Flip Horizontal; Image > Flip Canvas Vertical | the transform box element; W% reads 150, angle 90; Return gives "Undo Free Transform"; Escape in a second round leaves the layer as it was; flips are exact (`testFlip…` model goldens) | loading: a transform over 12 MP shows "Transforming…" |
 | PJ-15 | `testExportAtSizeAsTIFFAndHEIC` (`+Export`, PV-8) | Export; TIFF; size 50%; Export; HEIC quality 70; longest side 400; Export | files exist with TIFF and HEIC headers; TIFF is 400 × 300; HEIC's longer side 400 | error: a longest side over 16384 disables Export with the reason; loading: "Exporting…" |
 | PJ-16 | `testEyedropperPicksColor` (`+Sample`, PV-9) | Eyedropper (I); click the sun; 5 × 5; click the sky; B | the brush color well's hex reads the sun's color, then the sky's mean; picking is not an undo step | empty: a click on a transparent pixel keeps the color and says "Nothing to sample here." |
-| PJ-17 | `testLayoutAtWidths` (`+Layout`, PV-10) | relaunch at each width in section 7.4 | the layout rules of section 7.4 at each width | none |
+| PJ-17 | `testLayoutAtWidths` (`+Layout`, PV-10) | relaunch at 880, 960 and 1024 pt (section 7.4) | the layout rules of section 7.4 at each width | none |
 
 ### 4.4 Fixtures
 
@@ -617,7 +628,7 @@ from disk, so the UI test target never builds a document file:
 | Fixture | Contents | Used by |
 |---|---|---|
 | `empty` | no image | the empty states |
-| `sample` | 800 × 600 sky, a yellow sun disc at (560, 220) r 60, a green field; one Background layer (the `writeTestPhoto` picture) | most journeys |
+| `sample` | the `writeTestPhoto` picture: 800 × 600, a sky gradient from blue at the top to orange at the bottom, a yellow sun disc centered at (560, 220) with radius 90; one Background layer | most journeys |
 | `layered` | `sample` plus "Paint" (a red stroke, Multiply, 60%), "Curves 1" (an adjustment layer), and a mask on Paint | PV-5, PV-6 views and snapshots |
 | `large` | 4000 × 3000 noise and gradients, three layers | PJ-P1–P3, model budgets |
 | `limit` (tests only) | 16 MP, eight layers each with a mask | `PhotoBudgetTests` |
@@ -888,7 +899,9 @@ public protocol LayerMerging: PhotoUseCase {
     func mergeDown(_ upper: LayerContent, onto lower: LayerContent) throws -> PlacedPixels
     /// Every visible layer, bottom-up, then `adjustments`, as one canvas-size
     /// layer: the same pixels Export writes before its format's background.
-    /// Each layer sits at its own `offsetX`, `offsetY`.
+    /// Each layer sits at its own `offsetX`, `offsetY`. The workspace resets
+    /// the whole-image adjustments to their defaults in the same step, since
+    /// they are now in the pixels.
     func flatten(_ layers: [LayerContent], canvas: CanvasSize, adjustments: AdjustmentSettings) throws -> TiledPixels
 }
 ```
@@ -1171,11 +1184,14 @@ public protocol ColorSampling: PhotoUseCase {
 
 ### 5.2 Services and fakes
 
-`Sources/PhotoModel/PhotoServices.swift` (PV-0). `.live` is built the same
-way from `Live<X>.make()` in each feature's `Live/` file, each returning a
-`NotBuilt` stand-in (`unavailableHelp` = "Not built yet (PV-n).") until its
-feature replaces it. `LiveServicesTests` (PV-0) fails when a member of
-`.live` is a `Fake` type, and lists which are still `NotBuilt`.
+`Sources/PhotoModel/PhotoServices.swift` (PV-0). `.live` is the workspace's
+default, so a test or a window that forgets to choose still runs the real
+code. It reads each member from its feature's file in `Live/`, which returns
+a `NotBuilt` stand-in (`unavailableHelp` = "Not built yet (PV-n).") until the
+feature replaces it. `.fake` makes new fake instances on every read, so no
+two workspaces (or two parallel tests) share a fake's state.
+`LiveServicesTests` (PV-0) fails when a member of `.live` is a `Fake` type,
+and lists which are still `NotBuilt`.
 
 ```swift
 // PhotoServices.swift: one value per v2 use case, the seam between the
@@ -1208,11 +1224,25 @@ public struct PhotoServices: Sendable {
     }
 
     /// Every use case on its fake: deterministic, instant, no file system.
-    public static let fake = PhotoServices(
-        archive: FakeArchive(), recovery: FakeRecovery(), clipboard: FakeClipboard(), merging: FakeMerging(),
-        crop: FakeCrop(), selection: FakeSelection(), masking: FakeMasking(),
-        adjustmentLayers: FakeAdjustmentLayers(), transform: FakeTransform(), exportSizing: FakeExportSizing(),
-        sampling: FakeSampling())
+    /// New instances on every read, so no two workspaces share a fake's state.
+    public static var fake: PhotoServices {
+        PhotoServices(
+            archive: FakeArchive(), recovery: FakeRecovery(), clipboard: FakeClipboard(), merging: FakeMerging(),
+            crop: FakeCrop(), selection: FakeSelection(), masking: FakeMasking(),
+            adjustmentLayers: FakeAdjustmentLayers(), transform: FakeTransform(), exportSizing: FakeExportSizing(),
+            sampling: FakeSampling())
+    }
+
+    /// Every use case on its live conformance, each from its feature's file
+    /// in `Live/` (a NotBuilt stand-in until the feature lands). The
+    /// workspace's default.
+    public static var live: PhotoServices {
+        PhotoServices(
+            archive: LiveDocuments.archive(), recovery: LiveDocuments.recovery(), clipboard: LiveEdit.clipboard(),
+            merging: LiveEdit.merging(), crop: LiveCrop.make(), selection: LiveSelection.selection(),
+            masking: LiveSelection.masking(), adjustmentLayers: LiveAdjustmentLayers.make(),
+            transform: LiveTransform.make(), exportSizing: LiveExportSizing.make(), sampling: LiveSampling.make())
+    }
 }
 ```
 
@@ -1224,8 +1254,11 @@ that still changes something a journey can see:
 // Fakes/PhotoFakes.swift: a fake per v2 contract, for building views and
 // journeys before the logic. Each is deterministic and does the least that
 // still changes something a journey can see, so no control looks dead on
-// fakes. None reads the file system. The real behavior is the Live types';
-// a test fails if `.live` holds any Fake (LiveServicesTests). Linux-safe.
+// fakes. None reads the file system, and none shares state with another
+// instance: `PhotoServices.fake` makes new ones on every read, so parallel
+// tests never see each other's documents. The real behavior is the Live
+// types'; a test fails if `.live` holds any Fake (LiveServicesTests).
+// Linux-safe.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -1234,13 +1267,10 @@ import Foundation
 import CoreRaster
 import Synchronization
 
-/// The fakes' text when a fake refuses on purpose.
-enum FakeText {
-    static let nothing = "Nothing to copy."
-}
-
-/// Writes the manifest as plain lines and each image as raw bytes, no codec.
-public struct FakeArchive: DocumentArchiving {
+/// Writes a one-line manifest and each image as raw bytes, no codec, and
+/// gives back the last snapshot this instance wrote.
+public final class FakeArchive: DocumentArchiving {
+    private let last = Mutex<PhotoDocumentSnapshot?>(nil)
     public var unavailableHelp: String? { nil }
     public var formatVersion: Int { 1 }
     public init() {}
@@ -1248,15 +1278,15 @@ public struct FakeArchive: DocumentArchiving {
     public func encode(_ snapshot: PhotoDocumentSnapshot, codec: any PhotoImageCodec) throws -> PhotoPackage {
         var files: [String: Data] = ["document.txt": Data("fake \(snapshot.canvas.width)x\(snapshot.canvas.height)".utf8)]
         for (id, image) in snapshot.pixels { files["layers/\(id).raw"] = Data(image.rgba8) }
-        FakeArchiveStore.shared.withLock { $0 = snapshot }
+        last.withLock { $0 = snapshot }
         return PhotoPackage(files: files)
     }
 
     public func decode(_ package: PhotoPackage, codec: any PhotoImageCodec) throws -> PhotoDocumentSnapshot {
-        guard package.files["document.txt"] != nil, let last = FakeArchiveStore.shared.withLock({ $0 }) else {
+        guard package.files["document.txt"] != nil, let snapshot = last.withLock({ $0 }) else {
             throw ArchiveError.notADocument
         }
-        return last
+        return snapshot
     }
 
     public func container(_ package: PhotoPackage) throws -> Data {
@@ -1267,11 +1297,6 @@ public struct FakeArchive: DocumentArchiving {
         guard String(decoding: data, as: UTF8.self).hasPrefix("fake ") else { throw ArchiveError.notADocument }
         return PhotoPackage(files: ["document.txt": data])
     }
-}
-
-/// The last snapshot FakeArchive wrote, so decode gives it back.
-enum FakeArchiveStore {
-    static let shared = Mutex<PhotoDocumentSnapshot?>(nil)
 }
 
 /// Keeps entries in memory per window.
@@ -1458,6 +1483,153 @@ public struct FakeSampling: ColorSampling {
 }
 ```
 
+The stand-ins, `Sources/PhotoModel/Live/NotBuilt.swift` (PV-0), and the
+shape of each feature's `Live/` file as PV-0 creates it (one enum per file:
+`LiveDocuments.swift`, `LiveEdit.swift`, `LiveCrop.swift`,
+`LiveSelection.swift`, `LiveAdjustmentLayers.swift`, `LiveTransform.swift`,
+`LiveExportSizing.swift`, `LiveSampling.swift`; shown here together):
+
+```swift
+// Live/NotBuilt.swift: the stand-ins `.live` holds for a use case whose
+// feature hasn't landed. Every call refuses with the same text its
+// `unavailableHelp` gives, so a control that reaches one anyway shows why.
+// Linux-safe.
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
+import Foundation
+#endif
+import CoreRaster
+
+struct NotBuilt: Sendable {
+    let feature: String
+    var help: String { "Not built yet (\(feature))." }
+    func refuse() -> PhotoRefusal { PhotoRefusal(help) }
+}
+
+struct NotBuiltArchive: DocumentArchiving {
+    let not = NotBuilt(feature: "PV-1")
+    var unavailableHelp: String? { not.help }
+    var formatVersion: Int { 0 }
+    func encode(_ snapshot: PhotoDocumentSnapshot, codec: any PhotoImageCodec) throws -> PhotoPackage { throw not.refuse() }
+    func decode(_ package: PhotoPackage, codec: any PhotoImageCodec) throws -> PhotoDocumentSnapshot { throw not.refuse() }
+    func container(_ package: PhotoPackage) throws -> Data { throw not.refuse() }
+    func package(fromContainer data: Data) throws -> PhotoPackage { throw not.refuse() }
+}
+
+struct NotBuiltRecovery: RecoveryStoring {
+    let not = NotBuilt(feature: "PV-1")
+    var unavailableHelp: String? { not.help }
+    func write(_ entry: RecoveryEntry, window: String) throws { throw not.refuse() }
+    func leftBehind() throws -> [RecoveryEntry] { [] }
+    func discard(window: String) throws {}
+    func discardAll() throws {}
+}
+
+struct NotBuiltClipboard: PixelClipboard {
+    let not = NotBuilt(feature: "PV-2")
+    var unavailableHelp: String? { not.help }
+    func copy(_ content: PlacedPixels, selection: PixelRect?, mask: Mask?) throws -> ClipboardImage? { throw not.refuse() }
+    func placement(of image: ClipboardImage, canvas: CanvasSize, center: Mask.Point) -> PixelRect {
+        PixelRect(x: 0, y: 0, width: image.image.width, height: image.image.height)
+    }
+}
+
+struct NotBuiltMerging: LayerMerging {
+    let not = NotBuilt(feature: "PV-2")
+    var unavailableHelp: String? { not.help }
+    func mergeDown(_ upper: LayerContent, onto lower: LayerContent) throws -> PlacedPixels { throw not.refuse() }
+    func flatten(_ layers: [LayerContent], canvas: CanvasSize, adjustments: AdjustmentSettings) throws -> TiledPixels {
+        throw not.refuse()
+    }
+}
+
+struct NotBuiltCrop: CropSizing {
+    let not = NotBuilt(feature: "PV-3")
+    var unavailableHelp: String? { not.help }
+    func setting(_ field: CropField, to value: Int, in crop: PixelRect, aspect: CropAspect, canvas: CanvasSize) -> PixelRect { crop }
+    func dragged(from anchor: Mask.Point, to point: Mask.Point, aspect: CropAspect, canvas: CanvasSize) -> PixelRect {
+        PixelRect(from: anchor, to: point).intersection(canvas.rect) ?? canvas.rect
+    }
+    func applying(_ aspect: CropAspect, to crop: PixelRect?, canvas: CanvasSize) -> PixelRect { crop ?? canvas.rect }
+    func swapped(_ aspect: CropAspect, canvas: CanvasSize) -> CropAspect { aspect }
+}
+
+struct NotBuiltSelection: SelectionShaping {
+    let not = NotBuilt(feature: "PV-5")
+    var unavailableHelp: String? { not.help }
+    func mask(for shape: SelectionShape, canvas: CanvasSize) throws -> Mask { throw not.refuse() }
+    func combine(_ current: Mask?, with new: Mask, _ mode: SelectionCombine) throws -> Mask? { throw not.refuse() }
+    func inverted(_ mask: Mask?, canvas: CanvasSize) throws -> Mask? { throw not.refuse() }
+    func feathered(_ mask: Mask, radius: Double) throws -> Mask { throw not.refuse() }
+    func bounds(of mask: Mask) -> PixelRect? { nil }
+    func outline(of mask: Mask) -> [[Mask.Point]] { [] }
+}
+
+struct NotBuiltMasking: LayerMasking {
+    let not = NotBuilt(feature: "PV-5")
+    var unavailableHelp: String? { not.help }
+    func mask(from selection: Mask?, layerBounds: PixelRect) throws -> TiledPixels { throw not.refuse() }
+    func applying(_ mask: TiledPixels, to pixels: TiledPixels) throws -> TiledPixels { throw not.refuse() }
+    func masked(_ region: PixelBuffer, at origin: (x: Int, y: Int), by mask: TiledPixels) throws -> PixelBuffer { region }
+}
+
+struct NotBuiltAdjustmentLayers: AdjustmentLayering {
+    let not = NotBuilt(feature: "PV-6")
+    var unavailableHelp: String? { not.help }
+    var kinds: [AdjustmentKind] { [] }
+    func applying(_ settings: AdjustmentSettings, to below: PixelBuffer, opacity: Double, blendMode: BlendMode,
+                  mask: PixelBuffer?) throws -> PixelBuffer { below }
+}
+
+struct NotBuiltTransform: LayerTransforming {
+    let not = NotBuilt(feature: "PV-7")
+    var unavailableHelp: String? { not.help }
+    func handle(at point: Mask.Point, in draft: TransformDraft, tolerance: Double) -> TransformHandle? { nil }
+    func dragged(_ draft: TransformDraft, handle: TransformHandle, from start: Mask.Point, to point: Mask.Point,
+                 modifiers: DragModifiers) -> TransformDraft { draft }
+    func corners(of draft: TransformDraft) -> [Mask.Point] { [] }
+    func applied(_ draft: TransformDraft, to content: PlacedPixels) throws -> PlacedPixels { throw not.refuse() }
+    func flipped(_ content: PlacedPixels, _ axis: FlipAxis) throws -> PlacedPixels { throw not.refuse() }
+}
+
+struct NotBuiltExportSizing: ExportSizing {
+    let not = NotBuilt(feature: "PV-8")
+    var unavailableHelp: String? { not.help }
+    func outputSize(for canvas: CanvasSize, _ size: ExportSize) throws -> CanvasSize { canvas }
+    func resized(_ image: DecodedImage, to size: CanvasSize) throws -> DecodedImage { image }
+}
+
+struct NotBuiltSampling: ColorSampling {
+    let not = NotBuilt(feature: "PV-9")
+    var unavailableHelp: String? { not.help }
+    func sample(_ picture: PixelBuffer, center: (x: Int, y: Int), size: SampleSize) -> SampledColor? { nil }
+}
+```
+
+```swift
+// Scratch stand-in for PV-0's eight Live/<X>.swift stubs, one enum per file in
+// the real tree (LiveDocuments.swift, LiveEdit.swift, ...), each owned by its
+// feature, which replaces the NotBuilt it returns.
+enum LiveDocuments {
+    static func archive() -> any DocumentArchiving { NotBuiltArchive() }
+    static func recovery() -> any RecoveryStoring { NotBuiltRecovery() }
+}
+enum LiveEdit {
+    static func clipboard() -> any PixelClipboard { NotBuiltClipboard() }
+    static func merging() -> any LayerMerging { NotBuiltMerging() }
+}
+enum LiveCrop { static func make() -> any CropSizing { NotBuiltCrop() } }
+enum LiveSelection {
+    static func selection() -> any SelectionShaping { NotBuiltSelection() }
+    static func masking() -> any LayerMasking { NotBuiltMasking() }
+}
+enum LiveAdjustmentLayers { static func make() -> any AdjustmentLayering { NotBuiltAdjustmentLayers() } }
+enum LiveTransform { static func make() -> any LayerTransforming { NotBuiltTransform() } }
+enum LiveExportSizing { static func make() -> any ExportSizing { NotBuiltExportSizing() } }
+enum LiveSampling { static func make() -> any ColorSampling { NotBuiltSampling() } }
+```
+
 ### 5.3 What each feature adds to the workspace
 
 PV-0 adds the stored state (the only edit to `PhotoWorkspace.swift` and
@@ -1472,7 +1644,7 @@ which isn't `Equatable`):
 ```swift
     // v2 state (PV-0). Each is written only by the extension file named.
     /// The use cases (PhotoServices); `.live` in the app, `.fake` under -PhotoFixture.
-    public internal(set) var services: PhotoServices = .fake
+    public internal(set) var services: PhotoServices = .live
     /// The selection's coverage when it isn't an exact rectangle (PhotoSelectionMask.swift).
     public internal(set) var selectionMask: Mask?
     /// The Marquee tool's shape and feather (PhotoSelectionMask.swift).
@@ -1491,9 +1663,11 @@ which isn't `Equatable`):
     public internal(set) var exportOptions = ExportOptions()
     /// What the open file is, for Save (PhotoDocumentFile.swift).
     public internal(set) var fileKind: PhotoFileKind?
-    /// The history position at the last save; nil when never saved (PhotoDocumentFile.swift).
-    public internal(set) var savedHistoryIndex: Int?
-    /// A one-line refusal or note for the status line ("Nothing to paste.").
+    /// The history step the file on disk shows (`PhotoHistory.currentStepID`);
+    /// nil when no file holds the image. `start()` sets it for an opened file.
+    public internal(set) var savedStepID: Int?
+    /// A one-line refusal or note for the status line ("Nothing to paste.");
+    /// `clearStatus()` drops it (the window calls it 4 s later).
     public internal(set) var statusMessage: String?
 ```
 
@@ -1516,9 +1690,35 @@ public enum PhotoLayerKind: Hashable, Sendable {
 }
 ```
 
-Added to `PhotoHistory` (PV-0): a `.selection(PixelRect?, Mask?)` edit, so a
-selection change is one "Select" step (#421), and `PhotoStack` keeps
-`masks` beside `pixels`, so every whole-stack step restores masks too.
+Changed in `PhotoHistory` (PV-0):
+
+- a `.selection(PixelRect?, Mask?)` edit, so a selection change is one
+  "Select" step (#421);
+- `PhotoStack` keeps `masks` beside `pixels`, so every whole-stack step
+  restores masks too;
+- every recorded step gets an id from a counter that never repeats, and
+  `currentStepID` is the newest undo entry's id (0 at the start). The dirty
+  marker compares it with `savedStepID`, so it stays right past the 50-step
+  limit and after an undo followed by a new edit (an index would not);
+- `apply(.layers)`'s guard (today `Set(list.map(\.id)) == Set(pixels.keys)`,
+  `PhotoHistory.swift:139`) and the invariant at the top of
+  `PhotoWorkspace.swift` change to "`pixels` holds one buffer per **pixel**
+  layer", or the first adjustment layer would make every layer-list undo a
+  no-op.
+
+Also PV-0, so later features stay inside their files:
+
+- `start()` resets every v2 field (selection mask, masks, transform draft,
+  status message, file kind) and sets `savedStepID` to the current step for
+  an opened file, so a just-opened or a new blank image is clean.
+- Crop, Image Size, Rotate, Straighten and Delete Layer call
+  `layerGeometryChanged(_:_:)` for each layer they change; PV-2 (Duplicate,
+  Merge Down) and PV-7 (transform, flips) call it from their own files. It is
+  a no-op until PV-5 fills it in `PhotoMask.swift` to keep each mask the size
+  and place of its layer.
+- `paintTargetID()` refuses an adjustment layer with "Pick a pixel layer to
+  paint on." (PJ-9) from the start, since PV-0 adds layer kinds; PV-5 adds
+  the mask target.
 
 The methods, by feature:
 
@@ -1540,11 +1740,43 @@ public enum AdjustTarget: Hashable, Sendable {
 extension PhotoWorkspace {
     public func toolHelp(_ tool: PhotoTool) -> String? { nil }
     public init(services: PhotoServices) { self.init(); self.services = services }
+    public mutating func clearStatus() { statusMessage = nil }
+    /// The paint target for brush, eraser, clone and heal: nil, with
+    /// `statusMessage` "Pick a pixel layer to paint on.", on an adjustment
+    /// layer (PV-0 writes this check; PV-5 adds the mask case in PhotoMask.swift).
+    func paintTargetID() -> PhotoLayer.ID? { selectedLayerID }
+}
+
+/// A geometry change every layer's extras (its mask) must follow (PV-0 calls
+/// `layerGeometryChanged` from crop, Image Size, rotate, straighten, delete,
+/// and PV-2 and PV-7 from their files; PV-5 fills it in PhotoMask.swift).
+public enum LayerGeometryChange: Sendable {
+    case cropped(PixelRect)
+    case resized(scaleX: Double, scaleY: Double)
+    case rotated(QuarterTurn)
+    case straightened(degrees: Double, crop: PixelRect)
+    case flippedCanvas(FlipAxis)
+    case transformed(LayerTransform)
+    case flipped(FlipAxis)
+    case duplicated(from: PhotoLayer.ID)
+    case removed
+}
+
+extension PhotoWorkspace {
+    mutating func layerGeometryChanged(_ id: PhotoLayer.ID, _ change: LayerGeometryChange) {}
+}
+
+// PV-0 (PhotoHistory.swift): every recorded step gets a new id from a counter
+// that never goes back or repeats; trimming the oldest steps keeps the ids.
+extension PhotoWorkspace {
+    /// The id of the step the image is at: the newest undo entry's, or 0 at
+    /// the start ("New Image", "Open").
+    public var currentStepID: Int { 0 }
 }
 
 // PV-1 (PhotoDocumentFile.swift, PhotoRecovery.swift)
 extension PhotoWorkspace {
-    public var isDirty: Bool { savedHistoryIndex != historyIndex }
+    public var isDirty: Bool { savedStepID != currentStepID }
     public var saveAction: SaveAction { .saveAs }
     public func snapshot() throws -> PhotoDocumentSnapshot { throw PhotoRefusal("") }
     public func documentPackage(codec: any PhotoImageCodec) throws -> PhotoPackage { PhotoPackage(files: [:]) }
@@ -1643,7 +1875,7 @@ extension PhotoWorkspace {
 
 | Journey | Contracts | Workspace calls |
 |---|---|---|
-| PJ-1 save and reopen | `DocumentArchiving` (`encode`, `container`, `package(fromContainer:)`, `decode`) | `saveAction`, `documentPackage(codec:)`, `didSave(as:kind:)`, `openDocument(_:name:codec:)`, `isDirty` |
+| PJ-1 save and reopen | `DocumentArchiving` (`encode`, `container`, `package(fromContainer:)`, `decode`) | `saveAction`, `documentPackage(codec:)`, `didSave(as:kind:)`, `openDocument(_:name:codec:)`, `isDirty` (`savedStepID != currentStepID`) |
 | PJ-2 unsaved prompt, Open Recent | – (AppKit's recent list) | `isDirty` |
 | PJ-3 restore after a crash | `RecoveryStoring`, `DocumentArchiving` | `autosaveDue(lastEdit:lastAutosave:now:)`, `recoveryEntry(now:codec:)`, `restore(_:codec:)` |
 | PJ-4 bad documents | `DocumentArchiving` (`ArchiveError.message`) | `openDocument` |
@@ -1729,7 +1961,7 @@ means it doesn't exist yet (section 6.3).
 | Canvas overlay | crop pending | `CropShade` | existing, PV-3 |
 | Canvas overlay | rectangle selection | `SelectionOutline` | existing |
 | Canvas overlay | ellipse, lasso, feathered selection | **`SelectionPathOutline`** | PV-5 |
-| Canvas overlay | Free Transform | **`SelectionHandles`** (S12, #273, shared with Flare and Design) | PV-7 |
+| Canvas overlay | Free Transform | **`SelectionHandles` with rotation** (on top of #273) | PV-7 |
 | Canvas overlay | brush, eraser, clone, heal | **`BrushCursorMark`** | PV-4 |
 | Adjust tab: tool options | brush, eraser | `InspectorSection`, `InspectorSliderRow`, `InspectorColorWellRow` | existing |
 | Adjust tab: tool options | marquee | `ChoiceChips` (Rectangle, Ellipse, Lasso), `InspectorSliderRow` (Feather, px) | PV-5 |
@@ -1755,7 +1987,7 @@ plain SwiftUI placeholder until its component lands (CLAUDE.md).
 | Component | Need | Who asks | Existing issue |
 |---|---|---|---|
 | `SelectionPathOutline` | marching ants along closed polylines in document pixels at a zoom, black under white dashes, no hit testing | PV-5 | needs a new issue |
-| `SelectionHandles` | a transform box from four corners (any rotation) with 8 square handles on the pixel grid and a rotate zone; marks only | PV-7 | #273 (S12), shared with Flare and Design |
+| `SelectionHandles` with rotation | a transform box from four corners at any rotation, 8 square handles on the pixel grid and a rotate zone; marks only | PV-7 | needs a new issue: #273 moves Design's axis-aligned resize handles into SuiteUI for Flare and Halo and has no rotation; the new issue builds on it |
 | `BrushCursorMark` | a ring of a diameter in document pixels at a zoom, black under white, following the pointer | PV-4 | needs a new issue (#588 asks Photo to draw it; the mark belongs in `CanvasMarks`) |
 | `LayerList` with an accessory slot | Flare's S15 plus a trailing accessory per row (Photo's mask badge) and a leading symbol | PV-5, PV-6 | not filed; Flare's S15 |
 | Save status in `EditorTopBar` | Saved, Edited, Edited autosaved, Not saved | PV-1 | #339 (S6) |
@@ -1772,9 +2004,9 @@ Photo: #255 (`ScrubField.beginTyping` ignores `decimals:`) and #586
 (the shell is dark in both, so they guard regressions in the snapshot host),
 named `photo-<state>-<scheme>.png`: `photo-unsaved`, `photo-keep-layers`
 (PV-1); `photo-pasted-layer` (PV-2); `photo-crop-options`,
-`photo-crop-ratio` (PV-3); `photo-history-tab`, `photo-brush-cursor` (PV-4);
-`photo-selection-ellipse`, `photo-selection-lasso`, `photo-layer-mask`
-(PV-5); `photo-adjustment-layer`, `photo-adjust-target` (PV-6);
+`photo-crop-ratio` (PV-3); `photo-history` (the name #644 gives),
+`photo-brush-cursor` (PV-4); `photo-selection-mask` (the name #421 gives),
+`photo-selection-lasso`, `photo-layer-mask` (PV-5); `photo-adjustment-layer`, `photo-adjust-target` (PV-6);
 `photo-transform-box` (PV-7); `photo-export-options` (PV-8);
 `photo-eyedropper-options` (PV-9); `photo-adjustments-aligned` (PV-10).
 
@@ -1793,17 +2025,25 @@ SuiteUI's #330) isn't built yet:
 
 - **Model step** (Linux and macOS, `swift test`): wall time of the
   workspace call one pointer event or key makes, on the `large` fixture
-  (4000 × 3000, three layers), median and p95 of 60 events. Gate in
-  `Tests/PhotoModelTests/PhotoBudgetTests.swift`, one `@Test` per row. The
-  debug gate is the device target × 10, as the rubric's model budgets are.
+  (4000 × 3000, three layers), median and p95 of 60 events. One `@Test`
+  per row, in the owning feature's `Photo<Feature>BudgetTests.swift` (the
+  last column below). CI runs debug, so CI gates on the debug number (the
+  device target × 10, as the rubric's model budgets do); the device target
+  is checked locally with `swift test -c release --filter Budget`.
 - **Event to picture** (macOS, `Tests/AppSnapshotTests`): the model step
   plus `PhotoRenderer.update` of the damaged tiles plus `CanvasTiles.apply`,
   done the way the window does it, exactly as `PhotoBrushLatencyTests`
-  measures the brush today. Release p50 gate 8 ms (half a 60 Hz frame, the
-  other half left for SwiftUI and Core Animation, the brush test's rule);
-  debug reports only. Each feature adds its rows to a new file
-  `Photo<Feature>LatencyTests.swift` and its line to the contact sheet as
-  `<TOOL>-LATENCY`.
+  measures the brush today. The 8 ms p50 gate (half a 60 Hz frame, the other
+  half left for SwiftUI and Core Animation, the brush test's rule) holds in a
+  release build, which CI doesn't run: CI's debug run only reports the
+  number (on the contact sheet as `<TOOL>-LATENCY`), and the gate is checked
+  locally on a Mac with `swift test -c release --filter Latency`, as the
+  brush budget was set. Each feature's rows go in its own
+  `Photo<Feature>LatencyTests.swift`.
+- **Progress marks** ("within 100 ms", QB-L9) need the frame probe's marks,
+  so every such cell is report-only until #330 lands; until then the model
+  half is gated (the work runs off the main actor, and the call that starts
+  it returns within one frame).
 - **Frames late** (macOS journeys, QB-L1, QB-L2): report-only through the
   hitch metric (`XCTHitchMetric`, as `testBrushStrokeHitchesOnALargePhoto`
   does) until #330 lands; then the perf journeys PJ-P1 and PJ-P2 read
@@ -1831,9 +2071,26 @@ SuiteUI's #330) isn't built yet:
 | PB-17 | History jump of 10 steps | ≤ 50 ms / ≤ 500 ms | ≤ 1 frame for the damaged tiles | – | PV-4 |
 | PB-18 | Save a 3-layer 12 MP document (encode through a codec stub on Linux; ImageIO on macOS) | ≤ 2 s / ≤ 20 s | "Saving…" within 100 ms; the window stays responsive | QB-L9, QB-L12 | PV-1 |
 | PB-19 | Open the same document | ≤ 2 s / ≤ 20 s | "Opening…" within 100 ms | QB-L9, QB-L12, PJ-P3 | PV-1 |
-| PB-20 | Autosave of the same document, off the main actor | ≤ 2 s / ≤ 20 s; the main actor blocked ≤ 1 frame (the snapshot copy only) | – | QB-L12 | PV-1 |
+| PB-20 | Autosave of the same document, off the main actor | ≤ 2 s / ≤ 20 s; the snapshot copy taken on the main actor ≤ 1.6 ms / ≤ 16 ms | – | QB-L12 | PV-1 |
 | PB-21 | Export 12 MP at 50 % as JPEG | ≤ 1.5 s / ≤ 15 s | "Exporting…" within 100 ms | QB-L8, QB-L9 | PV-8 |
 | PB-22 | Pan and zoom (Space-drag, pinch) | – (view only) | ≤ 4 ms (no tiles re-rendered) | QB-L1, PJ-P1 | existing (new row) |
+
+Where each row is tested (model step / event to picture), so every cell has
+a file and an owner:
+
+| Rows | Model step file | Event-to-picture file | Owner |
+|---|---|---|---|
+| PB-1, PB-2, PB-9 | `MT/PhotoBudgetTests.swift` | `ST/PhotoBrushLatencyTests.swift` (exists; PB-2 and PB-9 add series) | PV-0 |
+| PB-22 | – | report-only through the hitch journey and PJ-P1 | PV-0 |
+| PB-15, PB-16 | `MT/PhotoEditBudgetTests.swift` | – (the new layer's tiles are PB-1's path) | PV-2 |
+| PB-8 | `MT/PhotoCropBudgetTests.swift` | overlay only: report-only through PJ-P1 | PV-3 |
+| PB-17 | `MT/PhotoHistoryBudgetTests.swift` | – | PV-4 |
+| PB-3, PB-4, PB-5, PB-6, PB-7 | `MT/PhotoSelectionBudgetTests.swift` | `ST/PhotoSelectionLatencyTests.swift` | PV-5 |
+| PB-13 | `MT/PhotoAdjustmentLayerBudgetTests.swift` | `ST/PhotoAdjustmentLayerLatencyTests.swift` | PV-6 |
+| PB-10, PB-11, PB-12 | `MT/PhotoTransformBudgetTests.swift` | `ST/PhotoTransformLatencyTests.swift` | PV-7 |
+| PB-21 | `MT/PhotoExportBudgetTests.swift` | – | PV-8 |
+| PB-14 | `MT/PhotoEyedropperTests.swift` (a budget `@Test`) | – | PV-9 |
+| PB-18, PB-19, PB-20 | `MT/PhotoDocumentsBudgetTests.swift`; PB-20's main-actor part is the snapshot copy, gated ≤ 16 ms debug | – | PV-1 |
 
 Perf journeys (report-only until #330; owner in brackets):
 
@@ -1841,7 +2098,7 @@ Perf journeys (report-only until #330; owner in brackets):
 |---|---|---|---|
 | PJ-P1 | `testCanvasDragLatency` (`+Perf`, PV-0) | on `large`: velocity-controlled drags across 600 pt at 300 pt/s for brush, ellipse marquee, crop, transform handle, Space-pan | at least 60 samples per series; frames late p95 (QB-L1) |
 | PJ-P2 | `testSliderScrubLatency` (`+Perf`, PV-0) | Exposure bar drag on `large`, then the same on an adjustment layer once PV-6 lands | at least 60 samples; QB-L2 |
-| PJ-P3 | `testOpenLargeDocument` (`+Perf`, PV-1) | save `large` as a document, reopen it | the "Opening…" mark within QB-L9; no main-thread stall over QB-L12 |
+| PJ-P3 | `testOpenLargeDocument` (`+PerfDocuments`, PV-1) | save `large` as a document, reopen it | the "Opening…" mark within QB-L9; no main-thread stall over QB-L12 |
 
 ### 7.2 App-audit checks that apply
 
@@ -1886,10 +2143,13 @@ Linux unless marked macOS. "Bit for bit" compares `PixelBuffer` storage.
 ### 7.4 Layout spec (alignment at several window widths)
 
 Measured by PJ-17 `testLayoutAtWidths` (PV-10) from the accessibility frames
-of identified elements, at window widths 1024 (the runner's display and
-`SuiteSize.windowMinimum`'s width bound), 1280, 1440 and 1920 points, each
-launched with a new `-PhotoWindowWidth <pt>` argument (PV-0) on `layered`
-with the Adjust tab open. Tolerance 1 pt.
+of identified elements, at window widths 880 (`SuiteSize.windowMinimum`,
+200 + 440 + 240), 960 and 1024 points (the macOS runner's display is
+1024 × 768, so wider windows would fail the audit's `offscreen` check
+there), each launched with a new `-PhotoWindowWidth <pt>` argument (PV-0)
+on `layered` with the Adjust tab open. Tolerance 1 pt. The same test runs at
+1280, 1440 and 1920 locally with `scripts/ui-test` on a larger display
+(`PHOTO_LAYOUT_WIDE=1`); CI skips those widths with a message.
 
 1. The panel is exactly `SuiteSize.editorPanelWidth` (280) wide and its
    right edge is the window's; the rail's width is constant across widths.
@@ -1904,8 +2164,7 @@ with the Adjust tab open. Tolerance 1 pt.
 6. No identified element lies outside the window (the audit's `offscreen`)
    and no two controls overlap (`overlap`), at every width.
 7. The top bar's items keep one baseline (equal midY) and none is clipped:
-   below 1280 the lowest-priority labels collapse to icons, never
-   off-screen.
+   at 880 the lowest-priority labels collapse to icons, never off-screen.
 
 Model half (Linux): `PhotoLayoutTests` (PV-10) asserts the inspector's text
 constants fit: the no-image message keeps "File > New Image" on one line
@@ -1961,7 +2220,7 @@ Open issues on other lines that v2 touches:
 | #330 FrameProbe | suiteui | PJ-P1, PJ-P2 report hitches only until it lands |
 | #339 S6 save status | suiteui | PV-1 shows the unsaved state with a plain label until it lands |
 | #340 S7 status pills | suiteui | "Preview data" and refusal pills use the current `statusPill(.warning)` until it lands |
-| #273 selection handles into SuiteUI | suiteui | PV-7's transform box |
+| #273 selection handles into SuiteUI | suiteui | the base PV-7's rotating transform box builds on (a new `needs-ui` issue adds rotation) |
 | #274 share open and save panel plumbing | suiteui | touches the code PV-0 moves into `PhotoWindow+File.swift`; it must not run during waves 0–1, or PV-1 absorbs it (section 9, question 6) |
 | #591 a `ScrubTrack` owns its step | suiteui | none for v2 |
 
@@ -2041,13 +2300,16 @@ owns it.
   `A/SelectionOverlay.swift` (today's marks moved in), stubs
   `A/TransformOverlay.swift`, `A/BrushCursorOverlay.swift`;
   `A/PhotoAdjustTab.swift`, `A/PhotoLayersTab.swift`, `A/PhotoToolOptions.swift`
-  (today's panel moved in), stubs `A/PhotoHistoryTab.swift`, `A/CropOptions.swift`,
+  (today's panel moved in), stubs `A/PhotoHistoryTab.swift` (not shown until
+  PV-4 adds the tab), `A/CropOptions.swift`,
   `A/SelectOptions.swift`, `A/TransformOptions.swift`, `A/SampleOptions.swift`.
 - Tests: `MT/PhotoContractsTests.swift`, `MT/PhotoFakesTests.swift`,
   `MT/LiveServicesTests.swift`, `MT/PhotoBudgetTests.swift` (PB-1, PB-2, PB-9),
   edits `MT/PhotoToolsTests.swift`; `ST/PhotoSeamsSnapshots.swift`
   (Preview data pill), edits the Photo snapshot files whose views moved;
-  `UT/PhotoJourneyTests+Perf.swift` (PJ-P1, PJ-P2; after #333).
+  `UT/PhotoJourneyTests+Perf.swift` (PJ-P1, PJ-P2; after #333),
+  `UT/PhotoJourney+Fixtures.swift` (shared helpers), edits
+  `UT/PhotoJourneyTests.swift` (uses them).
 - Docs: `docs/c4/model.json` (the `photo-model-sources` and
   `photo-app-sources` descriptions name everything in section 2, once).
 - Also: files the six `needs-ui` issues of section 6.3.
@@ -2061,7 +2323,10 @@ owns it.
 
 - `M/PhotoDocumentFile.swift`, `M/PhotoRecovery.swift`, `M/Live/LiveDocuments.swift`
 - `A/PhotoWindow+File.swift`, `A/PhotoCommands+File.swift`, `A/PhotoTopBar.swift`,
-  `A/PhotoPackageIO.swift` (new), `A/PhotoAutosave.swift` (new)
+  `A/PhotoPackageIO.swift` (new), `A/PhotoAutosave.swift` (new),
+  `A/PhotoApp.swift` (an app delegate adaptor: open a file from Open Recent or
+  Finder with no window, `applicationShouldTerminate` for the unsaved prompt
+  on Quit, the menu's no-window fallback for File items)
 - `MT/PhotoDocumentRoundTripTests.swift`, `MT/PhotoDocumentFileTests.swift`,
   `MT/PhotoContainerTests.swift`, `MT/PhotoRecoveryTests.swift`,
   `MT/PhotoDocumentsBudgetTests.swift`
@@ -2102,19 +2367,26 @@ owns it.
 - `M/PhotoAdjustmentLayer.swift`, `M/PhotoLayerComposite.swift`,
   `M/Live/LiveAdjustmentLayers.swift`
 - `A/PhotoWindow+AdjustmentLayer.swift`, `A/PhotoAdjustTab.swift`,
-  `A/PhotoLayersTab.swift`, `A/PhotoCommands+Layer.swift`
+  `A/PhotoLayersTab.swift`, `A/PhotoCommands+Layer.swift`,
+  `A/AdjustmentsInspector.swift` (only the layer's sections; no Blur on a
+  layer), `A/CurvesSection.swift` (reads and writes the target's curve)
 - `MT/PhotoAdjustmentLayerTests.swift`, `MT/PhotoAdjustmentLayerTileTests.swift`,
   `MT/PhotoAdjustmentLayerBudgetTests.swift`
 - `ST/PhotoAdjustmentLayerSnapshots.swift`, `ST/PhotoAdjustmentLayerLatencyTests.swift`
-- `UT/PhotoJourneyTests+AdjustmentLayers.swift`
+- `UT/PhotoJourneyTests+AdjustmentLayers.swift`, `UT/PhotoJourneyTests+PerfAdjustmentLayers.swift`
+  (PJ-P2's adjustment-layer series)
 
 **PV-4 history tab and brush cursor** (wave 2)
 
 - `M/PhotoHistoryRows.swift` (new: each row's name and whether it is current
   or undone, from `historySteps` and `historyIndex`)
-- `A/PhotoWindow+History.swift`, `A/PhotoHistoryTab.swift`, `A/BrushCursorOverlay.swift`
+- `A/PhotoWindow+History.swift`, `A/PhotoHistoryTab.swift`, `A/BrushCursorOverlay.swift`,
+  `A/PhotoPanel.swift` (adds the History tab to `PhotoPanelTab`)
 - `MT/PhotoHistoryRowsTests.swift`, `MT/PhotoHistoryBudgetTests.swift`
 - `ST/PhotoHistorySnapshots.swift` (the name #644 gives), `ST/PhotoBrushCursorSnapshots.swift`
+- #644 names `PhotoHistoryItems.swift` and a sidebar; Photo's window has no
+  sidebar, so PV-4's packet edits #644's file list to the History tab files
+  above before its PR says "Closes #644".
 - `UT/PhotoJourneyTests+History.swift`
 
 **PV-7 transform and flip** (wave 2)
@@ -2214,3 +2486,42 @@ Each has a recommendation; the blueprint is written as if it is accepted.
    it. File a separate issue to add it, or leave it?
 8. **Engine issues.** File CR-1 to CR-4 on creative-core when the PV-5 and
    PV-7 packets are written; CR-5 and CR-6 only if PB-13 or PB-3 fail.
+
+---
+
+## 10. Critic rounds
+
+A critic agent read this blueprint against the repo's rules, the Photo code,
+CoreRaster and the open issues, and tried to refute it. Each finding was
+verified with evidence (file and line, or a command) before it counted.
+
+### Round 1 (2026-10-14): 5 blocking, 8 major, 5 minor; all fixed
+
+Confirmed correct by the critic: the counts in section 0, the CoreRaster
+claims, no shortcut collision, no shared file within a wave, no product
+name in either file.
+
+| # | Severity | Finding | Fix |
+|---|---|---|---|
+| C1 | blocking | `isDirty` compared history indexes, which stop at the 50-step limit and repeat after undo plus a new edit, so an edit could read as saved | Steps get ids from a counter that never repeats; `isDirty` is `savedStepID != currentStepID` (5.3) |
+| C2 | blocking | `PhotoHistory.apply(.layers)` requires one pixel buffer per layer, so any adjustment layer would make layer-list undo a silent no-op (PJ-9 step 5) | PV-0 changes that guard and the workspace invariant to pixel layers (5.3) |
+| C3 | blocking | Masks must follow crop, resize, rotate, straighten, delete, duplicate, merge and flips, all in files PV-5 doesn't own | PV-0 adds `layerGeometryChanged(_:_:)`, called from every such place, filled by PV-5 in its own file (5.3) |
+| C4 | blocking | PV-6 needed `AdjustmentsInspector.swift`, `CurvesSection.swift` and the paint refusal, none owned | Both files go to PV-6 (wave 2); PV-0 writes the adjustment-layer paint refusal (5.3, 8.3) |
+| C5 | blocking | The layout journey's 1280–1920 pt windows can't fit the 1024 × 768 runner, and 1024 isn't the window minimum (880) | CI measures at 880, 960, 1024; wider widths run locally (7.4) |
+| C6 | major | The History tab case, Return and Escape for transform, and PJ-P2's adjustment-layer series sat in files their features don't own | PV-4 owns `PhotoPanel.swift`; Return and Escape route by mode through `PhotoWindow+Transform.swift`; PV-6 gets its own perf journey file (2.4, 8.3) |
+| C7 | major | Open Recent with no window and Quit's unsaved prompt need `PhotoApp.swift` | PV-1 owns `PhotoApp.swift` in wave 1 (8.3) |
+| C8 | major | `.fake` as the workspace default could write fake bytes to a user's file; the fakes shared global state across parallel tests | `.live` is the default; `.fake` makes new instances per read; `FakeArchive` keeps its own state (5.2, recompiled) |
+| C9 | major | v2 state had no reset on open or new, the saved marker no initial value, the status message no way to clear | `start()` resets every v2 field and marks an opened file saved; `clearStatus()` (5.3) |
+| C10 | major | Release-only gates that CI never runs, cells with no test or owner, 100 ms marks that need the frame probe | Every row has a file and owner; release gates are local, CI gates the debug number; marks are report-only until #330 (7.1) |
+| C11 | major | `writeTestPhoto` is private to one class, and the fixture description didn't match its picture | PV-0 moves it to `UITests/PhotoJourney+Fixtures.swift`; the `sample` fixture is that picture (4.1, 4.4) |
+| C12 | major | #273 has no rotation, which the transform box needs | A new `needs-ui` issue on top of #273 (6.3) |
+| C13 | major | `PhotoHistoryRows.swift` was in no C4 component | Added to `photo-model-history` in `c4-planned.json` |
+| C14 | minor | PJ-4's expected message named the wrong path | `data/layer-2.png` |
+| C15 | minor | PJ-9 sent the adjustment backward twice when once reaches the bottom | One Send Backward, and the button is then disabled |
+| C16 | minor | Issue labels left out `gap`; #644 and #421 name other file and PNG names | Labels fixed; PNG names follow the issues; PV-4's packet edits #644's file list |
+| C17 | minor | No section 10 yet; PJ-P3's file differed between 7.1 and 8.3 | This section; `+PerfDocuments` in both |
+| C18 | minor | Flatten bakes in the whole-image adjustments but didn't reset them | The workspace resets them in the same step (5.1) |
+
+After the fixes the contracts, fakes, `NotBuilt` stand-ins and workspace
+stubs were compiled again (`swift build --build-tests`), and the 309 Photo
+model tests passed with `.live` as the default.

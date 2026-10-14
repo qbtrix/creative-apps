@@ -48,10 +48,11 @@
               {
                 "id": "photo-model-history",
                 "name": "History",
-                "description": "Named undo and redo kept as tiles, layer lists or whole stacks; the history list and jump. PV-0 adds the selection step and masks in the stack.",
+                "description": "Named undo and redo kept as tiles, layer lists or whole stacks; the history list and jump. PV-0 adds the selection step and masks in the stack. PhotoHistoryRows (PV-4) is each History tab row: its name and whether it is current or undone.",
                 "technology": "Swift 6, Foundation",
                 "paths": [
-                  "Sources/PhotoModel/PhotoHistory.swift"
+                  "Sources/PhotoModel/PhotoHistory.swift",
+                  "Sources/PhotoModel/PhotoHistoryRows.swift"
                 ],
                 "status": "existing",
                 "authored": true
