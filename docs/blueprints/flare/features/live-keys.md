@@ -183,6 +183,7 @@ is owned by another feature.
 | quality row | budget (CI gate, debug) | test |
 |---|---|---|
 | QB-L7 one drag step through the engine | ≤ 10 ms per `setValue` scrub step (perform and validate) on `bounce` | `LiveKeysBudgetTests.scrubStepWithinBudget` (median of 120 steps) |
+| QB-L7 one key drag step through the engine | ≤ 10 ms per `moveKeys` step (perform and validate) on `bounce` | `LiveKeysBudgetTests.moveKeyStepWithinBudget` (median of 50 steps; flare.md 12.5 gap 2) |
 | QB-F3 one gesture, one step | a scrub, a key drag and each menu action are one named entry; scrubbing never adds a second | `LivePropertiesSetTests`, `LiveKeyframesEditTests` (one `undo()` restores) |
 | QB-L3 hook | a key drag of 50 steps is one entry, and `MoveKeyframe` merges (`a.merge(b)`), so timeline scrubs stay cheap | `LiveKeyframesEditTests.coalescedDragIsOneEntry` |
 
