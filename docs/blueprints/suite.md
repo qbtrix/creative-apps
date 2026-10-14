@@ -2589,7 +2589,10 @@ feature edits only its own slot file under `Sources/SuiteShell/Live/`),
 `SuiteFixtures` (SC-3, all five fixtures up front), `UITests/audit-baseline.json`
 (HM-3), `docs/design.md` (HM-4), `docs/review-rubric.md` (SW-4). Journey
 files are one per feature (`AfterGlowJourneyTests+<Area>.swift`).
-Snapshot files are one per feature. The `Sources/SuiteModel/<Area>/`
+Snapshot files are one per feature. SW-3 creates `SettingsRoute.swift`
+and `OpenInMenu.swift` as disabled stubs ("Not connected yet (settings)."
+and "… (recents-open-in).") so `SuiteCommands` builds in wave 2; settings
+and recents-open-in own them from wave 3. The `Sources/SuiteModel/<Area>/`
 folders are disjoint by construction. Within wave 4, onboarding and
 updater both depend on preferences (F5, wave 3) but own nothing of it.
 
@@ -2619,3 +2622,57 @@ takes the fast lane.
 | flare-in-halo | render a scene at frame N to a `PixelBuffer`; CoreRaster affine composite (#767's) | needs a new core issue (the first); the second is Halo's |
 | shared-assets | none in v1; CoreAsset (#148–#154) later | existing core issues, p3, no dependency |
 | all others | none | — |
+
+---
+
+## 9. Decisions for the captain
+
+Made here, with reasons (reverse any by saying so):
+
+| # | Decision | Why |
+|---|---|---|
+| D1 | Embedded app bundles, one process each (2.5, shape B) | The only shape that keeps a real Dock icon per app; crash isolation; today's apps barely change |
+| D2 | Shared frameworks through the `project.yml` release graph (route R1), not a second package | No source path moves while six blueprints are editing SuiteUI |
+| D3 | One store folder by plain path; app group later | Ad-hoc signing has no team id for an app group |
+| D4 | Hand-offs are files opened with the target app | Works for running and cold apps alike; launch arguments don't reach a running app |
+| D5 | The suite never imports an engine; apps convert | Keeps SuiteModel tiny and Linux-fast; a shared store never loads five engines |
+| D6 | Every document app follows Flare's recovery-file policy | Losing work is worse than any missing feature (flare.md decision 4) |
+| D7 | `⌃⌘0`–`⌃⌘5` for Switch To | Free in every app's menus today (BU-1 test guards it) |
+
+Open questions:
+
+1. **Q1 Names and ids.** The id prefix (`org.creativesuite` today), the
+   bundle id of AfterGlow, and the inner app names in Finder (`Flare.app`
+   or `AfterGlow Flare.app`).
+2. **Q2 Updater.** Where the feed and zips live (GitHub Releases of this
+   repo?), who holds the Ed25519 signing key, and whether to write our own
+   (planned: about 400 lines with CryptoKit) or adopt an MIT-licensed
+   open-source updater framework (needs an approving issue; CLAUDE.md "No
+   new dependencies").
+3. **Q3 Signing and distribution.** v1 stays ad-hoc signed and not
+   sandboxed. A Developer ID with notarization (hardened runtime) brings a
+   team id, and with it an app group container for the store. When?
+4. **Q4 App icons.** Six Dock icons need art; until then BU-5 ships plain
+   placeholders (a coloured rounded square with the app's initial, drawn by
+   a script). Who draws them?
+5. **Q5 Prewarm.** Should AfterGlow launch the last-used app hidden at its
+   own launch, so the first switch is an activation too? Costs memory for
+   an app the person may not open. Default in this blueprint: no.
+6. **Q6 Recovery in Design and Halo v1.** D6 makes recovery the suite rule;
+   Design's blueprint leaves it out of v1 (its Q4) and Halo calls it
+   "Later". Pull it into their v1, or let the suite rule apply from their
+   v1.1?
+7. **Q7 Where a returned edit is written.** Next to the original
+   (`<name> edit <n>.png` and `.ora`; Library's folder stays the truth) or
+   inside the suite store (the person's folders stay untouched, but the
+   catalog then points into Application Support)?
+8. **Q8 Library round trip timing.** Library's blueprint calls the round
+   trip "later"; this blueprint schedules it in wave 4, after Library v1.
+   Agree?
+9. **Q9 A new line.** This work needs `line:suite` (and a `needs-suite`
+   label for app-line adoption tasks). Create them?
+10. **Q10 Finder visibility.** Embedded apps may not show in Launchpad or
+    Spotlight on their own; AfterGlow does. Acceptable for v1?
+11. **Q11 Standalone builds.** Keep publishing the five standalone
+    `<X>App.app` bundles in `app-builds` for review until every journey
+    launches through `AfterGlow.app`, then drop them?
