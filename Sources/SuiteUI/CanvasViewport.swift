@@ -13,6 +13,11 @@
 // one. Whether a drag pans is decided when it starts, so a tool drag always
 // gets its `onDragEnd`. The host owns the zoom (the top bar and status bar
 // show it) and learns the viewport's size from `onSize` to work out a fit.
+// With `onZoom`, the viewport also zooms itself through it, clamped by
+// ZoomMath to 10% to 3200%: pinch, and Command-plus, Command-minus and
+// Command-0 (fit) while it has focus. `checkerboard: false` puts the document
+// on the plain artboard color instead of the checkerboard. `onPointer`
+// reports the document point under the pointer, nil once it leaves the artboard.
 // CanvasLayout is the placement and pan math, plain and tested on its own;
 // every pan is clamped to its scrollable area. The content is clipped to the
 // artboard; the overlay (selection outlines and handles, inline editors) is
@@ -55,6 +60,14 @@ public struct CanvasLayout: Equatable, Sendable {
         CGPoint(x: (point.x - origin.x) / scale, y: (point.y - origin.y) / scale)
     }
 
+    /// The document point under `point`, or nil when `point` is off the artboard.
+    public func artboardPoint(_ point: CGPoint) -> CGPoint? {
+        let document = documentPoint(point)
+        let size = CGSize(width: artboard.width / scale, height: artboard.height / scale)
+        guard document.x >= 0, document.y >= 0, document.x < size.width, document.y < size.height else { return nil }
+        return document
+    }
+
     /// `offset` kept inside the scrollable area, so the viewport never shows past its edges.
     public func clamped(_ offset: CGPoint) -> CGPoint {
         CGPoint(
@@ -88,11 +101,13 @@ public struct CanvasViewport<Content: View, Overlay: View>: View {
     private let documentSize: CGSize
     private let zoom: Double
     private let pointer: PointerStyle?
+    private let checkerboard: Bool
     private let onSize: @MainActor (CGSize) -> Void
     private let onZoom: (@MainActor (Double) -> Void)?
     private let onDrag: (@MainActor (CGPoint, CGPoint) -> Void)?
     private let onDragEnd: (@MainActor () -> Void)?
     private let onKey: (@MainActor (KeyPress) -> KeyPress.Result)?
+    private let onPointer: (@MainActor (CGPoint?) -> Void)?
     private let content: Content
     private let overlay: Overlay
     @State private var scrolled: CGPoint = .zero
@@ -106,24 +121,28 @@ public struct CanvasViewport<Content: View, Overlay: View>: View {
 
     /// `documentSize` in pixels; `content` and `overlay` are laid out at the
     /// artboard's size (the document at `zoom`), overlay on top. Only the
-    /// content is clipped to the artboard.
+    /// content is clipped to the artboard. The checkerboard shows behind it
+    /// unless `checkerboard` is false.
     public init(
-        documentSize: CGSize, zoom: Double, pointer: PointerStyle? = nil,
+        documentSize: CGSize, zoom: Double, pointer: PointerStyle? = nil, checkerboard: Bool = true,
         onSize: @escaping @MainActor (CGSize) -> Void = { _ in },
         onZoom: (@MainActor (Double) -> Void)? = nil,
         onDrag: (@MainActor (CGPoint, CGPoint) -> Void)? = nil,
         onDragEnd: (@MainActor () -> Void)? = nil,
         onKey: (@MainActor (KeyPress) -> KeyPress.Result)? = nil,
+        onPointer: (@MainActor (CGPoint?) -> Void)? = nil,
         @ViewBuilder content: () -> Content, @ViewBuilder overlay: () -> Overlay
     ) {
         self.documentSize = documentSize
         self.zoom = zoom
         self.pointer = pointer
+        self.checkerboard = checkerboard
         self.onSize = onSize
         self.onZoom = onZoom
         self.onDrag = onDrag
         self.onDragEnd = onDragEnd
         self.onKey = onKey
+        self.onPointer = onPointer
         self.content = content()
         self.overlay = overlay()
     }
@@ -164,7 +183,11 @@ public struct CanvasViewport<Content: View, Overlay: View>: View {
             ZStack(alignment: .topLeading) {
                 Color.clear
                 ZStack(alignment: .topLeading) {
-                    Rectangle().fill(ImagePaint(image: Self.checkerboard))
+                    if checkerboard {
+                        Rectangle().fill(ImagePaint(image: Self.checkerTile))
+                    } else {
+                        SuiteColor.artboard
+                    }
                     content
                 }
                 .frame(width: layout.artboard.width, height: layout.artboard.height, alignment: .topLeading)
@@ -178,15 +201,16 @@ public struct CanvasViewport<Content: View, Overlay: View>: View {
             }
             .frame(width: layout.content.width, height: layout.content.height, alignment: .topLeading)
             .contentShape(.rect)
+            .onContinuousHover { phase in hover(phase, layout) }
             .gesture(drag(layout), isEnabled: onDrag != nil)
-            .simultaneousGesture(pan(layout), isEnabled: onKey != nil)
+            .simultaneousGesture(pan(layout), isEnabled: takesKeys)
             .simultaneousGesture(pinch, isEnabled: onZoom != nil)
             .pointerStyle(panStart != nil ? .grabActive : spaceHeld ? .grabIdle : pointer)
         }
         .scrollPosition($position)
         .onScrollGeometryChange(for: CGPoint.self) { $0.contentOffset } action: { _, offset in scrolled = offset }
         .background(SuiteColor.canvasSurround)
-        .focusable(onKey != nil)
+        .focusable(takesKeys)
         .focused($isFocused)
         .focusEffectDisabled()
         // Space let go while focus was elsewhere never arrives here.
@@ -202,12 +226,41 @@ public struct CanvasViewport<Content: View, Overlay: View>: View {
             return .handled
         }
         guard press.phase == .down else { return .ignored }
+        if let zoomed = zoomKey(press, layout) {
+            onZoom?(zoomed)
+            return .handled
+        }
         if case .handled? = onKey?(press) { return .handled }
         guard press.modifiers.isDisjoint(with: [.command, .option, .control]),
             let offset = layout.panned(from: scrolled, key: press.key, page: press.modifiers.contains(.shift))
         else { return .ignored }
         position.scrollTo(point: offset)
         return .handled
+    }
+
+    /// The canvas takes focus and keys when the host handles keys or zoom.
+    private var takesKeys: Bool { onKey != nil || onZoom != nil }
+
+    /// The zoom Command-plus (or Command-equals), Command-minus or Command-0 asks for;
+    /// nil for any other key, or without `onZoom`.
+    private func zoomKey(_ press: KeyPress, _ layout: CanvasLayout) -> Double? {
+        guard onZoom != nil, press.modifiers.contains(.command),
+            press.modifiers.isDisjoint(with: [.option, .control])
+        else { return nil }
+        switch press.key {
+        case "=", "+": return ZoomMath.zoomedIn(from: zoom)
+        case "-": return ZoomMath.zoomedOut(from: zoom)
+        case "0": return ZoomMath.fit(document: documentSize, in: layout.viewport)
+        default: return nil
+        }
+    }
+
+    private func hover(_ phase: HoverPhase, _ layout: CanvasLayout) {
+        guard let onPointer else { return }
+        switch phase {
+        case .active(let location): onPointer(layout.artboardPoint(location))
+        case .ended: onPointer(nil)
+        }
     }
 
     /// A drag that starts with Space held scrolls with the pointer. It reads the pointer in
@@ -227,7 +280,7 @@ public struct CanvasViewport<Content: View, Overlay: View>: View {
             .onChanged { value in
                 // A drag that starts with Space held is a pan; a tool drag under way keeps going.
                 guard panStart == nil, last != nil || !spaceHeld else { return }
-                if onKey != nil { isFocused = true }
+                if takesKeys { isFocused = true }
                 let point = layout.documentPoint(value.location)
                 onDrag?(last ?? layout.documentPoint(value.startLocation), point)
                 last = point
@@ -244,13 +297,13 @@ public struct CanvasViewport<Content: View, Overlay: View>: View {
             .onChanged { value in
                 let base = pinchBase ?? zoom
                 pinchBase = base
-                onZoom?(base * value.magnification)
+                onZoom?(ZoomMath.clamped(base * value.magnification))
             }
             .onEnded { _ in pinchBase = nil }
     }
 
     /// Two squares of each checker tone, tiled behind the document.
-    private static var checkerboard: Image {
+    private static var checkerTile: Image {
         let square = SuiteSize.checkerSquare
         return Image(size: CGSize(width: 2 * square, height: 2 * square)) { context in
             context.fill(
