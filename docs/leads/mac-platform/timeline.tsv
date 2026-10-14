@@ -13,3 +13,5 @@ utc	stage	event	ref	note
 2026-10-14T16:44Z	3	pr-merged	#762	MP-6 launch recovery, feature-done
 2026-10-14T16:44Z	3	stage-end	wave4	all 6 tasks merged
 2026-10-14T16:44Z	4	stage-start	round1	waiting for CI on 5e1870d
+2026-10-14T16:50Z	4	ci-run	38600685744	red: AutosaveTests.quitWritesWhenDirty only; everything compiled on macOS
+2026-10-14T16:50Z	4	round-findings	round1	1 finding, fix batch r1-b1
