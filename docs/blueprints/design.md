@@ -280,7 +280,7 @@ one file. SuiteUI #333 (QH-4) changes the template to `UITests/Journey*.swift`
 plus `UITests/<target>*.swift` and adds `Journey+Input.swift` (keys with
 modifiers, velocity drags, `perf()`). Each Design feature then owns its own
 `UITests/DesignJourneyTests+<Area>.swift` with its own `XCTestCase` class.
-If #333 is still open when wave 0 starts, D0-6 makes the same one-line
+If #333 is still open when wave 0 starts, D0-7 makes the same one-line
 template change itself (project.yml is not protected) and the helpers stay
 with #333 (section 9, Q1). J6 and the other new journeys go in their own
 files; `testAlignALayer` and the other existing tests in
@@ -314,11 +314,11 @@ from disk; frames in page points, children listed back to front):
 | # | Test (file, feature) | Fixture | Steps (each one shot) | Asserts | Empty, error and loading states passed |
 |---|---|---|---|---|---|
 | J0 | `testLaunchShowsWindowShell` (`DesignJourneyTests.swift`, exists) | none | launch | `expectEditorShell()`; canvas empty state with New File; panel "No Selection" | empty: no file open |
-| J1 | `testEveryMenuOpens` (exists; D0-6 extends) | empty | open File, Edit, Page, Object, View; Page > Add Page | each menu holds the items section 6 lists without a wave marker, each enabled or disabled with a tooltip (D0-6 writes that list into the test; a later feature that adds an item adds it there); "Undo Add Page" | empty selection: Edit and Object items disabled with reasons |
+| J1 | `testEveryMenuOpens` (exists; D0-6 extends) | empty | open File, Edit, Page, Object, View; Page > Add Page | each menu holds the items section 6 lists without a wave marker, each enabled or disabled with a tooltip (D0-6 writes that list into the test; D2-4 adds the tier-2 items; no wave-1 feature adds a menu item); "Undo Add Page" | empty selection: Edit and Object items disabled with reasons |
 | J2 | `testNewFileAndEveryTool` (exists) | empty | ⌘N; `clickEachTool()` | each enabled tool picked; Pen listed disabled with its reason | – |
 | J3 | `testDrawShapesAddTextAndSave` (exists; the core loop) | empty | Frame, Rectangle, Ellipse drags; move; resize; Shift-click; Layers eye; Text "Hello"; undo; redo; ⌘S to `-DesignSaveTo`; relaunch with `-DesignOpenFile` | each step's undo name; the reopened file shows its layers | empty canvas, text edit open |
 | J4 | `testZoomPanFitAndZoomToSelection` (`+Select`, F1) | cards | read the zoom pill (the fitted percent f); ⌘+ twice; Space-drag 200 pt; ⌘0; select "C"; View > Zoom to Selection (⌥⌘2); Escape | after ⌘+ twice the pill reads the second `ViewerZoom` stop above f; the ruler's first label changed after the pan; after ⌘0 the pill reads f again; after Zoom to Selection the pill reads the stop that fits "C" and "C"'s frame center (`design.canvas.selection`) is within 2 pt of the canvas center. The centering assert needs the new SuiteUI `CanvasViewport` "show a document rect" input (section 8.2, F1); until it lands that one assert is an `XCTSkip` naming the issue | nothing selected: Zoom to Selection disabled with "Select a layer first." |
-| J5 | `testMarqueeMoveResizeSeveral` (`+Select`, F1) | cards | drag from Desktop's empty background at (80, 80) to (520, 240) (a marquee inside Desktop, rule D0-3); drag "A" 40 pt right; drag the box's bottom-right handle out 20 pt; ⇧→; ⌫; ⌘Z; then a marquee from (380, 580) to (720, 720) over "Locked" and "Hidden" | header reads "2 Layers" after the first marquee; "Undo Move" then "Undo Resize", "Undo Nudge", "Undo Delete" each one step; after ⌘Z both layers are back; the last marquee selects nothing and the header reads "Desktop"'s page | marquee over only locked and hidden layers selects nothing |
+| J5 | `testMarqueeMoveResizeSeveral` (`+Select`, F1) | cards | drag from Desktop's empty background at (80, 80) to (520, 240) (a marquee inside Desktop, rule D0-3); drag "A" 40 pt right; drag the box's bottom-right handle out 20 pt; ⇧→; ⌫; ⌘Z; then a marquee from (380, 580) to (720, 720) over "Locked" and "Hidden" | header reads "2 Layers" after the first marquee; "Undo Move" then "Undo Resize", "Undo Nudge", "Undo Delete" each one step; after ⌘Z both layers are back; the last marquee selects nothing (the inspector shows the page) | marquee over only locked and hidden layers selects nothing |
 | J6 | `testAlignAndDistributeSeveral` (`+Select`, F1) | cards | select A, B, C; Align Top from the inspector; Object > Distribute Horizontally; select A and B; Distribute | Edit menu "Undo Align Top", then "Undo Distribute Horizontally"; with two selected Distribute is disabled with "Select 3 or more layers." | refusal: disabled with reason |
 | J7 | `testDuplicateAndOptionDrag` (`+Arrange`, F2) | cards | select "A"; ⌘D; Option-drag "A" 100 pt down; select "Locked" from Layers; ⌘D | Layers shows "A" three times; "Undo Duplicate" after each; the copy of "Locked" is unlocked; nothing selected: Duplicate disabled with "Select a layer first." | empty selection |
 | J8 | `testCutCopyPasteAcrossFiles` (`+Arrange`, F2) | cards, then empty | select "Pair"; ⌘C; ⌘V; select "B"; ⌘X; relaunch with `-DesignFixture empty`; ⌘V; select the pasted "B", click the inspector's X field, ⌘A, ⌘C, ⌘V, Return | pasted "Pair" offset 10, 10 with two children; "Undo Paste", "Undo Cut"; after the relaunch the new file holds "B" (the pasteboard outlives the app); in the X field ⌘C and ⌘V acted on the text and the layer count is unchanged | Paste disabled with "The pasteboard holds no Design layers." after copying plain text |
@@ -1641,7 +1641,9 @@ PR that needs them; this blueprint does not edit that shared file.
    value differs reads "Mixed" in secondary text (no marker); typing or
    scrubbing sets every selected layer; one undo step.
 3. **Frame names sit above their frame**, outside it, in caption type, one
-   size at any zoom, clipped by nothing (#266).
+   size at any zoom. They draw in the canvas overlay (`DesignFrameLabels`),
+   which `CanvasViewport` does not clip, so a frame at the page's top edge
+   keeps its name (#266).
 4. **Selection marks.** One layer: outline and handles (today's). Several:
    each layer's outline, the dashed `SelectionOutline` around them all, and
    the 8 handles on that box. Marquee: a 1 pt accent outline over a 10%
@@ -1650,8 +1652,8 @@ PR that needs them; this blueprint does not edit that shared file.
    Return, through `SidebarRow`'s rename (SuiteUI #577, #108); an empty name
    is refused and the old one stays.
 6. **Status line** gains the selection count ("2 Layers") next to zoom and
-   page size; the top bar's save status shows the unsaved dot (#270, needs
-   SuiteUI #339).
+   page size (D0-5a); the top bar's save status shows the unsaved dot (F5,
+   #270, needs SuiteUI #339).
 
 ### Screens and their components
 
@@ -1663,7 +1665,7 @@ CLAUDE.md asks for.
 |---|---|---|---|
 | Main window | Top bar: "Design" menu, document menu, New, Open, Save, Undo, Redo, zoom out, fit, zoom in; Export… (wave 3, the one filled primary); save status | `EditorTopBar`, `EditorBarMenu`, `EditorBarItem`, `EditorBarDivider` | #339 (outlined items, primary, save status) |
 | Main window | Tool rail: Move V, Frame F, Rectangle R, Ellipse O, Text T, Pen P (disabled with its reason until wave 3) | `ToolbarGroup(style: .rail)` | – |
-| Main window | Canvas: page, artwork, frame names, selection marks, marquee, inline text editor, pen draft (wave 3); empty state with New File | `CanvasViewport`, `SelectionOutline`, `CanvasMarks`, `EmptyStateView`, `DesignArtwork`, `DesignSelectionMarks`, `DesignTextOverlay`, `DesignPenMarks` | #273 (handles into SuiteUI; not blocking), #706 (anchor mark, wave 3), #264 (ruler unit reads px) |
+| Main window | Canvas: page, artwork, frame names, selection marks, marquee, inline text editor, pen draft (wave 3); empty state with New File | `CanvasViewport`, `SelectionOutline`, `CanvasMarks`, `EmptyStateView`, `DesignArtwork`, `DesignSelectionMarks`, `DesignFrameLabels`, `DesignTextOverlay`, `DesignPenMarks` | a new SuiteUI issue: `CanvasViewport` scrolls to show a document rect the host gives (Zoom to Selection, F1); #273 (handles into SuiteUI; not blocking); #706 (anchor mark, wave 3); #264 (ruler unit reads px) |
 | Main window | Status line: zoom, page size, selection count, last message, tool | `ViewerStatusBar` | #340 (pills; name and API kept) |
 | Properties tab | One layer: header, Align row, Layer (Hidden, Locked), Frame (X, Y, W, H), Corner radius, Fill (color, opacity), Stroke (color, width, add and remove), Text (family, size, weight, alignment) | `InspectorHeader`, `InspectorSection`, `InspectorAction`, `ScrubField`, `StudioScrubRow`, `InspectorColorWellRow`, `ChoiceChips`, `Picker`, `Toggle(.checkbox)` | #745 / #718 (public `onEnd` on `ScrubField` and the color row; Design has a local end today) |
 | Properties tab | Several layers: "<n> Layers", Align row with Distribute, rows reading "Mixed" | as above, plus `InspectorAction` for Distribute | – |
@@ -1702,15 +1704,15 @@ gate is the CI p95 × 1.5, never tighter than the device target.
 Each tool has two halves. The **model half** is the Model work one input
 causes, timed on Linux now (`Tests/DesignModelTests/DesignBudgetTests.swift`,
 median and p95 of 200 runs on the `crowd` fixture; debug CI gates are 10 ×
-the device target, as the rubric does). D0-6 adds the timing helper
+the device target, as the rubric does). D0-4 adds the timing helper
 (`Tests/DesignModelTests/DesignBudget.swift`) and QD-S8, QD-S9 and QD-S11;
 each feature puts its rows in its own `Design<Area>BudgetTests.swift`, so
 the test names below are `<file>.<test>`. The **screen half** is frames late
 from the event to the first frame that shows it, read from SuiteUI's
-`FrameProbe` (#330) by the perf journeys P1 to P4 through `perf()` (#333).
-Until #330 lands the screen half cannot be measured anywhere, so those rows
-are recorded as blocked in each lead's RECORD.md and the model half gates
-alone (section 9, Q3).
+`FrameProbe` (#330) by the perf journeys P1 to P4 through `perf()` and the
+velocity drags of `Journey+Input.swift` (#333). Until both land, P1 to P4
+cannot run even report-only: each lead records them as blocked in RECORD.md
+with the issue numbers, and the model half gates alone (section 9, Q3).
 
 | id | Tool or input | Model half: device / Linux debug gate | Screen half (device target) | Test |
 |---|---|---|---|---|
@@ -1746,8 +1748,8 @@ down.
 
 Checked at five window sizes: 880 × 560 (`SuiteSize.windowMinimum`),
 1024 × 768 (the CI runner's display), 1280 × 800, 1440 × 900 and
-1920 × 1080. `testLayoutAtWidths` (`+Layout`, D0-6) launches with
-`-DesignWindowSize <w>x<h>` (D0-6 adds the argument) on `cards` with "A"
+1920 × 1080. `testLayoutAtWidths` (`+Layout`, D0-7) launches with
+`-DesignWindowSize <w>x<h>` (D0-5a adds the argument) on `cards` with "A"
 selected, shoots each size, and asserts from element frames, to 0.5 pt:
 
 1. Rail, canvas and panel sit side by side with no gap or overlap; the panel
@@ -1768,15 +1770,15 @@ selected, shoots each size, and asserts from element frames, to 0.5 pt:
 
 | id | Check | Reference | Runs |
 |---|---|---|---|
-| QD-V1 | Save is stable: open then save gives the same bytes, for every fixture and for a version-1 file written before D0-1 | the fixture's committed JSON in `Tests/DesignModelTests/Fixtures/` | Linux |
-| QD-V2 | The canvas draws what the file holds: the `cards` canvas matches its golden within QB-V2 (channel 2/255, ≤ 0.5% pixels), Dark and Dark + Increase Contrast | `Tests/AppSnapshotTests/Golden/design-canvas-cards-*.png` (#331, #332) | macOS CI |
-| QD-V3 | Curves stay curves: an ellipse, a rounded rectangle and (wave 3) a pen curve reach the drawing layer as curve elements, never line segments | element kinds of the built `Path` | macOS CI (`DesignArtworkPathTests`) |
-| QD-V4 | Grouping and ungrouping move nothing: every leaf frame is equal before and after, and the canvas golden is unchanged | the pre-group frames; the golden | Linux; macOS CI |
+| QD-V1 | Save is stable: for every fixture, `encode(decode(encode(doc))) == encode(doc)` byte for byte; a version-1 JSON string written before D0-1 decodes to the same tree with the new fields at their defaults | the fixture built in code; the version-1 string in the test | Linux |
+| QD-V2 | The canvas draws what the file holds: the `cards` canvas matches its golden within QB-V2 (channel 2/255, ≤ 0.5% pixels), Dark and Dark + Increase Contrast | `Tests/AppSnapshotTests/Golden/design-canvas-cards-*.png` | macOS CI, **blocked on SuiteUI #331 and #332** (no golden harness exists yet); until then the plain snapshot PNGs are judged by eye |
+| QD-V3 | Curves stay curves: an ellipse, a rounded rectangle and (wave 3) a pen curve reach the drawing layer as curve elements, never line segments | element kinds of the built `Path` | macOS CI (`Tests/AppSnapshotTests/DesignArtworkPathTests.swift`, no golden needed) |
+| QD-V4 | Grouping and ungrouping move nothing: every leaf frame is equal before and after (Linux), and the canvas golden is unchanged (macOS CI, blocked on #331 and #332 like QD-V2) | the pre-group frames; the golden | Linux; macOS CI |
 | QD-V5 | Duplicate and paste copy faithfully: the copy equals the original except ids, the offset and the lock | the original subtree | Linux |
 | QD-V6 | Align and distribute land exactly: three rectangles at x 10, 50, 200 aligned left all have x 10; widths 20, 40, 20 spanning 0...300 distribute to equal gaps (≤ 1e-9) | #714's numbers | Linux |
-| QD-V7 | Text doesn't jump: the committed text's frame equals the editor's at 25%, 50%, 100% and 200% zoom (#268) | the editor frame | macOS CI (`DesignTextScaleTests`) |
-| QD-V8 | SVG export (wave 3) equals a reference document for the `cards` Desktop frame: viewBox, one element per visible layer, clipPath for the frame, escaped text, opacity and stroke attributes | `Tests/DesignModelTests/Fixtures/cards-desktop.svg` | Linux |
-| QD-V9 | PNG export (wave 3) of a frame equals the canvas golden of that frame (QB-V4) | the QD-V2 golden | macOS CI |
+| QD-V7 | Text doesn't jump: the committed text's frame equals the editor's at 25%, 50%, 100% and 200% zoom (#268) | the editor frame | macOS CI (`Tests/AppSnapshotTests/DesignTextScaleTests.swift`) |
+| QD-V8 | SVG export (wave 3) equals a reference document for the `cards` Desktop frame: viewBox, one element per visible layer, clipPath for the frame, escaped text, opacity and stroke attributes | a string literal in `DesignSVGTests.swift` | Linux |
+| QD-V9 | PNG export (wave 3) of a frame equals the canvas golden of that frame (QB-V4) | the QD-V2 golden | macOS CI, blocked on #331 and #332 |
 
 ### 7.5 Feel
 
@@ -1808,7 +1810,7 @@ and the several-layer selection box under Increase Contrast (QB-F5, once
 | #416 | Group and ungroup | p1 | F2 `copy-group` |
 | #415 | Cut, copy, paste | p1 | F2 `copy-group` |
 | #414 | Duplicate, Option-drag | p1 | F2 `copy-group` |
-| #288 | Controls without identifiers | p2 | Spread: D0-4 and D0-5 (window, top bar, menus), then each wave-1 feature for the views it owns; the SuiteUI part goes to SuiteUI. Closes when the `identifier` count is 0 |
+| #288 | Controls without identifiers | p2 | Spread: D0-5a, D0-5b and D0-6 (window, top bar, canvas, menus), then each wave-1 feature for the views it owns; the SuiteUI part goes to SuiteUI. Closes when the `identifier` count is 0 |
 | #276 | Locked hint in the gutter | p3 | F3 `style-rows` |
 | #275 | System undo lost in text fields; close prompt | p1 | F5 `files-history` |
 | #270 | Save stays bright after saving | p3 | F5 `files-history` |
@@ -1820,7 +1822,8 @@ and the several-layer selection box under Increase Contrast (QB-F5, once
 | #19 | Components panel | p2 | F8 `components` (wave 3) |
 
 Gaps with no issue (each lead files a `gap` issue when it starts): marquee,
-several-layer transform and zoom to selection (F1); rename, reorder, nest and
+several-layer transform and zoom to selection, plus the `CanvasViewport`
+"show a document rect" `needs-ui` issue (F1); rename, reorder, nest and
 Arrange (F4); the open-error journey (F5); the Pen tool (F7); the public
 `DesignPage` init (D0-1). Open PR #719 duplicates the fix that shipped as
 #749 and can close (Q6).
@@ -1829,31 +1832,37 @@ Arrange (F4); the open-error journey (F5); the Pen tool (F7); the public
 
 A wave starts when everything it waits on has merged. No two features in a
 wave own the same file; across waves a file changes hands only after the
-earlier wave merged. "Tests" means new files in `Tests/DesignModelTests/`
-unless a path says otherwise; journeys are `UITests/DesignJourneyTests+<Area>.swift`;
-snapshots are in `Tests/AppSnapshotTests/`. Paths below drop the
+earlier wave merged; tasks inside one feature run in order and may pass a
+file along. "Tests" means new files in `Tests/DesignModelTests/` unless a
+path says otherwise; journeys are `UITests/DesignJourneyTests+<Area>.swift`;
+snapshots are in `Tests/AppSnapshotTests/`. Paths drop the
 `Sources/DesignModel/` and `Sources/DesignApp/` prefixes where the file name
 says which target (`Live/`, `Contracts/`, `Fakes/` are DesignModel).
 
 #### Wave 0: `design-seams` (one feature, tasks in order)
 
 Waits on: PR #753 merged (it adds `cornerRadius`); SuiteUI #333 for the
-journey template, or D0-6 makes the one-line template change (Q1). Engine:
+journey template, or D0-7 makes the one-line template change (Q1). Engine:
 none.
 
 | Task | Behavior | Owned files |
 |---|---|---|
-| D0-1 | Style schema with old files still opening; public `DesignPage` init; `services` and `marquee` on the workspace | `DesignNode.swift`, `DesignWorkspace.swift`, `DesignFile.swift`; tests `DesignStyleSchemaTests.swift`, `Fixtures/v1-before-style.json` |
-| D0-2 | Contracts, `DesignServices`, `NotBuilt`, tier-1 fakes, the contract law | `Contracts/EditContracts.swift`, `Contracts/StyleTypes.swift`, `Contracts/UseCases.swift`, `DesignServices.swift`, `Fakes/FakeSupport.swift`, `Fakes/DesignFakes.swift`; tests `DesignContractLawTests.swift`, `DesignIDMintTests.swift` |
-| D0-2b | One stub per tier-1 live type, forwarding to `NotBuilt` (`LiveFiling` to today's codec), and `.live` naming them, so no later feature edits `DesignServices.swift` | `Live/LiveMarquee.swift`, `Live/LiveTransforming.swift`, `Live/LiveAligning.swift`, `Live/LiveFraming.swift`, `Live/LiveDuplicating.swift`, `Live/LiveGrouping.swift`, `Live/LiveClipboard.swift`, `Live/LiveOrdering.swift`, `Live/LiveStyling.swift`, `Live/LiveFiling.swift`, `DesignServices.swift` |
-| D0-3 | `DesignActions` (section 5.5) and the gesture routes: marquee on an empty-canvas drag, several-layer move and resize, Option-drag copies | `DesignActions.swift`, `DesignCanvasEditing.swift`; tests `DesignActionsTests.swift`, `DesignGestureRouteTests.swift` |
-| D0-4 | Every new intent, `perform` for each, launch arguments `-DesignServices`, `-DesignFixture`, `-DesignWindowSize`; marquee mark; selection marks split out; pasteboard bridge with the canvas and Layers copy and paste hooks; rename presentation state | `DesignIntent.swift`, `DesignWindow.swift`, `DesignCanvas.swift`, `DesignCanvasMarks.swift`, `DesignSelectionMarks.swift`, `DesignPasteboardBridge.swift`, `DesignLayersPanel.swift` |
-| D0-5 | Menus: Edit (Cut, Copy, Paste, Duplicate, Select All), Page (Rename Page…), Object (Group, Ungroup, Arrange, Distribute), View (Zoom to Selection); every item disabled with its help | `DesignCommands.swift`, `DesignEditMenu.swift`, `DesignObjectMenu.swift`; snapshots `DesignEditMenuSnapshots.swift`, `DesignPageMenuSnapshots.swift`; `UITests/DesignJourneyTests.swift` (J1's item list) |
-| D0-6 | Fixtures, the budget helper and the shared budget rows, the every-control sweep and the layout journey | `DesignFixtures.swift`; tests `DesignFixturesTests.swift`, `DesignBudget.swift`, `DesignBudgetTests.swift`; `UITests/DesignJourneyTests+EveryControl.swift`, `UITests/DesignJourneyTests+Layout.swift`; `project.yml` only if #333 is open |
+| D0-1 | Style schema (5.1) with version-1 files still opening; `DesignNode(id:copying:)`; public `DesignPage` init; `marquee` on the workspace; every selection change ends the edit run | `DesignNode.swift`, `DesignWorkspace.swift`, `DesignSelection.swift`, `DesignFile.swift`; tests `DesignStyleSchemaTests.swift` |
+| D0-2 | Contracts, `DesignServices` (`.live` all `NotBuilt`), `services` on the workspace, tier-1 fakes, the contract law | `Contracts/EditContracts.swift`, `Contracts/StyleTypes.swift`, `Contracts/UseCases.swift`, `DesignServices.swift`, `DesignWorkspace.swift`, `Fakes/FakeSupport.swift`, `Fakes/DesignFakes.swift`; tests `DesignContractLawTests.swift`, `DesignIDMintTests.swift` |
+| D0-2b | One stub per tier-1 live type forwarding to `NotBuilt`, and `.live` naming them, so no later feature edits `DesignServices.swift` | `Live/LiveMarquee.swift`, `Live/LiveTransforming.swift`, `Live/LiveAligning.swift`, `Live/LiveFraming.swift`, `Live/LiveDuplicating.swift`, `Live/LiveGrouping.swift`, `Live/LiveClipboard.swift`, `Live/LiveOrdering.swift`, `Live/LiveStyling.swift`, `Live/LiveFiling.swift`, `DesignServices.swift` |
+| D0-3 | `DesignActions` (5.5), with today's single-layer methods behind `.delete`, `.nudge` and `.align` for one layer; the gesture routes: **marquee rule** (a Move press on a frame's empty background, no child under the pointer, that then drags starts a marquee over that frame's children unless the frame is already selected, when it moves; a click there without moving selects the frame; a press off every frame starts a marquee over the page's top level), several-layer move and resize, Option-drag copies; `endDrag` ends the edit run | `DesignActions.swift`, `DesignCanvasEditing.swift`; tests `DesignActionsTests.swift`, `DesignGestureRouteTests.swift` |
+| D0-4 | Fixtures (`empty`, `cards`, `two-pages`, `crowd`); the budget helper and the shared budget rows QD-S8, QD-S9, QD-S11 | `DesignFixtures.swift`; tests `DesignFixturesTests.swift`, `DesignBudget.swift`, `DesignBudgetTests.swift` |
+| D0-5a | Every new intent and `perform` for it; launch arguments `-DesignServices`, `-DesignFixture`, `-DesignWindowSize`; Zoom to Selection sets the zoom and hands the rect to the canvas as `show`; the several-layer inspector shell (header, Align row with Distribute, rows reading "Mixed", each control's help from the actions); the status line's selection count | `DesignIntent.swift`, `DesignWindow.swift`, `DesignEditor.swift`, `DesignInspector.swift`, `DesignAlignBar.swift` |
+| D0-5b | Canvas: the marquee mark; selection marks split into their own file; an empty frame-name overlay slot (`DesignFrameLabels`); the `show` rect parameter (unused until F1); the pasteboard bridge and the copy, cut and paste hooks on the canvas and Layers; rename presentation state in Layers | `DesignCanvas.swift`, `DesignCanvasMarks.swift`, `DesignSelectionMarks.swift`, `DesignFrameLabels.swift`, `DesignPasteboardBridge.swift`, `DesignLayersPanel.swift` |
+| D0-6 | Menus: Edit adds Duplicate after the stock pasteboard group, which stays, so Cut, Copy, Paste and Select All keep working in text fields and reach layers through the D0-5b focus hooks; Page adds Rename Page…; Object adds Group, Ungroup, Arrange, Distribute; View adds Zoom to Selection; every item disabled with its help | `DesignCommands.swift`, `DesignEditMenu.swift`, `DesignObjectMenu.swift`; snapshots `DesignEditMenuSnapshots.swift`, `DesignPageMenuSnapshots.swift`; `UITests/DesignJourneyTests.swift` (J1's item list) |
+| D0-7 | The every-control sweep and the layout journey | `UITests/DesignJourneyTests+EveryControl.swift`, `UITests/DesignJourneyTests+Layout.swift`; `project.yml` only if #333 is open |
 
-D0-2 and D0-4 also update `docs/c4/model.json`'s `design-model-sources` and
+D0-2 and D0-5b update `docs/c4/model.json`'s `design-model-sources` and
 `design-app-sources` descriptions (contracts, services, fakes, live types;
-selection marks and the pasteboard bridge).
+selection marks, frame labels and the pasteboard bridge). The Edit menu's
+text-field behaviour follows current docs for SwiftUI's focused copy, cut and
+paste hooks (CLAUDE.md "check current docs"); Undo and Redo inside text
+fields are F5's (#275).
 
 #### Wave 1: the rest of tier 1 (five features side by side)
 
@@ -1862,11 +1871,11 @@ edits and file live in DesignModel; CoreColor is not needed until #21).
 
 | Feature | Covers | Owned files | Waits on (besides wave 0) |
 |---|---|---|---|
-| F1 `select-several` | marquee, several-layer move, resize, nudge, delete; align several and distribute (#714); zoom to selection; #542, #607; J4, J5, J6, P1 | `Live/LiveMarquee.swift`, `Live/LiveTransforming.swift`, `Live/LiveAligning.swift`, `Live/LiveFraming.swift`, `DesignAlign.swift`, `DesignSelection.swift`, `DesignCanvasEditing.swift`, `DesignCanvas.swift`, `DesignSelectionMarks.swift`, `DesignAlignBar.swift`; tests `DesignMarqueeTests.swift`, `DesignSeveralTransformTests.swift`, `DesignDistributeTests.swift`, `DesignFramingTests.swift`, `DesignSelectBudgetTests.swift`; snapshots `DesignMarqueeSnapshots.swift`, `DesignAlignSnapshots.swift`, `DesignMultiSelectSnapshots.swift`; journeys `+Select`, `+PerfCanvas` | SuiteUI #330 for P1's screen half (report-only until then) |
+| F1 `select-several` | marquee, several-layer move, resize, nudge, delete; align several and distribute (#714); Zoom to Selection; #542, #607; J4, J5, J6, P1 | `Live/LiveMarquee.swift`, `Live/LiveTransforming.swift`, `Live/LiveAligning.swift`, `Live/LiveFraming.swift`, `DesignAlign.swift`, `DesignCanvasEditing.swift`, `DesignCanvas.swift`, `DesignSelectionMarks.swift`, `DesignAlignBar.swift`; tests `DesignMarqueeTests.swift`, `DesignSeveralTransformTests.swift`, `DesignDistributeTests.swift`, `DesignFramingTests.swift`, `DesignSelectBudgetTests.swift`; snapshots `DesignMarqueeSnapshots.swift`, `DesignAlignSnapshots.swift`, `DesignMultiSelectSnapshots.swift`; journeys `+Select`, `+PerfCanvas` | a new SuiteUI issue, filed by the F1 lead: `CanvasViewport` scrolls to show a document rect the host passes (J4's centering assert waits on it); SuiteUI #330 and #333 for P1 |
 | F2 `copy-group` | duplicate and Option-drag (#414), group and ungroup (#416), cut, copy, paste (#415); J7, J8, J9 | `Live/LiveDuplicating.swift`, `Live/LiveGrouping.swift`, `Live/LiveClipboard.swift`; tests `DesignDuplicateTests.swift`, `DesignGroupTests.swift`, `DesignPasteboardTests.swift`; snapshots `DesignDuplicateSnapshots.swift`, `DesignGroupSnapshots.swift`, `DesignPasteboardSnapshots.swift`; journey `+Arrange` | nothing |
-| F3 `style-rows` | opacity and stroke (#752), text family, size, weight, alignment (#267), no jump on commit (#268), hint column (#276), frame names (#266), drawing radius, stroke and opacity; J10, J11, P2 | `Live/LiveStyling.swift`, `DesignInspector.swift`, `DesignInspectorStyle.swift`, `DesignInspectorContent.swift`, `DesignCanvasMarks.swift`, `DesignTextEditor.swift`, `DesignText.swift`; tests `DesignStyleTests.swift`, `DesignTextScaleTests.swift`, `DesignStyleBudgetTests.swift`; snapshots `DesignInspectorSnapshots.swift`, `DesignTextSnapshots.swift`, `DesignStyleSnapshots.swift`, `DesignArtworkPathTests.swift`; journeys `+Style`, `+PerfScrub` | SuiteUI #745 or #718 (public `onEnd`; Design's local end works meanwhile) |
-| F4 `layers-panel` | rename layers and pages, drag to reorder and nest, Arrange, group-row toggles (#589), lock commits a text edit (#613); J12, P3 | `Live/LiveOrdering.swift`, `DesignLayersPanel.swift`, `DesignLayerToggles.swift`, `DesignWorkspace.swift`; tests `DesignOrderingTests.swift`, `DesignRenameTests.swift`, `DesignLockTextEditTests.swift`, `DesignLayersBudgetTests.swift`; snapshots `DesignLayersSnapshots.swift`; journeys `+Layers`, `+PerfLayers` | SuiteUI #589, #577, #108, #73 (until they land: mouse rename, no context menu, the group-row eye step skipped with its issue named) |
-| F5 `files-history` | system undo in text fields and the close prompt (#275), save status and the unsaved dot (#270), the codec behind `DocumentFiling`, the open-error journey; J13, J14, J16, P4 | `Live/LiveFiling.swift`, `DesignFile.swift`, `DesignHistory.swift`, `DesignCommands.swift`, `DesignWindow.swift`, `DesignEditor.swift`; tests `DesignDirtyTests.swift`, `DesignFilingTests.swift`; snapshots `DesignFileSnapshots.swift`, `DesignFileMenuSnapshots.swift`; journeys `+Files`, `+PerfFiles` | SuiteUI #339 (save status in the top bar; a plain status text meanwhile) |
+| F3 `style-rows` | opacity and stroke (#752), text family, size, weight, alignment (#267), several layers' rows set each layer ("Mixed"), no jump on commit (#268), hint column (#276), frame names in the overlay (#266), drawing radius, stroke and opacity; J10, J11, P2 | `Live/LiveStyling.swift`, `DesignInspector.swift`, `DesignInspectorStyle.swift`, `DesignInspectorContent.swift`, `DesignCanvasMarks.swift`, `DesignFrameLabels.swift`, `DesignTextEditor.swift`, `DesignText.swift`; tests `DesignStyleTests.swift`, `DesignStyleBudgetTests.swift`; snapshots `DesignInspectorSnapshots.swift`, `DesignTextSnapshots.swift`, `DesignStyleSnapshots.swift`, `DesignArtworkPathTests.swift`, `DesignTextScaleTests.swift`; journeys `+Style`, `+PerfScrub` | SuiteUI #745 or #718 (public `onEnd`; Design's local end works meanwhile); #330 and #333 for P2 |
+| F4 `layers-panel` | rename layers and pages, drag to reorder and nest, Arrange, group-row toggles (#589), lock commits a text edit (#613); J12, P3 | `Live/LiveOrdering.swift`, `DesignLayersPanel.swift`, `DesignLayerToggles.swift`, `DesignWorkspace.swift`; tests `DesignOrderingTests.swift`, `DesignRenameTests.swift`, `DesignLockTextEditTests.swift`, `DesignLayersBudgetTests.swift`; snapshots `DesignLayersSnapshots.swift`; journeys `+Layers`, `+PerfLayers` | SuiteUI #589, #577, #108, #73 (until they land: mouse rename only, no context menu, and J12's group-row eye step is an `XCTSkip` naming #589); #330 and #333 for P3 |
+| F5 `files-history` | system Undo and Redo inside text fields and the close prompt (#275), save status and the unsaved dot (#270), the codec behind `DocumentFiling`, the open-error journey; J13, J14, J16, P4 | `Live/LiveFiling.swift`, `DesignFile.swift`, `DesignHistory.swift`, `DesignCommands.swift`, `DesignWindow.swift`, `DesignEditor.swift`; tests `DesignDirtyTests.swift`, `DesignFilingTests.swift`; snapshots `DesignFileSnapshots.swift`, `DesignFileMenuSnapshots.swift`; journeys `+Files`, `+PerfFiles` | SuiteUI #339 (save status in the top bar; a plain status text meanwhile); #330 and #333 for P4 |
 
 #### Wave 2: `design-seams-2` (one feature, tasks in order)
 
@@ -1874,10 +1883,10 @@ Waits on: wave 1 merged (it edits files wave 1 owns). Engine: none.
 
 | Task | Behavior | Owned files |
 |---|---|---|
-| D2-1 | Tier-2 schema: `path` kind and field, `componentID`, file `components` and `variables`, file version 2 with version 1 still opening; snapshots of history carry components and variables | `DesignNode.swift`, `DesignInspectorContent.swift`, `DesignFile.swift`, `DesignHistory.swift`, `DesignWorkspace.swift`; tests `DesignTierTwoSchemaTests.swift`, `Fixtures/v1-file.json` |
+| D2-1 | Tier-2 schema (5.1): `path` kind with every switch over the kind (a placeholder case in the canvas), `path`, `componentID`, `fillVariableID`, file `components` and `variables`, file version 2 with version 1 still opening; history snapshots carry components and variables | `DesignNode.swift`, `DesignInspectorContent.swift`, `DesignCanvasMarks.swift`, `DesignFile.swift`, `DesignHistory.swift`, `DesignWorkspace.swift`; tests `DesignTierTwoSchemaTests.swift` |
 | D2-2 | Tier-2 fakes and live stubs; `.fake` and `.live` name them | `Fakes/DesignTierTwoFakes.swift`, `Live/LiveExport.swift`, `Live/LivePen.swift`, `Live/LiveComponents.swift`, `Live/LiveVariables.swift`, `DesignServices.swift`; tests `DesignContractLawTierTwoTests.swift` |
-| D2-3 | Actions and routes: export plan, pen press and drag, create and insert component, variable edits, light and dark mode | `DesignActions.swift`, `DesignCanvasEditing.swift`; tests `DesignActionsTierTwoTests.swift` |
-| D2-4 | Intents, menus and the top bar: Export…, Create Component, Variables…, Light / Dark; the canvas draws paths and resolved instances | `DesignIntent.swift`, `DesignWindow.swift`, `DesignCommands.swift`, `DesignObjectMenu.swift`, `DesignEditor.swift`, `DesignCanvasMarks.swift`; `docs/c4/model.json` (names the wave-3 files, so no wave-3 feature edits it) |
+| D2-3 | Actions and routes: export plan, pen press, drag and finish, create and insert component, variable edits and binding, light and dark mode, `displayFill(of:)` and `resolvedChildren(of:)` for the canvas | `DesignActions.swift`, `DesignCanvasEditing.swift`; tests `DesignActionsTierTwoTests.swift` |
+| D2-4 | The canvas draws paths, resolved instances and bound fills; the pen draft slot in the overlay; Export…, Create Component, Variables… and Light / Dark in the menus and top bar | `DesignCanvasMarks.swift`, `DesignCanvas.swift`, `DesignIntent.swift`, `DesignWindow.swift`, `DesignCommands.swift`, `DesignObjectMenu.swift`, `DesignEditor.swift`; `docs/c4/model.json` (names the wave-3 files, so no wave-3 feature edits it) |
 
 #### Wave 3: tier 2 (four features side by side)
 
@@ -1885,10 +1894,10 @@ Waits on: wave 2 merged.
 
 | Feature | Covers | Owned files | Engine work it waits on |
 |---|---|---|---|
-| F6 `export` | #418: PNG 1x/2x/3x, SVG, PDF; progress, Cancel, per-file errors | `Live/LiveExport.swift`, `Live/DesignSVG.swift`, `DesignExportSheet.swift`, `DesignRasterizer.swift`; tests `DesignExportTests.swift`, `DesignSVGTests.swift`, `DesignExportBudgetTests.swift`, `Fixtures/cards-desktop.svg`; snapshots `DesignExportSnapshots.swift`; journey `+Export` | none (the SVG writer is DesignModel's, per #418; PNG and PDF render the artwork view) |
-| F7 `pen` | Pen tool: corners, smooth points, close; enable the tool | `Live/LivePen.swift`, `DesignPenMarks.swift`, `DesignWorkspace.swift` (the tool's help); tests `DesignPenTests.swift`; snapshots `DesignPenSnapshots.swift`; journey `+Pen` | **Needs a new core issue:** "Shared path geometry: a Linux-safe path (move, line, cubic, close) with exact cubic bounds, a hit test within a tolerance and SVG path data, for Flare and Design." Also SuiteUI #706 (anchor mark) |
+| F6 `export` | #418: PNG 1x/2x/3x, SVG, PDF; progress, Cancel, per-file errors | `Live/LiveExport.swift`, `Live/DesignSVG.swift`, `DesignExportSheet.swift`, `DesignRasterizer.swift`; tests `DesignExportTests.swift`, `DesignSVGTests.swift`, `DesignExportBudgetTests.swift`; snapshots `DesignExportSnapshots.swift`; journey `+Export` | none (the SVG writer is DesignModel's, per #418; PNG and PDF render the artwork view) |
+| F7 `pen` | Pen tool: corners, smooth points, close, Return and Escape finish; enable the tool | `Live/LivePen.swift`, `DesignPenMarks.swift`, `DesignCanvas.swift`, `DesignWorkspace.swift` (the tool's help); tests `DesignPenTests.swift`; snapshots `DesignPenSnapshots.swift`; journey `+Pen` | **Needs a new core issue:** "Shared path geometry: a Linux-safe path (move, line, cubic, close) with exact cubic bounds, a hit test within a tolerance and SVG path data, for Flare and Design." Also SuiteUI #706 (anchor mark) |
 | F8 `components` | #19: create from a frame, Assets section, insert, instances draw the component | `Live/LiveComponents.swift`, `DesignPanel.swift`, `DesignAssetsPanel.swift`; tests `DesignComponentsTests.swift`; snapshots `DesignComponentsSnapshots.swift`; journey `+Components` | none |
-| F9 `variables` | #20: Variables sheet, light and dark values, fills bound to a variable, preview mode | `Live/LiveVariables.swift`, `DesignVariablesSheet.swift`, `DesignInspector.swift`; tests `DesignVariablesTests.swift`; snapshots `DesignVariablesSnapshots.swift`; journey `+Variables` | none (CoreColor wide gamut is #21, not v1) |
+| F9 `variables` | #20: Variables sheet, light and dark values, fills bound to a variable (drawn through D2-3's `displayFill`), preview mode | `Live/LiveVariables.swift`, `DesignVariablesSheet.swift`, `DesignInspector.swift`; tests `DesignVariablesTests.swift`; snapshots `DesignVariablesSnapshots.swift`; journey `+Variables` | none (CoreColor wide gamut is #21, not v1) |
 
 ### 8.3 Why this order
 
@@ -1922,7 +1931,7 @@ Waits on: wave 2 merged.
 
 1. **Q1 Journey files.** Wave 0 needs SuiteUI #333's template change so each
    feature owns its own journey file. If #333 is not merged when wave 0
-   starts, may D0-6 make the one-line `project.yml` change itself (leaving
+   starts, may D0-7 make the one-line `project.yml` change itself (leaving
    the input and perf helpers to #333)?
 2. **Q2 Auto Layout.** #752's last bullet stores direction, gap, padding and
    alignment with no layout math, which leaves controls that change nothing
