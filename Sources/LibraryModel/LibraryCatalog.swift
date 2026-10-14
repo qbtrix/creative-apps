@@ -96,6 +96,32 @@ public struct LibraryCatalog: Sendable, Equatable {
         mode = .loupe
     }
 
+    /// View > Loupe: opens the first selected photo in the sort, else the
+    /// loupe's last photo, else the first shown. No photos: nothing changes.
+    public mutating func showLoupe() {
+        let order = sortedItems.map(\.id)
+        let last = focusedItemID.flatMap { order.contains($0) ? $0 : nil }
+        guard let id = order.first(where: selection.contains) ?? last ?? order.first else { return }
+        open(id)
+    }
+
+    /// Moves the loupe `steps` photos along the sort; it stops at the ends.
+    public mutating func stepLoupe(by steps: Int) {
+        let order = sortedItems.map(\.id)
+        guard mode == .loupe, let id = focusedItemID, let index = order.firstIndex(of: id) else { return }
+        let last = order.count - 1
+        // Clamp the step first so a huge count cannot overflow `Int`.
+        focusedItemID = order[min(max(index + min(max(steps, -last), last), 0), last)]
+    }
+
+    /// Escape, G or View > Grid: back to the grid with the loupe's photo selected.
+    public mutating func showGrid() {
+        if mode == .loupe, let id = focusedItemID, sortedItems.contains(where: { $0.id == id }) {
+            selection = [id]
+        }
+        mode = .grid
+    }
+
     /// The photos with every id unique; the first photo with an id keeps it.
     private static func uniquingIDs(_ photos: [PhotoItem]) -> [PhotoItem] {
         var taken = Set<String>()

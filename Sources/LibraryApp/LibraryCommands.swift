@@ -1,6 +1,7 @@
-// LibraryCommands.swift: File > Load Sample Photos, View > Sort By and View >
-// Larger and Smaller Thumbnails, fed by the focused window's LibraryMenu. With
-// no window focused, or at a size limit, the items disable rather than hide.
+// LibraryCommands.swift: File > Load Sample Photos, View > Grid and Loupe,
+// View > Sort By and View > Larger and Smaller Thumbnails, fed by the focused
+// window's LibraryMenu. With no window focused, at a size limit, or already in
+// that mode, the items disable rather than hide.
 import LibraryModel
 import SwiftUI
 
@@ -11,6 +12,8 @@ struct LibraryMenu {
     let setSort: @MainActor (LibrarySort) -> Void
     let larger: (@MainActor () -> Void)?
     let smaller: (@MainActor () -> Void)?
+    let showGrid: (@MainActor () -> Void)?  // nil in the grid
+    let showLoupe: (@MainActor () -> Void)?  // nil in the loupe or with no photos shown
 }
 
 extension FocusedValues {
@@ -26,6 +29,11 @@ struct LibraryCommands: Commands {
                 .disabled(menu == nil)
         }
         CommandGroup(before: .toolbar) {
+            Button("Grid", systemImage: "square.grid.2x2") { menu?.showGrid?() }
+                .disabled(menu?.showGrid == nil)
+            Button("Loupe", systemImage: "rectangle") { menu?.showLoupe?() }
+                .disabled(menu?.showLoupe == nil)
+            Divider()
             Picker("Sort By", selection: Binding(get: { menu?.sort ?? .captureDate }, set: { menu?.setSort($0) })) {
                 ForEach(LibrarySort.allCases, id: \.self) { Text($0.rawValue).tag($0) }
             }
