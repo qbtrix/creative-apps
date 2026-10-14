@@ -143,6 +143,15 @@ public struct FlareWorkspace: Sendable, Equatable {
         cancelDrag(); selection = []
     }
 
+    /// Selects the scene that took removed scene `id`'s place in `order`, or the last one when it was last; with no
+    /// scenes left, nothing.
+    private mutating func selectNeighbour(of id: String, in order: [String]) {
+        let ids = Set(scenes.map(\.id)), i = order.firstIndex(of: id) ?? 0
+        let after = order.dropFirst(i).first(where: ids.contains), before = order.prefix(i).last(where: ids.contains)
+        selectedSceneID = nil
+        if let next = after ?? before ?? scenes.first?.id { selectScene(next) }
+    }
+
     /// Selects a layer of the selected scene by id. An unknown id is ignored.
     public mutating func selectLayer(_ id: String) {
         guard selectedScene?.layers.contains(where: { $0.id == id }) == true else { return }
@@ -197,9 +206,11 @@ public struct FlareWorkspace: Sendable, Equatable {
     /// Runs `body` on a copy of the engine and commits it only if it succeeds.
     /// With a `label`, `body` runs inside `engine.group(label)`: only for
     /// workspace-level compositions such as Cut, since a contract opens its
-    /// own group. Afterwards a selected layer that no longer exists is deselected.
+    /// own group. Afterwards a selected scene that no longer exists (an undone Add Scene, a redone Delete Scene)
+    /// gives way to its neighbour, clamped to the scene list, and a selected layer that no longer exists is deselected.
     mutating func step(_ label: String? = nil, _ body: (inout CommandEngine) throws -> Void) {
         guard var next = engine else { return refuse(.noDocument) }
+        let order = scenes.map(\.id)
         do {
             if let label { try next.group(label, body) } else { try body(&next) }
         } catch let error as CommandError {
@@ -209,6 +220,7 @@ public struct FlareWorkspace: Sendable, Equatable {
         }
         engine = next
         layerError = nil
+        if let id = selectedSceneID, selectedScene == nil { selectNeighbour(of: id, in: order) }
         if let id = selectedLayerID, selectedScene?.layers.contains(where: { $0.id == id }) != true {
             selectedLayerID = nil
         }
