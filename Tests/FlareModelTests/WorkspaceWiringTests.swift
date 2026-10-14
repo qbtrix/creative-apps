@@ -104,7 +104,7 @@ private func ball(_ w: FlareWorkspace) -> Layer? { w.document?.scenes.first?.lay
     w.machineID = "button"
     w.machinePreview = MachinePreview(machineID: "button", stateID: "idle", frame: 3, inputs: [:])
     (w.machineError, w.exportState, w.assist.prompt) = ("No machine.", .running(progress: 0.5), "bounce higher")
-    (w.fileName, w.isDirty, w.saveError, w.loadState) = ("bounce.flare", true, "Disk full.", .failed("Bad file."))
+    (w.fileName, w.savedDocument, w.saveError, w.loadState) = ("bounce.flare", nil, "Disk full.", .failed("Bad file."))
     (w.loops, w.autoKey, w.onion.isOn, w.showsMotionPath, w.recent) = (false, true, true, true, ["a.flare"])
     w.load(FlareFixtures.bounce)
     var fresh = workspace(FlareFixtures.bounce, .select)
@@ -119,7 +119,7 @@ private func ball(_ w: FlareWorkspace) -> Layer? { w.document?.scenes.first?.lay
         { $0.onion.before = 3 }, { $0.showsMotionPath = true }, { $0.editingSymbolID = "star" },
         { $0.machineID = "button" }, { $0.machineError = "No machine." }, { $0.exportState = .failed("Disk full.") },
         { $0.machinePreview = MachinePreview(machineID: "m", stateID: "idle", frame: 0, inputs: [:]) },
-        { $0.assist.error = .timedOut }, { $0.fileName = "bounce.flare" }, { $0.isDirty = true },
+        { $0.assist.error = .timedOut }, { $0.fileName = "bounce.flare" }, { $0.savedDocument = nil },
         { $0.saveError = "Disk full." }, { $0.loadState = .loading }, { $0.recent = ["a.flare"] },
     ]
     for (i, change) in changes.enumerated() {

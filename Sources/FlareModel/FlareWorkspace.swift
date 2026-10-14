@@ -78,7 +78,8 @@ public struct FlareWorkspace: Sendable, Equatable {
     /// The open file's name, unsaved changes, the last save failure, the
     /// open under way, and recently opened files (FlareFiles.swift).
     public internal(set) var fileName: String?
-    public internal(set) var isDirty = false
+    /// The document as last opened or saved; `isDirty` compares against it.
+    var savedDocument: Document?
     public internal(set) var saveError: String?
     public internal(set) var loadState = LoadState.idle
     public internal(set) var recent: [String] = []
@@ -133,7 +134,7 @@ public struct FlareWorkspace: Sendable, Equatable {
         (isPlaying, playClock, editingSymbolID, symbolReturnFrame) = (false, 0, nil, 0)
         (machineID, machinePreview, machineError) = (nil, nil, nil)
         (exportState, assist) = (.idle, AssistState())
-        (fileName, isDirty, saveError, loadState) = (nil, false, nil, .idle)
+        (fileName, savedDocument, saveError, loadState) = (nil, document, nil, .idle)
     }
 
     /// Selects a scene by id. An id not in the document is ignored. Selecting
