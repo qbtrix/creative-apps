@@ -1,7 +1,8 @@
 // FlareMachines.swift: the Interactions editor's state on FlareWorkspace (docs/blueprints/flare.md, section 2, LM-0c2):
 // the machine being edited, its states from frame labels, transitions and inputs, and the live preview. Every edit
-// goes through `services.machines` as one named undo step and stops the preview. A refusal changes nothing and puts
-// its message in `machineError`, never in `layerError`; the next edit that succeeds clears it.
+// goes through `services.machines` as one named undo step and stops the preview, and so does an undo or redo that
+// changes the machines. A refusal changes nothing and puts its message in `machineError`, never in `layerError`; the
+// next edit that succeeds clears it.
 import FlareCore
 
 extension FlareWorkspace {
@@ -130,6 +131,16 @@ extension FlareWorkspace {
     public mutating func advancePreview(frames: Int) {
         guard let p = machinePreview, let document else { return }
         machinePreview = services.preview.advance(p, frames: frames, in: document)
+    }
+
+    /// Runs an undo or redo, then reconciles the machine state with the restored document: changed machines stop the
+    /// preview, as any machine edit does, and an edited machine that is gone is no longer edited.
+    mutating func historyStep(_ body: (inout CommandEngine) throws -> Void) {
+        let before = machines
+        step(nil, body)
+        guard machines != before else { return }
+        stopPreview()
+        if machine == nil { machineID = nil }
     }
 
     /// Runs an edit of the edited machine; refused when none is edited.
