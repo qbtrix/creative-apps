@@ -8,7 +8,8 @@
 // undo names, sizes and layer counts by the panel header, values XCUITest
 // can't read by the canvas pixels; tier-1 files are named tools.png, a name
 // the audit knows. Another journey edits with every other tool,
-// one straightens the image by 3 degrees from the Image menu, and the Curves
+// one straightens the image by 3 degrees from the Image menu (typed after
+// Command-A in the sheet's field, then Command-A selects the canvas), and the Curves
 // journey drags the curve up and nudges it with an arrow key, each one
 // "Undo Curves" step that changes the canvas. Curves, Levels and
 // Hue/Saturation are shot right after their edits, then undone back to their
@@ -267,8 +268,11 @@ final class PhotoJourneyTests: XCTestCase {
         let angle = photo.element("photo.straighten.angle")
         XCTAssert(angle.waitForExistence(timeout: 5), "no Angle field in the Straighten sheet")
         photo.shot("straighten-sheet")
-        // Not Command-A: Select > All takes it from the field (#575).
-        replaceText(in: angle, with: "3", photo)
+        // Command-A selects the field's text, not the canvas behind the sheet (#575).
+        angle.click()
+        photo.app.typeKey("a", modifierFlags: .command)
+        photo.app.typeText("3")
+        XCTAssertEqual(angle.value as? String, "3", "Command-A in the Angle field didn't select its text")
         // XCUITest reads a SwiftUI Text's words as its value, not its label.
         let newSize = photo.app.sheets.staticTexts.matching(NSPredicate(format: "value BEGINSWITH 'New size '")).firstMatch
         XCTAssert(newSize.waitForExistence(timeout: 5), "the sheet doesn't say the new size")
@@ -282,6 +286,11 @@ final class PhotoJourneyTests: XCTestCase {
         XCTAssert(photo.app.staticTexts[size].waitForExistence(timeout: 5), "the canvas isn't \(size) after Straighten")
         XCTAssertFalse(photo.app.staticTexts["800 × 600 px"].exists, "the canvas size didn't change")
         photo.shot("straightened")
+
+        // With the sheet gone, Command-A is Select > All on the canvas again.
+        photo.app.typeKey("a", modifierFlags: .command)
+        let selected = photo.app.staticTexts.matching(NSPredicate(format: "label CONTAINS 'Selection ' OR value CONTAINS 'Selection '"))
+        XCTAssert(selected.firstMatch.waitForExistence(timeout: 5), "Command-A didn't select the canvas after the sheet closed")
     }
 
     @MainActor func testTier1CropResize() throws {

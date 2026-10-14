@@ -41,6 +41,9 @@ struct PhotoWindow: View {
     @State private var isRenaming = false
     @State private var renameText = ""
 
+    /// A sheet or the rename alert is up, so Select > All leaves Command-A to its fields.
+    private var isPresenting: Bool { isExporting || isResizing || straightenDraft != nil || isRenaming }
+
     /// The launch file opens in the first window only.
     @MainActor private static var launchFileOpened = false
 
@@ -50,7 +53,7 @@ struct PhotoWindow: View {
             note: renderer.failure ?? note, zoom: zoom, tab: tab,
             onTab: { tab = $0 }, onViewport: viewportChanged, onZoom: setZoom, perform: perform, straighten: straightenDraft)
             .navigationTitle(model.documentName ?? (model.canvas == nil ? "Photo" : "Untitled"))
-            .focusedSceneValue(\.photoMenu, PhotoMenu(model: model, perform: perform))
+            .focusedSceneValue(\.photoMenu, PhotoMenu(model: model, isPresenting: isPresenting, perform: perform))
             .onChange(of: model.revision) { renderer.show(model) }
             .onChange(of: model.canvas) {
                 fitPending = true
