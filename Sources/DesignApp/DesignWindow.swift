@@ -87,6 +87,7 @@ struct DesignWindow: View {
             try? model.setNodeFrame(id, x: x, y: y, width: width, height: height)
         case .setFill(let id, let color): try? model.setFill(id, color)
         case .align(let edge): model.alignLayer(edge)
+        case .endEditRun: model.endEditRun()
         case .setHidden(let id, let hidden): try? model.setNodeHidden(id, hidden)
         case .setLocked(let id, let locked): try? model.setNodeLocked(id, locked)
         case .toggleFlag(let id, let flag): try? model.toggleNodeFlag(id, flag)

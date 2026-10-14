@@ -86,7 +86,9 @@ private struct DesignNodeProperties: View {
         }
     }
 
-    /// One of X, Y, W and H: a scrub field that sends the whole frame with `field` changed.
+    /// One of X, Y, W and H: a scrub field that sends the whole frame with `field` changed. The end
+    /// of a drag or a Return ends the edit run, so the next one is its own undo step (#536);
+    /// ScrubField's own onEnd replaces this once it is public (#745).
     private func frameRow(
         _ label: String, _ name: String, _ field: WritableKeyPath<DesignRect, Double>, _ range: ClosedRange<Double>
     ) -> some View {
@@ -96,6 +98,8 @@ private struct DesignNodeProperties: View {
                 frame[keyPath: field] = value
                 perform(.setFrame(node.id, x: frame.x, y: frame.y, width: frame.width, height: frame.height))
             }
+            .simultaneousGesture(DragGesture(minimumDistance: 0).onEnded { _ in perform(.endEditRun) })
+            .onSubmit { perform(.endEditRun) }
         }
     }
 }

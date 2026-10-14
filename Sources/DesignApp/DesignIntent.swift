@@ -25,6 +25,7 @@ enum DesignIntent {
     case setFrame(String, x: Double, y: Double, width: Double, height: Double)
     case setFill(String, DesignColor)
     case align(DesignAlignEdge)
+    case endEditRun
     case setHidden(String, Bool), setLocked(String, Bool)
     case toggleFlag(String, DesignLayerFlag)
     case editText(String)
