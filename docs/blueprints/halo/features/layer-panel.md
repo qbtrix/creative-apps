@@ -80,7 +80,7 @@ lands, so the journey reads titles and never presses ⌘Z (LP-4):
    took Badge 2's place); artboard "Frame 0: Background, Badge"; Edit menu
    reads "Undo Delete Layer".
 8. Click Rig's lane in the timeline (selects Rig, focuses the timeline), then
-   ⌫ three times and once more. Rows go to Title, Badge, Background, then
+   press ⌫ four times. Rows go to Title, Badge, Background, then
    Title, Badge, then Title, then none; the list shows "No layers yet. Add one
    from Layer > New." (`halo.layers.empty`); the artboard reads "Frame 0: no
    layers"; Layer > Delete is disabled with "Select a layer first.".
@@ -100,10 +100,12 @@ and `HaloLayerAvailabilityTests`, including undo of each edit.
 ## Contract slice
 
 No new protocol and no service: layer housekeeping is engine-direct
-(section 2). Everything below is new in HaloModel; command case names are
-the ones W0's `HaloCommand` gives Layer > Duplicate, Rename, Delete, Bring
-Forward and Send Backward (written here as `.duplicateLayer`, `.renameLayer`,
-`.deleteLayer`, `.bringLayerForward`, `.sendLayerBackward`).
+(section 2). Everything below is new in HaloModel. Command cases are W0's
+(FD-11): views act only through `perform(_:)`, and commands that carry a
+value have payload cases. Written here as `.duplicateLayer`, `.deleteLayer`,
+`.bringLayerForward`, `.sendLayerBackward`, the menu's payload-free Rename
+item (`.beginRenameLayer`), `.renameLayer(id, name)` (FD-11 names it) and
+`.moveLayer(id, index)` for the list's drag; use W0's spellings.
 
 ```swift
 // HaloLayerEdits.swift (LP-1). Every write is one `edit` step; all act on
@@ -112,7 +114,6 @@ extension HaloProject {
     public mutating func deleteSelectedLayer()                     // "Delete Layer", control "halo.layers.list"
     public mutating func renameLayer(_ id: String, to name: String) // "Rename Layer", control "halo.layers.row.<id>"
     public mutating func moveLayer(_ id: String, to index: Int)     // "Move Layer"; index top first, clamped
-    public mutating func moveLayer(fromOffset: Int, toOffset: Int)  // `.onMove`'s offsets, converted by `moveTarget`
     public mutating func bringSelectedLayerForward()               // "Move Layer", one place toward the top
     public mutating func sendSelectedLayerBackward()               // "Move Layer", one place toward the bottom
     public mutating func duplicateSelectedLayer()                  // "Duplicate Layer"
@@ -193,19 +194,21 @@ pass`, `Head:`. LP-4 also carries `feature-done`.
 | id | issue | what | owned files | depends on | size |
 |---|---|---|---|---|---|
 | LP-1 | #770 (part) | The four edits, the two one-place moves and `moveTarget`, each one named step through `edit`; duplicate selects the copy; delete un-parents children through `services.keying.setParent(nil, …)` with the `.notBuilt` fallback and selects the layer that took its place | `Sources/HaloModel/HaloLayerEdits.swift`, `Tests/HaloModelTests/HaloLayerEditsTests.swift` | – | ~360 |
-| LP-2 | #770 (part) | Turn the Layer commands on: `HaloAvailability+Layers.swift` answers state for Duplicate, Rename, Delete, Bring Forward, Send Backward (New stays as W0 wrote it); `HaloWindow+Layers.swift` routes each to LP-1 (⌫ from the viewer and timeline included) and shows Layer > Rename… as a window-modal `NSAlert` with an `NSTextField` accessory, titled "Rename Layer", buttons Rename and Cancel, whose Rename calls `renameLayer` (needs no state in a W0 file); the edit budget rows | `Sources/HaloModel/Availability/HaloAvailability+Layers.swift`, `Sources/HaloApp/HaloWindow+Layers.swift`, `Tests/HaloModelTests/HaloLayerAvailabilityTests.swift`, `Tests/HaloModelTests/HaloLayerEditsBudgetTests.swift` | LP-1 | ~260 |
-| LP-3 | #770 (part) | `HaloLayerList` replaces W0's stub: a system `List` of `SidebarRow`s (rename on the row through `onRename`, select), `.onMove` calling `moveLayer(fromOffset:toOffset:)`, `.onDeleteCommand` sending `.deleteLayer`, the refusal caption under the named row, the empty text; each row `halo.layers.row.<id>` through `.haloControl`; snapshots | `Sources/HaloApp/HaloLayerList.swift`, `Tests/AppSnapshotTests/HaloLayersSnapshots.swift` | LP-1 | ~240 |
+| LP-2 | #770 (part) | Turn the Layer commands on: `HaloAvailability+Layers.swift` answers state for Duplicate, Rename, Delete, Bring Forward, Send Backward (New stays as W0 wrote it); `HaloWindow+Layers.swift` routes each to LP-1 (⌫ from the viewer and timeline, `.renameLayer(id, name)` and `.moveLayer(id, index)` included) and shows Layer > Rename… as a window-modal `NSAlert` with an `NSTextField` accessory, titled "Rename Layer", buttons Rename and Cancel, whose Rename calls `renameLayer` (needs no state in a W0 file); the edit budget rows | `Sources/HaloModel/Availability/HaloAvailability+Layers.swift`, `Sources/HaloApp/HaloWindow+Layers.swift`, `Tests/HaloModelTests/HaloLayerAvailabilityTests.swift`, `Tests/HaloModelTests/HaloLayerEditsBudgetTests.swift` | LP-1 | ~260 |
+| LP-3 | #770 (part) | `HaloLayerList` replaces W0's stub's body: a system `List` of `SidebarRow`s (select; rename on the row, whose `onRename` sends `.renameLayer(id, name)`), `.onMove` sending `.moveLayer(id, index)` with the index from `HaloProject.moveTarget`, `.onDeleteCommand` sending `.deleteLayer`, the refusal caption under the named row, the empty text; each row `halo.layers.row.<id>` through `.haloControl`; snapshots | `Sources/HaloApp/HaloLayerList.swift`, `Tests/AppSnapshotTests/HaloLayersSnapshots.swift` | LP-1 | ~240 |
 | LP-4 | #770 (closes; `feature-done`) | H-J9 `testLayerHousekeeping`, eight steps above, on `-HaloFixture three-layers` | `UITests/HaloJourneyTests+Layers.swift` | LP-2, LP-3, #333 | ~170 |
 
 LP-2 and LP-3 touch disjoint files and can build side by side after LP-1.
 LP-2 lands its availability file and its routes in one PR so no Layer item
 is ever enabled before it acts (QB-F1). LP-3 keeps the init that W0's one call
-site in `HaloCompositionInspector.swift` uses; FD-15 replaces the list whole
-by design, so the stub's init is the seam. The lead reads the merged stub at
-stage 1: if it can't reach rename, move and delete (no `model` and no
-action closures), the lead files that on this feature issue before LP-3 and
-routes the actions through `HaloWindow+Layers.swift`, the area file W0
-created for exactly this, rather than editing a W0 file. The H-J9 journey
+site in `HaloCompositionInspector.swift` uses and replaces only the body.
+FD-15 gives the slot views `init(model: HaloProject, perform: @escaping
+(HaloCommand) -> Void)` but does not name `HaloLayerList` among them, and
+FD-11 names `.renameLayer(String, String)` but no move payload. The lead
+checks both on the merged W0 code at stage 1. If the list's init has no
+`perform`, or `HaloCommand` has no move case, that is a W0 gap: the lead
+records it on this feature issue and asks the supervisor. It does not edit
+`HaloCommand.swift`, `HaloCompositionInspector.swift` or `HaloWindow.swift`. The H-J9 journey
 stays on `-HaloFixture`: no live service changes what it reads, and core-loop
 (W3) flips it and adds ⌘Z.
 
