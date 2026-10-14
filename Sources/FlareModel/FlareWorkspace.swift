@@ -178,9 +178,10 @@ public struct FlareWorkspace: Sendable, Equatable {
         cancelDrag()
     }
 
-    /// Undoes or redoes the last change; nothing to undo or redo is a no-op.
-    public mutating func undo() { if canUndo { step { try $0.undo() } } }
-    public mutating func redo() { if canRedo { step { try $0.redo() } } }
+    /// Undoes or redoes the last change; nothing to undo or redo is a no-op. A step that changes the machines stops
+    /// the machine preview, and an edited machine the document no longer has leaves nothing edited (#658).
+    public mutating func undo() { if canUndo { historyStep { try $0.undo() } } }
+    public mutating func redo() { if canRedo { historyStep { try $0.redo() } } }
 
     /// Runs `command` as one undo step, then sets the layer selection to
     /// `selection` when it is `.layer`. On a throw nothing changes but `layerError`.
