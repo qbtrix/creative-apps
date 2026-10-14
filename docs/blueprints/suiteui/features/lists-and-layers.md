@@ -117,7 +117,7 @@ Public API this feature adds (additive; existing calls compile unchanged):
 
 ```swift
 SidebarItem(..., isDimmed: Bool = false)                                     // LL-4
-LayerList(rows:, onToggle:, onRename:, onMove:, contextActions:)             // LL-5
+LayerList(rows:, onToggle:, onRename:, onMove:)   // LL-5; contextActions: added by LL-8
 SidebarRow(..., onRename: (@MainActor (String) -> String?)?)                 // LL-6, the Void form kept
 SuiteWindow(..., onRename: (@MainActor (SidebarItem.ID, String) -> String?)?,   // LL-6, an overload; the Void form kept
             contextActions: ((SidebarItem.ID) -> [ToolbarAction])? = nil,   // LL-8
