@@ -85,13 +85,14 @@
               {
                 "id": "design-model-inspector",
                 "name": "Inspector logic",
-                "description": "What the inspector and Layers rows show and why a control is off: header lines, locks, eye and lock toggles, align to frame or page.",
+                "description": "What the inspector and Layers rows show and why a control is off: header lines, locks, eye and lock toggles, align to frame or page, corner radius for one layer (DesignCorners, from #753).",
                 "technology": "Swift 6, Foundation",
                 "paths": [
                   "Sources/DesignModel/DesignInspectorContent.swift",
                   "Sources/DesignModel/DesignLocking.swift",
                   "Sources/DesignModel/DesignLayerToggles.swift",
-                  "Sources/DesignModel/DesignAlign.swift"
+                  "Sources/DesignModel/DesignAlign.swift",
+                  "Sources/DesignModel/DesignCorners.swift"
                 ],
                 "status": "existing",
                 "authored": true
@@ -170,13 +171,14 @@
               {
                 "id": "design-app-shell",
                 "name": "Window shell",
-                "description": "DesignApp scene, DesignWindow (the one model, presentation state, perform for every intent, launch arguments), DesignEditor (top bar, rail, status line) and DesignIntent.",
+                "description": "DesignApp scene, DesignWindow (the one model, presentation state, perform for every intent, launch arguments), DesignEditor (top bar, rail, status line), DesignIntent and DesignControls (the suite.controls list for the every-control journey).",
                 "technology": "Swift 6, SwiftUI, macOS 26",
                 "paths": [
                   "Sources/DesignApp/DesignApp.swift",
                   "Sources/DesignApp/DesignWindow.swift",
                   "Sources/DesignApp/DesignEditor.swift",
-                  "Sources/DesignApp/DesignIntent.swift"
+                  "Sources/DesignApp/DesignIntent.swift",
+                  "Sources/DesignApp/DesignControls.swift"
                 ],
                 "status": "existing",
                 "authored": true
