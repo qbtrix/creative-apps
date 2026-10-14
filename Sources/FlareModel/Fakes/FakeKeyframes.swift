@@ -58,7 +58,7 @@ public struct FakeKeyframes: KeyframeEditing {
         let ordered = moving.sorted { delta > 0 ? $0.frame > $1.frame : $0.frame < $1.frame }
         func write(_ engine: inout CommandEngine) throws {
             for key in ordered {
-                try engine.perform(MoveKeyframe(sceneID: sceneID, layerID: key.layerID, property: key.property,
+                try engine.perform(MoveKeyframe(owner: .scene(sceneID), layerID: key.layerID, property: key.property,
                                                 from: key.frame, to: key.frame + delta), coalesceKey: coalesceKey)
             }
         }
@@ -74,7 +74,7 @@ public struct FakeKeyframes: KeyframeEditing {
         let removing = try Self.expand(keys, owner: owner, in: engine.document)
         try engine.group("Delete Keyframe") { engine in
             for key in removing.sorted(by: { ($0.layerID, $0.property, $0.frame) < ($1.layerID, $1.property, $1.frame) }) {
-                try engine.perform(RemoveKeyframe(sceneID: sceneID, layerID: key.layerID, property: key.property, frame: key.frame))
+                try engine.perform(RemoveKeyframe(owner: .scene(sceneID), layerID: key.layerID, property: key.property, frame: key.frame))
             }
         }
     }
@@ -104,7 +104,7 @@ public struct FakeKeyframes: KeyframeEditing {
         try engine.group("Insert Frame") { engine in
             for layer in layers {
                 guard let last = Self.lastFrame(of: layer), last >= frame else { continue }
-                try engine.perform(ShiftKeyframes(sceneID: sceneID, layerID: layer.id, fromFrame: frame, toFrame: last, delta: count))
+                try engine.perform(ShiftKeyframes(owner: .scene(sceneID), layerID: layer.id, fromFrame: frame, toFrame: last, delta: count))
             }
             if duration != scene.durationFrames {
                 try engine.perform(SetSceneTiming(sceneID: sceneID, fps: scene.fps, durationFrames: duration))
@@ -125,11 +125,11 @@ public struct FakeKeyframes: KeyframeEditing {
             for layer in layers {
                 for (property, keys) in layer.tracks.sorted(by: { $0.key < $1.key }) {
                     for key in keys where key.frame >= frame && key.frame < end {
-                        try engine.perform(RemoveKeyframe(sceneID: sceneID, layerID: layer.id, property: property, frame: key.frame))
+                        try engine.perform(RemoveKeyframe(owner: .scene(sceneID), layerID: layer.id, property: property, frame: key.frame))
                     }
                 }
                 guard let last = Self.lastFrame(of: layer), last >= end else { continue }
-                try engine.perform(ShiftKeyframes(sceneID: sceneID, layerID: layer.id, fromFrame: end, toFrame: last, delta: -count))
+                try engine.perform(ShiftKeyframes(owner: .scene(sceneID), layerID: layer.id, fromFrame: end, toFrame: last, delta: -count))
             }
             for name in labels.filter({ $0.value < end }).keys.sorted() {
                 try engine.perform(RemoveFrameLabel(sceneID: sceneID, name: name))

@@ -36,7 +36,8 @@ private func validation(_ rule: String) -> CommandError {
         .sceneNotFound("scene-1"), .layerNotFound("layer-1"), .duplicateID("idle"),
         .keyframeNotFound(property: "x", frame: 3), .frameOccupied(property: "x", frame: 3), .invalidFrame(-1),
         .labelNotFound("idle"), .invalidFPS(0), .invalidDuration(-1), .shapeNotFound(2), .layerLocked("layer-1"),
-        .symbolNotFound("sym-1"), .symbolInUse("sym-1"), .invalidGuidePosition, .swatchNotFound("Red"),
+        .symbolNotFound("sym-1"), .symbolInUse("sym-1"), .invalidGuidePosition, .invalidTransform, .emptyName,
+        .swatchNotFound("Red"),
         .emptySwatchName, .invalidColor(Color(r: 2, g: 0, b: 0, a: 1)), .invalidIndex(5), .notExecuted,
         .nothingToUndo, .nothingToRedo, .groupInProgress, .unknownCommand("x.y"), .malformedCommand("bad json"),
         .invalidDocument("Add State: \(FormatError.invalid("scene scene-1: fps must be > 0"))"),
@@ -53,6 +54,14 @@ private func validation(_ rule: String) -> CommandError {
         let message = FlareWorkspace.machineMessage(error)
         #expect(!looksLikeDebugText(message, of: error), "\(error) gave \(message)")
     }
+}
+
+/// The refusals creative-core added with layer owners (a non-finite instance transform, an empty name) read as
+/// their own sentences, not the generic line.
+@Test func instanceTransformAndEmptyNameRefusalsHaveTheirOwnSentences() {
+    #expect(FlareWorkspace.machineMessage(CommandError.invalidTransform)
+        == "An instance\u{2019}s position, scale and rotation must be numbers.")
+    #expect(FlareWorkspace.machineMessage(CommandError.emptyName) == "Type a name.")
 }
 
 @Test func theFakesOwnRefusalsAndNotBuiltReasonsPassThrough() {
