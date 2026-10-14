@@ -5,3 +5,7 @@ utc	stage	event	ref	note
 2026-10-14T23:03Z	3	stage-start	wave1	SN-1 builder launched; Swift 6.3.3 installed, creative-core 98be31a has LC-8 and LC-10
 2026-10-14T23:41Z	3	pr-merged	#876	SN-1 LiveScenes add and remove
 2026-10-14T23:41Z	3	stage-start	wave2	SN-2 SN-3 SN-4 on 640d08d (session restarted; resumed)
+2026-10-14T23:57Z	3	pr-merged	#879	SN-2 rename and reorder
+2026-10-14T23:57Z	3	pr-merged	#880	SN-3 canvas and timing
+2026-10-14T23:57Z	3	pr-merged	#882	SN-4 guides
+2026-10-14T23:57Z	3	stage-start	wave3	SN-5 on 5de7e13

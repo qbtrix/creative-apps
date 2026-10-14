@@ -2,18 +2,18 @@
 
 Issue: #800 · Packet: docs/blueprints/flare/features/live-scenes.md
 Run: act-1a13ca4f89e-0ft1 · Session: claude/live-scenes-lead-d0sj3t · Started: 2026-10-14
-Stage: 3 wave 2
-Base: 640d08d83c35cbb12bd71f59b24583857b2863b4
-Next: wait for SN-2, SN-3, SN-4 PRs to merge, then run wave 3 (SN-5, feature-done)
+Stage: 3 wave 3
+Base: 5de7e13da4c2f56e017354128042f556a02e1d26
+Next: wait for SN-5 (feature-done) to merge, then stage 4 on the CI run it triggers
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
 |---|---|---|---|---|---|---|
 | SN-1 | 1 | `LiveScenes` struct: newDocument, addScene, removeScene (never the last) | Sources/FlareModel/Live/LiveScenes.swift, Tests/FlareModelTests/LiveScenesTests.swift | LiveScenesTests | #876 | merged |
-| SN-2 | 2 | renameScene, reorderScene on LC-8 RenameScene/ReorderScene, clamped index | Live/LiveScenes+Order.swift, LiveScenesOrderTests.swift | LiveScenesOrderTests | | building |
-| SN-3 | 2 | setCanvas (LC-8 SetSceneCanvas), setTiming | Live/LiveScenes+Canvas.swift, LiveScenesCanvasTests.swift | LiveScenesCanvasTests | | building |
-| SN-4 | 2 | guides add/remove; drag is one merged MoveGuide (LC-10); QB-L7 budget | Live/LiveScenes+Guides.swift, LiveScenesGuidesTests.swift | LiveScenesGuidesTests | | building |
-| SN-5 | 3 | SceneEditing conformance, model journey steps 1-4, refusalsArePlainText, liveEqualsFake (feature-done) | Live/LiveScenes+SceneEditing.swift, LiveScenesJourneyTests.swift | LiveScenesJourneyTests | | planned |
+| SN-2 | 2 | renameScene, reorderScene on LC-8 RenameScene/ReorderScene, clamped index | Live/LiveScenes+Order.swift, LiveScenesOrderTests.swift | LiveScenesOrderTests | #879 | merged |
+| SN-3 | 2 | setCanvas (LC-8 SetSceneCanvas), setTiming | Live/LiveScenes+Canvas.swift, LiveScenesCanvasTests.swift | LiveScenesCanvasTests | #880 | merged |
+| SN-4 | 2 | guides add/remove; drag is one merged MoveGuide (LC-10); QB-L7 budget | Live/LiveScenes+Guides.swift, LiveScenesGuidesTests.swift | LiveScenesGuidesTests | #882 | merged |
+| SN-5 | 3 | SceneEditing conformance, model journey steps 1-4, refusalsArePlainText, liveEqualsFake (feature-done) | Live/LiveScenes+SceneEditing.swift, LiveScenesJourneyTests.swift | LiveScenesJourneyTests | | building |
 
 Journeys (model half, SN-5): J2 new from preset, J16 scenes, J14 guides; steps 1-4 of the packet.
 Quality bars: QB-F3 one gesture one step, QB-L7 <= 10 ms per moveGuide step (median of 50), QB-F2 plain refusals.
