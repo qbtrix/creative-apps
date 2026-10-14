@@ -5,3 +5,4 @@ utc	stage	event	ref	note
 2026-10-14T17:40Z	1	stage-end	#777	tasks copied
 2026-10-14T17:52Z	2	stage-end	#777	15 waves on two chains
 2026-10-14T17:52Z	3	stage-start	wave 1	FD-1, FD-19
+2026-10-14T17:57Z	-	heartbeat	-	waiting on builders
