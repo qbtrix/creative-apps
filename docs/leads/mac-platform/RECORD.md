@@ -2,9 +2,9 @@
 
 Issue: #793 (resumes #754) · Packet: docs/blueprints/flare/features/mac-platform.md
 Run: act-1a13c789856-0qa9 (first run act-1a13b14336c-tqna) · Session: claude/mac-platform-lead-lxlcta (first: claude/mac-platform-lead-7jx22z) · Started: 2026-10-14T15:43Z, resumed 2026-10-14T22:15Z
-Stage: 4 round 3
+Stage: 5 finish
 Base: 1098ff2d6c135020391cef770f4de11dfde9465a
-Next: wait for the r3-b1 fixer PR (FlareModel vs creative-core main's LayerOwner commands) to merge; then rebase the feature-done status PR on dev, rerun scripts/ci, open it; the lane dispatches CI; green -> Belt-Contact-Sheet on #793.
+Next: wait for the lane to merge #806 (feature-done) and the CI run it dispatches on dev. Green -> Belt-Contact-Sheet on #793. Red only on PhotoBrushLatencyTests -> note on dev-red, gap issue on line:photo. Red in Flare files -> fix batch.
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -33,7 +33,7 @@ Next: wait for the r3-b1 fixer PR (FlareModel vs creative-core main's LayerOwner
 | round | CI run | CI | audit vs baseline | lenses | confirmed | fixed by | clean |
 |---|---|---|---|---|---|---|---|
 | 1 | 38600685744 (5e1870d) | red: macOS swift test, 1 of 1670 failed (AutosaveTests.quitWritesWhenDirty, 76 s vs 60 s window); Linux green; journeys not reached | not measured (journeys did not run) | none run: CI red, fix first | 1 (flaky time window in MP-5 test) | #764 | no |
-| 3 | none yet (1098ff2) | Linux gate red locally: dev's FlareModel no longer builds against creative-core main 98be31a (key commands take owner: LayerOwner, new CommandError cases .invalidTransform, .emptyName) | - | none: build first | 1 (build break, line:flare) | r3-b1 fixer | no |
+| 3 | none yet (1098ff2) | Linux gate red locally: dev's FlareModel no longer builds against creative-core main 98be31a (key commands take owner: LayerOwner, new CommandError cases .invalidTransform, .emptyName) | - | none: build first | 1 (build break, line:flare) | #801 (merged 22:22Z) | no |
 | 2 | 38602105363 (4594082) | red: macOS swift test, 1 of 1670 failed, PhotoBrushLatencyTests.aBrushDragEventBecomesAFrameWithinBudget (line:photo timing budget, 8.4 ms vs 3.0; 1.0 ms on the previous run). All mac-platform tests pass. Linux green; journeys not reached | not measured (journeys did not run) | none: no ui-screens, and this feature changes no screen | 0 in feature files | - | no (outside red) |
 
 ## Decisions
@@ -42,8 +42,8 @@ Next: wait for the r3-b1 fixer PR (FlareModel vs creative-core main's LayerOwner
 - gh CLI has no valid token in this session; builders open PRs and set labels through the GitHub MCP tools.
 
 ## Open
-- creative-core main moved under dev (Package.swift tracks branch main, Package.resolved is gitignored): every Linux build of dev fails at swift build until r3-b1 merges. No one else had an issue or PR for it.
-- Feature-done status PR is committed locally on claude/mac-platform-lead-lxlcta (packet Status line, waves.md issue #793); it opens after r3-b1 merges.
+- creative-core main moved under dev (Package.swift tracks branch main, Package.resolved is gitignored): fixed by #801. No one else had an issue or PR for it.
+- Feature-done PR #806 (packet Status line, waves.md issue #793) opened 22:25Z on head e3c132f.
 - dev-red #763: PhotoBrushLatencyTests budget (line:photo), triaged there; re-run of the failed job gave 403, so the feature waits on the next lane-dispatched CI run.
 - Round 1 critic panel skipped: the run stopped at swift test, so no ui-screens or audit exist for this head.
 - none
