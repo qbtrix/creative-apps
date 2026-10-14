@@ -30,6 +30,15 @@ extension FlareWorkspace {
         return "\(code(currentFrame)) / \(code(timelineFrames))"
     }
 
+    /// Moves a playhead past the timeline's end to its last frame (frame 0 with no frames), keeping a running play's
+    /// clock on it (#615). Called after anything that can shorten the timeline: a scene switch or an edit.
+    mutating func clampPlayhead() {
+        let last = max(timelineFrames - 1, 0)
+        guard currentFrame > last else { return }
+        currentFrame = last
+        if isPlaying { playClock = canPlay ? Double(last) / Double(playbackFPS) : 0 }
+    }
+
     /// Starts playing from the playhead. Without loop, playing from the last frame starts over from the first.
     public mutating func play() {
         guard canPlay else { return }
