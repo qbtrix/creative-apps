@@ -7,7 +7,8 @@
 // pixels and EV, two by default), halves away from zero. `text` is what a row
 // shows (fixed decimals and the unit, "45°", "0.0 pt") and `spoken` what
 // VoiceOver reads ("45 degrees"). `committed` keeps the value when the
-// typed text is still the text the field opened with.
+// typing field closes without an edit, and commits any number typed into it,
+// even one spelled as the field's opening text.
 public enum NumericInput {
     /// The value `text` names, clamped to `range`. Text that isn't a number,
     /// and NaN, give back `old`. Surrounding whitespace is ignored.
@@ -18,12 +19,14 @@ public enum NumericInput {
     }
 
     /// What a typing field commits when it closes on `text`, having opened on
-    /// `format(old)`: `old` itself while the text is still that, so a click
-    /// and click away never rounds a value the field only showed rounded;
-    /// otherwise `parse`.
-    public static func committed(_ text: String, in range: ClosedRange<Double>, keeping old: Double) -> Double {
-        let trimmed = String(text.drop(while: \.isWhitespace).reversed().drop(while: \.isWhitespace).reversed())
-        return trimmed == format(old) ? old : parse(text, in: range, keeping: old)
+    /// `format(old)`: `old` itself when the user never `edited` the draft, so
+    /// a click and click away never rounds a value the field only showed
+    /// rounded; otherwise `parse`, so a typed number commits even when it
+    /// matches the opening text (typing 1.23 over a gamma of 1.2345 sets 1.23).
+    public static func committed(
+        _ text: String, in range: ClosedRange<Double>, keeping old: Double, edited: Bool
+    ) -> Double {
+        edited ? parse(text, in: range, keeping: old) : old
     }
 
     /// `value` moved into `range`; NaN gives the range's lower bound.

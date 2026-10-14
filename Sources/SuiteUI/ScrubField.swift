@@ -14,10 +14,12 @@
 // A ScrubTrack lets the bar move along a non-linear track (Photo's log gamma).
 // Values go out through `onChange` already clamped and snapped (ScrubValue,
 // NumericInput), then `onEnd` once per drag, key or typed value, so a host
-// makes each one undo step; closing the typing field on its opening text
-// changes nothing (NumericInput.committed). The bar is a real slider to
+// makes each one undo step; closing the typing field without typing changes
+// nothing, and a typed number commits even when it matches the opening text
+// (NumericInput.committed). The bar is a real slider to
 // VoiceOver and XCUI (an accessibility representation), spoken with its unit.
-// Owns presentation state only: the typed draft, the drag anchor, hover.
+// Owns presentation state only: the typed draft and whether it was edited,
+// the drag anchor, hover.
 import AppKit
 import SwiftUI
 
@@ -43,6 +45,7 @@ public struct ScrubField: View {
     private let onEnd: @MainActor () -> Void
     private let bar: Bar?
     @State private var draft: String?
+    @State private var edited = false
     @State private var anchor: (position: Double, x: CGFloat, multiplier: Double)?
     @State private var hovering = false
     @FocusState private var isTyping: Bool
@@ -164,7 +167,10 @@ public struct ScrubField: View {
     @ViewBuilder
     private func valueText(_ color: Color, mixed: Bool = false) -> some View {
         if draft != nil {
-            TextField(label, text: Binding(get: { draft ?? "" }, set: { draft = $0 }))
+            TextField(label, text: Binding(get: { draft ?? "" }, set: {
+                draft = $0
+                edited = true
+            }))
                 .textFieldStyle(.plain)
                 .labelsHidden()
                 .multilineTextAlignment(.trailing)
@@ -263,13 +269,14 @@ public struct ScrubField: View {
     private func beginTyping() {
         guard isEnabled else { return }
         draft = NumericInput.format(value)
+        edited = false
     }
 
     private func commit(refocus: Bool = false) {
         guard let text = draft else { return }
         draft = nil
         if refocus { isFocused = true }
-        let parsed = NumericInput.committed(text, in: range, keeping: value)
+        let parsed = NumericInput.committed(text, in: range, keeping: value, edited: edited)
         guard parsed != value else { return }
         onChange(parsed)
         onEnd()
