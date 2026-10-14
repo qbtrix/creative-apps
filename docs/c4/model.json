@@ -213,7 +213,7 @@
               {
                 "id": "halo-app-sources",
                 "name": "HaloApp sources",
-                "description": "The Halo app (motion graphics): the SwiftUI App scene and views in Sources/HaloApp, built from SuiteUI: the window, the Layer and Composition menus, the selected composition's layer list, the New Composition sheet, and the alert for a refused rename.",
+                "description": "The Halo app (motion graphics): the SwiftUI App scene and views in Sources/HaloApp, built from SuiteUI: the window, the Layer and Composition menus, the selected composition's layer list, the viewer's timeline strip (scrub, select a layer, I and O set in and out points), the New Composition sheet, and the alert for a refused rename.",
                 "technology": "Swift 6, SwiftUI, macOS 26",
                 "paths": [
                   "Sources/HaloApp/"
@@ -233,7 +233,7 @@
               {
                 "id": "halo-model-sources",
                 "name": "HaloModel sources",
-                "description": "Linux-safe state and logic behind Halo's window: HaloProject (compositions, the selected one, unique names), HaloLayer (kind, span, color, opacity, CoreRaster blend mode, solid rectangle), FrameRenderer (composites a composition's solids into one preview frame with CoreRaster), the New Composition draft and its validated settings, and RefusedRename, which keeps a refused composition rename for the alert.",
+                "description": "Linux-safe state and logic behind Halo's window: HaloProject (compositions, the selected one, unique names), HaloTimeline (each composition's playhead, timecodes, the layers active at a frame, the strip's rows, in and out points at the playhead), HaloLayer (kind, span, color, opacity, CoreRaster blend mode, solid rectangle), FrameRenderer (composites a composition's solids into one preview frame with CoreRaster), the New Composition draft and its validated settings, and RefusedRename, which keeps a refused composition rename for the alert.",
                 "technology": "Swift 6, Foundation",
                 "paths": [
                   "Sources/HaloModel/"
