@@ -590,6 +590,54 @@
         "target": "suiteui-contracts",
         "description": "would compile Contracts/ on Linux (Q1)",
         "style": "sync"
+      },
+      {
+        "source": "suiteui-inspector",
+        "target": "suiteui-contracts",
+        "description": "conforms to HexColorEditing and KeyframeFacing",
+        "style": "sync"
+      },
+      {
+        "source": "suiteui-chips",
+        "target": "suiteui-contracts",
+        "description": "conforms to PresetNavigating",
+        "style": "sync"
+      },
+      {
+        "source": "suiteui-tools",
+        "target": "suiteui-contracts",
+        "description": "conforms to ToolPicking",
+        "style": "sync"
+      },
+      {
+        "source": "suiteui-canvas",
+        "target": "suiteui-contracts",
+        "description": "conforms to CanvasNavigating",
+        "style": "sync"
+      },
+      {
+        "source": "suiteui-viewer-chrome",
+        "target": "suiteui-contracts",
+        "description": "conforms to StatusPillComposing and TransportStepping",
+        "style": "sync"
+      },
+      {
+        "source": "suite-snapshot-files",
+        "target": "suiteui-contracts",
+        "description": "GoldenImage conforms to GoldenComparing",
+        "style": "sync"
+      },
+      {
+        "source": "suiteui-timeline",
+        "target": "suiteui-probes",
+        "description": "reports scrub and key-drag events",
+        "style": "sync"
+      },
+      {
+        "source": "suiteui-tools",
+        "target": "suiteui-probes",
+        "description": "registers every ToolbarAction-built control with ControlInventory",
+        "style": "sync"
       }
     ]
   }

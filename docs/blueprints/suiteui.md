@@ -1598,7 +1598,7 @@ at the next wave.
 
 **suite-harness (wave 1)**
 - `Sources/SuiteUI/Contracts/` (every file of section 5), `Sources/SuiteUI/SuiteGallery.swift`, `Sources/SuiteUI/Gallery/GalleryIndex.swift`, and the stubs `Gallery/GalleryChrome.swift`, `GalleryInspector.swift`, `GalleryLists.swift`, `GalleryCanvas.swift`, `GalleryTimeline.swift`, `GalleryGraph.swift` (harness, then their features)
-- `Sources/SuiteUI/FrameProbe.swift`, `Sources/SuiteUI/ControlInventory.swift`, `Sources/SuiteUI/Tokens.swift`
+- `Sources/SuiteUI/FrameProbe.swift`, `Sources/SuiteUI/ControlInventory.swift`, `Sources/SuiteUI/Tokens.swift` (every token waves 2–4 need, and their contrast pairs in `TokensTests`, land here), `Sources/SuiteUI/Glass.swift` (the snapshot host's glass stand-in at scale 2)
 - `Sources/SuiteUI/SuiteWindow.swift` (the `-SuiteGallery` hook; harness, then lists-and-layers)
 - `Sources/SuiteUI/ToolbarGroup.swift`, `EditorTopBar.swift`, `InspectorAction.swift`, `EmptyStateView.swift` (only to register `ToolbarAction`-built controls with the inventory; harness, then editor-chrome or inspector-controls)
 - `project.yml`, `UITests/Journey.swift`, `UITests/Journey+Input.swift`, `UITests/SuiteJourneyTests.swift`, `UITests/SuiteJourneyTests+Smoke.swift`, `UITests/audit-baseline.json` (the `suiteui` key at 0 only)
@@ -1647,9 +1647,11 @@ Checks on this list: within wave 2 the four features' lists share no path
 (`ToolbarGroup.swift`, `EditorTopBar.swift`, `InspectorAction.swift`,
 `EmptyStateView.swift` and `SuiteWindow.swift` were the harness's in wave
 1 and belong to exactly one wave-2 feature each); within wave 3 timeline
-and node-graph share none. `Sources/SuiteUI/SnapshotRendering`-style shared
-test helpers do not exist today; a feature that needs a shared test helper
-adds it in its own file, never in another feature's.
+and node-graph share none. Every one of the 36 SuiteUI source files, the 29
+`Tests/SuiteUITests` files and the 19 `Tests/AppSnapshotTests/Suite*` files
+on dev appears in exactly one list (checked by script against the tree). A
+feature that needs a shared test helper adds it in its own file, never in
+another feature's.
 
 ### 8.4 What every packet will carry
 
