@@ -5,7 +5,7 @@
 // DesignCanvasEditing, DesignDrawing, DesignText, DesignFile).
 //
 // Invariants:
-// - An open file keeps a page; a selected node is on the selected page; ids are
+// - An open file keeps a page; selected nodes are on the selected page; ids are
 //   never reused within a file (undo restores the id counters as a max).
 // - `held` holds exactly the page and node ids on the pages; every change that
 //   adds or removes an id updates it, so minting never walks the tree (#433).
@@ -78,7 +78,14 @@ public struct DesignWorkspace: Sendable, Equatable {
     /// Pages of the open file; empty when no file is open.
     public internal(set) var pages: [DesignPage] = []
     public internal(set) var selectedPageID: String?
-    public internal(set) var selectedNodeID: String?
+    /// The selected layers on the selected page, in the order they joined (DesignSelection).
+    public internal(set) var selectedNodeIDs: [String] = []
+    /// The primary selection: the layer that joined last. Single-selection callers read this;
+    /// setting it replaces the whole selection with that one layer (nil clears it).
+    public internal(set) var selectedNodeID: String? {
+        get { selectedNodeIDs.last }
+        set { selectedNodeIDs = newValue.map { [$0] } ?? [] }
+    }
     public internal(set) var expandedNodeIDs: Set<String> = []
     public internal(set) var tool: DesignTool = .move
     /// The text node being edited inline, and its live text (DesignText).
@@ -201,7 +208,7 @@ public struct DesignWorkspace: Sendable, Equatable {
         expandAncestors(of: id, in: page.nodes)
     }
 
-    /// Clears the node selection; the page stays selected.
+    /// Clears the node selection, every selected layer; the page stays selected.
     public mutating func deselect() {
         commitTextEdit()
         selectedNodeID = nil

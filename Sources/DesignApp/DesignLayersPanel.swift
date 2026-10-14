@@ -3,7 +3,10 @@
 // a row under them, then the current page's layer tree, frontmost layer at the
 // top (`frontToBack`; the document keeps paint order). Selection runs through
 // the List, so arrow keys and type-select move through pages and layers; the
-// highlighted row is the selected layer, or the current page when no layer is.
+// highlighted rows are the selected layers, or the current page when no layer is.
+// Shift-click adds a layer or takes it out, the way it does on the canvas: the
+// list's change goes to the workspace with the Shift key (`selectRows`), which
+// toggles only the clicked row and turns away a locked or hidden one.
 // The current page always carries a checkmark, so the page you are editing,
 // the one Delete Page removes, stays marked while a layer holds the highlight.
 // A layer with children is a DisclosureGroup whose expanded state is the
@@ -58,13 +61,12 @@ struct DesignLayersPanel: View {
         Text(title).foregroundStyle(SuiteColor.textSecondary)
     }
 
-    /// Picking a row selects that page or layer; clicking empty space deselects the layer.
-    private var selection: Binding<String?> {
+    /// Picking a row selects that page or layer, Shift-click toggles a layer, and clicking empty
+    /// space deselects the layers.
+    private var selection: Binding<Set<String>> {
         Binding(
-            get: { model.selectedNodeID ?? model.selectedPageID },
-            set: { id in
-                if let id { perform(.select(id)) } else { perform(.deselect) }
-            })
+            get: { model.selectedNodeIDs.isEmpty ? Set(model.selectedPageID.map { [$0] } ?? []) : Set(model.selectedNodeIDs) },
+            set: { perform(.selectRows($0, shift: DesignModifiers.current.contains(.shift))) })
     }
 
     /// Add Page and Delete Page (the checked page); the last page can't be deleted. Untagged, so not selectable.

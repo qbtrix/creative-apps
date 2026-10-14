@@ -3,8 +3,9 @@
 // then Layer (Hidden and Locked checkboxes), Frame (X, Y, W and H as scrub
 // fields) and Fill (the color well; a text layer's is its text color, a group
 // has none). A locked layer, or one inside a locked group, can't be edited, so
-// Frame and Fill are disabled and a line says why. With only a page selected it shows the page's size,
-// read only. Values in, intents out; the model clamps and refuses what it must.
+// Frame and Fill are disabled and a line says why. With several layers selected
+// Frame and Fill read "Multiple layers selected", disabled with the reason (#413).
+// With only a page selected it shows the page's size, read only. Values in, intents out; the model clamps and refuses what it must.
 import DesignModel
 import SuiteUI
 import SwiftUI
@@ -16,7 +17,9 @@ struct DesignInspector: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 0) {
-                if let node = model.selectedNode {
+                if model.hasMultipleSelection {
+                    DesignMultipleProperties(count: model.selectedNodeIDs.count)
+                } else if let node = model.selectedNode {
                     DesignNodeProperties(node: node, lockHelp: model.lockHelp(node.id), perform: perform).id(node.id)
                 } else if let page = model.selectedPage {
                     DesignPageProperties(page: page).id(page.id)
@@ -83,6 +86,28 @@ private struct DesignNodeProperties: View {
                 var frame = node.frame
                 frame[keyPath: field] = value
                 perform(.setFrame(node.id, x: frame.x, y: frame.y, width: frame.width, height: frame.height))
+            }
+        }
+    }
+}
+
+/// Several layers: a header with their count, and Frame and Fill that say so and can't be edited yet.
+private struct DesignMultipleProperties: View {
+    let count: Int
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            InspectorHeader("\(count) Layers")
+            ForEach(["Frame", "Fill"], id: \.self) { section in
+                InspectorSection(section) {
+                    InspectorRow("") {
+                        Text(DesignWorkspace.multipleLayersText)
+                            .font(SuiteFont.inspectorValue)
+                            .foregroundStyle(SuiteColor.secondaryText)
+                    }
+                    .disabled(true)
+                    DesignPanelHint(DesignWorkspace.multipleLayersHelp)
+                }
             }
         }
     }

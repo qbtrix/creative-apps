@@ -78,6 +78,7 @@ struct DesignWindow: View {
         case .deleteSelection: model.deleteSelection()
         case .deselect: model.deselect()
         case .select(let id): model.selectItem(id)
+        case .selectRows(let ids, let shift): model.selectRows(ids, shift: shift)
         // The ids below come from the model's own rows, so a refused call can't happen.
         case .setExpanded(let id, let isExpanded): try? model.setExpanded(id, isExpanded)
         case .addPage: model.addPage()

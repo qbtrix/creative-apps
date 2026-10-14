@@ -60,6 +60,19 @@ final class DesignJourneyTests: XCTestCase {
         design.drag(on: "suite.canvas", from: CGVector(dx: 0.75, dy: 0.725), to: CGVector(dx: 0.85, dy: 0.8), step: "resized")
         XCTAssert(design.app.buttons["Undo Resize"].waitForExistence(timeout: 5), "the handle drag didn't resize")
         design.shot("inspector")
+        // Shift-click the rectangle: it joins the ellipse, the inspector says so, and Escape clears both.
+        let canvas = design.element("suite.canvas")
+        XCUIElement.perform(withKeyModifiers: .shift) {
+            canvas.coordinate(withNormalizedOffset: CGVector(dx: 0.22, dy: 0.22)).click()
+        }
+        let multiple = design.app.staticTexts["Multiple layers selected"].firstMatch
+        XCTAssert(multiple.waitForExistence(timeout: 5), "Shift-click didn't add the rectangle to the selection")
+        design.shot("multi-select")
+        design.app.typeKey(.escape, modifierFlags: [])
+        let cleared = XCTNSPredicateExpectation(predicate: NSPredicate(format: "exists == false"), object: multiple)
+        XCTAssertEqual(XCTWaiter.wait(for: [cleared], timeout: 5), .completed, "Escape didn't clear the selection")
+        // A plain click gives the selection back to the ellipse.
+        canvas.coordinate(withNormalizedOffset: CGVector(dx: 0.65, dy: 0.6)).click()
         // With the ellipse holding the selection, the Layers tab still checks the current page.
         tab("Layers", in: design)
         XCTAssert(design.element("design.current-page").waitForExistence(timeout: 5), "Layers lost the current page's mark")

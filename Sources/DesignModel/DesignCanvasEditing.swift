@@ -13,7 +13,11 @@
 //           aspect, Option works from the center; a small node shows only its
 //           corners, outside it, and a press inside it moves it); otherwise it selects the node
 //           under the pointer (none deselects) and a drag moves it with its
-//           subtree. A click on an already selected text node edits it.
+//           subtree. A click on an already selected text node edits it. With
+//           Shift a press on a node adds it to the selection or takes it out
+//           (DesignSelection) and moves nothing; on empty canvas it keeps the
+//           selection. Several selected layers show no handles, and Nudge and
+//           Delete wait for one (acting on several is a later slice of #413).
 //   frame, rectangle, ellipse, text   DesignDrawing.
 //   pen     nothing.
 //
@@ -61,7 +65,8 @@ extension DesignWorkspace {
     /// being `handleTolerance` across); corners win a tie. A press inside a compact node is never
     /// a handle: its handles sit outside it, so the press moves it.
     public func handle(at point: DesignPoint) -> DesignHandle? {
-        guard let node = selectedNode, !isLockedInTree(node.id), !isHiddenInTree(node.id) else { return nil }
+        guard selectedNodeIDs.count == 1, let node = selectedNode, !isLockedInTree(node.id), !isHiddenInTree(node.id)
+        else { return nil }
         let frame = node.frame
         let inside = point.x > frame.x && point.x < frame.maxX && point.y > frame.y && point.y < frame.maxY
         if inside, frame.isCompact(handleSize: handleTolerance) { return nil }
@@ -84,9 +89,10 @@ extension DesignWorkspace {
     }
 
     /// Moves the selected node by 1 point (10 with Shift). A run of nudges to one node is one
-    /// step. Does nothing without an unlocked selection, or while editing text.
+    /// step. Does nothing without an unlocked selection, with several layers selected, or while
+    /// editing text.
     public mutating func nudge(_ direction: DesignDirection, shift: Bool) {
-        guard editingTextID == nil, let id = selectedNodeID else { return }
+        guard editingTextID == nil, selectedNodeIDs.count == 1, let id = selectedNodeID else { return }
         let step = shift ? 10.0 : 1.0
         let delta = switch direction {
         case .up: DesignPoint(x: 0, y: -step)
@@ -109,9 +115,9 @@ extension DesignWorkspace {
     }
 
     /// Deletes the selected node and its subtree and deselects. Does nothing without a
-    /// selection outside any lock, or while editing text.
+    /// selection outside any lock, with several layers selected, or while editing text.
     public mutating func deleteSelection() {
-        guard editingTextID == nil, let node = selectedNode, !isLockedInTree(node.id),
+        guard editingTextID == nil, selectedNodeIDs.count == 1, let node = selectedNode, !isLockedInTree(node.id),
             let page = pages.firstIndex(where: { $0.id == selectedPageID })
         else { return }
         let before = snapshot
@@ -124,7 +130,7 @@ extension DesignWorkspace {
     /// One pointer move of the active tool's gesture, from the gesture's start to `end`.
     public mutating func drag(from start: DesignPoint, to end: DesignPoint, modifiers: DesignModifiers = []) {
         guard isOpen, end.isFinite, gesture != nil || start.isFinite else { return }
-        if gesture == nil { gesture = beginGesture(at: start) }
+        if gesture == nil { gesture = beginGesture(at: start, shift: modifiers.contains(.shift)) }
         guard var current = gesture else { return }
         if end != current.start { current.moved = true }
         let delta = DesignPoint(x: end.x - current.start.x, y: end.y - current.start.y)
@@ -181,8 +187,9 @@ extension DesignWorkspace {
         }
     }
 
-    /// Decides what the gesture starting at `start` does, selecting the node a Move press hits.
-    private mutating func beginGesture(at start: DesignPoint) -> DesignGesture {
+    /// Decides what the gesture starting at `start` does, selecting the node a Move press hits, or
+    /// with `shift` adding it to the selection or taking it out.
+    private mutating func beginGesture(at start: DesignPoint, shift: Bool) -> DesignGesture {
         commitTextEdit()
         var route = DesignGesture.Route.none
         var wasSelected = false
@@ -190,6 +197,8 @@ extension DesignWorkspace {
         case .move:
             if let handle = handle(at: start), let node = selectedNode {
                 route = .resize(node.id, handle, node.frame)
+            } else if shift {
+                if let id = hitTest(start) { toggleSelection(id) }
             } else if let id = hitTest(start) {
                 wasSelected = id == selectedNodeID
                 selectItem(id)

@@ -18,6 +18,7 @@ enum DesignIntent {
     case nudge(DesignDirection, shift: Bool)
     case deleteSelection, deselect
     case select(String)
+    case selectRows(Set<String>, shift: Bool)
     case setExpanded(String, Bool)
     case addPage, deletePage
     case setFrame(String, x: Double, y: Double, width: Double, height: Double)

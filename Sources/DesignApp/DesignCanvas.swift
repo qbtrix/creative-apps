@@ -1,9 +1,11 @@
 // DesignCanvas.swift: the canvas of Design's editor shell: the selected page on
 // SuiteUI's CanvasViewport (rulers, checkerboard, zoom), with its nodes painted
-// by DesignArtwork and the selection's outline and handles over them, or the
+// by DesignArtwork and each selected layer's outline over them (handles with one,
+// and a box around them all with several), or the
 // empty state with a New File button when nothing is open. Pointer drags go to
 // the workspace as `.drag` with the modifier keys held, and the release as
-// `.endDrag`; the workspace decides what a press hits and which tool acts. The
+// `.endDrag`; the workspace decides what a press hits, which tool acts and what
+// Shift-click adds to the selection. The
 // overlay (not clipped to the page) is the selection's marks, left out for the
 // text node being edited, then DesignTextOverlay, the inline text editor. Keys reach the
 // canvas while it has focus. During an inline text edit the canvas passes no key
@@ -35,7 +37,8 @@ struct DesignCanvas: View {
     private func canvas(_ page: DesignPage) -> some View {
         let painted = page.painted
         // A hidden node, or one inside a hidden frame, is not on the canvas, so it has no outline.
-        let selected = painted.first { $0.node.id == model.selectedNodeID }?.node
+        let selected = painted.map(\.node).filter { model.isSelected($0.id) }
+        let several = selected.count > 1
         return CanvasViewport(
             documentSize: CGSize(width: page.frameWidth, height: page.frameHeight), zoom: zoom,
             pointer: model.tool.pointer, onSize: onViewport, onZoom: onZoom,
@@ -45,8 +48,11 @@ struct DesignCanvas: View {
             DesignArtwork(painted: painted, zoom: zoom, editingTextID: model.editingTextID)
         } overlay: {
             // The text being edited shows its editor's box instead of handles.
-            if let selected, selected.id != model.editingTextID {
-                DesignSelectionMarks(rect: selected.frame, zoom: zoom, handles: model.lockHelp(selected.id) == nil)
+            ForEach(selected.filter { $0.id != model.editingTextID }) { node in
+                DesignSelectionMarks(rect: node.frame, zoom: zoom, handles: !several && model.lockHelp(node.id) == nil)
+            }
+            if several, let bounds = model.selectionBounds {
+                DesignSelectionMarks(rect: bounds, zoom: zoom, handles: false)
             }
             DesignTextOverlay(model: model, zoom: zoom, perform: perform)
         }
