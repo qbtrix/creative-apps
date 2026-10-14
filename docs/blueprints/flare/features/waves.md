@@ -31,7 +31,7 @@ lists its tasks, owned files and acceptance tests.
   over FlareCore".
 - **Files across wave 2.** export-preview owns `FlareServices.swift`,
   `Fakes/FlareFixtures.swift`, the export fakes, `ExportScan.swift`,
-  `FlareExport.swift`, `ServicesTests.swift` and `docs/c4/model.json`. The
+  `FlareExport.swift` and `docs/c4/model.json`. The
   three live features own only their own files under `Sources/FlareModel/Live/`
   and their own test files. Nothing is shared.
 

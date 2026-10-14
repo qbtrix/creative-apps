@@ -81,7 +81,9 @@ ExportScan.warnings(doc, options):                 # EP-2; fixed order, one line
   scene = doc.scene(options.sceneID) else []
   out = []
   t = layers(scene) with texts nonEmpty            -> "Text isn't exported yet (n layer|layers)."
-  i = instances(scene) whose symbol has >1 frame or any track -> "Symbol animation exports as its first frame (n instance|instances)."
+  i = instances(scene) whose symbol is animated       -> "Symbol animation exports as its first frame (n instance|instances)."
+      animated(symbol) = some layer has a track with 2+ keys, or holds an instance of an animated symbol
+                         (recursive, each symbol visited once, so a cycle can't loop)
   m = doc.stateMachines.count                      -> "Interactions aren't exported (n machine|machines)."
   if options.format == .lottie && !options.transparentBackground
                                                    -> "Background color isn't part of Lottie."
@@ -105,7 +107,9 @@ workspace (EP-5):
   exportHelp = document == nil ? "Open or create an animation to export." : nil
   beginExport: guard exportHelp == nil; exportState = .running(0)
   exportProgressed(p): if case .running(let old) = state, p.isFinite: .running(min(max(p, old), 1))
-  finishExport(.success(r)) -> .finished(r); (.failure(CancellationError)) -> .idle; (.failure(e)) -> .failed(plain message)
+  finishExport(.success(r)) -> .finished(r); (.failure(CancellationError)) -> .idle
+  finishExport(.failure(e)) -> .failed(text), text = (e as? LocalizedError)?.errorDescription
+                               ?? "The export didn't finish. Try again."   # never "\(e)", which prints case names
 ```
 
 The app runs `services.export.export(...)` in a task and reports back through
@@ -119,26 +123,32 @@ Every task is one PR to `dev`: at most 400 changed lines and 15 files, label
 
 | id | issue | what | owned files | depends on |
 |---|---|---|---|---|
-| EP-1 | #324 (part) | Fixture `showcase`: `bounce` plus a text layer "Title", one instance of an animated "Spin" symbol and one machine; registered in `FlareFixtures.all` | `Sources/FlareModel/Fakes/Fixtures/ShowcaseFixture.swift`, `Sources/FlareModel/Fakes/FlareFixtures.swift`, `Tests/FlareModelTests/ShowcaseFixtureTests.swift` | – |
-| EP-2 | #324 (part) | `ExportScan.warnings`, one test per warning | `Sources/FlareModel/ExportScan.swift`, `Tests/FlareModelTests/ExportScanTests.swift` | EP-1 |
-| EP-3 | #324 (part) | `FakeRasterizer` | `Sources/FlareModel/Fakes/FakeRasterizer.swift`, `Tests/FlareModelTests/FakeRasterizerTests.swift` | – |
-| EP-4 | #324 (part) | `FakeExport`: the three formats, progress, cancellation, warnings from the scan | `Sources/FlareModel/Fakes/FakeExport.swift`, `Tests/FlareModelTests/FakeExportTests.swift` | EP-2, EP-3 |
-| EP-5 | #324 (part) | Workspace export state and `exportHelp`; `FlareServices.fake` holds `FakeExport()`; `ServicesTests` updated; C4 `flare-model-sources` names `ExportScan`, `FakeExport`, `FakeRasterizer`, `FlareExport` and `showcase` | `Sources/FlareModel/FlareExport.swift`, `Sources/FlareModel/FlareServices.swift`, `Tests/FlareModelTests/ExportWorkspaceTests.swift`, `Tests/FlareModelTests/ServicesTests.swift`, `docs/c4/model.json` | EP-4 |
+| EP-1 | #324 (part) | Fixture `showcase`: `bounce` plus a layer named "Title" holding one text item whose string is "Title", one instance of an animated "Spin" symbol and one machine; registered in `FlareFixtures.all` | `Sources/FlareModel/Fakes/Fixtures/ShowcaseFixture.swift`, `Sources/FlareModel/Fakes/FlareFixtures.swift`, `Tests/FlareModelTests/ShowcaseFixtureTests.swift`, `docs/c4/model.json` | – |
+| EP-2 | #324 (part) | `ExportScan.warnings`, one test per warning | `Sources/FlareModel/ExportScan.swift`, `Tests/FlareModelTests/ExportScanTests.swift`, `docs/c4/model.json` | EP-1 |
+| EP-3 | #324 (part) | `FakeRasterizer` | `Sources/FlareModel/Fakes/FakeRasterizer.swift`, `Tests/FlareModelTests/FakeRasterizerTests.swift`, `docs/c4/model.json` | EP-2 |
+| EP-4 | #324 (part) | `FakeExport`: the three formats, progress, cancellation, warnings from the scan | `Sources/FlareModel/Fakes/FakeExport.swift`, `Tests/FlareModelTests/FakeExportTests.swift`, `docs/c4/model.json` | EP-3 |
+| EP-5 | #324 (part) | Workspace export state and `exportHelp`; `FlareServices.fake` holds `FakeExport()` | `Sources/FlareModel/FlareExport.swift`, `Sources/FlareModel/FlareServices.swift`, `Tests/FlareModelTests/ExportWorkspaceTests.swift`, `docs/c4/model.json` | EP-4 |
 | EP-6 | #324 (closes) | The model journey test for J22 and J23 | `Tests/FlareModelTests/ExportJourneyTests.swift` | EP-5 |
 
-The issue body lists one test file (`ExportScanTests.swift`); the packet
-splits the tests one file per task (CLAUDE.md: prefer a new file). The PRs
-say so.
+Each of EP-1 to EP-5 adds something the `flare-model-sources` C4
+description doesn't mention yet (the `showcase` fixture, the warnings scan,
+`FakeRasterizer`, `FakeExport`, the workspace's export methods), so each
+edits its own sentence there in the same PR. That puts `docs/c4/model.json`
+in each task and makes EP-1 to EP-5 one chain. `ServicesTests.swift` needs
+no edit: it checks only members that are still `NotBuilt` (#405), so the
+`.fake.export` check goes in `ExportWorkspaceTests`. The issue body lists one
+test file (`ExportScanTests.swift`); the packet splits the tests one file per
+task (CLAUDE.md: prefer a new file), and the PRs say so.
 
 ## Acceptance test per task
 
 | id | test | fails when |
 |---|---|---|
-| EP-1 | `ShowcaseFixtureTests`: `showcase` passes `FlareFormat.validate`; it holds Background, Ball, Shadow, a layer with one text item named "Title", one instance of symbol "Spin" whose layer has two or more rotation keys, and one state machine; `FlareFormat.encode` then `decode` gives the same document; `FlareFixtures.all` has the name "showcase" | the fixture is missing a part J22 or J27 needs, or does not round-trip |
+| EP-1 | `ShowcaseFixtureTests`: `showcase` passes `FlareFormat.validate`; it holds Background, Ball, Shadow, a layer named "Title" with one text item whose string is "Title", one instance of symbol "Spin" whose layer has two or more rotation keys, and one state machine; `FlareFormat.encode` then `decode` gives the same document; `FlareFixtures.all` has the name "showcase" | the fixture is missing a part J22 or J27 needs, or does not round-trip |
 | EP-2 | `ExportScanTests`: one test each for text (1 layer, then 2 layers), an animated instance (and a still one, which gives no warning), a machine, the Lottie background (and none for SVG, and none with `transparentBackground`); `bounce` gives `[]`; `showcase` with Lottie gives the four lines in order | a case is dropped, worded differently from J22, or the order changes |
 | EP-3 | `FakeRasterizerTests`: bytes start with `89 50 4E 47 0D 0A 1A 0A`; two calls give equal bytes; scale 0, -1 and NaN throw | not a PNG, not stable, or a bad scale passes |
-| EP-4 | `FakeExportTests`: `bounce` 0–12 step 2 gives 7 files named `frame_0000.png` … `frame_0012.png`; progress values rise and end at 1; cancelling the task after the first frame throws `CancellationError` and progress never reaches 1; SVG starts `<svg`; Lottie parses with `JSONSerialization` and has `fr` 24; `result.warnings == ExportScan.warnings` | a frame count, name or format is wrong, or cancel returns files |
-| EP-5 | `ExportWorkspaceTests`: with no document `exportHelp` is the sentence and `beginExport` leaves `.idle`; `.running` never decreases and clamps to 1; success gives `.finished`, `CancellationError` gives `.idle`, another error `.failed` with no type names in the text; `ServicesTests`: `.fake.export` warns on `showcase`, `.live.export` is still `NotBuilt` "Not connected yet (IN-7)." | a state is skipped, progress goes back, or the fake is not wired |
+| EP-4 | `FakeExportTests`: `bounce` 0–12 step 2 gives 7 files named `frame_0000.png` … `frame_0012.png`; progress values rise and end at 1; a progress callback that cancels its own task on the first call (`withUnsafeCurrentTask { $0?.cancel() }`) makes the export throw `CancellationError` with progress never reaching 1; SVG starts `<svg`; Lottie parses with `JSONSerialization` and has `fr` 24; `result.warnings == ExportScan.warnings` | a frame count, name or format is wrong, or cancel returns files |
+| EP-5 | `ExportWorkspaceTests`: with no document `exportHelp` is the sentence and `beginExport` leaves `.idle`; `.running` never decreases and clamps to 1; success gives `.finished`, `CancellationError` gives `.idle`, a `CommandError` gives `.failed("The export didn't finish. Try again.")` and an error with a `LocalizedError` description gives that text; `FlareServices.fake().export` warns on `showcase` | a state is skipped, progress goes back, or the fake is not wired |
 | EP-6 | `ExportJourneyTests.testExportSVGLottieAndPNGSequence` and `.testExportFailuresAndCancel` walk steps 1–6 above | any step's state or warnings differ from the journey |
 
 ## Quality tests

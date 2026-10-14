@@ -56,7 +56,7 @@ and the easing inspector (`FlareApp.swift`, `FlareCommands.swift`,
   and assist methods when LM-0c3 and LM-0c4 build them.
 - The Ellipse tool works on the workspace itself in
   `Sources/FlareModel/FlareDrawing.swift`, a stopgap until LC-4's
-  `Shape.ellipse(in:)` (qbtrix/creative-core#182). Machine refusal text sits in
+  ellipse builder in `PathBuilders.swift` (qbtrix/creative-core#182). Machine refusal text sits in
   `FlareMachineMessages.swift`.
 - The per-key easing protocol is `KeyframeEasing`; `EasingEditing` stays the
   window-level editor (see `flare-issues.md`).
@@ -75,9 +75,10 @@ merges. Every live conformance except `LiveEasing` waits on them.
 
 **What is left, as feature packets.** The open p1 logic work is grouped into
 five features in `docs/blueprints/flare/features/` (`waves.md` gives the
-order): wave 1 `export-preview` (#324) and `mac-platform` (#370, #372, #373,
-#739); wave 2, once the engine lands, `live-stage` (#357, #740),
-`live-keys` (#13, #358) and `live-scenes` (#362).
+order): wave 1 `mac-platform` (#370, #372, #373, #739) alone, since it owns
+`docs/c4/model.json`; wave 2 `export-preview` (#324) and, as their engine
+issues land, `live-stage` (#357, #740), `live-keys` (#13, #358) and
+`live-scenes` (#362).
 
 **Later features (UI and integrate, not in a packet yet).** The Flare UI on
 fakes: F1a #346, F1b #347, F3c #375, F5 #391, F6b #348, F6c #349, F7b #376,
@@ -560,7 +561,7 @@ State changes are awaited with `waitForExistence` or a value predicate
 | J19 | `testMachineGraphAndStates` (`+Machines`, F13a) | button | ⇧⌘M (empty state); Add Machine "Button" with first state idle from its label; add states hover and pressed from labels; rename the machine "Hover button" | empty text first; 1, then 3 nodes placed left to right; idle marked initial; machine menu reads "Hover button" |
 | J20 | `testTransitionsInputsAndRefusals` (`+Transitions`, F13b) | button with states | add bool input hover (default false); set its default true, then false; wire idle → hover on trigger "pointer" with hover == true; change the condition to hover == false, then back; remove state hover; add a number input "speed"; remove it; wire hover → pressed on trigger "click" | input row default reads true then false; arrow idle → hover with chip "hover == true"; removing hover is refused inline: "hover is used by the transition idle → hover"; the graph is unchanged; speed row appears then goes; issues list empty |
 | J21 | `testMachinePreview` (`+Preview`, F14) | button with machine | Preview on; toggle hover on; toggle hover off | active state value "idle", then "hover", then "idle"; the probe reports the state switch on the next frame tick |
-| J22 | `testExportSVGLottieAndPNGSequence` (`+Export`, F15a) | showcase | ⇧⌘E SVG; Lottie; PNG 0–12 step 2 to `-FlareExportTo` | files exist; SVG starts `<svg`; Lottie parses with `fr` 24; 7 PNGs with the PNG header; the warnings list shows "Text isn't exported yet (1 layer)", "Symbol animation exports as its first frame (1 instance)" and "Interactions aren't exported (1 machine)", plus "Background color isn't part of Lottie" for Lottie |
+| J22 | `testExportSVGLottieAndPNGSequence` (`+Export`, F15a) | showcase | ⇧⌘E SVG; Lottie; PNG 0–12 step 2 to `-FlareExportTo` | files exist; SVG starts `<svg`; Lottie parses with `fr` 24; 7 PNGs with the PNG header; the warnings list shows "Text isn't exported yet (1 layer).", "Symbol animation exports as its first frame (1 instance)." and "Interactions aren't exported (1 machine).", plus "Background color isn't part of Lottie." for Lottie (each ends with a period, as `ExportResult.warnings` documents) |
 | J23 | `testExportFailuresCancelAndReplace` (`+ExportErrors`, F15b) | bounce | export PNG to the same folder twice; Replace; export to a read-only folder; start a 2x PNG export of 0–47 and Cancel | "Replace existing files?" shown, then success; error row with the reason and Try Again; after Cancel no PNG is left in the folder |
 | J24 | `testAssistProposalAcceptAndReject` (`+Assist`, F16a) | bounce | ⌥⌘A; "pop in and settle"; Generate; Preview; Reject; Generate; Accept | progress, then proposal rows in the AI color; suggested diamonds during preview; after Reject the Edit menu's Undo title is unchanged; after Accept it reads "Undo Assist" and one ⌘Z removes every proposed key |
 | J25 | `testAssistFailures` (`+AssistErrors`, F16b) | bounce with `-FlareAssistMode fail`, `timeout`, `empty`, `text` | Generate in each launch | the matching message from section 3.3; Accept disabled; the document unchanged |
