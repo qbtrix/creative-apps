@@ -72,19 +72,20 @@ extension FlareWorkspace {
     }
 
     /// Adds the ellipse from `start` to `end` as a new "Ellipse N" layer (the
-    /// smallest N no layer uses as a name or id) above the selected layer, on
-    /// top without one, and selects it. One "Add Ellipse" undo step.
+    /// smallest N no scene or symbol layer uses as a name or id) of the edited
+    /// owner (the symbol edited in place, else the scene) above the selected
+    /// layer, on top without one, and selects it. One "Add Ellipse" undo step.
     mutating func commitEllipse(from start: Point, to end: Point, stageScale: Double) {
         guard let shape = Self.ellipse(from: start, to: end, stageScale: stageScale) else { return }
-        guard let scene = selectedScene else { return refuse(.noDocument) }
-        let taken = Set(scenes.flatMap { $0.layers.flatMap { [$0.id, $0.name] } })
+        guard let owner = propertyOwner, let ownerLayers else { return refuse(.noDocument) }
+        let taken = takenLayerNames
         var n = 1
         while taken.contains("ellipse-\(n)") || taken.contains("Ellipse \(n)") { n += 1 }
         let layer = Layer(id: "ellipse-\(n)", name: "Ellipse \(n)")
-        let below = scene.layers.firstIndex { $0.id == selectedLayerID }
+        let below = ownerLayers.firstIndex { $0.id == selectedLayerID }
         applyGroup("Add Ellipse", selection: .layer(layer.id)) { engine in
-            try engine.perform(AddLayer(owner: .scene(scene.id), layer: layer, index: below.map { $0 + 1 }))
-            try engine.perform(AddShape(owner: .scene(scene.id), layerID: layer.id, shape: shape))
+            try engine.perform(AddLayer(owner: owner, layer: layer, index: below.map { $0 + 1 }))
+            try engine.perform(AddShape(owner: owner, layerID: layer.id, shape: shape))
         }
     }
 }

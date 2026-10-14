@@ -23,7 +23,7 @@ private func draft(_ tool: FlareTool, _ a: Point, _ b: Point, _ keys: DragModifi
 @Test func aRectangleCommitIsOneUndoAddRectangleEntry() throws {
     var engine = CommandEngine(document: FlareFixtures.empty)
     let box = try #require(draft(.rectangle, Point(x: 40, y: 40), Point(x: 200, y: 160)))
-    #expect(try shapes.commit(box, sceneID: "scene-1", aboveLayerID: nil, in: &engine) == "rectangle-1")
+    #expect(try shapes.commit(box, owner: .scene("scene-1"), aboveLayerID: nil, in: &engine) == "rectangle-1")
     #expect(bounds(engine, "rectangle-1") == Rect(minX: 40, minY: 40, maxX: 200, maxY: 160))
     #expect(layers(engine).map(\.name) == ["Rectangle 1"] && engine.undoActionName == "Undo Add Rectangle")
     try engine.undo()
@@ -47,7 +47,7 @@ private func draft(_ tool: FlareTool, _ a: Point, _ b: Point, _ keys: DragModifi
     let pen = try #require(path)
     #expect(pen.anchors.count == 3 && pen.smoothAnchors == [1] && pen.isClosed && pen.shape.closed)
     var engine = CommandEngine(document: FlareFixtures.empty)
-    let id = try shapes.commit(pen, sceneID: "scene-1", aboveLayerID: nil, in: &engine)
+    let id = try shapes.commit(pen, owner: .scene("scene-1"), aboveLayerID: nil, in: &engine)
     #expect(id == "path-1" && engine.undoActionName == "Undo Add Path")
 }
 

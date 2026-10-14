@@ -39,7 +39,7 @@ extension NotBuilt: StageRendering, StageHitTesting {
 extension NotBuilt: ShapeBuilding {
     public func unavailableHelp(for _: FlareTool) -> String? { reason }
     public func draft(_: FlareTool, from _: Point, to _: Point, modifiers _: DragModifiers, previous _: ShapeDraft?) -> ShapeDraft? { nil }
-    public func commit(_: ShapeDraft, sceneID _: String, aboveLayerID _: String?, in _: inout CommandEngine) throws -> String { throw self }
+    public func commit(_: ShapeDraft, owner _: LayerOwner, aboveLayerID _: String?, in _: inout CommandEngine) throws -> String { throw self }
     public func boxResult(_: BoxGesture, layers _: [String], document _: Document, sceneID _: String,
                           frame _: Int, box _: Rect) -> [String: [String: Double]] { [:] }
     public func commitBox(_: BoxGesture, layers _: [String], sceneID _: String, frame _: Int, box _: Rect,

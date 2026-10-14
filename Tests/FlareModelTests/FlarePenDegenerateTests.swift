@@ -40,7 +40,7 @@ private func click(_ x: Double, _ y: Double, after previous: ShapeDraft?) -> Sha
     for draft in [one, stacked] {
         var engine = CommandEngine(document: FlareFixtures.empty)
         #expect(throws: CommandError.self) {
-            try shapes.commit(draft, sceneID: "scene-1", aboveLayerID: nil, in: &engine)
+            try shapes.commit(draft, owner: .scene("scene-1"), aboveLayerID: nil, in: &engine)
         }
         #expect(engine.document.layers(of: .scene("scene-1"))?.isEmpty == true && !engine.canUndo)
     }

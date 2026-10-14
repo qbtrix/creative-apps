@@ -32,7 +32,7 @@ private func click(_ x: Double, _ y: Double, after previous: ShapeDraft?) -> Sha
     let points = [Point(x: 3, y: 3), Point(x: 3.6, y: 3), Point(x: 3, y: 3.6)]
     let draft = ShapeDraft(tool: .pen, shape: FlareShape(points: points, closed: true), anchors: points, isClosed: true)
     var engine = CommandEngine(document: FlareFixtures.empty)
-    #expect(throws: CommandError.self) { try shapes.commit(draft, sceneID: "scene-1", aboveLayerID: nil, in: &engine) }
+    #expect(throws: CommandError.self) { try shapes.commit(draft, owner: .scene("scene-1"), aboveLayerID: nil, in: &engine) }
     #expect(engine.document.layers(of: .scene("scene-1"))?.isEmpty == true && !engine.canUndo)
 }
 
@@ -43,7 +43,7 @@ private func click(_ x: Double, _ y: Double, after previous: ShapeDraft?) -> Sha
     let draft = try #require(d)
     #expect(draft.anchors.count == 2)
     var engine = CommandEngine(document: FlareFixtures.empty)
-    _ = try shapes.commit(draft, sceneID: "scene-1", aboveLayerID: nil, in: &engine)
+    _ = try shapes.commit(draft, owner: .scene("scene-1"), aboveLayerID: nil, in: &engine)
     #expect(engine.document.layers(of: .scene("scene-1"))?.map(\.name) == ["Path 1"] && engine.canUndo)
 }
 

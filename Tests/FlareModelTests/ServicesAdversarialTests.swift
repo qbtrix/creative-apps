@@ -65,7 +65,7 @@ private func expectEveryWriteRefused(_ s: FlareServices, _ r: Reasons) {
     expectRefused(r.scenes) { try s.scenes.moveGuide(at: 0, to: 9, sceneID: "scene-1", coalesceKey: "g", in: &$0) }
     expectRefused(r.scenes) { try s.scenes.removeGuide(at: 0, sceneID: "scene-1", in: &$0) }
 
-    expectRefused(r.shapes) { _ = try s.shapes.commit(draft, sceneID: "scene-1", aboveLayerID: nil, in: &$0) }
+    expectRefused(r.shapes) { _ = try s.shapes.commit(draft, owner: .scene("scene-1"), aboveLayerID: nil, in: &$0) }
     expectRefused(r.shapes) {
         try s.shapes.commitBox(.move(dx: 1, dy: 1), layers: ["ball"], sceneID: "scene-1", frame: 0,
                                box: Rect(minX: 0, minY: 0, maxX: 1, maxY: 1), autoKey: true, in: &$0)
