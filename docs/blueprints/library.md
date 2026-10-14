@@ -712,13 +712,15 @@ live conformances. The code below is the whole contract layer: it is also
 in `docs/blueprints/library/contracts/`, and
 `docs/blueprints/library/contracts/check.sh` copies it over today's
 `Sources/LibraryModel` and runs `swift test` on Linux in Swift 6 mode
-against creative-core `main`. It compiled with no warnings and the smoke
-tests (`ContractSmokeTests.swift`: every contract through
-`LibraryServices.fake`, and every live stub's reason through
-`LibraryServices.live`) passed on 2026-10-14 (Swift 6.1.2,
-x86_64 Ubuntu 24.04). The spine lands these files verbatim as
+against creative-core `main`: the four smoke tests in
+`ContractSmokeTests.swift` (every contract through `LibraryServices.fake`;
+every notice's exact text; the fakes showing each change a journey's (F)
+steps assert; every live stub's reason through `LibraryServices.live`) plus
+all 63 existing LibraryModel tests against the new `PhotoItem`. On
+2026-10-14 it compiled with no warnings and 67 of 67 tests passed (Swift
+6.1.2, x86_64 Ubuntu 24.04). The spine lands these files verbatim as
 `Sources/LibraryModel/Contracts/`, `Sources/LibraryModel/Fakes/`,
-`Sources/LibraryModel/Live/` (stubs) and
+`Sources/LibraryModel/Live/` (stubs), `Sources/LibraryModel/SampleImage.swift` and
 `Sources/LibraryModel/LibraryServices.swift`, and the `PhotoItem` changes in
 5.5.
 
@@ -1915,7 +1917,7 @@ Checklist:
 
 - [x] One protocol per use case, with exact signatures, in a file that
       compiles on Linux (`check.sh`, run on 2026-10-14).
-- [x] Every protocol has a fake, and the smoke test calls every one.
+- [x] Every protocol has a fake, and the smoke tests call every one.
 - [x] Every journey step in section 4 maps to a method in 5.7 or a menu
       item in 6.2, and every method names the file and feature that owns it.
 
