@@ -4,7 +4,7 @@
 // +1, the Layers tab and the export sheet. Each writes
 // photo-<state>-light.png and photo-<state>-dark.png; the editor is dark in
 // both on purpose. The canvas picture is rendered the way the window renders
-// it (the workspace's composite as display bytes).
+// it (the workspace's tiles on their layers).
 import CoreRaster
 import PhotoModel
 import SuiteUI
@@ -13,11 +13,10 @@ import Testing
 
 @testable import PhotoApp
 
-/// The workspace's picture as the canvas shows it.
+/// The workspace's picture as the canvas shows it: its tile layers.
 @MainActor
-func photoImage(_ model: PhotoWorkspace) throws -> CGImage? {
-    guard let canvas = model.canvas else { return nil }
-    return CanvasRenderer.image(rgba8: try model.composite().rgba8(), width: canvas.width, height: canvas.height, alpha: .last)
+func photoTiles(_ model: PhotoWorkspace) throws -> CanvasTiles? {
+    try CanvasTiles.complete(model)
 }
 
 @MainActor
@@ -49,10 +48,10 @@ func photoImage(_ model: PhotoWorkspace) throws -> CGImage? {
     }
 
     private func shoot(_ state: String, _ model: PhotoWorkspace, tab: PhotoPanelTab = .adjust) throws {
-        let image = try photoImage(model)
+        let tiles = try photoTiles(model)
         for scheme in [ColorScheme.light, .dark] {
             try snapshot(
-                PhotoEditor(model: model, image: image, renderMilliseconds: 8, zoom: 1, tab: tab),
+                PhotoEditor(model: model, tiles: tiles, renderMilliseconds: 8, zoom: 1, tab: tab),
                 name: "photo-\(state)-\(scheme == .dark ? "dark" : "light")", scheme: scheme)
         }
     }

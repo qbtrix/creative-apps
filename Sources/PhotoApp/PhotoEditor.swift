@@ -16,7 +16,7 @@ import SwiftUI
 
 struct PhotoEditor: View {
     let model: PhotoWorkspace
-    var image: CGImage?
+    var tiles: CanvasTiles?
     var renderMilliseconds: Double?
     var note: String?
     var zoom = 1.0
@@ -35,7 +35,7 @@ struct PhotoEditor: View {
             ToolbarGroup(tools: PhotoTool.allCases, selected: model.tool, style: .rail) { perform(.tool($0)) }
         } canvas: {
             PhotoCanvas(
-                model: model, image: image, zoom: zoom, onViewport: onViewport, onZoom: onZoom, perform: perform,
+                model: model, tiles: tiles, zoom: zoom, onViewport: onViewport, onZoom: onZoom, perform: perform,
                 straighten: straighten)
                 .scrollIndicators(.never)
         } panel: {
@@ -127,7 +127,7 @@ struct PhotoImageMenu: View {
     }
 }
 
-/// The canvas: the rendered picture on the checkerboard with the selection and
+/// The canvas: the rendered picture (TileCanvas) on the checkerboard with the selection and
 /// a pending crop over it, or the empty state. Drags go to the active tool;
 /// with the canvas focused, V M B E C pick tools, Delete clears the selection
 /// (Shift-Delete fills it), Return applies a crop and Escape cancels it or
@@ -135,7 +135,7 @@ struct PhotoImageMenu: View {
 /// open the picture turns by its angle under StraightenMarks.
 struct PhotoCanvas: View {
     let model: PhotoWorkspace
-    let image: CGImage?
+    let tiles: CanvasTiles?
     let zoom: Double
     var onViewport: @MainActor (CGSize) -> Void = { _ in }
     var onZoom: @MainActor (Double) -> Void = { _ in }
@@ -150,10 +150,7 @@ struct PhotoCanvas: View {
                     documentSize: size, zoom: zoom, pointer: model.tool.pointer, onSize: onViewport, onZoom: onZoom,
                     onDrag: { perform(.drag($0, $1)) }, onDragEnd: { perform(.endDrag) }, onKey: key
                 ) {
-                    if let image {
-                        Image(decorative: image, scale: 1).resizable().interpolation(zoom >= 2 ? .none : .high)
-                            .rotationEffect(.degrees(straighten?.degrees ?? 0))
-                    }
+                    if let tiles { TileCanvas(tiles: tiles, zoom: zoom, degrees: straighten?.degrees ?? 0) }
                 } overlay: {
                     if let selection = model.selection { SelectionOutline(rect: selection.cgRect, zoom: zoom) }
                     if let crop = model.pendingCrop { CropShade(rect: crop.cgRect, documentSize: size, zoom: zoom) }
