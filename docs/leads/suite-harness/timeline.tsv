@@ -14,3 +14,4 @@ utc	stage	event	ref	note
 2026-10-14T22:28Z	3	heartbeat	wave2	dev builds again (#801); rebasing SH-3/4/9 on 5eef022
 2026-10-14T22:37Z	3	pr-opened	#850	SH-3 secondary text contrast
 2026-10-14T22:40Z	3	pr-opened	#866	SH-9 GoldenImage compare
+2026-10-14T22:41Z	3	pr-merged	#850	SH-3 secondary text contrast
