@@ -5,3 +5,5 @@ utc	stage	event	ref	note
 2026-10-14T16:26Z	3	pr-merged	#756	MP-4 StagePath
 2026-10-14T16:26Z	3	pr-merged	#757	MP-1 open recent
 2026-10-14T16:26Z	3	stage-start	wave2	MP-2 base 956d946
+2026-10-14T16:31Z	3	pr-merged	#759	MP-2 autosave due
+2026-10-14T16:31Z	3	stage-start	wave3	MP-3 MP-5 base 8917507
