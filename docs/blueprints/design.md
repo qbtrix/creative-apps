@@ -325,10 +325,10 @@ from disk):
 | J14 | `testCloseWithUnsavedChanges` (`+Files`, F5) | cards | draw; ⌘W; Cancel; ⌘W; Don't Save | the alert names the file; Cancel keeps the window; Don't Save closes it | – |
 | J15 | `testEveryControlActsOrSaysWhy` (`+EveryControl`, D0-6) | cards | read `suite.controls`, click each enabled `design.*` control, Escape, ⌘Z | every enabled control changed the shot or a value; every disabled one has a reason. A sweep, never cited by the matrix | – |
 | J16 | `testOpenBadFiles` (`+Files`, F5) | bad files | launch with `-DesignOpenFile` on each | the alert reads "It is not a Design file.", "It was made by a newer version of Design (file version 99).", "It has no pages.", "It uses the id node-2 more than once."; the window stays empty | error |
-| P1 | `testCanvasDragLatency` (`+Perf`, F1) | crowd | four velocity drags of 600 pt at 300 pt/s: move a layer, draw a rectangle, resize, marquee; one Space-pan; ⌘+ and ⌘− ten times each | at least 60 samples per drag series; QB-L1 and QD-S1 to QD-S5 (section 7) | – |
-| P2 | `testScrubLatency` (`+Perf`, F3) | crowd | velocity drag on the Opacity bar and the X scrub field; type 30 characters into the inline text editor | at least 60 samples per series; QB-L2 and QD-S6 | – |
-| P3 | `testLayerListScroll` (`+Perf`, F4) | crowd | scroll Layers end to end, all frames expanded | QD-L5 | – |
-| P4 | `testOpenLargeFile` (`+Perf`, F5) | crowd saved then reopened | ⌘O | progress within QB-L9; no stall over QB-L12 | loading |
+| P1 | `testCanvasDragLatency` (`+PerfCanvas`, F1) | crowd | four velocity drags of 600 pt at 300 pt/s: move a layer, draw a rectangle, resize, marquee; one Space-pan; ⌘+ and ⌘− ten times each | at least 60 samples per drag series; QB-L1 and QD-S1 to QD-S5 (section 7) | – |
+| P2 | `testScrubLatency` (`+PerfScrub`, F3) | crowd | velocity drag on the Opacity bar and the X scrub field; type 30 characters into the inline text editor | at least 60 samples per series; QB-L2 and QD-S6 | – |
+| P3 | `testLayerListScroll` (`+PerfLayers`, F4) | crowd | scroll Layers end to end, all frames expanded | QD-S10 | – |
+| P4 | `testOpenLargeFile` (`+PerfFiles`, F5) | crowd saved then reopened | ⌘O | progress within QB-L9; no stall over QB-L12 | loading |
 
 Tier-2 journeys, written with their packets: `testExportPNGSVGPDF`
 (`+Export`; from #418 (c), plus Cancel and a read-only folder),
@@ -1352,7 +1352,8 @@ public struct FakeFiling: DocumentFiling {
 
 ```swift
 // Fakes/DesignTierTwoFakes.swift (D2-1): the tier-2 fakes. Same rules as DesignFakes.swift.
-// Uses `union` and `topLevel`, which D2-1 moves from DesignFakes.swift into Fakes/FakeSupport.swift.
+// Uses `union` and `topLevel`, which D0-2 puts in Fakes/FakeSupport.swift (internal, not private)
+// rather than at the top of DesignFakes.swift as compiled here.
 
 public struct FakeExport: ExportPlanning {
     public init() {}
@@ -1578,7 +1579,10 @@ gate is the CI p95 × 1.5, never tighter than the device target.
 Each tool has two halves. The **model half** is the Model work one input
 causes, timed on Linux now (`Tests/DesignModelTests/DesignBudgetTests.swift`,
 median and p95 of 200 runs on the `crowd` fixture; debug CI gates are 10 ×
-the device target, as the rubric does). The **screen half** is frames late
+the device target, as the rubric does). D0-6 adds the timing helper
+(`Tests/DesignModelTests/DesignBudget.swift`) and QD-S8, QD-S9 and QD-S11;
+each feature puts its rows in its own `Design<Area>BudgetTests.swift`, so
+the test names below are `<file>.<test>`. The **screen half** is frames late
 from the event to the first frame that shows it, read from SuiteUI's
 `FrameProbe` (#330) by the perf journeys P1 to P4 through `perf()` (#333).
 Until #330 lands the screen half cannot be measured anywhere, so those rows
@@ -1587,18 +1591,18 @@ alone (section 9, Q3).
 
 | id | Tool or input | Model half: device / Linux debug gate | Screen half (device target) | Test |
 |---|---|---|---|---|
-| QD-S1 | Move tool: one drag step on a frame with 50 children (rewind, translate, preview) | ≤ 1 ms / ≤ 10 ms | p95 ≤ 2 frames late (QB-L1) | `DesignBudgetTests.moveStep`; P1 move |
-| QD-S2 | Frame, Rectangle, Ellipse: one draw step | ≤ 1 ms / ≤ 10 ms | p95 ≤ 2 frames late | `drawStep`; P1 draw |
-| QD-S3 | Resize handle: one step, one layer and 20 layers | ≤ 1 ms / ≤ 10 ms | p95 ≤ 2 frames late | `resizeStep`; P1 resize |
-| QD-S4 | Marquee: one step (query 2,000 layers, set selection) | ≤ 1 ms / ≤ 10 ms | p95 ≤ 2 frames late | `marqueeStep`; P1 marquee |
+| QD-S1 | Move tool: one drag step on a frame with 50 children (rewind, translate, preview) | ≤ 1 ms / ≤ 10 ms | p95 ≤ 2 frames late (QB-L1) | `DesignSelectBudgetTests.moveStep`; P1 move |
+| QD-S2 | Frame, Rectangle, Ellipse: one draw step | ≤ 1 ms / ≤ 10 ms | p95 ≤ 2 frames late | `DesignSelectBudgetTests.drawStep`; P1 draw |
+| QD-S3 | Resize handle: one step, one layer and 20 layers | ≤ 1 ms / ≤ 10 ms | p95 ≤ 2 frames late | `DesignSelectBudgetTests.resizeStep`; P1 resize |
+| QD-S4 | Marquee: one step (query 2,000 layers, set selection) | ≤ 1 ms / ≤ 10 ms | p95 ≤ 2 frames late | `DesignSelectBudgetTests.marqueeStep`; P1 marquee |
 | QD-S5 | Space-pan and zoom keys | none (view state) | pan p95 ≤ 2 frames late; a zoom key repaints within 2 frames | P1 pan, zoom |
-| QD-S6 | Text tool: one keystroke in the inline editor | `setTextDraft` ≤ 0.1 ms / ≤ 1 ms | p95 ≤ 2 frames late | `textDraftStep`; P2 typing |
-| QD-S7 | Inspector scrub (opacity, radius, stroke width, X) | `setStyle` / `setNodeFrame` step ≤ 0.5 ms / ≤ 5 ms, coalesced to one step | p95 ≤ 2 frames late (QB-L2) | `scrubStep`; P2 |
-| QD-S8 | Hit test per pointer move | ≤ 0.5 ms / ≤ 5 ms on 2,000 layers | – | `hitTest` |
-| QD-S9 | Any command that changes the document (`apply` plus one history record) | ≤ 1 ms / ≤ 10 ms | – | `applyStep` |
-| QD-S10 | Layers list with every row expanded (2,000 rows) | row build ≤ 5 ms / ≤ 50 ms | scroll p95 frame interval ≤ 1.5 refreshes (QB-L10) | `layerRows`; P3 |
-| QD-S11 | Open and save the `crowd` file | decode and encode ≤ 50 ms / ≤ 500 ms | progress within 100 ms (QB-L9); no main-thread stall over 2 refreshes (QB-L12) | `fileRoundTrip`; P4 |
-| QD-S12 | Export (wave 3): SVG of the Desktop frame of `crowd`; PNG at 2x | SVG ≤ 100 ms / ≤ 1 s | PNG progress within 100 ms; 2x PNG of 1440 × 1024 written ≤ 1 s | `svgExport`; `testExportPNGSVGPDF` |
+| QD-S6 | Text tool: one keystroke in the inline editor | `setTextDraft` ≤ 0.1 ms / ≤ 1 ms | p95 ≤ 2 frames late | `DesignStyleBudgetTests.textDraftStep`; P2 typing |
+| QD-S7 | Inspector scrub (opacity, radius, stroke width, X) | `setStyle` / `setNodeFrame` step ≤ 0.5 ms / ≤ 5 ms, coalesced to one step | p95 ≤ 2 frames late (QB-L2) | `DesignStyleBudgetTests.scrubStep`; P2 |
+| QD-S8 | Hit test per pointer move | ≤ 0.5 ms / ≤ 5 ms on 2,000 layers | – | `DesignBudgetTests.hitTest` |
+| QD-S9 | Any command that changes the document (`apply` plus one history record) | ≤ 1 ms / ≤ 10 ms | – | `DesignBudgetTests.applyStep` |
+| QD-S10 | Layers list with every row expanded (2,000 rows) | row build ≤ 5 ms / ≤ 50 ms | scroll p95 frame interval ≤ 1.5 refreshes (QB-L10) | `DesignLayersBudgetTests.layerRows`; P3 |
+| QD-S11 | Open and save the `crowd` file | decode and encode ≤ 50 ms / ≤ 500 ms | progress within 100 ms (QB-L9); no main-thread stall over 2 refreshes (QB-L12) | `DesignBudgetTests.fileRoundTrip`; P4 |
+| QD-S12 | Export (wave 3): SVG of the Desktop frame of `crowd`; PNG at 2x | SVG ≤ 100 ms / ≤ 1 s | PNG progress within 100 ms; 2x PNG of 1440 × 1024 written ≤ 1 s | `DesignExportBudgetTests.svgExport`; `testExportPNGSVGPDF` |
 
 ### 7.2 App-audit checks that apply
 
@@ -1661,3 +1665,130 @@ Edit menu's undo name after every gesture (QB-F3), the keyboard step on one
 Studio row and one scrub field in J10 (QB-F4), and goldens for the marquee
 and the several-layer selection box under Increase Contrast (QB-F5, once
 #332 lands).
+
+---
+
+## 8. Coverage and waves
+
+### 8.1 Every open line:design issue
+
+| Issue | Title (short) | Tier | Feature |
+|---|---|---|---|
+| #752 | Fill opacity, stroke, Auto Layout | p1 | F3 `style-rows` (opacity, stroke); Auto Layout bullet: not v1 (Q2) |
+| #714 | Align several, distribute | p1 | F1 `select-several` |
+| #613 | Lock mid text edit drops the typing | p3 | F4 `layers-panel` (lock commits the edit first, in `DesignWorkspace.swift`) |
+| #607 | Arrows nudge a layer in a hidden group | p3 | F1 `select-several` (`DesignCanvasEditing.swift`) |
+| #589 | Group row's toggles unreachable | quality | F4 `layers-panel`, after the SuiteUI side of #589 |
+| #542 | Edit mid drag leaves a stray undo step | p3 | F1 `select-several` (`DesignCanvasEditing.swift`) |
+| #532 | Corner radius, stroke, Auto Layout | p1 | Radius: PR #753 (before wave 0); rest is #752 → F3 |
+| #418 | Export PNG, SVG, PDF | p2 | F6 `export` (wave 3) |
+| #416 | Group and ungroup | p1 | F2 `copy-group` |
+| #415 | Cut, copy, paste | p1 | F2 `copy-group` |
+| #414 | Duplicate, Option-drag | p1 | F2 `copy-group` |
+| #288 | Controls without identifiers | p2 | Spread: D0-4 and D0-5 (window, top bar, menus), then each wave-1 feature for the views it owns; the SuiteUI part goes to SuiteUI. Closes when the `identifier` count is 0 |
+| #276 | Locked hint in the gutter | p3 | F3 `style-rows` |
+| #275 | System undo lost in text fields; close prompt | p1 | F5 `files-history` |
+| #270 | Save stays bright after saving | p3 | F5 `files-history` |
+| #268 | Text jumps size on commit | p1 | F3 `style-rows` |
+| #267 | Stroke, opacity, text size | p1 | F3 `style-rows` (Align is done, #716) |
+| #266 | Frame names inside the frame | p2 | F3 `style-rows` (the artwork painter) |
+| #21 | Wide-gamut variables | p3 | Not v1 |
+| #20 | Variables, light and dark | p2 | F9 `variables` (wave 3) |
+| #19 | Components panel | p2 | F8 `components` (wave 3) |
+
+Gaps with no issue (each lead files a `gap` issue when it starts): marquee,
+several-layer transform and zoom to selection (F1); rename, reorder, nest and
+Arrange (F4); the open-error journey (F5); the Pen tool (F7); the public
+`DesignPage` init (D0-1). Open PR #719 duplicates the fix that shipped as
+#749 and can close (Q6).
+
+### 8.2 Waves
+
+A wave starts when everything it waits on has merged. No two features in a
+wave own the same file; across waves a file changes hands only after the
+earlier wave merged. "Tests" means new files in `Tests/DesignModelTests/`
+unless a path says otherwise; journeys are `UITests/DesignJourneyTests+<Area>.swift`;
+snapshots are in `Tests/AppSnapshotTests/`. Paths below drop the
+`Sources/DesignModel/` and `Sources/DesignApp/` prefixes where the file name
+says which target (`Live/`, `Contracts/`, `Fakes/` are DesignModel).
+
+#### Wave 0: `design-seams` (one feature, tasks in order)
+
+Waits on: PR #753 merged (it adds `cornerRadius`); SuiteUI #333 for the
+journey template, or D0-6 makes the one-line template change (Q1). Engine:
+none.
+
+| Task | Behavior | Owned files |
+|---|---|---|
+| D0-1 | Style schema with old files still opening; public `DesignPage` init; `services` and `marquee` on the workspace | `DesignNode.swift`, `DesignWorkspace.swift`, `DesignFile.swift`; tests `DesignStyleSchemaTests.swift`, `Fixtures/v1-before-style.json` |
+| D0-2 | Contracts, `DesignServices`, `NotBuilt`, tier-1 fakes, the contract law | `Contracts/EditContracts.swift`, `Contracts/StyleTypes.swift`, `Contracts/UseCases.swift`, `DesignServices.swift`, `Fakes/FakeSupport.swift`, `Fakes/DesignFakes.swift`; tests `DesignContractLawTests.swift`, `DesignIDMintTests.swift` |
+| D0-2b | One stub per tier-1 live type, forwarding to `NotBuilt` (`LiveFiling` to today's codec), and `.live` naming them, so no later feature edits `DesignServices.swift` | `Live/LiveMarquee.swift`, `Live/LiveTransforming.swift`, `Live/LiveAligning.swift`, `Live/LiveFraming.swift`, `Live/LiveDuplicating.swift`, `Live/LiveGrouping.swift`, `Live/LiveClipboard.swift`, `Live/LiveOrdering.swift`, `Live/LiveStyling.swift`, `Live/LiveFiling.swift`, `DesignServices.swift` |
+| D0-3 | `DesignActions` (section 5.5) and the gesture routes: marquee on an empty-canvas drag, several-layer move and resize, Option-drag copies | `DesignActions.swift`, `DesignCanvasEditing.swift`; tests `DesignActionsTests.swift`, `DesignGestureRouteTests.swift` |
+| D0-4 | Every new intent, `perform` for each, launch arguments `-DesignServices`, `-DesignFixture`, `-DesignWindowSize`; marquee mark; selection marks split out; pasteboard bridge with the canvas and Layers copy and paste hooks; rename presentation state | `DesignIntent.swift`, `DesignWindow.swift`, `DesignCanvas.swift`, `DesignCanvasMarks.swift`, `DesignSelectionMarks.swift`, `DesignPasteboardBridge.swift`, `DesignLayersPanel.swift` |
+| D0-5 | Menus: Edit (Cut, Copy, Paste, Duplicate, Select All), Page (Rename Page…), Object (Group, Ungroup, Arrange, Distribute), View (Zoom to Selection); every item disabled with its help | `DesignCommands.swift`, `DesignEditMenu.swift`, `DesignObjectMenu.swift`; snapshots `DesignEditMenuSnapshots.swift`, `DesignPageMenuSnapshots.swift`; `UITests/DesignJourneyTests.swift` (J1's item list) |
+| D0-6 | Fixtures, the budget helper and the shared budget rows, the every-control sweep and the layout journey | `DesignFixtures.swift`; tests `DesignFixturesTests.swift`, `DesignBudget.swift`, `DesignBudgetTests.swift`; `UITests/DesignJourneyTests+EveryControl.swift`, `UITests/DesignJourneyTests+Layout.swift`; `project.yml` only if #333 is open |
+
+D0-2 and D0-4 also update `docs/c4/model.json`'s `design-model-sources` and
+`design-app-sources` descriptions (contracts, services, fakes, live types;
+selection marks and the pasteboard bridge).
+
+#### Wave 1: the rest of tier 1 (five features side by side)
+
+Waits on: wave 0 merged. Engine: none for any of the five (Design's tree,
+edits and file live in DesignModel; CoreColor is not needed until #21).
+
+| Feature | Covers | Owned files | Waits on (besides wave 0) |
+|---|---|---|---|
+| F1 `select-several` | marquee, several-layer move, resize, nudge, delete; align several and distribute (#714); zoom to selection; #542, #607; J4, J5, J6, P1 | `Live/LiveMarquee.swift`, `Live/LiveTransforming.swift`, `Live/LiveAligning.swift`, `Live/LiveFraming.swift`, `DesignAlign.swift`, `DesignSelection.swift`, `DesignCanvasEditing.swift`, `DesignCanvas.swift`, `DesignSelectionMarks.swift`, `DesignAlignBar.swift`; tests `DesignMarqueeTests.swift`, `DesignSeveralTransformTests.swift`, `DesignDistributeTests.swift`, `DesignFramingTests.swift`, `DesignSelectBudgetTests.swift`; snapshots `DesignMarqueeSnapshots.swift`, `DesignAlignSnapshots.swift`, `DesignMultiSelectSnapshots.swift`; journeys `+Select`, `+PerfCanvas` | SuiteUI #330 for P1's screen half (report-only until then) |
+| F2 `copy-group` | duplicate and Option-drag (#414), group and ungroup (#416), cut, copy, paste (#415); J7, J8, J9 | `Live/LiveDuplicating.swift`, `Live/LiveGrouping.swift`, `Live/LiveClipboard.swift`; tests `DesignDuplicateTests.swift`, `DesignGroupTests.swift`, `DesignPasteboardTests.swift`; snapshots `DesignDuplicateSnapshots.swift`, `DesignGroupSnapshots.swift`, `DesignPasteboardSnapshots.swift`; journey `+Arrange` | nothing |
+| F3 `style-rows` | opacity and stroke (#752), text family, size, weight, alignment (#267), no jump on commit (#268), hint column (#276), frame names (#266), drawing radius, stroke and opacity; J10, J11, P2 | `Live/LiveStyling.swift`, `DesignInspector.swift`, `DesignInspectorStyle.swift`, `DesignInspectorContent.swift`, `DesignCanvasMarks.swift`, `DesignTextEditor.swift`, `DesignText.swift`; tests `DesignStyleTests.swift`, `DesignTextScaleTests.swift`, `DesignStyleBudgetTests.swift`; snapshots `DesignInspectorSnapshots.swift`, `DesignTextSnapshots.swift`, `DesignStyleSnapshots.swift`, `DesignArtworkPathTests.swift`; journeys `+Style`, `+PerfScrub` | SuiteUI #745 or #718 (public `onEnd`; Design's local end works meanwhile) |
+| F4 `layers-panel` | rename layers and pages, drag to reorder and nest, Arrange, group-row toggles (#589), lock commits a text edit (#613); J12, P3 | `Live/LiveOrdering.swift`, `DesignLayersPanel.swift`, `DesignLayerToggles.swift`, `DesignWorkspace.swift`; tests `DesignOrderingTests.swift`, `DesignRenameTests.swift`, `DesignLockTextEditTests.swift`, `DesignLayersBudgetTests.swift`; snapshots `DesignLayersSnapshots.swift`; journeys `+Layers`, `+PerfLayers` | SuiteUI #589, #577, #108, #73 (until they land: mouse rename, no context menu, the group-row eye step skipped with its issue named) |
+| F5 `files-history` | system undo in text fields and the close prompt (#275), save status and the unsaved dot (#270), the codec behind `DocumentFiling`, the open-error journey; J13, J14, J16, P4 | `Live/LiveFiling.swift`, `DesignFile.swift`, `DesignHistory.swift`, `DesignCommands.swift`, `DesignWindow.swift`, `DesignEditor.swift`; tests `DesignDirtyTests.swift`, `DesignFilingTests.swift`; snapshots `DesignFileSnapshots.swift`, `DesignFileMenuSnapshots.swift`; journeys `+Files`, `+PerfFiles` | SuiteUI #339 (save status in the top bar; a plain status text meanwhile) |
+
+#### Wave 2: `design-seams-2` (one feature, tasks in order)
+
+Waits on: wave 1 merged (it edits files wave 1 owns). Engine: none.
+
+| Task | Behavior | Owned files |
+|---|---|---|
+| D2-1 | Tier-2 schema: `path` kind and field, `componentID`, file `components` and `variables`, file version 2 with version 1 still opening; snapshots of history carry components and variables | `DesignNode.swift`, `DesignInspectorContent.swift`, `DesignFile.swift`, `DesignHistory.swift`, `DesignWorkspace.swift`; tests `DesignTierTwoSchemaTests.swift`, `Fixtures/v1-file.json` |
+| D2-2 | Tier-2 fakes and live stubs; `.fake` and `.live` name them | `Fakes/DesignTierTwoFakes.swift`, `Live/LiveExport.swift`, `Live/LivePen.swift`, `Live/LiveComponents.swift`, `Live/LiveVariables.swift`, `DesignServices.swift`; tests `DesignContractLawTierTwoTests.swift` |
+| D2-3 | Actions and routes: export plan, pen press and drag, create and insert component, variable edits, light and dark mode | `DesignActions.swift`, `DesignCanvasEditing.swift`; tests `DesignActionsTierTwoTests.swift` |
+| D2-4 | Intents, menus and the top bar: Export…, Create Component, Variables…, Light / Dark; the canvas draws paths and resolved instances | `DesignIntent.swift`, `DesignWindow.swift`, `DesignCommands.swift`, `DesignObjectMenu.swift`, `DesignEditor.swift`, `DesignCanvasMarks.swift`; `docs/c4/model.json` (names the wave-3 files, so no wave-3 feature edits it) |
+
+#### Wave 3: tier 2 (four features side by side)
+
+Waits on: wave 2 merged.
+
+| Feature | Covers | Owned files | Engine work it waits on |
+|---|---|---|---|
+| F6 `export` | #418: PNG 1x/2x/3x, SVG, PDF; progress, Cancel, per-file errors | `Live/LiveExport.swift`, `Live/DesignSVG.swift`, `DesignExportSheet.swift`, `DesignRasterizer.swift`; tests `DesignExportTests.swift`, `DesignSVGTests.swift`, `DesignExportBudgetTests.swift`, `Fixtures/cards-desktop.svg`; snapshots `DesignExportSnapshots.swift`; journey `+Export` | none (the SVG writer is DesignModel's, per #418; PNG and PDF render the artwork view) |
+| F7 `pen` | Pen tool: corners, smooth points, close; enable the tool | `Live/LivePen.swift`, `DesignPenMarks.swift`, `DesignWorkspace.swift` (the tool's help); tests `DesignPenTests.swift`; snapshots `DesignPenSnapshots.swift`; journey `+Pen` | **Needs a new core issue:** "Shared path geometry: a Linux-safe path (move, line, cubic, close) with exact cubic bounds, a hit test within a tolerance and SVG path data, for Flare and Design." Also SuiteUI #706 (anchor mark) |
+| F8 `components` | #19: create from a frame, Assets section, insert, instances draw the component | `Live/LiveComponents.swift`, `DesignPanel.swift`, `DesignAssetsPanel.swift`; tests `DesignComponentsTests.swift`; snapshots `DesignComponentsSnapshots.swift`; journey `+Components` | none |
+| F9 `variables` | #20: Variables sheet, light and dark values, fills bound to a variable, preview mode | `Live/LiveVariables.swift`, `DesignVariablesSheet.swift`, `DesignInspector.swift`; tests `DesignVariablesTests.swift`; snapshots `DesignVariablesSnapshots.swift`; journey `+Variables` | none (CoreColor wide gamut is #21, not v1) |
+
+### 8.3 Why this order
+
+- **Wave 0 takes every shared file once.** `DesignIntent.swift`,
+  `DesignCommands.swift`, `DesignWindow.swift`, `DesignServices.swift` and
+  `DesignNode.swift` are where parallel features would collide. Wave 0 puts
+  every tier-1 case, menu item, service slot and stored field in place,
+  backed by `NotBuilt`, so no control is dead (each says "<Feature> isn't
+  built yet.") and wave 1 only fills its own `Live/` files and its own
+  views. This is Flare's LM-0a3 move ("every stored property in one PR") for
+  Design.
+- **Wave 1 is the everyday loop**, in five features with disjoint files;
+  each can ship in any order. F1 and F2 together finish the "several
+  layers" story that priorities item 7 says comes first.
+- **Wave 2 repeats the seam for tier 2**, once wave 1 has let go of the
+  shared files, so wave 3's four features run side by side.
+- **Only F7 waits on creative-core**, and only for path geometry. If that
+  issue is slow, F7 waits alone; nothing else depends on it.
+
+### 8.4 Engine work
+
+| Feature | creative-core work |
+|---|---|
+| D0, F1–F5, D2, F6, F8, F9 | none |
+| F7 `pen` | needs a new core issue: shared path geometry (spec in 8.2) |
+| #21 (not v1) | none new: CoreColor's existing conversion, per #21's body |
