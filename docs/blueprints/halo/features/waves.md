@@ -124,6 +124,9 @@ the packet carries the fix (each packet's "Review notes folded in" section):
 - #772 SuiteUI timeline: lane accessibility value names its span and key
   frames (needs-ui, line:suiteui): H-J3 reads the span from the inspector
   until it lands.
+- #783 SuiteUI: InspectorSliderRow reports typed text that isn't a number
+  (needs-ui, line:suiteui): until it lands, H-J6 asserts only that a typed
+  `abc` keeps the value; the refusal message is proven in HaloModel tests.
 
 ## Open questions left for the captain
 
