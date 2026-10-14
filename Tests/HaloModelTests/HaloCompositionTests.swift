@@ -1,6 +1,6 @@
 // HaloCompositionTests.swift: composition settings validation and HaloProject's
 // duplicate, rename and delete. Runs on Linux and macOS.
-import HaloModel
+@testable import HaloModel
 import Testing
 
 @Test(arguments: [
@@ -55,6 +55,20 @@ func settingsValidation(width: Int, height: Int, fps: Int, seconds: Double, vali
     #expect(project.selectedComposition?.layers.map(\.id) == ["comp-3-layer-1"])
     #expect(project.selectedComposition?.layers.map(\.name) == ["Solid 1"])
     #expect(project.duplicateComposition("comp-9") == false)
+}
+
+@Test func duplicateCompositionPointsTheCopiedChildAtTheCopiedParent() {
+    var project = HaloProject()
+    project.newComposition()
+    project.newLayer(.null)
+    project.newLayer(.solid)
+    project.updateSelectedComposition { $0.layers[0].parentID = "comp-1-layer-1" }
+    #expect(project.duplicateComposition("comp-1") == true)
+    let copy = project.selectedComposition
+    #expect(copy?.layers.map(\.id) == ["comp-2-layer-2", "comp-2-layer-1"])
+    #expect(copy?.layers.first?.parentID == "comp-2-layer-1")
+    #expect(copy?.layers.last?.parentID == nil)
+    #expect(project.compositions.first?.layers.first?.parentID == "comp-1-layer-1")
 }
 
 @Test func renameTrimsAndRefusesEmptyOrTakenNames() {

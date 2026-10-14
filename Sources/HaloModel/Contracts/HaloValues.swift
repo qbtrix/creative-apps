@@ -1,6 +1,6 @@
 // Contracts/HaloValues.swift: the key values every Halo contract speaks
-// (properties, keys, easing presets, text); the document values and the
-// refusal types sit in HaloDocumentValues.swift. Linux-safe.
+// (properties, keys, easing presets, text) and the edit, refusal and file
+// errors; the document values sit in HaloDocumentValues.swift. Linux-safe.
 // FlareCore's keyframe, easing, matrix and point are used as they are (never
 // mirrored), under Halo names so HaloApp never has to import FlareCore, whose
 // Path and Color clash with SwiftUI's.
@@ -183,5 +183,63 @@ public struct HaloTextContent: Codable, Sendable, Hashable {
         self.string = string; self.fontSize = fontSize
         self.width = width ?? fontSize * 0.6 * Double(max(string.count, 1))
         self.height = height ?? fontSize
+    }
+}
+
+/// Why an edit was refused. `message` is the text the window shows.
+public enum HaloEditError: Error, Sendable, Hashable {
+    case noComposition
+    case noLayerSelected
+    case unknownLayer(String)
+    case notANumber(HaloProperty)
+    /// The layer's name, for the message.
+    case parentCycle(String)
+    case inPointAfterOut
+    case outPointBeforeIn
+    case emptyName
+    case emptyText
+    case noKeySelected
+    case notBuilt(String)
+
+    public var message: String {
+        switch self {
+        case .noComposition: "Create a composition first."
+        case .noLayerSelected: "Select a layer first."
+        case .unknownLayer: "That layer no longer exists."
+        case .notANumber(let p): "\(p.title) needs a number."
+        case .parentCycle(let name): "\(name) can't follow a layer that follows it."
+        case .inPointAfterOut: "The in point must come before the out point."
+        case .outPointBeforeIn: "The out point must come after the in point."
+        case .emptyName: "Enter a name."
+        case .emptyText: "Enter some text."
+        case .noKeySelected: "Pick a key in the EASING list first."
+        case .notBuilt(let what): "\(what) isn't built yet."
+        }
+    }
+}
+
+/// A refused edit, kept until the next edit or a dismissal, with the
+/// control that refused it so the window shows the message under that row.
+public struct HaloRefusal: Sendable, Hashable {
+    /// The refusing control's identifier ("halo.inspector.row.rotation").
+    public var control: String
+    public var message: String
+    public init(control: String, message: String) { self.control = control; self.message = message }
+}
+
+/// Why a project file didn't open. The open project stays as it was.
+public enum HaloFileError: Error, Sendable, Hashable {
+    case notAHaloFile
+    case newerVersion(Int)
+    case damaged(String)
+    case tooLarge
+
+    public var message: String {
+        switch self {
+        case .notAHaloFile: "This file isn't a Halo project."
+        case .newerVersion(let v): "This project was saved by a newer Halo (format \(v)). Update Halo to open it."
+        case .damaged(let detail): "This project is damaged: \(detail)."
+        case .tooLarge: "This project is larger than Halo can open (64 MB)."
+        }
     }
 }

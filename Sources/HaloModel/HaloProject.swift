@@ -9,8 +9,9 @@
 // dismissed.
 import CoreRaster
 
-/// A composition: a sized, timed canvas that layers play in.
-public struct HaloComposition: Identifiable, Sendable, Hashable {
+/// A composition: a sized, timed canvas that layers play in. Codable, so a
+/// project file holds it as it is, playhead included.
+public struct HaloComposition: Identifiable, Codable, Sendable, Hashable {
     public let id: String
     public var name: String
     public var width: Int
@@ -101,16 +102,23 @@ public struct HaloProject: Sendable, Equatable {
     }
 
     /// Copies a composition and its layers in under the original, named
-    /// "<name> copy" ("<name> copy 2", ...), and selects the copy. An unknown
-    /// id is refused.
+    /// "<name> copy" ("<name> copy 2", ...), and selects the copy; a copied
+    /// layer's parent is the copy of its parent. An unknown id is refused.
     @discardableResult
     public mutating func duplicateComposition(_ id: String) -> Bool {
         guard let index = compositions.firstIndex(where: { $0.id == id }) else { return false }
         let original = compositions[index]
         let newID = takeCompositionID()
-        let layers = original.layers.map { layer in
+        var newIDs: [String: String] = [:]
+        for layer in original.layers {
             let suffix = layer.id.hasPrefix(original.id) ? String(layer.id.dropFirst(original.id.count)) : "-\(layer.id)"
-            return layer.withID(newID + suffix)
+            newIDs[layer.id] = newID + suffix
+        }
+        // Each copied layer follows the copy of its parent, never the original.
+        let layers = original.layers.map { layer in
+            var copy = layer.withID(newIDs[layer.id] ?? newID + "-\(layer.id)")
+            copy.parentID = layer.parentID.flatMap { newIDs[$0] }
+            return copy
         }
         let copy = HaloComposition(
             id: newID, name: uniqueName("\(original.name) copy"), width: original.width, height: original.height,
