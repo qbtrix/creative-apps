@@ -198,7 +198,7 @@ decode(data):                                      # HF-4, HF-5 (live)
 
 fileData():  try services.files.encode(document)   # HF-6
 beginOpen(name, path):  file.opening = HaloRecentFile(name, path); file.error = nil
-finishOpen(.success(s)): document = s; history = HaloHistory()      # opening clears history
+finishOpen(.success(s)): restore(s); history = HaloHistory()      # opening clears history
                          file = name/path of opening, unsaved false, opening nil, error nil
                          pushRecent(opening)
 finishOpen(.failure(e)): file.opening = nil; file.error = e.message  # document unchanged
