@@ -603,9 +603,11 @@ pattern, FlareCore and CoreRaster only, value types, `Sendable`, Swift 6.
 **Proof.** The code below is copied from
 `docs/blueprints/halo/contracts/`, and `docs/blueprints/halo/contracts/check.sh`
 builds it with today's HaloModel and creative-core `main` in a throwaway
-package and runs `Tests/HaloContractTests.swift` (7 tests on the fakes). Run
-on 2026-10-14 with Swift 6.3.3 on Ubuntu 24.04 against creative-core
-4cac701: `CONTRACTS: PASS`, no warnings. W0 copies these files into
+package and runs `Tests/HaloContractTests.swift` (9 tests on the fakes:
+drawing, easing, drag, parenting and cycles, opacity's one home, history
+coalescing and redo, file round trip and refusals, render plan size, clock
+edges and typed values). Run on 2026-10-14 with Swift 6.3.3 on Ubuntu 24.04
+against creative-core 4cac701: `CONTRACTS: PASS`, no warnings. W0 copies these files into
 `Sources/HaloModel/` (the fakes split one file per contract, the live stubs
 one file per contract under `Live/`).
 
