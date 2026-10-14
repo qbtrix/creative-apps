@@ -22,8 +22,74 @@ easing, symbols, state machines, and SVG and Lottie export. So the risk is the
 drawing feel and the UI, not the model, which is why every feature below
 carries a quality bar and the test that measures it.
 
-Contents: 1 Scope · 2 Architecture · 3 Screens · 4 Journeys · 5 Coverage
+Contents: 0 Status on dev · 1 Scope · 2 Architecture · 3 Screens · 4 Journeys · 5 Coverage
 matrix · 6 Contracts · 7 Tasks · 8 Order · 9 Decisions · 10 Still open
+
+---
+
+## 0. Status on dev (2026-10-14)
+
+Read on `origin/dev` e823592 (checked again at 65e2707) and creative-core `main` cfad97f (the revision
+`Package.swift` resolves). The rest of this blueprint is the plan as approved
+at G0; this section says how far dev has got and where names moved.
+
+**Shipped.** The LM-0 chain up to LM-0c2 (#314–#323, plus the splits #473
+LM-0a2c, #547 LM-0a3b and #605 LM-0c2b), LM-1 (#356, open, save data, file
+name and dirty flag only), LM-6 `LiveEasing` (#359), LM-7 playback (#360) and
+LM-15 `MachineLayout` (#327), LM-0c3 fake export, the shared warnings
+scan and fixture `showcase` (#324, in #747), LA-2 `PlaybackDriver` with a
+Linux-tested `PlaybackTicker` in `FlarePlaybackTicks.swift` (#372, in #751),
+and about 60 follow-up fixes (#603–#710:
+editing in place, locked layers, playback edge cases, plain refusal text).
+`FlareServices.fake` holds every fake except `assist`, still `NotBuilt`; `FlareServices.live` is all `NotBuilt`. On the UI side nothing of
+section 7.3 has started: the window is still `SuiteWindow` with the sidebar
+and the easing inspector (`FlareApp.swift`, `FlareCommands.swift`,
+`FlareEasingInspector.swift`, `FlareLayerItems.swift`). SuiteUI already has
+`KeyframeButton`, `PresetGrid`, `ChipRow`, `InspectorAction`, `CurveEditor`,
+`CanvasMarks`, `EditorShell` and `EditorTopBar`; S7 (#340), S9 (#342), S12
+(#273), S13 (#343), QH-2 (#331), QH-2b (#332) and QH-4 (#333) are still open.
+
+**Names that moved.**
+
+- `StageHitTesting` takes `editing symbolID:` (#641); section 6.2 now shows it.
+- `ExportState`, `AssistState` and `LoadState` live in
+  `Sources/FlareModel/FlareWorkspaceState.swift`, not in `FlareExport.swift`
+  and `FlareAssist.swift`; `FlareExport.swift` holds the workspace's export
+  methods (LM-0c3), and `FlareAssist.swift` will hold assist's (LM-0c4).
+- The display-link tick math is in the Model: `PlaybackTicker` and
+  `FlareWorkspace.tick(target:ticker:)` in `FlarePlaybackTicks.swift`;
+  `Sources/FlareApp/PlaybackDriver.swift` only owns the link.
+- The Ellipse tool works on the workspace itself in
+  `Sources/FlareModel/FlareDrawing.swift`, a stopgap until LC-4's
+  ellipse builder in `PathBuilders.swift` (qbtrix/creative-core#182). Machine refusal text sits in
+  `FlareMachineMessages.swift`.
+- The per-key easing protocol is `KeyframeEasing`; `EasingEditing` stays the
+  window-level editor (see `flare-issues.md`).
+
+**Closed but not finished.** #356 (LM-1) closed without the Open Recent list
+and the autosave due time (`FlareFiles.swift` says they follow later), and
+#206 (LM-3) closed with the Ellipse stopgap but no `LiveShapes`. Both are
+needed by p1 work (LA-3 and IN-1), so the feature packets carry them as new
+tasks (#739, #740).
+
+**The engine.** creative-core `main` has none of LC-1–LC-10 yet: no render
+list, topmost hit, world bounds, path builders, `owner:` on keyframe
+commands, `SetShapeStroke`, `SetShapePath`, `DuplicateLayer`, scene rename,
+reorder or canvas commands, onion frames, or `SetKeyframe` and `MoveGuide`
+merges. Every live conformance except `LiveEasing` waits on them.
+
+**What is left, as feature packets.** The open p1 logic work is grouped into
+four features in `docs/blueprints/flare/features/` (`waves.md` gives the
+order): wave 1 `mac-platform` (#370, #373, #739), which waits on nothing;
+wave 2, as their engine issues land, `live-stage` (#357, #740), `live-keys`
+(#13, #358) and `live-scenes` (#362).
+
+**Later features (UI and integrate, not in a packet yet).** The Flare UI on
+fakes: F1a #346, F1b #347, F3c #375, F5 #391, F6b #348, F6c #349, F7b #376,
+F8 #377, F9 #378, F11a #350, F11b #351, F17b #392, F17c #393, F18 #384, and
+the older issues that now carry F tasks (#11, #12, #15, #186, #203, #204,
+#205). The p1 integrate tasks IN-1 #397, IN-2 #385, IN-4 #398 and IN-9 #399
+wait on that UI and on gate G2.
 
 ---
 
@@ -499,7 +565,7 @@ State changes are awaited with `waitForExistence` or a value predicate
 | J19 | `testMachineGraphAndStates` (`+Machines`, F13a) | button | ⇧⌘M (empty state); Add Machine "Button" with first state idle from its label; add states hover and pressed from labels; rename the machine "Hover button" | empty text first; 1, then 3 nodes placed left to right; idle marked initial; machine menu reads "Hover button" |
 | J20 | `testTransitionsInputsAndRefusals` (`+Transitions`, F13b) | button with states | add bool input hover (default false); set its default true, then false; wire idle → hover on trigger "pointer" with hover == true; change the condition to hover == false, then back; remove state hover; add a number input "speed"; remove it; wire hover → pressed on trigger "click" | input row default reads true then false; arrow idle → hover with chip "hover == true"; removing hover is refused inline: "hover is used by the transition idle → hover"; the graph is unchanged; speed row appears then goes; issues list empty |
 | J21 | `testMachinePreview` (`+Preview`, F14) | button with machine | Preview on; toggle hover on; toggle hover off | active state value "idle", then "hover", then "idle"; the probe reports the state switch on the next frame tick |
-| J22 | `testExportSVGLottieAndPNGSequence` (`+Export`, F15a) | showcase | ⇧⌘E SVG; Lottie; PNG 0–12 step 2 to `-FlareExportTo` | files exist; SVG starts `<svg`; Lottie parses with `fr` 24; 7 PNGs with the PNG header; the warnings list shows "Text isn't exported yet (1 layer)", "Symbol animation exports as its first frame (1 instance)" and "Interactions aren't exported (1 machine)", plus "Background color isn't part of Lottie" for Lottie |
+| J22 | `testExportSVGLottieAndPNGSequence` (`+Export`, F15a) | showcase | ⇧⌘E SVG; Lottie; PNG 0–12 step 2 to `-FlareExportTo` | files exist; SVG starts `<svg`; Lottie parses with `fr` 24; 7 PNGs with the PNG header; the warnings list shows "Text isn't exported yet (1 layer).", "Symbol animation exports as its first frame (1 instance)." and "Interactions aren't exported (1 machine).", plus "Background color isn't part of Lottie." for Lottie (each ends with a period, as `ExportResult.warnings` documents) |
 | J23 | `testExportFailuresCancelAndReplace` (`+ExportErrors`, F15b) | bounce | export PNG to the same folder twice; Replace; export to a read-only folder; start a 2x PNG export of 0–47 and Cancel | "Replace existing files?" shown, then success; error row with the reason and Try Again; after Cancel no PNG is left in the folder |
 | J24 | `testAssistProposalAcceptAndReject` (`+Assist`, F16a) | bounce | ⌥⌘A; "pop in and settle"; Generate; Preview; Reject; Generate; Accept | progress, then proposal rows in the AI color; suggested diamonds during preview; after Reject the Edit menu's Undo title is unchanged; after Accept it reads "Undo Assist" and one ⌘Z removes every proposed key |
 | J25 | `testAssistFailures` (`+AssistErrors`, F16b) | bounce with `-FlareAssistMode fail`, `timeout`, `empty`, `text` | Generate in each launch | the matching message from section 3.3; Accept disabled; the document unchanged |
@@ -734,14 +800,17 @@ public protocol StageRendering: Sendable {
 }
 
 // What is under the pointer, inside a marquee, and the selection's bounds.
+// `editing` is the symbol edited in place: its own items are hit, never the
+// scene's (#641). An extension keeps the three calls without `editing:`.
 public protocol StageHitTesting: Sendable {
     /// `tolerance` is in scene points (the app passes 4 pt divided by zoom).
     /// Hidden and locked layers and text items are never hit.
-    func hit(_ document: Document, sceneID: String, frame: Int, at point: Point,
+    func hit(_ document: Document, sceneID: String, frame: Int, editing symbolID: String?, at point: Point,
              tolerance: Double) -> StageAddress?
-    func marquee(_ document: Document, sceneID: String, frame: Int, rect: Rect) -> [StageAddress]
+    func marquee(_ document: Document, sceneID: String, frame: Int, editing symbolID: String?, rect: Rect) -> [StageAddress]
     /// World bounds including stroke width; nil for an empty selection.
-    func bounds(_ document: Document, sceneID: String, frame: Int, of items: [StageAddress]) -> Rect?
+    func bounds(_ document: Document, sceneID: String, frame: Int, editing symbolID: String?,
+                of items: [StageAddress]) -> Rect?
 }
 
 // Contracts/ShapeContracts.swift. Tool gestures to shapes, direct selection, edit menu.
