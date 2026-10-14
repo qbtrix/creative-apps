@@ -6,6 +6,7 @@ import FlareCore
 
 extension FlareWorkspace {
     static let machineRefused = "The machine could not be changed."
+    static let framesOutsideScene = "The state\u{2019}s frames must be inside the scene."
 
     static func machineMessage(_ error: any Error) -> String {
         switch error {
@@ -51,7 +52,7 @@ extension FlareWorkspace {
         if let id = between(rule, "duplicate state id ", "") { return "\(id) is already a state." }
         if let id = between(rule, "unknown initial state ", "") { return "\(id) isn\u{2019}t a state of this machine." }
         if between(rule, "state ", " frame range outside scene") != nil {
-            return "The state\u{2019}s frames must be inside the scene."
+            return framesOutsideScene
         }
         if let id = between(rule, "state ", " has unknown scene ", partial: true) {
             return "\(id)\u{2019}s scene is no longer in the document."
