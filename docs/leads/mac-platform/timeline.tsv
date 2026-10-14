@@ -19,3 +19,4 @@ utc	stage	event	ref	note
 2026-10-14T17:02Z	4	pr-merged	#764	r1-b1
 2026-10-14T17:02Z	4	ci-run	38602105363	red: PhotoBrushLatencyTests only (line:photo); all feature tests green
 2026-10-14T17:02Z	4	round-findings	round2	0 in feature; outside red noted on #763, rerun 403
+2026-10-14T17:44Z	4	heartbeat	-	waiting on next dev CI run; heartbeat job ended at its time limit, heartbeats now via check-ins
