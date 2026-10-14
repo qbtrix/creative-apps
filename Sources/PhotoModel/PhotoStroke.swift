@@ -22,6 +22,9 @@
 //                  it); a click drops it.
 //   move           shifts the selected layer by the drag, in whole pixels
 //                  ("Move Layer").
+//   clone          clone dabs (PhotoRetouch) at the brush's size along the
+//                  pointer samples, from the sampled source, as one step
+//                  ("Clone"); with no source sampled it does nothing.
 //
 // ponytail: capsules write through PixelBuffer.pixel/setPixel one pixel at a
 // time, with source-over and the eraser's scaling inline, and visit each
@@ -33,9 +36,10 @@ import CoreRaster
 struct PhotoStroke: Sendable, Equatable {
     var tool: PhotoTool
     var start: Mask.Point
-    /// Brush and eraser: the layer; by tile index, each painted tile as it
-    /// was before the stroke and its pixels' coverage so far (row-major, the
-    /// tile's size); and the last four pointer samples and their pressures.
+    /// Brush, eraser and clone: the layer; by tile index, each painted tile as
+    /// it was before the stroke and its pixels' coverage so far (row-major, the
+    /// tile's size); and the last four pointer samples and their pressures
+    /// (clone keeps only the last).
     var layerID: PhotoLayer.ID?
     var before: [Int: PixelBuffer] = [:]
     var coverage: [Int: [Float]] = [:]
@@ -68,6 +72,9 @@ extension PhotoWorkspace {
         case .move:
             if begun { current.layersBefore = layers }
             moveSelectedLayer(current, to: end)
+        case .clone:
+            cloneDabs(along: [current.samples.last?.point ?? start, end], size: brushOptions.size, &current)
+            current.samples = [PhotoStroke.Sample(point: end, pressure: 1)]
         }
         stroke = current
     }
@@ -88,6 +95,9 @@ extension PhotoWorkspace {
             if done.layersBefore != layers, !done.layersBefore.isEmpty {
                 record(.layers(done.layersBefore, selected: selectedLayerID), named: "Move Layer")
             }
+        case .clone:
+            guard let id = done.layerID, !done.before.isEmpty else { return }
+            record(.tiles(layer: id, done.before), named: "Clone")
         }
     }
 

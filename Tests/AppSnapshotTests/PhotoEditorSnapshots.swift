@@ -86,6 +86,16 @@ func photoImage(_ model: PhotoWorkspace) throws -> CGImage? {
         try shoot("eraser-stroke", model)
     }
 
+    /// The Clone tool after Option-clicking the sun and dragging a copy of it into the sky (#647).
+    @Test func cloneWithSource() throws {
+        var model = try opened()
+        model.setToolOption(.size(60))
+        model.selectTool(.clone)
+        model.setCloneSource(at: Mask.Point(x: 420, y: 200))
+        drag(&model, .clone, (180, 120), (220, 140))
+        try shoot("clone-source", model)
+    }
+
     @Test func selectionAndPendingCrop() throws {
         var model = try opened()
         drag(&model, .marquee, (80, 80), (300, 240))

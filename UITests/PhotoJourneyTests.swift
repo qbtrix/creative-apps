@@ -7,7 +7,8 @@
 // testTier1UndoRedoZoomPan and testTier1Layers. Edits are checked by their
 // undo names, sizes and layer counts by the panel header, values XCUITest
 // can't read by the canvas pixels; tier-1 files are named tools.png, a name
-// the audit knows. Another journey edits with every other tool,
+// the audit knows. Another journey edits with every other tool (Clone after
+// an Option-click sets its source),
 // one straightens the image by 3 degrees from the Image menu, and the Curves
 // journey drags the curve up and nudges it with an arrow key, each one
 // "Undo Curves" step that changes the canvas. Curves, Levels and
@@ -212,6 +213,16 @@ final class PhotoJourneyTests: XCTestCase {
 
         tools["Move"].click()
         photo.drag(on: "suite.canvas", from: CGVector(dx: 0.5, dy: 0.5), to: CGVector(dx: 0.6, dy: 0.55), step: "moved")
+
+        tools["Clone"].click()
+        let canvas = photo.element("suite.canvas")
+        // Option-click sets the source and shows its mark; a plain drag then clones (#647).
+        XCUIElement.perform(withKeyModifiers: .option) {
+            canvas.coordinate(withNormalizedOffset: CGVector(dx: 0.3, dy: 0.3)).click()
+        }
+        XCTAssert(photo.element("photo.clone.source").waitForExistence(timeout: 5), "Option-click set no clone source")
+        photo.drag(on: "suite.canvas", from: CGVector(dx: 0.6, dy: 0.6), to: CGVector(dx: 0.7, dy: 0.65), step: "cloned")
+        XCTAssert(photo.app.buttons["Undo Clone"].waitForExistence(timeout: 5), "a Clone drag didn't clone")
 
         tools["Crop"].click()
         photo.drag(on: "suite.canvas", from: CGVector(dx: 0.1, dy: 0.1), to: CGVector(dx: 0.9, dy: 0.9), step: "crop-pending")

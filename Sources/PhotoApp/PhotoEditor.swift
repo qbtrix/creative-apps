@@ -128,8 +128,9 @@ struct PhotoImageMenu: View {
 }
 
 /// The canvas: the rendered picture on the checkerboard with the selection and
-/// a pending crop over it, or the empty state. Drags go to the active tool;
-/// with the canvas focused, V M B E C pick tools, Delete clears the selection
+/// a pending crop over it, and with Clone the source mark, or the empty
+/// state. Drags go to the active tool (Option with Clone samples its source);
+/// with the canvas focused, V M B E C S pick tools, Delete clears the selection
 /// (Shift-Delete fills it), Return applies a crop and Escape cancels it or
 /// deselects. Dropping an image file opens it. While the Straighten sheet is
 /// open the picture turns by its angle under StraightenMarks.
@@ -157,6 +158,9 @@ struct PhotoCanvas: View {
                 } overlay: {
                     if let selection = model.selection { SelectionOutline(rect: selection.cgRect, zoom: zoom) }
                     if let crop = model.pendingCrop { CropShade(rect: crop.cgRect, documentSize: size, zoom: zoom) }
+                    if model.tool == .clone, let source = model.cloneSource {
+                        CloneSourceMark(x: source.point.x, y: source.point.y, zoom: zoom)
+                    }
                     if let straighten,
                         let frame = model.straightenFrame(degrees: straighten.degrees, cropToFit: straighten.cropToFit)
                     {

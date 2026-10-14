@@ -20,7 +20,7 @@ import CoreRaster
 
 /// The tools on Photo's tool rail.
 public enum PhotoTool: String, CaseIterable, Sendable {
-    case move, marquee, brush, eraser, crop
+    case move, marquee, brush, eraser, crop, clone
 
     /// Why the rail shows this tool disabled, as its tooltip; nil once the
     /// tool works. Every tool works: the canvas sends its drags to `drag`.
@@ -131,9 +131,10 @@ public struct PhotoWorkspace: Sendable {
     public var toolOptions: ToolOptions { tool == .eraser ? eraserOptions : brushOptions }
 
     /// The brush cursor's diameter in canvas pixels: the size of the selected
-    /// brush or eraser. Nil with no image open or another tool selected.
+    /// brush, eraser or clone stamp (which uses the brush's options). Nil with
+    /// no image open or another tool selected.
     public var brushCursorDiameter: Double? {
-        guard canvas != nil, tool == .brush || tool == .eraser else { return nil }
+        guard canvas != nil, tool == .brush || tool == .eraser || tool == .clone else { return nil }
         return toolOptions.size
     }
 
