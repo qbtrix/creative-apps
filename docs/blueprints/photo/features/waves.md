@@ -10,10 +10,10 @@ the same file. Each packet lists its tasks, owned files and acceptance tests.
 | wave | feature | PV | packet | covers | tier | waits on (this repo) | waits on (creative-core) | feature issue |
 |---|---|---|---|---|---|---|---|---|
 | 0 | The seams: contracts, fakes, services, state, routing, file splits | PV-0 | `photo-seams.md` | – | p1 (by dependency) | nothing | nothing | filed after this packet PR merges |
-| 0 | Shared journey helpers | PV-0 (journey part) | `photo-journey-kit.md` | – | p1 (by dependency) | #778 (suite-harness: SH-7 closes #333) | nothing | file when ready |
-| 1 | Save and reopen with layers, Open Recent, unsaved state, recovery | PV-1 | `photo-documents.md` | – | p1 | photo-seams, photo-journey-kit | nothing | file when ready |
-| 1 | Cut, Copy, Paste, Duplicate, Merge Down, Flatten | PV-2 | `photo-edit.md` | – | p1 | photo-seams, photo-journey-kit | nothing | file when ready |
-| 1 | Typed crop size and aspect lock; the perf journeys | PV-3 | `photo-crop.md` | #544 | p1 | photo-seams, photo-journey-kit | nothing | file when ready |
+| 0 | Shared journey helpers | PV-0 (journey part) | `photo-journey-kit.md` | – | p1 (by dependency) | #333 (QH-4; suite-harness #778 closes it with task SH-7) | nothing | file when ready |
+| 1 | Save and reopen with layers, Open Recent, unsaved state, recovery | PV-1 | `photo-documents.md` | – | p1 | photo-seams (journey tasks only: photo-journey-kit) | nothing | file when ready |
+| 1 | Cut, Copy, Paste, Duplicate, Merge Down, Flatten | PV-2 | `photo-edit.md` | – | p1 | photo-seams (journey tasks only: photo-journey-kit) | nothing | file when ready |
+| 1 | Typed crop size and aspect lock; the perf journeys | PV-3 | `photo-crop.md` | #544 | p1 | photo-seams (journey tasks only: photo-journey-kit) | nothing | file when ready |
 | 2 | Adjustment layers | PV-6 | `photo-adjustment-layers.md` | #580 | p1 | photo-edit (hands over `PhotoCommands+Layer.swift`) | nothing (CR-5 optional) | file when ready |
 
 The blueprint's PV-0 is two features here: its journey part (moving
@@ -36,11 +36,18 @@ issue exists, so filing earlier would only start leads that stop.
 | feature | title | tier | file when these are closed | `Depends on:` line |
 |---|---|---|---|---|
 | photo-seams | Feature: photo-seams | p1 | nothing (file after this packet PR merges) | `Depends on: none` |
-| photo-journey-kit | Feature: photo-journey-kit | p1 | #778 (suite-harness) | `Depends on: #778 (suite-harness)` |
-| photo-documents | Feature: photo-documents | p1 | photo-seams' issue, photo-journey-kit's issue | `Depends on: #<photo-seams>, #<photo-journey-kit>` |
-| photo-edit | Feature: photo-edit | p1 | photo-seams' issue, photo-journey-kit's issue | `Depends on: #<photo-seams>, #<photo-journey-kit>` |
-| photo-crop | Feature: photo-crop | p1 | photo-seams' issue, photo-journey-kit's issue | `Depends on: #<photo-seams>, #<photo-journey-kit>` |
+| photo-journey-kit | Feature: photo-journey-kit | p1 | #333 (closed by suite-harness SH-7) | `Depends on: #333 (QH-4 journey files)` |
+| photo-documents | Feature: photo-documents | p1 | photo-seams' issue | `Depends on: #<photo-seams> (photo-seams)` |
+| photo-edit | Feature: photo-edit | p1 | photo-seams' issue | `Depends on: #<photo-seams> (photo-seams)` |
+| photo-crop | Feature: photo-crop | p1 | photo-seams' issue | `Depends on: #<photo-seams> (photo-seams)` |
 | photo-adjustment-layers | Feature: photo-adjustment-layers | p1 | photo-edit's issue | `Depends on: #<photo-edit>` |
+
+A wave-1 feature does not wait on photo-journey-kit as a whole: only its
+journey tasks (D-11, D-12, E-9, E-10, CP-5, CP-7) use the kit's helper, and
+each packet tells the lead to build everything else first and, if the kit
+is still open then, record the wait and keep its heartbeat until it closes
+(blueprint 4.1: the model and view tasks don't wait on #333). The kit itself
+waits only on #333, not on the rest of suite-harness.
 
 The three wave-1 features run side by side: their owned files are disjoint
 (checked in "Files across the waves").
@@ -49,7 +56,7 @@ The three wave-1 features run side by side: their owned files are disjoint
 
 | need | where | who makes it | until then |
 |---|---|---|---|
-| A second Photo journey file compiles (#333 QH-4) | `project.yml`, `UITests/Journey.swift` | suite-harness #778, task SH-7 | photo-journey-kit waits; every wave-1 feature waits on the kit |
+| A second Photo journey file compiles (#333 QH-4) | `project.yml`, `UITests/Journey.swift` | suite-harness #778, task SH-7 | photo-journey-kit waits on #333; the wave-1 journey tasks wait on the kit |
 | Save status in `EditorTopBar` (#339 S6) | `Sources/SuiteUI/EditorTopBar.swift` | editor-chrome EC-4 (SuiteUI wave 2, filed after #778) | photo-documents shows a plain label; the swap is a `line:photo` follow-up |
 | Status pills, warning pill (#340 S7) | `Sources/SuiteUI/ViewerStatusBar.swift` | editor-chrome EC-6 | photo-seams uses today's `statusPill(.warning)` for "Preview data" |
 | `LayerList` with a leading symbol and trailing accessory | `Sources/SuiteUI/LayerList.swift` | lists-and-layers LL-5 plus a new `needs-ui` issue photo-seams' lead files | photo-adjustment-layers keeps today's `List` rows with the symbol |
@@ -67,7 +74,7 @@ No feature here edits `Sources/SuiteUI/**`, `project.yml`,
   because each app task needs the Model types before it (packet, Tasks).
 - **The kit beside it.** It touches only `UITests/PhotoJourneyTests.swift`
   and its new `+Fixtures` file, which photo-seams never touches, and it
-  needs #778 rather than any seam.
+  needs #333 rather than any seam.
 - **Every p1 next** (`docs/priorities.md`: nothing `p2` starts on a line
   while a `p1` is open and unblocked). photo-documents, photo-edit and
   photo-crop are independent. photo-adjustment-layers shares
@@ -125,7 +132,7 @@ No feature here edits `Sources/SuiteUI/**`, `project.yml`,
 | Merge Down and Flatten call the per-layer hook | photo-seams note 2, photo-edit note 2, photo-adjustment-layers note 1 |
 | 8.3 unowned needs before wave 3 | (1) photo-seams note 3 (`hover` from `onPointer`); (2) and (3) below, "Later waves" |
 | PV-5 could run in wave 3 | "Later waves" |
-| `docs/design.md` and `docs/priorities.md` edits have no owner | the supervisor owns both, with the C4 and look sections it folds in; #544 and #580 were relabelled `p1` when this packet PR was opened |
+| `docs/design.md` and `docs/priorities.md` edits have no owner | the supervisor owns both, with the C4 and look sections it folds in; #544 and #580 relabelled from `p2` to `p1` (blueprint question 2) when this packet PR was opened |
 | PJ-7's error state; failed save has no journey | photo-edit note 3 (`-PhotoFixture layered`); photo-documents PJ-1b |
 | QB-F2 has no number or test | each packet's quality table: `PhotoDragRoutingTests.refusalIsImmediate`, `PhotoCropSizeTests.dragUpdatesEveryEvent` (PB-8), `PhotoDocumentFileTests.statusFollowsEdits`, `PhotoClipboardTests.nothingToCopyIsImmediate`, `PhotoAdjustmentLayerTests.adjustDamagesAtOnce` |
 | Schedule risk: #333, CR-1 to CR-4, CR-2 | #333 is photo-journey-kit's wait; CR items, "Later waves" |
@@ -144,11 +151,11 @@ No feature here edits `Sources/SuiteUI/**`, `project.yml`,
 | wave | feature | covers | waits on | notes from the review |
 |---|---|---|---|---|
 | 3 | PV-4 history tab and brush cursor | #644, #588 | waves 1 and 2 | draws the ring from photo-seams' `hover`, so it owns `BrushCursorOverlay.swift` and never `PhotoEditor.swift` |
-| 3 | PV-7 transform and flip | – (a `gap` issue filed with its packet) | waves 1 and 2; creative-core CR-1 | CR-2 (an exact flip) is a pixel copy small enough to live in Photo's `Live/LiveTransform.swift`, so only CR-1 waits on core. Its single-layer preview (PB-10) needs a render file and a canvas file; its packet takes `M/PhotoLayerComposite.swift` (free after PV-6) and `A/TransformOverlay.swift`, and draws the preview from the layer's own tiles there, so no other wave-3 feature is touched |
+| 3 | PV-7 transform and flip | – (a `gap` issue filed with its packet) | waves 1 and 2; creative-core CR-1 | CR-2 (an exact flip) is a pixel copy small enough to live in Photo's `Live/LiveTransform.swift`, so only CR-1 waits on core. Its single-layer preview (PB-10) needs a render file and a canvas file; its packet adds its own `M/PhotoTransformPreview.swift` (the layer's picture for the preview, from its own tiles) and draws it in `A/TransformOverlay.swift` (its own), so it never takes `M/PhotoLayerComposite.swift`, which goes to PV-5 |
 | 3 | PV-8 export size, TIFF, HEIC | – (a `gap` issue) | waves 1 and 2 | photo-documents routes Save through `ImageFormat(fileName:)`, so adding `.tiff` and `.heic` in `PhotoImageFile.swift` makes them writable with no edit to `PhotoDocumentFile.swift` or `PhotoWindow+File.swift` |
 | 3 | PV-9 eyedropper | – (a `gap` issue) | waves 1 and 2 | – |
 | 3 | PV-10 polish | #79, #252, #253, #289; moves #255, #586 to SuiteUI | waves 1 and 2 | – |
-| 3 (was 4) | PV-5 selections and masks | #421 | photo-adjustment-layers; creative-core CR-3, CR-4 | it shares no file with the other wave-3 features, so it need not wait for all of wave 3; masks rank earliest in the course outlines |
+| 3 (was 4) | PV-5 selections and masks | #421 | photo-adjustment-layers; creative-core CR-3, CR-4 | it shares no file with the other wave-3 features once PV-7 keeps its preview in its own files (row above), so it need not wait for all of wave 3; masks rank earliest in the course outlines. The wave-3 packets must re-check this with a script over their task tables |
 
 The PV-1, PV-2, PV-7, PV-8 and PV-9 `gap` issues of blueprint 8.1 are not
 filed: each feature issue here (or its later packet) stands for that work,
@@ -156,7 +163,55 @@ and a second issue per feature would be a duplicate.
 
 ## Critic round
 
-(Filled in after the critic pass below.)
+One read-only critic agent tried to refute the six packets: task size, owned
+files overlapping within a wave or inside a feature without a chain, the
+shared-file rule and protected paths, tests that can't fail, closed or
+duplicate issues, facts against `dev`, and the review notes of #768. It found
+5 blocking, 12 major and 13 minor problems; all are fixed in the packets.
+
+| # | sev. | finding | fix |
+|---|---|---|---|
+| 1 | blocking | S-6a's `.eyedropper` breaks switches in `PhotoStroke.swift`, `PhotoIntent.swift` and `PhotoPanel.swift` it didn't own | S-6a owns those three files, adds empty arms and the fallback help "Not built yet (PV-9)." |
+| 2 | blocking | `LiveServicesTests` asserted every `.live` member is `NotBuilt`, so each wave-1 feature would break a file only photo-seams owns | it asserts "nil, or exactly that member's NotBuilt text" |
+| 3 | blocking | no file outside `PhotoWorkspace.swift` could make a layer id (paste, duplicate, adjustment layers, fixtures, a loaded document) | S-6a makes `insertLayer` internal and adds `reserveLayerIDs(after:)`; D-3, E-3, AL-3 test fresh ids |
+| 4 | blocking | photo-documents needed `@State` and modifiers on `PhotoWindow.swift`, which no wave-1 feature owns | S-8a gives every area an identity `ViewModifier` in its own file; photo-documents keeps all its window state in `PhotoFileArea` |
+| 5 | blocking | S-10b changed `StrokePacer`'s moves, built in `PhotoWindow.swift`, which it didn't own | S-10b owns `PhotoWindow.swift` (in the chain) |
+| 6 | major | S-6a used `currentStepID` (S-6b) and tested `isDirty` (owned by no task) | `isDirty` and the `savedStepID` line move to S-6b |
+| 7 | major | S-7b's geometry-hook calls sat in files it didn't own | the hook is declared in S-6a (delete calls it); S-7c calls it from Apply Crop; S-7b from Image Size, Rotate, Straighten |
+| 8 | major | S-8a named intent types from files S-8b creates | S-8a creates all nine area files as stubs |
+| 9 | major | the rail reads `PaletteTool.unavailableHelp` from the enum, so the Eyedropper would look enabled on `.live`; S-7a dropped the live check | `PhotoRailTool` (S-10a) carries `toolHelp`; "I" doesn't pick a disabled tool; S-7a keeps "acts or has help" on `.live` |
+| 10 | major | waves.md gave `PhotoLayerComposite.swift` to PV-5 and PV-7 in one wave | PV-7's preview goes in its own `M/PhotoTransformPreview.swift` |
+| 11 | major | PJ-1b's flat save never reached the locked folder | the journey adds a layer first, so Save writes a new document there |
+| 12 | major | waves.md said #544 and #580 were already `p1` | relabelled when the PR was opened |
+| 13 | major | the kit waited on all of #778 and every wave-1 feature on the kit | the kit waits on #333; wave-1 features depend on photo-seams only, and only their journey tasks wait on the kit |
+| 14 | major | S-7a weighted only Delete and Fill by the selection, not the dabs, leaving PV-5 to edit unowned files | new S-7c routes every dab, Delete and Fill through `selectionCoverage` |
+| 15 | major | Apply Crop's `.defaultAction` would apply the crop on Return in a crop field | CP-4 removes it; PJ-8 asserts the crop stays pending |
+| 16 | major | an opened PNG had no file kind once `start()` reset it | D-3 adds `openImage`, which sets it; the window opens through it |
+| 17 | major | `AdjustmentSettings` isn't `Codable` and its file is frozen after S-6a | S-6a adds `Codable` |
+| 18 | minor | PB-20's 16 ms debug gate read as converting pixels on the main actor | it is the copy-on-write value copy; conversion runs off main |
+| 19 | minor | 16,000,000 paste cap against the 16,777,216 open limit, rounding past it | `maxOpenPixels`, sides rounded down: 5016 × 3344, "Pasted at 84%." |
+| 20 | minor | KT-1 counted eleven helper calls | seven |
+| 21 | minor | the blueprint still said `main` 4cac701 in two places | fixed (sections 0.3 and 5) |
+| 22 | minor | S-8a's Return/Escape check belonged to S-10b | moved |
+| 23 | minor | `PhotoMenu` already carries the workspace; the flat `.selectAll` must stay | S-9 and S-8a say so |
+| 24 | minor | PJ-P3's large document pointed at a fixture on fakes | it writes a 4000 × 3000 photo and saves it |
+| 25 | minor | `PhotoPasteboard` took no pasteboard but its test used a private one | a `pasteboard:` parameter, `.general` by default |
+| 26 | minor | the copy focus rule covered sheets only | also any text view that is first responder |
+| 27 | minor | AL-8's done check named journeys of features it doesn't wait on | "those merged by then" |
+| 28 | minor | three QB-F2 tests appeared only in the quality tables | each is in its task's acceptance |
+| 29 | minor | the `limit` fixture is about 4 GB and unused | left out of S-5 |
+| 30 | minor | E-2 compared a Float merge with the 8-bit render | the render after equals the render before |
+
+Checked clean by the critic: no file owned by two features in one wave and
+no shared file between unchained tasks inside a feature (a script over every
+task table); no task touches `Sources/SuiteUI/**`, `project.yml`,
+`UITests/Journey*`, `AppSnapshotTests.swift`, `docs/c4/model.json`,
+`docs/design.md` or a protected path; every file named as edited or
+unchanged exists; #544, #580, #333, #778, #339, #340 and #273 are open and
+covered once; `CanvasViewport.onPointer`, `statusPill(.warning)`,
+`ScrubField`, `ChoiceChips` and `InspectorAction` exist; the crop, paste,
+history and zip arithmetic holds; Command-J and Command-E are free; no
+product names.
 
 ## The lead contract
 

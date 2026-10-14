@@ -12,9 +12,12 @@ branch:** `lead/photo-documents`
 2 of the usage map.
 
 **Depends on:** photo-seams (contracts, `LiveDocuments.swift` stub,
-`PhotoWindow+File.swift`, `PhotoCommands+File.swift`, `PhotoTopBar.swift`,
-`fileServices(_:)`) and photo-journey-kit (`writeTestPhoto`, a second
-journey file). No creative-core issue: the zip container is pure Swift in
+`PhotoWindow+File.swift` with its `PhotoFileArea` modifier,
+`PhotoCommands+File.swift`, `PhotoTopBar.swift`, `fileServices(_:)`,
+`isDirty`). Only the journey tasks D-11 and D-12 also wait on
+photo-journey-kit (`writeTestPhoto`, a second journey file); if it is still
+open when they come up, the lead records the wait, keeps its heartbeat, and
+builds them once it closes. No creative-core issue: the zip container is pure Swift in
 PhotoModel and PNGs go through the app's `PhotoImageCodec`.
 
 Blueprint sections: 4.2 PJ-1 to PJ-4, 5.1 (documents and recovery
@@ -55,6 +58,22 @@ Unsaved changes, Open failure), 7.1 PB-18 to PB-20, 7.3 PF-1, PF-2, 8.3.
 
 **Decisions (this packet):**
 
+- **Window state lives in the area modifier.** Everything this feature hangs
+  on the window (the Keep layers? dialog, the failed-save flag, the autosave
+  object and its one-second tick, the `noteEdit` call on each
+  `model.revision` change, the restore offer, the close prompt and the
+  window's edited dot through an `NSWindow` accessor) is `@State` and
+  modifiers inside `PhotoFileArea` in `PhotoWindow+File.swift`, which
+  photo-seams applies to the window. `PhotoWindow.swift` is not edited.
+- **`isDirty` is photo-seams'** (S-6b, `PhotoHistory.swift`); this feature
+  only reads it.
+- **An opened flat file knows its kind.** `openImage(_:name:codec:)` in
+  `PhotoDocumentFile.swift` opens through today's `open` and sets
+  `fileKind = fileKind(forName:)`, so a just-opened PNG saves in place;
+  the window opens through it (D-7).
+- **Adjustments in the JSON** use `AdjustmentSettings`' `Codable`
+  conformance, which photo-seams adds (S-6a).
+
 - **Reading.** Photo reads only documents that carry `photo/document.json`
   (the layer list, kinds, masks, whole-image adjustments, format version).
   `stack.xml` is written for other OpenRaster readers but not parsed back:
@@ -82,7 +101,9 @@ error state per note 3, and one new journey.
    Edit reading "Redo" only.
 2. **PJ-1b `testFailedSaveSaysNotSaved`** (`+Documents`, new): open
    `beach.png` with `-PhotoSaveTo <tmp>/locked` (the test makes the folder
-   and sets it to `0o500`); brush; File > Save, Save as Photo Document.
+   and sets it to `0o500`); Layer > New Layer and brush (so Save asks Keep
+   layers? and writes a new document into the locked folder rather than
+   over `beach.png`); File > Save, Save as Photo Document.
    Assert the alert "The image couldn't be saved: <reason>." with OK, then
    `photo.bar.saved` reads "Not saved" and the window stays edited. Restore
    the folder's permissions in `tearDown`.
@@ -99,8 +120,9 @@ error state per note 3, and one new journey.
    relaunches: no offer, and the file is gone.
 5. **PJ-4 `testOpenBadDocuments`** (`+Documents`): as written (four files,
    four `ArchiveError.message` alerts, the empty state stays).
-6. **PJ-P3 `testOpenLargeDocument`** (`+PerfDocuments`): save `large` (from
-   `-PhotoFixture large` with `.live` documents: see D-8) as a document,
+6. **PJ-P3 `testOpenLargeDocument`** (`+PerfDocuments`): write a 4000 × 3000
+   photo with `writeTestPhoto(to:width:height:)`, open it, add two layers
+   and save as a document (see D-12; `-PhotoFixture large` runs on fakes),
    reopen it; report the "Opening…" mark and main-thread stalls
    (report-only until SuiteUI's FrameProbe #330, in suite-harness).
 
@@ -133,6 +155,8 @@ extension PhotoWorkspace {
     public var needsDocument: Bool
     /// The kind of an opened file: .document for "ora", .image(f) for a name ImageFormat maps, else .readOnly.
     public static func fileKind(forName name: String) -> PhotoFileKind
+    /// Opens a flat file through today's `open` and sets `fileKind` from its name.
+    public mutating func openImage(_ data: Data, name: String, codec: some PhotoImageCodec) throws
 }
 
 // M/PhotoRecovery.swift
@@ -222,13 +246,13 @@ in photo-seams (`M/`, `A/`, `MT/`, `ST/`, `UT/` = `UITests/`).
 |---|---|---|---|---|---|
 | D-1 | – | The stored-entry zip writer and reader with CRC-32 | `M/Live/PhotoZip.swift`, `MT/PhotoContainerTests.swift` | – | ~300, 2 |
 | D-2 | – | `LiveArchive`: encode and decode the document; `LiveDocuments.archive()` returns it | `M/Live/LiveArchive.swift`, `M/Live/LiveDocuments.swift`, `MT/PhotoDocumentRoundTripTests.swift` | D-1 | ~390, 3 |
-| D-3 | – | Workspace side: `snapshot`, `documentPackage`, `openDocument`, `didSave`, `saveAction`, `fileKind(forName:)`, `needsDocument`, `saveStatus` | `M/PhotoDocumentFile.swift`, `MT/PhotoDocumentFileTests.swift` | D-2 | ~330, 2 |
+| D-3 | – | Workspace side: `snapshot`, `documentPackage`, `openDocument` (moving the layer-id counter past the loaded ids with `reserveLayerIDs`), `openImage`, `didSave`, `saveAction`, `fileKind(forName:)`, `needsDocument`, `saveStatus` | `M/PhotoDocumentFile.swift`, `MT/PhotoDocumentFileTests.swift` | D-2 | ~330, 2 |
 | D-4a | – | `autosaveDue`, `recoveryEntry`, `restore`, `RecoveryOffer` text | `M/PhotoRecovery.swift`, `MT/PhotoRecoveryTests.swift` | D-3 | ~220, 2 |
 | D-4b | – | `LiveRecovery` (folder I/O, atomic, damaged files dropped); `LiveDocuments.recovery(directory:)` | `M/Live/LiveRecovery.swift`, `M/Live/LiveDocuments.swift`, `MT/LiveRecoveryTests.swift` | D-4a | ~250, 3 |
 | D-5 | – | Budgets PB-18, PB-19, PB-20 on `large` | `MT/PhotoDocumentsBudgetTests.swift` | D-4b | ~150, 1 |
 | D-6 | – | `PhotoPackageIO`: read and write a document's bytes off the main actor; PF-1 through ImageIO | `A/PhotoPackageIO.swift`, `ST/PhotoPackageIOTests.swift` | D-3 | ~220, 2 |
-| D-7 | – | Save routing, Keep layers?, open `.ora`, open errors, "Not saved", `fileServices` with the recovery folder; Open Recent noted after each open and save | `A/PhotoWindow+File.swift`, `A/PhotoCommands+File.swift` | D-6, D-4b | ~340, 2 |
-| D-8 | – | Save status in the top bar (plain until EC-4), the window's edited dot, the "Saving…" and "Opening…" notes; snapshots | `A/PhotoTopBar.swift`, `ST/PhotoDocumentsSnapshots.swift` | D-7 | ~200, 2 |
+| D-7 | – | Save routing, Keep layers?, open `.ora` and flat files through `openImage`, open errors, "Not saved", `fileServices` with the recovery folder; Open Recent noted after each open and save; all of it inside `PhotoFileArea` | `A/PhotoWindow+File.swift`, `A/PhotoCommands+File.swift` | D-6, D-4b | ~340, 2 |
+| D-8 | – | Save status in the top bar (plain until EC-4), the window's edited dot (from `PhotoFileArea`), the "Saving…" and "Opening…" notes; snapshots | `A/PhotoTopBar.swift`, `A/PhotoWindow+File.swift`, `ST/PhotoDocumentsSnapshots.swift` | D-7 | ~220, 3 |
 | D-9 | – | `PhotoAutosave` (Flare's shape) and its wiring: tick every second, restore offer at launch, discard on a clean close | `A/PhotoAutosave.swift`, `A/PhotoWindow+File.swift`, `ST/PhotoAutosaveTests.swift` | D-8 | ~360, 3 |
 | D-10 | – | App delegate adaptor: Open Recent and Finder opens with no window, the unsaved prompt on close and on Quit | `A/PhotoApp.swift`, `A/PhotoWindow+File.swift`, `ST/PhotoUnsavedPromptTests.swift` | D-9 | ~260, 3 |
 | D-11 | – | Journeys PJ-1, PJ-1b, PJ-2, PJ-4 | `UT/PhotoJourneyTests+Documents.swift` | D-10, photo-journey-kit | ~330, 1 |
@@ -250,10 +274,10 @@ and saves as a document; the perf numbers come from reopening that file.
 |---|---|---|
 | D-1 | `PhotoContainerTests`: a package with `mimetype` and two entries round-trips byte for byte; the first local header's name is `mimetype` at offset 30 and its data `image/openraster` (the OpenRaster rule); CRC-32 of "123456789" is `0xCBF43926`; a flipped data byte gives `.damaged("data/layer-1.png is corrupt")`; `not a zip` gives `.notADocument`; a method-8 entry gives `.damaged` | an entry is reordered or compressed, the CRC is wrong, or bad bytes open |
 | D-2 | `PhotoDocumentRoundTripTests` with an in-memory lossless codec: PF-1 (every layer's 8-bit bytes, masks, kinds, blend, opacity, offsets, visibility, the global adjustments, the selected layer survive exactly); format 2 gives `.newerVersion(2)`; a missing `data/layer-2.png` gives that exact damaged text; a 20 MP layer gives `.tooLarge`; no `photo/document.json` gives its damaged text | a field is lost, or a bad package opens or throws another error |
-| D-3 | `PhotoDocumentFileTests`: `fileKind(forName:)` maps `a.ora`, `a.PNG`, `a.jpeg`, `a.heic` to document, PNG, JPEG, readOnly; `saveAction` is `.askKeepLayers(.png)` after New Layer on an opened PNG and `.writeImage(.png)` with one layer; `didSave` makes `isDirty` false and an undo makes it true; `openDocument` leaves nothing to undo; `compositeSurvives` (PF-2): the composite after reopening is within 1/255 of the one before | Save routes wrong, a just-opened document reads dirty, or the picture drifts past 1/255 |
+| D-3 | `PhotoDocumentFileTests`: `fileKind(forName:)` maps `a.ora`, `a.PNG`, `a.jpeg`, `a.heic` to document, PNG, JPEG, readOnly; `openImage` of `a.png` sets `.image(.png)`; `saveAction` is `.askKeepLayers(.png)` after New Layer on an opened PNG and `.writeImage(.png)` with one layer; `didSave` makes `isDirty` false and an undo makes it true; `openDocument` leaves nothing to undo, and a New Layer after opening a document whose ids reach 40 gets id 41; `statusFollowsEdits` (QB-F2): `saveStatus` reads `.edited` in the same call as an edit and `.saved` after `didSave`; `compositeSurvives` (PF-2): the composite after reopening is within 1/255 of the one before | Save routes wrong, a just-opened document reads dirty, or the picture drifts past 1/255 |
 | D-4a | `PhotoRecoveryTests`: due at exactly `delay` after the last edit and not before; not due when clean, after an autosave of that edit, or with NaN; `recoveryEntry` is nil when clean; `restore` lands 2 layers, dirty, `fileKind == nil`; `RecoveryOffer` text with a fixed `time` is "Restore beach.png from 9:41 AM?" and "Restore the unsaved image from 9:41 AM?" untitled | due early or twice, a clean image autosaves, a restore reads clean |
 | D-4b | `LiveRecoveryTests` in a temp folder: write then `leftBehind` gives the entry; a second write for the same window replaces it; two windows give two entries newest first; `discard(window:)` removes one, `discardAll` all; a `not a zip` file is removed and skipped; the write is atomic (no partial file after a throwing write) | an entry is lost, a damaged file is offered or left, or a partial file appears |
-| D-5 | `PhotoDocumentsBudgetTests`: PB-18 save and PB-19 open of a 3-layer 12 MP document ≤ 2 s release, PB-20 autosave ≤ 2 s release and its main-actor snapshot copy ≤ 16 ms debug (gated in CI) | the debug snapshot copy is over 16 ms, or a release gate is missed locally |
+| D-5 | `PhotoDocumentsBudgetTests`: PB-18 save and PB-19 open of a 3-layer 12 MP document ≤ 2 s release, PB-20 autosave ≤ 2 s release; its main-actor part, copying the `PhotoWorkspace` value (copy-on-write: no pixel is converted on the main actor; `snapshot()` and the encode run off it), ≤ 16 ms debug (gated in CI) | the debug snapshot copy is over 16 ms, or a release gate is missed locally |
 | D-6 | `PhotoPackageIOTests` (macOS): PF-1 through `ImageIOCodec`; the write runs with `Thread.isMainThread == false` inside it; a write into a read-only folder throws and leaves no file | a field changes through ImageIO, the write runs on main, or a failed write leaves a file |
 | D-7 | V5 and V6 green (a one-layer PNG still saves in place with no question); PJ-1 and PJ-4 pass once D-11 lands; the app-state rule passes | a flat one-layer save asks, or a view assigns state |
 | D-8 | `PhotoDocumentsSnapshots`: `photo-unsaved-light.png`, `-dark.png` (the dot and "Edited") and `photo-keep-layers-light.png`, `-dark.png`; every element has a `photo.bar.saved` or `photo.file.*` identifier | a status has no identifier, or the dialog doesn't fit 1024 × 768 |
@@ -268,7 +292,7 @@ and saves as a document; the perf numbers come from reopening that file.
 |---|---|---|
 | PB-18 save, 3-layer 12 MP | ≤ 2 s release, report debug; "Saving…" within 100 ms (report until #330) | `PhotoDocumentsBudgetTests.saveDocument` |
 | PB-19 open the same | ≤ 2 s release, report debug | `PhotoDocumentsBudgetTests.openDocument`, PJ-P3 |
-| PB-20 autosave | ≤ 2 s off main release; snapshot copy on main ≤ 1.6 ms release, ≤ 16 ms debug (gated) | `PhotoDocumentsBudgetTests.autosaveSnapshotCopy` |
+| PB-20 autosave | ≤ 2 s off main release; the workspace value copy on main ≤ 1.6 ms release, ≤ 16 ms debug (gated) | `PhotoDocumentsBudgetTests.autosaveSnapshotCopy` |
 | PF-1 | exact round trip in 8 bits | `PhotoDocumentRoundTripTests`, `PhotoPackageIOTests` |
 | PF-2 | composite within 1/255 after reopening | `PhotoDocumentFileTests.compositeSurvives` |
 | QB-L12 | reads, decodes and writes never on the main thread | `PhotoPackageIOTests.writesOffMain`, `PhotoAutosaveTests.readsOffMain` |

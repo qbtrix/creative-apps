@@ -120,7 +120,7 @@ circle is #588).
   #330 (p3), golden compare #331 (p1), the scale-2 four-appearance host #332
   (p1), the journey file split and input helpers #333 (p1), status pills #340.
   Until #333 lands every Photo journey lives in one file.
-- **creative-core** (`main` 4cac701) CoreRaster has: `PixelBuffer` (Float32,
+- **creative-core** (`dev` 4cac701) CoreRaster has: `PixelBuffer` (Float32,
   linear, premultiplied), `composite` with the 16 blend modes and an integer
   offset (no mask parameter), `Mask` (rectangle, ellipse, polygon; add,
   subtract, intersect, invert; no feather), exposure, levels, curves, the
@@ -662,7 +662,7 @@ views and its logic can be built in parallel (the view on the fake, the
 logic as the live conformance) and meet in `PhotoServices`.
 
 **Checked on Linux.** Every block below was compiled on 2026-10-14, as
-written, inside PhotoModel on dev 956d946 with creative-core `main` 4cac701,
+written, inside PhotoModel on dev 956d946 with creative-core `dev` 4cac701,
 Swift 6.3.3 on Ubuntu 24.04 (`swift build --build-tests`), and the 309
 existing Photo model tests passed with it in place. PV-0's first task lands
 exactly these files and repeats that build.

@@ -123,7 +123,7 @@ public enum PhotoLayerComposite {
 // Sources/PhotoModel/PhotoFixtures.swift (S-5, S-12)
 public enum PhotoFixture: String, CaseIterable, Sendable { case empty, sample, layered, large }
 extension PhotoWorkspace {
-    /// The fixture on `.fake` services (blueprint 4.4); `limit` is test-only.
+    /// The fixture on `.fake` services (blueprint 4.4; `limit` is left out, see S-5).
     public static func fixture(_ name: PhotoFixture) throws -> PhotoWorkspace
 }
 public struct PhotoLaunchOptions: Equatable, Sendable {   // S-12
@@ -140,6 +140,23 @@ extension PhotoWindow {
     static func fileServices(_ live: PhotoServices) -> PhotoServices { live }
 }
 
+// Sources/PhotoApp/PhotoWindow+<Area>.swift (S-8a), one per area; PhotoWindow applies all nine.
+// A feature keeps its own @State, alerts, dialogs and timers inside its area's modifier.
+struct PhotoFileArea: ViewModifier {
+    let model: PhotoWorkspace
+    let perform: (PhotoIntent) -> Void
+    func body(content: Content) -> some View { content }   // identity until photo-documents
+}
+
+// Sources/PhotoApp/PhotoRailTool.swift (S-10a): the rail's tool, carrying model.toolHelp(tool).
+struct PhotoRailTool: PaletteTool { let tool: PhotoTool; let help: String? }
+
+// Sources/PhotoModel/PhotoWorkspace.swift (S-6a)
+extension PhotoWorkspace {
+    mutating func insertLayer(named: String, pixels: TiledPixels?, kind: PhotoLayerKind, at index: Int) -> PhotoLayer.ID
+    mutating func reserveLayerIDs(after maxID: Int)
+}
+
 // Sources/PhotoApp/PhotoCanvasOverlay.swift (S-10b)
 struct PhotoCanvasOverlay: View {
     let model: PhotoWorkspace
@@ -152,16 +169,24 @@ struct PhotoCanvasOverlay: View {
 
 ```
 S-6a  PhotoWorkspace: add the stored v2 properties of 5.3 (services excluded from ==);
-      PhotoLayer: kind, hasMask, isMaskEnabled; AdjustmentSettings: Hashable;
-      PhotoTool gains .eyedropper ("I"); toolHelp(tool) = tool == .eyedropper
-        ? services.sampling.unavailableHelp : tool.unavailableHelp
-      start(): reset selectionMask, masks, editsMask, transformDraft, statusMessage,
-        fileKind; savedStepID = currentStepID
+      PhotoLayer: kind, hasMask, isMaskEnabled; AdjustmentSettings (and CurvePoint): Hashable, Codable
+        (photo-documents writes them into photo/document.json; the file is frozen after this task)
+      PhotoTool gains .eyedropper ("I"); PhotoTool.unavailableHelp gives "Not built yet (PV-9)." for it
+        (the fallback text), so today's PhotoToolsTests still passes; empty .eyedropper arms in the
+        switches of PhotoStroke.swift (:71, :111), PhotoIntent.swift (:41, :53, :65), PhotoPanel.swift (:62)
+      toolHelp(tool) = tool == .eyedropper ? services.sampling.unavailableHelp : tool.unavailableHelp
+      insertLayer(named:pixels: TiledPixels?, kind:at:) and nextLayerNumber made internal;
+        reserveLayerIDs(after: maxID) so a loaded document's ids are never handed out again
+      LayerGeometryChange and layerGeometryChanged(_:_:) declared in a new PhotoMask.swift (empty body);
+        removeLayer calls it with .removed
+      start(): reset selectionMask, masks, editsMask, transformDraft, statusMessage, fileKind
       invariant comment: pixels holds one buffer per *pixel* layer
 
 S-6b  PhotoHistory: nextID counter (never reused); each recorded step carries id;
       currentStepID = undo.last?.id ?? baseStepID; trimming the oldest step sets
         baseStepID = trimmed.id (like baseName)
+      isDirty = canvas != nil && savedStepID != currentStepID (here, not in PV-1's file, so every
+        feature reads one definition); start() sets savedStepID = currentStepID
       new edits .selection(PixelRect?, Mask?), .maskTiles(layer, [Int: PixelBuffer]);
       PhotoStack keeps masks; apply(.layers) guard compares pixel-layer ids only
 
@@ -172,16 +197,27 @@ S-7a  drag(from:to:pressure:modifiers:zoom:) and drags([...], zoom:) are the rea
                      .crop    -> cropDrag (today's code, moved)
                      .eyedropper -> sampleDrag: services.sampling.sample(picture around point)
                                     -> tool options color; never a history step
-                     else today's paint, through paintTarget()
-      paintTarget(): nil + statusMessage "Pick a pixel layer to paint on." on an adjustment layer
-      Delete, Fill weight each pixel by selectionCoverage(x:y:) (1 inside today's rect)
+                     else today's paint
+
+S-7c  paintTarget(): .pixels(id); nil + statusMessage "Pick a pixel layer to paint on." on an
+        adjustment layer; brush, eraser, clone and heal write through it
+      every dab (PhotoStroke, PhotoRetouch), Delete and Fill weight each pixel by
+        selectionCoverage(x:y:) (1 inside today's rect, 1 everywhere with no selection: no change yet)
+      Select All, Deselect and Apply Crop set or clear selectionMask through PhotoSelectionMask.swift;
+        applyCrop calls layerGeometryChanged(id, .cropped(rect)) for each layer
 
 S-7b  PhotoRender: for each visible layer bottom-up: picture = PhotoLayerComposite.composite(...)
-      layerGeometryChanged(id, change) called from crop, Image Size, rotate, straighten,
-      delete; body in PhotoMask.swift is empty
+      Image Size, Rotate and Straighten call layerGeometryChanged for each layer
 
 S-8a  PhotoIntent: case file(FileIntent), edit(EditIntent), crop(CropIntent), history(...),
-      select(...), adjustmentLayer(...), transform(...), export(...), sample(...), confirm, dismiss
+      select(...), adjustmentLayer(...), transform(...), export(...), sample(...), confirm, dismiss;
+      the flat .selectAll case stays (PhotoSelectAllMenuTests matches on it)
+      each PhotoWindow+<Area>.swift (all nine, File and Export included as stubs) declares its area
+        enum, an empty perform switch, and an identity ViewModifier PhotoWindow applies:
+        `struct Photo<Area>Area: ViewModifier { let model: PhotoWorkspace; let perform: (PhotoIntent) -> Void }`
+        so a feature adds its own @State, alerts, dialogs, timers and window hooks inside its area's
+        modifier without editing PhotoWindow.swift (photo-documents: autosave, Keep layers?, the failed-save
+        flag, the close prompt, the edited dot)
       perform(.confirm): if confirmTransform() {} else today's applyCrop
       perform(.dismiss): if dismissTransform() {} else today's cancelCrop / deselect
 ```
@@ -201,29 +237,31 @@ counts twice in the diff, so the split tasks below are sized for that.
 | S-2 | – | Selection, layer and output contracts (5.1, verbatim) | `M/Contracts/SelectionContracts.swift`, `M/Contracts/LayerContracts.swift`, `M/Contracts/OutputContracts.swift`, `MT/PhotoContractsLayerTests.swift` | S-1 | ~300, 4 |
 | S-3 | – | The fakes (5.2), one file per contract file | `M/Fakes/FakeDocuments.swift`, `M/Fakes/FakeEdit.swift`, `M/Fakes/FakeGeometry.swift`, `M/Fakes/FakeOutput.swift`, `MT/PhotoFakesTests.swift` | S-2 | ~340, 5 |
 | S-4 | – | `PhotoServices`, `NotBuilt` stand-ins and the eight `Live/` stubs; `LiveServicesTests` | `M/PhotoServices.swift`, `M/Live/NotBuilt.swift`, `M/Live/LiveDocuments.swift`, `M/Live/LiveEdit.swift`, `M/Live/LiveCrop.swift`, `M/Live/LiveSelection.swift`, `M/Live/LiveAdjustmentLayers.swift`, `M/Live/LiveTransform.swift`, `M/Live/LiveExportSizing.swift`, `M/Live/LiveSampling.swift`, `MT/LiveServicesTests.swift` | S-3 | ~330, 11 |
-| S-6a | – | v2 stored state, layer kinds and mask flags, `AdjustmentSettings: Hashable`, `.eyedropper`, `toolHelp`, `start()` resets, `clearStatus()` | `M/PhotoWorkspace.swift`, `M/PhotoLayer.swift`, `M/AdjustmentSettings.swift`, `MT/PhotoV2StateTests.swift` | S-4 | ~220, 4 |
-| S-6b | – | Step ids, `currentStepID`, `baseStepID`, `.selection` and `.maskTiles` steps, masks in `PhotoStack`, the pixel-layer guard | `M/PhotoHistory.swift`, `MT/PhotoStepIDTests.swift` | S-6a | ~250, 2 |
-| S-5 | – | Fixtures `empty`, `sample`, `layered`, `large`, `limit` built in code | `M/PhotoFixtures.swift`, `MT/PhotoFixturesTests.swift` | S-6b | ~220, 2 |
-| S-7a | – | Drags with modifiers and zoom (old two kept as wrappers); routing by component; `paintTarget()`; selection coverage for Delete and Fill; marquee and crop code moved; the real eyedropper stub; `PhotoToolsTests` reads `toolHelp` and runs every tool on `.fake` | `M/PhotoStroke.swift`, `M/PhotoSelection.swift`, `M/PhotoSelectionMask.swift`, `M/PhotoCropSize.swift`, `M/PhotoTransform.swift`, `M/PhotoEyedropper.swift`, `MT/PhotoToolsTests.swift`, `MT/PhotoDragRoutingTests.swift` | S-5 | ~390, 8 |
-| S-7b | – | `PhotoLayerComposite` hook (review note 2), render through it; `layerGeometryChanged` and its calls | `M/PhotoRender.swift`, `M/PhotoLayerComposite.swift`, `M/PhotoImageOps.swift`, `M/PhotoStraighten.swift`, `M/PhotoMask.swift`, `MT/PhotoLayerCompositeTests.swift` | S-7a | ~260, 6 |
-| S-8a | – | `PhotoIntent` sub-enums, `.confirm` / `.dismiss`, `PhotoWindow` state made internal with the v2 presentation flags, and the area stubs | `A/PhotoIntent.swift`, `A/PhotoWindow.swift`, `A/PhotoWindow+Edit.swift`, `A/PhotoWindow+Crop.swift`, `A/PhotoWindow+History.swift`, `A/PhotoWindow+Select.swift`, `A/PhotoWindow+AdjustmentLayer.swift`, `A/PhotoWindow+Transform.swift`, `A/PhotoWindow+Sample.swift` | S-7b | ~330, 9 |
+| S-6a | – | v2 stored state, layer kinds and mask flags, `AdjustmentSettings: Hashable, Codable`, `.eyedropper` with its empty arms and fallback help, `toolHelp`, internal `insertLayer` and `reserveLayerIDs`, the geometry hook's declaration, `start()` resets, `clearStatus()` | `M/PhotoWorkspace.swift`, `M/PhotoLayer.swift`, `M/AdjustmentSettings.swift`, `M/PhotoMask.swift`, `M/PhotoStroke.swift`, `A/PhotoIntent.swift`, `A/PhotoPanel.swift`, `MT/PhotoV2StateTests.swift` | S-4 | ~300, 8 |
+| S-6b | – | Step ids, `currentStepID`, `baseStepID`, `isDirty`, `savedStepID` set by `start()`, `.selection` and `.maskTiles` steps, masks in `PhotoStack`, the pixel-layer guard | `M/PhotoHistory.swift`, `MT/PhotoStepIDTests.swift` | S-6a | ~270, 2 |
+| S-5 | – | Fixtures `empty`, `sample`, `layered`, `large` built in code (the blueprint's test-only `limit`, about 4 GB of Float32, is left out; no packet test uses it) | `M/PhotoFixtures.swift`, `MT/PhotoFixturesTests.swift` | S-6b | ~200, 2 |
+| S-7a | – | Drags with modifiers and zoom (old two kept as wrappers); routing by component; marquee and crop drags moved; the real eyedropper stub; `PhotoToolsTests` reads `toolHelp` and runs every tool on `.fake` | `M/PhotoStroke.swift`, `M/PhotoSelectionMask.swift`, `M/PhotoCropSize.swift`, `M/PhotoTransform.swift`, `M/PhotoEyedropper.swift`, `MT/PhotoToolsTests.swift`, `MT/PhotoDragRoutingTests.swift` | S-5 | ~340, 7 |
+| S-7c | – | `paintTarget()`; every dab, Delete and Fill weighted by `selectionCoverage`; Select All, Deselect and Apply Crop through `PhotoSelectionMask.swift`; Apply Crop calls the geometry hook | `M/PhotoStroke.swift`, `M/PhotoRetouch.swift`, `M/PhotoSelection.swift`, `M/PhotoSelectionMask.swift`, `MT/PhotoPaintTargetTests.swift` | S-7a | ~260, 5 |
+| S-7b | – | `PhotoLayerComposite` hook (review note 2), render through it; Image Size, Rotate and Straighten call the geometry hook | `M/PhotoRender.swift`, `M/PhotoLayerComposite.swift`, `M/PhotoImageOps.swift`, `M/PhotoStraighten.swift`, `MT/PhotoLayerCompositeTests.swift` | S-7c | ~240, 5 |
+| S-8a | – | `PhotoIntent` sub-enums, `.confirm` / `.dismiss`, `PhotoWindow` state made internal with the v2 presentation flags; all nine area files as stubs, each with its identity area modifier applied by `PhotoWindow` | `A/PhotoIntent.swift`, `A/PhotoWindow.swift`, `A/PhotoWindow+File.swift`, `A/PhotoWindow+Export.swift`, `A/PhotoWindow+Edit.swift`, `A/PhotoWindow+Crop.swift`, `A/PhotoWindow+History.swift`, `A/PhotoWindow+Select.swift`, `A/PhotoWindow+AdjustmentLayer.swift`, `A/PhotoWindow+Transform.swift`, `A/PhotoWindow+Sample.swift` | S-7b | ~380, 11 |
 | S-8b | – | Today's open, save and export moved into their area files; `fileServices(_:)` (review note 4) | `A/PhotoWindow.swift`, `A/PhotoWindow+File.swift`, `A/PhotoWindow+Export.swift` | S-8a | ~300, 3 |
-| S-9 | – | The menu bar split per menu; `PhotoMenu` carries the workspace value | `A/PhotoCommands.swift`, `A/PhotoCommands+File.swift`, `A/PhotoCommands+Edit.swift`, `A/PhotoCommands+Select.swift`, `A/PhotoCommands+Image.swift`, `A/PhotoCommands+Layer.swift`, `A/PhotoCommands+View.swift` | S-8b | ~380, 7 |
-| S-10a | – | Top bar and status line out of `PhotoEditor`; the status line shows `statusMessage` | `A/PhotoEditor.swift`, `A/PhotoTopBar.swift`, `A/PhotoStatusLine.swift`, `ST/PhotoEditorSnapshots.swift` | S-9 | ~300, 4 |
-| S-10b | – | The overlay files (identified marks, review note 1), `hover` from `onPointer` (note 3), Return and Escape as `.confirm` and `.dismiss`, `StrokePacer` passes modifiers per event | `A/PhotoEditor.swift`, `A/PhotoCanvasOverlay.swift`, `A/CropOverlay.swift`, `A/SelectionOverlay.swift`, `A/TransformOverlay.swift`, `A/BrushCursorOverlay.swift`, `A/StrokePacer.swift`, `ST/PhotoStrokePacerTests.swift` | S-10a | ~340, 8 |
-| S-11a | – | Panel split, part 1: the Adjust tab and the tool options out of `PhotoPanel` | `A/PhotoPanel.swift`, `A/PhotoAdjustTab.swift`, `A/PhotoToolOptions.swift`, `A/CropOptions.swift`, `A/SelectOptions.swift`, `A/TransformOptions.swift`, `A/SampleOptions.swift`, `ST/PhotoProInspectorSnapshots.swift` | S-10b | ~360, 8 |
+| S-9 | – | The menu bar split per menu (`PhotoMenu` already carries the workspace value; each menu file reads it) | `A/PhotoCommands.swift`, `A/PhotoCommands+File.swift`, `A/PhotoCommands+Edit.swift`, `A/PhotoCommands+Select.swift`, `A/PhotoCommands+Image.swift`, `A/PhotoCommands+Layer.swift`, `A/PhotoCommands+View.swift` | S-8b | ~380, 7 |
+| S-10a | – | Top bar and status line out of `PhotoEditor`; the status line shows `statusMessage`; the rail reads `toolHelp` through an app-side `PaletteTool` wrapper (`PhotoRailTool`), and the "I" key never selects a disabled tool | `A/PhotoEditor.swift`, `A/PhotoTopBar.swift`, `A/PhotoStatusLine.swift`, `A/PhotoRailTool.swift`, `ST/PhotoEditorSnapshots.swift` | S-9 | ~340, 5 |
+| S-10b | – | The overlay files (identified marks, review note 1), `hover` from `onPointer` (note 3), Return and Escape as `.confirm` and `.dismiss`, `StrokePacer` passes modifiers per event (and the window's call that builds its moves) | `A/PhotoEditor.swift`, `A/PhotoWindow.swift`, `A/PhotoCanvasOverlay.swift`, `A/CropOverlay.swift`, `A/SelectionOverlay.swift`, `A/TransformOverlay.swift`, `A/BrushCursorOverlay.swift`, `A/StrokePacer.swift`, `ST/PhotoStrokePacerTests.swift` | S-10a | ~360, 9 |
+| S-11a | – | Panel split, part 1: the Adjust tab and the tool options out of `PhotoPanel`; the crop's Apply and Cancel buttons move into `CropOptions.swift` unchanged | `A/PhotoPanel.swift`, `A/PhotoAdjustTab.swift`, `A/PhotoToolOptions.swift`, `A/CropOptions.swift`, `A/SelectOptions.swift`, `A/TransformOptions.swift`, `A/SampleOptions.swift`, `ST/PhotoProInspectorSnapshots.swift` | S-10b | ~360, 8 |
 | S-11b | – | Panel split, part 2: the Layers tab out; `PhotoHistoryTab` stub (not shown until PV-4) | `A/PhotoPanel.swift`, `A/PhotoLayersTab.swift`, `A/PhotoHistoryTab.swift`, `ST/PhotoLayerRowSnapshots.swift` | S-11a | ~260, 4 |
 | S-12 | – | Launch arguments `-PhotoFixture`, `-PhotoWindowWidth`; `.fake` under a fixture; the "Preview data" pill | `M/PhotoFixtures.swift`, `MT/PhotoLaunchOptionsTests.swift`, `A/PhotoApp.swift`, `A/PhotoWindow.swift`, `A/PhotoStatusLine.swift`, `ST/PhotoSeamsSnapshots.swift` | S-11b | ~240, 6 |
 | S-13 | – | Budgets PB-2 (clone, heal dab) and PB-9 (move drag) on `large`; PB-2's event-to-picture series | `MT/PhotoBudgetTests.swift`, `ST/PhotoBrushLatencyTests.swift` | S-12 | ~200, 2 |
 
-Chains: S-1 → S-2 → S-3 → S-4 → S-6a → S-6b → S-5 → S-7a → S-7b (each needs
-the types before it); S-8a → S-8b → S-9 → S-10a → S-10b → S-11a → S-11b →
-S-12 share `PhotoWindow.swift`, `PhotoEditor.swift`, `PhotoPanel.swift` or
-`PhotoStatusLine.swift` in turn. S-8a starts after S-7b because the window
-calls the new `drag` and intents. S-13 is last and carries `feature-done`.
-The two chains are one line here because every app task needs the Model
-types; a lead may run S-13's Model half in parallel with the app chain once
-S-7b has merged (it owns no file of that chain).
+Chains: S-1 → S-2 → S-3 → S-4 → S-6a → S-6b → S-5 → S-7a → S-7c → S-7b
+(each needs the types before it; S-6a, S-7a and S-7c share
+`PhotoStroke.swift`, S-6a shares `PhotoIntent.swift` and `PhotoPanel.swift`
+with S-8a and S-11a later in the line); S-8a → S-8b → S-9 → S-10a → S-10b →
+S-11a → S-11b → S-12 share `PhotoWindow.swift`, `PhotoEditor.swift`,
+`PhotoPanel.swift` or `PhotoStatusLine.swift` in turn. S-8a starts after
+S-7b because the window calls the new `drag` and intents. S-13 is last and
+carries `feature-done`; a lead may run its Model half beside the app chain
+once S-7b has merged (it owns no file of that chain).
 
 **Lead step, no PR:** after S-4 merges, the lead files the four `needs-ui`
 issues of blueprint 6.3 that don't exist yet (each labelled `needs-ui` and
@@ -239,18 +277,19 @@ accessory on `LayerList` rows (lists-and-layers' LL-5). #339 and #340 exist.
 | S-1 | `PhotoContractsTests`: `ArchiveError.message` gives the four texts of PJ-4 exactly; `CropAspect.presets` titles are Free, Original, 1:1, 3:2, 4:3, 16:9; `PhotoRefusal("x") == PhotoRefusal("x")`; `DragModifiers([.shift, .option])` contains both | a text, title or option differs from 5.1 |
 | S-2 | `PhotoContractsLayerTests`: `SelectionCombine([.shift]) == .add`, `([.option]) == .subtract`, `([]) == .replace`, Shift wins over both; `SampleSize` titles; `LayerTransform.identity` is all 1 and 0; `ExportOptions()` is PNG, 0.9, 100 % | a default or mapping differs from 5.1 |
 | S-3 | `PhotoFakesTests`: every fake's `unavailableHelp` is nil; `FakeArchive` round-trips a snapshot through `encode`, `container`, `package(fromContainer:)`, `decode`, and a second instance does not see the first's snapshot; `FakeSampling` gives (255, 204, 0); `FakeAdjustmentLayers` changes a gray pixel | a fake is unavailable, shares state across instances, or changes nothing a journey sees |
-| S-4 | `LiveServicesTests`: no member of `.live` is a type whose name starts with `Fake`; every member's `unavailableHelp` is "Not built yet (PV-n)." with the right n; `PhotoServices.fake` read twice gives two different `FakeArchive` instances (`!==`) | `.live` holds a fake, a help text names the wrong feature, or `.fake` shares instances |
-| S-6a | `PhotoV2StateTests`: a new workspace is `.live`; `toolHelp(.eyedropper)` is "Not built yet (PV-9)." on `.live` and nil on `.fake`; `newCanvas` then `open` resets every v2 field; `isDirty` is false right after `newCanvas` and with no canvas; two workspaces differing only in `services` are `==` | a v2 field survives `start()`, a new image reads dirty, or `services` takes part in `==` |
-| S-6b | `PhotoStepIDTests`: edit, undo, edit gives a `currentStepID` never seen before; 51 edits then 50 undos leave `currentStepID != 0` (the trim moved `baseStepID`); a `.selection` step undoes the selection; `.layers` undo works with a layer that has no pixels entry (an adjustment layer built in the test) | an id repeats, undo-all after a trim reads as the base, or layer-list undo is a no-op with an adjustment layer |
+| S-4 | `LiveServicesTests`: no member of `.live` is a type whose name starts with `Fake`; each member's `unavailableHelp` is either nil or exactly "Not built yet (PV-n)." with that member's n (archive and recovery PV-1, clipboard and merging PV-2, crop PV-3, selection and masking PV-5, adjustment layers PV-6, transform PV-7, export sizing PV-8, sampling PV-9), and the test prints which are still `NotBuilt`; `PhotoServices.fake` read twice gives two different `FakeArchive` instances (`!==`) | `.live` holds a fake, a help text names the wrong feature, or `.fake` shares instances (it keeps passing as each feature replaces its stand-in) |
+| S-6a | `PhotoV2StateTests`: a new workspace is `.live`; `toolHelp(.eyedropper) == services.sampling.unavailableHelp` on `.live` and nil on `.fake`; `newCanvas` then `open` resets every v2 field; two workspaces differing only in `services` are `==`; `reserveLayerIDs(after: 40)` makes the next `insertLayer` id 41; `AdjustmentSettings` round-trips through `JSONEncoder` and `JSONDecoder` equal; deleting a layer calls `layerGeometryChanged(_, .removed)` once (a counting test hook); every existing Photo model test passes unchanged | a v2 field survives `start()`, a loaded id can repeat, settings don't round-trip, or `services` takes part in `==` |
+| S-6b | `PhotoStepIDTests`: edit, undo, edit gives a `currentStepID` never seen before; 51 edits then 50 undos leave `currentStepID != 0` (the trim moved `baseStepID`); `isDirty` is false right after `newCanvas`, after `open` and with no canvas, true after an edit, false after undoing it; a `.selection` step undoes the selection; `.layers` undo works with a layer that has no pixels entry (an adjustment layer built in the test) | an id repeats, undo-all after a trim reads as the base, a new image reads dirty, or layer-list undo is a no-op with an adjustment layer |
 | S-5 | `PhotoFixturesTests`: `sample` is 800 × 600 with the sun's center pixel yellow and (10, 10) blue; `layered` has 3 layers top first Paint (Multiply, 60 %, masked), Curves 1 (adjustment), Background; `large` is 4000 × 3000 with 3 layers; every fixture runs on `.fake` | a fixture's size, layer order or kinds differ from 4.4 |
-| S-7a | `PhotoToolsTests` (edited): on `.fake` each tool's drag on `sample` changes the workspace; on `.live` a tool with `toolHelp != nil` exists only if its help is non-empty. `PhotoDragRoutingTests`: a Shift-drag reaches `selectionDrag` with `.shift`; the wrapper with `sampling: true` equals a drag with `[.option]`; a brush drag on an adjustment layer leaves pixels unchanged and sets "Pick a pixel layer to paint on."; the eyedropper drag adds no history step. Every existing Photo model test passes unchanged | a tool is dead on `.fake`, a modifier is dropped, or an old test needed an edit |
-| S-7b | `PhotoLayerCompositeTests`: `PhotoRenderer.render` of `sample` and of a 3-layer stack equals the image from before the change bit for bit (stored as the reference from today's code in the test); `composite` of an adjustment layer returns `below` unchanged; Crop calls `layerGeometryChanged` once per layer (a counting test hook) | the render changes by one bit, or a geometry change skips a layer |
-| S-8a | `scripts/ci` app-state rule passes; V1–V12 green on the next macOS run (the window still routes every v1 intent); Return applies a pending crop and Escape cancels it in V7 and V9 | an existing journey breaks, or a view assigns model state |
+| S-7a | `PhotoToolsTests` (edited): on `.fake` each tool's drag on `sample` changes the workspace; on `.live` each tool either changes the workspace or has a non-empty `toolHelp`. `PhotoDragRoutingTests`: a Shift-drag reaches `selectionDrag` with `.shift`; the wrapper with `sampling: true` equals a drag with `[.option]`; the eyedropper drag adds no history step. Every existing Photo model test passes unchanged | a tool is dead on either services, a modifier is dropped, or an old test needed an edit |
+| S-7c | `PhotoPaintTargetTests`: `refusalIsImmediate` (QB-F2), a brush drag on an adjustment layer leaves pixels unchanged and `statusMessage` reads "Pick a pixel layer to paint on." after that one call; with `selectionCoverage` forced to 0 outside a test rect (a test hook), brush, eraser, clone and heal dabs and Fill change no pixel outside it; with no selection every existing brush, eraser, clone, heal and fill test passes unchanged; Apply Crop calls `layerGeometryChanged` once per layer | a dab ignores the coverage, a refusal is late, or today's paint changes |
+| S-7b | `PhotoLayerCompositeTests`: `PhotoRenderer.render` of `sample` and of a 3-layer stack equals the image from before the change bit for bit (stored as the reference from today's code in the test); `composite` of an adjustment layer returns `below` unchanged; Image Size, Rotate and Straighten call `layerGeometryChanged` once per layer | the render changes by one bit, or a geometry change skips a layer |
+| S-8a | `scripts/ci` app-state rule passes; V1–V12 green on the next macOS run (the window still routes every v1 intent, each area modifier is the identity); `PhotoSelectAllMenuTests` unchanged and passing | an existing journey breaks, or a view assigns model state |
 | S-8b | V5, V6 (open, paint, save, Save As) and the export step of V2 green on the next macOS run; `fileServices` returns its argument | open, save or export behaves differently |
 | S-9 | V4 (every menu opens) green; each menu's item titles, shortcuts and enabled states equal today's (`PhotoSelectAllMenuTests` unchanged and passing) | a menu item moves, loses its shortcut or its disabled state |
-| S-10a | `PhotoEditorSnapshots` PNGs unchanged (named in the PR); with `statusMessage` set, a new snapshot `photo-status-message-dark.png` shows it left of the pills | the shell's look changes, or the message doesn't show |
-| S-10b | `PhotoStrokePacerTests` (edited): a frame's events keep their own modifiers; a crop pending shows an element `photo.canvas.crop` that is not a button (a snapshot-host accessibility check); `hover` is nil after the pointer leaves | a modifier is merged across events, a mark is a control or has no identifier |
-| S-11a | `PhotoProInspectorSnapshots` and `PhotoAdjustmentsSnapshots` PNGs unchanged; V3 and V11 green | the Adjust tab's look changes |
+| S-10a | `PhotoEditorSnapshots` PNGs unchanged apart from the Eyedropper on the rail (named in the PR); with `statusMessage` set, a new snapshot `photo-status-message-dark.png` shows it left of the pills; a unit test that `PhotoRailTool(.eyedropper)` on `.live` reports the sampling help and on `.fake` nil | the shell's look changes, the message doesn't show, or the rail enables the eyedropper on `.live` |
+| S-10b | `PhotoStrokePacerTests` (edited): a frame's events keep their own modifiers; a crop pending shows an element `photo.canvas.crop` that is not a button (a snapshot-host accessibility check); `hover` is nil after the pointer leaves; V7 and V9 green (Return applies a pending crop, Escape cancels it) | a modifier is merged across events, a mark is a control or has no identifier, or Return and Escape stop working |
+| S-11a | `PhotoProInspectorSnapshots` and `PhotoAdjustmentsSnapshots` PNGs unchanged; V3, V9 and V11 green | the Adjust tab's look changes |
 | S-11b | `PhotoLayerRowSnapshots` PNGs unchanged; V10 green; the History tab is not shown | the Layers tab changes, or an empty History tab appears |
 | S-12 | `PhotoLaunchOptionsTests`: `["-PhotoFixture", "layered"]` gives `.layered`; `"nope"` gives `unknownFixture == "nope"` and no fixture; `-PhotoWindowWidth 500` is ignored (under 880); `PhotoSeamsSnapshots` records `photo-preview-pill-dark.png` | an argument parses wrongly, or fixtures run on `.live` |
 | S-13 | `PhotoBudgetTests`: PB-2 clone and heal 64 px dab ≤ 1 ms median in release (reported in debug), PB-9 move drag ≤ 0.1 ms release (reported in debug), 60 events each on `large`; the latency file adds the clone and heal series | a series has fewer than 60 samples, or a release gate is missed locally |
@@ -262,8 +301,8 @@ accessory on `LayerList` rows (lists-and-layers' LL-5). #339 and #340 exist.
 | PB-2 clone, heal drag event | ≤ 1 ms release, report in debug; ≤ 8 ms event to picture (release p50) | `PhotoBudgetTests.cloneHealDab`, `PhotoBrushLatencyTests` (new series) |
 | PB-9 move drag | ≤ 0.1 ms release, report in debug | `PhotoBudgetTests.moveDrag` |
 | PB-1 brush (regression) | ≤ 3 ms, ≤ 8 ms (existing) | `PhotoBrushLatencyTests.dragBudget` unchanged after S-7a |
-| QB-F1 no dead controls | every tool on `.fake` changes the image; on `.live` a disabled tool has help | `PhotoToolsTests` (S-7a) |
-| QB-F2 live feedback | a refusal reaches `statusMessage` in the same call that refuses | `PhotoDragRoutingTests.refusalIsImmediate` (S-7a) |
+| QB-F1 no dead controls | every tool on `.fake` changes the image; on `.live` each tool acts or has help, and the rail shows that help | `PhotoToolsTests` (S-7a), `PhotoRailTool` test (S-10a) |
+| QB-F2 live feedback | a refusal reaches `statusMessage` in the same call that refuses | `PhotoPaintTargetTests.refusalIsImmediate` (S-7c) |
 | 7.2 audit | no Photo count rises; new marks are identified non-controls | the app audit of the `feature-done` CI run against `UITests/audit-baseline.json` |
 
 ## Done check

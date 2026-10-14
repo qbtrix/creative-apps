@@ -10,16 +10,18 @@ feature here because it is the only part of PV-0 that waits on SuiteUI.
 
 **Covers:** no open issue.
 
-**Depends on:** #778 (suite-harness). Its task SH-7 closes #333 (QH-4): the
-journey template then compiles `UITests/<target>*.swift`, so a second Photo
-journey file builds. Today `project.yml` compiles only
-`UITests/PhotoJourneyTests.swift`, and this feature never edits
-`project.yml` or `UITests/Journey*.swift` (shared-file rule). It does not
-wait on photo-seams: it touches no file photo-seams owns and needs none of
-its code (the helper only passes argument strings).
+**Depends on:** #333 (QH-4), which suite-harness (#778) closes with its
+task SH-7: the journey template then compiles `UITests/<target>*.swift`, so a
+second Photo journey file builds. It needs only that task, not the whole of
+suite-harness. Today `project.yml` compiles only
+`UITests/PhotoJourneyTests.swift`, and this feature never edits `project.yml`
+or `UITests/Journey*.swift` (shared-file rule). It does not wait on
+photo-seams: it touches no file photo-seams owns and needs none of its code
+(the helper only passes argument strings).
 
-Every wave-1 Photo feature's journey task depends on this feature, since
-their journey files call `writeTestPhoto`.
+Only the journey tasks of the wave-1 features (D-11, D-12, E-9, E-10, CP-5,
+CP-7) and of photo-adjustment-layers (AL-8) wait on this feature, since
+their journey files call `writeTestPhoto`; their Model and view tasks don't.
 
 ## Journey steps
 
@@ -53,7 +55,7 @@ func photoArguments(open file: URL? = nil, saveTo: URL? = nil, exportTo: URL? = 
 move PhotoJourneyTests.writeTestPhoto (private static) to a top-level internal function, body unchanged
 photoArguments: for each non-nil -> ["-PhotoOpenFile", path], ["-PhotoSaveTo", path], ["-PhotoExportTo", path],
   ["-PhotoFixture", name], ["-PhotoRecoveryDir", path], ["-PhotoWindowWidth", "\(w)"]
-PhotoJourneyTests: replace its eleven Self.writeTestPhoto(...) calls with writeTestPhoto(...) and its
+PhotoJourneyTests: replace its seven Self.writeTestPhoto(...) calls with writeTestPhoto(...) and its
   hand-built argument arrays with photoArguments(...); no step or assertion changes
 ```
 
@@ -65,7 +67,7 @@ One PR to `dev`, at most 400 lines and 15 files, label `fast-lane` and
 
 | id | issue | what | owned files | depends on | size |
 |---|---|---|---|---|---|
-| KT-1 | – | Move `writeTestPhoto`, add `photoArguments`, the smoke journey; `PhotoJourneyTests` calls them | `UITests/PhotoJourneyTests.swift`, `UITests/PhotoJourneyTests+Fixtures.swift` | #778 closed | ~150, 2 |
+| KT-1 | – | Move `writeTestPhoto`, add `photoArguments`, the smoke journey; `PhotoJourneyTests` calls them | `UITests/PhotoJourneyTests.swift`, `UITests/PhotoJourneyTests+Fixtures.swift` | #333 closed | ~150, 2 |
 
 ## Acceptance test per task
 

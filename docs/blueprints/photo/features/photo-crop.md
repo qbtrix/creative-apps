@@ -13,8 +13,16 @@ from p2 to p1 with the blueprint, section 9 question 2) · **Lead branch:**
 
 **Depends on:** photo-seams (`CropContracts.swift`, `LiveCrop.swift` stub,
 `PhotoCropSize.swift` with today's crop drag moved in, `cropAspect` state,
-`PhotoWindow+Crop.swift`, `CropOptions.swift`, `CropOverlay.swift`) and
-photo-journey-kit. No creative-core issue.
+`PhotoWindow+Crop.swift`, `CropOptions.swift` with today's Apply and Cancel
+buttons moved in, `CropOverlay.swift`). Only the journey tasks CP-5 and CP-7
+also wait on photo-journey-kit; if it is still open when they come up, the
+lead records the wait, keeps its heartbeat, and builds them once it closes.
+No creative-core issue.
+
+**Return in a field commits the field.** Today Apply Crop carries
+`.keyboardShortcut(.defaultAction)` (`PhotoPanel.swift:97`), so Return typed
+in the W field would apply the crop. CP-4 removes that shortcut; Return on
+the canvas still applies through photo-seams' `.confirm`.
 
 Blueprint sections: 4.2 PJ-8, 5.1 (`CropSizing`, `CropAspect`, `CropField`),
 5.3 (PV-3 methods), 6.1 rules 2 and 5, 6.2 (crop options), 7.1 PB-8 and the
@@ -37,7 +45,8 @@ perf journeys, 7.3 PF-5, 7.4 rule 5, 7.5 QB-F4.
 1. **PJ-8 `testTypedCropSizeAndAspect`** (`+Crop`), as blueprint 4.2 writes
    it: on `beach.png` (800 × 600), Crop (C) shows X, Y, W, H with the
    placeholder "Drag on the image, or type a size" and the six aspect chips;
-   1:1 gives a centered 600 × 600 pending crop; W 400, Return gives H 400
+   1:1 gives a centered 600 × 600 pending crop; W 400, Return gives H 400 and the crop stays pending (the canvas is
+   still 800 × 600)
    with X and Y kept; 3:2 then swap (`photo.crop.swap`) reads 2:3 with
    H > W; Free and a drag from (10, 10) to (210, 110) give W 200, H 100
    (±1 at Fit); X 700, Return reads X 600 (clamped); Return applies: canvas
@@ -122,7 +131,7 @@ pass`, `Head:`. The last one carries `feature-done`.
 | CP-1 | #544 (part) | `LiveCropSizing`: typed fields, locked drag, applying and swapping an aspect | `M/Live/LiveCrop.swift`, `MT/LiveCropSizingTests.swift` | – | ~300, 2 |
 | CP-2 | #544 (part) | Workspace: `setCropField`, `setCropAspect`, `swapCropAspect`, `cropFieldsEnabled`, `cropFieldValue`, `cropAspectBadge`; the crop drag keeps the lock | `M/PhotoCropSize.swift`, `MT/PhotoCropSizeTests.swift` | CP-1 | ~300, 2 |
 | CP-3 | – | Budget PB-8 (crop drag and a typed field) on `large` | `MT/PhotoCropBudgetTests.swift` | CP-2 | ~100, 1 |
-| CP-4 | #544 (part) | Crop options: four `ScrubField`s two per row in a `Grid`, the six aspect `ChoiceChips`, Swap, Apply Crop, Cancel; the window's crop intents | `A/CropOptions.swift`, `A/PhotoWindow+Crop.swift`, `ST/PhotoCropOptionsSnapshots.swift` | CP-2 | ~300, 3 |
+| CP-4 | #544 (part) | Crop options: four `ScrubField`s two per row in a `Grid`, the six aspect `ChoiceChips`, Swap, Apply Crop (its `.defaultAction` shortcut removed), Cancel; the window's crop intents | `A/CropOptions.swift`, `A/PhotoWindow+Crop.swift`, `ST/PhotoCropOptionsSnapshots.swift` | CP-2 | ~300, 3 |
 | CP-5 | #544 (closes) | The aspect pill on the crop overlay; journey PJ-8 | `A/CropOverlay.swift`, `UT/PhotoJourneyTests+Crop.swift` | CP-4, photo-journey-kit | ~240, 2 |
 | CP-7 | – | Perf journeys PJ-P1 (brush, crop, Space-pan series) and PJ-P2 (Exposure scrub) | `UT/PhotoJourneyTests+Perf.swift` | CP-5, photo-journey-kit | ~200, 1 |
 
@@ -139,7 +148,7 @@ in that order.
 | CP-2 | `PhotoCropSizeTests`: `setCropField(.width, 0)` returns false and changes nothing; fields are disabled with no crop and Free and enabled after choosing 1:1; the crop drag under 3:2 keeps 3:2; `dragUpdatesEveryEvent` (QB-F2): 60 drag events give 60 different `pendingCrop` values; PF-5: a typed crop then Apply equals CoreRaster `cropped` of each layer at that rect; nothing but Apply records a history step | a bad value is taken, the drag ignores the lock, the overlay would lag, or a field edit is an undo step |
 | CP-3 | `PhotoCropBudgetTests`: PB-8 ≤ 0.05 ms release and ≤ 0.5 ms debug (gated in CI), 60 events on `large` | the debug gate fails in CI |
 | CP-4 | `PhotoCropOptionsSnapshots`: `photo-crop-options-light.png`, `-dark.png` (empty state) and `photo-crop-ratio-light.png`, `-dark.png` (1:1 locked, 600 × 600); identifiers `photo.crop.x`, `.y`, `.width`, `.height`, `.aspect.<title>`, `.swap`, `.apply`, `.cancel`; the four fields line up as a 2 × 2 grid (7.4 rule 5, equal widths in the snapshot host's frames) | a control has no identifier, or the grid is ragged |
-| CP-5 | PJ-8 passes on the macOS run with every step `shot`; the overlay's pill reads "1:1" under the lock and is absent under Free | any step fails |
+| CP-5 | PJ-8 passes on the macOS run with every step `shot`, including Return in the W field leaving the crop pending; the overlay's pill reads "1:1" under the lock and is absent under Free | any step fails, or Return in a field applies the crop |
 | CP-7 | PJ-P1 records at least 60 samples per series (brush, crop, pan) and PJ-P2 at least 60, as report-only lines on the contact sheet | a series has fewer than 60 samples |
 
 ## Quality tests

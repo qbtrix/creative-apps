@@ -17,7 +17,8 @@ with a comment linking this packet when it starts.
 
 **Depends on:** photo-edit (it hands over `A/PhotoCommands+Layer.swift`; it
 needs no wait for photo-documents or photo-crop, blueprint 8.2). That
-implies photo-seams and photo-journey-kit. No creative-core issue; CR-5
+implies photo-seams; its journey task AL-8 also uses photo-journey-kit,
+which closes before photo-edit's own journey tasks can. No creative-core issue; CR-5
 (`hueSaturation` in CoreRaster) is optional and filed only if PB-13 fails in
 release.
 
@@ -160,7 +161,7 @@ carries `feature-done`.
 |---|---|---|
 | AL-1 | `LiveAdjustmentLayeringTests`: PF-8 part one, opacity 1, normal, no mask equals the same settings applied by today's whole-image path bit for bit; opacity 0 returns `below` bit for bit; opacity 0.5 lies halfway within 1/255; a gray mask of 0.5 equals opacity 0.5 within 1/255; Blur enabled in the settings is ignored | the adjustment differs from the whole-image path, or Blur applies on a layer |
 | AL-2 | `PhotoAdjustmentLayerTileTests`: PF-12, the damaged tiles with an adjustment layer in a 3-layer stack equal `PhotoRenderer.render` of the full frame; PF-8 part two, an adjustment layer at the top equals whole-image adjustments with the same settings bit for bit; a hidden one equals no layer; Flatten (`LiveMerging`) of the stack equals the render | a tile differs from the frame, or Flatten ignores the adjustment |
-| AL-3 | `PhotoAdjustmentLayerTests`: add gives "Curves 1" above the selected layer, selected, one "New Adjustment Layer" step; a second gives "Curves 2"; `adjustTarget` follows the selection; a curve drag of 30 events is one "Curves" step; undo of the layer-list step with an adjustment layer works (photo-seams' guard); `layerInfo` gives "Nothing below to adjust." at the bottom only; `adjustSections` is `[.curves]` for a Curves layer and the five sections for `.image` | names repeat, a gesture takes many steps, or the target is wrong |
+| AL-3 | `PhotoAdjustmentLayerTests`: add gives "Curves 1" above the selected layer, selected, one "New Adjustment Layer" step; a second gives "Curves 2"; `adjustTarget` follows the selection; a curve drag of 30 events is one "Curves" step; the new layer's id is one never used before (photo-seams' internal `insertLayer`); undo of the layer-list step with an adjustment layer works (photo-seams' guard); `layerInfo` gives "Nothing below to adjust." at the bottom only; `adjustDamagesAtOnce` (QB-F2): one `adjustLayer` call records damage `.all` in that call; `adjustSections` is `[.curves]` for a Curves layer and the five sections for `.image` | names repeat, a gesture takes many steps, or the target is wrong |
 | AL-4 | `PhotoAdjustmentLayerBudgetTests`: PB-13, an Exposure drag event on an adjustment layer in a 3-layer stack, one 256 px tile, ≤ 4 ms release (report in debug); the latency series ≤ 8 ms per tile batch release p50 (reported in CI) | a release gate is missed locally, or a series has fewer than 60 samples |
 | AL-5 | V4 green; the four kinds are items under New Adjustment Layer, disabled with "Open an image first." with no image (snapshot-host menu check); Blur is not offered | an item is dead, or Blur is offered |
 | AL-6 | `PhotoAdjustmentLayerSnapshots`: `photo-adjustment-layer-light.png`, `-dark.png` (Paint, Curves 1, Background, from `layered`); every row has `photo.layer.<id>.eye` and `.kind` with labels; V10 green | a row has no identifier, or the symbol is missing |
@@ -181,8 +182,9 @@ carries `feature-done`.
 ## Done check
 
 - **Journeys green:** the macOS run on `dev` triggered by the
-  `feature-done` PR is green: PJ-9, V1–V12 and every wave-1 journey (PJ-1 to
-  PJ-8, which must not change).
+  `feature-done` PR is green: PJ-9, V1–V12 and the journeys of every wave-1
+  feature merged by then (PJ-5 to PJ-7 always; PJ-1 to PJ-4 and PJ-8 if
+  photo-documents and photo-crop have landed), none of which may change.
 - **Audit zero new:** no Photo count over `UITests/audit-baseline.json`.
 - **Contact sheet:** `Belt-Contact-Sheet: <run link>` on the feature issue,
   one line per journey, the PB-13 number and the audit counts.
