@@ -13,6 +13,9 @@ final class HaloJourneyTests: XCTestCase {
         let halo = Journey("Halo", self)
         halo.click("New Composition…", step: "new-composition-sheet")
         halo.click("Create", in: .sheet, step: "new-composition")
+        let inspector = halo.element("halo.inspector")
+        XCTAssert(inspector.waitForExistence(timeout: 5), "no composition inspector after Create")
+        XCTAssert(inspector.staticTexts["Frame Rate"].exists, "the inspector has no Frame Rate row")
     }
 
     @MainActor func testScrubTheTimeline() {

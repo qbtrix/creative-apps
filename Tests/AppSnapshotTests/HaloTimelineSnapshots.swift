@@ -1,6 +1,6 @@
 // HaloTimelineSnapshots.swift: HaloViewer with three layers of different
 // spans and the playhead at frame 36, so the timeline strip shows three span
-// bars and the readout shows 00:00:01:06 at 30 fps, in Light and Dark. Writes
+// bars and the status bar shows 00:00:01:06 at 30 fps, in Light and Dark. Writes
 // halo-timeline-light.png and halo-timeline-dark.png. macOS only.
 import HaloModel
 import SwiftUI
