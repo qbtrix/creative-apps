@@ -63,6 +63,13 @@ public struct PhotoItem: Identifiable, Sendable, Hashable {
         [color.c0, color.c1, color.c2].map { UInt8(($0 * 255).rounded()) } + [255]
     }
 
+    /// The same photo at another pixel size (fakes use it for a crop's shape).
+    func withSize(_ size: PixelSize) -> PhotoItem {
+        PhotoItem(
+            id: id, name: name, captureDate: captureDate, color: color, rating: rating, label: label, flag: flag,
+            path: path, pixelSize: size, develop: develop, availability: availability)
+    }
+
     /// The same photo under another id.
     func withID(_ newID: String) -> PhotoItem {
         PhotoItem(
@@ -89,9 +96,30 @@ public enum LibrarySort: String, CaseIterable, Sendable, Hashable {
 /// What the content area shows: the grid, or one photo in the loupe.
 public enum LibraryMode: Sendable, Hashable { case grid, loupe }
 
-/// Whether a photo's file can be read. The raw text is the grid cell's help.
+/// Whether a photo's file can be read; `help` is the grid cell's tooltip.
 public enum PhotoAvailability: Hashable, Sendable {
     case available
     case missing
     case unreadable(String)
+
+    /// Nil while available; else what the cell's help says.
+    public var help: String? {
+        switch self {
+        case .available: nil
+        case .missing: "The file is missing."
+        case .unreadable(let reason): "Library can't read this file: \(reason)."
+        }
+    }
+}
+
+extension PhotoItem {
+    /// The loupe photo's and grid cell's accessibility value, e.g.
+    /// "3 stars, Picked, Red"; "No stars" when unrated. Journeys read it.
+    public var cullSummary: String {
+        var parts = [rating == 0 ? "No stars" : rating == 1 ? "1 star" : "\(rating) stars"]
+        if flag == .pick { parts.append("Picked") }
+        if flag == .reject { parts.append("Rejected") }
+        if let label { parts.append(label.rawValue) }
+        return parts.joined(separator: ", ")
+    }
 }

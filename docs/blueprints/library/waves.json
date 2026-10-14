@@ -46,7 +46,19 @@
         "UITests/Journey+Library.swift",
         "UITests/LibraryJourneyTests.swift",
         "UITests/LibraryJourneyTests+Shell.swift",
-        "Tests/LibraryModelTests/LibraryBudget.swift"
+        "Tests/LibraryModelTests/Budget.swift",
+        "Sources/LibraryApp/LibraryLoupe.swift",
+        "Sources/LibraryApp/LibraryControls.swift",
+        "Sources/LibraryModel/SampleImage.swift",
+        "Sources/LibraryApp/CropInspector.swift",
+        "Sources/LibraryModel/LibraryEmptyCollection.swift",
+        "Tests/LibraryModelTests/LibraryCellSizeFuzzTests.swift",
+        "Tests/LibraryModelTests/LibraryCollectionEmptinessTests.swift",
+        "Tests/LibraryModelTests/LibraryEmptyCollectionTests.swift",
+        "Tests/LibraryModelTests/LibraryGridEdgeTests.swift",
+        "Tests/LibraryModelTests/LibraryGridTests.swift",
+        "Tests/LibraryModelTests/LibraryPhotoIDFuzzTests.swift",
+        "Tests/AppSnapshotTests/LibraryEmptyCollectionSnapshots.swift"
       ],
       "core": "none",
       "suiteui": "none (#333 for its own journey file; until then it edits LibraryJourneyTests.swift)",
@@ -56,7 +68,8 @@
         "J10",
         "J11"
       ],
-      "notes": "Creates every stub file later features replace; lands as several stacked PRs. Coordinates with open PR #217 (#156)."
+      "notes": "Creates every stub file later features replace; lands as several stacked PRs. Coordinates with open PR #217 (#156). In wave 1 it also adds PhotoItem.cullSummary as the accessibility value of the loupe photo (LibraryLoupe.swift) and the grid cells, and embeds the LibraryCropOverlay and CropInspector stubs, so later features never edit another's view. Existing tests it owns are kept passing (the hand-written == keeps whole-catalog comparisons working).",
+      "quality": "QB-F1 (J11), QB-F3 (undo), QB-V5"
     },
     {
       "id": "import",
@@ -88,7 +101,8 @@
         "J1",
         "P6"
       ],
-      "notes": "Owns LibraryJourneyTests.swift in its wave, for its journey steps if #333 has not merged."
+      "notes": "Owns LibraryJourneyTests.swift in its wave, for its journey steps if #333 has not merged.",
+      "quality": "QB-L9, QB-LIB-1, QB-LIB-V6, QB-F2"
     },
     {
       "id": "thumbnails",
@@ -119,7 +133,8 @@
         "J2",
         "P1"
       ],
-      "notes": "Live thumbnails read files through services.decoder, which is FakeDecoder in tests and the live ImageIODecoder once import lands."
+      "notes": "Live thumbnails read files through services.decoder, which is FakeDecoder in tests and the live ImageIODecoder once import lands.",
+      "quality": "QB-LIB-3, QB-LIB-8, QB-LIB-V5"
     },
     {
       "id": "cull",
@@ -153,7 +168,8 @@
         "J4",
         "P2"
       ],
-      "notes": "#724's keys only; its zoom and photo size go to loupe-viewport. The grid's reject mark (dimmed cell, xmark badge) is drawn by thumbnails, which owns the cell builder; cull changes only Model state."
+      "notes": "#724's keys only; its zoom and photo size go to loupe-viewport. The grid's reject mark (dimmed cell, xmark badge) is drawn by thumbnails, which owns the cell builder; cull changes only Model state.",
+      "quality": "QB-LIB-4, QB-LIB-5, QB-F3, QB-F4"
     },
     {
       "id": "persist",
@@ -184,7 +200,8 @@
         "J9",
         "P7"
       ],
-      "notes": "Writes the develop and crop objects from the start (their types come from the spine), so #423's and #425's catalog parts are done here."
+      "notes": "Writes the develop and crop objects from the start (their types come from the spine), so #423's and #425's catalog parts are done here.",
+      "quality": "QB-LIB-2, QB-L12, QB-LIB-V7"
     },
     {
       "id": "loupe-viewport",
@@ -219,7 +236,8 @@
         "J3",
         "P4"
       ],
-      "notes": "#724's zoom, photo on the artboard and real size."
+      "notes": "#724's zoom, photo on the artboard and real size.",
+      "quality": "QB-LIB-5, QB-L1 (pan), QB-LIB-8"
     },
     {
       "id": "develop",
@@ -254,7 +272,8 @@
         "J5",
         "P3"
       ],
-      "notes": "Owns LibraryJourneyTests.swift in its wave, for its journey steps if #333 has not merged."
+      "notes": "Owns LibraryJourneyTests.swift in its wave, for its journey steps if #333 has not merged.",
+      "quality": "QB-L2, QB-LIB-6, QB-LIB-V1, QB-LIB-V2, QB-LIB-V3, QB-F3"
     },
     {
       "id": "status-and-layout",
@@ -285,7 +304,8 @@
       "journeys": [
         "J12"
       ],
-      "notes": "Identifiers in other features' views are each feature's own job; this one clears what is left of #291's list."
+      "notes": "Identifiers in other features' views are each feature's own job; this one clears what is left of #291's list.",
+      "quality": "layout spec 7.3, audit exit 7.2, QB-V5"
     },
     {
       "id": "crop",
@@ -304,7 +324,8 @@
         "Tests/AppSnapshotTests/LibraryCropSnapshots.swift",
         "UITests/LibraryJourneyTests+Crop.swift",
         "UITests/LibraryJourneyTests+PerfCrop.swift",
-        "Tests/LibraryModelTests/LibraryCropBudgetTests.swift"
+        "Tests/LibraryModelTests/LibraryCropBudgetTests.swift",
+        "Sources/LibraryApp/CropInspector.swift"
       ],
       "core": "none (creative-core#230 closed by #251)",
       "suiteui": "S-L3 CropHandles; #330, #333",
@@ -315,7 +336,8 @@
         "J6",
         "P5"
       ],
-      "notes": "Edits LiveDevelop.swift (crop after tone), which develop owned in wave 3."
+      "notes": "Edits LiveDevelop.swift (crop after tone), which develop owned in wave 3.",
+      "quality": "QB-L1, QB-LIB-V4, QB-F3, QB-F4"
     },
     {
       "id": "export",
@@ -335,7 +357,8 @@
         "Tests/AppSnapshotTests/LibraryExportFidelityTests.swift",
         "UITests/LibraryJourneyTests+Export.swift",
         "UITests/LibraryJourneyTests.swift",
-        "Tests/LibraryModelTests/LibraryExportBudgetTests.swift"
+        "Tests/LibraryModelTests/LibraryExportBudgetTests.swift",
+        "UITests/LibraryJourneyTests+PerfExport.swift"
       ],
       "core": "none",
       "suiteui": "S-L5 ProgressRow; #330, #333",
@@ -344,9 +367,11 @@
         "import"
       ],
       "journeys": [
-        "J7"
+        "J7",
+        "P8"
       ],
-      "notes": "Its last task (the QB-V4 test with a cropped photo) waits for crop to merge. Owns LibraryJourneyTests.swift in its wave, for its journey steps if #333 has not merged."
+      "notes": "Its last task (the QB-V4 test with a cropped photo) waits for crop to merge. Owns LibraryJourneyTests.swift in its wave, for its journey steps if #333 has not merged.",
+      "quality": "QB-L9, QB-LIB-7, QB-V4, QB-F2"
     },
     {
       "id": "filters-collections",
@@ -371,7 +396,8 @@
         "cull"
       ],
       "journeys": [],
-      "notes": "Not v1. Needs one menu item added to LibraryCommands.swift; it takes that file for this wave."
+      "notes": "Not v1. Needs one menu item added to LibraryCommands.swift; it takes that file for this wave.",
+      "quality": "later"
     },
     {
       "id": "metadata-more",
@@ -392,7 +418,8 @@
         "import"
       ],
       "journeys": [],
-      "notes": "Not v1. Camera details come from the Exif the import scan already reads."
+      "notes": "Not v1. Camera details come from the Exif the import scan already reads.",
+      "quality": "later"
     },
     {
       "id": "raw",
@@ -415,7 +442,8 @@
         "thumbnails"
       ],
       "journeys": [],
-      "notes": "Not v1, pending evidence (docs/priorities.md)."
+      "notes": "Not v1, pending evidence (docs/priorities.md).",
+      "quality": "later"
     }
   ]
 }

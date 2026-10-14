@@ -1,6 +1,7 @@
 import Testing
 import Foundation
 import CoreColor
+import CoreRaster
 @testable import LibraryModel
 
 @Test func fakesDriveEveryContract() async throws {
@@ -33,4 +34,41 @@ import CoreColor
     #expect(services.unavailable["importer"] == "Import isn't connected yet (import).")
     #expect(services.unavailable.count == 8)
     await #expect(throws: LibraryError.self) { try await services.importer.importFolder("/f", known: [], progress: { _ in }) }
+}
+
+@Test func noticesSayExactlyWhatJourneysRead() {
+    #expect(ImportNotice(folder: "/f", added: 26, failures: [FileFailure(path: "/f/b.jpg", reason: "not an image file")]).message
+        == "Imported 26 photos. 1 file couldn't be imported.")
+    #expect(ImportNotice(folder: "/f", alreadyKnown: 26).message == "No new photos in /f.")
+    #expect(ImportNotice(folder: "/f", error: .unreadableFolder("/f")).message
+        == "Library can't read /f. Check that you have access to it.")
+    #expect(ExportSummary(total: 2, written: ["a", "b"]).message == "Exported 2 photos.")
+    #expect(ExportSummary(total: 24, written: ["a"], cancelled: true).message == "Exported 1 of 24. Export was cancelled.")
+    #expect(CatalogFileState.newer(version: 2).canSave == false && CatalogFileState.damaged.canSave)
+    #expect(ThumbnailBucket.longSide(forCell: 320, scale: 2) == 1024)
+    #expect(ThumbnailBucket.longSide(forCell: 80, scale: 1) == 128)
+}
+
+@Test func fakesShowEveryJourneyChange() async throws {
+    let date = Date(timeIntervalSince1970: 0)
+    var photo = PhotoItem(name: "IMG_0001", captureDate: date, color: Color3(0.5, 0.5, 0.5), rating: 3, flag: .reject,
+                          pixelSize: PixelSize(width: 600, height: 400))
+    #expect(photo.cullSummary == "3 stars, Rejected")
+    let culling = FakeCulling()
+    #expect(culling.advance(from: "a", before: ["a", "b"], after: ["a", "b"]) == "b")
+    #expect(culling.advance(from: "b", before: ["a", "b"], after: ["a", "b"]) == "b")
+    let loupe = FakeLoupe()
+    let plain = try await loupe.render(photo, settings: .neutral, longSide: 300, quality: .full)
+    let brighter = try await loupe.render(photo, settings: DevelopSettings.neutral.setting(.exposure, to: 1), longSide: 300, quality: .full)
+    #expect(plain.image.checksum != brighter.image.checksum)
+    #expect(plain.histogram.red.reduce(0, +) == 300 * 200)
+    let crop = FakeCrop()
+    let square = try crop.initial(aspect: .square, angle: 0, photo: photo.pixelSize)
+    let turned = try crop.straightened(square, angle: 10, photo: photo.pixelSize)
+    #expect(turned.rect.width < square.rect.width)
+    photo.develop = DevelopSettings.neutral.setting(crop: square)
+    let thumb = try await FakeThumbnails().thumbnail(for: photo, longSide: 128)
+    #expect(thumb.size.width == thumb.size.height)
+    let live = LibraryServices.live(decoder: FakeDecoder(photos: []), writer: FakeJPEGWriter(), store: FakeCatalogStore())
+    #expect(try live.develop.histogram(of: PixelBuffer(rgba8: [0, 0, 0, 255], width: 1, height: 1)) == .empty)
 }

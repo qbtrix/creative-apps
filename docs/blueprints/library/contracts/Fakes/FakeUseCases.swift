@@ -8,6 +8,13 @@ import FoundationEssentials
 #else
 import Foundation
 #endif
+#if canImport(Glibc)
+import Glibc
+#elseif canImport(Musl)
+import Musl
+#elseif canImport(Darwin)
+import Darwin
+#endif
 import CoreRaster
 
 public struct FakeImporter: PhotoImporting {
@@ -30,7 +37,14 @@ public struct FakeThumbnails: ThumbnailProviding {
     public init(mode: FakeMode = .ok) { self.mode = mode }
     public func thumbnail(for photo: PhotoItem, longSide: Int) async throws -> DisplayImage {
         try await FakeBehavior.perform(mode, failing: .notAnImage(photo.id))
-        guard let image = FakeBehavior.gradient(for: photo, longSide: longSide) else {
+        var shaped = photo
+        if let rect = photo.develop.crop?.rect {
+            // The crop's shape, so a cropped photo's cell changes on fakes too.
+            let size = PixelSize(width: max(Int(Double(photo.pixelSize.width) * rect.width), 1),
+                                 height: max(Int(Double(photo.pixelSize.height) * rect.height), 1))
+            shaped = photo.withSize(size)
+        }
+        guard let image = FakeBehavior.gradient(for: shaped, longSide: longSide) else {
             throw LibraryError.notAnImage(photo.id)
         }
         return image
@@ -38,7 +52,8 @@ public struct FakeThumbnails: ThumbnailProviding {
     public func invalidate(_ id: String) async {}
 }
 
-/// Applies changes like the live one but never advances (Auto Advance is the live rule).
+/// Applies changes like the live one; Auto Advance is the plain rule (the
+/// next id in `before`, staying on the last) without the filter case.
 public struct FakeCulling: PhotoCulling {
     let mode: FakeMode
     public init(mode: FakeMode = .ok) { self.mode = mode }
@@ -58,7 +73,10 @@ public struct FakeCulling: PhotoCulling {
             return copy
         }
     }
-    public func advance(from id: String, before: [String], after: [String]) -> String? { id }
+    public func advance(from id: String, before: [String], after: [String]) -> String? {
+        guard let index = before.firstIndex(of: id) else { return after.first }
+        return index + 1 < before.count ? before[index + 1] : id
+    }
 }
 
 /// Stores ids and ratings only, as text: enough to drive the restore journey on fakes.
@@ -86,10 +104,21 @@ public struct FakeLoupe: LoupeImaging {
     public func render(_ photo: PhotoItem, settings: DevelopSettings, longSide: Int,
                        quality: RenderQuality) async throws -> RenderedPhoto {
         try await FakeBehavior.perform(mode, failing: .renderFailed("the preview failed on purpose"))
-        guard let image = FakeBehavior.gradient(for: photo, longSide: quality == .preview ? 512 : longSide) else {
+        guard let base = FakeBehavior.gradient(for: photo, longSide: quality == .preview ? 512 : longSide) else {
             throw LibraryError.renderFailed("empty photo")
         }
-        return RenderedPhoto(image: image, histogram: .empty, quality: quality)
+        // Not the develop math: a visible stand-in so the UI track sees every
+        // slider move. Each step of any slider brightens by one byte level.
+        let lift = Int(DevelopSlider.allCases.map { settings.value($0) / $0.step / 100 }.reduce(0, +).rounded())
+        var bytes = base.rgba8
+        var red = [Int](repeating: 0, count: HistogramBins.binCount), green = red, blue = red
+        for i in stride(from: 0, to: bytes.count, by: 4) {
+            for c in 0..<3 { bytes[i + c] = UInt8(min(max(Int(bytes[i + c]) + lift, 0), 255)) }
+            red[Int(bytes[i])] += 1; green[Int(bytes[i + 1])] += 1; blue[Int(bytes[i + 2])] += 1
+        }
+        guard let image = DisplayImage(size: base.size, rgba8: bytes) else { throw LibraryError.renderFailed("size") }
+        let histogram = HistogramBins(red: red, green: green, blue: blue, shadowClipped: 0, highlightClipped: 0)
+        return RenderedPhoto(image: image, histogram: histogram, quality: quality)
     }
     public func prefetch(_ photos: [PhotoItem], longSide: Int) async {}
 }
@@ -105,7 +134,9 @@ public struct FakeDevelop: DevelopRendering {
     public func histogram(of buffer: PixelBuffer) throws -> HistogramBins { .empty }
 }
 
-/// Centers the aspect on the photo and ignores the angle's shrink.
+/// Centers the aspect on the photo; an angle shrinks the rect by
+/// cos + sin of it (a stand-in for `straightenCrop`); handle drags move the
+/// matching edges by the drag, clamped to the photo, ignoring the aspect.
 public struct FakeCrop: CropGeometry {
     public init() {}
     public func initial(aspect: CropAspect, angle: Double, photo: PixelSize) throws -> CropSettings {
@@ -119,9 +150,32 @@ public struct FakeCrop: CropGeometry {
         return CropSettings(angle: min(max(angle, -45), 45), rect: rect, aspect: aspect)
     }
     public func dragged(_ crop: CropSettings, handle: CropHandle, dx: Double, dy: Double,
-                        photo: PixelSize) throws -> CropSettings { crop }
+                        photo: PixelSize) throws -> CropSettings {
+        guard photo.width > 0, photo.height > 0 else { return crop }
+        let ux = dx / Double(photo.width), uy = dy / Double(photo.height)
+        var r = crop.rect
+        switch handle {
+        case .inside: r.x += ux; r.y += uy
+        case .left, .topLeft, .bottomLeft: r.x += ux; r.width -= ux
+        case .right, .topRight, .bottomRight: r.width += ux
+        case .top, .bottom: break
+        }
+        switch handle {
+        case .top, .topLeft, .topRight: r.y += uy; r.height -= uy
+        case .bottom, .bottomLeft, .bottomRight: r.height += uy
+        default: break
+        }
+        r.width = min(max(r.width, 0.01), 1); r.height = min(max(r.height, 0.01), 1)
+        r.x = min(max(r.x, 0), 1 - r.width); r.y = min(max(r.y, 0), 1 - r.height)
+        return CropSettings(angle: crop.angle, rect: r, aspect: crop.aspect)
+    }
     public func straightened(_ crop: CropSettings, angle: Double, photo: PixelSize) throws -> CropSettings {
-        CropSettings(angle: min(max(angle, -45), 45), rect: crop.rect, aspect: crop.aspect)
+        let a = min(max(angle, -45), 45), radians = abs(a) * Double.pi / 180
+        let shrink = 1 / (cos(radians) + sin(radians))
+        var r = crop.rect
+        let w = r.width * shrink, h = r.height * shrink
+        r.x += (r.width - w) / 2; r.y += (r.height - h) / 2; r.width = w; r.height = h
+        return CropSettings(angle: a, rect: r, aspect: crop.aspect)
     }
     public func frame(_ crop: CropSettings, photo: PixelSize) throws -> PixelRect {
         PixelRect(x: Int(crop.rect.x * Double(photo.width)), y: Int(crop.rect.y * Double(photo.height)),

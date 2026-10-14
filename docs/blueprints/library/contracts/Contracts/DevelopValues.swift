@@ -9,13 +9,28 @@ import Foundation
 
 /// One develop slider. The raw value is the row's label.
 public enum DevelopSlider: String, CaseIterable, Sendable, Codable {
-    case exposure = "Exposure", temperature = "Temperature", tint = "Tint"
-    case contrast = "Contrast", highlights = "Highlights", shadows = "Shadows"
+    // The panel's order: TONE, then COLOR.
+    case exposure = "Exposure", contrast = "Contrast", highlights = "Highlights", shadows = "Shadows"
+    case temperature = "Temperature", tint = "Tint"
+
+    /// The inspector section the row sits in; a section's Reset resets its group.
+    public var group: DevelopGroup {
+        switch self {
+        case .exposure, .contrast, .highlights, .shadows: .tone
+        case .temperature, .tint: .color
+        }
+    }
 
     /// Exposure in stops, -5...5; the rest -100...100 (CoreRaster's slider range).
     public var range: ClosedRange<Double> { self == .exposure ? -5...5 : -100...100 }
     /// One arrow-key step; Shift is ten, Option a tenth (docs/design.md, Scrub fields).
     public var step: Double { self == .exposure ? 0.01 : 1 }
+}
+
+/// A develop section. The raw value is its header.
+public enum DevelopGroup: String, CaseIterable, Sendable {
+    case tone = "Tone", color = "Color"
+    public var sliders: [DevelopSlider] { DevelopSlider.allCases.filter { $0.group == self } }
 }
 
 public struct DevelopSettings: Hashable, Sendable, Codable {

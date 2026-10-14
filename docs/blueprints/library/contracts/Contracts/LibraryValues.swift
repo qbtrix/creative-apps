@@ -26,6 +26,20 @@ public struct PixelSize: Hashable, Sendable, Codable {
     }
 }
 
+/// The thumbnail sizes the grid asks for: the smallest bucket whose long
+/// side covers the cell at the display's scale (a 320 pt cell at 2x needs
+/// 640 px, so 1024).
+public enum ThumbnailBucket {
+    public static let sizes = [128, 256, 512, 1024]
+    /// The live LRU's limit in bytes of display images (256 MB).
+    public static let cacheBytes = 256 * 1024 * 1024
+    /// The bucket for a cell `cellWidth` points wide at `scale` pixels a point.
+    public static func longSide(forCell cellWidth: Int, scale: Int) -> Int {
+        let needed = max(cellWidth, 1) * max(scale, 1)
+        return sizes.first { $0 >= needed } ?? 1024
+    }
+}
+
 /// A rectangle in whole pixels.
 public struct PixelRect: Hashable, Sendable {
     public var x: Int, y: Int, width: Int, height: Int
@@ -57,8 +71,8 @@ public struct DisplayImage: Hashable, Sendable {
     }
 }
 
-/// The image file types v1 imports. The raw value is the lowercased extension
-/// set's first member.
+/// The image file types v1 imports (JPEG, PNG, HEIC); see `kind(forFileName:)`
+/// for the extensions each accepts.
 public enum PhotoFileKind: String, Sendable, Codable, CaseIterable {
     case jpeg, png, heic
     /// The kind for a file name, matched without regard to case; nil for anything else.

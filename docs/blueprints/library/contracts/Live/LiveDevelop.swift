@@ -19,5 +19,5 @@ public struct LiveDevelop: DevelopRendering {
         return buffer
     }
 
-    public func histogram(of buffer: PixelBuffer) throws -> HistogramBins { throw Self.notBuilt }
+    public func histogram(of buffer: PixelBuffer) throws -> HistogramBins { .empty }  // no histogram until develop
 }

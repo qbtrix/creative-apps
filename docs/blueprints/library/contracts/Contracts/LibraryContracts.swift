@@ -60,9 +60,10 @@ public protocol PhotoImporting: Sendable {
 }
 
 /// J2. Grid thumbnails. Live: `LiveThumbnails(decoder:develop:)`, an actor
-/// with an LRU of `ThumbnailBucket.cacheLimit` images.
+/// with an LRU of at most `ThumbnailBucket.cacheBytes` of images. A photo
+/// with no `path` (a sample) is drawn from `SampleImage`, never decoded.
 public protocol ThumbnailProviding: Sendable {
-    /// The photo at `longSide` (a bucket: 128, 256 or 512) with its develop
+    /// The photo at `longSide` (a `ThumbnailBucket`) with its develop
     /// settings and crop applied. Throws `missingFile` or `notAnImage`.
     func thumbnail(for photo: PhotoItem, longSide: Int) async throws -> DisplayImage
     /// Drops cached images of `id` (after its settings change).
@@ -95,7 +96,7 @@ public protocol CatalogCoding: Sendable {
 
 /// J3, J5. The loupe's picture. Live: `LiveLoupeImaging(decoder:develop:)`,
 /// an actor caching the decoded screen-size buffers of the focused photo and
-/// its two neighbours.
+/// its two neighbours. A photo with no `path` is drawn from `SampleImage`.
 public protocol LoupeImaging: Sendable {
     /// `photo` with `settings` (tone and crop), long side at most `longSide`,
     /// and its histogram. `.preview` renders from the 512 px thumbnail decode
@@ -128,7 +129,8 @@ public protocol CropGeometry: Sendable {
     func frame(_ crop: CropSettings, photo: PixelSize) throws -> PixelRect
 }
 
-/// J7. Export. Live: `LiveExporter(decoder:develop:)`.
+/// J7. Export. Live: `LiveExporter(decoder:develop:)`. A photo with no
+/// `path` exports its `SampleImage` at its `pixelSize`.
 public protocol PhotoExporting: Sendable {
     /// Sizes and file names for `photos`: long edge from `options`, never
     /// enlarged; `<name>.jpg`, then `<name> 2.jpg`, ... skipping

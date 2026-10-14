@@ -36,13 +36,14 @@
               {
                 "id": "library-app-shell",
                 "name": "App shell",
-                "description": "The Window scene, the root LibraryWindow holding the one model, the whole menu bar and the per-area menu structs.",
+                "description": "The Window scene, the root LibraryWindow holding the one model, the whole menu bar, the per-feature menu structs, and LibraryControls (the library.controls JSON the every-control journey reads).",
                 "technology": "Swift 6, SwiftUI, macOS 26",
                 "paths": [
                   "Sources/LibraryApp/LibraryApp.swift",
                   "Sources/LibraryApp/LibraryWindow.swift",
                   "Sources/LibraryApp/LibraryCommands.swift",
-                  "Sources/LibraryApp/LibraryMenus.swift"
+                  "Sources/LibraryApp/LibraryMenus.swift",
+                  "Sources/LibraryApp/LibraryControls.swift"
                 ],
                 "status": "existing",
                 "authored": true
@@ -96,11 +97,12 @@
               },
               {
                 "id": "library-app-crop",
-                "name": "Crop overlay",
-                "description": "The crop frame, shade and thirds grid over the loupe photo.",
+                "name": "Crop overlay and section",
+                "description": "The crop frame, shade and thirds grid over the loupe photo, and the CROP section shown in the Develop tab while cropping.",
                 "technology": "Swift 6, SwiftUI, macOS 26",
                 "paths": [
-                  "Sources/LibraryApp/LibraryCropOverlay.swift"
+                  "Sources/LibraryApp/LibraryCropOverlay.swift",
+                  "Sources/LibraryApp/CropInspector.swift"
                 ],
                 "status": "planned",
                 "authored": true
@@ -112,6 +114,17 @@
                 "technology": "Swift 6, SwiftUI, macOS 26",
                 "paths": [
                   "Sources/LibraryApp/LibraryExportSheet.swift"
+                ],
+                "status": "planned",
+                "authored": true
+              },
+              {
+                "id": "library-app-later",
+                "name": "Later views",
+                "description": "Wave 5 (not v1): filters and collections in the sidebar.",
+                "technology": "Swift 6, SwiftUI, macOS 26",
+                "paths": [
+                  "Sources/LibraryApp/LibraryWindow+Filters.swift"
                 ],
                 "status": "planned",
                 "authored": true
@@ -180,10 +193,11 @@
               {
                 "id": "library-fixtures",
                 "name": "Fixtures and launch",
-                "description": "Seeded sample photos, the named fixtures journeys launch with, and launch-argument parsing.",
+                "description": "Seeded sample photos, SampleImage (the picture of a photo with no file, for fakes and live alike), the named fixtures journeys launch with, and launch-argument parsing.",
                 "technology": "Swift 6, Foundation",
                 "paths": [
                   "Sources/LibraryModel/LibrarySample.swift",
+                  "Sources/LibraryModel/SampleImage.swift",
                   "Sources/LibraryModel/LibraryFixtures.swift",
                   "Sources/LibraryModel/LibraryLaunch.swift"
                 ],
@@ -297,6 +311,20 @@
                 "paths": [
                   "Sources/LibraryModel/LibraryStatusText.swift",
                   "Sources/LibraryModel/LibraryLayout.swift"
+                ],
+                "status": "planned",
+                "authored": true
+              },
+              {
+                "id": "library-later",
+                "name": "Later model",
+                "description": "Wave 5 (not v1): collections and filters (#31), keywords (#744), raw file rules (#427).",
+                "technology": "Swift 6, Foundation",
+                "paths": [
+                  "Sources/LibraryModel/LibraryCollections.swift",
+                  "Sources/LibraryModel/LibraryFilter.swift",
+                  "Sources/LibraryModel/LibraryKeywords.swift",
+                  "Sources/LibraryModel/RawFileTypes.swift"
                 ],
                 "status": "planned",
                 "authored": true
