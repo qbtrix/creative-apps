@@ -403,10 +403,14 @@ no app change and no manifest change:
   `Journey` template; after #333 the template compiles
   `UITests/<target>*.swift`, so each feature owns its own
   `UITests/SuiteJourneyTests+<Area>.swift` (section 8 lists them).
-  `Journey("Library", self, arguments: ["-SuiteGallery", page])` launches
-  it; shots are named `library-gallery-<page>-<step>`, so they never
-  collide with Library's own journey shots, and the audit counts them
-  under `library` (question Q3).
+  `Journey("Library", self, name: "suiteui", arguments: ["-SuiteGallery",
+  page])` launches it. The new `name:` parameter (suite-harness edits
+  `UITests/Journey.swift` for it) names the shots `suiteui-<page>-<step>`
+  and tallies the audit under a new `suiteui` key in
+  `UITests/audit-baseline.json`, at **0 for every check**, so gallery
+  shots never move Library's counts and the gallery starts clean (adding an
+  app key at 0 does not loosen the audit; question Q3 asks the captain to
+  confirm).
 
 Question Q2 offers the alternative: a dedicated gallery executable target.
 
@@ -1385,3 +1389,100 @@ component that does not exist yet and the issue that builds it.
 Every page renders in Dark (editor pages always), and the window pages also
 in Light; every component additionally has goldens in all four appearances
 (section 7.4).
+
+---
+
+## 7. Quality bar
+
+Every row says what is measured, where, and what fails it. "CI" is the
+macOS job on `dev`; "Linux" is `scripts/ci` (for SuiteUI rules only once
+Q1 lands; until then the same test runs in `SuiteUITests` on macOS). New
+perf rows ship report-only and get their gate after ten green runs, as
+`docs/review-rubric.md` (How gates are set) says; a gate never loosens
+without the captain.
+
+### 7.1 Input-to-screen budgets, per interactive component
+
+Measured by `FrameProbe` (UC17) in frames late: refreshes between the input
+event's timestamp and the first refresh that shows its result. Each series
+needs at least 60 samples or the test fails as invalid.
+
+| id | Component and input | Device target | CI gate | Measured by |
+|---|---|---|---|---|
+| QB-S1 | Bar slider and exact field: drag (= QB-L2) | p95 ≤ 2 frames late | report-only, then set from CI (placeholder 3) | SP1 |
+| QB-S2 | Bar slider: arrow key to the new value drawn | p95 ≤ 1 frame late | report-only (placeholder 2) | SJ11's key presses with `-SuitePerfProbe`, series `slider-key` |
+| QB-S3 | Canvas drag and Space-pan (= QB-L1) | p95 ≤ 2 | placeholder 3 | SP2 |
+| QB-S4 | Selection handle drag (= QB-L1) | p95 ≤ 2 | placeholder 3 | SP5 |
+| QB-S5 | Timeline ruler scrub and key drag (= QB-L3) | p95 ≤ 2 | placeholder 3 | SP3 (scrub); SJ19's key drag, series `key-drag` |
+| QB-S6 | Curve handle and tone point drag (= QB-L2) | p95 ≤ 2 | placeholder 3 | SJ16 and SJ20 with the probe, series `curve-drag` |
+| QB-S7 | Layer list (300 rows) and thumbnail grid (2,000 items) scroll (= QB-L10) | frame interval p95 ≤ 1.5 refreshes | set from CI | SP4 |
+| QB-S8 | Chip, preset, tab, tool and transport press: press to the selected state drawn | p95 ≤ 1 frame late | placeholder 2 | SJ4, SJ5, SJ8, SJ15 with the probe, series `press` |
+| QB-S9 | State fades (hover, on, disabled) | 0.14 s ± 1 refresh; 0 under Reduce Motion | exact | the probe's animation mark in SJ15 with and without the Reduce Motion switch (QB-F5) |
+| QB-S10 | Timeline slot divider drag | p95 ≤ 2 | placeholder 3 | SJ2 with the probe, series `slot-drag` |
+
+**Rule budgets** (wall time, median and p95 of 100 runs, `Tests/SuiteUITests/SuiteBudgetTests.swift`;
+the debug gate is ten times the device target, as for Model budgets):
+
+| id | Call | Target | Debug gate |
+|---|---|---|---|
+| QB-S11 | `TimelineMapping.rulerMarks` over a 4,096 pt stretch of a 100,000-frame timeline | ≤ 0.2 ms | ≤ 2 ms |
+| QB-S12 | `GridSelecting.click` with ⇧ over 10,000 ids | ≤ 1 ms | ≤ 10 ms |
+| QB-S13 | `HandleGeometryProviding.hit` | ≤ 0.02 ms | ≤ 0.2 ms |
+| QB-S14 | `ListEditing.reordered` over 10,000 ids | ≤ 1 ms | ≤ 10 ms |
+| QB-S15 | `GoldenComparing.compare` of two 2,880 × 1,800 images | ≤ 150 ms | ≤ 1.5 s |
+| QB-S16 | `FrameProbeRecording.summary` over 10,000 samples | ≤ 2 ms | ≤ 20 ms |
+
+### 7.2 App-audit checks that apply
+
+All six checks of `docs/blueprints/app-audit.md` run on every gallery shot
+under the `suiteui` key, baseline 0 for each:
+
+| Check | Why it applies to SuiteUI | Where a SuiteUI fault showed before |
+|---|---|---|
+| `disabled-dim` | Every SuiteUI control dims at 40 % when disabled | #233 (`EditorBarLabelStyle` overrode dimming) |
+| `overlap` | Section headers, Reset icons, toggles in rows | #215, #285 |
+| `contrast` | Every token pair, headers, pills | #62, #146, #283, #284 |
+| `identifier` | Every gallery control carries `suite.gallery.*`; shells carry `suite.*` | #262 |
+| `offscreen` | Shells at the window minimum | #215, #263 |
+| `unnamed` | Icon-only buttons (undo, transport, toggles, Reset) | #63 |
+
+And because SuiteUI draws every app's chrome, every SuiteUI feature's last
+round reads the five apps' audit counts on the CI run that contains it: a
+count that rises in any app is that feature's finding, not the app's.
+
+### 7.3 Layout spec
+
+| id | Check | Widths | Measured by |
+|---|---|---|---|
+| QB-S17 | Shell regions inside the window, no overlap over 1 pt, content ≥ `contentMinimum.width`, the right panel exactly `editorPanelWidth` | 880, 1024, 1280, 1440 pt | SJ1 (frames from the accessibility tree) |
+| QB-S18 | `ShellLayingOut.columns`: leading + content + trailing = the window width, content never under its minimum, `fits` false only under the minimum | every 40 pt from 600 to 2,560 | `ShellLayoutTests` (rule test) |
+| QB-S19 | Inspector rows align: every row's leading and trailing edges equal (±0.5 pt), every value's trailing edge equal, every label inside its row, no text clipped (its frame inside the row) | inspector widths 200, 240, 280, 360 (`inspectorWidth` min, ideal, the editor panel, max) | SJ24 `testInspectorRowsAlignAtEveryWidth` (`+Inspector`): the `inspector` page with `-SuiteGalleryWidth <w>` |
+| QB-S20 | Hit sizes: every control in `suite.controls` is at least 20 × 20 pt (WCAG 2.5.8), and the ones the token table lists at their hit size (28 for chips, keyframe button, preset hit; 12 for handles at any zoom) | every page | SJ25 `testEveryControlMeetsHitSize` (`SuiteJourneyTests.swift`) |
+| QB-S21 | Timeline labels end inside the strip and never overlap | lane widths 320, 640, 1,280 pt and 48 to 100,000 frames | `FrameMapping` label tests (exist) plus SJ19's long page shot |
+| QB-S22 | Corners nest: an inner shape's radius is one step under its container's | every component | `TokensTests.geometry` plus goldens |
+| QB-S23 | Fits the window minimum: rail + content minimum + panel ≤ `windowMinimum.width` | – | `TokensTests` (exists) |
+
+### 7.4 Fidelity: output equals a reference
+
+| id | Check | Reference | Measured by |
+|---|---|---|---|
+| QB-S24 | Every component state has a golden (QB-V5): rest, hover, focus, pressed or dragging, editing, disabled, and every state color it can show, in Light, Dark and both with Increase Contrast; one contact sheet per component family per appearance | committed PNGs in `Tests/AppSnapshotTests/Golden/` | `GoldenComparing` through `SnapshotHost` at scale 2: channel tolerance 2/255, at most 0.5 % differing pixels |
+| QB-S25 | Hairlines: a 1 pt divider, ruler edge, selection outline and timeline slot divider is exactly 2 device pixels at 2× (QB-V3) | the golden's pixel column | `SnapshotHostTests` hairline test |
+| QB-S26 | Curves stay curves: `CurveEditor.curvePath` and `ToneCurveEditor`'s path hold cubic elements, never a polyline of over 8 segments; arrows in `NodeGraph` are one cubic for a loop | element kinds | `CurveEditorTests`, `NodeGraphTests` |
+| QB-S27 | Number rules equal a reference table: 60 rows of (start, points, modifiers, step, range) → value and (value, key, modifiers) → value | a table in `Tests/SuiteUITests/ScrubReferenceTests.swift` written from `docs/design.md`'s rules, not from the code | the live `ValueScrubbing` |
+| QB-S28 | Selection rules equal a reference: 40 click and arrow sequences → selection and anchor | a table in `GridSelectionReferenceTests` | the live `GridSelecting` |
+| QB-S29 | Frame mapping equals a reference: frame ↔ x round trips for 0...duration at 5 frame widths; ruler marks for 6 fixed stretches | a table | the live `TimelineMapping` |
+| QB-S30 | Probe math equals a reference: 100 synthetic samples at 60 Hz and 120 Hz → known p50, p95 and dropped count | a table | `FrameProbeTests` |
+| QB-S31 | Golden compare equals a reference: identical images pass with share 0; one pixel off by 3 in a 10 × 10 image fails at share 0.01; a size mismatch fails with share 1 | three fixed images built in code | `GoldenImageTests` |
+| QB-S32 | Contrast (QB-V6) for every new token pair: the slot divider, node text on `card`, the point mark's ink on paper, the error message under a refused rename | `docs/design.md` ratio rules | `TokensTests.contrast` |
+| QB-S33 | Arrow ends lie on node edges (±0.5 pt) for 8 fixed node pairs and a self-loop stays outside its node | a table | `NodeGraphTests` against the live `GraphGeometry` |
+
+### 7.5 Feel (QB-F rows, SuiteUI's share)
+
+| Row | SuiteUI's part | Measured by |
+|---|---|---|
+| QB-F1 no dead controls | `ControlInventorying.violations()` is empty on every gallery page; every app's sweep reads the same JSON | SJ0, the apps' every-control journeys |
+| QB-F3 one gesture, one undo step | every component ends each gesture with exactly one `onEnd` (`EditRun`) | SJ11–SJ17, SJ19, SJ20 assert the log's `ends`; `EditRunTests` |
+| QB-F4 keyboard parity | every value the pointer changes changes from the keyboard too | SJ11, SJ12, SJ14–SJ17, SJ19 each do it once |
+| QB-F5 Reduce Motion, Increase Contrast | fades instant, the preview dot stops; outlines appear | QB-S9, goldens in the IC appearances |
+| QB-F6 geometry holds | sizes and radii match the tokens | `TokensTests.geometry`, goldens |
