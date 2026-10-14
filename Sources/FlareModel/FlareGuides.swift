@@ -15,6 +15,7 @@ extension FlareWorkspace {
     /// Adds a guide at `position` scene points, one "Add Guide" step.
     public mutating func addGuide(_ axis: Guide.Axis, at position: Double) {
         guard let sceneID = selectedSceneID else { return refuse(.noDocument) }
+        guard position.isFinite else { return refuse(.command(.invalidGuidePosition)) }
         let scenes = services.scenes
         step { _ = try scenes.addGuide(axis, at: position, sceneID: sceneID, in: &$0) }
     }
@@ -23,6 +24,7 @@ extension FlareWorkspace {
     /// one "Move Guide" step; the next drag begins where this one ended, so it gets a step of its own.
     public mutating func moveGuide(at index: Int, to position: Double, dragStart start: Double) {
         guard let sceneID = selectedSceneID else { return refuse(.noDocument) }
+        guard position.isFinite else { return refuse(.command(.invalidGuidePosition)) }
         let scenes = services.scenes, key = "guide-\(sceneID)-\(index)-\(start)"
         step { try scenes.moveGuide(at: index, to: position, sceneID: sceneID, coalesceKey: key, in: &$0) }
     }

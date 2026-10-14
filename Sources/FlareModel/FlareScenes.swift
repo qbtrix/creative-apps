@@ -52,14 +52,24 @@ extension FlareWorkspace {
         step { try scenes.reorderScene(id, to: row, in: &$0) }
     }
 
-    /// Sets the selected scene's size and background, or its frame rate and length, in one step.
+    /// Sets the selected scene's size and background, or its frame rate and length, in one step. A value the engine
+    /// would refuse is refused first with a sentence about the field (#571).
     public mutating func setSceneCanvas(width: Double, height: Double, background: FlareColor) {
         guard let id = selectedSceneID else { return refuse(.noDocument) }
+        guard width.isFinite, height.isFinite, width > 0, height > 0 else {
+            return refuse(.refused("Canvas size must be greater than 0."))
+        }
+        guard background.isFinite else { return refuse(.refused("Pick a valid background color.")) }
         let scenes = services.scenes
         step { try scenes.setCanvas(id, width: width, height: height, background: background, in: &$0) }
     }
     public mutating func setSceneTiming(fps: Int, durationFrames: Int) {
         guard let id = selectedSceneID else { return refuse(.noDocument) }
+        guard fps > 0 else { return refuse(.command(.invalidFPS(fps))) }
+        guard durationFrames >= 0 else { return refuse(.command(.invalidDuration(durationFrames))) }
+        if let label = selectedScene?.labels.filter({ $0.value > durationFrames }).min(by: { $0.key < $1.key }) {
+            return refuse(.refused("Length must reach frame \(label.value), where the label \u{201C}\(label.key)\u{201D} sits."))
+        }
         let scenes = services.scenes
         step { try scenes.setTiming(id, fps: fps, durationFrames: durationFrames, in: &$0) }
     }
