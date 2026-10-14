@@ -111,8 +111,9 @@ that owns it, after the captain approves this blueprint.
 | A component gallery that journeys can launch (`-SuiteGallery <page>`) | SuiteUI has no window of its own, so its behaviours have no journey; today they are proven only through whatever an app happens to show | suite-harness |
 | A control inventory (`suite.controls` JSON: every control's identifier, enabled state and reason) | Flare's J29 and every app's "every control acts or says why" sweep read it; nothing writes it | suite-harness |
 | Linux-checkable contracts for the component rules (section 5) | UI and logic can only be built in parallel against a fixed seam | suite-harness (files), every feature (conformances) |
-| Path, motion path and onion marks for Flare (`PathMarks`, `MotionPathMarks`, `GhostLayer`) | Named in #273's title area but not in its acceptance; Flare's J4 and J13 need them | canvas-marks |
-| Timeline playhead pill drag and the recording ring | Flare J9, J6 | timeline (inside #62's restyle; confirm in the packet) |
+| `Journey(name:)` and a `suiteui` audit key at 0 | Gallery shots must not count under the host app (section 4.1) | suite-harness |
+| One token sheet for the later waves (section 6.2) | So no wave-2 or wave-3 feature edits `Tokens.swift` | suite-harness |
+| An `EditRun` rule shared by every `onEnd` (section 5) | One gesture, one end, in one tested place instead of once per component | suite-harness |
 
 ### 0.5 Who uses what today
 
@@ -1535,7 +1536,7 @@ count that rises in any app is that feature's finding, not the app's.
 | #308 | p3 | Rename guard: behavioural journey | lists-and-layers | one SJ17 step covers #308, #311, #312 |
 | #311 | p3 | Rename guard: optional-chained helper | lists-and-layers | closed by #308's journey |
 | #312 | p3 | Rename guard: outside label style | lists-and-layers | closed by #308's journey |
-| #273 | p1 | Selection handles and the vector marks | canvas-marks | adds `PathMarks`, `MotionPathMarks`, `GhostLayer` (0.4) |
+| #273 | p1 | Selection handles and the vector marks (`PathMarks`, `MotionPathMarks`, `GhostLayer`, guide marks) | canvas-marks | Design's selection marks move into SuiteUI; Design adopts them in a `line:design` task |
 | #706 | – | Point mark | canvas-marks | one mark for both |
 | #737 | – | Source crosshair | canvas-marks | duplicate of #706's mark: closed by the same PR |
 | #530 | – | Grid mark | canvas-marks | |
