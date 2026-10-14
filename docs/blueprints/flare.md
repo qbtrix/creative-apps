@@ -1612,3 +1612,217 @@ weighed, not as open options.
 - **The suite model provider** (Phase 3) has no date, so IN-8 has none.
 - **Belt allowlist.** The logic mandates' `swift test --filter Budget` check
   needs `swift` on the factory's command allowlist (see the process doc).
+
+---
+
+## 11. Pseudo-C4 (`flare/c4-planned.json`)
+
+`docs/blueprints/flare/c4-planned.json` is Flare's planned C4 model in the
+shape of `docs/c4/model.json`: every L3 component Flare v1 needs, read from
+section 2, the task tables in section 7 and the four feature packets. Each
+component has a name, a description, the source paths it owns, its
+relationships (on the component; the model's `relationships` list holds
+the container edges, as in `docs/c4/model.json`, then every component edge
+flattened), `"authored": true`, and a status:
+
+- **existing**: every path it lists is on `origin/dev` (956d946, 2026-10-14).
+- **planned**: at least one of its paths is not on dev yet. Today every
+  planned component has none of its files; components were split so that
+  no component was half built on 956d946. A planned component turns
+  existing in the PR that lands its last file.
+
+What it holds:
+
+| Container | Existing | Planned |
+|---|---|---|
+| FlareModel (`Sources/FlareModel/`) | workspace and services, contracts, stage gestures, Edit menu, animate, playback, scenes and layers, symbols, machines, files, export state, fakes, live easing | assist state, fake assist, large fixtures, live stage, live keys, live scenes, live onion and library, live interact, live export, live assist |
+| FlareApp (`Sources/FlareApp/`) | today's shell (`FlareApp`, `FlareCommands`, layer items, easing inspector), stage path and playback driver | rasterizer, autosave and recovery, window and intents, stage, inspector, timeline, panels, interactions, file and edit, export, assist views |
+| SuiteUI (the parts Flare uses; `line:suiteui` owns them) | tokens, window shell, content surfaces, editor shell, canvas and marks, inspector parts, timeline strip, segmented tabs | vector marks (S12), transport (S7), layer list (S15), node graph (S14), frame probe (QH-1) |
+| FlareCore (creative-core) | document, engine, timeline and format; edit commands; hit test and shape bounds; exporters | render list, hit query, world bounds, builders and onion (LC-1 to LC-4, LC-9); instance commands (LC-6); machine commands and player (LC-11, LC-12) |
+
+The FlareModel and FlareApp components together own every file under
+`Sources/FlareModel/` and `Sources/FlareApp/` on dev exactly once, the same
+rule `scripts/ci` applies to `docs/c4/model.json`. FlareCore paths are in
+creative-core and list only the files the LC tasks name; their status was
+read from creative-core `main` cfad97f, the revision dev resolves, not from
+this repo.
+
+This file is a plan, not the gate. `docs/c4/model.json` stays the checked
+model: there each Flare target is still one component, and its description
+grows in the PR that adds the behavior (section 2, C4 deltas). Nothing reads
+this file in CI.
+
+---
+
+## 12. Quality bar
+
+What "fast, aligned and faithful" means for Flare v1, as numbers a run can
+check. Rubric section 6 defines the ids (QB-…) and how CI gates are set;
+this section binds them to Flare's tools, screens and exports. Every item
+names where it is measured:
+
+- **Linux**: `scripts/ci` (Model tests in debug), the local gate before every PR (no CI runs on a PR).
+- **macOS unit**: `Tests/AppSnapshotTests` and `Tests/SuiteUITests`, in the `macOS` job on `dev`.
+- **macOS journey**: `UITests/FlareJourneyTests*.swift`, in the `macOS` job
+  on `dev`; locally `scripts/ui-test`, then `scripts/contact-sheet`. Perf
+  journeys attach `perf-<test>.json`; audits attach `audit-counts.json`
+  (both in the `ui-screens` artifact).
+- **Release, local**: `swift test -c release --filter <suite>`, for the
+  release half of a model budget.
+
+Status: **covered** means the named test is on dev 956d946 and asserts the
+item now. **planned** names the task that adds it. A planned item is still
+part of the bar: its feature is not done until the test exists and passes.
+
+### 12.1 Input-to-screen speed, per interactive tool
+
+"Frames late" is the rubric's unit: display refreshes between an input
+event's timestamp and the refresh whose frame first shows it, read from
+`FrameProbe` (QH-1). Device targets are release builds on a 60 or 120 Hz
+Mac; CI gates are the rubric's placeholders until QH-7 sets them from ten
+runs (never tighter than the device target). The model half is the work
+the Model does per input event; its CI gate is debug, ten times the device
+target, as the rubric says, measured as the median of N runs on `bounce`
+in the packets' budget tests and as median and p95 on `reference` in QH-3's
+`StageBudgetTests` and creative-core's `FlareBudgetTests` (LC-14), which
+own QB-L5 to QB-L7 for the whole app. The easing editor keeps its own
+tighter p95 gate (5 ms debug, 1 ms release).
+
+| Tool | End to end (device; CI gate) | End-to-end test | Model half per event (debug CI gate) | Model tests |
+|---|---|---|---|---|
+| **Stage drag**: move, draw Rectangle, drag a Pen handle, Space-pan; also scale and rotate handles, Ellipse, Direct Select anchor drag | QB-L1: p95 ≤ 2 frames late; CI 3 (placeholder). A drag preview draws before mouse-up (QB-F2, the probe's mark) | P1 `testCanvasDragLatency` on `reference`: four series (move a shape, draw a rectangle, drag a pen handle, Space-pan), ≥ 60 samples each (planned, QH-5). Scale, rotate, ellipse, anchor drag and the QB-F2 mark: gap 5 | hit ≤ 10 ms (QB-L5); draw list ≤ 20 ms (QB-L6); one drag step ≤ 10 ms (QB-L7); a pointer move performs no command (section 2) | covered: `WorkspaceWiringTests.aLongDragPerformsNothingUntilMouseUpThenOneStep` (no command until mouse-up), `DirectSelectMoveSpaceTests.aDirectSelectMoveStaysWithinTheEditBudget` (QB-L7). Behaviour, not timing: `FlareToolsTests.flareToolActsOrIsDisabled`, `ShapeFakesTests.aRectangleCommitIsOneUndoAddRectangleEntry`, `ShapeFakesTests.editPathMoveAndDeleteAreOneEntryEachAndUndoExactly`. Planned: hit and draw list in `LiveStageBudgetTests` (ST-10), `StageBudgetTests` (QH-3), `FlareBudgetTests` (LC-14) |
+| **Scrub**: drag the playhead | QB-L3: p95 ≤ 2 frames late; CI 3 | P3 `testTimelineScrubLatency` (planned, QH-5) | set the frame, then the draw list for it ≤ 20 ms (QB-L6); a scrub is never an undo step (QB-F3) | covered: `FlarePlaybackTests.playbackAndScrubbingAreNotUndoSteps`, `FlarePlaybackTests.scrubbingWhilePlayingContinuesFromTheNewFrame`, `PlayheadClampTests`. Planned: `LiveStageBudgetTests.drawListWithinBudget` (ST-10) |
+| **Inspector scrub**: drag a TRANSFORM bar slider | QB-L2: p95 ≤ 2 frames late; CI 3 | P2 `testSliderScrubLatency` on the Rotation bar (planned, QH-5) | one `setValue` step ≤ 10 ms (QB-L7); a whole scrub is one undo entry (one merged command once LC-10 lands) | covered: `PropertyFakesTests.oneHundredTwentyScrubValuesLeaveExactlyOneUndoEntry`, `PropertyScrubUndoTests.aScrubThatEndsOnItsStartValueDoesNotSwallowTheNextScrub`. Planned: `LiveKeysBudgetTests.scrubStepWithinBudget` (live-keys KY-9) |
+| **Keyframe drag**: retime a key on the timeline | QB-L3: p95 ≤ 2 frames late; CI 3 | P3, second series: drag Ball's key at 24 across 24 frames (planned; gap 1 below) | one `moveKeys` step ≤ 10 ms (QB-L7); a 50-step drag is one entry (`MoveKeyframe` merges) | covered: `TimelineFakesTests.keyMovesAreOneStepAndPassOverKeysThatMoveToo`, `TimelineFakesTests.movingKey24Onto36ThrowsAndChangesNothing`. Planned: `LiveKeyframesEditTests.coalescedDragIsOneEntry` (KY-6); the step budget (gap 2) |
+| **Easing curve drag**: drag a curve handle | QB-L2: p95 ≤ 2 frames late; CI 3. The handle follows the pointer to 0.03 of the curve's unit square | P2, second series on `flare.easing.handle1` (planned; gap 1). Covered now, for position not timing: `FlareJourneyTests.testEditEasingOfAKeyframeSegment` | one handle move p95 ≤ 5 ms debug, ≤ 1 ms release; one drag is one undo step | covered: `FlareEasingDragCostTests.handleDragP95UnderBudget` (200 layers × 4 tracks × 25 keys), `LiveEasingTests.coalescedDragStepP95UnderBudget`, `FlareEasingTests.oneDragIsOneUndoStep`, `LiveEasingTests.coalescedDragIsOneStepThatUndoesToTheStart` |
+| **Playback**: play at the document rate | QB-L4: 0 dropped frames and tick jitter p95 < 2 ms over 5 s; CI ≤ 2 dropped frames in 5 s. QB-L11: 500 nested instances at 30 fps drop 0 | P4 `testPlaybackHoldsFrameRate` on `reference`, P5 `testNestedInstancesPlayback` on `crowd` (planned, QH-5, QH-6) | the ticker turns link timestamps into frames with no drift; one nested frame's draw list ≤ 40 ms (QB-L11) | covered: `FlarePlaybackTicksTests.fiveSecondsAtTheDocumentRateDropNoFrames` (60 and 120 Hz), `FlarePlaybackTicksTests.oneStallStaysInsideTheCIGate`, `FlarePlaybackTests.fiveSecondsAt60HzTicksShowsEveryFrameWithoutDrift`, `PlaybackDriverTests.theDriverAgreesWithTheFakeOnTheSameTicks` and `.usesTheTargetTimestampNotWallTime` (macOS unit). Planned: `LiveStageBudgetTests.nestedDrawListWithinBudget` (ST-10) |
+| **Guide drag**: drag a guide out of a ruler and along it | QB-L1: p95 ≤ 2 frames late; CI 3 | P1, a guide series (gap 5) | one `moveGuide` step ≤ 10 ms (QB-L7, median of 50); a drag is one entry | covered: `StageFakesTests.aGuideDragOfFiftyStepsIsOneUndoEntry`, `GuideDragUndoTests.aGuideDragThatEndsWhereItStartedDoesNotSwallowTheNextDrag`. Planned: `LiveScenesGuidesTests.dragStepWithinBudget` (live-scenes SN-4) |
+| **Scroll**: timeline lanes and layer list of `crowd` | QB-L10: p95 frame interval ≤ 1.5 refreshes; CI set from CI | P6 `testTimelineAndLayerListScroll` (planned, QH-6) | 300 timeline rows ≤ 50 ms debug | planned: `HugeDocumentBudgetTests` (QH-3) |
+
+Waits are part of speed too: open, export and assist show their progress
+state ≤ 100 ms after the command (QB-L9; covered for open's model half by
+`FlareFilesTests.progressShowsAtOnceAndOpenFinishesOffTheDecode`; P7 and
+J24 planned), and opening up to 64 MB never stalls the main thread longer
+than 2 refreshes (QB-L12; P7 planned, QH-6), and export of an SVG frame, 300 Lottie frames and 48 1080p
+PNGs stays inside QB-L8 (covered on the fake by
+`ExportScanTests.svgFrameLottieAndPNGSequenceStayInsideQBL8`; live in
+LM-13a).
+
+### 12.2 App-audit checks
+
+Every check in `AppAudit.checks` has scope `.all`, so all six run on every
+Flare journey shot (`docs/blueprints/app-audit.md`): `disabled-dim`,
+`overlap`, `contrast`, `identifier`, `offscreen` and `unnamed`. Measured on
+the macOS job on `dev` (`audit-counts.json` in `ui-screens`) and locally with
+`scripts/ui-test`; the checks' own logic is tested on Linux by
+`AuditChecksTests`.
+
+| Check | Flare baseline today (`UITests/audit-baseline.json`) | Bar |
+|---|---|---|
+| `disabled-dim` | 0 (not listed) | stays 0: every disabled tool and menu item (section 3) reads as disabled |
+| `overlap` | 0 (not listed) | stays 0 at every width in 12.3 |
+| `contrast` | 3 | no rise in any PR; 0 when v1 ships |
+| `identifier` | 15 | no rise; 0 once F1b gives every control its `flare.<area>.<name>` identifier (section 4, Modes) |
+| `offscreen` | 15 | no rise; target 0 after F1a moves the window to `EditorShell` (its columns need 762 pt, 12.3); F1a's PR lowers the count or says what is left and why |
+| `unnamed` | 0 (not listed) | stays 0 |
+
+A Flare count never goes up (an unlisted check counts as 0, so a first
+finding is a rise; CLAUDE.md, Fast lane); falls are written back by CI's
+`Audit lower` job. Every new screen Flare adds gets a journey `shot`, so the
+audit sees it.
+
+### 12.3 Layout at several window widths
+
+The editor's columns come from tokens: the rail is `toolButton` + 2 × `xs`
+= 40 pt, the right panel `editorPanelWidth` = 280 pt, with a 1 pt divider
+after the rail and before the panel (`EditorShell`), the top bar
+`editorTopBar` = 48 pt, the timeline's name column `timelineLabelColumn` =
+160 pt. Widths checked:
+
+| Width × height | Why |
+|---|---|
+| 880 × 560 | `SuiteSize.windowMinimum` |
+| 1000 × 640 | `SuiteSize.windowLaunch` |
+| 1024 × 700 | the CI runner's screen width (1024 × 768 less the menu bar) |
+| 1440 × 900 | a laptop; the snapshot frame |
+
+At every width, with `bounce` open:
+
+1. The top bar spans the window, 48 pt tall; its first item starts at
+   `windowControlsInset` (76 pt); the save status is the trailing item,
+   `SuiteSpacing.s` (8 pt) from the window's edge (`EditorTopBar`'s
+   padding); Export… is the one filled item; no two items overlap.
+2. The rail is 40 pt wide at x = 0 under the top bar. The panel is exactly
+   280 pt wide, its trailing edge on the window's; it never shrinks. The
+   stage column takes the rest: W − 322 pt (558 pt at the minimum, above
+   `contentMinimum` 440).
+3. At Fit, the artboard is centred in the stage viewport to 0.5 pt and
+   leaves at least `SuiteSpacing.xxl` (32 pt), `CanvasViewport`'s fit
+   margin, on its limiting side, and Fit never zooms past 100%.
+4. The timeline's lanes start on the same x as its ruler, after the 160 pt
+   name column; the playhead's x equals `FrameMapping`'s x for the current
+   frame to 0.5 pt; the transport capsule is centred in the stage column to
+   0.5 pt.
+5. In the Properties tab every bar slider spans the panel minus its keyframe
+   slots, and the trailing edges of all value texts line up to 0.5 pt.
+6. Nothing is hidden to make room: the panel shows without hiding anything
+   (today's `testEditEasingOfAKeyframeSegment` hides the sidebar to fit the
+   1024 runner; that ends with F1a), and the audit's `overlap` and
+   `offscreen` find nothing.
+7. At 560 pt tall the stage keeps `EditorShell`'s 360 pt minimum height
+   (`contentMinimum.height`) and the timeline shows its ruler and two lanes
+   (88 pt), so S9's timeline slot and the status row share at most
+   560 − 48 − 360 = 152 pt.
+
+| Measured by | Widths | Status |
+|---|---|---|
+| `EditorShellTests.editorShellFitsTheWindowMinimum` (macOS unit): rail + content minimum + panel ≤ window minimum | all | covered |
+| `TokensTests.splitViewIdealWidthsFitTheWindowMinimum`, `.windowLaunchSizeComesFromTheColumnTokens` | 880, 1000 | covered (today's `SuiteWindow`) |
+| `ScrubValueTests.fitScaleFitsInsideTheInsetAndNeverZoomsIn` (rule 3's Fit), `EditorShellTests.canvasLayoutCentresAFittingDocument` (centring at a fixed zoom) | all | covered |
+| `SuiteWindowMinimumSnapshots` (`suiteui-window-minimum-*.png`) | 880 | covered (the shell Flare leaves) |
+| `FlareJourneyTests+Layout.testLayoutAtEachWidth`: launches with a `-FlareWindowSize <w>x<h>` argument, reads the frames of `EditorShell`'s `suite.tools` (rail) and `suite.inspector` (panel) and of new `flare.topbar`, `flare.artboard`, `flare.timeline` and `flare.transport` ids, asserts rules 1–7 with the token values written into the journey (UITests import no SuiteUI), and shoots each width (so the audit runs) | 880, 1000, 1024 | planned (gap 3) |
+| `FlareLayoutSnapshots`: `FlareEditor` on `bounce` at each width inside the 1440 × 900 frame, `flare-layout-<w>-dark.png` | all four | planned (gap 3) |
+
+### 12.4 Fidelity: export equals a reference
+
+| Item | Reference and tolerance | Test | Status |
+|---|---|---|---|
+| Curves stay curves (QB-V1) | each FlareCore `cubic` is one `addCurve`, element for element | `StagePathTests.cubicsStayCurves` (macOS unit); `LiveStageTests.cubicsKept`, `LiveShapesTests.ellipseIsFourCubics` (Linux, ST-1, ST-6) | covered on macOS; Linux planned |
+| Save then open | byte-identical file | `FlareFilesTests.saveThenOpenIsByteIdentical` | covered |
+| Easing | each preset's curve at x = 0.25, 0.5 and 0.75 within 1e-9 of the table; samples within 1e-9 of FlareCore | `LiveEasingTests.presetTableGolden`, `.curveEndpointsExact`, `FlareEasingTests.samplesMatchFlareCoreWithinOneBillionth` | covered |
+| Playback timing | the same link timestamps give the same frames, live and fake | `PlaybackDriverTests.theDriverAgreesWithTheFakeOnTheSameTicks`, `FlarePlaybackTests.fiveSecondsAt60HzTicksShowsEveryFrameWithoutDrift` | covered |
+| Warnings, never a silent drop | `showcase` exports carry the scan's warnings for their format: three for SVG and PNG, four for Lottie (its background) | `ExportScanTests.everyFormatExportsShowcaseCarryingTheScansWarnings`, `.showcaseIsValidAndHoldsOneOfEachWarning` (fake); `LiveExportWarningsTests` (LM-13b) | covered on the fake; live planned |
+| PNG sequence shape | `bounce` 0–12 step 2 gives 7 PNGs; 0–48 step 2 gives 25 | `ExportScanTests.bounceZeroToTwelveStepTwoGivesSevenPNGs` (fake); `LiveExportTests` (LM-13a) | covered on the fake; live planned |
+| Stage golden (QB-V2, V3) | `bounce` and `character` at frame 24, 2x: channel tolerance 2/255, ≤ 0.5% differing pixels; a 1 pt hairline is 2 px | `FlareStageSnapshots` on `GoldenImage` and `SnapshotHost` (F3a, QH-2, QH-2b) | planned |
+| PNG export equals the stage (QB-V4) | the PNG `StageRasterizer` writes for `bounce` frames 0 and 24 at 2x equals the stage golden of that frame within QB-V2's tolerance | `RasterizerTests` (LA-1) | planned |
+| SVG export equals a reference | `bounce` frame 24 SVG byte-identical to a committed reference; parses with `XMLParser` | creative-core `RenderListTests` (LC-1, SVG golden byte-identical); `LiveExportTests` against `Tests/FlareModelTests/Golden/bounce-24.svg` (gap 4); IN-7's parse check | planned |
+| Lottie export equals a reference | `bounce` Lottie decodes to the same JSON object as a committed reference (key order free; numbers to 1e-6); `fr` 24; position, scale, rotation and opacity tracks present | creative-core `LottieTracksTests` (LC-13); `LiveExportTests` against `Tests/FlareModelTests/Golden/bounce.lottie.json` (gap 4) | planned |
+| Live equals fake | the live stage's draw list equals the fake's on `bounce` and `character` | `LiveConformanceTests` (ST-5) | planned |
+| Convert to Symbol changes no pixel | the render-list diff before and after is empty | `LiveLibraryTests` (LM-10) | planned |
+
+### 12.5 Gaps this bar opens
+
+Each is a test no task owns yet; the next packet that touches its file
+takes it, and until then it is listed here, not silently dropped.
+
+1. **P2 and P3 second series.** QH-5's P2 adds a drag of the easing curve
+   handle and P3 a key drag, each ≥ 60 samples, so keyframe and easing drags
+   are timed end to end, not only the Rotation bar and the playhead.
+2. **Key drag step budget.** `LiveKeysBudgetTests` (KY-9) adds
+   `moveKeyStepWithinBudget`: the median of 50 `moveKeys` steps on `bounce`
+   ≤ 10 ms debug (QB-L7).
+3. **Layout journey and snapshots.** A `-FlareWindowSize` launch argument
+   (in `FlareLaunch.swift`, F1a), `UITests/FlareJourneyTests+Layout.swift`
+   and `Tests/AppSnapshotTests/FlareLayoutSnapshots.swift`, after F1b gives
+   the regions their identifiers and QH-4 makes the journey template
+   compile `UITests/FlareJourneyTests*.swift`.
+4. **Export references.** `Tests/FlareModelTests/Golden/bounce-24.svg` and
+   `bounce.lottie.json`, written once by LM-13a from the live exporters,
+   reviewed by eye in that PR, then compared on every run. No test target
+   holds non-Swift files yet and `Package.swift` is protected, so SwiftPM
+   would warn about them as unhandled files: LM-13a either embeds the
+   references as string literals in a Swift file or files the
+   `Package.swift` resource change as its own issue first.
+5. **More P1 series.** QH-5's P1 adds scale and rotate handle drags, an
+   Ellipse draw, a Direct Select anchor drag and a guide drag, and records
+   the probe's "preview before mouse-up" mark for each draw (QB-F2).

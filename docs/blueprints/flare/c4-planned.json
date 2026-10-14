@@ -1,0 +1,2044 @@
+{
+  "version": "1.0",
+  "scope": "creative-apps",
+  "generated_at": "2026-10-14T00:00:00Z",
+  "source_path": ".",
+  "authored": true,
+  "model": {
+    "people": [],
+    "systems": [
+      {
+        "id": "creative-apps",
+        "name": "creative-apps",
+        "description": "Flare's slice of creative-apps: every L3 component Flare v1 needs (docs/blueprints/flare.md sections 2 and 7, and the packets in docs/blueprints/flare/features/), each marked existing (all its paths on origin/dev 956d946) or planned (none yet).",
+        "tags": [
+          "internal"
+        ],
+        "containers": [
+          {
+            "id": "flare-model",
+            "name": "FlareModel",
+            "description": "Linux-safe state and logic behind Flare's window: the workspace, the use-case contracts, their fakes and live conformances over FlareCore.",
+            "technology": "Swift 6, Foundation",
+            "tags": [
+              "internal"
+            ],
+            "components": [
+              {
+                "id": "flare-workspace",
+                "name": "Workspace and services",
+                "description": "FlareWorkspace, the one Sendable, Equatable value behind a window (document, engine, selected scene, tool, selection, drafts, frame and playback, auto-key, onion, symbol being edited, machine, export, assist and file state, section 2's stored-property table), the FlareCore typealiases (FlarePath, FlareColor, FlareScene, FlareShape, FlareTransition), and FlareServices: one existential per use-case contract with its .fake and .live values. toolHelp(_:) reads each tool's service for the reason a tool is off.",
+                "technology": "Swift 6, Foundation",
+                "paths": [
+                  "Sources/FlareModel/FlareWorkspace.swift",
+                  "Sources/FlareModel/FlareWorkspaceState.swift",
+                  "Sources/FlareModel/FlareTypealiases.swift",
+                  "Sources/FlareModel/FlareServices.swift"
+                ],
+                "relationships": [
+                  {
+                    "target": "flare-contracts",
+                    "description": "holds one conformance per use-case contract",
+                    "style": "sync"
+                  },
+                  {
+                    "target": "flarecore-document",
+                    "description": "owns the open Document and its CommandEngine",
+                    "style": "sync"
+                  }
+                ],
+                "status": "existing",
+                "authored": true
+              },
+              {
+                "id": "flare-contracts",
+                "name": "Use-case contracts",
+                "description": "One Swift protocol per use case (section 6.2), Linux-safe, FlareCore and Foundation types only: StageRendering, StageHitTesting, ShapeBuilding, PropertyAnimating, KeyframeEditing, KeyframeEasing, OnionSkinning, SceneEditing, LibraryManaging, StateMachineEditing, StateMachinePreviewing, Exporting with its FrameRasterizing argument, and AnimationAssisting, plus the shared value types (StageAddress, StageDrawList, ShapeDraft, ExportOptions, AssistProposal and the rest). Every fake and live conformance codes against these.",
+                "technology": "Swift 6, Foundation",
+                "paths": [
+                  "Sources/FlareModel/Contracts/StageContracts.swift",
+                  "Sources/FlareModel/Contracts/ShapeContracts.swift",
+                  "Sources/FlareModel/Contracts/AnimateContracts.swift",
+                  "Sources/FlareModel/Contracts/SceneContracts.swift",
+                  "Sources/FlareModel/Contracts/LibraryContracts.swift",
+                  "Sources/FlareModel/Contracts/InteractContracts.swift",
+                  "Sources/FlareModel/Contracts/ExportContracts.swift",
+                  "Sources/FlareModel/Contracts/AssistContracts.swift"
+                ],
+                "relationships": [
+                  {
+                    "target": "flarecore-document",
+                    "description": "signatures use FlareCore value types",
+                    "style": "sync"
+                  }
+                ],
+                "status": "existing",
+                "authored": true
+              },
+              {
+                "id": "flare-stage-gestures",
+                "name": "Selection, drag and drawing",
+                "description": "FlareSelection (click, Shift-click, marquee, the selection box's bounds), FlareDrag (a stage gesture changes only draft and dragPreview while the pointer moves, then commits once on mouse-up as one named undo step: Add Rectangle, Move, Scale, Rotate, Edit Path) and FlareDrawing (the Ellipse tool's draft and commit on the workspace, the stopgap until LiveShapes and LC-4's ellipse builder).",
+                "technology": "Swift 6, Foundation",
+                "paths": [
+                  "Sources/FlareModel/FlareSelection.swift",
+                  "Sources/FlareModel/FlareDrag.swift",
+                  "Sources/FlareModel/FlareDrawing.swift"
+                ],
+                "relationships": [
+                  {
+                    "target": "flare-contracts",
+                    "description": "calls services.hits and services.shapes",
+                    "style": "sync"
+                  },
+                  {
+                    "target": "flare-workspace",
+                    "description": "extends FlareWorkspace",
+                    "style": "sync"
+                  }
+                ],
+                "status": "existing",
+                "authored": true
+              },
+              {
+                "id": "flare-edit",
+                "name": "Edit menu",
+                "description": "FlareEdit runs Cut, Copy, Paste, Duplicate, Delete, Select All and Deselect, each one named undo step (Cut composed by the workspace's step) or disabled with the reason it refuses with.",
+                "technology": "Swift 6, Foundation",
+                "paths": [
+                  "Sources/FlareModel/FlareEdit.swift"
+                ],
+                "relationships": [
+                  {
+                    "target": "flare-contracts",
+                    "description": "calls services.shapes for delete, duplicate, copy and paste",
+                    "style": "sync"
+                  },
+                  {
+                    "target": "flare-workspace",
+                    "description": "extends FlareWorkspace",
+                    "style": "sync"
+                  }
+                ],
+                "status": "existing",
+                "authored": true
+              },
+              {
+                "id": "flare-animate",
+                "name": "Properties, keys, easing and onion state",
+                "description": "FlareAnimate (auto-key, the inspector's animated properties with Mixed, one coalesced step per scrub, the stopwatch and keyframe button by section 2's not-animated rule), FlareEasing with EasingEditing and FakeEasingEditing (the window-level easing editor: segments, presets, handle drags as one coalesced step), and FlareOnionState (onion skin and motion path preferences, ghosts and path read from services.onion).",
+                "technology": "Swift 6, Foundation",
+                "paths": [
+                  "Sources/FlareModel/FlareAnimate.swift",
+                  "Sources/FlareModel/FlareEasing.swift",
+                  "Sources/FlareModel/EasingEditing.swift",
+                  "Sources/FlareModel/FakeEasingEditing.swift",
+                  "Sources/FlareModel/FlareOnionState.swift"
+                ],
+                "relationships": [
+                  {
+                    "target": "flare-contracts",
+                    "description": "calls services.properties, keyframes, easing and onion",
+                    "style": "sync"
+                  },
+                  {
+                    "target": "flare-workspace",
+                    "description": "extends FlareWorkspace",
+                    "style": "sync"
+                  }
+                ],
+                "status": "existing",
+                "authored": true
+              },
+              {
+                "id": "flare-playback",
+                "name": "Playback clock",
+                "description": "FlarePlayback (current frame, playing, loop, advance(elapsed:), the symbol's range while editing in place) and FlarePlaybackTicks: PlaybackTicker turns display-link target timestamps into elapsed seconds, FlareWorkspace.tick is the link's entry point, and PlaybackBudget holds QB-L4's dropped-frame gate. Engine-direct over Timeline.playbackFrame.",
+                "technology": "Swift 6, Foundation",
+                "paths": [
+                  "Sources/FlareModel/FlarePlayback.swift",
+                  "Sources/FlareModel/FlarePlaybackTicks.swift"
+                ],
+                "relationships": [
+                  {
+                    "target": "flarecore-document",
+                    "description": "samples frames with Timeline.playbackFrame",
+                    "style": "sync"
+                  },
+                  {
+                    "target": "flare-workspace",
+                    "description": "extends FlareWorkspace",
+                    "style": "sync"
+                  }
+                ],
+                "status": "existing",
+                "authored": true
+              },
+              {
+                "id": "flare-scenes-layers",
+                "name": "Scenes, guides and layers",
+                "description": "FlareScenes (add, rename, remove never the last, reorder, canvas and timing), FlareGuides (add, move as one coalesced step per drag, remove, clear) and FlareLayers (the layers panel, engine-direct: add, remove, rename, visibility, lock, order).",
+                "technology": "Swift 6, Foundation",
+                "paths": [
+                  "Sources/FlareModel/FlareScenes.swift",
+                  "Sources/FlareModel/FlareGuides.swift",
+                  "Sources/FlareModel/FlareLayers.swift"
+                ],
+                "relationships": [
+                  {
+                    "target": "flare-contracts",
+                    "description": "calls services.scenes",
+                    "style": "sync"
+                  },
+                  {
+                    "target": "flarecore-commands",
+                    "description": "performs layer commands directly",
+                    "style": "sync"
+                  },
+                  {
+                    "target": "flare-workspace",
+                    "description": "extends FlareWorkspace",
+                    "style": "sync"
+                  }
+                ],
+                "status": "existing",
+                "authored": true
+              },
+              {
+                "id": "flare-symbols",
+                "name": "Symbols and swatches",
+                "description": "FlareSymbols: the Library tab's symbols with usage counts and swatches, Convert to Symbol, place an instance, the reason Delete is off while a symbol is used, and editing a symbol in place (the owner switch, the symbol's length on the timeline, the scene frame to return to).",
+                "technology": "Swift 6, Foundation",
+                "paths": [
+                  "Sources/FlareModel/FlareSymbols.swift"
+                ],
+                "relationships": [
+                  {
+                    "target": "flare-contracts",
+                    "description": "calls services.library",
+                    "style": "sync"
+                  },
+                  {
+                    "target": "flare-workspace",
+                    "description": "extends FlareWorkspace",
+                    "style": "sync"
+                  }
+                ],
+                "status": "existing",
+                "authored": true
+              },
+              {
+                "id": "flare-machines",
+                "name": "Interactions state and graph layout",
+                "description": "FlareMachines (the edited machine, states from frame labels, transitions and inputs, each edit one named undo step with refusals in machineError, and the live preview, which any edit stops), FlareMachineMessages (the plain refusal text) and MachineLayout (columns by breadth-first distance from the initial state, unreachable states in a last column; the same machine always gives the same layout).",
+                "technology": "Swift 6, Foundation",
+                "paths": [
+                  "Sources/FlareModel/FlareMachines.swift",
+                  "Sources/FlareModel/FlareMachineMessages.swift",
+                  "Sources/FlareModel/MachineLayout.swift"
+                ],
+                "relationships": [
+                  {
+                    "target": "flare-contracts",
+                    "description": "calls services.machines and services.preview",
+                    "style": "sync"
+                  },
+                  {
+                    "target": "flare-workspace",
+                    "description": "extends FlareWorkspace",
+                    "style": "sync"
+                  }
+                ],
+                "status": "existing",
+                "authored": true
+              },
+              {
+                "id": "flare-files",
+                "name": "Files, Open Recent and recovery data",
+                "description": "FlareFiles: open through load (progress first, a pure decode the app runs off the main thread, then the landing), save bytes, file name, title and dirty flag, section 3.3's alert text per FormatError, the Open Recent list (paths, most recent first, at most ten). mac-platform MP-2 and MP-3 add to this file the autosave due time, the recovery bytes and restoring a recovered document as unsaved work. FlareSampleAnimation builds the sample document the toolbar opens today.",
+                "technology": "Swift 6, Foundation",
+                "paths": [
+                  "Sources/FlareModel/FlareFiles.swift",
+                  "Sources/FlareModel/FlareSampleAnimation.swift"
+                ],
+                "relationships": [
+                  {
+                    "target": "flarecore-document",
+                    "description": "encodes and decodes with FlareFormat",
+                    "style": "sync"
+                  },
+                  {
+                    "target": "flare-workspace",
+                    "description": "extends FlareWorkspace",
+                    "style": "sync"
+                  }
+                ],
+                "status": "existing",
+                "authored": true
+              },
+              {
+                "id": "flare-export-state",
+                "name": "Export options, scan and run",
+                "description": "FlareExport (the export sheet's options, progress, cancel, result and warnings) and ExportScan (names everything an export can't write: text, symbol animation, machines, Lottie's background), so nothing is dropped silently.",
+                "technology": "Swift 6, Foundation",
+                "paths": [
+                  "Sources/FlareModel/FlareExport.swift",
+                  "Sources/FlareModel/ExportScan.swift"
+                ],
+                "relationships": [
+                  {
+                    "target": "flare-contracts",
+                    "description": "calls services.export with the window's FrameRasterizing",
+                    "style": "sync"
+                  },
+                  {
+                    "target": "flare-workspace",
+                    "description": "extends FlareWorkspace",
+                    "style": "sync"
+                  }
+                ],
+                "status": "existing",
+                "authored": true
+              },
+              {
+                "id": "flare-assist-state",
+                "name": "Assist state",
+                "description": "FlareAssist (LM-0c4): the Assist popover's prompt, proposal, preview list and error; Accept applies the proposal as one \"Assist\" undo group through the shared apply code, Reject leaves the history untouched, and a proposal that adds or edits text is rejected whole with a reason.",
+                "technology": "Swift 6, Foundation",
+                "paths": [
+                  "Sources/FlareModel/FlareAssist.swift"
+                ],
+                "relationships": [
+                  {
+                    "target": "flare-contracts",
+                    "description": "calls services.assist",
+                    "style": "sync"
+                  },
+                  {
+                    "target": "flare-workspace",
+                    "description": "extends FlareWorkspace",
+                    "style": "sync"
+                  }
+                ],
+                "status": "planned",
+                "authored": true
+              },
+              {
+                "id": "flare-fakes",
+                "name": "Fixture fakes",
+                "description": "The fakes the UI track and snapshots run on: FakeScenes, FakeStage, FakeHits, FakeShapes, FakeProperties, FakeKeyframes, FakeEasing, FakeOnion, FakeLibrary, FakeMachines, FakePreview, FakeExport with FakeRasterizer, NotBuilt for members without a fake, FixtureEdit (a document-swapping Command, never registered), and FlareFixtures with the empty, bounce, character, button and showcase documents.",
+                "technology": "Swift 6, Foundation",
+                "paths": [
+                  "Sources/FlareModel/Fakes/FakeScenes.swift",
+                  "Sources/FlareModel/Fakes/FakeStage.swift",
+                  "Sources/FlareModel/Fakes/FakeHits.swift",
+                  "Sources/FlareModel/Fakes/FakeShapes.swift",
+                  "Sources/FlareModel/Fakes/FakeProperties.swift",
+                  "Sources/FlareModel/Fakes/FakeKeyframes.swift",
+                  "Sources/FlareModel/Fakes/FakeEasing.swift",
+                  "Sources/FlareModel/Fakes/FakeOnion.swift",
+                  "Sources/FlareModel/Fakes/FakeLibrary.swift",
+                  "Sources/FlareModel/Fakes/FakeMachines.swift",
+                  "Sources/FlareModel/Fakes/FakePreview.swift",
+                  "Sources/FlareModel/Fakes/FakeExport.swift",
+                  "Sources/FlareModel/Fakes/FakeRasterizer.swift",
+                  "Sources/FlareModel/Fakes/NotBuilt.swift",
+                  "Sources/FlareModel/Fakes/FixtureEdit.swift",
+                  "Sources/FlareModel/Fakes/FlareFixtures.swift",
+                  "Sources/FlareModel/Fakes/Fixtures/BounceFixture.swift",
+                  "Sources/FlareModel/Fakes/Fixtures/ButtonFixture.swift",
+                  "Sources/FlareModel/Fakes/Fixtures/CharacterFixture.swift",
+                  "Sources/FlareModel/Fakes/Fixtures/ShowcaseFixture.swift"
+                ],
+                "relationships": [
+                  {
+                    "target": "flare-contracts",
+                    "description": "conforms to every contract",
+                    "style": "sync"
+                  },
+                  {
+                    "target": "flarecore-commands",
+                    "description": "runs fixture edits through the real CommandEngine",
+                    "style": "sync"
+                  }
+                ],
+                "status": "existing",
+                "authored": true
+              },
+              {
+                "id": "flare-fake-assist",
+                "name": "Fake assist",
+                "description": "FakeAssist (LM-0c4): canned proposals in each FakeAssistMode (already declared in AssistContracts) that the -FlareAssistMode launch argument picks, so the Assist UI ships on the fake before the suite's model provider exists.",
+                "technology": "Swift 6, Foundation",
+                "paths": [
+                  "Sources/FlareModel/Fakes/FakeAssist.swift"
+                ],
+                "relationships": [
+                  {
+                    "target": "flare-contracts",
+                    "description": "conforms to AnimationAssisting",
+                    "style": "sync"
+                  }
+                ],
+                "status": "planned",
+                "authored": true
+              },
+              {
+                "id": "flare-large-fixtures",
+                "name": "Large fixtures",
+                "description": "LM-0c5: the reference (20 layers, 1,000 shapes, 300 frames, 50 two-level nested instances), crowd (300 layers, 500 animated instances, 5,000 keys) and limit (9,999 layers) documents the perf journeys P1 to P7 and the model budgets run on.",
+                "technology": "Swift 6, Foundation",
+                "paths": [
+                  "Sources/FlareModel/Fakes/Fixtures/ReferenceFixture.swift",
+                  "Sources/FlareModel/Fakes/Fixtures/CrowdFixture.swift",
+                  "Sources/FlareModel/Fakes/Fixtures/LimitFixture.swift"
+                ],
+                "relationships": [
+                  {
+                    "target": "flare-fakes",
+                    "description": "registered in FlareFixtures",
+                    "style": "sync"
+                  }
+                ],
+                "status": "planned",
+                "authored": true
+              },
+              {
+                "id": "flare-live-easing",
+                "name": "Live easing",
+                "description": "LiveEasing (LM-6): KeyframeEasing over FlareCore's SetKeyframeEasing; KY-8 (live-keys) adds the owner path for a symbol's layers.",
+                "technology": "Swift 6, Foundation",
+                "paths": [
+                  "Sources/FlareModel/Live/LiveEasing.swift"
+                ],
+                "relationships": [
+                  {
+                    "target": "flare-contracts",
+                    "description": "conforms to KeyframeEasing",
+                    "style": "sync"
+                  },
+                  {
+                    "target": "flarecore-commands",
+                    "description": "performs SetKeyframeEasing",
+                    "style": "sync"
+                  }
+                ],
+                "status": "existing",
+                "authored": true
+              },
+              {
+                "id": "flare-live-stage",
+                "name": "Live stage, hits and shapes",
+                "description": "The live-stage packet (ST-1 to ST-9): LiveStage builds the StageDrawList from the render list (paint order, opacity, cubics kept, nested instances, editing in place); LiveHits gives the topmost hit with its address, the marquee and world bounds with stroke; LiveShapes drafts and commits Rectangle, Ellipse and Pen, the box move, scale and rotate over BoxGestureMath (moved out of FakeShapes), and path edit, translate, delete, duplicate, copy and paste, each one named undo group.",
+                "technology": "Swift 6, Foundation",
+                "paths": [
+                  "Sources/FlareModel/Live/LiveStage.swift",
+                  "Sources/FlareModel/Live/LiveHits.swift",
+                  "Sources/FlareModel/Live/LiveHits+Marquee.swift",
+                  "Sources/FlareModel/Live/LiveShapes.swift",
+                  "Sources/FlareModel/Live/LiveShapes+Box.swift",
+                  "Sources/FlareModel/Live/LiveShapes+Edit.swift",
+                  "Sources/FlareModel/Live/BoxGestureMath.swift"
+                ],
+                "relationships": [
+                  {
+                    "target": "flare-contracts",
+                    "description": "conforms to StageRendering, StageHitTesting and ShapeBuilding",
+                    "style": "sync"
+                  },
+                  {
+                    "target": "flarecore-render",
+                    "description": "reads Scene.renderList, the hit query and world bounds",
+                    "style": "sync"
+                  },
+                  {
+                    "target": "flarecore-commands",
+                    "description": "performs shape and layer commands",
+                    "style": "sync"
+                  },
+                  {
+                    "target": "flarecore-instances",
+                    "description": "moves instances with SetInstanceTransform",
+                    "style": "sync"
+                  }
+                ],
+                "status": "planned",
+                "authored": true
+              },
+              {
+                "id": "flare-live-keys",
+                "name": "Live properties and keyframes",
+                "description": "The live-keys packet (KY-1 to KY-7): LiveProperties reads values, key states and Mixed and writes by section 2's rule as one merged SetKeyframe per scrub, with the stopwatch, keyframe button, fill and stroke; LiveKeyframes gives the timeline rows and labels, moves and removes keys (collision and past-the-end refused) and inserts and removes frames.",
+                "technology": "Swift 6, Foundation",
+                "paths": [
+                  "Sources/FlareModel/Live/LiveProperties.swift",
+                  "Sources/FlareModel/Live/LiveProperties+Keys.swift",
+                  "Sources/FlareModel/Live/LiveProperties+Paint.swift",
+                  "Sources/FlareModel/Live/LiveKeyframes.swift",
+                  "Sources/FlareModel/Live/LiveKeyframes+Edit.swift",
+                  "Sources/FlareModel/Live/LiveKeyframes+Frames.swift"
+                ],
+                "relationships": [
+                  {
+                    "target": "flare-contracts",
+                    "description": "conforms to PropertyAnimating and KeyframeEditing",
+                    "style": "sync"
+                  },
+                  {
+                    "target": "flarecore-commands",
+                    "description": "performs owner-aware keyframe commands, merged per scrub (LC-5, LC-10)",
+                    "style": "sync"
+                  },
+                  {
+                    "target": "flarecore-document",
+                    "description": "samples values at the playhead",
+                    "style": "sync"
+                  }
+                ],
+                "status": "planned",
+                "authored": true
+              },
+              {
+                "id": "flare-live-scenes",
+                "name": "Live scenes and guides",
+                "description": "The live-scenes packet (SN-1 to SN-5): LiveScenes makes a new document, adds, removes (never the last), renames and reorders scenes, sets canvas and timing, and adds, moves (one merged MoveGuide per drag) and removes guides.",
+                "technology": "Swift 6, Foundation",
+                "paths": [
+                  "Sources/FlareModel/Live/LiveScenes.swift",
+                  "Sources/FlareModel/Live/LiveScenes+Order.swift",
+                  "Sources/FlareModel/Live/LiveScenes+Canvas.swift",
+                  "Sources/FlareModel/Live/LiveScenes+Guides.swift",
+                  "Sources/FlareModel/Live/LiveScenes+SceneEditing.swift"
+                ],
+                "relationships": [
+                  {
+                    "target": "flare-contracts",
+                    "description": "conforms to SceneEditing",
+                    "style": "sync"
+                  },
+                  {
+                    "target": "flarecore-commands",
+                    "description": "performs scene and guide commands (LC-8, LC-10)",
+                    "style": "sync"
+                  }
+                ],
+                "status": "planned",
+                "authored": true
+              },
+              {
+                "id": "flare-live-onion-library",
+                "name": "Live onion and library",
+                "description": "LiveOnion (LM-8: ghosts from Layer.onionFrames with falling opacity, the motion path with ticks that follow the easing) and LiveLibrary (LM-10: symbols with usage counts including nested instances, convert with an empty render diff, instance playback).",
+                "technology": "Swift 6, Foundation",
+                "paths": [
+                  "Sources/FlareModel/Live/LiveOnion.swift",
+                  "Sources/FlareModel/Live/LiveLibrary.swift"
+                ],
+                "relationships": [
+                  {
+                    "target": "flare-contracts",
+                    "description": "conforms to OnionSkinning and LibraryManaging",
+                    "style": "sync"
+                  },
+                  {
+                    "target": "flarecore-render",
+                    "description": "reads onion frames and the render list",
+                    "style": "sync"
+                  },
+                  {
+                    "target": "flarecore-commands",
+                    "description": "performs symbol commands",
+                    "style": "sync"
+                  },
+                  {
+                    "target": "flarecore-instances",
+                    "description": "places instances and sets their playback",
+                    "style": "sync"
+                  }
+                ],
+                "status": "planned",
+                "authored": true
+              },
+              {
+                "id": "flare-live-interact",
+                "name": "Live machines and preview",
+                "description": "LiveMachines (LM-11: machine, state, transition and input commands with refusals that name the blocking transition, issues from StateMachine.issues) and LivePreview (LM-12: the runtime player driving the active state from input changes).",
+                "technology": "Swift 6, Foundation",
+                "paths": [
+                  "Sources/FlareModel/Live/LiveMachines.swift",
+                  "Sources/FlareModel/Live/LivePreview.swift"
+                ],
+                "relationships": [
+                  {
+                    "target": "flare-contracts",
+                    "description": "conforms to StateMachineEditing and StateMachinePreviewing",
+                    "style": "sync"
+                  },
+                  {
+                    "target": "flarecore-machines",
+                    "description": "performs machine commands and runs MachinePlayer",
+                    "style": "sync"
+                  }
+                ],
+                "status": "planned",
+                "authored": true
+              },
+              {
+                "id": "flare-live-export",
+                "name": "Live export",
+                "description": "LiveExport (LM-13a: SVG frame, Lottie, PNG sequence through the window's rasterizer, cancellation leaves no files) and LiveExportCleaning (LM-13b: text removed from a copy before export, the scan's warnings attached; never throws for content v1 can't write).",
+                "technology": "Swift 6, Foundation",
+                "paths": [
+                  "Sources/FlareModel/Live/LiveExport.swift",
+                  "Sources/FlareModel/Live/LiveExportCleaning.swift"
+                ],
+                "relationships": [
+                  {
+                    "target": "flare-contracts",
+                    "description": "conforms to Exporting",
+                    "style": "sync"
+                  },
+                  {
+                    "target": "flarecore-export",
+                    "description": "runs SVGExporter and LottieExporter",
+                    "style": "sync"
+                  }
+                ],
+                "status": "planned",
+                "authored": true
+              },
+              {
+                "id": "flare-live-assist",
+                "name": "Live assist",
+                "description": "LiveAssist (LM-14): AnimationAssisting behind a provider protocol, unavailable with a reason until the suite's model provider exists; a provider's proposal goes through the shared apply code.",
+                "technology": "Swift 6, Foundation",
+                "paths": [
+                  "Sources/FlareModel/Live/LiveAssist.swift"
+                ],
+                "relationships": [
+                  {
+                    "target": "flare-contracts",
+                    "description": "conforms to AnimationAssisting",
+                    "style": "sync"
+                  },
+                  {
+                    "target": "flarecore-commands",
+                    "description": "proposals are lists of registered commands",
+                    "style": "sync"
+                  }
+                ],
+                "status": "planned",
+                "authored": true
+              }
+            ]
+          },
+          {
+            "id": "flare-app",
+            "name": "FlareApp",
+            "description": "The Flare app on SuiteUI's EditorShell: window, intents, views, and the CoreGraphics and display-link platform files. Reads FlareModel and calls its methods.",
+            "technology": "Swift 6, SwiftUI, macOS 26",
+            "tags": [
+              "internal",
+              "macos-only"
+            ],
+            "components": [
+              {
+                "id": "flare-app-shell",
+                "name": "Today's app shell",
+                "description": "The App scene (FlareApp), the menu bar (FlareCommands), the sidebar layer rows (FlareLayerItems) and the easing inspector (FlareEasingInspector) on SuiteWindow. F1a splits FlareApp.swift onto EditorShell, F2 rebinds every FlareCommands item to a FlareIntent, F11a deletes FlareLayerItems for the Layers tab, and F9's easing popover and TIMING row take over the easing inspector.",
+                "technology": "Swift 6, SwiftUI, macOS 26",
+                "paths": [
+                  "Sources/FlareApp/FlareApp.swift",
+                  "Sources/FlareApp/FlareCommands.swift",
+                  "Sources/FlareApp/FlareLayerItems.swift",
+                  "Sources/FlareApp/FlareEasingInspector.swift"
+                ],
+                "relationships": [
+                  {
+                    "target": "flare-workspace",
+                    "description": "reads state and calls its methods",
+                    "style": "sync"
+                  },
+                  {
+                    "target": "flare-animate",
+                    "description": "the easing inspector calls the easing editor",
+                    "style": "sync"
+                  },
+                  {
+                    "target": "flare-scenes-layers",
+                    "description": "the sidebar lists and edits layers",
+                    "style": "sync"
+                  },
+                  {
+                    "target": "suiteui-content",
+                    "description": "shows the scene in CanvasSurface and SurfaceCard",
+                    "style": "sync"
+                  },
+                  {
+                    "target": "suiteui-window",
+                    "description": "builds the window from SuiteWindow",
+                    "style": "sync"
+                  }
+                ],
+                "status": "existing",
+                "authored": true
+              },
+              {
+                "id": "flare-platform",
+                "name": "Stage path and playback driver",
+                "description": "StagePath (LA-0, MP-4): FlareCore Path and Matrix to CGPath with one addCurve per cubic, document colors to CGColor(srgbRed:green:blue:alpha:), non-finite points skipped; the one conversion the stage and the rasterizer share. PlaybackDriver (LA-2): an NSScreen display link that feeds target timestamps into FlareWorkspace.tick.",
+                "technology": "Swift 6, SwiftUI, macOS 26",
+                "paths": [
+                  "Sources/FlareApp/StagePath.swift",
+                  "Sources/FlareApp/PlaybackDriver.swift"
+                ],
+                "relationships": [
+                  {
+                    "target": "flare-playback",
+                    "description": "calls FlareWorkspace.tick with each target timestamp",
+                    "style": "sync"
+                  },
+                  {
+                    "target": "flarecore-document",
+                    "description": "converts FlareCore paths and colors",
+                    "style": "sync"
+                  }
+                ],
+                "status": "existing",
+                "authored": true
+              },
+              {
+                "id": "flare-rasterizer",
+                "name": "PNG rasterizer",
+                "description": "StageRasterizer (LA-1): a StageDrawList to PNG at a pixel scale with CoreGraphics on StagePath, so a PNG export equals the stage picture (QB-V4). FlareWindow passes it to export when the services are live, FakeRasterizer otherwise.",
+                "technology": "Swift 6, SwiftUI, macOS 26",
+                "paths": [
+                  "Sources/FlareApp/StageRasterizer.swift"
+                ],
+                "relationships": [
+                  {
+                    "target": "flare-platform",
+                    "description": "draws through StagePath",
+                    "style": "sync"
+                  },
+                  {
+                    "target": "flare-contracts",
+                    "description": "conforms to FrameRasterizing",
+                    "style": "sync"
+                  }
+                ],
+                "status": "planned",
+                "authored": true
+              },
+              {
+                "id": "flare-autosave",
+                "name": "Autosave and recovery",
+                "description": "FlareAutosave (mac-platform MP-5, MP-6): RecoveryFile and the writer that polls autosaveDue, writes recoveryData atomically off the main thread, removes the file after a clean save and writes once more on quit; on launch it reads and decodes a recovery file off the main thread and offers Restore or Discard. FlareRecovery (F17c) shows the offer and the save-failure alert in the window.",
+                "technology": "Swift 6, SwiftUI, macOS 26",
+                "paths": [
+                  "Sources/FlareApp/FlareAutosave.swift",
+                  "Sources/FlareApp/FlareRecovery.swift"
+                ],
+                "relationships": [
+                  {
+                    "target": "flare-files",
+                    "description": "reads autosaveDue and recoveryData, calls restoreRecovery",
+                    "style": "sync"
+                  }
+                ],
+                "status": "planned",
+                "authored": true
+              },
+              {
+                "id": "flare-window",
+                "name": "Window, intents and launch",
+                "description": "FlareWindow owns the one model and presentation state (zoom, panel tab, popovers, file URL); every control sends a FlareIntent, which the router (FlareWindow+Router) hands to one FlareWindow+<Area> file. FlareLaunch reads -FlareFixture, -FlareSample, -FlareOpenFile, -FlareSaveTo, -FlareExportTo, -FlareAssistMode, -FlarePerfProbe and -FlareWindowSize (section 12.3). FlareEditor lays out EditorShell's slots; FlareControls gives every control its flare.<area>.<name> identifier and the suite.controls JSON.",
+                "technology": "Swift 6, SwiftUI, macOS 26",
+                "paths": [
+                  "Sources/FlareApp/FlareWindow.swift",
+                  "Sources/FlareApp/FlareIntent.swift",
+                  "Sources/FlareApp/FlareWindow+Router.swift",
+                  "Sources/FlareApp/FlareLaunch.swift",
+                  "Sources/FlareApp/FlareEditor.swift",
+                  "Sources/FlareApp/FlareControls.swift"
+                ],
+                "relationships": [
+                  {
+                    "target": "flare-workspace",
+                    "description": "owns one FlareWorkspace and calls its methods",
+                    "style": "sync"
+                  },
+                  {
+                    "target": "flare-fakes",
+                    "description": "-FlareFixture picks .fake and a fixture",
+                    "style": "sync"
+                  },
+                  {
+                    "target": "suiteui-editor-shell",
+                    "description": "lays the window out on EditorShell and EditorTopBar",
+                    "style": "sync"
+                  }
+                ],
+                "status": "planned",
+                "authored": true
+              },
+              {
+                "id": "flare-stage-view",
+                "name": "Stage view",
+                "description": "FlareStage (F3a: the draw list in one Canvas under drawingGroup, readOnly for preview), FlareStageOverlay (draft, selection, ghosts, motion path and guides in a separate overlay Canvas, so a pointer move redraws only the overlay), FlareStageSelection (F3b), FlareStageTools (F4a: Rectangle, Ellipse, Pen and their one-key shortcuts), FlareStageDirect (F4b), FlareStageGuides (F3c: zoom, pan, rulers, guides) and the Stage, Tools and View intent areas.",
+                "technology": "Swift 6, SwiftUI, macOS 26",
+                "paths": [
+                  "Sources/FlareApp/FlareStage.swift",
+                  "Sources/FlareApp/FlareStageOverlay.swift",
+                  "Sources/FlareApp/FlareStageSelection.swift",
+                  "Sources/FlareApp/FlareStageTools.swift",
+                  "Sources/FlareApp/FlareStageDirect.swift",
+                  "Sources/FlareApp/FlareStageGuides.swift",
+                  "Sources/FlareApp/FlareWindow+Stage.swift",
+                  "Sources/FlareApp/FlareWindow+Tools.swift",
+                  "Sources/FlareApp/FlareWindow+View.swift"
+                ],
+                "relationships": [
+                  {
+                    "target": "flare-stage-gestures",
+                    "description": "sends drag, endDrag and selection calls",
+                    "style": "sync"
+                  },
+                  {
+                    "target": "flare-platform",
+                    "description": "draws paths through StagePath",
+                    "style": "sync"
+                  },
+                  {
+                    "target": "suiteui-canvas",
+                    "description": "draws handles with CanvasMarks and sits in CanvasViewport with rulers",
+                    "style": "sync"
+                  },
+                  {
+                    "target": "suiteui-vector-marks",
+                    "description": "draws anchors, ghosts, the motion path and guides",
+                    "style": "sync"
+                  },
+                  {
+                    "target": "suiteui-probe",
+                    "description": "marks input-to-display timings",
+                    "style": "sync"
+                  }
+                ],
+                "status": "planned",
+                "authored": true
+              },
+              {
+                "id": "flare-inspector-view",
+                "name": "Inspector view",
+                "description": "FlareInspector (F6a: title, info card, TRANSFORM bar sliders with keyframe buttons, Mixed), FlareInspectorTransform, FlareInspectorFill (F6b), FlareInspectorScene and FlareInspectorInstance (F6c), FlareInspectorTiming with FlareEasingPopover (F9), FlareOnionPopover (F10), FlareRecording (F5: the auto-key ring and dot) and the Inspector intent area.",
+                "technology": "Swift 6, SwiftUI, macOS 26",
+                "paths": [
+                  "Sources/FlareApp/FlareInspector.swift",
+                  "Sources/FlareApp/FlareInspectorTransform.swift",
+                  "Sources/FlareApp/FlareInspectorFill.swift",
+                  "Sources/FlareApp/FlareInspectorScene.swift",
+                  "Sources/FlareApp/FlareInspectorInstance.swift",
+                  "Sources/FlareApp/FlareInspectorTiming.swift",
+                  "Sources/FlareApp/FlareEasingPopover.swift",
+                  "Sources/FlareApp/FlareOnionPopover.swift",
+                  "Sources/FlareApp/FlareRecording.swift",
+                  "Sources/FlareApp/FlareWindow+Inspector.swift"
+                ],
+                "relationships": [
+                  {
+                    "target": "flare-animate",
+                    "description": "reads properties and calls setValue, toggleKey, easing and onion methods",
+                    "style": "sync"
+                  },
+                  {
+                    "target": "suiteui-inspector",
+                    "description": "builds rows from the bar slider, KeyframeButton, InspectorHeader, PresetGrid and CurveEditor",
+                    "style": "sync"
+                  }
+                ],
+                "status": "planned",
+                "authored": true
+              },
+              {
+                "id": "flare-timeline-view",
+                "name": "Timeline and transport view",
+                "description": "FlareTimeline (F7a: lanes, diamonds, scrub, readouts, empty text, a symbol's timeline), FlareTimelineEdit (F8: retime, delete, insert and remove frames, labels), FlareTransport (F7b: play, loop, step, the actual-fps pill) and the Timeline intent area.",
+                "technology": "Swift 6, SwiftUI, macOS 26",
+                "paths": [
+                  "Sources/FlareApp/FlareTimeline.swift",
+                  "Sources/FlareApp/FlareTimelineEdit.swift",
+                  "Sources/FlareApp/FlareTransport.swift",
+                  "Sources/FlareApp/FlareWindow+Timeline.swift"
+                ],
+                "relationships": [
+                  {
+                    "target": "flare-animate",
+                    "description": "calls key moves, removals and frame edits",
+                    "style": "sync"
+                  },
+                  {
+                    "target": "flare-playback",
+                    "description": "reads the frame and calls play, pause, step",
+                    "style": "sync"
+                  },
+                  {
+                    "target": "suiteui-timeline",
+                    "description": "builds on TimelineStrip and FrameMapping",
+                    "style": "sync"
+                  },
+                  {
+                    "target": "suiteui-transport",
+                    "description": "plays and steps through TransportCapsule",
+                    "style": "sync"
+                  }
+                ],
+                "status": "planned",
+                "authored": true
+              },
+              {
+                "id": "flare-panels-view",
+                "name": "Layers and Library panels",
+                "description": "FlareLayersPanel (F11a: scenes on top, then layers, on LayerList), FlareLibraryPanel (F12a: symbols, Convert to Symbol, place, edit in place), FlareBreadcrumb, FlareLibrarySwatches (F12b) and the Layers and Library intent areas.",
+                "technology": "Swift 6, SwiftUI, macOS 26",
+                "paths": [
+                  "Sources/FlareApp/FlareLayersPanel.swift",
+                  "Sources/FlareApp/FlareLibraryPanel.swift",
+                  "Sources/FlareApp/FlareBreadcrumb.swift",
+                  "Sources/FlareApp/FlareLibrarySwatches.swift",
+                  "Sources/FlareApp/FlareWindow+Layers.swift",
+                  "Sources/FlareApp/FlareWindow+Library.swift"
+                ],
+                "relationships": [
+                  {
+                    "target": "flare-scenes-layers",
+                    "description": "calls scene and layer methods",
+                    "style": "sync"
+                  },
+                  {
+                    "target": "flare-symbols",
+                    "description": "calls symbol and swatch methods",
+                    "style": "sync"
+                  },
+                  {
+                    "target": "suiteui-panels",
+                    "description": "switches Layers and Library with SegmentedTabs",
+                    "style": "sync"
+                  },
+                  {
+                    "target": "suiteui-layer-list",
+                    "description": "lists scenes and layers in LayerList",
+                    "style": "sync"
+                  }
+                ],
+                "status": "planned",
+                "authored": true
+              },
+              {
+                "id": "flare-interactions-view",
+                "name": "Interactions editor view",
+                "description": "FlareInteractions (F13a: the mode switch and the graph laid out by MachineLayout), FlareMachineInspector (F13b: state, transition, condition and inputs with inline refusals), FlareMachinePreview (F14: read-only stage, a control per input, the active state) and the Interactions intent area.",
+                "technology": "Swift 6, SwiftUI, macOS 26",
+                "paths": [
+                  "Sources/FlareApp/FlareInteractions.swift",
+                  "Sources/FlareApp/FlareMachineInspector.swift",
+                  "Sources/FlareApp/FlareMachinePreview.swift",
+                  "Sources/FlareApp/FlareWindow+Interactions.swift"
+                ],
+                "relationships": [
+                  {
+                    "target": "flare-machines",
+                    "description": "reads the layout and calls machine and preview methods",
+                    "style": "sync"
+                  },
+                  {
+                    "target": "suiteui-node-graph",
+                    "description": "draws the graph with NodeGraph",
+                    "style": "sync"
+                  }
+                ],
+                "status": "planned",
+                "authored": true
+              },
+              {
+                "id": "flare-files-edit-view",
+                "name": "File and Edit views",
+                "description": "FlareNewSheet (F11b: presets, fps, Create), FlareFilePanels (F17a: open and save panels, title, unsaved dot, Open Recent, close prompt), FlareOpenStatus (F17b: load progress, open errors, the text pill), FlarePasteboard (F18) and the File and Edit intent areas.",
+                "technology": "Swift 6, SwiftUI, macOS 26",
+                "paths": [
+                  "Sources/FlareApp/FlareNewSheet.swift",
+                  "Sources/FlareApp/FlareFilePanels.swift",
+                  "Sources/FlareApp/FlareOpenStatus.swift",
+                  "Sources/FlareApp/FlarePasteboard.swift",
+                  "Sources/FlareApp/FlareWindow+File.swift",
+                  "Sources/FlareApp/FlareWindow+Edit.swift"
+                ],
+                "relationships": [
+                  {
+                    "target": "flare-files",
+                    "description": "loads, saves and lists recent files",
+                    "style": "sync"
+                  },
+                  {
+                    "target": "flare-edit",
+                    "description": "runs the Edit menu actions",
+                    "style": "sync"
+                  },
+                  {
+                    "target": "suiteui-inspector",
+                    "description": "builds the new sheet from PresetGrid",
+                    "style": "sync"
+                  }
+                ],
+                "status": "planned",
+                "authored": true
+              },
+              {
+                "id": "flare-export-view",
+                "name": "Export sheet",
+                "description": "FlareExportSheet (F15a: SVG, Lottie and PNG tabs, options, warnings, progress, Reveal), FlareExportStatus (F15b: failure, Cancel, Replace) and the Export intent area.",
+                "technology": "Swift 6, SwiftUI, macOS 26",
+                "paths": [
+                  "Sources/FlareApp/FlareExportSheet.swift",
+                  "Sources/FlareApp/FlareExportStatus.swift",
+                  "Sources/FlareApp/FlareWindow+Export.swift"
+                ],
+                "relationships": [
+                  {
+                    "target": "flare-export-state",
+                    "description": "sets options and runs the export",
+                    "style": "sync"
+                  },
+                  {
+                    "target": "flare-rasterizer",
+                    "description": "hands StageRasterizer to a live export",
+                    "style": "sync"
+                  }
+                ],
+                "status": "planned",
+                "authored": true
+              },
+              {
+                "id": "flare-assist-view",
+                "name": "Assist popover",
+                "description": "FlareAssistPopover (F16a: prompt, progress, proposal rows in the AI-suggestion color, Preview, Accept, Reject), FlareAssistErrors (F16b) and the Assist intent area.",
+                "technology": "Swift 6, SwiftUI, macOS 26",
+                "paths": [
+                  "Sources/FlareApp/FlareAssistPopover.swift",
+                  "Sources/FlareApp/FlareAssistErrors.swift",
+                  "Sources/FlareApp/FlareWindow+Assist.swift"
+                ],
+                "relationships": [
+                  {
+                    "target": "flare-assist-state",
+                    "description": "reads the proposal and calls generate, accept and reject",
+                    "style": "sync"
+                  }
+                ],
+                "status": "planned",
+                "authored": true
+              }
+            ]
+          },
+          {
+            "id": "suiteui",
+            "name": "SuiteUI",
+            "description": "The SuiteUI parts Flare builds from (line:suiteui owns them).",
+            "technology": "Swift 6, SwiftUI, macOS 26",
+            "tags": [
+              "internal",
+              "macos-only"
+            ],
+            "components": [
+              {
+                "id": "suiteui-window",
+                "name": "SuiteWindow shell",
+                "description": "SuiteWindow with SidebarSection and SidebarRow, ToolbarGroup and the tokens: the shell Flare runs in until F1a moves it to EditorShell.",
+                "technology": "Swift 6, SwiftUI, macOS 26",
+                "paths": [
+                  "Sources/SuiteUI/SuiteWindow.swift",
+                  "Sources/SuiteUI/SidebarSection.swift",
+                  "Sources/SuiteUI/SidebarRow.swift",
+                  "Sources/SuiteUI/ToolbarGroup.swift"
+                ],
+                "relationships": [
+                  {
+                    "target": "suiteui-tokens",
+                    "description": "sizes and colors from the tokens",
+                    "style": "sync"
+                  }
+                ],
+                "status": "existing",
+                "authored": true
+              },
+              {
+                "id": "suiteui-tokens",
+                "name": "Tokens",
+                "description": "Spacing, radius, size, type and color tokens: the column widths, window minimum and launch size, editor bar and panel widths and timeline sizes section 12.3 is written against.",
+                "technology": "Swift 6, SwiftUI, macOS 26",
+                "paths": [
+                  "Sources/SuiteUI/Tokens.swift"
+                ],
+                "relationships": [],
+                "status": "existing",
+                "authored": true
+              },
+              {
+                "id": "suiteui-content",
+                "name": "Content surfaces",
+                "description": "CanvasSurface and SurfaceCard: the artboard surface and scene card today's Flare window shows until F3a's stage replaces them.",
+                "technology": "Swift 6, SwiftUI, macOS 26",
+                "paths": [
+                  "Sources/SuiteUI/CanvasSurface.swift",
+                  "Sources/SuiteUI/SurfaceCard.swift"
+                ],
+                "relationships": [
+                  {
+                    "target": "suiteui-tokens",
+                    "description": "sizes and colors from the tokens",
+                    "style": "sync"
+                  }
+                ],
+                "status": "existing",
+                "authored": true
+              },
+              {
+                "id": "suiteui-editor-shell",
+                "name": "Editor shell",
+                "description": "EditorShell, EditorTopBar, EmptyStateView and ViewerStatusBar: the dark editor window with a hidden title bar. S9 adds the resizable timeline slot (inside EditorShell.swift).",
+                "technology": "Swift 6, SwiftUI, macOS 26",
+                "paths": [
+                  "Sources/SuiteUI/EditorShell.swift",
+                  "Sources/SuiteUI/EditorTopBar.swift",
+                  "Sources/SuiteUI/EmptyStateView.swift",
+                  "Sources/SuiteUI/ViewerStatusBar.swift"
+                ],
+                "relationships": [],
+                "status": "existing",
+                "authored": true
+              },
+              {
+                "id": "suiteui-canvas",
+                "name": "Canvas viewport and marks",
+                "description": "CanvasViewport, Ruler, ZoomMath and CanvasMarks: the stage's scroll and zoom, rulers, and selection handles drawn on the pixel grid.",
+                "technology": "Swift 6, SwiftUI, macOS 26",
+                "paths": [
+                  "Sources/SuiteUI/CanvasViewport.swift",
+                  "Sources/SuiteUI/Ruler.swift",
+                  "Sources/SuiteUI/ZoomMath.swift",
+                  "Sources/SuiteUI/CanvasMarks.swift"
+                ],
+                "relationships": [],
+                "status": "existing",
+                "authored": true
+              },
+              {
+                "id": "suiteui-vector-marks",
+                "name": "Vector marks",
+                "description": "S12: PathMarks, MotionPathMarks, GhostLayer and guide marks with smooth and corner anchors that differ in shape and handle hit rects of the hit token at any zoom.",
+                "technology": "Swift 6, SwiftUI, macOS 26",
+                "paths": [
+                  "Sources/SuiteUI/CanvasMarks+Vector.swift"
+                ],
+                "relationships": [
+                  {
+                    "target": "suiteui-canvas",
+                    "description": "extends CanvasMarks",
+                    "style": "sync"
+                  }
+                ],
+                "status": "planned",
+                "authored": true
+              },
+              {
+                "id": "suiteui-inspector",
+                "name": "Inspector parts",
+                "description": "InspectorRows (the bar slider), StudioScrubRow, ScrubField, ScrubValue, NumericInput, KeyframeButton, InspectorHeader, InspectorAction, PresetGrid, ChipRow, ChoiceChips, ColorWell and CurveEditor.",
+                "technology": "Swift 6, SwiftUI, macOS 26",
+                "paths": [
+                  "Sources/SuiteUI/InspectorRows.swift",
+                  "Sources/SuiteUI/StudioScrubRow.swift",
+                  "Sources/SuiteUI/ScrubField.swift",
+                  "Sources/SuiteUI/ScrubValue.swift",
+                  "Sources/SuiteUI/NumericInput.swift",
+                  "Sources/SuiteUI/KeyframeButton.swift",
+                  "Sources/SuiteUI/InspectorHeader.swift",
+                  "Sources/SuiteUI/InspectorAction.swift",
+                  "Sources/SuiteUI/PresetGrid.swift",
+                  "Sources/SuiteUI/ChipRow.swift",
+                  "Sources/SuiteUI/ChoiceChips.swift",
+                  "Sources/SuiteUI/ColorWell.swift",
+                  "Sources/SuiteUI/CurveEditor.swift"
+                ],
+                "relationships": [],
+                "status": "existing",
+                "authored": true
+              },
+              {
+                "id": "suiteui-timeline",
+                "name": "Timeline strip",
+                "description": "TimelineStrip with FrameMapping: lanes, key states, playhead and frame mapping shared by Flare and Halo; S10 restyles it.",
+                "technology": "Swift 6, SwiftUI, macOS 26",
+                "paths": [
+                  "Sources/SuiteUI/TimelineStrip.swift",
+                  "Sources/SuiteUI/FrameMapping.swift"
+                ],
+                "relationships": [],
+                "status": "existing",
+                "authored": true
+              },
+              {
+                "id": "suiteui-transport",
+                "name": "Transport capsule",
+                "description": "S7: TransportCapsule (play, loop, step, the fps pill) beside the restyled ViewerStatusBar pills.",
+                "technology": "Swift 6, SwiftUI, macOS 26",
+                "paths": [
+                  "Sources/SuiteUI/TransportCapsule.swift"
+                ],
+                "relationships": [
+                  {
+                    "target": "suiteui-editor-shell",
+                    "description": "sits in the status bar",
+                    "style": "sync"
+                  }
+                ],
+                "status": "planned",
+                "authored": true
+              },
+              {
+                "id": "suiteui-panels",
+                "name": "Panel lists and tabs",
+                "description": "SegmentedTabs: the right panel's tabs (Properties, Layers, Library).",
+                "technology": "Swift 6, SwiftUI, macOS 26",
+                "paths": [
+                  "Sources/SuiteUI/SegmentedTabs.swift"
+                ],
+                "relationships": [],
+                "status": "existing",
+                "authored": true
+              },
+              {
+                "id": "suiteui-layer-list",
+                "name": "Layer list",
+                "description": "S15: LayerList, a non-split container over SidebarRow with sections, drag to reorder and rename.",
+                "technology": "Swift 6, SwiftUI, macOS 26",
+                "paths": [
+                  "Sources/SuiteUI/LayerList.swift"
+                ],
+                "relationships": [
+                  {
+                    "target": "suiteui-window",
+                    "description": "wraps SidebarRow",
+                    "style": "sync"
+                  }
+                ],
+                "status": "planned",
+                "authored": true
+              },
+              {
+                "id": "suiteui-node-graph",
+                "name": "Node graph",
+                "description": "S14: NodeGraph, nodes at given positions, arrows with condition chips, warning badges.",
+                "technology": "Swift 6, SwiftUI, macOS 26",
+                "paths": [
+                  "Sources/SuiteUI/NodeGraph.swift"
+                ],
+                "relationships": [],
+                "status": "planned",
+                "authored": true
+              },
+              {
+                "id": "suiteui-probe",
+                "name": "Frame probe",
+                "description": "QH-1: FrameProbe, input-to-display timings in frames late plus marks (preview before mouse-up, progress shown, animation ended, autosaved, state switched), exposed as suite.perf under a launch flag.",
+                "technology": "Swift 6, SwiftUI, macOS 26",
+                "paths": [
+                  "Sources/SuiteUI/FrameProbe.swift"
+                ],
+                "relationships": [],
+                "status": "planned",
+                "authored": true
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "creative-core",
+        "name": "creative-core",
+        "description": "FlareCore in qbtrix/creative-core. Paths are in that repo and list only the files flare.md's LC tasks name; status follows flare.md sections 0 and 2 (core main cfad97f, the revision dev resolves), not this repo's Sources/: an engine part that exists and an LC task extends is existing, one an LC task creates is planned.",
+        "tags": [
+          "external"
+        ],
+        "containers": [
+          {
+            "id": "flarecore",
+            "name": "FlareCore library",
+            "description": "Animation document model, commands with undo, timeline, file format and export.",
+            "technology": "Swift 6, SwiftPM",
+            "tags": [
+              "external"
+            ],
+            "components": [
+              {
+                "id": "flarecore-document",
+                "name": "Document, engine, timeline and format",
+                "description": "Document, scenes, layers, shapes, symbols and machines; the CommandEngine with undo, group and coalesceKey and the CommandRegistry; Geometry (LC-1 fixes the Transform doc comment); timeline sampling, Timeline.playbackFrame and easing; FlareFormat encode, decode and validate (pure, Sendable), with validateStateMachines. Paths are only the files the blueprint's LC tasks name.",
+                "technology": "Swift 6, SwiftPM",
+                "paths": [
+                  "Sources/FlareCore/Document.swift",
+                  "Sources/FlareCore/Commands.swift",
+                  "Sources/FlareCore/CommandRegistry.swift",
+                  "Sources/FlareCore/Geometry.swift",
+                  "Sources/FlareCore/LayerCommand.swift",
+                  "Sources/FlareCore/FlareFormat.swift",
+                  "Sources/FlareCore/StateMachineValidation.swift"
+                ],
+                "relationships": [],
+                "status": "existing",
+                "authored": true
+              },
+              {
+                "id": "flarecore-commands",
+                "name": "Edit commands",
+                "description": "The undoable edit commands (41 on core main cfad97f). LC-5, LC-7, LC-8, LC-10 and LC-12b extend them: owner-aware keyframe commands, SetShapeStroke, SetShapePath, DuplicateLayer, SetSceneCanvas, RenameScene, ReorderScene, RenameSymbol, and the SetKeyframe and MoveGuide merges.",
+                "technology": "Swift 6, SwiftPM",
+                "paths": [
+                  "Sources/FlareCore/KeyframeCommands.swift",
+                  "Sources/FlareCore/LayerCommands.swift",
+                  "Sources/FlareCore/ShapeCommands.swift",
+                  "Sources/FlareCore/SceneCommands.swift",
+                  "Sources/FlareCore/GuideCommands.swift",
+                  "Sources/FlareCore/SymbolCommands.swift"
+                ],
+                "relationships": [
+                  {
+                    "target": "flarecore-document",
+                    "description": "runs on the CommandEngine",
+                    "style": "sync"
+                  }
+                ],
+                "status": "existing",
+                "authored": true
+              },
+              {
+                "id": "flarecore-instances",
+                "name": "Instance commands",
+                "description": "LC-6 (Q5e): AddInstance, RemoveInstance, SetInstanceTransform (a drag merges into one entry) and SetInstancePlayback, with finite transform validation. Not on core main cfad97f.",
+                "technology": "Swift 6, SwiftPM",
+                "paths": [
+                  "Sources/FlareCore/InstanceCommands.swift"
+                ],
+                "relationships": [
+                  {
+                    "target": "flarecore-document",
+                    "description": "runs on the CommandEngine",
+                    "style": "sync"
+                  }
+                ],
+                "status": "planned",
+                "authored": true
+              },
+              {
+                "id": "flarecore-hits",
+                "name": "Hit test and shape bounds",
+                "description": "Today's hit test and shape bounds; LC-2 and LC-3 extend them with the zoom-aware tolerance and stroke-inclusive bounds.",
+                "technology": "Swift 6, SwiftPM",
+                "paths": [
+                  "Sources/FlareCore/HitTest.swift",
+                  "Sources/FlareCore/ShapeBounds.swift"
+                ],
+                "relationships": [
+                  {
+                    "target": "flarecore-document",
+                    "description": "reads shapes and transforms",
+                    "style": "sync"
+                  }
+                ],
+                "status": "existing",
+                "authored": true
+              },
+              {
+                "id": "flarecore-render",
+                "name": "Render list, hit query, world bounds, builders, onion",
+                "description": "LC-1 Scene.renderList(at:symbols:) (G45), LC-2 the topmost hit with address and marquee, LC-3 world bounds with stroke, LC-4 path builders (rectangle with corner radius, ellipse as four cubics, polygon, star), LC-9 Layer.onionFrames (G46). None on core main cfad97f.",
+                "technology": "Swift 6, SwiftPM",
+                "paths": [
+                  "Sources/FlareCore/RenderList.swift",
+                  "Sources/FlareCore/HitQuery.swift",
+                  "Sources/FlareCore/WorldBounds.swift",
+                  "Sources/FlareCore/PathBuilders.swift",
+                  "Sources/FlareCore/Onion.swift"
+                ],
+                "relationships": [
+                  {
+                    "target": "flarecore-document",
+                    "description": "reads scenes and symbols",
+                    "style": "sync"
+                  },
+                  {
+                    "target": "flarecore-hits",
+                    "description": "builds on the hit test and shape bounds",
+                    "style": "sync"
+                  }
+                ],
+                "status": "planned",
+                "authored": true
+              },
+              {
+                "id": "flarecore-machines",
+                "name": "State machine commands and player",
+                "description": "LC-11a the non-throwing StateMachine.issues(in:); LC-11b to LC-11e machine, state, transition and input commands; LC-12 MachinePlayer, the runtime the preview drives.",
+                "technology": "Swift 6, SwiftPM",
+                "paths": [
+                  "Sources/FlareCore/StateMachineIssues.swift",
+                  "Sources/FlareCore/StateMachineCommands.swift",
+                  "Sources/FlareCore/MachineStateCommands.swift",
+                  "Sources/FlareCore/TransitionCommands.swift",
+                  "Sources/FlareCore/MachineInputCommands.swift",
+                  "Sources/FlareCore/MachinePlayer.swift"
+                ],
+                "relationships": [
+                  {
+                    "target": "flarecore-document",
+                    "description": "runs on the CommandEngine",
+                    "style": "sync"
+                  }
+                ],
+                "status": "planned",
+                "authored": true
+              },
+              {
+                "id": "flarecore-export",
+                "name": "Exporters",
+                "description": "SVGExporter and LottieExporter. LC-1 moves SVG onto the render list; LC-13 adds Lottie opacity, scale and rotation tracks (G52).",
+                "technology": "Swift 6, SwiftPM",
+                "paths": [
+                  "Sources/FlareCore/Export/SVGExporter.swift",
+                  "Sources/FlareCore/Export/LottieExporter.swift"
+                ],
+                "relationships": [
+                  {
+                    "target": "flarecore-render",
+                    "description": "SVG walks the render list after LC-1",
+                    "style": "sync"
+                  }
+                ],
+                "status": "existing",
+                "authored": true
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "relationships": [
+      {
+        "source": "flare-model",
+        "target": "flarecore",
+        "description": "uses FlareCore from creative-core",
+        "style": "sync"
+      },
+      {
+        "source": "flare-app",
+        "target": "flare-model",
+        "description": "reads state and calls its methods",
+        "style": "sync"
+      },
+      {
+        "source": "flare-app",
+        "target": "suiteui",
+        "description": "builds its window from SuiteUI components",
+        "style": "sync"
+      },
+      {
+        "source": "flare-app",
+        "target": "flarecore",
+        "description": "converts FlareCore paths and colors (StagePath)",
+        "style": "sync"
+      },
+      {
+        "source": "flare-workspace",
+        "target": "flare-contracts",
+        "description": "holds one conformance per use-case contract",
+        "style": "sync"
+      },
+      {
+        "source": "flare-workspace",
+        "target": "flarecore-document",
+        "description": "owns the open Document and its CommandEngine",
+        "style": "sync"
+      },
+      {
+        "source": "flare-contracts",
+        "target": "flarecore-document",
+        "description": "signatures use FlareCore value types",
+        "style": "sync"
+      },
+      {
+        "source": "flare-stage-gestures",
+        "target": "flare-contracts",
+        "description": "calls services.hits and services.shapes",
+        "style": "sync"
+      },
+      {
+        "source": "flare-stage-gestures",
+        "target": "flare-workspace",
+        "description": "extends FlareWorkspace",
+        "style": "sync"
+      },
+      {
+        "source": "flare-edit",
+        "target": "flare-contracts",
+        "description": "calls services.shapes for delete, duplicate, copy and paste",
+        "style": "sync"
+      },
+      {
+        "source": "flare-edit",
+        "target": "flare-workspace",
+        "description": "extends FlareWorkspace",
+        "style": "sync"
+      },
+      {
+        "source": "flare-animate",
+        "target": "flare-contracts",
+        "description": "calls services.properties, keyframes, easing and onion",
+        "style": "sync"
+      },
+      {
+        "source": "flare-animate",
+        "target": "flare-workspace",
+        "description": "extends FlareWorkspace",
+        "style": "sync"
+      },
+      {
+        "source": "flare-playback",
+        "target": "flarecore-document",
+        "description": "samples frames with Timeline.playbackFrame",
+        "style": "sync"
+      },
+      {
+        "source": "flare-playback",
+        "target": "flare-workspace",
+        "description": "extends FlareWorkspace",
+        "style": "sync"
+      },
+      {
+        "source": "flare-scenes-layers",
+        "target": "flare-contracts",
+        "description": "calls services.scenes",
+        "style": "sync"
+      },
+      {
+        "source": "flare-scenes-layers",
+        "target": "flarecore-commands",
+        "description": "performs layer commands directly",
+        "style": "sync"
+      },
+      {
+        "source": "flare-scenes-layers",
+        "target": "flare-workspace",
+        "description": "extends FlareWorkspace",
+        "style": "sync"
+      },
+      {
+        "source": "flare-symbols",
+        "target": "flare-contracts",
+        "description": "calls services.library",
+        "style": "sync"
+      },
+      {
+        "source": "flare-symbols",
+        "target": "flare-workspace",
+        "description": "extends FlareWorkspace",
+        "style": "sync"
+      },
+      {
+        "source": "flare-machines",
+        "target": "flare-contracts",
+        "description": "calls services.machines and services.preview",
+        "style": "sync"
+      },
+      {
+        "source": "flare-machines",
+        "target": "flare-workspace",
+        "description": "extends FlareWorkspace",
+        "style": "sync"
+      },
+      {
+        "source": "flare-files",
+        "target": "flarecore-document",
+        "description": "encodes and decodes with FlareFormat",
+        "style": "sync"
+      },
+      {
+        "source": "flare-files",
+        "target": "flare-workspace",
+        "description": "extends FlareWorkspace",
+        "style": "sync"
+      },
+      {
+        "source": "flare-export-state",
+        "target": "flare-contracts",
+        "description": "calls services.export with the window's FrameRasterizing",
+        "style": "sync"
+      },
+      {
+        "source": "flare-export-state",
+        "target": "flare-workspace",
+        "description": "extends FlareWorkspace",
+        "style": "sync"
+      },
+      {
+        "source": "flare-assist-state",
+        "target": "flare-contracts",
+        "description": "calls services.assist",
+        "style": "sync"
+      },
+      {
+        "source": "flare-assist-state",
+        "target": "flare-workspace",
+        "description": "extends FlareWorkspace",
+        "style": "sync"
+      },
+      {
+        "source": "flare-fakes",
+        "target": "flare-contracts",
+        "description": "conforms to every contract",
+        "style": "sync"
+      },
+      {
+        "source": "flare-fakes",
+        "target": "flarecore-commands",
+        "description": "runs fixture edits through the real CommandEngine",
+        "style": "sync"
+      },
+      {
+        "source": "flare-fake-assist",
+        "target": "flare-contracts",
+        "description": "conforms to AnimationAssisting",
+        "style": "sync"
+      },
+      {
+        "source": "flare-large-fixtures",
+        "target": "flare-fakes",
+        "description": "registered in FlareFixtures",
+        "style": "sync"
+      },
+      {
+        "source": "flare-live-easing",
+        "target": "flare-contracts",
+        "description": "conforms to KeyframeEasing",
+        "style": "sync"
+      },
+      {
+        "source": "flare-live-easing",
+        "target": "flarecore-commands",
+        "description": "performs SetKeyframeEasing",
+        "style": "sync"
+      },
+      {
+        "source": "flare-live-stage",
+        "target": "flare-contracts",
+        "description": "conforms to StageRendering, StageHitTesting and ShapeBuilding",
+        "style": "sync"
+      },
+      {
+        "source": "flare-live-stage",
+        "target": "flarecore-render",
+        "description": "reads Scene.renderList, the hit query and world bounds",
+        "style": "sync"
+      },
+      {
+        "source": "flare-live-stage",
+        "target": "flarecore-commands",
+        "description": "performs shape and layer commands",
+        "style": "sync"
+      },
+      {
+        "source": "flare-live-stage",
+        "target": "flarecore-instances",
+        "description": "moves instances with SetInstanceTransform",
+        "style": "sync"
+      },
+      {
+        "source": "flare-live-keys",
+        "target": "flare-contracts",
+        "description": "conforms to PropertyAnimating and KeyframeEditing",
+        "style": "sync"
+      },
+      {
+        "source": "flare-live-keys",
+        "target": "flarecore-commands",
+        "description": "performs owner-aware keyframe commands, merged per scrub (LC-5, LC-10)",
+        "style": "sync"
+      },
+      {
+        "source": "flare-live-keys",
+        "target": "flarecore-document",
+        "description": "samples values at the playhead",
+        "style": "sync"
+      },
+      {
+        "source": "flare-live-scenes",
+        "target": "flare-contracts",
+        "description": "conforms to SceneEditing",
+        "style": "sync"
+      },
+      {
+        "source": "flare-live-scenes",
+        "target": "flarecore-commands",
+        "description": "performs scene and guide commands (LC-8, LC-10)",
+        "style": "sync"
+      },
+      {
+        "source": "flare-live-onion-library",
+        "target": "flare-contracts",
+        "description": "conforms to OnionSkinning and LibraryManaging",
+        "style": "sync"
+      },
+      {
+        "source": "flare-live-onion-library",
+        "target": "flarecore-render",
+        "description": "reads onion frames and the render list",
+        "style": "sync"
+      },
+      {
+        "source": "flare-live-onion-library",
+        "target": "flarecore-commands",
+        "description": "performs symbol commands",
+        "style": "sync"
+      },
+      {
+        "source": "flare-live-onion-library",
+        "target": "flarecore-instances",
+        "description": "places instances and sets their playback",
+        "style": "sync"
+      },
+      {
+        "source": "flare-live-interact",
+        "target": "flare-contracts",
+        "description": "conforms to StateMachineEditing and StateMachinePreviewing",
+        "style": "sync"
+      },
+      {
+        "source": "flare-live-interact",
+        "target": "flarecore-machines",
+        "description": "performs machine commands and runs MachinePlayer",
+        "style": "sync"
+      },
+      {
+        "source": "flare-live-export",
+        "target": "flare-contracts",
+        "description": "conforms to Exporting",
+        "style": "sync"
+      },
+      {
+        "source": "flare-live-export",
+        "target": "flarecore-export",
+        "description": "runs SVGExporter and LottieExporter",
+        "style": "sync"
+      },
+      {
+        "source": "flare-live-assist",
+        "target": "flare-contracts",
+        "description": "conforms to AnimationAssisting",
+        "style": "sync"
+      },
+      {
+        "source": "flare-live-assist",
+        "target": "flarecore-commands",
+        "description": "proposals are lists of registered commands",
+        "style": "sync"
+      },
+      {
+        "source": "flare-app-shell",
+        "target": "flare-workspace",
+        "description": "reads state and calls its methods",
+        "style": "sync"
+      },
+      {
+        "source": "flare-app-shell",
+        "target": "flare-animate",
+        "description": "the easing inspector calls the easing editor",
+        "style": "sync"
+      },
+      {
+        "source": "flare-app-shell",
+        "target": "flare-scenes-layers",
+        "description": "the sidebar lists and edits layers",
+        "style": "sync"
+      },
+      {
+        "source": "flare-app-shell",
+        "target": "suiteui-content",
+        "description": "shows the scene in CanvasSurface and SurfaceCard",
+        "style": "sync"
+      },
+      {
+        "source": "flare-app-shell",
+        "target": "suiteui-window",
+        "description": "builds the window from SuiteWindow",
+        "style": "sync"
+      },
+      {
+        "source": "flare-platform",
+        "target": "flare-playback",
+        "description": "calls FlareWorkspace.tick with each target timestamp",
+        "style": "sync"
+      },
+      {
+        "source": "flare-platform",
+        "target": "flarecore-document",
+        "description": "converts FlareCore paths and colors",
+        "style": "sync"
+      },
+      {
+        "source": "flare-rasterizer",
+        "target": "flare-platform",
+        "description": "draws through StagePath",
+        "style": "sync"
+      },
+      {
+        "source": "flare-rasterizer",
+        "target": "flare-contracts",
+        "description": "conforms to FrameRasterizing",
+        "style": "sync"
+      },
+      {
+        "source": "flare-autosave",
+        "target": "flare-files",
+        "description": "reads autosaveDue and recoveryData, calls restoreRecovery",
+        "style": "sync"
+      },
+      {
+        "source": "flare-window",
+        "target": "flare-workspace",
+        "description": "owns one FlareWorkspace and calls its methods",
+        "style": "sync"
+      },
+      {
+        "source": "flare-window",
+        "target": "flare-fakes",
+        "description": "-FlareFixture picks .fake and a fixture",
+        "style": "sync"
+      },
+      {
+        "source": "flare-window",
+        "target": "suiteui-editor-shell",
+        "description": "lays the window out on EditorShell and EditorTopBar",
+        "style": "sync"
+      },
+      {
+        "source": "flare-stage-view",
+        "target": "flare-stage-gestures",
+        "description": "sends drag, endDrag and selection calls",
+        "style": "sync"
+      },
+      {
+        "source": "flare-stage-view",
+        "target": "flare-platform",
+        "description": "draws paths through StagePath",
+        "style": "sync"
+      },
+      {
+        "source": "flare-stage-view",
+        "target": "suiteui-canvas",
+        "description": "draws handles with CanvasMarks and sits in CanvasViewport with rulers",
+        "style": "sync"
+      },
+      {
+        "source": "flare-stage-view",
+        "target": "suiteui-vector-marks",
+        "description": "draws anchors, ghosts, the motion path and guides",
+        "style": "sync"
+      },
+      {
+        "source": "flare-stage-view",
+        "target": "suiteui-probe",
+        "description": "marks input-to-display timings",
+        "style": "sync"
+      },
+      {
+        "source": "flare-inspector-view",
+        "target": "flare-animate",
+        "description": "reads properties and calls setValue, toggleKey, easing and onion methods",
+        "style": "sync"
+      },
+      {
+        "source": "flare-inspector-view",
+        "target": "suiteui-inspector",
+        "description": "builds rows from the bar slider, KeyframeButton, InspectorHeader, PresetGrid and CurveEditor",
+        "style": "sync"
+      },
+      {
+        "source": "flare-timeline-view",
+        "target": "flare-animate",
+        "description": "calls key moves, removals and frame edits",
+        "style": "sync"
+      },
+      {
+        "source": "flare-timeline-view",
+        "target": "flare-playback",
+        "description": "reads the frame and calls play, pause, step",
+        "style": "sync"
+      },
+      {
+        "source": "flare-timeline-view",
+        "target": "suiteui-timeline",
+        "description": "builds on TimelineStrip and FrameMapping",
+        "style": "sync"
+      },
+      {
+        "source": "flare-timeline-view",
+        "target": "suiteui-transport",
+        "description": "plays and steps through TransportCapsule",
+        "style": "sync"
+      },
+      {
+        "source": "flare-panels-view",
+        "target": "flare-scenes-layers",
+        "description": "calls scene and layer methods",
+        "style": "sync"
+      },
+      {
+        "source": "flare-panels-view",
+        "target": "flare-symbols",
+        "description": "calls symbol and swatch methods",
+        "style": "sync"
+      },
+      {
+        "source": "flare-panels-view",
+        "target": "suiteui-panels",
+        "description": "switches Layers and Library with SegmentedTabs",
+        "style": "sync"
+      },
+      {
+        "source": "flare-panels-view",
+        "target": "suiteui-layer-list",
+        "description": "lists scenes and layers in LayerList",
+        "style": "sync"
+      },
+      {
+        "source": "flare-interactions-view",
+        "target": "flare-machines",
+        "description": "reads the layout and calls machine and preview methods",
+        "style": "sync"
+      },
+      {
+        "source": "flare-interactions-view",
+        "target": "suiteui-node-graph",
+        "description": "draws the graph with NodeGraph",
+        "style": "sync"
+      },
+      {
+        "source": "flare-files-edit-view",
+        "target": "flare-files",
+        "description": "loads, saves and lists recent files",
+        "style": "sync"
+      },
+      {
+        "source": "flare-files-edit-view",
+        "target": "flare-edit",
+        "description": "runs the Edit menu actions",
+        "style": "sync"
+      },
+      {
+        "source": "flare-files-edit-view",
+        "target": "suiteui-inspector",
+        "description": "builds the new sheet from PresetGrid",
+        "style": "sync"
+      },
+      {
+        "source": "flare-export-view",
+        "target": "flare-export-state",
+        "description": "sets options and runs the export",
+        "style": "sync"
+      },
+      {
+        "source": "flare-export-view",
+        "target": "flare-rasterizer",
+        "description": "hands StageRasterizer to a live export",
+        "style": "sync"
+      },
+      {
+        "source": "flare-assist-view",
+        "target": "flare-assist-state",
+        "description": "reads the proposal and calls generate, accept and reject",
+        "style": "sync"
+      },
+      {
+        "source": "suiteui-window",
+        "target": "suiteui-tokens",
+        "description": "sizes and colors from the tokens",
+        "style": "sync"
+      },
+      {
+        "source": "suiteui-content",
+        "target": "suiteui-tokens",
+        "description": "sizes and colors from the tokens",
+        "style": "sync"
+      },
+      {
+        "source": "suiteui-vector-marks",
+        "target": "suiteui-canvas",
+        "description": "extends CanvasMarks",
+        "style": "sync"
+      },
+      {
+        "source": "suiteui-transport",
+        "target": "suiteui-editor-shell",
+        "description": "sits in the status bar",
+        "style": "sync"
+      },
+      {
+        "source": "suiteui-layer-list",
+        "target": "suiteui-window",
+        "description": "wraps SidebarRow",
+        "style": "sync"
+      },
+      {
+        "source": "flarecore-commands",
+        "target": "flarecore-document",
+        "description": "runs on the CommandEngine",
+        "style": "sync"
+      },
+      {
+        "source": "flarecore-instances",
+        "target": "flarecore-document",
+        "description": "runs on the CommandEngine",
+        "style": "sync"
+      },
+      {
+        "source": "flarecore-hits",
+        "target": "flarecore-document",
+        "description": "reads shapes and transforms",
+        "style": "sync"
+      },
+      {
+        "source": "flarecore-render",
+        "target": "flarecore-document",
+        "description": "reads scenes and symbols",
+        "style": "sync"
+      },
+      {
+        "source": "flarecore-render",
+        "target": "flarecore-hits",
+        "description": "builds on the hit test and shape bounds",
+        "style": "sync"
+      },
+      {
+        "source": "flarecore-machines",
+        "target": "flarecore-document",
+        "description": "runs on the CommandEngine",
+        "style": "sync"
+      },
+      {
+        "source": "flarecore-export",
+        "target": "flarecore-render",
+        "description": "SVG walks the render list after LC-1",
+        "style": "sync"
+      }
+    ]
+  }
+}
