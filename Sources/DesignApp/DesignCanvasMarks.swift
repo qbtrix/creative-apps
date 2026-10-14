@@ -8,6 +8,7 @@
 //
 // Invariants:
 // - Frames are absolute page points; multiplying by the zoom is the only mapping.
+// - Rectangles and frames round their corners by drawnCornerRadius (DesignCorners).
 // - Paint order is DesignPage.painted: a node, then its children, siblings back to
 //   front; a hidden node takes its whole subtree with it, label and handles too.
 // - Frame names and handles stay one size on screen at any zoom. Text nodes scale
@@ -75,11 +76,14 @@ struct DesignArtwork: View {
             for item in painted {
                 let node = item.node
                 let box = node.frame.cgRect.applying(fit)
+                let outline = Path(roundedRect: box, cornerRadius: node.drawnCornerRadius * scale, style: .circular)
                 switch node.kind {
                 case .frame:
-                    context.fill(Path(box), with: .color(node.fill.color))
-                    context.stroke(Path(box), with: .color(SuiteColor.overlayInk.opacity(0.15)), lineWidth: 1)
-                case .rectangle, .instance:
+                    context.fill(outline, with: .color(node.fill.color))
+                    context.stroke(outline, with: .color(SuiteColor.overlayInk.opacity(0.15)), lineWidth: 1)
+                case .rectangle:
+                    context.fill(outline, with: .color(node.fill.color))
+                case .instance:
                     context.fill(Path(box), with: .color(node.fill.color))
                 case .ellipse:
                     context.fill(Path(ellipseIn: box), with: .color(node.fill.color))

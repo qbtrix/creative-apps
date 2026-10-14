@@ -1,10 +1,13 @@
 // DesignInspector.swift: the Properties tab of Design's panel. A selected
 // layer shows its header (name, then kind unless the name says it, then size),
-// then Align (DesignAlignBar), then Layer (Hidden and Locked checkboxes), Frame (X, Y, W and H as scrub
-// fields) and Fill (the color well; a text layer's is its text color, a group
+// then Align (DesignAlignBar), then Layer (Hidden and Locked checkboxes), Frame
+// (X, Y, W and H as scrub fields, then Radius, a rectangle's or frame's corner
+// radius) and Fill (the color well; a text layer's is its text color, a group
 // has none). A locked layer, or one inside a locked group, can't be edited, so
-// Frame and Fill are disabled and a line says why. With only a page selected it shows the page's size,
-// read only. With several layers selected it shows "Multiple layers selected"
+// Frame and Fill are disabled and a line says why. Radius is also off for a
+// kind with no corners, with its reason as the tooltip. With only a page
+// selected it shows the page's size, read only. With several layers selected
+// it shows "Multiple layers selected"
 // where Frame and Fill's values go, with the reason as the rows' tooltip and a
 // hint below, since editing several layers at once comes later (#413). The rows
 // hold no control, so they aren't disabled: a disabled row dims its label
@@ -24,7 +27,8 @@ struct DesignInspector: View {
                     DesignMultipleProperties(count: model.selectedNodeIDs.count, help: help)
                 } else if let node = model.selectedNode {
                     DesignNodeProperties(
-                        node: node, lockHelp: model.lockHelp(node.id), alignHelp: model.alignHelps, perform: perform
+                        node: node, lockHelp: model.lockHelp(node.id), alignHelp: model.alignHelps,
+                        radiusHelp: model.cornerRadiusHelp, perform: perform
                     ).id(node.id)
                 } else if let page = model.selectedPage {
                     DesignPageProperties(page: page).id(page.id)
@@ -42,6 +46,8 @@ private struct DesignNodeProperties: View {
     let lockHelp: String?
     /// Why each Align command can't run, keyed by edge.
     let alignHelp: [DesignAlignEdge: String]
+    /// Why Radius can't be set (no corners, or a lock), or nil.
+    let radiusHelp: String?
     let perform: DesignPerform
 
     /// How far X and Y can be set, and the most W and H can be, in points.
@@ -72,6 +78,14 @@ private struct DesignNodeProperties: View {
                 }
                 .disabled(lockHelp != nil)
                 .help(lockHelp ?? "")
+                InspectorRow("Radius") {
+                    ScrubField(
+                        "Corner radius", value: node.drawnCornerRadius, in: 0...node.maxCornerRadius, step: 1, unit: "pt",
+                        decimals: 1
+                    ) { perform(.setCornerRadius(node.id, $0)) }
+                }
+                .disabled(radiusHelp != nil)
+                .help(radiusHelp ?? "")
             }
             if let label = node.kind.fillLabel {
                 InspectorSection("Fill") {

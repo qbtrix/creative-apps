@@ -2,8 +2,10 @@
 // editor's panel width: a page with no layer selected, a rectangle selected
 // (Layer, Frame and Fill), a locked rectangle (Frame and Fill disabled,
 // with the line saying why), and a rectangle inside a locked group (disabled
-// the same way). Writes design-inspector-page-, -node-, -locked- and
-// -locked-group-{light,dark}.png. macOS only.
+// the same way), and a rectangle with rounded corners (Radius 16) with the
+// canvas drawing it. Writes design-inspector-page-, -node-, -locked-,
+// -locked-group- and -radius-{light,dark}.png, and
+// design-canvas-radius-{light,dark}.png. macOS only.
 import DesignModel
 import SuiteUI
 import SwiftUI
@@ -41,6 +43,18 @@ import Testing
         try model.setNodeLocked(group, true)
         model.selectItem(rectangle)
         try shoot("locked-group", model)
+    }
+
+    @Test func roundedCorners() throws {
+        var model = DesignWorkspace()
+        model.newFile()
+        let rectangle = try model.addNode(.rectangle, frame: DesignRect(x: 80, y: 80, width: 320, height: 200), in: "node-1")
+        try model.setFill(rectangle, DesignColor(24, 119, 242))
+        try model.setCornerRadius(rectangle, 16)
+        try model.setCornerRadius("node-1", 24)
+        model.selectItem(rectangle)
+        try shoot("radius", model)
+        try shootCanvas(model, "design-canvas-radius")
     }
 }
 

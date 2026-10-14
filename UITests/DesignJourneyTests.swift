@@ -13,6 +13,8 @@
 // journey checks each menu really opens, and adds a page from the Page menu.
 // The align journey draws a rectangle, centers it from the inspector's Align
 // row and moves it to the top from Object > Align, one undo step each.
+// The corner journey draws a rectangle, types a Radius into the inspector and
+// checks it is one undo step that Undo takes back.
 import XCTest
 
 final class DesignJourneyTests: XCTestCase {
@@ -54,6 +56,32 @@ final class DesignJourneyTests: XCTestCase {
         design.shot("align-top")
         design.click("Undo Align Top", in: .window, step: "align-undone")
         XCTAssert(design.app.buttons["Undo Align Center"].waitForExistence(timeout: 5), "Undo didn't undo Align Top alone")
+    }
+
+    @MainActor func testRoundARectanglesCorners() {
+        let design = Journey("Design", self)
+        design.app.typeKey("n", modifierFlags: .command)
+        XCTAssert(design.element("suite.canvas").waitForExistence(timeout: 10), "New File showed no canvas")
+        design.element("suite.tools").buttons["Rectangle"].click()
+        design.drag(on: "suite.canvas", from: CGVector(dx: 0.2, dy: 0.2), to: CGVector(dx: 0.5, dy: 0.5), step: "corner-rectangle")
+        XCTAssert(design.app.buttons["Undo Add Rectangle"].waitForExistence(timeout: 5), "drawing a rectangle made no undo step")
+        // Click the Radius number to type into it, then commit with Return.
+        let radius = design.element("design.properties").descendants(matching: .any)
+            .matching(NSPredicate(format: "label == %@", "Corner radius")).firstMatch
+        XCTAssert(radius.waitForExistence(timeout: 5), "the inspector has no Radius row")
+        radius.click()
+        let panel = design.element("design.properties"), named = panel.textFields["Corner radius"]
+        let field = named.waitForExistence(timeout: 3) ? named : panel.textFields.firstMatch
+        XCTAssert(field.waitForExistence(timeout: 5), "clicking Radius opened no field to type in")
+        field.click()
+        design.app.typeKey(.rightArrow, modifierFlags: .command)
+        for _ in 0..<8 { design.app.typeKey(.delete, modifierFlags: []) }
+        design.app.typeText("24\r")
+        XCTAssert(
+            design.app.buttons["Undo Change Corner Radius"].waitForExistence(timeout: 5), "typing a radius made no undo step")
+        design.shot("corner-rounded")
+        design.click("Undo Change Corner Radius", in: .window, step: "corner-undone")
+        XCTAssert(design.app.buttons["Undo Add Rectangle"].waitForExistence(timeout: 5), "Undo didn't take the radius back")
     }
 
     @MainActor func testDrawShapesAddTextAndSave() throws {

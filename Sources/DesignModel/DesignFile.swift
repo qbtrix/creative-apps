@@ -10,7 +10,9 @@
 // than 1, has no page, repeats an id (page and node ids share one namespace, as
 // `selectItem` looks them up together), nests children under a node that cannot
 // hold them, or has a page or node whose size is under 1 point or whose numbers
-// are not finite. Saving runs the same number check, so a file written here
+// are not finite, or a negative corner radius. A node written before corner
+// radius existed opens with square corners (DesignNode's decoder). Saving runs
+// the same number check, so a file written here
 // always opens again. Opening clears the undo history and the selection, so Open
 // only fills a workspace with nothing open (`takesOpenedFile`).
 #if canImport(FoundationEssentials)
@@ -116,7 +118,9 @@ extension DesignWorkspace {
         func checkNodes(_ nodes: [DesignNode]) throws(DesignFileError) {
             for node in nodes {
                 try claim(node.id)
-                guard drawable(node.frame) else { throw .invalidNumber(node.id) }
+                guard drawable(node.frame), node.cornerRadius.isFinite, node.cornerRadius >= 0 else {
+                    throw .invalidNumber(node.id)
+                }
                 guard node.children.isEmpty || node.kind.holdsChildren else { throw .notAContainer(node.id) }
                 try checkNodes(node.children)
             }
