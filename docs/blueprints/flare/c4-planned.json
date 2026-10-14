@@ -255,7 +255,7 @@
               {
                 "id": "flare-files",
                 "name": "Files, Open Recent and recovery data",
-                "description": "FlareFiles: open through load (progress first, a pure decode the app runs off the main thread, then the landing), save bytes, file name, title and dirty flag, section 3.3's alert text per FormatError, the Open Recent list (paths, most recent first, at most ten), the autosave due time and recovery bytes (mac-platform MP-2) and restoring a recovered document as unsaved work (MP-3). FlareSampleAnimation builds the sample document the toolbar opens today.",
+                "description": "FlareFiles: open through load (progress first, a pure decode the app runs off the main thread, then the landing), save bytes, file name, title and dirty flag, section 3.3's alert text per FormatError, the Open Recent list (paths, most recent first, at most ten). mac-platform MP-2 and MP-3 add to this file the autosave due time, the recovery bytes and restoring a recovered document as unsaved work. FlareSampleAnimation builds the sample document the toolbar opens today.",
                 "technology": "Swift 6, Foundation",
                 "paths": [
                   "Sources/FlareModel/FlareFiles.swift",
@@ -453,7 +453,12 @@
                   },
                   {
                     "target": "flarecore-commands",
-                    "description": "performs shape, layer and instance commands",
+                    "description": "performs shape and layer commands",
+                    "style": "sync"
+                  },
+                  {
+                    "target": "flarecore-instances",
+                    "description": "moves instances with SetInstanceTransform",
                     "style": "sync"
                   }
                 ],
@@ -542,7 +547,12 @@
                   },
                   {
                     "target": "flarecore-commands",
-                    "description": "performs symbol and instance commands",
+                    "description": "performs symbol commands",
+                    "style": "sync"
+                  },
+                  {
+                    "target": "flarecore-instances",
+                    "description": "places instances and sets their playback",
                     "style": "sync"
                   }
                 ],
@@ -600,7 +610,7 @@
               {
                 "id": "flare-live-assist",
                 "name": "Live assist",
-                "description": "LiveAssist (LM-14): Assisting behind a provider protocol, unavailable with a reason until the suite's model provider exists; a provider's proposal goes through the shared apply code.",
+                "description": "LiveAssist (LM-14): AnimationAssisting behind a provider protocol, unavailable with a reason until the suite's model provider exists; a provider's proposal goes through the shared apply code.",
                 "technology": "Swift 6, Foundation",
                 "paths": [
                   "Sources/FlareModel/Live/LiveAssist.swift"
@@ -652,6 +662,16 @@
                   {
                     "target": "flare-animate",
                     "description": "the easing inspector calls the easing editor",
+                    "style": "sync"
+                  },
+                  {
+                    "target": "flare-scenes-layers",
+                    "description": "the sidebar lists and edits layers",
+                    "style": "sync"
+                  },
+                  {
+                    "target": "suiteui-content",
+                    "description": "shows the scene in CanvasSurface and SurfaceCard",
                     "style": "sync"
                   },
                   {
@@ -732,7 +752,7 @@
               {
                 "id": "flare-window",
                 "name": "Window, intents and launch",
-                "description": "FlareWindow owns the one model and presentation state (zoom, panel tab, popovers, file URL); every control sends a FlareIntent, which the router (FlareWindow+Router) hands to one FlareWindow+<Area> file. FlareLaunch reads -FlareFixture, -FlareSample, -FlareOpenFile, -FlareSaveTo, -FlareExportTo, -FlareAssistMode and -FlarePerfProbe. FlareEditor lays out EditorShell's slots; FlareControls gives every control its flare.<area>.<name> identifier and the suite.controls JSON.",
+                "description": "FlareWindow owns the one model and presentation state (zoom, panel tab, popovers, file URL); every control sends a FlareIntent, which the router (FlareWindow+Router) hands to one FlareWindow+<Area> file. FlareLaunch reads -FlareFixture, -FlareSample, -FlareOpenFile, -FlareSaveTo, -FlareExportTo, -FlareAssistMode, -FlarePerfProbe and -FlareWindowSize (section 12.3). FlareEditor lays out EditorShell's slots; FlareControls gives every control its flare.<area>.<name> identifier and the suite.controls JSON.",
                 "technology": "Swift 6, SwiftUI, macOS 26",
                 "paths": [
                   "Sources/FlareApp/FlareWindow.swift",
@@ -1039,10 +1059,46 @@
                   "Sources/SuiteUI/SuiteWindow.swift",
                   "Sources/SuiteUI/SidebarSection.swift",
                   "Sources/SuiteUI/SidebarRow.swift",
-                  "Sources/SuiteUI/ToolbarGroup.swift",
+                  "Sources/SuiteUI/ToolbarGroup.swift"
+                ],
+                "relationships": [
+                  {
+                    "target": "suiteui-tokens",
+                    "description": "sizes and colors from the tokens",
+                    "style": "sync"
+                  }
+                ],
+                "status": "existing",
+                "authored": true
+              },
+              {
+                "id": "suiteui-tokens",
+                "name": "Tokens",
+                "description": "Spacing, radius, size, type and color tokens: the column widths, window minimum and launch size, editor bar and panel widths and timeline sizes section 12.3 is written against.",
+                "technology": "Swift 6, SwiftUI, macOS 26",
+                "paths": [
                   "Sources/SuiteUI/Tokens.swift"
                 ],
                 "relationships": [],
+                "status": "existing",
+                "authored": true
+              },
+              {
+                "id": "suiteui-content",
+                "name": "Content surfaces",
+                "description": "CanvasSurface and SurfaceCard: the artboard surface and scene card today's Flare window shows until F3a's stage replaces them.",
+                "technology": "Swift 6, SwiftUI, macOS 26",
+                "paths": [
+                  "Sources/SuiteUI/CanvasSurface.swift",
+                  "Sources/SuiteUI/SurfaceCard.swift"
+                ],
+                "relationships": [
+                  {
+                    "target": "suiteui-tokens",
+                    "description": "sizes and colors from the tokens",
+                    "style": "sync"
+                  }
+                ],
                 "status": "existing",
                 "authored": true
               },
@@ -1245,13 +1301,12 @@
               {
                 "id": "flarecore-commands",
                 "name": "Edit commands",
-                "description": "The undoable edit commands (41 on core main cfad97f). LC-5 to LC-8, LC-10 and LC-12b extend them: owner-aware keyframe commands, AddInstance, SetInstanceTransform and SetInstancePlayback, SetShapeStroke, SetShapePath, DuplicateLayer, SetSceneCanvas, RenameScene, ReorderScene, RenameSymbol, and the SetKeyframe and MoveGuide merges.",
+                "description": "The undoable edit commands (41 on core main cfad97f). LC-5, LC-7, LC-8, LC-10 and LC-12b extend them: owner-aware keyframe commands, SetShapeStroke, SetShapePath, DuplicateLayer, SetSceneCanvas, RenameScene, ReorderScene, RenameSymbol, and the SetKeyframe and MoveGuide merges.",
                 "technology": "Swift 6, SwiftPM",
                 "paths": [
                   "Sources/FlareCore/KeyframeCommands.swift",
                   "Sources/FlareCore/LayerCommands.swift",
                   "Sources/FlareCore/ShapeCommands.swift",
-                  "Sources/FlareCore/InstanceCommands.swift",
                   "Sources/FlareCore/SceneCommands.swift",
                   "Sources/FlareCore/GuideCommands.swift",
                   "Sources/FlareCore/SymbolCommands.swift"
@@ -1264,6 +1319,24 @@
                   }
                 ],
                 "status": "existing",
+                "authored": true
+              },
+              {
+                "id": "flarecore-instances",
+                "name": "Instance commands",
+                "description": "LC-6 (Q5e): AddInstance, RemoveInstance, SetInstanceTransform (a drag merges into one entry) and SetInstancePlayback, with finite transform validation. Not on core main cfad97f.",
+                "technology": "Swift 6, SwiftPM",
+                "paths": [
+                  "Sources/FlareCore/InstanceCommands.swift"
+                ],
+                "relationships": [
+                  {
+                    "target": "flarecore-document",
+                    "description": "runs on the CommandEngine",
+                    "style": "sync"
+                  }
+                ],
+                "status": "planned",
                 "authored": true
               },
               {
@@ -1360,6 +1433,30 @@
       }
     ],
     "relationships": [
+      {
+        "source": "flare-model",
+        "target": "flarecore",
+        "description": "uses FlareCore from creative-core",
+        "style": "sync"
+      },
+      {
+        "source": "flare-app",
+        "target": "flare-model",
+        "description": "reads state and calls its methods",
+        "style": "sync"
+      },
+      {
+        "source": "flare-app",
+        "target": "suiteui",
+        "description": "builds its window from SuiteUI components",
+        "style": "sync"
+      },
+      {
+        "source": "flare-app",
+        "target": "flarecore",
+        "description": "converts FlareCore paths and colors (StagePath)",
+        "style": "sync"
+      },
       {
         "source": "flare-workspace",
         "target": "flare-contracts",
@@ -1555,7 +1652,13 @@
       {
         "source": "flare-live-stage",
         "target": "flarecore-commands",
-        "description": "performs shape, layer and instance commands",
+        "description": "performs shape and layer commands",
+        "style": "sync"
+      },
+      {
+        "source": "flare-live-stage",
+        "target": "flarecore-instances",
+        "description": "moves instances with SetInstanceTransform",
         "style": "sync"
       },
       {
@@ -1603,7 +1706,13 @@
       {
         "source": "flare-live-onion-library",
         "target": "flarecore-commands",
-        "description": "performs symbol and instance commands",
+        "description": "performs symbol commands",
+        "style": "sync"
+      },
+      {
+        "source": "flare-live-onion-library",
+        "target": "flarecore-instances",
+        "description": "places instances and sets their playback",
         "style": "sync"
       },
       {
@@ -1652,6 +1761,18 @@
         "source": "flare-app-shell",
         "target": "flare-animate",
         "description": "the easing inspector calls the easing editor",
+        "style": "sync"
+      },
+      {
+        "source": "flare-app-shell",
+        "target": "flare-scenes-layers",
+        "description": "the sidebar lists and edits layers",
+        "style": "sync"
+      },
+      {
+        "source": "flare-app-shell",
+        "target": "suiteui-content",
+        "description": "shows the scene in CanvasSurface and SurfaceCard",
         "style": "sync"
       },
       {
@@ -1847,6 +1968,18 @@
         "style": "sync"
       },
       {
+        "source": "suiteui-window",
+        "target": "suiteui-tokens",
+        "description": "sizes and colors from the tokens",
+        "style": "sync"
+      },
+      {
+        "source": "suiteui-content",
+        "target": "suiteui-tokens",
+        "description": "sizes and colors from the tokens",
+        "style": "sync"
+      },
+      {
         "source": "suiteui-vector-marks",
         "target": "suiteui-canvas",
         "description": "extends CanvasMarks",
@@ -1866,6 +1999,12 @@
       },
       {
         "source": "flarecore-commands",
+        "target": "flarecore-document",
+        "description": "runs on the CommandEngine",
+        "style": "sync"
+      },
+      {
+        "source": "flarecore-instances",
         "target": "flarecore-document",
         "description": "runs on the CommandEngine",
         "style": "sync"
