@@ -196,3 +196,117 @@ Checklist:
       develop, export JPEG at a size, persistence, crop and straighten).
 - [x] Every non-goal names a behavior, not another company's product.
 - [x] Every "out" row names where it goes (later tier or another app).
+
+---
+
+## 2. Pseudo-C4 (drawn before code)
+
+The machine-readable twin of this section is
+`docs/blueprints/library/c4-planned.json`, in the shape of
+`docs/c4/model.json`, with `"status": "planned"` or `"existing"` and
+`"authored": true` on every component. `docs/c4/model.json` itself is not
+edited by this blueprint: each feature updates its own component
+descriptions there when it lands (CLAUDE.md, C4 owner rule), using the
+descriptions below. Because `model.json` covers a whole target folder with
+one component per target, every new file below is already owned there; the
+finer components here are for planning and for owned-file checks.
+
+### 2.1 L1 and L2: the system and its containers
+
+```
+                    ┌────────────────────────── creative-apps ──────────────────────────┐
+ person ──uses──▶   │  LibraryApp (macOS) ──reads, calls──▶ LibraryModel (Linux-safe)  │
+ (photos on disk)   │      │  builds window from                 │ uses                 │
+                    │      ▼                                     ▼                      │
+                    │   SuiteUI (macOS)                 creative-core: CoreRaster,      │
+                    │                                    CoreColor (existing)          │
+                    └───────────────────────────────────────────────────────────────────┘
+ LibraryApp ──reads and writes──▶ the person's image files (read only) and
+             Application Support/Library/catalog.json; writes exported JPEGs
+ CoreCatalog (creative-core#157, planned): not used in v1 (decision D1)
+```
+
+| Container | Status | Responsibility | Owned paths |
+|---|---|---|---|
+| `library-app` | existing | The SwiftUI app: window, menus, views, and the platform adapters that need Darwin (ImageIO decode and encode, folder scan, file store) | `Sources/LibraryApp/` |
+| `library-model` | existing | State and logic behind the window, the use-case contracts, their live conformances over CoreRaster, and the fakes. Linux-safe | `Sources/LibraryModel/` |
+| `suiteui` | existing (other line) | Shared components; Library asks for new ones by `needs-ui` issue | `Sources/SuiteUI/` |
+| `coreraster`, `corecolor` | existing (creative-core) | Pixels, resampling, develop adjustments, histogram, rotate, crop; color | creative-core |
+| `corecatalog` | planned (creative-core#157) | SQLite catalog. Not a v1 dependency: `Package.swift` gives LibraryModel no CoreCatalog and GRDB is not Linux-checked here | creative-core |
+
+### 2.2 L3: LibraryModel components
+
+`LibraryCatalog` stays the one value-type state behind the window. Each
+component below owns its own files; only the spine (`library-catalog`)
+declares stored properties, all of them, in one PR, so no later feature edits
+`LibraryCatalog.swift` (Flare's LM-0a3 pattern).
+
+| Component | Status | Responsibility | Owned paths | Uses |
+|---|---|---|---|---|
+| `library-catalog` | existing, grows | `LibraryCatalog`'s stored state (every property v1 needs, section 5.4), `PhotoItem`, sort and the cached display order, collections and their empty-state copy | `LibraryCatalog.swift`, `PhotoItem.swift`, `LibraryOrder.swift`, `LibraryEmptyCollection.swift` | `library-contracts`, `library-history` |
+| `library-contracts` | planned | The use-case protocols and their value types (section 5), and `LibraryServices` (one existential per contract, `.fake` and `.live`) | `Contracts/`, `LibraryServices.swift` | CoreRaster (types only) |
+| `library-fakes` | planned | One fake per contract, deterministic, with failure modes for error journeys | `Fakes/` | `library-contracts`, `library-fixtures` |
+| `library-fixtures` | existing, grows | Seeded samples and the named fixtures journeys launch with; launch-argument parsing | `LibrarySample.swift`, `LibraryFixtures.swift`, `LibraryLaunch.swift` | `library-catalog` |
+| `library-history` | planned | Undo and redo: named steps, each holding the values it puts back; coalescing for slider drags | `CatalogHistory.swift` | none |
+| `library-import` | planned | Folder import: file type rules, path ids, skip known paths, merge into the catalog, progress and failure state | `LibraryImport.swift`, `Live/LiveImporter.swift` | `PhotoDecoding` (platform) |
+| `library-thumbnails` | planned | Size buckets from the cell size, requests for visible cells, an LRU of display bytes, rebuild after a develop change | `LibraryThumbnails.swift`, `Live/LiveThumbnails.swift` | CoreRaster `resized`, `PhotoDecoding`, `DevelopRendering` |
+| `library-culling` | existing, grows | Rating, flag and label on a set of ids with undo, keyboard mapping, Auto Advance, mixed values for the inspector | `MetadataEditing.swift`, `LibraryCulling.swift`, `Live/LiveCulling.swift` | `library-history` |
+| `library-persistence` | planned | Catalog file v1 (JSON) encode and decode, restore, setting aside a damaged file, the dirty flag and save requests | `LibraryPersistence.swift`, `Live/LiveCatalogCoding.swift` | `CatalogStoring` (platform) |
+| `library-loupe` | existing, grows | The loupe's photo and place, zoom (fit, 100%, steps), pan, the latest-wins render of the loupe image and its histogram, prefetch of the neighbours | `LoupeState.swift`, `LoupeZoom.swift`, `LibraryLoupeImage.swift`, `RenderQueue.swift`, `Live/LiveLoupeImaging.swift` | `DevelopRendering`, `PhotoDecoding` |
+| `library-develop` | planned | Develop settings per photo, slider edits with clamping and coalesced undo, reset, copy and paste, the renderer over CoreRaster | `LibraryDevelop.swift`, `Live/LiveDevelop.swift` | CoreRaster adjustments and `Histogram` |
+| `library-crop` | planned | Crop rectangle and angle, aspect presets, the frame kept inside the straightened image, apply and cancel | `LibraryCrop.swift`, `Live/LiveCrop.swift` | CoreRaster `rotated`, `straightenCrop`, `cropped` |
+| `library-export` | planned | Export plan (sizes, never enlarge, names that never overwrite, quality), progress, cancel, per-file failures | `LibraryExport.swift`, `Live/LiveExporter.swift` | `DevelopRendering`, CoreRaster `resized`, `JPEGWriting` (platform) |
+
+All paths are under `Sources/LibraryModel/`.
+
+### 2.3 L3: LibraryApp components
+
+| Component | Status | Responsibility | Owned paths | Uses |
+|---|---|---|---|---|
+| `library-app-shell` | existing, restructured | The `Window` scene, the root `LibraryWindow` holding the one `model`, the whole menu bar, the per-area menu structs, launch arguments | `LibraryApp.swift`, `LibraryWindow.swift`, `LibraryCommands.swift`, `LibraryMenus.swift` | every area file |
+| `library-app-areas` | planned | One file per area that builds that area's menu closures and runs its async work: `+File` (import, export, samples), `+Edit` (undo, redo), `+View` (grid, loupe, zoom, sort, sizes), `+Photo` (develop, crop), `+Metadata` (rating, flag, label, Auto Advance), `+Keys` (grid and loupe keys), `+Persist` (load at launch, save after changes) | `LibraryWindow+File.swift`, `+Edit`, `+View`, `+Photo`, `+Metadata`, `+Keys`, `+Persist` | `library-model` |
+| `library-app-browse` | existing, grows | The content area: empty states, import progress row, the grid with real thumbnails, the loupe on `CanvasViewport`, the status pills | `LibraryBrowser.swift`, `LibraryGrid.swift`, `DisplayImage+Image.swift`, `LibraryLoupe.swift`, `LibraryStatusBar.swift` | SuiteUI |
+| `library-app-inspector` | existing, grows | The inspector: Info and Develop tabs, metadata, develop sliders and histogram | `LibraryInspector.swift`, `MetadataInspector.swift`, `DevelopInspector.swift` | SuiteUI |
+| `library-app-crop` | planned | The crop frame over the loupe photo | `LibraryCropOverlay.swift` | SuiteUI `CropShade`, `SelectionOutline` |
+| `library-app-export` | planned | The export sheet | `LibraryExportSheet.swift` | SuiteUI |
+| `library-app-platform` | planned | Darwin adapters that conform to the platform contracts: `ImageIODecoder` (`PhotoDecoding`: folder scan, metadata, decode with orientation to sRGB RGBA8), `JPEGWriter` (`JPEGWriting`), `CatalogStore` (`CatalogStoring`: Application Support, atomic write, `.bad` rename) | `Platform/` | ImageIO, Foundation |
+
+All paths are under `Sources/LibraryApp/`. No SwiftUI in `Platform/`
+(the logic track builds it, like Flare's `StagePath.swift`).
+
+### 2.4 Relationships
+
+| From | To | What |
+|---|---|---|
+| `library-app-shell` | `library-catalog` | holds the one `LibraryCatalog`, reads it, calls its methods |
+| `library-app-areas` | `library-contracts` | awaits a service (import, thumbnails, loupe render, export, store) off the main actor, then hands the result to a catalog method |
+| `library-app-platform` | `library-contracts` | conforms to `PhotoDecoding`, `JPEGWriting`, `CatalogStoring` |
+| `library-app-browse`, `library-app-inspector`, `library-app-crop`, `library-app-export` | `suiteui` | build their views from SuiteUI |
+| `library-catalog` | `library-history` | records every catalog change as a named step |
+| `library-thumbnails`, `library-loupe`, `library-export` | `library-develop` | render with the photo's settings, so grid, loupe and export match (QB-V4) |
+| `library-develop`, `library-crop`, `library-thumbnails`, `library-export` | `coreraster` | every pixel operation |
+| `library-fakes` | `library-fixtures` | fake data comes from the fixtures |
+| `library-persistence` | `library-catalog` | encodes and restores records; never pixels |
+
+### 2.5 What runs where (threads)
+
+- The main actor owns `LibraryCatalog` and the views. A catalog method
+  never decodes, renders or touches the disk.
+- Decoding, thumbnail building, loupe renders, export and catalog file
+  writes run in `Task`s off the main actor, started by the area files, and
+  return results through a catalog method (`finishImport`,
+  `setThumbnail`, `showLoupeRender`, ...). Each result carries the request
+  token it answers; a result for a stale token is dropped (`RenderQueue`
+  rule: latest wins).
+- Contracts are `Sendable` and stateless or actor-backed, so a live service
+  can run on any thread. The LRU caches are actors inside the live
+  conformances.
+
+Checklist:
+
+- [x] Every component has a status, a responsibility, owned paths and its
+      relationships, here and in `c4-planned.json`.
+- [x] Every existing file under `Sources/LibraryModel/` and
+      `Sources/LibraryApp/` is in exactly one component (checked by the
+      script in section 9).
+- [x] No component writes another line's target.
