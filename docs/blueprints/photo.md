@@ -111,7 +111,7 @@ circle is #588).
   `EditorShell`; `PhotoPanel` holds the Adjust | Layers tabs;
   `PhotoCommands` is the whole menu bar in one file; `TileCanvas` and
   `StrokePacer` are the fast canvas path; `ImageIOCodec` is the codec.
-- **Tests.** 49 files in `Tests/PhotoModelTests` (Linux), 16 Photo files in
+- **Tests.** 50 files in `Tests/PhotoModelTests` (one is shared support) (Linux), 16 Photo files in
   `Tests/AppSnapshotTests` (including `PhotoBrushLatencyTests` and
   `PhotoTileCanvasTests`), one journey file.
 - **App audit** (`UITests/audit-baseline.json`): `photo` is at
@@ -218,3 +218,118 @@ or writing any closed layered format.
 
 Tier 3 stays out of v2: text, paths and a pen, layer styles, print setup,
 specialist controls, gradients and fills.
+
+---
+
+## 2. Pseudo-C4 (drawn before code)
+
+Three layers, as `docs/engineering.md` says. SuiteUI sits beside the app and
+knows no Model. Nothing new at L1 or L2: v2 adds L3 components (groups of
+files) inside the two Photo containers. The same model is
+`docs/blueprints/photo/c4-planned.json`, in the shape of `docs/c4/model.json`,
+with `"status"` and `"authored": true` on every element.
+
+```
+creative-core (Linux)       creative-apps
+CoreRaster, CoreColor ───▶  PhotoModel ──────────────────────▶ PhotoApp ◀── SuiteUI
+                            workspace + history + render        window, intents, menus,
+                            contracts ─▶ fakes | live           canvas + overlays, panel,
+                            (Linux, tested)                     sheets, platform (ImageIO,
+                                                                packages, pasteboard, autosave)
+```
+
+### 2.1 L2 containers
+
+| Container | Status | Responsibility | Paths | Relationships |
+|---|---|---|---|---|
+| PhotoModel | existing | Every bit of Photo's state and logic, Linux-safe and tested: the workspace, history, renderer, the v2 contracts with their fakes and live conformances | `Sources/PhotoModel/` | uses CoreRaster and CoreColor (creative-core) |
+| PhotoApp | existing | The SwiftUI window on SuiteUI's `EditorShell`, its menus and sheets, and the platform code (ImageIO, file packages, pasteboard, autosave timer) | `Sources/PhotoApp/` | builds from SuiteUI; reads PhotoModel and calls its methods |
+| SuiteUI | existing (other line) | Shared components; v2 asks for six (section 6.3) | `Sources/SuiteUI/` | – |
+| CoreRaster, CoreColor | existing (creative-core) | Pixels, compositing, masks, tone, resampling; v2 asks for five engine additions (section 8.4) | creative-core | – |
+
+### 2.2 L3 components in PhotoModel
+
+The existing component `photo-model-sources` (`Sources/PhotoModel/`) is split
+here by responsibility so features can own parts of it. The C4 gate in
+`scripts/ci` only reads `docs/c4/model.json`, where the one component keeps
+owning the whole folder; PV-0 rewrites that component's description once to
+name everything below, so no later feature edits `docs/c4/model.json`.
+
+| Component | Status | Responsibility | Owned paths | Relationships |
+|---|---|---|---|---|
+| workspace | existing (v2 adds state in PV-0) | `PhotoWorkspace`: the open image, layers (top first) with kind and mask flags, pixels and masks as tiles, selection (rect plus optional coverage mask), tool and tool options, pending crop and aspect, transform draft, sample size, services, the saved marker | `PhotoWorkspace.swift`, `PhotoLayer.swift`, `PixelRect.swift`, `TiledPixels.swift`, `ToolOptions.swift`, `PhotoInspectorContent.swift`, `PhotoLayerMenu.swift` | calls contracts through `services`; records every edit in history |
+| history | existing (PV-0 adds the selection step and masks in the stack) | Named undo and redo by tiles, layer lists or whole stacks; the history list and jump | `PhotoHistory.swift` | read by the History tab (PV-4) |
+| render | existing (PV-0 extracts the per-layer step) | Composite visible layers bottom-up, then the global adjustments; damaged tiles only for the live canvas; the curve's samples and histogram | `PhotoRender.swift`, `PhotoTileUpdate.swift`, `PhotoLayerComposite.swift` (new in PV-0: one layer's contribution, the hook PV-6 and PV-5 fill), `AdjustmentSettings.swift`, `GammaTrack.swift`, `HueSaturation.swift` | uses CoreRaster `composite`; calls `adjustmentLayers` and `masking` |
+| tools | existing (PV-0 routes drags) | Each tool's drag: brush, eraser, clone, heal, move; routes marquee, crop, eyedropper and transform drags to their components; weights paint by the selection's coverage | `PhotoStroke.swift`, `PhotoRetouch.swift`, `PhotoSelection.swift` | calls select-mask, crop, transform, eyedropper |
+| image-ops | existing | Open and export through `PhotoImageCodec`; Image Size, Rotate, Straighten | `PhotoImageFile.swift`, `PhotoImageOps.swift`, `PhotoStraighten.swift` | uses CoreRaster resample and rotate |
+| contracts | planned (PV-0) | One protocol per v2 use case and the values they share (section 5); `PhotoServices` with `.fake` and `.live` | `Contracts/`, `PhotoServices.swift` | implemented by fakes and live |
+| fakes | planned (PV-0) | Deterministic fakes and the fixture images for views, snapshots and `-PhotoFixture` journeys | `Fakes/`, `PhotoFixtures.swift` | implement contracts |
+| live | planned (PV-0 stubs; each feature fills its file) | The real conformances over CoreRaster; `NotBuilt` stand-ins until each feature lands | `Live/` | use CoreRaster; implement contracts |
+| documents | planned (PV-1) | Snapshot to and from the workspace, Save routing (document or flat image), the dirty marker, autosave due time | `PhotoDocumentFile.swift`, `PhotoRecovery.swift` | calls `archive`, `recovery` |
+| edit | planned (PV-2) | Cut, Copy, Paste as a new layer, Duplicate Layer, Merge Down, Flatten Image, with their availability | `PhotoClipboard.swift`, `PhotoLayerOps.swift` | calls `clipboard`, `merging` |
+| crop | planned (PV-3) | Typed crop numbers and the aspect lock; the crop drag | `PhotoCropSize.swift` | calls `crop` |
+| select-mask | planned (PV-5) | Selection shapes, add and subtract, invert, feather; selection coverage for paint; layer masks: add, delete, apply, enable, paint on the mask | `PhotoSelectionMask.swift`, `PhotoMask.swift` | calls `selection`, `masking` |
+| adjustment-layers | planned (PV-6) | New adjustment layer, edit its settings, render it in the stack | `PhotoAdjustmentLayer.swift` | calls `adjustmentLayers` |
+| transform | planned (PV-7) | Free Transform mode: begin, drag handles, typed values, commit, cancel; flip layer and canvas | `PhotoTransform.swift` | calls `transform` |
+| export | planned (PV-8) | Export options and output size; TIFF and HEIC | `PhotoExportOptions.swift` (and the `ImageFormat` cases in `PhotoImageFile.swift`) | calls `exportSizing` |
+| eyedropper | planned (PV-9) | The Eyedropper tool's drag: sample the composited image into the brush color | `PhotoEyedropper.swift` | calls `sampling` |
+
+All paths are under `Sources/PhotoModel/`.
+
+### 2.3 L3 components in PhotoApp
+
+| Component | Status | Responsibility | Owned paths | Relationships |
+|---|---|---|---|---|
+| window | existing (PV-0 splits the router) | `PhotoApp`, `PhotoWindow` (the one `@State` model and presentation state), `PhotoIntent` with one sub-enum per v2 area, and one `PhotoWindow+<Area>.swift` per area | `PhotoApp.swift`, `PhotoWindow.swift`, `PhotoIntent.swift`, `PhotoWindow+File.swift` (PV-1), `+Edit.swift` (PV-2), `+Crop.swift` (PV-3), `+History.swift` (PV-4), `+Select.swift` (PV-5), `+AdjustmentLayer.swift` (PV-6), `+Transform.swift` (PV-7), `+Export.swift` (PV-8), `+Sample.swift` (PV-9) | calls PhotoModel |
+| commands | existing (PV-0 splits per menu) | The menu bar: `PhotoMenu` carries the workspace value, so each menu reads what it needs | `PhotoCommands.swift`, `PhotoCommands+File.swift`, `+Edit.swift`, `+Select.swift`, `+Image.swift`, `+Layer.swift`, `+View.swift` | sends `PhotoIntent` |
+| canvas | existing (PV-0 adds the overlay and splits the bars) | The EditorShell layout, the tile canvas and its renderer, the stroke pacer, pointer pressure; the overlay of marks; the top bar and the status line | `PhotoEditor.swift`, `PhotoTopBar.swift`, `PhotoStatusLine.swift`, `TileCanvas.swift`, `CanvasRenderer.swift`, `StrokePacer.swift`, `PointerPressure.swift`, `PhotoCanvasOverlay.swift`, `CropOverlay.swift`, `SelectionOverlay.swift`, `TransformOverlay.swift`, `BrushCursorOverlay.swift` | SuiteUI `EditorShell`, `CanvasViewport`, `CanvasMarks` |
+| panel | existing (PV-0 splits per tab) | The right panel: Adjust, Layers and History tabs; tool options per tool | `PhotoPanel.swift`, `PhotoAdjustTab.swift`, `PhotoLayersTab.swift`, `PhotoHistoryTab.swift`, `PhotoToolOptions.swift`, `CropOptions.swift`, `SelectOptions.swift`, `TransformOptions.swift`, `SampleOptions.swift`, `AdjustmentsInspector.swift`, `CurvesSection.swift` | SuiteUI inspector rows, chips, tabs |
+| sheets | existing | Export, Image Size, Straighten | `ExportSheet.swift`, `ImageSizeSheet.swift`, `StraightenSheet.swift` | – |
+| platform | existing (ImageIO) and planned | The ImageIO codec; reading and writing document packages; the autosave timer; the pasteboard | `ImageIOCodec.swift`, `PhotoPackageIO.swift` (PV-1), `PhotoAutosave.swift` (PV-1), `PhotoPasteboard.swift` (PV-2) | ImageIO, AppKit |
+
+All paths are under `Sources/PhotoApp/`.
+
+### 2.4 Why the seams first (PV-0)
+
+Photo today has five files every feature would touch: `PhotoWorkspace.swift`
+(its `==` lists every stored property), `PhotoIntent.swift` (one flat enum),
+`PhotoWindow.swift` (one `perform` switch and `private` state),
+`PhotoCommands.swift` (the whole menu bar) and `PhotoPanel.swift`. PV-0
+splits each so that every later feature owns its own files, exactly as
+Flare's LM-0a3 and F1 did:
+
+- **One PR adds every v2 stored property** to `PhotoWorkspace` (and its `==`),
+  `PhotoLayer` (`kind`, `hasMask`, `isMaskEnabled`) and `PhotoHistory`
+  (`.selection` step; masks in `PhotoStack`). No later feature edits those
+  three files.
+- **Drags route by component.** `PhotoStroke.drag` sends marquee drags to
+  `selectionDrag` (`PhotoSelectionMask.swift`), crop to `cropDrag`
+  (`PhotoCropSize.swift`), eyedropper to `sampleDrag`
+  (`PhotoEyedropper.swift`), and any drag while `transformDraft != nil` to
+  `transformDrag` (`PhotoTransform.swift`). PV-0 moves today's marquee and
+  crop code into those files unchanged and creates the other two as
+  no-op stubs; each feature then owns its file. Brush, eraser, clone and heal
+  multiply each dab by `selectionCoverage(x:y:)`, which PV-0 defines as 1
+  (no change) and PV-5 fills.
+- **Rendering routes by layer.** `PhotoLayerComposite.swift` holds one
+  layer's contribution (today: composite its pixels). PV-6 adds adjustment
+  layers to it in wave 2, PV-5 adds masks in wave 3.
+- **Intents and menus route by area.** `PhotoIntent` gains one case per
+  area holding that area's own enum, declared in the area's
+  `PhotoWindow+<Area>.swift` (empty enum plus an empty `switch`). PV-0
+  makes `PhotoWindow`'s stored state `internal` so the area files can reach
+  it, and declares every v2 presentation flag (recovery offer, paste
+  refusal text, transform mode, export options draft).
+- **Availability comes from services.** A control that needs a use case
+  reads `model.services.<use case>.unavailableHelp`. `.live` starts as
+  `NotBuilt` for every v2 use case ("Not built yet (PV-n)."), so a v2 menu
+  item or tool is disabled with that tooltip until its feature lands; under
+  `-PhotoFixture` every fake answers nil. A feature never edits
+  `PhotoServices.swift`: `.live` reads `Live<X>.make()` from the feature's own
+  `Live/` file.
+- **The tool enum grows once.** PV-0 adds `.eyedropper` (I) to `PhotoTool`.
+  A tool's availability moves to `PhotoWorkspace.toolHelp(_:) -> String?`,
+  which reads the tool's service (the eyedropper's is `services.sampling`);
+  `PhotoTool.unavailableHelp` stays as the fallback text. `PhotoToolsTests`
+  changes in the same PR to read `toolHelp` and to run each tool on
+  `.fake`, where every tool works.

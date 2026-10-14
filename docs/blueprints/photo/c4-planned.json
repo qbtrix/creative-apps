@@ -1,0 +1,591 @@
+{
+  "version": "1.0",
+  "scope": "creative-apps (Photo v2 blueprint, planned)",
+  "generated_at": "2026-10-14T00:00:00Z",
+  "source_path": ".",
+  "authored": true,
+  "model": {
+    "people": [],
+    "systems": [
+      {
+        "id": "creative-apps",
+        "name": "creative-apps",
+        "description": "The Photo part of creative-apps as planned for v2: the PhotoModel and PhotoApp containers split into L3 components by responsibility, each marked existing or planned.",
+        "tags": [
+          "internal"
+        ],
+        "status": "existing",
+        "authored": true,
+        "containers": [
+          {
+            "id": "photo-model",
+            "name": "PhotoModel",
+            "description": "Linux-safe state and logic behind Photo's window, with the v2 contracts, fakes and live conformances.",
+            "technology": "Swift 6, Foundation",
+            "tags": [
+              "internal"
+            ],
+            "status": "existing",
+            "authored": true,
+            "components": [
+              {
+                "id": "photo-model-workspace",
+                "name": "Workspace",
+                "description": "PhotoWorkspace: the open image, the layer stack (top first) with kind and mask flags, pixels and masks as copy-on-write tiles, the selection (rect plus optional coverage mask), tool and tool options, pending crop and aspect, transform draft, sample size, services and the saved marker. PV-0 adds every v2 stored property in one PR.",
+                "technology": "Swift 6, Foundation",
+                "paths": [
+                  "Sources/PhotoModel/PhotoWorkspace.swift",
+                  "Sources/PhotoModel/PhotoLayer.swift",
+                  "Sources/PhotoModel/PixelRect.swift",
+                  "Sources/PhotoModel/TiledPixels.swift",
+                  "Sources/PhotoModel/ToolOptions.swift",
+                  "Sources/PhotoModel/PhotoInspectorContent.swift",
+                  "Sources/PhotoModel/PhotoLayerMenu.swift"
+                ],
+                "status": "existing",
+                "authored": true
+              },
+              {
+                "id": "photo-model-history",
+                "name": "History",
+                "description": "Named undo and redo kept as tiles, layer lists or whole stacks; the history list and jump. PV-0 adds the selection step and masks in the stack.",
+                "technology": "Swift 6, Foundation",
+                "paths": [
+                  "Sources/PhotoModel/PhotoHistory.swift"
+                ],
+                "status": "existing",
+                "authored": true
+              },
+              {
+                "id": "photo-model-render",
+                "name": "Render",
+                "description": "Composites the visible layers bottom-up then the global adjustments; renders only damaged tiles for the live canvas; the curve's samples and histogram. PhotoLayerComposite (PV-0) is one layer's contribution, which PV-6 (adjustment layers) and PV-5 (masks) fill.",
+                "technology": "Swift 6, Foundation",
+                "paths": [
+                  "Sources/PhotoModel/PhotoRender.swift",
+                  "Sources/PhotoModel/PhotoTileUpdate.swift",
+                  "Sources/PhotoModel/PhotoLayerComposite.swift",
+                  "Sources/PhotoModel/AdjustmentSettings.swift",
+                  "Sources/PhotoModel/GammaTrack.swift",
+                  "Sources/PhotoModel/HueSaturation.swift"
+                ],
+                "status": "existing",
+                "authored": true
+              },
+              {
+                "id": "photo-model-tools",
+                "name": "Tools",
+                "description": "Each tool's drag (brush, eraser, clone, heal, move) with paint weighted by the selection's coverage; routes marquee, crop, eyedropper and transform drags to their components.",
+                "technology": "Swift 6, Foundation",
+                "paths": [
+                  "Sources/PhotoModel/PhotoStroke.swift",
+                  "Sources/PhotoModel/PhotoRetouch.swift",
+                  "Sources/PhotoModel/PhotoSelection.swift"
+                ],
+                "status": "existing",
+                "authored": true
+              },
+              {
+                "id": "photo-model-image-ops",
+                "name": "Image operations",
+                "description": "Open and export through PhotoImageCodec; Image Size, Rotate, Straighten.",
+                "technology": "Swift 6, Foundation",
+                "paths": [
+                  "Sources/PhotoModel/PhotoImageFile.swift",
+                  "Sources/PhotoModel/PhotoImageOps.swift",
+                  "Sources/PhotoModel/PhotoStraighten.swift"
+                ],
+                "status": "existing",
+                "authored": true
+              },
+              {
+                "id": "photo-model-contracts",
+                "name": "Contracts",
+                "description": "One protocol per v2 use case (documents, recovery, clipboard, merging, crop, selection, masking, adjustment layers, transform, export sizing, sampling) and the values they share; PhotoServices with .fake and .live.",
+                "technology": "Swift 6, Foundation",
+                "paths": [
+                  "Sources/PhotoModel/Contracts/",
+                  "Sources/PhotoModel/PhotoServices.swift"
+                ],
+                "status": "planned",
+                "authored": true
+              },
+              {
+                "id": "photo-model-fakes",
+                "name": "Fakes",
+                "description": "Deterministic fakes for every contract and the fixture images used by views, snapshots and -PhotoFixture journeys.",
+                "technology": "Swift 6, Foundation",
+                "paths": [
+                  "Sources/PhotoModel/Fakes/",
+                  "Sources/PhotoModel/PhotoFixtures.swift"
+                ],
+                "status": "planned",
+                "authored": true
+              },
+              {
+                "id": "photo-model-live",
+                "name": "Live conformances",
+                "description": "The real conformances over CoreRaster, one file per use case, each a NotBuilt stand-in until its feature lands.",
+                "technology": "Swift 6, Foundation",
+                "paths": [
+                  "Sources/PhotoModel/Live/"
+                ],
+                "status": "planned",
+                "authored": true
+              },
+              {
+                "id": "photo-model-documents",
+                "name": "Documents",
+                "description": "PV-1: workspace snapshot to and from the layered document, Save routing, the dirty marker, autosave due time and recovery.",
+                "technology": "Swift 6, Foundation",
+                "paths": [
+                  "Sources/PhotoModel/PhotoDocumentFile.swift",
+                  "Sources/PhotoModel/PhotoRecovery.swift"
+                ],
+                "status": "planned",
+                "authored": true
+              },
+              {
+                "id": "photo-model-edit",
+                "name": "Edit and layer operations",
+                "description": "PV-2: Cut, Copy, Paste as a new layer, Duplicate Layer, Merge Down, Flatten Image.",
+                "technology": "Swift 6, Foundation",
+                "paths": [
+                  "Sources/PhotoModel/PhotoClipboard.swift",
+                  "Sources/PhotoModel/PhotoLayerOps.swift"
+                ],
+                "status": "planned",
+                "authored": true
+              },
+              {
+                "id": "photo-model-crop",
+                "name": "Crop precision",
+                "description": "PV-3: typed crop numbers, the aspect lock and the crop drag.",
+                "technology": "Swift 6, Foundation",
+                "paths": [
+                  "Sources/PhotoModel/PhotoCropSize.swift"
+                ],
+                "status": "planned",
+                "authored": true
+              },
+              {
+                "id": "photo-model-select-mask",
+                "name": "Selections and masks",
+                "description": "PV-5: selection shapes, add and subtract, invert, feather, coverage for paint; layer masks add, delete, apply, enable and paint.",
+                "technology": "Swift 6, Foundation",
+                "paths": [
+                  "Sources/PhotoModel/PhotoSelectionMask.swift",
+                  "Sources/PhotoModel/PhotoMask.swift"
+                ],
+                "status": "planned",
+                "authored": true
+              },
+              {
+                "id": "photo-model-adjustment-layers",
+                "name": "Adjustment layers",
+                "description": "PV-6: new adjustment layer, its settings, its place in the render.",
+                "technology": "Swift 6, Foundation",
+                "paths": [
+                  "Sources/PhotoModel/PhotoAdjustmentLayer.swift"
+                ],
+                "status": "planned",
+                "authored": true
+              },
+              {
+                "id": "photo-model-transform",
+                "name": "Transform",
+                "description": "PV-7: Free Transform mode (begin, handle drags, typed values, commit, cancel) and flips of a layer and the canvas.",
+                "technology": "Swift 6, Foundation",
+                "paths": [
+                  "Sources/PhotoModel/PhotoTransform.swift"
+                ],
+                "status": "planned",
+                "authored": true
+              },
+              {
+                "id": "photo-model-export",
+                "name": "Export options",
+                "description": "PV-8: export options, output size, TIFF and HEIC.",
+                "technology": "Swift 6, Foundation",
+                "paths": [
+                  "Sources/PhotoModel/PhotoExportOptions.swift"
+                ],
+                "status": "planned",
+                "authored": true
+              },
+              {
+                "id": "photo-model-eyedropper",
+                "name": "Eyedropper",
+                "description": "PV-9: the Eyedropper tool's drag samples the composited image into the brush color.",
+                "technology": "Swift 6, Foundation",
+                "paths": [
+                  "Sources/PhotoModel/PhotoEyedropper.swift"
+                ],
+                "status": "planned",
+                "authored": true
+              }
+            ]
+          },
+          {
+            "id": "photo-app",
+            "name": "PhotoApp",
+            "description": "The Photo app: the SwiftUI window on SuiteUI's EditorShell, its menus and sheets, and the platform code.",
+            "technology": "Swift 6, SwiftUI, macOS 26",
+            "tags": [
+              "internal",
+              "macos-only"
+            ],
+            "status": "existing",
+            "authored": true,
+            "components": [
+              {
+                "id": "photo-app-window",
+                "name": "Window and intents",
+                "description": "PhotoApp, PhotoWindow (the one @State model and presentation state), PhotoIntent with one sub-enum per v2 area, and one PhotoWindow+<Area> router per area.",
+                "technology": "Swift 6, SwiftUI, macOS 26",
+                "paths": [
+                  "Sources/PhotoApp/PhotoApp.swift",
+                  "Sources/PhotoApp/PhotoWindow.swift",
+                  "Sources/PhotoApp/PhotoIntent.swift",
+                  "Sources/PhotoApp/PhotoWindow+File.swift",
+                  "Sources/PhotoApp/PhotoWindow+Edit.swift",
+                  "Sources/PhotoApp/PhotoWindow+Crop.swift",
+                  "Sources/PhotoApp/PhotoWindow+History.swift",
+                  "Sources/PhotoApp/PhotoWindow+Select.swift",
+                  "Sources/PhotoApp/PhotoWindow+AdjustmentLayer.swift",
+                  "Sources/PhotoApp/PhotoWindow+Transform.swift",
+                  "Sources/PhotoApp/PhotoWindow+Export.swift",
+                  "Sources/PhotoApp/PhotoWindow+Sample.swift"
+                ],
+                "status": "existing",
+                "authored": true
+              },
+              {
+                "id": "photo-app-commands",
+                "name": "Menu bar",
+                "description": "The menus, one file per menu; PhotoMenu carries the workspace value so each menu reads what it needs.",
+                "technology": "Swift 6, SwiftUI, macOS 26",
+                "paths": [
+                  "Sources/PhotoApp/PhotoCommands.swift",
+                  "Sources/PhotoApp/PhotoCommands+File.swift",
+                  "Sources/PhotoApp/PhotoCommands+Edit.swift",
+                  "Sources/PhotoApp/PhotoCommands+Select.swift",
+                  "Sources/PhotoApp/PhotoCommands+Image.swift",
+                  "Sources/PhotoApp/PhotoCommands+Layer.swift",
+                  "Sources/PhotoApp/PhotoCommands+View.swift"
+                ],
+                "status": "existing",
+                "authored": true
+              },
+              {
+                "id": "photo-app-canvas",
+                "name": "Canvas",
+                "description": "The EditorShell layout, top bar and status line, the tile canvas and its renderer, stroke pacer, pointer pressure, and the overlay marks (crop, selection, transform box, brush cursor).",
+                "technology": "Swift 6, SwiftUI, macOS 26",
+                "paths": [
+                  "Sources/PhotoApp/PhotoEditor.swift",
+                  "Sources/PhotoApp/PhotoTopBar.swift",
+                  "Sources/PhotoApp/PhotoStatusLine.swift",
+                  "Sources/PhotoApp/TileCanvas.swift",
+                  "Sources/PhotoApp/CanvasRenderer.swift",
+                  "Sources/PhotoApp/StrokePacer.swift",
+                  "Sources/PhotoApp/PointerPressure.swift",
+                  "Sources/PhotoApp/PhotoCanvasOverlay.swift",
+                  "Sources/PhotoApp/CropOverlay.swift",
+                  "Sources/PhotoApp/SelectionOverlay.swift",
+                  "Sources/PhotoApp/TransformOverlay.swift",
+                  "Sources/PhotoApp/BrushCursorOverlay.swift"
+                ],
+                "status": "existing",
+                "authored": true
+              },
+              {
+                "id": "photo-app-panel",
+                "name": "Panel",
+                "description": "The right panel: Adjust, Layers and History tabs and the tool options per tool.",
+                "technology": "Swift 6, SwiftUI, macOS 26",
+                "paths": [
+                  "Sources/PhotoApp/PhotoPanel.swift",
+                  "Sources/PhotoApp/PhotoAdjustTab.swift",
+                  "Sources/PhotoApp/PhotoLayersTab.swift",
+                  "Sources/PhotoApp/PhotoHistoryTab.swift",
+                  "Sources/PhotoApp/PhotoToolOptions.swift",
+                  "Sources/PhotoApp/CropOptions.swift",
+                  "Sources/PhotoApp/SelectOptions.swift",
+                  "Sources/PhotoApp/TransformOptions.swift",
+                  "Sources/PhotoApp/SampleOptions.swift",
+                  "Sources/PhotoApp/AdjustmentsInspector.swift",
+                  "Sources/PhotoApp/CurvesSection.swift"
+                ],
+                "status": "existing",
+                "authored": true
+              },
+              {
+                "id": "photo-app-sheets",
+                "name": "Sheets",
+                "description": "Export, Image Size and Straighten sheets.",
+                "technology": "Swift 6, SwiftUI, macOS 26",
+                "paths": [
+                  "Sources/PhotoApp/ExportSheet.swift",
+                  "Sources/PhotoApp/ImageSizeSheet.swift",
+                  "Sources/PhotoApp/StraightenSheet.swift"
+                ],
+                "status": "existing",
+                "authored": true
+              },
+              {
+                "id": "photo-app-platform",
+                "name": "Platform",
+                "description": "The ImageIO codec behind PhotoImageCodec (existing); document packages on disk, the autosave timer and the pasteboard (planned).",
+                "technology": "Swift 6, SwiftUI, macOS 26",
+                "paths": [
+                  "Sources/PhotoApp/ImageIOCodec.swift",
+                  "Sources/PhotoApp/PhotoPackageIO.swift",
+                  "Sources/PhotoApp/PhotoAutosave.swift",
+                  "Sources/PhotoApp/PhotoPasteboard.swift"
+                ],
+                "status": "existing",
+                "authored": true
+              }
+            ]
+          },
+          {
+            "id": "suiteui",
+            "name": "SuiteUI",
+            "description": "The shared design system (another line); v2 asks for the components in docs/blueprints/photo.md section 6.3.",
+            "technology": "Swift 6, SwiftUI, macOS 26",
+            "tags": [
+              "internal",
+              "macos-only"
+            ],
+            "status": "existing",
+            "authored": true,
+            "components": []
+          }
+        ]
+      },
+      {
+        "id": "creative-core",
+        "name": "creative-core",
+        "description": "The engines. Photo uses CoreRaster and CoreColor; v2 asks for the additions in docs/blueprints/photo.md section 8.4.",
+        "tags": [
+          "external"
+        ],
+        "status": "existing",
+        "authored": true,
+        "containers": [
+          {
+            "id": "coreraster",
+            "name": "CoreRaster",
+            "description": "Pixel buffers, compositing, masks, tone, resampling.",
+            "technology": "Swift 6",
+            "tags": [
+              "external"
+            ],
+            "status": "existing",
+            "authored": true,
+            "components": []
+          },
+          {
+            "id": "corecolor",
+            "name": "CoreColor",
+            "description": "Color spaces and transfer curves.",
+            "technology": "Swift 6",
+            "tags": [
+              "external"
+            ],
+            "status": "existing",
+            "authored": true,
+            "components": []
+          }
+        ]
+      }
+    ],
+    "relationships": [
+      {
+        "source": "photo-app",
+        "target": "suiteui",
+        "description": "builds its window from SuiteUI components",
+        "style": "sync",
+        "status": "existing",
+        "authored": true
+      },
+      {
+        "source": "photo-app",
+        "target": "photo-model",
+        "description": "reads state and calls its methods",
+        "style": "sync",
+        "status": "existing",
+        "authored": true
+      },
+      {
+        "source": "photo-model",
+        "target": "coreraster",
+        "description": "uses CoreRaster from creative-core",
+        "style": "sync",
+        "status": "existing",
+        "authored": true
+      },
+      {
+        "source": "photo-model",
+        "target": "corecolor",
+        "description": "uses CoreColor from creative-core",
+        "style": "sync",
+        "status": "existing",
+        "authored": true
+      },
+      {
+        "source": "photo-app-window",
+        "target": "photo-model-workspace",
+        "description": "calls workspace methods for every intent",
+        "style": "sync",
+        "status": "existing",
+        "authored": true
+      },
+      {
+        "source": "photo-app-commands",
+        "target": "photo-app-window",
+        "description": "sends PhotoIntent",
+        "style": "sync",
+        "status": "existing",
+        "authored": true
+      },
+      {
+        "source": "photo-app-panel",
+        "target": "photo-app-window",
+        "description": "sends PhotoIntent",
+        "style": "sync",
+        "status": "existing",
+        "authored": true
+      },
+      {
+        "source": "photo-app-canvas",
+        "target": "photo-model-render",
+        "description": "draws the damaged tiles and reads overlay geometry",
+        "style": "sync",
+        "status": "existing",
+        "authored": true
+      },
+      {
+        "source": "photo-app-platform",
+        "target": "photo-model-image-ops",
+        "description": "implements PhotoImageCodec",
+        "style": "sync",
+        "status": "existing",
+        "authored": true
+      },
+      {
+        "source": "photo-app-platform",
+        "target": "photo-model-documents",
+        "description": "writes and reads the packages it encodes; fires autosave",
+        "style": "sync",
+        "status": "planned",
+        "authored": true
+      },
+      {
+        "source": "photo-model-workspace",
+        "target": "photo-model-history",
+        "description": "records one step per edit",
+        "style": "sync",
+        "status": "existing",
+        "authored": true
+      },
+      {
+        "source": "photo-model-workspace",
+        "target": "photo-model-contracts",
+        "description": "calls use cases through services",
+        "style": "sync",
+        "status": "planned",
+        "authored": true
+      },
+      {
+        "source": "photo-model-fakes",
+        "target": "photo-model-contracts",
+        "description": "implements every contract",
+        "style": "sync",
+        "status": "planned",
+        "authored": true
+      },
+      {
+        "source": "photo-model-live",
+        "target": "photo-model-contracts",
+        "description": "implements every contract",
+        "style": "sync",
+        "status": "planned",
+        "authored": true
+      },
+      {
+        "source": "photo-model-live",
+        "target": "coreraster",
+        "description": "does the pixel work",
+        "style": "sync",
+        "status": "planned",
+        "authored": true
+      },
+      {
+        "source": "photo-model-tools",
+        "target": "photo-model-select-mask",
+        "description": "routes marquee drags; reads selection coverage",
+        "style": "sync",
+        "status": "planned",
+        "authored": true
+      },
+      {
+        "source": "photo-model-tools",
+        "target": "photo-model-crop",
+        "description": "routes crop drags",
+        "style": "sync",
+        "status": "planned",
+        "authored": true
+      },
+      {
+        "source": "photo-model-tools",
+        "target": "photo-model-transform",
+        "description": "routes drags in transform mode",
+        "style": "sync",
+        "status": "planned",
+        "authored": true
+      },
+      {
+        "source": "photo-model-tools",
+        "target": "photo-model-eyedropper",
+        "description": "routes eyedropper drags",
+        "style": "sync",
+        "status": "planned",
+        "authored": true
+      },
+      {
+        "source": "photo-model-render",
+        "target": "photo-model-adjustment-layers",
+        "description": "applies adjustment layers in the stack",
+        "style": "sync",
+        "status": "planned",
+        "authored": true
+      },
+      {
+        "source": "photo-model-render",
+        "target": "photo-model-select-mask",
+        "description": "applies layer masks",
+        "style": "sync",
+        "status": "planned",
+        "authored": true
+      },
+      {
+        "source": "photo-model-documents",
+        "target": "photo-model-contracts",
+        "description": "archive and recovery",
+        "style": "sync",
+        "status": "planned",
+        "authored": true
+      },
+      {
+        "source": "photo-model-edit",
+        "target": "photo-model-contracts",
+        "description": "clipboard and merging",
+        "style": "sync",
+        "status": "planned",
+        "authored": true
+      }
+    ]
+  }
+}
