@@ -91,6 +91,22 @@ public struct HaloLayer: Identifiable, Codable, Sendable, Hashable {
         case id, name, kind, inFrame, outFrame, color, storedOpacity = "opacity", blendMode, rect, tracks, parentID, text
     }
 
+    /// Decodes through the clamping init, so a file can't carry an opacity
+    /// outside 0...1 or NaN. Missing W0 fields decode as empty.
+    public init(from decoder: any Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        self.init(
+            id: try c.decode(String.self, forKey: .id), name: try c.decode(String.self, forKey: .name),
+            kind: try c.decode(HaloLayerKind.self, forKey: .kind), inFrame: try c.decode(Int.self, forKey: .inFrame),
+            outFrame: try c.decode(Int.self, forKey: .outFrame), color: try c.decode(HaloLayerColor.self, forKey: .color),
+            opacity: try c.decode(Double.self, forKey: .storedOpacity),
+            blendMode: try c.decode(BlendMode.self, forKey: .blendMode),
+            rect: try c.decodeIfPresent(HaloLayerRect.self, forKey: .rect))
+        tracks = try c.decodeIfPresent([String: [HaloKeyframe]].self, forKey: .tracks) ?? [:]
+        parentID = try c.decodeIfPresent(String.self, forKey: .parentID)
+        text = try c.decodeIfPresent(HaloTextContent.self, forKey: .text)
+    }
+
     /// Clamps `opacity` to 0...1; a NaN opacity falls back to 1, the default.
     public init(
         id: String, name: String, kind: HaloLayerKind, inFrame: Int, outFrame: Int, color: HaloLayerColor,

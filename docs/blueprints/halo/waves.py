@@ -6,37 +6,48 @@
 import json, sys, itertools
 
 M, A, T, SN, U = "Sources/HaloModel/", "Sources/HaloApp/", "Tests/HaloModelTests/", "Tests/AppSnapshotTests/", "UITests/"
+AV = M + "Availability/HaloAvailability+"
+existing_model_tests = ["HaloCompositionDeleteCommandTests", "HaloCompositionDraftEdgeTests", "HaloCompositionDraftParsingTests",
+    "HaloCompositionDraftTests", "HaloCompositionEdgeTests", "HaloCompositionTests", "HaloLayerOpacityClampTests",
+    "HaloLayersTests", "HaloNameCaseFoldingTests", "HaloProjectTests", "HaloRenameLookalikeEdgeTests",
+    "HaloRenameLookalikeTests", "HaloRenameRefusalEdgeTests", "HaloRenameRefusalTests", "HaloStatusTextTests",
+    "HaloTimelineCostTests", "HaloTimelineTests", "HaloUniqueNameFuzzTests", "HaloUniqueNameLookalikeTests"]
+areas = ["Composition", "Playback", "Keys", "Layers", "History", "Files", "Easing", "Render", "Text"]
 contracts = ["FrameDrawing", "LayerPlacing", "PropertyKeying", "ViewerDragging", "KeyEasing", "ProjectHistory",
              "ProjectFiles", "PlaybackClock", "FrameRendering", "CompositionRendering"]
 
 features = [
   dict(wave=0, id="foundation", name="Foundation: contracts, fakes, state and the window's seams",
-       covers=["#286", "#290", "#149"], waits_ui=["#333 not needed (alone in its wave)"],
+       covers=["#286", "#290", "#149"], waits_ui=["none: alone in its wave, so its journeys (H-J0, H-J1, H-J13, layout L1 and L6) stay in HaloJourneyTests.swift"],
        core="none",
        owns=[M+"Contracts/HaloValues.swift", M+"Contracts/HaloContracts.swift"]
          + [M+f"Fakes/Fake{c}.swift" for c in contracts] + [M+"Fakes/FakeTextRasterizer.swift"]
          + [M+f"Live/Live{c}.swift" for c in contracts]
          + [M+"HaloServices.swift", M+"HaloLayerDefaults.swift", M+"HaloFixtures.swift", M+"HaloCommand.swift",
             M+"HaloViewerState.swift", M+"HaloProject.swift", M+"HaloLayer.swift", M+"HaloTimeline.swift",
-            M+"HaloStatusText.swift", M+"NameKey.swift",
+            M+"HaloStatusText.swift", M+"NameKey.swift"]
+         + [AV + a + ".swift" for a in areas]
+         + [A+"HaloControls.swift",
             A+"HaloApp.swift", A+"HaloLaunch.swift", A+"HaloWindow.swift", A+"HaloViewer.swift"]
          + [A+f"HaloWindow+{x}.swift" for x in ["Viewer", "Playback", "Keys", "Layers", "Edit", "File", "Easing", "Render", "Text"]]
          + [A+"HaloViewerCanvas.swift", A+"HaloViewerGestures.swift", A+"HaloRenderedFrameView.swift", A+"HaloTransport.swift",
             A+"HaloLayerInspector.swift", A+"HaloEasingInspector.swift", A+"HaloTextInspector.swift", A+"HaloTextRasterizer.swift",
             A+"HaloFileMenu.swift", A+"HaloEditMenu.swift", A+"HaloAnimationMenu.swift", A+"HaloCommands.swift",
             A+"HaloCompositionCommands.swift", A+"NewCompositionSheet.swift", A+"HaloCompositionInspector.swift",
-            A+"HaloTimelineView.swift"]
+            A+"HaloTimelineView.swift", A+"HaloLayerList.swift"]
          + [T+f"{c}ContractTests.swift" for c in contracts]
          + [T+"HaloCommandTests.swift", T+"HaloFixturesTests.swift", T+"HaloEditTests.swift", T+"HaloBudget.swift",
             T+"HaloFoundationBudgetTests.swift", T+"HaloNameWhitespaceTests.swift",
-            SN+"HaloWindowSnapshots.swift", U+"HaloJourneyTests.swift",
-            "docs/c4/model.json", "docs/design.md"],
-       note="Copies section 5's files into Sources (fakes and live stubs one file per contract); every W1 and W2 file below that W0 creates as a stub passes to its feature, which replaces it whole."),
+            SN+"HaloWindowSnapshots.swift", SN+"HaloCompositionSnapshots.swift", SN+"HaloCompositionInspectorSnapshots.swift",
+            SN+"HaloLayersSnapshots.swift", SN+"HaloTimelineSnapshots.swift", U+"HaloJourneyTests.swift",
+            "docs/c4/model.json", "docs/design.md"]
+         + [T + t + ".swift" for t in existing_model_tests],
+       note="Also: timeline rows carry each layer's key frames and the strip draws them as diamonds (`HaloTimeline.swift`, `HaloTimelineView.swift`); the inspector always shows the layer list. Copies section 5's files into Sources (fakes and live stubs one file per contract); every W1 and W2 file below that W0 creates as a stub passes to its feature, which replaces it whole."),
   dict(wave=1, id="viewer-playback", name="See and play the composition",
        covers=["#37", "#457"], waits_ui=["#333 (journey files)", "#340 TransportCapsule (placeholder meanwhile)"],
-       core="none to start. Rotated shape layers in the pixel render wait on creative-core#182 (ellipse path builder, LC-4); until it lands the renderer draws an axis-aligned shape with `Mask.ellipse` and counts a rotated one as skipped (the viewer draws it either way)",
+       core="none. Shape layers render through an ellipse built from four cubic `PathElement`s (the stopgap Flare uses) until creative-core#182's path builder lands",
        owns=[M+"Live/LiveFrameDrawing.swift", M+"Live/LivePlaybackClock.swift", M+"Live/LiveFrameRendering.swift",
-             M+"FrameRenderer.swift", M+"HaloPlayback.swift",
+             M+"FrameRenderer.swift", M+"HaloPlayback.swift", AV+"Playback.swift",
              A+"HaloViewerCanvas.swift", A+"HaloTransport.swift", A+"HaloPlaybackDriver.swift",
              A+"HaloWindow+Viewer.swift", A+"HaloWindow+Playback.swift",
              T+"FrameDrawingContractTests.swift", T+"PlaybackClockContractTests.swift", T+"FrameRenderingContractTests.swift",
@@ -49,7 +60,7 @@ features = [
        covers=["#38", "#207"], waits_ui=["#333 (journey files)"],
        core="none",
        owns=[M+"Live/LiveLayerPlacing.swift", M+"Live/LivePropertyKeying.swift", M+"Live/LiveViewerDragging.swift",
-             M+"HaloKeying.swift", M+"HaloViewerDrag.swift",
+             M+"HaloKeying.swift", M+"HaloViewerDrag.swift", AV+"Keys.swift",
              A+"HaloLayerInspector.swift", A+"HaloViewerGestures.swift", A+"HaloWindow+Keys.swift",
              T+"LayerPlacingContractTests.swift", T+"PropertyKeyingContractTests.swift", T+"ViewerDraggingContractTests.swift",
              T+"HaloKeyingTests.swift", T+"HaloKeyByDragTests.swift", T+"HaloKeysBudgetTests.swift",
@@ -59,7 +70,7 @@ features = [
   dict(wave=1, id="history-files", name="Undo, redo, save and open",
        covers=["#208", "#209"], waits_ui=["#333 (journey files)"],
        core="none",
-       owns=[M+"Live/LiveProjectHistory.swift", M+"Live/LiveProjectFiles.swift", M+"HaloHistory.swift", M+"HaloFiles.swift",
+       owns=[M+"Live/LiveProjectHistory.swift", M+"Live/LiveProjectFiles.swift", M+"HaloHistory.swift", M+"HaloFiles.swift", AV+"History.swift", AV+"Files.swift",
              A+"HaloWindow+Edit.swift", A+"HaloWindow+File.swift", A+"HaloDocumentType.swift",
              T+"ProjectHistoryContractTests.swift", T+"ProjectFilesContractTests.swift", T+"HaloUndoTests.swift",
              T+"HaloFileTests.swift", T+"HaloFilesBudgetTests.swift",
@@ -69,13 +80,13 @@ features = [
   dict(wave=1, id="layer-panel", name="Layer housekeeping",
        covers=["L-1 (to file)"], waits_ui=["#333 (journey files)"],
        core="none",
-       owns=[M+"HaloLayerEdits.swift", A+"HaloLayerList.swift", A+"HaloWindow+Layers.swift",
+       owns=[M+"HaloLayerEdits.swift", AV+"Layers.swift", A+"HaloLayerList.swift", A+"HaloWindow+Layers.swift",
              T+"HaloLayerEditsTests.swift", SN+"HaloLayersSnapshots.swift", U+"HaloJourneyTests+Layers.swift"],
        note="H-J9."),
   dict(wave=2, id="easing", name="Ease keys",
        covers=["#428"], waits_ui=["#333", "timeline key shapes and selection (Flare S10/S11, to file as needs-ui; plain diamonds meanwhile)"],
        core="none (FlareCore `Easing` and `Timeline.value` already ease)",
-       owns=[M+"Live/LiveKeyEasing.swift", M+"HaloKeySelection.swift",
+       owns=[M+"Live/LiveKeyEasing.swift", M+"HaloKeySelection.swift", AV+"Easing.swift",
              A+"HaloEasingInspector.swift", A+"HaloTimelineView.swift", A+"HaloWindow+Easing.swift",
              T+"KeyEasingContractTests.swift", T+"HaloEasingTests.swift", T+"HaloEasingBudgetTests.swift",
              SN+"HaloEasingSnapshots.swift", U+"HaloJourneyTests+Easing.swift"],
@@ -83,7 +94,7 @@ features = [
   dict(wave=2, id="render-out", name="Render a frame and render to files",
        covers=["#451", "#429"], waits_ui=["#333"],
        core="none (the PNG and movie writers are app-side: ImageIO and AVFoundation)",
-       owns=[M+"Live/LiveCompositionRendering.swift", M+"HaloRenderFrame.swift", M+"HaloRenderJob.swift",
+       owns=[M+"Live/LiveCompositionRendering.swift", M+"HaloRenderFrame.swift", M+"HaloRenderJob.swift", AV+"Render.swift",
              A+"HaloRenderSheet.swift", A+"HaloRenderedFrameView.swift", A+"HaloFrameImage.swift", A+"HaloPNGWriter.swift",
              A+"HaloMovieWriter.swift", A+"HaloWindow+Render.swift",
              T+"CompositionRenderingContractTests.swift", T+"HaloRenderPlanTests.swift", T+"HaloRenderFrameTests.swift",
@@ -94,8 +105,8 @@ features = [
        note="H-J20, H-J21; HB-12, HB-13; HF-7, HF-8. Waits on viewer-playback (the live renderer)."),
   dict(wave=2, id="text-layers", name="Text layers",
        covers=["#430"], waits_ui=["#333"],
-       core="needs a new core issue: CoreRaster draws a PixelBuffer through a 2D affine matrix with bilinear sampling (suite plan H6), so scaled or rotated text renders; until it lands, text renders only at scale 1 and rotation 0 and is otherwise counted as skipped",
-       owns=[M+"HaloTextEdits.swift", A+"HaloTextInspector.swift", A+"HaloTextRasterizer.swift", A+"HaloWindow+Text.swift",
+       core="none: scaled and rotated text is drawn with CoreRaster's `resized` and `rotated(degrees:)`, then `composite` at an offset (v1 has no skew)",
+       owns=[M+"HaloTextEdits.swift", AV+"Text.swift", A+"HaloTextInspector.swift", A+"HaloTextRasterizer.swift", A+"HaloWindow+Text.swift",
              T+"HaloTextLayerTests.swift", SN+"HaloTextLayerSnapshots.swift", SN+"HaloTextFidelityTests.swift",
              U+"HaloJourneyTests+Text.swift"],
        note="H-J22; HF-10. Waits on layer-keys (inspector), viewer-playback (the renderer's text hook) and history-files (Undo name)."),
@@ -107,7 +118,7 @@ features = [
              U+"HaloJourneyTests+Inspector.swift", U+"HaloJourneyTests+Parent.swift", U+"HaloJourneyTests+History.swift",
              U+"HaloJourneyTests+Layers.swift", U+"HaloJourneyTests+Easing.swift", U+"HaloJourneyTests+Text.swift",
              U+"HaloJourneyTests+RenderFrame.swift", U+"HaloJourneyTests+Render.swift"],
-       note="H-J12 live; H-P1 to H-P4; layout L3 to L5; flips every fixture journey still on `-HaloFixture` to `-HaloSample`. Waits on every W1 and W2 feature."),
+       note="H-J12 live; H-P1 to H-P4; layout L3 to L5; flips every fixture journey still on `-HaloFixture` to `-HaloSample`. Its feature issue is filed only once every W1 and W2 feature is done, because it edits their journey files."),
 ]
 
 def check(c4path):

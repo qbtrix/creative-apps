@@ -49,24 +49,28 @@ public protocol PropertyKeying: HaloService {
     /// One row per property in `HaloProperty.allCases` order; empty for an
     /// unknown layer.
     func rows(for layerID: String, in composition: HaloComposition, at frame: Int) -> [HaloPropertyRow]
-    /// Not animated: sets the one value (key at frame 0, or the static value).
+    /// Not animated: sets the static value (opacity's lives in
+    /// `HaloLayer.opacity` with no track; every other property's in a one-key
+    /// track at frame 0).
     /// Animated: writes a key at `frame`. NaN or infinity throws
     /// `.notANumber`; other values clamp to `property.range`.
     func setValue(
         _ value: Double, for property: HaloProperty, of layerID: String, at frame: Int,
         in composition: inout HaloComposition) throws
-    /// The stopwatch. Off to on: keys at `frame` and at the last frame with
-    /// the current value (so the row turns animated). On to off: drops the
-    /// track and keeps the value at `frame`.
+    /// The stopwatch. Off to on: keys at `frame` and at the last frame (or
+    /// frame 0 when `frame` is the last) with the current value, so the row
+    /// turns animated. On to off: the value at `frame` becomes the static
+    /// value, stored as `setValue` stores a not-animated one.
     func toggleAnimation(
         _ property: HaloProperty, of layerID: String, at frame: Int, in composition: inout HaloComposition) throws
     /// The diamond: adds a key at `frame` with the sampled value, or removes
     /// the one there. A track left with one key is not animated.
     func toggleKey(
         _ property: HaloProperty, of layerID: String, at frame: Int, in composition: inout HaloComposition) throws
-    /// Parent picker. Nil clears it. A cycle throws `.parentCycle`. The child
-    /// keeps its place on screen at `frame` (its position is rewritten in the
-    /// parent's space).
+    /// Parent picker. Nil clears it. A cycle (the layer itself, or a layer
+    /// that already follows it) throws `.parentCycle(name)`; an unknown id
+    /// throws `.unknownLayer`. The child keeps its place on screen at `frame`:
+    /// its position is rewritten in the new parent's space through `setValue`.
     func setParent(
         _ parentID: String?, of layerID: String, at frame: Int, in composition: inout HaloComposition) throws
 }
@@ -98,10 +102,14 @@ public protocol KeyEasing: HaloService {
 public protocol ProjectHistory: HaloService {
     /// How many steps undo keeps; the oldest drops past it.
     var limit: Int { get }
-    /// Adds a step named `name` whose undo returns `before`, and clears redo.
-    /// With a non-nil `coalesceKey` equal to the newest step's, the newest
-    /// step keeps its own `before` and nothing is added.
+    /// Adds a step named `name` whose undo returns `before`. Always clears
+    /// redo. With a non-nil `coalesceKey` equal to the newest step's (and that
+    /// step not ended), the newest step keeps its own `before` and nothing is
+    /// added.
     func record(_ name: String, before: HaloDocumentState, coalesceKey: String?, in history: inout HaloHistory)
+    /// Ends the newest step's coalescing, so the next scrub of the same row is
+    /// its own step. Called at the end of every drag, typed value or nudge.
+    func endCoalescing(in history: inout HaloHistory)
     /// The state to return to, moving the step onto redo with `current`.
     /// Nil when there is nothing to undo.
     func undo(_ current: HaloDocumentState, in history: inout HaloHistory) -> HaloDocumentState?
@@ -131,9 +139,11 @@ public protocol PlaybackClock: HaloService {
 /// #451, #430: a frame as pixels (CoreRaster), the reference the viewer and
 /// every rendered file must match.
 public protocol FrameRendering: HaloService {
-    /// Renders `list` at 1/`scale` size (1 = full). `text` draws text layers;
-    /// with nil they are skipped and counted in `skippedLayerCount`.
-    func render(_ list: HaloDrawList, scale: Int, text: (any TextRasterizing)?) throws -> HaloRenderedFrame
+    /// Renders `list` into a `width` × `height` buffer (the composition scaled
+    /// to fit exactly: Render Frame passes a quarter of the size, Render…
+    /// the plan's size). `text` draws text layers; with nil they are skipped
+    /// and counted in `skippedLayerCount`. Nulls never count.
+    func render(_ list: HaloDrawList, width: Int, height: Int, text: (any TextRasterizing)?) throws -> HaloRenderedFrame
 }
 
 /// #430: words to pixels. HaloApp supplies the CoreText one; tests use a fake.
@@ -141,6 +151,9 @@ public protocol TextRasterizing: Sendable {
     /// The text in `color` on a transparent buffer just big enough for it,
     /// linear light, premultiplied; its (0, 0) is the line box's top left.
     func rasterize(_ text: HaloTextContent, color: HaloLayerColor) throws -> PixelBuffer
+    /// The line box `rasterize` fills, in composition pixels. The viewer, hit
+    /// testing and the default anchor use it, so text bounds match the pixels.
+    func measure(_ text: HaloTextContent) -> HaloLayerRect
 }
 
 /// #429: where rendered frames go. HaloApp supplies the PNG and movie writers.
@@ -157,10 +170,11 @@ public protocol CompositionRendering: HaloService {
     /// The frames and names for `settings`. Throws `.noComposition` for a
     /// composition with no frames.
     func plan(_ composition: HaloComposition, settings: HaloRenderSettings) throws -> HaloRenderPlan
-    /// Sends every planned frame to `sink` in order, checking `isCancelled`
-    /// before each one. A sink error stops at that frame.
+    /// Sends every planned frame, rendered at the plan's size with `text`
+    /// drawing text layers, to `sink` in order, checking `isCancelled` before
+    /// each one. A sink error stops at that frame.
     func run(
-        _ plan: HaloRenderPlan, of composition: HaloComposition, into sink: inout some RenderSink,
-        isCancelled: () -> Bool
+        _ plan: HaloRenderPlan, of composition: HaloComposition, text: (any TextRasterizing)?,
+        into sink: inout some RenderSink, isCancelled: () -> Bool
     ) -> HaloRenderOutcome
 }

@@ -33,7 +33,7 @@ Read on `origin/dev` 956d946 (2026-10-14).
 
 ### What exists
 
-**HaloModel** (`Sources/HaloModel/`, 9 files, Linux-safe, depends on
+**HaloModel** (`Sources/HaloModel/`, 10 files, Linux-safe, depends on
 FlareCore and CoreRaster in `Package.swift` but imports only CoreRaster):
 
 | File | What it does today | Tests |
@@ -46,7 +46,7 @@ FlareCore and CoreRaster in `Package.swift` but imports only CoreRaster):
 | `HaloStatusText.swift` | Size, rate, duration and status-bar timecode text | `HaloStatusTextTests` |
 | `NameKey.swift`, `RefusedRename.swift`, `CompositionDeleteCommand.swift` | Name comparison by case folding; the refused rename kept for the alert; Command-Delete inside the rename field edits text | `HaloNameCaseFoldingTests`, `HaloRenameRefusal*`, `HaloCompositionDeleteCommandTests` |
 
-131 `@Test`s in `Tests/HaloModelTests/` (20 files).
+131 `@Test`s in `Tests/HaloModelTests/` (21 files).
 
 **HaloApp** (`Sources/HaloApp/`, 8 files, macOS): `SuiteWindow` with a
 Compositions sidebar (add, select, double-click rename), `HaloViewer` (an
@@ -184,7 +184,7 @@ Calls against the suite plan (`creative-core docs/design/suite.md`, Halo MVP):
 | Masks and track mattes | Later | Tier 3 in `docs/priorities.md` |
 | 3 effects (blur, fill, levels) | Later (#39 stays p2, not v1) | Tier 2; the render path must first match the viewer (HF-1) before effects change pixels |
 | Motion blur | Later | Tier 3 by inference; needs H9 |
-| RAM preview | v1 plays the viewer's vector drawing live; a cached pixel preview is later | The viewer draws vectors with SwiftUI at screen size, so live playback needs no cache for v1 layer kinds (HB-4) |
+| RAM preview | v1 plays the viewer's vector drawing live; a cached pixel preview is later | The viewer draws vectors with SwiftUI at screen size, so live playback needs no cache for v1 layer kinds (HB-5, HB-11) |
 | Export to H.264 | v1 (#429) | Tier 2 but the only way a piece leaves the app |
 | Flare scene as a layer | Later (H10) | Needs the composition renderer to sample arbitrary vector content |
 | AI "animate in" presets | Later | Suite Phase 3 |
@@ -244,7 +244,7 @@ Linux-safe state and logic behind Halo's window: the project document, selection
 | `halo-project` Project and compositions | existing | HaloProject: the window's one value-type state. Holds the document (compositions, selection, id counter) as a HaloDocumentState, the services, and every stored property v1 needs (history, playback, viewer drag, selected keys, file, rendered frame, render job, last refusal), each written only by its own extension file. Composition new, duplicate, rename (look-alike names refused), delete, select; the New Composition draft and settings; status text; `edit(_:coalesceKey:_:)`, the one place an edit records undo. | `Sources/HaloModel/HaloProject.swift`<br>`Sources/HaloModel/CompositionSettings.swift`<br>`Sources/HaloModel/CompositionDraft.swift`<br>`Sources/HaloModel/NameKey.swift`<br>`Sources/HaloModel/RefusedRename.swift`<br>`Sources/HaloModel/CompositionDeleteCommand.swift`<br>`Sources/HaloModel/HaloStatusText.swift` | reads its services → `halo-services`; stores HaloDocumentState and HaloHistory → `halo-contracts` |
 | `halo-layers` Layers | existing | HaloLayer (kind, span, color, opacity, CoreRaster blend mode, solid rectangle, and from W0 keyframe tracks keyed by HaloProperty, parent id and text content; Codable) and each kind's own box and default property values. | `Sources/HaloModel/HaloLayer.swift`<br>`Sources/HaloModel/HaloLayerDefaults.swift` | stores FlareCore Keyframe tracks → `flarecore`; stores CoreRaster BlendMode → `coreraster` |
 | `halo-timeline` Timeline and playback | existing | Each composition's playhead and timecode, the strip's rows with key frames, in and out points at the playhead (I and O), and from W1 play, pause, loop, step and the tick that advances the playhead through PlaybackClock. | `Sources/HaloModel/HaloTimeline.swift`<br>`Sources/HaloModel/HaloPlayback.swift` | advances through PlaybackClock → `halo-contracts` |
-| `halo-commands` Commands and availability | planned | HaloCommand: every menu, toolbar and key command of v1, with its title, and HaloProject.unavailableHelp(for:): nil when it can act now, else the reason the control shows. Read from each service's unavailableHelp and the state, so a command turns on when its feature's live type lands. | `Sources/HaloModel/HaloCommand.swift` | reads each service's unavailableHelp → `halo-services` |
+| `halo-commands` Commands and availability | planned | HaloCommand: every menu, toolbar and key command of v1, by area, with its title, and HaloProject.unavailableHelp(for:): nil when it can act now, else the reason the control shows. It dispatches to one file per area under Availability/; W0 writes them as stubs and each feature replaces its own area's file when its action works. | `Sources/HaloModel/HaloCommand.swift`<br>`Sources/HaloModel/Availability/` | reads each service's unavailableHelp → `halo-services` |
 | `halo-contracts` Use-case contracts | planned | One protocol per use case (FrameDrawing, LayerPlacing, PropertyKeying, ViewerDragging, KeyEasing, ProjectHistory, ProjectFiles, PlaybackClock, FrameRendering, TextRasterizing, RenderSink, CompositionRendering) and the values they speak (HaloProperty, HaloDrawList, HaloDocumentState, HaloHistory, HaloKeyRef, HaloEasingPreset, the render plan and the error enums). FlareCore's Keyframe, Easing, Matrix and Point under Halo names. | `Sources/HaloModel/Contracts/` | names FlareCore Keyframe, Easing, Matrix and Point → `flarecore`; names PixelBuffer and BlendMode → `coreraster` |
 | `halo-services` Services and live conformances | planned | HaloServices: one existential per contract with its .fake and .live values. Live/ holds one file per contract: a W0 stub that says why its controls are disabled, replaced whole by its feature with the real conformance over FlareCore and CoreRaster. | `Sources/HaloModel/HaloServices.swift`<br>`Sources/HaloModel/Live/` | conforms to → `halo-contracts`; samples tracks, eases, multiplies matrices → `flarecore`; composites, masks and converts pixels → `coreraster` |
 | `halo-fakes` Fakes and fixtures | planned | One fake per contract, small and predictable, for views, snapshots and journeys before the live types land; HaloFixtures builds the named fixture projects (empty, three-layers, keyed, parented, two-comps, reference, crowd) in code. | `Sources/HaloModel/Fakes/`<br>`Sources/HaloModel/HaloFixtures.swift` | conforms to → `halo-contracts` |
@@ -264,7 +264,7 @@ The Halo app: the SwiftUI scene, the window and its views built from SuiteUI, th
 | Component | Status | Responsibility | Owned paths | Relationships |
 |---|---|---|---|---|
 | `halo-scene` App scene and launch | existing | The App scene (WindowGroup, commands) and the launch arguments that pick services and data for journeys: -HaloFixture, -HaloSample, -HaloOpenFile, -HaloSaveTo, -HaloRenderTo, -HaloWindowSize, -HaloPerfProbe. | `Sources/HaloApp/HaloApp.swift`<br>`Sources/HaloApp/HaloLaunch.swift` | shows → `halo-window`; installs → `halo-menus` |
-| `halo-window` Window and command router | planned | HaloWindow: the one @State model, every presentation flag v1 needs, and perform(_ command: HaloCommand), which routes each command to its area file (HaloWindow+Viewer, +Playback, +Keys, +Layers, +Edit, +File, +Easing, +Render, +Text). W0 writes the router and stub area files; each feature owns one area file. | `Sources/HaloApp/HaloWindow.swift`<br>`Sources/HaloApp/HaloWindow+Viewer.swift`<br>`Sources/HaloApp/HaloWindow+Playback.swift`<br>`Sources/HaloApp/HaloWindow+Keys.swift`<br>`Sources/HaloApp/HaloWindow+Layers.swift`<br>`Sources/HaloApp/HaloWindow+Edit.swift`<br>`Sources/HaloApp/HaloWindow+File.swift`<br>`Sources/HaloApp/HaloWindow+Easing.swift`<br>`Sources/HaloApp/HaloWindow+Render.swift`<br>`Sources/HaloApp/HaloWindow+Text.swift` | reads state, calls methods → `halo-project`; asks each command's availability → `halo-commands`; SuiteWindow shell → `suiteui` |
+| `halo-window` Window and command router | planned | HaloWindow: the one @State model, every presentation flag v1 needs, and perform(_ command: HaloCommand), which routes each command to its area file (HaloWindow+Viewer, +Playback, +Keys, +Layers, +Edit, +File, +Easing, +Render, +Text). W0 writes the router and stub area files; each feature owns one area file. HaloControls gathers every halo.* control's id, enabled state and help into the halo.controls JSON (under -HaloControlsProbe) for the every-control journey. | `Sources/HaloApp/HaloWindow.swift`<br>`Sources/HaloApp/HaloControls.swift`<br>`Sources/HaloApp/HaloWindow+Viewer.swift`<br>`Sources/HaloApp/HaloWindow+Playback.swift`<br>`Sources/HaloApp/HaloWindow+Keys.swift`<br>`Sources/HaloApp/HaloWindow+Layers.swift`<br>`Sources/HaloApp/HaloWindow+Edit.swift`<br>`Sources/HaloApp/HaloWindow+File.swift`<br>`Sources/HaloApp/HaloWindow+Easing.swift`<br>`Sources/HaloApp/HaloWindow+Render.swift`<br>`Sources/HaloApp/HaloWindow+Text.swift` | reads state, calls methods → `halo-project`; asks each command's availability → `halo-commands`; SuiteWindow shell → `suiteui` |
 | `halo-menus` Menus | existing | Composition, Layer, File, Edit and Animation menus. Every item sends a HaloCommand through the focused window and is disabled, with the Model's reason as help, when it can't act. | `Sources/HaloApp/HaloCommands.swift`<br>`Sources/HaloApp/HaloCompositionCommands.swift`<br>`Sources/HaloApp/HaloFileMenu.swift`<br>`Sources/HaloApp/HaloEditMenu.swift`<br>`Sources/HaloApp/HaloAnimationMenu.swift` | sends commands to → `halo-window` |
 | `halo-viewer` Viewer | existing | The viewer: the artboard (CanvasSurface) with the draw list painted in a SwiftUI Canvas, the selection outline, the drag gesture, the rendered-frame image (HaloRenderedFrameView), the status bar and the transport; the display-link playback driver. | `Sources/HaloApp/HaloViewer.swift`<br>`Sources/HaloApp/HaloViewerCanvas.swift`<br>`Sources/HaloApp/HaloViewerGestures.swift`<br>`Sources/HaloApp/HaloRenderedFrameView.swift`<br>`Sources/HaloApp/HaloTransport.swift`<br>`Sources/HaloApp/HaloPlaybackDriver.swift` | reads the draw list, calls the drag → `halo-viewer-model`; CanvasSurface, SelectionOutline, ViewerStatusBar, TransportCapsule → `suiteui` |
 | `halo-timeline-view` Timeline view | existing | The strip under the viewer: one lane per layer with its span and key diamonds, the playhead, scrub, I and O, key selection and the key context menu. | `Sources/HaloApp/HaloTimelineView.swift` | reads rows, calls scrub and points → `halo-timeline`; TimelineStrip → `suiteui` |
@@ -300,10 +300,11 @@ later feature edits that file:
 | `playback: HaloPlaybackState` (playing, loops, start frame, start time) | transport, driver | `HaloPlayback.swift` |
 | `viewerDrag: HaloViewerDragState?` (layer, start point, delta) | viewer | `HaloViewerDrag.swift` |
 | `selectedKeys: Set<HaloKeyRef>` | timeline, inspector, Animation menu | `HaloKeySelection.swift` |
-| `file: HaloFileState` (name, unsaved, error, recent) | title, File menu, alerts | `HaloFiles.swift` |
+| `file: HaloFileState` (name, path, unsaved, opening, error, recent) | title, File menu, alerts | `HaloFiles.swift` |
 | `renderedFrame: HaloRenderedFrame?`, `renderedFrameStale: Bool` | viewer | `HaloRenderFrame.swift` |
 | `renderJob: HaloRenderJobState?` (settings, plan, progress, outcome) | Render sheet | `HaloRenderJob.swift` |
-| `refusal: String?` (the last refused edit's message) | the control that refused | `HaloProject.swift` (`edit` sets it from a thrown `HaloEditError`) |
+| `refusal: HaloRefusal?` (the refusing control's id and the message) | the control whose id it names, which shows the message under itself | `HaloProject.swift` (`edit(_:control:…)` sets it from a thrown `HaloEditError`; the next edit or `dismissRefusal()` clears it) |
+| `document.nextLayerNumber` | new and duplicated layers | `HaloProject.swift` (`takeLayerID()`), so a deleted layer's id is never reused |
 
 The same PR changes stored state from `public private(set)` to
 `public internal(set)`, as Flare's LM-0a3 did: extensions in other files of
@@ -311,11 +312,14 @@ HaloModel can write their own property, and HaloApp, another module, still
 cannot (the compiler and the app-state lint both hold).
 
 **One undo step, exactly.** Every document edit goes through
-`mutating func edit(_ name: String, coalesceKey: String? = nil, _ body: (inout HaloDocumentState) throws -> Void)`
+`mutating func edit(_ name: String, control: String, coalesceKey: String? = nil, _ body: (inout HaloDocumentState) throws -> Void)`
 in `HaloProject.swift`: it copies the document, runs the body on the copy,
 and only if the body did not throw and the copy differs from the original,
 stores the copy and calls `services.history.record(name, before:, coalesceKey:, in: &history)`.
-A throw sets `refusal` to the error's message and changes nothing. So:
+A throw sets `refusal` to `HaloRefusal(control:message:)` and changes
+nothing. `endCoalescing()` (also in `HaloProject.swift`) calls
+`services.history.endCoalescing(in:)` at the end of every drag, typed value
+or nudge, so the next scrub of the same row is a new step. So:
 
 - *Scrubs* (an inspector bar drag, arrow-key nudges on one row) pass
   `coalesceKey: "<layer id>.<property>"`: one undo entry however many calls.
@@ -342,9 +346,12 @@ and live and stated in `PropertyKeying`'s doc comments, is Flare's (section 2
 of `docs/blueprints/flare.md`), so the two apps' keyframe buttons behave the
 same:
 
-- No track or one key: **not animated**. The value is that key's (or the
-  layer default: anchor and position at the box center, scale 1, rotation 0,
-  opacity the layer's `opacity`). Setting it rewrites that one key.
+- No track or one key: **not animated**. The value is that key's, or the
+  layer default (anchor and position at the box center, scale 1, rotation
+  0). Opacity's static value has one home, `HaloLayer.opacity`, with no
+  track; every other property's is a one-key track at frame 0. Setting a
+  not-animated value writes that home (W0 moves today's
+  `setSelectedLayerOpacity` onto the same path).
 - Two or more keys: **animated**. Setting it at any frame writes a key at
   the playhead. The stopwatch is filled; "keyed here" when a key sits at the
   playhead.
@@ -371,7 +378,10 @@ its span) does not hide children. A parent cycle can't be made
    vectors, each with its matrix, opacity and blend mode
    (`GraphicsContext.blendMode` maps from CoreRaster's `BlendMode` in one
    switch in `HaloViewerCanvas.swift`). No pixels are composited per frame
-   while scrubbing or playing; HB-2 and HB-4 hold because of this.
+   while scrubbing or playing; HB-5 and HB-11 hold because of this. The
+   `Canvas` draws in linear light (`drawingGroup(colorMode: .linear)`), the
+   space CoreRaster composites in, so translucent layers and blend modes
+   match the render (HF-1).
 2. `FrameRendering` turns the same list into CoreRaster pixels: each item's
    outline (a FlareCore `Path` of its box or ellipse, transformed by its
    matrix and flattened) becomes a `Mask.polygon`, filled with its color,
@@ -383,14 +393,26 @@ its span) does not hide children. A parent cycle can't be made
    calls `model.tick(now:)`; the frame math is `PlaybackClock` (FlareCore's
    `Timeline.playbackFrame` in the live type), tested on Linux.
 
-**Commands and availability.** `HaloCommand` (Model) lists every command in
-v1. `HaloProject.unavailableHelp(for:)` returns nil when the command can act
-now, or the reason (from the state, then from the command's service:
-`services.clock.unavailableHelp` for Play). Menus, toolbar items and the
-journey sweep read it, so a command turns on the day its live type replaces
-the W0 stub, and `HaloCommandTests` proves on Linux that every command on
-`.live` today is disabled with a reason. On the app side `HaloWindow.perform`
-routes each command to its area file.
+**Commands and availability.** `HaloCommand` (Model, W0) lists every
+command in v1, each in one area (viewer and playback, keys, layers, history,
+files, easing, render, text). `HaloProject.unavailableHelp(for:)` returns
+nil when the command can act now, or the reason. It dispatches by area to
+one function per area, each in its own file
+`Sources/HaloModel/Availability/HaloAvailability+<Area>.swift`. W0 writes
+every area file as a stub that answers the state's reasons ("Create a
+composition first.", "Select a layer first.") and then "Not built yet
+(#n)."; each feature replaces its own area's file when its action works,
+whether or not the area has a service (layer housekeeping has none). So a
+command never turns on before its action exists: ⌘R stays disabled through
+W1 even though `LiveFrameRendering` lands there, because the render area
+file is render-out's. `HaloCommandTests` (W0) checks the invariant, not a
+snapshot: every command is either enabled or disabled with non-empty help,
+and on `.fake` with `keyed` every command is enabled exactly when its
+area's file says so; each feature's own tests assert its commands turn on.
+On the app side `HaloWindow.perform` routes each command to its area file,
+and `HaloControls.swift` (W0) gathers every `halo.*` control's identifier,
+enabled state and help into the `halo.controls` JSON that H-J13 reads,
+exposed as an accessibility value under `-HaloControlsProbe`.
 
 **Engine-direct (no protocol, one conformer):** composition management and
 the New Composition draft (shipped, in `HaloProject`), timecode and status
@@ -405,19 +427,22 @@ fakes belong (the same call as Flare).
 services plus a fixture project), `-HaloSample <name>` (the same project on
 live services, for integrated journeys), `-HaloOpenFile <path>`,
 `-HaloSaveTo <file path>` (Save writes there without a panel), `-HaloRenderTo <folder>`, `-HaloWindowSize <w>x<h>`
-(layout checks), `-HaloPerfProbe` (exposes the frame probe once #330 lands).
+(layout checks), `-HaloControlsProbe` (the `halo.controls` JSON),
+`-HaloPerfProbe` (exposes the frame probe once #330 lands). HaloLaunch
+also sets `services.text` to the CoreText rasterizer (W0 stub, replaced by
+text-layers), so Render Frame and Render… draw text through it.
 
 **Fixtures** (`HaloFixtures`, HaloModel, built in code, W0):
 
 | Fixture | Contents | Used by |
 |---|---|---|
-| `empty` | One composition "Comp 1", 1920 × 1080, 30 fps, 10 s, no layers | H-J1, H-J8 |
-| `three-layers` | "Intro", 1920 × 1080, 24 fps, 72 frames: "Title" text (frames 24–72), "Badge" shape, "Background" solid, "Rig" null (0–72) | H-J2, H-J3, H-J4, H-J11 |
-| `keyed` | "Bounce", 1920 × 1080, 24 fps, 48 frames: "Ball" solid 200 × 200 with x keyed 160 at 0 and 960 at 24, opacity 0 at 0 and 1 at 12; "Floor" solid, not animated | H-J5, H-J6, H-J7, H-J9 |
-| `parented` | `keyed` plus a "Rig" null that Ball follows, Rig x keyed | H-J6 (parent step), parenting tests |
-| `two-comps` | "Intro" and "Outro" with layers and keys | H-J10 |
-| `reference` | 1920 × 1080, 30 fps, 300 frames, 50 layers (solids, shapes, text), every property keyed at 10 frames: 4,000 keys | budgets HB-1 to HB-10 |
-| `crowd` | 300 layers, 5,000 keys, 1920 × 1080, 30 fps, 300 frames | HB-6, HB-9, layout checks |
+| `empty` | One composition "Comp 1", 1920 × 1080, 30 fps, 10 s, no layers | H-J8, H-J22 |
+| `three-layers` | "Intro", 1920 × 1080, 24 fps, 72 frames, four layers top first: "Title" text (frames 24–72), "Badge" shape, "Background" solid, "Rig" null (0–72) | H-J2, H-J3, H-J4, H-J9 |
+| `keyed` | "Bounce", 1920 × 1080, 24 fps, 48 frames: "Ball" solid 200 × 200 with x keyed 160 at 0 and 960 at 24, opacity 0 at 0 and 1 at 12; "Floor" solid, not animated | H-J5, H-J6, H-J7, H-J13, H-J21, layout checks, HF-1 |
+| `parented` | `keyed` plus a "Rig" null (x keyed 960 at 0 and 1160 at 47) that nothing follows yet | H-J20 (a null in the render, #457), H-J23, parenting tests |
+| `two-comps` | "Intro" (the `three-layers` composition) and "Outro" (the `keyed` composition, with Ball and its keys) | H-J10 |
+| `reference` | 1920 × 1080, 30 fps, 300 frames, 50 layers (solids, shapes, text), every property keyed at 10 frames: 4,000 keys | HB-1 to HB-5, HB-7, HB-11, HB-12, H-P1 to H-P4 |
+| `crowd` | 300 layers, 5,000 keys, 1920 × 1080, 30 fps, 300 frames | HB-6, HB-8 to HB-10, H-J10's large-file step, layout checks |
 
 ---
 
@@ -520,17 +545,17 @@ claims come from the frame probe's JSON once #330 lands (section 7).
 | H-J0 | `testLaunchShowsWindowShell` (`HaloJourneyTests.swift`, shipped; extended by W0) | none | launch | `expectWindowShell()`; the viewer's empty state "No Composition" with New Composition…; the inspector's "No Selection"; no audit count over baseline |
 | H-J1 | `testNewComposition` (`HaloJourneyTests.swift`, shipped; extended by W0) | none | New Composition…; type `abc` in Width; type `1080` in Width, `1920` in Height; pick 24 fps; Create | the problem "Width must be a whole number of pixels." and Create disabled; then Create enabled; inspector header reads "1080 × 1920" and "24 fps · 10 s"; sidebar row "Comp 1" |
 | H-J2 | `testLayersDrawAtThePlayhead` (`+Viewer`, viewer-playback) | `three-layers` | scrub to frame 12; scrub to frame 30; Layer > New > Solid | `halo.viewer.artboard` value "Frame 12: Background, Badge" (Title starts at 24; Rig is a null, never drawn); at 30 "Frame 30: Background, Badge, Title"; after New > Solid "…, Solid 1" on top and the layer list's first row "Solid 1" |
-| H-J3 | `testScrubAndSetInOutPoints` (`HaloJourneyTests.swift`, shipped as `testScrubTheTimeline`; extended by viewer-playback) | `three-layers` | select Badge in the timeline; scrub to 20; press I; scrub to 50; press O; scrub to 60 | timecode reads 00:00:00:20 then 00:00:02:02; Badge's span is 20–50 (row value "20 → 51"); at 60 the artboard value has no Badge |
+| H-J3 | `testScrubAndSetInOutPoints` (`HaloJourneyTests.swift`, shipped as `testScrubTheTimeline`; extended by viewer-playback) | `three-layers` | select Badge in the timeline; scrub to 20; press I; scrub to 50; press O; scrub to 60 | timecode reads 00:00:00:20 then 00:00:02:02; the inspector header for Badge reads "Frames 20–50" (`TimelineStrip` exposes only "n keyframes" per lane, so spans are read from the inspector until the `needs-ui` issue in 8.5 lands); at 60 the artboard value has no Badge |
 | H-J4 | `testPlayPauseLoopAndStep` (`+Playback`, viewer-playback) | `three-layers` | Space; wait 1 s; Space; → twice; Animation > Go to End; Loop off; Animation > Go to Start; Space; wait 4 s | play button value "Playing" then "Paused"; frame after pause f ≠ 0; after → → f + 2; at end the timecode reads 00:00:02:23; with Loop off playback stops on the last frame and the button reads "Paused" |
 | H-J5 | `testDragLayerToKeyPosition` (`+Drag`, layer-keys) | `keyed` | scrub to 12; drag Ball 100 px right in the artboard; open Edit; scrub to 0; drag Floor 50 px down | Ball's Position X row reads its frame-12 value + 100 and its key button "Keyed at this frame"; the Edit menu reads "Undo Move"; Floor's Position Y row moved by 50 and its key button reads "Not animated" (not animated layers move without keys); dragging empty surround selects nothing |
-| H-J6 | `testInspectorKeysTransform` (`+Inspector`, layer-keys) | `keyed` | select Ball; click Rotation's stopwatch; scrub to 20; drag the Rotation bar right; focus it, → twice, Shift-→; click Opacity's diamond at 20 | Rotation key button "Animated", then "Keyed at this frame" at 20; value steps +1, +1, +10 (`QB-F4`); Ball's lane gains diamonds at 20 and 47 (the lane shows every property's keys: 0, 12, 20, 24, 47); Opacity "Keyed at this frame"; Edit menu "Undo Add Key" |
-| H-J7 | `testEaseKeys` (`+Easing`, easing) | `keyed` | select Ball; in EASING click the row "Position X 0 → 24"; click Ease In and Out; drag curve handle 1; open Edit | the Animation > Keyframe Easing items are disabled with help "Select a key on the timeline first." before the row is picked; after the chip the row reads "Ease In and Out" and Ball's Position X at frame 12 reads 560.0 px (the eased midpoint equals the linear one for this symmetric curve, so the test also reads frame 6: below the linear 360.0 px); after the drag no chip is on and the row reads "Custom"; the Edit menu reads "Undo Keyframe Easing" |
-| H-J8 | `testUndoRedoEveryEdit` (`+History`, history-files) | `empty` | Layer > New > Solid; rename the composition "Intro"; Composition > Delete is disabled (one left); Composition > New, Create; Composition > Delete; ⌘Z; ⌘Z; ⇧⌘Z | after each edit the Edit menu names it ("Undo New Layer", "Undo Rename Composition", "Undo New Composition", "Undo Delete Composition"); the first ⌘Z brings the deleted composition back with its layers at its place in the sidebar; the second removes it; ⇧⌘Z restores it; scrubbing in between adds no step |
+| H-J6 | `testInspectorKeysTransform` (`+Inspector`, layer-keys) | `keyed` | select Ball; scrub to 6; click Rotation's stopwatch; scrub to 20; drag the Rotation bar right; focus it, → twice, Shift-→; type `abc` in the Rotation value and Return; click Opacity's diamond at 20 | after the stopwatch Rotation's key button reads "Keyed at this frame" (keys at 6 and 47); at 20 "Animated", then "Keyed at this frame" after the drag; value steps +1, +1, +10 (`QB-F4`); `abc` keeps the value and shows "Rotation needs a number." under the row; Ball's lane value goes from "3 keyframes" (0, 12, 24) to "6 keyframes" (0, 6, 12, 20, 24, 47; the lane counts every property's key frames); Opacity "Keyed at this frame"; Edit menu "Undo Add Key" |
+| H-J7 | `testEaseKeys` (`+Easing`, easing) | `keyed` | select Ball; in EASING click the row "Position X 0 → 24"; click Ease In and Out; drag curve handle 1; open Edit | the Animation > Keyframe Easing items are disabled with help "Pick a key in the EASING list first." before the row is picked; after the chip the row reads "Ease In and Out" and Ball's Position X at frame 12 reads 560.0 px (the eased midpoint equals the linear one for this symmetric curve, so the test also reads frame 6: below the linear 360.0 px); after the drag no chip is on and the row reads "Custom"; the Edit menu reads "Undo Keyframe Easing" |
+| H-J8 | `testUndoRedoEveryEdit` (`+History`, history-files) | `empty` | Layer > New > Solid; rename the composition "Intro"; Composition > Delete is disabled (one left); Composition > New, Create; select Intro; Composition > Delete; ⌘Z; ⌘Z; ⇧⌘Z | after each edit the Edit menu names it ("Undo New Layer", "Undo Rename Composition", "Undo New Composition", "Undo Delete Composition"); the first ⌘Z brings Intro back first in the sidebar, selected, with its layer Solid 1; the second ⌘Z removes Comp 2; ⇧⌘Z brings it back; scrubbing in between adds no step |
 | H-J9 | `testLayerHousekeeping` (`+Layers`, layer-panel) | `three-layers` | select Badge; Layer > Duplicate; rename "Badge copy" to "Badge 2" in the list; drag it to the bottom; Layer > Delete; ⌘Z | "Badge copy" appears above Badge; renamed; last in the list and drawn first (artboard value lists it first); gone, then back on ⌘Z; each step named in the Edit menu |
-| H-J10 | `testSaveAndReopen` (`+Files`, history-files) | `two-comps` with `-HaloSaveTo <tmp>/Spot.halo` (skips the save panel) | ⌘S; quit; relaunch with `-HaloOpenFile <saved path>`; File > Open Recent | the window title reads "Spot" with no unsaved dot; after reopen both compositions, their layers and Ball's keys are back and the history is empty (Undo disabled with "Nothing to undo."); Open Recent lists "Spot" |
-| H-J11 | `testOpenBadFiles` (`+FileErrors`, history-files) | none, then `-HaloOpenFile` per file | write four files in the test's temp folder (`not json`; `{"format":"halo","version":2}`; `{"format":"halo","version":1,"compositions":[{"id":"a"}]}`; 65 MB of spaces) and open each | each alert's text is `HaloFileError.message` for its case (not a Halo project; newer format 2; damaged with the reason; too large); after each, the empty state stays |
+| H-J10 | `testSaveAndReopen` (`+Files`, history-files) | `two-comps` with `-HaloSaveTo <tmp>/Spot.halo` (skips the save panel); then `crowd` with `-HaloSaveTo <tmp>/Crowd.halo` | ⌘S; quit; relaunch with `-HaloOpenFile <tmp>/Spot.halo`; New Composition… (makes the project unsaved); File > Open Recent > Spot, Don't Save; quit; launch on `crowd`, ⌘S, quit, relaunch with `-HaloOpenFile <tmp>/Crowd.halo` | the window title reads "Spot" with no unsaved dot; after reopen both compositions, their layers and Ball's keys in Outro are back and the history is empty (Undo disabled with "Nothing to undo."); Open Recent lists "Spot" and choosing it reopens the file from its saved path (the list persists across launches); opening Crowd shows the progress row (probe mark, HB-U5) and then 300 layers |
+| H-J11 | `testOpenBadFiles` (`+FileErrors`, history-files) | none, then `-HaloOpenFile` per file | write four files in the test's temp folder (`not json`; `{"format":"halo","version":2}`; `{"format":"halo","version":1,"project":{"compositions":[{"id":"a"}]}}`; 65 MB of spaces) and open each | each alert's text is `HaloFileError.message` for its case (not a Halo project; newer format 2; damaged with the reason; too large); after each, the empty state stays |
 | H-J12 | `testKeyLayerAndSave` (`HaloJourneyTests.swift`, core-loop; replaces the `XCTSkip`) | live, `-HaloSaveTo` | New Composition…, Create; Layer > New > Solid; scrub to 0; Position X stopwatch; scrub to 24; drag the solid 300 px right; Ease Out on its first key; Space, wait 1 s, Space; ⌘Z; ⇧⌘Z; ⌘S; relaunch on the file | each step on live services; Edit menu names along the way; the reopened file has Position X keys at 0, 24 and 299 (the stopwatch also keys the last frame) with Ease Out on the first |
-| H-J13 | `testEveryMenuOpens` (shipped) and `testEveryControlActsOrSaysWhy` (`+EveryControl`, W0) | `keyed` | open each menu; then read the `halo.controls` JSON (every `halo.*` control with enabled and help), click each enabled one, Escape, ⌘Z | every menu shot; each menu's item count equals section 6's menu list; every enabled control changed the shot or a value; every disabled one has help text (`QB-F1`). A sweep: the coverage matrix never cites it |
+| H-J13 | `testEveryMenuOpens` (shipped) and `testEveryControlActsOrSaysWhy` (`HaloJourneyTests.swift`, W0) | `keyed` with `-HaloControlsProbe` | open each menu; then read the `halo.controls` JSON (every `halo.*` control with enabled and help, from `HaloControls.swift`), click each enabled one, Escape, ⌘Z | every menu shot; each menu holds exactly section 6's Halo items (the system's own Edit and Window items are not counted); every enabled control changed the shot or a value; every disabled one has help text (`QB-F1`). A sweep: the coverage matrix never cites it |
 
 ### States each journey passes through
 
@@ -538,22 +563,22 @@ claims come from the frame probe's JSON once #330 lands (section 7).
 |---|---|---|---|
 | H-J0, H-J1 | "No Composition" empty state with New Composition…; "No Selection" in the inspector | each `CompositionSettings.problems` line under the form, Create disabled | none |
 | H-J2 | a composition with no layers: the artboard shows the background and the value "Frame 0: no layers"; a frame where nothing is in its span reads the same | none (draw never fails) | none |
-| H-J3 | no layer selected: I and O are refused and the timeline's help says "Select a layer, then press I or O." | I after the out point (or O before the in point) is refused: the row keeps its span and `refusal` reads "The in point must come before the out point." | none |
+| H-J3 | no layer selected: I and O are refused and the timeline's help says "Select a layer, then press I or O." | I after the out point (or O before the in point) is refused: the span stays and the message (`HaloEditError.inPointAfterOut` / `.outPointBeforeIn`, refusal control `halo.timeline`) shows under the timeline | none |
 | H-J4 | no composition: Play disabled with "Create a composition first." | none | none |
 | H-J5 | a drag that starts on no layer moves nothing and adds no step | a drag on a layer outside its span can't hit it | the live preview while dragging (`viewerDrag`) is the in-between state; the probe's "preview before mouse-up" mark proves it once #330 lands |
-| H-J6 | no layer selected: the TRANSFORM group is replaced by "Select a layer to see its properties." | a typed `abc` in a row keeps the old value and shows "Rotation needs a number." under the row | none |
+| H-J6 | no layer selected: the TRANSFORM group is replaced by "Select a layer to see its properties." | a typed `abc` goes to `setProperty(_:text:)`, which parses in the Model (`HaloProperty.parse`), keeps the old value and sets the refusal "Rotation needs a number." for `halo.inspector.row.rotation` | none |
 | H-J7 | no keys on the layer: "Key a property to shape its easing."; keys but none picked: "Pick a key above." | setting easing with nothing selected is refused (the menu item is disabled with that reason) | none |
 | H-J8 | nothing to undo: Undo disabled, help "Nothing to undo." | none | none |
-| H-J9 | deleting the last layer leaves the timeline's empty text "No layers yet. Add one from Layer > New." | renaming to an empty name keeps the old one | none |
-| H-J10, H-J11 | a new project is "Untitled Project" until saved | save to a read-only folder: the title shows "Not saved" and an alert with the reason; open errors per `HaloFileError` | opening a large file shows progress in the viewer after 100 ms (`QB-L9`); the window stays responsive (decode runs off the main actor) |
+| H-J9 | deleting the last layer leaves the timeline's empty text "No layers yet. Add one from Layer > New." | renaming to an empty name keeps the old one and shows "Enter a name." (`HaloEditError.emptyName`) on the row | none |
+| H-J10, H-J11 | a new project is "Untitled Project" until saved | save to a read-only folder: the title shows "Not saved" and an alert with the reason; open errors per `HaloFileError` | opening a file calls `beginOpen(name:path:)` (the viewer shows a progress row once 100 ms pass, `QB-L9`), decodes with `services.files.decode` in a detached task, then `finishOpen(_:)` on the main actor with the result; the main thread never stalls over 2 refreshes (`QB-L12`, HB-U5) |
 
 ### Tier-2 journeys (v1, after the core loop)
 
 | # | Test (file, feature) | Launch | Steps | Asserts |
 |---|---|---|---|---|
-| H-J20 | `testRenderFrame` (`+RenderFrame`, render-out) | `keyed` | scrub to 12; ⌘R; scrub to 13 | the viewer shows the rendered image (`halo.viewer.rendered` exists) with the note gone (#457); after scrubbing it reads "Rendered frame is out of date." until ⌘R again |
+| H-J20 | `testRenderFrame` (`+RenderFrame`, render-out) | `parented` (has the Rig null) | scrub to 12; ⌘R; scrub to 13 | the viewer shows the rendered image (`halo.viewer.rendered` exists) and no skipped-layer note although Rig is a null (#457); after scrubbing it reads "Rendered frame is out of date." until ⌘R again |
 | H-J21 | `testRenderPNGSequence` (`+Render`, render-out) | `keyed` (48 frames) with `-HaloRenderTo` | File > Render…; PNG sequence, half size; Render; then start a movie render and Cancel | progress "Frame n of 48" then success with Reveal in Finder; 48 files `Bounce_0001.png` … `Bounce_0048.png` of 960 × 540; after Cancel no partial movie is left |
-| H-J22 | `testTextLayer` (`+Text`, text-layers) | `empty` | Layer > New > Text; type "Hello" in TEXT; size 96; empty the field and press Return | artboard value lists "Text 1: Hello"; Edit menu "Undo Edit Text"; the empty string is refused and "Hello" comes back |
+| H-J22 | `testTextLayer` (`+Text`, text-layers) | `empty` | Layer > New > Text; type "Hello" in TEXT; size 96; empty the field and press Return | artboard value lists "Text 1: Hello"; Edit menu "Undo Edit Text"; the empty string is refused with "Enter some text." (`HaloEditError.emptyText`) and "Hello" comes back |
 | H-J23 | `testParentAndBlend` (`+Parent`, layer-keys) | `parented` | select Ball; Parent → Rig; drag Rig 100 px right; Blend → Multiply; Parent → None | Ball moves with Rig (its own Position X row unchanged); the Blend row reads Multiply; clearing the parent keeps Ball where it is on screen; Ball's parent menu leaves out Ball itself and any layer following Ball |
 
 ### Perf journeys (after QH-1 #330 and QH-4 #333)
@@ -625,25 +650,27 @@ goes through `edit`; every read is a computed property.
 
 | File (feature) | Methods |
 |---|---|
+| `HaloProject.swift` (W0) | `edit(_:control:coalesceKey:_:)` (internal), `endCoalescing()`, `dismissRefusal()`, `var refusal: HaloRefusal?`, `takeLayerID()` (internal) |
 | `HaloViewerState.swift` (W0) | `var viewerDrawList: HaloDrawList?` (drawing at the playhead plus the drag offset), `var viewerSummary: String` |
 | `HaloCommand.swift` (W0) | `enum HaloCommand`, `func unavailableHelp(for: HaloCommand) -> String?`, `func title(for: HaloCommand) -> String` (Undo and Redo carry the step name) |
 | `HaloPlayback.swift` (viewer-playback) | `play(at now: Double)`, `pause()`, `togglePlay(at:)`, `setLoops(_:)`, `tick(now:)`, `stepFrame(by:)`, `goToStart()`, `goToEnd()` |
 | `HaloViewerDrag.swift` (layer-keys) | `beginViewerDrag(at: HaloPoint)`, `moveViewerDrag(to: HaloPoint)`, `endViewerDrag()`, `cancelViewerDrag()` |
-| `HaloKeying.swift` (layer-keys) | `var propertyRows: [HaloPropertyRow]`, `setProperty(_:to:)` (coalesced per row), `endPropertyScrub()`, `toggleAnimation(_:)`, `toggleKey(_:)`, `setParent(_:)`, `var parentChoices: [(id: String, name: String)]` |
+| `HaloKeying.swift` (layer-keys) | `var propertyRows: [HaloPropertyRow]`, `setProperty(_:to:)` (coalesced per row), `setProperty(_:text:)` (a typed value, parsed by `HaloProperty.parse`; not a number sets the refusal), `endPropertyScrub()` (calls `endCoalescing()`), `toggleAnimation(_:)`, `toggleKey(_:)`, `setParent(_:)`, `var parentChoices: [(id: String, name: String)]` |
 | `HaloLayerEdits.swift` (layer-panel) | `deleteSelectedLayer()`, `renameLayer(_:to:)`, `moveLayer(_:to:)`, `duplicateSelectedLayer()` |
 | `HaloHistory.swift` (history-files) | `undo()`, `redo()`, `var undoTitle: String?`, `var redoTitle: String?` |
-| `HaloFiles.swift` (history-files) | `fileData() throws -> Data`, `open(_ data: Data, name: String) throws`, `didSave(as name: String)`, `var title: String`, `var recent: [String]` |
+| `HaloFiles.swift` (history-files) | `fileData() throws -> Data`, `beginOpen(name:path:)`, `finishOpen(_ result: Result<HaloDocumentState, HaloFileError>)` (the app decodes with `services.files.decode` in a detached task between the two), `didSave(name:path:)`, `didFailSave(_ message:)`, `var recent: [HaloRecentFile]` (name and path, newest first, 10 at most), `setRecent(_:)` (HaloApp loads the list from `UserDefaults` at launch in `HaloWindow+File.swift` and writes it back after each change) |
 | `HaloKeySelection.swift` (easing) | `var keySegments: [HaloKeySegment]`, `selectKey(_:extending:)`, `clearKeySelection()`, `setEasing(_ preset: HaloEasingPreset)`, `setCustomEasing(_:coalesceKey:)` |
-| `HaloRenderFrame.swift` (render-out) | `renderCurrentFrame()`, `var renderedFrameNote: String?` |
-| `HaloRenderJob.swift` (render-out) | `startRender(_ settings:)`, `renderProgress(frame:)`, `cancelRender()`, `finishRender(_ outcome:)` |
-| `HaloTextEdits.swift` (text-layers) | `setText(_:)`, `setFontSize(_:)` |
+| `HaloRenderFrame.swift` (render-out) | `renderCurrentFrame()` (through `services.rendering` with `services.text`, at a quarter of the composition size), `var renderedFrameNote: String?` |
+| `HaloRenderJob.swift` (render-out) | `startRender(_ settings:)` (the app runs `CompositionRendering.run` with `services.text` and its sink off the main actor), `renderProgress(frame:)`, `cancelRender()`, `finishRender(_ outcome:)` |
+| `HaloTextEdits.swift` (text-layers) | `setText(_:)` (empty refused with `.emptyText`), `setFontSize(_:)` |
 
 The state types the stored properties use (`HaloPlaybackState`,
 `HaloViewerDragState`, `HaloFileState`, `HaloRenderJobState`) are declared
 with `HaloProject` in W0, all `Sendable` and `Equatable` with public
-memberwise inits; `HaloKeySegment` (a key and the next one on a track, with
-its preset or "Custom") is declared by the easing feature in
-`HaloKeySelection.swift`.
+memberwise inits, as is `HaloRecentFile` (name and path), so W0 owns them
+and history-files only fills them; `HaloKeySegment` (a key and the next one
+on a track, with its preset or "Custom") is declared by the easing feature
+in `HaloKeySelection.swift`.
 
 ### W0 change to `HaloLayer`
 
@@ -663,7 +690,9 @@ W0 leaves it):
 ```
 
 `withID` (used by Duplicate Composition) copies all three, and
-`duplicateComposition` remaps `parentID` to the copy's ids.
+`duplicateComposition` remaps `parentID` to the copy's ids. Decoding goes
+through the clamping init, so a file can't carry an opacity outside 0...1;
+`ProjectFiles.decode` also checks opacity and key values are finite.
 
 ### 5.1 Values (`Contracts/HaloValues.swift`)
 
@@ -686,7 +715,8 @@ public typealias HaloMatrix = FlareCore.Matrix
 public typealias HaloPoint = FlareCore.Point
 
 /// An animatable layer property. The raw value is the track key in
-/// `HaloLayer.tracks`, the same names FlareCore's `Layer.sample` uses.
+/// `HaloLayer.tracks`; x, y, scaleX, scaleY, rotation and opacity are the
+/// names FlareCore's `Layer.sample` uses, anchorX and anchorY are Halo's own.
 public enum HaloProperty: String, CaseIterable, Codable, Sendable {
     case x, y, scaleX, scaleY, rotation, opacity, anchorX, anchorY
 
@@ -747,6 +777,17 @@ public enum HaloProperty: String, CaseIterable, Codable, Sendable {
         case .x, .y, .anchorX, .anchorY: 1
         case .scaleX, .scaleY, .opacity, .rotation: 0
         }
+    }
+
+    /// The stored value for what a person typed in the row ("45", "45°",
+    /// " 50 %"): the number before the unit, divided by `displayFactor`. Nil
+    /// when it isn't a number, so the row keeps its value and says why.
+    public func parse(_ text: String) -> Double? {
+        let trimmed = text.filter { !$0.isWhitespace }
+        let number = trimmed.hasSuffix(unit.filter { !$0.isWhitespace })
+            ? String(trimmed.dropLast(unit.filter { !$0.isWhitespace }.count)) : trimmed
+        guard let value = Double(number), value.isFinite else { return nil }
+        return value / displayFactor
     }
 
     /// The value as the row shows it and VoiceOver reads it: "960.0 px",
@@ -889,12 +930,16 @@ public struct HaloDocumentState: Codable, Sendable, Hashable {
     public var selectedLayerID: String?
     /// The number in the next composition id; only goes up.
     public var nextCompositionNumber: Int
+    /// The number in the next layer id ("comp-1-layer-7"); only goes up, so a
+    /// deleted or duplicated layer never makes two layers share an id.
+    public var nextLayerNumber: Int
     public init(
         compositions: [HaloComposition] = [], selectedCompositionID: String? = nil, selectedLayerID: String? = nil,
-        nextCompositionNumber: Int = 1
+        nextCompositionNumber: Int = 1, nextLayerNumber: Int = 1
     ) {
         self.compositions = compositions; self.selectedCompositionID = selectedCompositionID
         self.selectedLayerID = selectedLayerID; self.nextCompositionNumber = nextCompositionNumber
+        self.nextLayerNumber = nextLayerNumber
     }
 }
 
@@ -934,7 +979,8 @@ public struct HaloPlaybackTick: Sendable, Hashable {
 public struct HaloRenderSettings: Sendable, Hashable {
     public enum Format: String, CaseIterable, Sendable { case pngSequence, movie }
     public var format: Format
-    /// Half size halves width and height, rounded down to even.
+    /// Half size: width and height halved, then rounded down to even (movie
+    /// encoders need even sizes), at least 2. The plan carries the pixel size.
     public var halfSize: Bool
     public init(format: Format, halfSize: Bool = false) { self.format = format; self.halfSize = halfSize }
 }
@@ -965,22 +1011,42 @@ public enum HaloRenderOutcome: Sendable, Hashable {
 /// Why an edit was refused. `message` is the text the window shows.
 public enum HaloEditError: Error, Sendable, Hashable {
     case noComposition
+    case noLayerSelected
     case unknownLayer(String)
     case notANumber(HaloProperty)
+    /// The layer's name, for the message.
     case parentCycle(String)
+    case inPointAfterOut
+    case outPointBeforeIn
+    case emptyName
+    case emptyText
     case noKeySelected
     case notBuilt(String)
 
     public var message: String {
         switch self {
         case .noComposition: "Create a composition first."
+        case .noLayerSelected: "Select a layer first."
         case .unknownLayer: "That layer no longer exists."
         case .notANumber(let p): "\(p.title) needs a number."
         case .parentCycle(let name): "\(name) can't follow a layer that follows it."
-        case .noKeySelected: "Select a key on the timeline first."
+        case .inPointAfterOut: "The in point must come before the out point."
+        case .outPointBeforeIn: "The out point must come after the in point."
+        case .emptyName: "Enter a name."
+        case .emptyText: "Enter some text."
+        case .noKeySelected: "Pick a key in the EASING list first."
         case .notBuilt(let what): "\(what) isn't built yet."
         }
     }
+}
+
+/// A refused edit, kept until the next edit or a dismissal, with the
+/// control that refused it so the window shows the message under that row.
+public struct HaloRefusal: Sendable, Hashable {
+    /// The refusing control's identifier ("halo.inspector.row.rotation").
+    public var control: String
+    public var message: String
+    public init(control: String, message: String) { self.control = control; self.message = message }
 }
 
 /// Why a project file didn't open. The open project stays as it was.
@@ -1055,24 +1121,28 @@ public protocol PropertyKeying: HaloService {
     /// One row per property in `HaloProperty.allCases` order; empty for an
     /// unknown layer.
     func rows(for layerID: String, in composition: HaloComposition, at frame: Int) -> [HaloPropertyRow]
-    /// Not animated: sets the one value (key at frame 0, or the static value).
+    /// Not animated: sets the static value (opacity's lives in
+    /// `HaloLayer.opacity` with no track; every other property's in a one-key
+    /// track at frame 0).
     /// Animated: writes a key at `frame`. NaN or infinity throws
     /// `.notANumber`; other values clamp to `property.range`.
     func setValue(
         _ value: Double, for property: HaloProperty, of layerID: String, at frame: Int,
         in composition: inout HaloComposition) throws
-    /// The stopwatch. Off to on: keys at `frame` and at the last frame with
-    /// the current value (so the row turns animated). On to off: drops the
-    /// track and keeps the value at `frame`.
+    /// The stopwatch. Off to on: keys at `frame` and at the last frame (or
+    /// frame 0 when `frame` is the last) with the current value, so the row
+    /// turns animated. On to off: the value at `frame` becomes the static
+    /// value, stored as `setValue` stores a not-animated one.
     func toggleAnimation(
         _ property: HaloProperty, of layerID: String, at frame: Int, in composition: inout HaloComposition) throws
     /// The diamond: adds a key at `frame` with the sampled value, or removes
     /// the one there. A track left with one key is not animated.
     func toggleKey(
         _ property: HaloProperty, of layerID: String, at frame: Int, in composition: inout HaloComposition) throws
-    /// Parent picker. Nil clears it. A cycle throws `.parentCycle`. The child
-    /// keeps its place on screen at `frame` (its position is rewritten in the
-    /// parent's space).
+    /// Parent picker. Nil clears it. A cycle (the layer itself, or a layer
+    /// that already follows it) throws `.parentCycle(name)`; an unknown id
+    /// throws `.unknownLayer`. The child keeps its place on screen at `frame`:
+    /// its position is rewritten in the new parent's space through `setValue`.
     func setParent(
         _ parentID: String?, of layerID: String, at frame: Int, in composition: inout HaloComposition) throws
 }
@@ -1104,10 +1174,14 @@ public protocol KeyEasing: HaloService {
 public protocol ProjectHistory: HaloService {
     /// How many steps undo keeps; the oldest drops past it.
     var limit: Int { get }
-    /// Adds a step named `name` whose undo returns `before`, and clears redo.
-    /// With a non-nil `coalesceKey` equal to the newest step's, the newest
-    /// step keeps its own `before` and nothing is added.
+    /// Adds a step named `name` whose undo returns `before`. Always clears
+    /// redo. With a non-nil `coalesceKey` equal to the newest step's (and that
+    /// step not ended), the newest step keeps its own `before` and nothing is
+    /// added.
     func record(_ name: String, before: HaloDocumentState, coalesceKey: String?, in history: inout HaloHistory)
+    /// Ends the newest step's coalescing, so the next scrub of the same row is
+    /// its own step. Called at the end of every drag, typed value or nudge.
+    func endCoalescing(in history: inout HaloHistory)
     /// The state to return to, moving the step onto redo with `current`.
     /// Nil when there is nothing to undo.
     func undo(_ current: HaloDocumentState, in history: inout HaloHistory) -> HaloDocumentState?
@@ -1137,9 +1211,11 @@ public protocol PlaybackClock: HaloService {
 /// #451, #430: a frame as pixels (CoreRaster), the reference the viewer and
 /// every rendered file must match.
 public protocol FrameRendering: HaloService {
-    /// Renders `list` at 1/`scale` size (1 = full). `text` draws text layers;
-    /// with nil they are skipped and counted in `skippedLayerCount`.
-    func render(_ list: HaloDrawList, scale: Int, text: (any TextRasterizing)?) throws -> HaloRenderedFrame
+    /// Renders `list` into a `width` × `height` buffer (the composition scaled
+    /// to fit exactly: Render Frame passes a quarter of the size, Render…
+    /// the plan's size). `text` draws text layers; with nil they are skipped
+    /// and counted in `skippedLayerCount`. Nulls never count.
+    func render(_ list: HaloDrawList, width: Int, height: Int, text: (any TextRasterizing)?) throws -> HaloRenderedFrame
 }
 
 /// #430: words to pixels. HaloApp supplies the CoreText one; tests use a fake.
@@ -1147,6 +1223,9 @@ public protocol TextRasterizing: Sendable {
     /// The text in `color` on a transparent buffer just big enough for it,
     /// linear light, premultiplied; its (0, 0) is the line box's top left.
     func rasterize(_ text: HaloTextContent, color: HaloLayerColor) throws -> PixelBuffer
+    /// The line box `rasterize` fills, in composition pixels. The viewer, hit
+    /// testing and the default anchor use it, so text bounds match the pixels.
+    func measure(_ text: HaloTextContent) -> HaloLayerRect
 }
 
 /// #429: where rendered frames go. HaloApp supplies the PNG and movie writers.
@@ -1163,11 +1242,12 @@ public protocol CompositionRendering: HaloService {
     /// The frames and names for `settings`. Throws `.noComposition` for a
     /// composition with no frames.
     func plan(_ composition: HaloComposition, settings: HaloRenderSettings) throws -> HaloRenderPlan
-    /// Sends every planned frame to `sink` in order, checking `isCancelled`
-    /// before each one. A sink error stops at that frame.
+    /// Sends every planned frame, rendered at the plan's size with `text`
+    /// drawing text layers, to `sink` in order, checking `isCancelled` before
+    /// each one. A sink error stops at that frame.
     func run(
-        _ plan: HaloRenderPlan, of composition: HaloComposition, into sink: inout some RenderSink,
-        isCancelled: () -> Bool
+        _ plan: HaloRenderPlan, of composition: HaloComposition, text: (any TextRasterizing)?,
+        into sink: inout some RenderSink, isCancelled: () -> Bool
     ) -> HaloRenderOutcome
 }
 ```
@@ -1182,15 +1262,19 @@ public protocol CompositionRendering: HaloService {
 
 extension HaloLayer {
     /// The layer's box in layer space (composition pixels, top-left origin).
-    public func bounds(in composition: HaloComposition) -> HaloLayerRect {
+    /// A text layer's box comes from `measuring` (the app's CoreText
+    /// rasterizer, so it matches the pixels), centered; without one, an
+    /// estimate of 0.6 em per character.
+    public func bounds(in composition: HaloComposition, measuring: (any TextRasterizing)? = nil) -> HaloLayerRect {
         let w = Double(composition.width), h = Double(composition.height)
         switch kind {
         case .solid: return rect ?? HaloLayerRect(x: 0, y: 0, width: w, height: h)
         case .shape: return rect ?? HaloLayerRect(x: w / 2 - 100, y: h / 2 - 100, width: 200, height: 200)
         case .text:
             let content = text ?? HaloTextContent()
-            let width = content.fontSize * 0.6 * Double(max(content.string.count, 1))
-            return HaloLayerRect(x: w / 2 - width / 2, y: h / 2 - content.fontSize / 2, width: width, height: content.fontSize)
+            let box = measuring?.measure(content)
+                ?? HaloLayerRect(x: 0, y: 0, width: content.fontSize * 0.6 * Double(max(content.string.count, 1)), height: content.fontSize)
+            return HaloLayerRect(x: w / 2 - box.width / 2, y: h / 2 - box.height / 2, width: box.width, height: box.height)
         case .null: return HaloLayerRect(x: w / 2, y: h / 2, width: 0, height: 0)
         }
     }
@@ -1214,10 +1298,10 @@ extension HaloLayer {
 ```swift
 // HaloServices.swift (W0): one existential per Halo contract. HaloProject
 // takes it at init; `.fake` runs the views on fakes, `.live` is what the app
-// ships. W0 fills `.live` with `HaloNotBuilt`, which says why for every
-// control; each feature swaps its own live type in by editing only its own
-// Live/<Name>.swift file, because W0 already names `LiveFrameDrawing` and the
-// rest here as typealiases of `HaloNotBuilt`.
+// ships. W0 already names `LiveFrameDrawing` and the rest here, each a stub
+// struct in its own Live/<Name>.swift that says why its controls are
+// disabled; a feature swaps its live type in by replacing only that file.
+// `text` is the one service HaloApp supplies (CoreText); the Model can't.
 public struct HaloServices: Sendable {
     public var drawing: any FrameDrawing
     public var placing: any LayerPlacing
@@ -1229,22 +1313,26 @@ public struct HaloServices: Sendable {
     public var clock: any PlaybackClock
     public var rendering: any FrameRendering
     public var compositionRendering: any CompositionRendering
+    /// Draws and measures text layers; nil until HaloApp sets it at launch
+    /// (HaloLaunch), so Linux tests run with the fake or without text.
+    public var text: (any TextRasterizing)?
 
     public init(
         drawing: any FrameDrawing, placing: any LayerPlacing, keying: any PropertyKeying,
         dragging: any ViewerDragging, easing: any KeyEasing, history: any ProjectHistory, files: any ProjectFiles,
-        clock: any PlaybackClock, rendering: any FrameRendering, compositionRendering: any CompositionRendering
+        clock: any PlaybackClock, rendering: any FrameRendering, compositionRendering: any CompositionRendering,
+        text: (any TextRasterizing)? = nil
     ) {
         self.drawing = drawing; self.placing = placing; self.keying = keying; self.dragging = dragging
         self.easing = easing; self.history = history; self.files = files; self.clock = clock
-        self.rendering = rendering; self.compositionRendering = compositionRendering
+        self.rendering = rendering; self.compositionRendering = compositionRendering; self.text = text
     }
 
     public static let fake = HaloServices(
         drawing: FakeFrameDrawing(), placing: FakeLayerPlacing(), keying: FakePropertyKeying(),
         dragging: FakeViewerDragging(), easing: FakeKeyEasing(), history: FakeProjectHistory(),
         files: FakeProjectFiles(), clock: FakePlaybackClock(), rendering: FakeFrameRendering(),
-        compositionRendering: FakeCompositionRendering())
+        compositionRendering: FakeCompositionRendering(), text: FakeTextRasterizer())
 
     public static let live = HaloServices(
         drawing: LiveFrameDrawing(), placing: LiveLayerPlacing(), keying: LivePropertyKeying(),
@@ -1281,8 +1369,13 @@ public struct LivePropertyKeying: PropertyKeying {
 ```swift
 // Fakes/HaloFakes.swift: a small, predictable conformance of every Halo
 // contract, so HaloApp's views, snapshots and journeys run before the live
-// types land. Fakes ignore parenting and draw text as a box; everything else
-// follows the contract's doc comment. Linux-safe. Never used by `.live`.
+// types land. Each fake keeps its contract's doc comment; where it is
+// simpler than the live type it says so here:
+// - FakeFrameRendering fills each item's axis-aligned world box with its
+//   color (no blend modes, no anti-aliasing); FakeTextRasterizer draws a box.
+// - FakeProjectFiles checks the envelope, version and size, but not the
+//   contents' rules (unique names, spans, sorted keys, cycles).
+// Linux-safe. Never used by `.live`.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -1299,13 +1392,36 @@ public struct FakeLayerPlacing: LayerPlacing {
         return layer.defaultValue(property, in: composition)
     }
     public func worldMatrix(of layerID: String, in composition: HaloComposition, at frame: Int) -> HaloMatrix? {
-        func v(_ p: HaloProperty) -> Double { value(p, of: layerID, in: composition, at: frame) ?? 0 }
         guard composition.layers.contains(where: { $0.id == layerID }) else { return nil }
+        var matrix = localMatrix(of: layerID, in: composition, at: frame)
+        var seen: Set<String> = [layerID]
+        var next = composition.layers.first { $0.id == layerID }?.parentID
+        while let parent = next, !seen.contains(parent), composition.layers.contains(where: { $0.id == parent }) {
+            matrix = localMatrix(of: parent, in: composition, at: frame) * matrix
+            seen.insert(parent)
+            next = composition.layers.first { $0.id == parent }?.parentID
+        }
+        return matrix
+    }
+    public func parentCandidates(for layerID: String, in composition: HaloComposition) -> [String] {
+        composition.layers.map(\.id).filter { $0 != layerID && !Self.follows($0, layerID, in: composition) }
+    }
+
+    func localMatrix(of layerID: String, in composition: HaloComposition, at frame: Int) -> HaloMatrix {
+        func v(_ p: HaloProperty) -> Double { value(p, of: layerID, in: composition, at: frame) ?? 0 }
         return HaloMatrix.translation(x: v(.x), y: v(.y)) * HaloMatrix.rotation(degrees: v(.rotation))
             * HaloMatrix.scale(x: v(.scaleX), y: v(.scaleY)) * HaloMatrix.translation(x: -v(.anchorX), y: -v(.anchorY))
     }
-    public func parentCandidates(for layerID: String, in composition: HaloComposition) -> [String] {
-        composition.layers.map(\.id).filter { $0 != layerID }
+
+    /// Whether `layerID` follows `ancestorID` through its chain of parents.
+    static func follows(_ layerID: String, _ ancestorID: String, in composition: HaloComposition) -> Bool {
+        var seen: Set<String> = []
+        var next = composition.layers.first { $0.id == layerID }?.parentID
+        while let id = next, seen.insert(id).inserted {
+            if id == ancestorID { return true }
+            next = composition.layers.first { $0.id == id }?.parentID
+        }
+        return false
     }
 }
 
@@ -1346,37 +1462,77 @@ public struct FakePropertyKeying: PropertyKeying {
         try change(layerID, in: &composition) { layer in
             let track = layer.tracks[property.rawValue] ?? []
             if track.count >= 2 { layer.tracks[property.rawValue] = Self.keyed(track, frame: frame, value: v) }
-            else if property == .opacity, track.isEmpty { layer.opacity = v }
-            else { layer.tracks[property.rawValue] = [HaloKeyframe(frame: track.first?.frame ?? 0, value: v)] }
+            else { Self.setStatic(v, property, of: &layer) }
         }
     }
     public func toggleAnimation(
         _ property: HaloProperty, of layerID: String, at frame: Int, in composition: inout HaloComposition
     ) throws {
-        let v = FakeLayerPlacing().value(property, of: layerID, in: composition, at: frame) ?? 0
+        guard let v = FakeLayerPlacing().value(property, of: layerID, in: composition, at: frame) else {
+            throw HaloEditError.unknownLayer(layerID)
+        }
         let last = composition.lastFrame
         try change(layerID, in: &composition) { layer in
-            let track = layer.tracks[property.rawValue] ?? []
-            if track.count >= 2 { layer.tracks[property.rawValue] = [HaloKeyframe(frame: 0, value: v)] }
-            else { layer.tracks[property.rawValue] = Self.keyed(Self.keyed([], frame: frame, value: v), frame: frame == last ? 0 : last, value: v) }
+            if (layer.tracks[property.rawValue] ?? []).count >= 2 { Self.setStatic(v, property, of: &layer) }
+            else {
+                layer.tracks[property.rawValue] = Self.keyed(
+                    Self.keyed([], frame: frame, value: v), frame: frame == last ? 0 : last, value: v)
+            }
         }
     }
     public func toggleKey(
         _ property: HaloProperty, of layerID: String, at frame: Int, in composition: inout HaloComposition
     ) throws {
-        let v = FakeLayerPlacing().value(property, of: layerID, in: composition, at: frame) ?? 0
+        guard let v = FakeLayerPlacing().value(property, of: layerID, in: composition, at: frame) else {
+            throw HaloEditError.unknownLayer(layerID)
+        }
         try change(layerID, in: &composition) { layer in
             var track = layer.tracks[property.rawValue] ?? []
             if track.contains(where: { $0.frame == frame }) { track.removeAll { $0.frame == frame } }
             else { track = Self.keyed(track, frame: frame, value: v) }
-            layer.tracks[property.rawValue] = track
+            if track.count < 2 {
+                Self.setStatic(track.first?.value ?? v, property, of: &layer)
+            } else {
+                layer.tracks[property.rawValue] = track
+            }
         }
     }
     public func setParent(
         _ parentID: String?, of layerID: String, at frame: Int, in composition: inout HaloComposition
     ) throws {
-        if let parentID, parentID == layerID { throw HaloEditError.parentCycle(layerID) }
-        try change(layerID, in: &composition) { $0.parentID = parentID }
+        guard let layer = composition.layers.first(where: { $0.id == layerID }) else {
+            throw HaloEditError.unknownLayer(layerID)
+        }
+        if let parentID {
+            guard composition.layers.contains(where: { $0.id == parentID }) else { throw HaloEditError.unknownLayer(parentID) }
+            if parentID == layerID || FakeLayerPlacing.follows(parentID, layerID, in: composition) {
+                throw HaloEditError.parentCycle(layer.name)
+            }
+        }
+        let placing = FakeLayerPlacing()
+        guard let world = placing.worldMatrix(of: layerID, in: composition, at: frame),
+            let ax = placing.value(.anchorX, of: layerID, in: composition, at: frame),
+            let ay = placing.value(.anchorY, of: layerID, in: composition, at: frame)
+        else { throw HaloEditError.unknownLayer(layerID) }
+        let onScreen = world.apply(HaloPoint(x: ax, y: ay))
+        var copy = composition
+        try change(layerID, in: &copy) { $0.parentID = parentID }
+        let parentWorld = parentID.flatMap { placing.worldMatrix(of: $0, in: copy, at: frame) } ?? .identity
+        guard let local = try? parentWorld.inverted().apply(onScreen) else { throw HaloEditError.parentCycle(layer.name) }
+        try setValue(local.x, for: .x, of: layerID, at: frame, in: &copy)
+        try setValue(local.y, for: .y, of: layerID, at: frame, in: &copy)
+        composition = copy
+    }
+
+    /// The not-animated home of a value: `opacity` on the layer, every other
+    /// property a one-key track at frame 0.
+    static func setStatic(_ value: Double, _ property: HaloProperty, of layer: inout HaloLayer) {
+        if property == .opacity {
+            layer.opacity = value
+            layer.tracks[property.rawValue] = nil
+        } else {
+            layer.tracks[property.rawValue] = [HaloKeyframe(frame: 0, value: value)]
+        }
     }
 
     /// `track` with a key at `frame` set to `value`, kept sorted.
@@ -1409,12 +1565,17 @@ public struct FakeViewerDragging: ViewerDragging {
     ) throws {
         guard delta.x != 0 || delta.y != 0 else { return }
         let placing = FakeLayerPlacing(), keying = FakePropertyKeying()
-        guard let x = placing.value(.x, of: layerID, in: composition, at: frame),
+        guard let layer = composition.layers.first(where: { $0.id == layerID }),
+            let x = placing.value(.x, of: layerID, in: composition, at: frame),
             let y = placing.value(.y, of: layerID, in: composition, at: frame)
         else { throw HaloEditError.unknownLayer(layerID) }
+        // The delta is in composition space; a parented layer moves in its parent's.
+        let parentWorld = layer.parentID.flatMap { placing.worldMatrix(of: $0, in: composition, at: frame) } ?? .identity
+        let inverse = (try? parentWorld.inverted()) ?? .identity
+        let origin = inverse.apply(HaloPoint(x: 0, y: 0)), moved = inverse.apply(delta)
         var copy = composition
-        try keying.setValue(x + delta.x, for: .x, of: layerID, at: frame, in: &copy)
-        try keying.setValue(y + delta.y, for: .y, of: layerID, at: frame, in: &copy)
+        try keying.setValue(x + moved.x - origin.x, for: .x, of: layerID, at: frame, in: &copy)
+        try keying.setValue(y + moved.y - origin.y, for: .y, of: layerID, at: frame, in: &copy)
         composition = copy
     }
 }
@@ -1447,10 +1608,14 @@ public struct FakeProjectHistory: ProjectHistory {
     public let limit = 100
     public init() {}
     public func record(_ name: String, before: HaloDocumentState, coalesceKey: String?, in history: inout HaloHistory) {
+        history.redo = []
         if let coalesceKey, history.undo.last?.coalesceKey == coalesceKey { return }
         history.undo.append(HaloHistoryEntry(name: name, before: before, coalesceKey: coalesceKey))
         if history.undo.count > limit { history.undo.removeFirst() }
-        history.redo = []
+    }
+    public func endCoalescing(in history: inout HaloHistory) {
+        guard !history.undo.isEmpty else { return }
+        history.undo[history.undo.count - 1].coalesceKey = nil
     }
     public func undo(_ current: HaloDocumentState, in history: inout HaloHistory) -> HaloDocumentState? {
         guard let step = history.undo.popLast() else { return nil }
@@ -1464,18 +1629,35 @@ public struct FakeProjectHistory: ProjectHistory {
     }
 }
 
+/// The file envelope both the fake and the live type write.
+struct HaloFileEnvelope: Codable {
+    var format: String
+    var version: Int
+    var project: HaloDocumentState?
+}
+
 public struct FakeProjectFiles: ProjectFiles {
+    public static let maxBytes = 64 * 1024 * 1024
     public init() {}
     public func encode(_ state: HaloDocumentState) throws -> Data {
         let encoder = JSONEncoder()
         encoder.outputFormatting = [.sortedKeys]
-        return try encoder.encode(state)
+        return try encoder.encode(HaloFileEnvelope(format: "halo", version: 1, project: state))
     }
     public func decode(_ data: Data) throws -> HaloDocumentState {
-        do { return try JSONDecoder().decode(HaloDocumentState.self, from: data) } catch {
+        guard data.count <= Self.maxBytes else { throw HaloFileError.tooLarge }
+        guard let head = try? JSONDecoder().decode(Header.self, from: data), head.format == "halo" else {
             throw HaloFileError.notAHaloFile
         }
+        guard head.version <= 1 else { throw HaloFileError.newerVersion(head.version) }
+        do {
+            guard let project = try JSONDecoder().decode(HaloFileEnvelope.self, from: data).project else {
+                throw HaloFileError.damaged("it has no project")
+            }
+            return project
+        } catch let error as HaloFileError { throw error } catch { throw HaloFileError.damaged("\(error)") }
     }
+    struct Header: Codable { var format: String; var version: Int }
 }
 
 public struct FakePlaybackClock: PlaybackClock {
@@ -1486,7 +1668,8 @@ public struct FakePlaybackClock: PlaybackClock {
         guard durationFrames > 0, framesPerSecond > 0, elapsed.isFinite, elapsed > 0 else {
             return HaloPlaybackTick(frame: max(0, min(startFrame, durationFrames - 1)), ended: false)
         }
-        let ahead = Int(min(elapsed * Double(framesPerSecond), 1e9))
+        // The same 1e-9 as FlareCore's playbackFrame, so fake and live agree on frame edges.
+        let ahead = Int(min((elapsed * Double(framesPerSecond) + 1e-9).rounded(.down), 1e9))
         let raw = startFrame + ahead
         if loops { return HaloPlaybackTick(frame: raw % durationFrames, ended: false) }
         return raw >= durationFrames - 1
@@ -1494,25 +1677,41 @@ public struct FakePlaybackClock: PlaybackClock {
     }
 }
 
-/// Fills the frame with the top item's color: enough for the viewer to show
-/// "a rendered frame" and for render loops to count frames.
+/// Fills each item's axis-aligned world box with its color, bottom first.
 public struct FakeFrameRendering: FrameRendering {
     public init() {}
-    public func render(_ list: HaloDrawList, scale: Int, text: (any TextRasterizing)?) throws -> HaloRenderedFrame {
-        let s = max(scale, 1)
-        let top = list.items.last.map { RGBA(r: Float($0.color.red), g: Float($0.color.green), b: Float($0.color.blue), a: 1) }
-        let pixels = try PixelBuffer(width: max(1, list.width / s), height: max(1, list.height / s), fill: top ?? .clear)
-        let skipped = text == nil ? list.items.filter { $0.kind == .text }.count : 0
+    public func render(_ list: HaloDrawList, width: Int, height: Int, text: (any TextRasterizing)?) throws -> HaloRenderedFrame {
+        var pixels = try PixelBuffer(width: max(1, width), height: max(1, height))
+        let sx = Double(pixels.width) / Double(max(1, list.width)), sy = Double(pixels.height) / Double(max(1, list.height))
+        var skipped = 0
+        for item in list.items {
+            if item.kind == .text, text == nil { skipped += 1; continue }
+            let b = item.bounds
+            let corners = [(b.x, b.y), (b.x + b.width, b.y), (b.x, b.y + b.height), (b.x + b.width, b.y + b.height)]
+                .map { item.matrix.apply(HaloPoint(x: $0.0, y: $0.1)) }
+            guard let minX = corners.map(\.x).min(), let maxX = corners.map(\.x).max(),
+                let minY = corners.map(\.y).min(), let maxY = corners.map(\.y).max()
+            else { continue }
+            let a = Float(item.opacity)
+            let color = RGBA(r: Float(item.color.red) * a, g: Float(item.color.green) * a, b: Float(item.color.blue) * a, a: a)
+            let x0 = max(0, Int(minX * sx)), x1 = min(pixels.width, Int(maxX * sx))
+            let y0 = max(0, Int(minY * sy)), y1 = min(pixels.height, Int(maxY * sy))
+            guard x0 < x1, y0 < y1 else { continue }
+            for y in y0..<y1 { for x in x0..<x1 { try pixels.setPixel(x: x, y: y, color) } }
+        }
         return HaloRenderedFrame(pixels: pixels, frame: list.frame, skippedLayerCount: skipped)
     }
 }
 
 public struct FakeTextRasterizer: TextRasterizing {
     public init() {}
+    public func measure(_ text: HaloTextContent) -> HaloLayerRect {
+        HaloLayerRect(x: 0, y: 0, width: text.fontSize * 0.6 * Double(max(text.string.count, 1)), height: text.fontSize)
+    }
     public func rasterize(_ text: HaloTextContent, color: HaloLayerColor) throws -> PixelBuffer {
-        let w = max(1, Int(text.fontSize * 0.6 * Double(max(text.string.count, 1))))
+        let box = measure(text)
         return try PixelBuffer(
-            width: w, height: max(1, Int(text.fontSize)),
+            width: max(1, Int(box.width)), height: max(1, Int(box.height)),
             fill: RGBA(r: Float(color.red), g: Float(color.green), b: Float(color.blue), a: 1))
     }
 }
@@ -1521,9 +1720,9 @@ public struct FakeCompositionRendering: CompositionRendering {
     public init() {}
     public func plan(_ composition: HaloComposition, settings: HaloRenderSettings) throws -> HaloRenderPlan {
         guard composition.durationFrames > 0 else { throw HaloEditError.noComposition }
-        let even = { (n: Int) in max(2, n / 2 / 2 * 2) }
-        let w = settings.halfSize ? even(composition.width) : composition.width
-        let h = settings.halfSize ? even(composition.height) : composition.height
+        let half = { (n: Int) in max(2, n / 2 / 2 * 2) }
+        let w = settings.halfSize ? half(composition.width) : composition.width
+        let h = settings.halfSize ? half(composition.height) : composition.height
         let frames = Array(0..<composition.durationFrames)
         let names: [String] = switch settings.format {
         case .movie: ["\(composition.name).mp4"]
@@ -1535,8 +1734,8 @@ public struct FakeCompositionRendering: CompositionRendering {
         return HaloRenderPlan(width: w, height: h, framesPerSecond: composition.framesPerSecond, frames: frames, fileNames: names)
     }
     public func run(
-        _ plan: HaloRenderPlan, of composition: HaloComposition, into sink: inout some RenderSink,
-        isCancelled: () -> Bool
+        _ plan: HaloRenderPlan, of composition: HaloComposition, text: (any TextRasterizing)?,
+        into sink: inout some RenderSink, isCancelled: () -> Bool
     ) -> HaloRenderOutcome {
         do { try sink.begin(plan) } catch { return .failed(frame: 0, message: "\(error)") }
         for (i, frame) in plan.frames.enumerated() {
@@ -1546,7 +1745,7 @@ public struct FakeCompositionRendering: CompositionRendering {
             }
             do {
                 let list = FakeFrameDrawing().drawList(composition, at: frame)
-                let image = try FakeFrameRendering().render(list, scale: 1, text: nil)
+                let image = try FakeFrameRendering().render(list, width: plan.width, height: plan.height, text: text)
                 let name = plan.fileNames.count == plan.frames.count ? plan.fileNames[i] : plan.fileNames.first ?? ""
                 try sink.write(image, named: name)
             } catch {
@@ -1564,6 +1763,7 @@ public struct FakeCompositionRendering: CompositionRendering {
 
 ```swift
 import Testing
+import Foundation
 import HaloModel
 
 @Suite struct HaloContractTests {
@@ -1596,7 +1796,30 @@ import HaloModel
         #expect(comp.layers[1].tracks["x"]?.map(\.frame) == [0, 15, 30])
     }
 
-    @Test func fakeHistoryCoalescesAndUndoes() {
+    @Test func fakeParentingFollowsAndRefusesCycles() throws {
+        var comp = keyed()
+        let keying = FakePropertyKeying(), placing = FakeLayerPlacing()
+        let before = placing.worldMatrix(of: "s", in: comp, at: 0)?.apply(HaloPoint(x: 50, y: 50))
+        try keying.setParent("n", of: "s", at: 0, in: &comp)
+        #expect(placing.worldMatrix(of: "s", in: comp, at: 0)?.apply(HaloPoint(x: 50, y: 50)) == before)
+        #expect(placing.parentCandidates(for: "n", in: comp).isEmpty)
+        #expect(throws: HaloEditError.parentCycle("Null 1")) { try keying.setParent("s", of: "n", at: 0, in: &comp) }
+        try keying.setValue(300, for: .x, of: "n", at: 0, in: &comp)
+        #expect(placing.worldMatrix(of: "s", in: comp, at: 0)?.apply(HaloPoint(x: 50, y: 50)).x == (before?.x ?? 0) + 100)
+    }
+
+    @Test func fakeOpacityHasOneStaticHome() throws {
+        var comp = keyed()
+        let keying = FakePropertyKeying()
+        try keying.setValue(0.5, for: .opacity, of: "s", at: 10, in: &comp)
+        #expect(comp.layers[1].opacity == 0.5 && comp.layers[1].tracks["opacity"] == nil)
+        try keying.toggleAnimation(.opacity, of: "s", at: 10, in: &comp)
+        #expect(comp.layers[1].tracks["opacity"]?.map(\.frame) == [10, 59])
+        try keying.toggleAnimation(.opacity, of: "s", at: 10, in: &comp)
+        #expect(comp.layers[1].opacity == 0.5 && comp.layers[1].tracks["opacity"] == nil)
+    }
+
+    @Test func fakeHistoryCoalescesEndsAndClearsRedo() {
         let history = FakeProjectHistory()
         var h = HaloHistory()
         let a = HaloDocumentState(), b = HaloDocumentState(nextCompositionNumber: 2)
@@ -1604,39 +1827,51 @@ import HaloModel
         history.record("Change Rotation", before: b, coalesceKey: "rot", in: &h)
         #expect(h.undo.count == 1)
         #expect(h.undoTitle == "Undo Change Rotation")
-        #expect(history.undo(b, in: &h) == a)
-        #expect(h.redoTitle == "Redo Change Rotation")
+        history.endCoalescing(in: &h)
+        history.record("Change Rotation", before: b, coalesceKey: "rot", in: &h)
+        #expect(h.undo.count == 2)
+        #expect(history.undo(b, in: &h) == b)
+        history.record("Change Rotation", before: a, coalesceKey: "rot", in: &h)
+        #expect(h.redo.isEmpty)
     }
 
-    @Test func fakeFilesRoundTrip() throws {
+    @Test func fakeFilesRoundTripAndRefuse() throws {
         let state = HaloDocumentState(compositions: [keyed()], selectedCompositionID: "c", nextCompositionNumber: 2)
         let files = FakeProjectFiles()
         #expect(try files.decode(files.encode(state)) == state)
+        #expect(throws: HaloFileError.notAHaloFile) { try files.decode(Data("not json".utf8)) }
+        #expect(throws: HaloFileError.newerVersion(2)) { try files.decode(Data(#"{"format":"halo","version":2}"#.utf8)) }
+        #expect(throws: HaloFileError.damaged("it has no project")) { try files.decode(Data(#"{"format":"halo","version":1}"#.utf8)) }
     }
 
-    @Test func fakeRenderRunsEveryFrame() throws {
+    @Test func fakeRenderRunsEveryFrameAtThePlanSize() throws {
         struct Count: RenderSink {
             var names: [String] = []
-            var finished = false
+            var widths: Set<Int> = []
             mutating func begin(_ plan: HaloRenderPlan) throws {}
-            mutating func write(_ frame: HaloRenderedFrame, named fileName: String) throws { names.append(fileName) }
-            mutating func finish(cancelled: Bool) throws { finished = !cancelled }
+            mutating func write(_ frame: HaloRenderedFrame, named fileName: String) throws {
+                names.append(fileName); widths.insert(frame.pixels.width)
+            }
+            mutating func finish(cancelled: Bool) throws {}
         }
         let r = FakeCompositionRendering()
-        let plan = try r.plan(keyed(), settings: HaloRenderSettings(format: .pngSequence))
+        let plan = try r.plan(keyed(), settings: HaloRenderSettings(format: .pngSequence, halfSize: true))
         var sink = Count()
-        #expect(r.run(plan, of: keyed(), into: &sink, isCancelled: { false }) == .finished(frames: 60))
+        #expect(r.run(plan, of: keyed(), text: nil, into: &sink, isCancelled: { false }) == .finished(frames: 60))
         #expect(sink.names.first == "Intro_0001.png" && sink.names.last == "Intro_0060.png")
+        #expect(sink.widths == [200])
     }
 
-    @Test func liveStubsSayWhy() {
+    @Test func liveStubsSayWhyAndClockMatchesFlareCoreEdges() {
         #expect(HaloServices.live.drawing.unavailableHelp != nil)
         #expect(HaloServices.fake.drawing.unavailableHelp == nil)
         #expect(FakePlaybackClock().tick(startFrame: 50, elapsed: 1, framesPerSecond: 24, durationFrames: 60, loops: true).frame == 14)
+        #expect(FakePlaybackClock().tick(startFrame: 0, elapsed: 0.7, framesPerSecond: 30, durationFrames: 60, loops: false).frame == 21)
+        #expect(HaloProperty.rotation.parse(" 45° ") == 45 && HaloProperty.opacity.parse("50%") == 0.5)
+        #expect(HaloProperty.rotation.parse("abc") == nil)
     }
 }
 ```
-
 
 ---
 
@@ -1671,12 +1906,14 @@ file in parallel:
    key diamonds on it (idle `textSecondary`, selected `accent`, at the
    playhead `stateKeyed`), easing shown by the diamond's shape (#428:
    diamond linear, rounded eased, square hold; needs SuiteUI, below).
-4. **Inspector order** for a selected layer: header (layer name; kind, span,
-   parent), TRANSFORM (Position X, Position Y, Scale X, Scale Y, Rotation,
-   Opacity, Anchor X, Anchor Y, each a bar with its `KeyframeButton`), LAYER
-   (Parent, Blend), EASING (the selected layer's key segments, chips, curve),
-   TEXT for a text layer. With no layer selected: the composition header and
-   rows, then the layer list.
+4. **Inspector order**: the composition header and rows, then LAYERS (the
+   layer list, always shown, so a layer can be renamed, reordered or picked
+   with another one selected), then for the selected layer: its header
+   (name; kind, "Frames 20–50", parent), TRANSFORM (Position X, Position Y,
+   Scale X, Scale Y, Rotation, Opacity, Anchor X, Anchor Y, each a bar with
+   its `KeyframeButton`), LAYER (Parent, Blend), EASING (the layer's key
+   segments, chips, curve), TEXT for a text layer. A refused edit's message
+   shows in `SuiteFont.caption` under the control `refusal.control` names.
 5. **Numbers** show their unit and places from `HaloProperty` (`unit`,
    `decimals`, `displayFactor`): "960.0 px", "100%", "45°".
 
@@ -1701,7 +1938,7 @@ view uses the placeholder named until it lands.
 | New Composition sheet | Name, width, height, rate, duration, problems, Create | system `Form`, `TextField`, `Picker` | – (#286 adds `.accessibilityLabel`s in the Halo view) |
 | Render sheet | Format (PNG sequence, Movie), size (Full, Half), destination, Render; progress row "Frame 48 of 240" with Cancel; success with Reveal in Finder; failure with the frame and reason | system `Form`, `Picker(.segmented)`, `ProgressView`, `Button` | – |
 | Alerts | Open and save failures, close with unsaved changes | system `.alert` | – |
-| Menus | File: New Composition…, Open… ⌘O, Open Recent, Save ⌘S, Save As… ⇧⌘S, Render… ⇧⌘R, Render Frame ⌘R. Edit: Undo <step> ⌘Z, Redo <step> ⇧⌘Z, plus the system items. Composition: New ⌥⌘N, Duplicate ⌘D, Delete ⌘⌫. Layer: New ▸ (Solid, Shape, Text, Null), Duplicate ⇧⌘D, Rename, Delete ⌫, Bring Forward ⌘], Send Backward ⌘[. Animation: Play/Pause, Loop, Next Frame, Previous Frame, Go to Start, Go to End, Set In Point, Set Out Point, Keyframe Easing ▸ (the five presets). Space, →, ←, Home, End, I and O act while the viewer or the timeline has focus (`onKeyPress`, as the timeline's I and O do today) and the menu items show them in their help, not as key equivalents, so typing in a field never plays or sets a point. Every item works or is disabled with `unavailableHelp(for:)` | `CommandMenu`, `CommandGroup(replacing: .undoRedo)`, `CommandGroup(replacing: .newItem)` | – |
+| Menus | File: New Composition…, Open… ⌘O, Open Recent, Save ⌘S, Save As… ⇧⌘S, Render… ⇧⌘R, Render Frame ⌘R. Edit: Undo <step> ⌘Z, Redo <step> ⇧⌘Z, plus the system items. Composition: New ⌥⌘N, Duplicate ⌘D, Delete ⌘⌫. Layer: New ▸ (Solid, Shape, Text, Null), Duplicate ⇧⌘D, Rename, Delete, Bring Forward ⌘], Send Backward ⌘[. Animation: Play/Pause, Loop, Next Frame, Previous Frame, Go to Start, Go to End, Set In Point, Set Out Point, Keyframe Easing ▸ (the five presets). Space, →, ←, Home, End, I, O and ⌫ (delete the selected layer) act while the viewer or the timeline has focus (`onKeyPress`, as the timeline's I and O do today) and the menu items show them in their help, not as key equivalents, so typing in a field never plays or sets a point. Every item works or is disabled with `unavailableHelp(for:)` | `CommandMenu`, `CommandGroup(replacing: .undoRedo)`, `CommandGroup(replacing: .newItem)` | – |
 
 `Duplicate` is ⌘D for compositions today (shipped). Layer > Duplicate takes
 ⇧⌘D so the two don't collide; section 9 asks the captain whether ⌘D should
@@ -1793,7 +2030,7 @@ selected.
 
 | id | Rule | Tolerance | Measured by |
 |---|---|---|---|
-| L1 | Nothing off the window, no two enabled controls overlapping | the audit's own (1 pt slack, 2 pt overlap) | `testLayoutAtWidths` (`+Layout`, W0): relaunch at each size, shoot `halo-layout-<w>`; the audit runs on each shot |
+| L1 | Nothing off the window, no two enabled controls overlapping | the audit's own (1 pt slack, 2 pt overlap) | `testLayoutAtWidths` (`HaloJourneyTests.swift`, W0): relaunch at each size, shoot `halo-layout-<w>`; the audit runs on each shot |
 | L2 | The artboard is centered in the viewer and keeps its aspect | centers within 1 pt; aspect within 0.5% | same journey: frames of `halo.viewer` and `halo.viewer.artboard`; Linux half: `CanvasLayout`/fit math unchanged |
 | L3 | The playhead sits on its frame: lane origin + frame × frame width | ≤ 1 pt at frames 0, last / 2, last | `HaloLayoutTests` (macOS, AppSnapshotTests) hosting `HaloTimelineView` at 600, 900 and 1400 pt; Linux half: `frameWidth(toFit:)` tests |
 | L4 | Inspector rows align: every TRANSFORM bar starts and ends at the same x; keyframe buttons in one column; labels never truncate | ≤ 0.5 pt | `HaloLayoutTests` hosting `HaloLayerInspector` at the inspector's minimum, ideal and maximum widths |
@@ -1804,7 +2041,7 @@ selected.
 
 | id | Output | Reference | Tolerance | Test (where) |
 |---|---|---|---|---|
-| HF-1 | The viewer's drawing of `keyed` at frame 12, at full composition size | `FrameRendering.render(scale: 1)` of the same draw list | channel ≤ 2/255, ≤ 0.5% of pixels differ (QB-V2, QB-V4) | `HaloViewerFidelityTests` (macOS, viewer-playback) |
+| HF-1 | The viewer's drawing (its `Canvas` in linear light, as section 2 requires) of `keyed` at frames 6 (Ball at opacity 0.5) and 12, and of a test composition with a Multiply solid over another, at full composition size | `FrameRendering.render(width:height:text:)` of the same draw list at full size | channel ≤ 2/255, ≤ 0.5% of pixels differ (QB-V2, QB-V4) | `HaloViewerFidelityTests` (macOS, viewer-playback) |
 | HF-2 | `LiveFrameRendering` of a 40 × 20 test composition: a 50% red solid in Multiply over blue, and a solid rotated 45° | pixel values written in the test from the W3C formulas [S3]; coverage 1 at the rotated solid's center, 0 at a far corner, strictly between on its edge | exact for the blend values (`Float` equality after CoreRaster's math); edge strictly in (0, 1) | `LiveFrameRenderingTests` (Linux, viewer-playback) |
 | HF-3 | `LayerPlacing.value` for every property and frame of `reference` | FlareCore `Timeline.value(of:at:)` on the same track | exact | `LayerPlacingContractTests` (Linux, layer-keys) |
 | HF-4 | Position X at frames 6, 12, 18 for each easing preset on `keyed` | `160 + 800 × Easing.value(at: f / 24)` | exact; Hold equals 160 until frame 24 | `HaloEasingTests` (Linux, easing) |
@@ -1813,7 +2050,7 @@ selected.
 | HF-7 | Frame n of a PNG sequence, decoded | `render(scale: 1)` of frame n as `rgba8` | exact bytes | `HaloPNGWriterTests` (macOS, render-out) |
 | HF-8 | The H.264 movie | the plan | frame count and duration exact; frame 0 within 4/255 of HF-7's PNG on ≥ 99% of pixels (H.264 is lossy) | `HaloMovieWriterTests` (macOS, render-out) |
 | HF-9 | Timecode of frames at 24, 25, 30 and 60 fps | the SMPTE-style table in the test [S5] | exact | `HaloTimelineTests` (exists) |
-| HF-10 | A rendered text layer's ink bounds | the viewer's text bounds for the same layer | ≤ 1 px at full size (QB-V4) | `HaloTextLayerTests` (Linux with the fake rasterizer for placement), `HaloTextFidelityTests` (macOS with CoreText) (text-layers) |
+| HF-10 | A rendered text layer's box | the viewer's text box for the same layer: both come from `TextRasterizing.measure`, which the viewer, hit testing and the default anchor use (`HaloLayer.bounds(in:measuring:)`) | ≤ 1 px at full size (QB-V4) | `HaloTextLayerTests` (Linux with the fake rasterizer for placement), `HaloTextFidelityTests` (macOS with CoreText) (text-layers) |
 
 ### 7.5 Feel (rubric section 6)
 
@@ -1873,7 +2110,9 @@ as soon as its own W1 dependencies merge, without waiting for the whole of
 W1. Journey tasks inside W1 to W3 also wait on SuiteUI QH-4 (#333); their
 Model and view tasks don't. The lead playbook's stage 0 stops a lead whose
 `Depends on:` issue is open, so each feature issue is filed with the one
-dependency named in its row below.
+dependency named in its row below. waves.py checks overlaps inside a wave;
+across waves a later feature may own an earlier one's file only after that
+feature is done, which the filing rule guarantees.
 
 | Wave | Feature | Feature issue `Depends on:` | Tasks (packet estimate) |
 |---|---|---|---|
@@ -1885,7 +2124,7 @@ dependency named in its row below.
 | W2 | `easing` | `layer-keys` (and `history-files` for its journey) | about 5 |
 | W2 | `render-out` | `viewer-playback` | about 7 |
 | W2 | `text-layers` | `layer-keys` (and `viewer-playback`, `history-files`) | about 4 |
-| W3 | `core-loop` | `easing` | about 4 |
+| W3 | `core-loop` | filed once `easing`, `render-out` and `text-layers` are all done (it edits their journey files); `Depends on:` the last of them to finish | about 4 |
 
 Where an issue's own `Depends on:` line is stricter than this (the serial
 chain #37 → #207 → #208 → #209 and #38 → #428), the line is what changes,
@@ -1904,18 +2143,18 @@ them whole. Every `Sources/` file below has exactly one owning component in
 #### W0 · `foundation`: Foundation: contracts, fakes, state and the window's seams
 
 - **Covers:** #286, #290, #149
-- **Waits on (SuiteUI and harness):** #333 not needed (alone in its wave)
+- **Waits on (SuiteUI and harness):** none: alone in its wave, so its journeys (H-J0, H-J1, H-J13, layout L1 and L6) stay in HaloJourneyTests.swift
 - **Waits on (creative-core):** none
-- **Proves:** Copies section 5's files into Sources (fakes and live stubs one file per contract); every W1 and W2 file below that W0 creates as a stub passes to its feature, which replaces it whole.
-- **Owned files (82):** `Sources/HaloModel/Contracts/HaloValues.swift`, `Sources/HaloModel/Contracts/HaloContracts.swift`, `Sources/HaloModel/Fakes/FakeFrameDrawing.swift`, `Sources/HaloModel/Fakes/FakeLayerPlacing.swift`, `Sources/HaloModel/Fakes/FakePropertyKeying.swift`, `Sources/HaloModel/Fakes/FakeViewerDragging.swift`, `Sources/HaloModel/Fakes/FakeKeyEasing.swift`, `Sources/HaloModel/Fakes/FakeProjectHistory.swift`, `Sources/HaloModel/Fakes/FakeProjectFiles.swift`, `Sources/HaloModel/Fakes/FakePlaybackClock.swift`, `Sources/HaloModel/Fakes/FakeFrameRendering.swift`, `Sources/HaloModel/Fakes/FakeCompositionRendering.swift`, `Sources/HaloModel/Fakes/FakeTextRasterizer.swift`, `Sources/HaloModel/Live/LiveFrameDrawing.swift`, `Sources/HaloModel/Live/LiveLayerPlacing.swift`, `Sources/HaloModel/Live/LivePropertyKeying.swift`, `Sources/HaloModel/Live/LiveViewerDragging.swift`, `Sources/HaloModel/Live/LiveKeyEasing.swift`, `Sources/HaloModel/Live/LiveProjectHistory.swift`, `Sources/HaloModel/Live/LiveProjectFiles.swift`, `Sources/HaloModel/Live/LivePlaybackClock.swift`, `Sources/HaloModel/Live/LiveFrameRendering.swift`, `Sources/HaloModel/Live/LiveCompositionRendering.swift`, `Sources/HaloModel/HaloServices.swift`, `Sources/HaloModel/HaloLayerDefaults.swift`, `Sources/HaloModel/HaloFixtures.swift`, `Sources/HaloModel/HaloCommand.swift`, `Sources/HaloModel/HaloViewerState.swift`, `Sources/HaloModel/HaloProject.swift`, `Sources/HaloModel/HaloLayer.swift`, `Sources/HaloModel/HaloTimeline.swift`, `Sources/HaloModel/HaloStatusText.swift`, `Sources/HaloModel/NameKey.swift`, `Sources/HaloApp/HaloApp.swift`, `Sources/HaloApp/HaloLaunch.swift`, `Sources/HaloApp/HaloWindow.swift`, `Sources/HaloApp/HaloViewer.swift`, `Sources/HaloApp/HaloWindow+Viewer.swift`, `Sources/HaloApp/HaloWindow+Playback.swift`, `Sources/HaloApp/HaloWindow+Keys.swift`, `Sources/HaloApp/HaloWindow+Layers.swift`, `Sources/HaloApp/HaloWindow+Edit.swift`, `Sources/HaloApp/HaloWindow+File.swift`, `Sources/HaloApp/HaloWindow+Easing.swift`, `Sources/HaloApp/HaloWindow+Render.swift`, `Sources/HaloApp/HaloWindow+Text.swift`, `Sources/HaloApp/HaloViewerCanvas.swift`, `Sources/HaloApp/HaloViewerGestures.swift`, `Sources/HaloApp/HaloRenderedFrameView.swift`, `Sources/HaloApp/HaloTransport.swift`, `Sources/HaloApp/HaloLayerInspector.swift`, `Sources/HaloApp/HaloEasingInspector.swift`, `Sources/HaloApp/HaloTextInspector.swift`, `Sources/HaloApp/HaloTextRasterizer.swift`, `Sources/HaloApp/HaloFileMenu.swift`, `Sources/HaloApp/HaloEditMenu.swift`, `Sources/HaloApp/HaloAnimationMenu.swift`, `Sources/HaloApp/HaloCommands.swift`, `Sources/HaloApp/HaloCompositionCommands.swift`, `Sources/HaloApp/NewCompositionSheet.swift`, `Sources/HaloApp/HaloCompositionInspector.swift`, `Sources/HaloApp/HaloTimelineView.swift`, `Tests/HaloModelTests/FrameDrawingContractTests.swift`, `Tests/HaloModelTests/LayerPlacingContractTests.swift`, `Tests/HaloModelTests/PropertyKeyingContractTests.swift`, `Tests/HaloModelTests/ViewerDraggingContractTests.swift`, `Tests/HaloModelTests/KeyEasingContractTests.swift`, `Tests/HaloModelTests/ProjectHistoryContractTests.swift`, `Tests/HaloModelTests/ProjectFilesContractTests.swift`, `Tests/HaloModelTests/PlaybackClockContractTests.swift`, `Tests/HaloModelTests/FrameRenderingContractTests.swift`, `Tests/HaloModelTests/CompositionRenderingContractTests.swift`, `Tests/HaloModelTests/HaloCommandTests.swift`, `Tests/HaloModelTests/HaloFixturesTests.swift`, `Tests/HaloModelTests/HaloEditTests.swift`, `Tests/HaloModelTests/HaloBudget.swift`, `Tests/HaloModelTests/HaloFoundationBudgetTests.swift`, `Tests/HaloModelTests/HaloNameWhitespaceTests.swift`, `Tests/AppSnapshotTests/HaloWindowSnapshots.swift`, `UITests/HaloJourneyTests.swift`, `docs/c4/model.json`, `docs/design.md`
+- **Proves:** Also: timeline rows carry each layer's key frames and the strip draws them as diamonds (`HaloTimeline.swift`, `HaloTimelineView.swift`); the inspector always shows the layer list. Copies section 5's files into Sources (fakes and live stubs one file per contract); every W1 and W2 file below that W0 creates as a stub passes to its feature, which replaces it whole.
+- **Owned files (116):** `Sources/HaloModel/Contracts/HaloValues.swift`, `Sources/HaloModel/Contracts/HaloContracts.swift`, `Sources/HaloModel/Fakes/FakeFrameDrawing.swift`, `Sources/HaloModel/Fakes/FakeLayerPlacing.swift`, `Sources/HaloModel/Fakes/FakePropertyKeying.swift`, `Sources/HaloModel/Fakes/FakeViewerDragging.swift`, `Sources/HaloModel/Fakes/FakeKeyEasing.swift`, `Sources/HaloModel/Fakes/FakeProjectHistory.swift`, `Sources/HaloModel/Fakes/FakeProjectFiles.swift`, `Sources/HaloModel/Fakes/FakePlaybackClock.swift`, `Sources/HaloModel/Fakes/FakeFrameRendering.swift`, `Sources/HaloModel/Fakes/FakeCompositionRendering.swift`, `Sources/HaloModel/Fakes/FakeTextRasterizer.swift`, `Sources/HaloModel/Live/LiveFrameDrawing.swift`, `Sources/HaloModel/Live/LiveLayerPlacing.swift`, `Sources/HaloModel/Live/LivePropertyKeying.swift`, `Sources/HaloModel/Live/LiveViewerDragging.swift`, `Sources/HaloModel/Live/LiveKeyEasing.swift`, `Sources/HaloModel/Live/LiveProjectHistory.swift`, `Sources/HaloModel/Live/LiveProjectFiles.swift`, `Sources/HaloModel/Live/LivePlaybackClock.swift`, `Sources/HaloModel/Live/LiveFrameRendering.swift`, `Sources/HaloModel/Live/LiveCompositionRendering.swift`, `Sources/HaloModel/HaloServices.swift`, `Sources/HaloModel/HaloLayerDefaults.swift`, `Sources/HaloModel/HaloFixtures.swift`, `Sources/HaloModel/HaloCommand.swift`, `Sources/HaloModel/HaloViewerState.swift`, `Sources/HaloModel/HaloProject.swift`, `Sources/HaloModel/HaloLayer.swift`, `Sources/HaloModel/HaloTimeline.swift`, `Sources/HaloModel/HaloStatusText.swift`, `Sources/HaloModel/NameKey.swift`, `Sources/HaloModel/Availability/HaloAvailability+Composition.swift`, `Sources/HaloModel/Availability/HaloAvailability+Playback.swift`, `Sources/HaloModel/Availability/HaloAvailability+Keys.swift`, `Sources/HaloModel/Availability/HaloAvailability+Layers.swift`, `Sources/HaloModel/Availability/HaloAvailability+History.swift`, `Sources/HaloModel/Availability/HaloAvailability+Files.swift`, `Sources/HaloModel/Availability/HaloAvailability+Easing.swift`, `Sources/HaloModel/Availability/HaloAvailability+Render.swift`, `Sources/HaloModel/Availability/HaloAvailability+Text.swift`, `Sources/HaloApp/HaloControls.swift`, `Sources/HaloApp/HaloApp.swift`, `Sources/HaloApp/HaloLaunch.swift`, `Sources/HaloApp/HaloWindow.swift`, `Sources/HaloApp/HaloViewer.swift`, `Sources/HaloApp/HaloWindow+Viewer.swift`, `Sources/HaloApp/HaloWindow+Playback.swift`, `Sources/HaloApp/HaloWindow+Keys.swift`, `Sources/HaloApp/HaloWindow+Layers.swift`, `Sources/HaloApp/HaloWindow+Edit.swift`, `Sources/HaloApp/HaloWindow+File.swift`, `Sources/HaloApp/HaloWindow+Easing.swift`, `Sources/HaloApp/HaloWindow+Render.swift`, `Sources/HaloApp/HaloWindow+Text.swift`, `Sources/HaloApp/HaloViewerCanvas.swift`, `Sources/HaloApp/HaloViewerGestures.swift`, `Sources/HaloApp/HaloRenderedFrameView.swift`, `Sources/HaloApp/HaloTransport.swift`, `Sources/HaloApp/HaloLayerInspector.swift`, `Sources/HaloApp/HaloEasingInspector.swift`, `Sources/HaloApp/HaloTextInspector.swift`, `Sources/HaloApp/HaloTextRasterizer.swift`, `Sources/HaloApp/HaloFileMenu.swift`, `Sources/HaloApp/HaloEditMenu.swift`, `Sources/HaloApp/HaloAnimationMenu.swift`, `Sources/HaloApp/HaloCommands.swift`, `Sources/HaloApp/HaloCompositionCommands.swift`, `Sources/HaloApp/NewCompositionSheet.swift`, `Sources/HaloApp/HaloCompositionInspector.swift`, `Sources/HaloApp/HaloTimelineView.swift`, `Sources/HaloApp/HaloLayerList.swift`, `Tests/HaloModelTests/FrameDrawingContractTests.swift`, `Tests/HaloModelTests/LayerPlacingContractTests.swift`, `Tests/HaloModelTests/PropertyKeyingContractTests.swift`, `Tests/HaloModelTests/ViewerDraggingContractTests.swift`, `Tests/HaloModelTests/KeyEasingContractTests.swift`, `Tests/HaloModelTests/ProjectHistoryContractTests.swift`, `Tests/HaloModelTests/ProjectFilesContractTests.swift`, `Tests/HaloModelTests/PlaybackClockContractTests.swift`, `Tests/HaloModelTests/FrameRenderingContractTests.swift`, `Tests/HaloModelTests/CompositionRenderingContractTests.swift`, `Tests/HaloModelTests/HaloCommandTests.swift`, `Tests/HaloModelTests/HaloFixturesTests.swift`, `Tests/HaloModelTests/HaloEditTests.swift`, `Tests/HaloModelTests/HaloBudget.swift`, `Tests/HaloModelTests/HaloFoundationBudgetTests.swift`, `Tests/HaloModelTests/HaloNameWhitespaceTests.swift`, `Tests/AppSnapshotTests/HaloWindowSnapshots.swift`, `Tests/AppSnapshotTests/HaloCompositionSnapshots.swift`, `Tests/AppSnapshotTests/HaloCompositionInspectorSnapshots.swift`, `Tests/AppSnapshotTests/HaloLayersSnapshots.swift`, `Tests/AppSnapshotTests/HaloTimelineSnapshots.swift`, `UITests/HaloJourneyTests.swift`, `docs/c4/model.json`, `docs/design.md`, `Tests/HaloModelTests/HaloCompositionDeleteCommandTests.swift`, `Tests/HaloModelTests/HaloCompositionDraftEdgeTests.swift`, `Tests/HaloModelTests/HaloCompositionDraftParsingTests.swift`, `Tests/HaloModelTests/HaloCompositionDraftTests.swift`, `Tests/HaloModelTests/HaloCompositionEdgeTests.swift`, `Tests/HaloModelTests/HaloCompositionTests.swift`, `Tests/HaloModelTests/HaloLayerOpacityClampTests.swift`, `Tests/HaloModelTests/HaloLayersTests.swift`, `Tests/HaloModelTests/HaloNameCaseFoldingTests.swift`, `Tests/HaloModelTests/HaloProjectTests.swift`, `Tests/HaloModelTests/HaloRenameLookalikeEdgeTests.swift`, `Tests/HaloModelTests/HaloRenameLookalikeTests.swift`, `Tests/HaloModelTests/HaloRenameRefusalEdgeTests.swift`, `Tests/HaloModelTests/HaloRenameRefusalTests.swift`, `Tests/HaloModelTests/HaloStatusTextTests.swift`, `Tests/HaloModelTests/HaloTimelineCostTests.swift`, `Tests/HaloModelTests/HaloTimelineTests.swift`, `Tests/HaloModelTests/HaloUniqueNameFuzzTests.swift`, `Tests/HaloModelTests/HaloUniqueNameLookalikeTests.swift`
 
 #### W1 · `viewer-playback`: See and play the composition
 
 - **Covers:** #37, #457
 - **Waits on (SuiteUI and harness):** #333 (journey files); #340 TransportCapsule (placeholder meanwhile)
-- **Waits on (creative-core):** none to start. Rotated shape layers in the pixel render wait on creative-core#182 (ellipse path builder, LC-4); until it lands the renderer draws an axis-aligned shape with `Mask.ellipse` and counts a rotated one as skipped (the viewer draws it either way)
+- **Waits on (creative-core):** none. Shape layers render through an ellipse built from four cubic `PathElement`s (the stopgap Flare uses) until creative-core#182's path builder lands
 - **Proves:** H-J2, H-J3 (extends the shipped scrub journey), H-J4; HB-2, HB-5, HB-11; HF-1, HF-2.
-- **Owned files (23):** `Sources/HaloModel/Live/LiveFrameDrawing.swift`, `Sources/HaloModel/Live/LivePlaybackClock.swift`, `Sources/HaloModel/Live/LiveFrameRendering.swift`, `Sources/HaloModel/FrameRenderer.swift`, `Sources/HaloModel/HaloPlayback.swift`, `Sources/HaloApp/HaloViewerCanvas.swift`, `Sources/HaloApp/HaloTransport.swift`, `Sources/HaloApp/HaloPlaybackDriver.swift`, `Sources/HaloApp/HaloWindow+Viewer.swift`, `Sources/HaloApp/HaloWindow+Playback.swift`, `Tests/HaloModelTests/FrameDrawingContractTests.swift`, `Tests/HaloModelTests/PlaybackClockContractTests.swift`, `Tests/HaloModelTests/FrameRenderingContractTests.swift`, `Tests/HaloModelTests/HaloPlaybackTests.swift`, `Tests/HaloModelTests/LiveFrameRenderingTests.swift`, `Tests/HaloModelTests/HaloRenderTests.swift`, `Tests/HaloModelTests/HaloRenderEdgeTests.swift`, `Tests/HaloModelTests/HaloViewerBudgetTests.swift`, `Tests/AppSnapshotTests/HaloPreviewSnapshots.swift`, `Tests/AppSnapshotTests/HaloViewerFidelityTests.swift`, `UITests/HaloJourneyTests+Viewer.swift`, `UITests/HaloJourneyTests+Playback.swift`, `UITests/HaloJourneyTests.swift`
+- **Owned files (24):** `Sources/HaloModel/Live/LiveFrameDrawing.swift`, `Sources/HaloModel/Live/LivePlaybackClock.swift`, `Sources/HaloModel/Live/LiveFrameRendering.swift`, `Sources/HaloModel/FrameRenderer.swift`, `Sources/HaloModel/HaloPlayback.swift`, `Sources/HaloModel/Availability/HaloAvailability+Playback.swift`, `Sources/HaloApp/HaloViewerCanvas.swift`, `Sources/HaloApp/HaloTransport.swift`, `Sources/HaloApp/HaloPlaybackDriver.swift`, `Sources/HaloApp/HaloWindow+Viewer.swift`, `Sources/HaloApp/HaloWindow+Playback.swift`, `Tests/HaloModelTests/FrameDrawingContractTests.swift`, `Tests/HaloModelTests/PlaybackClockContractTests.swift`, `Tests/HaloModelTests/FrameRenderingContractTests.swift`, `Tests/HaloModelTests/HaloPlaybackTests.swift`, `Tests/HaloModelTests/LiveFrameRenderingTests.swift`, `Tests/HaloModelTests/HaloRenderTests.swift`, `Tests/HaloModelTests/HaloRenderEdgeTests.swift`, `Tests/HaloModelTests/HaloViewerBudgetTests.swift`, `Tests/AppSnapshotTests/HaloPreviewSnapshots.swift`, `Tests/AppSnapshotTests/HaloViewerFidelityTests.swift`, `UITests/HaloJourneyTests+Viewer.swift`, `UITests/HaloJourneyTests+Playback.swift`, `UITests/HaloJourneyTests.swift`
 
 #### W1 · `layer-keys`: Key layers: inspector, drag and parent
 
@@ -1923,7 +2162,7 @@ them whole. Every `Sources/` file below has exactly one owning component in
 - **Waits on (SuiteUI and harness):** #333 (journey files)
 - **Waits on (creative-core):** none
 - **Proves:** H-J5, H-J6, H-J23; HB-1, HB-3, HB-4; HF-3, HF-5.
-- **Owned files (19):** `Sources/HaloModel/Live/LiveLayerPlacing.swift`, `Sources/HaloModel/Live/LivePropertyKeying.swift`, `Sources/HaloModel/Live/LiveViewerDragging.swift`, `Sources/HaloModel/HaloKeying.swift`, `Sources/HaloModel/HaloViewerDrag.swift`, `Sources/HaloApp/HaloLayerInspector.swift`, `Sources/HaloApp/HaloViewerGestures.swift`, `Sources/HaloApp/HaloWindow+Keys.swift`, `Tests/HaloModelTests/LayerPlacingContractTests.swift`, `Tests/HaloModelTests/PropertyKeyingContractTests.swift`, `Tests/HaloModelTests/ViewerDraggingContractTests.swift`, `Tests/HaloModelTests/HaloKeyingTests.swift`, `Tests/HaloModelTests/HaloKeyByDragTests.swift`, `Tests/HaloModelTests/HaloKeysBudgetTests.swift`, `Tests/AppSnapshotTests/HaloInspectorSnapshots.swift`, `Tests/AppSnapshotTests/HaloKeyByDragSnapshots.swift`, `UITests/HaloJourneyTests+Drag.swift`, `UITests/HaloJourneyTests+Inspector.swift`, `UITests/HaloJourneyTests+Parent.swift`
+- **Owned files (20):** `Sources/HaloModel/Live/LiveLayerPlacing.swift`, `Sources/HaloModel/Live/LivePropertyKeying.swift`, `Sources/HaloModel/Live/LiveViewerDragging.swift`, `Sources/HaloModel/HaloKeying.swift`, `Sources/HaloModel/HaloViewerDrag.swift`, `Sources/HaloModel/Availability/HaloAvailability+Keys.swift`, `Sources/HaloApp/HaloLayerInspector.swift`, `Sources/HaloApp/HaloViewerGestures.swift`, `Sources/HaloApp/HaloWindow+Keys.swift`, `Tests/HaloModelTests/LayerPlacingContractTests.swift`, `Tests/HaloModelTests/PropertyKeyingContractTests.swift`, `Tests/HaloModelTests/ViewerDraggingContractTests.swift`, `Tests/HaloModelTests/HaloKeyingTests.swift`, `Tests/HaloModelTests/HaloKeyByDragTests.swift`, `Tests/HaloModelTests/HaloKeysBudgetTests.swift`, `Tests/AppSnapshotTests/HaloInspectorSnapshots.swift`, `Tests/AppSnapshotTests/HaloKeyByDragSnapshots.swift`, `UITests/HaloJourneyTests+Drag.swift`, `UITests/HaloJourneyTests+Inspector.swift`, `UITests/HaloJourneyTests+Parent.swift`
 
 #### W1 · `history-files`: Undo, redo, save and open
 
@@ -1931,7 +2170,7 @@ them whole. Every `Sources/` file below has exactly one owning component in
 - **Waits on (SuiteUI and harness):** #333 (journey files)
 - **Waits on (creative-core):** none
 - **Proves:** H-J8, H-J10, H-J11; HB-8, HB-10; HF-6. Closes the gap #127 left (undo of Delete Composition).
-- **Owned files (17):** `Sources/HaloModel/Live/LiveProjectHistory.swift`, `Sources/HaloModel/Live/LiveProjectFiles.swift`, `Sources/HaloModel/HaloHistory.swift`, `Sources/HaloModel/HaloFiles.swift`, `Sources/HaloApp/HaloWindow+Edit.swift`, `Sources/HaloApp/HaloWindow+File.swift`, `Sources/HaloApp/HaloDocumentType.swift`, `Tests/HaloModelTests/ProjectHistoryContractTests.swift`, `Tests/HaloModelTests/ProjectFilesContractTests.swift`, `Tests/HaloModelTests/HaloUndoTests.swift`, `Tests/HaloModelTests/HaloFileTests.swift`, `Tests/HaloModelTests/HaloFilesBudgetTests.swift`, `Tests/AppSnapshotTests/HaloEditMenuSnapshots.swift`, `Tests/AppSnapshotTests/HaloFileSnapshots.swift`, `UITests/HaloJourneyTests+History.swift`, `UITests/HaloJourneyTests+Files.swift`, `UITests/HaloJourneyTests+FileErrors.swift`
+- **Owned files (19):** `Sources/HaloModel/Live/LiveProjectHistory.swift`, `Sources/HaloModel/Live/LiveProjectFiles.swift`, `Sources/HaloModel/HaloHistory.swift`, `Sources/HaloModel/HaloFiles.swift`, `Sources/HaloModel/Availability/HaloAvailability+History.swift`, `Sources/HaloModel/Availability/HaloAvailability+Files.swift`, `Sources/HaloApp/HaloWindow+Edit.swift`, `Sources/HaloApp/HaloWindow+File.swift`, `Sources/HaloApp/HaloDocumentType.swift`, `Tests/HaloModelTests/ProjectHistoryContractTests.swift`, `Tests/HaloModelTests/ProjectFilesContractTests.swift`, `Tests/HaloModelTests/HaloUndoTests.swift`, `Tests/HaloModelTests/HaloFileTests.swift`, `Tests/HaloModelTests/HaloFilesBudgetTests.swift`, `Tests/AppSnapshotTests/HaloEditMenuSnapshots.swift`, `Tests/AppSnapshotTests/HaloFileSnapshots.swift`, `UITests/HaloJourneyTests+History.swift`, `UITests/HaloJourneyTests+Files.swift`, `UITests/HaloJourneyTests+FileErrors.swift`
 
 #### W1 · `layer-panel`: Layer housekeeping
 
@@ -1939,7 +2178,7 @@ them whole. Every `Sources/` file below has exactly one owning component in
 - **Waits on (SuiteUI and harness):** #333 (journey files)
 - **Waits on (creative-core):** none
 - **Proves:** H-J9.
-- **Owned files (6):** `Sources/HaloModel/HaloLayerEdits.swift`, `Sources/HaloApp/HaloLayerList.swift`, `Sources/HaloApp/HaloWindow+Layers.swift`, `Tests/HaloModelTests/HaloLayerEditsTests.swift`, `Tests/AppSnapshotTests/HaloLayersSnapshots.swift`, `UITests/HaloJourneyTests+Layers.swift`
+- **Owned files (7):** `Sources/HaloModel/HaloLayerEdits.swift`, `Sources/HaloModel/Availability/HaloAvailability+Layers.swift`, `Sources/HaloApp/HaloLayerList.swift`, `Sources/HaloApp/HaloWindow+Layers.swift`, `Tests/HaloModelTests/HaloLayerEditsTests.swift`, `Tests/AppSnapshotTests/HaloLayersSnapshots.swift`, `UITests/HaloJourneyTests+Layers.swift`
 
 #### W2 · `easing`: Ease keys
 
@@ -1947,7 +2186,7 @@ them whole. Every `Sources/` file below has exactly one owning component in
 - **Waits on (SuiteUI and harness):** #333; timeline key shapes and selection (Flare S10/S11, to file as needs-ui; plain diamonds meanwhile)
 - **Waits on (creative-core):** none (FlareCore `Easing` and `Timeline.value` already ease)
 - **Proves:** H-J7; HB-7; HF-4. Waits on layer-keys (keys to ease) and history-files (the journey reads the Undo name).
-- **Owned files (10):** `Sources/HaloModel/Live/LiveKeyEasing.swift`, `Sources/HaloModel/HaloKeySelection.swift`, `Sources/HaloApp/HaloEasingInspector.swift`, `Sources/HaloApp/HaloTimelineView.swift`, `Sources/HaloApp/HaloWindow+Easing.swift`, `Tests/HaloModelTests/KeyEasingContractTests.swift`, `Tests/HaloModelTests/HaloEasingTests.swift`, `Tests/HaloModelTests/HaloEasingBudgetTests.swift`, `Tests/AppSnapshotTests/HaloEasingSnapshots.swift`, `UITests/HaloJourneyTests+Easing.swift`
+- **Owned files (11):** `Sources/HaloModel/Live/LiveKeyEasing.swift`, `Sources/HaloModel/HaloKeySelection.swift`, `Sources/HaloModel/Availability/HaloAvailability+Easing.swift`, `Sources/HaloApp/HaloEasingInspector.swift`, `Sources/HaloApp/HaloTimelineView.swift`, `Sources/HaloApp/HaloWindow+Easing.swift`, `Tests/HaloModelTests/KeyEasingContractTests.swift`, `Tests/HaloModelTests/HaloEasingTests.swift`, `Tests/HaloModelTests/HaloEasingBudgetTests.swift`, `Tests/AppSnapshotTests/HaloEasingSnapshots.swift`, `UITests/HaloJourneyTests+Easing.swift`
 
 #### W2 · `render-out`: Render a frame and render to files
 
@@ -1955,30 +2194,30 @@ them whole. Every `Sources/` file below has exactly one owning component in
 - **Waits on (SuiteUI and harness):** #333
 - **Waits on (creative-core):** none (the PNG and movie writers are app-side: ImageIO and AVFoundation)
 - **Proves:** H-J20, H-J21; HB-12, HB-13; HF-7, HF-8. Waits on viewer-playback (the live renderer).
-- **Owned files (19):** `Sources/HaloModel/Live/LiveCompositionRendering.swift`, `Sources/HaloModel/HaloRenderFrame.swift`, `Sources/HaloModel/HaloRenderJob.swift`, `Sources/HaloApp/HaloRenderSheet.swift`, `Sources/HaloApp/HaloRenderedFrameView.swift`, `Sources/HaloApp/HaloFrameImage.swift`, `Sources/HaloApp/HaloPNGWriter.swift`, `Sources/HaloApp/HaloMovieWriter.swift`, `Sources/HaloApp/HaloWindow+Render.swift`, `Tests/HaloModelTests/CompositionRenderingContractTests.swift`, `Tests/HaloModelTests/HaloRenderPlanTests.swift`, `Tests/HaloModelTests/HaloRenderFrameTests.swift`, `Tests/HaloModelTests/HaloRenderBudgetTests.swift`, `Tests/AppSnapshotTests/HaloRenderSheetSnapshots.swift`, `Tests/AppSnapshotTests/HaloRenderSnapshots.swift`, `Tests/AppSnapshotTests/HaloPNGWriterTests.swift`, `Tests/AppSnapshotTests/HaloMovieWriterTests.swift`, `UITests/HaloJourneyTests+RenderFrame.swift`, `UITests/HaloJourneyTests+Render.swift`
+- **Owned files (20):** `Sources/HaloModel/Live/LiveCompositionRendering.swift`, `Sources/HaloModel/HaloRenderFrame.swift`, `Sources/HaloModel/HaloRenderJob.swift`, `Sources/HaloModel/Availability/HaloAvailability+Render.swift`, `Sources/HaloApp/HaloRenderSheet.swift`, `Sources/HaloApp/HaloRenderedFrameView.swift`, `Sources/HaloApp/HaloFrameImage.swift`, `Sources/HaloApp/HaloPNGWriter.swift`, `Sources/HaloApp/HaloMovieWriter.swift`, `Sources/HaloApp/HaloWindow+Render.swift`, `Tests/HaloModelTests/CompositionRenderingContractTests.swift`, `Tests/HaloModelTests/HaloRenderPlanTests.swift`, `Tests/HaloModelTests/HaloRenderFrameTests.swift`, `Tests/HaloModelTests/HaloRenderBudgetTests.swift`, `Tests/AppSnapshotTests/HaloRenderSheetSnapshots.swift`, `Tests/AppSnapshotTests/HaloRenderSnapshots.swift`, `Tests/AppSnapshotTests/HaloPNGWriterTests.swift`, `Tests/AppSnapshotTests/HaloMovieWriterTests.swift`, `UITests/HaloJourneyTests+RenderFrame.swift`, `UITests/HaloJourneyTests+Render.swift`
 
 #### W2 · `text-layers`: Text layers
 
 - **Covers:** #430
 - **Waits on (SuiteUI and harness):** #333
-- **Waits on (creative-core):** needs a new core issue: CoreRaster draws a PixelBuffer through a 2D affine matrix with bilinear sampling (suite plan H6), so scaled or rotated text renders; until it lands, text renders only at scale 1 and rotation 0 and is otherwise counted as skipped
+- **Waits on (creative-core):** none: scaled and rotated text is drawn with CoreRaster's `resized` and `rotated(degrees:)`, then `composite` at an offset (v1 has no skew)
 - **Proves:** H-J22; HF-10. Waits on layer-keys (inspector), viewer-playback (the renderer's text hook) and history-files (Undo name).
-- **Owned files (8):** `Sources/HaloModel/HaloTextEdits.swift`, `Sources/HaloApp/HaloTextInspector.swift`, `Sources/HaloApp/HaloTextRasterizer.swift`, `Sources/HaloApp/HaloWindow+Text.swift`, `Tests/HaloModelTests/HaloTextLayerTests.swift`, `Tests/AppSnapshotTests/HaloTextLayerSnapshots.swift`, `Tests/AppSnapshotTests/HaloTextFidelityTests.swift`, `UITests/HaloJourneyTests+Text.swift`
+- **Owned files (9):** `Sources/HaloModel/HaloTextEdits.swift`, `Sources/HaloModel/Availability/HaloAvailability+Text.swift`, `Sources/HaloApp/HaloTextInspector.swift`, `Sources/HaloApp/HaloTextRasterizer.swift`, `Sources/HaloApp/HaloWindow+Text.swift`, `Tests/HaloModelTests/HaloTextLayerTests.swift`, `Tests/AppSnapshotTests/HaloTextLayerSnapshots.swift`, `Tests/AppSnapshotTests/HaloTextFidelityTests.swift`, `UITests/HaloJourneyTests+Text.swift`
 
 #### W3 · `core-loop`: The core loop, live, measured
 
 - **Covers:** the H-J12 XCTSkip in HaloJourneyTests.swift
 - **Waits on (SuiteUI and harness):** #333; #330 FrameProbe for H-P1 to H-P4 (report-only until then)
 - **Waits on (creative-core):** none
-- **Proves:** H-J12 live; H-P1 to H-P4; layout L3 to L5; flips every fixture journey still on `-HaloFixture` to `-HaloSample`. Waits on every W1 and W2 feature.
+- **Proves:** H-J12 live; H-P1 to H-P4; layout L3 to L5; flips every fixture journey still on `-HaloFixture` to `-HaloSample`. Its feature issue is filed only once every W1 and W2 feature is done, because it edits their journey files.
 - **Owned files (15):** `UITests/HaloJourneyTests.swift`, `UITests/HaloJourneyTests+Perf.swift`, `Tests/AppSnapshotTests/HaloViewerLatencyTests.swift`, `Tests/AppSnapshotTests/HaloLayoutTests.swift`, `UITests/HaloJourneyTests+Viewer.swift`, `UITests/HaloJourneyTests+Playback.swift`, `UITests/HaloJourneyTests+Drag.swift`, `UITests/HaloJourneyTests+Inspector.swift`, `UITests/HaloJourneyTests+Parent.swift`, `UITests/HaloJourneyTests+History.swift`, `UITests/HaloJourneyTests+Layers.swift`, `UITests/HaloJourneyTests+Easing.swift`, `UITests/HaloJourneyTests+Text.swift`, `UITests/HaloJourneyTests+RenderFrame.swift`, `UITests/HaloJourneyTests+Render.swift`
 
 ### 8.4 creative-core work
 
 | Need | Who waits | Core issue | One-line spec |
 |---|---|---|---|
-| Ellipse as a `Path` (rotated shape layers in the pixel render) | `viewer-playback` (not blocking: axis-aligned shapes render meanwhile) | creative-core#182 (LC-4 path builders, open as of `docs/blueprints/flare.md` on 2026-10-14) | – |
-| Draw a `PixelBuffer` through an affine matrix with bilinear sampling | `text-layers` (not blocking: untransformed text renders meanwhile); later image layers and precomps | needs a new core issue | `composite(_ source:, onto:, transform: Matrix-like 2×3, mode:, opacity:)` in CoreRaster (suite plan H6): identity equals composite at offset; 2× scale gives interpolated edges; 90° equals `rotated(.quarter)` |
+| Ellipse as a `Path` (shape layers in the pixel render) | nobody: `viewer-playback` builds the ellipse as four cubic `PathElement`s (data, the same stopgap Flare's Ellipse tool uses) and flattens it with FlareCore; it moves to the builder when it lands | creative-core#182 (LC-4 path builders, open as of `docs/blueprints/flare.md` on 2026-10-14) | – |
+| Draw a `PixelBuffer` through an affine matrix with bilinear sampling | nobody in v1: text-layers draws scaled and rotated text with CoreRaster's `resized` and `rotated(degrees:)` then `composite` at an offset (v1 has no skew); image layers and precomps (later) need it | needs a new core issue, before image layers | `composite(_ source:, onto:, transform: Matrix-like 2×3, mode:, opacity:)` in CoreRaster (suite plan H6): identity equals composite at offset; 2× scale gives interpolated edges; 90° equals `rotated(.quarter)` |
 | A Halo document engine with commands (H1, H3, H5 in the suite plan) | nobody in v1 | needs a new core issue, later | replaces the whole-document history (`ponytail:` in `HaloHistory.swift`) and moves sampling and the render graph into creative-core |
 
 FlareCore and CoreRaster on `main` 4cac701 already give every other v1
@@ -1989,7 +2228,7 @@ hold), `Timeline.value(of:at:)` and `playbackFrame`, `Matrix`,
 blend modes, `resized`, `rgba8(colorSpace:)`. This session could not read
 creative-core's issue tracker (its GitHub access is limited to this repo),
 so the issue named above comes from this repo's Flare blueprint, and the
-two "needs a new core issue" rows are to be checked against the tracker
+two "needs a new core issue" rows (neither blocks v1) are to be checked against the tracker
 before filing (section 9, Q6).
 
 ### 8.5 SuiteUI and harness work Halo waits on
@@ -2002,6 +2241,7 @@ before filing (section 9, Q6).
 | Transport capsule | #340 | `viewer-playback` | plain SF Symbol buttons in the status bar's trailing slot |
 | Timeline key shapes by easing, selected keys | not filed (Flare S10, S11) | `easing` | plain diamonds; the selection shows in the EASING rows |
 | Timeline keys from the keyboard and VoiceOver | #63 | `easing` (keyboard parity on keys) | keys are selected from the EASING rows, which are keyboard reachable |
+| Lane values that name spans and key frames (today each lane reads only "n keyframes") | to file as `needs-ui` | journeys that assert spans (H-J3) | the inspector header shows the span |
 | Rename message on a sidebar row | #577 | #139 (not v1) | the alert |
 | Rotated selection box, anchor mark | #273, #706 | `layer-keys` (polish) | axis-aligned `SelectionOutline`; no anchor mark |
 
@@ -2047,3 +2287,9 @@ before filing (section 9, Q6).
    timeline or layer list has it, the composition from the sidebar) instead
    of D6's split?
 8. **Effects.** Confirm #39 (effects stack) is not v1.
+9. **Issue bodies.** Several open issues name files, test names or
+   mechanics this blueprint replaces (#37's `HaloPreviewTests`, toolbar Play
+   and `TimelineView(.animation)` clock; #38's steppers; #208's
+   `HaloHistory.swift` as the only history file). The feature packets will
+   say "the packet wins over the issue body"; should the issues also be
+   edited to point at their packet?

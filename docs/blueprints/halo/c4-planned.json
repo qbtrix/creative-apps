@@ -103,9 +103,10 @@
               {
                 "id": "halo-commands",
                 "name": "Commands and availability",
-                "description": "HaloCommand: every menu, toolbar and key command of v1, with its title, and HaloProject.unavailableHelp(for:): nil when it can act now, else the reason the control shows. Read from each service's unavailableHelp and the state, so a command turns on when its feature's live type lands.",
+                "description": "HaloCommand: every menu, toolbar and key command of v1, by area, with its title, and HaloProject.unavailableHelp(for:): nil when it can act now, else the reason the control shows. It dispatches to one file per area under Availability/; W0 writes them as stubs and each feature replaces its own area's file when its action works.",
                 "paths": [
-                  "Sources/HaloModel/HaloCommand.swift"
+                  "Sources/HaloModel/HaloCommand.swift",
+                  "Sources/HaloModel/Availability/"
                 ],
                 "status": "planned",
                 "authored": true,
@@ -375,9 +376,10 @@
               {
                 "id": "halo-window",
                 "name": "Window and command router",
-                "description": "HaloWindow: the one @State model, every presentation flag v1 needs, and perform(_ command: HaloCommand), which routes each command to its area file (HaloWindow+Viewer, +Playback, +Keys, +Layers, +Edit, +File, +Easing, +Render, +Text). W0 writes the router and stub area files; each feature owns one area file.",
+                "description": "HaloWindow: the one @State model, every presentation flag v1 needs, and perform(_ command: HaloCommand), which routes each command to its area file (HaloWindow+Viewer, +Playback, +Keys, +Layers, +Edit, +File, +Easing, +Render, +Text). W0 writes the router and stub area files; each feature owns one area file. HaloControls gathers every halo.* control's id, enabled state and help into the halo.controls JSON (under -HaloControlsProbe) for the every-control journey.",
                 "paths": [
                   "Sources/HaloApp/HaloWindow.swift",
+                  "Sources/HaloApp/HaloControls.swift",
                   "Sources/HaloApp/HaloWindow+Viewer.swift",
                   "Sources/HaloApp/HaloWindow+Playback.swift",
                   "Sources/HaloApp/HaloWindow+Keys.swift",

@@ -16,7 +16,8 @@ public typealias HaloMatrix = FlareCore.Matrix
 public typealias HaloPoint = FlareCore.Point
 
 /// An animatable layer property. The raw value is the track key in
-/// `HaloLayer.tracks`, the same names FlareCore's `Layer.sample` uses.
+/// `HaloLayer.tracks`; x, y, scaleX, scaleY, rotation and opacity are the
+/// names FlareCore's `Layer.sample` uses, anchorX and anchorY are Halo's own.
 public enum HaloProperty: String, CaseIterable, Codable, Sendable {
     case x, y, scaleX, scaleY, rotation, opacity, anchorX, anchorY
 
@@ -77,6 +78,17 @@ public enum HaloProperty: String, CaseIterable, Codable, Sendable {
         case .x, .y, .anchorX, .anchorY: 1
         case .scaleX, .scaleY, .opacity, .rotation: 0
         }
+    }
+
+    /// The stored value for what a person typed in the row ("45", "45°",
+    /// " 50 %"): the number before the unit, divided by `displayFactor`. Nil
+    /// when it isn't a number, so the row keeps its value and says why.
+    public func parse(_ text: String) -> Double? {
+        let trimmed = text.filter { !$0.isWhitespace }
+        let number = trimmed.hasSuffix(unit.filter { !$0.isWhitespace })
+            ? String(trimmed.dropLast(unit.filter { !$0.isWhitespace }.count)) : trimmed
+        guard let value = Double(number), value.isFinite else { return nil }
+        return value / displayFactor
     }
 
     /// The value as the row shows it and VoiceOver reads it: "960.0 px",
@@ -219,12 +231,16 @@ public struct HaloDocumentState: Codable, Sendable, Hashable {
     public var selectedLayerID: String?
     /// The number in the next composition id; only goes up.
     public var nextCompositionNumber: Int
+    /// The number in the next layer id ("comp-1-layer-7"); only goes up, so a
+    /// deleted or duplicated layer never makes two layers share an id.
+    public var nextLayerNumber: Int
     public init(
         compositions: [HaloComposition] = [], selectedCompositionID: String? = nil, selectedLayerID: String? = nil,
-        nextCompositionNumber: Int = 1
+        nextCompositionNumber: Int = 1, nextLayerNumber: Int = 1
     ) {
         self.compositions = compositions; self.selectedCompositionID = selectedCompositionID
         self.selectedLayerID = selectedLayerID; self.nextCompositionNumber = nextCompositionNumber
+        self.nextLayerNumber = nextLayerNumber
     }
 }
 
@@ -264,7 +280,8 @@ public struct HaloPlaybackTick: Sendable, Hashable {
 public struct HaloRenderSettings: Sendable, Hashable {
     public enum Format: String, CaseIterable, Sendable { case pngSequence, movie }
     public var format: Format
-    /// Half size halves width and height, rounded down to even.
+    /// Half size: width and height halved, then rounded down to even (movie
+    /// encoders need even sizes), at least 2. The plan carries the pixel size.
     public var halfSize: Bool
     public init(format: Format, halfSize: Bool = false) { self.format = format; self.halfSize = halfSize }
 }
@@ -295,22 +312,42 @@ public enum HaloRenderOutcome: Sendable, Hashable {
 /// Why an edit was refused. `message` is the text the window shows.
 public enum HaloEditError: Error, Sendable, Hashable {
     case noComposition
+    case noLayerSelected
     case unknownLayer(String)
     case notANumber(HaloProperty)
+    /// The layer's name, for the message.
     case parentCycle(String)
+    case inPointAfterOut
+    case outPointBeforeIn
+    case emptyName
+    case emptyText
     case noKeySelected
     case notBuilt(String)
 
     public var message: String {
         switch self {
         case .noComposition: "Create a composition first."
+        case .noLayerSelected: "Select a layer first."
         case .unknownLayer: "That layer no longer exists."
         case .notANumber(let p): "\(p.title) needs a number."
         case .parentCycle(let name): "\(name) can't follow a layer that follows it."
-        case .noKeySelected: "Select a key on the timeline first."
+        case .inPointAfterOut: "The in point must come before the out point."
+        case .outPointBeforeIn: "The out point must come after the in point."
+        case .emptyName: "Enter a name."
+        case .emptyText: "Enter some text."
+        case .noKeySelected: "Pick a key in the EASING list first."
         case .notBuilt(let what): "\(what) isn't built yet."
         }
     }
+}
+
+/// A refused edit, kept until the next edit or a dismissal, with the
+/// control that refused it so the window shows the message under that row.
+public struct HaloRefusal: Sendable, Hashable {
+    /// The refusing control's identifier ("halo.inspector.row.rotation").
+    public var control: String
+    public var message: String
+    public init(control: String, message: String) { self.control = control; self.message = message }
 }
 
 /// Why a project file didn't open. The open project stays as it was.

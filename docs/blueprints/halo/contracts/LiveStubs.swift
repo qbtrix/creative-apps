@@ -66,6 +66,7 @@ public struct LiveProjectHistory: ProjectHistory {
     public var unavailableHelp: String? { "Undo arrives with #208." }
     public var limit: Int { 0 }
     public func record(_ name: String, before: HaloDocumentState, coalesceKey: String?, in history: inout HaloHistory) {}
+    public func endCoalescing(in history: inout HaloHistory) {}
     public func undo(_ current: HaloDocumentState, in history: inout HaloHistory) -> HaloDocumentState? { nil }
     public func redo(_ current: HaloDocumentState, in history: inout HaloHistory) -> HaloDocumentState? { nil }
 }
@@ -88,7 +89,7 @@ public struct LivePlaybackClock: PlaybackClock {
 public struct LiveFrameRendering: FrameRendering {
     public init() {}
     public var unavailableHelp: String? { "Render Frame arrives with #451." }
-    public func render(_ list: HaloDrawList, scale: Int, text: (any TextRasterizing)?) throws -> HaloRenderedFrame {
+    public func render(_ list: HaloDrawList, width: Int, height: Int, text: (any TextRasterizing)?) throws -> HaloRenderedFrame {
         throw HaloEditError.notBuilt("Rendering")
     }
 }
@@ -100,7 +101,8 @@ public struct LiveCompositionRendering: CompositionRendering {
         throw HaloEditError.notBuilt("Render")
     }
     public func run(
-        _ plan: HaloRenderPlan, of composition: HaloComposition, into sink: inout some RenderSink, isCancelled: () -> Bool
+        _ plan: HaloRenderPlan, of composition: HaloComposition, text: (any TextRasterizing)?,
+        into sink: inout some RenderSink, isCancelled: () -> Bool
     ) -> HaloRenderOutcome {
         .failed(frame: 0, message: HaloEditError.notBuilt("Render").message)
     }

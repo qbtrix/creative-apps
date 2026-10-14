@@ -5,15 +5,19 @@
 
 extension HaloLayer {
     /// The layer's box in layer space (composition pixels, top-left origin).
-    public func bounds(in composition: HaloComposition) -> HaloLayerRect {
+    /// A text layer's box comes from `measuring` (the app's CoreText
+    /// rasterizer, so it matches the pixels), centered; without one, an
+    /// estimate of 0.6 em per character.
+    public func bounds(in composition: HaloComposition, measuring: (any TextRasterizing)? = nil) -> HaloLayerRect {
         let w = Double(composition.width), h = Double(composition.height)
         switch kind {
         case .solid: return rect ?? HaloLayerRect(x: 0, y: 0, width: w, height: h)
         case .shape: return rect ?? HaloLayerRect(x: w / 2 - 100, y: h / 2 - 100, width: 200, height: 200)
         case .text:
             let content = text ?? HaloTextContent()
-            let width = content.fontSize * 0.6 * Double(max(content.string.count, 1))
-            return HaloLayerRect(x: w / 2 - width / 2, y: h / 2 - content.fontSize / 2, width: width, height: content.fontSize)
+            let box = measuring?.measure(content)
+                ?? HaloLayerRect(x: 0, y: 0, width: content.fontSize * 0.6 * Double(max(content.string.count, 1)), height: content.fontSize)
+            return HaloLayerRect(x: w / 2 - box.width / 2, y: h / 2 - box.height / 2, width: box.width, height: box.height)
         case .null: return HaloLayerRect(x: w / 2, y: h / 2, width: 0, height: 0)
         }
     }
