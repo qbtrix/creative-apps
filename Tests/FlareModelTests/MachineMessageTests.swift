@@ -19,7 +19,7 @@ private func looksLikeDebugText(_ message: String, of error: any Error) -> Bool 
     #expect(w.machineError == "idle is already a state.")
     w.setInitialMachineState("nope")
     #expect(w.machineError == "nope isn\u{2019}t a state of this machine.")
-    w.updateMachineState(MachineState(id: "idle", name: "idle", sceneID: "scene-1", startFrame: 30, endFrame: 10))
+    w.updateMachineState(MachineState(id: "idle", name: "idle", sceneID: "scene-1", startFrame: 30, endFrame: 80))
     #expect(w.machineError == "The state\u{2019}s frames must be inside the scene.")
     w.updateMachineTransition(at: 5, to: FlareTransition(from: "idle", to: "idle", trigger: "t"))
     #expect(w.machineError == "That item is no longer there.")

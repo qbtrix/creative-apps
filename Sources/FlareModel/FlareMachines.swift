@@ -64,7 +64,19 @@ extension FlareWorkspace {
         editMachine { try $0.addState(state, to: $1, in: &$2) }
     }
 
+    /// Why `state`'s frame range can't apply, in the words a disabled frame-range control shows; nil when it can, or
+    /// when its scene is gone, which the engine reports. Frames outside the scene come first, so a reversed range only
+    /// gets its own reason while both ends are inside the scene (#681).
+    public func machineStateFramesProblem(_ state: MachineState) -> String? {
+        guard let scene = document?.scenes.first(where: { $0.id == state.sceneID }) else { return nil }
+        if state.startFrame < 0 || state.startFrame > scene.durationFrames || state.endFrame < 0
+            || state.endFrame > scene.durationFrames { return Self.framesOutsideScene }
+        return state.startFrame > state.endFrame ? Self.endBeforeStart : nil
+    }
+
+    /// Refused, with the reason `machineStateFramesProblem` gives, when the state's frame range can't apply.
     public mutating func updateMachineState(_ state: MachineState) {
+        if let problem = machineStateFramesProblem(state) { return refuseMachine(problem) }
         editMachine { try $0.updateState(state, in: $1, in: &$2) }
     }
 
@@ -171,5 +183,6 @@ extension FlareWorkspace {
 
     static let emptyMachineName = "Type a name for the machine."
     static let noMachineSelected = "Select a machine first."
+    static let endBeforeStart = "End frame must be at or after the start frame."
     static func noLabel(_ label: String) -> String { "This scene has no frame label \u{201C}\(label)\u{201D}." }
 }
