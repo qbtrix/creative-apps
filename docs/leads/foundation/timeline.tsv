@@ -1,0 +1,4 @@
+utc	stage	event	ref	note
+2026-10-14T17:33Z	0	stage-start	#777	base 52928d1
+2026-10-14T17:40Z	0	stage-end	#777	depends on: none
+2026-10-14T17:40Z	1	stage-start	#777	packet ed58c3a
