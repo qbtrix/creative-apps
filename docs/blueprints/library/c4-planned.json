@@ -1,0 +1,567 @@
+{
+  "version": "1.0",
+  "scope": "creative-apps: Library (planned)",
+  "generated_at": "2026-10-14T00:00:00Z",
+  "source_path": ".",
+  "authored": true,
+  "model": {
+    "people": [
+      {
+        "id": "photographer",
+        "name": "Person with a folder of photos",
+        "description": "Imports, culls, develops and exports photos."
+      }
+    ],
+    "systems": [
+      {
+        "id": "creative-apps",
+        "name": "creative-apps",
+        "description": "The macOS app shells of the creative suite; this file plans only Library's containers and components.",
+        "tags": [
+          "internal"
+        ],
+        "containers": [
+          {
+            "id": "library-app",
+            "name": "LibraryApp",
+            "description": "The Library app (photo catalog and develop): the SwiftUI Window scene, its menu bar, views built from SuiteUI, and the Darwin platform adapters. Reads LibraryModel and calls its methods.",
+            "technology": "Swift 6, SwiftUI, macOS 26",
+            "tags": [
+              "internal",
+              "macos-only"
+            ],
+            "status": "existing",
+            "authored": true,
+            "components": [
+              {
+                "id": "library-app-shell",
+                "name": "App shell",
+                "description": "The Window scene, the root LibraryWindow holding the one model, the whole menu bar, the per-feature menu structs, and LibraryControls (the library.controls JSON the every-control journey reads).",
+                "technology": "Swift 6, SwiftUI, macOS 26",
+                "paths": [
+                  "Sources/LibraryApp/LibraryApp.swift",
+                  "Sources/LibraryApp/LibraryWindow.swift",
+                  "Sources/LibraryApp/LibraryCommands.swift",
+                  "Sources/LibraryApp/LibraryMenus.swift",
+                  "Sources/LibraryApp/LibraryControls.swift"
+                ],
+                "status": "existing",
+                "authored": true
+              },
+              {
+                "id": "library-app-areas",
+                "name": "Window areas",
+                "description": "One file per feature that builds its menu closures and runs its async work, handing results to catalog methods: Edit, Import, Thumbnails, Cull, Persist, Loupe, Develop, Crop, Export. The spine creates each as a stub.",
+                "technology": "Swift 6, SwiftUI, macOS 26",
+                "paths": [
+                  "Sources/LibraryApp/LibraryWindow+Edit.swift",
+                  "Sources/LibraryApp/LibraryWindow+Import.swift",
+                  "Sources/LibraryApp/LibraryWindow+Thumbnails.swift",
+                  "Sources/LibraryApp/LibraryWindow+Cull.swift",
+                  "Sources/LibraryApp/LibraryWindow+Persist.swift",
+                  "Sources/LibraryApp/LibraryWindow+Loupe.swift",
+                  "Sources/LibraryApp/LibraryWindow+Develop.swift",
+                  "Sources/LibraryApp/LibraryWindow+Crop.swift",
+                  "Sources/LibraryApp/LibraryWindow+Export.swift"
+                ],
+                "status": "planned",
+                "authored": true
+              },
+              {
+                "id": "library-app-browse",
+                "name": "Browse views",
+                "description": "Empty states, the import progress row, the thumbnail grid, the loupe on CanvasViewport, display bytes to Image, and the status pills.",
+                "technology": "Swift 6, SwiftUI, macOS 26",
+                "paths": [
+                  "Sources/LibraryApp/LibraryBrowser.swift",
+                  "Sources/LibraryApp/LibraryGrid.swift",
+                  "Sources/LibraryApp/DisplayImage+Image.swift",
+                  "Sources/LibraryApp/LibraryLoupe.swift",
+                  "Sources/LibraryApp/LibraryStatusBar.swift"
+                ],
+                "status": "existing",
+                "authored": true
+              },
+              {
+                "id": "library-app-inspector",
+                "name": "Inspector",
+                "description": "Info and Develop tabs, the metadata inspector, develop sliders and the histogram.",
+                "technology": "Swift 6, SwiftUI, macOS 26",
+                "paths": [
+                  "Sources/LibraryApp/LibraryInspector.swift",
+                  "Sources/LibraryApp/MetadataInspector.swift",
+                  "Sources/LibraryApp/DevelopInspector.swift"
+                ],
+                "status": "existing",
+                "authored": true
+              },
+              {
+                "id": "library-app-crop",
+                "name": "Crop overlay and section",
+                "description": "The crop frame, shade and thirds grid over the loupe photo, and the CROP section shown in the Develop tab while cropping.",
+                "technology": "Swift 6, SwiftUI, macOS 26",
+                "paths": [
+                  "Sources/LibraryApp/LibraryCropOverlay.swift",
+                  "Sources/LibraryApp/CropInspector.swift"
+                ],
+                "status": "planned",
+                "authored": true
+              },
+              {
+                "id": "library-app-export",
+                "name": "Export sheet",
+                "description": "The export sheet: long edge, quality, folder, progress, cancel and failures.",
+                "technology": "Swift 6, SwiftUI, macOS 26",
+                "paths": [
+                  "Sources/LibraryApp/LibraryExportSheet.swift"
+                ],
+                "status": "planned",
+                "authored": true
+              },
+              {
+                "id": "library-app-later",
+                "name": "Later views",
+                "description": "Wave 5 (not v1): filters and collections in the sidebar.",
+                "technology": "Swift 6, SwiftUI, macOS 26",
+                "paths": [
+                  "Sources/LibraryApp/LibraryWindow+Filters.swift"
+                ],
+                "status": "planned",
+                "authored": true
+              },
+              {
+                "id": "library-app-platform",
+                "name": "Platform adapters",
+                "description": "Darwin conformances to the platform contracts: ImageIODecoder (scan, metadata, decode with orientation to sRGB RGBA8), JPEGWriter, CatalogStore (Application Support, atomic write, .bad rename). No SwiftUI.",
+                "technology": "Swift 6, ImageIO, Foundation, macOS 26",
+                "paths": [
+                  "Sources/LibraryApp/Platform/"
+                ],
+                "status": "planned",
+                "authored": true
+              }
+            ]
+          },
+          {
+            "id": "library-model",
+            "name": "LibraryModel",
+            "description": "Linux-safe state and logic behind Library's window: the catalog, undo history, use-case contracts with live conformances over CoreRaster and fakes, and fixtures.",
+            "technology": "Swift 6, Foundation",
+            "tags": [
+              "internal"
+            ],
+            "status": "existing",
+            "authored": true,
+            "components": [
+              {
+                "id": "library-catalog",
+                "name": "Catalog state",
+                "description": "LibraryCatalog's stored state (every property v1 needs, declared once by the spine), PhotoItem, sort and the cached display order, collections and their empty-state copy.",
+                "technology": "Swift 6, Foundation",
+                "paths": [
+                  "Sources/LibraryModel/LibraryCatalog.swift",
+                  "Sources/LibraryModel/PhotoItem.swift",
+                  "Sources/LibraryModel/LibraryOrder.swift",
+                  "Sources/LibraryModel/LibraryEmptyCollection.swift"
+                ],
+                "status": "existing",
+                "authored": true
+              },
+              {
+                "id": "library-contracts",
+                "name": "Use-case contracts",
+                "description": "One Swift protocol per use case with its value types, and LibraryServices holding one existential per contract with .fake and .live values.",
+                "technology": "Swift 6, Foundation",
+                "paths": [
+                  "Sources/LibraryModel/Contracts/",
+                  "Sources/LibraryModel/LibraryServices.swift"
+                ],
+                "status": "planned",
+                "authored": true
+              },
+              {
+                "id": "library-fakes",
+                "name": "Fakes",
+                "description": "One deterministic fake per contract, with failure modes for the error journeys, built from the fixtures.",
+                "technology": "Swift 6, Foundation",
+                "paths": [
+                  "Sources/LibraryModel/Fakes/"
+                ],
+                "status": "planned",
+                "authored": true
+              },
+              {
+                "id": "library-fixtures",
+                "name": "Fixtures and launch",
+                "description": "Seeded sample photos, SampleImage (the picture of a photo with no file, for fakes and live alike), the named fixtures journeys launch with, and launch-argument parsing.",
+                "technology": "Swift 6, Foundation",
+                "paths": [
+                  "Sources/LibraryModel/LibrarySample.swift",
+                  "Sources/LibraryModel/SampleImage.swift",
+                  "Sources/LibraryModel/LibraryFixtures.swift",
+                  "Sources/LibraryModel/LibraryLaunch.swift"
+                ],
+                "status": "existing",
+                "authored": true
+              },
+              {
+                "id": "library-history",
+                "name": "Undo history",
+                "description": "Named undo and redo steps, each holding the values it puts back, with coalescing for slider drags.",
+                "technology": "Swift 6, Foundation",
+                "paths": [
+                  "Sources/LibraryModel/CatalogHistory.swift"
+                ],
+                "status": "planned",
+                "authored": true
+              },
+              {
+                "id": "library-import",
+                "name": "Folder import",
+                "description": "File type rules, path ids, skipping known paths, merging into the catalog, import progress and failures.",
+                "technology": "Swift 6, Foundation",
+                "paths": [
+                  "Sources/LibraryModel/LibraryImport.swift",
+                  "Sources/LibraryModel/Live/LiveImporter.swift"
+                ],
+                "status": "planned",
+                "authored": true
+              },
+              {
+                "id": "library-thumbnails",
+                "name": "Thumbnails",
+                "description": "Size buckets from the cell size, requests for visible cells, an LRU of display bytes, rebuilding after a develop change.",
+                "technology": "Swift 6, Foundation",
+                "paths": [
+                  "Sources/LibraryModel/LibraryThumbnails.swift",
+                  "Sources/LibraryModel/Live/LiveThumbnails.swift"
+                ],
+                "status": "planned",
+                "authored": true
+              },
+              {
+                "id": "library-culling",
+                "name": "Culling",
+                "description": "Rating, flag and label on a set of ids with undo, the keyboard mapping, Auto Advance, and mixed values for the inspector.",
+                "technology": "Swift 6, Foundation",
+                "paths": [
+                  "Sources/LibraryModel/MetadataEditing.swift",
+                  "Sources/LibraryModel/LibraryCulling.swift",
+                  "Sources/LibraryModel/Live/LiveCulling.swift"
+                ],
+                "status": "existing",
+                "authored": true
+              },
+              {
+                "id": "library-persistence",
+                "name": "Catalog file",
+                "description": "Catalog file v1 (JSON) encode and decode, restore, setting aside a damaged file, the dirty flag and save requests.",
+                "technology": "Swift 6, Foundation",
+                "paths": [
+                  "Sources/LibraryModel/LibraryPersistence.swift",
+                  "Sources/LibraryModel/Live/LiveCatalogCoding.swift"
+                ],
+                "status": "planned",
+                "authored": true
+              },
+              {
+                "id": "library-loupe",
+                "name": "Loupe",
+                "description": "The loupe's photo and place, zoom and pan, the latest-wins render of the loupe image and its histogram, and prefetch of the neighbours.",
+                "technology": "Swift 6, Foundation",
+                "paths": [
+                  "Sources/LibraryModel/LoupeState.swift",
+                  "Sources/LibraryModel/LoupeZoom.swift",
+                  "Sources/LibraryModel/LibraryLoupeImage.swift",
+                  "Sources/LibraryModel/RenderQueue.swift",
+                  "Sources/LibraryModel/Live/LiveLoupeImaging.swift"
+                ],
+                "status": "existing",
+                "authored": true
+              },
+              {
+                "id": "library-develop",
+                "name": "Develop",
+                "description": "Develop settings per photo, slider edits with clamping and coalesced undo, reset, copy and paste, and the renderer over CoreRaster.",
+                "technology": "Swift 6, Foundation",
+                "paths": [
+                  "Sources/LibraryModel/LibraryDevelop.swift",
+                  "Sources/LibraryModel/Live/LiveDevelop.swift"
+                ],
+                "status": "planned",
+                "authored": true
+              },
+              {
+                "id": "library-crop",
+                "name": "Crop and straighten",
+                "description": "Crop rectangle and angle, aspect presets, the frame kept inside the straightened image, apply and cancel.",
+                "technology": "Swift 6, Foundation",
+                "paths": [
+                  "Sources/LibraryModel/LibraryCrop.swift",
+                  "Sources/LibraryModel/Live/LiveCrop.swift"
+                ],
+                "status": "planned",
+                "authored": true
+              },
+              {
+                "id": "library-status",
+                "name": "Status text and layout",
+                "description": "Status pill text, inspector header facts, and the layout math the layout tests check (grid columns, loupe fit).",
+                "technology": "Swift 6, Foundation",
+                "paths": [
+                  "Sources/LibraryModel/LibraryStatusText.swift",
+                  "Sources/LibraryModel/LibraryLayout.swift"
+                ],
+                "status": "planned",
+                "authored": true
+              },
+              {
+                "id": "library-later",
+                "name": "Later model",
+                "description": "Wave 5 (not v1): collections and filters (#31), keywords (#744), raw file rules (#427).",
+                "technology": "Swift 6, Foundation",
+                "paths": [
+                  "Sources/LibraryModel/LibraryCollections.swift",
+                  "Sources/LibraryModel/LibraryFilter.swift",
+                  "Sources/LibraryModel/LibraryKeywords.swift",
+                  "Sources/LibraryModel/RawFileTypes.swift"
+                ],
+                "status": "planned",
+                "authored": true
+              },
+              {
+                "id": "library-export",
+                "name": "Export",
+                "description": "Export plan (sizes, never enlarging, names that never overwrite, quality), progress, cancel and per-file failures.",
+                "technology": "Swift 6, Foundation",
+                "paths": [
+                  "Sources/LibraryModel/LibraryExport.swift",
+                  "Sources/LibraryModel/Live/LiveExporter.swift"
+                ],
+                "status": "planned",
+                "authored": true
+              }
+            ]
+          },
+          {
+            "id": "suiteui",
+            "name": "SuiteUI",
+            "description": "The shared design system (another line). Library asks for new parts by needs-ui issue.",
+            "technology": "Swift 6, SwiftUI, macOS 26",
+            "tags": [
+              "internal",
+              "macos-only"
+            ],
+            "status": "existing",
+            "authored": true,
+            "components": [
+              {
+                "id": "suiteui-sources",
+                "name": "SuiteUI sources",
+                "description": "Existing shared components, plus the parts section 6 of the Library blueprint asks for.",
+                "technology": "Swift 6, SwiftUI, macOS 26",
+                "paths": [
+                  "Sources/SuiteUI/"
+                ],
+                "status": "existing",
+                "authored": true
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "creative-core",
+        "name": "creative-core",
+        "description": "The engines (another repo).",
+        "tags": [
+          "external"
+        ],
+        "containers": [
+          {
+            "id": "coreraster",
+            "name": "CoreRaster",
+            "description": "Pixel buffers, resampling, develop adjustments, histogram, rotate and crop.",
+            "technology": "Swift 6, Foundation",
+            "tags": [
+              "external"
+            ],
+            "status": "existing",
+            "authored": true,
+            "components": []
+          },
+          {
+            "id": "corecolor",
+            "name": "CoreColor",
+            "description": "Color spaces and transfer curves.",
+            "technology": "Swift 6, Foundation",
+            "tags": [
+              "external"
+            ],
+            "status": "existing",
+            "authored": true,
+            "components": []
+          },
+          {
+            "id": "corecatalog",
+            "name": "CoreCatalog",
+            "description": "SQLite photo catalog (creative-core#157). Not a v1 dependency of Library (decision D1).",
+            "technology": "Swift 6, GRDB",
+            "tags": [
+              "external"
+            ],
+            "status": "planned",
+            "authored": true,
+            "components": []
+          }
+        ]
+      }
+    ],
+    "relationships": [
+      {
+        "source": "library-app-shell",
+        "target": "library-catalog",
+        "description": "holds the one LibraryCatalog, reads it and calls its methods",
+        "style": "sync"
+      },
+      {
+        "source": "library-app-areas",
+        "target": "library-contracts",
+        "description": "awaits a service off the main actor, then hands the result to a catalog method",
+        "style": "sync"
+      },
+      {
+        "source": "library-app-platform",
+        "target": "library-contracts",
+        "description": "conforms to PhotoDecoding, JPEGWriting and CatalogStoring",
+        "style": "sync"
+      },
+      {
+        "source": "library-app-browse",
+        "target": "suiteui",
+        "description": "builds its views from SuiteUI",
+        "style": "sync"
+      },
+      {
+        "source": "library-app-inspector",
+        "target": "suiteui",
+        "description": "builds its views from SuiteUI",
+        "style": "sync"
+      },
+      {
+        "source": "library-app-crop",
+        "target": "suiteui",
+        "description": "builds its overlay from SuiteUI CropShade and SelectionOutline",
+        "style": "sync"
+      },
+      {
+        "source": "library-app-export",
+        "target": "suiteui",
+        "description": "builds its sheet from SuiteUI",
+        "style": "sync"
+      },
+      {
+        "source": "library-catalog",
+        "target": "library-history",
+        "description": "records every catalog change as a named step",
+        "style": "sync"
+      },
+      {
+        "source": "library-catalog",
+        "target": "library-contracts",
+        "description": "calls the use cases through LibraryServices",
+        "style": "sync"
+      },
+      {
+        "source": "library-fakes",
+        "target": "library-contracts",
+        "description": "conforms to every contract",
+        "style": "sync"
+      },
+      {
+        "source": "library-fakes",
+        "target": "library-fixtures",
+        "description": "takes its data from the fixtures",
+        "style": "sync"
+      },
+      {
+        "source": "library-import",
+        "target": "library-contracts",
+        "description": "conforms to PhotoImporting over PhotoDecoding",
+        "style": "sync"
+      },
+      {
+        "source": "library-thumbnails",
+        "target": "library-develop",
+        "description": "renders a developed photo's thumbnail with its settings",
+        "style": "sync"
+      },
+      {
+        "source": "library-loupe",
+        "target": "library-develop",
+        "description": "renders the loupe image with the photo's settings",
+        "style": "sync"
+      },
+      {
+        "source": "library-export",
+        "target": "library-develop",
+        "description": "renders each exported photo with its settings",
+        "style": "sync"
+      },
+      {
+        "source": "library-develop",
+        "target": "coreraster",
+        "description": "exposure, white balance, contrast, highlights and shadows, histogram",
+        "style": "sync"
+      },
+      {
+        "source": "library-crop",
+        "target": "coreraster",
+        "description": "rotated, straightenCrop and cropped",
+        "style": "sync"
+      },
+      {
+        "source": "library-thumbnails",
+        "target": "coreraster",
+        "description": "resized with lanczos3, rgba8 display bytes",
+        "style": "sync"
+      },
+      {
+        "source": "library-export",
+        "target": "coreraster",
+        "description": "resized with lanczos3",
+        "style": "sync"
+      },
+      {
+        "source": "library-persistence",
+        "target": "library-catalog",
+        "description": "encodes and restores photo records, never pixels",
+        "style": "sync"
+      },
+      {
+        "source": "photographer",
+        "target": "library-app",
+        "description": "imports, culls, develops and exports photos",
+        "style": "sync"
+      },
+      {
+        "source": "library-app",
+        "target": "library-model",
+        "description": "reads state and calls its methods",
+        "style": "sync"
+      },
+      {
+        "source": "library-model",
+        "target": "coreraster",
+        "description": "uses CoreRaster from creative-core",
+        "style": "sync"
+      },
+      {
+        "source": "library-model",
+        "target": "corecolor",
+        "description": "uses CoreColor from creative-core",
+        "style": "sync"
+      }
+    ]
+  }
+}

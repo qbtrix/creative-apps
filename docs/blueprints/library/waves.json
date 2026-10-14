@@ -1,0 +1,451 @@
+{
+  "generated": "2026-10-14",
+  "rule": "No two features in one wave own the same path or a path prefix of another's. A path ending in / or + is a prefix.",
+  "features": [
+    {
+      "id": "spine",
+      "wave": 1,
+      "title": "Contracts, fakes, live stubs, catalog state, undo, launch arguments, and the app split into per-feature files",
+      "issues": [
+        156,
+        235
+      ],
+      "owned": [
+        "Sources/LibraryModel/LibraryCatalog.swift",
+        "Sources/LibraryModel/PhotoItem.swift",
+        "Sources/LibraryModel/LibraryOrder.swift",
+        "Sources/LibraryModel/CatalogHistory.swift",
+        "Sources/LibraryModel/LibraryServices.swift",
+        "Sources/LibraryModel/Contracts/",
+        "Sources/LibraryModel/Fakes/",
+        "Sources/LibraryModel/Live/",
+        "Sources/LibraryModel/LibraryFixtures.swift",
+        "Sources/LibraryModel/LibraryLaunch.swift",
+        "Sources/LibraryModel/LibrarySample.swift",
+        "Sources/LibraryApp/LibraryApp.swift",
+        "Sources/LibraryApp/LibraryWindow.swift",
+        "Sources/LibraryApp/LibraryCommands.swift",
+        "Sources/LibraryApp/LibraryMenus.swift",
+        "Sources/LibraryApp/LibraryWindow+",
+        "Sources/LibraryApp/LibraryBrowser.swift",
+        "Sources/LibraryApp/LibraryGrid.swift",
+        "Sources/LibraryApp/DisplayImage+Image.swift",
+        "Sources/LibraryApp/LibraryInspector.swift",
+        "Sources/LibraryApp/DevelopInspector.swift",
+        "Sources/LibraryApp/LibraryCropOverlay.swift",
+        "Sources/LibraryApp/LibraryExportSheet.swift",
+        "Sources/LibraryApp/LibraryStatusBar.swift",
+        "Sources/LibraryApp/Platform/",
+        "Tests/LibraryModelTests/LibraryHistoryTests.swift",
+        "Tests/LibraryModelTests/LibraryServicesTests.swift",
+        "Tests/LibraryModelTests/LibraryLaunchTests.swift",
+        "Tests/LibraryModelTests/LibraryOrderTests.swift",
+        "Tests/LibraryModelTests/LibraryCatalogTests.swift",
+        "Tests/LibraryModelTests/LibraryPhotoIDTests.swift",
+        "Tests/AppSnapshotTests/LibraryShellSnapshots.swift",
+        "UITests/Journey+Library.swift",
+        "UITests/LibraryJourneyTests.swift",
+        "UITests/LibraryJourneyTests+Shell.swift",
+        "Tests/LibraryModelTests/Budget.swift",
+        "Sources/LibraryApp/LibraryLoupe.swift",
+        "Sources/LibraryApp/LibraryControls.swift",
+        "Sources/LibraryModel/SampleImage.swift",
+        "Sources/LibraryApp/CropInspector.swift",
+        "Sources/LibraryModel/LibraryEmptyCollection.swift",
+        "Tests/LibraryModelTests/LibraryCellSizeFuzzTests.swift",
+        "Tests/LibraryModelTests/LibraryCollectionEmptinessTests.swift",
+        "Tests/LibraryModelTests/LibraryEmptyCollectionTests.swift",
+        "Tests/LibraryModelTests/LibraryGridEdgeTests.swift",
+        "Tests/LibraryModelTests/LibraryGridTests.swift",
+        "Tests/LibraryModelTests/LibraryPhotoIDFuzzTests.swift",
+        "Tests/AppSnapshotTests/LibraryEmptyCollectionSnapshots.swift"
+      ],
+      "core": "none",
+      "suiteui": "none for its own work; the cell values it declares are shown once S-L2 lands (a hard wait for journey steps that read them); #333 for its own journey file (until then it edits LibraryJourneyTests.swift)",
+      "depends": [],
+      "journeys": [
+        "J0",
+        "J10",
+        "J11"
+      ],
+      "notes": "Creates every stub file later features replace; lands as several stacked PRs. Coordinates with open PR #217 (#156). In wave 1 it also adds PhotoItem.cullSummary as the accessibility value of the loupe photo (LibraryLoupe.swift) and the grid cells, and embeds the LibraryCropOverlay and CropInspector stubs, so later features never edit another's view. Existing tests it owns are kept passing (the hand-written == keeps whole-catalog comparisons working). It also presents LibraryExportSheet from LibraryWindow while exportState is not idle, shows the Preview data pill while services are fakes, and switches today's four journeys to -LibraryFixture samples.",
+      "quality": "QB-F1 (J11), QB-F3 (undo), QB-V5"
+    },
+    {
+      "id": "import",
+      "wave": 2,
+      "title": "Import a folder: scan, metadata, path ids, skip known, progress, failures",
+      "issues": [
+        210
+      ],
+      "owned": [
+        "Sources/LibraryModel/LibraryImport.swift",
+        "Sources/LibraryModel/Live/LiveImporter.swift",
+        "Sources/LibraryApp/Platform/ImageIODecoder.swift",
+        "Sources/LibraryApp/LibraryWindow+Import.swift",
+        "Sources/LibraryApp/LibraryBrowser.swift",
+        "Tests/LibraryModelTests/LibraryImportTests.swift",
+        "Tests/AppSnapshotTests/LibraryImportSnapshots.swift",
+        "Tests/AppSnapshotTests/LibraryDecodeTests.swift",
+        "UITests/LibraryJourneyTests+Import.swift",
+        "UITests/LibraryJourneyTests+PerfImport.swift",
+        "UITests/LibraryJourneyTests.swift",
+        "Tests/LibraryModelTests/LibraryImportBudgetTests.swift"
+      ],
+      "core": "none (decode is ImageIO in LibraryApp)",
+      "suiteui": "S-L4 InlineNotice, S-L5 ProgressRow (placeholders until then); #330, #333",
+      "depends": [
+        "spine"
+      ],
+      "journeys": [
+        "J1",
+        "P6"
+      ],
+      "notes": "Owns LibraryJourneyTests.swift in its wave, for its journey steps if #333 has not merged. Deletes the skipped testImportRateAndRelaunch (J8 replaces it).",
+      "quality": "QB-L9, QB-LIB-1, QB-LIB-V6, QB-F2"
+    },
+    {
+      "id": "thumbnails",
+      "wave": 2,
+      "title": "Real grid thumbnails: buckets, visible requests, LRU, placeholders",
+      "issues": [
+        33
+      ],
+      "owned": [
+        "Sources/LibraryModel/LibraryThumbnails.swift",
+        "Sources/LibraryModel/Live/LiveThumbnails.swift",
+        "Sources/LibraryApp/LibraryGrid.swift",
+        "Sources/LibraryApp/DisplayImage+Image.swift",
+        "Sources/LibraryApp/LibraryWindow+Thumbnails.swift",
+        "Tests/LibraryModelTests/LibraryThumbnailTests.swift",
+        "Tests/AppSnapshotTests/LibraryThumbnailSnapshots.swift",
+        "Tests/AppSnapshotTests/LibraryGridSnapshots.swift",
+        "UITests/LibraryJourneyTests+Grid.swift",
+        "UITests/LibraryJourneyTests+PerfGrid.swift",
+        "Tests/LibraryModelTests/LibraryGridBudgetTests.swift"
+      ],
+      "core": "none (resized and rgba8 landed: creative-core #132, #143)",
+      "suiteui": "S-L2 ThumbnailGrid additions; #330, #333",
+      "depends": [
+        "spine"
+      ],
+      "journeys": [
+        "J2",
+        "P1"
+      ],
+      "notes": "Live thumbnails read files through services.decoder, which is FakeDecoder in tests and the live ImageIODecoder once import lands. Its (L) steps wait for import to merge. Cell values need S-L2.",
+      "quality": "QB-LIB-3, QB-LIB-8, QB-LIB-V5"
+    },
+    {
+      "id": "cull",
+      "wave": 2,
+      "title": "Cull from the keyboard with undo and Auto Advance, in grid and loupe",
+      "issues": [
+        211,
+        426,
+        724
+      ],
+      "owned": [
+        "Sources/LibraryModel/LibraryCulling.swift",
+        "Sources/LibraryModel/Live/LiveCulling.swift",
+        "Sources/LibraryModel/MetadataEditing.swift",
+        "Sources/LibraryApp/LibraryWindow+Cull.swift",
+        "Tests/LibraryModelTests/LibraryRatingTests.swift",
+        "Tests/LibraryModelTests/LibraryAutoAdvanceTests.swift",
+        "Tests/LibraryModelTests/LibraryMetadataTests.swift",
+        "Tests/AppSnapshotTests/LibraryRatingSnapshots.swift",
+        "Tests/AppSnapshotTests/LibraryAutoAdvanceSnapshots.swift",
+        "UITests/LibraryJourneyTests+Cull.swift",
+        "UITests/LibraryJourneyTests+PerfCull.swift",
+        "Tests/LibraryModelTests/LibraryCullBudgetTests.swift",
+        "Sources/LibraryApp/MetadataInspector.swift",
+        "Tests/AppSnapshotTests/LibraryMetadataSnapshots.swift"
+      ],
+      "core": "none",
+      "suiteui": "S-L2 (reject badge); #330, #333",
+      "depends": [
+        "spine"
+      ],
+      "journeys": [
+        "J4",
+        "P2"
+      ],
+      "notes": "#724's keys only; its zoom and photo size go to loupe-viewport. The grid's reject mark (dimmed cell, xmark badge) is drawn by thumbnails, which owns the cell builder; cull changes only Model state. Owns MetadataInspector.swift in wave 2: it routes the stars, flag and label through cull(_:) and gives every control an identifier (most of #291's list); metadata-more takes the file in wave 5. Its (L) steps wait for import to merge. Its PR that lands the loupe keys says 'Part of #724'; whichever of cull and loupe-viewport merges its #724 part last says 'Closes #724'.",
+      "quality": "QB-LIB-4, QB-LIB-5, QB-F3, QB-F4"
+    },
+    {
+      "id": "persist",
+      "wave": 2,
+      "title": "The catalog file: JSON v1 with develop and crop, restore at launch, set aside a damaged file",
+      "issues": [
+        212
+      ],
+      "owned": [
+        "Sources/LibraryModel/LibraryPersistence.swift",
+        "Sources/LibraryModel/Live/LiveCatalogCoding.swift",
+        "Sources/LibraryApp/Platform/CatalogStore.swift",
+        "Sources/LibraryApp/LibraryWindow+Persist.swift",
+        "Tests/LibraryModelTests/LibraryPersistTests.swift",
+        "Tests/LibraryModelTests/Golden/catalog-v1.json",
+        "Tests/AppSnapshotTests/LibraryRestoreSnapshots.swift",
+        "UITests/LibraryJourneyTests+Persist.swift",
+        "UITests/LibraryJourneyTests+PerfLaunch.swift",
+        "Tests/LibraryModelTests/LibraryCatalogBudgetTests.swift"
+      ],
+      "core": "none for v1 (JSON); creative-core#157 only if decision D1 picks the SQLite catalog",
+      "suiteui": "S-L4 InlineNotice; #330, #333",
+      "depends": [
+        "spine"
+      ],
+      "journeys": [
+        "J8",
+        "J9",
+        "P7"
+      ],
+      "notes": "Writes the develop and crop objects from the start (their types come from the spine), so #423's and #425's catalog parts are done here. Its (L) steps wait for import to merge. Flushes on quit and exposes library.catalog = saved or dirty.",
+      "quality": "QB-LIB-2, QB-L12, QB-LIB-V7"
+    },
+    {
+      "id": "loupe-viewport",
+      "wave": 2,
+      "title": "Loupe on CanvasViewport: zoom, pan, real photo size, latest-wins render, prefetch",
+      "issues": [
+        724
+      ],
+      "owned": [
+        "Sources/LibraryModel/LoupeState.swift",
+        "Sources/LibraryModel/LoupeZoom.swift",
+        "Sources/LibraryModel/LibraryLoupeImage.swift",
+        "Sources/LibraryModel/RenderQueue.swift",
+        "Sources/LibraryModel/Live/LiveLoupeImaging.swift",
+        "Sources/LibraryApp/LibraryLoupe.swift",
+        "Sources/LibraryApp/LibraryWindow+Loupe.swift",
+        "Tests/LibraryModelTests/LibraryLoupeTests.swift",
+        "Tests/LibraryModelTests/LibraryLoupeZoomTests.swift",
+        "Tests/LibraryModelTests/LibraryRenderQueueTests.swift",
+        "Tests/LibraryModelTests/LibraryLoupeImageTests.swift",
+        "Tests/AppSnapshotTests/LibraryLoupeSnapshots.swift",
+        "UITests/LibraryJourneyTests+Loupe.swift",
+        "UITests/LibraryJourneyTests+PerfLoupe.swift",
+        "Tests/LibraryModelTests/LibraryLoupeBudgetTests.swift"
+      ],
+      "core": "none",
+      "suiteui": "#330, #333",
+      "depends": [
+        "spine"
+      ],
+      "journeys": [
+        "J3",
+        "P4"
+      ],
+      "notes": "#724's zoom, photo on the artboard and real size. Adds Home and End (first and last photo) and scroll pan. Its (L) steps wait for import to merge. Its #724 PR says 'Part of #724' unless it merges after cull's, then 'Closes #724'.",
+      "quality": "QB-LIB-5, QB-L1 (pan), QB-LIB-8"
+    },
+    {
+      "id": "develop",
+      "wave": 3,
+      "title": "Develop sliders, histogram, render to pixels in loupe and grid, copy and paste settings",
+      "issues": [
+        32,
+        423
+      ],
+      "owned": [
+        "Sources/LibraryModel/LibraryDevelop.swift",
+        "Sources/LibraryModel/Live/LiveDevelop.swift",
+        "Sources/LibraryApp/DevelopInspector.swift",
+        "Sources/LibraryApp/LibraryWindow+Develop.swift",
+        "Tests/LibraryModelTests/LibraryDevelopTests.swift",
+        "Tests/LibraryModelTests/LibraryDevelopRenderTests.swift",
+        "Tests/AppSnapshotTests/LibraryDevelopSnapshots.swift",
+        "Tests/AppSnapshotTests/LibraryDevelopRenderSnapshots.swift",
+        "UITests/LibraryJourneyTests+Develop.swift",
+        "UITests/LibraryJourneyTests+PerfDevelop.swift",
+        "UITests/LibraryJourneyTests.swift",
+        "Tests/LibraryModelTests/LibraryDevelopBudgetTests.swift"
+      ],
+      "core": "none (creative-core#231 closed by #246); a new core issue only if QB-LIB-6's model half misses: PixelBuffer.developed(temperature:tint:exposure:contrast:highlights:shadows:), one pass over storage, equal to the chained calls within 1e-6",
+      "suiteui": "S-L1 HistogramView; #330, #333",
+      "depends": [
+        "spine",
+        "loupe-viewport",
+        "thumbnails"
+      ],
+      "journeys": [
+        "J5",
+        "P3"
+      ],
+      "notes": "Owns LibraryJourneyTests.swift in its wave, for its journey steps if #333 has not merged.",
+      "quality": "QB-L2, QB-LIB-6, QB-LIB-V1, QB-LIB-V2, QB-LIB-V3, QB-F3"
+    },
+    {
+      "id": "status-and-layout",
+      "wave": 3,
+      "title": "Status pills, inspector header (#185), the remaining identifiers (#291), layout tests",
+      "issues": [
+        185,
+        291
+      ],
+      "owned": [
+        "Sources/LibraryModel/LibraryStatusText.swift",
+        "Sources/LibraryModel/LibraryLayout.swift",
+        "Sources/LibraryApp/LibraryStatusBar.swift",
+        "Sources/LibraryApp/LibraryInspector.swift",
+        "Tests/LibraryModelTests/LibraryStatusTextTests.swift",
+        "Tests/LibraryModelTests/LibraryLayoutTests.swift",
+        "Tests/AppSnapshotTests/LibraryLayoutSnapshots.swift",
+        "Tests/AppSnapshotTests/LibraryInspectorSnapshots.swift",
+        "UITests/LibraryJourneyTests+Layout.swift"
+      ],
+      "core": "none",
+      "suiteui": "S-L7 optional zoom and size pills; #330, #333",
+      "depends": [
+        "spine",
+        "thumbnails",
+        "loupe-viewport"
+      ],
+      "journeys": [
+        "J12"
+      ],
+      "notes": "Identifiers in other features' views are each feature's own job; this one clears what is left of #291's list.",
+      "quality": "layout spec 7.3, audit exit 7.2, QB-V5"
+    },
+    {
+      "id": "crop",
+      "wave": 4,
+      "title": "Crop and straighten in the loupe, applied in render, thumbnail and export",
+      "issues": [
+        425
+      ],
+      "owned": [
+        "Sources/LibraryModel/LibraryCrop.swift",
+        "Sources/LibraryModel/Live/LiveCrop.swift",
+        "Sources/LibraryModel/Live/LiveDevelop.swift",
+        "Sources/LibraryApp/LibraryCropOverlay.swift",
+        "Sources/LibraryApp/LibraryWindow+Crop.swift",
+        "Tests/LibraryModelTests/LibraryCropTests.swift",
+        "Tests/AppSnapshotTests/LibraryCropSnapshots.swift",
+        "UITests/LibraryJourneyTests+Crop.swift",
+        "UITests/LibraryJourneyTests+PerfCrop.swift",
+        "Tests/LibraryModelTests/LibraryCropBudgetTests.swift",
+        "Sources/LibraryApp/CropInspector.swift"
+      ],
+      "core": "none (creative-core#230 closed by #251)",
+      "suiteui": "S-L3 CropHandles; #330, #333",
+      "depends": [
+        "develop"
+      ],
+      "journeys": [
+        "J6",
+        "P5"
+      ],
+      "notes": "Edits LiveDevelop.swift (crop after tone), which develop owned in wave 3.",
+      "quality": "QB-L1, QB-LIB-V4, QB-F3, QB-F4"
+    },
+    {
+      "id": "export",
+      "wave": 4,
+      "title": "Export JPEG at a set long edge and quality, never overwriting",
+      "issues": [
+        424
+      ],
+      "owned": [
+        "Sources/LibraryModel/LibraryExport.swift",
+        "Sources/LibraryModel/Live/LiveExporter.swift",
+        "Sources/LibraryApp/Platform/JPEGWriter.swift",
+        "Sources/LibraryApp/LibraryExportSheet.swift",
+        "Sources/LibraryApp/LibraryWindow+Export.swift",
+        "Tests/LibraryModelTests/LibraryExportPlanTests.swift",
+        "Tests/AppSnapshotTests/LibraryExportSnapshots.swift",
+        "Tests/AppSnapshotTests/LibraryExportFidelityTests.swift",
+        "UITests/LibraryJourneyTests+Export.swift",
+        "UITests/LibraryJourneyTests.swift",
+        "Tests/LibraryModelTests/LibraryExportBudgetTests.swift",
+        "UITests/LibraryJourneyTests+PerfExport.swift"
+      ],
+      "core": "none",
+      "suiteui": "S-L5 ProgressRow; #330, #333",
+      "depends": [
+        "develop",
+        "import"
+      ],
+      "journeys": [
+        "J7",
+        "P8"
+      ],
+      "notes": "Its last task (the QB-V4 test with a cropped photo) waits for crop to merge. Owns LibraryJourneyTests.swift in its wave, for its journey steps if #333 has not merged.",
+      "quality": "QB-L9, QB-LIB-7, QB-V4, QB-F2"
+    },
+    {
+      "id": "filters-collections",
+      "wave": 5,
+      "title": "Filter by flag and rating, collections you make, smart rules (not v1)",
+      "issues": [
+        31
+      ],
+      "owned": [
+        "Sources/LibraryModel/LibraryCollections.swift",
+        "Sources/LibraryModel/LibraryFilter.swift",
+        "Sources/LibraryApp/LibraryWindow.swift",
+        "Sources/LibraryApp/LibraryWindow+Filters.swift",
+        "Tests/LibraryModelTests/LibraryCollectionsTests.swift",
+        "Tests/AppSnapshotTests/LibraryCollectionsSnapshots.swift",
+        "UITests/LibraryJourneyTests+Filters.swift",
+        "Sources/LibraryApp/LibraryCommands.swift"
+      ],
+      "core": "none",
+      "suiteui": "none",
+      "depends": [
+        "cull"
+      ],
+      "journeys": [],
+      "notes": "Not v1. Needs one menu item added to LibraryCommands.swift; it takes that file for this wave.",
+      "quality": "later"
+    },
+    {
+      "id": "metadata-more",
+      "wave": 5,
+      "title": "Keywords and camera details (not v1)",
+      "issues": [
+        744
+      ],
+      "owned": [
+        "Sources/LibraryModel/LibraryKeywords.swift",
+        "Tests/LibraryModelTests/LibraryKeywordTests.swift",
+        "Sources/LibraryApp/MetadataInspector.swift",
+        "Tests/AppSnapshotTests/LibraryMetadataSnapshots.swift"
+      ],
+      "core": "none",
+      "suiteui": "none",
+      "depends": [
+        "import"
+      ],
+      "journeys": [],
+      "notes": "Not v1. Camera details come from the Exif the import scan already reads.",
+      "quality": "later"
+    },
+    {
+      "id": "raw",
+      "wave": 5,
+      "title": "Camera raw files through the system decoder (not v1)",
+      "issues": [
+        427
+      ],
+      "owned": [
+        "Sources/LibraryModel/RawFileTypes.swift",
+        "Sources/LibraryApp/Platform/RawDecoding.swift",
+        "Tests/LibraryModelTests/LibraryRawImportTests.swift",
+        "Tests/AppSnapshotTests/LibraryRawSnapshots.swift",
+        "UITests/LibraryJourneyTests+Raw.swift"
+      ],
+      "core": "none",
+      "suiteui": "S-L2 (RAW badge)",
+      "depends": [
+        "import",
+        "thumbnails"
+      ],
+      "journeys": [],
+      "notes": "Not v1, pending evidence (docs/priorities.md).",
+      "quality": "later"
+    }
+  ]
+}
