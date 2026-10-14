@@ -3,3 +3,5 @@ utc	stage	event	ref	note
 2026-10-14T23:01Z	1	stage-end	#800	packet read
 2026-10-14T23:01Z	2	stage-end	#800	3 waves planned
 2026-10-14T23:03Z	3	stage-start	wave1	SN-1 builder launched; Swift 6.3.3 installed, creative-core 98be31a has LC-8 and LC-10
+2026-10-14T23:41Z	3	pr-merged	#876	SN-1 LiveScenes add and remove
+2026-10-14T23:41Z	3	stage-start	wave2	SN-2 SN-3 SN-4 on 640d08d (session restarted; resumed)

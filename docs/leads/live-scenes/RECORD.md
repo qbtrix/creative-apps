@@ -2,17 +2,17 @@
 
 Issue: #800 · Packet: docs/blueprints/flare/features/live-scenes.md
 Run: act-1a13ca4f89e-0ft1 · Session: claude/live-scenes-lead-d0sj3t · Started: 2026-10-14
-Stage: 3 wave 1
-Base: bfd0328ee45430ff0c77675e52c7054d2c5bb8c1
-Next: wait for SN-1 PR (workflow wf_8554aa48-55e) to merge, then run wave 2 (SN-2, SN-3, SN-4)
+Stage: 3 wave 2
+Base: 640d08d83c35cbb12bd71f59b24583857b2863b4
+Next: wait for SN-2, SN-3, SN-4 PRs to merge, then run wave 3 (SN-5, feature-done)
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
 |---|---|---|---|---|---|---|
-| SN-1 | 1 | `LiveScenes` struct: newDocument, addScene, removeScene (never the last) | Sources/FlareModel/Live/LiveScenes.swift, Tests/FlareModelTests/LiveScenesTests.swift | LiveScenesTests | | building |
-| SN-2 | 2 | renameScene, reorderScene on LC-8 RenameScene/ReorderScene, clamped index | Live/LiveScenes+Order.swift, LiveScenesOrderTests.swift | LiveScenesOrderTests | | planned |
-| SN-3 | 2 | setCanvas (LC-8 SetSceneCanvas), setTiming | Live/LiveScenes+Canvas.swift, LiveScenesCanvasTests.swift | LiveScenesCanvasTests | | planned |
-| SN-4 | 2 | guides add/remove; drag is one merged MoveGuide (LC-10); QB-L7 budget | Live/LiveScenes+Guides.swift, LiveScenesGuidesTests.swift | LiveScenesGuidesTests | | planned |
+| SN-1 | 1 | `LiveScenes` struct: newDocument, addScene, removeScene (never the last) | Sources/FlareModel/Live/LiveScenes.swift, Tests/FlareModelTests/LiveScenesTests.swift | LiveScenesTests | #876 | merged |
+| SN-2 | 2 | renameScene, reorderScene on LC-8 RenameScene/ReorderScene, clamped index | Live/LiveScenes+Order.swift, LiveScenesOrderTests.swift | LiveScenesOrderTests | | building |
+| SN-3 | 2 | setCanvas (LC-8 SetSceneCanvas), setTiming | Live/LiveScenes+Canvas.swift, LiveScenesCanvasTests.swift | LiveScenesCanvasTests | | building |
+| SN-4 | 2 | guides add/remove; drag is one merged MoveGuide (LC-10); QB-L7 budget | Live/LiveScenes+Guides.swift, LiveScenesGuidesTests.swift | LiveScenesGuidesTests | | building |
 | SN-5 | 3 | SceneEditing conformance, model journey steps 1-4, refusalsArePlainText, liveEqualsFake (feature-done) | Live/LiveScenes+SceneEditing.swift, LiveScenesJourneyTests.swift | LiveScenesJourneyTests | | planned |
 
 Journeys (model half, SN-5): J2 new from preset, J16 scenes, J14 guides; steps 1-4 of the packet.
