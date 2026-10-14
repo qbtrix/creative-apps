@@ -2,7 +2,9 @@
 // whole-window screenshot after every step (see Journey.swift). Design is an
 // EditorShell window. The core journey draws a frame (crossing the page's top
 // edge, so its handles show past it), a rectangle and an ellipse, moves and
-// resizes the ellipse, checks Layers still marks the current page while the
+// resizes the ellipse, checks the tool rail and the status line's tool are back
+// on Move after each draw and after the text placement (#278), so the move and
+// the press on the committed text select and move rather than draw again; checks Layers still marks the current page while the
 // ellipse is selected, hides a layer from its row's eye and undoes that,
 // places and types text (shot while typing, when the editor
 // draws at full size, and once committed, with a small box's corner handles
@@ -67,16 +69,21 @@ final class DesignJourneyTests: XCTestCase {
         tools["Frame"].click()
         design.drag(on: "suite.canvas", from: CGVector(dx: 0.1, dy: 0.1), to: CGVector(dx: 0.45, dy: 0.5), step: "drew-frame")
         XCTAssert(design.app.buttons["Undo Add Frame"].waitForExistence(timeout: 5), "drawing a frame made no undo step")
+        expectMove(design, after: "drawing a frame")
         tools["Rectangle"].click()
         design.drag(on: "suite.canvas", from: CGVector(dx: 0.15, dy: 0.15), to: CGVector(dx: 0.3, dy: 0.3), step: "drew-rectangle")
+        XCTAssert(design.app.buttons["Undo Add Rectangle"].waitForExistence(timeout: 5), "drawing a rectangle made no undo step")
+        expectMove(design, after: "drawing a rectangle")
         tools["Ellipse"].click()
         design.drag(on: "suite.canvas", from: CGVector(dx: 0.55, dy: 0.2), to: CGVector(dx: 0.75, dy: 0.45), step: "drew-ellipse")
         XCTAssert(design.app.buttons["Undo Add Ellipse"].waitForExistence(timeout: 5), "drawing an ellipse made no undo step")
+        expectMove(design, after: "drawing an ellipse")
 
-        tools["Move"].click()
-        // Grab the ellipse's middle and drag it down: it now spans (0.55, 0.475)-(0.75, 0.725).
+        // No click on Move: the draw left it picked, so this press grabs the ellipse's middle
+        // and drags it down instead of drawing a second ellipse: it now spans (0.55, 0.475)-(0.75, 0.725).
         design.drag(on: "suite.canvas", from: CGVector(dx: 0.65, dy: 0.325), to: CGVector(dx: 0.65, dy: 0.6), step: "moved")
-        XCTAssert(design.app.buttons["Undo Move"].waitForExistence(timeout: 5), "the move made no undo step")
+        XCTAssert(design.app.buttons["Undo Move"].waitForExistence(timeout: 5), "the press after a draw didn't move the ellipse")
+        XCTAssertFalse(design.app.buttons["Undo Add Ellipse"].exists, "the press after a draw drew another ellipse")
         // Its bottom-right handle sits on that corner.
         design.drag(on: "suite.canvas", from: CGVector(dx: 0.75, dy: 0.725), to: CGVector(dx: 0.85, dy: 0.8), step: "resized")
         XCTAssert(design.app.buttons["Undo Resize"].waitForExistence(timeout: 5), "the handle drag didn't resize")
@@ -111,6 +118,16 @@ final class DesignJourneyTests: XCTestCase {
         design.app.typeText("\r")
         XCTAssert(design.app.buttons["Undo Add Text"].waitForExistence(timeout: 5), "typing text made no undo step")
         design.shot("text-committed")
+        expectMove(design, after: "placing text")
+        // The next press, just inside the small text box, moves it instead of placing more text.
+        let canvas = design.element("suite.canvas")
+        let text = canvas.coordinate(withNormalizedOffset: CGVector(dx: 0.2, dy: 0.75)).withOffset(CGVector(dx: 6, dy: 4))
+        text.press(forDuration: 0.1, thenDragTo: text.withOffset(CGVector(dx: 40, dy: 0)))
+        XCTAssert(design.app.buttons["Undo Move"].waitForExistence(timeout: 5), "the press after placing text didn't move it")
+        XCTAssertFalse(design.element("design.text").exists, "the press after placing text started another text edit")
+        design.shot("text-moved")
+        design.click("Undo Move", in: .window, step: "text-move-undone")
+        XCTAssert(design.app.buttons["Undo Add Text"].waitForExistence(timeout: 5), "undoing the text move lost Add Text")
 
         design.click("Undo Add Text", in: .window, step: "undone")
         XCTAssert(design.app.buttons["Redo Add Text"].waitForExistence(timeout: 5), "Undo didn't undo the text")
@@ -128,6 +145,22 @@ final class DesignJourneyTests: XCTestCase {
         let reopened = Journey("Design", self, arguments: ["-DesignOpenFile", file.path])
         XCTAssert(reopened.app.windows["journey.design"].waitForExistence(timeout: 30), "journey.design didn't reopen")
         reopened.shot("reopened")
+    }
+
+    /// The tool rail shows Move as the picked tool and the status line names Move, checked for
+    /// up to three seconds after `action`.
+    @MainActor private func expectMove(_ design: Journey, after action: String) {
+        let move = design.element("suite.tools").buttons["Move"]
+        let status = design.element("design.status.tool")
+        XCTAssert(status.waitForExistence(timeout: 5), "no tool in the status line (design.status.tool)")
+        var picked = false
+        for _ in 0..<10 {
+            picked = move.isSelected && ((status.value as? String) == "Move" || status.label == "Move")
+            if picked { break }
+            Thread.sleep(forTimeInterval: 0.3)
+        }
+        XCTAssert(move.isSelected, "the tool rail doesn't show Move picked after \(action)")
+        XCTAssert(picked, "the status line shows \(status.label) \(String(describing: status.value)), not Move, after \(action)")
     }
 
     /// Clicks the panel tab titled `title` (a segment, whatever role the system gives it).

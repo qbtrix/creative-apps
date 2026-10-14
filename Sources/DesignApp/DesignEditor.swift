@@ -37,6 +37,7 @@ struct DesignEditor: View {
             ViewerStatusBar(zoom: model.isOpen ? zoom : 0, size: model.selectedPage?.sizeText ?? "No file open") {
                 if let note { Text(note) }
                 Text(model.tool.title)
+                    .accessibilityIdentifier("design.status.tool")
             }
         }
     }
