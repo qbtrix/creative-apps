@@ -2112,3 +2112,90 @@ popover writes the asset's payload into the host document and stores its
 the host calls `linking.status`; `.updateAvailable` shows the mark, Update
 replaces the payload in one undo step and stores `linking.updated`.
 `.missing` keeps the last copy and says so.
+
+---
+
+## 6. Look
+
+The suite look is `docs/design.md`. The house reference for every
+inspector-like surface is Flare's easing editor: `StudioScrubRow` for
+numbers, `ChoiceChips` and `PresetGrid` for presets, flat filled controls,
+color only for state. This section says what AfterGlow adds. It edits no
+shared doc: the `docs/design.md` additions in 6.4 land with the home
+feature's last task (owned there, section 8), after SuiteUI's suite-record
+wave, so the two never touch the file in the same wave.
+
+### 6.1 Screens and their components
+
+Component names are SuiteUI unless marked **new** (a `needs-ui` issue on
+`line:suiteui`, 6.3) or system.
+
+| Screen | Window | Region | Components |
+|---|---|---|---|
+| Home | `Window("AfterGlow", id: "home")`, `SuiteWindow` (follows the system appearance; it is a content window, not an editor), minimum 880 × 560, launch 1000 × 640 (#715's numbers) | Sidebar: Home, Assets, then APPS (the five, each with a running dot; a click filters the recents, a double-click switches) | `SidebarSection`, `SidebarRow` with the **new** trailing accessory slot for the running dot |
+| | | New row: five tiles with their presets | **new** `AppTile` (app symbol, title, `ChoiceChips` of presets under it, disabled reason, progress ring after 100 ms); `ChoiceChips` |
+| | | Recents: header, app filter chips, grid | `Text` in `SuiteFont.sectionCaps`; `ChipRow` (one chip per app plus All); `ThumbnailGrid` with **new** `ThumbnailBadges` app symbol and "Missing" warning badge; `.searchable` in the toolbar |
+| | | Empty, error | `EmptyStateView` ("No recent work yet…", Open… prominent); the missing-file message in place under the card (Library's **requested** `InlineNotice`, S-L4 in #769) |
+| | | Inspector (selected card) | `InspectorHeader` (name, app, modified, size), `InspectorAction` (Open, Open In ▸, Show in Finder, Remove from Recents) |
+| | | Toolbar | Open… (`ToolbarAction`), search, the inspector toggle; "Preview data" pill while `isPreview` |
+| Assets page | the home window's content when Assets is selected | Kind picker, grid, colours | `Picker(.segmented)` (All, Colours, Vector, Images, Animations); `ThumbnailGrid`; **new** `SwatchChip` grid for colours (swatch, hex, P3 badge) |
+| | | Inspector (selected asset) | `InspectorHeader` (kind, revision, "From Cards.design"), `InspectorColorRow` for a colour, `InspectorAction` (Place In ▸, Copy, Remove) |
+| Settings | `Settings` scene, `TabView` with General and one tab per app | Each tab is a `Form` | `Picker` (units; autosave 10 s, 30 s, 1 min, 5 min), `Toggle` (check for updates), `Button` (Check Now, Show Welcome Again); per-app tabs: the app's default New preset (`Picker`) and "At launch: reopen last documents / start empty" (`Picker(.radioGroup)`) |
+| Onboarding | `Window` 720 × 520, opened once | Three pages | system `VStack` with `SuiteFont`; page 1: the five app symbols and names; page 2: `ChoiceChips` (Animation, Design, Photos, Motion, Everything); page 3: three sample `Button`s; Continue (prominent), Skip |
+| Update | sheet on the home window | Offer, progress, error | `Text` (version, notes in a `ScrollView`), `ProgressView`, Install and Relaunch (prominent), Later; error with `stateError` and its symbol |
+| Inside each app | the app's own menu bar | Window > Switch To ▸, File > Open In ▸, AppName > Settings… | system `Menu`/`Button` in `SuiteCommands` |
+| | colour popovers (Flare FILL, Design fill, Photo foreground) | SUITE COLOURS section | **new** `SwatchChip` row; "Add to Suite Colours" `InspectorAction` |
+| | Flare and Halo layer rows | linked asset | **new** `LayerList` accessory (link symbol; `stateWarning` triangle with "Update available"); SuiteUI's planned `LayerList` (#765 wave 2 lists-and-layers) |
+
+### 6.2 Menus
+
+Every item works or is disabled with a reason, never hidden (design.md
+Commands).
+
+- **AfterGlow** (launcher): About AfterGlow, Check for Updates…, Settings… ⌘,, Hide, Quit ⌘Q.
+- **File**: New ▸ (New Animation, New Design, New Image, Import Photos…, New Composition), Open… ⌘O (routes by type), Open Recent ▸ (all apps, 20 newest, Clear Menu), Close ⌘W.
+- **Edit**: Undo/Redo (Remove from Recents is undoable), Cut, Copy (a selected asset), Paste (into Assets: Add from Clipboard), Delete (Remove from Recents / Remove Asset), Select All.
+- **View**: Show Sidebar, Show Inspector ⌥⌘I, Larger Thumbnails ⌘+, Smaller Thumbnails ⌘−.
+- **Window**: Switch To ▸ (Home ⌃⌘0, Flare ⌃⌘1, Design ⌃⌘2, Photo ⌃⌘3, Library ⌃⌘4, Halo ⌃⌘5), Assets ⌥⌘A, then the system items.
+- **Help**: AfterGlow Help (system).
+- **In each app, added by `SuiteCommands`**: Window > Switch To ▸ (the same six, the current app checked and disabled "You're in Flare."); File > Open In ▸ (the readers of the front document, else disabled "No other app opens <type name> files."); <App> > Settings… ⌘, (opens AfterGlow Settings at that app's tab); <App> > AfterGlow Home ⌃⌘0. Library adds Photo > Edit in Photo (⌘E) through its own adoption task; Design adds Object > Add to Assets; Flare and Halo add Object > Update Linked Asset.
+
+Control-Command with a digit is not one of the standard shortcuts design.md
+reserves; BU-1's `SuiteCommandsTests` checks that no app's menus already
+bind ⌃⌘0–⌃⌘5.
+
+### 6.3 What SuiteUI needs to add (filed by the home and shared-assets features as `needs-ui`)
+
+| Component | For | Spec |
+|---|---|---|
+| `AppTile` | home New row | A `Button` whose label is the app symbol (32 pt), title in `SuiteFont.body` semibold, and an optional `ChoiceChips` under it; flat `panel` fill, radius `SuiteRadius.card`; disabled at 40% with `.help(reason)`; a `ProgressView` ring replaces the symbol while launching. Goldens in four appearances (QB-V5) |
+| `ThumbnailBadges` app symbol + missing | recents grid | Extends the existing `ThumbnailBadges`: a leading app symbol badge and a trailing `stateWarning` triangle with "Missing". Library's S-L2 (`ThumbnailGrid` hooks) is the same file: one issue, filed against Library's |
+| `SidebarRow` trailing accessory | running dot | A 6 pt dot in `textSecondary` (running) next to the title; the dot has an accessibility value "Running" |
+| `SwatchChip` | Assets page, colour popovers | 24 pt rounded swatch (radius `SuiteRadius.row`) with the hex under it in `SuiteFont.caption` tabular; a "P3" caption badge for Display P3 colours; selected = `stateSelected` outline |
+| `LayerList` accessory | link mark on layer rows | The planned `LayerList` (#765) gains a trailing accessory slot; the suite puts the `link` symbol there, or the `stateWarning` triangle when an update is available |
+
+None of these is in #765's plan; each is a `needs-ui` issue filed by the
+feature that first needs it (home: `AppTile`, `ThumbnailBadges`, `SidebarRow`
+accessory; shared-assets: `SwatchChip`; linked-assets: `LayerList`
+accessory). Until it merges, the feature uses a plain SwiftUI placeholder
+and keeps going (CLAUDE.md).
+
+### 6.4 Additions to `docs/design.md` (a new "AfterGlow" section)
+
+1. **One family, one mark per app.** In UI each app is its SF Symbol and
+   name: Flare `scribble.variable`, Design `square.on.circle`, Photo
+   `paintbrush.pointed`, Library `photo.on.rectangle.angled`, Halo
+   `film.stack`, AfterGlow `square.grid.3x3.square`. SF Symbols are never
+   used as Dock icons (their license reserves them for UI); Dock icons come
+   from `Bundle/Icons/` (art: Q4).
+2. **The home is a content window.** It follows the system appearance; the
+   editors stay dark (Editor shell). Cards and tiles are flat content, no
+   glass; the sidebar and toolbar are the system's.
+3. **Cross-app commands live in the same place in every app**: Window >
+   Switch To, File > Open In, <App> > Settings…, Edit > Paste with the
+   suite's refusal text. Never a toolbar-only route.
+4. **Moving work keeps its memory**: a linked item shows the `link` symbol;
+   "Update available" uses `stateWarning` with its triangle; a missing
+   source says "using the last copy" in `textSecondary`.
+5. **A hand-off is never silent**: the target app comes forward; if it
+   takes longer than 100 ms the source shows progress (QB-L9).
