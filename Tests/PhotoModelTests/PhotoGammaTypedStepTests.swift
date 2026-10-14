@@ -94,3 +94,38 @@ import Testing
         #expect(stepped(from: 0.95, by: -10 * GammaTrack.step) < 0.91)
     }
 }
+
+/// A Shift-sized step toward 1 from just outside the band (1.11, 0.9) stops
+/// at 1 instead of crossing it to the far side (#618).
+@Suite struct PhotoGammaOutsideBandCoarseStepTests {
+    private func stepped(from gamma: Double, by delta: Double) -> Double {
+        GammaTrack.snappedGamma(atPosition: GammaTrack.steppedPosition(
+            from: GammaTrack.position(ofGamma: gamma), by: delta))
+    }
+
+    @Test(arguments: [1.10, 1.11, 1.12])
+    func aShiftDecrementFromJustAboveTheBandStopsAtOne(_ gamma: Double) {
+        #expect(stepped(from: gamma, by: -10 * GammaTrack.step) == 1)
+    }
+
+    @Test(arguments: [0.91, 0.90])
+    func aShiftIncrementFromJustBelowTheBandStopsAtOne(_ gamma: Double) {
+        #expect(stepped(from: gamma, by: 10 * GammaTrack.step) == 1)
+    }
+
+    @Test func aStepRightThenShiftLeftReturnsToOne() {
+        let right = GammaTrack.steppedPosition(from: 0, by: GammaTrack.step)
+        let back = GammaTrack.steppedPosition(from: right, by: -10 * GammaTrack.step)
+        #expect(back == 0)
+    }
+
+    @Test func aStepThatStopsShortOfOneStillMovesOneStep() {
+        #expect(GammaTrack.steppedPosition(from: 0.5, by: -0.1) == 0.5 - 0.1)
+        #expect(GammaTrack.steppedPosition(from: -0.5, by: 0.1) == -0.5 + 0.1)
+    }
+
+    @Test func aShiftStepFromOneStillLeavesTheDetent() {
+        #expect(stepped(from: 1, by: 10 * GammaTrack.step) > 1.1)
+        #expect(stepped(from: 1, by: -10 * GammaTrack.step) < 0.91)
+    }
+}
