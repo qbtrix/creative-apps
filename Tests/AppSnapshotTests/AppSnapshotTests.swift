@@ -46,7 +46,7 @@ import PhotoModel
         try open.newCanvas(width: 1920, height: 1080)
         try snapshotStates(
             "photo", empty: PhotoEditor(model: PhotoWorkspace()),
-            open: PhotoEditor(model: open, image: try photoImage(open), zoom: 0.5))
+            open: PhotoEditor(model: open, tiles: try photoTiles(open), zoom: 0.5))
     }
 
     @Test func library() throws {

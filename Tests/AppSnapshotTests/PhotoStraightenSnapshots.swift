@@ -28,10 +28,10 @@ import Testing
         try model.open(rgba8: bytes, width: w, height: h, name: "horizon.png")
         let draft = StraightenDraft(degrees: 7.5, cropToFit: true)
         let frame = try #require(model.straightenFrame(degrees: draft.degrees, cropToFit: draft.cropToFit))
-        let image = try photoImage(model)
+        let tiles = try photoTiles(model)
         for scheme in [ColorScheme.light, .dark] {
             let view = ZStack(alignment: .top) {
-                PhotoEditor(model: model, image: image, renderMilliseconds: 8, zoom: 1, straighten: draft)
+                PhotoEditor(model: model, tiles: tiles, renderMilliseconds: 8, zoom: 1, straighten: draft)
                 StraightenSheet(draft: draft, frame: frame)
                     .background(SuiteColor.panel, in: .rect(cornerRadius: SuiteRadius.large))
                     .padding(.top, SuiteSpacing.xxl)

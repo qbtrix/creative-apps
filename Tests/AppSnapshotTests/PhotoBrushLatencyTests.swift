@@ -4,13 +4,13 @@
 // State, which has a get and a set but no in-place modify, so the drag
 // mutates a copy while State keeps the old value (StateBox stands in for it;
 // CanvasRenderer's in-flight render holds one the same way). CanvasRenderer
-// then renders after the frame it keeps (PhotoRenderer.render) and wraps the
-// bytes in a CGImage (CanvasRenderer.image). The events are 120 steps of one
+// then renders the tiles damaged since the revision it shows
+// (PhotoRenderer.update) and makes their images (CanvasTiles.apply). The events are 120 steps of one
 // steady stroke, each rendered before the next, the case where the renderer
 // keeps up. The test prints p50 and p95 of each part as one BRUSH-LATENCY
 // line and writes it to .build/snapshots/photo-brush-latency.txt, with the
 // stroke's first event and its mouse-up. Not timed: SwiftUI's diff and draw,
-// and Core Animation taking each new full-size CGImage. macOS only.
+// and Core Animation taking each new tile image. macOS only.
 //
 // Budgets, p50 per event. A 60 Hz frame is 16 ms; half of it is left for
 // what this test can't time, so in a release build the timed parts get 8 ms.
@@ -40,14 +40,15 @@ import Testing
     static let dragBudget = 3.0
     static let totalBudget: Double? = config == "release" ? 8 : nil
 
-    @Test func aBrushDragEventBecomesAFrameWithinBudget() async throws {
+    @MainActor @Test func aBrushDragEventBecomesAFrameWithinBudget() async throws {
         let clock = ContinuousClock()
         var open = PhotoWorkspace()
         try open.newCanvas(width: 4000, height: 3000)
         open.selectTool(.brush)
         let state = StateBox(open)
         var started = clock.now
-        var frame = try await PhotoRenderer.render(state.value)
+        let tiles = CanvasTiles()
+        var shown = try await PhotoRenderer.update(state.value, since: nil).revision
         let firstFrame = milliseconds(clock.now - started)
         let path = (0...120).map { Mask.Point(x: 400 + 14 * Double($0), y: 1500 + 250 * sin(Double($0) / 12)) }
 
@@ -57,12 +58,12 @@ import Testing
             let t0 = clock.now
             state.drag(from: i == 0 ? to : path[i - 1], to: to)
             let t1 = clock.now
-            let next = try await PhotoRenderer.render(state.value, after: frame)
+            let next = try await PhotoRenderer.update(state.value, since: shown)
             let t2 = clock.now
-            let picture = CanvasRenderer.image(next)
+            tiles.apply(next)
             let t3 = clock.now
-            #expect(picture != nil)
-            frame = next
+            #expect(tiles.handedBytes == next.tiles.reduce(0) { $0 + $1.rgba8.count })
+            shown = next.revision
             guard i > 0 else {
                 strokeStart = milliseconds(t1 - t0)
                 continue
@@ -81,7 +82,7 @@ import Testing
         }
         let report = [
             "BRUSH-LATENCY config=\(Self.config) canvas=4000x3000 events=\(total.count) ms per event:",
-            split("drag", drag) + ",", split("render", render) + ",", split("cgimage", image) + ",",
+            split("drag", drag) + ",", split("render", render) + ",", split("tiles", image) + ",",
             split("total", total), "| stroke first drag \(format(strokeStart)), mouse-up \(format(strokeEnd)),",
             "first frame \(format(firstFrame)) | budget p50 drag <= \(format(Self.dragBudget)),",
             "total <= \(Self.totalBudget.map(format) ?? "report only (debug)")",

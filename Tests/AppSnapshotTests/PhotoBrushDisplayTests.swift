@@ -1,11 +1,12 @@
 // PhotoBrushDisplayTests.swift: what one brush drag event costs on its way to
 // the screen, on a 4000 x 3000 image, through the window's own path: the drag
-// on State's copy (StateBox), CanvasRenderer.show, then the CGImage the canvas
-// view gets (`renderer.image`). 120 events of one fast stroke; each that
+// on State's copy (StateBox), CanvasRenderer.show, then the tile images the
+// canvas view's layers get (`renderer.tiles`, attached to a TileCanvasView as
+// in the window). 120 events of one fast stroke; each that
 // moves the revision is shown before the next, as the window does. Per event
 // it measures wall time until the new picture is on the renderer, the bytes
-// malloc hands out to that event's work, and the bytes of the new picture
-// the view must draw. A second pass calls the same pieces one by one to say
+// malloc hands out to that event's work, and the bytes of the new tile
+// images the view must draw. A second pass calls the same pieces one by one to say
 // where the bytes go. Report: one BRUSH-DISPLAY line in
 // .build/snapshots/photo-brush-display.txt, inlined by the contact sheet.
 //
@@ -19,7 +20,7 @@
 // Animation. A debug build (CI's `swift test`) runs CoreRaster's per-pixel
 // loops about 20x slower, so the tile render alone outruns any debug budget
 // there; debug time is reported against the rubric's 10x reference, not
-// asserted. The byte budget is a known issue until the canvas shows tiles.
+// asserted.
 //
 // The byte count comes from libmalloc's `malloc_logger` hook (what malloc
 // stack logging uses), counting only allocations made under the task-local
@@ -54,6 +55,8 @@ import Testing
         let state = StateBox(open)
         let split = try await whereTheBytesGo()
         let renderer = CanvasRenderer()
+        let view = TileCanvasView(frame: CGRect(x: 0, y: 0, width: 1000, height: 750))
+        renderer.tiles.attach(view)
         renderer.show(state.value)
         await nextPicture(renderer)
         let clock = ContinuousClock()
@@ -64,7 +67,6 @@ import Testing
         AllocationCounter.install()
         defer { AllocationCounter.uninstall() }
         for (i, to) in Self.path.enumerated() {
-            let before = renderer.image
             AllocationCounter.reset()
             let t0 = clock.now
             let t1 = AllocationCounter.$counting.withValue(true) {
@@ -79,13 +81,13 @@ import Testing
             await nextPicture(renderer)
             let t2 = clock.now
             let bytes = AllocationCounter.bytes
-            let image = try #require(renderer.image, "\(renderer.failure ?? "no picture")")
+            #expect(renderer.failure == nil && renderer.revision == state.value.revision, "\(renderer.failure ?? "")")
             let dirtyPixels = PhotoRenderer.tiles(of: canvas, in: state.value.damage(since: shown))
                 .reduce(0) { $0 + $1.width * $1.height }
             shown = state.value.revision
             guard i > 0 else { continue }  // the stroke's first event, like PhotoBrushLatencyTests
-            let newPicture = image === before ? 0 : image.bytesPerRow * image.height
-            let ms = (drag: milliseconds(t1 - t0), total: milliseconds(t2 - t0), render: renderer.frame?.milliseconds ?? 0)
+            let newPicture = renderer.tiles.handedBytes
+            let ms = (drag: milliseconds(t1 - t0), total: milliseconds(t2 - t0), render: renderer.lastMilliseconds ?? 0)
             drag.append(ms.drag)
             render.append(ms.render)
             handOff.append(ms.total - ms.drag - ms.render)
@@ -112,7 +114,7 @@ import Testing
             ms("total", total) + " ms (" + ms("drag", drag) + ",", ms("render", render) + ",", ms("hand-off", handOff) + ")",
             "| " + mb("allocated", allocated) + " MB,", mb("picture", picture) + " MB,",
             "dirty p50 \(Int(percentile(dirty, 0.5))) px | where the bytes go, MB per event p50:",
-            "drag \(format(split.drag / 1e6)), render \(format(split.render / 1e6)), cgimage \(format(split.image / 1e6))",
+            "drag \(format(split.drag / 1e6)), render \(format(split.render / 1e6)), tiles \(format(split.image / 1e6))",
             "| budget per dirty px: allocated <= \(Self.allocatedPerDirtyPixel) B (+ 1 MB an event),",
             "picture <= \(Self.picturePerDirtyPixel) B",
             "(\(overBudget.count) of \(total.count) events over), total p95 <=",
@@ -123,36 +125,33 @@ import Testing
         try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
         try Data((report + "\n").utf8).write(to: folder.appending(path: "photo-brush-display.txt"))
 
-        // Known issue until the canvas takes tiles instead of one full-size picture.
-        withKnownIssue("every event still copies and hands over the whole canvas") {
-            #expect(overBudget.count == 0, "first event over the byte budget: \(overBudget.first ?? 0); \(report)")
-        }
+        #expect(overBudget.count == 0, "first event over the byte budget: \(overBudget.first ?? 0); \(report)")
         if let budget = Self.timeBudget { #expect(percentile(total, 0.95) <= budget, "\(report)") }
     }
 
-    /// The window's pieces called one at a time, the frame before kept alive
-    /// as CanvasRenderer keeps it: median bytes per event of the drag on
-    /// State's copy, PhotoRenderer.render and CanvasRenderer.image.
+    /// The window's pieces called one at a time: median bytes per event of
+    /// the drag on State's copy, PhotoRenderer.update and CanvasTiles.apply.
     private func whereTheBytesGo() async throws -> (drag: Double, render: Double, image: Double) {
         var open = PhotoWorkspace()
         try open.newCanvas(width: 4000, height: 3000)
         open.selectTool(.brush)
         let state = StateBox(open)
-        var frame = try await PhotoRenderer.render(state.value)
+        let tiles = CanvasTiles()
+        var shown = try await PhotoRenderer.update(state.value, since: nil).revision
         var drag: [Double] = [], render: [Double] = [], image: [Double] = []
         AllocationCounter.install()
         defer { AllocationCounter.uninstall() }
         for (i, to) in Self.path.prefix(21).enumerated() {
             let d = AllocationCounter.count { state.drag(from: i == 0 ? to : Self.path[i - 1], to: to) }
-            guard state.value.revision != frame.revision else { continue }
+            guard state.value.revision != shown else { continue }
             AllocationCounter.reset()
-            let previous = frame
+            let since = shown
             let next = try await AllocationCounter.$counting.withValue(true) {
-                try await PhotoRenderer.render(state.value, after: previous)
+                try await PhotoRenderer.update(state.value, since: since)
             }
             let r = AllocationCounter.bytes
-            let picture = AllocationCounter.count { _ = CanvasRenderer.image(next) }
-            frame = next
+            let picture = AllocationCounter.count { tiles.apply(next) }
+            shown = next.revision
             guard i > 0 else { continue }
             drag.append(Double(d))
             render.append(Double(r))
@@ -163,11 +162,11 @@ import Testing
     }
 }
 
-/// Waits until the renderer's picture or failure next changes.
+/// Waits until the renderer's shown revision or failure next changes.
 @MainActor private func nextPicture(_ renderer: CanvasRenderer) async {
     await withCheckedContinuation { done in
         withObservationTracking {
-            _ = renderer.image
+            _ = renderer.revision
             _ = renderer.failure
         } onChange: {
             done.resume()
