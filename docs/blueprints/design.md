@@ -267,3 +267,70 @@ Sources (the first two are the ones `docs/priorities.md` used for Design):
 | Smart guides and snapping | *inferred* | missing | none (first item after v1) |
 | Boolean operations, masks | *inferred* | missing | none |
 | Prototype links and a player | S3 | missing | none |
+
+---
+
+## 4. Journeys
+
+**Files.** `project.yml`'s Journey template compiles `UITests/Journey.swift`
+plus `UITests/<target>.swift` only, so today every feature would append to
+one file. SuiteUI #333 (QH-4) changes the template to `UITests/Journey*.swift`
+plus `UITests/<target>*.swift` and adds `Journey+Input.swift` (keys with
+modifiers, velocity drags, `perf()`). Each Design feature then owns its own
+`UITests/DesignJourneyTests+<Area>.swift` with its own `XCTestCase` class.
+If #333 is still open when wave 0 starts, D0-6 makes the same one-line
+template change itself (project.yml is not protected) and the helpers stay
+with #333 (section 9, Q1).
+
+**Modes.** A journey launches with `-DesignFixture <name>` (D0-6: the window
+opens that fixture as an unsaved file). It runs on `-DesignServices fake`
+while its feature builds the UI, and on the live services once the feature's
+live type lands; the feature's last PR removes the flag. Every step takes a
+`shot`. Controls carry identifiers `design.<area>.<name>`; titles that change
+(Undo names) are found by identifier (`design.bar.undo`).
+
+**Waiting.** No journey asserts timing through an XCUI query: state is
+awaited with `waitForExistence` or a value predicate (5 s, as today), and
+timing comes from the probe's JSON (section 7).
+
+**Fixtures** (`DesignFixtures`, DesignModel, D0-6; built in code, never read
+from disk):
+
+| Fixture | Contents | Used by |
+|---|---|---|
+| `empty` | New File: one page, the "Desktop" frame | J1–J4 |
+| `cards` | Desktop frame 1440 × 1024; inside it rectangles "A" (100, 100, 100 × 80), "B" (300, 140, 200 × 80), "C" (700, 100, 100 × 120); text "Title" (100, 40, 200 × 32); group "Pair" holding two ellipses; rectangle "Locked" (locked); rectangle "Hidden" (hidden) | J5–J15 |
+| `two-pages` | `cards` plus a second page "Mobile" 390 × 844 with a frame "Phone" | J12, J16 |
+| `crowd` | 2,000 layers: 40 frames of 49 rectangles and one text each | P1–P4, model budgets |
+| bad files | written by the test into its temp folder: `not json`, `{"version":2,"pages":[]}`, `{"version":1,"pages":[]}`, a file repeating an id | J16 |
+
+### Tier-1 journeys
+
+| # | Test (file, feature) | Fixture | Steps (each one shot) | Asserts | Empty, error and loading states passed |
+|---|---|---|---|---|---|
+| J0 | `testLaunchShowsWindowShell` (`DesignJourneyTests.swift`, exists) | none | launch | `expectEditorShell()`; canvas empty state with New File; panel "No Selection" | empty: no file open |
+| J1 | `testEveryMenuOpens` (exists; D0-5 extends) | empty | open File, Edit, Page, Object, View; Page > Add Page | each menu's items equal section 6's menu list, enabled or disabled with a tooltip; "Undo Add Page" | empty selection: Edit and Object items disabled with reasons |
+| J2 | `testNewFileAndEveryTool` (exists) | empty | ⌘N; `clickEachTool()` | each enabled tool picked; Pen listed disabled with its reason | – |
+| J3 | `testDrawShapesAddTextAndSave` (exists; the core loop) | empty | Frame, Rectangle, Ellipse drags; move; resize; Shift-click; Layers eye; Text "Hello"; undo; redo; ⌘S to `-DesignSaveTo`; relaunch with `-DesignOpenFile` | each step's undo name; the reopened file shows its layers | empty canvas, text edit open |
+| J4 | `testZoomPanFitAndZoomToSelection` (`+Select`, F1) | cards | ⌘+ twice; Space-drag 200 pt; ⌘0; select "C"; View > Zoom to Selection (⌥⌘2); Escape; check Zoom to Selection is off | zoom pill 200% after two steps from 100%; ruler origin label changed after the pan; "Fit" zoom after ⌘0; after Zoom to Selection "C" is centered (its frame's center within 2 pt of the canvas center, read from `design.canvas.selection` frame) | nothing selected: Zoom to Selection disabled with "Select a layer first." |
+| J5 | `testMarqueeMoveResizeSeveral` (`+Select`, F1) | cards | drag a marquee from empty canvas around "A" and "B"; drag "A" 40 pt right; drag the box's bottom-right handle out 20 pt; ⇧→; ⌫; ⌘Z | header reads "2 Layers" after the marquee and "Locked" is not included; "Undo Move" then "Undo Resize", "Undo Nudge", "Undo Delete" each one step; after ⌘Z both layers are back | marquee over only locked and hidden layers selects nothing (Escape state) |
+| J6 | `testAlignAndDistributeSeveral` (`+Select`, F1; replaces `testAlignALayer` steps for several) | cards | select A, B, C; Align Top from the inspector; Object > Distribute Horizontally; select A and B; Distribute | Edit menu "Undo Align Top", then "Undo Distribute Horizontally"; with two selected Distribute is disabled with "Select 3 or more layers." | refusal: disabled with reason |
+| J7 | `testDuplicateAndOptionDrag` (`+Arrange`, F2) | cards | select "A"; ⌘D; Option-drag "A" 100 pt down; select "Locked" from Layers; ⌘D | Layers shows "A" three times; "Undo Duplicate" after each; the copy of "Locked" is unlocked; nothing selected: Duplicate disabled with "Select a layer first." | empty selection |
+| J8 | `testCutCopyPasteAcrossWindows` (`+Arrange`, F2) | cards | select "Pair"; ⌘C; ⌘V; ⌘X on "B"; ⌘N (a second window); ⌘V; rename "A" in Layers, select its text, ⌘C, ⌘V | pasted "Pair" offset 10, 10 with two children; "Undo Paste", "Undo Cut"; the second window holds "B"; the rename field pasted text and the layer count is unchanged | Paste disabled with "The pasteboard holds no Design layers." after copying plain text |
+| J9 | `testGroupAndUngroup` (`+Arrange`, F2) | cards | select A and B; ⌘G; ⌥⌘G is not used; ⇧⌘G; select A and "Title" across parents | group row with two children and "Undo Group"; after ⇧⌘G the row is gone and "Undo Ungroup"; across parents Group is disabled with "Select layers that share a parent." | refusal |
+| J10 | `testInspectorStyleRows` (`+Style`, F3) | cards | select "A"; Corner radius 12 by typing; drag Opacity to 50%; add a stroke, width 4 with → four times; select "Hidden" from Layers | each value reads back; one undo step per row ("Undo Change Corner Radius", "Undo Change Opacity", "Undo Change Stroke"); keyboard parity on the width row; a hidden layer's rows are disabled with "Show Hidden to change it." | disabled with reason |
+| J11 | `testTextFontAndSize` (`+Style`, F3) | cards | select "Title"; size 32; weight Bold; alignment Center; zoom to 50%; double-click "Title", type, Return | rows read back; the committed text's frame equals the editor's frame within 1 pt (no jump, #268); "Undo Edit Text" | text edit open |
+| J12 | `testLayersRenameReorderNest` (`+Layers`, F4) | two-pages | double-click "A" row, type "Avatar", Return; drag "C" above "B"; drag "Title" into "Pair"; Object > Arrange > Send to Back on "B"; hide "Pair" from its own row's eye; rename page "Mobile" to "Phone screens" | row reads "Avatar" ("Undo Rename Layer"); order C above B; "Title" nested under Pair; B last; Pair's eye toggled (#589); page renamed; each one step | empty-name rename refused, the row keeps its old name |
+| J13 | `testUndoInTextFieldsAndDirtyState` (`+Files`, F5) | cards | type in the X field and press ⌘Z inside the field; Escape; draw a rectangle; check the dot; ⌘S | ⌘Z in the field undid the typing, not a document step (#275); the top bar shows the unsaved dot after the draw and "Saved" after ⌘S (#270) | save in progress shows "Saving…" when slower than 100 ms (QB-L9) |
+| J14 | `testCloseWithUnsavedChanges` (`+Files`, F5) | cards | draw; ⌘W; Cancel; ⌘W; Don't Save | the alert names the file; Cancel keeps the window; Don't Save closes it | – |
+| J15 | `testEveryControlActsOrSaysWhy` (`+EveryControl`, D0-6) | cards | read `suite.controls`, click each enabled `design.*` control, Escape, ⌘Z | every enabled control changed the shot or a value; every disabled one has a reason. A sweep, never cited by the matrix | – |
+| J16 | `testOpenBadFiles` (`+Files`, F5) | bad files | launch with `-DesignOpenFile` on each | the alert reads "It is not a Design file.", "It was made by a newer version of Design (file version 2).", "It has no pages.", "It uses the id node-2 more than once."; the window stays empty | error |
+| P1 | `testCanvasDragLatency` (`+Perf`, F1) | crowd | four velocity drags of 600 pt at 300 pt/s: move a layer, draw a rectangle, resize, marquee; one Space-pan | at least 60 samples each; QB-L1 (section 7) | – |
+| P2 | `testScrubLatency` (`+Perf`, F3) | crowd | velocity drag on the Opacity bar and the X scrub field | at least 60 samples; QB-L2 | – |
+| P3 | `testLayerListScroll` (`+Perf`, F4) | crowd | scroll Layers end to end, all frames expanded | QD-L5 | – |
+| P4 | `testOpenLargeFile` (`+Perf`, F5) | crowd saved then reopened | ⌘O | progress within QB-L9; no stall over QB-L12 | loading |
+
+Tier-2 journeys, written with their packets: `testExportPNGSVGPDF`
+(`+Export`; from #418 (c), plus Cancel and a read-only folder),
+`testPenCornersAndCurves` (`+Pen`), `testComponentsCreateAndInsert`
+(`+Components`) and `testVariablesLightAndDark` (`+Variables`).
