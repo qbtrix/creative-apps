@@ -45,7 +45,7 @@ public protocol ShapeBuilding: Sendable {
                    autoKey: Bool, in engine: inout CommandEngine) throws
     /// Grouped "Edit Path" (direct select).
     func setPath(_ path: FlarePath, of item: StageAddress, in engine: inout CommandEngine) throws
-    /// Grouped "Move" (direct select of whole items).
+    /// Grouped "Move" (direct select of whole items) by (`dx`, `dy`) in the items' layer space, not scene points.
     func translate(_ items: [StageAddress], dx: Double, dy: Double, in engine: inout CommandEngine) throws
     /// Grouped "Delete".
     func delete(_ items: [StageAddress], in engine: inout CommandEngine) throws
