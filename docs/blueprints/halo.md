@@ -482,3 +482,85 @@ Sources (public, no product opened or run):
 
 "To file (L-1)" is a new `line:halo` issue this blueprint asks for; it is
 filed when the captain approves (section 9, Q4).
+
+---
+
+## 4. Journeys
+
+Every tier-1 feature has a journey: an XCUITest that launches the release
+bundle, works the window like a person, and shoots the whole window after
+every step (`docs/engineering.md`, Human-like UI tests). The app audit runs
+on every shot.
+
+**Files.** Today all Halo journeys live in `UITests/HaloJourneyTests.swift`,
+because `project.yml` compiles exactly one file per app. Once SuiteUI QH-4
+(#333) lands, each feature owns `UITests/HaloJourneyTests+<Area>.swift`
+with its own `XCTestCase` class, so two features never edit one journey
+file. Until then a feature's journey task waits on #333 (section 8).
+
+**Modes.** A journey first runs on `-HaloFixture <name>` (fake services) and
+is flipped to `-HaloSample <name>` (live services, same project) by the task
+that lands the live type. H-J12 runs live from its first PR.
+
+**Finding things.** By the title a person reads where there is one, else
+by identifier (`halo.<area>.<name>`). The viewer can't be read through
+pixels in XCUITest, so `halo.viewer.artboard` carries the Model's
+`viewerSummary` as its accessibility value ("Frame 30: Background, Badge,
+Title"), built and tested in HaloModel. Drags use normalized points inside
+`halo.viewer.artboard`, which map one to one onto composition pixels.
+
+**Waiting.** No journey asserts timing through an XCUI query. State changes
+are awaited with `waitForExistence` or a value predicate (2 s). Timing
+claims come from the frame probe's JSON once #330 lands (section 7).
+
+### Tier-1 journeys
+
+| # | Test (file, feature) | Launch | Steps (each one shot, named `halo-<step>`) | Asserts |
+|---|---|---|---|---|
+| H-J0 | `testLaunchShowsWindowShell` (`HaloJourneyTests.swift`, shipped; extended by W0) | none | launch | `expectWindowShell()`; the viewer's empty state "No Composition" with New Composition…; the inspector's "No Selection"; no audit count over baseline |
+| H-J1 | `testNewComposition` (`HaloJourneyTests.swift`, shipped; extended by W0) | none | New Composition…; type `abc` in Width; type `1080` in Width, `1920` in Height; pick 24 fps; Create | the problem "Width must be a whole number of pixels." and Create disabled; then Create enabled; inspector header reads "1080 × 1920" and "24 fps · 10 s"; sidebar row "Comp 1" |
+| H-J2 | `testLayersDrawAtThePlayhead` (`+Viewer`, viewer-playback) | `three-layers` | scrub to frame 12; scrub to frame 30; Layer > New > Solid | `halo.viewer.artboard` value "Frame 12: Background, Badge" (Title starts at 24; Rig is a null, never drawn); at 30 "Frame 30: Background, Badge, Title"; after New > Solid "…, Solid 1" on top and the layer list's first row "Solid 1" |
+| H-J3 | `testScrubAndSetInOutPoints` (`HaloJourneyTests.swift`, shipped as `testScrubTheTimeline`; extended by viewer-playback) | `three-layers` | select Badge in the timeline; scrub to 20; press I; scrub to 50; press O; scrub to 60 | timecode reads 00:00:00:20 then 00:00:02:02; Badge's span is 20–50 (row value "20 → 51"); at 60 the artboard value has no Badge |
+| H-J4 | `testPlayPauseLoopAndStep` (`+Playback`, viewer-playback) | `three-layers` | Space; wait 1 s; Space; → twice; Animation > Go to End; Loop off; Space; wait 4 s | play button value "Playing" then "Paused"; frame after pause f ≠ 0; after → → f + 2; at end the timecode reads 00:00:02:23; with Loop off playback stops on the last frame and the button reads "Paused" |
+| H-J5 | `testDragLayerToKeyPosition` (`+Drag`, layer-keys) | `keyed` | scrub to 12; drag Ball 100 px right in the artboard; open Edit; scrub to 0; drag Floor 50 px down | Ball's Position X row reads its frame-12 value + 100 and its key button "Keyed at this frame"; the Edit menu reads "Undo Move"; Floor's Position Y row moved by 50 and its key button reads "Not animated" (not animated layers move without keys); dragging empty surround selects nothing |
+| H-J6 | `testInspectorKeysTransform` (`+Inspector`, layer-keys) | `keyed` | select Ball; click Rotation's stopwatch; scrub to 20; drag the Rotation bar right; focus it, → twice, Shift-→; click Opacity's diamond at 20 | Rotation key button "Animated", then "Keyed at this frame" at 20; value steps +1, +1, +10 (`QB-F4`); diamonds on Ball's lane at 0, 20, 47; Opacity "Keyed at this frame"; Edit menu "Undo Add Key" |
+| H-J7 | `testEaseKeys` (`+Easing`, easing) | `keyed` | select Ball; in EASING click the row "Position X 0 → 24"; click Ease In and Out; drag curve handle 1; open Edit | the Animation > Keyframe Easing items are disabled with help "Select a key on the timeline first." before the row is picked; after the chip the row reads "Ease In and Out" and Ball's Position X at frame 12 reads 560.0 px (the eased midpoint equals the linear one for this symmetric curve, so the test also reads frame 6: below the linear 360.0 px); after the drag no chip is on and the row reads "Custom"; the Edit menu reads "Undo Keyframe Easing" |
+| H-J8 | `testUndoRedoEveryEdit` (`+History`, history-files) | `empty` | Layer > New > Solid; rename the composition "Intro"; Composition > Delete is disabled (one left); Composition > New, Create; Composition > Delete; ⌘Z; ⌘Z; ⇧⌘Z | after each edit the Edit menu names it ("Undo New Layer", "Undo Rename Composition", "Undo New Composition", "Undo Delete Composition"); the first ⌘Z brings the deleted composition back with its layers at its place in the sidebar; the second removes it; ⇧⌘Z restores it; scrubbing in between adds no step |
+| H-J9 | `testLayerHousekeeping` (`+Layers`, layer-panel) | `three-layers` | select Badge; Layer > Duplicate; rename "Badge copy" to "Badge 2" in the list; drag it to the bottom; Layer > Delete; ⌘Z | "Badge copy" appears above Badge; renamed; last in the list and drawn first (artboard value lists it first); gone, then back on ⌘Z; each step named in the Edit menu |
+| H-J10 | `testSaveAndReopen` (`+Files`, history-files) | `two-comps` with `-HaloSaveTo` | ⌘S; name "Spot"; Save; quit; relaunch with `-HaloOpenFile <saved path>`; File > Open Recent | the window title reads "Spot" with no unsaved dot; after reopen both compositions, their layers and Ball's keys are back and the history is empty (Undo disabled with "Nothing to undo."); Open Recent lists "Spot" |
+| H-J11 | `testOpenBadFiles` (`+FileErrors`, history-files) | none, then `-HaloOpenFile` per file | write four files in the test's temp folder (`not json`; `{"format":"halo","version":2}`; `{"format":"halo","version":1,"compositions":[{"id":"a"}]}`; 65 MB of spaces) and open each | each alert's text is `HaloFileError.message` for its case (not a Halo project; newer format 2; damaged with the reason; too large); after each, the empty state stays |
+| H-J12 | `testKeyLayerAndSave` (`HaloJourneyTests.swift`, core-loop; replaces the `XCTSkip`) | live, `-HaloSaveTo` | New Composition…, Create; Layer > New > Solid; scrub to 0; Position X stopwatch; scrub to 24; drag the solid 300 px right; Ease Out on its first key; Space, wait 1 s, Space; ⌘Z; ⇧⌘Z; ⌘S; relaunch on the file | each step on live services; Edit menu names along the way; the reopened file has Position X keys at 0 and 24 with Ease Out on the first |
+| H-J13 | `testEveryMenuOpens` (shipped) and `testEveryControlActsOrSaysWhy` (`+EveryControl`, W0) | `keyed` | open each menu; then read the `halo.controls` JSON (every `halo.*` control with enabled and help), click each enabled one, Escape, ⌘Z | every menu shot; each menu's item count equals section 6's menu list; every enabled control changed the shot or a value; every disabled one has help text (`QB-F1`). A sweep: the coverage matrix never cites it |
+
+### States each journey passes through
+
+| Journey | Empty | Error | Loading |
+|---|---|---|---|
+| H-J0, H-J1 | "No Composition" empty state with New Composition…; "No Selection" in the inspector | each `CompositionSettings.problems` line under the form, Create disabled | none |
+| H-J2 | a composition with no layers: the artboard shows the background and the value "Frame 0: no layers"; a frame where nothing is in its span reads the same | none (draw never fails) | none |
+| H-J3 | no layer selected: I and O are refused and the timeline's help says "Select a layer, then press I or O." | I after the out point (or O before the in point) is refused: the row keeps its span and `refusal` reads "The in point must come before the out point." | none |
+| H-J4 | no composition: Play disabled with "Create a composition first." | none | none |
+| H-J5 | a drag that starts on no layer moves nothing and adds no step | a drag on a layer outside its span can't hit it | the live preview while dragging (`viewerDrag`) is the in-between state; the probe's "preview before mouse-up" mark proves it once #330 lands |
+| H-J6 | no layer selected: the TRANSFORM group is replaced by "Select a layer to see its properties." | a typed `abc` in a row keeps the old value and shows "Rotation needs a number." under the row | none |
+| H-J7 | no keys on the layer: "Key a property to shape its easing."; keys but none picked: "Pick a key above." | setting easing with nothing selected is refused (the menu item is disabled with that reason) | none |
+| H-J8 | nothing to undo: Undo disabled, help "Nothing to undo." | none | none |
+| H-J9 | deleting the last layer leaves the timeline's empty text "No layers yet. Add one from Layer > New." | renaming to an empty name keeps the old one | none |
+| H-J10, H-J11 | a new project is "Untitled Project" until saved | save to a read-only folder: the title shows "Not saved" and an alert with the reason; open errors per `HaloFileError` | opening a large file shows progress in the viewer after 100 ms (`QB-L9`); the window stays responsive (decode runs off the main actor) |
+
+### Tier-2 journeys (v1, after the core loop)
+
+| # | Test (file, feature) | Launch | Steps | Asserts |
+|---|---|---|---|---|
+| H-J20 | `testRenderFrame` (`+RenderFrame`, render-out) | `keyed` | scrub to 12; ⌘R; scrub to 13 | the viewer shows the rendered image (`halo.viewer.rendered` exists) with the note gone (#457); after scrubbing it reads "Rendered frame is out of date." until ⌘R again |
+| H-J21 | `testRenderPNGSequence` (`+Render`, render-out) | `keyed` (48 frames) with `-HaloRenderTo` | File > Render…; PNG sequence, half size; Render; then start a movie render and Cancel | progress "Frame n of 48" then success with Reveal in Finder; 48 files `Bounce_0001.png` … `Bounce_0048.png` of 960 × 540; after Cancel no partial movie is left |
+| H-J22 | `testTextLayer` (`+Text`, text-layers) | `empty` | Layer > New > Text; type "Hello" in TEXT; size 96; empty the field and press Return | artboard value lists "Text 1: Hello"; Edit menu "Undo Edit Text"; the empty string is refused and "Hello" comes back |
+| H-J23 | `testParentAndBlend` (`+Parent`, layer-keys) | `parented` | select Ball; Parent → Rig; drag Rig 100 px right; Blend → Multiply; Parent → None | Ball moves with Rig (its own Position X row unchanged); the Blend row reads Multiply; clearing the parent keeps Ball where it is on screen; Ball's parent menu leaves out Ball itself and any layer following Ball |
+
+### Perf journeys (after QH-1 #330 and QH-4 #333)
+
+| # | Test | Launch | Steps | Budget (section 7) |
+|---|---|---|---|---|
+| H-P1 | `testViewerDragLatency` (`+Perf`, core-loop) | `reference` | four velocity-controlled drags of a layer across 600 pt at 300 pt/s | HB-U1, at least 60 samples per drag |
+| H-P2 | `testInspectorScrubLatency` (`+Perf`, core-loop) | `reference` | drag the Rotation bar | HB-U2 |
+| H-P3 | `testPlayheadScrubLatency` (`+Perf`, core-loop) | `reference` | drag the playhead end to end | HB-U3 |
+| H-P4 | `testPlaybackHoldsRate` (`+Perf`, core-loop) | `reference` | play 5 s at 30 fps | HB-U4 |
