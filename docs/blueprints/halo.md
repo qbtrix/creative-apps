@@ -2004,3 +2004,46 @@ before filing (section 9, Q6).
 | Timeline keys from the keyboard and VoiceOver | #63 | `easing` (keyboard parity on keys) | keys are selected from the EASING rows, which are keyboard reachable |
 | Rename message on a sidebar row | #577 | #139 (not v1) | the alert |
 | Rotated selection box, anchor mark | #273, #706 | `layer-keys` (polish) | axis-aligned `SelectionOutline`; no anchor mark |
+
+---
+
+## 9. Decisions and open questions for the captain
+
+### Calls this blueprint makes (overrule any of them)
+
+| # | Call | Why |
+|---|---|---|
+| D1 | Halo stays on `SuiteWindow` in v1 (sidebar of compositions, viewer, inspector) and uses the Studio rows inside the inspector | It works today, its journeys and audit baseline are built on it, and compositions want a sidebar; `EditorShell` has none and its timeline slot (#342) is open. See Q1 |
+| D2 | Undo keeps whole-document snapshots, 100 steps, marked `ponytail:` | #208's own call; Halo has no command engine in creative-core yet; HB-8 and HB-9 bound the cost |
+| D3 | Keys are FlareCore `Keyframe`s on the layer, with Flare's not-animated rule | One keyframe model in the suite; #207 and #428 already say so |
+| D4 | The viewer draws vectors live; the CoreRaster render is the reference every file is made from, and HF-1 holds them equal | Live scrub and playback without a pixel cache; one truth for output |
+| D5 | Space, arrows, Home, End, I and O act while the viewer or timeline has focus, not as menu key equivalents | Plain-key menu equivalents would fire while typing in a field |
+| D6 | Layer > Duplicate is ⇧⌘D; ⌘D stays Composition > Duplicate | ⌘D already ships for compositions. See Q7 |
+| D7 | The app runs on `.live` from W0, with every unbuilt command disabled and its reason as help; fixtures only by launch argument | No dead controls, and the window never shows fake data to a person |
+| D8 | v1 is section 1's line: tier 1 plus render, text, parenting, blend and the curve editor; effects, precomps, images, masks and autosave later | Section 3 |
+
+### Questions
+
+1. **Shell.** Keep `SuiteWindow` (D1), or move Halo to the dark `EditorShell`
+   like Photo, Design and Flare? Moving later costs one W0-sized PR; moving
+   now makes W0 depend on #342 (timeline slot) and puts the compositions in
+   a panel tab instead of a sidebar.
+2. **Dependency lines.** May I (or the lead) edit the `Depends on:` lines of
+   #38, #207 and #208 to the foundation feature issue, #428 to the
+   layer-keys feature issue, and take `needs-human` off #207 (section 8.1)?
+3. **Harness rank.** Halo's UI latency budgets need SuiteUI #330 (frame
+   probe, now p3) and its parallel journeys need #333 (QH-4, p1). Rank #330
+   p1 by dependency, or accept report-only UI budgets for Halo v1?
+4. **New issues.** File L-1 (layer delete, rename, reorder, duplicate; tier
+   1 by inference) on `line:halo`, and a `needs-ui` issue for timeline key
+   shapes by easing and selected keys (Flare's unfiled S10 and S11)?
+5. **Tier-2 scope.** Render (#429, #451) and text (#430) are in v1 because a
+   piece can't leave the app without render and most pieces carry a title.
+   Keep both, or cut text to v1.1?
+6. **Engine.** File the CoreRaster affine-sampling issue (section 8.4) on
+   creative-core now, and confirm creative-core#182 is still open? This
+   session could not read creative-core's issues.
+7. **⌘D.** Should ⌘D duplicate whatever has focus (the layer when the
+   timeline or layer list has it, the composition from the sidebar) instead
+   of D6's split?
+8. **Effects.** Confirm #39 (effects stack) is not v1.
