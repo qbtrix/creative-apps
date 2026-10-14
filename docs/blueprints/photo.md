@@ -1637,3 +1637,120 @@ extension PhotoWorkspace {
 | PJ-15 export size and formats | `ExportSizing` | `setExportOptions(_:)`, `exportSize(_:)`, `export(_:codec:)` |
 | PJ-16 eyedropper | `ColorSampling` | `setSampleSize(_:)`, `sample(at:)`, `drag` (eyedropper) |
 | PJ-17 layout | – | – (views only) |
+
+---
+
+## 6. Look
+
+Photo already follows `docs/design.md`'s Editor shell: dark in both
+appearances, hidden title bar, the 48 pt top bar, the docked rail, the
+canvas with rulers and a checkerboard, the 280 pt right panel with
+`SegmentedTabs`, and status pills. v2 keeps all of it. The house reference
+for every new control is Flare's easing editor (the Studio rows and chips in
+`docs/design.md`): `StudioScrubRow` / `InspectorSliderRow` bars for numbers
+in a range, `ScrubField` for exact coordinates, `ChoiceChips` / `PresetGrid`
+for one-of-a-few presets, `ChipRow` toggle chips for modes, `InspectorAction`
+for a full-width command, `InspectorSection` with uppercase caps headers.
+
+### 6.1 What Photo adds to `docs/design.md`
+
+These are rules for Photo's screens; SuiteUI's components carry the look.
+None needs a new token.
+
+1. **The panel has three tabs:** Adjust, Layers, History, in that order.
+   The tab bar never scrolls away.
+2. **Tool options lead the Adjust tab** and change with the tool: brush and
+   eraser (size, hardness, opacity, color), Marquee (shape chips, feather),
+   Crop (X, Y, W, H, aspect chips, swap), Eyedropper (sample size chips),
+   Free Transform (W %, H %, angle, Apply, Cancel). Exact coordinates (crop
+   X, Y, W, H) are `ScrubField`s two per row in a `Grid`, one decimal never
+   (whole pixels); ranges (feather, W %, H %, angle) are bar sliders with
+   their unit.
+3. **The Adjust tab edits what is selected.** With an adjustment layer
+   selected it shows only that layer's sections, under a header naming the
+   layer; otherwise the whole-image sections under the header "Image". The
+   header's info line says which ("Adjusts the layers below" / "Adjusts the
+   whole image"). People must never wonder which one a slider changes.
+4. **Layer rows** carry, left to right: the eye, a kind symbol
+   (`photo` for pixels, `slider.horizontal.3` for an adjustment), the name,
+   and a mask badge (`rectangle.dashed.badge.record`, filled while the mask
+   is the paint target, struck through while disabled). Each has a tooltip
+   and an identifier (`photo.layer.<id>.eye`, `.kind`, `.mask-badge`).
+5. **Overlay marks** are black-under-white like `SelectionOutline`, 1 device
+   pixel, never take a click (the canvas gesture does): marching ants for any
+   selection outline, the transform box with 8 square handles and a rotate
+   cursor zone, the brush cursor ring, the crop shade with its thirds and,
+   with an aspect lock, the aspect shown in a pill on the crop's top edge.
+6. **Unsaved state** is the top bar's save status (S6, #339): "Saved", the
+   unsaved dot with "Edited", "Edited, autosaved", "Not saved" in the error
+   color after a failed save. The window's close button shows the system's
+   edited dot too.
+7. **Refusals go to the status line**, left of the pills, in the warning
+   color with `exclamationmark.triangle`, for 4 s or until the next action
+   ("Nothing to paste.", "Pick a pixel layer to paint on."). Alerts only
+   for open and save failures and for the "Keep layers?" choice.
+8. **Long work shows a note** in the canvas's top-left after 100 ms
+   (the existing Straightening note's style): "Opening…", "Saving…",
+   "Transforming…", "Exporting…", "Merging…".
+9. **Fake data says so.** Under `-PhotoFixture` the status pills include a
+   warning pill "Preview data", as Flare does.
+
+### 6.2 Screens and their components
+
+Components are SuiteUI unless named `Photo*` or a system control. **Bold**
+means it doesn't exist yet (section 6.3).
+
+| Screen | State | Uses | Feature |
+|---|---|---|---|
+| Main window | every | `EditorShell`, `EditorTopBar` (+ save status, **S6 #339**), `ToolbarGroup(style: .rail)`, `CanvasViewport`, `ViewerStatusBar` (pills **S7 #340**) | PV-0, PV-1 |
+| Canvas overlay | crop pending | `CropShade` | existing, PV-3 |
+| Canvas overlay | rectangle selection | `SelectionOutline` | existing |
+| Canvas overlay | ellipse, lasso, feathered selection | **`SelectionPathOutline`** | PV-5 |
+| Canvas overlay | Free Transform | **`SelectionHandles`** (S12, #273, shared with Flare and Design) | PV-7 |
+| Canvas overlay | brush, eraser, clone, heal | **`BrushCursorMark`** | PV-4 |
+| Adjust tab: tool options | brush, eraser | `InspectorSection`, `InspectorSliderRow`, `InspectorColorWellRow` | existing |
+| Adjust tab: tool options | marquee | `ChoiceChips` (Rectangle, Ellipse, Lasso), `InspectorSliderRow` (Feather, px) | PV-5 |
+| Adjust tab: tool options | crop | `ScrubField` × 4 in a `Grid`, `ChoiceChips` (6 aspects), `InspectorAction` (Swap; Apply Crop; Cancel) | PV-3 |
+| Adjust tab: tool options | eyedropper | `ChoiceChips` (Point, 3 × 3, 5 × 5), `InspectorColorWellRow` (the picked color, read-only) | PV-9 |
+| Adjust tab: tool options | transform | `InspectorSliderRow` (W %, H %, Angle °), `InspectorAction` (Apply, Cancel) | PV-7 |
+| Adjust tab: sections | image or adjustment layer | `InspectorHeader`, `InspectorSection`, `Toggle` (checkbox), `InspectorSliderRow`, `ToneCurveEditor` | existing, PV-6 |
+| Layers tab | any image | `List` rows (until **`LayerList`**, Flare's S15, unfiled), `InspectorPickerRow` (blend), `InspectorSliderRow` (opacity), `InspectorAction` | existing, PV-5, PV-6 |
+| Layers tab | adjustment and mask marks | SF Symbols in the row, **row accessory slot** in `LayerList` | PV-5, PV-6 |
+| History tab | steps | `List` of rows (`SidebarRow`), later steps in the secondary text color with a `clock.arrow.circlepath` symbol on the current one | PV-4 |
+| History tab | empty | `EmptyStateView` ("No edits yet. Each change you make is listed here.") | PV-4 |
+| Export sheet | – | `Picker` (segmented: PNG, JPEG, TIFF, HEIC), `InspectorSliderRow` (Quality %, Size %), `ScrubField` (Longest side px), a `Picker` for the size kind, the output size line | PV-8 |
+| Keep layers? | Save of a flat file with layers | system `.confirmationDialog`: Save as Photo Document (default), Flatten into PNG, Cancel | PV-1 |
+| Restore offer | launch after a crash | system alert: Restore, Discard | PV-1 |
+| Unsaved changes | close or quit | the system's document alert | PV-1 |
+| Open failure | bad package | system alert with `ArchiveError.message` | PV-1 |
+
+### 6.3 SuiteUI components v2 needs (`needs-ui`, `line:suiteui`)
+
+Filed by PV-0 once the captain approves this blueprint; each feature uses a
+plain SwiftUI placeholder until its component lands (CLAUDE.md).
+
+| Component | Need | Who asks | Existing issue |
+|---|---|---|---|
+| `SelectionPathOutline` | marching ants along closed polylines in document pixels at a zoom, black under white dashes, no hit testing | PV-5 | needs a new issue |
+| `SelectionHandles` | a transform box from four corners (any rotation) with 8 square handles on the pixel grid and a rotate zone; marks only | PV-7 | #273 (S12), shared with Flare and Design |
+| `BrushCursorMark` | a ring of a diameter in document pixels at a zoom, black under white, following the pointer | PV-4 | needs a new issue (#588 asks Photo to draw it; the mark belongs in `CanvasMarks`) |
+| `LayerList` with an accessory slot | Flare's S15 plus a trailing accessory per row (Photo's mask badge) and a leading symbol | PV-5, PV-6 | not filed; Flare's S15 |
+| Save status in `EditorTopBar` | Saved, Edited, Edited autosaved, Not saved | PV-1 | #339 (S6) |
+| Status pills, warning pill | "Preview data", refusal messages | PV-0 | #340 (S7) |
+
+Two v1 bugs whose fix is in SuiteUI are tracked to that line, not built in
+Photo: #255 (`ScrubField.beginTyping` ignores `decimals:`) and #586
+(`InspectorSectionHeader` Reset hit target). PV-10 relabels them
+`line:suiteui` with a comment.
+
+### 6.4 Snapshots each feature adds
+
+`Tests/AppSnapshotTests/Photo<Feature>Snapshots.swift`, Light and Dark
+(the shell is dark in both, so they guard regressions in the snapshot host),
+named `photo-<state>-<scheme>.png`: `photo-unsaved`, `photo-keep-layers`
+(PV-1); `photo-pasted-layer` (PV-2); `photo-crop-options`,
+`photo-crop-ratio` (PV-3); `photo-history-tab`, `photo-brush-cursor` (PV-4);
+`photo-selection-ellipse`, `photo-selection-lasso`, `photo-layer-mask`
+(PV-5); `photo-adjustment-layer`, `photo-adjust-target` (PV-6);
+`photo-transform-box` (PV-7); `photo-export-options` (PV-8);
+`photo-eyedropper-options` (PV-9); `photo-adjustments-aligned` (PV-10).
