@@ -31,3 +31,6 @@ utc	stage	event	ref	note
 2026-10-14T22:59Z	4	heartbeat	-	waiting on next dev CI run (round 4); #851 open
 2026-10-14T23:20Z	4	heartbeat	-	waiting on next dev CI run (round 4); #851 open
 2026-10-14T23:42Z	4	heartbeat	-	waiting on next dev CI run (round 4); #851 open
+2026-10-14T23:32Z	4	ci-run	38654031210	red outside: Photo budget (#851) and SuiteUI harness tests (#778); all feature tests green, Linux green
+2026-10-14T23:50Z	5	stage-end	#793	Belt-Contact-Sheet comment posted; 4 rounds spent, gaps named
+2026-10-14T23:50Z	5	stopped	-	lead done
