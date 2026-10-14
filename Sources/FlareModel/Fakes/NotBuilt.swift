@@ -31,9 +31,9 @@ extension NotBuilt: StageRendering, StageHitTesting {
     public func drawList(_: Document, sceneID _: String, frame _: Int, editing _: String?) -> StageDrawList {
         StageDrawList(width: 0, height: 0, background: FlareColor(r: 1, g: 1, b: 1), items: [])
     }
-    public func hit(_: Document, sceneID _: String, frame _: Int, at _: Point, tolerance _: Double) -> StageAddress? { nil }
-    public func marquee(_: Document, sceneID _: String, frame _: Int, rect _: Rect) -> [StageAddress] { [] }
-    public func bounds(_: Document, sceneID _: String, frame _: Int, of _: [StageAddress]) -> Rect? { nil }
+    public func hit(_: Document, sceneID _: String, frame _: Int, editing _: String?, at _: Point, tolerance _: Double) -> StageAddress? { nil }
+    public func marquee(_: Document, sceneID _: String, frame _: Int, editing _: String?, rect _: Rect) -> [StageAddress] { [] }
+    public func bounds(_: Document, sceneID _: String, frame _: Int, editing _: String?, of _: [StageAddress]) -> Rect? { nil }
 }
 
 extension NotBuilt: ShapeBuilding {
