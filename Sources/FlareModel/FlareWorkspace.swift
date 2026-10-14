@@ -215,11 +215,11 @@ public struct FlareWorkspace: Sendable, Equatable {
     /// own group. Afterwards a selected scene that no longer exists (an undone Add Scene, a redone Delete Scene)
     /// gives way to its neighbour, clamped to the scene list, a selected layer the edited owner no longer has is
     /// deselected, a playhead past a shortened timeline moves to its last frame (#615), and a running play whose
-    /// rate changed stays on its frame (#640).
+    /// rate or length changed stays on its frame (#640, #665).
     /// A symbol being edited in place that no longer exists ends the edit, as `exitSymbol` does (#603).
     mutating func step(_ label: String? = nil, _ body: (inout CommandEngine) throws -> Void) {
         guard var next = engine else { return refuse(.noDocument) }
-        let order = scenes.map(\.id), fps = playbackFPS
+        let order = scenes.map(\.id), fps = playbackFPS, frames = timelineFrames
         do {
             if let label { try next.group(label, body) } else { try body(&next) }
         } catch let error as CommandError {
@@ -234,7 +234,7 @@ public struct FlareWorkspace: Sendable, Equatable {
         if let id = selectedLayerID, ownerLayers?.contains(where: { $0.id == id }) != true {
             selectedLayerID = nil
         }
-        clampPlayhead(rateWas: fps)
+        clampPlayhead(rateWas: fps, framesWas: frames)
     }
 
     public static func == (lhs: Self, rhs: Self) -> Bool {
