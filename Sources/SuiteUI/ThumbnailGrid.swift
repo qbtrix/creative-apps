@@ -136,8 +136,8 @@ public struct ThumbnailGrid<ID: Hashable>: View {
     }
 }
 
-/// One thumbnail: the image (or a flat placeholder) with its badges, and the
-/// caption under it. Selection is an accent ring and a light accent fill.
+/// One thumbnail: the image (or a flat placeholder) with its badges clipped
+/// to it, and the caption under it. Selection is an accent ring and a light accent fill.
 private struct ThumbnailCell<ID: Hashable>: View {
     let item: ThumbnailItem<ID>
     let size: CGSize
@@ -147,8 +147,10 @@ private struct ThumbnailCell<ID: Hashable>: View {
         VStack(spacing: SuiteSpacing.xs) {
             thumbnail
                 .frame(width: size.width, height: size.height)
-                .clipShape(RoundedRectangle(cornerRadius: SuiteRadius.small))
+                // Badges go on before the clip, so a small cell trims them
+                // instead of letting them spill past its edge (issue #102).
                 .overlay(alignment: .bottomLeading) { badges }
+                .clipShape(RoundedRectangle(cornerRadius: SuiteRadius.small))
                 .overlay(
                     RoundedRectangle(cornerRadius: SuiteRadius.small)
                         .strokeBorder(isSelected ? SuiteColor.accent : SuiteColor.separator, lineWidth: isSelected ? 2 : 1))
