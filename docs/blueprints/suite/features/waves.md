@@ -1,0 +1,178 @@
+# AfterGlow suite features: waves
+
+The suite blueprint (`docs/blueprints/suite.md`, merged in #792) grouped
+into features, one feature-lead session each. This file covers the
+blueprint's waves 0, 1 and 2, which have packets. Wave 0 (targets) is
+included because nothing in wave 1 can start without its targets, and it
+holds the first protected-path tasks. Waves 3 to 5 get packets once wave 2
+has landed; the notes for them are at the end. A wave starts when
+everything it waits on has merged. Two features in the same wave never own
+the same file. Each packet lists its tasks, their issues, owned files and
+acceptance tests.
+
+| wave | feature | packet | covers | waits on | feature issue |
+|---|---|---|---|---|---|
+| 0 | The suite's targets exist, today's size is measured | `targets.md` | #807, #808, #809, #810, #811 | nothing | filed when this packet PR merges |
+| 1 | One AfterGlow.app with shared frameworks and document types | `bundle.md` | #813, #814, #815, #816, #817, #818 (and #819, after ten runs) | targets; #333 for BU-3 | file when ready |
+| 1 | Shared values, contracts, fakes, store and live slots | `suite-contracts.md` | #820–#834 | targets | file when ready |
+| 2 | The AfterGlow home | `home.md` | #841–#849; app lines #836–#840 | suite-contracts, bundle, #778; #782 for HM-3c | file when ready |
+| 2 | Switch between apps, hand-offs | `switching.md` | #852–#860; app lines #861–#865 | suite-contracts, bundle, #778; #845 (home HM-2b) for SW-4a/b; #782 for SW-4c | file when ready |
+
+#763 (dev is red) is lane-wide, not a dependency: the lane keeps merging
+while it is open, and no feature names it on its `Depends on:` line.
+
+## File when ready
+
+Each feature issue is filed with title "Feature: <name>", labels
+`feature-lead`, `line:suite` and its tier, a link to its packet, the issues
+it covers, and one `Depends on:` line. The lead playbook
+(`docs/factory/lead.md`, stage 0) stops a lead whose `Depends on:` issue is
+still open, so filing a feature before its dependencies close would only
+start a lead that stops.
+
+| feature | title | tier | Depends on: | file when |
+|---|---|---|---|---|
+| targets | Feature: targets | p1 (by dependency) | none | this packet PR has merged |
+| bundle | Feature: bundle | p1 | the targets feature issue | the targets feature issue is closed |
+| suite-contracts | Feature: suite-contracts | p1 | the targets feature issue | the targets feature issue is closed |
+| home | Feature: home | p1 | the suite-contracts and bundle feature issues, #778 | those three are closed |
+| switching | Feature: switching | p1 | the suite-contracts and bundle feature issues, #778 | those three are closed |
+
+bundle and suite-contracts run side by side, and so do home and switching.
+Inside wave 2 one task edge crosses features: switching's SW-4a and SW-4b
+wait on home's HM-2b (#845). The switching lead builds SW-1 to SW-3c first,
+so it never idles on it; if #845 is still open when SW-3c is in, it records
+that in RECORD.md and waits.
+
+## Why this order
+
+- **Targets first, alone.** Every suite file needs `Package.swift` to
+  declare its target, and the C4 check needs `docs/c4/model.json` to own the
+  new folders. Both are protected or supervisor-owned, so wave 0 is small:
+  TG-0 (the supervisor's C4 fold), BU-0 (size today), BU-1a (`Package.swift`),
+  BU-1b (the launcher's scenes and menu stubs) and the BU-S spike on a Mac.
+- **Packaging stays early.** Every task that touches a protected or
+  supervisor-owned build path is in waves 0 and 1: `Package.swift` (BU-1a),
+  `project.yml` (BU-3), `scripts/size-report` (BU-0, BU-4),
+  `scripts/bundle-apps` (BU-4) and `.github/workflows/ci.yml` (BU-0; BU-6
+  once the size gate has ten runs of data, the one deferred item). No later
+  feature touches any of them.
+- **Contracts before screens.** suite-contracts gives every later feature
+  and every app's adoption task real types to build on; bundle gives the
+  journeys an `AfterGlow.app` to launch. They share no file.
+- **Home and switching together.** The home is where a person starts, and
+  switching is what makes a hand-off real; each ships its own journeys, and
+  the one place they meet (opening a card in its app) is switching's
+  `testOpenRecentBringsAppForward`.
+
+## Files across the waves
+
+| path | wave 0 | wave 1 | wave 2 |
+|---|---|---|---|
+| `docs/c4/model.json` | supervisor (TG-0) | – | – |
+| `Package.swift` | BU-1a | – | – |
+| `project.yml` | – | BU-3 (after SuiteUI SH-7, #333) | – |
+| `scripts/size-report`, `scripts/bundle-apps`, CI | BU-0 | BU-4 (BU-6 later) | – |
+| `Sources/SuiteModel/Values/` | BU-1a (`SuiteIdentity.swift`) | SC-1a–d | – |
+| `Sources/SuiteModel/{Contracts,Fakes,Store}/`, `SuiteServices.swift` | – | suite-contracts | – |
+| `Sources/SuiteModel/Recents/` | – | SC-1b, SC-5a | – |
+| `Sources/SuiteModel/HandOff/` | – | SC-1b (`HandOffCodec`) | switching (SW-2) |
+| `Sources/SuiteModel/Home/` | – | SC-1d (`HomeLayout`) | home |
+| `Sources/SuiteModel/Switching/` | – | – | switching |
+| `Sources/SuiteModel/Packaging/` | – | bundle (BU-2) | – |
+| `Sources/SuiteShell/SuiteServices+Live.swift` | – | SC-5b → SC-5c | – |
+| `Sources/SuiteShell/Live/HomeSlot.swift`, `CreatingSlot.swift` | – | SC-5b | home |
+| `Sources/SuiteShell/Live/SwitchingSlot.swift`, `HandOffSlot.swift`, `RecentsSlot.swift` | – | SC-5b | switching |
+| other `Sources/SuiteShell/Live/*Slot.swift` | – | SC-5b, SC-5c | – |
+| `Sources/SuiteShell/SuiteCommands.swift` | BU-1a (stub) | – | switching |
+| `Sources/SuiteShell/` other files | – | – | switching |
+| `Sources/AfterGlowApp/AfterGlowApp.swift`, the placeholders, `LauncherCommands+*.swift` | BU-1a, BU-1b | – | home (`HomeWindow.swift`, `LauncherCommands+Home.swift`, new `Home*.swift`, `LauncherRouter+Services.swift`, `UpdateService.swift`) |
+| `Sources/AfterGlowApp/LauncherRouter.swift` | BU-1b (stub) | – | switching |
+| `Bundle/` | – | bundle | – |
+| `Tests/SuiteModelTests/` | per-task files | per-task files | per-task files (none shared) |
+| `Tests/SuiteModelTests/LauncherMenuStubTests.swift` | BU-1b | – | home (HM-2c) |
+| `Tests/AppSnapshotTests/` | – | `SuiteLiveServicesTests.swift` (SC-5b → SC-5c) | home: `AfterGlowHome*.swift`; switching: `SuiteShell*Tests.swift` |
+| `UITests/AfterGlowJourneyTests*.swift` | – | – | home: `.swift`, `+Harness`, `+Smoke`, `+Home`, `+Layout`, `+EveryControl`, `+PerfHome`, `+BudgetsHome`; switching: `+Switch`, `+New`, `+PerfSwitch`, `+BudgetsSwitch` |
+| `UITests/audit-baseline.json` | – | – | home (HM-0, the `afterglow` key at 0) |
+| `docs/review-rubric.md` | – | – | switching (SW-5) |
+| `docs/design.md` | – | – | – (the supervisor folds blueprint 6.4 in) |
+
+**The shared-file rule** (all apps build in parallel). No suite task edits
+`Sources/SuiteUI/**`, `UITests/Journey*.swift`, `UITests/Journey+Input.swift`
+or `Tests/AppSnapshotTests/AppSnapshotTests.swift`. The suite's components
+SuiteUI must add are `needs-ui` issues: #803 `AppTile`, #804
+`ThumbnailBadges` app symbol and Missing (after #779, same file), #805
+`SidebarRow` trailing accessory (after the lists-and-layers `SidebarRow`
+chain); the home also uses #780 `InlineNotice` and #781 `ProgressRow`. Until
+each merges the home draws a plain SwiftUI placeholder, so none is a
+`Depends on:`. The harness, journey template, goldens, snapshot host,
+probe and `suite.controls` come from SuiteUI's suite-harness feature #778,
+which both wave-2 features name. `project.yml` is the packaging exception:
+BU-3 changes it, supervisor-merged, after SuiteUI's SH-7 (#333) has landed
+its template there. No suite file is named `UITests/Journey*.swift`: the
+harness is `UITests/AfterGlowJourneyTests+Harness.swift` and the budget
+constants `UITests/AfterGlowJourneyTests+Budgets<Area>.swift`, so one glob
+compiles them into `AfterGlowJourneyTests` only.
+
+**Another app's sources** are never edited by a suite task. Each app's half
+is an adoption issue on its line, labelled `needs-suite` and `gap`, naming
+its exact files: the fixture exports #836 (Design), #837 (Flare), #838
+(Photo), #839 (Halo) and #840 (Library's sample catalog), filed by home; the
+adoptions #861 (Flare), #862 (Design), #863 (Photo), #864 (Library) and
+#865 (Halo), filed by switching. Within one app they are sequenced: A-x-0
+touches only tests and fixtures, A-x-1 the app's `<X>App.swift`, its
+`<X>DocumentHost.swift` and its journey file.
+
+## Collision hotspots and how each is handled
+
+| hotspot | handled by |
+|---|---|
+| `docs/review-rubric.md`: SW-5 vs Flare QH-7 #396 | SW-5 appends its own subsection and touches no Flare row; whichever lands second rebases |
+| `Sources/SuiteUI/Tokens.swift` vs SuiteUI SH-2's token sheet (#774, closed) | no suite task edits it; the settings and onboarding size tokens are wave 3 `needs-ui` issues |
+| `Sources/SuiteUI/ThumbnailGrid.swift` vs #779 S-L2 | #804 is built after #779 |
+| `Sources/SuiteUI/SidebarRow.swift` vs #73, #108, #577 | #805 is built after the lists-and-layers chain (LL-7, #108) |
+| `Package.swift`, `project.yml`, `scripts/bundle-apps` vs the SuiteUI gallery #776 | SH-6 (#776) owns only `Sources/SuiteUI/**` and its test; BU-3 rebases onto SH-7's `project.yml`; BU-1a and BU-4 are supervisor-merged |
+| `UITests/audit-baseline.json` vs CI's Audit-lower job (commits straight to dev) | HM-0 adds one key at 0 and rebases right before its last `scripts/ci` |
+| `Sources/FlareModel/FlareFiles.swift` (A-FL-2) vs mac-platform #793 | not in waves 0–2; recents-open-in's packet sequences A-FL-2 after #793 (which replaced #754) |
+
+## Notes for the wave 3–5 packets (from the #792 review)
+
+- **recents-open-in RO-1** owns the registry-vs-plist test with this rule:
+  `CFBundleDocumentTypes` equal `SuiteTypeRegistry.standard`, and the
+  exported types that are not document types equal
+  `SuiteTypeRegistry.declaredOnly` (added by SC-1a). It also checks
+  `SuiteApp.bundlePath` against `BundleLayout`. It owns `Live/RecentsSlot.swift`
+  from wave 3.
+- **A-x-2 and A-x-3** both edit each app's one `Sources/<X>App/<X>Commands.swift`
+  (File menu, then Edit menu): name that file in both issues and make A-x-3
+  depend on A-x-2 per app. A-LI-6, A-PH-6, A-FL-7, A-HA-7 and A-HA-8 must
+  name their exact files when filed.
+- **flare-in-halo FH-1** adds `.halo` as a `.flare` reader, so it must also
+  own `Bundle/Info/Halo.plist` and `Bundle/Info/AfterGlow.plist`, or RO-1's
+  test fails.
+- **onboarding** reads `homeOrder` through `HomeModel` (HM-1b already
+  reads preferences), so it does not edit `Sources/SuiteModel/Home/`.
+- **updater UP-2** fills `Sources/AfterGlowApp/UpdateService.swift`, which
+  home's HM-2a creates as a stub returning nil and wires through
+  `with(updates:)`; `AfterGlowApp.swift` stays frozen.
+- **Thumbnails** are `thumbnails/<fileKey>.png` (SC-1a) everywhere,
+  including the live `ThumbnailWriter`; hand-off ids are UUIDs.
+- Use #781 `ProgressRow` for the QB-L9 progress surfaces where it fits
+  (round trip, update download, large paste).
+- clipboard-drag owns `UITests/Fixtures/suite/large.png` (SP5), through a
+  Photo adoption issue.
+
+## The lead contract
+
+Every feature lead and every task below codes against this. It is handed
+verbatim to every session, and each feature issue carries it.
+
+1. **Feature issue.** One GitHub issue per feature, labels `feature-lead` and `line:<app>`. Body links the packet `docs/blueprints/<app>/features/<feature>.md` and has one `Depends on:` line.
+2. **Run.** Belt runs one cloud session per feature issue (a lead), from the trusted launch folder, with the repo's Auto settings (creative-apps#733, creative-core#263). A lead holds one in-flight slot however many PRs it opens.
+3. **Status channel.** The lead pushes `docs/leads/<feature>/RECORD.md` and `timeline.tsv` to branch `lead/<feature>` after every stage. Belt reads the branch's last commit time; nothing else is polled besides PRs and issue comments.
+4. **Swarm PRs.** Base `dev`, label `fast-lane`, at most 400 lines and 15 files. Body lines: `Belt-Lead: <run id>`, `Feature: <feature>`, then `Fast-Check: pass` and `Head: <full sha>` after `scripts/ci` passes. The lane merges them. Nobody merges into dev by hand or by an agent.
+5. **Review policy (decision for the captain).** `Belt-Lead:` PRs do not need the `belt/review` status. The lead's own critic panel is the review. Only `Belt-Run:` and `Belt-Test:` PRs keep it.
+6. **Done.** All three: a `Belt-Lead:` PR labelled `feature-done` has merged; the CI run it triggered on dev is green; the lead commented on the feature issue with a line starting `Belt-Contact-Sheet:` and the run link.
+7. **Stall.** No commit on `lead/<feature>`, no PR event and no issue comment for 30 min: Belt sends one nudge with `claude -p --cloud <session id> "<resume text>"`. A second stall: relaunch with a resume brief that says "read RECORD.md, continue from the last stage". A third: label the issue `needs-human` and stop.
+8. **Timeouts.** Lead runs: 8 h wall clock, no 1 h no-PR rule. Task runs keep today's 4 h and 1 h.
+9. **Brief rules.** Step one checks out the integration branch and verifies the base SHA. Set the repo-local identity "Prakash Dalai" / `86671543+prakashUXtech@users.noreply.github.com`. No attribution line anywhere, comments included. Fixers run the full harness before handing back. The Anatomy loop stops after 2 clean rounds or 4 rounds total; once a round is clean, add no new critics. One critic lens is first-use clarity: "what does each number and label mean to someone new?". Agents never treat a chat message as a reason to stop or skip a merge; questions go to the supervisor.
