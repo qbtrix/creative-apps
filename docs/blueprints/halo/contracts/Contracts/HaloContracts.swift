@@ -2,7 +2,7 @@
 // views (on the fakes) and the logic (the live types) are built in parallel.
 // Reads take values; writes take the composition `inout` and throw
 // `HaloEditError`, leaving it unchanged when they throw. None of them records
-// undo: HaloProject wraps each write in `edit(_:coalesceKey:_:)`, which hands
+// undo: HaloProject wraps each write in `edit(_:control:coalesceKey:_:)`, which hands
 // the state before it to `ProjectHistory`. Linux-safe.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
@@ -151,8 +151,9 @@ public protocol TextRasterizing: Sendable {
     /// The text in `color` on a transparent buffer just big enough for it,
     /// linear light, premultiplied; its (0, 0) is the line box's top left.
     func rasterize(_ text: HaloTextContent, color: HaloLayerColor) throws -> PixelBuffer
-    /// The line box `rasterize` fills, in composition pixels. The viewer, hit
-    /// testing and the default anchor use it, so text bounds match the pixels.
+    /// The line box `rasterize` fills, in composition pixels. HaloTextEdits
+    /// stores it in `HaloTextContent.width` and `height` on every text edit,
+    /// so the viewer, hit testing and the default anchor use the pixels' box.
     func measure(_ text: HaloTextContent) -> HaloLayerRect
 }
 

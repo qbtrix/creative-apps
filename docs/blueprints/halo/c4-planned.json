@@ -34,7 +34,7 @@
               {
                 "id": "halo-project",
                 "name": "Project and compositions",
-                "description": "HaloProject: the window's one value-type state. Holds the document (compositions, selection, id counter) as a HaloDocumentState, the services, and every stored property v1 needs (history, playback, viewer drag, selected keys, file, rendered frame, render job, last refusal), each written only by its own extension file. Composition new, duplicate, rename (look-alike names refused), delete, select; the New Composition draft and settings; status text; `edit(_:coalesceKey:_:)`, the one place an edit records undo.",
+                "description": "HaloProject: the window's one value-type state. Holds the document (compositions, selection, id counter) as a HaloDocumentState, the services, and every stored property v1 needs (history, playback, viewer drag, selected keys, file, rendered frame, render job, last refusal), each written only by its own extension file. Composition new, duplicate, rename (look-alike names refused), delete, select; the New Composition draft and settings; status text; edit(_:control:coalesceKey:_:), the one place an edit records undo, and endCoalescing().",
                 "paths": [
                   "Sources/HaloModel/HaloProject.swift",
                   "Sources/HaloModel/CompositionSettings.swift",
@@ -269,7 +269,7 @@
               {
                 "id": "halo-files",
                 "name": "Project files",
-                "description": "fileData() and open(_:) through ProjectFiles, the file name, unsaved flag, the last save or open error, and the Open Recent list. Opening clears history.",
+                "description": "fileData() through ProjectFiles; beginOpen and finishOpen around a decode the app runs off the main actor; the file name and path, unsaved flag, the last save or open error, and the Open Recent list (name and path; HaloApp persists it). Opening clears history.",
                 "paths": [
                   "Sources/HaloModel/HaloFiles.swift"
                 ],
@@ -376,7 +376,7 @@
               {
                 "id": "halo-window",
                 "name": "Window and command router",
-                "description": "HaloWindow: the one @State model, every presentation flag v1 needs, and perform(_ command: HaloCommand), which routes each command to its area file (HaloWindow+Viewer, +Playback, +Keys, +Layers, +Edit, +File, +Easing, +Render, +Text). W0 writes the router and stub area files; each feature owns one area file. HaloControls gathers every halo.* control's id, enabled state and help into the halo.controls JSON (under -HaloControlsProbe) for the every-control journey.",
+                "description": "HaloWindow (today inside HaloApp.swift; W0 moves it to its own file): the one @State model, every presentation flag v1 needs, and perform(_ command: HaloCommand), which routes each command to its area file (HaloWindow+Viewer, +Playback, +Keys, +Layers, +Edit, +File, +Easing, +Render, +Text). W0 writes the router and stub area files; each feature owns one area file. HaloControls gathers every halo.* control's id, enabled state and help into the halo.controls JSON (under -HaloControlsProbe) for the every-control journey.",
                 "paths": [
                   "Sources/HaloApp/HaloWindow.swift",
                   "Sources/HaloApp/HaloControls.swift",
@@ -390,7 +390,7 @@
                   "Sources/HaloApp/HaloWindow+Render.swift",
                   "Sources/HaloApp/HaloWindow+Text.swift"
                 ],
-                "status": "planned",
+                "status": "existing",
                 "authored": true,
                 "relationships": [
                   {
@@ -434,7 +434,7 @@
               {
                 "id": "halo-viewer",
                 "name": "Viewer",
-                "description": "The viewer: the artboard (CanvasSurface) with the draw list painted in a SwiftUI Canvas, the selection outline, the drag gesture, the rendered-frame image (HaloRenderedFrameView), the status bar and the transport; the display-link playback driver.",
+                "description": "The viewer (HaloViewer, today inside HaloApp.swift; W0 moves it to HaloViewer.swift): the artboard (CanvasSurface) with the draw list painted in a SwiftUI Canvas, the selection outline, the drag gesture, the rendered-frame image (HaloRenderedFrameView), the status bar and the transport; the display-link playback driver.",
                 "paths": [
                   "Sources/HaloApp/HaloViewer.swift",
                   "Sources/HaloApp/HaloViewerCanvas.swift",
@@ -598,7 +598,7 @@
               {
                 "id": "halo-journeys",
                 "name": "Halo journeys",
-                "description": "UITests/HaloJourneyTests.swift and, once QH-4 (#333) lands, one HaloJourneyTests+<Area>.swift per feature: the tier-1 journeys H-J0 to H-J12 with a whole-window shot per step and the app audit on every shot.",
+                "description": "UITests/HaloJourneyTests.swift and, once QH-4 (#333) lands, one HaloJourneyTests+<Area>.swift per feature: the journeys H-J0 to H-J23 and the perf journeys H-P1 to H-P5 with a whole-window shot per step and the app audit on every shot.",
                 "paths": [
                   "UITests/HaloJourneyTests"
                 ],

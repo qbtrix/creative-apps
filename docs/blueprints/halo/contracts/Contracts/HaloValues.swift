@@ -167,12 +167,21 @@ public enum HaloEasingPreset: String, CaseIterable, Sendable {
 }
 
 /// A text layer's words and size (tier 2, #430). Color is the layer's.
+/// `width` and `height` are the line box `TextRasterizing.measure` gave when
+/// the words or size last changed (HaloTextEdits sets them through
+/// `services.text`), so the viewer, hit testing, the default anchor and the
+/// rendered pixels all use one box, and a saved file keeps its layout.
 public struct HaloTextContent: Codable, Sendable, Hashable {
     public var string: String
     /// In composition pixels.
     public var fontSize: Double
-    public init(string: String = "Text", fontSize: Double = 72) {
+    /// The measured line box; an estimate (0.6 em a character) until measured.
+    public var width: Double
+    public var height: Double
+    public init(string: String = "Text", fontSize: Double = 72, width: Double? = nil, height: Double? = nil) {
         self.string = string; self.fontSize = fontSize
+        self.width = width ?? fontSize * 0.6 * Double(max(string.count, 1))
+        self.height = height ?? fontSize
     }
 }
 

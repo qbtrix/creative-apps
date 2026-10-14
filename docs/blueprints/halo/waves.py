@@ -42,7 +42,7 @@ features = [
             SN+"HaloLayersSnapshots.swift", SN+"HaloTimelineSnapshots.swift", U+"HaloJourneyTests.swift",
             "docs/c4/model.json", "docs/design.md"]
          + [T + t + ".swift" for t in existing_model_tests],
-       note="Also: timeline rows carry each layer's key frames and the strip draws them as diamonds (`HaloTimeline.swift`, `HaloTimelineView.swift`); the inspector always shows the layer list. Copies section 5's files into Sources (fakes and live stubs one file per contract); every W1 and W2 file below that W0 creates as a stub passes to its feature, which replaces it whole."),
+       note="H-J0, H-J1, H-J13, layout L1, L2 and L6; HB-6, HB-9. Moves HaloWindow and HaloViewer out of HaloApp.swift, keeping `HaloProject()` and `HaloViewer(model:)` as AppSnapshotTests calls them; leaves CompositionSettings, CompositionDraft, RefusedRename, CompositionDeleteCommand and RenameRefusalAlert unchanged. The stub HaloLayerInspector already shows the selected layer's header (name, kind, frames) that H-J3 reads. Also: timeline rows carry each layer's key frames and the strip draws them as diamonds (`HaloTimeline.swift`, `HaloTimelineView.swift`); the inspector always shows the layer list. Copies section 5's files into Sources (fakes and live stubs one file per contract); every W1 and W2 file below that W0 creates as a stub passes to its feature, which replaces it whole."),
   dict(wave=1, id="viewer-playback", name="See and play the composition",
        covers=["#37", "#457"], waits_ui=["#333 (journey files)", "#340 TransportCapsule (placeholder meanwhile)"],
        core="none. Shape layers render through an ellipse built from four cubic `PathElement`s (the stopgap Flare uses) until creative-core#182's path builder lands",
@@ -111,14 +111,14 @@ features = [
              U+"HaloJourneyTests+Text.swift"],
        note="H-J22; HF-10. Waits on layer-keys (inspector), viewer-playback (the renderer's text hook) and history-files (Undo name)."),
   dict(wave=3, id="core-loop", name="The core loop, live, measured",
-       covers=["the H-J12 XCTSkip in HaloJourneyTests.swift"], waits_ui=["#333", "#330 FrameProbe for H-P1 to H-P4 (report-only until then)"],
+       covers=["the H-J12 XCTSkip in HaloJourneyTests.swift"], waits_ui=["#333", "#330 FrameProbe for H-P1 to H-P5 (report-only until then)"],
        core="none",
-       owns=[U+"HaloJourneyTests.swift", U+"HaloJourneyTests+Perf.swift", SN+"HaloViewerLatencyTests.swift", SN+"HaloLayoutTests.swift",
+       owns=[U+"HaloJourneyTests.swift", U+"HaloJourneyTests+Perf.swift", U+"HaloJourneyTests+Files.swift", U+"HaloJourneyTests+FileErrors.swift", SN+"HaloViewerLatencyTests.swift", SN+"HaloLayoutTests.swift",
              U+"HaloJourneyTests+Viewer.swift", U+"HaloJourneyTests+Playback.swift", U+"HaloJourneyTests+Drag.swift",
              U+"HaloJourneyTests+Inspector.swift", U+"HaloJourneyTests+Parent.swift", U+"HaloJourneyTests+History.swift",
              U+"HaloJourneyTests+Layers.swift", U+"HaloJourneyTests+Easing.swift", U+"HaloJourneyTests+Text.swift",
              U+"HaloJourneyTests+RenderFrame.swift", U+"HaloJourneyTests+Render.swift"],
-       note="H-J12 live; H-P1 to H-P4; layout L3 to L5; flips every fixture journey still on `-HaloFixture` to `-HaloSample`. Its feature issue is filed only once every W1 and W2 feature is done, because it edits their journey files."),
+       note="H-J12 live; H-P1 to H-P5; layout L3 to L5; flips every fixture journey still on `-HaloFixture` to `-HaloSample`. Its feature issue is filed only once every W1 and W2 feature is done, because it edits their journey files."),
 ]
 
 def check(c4path):

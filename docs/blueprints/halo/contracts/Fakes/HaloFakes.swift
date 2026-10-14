@@ -337,7 +337,8 @@ public struct FakeFrameRendering: FrameRendering {
 public struct FakeTextRasterizer: TextRasterizing {
     public init() {}
     public func measure(_ text: HaloTextContent) -> HaloLayerRect {
-        HaloLayerRect(x: 0, y: 0, width: text.fontSize * 0.6 * Double(max(text.string.count, 1)), height: text.fontSize)
+        let estimate = HaloTextContent(string: text.string, fontSize: text.fontSize)
+        return HaloLayerRect(x: 0, y: 0, width: estimate.width, height: estimate.height)
     }
     public func rasterize(_ text: HaloTextContent, color: HaloLayerColor) throws -> PixelBuffer {
         let box = measure(text)
