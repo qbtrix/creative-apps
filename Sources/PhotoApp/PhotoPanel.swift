@@ -131,12 +131,15 @@ struct PhotoLayersPanel: View {
         VStack(alignment: .leading, spacing: 0) {
             List(selection: Binding(get: { model.selectedLayerID }, set: { if let id = $0 { perform(.selectLayer(id)) } })) {
                 ForEach(model.layers) { layer in
-                    row(layer).tag(layer.id)
+                    PhotoLayerRow(layer: layer, isSelected: layer.id == model.selectedLayerID, perform: perform).tag(layer.id)
                 }
                 .onMove { perform(.moveLayers($0, $1)) }
             }
             .listStyle(.plain)
             .scrollContentBackground(.hidden)
+            // The focused selection fills with the tint under white text. Brand blue
+            // reads 4.23:1 there; accentFill, the suite's fill for white text, 5.05:1.
+            .tint(SuiteColor.accentFill)
             .accessibilityIdentifier("photo.layers")
             HStack(spacing: 0) {
                 EditorBarItem(ToolbarAction("New Layer", systemImage: "plus") { perform(.addLayer) }, showsTitle: false)
@@ -169,14 +172,24 @@ struct PhotoLayersPanel: View {
             }
         }
     }
+}
 
-    private func row(_ layer: PhotoLayer) -> some View {
+/// One Layers row: the show/hide eye, the name, and the blend mode and opacity
+/// when either is not the default. Hierarchical styles, so on the focused
+/// selection's fill the row turns white with the system's own selected text;
+/// a selected row draws everything primary, since secondary is too faint there.
+struct PhotoLayerRow: View {
+    let layer: PhotoLayer
+    let isSelected: Bool
+    let perform: PhotoPerform
+
+    var body: some View {
         HStack(spacing: SuiteSpacing.s) {
             Button {
                 perform(.toggleVisibility(layer.id))
             } label: {
                 Image(systemName: layer.isVisible ? "eye" : "eye.slash")
-                    .foregroundStyle(layer.isVisible ? Color.primary : SuiteColor.secondaryText)
+                    .foregroundStyle(isSelected || layer.isVisible ? HierarchicalShapeStyle.primary : .secondary)
             }
             .buttonStyle(.borderless)
             .help(layer.isVisible ? "Hide Layer" : "Show Layer")
@@ -188,7 +201,7 @@ struct PhotoLayersPanel: View {
                 Text("\(layer.blendMode.title) \(Int(layer.opacityPercent.rounded()))%")
                     .font(SuiteFont.inspectorMeta)
                     // The secondary grey reads 3:1 on the selection highlight; WCAG wants 4.5:1.
-                    .foregroundStyle(layer.id == model.selectedLayerID ? Color.primary : SuiteColor.secondaryText)
+                    .foregroundStyle(isSelected ? HierarchicalShapeStyle.primary : .secondary)
             }
         }
         .font(SuiteFont.inspectorLabel)
