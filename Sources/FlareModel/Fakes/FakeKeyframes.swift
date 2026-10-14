@@ -3,7 +3,8 @@
 // `RemoveKeyframe`, `ShiftKeyframes`, `SetFrameLabel` and `RemoveFrameLabel`. A summary key (no property) stands for
 // every track keyed at its frame. A move runs on a copy of the engine, so one that would land a key on another key
 // throws and changes nothing. A frame insert that pushes a key past the scene's last frame grows the scene in the same
-// step (`SetSceneTiming`), so the final pose still plays. Keyframe commands take scene layers only, so a symbol owner throws until
+// step (`SetSceneTiming`), so the final pose still plays. A frame insert or remove on every layer of the scene also
+// moves the labels at or after its frame by the same count, and drops a label inside a removed run (#637). Keyframe commands take scene layers only, so a symbol owner throws until
 // they take an owner (LC-5). With `unavailable` set, reads are empty and every write throws it.
 import FlareCore
 
@@ -85,6 +86,14 @@ public struct FakeKeyframes: KeyframeEditing {
             guard !overflow, end < Int.max else { throw CommandError.invalidFrame(count) }
             duration = max(duration, end + 1)
         }
+        // A label sits on a frame in 0...durationFrames, so the scene grows to hold one pushed past its end too.
+        let moved = Self.ruler(count, at: frame, layerIDs: layerIDs, owner: owner, in: engine.document)
+            ? scene.labels.filter { $0.value >= frame } : [:]
+        for label in moved.values {
+            let (to, overflow) = label.addingReportingOverflow(count)
+            guard !overflow else { throw CommandError.invalidFrame(count) }
+            duration = max(duration, to)
+        }
         try engine.group("Insert Frame") { engine in
             for layer in layers {
                 guard let last = Self.lastFrame(of: layer), last >= frame else { continue }
@@ -93,6 +102,7 @@ public struct FakeKeyframes: KeyframeEditing {
             if duration != scene.durationFrames {
                 try engine.perform(SetSceneTiming(sceneID: sceneID, fps: scene.fps, durationFrames: duration))
             }
+            try Self.relabel(moved.mapValues { $0 + count }, sceneID: sceneID, in: &engine)
         }
     }
 
@@ -102,6 +112,8 @@ public struct FakeKeyframes: KeyframeEditing {
         let sceneID = try Self.scene(owner)
         let layers = try Self.frameEdit(count, at: frame, layerIDs: layerIDs, owner: owner, in: engine.document)
         let end = count > Int.max - frame ? Int.max : frame + count  // the first frame after the removed run
+        let labels = Self.ruler(count, at: frame, layerIDs: layerIDs, owner: owner, in: engine.document)
+            ? engine.document.scenes.first { $0.id == sceneID }?.labels.filter { $0.value >= frame } ?? [:] : [:]
         try engine.group("Remove Frame") { engine in
             for layer in layers {
                 for (property, keys) in layer.tracks.sorted(by: { $0.key < $1.key }) {
@@ -112,6 +124,10 @@ public struct FakeKeyframes: KeyframeEditing {
                 guard let last = Self.lastFrame(of: layer), last >= end else { continue }
                 try engine.perform(ShiftKeyframes(sceneID: sceneID, layerID: layer.id, fromFrame: end, toFrame: last, delta: -count))
             }
+            for name in labels.filter({ $0.value < end }).keys.sorted() {
+                try engine.perform(RemoveFrameLabel(sceneID: sceneID, name: name))
+            }
+            try Self.relabel(labels.filter { $0.value >= end }.mapValues { $0 - count }, sceneID: sceneID, in: &engine)
         }
     }
 
@@ -143,6 +159,19 @@ public struct FakeKeyframes: KeyframeEditing {
             }
         }
         return out
+    }
+
+    /// Whether a frame edit moves the scene ruler, and so its labels: a count of 1 or more on every layer of a scene.
+    private static func ruler(_ count: Int, at frame: Int, layerIDs: [String], owner: LayerOwner, in document: Document) -> Bool {
+        guard count > 0, frame >= 0, case .scene = owner, let all = document.layers(of: owner), !all.isEmpty else { return false }
+        return Set(all.map(\.id)).isSubset(of: Set(layerIDs))
+    }
+
+    /// Sets each label to its new frame, in name order. Labels move as one block, so none lands on another's frame.
+    private static func relabel(_ labels: [String: Int], sceneID: String, in engine: inout CommandEngine) throws {
+        for (name, frame) in labels.sorted(by: { $0.key < $1.key }) {
+            try engine.perform(SetFrameLabel(sceneID: sceneID, name: name, frame: frame))
+        }
     }
 
     private static func lastFrame(of layer: Layer) -> Int? { layer.tracks.values.flatMap { $0.map(\.frame) }.max() }
