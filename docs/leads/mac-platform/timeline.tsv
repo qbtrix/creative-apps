@@ -7,3 +7,6 @@ utc	stage	event	ref	note
 2026-10-14T16:26Z	3	stage-start	wave2	MP-2 base 956d946
 2026-10-14T16:31Z	3	pr-merged	#759	MP-2 autosave due
 2026-10-14T16:31Z	3	stage-start	wave3	MP-3 MP-5 base 8917507
+2026-10-14T16:38Z	3	pr-merged	#760	MP-3 restore
+2026-10-14T16:38Z	3	pr-merged	#761	MP-5 autosave writer
+2026-10-14T16:38Z	3	stage-start	wave4	MP-6 base 5c167aa
