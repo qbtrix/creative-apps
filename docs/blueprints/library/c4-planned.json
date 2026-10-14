@@ -50,16 +50,18 @@
               {
                 "id": "library-app-areas",
                 "name": "Window areas",
-                "description": "One file per area that builds its menu closures and runs its async work: File, Edit, View, Photo, Metadata, Keys, Persist.",
+                "description": "One file per feature that builds its menu closures and runs its async work, handing results to catalog methods: Edit, Import, Thumbnails, Cull, Persist, Loupe, Develop, Crop, Export. The spine creates each as a stub.",
                 "technology": "Swift 6, SwiftUI, macOS 26",
                 "paths": [
-                  "Sources/LibraryApp/LibraryWindow+File.swift",
                   "Sources/LibraryApp/LibraryWindow+Edit.swift",
-                  "Sources/LibraryApp/LibraryWindow+View.swift",
-                  "Sources/LibraryApp/LibraryWindow+Photo.swift",
-                  "Sources/LibraryApp/LibraryWindow+Metadata.swift",
-                  "Sources/LibraryApp/LibraryWindow+Keys.swift",
-                  "Sources/LibraryApp/LibraryWindow+Persist.swift"
+                  "Sources/LibraryApp/LibraryWindow+Import.swift",
+                  "Sources/LibraryApp/LibraryWindow+Thumbnails.swift",
+                  "Sources/LibraryApp/LibraryWindow+Cull.swift",
+                  "Sources/LibraryApp/LibraryWindow+Persist.swift",
+                  "Sources/LibraryApp/LibraryWindow+Loupe.swift",
+                  "Sources/LibraryApp/LibraryWindow+Develop.swift",
+                  "Sources/LibraryApp/LibraryWindow+Crop.swift",
+                  "Sources/LibraryApp/LibraryWindow+Export.swift"
                 ],
                 "status": "planned",
                 "authored": true
@@ -283,6 +285,18 @@
                 "paths": [
                   "Sources/LibraryModel/LibraryCrop.swift",
                   "Sources/LibraryModel/Live/LiveCrop.swift"
+                ],
+                "status": "planned",
+                "authored": true
+              },
+              {
+                "id": "library-status",
+                "name": "Status text and layout",
+                "description": "Status pill text, inspector header facts, and the layout math the layout tests check (grid columns, loupe fit).",
+                "technology": "Swift 6, Foundation",
+                "paths": [
+                  "Sources/LibraryModel/LibraryStatusText.swift",
+                  "Sources/LibraryModel/LibraryLayout.swift"
                 ],
                 "status": "planned",
                 "authored": true

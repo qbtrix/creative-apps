@@ -27,3 +27,10 @@ import CoreColor
     #expect(loupe.image.size.longSide == 2048)
     #expect(PhotoFileKind.kind(forFileName: "a.JPG") == .jpeg && PhotoFileKind.kind(forFileName: ".heic") == nil)
 }
+
+@Test func liveStubsSayWhyUntilBuilt() async throws {
+    let services = LibraryServices.live(decoder: FakeDecoder(photos: []), writer: FakeJPEGWriter(), store: FakeCatalogStore())
+    #expect(services.unavailable["importer"] == "Import isn't connected yet (import).")
+    #expect(services.unavailable.count == 8)
+    await #expect(throws: LibraryError.self) { try await services.importer.importFolder("/f", known: [], progress: { _ in }) }
+}

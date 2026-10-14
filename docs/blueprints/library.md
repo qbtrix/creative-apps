@@ -256,20 +256,28 @@ declares stored properties, all of them, in one PR, so no later feature edits
 | `library-develop` | planned | Develop settings per photo, slider edits with clamping and coalesced undo, reset, copy and paste, the renderer over CoreRaster | `LibraryDevelop.swift`, `Live/LiveDevelop.swift` | CoreRaster adjustments and `Histogram` |
 | `library-crop` | planned | Crop rectangle and angle, aspect presets, the frame kept inside the straightened image, apply and cancel | `LibraryCrop.swift`, `Live/LiveCrop.swift` | CoreRaster `rotated`, `straightenCrop`, `cropped` |
 | `library-export` | planned | Export plan (sizes, never enlarge, names that never overwrite, quality), progress, cancel, per-file failures | `LibraryExport.swift`, `Live/LiveExporter.swift` | `DevelopRendering`, CoreRaster `resized`, `JPEGWriting` (platform) |
+| `library-status` | planned | Status pill text (counts, selection, zoom), inspector header facts, and the layout math the layout tests check (grid columns, loupe fit) | `LibraryStatusText.swift`, `LibraryLayout.swift` | `library-catalog` |
 
 All paths are under `Sources/LibraryModel/`.
+
+**No shared wiring file.** `LibraryServices.live` (section 5.4) names a
+`Live…` type for every member from the start. The spine creates each
+`Live/Live….swift` as a stub that forwards to the fake and carries
+`static let unavailable: String? = "<what> isn't connected yet (<feature>)."`;
+the feature that builds it replaces the file and sets `unavailable` to nil.
+So no two features ever edit the same wiring line.
 
 ### 2.3 L3: LibraryApp components
 
 | Component | Status | Responsibility | Owned paths | Uses |
 |---|---|---|---|---|
-| `library-app-shell` | existing, restructured | The `Window` scene, the root `LibraryWindow` holding the one `model`, the whole menu bar, the per-area menu structs, launch arguments | `LibraryApp.swift`, `LibraryWindow.swift`, `LibraryCommands.swift`, `LibraryMenus.swift` | every area file |
-| `library-app-areas` | planned | One file per area that builds that area's menu closures and runs its async work: `+File` (import, export, samples), `+Edit` (undo, redo), `+View` (grid, loupe, zoom, sort, sizes), `+Photo` (develop, crop), `+Metadata` (rating, flag, label, Auto Advance), `+Keys` (grid and loupe keys), `+Persist` (load at launch, save after changes) | `LibraryWindow+File.swift`, `+Edit`, `+View`, `+Photo`, `+Metadata`, `+Keys`, `+Persist` | `library-model` |
+| `library-app-shell` | existing, restructured | The `Window` scene, the root `LibraryWindow` holding the one `model` (with the window-level `onKeyPress` that hands keys to the cull area), the whole menu bar (every v1 item, section 6.2), and `LibraryMenu`, one sub-struct of closures per feature | `LibraryApp.swift`, `LibraryWindow.swift`, `LibraryCommands.swift`, `LibraryMenus.swift` | every area file |
+| `library-app-areas` | planned | One file per feature: it builds that feature's menu sub-struct (nil closures disable items) and runs its async work, handing results to catalog methods. `+Edit` (undo, redo, samples), `+Import`, `+Thumbnails`, `+Cull` (keys, Metadata menu), `+Persist` (load at launch, save after changes), `+Loupe` (View menu, renders, prefetch), `+Develop`, `+Crop`, `+Export`. The spine creates each as a stub returning an all-nil sub-struct | `LibraryWindow+Edit.swift`, `+Import`, `+Thumbnails`, `+Cull`, `+Persist`, `+Loupe`, `+Develop`, `+Crop`, `+Export` | `library-model` |
 | `library-app-browse` | existing, grows | The content area: empty states, import progress row, the grid with real thumbnails, the loupe on `CanvasViewport`, the status pills | `LibraryBrowser.swift`, `LibraryGrid.swift`, `DisplayImage+Image.swift`, `LibraryLoupe.swift`, `LibraryStatusBar.swift` | SuiteUI |
 | `library-app-inspector` | existing, grows | The inspector: Info and Develop tabs, metadata, develop sliders and histogram | `LibraryInspector.swift`, `MetadataInspector.swift`, `DevelopInspector.swift` | SuiteUI |
 | `library-app-crop` | planned | The crop frame over the loupe photo | `LibraryCropOverlay.swift` | SuiteUI `CropShade`, `SelectionOutline` |
 | `library-app-export` | planned | The export sheet | `LibraryExportSheet.swift` | SuiteUI |
-| `library-app-platform` | planned | Darwin adapters that conform to the platform contracts: `ImageIODecoder` (`PhotoDecoding`: folder scan, metadata, decode with orientation to sRGB RGBA8), `JPEGWriter` (`JPEGWriting`), `CatalogStore` (`CatalogStoring`: Application Support, atomic write, `.bad` rename) | `Platform/` | ImageIO, Foundation |
+| `library-app-platform` | planned | Darwin adapters that conform to the platform contracts: `ImageIODecoder` (`PhotoDecoding`: folder scan, metadata, decode with orientation to sRGB RGBA8), `JPEGWriter` (`JPEGWriting`), `CatalogStore` (`CatalogStoring`: Application Support, atomic write, `.bad` rename). The spine creates the three files as stubs that throw "not built yet"; import, export and persist each own one | `Platform/` | ImageIO, Foundation |
 
 All paths are under `Sources/LibraryApp/`. No SwiftUI in `Platform/`
 (the logic track builds it, like Flare's `StagePath.swift`).
@@ -626,13 +634,13 @@ feature): see section 7.3.
 
 | # | Test (file, feature) | Fixture | Steps | Measures (section 7) |
 |---|---|---|---|---|
-| P1 | `testGridScrollLarge` (`+Perf.swift`, thumbnails) | `large` | scroll the grid end to end at a set velocity | QB-LIB-3 |
-| P2 | `testCullKeyLatency` (`+Perf.swift`, cull) | `shoot` | 60 rating keys in the grid, then 60 in the loupe with Auto Advance | QB-LIB-4, QB-LIB-5 |
-| P3 | `testDevelopSliderLatency` (`+Perf.swift`, develop) | `shoot` live | velocity drag on Exposure across its range | QB-L2, QB-LIB-6 |
-| P4 | `testLoupeStepLatency` (`+Perf.swift`, loupe-viewport) | `shoot` live | Right 23 times | QB-LIB-5 |
-| P5 | `testCropDragLatency` (`+Perf.swift`, crop) | `shoot` | velocity drag of the crop corner | QB-L1 |
-| P6 | `testImportProgressAndThroughput` (`+Perf.swift`, import) | 200 written 4000 × 3000 JPEGs | import | QB-L9, QB-LIB-1 |
-| P7 | `testLaunchLargeCatalog` (`+Perf.swift`, persist) | `large` saved, relaunched | launch | QB-LIB-2, QB-L12 |
+| P1 | `testGridScrollLarge` (`+PerfGrid.swift`, thumbnails) | `large` | scroll the grid end to end at a set velocity | QB-LIB-3 |
+| P2 | `testCullKeyLatency` (`+PerfCull.swift`, cull) | `shoot` | 60 rating keys in the grid, then 60 in the loupe with Auto Advance | QB-LIB-4, QB-LIB-5 |
+| P3 | `testDevelopSliderLatency` (`+PerfDevelop.swift`, develop) | `shoot` live | velocity drag on Exposure across its range | QB-L2, QB-LIB-6 |
+| P4 | `testLoupeStepLatency` (`+PerfLoupe.swift`, loupe-viewport) | `shoot` live | Right 23 times; then Actual Size and a velocity pan of 600 pt at 300 pt/s | QB-LIB-5, QB-L1 (pan) |
+| P5 | `testCropDragLatency` (`+PerfCrop.swift`, crop) | `shoot` | velocity drag of the crop corner | QB-L1 |
+| P6 | `testImportProgressAndThroughput` (`+PerfImport.swift`, import) | 200 written 4000 × 3000 JPEGs | import | QB-L9, QB-LIB-1 |
+| P7 | `testLaunchLargeCatalog` (`+PerfLaunch.swift`, persist) | `large` saved, relaunched | launch | QB-LIB-2, QB-L12 |
 
 Every perf journey asserts at least 60 samples (else it fails as invalid)
 and attaches `perf-<test>.json`. They ship report-only (rubric 6, How
@@ -659,10 +667,12 @@ in `docs/blueprints/library/contracts/`, and
 `docs/blueprints/library/contracts/check.sh` copies it over today's
 `Sources/LibraryModel` and runs `swift test` on Linux in Swift 6 mode
 against creative-core `main`. It compiled with no warnings and the smoke
-test (`ContractSmokeTests.swift`, which calls every contract through
-`LibraryServices.fake`) passed on 2026-10-14 (Swift 6.1.2,
+tests (`ContractSmokeTests.swift`: every contract through
+`LibraryServices.fake`, and every live stub's reason through
+`LibraryServices.live`) passed on 2026-10-14 (Swift 6.1.2,
 x86_64 Ubuntu 24.04). The spine lands these files verbatim as
-`Sources/LibraryModel/Contracts/`, `Sources/LibraryModel/Fakes/` and
+`Sources/LibraryModel/Contracts/`, `Sources/LibraryModel/Fakes/`,
+`Sources/LibraryModel/Live/` (stubs) and
 `Sources/LibraryModel/LibraryServices.swift`, and the `PhotoItem` changes in
 5.5.
 
@@ -1224,10 +1234,9 @@ public struct ExportPlan: Hashable, Sendable {
 ```swift
 // LibraryServices.swift: one existential per contract. `.fake` runs every
 // member on its fake (the UI track, snapshots, `-LibraryFixture`); `.live`
-// takes the platform adapters from LibraryApp and builds the live
-// conformances. Until a feature's live conformance lands, its slot holds
-// the fake built with an `unavailable` reason, so the control that needs it
-// shows disabled with that reason. Each feature edits one line of `live`.
+// takes the platform adapters from LibraryApp and builds the `Live…`
+// conformances. Until a feature lands, its `Live…` type is the spine's stub,
+// whose `unavailable` reason disables the controls that need it.
 public struct LibraryServices: Sendable {
     public var decoder: any PhotoDecoding
     public var importer: any PhotoImporting
@@ -1267,26 +1276,53 @@ public struct LibraryServices: Sendable {
             exporter: FakeExporter(mode: mode), writer: FakeJPEGWriter(mode: mode), isPreview: true)
     }
 
-    /// The live services over LibraryApp's platform adapters. While a feature
-    /// is unbuilt its member is the fake with a reason (the line it edits).
+    /// The live services over LibraryApp's platform adapters. Every member is
+    /// its `Live…` type from the start; a feature replaces its own `Live/`
+    /// file and sets that type's `unavailable` to nil, so nobody edits this.
     public static func live(decoder: any PhotoDecoding, writer: any JPEGWriting,
                             store: any CatalogStoring) -> LibraryServices {
-        var services = fake()
-        services.decoder = decoder
-        services.writer = writer
-        services.store = store
-        services.unavailable = [
-            "importer": "Import isn't connected yet (import).",
-            "thumbnails": "Thumbnails aren't connected yet (thumbnails).",
-            "culling": "Rating isn't connected yet (cull).",
-            "coding": "Saving the catalog isn't connected yet (persist).",
-            "loupe": "The loupe isn't connected yet (loupe-viewport).",
-            "develop": "Develop isn't connected yet (develop).",
-            "crop": "Crop isn't connected yet (crop).",
-            "exporter": "Export isn't connected yet (export).",
+        let develop = LiveDevelop()
+        let reasons: [(String, String?)] = [
+            ("importer", LiveImporter.unavailable), ("thumbnails", LiveThumbnails.unavailable),
+            ("culling", LiveCulling.unavailable), ("coding", LiveCatalogCoding.unavailable),
+            ("loupe", LiveLoupeImaging.unavailable), ("develop", LiveDevelop.unavailable),
+            ("crop", LiveCrop.unavailable), ("exporter", LiveExporter.unavailable),
         ]
-        services.isPreview = false
-        return services
+        var unavailable: [String: String] = [:]
+        for (member, reason) in reasons { if let reason { unavailable[member] = reason } }
+        return LibraryServices(
+            decoder: decoder, importer: LiveImporter(decoder: decoder),
+            thumbnails: LiveThumbnails(decoder: decoder, develop: develop), culling: LiveCulling(),
+            coding: LiveCatalogCoding(), store: store, loupe: LiveLoupeImaging(decoder: decoder, develop: develop),
+            develop: develop, crop: LiveCrop(), exporter: LiveExporter(decoder: decoder, develop: develop),
+            writer: writer, unavailable: unavailable, isPreview: false)
+    }
+}
+```
+
+Each `Live/Live….swift` starts as a spine stub of this shape (all eight are
+in `docs/blueprints/library/contracts/Live/`):
+
+```swift
+// Live/LiveImporter.swift: spine stub. The import feature replaces this file
+// with the live conformance and sets `unavailable` to nil; until then every
+// call throws the reason, and controls that need it are disabled with it.
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
+import Foundation
+#endif
+import CoreRaster
+
+public struct LiveImporter: PhotoImporting {
+    public static let unavailable: String? = "Import isn't connected yet (import)."
+    static var notBuilt: LibraryError { .invalid(unavailable ?? "") }
+    let decoder: any PhotoDecoding
+    public init(decoder: any PhotoDecoding) { self.decoder = decoder }
+
+    public func importFolder(_ folder: String, known: Set<String>,
+                             progress: @escaping @Sendable (ImportProgress) -> Void) async throws -> ImportResult {
+        throw Self.notBuilt
     }
 }
 ```

@@ -13,7 +13,7 @@ work="${1:-$(mktemp -d)}"
 pkg="$work/contracts"
 rm -rf "$pkg" && mkdir -p "$pkg/Sources" "$pkg/Tests/LibraryModelTests"
 cp -r "$repo/Sources/LibraryModel" "$pkg/Sources/LibraryModel"
-cp -r "$here/Contracts" "$here/Fakes" "$here/LibraryServices.swift" "$here/PhotoItem.swift" "$pkg/Sources/LibraryModel/"
+cp -r "$here/Contracts" "$here/Fakes" "$here/Live" "$here/LibraryServices.swift" "$here/PhotoItem.swift" "$pkg/Sources/LibraryModel/"
 cp "$here/ContractSmokeTests.swift" "$pkg/Tests/LibraryModelTests/"
 cat >"$pkg/Package.swift" <<'SWIFT'
 // swift-tools-version: 6.0
