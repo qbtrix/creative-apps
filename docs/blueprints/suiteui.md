@@ -417,7 +417,7 @@ no app change and no manifest change:
 - **Host shortcuts.** The gallery runs inside Library, whose menu commands
   stay live, and the menu bar takes key equivalents first. Gallery steps
   never press a Library shortcut: ⌘+ and ⌘− (Larger and Smaller
-  Thumbnails) are out, so zoom steps use ⌘= and the View menu's items;
+  Thumbnails) are out, so zoom steps use ⌘= and ⌘0 (the View menu holds Library's thumbnail sizes, not zoom);
   each packet lists Library's `LibraryCommands` shortcuts it checked. `ControlInventory` (probes) publishes every control's
   identifier, enabled state and reason as `suite.controls` under
   `-SuitePerfProbe`, the same flag that publishes `suite.perf`.
