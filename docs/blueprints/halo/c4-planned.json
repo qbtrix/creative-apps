@@ -390,7 +390,7 @@
                   "Sources/HaloApp/HaloWindow+Render.swift",
                   "Sources/HaloApp/HaloWindow+Text.swift"
                 ],
-                "status": "existing",
+                "status": "planned",
                 "authored": true,
                 "relationships": [
                   {
@@ -443,7 +443,7 @@
                   "Sources/HaloApp/HaloTransport.swift",
                   "Sources/HaloApp/HaloPlaybackDriver.swift"
                 ],
-                "status": "existing",
+                "status": "planned",
                 "authored": true,
                 "relationships": [
                   {

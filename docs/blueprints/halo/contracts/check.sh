@@ -29,7 +29,7 @@ cat >"$work/Package.swift" <<SWIFT
 import PackageDescription
 let package = Package(
     name: "halo-contracts-check",
-    dependencies: [$core],
+    platforms: [.macOS("26.0")], dependencies: [$core],
     targets: [
         .target(name: "HaloModel", dependencies: [
             .product(name: "FlareCore", package: "$pkg"), .product(name: "CoreRaster", package: "$pkg")]),
