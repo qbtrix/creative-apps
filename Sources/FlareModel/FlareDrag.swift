@@ -48,7 +48,11 @@ extension FlareWorkspace {
         case .ellipse:
             draft = Self.ellipse(from: start, to: end, stageScale: stageScale).map { ShapeDraft(tool: .ellipse, shape: $0) }
         case .rectangle: draft = g.isClick ? nil : shapes.draft(tool, from: start, to: end, modifiers: modifiers, previous: nil)
-        case .pen: draft = shapes.draft(tool, from: start, to: end, modifiers: modifiers, previous: g.base)
+        case .pen:
+            // The pen's tolerances are on screen: the draft carries this click's fit scale (#619).
+            var base = g.base ?? ShapeDraft(tool: .pen, shape: FlareShape(points: []))
+            base.stageScale = stageScale
+            draft = shapes.draft(tool, from: start, to: end, modifiers: modifiers, previous: base)
         case .select, .directSelect:
             let drags = !g.isClick && start.isFinite && end.isFinite
             marquee = drags && g.moving.isEmpty ? Rect(enclosing: [start, end]) : nil

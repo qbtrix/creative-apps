@@ -13,10 +13,11 @@ public struct ShapeDraft: Equatable, Sendable {
     public var anchors: [Point]         // pen only; empty for primitives
     public var smoothAnchors: Set<Int>  // pen anchors made by a drag
     public var isClosed: Bool
+    public var stageScale: Double       // pen only: the fit scale of its latest click, stage points per scene point
     public init(tool: FlareTool, shape: FlareShape, anchors: [Point] = [],
-                smoothAnchors: Set<Int> = [], isClosed: Bool = false) {
+                smoothAnchors: Set<Int> = [], isClosed: Bool = false, stageScale: Double = 1) {
         self.tool = tool; self.shape = shape; self.anchors = anchors
-        self.smoothAnchors = smoothAnchors; self.isClosed = isClosed
+        self.smoothAnchors = smoothAnchors; self.isClosed = isClosed; self.stageScale = stageScale
     }
 }
 
