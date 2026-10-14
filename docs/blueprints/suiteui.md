@@ -286,3 +286,88 @@ asserts it), and every relationship names ids that exist.
 Golden comparison (`GoldenComparing`) belongs to the snapshot container, not
 to SuiteUI: its conformance lives in `Tests/AppSnapshotTests/GoldenImage.swift`
 and its contract in `Contracts/` so it can be unit-tested with the rest.
+
+---
+
+## 3. Usage map
+
+SuiteUI has no users of its own (`docs/priorities.md`, SuiteUI). A component
+takes the **highest tier of any app step that shows it**: tier 1 if any
+app's tier-1 loop puts it on screen, tier 2 if only weekly features do, tier
+3 otherwise. A dependency is never below what needs it, so the harness that
+proves tier-1 components is tier 1.
+
+**How the app tiers were made.** `docs/priorities.md` ranked each app from
+public sources only: usage surveys, help-centre task articles, course
+syllabi, "learn these first" shortcut sheets and community threads, and no
+other app was opened. The surveys it lists: the 2019 motion design survey
+(schoolofmotion.com/blog/2019-motion-design-survey), photo editing habits of
+18–25s (petapixel.com, 2024-06-21), the photo editing software survey
+(shotkit.com/photo-editing-software-survey), the state of design systems
+2022–23 (sympli.io), and the UX tools survey 2022 (designcompass.org).
+Rows it marks *inferred* stay inferred here.
+
+**What this blueprint adds** for the component-level rules (not for ranking
+apps): the macOS Human Interface Guidelines (developer.apple.com/design/
+human-interface-guidelines: sidebars, inspectors, toolbars, sliders, focus
+and keyboard navigation), WCAG 2.2 success criteria 1.4.3 contrast, 1.4.11
+non-text contrast and 2.5.8 target size (w3.org/TR/WCAG22), and the WAI-ARIA
+Authoring Practices slider, grid and tree view patterns
+(w3.org/WAI/ARIA/apg/patterns/), which give the keyboard model every
+adjustable and selectable component follows (arrows step, Page or Shift
+steps coarse, Home and End jump, Return edits, Escape cancels).
+
+App letters: **F** Flare, **D** Design, **P** Photo, **L** Library, **H**
+Halo. "now" is the grep table in 0.5; "planned" comes from each app's
+blueprint or issues.
+
+### 3.1 Tier 1: on every app's everyday loop
+
+| Component | Apps now | Apps planned | The tier-1 step that shows it (`docs/priorities.md`) |
+|---|---|---|---|
+| Tokens, glass | all | all | every screen |
+| `SuiteWindow` | F L H | L H | Library browse (#33); Halo compositions (#36) |
+| `EditorShell`, top bar, `EditorBarItem(.primary)`, save status | D P | F D P | Open, save, undo for F (5), D (8), P (1, 4) |
+| Timeline slot in `EditorShell` | – | F (H if it moves to the shell) | Flare keyframes and scrub (1, 3) |
+| `ToolbarGroup` rail and floating palette | F D P | F D P H | Draw and select (F 4, D 2–3, P 2) |
+| `CanvasViewport`, rulers, zoom, pan | D P | F D P | Zoom and pan (F 5, D 1, P 4) |
+| `CanvasSurface` | F L H | L H | Library loupe (#29); Halo viewer (H 4) |
+| `SelectionOutline`, `CropShade` | D P | D P | Select (D 2); crop (P 2) |
+| `SelectionHandles`, `PathMarks`, guide marks | – (Design draws its own) | F D H | Select, move, resize (F 4, D 2, H 5) |
+| `InspectorHeader`, `InspectorSection`, `InspectorRow` | D P L H | all | Properties inspector (D 5); tone (P 3); develop (L 4) |
+| Bar slider (`InspectorSliderRow`, `StudioScrubRow`) | F P | all | Exposure and levels (P 3); develop (L 4); transform rows (F 1, H 3) |
+| `ScrubField` exact numbers with `onEnd` | D | D F | Position and size (D 5) |
+| `InspectorPickerRow`, toggle rows | P L | all | Develop and tone options (P 3, L 4) |
+| `InspectorColorRow` | D P | D F | Fill and stroke (D 5, F 4) |
+| `KeyframeButton` | – | F H | Keyframe a property (F 1, H 3) |
+| `PresetGrid`, `ChoiceChips`, `ChipRow` | F | F H | Easing presets (F 2, H 7) |
+| `ToneCurveEditor` | P | P | Curves (P 3) |
+| `SidebarRow`, `SidebarSection`, `LayerList` (dimmed, rename, reorder) | F D H | F D P H | Layers panel (F 4, D 6, P 5); compositions (H 1) |
+| `ThumbnailGrid` | L | L | Browse the grid, cull with keys (L 2, 3) |
+| `TimelineStrip` (selectable, draggable keys) | H | F H | Keys on a timeline, retime and delete (F 1, H 2–3) |
+| `TransportCapsule` | – | F H | Play and loop with Space (F 3, H 4) |
+| `ViewerStatusBar` pills | D P H | all canvas apps | Zoom readout under every canvas (design doc, Viewer chrome) |
+| `EmptyStateView` | all | all | Open or create a document (every app's step 1) |
+| `SegmentedTabs` | D P | D P F | The right panel's tabs (P 5 layers, D 6) |
+| Golden compare and snapshot host (#331, #332) | – | all | p1 by dependency: every tier-1 component's look is proven by it |
+| Journey files and helpers (#333), gallery, control inventory | – | all | p1 by dependency: every journey in section 4 runs on it |
+
+### 3.2 Tier 2: weekly
+
+| Component | Apps planned | Step |
+|---|---|---|
+| `CurveEditor` (custom easing curve) | F H | Curve editor (F tier 2) |
+| `CanvasPointMark`, `CanvasGrid` | P | Clone and heal (P tier 2, #422); straighten grid (P, done for v1 on a placeholder) |
+| `MotionPathMarks`, `GhostLayer` | F | Onion skin and motion paths (F tier 2) |
+| Row context menus (#73) | H F D | Duplicate and delete compositions (H #35) |
+| Keyboard rename (#108), contrast fixes (#283, #284, #285, #622) | all | Accessibility basics (tier 2 in every app) |
+| `InspectorStepperRow` | – | No caller planned; kept, not extended |
+
+### 3.3 Tier 3: specialist
+
+| Component | Apps planned | Step |
+|---|---|---|
+| `NodeGraph` (#344) | F | Interactive state machines (F tier 3, but in Flare's v1 scope) |
+| `FrameProbe` (#330) | all | Perf budgets (tier 3 in every app). It ships in wave 1 anyway: section 7's budgets cannot be measured without it, and it is small |
+| App-owned expansion (#111), the rename-guard tests (#249, #308, #311, #312) | D | Polish and test plumbing |
+| Command palette (#7) | all | No tier-1 or tier-2 step needs it: not v1 |
