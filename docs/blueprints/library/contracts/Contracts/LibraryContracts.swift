@@ -52,11 +52,15 @@ public protocol CatalogStoring: Sendable {
 public protocol PhotoImporting: Sendable {
     /// Scans `folder`, skips paths in `known`, and returns the new photos in
     /// capture-date order with ids equal to their paths. Calls `progress`
-    /// after each file, at most 30 times a second. Throws
-    /// `unreadableFolder`, or `noPhotos` when the folder holds no image file
-    /// at all; a file that fails is a `FileFailure`, never a throw.
+    /// after each file, at most 30 times a second, and `added` with each
+    /// batch of new photos (at most 50, at least every 250 ms) as they are
+    /// read, so the grid fills while the import runs; the result repeats
+    /// them all. Throws `unreadableFolder`, or `noPhotos` when the folder
+    /// holds no image file at all; a file that fails is a `FileFailure`,
+    /// never a throw.
     func importFolder(_ folder: String, known: Set<String>,
-                      progress: @escaping @Sendable (ImportProgress) -> Void) async throws -> ImportResult
+                      progress: @escaping @Sendable (ImportProgress) -> Void,
+                      added: @escaping @Sendable ([PhotoItem]) -> Void) async throws -> ImportResult
 }
 
 /// J2. Grid thumbnails. Live: `LiveThumbnails(decoder:develop:)`, an actor

@@ -61,14 +61,14 @@
         "Tests/AppSnapshotTests/LibraryEmptyCollectionSnapshots.swift"
       ],
       "core": "none",
-      "suiteui": "none (#333 for its own journey file; until then it edits LibraryJourneyTests.swift)",
+      "suiteui": "none for its own work; the cell values it declares are shown once S-L2 lands (a hard wait for journey steps that read them); #333 for its own journey file (until then it edits LibraryJourneyTests.swift)",
       "depends": [],
       "journeys": [
         "J0",
         "J10",
         "J11"
       ],
-      "notes": "Creates every stub file later features replace; lands as several stacked PRs. Coordinates with open PR #217 (#156). In wave 1 it also adds PhotoItem.cullSummary as the accessibility value of the loupe photo (LibraryLoupe.swift) and the grid cells, and embeds the LibraryCropOverlay and CropInspector stubs, so later features never edit another's view. Existing tests it owns are kept passing (the hand-written == keeps whole-catalog comparisons working).",
+      "notes": "Creates every stub file later features replace; lands as several stacked PRs. Coordinates with open PR #217 (#156). In wave 1 it also adds PhotoItem.cullSummary as the accessibility value of the loupe photo (LibraryLoupe.swift) and the grid cells, and embeds the LibraryCropOverlay and CropInspector stubs, so later features never edit another's view. Existing tests it owns are kept passing (the hand-written == keeps whole-catalog comparisons working). It also presents LibraryExportSheet from LibraryWindow while exportState is not idle, shows the Preview data pill while services are fakes, and switches today's four journeys to -LibraryFixture samples.",
       "quality": "QB-F1 (J11), QB-F3 (undo), QB-V5"
     },
     {
@@ -101,7 +101,7 @@
         "J1",
         "P6"
       ],
-      "notes": "Owns LibraryJourneyTests.swift in its wave, for its journey steps if #333 has not merged.",
+      "notes": "Owns LibraryJourneyTests.swift in its wave, for its journey steps if #333 has not merged. Deletes the skipped testImportRateAndRelaunch (J8 replaces it).",
       "quality": "QB-L9, QB-LIB-1, QB-LIB-V6, QB-F2"
     },
     {
@@ -133,7 +133,7 @@
         "J2",
         "P1"
       ],
-      "notes": "Live thumbnails read files through services.decoder, which is FakeDecoder in tests and the live ImageIODecoder once import lands.",
+      "notes": "Live thumbnails read files through services.decoder, which is FakeDecoder in tests and the live ImageIODecoder once import lands. Its (L) steps wait for import to merge. Cell values need S-L2.",
       "quality": "QB-LIB-3, QB-LIB-8, QB-LIB-V5"
     },
     {
@@ -157,7 +157,9 @@
         "Tests/AppSnapshotTests/LibraryAutoAdvanceSnapshots.swift",
         "UITests/LibraryJourneyTests+Cull.swift",
         "UITests/LibraryJourneyTests+PerfCull.swift",
-        "Tests/LibraryModelTests/LibraryCullBudgetTests.swift"
+        "Tests/LibraryModelTests/LibraryCullBudgetTests.swift",
+        "Sources/LibraryApp/MetadataInspector.swift",
+        "Tests/AppSnapshotTests/LibraryMetadataSnapshots.swift"
       ],
       "core": "none",
       "suiteui": "S-L2 (reject badge); #330, #333",
@@ -168,7 +170,7 @@
         "J4",
         "P2"
       ],
-      "notes": "#724's keys only; its zoom and photo size go to loupe-viewport. The grid's reject mark (dimmed cell, xmark badge) is drawn by thumbnails, which owns the cell builder; cull changes only Model state.",
+      "notes": "#724's keys only; its zoom and photo size go to loupe-viewport. The grid's reject mark (dimmed cell, xmark badge) is drawn by thumbnails, which owns the cell builder; cull changes only Model state. Owns MetadataInspector.swift in wave 2: it routes the stars, flag and label through cull(_:) and gives every control an identifier (most of #291's list); metadata-more takes the file in wave 5. Its (L) steps wait for import to merge. Its PR that lands the loupe keys says 'Part of #724'; whichever of cull and loupe-viewport merges its #724 part last says 'Closes #724'.",
       "quality": "QB-LIB-4, QB-LIB-5, QB-F3, QB-F4"
     },
     {
@@ -200,7 +202,7 @@
         "J9",
         "P7"
       ],
-      "notes": "Writes the develop and crop objects from the start (their types come from the spine), so #423's and #425's catalog parts are done here.",
+      "notes": "Writes the develop and crop objects from the start (their types come from the spine), so #423's and #425's catalog parts are done here. Its (L) steps wait for import to merge. Flushes on quit and exposes library.catalog = saved or dirty.",
       "quality": "QB-LIB-2, QB-L12, QB-LIB-V7"
     },
     {
@@ -236,7 +238,7 @@
         "J3",
         "P4"
       ],
-      "notes": "#724's zoom, photo on the artboard and real size.",
+      "notes": "#724's zoom, photo on the artboard and real size. Adds Home and End (first and last photo) and scroll pan. Its (L) steps wait for import to merge. Its #724 PR says 'Part of #724' unless it merges after cull's, then 'Closes #724'.",
       "quality": "QB-LIB-5, QB-L1 (pan), QB-LIB-8"
     },
     {
@@ -295,7 +297,7 @@
         "UITests/LibraryJourneyTests+Layout.swift"
       ],
       "core": "none",
-      "suiteui": "#340 status pills; #330, #333",
+      "suiteui": "S-L7 optional zoom and size pills; #330, #333",
       "depends": [
         "spine",
         "thumbnails",
@@ -408,8 +410,8 @@
       ],
       "owned": [
         "Sources/LibraryModel/LibraryKeywords.swift",
-        "Sources/LibraryApp/MetadataInspector.swift",
         "Tests/LibraryModelTests/LibraryKeywordTests.swift",
+        "Sources/LibraryApp/MetadataInspector.swift",
         "Tests/AppSnapshotTests/LibraryMetadataSnapshots.swift"
       ],
       "core": "none",

@@ -19,4 +19,11 @@ enum FakeBehavior {
     static func gradient(for photo: PhotoItem, longSide: Int?) -> DisplayImage? {
         SampleImage.image(for: photo, longSide: longSide)
     }
+
+    /// `photo` at its crop's shape, so a cropped photo looks cropped on fakes too.
+    static func cropShaped(_ photo: PhotoItem, _ crop: CropSettings?) -> PhotoItem {
+        guard let rect = crop?.rect else { return photo }
+        return photo.withSize(PixelSize(width: max(Int(Double(photo.pixelSize.width) * rect.width), 1),
+                                        height: max(Int(Double(photo.pixelSize.height) * rect.height), 1)))
+    }
 }

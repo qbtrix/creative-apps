@@ -1,6 +1,8 @@
 // Live/LiveDevelop.swift: spine stub. The develop feature replaces this file
-// with the live conformance and sets `unavailable` to nil; until then every
-// call throws the reason, and controls that need it are disabled with it.
+// with the live conformance and sets `unavailable` to nil. Until then it
+// does what needs no file (samples through `SampleImage`, pure rules) and
+// throws its reason for anything that needs the feature, so the controls
+// that need it are disabled with that reason.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -13,11 +15,12 @@ public struct LiveDevelop: DevelopRendering {
     static var notBuilt: LibraryError { .invalid(unavailable ?? "") }
     public init() {}
 
+    /// Neutral settings are already right; anything else waits for the feature.
     public func render(_ buffer: PixelBuffer, settings: DevelopSettings) throws -> PixelBuffer {
-        // Neutral settings are already right; anything else waits for the feature.
         guard settings.isNeutral else { throw Self.notBuilt }
         return buffer
     }
 
-    public func histogram(of buffer: PixelBuffer) throws -> HistogramBins { .empty }  // no histogram until develop
+    /// No histogram until develop, so the live loupe works in wave 2.
+    public func histogram(of buffer: PixelBuffer) throws -> HistogramBins { .empty }
 }

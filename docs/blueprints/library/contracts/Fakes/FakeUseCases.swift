@@ -24,10 +24,14 @@ public struct FakeImporter: PhotoImporting {
         self.photos = photos; self.mode = mode
     }
     public func importFolder(_ folder: String, known: Set<String>,
-                             progress: @escaping @Sendable (ImportProgress) -> Void) async throws -> ImportResult {
+                             progress: @escaping @Sendable (ImportProgress) -> Void,
+                             added: @escaping @Sendable ([PhotoItem]) -> Void) async throws -> ImportResult {
         try await FakeBehavior.perform(mode, failing: .unreadableFolder(folder))
         let fresh = photos.filter { !known.contains($0.id) }
-        for index in fresh.indices { progress(ImportProgress(done: index, total: fresh.count)) }
+        for index in fresh.indices {
+            progress(ImportProgress(done: index, total: fresh.count))
+            added([fresh[index]])
+        }
         return ImportResult(added: fresh, alreadyKnown: photos.count - fresh.count, failures: [])
     }
 }
@@ -37,14 +41,8 @@ public struct FakeThumbnails: ThumbnailProviding {
     public init(mode: FakeMode = .ok) { self.mode = mode }
     public func thumbnail(for photo: PhotoItem, longSide: Int) async throws -> DisplayImage {
         try await FakeBehavior.perform(mode, failing: .notAnImage(photo.id))
-        var shaped = photo
-        if let rect = photo.develop.crop?.rect {
-            // The crop's shape, so a cropped photo's cell changes on fakes too.
-            let size = PixelSize(width: max(Int(Double(photo.pixelSize.width) * rect.width), 1),
-                                 height: max(Int(Double(photo.pixelSize.height) * rect.height), 1))
-            shaped = photo.withSize(size)
-        }
-        guard let image = FakeBehavior.gradient(for: shaped, longSide: longSide) else {
+        guard let image = FakeBehavior.gradient(for: FakeBehavior.cropShaped(photo, photo.develop.crop),
+                                                longSide: longSide) else {
             throw LibraryError.notAnImage(photo.id)
         }
         return image
@@ -104,12 +102,15 @@ public struct FakeLoupe: LoupeImaging {
     public func render(_ photo: PhotoItem, settings: DevelopSettings, longSide: Int,
                        quality: RenderQuality) async throws -> RenderedPhoto {
         try await FakeBehavior.perform(mode, failing: .renderFailed("the preview failed on purpose"))
-        guard let base = FakeBehavior.gradient(for: photo, longSide: quality == .preview ? 512 : longSide) else {
+        guard let base = FakeBehavior.gradient(for: FakeBehavior.cropShaped(photo, settings.crop),
+                                               longSide: quality == .preview ? 512 : longSide) else {
             throw LibraryError.renderFailed("empty photo")
         }
         // Not the develop math: a visible stand-in so the UI track sees every
-        // slider move. Each step of any slider brightens by one byte level.
-        let lift = Int(DevelopSlider.allCases.map { settings.value($0) / $0.step / 100 }.reduce(0, +).rounded())
+        // slider move. Each step of any slider (0.01 EV, or 1) lifts by one
+        // byte level, clamped to the byte range.
+        let steps = DevelopSlider.allCases.map { settings.value($0) / $0.step }.reduce(0, +)
+        let lift = Int(min(max(steps, -255), 255).rounded())
         var bytes = base.rgba8
         var red = [Int](repeating: 0, count: HistogramBins.binCount), green = red, blue = red
         for i in stride(from: 0, to: bytes.count, by: 4) {
@@ -134,7 +135,8 @@ public struct FakeDevelop: DevelopRendering {
     public func histogram(of buffer: PixelBuffer) throws -> HistogramBins { .empty }
 }
 
-/// Centers the aspect on the photo; an angle shrinks the rect by
+/// Takes no `FakeMode` (pure geometry, nothing to fail). Centers the aspect
+/// on the photo; an angle shrinks the rect by
 /// cos + sin of it (a stand-in for `straightenCrop`); handle drags move the
 /// matching edges by the drag, clamped to the photo, ignoring the aspect.
 public struct FakeCrop: CropGeometry {

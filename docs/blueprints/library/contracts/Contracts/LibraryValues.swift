@@ -62,7 +62,7 @@ public struct DisplayImage: Hashable, Sendable {
         self.rgba8 = rgba8
     }
     /// FNV-1a over the bytes as 16 hex digits: the loupe photo's checksum
-    /// that journeys read. Computed on demand (only under the perf or test flag).
+    /// that journeys read. Computed on demand, only under `-LibraryTestValues`.
     public var checksum: String {
         var hash: UInt64 = 0xcbf2_9ce4_8422_2325
         for byte in rgba8 { hash = (hash ^ UInt64(byte)) &* 0x0000_0100_0000_01b3 }

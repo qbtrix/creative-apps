@@ -27,7 +27,7 @@ public struct PhotoItem: Identifiable, Sendable, Hashable {
     public internal(set) var label: PhotoLabel?
     /// The file's absolute path; nil for a generated sample. Equal to `id` for an imported photo.
     public let path: String?
-    /// After the Exif orientation; samples use `LibraryCatalog.loupeArtboard`.
+    /// After the Exif orientation; samples are 4032 × 3024.
     public let pixelSize: PixelSize
     /// Edit instructions; neutral until the person develops the photo.
     public internal(set) var develop: DevelopSettings

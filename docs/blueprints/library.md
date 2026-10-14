@@ -263,7 +263,8 @@ All paths are under `Sources/LibraryModel/`.
 
 **No shared wiring file.** `LibraryServices.live` (section 5.4) names a
 `Live…` type for every member from the start. The spine creates each
-`Live/Live….swift` as a stub that forwards to the fake and carries
+`Live/Live….swift` as a stub that handles what needs no file (samples,
+plain cull rules), throws for the rest, and carries
 `static let unavailable: String? = "<what> isn't connected yet (<feature>)."`;
 the feature that builds it replaces the file and sets `unavailable` to nil.
 So no two features ever edit the same wiring line.
@@ -439,7 +440,25 @@ Checklist:
   journey below says which steps run in which mode: **(F)** passes on
   fakes, **(L)** needs the live conformance and runs only once that
   feature's last task has replaced its `Live/` stub. A feature's journey
-  ships with its (F) steps; its last task adds the (L) steps.
+  ships with its (F) steps; its last task adds the (L) steps. Every (L)
+  setup imports real files, so in wave 2 the (L) steps of thumbnails, cull,
+  persist and loupe-viewport also wait for import to merge (their packets
+  say so; `check_waves.py` forbids same-wave dependencies, so it is a task
+  order inside the wave, not a feature dependency).
+- **Today's journeys.** The four existing journeys click "Load Sample
+  Photos" in the content, which becomes the File menu's item once the empty
+  state's button is Import Folder…. The spine switches
+  `testLoadSamplePhotos`, `testEveryMenuOpens`,
+  `testLoupeStepsAndReturnsToTheGrid` and `testRateASelectedPhoto` to
+  `-LibraryFixture samples` (and File > Load Sample Photos for the first)
+  in the same PR, in `UITests/LibraryJourneyTests.swift`, which it owns.
+- **Sort for the named photos.** In `shoot`, capture order is not name
+  order (below), so J3–J7 start with View > Sort By > Name to put
+  `IMG_0001` first.
+- **Saved before quit.** The window carries `library.catalog` with value
+  `saved` or `dirty` (`saveRevision == savedRevision`); every journey that
+  terminates and relaunches waits for `saved` first, and the persist area
+  also flushes on `NSApplication.willTerminateNotification`.
 - **Launch arguments** (parsed in `LibraryLaunch.swift`, Linux-tested):
 
 | Argument | Effect |
@@ -451,6 +470,8 @@ Checklist:
 | `-LibraryExportTo <path>` | The export sheet's folder; Export writes there without a panel |
 | `-LibraryFakeMode ok\|fail\|slow` | Fakes only: every call succeeds, fails with its error, or waits 2 s first |
 | `-LibraryPerfProbe` | Exposes `suite.perf` (SuiteUI QH-1, #330, with S-L8's named marks) |
+| `-LibraryTestValues` | Computes the loupe checksum and other test-only values (`DisplayImage.checksum`); every journey that reads one passes it |
+| `-LibraryReduceMotion` | The app treats Reduce Motion as on (an app-level override the animated views read beside the system setting), for QB-F5's probe check |
 | `-LibraryWindowSize <w>x<h>` | The window's initial content size, for the layout journey |
 
 - **Fixtures** (`LibraryFixtures`, built in code):
@@ -459,7 +480,7 @@ Checklist:
 |---|---|---|
 | `empty` | no photos | fake runs of J0 |
 | `samples` | today's 60 seeded samples (`LibrarySample`), with `pixelSize` 4032 × 3024 and no path | existing journeys, snapshots |
-| `shoot` | 24 photos `IMG_0001` … `IMG_0024`; every third one (`IMG_0003`, `IMG_0006`, … `IMG_0024`, 8 photos) portrait 4000 × 6000, the other 16 landscape 6000 × 4000; captured 2026-06-01 10:00 UTC plus one minute per number; no ratings, flags or labels | J2–J7 (F); `LibraryFiles.writeShoot` writes the same 24 for (L) |
+| `shoot` | 24 photos `IMG_0001` … `IMG_0024`; every third one (`IMG_0003`, `IMG_0006`, … `IMG_0024`, 8 photos) portrait 4000 × 6000, the other 16 landscape 6000 × 4000; `IMG_n` captured 2026-06-01 10:00 UTC plus `(7 · n) mod 24` minutes, so capture order (`IMG_0024` first) differs from name order; no ratings, flags or labels | J2–J7 (F); `LibraryFiles.writeShoot` writes the same 24 for (L) |
 | `large` | 10,000 records over 365 days, names `IMG_00001` … | P1 (F), model budgets |
 
 - **Identifiers and values.** Every Library control and mark gets
@@ -467,12 +488,16 @@ Checklist:
   `library.loupe.photo`, `library.develop.exposure`, `library.crop.frame`,
   `library.export.longEdge`, ...). Accessibility values carry what a test
   reads, all built in the Model: a grid cell's value is its load state
-  (`loading`, `ready`, `unreadable`) then `PhotoItem.cullSummary`
-  ("3 stars, Picked, Red"); the loupe photo's value is `preview` or `full`,
-  the render's checksum, the zoom percent, then `cullSummary`
-  (`full 3f9a… 100% 3 stars`), so a journey can tell that the pixels, the
-  zoom or the rating changed. The spine puts `cullSummary` on the loupe
-  photo and the cells in wave 1, so cull never edits a view.
+  (`loading`, `ready`, `unreadable`), the shown image's pixel size, then
+  `PhotoItem.cullSummary` ("ready 256×171 3 stars, Picked, Red"); the loupe
+  photo's value is `preview` or `full`, the render's pixel size and
+  checksum, the zoom percent, then `cullSummary`
+  (`full 2048×1365 3f9a… 100% 3 stars`), so a journey can tell that the
+  pixels, the shape, the zoom or the rating changed. The spine puts the
+  loupe value on the photo in wave 1. Cell values need S-L2 (a per-cell
+  value hook in `ThumbnailGrid`), a hard SuiteUI wait for the steps that
+  read them; until it lands those steps open the photo in the loupe and
+  read the loupe value instead.
 - **Every control acts or says why.** `library.controls` is a JSON
   accessibility value on the window (spine: `LibraryControls.swift`, after
   Flare's `FlareControls.swift`) listing every `library.*` control with
@@ -487,16 +512,16 @@ Checklist:
 The States line of each journey names every empty, loading and error state
 it passes through; each has a snapshot in section 6.3.
 
-**J0 · `testLaunchShowsEmptyCatalog`** (`+Shell.swift`, spine; import flips
-step 2)
+**J0 · `testLaunchShowsEmptyCatalog`** (`+Shell.swift`, spine)
 1. (F, L) Launch with an empty `-LibraryCatalogDir` and no fixture. Shot
    `empty`. Expect `expectWindowShell()`, the empty state "No Photos" with
    **Import Folder…** as its one prominent button, sidebar counts 0.
-2. (F, L) Open File. Shot `file-menu-empty`. In wave 1, Import Folder… and
-   the empty state's button are disabled and the button's help reads
-   "Import isn't connected yet (import)." (the live stub's reason); the
-   import feature's last task changes this step to expect both enabled.
-   Export… is disabled.
+2. (F, L) Open File. Shot `file-menu-empty`. Import Folder… and the empty
+   state's button are enabled exactly when `library.controls` lists
+   `library.import` as enabled; when it is disabled, its reason is the
+   button's help (in wave 1 "Import isn't connected yet (import)."). So the
+   step passes before and after import lands without an edit. Export… is
+   disabled.
 3. (F, L) Open Edit. Expect Undo and Redo disabled.
 States: empty (catalog); disabled with a reason.
 
@@ -504,29 +529,35 @@ States: empty (catalog); disabled with a reason.
 1. Write 24 JPEGs (4 of them in a subfolder `day2/`), 1 PNG, 1 HEIC,
    `LibraryFiles.broken` and a `notes.txt` into a temp folder; launch with
    `-LibraryImportFolder` on it (no `-LibraryImportOnLaunch`).
-2. Click **Import Folder…**. Shot `importing`. Expect the progress row
-   `library.import.progress` ("Importing 3 of 27") while it runs, and
-   placeholder cells (value `loading`) as records arrive.
+2. Click **Import Folder…**. Shot `importing`. Expect placeholder cells
+   (value `loading`) as batches arrive (`PhotoImporting`'s `added`
+   callback) before the import ends. The progress row itself is asserted
+   in step 6, since 27 small files may finish before its 100 ms delay.
 3. Wait for the progress row to go. Shot `imported`. Expect 26 cells; All
    Photos reads 26; capture-date order (the first cell is the earliest
    written); the notice reads `ImportNotice.message` = "Imported 26 photos.
    1 file couldn't be imported." with **Show** listing `broken.jpg: not an
    image file`; `notes.txt` is not mentioned (not an image type).
-4. Import the same folder again. Shot `import-again`. Expect "No new photos
-   in <folder>." and still 26 cells.
+4. Delete `broken.jpg`; import the same folder again. Shot `import-again`.
+   Expect "No new photos in <folder>." and still 26 cells.
 5. Relaunch with `-LibraryImportFolder` on `LibraryFiles.unreadableFolder()`
    and import. Shot `import-denied`. Expect "Library can't read <folder>.
    Check that you have access to it." in the error state.
+6. (F) Relaunch with `-LibraryFixture shoot -LibraryFakeMode slow` and an
+   empty catalog; File > Import Folder…. Shot `import-progress`. Expect
+   `library.import.progress` reading "Importing 1 of 24" within the 2 s
+   the slow fake waits.
 States: empty → loading (progress row, placeholder cells) → loaded;
 error (broken file, unreadable folder); nothing new.
 
 **J2 · `testGridShowsThumbnailsAndSorts`** (`+Grid.swift`, thumbnails)
 1. (F) Launch on `shoot`. (L) Launch live on `writeShoot`. Shot `grid`.
-   Expect every visible cell's value to start with `ready` within 2 s;
-   portrait cells' images are taller than wide.
-2. (F, L) View > Zoom In (Larger Thumbnails in the grid) twice. Shot
-   `grid-larger`. Expect fewer columns; cells `ready` again at the next
-   bucket.
+   Expect every visible cell's value to start with `ready` within 2 s.
+   The first cell (capture order) is `IMG_0024`; portrait cells' values
+   report a height above their width (e.g. `ready 171×256`).
+2. (F, L) View > Zoom In (Larger Thumbnails in the grid) three times
+   (160 → 280 pt). Shot `grid-larger`. Expect fewer columns and every
+   visible cell `ready` at the next bucket (512 → 1024 px at 2x).
 3. (F, L) View > Sort By > Name. Shot `grid-by-name`. Expect the first
    cell's caption `IMG_0001`.
 4. (F, L) Click a cell, Shift-click the fourth after it. Expect five cells
@@ -534,24 +565,31 @@ error (broken file, unreadable folder); nothing new.
 States: loading (placeholder cells) → ready.
 
 **J3 · `testLoupeStepsZoomsAndReturns`** (`+Loupe.swift`, loupe-viewport;
-the existing `testLoupeStepsAndReturnsToTheGrid` stays as is)
-1. (F) Launch on `shoot`. (L) Live on `writeShoot`. Double-click the first
-   cell. Shot `loupe`. Expect `library.loupe.photo` with a value starting
-   `preview`, then `full` within 2 s, and the readout "IMG_0001 · 1 of 24".
+the existing `testLoupeStepsAndReturnsToTheGrid` stays, on
+`-LibraryFixture samples` from the spine)
+1. (F) Launch on `shoot`. (L) Live on `writeShoot`. Sort by Name;
+   double-click the first cell. Shot `loupe`. Expect `library.loupe.photo`
+   with a value starting `full` within 2 s, and the readout
+   "IMG_0001 · 1 of 24". (F) With `-LibraryFakeMode slow` the value reads
+   `preview` first (the thumbnail scaled up); shot `loupe-preview`.
 2. (F, L) Press Right twice. Shot `loupe-step`. Expect "3 of 24".
 3. (F, L) View > Actual Size (Command-1). Shot `loupe-100`. Expect the
    photo's value to contain `100%`.
-4. (F, L) Hold Space and drag the photo 200 pt left (CanvasViewport pans
-   only on Space-drag, scroll and arrows). Shot `loupe-pan`. Expect the
-   photo frame's x moved left by 200 (±2).
-5. (F, L) View > Zoom to Fit (Command-0), then Escape. Shot `loupe-grid`.
-   Expect the grid with `IMG_0003` selected.
+4. (F, L) Scroll the photo 200 pt left (`scroll(byDeltaX:deltaY:)`;
+   XCUITest can't hold Space through a drag, and CanvasViewport pans on
+   scroll and arrows too). Shot `loupe-pan`. Expect the photo frame's x
+   moved left by 200 (±2). Space-drag is covered by a Model test of the pan
+   math.
+5. (F, L) View > Zoom to Fit (Command-0); press End, then Home. Expect
+   "24 of 24", then "1 of 24" (loupe-viewport adds Home and End). Right
+   twice; Escape. Shot `loupe-grid`. Expect the grid with `IMG_0003`
+   selected.
 States: loading (`preview` before `full`).
 
 **J4 · `testCullWithKeysAndAutoAdvance`** (`+Cull.swift`, cull; all steps
 F and L)
-1. Launch on `shoot` (L: live on `writeShoot`); open `IMG_0001` in the
-   loupe. Metadata > Auto Advance is checked by default.
+1. Launch on `shoot` (L: live on `writeShoot`); sort by Name; open
+   `IMG_0001` in the loupe. Metadata > Auto Advance is checked by default.
 2. Press 3. Shot `cull-rated`. Expect "2 of 24"; press Left: the photo's
    value ends `3 stars`; press Right.
 3. Press P on `IMG_0002`, then X on `IMG_0003`. Shot `cull-flagged`.
@@ -562,20 +600,24 @@ F and L)
 5. Uncheck Metadata > Auto Advance; press 5. Expect still the same photo,
    its value `5 stars`.
 6. Escape; click `IMG_0005`, Command-click `IMG_0006`; press 2. Shot
-   `cull-grid`. Expect both cells' values contain `2 stars` and the
-   selection did not move.
-7. Press U; Edit's Undo item reads "Undo Clear Flag".
+   `cull-grid`. Expect both cells' values contain `2 stars` (before S-L2:
+   open each in the loupe and read its value) and the selection did not
+   move.
+7. Press P (both picked), then U; Edit's Undo item reads "Undo Clear
+   Flag".
 States: none beyond the loaded grid; with nothing selected the keys do
 nothing and the Metadata items are disabled.
 
 **J5 · `testDevelopSlidersAndHistogram`** (`+Develop.swift`, develop)
-1. (F) Launch on `shoot`. (L) Live on `writeShoot`. Open `IMG_0001` in the
-   loupe; click the inspector's **Develop** tab. Shot `develop`. Expect the
+1. (F) Launch on `shoot`. (L) Live on `writeShoot`. Both with
+   `-LibraryTestValues`. Sort by Name; open `IMG_0001` in the loupe; click the inspector's **Develop** tab. Shot `develop`. Expect the
    histogram `library.develop.histogram`, TONE rows Exposure, Contrast,
    Highlights, Shadows and COLOR rows Temperature, Tint, all at 0.
 2. (F, L) Drag Exposure right. Shot `develop-exposure`. Expect the row's
    value above 0, the loupe photo's checksum changed, and the histogram's
-   value (its mean, as text) went up.
+   value went up: the Model builds it as `mean 0.4213` (four decimals, the
+   mean sRGB value over all three channels), so one byte level of change
+   shows.
 3. (F, L) Focus Contrast; press Right three times, then Shift-Right.
    Expect 3, then 13 (step 1, Shift ten).
 4. (F, L) Edit's Undo item reads "Undo Contrast"; undo once; Contrast
@@ -586,37 +628,45 @@ nothing and the Metadata items are disabled.
    Undo reads "Undo Paste Settings".
 6. (F, L) Click the TONE section's Reset. Expect its four rows at 0 and Undo
    "Undo Reset Tone". (A per-row reset waits on S-L6.)
-7. (L) Set Exposure to +1 on `IMG_0001`, note the loupe checksum; terminate
-   and relaunch on the same `-LibraryCatalogDir`; open `IMG_0001`. Expect
+7. (L) Set Exposure to +1 on `IMG_0001`, note the loupe checksum; wait for
+   `library.catalog` = `saved`; terminate and relaunch on the same
+   `-LibraryCatalogDir`; open `IMG_0001`. Expect
    Exposure +1 and the same checksum (develop survives relaunch; persist
    landed in wave 2).
 8. (F) Relaunch with `-LibraryFakeMode fail`; open a photo. Shot
    `develop-error`. Expect "Couldn't render this photo: the preview failed
-   on purpose." under the histogram and the last picture kept.
+   on purpose." under the histogram and the loupe's placeholder (there is
+   no earlier picture to keep; keeping the last picture after a later
+   failure is a Model test, `LibraryLoupeImageTests`).
 States: loading (`preview` while a render runs); error (render failed).
 
 **J6 · `testCropAndStraighten`** (`+Crop.swift`, crop)
-1. (F, L) Open `IMG_0001` (6000 × 4000) in the loupe; Photo > Crop (R).
+1. (F) Launch on `shoot`. (L) Live on `writeShoot`. Both with
+   `-LibraryTestValues`. Sort by Name; open `IMG_0001` (6000 × 4000) in the
+   loupe; Photo > Crop (R).
    Shot `crop`. Expect `library.crop.frame`, the aspect chips and the
    Straighten row.
 2. (F, L) Click **1:1**. Expect the frame's value "4000 × 4000".
 3. (F, L) Focus Straighten, type 5, Return. Shot `crop-straighten`. Expect
    the frame's width under 4000 and the angle 5°. (L) The width equals
-   `straightenCrop`'s for 5° (±1 px).
-4. (F, L) Press Return. Shot `crop-applied`. Expect the loupe photo's
-   value reports a square size; Escape: the `IMG_0001` cell is square;
-   Undo reads "Undo Crop".
+   `straightenCrop`'s *height* for 6000 × 4000 at 5° (3545, ±1 px), since a
+   1:1 frame is limited by the short side.
+4. (F, L) Click the photo (focus leaves the Straighten field), press
+   Return. Shot `crop-applied`. Expect the loupe value's size square;
+   Escape: the `IMG_0001` cell's value size is square; Undo reads "Undo
+   Crop".
 5. (F, L) Undo; R; drag the frame's corner; Escape. Expect no change and no
    new undo step.
 6. (F, L) Layout: the six aspect chips have equal widths within 0.5 pt.
-7. (L) Crop to 1:1 and relaunch on the same catalog: the cell is still
-   square (persist).
+7. (L) Crop to 1:1, wait for `library.catalog` = `saved`, relaunch on the
+   same catalog: the cell is still square (persist).
 States: none beyond the loaded photo.
 
 **J7 · `testExportJPEGsAtASize`** (`+Export.swift`, export; steps 2–7 L,
 because only the live writer makes files)
-1. (F, L) Launch with `-LibraryExportTo` on a temp folder; select
-   `IMG_0001` and `IMG_0002`; File > Export… (Shift-Command-E). Shot
+1. (F) Launch on `shoot`. (L) Live on `writeShoot`. Both with
+   `-LibraryExportTo` on a temp folder. Sort by Name; select `IMG_0001` and
+   `IMG_0002`; File > Export… (Shift-Command-E). Shot
    `export-sheet`. Expect long edge 2048, quality 85, "Export 2 Photos";
    the sheet lies inside the display.
 2. Set the long edge to 1024 and quality to 80; click **Export**. Shot
@@ -636,11 +686,13 @@ because only the live writer makes files)
 States: loading (progress row), error (per-file failures), cancelled.
 
 **J8 · `testCatalogSurvivesRelaunch`** (`+Persist.swift`, persist; all L;
-replaces the skipped `testImportRateAndRelaunch`)
+it replaces the skipped `testImportRateAndRelaunch`, which import deletes
+from `LibraryJourneyTests.swift`, the file it owns in wave 2)
 1. Write 6 JPEGs, 2 of them in `day2/`; launch with
    `-LibraryImportFolder` and `-LibraryImportOnLaunch`. Rate the first 4
    stars, pick the second, label the third Red.
-2. Terminate (`XCUIApplication.terminate()`) and relaunch with the same
+2. Wait for `library.catalog` = `saved`; terminate
+   (`XCUIApplication.terminate()`) and relaunch with the same
    `-LibraryCatalogDir` and no import. Shot `relaunched`. Expect 6 cells,
    the first `4 stars`, the second `Picked`, the third `Red`, Favorites 1.
 3. Delete `day2/` from disk; relaunch. Shot `missing-files`. Expect those
@@ -679,9 +731,9 @@ selected" after J2 step 4's selection, and the loupe's zoom percent.
 | # | Test (file, feature) | Mode and data | Steps | Measures (section 7) | Samples |
 |---|---|---|---|---|---|
 | P1 | `testGridScrollLarge` (`+PerfGrid.swift`, thumbnails) | F, `large` | scroll the grid end to end at 2,000 pt/s, three times | QB-LIB-3, QB-LIB-8 | frame intervals, ≥ 60 |
-| P2 | `testCullKeyLatency` (`+PerfCull.swift`, cull) | F and L, `shoot` | 60 rating keys in the grid, then 60 in the loupe with Auto Advance (wrapping back with Home) | QB-LIB-4, QB-LIB-5 | ≥ 60 per series |
+| P2 | `testCullKeyLatency` (`+PerfCull.swift`, cull) | F and L, `shoot` | 60 rating keys in the grid, then 60 in the loupe with Auto Advance (Home after each 23, once loupe-viewport's Home has landed; Left × 23 before) | QB-LIB-4, QB-LIB-5 | ≥ 60 per series |
 | P3 | `testDevelopSliderLatency` (`+PerfDevelop.swift`, develop) | L, `writeShoot` | velocity drag on Exposure across its range, three times | QB-L2, QB-LIB-6 | ≥ 60 per series |
-| P4 | `testLoupeStepLatency` (`+PerfLoupe.swift`, loupe-viewport) | L, `writeShoot` | Right 23 times, Home, three passes (69 steps); then Actual Size and a Space-drag pan of 600 pt at 300 pt/s | QB-LIB-5, QB-L1 (pan), QB-LIB-8 | ≥ 60 per series |
+| P4 | `testLoupeStepLatency` (`+PerfLoupe.swift`, loupe-viewport) | L, `writeShoot` | Right 23 times, Home, three passes (69 steps); then Actual Size and a scroll pan of 600 pt in 60 steps | QB-LIB-5, QB-L1 (pan), QB-LIB-8 | ≥ 60 per series |
 | P5 | `testCropDragLatency` (`+PerfCrop.swift`, crop) | F, `shoot` | velocity drag of the crop corner, three times | QB-L1 | ≥ 60 |
 | P6 | `testImportProgressAndThroughput` (`+PerfImport.swift`, import) | L, 200 written 4000 × 3000 JPEGs | import, five times into fresh catalogs | QB-L9, QB-LIB-1 | single marks: 5 runs, each with its `progress` and `thumb-ready` marks |
 | P7 | `testLaunchLargeCatalog` (`+PerfLaunch.swift`, persist) | L, a 10,000-record `catalog.json` the test writes in the v1 format (files missing, so cells show placeholders) | launch, five times | QB-LIB-2, QB-L12 | single marks: 5 runs, each with `launch-grid` |
@@ -712,13 +764,14 @@ live conformances. The code below is the whole contract layer: it is also
 in `docs/blueprints/library/contracts/`, and
 `docs/blueprints/library/contracts/check.sh` copies it over today's
 `Sources/LibraryModel` and runs `swift test` on Linux in Swift 6 mode
-against creative-core `main`: the four smoke tests in
+against creative-core `main`: the six smoke tests in
 `ContractSmokeTests.swift` (every contract through `LibraryServices.fake`;
-every notice's exact text; the fakes showing each change a journey's (F)
-steps assert; every live stub's reason through `LibraryServices.live`) plus
-all 63 existing LibraryModel tests against the new `PhotoItem`. On
-2026-10-14 it compiled with no warnings and 67 of 67 tests passed (Swift
-6.1.2, x86_64 Ubuntu 24.04). The spine lands these files verbatim as
+every fake called once; every notice's exact text; the fakes showing each
+change a journey's (F) steps assert; every live stub's reason; samples on
+the live stubs) plus all 63 existing LibraryModel tests against the new
+`PhotoItem`, against creative-core 4cac701 (pinned in `check.sh`, `CORE_REV`
+overrides). On 2026-10-14 it compiled with no warnings and 69 of 69 tests
+passed (Swift 6.1.2, x86_64 Ubuntu 24.04). The spine lands these files verbatim as
 `Sources/LibraryModel/Contracts/`, `Sources/LibraryModel/Fakes/`,
 `Sources/LibraryModel/Live/` (stubs), `Sources/LibraryModel/SampleImage.swift` and
 `Sources/LibraryModel/LibraryServices.swift`, and the `PhotoItem` changes in
@@ -740,7 +793,7 @@ all 63 existing LibraryModel tests against the new `PhotoItem`. On
 | `CropGeometry` | crop frame rules (J6) | use case | `LiveCrop` (crop) | `FakeCrop`: centered aspect, a simple angle shrink, edge drags |
 | `PhotoExporting` | export plan and render (J7) | use case | `LiveExporter(decoder:develop:)` (export) | `FakeExporter`: same naming rule |
 
-Every fake takes a `FakeMode` (`-LibraryFakeMode ok|fail|slow`): `fail`
+Every fake but `FakeCrop` (pure geometry) takes a `FakeMode` (`-LibraryFakeMode ok|fail|slow`): `fail`
 throws the contract's error, `slow` waits 2 s first, so every loading and
 error state can be shown and snapshotted before any live code exists.
 
@@ -819,7 +872,7 @@ public struct DisplayImage: Hashable, Sendable {
         self.rgba8 = rgba8
     }
     /// FNV-1a over the bytes as 16 hex digits: the loupe photo's checksum
-    /// that journeys read. Computed on demand (only under the perf or test flag).
+    /// that journeys read. Computed on demand, only under `-LibraryTestValues`.
     public var checksum: String {
         var hash: UInt64 = 0xcbf2_9ce4_8422_2325
         for byte in rgba8 { hash = (hash ^ UInt64(byte)) &* 0x0000_0100_0000_01b3 }
@@ -983,8 +1036,8 @@ public struct DevelopSettings: Hashable, Sendable, Codable {
     public init() {}
 
     public var isNeutral: Bool { self == .neutral }
-    /// True when no tone slider is off zero (the crop may still be set).
-    public var isToneNeutral: Bool { DevelopSlider.allCases.allSatisfy { value($0) == 0 } }
+    /// True when no slider is off zero (the crop may still be set).
+    public var isAdjustmentNeutral: Bool { DevelopSlider.allCases.allSatisfy { value($0) == 0 } }
 
     public func value(_ slider: DevelopSlider) -> Double {
         switch slider {
@@ -1018,8 +1071,8 @@ public struct DevelopSettings: Hashable, Sendable, Codable {
         return copy
     }
 
-    /// The tone sliders of `other` with this crop: Paste Settings never pastes a crop.
-    public func pastingTone(from other: DevelopSettings) -> DevelopSettings {
+    /// All six sliders of `other` with this crop: Paste Settings never pastes a crop.
+    public func pastingAdjustments(from other: DevelopSettings) -> DevelopSettings {
         var copy = other
         copy.crop = crop
         return copy
@@ -1278,11 +1331,15 @@ public protocol CatalogStoring: Sendable {
 public protocol PhotoImporting: Sendable {
     /// Scans `folder`, skips paths in `known`, and returns the new photos in
     /// capture-date order with ids equal to their paths. Calls `progress`
-    /// after each file, at most 30 times a second. Throws
-    /// `unreadableFolder`, or `noPhotos` when the folder holds no image file
-    /// at all; a file that fails is a `FileFailure`, never a throw.
+    /// after each file, at most 30 times a second, and `added` with each
+    /// batch of new photos (at most 50, at least every 250 ms) as they are
+    /// read, so the grid fills while the import runs; the result repeats
+    /// them all. Throws `unreadableFolder`, or `noPhotos` when the folder
+    /// holds no image file at all; a file that fails is a `FileFailure`,
+    /// never a throw.
     func importFolder(_ folder: String, known: Set<String>,
-                      progress: @escaping @Sendable (ImportProgress) -> Void) async throws -> ImportResult
+                      progress: @escaping @Sendable (ImportProgress) -> Void,
+                      added: @escaping @Sendable ([PhotoItem]) -> Void) async throws -> ImportResult
 }
 
 /// J2. Grid thumbnails. Live: `LiveThumbnails(decoder:develop:)`, an actor
@@ -1490,15 +1547,20 @@ public struct LibraryServices: Sendable {
 }
 ```
 
-Each `Live/Live….swift` starts as a spine stub of this shape (all eight are
-in `docs/blueprints/library/contracts/Live/`). `LiveDevelop`'s stub already
-returns neutral renders and an empty histogram, so the live loupe works in
-wave 2 before develop lands:
+Each `Live/Live….swift` starts as a spine stub (all eight are in
+`docs/blueprints/library/contracts/Live/`). A stub does what needs no file
+and no feature: sample photos draw through `SampleImage`, culling applies
+the plain rules (so the #750 inspector keeps working), `LiveDevelop`
+returns neutral renders and an empty histogram (so the live loupe works in
+wave 2). Anything that needs a file or the feature throws the reason. The
+thumbnails stub:
 
 ```swift
-// Live/LiveImporter.swift: spine stub. The import feature replaces this file
-// with the live conformance and sets `unavailable` to nil; until then every
-// call throws the reason, and controls that need it are disabled with it.
+// Live/LiveThumbnails.swift: spine stub. The thumbnails feature replaces this file
+// with the live conformance and sets `unavailable` to nil. Until then it
+// does what needs no file (samples through `SampleImage`, pure rules) and
+// throws its reason for anything that needs the feature, so the controls
+// that need it are disabled with that reason.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -1506,24 +1568,29 @@ import Foundation
 #endif
 import CoreRaster
 
-public struct LiveImporter: PhotoImporting {
-    public static let unavailable: String? = "Import isn't connected yet (import)."
+public struct LiveThumbnails: ThumbnailProviding {
+    public static let unavailable: String? = "Thumbnails aren't connected yet (thumbnails)."
     static var notBuilt: LibraryError { .invalid(unavailable ?? "") }
     let decoder: any PhotoDecoding
-    public init(decoder: any PhotoDecoding) { self.decoder = decoder }
-
-    public func importFolder(_ folder: String, known: Set<String>,
-                             progress: @escaping @Sendable (ImportProgress) -> Void) async throws -> ImportResult {
-        throw Self.notBuilt
+    let develop: any DevelopRendering
+    public init(decoder: any PhotoDecoding, develop: any DevelopRendering) {
+        self.decoder = decoder; self.develop = develop
     }
+
+    public func thumbnail(for photo: PhotoItem, longSide: Int) async throws -> DisplayImage {
+        guard photo.path == nil, let image = SampleImage.image(for: photo, longSide: longSide) else { throw Self.notBuilt }
+        return image
+    }
+
+    public func invalidate(_ id: String) async {}
 }
 ```
 
 <details><summary>The fakes (Fakes/FakeSupport.swift, FakePlatform.swift, FakeUseCases.swift)</summary>
 
-The fakes are stand-ins, not the engine: `FakeLoupe` brightens by a byte
-level per slider step so every slider visibly moves the picture and the
-histogram; `FakeCrop` shrinks by a simple angle rule; `FakeCulling`
+The fakes are stand-ins, not the engine: `FakeLoupe` lifts by one byte
+level per slider step (0.01 EV, or 1) and takes the crop's shape, so every
+slider and crop visibly changes the picture and the histogram; `FakeCrop` shrinks by a simple angle rule; `FakeCulling`
 advances by the plain rule. Journey steps that need the real math are
 marked live-only in section 4.
 
@@ -1548,6 +1615,13 @@ enum FakeBehavior {
     /// The photo's sample gradient (`SampleImage`), so fakes and samples agree.
     static func gradient(for photo: PhotoItem, longSide: Int?) -> DisplayImage? {
         SampleImage.image(for: photo, longSide: longSide)
+    }
+
+    /// `photo` at its crop's shape, so a cropped photo looks cropped on fakes too.
+    static func cropShaped(_ photo: PhotoItem, _ crop: CropSettings?) -> PhotoItem {
+        guard let rect = crop?.rect else { return photo }
+        return photo.withSize(PixelSize(width: max(Int(Double(photo.pixelSize.width) * rect.width), 1),
+                                        height: max(Int(Double(photo.pixelSize.height) * rect.height), 1)))
     }
 }
 ```
@@ -1652,10 +1726,14 @@ public struct FakeImporter: PhotoImporting {
         self.photos = photos; self.mode = mode
     }
     public func importFolder(_ folder: String, known: Set<String>,
-                             progress: @escaping @Sendable (ImportProgress) -> Void) async throws -> ImportResult {
+                             progress: @escaping @Sendable (ImportProgress) -> Void,
+                             added: @escaping @Sendable ([PhotoItem]) -> Void) async throws -> ImportResult {
         try await FakeBehavior.perform(mode, failing: .unreadableFolder(folder))
         let fresh = photos.filter { !known.contains($0.id) }
-        for index in fresh.indices { progress(ImportProgress(done: index, total: fresh.count)) }
+        for index in fresh.indices {
+            progress(ImportProgress(done: index, total: fresh.count))
+            added([fresh[index]])
+        }
         return ImportResult(added: fresh, alreadyKnown: photos.count - fresh.count, failures: [])
     }
 }
@@ -1665,14 +1743,8 @@ public struct FakeThumbnails: ThumbnailProviding {
     public init(mode: FakeMode = .ok) { self.mode = mode }
     public func thumbnail(for photo: PhotoItem, longSide: Int) async throws -> DisplayImage {
         try await FakeBehavior.perform(mode, failing: .notAnImage(photo.id))
-        var shaped = photo
-        if let rect = photo.develop.crop?.rect {
-            // The crop's shape, so a cropped photo's cell changes on fakes too.
-            let size = PixelSize(width: max(Int(Double(photo.pixelSize.width) * rect.width), 1),
-                                 height: max(Int(Double(photo.pixelSize.height) * rect.height), 1))
-            shaped = photo.withSize(size)
-        }
-        guard let image = FakeBehavior.gradient(for: shaped, longSide: longSide) else {
+        guard let image = FakeBehavior.gradient(for: FakeBehavior.cropShaped(photo, photo.develop.crop),
+                                                longSide: longSide) else {
             throw LibraryError.notAnImage(photo.id)
         }
         return image
@@ -1732,12 +1804,15 @@ public struct FakeLoupe: LoupeImaging {
     public func render(_ photo: PhotoItem, settings: DevelopSettings, longSide: Int,
                        quality: RenderQuality) async throws -> RenderedPhoto {
         try await FakeBehavior.perform(mode, failing: .renderFailed("the preview failed on purpose"))
-        guard let base = FakeBehavior.gradient(for: photo, longSide: quality == .preview ? 512 : longSide) else {
+        guard let base = FakeBehavior.gradient(for: FakeBehavior.cropShaped(photo, settings.crop),
+                                               longSide: quality == .preview ? 512 : longSide) else {
             throw LibraryError.renderFailed("empty photo")
         }
         // Not the develop math: a visible stand-in so the UI track sees every
-        // slider move. Each step of any slider brightens by one byte level.
-        let lift = Int(DevelopSlider.allCases.map { settings.value($0) / $0.step / 100 }.reduce(0, +).rounded())
+        // slider move. Each step of any slider (0.01 EV, or 1) lifts by one
+        // byte level, clamped to the byte range.
+        let steps = DevelopSlider.allCases.map { settings.value($0) / $0.step }.reduce(0, +)
+        let lift = Int(min(max(steps, -255), 255).rounded())
         var bytes = base.rgba8
         var red = [Int](repeating: 0, count: HistogramBins.binCount), green = red, blue = red
         for i in stride(from: 0, to: bytes.count, by: 4) {
@@ -1762,7 +1837,8 @@ public struct FakeDevelop: DevelopRendering {
     public func histogram(of buffer: PixelBuffer) throws -> HistogramBins { .empty }
 }
 
-/// Centers the aspect on the photo; an angle shrinks the rect by
+/// Takes no `FakeMode` (pure geometry, nothing to fail). Centers the aspect
+/// on the photo; an angle shrinks the rect by
 /// cos + sin of it (a stand-in for `straightenCrop`); handle drags move the
 /// matching edges by the drag, clamped to the photo, ignoring the aspect.
 public struct FakeCrop: CropGeometry {
@@ -1869,7 +1945,7 @@ CLAUDE.md's `public private(set)`, recorded as decision D6.
 | `history: CatalogHistory` | Edit menu | `CatalogHistory.swift` (spine) |
 | `order: [String]` (the shown ids in sort order, cached) | grid, loupe, status | `LibraryOrder.swift` (spine): rebuilt on load, sort, collection, and any change that can reorder or hide |
 | `importState: ImportState` (`.idle`, `.running(ImportProgress)`), `importNotice: ImportNotice?` (5.2) | progress row, notice | `LibraryImport.swift` (import) |
-| `thumbnails: [String: DisplayImage]`, `thumbnailLongSide: Int`, `pendingThumbnails: Set<String>` | grid cells | `LibraryThumbnails.swift` (thumbnails) |
+| `thumbnails: [String: DisplayImage]` (at most 128 MB, evicted by `requestThumbnails`), `thumbnailLongSide: Int`, `pendingThumbnails: [String: ThumbnailRequest]` | grid cells | `LibraryThumbnails.swift` (thumbnails) |
 | `autoAdvance: Bool` | Metadata menu | `LibraryCulling.swift` (cull) |
 | `loupeZoom: LoupeZoom` (`.fit`, `.actual`, `.scale(Double)`), `loupeRender: RenderedPhoto?`, `loupeRenderToken: Int`, `loupeError: String?` | loupe, status pills, histogram | `LoupeZoom.swift`, `LibraryLoupeImage.swift` (loupe-viewport) |
 | `copiedSettings: DevelopSettings?` | Photo menu | `LibraryDevelop.swift` (develop) |
@@ -1899,10 +1975,10 @@ calls the matching `finish…`/`show…` method with the request's token.
 
 | Journey step | Method (file, feature) | Undo step |
 |---|---|---|
-| J1 Import Folder… | `beginImport(_ folder: String) -> Set<String>?` (known ids; nil while one runs) · `showImportProgress(_:)` · `finishImport(_ result: ImportResult)` · `failImport(_ error: LibraryError)` · `dismissImportNotice()` (`LibraryImport.swift`, import) | none: import is not undoable in v1 (decision D4) |
-| J2 thumbnails | `thumbnailLongSide(forCell:scale:) -> Int` (`ThumbnailBucket`: 128, 256, 512, 1024) · `requestThumbnails(visible: [String]) -> [String]` (ids to build) · `setThumbnail(_ image: DisplayImage, for id: String, longSide: Int)` · `failThumbnail(_ id: String, _ error: LibraryError)` (`LibraryThumbnails.swift`, thumbnails) | none |
+| J1 Import Folder… | `beginImport(_ folder: String) -> Set<String>?` (known ids; nil while one runs) · `showImportProgress(_:)` · `appendImported(_ photos: [PhotoItem])` (each batch from `added`; ids already present are ignored) · `finishImport(_ result: ImportResult)` · `failImport(_ error: LibraryError)` · `dismissImportNotice()` (`LibraryImport.swift`, import) | none: import is not undoable in v1 (decision D4) |
+| J2 thumbnails | `thumbnailLongSide(forCell:scale:) -> Int` (`ThumbnailBucket`: 128, 256, 512, 1024) · `requestThumbnails(visible: [String]) -> [ThumbnailRequest]` (id, long side, and the photo's `develop` revision as a token; it also evicts held images outside the visible ids plus two screens of margin, keeping `thumbnails` under 128 MB) · `setThumbnail(_ image: DisplayImage, for request: ThumbnailRequest)` (dropped when the token is stale: the photo's settings changed after the request) · `failThumbnail(_ request: ThumbnailRequest, _ error: LibraryError)` (`LibraryThumbnails.swift`, thumbnails) | none |
 | J2 sort, sizes, selection | existing `setSort`, `stepCellSize`, `select` (spine moves them onto `order`) | none |
-| J3 loupe step and zoom | existing `open`, `showLoupe`, `stepLoupe`, `showGrid`, plus `zoomLoupe(_ zoom: LoupeZoom)`, `stepZoom(by:)`, `loupeRequest() -> LoupeRequest?` (photo, settings, long side, token) · `showLoupeRender(_:token:)` · `failLoupeRender(_:token:)` · `neighboursToPrefetch() -> [PhotoItem]` (`LoupeZoom.swift`, `LibraryLoupeImage.swift`, loupe-viewport) | none |
+| J3 loupe step and zoom | existing `open`, `showLoupe`, `stepLoupe`, `showGrid`, plus `zoomLoupe(_ zoom: LoupeZoom)`, `stepZoom(by:)`, `loupeRequest() -> LoupeRequest?` (photo, settings, long side, token) · `showLoupeRender(_:token:)` · `failLoupeRender(_:token:)` · `neighboursToPrefetch() -> [PhotoItem]` · `showFirstInLoupe()`, `showLastInLoupe()` (Home, End) · `panLoupe(dx:dy:)` (the Space-drag math, Model-tested) (`LoupeZoom.swift`, `LibraryLoupeImage.swift`, loupe-viewport) | none |
 | J4 keys | `cull(_ change: CullChange)` (applies to the loupe photo, else the selection; Auto Advance when it applies) · `cullKey(_ key: Character) -> CullChange?` (`0`–`5`, `p`, `x`, `u`) · `setAutoAdvance(_:)` (`LibraryCulling.swift`, cull). The existing `setRating`, `setFlag`, `setLabel`, `clickStar` call `cull` | "Set Rating", "Pick", "Reject", "Clear Flag", "Set Label" |
 | J4–J7 undo | `undo()`, `redo()`, `undoTitle: String?`, `redoTitle: String?` (`CatalogHistory.swift`, spine) | n/a |
 | J5 develop | `setDevelop(_ slider: DevelopSlider, to value: Double, coalesceKey: String?)` · `endDevelopDrag()` · `resetDevelop(_ group: DevelopGroup?)` (nil: all; a per-row reset waits on S-L6 and adds `resetDevelop(_ slider:)`) · `copySettings()` · `pasteSettings()` (to the selection or the loupe photo) · `developError: String?` from `loupeError` (`LibraryDevelop.swift`, develop) | "<Slider>" coalesced per drag, "Reset Tone", "Reset Color", "Reset Develop", "Paste Settings" |
@@ -1910,8 +1986,9 @@ calls the matching `finish…`/`show…` method with the request's token.
 | J7 export | `beginExport() -> Bool` (false with nothing to export) · `setExportOptions(_:)` · `exportPlan(existingNames:) -> ExportPlan` · `showExportProgress(done:total:)` · `finishExport(_ summary: ExportSummary)` · `cancelExport()` · `retryExport() -> Bool` (re-plans `failedIDs`) · `closeExport()` (`LibraryExport.swift`, export) | none |
 | J8, J9 persist | `restore(_ photos: [PhotoItem])` · `failRestore(_ error: LibraryError)` · `saveRequest() -> (revision: Int, photos: [PhotoItem])?` (nil when saved) · `didSave(revision:)` · `failSave(_:)` (`LibraryPersistence.swift`, persist) | none |
 | J0, every area | `help(for member: String) -> String?` (the `unavailable` reason, for disabled controls) · `controlsJSON: String` (J11's `library.controls`) (spine) | n/a |
-| J2–J8 values | `PhotoItem.cullSummary`, `cellValue(for id:) -> String` (load state then cull summary), `loupeValue: String?` (quality, checksum, zoom percent, cull summary) (spine; checksum and zoom filled by loupe-viewport) | n/a |
-| J1, J8 setup | `importOnLaunch: String?` from `-LibraryImportOnLaunch` (`LibraryLaunch.swift`, spine) | n/a |
+| J2–J8 values | `PhotoItem.cullSummary`, `cellValue(for id:) -> String` (load state, shown pixel size, cull summary), `loupeValue: String?` (quality, rendered pixel size, checksum under `-LibraryTestValues`, zoom percent, cull summary), `histogramValue: String` (`mean 0.4213`) (spine declares them; thumbnails, loupe-viewport and develop fill their parts) | n/a |
+| J5–J9 relaunch | `catalogValue: String` (`saved` or `dirty`, the `library.catalog` value) (`LibraryPersistence.swift`, persist; the spine declares it as always `saved`) | n/a |
+| J1, J8 setup | `importOnLaunch: Bool` from `-LibraryImportOnLaunch` with `importFolder: String?` from `-LibraryImportFolder` (`LibraryLaunch.swift`, spine) | n/a |
 
 Checklist:
 
@@ -1960,7 +2037,7 @@ SuiteUI does not have; section 6.4 lists them as issues to file.
 | Screen | Region | Contents | Components |
 |---|---|---|---|
 | Main window, grid | Sidebar | Library section: All Photos, Favorites, Recently Added with counts | `SuiteWindow`, `SidebarItem` / `SidebarRow` |
-| | Content | Notice (import result, catalog problem); import progress row; the grid; status pills under it | **needs-ui** `InlineNotice`; **needs-ui** `ProgressRow`; `ThumbnailGrid` (**needs-ui**: visible ids, per-cell loading state and identifier, reject and unreadable badges); `**needs-ui** S-L7 status row (`ViewerStatusBar` draws only a zoom percent and a size today): "24 photos", "3 selected", thumbnail size |
+| | Content | Notice (import result, catalog problem); import progress row; the grid; status pills under it | **needs-ui** `InlineNotice`; **needs-ui** `ProgressRow`; `ThumbnailGrid` (**needs-ui**: visible ids, per-cell loading state and identifier, reject and unreadable badges); `ViewerStatusBar(zoom:size:trailing:)` with its trailing pills ("3 selected"); **needs-ui** S-L7 to make the zoom and size pills optional, so the grid shows "24 photos" and the thumbnail size instead of a zoom percent |
 | | Inspector | Tabs Info and Develop; Info: `InspectorHeader` (name or "3 Photos", facts: date, size, file kind), Metadata section (existing) | `SegmentedTabs`, `InspectorHeader`, `InspectorSection`, `InspectorRow`, `InspectorPickerRow`; with nothing selected, the collection's `InspectorHeader` and "N photos" (replacing today's `SurfaceCard`, which design.md keeps out of inspectors) |
 | Main window, empty | Content | "No Photos", Import Folder… as the one prominent button; Load Sample Photos stays in File | `EmptyStateView` |
 | Loupe | Content | The photo on `CanvasViewport` (no checkerboard) at fit, 100% or a step; Space-drag, scroll or arrows pan when zoomed (a plain drag reaches the host as `onDrag`: unused in the loupe, the crop frame in crop mode); readout "IMG_0003 · 3 of 24" | `CanvasViewport`, `GlassPanel`; `ViewerStatusBar(zoom:size:)` (zoom percent from `ViewerZoom`, pixel size) |
@@ -2007,11 +2084,11 @@ rubric's tolerance.
 
 | Feature | Snapshot states |
 |---|---|
-| spine | `library-empty-import` (with Import Folder…; `library-empty` stays the existing shot in `AppSnapshotTests.swift`, which no Library feature edits), `library-inspector-none`, `library-notice-damaged`, `library-notice-newer` |
+| spine | `library-preview-data` (the "Preview data" pill while services are fakes, drawn by the spine as a `ViewerStatusBar` trailing warning pill until status-and-layout's bar takes it over), `library-empty-import` (with Import Folder…; `library-empty` stays the existing shot in `AppSnapshotTests.swift`, which no Library feature edits), `library-inspector-none`, `library-notice-damaged`, `library-notice-newer` |
 | import | `library-importing` (progress row), `library-imported`, `library-import-failures`, `library-import-nothing-new`, `library-import-denied` |
 | thumbnails | `library-grid-thumbnails`, `library-grid-loading`, `library-grid-unreadable` |
 | cull | `library-rated` (stars, pick, reject dimmed) |
-| loupe-viewport | `library-loupe-fit`, `library-loupe-100`, `library-loupe-100-panned` |
+| loupe-viewport | `library-loupe-fit`, `library-loupe-preview`, `library-loupe-100`, `library-loupe-100-panned` |
 | persist | `library-restored` |
 | develop | `library-develop`, `library-develop-render`, `library-develop-mixed`, `library-develop-error` |
 | crop | `library-crop`, `library-crop-straightened` |
@@ -2026,12 +2103,12 @@ issue when the blueprint merges.
 | Id | Part | What Library needs | Needed by |
 |---|---|---|---|
 | S-L1 | `HistogramView` | Draws three channel arrays of bin heights (0...1) and two clipping flags with labels, 120 pt tall, in a well; accessibility value a short summary ("Mean 0.42, highlights clipped") | develop |
-| S-L2 | `ThumbnailGrid` additions | `onVisibleChange([ID])` as cells appear and disappear; a per-cell state (loading, ready, unreadable with help) as the cell's accessibility value; a per-cell identifier from an id prefix; a `dimmed` badge state for rejects; aspect-fit inside the cell | thumbnails, cull |
+| S-L2 | `ThumbnailGrid` additions | `onVisibleChange([ID])` as cells appear and disappear; a per-cell accessibility value and help from the app; a per-cell identifier from an id prefix; a `dimmed` badge state for rejects; aspect-fit inside the cell | thumbnails, cull; a hard wait for journey steps that read cell values (they read the loupe value until it lands) |
 | S-L3 | `CropHandles` | Eight handles and an inside drag over a rect at a zoom, reporting `(handle, dx, dy)` in document pixels; thirds grid while dragging; arrow keys nudge the focused handle (Shift 10) | crop |
 | S-L4 | `InlineNotice` | Symbol, state color, one sentence, one optional action, a close button; content layer, flat | import, persist, export |
 | S-L5 | `ProgressRow` | "Importing 3 of 27" text, a determinate bar, an optional Cancel; shows only after 100 ms | import, export |
 | S-L6 | Row reset on `InspectorSliderRow` | An optional `onReset` drawing a small reset button inside the row while the value is off its default | develop (per-row reset; until then the section reset) |
-| S-L7 | Status row with free pills | `ViewerStatusBar` with a list of text pills (and the zoom pill optional), for the grid's "24 photos", "3 selected", size | status-and-layout |
+| S-L7 | Optional zoom and size pills | `ViewerStatusBar` already takes trailing pills; it needs its zoom and size pills to be optional, so the grid row reads "24 photos · 3 selected · 160 pt" | status-and-layout |
 | S-L8 | Named probe marks | `FrameProbe.mark(_ name: String)` for app marks (`thumb-ready`, `render-preview`, `render-full`, `launch-grid`), in the same JSON as #330's fixed marks; a comment on #330 or its own issue | every perf journey |
 | existing | #330 FrameProbe, #331 and #332 goldens, #333 journey files and velocity drags | as in Flare | perf journeys, goldens, journey files |
 
@@ -2094,10 +2171,10 @@ CI runs (measured p95 × 1.5, never tighter than the target), written in
 | QB-L2 | Drag a develop slider: the bar's marker | p95 ≤ 2 frames late | P3 probe | `setDevelop` ≤ 0.1 ms (1 ms) |
 | QB-LIB-6 | Drag a develop slider: the loupe picture follows | p95 ≤ 100 ms from a slider event to a `render-preview` at least that new; `render-full` ≤ 400 ms after mouse-up for a 6000 × 4000 photo | P3 probe | release only (debug reports): preview render (512 px long side, all six sliders) ≤ 8 ms; full render (2048 px) ≤ 120 ms; histogram of 2048 px ≤ 10 ms |
 | QB-L9 | Import or export starts | `progress` mark ≤ 100 ms after the command | P6, P8 probe | `beginImport`, `beginExport` ≤ 1 ms (10 ms) |
-| QB-LIB-1 | Import 200 JPEGs of 4000 × 3000 | the first 20 cells `thumb-ready` ≤ 2 s after the command; all records in ≤ 10 s; the main thread never stalls more than 2 refreshes | P6 probe | `finishImport` of 200 into 10,000 ≤ 5 ms (50 ms); planning 10,000 candidates against 10,000 known ≤ 20 ms (200 ms) |
+| QB-LIB-1 | Import 200 JPEGs of 4000 × 3000 | the first batch of cells appears and the first 20 are `thumb-ready` ≤ 2 s after the command (batches come through `added` while the import runs); all records in ≤ 10 s; the main thread never stalls more than 2 refreshes | P6 probe | `finishImport` of 200 into 10,000 ≤ 5 ms (50 ms); planning 10,000 candidates against 10,000 known ≤ 20 ms (200 ms) |
 | QB-LIB-2 | Launch on a 10,000-photo catalog | `launch-grid` ≤ 1 s after launch; no main-thread stall over 2 refreshes while the catalog decodes | P7 probe | `LiveCatalogCoding.decode` of 10,000 ≤ 100 ms (1 s); `encode` ≤ 50 ms (500 ms) |
 | QB-LIB-7 | Export 10 photos of 6000 × 4000 at long edge 2048 | ≤ 15 s; progress advances after each file | P8 probe (report-only) | `plan` for 1,000 photos ≤ 5 ms (50 ms) |
-| QB-LIB-8 | Memory | Peak resident memory ≤ 1.5 GB while scrolling the 10,000 catalog and stepping the loupe through 24 photos | P1 and P4 with `XCTMemoryMetric` | the thumbnail LRU never holds more than `ThumbnailBucket.cacheBytes` (256 MB) (`LibraryThumbnailTests` sums it); the loupe actor holds at most 3 decoded screen-size buffers (`LibraryLoupeImageTests` counts) |
+| QB-LIB-8 | Memory | Peak resident memory ≤ 1.5 GB while scrolling the 10,000 catalog and stepping the loupe through 24 photos | P1 and P4 with `XCTMemoryMetric` | the live thumbnail LRU never holds more than `ThumbnailBucket.cacheBytes` (256 MB) and the catalog's `thumbnails` never more than 128 MB after scrolling all 10,000 (`LibraryThumbnailTests` sums both); the loupe actor holds at most 3 decoded screen-size buffers (`LibraryLoupeImageTests` counts) |
 
 Why the loupe has two numbers: a 6000 × 4000 photo is 384 MB as Float32,
 and one CoreRaster adjustment pass over a screen-size copy takes tens of
@@ -2167,7 +2244,7 @@ and maximum (360) width, in three places:
 | QB-LIB-V3 | Histogram is the picture's | CoreRaster `Histogram(of:bins:256,encoding:.sRGB)` of the rendered buffer, exactly; each channel sums to the pixel count | `LibraryDevelopTests` (Linux) |
 | QB-LIB-V4 | Crop size and edges | 600 × 400 at rect width 0.5 renders 300 px wide; 1:1 on 6000 × 4000 is 4000 × 4000; a 10° straighten's crop has alpha 1 in every pixel (no transparent corner) | `LibraryCropTests` (Linux) |
 | QB-V4 | What you see is what you export | (a) exact: `LiveExporter.render` equals the same pipeline run by hand (decode at full size, `LiveDevelop.render`, lanczos3 to 1024), bit for bit; (b) WYSIWYG: that export before JPEG vs the loupe's `.full` render at long side 1024 (which develops a screen-size decode, so order differs at edges) within the rubric's QB-V2 tolerance (2/255 per channel, at most 0.5% of pixels over it) plus a mean absolute difference ≤ 1/255; (c) after JPEG at quality 95 and decoding, PSNR ≥ 40 dB against (a) | `LibraryExportFidelityTests` (macOS, `Tests/AppSnapshotTests/`, real `JPEGWriter` and `ImageIODecoder`) |
-| QB-LIB-V5 | Thumbnail matches the loupe | the 256 px thumbnail vs the loupe's `.full` render resized to 256 with lanczos3: mean absolute difference ≤ 1/255, max ≤ 8/255 | `LibraryThumbnailTests` (Linux, fake decoder giving a fixed gradient) |
+| QB-LIB-V5 | Thumbnail matches the full picture | the 256 px thumbnail vs the hand-run pipeline (fake decoder at full size, `LiveDevelop.render`, lanczos3 to 256): mean absolute difference ≤ 1/255, max ≤ 8/255; needs no other wave-2 feature | `LibraryThumbnailTests` (Linux, fake decoder giving a fixed gradient) |
 | QB-LIB-V6 | Decode orientation and color | a generated JPEG with Exif orientation 6 decodes as portrait, its red marker pixel lands top-left; a Display P3 PNG decodes to sRGB within 2/255 of the expected value | `LibraryDecodeTests` (macOS, `Tests/AppSnapshotTests/`) |
 | QB-LIB-V7 | Catalog file round trip | encode → decode → encode is byte-equal; a fixed three-photo catalog encodes byte-equal to the committed `Tests/LibraryModelTests/Golden/catalog-v1.json` (with `develop` and `crop`), and that file without `develop` objects decodes to neutral settings | `LibraryPersistTests` (Linux) |
 | QB-V5 | Every new visible state has a golden | the PNGs of 6.3, rubric tolerance (channel 2/255, ≤ 0.5% pixels) | `GoldenImage` once #331 and #332 land; PNGs for eyes until then |
@@ -2179,7 +2256,8 @@ everything from the keyboard once (QB-F4). QB-F5: Library's tinted states
 (reject dimming, clipping warnings, notices, progress) get Increase
 Contrast goldens with QB-V5's four appearances, and its only animations
 (progress, the loupe's preview-to-full swap) record a duration of 0 under
-Reduce Motion through the probe; each owning feature's packet lists them.
+Reduce Motion through the probe, in a journey step launched with
+`-LibraryReduceMotion`; each owning feature's packet lists them.
 
 Checklist:
 
@@ -2267,8 +2345,8 @@ wave owned; the note says so.
 **`spine`** (#156, #235). Contracts, fakes, live stubs, catalog state, undo, launch arguments, and the app split into per-feature files.
 
 - Engine (creative-core): none.
-- SuiteUI: none (#333 for its own journey file; until then it edits LibraryJourneyTests.swift).
-- Note: Creates every stub file later features replace; lands as several stacked PRs. Coordinates with open PR #217 (#156). In wave 1 it also adds PhotoItem.cullSummary as the accessibility value of the loupe photo (LibraryLoupe.swift) and the grid cells, and embeds the LibraryCropOverlay and CropInspector stubs, so later features never edit another's view. Existing tests it owns are kept passing (the hand-written == keeps whole-catalog comparisons working).
+- SuiteUI: none for its own work; the cell values it declares are shown once S-L2 lands (a hard wait for journey steps that read them); #333 for its own journey file (until then it edits LibraryJourneyTests.swift).
+- Note: Creates every stub file later features replace; lands as several stacked PRs. Coordinates with open PR #217 (#156). In wave 1 it also adds PhotoItem.cullSummary as the accessibility value of the loupe photo (LibraryLoupe.swift) and the grid cells, and embeds the LibraryCropOverlay and CropInspector stubs, so later features never edit another's view. Existing tests it owns are kept passing (the hand-written == keeps whole-catalog comparisons working). It also presents LibraryExportSheet from LibraryWindow while exportState is not idle, shows the Preview data pill while services are fakes, and switches today's four journeys to -LibraryFixture samples.
 - Owned files: `Sources/LibraryModel/LibraryCatalog.swift`, `Sources/LibraryModel/PhotoItem.swift`, `Sources/LibraryModel/LibraryOrder.swift`, `Sources/LibraryModel/CatalogHistory.swift`, `Sources/LibraryModel/LibraryServices.swift`, `Sources/LibraryModel/Contracts/`, `Sources/LibraryModel/Fakes/`, `Sources/LibraryModel/Live/`, `Sources/LibraryModel/LibraryFixtures.swift`, `Sources/LibraryModel/LibraryLaunch.swift`, `Sources/LibraryModel/LibrarySample.swift`, `Sources/LibraryApp/LibraryApp.swift`, `Sources/LibraryApp/LibraryWindow.swift`, `Sources/LibraryApp/LibraryCommands.swift`, `Sources/LibraryApp/LibraryMenus.swift`, `Sources/LibraryApp/LibraryWindow+`, `Sources/LibraryApp/LibraryBrowser.swift`, `Sources/LibraryApp/LibraryGrid.swift`, `Sources/LibraryApp/DisplayImage+Image.swift`, `Sources/LibraryApp/LibraryInspector.swift`, `Sources/LibraryApp/DevelopInspector.swift`, `Sources/LibraryApp/LibraryCropOverlay.swift`, `Sources/LibraryApp/LibraryExportSheet.swift`, `Sources/LibraryApp/LibraryStatusBar.swift`, `Sources/LibraryApp/Platform/`, `Tests/LibraryModelTests/LibraryHistoryTests.swift`, `Tests/LibraryModelTests/LibraryServicesTests.swift`, `Tests/LibraryModelTests/LibraryLaunchTests.swift`, `Tests/LibraryModelTests/LibraryOrderTests.swift`, `Tests/LibraryModelTests/LibraryCatalogTests.swift`, `Tests/LibraryModelTests/LibraryPhotoIDTests.swift`, `Tests/AppSnapshotTests/LibraryShellSnapshots.swift`, `UITests/Journey+Library.swift`, `UITests/LibraryJourneyTests.swift`, `UITests/LibraryJourneyTests+Shell.swift`, `Tests/LibraryModelTests/Budget.swift`, `Sources/LibraryApp/LibraryLoupe.swift`, `Sources/LibraryApp/LibraryControls.swift`, `Sources/LibraryModel/SampleImage.swift`, `Sources/LibraryApp/CropInspector.swift`, `Sources/LibraryModel/LibraryEmptyCollection.swift`, `Tests/LibraryModelTests/LibraryCellSizeFuzzTests.swift`, `Tests/LibraryModelTests/LibraryCollectionEmptinessTests.swift`, `Tests/LibraryModelTests/LibraryEmptyCollectionTests.swift`, `Tests/LibraryModelTests/LibraryGridEdgeTests.swift`, `Tests/LibraryModelTests/LibraryGridTests.swift`, `Tests/LibraryModelTests/LibraryPhotoIDFuzzTests.swift`, `Tests/AppSnapshotTests/LibraryEmptyCollectionSnapshots.swift`.
 
 #### Wave 2: the loop on real files (after the spine)
@@ -2277,35 +2355,35 @@ wave owned; the note says so.
 
 - Engine (creative-core): none (decode is ImageIO in LibraryApp).
 - SuiteUI: S-L4 InlineNotice, S-L5 ProgressRow (placeholders until then); #330, #333.
-- Note: Owns LibraryJourneyTests.swift in its wave, for its journey steps if #333 has not merged.
+- Note: Owns LibraryJourneyTests.swift in its wave, for its journey steps if #333 has not merged. Deletes the skipped testImportRateAndRelaunch (J8 replaces it).
 - Owned files: `Sources/LibraryModel/LibraryImport.swift`, `Sources/LibraryModel/Live/LiveImporter.swift`, `Sources/LibraryApp/Platform/ImageIODecoder.swift`, `Sources/LibraryApp/LibraryWindow+Import.swift`, `Sources/LibraryApp/LibraryBrowser.swift`, `Tests/LibraryModelTests/LibraryImportTests.swift`, `Tests/AppSnapshotTests/LibraryImportSnapshots.swift`, `Tests/AppSnapshotTests/LibraryDecodeTests.swift`, `UITests/LibraryJourneyTests+Import.swift`, `UITests/LibraryJourneyTests+PerfImport.swift`, `UITests/LibraryJourneyTests.swift`, `Tests/LibraryModelTests/LibraryImportBudgetTests.swift`.
 
 **`thumbnails`** (#33). Real grid thumbnails: buckets, visible requests, LRU, placeholders.
 
 - Engine (creative-core): none (resized and rgba8 landed: creative-core #132, #143).
 - SuiteUI: S-L2 ThumbnailGrid additions; #330, #333.
-- Note: Live thumbnails read files through services.decoder, which is FakeDecoder in tests and the live ImageIODecoder once import lands.
+- Note: Live thumbnails read files through services.decoder, which is FakeDecoder in tests and the live ImageIODecoder once import lands. Its (L) steps wait for import to merge. Cell values need S-L2.
 - Owned files: `Sources/LibraryModel/LibraryThumbnails.swift`, `Sources/LibraryModel/Live/LiveThumbnails.swift`, `Sources/LibraryApp/LibraryGrid.swift`, `Sources/LibraryApp/DisplayImage+Image.swift`, `Sources/LibraryApp/LibraryWindow+Thumbnails.swift`, `Tests/LibraryModelTests/LibraryThumbnailTests.swift`, `Tests/AppSnapshotTests/LibraryThumbnailSnapshots.swift`, `Tests/AppSnapshotTests/LibraryGridSnapshots.swift`, `UITests/LibraryJourneyTests+Grid.swift`, `UITests/LibraryJourneyTests+PerfGrid.swift`, `Tests/LibraryModelTests/LibraryGridBudgetTests.swift`.
 
 **`cull`** (#211, #426, #724). Cull from the keyboard with undo and Auto Advance, in grid and loupe.
 
 - Engine (creative-core): none.
 - SuiteUI: S-L2 (reject badge); #330, #333.
-- Note: #724's keys only; its zoom and photo size go to loupe-viewport. The grid's reject mark (dimmed cell, xmark badge) is drawn by thumbnails, which owns the cell builder; cull changes only Model state.
-- Owned files: `Sources/LibraryModel/LibraryCulling.swift`, `Sources/LibraryModel/Live/LiveCulling.swift`, `Sources/LibraryModel/MetadataEditing.swift`, `Sources/LibraryApp/LibraryWindow+Cull.swift`, `Tests/LibraryModelTests/LibraryRatingTests.swift`, `Tests/LibraryModelTests/LibraryAutoAdvanceTests.swift`, `Tests/LibraryModelTests/LibraryMetadataTests.swift`, `Tests/AppSnapshotTests/LibraryRatingSnapshots.swift`, `Tests/AppSnapshotTests/LibraryAutoAdvanceSnapshots.swift`, `UITests/LibraryJourneyTests+Cull.swift`, `UITests/LibraryJourneyTests+PerfCull.swift`, `Tests/LibraryModelTests/LibraryCullBudgetTests.swift`.
+- Note: #724's keys only; its zoom and photo size go to loupe-viewport. The grid's reject mark (dimmed cell, xmark badge) is drawn by thumbnails, which owns the cell builder; cull changes only Model state. Owns MetadataInspector.swift in wave 2: it routes the stars, flag and label through cull(_:) and gives every control an identifier (most of #291's list); metadata-more takes the file in wave 5. Its (L) steps wait for import to merge. Its PR that lands the loupe keys says 'Part of #724'; whichever of cull and loupe-viewport merges its #724 part last says 'Closes #724'.
+- Owned files: `Sources/LibraryModel/LibraryCulling.swift`, `Sources/LibraryModel/Live/LiveCulling.swift`, `Sources/LibraryModel/MetadataEditing.swift`, `Sources/LibraryApp/LibraryWindow+Cull.swift`, `Tests/LibraryModelTests/LibraryRatingTests.swift`, `Tests/LibraryModelTests/LibraryAutoAdvanceTests.swift`, `Tests/LibraryModelTests/LibraryMetadataTests.swift`, `Tests/AppSnapshotTests/LibraryRatingSnapshots.swift`, `Tests/AppSnapshotTests/LibraryAutoAdvanceSnapshots.swift`, `UITests/LibraryJourneyTests+Cull.swift`, `UITests/LibraryJourneyTests+PerfCull.swift`, `Tests/LibraryModelTests/LibraryCullBudgetTests.swift`, `Sources/LibraryApp/MetadataInspector.swift`, `Tests/AppSnapshotTests/LibraryMetadataSnapshots.swift`.
 
 **`persist`** (#212). The catalog file: JSON v1 with develop and crop, restore at launch, set aside a damaged file.
 
 - Engine (creative-core): none for v1 (JSON); creative-core#157 only if decision D1 picks the SQLite catalog.
 - SuiteUI: S-L4 InlineNotice; #330, #333.
-- Note: Writes the develop and crop objects from the start (their types come from the spine), so #423's and #425's catalog parts are done here.
+- Note: Writes the develop and crop objects from the start (their types come from the spine), so #423's and #425's catalog parts are done here. Its (L) steps wait for import to merge. Flushes on quit and exposes library.catalog = saved or dirty.
 - Owned files: `Sources/LibraryModel/LibraryPersistence.swift`, `Sources/LibraryModel/Live/LiveCatalogCoding.swift`, `Sources/LibraryApp/Platform/CatalogStore.swift`, `Sources/LibraryApp/LibraryWindow+Persist.swift`, `Tests/LibraryModelTests/LibraryPersistTests.swift`, `Tests/LibraryModelTests/Golden/catalog-v1.json`, `Tests/AppSnapshotTests/LibraryRestoreSnapshots.swift`, `UITests/LibraryJourneyTests+Persist.swift`, `UITests/LibraryJourneyTests+PerfLaunch.swift`, `Tests/LibraryModelTests/LibraryCatalogBudgetTests.swift`.
 
 **`loupe-viewport`** (#724). Loupe on CanvasViewport: zoom, pan, real photo size, latest-wins render, prefetch.
 
 - Engine (creative-core): none.
 - SuiteUI: #330, #333.
-- Note: #724's zoom, photo on the artboard and real size.
+- Note: #724's zoom, photo on the artboard and real size. Adds Home and End (first and last photo) and scroll pan. Its (L) steps wait for import to merge. Its #724 PR says 'Part of #724' unless it merges after cull's, then 'Closes #724'.
 - Owned files: `Sources/LibraryModel/LoupeState.swift`, `Sources/LibraryModel/LoupeZoom.swift`, `Sources/LibraryModel/LibraryLoupeImage.swift`, `Sources/LibraryModel/RenderQueue.swift`, `Sources/LibraryModel/Live/LiveLoupeImaging.swift`, `Sources/LibraryApp/LibraryLoupe.swift`, `Sources/LibraryApp/LibraryWindow+Loupe.swift`, `Tests/LibraryModelTests/LibraryLoupeTests.swift`, `Tests/LibraryModelTests/LibraryLoupeZoomTests.swift`, `Tests/LibraryModelTests/LibraryRenderQueueTests.swift`, `Tests/LibraryModelTests/LibraryLoupeImageTests.swift`, `Tests/AppSnapshotTests/LibraryLoupeSnapshots.swift`, `UITests/LibraryJourneyTests+Loupe.swift`, `UITests/LibraryJourneyTests+PerfLoupe.swift`, `Tests/LibraryModelTests/LibraryLoupeBudgetTests.swift`.
 
 #### Wave 3: develop and the readouts (after wave 2)
@@ -2320,7 +2398,7 @@ wave owned; the note says so.
 **`status-and-layout`** (#185, #291). Status pills, inspector header (#185), the remaining identifiers (#291), layout tests.
 
 - Engine (creative-core): none.
-- SuiteUI: #340 status pills; #330, #333.
+- SuiteUI: S-L7 optional zoom and size pills; #330, #333.
 - Note: Identifiers in other features' views are each feature's own job; this one clears what is left of #291's list.
 - Owned files: `Sources/LibraryModel/LibraryStatusText.swift`, `Sources/LibraryModel/LibraryLayout.swift`, `Sources/LibraryApp/LibraryStatusBar.swift`, `Sources/LibraryApp/LibraryInspector.swift`, `Tests/LibraryModelTests/LibraryStatusTextTests.swift`, `Tests/LibraryModelTests/LibraryLayoutTests.swift`, `Tests/AppSnapshotTests/LibraryLayoutSnapshots.swift`, `Tests/AppSnapshotTests/LibraryInspectorSnapshots.swift`, `UITests/LibraryJourneyTests+Layout.swift`.
 
@@ -2354,7 +2432,7 @@ wave owned; the note says so.
 - Engine (creative-core): none.
 - SuiteUI: none.
 - Note: Not v1. Camera details come from the Exif the import scan already reads.
-- Owned files: `Sources/LibraryModel/LibraryKeywords.swift`, `Sources/LibraryApp/MetadataInspector.swift`, `Tests/LibraryModelTests/LibraryKeywordTests.swift`, `Tests/AppSnapshotTests/LibraryMetadataSnapshots.swift`.
+- Owned files: `Sources/LibraryModel/LibraryKeywords.swift`, `Tests/LibraryModelTests/LibraryKeywordTests.swift`, `Sources/LibraryApp/MetadataInspector.swift`, `Tests/AppSnapshotTests/LibraryMetadataSnapshots.swift`.
 
 **`raw`** (#427). Camera raw files through the system decoder (not v1).
 

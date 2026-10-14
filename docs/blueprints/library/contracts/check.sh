@@ -9,7 +9,15 @@ set -euo pipefail
 here="$(cd "$(dirname "$0")" && pwd)"
 repo="$(cd "$here/../../../.." && pwd)"
 work="${1:-$(mktemp -d)}"
-[ -d "$work/core" ] || git clone -q --depth 1 https://github.com/qbtrix/creative-core "$work/core"
+# The creative-core revision the blueprint was checked against; override
+# with CORE_REV=<sha or branch> to check against another.
+rev="${CORE_REV:-4cac701f50d6c434e6726917d6230db01e5167e5}"
+if [ ! -d "$work/core" ]; then
+  git init -q "$work/core"
+  git -C "$work/core" remote add origin https://github.com/qbtrix/creative-core
+fi
+git -C "$work/core" fetch -q --depth 1 origin "$rev"
+git -C "$work/core" checkout -q FETCH_HEAD
 pkg="$work/contracts"
 rm -rf "$pkg" && mkdir -p "$pkg/Sources" "$pkg/Tests/LibraryModelTests"
 cp -r "$repo/Sources/LibraryModel" "$pkg/Sources/LibraryModel"

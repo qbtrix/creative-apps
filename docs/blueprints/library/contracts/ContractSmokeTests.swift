@@ -8,7 +8,7 @@ import CoreRaster
     let photo = PhotoItem(name: "IMG_1", captureDate: Date(timeIntervalSince1970: 0), color: Color3(1, 0, 0),
                           pixelSize: PixelSize(width: 6000, height: 4000))
     let services = LibraryServices.fake([photo])
-    let result = try await services.importer.importFolder("/f", known: [], progress: { _ in })
+    let result = try await services.importer.importFolder("/f", known: [], progress: { _ in }, added: { _ in })
     #expect(result.added.count == 1)
     let thumb = try await services.thumbnails.thumbnail(for: photo, longSide: 256)
     #expect(thumb.size == PixelSize(width: 256, height: 171))
@@ -33,7 +33,7 @@ import CoreRaster
     let services = LibraryServices.live(decoder: FakeDecoder(photos: []), writer: FakeJPEGWriter(), store: FakeCatalogStore())
     #expect(services.unavailable["importer"] == "Import isn't connected yet (import).")
     #expect(services.unavailable.count == 8)
-    await #expect(throws: LibraryError.self) { try await services.importer.importFolder("/f", known: [], progress: { _ in }) }
+    await #expect(throws: LibraryError.self) { try await services.importer.importFolder("/f", known: [], progress: { _ in }, added: { _ in }) }
 }
 
 @Test func noticesSayExactlyWhatJourneysRead() {
@@ -71,4 +71,38 @@ import CoreRaster
     #expect(thumb.size.width == thumb.size.height)
     let live = LibraryServices.live(decoder: FakeDecoder(photos: []), writer: FakeJPEGWriter(), store: FakeCatalogStore())
     #expect(try live.develop.histogram(of: PixelBuffer(rgba8: [0, 0, 0, 255], width: 1, height: 1)) == .empty)
+}
+
+@Test func everyFakeAnswers() async throws {
+    let photo = PhotoItem(name: "IMG_0001", captureDate: Date(timeIntervalSince1970: 0), color: Color3(0.2, 0.4, 0.6),
+                          pixelSize: PixelSize(width: 60, height: 40))
+    let services = LibraryServices.fake([photo])
+    let scan = try await services.decoder.scan(folder: "/f")
+    #expect(scan.candidates.map(\.path) == ["/f/IMG_0001.jpg"])
+    let decoded = try await services.decoder.decode(path: photo.id, maxLongSide: 30)
+    #expect(decoded.size == PixelSize(width: 30, height: 20))
+    let data = try services.coding.encode([photo])
+    #expect(try services.coding.decode(data).map(\.id) == ["IMG_0001"])
+    try await services.store.write(data)
+    #expect(try await services.store.read() == data)
+    #expect(try await services.store.setAside() == "catalog.json.bad")
+    let buffer = try PixelBuffer(rgba8: decoded.rgba8, width: 30, height: 20)
+    #expect(try services.develop.render(buffer, settings: .neutral) == buffer)
+    let plan = services.exporter.plan([photo], options: ExportOptions(longEdge: 16, folder: "/out"), existingNames: [])
+    let item = try #require(plan.items.first)
+    let image = try await services.exporter.render(item, photo: photo)
+    try await services.writer.write(image, quality: 85, folder: "/out", fileName: item.fileName)
+    #expect(try await services.writer.existingNames(in: "/out") == ["IMG_0001.jpg"])
+    await #expect(throws: LibraryError.self) {
+        try await services.writer.write(image, quality: 85, folder: "/out", fileName: item.fileName)
+    }
+}
+
+@Test func liveStubsKeepSamplesWorking() async throws {
+    let sample = PhotoItem(name: "IMG_0001", captureDate: Date(timeIntervalSince1970: 0), color: Color3(1, 0, 0),
+                           pixelSize: PixelSize(width: 40, height: 30))
+    let live = LibraryServices.live(decoder: FakeDecoder(photos: []), writer: FakeJPEGWriter(), store: FakeCatalogStore())
+    #expect(try await live.thumbnails.thumbnail(for: sample, longSide: 20).size == PixelSize(width: 20, height: 15))
+    #expect(try await live.loupe.render(sample, settings: .neutral, longSide: 40, quality: .full).image.size.width == 40)
+    #expect(try live.culling.apply(.rating(4), to: [sample.id], in: [sample]).first?.rating == 4)
 }

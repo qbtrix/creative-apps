@@ -47,8 +47,8 @@ public struct DevelopSettings: Hashable, Sendable, Codable {
     public init() {}
 
     public var isNeutral: Bool { self == .neutral }
-    /// True when no tone slider is off zero (the crop may still be set).
-    public var isToneNeutral: Bool { DevelopSlider.allCases.allSatisfy { value($0) == 0 } }
+    /// True when no slider is off zero (the crop may still be set).
+    public var isAdjustmentNeutral: Bool { DevelopSlider.allCases.allSatisfy { value($0) == 0 } }
 
     public func value(_ slider: DevelopSlider) -> Double {
         switch slider {
@@ -82,8 +82,8 @@ public struct DevelopSettings: Hashable, Sendable, Codable {
         return copy
     }
 
-    /// The tone sliders of `other` with this crop: Paste Settings never pastes a crop.
-    public func pastingTone(from other: DevelopSettings) -> DevelopSettings {
+    /// All six sliders of `other` with this crop: Paste Settings never pastes a crop.
+    public func pastingAdjustments(from other: DevelopSettings) -> DevelopSettings {
         var copy = other
         copy.crop = crop
         return copy
