@@ -125,11 +125,18 @@ private func edited() throws -> FlareWorkspace {
     @Test func quitWritesWhenDirty() async throws {
         let model = try edited()
         let file = recoveryFile()
+        // Bracket the write rather than comparing to "now" at assertion time:
+        // under a parallel run the main actor can be busy long after the read,
+        // so a now-relative window measures scheduling delay, not the write.
+        // 2 s slack covers filesystem timestamp granularity.
+        let before = Date()
         await FlareAutosave(recovery: file).willQuit(model: model)
         let written = await file.read()
+        let after = Date()
         let (data, date) = try #require(written)
         #expect(data == model.recoveryData())
-        #expect(abs(date.timeIntervalSinceNow) < 60)
+        #expect(date >= before.addingTimeInterval(-2))
+        #expect(date <= after.addingTimeInterval(2))
     }
 
     @Test func missingFileReadsNil() async {
