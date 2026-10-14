@@ -10,8 +10,8 @@ the features in dependency waves. Feature packets
 
 Sources read on 2026-10-14: creative-apps `origin/dev` 956d946 (Sources,
 Tests, UITests, docs, the open `line:photo` issues and the merged Photo PRs),
-creative-core `main` 4cac701 (CoreRaster, the revision `Package.swift`
-resolves today, since it tracks `main`), `docs/design.md`,
+creative-core `dev` 4cac701 (CoreRaster; `main`, which `Package.swift`
+tracks, is cfad97f, with no CoreRaster difference), `docs/design.md`,
 `docs/priorities.md`, `docs/review-rubric.md` section 6 (every `QB-` id),
 `docs/blueprints/app-audit.md`, `docs/blueprints/brush-display-lessons.md`,
 and `docs/blueprints/flare.md` as the worked example of the shape.
