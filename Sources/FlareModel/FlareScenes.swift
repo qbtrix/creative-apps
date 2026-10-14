@@ -9,7 +9,13 @@ extension FlareWorkspace {
         guard scenes.contains(where: { $0.id == id }) else { return FlareLayerError.noDocument.message }
         guard scenes.count > 1 else { return FakeScenes.lastSceneMessage }
         guard let user = machines.first(where: { $0.states.contains { $0.sceneID == id } }) else { return nil }
-        return "The machine \u{201C}\(user.name)\u{201D} uses this scene. Remove its states on this scene first."
+        // The initial state can't be removed, so its reason names steps that work (#694).
+        if let initial = user.states.first(where: { $0.id == user.initialState && $0.sceneID == id }) {
+            return "The machine \u{201C}\(user.name)\u{201D} starts in \u{201C}\(initial.name)\u{201D} on this scene, and its "
+                + "initial state can't be removed. Move that state to another scene or remove the machine first."
+        }
+        return "The machine \u{201C}\(user.name)\u{201D} uses this scene. Move its states on this scene to another scene "
+            + "or remove them first."
     }
 
     /// The plain words for an engine refusal of Remove Scene, never its debug text (#683).

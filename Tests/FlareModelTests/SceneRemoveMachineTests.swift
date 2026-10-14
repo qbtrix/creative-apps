@@ -17,7 +17,7 @@ private func buttonWithMachineOnFirstScene() -> (FlareWorkspace, String) {
 @Test func removeSceneIsDisabledForASceneAMachineUses683() {
     let (w, a) = buttonWithMachineOnFirstScene()
     #expect(w.machines.count == 1 && w.scenes.count == 2)
-    #expect(w.sceneRemoveHelp(a) == "The machine \u{201C}Button\u{201D} uses this scene. Remove its states on this scene first.")
+    #expect(w.sceneRemoveHelp(a) == initialOnSceneHelp)
 }
 
 @Test func removingASceneAMachineUsesIsRefusedInPlainWords683() {
