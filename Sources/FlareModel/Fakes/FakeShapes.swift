@@ -99,6 +99,11 @@ public struct FakeShapes: ShapeBuilding {
             switch gesture {
             case .move(let dx, let dy): values = ["x": t.x + dx, "y": t.y + dy]
             case .scale(let h, let to):
+                if let oblique = Self.obliqueScale(h, to: to, layer: layer, t: t, document: document,
+                                                   sceneID: sceneID, frame: frame, box: box) {
+                    values = oblique
+                    break
+                }
                 let handle = ((h % 8) + 8) % 8, grip = Self.handle(handle, on: box), fixed = Self.handle(handle + 4, on: box)
                 // An edge handle drags one world axis; drop the other part of the pointer.
                 let pointer = Point(x: handle % 4 == 1 ? grip.x : to.x, y: handle % 4 == 3 ? grip.y : to.y)
@@ -316,6 +321,41 @@ public struct FakeShapes: ShapeBuilding {
         return x1 - x0 >= anchorTolerance || y1 - y0 >= anchorTolerance
     }
     /// `a / b`, or 1 when that is not a finite number.
+    /// Scale on a layer turned off a multiple of 90° (#560): the world box's handles sit off the layer's sides, so
+    /// the gesture works on the layer's own (oriented) box instead. The oriented handle of the same kind nearest the
+    /// grabbed one moves with the pointer's drag, mapped into the layer's axes (an edge takes only the part along its
+    /// normal), and the opposite oriented handle stays put. Nil when the layer is square to the world or can't invert.
+    private static func obliqueScale(_ h: Int, to: Point, layer: Layer, t: Transform, document: Document,
+                                     sceneID: String, frame: Int, box: Rect) -> [String: Double]? {
+        let quarter = t.rotation.remainder(dividingBy: 90)
+        guard quarter.isFinite, abs(quarter) > 1e-9, let back = try? t.matrix.inverted() else { return nil }
+        // The layer's content in its own space: each drawn item's box (stroke included), as FakeHits bounds it.
+        var points: [Point] = []
+        for item in FakeStage().drawList(document, sceneID: sceneID, frame: frame, editing: nil).items
+        where item.address.layerID == layer.id && !item.isText {
+            guard let path = item.path.bounds else { continue }
+            let width = item.stroke?.width ?? 0, half = width.isFinite ? max(width, 0) / 2 : 0
+            let r = Rect(minX: path.minX - half, minY: path.minY - half, maxX: path.maxX + half, maxY: path.maxY + half)
+            points += corners(r).map { (back * item.transform).apply($0) }
+        }
+        guard let local = Rect(enclosing: points) else { return nil }
+        let handle = ((h % 8) + 8) % 8, grip = Self.handle(handle, on: box), m = t.matrix
+        func gap(_ i: Int) -> Double {
+            let p = m.apply(Self.handle(i, on: local))
+            return (p.x - grip.x) * (p.x - grip.x) + (p.y - grip.y) * (p.y - grip.y)
+        }
+        guard let near = stride(from: handle % 2, to: 8, by: 2).min(by: { gap($0) < gap($1) }) else { return nil }
+        let g = Self.handle(near, on: local), f = Self.handle(near + 4, on: local)
+        // The drag in the layer's own units: through the inverse of its turn and scale, not its offset.
+        let origin = back.apply(Point(x: 0, y: 0)), moved = back.apply(Point(x: to.x - grip.x, y: to.y - grip.y))
+        let d = Point(x: moved.x - origin.x, y: moved.y - origin.y)
+        let sx = near % 4 == 1 ? 1 : ratio(g.x - f.x + d.x, g.x - f.x)
+        let sy = near % 4 == 3 ? 1 : ratio(g.y - f.y + d.y, g.y - f.y)
+        // Keep `f` where it is: x' + R·S'·f = the scene point of f now.
+        let pinned = m.apply(f), turn = Matrix.rotation(degrees: t.rotation)
+        let p = turn.apply(Point(x: t.scaleX * sx * f.x, y: t.scaleY * sy * f.y))
+        return ["x": pinned.x - p.x, "y": pinned.y - p.y, "scaleX": t.scaleX * sx, "scaleY": t.scaleY * sy]
+    }
     private static func ratio(_ a: Double, _ b: Double) -> Double { b != 0 && (a / b).isFinite ? a / b : 1 }
     /// Handle `h` (0...7 clockwise from top-left, taken mod 8) on `box`, where the stage draws it.
     public static func handle(_ h: Int, on box: Rect) -> Point {
