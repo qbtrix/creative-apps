@@ -3,7 +3,8 @@
 // item. Row height follows the system sidebar size setting, so nothing here
 // fixes a height. The row owns only presentation state (the rename draft);
 // toggles and renames go out through closures, and a nil closure turns that
-// gesture off.
+// gesture off. Each toggle icon lays out both of its symbols and draws one,
+// so it is as wide in every state and the toggles form a column (#53).
 import SwiftUI
 
 public struct SidebarItem: Identifiable, Hashable, Sendable {
@@ -95,7 +96,7 @@ public struct SidebarRow: View {
             Spacer(minLength: SuiteSpacing.s)
             ForEach(item.toggles) { toggle in
                 Toggle(isOn: Binding(get: { toggle.isOn }, set: { _ in onToggle?(toggle.id) })) {
-                    Label(toggle.title, systemImage: toggle.systemImage)
+                    Label { Text(toggle.title) } icon: { SidebarToggleIcon(toggle: toggle) }
                 }
                 .toggleStyle(.button)
                 .buttonStyle(.plain)
@@ -144,5 +145,21 @@ public struct SidebarRow: View {
         guard let name = draft?.trimmingCharacters(in: .whitespaces) else { return }
         draft = nil
         if !name.isEmpty, name != item.title { onRename?(name) }
+    }
+}
+
+/// A toggle's icon: its on and off symbols stacked, only the current one
+/// drawn. The unseen symbol still takes part in layout, so the icon is as
+/// wide as the wider of the two whatever the state, and a toggle with the
+/// same symbols sits at the same x in every row (#53). No hand-sized frame.
+private struct SidebarToggleIcon: View {
+    let toggle: SidebarToggle
+
+    var body: some View {
+        ZStack {
+            Image(systemName: toggle.onSymbol).opacity(toggle.isOn ? 1 : 0)
+            Image(systemName: toggle.offSymbol).opacity(toggle.isOn ? 0 : 1)
+        }
+        .accessibilityHidden(true)
     }
 }
