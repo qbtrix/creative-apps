@@ -55,7 +55,7 @@ All four can run side by side: their owned files are disjoint (checked in
 | suite-harness | every SuiteUI wave-2 feature; every app's goldens and second journey file (Flare's `FlareJourneyTests+<Area>.swift` plan needs #333); Flare's perf journeys QH-5 and QH-6 (they need #330 and #333) |
 | editor-chrome | Flare F1a #346, F1b #347, F7b #376 (transport); Design's and Photo's primary Export and save status |
 | inspector-controls | Design's one-undo-step edit runs (follow-up of closed #536, on the #749 workaround today); Photo's Gamma from the keyboard (follow-up of closed #584); Flare F6a #186, F6b #348, F6c #349, F9 #378 |
-| lists-and-layers | Flare F11a #350; Halo's inline rename refusal (#139) and composition context menu (follow-up of closed #35); Design's Layers toggles and expansion (follow-ups of closed #50 and #549) |
+| lists-and-layers | Flare F11a #350; Halo's inline rename refusal (#139) and composition context menu (follow-up of closed #35); Design's Layers toggles and expansion (follow-ups of closed #50 and PR #549) |
 | canvas-marks | Flare's stage (#12, F3c #375, F4b #390); Design adopting the shared handles; Photo swapping `CloneSourceMark` and `StraightenMarks` (follow-ups of closed #647, #422, #419); Halo's viewer |
 
 An app feature that needs one of these depends on that SuiteUI feature's
@@ -125,6 +125,36 @@ packet covers until the feature issue is filed).
 - `Sources/SuiteUI/Contracts/ContractTypes.swift`, `FrameProbeRecording.swift`
   and `ControlInventorying.swift` are compiled into every app's journey
   bundle after SH-7, so they stay Foundation-only for good.
+
+## Critic round
+
+One read-only critic agent tried to refute the five packets: task size,
+owned files overlapping within a wave or inside a feature without a chain,
+the shared-file rule and protected paths, tests that cannot fail, closed or
+duplicate issues, facts against `dev`, and contradictions with the
+blueprint and the review of #765. It found 8 major and 5 minor problems,
+none blocking, all fixed in the packets:
+
+| # | finding | fix |
+|---|---|---|
+| 1 | `.suiteProbes()` would nest (window, gallery, `EditorShell`) and publish two `suite.controls` elements | it publishes only at the outermost call; `ControlInventoryTests` proves it (SH-5) |
+| 2 | no task owned the gallery's page list, and canvas-marks adds `surface` pages | each `Gallery<Area>.swift` declares its own pages; SH-6 lists the 18 blueprint names and tests uniqueness |
+| 3 | the `window` page's internal init was named only in lists-and-layers | in SH-6's task and test |
+| 4 | no task said component snapshots call `assertGolden`; three baseline tasks had no snapshot owner | the rule is in every wave-2 packet; IC-6 owns `SuiteHeaderSnapshots`, LL-12 `SuiteGridSmallSnapshots`, CM-10 a new `SuiteSurfaceSnapshots` |
+| 5 | CM-4's pixel check could not reach `SnapshotHost` from `SuiteUITests` | moved into `SuiteMarksSnapshots` |
+| 6 | CM-2's ⇧-resize number contradicted its rule | 250 × 125 |
+| 7 | LL-11 pinned `secondaryText`, the faint system grey #284 reported | pins `textSecondary`, as #599 left it |
+| 8 | `LayerList` never got the refusable rename SJ17 needs | LL-5 depends on LL-6 and uses the `String?` form |
+| 9 | EC-6 restated pills already on `dev` (#522) | rescoped to routing the text through `SuiteStatusPills` and mapping `PillStyle` onto `StatusPillStyle` |
+| 10 | SH-3 tested the wrong backgrounds and a system color with no hex | `secondaryText` on palette values, tested on `card`, `panel` and `surface` |
+| 11 | SH-9's 0.01 threshold made the one-pixel case pass | fails at `.standard` (0.005) |
+| 12 | #549 is a pull request | "PR #549" |
+| 13 | IC-18's PNG count; no split fallback for LL-13 and CM-11; `SuiteGallery`'s init | 8 PNGs; LL-13b and CM-11b; the init takes a `GalleryRequest` |
+
+Checked clean: no shared path between the four wave-2 features, every
+in-feature file share is a chain, no protected path, no `docs/c4/model.json`
+or `docs/design.md` edit, every token a wave-2 task needs is in SH-2, every
+covered issue is open (#745 is closed and not covered), no product names.
 
 ## Later waves (no packet yet)
 

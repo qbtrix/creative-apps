@@ -31,7 +31,7 @@ and adds contract, gallery and Fake-test files to each covered issue
 Halo's inline rename refusal (#139 drops its modal alert once LL-6 lands)
 and its composition context menu (the follow-up of closed #35, after LL-8),
 Design's Layers group toggles and expansion (follow-ups of closed #50 and
-#549, after LL-9).
+PR #549, after LL-9).
 
 **Not this line's:** #589's second acceptance bullet (Design's journey
 hides a group from its row's eye) and #284's Design half (`Section("Pages")`
@@ -160,7 +160,7 @@ SuiteGridSelecting : GridSelecting (LL-3): wraps GridSelection.click / move / co
 Every task is one PR to `dev`: at most 400 changed lines and 15 files,
 label `fast-lane`, body lines `Belt-Lead:`, `Feature: lists-and-layers`,
 `Fast-Check: pass`, `Head:`. LL-17 carries `feature-done`. Each component
-task registers its controls with `.suiteControl` (eye, lock, rename field,
+task's snapshot test also calls `assertGolden` through `SnapshotHost` in the four appearances (QB-V5), so the baseline tasks at the end have recorded actuals to commit. Each component task registers its controls with `.suiteControl` (eye, lock, rename field,
 menu items; a test that each reason equals its `.help`) and emits its
 interval series. No task edits `docs/c4/model.json`, `docs/design.md`,
 `Tokens.swift` or `project.yml`.
@@ -171,14 +171,14 @@ interval series. No task edits `docs/c4/model.json`, `docs/design.md`,
 | LL-2 | – | `SuiteListEditing`: rename outcomes, reorder, drop index (QB-S14) | `Sources/SuiteUI/ListEditing.swift`, `Tests/SuiteUITests/ListEditingTests.swift`, `Tests/SuiteUITests/ListBudgetTests.swift` | LL-1 |
 | LL-3 | – | `SuiteGridSelecting` over `GridSelection`; the 40-sequence reference (QB-S28) and QB-S12 | `Sources/SuiteUI/GridSelection.swift`, `Tests/SuiteUITests/GridSelectionReferenceTests.swift`, `Tests/SuiteUITests/ListBudgetTests.swift` | LL-2 |
 | LL-4 | #146 (part) | `SidebarItem.isDimmed`; `SidebarRow` dims title and symbol | `Sources/SuiteUI/SidebarRow.swift`, `Tests/SuiteUITests/SidebarTests.swift`, `Tests/AppSnapshotTests/SuiteSidebarSnapshots.swift` | – |
-| LL-5 | #146 (closes) | `LayerList`: flat rows, eye and lock column, drag to reorder with the insertion line, `layers-scroll` | `Sources/SuiteUI/LayerList.swift`, `Tests/SuiteUITests/LayerListTests.swift`, `Tests/AppSnapshotTests/SuiteLayerListSnapshots.swift` | LL-2, LL-4 |
+| LL-5 | #146 (closes) | `LayerList`: flat rows, eye and lock column, rename through LL-6's refusable `String?` form (SJ17 refuses `Taken` on it), drag to reorder with the insertion line, `layers-scroll` | `Sources/SuiteUI/LayerList.swift`, `Tests/SuiteUITests/LayerListTests.swift`, `Tests/AppSnapshotTests/SuiteLayerListSnapshots.swift` | LL-2, LL-6 |
 | LL-6 | #577 | A rename the app can refuse: the draft stays, the message shows inline; threaded through `SidebarSection` and `SuiteWindow` | `Sources/SuiteUI/SidebarRow.swift`, `Sources/SuiteUI/SidebarSection.swift`, `Sources/SuiteUI/SuiteWindow.swift`, `Tests/SuiteUITests/SidebarRenameRefusalTests.swift`, `Tests/AppSnapshotTests/SuiteSidebarSnapshots.swift` | LL-2, LL-4 |
 | LL-7 | #108 | Rename from Return on the focused row and from a "Rename" accessibility action | `Sources/SuiteUI/SidebarRow.swift`, `Tests/SuiteUITests/SidebarKeyboardRenameTests.swift` | LL-6 |
 | LL-8 | #73 | Row context menus from `ToolbarAction`s, disabled with help | `Sources/SuiteUI/SidebarSection.swift`, `Sources/SuiteUI/SuiteWindow.swift`, `Sources/SuiteUI/LayerList.swift`, `Tests/SuiteUITests/SidebarContextMenuTests.swift` | LL-5, LL-6 |
 | LL-9 | #589, #111 (closes both) | App-owned expansion; a parent row's toggles are their own elements; files the `line:design` follow-up for #589's Design journey | `Sources/SuiteUI/SidebarSection.swift`, `Sources/SuiteUI/SuiteWindow.swift`, `Tests/SuiteUITests/SidebarNestingTests.swift` | LL-8 |
 | LL-10 | #249 | The nesting snapshot draws through `SidebarNode` in a sidebar `List`, expanded through LL-9's seam, so reverting the two-level cap changes the PNG | `Tests/AppSnapshotTests/SuiteSidebarNestingSnapshots.swift` | LL-9 |
-| LL-11 | #284 | The section header's text is `SuiteColor.secondaryText` (from #599) and a test pins it; files the `line:design` issue for Design's `Section("Pages")` | `Sources/SuiteUI/SidebarSection.swift`, `Tests/SuiteUITests/SidebarEdgeTests.swift` | LL-9 |
-| LL-12 | – | `ThumbnailGrid` through `SuiteGridSelecting`; `grid-scroll`; item registration | `Sources/SuiteUI/ThumbnailGrid.swift`, `Tests/AppSnapshotTests/SuiteGridSnapshots.swift` | LL-3 |
+| LL-11 | #284 | The section header's text stays `SuiteColor.textSecondary` (from #599, `SidebarSection.swift:31`; not `secondaryText`, the system grey #284 measured) and a test pins it; files the `line:design` issue for Design's `Section("Pages")` | `Sources/SuiteUI/SidebarSection.swift`, `Tests/SuiteUITests/SidebarEdgeTests.swift` | LL-9 |
+| LL-12 | – | `ThumbnailGrid` through `SuiteGridSelecting`; `grid-scroll`; item registration; goldens of both grid sizes | `Sources/SuiteUI/ThumbnailGrid.swift`, `Tests/AppSnapshotTests/SuiteGridSnapshots.swift`, `Tests/AppSnapshotTests/SuiteGridSmallSnapshots.swift` | LL-3 |
 | LL-13 | – | The `window`, `layers`, `layers-300`, `grid` and `grid-2000` gallery pages, their log and the Fakes path | `Sources/SuiteUI/Gallery/GalleryLists.swift` | LL-5, LL-7, LL-9, LL-11, LL-12 |
 | LL-14 | #308, #311, #312 (closes all three) | SJ1b, SJ17 (with the rename-guard steps), SJ18 | `UITests/SuiteJourneyTests+Lists.swift` | LL-13 |
 | LL-15 | – | SJ22, SP4 | `UITests/SuiteJourneyTests+Lists.swift` | LL-14 |
@@ -187,14 +187,13 @@ interval series. No task edits `docs/c4/model.json`, `docs/design.md`,
 
 Sizes: LL-1 ~200 lines; LL-2 ~260; LL-3 ~300 (the reference is data);
 LL-4 ~90; LL-5 ~330; LL-6 ~340; LL-7 ~150; LL-8 ~220; LL-9 ~280; LL-10
-~120; LL-11 ~60; LL-12 ~150; LL-13 ~380; LL-14 ~360; LL-15 ~200.
+~120; LL-11 ~60; LL-12 ~150; LL-13 ~380 (if it passes 400, the `grid` pages move to LL-13b in the same file, chained); LL-14 ~360; LL-15 ~200.
 
-Chains (shared files): `SidebarRow.swift` LL-4 → LL-6 → LL-7;
+Chains (shared files): `SidebarRow.swift` LL-4 → LL-6 → LL-7; LL-5 after LL-6 (it uses the refusable rename);
 `SidebarSection.swift` and `SuiteWindow.swift` LL-6 → LL-8 → LL-9 → LL-11;
 `LayerList.swift` LL-5 → LL-8; `ListBudgetTests.swift` LL-2 → LL-3;
 `SuiteSidebarSnapshots.swift` LL-4 → LL-6; the journey file LL-14 → LL-15.
-LL-1, LL-4 start at once. `SuiteSidebarToggleColumnSnapshots.swift`,
-`SuiteGridSmallSnapshots.swift`, `SuiteWindowLaunchSnapshots.swift`,
+LL-1, LL-4 start at once. `SuiteSidebarToggleColumnSnapshots.swift`, `SuiteWindowLaunchSnapshots.swift`,
 `SuiteWindowMinimumSnapshots.swift` and the other `Sidebar*`/`GridSelection*`
 tests are this feature's in wave 2 and must keep passing unchanged.
 
@@ -212,7 +211,7 @@ tests are this feature's in wave 2 and must keep passing unchanged.
 | LL-8 | `SidebarContextMenuTests`: an item with no actions builds no menu; a disabled action is disabled with its `unavailableHelp` as help; existing `SuiteWindow` initializers compile unchanged | a menu appears with no actions, or a disabled item has no reason |
 | LL-9 | `SidebarNestingTests`: with `expanded` given, the disclosure follows it and a click calls `onExpand(id, true)`; with `onExpand` nil the group keeps its own state; the two-level cap holds; the parent row's toggles are separate accessibility children (checked in a hosted view's accessibility tree) | the app's set is ignored, or the toggles merge into one element |
 | LL-10 | `SuiteSidebarNestingSnapshots` renders the real `SidebarNode` with Level 1 expanded: the chevron, the system indent and Level 3 lined up with Level 2; changing `secondLevelRows` back to `children` in `SidebarSection.swift` changes the PNG (stated in the PR, checked on the CI artifact) | the snapshot still hand-draws rows |
-| LL-11 | `SidebarEdgeTests`: the section header's foreground is `SuiteColor.secondaryText`; SJ1b's `contrast` count on the `window` page is 0 | the header falls back to the list's own faint style |
+| LL-11 | `SidebarEdgeTests`: the section header's foreground is `SuiteColor.textSecondary`; SJ1b's `contrast` count on the `window` page is 0 | the header falls back to the list's own faint style |
 | LL-12 | `SuiteGridSnapshots` unchanged except the registered identifiers; a unit test that the grid's click path calls `SuiteGridSelecting` and gives SJ18's three selections | the grid bypasses the rule |
 | LL-13 | SJ0 opens all five list pages with `violations()` empty; each builds with `-SuiteGalleryFakes` | a control is unregistered or reasonless |
 | LL-14 | SJ1b, SJ17 (including the rename-guard steps), SJ18 pass on CI | any 4.2 assert, or a double-click on a toggle or the blank space opens the field |

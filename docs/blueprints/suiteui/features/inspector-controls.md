@@ -178,7 +178,7 @@ Readable values (IC-7, IC-8): accessibilityRepresentation { Slider(value, in: ra
 Every task is one PR to `dev`: at most 400 changed lines and 15 files,
 label `fast-lane`, body lines `Belt-Lead:`, `Feature: inspector-controls`,
 `Fast-Check: pass`, `Head:`. IC-18 carries `feature-done`. Each component
-task registers its controls with `.suiteControl` (a test that each entry's
+task's snapshot test also calls `assertGolden` through `SnapshotHost` in the four appearances (QB-V5), so the baseline tasks at the end have recorded actuals to commit. Each component task registers its controls with `.suiteControl` (a test that each entry's
 reason equals its `.help`), emits its probe series and moves its fades from
 `accessibilityReduceMotion` to `suiteReduceMotion` (today in `ChipRow`,
 `CurveEditor`, `ScrubField`, `InspectorRows`, `KeyframeButton`,
@@ -192,7 +192,7 @@ reason equals its `.help`), emits its probe series and moves its fades from
 | IC-3 | #718 (closes) | `onEnd` on `InspectorColorWellRow` and `InspectorColorRow`; `HexColor`'s parsing as a Foundation-only `HexColorEditing` conformance with `#RGB` | `Sources/SuiteUI/ColorWell.swift`, `Tests/SuiteUITests/HexColorTests.swift` | IC-1 |
 | IC-4 | #591, #88 (closes both) | `ScrubTrack.stepped` decides arrow, VoiceOver and Slider steps; `ScrubTrack` conforms to `TrackStepping`; the log-mapped row snapshot | `Sources/SuiteUI/ScrubValue.swift`, `Sources/SuiteUI/ScrubField.swift`, `Tests/SuiteUITests/ScrubValueTests.swift`, `Tests/AppSnapshotTests/SuiteSliderSnapshots.swift` | IC-1, IC-2 |
 | IC-5 | – | `SuiteValueScrubbing` over `ScrubValue` and `NumericInput`; the 60-row reference table (QB-S27) | `Sources/SuiteUI/ScrubValue.swift`, `Sources/SuiteUI/NumericInput.swift`, `Tests/SuiteUITests/ScrubReferenceTests.swift`, `Tests/SuiteUITests/NumericInputTests.swift` | IC-4 |
-| IC-6 | #622, #285 (closes both) | Reset beside the header, hit ≥ `iconButtonHit`, no overlap; `InspectorRows` and `InspectorAction` on `suiteReduceMotion` | `Sources/SuiteUI/InspectorRows.swift`, `Sources/SuiteUI/InspectorAction.swift`, `Tests/SuiteUITests/InspectorSectionTests.swift`, `Tests/AppSnapshotTests/SuiteInspectorSnapshots.swift` | – |
+| IC-6 | #622, #285 (closes both) | Reset beside the header, hit ≥ `iconButtonHit`, no overlap; `InspectorRows` and `InspectorAction` on `suiteReduceMotion`; goldens of the section header and of the inspector title and info card | `Sources/SuiteUI/InspectorRows.swift`, `Sources/SuiteUI/InspectorAction.swift`, `Tests/SuiteUITests/InspectorSectionTests.swift`, `Tests/AppSnapshotTests/SuiteInspectorSnapshots.swift`, `Tests/AppSnapshotTests/SuiteHeaderSnapshots.swift` | – |
 | IC-7 | #262 (part) | Bar rows read their value (`accessibilityRepresentation` with a `Slider`); `bar-slider` and `slider-key` series | `Sources/SuiteUI/ScrubField.swift`, `Sources/SuiteUI/StudioScrubRow.swift`, `Tests/SuiteUITests/SliderBarTests.swift` | IC-4 |
 | IC-8 | #343, #262 (closes both) | `CurveEditor`: `EasingHandleNudging` conformance, `EditRun`, readable handle values, the preview dot's Reduce Motion probe mark, `curve-drag` | `Sources/SuiteUI/CurveEditor.swift`, `Tests/SuiteUITests/CurveEditorTests.swift`, `Tests/AppSnapshotTests/SuiteCurveEditorSnapshots.swift` | IC-1, IC-7 |
 | IC-9 | – | `ToneCurveEditor` on `CurvePointEditing`, `EditRun`, `curve-drag` | `Sources/SuiteUI/ToneCurveEditor.swift`, `Tests/SuiteUITests/ToneCurveEditorTests.swift`, `Tests/AppSnapshotTests/SuiteToneCurveSnapshots.swift` | IC-1 |
@@ -204,7 +204,7 @@ reason equals its `.help`), emits its probe series and moves its fades from
 | IC-15 | – | Baselines: bar slider, exact field, color row in four appearances | `Tests/AppSnapshotTests/Golden/inspector/` (12 PNGs) | IC-14's CI run |
 | IC-16 | – | Baselines: section header and Reset, keyframe button, presets in four appearances | `Tests/AppSnapshotTests/Golden/inspector/` (12 PNGs) | IC-15 |
 | IC-17 | – | Baselines: chips, easing curve, tone curve in four appearances | `Tests/AppSnapshotTests/Golden/inspector/` (12 PNGs) | IC-16 |
-| IC-18 | – | Baselines: inspector title and info card in four appearances; `feature-done` | `Tests/AppSnapshotTests/Golden/inspector/` (4 PNGs) | IC-17 |
+| IC-18 | – | Baselines: inspector title and info card in four appearances; `feature-done` | `Tests/AppSnapshotTests/Golden/inspector/` (8 PNGs) | IC-17 |
 
 Sizes: IC-1 ~380 lines; IC-2 ~120; IC-3 ~220; IC-4 ~250; IC-5 ~330 (the
 table is data); IC-6 ~200; IC-7 ~180; IC-8 ~260; IC-9 ~220; IC-10 ~150;
@@ -214,9 +214,9 @@ IC-11 ~250; IC-12 ~380; IC-13 ~350; IC-14 ~330. If IC-12 passes 400, the
 `ScrubField.swift` is edited by IC-2, IC-4 and IC-7, and `ScrubValue.swift`
 by IC-4 and IC-5: those run as chains (IC-2 → IC-4 → IC-5 and IC-4 → IC-7 →
 IC-8). IC-1, IC-2, IC-6, IC-9, IC-10 and IC-11 have no shared file and start
-together. `InspectorHeader.swift`, `SuiteHeaderSnapshots.swift`,
-`SuiteProInspectorSnapshots.swift` and `PresetGrid`'s look are this
-feature's in wave 2; only the tasks above change them.
+together. `InspectorHeader.swift` and `SuiteProInspectorSnapshots.swift` are this
+feature's in wave 2; no task changes them (IC-6 records the title and info
+card goldens from `SuiteHeaderSnapshots.swift`).
 
 ## Acceptance test per task
 

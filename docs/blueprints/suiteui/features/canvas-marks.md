@@ -172,7 +172,8 @@ CanvasSurface.fitted(artboard, in size, inset) (CM-10): pure; sides ≤ 0 -> 1; 
 
 Every task is one PR to `dev`: at most 400 changed lines and 15 files,
 label `fast-lane`, body lines `Belt-Lead:`, `Feature: canvas-marks`,
-`Fast-Check: pass`, `Head:`. CM-16 carries `feature-done`. Marks are not
+`Fast-Check: pass`, `Head:`. CM-16 carries `feature-done`. Each component
+task's snapshot test also calls `assertGolden` through `SnapshotHost` in the four appearances (QB-V5), so the baseline tasks at the end have recorded actuals to commit. Marks are not
 controls (hidden from accessibility, no hit), so only `CanvasViewport` and
 the page's switches register with `.suiteControl`. No task edits
 `docs/c4/model.json`, `docs/design.md`, `Tokens.swift`, `project.yml` or
@@ -190,8 +191,8 @@ called).
 | CM-7 | #706, #737 (closes both) | `CanvasPointMark`; files the `line:photo` swap of `CloneSourceMark` | `Sources/SuiteUI/CanvasMarks+Points.swift`, `Tests/SuiteUITests/CanvasPointMarksTests.swift`, `Tests/AppSnapshotTests/SuitePointMarkSnapshots.swift` | – |
 | CM-8 | #530 | `CanvasGrid`; files the `line:photo` swap of `StraightenMarks` | `Sources/SuiteUI/CanvasMarks+Points.swift`, `Tests/SuiteUITests/CanvasPointMarksTests.swift`, `Tests/AppSnapshotTests/SuitePointMarkSnapshots.swift` | CM-7 |
 | CM-9 | #264 | The ruler corner's unit; `canvas-drag` series; the viewport's registration | `Sources/SuiteUI/CanvasViewport.swift`, `Sources/SuiteUI/Ruler.swift`, `Tests/SuiteUITests/RulerMarksTests.swift`, `Tests/AppSnapshotTests/CanvasViewportSnapshots.swift` | CM-3 |
-| CM-10 | – | `CanvasSurface.fitted`, the `suite.canvas.artboard` identifier | `Sources/SuiteUI/CanvasSurface.swift`, `Tests/SuiteUITests/CanvasSurfaceTests.swift` | – |
-| CM-11 | – | The `canvas`, `canvas-pt`, `marks`, `surface` and `surface-empty` gallery pages, their log and the Fakes path | `Sources/SuiteUI/Gallery/GalleryCanvas.swift` | CM-6, CM-8, CM-9, CM-10 |
+| CM-10 | – | `CanvasSurface.fitted`, the `suite.canvas.artboard` identifier, its goldens | `Sources/SuiteUI/CanvasSurface.swift`, `Tests/SuiteUITests/CanvasSurfaceTests.swift`, `Tests/AppSnapshotTests/SuiteSurfaceSnapshots.swift` | – |
+| CM-11 | – | The `canvas`, `canvas-pt`, `marks`, `surface` and `surface-empty` gallery pages (the last two declared in `GalleryCanvas.pages`, SH-6's per-area list), their log and the Fakes path | `Sources/SuiteUI/Gallery/GalleryCanvas.swift` | CM-6, CM-8, CM-9, CM-10 |
 | CM-12 | – | SJ9 (with the ⌘= proof), SJ10, SJ26 | `UITests/SuiteJourneyTests+Canvas.swift` | CM-11 |
 | CM-13 | – | SJ21, SP2, SP5 | `UITests/SuiteJourneyTests+Canvas.swift` | CM-12 |
 | CM-14 | – | Baselines: viewport and rulers (px, pt), selection handles, path marks in four appearances | `Tests/AppSnapshotTests/Golden/canvas/` (12 PNGs) | CM-13's CI run |
@@ -199,7 +200,7 @@ called).
 | CM-16 | – | Baselines: `CanvasSurface` in four appearances; `feature-done` | `Tests/AppSnapshotTests/Golden/canvas/` (4 PNGs) | CM-15 |
 
 Sizes: CM-1 ~260 lines; CM-2 ~320; CM-3 ~180; CM-4 ~330; CM-5 ~280; CM-6
-~250; CM-7 ~200; CM-8 ~160; CM-9 ~150; CM-10 ~120; CM-11 ~380; CM-12
+~250; CM-7 ~200; CM-8 ~160; CM-9 ~150; CM-10 ~170; CM-11 ~380 (if it passes 400, the `surface` pages move to CM-11b in the same file, chained); CM-12
 ~360; CM-13 ~250.
 
 Chains: `CanvasMarks+Vector.swift`, `CanvasMarksTests.swift` and
@@ -214,15 +215,15 @@ passing unchanged.
 | id | test | fails when |
 |---|---|---|
 | CM-1 | `CanvasFakeTests`: each Fake gives `main.swift`'s literal result with its gap (doubles and halves; corners only) | a Fake loses its gap |
-| CM-2 | `HandleGeometryTests`: every handle's hit rect is 12 × 12 at zoom 0.25, 1 and 4 (view points); on a 4 × 4 pt rect the corner nearest the point wins; dragging bottomRight by (50, 0) with ⇧ from 200 × 100 gives 300 × 150 (±1); a drag past the opposite side gives width 0, never negative; a quarter turn gives 90 and with snap 13° gives 15 | a hit size scales with zoom, an overlap picks an edge, or a rect goes negative |
+| CM-2 | `HandleGeometryTests`: every handle's hit rect is 12 × 12 at zoom 0.25, 1 and 4 (view points); on a 4 × 4 pt rect the corner nearest the point wins; dragging bottomRight by (50, 0) with ⇧ from 200 × 100 gives 250 × 125 (±1; the larger relative change, 1.25, on both sides); a drag past the opposite side gives width 0, never negative; a quarter turn gives 90 and with snap 13° gives 15 | a hit size scales with zoom, an overlap picks an edge, or a rect goes negative |
 | CM-3 | `ZoomMathTests`: `zoomedIn` from 1 is ZoomMath's next stop (1.5 then 2, as `ViewerZoom.stops` gives); NaN clamps to 1; a 0 × 0 document fits at 1; a viewport with no room gives 0.1; `CanvasPanTests`: → pans a tenth, ⇧→ a whole viewport | a stop, a fit or a pan step is wrong, or a zero divides |
-| CM-4 | `CanvasMarksTests`: `SelectionHandles` draws 8 handles and hit rects come from `SuiteHandleGeometry`; one end per drag; lines pixel-aligned at scale 2 (via `SnapshotHost`); `SuiteMarksSnapshots` handles at 25, 100 and 400 % | a drag ends twice, or a handle is off the pixel grid |
+| CM-4 | `CanvasMarksTests`: `SelectionHandles` draws 8 handles and hit rects come from `SuiteHandleGeometry`; one end per drag; `SuiteMarksSnapshots` handles at 25, 100 and 400 %, and its hairline check (in `Tests/AppSnapshotTests`, where `SnapshotHost` lives; `SuiteUITests` cannot reach it) that outline lines are 2 device px and handles sit on the pixel grid at scale 2 | a drag ends twice, or a handle is off the pixel grid |
 | CM-5 | `CanvasMarksTests`: a smooth anchor and a corner anchor draw different shapes; guide marks span the viewport; snapshots added | anchors look the same |
 | CM-6 | `CanvasMarksTests`: `MotionPathMarks` draws one dot per frame point; `GhostLayer` draws at its opacity; snapshots added | a point or the opacity is wrong |
 | CM-7 | `CanvasPointMarksTests`: the mark's on-screen size is the same at zoom 1 and 4; it takes no hit and is hidden from accessibility; `SuitePointMarkSnapshots` over light and dark pixels at zoom 1 and 4 (#737's acceptance, #706's) | the size scales, or the mark takes a click |
 | CM-8 | `CanvasPointMarksTests`: a 3-cell grid draws 2 lines each way, 0 cells draws none; snapshots over a light and a dark image in Light and Dark | the line count is off, or 0 cells draws |
 | CM-9 | `RulerMarksTests`: the corner reads the given unit, "px" by default; `CanvasViewportSnapshots` adds the "pt" corner and the existing PNGs are unchanged | the default changes Design's or Photo's rulers |
-| CM-10 | `CanvasSurfaceTests`: `fitted` centres a 400 × 300 artboard in 800 × 600 at scale 1, in 200 × 150 (less the inset) at the smaller scale, never above 1, and a 0 × 0 artboard as 1 × 1 with no division; `LibraryLoupeSnapshots` unchanged | the rect is off-centre, scales up, or divides by zero |
+| CM-10 | `CanvasSurfaceTests`: `fitted` centres a 400 × 300 artboard in 800 × 600 at scale 1, in 200 × 150 (less the inset) at the smaller scale, never above 1, and a 0 × 0 artboard as 1 × 1 with no division; `SuiteSurfaceSnapshots` records the surface and the empty variant; `LibraryLoupeSnapshots` unchanged | the rect is off-centre, scales up, or divides by zero |
 | CM-11 | SJ0 opens the five canvas pages with `violations()` empty; each builds with `-SuiteGalleryFakes` | a control is unregistered or reasonless |
 | CM-12 | SJ9, SJ10, SJ26 pass on CI | any assert, including the ⌘= step |
 | CM-13 | SJ21 passes; SP2 and SP5 hold ≥ 60 samples each | an assert fails or a series is short |
@@ -235,7 +236,7 @@ passing unchanged.
 | QB-S3 canvas drag and Space-pan | p95 ≤ 2 frames late (placeholder 3), report-only | SP2, series `canvas-drag` |
 | QB-S4 handle drag | p95 ≤ 2 (placeholder 3) | SP5, series `handle-drag` |
 | QB-S13 `HandleGeometryProviding.hit` | ≤ 0.02 ms (debug ≤ 0.2 ms) | `HandleBudgetTests.hitWithinBudget` |
-| QB-S25 hairlines 2 device px at 2× | the selection outline and ruler edge | `CanvasMarksTests` through `SnapshotHost` |
+| QB-S25 hairlines 2 device px at 2× | the selection outline and ruler edge | `SuiteMarksSnapshots` through `SnapshotHost` |
 | QB-S20 handle hits | ≥ 12 pt at every zoom (not elements) | SJ10's log, `HandleGeometryTests` |
 | QB-S32 point-mark ink on paper | its contrast pair (landed by SH-2) | `TokensTests` (harness) |
 

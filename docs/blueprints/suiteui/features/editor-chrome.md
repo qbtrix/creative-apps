@@ -130,7 +130,9 @@ EditorShell(..., timeline: (some View)? = nil)            // EC-3; nil = today's
 EditorBarItem(..., prominence: .primary)                   // EC-4; registers role "primary"
 EditorSaveStatus(.saved | .unsaved | .failed)              // EC-4
 TransportCapsule(state: TransportState, onPlay:, onStep:, onStart:, onEnd:, onLoop:)  // EC-5
-ViewerStatusBar(..., trailing: [StatusPill], onToggle: (String) -> Void)  // EC-6; old init kept
+StatusPillStyle(_ style: PillStyle)   // EC-6: the contract's PillStyle maps onto the StatusPillStyle already on dev
+// ViewerStatusBar keeps its init and trailing slot (toggle and warning pills already draw, #522);
+// EC-6 routes its zoom and size text through SuiteStatusPills and registers toggle pills
 ```
 
 **Views with no contract** (5.2): `EmptyStateView`, `SegmentedTabs`,
@@ -184,6 +186,7 @@ SuiteToolPicking : ToolPicking                                    # EC-8
 Every task is one PR to `dev`: at most 400 changed lines and 15 files,
 label `fast-lane`, body lines `Belt-Lead:`, `Feature: editor-chrome`,
 `Fast-Check: pass`, `Head:`. EC-13 carries `feature-done`. Every component
+task's snapshot test also calls `assertGolden` through `SnapshotHost` in the four appearances (QB-V5; editor screens in Dark and Dark + Increase Contrast), so EC-12 and EC-13 have recorded actuals to commit. Every component
 task registers its controls with `.suiteControl` (with a test that the
 entry's reason equals its `.help`), emits its probe series, and moves its
 fades to `suiteReduceMotion` with `fade-start`/`fade-end` marks. No task
@@ -197,7 +200,7 @@ edits `docs/c4/model.json`, `docs/design.md`, `Tokens.swift` or
 | EC-3 | #342 (closes) | `EditorShell(timeline:)`: divider, drag, collapse and restore, `slot-drag` series, `.suiteProbes()` | `Sources/SuiteUI/EditorShell.swift`, `Tests/SuiteUITests/EditorShellTests.swift`, `Tests/AppSnapshotTests/SuiteShellSnapshots.swift` | EC-2 |
 | EC-4 | #339 | `EditorBarItem` outlined and `.primary` (role "primary"), `EditorSaveStatus`, `EmptyStateView`'s button in the primary style | `Sources/SuiteUI/EditorTopBar.swift`, `Sources/SuiteUI/EmptyStateView.swift`, `Tests/AppSnapshotTests/SuiteTopBarSnapshots.swift`, `Tests/AppSnapshotTests/SuiteEditorBarDimmingTests.swift` | – |
 | EC-5 | #340 (part) | `TransportCapsule` and `SuiteTransport` | `Sources/SuiteUI/TransportCapsule.swift`, `Tests/SuiteUITests/TransportTests.swift`, `Tests/AppSnapshotTests/SuiteTransportSnapshots.swift` | EC-1 |
-| EC-6 | #340 (closes) | Toggle and warning pills through `SuiteStatusPills` | `Sources/SuiteUI/ViewerStatusBar.swift`, `Tests/SuiteUITests/StatusPillTests.swift`, `Tests/AppSnapshotTests/SuiteStatusSnapshots.swift` | EC-1 |
+| EC-6 | #340 (closes) | `SuiteStatusPills` behind `ViewerStatusBar`'s zoom and size text; `PillStyle` maps onto the existing `StatusPillStyle`; toggle pills register and emit `press` | `Sources/SuiteUI/ViewerStatusBar.swift`, `Tests/SuiteUITests/StatusPillTests.swift`, `Tests/AppSnapshotTests/SuiteStatusSnapshots.swift` | EC-1 |
 | EC-7 | #341 | `SegmentedTabs` as a capsule (still a `Picker`), rail colors, tab fades | `Sources/SuiteUI/SegmentedTabs.swift`, `Sources/SuiteUI/ToolbarGroup.swift`, `Tests/AppSnapshotTests/SuiteTabsSnapshots.swift` | – |
 | EC-8 | – | `SuiteToolPicking` behind `ToolbarGroup`: key pick, help, violations; `press` series and tool fades | `Sources/SuiteUI/ToolbarGroup.swift`, `Tests/SuiteUITests/ToolPickingTests.swift` | EC-1, EC-7 |
 | EC-9 | – | The `editor`, `editor-plain` and `empty` gallery pages, their log, page switches (save state, warning, `frameCount` 0, Reduce Motion) and the `-SuiteGalleryFakes` path | `Sources/SuiteUI/Gallery/GalleryChrome.swift` | EC-3, EC-4, EC-5, EC-6, EC-8 |
@@ -227,7 +230,7 @@ wave 2 but no task changes them.
 | EC-3 | `EditorShellTests`: a shell built without `timeline:` has the same layout values as today (the existing assertions unchanged); with a slot, the window minimum still fits (QB-S23); `SuiteShellSnapshots` records the slot open, collapsed and dragged in Dark and Dark + Increase Contrast; `SuiteEditorShellSnapshots`' PNGs are byte-identical | a no-timeline shell changes, or the minimum no longer fits |
 | EC-4 | `SuiteEditorBarDimmingTests`: the primary item's hover lightens and never greys, a disabled primary dims to 40 %; `SuiteTopBarSnapshots` records outlined, primary and the three save states; a unit test that the primary registers `role: "primary"` and an outlined item `role: nil`; the save status's accessibility labels are "Saved", "Unsaved changes", "Not saved" | hover greys, the role is wrong, or a label differs |
 | EC-5 | `TransportTests`: from frame 47 of 48 a step stays at 47 with loop off and goes to 0 with loop on; step −1 from 0 wraps to 47 with loop on; `frameCount` 0 gives every face's help "Nothing to play." and a step changes nothing; timecode at 24 fps for frame 24 of 48 is `00:01 / 00:02`; `fps` 0 gives `--:--` with no division; each button's entry reason equals its `.help` | a wrap, a clamp or the timecode is wrong, or a zero divides |
-| EC-6 | `StatusPillTests`: zoom 2 gives "200%" (`ViewerZoom.percentText` unchanged), NaN gives "–", 1920 × 1080 gives "1920 × 1080", trailing pills keep their order; `SuiteStatusSnapshots` adds the toggle (on, off) and warning pills; the old `ViewerStatusBar` init draws byte-identical PNGs | a text differs or the old init's look changes |
+| EC-6 | `StatusPillTests`: zoom 2 gives "200%" (`ViewerZoom.percentText` unchanged), NaN and 0 give "–", 1920 × 1080 gives "1920 × 1080", trailing pills keep their order; `ViewerStatusBar` takes its text from `SuiteStatusPills` (a bar built with zoom NaN shows "–", which today's code does not); `StatusPillStyle(PillStyle)` maps all three cases; a toggle pill's entry reason equals its `.help`; the existing `SuiteStatusSnapshots` PNGs (toggle and warning pills from #522) are byte-identical | the bar formats zoom itself, a style maps wrong, or an existing pill's look changes |
 | EC-7 | `SuiteTabsSnapshots` records the capsule tabs and the rail's selected, hover and disabled colors; a unit test that `SegmentedTabs` still builds a `Picker` (its body type) | the tabs stop being a `Picker` underneath |
 | EC-8 | `ToolPickingTests`: key `b` picks the enabled Brush, never a disabled tool; `help` is "Brush (B)" or the reason; two tools on `B` and one with an empty reason are violations; a `ToolbarGroup` tool's registered reason equals its `.help` | a disabled tool is picked by key, or a duplicate passes |
 | EC-9 | The page builds both with live rules and with `-SuiteGalleryFakes`; SJ0 (harness) opens `editor`, `editor-plain` and `empty` with `violations()` empty | a control on the page is unregistered or disabled without a reason |

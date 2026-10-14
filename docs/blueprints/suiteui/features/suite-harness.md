@@ -144,14 +144,15 @@ extension View {
     public func suiteProbes() -> some View   // SH-5: publishes suite.perf and suite.controls under -SuitePerfProbe
 }
 extension EnvironmentValues { public var suiteReduceMotion: Bool }    // SH-5, defaults to the system setting
-public struct SuiteGallery: View { public init(page: String) }        // SH-6
+public struct GalleryRequest { page: String; fakes: Bool; width: Double? }   // SH-6
+public struct SuiteGallery: View { public init(_ request: GalleryRequest) }  // SH-6
 ```
 
 `role:` answers the review of #765: `.suiteControl` needs it so
 editor-chrome's Export can register `role: "primary"` (SJ3) without editing
 `SuiteEnvironment.swift`, which no wave-2 feature owns.
 
-`.suiteProbes()` is applied by `SuiteWindow` (SH-6) and by the gallery root.
+`.suiteProbes()` is applied by `SuiteWindow` (SH-6) and by the gallery root, and editor-chrome applies it to `EditorShell`. Under `-SuiteGallery` those nest (the window's body is the gallery, and the `editor` page draws an `EditorShell`), so `.suiteProbes()` publishes only at the outermost one: it sets an environment flag, and an inner call whose flag is already set adds nothing. One `suite.controls` and one `suite.perf` element per window, always.
 `EditorShell` applies it in editor-chrome (EC-3), the feature that owns
 `EditorShell.swift` in wave 2; until then Design and Photo publish nothing,
 which changes no journey today.
@@ -177,11 +178,18 @@ SuiteControlInventory : ControlInventorying                      # SH-5
   violations(): duplicates ∪ { id | !enabled && reason empty }, sorted
   .suiteControl(id, enabled, reason, role): onAppear/onChange register; onDisappear unregister; also .accessibilityIdentifier(id)
 
-SuiteGallery.request(from arguments) -> (page, fakes, width)?   # SH-6, pure, unit-tested
+SuiteGallery.request(from arguments) -> GalleryRequest?        # SH-6, pure, unit-tested
   page  = value after "-SuiteGallery", else nil (no gallery)
   fakes = "-SuiteGalleryFakes" present
   width = Double(value after "-SuiteGalleryWidth") if finite and > 0, else nil
 SuiteWindow.body: if let request (read once, in init) { SuiteGallery(request) } else { today's split view }
+SuiteWindow(galleryPage: ...) internal init: skips the argument check, so the `window` page's inner window never recurses
+SuiteGallery.pages = GalleryIndex.pages + GalleryChrome.pages + GalleryInspector.pages + GalleryLists.pages
+                   + GalleryCanvas.pages + GalleryTimeline.pages + GalleryGraph.pages
+  each Gallery<Area>.swift declares `static let pages: [String: () -> AnyView]` in its own file, so a wave-2 feature
+  adds a page (canvas-marks adds `surface`, `surface-empty`) without editing SuiteGallery.swift. The stubs start with
+  the blueprint's 6.3 names: index; window; editor, editor-plain, empty; inspector, curves; layers, layers-300,
+  grid, grid-2000; canvas, canvas-pt, marks; timeline, timeline-long; graph, graph-loop
 
 GoldenImage : GoldenComparing                                    # SH-9
   guard sizes equal and bytes.count == w*h*4 else fail(share 1)
@@ -213,7 +221,7 @@ owns every new file; suite-record #345 updates the description) or
 | SH-3 | #283 | Secondary text reaches 4.5:1 on light cards and panels | `Sources/SuiteUI/Tokens.swift`, `Tests/SuiteUITests/TokensTests.swift` | SH-2 | ~40, 2 |
 | SH-4 | #330 | `SuiteFrameProbe`: frames late, intervals, marks, the `suite.perf` publisher | `Sources/SuiteUI/FrameProbe.swift`, `Tests/SuiteUITests/FrameProbeTests.swift` | SH-1 | ~330, 2 |
 | SH-5 | #775 | `SuiteControlInventory`, `SuiteEnvironment` (`suiteReduceMotion`, `.suiteControl(…role:)`, `.suiteProbes()`), `ToolbarAction.identifier` applied and registered in the four views | `Sources/SuiteUI/ControlInventory.swift`, `Sources/SuiteUI/SuiteEnvironment.swift`, `Sources/SuiteUI/ToolbarGroup.swift`, `Sources/SuiteUI/EditorTopBar.swift`, `Sources/SuiteUI/InspectorAction.swift`, `Sources/SuiteUI/EmptyStateView.swift`, `Tests/SuiteUITests/ControlInventoryTests.swift` | SH-1, SH-4 | ~340, 7 |
-| SH-6 | #776 | The gallery, its index, the six page stubs, the `SuiteWindow` hook and toolbar identifiers | `Sources/SuiteUI/SuiteGallery.swift`, `Sources/SuiteUI/Gallery/GalleryIndex.swift`, `Sources/SuiteUI/Gallery/GalleryChrome.swift`, `Sources/SuiteUI/Gallery/GalleryInspector.swift`, `Sources/SuiteUI/Gallery/GalleryLists.swift`, `Sources/SuiteUI/Gallery/GalleryCanvas.swift`, `Sources/SuiteUI/Gallery/GalleryTimeline.swift`, `Sources/SuiteUI/Gallery/GalleryGraph.swift`, `Sources/SuiteUI/SuiteWindow.swift`, `Tests/SuiteUITests/SuiteGalleryTests.swift` | SH-5 | ~330, 10 |
+| SH-6 | #776 | The gallery, its index, the six page stubs (each declaring its own page names), the `SuiteWindow` hook with the internal init that skips it, and toolbar identifiers | `Sources/SuiteUI/SuiteGallery.swift`, `Sources/SuiteUI/Gallery/GalleryIndex.swift`, `Sources/SuiteUI/Gallery/GalleryChrome.swift`, `Sources/SuiteUI/Gallery/GalleryInspector.swift`, `Sources/SuiteUI/Gallery/GalleryLists.swift`, `Sources/SuiteUI/Gallery/GalleryCanvas.swift`, `Sources/SuiteUI/Gallery/GalleryTimeline.swift`, `Sources/SuiteUI/Gallery/GalleryGraph.swift`, `Sources/SuiteUI/SuiteWindow.swift`, `Tests/SuiteUITests/SuiteGalleryTests.swift` | SH-5 | ~330, 10 |
 | SH-7 | #333 | The template compiles `UITests/Journey*.swift`, `UITests/<target>*.swift` and the three journey-safe contract files; the `SuiteJourneyTests` bundle; `Journey(name:)`; input, velocity-drag and perf helpers; SJ0; the smoke file; the `suiteui` audit key at 0 | `project.yml`, `UITests/Journey.swift`, `UITests/Journey+Input.swift`, `UITests/SuiteJourneyTests.swift`, `UITests/SuiteJourneyTests+Smoke.swift`, `UITests/audit-baseline.json` | SH-6 | ~360, 6 |
 | SH-8 | – | SJ25 and the journey gate constants (placeholders from section 7.1) | `UITests/SuiteJourneyTests.swift`, `UITests/SuiteJourneyTests+Budgets.swift` | SH-7 | ~150, 2 |
 | SH-9 | #331 | `GoldenImage`: the compare, baselines by `#filePath`, actual and diff into `.build/snapshots/`, the recording rule | `Tests/AppSnapshotTests/GoldenImage.swift`, `Tests/AppSnapshotTests/GoldenImageTests.swift`, `Tests/AppSnapshotTests/Golden/README.md` | SH-1 | ~300, 3 |
@@ -238,13 +246,13 @@ later SuiteUI feature: a later need goes to the supervisor as an issue.
 |---|---|---|
 | SH-1 | `EditRunTests`: `change()` true once then false; `end()` true once per run, false with no change; three drag-like runs give `ends == 3`. `HarnessFakeTests`: `FakeFrameProbe` reports 0 frames late and `valid` only at 60 samples; `FakeControlInventory` reports a disabled entry with no reason and *not* a duplicate (its deliberate gap); `FakeGoldenComparing` fails one changed byte with share 1 and no diff image | a run ends twice, an end with no change counts, or a Fake stops being wrong on purpose (the live tests below rely on the gap) |
 | SH-2 | `TokensTests.geometry` lists the 14 new tokens with their values (section 6.2's 13 plus `iconButtonHit` 20, the Reset hit inspector-controls needs for #622, since no wave-2 feature may edit `Tokens.swift`); `TokensTests.contrast` checks the four QB-S32 pairs at `docs/design.md`'s ratios | a token is missing, renamed or a pair is under its ratio |
-| SH-3 | `TokensTests.contrast`: `secondaryText` on `card` and on `panel` is at least 4.5:1 in Light and Dark (both resolved through the token's own colors, as the existing contrast table does) | either pair is under 4.5:1 |
+| SH-3 | `TokensTests.contrast`: `secondaryText` is redefined on palette values (today it is the system `.secondary`, which has no hex to test) and is at least 4.5:1 on `card`, on `panel` and on `surface` (the background `SurfaceCard` draws, where #283 measured the cards) in Light and Dark, through the palette's hex values as the existing contrast table does | any pair is under 4.5:1, or `secondaryText` is still a system color the test can't measure |
 | SH-4 | `FrameProbeTests.referenceTable` (QB-S30): 100 synthetic samples at 60 Hz and at 120 Hz give the table's p50, p95 and dropped count; a non-finite time is dropped; a refresh interval of 0 gives `valid: false` and no division; the encoded JSON decodes to the same `ProbeDocument`; `FrameProbeTests.summaryWithinBudget` (QB-S16) | a percentile or a drop count is off, a NaN is kept, or the JSON round trip differs |
-| SH-5 | `ControlInventoryTests`: a duplicate id and a disabled entry with no reason are violations (the live type catches what the Fake misses); `document()` is sorted; JSON round trip; a `ToolbarAction` with `unavailableHelp` registers `enabled: false` with `reason == action.help`; one without an identifier registers nothing; `role: "primary"` survives the round trip | a duplicate passes, a reason differs from `.help`, or an unnamed action registers |
-| SH-6 | `SuiteGalleryTests`: `request(from:)` returns the page for `-SuiteGallery editor`, nil without the flag, `fakes` only with `-SuiteGalleryFakes`, width 240 for `-SuiteGalleryWidth 240` and nil for `abc`, `0` or `-5`; every name in `SuiteGallery.pages` resolves to exactly one page view and an unknown name to the empty state | a flag parses wrong, or a page has no view |
+| SH-5 | `ControlInventoryTests`: `.suiteProbes()` nested inside `.suiteProbes()` publishes one `suite.controls` and one `suite.perf` element (a hosted view's accessibility tree); a duplicate id and a disabled entry with no reason are violations (the live type catches what the Fake misses); `document()` is sorted; JSON round trip; a `ToolbarAction` with `unavailableHelp` registers `enabled: false` with `reason == action.help`; one without an identifier registers nothing; `role: "primary"` survives the round trip | a duplicate passes, a reason differs from `.help`, an unnamed action registers, or nested probes publish twice |
+| SH-6 | `SuiteGalleryTests`: the internal init builds a `SuiteWindow` that ignores `-SuiteGallery`; page names are unique across the area files and include the 18 listed in the pseudocode; `request(from:)` returns the page for `-SuiteGallery editor`, nil without the flag, `fakes` only with `-SuiteGalleryFakes`, width 240 for `-SuiteGalleryWidth 240` and nil for `abc`, `0` or `-5`; every name in `SuiteGallery.pages` resolves to exactly one page view and an unknown name to the empty state | a flag parses wrong, a page has no view, two areas declare one name, or the `window` page would recurse |
 | SH-7 | The CI log lists `SuiteSmokeJourneys.testSecondFileRuns` from the second file and `SuiteJourneyTests.testGalleryOpensEveryPage` passes (SJ0); Flare, Design, Photo, Library and Halo journeys still run and their counts in `audit-baseline.json` are unchanged; the `suiteui` key is present at 0 for every check | the second file is not compiled, an app bundle stops building, or a gallery shot counts under `library` |
 | SH-8 | `SuiteJourneyTests.testEveryControlMeetsHitSize` (SJ25) passes on every page; `SuiteJourneyTests+Budgets.swift` holds the section 7.1 placeholders as named constants that `Journey+Input`'s `perf()` reads | a listed control is under its hit size, or a constant is missing |
-| SH-9 | `GoldenImageTests.reference` (QB-S31): identical 10 × 10 images pass with share 0; one pixel off by 3 fails at `maxShare` 0.01 and writes the actual and the diff; a size mismatch fails with share 1; a missing baseline writes the actual and records a known issue; `GoldenImageTests.compareWithinBudget` (QB-S15) | a tolerance is applied wrong, nothing is written, or a missing baseline passes silently |
+| SH-9 | `GoldenImageTests.reference` (QB-S31): identical 10 × 10 images pass with share 0; one pixel off by 3 (share 0.01) fails at `.standard` (`maxShare` 0.005) and passes at `maxShare` 0.01 and writes the actual and the diff; a size mismatch fails with share 1; a missing baseline writes the actual and records a known issue; `GoldenImageTests.compareWithinBudget` (QB-S15) | a tolerance is applied wrong, nothing is written, or a missing baseline passes silently |
 | SH-10 | `SnapshotHostTests`: a 100 × 50 pt view renders 200 × 100 px; a 1 pt `hairline` is exactly 2 px wide (QB-S25); the high-contrast hosts resolve a dynamic token to its Increase Contrast value; `suiteGlass` in the host draws the stand-in at scale 2 | the scale, the hairline or the appearance is wrong |
 
 ## Quality tests
