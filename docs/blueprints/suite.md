@@ -169,3 +169,302 @@ Checklist:
       updater, settings, onboarding, size) has an "In v1" row.
 - [x] Every non-goal names a behavior, not another company's product.
 - [x] Every "out" item names where it goes (later).
+
+---
+
+## 2. Pseudo-C4 and packaging (drawn before code)
+
+Marked **existing** when a path is on `origin/dev` 4594082, **planned**
+otherwise. The same model as data is `docs/blueprints/suite/c4-planned.json`
+(shape of `docs/c4/model.json`, each element with `status` and
+`authored: true`). It is not read by `scripts/ci`; `docs/c4/model.json`
+stays the gate, and task BU-1 (section 8) copies the planned containers into
+it when the targets are created.
+
+### 2.1 L1: the system
+
+```
+person ──uses──▶ AfterGlow.app (macOS) ──links once──▶ shared frameworks
+                     │  launcher process: home, settings, onboarding, updater, file router
+                     ├─ Flare.app   ┐
+                     ├─ Design.app  │ embedded app bundles, one process each,
+                     ├─ Photo.app   │ own Dock icon, menu bar, windows, file types
+                     ├─ Library.app │
+                     └─ Halo.app    ┘
+                 all six processes ◀──▶ the suite store (~/Library/Application Support/AfterGlow)
+                                    ◀──▶ the system pasteboard, Launch Services, distributed notifications
+creative-core (FlareCore, CoreRaster, CoreColor) ◀── the Models, linked once as one shared engine framework
+```
+
+### 2.2 L2: containers
+
+| Container | Status | Responsibility | Owned paths | Line |
+|---|---|---|---|---|
+| `SuiteModel` | planned | Linux-safe values, contracts, fakes and pure logic for everything shared between apps: app identity and type registry, document references, recents, routing, hand-offs, round trips, pasteboard coding, assets and links, preferences, onboarding, update feed, size budget. Foundation only; no engine import | `Sources/SuiteModel/` | `line:suite` |
+| `SuiteShell` | planned | macOS glue every app process links: live conformances that need AppKit or Launch Services (open an app, hand-off transport, pasteboard and drag bridges, store change notifications, thumbnail writer), the shared menu commands (Switch To, Open In, Settings route) and the one modifier each app adds to its scene | `Sources/SuiteShell/` | `line:suite` |
+| `AfterGlowApp` | planned | The launcher executable, `AfterGlow.app/Contents/MacOS/AfterGlow`: home window, Assets page, Settings scene, onboarding, updater, and the file router for document types | `Sources/AfterGlowApp/` | `line:suite` |
+| AfterGlow bundle | planned | The packaged artifact and its inputs: Info.plists with document and exported types, icons, entitlements, the release build graph | `Bundle/` (plists, icons), the release section of `project.yml`, `scripts/bundle-apps`, `scripts/size-report` | `line:suite` (protected paths: supervisor merges) |
+| `SuiteModelTests` | planned | Model tests, contract conformance suites against fakes and live stores, model budgets, registry-vs-plist checks | `Tests/SuiteModelTests/` | `line:suite` |
+| AfterGlow journeys | planned | XCUITest bundle `AfterGlowJourneyTests` that drives the launcher and, through it, the apps | `UITests/AfterGlowJourneyTests*.swift` | `line:suite` |
+| `SuiteUI` | existing | Design system; gains the home and settings parts listed in section 6.3 through `needs-ui` issues | `Sources/SuiteUI/` | `line:suiteui` |
+| `<X>App`, `<X>Model` (×5) | existing | The apps. Each adopts the suite with small tasks on its own line (section 8.4): one modifier in `<X>App.swift`, its document kinds and pasteboard representations in `<X>Model` | `Sources/<X>App/`, `Sources/<X>Model/` | `line:<x>` |
+| creative-core engines | existing (external) | FlareCore, CoreRaster, CoreColor; the suite asset model tasks (creative-core #148–#154, p3 today) | qbtrix/creative-core | `needs-core` |
+
+Each `<X>Model` gains one dependency, `SuiteModel` (Foundation only, so the
+Linux build stays as fast as today). `SuiteModel` never imports an app
+Model or an engine: the apps convert between their own types and the suite's
+values, so a shared store never needs to load five engines.
+
+### 2.3 L3: components
+
+**SuiteModel** (`Sources/SuiteModel/`, all planned)
+
+| Component | Responsibility | Paths | Relationships |
+|---|---|---|---|
+| suite-identity | `SuiteApp` (the five apps plus the launcher), bundle ids, the one id prefix, and `SuiteTypeRegistry`: every document and pasteboard type each app reads and writes, with the default app per type | `Values/` | used by every other component; mirrored by `Bundle/Info/*.plist` (checked by a test) |
+| suite-store | `SuiteLocations` (the support folder, overridable with `-SuiteSupportDir`), `FileStore`: JSON files written atomically with a revision number; a write against a stale revision re-reads and merges | `Store/` | used by recents, assets, preferences, hand-offs |
+| suite-contracts | One protocol per use case (section 5) | `Contracts/` | implemented by fakes, stores and SuiteShell's live types |
+| suite-fakes | A fake per contract with `unavailable:`; fixtures (`SuiteFixtures`: empty, week of work, round trip, assets) | `Fakes/` | used by snapshots, journeys, the apps' fake services |
+| suite-services | `SuiteServices` with `.fake` and `.live` slots | `SuiteServices.swift` | assembled live in SuiteShell |
+| suite-recents | `RecentsList` (merge, dedupe by file identity, cap 200, filter by app, search), recording rules | `Recents/` | store; home; each app's Open Recent |
+| suite-routing | Which app opens a type, the Open In list for a document, Finder routing decisions | `Routing/` | registry; launcher router; Open In menu |
+| suite-handoff | `HandOff` values (verb, payload, return address), codec and lifecycle | `HandOff/` | transport in SuiteShell; round trip; new document |
+| suite-switching | Switch requests and receipts, run states, the Switch To menu model | `Switching/` | SuiteShell launcher; home |
+| suite-home | Home state: new tiles and presets, recents grid sections, running apps strip, `HomeLayout` column math | `Home/` | AfterGlowApp home views |
+| suite-pasteboard | `SuiteClipItem` and its typed representations; best-item choice for a target app | `Pasteboard/` | SuiteShell bridges; each app's paste |
+| suite-roundtrip | Library → Photo → Library sessions and their states | `RoundTrip/` | hand-off; Library and Photo adoption |
+| suite-assets | `SuiteAsset`, colours, the asset index (add, update with revision, remove, search) | `Assets/` | store; Assets page; each app's colour popover |
+| suite-links | `AssetLink` and its status (current, update available, missing) | `Links/` | assets; Flare and Halo adoption |
+| suite-animation | `AnimationSummary` of a `.flare` for Halo's import | `Animation/` | Halo adoption |
+| suite-preferences | `SuitePreferences` (General plus a pane per app), defaults, change records | `Preferences/` | store; Settings scene; every app |
+| suite-onboarding | Pages, choices, when to show | `Onboarding/` | AfterGlowApp |
+| suite-update | Update feed parsing, version compare, offer, install plan | `Update/` | AfterGlowApp updater |
+| suite-packaging | `BundleLayout` (where each executable and framework sits, the rpaths), `SizeReport` and `SizeBudget` with their evaluation | `Packaging/` | `scripts/size-report` output; CI |
+
+**SuiteShell** (`Sources/SuiteShell/`, macOS, all planned)
+
+| Component | Responsibility | Paths |
+|---|---|---|
+| shell-live | `SuiteServices.live` and one slot file per member (each feature swaps its own) | `SuiteServices+Live.swift`, `Live/` |
+| shell-apps | Open or activate an app (`NSWorkspace.openApplication(at:configuration:)`, `NSRunningApplication.activate`), run states, the Switch To commands | `AppLauncher.swift`, `SuiteCommands.swift` |
+| shell-handoff | Write a hand-off file and open it with the target app (`NSWorkspace.open(_:withApplicationAt:configuration:)`); receive one in `onOpenURL` | `HandOffTransport.swift` |
+| shell-store-watch | Post and observe `DistributedNotificationCenter` changes for recents, assets and preferences | `StoreWatcher.swift` |
+| shell-pasteboard | Map `SuiteClipItem` to `NSPasteboard` items and drag providers, and back | `PasteboardBridge.swift`, `DragBridge.swift` |
+| shell-documents | Record opens and saves into recents, write thumbnails, the Open In submenu | `SuiteDocumentsBridge.swift`, `ThumbnailWriter.swift`, `OpenInMenu.swift` |
+| shell-adoption | `.suiteApp(_:)`: the one modifier an app adds to its scene (installs the commands, the hand-off receiver, the store watcher, and the settings route) | `SuiteAppModifier.swift`, `SettingsRoute.swift` |
+
+**AfterGlowApp** (`Sources/AfterGlowApp/`, macOS, all planned)
+
+| Component | Responsibility | Paths |
+|---|---|---|
+| launcher-scene | `@main AfterGlowApp`: the home `Window`, the `Settings` scene, the onboarding window; an app delegate that routes opened files to the right app | `AfterGlowApp.swift`, `LauncherRouter.swift` |
+| home | The home window: New tiles, recents grid, search, app filter, running apps strip | `Home*.swift` |
+| assets-page | The Assets page of the home sidebar | `Assets*.swift` |
+| settings | General and per-app panes | `Settings*.swift` |
+| onboarding | The three first-launch pages | `Onboarding*.swift` |
+| updater | Check, offer sheet, progress, install | `Update*.swift` |
+
+### 2.4 Relationships
+
+| From | To | What |
+|---|---|---|
+| each `<X>Model` | SuiteModel | declares its document kinds and pasteboard representations; reads preferences |
+| each `<X>App` | SuiteShell | `.suiteApp(.<x>)` on its scene; Open In and Switch To menus; records recents |
+| AfterGlowApp | SuiteShell, SuiteModel, SuiteUI | home, settings, onboarding, updater |
+| SuiteShell | SuiteModel, SuiteUI | live conformances; menu commands built from SuiteUI parts |
+| every process | suite store | JSON files under `~/Library/Application Support/AfterGlow/` |
+| every process | each other | hand-off files opened with the target app; distributed notifications for store changes; the system pasteboard |
+| `<X>Model` | creative-core | unchanged, but linked through one shared engine framework (2.5) |
+
+### 2.5 Packaging: one process or six
+
+The captain's brief requires three things at once: one bundle; each app keeps
+its own Dock icon, windows and file types; switching is instant. Two shapes
+can give one bundle:
+
+| | A: one process, per-app scenes | B: embedded app bundles, one process each (chosen) |
+|---|---|---|
+| Layout | `AfterGlow.app/Contents/MacOS/AfterGlow` holds all five apps as scenes | `AfterGlow.app/Contents/Helpers/<X>.app` (Apple docs: "Placing content in a bundle", help apps and helper tools go in `Contents/Helpers/`); frameworks in `AfterGlow.app/Contents/Frameworks/` |
+| Own Dock icon per app | **No.** One process is one Dock tile; it could only swap its icon as the front app changes | Yes: each process has its tile, its Command-Tab entry, its "Keep in Dock" |
+| Own menu bar | One menu bar re-keyed by the focused scene; the app menu always reads "AfterGlow" | Yes, natively: the Flare menu bar reads "Flare" |
+| Own file types | One bundle declares all types and routes to scenes | Each embedded app declares its own; the outer bundle also declares them and routes (2.6), so Finder works even if Launch Services does not index nested bundles |
+| Switching an app that is running | A scene comes forward: ~1 frame | The process activates: no launch; measured by QB-S1 (section 7) |
+| First open of an app | A scene opens: no launch | A cold process launch; QB-S2 budgets it, and apps stay running after their last window closes so it happens once per session |
+| Shared code | Linked once by construction | Linked once only if built as frameworks (below) |
+| Memory | One heap; closing an app frees little | Five heaps, but framework code pages are file-backed and shared between processes; quitting an app frees all of it |
+| A crash | Takes every app and every unsaved document down | Takes one app; the others keep running |
+| Cross-app data | In memory | Pasteboard, hand-off files, the suite store (2.6) |
+| Today's code | Five `@main` apps must become scene libraries; five sets of `Commands` must merge into one menu bar; focused values must be scoped per app | The five `@main` apps stay as they are; each adds one modifier |
+| UI journeys | One XCUIApplication for everything | One per app, as today (`UITests/Journey.swift` launches a bundle by path) plus the launcher's |
+
+**Pick B.** It is the only shape that meets "each app keeps its own Dock
+icon" without faking it, it keeps a crash in one app from losing work in
+four others, and it changes almost nothing in today's five apps. Its two
+costs are paid for explicitly: code is linked once as frameworks (below),
+and the first open of each app per session is a cold launch with its own
+budget, after which switching is an activation.
+
+**Measured so far.** On Linux (this session, swift 6.3.3, `swift build -c
+release` of every Model target at 4594082 and creative-core `main`), the
+engine object code each app carries is:
+| Engine (creative-core `cfad97f`) | Code (`size` text, KB) | Linked into today | Copies today | Copies after the split |
+|---|---|---|---|---|
+| FlareCore | 894 | Flare, Halo | 2 | 1 |
+| CoreRaster | 121 | Photo, Library, Halo | 3 | 1 |
+| CoreColor | 18 | Design, Photo, Library | 3 | 1 |
+| Total | | | 2,205 KB | 1,033 KB |
+
+So the engines alone repeat about 1.2 MB of code across the five
+executables on Linux x86_64 (Mach-O arm64 differs; BU-0 measures it). For
+scale, the app Models compile to 741 KB (Flare), 234 (Design), 215
+(Photo), 69 (Library) and 85 (Halo) of code, and each is used by one app
+only, so they stay inside their app. creative-core `main` also has
+`CoreAsset` and `CoreCatalog` modules, each holding only an error type
+today (`AssetError.swift`, `CatalogError.swift`).
+The macOS numbers (per-executable size, duplicated SuiteUI symbols, cold
+launch and activation times, resident memory) are measured by task BU-0 on
+the macOS runner before any packaging change lands, and recorded in that
+task's PR; the gates in section 7 start report-only from those numbers.
+
+**Shared frameworks: how.** SwiftPM links a library target into an
+executable of the same package statically, and a package cannot depend on
+its own products, so `Package.swift` alone cannot make SuiteUI a shared
+framework without moving its sources into a second package (which would
+rename every SuiteUI path that six lines are editing). Two routes:
+
+| Route | What changes | Risk |
+|---|---|---|
+| R1 (chosen): the release graph in `project.yml` | XcodeGen already builds the journey bundles. A `Release` section adds framework targets compiled from the existing folders: `SuiteUI.framework` (`Sources/SuiteUI`), `SuiteModel.framework`, `SuiteShell.framework`, and `CreativeEngines.framework` (one source file, `Bundle/Engines/CreativeEngines.swift`, that re-exports FlareCore, CoreRaster and CoreColor, and is the only target that links the creative-core package products). Each `<X>Model` becomes a static library that links `CreativeEngines`; each `<X>App` an application target with `@executable_path/../../../../Frameworks` on its run path. `Package.swift` keeps its Linux and test graph; no source path moves | Two build descriptions can drift: `BuildGraphTests` (Linux, `Tests/SuiteModelTests`) reads both files and fails when a target in one is missing from the other. Model sources import FlareCore through the re-export: BU-0 proves it builds |
+| R2: second package | `Packages/Shared/Package.swift` with `.dynamic` products; SuiteUI sources move there | Renames every SuiteUI path mid-flight (six open blueprints plan edits there); C4, the design lint and the app-state rule move with it |
+
+If BU-0 shows R1 cannot link the engines once (for example a module that
+will not re-export), the fallback is "needs a new core issue": creative-core
+declares `.library(name: "CreativeEngines", type: .dynamic, targets:
+["FlareCore", "CoreRaster", "CoreColor"])`, and the apps' release graph
+links that product instead of the re-export file.
+
+**Changes this needs** (every one is a protected path, so each task is
+marked "supervisor merges" in section 8):
+
+1. `Package.swift`: add `SuiteModel` and `SuiteModelTests` (all platforms),
+   `SuiteShell` and the `AfterGlowApp` executable (macOS); `model()` adds
+   `"SuiteModel"` to every `<X>Model`; every `<X>App` adds `"SuiteShell"`;
+   `AppSnapshotTests` adds `AfterGlowApp` and `SuiteShell`. Shape:
+   ```swift
+   let suite: [Target] = [
+       .target(name: "SuiteModel"),
+       .testTarget(name: "SuiteModelTests", dependencies: ["SuiteModel"]),
+   ]
+   func model(_ name: String, _ engines: [String]) -> [Target] {
+       [
+           .target(name: "\(name)Model",
+                   dependencies: ["SuiteModel"] + engines.map { .product(name: $0, package: core) }),
+           .testTarget(name: "\(name)ModelTests", dependencies: [.target(name: "\(name)Model")]),
+       ]
+   }
+   #if os(macOS)
+   products += [.executable(name: "AfterGlowApp", targets: ["AfterGlowApp"])]
+   targets += [
+       .target(name: "SuiteShell", dependencies: ["SuiteUI", "SuiteModel"]),
+       .executableTarget(name: "AfterGlowApp", dependencies: ["SuiteUI", "SuiteShell", "SuiteModel"]),
+   ]
+   targets += apps.map { .executableTarget(name: "\($0)App",
+                                           dependencies: ["SuiteUI", "SuiteShell", .target(name: "\($0)Model")]) }
+   #endif
+   ```
+2. `project.yml` (not protected, but it travels with the next item): the
+   `Release` framework and app targets of R1, and an `AfterGlowJourneyTests`
+   bundle in the `Journeys` scheme.
+3. `scripts/bundle-apps`: build the `Release` graph with `xcodebuild`, then
+   assemble `AfterGlow.app` (launcher executable; `Contents/Helpers/<X>.app`
+   ×5; `Contents/Frameworks/` ×4); copy the Info.plists from `Bundle/Info/`
+   (document types, exported types, icons, `LSMinimumSystemVersion` 26.0);
+   sign inside out (frameworks, then each helper app, then the outer app;
+   ad-hoc until a Developer ID exists); keep `plutil -lint` and `codesign
+   --verify --deep --strict`; tar as `app-builds.tar.gz`. Journeys keep
+   working because the five `.build/apps/<X>App.app` paths become symlinks
+   into the bundle (BU-4 acceptance) until each journey moves to the
+   `AfterGlow.app` paths.
+4. `scripts/size-report` (new): reads the assembled bundle and writes
+   `.build/size-report.json` (`SizeReport`, section 5): bytes per
+   executable, per framework, per app bundle and for the whole bundle,
+   uncompressed and in the tarball, and the count of SuiteUI symbols
+   defined in each app executable (`nm -U`; must be 0 after the split).
+   The decision (over or under budget) is `SizeBudget.evaluate` in
+   SuiteModel, run by `swift run`-free means: the script calls the
+   SuiteModelTests filter `SizeGateTests` with `SUITE_SIZE_REPORT` set.
+5. `.github/workflows/ci.yml`, `macos` job: after `scripts/bundle-apps`, run
+   `scripts/size-report`, upload `size-report` (the JSON), add the table to
+   the job summary, and fail on an over-budget row once the gate is set.
+   The `linux` job is unchanged (it never sees SuiteShell or AfterGlowApp).
+6. `scripts/ci`: no new lint; the C4 check already covers new `Sources/`
+   folders once `docs/c4/model.json` names them (BU-1).
+
+### 2.6 Processes, the store and the wires between them
+
+**Processes.** The launcher (`AfterGlow`) and each app run as their own
+process. An app never quits when its last window closes (SwiftUI's
+`WindowGroup` default on macOS), so returning to it is an activation. Every
+app restores its windows at relaunch (system window restoration, plus each
+app's recovery file for unsaved work).
+
+**The suite store.** One folder, `~/Library/Application Support/AfterGlow/`
+(`SuiteLocations`; journeys pass `-SuiteSupportDir <tmp>`):
+
+| Path | Content | Writers |
+|---|---|---|
+| `recents.json` | `RecentsList` (revisioned) | every app on open and save; the home on remove |
+| `preferences.json` | `SuitePreferences` (revisioned) | the Settings scene |
+| `assets/index.json`, `assets/<id>/<revision>.<ext>` | the asset index and payloads (SVG, PNG, `.flare`, colour JSON) | any app's "Add to Assets"; the Assets page |
+| `handoffs/<id>.aghandoff` | one `HandOff` (JSON) per hand-off, deleted when complete or after 7 days | the sending app; the receiving app updates `state` |
+| `thumbnails/<file id>.png` | a 512 px thumbnail per recent document | the app that saved it |
+
+Writes are atomic replace with a revision: a writer reads the revision,
+writes `revision + 1`, and on a mismatch re-reads, merges (the merge is pure
+Model code) and tries again. After a write, the writer posts the
+distributed notification `org.creativesuite.suite.changed` with the file
+name; every process re-reads that file. The folder is shared by plain path
+because the bundle is ad-hoc signed and not sandboxed in v1. An app group
+container needs a team identifier to sign with (Apple docs: "Accessing app
+group containers in your existing macOS app"); moving there is Q3.
+
+**Hand-off transport.** A hand-off is a small file of the exported type
+`org.creativesuite.suite.handoff`, which every app declares it opens. The
+sender writes it and opens it with the target app
+(`NSWorkspace.open(_:withApplicationAt:configuration:)`), so the same path
+works whether the target is running (an open-document event) or not (a
+launch with the file). Launch arguments are not used for this: they are
+ignored when the app is already running (Apple docs:
+`NSWorkspace.LaunchConfigurationKey.arguments`, "Ignored if a new instance of
+the app is not launched").
+
+**File router.** The outer `AfterGlow.app` declares every suite document
+type (role Editor, rank Owner) and exports the suite's types. Opening a
+`.flare` from Finder that reaches the launcher is forwarded to
+`Contents/Helpers/Flare.app` the same way as a hand-off, and the launcher
+shows no window for it. Each embedded app declares its own types too, so if
+Launch Services indexes the nested bundles the file goes there directly.
+Either way the file opens in Flare; QB-S6 times it.
+
+**Exported and imported types** (`SuiteTypeRegistry`, mirrored in
+`Bundle/Info/AfterGlow.plist`):
+
+| Identifier | Extension | Conforms to | Opened by | Note |
+|---|---|---|---|---|
+| `org.creativesuite.flare.animation` | `flare` | `public.data`, `public.content` | Flare; Halo (Open In, import) | JSON inside, not declared as `public.json` so text editors don't claim it |
+| `org.creativesuite.design.document` | `design` | `public.data`, `public.content` | Design | |
+| `org.creativesuite.halo.project` | `halo` | `public.data`, `public.content` | Halo | Halo's `HaloDocumentType.swift` uses this id (#767 names the file, not the id) |
+| OpenRaster (imported) | `ora` | `public.image`, `public.zip-archive` | Photo | Photo v2's format (#768). BU-5 checks whether macOS 26 declares it; if not, imported as `org.creativesuite.photo.openraster` |
+| `public.png`, `public.jpeg`, `public.heic` | | | Photo (Editor, Alternate), Library (import) | never Owner |
+| `org.creativesuite.suite.handoff` | `aghandoff` | `public.data` | every app (Viewer) | 2.6 transport |
+| `org.creativesuite.suite.asset` | (pasteboard only) | `public.data` | every app | the asset envelope, section 5 |
+| `org.creativesuite.design.layers` | (pasteboard only) | `public.data` | Design | already planned in #766 |
+| `org.creativesuite.flare.layers` | (pasteboard only) | `public.data` | Flare | the `AddLayer` envelopes of #384 |
+
+The id prefix stays `org.creativesuite` (today's placeholder in
+`scripts/bundle-apps` and `project.yml`) until the captain names the real
+one (Q1); it is one constant, `SuiteIdentity.prefix`.
+
+**Threads.** Store reads and writes, thumbnail writes and hand-off file I/O
+run off the main thread in each process; the main thread only applies the
+decoded value. Nothing in the suite store blocks a window.
