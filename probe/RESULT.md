@@ -4,3 +4,4 @@
 3. git-clone | 2026-10-14T13:23:03Z | ok
 4. mcp | 2026-10-14T13:23:24Z | ok: apple-docs searchAppleDocumentation("NSScrubber") returned 22 results, no permission prompt
 5. web | 2026-10-14T13:23:26Z | ok: fetched (title "Sliders | Apple Developer Documentation"); body came back empty because the page renders client-side
+6. done | 2026-10-14T13:23:28Z | ok
