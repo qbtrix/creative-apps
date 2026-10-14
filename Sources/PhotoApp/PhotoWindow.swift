@@ -51,7 +51,7 @@ struct PhotoWindow: View {
 
     var body: some View {
         PhotoEditor(
-            model: model, image: renderer.image, renderMilliseconds: renderer.milliseconds,
+            model: model, tiles: renderer.tiles, renderMilliseconds: renderer.milliseconds,
             note: renderer.failure ?? note, zoom: zoom, tab: tab,
             onTab: { tab = $0 }, onViewport: viewportChanged, onZoom: setZoom, perform: perform, straighten: straightenDraft)
             .navigationTitle(model.documentName ?? (model.canvas == nil ? "Photo" : "Untitled"))

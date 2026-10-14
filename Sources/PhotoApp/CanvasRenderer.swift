@@ -1,15 +1,14 @@
 // CanvasRenderer.swift: keeps the canvas picture up to date without blocking
-// the window. Each change to the workspace asks for a frame; PhotoRenderer
-// makes it off the main actor, redrawing only what changed since the last
-// one. While a render runs, newer requests wait and only the latest is drawn,
-// so a fast brush stroke never queues up stale frames. The frame becomes a
-// CGImage (sRGB, straight alpha) for the canvas, and its time goes to the
+// the window. Each change to the workspace asks for the tiles that changed
+// since the picture shown (PhotoRenderer.update), rendered off the main actor;
+// a new image or a new size asks for all of them. While a render runs, newer
+// requests wait and only the latest is drawn, so a fast brush stroke never
+// queues up stale frames. The tiles go straight to the tile layers
+// (CanvasTiles), not through SwiftUI, so no whole-canvas buffer or picture
+// exists per event. `revision` says what is shown; the render time reaches the
 // status line at most four times a second, so the readout doesn't redraw the
-// window every frame. The frame itself is kept outside observation: the
-// Observation macro compares an Equatable value before it notifies, which for
-// a frame means comparing every byte of the canvas. A failed render keeps the
-// last good picture and its message. Presentation state only: it never
-// changes the workspace.
+// window every frame. A failed render keeps the last good picture and its
+// message. Presentation state only: it never changes the workspace.
 import CoreGraphics
 import Foundation
 import Observation
@@ -17,11 +16,14 @@ import PhotoModel
 
 @MainActor @Observable
 final class CanvasRenderer {
-    private(set) var image: CGImage?
+    let tiles = CanvasTiles()
+    /// The revision the tiles show; nil with no image.
+    private(set) var revision: Int?
     /// The latest render's time, published at most every `timing`.
     private(set) var milliseconds: Double?
     private(set) var failure: String?
-    @ObservationIgnored private(set) var frame: PhotoFrame?
+    /// The latest render's time, every render.
+    @ObservationIgnored private(set) var lastMilliseconds: Double?
     @ObservationIgnored private var timed = ContinuousClock.now - timing
     private static let timing = Duration.milliseconds(250)
     private var isRendering = false
@@ -29,8 +31,9 @@ final class CanvasRenderer {
 
     /// Draws `workspace` once the render in flight, if any, is done.
     func show(_ workspace: PhotoWorkspace) {
-        guard workspace.canvas != nil else {
-            (image, frame, milliseconds, waiting) = (nil, nil, nil, nil)
+        guard let canvas = workspace.canvas else {
+            tiles.clear()
+            (revision, milliseconds, waiting) = (nil, nil, nil)
             return
         }
         guard !isRendering else {
@@ -38,16 +41,18 @@ final class CanvasRenderer {
             return
         }
         isRendering = true
-        let previous = frame
+        let sameSize = canvas.width == tiles.width && canvas.height == tiles.height
+        let since = sameSize ? revision : nil
         Task {
             do {
-                let next = try await PhotoRenderer.render(workspace, after: previous)
-                frame = next
-                image = Self.image(next)
+                let update = try await PhotoRenderer.update(workspace, since: since)
+                tiles.apply(update)
+                lastMilliseconds = update.milliseconds
                 if ContinuousClock.now - timed >= Self.timing {
-                    (milliseconds, timed) = (next.milliseconds, .now)
+                    (milliseconds, timed) = (update.milliseconds, .now)
                 }
                 failure = nil
+                revision = update.revision
             } catch {
                 failure = "The picture couldn't be drawn: \(error)"
             }
@@ -59,13 +64,8 @@ final class CanvasRenderer {
         }
     }
 
-    /// A frame's bytes as an image; nil only if CoreGraphics refuses them.
-    nonisolated static func image(_ frame: PhotoFrame) -> CGImage? {
-        image(rgba8: frame.rgba8, width: frame.width, height: frame.height, alpha: .last)
-    }
-
     /// 8-bit sRGB bytes as an image. `alpha` is `.last` for straight alpha,
-    /// `.noneSkipLast` for opaque pixels.
+    /// `.premultipliedLast` for premultiplied, `.noneSkipLast` for opaque pixels.
     nonisolated static func image(rgba8: [UInt8], width: Int, height: Int, alpha: CGImageAlphaInfo) -> CGImage? {
         guard let space = CGColorSpace(name: CGColorSpace.sRGB),
             let provider = CGDataProvider(data: Data(rgba8) as CFData)
