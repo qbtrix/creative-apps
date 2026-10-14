@@ -2,10 +2,11 @@
 // open image's size and name, its layer stack (top first) with each layer's
 // pixels, the selected layer, the active tool, the brush's and the eraser's
 // options (each tool keeps its own), the image
-// adjustments, the marquee selection and a pending crop, and the undo history.
+// adjustments, the marquee selection and a pending crop, the clone source, and
+// the undo history.
 // Linux-safe: no UI imports. PhotoApp changes it only through the methods here
 // and in the extensions beside it (PhotoStroke, PhotoSelection, PhotoHistory,
-// PhotoImageFile, PhotoImageOps, PhotoStraighten).
+// PhotoImageFile, PhotoImageOps, PhotoStraighten, PhotoRetouch).
 //
 // Invariants: with an image open there is at least one layer, the selection
 // names one of them, and `pixels` holds exactly one buffer per layer id.
@@ -61,6 +62,8 @@ public struct PhotoWorkspace: Sendable {
     public internal(set) var selection: PixelRect?
     /// The crop rectangle being drawn, before Apply Crop; nil for none.
     public internal(set) var pendingCrop: PixelRect?
+    /// Where the clone stamp copies from (PhotoRetouch); nil until sampled.
+    public internal(set) var cloneSource: CloneSource?
     /// Goes up with every change to what the canvas shows.
     public private(set) var revision = 0
     /// Goes up with every such change except an adjustment's (curvesHistogramKey).
@@ -102,6 +105,7 @@ public struct PhotoWorkspace: Sendable {
         adjustments = AdjustmentSettings()
         selection = nil
         pendingCrop = nil
+        cloneSource = nil
         stroke = nil
         history = PhotoHistory()
         // Only an opened file has a name; a new canvas starts unnamed.
@@ -280,7 +284,8 @@ extension PhotoWorkspace: Equatable {
             && lhs.layers == rhs.layers && lhs.selectedLayerID == rhs.selectedLayerID && lhs.tool == rhs.tool
             && lhs.brushOptions == rhs.brushOptions
             && lhs.eraserOptions == rhs.eraserOptions && lhs.adjustments == rhs.adjustments
-            && lhs.selection == rhs.selection && lhs.pendingCrop == rhs.pendingCrop && lhs.stroke == rhs.stroke
+            && lhs.selection == rhs.selection && lhs.pendingCrop == rhs.pendingCrop
+            && lhs.cloneSource == rhs.cloneSource && lhs.stroke == rhs.stroke
             && lhs.history == rhs.history && lhs.pixels == rhs.pixels
     }
 }
