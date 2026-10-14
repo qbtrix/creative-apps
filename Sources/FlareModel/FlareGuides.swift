@@ -21,13 +21,17 @@ extension FlareWorkspace {
     }
 
     /// Moves guide `index` to `position` during a drag that began with the guide at `start`. Moves of one drag share
-    /// one "Move Guide" step; the next drag begins where this one ended, so it gets a step of its own.
+    /// one "Move Guide" step until `endGuideDrag()`, so the next drag gets a step of its own even when it starts from
+    /// the same position (#628).
     public mutating func moveGuide(at index: Int, to position: Double, dragStart start: Double) {
         guard let sceneID = selectedSceneID else { return refuse(.noDocument) }
         guard position.isFinite else { return refuse(.command(.invalidGuidePosition)) }
-        let scenes = services.scenes, key = "guide-\(sceneID)-\(index)-\(start)"
+        let scenes = services.scenes, key = "guide-\(sceneID)-\(index)-\(start)-\(guideDragSerial)"
         step { try scenes.moveGuide(at: index, to: position, sceneID: sceneID, coalesceKey: key, in: &$0) }
     }
+
+    /// Ends the current guide drag: the next `moveGuide` starts a new undo step.
+    public mutating func endGuideDrag() { guideDragSerial &+= 1 }
 
     /// Removes guide `index`, one "Remove Guide" step.
     public mutating func removeGuide(at index: Int) {
