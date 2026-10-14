@@ -134,11 +134,13 @@ public struct FakeShapes: ShapeBuilding {
                 let onto = back.apply(Point(x: pointer.x - fixed.x, y: pointer.y - fixed.y))
                 // An edge stretches only the local axis nearest its world axis.
                 let alongX = abs(turn.a) >= abs(turn.b), edge = handle % 2 == 1
-                let sx = edge && (handle % 4 == 1) == alongX ? 1 : Self.ratio(onto.x, from.x)
-                let sy = edge && (handle % 4 == 3) == alongX ? 1 : Self.ratio(onto.y, from.y)
+                let keepX = edge && (handle % 4 == 1) == alongX, keepY = edge && (handle % 4 == 3) == alongX
+                let sx = keepX ? 1 : Self.ratio(onto.x, from.x), sy = keepY ? 1 : Self.ratio(onto.y, from.y)
                 // Square to the world, a zero axis leaves the box 0 wide (or tall), and every later drag reads that
-                // side as 0 and can't grow it: leave the layer as it was, as for 0 x 0 below (#688).
-                if sx == 0 || sy == 0 { continue }
+                // side as 0 and can't grow it: leave the layer as it was, as for 0 x 0 below (#688). A drop within
+                // rounding of the opposite line (the viewport maps one there at 70%) rounds the box to 0 too (#698).
+                if sx == 0 || sy == 0 || (!keepX && from.x != 0 && abs(onto.x) < Self.lineTolerance)
+                    || (!keepY && from.y != 0 && abs(onto.y) < Self.lineTolerance) { continue }
                 let o = back.apply(Point(x: t.x - fixed.x, y: t.y - fixed.y))
                 let p = turn.apply(Point(x: o.x * sx, y: o.y * sy))
                 values = ["x": fixed.x + p.x, "y": fixed.y + p.y, "scaleX": t.scaleX * sx, "scaleY": t.scaleY * sy]
@@ -427,6 +429,9 @@ public struct FakeShapes: ShapeBuilding {
         return near.min { abs($0.x - $0.y) < abs($1.x - $1.y) } ?? (even, even)
     }
     /// `a / b`, or 1 when that is not a finite number.
+    /// How near (in points) a Scale drop must land to the opposite line to count as on it: far above the rounding a
+    /// viewport round trip adds, far below anything a pointer can aim at (#698).
+    private static let lineTolerance = 1e-6
     private static func ratio(_ a: Double, _ b: Double) -> Double { b != 0 && (a / b).isFinite ? a / b : 1 }
     /// Handle `h` (0...7 clockwise from top-left, taken mod 8) on `box`, where the stage draws it.
     public static func handle(_ h: Int, on box: Rect) -> Point {
