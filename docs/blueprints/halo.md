@@ -418,3 +418,67 @@ live services, for integrated journeys), `-HaloOpenFile <path>`,
 | `two-comps` | "Intro" and "Outro" with layers and keys | H-J10 |
 | `reference` | 1920 × 1080, 30 fps, 300 frames, 50 layers (solids, shapes, text), every property keyed at 10 frames: 4,000 keys | budgets HB-1 to HB-10 |
 | `crowd` | 300 layers, 5,000 keys, 1920 × 1080, 30 fps, 300 frames | HB-6, HB-9, layout checks |
+
+---
+
+## 3. Usage map
+
+Starts from `docs/priorities.md` (Halo section) and keeps its rule: the
+features people use in nearly every session first. No public study measures
+per-feature use in motion graphics tools, so, as there, tiers come from what
+beginner courses teach first, what shortcut lists repeat, and what the
+public specs we build on define. Rows marked *inferred* have no direct
+source and move first if usage data turns up.
+
+Sources (public, no product opened or run):
+
+- [S1] 2019 motion design survey, 1,065 respondents (already used by
+  `docs/priorities.md`): https://schoolofmotion.com/blog/2019-motion-design-survey
+  — most respondents make short commercial and social pieces; keyframed 2D
+  animation of text and shapes is the bulk of the work.
+- [S2] W3C CSS Easing Functions Level 1: https://www.w3.org/TR/css-easing-1/
+  — the linear, ease-in, ease-out, ease-in-out and step (hold) presets and
+  the cubic-bezier form; FlareCore's `Easing` follows it.
+- [S3] W3C Compositing and Blending Level 1: https://www.w3.org/TR/compositing-1/
+  — the 16 blend modes and source-over; CoreRaster follows it.
+- [S4] Lottie Animation Community format specification:
+  https://lottie.github.io/lottie-spec/ — layer model (in and out points, parenting, transform with anchor
+  point, solids, shapes, text, nulls, precomps), a public description of
+  what motion graphics layers carry.
+- [S5] SMPTE ST 12-1 timecode (hours:minutes:seconds:frames), as public
+  summaries describe it: https://en.wikipedia.org/wiki/SMPTE_timecode
+  — the readout format Halo already shows.
+
+| Tier | Feature | Evidence | Issue | v1 |
+|---|---|---|---|---|
+| 1 | Create or pick a composition (size, rate, duration) | priorities.md; [S4] | shipped (#35) | yes |
+| 1 | Timeline: layers, in and out points, scrub the playhead | priorities.md; [S4]; [S5] | shipped (#36) | yes |
+| 1 | See layers drawn at the playhead | priorities.md ("preview at the playhead") | #37 | yes |
+| 1 | Play, pause, loop at the composition rate | priorities.md | #37 | yes |
+| 1 | Keyframe position, scale, rotation, opacity (stopwatch, key at playhead) | priorities.md; [S1]; [S4] | #38 | yes |
+| 1 | Drag a layer in the viewer to key its position | priorities.md, *inferred* | #207 | yes |
+| 1 | Easing presets | priorities.md; [S2] | #428 | yes |
+| 1 | Undo and redo | priorities.md, *inferred* | #208 | yes |
+| 1 | Save and open | priorities.md, *inferred* | #209 | yes |
+| 1 | Layers: new, delete, rename, reorder, duplicate | *inferred* (the same tier Design gives its layers panel in priorities.md) | to file (L-1) | yes |
+| 2 | Render to a movie or PNG sequence | priorities.md (export is p2 for Halo and Flare) | #429 | yes |
+| 2 | Render Frame into the viewer | follows #429; checks what render will write | #451 | yes |
+| 2 | Text layers | priorities.md; [S4] | #430 | yes |
+| 2 | Parenting | priorities.md; [S4] | #38 (parent picker) | yes |
+| 2 | Blend modes | priorities.md; [S3] | shipped in the Model; picker in #38 | yes |
+| 2 | Anchor point | [S4], *inferred* | #38 | yes |
+| 2 | Custom easing curve | priorities.md (Flare: curve editor tier 2); SuiteUI `CurveEditor` exists | #428 | yes (cheap) |
+| 2 | Effects stack (blur, fill, levels) | priorities.md | #39 | no |
+| 2 | Precompose | priorities.md; [S4] | – | no |
+| 2 | Image and footage layers | [S4], *inferred* | – | no |
+| 2 | Retime keys by dragging on the timeline; per-property lanes | *inferred* | – | no |
+| 2 | Open Recent | *inferred* (Flare ships it in v1) | #209 (in scope) | yes |
+| 3 | Expressions | priorities.md | – | no |
+| 3 | Masks and track mattes | priorities.md; [S3] | – | no |
+| 3 | Keying, tracking, 3D layers | priorities.md | – | no |
+| 3 | Motion blur | *inferred*; suite plan H9 | – | no |
+| 3 | Autosave and crash recovery | *inferred* (Flare ships it in v1; first Halo Later item) | – | no |
+| – | Bugs and accessibility on shipped screens | review and audit | #457, #286, #290, #149, #139 | #457, #286, #290 yes; #149 yes (p3, small); #139 no (waits on SuiteUI #577) |
+
+"To file (L-1)" is a new `line:halo` issue this blueprint asks for; it is
+filed when the captain approves (section 9, Q4).
