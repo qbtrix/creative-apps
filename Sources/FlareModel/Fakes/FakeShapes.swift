@@ -1,7 +1,7 @@
 // FakeShapes.swift: ShapeBuilding by hand (docs/blueprints/flare.md, 6.3). Rectangles and ellipses are polygons, a pen
 // path is straight segments with dragged anchors marked smooth; a click within `anchorTolerance` stage points of its last
 // anchor adds nothing, it closes on 3 anchors that far apart, and one whose extent is under it doesn't commit (#561), at
-// the draft's fit scale (#619). Each write
+// the draft's fit scale (#619); a click within `closeDistance` stage points of its first anchor closes it (#649). Each write
 // is one group named by section 2, of real FlareCore commands or `FixtureEdit` where FlareCore has none (path edit,
 // text and instance move, instance delete).
 // Box gestures follow the not-animated / animated rule; a delete that empties a layer removes the layer. The pasteboard holds `AddLayer` envelopes from
@@ -22,8 +22,17 @@ public struct FakeShapes: ShapeBuilding {
     public static let nothingToPaste = "Nothing to paste."
     /// Sides of a fake ellipse's polygon.
     public static let ellipseSides = 32
-    /// How near the first pen anchor a click closes the path, in scene points.
+    /// How near the first pen anchor a click closes the path, in stage (view) points: `FlareWorkspace.hitSlop`, so
+    /// the close click lands the same on-screen distance off at any fit scale (#649).
     public static let closeDistance = 4.0
+    /// `closeDistance` in scene points on a stage drawn at `stageScale` stage points per scene point, the pen draft's
+    /// `stageScale`. A degenerate scale gives +infinity, as `anchorTolerance(atStageScale:)` does; no path closes
+    /// then, since no second anchor lands.
+    public static func closeDistance(atStageScale stageScale: Double) -> Double {
+        guard stageScale > 0 else { return .infinity }  // also NaN
+        let radius = closeDistance / stageScale
+        return radius.isFinite ? radius : .infinity
+    }
     /// How near two pen anchors are the same anchor, and the smallest extent a pen path commits at, in stage (view)
     /// points: `FlareWorkspace.clickSlop`, so a click's sub-point jitter stacks no anchor and commits no layer at any
     /// fit scale (#619).
@@ -67,7 +76,8 @@ public struct FakeShapes: ShapeBuilding {
         // A click near the last anchor adds no near zero-length segment.
         if let last = draft.anchors.last, Self.near(last, point, tolerance) { return draft }
         let (dx, dy) = (point.x - (draft.anchors.first?.x ?? .infinity), point.y - (draft.anchors.first?.y ?? 0))
-        if Self.distinct(draft.anchors, tolerance) >= 3, (dx * dx + dy * dy).squareRoot() <= Self.closeDistance {
+        if Self.distinct(draft.anchors, tolerance) >= 3, (dx * dx + dy * dy).squareRoot()
+            <= Self.closeDistance(atStageScale: draft.stageScale) {
             draft.isClosed = true
         } else {
             if dragged { draft.smoothAnchors.insert(draft.anchors.count) }
