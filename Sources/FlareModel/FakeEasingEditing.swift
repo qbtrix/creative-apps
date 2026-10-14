@@ -13,14 +13,16 @@ public struct FakeEasingEditing: EasingEditing, Equatable {
 
     public let easingSegments: [EasingSegment]
     public private(set) var selectedEasingSegment: EasingSegment?
+    public let easingUnavailableReason: String?
     private var easings: [EasingSegment: Easing]
     private var history: [Change] = []
     /// The handle being dragged; moves of it fold into one undo step.
     private var dragging: EasingHandle?
 
     /// x 0-24 Ease (selected), x 24-48 Linear, y 0-24 Hold, opacity 12-36
-    /// Ease In-Out.
-    public init() {
+    /// Ease In-Out. `unavailableReason` turns the edits off, as inside a symbol.
+    public init(unavailableReason: String? = nil) {
+        easingUnavailableReason = unavailableReason
         let fixture: [(EasingSegment, Easing)] = [
             (EasingSegment(property: "opacity", startFrame: 12, endFrame: 36), .easeInOut),
             (EasingSegment(property: "x", startFrame: 0, endFrame: 24), .ease),

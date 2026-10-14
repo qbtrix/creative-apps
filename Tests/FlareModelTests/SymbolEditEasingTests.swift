@@ -44,3 +44,26 @@ private func editingWaveHand() -> FlareWorkspace {
     w.exitSymbol()
     #expect(w.easingSegments.isEmpty)
 }
+
+// #668: inside a symbol the curve, chips and scrub rows would be live but refused, so the editor says why they are off.
+@Test func theEasingControlsInASymbolAreUnavailableWithAReason() {
+    var w = editingWaveHand()
+    guard let segment = w.easingSegments.first else { Issue.record("no segment"); return }
+    w.selectEasingSegment(segment)
+    #expect(w.currentEasing != nil)
+    #expect(w.easingUnavailableReason == FlareWorkspace.easingInSymbolMessage)
+    let before = w.document
+    w.moveEasingHandle(.first, to: Point(x: 0.4, y: 0.1))
+    #expect(w.document == before)
+    w.selectEasingSegment(segment)
+    #expect(w.selectedEasingSegment == segment)
+}
+
+@Test func theEasingControlsInTheSceneAreAvailable() {
+    var w = editingWaveHand()
+    #expect(w.easingUnavailableReason != nil)
+    w.exitSymbol()
+    #expect(w.easingUnavailableReason == nil)
+    #expect(FakeEasingEditing().easingUnavailableReason == nil)
+    #expect(FakeEasingEditing(unavailableReason: "Off.").easingUnavailableReason == "Off.")
+}

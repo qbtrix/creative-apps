@@ -6,7 +6,10 @@
 // contract, so it runs on FakeEasingEditing in snapshots and on FlareWorkspace
 // in the window. It only reads the editor and calls the closures; it never
 // mutates the editor. Every drag, nudge or typed value ends in `onEndDrag`,
-// so each is one undo step. Owns presentation state only: the hovered row.
+// so each is one undo step. When the editor gives `easingUnavailableReason`
+// (inside a symbol) the EASING controls show disabled, with the reason as a
+// line above them and as their help; KEYFRAMES stays live.
+// Owns presentation state only: the hovered row.
 // It brings no side gutter of its own; the inspector it sits in supplies one.
 import FlareCore
 import FlareModel
@@ -79,6 +82,13 @@ struct FlareEasingInspector<Editor: EasingEditing>: View {
 
     @ViewBuilder private var easing: some View {
         if let easing = editor.currentEasing, let handles = editor.currentEasingHandles {
+            let reason = editor.easingUnavailableReason
+            if let reason {
+                Text(reason)
+                    .font(SuiteFont.inspectorMeta)
+                    .foregroundStyle(SuiteColor.secondaryText)
+                    .padding(.bottom, SuiteSpacing.xs)
+            }
             VStack(spacing: SuiteSpacing.xs) {
                 CurveEditor(
                     samples: editor.easingCurveSamples(count: 129).map { CGPoint(x: $0.x, y: $0.y) },
@@ -97,6 +107,8 @@ struct FlareEasingInspector<Editor: EasingEditing>: View {
                 scrubRow("X2", .second, handles.second, x: true)
                 scrubRow("Y2", .second, handles.second, x: false)
             }
+            .disabled(reason != nil)
+            .help(reason ?? "")
         } else {
             Text(editor.easingSegments.isEmpty ? "Key a property to shape its easing." : "Pick a keyframe above.")
                 .font(SuiteFont.inspectorMeta)

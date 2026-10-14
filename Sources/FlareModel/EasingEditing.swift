@@ -67,6 +67,9 @@ public protocol EasingEditing: Sendable {
     var selectedEasingSegment: EasingSegment? { get }
     /// The selected segment's easing; nil when no segment is selected.
     var currentEasing: Easing? { get }
+    /// Why the curve, presets and handle edits can't change the selected
+    /// segment, for the disabled controls' help; nil when they can.
+    var easingUnavailableReason: String? { get }
     var canUndo: Bool { get }
 
     /// Selects one of `easingSegments`; any other segment is ignored.

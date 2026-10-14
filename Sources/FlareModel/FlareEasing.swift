@@ -9,7 +9,8 @@
 // (FlareWorkspace.selectedLayerID) and ignored once its keyframes are gone.
 // The selected layer is looked up in the edited owner's layers, so inside a
 // symbol the editor reads the symbol's own timeline (#643). SetKeyframeEasing
-// still names a scene layer, so an easing change inside a symbol is refused.
+// still names a scene layer, so inside a symbol `easingUnavailableReason` says
+// why the curve, presets and handle rows are off, and a write is refused (#668).
 import FlareCore
 
 extension FlareWorkspace: EasingEditing {
@@ -35,6 +36,10 @@ extension FlareWorkspace: EasingEditing {
     public var currentEasing: Easing? {
         guard let segment = selectedEasingSegment, let layer = easingLayer else { return nil }
         return layer.tracks[segment.property]?.first { $0.frame == segment.startFrame }?.easing
+    }
+
+    public var easingUnavailableReason: String? {
+        editingSymbolID == nil ? nil : Self.easingInSymbolMessage
     }
 
     public mutating func selectEasingSegment(_ segment: EasingSegment) {
@@ -67,7 +72,7 @@ extension FlareWorkspace: EasingEditing {
     /// Gives the selected segment's start keyframe `easing` as one undo step,
     /// or as part of the open step when `coalesceKey` matches the last one.
     private mutating func setEasing(_ easing: Easing, coalesceKey: String?) {
-        guard editingSymbolID == nil else { return refuse(.refused(Self.easingInSymbolMessage)) }
+        if let reason = easingUnavailableReason { return refuse(.refused(reason)) }
         guard let sceneID = selectedSceneID, let layerID = selectedLayerID, let segment = selectedEasingSegment
         else { return }
         let command = SetKeyframeEasing(
