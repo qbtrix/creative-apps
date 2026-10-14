@@ -1954,3 +1954,43 @@ Waits on: wave 2 merged.
    Design's handles into SuiteUI for Flare and Halo. F1 edits
    `DesignSelectionMarks.swift`; should F1 wait for #273 to avoid doing the
    several-layer box twice?
+8. **Q8 Dragging a frame's background.** The marquee rule (D0-3) means a drag
+   that starts on an unselected frame's empty background draws a marquee
+   inside it instead of moving the frame; the frame moves once selected (a
+   click, or its Layers row). That is how most layout tools behave for a
+   frame that fills the page, and it is the only way to reach the marquee on
+   `cards`. Agree?
+
+---
+
+## 10. Critic rounds
+
+### Round 1 (one critic subagent, read-only, 2026-10-14)
+
+It found 6 blocking, 12 major and 9 minor items. All 21 open issues were in
+8.1, and it found no product name in the text. It could not compile section 5
+itself, because it had no toolchain. Every item below was checked against the
+code and fixed in this branch. After the fixes, section 5 was rebuilt against
+DesignModel, and its fakes ran on a `cards`-shaped tree on Swift 6.3.3.
+
+| # | Severity | Finding | Fix |
+|---|---|---|---|
+| 1 | blocking | A marquee can't start "on empty canvas": the Desktop frame fills the page, so a press hits it and moves it | Marquee rule in D0-3 (a drag on a frame's empty background selects inside it); J5 coordinates; Q8 |
+| 2 | blocking | Fakes acted on top-level layers only, so every `cards` layer (inside Desktop) was refused | Fakes walk the tree (`Fakes/FakeSupport.swift`); scratch test on a `cards` tree |
+| 3 | blocking | The several-layer inspector had no Align row, and the file belonged to F3 while F1 needed it | D0-5a builds the several-layer shell (Align with Distribute, "Mixed" rows) |
+| 4 | blocking | Zoom to Selection can't center: `CanvasViewport` keeps its scroll position private, and `DesignWindow` belonged to F5 | D0-5a does the zoom and hands a `show` rect to the canvas (F1's file); new SuiteUI issue named; J4's centering assert waits on it |
+| 5 | blocking | Nobody owned text-field Cut, Copy, Paste and Select All, and replacing the pasteboard group would break them | D0-6 keeps the stock pasteboard group, and layers answer through focus hooks; Undo and Redo in fields stay F5's (#275) |
+| 6 | blocking | `.live` all `NotBuilt` would disable today's Delete, nudge and Align after wave 0 | Single-layer `.delete`, `.nudge` and `.align` keep today's methods (rules in 5, the D0-3 row) |
+| 7 | major | J8's ⌘N replaces the document in the same window; its rename step needed F4 | J8 relaunches on `empty` (the pasteboard outlives the app) and uses the X field for the text check |
+| 8 | major | `cards` had no frames for Pair, Locked and Hidden; J9's across-parents pair shared a parent | Exact frames and parents; J9 uses A with E1 inside Pair |
+| 9 | major | Frame names above the frame are clipped by the artboard | `DesignFrameLabels` overlay slot (D0-5b), filled by F3 |
+| 10 | major | "Mixed" rows setting several layers had no contract | `StyleEditing.setFrame` and `setFill` over ids; `DesignStyleChange.frame` and `.fill`; F3 covers it |
+| 11 | major | The help law was untestable as written, and the fakes broke it (`.unchanged`, Copy, no framing or paste help) | Law restated (nil help: no refusal except `.unchanged`); `framingHelp`, `pasteHelp`, `zoomToSelectionHelp` added |
+| 12 | major | Fixed coalescing keys merged edits to different layers | `DesignEdit.runKey(base, ids)`; selection change and `endDrag` end the run |
+| 13 | major | QD-V1 byte equality couldn't hold for old files; fixtures were said to come from disk | Round-trip equality on encode, decode equality for old files; fixtures and references live in code |
+| 14 | major | Goldens and perf rows depended on #330, #331, #332 and #333 without saying so; `DesignTextScaleTests` was listed as a Linux test | Marked blocked with the issue numbers; test moved to `Tests/AppSnapshotTests` |
+| 15 | major | Adding `case path` in D2-1 broke `DesignArtwork`'s switch until D2-4 | D2-1 adds a placeholder case in the canvas in the same PR |
+| 16 | major | D0-1 used `DesignServices` before D0-2; D0-4 used fixtures before D0-6 | `services` moved into D0-2; fixtures are D0-4, before the app tasks D0-5a and D0-5b |
+| 17 | major | Wave 3: F7 needed `DesignCanvas.swift`; F9 had no binding field, no bind method and no drawing | F7 owns `DesignCanvas.swift`; `fillVariableID`, `VariableEditing.bind`, D2-3's `displayFill` and D2-4's drawing |
+| 18 | major | J4's zoom numbers ignored the fit on open; the pill never reads "Fit" | J4 asserts stops relative to the fitted percent |
+| 19–27 | minor | §5.6 contradicted 8.2; the saved marker's owner was inconsistent; cross-references to 8.3 and 10 were wrong; J1 counted items not built yet; `two-pages` usage; J6 edited a shared file; the status-line count's owner; #20's tier; S1's link was a product domain | Each fixed: `.fake` and `.live` comments; F5 owns the marker; references fixed; J1 lists only built items; `two-pages` is J12 only; J6 in `+Select`; the count is D0-5a's; a Calls row for #20; S1 cited by title |
