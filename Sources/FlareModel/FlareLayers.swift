@@ -22,6 +22,7 @@ public enum FlareLayerError: Error, Equatable, Sendable {
         case .command(.invalidFPS): "Frame rate must be at least 1 fps."
         case .command(.invalidDuration): "Length can't be negative."
         case .command(.invalidGuidePosition): "A guide needs a position on the canvas."
+        case .command(.layerLocked): "The layer is locked. Unlock it to change it."
         case .command(let error): "The layer could not be changed (\(error))."
         }
     }

@@ -22,10 +22,19 @@ extension FlareWorkspace {
     static func usable(_ stageScale: Double) -> Double { stageScale.isFinite && stageScale > 0 ? stageScale : 1 }
 
     /// Why `tool` is disabled, as its tooltip; nil when its drag works. Asks the tool's service; Ellipse draws through
-    /// the workspace (FlareDrawing.swift).
+    /// the workspace (FlareDrawing.swift). A drawing tool with a locked layer selected says to unlock it (#676).
     public func toolHelp(_ tool: FlareTool) -> String? {
-        guard tool != .ellipse, let reason = services.shapes.unavailableHelp(for: tool) else { return nil }
-        return reason.isEmpty ? tool.unavailableHelp ?? reason : reason
+        if tool != .ellipse, let reason = services.shapes.unavailableHelp(for: tool) {
+            return reason.isEmpty ? tool.unavailableHelp ?? reason : reason
+        }
+        return lockedHelp(tool)
+    }
+
+    /// "Unlock <layer> to draw on it." when `tool` draws and the edited owner's selected layer is locked, else nil.
+    func lockedHelp(_ tool: FlareTool) -> String? {
+        guard [.ellipse, .rectangle, .pen].contains(tool),
+              let locked = ownerLayers?.first(where: { $0.id == selectedLayerID && $0.isLocked }) else { return nil }
+        return Self.unlockMessage(locked.name)
     }
 
     /// One whole gesture: `dragChanged`, then `endDrag`.
@@ -43,6 +52,7 @@ extension FlareWorkspace {
         }
         gesture?.end = end; gesture?.modifiers = modifiers; gesture?.stageScale = stageScale
         guard selectedScene != nil, let g = gesture else { return draft = nil }
+        if lockedHelp(tool) != nil { return draft = nil }
         let shapes = services.shapes
         switch tool {
         case .ellipse:
@@ -65,6 +75,7 @@ extension FlareWorkspace {
         guard let g = gesture else { return }
         let pending = draft
         cancelDrag()
+        if let reason = lockedHelp(tool) { return refuse(.refused(reason)) }
         switch tool {
         case .ellipse: commitEllipse(from: g.start, to: g.end, stageScale: g.stageScale)
         case .rectangle: if let pending { commit(pending) }
