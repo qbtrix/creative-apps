@@ -4,7 +4,7 @@ Issue: #793 (resumes #754) · Packet: docs/blueprints/flare/features/mac-platfor
 Run: act-1a13c789856-0qa9 (first run act-1a13b14336c-tqna) · Session: claude/mac-platform-lead-lxlcta (first: claude/mac-platform-lead-7jx22z) · Started: 2026-10-14T15:43Z, resumed 2026-10-14T22:15Z
 Stage: 5 finish
 Base: 1098ff2d6c135020391cef770f4de11dfde9465a
-Next: wait for the lane to merge #806 (feature-done) and the CI run it dispatches on dev. Green -> Belt-Contact-Sheet on #793. Red only on PhotoBrushLatencyTests -> note on dev-red, gap issue on line:photo. Red in Flare files -> fix batch.
+Next: #806 merged 22:25Z (lane run 38647555088); find the CI run it dispatched on dev. Green -> Belt-Contact-Sheet on #793. Red only on PhotoBrushLatencyTests -> note on dev-red, gap issue on line:photo. Red in Flare files -> fix batch.
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |

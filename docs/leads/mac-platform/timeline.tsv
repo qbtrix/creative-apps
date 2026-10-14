@@ -25,3 +25,4 @@ utc	stage	event	ref	note
 2026-10-14T22:40Z	4	round-findings	round3	dev Linux build broken by creative-core main LayerOwner API; fixer r3-b1 started
 2026-10-14T22:22Z	4	pr-merged	#801	r3-b1 FlareModel builds against core main LayerOwner
 2026-10-14T22:25Z	5	pr-opened	#806	feature-done packet status
+2026-10-14T22:25Z	5	pr-merged	#806	feature-done; waiting on dispatched dev CI
