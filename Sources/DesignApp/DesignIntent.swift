@@ -22,6 +22,7 @@ enum DesignIntent {
     case addPage, deletePage
     case setFrame(String, x: Double, y: Double, width: Double, height: Double)
     case setFill(String, DesignColor)
+    case align(DesignAlignEdge)
     case setHidden(String, Bool), setLocked(String, Bool)
     case toggleFlag(String, DesignLayerFlag)
     case editText(String)

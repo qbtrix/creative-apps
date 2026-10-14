@@ -9,6 +9,8 @@
 // outside it), undoes and redoes, saves with -DesignSaveTo (no panel), then
 // relaunches with -DesignOpenFile and checks the saved file reopens. The menu
 // journey checks each menu really opens, and adds a page from the Page menu.
+// The align journey draws a rectangle, centers it from the inspector's Align
+// row and moves it to the top from Object > Align, one undo step each.
 import XCTest
 
 final class DesignJourneyTests: XCTestCase {
@@ -31,6 +33,25 @@ final class DesignJourneyTests: XCTestCase {
         design.app.menuItems["Add Page"].click()
         XCTAssert(design.app.buttons["Undo Add Page"].waitForExistence(timeout: 5), "Page > Add Page added no page")
         design.shot("added-page")
+    }
+
+    @MainActor func testAlignALayer() {
+        let design = Journey("Design", self)
+        design.app.typeKey("n", modifierFlags: .command)
+        XCTAssert(design.element("suite.canvas").waitForExistence(timeout: 10), "New File showed no canvas")
+        design.element("suite.tools").buttons["Rectangle"].click()
+        design.drag(on: "suite.canvas", from: CGVector(dx: 0.15, dy: 0.3), to: CGVector(dx: 0.3, dy: 0.45), step: "align-drew")
+        XCTAssert(design.app.buttons["Undo Add Rectangle"].waitForExistence(timeout: 5), "drawing made no undo step")
+        design.click("Align Center", in: .window, step: "align-centered")
+        XCTAssert(design.app.buttons["Undo Align Center"].waitForExistence(timeout: 5), "Align Center made no undo step")
+        XCTAssertFalse(design.app.windows.firstMatch.buttons["Align Center"].isEnabled, "Align Center stayed on once centered")
+        design.app.menuBars.firstMatch.menuBarItems["Object"].click()
+        design.app.menuItems["Align"].click()
+        design.app.menuItems["Align Top"].click()
+        XCTAssert(design.app.buttons["Undo Align Top"].waitForExistence(timeout: 5), "Object > Align > Align Top made no undo step")
+        design.shot("align-top")
+        design.click("Undo Align Top", in: .window, step: "align-undone")
+        XCTAssert(design.app.buttons["Undo Align Center"].waitForExistence(timeout: 5), "Undo didn't undo Align Top alone")
     }
 
     @MainActor func testDrawShapesAddTextAndSave() throws {
