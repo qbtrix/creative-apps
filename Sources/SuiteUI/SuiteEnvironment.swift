@@ -4,7 +4,10 @@
 // `suite.controls` hidden elements under `-SuitePerfProbe`, only at the
 // outermost call: it marks the environment, and an inner call that finds the
 // mark adds nothing, so a gallery page that draws an EditorShell still has
-// one of each. `.suiteControl(id:enabled:reason:role:)` sets the control's
+// one of each. Each element also reports its identifier through
+// SuiteProbeElementsKey, so a test counts what was placed without an
+// assistive client (SwiftUI builds a hosting view's accessibility tree only
+// when one asks). `.suiteControl(id:enabled:reason:role:)` sets the control's
 // accessibility identifier and keeps it registered in that window's
 // SuiteControlInventory while it is on screen. Plain keys rather than
 // `@Entry`, as in Glass.swift.
@@ -40,6 +43,13 @@ private struct SuiteControlStoreKey: EnvironmentKey {
 
 private struct SuiteProbesHostedKey: EnvironmentKey {
     static let defaultValue = false
+}
+
+/// The identifiers of the hidden elements `.suiteProbes()` placed, in tree order.
+struct SuiteProbeElementsKey: PreferenceKey {
+    static let defaultValue: [String] = []
+
+    static func reduce(value: inout [String], nextValue: () -> [String]) { value += nextValue() }
 }
 
 extension View {
@@ -104,7 +114,9 @@ private struct SuiteProbesModifier: ViewModifier {
                 .environment(\.suiteControlStore, store)
                 .background(alignment: .topLeading) {
                     SuitePerfElement(probe: probe, refreshInterval: SuiteFrameProbe.fallbackRefreshInterval)
+                        .preference(key: SuiteProbeElementsKey.self, value: [SuitePerfElement.identifier])
                     SuiteControlsElement(store: store)
+                        .preference(key: SuiteProbeElementsKey.self, value: [SuiteControlsElement.identifier])
                 }
         } else {
             content
