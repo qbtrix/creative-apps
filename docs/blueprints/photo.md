@@ -210,7 +210,7 @@ or writing any closed layered format.
 | Layers | Adjustment layers (Exposure, Levels, Curves, Hue/Saturation) in the stack, each with visibility, opacity, blend mode, reorder and a mask | Blur as an adjustment layer (it's a filter), layer groups, clipping masks, layer styles |
 | Select | Rectangle, Ellipse and Lasso (freehand, closed on release); Shift adds, Option subtracts; Select > Invert; Feather; brush, eraser, clone, heal, Fill and Delete act inside it | Magic wand, quick selection, refine edge, saved selections |
 | Masks | Add Mask from Selection, Delete Mask, Apply Mask, disable a mask; paint on the mask with brush and eraser | Vector masks, mask density and feather sliders on the layer |
-| Transform | Edit > Free Transform (Command-T): scale with the 8 handles, rotate outside them, Shift keeps ratio, typed W%, H%, angle; Flip Layer Horizontal and Vertical; Image > Flip Canvas Horizontal and Vertical | Skew, distort, perspective, warp |
+| Transform | Edit > Free Transform (Command-T): scale with the 8 handles, rotate outside them, Shift keeps ratio, typed W%, H%, angle; Edit > Transform > Flip Horizontal and Flip Vertical (the selected layer); Image > Flip Canvas Horizontal and Vertical | Skew, distort, perspective, warp |
 | History | The History tab: every named step, click to jump, later steps dimmed | Snapshots, history brush |
 | Paint | The brush cursor circle at the brush size; Eyedropper (I) picks a color from the image into the brush color, point or 3 × 3 or 5 × 5 average | Gradient, paint bucket, brush presets and textures |
 | Export | PNG, JPEG, TIFF and HEIC; a size as a percent or a longest side; quality for JPEG and HEIC | Export several sizes at once, web presets, metadata editing |
@@ -310,7 +310,9 @@ Flare's LM-0a3 and F1 did:
   crop code into those files unchanged and creates the other two as
   no-op stubs; each feature then owns its file. Brush, eraser, clone and heal
   multiply each dab by `selectionCoverage(x:y:)`, which PV-0 defines as 1
-  (no change) and PV-5 fills.
+  (no change), and paint into `paintTarget()` (the selected layer's pixels
+  today; its mask while `editsMask`), both stubs in `PhotoSelectionMask.swift`
+  and `PhotoMask.swift` that PV-5 fills.
 - **Rendering routes by layer.** `PhotoLayerComposite.swift` holds one
   layer's contribution (today: composite its pixels). PV-6 adds adjustment
   layers to it in wave 2, PV-5 adds masks in wave 3.
@@ -448,9 +450,10 @@ lists every empty, error and loading state the journey passes through.
 3. File > Save. Assert a "Keep layers?" choice appears, because the open
    file is a PNG: **Save as Photo Document** (default) or **Flatten into
    PNG**. Choose Save as Photo Document. Assert the title reads
-   `beach.agphoto`, "Saved", and the file exists in `<tmp>`.
+   `beach.ora`, "Saved", and the file exists in `<tmp>`, starts with the
+   zip signature and its first entry is `mimetype` reading `image/openraster`.
 4. Close the window (Command-W): no prompt. File > Open Recent >
-   `beach.agphoto`. Assert 2 layers, the top named "Layer 1" with opacity
+   `beach.ora`. Assert 2 layers, the top named "Layer 1" with opacity
    reads 50 and blend "Multiply", and the shot matches step 3's canvas.
 5. Command-Z. Assert the Edit menu reads "Redo" only (a reopened document
    has an empty history, "Open" as its first step).
@@ -491,9 +494,9 @@ offer's place, with Discard only, when the package is damaged).
 
 **PJ-4 `testOpenBadDocuments`** (`+Documents`, PV-1)
 
-For each file written by the test: a `.agphoto` whose manifest is `not json`;
-one with `"format": 2`; one missing a layer image; a 20 MP layer over the
-limit. Open each with `-PhotoOpenFile`.
+For each file written by the test: a `.ora` that is not a zip (bytes
+`not a zip`); one whose `photo/document.json` says `"format": 2`; one
+missing `data/layer-2.png`; one with a 20 MP layer, over the limit. Open each with `-PhotoOpenFile`.
 
 Assert the alert text is `ArchiveError.message` for the case ("This file
 isn't a Photo document.", "…made by a newer Photo (format 2)…", "This
@@ -601,7 +604,7 @@ can point at them.
 | PJ-11 | `testBrushCursorFollowsSize` (`+History`, PV-4) | Brush; hover the canvas; size 40, then 120; Move tool | `photo.canvas.brush-cursor` exists, its frame width is 40 × zoom, then 120 × zoom (±1 pt); gone with Move | none |
 | PJ-12 | `testEllipseLassoAddSubtract` (`+Select`, PV-5) | Marquee shape Ellipse; drag; Shift-drag a rectangle; Option-drag a lasso; Select > Invert; Feather 10; brush | the marching-ants element exists after each; the info line reads the selection's bounds; brush paints only inside (a pixel outside unchanged); each change is one "Undo Select" step | empty: Invert with nothing selected selects all |
 | PJ-13 | `testLayerMaskFromSelection` (`+Mask`, PV-5) | ellipse select; Layer > Add Mask from Selection; paint black on the mask; Shift-click the badge; Layer > Apply Mask | `photo.layer.mask-badge` on the row; the pixels outside are hidden, not deleted (disable shows them); Apply makes them transparent; one step each | error: Add Mask on an adjustment layer with nothing selected reveals all |
-| PJ-14 | `testFreeTransformAndFlip` (`+Transform`, PV-7) | Command-T; drag the bottom-right handle out by half; drag outside a corner a quarter turn with Shift; Return; Layer > Flip Horizontal; Image > Flip Canvas Vertical | the transform box element; W% reads 150, angle 90; Return gives "Undo Free Transform"; Escape in a second round leaves the layer as it was; flips are exact (`testFlip…` model goldens) | loading: a transform over 12 MP shows "Transforming…" |
+| PJ-14 | `testFreeTransformAndFlip` (`+Transform`, PV-7) | Command-T; drag the bottom-right handle out by half; drag outside a corner a quarter turn with Shift; Return; Edit > Transform > Flip Horizontal; Image > Flip Canvas Vertical | the transform box element; W% reads 150, angle 90; Return gives "Undo Free Transform"; Escape in a second round leaves the layer as it was; flips are exact (`testFlip…` model goldens) | loading: a transform over 12 MP shows "Transforming…" |
 | PJ-15 | `testExportAtSizeAsTIFFAndHEIC` (`+Export`, PV-8) | Export; TIFF; size 50%; Export; HEIC quality 70; longest side 400; Export | files exist with TIFF and HEIC headers; TIFF is 400 × 300; HEIC's longer side 400 | error: a longest side over 16384 disables Export with the reason; loading: "Exporting…" |
 | PJ-16 | `testEyedropperPicksColor` (`+Sample`, PV-9) | Eyedropper (I); click the sun; 5 × 5; click the sky; B | the brush color well's hex reads the sun's color, then the sky's mean; picking is not an undo step | empty: a click on a transparent pixel keeps the color and says "Nothing to sample here." |
 | PJ-17 | `testLayoutAtWidths` (`+Layout`, PV-10) | relaunch at each width in section 7.4 | the layout rules of section 7.4 at each width | none |
@@ -715,10 +718,13 @@ public struct LayerContent: Sendable, Equatable {
 
 ```swift
 // Contracts/DocumentContracts.swift: the layered document (PV-1). A document
-// is a package of files: a manifest and one 8-bit sRGB PNG per pixel layer
-// and per mask, written through the PhotoImageCodec the app already has, so
-// the format code runs and is tested on Linux. Recovery keeps the latest
-// autosaved package. Linux-safe.
+// is one OpenRaster file (a zip, https://www.openraster.org/baseline/): the
+// `mimetype` entry, `stack.xml` with the layers, one 8-bit sRGB PNG per pixel
+// layer, `mergedimage.png` and `Thumbnails/thumbnail.png`, plus Photo's own
+// `photo/document.json` for what OpenRaster has no word for (adjustment
+// layers, masks, the whole-image adjustments). PNGs go through the
+// PhotoImageCodec the app already has, so the format code runs and is tested
+// on Linux. Recovery keeps the latest autosaved file. Linux-safe.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -726,8 +732,9 @@ import Foundation
 #endif
 import CoreRaster
 
-/// A document as files, by path from the package root: "document.json",
-/// "layers/layer-3.png", "masks/layer-3.png", "thumbnail.png".
+/// A document's entries by path: "mimetype", "stack.xml",
+/// "data/layer-3.png", "photo/masks/layer-3.png", "photo/document.json",
+/// "mergedimage.png", "Thumbnails/thumbnail.png".
 public struct PhotoPackage: Sendable, Equatable {
     public var files: [String: Data]
     public init(files: [String: Data]) { self.files = files }
@@ -779,6 +786,13 @@ public protocol DocumentArchiving: PhotoUseCase {
     func encode(_ snapshot: PhotoDocumentSnapshot, codec: any PhotoImageCodec) throws -> PhotoPackage
     /// The snapshot in `package`. Throws `ArchiveError` and nothing else.
     func decode(_ package: PhotoPackage, codec: any PhotoImageCodec) throws -> PhotoDocumentSnapshot
+    /// The file's bytes: a zip whose first entry is `mimetype`, every entry
+    /// stored (PNGs are compressed already). Pure Swift, so Linux tests it.
+    func container(_ package: PhotoPackage) throws -> Data
+    /// The entries of a file `container` wrote. Throws `ArchiveError`
+    /// (`.notADocument` for a non-zip or another mimetype, `.damaged` for a
+    /// compressed entry, which v2 doesn't read).
+    func package(fromContainer data: Data) throws -> PhotoPackage
 }
 
 /// One autosaved document.
@@ -1244,6 +1258,15 @@ public struct FakeArchive: DocumentArchiving {
         }
         return last
     }
+
+    public func container(_ package: PhotoPackage) throws -> Data {
+        package.files["document.txt"] ?? Data()
+    }
+
+    public func package(fromContainer data: Data) throws -> PhotoPackage {
+        guard String(decoding: data, as: UTF8.self).hasPrefix("fake ") else { throw ArchiveError.notADocument }
+        return PhotoPackage(files: ["document.txt": data])
+    }
 }
 
 /// The last snapshot FakeArchive wrote, so decode gives it back.
@@ -1620,7 +1643,7 @@ extension PhotoWorkspace {
 
 | Journey | Contracts | Workspace calls |
 |---|---|---|
-| PJ-1 save and reopen | `DocumentArchiving` | `saveAction`, `documentPackage(codec:)`, `didSave(as:kind:)`, `openDocument(_:name:codec:)`, `isDirty` |
+| PJ-1 save and reopen | `DocumentArchiving` (`encode`, `container`, `package(fromContainer:)`, `decode`) | `saveAction`, `documentPackage(codec:)`, `didSave(as:kind:)`, `openDocument(_:name:codec:)`, `isDirty` |
 | PJ-2 unsaved prompt, Open Recent | – (AppKit's recent list) | `isDirty` |
 | PJ-3 restore after a crash | `RecoveryStoring`, `DocumentArchiving` | `autosaveDue(lastEdit:lastAutosave:now:)`, `recoveryEntry(now:codec:)`, `restore(_:codec:)` |
 | PJ-4 bad documents | `DocumentArchiving` (`ArchiveError.message`) | `openDocument` |
@@ -1900,4 +1923,256 @@ constants fit: the no-image message keeps "File > New Image" on one line
 - **QB-F4** Keyboard parity: crop fields type; transform W %, H % and angle
   type and arrow-step; Feather arrow-steps; every new tool has a one-key
   shortcut (I); every new menu command has its shortcut (Command-J, -E,
-  Shift-Command-E for Flatten, Command-T, Shift-Command-I for Invert).
+  Command-T, Shift-Command-I for Invert; Flatten Image has none, since
+  Shift-Command-E is Export).
+
+---
+
+## 8. Coverage and waves
+
+### 8.1 Every open `line:photo` issue
+
+| Issue | Feature | How it closes |
+|---|---|---|
+| #79 adjustments rows don't line up | PV-10 | layout rule 3 of section 7.4, PJ-17 |
+| #252 no-image message splits the menu path | PV-10 | `PhotoLayoutTests` |
+| #253 status bar says "No image" | PV-10 | `PhotoLayoutTests`, one constant for the three panes |
+| #255 Levels typing draft at two decimals | not Photo: SuiteUI (`ScrubField.beginTyping`) | PV-10 relabels it `line:suiteui` with a comment; cosmetic since #525 |
+| #289 controls with no identifier | PV-10 (Photo's own views); the rest is SuiteUI's | the audit's `identifier` count falls to SuiteUI's share |
+| #421 ellipse and lasso, layer masks | PV-5 | PJ-12, PJ-13, `PhotoSelectionMaskTests` |
+| #544 typed crop size and aspect lock | PV-3 | PJ-8 |
+| #580 adjustment layers (needs-spec) | PV-6 | PJ-9; section 1 and 6.1 rule 3 answer its open questions (the Adjust tab keeps a whole-image set; Exposure, Levels, Curves and Hue/Saturation can be layers, Blur can't; masks come with PV-5) |
+| #586 Reset hit target 9 pt | not Photo: SuiteUI (`InspectorSectionHeader`) | PV-10 relabels it `line:suiteui` |
+| #588 brush cursor circle | PV-4 | PJ-11 |
+| #644 History list | PV-4 | PJ-10 (a panel tab, since Photo's window has no sidebar) |
+
+Every v2 feature, the other way round: PV-0 (no issue; the seams), PV-1
+(no issue: layered save, Open Recent, recovery), PV-2 (no issue: edit and
+layer commands), PV-7 (no issue: transform), PV-8 (no issue: export size and
+formats), PV-9 (no issue: eyedropper). Each gets a `gap` issue when its
+packet is written.
+
+Open issues on other lines that v2 touches:
+
+| Issue | Line | Effect on Photo v2 |
+|---|---|---|
+| #333 QH-4 journey files | suiteui | every feature's journey task waits on it (one journey file per feature) |
+| #331, #332 goldens | suiteui | PF-13 goldens wait on them; PNGs for eyes until then |
+| #330 FrameProbe | suiteui | PJ-P1, PJ-P2 report hitches only until it lands |
+| #339 S6 save status | suiteui | PV-1 shows the unsaved state with a plain label until it lands |
+| #340 S7 status pills | suiteui | "Preview data" and refusal pills use the current `statusPill(.warning)` until it lands |
+| #273 selection handles into SuiteUI | suiteui | PV-7's transform box |
+| #274 share open and save panel plumbing | suiteui | touches the code PV-0 moves into `PhotoWindow+File.swift`; it must not run during waves 0–1, or PV-1 absorbs it (section 9, question 6) |
+| #591 a `ScrubTrack` owns its step | suiteui | none for v2 |
+
+### 8.2 Waves
+
+A wave starts when everything in its "waits on" cell has merged. No two
+features in one wave own the same file. Across waves a file can change
+hands; the later wave starts from the merged result.
+
+| Wave | Feature | Tier | Waits on (this repo) | Waits on (creative-core) |
+|---|---|---|---|---|
+| 0 | PV-0 seams: contracts, fakes, services, stored state, routing, splits | p1 by dependency | nothing (its journey task: #333) | nothing |
+| 1 | PV-1 documents: layered save and open, Open Recent, unsaved state, recovery | p1 | PV-0; journeys #333 | nothing |
+| 1 | PV-2 edit and layer commands: Cut, Copy, Paste, Duplicate, Merge Down, Flatten | p1 | PV-0; journeys #333 | nothing |
+| 1 | PV-3 crop precision (#544) | p1 | PV-0; journeys #333 | nothing |
+| 1 | PV-10 polish (#79, #252, #253, #289; moves #255, #586) | bugs | PV-0; journeys #333 | nothing |
+| 2 | PV-6 adjustment layers (#580) | p1 | wave 1 (PV-2 hands over `PhotoCommands+Layer.swift`, PV-10 `AdjustmentsInspector.swift`) | nothing; optional CR-5 |
+| 2 | PV-4 history tab and brush cursor (#644, #588) | p2 | wave 1 (tiers: p1 first) | nothing |
+| 2 | PV-7 transform and flip | p2 | wave 1 (PV-2 hands over `PhotoCommands+Edit.swift`) | CR-1, CR-2 |
+| 2 | PV-8 export size, TIFF, HEIC | p2 | wave 1 | nothing |
+| 2 | PV-9 eyedropper | p2 | wave 1 | nothing |
+| 3 | PV-5 selections and masks (#421) | p2 | PV-6 (hands over `PhotoLayerComposite.swift`, `PhotoLayersTab.swift`, `PhotoCommands+Layer.swift`) | CR-3, CR-4; optional CR-6 |
+
+Why this order:
+
+- **PV-0 alone first.** It edits the five shared files once
+  (section 2.4), so every later feature owns its own. It changes no
+  behavior a person sees except the eyedropper tool on the rail (disabled,
+  "Not built yet (PV-9).") and nothing when run on `.live`; the existing
+  309 model tests and twelve journeys are its regression gate.
+- **The tier-1 work next** (`docs/priorities.md`: nothing `p2` starts on a
+  line while a `p1` is open and unblocked). PV-1, PV-2 and PV-3 are
+  independent. PV-10 rides along because its bugs touch only files nobody
+  else in wave 1 owns.
+- **PV-6 is p1 but in wave 2** because it shares `PhotoCommands+Layer.swift`
+  with PV-2 and `AdjustmentsInspector.swift` with PV-10. If wave 1 runs
+  long, PV-6 can start as soon as PV-2 and PV-10 merge, without waiting for
+  PV-1 and PV-3.
+- **PV-5 last**: it needs PV-6's layer kinds in the render hook to put
+  masks on adjustment layers (#580's third question), and it waits on the
+  most engine work.
+
+### 8.3 Owned files per feature
+
+Paths are relative to the repo root; `M/` is `Sources/PhotoModel/`, `A/` is
+`Sources/PhotoApp/`, `MT/` is `Tests/PhotoModelTests/`, `ST/` is
+`Tests/AppSnapshotTests/`, `UT/` is `UITests/`. "(stub from PV-0)" means
+PV-0 creates the file with today's behavior or a no-op, and the feature then
+owns it.
+
+**PV-0 seams** (wave 0)
+
+- Model: `M/Contracts/PhotoContractTypes.swift`, `M/Contracts/DocumentContracts.swift`,
+  `M/Contracts/EditContracts.swift`, `M/Contracts/CropContracts.swift`,
+  `M/Contracts/SelectionContracts.swift`, `M/Contracts/LayerContracts.swift`,
+  `M/Contracts/OutputContracts.swift`, `M/PhotoServices.swift`,
+  `M/Fakes/PhotoFakes.swift` (may split per contract), `M/PhotoFixtures.swift`,
+  `M/Live/NotBuilt.swift`, and the stubs `M/Live/LiveDocuments.swift`,
+  `M/Live/LiveEdit.swift`, `M/Live/LiveCrop.swift`, `M/Live/LiveSelection.swift`,
+  `M/Live/LiveAdjustmentLayers.swift`, `M/Live/LiveTransform.swift`,
+  `M/Live/LiveExportSizing.swift`, `M/Live/LiveSampling.swift`;
+  edits `M/PhotoWorkspace.swift`, `M/PhotoLayer.swift`, `M/AdjustmentSettings.swift`,
+  `M/PhotoHistory.swift`, `M/PhotoStroke.swift`, `M/PhotoSelection.swift`,
+  `M/PhotoRender.swift`; new `M/PhotoLayerComposite.swift`,
+  `M/PhotoSelectionMask.swift` (today's marquee drag moved in),
+  `M/PhotoCropSize.swift` (today's crop drag moved in), and the stubs
+  `M/PhotoMask.swift`, `M/PhotoTransform.swift`, `M/PhotoEyedropper.swift`.
+- App: edits `A/PhotoApp.swift`, `A/PhotoIntent.swift`, `A/PhotoWindow.swift`,
+  `A/PhotoCommands.swift`, `A/PhotoEditor.swift`, `A/PhotoPanel.swift`; new
+  `A/PhotoWindow+File.swift` (today's open and save moved in),
+  `A/PhotoWindow+Export.swift` (today's export moved in), the stubs
+  `A/PhotoWindow+Edit.swift`, `+Crop.swift`, `+History.swift`, `+Select.swift`,
+  `+AdjustmentLayer.swift`, `+Transform.swift`, `+Sample.swift`;
+  `A/PhotoCommands+File.swift`, `+Edit.swift`, `+Select.swift`, `+Image.swift`,
+  `+Layer.swift`, `+View.swift` (today's items moved in); `A/PhotoTopBar.swift`,
+  `A/PhotoStatusLine.swift`, `A/PhotoCanvasOverlay.swift`, `A/CropOverlay.swift`,
+  `A/SelectionOverlay.swift` (today's marks moved in), stubs
+  `A/TransformOverlay.swift`, `A/BrushCursorOverlay.swift`;
+  `A/PhotoAdjustTab.swift`, `A/PhotoLayersTab.swift`, `A/PhotoToolOptions.swift`
+  (today's panel moved in), stubs `A/PhotoHistoryTab.swift`, `A/CropOptions.swift`,
+  `A/SelectOptions.swift`, `A/TransformOptions.swift`, `A/SampleOptions.swift`.
+- Tests: `MT/PhotoContractsTests.swift`, `MT/PhotoFakesTests.swift`,
+  `MT/LiveServicesTests.swift`, `MT/PhotoBudgetTests.swift` (PB-1, PB-2, PB-9),
+  edits `MT/PhotoToolsTests.swift`; `ST/PhotoSeamsSnapshots.swift`
+  (Preview data pill), edits the Photo snapshot files whose views moved;
+  `UT/PhotoJourneyTests+Perf.swift` (PJ-P1, PJ-P2; after #333).
+- Docs: `docs/c4/model.json` (the `photo-model-sources` and
+  `photo-app-sources` descriptions name everything in section 2, once).
+- Also: files the six `needs-ui` issues of section 6.3.
+- Tasks (each one PR, under 400 lines): contracts (two PRs), fakes and
+  fixtures, services and Live stubs, workspace state and history, model
+  routing (no behavior change), intents and window split, commands split,
+  editor and overlay split, panel split, launch arguments and the preview
+  pill, C4 description, perf journeys.
+
+**PV-1 documents** (wave 1)
+
+- `M/PhotoDocumentFile.swift`, `M/PhotoRecovery.swift`, `M/Live/LiveDocuments.swift`
+- `A/PhotoWindow+File.swift`, `A/PhotoCommands+File.swift`, `A/PhotoTopBar.swift`,
+  `A/PhotoPackageIO.swift` (new), `A/PhotoAutosave.swift` (new)
+- `MT/PhotoDocumentRoundTripTests.swift`, `MT/PhotoDocumentFileTests.swift`,
+  `MT/PhotoContainerTests.swift`, `MT/PhotoRecoveryTests.swift`,
+  `MT/PhotoDocumentsBudgetTests.swift`
+- `ST/PhotoDocumentsSnapshots.swift`, `ST/PhotoPackageIOTests.swift`
+- `UT/PhotoJourneyTests+Documents.swift`, `UT/PhotoJourneyTests+Recovery.swift`,
+  `UT/PhotoJourneyTests+PerfDocuments.swift`
+
+**PV-2 edit and layer commands** (wave 1)
+
+- `M/PhotoClipboard.swift`, `M/PhotoLayerOps.swift`, `M/Live/LiveEdit.swift`
+- `A/PhotoWindow+Edit.swift`, `A/PhotoCommands+Edit.swift`,
+  `A/PhotoCommands+Layer.swift`, `A/PhotoPasteboard.swift` (new)
+- `MT/PhotoClipboardTests.swift`, `MT/PhotoLayerOpsTests.swift`, `MT/PhotoEditBudgetTests.swift`
+- `ST/PhotoEditSnapshots.swift`, `ST/PhotoPasteboardTests.swift`
+- `UT/PhotoJourneyTests+Edit.swift`, `UT/PhotoJourneyTests+LayerOps.swift`
+
+**PV-3 crop precision** (wave 1)
+
+- `M/PhotoCropSize.swift`, `M/Live/LiveCrop.swift`
+- `A/PhotoWindow+Crop.swift`, `A/CropOptions.swift`, `A/CropOverlay.swift`
+- `MT/PhotoCropSizeTests.swift`, `MT/PhotoCropBudgetTests.swift`
+- `ST/PhotoCropOptionsSnapshots.swift`
+- `UT/PhotoJourneyTests+Crop.swift`
+
+**PV-10 polish** (wave 1)
+
+- `M/PhotoInspectorContent.swift`
+- `A/PhotoStatusLine.swift`, `A/PhotoEditor.swift`, `A/AdjustmentsInspector.swift`,
+  `A/CurvesSection.swift`, `A/ImageSizeSheet.swift`, `A/StraightenSheet.swift`
+- `MT/PhotoLayoutTests.swift`, edits `MT/PhotoInspectorContentTests.swift`
+- `ST/PhotoPolishSnapshots.swift`
+- `UT/PhotoJourneyTests+Layout.swift`
+- Also: relabels #255 and #586 to `line:suiteui`; the `-PhotoWindowWidth`
+  argument is PV-0's.
+
+**PV-6 adjustment layers** (wave 2)
+
+- `M/PhotoAdjustmentLayer.swift`, `M/PhotoLayerComposite.swift`,
+  `M/Live/LiveAdjustmentLayers.swift`
+- `A/PhotoWindow+AdjustmentLayer.swift`, `A/PhotoAdjustTab.swift`,
+  `A/PhotoLayersTab.swift`, `A/PhotoCommands+Layer.swift`
+- `MT/PhotoAdjustmentLayerTests.swift`, `MT/PhotoAdjustmentLayerTileTests.swift`,
+  `MT/PhotoAdjustmentLayerBudgetTests.swift`
+- `ST/PhotoAdjustmentLayerSnapshots.swift`, `ST/PhotoAdjustmentLayerLatencyTests.swift`
+- `UT/PhotoJourneyTests+AdjustmentLayers.swift`
+
+**PV-4 history tab and brush cursor** (wave 2)
+
+- `M/PhotoHistoryRows.swift` (new: each row's name and whether it is current
+  or undone, from `historySteps` and `historyIndex`)
+- `A/PhotoWindow+History.swift`, `A/PhotoHistoryTab.swift`, `A/BrushCursorOverlay.swift`
+- `MT/PhotoHistoryRowsTests.swift`, `MT/PhotoHistoryBudgetTests.swift`
+- `ST/PhotoHistorySnapshots.swift` (the name #644 gives), `ST/PhotoBrushCursorSnapshots.swift`
+- `UT/PhotoJourneyTests+History.swift`
+
+**PV-7 transform and flip** (wave 2)
+
+- `M/PhotoTransform.swift`, `M/Live/LiveTransform.swift`
+- `A/PhotoWindow+Transform.swift`, `A/TransformOptions.swift`, `A/TransformOverlay.swift`,
+  `A/PhotoCommands+Edit.swift`, `A/PhotoCommands+Image.swift`
+- `MT/PhotoTransformTests.swift`, `MT/PhotoTransformBudgetTests.swift`
+- `ST/PhotoTransformSnapshots.swift`, `ST/PhotoTransformLatencyTests.swift`
+- `UT/PhotoJourneyTests+Transform.swift`
+
+**PV-8 export size and formats** (wave 2)
+
+- `M/PhotoExportOptions.swift`, `M/PhotoImageFile.swift`, `M/Live/LiveExportSizing.swift`
+- `A/PhotoWindow+Export.swift`, `A/ExportSheet.swift`, `A/ImageIOCodec.swift`
+- `MT/PhotoExportOptionsTests.swift`, `MT/PhotoExportBudgetTests.swift`
+- `ST/PhotoExportOptionsSnapshots.swift`
+- `UT/PhotoJourneyTests+Export.swift`
+
+**PV-9 eyedropper** (wave 2)
+
+- `M/PhotoEyedropper.swift`, `M/Live/LiveSampling.swift`
+- `A/PhotoWindow+Sample.swift`, `A/SampleOptions.swift`
+- `MT/PhotoEyedropperTests.swift`
+- `ST/PhotoEyedropperSnapshots.swift`
+- `UT/PhotoJourneyTests+Sample.swift`
+
+**PV-5 selections and masks** (wave 3)
+
+- `M/PhotoSelectionMask.swift`, `M/PhotoMask.swift`, `M/PhotoLayerComposite.swift`,
+  `M/Live/LiveSelection.swift`
+- `A/PhotoWindow+Select.swift`, `A/SelectOptions.swift`, `A/SelectionOverlay.swift`,
+  `A/PhotoLayersTab.swift`, `A/PhotoCommands+Select.swift`, `A/PhotoCommands+Layer.swift`
+- `MT/PhotoSelectionMaskTests.swift` (the name #421 gives), `MT/PhotoMaskTests.swift`,
+  `MT/PhotoSelectionBudgetTests.swift`
+- `ST/PhotoSelectionMaskSnapshots.swift` (the name #421 gives), `ST/PhotoSelectionLatencyTests.swift`
+- `UT/PhotoJourneyTests+Select.swift`, `UT/PhotoJourneyTests+Mask.swift`
+
+Checked: within each wave the lists above share no path (a script over this
+section: every path listed once per wave).
+
+### 8.4 Engine work (creative-core)
+
+No open creative-core issue serves Photo. v2 needs these new ones; none is
+filed here (the captain files them with the packets).
+
+| id | Needs a new core issue | One-line spec | Waited on by |
+|---|---|---|---|
+| CR-1 | yes | `PixelBuffer.transformed(_ m: AffineMatrix, width:height:filter:) throws -> PixelBuffer`: resample through an affine map (scale, rotate, translate) with transparent outside and the `ResampleFilter` kernels, identity bit for bit | PV-7 |
+| CR-2 | yes | `PixelBuffer.flipped(_ axis: FlipAxis) -> PixelBuffer`: exact mirror (copied pixels, no filter), twice is the input | PV-7 |
+| CR-3 | yes | `Mask.feathered(radius: Double) throws -> Mask`: Gaussian blur of coverage with sigma = radius / 3, values kept in 0...1, radius 0 returns self | PV-5 |
+| CR-4 | yes | `Mask.contours(level: Float = 0.5) -> [[Mask.Point]]` and `Mask.coveredBounds -> (x, y, width, height)?`: marching-squares outlines for marching ants and the bounds Crop and Copy use | PV-5 |
+| CR-5 | optional | `PixelBuffer.hueSaturation(hue:saturation:lightness:) throws -> PixelBuffer`: move Photo's `HueSaturation.swift` (its `ponytail:`) into CoreRaster so an adjustment layer's tile render meets PB-13 | PV-6 (perf only) |
+| CR-6 | optional | `composite(_:onto:x:y:blendMode:opacity:mask:)`: the composite weighted by a coverage buffer, so a masked layer doesn't need a premultiply pass in Photo | PV-5 (perf only) |
+| CR-7 | yes, not v2 | `PixelBuffer.healed(offset:through:)` as creative-core#232 specified; #232 closed with `cloned` only, and Photo heals with a per-dab mean shift (`PhotoRetouch.swift`'s `ponytail:`) | none in v2; Heal's quality follow-up |
+
+PV-1 needs no engine work: the zip container is a small pure-Swift writer
+and reader of stored entries in PhotoModel (CRC-32 included), and PNGs go
+through the app's ImageIO codec as today. If the captain would rather have
+the container in creative-core (Library or Design may want it), that is
+section 9, question 1.
