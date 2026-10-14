@@ -266,7 +266,7 @@ asserts it), and every relationship names ids that exist.
 
 | Component | Status | Responsibility | Owned paths (`Sources/SuiteUI/`) | Relationships |
 |---|---|---|---|---|
-| Tokens and glass | existing | Every raw value and the one glass modifier | `Tokens.swift`, `Glass.swift`, `GlassPanel.swift` | used by every component |
+| Tokens and glass | existing + planned | Every raw value and the one glass modifier; planned: `SuiteEnvironment` (`suiteReduceMotion`, `.suiteControl(…)`) | `Tokens.swift`, `Glass.swift`, `GlassPanel.swift`, `SuiteEnvironment.swift` (planned) | used by every component |
 | Window shell | existing | `SuiteWindow`; planned: the `-SuiteGallery` hook, app-owned expansion, row context menus | `SuiteWindow.swift` | draws Rows and lists; shows the gallery |
 | Editor shell | existing + planned | `EditorShell`, the top bar family, `SegmentedTabs`; planned: timeline slot, `.primary`, save status, capsule tabs, `ShellLayout` | `EditorShell.swift`, `EditorTopBar.swift`, `SegmentedTabs.swift`, `ShellLayout.swift` (planned) | hosts Tools, Canvas, Viewer chrome, Timeline; conforms to `ShellLayingOut` |
 | Tool palette | existing | `ToolbarAction`, `PaletteTool`, `ToolbarGroup` (floating, rail) | `ToolbarGroup.swift` | hosted by both shells; conforms to `ToolPicking` |
@@ -284,7 +284,7 @@ asserts it), and every relationship names ids that exist.
 | Node graph | planned | `NodeGraph`, `NodeGraphGeometry` | `NodeGraph.swift`, `NodeGraphGeometry.swift` | conforms to `GraphGeometry` |
 | Probes | planned | `FrameProbe`, `ControlInventory` | `FrameProbe.swift`, `ControlInventory.swift` | fed by Canvas, Number entry, Timeline, Tools; read by the journey harness; conform to `FrameProbeRecording`, `ControlInventorying` |
 | Component gallery | planned | `SuiteGallery` and one page per family | `SuiteGallery.swift`, `Gallery/` | shown by Window shell; launched by SuiteUI's journeys |
-| Component contracts | planned | Section 5's protocols, value types, live conformances and Fakes, Foundation only | `Contracts/` | conformed to by the rule files; the Fakes back the gallery's UI-first pages |
+| Component contracts | planned | Section 5's protocols, value types and Fakes, Foundation only (live conformances sit beside their rule files) | `Contracts/` | conformed to by the rule files; the Fakes back the gallery's UI-first pages |
 
 Golden comparison (`GoldenComparing`) belongs to the snapshot container, not
 to SuiteUI: its conformance lives in `Tests/AppSnapshotTests/GoldenImage.swift`
