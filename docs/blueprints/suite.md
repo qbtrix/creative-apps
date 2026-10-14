@@ -722,3 +722,1393 @@ Photo's new image has the photo's pixel size; at 5 Paste is disabled with
 | SP6 | `testRoutedOpen` | `NSWorkspace.open` at the launcher → first frame of the document window, app running and app cold | QB-S6 |
 | SP7 | `testRoundTripLatency` | Edit in Photo → Photo's first frame with the image; Photo ⌘S → Library's thumbnail updated | QB-S7 |
 | SP8 | `testPreferencePropagation` | a setting changed in Settings → the change applied in each running app | QB-S8 |
+
+---
+
+## 5. Contracts
+
+One Swift protocol per use case, exact signatures, and a fake for each, so
+the home, the apps' menus and the stores can be built in parallel. They
+live in `SuiteModel` (Linux-safe, Foundation only, the
+`FoundationEssentials` import pattern, Swift 6, value types and actors,
+`Sendable`). The four files below are also committed as
+`docs/blueprints/suite/contracts/{Values,Contracts,Fakes,Services}.swift`
+with `main.swift` (smoke checks of every fake against the behavior this
+blueprint states) and `check.sh`, which compiles them with `swiftc
+-swift-version 6 -warnings-as-errors` and runs them. On this session's
+Linux toolchain (swift 6.3.3) it prints `contracts: PASS`. Task SC-1 moves
+them into `Sources/SuiteModel/` (one file per protocol and per fake) and
+their checks into `SuiteModelTests`.
+
+Every throwing requirement uses typed throws, `throws(SuiteError)`;
+`SuiteError.message` is the sentence the UI shows, so journeys assert the
+same text the Model test does.
+
+### 5.1 Use cases at a glance
+
+| UC | Protocol | Tier | Fake | Live (who builds it) | Feature |
+|---|---|---|---|---|---|
+| 1 | `AppSwitching` | 1 | `FakeSwitching` (run states, a missing app, a terminate hook) | SuiteShell `AppLauncher`: `NSRunningApplication.activate`, else `NSWorkspace.openApplication(at:configuration:)` at `SuiteApp.bundlePath` | switching |
+| 2 | `RecentWork` | 1 | `FakeRecents` | `FileStore` over `recents.json` + `StoreWatcher` | recents-open-in |
+| 3 | `DocumentCreating` | 1 | `FakeCreating` (also the reference: tiles and presets) | same type, moved to `Home/` | home |
+| 4 | `DocumentRouting` | 1 | `FakeRouting` (reference) | same type, in `Routing/` | recents-open-in |
+| 5 | `HandOffSending`, `HandOffReceiving` | 1 | `FakeHandOffs` | SuiteShell `HandOffTransport` + `FileStore` over `handoffs/` | switching |
+| 6 | `RoundTripEditing` | 2 | `FakeRoundTrips` | `FileStore` over `roundtrips/`; Library and Photo call their halves | photo-round-trip |
+| 7 | `PasteboardCoding` | 1 | `FakePasteboard` (reference: what each app accepts, best first) | same type in `Pasteboard/`; SuiteShell `PasteboardBridge`, `DragBridge` map it to AppKit | clipboard-drag |
+| 8 | `AssetLibrary` | 2 | `FakeAssets` | `FileStore` over `assets/` | shared-assets |
+| 9 | `AssetLinking` | 3 | `FakeLinking` (reference) | same type in `Links/` | linked-assets |
+| 10 | `AnimationSourceReading` | 3 | `FakeAnimationSource` | in HaloModel (it links FlareCore; SuiteModel never imports an engine) | flare-in-halo |
+| 11 | `PreferencesStoring` | 2 | `FakePreferences` (refuses a stale revision) | `FileStore` over `preferences.json` | settings |
+| 12 | `SettingsRouting` | 2 | `FakeSettingsRoute` | an `.openSettings` hand-off to the launcher | settings |
+| 13 | `OnboardingFlowing` | 3 | `FakeOnboarding` (reference) | same type in `Onboarding/` | onboarding |
+| 14 | `UpdateChecking` | 2 | `FakeUpdates` (feed and accepted signatures injected) | AfterGlowApp: URLSession, CryptoKit Ed25519 verify, replace the bundle | updater |
+| 15 | `ThumbnailPublishing` | 1 | `FakeThumbnails` | SuiteShell `ThumbnailWriter` | recents-open-in |
+| 16 | `HomeBuilding` | 1 | `FakeHome` (reference; the live one formats dates with the locale) | same type in `Home/` | home |
+| 17 | `SizeBudgetChecking` | 3 | `FakeSizeBudget` (reference) | same type in `Packaging/` | bundle |
+
+Which journey each contract serves: UC-1 SJ3, SP1, SP2; UC-2 SJ1, SJ4; UC-3
+SJ2; UC-4 SJ5, SJ11; UC-5 SJ1, SJ2, SJ5, SJ10; UC-6 SJ10; UC-7 SJ6, SJ14;
+UC-8 SJ13; UC-9 SJ16; UC-10 SJ17; UC-11 SJ12, SP8; UC-12 SJ12; UC-13 SJ18;
+UC-14 SJ15; UC-15 SJ4; UC-16 SJ0, SJ1, SP3, SP4; UC-17 the size gate
+(section 7.5).
+
+**Which services a launch gets.** `-SuiteFixture <name>`: `.fake` seeded
+from that fixture (journeys, snapshots), with the "Preview data" pill. No
+arguments (a person's launch): `.live`, built by SuiteShell from its slot
+files; a slot whose feature has not landed holds the fake with
+`unavailable: "Not connected yet (<feature>)."`, so its controls are
+disabled with that reason, never dead.
+
+### 5.2 The protocols (`Contracts.swift`)
+
+```swift
+// Contracts.swift: one protocol per suite use case (SuiteModel, planned
+// `Sources/SuiteModel/Contracts/`, one file per protocol there). UI and
+// logic build against these in parallel: the home and the apps' menus on
+// the fakes in Fakes.swift, the stores and SuiteShell's live types behind
+// them. Every throwing requirement throws `SuiteError`, whose `message` is
+// the sentence the UI shows.
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
+import Foundation
+#endif
+
+/// UC-1 Switch between apps (tier 1). Live: SuiteShell `AppLauncher`
+/// (NSRunningApplication.activate, else NSWorkspace.openApplication).
+public protocol AppSwitching: Sendable {
+    func runState(of app: SuiteApp) async -> AppRunState
+    /// Brings the app forward, launching it if needed; never opens a document.
+    func switchTo(_ app: SuiteApp, reason: SwitchReason) async throws(SuiteError) -> SwitchReceipt
+}
+
+/// UC-2 One recents list (tier 1). Live: `FileStore` over `recents.json`
+/// plus SuiteShell's change notification.
+public protocol RecentWork: Sendable {
+    func list() async throws(SuiteError) -> RecentsList
+    func note(_ ref: SuiteDocumentRef, event: RecentEvent, at date: Date, thumbnail: String?) async throws(SuiteError)
+    func remove(fileID: String) async throws(SuiteError)
+    func clear(app: SuiteApp) async throws(SuiteError)
+}
+
+/// UC-3 New document by type (tier 1). Pure: presets come from each app's
+/// own preset list (mirrored here), creating one makes the hand-off to send.
+public protocol DocumentCreating: Sendable {
+    func tiles(missing: Set<SuiteApp>) -> [NewTile]
+    func handOff(for preset: NewDocumentPreset, id: String, at date: Date) -> HandOff
+}
+
+/// UC-4 Route a file to its app, and list Open In targets (tier 1 and 2). Pure.
+public protocol DocumentRouting: Sendable {
+    /// The app a file opens in, or `.unsupportedFile`.
+    func route(fileName: String) throws(SuiteError) -> SuiteApp
+    /// Other apps that read this type, default first, never `from` itself.
+    func openInTargets(for type: SuiteTypeID, from app: SuiteApp) -> [SuiteApp]
+}
+
+/// UC-5 Send a hand-off to another process (tier 1: home opens and new
+/// documents ride on it). Live: SuiteShell `HandOffTransport`.
+public protocol HandOffSending: Sendable {
+    func send(_ handOff: HandOff) async throws(SuiteError) -> SwitchReceipt
+}
+
+/// UC-5b Receive and settle hand-offs (every app). Live: `FileStore` over `handoffs/`.
+public protocol HandOffReceiving: Sendable {
+    func receive(_ data: Data, now: Date) async throws(SuiteError) -> HandOff
+    func settle(id: String, as state: HandOffState) async throws(SuiteError)
+}
+
+/// UC-6 Library to Photo and back (tier 2). Live: a store over `roundtrips/`
+/// and hand-offs; Library and Photo each call their half.
+public protocol RoundTripEditing: Sendable {
+    /// Library: start; Photo receives an `.edit` hand-off with the session id.
+    func begin(_ source: RoundTripSource, id: String, at date: Date) async throws(SuiteError) -> RoundTripSession
+    /// Photo: the person saved; the flattened copy is for Library, the layered one for re-editing.
+    func photoSaved(session id: String, flattened: SuiteDocumentRef, layered: SuiteDocumentRef) async throws(SuiteError) -> RoundTripSession
+    /// Library: the copy is in the catalog, stacked on the original.
+    func returned(session id: String, as ref: SuiteDocumentRef) async throws(SuiteError) -> RoundTripSession
+    func cancel(session id: String) async throws(SuiteError)
+    func session(_ id: String) async -> RoundTripSession?
+}
+
+/// UC-7 Typed pasteboard and drag data between apps (tier 1). Pure; SuiteShell
+/// maps `TypedData` to and from NSPasteboard items and drag providers.
+public protocol PasteboardCoding: Sendable {
+    /// Richest first: the suite envelope, then SVG or PNG, then text.
+    func representations(of item: SuiteClipItem) -> [TypedData]
+    /// The best item this app can take from what is offered, or nil.
+    func bestItem(from offered: [TypedData], for app: SuiteApp) -> SuiteClipItem?
+    /// nil when Paste can act in this app; else why it is disabled.
+    func pasteRefusal(for offered: [TypedData], in app: SuiteApp) -> SuiteError?
+}
+
+/// UC-8 The shared asset and colour library (tier 2). Live: `FileStore` over `assets/`.
+public protocol AssetLibrary: Sendable {
+    func index() async throws(SuiteError) -> AssetIndex
+    func add(_ draft: AssetDraft, id: String, at date: Date) async throws(SuiteError) -> SuiteAsset
+    /// New payload or colour; the revision goes up by one.
+    func update(_ id: String, payload: Data?, color: SuiteColorValue?, at date: Date) async throws(SuiteError) -> SuiteAsset
+    func remove(_ id: String) async throws(SuiteError)
+    func payload(of asset: SuiteAsset) async throws(SuiteError) -> Data
+}
+
+/// UC-9 Placed assets keep their link (tier 3). Pure over the index.
+public protocol AssetLinking: Sendable {
+    func link(to asset: SuiteAsset) -> AssetLink
+    func status(of link: AssetLink, in index: AssetIndex) -> LinkStatus
+    /// The link after Update; nil when there is nothing newer.
+    func updated(_ link: AssetLink, in index: AssetIndex) -> AssetLink?
+}
+
+/// UC-10 Read a Flare animation for Halo (tier 3). Live: in HaloModel, which
+/// already links FlareCore (SuiteModel never imports an engine).
+public protocol AnimationSourceReading: Sendable {
+    func summary(of ref: SuiteDocumentRef) async throws(SuiteError) -> AnimationSummary
+}
+
+/// UC-11 Shared preferences (tier 2). Live: `FileStore` over `preferences.json`.
+public protocol PreferencesStoring: Sendable {
+    func load() async throws(SuiteError) -> SuitePreferences
+    /// Writes `revision + 1`; `.staleRevision` when another writer won (the caller reloads).
+    func save(_ preferences: SuitePreferences) async throws(SuiteError) -> SuitePreferences
+}
+
+/// UC-12 Open the one Settings window at a pane from any app (tier 2).
+/// Live: an `.openSettings` hand-off to the launcher.
+public protocol SettingsRouting: Sendable {
+    func open(_ pane: SettingsPane, from app: SuiteApp) async throws(SuiteError)
+}
+
+/// UC-13 First-launch onboarding (tier 3). Pure.
+public protocol OnboardingFlowing: Sendable {
+    var pages: [OnboardingPage] { get }
+    func shouldShow(_ preferences: SuitePreferences, version: Int) -> Bool
+    func finishing(_ preferences: SuitePreferences, focus: OnboardingFocus?, version: Int) -> SuitePreferences
+}
+
+/// UC-14 One updater (tier 2). Live: URLSession download, CryptoKit Ed25519
+/// verify, replace the bundle (in AfterGlowApp).
+public protocol UpdateChecking: Sendable {
+    func check(current: SuiteVersion) async throws(SuiteError) -> UpdateOffer?
+    /// Downloads and verifies; returns the local path of the verified zip.
+    func download(_ offer: UpdateOffer) async throws(SuiteError) -> String
+    /// Asks every running suite app to quit (each runs its own unsaved flow), then replaces and relaunches.
+    func install(zipAt path: String) async throws(SuiteError)
+}
+
+/// UC-15 Thumbnails for the home (tier 1). Live: SuiteShell `ThumbnailWriter`.
+public protocol ThumbnailPublishing: Sendable {
+    /// Writes a 512 px PNG; returns its store-relative path.
+    func publish(png: Data, for ref: SuiteDocumentRef) async throws(SuiteError) -> String
+}
+
+/// UC-16 Build the home's state (tier 1). Pure.
+public protocol HomeBuilding: Sendable {
+    func home(recents: RecentsList, running: [SuiteApp], query: String, filter: SuiteApp?,
+              order: [SuiteApp], missingApps: Set<SuiteApp>, missingFiles: Set<String>, now: Date) -> HomeState
+}
+
+/// UC-17 Size budget (tier 3, gates packaging). Pure; `scripts/size-report` feeds it.
+public protocol SizeBudgetChecking: Sendable {
+    func evaluate(_ report: SizeReport, against budget: SizeBudget) -> [SizeFinding]
+}
+```
+
+### 5.3 Wiring (`Services.swift`)
+
+```swift
+// Services.swift: SuiteServices (SuiteModel, planned
+// `Sources/SuiteModel/SuiteServices.swift`). One member per contract.
+// `.fake` is every fake; SuiteShell builds `.live` from one slot file per
+// member (`Sources/SuiteShell/Live/<Member>Slot.swift`), each returning the
+// fake with an `unavailable` reason until its feature swaps it, so features
+// in one wave never edit the same file.
+
+public struct SuiteServices: Sendable {
+    public var switching: any AppSwitching
+    public var recents: any RecentWork
+    public var creating: any DocumentCreating
+    public var routing: any DocumentRouting
+    public var sending: any HandOffSending
+    public var receiving: any HandOffReceiving
+    public var roundTrips: any RoundTripEditing
+    public var pasteboard: any PasteboardCoding
+    public var assets: any AssetLibrary
+    public var linking: any AssetLinking
+    public var animations: any AnimationSourceReading
+    public var preferences: any PreferencesStoring
+    public var settings: any SettingsRouting
+    public var onboarding: any OnboardingFlowing
+    public var updates: any UpdateChecking
+    public var thumbnails: any ThumbnailPublishing
+    public var home: any HomeBuilding
+    public var size: any SizeBudgetChecking
+    /// True while any member is a fake; drives a "Preview data" pill in the home.
+    public var isPreview: Bool
+
+    public init(switching: any AppSwitching, recents: any RecentWork, creating: any DocumentCreating,
+                routing: any DocumentRouting, sending: any HandOffSending, receiving: any HandOffReceiving,
+                roundTrips: any RoundTripEditing, pasteboard: any PasteboardCoding, assets: any AssetLibrary,
+                linking: any AssetLinking, animations: any AnimationSourceReading, preferences: any PreferencesStoring,
+                settings: any SettingsRouting, onboarding: any OnboardingFlowing, updates: any UpdateChecking,
+                thumbnails: any ThumbnailPublishing, home: any HomeBuilding, size: any SizeBudgetChecking, isPreview: Bool) {
+        self.switching = switching; self.recents = recents; self.creating = creating; self.routing = routing
+        self.sending = sending; self.receiving = receiving; self.roundTrips = roundTrips; self.pasteboard = pasteboard
+        self.assets = assets; self.linking = linking; self.animations = animations; self.preferences = preferences
+        self.settings = settings; self.onboarding = onboarding; self.updates = updates; self.thumbnails = thumbnails
+        self.home = home; self.size = size; self.isPreview = isPreview
+    }
+
+    /// Every member a fake, seeded from a fixture's recents and assets.
+    public static func fake(recents: RecentsList = RecentsList(), assets: AssetIndex = AssetIndex(),
+                            running: [SuiteApp] = [], missing: Set<SuiteApp> = []) -> SuiteServices {
+        let switching = FakeSwitching(running: running, missing: missing)
+        let handOffs = FakeHandOffs(switching: switching)
+        return SuiteServices(switching: switching, recents: FakeRecents(recents), creating: FakeCreating(),
+                             routing: FakeRouting(), sending: handOffs, receiving: handOffs,
+                             roundTrips: FakeRoundTrips(), pasteboard: FakePasteboard(), assets: FakeAssets(assets),
+                             linking: FakeLinking(), animations: FakeAnimationSource(), preferences: FakePreferences(),
+                             settings: FakeSettingsRoute(), onboarding: FakeOnboarding(), updates: FakeUpdates(),
+                             thumbnails: FakeThumbnails(), home: FakeHome(), size: FakeSizeBudget(), isPreview: true)
+    }
+}
+```
+
+### 5.4 Shared values (`Values.swift`)
+
+<details><summary>Values.swift (identity, type registry, document refs, errors, recents, hand-offs, round trip, colours and assets, pasteboard, preferences, onboarding, updates, home, packaging)</summary>
+
+```swift
+// Values.swift: the values every suite contract shares (SuiteModel,
+// planned `Sources/SuiteModel/Values/`). Foundation only, Linux-safe,
+// Sendable. Pure logic that several features need (recents merge, the type
+// registry, version compare) lives on these values so it is tested once.
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
+import Foundation
+#endif
+
+// MARK: identity
+
+/// The one id prefix. Placeholder until the captain names the real one (Q1).
+public enum SuiteIdentity {
+    public static let prefix = "org.creativesuite"
+}
+
+/// The launcher and the five apps inside AfterGlow.app.
+public enum SuiteApp: String, CaseIterable, Codable, Hashable, Sendable {
+    case launcher, flare, design, photo, library, halo
+
+    /// The five apps, in the home's default order.
+    public static let apps: [SuiteApp] = [.flare, .design, .photo, .library, .halo]
+
+    public var displayName: String {
+        switch self {
+        case .launcher: "AfterGlow"
+        case .flare: "Flare"
+        case .design: "Design"
+        case .photo: "Photo"
+        case .library: "Library"
+        case .halo: "Halo"
+        }
+    }
+
+    public var bundleID: String {
+        SuiteIdentity.prefix + "." + (self == .launcher ? "afterglow" : rawValue)
+    }
+
+    /// Path inside AfterGlow.app; the launcher is the bundle itself.
+    public var bundlePath: String {
+        self == .launcher ? "" : "Contents/Helpers/\(displayName).app"
+    }
+
+    /// Window > Switch To shortcut: Control-Command and this digit.
+    public var switchDigit: Int {
+        switch self {
+        case .launcher: 0
+        case .flare: 1
+        case .design: 2
+        case .photo: 3
+        case .library: 4
+        case .halo: 5
+        }
+    }
+}
+
+// MARK: types
+
+/// A uniform type identifier, as a string so the Model stays Linux-safe.
+public struct SuiteTypeID: RawRepresentable, Hashable, Codable, Sendable {
+    public var rawValue: String
+    public init(rawValue: String) { self.rawValue = rawValue }
+
+    public static let flareAnimation = SuiteTypeID(rawValue: SuiteIdentity.prefix + ".flare.animation")
+    public static let designDocument = SuiteTypeID(rawValue: SuiteIdentity.prefix + ".design.document")
+    public static let haloProject = SuiteTypeID(rawValue: SuiteIdentity.prefix + ".halo.project")
+    public static let photoOpenRaster = SuiteTypeID(rawValue: SuiteIdentity.prefix + ".photo.openraster")
+    public static let handOff = SuiteTypeID(rawValue: SuiteIdentity.prefix + ".suite.handoff")
+    public static let assetEnvelope = SuiteTypeID(rawValue: SuiteIdentity.prefix + ".suite.asset")
+    public static let designLayers = SuiteTypeID(rawValue: SuiteIdentity.prefix + ".design.layers")
+    public static let flareLayers = SuiteTypeID(rawValue: SuiteIdentity.prefix + ".flare.layers")
+    public static let png = SuiteTypeID(rawValue: "public.png")
+    public static let jpeg = SuiteTypeID(rawValue: "public.jpeg")
+    public static let heic = SuiteTypeID(rawValue: "public.heic")
+    public static let svg = SuiteTypeID(rawValue: "public.svg-image")
+    public static let plainText = SuiteTypeID(rawValue: "public.utf8-plain-text")
+}
+
+/// One file type the suite reads: who owns it and who else can open it.
+public struct SuiteDocumentType: Hashable, Sendable {
+    public var id: SuiteTypeID
+    public var name: String              // "Flare Animation"; used in messages
+    public var extensions: [String]      // lowercased, no dot
+    public var owner: SuiteApp?          // Editor, rank Owner; nil for public types
+    public var readers: [SuiteApp]       // Open In targets, default app first
+    public init(id: SuiteTypeID, name: String, extensions: [String], owner: SuiteApp?, readers: [SuiteApp]) {
+        self.id = id; self.name = name; self.extensions = extensions; self.owner = owner; self.readers = readers
+    }
+}
+
+/// Every document type in the suite. `Bundle/Info/*.plist` mirror it, and
+/// `TypeRegistryPlistTests` fails when they differ.
+public struct SuiteTypeRegistry: Sendable {
+    public var types: [SuiteDocumentType]
+    public init(types: [SuiteDocumentType]) { self.types = types }
+
+    public static let standard = SuiteTypeRegistry(types: [
+        SuiteDocumentType(id: .flareAnimation, name: "Flare Animation", extensions: ["flare"],
+                          owner: .flare, readers: [.flare, .halo]),
+        SuiteDocumentType(id: .designDocument, name: "Design Document", extensions: ["design"],
+                          owner: .design, readers: [.design]),
+        SuiteDocumentType(id: .haloProject, name: "Halo Project", extensions: ["halo"],
+                          owner: .halo, readers: [.halo]),
+        SuiteDocumentType(id: .photoOpenRaster, name: "Photo Document", extensions: ["ora"],
+                          owner: .photo, readers: [.photo]),
+        SuiteDocumentType(id: .png, name: "PNG image", extensions: ["png"], owner: nil, readers: [.photo, .library]),
+        SuiteDocumentType(id: .jpeg, name: "JPEG image", extensions: ["jpg", "jpeg"], owner: nil, readers: [.photo, .library]),
+        SuiteDocumentType(id: .heic, name: "HEIC image", extensions: ["heic"], owner: nil, readers: [.photo, .library]),
+    ])
+
+    public func type(forExtension ext: String) -> SuiteDocumentType? {
+        let e = ext.lowercased()
+        return types.first { $0.extensions.contains(e) }
+    }
+
+    public func type(_ id: SuiteTypeID) -> SuiteDocumentType? { types.first { $0.id == id } }
+
+    /// The app a routed open goes to: the owner, else the first reader.
+    public func defaultApp(for id: SuiteTypeID) -> SuiteApp? {
+        guard let t = type(id) else { return nil }
+        return t.owner ?? t.readers.first
+    }
+}
+
+// MARK: documents
+
+/// A document on disk, as every app and the launcher refer to it.
+public struct SuiteDocumentRef: Hashable, Codable, Sendable {
+    public var path: String          // absolute path
+    public var fileID: String        // stable identity (volume and file number from the app; the path when unknown)
+    public var app: SuiteApp         // the app that last opened or saved it
+    public var type: SuiteTypeID
+    public var displayName: String   // file name with extension
+    public var bookmark: Data?       // macOS bookmark data when the app has it; nil in tests and on Linux
+    public init(path: String, fileID: String, app: SuiteApp, type: SuiteTypeID, displayName: String, bookmark: Data? = nil) {
+        self.path = path; self.fileID = fileID; self.app = app; self.type = type
+        self.displayName = displayName; self.bookmark = bookmark
+    }
+}
+
+// MARK: errors
+
+/// Every suite failure, each with the sentence the UI shows.
+public enum SuiteError: Error, Equatable, Sendable {
+    case appMissing(SuiteApp)
+    case fileMissing(name: String)
+    case unsupportedFile(name: String)
+    case nothingToPaste
+    case cannotPaste(app: SuiteApp, kind: String)
+    case staleRevision
+    case damaged(String)
+    case notAvailable(String)
+    case cancelled
+    case timedOut
+    case updateNotVerified
+    case ioFailed(String)
+
+    public var message: String {
+        switch self {
+        case .appMissing(let a): "\(a.displayName) is missing from AfterGlow. Reinstall AfterGlow to get it back."
+        case .fileMissing(let n): "\(n) was moved or deleted."
+        case .unsupportedFile(let n): "AfterGlow can't open \u{201C}\(n)\u{201D}. It isn't a suite document or an image."
+        case .nothingToPaste: "Nothing to paste."
+        case .cannotPaste(let a, let k): "\(a.displayName) can't paste \(k) yet."
+        case .staleRevision: "Another app changed this at the same time. Try again."
+        case .damaged(let d): "This file is damaged: \(d)."
+        case .notAvailable(let r): r
+        case .cancelled: "Cancelled."
+        case .timedOut: "This took too long. Try again."
+        case .updateNotVerified: "This update couldn't be verified, so it wasn't installed."
+        case .ioFailed(let d): "Couldn't save: \(d)."
+        }
+    }
+}
+
+// MARK: recents
+
+public enum RecentEvent: String, Codable, Sendable { case opened, saved }
+
+public struct RecentItem: Hashable, Codable, Sendable {
+    public var ref: SuiteDocumentRef
+    public var lastUsed: Date
+    public var thumbnail: String?    // path relative to the store, e.g. "thumbnails/<fileID>.png"
+    public init(ref: SuiteDocumentRef, lastUsed: Date, thumbnail: String? = nil) {
+        self.ref = ref; self.lastUsed = lastUsed; self.thumbnail = thumbnail
+    }
+}
+
+/// The one recents list. Newest first, one entry per file, at most `cap`.
+public struct RecentsList: Codable, Equatable, Sendable {
+    public static let cap = 200
+    public var revision: Int
+    public private(set) var items: [RecentItem]
+
+    public init(revision: Int = 0, items: [RecentItem] = []) {
+        self.revision = revision
+        self.items = []
+        for item in items { note(item) }
+    }
+
+    /// Puts the item first, replacing an older entry for the same file.
+    public mutating func note(_ item: RecentItem) {
+        items.removeAll { $0.ref.fileID == item.ref.fileID }
+        let at = items.firstIndex { $0.lastUsed < item.lastUsed } ?? items.count
+        items.insert(item, at: at)
+        if items.count > Self.cap { items.removeLast(items.count - Self.cap) }
+    }
+
+    public mutating func remove(fileID: String) { items.removeAll { $0.ref.fileID == fileID } }
+    public mutating func clear(app: SuiteApp) { items.removeAll { $0.ref.app == app } }
+
+    /// Items for one app (nil: all) whose name contains the query, any case.
+    public func filtered(app: SuiteApp?, query: String) -> [RecentItem] {
+        let q = query.lowercased()
+        return items.filter { item in
+            (app == nil || item.ref.app == app) && (q.isEmpty || item.ref.displayName.lowercased().contains(q))
+        }
+    }
+
+    /// Two writers raced: keep the newest entry per file from both.
+    public func merging(_ other: RecentsList) -> RecentsList {
+        var merged = RecentsList(revision: max(revision, other.revision), items: items)
+        for item in other.items {
+            if let mine = merged.items.first(where: { $0.ref.fileID == item.ref.fileID }), mine.lastUsed >= item.lastUsed {
+                continue
+            }
+            merged.note(item)
+        }
+        return merged
+    }
+}
+
+// MARK: new documents
+
+public struct NewDocumentPreset: Hashable, Codable, Sendable {
+    public var id: String               // "flare.vertical"
+    public var app: SuiteApp
+    public var title: String            // "Vertical 9:16"
+    public var detail: String           // "1080 × 1920, 30 fps"
+    public var parameters: [String: String]   // read by the app, e.g. ["width": "1080"]
+    public init(id: String, app: SuiteApp, title: String, detail: String, parameters: [String: String] = [:]) {
+        self.id = id; self.app = app; self.title = title; self.detail = detail; self.parameters = parameters
+    }
+}
+
+// MARK: switching
+
+public enum AppRunState: Equatable, Sendable {
+    case notRunning, launching, running(windows: Int), missing
+}
+
+public enum SwitchReason: String, Codable, Sendable { case shortcut, menu, home, handOff }
+
+public struct SwitchReceipt: Equatable, Sendable {
+    public var app: SuiteApp
+    public var wasRunning: Bool
+    public var requestedAt: UInt64      // mach_continuous_time ticks; the probe pairs it with the target's frame
+    public init(app: SuiteApp, wasRunning: Bool, requestedAt: UInt64) {
+        self.app = app; self.wasRunning = wasRunning; self.requestedAt = requestedAt
+    }
+}
+
+// MARK: hand-offs
+
+public enum HandOffVerb: String, Codable, Sendable {
+    case open, new, edit, place, importAnimation, returnEdit, openSettings
+}
+
+public enum HandOffState: String, Codable, Sendable { case pending, accepted, returned, cancelled, expired }
+
+/// One request from one suite process to another, written as a `.aghandoff` file.
+public struct HandOff: Codable, Equatable, Identifiable, Sendable {
+    public static let formatVersion = 1
+    public var format: Int
+    public var id: String
+    public var from: SuiteApp
+    public var to: SuiteApp
+    public var verb: HandOffVerb
+    public var documents: [SuiteDocumentRef]
+    public var preset: NewDocumentPreset?
+    public var asset: AssetLink?
+    public var settingsPane: SettingsPane?
+    public var session: String?          // a round-trip session id
+    public var returnTo: SuiteApp?
+    public var createdAt: Date
+    public var state: HandOffState
+
+    public init(id: String, from: SuiteApp, to: SuiteApp, verb: HandOffVerb, documents: [SuiteDocumentRef] = [],
+                preset: NewDocumentPreset? = nil, asset: AssetLink? = nil, settingsPane: SettingsPane? = nil,
+                session: String? = nil, returnTo: SuiteApp? = nil, createdAt: Date, state: HandOffState = .pending) {
+        self.format = Self.formatVersion
+        self.id = id; self.from = from; self.to = to; self.verb = verb; self.documents = documents
+        self.preset = preset; self.asset = asset; self.settingsPane = settingsPane; self.session = session
+        self.returnTo = returnTo; self.createdAt = createdAt; self.state = state
+    }
+
+    /// Pending hand-offs older than this are expired by the next reader.
+    public static let lifetime: Double = 7 * 24 * 3600
+
+    public func isExpired(now: Date) -> Bool {
+        state == .pending && now.timeIntervalSince(createdAt) > Self.lifetime
+    }
+}
+
+/// The `.aghandoff` file format: sorted-key JSON; a newer format is refused by name.
+public enum HandOffCodec {
+    public static func encode(_ h: HandOff) throws(SuiteError) -> Data {
+        let e = JSONEncoder()
+        e.outputFormatting = [.sortedKeys]
+        do { return try e.encode(h) } catch { throw .damaged("hand-off could not be written") }
+    }
+
+    public static func decode(_ data: Data) throws(SuiteError) -> HandOff {
+        struct Head: Decodable { var format: Int }
+        guard let head = try? JSONDecoder().decode(Head.self, from: data) else { throw .damaged("not a hand-off") }
+        guard head.format <= HandOff.formatVersion else {
+            throw .notAvailable("This was sent by a newer AfterGlow. Update AfterGlow to open it.")
+        }
+        do { return try JSONDecoder().decode(HandOff.self, from: data) } catch { throw .damaged("hand-off fields") }
+    }
+}
+
+// MARK: round trip
+
+public struct RoundTripSource: Codable, Equatable, Sendable {
+    public var catalogPhotoID: String    // Library's photo id
+    public var original: SuiteDocumentRef
+    public init(catalogPhotoID: String, original: SuiteDocumentRef) {
+        self.catalogPhotoID = catalogPhotoID; self.original = original
+    }
+}
+
+public enum RoundTripState: Codable, Equatable, Sendable {
+    case open                              // Photo has it
+    case saved(flattened: SuiteDocumentRef, layered: SuiteDocumentRef)
+    case returned(SuiteDocumentRef)        // in Library's catalog, stacked on the original
+    case cancelled
+    case failed(String)
+}
+
+public struct RoundTripSession: Codable, Equatable, Identifiable, Sendable {
+    public var id: String
+    public var source: RoundTripSource
+    public var title: String               // "IMG_0002 (Library edit)"
+    public var state: RoundTripState
+    public var startedAt: Date
+    public init(id: String, source: RoundTripSource, title: String, state: RoundTripState, startedAt: Date) {
+        self.id = id; self.source = source; self.title = title; self.state = state; self.startedAt = startedAt
+    }
+}
+
+// MARK: colours and assets
+
+public enum SuiteColorSpace: String, Codable, Sendable { case sRGB, displayP3 }
+
+/// A colour as stored: components 0...1 in their own space, never converted on save.
+public struct SuiteColorValue: Codable, Hashable, Sendable {
+    public var space: SuiteColorSpace
+    public var red: Double, green: Double, blue: Double, alpha: Double
+    public init(space: SuiteColorSpace, red: Double, green: Double, blue: Double, alpha: Double = 1) {
+        self.space = space; self.red = red; self.green = green; self.blue = blue; self.alpha = alpha
+    }
+
+    /// "RRGGBB" (alpha dropped), for hex rows; components clamped to 0...1.
+    public var hex: String {
+        func byte(_ v: Double) -> String {
+            let n = Int((min(max(v, 0), 1) * 255).rounded())
+            let s = String(n, radix: 16, uppercase: true)
+            return s.count == 1 ? "0" + s : s
+        }
+        return byte(red) + byte(green) + byte(blue)
+    }
+}
+
+public enum AssetKind: String, Codable, CaseIterable, Sendable { case color, vector, image, animation }
+
+public struct SuiteAsset: Codable, Hashable, Identifiable, Sendable {
+    public var id: String
+    public var kind: AssetKind
+    public var name: String
+    public var revision: Int               // +1 on every update
+    public var color: SuiteColorValue?     // kind == .color
+    public var payload: String?            // "assets/<id>/<revision>.svg" for the other kinds
+    public var source: SuiteDocumentRef?   // where it was added from, if anywhere
+    public var modifiedAt: Date
+    public init(id: String, kind: AssetKind, name: String, revision: Int = 1, color: SuiteColorValue? = nil,
+                payload: String? = nil, source: SuiteDocumentRef? = nil, modifiedAt: Date) {
+        self.id = id; self.kind = kind; self.name = name; self.revision = revision; self.color = color
+        self.payload = payload; self.source = source; self.modifiedAt = modifiedAt
+    }
+}
+
+/// What an app hands to Add to Assets.
+public struct AssetDraft: Equatable, Sendable {
+    public var kind: AssetKind
+    public var name: String
+    public var color: SuiteColorValue?
+    public var payload: Data?              // SVG text, PNG bytes or a .flare file's bytes
+    public var payloadExtension: String?   // "svg", "png", "flare"
+    public var source: SuiteDocumentRef?
+    public init(kind: AssetKind, name: String, color: SuiteColorValue? = nil, payload: Data? = nil,
+                payloadExtension: String? = nil, source: SuiteDocumentRef? = nil) {
+        self.kind = kind; self.name = name; self.color = color; self.payload = payload
+        self.payloadExtension = payloadExtension; self.source = source
+    }
+}
+
+public struct AssetIndex: Codable, Equatable, Sendable {
+    public var revision: Int
+    public var assets: [SuiteAsset]
+    public init(revision: Int = 0, assets: [SuiteAsset] = []) { self.revision = revision; self.assets = assets }
+
+    public func asset(_ id: String) -> SuiteAsset? { assets.first { $0.id == id } }
+
+    /// By kind (nil: all) and name, any case, newest first.
+    public func search(_ query: String, kind: AssetKind?) -> [SuiteAsset] {
+        let q = query.lowercased()
+        return assets
+            .filter { (kind == nil || $0.kind == kind) && (q.isEmpty || $0.name.lowercased().contains(q)) }
+            .sorted { $0.modifiedAt > $1.modifiedAt }
+    }
+
+    /// Two writers raced: per asset keep the higher revision; removals are not resurrected
+    /// because a remove bumps the index revision and the remover writes last.
+    public func merging(_ other: AssetIndex) -> AssetIndex {
+        var byID: [String: SuiteAsset] = [:]
+        for a in assets + other.assets {
+            if let have = byID[a.id], have.revision >= a.revision { continue }
+            byID[a.id] = a
+        }
+        return AssetIndex(revision: max(revision, other.revision),
+                          assets: byID.values.sorted { $0.modifiedAt > $1.modifiedAt })
+    }
+}
+
+/// A placed asset's memory of where it came from. Stored inside the host document.
+public struct AssetLink: Codable, Hashable, Sendable {
+    public var assetID: String
+    public var kind: AssetKind
+    public var placedRevision: Int
+    public init(assetID: String, kind: AssetKind, placedRevision: Int) {
+        self.assetID = assetID; self.kind = kind; self.placedRevision = placedRevision
+    }
+}
+
+public enum LinkStatus: Equatable, Sendable { case current, updateAvailable(revision: Int), missing }
+
+// MARK: pasteboard
+
+/// One representation on the pasteboard or in a drag.
+public struct TypedData: Equatable, Sendable {
+    public var type: SuiteTypeID
+    public var data: Data
+    public init(type: SuiteTypeID, data: Data) { self.type = type; self.data = data }
+}
+
+/// The suite's own envelope: what was copied, from where, and its link if it is an asset.
+public struct AssetEnvelope: Codable, Equatable, Sendable {
+    public var name: String
+    public var kind: AssetKind
+    public var from: SuiteApp
+    public var link: AssetLink?
+    public var color: SuiteColorValue?
+    public var svg: String?
+    public init(name: String, kind: AssetKind, from: SuiteApp, link: AssetLink? = nil,
+                color: SuiteColorValue? = nil, svg: String? = nil) {
+        self.name = name; self.kind = kind; self.from = from; self.link = link; self.color = color; self.svg = svg
+    }
+}
+
+/// What a paste or drop delivers to an app, after the suite chose the best representation.
+public enum SuiteClipItem: Equatable, Sendable {
+    case envelope(AssetEnvelope)
+    case vector(svg: String, name: String)
+    case image(png: Data, pixelWidth: Int, pixelHeight: Int)
+    case color(SuiteColorValue)
+    case text(String)
+    case files([SuiteDocumentRef])
+
+    public var kindName: String {
+        switch self {
+        case .envelope(let e): e.kind == .image ? "images" : e.kind == .color ? "colours" : "vector art"
+        case .vector: "vector art"
+        case .image: "images"
+        case .color: "colours"
+        case .text: "text"
+        case .files: "files"
+        }
+    }
+}
+
+// MARK: preferences and settings
+
+public enum LengthUnit: String, Codable, CaseIterable, Sendable { case points, pixels, millimeters, centimeters, inches }
+
+public enum SettingsPane: Codable, Hashable, Sendable { case general, app(SuiteApp) }
+
+public struct SuitePreferences: Codable, Equatable, Sendable {
+    public var revision: Int
+    public var units: LengthUnit
+    public var autosaveSeconds: Int          // 10...600
+    public var checkForUpdates: Bool
+    public var onboardingDoneVersion: Int?   // nil: never finished or skipped
+    public var homeOrder: [SuiteApp]
+    public var perApp: [String: [String: String]]   // keyed by SuiteApp.rawValue; each app owns its keys
+    public init(revision: Int = 0, units: LengthUnit = .points, autosaveSeconds: Int = 30, checkForUpdates: Bool = true,
+                onboardingDoneVersion: Int? = nil, homeOrder: [SuiteApp] = SuiteApp.apps, perApp: [String: [String: String]] = [:]) {
+        self.revision = revision; self.units = units; self.autosaveSeconds = min(max(autosaveSeconds, 10), 600)
+        self.checkForUpdates = checkForUpdates; self.onboardingDoneVersion = onboardingDoneVersion
+        self.homeOrder = homeOrder; self.perApp = perApp
+    }
+}
+
+// MARK: onboarding
+
+public enum OnboardingFocus: String, Codable, CaseIterable, Sendable { case animation, design, photos, motion, everything }
+
+public struct OnboardingPage: Equatable, Sendable {
+    public var id: String
+    public var title: String
+    public var body: String
+    public var choices: [OnboardingFocus]    // empty except on the "what you do" page
+    public init(id: String, title: String, body: String, choices: [OnboardingFocus] = []) {
+        self.id = id; self.title = title; self.body = body; self.choices = choices
+    }
+}
+
+// MARK: updates
+
+public struct SuiteVersion: Comparable, Codable, Hashable, Sendable {
+    public var major: Int, minor: Int, patch: Int
+    public init(_ major: Int, _ minor: Int, _ patch: Int) { self.major = major; self.minor = minor; self.patch = patch }
+    public init?(_ text: String) {
+        let parts = text.split(separator: ".").map { Int($0) }
+        guard (1...3).contains(parts.count), parts.allSatisfy({ $0 != nil }) else { return nil }
+        let n = parts.compactMap { $0 } + [0, 0]
+        self.init(n[0], n[1], n[2])
+    }
+    public static func < (a: SuiteVersion, b: SuiteVersion) -> Bool {
+        (a.major, a.minor, a.patch) < (b.major, b.minor, b.patch)
+    }
+}
+
+public struct UpdateOffer: Codable, Equatable, Sendable {
+    public var version: SuiteVersion
+    public var notes: String
+    public var url: String                  // https zip of AfterGlow.app
+    public var byteCount: Int
+    public var signature: String            // base64 Ed25519 over the zip
+    public var minimumSystem: String        // "26.0"
+    public init(version: SuiteVersion, notes: String, url: String, byteCount: Int, signature: String, minimumSystem: String) {
+        self.version = version; self.notes = notes; self.url = url; self.byteCount = byteCount
+        self.signature = signature; self.minimumSystem = minimumSystem
+    }
+}
+
+public enum UpdateFeed {
+    /// The feed is a JSON array of offers; the newest above `current` wins.
+    public static func newest(in data: Data, above current: SuiteVersion) throws(SuiteError) -> UpdateOffer? {
+        guard let offers = try? JSONDecoder().decode([UpdateOffer].self, from: data) else { throw .damaged("update feed") }
+        return offers.filter { $0.version > current }.max { $0.version < $1.version }
+    }
+}
+
+// MARK: Flare in Halo
+
+public struct AnimationSummary: Codable, Equatable, Sendable {
+    public var name: String
+    public var width: Double, height: Double
+    public var framesPerSecond: Double
+    public var frameCount: Int
+    public var sceneNames: [String]
+    public init(name: String, width: Double, height: Double, framesPerSecond: Double, frameCount: Int, sceneNames: [String]) {
+        self.name = name; self.width = width; self.height = height
+        self.framesPerSecond = framesPerSecond; self.frameCount = frameCount; self.sceneNames = sceneNames
+    }
+}
+
+// MARK: home
+
+public struct NewTile: Equatable, Sendable {
+    public var app: SuiteApp
+    public var title: String                 // "New Animation"
+    public var presets: [NewDocumentPreset]
+    public var disabledReason: String?
+    public init(app: SuiteApp, title: String, presets: [NewDocumentPreset], disabledReason: String? = nil) {
+        self.app = app; self.title = title; self.presets = presets; self.disabledReason = disabledReason
+    }
+}
+
+public struct RecentCard: Equatable, Sendable {
+    public var item: RecentItem
+    public var age: String                   // "Today", "Yesterday", "Monday", "3 Oct"
+    public var isMissing: Bool
+    public init(item: RecentItem, age: String, isMissing: Bool) { self.item = item; self.age = age; self.isMissing = isMissing }
+}
+
+public struct HomeState: Equatable, Sendable {
+    public var tiles: [NewTile]
+    public var cards: [RecentCard]
+    public var running: [SuiteApp]
+    public var emptyMessage: String?          // set when there are no cards
+    public init(tiles: [NewTile], cards: [RecentCard], running: [SuiteApp], emptyMessage: String?) {
+        self.tiles = tiles; self.cards = cards; self.running = running; self.emptyMessage = emptyMessage
+    }
+}
+
+/// Column math for the home's tile row and recents grid (section 7.3).
+public enum HomeLayout {
+    public static let sidebar = 200.0, margin = 24.0, gap = 16.0, cardMin = 168.0, cardMax = 240.0
+
+    public static func columns(windowWidth: Double) -> Int {
+        let content = windowWidth - sidebar - 2 * margin
+        guard content > cardMin else { return 1 }
+        return max(1, Int((content + gap) / (cardMin + gap)))
+    }
+
+    public static func cardWidth(windowWidth: Double) -> Double {
+        let n = Double(columns(windowWidth: windowWidth))
+        let content = max(windowWidth - sidebar - 2 * margin, cardMin)
+        return min(cardMax, ((content - gap * (n - 1)) / n).rounded(.down))
+    }
+}
+
+// MARK: packaging
+
+public enum SizeEntryKind: String, Codable, Sendable { case executable, framework, appBundle, wholeBundle, tarball }
+
+public struct SizeEntry: Codable, Equatable, Sendable {
+    public var name: String                  // "Flare", "SuiteUI.framework", "AfterGlow.app"
+    public var kind: SizeEntryKind
+    public var bytes: Int
+    public init(name: String, kind: SizeEntryKind, bytes: Int) { self.name = name; self.kind = kind; self.bytes = bytes }
+}
+
+public struct SizeReport: Codable, Equatable, Sendable {
+    public var commit: String
+    public var entries: [SizeEntry]
+    public var suiteUISymbols: [String: Int]  // per app executable; 0 once SuiteUI is a framework
+    public init(commit: String, entries: [SizeEntry], suiteUISymbols: [String: Int]) {
+        self.commit = commit; self.entries = entries; self.suiteUISymbols = suiteUISymbols
+    }
+}
+
+public struct SizeBudget: Codable, Equatable, Sendable {
+    public var limits: [String: Int]          // entry name -> bytes
+    public var maxSuiteUISymbols: Int
+    public init(limits: [String: Int], maxSuiteUISymbols: Int = 0) { self.limits = limits; self.maxSuiteUISymbols = maxSuiteUISymbols }
+}
+
+public struct SizeFinding: Equatable, Sendable {
+    public var name: String
+    public var measured: Int
+    public var limit: Int
+    public init(name: String, measured: Int, limit: Int) { self.name = name; self.measured = measured; self.limit = limit }
+}
+```
+
+</details>
+
+### 5.5 Fakes (`Fakes.swift`)
+
+<details><summary>Fakes.swift (one per contract)</summary>
+
+```swift
+// Fakes.swift: one fake per contract (SuiteModel, planned
+// `Sources/SuiteModel/Fakes/`, one file each there). In memory, no disk, no
+// AppKit. Every fake takes `unavailable:`; set, its reads are empty and its
+// writes throw `.notAvailable(reason)`, so `.live` can point at a fake that
+// isn't integrated yet and the control shows disabled with that reason.
+// The pure contracts' fakes are also their reference behavior: the live
+// type for those is this code moved to its component folder.
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
+import Foundation
+#endif
+
+public actor FakeSwitching: AppSwitching {
+    public private(set) var states: [SuiteApp: AppRunState]
+    public private(set) var ticks: UInt64 = 0
+    let unavailable: String?
+    public init(running: [SuiteApp] = [], missing: Set<SuiteApp> = [], unavailable: String? = nil) {
+        var s: [SuiteApp: AppRunState] = [:]
+        for app in SuiteApp.allCases { s[app] = missing.contains(app) ? .missing : running.contains(app) ? .running(windows: 1) : .notRunning }
+        s[.launcher] = .running(windows: 1)
+        states = s
+        self.unavailable = unavailable
+    }
+    public func runState(of app: SuiteApp) -> AppRunState { states[app] ?? .notRunning }
+    public func switchTo(_ app: SuiteApp, reason: SwitchReason) throws(SuiteError) -> SwitchReceipt {
+        if let unavailable { throw .notAvailable(unavailable) }
+        let before = states[app] ?? .notRunning
+        if before == .missing { throw .appMissing(app) }
+        ticks += 1
+        if case .running = before {} else { states[app] = .running(windows: 1) }
+        if case .running = before { return SwitchReceipt(app: app, wasRunning: true, requestedAt: ticks) }
+        return SwitchReceipt(app: app, wasRunning: false, requestedAt: ticks)
+    }
+    /// Test hook: the app quit or crashed.
+    public func terminate(_ app: SuiteApp) { states[app] = .notRunning }
+}
+
+public actor FakeRecents: RecentWork {
+    public private(set) var stored: RecentsList
+    let unavailable: String?
+    public init(_ list: RecentsList = RecentsList(), unavailable: String? = nil) { stored = list; self.unavailable = unavailable }
+    public func list() throws(SuiteError) -> RecentsList { if let unavailable { throw .notAvailable(unavailable) }; return stored }
+    public func note(_ ref: SuiteDocumentRef, event: RecentEvent, at date: Date, thumbnail: String?) throws(SuiteError) {
+        if let unavailable { throw .notAvailable(unavailable) }
+        let keep = stored.items.first { $0.ref.fileID == ref.fileID }?.thumbnail
+        stored.note(RecentItem(ref: ref, lastUsed: date, thumbnail: thumbnail ?? keep))
+        stored.revision += 1
+    }
+    public func remove(fileID: String) throws(SuiteError) {
+        if let unavailable { throw .notAvailable(unavailable) }
+        stored.remove(fileID: fileID); stored.revision += 1
+    }
+    public func clear(app: SuiteApp) throws(SuiteError) {
+        if let unavailable { throw .notAvailable(unavailable) }
+        stored.clear(app: app); stored.revision += 1
+    }
+}
+
+public struct FakeCreating: DocumentCreating {
+    let unavailable: String?
+    public init(unavailable: String? = nil) { self.unavailable = unavailable }
+
+    /// Mirrors each app's own preset list (Flare's New Animation sheet, Halo's New Composition, …).
+    public static let presets: [SuiteApp: [NewDocumentPreset]] = [
+        .flare: [NewDocumentPreset(id: "flare.hd", app: .flare, title: "1080p 16:9", detail: "1920 × 1080, 24 fps", parameters: ["width": "1920", "height": "1080", "fps": "24"]),
+                 NewDocumentPreset(id: "flare.square", app: .flare, title: "Square", detail: "1080 × 1080, 24 fps", parameters: ["width": "1080", "height": "1080", "fps": "24"]),
+                 NewDocumentPreset(id: "flare.vertical", app: .flare, title: "Vertical 9:16", detail: "1080 × 1920, 30 fps", parameters: ["width": "1080", "height": "1920", "fps": "30"])],
+        .design: [NewDocumentPreset(id: "design.blank", app: .design, title: "Blank", detail: "One page")],
+        .photo: [NewDocumentPreset(id: "photo.sheet", app: .photo, title: "New Image…", detail: "Choose a size")],
+        .library: [NewDocumentPreset(id: "library.import", app: .library, title: "Import Folder…", detail: "PNG, JPEG, HEIC")],
+        .halo: [NewDocumentPreset(id: "halo.sheet", app: .halo, title: "New Composition…", detail: "Choose size, rate and length")],
+    ]
+
+    public func tiles(missing: Set<SuiteApp>) -> [NewTile] {
+        let titles: [SuiteApp: String] = [.flare: "New Animation", .design: "New Design", .photo: "New Image",
+                                          .library: "Import Photos…", .halo: "New Composition"]
+        return SuiteApp.apps.map { app in
+            let reason = missing.contains(app) ? SuiteError.appMissing(app).message : unavailable
+            return NewTile(app: app, title: titles[app] ?? app.displayName, presets: Self.presets[app] ?? [], disabledReason: reason)
+        }
+    }
+
+    public func handOff(for preset: NewDocumentPreset, id: String, at date: Date) -> HandOff {
+        HandOff(id: id, from: .launcher, to: preset.app, verb: .new, preset: preset, createdAt: date)
+    }
+}
+
+public struct FakeRouting: DocumentRouting {
+    public var registry: SuiteTypeRegistry
+    public init(registry: SuiteTypeRegistry = .standard) { self.registry = registry }
+
+    public func route(fileName: String) throws(SuiteError) -> SuiteApp {
+        let ext = fileName.split(separator: ".").last.map(String.init) ?? ""
+        if fileName.hasSuffix(".aghandoff") { return .launcher }
+        guard fileName.contains("."), let t = registry.type(forExtension: ext), let app = registry.defaultApp(for: t.id) else {
+            throw .unsupportedFile(name: fileName)
+        }
+        return app
+    }
+
+    public func openInTargets(for type: SuiteTypeID, from app: SuiteApp) -> [SuiteApp] {
+        (registry.type(type)?.readers ?? []).filter { $0 != app }
+    }
+}
+
+public actor FakeHandOffs: HandOffSending, HandOffReceiving {
+    public private(set) var sent: [HandOff] = []
+    public private(set) var settled: [String: HandOffState] = [:]
+    let unavailable: String?
+    let switching: FakeSwitching
+    public init(switching: FakeSwitching = FakeSwitching(), unavailable: String? = nil) {
+        self.switching = switching; self.unavailable = unavailable
+    }
+    public func send(_ handOff: HandOff) async throws(SuiteError) -> SwitchReceipt {
+        if let unavailable { throw .notAvailable(unavailable) }
+        sent.append(handOff)
+        return try await switching.switchTo(handOff.to, reason: .handOff)
+    }
+    public func receive(_ data: Data, now: Date) throws(SuiteError) -> HandOff {
+        var h = try HandOffCodec.decode(data)
+        if h.isExpired(now: now) { h.state = .expired; settled[h.id] = .expired; throw .notAvailable("This request expired.") }
+        h.state = .accepted
+        settled[h.id] = .accepted
+        return h
+    }
+    public func settle(id: String, as state: HandOffState) throws(SuiteError) {
+        if let unavailable { throw .notAvailable(unavailable) }
+        settled[id] = state
+    }
+}
+
+public actor FakeRoundTrips: RoundTripEditing {
+    public private(set) var sessions: [String: RoundTripSession] = [:]
+    let unavailable: String?
+    public init(unavailable: String? = nil) { self.unavailable = unavailable }
+
+    public func begin(_ source: RoundTripSource, id: String, at date: Date) throws(SuiteError) -> RoundTripSession {
+        if let unavailable { throw .notAvailable(unavailable) }
+        let base = source.original.displayName.split(separator: ".").first.map(String.init) ?? source.original.displayName
+        let s = RoundTripSession(id: id, source: source, title: "\(base) (Library edit)", state: .open, startedAt: date)
+        sessions[id] = s
+        return s
+    }
+    public func photoSaved(session id: String, flattened: SuiteDocumentRef, layered: SuiteDocumentRef) throws(SuiteError) -> RoundTripSession {
+        guard var s = sessions[id], s.state == .open || isSaved(s.state) else { throw .notAvailable("This edit is no longer open in Library.") }
+        s.state = .saved(flattened: flattened, layered: layered)
+        sessions[id] = s
+        return s
+    }
+    public func returned(session id: String, as ref: SuiteDocumentRef) throws(SuiteError) -> RoundTripSession {
+        guard var s = sessions[id], isSaved(s.state) else { throw .notAvailable("Nothing to bring back yet.") }
+        s.state = .returned(ref)
+        sessions[id] = s
+        return s
+    }
+    public func cancel(session id: String) throws(SuiteError) {
+        guard var s = sessions[id] else { return }
+        s.state = .cancelled
+        sessions[id] = s
+    }
+    public func session(_ id: String) -> RoundTripSession? { sessions[id] }
+
+    func isSaved(_ state: RoundTripState) -> Bool { if case .saved = state { return true }; return false }
+}
+
+public struct FakePasteboard: PasteboardCoding {
+    public init() {}
+
+    /// What each app can take, best first.
+    public static let accepts: [SuiteApp: [SuiteTypeID]] = [
+        .flare: [.assetEnvelope, .flareLayers, .svg, .plainText],
+        .design: [.assetEnvelope, .designLayers, .svg, .png, .plainText],
+        .photo: [.assetEnvelope, .png, .jpeg, .heic, .plainText],
+        .library: [.png, .jpeg, .heic],
+        .halo: [.assetEnvelope, .plainText],
+        .launcher: [.assetEnvelope, .svg, .png],
+    ]
+
+    public func representations(of item: SuiteClipItem) -> [TypedData] {
+        let enc = JSONEncoder()
+        enc.outputFormatting = [.sortedKeys]
+        switch item {
+        case .envelope(let e):
+            var reps = [TypedData]()
+            if let d = try? enc.encode(e) { reps.append(TypedData(type: .assetEnvelope, data: d)) }
+            if let svg = e.svg { reps.append(TypedData(type: .svg, data: Data(svg.utf8))) }
+            if let c = e.color { reps.append(TypedData(type: .plainText, data: Data(("#" + c.hex).utf8))) }
+            return reps
+        case .vector(let svg, _): return [TypedData(type: .svg, data: Data(svg.utf8))]
+        case .image(let png, _, _): return [TypedData(type: .png, data: png)]
+        case .color(let c):
+            let e = AssetEnvelope(name: "#" + c.hex, kind: .color, from: .launcher, color: c)
+            return representations(of: .envelope(e))
+        case .text(let t): return [TypedData(type: .plainText, data: Data(t.utf8))]
+        case .files: return []
+        }
+    }
+
+    public func bestItem(from offered: [TypedData], for app: SuiteApp) -> SuiteClipItem? {
+        for type in Self.accepts[app] ?? [] {
+            guard let rep = offered.first(where: { $0.type == type }) else { continue }
+            switch type {
+            case .assetEnvelope:
+                guard let e = try? JSONDecoder().decode(AssetEnvelope.self, from: rep.data) else { continue }   // damaged: fall back
+                if e.kind == .image, app == .flare || app == .halo { continue }
+                return .envelope(e)
+            case .svg: return .vector(svg: String(decoding: rep.data, as: UTF8.self), name: "Pasted art")
+            case .png, .jpeg, .heic: return .image(png: rep.data, pixelWidth: 0, pixelHeight: 0)
+            case .plainText: return .text(String(decoding: rep.data, as: UTF8.self))
+            default: continue   // an app's own layer types are read by that app's model, not here
+            }
+        }
+        return nil
+    }
+
+    public func pasteRefusal(for offered: [TypedData], in app: SuiteApp) -> SuiteError? {
+        if offered.isEmpty { return .nothingToPaste }
+        if bestItem(from: offered, for: app) != nil { return nil }
+        if offered.contains(where: { [.png, .jpeg, .heic].contains($0.type) }) { return .cannotPaste(app: app, kind: "images") }
+        return .cannotPaste(app: app, kind: "this")
+    }
+}
+
+public actor FakeAssets: AssetLibrary {
+    public private(set) var stored: AssetIndex
+    var payloads: [String: Data] = [:]
+    let unavailable: String?
+    public init(_ index: AssetIndex = AssetIndex(), unavailable: String? = nil) { stored = index; self.unavailable = unavailable }
+
+    public func index() throws(SuiteError) -> AssetIndex { if let unavailable { throw .notAvailable(unavailable) }; return stored }
+    public func add(_ draft: AssetDraft, id: String, at date: Date) throws(SuiteError) -> SuiteAsset {
+        if let unavailable { throw .notAvailable(unavailable) }
+        let path = draft.payload == nil ? nil : "assets/\(id)/1.\(draft.payloadExtension ?? "bin")"
+        let a = SuiteAsset(id: id, kind: draft.kind, name: draft.name, color: draft.color, payload: path, source: draft.source, modifiedAt: date)
+        if let p = path, let d = draft.payload { payloads[p] = d }
+        stored.assets.insert(a, at: 0); stored.revision += 1
+        return a
+    }
+    public func update(_ id: String, payload: Data?, color: SuiteColorValue?, at date: Date) throws(SuiteError) -> SuiteAsset {
+        if let unavailable { throw .notAvailable(unavailable) }
+        guard let i = stored.assets.firstIndex(where: { $0.id == id }) else { throw .notAvailable("This asset was removed.") }
+        var a = stored.assets[i]
+        a.revision += 1; a.modifiedAt = date
+        if let color { a.color = color }
+        if let payload, let old = a.payload {
+            let ext = old.split(separator: ".").last.map(String.init) ?? "bin"
+            a.payload = "assets/\(id)/\(a.revision).\(ext)"
+            if let p = a.payload { payloads[p] = payload }
+        }
+        stored.assets[i] = a; stored.revision += 1
+        return a
+    }
+    public func remove(_ id: String) throws(SuiteError) {
+        if let unavailable { throw .notAvailable(unavailable) }
+        stored.assets.removeAll { $0.id == id }; stored.revision += 1
+    }
+    public func payload(of asset: SuiteAsset) throws(SuiteError) -> Data {
+        guard let p = asset.payload, let d = payloads[p] else { throw .fileMissing(name: asset.name) }
+        return d
+    }
+}
+
+public struct FakeLinking: AssetLinking {
+    public init() {}
+    public func link(to asset: SuiteAsset) -> AssetLink { AssetLink(assetID: asset.id, kind: asset.kind, placedRevision: asset.revision) }
+    public func status(of link: AssetLink, in index: AssetIndex) -> LinkStatus {
+        guard let a = index.asset(link.assetID) else { return .missing }
+        return a.revision > link.placedRevision ? .updateAvailable(revision: a.revision) : .current
+    }
+    public func updated(_ link: AssetLink, in index: AssetIndex) -> AssetLink? {
+        guard case .updateAvailable(let r) = status(of: link, in: index) else { return nil }
+        return AssetLink(assetID: link.assetID, kind: link.kind, placedRevision: r)
+    }
+}
+
+public struct FakeAnimationSource: AnimationSourceReading {
+    public var summaries: [String: AnimationSummary]   // keyed by fileID
+    let unavailable: String?
+    public init(summaries: [String: AnimationSummary] = [:], unavailable: String? = nil) {
+        self.summaries = summaries; self.unavailable = unavailable
+    }
+    public func summary(of ref: SuiteDocumentRef) throws(SuiteError) -> AnimationSummary {
+        if let unavailable { throw .notAvailable(unavailable) }
+        guard let s = summaries[ref.fileID] else { throw .fileMissing(name: ref.displayName) }
+        return s
+    }
+}
+
+public actor FakePreferences: PreferencesStoring {
+    public private(set) var stored: SuitePreferences
+    let unavailable: String?
+    public init(_ p: SuitePreferences = SuitePreferences(), unavailable: String? = nil) { stored = p; self.unavailable = unavailable }
+    public func load() throws(SuiteError) -> SuitePreferences { if let unavailable { throw .notAvailable(unavailable) }; return stored }
+    public func save(_ p: SuitePreferences) throws(SuiteError) -> SuitePreferences {
+        if let unavailable { throw .notAvailable(unavailable) }
+        guard p.revision == stored.revision else { throw .staleRevision }
+        var next = p
+        next.revision += 1
+        stored = next
+        return next
+    }
+}
+
+public actor FakeSettingsRoute: SettingsRouting {
+    public private(set) var opened: [SettingsPane] = []
+    let unavailable: String?
+    public init(unavailable: String? = nil) { self.unavailable = unavailable }
+    public func open(_ pane: SettingsPane, from app: SuiteApp) throws(SuiteError) {
+        if let unavailable { throw .notAvailable(unavailable) }
+        opened.append(pane)
+    }
+}
+
+public struct FakeOnboarding: OnboardingFlowing {
+    public init() {}
+    public var pages: [OnboardingPage] {
+        [OnboardingPage(id: "apps", title: "Five apps, one AfterGlow",
+                        body: "Flare animates, Design draws, Photo retouches, Library sorts your photos, Halo composites. Switch with Control-Command 1 to 5."),
+         OnboardingPage(id: "focus", title: "What do you make most?", body: "AfterGlow puts those apps first. You can change this in Settings.",
+                        choices: OnboardingFocus.allCases),
+         OnboardingPage(id: "start", title: "Start with a sample", body: "Open a sample to see each app at work, or start from an empty home.")]
+    }
+    public func shouldShow(_ p: SuitePreferences, version: Int) -> Bool { p.onboardingDoneVersion == nil }
+    public func finishing(_ p: SuitePreferences, focus: OnboardingFocus?, version: Int) -> SuitePreferences {
+        var next = p
+        next.onboardingDoneVersion = version
+        let first: [SuiteApp]
+        switch focus {
+        case .animation: first = [.flare, .halo]
+        case .design: first = [.design]
+        case .photos: first = [.library, .photo]
+        case .motion: first = [.halo, .flare]
+        case .everything, nil: first = []
+        }
+        next.homeOrder = first + SuiteApp.apps.filter { !first.contains($0) }
+        return next
+    }
+}
+
+public actor FakeUpdates: UpdateChecking {
+    public var feed: Data
+    public private(set) var installed: [String] = []
+    let unavailable: String?
+    let validSignatures: Set<String>
+    public init(feed: Data = Data("[]".utf8), validSignatures: Set<String> = [], unavailable: String? = nil) {
+        self.feed = feed; self.validSignatures = validSignatures; self.unavailable = unavailable
+    }
+    public func check(current: SuiteVersion) throws(SuiteError) -> UpdateOffer? {
+        if let unavailable { throw .notAvailable(unavailable) }
+        return try UpdateFeed.newest(in: feed, above: current)
+    }
+    public func download(_ offer: UpdateOffer) throws(SuiteError) -> String {
+        guard validSignatures.contains(offer.signature) else { throw .updateNotVerified }
+        return "/tmp/AfterGlow-\(offer.version.major).\(offer.version.minor).\(offer.version.patch).zip"
+    }
+    public func install(zipAt path: String) throws(SuiteError) { installed.append(path) }
+}
+
+public actor FakeThumbnails: ThumbnailPublishing {
+    public private(set) var written: [String: Data] = [:]
+    let unavailable: String?
+    public init(unavailable: String? = nil) { self.unavailable = unavailable }
+    public func publish(png: Data, for ref: SuiteDocumentRef) throws(SuiteError) -> String {
+        if let unavailable { throw .notAvailable(unavailable) }
+        let path = "thumbnails/\(ref.fileID).png"
+        written[path] = png
+        return path
+    }
+}
+
+public struct FakeHome: HomeBuilding {
+    let creating: any DocumentCreating
+    public init(creating: any DocumentCreating = FakeCreating()) { self.creating = creating }
+
+    public func home(recents: RecentsList, running: [SuiteApp], query: String, filter: SuiteApp?,
+                     order: [SuiteApp], missingApps: Set<SuiteApp>, missingFiles: Set<String>, now: Date) -> HomeState {
+        let tiles = creating.tiles(missing: missingApps)
+        let ordered = order.compactMap { app in tiles.first { $0.app == app } }
+        let cards = recents.filtered(app: filter, query: query).map {
+            RecentCard(item: $0, age: Self.age(of: $0.lastUsed, now: now), isMissing: missingFiles.contains($0.ref.fileID))
+        }
+        let empty: String?
+        if !cards.isEmpty { empty = nil }
+        else if recents.items.isEmpty { empty = "No recent work yet. Start something new above, or open a file." }
+        else { empty = "Nothing matches \u{201C}\(query)\u{201D}." }
+        return HomeState(tiles: ordered, cards: cards, running: running.filter { $0 != .launcher }, emptyMessage: empty)
+    }
+
+    /// "Today", "Yesterday", else days ago; the live type formats weekday and date with the locale.
+    static func age(of date: Date, now: Date) -> String {
+        let days = Int(now.timeIntervalSince(date) / 86_400)
+        return days <= 0 ? "Today" : days == 1 ? "Yesterday" : "\(days) days ago"
+    }
+}
+
+public struct FakeSizeBudget: SizeBudgetChecking {
+    public init() {}
+    public func evaluate(_ report: SizeReport, against budget: SizeBudget) -> [SizeFinding] {
+        var out = report.entries.compactMap { e -> SizeFinding? in
+            guard let limit = budget.limits[e.name], e.bytes > limit else { return nil }
+            return SizeFinding(name: e.name, measured: e.bytes, limit: limit)
+        }
+        for (app, n) in report.suiteUISymbols.sorted(by: { $0.key < $1.key }) where n > budget.maxSuiteUISymbols {
+            out.append(SizeFinding(name: "\(app) SuiteUI symbols", measured: n, limit: budget.maxSuiteUISymbols))
+        }
+        return out
+    }
+}
+```
+
+</details>
+
+### 5.6 Hand-off flows, step by step
+
+**New document from the home (UC-3, UC-5).** The home asks
+`creating.handOff(for: preset, …)`, `sending.send` writes
+`handoffs/<id>.aghandoff` and opens it with the app; the app's
+`.suiteApp(_:)` modifier receives it (`onOpenURL`), `receiving.receive`
+decodes and marks it accepted, the app runs its own New with the preset's
+parameters, then `settle(id:as: .returned)`.
+
+**Round trip (UC-6).** Library: Photo > Edit in Photo calls
+`roundTrips.begin`, then sends an `.edit` hand-off carrying the original's
+ref and the session id. Photo opens the original as a new untitled document
+titled `session.title`; its Save writes the layered `.ora` and a flattened
+copy in the original's format (PNG or JPEG; HEIC becomes JPEG) next to the
+original, named `<name> edit <n>`, calls `photoSaved`, and sends a
+`.returnEdit` hand-off to Library. Library imports the flattened copy,
+stacks it on the original, calls `returned`. The original is never written.
+Closing Photo's document unsaved calls `cancel`.
+
+**Paste and drop (UC-7).** Copy in any app writes every representation
+`pasteboard.representations(of:)` returns, richest first, plus the app's
+own private type (Design's `org.creativesuite.design.layers`, Flare's
+`org.creativesuite.flare.layers`) so a paste inside the same app keeps full
+fidelity. Paste in an app first tries its own private type (its own model
+reads it), then `bestItem(from:for:)`. The Edit menu's Paste is disabled
+with `pasteRefusal(for:in:)`'s message. Drops use the same coding through
+`DragBridge`.
+
+**Linked placement (UC-8, UC-9).** Place from the Assets page or the colour
+popover writes the asset's payload into the host document and stores its
+`AssetLink` there. On activation and on every `assets` change notification
+the host calls `linking.status`; `.updateAvailable` shows the mark, Update
+replaces the payload in one undo step and stores `linking.updated`.
+`.missing` keeps the last copy and says so.
