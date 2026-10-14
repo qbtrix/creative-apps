@@ -1833,11 +1833,13 @@ and maximum (360) width, in three places:
 
 1. **Model math** (Linux), `Tests/LibraryModelTests/LibraryLayoutTests.swift`
    over `LibraryLayout` (status-and-layout feature): for each width, the
-   grid's column count is `max(1, ⌊(W − 2·inset + gap) / (cell + gap)⌋)`
-   with SuiteUI's inset and gap, every cell size from 80 to 320 gives at
-   least 2 columns at the content minimum (440 pt) up to cell 200 and at
-   least 1 above it, and the loupe's fit scale leaves `SuiteSize.canvasInset`
-   on the tighter axis.
+   content width is the window minus the sidebar and inspector; the grid's
+   column count is `max(1, ⌊(W − 2·12 + 12) / (cell + 2·xs + 12)⌋)` (the
+   `ThumbnailGrid` padding and spacing, `SuiteSpacing.m` = 12) and equals
+   SuiteUI's `GridSelection.columns` for the same width, so arrow keys and
+   the drawn grid agree; the default cell (160 pt) gives at least 2 columns
+   at the content minimum (440 pt); the loupe's fit scale leaves
+   `SuiteSize.canvasInset` on the tighter axis.
 2. **Journey** J12 `testLayoutAtWidths` (macOS, on the 1024 × 768 runner, so
    widths 880 and 1024 only), launched with `-LibraryWindowSize`: reads XCUI
    frames and asserts, within 0.5 pt: every grid cell in a column shares its
