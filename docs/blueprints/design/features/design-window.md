@@ -14,7 +14,9 @@ is dead. (Blueprint wave 0, tasks D0-5a to D0-7.)
 controls get `design.<area>.<name>` ids; #288 closes when the `identifier`
 count is 0, after wave 1). The lead files one `needs-ui` issue at stage 1,
 "SuiteUI: a `mixed` state on `ScrubField`" (labels `needs-ui`,
-`line:suiteui`), since no SuiteUI packet covers it; D0-5c uses a plain
+`line:suiteui`), since no SuiteUI task builds it (inspector-controls.md's
+states table lists an exact-field "Mixed" state but no IC task makes it; the
+new issue links that table so it doesn't read as a duplicate); D0-5c uses a plain
 "Mixed" text meanwhile.
 
 **Depends on:** the design-seams feature issue (the actions, services and
@@ -137,9 +139,9 @@ launch (D0-5a):
 
 perform(intent):                                     # one place, as today
   case .command(c):   do { try model.run(c) } catch { note = error.help }
-  case .copy:         bridge.write(try model.copySelection(), type: model.pasteboardType)
-  case .cut:          bridge.write(try model.cutSelection(), type: …)
-  case .paste:        if let data = bridge.read(type: …) { try model.paste(data) }
+  case .copy:         bridge.write(try model.copySelection(), type: model.pasteboardType)   # D0-5d
+  case .cut:          bridge.write(try model.cutSelection(), type: …)                      # D0-5d
+  case .paste:        if let data = bridge.read(type: …) { try model.paste(data) }         # D0-5d
   case .zoomToSelection:
       guard let rect = model.zoomToSelectionRect else return
       zoom = ViewerZoom stop that fits rect in the viewport; show = rect   # D0-5b's canvas takes `show`
@@ -154,7 +156,8 @@ inspector with n > 1 (D0-5c):
 
 canvas (D0-5b):
   overlay (not clipped by the page): marquee rect (1 pt accent stroke, 10 % accent fill),
-    DesignSelectionMarks (each outline, the dashed box, 8 handles when n > 1),
+    DesignSelectionMarks (each outline, the dashed box; its 8 handles only when
+      model.transformHelp == nil, so on `.live` no handle shows before select-several),
     DesignFrameLabels (empty slot; F3 fills it)
   DesignSelectionMarks' box carries .accessibilityIdentifier("design.canvas.selection")
 
@@ -175,12 +178,15 @@ carries `feature-done`. Paths drop `Sources/DesignApp/`; snapshots are in
 | D0-5a | #288 (part) | `DesignWindowOptions` and `openFixture`; every new intent and `perform` for it; the three launch arguments; Zoom to Selection sets the zoom and keeps the rect in the window's state; the status line's selection count | `Sources/DesignModel/DesignWindowOptions.swift`, `DesignIntent.swift`, `DesignWindow.swift`, `DesignEditor.swift`; `Tests/DesignModelTests/DesignWindowOptionsTests.swift`; snapshot `DesignStatusSnapshots.swift` | – | ~360, 6 |
 | D0-5b | #288 (part) | Canvas: the marquee mark; selection marks in their own file with `design.canvas.selection`; the empty `DesignFrameLabels` overlay slot; the `show` parameter | `DesignCanvas.swift`, `DesignCanvasMarks.swift`, `DesignSelectionMarks.swift`, `DesignFrameLabels.swift`; snapshot `DesignCanvasSeamSnapshots.swift` | D0-5a | ~300, 5 |
 | D0-5c | #288 (part); files the `ScrubField` mixed `needs-ui` issue | The several-layer inspector shell: "<n> Layers", the Align row with Distribute, rows reading "Mixed", each control's help from the actions | `DesignInspector.swift`, `DesignAlignBar.swift`; snapshot `DesignSeveralInspectorSnapshots.swift` | D0-5a | ~280, 3 |
-| D0-5d | #288 (part) | `DesignPasteboardBridge` (read and write under `pasteboardType`); copy, cut and paste hooks on the canvas and Layers; rename presentation state in Layers (row in rename, draft, refusal text) | `DesignPasteboardBridge.swift`, `DesignCanvas.swift`, `DesignLayersPanel.swift`; `Tests/AppSnapshotTests/DesignPasteboardBridgeTests.swift` | D0-5b | ~250, 4 |
+| D0-5d | #288 (part) | `DesignPasteboardBridge` (read and write under `pasteboardType`); copy, cut and paste hooks on the canvas and Layers; rename presentation state in Layers (row in rename, draft, refusal text) | `DesignPasteboardBridge.swift`, `DesignWindow.swift` (the `.copy`, `.cut` and `.paste` cases of `perform`), `DesignCanvas.swift`, `DesignLayersPanel.swift`; `Tests/AppSnapshotTests/DesignPasteboardBridgeTests.swift` | D0-5a, D0-5b | ~280, 5 |
 | D0-6 | #288 (part) | Menus: Edit adds Duplicate after the stock pasteboard group (which stays); Page adds Rename Page…; Object adds Group, Ungroup, Arrange ▸, Distribute; View adds Zoom to Selection; every Design item disabled with its help; J1's item list | `DesignCommands.swift`, `DesignEditMenu.swift`, `DesignObjectMenu.swift`; snapshots `DesignEditMenuSnapshots.swift`, `DesignPageMenuSnapshots.swift`; `UITests/DesignJourneyTests.swift` | D0-5a | ~330, 6 |
 | D0-7a | #288 (part) | `.suiteProbes()` at the window root; every Design-owned control gets its `DesignControlID` id and `.suiteControl` registration (rail and top bar through `ToolbarAction.identifier`) | `DesignWindow.swift`, `DesignEditor.swift`, `DesignPanel.swift`, `DesignInspector.swift`, `DesignAlignBar.swift`, `DesignLayersPanel.swift`, `DesignCanvas.swift`, `Sources/DesignModel/DesignWindowOptions.swift`; `Tests/DesignModelTests/DesignControlIDTests.swift` | D0-5c, D0-5d, D0-6; #778 (SH-5) | ~250, 9 |
 | D0-7b | – | The every-control sweep J15 and the layout journey | `UITests/DesignJourneyTests+EveryControl.swift`, `UITests/DesignJourneyTests+Layout.swift` | D0-7a; #778 (SH-7) | ~300, 2; `feature-done` |
 
-`DesignWindow.swift` and `DesignEditor.swift` pass D0-5a → D0-7a;
+`DesignWindow.swift` passes D0-5a → D0-5d → D0-7a (D0-5a declares the
+`.copy`, `.cut` and `.paste` intents and leaves their `perform` cases empty
+with a note; D0-5d fills them with the bridge); `DesignEditor.swift` D0-5a →
+D0-7a;
 `DesignCanvas.swift` D0-5b → D0-5d → D0-7a; `DesignInspector.swift` and
 `DesignAlignBar.swift` D0-5c → D0-7a; `DesignLayersPanel.swift` D0-5d →
 D0-7a; `DesignWindowOptions.swift` D0-5a → D0-7a. D0-5b, D0-5c and D0-6
@@ -191,7 +197,7 @@ touch disjoint files and may run side by side after D0-5a.
 | id | test | fails when |
 |---|---|---|
 | D0-5a | `DesignWindowOptionsTests` (Linux): `["-DesignServices", "fake"]` gives `.fake`, nothing or `"live"` or `"x"` gives `.live`; `-DesignFixture cards` gives "cards"; `-DesignWindowSize 880x560` gives width 880 and height 560, `"880"`, `"0x0"`, `"axb"` and a missing value give nil; `openFixture("cards")` opens it with `documentURL == nil`, `canUndo == false`, and `openFixture("nope")` is false and changes nothing; `selectionCountText` is nil, "1 Layer", "2 Layers". `DesignStatusSnapshots`: `design-status-two-layers` with A and B selected on `cards` | a bad argument crashes or picks fake, a fixture opens as undoable or saved, or the count reads wrong |
-| D0-5b | `DesignCanvasSeamSnapshots`: `design-canvas-marquee` (mid-marquee over A and B on `.fake`: the accent outline and fill drawn over the page edge, not clipped), `design-canvas-several` (A and B selected: two outlines, the dashed box, 8 handles); today's `DesignCanvasSnapshots`, `DesignResizeSnapshots`, `DesignSelectionEdgeSnapshots` and `DesignMultiSelectSnapshots` PNGs unchanged | the marquee is clipped or missing, several layers show no handles, or an existing PNG changes |
+| D0-5b | `DesignCanvasSeamSnapshots`: `design-canvas-marquee` (mid-marquee over A and B on `.fake`: the accent outline and fill drawn over the page edge, not clipped), `design-canvas-several-fake` (A and B on `.fake`: two outlines, the dashed box, 8 handles) and `design-canvas-several-live` (the same on `.live`: no handles, since resize is not built); today's `DesignCanvasSnapshots`, `DesignResizeSnapshots`, `DesignSelectionEdgeSnapshots` and `DesignMultiSelectSnapshots` PNGs unchanged | the marquee is clipped or missing, handles show on `.live` (a dead control) or are missing on `.fake`, or an existing PNG changes |
 | D0-5c | `DesignSeveralInspectorSnapshots`: `design-inspector-several-fake` (A and B on `.fake`: "2 Layers", the Align row with Distribute, X, Y and W reading "Mixed", H reading 80) and `design-inspector-several-live` (the same on `.live`: every control dimmed with its tooltip text asserted on the hosted view's `help`) | the header miscounts, a common value reads "Mixed", or a `.live` control is enabled |
 | D0-5d | `DesignPasteboardBridgeTests` (macOS, a private `NSPasteboard(name:)`): bytes written under `org.creativesuite.design.layers` read back equal; plain text on the pasteboard reads as nil for our type; reading never clears it | bytes change, another type is read as ours, or a read empties the pasteboard |
 | D0-6 | `DesignEditMenuSnapshots` adds `design-edit-menu-duplicate` (Duplicate after Cut, Copy, Paste and Select All; disabled with nothing selected); `DesignPageMenuSnapshots` adds Rename Page…; J1 (`DesignJourneyTests.testEveryMenuOpens`) lists each new item and checks each Design item is enabled or has a tooltip | an item is missing, the stock pasteboard group is replaced, or a disabled Design item has no reason |

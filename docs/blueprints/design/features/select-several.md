@@ -102,6 +102,7 @@ union of the visible selected frames.
 
 ```
 LiveMarquee.layers(touching r, in p, on page):
+  if let p, hiddenOrLockedInTree(p) { return [] }   # a hidden or locked parent hides its children
   level = p.map { page.nodes.node($0)?.children } ?? page.nodes
   return level.filter { !$0.isHidden && !$0.isLocked && touches($0.frame, r) }.map(\.id)
   # candidates are one level, so a hidden or locked ancestor is never crossed
@@ -124,8 +125,10 @@ distribute(axis, ids): ≥ 3 else .tooFewToDistribute; sort by min edge; outer t
 
 LiveFraming.rectToShow(ids) = union(visible selected frames); help nil exactly then
 
-#542: while gesture != nil, deleteSelection, nudge, run, setStyle and apply do nothing
-      and record nothing (as undo() and redo() already do)
+#542: while gesture != nil, the public entry points (deleteSelection, nudge, run,
+      setStyle, cutSelection, paste, moveLayer) do nothing and record nothing, as undo()
+      and redo() already do. `apply` itself has no guard: the drag steps of the
+      several-layer move, resize and Option-drag call it with the gesture live
 #607: nudge on one layer returns early when isHiddenInTree(id) (no step)
 ```
 
@@ -143,7 +146,7 @@ carries `feature-done`. Paths drop `Sources/DesignModel/` and
 | S-2 | gap "several layers" (part) | `LiveTransforming`: move, resize in the box, nudge, delete; lock and hidden refusals | `Live/LiveTransforming.swift`; tests `DesignSeveralTransformTests.swift` | – | ~330, 2 |
 | S-3 | #714 (Model part) | `LiveAligning`: align to the union with locked layers fixed; distribute | `Live/LiveAligning.swift`, `DesignAlign.swift` (the one-layer help reused, no behaviour change); tests `DesignDistributeTests.swift` | – | ~260, 3 |
 | S-4 | gap "Zoom to Selection" (part) | `LiveFraming` | `Live/LiveFraming.swift`; tests `DesignFramingTests.swift` | – | ~90, 2 |
-| S-5 | #542, #607 (closes both) | No edit or step while a gesture is live; no nudge of a hidden-in-tree layer | `DesignCanvasEditing.swift`, `DesignActions.swift`, `DesignActions+Edit.swift`; tests `DesignMidDragEditTests.swift`, `DesignHiddenNudgeTests.swift` | – | ~200, 5 |
+| S-5 | #542, #607 (closes both) | No edit or step while a gesture is live; no nudge of a hidden-in-tree layer | `DesignCanvasEditing.swift`, `DesignActions.swift`, `DesignActions+Edit.swift`; tests `DesignMidDragEditTests.swift`, `DesignHiddenNudgeTests.swift`, `DesignHeldIDsFuzzTests.swift` (existing: gains the `history.undo` check) | – | ~220, 6 |
 | S-6 | gaps "marquee select", "several layers" (close); #714 (closes); #288 (part) | Views: the several-layer box's handles drive `resize` through the canvas gesture; the Align row's Distribute buttons; the marquee drawn from the Model; snapshots | `DesignCanvas.swift`, `DesignSelectionMarks.swift`, `DesignAlignBar.swift`; snapshots `DesignMarqueeSnapshots.swift`, `DesignAlignSnapshots.swift`, `DesignMultiSelectSnapshots.swift` | S-1, S-2, S-3, S-5 | ~260, 6 |
 | S-7 | gap "Zoom to Selection" (closes) | J4, J5, J6 | `UITests/DesignJourneyTests+Select.swift` | S-4, S-6 | ~280, 1 |
 | S-8 | – | QD-S1 to QD-S4 model budgets; P1 | tests `DesignSelectBudgetTests.swift`; `UITests/DesignJourneyTests+PerfCanvas.swift` | S-7 | ~220, 2; `feature-done` |
@@ -158,12 +161,12 @@ issue does, filed by the lead.
 
 | id | test | fails when |
 |---|---|---|
-| S-1 | `DesignMarqueeTests` on `cards`: (80, 80)–(520, 240) in Desktop gives [A, B] in paint order; (380, 580)–(720, 720) gives []; (880, 380)–(1220, 520) at the top level gives [Desktop] (the top level's only candidate, and it touches every rect on the page); inside Pair (its id as parent) gives [E1, E2]; a hidden Pair gives [] for its children; a rect of zero size on an edge touches (closed intervals) | a hidden or locked layer, or one inside them, is picked, or the level is wrong |
-| S-2 | `DesignSeveralTransformTests`: A and B moved by (40, 0) both move with their subtrees, one step "Move" with `runKey("move", [A, B])`; the box (100, 100)–(500, 220) resized by the bottom-right handle (20, 0) scales A's x offset and width by 420/400; Shift keeps the ratio; a zero-width box never divides by zero; nudge 1 and 10; delete A and B is one "Delete" step; A with Locked throws `.locked("Locked")`, A with a layer in a hidden group throws `.hidden(...)`; the contract law on `.live` | a layer moves without its subtree, a locked layer moves, a box of zero size crashes, or a refusal records |
+| S-1 | `DesignMarqueeTests` on `cards`: (80, 80)–(520, 240) in Desktop gives [A, B] in paint order; (380, 580)–(720, 720) gives []; (880, 380)–(1220, 520) at the top level gives [Desktop] (the top level's only candidate, and it touches every rect on the page); inside Pair (its id as parent) gives [E1, E2]; with Pair hidden or locked, a marquee inside Pair gives []; a rect of zero size on an edge touches (closed intervals) | a hidden or locked layer, or one inside them, is picked, or the level is wrong |
+| S-2 | `DesignSeveralTransformTests`: A and B moved by (40, 0) both move with their subtrees, one step "Move" with `runKey("move", [A, B])`; the box (100, 100)–(500, 220) resized by the bottom-right handle (20, 0) moves B from x 300 to 310 (its offset 200 in the box scales by 420/400 to 210) and makes its width 210; Shift keeps the ratio; a zero-width box never divides by zero; nudge 1 and 10; delete A and B is one "Delete" step; A with Locked throws `.locked("Locked")`, with Pair hidden (the test hides it), E1 throws `.hidden("E1")` (the selected layer is named, not the hidden ancestor); a several-layer drag on a selection the gesture already moved keeps working (the #542 guard is not on `apply`); the contract law on `.live` | a layer moves without its subtree, a locked layer moves, a box of zero size crashes, or a refusal records |
 | S-3 | `DesignDistributeTests` (QD-V6): three rectangles at x 10, 50, 200 aligned left all have x 10; with the middle one locked, the other two go to 10 and it stays, and the union still counts it; widths 20, 40, 20 spanning 0…300 distribute to equal gaps within 1e-9; two layers throw `.tooFewToDistribute` and change nothing; Align Top on A, B, C of `cards` gives y 100 on all three; one layer keeps today's `alignLayer` result | a number is off, a locked layer moves, or one-layer align changes |
 | S-4 | `DesignFramingTests`: C alone gives C's frame; A and C give their union; Hidden alone gives nil and the help "Select a layer first."; nothing selected gives nil | a hidden layer is framed, or the help and rect disagree |
 | S-5 | `DesignMidDragEditTests`: #542's repro (a delete mid-move, then the move and two undos) passes: the rectangle survives, the undo names are "Undo Move" then "Undo Add Rectangle"; the same with a nudge, `run(.align(.left))` and `setStyle(.frame(.x, 5))`; the seeded fuzz in `DesignHeldIDsFuzzTests` gains a check that `history.undo` holds no step taken mid-gesture. `DesignHiddenNudgeTests`: #607's repro gives an unchanged frame and "Undo Hide Layer" | a mid-gesture edit records a step, or a hidden layer moves |
-| S-6 | `DesignMarqueeSnapshots`: `design-marquee` (mid-marquee over A and B, live); `DesignAlignSnapshots`: `design-align-light.png`, `design-align-dark.png` show three rectangles after Align Top (#714); `DesignMultiSelectSnapshots`: two of three selected now shows the 8 handles on the box; the journey guard in J5 (S-7) covers the gesture | a PNG lacks the box handles or the aligned row |
+| S-6 | `DesignMarqueeSnapshots`: `design-marquee` (mid-marquee over A and B, live); `DesignAlignSnapshots`: `design-align-light.png`, `design-align-dark.png` show three rectangles after Align Top (#714); `DesignMultiSelectSnapshots`: two of three selected now shows the 8 handles on the box (design-window drew the box with no handles while resize was not built; this task owns the PNG change); the journey guard in J5 (S-7) covers the gesture | a PNG lacks the box handles or the aligned row |
 | S-7 | J4, J5, J6 pass on the macOS run; J5 fails if the first marquee's count is not 2 or any undo name differs; J6 fails if Distribute with two is enabled | a step's name, count or disabled reason differs |
 | S-8 | `DesignSelectBudgetTests.moveStep`, `.drawStep`, `.resizeStep`, `.marqueeStep` under the Linux debug gates on `crowd`; P1 records ≥ 60 samples per series and writes `perf-design-canvas.json` (report-only until ten green runs set its gate) | a model step is over its gate, or P1 has fewer than 60 samples |
 
