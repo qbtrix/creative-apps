@@ -26,16 +26,9 @@ struct LibraryLoupe: View {
                         .aspectRatio(artboard, contentMode: .fit)
                         .frame(maxWidth: artboard.width, maxHeight: artboard.height)
                         .padding(SuiteSize.canvasInset)
-                        .accessibilityHidden(true)
+                        .accessibilityLabel(photo.name)
+                        .accessibilityIdentifier("library.loupe.photo")
                 }
-            }
-            .overlay(alignment: .bottom) {
-                GlassPanel {
-                    Text("\(photo.name)  ·  \(position)")
-                        .font(SuiteFont.monospacedDigits)
-                        .accessibilityIdentifier("library.loupe.position")
-                }
-                .padding(SuiteSpacing.l)
             }
             .focusable()
             .focused($isFocused)
@@ -49,9 +42,20 @@ struct LibraryLoupe: View {
                 }
                 return .handled
             }
-            // Focusable, it is one accessibility element; with no role it reads
-            // as static text, and the app audit measured the photo as its ink.
-            // A labelled container keeps the position readout inside it.
+            // After the focus modifiers, so the readout is never the focusable element.
+            .overlay(alignment: .bottom) {
+                GlassPanel {
+                    Text("\(photo.name)  ·  \(position)")
+                        .font(SuiteFont.monospacedDigits)
+                        .accessibilityIdentifier("library.loupe.position")
+                }
+                .padding(SuiteSpacing.l)
+            }
+            // A focusable view whose only element was the readout turned it into
+            // static text the size of the whole loupe, and the app audit read
+            // the photo as its ink. Now the photo is an image element and the
+            // readout sits outside the focusable part, so this is a group and
+            // the readout keeps its own frame.
             .accessibilityElement(children: .contain)
             .accessibilityLabel("Loupe")
             .accessibilityIdentifier("library.loupe")
