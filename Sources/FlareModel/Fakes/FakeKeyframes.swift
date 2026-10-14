@@ -2,10 +2,12 @@
 // `Layer.tracks`; moves, removes, frame inserts and removes, and labels are FlareCore's `MoveKeyframe`,
 // `RemoveKeyframe`, `ShiftKeyframes`, `SetFrameLabel` and `RemoveFrameLabel`. A summary key (no property) stands for
 // every track keyed at its frame. A move runs on a copy of the engine, so one that would land a key on another key
-// throws and changes nothing. A frame insert that pushes a key past the scene's last frame grows the scene in the same
-// step (`SetSceneTiming`), so the final pose still plays. A frame insert or remove on every layer of the scene also
-// moves the labels at or after its frame by the same count, and drops a label inside a removed run (#637). Keyframe commands take scene layers only, so a symbol owner throws until
-// they take an owner (LC-5). With `unavailable` set, reads are empty and every write throws it.
+// throws and changes nothing; a move that would land a key past the scene's last frame refuses too, so its pose still
+// plays. A frame insert that pushes a key past the scene's last frame grows the scene in the same step
+// (`SetSceneTiming`), so the final pose still plays. A frame insert or remove on every layer of the scene also moves the
+// labels at or after its frame by the same count, and drops a label inside a removed run (#637). Keyframe commands take
+// scene layers only, so a symbol owner throws until they take an owner (LC-5). With `unavailable` set, reads are empty
+// and every write throws it.
 import FlareCore
 
 public struct FakeKeyframes: KeyframeEditing {
@@ -47,6 +49,11 @@ public struct FakeKeyframes: KeyframeEditing {
         let moving = try Self.expand(keys, owner: owner, in: engine.document)
         guard delta != 0, !moving.isEmpty else { return }
         guard moving.allSatisfy({ !$0.frame.addingReportingOverflow(delta).overflow }) else { throw CommandError.invalidFrame(delta) }
+        // A key moved later never lands past the scene's last frame, where its pose would never play (#636).
+        guard let scene = engine.document.scenes.first(where: { $0.id == sceneID }) else { throw CommandError.sceneNotFound(sceneID) }
+        if delta > 0, let past = moving.map({ $0.frame + delta }).filter({ $0 >= scene.durationFrames }).max() {
+            throw CommandError.invalidFrame(past)
+        }
         // Keys at the leading edge move first, so no key passes over one that has not moved yet.
         let ordered = moving.sorted { delta > 0 ? $0.frame > $1.frame : $0.frame < $1.frame }
         func write(_ engine: inout CommandEngine) throws {
