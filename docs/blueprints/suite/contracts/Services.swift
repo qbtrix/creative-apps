@@ -23,7 +23,6 @@ public struct SuiteServices: Sendable {
     public var updates: any UpdateChecking
     public var thumbnails: any ThumbnailPublishing
     public var home: any HomeBuilding
-    public var size: any SizeBudgetChecking
     /// True while any member is a fake; drives a "Preview data" pill in the home.
     public var isPreview: Bool
 
@@ -32,12 +31,12 @@ public struct SuiteServices: Sendable {
                 roundTrips: any RoundTripEditing, pasteboard: any PasteboardCoding, assets: any AssetLibrary,
                 linking: any AssetLinking, animations: any AnimationSourceReading, preferences: any PreferencesStoring,
                 settings: any SettingsRouting, onboarding: any OnboardingFlowing, updates: any UpdateChecking,
-                thumbnails: any ThumbnailPublishing, home: any HomeBuilding, size: any SizeBudgetChecking, isPreview: Bool) {
+                thumbnails: any ThumbnailPublishing, home: any HomeBuilding, isPreview: Bool) {
         self.switching = switching; self.recents = recents; self.creating = creating; self.routing = routing
         self.sending = sending; self.receiving = receiving; self.roundTrips = roundTrips; self.pasteboard = pasteboard
         self.assets = assets; self.linking = linking; self.animations = animations; self.preferences = preferences
         self.settings = settings; self.onboarding = onboarding; self.updates = updates; self.thumbnails = thumbnails
-        self.home = home; self.size = size; self.isPreview = isPreview
+        self.home = home; self.isPreview = isPreview
     }
 
     /// Every member a fake, seeded from a fixture's recents and assets.
@@ -50,6 +49,6 @@ public struct SuiteServices: Sendable {
                              roundTrips: FakeRoundTrips(), pasteboard: FakePasteboard(), assets: FakeAssets(assets),
                              linking: FakeLinking(), animations: FakeAnimationSource(), preferences: FakePreferences(),
                              settings: FakeSettingsRoute(), onboarding: FakeOnboarding(), updates: FakeUpdates(),
-                             thumbnails: FakeThumbnails(), home: FakeHome(), size: FakeSizeBudget(), isPreview: true)
+                             thumbnails: FakeThumbnails(), home: FakeHome(), isPreview: true)
     }
 }

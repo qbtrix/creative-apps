@@ -731,8 +731,8 @@ One Swift protocol per use case, exact signatures, and a fake for each, so
 the home, the apps' menus and the stores can be built in parallel. They
 live in `SuiteModel` (Linux-safe, Foundation only, the
 `FoundationEssentials` import pattern, Swift 6, value types and actors,
-`Sendable`). The four files below are also committed as
-`docs/blueprints/suite/contracts/{Values,Contracts,Fakes,Services}.swift`
+`Sendable`). The five files below are also committed as
+`docs/blueprints/suite/contracts/{Values,Contracts,Fakes,Services,Packaging}.swift`
 with `main.swift` (smoke checks of every fake against the behavior this
 blueprint states) and `check.sh`, which compiles them with `swiftc
 -swift-version 6 -warnings-as-errors` and runs them. On this session's
@@ -764,7 +764,7 @@ same text the Model test does.
 | 14 | `UpdateChecking` | 2 | `FakeUpdates` (feed and accepted signatures injected) | AfterGlowApp: URLSession, CryptoKit Ed25519 verify, replace the bundle | updater |
 | 15 | `ThumbnailPublishing` | 1 | `FakeThumbnails` | SuiteShell `ThumbnailWriter` | recents-open-in |
 | 16 | `HomeBuilding` | 1 | `FakeHome` (reference; the live one formats dates with the locale) | same type in `Home/` | home |
-| 17 | `SizeBudgetChecking` | 3 | `FakeSizeBudget` (reference) | same type in `Packaging/` | bundle |
+| 17 | `SizeBudgetChecking` (in `Packaging.swift`: not a runtime service, so not in `SuiteServices`) | 3 | `FakeSizeBudget` (reference) | same type in `Packaging/` | bundle |
 
 Which journey each contract serves: UC-1 SJ3, SP1, SP2; UC-2 SJ1, SJ4; UC-3
 SJ2; UC-4 SJ5, SJ11; UC-5 SJ1, SJ2, SJ5, SJ10; UC-6 SJ10; UC-7 SJ6, SJ14;
@@ -927,11 +927,6 @@ public protocol HomeBuilding: Sendable {
     func home(recents: RecentsList, running: [SuiteApp], query: String, filter: SuiteApp?,
               order: [SuiteApp], missingApps: Set<SuiteApp>, missingFiles: Set<String>, now: Date) -> HomeState
 }
-
-/// UC-17 Size budget (tier 3, gates packaging). Pure; `scripts/size-report` feeds it.
-public protocol SizeBudgetChecking: Sendable {
-    func evaluate(_ report: SizeReport, against budget: SizeBudget) -> [SizeFinding]
-}
 ```
 
 ### 5.3 Wiring (`Services.swift`)
@@ -962,7 +957,6 @@ public struct SuiteServices: Sendable {
     public var updates: any UpdateChecking
     public var thumbnails: any ThumbnailPublishing
     public var home: any HomeBuilding
-    public var size: any SizeBudgetChecking
     /// True while any member is a fake; drives a "Preview data" pill in the home.
     public var isPreview: Bool
 
@@ -971,12 +965,12 @@ public struct SuiteServices: Sendable {
                 roundTrips: any RoundTripEditing, pasteboard: any PasteboardCoding, assets: any AssetLibrary,
                 linking: any AssetLinking, animations: any AnimationSourceReading, preferences: any PreferencesStoring,
                 settings: any SettingsRouting, onboarding: any OnboardingFlowing, updates: any UpdateChecking,
-                thumbnails: any ThumbnailPublishing, home: any HomeBuilding, size: any SizeBudgetChecking, isPreview: Bool) {
+                thumbnails: any ThumbnailPublishing, home: any HomeBuilding, isPreview: Bool) {
         self.switching = switching; self.recents = recents; self.creating = creating; self.routing = routing
         self.sending = sending; self.receiving = receiving; self.roundTrips = roundTrips; self.pasteboard = pasteboard
         self.assets = assets; self.linking = linking; self.animations = animations; self.preferences = preferences
         self.settings = settings; self.onboarding = onboarding; self.updates = updates; self.thumbnails = thumbnails
-        self.home = home; self.size = size; self.isPreview = isPreview
+        self.home = home; self.isPreview = isPreview
     }
 
     /// Every member a fake, seeded from a fixture's recents and assets.
@@ -989,14 +983,14 @@ public struct SuiteServices: Sendable {
                              roundTrips: FakeRoundTrips(), pasteboard: FakePasteboard(), assets: FakeAssets(assets),
                              linking: FakeLinking(), animations: FakeAnimationSource(), preferences: FakePreferences(),
                              settings: FakeSettingsRoute(), onboarding: FakeOnboarding(), updates: FakeUpdates(),
-                             thumbnails: FakeThumbnails(), home: FakeHome(), size: FakeSizeBudget(), isPreview: true)
+                             thumbnails: FakeThumbnails(), home: FakeHome(), isPreview: true)
     }
 }
 ```
 
 ### 5.4 Shared values (`Values.swift`)
 
-<details><summary>Values.swift (identity, type registry, document refs, errors, recents, hand-offs, round trip, colours and assets, pasteboard, preferences, onboarding, updates, home, packaging)</summary>
+<details><summary>Values.swift (identity, type registry, document refs, errors, recents, hand-offs, round trip, colours and assets, pasteboard, preferences, onboarding, updates, home)</summary>
 
 ```swift
 // Values.swift: the values every suite contract shares (SuiteModel,
@@ -1623,39 +1617,6 @@ public enum HomeLayout {
         return min(cardMax, ((content - gap * (n - 1)) / n).rounded(.down))
     }
 }
-
-// MARK: packaging
-
-public enum SizeEntryKind: String, Codable, Sendable { case executable, framework, appBundle, wholeBundle, tarball }
-
-public struct SizeEntry: Codable, Equatable, Sendable {
-    public var name: String                  // "Flare", "SuiteUI.framework", "AfterGlow.app"
-    public var kind: SizeEntryKind
-    public var bytes: Int
-    public init(name: String, kind: SizeEntryKind, bytes: Int) { self.name = name; self.kind = kind; self.bytes = bytes }
-}
-
-public struct SizeReport: Codable, Equatable, Sendable {
-    public var commit: String
-    public var entries: [SizeEntry]
-    public var suiteUISymbols: [String: Int]  // per app executable; 0 once SuiteUI is a framework
-    public init(commit: String, entries: [SizeEntry], suiteUISymbols: [String: Int]) {
-        self.commit = commit; self.entries = entries; self.suiteUISymbols = suiteUISymbols
-    }
-}
-
-public struct SizeBudget: Codable, Equatable, Sendable {
-    public var limits: [String: Int]          // entry name -> bytes
-    public var maxSuiteUISymbols: Int
-    public init(limits: [String: Int], maxSuiteUISymbols: Int = 0) { self.limits = limits; self.maxSuiteUISymbols = maxSuiteUISymbols }
-}
-
-public struct SizeFinding: Equatable, Sendable {
-    public var name: String
-    public var measured: Int
-    public var limit: Int
-    public init(name: String, measured: Int, limit: Int) { self.name = name; self.measured = measured; self.limit = limit }
-}
 ```
 
 </details>
@@ -2060,6 +2021,60 @@ public struct FakeHome: HomeBuilding {
         return days <= 0 ? "Today" : days == 1 ? "Yesterday" : "\(days) days ago"
     }
 }
+```
+
+</details>
+
+### 5.6 Size report and budget (`Packaging.swift`, owned by the bundle feature)
+
+<details><summary>Packaging.swift</summary>
+
+```swift
+// Packaging.swift: the size report and its budget (SuiteModel, planned
+// `Sources/SuiteModel/Packaging/`, owned by the bundle feature). Not a
+// runtime service, so not in SuiteServices: `scripts/size-report` writes a
+// SizeReport and `SizeGateTests` evaluates it against the committed budget.
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
+import Foundation
+#endif
+
+public enum SizeEntryKind: String, Codable, Sendable { case executable, framework, appBundle, wholeBundle, tarball }
+
+public struct SizeEntry: Codable, Equatable, Sendable {
+    public var name: String                  // "Flare", "SuiteUI.framework", "AfterGlow.app"
+    public var kind: SizeEntryKind
+    public var bytes: Int
+    public init(name: String, kind: SizeEntryKind, bytes: Int) { self.name = name; self.kind = kind; self.bytes = bytes }
+}
+
+public struct SizeReport: Codable, Equatable, Sendable {
+    public var commit: String
+    public var entries: [SizeEntry]
+    public var suiteUISymbols: [String: Int]  // per app executable; 0 once SuiteUI is a framework
+    public init(commit: String, entries: [SizeEntry], suiteUISymbols: [String: Int]) {
+        self.commit = commit; self.entries = entries; self.suiteUISymbols = suiteUISymbols
+    }
+}
+
+public struct SizeBudget: Codable, Equatable, Sendable {
+    public var limits: [String: Int]          // entry name -> bytes
+    public var maxSuiteUISymbols: Int
+    public init(limits: [String: Int], maxSuiteUISymbols: Int = 0) { self.limits = limits; self.maxSuiteUISymbols = maxSuiteUISymbols }
+}
+
+public struct SizeFinding: Equatable, Sendable {
+    public var name: String
+    public var measured: Int
+    public var limit: Int
+    public init(name: String, measured: Int, limit: Int) { self.name = name; self.measured = measured; self.limit = limit }
+}
+
+/// UC-17 Size budget (tier 3, gates packaging). Pure; `scripts/size-report` feeds it.
+public protocol SizeBudgetChecking: Sendable {
+    func evaluate(_ report: SizeReport, against budget: SizeBudget) -> [SizeFinding]
+}
 
 public struct FakeSizeBudget: SizeBudgetChecking {
     public init() {}
@@ -2078,7 +2093,7 @@ public struct FakeSizeBudget: SizeBudgetChecking {
 
 </details>
 
-### 5.6 Hand-off flows, step by step
+### 5.7 Hand-off flows, step by step
 
 **New document from the home (UC-3, UC-5).** The home asks
 `creating.handOff(for: preset, …)`, `sending.send` writes

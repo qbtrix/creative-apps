@@ -143,8 +143,3 @@ public protocol HomeBuilding: Sendable {
     func home(recents: RecentsList, running: [SuiteApp], query: String, filter: SuiteApp?,
               order: [SuiteApp], missingApps: Set<SuiteApp>, missingFiles: Set<String>, now: Date) -> HomeState
 }
-
-/// UC-17 Size budget (tier 3, gates packaging). Pure; `scripts/size-report` feeds it.
-public protocol SizeBudgetChecking: Sendable {
-    func evaluate(_ report: SizeReport, against budget: SizeBudget) -> [SizeFinding]
-}

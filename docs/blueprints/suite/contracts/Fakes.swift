@@ -393,17 +393,3 @@ public struct FakeHome: HomeBuilding {
         return days <= 0 ? "Today" : days == 1 ? "Yesterday" : "\(days) days ago"
     }
 }
-
-public struct FakeSizeBudget: SizeBudgetChecking {
-    public init() {}
-    public func evaluate(_ report: SizeReport, against budget: SizeBudget) -> [SizeFinding] {
-        var out = report.entries.compactMap { e -> SizeFinding? in
-            guard let limit = budget.limits[e.name], e.bytes > limit else { return nil }
-            return SizeFinding(name: e.name, measured: e.bytes, limit: limit)
-        }
-        for (app, n) in report.suiteUISymbols.sorted(by: { $0.key < $1.key }) where n > budget.maxSuiteUISymbols {
-            out.append(SizeFinding(name: "\(app) SuiteUI symbols", measured: n, limit: budget.maxSuiteUISymbols))
-        }
-        return out
-    }
-}
