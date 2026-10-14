@@ -1717,3 +1717,107 @@ QH-2 (#331) and QH-2b (#332) land: `halo-viewer-three-layers`,
 `halo-timeline-keys`, `halo-layer-list`, `halo-render-sheet-progress`,
 `halo-text-layer`, `halo-opened-project` (names follow the open issues where
 they already name one).
+
+---
+
+## 7. Quality bar
+
+Every item names where it is measured and the test that measures it. "Gate"
+means a test fails over the number; "report-only" means the test records the
+number and fails only on too few samples, until ten green CI runs set the
+gate at the measured CI p95 × 1.5, never tighter than the device target
+(`docs/review-rubric.md`, How gates are set). A gate never loosens without
+the captain.
+
+### 7.1 Input-to-screen speed budgets
+
+Two halves for each interactive tool. The **Model half** is the work between
+the input event and a value the view can draw: measured on Linux and macOS
+by `Tests/HaloModelTests/HaloBudgetTests.swift` (median and p95 over 200
+runs on the named fixture; debug CI gates carry the rubric's ×10). The **UI
+half** is input to the first display refresh that shows it, in frames late,
+measured by the frame probe (SuiteUI QH-1, #330) in the perf journeys
+H-P1 to H-P4. Until #330 lands, `Tests/AppSnapshotTests/HaloViewerLatencyTests.swift`
+(macOS, like `PhotoBrushLatencyTests`) times the Model plus SwiftUI path of
+each tool and writes one `HALO-LATENCY` line to
+`.build/snapshots/halo-latency.txt`, which the contact sheet shows.
+
+| id | Tool | What is timed | Fixture | Device target | CI gate | Test | Status |
+|---|---|---|---|---|---|---|---|
+| HB-1 | Viewer drag (key position) | one `moveViewerDrag(to:)` plus `viewerDrawList` | `reference` | ≤ 1 ms | ≤ 10 ms debug | `HaloBudgetTests.viewerDragStep` | gate from its first PR (layer-keys) |
+| HB-2 | Viewer redraw | `FrameDrawing.drawList` for one frame | `reference` | ≤ 2 ms | ≤ 20 ms debug | `HaloBudgetTests.drawList` | gate (viewer-playback) |
+| HB-3 | Viewer hit | `ViewerDragging.hit` per pointer move | `reference` | ≤ 1 ms | ≤ 10 ms debug | `HaloBudgetTests.hit` | gate (layer-keys) |
+| HB-4 | Inspector bar scrub | one `setProperty(_:to:)` (with `edit`'s copy and coalesced record) plus `propertyRows` | `reference` | ≤ 1 ms | ≤ 10 ms debug | `HaloBudgetTests.inspectorScrubStep` | gate (layer-keys) |
+| HB-5 | Playhead scrub | `scrub(to:)` plus `timelineRows` plus `viewerDrawList` | `reference` | ≤ 3 ms | ≤ 30 ms debug | `HaloBudgetTests.playheadScrubStep` | gate (viewer-playback) |
+| HB-6 | Timeline with many layers | `timelineRows` | `crowd` | ≤ 5 ms | ≤ 50 ms debug | `HaloBudgetTests.timelineRowsCrowd` (QB-L10's model half) | gate (W0, extends `HaloTimelineCostTests`) |
+| HB-7 | Easing chip | `setEasing` on two keys plus `keySegments` | `reference` | ≤ 1 ms | ≤ 10 ms debug | `HaloBudgetTests.easingStep` | gate (easing) |
+| HB-8 | Undo, Redo | one `undo()` or `redo()` | `crowd` | ≤ 2 ms | ≤ 20 ms debug | `HaloBudgetTests.undoStep` | gate (history-files) |
+| HB-9 | Any edit | `edit`'s copy, compare and record | `crowd` | ≤ 2 ms | ≤ 20 ms debug | `HaloBudgetTests.editRecord` | gate (W0) |
+| HB-10 | Save, Open | `fileData()`; `open(_:)` | `crowd` | ≤ 50 ms each | ≤ 500 ms debug | `HaloBudgetTests.saveCrowd`, `.openCrowd` | gate (history-files) |
+| HB-11 | Playback tick | `tick(now:)` plus `viewerDrawList` | `reference` | ≤ 2 ms | ≤ 20 ms debug | `HaloBudgetTests.playbackTick` | gate (viewer-playback) |
+| HB-12 | Render Frame (⌘R) | `FrameRendering.render` at preview scale (480 × 270) | `reference` | ≤ 50 ms release | report-only | `HaloBudgetTests.renderPreview` | report-only (render-out) |
+| HB-13 | Render… | 48 frames at 1920 × 1080 into a counting sink | `keyed` | < 5 s release | report-only, then < 10 s | `HaloBudgetTests.renderSequence` | report-only (render-out) |
+| HB-U1 | Viewer drag on screen | input to refresh | `reference` | p95 ≤ 2 frames late (QB-L1) | set from CI (placeholder 3) | H-P1 | report-only until #330 |
+| HB-U2 | Inspector bar on screen | input to refresh | `reference` | p95 ≤ 2 frames late (QB-L2) | set from CI (placeholder 3) | H-P2 | report-only until #330 |
+| HB-U3 | Playhead on screen | input to refresh | `reference` | p95 ≤ 2 frames late (QB-L3) | set from CI (placeholder 3) | H-P3 | report-only until #330 |
+| HB-U4 | Playback | 5 s at 30 fps | `reference` | 0 dropped, tick jitter p95 < 2 ms (QB-L4) | ≤ 2 dropped in 5 s | H-P4 | report-only until #330 |
+| HB-U5 | Open, Render… | command to progress shown | `crowd` file; `keyed` render | ≤ 100 ms (QB-L9) | set from CI (placeholder 200 ms) | the probe's progress mark in H-J10 and H-J21 | report-only until #330 |
+
+### 7.2 App-audit checks that apply
+
+All six checks of `docs/blueprints/app-audit.md` run on every Halo shot:
+`disabled-dim`, `overlap`, `contrast`, `identifier`, `offscreen`, `unnamed`.
+Halo's baseline today is contrast 2, identifier 10, offscreen 8, unnamed 5.
+
+| Check | Today | v1 target | How it gets there | Measured by |
+|---|---|---|---|---|
+| `unnamed` | 5 | 0 | #286 (W0): the sheet's fields get `.accessibilityLabel` | `audit-halo-*.json`, CI's Audit lower |
+| `identifier` | 10 | ≤ 3 (the SuiteUI chrome left to SuiteUI) | #290 (W0) for Halo's own views; every new Halo control ships with a `halo.*` identifier (review rubric) | same |
+| `offscreen` | 8 | 0 | the layout spec below at 1024 × 768 (the runner's display) | same, plus L1 |
+| `contrast` | 2 | 0 | SuiteUI #283 and #284 (sidebar headers, card text) | same |
+| `overlap`, `disabled-dim` | 0 | 0 | the status row's transport and pills (L5); every disabled item from `unavailableHelp` is drawn by the system or SuiteUI | same |
+
+Rule for every Halo feature: no count goes up (the audit fails the journeys
+if one does), and its PR body states the counts it expects.
+
+### 7.3 Layout spec
+
+Checked at window sizes **minimum** (`SuiteSize.windowMinimum`), **1024 ×
+768** (the CI runner's display), **1280 × 800**, **1440 × 900** and **1920 ×
+1080**, through `-HaloWindowSize`, with the `keyed` fixture and a layer
+selected.
+
+| id | Rule | Tolerance | Measured by |
+|---|---|---|---|
+| L1 | Nothing off the window, no two enabled controls overlapping | the audit's own (1 pt slack, 2 pt overlap) | `testLayoutAtWidths` (`+Layout`, W0): relaunch at each size, shoot `halo-layout-<w>`; the audit runs on each shot |
+| L2 | The artboard is centered in the viewer and keeps its aspect | centers within 1 pt; aspect within 0.5% | same journey: frames of `halo.viewer` and `halo.viewer.artboard`; Linux half: `CanvasLayout`/fit math unchanged |
+| L3 | The playhead sits on its frame: lane origin + frame × frame width | ≤ 1 pt at frames 0, last / 2, last | `HaloLayoutTests` (macOS, AppSnapshotTests) hosting `HaloTimelineView` at 600, 900 and 1400 pt; Linux half: `frameWidth(toFit:)` tests |
+| L4 | Inspector rows align: every TRANSFORM bar starts and ends at the same x; keyframe buttons in one column; labels never truncate | ≤ 0.5 pt | `HaloLayoutTests` hosting `HaloLayerInspector` at the inspector's minimum, ideal and maximum widths |
+| L5 | Status row: transport left, pills right, never overlapping; the timecode never truncates | 0 pt overlap | `HaloLayoutTests` hosting the status row at the content minimum width |
+| L6 | At the minimum window size the artboard is at least 160 pt wide and every inspector row is reachable by scrolling | ≥ 160 pt | `testLayoutAtWidths` at minimum |
+
+### 7.4 Fidelity tests (output equals a reference)
+
+| id | Output | Reference | Tolerance | Test (where) |
+|---|---|---|---|---|
+| HF-1 | The viewer's drawing of `keyed` at frame 12, at full composition size | `FrameRendering.render(scale: 1)` of the same draw list | channel ≤ 2/255, ≤ 0.5% of pixels differ (QB-V2, QB-V4) | `HaloViewerFidelityTests` (macOS, viewer-playback) |
+| HF-2 | `LiveFrameRendering` of a 40 × 20 test composition: a 50% red solid in Multiply over blue, and a solid rotated 45° | pixel values written in the test from the W3C formulas [S3]; coverage 1 at the rotated solid's center, 0 at a far corner, strictly between on its edge | exact for the blend values (`Float` equality after CoreRaster's math); edge strictly in (0, 1) | `LiveFrameRenderingTests` (Linux, viewer-playback) |
+| HF-3 | `LayerPlacing.value` for every property and frame of `reference` | FlareCore `Timeline.value(of:at:)` on the same track | exact | `LayerPlacingContractTests` (Linux, layer-keys) |
+| HF-4 | Position X at frames 6, 12, 18 for each easing preset on `keyed` | `160 + 800 × Easing.value(at: f / 24)` | exact; Hold equals 160 until frame 24 | `HaloEasingTests` (Linux, easing) |
+| HF-5 | World matrix of a three-deep parent chain; a layer's screen position before and after `setParent` | the matrices multiplied by hand in the test | 1e-9; 1e-6 | `LayerPlacingContractTests`, `PropertyKeyingContractTests` (Linux, layer-keys) |
+| HF-6 | `fileData()` of every fixture | itself after a decode and encode | byte for byte; and the decoded project equals the original | `ProjectFilesContractTests` (Linux, history-files) |
+| HF-7 | Frame n of a PNG sequence, decoded | `render(scale: 1)` of frame n as `rgba8` | exact bytes | `HaloPNGWriterTests` (macOS, render-out) |
+| HF-8 | The H.264 movie | the plan | frame count and duration exact; frame 0 within 4/255 of HF-7's PNG on ≥ 99% of pixels (H.264 is lossy) | `HaloMovieWriterTests` (macOS, render-out) |
+| HF-9 | Timecode of frames at 24, 25, 30 and 60 fps | the SMPTE-style table in the test [S5] | exact | `HaloTimelineTests` (exists) |
+| HF-10 | A rendered text layer's ink bounds | the viewer's text bounds for the same layer | ≤ 1 px at full size (QB-V4) | `HaloTextLayerTests` (Linux with the fake rasterizer for placement), `HaloTextFidelityTests` (macOS with CoreText) (text-layers) |
+
+### 7.5 Feel (rubric section 6)
+
+| id | How Halo meets it | Measured by |
+|---|---|---|
+| QB-F1 No dead controls | every command's availability is `unavailableHelp(for:)` | `HaloCommandTests` (Linux, W0: on `.live` today every command is disabled with a reason; on `.fake` with `keyed` every command but those needing a selection is enabled); H-J13 |
+| QB-F2 Immediate feedback | drag preview before mouse-up; refusals shown under the row that refused | the probe's preview mark (H-P1); H-J3, H-J6 asserts |
+| QB-F3 One gesture, one named step | `edit` and its names (section 2) | Model tests count `history.undo` after each gesture; journeys read the Edit menu |
+| QB-F4 Keyboard parity | bars step with arrows (Shift ×10, Option ×0.1); Space, ←, →, Home, End, I, O on the viewer and timeline | H-J4, H-J6 |
+| QB-F5 Reduce Motion, Increase Contrast | playback is content, not an animation; the curve's preview dot hides (SuiteUI); goldens in Increase Contrast once #332 lands | goldens |
+| QB-F6 Geometry holds | only SuiteUI components and tokens | design lint; L4 |
