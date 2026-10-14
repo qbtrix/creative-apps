@@ -1,0 +1,4 @@
+utc	stage	event	ref	note
+2026-10-14T15:43Z	0	stage-end	d56aa45	setup, base verified, depends on none
+2026-10-14T15:43Z	2	stage-end	-	4 waves planned
+2026-10-14T15:43Z	3	stage-start	wave1	MP-1 MP-4
