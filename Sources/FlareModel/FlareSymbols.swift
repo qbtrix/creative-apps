@@ -7,6 +7,7 @@ import FlareCore
 extension FlareWorkspace {
     static let convertNeedsArtMessage = "Select art to convert to a symbol."
     static let convertInSymbolMessage = "Exit the symbol to convert scene art."
+    static let moveInSymbolMessage = "Exit the symbol to move whole layers; Direct Select moves the symbol's art."
     static let placeNeedsLayerMessage = "Select a layer to place the symbol on."
     static let noInstanceMessage = "Select a symbol instance to edit it."
 
