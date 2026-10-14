@@ -647,3 +647,988 @@ Checklist:
       it.
 - [x] Every empty, loading and error state a tier-1 journey passes through
       is named in its States line.
+
+---
+
+## 5. Contracts
+
+One Swift protocol per use case, with exact signatures and a fake for
+each, so the UI track builds on fakes while the logic track builds the
+live conformances. The code below is the whole contract layer: it is also
+in `docs/blueprints/library/contracts/`, and
+`docs/blueprints/library/contracts/check.sh` copies it over today's
+`Sources/LibraryModel` and runs `swift test` on Linux in Swift 6 mode
+against creative-core `main`. It compiled with no warnings and the smoke
+test (`ContractSmokeTests.swift`, which calls every contract through
+`LibraryServices.fake`) passed on 2026-10-14 (Swift 6.1.2,
+x86_64 Ubuntu 24.04). The spine lands these files verbatim as
+`Sources/LibraryModel/Contracts/`, `Sources/LibraryModel/Fakes/` and
+`Sources/LibraryModel/LibraryServices.swift`, and the `PhotoItem` changes in
+5.5.
+
+### 5.1 Use cases and who conforms
+
+| Contract | Use case (journeys) | Kind | Live conformance (feature) | Fake |
+|---|---|---|---|---|
+| `PhotoDecoding` | read files: scan a folder, decode pixels (J1–J8) | platform | `ImageIODecoder`, `Sources/LibraryApp/Platform/` (import) | `FakeDecoder`: fixture photos in any folder, gradients |
+| `JPEGWriting` | write a JPEG, never overwrite (J7) | platform | `JPEGWriter` (export) | `FakeJPEGWriter`: in memory |
+| `CatalogStoring` | read, write and set aside the catalog file (J8, J9) | platform | `CatalogStore` (persist) | `FakeCatalogStore`: in memory |
+| `PhotoImporting` | import a folder (J1) | use case | `LiveImporter(decoder:)` (import) | `FakeImporter`: the fixture minus known ids |
+| `ThumbnailProviding` | grid thumbnails (J2) | use case | `LiveThumbnails(decoder:develop:)` (thumbnails) | `FakeThumbnails`: gradients |
+| `PhotoCulling` | rating, flag, label, Auto Advance (J4) | use case | `LiveCulling` (cull) | `FakeCulling`: applies, never advances |
+| `CatalogCoding` | catalog file v1 (J8, J9) | use case | `LiveCatalogCoding` (persist) | `FakeCatalogCoding`: id and rating as text |
+| `LoupeImaging` | the loupe's picture and histogram (J3, J5) | use case | `LiveLoupeImaging(decoder:develop:)` (loupe-viewport, then develop) | `FakeLoupe`: gradients, empty histogram |
+| `DevelopRendering` | settings to pixels (J5, J6, J7) | use case | `LiveDevelop` (develop; crop adds the crop) | `FakeDevelop`: unchanged buffer |
+| `CropGeometry` | crop frame rules (J6) | use case | `LiveCrop` (crop) | `FakeCrop`: centered aspect, no shrink |
+| `PhotoExporting` | export plan and render (J7) | use case | `LiveExporter(decoder:develop:)` (export) | `FakeExporter`: same naming rule |
+
+Every fake takes a `FakeMode` (`-LibraryFakeMode ok|fail|slow`): `fail`
+throws the contract's error, `slow` waits 2 s first, so every loading and
+error state can be shown and snapshotted before any live code exists.
+
+**Why culling has a protocol.** Culling has no engine behind it; its live
+conformance is plain Model code. It still gets a protocol so the UI track's
+key handling and the logic track's rules (Auto Advance through a filter,
+undo) can be built at the same time, and so `-LibraryFakeMode fail` can
+show a refused change. This is the one place this blueprint departs from
+Flare's decision 14 ("no protocol where there is one conformer"), at the
+cost of about 40 lines.
+
+### 5.2 Value types
+
+```swift
+// Contracts/LibraryValues.swift: the value types every Library contract
+// shares. Linux-safe, Sendable, no pixels except DisplayImage's bytes.
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
+import Foundation
+#endif
+
+/// A size in pixels. Both sides are at least 1 for a real photo.
+public struct PixelSize: Hashable, Sendable, Codable {
+    public var width: Int
+    public var height: Int
+    public init(width: Int, height: Int) {
+        self.width = width
+        self.height = height
+    }
+    public var longSide: Int { max(width, height) }
+    /// This size scaled so its long side is at most `longSide`, never enlarged,
+    /// each side at least 1. `longSide` under 1 is treated as 1.
+    public func fitting(longSide limit: Int) -> PixelSize {
+        let limit = max(limit, 1)
+        guard longSide > limit, width > 0, height > 0 else { return self }
+        let scale = Double(limit) / Double(longSide)
+        return PixelSize(width: max(Int((Double(width) * scale).rounded()), 1),
+                         height: max(Int((Double(height) * scale).rounded()), 1))
+    }
+}
+
+/// A rectangle in whole pixels.
+public struct PixelRect: Hashable, Sendable {
+    public var x: Int, y: Int, width: Int, height: Int
+    public init(x: Int, y: Int, width: Int, height: Int) {
+        self.x = x; self.y = y; self.width = width; self.height = height
+    }
+}
+
+/// Display bytes: sRGB, straight alpha, row-major, top row first, 4 bytes a
+/// pixel (CoreRaster's `rgba8(colorSpace:)` layout).
+public struct DisplayImage: Hashable, Sendable {
+    public let size: PixelSize
+    public let rgba8: [UInt8]
+    /// Nil unless `rgba8.count == width * height * 4` and both sides are at least 1.
+    public init?(size: PixelSize, rgba8: [UInt8]) {
+        guard size.width >= 1, size.height >= 1,
+              size.width.multipliedReportingOverflow(by: size.height).overflow == false,
+              rgba8.count == size.width * size.height * 4 else { return nil }
+        self.size = size
+        self.rgba8 = rgba8
+    }
+    /// FNV-1a over the bytes as 16 hex digits: the loupe photo's checksum
+    /// that journeys read. Computed on demand (only under the perf or test flag).
+    public var checksum: String {
+        var hash: UInt64 = 0xcbf2_9ce4_8422_2325
+        for byte in rgba8 { hash = (hash ^ UInt64(byte)) &* 0x0000_0100_0000_01b3 }
+        let hex = String(hash, radix: 16)
+        return String(repeating: "0", count: 16 - hex.count) + hex
+    }
+}
+
+/// The image file types v1 imports. The raw value is the lowercased extension
+/// set's first member.
+public enum PhotoFileKind: String, Sendable, Codable, CaseIterable {
+    case jpeg, png, heic
+    /// The kind for a file name, matched without regard to case; nil for anything else.
+    public static func kind(forFileName name: String) -> PhotoFileKind? {
+        guard let dot = name.lastIndex(of: "."), dot != name.startIndex else { return nil }
+        switch name[name.index(after: dot)...].lowercased() {
+        case "jpg", "jpeg": return .jpeg
+        case "png": return .png
+        case "heic", "heif": return .heic
+        default: return nil
+        }
+    }
+}
+
+/// One file a folder scan found, read for metadata only.
+public struct ImportCandidate: Hashable, Sendable {
+    /// The absolute file path: the photo's id once imported.
+    public var path: String
+    /// Exif DateTimeOriginal, else the file's creation date.
+    public var captureDate: Date
+    /// After the Exif orientation is applied.
+    public var pixelSize: PixelSize
+    public var kind: PhotoFileKind
+    public init(path: String, captureDate: Date, pixelSize: PixelSize, kind: PhotoFileKind) {
+        self.path = path; self.captureDate = captureDate; self.pixelSize = pixelSize; self.kind = kind
+    }
+}
+
+/// A file that could not be imported or exported, and why, in words for people.
+public struct FileFailure: Hashable, Sendable {
+    public var path: String
+    public var reason: String
+    public init(path: String, reason: String) {
+        self.path = path; self.reason = reason
+    }
+}
+
+/// What a folder scan found.
+public struct FolderScan: Hashable, Sendable {
+    public var candidates: [ImportCandidate]
+    /// Image-named files whose metadata could not be read.
+    public var failures: [FileFailure]
+    public init(candidates: [ImportCandidate], failures: [FileFailure]) {
+        self.candidates = candidates; self.failures = failures
+    }
+}
+
+public struct ImportProgress: Hashable, Sendable {
+    public var done: Int
+    public var total: Int
+    public init(done: Int, total: Int) {
+        self.done = done; self.total = total
+    }
+    /// "Importing 3 of 27".
+    public var text: String { "Importing \(min(done + 1, max(total, 1))) of \(max(total, 1))" }
+}
+
+public struct ImportResult: Hashable, Sendable {
+    /// New photos, in capture-date order.
+    public var added: [PhotoItem]
+    /// Paths already in the catalog, skipped.
+    public var alreadyKnown: Int
+    public var failures: [FileFailure]
+    public init(added: [PhotoItem], alreadyKnown: Int, failures: [FileFailure]) {
+        self.added = added; self.alreadyKnown = alreadyKnown; self.failures = failures
+    }
+}
+
+/// Every error a Library contract throws. `message` is the text the window shows.
+public enum LibraryError: Error, Hashable, Sendable {
+    case unreadableFolder(String)
+    case noPhotos(String)
+    case notAnImage(String)
+    case missingFile(String)
+    case damagedCatalog(String)
+    case newerCatalog(version: Int)
+    case invalid(String)
+    case renderFailed(String)
+    case writeFailed(path: String, reason: String)
+    case cancelled
+
+    public var message: String {
+        switch self {
+        case .unreadableFolder(let folder): "Library can't read \(folder). Check that you have access to it."
+        case .noPhotos(let folder): "No photos found in \(folder)."
+        case .notAnImage: "not an image file"
+        case .missingFile(let path): "The file is missing: \(path)"
+        case .damagedCatalog: "Library couldn't read its catalog and started a new one. The old file is catalog.json.bad."
+        case .newerCatalog: "This catalog was made by a newer Library. Update Library to open it."
+        case .invalid(let detail): detail
+        case .renderFailed(let reason): "Couldn't render this photo: \(reason)."
+        case .writeFailed(_, let reason): reason
+        case .cancelled: "Cancelled."
+        }
+    }
+}
+
+/// How the fakes behave; `-LibraryFakeMode`.
+public enum FakeMode: String, Sendable, CaseIterable {
+    case ok, fail, slow
+}
+```
+
+```swift
+// Contracts/DevelopValues.swift: a photo's develop settings, its crop, and
+// the histogram the develop panel draws. Settings are edit instructions,
+// never pixels; neutral settings render the photo unchanged.
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
+import Foundation
+#endif
+
+/// One develop slider. The raw value is the row's label.
+public enum DevelopSlider: String, CaseIterable, Sendable, Codable {
+    case exposure = "Exposure", temperature = "Temperature", tint = "Tint"
+    case contrast = "Contrast", highlights = "Highlights", shadows = "Shadows"
+
+    /// Exposure in stops, -5...5; the rest -100...100 (CoreRaster's slider range).
+    public var range: ClosedRange<Double> { self == .exposure ? -5...5 : -100...100 }
+    /// One arrow-key step; Shift is ten, Option a tenth (docs/design.md, Scrub fields).
+    public var step: Double { self == .exposure ? 0.01 : 1 }
+}
+
+public struct DevelopSettings: Hashable, Sendable, Codable {
+    public private(set) var exposure: Double = 0
+    public private(set) var temperature: Double = 0
+    public private(set) var tint: Double = 0
+    public private(set) var contrast: Double = 0
+    public private(set) var highlights: Double = 0
+    public private(set) var shadows: Double = 0
+    /// Nil: the whole photo, upright.
+    public private(set) var crop: CropSettings?
+
+    public static let neutral = DevelopSettings()
+    public init() {}
+
+    public var isNeutral: Bool { self == .neutral }
+    /// True when no tone slider is off zero (the crop may still be set).
+    public var isToneNeutral: Bool { DevelopSlider.allCases.allSatisfy { value($0) == 0 } }
+
+    public func value(_ slider: DevelopSlider) -> Double {
+        switch slider {
+        case .exposure: exposure
+        case .temperature: temperature
+        case .tint: tint
+        case .contrast: contrast
+        case .highlights: highlights
+        case .shadows: shadows
+        }
+    }
+
+    /// A copy with `slider` at `value`, clamped to its range; NaN and infinity give 0.
+    public func setting(_ slider: DevelopSlider, to value: Double) -> DevelopSettings {
+        let clamped = value.isFinite ? min(max(value, slider.range.lowerBound), slider.range.upperBound) : 0
+        var copy = self
+        switch slider {
+        case .exposure: copy.exposure = clamped
+        case .temperature: copy.temperature = clamped
+        case .tint: copy.tint = clamped
+        case .contrast: copy.contrast = clamped
+        case .highlights: copy.highlights = clamped
+        case .shadows: copy.shadows = clamped
+        }
+        return copy
+    }
+
+    public func setting(crop: CropSettings?) -> DevelopSettings {
+        var copy = self
+        copy.crop = crop
+        return copy
+    }
+
+    /// The tone sliders of `other` with this crop: Paste Settings never pastes a crop.
+    public func pastingTone(from other: DevelopSettings) -> DevelopSettings {
+        var copy = other
+        copy.crop = crop
+        return copy
+    }
+}
+
+/// A rectangle in 0...1 of an image's width and height.
+public struct UnitRect: Hashable, Sendable, Codable {
+    public var x: Double, y: Double, width: Double, height: Double
+    public static let full = UnitRect(x: 0, y: 0, width: 1, height: 1)
+    public init(x: Double, y: Double, width: Double, height: Double) {
+        self.x = x; self.y = y; self.width = width; self.height = height
+    }
+}
+
+/// The crop's aspect. The raw value is the chip's title.
+public enum CropAspect: String, CaseIterable, Sendable, Codable {
+    case original = "Original", free = "Free", square = "1:1"
+    case fourFive = "4:5", threeTwo = "3:2", sixteenNine = "16:9"
+
+    /// Width over height for a photo of `size` (a 3:2 on a portrait photo is 2:3); nil for Free.
+    public func ratio(for size: PixelSize) -> Double? {
+        let portrait = size.height > size.width
+        let base: Double? = switch self {
+        case .free: nil
+        case .original: size.height > 0 ? Double(size.width) / Double(size.height) : nil
+        case .square: 1
+        case .fourFive: 4.0 / 5.0
+        case .threeTwo: 3.0 / 2.0
+        case .sixteenNine: 16.0 / 9.0
+        }
+        guard let base, self != .original, self != .square else { return base }
+        return portrait == (base > 1) ? 1 / base : base
+    }
+}
+
+public struct CropSettings: Hashable, Sendable, Codable {
+    public static let angleRange: ClosedRange<Double> = -45...45
+    /// Degrees clockwise, in `angleRange`.
+    public var angle: Double
+    /// In 0...1 of the straightened photo's largest upright crop
+    /// (CoreRaster `PixelBuffer.straightenCrop`), so no transparent corner shows.
+    public var rect: UnitRect
+    public var aspect: CropAspect
+    public init(angle: Double, rect: UnitRect, aspect: CropAspect) {
+        self.angle = angle; self.rect = rect; self.aspect = aspect
+    }
+}
+
+/// A crop frame handle.
+public enum CropHandle: Sendable, Hashable, CaseIterable {
+    case topLeft, top, topRight, right, bottomRight, bottom, bottomLeft, left, inside
+}
+
+/// The develop panel's histogram: 256 bins per channel over sRGB-encoded
+/// values (what a display shows), plus clipping counts.
+public struct HistogramBins: Hashable, Sendable {
+    public static let binCount = 256
+    public let red: [Int], green: [Int], blue: [Int]
+    public let shadowClipped: Int, highlightClipped: Int
+    public static let empty = HistogramBins(
+        red: Array(repeating: 0, count: binCount), green: Array(repeating: 0, count: binCount),
+        blue: Array(repeating: 0, count: binCount), shadowClipped: 0, highlightClipped: 0)
+    public init(red: [Int], green: [Int], blue: [Int], shadowClipped: Int, highlightClipped: Int) {
+        self.red = red; self.green = green; self.blue = blue
+        self.shadowClipped = shadowClipped; self.highlightClipped = highlightClipped
+    }
+    /// Each channel scaled to 0...1 by the tallest bin of all three; all 0 (never NaN) when empty.
+    public var heights: (red: [Double], green: [Double], blue: [Double]) {
+        let tallest = Double(max(red.max() ?? 0, green.max() ?? 0, blue.max() ?? 0))
+        let scale: ([Int]) -> [Double] = { bins in bins.map { tallest > 0 ? Double($0) / tallest : 0 } }
+        return (scale(red), scale(green), scale(blue))
+    }
+}
+
+/// A preview is drawn from the thumbnail-size decode while a drag is under
+/// way; full is the screen-size render it settles to.
+public enum RenderQuality: String, Sendable, Hashable { case preview, full }
+
+/// The loupe's picture and its histogram.
+public struct RenderedPhoto: Hashable, Sendable {
+    public var image: DisplayImage
+    public var histogram: HistogramBins
+    public var quality: RenderQuality
+    public init(image: DisplayImage, histogram: HistogramBins, quality: RenderQuality) {
+        self.image = image; self.histogram = histogram; self.quality = quality
+    }
+}
+```
+
+### 5.3 The protocols
+
+```swift
+// Contracts/LibraryContracts.swift: one protocol per use case, so the UI
+// track builds on the fakes while the logic track builds the live
+// conformances. Three are platform contracts (decode, JPEG write, catalog
+// file), conformed to in LibraryApp/Platform; the rest are conformed to in
+// LibraryModel/Live over CoreRaster. Every async call runs off the main
+// actor and returns a value the window hands to a LibraryCatalog method.
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
+import Foundation
+#endif
+import CoreRaster
+
+// MARK: Platform (conformed to in LibraryApp/Platform, ImageIO and the file system)
+
+/// Reads image files. Live: `ImageIODecoder`. Fake: `FakeDecoder`.
+public protocol PhotoDecoding: Sendable {
+    /// Image files under `folder`, subfolders included, hidden files and
+    /// packages skipped, with their metadata; no pixels are decoded.
+    /// Throws `LibraryError.unreadableFolder` when the folder can't be listed.
+    func scan(folder: String) async throws -> FolderScan
+    /// The file's pixels with its Exif orientation applied, converted to
+    /// sRGB, long side at most `maxLongSide` (nil: full size), never enlarged.
+    /// Throws `missingFile` or `notAnImage`.
+    func decode(path: String, maxLongSide: Int?) async throws -> DisplayImage
+}
+
+/// Writes JPEG files. Live: `JPEGWriter`. Fake: `FakeJPEGWriter` (in memory).
+public protocol JPEGWriting: Sendable {
+    /// File names already in `folder`; throws `writeFailed` when it can't be listed.
+    func existingNames(in folder: String) async throws -> Set<String>
+    /// Writes `image` as an sRGB JPEG at `quality` (0...100) to `folder`/`fileName`.
+    /// Never overwrites: throws `writeFailed` when the file exists or can't be written.
+    func write(_ image: DisplayImage, quality: Int, folder: String, fileName: String) async throws
+}
+
+/// Where the catalog file lives. Live: `CatalogStore` (Application Support,
+/// or `-LibraryCatalogDir`). Fake: `FakeCatalogStore` (in memory).
+public protocol CatalogStoring: Sendable {
+    /// The file's bytes; nil when there is no catalog yet.
+    func read() async throws -> Data?
+    /// Replaces the file atomically (write to a temporary file, then rename).
+    func write(_ data: Data) async throws
+    /// Renames the file to `catalog.json.bad` (replacing an older `.bad`), so
+    /// the next write starts fresh; returns the new name.
+    func setAside() async throws -> String
+}
+
+// MARK: Use cases (conformed to in LibraryModel/Live)
+
+/// J1. Import a folder. Live: `LiveImporter(decoder:)`.
+public protocol PhotoImporting: Sendable {
+    /// Scans `folder`, skips paths in `known`, and returns the new photos in
+    /// capture-date order with ids equal to their paths. Calls `progress`
+    /// after each file, at most 30 times a second. Throws
+    /// `unreadableFolder`, or `noPhotos` when the folder holds no image file
+    /// at all; a file that fails is a `FileFailure`, never a throw.
+    func importFolder(_ folder: String, known: Set<String>,
+                      progress: @escaping @Sendable (ImportProgress) -> Void) async throws -> ImportResult
+}
+
+/// J2. Grid thumbnails. Live: `LiveThumbnails(decoder:develop:)`, an actor
+/// with an LRU of `ThumbnailBucket.cacheLimit` images.
+public protocol ThumbnailProviding: Sendable {
+    /// The photo at `longSide` (a bucket: 128, 256 or 512) with its develop
+    /// settings and crop applied. Throws `missingFile` or `notAnImage`.
+    func thumbnail(for photo: PhotoItem, longSide: Int) async throws -> DisplayImage
+    /// Drops cached images of `id` (after its settings change).
+    func invalidate(_ id: String) async
+}
+
+/// J4. Rating, flag and label. Live: `LiveCulling`. Pure and synchronous: it
+/// runs on the main actor inside a catalog method.
+public protocol PhotoCulling: Sendable {
+    /// `items` with `change` applied to every photo whose id is in `ids`;
+    /// the rest unchanged and in the same order. Throws
+    /// `LibraryError.invalid` for a rating outside 0...5, changing nothing.
+    func apply(_ change: CullChange, to ids: Set<String>, in items: [PhotoItem]) throws -> [PhotoItem]
+    /// Auto Advance: the photo to focus after a change to `id`. `before` is
+    /// the shown order before the change and `after` the order after it (a
+    /// filter may hide the photo). The next photo after `id`; if `id` is no
+    /// longer shown, the photo that took its place; `id` itself when it was
+    /// last; nil when nothing is shown.
+    func advance(from id: String, before: [String], after: [String]) -> String?
+}
+
+/// J8, J9. The catalog file. Live: `LiveCatalogCoding` (JSON, `"version": 1`).
+public protocol CatalogCoding: Sendable {
+    func encode(_ photos: [PhotoItem]) throws -> Data
+    /// Throws `damagedCatalog` for bytes that aren't a v1 catalog and
+    /// `newerCatalog` for a version above 1. A missing `develop` object
+    /// decodes as neutral settings.
+    func decode(_ data: Data) throws -> [PhotoItem]
+}
+
+/// J3, J5. The loupe's picture. Live: `LiveLoupeImaging(decoder:develop:)`,
+/// an actor caching the decoded screen-size buffers of the focused photo and
+/// its two neighbours.
+public protocol LoupeImaging: Sendable {
+    /// `photo` with `settings` (tone and crop), long side at most `longSide`,
+    /// and its histogram. `.preview` renders from the 512 px thumbnail decode
+    /// (used during a drag); `.full` from the screen-size decode.
+    func render(_ photo: PhotoItem, settings: DevelopSettings, longSide: Int,
+                quality: RenderQuality) async throws -> RenderedPhoto
+    /// Decodes `photos` ahead (the neighbours of the focused photo).
+    func prefetch(_ photos: [PhotoItem], longSide: Int) async
+}
+
+/// J5, J7. Develop settings to pixels. Live: `LiveDevelop` over CoreRaster:
+/// white balance, exposure, contrast, highlights and shadows in that order,
+/// then the crop. Neutral settings return the buffer unchanged.
+public protocol DevelopRendering: Sendable {
+    func render(_ buffer: PixelBuffer, settings: DevelopSettings) throws -> PixelBuffer
+    func histogram(of buffer: PixelBuffer) throws -> HistogramBins
+}
+
+/// J6. Crop geometry. Live: `LiveCrop` over CoreRaster's `straightenCrop`.
+public protocol CropGeometry: Sendable {
+    /// A crop at `aspect` and `angle`, centered and as large as fits.
+    func initial(aspect: CropAspect, angle: Double, photo: PixelSize) throws -> CropSettings
+    /// `crop` after dragging `handle` by `dx`, `dy` photo pixels, kept on its
+    /// aspect and inside the straightened photo; at least 16 px a side.
+    func dragged(_ crop: CropSettings, handle: CropHandle, dx: Double, dy: Double,
+                 photo: PixelSize) throws -> CropSettings
+    /// `crop` at a new angle, shrunk if needed to stay inside.
+    func straightened(_ crop: CropSettings, angle: Double, photo: PixelSize) throws -> CropSettings
+    /// The crop's frame in the straightened photo's pixels (what export writes).
+    func frame(_ crop: CropSettings, photo: PixelSize) throws -> PixelRect
+}
+
+/// J7. Export. Live: `LiveExporter(decoder:develop:)`.
+public protocol PhotoExporting: Sendable {
+    /// Sizes and file names for `photos`: long edge from `options`, never
+    /// enlarged; `<name>.jpg`, then `<name> 2.jpg`, ... skipping
+    /// `existingNames` and names earlier in the plan.
+    func plan(_ photos: [PhotoItem], options: ExportOptions, existingNames: Set<String>) -> ExportPlan
+    /// One planned photo at full size with its settings, resized with
+    /// lanczos3 to `item.size`. Throws `missingFile`, `notAnImage` or `renderFailed`.
+    func render(_ item: ExportPlan.Item, photo: PhotoItem) async throws -> DisplayImage
+}
+
+// MARK: Values the contracts above take
+
+/// One culling change.
+public enum CullChange: Hashable, Sendable {
+    case rating(Int)
+    case flag(PhotoFlag)
+    case label(PhotoLabel?)
+
+    /// The undo step's name: "Set Rating", "Pick", "Reject", "Clear Flag", "Set Label".
+    public var undoName: String {
+        switch self {
+        case .rating: "Set Rating"
+        case .flag(.pick): "Pick"
+        case .flag(.reject): "Reject"
+        case .flag(.none): "Clear Flag"
+        case .label: "Set Label"
+        }
+    }
+}
+
+public struct ExportOptions: Hashable, Sendable {
+    public static let defaultLongEdge = 2048
+    public static let longEdgeRange = 16...16384
+    /// Nil: original size.
+    public var longEdge: Int?
+    public var quality: Int
+    public var folder: String
+    /// `longEdge` and `quality` clamped to their ranges.
+    public init(longEdge: Int? = defaultLongEdge, quality: Int = 85, folder: String) {
+        self.longEdge = longEdge.map { min(max($0, Self.longEdgeRange.lowerBound), Self.longEdgeRange.upperBound) }
+        self.quality = min(max(quality, 0), 100)
+        self.folder = folder
+    }
+}
+
+public struct ExportPlan: Hashable, Sendable {
+    public struct Item: Hashable, Sendable {
+        public var photoID: String
+        public var fileName: String
+        public var size: PixelSize
+        public init(photoID: String, fileName: String, size: PixelSize) {
+            self.photoID = photoID; self.fileName = fileName; self.size = size
+        }
+    }
+    public var items: [Item]
+    public var options: ExportOptions
+    public init(items: [Item], options: ExportOptions) {
+        self.items = items; self.options = options
+    }
+}
+```
+
+### 5.4 Wiring: `LibraryServices`
+
+```swift
+// LibraryServices.swift: one existential per contract. `.fake` runs every
+// member on its fake (the UI track, snapshots, `-LibraryFixture`); `.live`
+// takes the platform adapters from LibraryApp and builds the live
+// conformances. Until a feature's live conformance lands, its slot holds
+// the fake built with an `unavailable` reason, so the control that needs it
+// shows disabled with that reason. Each feature edits one line of `live`.
+public struct LibraryServices: Sendable {
+    public var decoder: any PhotoDecoding
+    public var importer: any PhotoImporting
+    public var thumbnails: any ThumbnailProviding
+    public var culling: any PhotoCulling
+    public var coding: any CatalogCoding
+    public var store: any CatalogStoring
+    public var loupe: any LoupeImaging
+    public var develop: any DevelopRendering
+    public var crop: any CropGeometry
+    public var exporter: any PhotoExporting
+    public var writer: any JPEGWriting
+    /// Why a member can't act yet, by member name; empty once all are live.
+    public var unavailable: [String: String]
+    /// True for `.fake` (fixture data on screen); drives the "Preview data" pill.
+    public var isPreview: Bool
+
+    public init(decoder: any PhotoDecoding, importer: any PhotoImporting, thumbnails: any ThumbnailProviding,
+                culling: any PhotoCulling, coding: any CatalogCoding, store: any CatalogStoring,
+                loupe: any LoupeImaging, develop: any DevelopRendering, crop: any CropGeometry,
+                exporter: any PhotoExporting, writer: any JPEGWriting,
+                unavailable: [String: String] = [:], isPreview: Bool) {
+        self.decoder = decoder; self.importer = importer; self.thumbnails = thumbnails
+        self.culling = culling; self.coding = coding; self.store = store; self.loupe = loupe
+        self.develop = develop; self.crop = crop; self.exporter = exporter; self.writer = writer
+        self.unavailable = unavailable; self.isPreview = isPreview
+    }
+
+    /// Every member a fake over `photos` (a fixture's photos).
+    public static func fake(_ photos: [PhotoItem] = [], mode: FakeMode = .ok) -> LibraryServices {
+        let decoder = FakeDecoder(photos: photos, mode: mode)
+        return LibraryServices(
+            decoder: decoder, importer: FakeImporter(photos: photos, mode: mode),
+            thumbnails: FakeThumbnails(mode: mode), culling: FakeCulling(mode: mode),
+            coding: FakeCatalogCoding(mode: mode), store: FakeCatalogStore(mode: mode),
+            loupe: FakeLoupe(mode: mode), develop: FakeDevelop(mode: mode), crop: FakeCrop(),
+            exporter: FakeExporter(mode: mode), writer: FakeJPEGWriter(mode: mode), isPreview: true)
+    }
+
+    /// The live services over LibraryApp's platform adapters. While a feature
+    /// is unbuilt its member is the fake with a reason (the line it edits).
+    public static func live(decoder: any PhotoDecoding, writer: any JPEGWriting,
+                            store: any CatalogStoring) -> LibraryServices {
+        var services = fake()
+        services.decoder = decoder
+        services.writer = writer
+        services.store = store
+        services.unavailable = [
+            "importer": "Import isn't connected yet (import).",
+            "thumbnails": "Thumbnails aren't connected yet (thumbnails).",
+            "culling": "Rating isn't connected yet (cull).",
+            "coding": "Saving the catalog isn't connected yet (persist).",
+            "loupe": "The loupe isn't connected yet (loupe-viewport).",
+            "develop": "Develop isn't connected yet (develop).",
+            "crop": "Crop isn't connected yet (crop).",
+            "exporter": "Export isn't connected yet (export).",
+        ]
+        services.isPreview = false
+        return services
+    }
+}
+```
+
+<details><summary>The fakes (Fakes/FakeSupport.swift, FakePlatform.swift, FakeUseCases.swift)</summary>
+
+```swift
+// Fakes/FakeSupport.swift: what every fake shares: the `-LibraryFakeMode`
+// behavior (fail throws, slow waits 2 s first) and a gradient image made
+// from a photo's sample color, so fake thumbnails and loupe pictures differ
+// per photo and are the same on every run.
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
+import Foundation
+#endif
+
+enum FakeBehavior {
+    /// Waits in `.slow`, throws `error` in `.fail`.
+    static func perform(_ mode: FakeMode, failing error: LibraryError) async throws {
+        if mode == .slow { try await Task.sleep(nanoseconds: 2_000_000_000) }
+        if mode == .fail { throw error }
+    }
+
+    /// A left-to-right gradient from the photo's color to black, `size` fitted to `longSide`.
+    static func gradient(for photo: PhotoItem, longSide: Int?) -> DisplayImage? {
+        let size = longSide.map { photo.pixelSize.fitting(longSide: $0) } ?? photo.pixelSize
+        let color = photo.pixel
+        var bytes = [UInt8]()
+        bytes.reserveCapacity(size.width * size.height * 4)
+        for _ in 0..<size.height {
+            for x in 0..<size.width {
+                let t = size.width > 1 ? Double(x) / Double(size.width - 1) : 0
+                for channel in 0..<3 { bytes.append(UInt8((Double(color[channel]) * (1 - t / 2)).rounded())) }
+                bytes.append(255)
+            }
+        }
+        return DisplayImage(size: size, rgba8: bytes)
+    }
+}
+```
+
+```swift
+// Fakes/FakePlatform.swift: fakes of the three platform contracts. The
+// decoder "finds" the fixture's photos in any folder; the writer and the
+// store keep bytes in memory, so tests read back what was written.
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
+import Foundation
+#endif
+
+public struct FakeDecoder: PhotoDecoding {
+    let photos: [PhotoItem]
+    let mode: FakeMode
+    public init(photos: [PhotoItem], mode: FakeMode = .ok) {
+        self.photos = photos; self.mode = mode
+    }
+
+    public func scan(folder: String) async throws -> FolderScan {
+        try await FakeBehavior.perform(mode, failing: .unreadableFolder(folder))
+        let candidates = photos.map {
+            ImportCandidate(path: folder + "/" + $0.name + ".jpg", captureDate: $0.captureDate,
+                            pixelSize: $0.pixelSize, kind: .jpeg)
+        }
+        return FolderScan(candidates: candidates, failures: [])
+    }
+
+    public func decode(path: String, maxLongSide: Int?) async throws -> DisplayImage {
+        try await FakeBehavior.perform(mode, failing: .notAnImage(path))
+        guard let photo = photos.first(where: { $0.path == path || $0.id == path }),
+              let image = FakeBehavior.gradient(for: photo, longSide: maxLongSide)
+        else { throw LibraryError.missingFile(path) }
+        return image
+    }
+}
+
+public actor FakeJPEGWriter: JPEGWriting {
+    let mode: FakeMode
+    /// Written files by "folder/name", for tests.
+    public private(set) var files: [String: DisplayImage] = [:]
+    public init(mode: FakeMode = .ok) { self.mode = mode }
+
+    public func existingNames(in folder: String) async throws -> Set<String> {
+        Set(files.keys.filter { $0.hasPrefix(folder + "/") }.map { String($0.dropFirst(folder.count + 1)) })
+    }
+
+    public func write(_ image: DisplayImage, quality: Int, folder: String, fileName: String) async throws {
+        let key = folder + "/" + fileName
+        try await FakeBehavior.perform(mode, failing: .writeFailed(path: key, reason: "The folder is read-only."))
+        guard files[key] == nil else { throw LibraryError.writeFailed(path: key, reason: "The file already exists.") }
+        files[key] = image
+    }
+}
+
+public actor FakeCatalogStore: CatalogStoring {
+    let mode: FakeMode
+    public private(set) var data: Data?
+    public private(set) var setAsideCount = 0
+    public init(data: Data? = nil, mode: FakeMode = .ok) {
+        self.data = data; self.mode = mode
+    }
+    public func read() async throws -> Data? { data }
+    public func write(_ data: Data) async throws {
+        try await FakeBehavior.perform(mode, failing: .writeFailed(path: "catalog.json", reason: "The disk is full."))
+        self.data = data
+    }
+    public func setAside() async throws -> String {
+        data = nil
+        setAsideCount += 1
+        return "catalog.json.bad"
+    }
+}
+```
+
+```swift
+// Fakes/FakeUseCases.swift: fakes of the use-case contracts. Each does the
+// simplest honest thing (import returns the fixture, thumbnails and the
+// loupe are gradients, develop changes nothing, crop centers the aspect,
+// export plans by the same naming rule in a few lines) and obeys
+// `-LibraryFakeMode`, so the UI track can show every state.
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
+import Foundation
+#endif
+import CoreRaster
+
+public struct FakeImporter: PhotoImporting {
+    let photos: [PhotoItem]
+    let mode: FakeMode
+    public init(photos: [PhotoItem], mode: FakeMode = .ok) {
+        self.photos = photos; self.mode = mode
+    }
+    public func importFolder(_ folder: String, known: Set<String>,
+                             progress: @escaping @Sendable (ImportProgress) -> Void) async throws -> ImportResult {
+        try await FakeBehavior.perform(mode, failing: .unreadableFolder(folder))
+        let fresh = photos.filter { !known.contains($0.id) }
+        for index in fresh.indices { progress(ImportProgress(done: index, total: fresh.count)) }
+        return ImportResult(added: fresh, alreadyKnown: photos.count - fresh.count, failures: [])
+    }
+}
+
+public struct FakeThumbnails: ThumbnailProviding {
+    let mode: FakeMode
+    public init(mode: FakeMode = .ok) { self.mode = mode }
+    public func thumbnail(for photo: PhotoItem, longSide: Int) async throws -> DisplayImage {
+        try await FakeBehavior.perform(mode, failing: .notAnImage(photo.id))
+        guard let image = FakeBehavior.gradient(for: photo, longSide: longSide) else {
+            throw LibraryError.notAnImage(photo.id)
+        }
+        return image
+    }
+    public func invalidate(_ id: String) async {}
+}
+
+/// Applies changes like the live one but never advances (Auto Advance is the live rule).
+public struct FakeCulling: PhotoCulling {
+    let mode: FakeMode
+    public init(mode: FakeMode = .ok) { self.mode = mode }
+    public func apply(_ change: CullChange, to ids: Set<String>, in items: [PhotoItem]) throws -> [PhotoItem] {
+        if mode == .fail { throw LibraryError.invalid("Rating is unavailable in this preview.") }
+        if case .rating(let stars) = change, !(0...5).contains(stars) {
+            throw LibraryError.invalid("A rating is 0 to 5 stars.")
+        }
+        return items.map { item in
+            guard ids.contains(item.id) else { return item }
+            var copy = item
+            switch change {
+            case .rating(let stars): copy.rating = stars
+            case .flag(let flag): copy.flag = flag
+            case .label(let label): copy.label = label
+            }
+            return copy
+        }
+    }
+    public func advance(from id: String, before: [String], after: [String]) -> String? { id }
+}
+
+/// Stores ids and ratings only, as text: enough to drive the restore journey on fakes.
+public struct FakeCatalogCoding: CatalogCoding {
+    let mode: FakeMode
+    public init(mode: FakeMode = .ok) { self.mode = mode }
+    public func encode(_ photos: [PhotoItem]) throws -> Data {
+        Data(photos.map { "\($0.id)\t\($0.rating)" }.joined(separator: "\n").utf8)
+    }
+    public func decode(_ data: Data) throws -> [PhotoItem] {
+        if mode == .fail { throw LibraryError.damagedCatalog("fake") }
+        let lines = String(decoding: data, as: UTF8.self).split(separator: "\n")
+        return try lines.map { line in
+            let fields = line.split(separator: "\t")
+            guard fields.count == 2, let rating = Int(fields[1]) else { throw LibraryError.damagedCatalog("fake") }
+            return PhotoItem(id: String(fields[0]), name: String(fields[0]), captureDate: Date(timeIntervalSince1970: 0),
+                             color: .init(0.5, 0.5, 0.5), rating: rating)
+        }
+    }
+}
+
+public struct FakeLoupe: LoupeImaging {
+    let mode: FakeMode
+    public init(mode: FakeMode = .ok) { self.mode = mode }
+    public func render(_ photo: PhotoItem, settings: DevelopSettings, longSide: Int,
+                       quality: RenderQuality) async throws -> RenderedPhoto {
+        try await FakeBehavior.perform(mode, failing: .renderFailed("the preview failed on purpose"))
+        guard let image = FakeBehavior.gradient(for: photo, longSide: quality == .preview ? 512 : longSide) else {
+            throw LibraryError.renderFailed("empty photo")
+        }
+        return RenderedPhoto(image: image, histogram: .empty, quality: quality)
+    }
+    public func prefetch(_ photos: [PhotoItem], longSide: Int) async {}
+}
+
+/// Returns the buffer unchanged and an empty histogram.
+public struct FakeDevelop: DevelopRendering {
+    let mode: FakeMode
+    public init(mode: FakeMode = .ok) { self.mode = mode }
+    public func render(_ buffer: PixelBuffer, settings: DevelopSettings) throws -> PixelBuffer {
+        if mode == .fail { throw LibraryError.renderFailed("the preview failed on purpose") }
+        return buffer
+    }
+    public func histogram(of buffer: PixelBuffer) throws -> HistogramBins { .empty }
+}
+
+/// Centers the aspect on the photo and ignores the angle's shrink.
+public struct FakeCrop: CropGeometry {
+    public init() {}
+    public func initial(aspect: CropAspect, angle: Double, photo: PixelSize) throws -> CropSettings {
+        var rect = UnitRect.full
+        if let ratio = aspect.ratio(for: photo), photo.height > 0 {
+            let photoRatio = Double(photo.width) / Double(photo.height)
+            if ratio < photoRatio { rect.width = ratio / photoRatio } else { rect.height = photoRatio / ratio }
+            rect.x = (1 - rect.width) / 2
+            rect.y = (1 - rect.height) / 2
+        }
+        return CropSettings(angle: min(max(angle, -45), 45), rect: rect, aspect: aspect)
+    }
+    public func dragged(_ crop: CropSettings, handle: CropHandle, dx: Double, dy: Double,
+                        photo: PixelSize) throws -> CropSettings { crop }
+    public func straightened(_ crop: CropSettings, angle: Double, photo: PixelSize) throws -> CropSettings {
+        CropSettings(angle: min(max(angle, -45), 45), rect: crop.rect, aspect: crop.aspect)
+    }
+    public func frame(_ crop: CropSettings, photo: PixelSize) throws -> PixelRect {
+        PixelRect(x: Int(crop.rect.x * Double(photo.width)), y: Int(crop.rect.y * Double(photo.height)),
+                  width: max(Int(crop.rect.width * Double(photo.width)), 1),
+                  height: max(Int(crop.rect.height * Double(photo.height)), 1))
+    }
+}
+
+public struct FakeExporter: PhotoExporting {
+    let mode: FakeMode
+    public init(mode: FakeMode = .ok) { self.mode = mode }
+    public func plan(_ photos: [PhotoItem], options: ExportOptions, existingNames: Set<String>) -> ExportPlan {
+        var taken = existingNames
+        let items = photos.map { photo -> ExportPlan.Item in
+            var name = photo.name + ".jpg", n = 2
+            while taken.contains(name) { name = photo.name + " \(n).jpg"; n += 1 }
+            taken.insert(name)
+            let size = options.longEdge.map { photo.pixelSize.fitting(longSide: $0) } ?? photo.pixelSize
+            return ExportPlan.Item(photoID: photo.id, fileName: name, size: size)
+        }
+        return ExportPlan(items: items, options: options)
+    }
+    public func render(_ item: ExportPlan.Item, photo: PhotoItem) async throws -> DisplayImage {
+        try await FakeBehavior.perform(mode, failing: .renderFailed("the preview failed on purpose"))
+        guard let image = FakeBehavior.gradient(for: photo, longSide: item.size.longSide) else {
+            throw LibraryError.renderFailed("empty photo")
+        }
+        return image
+    }
+}
+```
+
+</details>
+
+### 5.5 `PhotoItem` grows four fields (spine)
+
+The checked version is `docs/blueprints/library/contracts/PhotoItem.swift`.
+Added, each with a default in the existing initializer so every current
+caller and test still compiles:
+
+```swift
+public let path: String?                              // nil for a sample; equal to `id` when imported
+public let pixelSize: PixelSize                       // after Exif orientation; samples 4032 × 3024
+public internal(set) var develop: DevelopSettings     // neutral until developed
+public internal(set) var availability: PhotoAvailability  // .available, .missing, .unreadable(reason)
+```
+
+`LibraryCatalog.loupeArtboard` goes away: the loupe reads the photo's own
+`pixelSize` (#724's "real photo size").
+
+### 5.6 `LibraryCatalog`: every stored property, declared once (spine)
+
+The spine adds all of these in one PR, so no feature edits
+`LibraryCatalog.swift` afterwards. Stored state becomes
+`public internal(set)` (Flare's LM-0a3 rule): extension files in the Model
+can write it, `LibraryApp` (another module) still cannot, so the app-state
+rule and the compiler still hold. This is a deliberate exception to
+CLAUDE.md's `public private(set)`, recorded as decision D6.
+
+| Stored property | Read by | Written by (file, feature) |
+|---|---|---|
+| `services: LibraryServices` | every extension | `init(services:)` (spine) |
+| `history: CatalogHistory` | Edit menu | `CatalogHistory.swift` (spine) |
+| `order: [String]` (the shown ids in sort order, cached) | grid, loupe, status | `LibraryOrder.swift` (spine): rebuilt on load, sort, collection, and any change that can reorder or hide |
+| `importState: ImportState` (`.idle`, `.running(ImportProgress)`), `importNotice: ImportNotice?` (added count, already known, failures, or an error message) | progress row, banner | `LibraryImport.swift` (import) |
+| `thumbnails: [String: DisplayImage]`, `thumbnailLongSide: Int`, `pendingThumbnails: Set<String>` | grid cells | `LibraryThumbnails.swift` (thumbnails) |
+| `autoAdvance: Bool` | Metadata menu | `LibraryCulling.swift` (cull) |
+| `loupeZoom: LoupeZoom` (`.fit`, `.actual`, `.scale(Double)`), `loupeRender: RenderedPhoto?`, `loupeRenderToken: Int`, `loupeError: String?` | loupe, status pills, histogram | `LoupeZoom.swift`, `LibraryLoupeImage.swift` (loupe-viewport) |
+| `copiedSettings: DevelopSettings?` | Photo menu | `LibraryDevelop.swift` (develop) |
+| `cropDraft: CropSettings?` (non-nil while cropping) | crop overlay, Photo menu | `LibraryCrop.swift` (crop) |
+| `exportState: ExportState` (`.idle`, `.editing(ExportOptions)`, `.running(done: Int, total: Int)`, `.finished(ExportSummary)`) | export sheet | `LibraryExport.swift` (export) |
+| `catalogState: CatalogFileState` (`.loading`, `.ready`, `.damaged(String)`, `.newer(String)`), `saveRevision: Int`, `savedRevision: Int`, `saveError: String?` | launch, banner | `LibraryPersistence.swift` (persist) |
+
+The enums above are declared by the spine in `LibraryCatalog.swift` next to
+the properties, with only the cases listed, so features add behavior, never
+cases. `ImportNotice`, `ExportSummary` are plain structs in the same file.
+
+### 5.7 The catalog methods each journey calls
+
+Views call only these (and the existing ones). Each mutating method runs
+on the main actor, never awaits, and is Linux-tested. An `async` service
+call happens in the area file (`LibraryWindow+<Area>.swift`), which then
+calls the matching `finish…`/`show…` method with the request's token.
+
+| Journey step | Method (file, feature) | Undo step |
+|---|---|---|
+| J1 Import Folder… | `beginImport(_ folder: String) -> Set<String>?` (known ids; nil while one runs) · `showImportProgress(_:)` · `finishImport(_ result: ImportResult)` · `failImport(_ error: LibraryError)` · `dismissImportNotice()` (`LibraryImport.swift`, import) | none: import is not undoable in v1 (decision D4) |
+| J2 thumbnails | `thumbnailLongSide(forCell:) -> Int` (128, 256, 512) · `requestThumbnails(visible: [String]) -> [String]` (ids to build) · `setThumbnail(_ image: DisplayImage, for id: String, longSide: Int)` · `failThumbnail(_ id: String, _ error: LibraryError)` (`LibraryThumbnails.swift`, thumbnails) | none |
+| J2 sort, sizes, selection | existing `setSort`, `stepCellSize`, `select` (spine moves them onto `order`) | none |
+| J3 loupe step and zoom | existing `open`, `showLoupe`, `stepLoupe`, `showGrid`, plus `zoomLoupe(_ zoom: LoupeZoom)`, `stepZoom(by:)`, `loupeRequest() -> LoupeRequest?` (photo, settings, long side, token) · `showLoupeRender(_:token:)` · `failLoupeRender(_:token:)` · `neighboursToPrefetch() -> [PhotoItem]` (`LoupeZoom.swift`, `LibraryLoupeImage.swift`, loupe-viewport) | none |
+| J4 keys | `cull(_ change: CullChange)` (applies to the loupe photo, else the selection; Auto Advance when it applies) · `cullKey(_ key: Character) -> CullChange?` (`0`–`5`, `p`, `x`, `u`) · `setAutoAdvance(_:)` (`LibraryCulling.swift`, cull). The existing `setRating`, `setFlag`, `setLabel`, `clickStar` call `cull` | "Set Rating", "Pick", "Reject", "Clear Flag", "Set Label" |
+| J4–J7 undo | `undo()`, `redo()`, `undoTitle: String?`, `redoTitle: String?` (`CatalogHistory.swift`, spine) | n/a |
+| J5 develop | `setDevelop(_ slider: DevelopSlider, to value: Double, coalesceKey: String?)` · `endDevelopDrag()` · `resetDevelop(_ slider: DevelopSlider?)` (nil: all) · `copySettings()` · `pasteSettings()` (to the selection or the loupe photo) (`LibraryDevelop.swift`, develop) | "<Slider>" coalesced per drag, "Reset <Slider>", "Reset Develop", "Paste Settings" |
+| J6 crop | `beginCrop()` · `setCropAspect(_:)` · `dragCrop(_ handle: CropHandle, dx: Double, dy: Double)` · `setCropAngle(_:)` · `applyCrop()` · `cancelCrop()` · `resetCrop()` (`LibraryCrop.swift`, crop) | "Crop" on apply, "Reset Crop"; drags and cancel record nothing |
+| J7 export | `beginExport() -> Bool` (false with nothing to export) · `setExportOptions(_:)` · `exportPlan(existingNames:) -> ExportPlan` · `showExportProgress(done:total:)` · `finishExport(_ summary: ExportSummary)` · `cancelExport()` · `closeExport()` (`LibraryExport.swift`, export) | none |
+| J8, J9 persist | `restore(_ photos: [PhotoItem])` · `failRestore(_ error: LibraryError)` · `saveRequest() -> (revision: Int, photos: [PhotoItem])?` (nil when saved) · `didSave(revision:)` · `failSave(_:)` (`LibraryPersistence.swift`, persist) | none |
+| every area | `help(for member: String) -> String?` (the `unavailable` reason, for disabled controls) (spine) | n/a |
+
+Checklist:
+
+- [x] One protocol per use case, with exact signatures, in a file that
+      compiles on Linux (`check.sh`, run on 2026-10-14).
+- [x] Every protocol has a fake, and the smoke test calls every one.
+- [x] Every journey step in section 4 maps to a method in 5.7 or a menu
+      item in 6.2, and every method names the file and feature that owns it.
