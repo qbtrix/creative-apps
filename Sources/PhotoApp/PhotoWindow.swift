@@ -43,7 +43,7 @@ struct PhotoWindow: View {
     @State private var isRenaming = false
     @State private var renameText = ""
 
-    /// A sheet or the rename alert is up, so Select > All leaves Command-A to its fields.
+    /// A sheet or the rename alert is up, so Select > All never selects the canvas.
     private var isPresenting: Bool { isExporting || isResizing || straightenDraft != nil || isRenaming }
 
     /// The launch file opens in the first window only.

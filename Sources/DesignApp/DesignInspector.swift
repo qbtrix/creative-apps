@@ -5,8 +5,10 @@
 // has none). A locked layer, or one inside a locked group, can't be edited, so
 // Frame and Fill are disabled and a line says why. With only a page selected it shows the page's size,
 // read only. With several layers selected it shows "Multiple layers selected"
-// where Frame and Fill's values go, disabled with the reason, since editing
-// several layers at once comes later (#413). Values in, intents out; the model clamps and refuses what it must.
+// where Frame and Fill's values go, with the reason as the rows' tooltip and a
+// hint below, since editing several layers at once comes later (#413). The rows
+// hold no control, so they aren't disabled: a disabled row dims its label
+// under 4.5:1. Values in, intents out; the model clamps and refuses what it must.
 import DesignModel
 import SuiteUI
 import SwiftUI
@@ -76,6 +78,7 @@ private struct DesignNodeProperties: View {
                     InspectorColorWellRow(label, color: HexColor(node.fill.red, node.fill.green, node.fill.blue)) {
                         perform(.setFill(node.id, DesignColor($0.red, $0.green, $0.blue)))
                     }
+                    .accessibilityIdentifier("design.fill")
                     .disabled(lockHelp != nil)
                     .help(lockHelp ?? "")
                 }
@@ -109,9 +112,8 @@ private struct DesignMultipleProperties: View {
             ForEach(["Frame", "Fill"], id: \.self) { title in
                 InspectorSection(title) {
                     InspectorRow(title) {
-                        Text("Multiple layers selected").foregroundStyle(SuiteColor.secondaryText)
+                        Text("Multiple layers selected").foregroundStyle(SuiteColor.textSecondary)
                     }
-                    .disabled(true)
                     .help(help)
                 }
             }
