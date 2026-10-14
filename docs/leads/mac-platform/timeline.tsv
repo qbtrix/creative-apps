@@ -2,3 +2,6 @@ utc	stage	event	ref	note
 2026-10-14T15:43Z	0	stage-end	d56aa45	setup, base verified, depends on none
 2026-10-14T15:43Z	2	stage-end	-	4 waves planned
 2026-10-14T15:43Z	3	stage-start	wave1	MP-1 MP-4
+2026-10-14T16:26Z	3	pr-merged	#756	MP-4 StagePath
+2026-10-14T16:26Z	3	pr-merged	#757	MP-1 open recent
+2026-10-14T16:26Z	3	stage-start	wave2	MP-2 base 956d946

@@ -2,16 +2,16 @@
 
 Issue: #754 · Packet: docs/blueprints/flare/features/mac-platform.md
 Run: act-1a13b14336c-tqna · Session: claude/mac-platform-lead-7jx22z · Started: 2026-10-14T15:43Z
-Stage: 3 wave 1
-Base: d56aa45663af79c7f5079a5cab666ce3a2992ceb
-Next: check the wave-1 PRs (MP-1, MP-4); once merged, build wave 2 (MP-2) on the new origin/dev
+Stage: 3 wave 2
+Base: 956d946ad5ddb225094dfd07396316be31eea04a
+Next: check the MP-2 PR; once merged, build wave 3 (MP-3 + MP-5)
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
 |---|---|---|---|---|---|---|
-| MP-1 | 1 | Open Recent: noteRecent(path), recentLimit 10, clearRecent | FlareFiles.swift, FlareRecentTests.swift, c4 flare-model-sources | FlareRecentTests | | building |
-| MP-4 | 1 | StagePath: FlarePath+Matrix to CGPath (one addCurve per cubic), cgColor sRGB | Sources/FlareApp/StagePath.swift, Tests/AppSnapshotTests/StagePathTests.swift, c4 flare-app-sources | StagePathTests (macOS) | | building |
-| MP-2 | 2 | autosaveDelay 30, autosaveDue(lastEdit:now:), recoveryData() | FlareFiles.swift, FlareAutosaveDueTests.swift, c4 flare-model-sources | FlareAutosaveDueTests | | waiting |
+| MP-1 | 1 | Open Recent: noteRecent(path), recentLimit 10, clearRecent | FlareFiles.swift, FlareRecentTests.swift, c4 flare-model-sources | FlareRecentTests | #757 | merged |
+| MP-4 | 1 | StagePath: FlarePath+Matrix to CGPath (one addCurve per cubic), cgColor sRGB | Sources/FlareApp/StagePath.swift, Tests/AppSnapshotTests/StagePathTests.swift, c4 flare-app-sources | StagePathTests (macOS) | #756 | merged |
+| MP-2 | 2 | autosaveDelay 30, autosaveDue(lastEdit:now:), recoveryData() | FlareFiles.swift, FlareAutosaveDueTests.swift, c4 flare-model-sources | FlareAutosaveDueTests | | building |
 | MP-3 | 3 | restoreRecovery(_:); model journey steps 1-3 | FlareFiles.swift, FlareRecoveryRestoreTests.swift, MacPlatformJourneyTests.swift, c4 flare-model-sources | FlareRecoveryRestoreTests, MacPlatformJourneyTests | | waiting |
 | MP-5 | 3 | RecoveryFile + autosave writer (poll, off-main atomic write, remove after save, quit write) | Sources/FlareApp/FlareAutosave.swift, Tests/AppSnapshotTests/AutosaveTests.swift, c4 flare-app-sources | AutosaveTests (macOS) | | waiting |
 | MP-6 | 4 | Recovery on launch: read off main, decode, offer text, Restore, Discard, damaged removed (feature-done) | Sources/FlareApp/FlareAutosave.swift, Tests/AppSnapshotTests/AutosaveRecoveryTests.swift, c4 flare-app-sources | AutosaveRecoveryTests (macOS) | | waiting |
