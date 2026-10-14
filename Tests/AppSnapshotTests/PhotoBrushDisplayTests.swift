@@ -85,7 +85,7 @@ import Testing
             shown = state.value.revision
             guard i > 0 else { continue }  // the stroke's first event, like PhotoBrushLatencyTests
             let newPicture = image === before ? 0 : image.bytesPerRow * image.height
-            let ms = (drag: milliseconds(t1 - t0), total: milliseconds(t2 - t0), render: renderer.milliseconds ?? 0)
+            let ms = (drag: milliseconds(t1 - t0), total: milliseconds(t2 - t0), render: renderer.frame?.milliseconds ?? 0)
             drag.append(ms.drag)
             render.append(ms.render)
             handOff.append(ms.total - ms.drag - ms.render)
