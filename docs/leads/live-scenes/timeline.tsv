@@ -1,0 +1,4 @@
+utc	stage	event	ref	note
+2026-10-14T23:01Z	0	stage-start	#800	setup on bfd0328
+2026-10-14T23:01Z	1	stage-end	#800	packet read
+2026-10-14T23:01Z	2	stage-end	#800	3 waves planned
