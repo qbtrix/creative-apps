@@ -14,7 +14,9 @@
 // document's back (nil until it is saved), and Save writes the right file (#436).
 //
 // A run of edits with the same coalescing key (one node's frame, nudges) is one
-// step; an undo or redo ends the run. A new edit clears Redo. The history keeps
+// step; an undo or redo ends the run, and so does endEditRun, which the inspector
+// calls when one scrub drag or committed field entry ends, so the next edit to
+// the same field is its own step (#536). A new edit clears Redo. The history keeps
 // the last 100 steps. An edit that changed nothing records nothing; New File
 // over a file with a location changes that location, so it always records (#492).
 // ponytail: one whole-document snapshot per step (copy-on-write, so edits share
@@ -79,7 +81,7 @@ extension DesignWorkspace {
         history.redo.append(DesignHistory.Step(
             name: step.name, snapshot: snapshot, swapsDocument: step.swapsDocument, documentURL: documentURL))
         restore(step)
-        endRun()
+        endEditRun()
     }
 
     /// Makes the last undone edit again. Ignored with nothing to redo, mid-drag and while editing text.
@@ -88,7 +90,7 @@ extension DesignWorkspace {
         history.undo.append(DesignHistory.Step(
             name: step.name, snapshot: snapshot, swapsDocument: step.swapsDocument, documentURL: documentURL))
         restore(step)
-        endRun()
+        endEditRun()
     }
 
     var snapshot: DesignSnapshot {
@@ -139,8 +141,9 @@ extension DesignWorkspace {
         (pageCount, nodeCount) = (snapshot.pageCount, snapshot.nodeCount)
     }
 
-    /// Stops the last step from absorbing the next edit.
-    private mutating func endRun() {
+    /// Ends the current edit run (one scrub drag, one committed field entry): the last step stops
+    /// absorbing edits, so the next one is its own step even with the same coalescing key.
+    public mutating func endEditRun() {
         guard let last = history.undo.indices.last else { return }
         history.undo[last].coalescing = nil
     }

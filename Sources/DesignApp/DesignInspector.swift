@@ -2,7 +2,8 @@
 // layer shows its header (name, then kind unless the name says it, then size),
 // then Layer (Hidden and Locked checkboxes), Frame (X, Y, W and H as scrub
 // fields) and Fill (the color well; a text layer's is its text color, a group
-// has none). A locked layer, or one inside a locked group, can't be edited, so
+// has none). Each scrub drag, click into a field or Return ends the edit run,
+// so separate edits to one field undo one at a time (#536). A locked layer, or one inside a locked group, can't be edited, so
 // Frame and Fill are disabled and a line says why. With only a page selected it shows the page's size,
 // read only. Values in, intents out; the model clamps and refuses what it must.
 import DesignModel
@@ -67,6 +68,7 @@ private struct DesignNodeProperties: View {
                     InspectorColorWellRow(label, color: HexColor(node.fill.red, node.fill.green, node.fill.blue)) {
                         perform(.setFill(node.id, DesignColor($0.red, $0.green, $0.blue)))
                     }
+                    .modifier(DesignEditRunEnd(perform: perform))
                     .disabled(lockHelp != nil)
                     .help(lockHelp ?? "")
                 }
@@ -84,7 +86,21 @@ private struct DesignNodeProperties: View {
                 frame[keyPath: field] = value
                 perform(.setFrame(node.id, x: frame.x, y: frame.y, width: frame.width, height: frame.height))
             }
+            .modifier(DesignEditRunEnd(perform: perform))
         }
+    }
+}
+
+/// Ends the edit run when a press on the field ends (a scrub drag, or the click that opens typing)
+/// and when a typed value is submitted. SuiteUI's public ScrubField and color row have no end
+/// callback, so this listens alongside their own gesture and submit.
+private struct DesignEditRunEnd: ViewModifier {
+    let perform: DesignPerform
+
+    func body(content: Content) -> some View {
+        content
+            .simultaneousGesture(DragGesture(minimumDistance: 0).onEnded { _ in perform(.endEditRun) })
+            .onSubmit { perform(.endEditRun) }
     }
 }
 

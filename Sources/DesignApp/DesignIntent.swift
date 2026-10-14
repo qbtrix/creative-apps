@@ -22,6 +22,8 @@ enum DesignIntent {
     case addPage, deletePage
     case setFrame(String, x: Double, y: Double, width: Double, height: Double)
     case setFill(String, DesignColor)
+    /// One scrub drag or committed field entry ended; the next frame or fill edit is its own undo step.
+    case endEditRun
     case setHidden(String, Bool), setLocked(String, Bool)
     case toggleFlag(String, DesignLayerFlag)
     case editText(String)
