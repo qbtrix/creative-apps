@@ -20,6 +20,20 @@ final class LibraryJourneyTests: XCTestCase {
         library.openEachMenu()
     }
 
+    @MainActor func testLoupeStepsAndReturnsToTheGrid() {
+        let library = Journey("Library", self)
+        library.click("Load Sample Photos")
+        let view = library.app.menuBars.firstMatch.menuBarItems["View"]
+        view.click()
+        view.menuItems["Loupe"].click()
+        XCTAssert(library.app.descendants(matching: .any)["library.loupe"].waitForExistence(timeout: 10), "no loupe")
+        library.shot("loupe")
+        library.app.typeKey(.rightArrow, modifierFlags: [])
+        library.shot("loupe-next")
+        library.app.typeKey(.escape, modifierFlags: [])
+        library.shot("loupe-back-to-grid")
+    }
+
     @MainActor func testImportRateAndRelaunch() throws {
         throw XCTSkip("journey arrives with #210 (import), #211 (rate) and #212 (relaunch)")
     }

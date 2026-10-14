@@ -30,7 +30,7 @@ struct LibraryWindow: View {
         ) {
             LibraryBrowser(
                 model: model, onLoadSamples: { model.loadSamples() }, onSelect: { model.select($0) },
-                onOpen: { model.open($0) })
+                onOpen: { model.open($0) }, onStep: { model.stepLoupe(by: $0) }, onGrid: { model.showGrid() })
         } inspector: {
             if let collection = model.selectedCollection {
                 SurfaceCard(title: collection.name, detail: "\(collection.count) photos")
@@ -43,13 +43,20 @@ struct LibraryWindow: View {
         LibraryMenu(
             sort: model.sort, loadSamples: { model.loadSamples() }, setSort: { model.setSort($0) },
             larger: stepCellSize(1, allowed: model.canShowLargerThumbnails),
-            smaller: stepCellSize(-1, allowed: model.canShowSmallerThumbnails))
+            smaller: stepCellSize(-1, allowed: model.canShowSmallerThumbnails),
+            showGrid: enabled(model.mode == .loupe) { model.showGrid() },
+            showLoupe: enabled(model.mode == .grid && !model.isSelectedCollectionEmpty) { model.showLoupe() })
     }
 
     /// A thumbnail size step for the View menu, nil at the size limit.
     private func stepCellSize(_ steps: Int, allowed: Bool) -> (@MainActor () -> Void)? {
         guard allowed else { return nil }
         return { model.stepCellSize(by: steps) }
+    }
+
+    /// A menu action, nil (so the item disables) when it can't run.
+    private func enabled(_ allowed: Bool, _ perform: @escaping @MainActor () -> Void) -> (@MainActor () -> Void)? {
+        allowed ? perform : nil
     }
 
     static func symbol(for collectionID: String) -> String {
@@ -63,14 +70,16 @@ struct LibraryWindow: View {
 
 /// The photo grid, or the empty state whose button loads the samples until
 /// import lands (L2); an empty collection in a non-empty catalog gets an empty
-/// state that says how to fill it, with a button back to All Photos. Opening
-/// sets loupe mode; the loupe view is library-03.
+/// state that says how to fill it, with a button back to All Photos. In loupe
+/// mode it shows the loupe's photo (LibraryLoupe) instead of the grid.
 struct LibraryBrowser: View {
     let model: LibraryCatalog
     var onLoadSamples: @MainActor () -> Void = {}
     var onSelect: @MainActor (Set<String>) -> Void = { _ in }
     var onOpen: @MainActor (String) -> Void = { _ in }
     var onShowAll: @MainActor () -> Void = {}
+    var onStep: @MainActor (Int) -> Void = { _ in }
+    var onGrid: @MainActor () -> Void = {}
 
     var body: some View {
         if model.isEmpty {
@@ -84,6 +93,8 @@ struct LibraryBrowser: View {
                 action: collection.emptyActionTitle.map {
                     ToolbarAction($0, systemImage: "photo.on.rectangle.angled", perform: onShowAll)
                 })
+        } else if let photo = model.loupeItem, let position = model.loupePosition {
+            LibraryLoupe(photo: photo, position: position, onStep: onStep, onGrid: onGrid)
         } else {
             let side = CGFloat(model.cellSize)
             ThumbnailGrid(
@@ -103,8 +114,8 @@ extension ThumbnailItem where ID == String {
                 colorLabel: photo.label.map { (name: $0.rawValue, color: Self.labelColors[$0] ?? .secondary) }))
     }
 
-    /// A one-pixel sRGB image from RGBA8 bytes; the cell stretches it to fill.
-    private static func image(rgba: [UInt8]) -> Image? {
+    /// A one-pixel sRGB image from RGBA8 bytes; the cell and the loupe stretch it to fill.
+    static func image(rgba: [UInt8]) -> Image? {
         guard rgba.count == 4, let space = CGColorSpace(name: CGColorSpace.sRGB),
               let provider = CGDataProvider(data: Data(rgba) as CFData),
               let pixel = CGImage(
