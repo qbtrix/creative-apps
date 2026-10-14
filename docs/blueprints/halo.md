@@ -1825,3 +1825,182 @@ selected.
 | QB-F4 Keyboard parity | bars step with arrows (Shift ×10, Option ×0.1); Space, ←, →, Home, End, I, O on the viewer and timeline | H-J4, H-J6 |
 | QB-F5 Reduce Motion, Increase Contrast | playback is content, not an animation; the curve's preview dot hides (SuiteUI); goldens in Increase Contrast once #332 lands | goldens |
 | QB-F6 Geometry holds | only SuiteUI components and tokens | design lint; L4 |
+
+---
+
+## 8. Coverage and waves
+
+### 8.1 Every open `line:halo` issue
+
+| Issue | Tier | Feature | Wave | Note |
+|---|---|---|---|---|
+| #37 Preview and playback | 1 | `viewer-playback` | W1 | |
+| #457 Render note counts nulls | bug | `viewer-playback` | W1 | the live renderer counts only kinds that draw |
+| #38 Layer inspector with keys, parent and blend mode | 1 | `layer-keys` | W1 | parent and blend are tier 2 but ride along (one inspector) |
+| #207 Drag a layer to key its position | 1 | `layer-keys` | W1 | `needs-human` can come off: the blocker in its last comment (no playhead, no drawing) is answered by #36 and the W0 fakes |
+| #208 Undo and Redo | 1 | `history-files` | W1 | |
+| #209 Save and open | 1 | `history-files` | W1 | W0 makes the types `Codable`; this adds the format, validation and the menus |
+| #428 Ease keys | 1 | `easing` | W2 | |
+| #451 Render Frame (⌘R) | 2 | `render-out` | W2 | |
+| #429 Render to a movie or PNG sequence | 2 | `render-out` | W2 | |
+| #430 Text layers | 2 | `text-layers` | W2 | |
+| #286 New Composition fields unlabeled | 2 | `foundation` | W0 | |
+| #290 10 controls without identifier | 2 | `foundation` | W0 | Halo's own views; the SuiteUI chrome stays with SuiteUI |
+| #149 Inner whitespace bypasses the taken-name check | 3 | `foundation` | W0 | last, optional task: it owns `NameKey.swift`, which no other feature touches |
+| #139 Rename refusal is a modal alert | 3 | not v1 | – | waits on SuiteUI #577; the alert keeps the typed name meanwhile |
+| #39 Effects stack panel | 2 | not v1 | – | v1.1, after HF-1 holds; CoreRaster already has blur and levels |
+| L-1 (to file) Delete, rename, reorder, duplicate a layer | 1 | `layer-panel` | W1 | filed on approval |
+
+### 8.2 Waves
+
+```
+W0  foundation ─────────────────────────────────────────────── waits on nothing
+        │
+        ├──▶ W1  viewer-playback   (#37, #457)
+        ├──▶ W1  layer-keys        (#38, #207)          four leads side by side,
+        ├──▶ W1  history-files     (#208, #209)         no shared file
+        └──▶ W1  layer-panel       (L-1)
+                 │
+                 ├──▶ W2  easing        (#428)   after layer-keys, history-files
+                 ├──▶ W2  render-out    (#451, #429)   after viewer-playback
+                 └──▶ W2  text-layers   (#430)   after layer-keys, viewer-playback, history-files
+                          │
+                          └──▶ W3  core-loop   after every W1 and W2 feature
+```
+
+A wave starts when everything it waits on has merged; a W2 feature may start
+as soon as its own W1 dependencies merge, without waiting for the whole of
+W1. Journey tasks inside W1 to W3 also wait on SuiteUI QH-4 (#333); their
+Model and view tasks don't. The lead playbook's stage 0 stops a lead whose
+`Depends on:` issue is open, so each feature issue is filed with the one
+dependency named in its row below.
+
+| Wave | Feature | Feature issue `Depends on:` | Tasks (packet estimate) |
+|---|---|---|---|
+| W0 | `foundation` | nothing | about 12 PRs: contracts and values; fakes (two PRs); live stubs and services; `HaloLayer` fields and `Codable`; `HaloProject` document, stored state and `edit`; `HaloCommand` and availability; fixtures; contract test suites; window router, area stubs and launch arguments; menus on `HaloCommand`; #286 and #290; C4 and design.md descriptions; #149 last |
+| W1 | `viewer-playback` | the foundation feature issue | about 7 |
+| W1 | `layer-keys` | the foundation feature issue | about 7 |
+| W1 | `history-files` | the foundation feature issue | about 6 |
+| W1 | `layer-panel` | the foundation feature issue | about 3 |
+| W2 | `easing` | `layer-keys` (and `history-files` for its journey) | about 5 |
+| W2 | `render-out` | `viewer-playback` | about 7 |
+| W2 | `text-layers` | `layer-keys` (and `viewer-playback`, `history-files`) | about 4 |
+| W3 | `core-loop` | `easing` | about 4 |
+
+Where an issue's own `Depends on:` line is stricter than this (the serial
+chain #37 → #207 → #208 → #209 and #38 → #428), the line is what changes,
+not the order: `docs/priorities.md` says a dependency that exists only in
+how a body is written is fixed by editing the line. With the contracts and
+fakes from W0, #38, #207, #208 and #209 no longer need #37's code.
+
+### 8.3 Features, owned files and engine waits
+
+The files each feature may touch. No two features in one wave share a file
+(checked by script against this table and `c4-planned.json`, section 10).
+Files W0 creates as stubs pass to the feature named on them, which replaces
+them whole. Every `Sources/` file below has exactly one owning component in
+`c4-planned.json`.
+
+#### W0 · `foundation`: Foundation: contracts, fakes, state and the window's seams
+
+- **Covers:** #286, #290, #149
+- **Waits on (SuiteUI and harness):** #333 not needed (alone in its wave)
+- **Waits on (creative-core):** none
+- **Proves:** Copies section 5's files into Sources (fakes and live stubs one file per contract); every W1 and W2 file below that W0 creates as a stub passes to its feature, which replaces it whole.
+- **Owned files (82):** `Sources/HaloModel/Contracts/HaloValues.swift`, `Sources/HaloModel/Contracts/HaloContracts.swift`, `Sources/HaloModel/Fakes/FakeFrameDrawing.swift`, `Sources/HaloModel/Fakes/FakeLayerPlacing.swift`, `Sources/HaloModel/Fakes/FakePropertyKeying.swift`, `Sources/HaloModel/Fakes/FakeViewerDragging.swift`, `Sources/HaloModel/Fakes/FakeKeyEasing.swift`, `Sources/HaloModel/Fakes/FakeProjectHistory.swift`, `Sources/HaloModel/Fakes/FakeProjectFiles.swift`, `Sources/HaloModel/Fakes/FakePlaybackClock.swift`, `Sources/HaloModel/Fakes/FakeFrameRendering.swift`, `Sources/HaloModel/Fakes/FakeCompositionRendering.swift`, `Sources/HaloModel/Fakes/FakeTextRasterizer.swift`, `Sources/HaloModel/Live/LiveFrameDrawing.swift`, `Sources/HaloModel/Live/LiveLayerPlacing.swift`, `Sources/HaloModel/Live/LivePropertyKeying.swift`, `Sources/HaloModel/Live/LiveViewerDragging.swift`, `Sources/HaloModel/Live/LiveKeyEasing.swift`, `Sources/HaloModel/Live/LiveProjectHistory.swift`, `Sources/HaloModel/Live/LiveProjectFiles.swift`, `Sources/HaloModel/Live/LivePlaybackClock.swift`, `Sources/HaloModel/Live/LiveFrameRendering.swift`, `Sources/HaloModel/Live/LiveCompositionRendering.swift`, `Sources/HaloModel/HaloServices.swift`, `Sources/HaloModel/HaloLayerDefaults.swift`, `Sources/HaloModel/HaloFixtures.swift`, `Sources/HaloModel/HaloCommand.swift`, `Sources/HaloModel/HaloViewerState.swift`, `Sources/HaloModel/HaloProject.swift`, `Sources/HaloModel/HaloLayer.swift`, `Sources/HaloModel/HaloTimeline.swift`, `Sources/HaloModel/HaloStatusText.swift`, `Sources/HaloModel/NameKey.swift`, `Sources/HaloApp/HaloApp.swift`, `Sources/HaloApp/HaloLaunch.swift`, `Sources/HaloApp/HaloWindow.swift`, `Sources/HaloApp/HaloViewer.swift`, `Sources/HaloApp/HaloWindow+Viewer.swift`, `Sources/HaloApp/HaloWindow+Playback.swift`, `Sources/HaloApp/HaloWindow+Keys.swift`, `Sources/HaloApp/HaloWindow+Layers.swift`, `Sources/HaloApp/HaloWindow+Edit.swift`, `Sources/HaloApp/HaloWindow+File.swift`, `Sources/HaloApp/HaloWindow+Easing.swift`, `Sources/HaloApp/HaloWindow+Render.swift`, `Sources/HaloApp/HaloWindow+Text.swift`, `Sources/HaloApp/HaloViewerCanvas.swift`, `Sources/HaloApp/HaloViewerGestures.swift`, `Sources/HaloApp/HaloRenderedFrameView.swift`, `Sources/HaloApp/HaloTransport.swift`, `Sources/HaloApp/HaloLayerInspector.swift`, `Sources/HaloApp/HaloEasingInspector.swift`, `Sources/HaloApp/HaloTextInspector.swift`, `Sources/HaloApp/HaloTextRasterizer.swift`, `Sources/HaloApp/HaloFileMenu.swift`, `Sources/HaloApp/HaloEditMenu.swift`, `Sources/HaloApp/HaloAnimationMenu.swift`, `Sources/HaloApp/HaloCommands.swift`, `Sources/HaloApp/HaloCompositionCommands.swift`, `Sources/HaloApp/NewCompositionSheet.swift`, `Sources/HaloApp/HaloCompositionInspector.swift`, `Sources/HaloApp/HaloTimelineView.swift`, `Tests/HaloModelTests/FrameDrawingContractTests.swift`, `Tests/HaloModelTests/LayerPlacingContractTests.swift`, `Tests/HaloModelTests/PropertyKeyingContractTests.swift`, `Tests/HaloModelTests/ViewerDraggingContractTests.swift`, `Tests/HaloModelTests/KeyEasingContractTests.swift`, `Tests/HaloModelTests/ProjectHistoryContractTests.swift`, `Tests/HaloModelTests/ProjectFilesContractTests.swift`, `Tests/HaloModelTests/PlaybackClockContractTests.swift`, `Tests/HaloModelTests/FrameRenderingContractTests.swift`, `Tests/HaloModelTests/CompositionRenderingContractTests.swift`, `Tests/HaloModelTests/HaloCommandTests.swift`, `Tests/HaloModelTests/HaloFixturesTests.swift`, `Tests/HaloModelTests/HaloEditTests.swift`, `Tests/HaloModelTests/HaloBudget.swift`, `Tests/HaloModelTests/HaloFoundationBudgetTests.swift`, `Tests/HaloModelTests/HaloNameWhitespaceTests.swift`, `Tests/AppSnapshotTests/HaloWindowSnapshots.swift`, `UITests/HaloJourneyTests.swift`, `docs/c4/model.json`, `docs/design.md`
+
+#### W1 · `viewer-playback`: See and play the composition
+
+- **Covers:** #37, #457
+- **Waits on (SuiteUI and harness):** #333 (journey files); #340 TransportCapsule (placeholder meanwhile)
+- **Waits on (creative-core):** none to start. Rotated shape layers in the pixel render wait on creative-core#182 (ellipse path builder, LC-4); until it lands the renderer draws an axis-aligned shape with `Mask.ellipse` and counts a rotated one as skipped (the viewer draws it either way)
+- **Proves:** H-J2, H-J3 (extends the shipped scrub journey), H-J4; HB-2, HB-5, HB-11; HF-1, HF-2.
+- **Owned files (23):** `Sources/HaloModel/Live/LiveFrameDrawing.swift`, `Sources/HaloModel/Live/LivePlaybackClock.swift`, `Sources/HaloModel/Live/LiveFrameRendering.swift`, `Sources/HaloModel/FrameRenderer.swift`, `Sources/HaloModel/HaloPlayback.swift`, `Sources/HaloApp/HaloViewerCanvas.swift`, `Sources/HaloApp/HaloTransport.swift`, `Sources/HaloApp/HaloPlaybackDriver.swift`, `Sources/HaloApp/HaloWindow+Viewer.swift`, `Sources/HaloApp/HaloWindow+Playback.swift`, `Tests/HaloModelTests/FrameDrawingContractTests.swift`, `Tests/HaloModelTests/PlaybackClockContractTests.swift`, `Tests/HaloModelTests/FrameRenderingContractTests.swift`, `Tests/HaloModelTests/HaloPlaybackTests.swift`, `Tests/HaloModelTests/LiveFrameRenderingTests.swift`, `Tests/HaloModelTests/HaloRenderTests.swift`, `Tests/HaloModelTests/HaloRenderEdgeTests.swift`, `Tests/HaloModelTests/HaloViewerBudgetTests.swift`, `Tests/AppSnapshotTests/HaloPreviewSnapshots.swift`, `Tests/AppSnapshotTests/HaloViewerFidelityTests.swift`, `UITests/HaloJourneyTests+Viewer.swift`, `UITests/HaloJourneyTests+Playback.swift`, `UITests/HaloJourneyTests.swift`
+
+#### W1 · `layer-keys`: Key layers: inspector, drag and parent
+
+- **Covers:** #38, #207
+- **Waits on (SuiteUI and harness):** #333 (journey files)
+- **Waits on (creative-core):** none
+- **Proves:** H-J5, H-J6, H-J23; HB-1, HB-3, HB-4; HF-3, HF-5.
+- **Owned files (19):** `Sources/HaloModel/Live/LiveLayerPlacing.swift`, `Sources/HaloModel/Live/LivePropertyKeying.swift`, `Sources/HaloModel/Live/LiveViewerDragging.swift`, `Sources/HaloModel/HaloKeying.swift`, `Sources/HaloModel/HaloViewerDrag.swift`, `Sources/HaloApp/HaloLayerInspector.swift`, `Sources/HaloApp/HaloViewerGestures.swift`, `Sources/HaloApp/HaloWindow+Keys.swift`, `Tests/HaloModelTests/LayerPlacingContractTests.swift`, `Tests/HaloModelTests/PropertyKeyingContractTests.swift`, `Tests/HaloModelTests/ViewerDraggingContractTests.swift`, `Tests/HaloModelTests/HaloKeyingTests.swift`, `Tests/HaloModelTests/HaloKeyByDragTests.swift`, `Tests/HaloModelTests/HaloKeysBudgetTests.swift`, `Tests/AppSnapshotTests/HaloInspectorSnapshots.swift`, `Tests/AppSnapshotTests/HaloKeyByDragSnapshots.swift`, `UITests/HaloJourneyTests+Drag.swift`, `UITests/HaloJourneyTests+Inspector.swift`, `UITests/HaloJourneyTests+Parent.swift`
+
+#### W1 · `history-files`: Undo, redo, save and open
+
+- **Covers:** #208, #209
+- **Waits on (SuiteUI and harness):** #333 (journey files)
+- **Waits on (creative-core):** none
+- **Proves:** H-J8, H-J10, H-J11; HB-8, HB-10; HF-6. Closes the gap #127 left (undo of Delete Composition).
+- **Owned files (17):** `Sources/HaloModel/Live/LiveProjectHistory.swift`, `Sources/HaloModel/Live/LiveProjectFiles.swift`, `Sources/HaloModel/HaloHistory.swift`, `Sources/HaloModel/HaloFiles.swift`, `Sources/HaloApp/HaloWindow+Edit.swift`, `Sources/HaloApp/HaloWindow+File.swift`, `Sources/HaloApp/HaloDocumentType.swift`, `Tests/HaloModelTests/ProjectHistoryContractTests.swift`, `Tests/HaloModelTests/ProjectFilesContractTests.swift`, `Tests/HaloModelTests/HaloUndoTests.swift`, `Tests/HaloModelTests/HaloFileTests.swift`, `Tests/HaloModelTests/HaloFilesBudgetTests.swift`, `Tests/AppSnapshotTests/HaloEditMenuSnapshots.swift`, `Tests/AppSnapshotTests/HaloFileSnapshots.swift`, `UITests/HaloJourneyTests+History.swift`, `UITests/HaloJourneyTests+Files.swift`, `UITests/HaloJourneyTests+FileErrors.swift`
+
+#### W1 · `layer-panel`: Layer housekeeping
+
+- **Covers:** L-1 (to file)
+- **Waits on (SuiteUI and harness):** #333 (journey files)
+- **Waits on (creative-core):** none
+- **Proves:** H-J9.
+- **Owned files (6):** `Sources/HaloModel/HaloLayerEdits.swift`, `Sources/HaloApp/HaloLayerList.swift`, `Sources/HaloApp/HaloWindow+Layers.swift`, `Tests/HaloModelTests/HaloLayerEditsTests.swift`, `Tests/AppSnapshotTests/HaloLayersSnapshots.swift`, `UITests/HaloJourneyTests+Layers.swift`
+
+#### W2 · `easing`: Ease keys
+
+- **Covers:** #428
+- **Waits on (SuiteUI and harness):** #333; timeline key shapes and selection (Flare S10/S11, to file as needs-ui; plain diamonds meanwhile)
+- **Waits on (creative-core):** none (FlareCore `Easing` and `Timeline.value` already ease)
+- **Proves:** H-J7; HB-7; HF-4. Waits on layer-keys (keys to ease) and history-files (the journey reads the Undo name).
+- **Owned files (10):** `Sources/HaloModel/Live/LiveKeyEasing.swift`, `Sources/HaloModel/HaloKeySelection.swift`, `Sources/HaloApp/HaloEasingInspector.swift`, `Sources/HaloApp/HaloTimelineView.swift`, `Sources/HaloApp/HaloWindow+Easing.swift`, `Tests/HaloModelTests/KeyEasingContractTests.swift`, `Tests/HaloModelTests/HaloEasingTests.swift`, `Tests/HaloModelTests/HaloEasingBudgetTests.swift`, `Tests/AppSnapshotTests/HaloEasingSnapshots.swift`, `UITests/HaloJourneyTests+Easing.swift`
+
+#### W2 · `render-out`: Render a frame and render to files
+
+- **Covers:** #451, #429
+- **Waits on (SuiteUI and harness):** #333
+- **Waits on (creative-core):** none (the PNG and movie writers are app-side: ImageIO and AVFoundation)
+- **Proves:** H-J20, H-J21; HB-12, HB-13; HF-7, HF-8. Waits on viewer-playback (the live renderer).
+- **Owned files (19):** `Sources/HaloModel/Live/LiveCompositionRendering.swift`, `Sources/HaloModel/HaloRenderFrame.swift`, `Sources/HaloModel/HaloRenderJob.swift`, `Sources/HaloApp/HaloRenderSheet.swift`, `Sources/HaloApp/HaloRenderedFrameView.swift`, `Sources/HaloApp/HaloFrameImage.swift`, `Sources/HaloApp/HaloPNGWriter.swift`, `Sources/HaloApp/HaloMovieWriter.swift`, `Sources/HaloApp/HaloWindow+Render.swift`, `Tests/HaloModelTests/CompositionRenderingContractTests.swift`, `Tests/HaloModelTests/HaloRenderPlanTests.swift`, `Tests/HaloModelTests/HaloRenderFrameTests.swift`, `Tests/HaloModelTests/HaloRenderBudgetTests.swift`, `Tests/AppSnapshotTests/HaloRenderSheetSnapshots.swift`, `Tests/AppSnapshotTests/HaloRenderSnapshots.swift`, `Tests/AppSnapshotTests/HaloPNGWriterTests.swift`, `Tests/AppSnapshotTests/HaloMovieWriterTests.swift`, `UITests/HaloJourneyTests+RenderFrame.swift`, `UITests/HaloJourneyTests+Render.swift`
+
+#### W2 · `text-layers`: Text layers
+
+- **Covers:** #430
+- **Waits on (SuiteUI and harness):** #333
+- **Waits on (creative-core):** needs a new core issue: CoreRaster draws a PixelBuffer through a 2D affine matrix with bilinear sampling (suite plan H6), so scaled or rotated text renders; until it lands, text renders only at scale 1 and rotation 0 and is otherwise counted as skipped
+- **Proves:** H-J22; HF-10. Waits on layer-keys (inspector), viewer-playback (the renderer's text hook) and history-files (Undo name).
+- **Owned files (8):** `Sources/HaloModel/HaloTextEdits.swift`, `Sources/HaloApp/HaloTextInspector.swift`, `Sources/HaloApp/HaloTextRasterizer.swift`, `Sources/HaloApp/HaloWindow+Text.swift`, `Tests/HaloModelTests/HaloTextLayerTests.swift`, `Tests/AppSnapshotTests/HaloTextLayerSnapshots.swift`, `Tests/AppSnapshotTests/HaloTextFidelityTests.swift`, `UITests/HaloJourneyTests+Text.swift`
+
+#### W3 · `core-loop`: The core loop, live, measured
+
+- **Covers:** the H-J12 XCTSkip in HaloJourneyTests.swift
+- **Waits on (SuiteUI and harness):** #333; #330 FrameProbe for H-P1 to H-P4 (report-only until then)
+- **Waits on (creative-core):** none
+- **Proves:** H-J12 live; H-P1 to H-P4; layout L3 to L5; flips every fixture journey still on `-HaloFixture` to `-HaloSample`. Waits on every W1 and W2 feature.
+- **Owned files (15):** `UITests/HaloJourneyTests.swift`, `UITests/HaloJourneyTests+Perf.swift`, `Tests/AppSnapshotTests/HaloViewerLatencyTests.swift`, `Tests/AppSnapshotTests/HaloLayoutTests.swift`, `UITests/HaloJourneyTests+Viewer.swift`, `UITests/HaloJourneyTests+Playback.swift`, `UITests/HaloJourneyTests+Drag.swift`, `UITests/HaloJourneyTests+Inspector.swift`, `UITests/HaloJourneyTests+Parent.swift`, `UITests/HaloJourneyTests+History.swift`, `UITests/HaloJourneyTests+Layers.swift`, `UITests/HaloJourneyTests+Easing.swift`, `UITests/HaloJourneyTests+Text.swift`, `UITests/HaloJourneyTests+RenderFrame.swift`, `UITests/HaloJourneyTests+Render.swift`
+
+### 8.4 creative-core work
+
+| Need | Who waits | Core issue | One-line spec |
+|---|---|---|---|
+| Ellipse as a `Path` (rotated shape layers in the pixel render) | `viewer-playback` (not blocking: axis-aligned shapes render meanwhile) | creative-core#182 (LC-4 path builders, open as of `docs/blueprints/flare.md` on 2026-10-14) | – |
+| Draw a `PixelBuffer` through an affine matrix with bilinear sampling | `text-layers` (not blocking: untransformed text renders meanwhile); later image layers and precomps | needs a new core issue | `composite(_ source:, onto:, transform: Matrix-like 2×3, mode:, opacity:)` in CoreRaster (suite plan H6): identity equals composite at offset; 2× scale gives interpolated edges; 90° equals `rotated(.quarter)` |
+| A Halo document engine with commands (H1, H3, H5 in the suite plan) | nobody in v1 | needs a new core issue, later | replaces the whole-document history (`ponytail:` in `HaloHistory.swift`) and moves sampling and the render graph into creative-core |
+
+FlareCore and CoreRaster on `main` 4cac701 already give every other v1
+feature what it needs: `Keyframe`, `Easing` (with the W3C presets and
+hold), `Timeline.value(of:at:)` and `playbackFrame`, `Matrix`,
+`Path.transformed(by:)` and `flattened(tolerance:)`, `Mask.rectangle`,
+`ellipse` and `polygon`, `composite` (same size and at an offset) with all 16
+blend modes, `resized`, `rgba8(colorSpace:)`. This session could not read
+creative-core's issue tracker (its GitHub access is limited to this repo),
+so the issue named above comes from this repo's Flare blueprint, and the
+two "needs a new core issue" rows are to be checked against the tracker
+before filing (section 9, Q6).
+
+### 8.5 SuiteUI and harness work Halo waits on
+
+| Need | Issue | Who waits | Meanwhile |
+|---|---|---|---|
+| One journey file per feature | #333 (QH-4) | every journey task in W1 to W3 | the journey task waits; Model and view tasks go ahead |
+| Frame probe | #330 (QH-1, p3) | H-P1 to H-P4, HB-U1 to HB-U5 | `HaloViewerLatencyTests` (macOS) reports the Model plus SwiftUI half; section 9, Q3 asks to rank #330 p1 by dependency |
+| Goldens and the scale-2 snapshot host | #331, #332 | HF-1's golden form, goldens in section 6 | PNG snapshots in Light and Dark |
+| Transport capsule | #340 | `viewer-playback` | plain SF Symbol buttons in the status bar's trailing slot |
+| Timeline key shapes by easing, selected keys | not filed (Flare S10, S11) | `easing` | plain diamonds; the selection shows in the EASING rows |
+| Timeline keys from the keyboard and VoiceOver | #63 | `easing` (keyboard parity on keys) | keys are selected from the EASING rows, which are keyboard reachable |
+| Rename message on a sidebar row | #577 | #139 (not v1) | the alert |
+| Rotated selection box, anchor mark | #273, #706 | `layer-keys` (polish) | axis-aligned `SelectionOutline`; no anchor mark |
