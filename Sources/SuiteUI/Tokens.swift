@@ -104,13 +104,18 @@ public enum SuiteSize {
     public static let compactControl: ControlSize = .small
     /// Room CanvasSurface leaves around the artboard on every side.
     public static let canvasInset: CGFloat = 64
-    /// The SuiteWindow columns. Their minimums and their ideals each add up to
-    /// no more than the window minimum, so the split view lays out inside a
-    /// 900 pt window instead of clipping the sidebar and inspector (#215).
+    /// The SuiteWindow columns. The window's sizes come from them: its minimum
+    /// width is the side columns' ideals around the content minimum, and its
+    /// launch width the side columns' ideals around the content ideal, so the
+    /// sidebar and inspector are never clipped at launch (#215, #579).
     public static let sidebarWidth: (min: CGFloat, ideal: CGFloat, max: CGFloat) = (160, 200, 320)
     public static let inspectorWidth: (min: CGFloat, ideal: CGFloat, max: CGFloat) = (200, 240, 360)
     public static let contentMinimum = CGSize(width: 440, height: 360)
-    public static let windowMinimum = CGSize(width: 900, height: 560)
+    public static let contentIdealWidth: CGFloat = 560
+    public static let windowMinimum = CGSize(
+        width: sidebarWidth.ideal + contentMinimum.width + inspectorWidth.ideal, height: 560)
+    public static let windowLaunch = CGSize(
+        width: sidebarWidth.ideal + contentIdealWidth + inspectorWidth.ideal, height: 640)
     /// The timeline's fixed track-name column, ruler, one lane, a keyframe
     /// diamond and its hit, the least room between two ruler labels and
     /// between two ruler ticks, the room one caption digit of a ruler label

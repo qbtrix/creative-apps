@@ -26,11 +26,21 @@ import Testing
     #expect(shell <= SuiteSize.windowMinimum.width)
 }
 
-/// #215: at its ideal widths the split view still fits the 900 pt window minimum.
+/// #215: at its ideal widths the split view still fits the window minimum.
 @Test func splitViewIdealWidthsFitTheWindowMinimum() {
-    #expect(SuiteSize.windowMinimum.width == 900)
+    #expect(SuiteSize.windowMinimum.width == 880)
     let ideal = SuiteSize.sidebarWidth.ideal + SuiteSize.contentMinimum.width + SuiteSize.inspectorWidth.ideal
     #expect(ideal <= SuiteSize.windowMinimum.width)
+}
+
+/// #579: the window opens wide enough for both side columns at their ideals
+/// around the content's ideal width, and that launch size is within the minimum.
+@Test func windowLaunchSizeComesFromTheColumnTokens() {
+    let launch = SuiteSize.sidebarWidth.ideal + SuiteSize.contentIdealWidth + SuiteSize.inspectorWidth.ideal
+    #expect(SuiteSize.windowLaunch.width == launch)
+    #expect(SuiteSize.contentIdealWidth >= SuiteSize.contentMinimum.width)
+    #expect(SuiteSize.windowLaunch.width >= SuiteSize.windowMinimum.width)
+    #expect(SuiteSize.windowLaunch.height >= SuiteSize.windowMinimum.height)
 }
 
 @Test func editorRowsMatchTheVisualLanguage() {
