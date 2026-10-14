@@ -1,12 +1,21 @@
 // FlareScenes.swift: the Layers tab's SCENES rows and the Scene inspector (docs/blueprints/flare.md, section 3), each
-// edit one undo step through `services.scenes`. Removing the last scene is refused with the Remove button's reason.
+// edit one undo step through `services.scenes`. Removing the last scene, or one a machine's state uses (the engine's
+// rule, #683), is refused with the Remove button's reason; a refusal from the engine still gets plain words.
 import FlareCore
 
 extension FlareWorkspace {
     /// Why scene `id` can't be removed, as the Remove button's tooltip; nil when it can.
     public func sceneRemoveHelp(_ id: String) -> String? {
         guard scenes.contains(where: { $0.id == id }) else { return FlareLayerError.noDocument.message }
-        return scenes.count > 1 ? nil : FakeScenes.lastSceneMessage
+        guard scenes.count > 1 else { return FakeScenes.lastSceneMessage }
+        guard let user = machines.first(where: { $0.states.contains { $0.sceneID == id } }) else { return nil }
+        return "The machine \u{201C}\(user.name)\u{201D} uses this scene. Remove its states on this scene first."
+    }
+
+    /// The plain words for an engine refusal of Remove Scene, never its debug text (#683).
+    static func sceneRemoveMessage(_ error: CommandError) -> String {
+        if case .sceneNotFound = error { return "This scene is no longer in the document." }
+        return "The scene could not be removed."
     }
 
     /// Adds a scene the size, rate and length of the selected one (the web preset without one) and selects it.
@@ -30,12 +39,13 @@ extension FlareWorkspace {
         step { try scenes.renameScene(id, to: trimmed, in: &$0) }
     }
 
-    /// Removes a scene, refused for the last one. Removing the selected scene selects the one after it, or the one
+    /// Removes a scene, refused for the last one or one a machine uses. Removing the selected scene selects the one after it, or the one
     /// before when it was last.
     public mutating func removeScene(_ id: String) {
         if let reason = sceneRemoveHelp(id) { return refuse(.refused(reason)) }
         let order = self.scenes.map(\.id), scenes = services.scenes
         step { try scenes.removeScene(id, in: &$0) }
+        if case .command(let error)? = layerError { return refuse(.refused(Self.sceneRemoveMessage(error))) }
         guard layerError == nil, id == selectedSceneID, let i = order.firstIndex(of: id) else { return }
         let rest = order.filter { $0 != id }
         if let next = rest.indices.contains(i) ? rest[i] : rest.last { selectScene(next) }
