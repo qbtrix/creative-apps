@@ -12,6 +12,11 @@
 // identifiers `suite.sidebar` and `suite.inspector`; the UI journeys in
 // UITests/ find them by those names. The window opens at SuiteSize.windowLaunch
 // and shrinks to SuiteSize.windowMinimum, both derived from the column tokens.
+// The window reads its launch arguments once: with `-SuiteGallery <page>` its
+// whole body is the SuiteGallery instead (SuiteGallery.swift); the internal
+// `galleryPage:` init skips that check, so the gallery's `window` page never
+// recurses. The window applies `.suiteProbes()`; its toolbar buttons carry
+// identifiers (`suite.inspectorToggle`, and each action's `identifier`).
 import SwiftUI
 
 public struct SuiteWindow<Content: View, Inspector: View>: View {
@@ -25,6 +30,8 @@ public struct SuiteWindow<Content: View, Inspector: View>: View {
     private let actions: [ToolbarAction]
     private let content: Content
     private let inspector: Inspector
+    /// The gallery this window shows instead of the app; nil shows the app.
+    let galleryRequest: GalleryRequest?
     @State private var showsInspector = true
 
     /// `title` names the open document (or the app when none is open).
@@ -40,6 +47,24 @@ public struct SuiteWindow<Content: View, Inspector: View>: View {
         actions: [ToolbarAction] = [],
         @ViewBuilder content: () -> Content, @ViewBuilder inspector: () -> Inspector
     ) {
+        self.init(
+            galleryPage: SuiteGallery.request(from: ProcessInfo.processInfo.arguments), title: title,
+            sections: sections, selection: selection, onSelect: onSelect, onToggle: onToggle, onMove: onMove,
+            onRename: onRename, actions: actions, content: content, inspector: inspector)
+    }
+
+    /// The window without the launch-argument check: it shows `galleryPage`
+    /// when given, else the app. The gallery's `window` page passes nil.
+    init(
+        galleryPage: GalleryRequest?, title: String, sections: [SidebarSection], selection: SidebarItem.ID?,
+        onSelect: @escaping @MainActor (SidebarItem.ID) -> Void,
+        onToggle: (@MainActor (SidebarItem.ID, SidebarToggle.ID) -> Void)? = nil,
+        onMove: (@MainActor (SidebarSection.ID, IndexSet, Int) -> Void)? = nil,
+        onRename: (@MainActor (SidebarItem.ID, String) -> Void)? = nil,
+        actions: [ToolbarAction] = [],
+        @ViewBuilder content: () -> Content, @ViewBuilder inspector: () -> Inspector
+    ) {
+        self.galleryRequest = galleryPage
         self.title = title
         self.sections = sections
         self.selection = selection
@@ -64,6 +89,21 @@ public struct SuiteWindow<Content: View, Inspector: View>: View {
     }
 
     public var body: some View {
+        Group {
+            if let galleryRequest {
+                SuiteGallery(galleryRequest)
+            } else {
+                splitView
+            }
+        }
+        .suiteProbes()
+        // The window opens at its ideal size: the launch size the column tokens add up to.
+        .frame(
+            minWidth: SuiteSize.windowMinimum.width, idealWidth: SuiteSize.windowLaunch.width,
+            minHeight: SuiteSize.windowMinimum.height, idealHeight: SuiteSize.windowLaunch.height)
+    }
+
+    private var splitView: some View {
         NavigationSplitView {
             List(selection: Binding(get: { selection }, set: { id in if let id { onSelect(id) } })) {
                 ForEach(sections) { section in
@@ -108,6 +148,7 @@ public struct SuiteWindow<Content: View, Inspector: View>: View {
                     }
                     .disabled(!action.isEnabled)
                     .help(action.help)
+                    .suiteControl(action)
                 }
             }
             ToolbarItem(placement: .primaryAction) {
@@ -118,12 +159,9 @@ public struct SuiteWindow<Content: View, Inspector: View>: View {
                 }
                 .keyboardShortcut("i", modifiers: [.command, .option])
                 .help(showsInspector ? "Hide Inspector" : "Show Inspector")
+                .suiteControl(id: "suite.inspectorToggle", enabled: true, reason: nil)
             }
         }
-        // The window opens at its ideal size: the launch size the column tokens add up to.
-        .frame(
-            minWidth: SuiteSize.windowMinimum.width, idealWidth: SuiteSize.windowLaunch.width,
-            minHeight: SuiteSize.windowMinimum.height, idealHeight: SuiteSize.windowLaunch.height)
     }
 
     /// Drag reorder for one section's rows; nil (reorder off) without `onMove`.
