@@ -1,0 +1,695 @@
+{
+  "version": "1.0",
+  "scope": "creative-apps/suiteui (planned)",
+  "generated_at": "2026-10-14T00:00:00Z",
+  "source_path": ".",
+  "authored": true,
+  "model": {
+    "people": [],
+    "systems": [
+      {
+        "id": "creative-apps",
+        "name": "creative-apps",
+        "description": "SuiteUI's slice of creative-apps, as planned in docs/blueprints/suiteui.md section 2. Same shape as docs/c4/model.json, with status (planned or existing) and authored on every container and component. Planning only: the C4 gate reads docs/c4/model.json, not this file.",
+        "tags": [
+          "internal"
+        ],
+        "containers": [
+          {
+            "id": "suiteui",
+            "name": "SuiteUI",
+            "status": "existing",
+            "authored": true,
+            "description": "The shared design system and component library (Sources/SuiteUI). Knows no Model and no engine. macOS only today.",
+            "technology": "Swift 6, SwiftUI, macOS 26",
+            "tags": [
+              "internal",
+              "macos-only"
+            ],
+            "components": [
+              {
+                "id": "suiteui-tokens",
+                "name": "Tokens and glass",
+                "status": "existing",
+                "authored": true,
+                "description": "Spacing, insets, radii, sizes, type, motion and the color tokens (graphite ladder, text and state colors as literal hex per appearance, Increase Contrast included); Liquid Glass applied in one snapshot-aware place (suiteGlass(in:)) and GlassPanel. The only place a raw value or a material may appear (design lint). Planned: SuiteEnvironment (suiteReduceMotion, an environment value that defaults to the system setting and that the gallery can override, and the .suiteControl modifier that registers a control with ControlInventory).",
+                "technology": "Swift 6, SwiftUI, macOS 26",
+                "paths": [
+                  "Sources/SuiteUI/Tokens.swift",
+                  "Sources/SuiteUI/Glass.swift",
+                  "Sources/SuiteUI/GlassPanel.swift",
+                  "Sources/SuiteUI/SuiteEnvironment.swift"
+                ]
+              },
+              {
+                "id": "suiteui-window-shell",
+                "name": "Window shell",
+                "status": "existing",
+                "authored": true,
+                "description": "SuiteWindow: the split-view window (sidebar of SidebarSections, content, hideable inspector) with launch and minimum sizes derived from the column tokens. Planned: the -SuiteGallery launch hook that shows SuiteGallery instead of the app's content (suite-harness), app-owned expansion and row context menus (lists).",
+                "technology": "Swift 6, SwiftUI, macOS 26",
+                "paths": [
+                  "Sources/SuiteUI/SuiteWindow.swift"
+                ]
+              },
+              {
+                "id": "suiteui-editor-shell",
+                "name": "Editor shell",
+                "status": "existing",
+                "authored": true,
+                "description": "EditorShell (top bar, docked rail, canvas, right panel, status line; dark in both appearances; planned: the resizable, collapsible timeline slot), EditorTopBar with EditorBarItem, EditorBarMenu and EditorBarDivider (planned: outlined items, one .primary, the save status), SegmentedTabs (planned: capsule look), and ShellLayout (planned, pure): column widths at a window width and the timeline slot's clamped height and collapse.",
+                "technology": "Swift 6, SwiftUI, macOS 26",
+                "paths": [
+                  "Sources/SuiteUI/EditorShell.swift",
+                  "Sources/SuiteUI/EditorTopBar.swift",
+                  "Sources/SuiteUI/SegmentedTabs.swift",
+                  "Sources/SuiteUI/ShellLayout.swift"
+                ]
+              },
+              {
+                "id": "suiteui-tools",
+                "name": "Tool palette",
+                "status": "existing",
+                "authored": true,
+                "description": "ToolbarAction (title, symbol, selected, unavailableHelp, one-key shortcut, handler), PaletteTool and ToolbarGroup in the floating glass and docked rail styles. An action can only be disabled by saying why. Planned: rail colors (#341).",
+                "technology": "Swift 6, SwiftUI, macOS 26",
+                "paths": [
+                  "Sources/SuiteUI/ToolbarGroup.swift"
+                ]
+              },
+              {
+                "id": "suiteui-canvas",
+                "name": "Canvas",
+                "status": "existing",
+                "authored": true,
+                "description": "CanvasSurface (artboard centered over the surround) and CanvasViewport (checkerboard, rulers, zoom 10 to 3200 percent, Space-drag and arrow pan, drags in document pixels, onDragEnd once per gesture), Ruler with RulerTicks, ZoomMath. Planned: the ruler corner unit (#264).",
+                "technology": "Swift 6, SwiftUI, macOS 26",
+                "paths": [
+                  "Sources/SuiteUI/CanvasSurface.swift",
+                  "Sources/SuiteUI/CanvasViewport.swift",
+                  "Sources/SuiteUI/Ruler.swift",
+                  "Sources/SuiteUI/ZoomMath.swift"
+                ]
+              },
+              {
+                "id": "suiteui-canvas-marks",
+                "name": "Canvas marks",
+                "status": "existing",
+                "authored": true,
+                "description": "Marks drawn over document content in a CanvasViewport overlay, never hit-tested themselves: SelectionOutline and CropShade (existing); planned: SelectionHandles (eight handles and a rotate zone outside each corner, hit size fixed in view points at any zoom), PathMarks, MotionPathMarks, GhostLayer, guide marks (#273), CanvasPointMark (#706, #737) and CanvasGrid (#530), with HandleGeometry, the pure handle layout, hit and resize math.",
+                "technology": "Swift 6, SwiftUI, macOS 26",
+                "paths": [
+                  "Sources/SuiteUI/CanvasMarks.swift",
+                  "Sources/SuiteUI/CanvasMarks+Vector.swift",
+                  "Sources/SuiteUI/CanvasMarks+Points.swift",
+                  "Sources/SuiteUI/HandleGeometry.swift"
+                ]
+              },
+              {
+                "id": "suiteui-inspector",
+                "name": "Inspector rows",
+                "status": "existing",
+                "authored": true,
+                "description": "InspectorHeader (title and info card), InspectorSection (caps header, collapse, Reset; planned: a 20 pt Reset hit beside the header button, #622 #285), InspectorRow, InspectorSliderRow, InspectorStepperRow, InspectorPickerRow, the one color row (HexColor, InspectorColorRow, InspectorColorWellRow; planned: onEnd, #718), InspectorAction and KeyframeButton with KeyState.",
+                "technology": "Swift 6, SwiftUI, macOS 26",
+                "paths": [
+                  "Sources/SuiteUI/InspectorHeader.swift",
+                  "Sources/SuiteUI/InspectorRows.swift",
+                  "Sources/SuiteUI/ColorWell.swift",
+                  "Sources/SuiteUI/InspectorAction.swift",
+                  "Sources/SuiteUI/KeyframeButton.swift"
+                ]
+              },
+              {
+                "id": "suiteui-number-entry",
+                "name": "Number entry",
+                "status": "existing",
+                "authored": true,
+                "description": "ScrubField (exact number) and the bar slider look, ScrubValue (drag, step, snap, fill, defaults; ScrubTrack for non-linear tracks; ViewerZoom), NumericInput (parse, format, spoken text) and StudioScrubRow. Planned: public onEnd on the exact field (#718), a track-owned discrete step (#591), readable accessibility values (#262).",
+                "technology": "Swift 6, SwiftUI, macOS 26",
+                "paths": [
+                  "Sources/SuiteUI/ScrubField.swift",
+                  "Sources/SuiteUI/ScrubValue.swift",
+                  "Sources/SuiteUI/NumericInput.swift",
+                  "Sources/SuiteUI/StudioScrubRow.swift"
+                ]
+              },
+              {
+                "id": "suiteui-chips",
+                "name": "Presets and chips",
+                "status": "existing",
+                "authored": true,
+                "description": "SuiteChipStyle, PresetGrid (one on at most, arrow keys move focus), ChoiceChips (three columns) and ChipRow (toggle chips that report On or Off).",
+                "technology": "Swift 6, SwiftUI, macOS 26",
+                "paths": [
+                  "Sources/SuiteUI/PresetGrid.swift",
+                  "Sources/SuiteUI/ChipRow.swift",
+                  "Sources/SuiteUI/ChoiceChips.swift"
+                ]
+              },
+              {
+                "id": "suiteui-curves",
+                "name": "Curve editors",
+                "status": "existing",
+                "authored": true,
+                "description": "CurveEditor (two-handle easing well, preview dot hidden under Reduce Motion, nudges, Tab between handles, one onEnd per gesture) and ToneCurveEditor (N points over a histogram; add, move, remove, nudge). Planned: goldens and the Reduce Motion probe mark (#343).",
+                "technology": "Swift 6, SwiftUI, macOS 26",
+                "paths": [
+                  "Sources/SuiteUI/CurveEditor.swift",
+                  "Sources/SuiteUI/ToneCurveEditor.swift"
+                ]
+              },
+              {
+                "id": "suiteui-lists",
+                "name": "Rows and lists",
+                "status": "existing",
+                "authored": true,
+                "description": "SidebarItem, SidebarToggle and SidebarRow (row toggles in one column, rename draft), SidebarSection and SidebarNode (two-level cap). Planned: LayerList, the panel container for layers and scenes outside a split view, with dimmed rows (#146), keyboard rename and a refusable rename that keeps the draft (#108, #577), reorder, row context menus (#73), separately reachable child-row toggles (#589), app-owned expansion (#111), and ListEditing, the pure rename and reorder rules.",
+                "technology": "Swift 6, SwiftUI, macOS 26",
+                "paths": [
+                  "Sources/SuiteUI/SidebarRow.swift",
+                  "Sources/SuiteUI/SidebarSection.swift",
+                  "Sources/SuiteUI/LayerList.swift",
+                  "Sources/SuiteUI/ListEditing.swift"
+                ]
+              },
+              {
+                "id": "suiteui-grid",
+                "name": "Thumbnail grid",
+                "status": "existing",
+                "authored": true,
+                "description": "ThumbnailItem, ThumbnailBadges and ThumbnailGrid (adaptive columns, click, Shift, Command and arrow selection) with GridSelection, its pure selection math.",
+                "technology": "Swift 6, SwiftUI, macOS 26",
+                "paths": [
+                  "Sources/SuiteUI/ThumbnailGrid.swift",
+                  "Sources/SuiteUI/GridSelection.swift"
+                ]
+              },
+              {
+                "id": "suiteui-timeline",
+                "name": "Timeline",
+                "status": "existing",
+                "authored": true,
+                "description": "TimelineTrack and TimelineStrip (names column, ruler, one lane per track with key diamonds and spans) with FrameMapping (frame to x and back, ruler marks, key hit-testing). Planned: the restyle with lane beds, name chips, key states, the playhead pill and the recording ring (#62), and TimelineKeys, the pure key selection and drag rules (#63).",
+                "technology": "Swift 6, SwiftUI, macOS 26",
+                "paths": [
+                  "Sources/SuiteUI/TimelineStrip.swift",
+                  "Sources/SuiteUI/FrameMapping.swift",
+                  "Sources/SuiteUI/TimelineKeys.swift"
+                ]
+              },
+              {
+                "id": "suiteui-viewer-chrome",
+                "name": "Viewer chrome",
+                "status": "existing",
+                "authored": true,
+                "description": "ViewerStatusBar (facts as status pills; toggle and warning pill styles) and, planned, TransportCapsule (start, step back, play and pause, step forward, end, loop, with the timecode readout) (#340).",
+                "technology": "Swift 6, SwiftUI, macOS 26",
+                "paths": [
+                  "Sources/SuiteUI/ViewerStatusBar.swift",
+                  "Sources/SuiteUI/TransportCapsule.swift"
+                ]
+              },
+              {
+                "id": "suiteui-content",
+                "name": "Content surfaces",
+                "status": "existing",
+                "authored": true,
+                "description": "SurfaceCard and EmptyStateView (ContentUnavailableView with the one prominent action; planned: the primary button style, #339).",
+                "technology": "Swift 6, SwiftUI, macOS 26",
+                "paths": [
+                  "Sources/SuiteUI/SurfaceCard.swift",
+                  "Sources/SuiteUI/EmptyStateView.swift"
+                ]
+              },
+              {
+                "id": "suiteui-node-graph",
+                "name": "Node graph",
+                "status": "planned",
+                "authored": true,
+                "description": "NodeGraph: nodes drawn at the positions the app gives, arrows that meet node edges with condition chips, a self-loop, warning badges, the active node highlighted (#344); NodeGraphGeometry holds the pure arrow and loop geometry.",
+                "technology": "Swift 6, SwiftUI, macOS 26",
+                "paths": [
+                  "Sources/SuiteUI/NodeGraph.swift",
+                  "Sources/SuiteUI/NodeGraphGeometry.swift"
+                ]
+              },
+              {
+                "id": "suiteui-probes",
+                "name": "Probes",
+                "status": "planned",
+                "authored": true,
+                "description": "FrameProbe: input-to-display timings in frames late, dropped frames, tick jitter and in-app marks, exposed as the suite.perf accessibility value only under the perf launch flag (#330). ControlInventory: every SuiteUI control registers its identifier, enabled state and reason, exposed as suite.controls under the same flag, for every app's every-control sweep.",
+                "technology": "Swift 6, SwiftUI, macOS 26",
+                "paths": [
+                  "Sources/SuiteUI/FrameProbe.swift",
+                  "Sources/SuiteUI/ControlInventory.swift"
+                ]
+              },
+              {
+                "id": "suiteui-gallery",
+                "name": "Component gallery",
+                "status": "planned",
+                "authored": true,
+                "description": "SuiteGallery: one page per component family, shown by SuiteWindow when the app is launched with -SuiteGallery <page>. Each page hosts real components over local presentation state and a readout (suite.gallery.log) of the values and end events the host would receive, so SuiteUI's journeys can prove behaviour without any app's Model. One file per page under Gallery/, each owned by one feature.",
+                "technology": "Swift 6, SwiftUI, macOS 26",
+                "paths": [
+                  "Sources/SuiteUI/SuiteGallery.swift",
+                  "Sources/SuiteUI/Gallery/"
+                ]
+              },
+              {
+                "id": "suiteui-contracts",
+                "name": "Component contracts",
+                "status": "planned",
+                "authored": true,
+                "description": "One protocol per use case (section 5 of docs/blueprints/suiteui.md) over Foundation-only value types, and a Fake for each, so a component's view and its rules can be built in parallel. Live conformances sit next to the rule file they wrap, outside this folder. No SwiftUI import; ready to move to a Linux target (question Q1).",
+                "technology": "Swift 6, Foundation",
+                "paths": [
+                  "Sources/SuiteUI/Contracts/"
+                ]
+              }
+            ]
+          },
+          {
+            "id": "suiteui-tests",
+            "name": "SuiteUITests",
+            "status": "existing",
+            "authored": true,
+            "description": "Unit tests of SuiteUI's rules and components (macOS).",
+            "technology": "Swift 6, Swift Testing, macOS 26",
+            "tags": [
+              "internal",
+              "macos-only",
+              "test"
+            ],
+            "components": [
+              {
+                "id": "suiteui-unit-tests",
+                "name": "SuiteUI unit tests",
+                "status": "existing",
+                "authored": true,
+                "description": "Rule tests (ScrubValue, NumericInput, FrameMapping, GridSelection, ZoomMath, RulerTicks, TokensTests contrast and geometry) and component tests; planned: one test file per new rule file and contract conformance.",
+                "technology": "Swift 6, Swift Testing",
+                "paths": [
+                  "Tests/SuiteUITests/"
+                ]
+              }
+            ]
+          },
+          {
+            "id": "suite-snapshots",
+            "name": "Suite snapshots and goldens",
+            "status": "existing",
+            "authored": true,
+            "description": "The SuiteUI part of AppSnapshotTests: Suite*Snapshots PNGs today; planned: GoldenImage and SnapshotHost (backing scale 2, four appearances) with committed baselines.",
+            "technology": "Swift 6, XCTest/Swift Testing, macOS 26",
+            "tags": [
+              "internal",
+              "macos-only",
+              "test"
+            ],
+            "components": [
+              {
+                "id": "suite-snapshot-files",
+                "name": "Suite snapshot files",
+                "status": "existing",
+                "authored": true,
+                "description": "Tests/AppSnapshotTests/Suite*.swift (one per component family); planned GoldenImage.swift, SnapshotHost.swift and the Golden/ baselines (#331, #332).",
+                "technology": "Swift 6",
+                "paths": [
+                  "Tests/AppSnapshotTests/Suite*.swift",
+                  "Tests/AppSnapshotTests/GoldenImage*.swift",
+                  "Tests/AppSnapshotTests/SnapshotHost*.swift",
+                  "Tests/AppSnapshotTests/Golden/",
+                  "Tests/AppSnapshotTests/CanvasViewportSnapshots.swift"
+                ]
+              }
+            ]
+          },
+          {
+            "id": "suite-journeys",
+            "name": "Journey harness",
+            "status": "existing",
+            "authored": true,
+            "description": "Existing: the shared XCUITest steps every app's journeys use (UITests/Journey.swift). Planned: the input, velocity-drag and perf helpers, the project.yml template that compiles every UITests/<target>*.swift file (#333), and SuiteJourneyTests, a bundle that launches a SuiteWindow app under -SuiteGallery and walks section 4's journeys.",
+            "technology": "Swift 6, XCTest UI testing, XcodeGen, macOS 26",
+            "tags": [
+              "internal",
+              "macos-only",
+              "test"
+            ],
+            "components": [
+              {
+                "id": "suite-journey-steps",
+                "name": "Journey steps",
+                "status": "existing",
+                "authored": true,
+                "description": "Journey: launch, shot, click, clickEachTool, openEachMenu, drag, element. Planned Journey+Input: keystrokes with modifiers, velocity-controlled drags, perf() and controls() readers.",
+                "technology": "Swift 6, XCTest",
+                "paths": [
+                  "UITests/Journey.swift",
+                  "UITests/Journey+Input.swift",
+                  "project.yml",
+                  "UITests/SuiteJourneyTests+Budgets.swift"
+                ]
+              },
+              {
+                "id": "suite-journey-tests",
+                "name": "SuiteUI journeys",
+                "status": "planned",
+                "authored": true,
+                "description": "SuiteJourneyTests.swift and one SuiteJourneyTests+<Area>.swift per feature: the SJ journeys of section 4.",
+                "technology": "Swift 6, XCTest",
+                "paths": [
+                  "UITests/SuiteJourneyTests*.swift"
+                ]
+              }
+            ]
+          },
+          {
+            "id": "suite-logic",
+            "name": "SuiteUI logic (Linux)",
+            "status": "planned",
+            "authored": true,
+            "description": "Proposed only (question Q1): a Linux-built target holding Contracts/ and the pure rule files, so scripts/ci tests them on every PR. Needs a Package.swift change, a protected path, so it waits on the captain.",
+            "technology": "Swift 6, Foundation",
+            "tags": [
+              "internal",
+              "proposal"
+            ],
+            "components": []
+          },
+          {
+            "id": "app-audit",
+            "name": "App audit",
+            "status": "existing",
+            "authored": true,
+            "description": "AppAuditTests and UITests/Audit.swift (docs/blueprints/app-audit.md). Not owned by SuiteUI; every journey shot runs it.",
+            "technology": "Swift 6",
+            "components": []
+          },
+          {
+            "id": "apps",
+            "name": "Flare, Design, Photo, Library, Halo apps",
+            "status": "existing",
+            "authored": true,
+            "description": "The five <X>App targets. Build every view from SuiteUI; never from a look-alike.",
+            "technology": "Swift 6, SwiftUI, macOS 26",
+            "components": []
+          }
+        ]
+      }
+    ],
+    "relationships": [
+      {
+        "source": "apps",
+        "target": "suiteui-window-shell",
+        "description": "Flare (today), Library and Halo build their window from SuiteWindow",
+        "style": "sync"
+      },
+      {
+        "source": "apps",
+        "target": "suiteui-editor-shell",
+        "description": "Design and Photo (and Flare after F1a) build their window from EditorShell",
+        "style": "sync"
+      },
+      {
+        "source": "apps",
+        "target": "suiteui-inspector",
+        "description": "every app's inspector is built from the rows",
+        "style": "sync"
+      },
+      {
+        "source": "apps",
+        "target": "suiteui-contracts",
+        "description": "app Models may reuse the Foundation-only rules once they move to a Linux target (Q1)",
+        "style": "sync"
+      },
+      {
+        "source": "suiteui-window-shell",
+        "target": "suiteui-lists",
+        "description": "draws SidebarSection and SidebarRow in the sidebar",
+        "style": "sync"
+      },
+      {
+        "source": "suiteui-window-shell",
+        "target": "suiteui-gallery",
+        "description": "shows SuiteGallery under -SuiteGallery",
+        "style": "sync"
+      },
+      {
+        "source": "suiteui-editor-shell",
+        "target": "suiteui-tools",
+        "description": "hosts the docked ToolbarGroup rail",
+        "style": "sync"
+      },
+      {
+        "source": "suiteui-editor-shell",
+        "target": "suiteui-canvas",
+        "description": "hosts the CanvasViewport",
+        "style": "sync"
+      },
+      {
+        "source": "suiteui-editor-shell",
+        "target": "suiteui-viewer-chrome",
+        "description": "hosts the status pills and, beside the timeline, the transport",
+        "style": "sync"
+      },
+      {
+        "source": "suiteui-editor-shell",
+        "target": "suiteui-timeline",
+        "description": "hosts a TimelineStrip in the timeline slot",
+        "style": "sync"
+      },
+      {
+        "source": "suiteui-canvas",
+        "target": "suiteui-canvas-marks",
+        "description": "draws marks in its overlay at the canvas zoom",
+        "style": "sync"
+      },
+      {
+        "source": "suiteui-canvas",
+        "target": "suiteui-probes",
+        "description": "reports pointer events and their first drawn frame",
+        "style": "sync"
+      },
+      {
+        "source": "suiteui-inspector",
+        "target": "suiteui-number-entry",
+        "description": "the slider and stepper rows are the bar slider",
+        "style": "sync"
+      },
+      {
+        "source": "suiteui-inspector",
+        "target": "suiteui-chips",
+        "description": "sections hold presets and chips",
+        "style": "sync"
+      },
+      {
+        "source": "suiteui-number-entry",
+        "target": "suiteui-probes",
+        "description": "reports scrub events and their first drawn frame",
+        "style": "sync"
+      },
+      {
+        "source": "suiteui-number-entry",
+        "target": "suiteui-contracts",
+        "description": "conforms to ValueScrubbing",
+        "style": "sync"
+      },
+      {
+        "source": "suiteui-canvas-marks",
+        "target": "suiteui-contracts",
+        "description": "conforms to HandleGeometryProviding",
+        "style": "sync"
+      },
+      {
+        "source": "suiteui-timeline",
+        "target": "suiteui-contracts",
+        "description": "conforms to TimelineMapping and KeyEditing",
+        "style": "sync"
+      },
+      {
+        "source": "suiteui-lists",
+        "target": "suiteui-contracts",
+        "description": "conforms to ListEditing",
+        "style": "sync"
+      },
+      {
+        "source": "suiteui-grid",
+        "target": "suiteui-contracts",
+        "description": "conforms to GridSelecting",
+        "style": "sync"
+      },
+      {
+        "source": "suiteui-curves",
+        "target": "suiteui-contracts",
+        "description": "conforms to CurvePointEditing",
+        "style": "sync"
+      },
+      {
+        "source": "suiteui-editor-shell",
+        "target": "suiteui-contracts",
+        "description": "conforms to ShellLayingOut",
+        "style": "sync"
+      },
+      {
+        "source": "suiteui-node-graph",
+        "target": "suiteui-contracts",
+        "description": "conforms to GraphGeometry",
+        "style": "sync"
+      },
+      {
+        "source": "suiteui-probes",
+        "target": "suiteui-contracts",
+        "description": "conforms to FrameProbeRecording and ControlInventorying",
+        "style": "sync"
+      },
+      {
+        "source": "suiteui-gallery",
+        "target": "suiteui-contracts",
+        "description": "pages run on the live conformances, with a Fake switch for UI work",
+        "style": "sync"
+      },
+      {
+        "source": "suiteui-tokens",
+        "target": "suiteui",
+        "description": "every component takes its values from the tokens",
+        "style": "sync"
+      },
+      {
+        "source": "suite-journey-tests",
+        "target": "suiteui-gallery",
+        "description": "launches a SuiteWindow app with -SuiteGallery <page>",
+        "style": "sync"
+      },
+      {
+        "source": "suite-journey-steps",
+        "target": "suiteui-probes",
+        "description": "reads suite.perf and suite.controls",
+        "style": "sync"
+      },
+      {
+        "source": "suite-journey-steps",
+        "target": "app-audit",
+        "description": "audits every window shot",
+        "style": "sync"
+      },
+      {
+        "source": "suite-snapshot-files",
+        "target": "suiteui",
+        "description": "renders every component state into goldens",
+        "style": "sync"
+      },
+      {
+        "source": "suiteui-unit-tests",
+        "target": "suiteui",
+        "description": "tests the rules and conformances",
+        "style": "sync"
+      },
+      {
+        "source": "suite-logic",
+        "target": "suiteui-contracts",
+        "description": "would compile Contracts/ on Linux (Q1)",
+        "style": "sync"
+      },
+      {
+        "source": "suiteui-inspector",
+        "target": "suiteui-contracts",
+        "description": "conforms to HexColorEditing and KeyframeFacing",
+        "style": "sync"
+      },
+      {
+        "source": "suiteui-chips",
+        "target": "suiteui-contracts",
+        "description": "conforms to PresetNavigating",
+        "style": "sync"
+      },
+      {
+        "source": "suiteui-tools",
+        "target": "suiteui-contracts",
+        "description": "conforms to ToolPicking",
+        "style": "sync"
+      },
+      {
+        "source": "suiteui-canvas",
+        "target": "suiteui-contracts",
+        "description": "conforms to CanvasNavigating",
+        "style": "sync"
+      },
+      {
+        "source": "suiteui-viewer-chrome",
+        "target": "suiteui-contracts",
+        "description": "conforms to StatusPillComposing and TransportStepping",
+        "style": "sync"
+      },
+      {
+        "source": "suite-snapshot-files",
+        "target": "suiteui-contracts",
+        "description": "GoldenImage conforms to GoldenComparing",
+        "style": "sync"
+      },
+      {
+        "source": "suiteui-timeline",
+        "target": "suiteui-probes",
+        "description": "reports scrub and key-drag events",
+        "style": "sync"
+      },
+      {
+        "source": "suiteui-tools",
+        "target": "suiteui-probes",
+        "description": "registers every ToolbarAction-built control with ControlInventory",
+        "style": "sync"
+      },
+      {
+        "source": "suiteui-chips",
+        "target": "suiteui-probes",
+        "description": "reports press series",
+        "style": "sync"
+      },
+      {
+        "source": "suiteui-curves",
+        "target": "suiteui-probes",
+        "description": "reports curve-drag series",
+        "style": "sync"
+      },
+      {
+        "source": "suiteui-editor-shell",
+        "target": "suiteui-probes",
+        "description": "reports press and slot-drag series",
+        "style": "sync"
+      },
+      {
+        "source": "suiteui-viewer-chrome",
+        "target": "suiteui-probes",
+        "description": "reports transport press series",
+        "style": "sync"
+      },
+      {
+        "source": "suiteui-canvas-marks",
+        "target": "suiteui-probes",
+        "description": "reports handle-drag series",
+        "style": "sync"
+      },
+      {
+        "source": "suiteui-lists",
+        "target": "suiteui-probes",
+        "description": "reports scroll frame intervals",
+        "style": "sync"
+      },
+      {
+        "source": "suiteui-grid",
+        "target": "suiteui-probes",
+        "description": "reports scroll frame intervals",
+        "style": "sync"
+      },
+      {
+        "source": "suiteui-inspector",
+        "target": "suiteui-probes",
+        "description": "registers every row control with ControlInventory",
+        "style": "sync"
+      }
+    ]
+  }
+}
