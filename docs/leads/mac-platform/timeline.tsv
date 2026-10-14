@@ -29,3 +29,4 @@ utc	stage	event	ref	note
 2026-10-14T22:32Z	4	ci-run	38647662189	red: Photo timing budgets only (Linux copy cost, macOS latency); all feature tests green
 2026-10-14T22:45Z	4	round-findings	round3	0 in feature; gap #851 filed on line:photo, noted on #763
 2026-10-14T22:59Z	4	heartbeat	-	waiting on next dev CI run (round 4); #851 open
+2026-10-14T23:20Z	4	heartbeat	-	waiting on next dev CI run (round 4); #851 open
