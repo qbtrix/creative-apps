@@ -62,9 +62,11 @@ per bundle, so no second journey file per app is picked up yet (#333).
 
 **The Linux gap.** `Package.swift` declares SuiteUI and its tests only under
 `#if os(macOS)`. The Linux gate (`scripts/ci`) never compiles a line of
-SuiteUI, including its pure rule files (`ScrubValue`, `NumericInput`,
-`FrameMapping`, `GridSelection`, `ZoomMath`, `RulerTicks`), which already
-avoid SwiftUI on purpose. Every SuiteUI PR so far has merged on the macOS job
+SuiteUI, including its rule files. Only some are Linux-ready as they stand:
+`NumericInput`, `FrameMapping` and `GridSelection` import Foundation only;
+`ScrubValue.swift` is Foundation except `ViewerZoom.fitScale`, which takes
+`CGSize` and `CGFloat`; `ZoomMath.swift` imports CoreGraphics; `RulerTicks`
+lives inside `Ruler.swift`, which imports SwiftUI. Every SuiteUI PR so far has merged on the macOS job
 on `dev` alone. Section 5 and question Q1 deal with this.
 
 ### 0.2 Merged work, by the blueprint tasks it closed
@@ -145,7 +147,7 @@ dev). `–` means none yet.
 | `SurfaceCard`, `GlassPanel` | 1, – | – | – | 1, 1 | – |
 | `KeyframeButton`, `PresetGrid`, `ChipRow`, `InspectorColorRow`, `InspectorStepperRow` | – | – | – | – | – |
 
-The last row is built and waiting: Flare's inspector (F6a #348 and after)
+The last row is built and waiting: Flare's inspector (F6a #186, F6b #348 and after)
 is its first user. Flare is still on `SuiteWindow`; its F1a (#346) and F1b
 (#347) move it to `EditorShell`, which is why the editor-chrome feature
 comes first in section 8.
@@ -311,8 +313,9 @@ Rows it marks *inferred* stay inferred here.
 **What this blueprint adds** for the component-level rules (not for ranking
 apps): the macOS Human Interface Guidelines (developer.apple.com/design/
 human-interface-guidelines: sidebars, inspectors, toolbars, sliders, focus
-and keyboard navigation), WCAG 2.2 success criteria 1.4.3 contrast, 1.4.11
-non-text contrast and 2.5.8 target size (w3.org/TR/WCAG22), and the WAI-ARIA
+and keyboard navigation), WCAG 2.2 success criteria 1.4.3 contrast and 1.4.11
+non-text contrast (w3.org/TR/WCAG22; target sizes follow `docs/design.md`'s
+own 20 pt floor, not WCAG's), and the WAI-ARIA
 Authoring Practices slider, grid and tree view patterns
 (w3.org/WAI/ARIA/apg/patterns/), which give the keyboard model every
 adjustable and selectable component follows (arrows step, Page or Shift
@@ -327,7 +330,7 @@ blueprint or issues.
 | Component | Apps now | Apps planned | The tier-1 step that shows it (`docs/priorities.md`) |
 |---|---|---|---|
 | Tokens, glass | all | all | every screen |
-| `SuiteWindow` | F L H | L H | Library browse (#33); Halo compositions (#36) |
+| `SuiteWindow` | F L H | L H | Library browse (#33); Halo's compositions sidebar (H 1) |
 | `EditorShell`, top bar, `EditorBarItem(.primary)`, save status | D P | F D P | Open, save, undo for F (5), D (8), P (1, 4) |
 | Timeline slot in `EditorShell` | – | F (H if it moves to the shell) | Flare keyframes and scrub (1, 3) |
 | `ToolbarGroup` rail and floating palette | F D P | F D P H | Draw and select (F 4, D 2–3, P 2) |
@@ -384,8 +387,13 @@ So the harness feature adds a **gallery behind a launch flag** that needs
 no app change and no manifest change:
 
 - `SuiteWindow` checks its process arguments once. With `-SuiteGallery
-  <page>` it shows `SuiteGallery(page:)` in place of the app's sidebar,
-  content and inspector. Without the flag nothing changes. Every
+  <page>` its **whole body** is `SuiteGallery(page:)`, filling the window:
+  no split view, sidebar or inspector of the app's around it, so an
+  `EditorShell` page gets the full window width (`EditorShell` sets a
+  minimum width of `SuiteSize.windowMinimum.width`). The `window` page
+  builds its inner `SuiteWindow` through an internal init that skips the
+  flag check, so the gallery never recurses. Without the flag nothing
+  changes. Every
   `SuiteWindow` app can host it; the journeys launch **Library**, whose
   window stays a `SuiteWindow` in every app plan (Flare and Halo may move to
   `EditorShell`). Pages that need the editor look draw an `EditorShell`
@@ -419,6 +427,25 @@ no app change and no manifest change:
 
 Question Q2 offers the alternative: a dedicated gallery executable target.
 
+**What a journey can read.** XCUITest reads an element's identifier,
+label, title, `isEnabled`, `isSelected`, `hasFocus` and frame reliably, but
+not its tooltip, and many SwiftUI accessibility values read as empty (#262).
+So in the tables below:
+
+- "selected" or "On/Off" means `isSelected` (SuiteUI's selected tools,
+  tabs, pills, chips and presets carry the `.isSelected` trait);
+- "tooltip is its reason" means the `suite.controls` entry for that
+  identifier has that `reason` and `enabled: false`; the tooltip itself is
+  proven by a unit test of `.help(action.help)` in the owning feature;
+- every other "value" (a slider's number, "Not animated", "locked", a
+  handle's rect) is read from the gallery log, which states it after each
+  step. No journey reads `.value` until #262's fix covers that component.
+
+`suite.controls` has one publisher, SuiteUI's `ControlInventory`. Apps feed
+it through the same `.suiteControl(…)` modifier; Flare's F1b (#347), which
+planned its own `suite.controls` in `FlareControls.swift`, feeds this one
+instead (question Q9).
+
 **Waiting.** No journey asserts timing through an XCUI query. State is
 awaited with `waitForExistence` or a label predicate (2 s); timing comes
 from `suite.perf` (section 7). Every step takes a `shot`, so every step is
@@ -446,8 +473,8 @@ Page names are the gallery's (section 6.2). "Log reads" means the label of
 | SJ6 | `testStatusPills` (`+Chrome`) | `editor` | read the pills; click the toggle pill; click it again; switch the page's warning on | zoom pill text equals `ViewerZoom.percentText` of the page zoom; size pill "1920 × 1080"; toggle pill value On, then Off, log `toggle onion`; the warning pill shows its triangle and label | empty: no trailing pills · error: warning pill · loading: none |
 | SJ7 | `testEmptyStateOffersAction` (`+Chrome`) | `empty` | read it; click its button; open the variant without an action | title, message and one primary button; log `action new`; the variant has no button | empty: itself · error: none · loading: none |
 | SJ8 | `testSegmentedTabsSwitch` (`+Chrome`) | `editor` | click the second tab; press ← with the tabs focused | log `tab layers`, then `tab adjust`; the selected tab's value is "selected" | none · none · none |
-| SJ9 | `testCanvasZoomPanAndDrag` (`+Canvas`) | `canvas` | ⌘+ twice; ⌘0; drag 100 pt right from the artboard's corner; Space-drag 100 pt; press → with the canvas focused; open `canvas-pt` | zoom pill 200 %, then the fit value; log `drag (0,0)→(100,0) ends 1` in document pixels at 100 %; the Space-drag moves the scroll position and adds no drag to the log; → scrolls a tenth of the viewport; `canvas-pt`'s ruler corner reads "pt" (#264) | empty: a 0 × 0 document fits at the smallest zoom and draws no artboard · error: none · loading: none |
-| SJ10 | `testSelectionHandlesAtEveryZoom` (`+Canvas`) | `marks` | at zoom 25 %, 100 % and 400 %: drag the bottom-right handle 50 pt out; ⇧-drag it; drag the rotate zone a quarter turn | log names `handle bottomRight` and the new rect each time; each handle's hit frame is at least 12 × 12 pt at every zoom; ⇧ keeps the aspect ratio (±1 px); the rotate drag logs `rotate 90` (±1) | empty: no selection draws no handles · error: none · loading: none |
+| SJ9 | `testCanvasZoomPanAndDrag` (`+Canvas`) | `canvas` | ⌘+ twice; ⌘0; drag 100 pt right from the artboard's corner; Space-drag 100 pt; press → with the canvas focused; open `canvas-pt` | the page's document is 400 × 300 in a larger viewport, so fit is 100 %; zoom pill 200 %, then 100 %; log `drag (0,0)→(100,0) ends 1` in document pixels; the Space-drag moves the scroll position and adds no drag to the log; → scrolls a tenth of the viewport; `canvas-pt`'s ruler corner reads "pt" (#264) | empty: a 0 × 0 document fits at 100 % (each side counts as 1 pt, `ViewerZoom.fitScale`) and draws no artboard · error: none · loading: none |
+| SJ10 | `testSelectionHandlesAtEveryZoom` (`+Canvas`) | `marks` | at zoom 25 %, 100 % and 400 %: drag the bottom-right handle 50 pt out; ⇧-drag it; drag the rotate zone a quarter turn | log names `handle bottomRight` and the new rect each time; after the ⇧-drag it reads `handle bottomRight keepAspect` with a rect whose width ÷ height equals the start's (±1 px); each handle's hit frame (logged, since marks are not elements) is at least 12 × 12 pt at every zoom; the rotate drag on the zone outside the top-right corner logs `rotate 90` (±1) | empty: no selection draws no handles · error: none · loading: none |
 | SJ11 | `testBarSliderScrubTypeAndStep` (`+Inspector`) | `inspector` | drag the Rotation bar 40 pt right; ⇧-drag 4 pt; ⌥-drag 10 pt; click the value, type 72, Return; click, type `abc`, Return; click, type 9, Escape; focus it, press → twice, ⇧→, End, Home; hover the disabled row | values +40, +40, +1 steps as `ScrubValue` says; 72; still 72 after `abc`; still 72 after Escape; then 73, 74, 84, the maximum, the minimum; log `ends n` grows by exactly one per drag, typed commit and key press; the disabled row's tooltip is its reason and dragging it changes nothing | empty: "Mixed" shows no marker · error: `abc` keeps the old value · loading: none |
 | SJ12 | `testExactFieldAndColorRowEnd` (`+Inspector`) | `inspector` | drag the X field 30 pt; press ↑; click the FILL hex, type `FF3B30`, Return; type `zz`, Return; pick a color in the system panel | X +30 then +1, log `ends` +1 each (#718); fill reads `#FF3B30`, log `color #FF3B30 ends` +1; `zz` keeps `#FF3B30`; the panel pick logs one end when the panel closes | empty: none · error: `zz` refused · loading: none |
 | SJ13 | `testSectionsPickersTogglesAndReset` (`+Inspector`) | `inspector` | click the TRANSFORM header; click it again; change a value; click Reset; choose "Round" in the Cap picker; click the checkbox row; hover the disabled action | the section collapses and expands; Reset appears only while the section differs and its hit frame is at least 20 × 20 pt and overlaps no other control (#622, #285); log `reset transform`; picker value "Round"; checkbox value toggles; the action's tooltip is its reason | empty: an empty section shows its header only · error: none · loading: none |
@@ -455,19 +482,19 @@ Page names are the gallery's (section 6.2). "Log reads" means the label of
 | SJ15 | `testPresetsAndChips` (`+Inspector`) | `inspector` | click "Ease Out"; press → and Space; click the Onion chip twice | one preset on at a time, log `preset ease-out`, then the neighbour; chip value On, then Off | empty: no preset matches (selected nil) shows none on · error: none · loading: none |
 | SJ16 | `testToneCurveAddMoveRemove` (`+Inspector`) | `curves` | click inside the well; drag the new point 20 pt up; press ↑; press Tab; drag a middle point out of the well; press Delete on the focused point | log points count +1, then moved, nudged by 0.01, focus moved, count −1, count −1; log `ends` +1 per gesture, nudge and delete | empty: two end points only cannot be deleted · error: none · loading: histogram missing draws no bars |
 | SJ17 | `testLayerListToggleRenameReorder` (`+Lists`) | `layers` | click Ball's eye; click Shadow's lock; double-click Ball's title, type `Hero`, Return; focus Shadow, press Return, type `Taken`, Return; press Escape; drag Shadow above Hero; click a child row's eye (#589) | log `toggle eye ball`; Shadow's row is dimmed (title in secondary text, its value includes "locked"); log `rename ball Hero`; `Taken` is refused with the page's message inline under the row and the draft stays; Escape restores "Shadow"; log `move shadow 0`; the child's eye is its own element and logs `toggle eye child` | empty: "No layers yet." text · error: refused rename · loading: none |
-| SJ18 | `testThumbnailGridSelectsByClickAndKeys` (`+Lists`) | `grid` | click item 3; ⇧-click item 6; ⌘-click item 4; press → | log selection `3,5,6`, then `3,4,5,6`… exactly as `GridSelection` gives; → moves the anchor one item | empty: no items shows the page's empty state · error: none · loading: an item without an image shows its caption on the placeholder fill |
+| SJ18 | `testThumbnailGridSelectsByClickAndKeys` (`+Lists`) | `grid` | click item 3; ⇧-click item 6; ⌘-click item 4; press → | log selection `3`, then `3,4,5,6`, then `3,5,6` (⌘ toggles 4 off), exactly as `GridSelection` gives; → moves the anchor one item and logs the result | empty: no items shows the page's empty state · error: none · loading: an item without an image shows its caption on the placeholder fill |
 | SJ19 | `testTimelineScrubSelectAndDragKeys` (`+Timeline`) | `timeline`, `timeline-long` | drag the ruler to frame 30; click Ball's key at 12; press →; drag the selected key 5 frames right; press ⌫ on it; toggle the page's recording; open `timeline-long` (10,000 frames) and scroll to the end | log `scrub 30`; `select ball 12`, then `select ball 24` (#63); `move ball 24→29 ends 1`; `delete ball 29`; the playhead pill reads 30; the recording ring element exists while on; `timeline-long` draws ruler labels at the end (#219) | empty: no tracks shows "No layers yet." · error: a drag past the end clamps to the last frame · loading: none |
 | SJ24 | `testInspectorRowsAlignAtEveryWidth` (`+Inspector`) | `inspector` | launch with `-SuiteGalleryWidth` 200, 240, 280 and 360 in turn; shot each | every row's leading and trailing edges equal (±0.5 pt); every value's trailing edge equal; every label and value frame inside its row (QB-S19) | empty: none · error: none · loading: none |
-| SJ25 | `testEveryControlMeetsHitSize` (`SuiteJourneyTests.swift`) | each page | read `suite.controls` on each page; measure each listed control's frame | every control is at least 20 × 20 pt, and the ones the token table lists at their hit size (QB-S20) | empty: a page with no controls passes with a count of 0 · error: none · loading: none |
+| SJ25 | `testEveryControlMeetsHitSize` (`SuiteJourneyTests.swift`) | each page | read `suite.controls` on each page; measure each listed control's frame | every control meets QB-S20: at least 20 × 20 pt unless the token table names a smaller hit (handles and anchors 12, timeline keys 16), and at its token hit size where one is listed | empty: a page with no controls passes with a count of 0 · error: none · loading: none |
 
 ### 4.3 Tier-2 and tier-3 journeys
 
 | # | Test (file) | Page | Steps | Asserts |
 |---|---|---|---|---|
 | SJ20 | `testEasingCurveHandles` (`+Inspector`) | `curves` | drag handle 1; Tab; press ↑; ⇧↑ | one `ends` per gesture; values change by 0.01 and 0.1; the preview dot is absent under the page's Reduce Motion switch (probe mark, #343) |
-| SJ21 | `testPointAndGridMarks` (`+Canvas`) | `marks` | show the point mark at zoom 1 and 4 over light and dark pixels; show the grid | the mark's on-screen size is the same at both zooms; it takes no click (the drag under it logs); the grid draws `cells` lines (#706, #737, #530) |
+| SJ21 | `testPointAndGridMarks` (`+Canvas`) | `marks` | show the point mark at zoom 1 and 4 over light and dark pixels; show the grid | the log states the mark's on-screen size, the same at both zooms, and the grid's line count (`cells` − 1 each way); a drag through the mark still logs, so it takes no click; how both look is proven by goldens over light and dark pixels (#706, #737, #530) |
 | SJ22 | `testRowContextMenus` (`+Lists`) | `layers` | right-click Ball; choose Duplicate; right-click again; hover the disabled Delete | log `menu duplicate ball`; Delete is disabled and its reason is the item's help (#73) |
-| SJ23 | `testNodeGraphDrawsAndSelects` (`+Graph`) | `graph` | click node B; click the arrow A→B; open `graph-loop` | log `select node b`, `select edge a-b`; each arrow's ends lie on its nodes' edges (±1 pt); the self-loop draws outside its node; the warning badge has its triangle and label (#344) |
+| SJ23 | `testNodeGraphDrawsAndSelects` (`+Graph`) | `graph` | click node B; click the arrow A→B; open `graph-loop` | log `select node b`, `select edge a-b`; the log states each arrow's end points, which lie on their nodes' edges (±1 pt), and the self-loop's bounds, outside its node; the warning badge is an element whose label is its text; the drawing itself is a golden and QB-S33's unit test (#344) |
 
 ### 4.4 Perf journeys (report-only first, section 7)
 
@@ -478,6 +505,11 @@ Page names are the gallery's (section 6.2). "Log reads" means the label of
 | SP3 | `testTimelineScrubLatency` (`+Timeline`) | `timeline-long` | drag the playhead across the ruler | frames late |
 | SP4 | `testListAndGridScroll` (`+Lists`) | `layers-300`, `grid-2000` | scroll each end to end | frame interval p95 |
 | SP5 | `testHandleDragLatency` (`+Canvas`) | `marks` | drag a handle at 300 pt/s | frames late |
+| SP6 | `testSliderKeyLatency` (`+Inspector`) | `inspector` | focus a bar slider, press → 60 times, 50 ms apart | frames late, series `slider-key` |
+| SP7 | `testCurveDragLatency` (`+Inspector`) | `curves` | velocity-controlled drag of an easing handle, then a tone point | frames late, series `curve-drag` |
+| SP8 | `testKeyDragLatency` (`+Timeline`) | `timeline-long` | velocity-controlled drag of a selected key across 600 pt | frames late, series `key-drag` |
+| SP9 | `testPressLatency` (`+Chrome`) and `testChipPressLatency` (`+Inspector`) | `editor`, `inspector` | 60 presses each over tools, tabs and transport; over chips and presets | frames late, series `press` |
+| SP10 | `testSlotDragLatency` (`+Chrome`) | `editor` | velocity-controlled drag of the slot divider, 300 pt up and back | frames late, series `slot-drag` |
 
 Each perf test lives in the journey file of the feature that owns its page.
 The harness feature supplies only the helpers they call
@@ -500,9 +532,13 @@ live conformance and its tests, and the gallery page switches between them
   holding the protocol, its value types and its Fake; the shared types in
   `Contracts/ContractTypes.swift`. Live conformances sit next to the rule
   file they wrap (`ScrubValue.swift` gains `SuiteValueScrubbing`), so the
-  contract folder never imports SwiftUI. The suite-harness feature lands all
-  of `Contracts/` in its first task, exactly as below; later features add
-  conformances, never signatures (a signature change is a blueprint change).
+  contract folder never imports SwiftUI. The code below is frozen by this
+  blueprint, but it lands in pieces, because one PR holds at most 400 lines
+  and 15 files: suite-harness lands `ContractTypes.swift` (the shared types
+  and `EditRun`) and the three harness contracts; every other feature lands
+  its own contract files (the Feature column of 5.2) as its first task.
+  Features add conformances, never signatures; a signature change is a
+  blueprint change.
 - **Linux.** Nothing under `Sources/SuiteUI/` builds on Linux today, and
   `Package.swift` is protected, so the contracts cannot live in a Linux
   target without the captain (question Q1). Until then: they import
@@ -873,7 +909,9 @@ public protocol CanvasNavigating: Sendable {
     func clamped(_ zoom: Double) -> Double
     func zoomedIn(from zoom: Double) -> Double
     func zoomedOut(from zoom: Double) -> Double
-    /// The zoom that fits `document` inside `viewport` less `margin` on every side; never a division by zero.
+    /// The zoom that fits `document` inside `viewport` less `margin` on every side, never above 1 (100 %);
+    /// a side that is 0 or negative counts as 1 pt, so a 0 × 0 document fits at 100 %; a viewport with no
+    /// room gives the smallest zoom. Never a division by zero.
     func fit(document: PlaneExtent, in viewport: PlaneExtent, margin: Double) -> Double
     /// A view point (in the canvas's content, scrolled) to document pixels.
     func documentPoint(_ view: PlanePoint, artboardOrigin: PlanePoint, zoom: Double) -> PlanePoint
@@ -889,8 +927,8 @@ public struct FakeCanvasNavigating: CanvasNavigating {
     public func zoomedOut(from zoom: Double) -> Double { clamped(zoom / 2) }
     public func fit(document: PlaneExtent, in viewport: PlaneExtent, margin: Double) -> Double {
         let w = viewport.width - 2 * margin, h = viewport.height - 2 * margin
-        guard w > 0, h > 0, document.width > 0, document.height > 0 else { return 0.1 }
-        return clamped(min(w / document.width, h / document.height))
+        guard w > 0, h > 0 else { return 0.1 }
+        return clamped(min(w / max(document.width, 1), h / max(document.height, 1), 1))
     }
     public func documentPoint(_ view: PlanePoint, artboardOrigin: PlanePoint, zoom: Double) -> PlanePoint {
         let z = clamped(zoom)
@@ -909,14 +947,18 @@ public struct FakeCanvasNavigating: CanvasNavigating {
 
 // UC8 · SJ10, SP5 · Contracts/HandleGeometryProviding.swift
 public enum HandleKind: String, Sendable, CaseIterable {
-    case topLeft, top, topRight, right, bottomRight, bottom, bottomLeft, left, rotate
+    case topLeft, top, topRight, right, bottomRight, bottom, bottomLeft, left
+    /// The rotate zones, one just outside each corner (docs/design.md, Stage marks).
+    case rotateTopLeft, rotateTopRight, rotateBottomRight, rotateBottomLeft
 }
 
 public protocol HandleGeometryProviding: Sendable {
     /// Each handle's hit rect in view points around `rect` (view points at the current zoom). The hit size
-    /// is `SuiteSize.selectionHandle`'s hit (12 pt) at every zoom; the rotate zone sits outside the top-right corner.
+    /// is `SuiteSize.selectionHandleHit` (12 pt) at every zoom; a rotate zone (`rotateZone`, 16 pt) sits just
+    /// outside each corner.
     func handles(around rect: PlaneRect, hitSize: Double) -> [HandleKind: PlaneRect]
-    /// The handle under `point`, corners before edges before rotate; nil when none.
+    /// The handle under `point`, corners before edges before rotate zones; nil when none. Where hit squares
+    /// overlap (a rect smaller than the hit size) the corner nearest the point wins.
     func hit(_ point: PlanePoint, around rect: PlaneRect, hitSize: Double) -> HandleKind?
     /// `rect` after dragging `handle` by `delta`, the opposite side fixed; `keepAspect` (⇧) scales evenly.
     func resized(_ rect: PlaneRect, handle: HandleKind, by delta: PlanePoint, keepAspect: Bool) -> PlaneRect
@@ -924,7 +966,8 @@ public protocol HandleGeometryProviding: Sendable {
     func rotation(from start: PlanePoint, to end: PlanePoint, center: PlanePoint, snap: Bool) -> Double
 }
 
-/// Corner handles only; edges and rotate are never hit. Enough to draw handles, not for SJ10.
+/// Corner handles only; edges and rotate zones are never hit, and overlapping squares pick any one of them.
+/// Enough to draw handles, not for SJ10.
 public struct FakeHandleGeometry: HandleGeometryProviding {
     public init() {}
     private func square(_ p: PlanePoint, _ s: Double) -> PlaneRect { PlaneRect(x: p.x - s / 2, y: p.y - s / 2, width: s, height: s) }
@@ -1018,9 +1061,10 @@ public struct FakeListEditing: ListEditing {
 
 // UC11 · SJ19, SP3 · Contracts/TimelineMapping.swift
 public struct TimelineScale: Hashable, Sendable {
-    public var duration: Int          // frames; below 0 counts as 0
+    /// The last frame: frames run 0...lastFrame (FrameMapping's `duration`). Below 0 counts as 0.
+    public var lastFrame: Int
     public var frameWidth: Double     // points per frame; 0, negative or NaN maps every x to frame 0
-    public init(duration: Int, frameWidth: Double) { self.duration = duration; self.frameWidth = frameWidth }
+    public init(lastFrame: Int, frameWidth: Double) { self.lastFrame = lastFrame; self.frameWidth = frameWidth }
 }
 
 public struct RulerMarkSet: Equatable, Sendable {
@@ -1031,7 +1075,7 @@ public struct RulerMarkSet: Equatable, Sendable {
 
 public protocol TimelineMapping: Sendable {
     func x(forFrame frame: Int, scale: TimelineScale) -> Double
-    /// Always inside 0...duration.
+    /// Always inside 0...lastFrame.
     func frame(atX x: Double, scale: TimelineScale) -> Int
     /// The key nearest `x` within `tolerance` points, if any.
     func keyframe(nearX x: Double, in keyframes: [Int], tolerance: Double, scale: TimelineScale) -> Int?
@@ -1045,7 +1089,7 @@ public struct FakeTimelineMapping: TimelineMapping {
     public func x(forFrame frame: Int, scale: TimelineScale) -> Double { Double(frame) * max(scale.frameWidth, 0) }
     public func frame(atX x: Double, scale: TimelineScale) -> Int {
         guard scale.frameWidth > 0, x.isFinite else { return 0 }
-        return min(max(Int((x / scale.frameWidth).rounded()), 0), max(scale.duration, 0))
+        return min(max(Int((x / scale.frameWidth).rounded()), 0), max(scale.lastFrame, 0))
     }
     public func keyframe(nearX x: Double, in keyframes: [Int], tolerance: Double, scale: TimelineScale) -> Int? {
         keyframes.first { abs(self.x(forFrame: $0, scale: scale) - x) <= tolerance }
@@ -1057,7 +1101,7 @@ public struct FakeTimelineMapping: TimelineMapping {
 }
 
 // UC12 · SJ19 · Contracts/KeyEditing.swift
-public struct KeyRef: Hashable, Sendable {
+public struct LaneKey: Hashable, Sendable {
     public var track: String
     public var frame: Int
     public init(track: String, frame: Int) { self.track = track; self.frame = frame }
@@ -1065,38 +1109,40 @@ public struct KeyRef: Hashable, Sendable {
 
 public protocol KeyEditing: Sendable {
     /// The key the selection moves to with ← or → (`direction` −1 or +1): along the same track, nil at its ends (#63).
-    func nextKey(after key: KeyRef, direction: Int, tracks: [String: [Int]]) -> KeyRef?
+    func nextKey(after key: LaneKey, direction: Int, tracks: [String: [Int]]) -> LaneKey?
     /// Whole frames a drag of `points` moves keys by.
     func frameDelta(points: Double, scale: TimelineScale) -> Int
-    /// Old key to new frame for moving `keys` by `delta`, clamped as a group so none leaves 0...duration.
-    func moved(_ keys: Set<KeyRef>, by delta: Int, duration: Int) -> [KeyRef: Int]
+    /// Old key to new frame for moving `keys` by `delta`, clamped as a group so none leaves 0...lastFrame.
+    func moved(_ keys: Set<LaneKey>, by delta: Int, lastFrame: Int) -> [LaneKey: Int]
 }
 
 /// Moves each key on its own, clamping each (the live rule clamps the group).
 public struct FakeKeyEditing: KeyEditing {
     public init() {}
-    public func nextKey(after key: KeyRef, direction: Int, tracks: [String: [Int]]) -> KeyRef? {
+    public func nextKey(after key: LaneKey, direction: Int, tracks: [String: [Int]]) -> LaneKey? {
         let frames = (tracks[key.track] ?? []).sorted()
         guard let i = frames.firstIndex(of: key.frame), frames.indices.contains(i + direction) else { return nil }
-        return KeyRef(track: key.track, frame: frames[i + direction])
+        return LaneKey(track: key.track, frame: frames[i + direction])
     }
     public func frameDelta(points: Double, scale: TimelineScale) -> Int {
         scale.frameWidth > 0 && points.isFinite ? Int((points / scale.frameWidth).rounded()) : 0
     }
-    public func moved(_ keys: Set<KeyRef>, by delta: Int, duration: Int) -> [KeyRef: Int] {
-        Dictionary(uniqueKeysWithValues: keys.map { ($0, min(max($0.frame + delta, 0), max(duration, 0))) })
+    public func moved(_ keys: Set<LaneKey>, by delta: Int, lastFrame: Int) -> [LaneKey: Int] {
+        Dictionary(uniqueKeysWithValues: keys.map { ($0, min(max($0.frame + delta, 0), max(lastFrame, 0))) })
     }
 }
 
 // UC13 · SJ5 · Contracts/TransportStepping.swift
 public struct TransportState: Hashable, Sendable {
     public var frame: Int
-    public var duration: Int          // frames; 0 means nothing to play
+    /// How many frames: frames run 0...frameCount - 1, the same frames as a TimelineScale
+    /// whose lastFrame is frameCount - 1. 0 means nothing to play.
+    public var frameCount: Int
     public var fps: Int
     public var isPlaying: Bool
     public var loops: Bool
-    public init(frame: Int, duration: Int, fps: Int, isPlaying: Bool = false, loops: Bool = false) {
-        self.frame = frame; self.duration = duration; self.fps = fps; self.isPlaying = isPlaying; self.loops = loops
+    public init(frame: Int, frameCount: Int, fps: Int, isPlaying: Bool = false, loops: Bool = false) {
+        self.frame = frame; self.frameCount = frameCount; self.fps = fps; self.isPlaying = isPlaying; self.loops = loops
     }
 }
 
@@ -1120,7 +1166,7 @@ public protocol TransportStepping: Sendable {
 /// Never wraps and prints frames ("12 / 48") instead of a timecode.
 public struct FakeTransportStepping: TransportStepping {
     public init() {}
-    private func last(_ s: TransportState) -> Int { max(s.duration - 1, 0) }
+    private func last(_ s: TransportState) -> Int { max(s.frameCount - 1, 0) }
     public func stepped(_ s: TransportState, by frames: Int) -> TransportState {
         var n = s; n.frame = min(max(s.frame + frames, 0), last(s)); return n
     }
@@ -1128,8 +1174,8 @@ public struct FakeTransportStepping: TransportStepping {
     public func toEnd(_ s: TransportState) -> TransportState { var n = s; n.frame = last(s); return n }
     public func face(_ s: TransportState) -> TransportFace {
         TransportFace(playTitle: s.isPlaying ? "Pause" : "Play",
-                      unavailableHelp: s.duration > 0 ? nil : "Nothing to play.",
-                      timecode: "\(s.frame) / \(s.duration)")
+                      unavailableHelp: s.frameCount > 0 ? nil : "Nothing to play.",
+                      timecode: "\(s.frame) / \(s.frameCount)")
     }
 }
 
@@ -1234,26 +1280,48 @@ public struct ProbeSummary: Hashable, Sendable, Codable {
     }
 }
 
+/// Frames drawn during a scroll or playback, which have no input event: intervals between drawn frames.
+public struct FrameIntervalSummary: Hashable, Sendable, Codable {
+    public var count: Int              // intervals measured
+    public var p95Refreshes: Double    // p95 interval in refreshes (QB-S7: ≤ 1.5)
+    public var dropped: Int            // refreshes with no new frame while one was due
+    public var jitterP95: Double       // p95 of |interval − refresh|, seconds (QB-L4)
+    public var valid: Bool             // at least 60 intervals
+    public init(count: Int, p95Refreshes: Double, dropped: Int, jitterP95: Double, valid: Bool) {
+        self.count = count; self.p95Refreshes = p95Refreshes; self.dropped = dropped; self.jitterP95 = jitterP95; self.valid = valid
+    }
+}
+
 public protocol FrameProbeRecording: Sendable {
     mutating func record(_ sample: ProbeSample)
+    /// A frame of `series` drawn at the target timestamp `time` (scrolls, playback).
+    mutating func drew(_ series: String, at time: Double)
     /// An in-app moment: "preview-before-mouse-up", "progress-shown", "animation-ended" and the like.
     mutating func mark(_ name: String, at time: Double)
     /// Frames late = refreshes between the event and the refresh that showed it, at `refreshInterval` seconds.
     func summary(of series: String, refreshInterval: Double) -> ProbeSummary
+    func intervals(of series: String, refreshInterval: Double) -> FrameIntervalSummary
     /// The `suite.perf` JSON.
     func encoded() throws -> Data
 }
 
-/// Keeps samples and marks; reports every sample as 0 frames late.
+/// Keeps samples, frames and marks; reports every sample as 0 frames late.
 public struct FakeFrameProbe: FrameProbeRecording {
     public private(set) var samples: [ProbeSample] = []
     public private(set) var marks: [String: Double] = [:]
     public init() {}
+    public private(set) var drawn: [String: [Double]] = [:]
     public mutating func record(_ sample: ProbeSample) { samples.append(sample) }
+    public mutating func drew(_ series: String, at time: Double) { drawn[series, default: []].append(time) }
     public mutating func mark(_ name: String, at time: Double) { marks[name] = time }
     public func summary(of series: String, refreshInterval: Double) -> ProbeSummary {
         let n = samples.filter { $0.series == series }.count
         return ProbeSummary(count: n, p50FramesLate: 0, p95FramesLate: 0, valid: n >= 60)
+    }
+    /// Reports every interval as exactly one refresh, nothing dropped.
+    public func intervals(of series: String, refreshInterval: Double) -> FrameIntervalSummary {
+        let n = max((drawn[series]?.count ?? 0) - 1, 0)
+        return FrameIntervalSummary(count: n, p95Refreshes: 1, dropped: 0, jitterP95: 0, valid: n >= 60)
     }
     public func encoded() throws -> Data { try JSONEncoder().encode(samples) }
 }
@@ -1369,6 +1437,15 @@ no other SuiteUI feature edits it. This blueprint does not edit it.
 | Node graph | Nodes are `card`-filled rounded rects at `SuiteRadius.control`, 120 × 56 pt, title in `inspectorTitle`, detail in `pill` type; arrows 1.5 pt `textSecondary` with a 6 pt head, condition chips (`ChipRow` look, not interactive) at the arrow's middle; the initial node has a 2 pt leading bar; the active node (preview) takes the `stateSelected` tint and outline; a warning badge is the triangle in `stateWarning` with its text as the accessibility label | node-graph |
 | Gallery pages | Plain `List` index; each page a `Form`-free stack of the real components on the right background (`panel` for inspector pages, `canvasSurround` for canvas pages, the dark `EditorShell` for editor pages) and the log row at the bottom in `SuiteFont.timecode` | suite-harness |
 
+**Reduce Motion in the gallery.** `accessibilityReduceMotion` is
+read-only in SwiftUI's environment, so a page cannot switch it. Suite-harness
+adds `Sources/SuiteUI/SuiteEnvironment.swift` with `suiteReduceMotion`, an
+environment value that defaults to the system setting; the gallery's Reduce
+Motion switch overrides it. Each wave-2 and wave-3 feature moves its own
+components from `accessibilityReduceMotion` to `suiteReduceMotion` (today:
+`ChipRow`, `CurveEditor`, `ScrubField`, `InspectorRows`, `KeyframeButton`,
+`InspectorAction`), so SJ20 and QB-S9 can measure both settings.
+
 **New tokens**, all landed once by suite-harness in `Tokens.swift` so no
 later wave edits that file: `timelineSlotMinimum` 120, `timelineSlotToolbar`
 36, `timelineGrab` 8, `rotateZone` 16, `pointMarkRing` 12, `pointMarkCross`
@@ -1420,18 +1497,26 @@ needs at least 60 samples or the test fails as invalid.
 | id | Component and input | Device target | CI gate | Measured by |
 |---|---|---|---|---|
 | QB-S1 | Bar slider and exact field: drag (= QB-L2) | p95 ≤ 2 frames late | report-only, then set from CI (placeholder 3) | SP1 |
-| QB-S2 | Bar slider: arrow key to the new value drawn | p95 ≤ 1 frame late | report-only (placeholder 2) | SJ11's key presses with `-SuitePerfProbe`, series `slider-key` |
+| QB-S2 | Bar slider: arrow key to the new value drawn | p95 ≤ 1 frame late | report-only (placeholder 2) | SP6, series `slider-key` |
 | QB-S3 | Canvas drag and Space-pan (= QB-L1) | p95 ≤ 2 | placeholder 3 | SP2 |
 | QB-S4 | Selection handle drag (= QB-L1) | p95 ≤ 2 | placeholder 3 | SP5 |
-| QB-S5 | Timeline ruler scrub and key drag (= QB-L3) | p95 ≤ 2 | placeholder 3 | SP3 (scrub); SJ19's key drag, series `key-drag` |
-| QB-S6 | Curve handle and tone point drag (= QB-L2) | p95 ≤ 2 | placeholder 3 | SJ16 and SJ20 with the probe, series `curve-drag` |
-| QB-S7 | Layer list (300 rows) and thumbnail grid (2,000 items) scroll (= QB-L10) | frame interval p95 ≤ 1.5 refreshes | set from CI | SP4 |
-| QB-S8 | Chip, preset, tab, tool and transport press: press to the selected state drawn | p95 ≤ 1 frame late | placeholder 2 | SJ4, SJ5, SJ8, SJ15 with the probe, series `press` |
-| QB-S9 | State fades (hover, on, disabled) | 0.14 s ± 1 refresh; 0 under Reduce Motion | exact | the probe's animation mark in SJ15 with and without the Reduce Motion switch (QB-F5) |
-| QB-S10 | Timeline slot divider drag | p95 ≤ 2 | placeholder 3 | SJ2 with the probe, series `slot-drag` |
+| QB-S5 | Timeline ruler scrub and key drag (= QB-L3) | p95 ≤ 2 | placeholder 3 | SP3 (scrub); SP8, series `key-drag` |
+| QB-S6 | Curve handle and tone point drag (= QB-L2) | p95 ≤ 2 | placeholder 3 | SP7, series `curve-drag` |
+| QB-S7 | Layer list (300 rows) and thumbnail grid (2,000 items) scroll (= QB-L10) | frame interval p95 ≤ 1.5 refreshes | set from CI | SP4 (`intervals(of:)`) |
+| QB-S8 | Chip, preset, tab, tool and transport press: press to the selected state drawn | p95 ≤ 1 frame late | placeholder 2 | SP9, series `press` |
+| QB-S9 | State fades (hover, on, disabled) | 0.14 s ± 1 refresh; 0 under Reduce Motion | report-only first, like every perf row; then 0.14 s ± 1 refresh and 0 | the probe's animation mark in SJ15 with and without the Reduce Motion switch (QB-F5) |
+| QB-S10 | Timeline slot divider drag | p95 ≤ 2 | placeholder 3 | SP10, series `slot-drag` |
 
-**Rule budgets** (wall time, median and p95 of 100 runs, `Tests/SuiteUITests/SuiteBudgetTests.swift`;
-the debug gate is ten times the device target, as for Model budgets):
+**Rule budgets** (wall time, median and p95 of 100 runs; the debug gate is
+ten times the device target, as for Model budgets). Each budget lives in the
+test file of the feature that owns the rule: `TimelineBudgetTests.swift`
+(timeline), `ListBudgetTests.swift` (lists-and-layers), `HandleBudgetTests.swift`
+(canvas-marks), and `GoldenImageTests.swift` and `FrameProbeTests.swift`
+(suite-harness). SuiteUI's journey gate constants live in
+`UITests/SuiteBudgets.swift`, created by suite-harness with the
+placeholders below; setting a gate after ten green runs is a one-line PR on
+that file, made after the waves, as Flare's QH-7 (#396) does for
+`UITests/Journey+Budgets.swift`, which stays Flare's.
 
 | id | Call | Target | Debug gate |
 |---|---|---|---|
@@ -1467,7 +1552,7 @@ count that rises in any app is that feature's finding, not the app's.
 | QB-S17 | Shell regions inside the window, no overlap over 1 pt, content ≥ `contentMinimum.width`, the right panel exactly `editorPanelWidth` | 880, 1024, 1280, 1440 pt | SJ1 (frames from the accessibility tree) |
 | QB-S18 | `ShellLayingOut.columns`: leading + content + trailing = the window width, content never under its minimum, `fits` false only under the minimum | every 40 pt from 600 to 2,560 | `ShellLayoutTests` (rule test) |
 | QB-S19 | Inspector rows align: every row's leading and trailing edges equal (±0.5 pt), every value's trailing edge equal, every label inside its row, no text clipped (its frame inside the row) | inspector widths 200, 240, 280, 360 (`inspectorWidth` min, ideal, the editor panel, max) | SJ24 `testInspectorRowsAlignAtEveryWidth` (`+Inspector`): the `inspector` page with `-SuiteGalleryWidth <w>` |
-| QB-S20 | Hit sizes: every control in `suite.controls` is at least 20 × 20 pt (WCAG 2.5.8), and the ones the token table lists at their hit size (28 for chips, keyframe button, preset hit; 12 for handles at any zoom) | every page | SJ25 `testEveryControlMeetsHitSize` (`SuiteJourneyTests.swift`) |
+| QB-S20 | Hit sizes (`docs/design.md`, Sizes and Symbols and controls): every control in `suite.controls` is at least 20 × 20 pt unless the token table names a smaller hit (selection handles 12, anchors 12, timeline keys 16), and the ones the table lists at their hit size (28 for chips, the keyframe button and the preset hit) | every page | SJ25 `testEveryControlMeetsHitSize` (`SuiteJourneyTests.swift`) |
 | QB-S21 | Timeline labels end inside the strip and never overlap | lane widths 320, 640, 1,280 pt and 48 to 100,000 frames | `FrameMapping` label tests (exist) plus SJ19's long page shot |
 | QB-S22 | Corners nest: an inner shape's radius is one step under its container's | every component | `TokensTests.geometry` plus goldens |
 | QB-S23 | Fits the window minimum: rail + content minimum + panel ≤ `windowMinimum.width` | – | `TokensTests` (exists) |
@@ -1476,7 +1561,7 @@ count that rises in any app is that feature's finding, not the app's.
 
 | id | Check | Reference | Measured by |
 |---|---|---|---|
-| QB-S24 | Every component state has a golden (QB-V5): rest, hover, focus, pressed or dragging, editing, disabled, and every state color it can show, in Light, Dark and both with Increase Contrast; one contact sheet per component family per appearance | committed PNGs in `Tests/AppSnapshotTests/Golden/` | `GoldenComparing` through `SnapshotHost` at scale 2: channel tolerance 2/255, at most 0.5 % differing pixels |
+| QB-S24 | Every component state has a golden (QB-V5): rest, hover, focus, pressed or dragging, editing, disabled, and every state color it can show, in Light, Dark and both with Increase Contrast; one contact sheet per component per appearance (QB-V5) | committed PNGs in `Tests/AppSnapshotTests/Golden/` | `GoldenComparing` through `SnapshotHost` at scale 2: channel tolerance 2/255, at most 0.5 % differing pixels |
 | QB-S25 | Hairlines: a 1 pt divider, ruler edge, selection outline and timeline slot divider is exactly 2 device pixels at 2× (QB-V3) | the golden's pixel column | `SnapshotHostTests` hairline test |
 | QB-S26 | Curves stay curves: `CurveEditor.curvePath` and `ToneCurveEditor`'s path hold cubic elements, never a polyline of over 8 segments; arrows in `NodeGraph` are one cubic for a loop | element kinds | `CurveEditorTests`, `NodeGraphTests` |
 | QB-S27 | Number rules equal a reference table: 60 rows of (start, points, modifiers, step, range) → value and (value, key, modifiers) → value | a table in `Tests/SuiteUITests/ScrubReferenceTests.swift` written from `docs/design.md`'s rules, not from the code | the live `ValueScrubbing` |
@@ -1562,12 +1647,12 @@ waits on creative-core**: every "core" cell is "none".
 | Wave | Feature | Covers | Waits on | creative-core | App features it unblocks |
 |---|---|---|---|---|---|
 | 1 | suite-harness | #331, #332, #333, #330, #283; gallery, control inventory, contracts, token sheet, `Journey(name:)`, the `suiteui` audit key | nothing | none | every app's goldens; every app's second journey file (Flare's `FlareJourneyTests+<Area>.swift` plan needs #333); Flare's perf journeys (QH-5, QH-6) |
-| 2 | editor-chrome | #339, #340, #341, #342 | wave 1 (#332 for goldens; the gallery) | none | Flare F1a #346 and F1b #347 (the window on `EditorShell`), Flare's transport and playback UI; Design and Photo's primary Export and save status |
-| 2 | inspector-controls | #718, #745, #591, #88, #622, #285, #262, #343 | wave 1 | none | Design's undo runs (#536), Photo's Gamma (#584), Flare's inspector (F6a #348 and after), Flare and Halo easing |
-| 2 | lists-and-layers | #146, #108, #73, #577, #589, #111, #284, #249, #308, #311, #312 | wave 1 | none | Flare's layers and scenes panel (F11a), Halo's rename refusal (#139) and composition menu (#35), Design's Layers (#50, #549) |
-| 2 | canvas-marks | #273, #706, #737, #530, #264 | wave 1 | none | Flare's stage (F3a #12 and its select and direct-select tasks), Design's handles, Photo's Clone and Heal (#647, #422) and Straighten (#419) |
-| 3 | timeline | #62, #219, #63 | wave 2's editor-chrome (#62 depends on #342) | none | Flare's timeline (F7a, F8 #377), Halo's timeline (#36) |
-| 3 | node-graph | #344 | wave 1 | none | Flare's Interactions editor (F13a and after) |
+| 2 | editor-chrome | #339, #340, #341, #342 | wave 1 (#332 for goldens; the gallery) | none | Flare F1a #346 and F1b #347 (the window on `EditorShell`), Flare F7b #376 (transport); Design and Photo's primary Export and save status |
+| 2 | inspector-controls | #718, #745, #591, #88, #622, #285, #262, #343 | wave 1 | none | Design's one-undo-step edit runs (the follow-up of closed #536, now on the #749 workaround), Photo's Gamma detent (follow-up of closed #584), Flare's inspector (F6a #186, F6b #348, F6c #349), Flare's easing popover (F9 #378) |
+| 2 | lists-and-layers | #146, #108, #73, #577, #589, #111, #284, #249, #308, #311, #312 | wave 1 | none | Flare's layers and scenes panel (F11a #350), Halo's inline rename refusal and composition context menu (follow-ups of #139 and closed #35), Design's Layers toggles and expansion (follow-ups of closed #50 and #549) |
+| 2 | canvas-marks | #273, #706, #737, #530, #264 | wave 1 | none | Flare's stage (#12, F3c #375, F4b #390), Design adopting the shared handles, Photo swapping its `CloneSourceMark` and `StraightenMarks` placeholders (Clone, Heal and Straighten shipped on them: closed #647, #422, #419) |
+| 3 | timeline | #62, #219, #63 | wave 2's editor-chrome (#62 depends on #342) | none | Flare's timeline (#11, F8 #377, F5 #391's recording ring), Halo's timeline keys |
+| 3 | node-graph | #344 | wave 1 | none | Flare's Interactions editor (F13a #352, F13b #353, F14 #381) |
 | 4 | suite-record | #345; section 6.2's rows into `docs/design.md` | waves 1–3 | none | nothing waits on it; it brings the shared docs up to date |
 
 Why this order:
@@ -1594,49 +1679,65 @@ Why this order:
 ### 8.3 Owned files per feature
 
 Test files are listed by name; `Golden/<area>/` is each feature's own
-baseline folder. A file under "harness, then" passes to the named feature
+baseline folder.
+
+**Every feature, in its own files** (so no feature does this in another's):
+registers every control it draws with `ControlInventory` through
+`.suiteControl(id:enabled:reason:)`, with a unit test per component that
+the entry's reason equals its `.help`; reports its probe series to
+`FrameProbe` (editor-chrome: `press`, `slot-drag`; inspector-controls:
+`bar-slider`, `slider-key`, `curve-drag`, `press` for chips and presets;
+lists-and-layers: the `layers-300` and `grid-2000` scroll intervals;
+canvas-marks: `canvas-drag`, `handle-drag`; timeline: `timeline-scrub`,
+`key-drag`); and switches its components to `suiteReduceMotion`. A file under "harness, then" passes to the named feature
 at the next wave.
 
 **suite-harness (wave 1)**
-- `Sources/SuiteUI/Contracts/` (every file of section 5), `Sources/SuiteUI/SuiteGallery.swift`, `Sources/SuiteUI/Gallery/GalleryIndex.swift`, and the stubs `Gallery/GalleryChrome.swift`, `GalleryInspector.swift`, `GalleryLists.swift`, `GalleryCanvas.swift`, `GalleryTimeline.swift`, `GalleryGraph.swift` (harness, then their features)
+- `Sources/SuiteUI/Contracts/ContractTypes.swift`, `Contracts/FrameProbeRecording.swift`, `Contracts/ControlInventorying.swift`, `Contracts/GoldenComparing.swift`, `Sources/SuiteUI/SuiteEnvironment.swift` (`suiteReduceMotion`, the `.suiteControl(…)` modifier), `Sources/SuiteUI/SuiteGallery.swift`, `Sources/SuiteUI/Gallery/GalleryIndex.swift`, and the stubs `Gallery/GalleryChrome.swift`, `GalleryInspector.swift`, `GalleryLists.swift`, `GalleryCanvas.swift`, `GalleryTimeline.swift`, `GalleryGraph.swift` (harness, then their features)
 - `Sources/SuiteUI/FrameProbe.swift`, `Sources/SuiteUI/ControlInventory.swift`, `Sources/SuiteUI/Tokens.swift` (every token waves 2–4 need, and their contrast pairs in `TokensTests`, land here), `Sources/SuiteUI/Glass.swift` (the snapshot host's glass stand-in at scale 2)
-- `Sources/SuiteUI/SuiteWindow.swift` (the `-SuiteGallery` hook; harness, then lists-and-layers)
+- `Sources/SuiteUI/SuiteWindow.swift` (the `-SuiteGallery` hook, and identifiers on its Show/Hide Inspector and `actions` toolbar buttons so gallery pages start at an `identifier` count of 0; harness, then lists-and-layers)
 - `Sources/SuiteUI/ToolbarGroup.swift`, `EditorTopBar.swift`, `InspectorAction.swift`, `EmptyStateView.swift` (only to register `ToolbarAction`-built controls with the inventory; harness, then editor-chrome or inspector-controls)
-- `project.yml`, `UITests/Journey.swift`, `UITests/Journey+Input.swift`, `UITests/SuiteJourneyTests.swift`, `UITests/SuiteJourneyTests+Smoke.swift`, `UITests/audit-baseline.json` (the `suiteui` key at 0 only)
+- `project.yml`, `UITests/Journey.swift`, `UITests/Journey+Input.swift`, `UITests/SuiteBudgets.swift`, `UITests/SuiteJourneyTests.swift`, `UITests/SuiteJourneyTests+Smoke.swift`, `UITests/audit-baseline.json` (the `suiteui` key at 0 only)
 - `Tests/AppSnapshotTests/GoldenImage.swift`, `GoldenImageTests.swift`, `SnapshotHost.swift`, `SnapshotHostTests.swift`, `Golden/README.md`
 - `Tests/SuiteUITests/TokensTests.swift`, `FrameProbeTests.swift`, `ControlInventoryTests.swift`, `EditRunTests.swift`, `ContractFakesTests.swift`
 
 **editor-chrome (wave 2)**
+- `Sources/SuiteUI/Contracts/ShellLayingOut.swift`, `ToolPicking.swift`, `TransportStepping.swift`, `StatusPillComposing.swift`
 - `Sources/SuiteUI/EditorShell.swift`, `EditorTopBar.swift`, `SegmentedTabs.swift`, `ToolbarGroup.swift`, `ShellLayout.swift`, `TransportCapsule.swift`, `ViewerStatusBar.swift`, `EmptyStateView.swift`, `SurfaceCard.swift`, `GlassPanel.swift`, `Gallery/GalleryChrome.swift`
 - `UITests/SuiteJourneyTests+Chrome.swift`
 - `Tests/SuiteUITests/EditorShellTests.swift`, `ShellLayoutTests.swift`, `TransportTests.swift`, `ToolPickingTests.swift`, `StatusPillTests.swift`
-- `Tests/AppSnapshotTests/SuiteEditorShellSnapshots.swift`, `SuiteEditorBarDimmingTests.swift`, `SuiteStatusSnapshots.swift`, `SuiteWindowLaunchSnapshots.swift`, `SuiteWindowMinimumSnapshots.swift`, `SuiteTopBarSnapshots.swift`, `SuiteTabsSnapshots.swift`, `SuiteTransportSnapshots.swift`, `Golden/chrome/`
+- `Tests/AppSnapshotTests/SuiteEditorShellSnapshots.swift`, `SuiteEditorBarDimmingTests.swift`, `SuiteStatusSnapshots.swift`, `SuiteWindowLaunchSnapshots.swift`, `SuiteWindowMinimumSnapshots.swift`, `SuiteShellSnapshots.swift` (the name #342 gives), `SuiteTopBarSnapshots.swift`, `SuiteTabsSnapshots.swift`, `SuiteTransportSnapshots.swift`, `Golden/chrome/`
 
 **inspector-controls (wave 2)**
+- `Sources/SuiteUI/Contracts/ValueScrubbing.swift`, `HexColorEditing.swift`, `KeyframeFacing.swift`, `PresetNavigating.swift`, `CurvePointEditing.swift`
 - `Sources/SuiteUI/InspectorRows.swift`, `InspectorHeader.swift`, `InspectorAction.swift`, `ColorWell.swift`, `KeyframeButton.swift`, `ScrubField.swift`, `ScrubValue.swift`, `NumericInput.swift`, `StudioScrubRow.swift`, `PresetGrid.swift`, `ChipRow.swift`, `ChoiceChips.swift`, `CurveEditor.swift`, `ToneCurveEditor.swift`, `Gallery/GalleryInspector.swift`
 - `UITests/SuiteJourneyTests+Inspector.swift`
 - `Tests/SuiteUITests/ScrubValueTests.swift`, `ScrubReferenceTests.swift`, `NumericInputTests.swift`, `SliderBarTests.swift`, `KeyframeButtonTests.swift`, `PresetGridTests.swift`, `CurveEditorTests.swift`, `ToneCurveEditorTests.swift`, `HexColorTests.swift`
 - `Tests/AppSnapshotTests/SuiteInspectorSnapshots.swift`, `SuiteProInspectorSnapshots.swift`, `SuiteSliderSnapshots.swift`, `SuiteHeaderSnapshots.swift`, `SuiteKeyframeSnapshots.swift`, `SuitePresetsSnapshots.swift`, `SuiteCurveEditorSnapshots.swift`, `SuiteToneCurveSnapshots.swift`, `Golden/inspector/`
 
 **lists-and-layers (wave 2)**
+- `Sources/SuiteUI/Contracts/GridSelecting.swift`, `ListEditing.swift`
 - `Sources/SuiteUI/SidebarRow.swift`, `SidebarSection.swift`, `SuiteWindow.swift`, `LayerList.swift`, `ListEditing.swift`, `ThumbnailGrid.swift`, `GridSelection.swift`, `Gallery/GalleryLists.swift`
 - `UITests/SuiteJourneyTests+Lists.swift`
-- `Tests/SuiteUITests/SidebarTests.swift`, `SidebarEdgeTests.swift`, `SidebarNestingTests.swift`, `SidebarRenameGestureTests.swift`, `LayerListTests.swift`, `ListEditingTests.swift`, `GridSelectionTests.swift`, `GridSelectionEdgeTests.swift`, `GridSelectionExtendTests.swift`, `GridSelectionOverflowTests.swift`, `GridSelectionToggleTests.swift`, `GridSelectionToggleFuzzTests.swift`, `GridSelectionReferenceTests.swift`
+- `Tests/SuiteUITests/SidebarTests.swift`, `SidebarEdgeTests.swift`, `SidebarNestingTests.swift`, `SidebarRenameGestureTests.swift`, `LayerListTests.swift`, `ListEditingTests.swift`, `GridSelectionTests.swift`, `GridSelectionEdgeTests.swift`, `GridSelectionExtendTests.swift`, `GridSelectionOverflowTests.swift`, `GridSelectionToggleTests.swift`, `GridSelectionToggleFuzzTests.swift`, `GridSelectionReferenceTests.swift`, `ListBudgetTests.swift`
 - `Tests/AppSnapshotTests/SuiteSidebarSnapshots.swift`, `SuiteSidebarNestingSnapshots.swift`, `SuiteSidebarToggleColumnSnapshots.swift`, `SuiteGridSnapshots.swift`, `SuiteGridSmallSnapshots.swift`, `SuiteLayerListSnapshots.swift`, `Golden/lists/`
 
 **canvas-marks (wave 2)**
+- `Sources/SuiteUI/Contracts/CanvasNavigating.swift`, `HandleGeometryProviding.swift`
 - `Sources/SuiteUI/CanvasMarks.swift`, `CanvasMarks+Vector.swift`, `CanvasMarks+Points.swift`, `HandleGeometry.swift`, `CanvasViewport.swift`, `CanvasSurface.swift`, `Ruler.swift`, `ZoomMath.swift`, `Gallery/GalleryCanvas.swift`
 - `UITests/SuiteJourneyTests+Canvas.swift`
-- `Tests/SuiteUITests/CanvasPanTests.swift`, `ZoomMathTests.swift`, `RulerMarksTests.swift`, `RulerLabelPlacementTests.swift`, `RulerLabelSweepTests.swift`, `RulerLabelWidthTests.swift`, `CanvasMarksTests.swift`, `HandleGeometryTests.swift`
-- `Tests/AppSnapshotTests/SuiteMarksSnapshots.swift`, `Golden/canvas/`
+- `Tests/SuiteUITests/CanvasPanTests.swift`, `ZoomMathTests.swift`, `RulerMarksTests.swift`, `RulerLabelPlacementTests.swift`, `RulerLabelSweepTests.swift`, `RulerLabelWidthTests.swift`, `CanvasMarksTests.swift`, `HandleGeometryTests.swift`, `HandleBudgetTests.swift`
+- `Tests/AppSnapshotTests/SuiteMarksSnapshots.swift`, `CanvasViewportSnapshots.swift`, `Golden/canvas/`
 
 **timeline (wave 3)**
+- `Sources/SuiteUI/Contracts/TimelineMapping.swift`, `KeyEditing.swift`
 - `Sources/SuiteUI/TimelineStrip.swift`, `FrameMapping.swift`, `TimelineKeys.swift`, `Gallery/GalleryTimeline.swift`
 - `UITests/SuiteJourneyTests+Timeline.swift`
-- `Tests/SuiteUITests/FrameMappingTests.swift`, `FrameMappingEdgeTests.swift`, `FrameMappingOverflowTests.swift`, `FrameMappingSweepTests.swift`, `TimelineKeysTests.swift`, `TimelineKeyDragTests.swift`
+- `Tests/SuiteUITests/FrameMappingTests.swift`, `FrameMappingEdgeTests.swift`, `FrameMappingOverflowTests.swift`, `FrameMappingSweepTests.swift`, `TimelineKeysTests.swift`, `TimelineKeyDragTests.swift`, `TimelineBudgetTests.swift`
 - `Tests/AppSnapshotTests/SuiteTimelineSnapshots.swift`, `Golden/timeline/`
 
 **node-graph (wave 3)**
+- `Sources/SuiteUI/Contracts/GraphGeometry.swift`
 - `Sources/SuiteUI/NodeGraph.swift`, `NodeGraphGeometry.swift`, `Gallery/GalleryGraph.swift`
 - `UITests/SuiteJourneyTests+Graph.swift`
 - `Tests/SuiteUITests/NodeGraphTests.swift`, `Tests/AppSnapshotTests/SuiteGraphSnapshots.swift`, `Golden/graph/`
@@ -1644,13 +1745,14 @@ at the next wave.
 **suite-record (wave 4)**
 - `docs/c4/model.json` (the `suiteui` container and `suiteui-sources` descriptions only), `docs/design.md` (section 6.2's rows only)
 
-Checks on this list: within wave 2 the four features' lists share no path
+Checks on this list (by script against the tree): within wave 2 the four features' lists share no path
 (`ToolbarGroup.swift`, `EditorTopBar.swift`, `InspectorAction.swift`,
 `EmptyStateView.swift` and `SuiteWindow.swift` were the harness's in wave
 1 and belong to exactly one wave-2 feature each); within wave 3 timeline
 and node-graph share none. Every one of the 36 SuiteUI source files, the 29
-`Tests/SuiteUITests` files and the 19 `Tests/AppSnapshotTests/Suite*` files
-on dev appears in exactly one list (checked by script against the tree). A
+`Tests/SuiteUITests` files, the 19 `Tests/AppSnapshotTests/Suite*` files and
+`CanvasViewportSnapshots.swift` on dev appears in exactly one list per wave
+(a file handed over between waves appears once in each of its two waves). A
 feature that needs a shared test helper adds it in its own file, never in
 another feature's.
 
@@ -1668,7 +1770,7 @@ written after the captain approves this blueprint, not before.
 
 | # | Question | Recommendation | What changes if not |
 |---|---|---|---|
-| Q1 | Add a Linux target for SuiteUI's pure rules and contracts (a `Package.swift` change, protected)? | Yes: a `SuiteUILogic` target with `Contracts/` and the rule files (`ScrubValue`, `NumericInput`, `FrameMapping`, `GridSelection`, `ZoomMath`, `RulerTicks`, and the planned `ShellLayout`, `HandleGeometry`, `ListEditing`, `TimelineKeys`, `NodeGraphGeometry`, `FrameProbe` math), which SuiteUI re-exports. Then `scripts/ci` tests them on every PR, and app Models may reuse them | Contracts stay in `Sources/SuiteUI/Contracts/`, compiled only by the macOS job; this blueprint's Linux run in `docs/blueprints/suiteui/contracts/` is the only Linux proof, rerun by hand |
+| Q1 | Add a Linux target for SuiteUI's pure rules and contracts (a `Package.swift` change, protected)? | Yes: a `SuiteUILogic` target with `Contracts/` and the rule files, which SuiteUI re-exports. Ready as they are: `NumericInput`, `FrameMapping`, `GridSelection`. Need a split first: `ScrubValue` (move `ViewerZoom.fitScale` to `PlaneExtent`), `ZoomMath` (drop the CoreGraphics import, take `PlaneExtent`), `RulerTicks` (out of `Ruler.swift`, which imports SwiftUI). New ones written Linux-ready: `ShellLayout`, `HandleGeometry`, `ListEditing`, `TimelineKeys`, `NodeGraphGeometry`, the `FrameProbe` math. Then `scripts/ci` tests them on every PR, and app Models may reuse them | Contracts stay in `Sources/SuiteUI/Contracts/`, compiled only by the macOS job; this blueprint's Linux run in `docs/blueprints/suiteui/contracts/` is the only Linux proof, rerun by hand |
 | Q2 | Gallery behind `-SuiteGallery` in `SuiteWindow`, or a separate gallery app target? | The flag: no protected file changes, and it runs inside a real app bundle | A `SuiteGalleryApp` target needs `Package.swift` and `scripts/bundle-apps` (both protected) |
 | Q3 | A `suiteui` key in `UITests/audit-baseline.json`, every check at 0? | Yes | Gallery shots would count under `library` and raise its baseline |
 | Q4 | Drop #342 from #62's `Depends on:` line so the timeline restyle runs in wave 2? | Yes, if Flare's timeline UI is wanted sooner; the gallery page can host the strip in a panel until the slot lands | Timeline stays in wave 3 as planned |
@@ -1676,3 +1778,4 @@ written after the captain approves this blueprint, not before.
 | Q6 | Close #745 as a duplicate of #718 and #737 of #706 now? | Yes | The packets close them with the same PRs anyway |
 | Q7 | Who owns `docs/design.md` edits for SuiteUI: one wave-4 feature (this plan) or each feature as it lands? | One feature: four wave-2 features would otherwise edit one file | Waves 2 and 3 serialize on `docs/design.md` |
 | Q8 | `design.md`'s Visual language tables (34 pt bars, 6 pt gaps, 16/8 section spacing) disagree with its Studio rows section and the code (28, 4, 12/4). Should suite-record rewrite the tables to the Studio values? | Yes, so the doc has one number per thing | Readers keep needing the "this section wins" sentence |
+| Q9 | One publisher of `suite.controls`: SuiteUI's `ControlInventory`, with Flare's F1b (#347) feeding it instead of writing its own from `FlareControls.swift`? | Yes; a `line:flare` note on #347 goes with the suite-harness packet | Two elements with one identifier in Flare's window, and two plans that disagree |

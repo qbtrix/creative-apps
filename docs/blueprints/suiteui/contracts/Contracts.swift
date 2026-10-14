@@ -306,7 +306,9 @@ public protocol CanvasNavigating: Sendable {
     func clamped(_ zoom: Double) -> Double
     func zoomedIn(from zoom: Double) -> Double
     func zoomedOut(from zoom: Double) -> Double
-    /// The zoom that fits `document` inside `viewport` less `margin` on every side; never a division by zero.
+    /// The zoom that fits `document` inside `viewport` less `margin` on every side, never above 1 (100 %);
+    /// a side that is 0 or negative counts as 1 pt, so a 0 × 0 document fits at 100 %; a viewport with no
+    /// room gives the smallest zoom. Never a division by zero.
     func fit(document: PlaneExtent, in viewport: PlaneExtent, margin: Double) -> Double
     /// A view point (in the canvas's content, scrolled) to document pixels.
     func documentPoint(_ view: PlanePoint, artboardOrigin: PlanePoint, zoom: Double) -> PlanePoint
@@ -322,8 +324,8 @@ public struct FakeCanvasNavigating: CanvasNavigating {
     public func zoomedOut(from zoom: Double) -> Double { clamped(zoom / 2) }
     public func fit(document: PlaneExtent, in viewport: PlaneExtent, margin: Double) -> Double {
         let w = viewport.width - 2 * margin, h = viewport.height - 2 * margin
-        guard w > 0, h > 0, document.width > 0, document.height > 0 else { return 0.1 }
-        return clamped(min(w / document.width, h / document.height))
+        guard w > 0, h > 0 else { return 0.1 }
+        return clamped(min(w / max(document.width, 1), h / max(document.height, 1), 1))
     }
     public func documentPoint(_ view: PlanePoint, artboardOrigin: PlanePoint, zoom: Double) -> PlanePoint {
         let z = clamped(zoom)
@@ -342,14 +344,18 @@ public struct FakeCanvasNavigating: CanvasNavigating {
 
 // UC8 · SJ10, SP5 · Contracts/HandleGeometryProviding.swift
 public enum HandleKind: String, Sendable, CaseIterable {
-    case topLeft, top, topRight, right, bottomRight, bottom, bottomLeft, left, rotate
+    case topLeft, top, topRight, right, bottomRight, bottom, bottomLeft, left
+    /// The rotate zones, one just outside each corner (docs/design.md, Stage marks).
+    case rotateTopLeft, rotateTopRight, rotateBottomRight, rotateBottomLeft
 }
 
 public protocol HandleGeometryProviding: Sendable {
     /// Each handle's hit rect in view points around `rect` (view points at the current zoom). The hit size
-    /// is `SuiteSize.selectionHandle`'s hit (12 pt) at every zoom; the rotate zone sits outside the top-right corner.
+    /// is `SuiteSize.selectionHandleHit` (12 pt) at every zoom; a rotate zone (`rotateZone`, 16 pt) sits just
+    /// outside each corner.
     func handles(around rect: PlaneRect, hitSize: Double) -> [HandleKind: PlaneRect]
-    /// The handle under `point`, corners before edges before rotate; nil when none.
+    /// The handle under `point`, corners before edges before rotate zones; nil when none. Where hit squares
+    /// overlap (a rect smaller than the hit size) the corner nearest the point wins.
     func hit(_ point: PlanePoint, around rect: PlaneRect, hitSize: Double) -> HandleKind?
     /// `rect` after dragging `handle` by `delta`, the opposite side fixed; `keepAspect` (⇧) scales evenly.
     func resized(_ rect: PlaneRect, handle: HandleKind, by delta: PlanePoint, keepAspect: Bool) -> PlaneRect
@@ -357,7 +363,8 @@ public protocol HandleGeometryProviding: Sendable {
     func rotation(from start: PlanePoint, to end: PlanePoint, center: PlanePoint, snap: Bool) -> Double
 }
 
-/// Corner handles only; edges and rotate are never hit. Enough to draw handles, not for SJ10.
+/// Corner handles only; edges and rotate zones are never hit, and overlapping squares pick any one of them.
+/// Enough to draw handles, not for SJ10.
 public struct FakeHandleGeometry: HandleGeometryProviding {
     public init() {}
     private func square(_ p: PlanePoint, _ s: Double) -> PlaneRect { PlaneRect(x: p.x - s / 2, y: p.y - s / 2, width: s, height: s) }
@@ -451,9 +458,10 @@ public struct FakeListEditing: ListEditing {
 
 // UC11 · SJ19, SP3 · Contracts/TimelineMapping.swift
 public struct TimelineScale: Hashable, Sendable {
-    public var duration: Int          // frames; below 0 counts as 0
+    /// The last frame: frames run 0...lastFrame (FrameMapping's `duration`). Below 0 counts as 0.
+    public var lastFrame: Int
     public var frameWidth: Double     // points per frame; 0, negative or NaN maps every x to frame 0
-    public init(duration: Int, frameWidth: Double) { self.duration = duration; self.frameWidth = frameWidth }
+    public init(lastFrame: Int, frameWidth: Double) { self.lastFrame = lastFrame; self.frameWidth = frameWidth }
 }
 
 public struct RulerMarkSet: Equatable, Sendable {
@@ -464,7 +472,7 @@ public struct RulerMarkSet: Equatable, Sendable {
 
 public protocol TimelineMapping: Sendable {
     func x(forFrame frame: Int, scale: TimelineScale) -> Double
-    /// Always inside 0...duration.
+    /// Always inside 0...lastFrame.
     func frame(atX x: Double, scale: TimelineScale) -> Int
     /// The key nearest `x` within `tolerance` points, if any.
     func keyframe(nearX x: Double, in keyframes: [Int], tolerance: Double, scale: TimelineScale) -> Int?
@@ -478,7 +486,7 @@ public struct FakeTimelineMapping: TimelineMapping {
     public func x(forFrame frame: Int, scale: TimelineScale) -> Double { Double(frame) * max(scale.frameWidth, 0) }
     public func frame(atX x: Double, scale: TimelineScale) -> Int {
         guard scale.frameWidth > 0, x.isFinite else { return 0 }
-        return min(max(Int((x / scale.frameWidth).rounded()), 0), max(scale.duration, 0))
+        return min(max(Int((x / scale.frameWidth).rounded()), 0), max(scale.lastFrame, 0))
     }
     public func keyframe(nearX x: Double, in keyframes: [Int], tolerance: Double, scale: TimelineScale) -> Int? {
         keyframes.first { abs(self.x(forFrame: $0, scale: scale) - x) <= tolerance }
@@ -490,7 +498,7 @@ public struct FakeTimelineMapping: TimelineMapping {
 }
 
 // UC12 · SJ19 · Contracts/KeyEditing.swift
-public struct KeyRef: Hashable, Sendable {
+public struct LaneKey: Hashable, Sendable {
     public var track: String
     public var frame: Int
     public init(track: String, frame: Int) { self.track = track; self.frame = frame }
@@ -498,38 +506,40 @@ public struct KeyRef: Hashable, Sendable {
 
 public protocol KeyEditing: Sendable {
     /// The key the selection moves to with ← or → (`direction` −1 or +1): along the same track, nil at its ends (#63).
-    func nextKey(after key: KeyRef, direction: Int, tracks: [String: [Int]]) -> KeyRef?
+    func nextKey(after key: LaneKey, direction: Int, tracks: [String: [Int]]) -> LaneKey?
     /// Whole frames a drag of `points` moves keys by.
     func frameDelta(points: Double, scale: TimelineScale) -> Int
-    /// Old key to new frame for moving `keys` by `delta`, clamped as a group so none leaves 0...duration.
-    func moved(_ keys: Set<KeyRef>, by delta: Int, duration: Int) -> [KeyRef: Int]
+    /// Old key to new frame for moving `keys` by `delta`, clamped as a group so none leaves 0...lastFrame.
+    func moved(_ keys: Set<LaneKey>, by delta: Int, lastFrame: Int) -> [LaneKey: Int]
 }
 
 /// Moves each key on its own, clamping each (the live rule clamps the group).
 public struct FakeKeyEditing: KeyEditing {
     public init() {}
-    public func nextKey(after key: KeyRef, direction: Int, tracks: [String: [Int]]) -> KeyRef? {
+    public func nextKey(after key: LaneKey, direction: Int, tracks: [String: [Int]]) -> LaneKey? {
         let frames = (tracks[key.track] ?? []).sorted()
         guard let i = frames.firstIndex(of: key.frame), frames.indices.contains(i + direction) else { return nil }
-        return KeyRef(track: key.track, frame: frames[i + direction])
+        return LaneKey(track: key.track, frame: frames[i + direction])
     }
     public func frameDelta(points: Double, scale: TimelineScale) -> Int {
         scale.frameWidth > 0 && points.isFinite ? Int((points / scale.frameWidth).rounded()) : 0
     }
-    public func moved(_ keys: Set<KeyRef>, by delta: Int, duration: Int) -> [KeyRef: Int] {
-        Dictionary(uniqueKeysWithValues: keys.map { ($0, min(max($0.frame + delta, 0), max(duration, 0))) })
+    public func moved(_ keys: Set<LaneKey>, by delta: Int, lastFrame: Int) -> [LaneKey: Int] {
+        Dictionary(uniqueKeysWithValues: keys.map { ($0, min(max($0.frame + delta, 0), max(lastFrame, 0))) })
     }
 }
 
 // UC13 · SJ5 · Contracts/TransportStepping.swift
 public struct TransportState: Hashable, Sendable {
     public var frame: Int
-    public var duration: Int          // frames; 0 means nothing to play
+    /// How many frames: frames run 0...frameCount - 1, the same frames as a TimelineScale
+    /// whose lastFrame is frameCount - 1. 0 means nothing to play.
+    public var frameCount: Int
     public var fps: Int
     public var isPlaying: Bool
     public var loops: Bool
-    public init(frame: Int, duration: Int, fps: Int, isPlaying: Bool = false, loops: Bool = false) {
-        self.frame = frame; self.duration = duration; self.fps = fps; self.isPlaying = isPlaying; self.loops = loops
+    public init(frame: Int, frameCount: Int, fps: Int, isPlaying: Bool = false, loops: Bool = false) {
+        self.frame = frame; self.frameCount = frameCount; self.fps = fps; self.isPlaying = isPlaying; self.loops = loops
     }
 }
 
@@ -553,7 +563,7 @@ public protocol TransportStepping: Sendable {
 /// Never wraps and prints frames ("12 / 48") instead of a timecode.
 public struct FakeTransportStepping: TransportStepping {
     public init() {}
-    private func last(_ s: TransportState) -> Int { max(s.duration - 1, 0) }
+    private func last(_ s: TransportState) -> Int { max(s.frameCount - 1, 0) }
     public func stepped(_ s: TransportState, by frames: Int) -> TransportState {
         var n = s; n.frame = min(max(s.frame + frames, 0), last(s)); return n
     }
@@ -561,8 +571,8 @@ public struct FakeTransportStepping: TransportStepping {
     public func toEnd(_ s: TransportState) -> TransportState { var n = s; n.frame = last(s); return n }
     public func face(_ s: TransportState) -> TransportFace {
         TransportFace(playTitle: s.isPlaying ? "Pause" : "Play",
-                      unavailableHelp: s.duration > 0 ? nil : "Nothing to play.",
-                      timecode: "\(s.frame) / \(s.duration)")
+                      unavailableHelp: s.frameCount > 0 ? nil : "Nothing to play.",
+                      timecode: "\(s.frame) / \(s.frameCount)")
     }
 }
 
@@ -667,26 +677,48 @@ public struct ProbeSummary: Hashable, Sendable, Codable {
     }
 }
 
+/// Frames drawn during a scroll or playback, which have no input event: intervals between drawn frames.
+public struct FrameIntervalSummary: Hashable, Sendable, Codable {
+    public var count: Int              // intervals measured
+    public var p95Refreshes: Double    // p95 interval in refreshes (QB-S7: ≤ 1.5)
+    public var dropped: Int            // refreshes with no new frame while one was due
+    public var jitterP95: Double       // p95 of |interval − refresh|, seconds (QB-L4)
+    public var valid: Bool             // at least 60 intervals
+    public init(count: Int, p95Refreshes: Double, dropped: Int, jitterP95: Double, valid: Bool) {
+        self.count = count; self.p95Refreshes = p95Refreshes; self.dropped = dropped; self.jitterP95 = jitterP95; self.valid = valid
+    }
+}
+
 public protocol FrameProbeRecording: Sendable {
     mutating func record(_ sample: ProbeSample)
+    /// A frame of `series` drawn at the target timestamp `time` (scrolls, playback).
+    mutating func drew(_ series: String, at time: Double)
     /// An in-app moment: "preview-before-mouse-up", "progress-shown", "animation-ended" and the like.
     mutating func mark(_ name: String, at time: Double)
     /// Frames late = refreshes between the event and the refresh that showed it, at `refreshInterval` seconds.
     func summary(of series: String, refreshInterval: Double) -> ProbeSummary
+    func intervals(of series: String, refreshInterval: Double) -> FrameIntervalSummary
     /// The `suite.perf` JSON.
     func encoded() throws -> Data
 }
 
-/// Keeps samples and marks; reports every sample as 0 frames late.
+/// Keeps samples, frames and marks; reports every sample as 0 frames late.
 public struct FakeFrameProbe: FrameProbeRecording {
     public private(set) var samples: [ProbeSample] = []
     public private(set) var marks: [String: Double] = [:]
     public init() {}
+    public private(set) var drawn: [String: [Double]] = [:]
     public mutating func record(_ sample: ProbeSample) { samples.append(sample) }
+    public mutating func drew(_ series: String, at time: Double) { drawn[series, default: []].append(time) }
     public mutating func mark(_ name: String, at time: Double) { marks[name] = time }
     public func summary(of series: String, refreshInterval: Double) -> ProbeSummary {
         let n = samples.filter { $0.series == series }.count
         return ProbeSummary(count: n, p50FramesLate: 0, p95FramesLate: 0, valid: n >= 60)
+    }
+    /// Reports every interval as exactly one refresh, nothing dropped.
+    public func intervals(of series: String, refreshInterval: Double) -> FrameIntervalSummary {
+        let n = max((drawn[series]?.count ?? 0) - 1, 0)
+        return FrameIntervalSummary(count: n, p95Refreshes: 1, dropped: 0, jitterP95: 0, valid: n >= 60)
     }
     public func encoded() throws -> Data { try JSONEncoder().encode(samples) }
 }

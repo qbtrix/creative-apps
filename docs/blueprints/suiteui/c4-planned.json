@@ -32,12 +32,13 @@
                 "name": "Tokens and glass",
                 "status": "existing",
                 "authored": true,
-                "description": "Spacing, insets, radii, sizes, type, motion and the color tokens (graphite ladder, text and state colors as literal hex per appearance, Increase Contrast included); Liquid Glass applied in one snapshot-aware place (suiteGlass(in:)) and GlassPanel. The only place a raw value or a material may appear (design lint).",
+                "description": "Spacing, insets, radii, sizes, type, motion and the color tokens (graphite ladder, text and state colors as literal hex per appearance, Increase Contrast included); Liquid Glass applied in one snapshot-aware place (suiteGlass(in:)) and GlassPanel. The only place a raw value or a material may appear (design lint). Planned: SuiteEnvironment (suiteReduceMotion, an environment value that defaults to the system setting and that the gallery can override, and the .suiteControl modifier that registers a control with ControlInventory).",
                 "technology": "Swift 6, SwiftUI, macOS 26",
                 "paths": [
                   "Sources/SuiteUI/Tokens.swift",
                   "Sources/SuiteUI/Glass.swift",
-                  "Sources/SuiteUI/GlassPanel.swift"
+                  "Sources/SuiteUI/GlassPanel.swift",
+                  "Sources/SuiteUI/SuiteEnvironment.swift"
                 ]
               },
               {
@@ -95,7 +96,7 @@
                 "name": "Canvas marks",
                 "status": "existing",
                 "authored": true,
-                "description": "Marks drawn over document content in a CanvasViewport overlay, never hit-tested themselves: SelectionOutline and CropShade (existing); planned: SelectionHandles (eight handles and the rotate zone, hit size fixed in view points at any zoom), PathMarks, MotionPathMarks, GhostLayer, guide marks (#273), CanvasPointMark (#706, #737) and CanvasGrid (#530), with HandleGeometry, the pure handle layout, hit and resize math.",
+                "description": "Marks drawn over document content in a CanvasViewport overlay, never hit-tested themselves: SelectionOutline and CropShade (existing); planned: SelectionHandles (eight handles and a rotate zone outside each corner, hit size fixed in view points at any zoom), PathMarks, MotionPathMarks, GhostLayer, guide marks (#273), CanvasPointMark (#706, #737) and CanvasGrid (#530), with HandleGeometry, the pure handle layout, hit and resize math.",
                 "technology": "Swift 6, SwiftUI, macOS 26",
                 "paths": [
                   "Sources/SuiteUI/CanvasMarks.swift",
@@ -262,7 +263,7 @@
                 "name": "Component contracts",
                 "status": "planned",
                 "authored": true,
-                "description": "One protocol per use case (section 5 of docs/blueprints/suiteui.md) over Foundation-only value types, the live conformance over the existing rule files, and a Fake for each, so a component's view and its rules can be built in parallel. No SwiftUI import; ready to move to a Linux target (question Q1).",
+                "description": "One protocol per use case (section 5 of docs/blueprints/suiteui.md) over Foundation-only value types, and a Fake for each, so a component's view and its rules can be built in parallel. Live conformances sit next to the rule file they wrap, outside this folder. No SwiftUI import; ready to move to a Linux target (question Q1).",
                 "technology": "Swift 6, Foundation",
                 "paths": [
                   "Sources/SuiteUI/Contracts/"
@@ -320,7 +321,8 @@
                   "Tests/AppSnapshotTests/Suite*.swift",
                   "Tests/AppSnapshotTests/GoldenImage*.swift",
                   "Tests/AppSnapshotTests/SnapshotHost*.swift",
-                  "Tests/AppSnapshotTests/Golden/"
+                  "Tests/AppSnapshotTests/Golden/",
+                  "Tests/AppSnapshotTests/CanvasViewportSnapshots.swift"
                 ]
               }
             ]
@@ -348,7 +350,8 @@
                 "paths": [
                   "UITests/Journey.swift",
                   "UITests/Journey+Input.swift",
-                  "project.yml"
+                  "project.yml",
+                  "UITests/SuiteBudgets.swift"
                 ]
               },
               {
@@ -637,6 +640,54 @@
         "source": "suiteui-tools",
         "target": "suiteui-probes",
         "description": "registers every ToolbarAction-built control with ControlInventory",
+        "style": "sync"
+      },
+      {
+        "source": "suiteui-chips",
+        "target": "suiteui-probes",
+        "description": "reports press series",
+        "style": "sync"
+      },
+      {
+        "source": "suiteui-curves",
+        "target": "suiteui-probes",
+        "description": "reports curve-drag series",
+        "style": "sync"
+      },
+      {
+        "source": "suiteui-editor-shell",
+        "target": "suiteui-probes",
+        "description": "reports press and slot-drag series",
+        "style": "sync"
+      },
+      {
+        "source": "suiteui-viewer-chrome",
+        "target": "suiteui-probes",
+        "description": "reports transport press series",
+        "style": "sync"
+      },
+      {
+        "source": "suiteui-canvas-marks",
+        "target": "suiteui-probes",
+        "description": "reports handle-drag series",
+        "style": "sync"
+      },
+      {
+        "source": "suiteui-lists",
+        "target": "suiteui-probes",
+        "description": "reports scroll frame intervals",
+        "style": "sync"
+      },
+      {
+        "source": "suiteui-grid",
+        "target": "suiteui-probes",
+        "description": "reports scroll frame intervals",
+        "style": "sync"
+      },
+      {
+        "source": "suiteui-inspector",
+        "target": "suiteui-probes",
+        "description": "registers every row control with ControlInventory",
         "style": "sync"
       }
     ]
