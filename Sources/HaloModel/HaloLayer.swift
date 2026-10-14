@@ -1,13 +1,15 @@
-// HaloLayer.swift: one layer in a Halo composition: what kind it is, the frames
-// it is visible for, its color, opacity, blend mode and the rectangle a solid
-// fills. Linux-safe: no UI imports. Layers live in `HaloComposition.layers`,
+// HaloLayer.swift: one layer in a Halo composition: what kind it is, the
+// frames it is visible for, its color, opacity, blend mode, the rectangle a
+// solid fills, its keyframe tracks, the layer it follows and a text layer's
+// words. Codable; decoding goes through the clamping init. Linux-safe: no UI imports. Layers live in `HaloComposition.layers`,
 // top first; HaloProject adds and selects them. `blendMode` is CoreRaster's
 // BlendMode, never a mirror of it.
 import CoreRaster
+import FlareCore
 
 /// What a layer draws: a solid fill, a shape, text, or nothing (a null that
 /// other layers can follow).
-public enum HaloLayerKind: String, CaseIterable, Sendable {
+public enum HaloLayerKind: String, CaseIterable, Codable, Sendable {
     case solid, shape, text, null
 
     /// The kind's name as menus and default layer names show it ("Solid").
@@ -32,7 +34,7 @@ public enum HaloLayerKind: String, CaseIterable, Sendable {
 }
 
 /// An sRGB color with components in 0...1.
-public struct HaloLayerColor: Sendable, Hashable {
+public struct HaloLayerColor: Codable, Sendable, Hashable {
     public var red: Double
     public var green: Double
     public var blue: Double
@@ -45,7 +47,7 @@ public struct HaloLayerColor: Sendable, Hashable {
 }
 
 /// An axis-aligned rectangle in composition pixels, top-left origin.
-public struct HaloLayerRect: Sendable, Hashable {
+public struct HaloLayerRect: Codable, Sendable, Hashable {
     public var x: Double
     public var y: Double
     public var width: Double
@@ -60,7 +62,7 @@ public struct HaloLayerRect: Sendable, Hashable {
 }
 
 /// A layer, visible from `inFrame` up to (not including) `outFrame`.
-public struct HaloLayer: Identifiable, Sendable, Hashable {
+public struct HaloLayer: Identifiable, Codable, Sendable, Hashable {
     public let id: String
     public var name: String
     public var kind: HaloLayerKind
@@ -77,6 +79,33 @@ public struct HaloLayer: Identifiable, Sendable, Hashable {
     public var blendMode: BlendMode
     /// The area a solid fills, in composition pixels; nil fills the whole frame.
     public var rect: HaloLayerRect?
+    /// W0: keyframe tracks by `HaloProperty.rawValue`, each sorted by frame
+    /// with one key per frame. A property with no track uses its default.
+    public var tracks: [String: [HaloKeyframe]] = [:]
+    /// W0: the layer this one follows; nil for none. Never a cycle.
+    public var parentID: String?
+    /// W0: a text layer's words and size; nil for other kinds (tier 2, #430).
+    public var text: HaloTextContent?
+
+    enum CodingKeys: String, CodingKey {
+        case id, name, kind, inFrame, outFrame, color, storedOpacity = "opacity", blendMode, rect, tracks, parentID, text
+    }
+
+    /// Decodes through the clamping init, so a file can't carry an opacity
+    /// outside 0...1 or NaN. Missing W0 fields decode as empty.
+    public init(from decoder: any Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        self.init(
+            id: try c.decode(String.self, forKey: .id), name: try c.decode(String.self, forKey: .name),
+            kind: try c.decode(HaloLayerKind.self, forKey: .kind), inFrame: try c.decode(Int.self, forKey: .inFrame),
+            outFrame: try c.decode(Int.self, forKey: .outFrame), color: try c.decode(HaloLayerColor.self, forKey: .color),
+            opacity: try c.decode(Double.self, forKey: .storedOpacity),
+            blendMode: try c.decode(BlendMode.self, forKey: .blendMode),
+            rect: try c.decodeIfPresent(HaloLayerRect.self, forKey: .rect))
+        tracks = try c.decodeIfPresent([String: [HaloKeyframe]].self, forKey: .tracks) ?? [:]
+        parentID = try c.decodeIfPresent(String.self, forKey: .parentID)
+        text = try c.decodeIfPresent(HaloTextContent.self, forKey: .text)
+    }
 
     /// Clamps `opacity` to 0...1; a NaN opacity falls back to 1, the default.
     public init(
@@ -102,8 +131,12 @@ public struct HaloLayer: Identifiable, Sendable, Hashable {
 
     /// This layer under another id, everything else kept.
     func withID(_ id: String) -> HaloLayer {
-        HaloLayer(
+        var copy = HaloLayer(
             id: id, name: name, kind: kind, inFrame: inFrame, outFrame: outFrame, color: color, opacity: opacity,
             blendMode: blendMode, rect: rect)
+        copy.tracks = tracks
+        copy.parentID = parentID  // W0: duplicateComposition remaps it to the copy's ids
+        copy.text = text
+        return copy
     }
 }

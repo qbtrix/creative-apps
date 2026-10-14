@@ -1,7 +1,12 @@
 // HaloLayerOpacityClampTests.swift: a layer's opacity stays in 0...1 (NaN
 // becomes 1) after any assignment, not only in init, so an out-of-range value
-// never makes the layer vanish from the rendered frame (#456). Runs on Linux
-// and macOS.
+// never makes the layer vanish from the rendered frame (#456), and a decoded
+// file can't carry one either. Runs on Linux and macOS.
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
+import Foundation
+#endif
 import CoreRaster
 import HaloModel
 import Testing
@@ -36,4 +41,17 @@ func opacityAssignedAfterInitIsClamped(assigned: Double, stored: Double) throws 
     #expect(layer.opacity == 1)
     layer.opacity -= 3
     #expect(layer.opacity == 0)
+}
+
+@Test(arguments: [("3", 1.0), ("-2", 0.0), ("\"nan\"", 1.0), ("\"inf\"", 1.0), ("0.25", 0.25)])
+func decodedOpacityIsClamped(opacity: String, stored: Double) throws {
+    let json = """
+        {"id":"a","name":"A","kind":"solid","inFrame":0,"outFrame":30,
+         "color":{"red":1,"green":1,"blue":1},"opacity":\(opacity),"blendMode":"normal"}
+        """
+    let decoder = JSONDecoder()
+    decoder.nonConformingFloatDecodingStrategy = .convertFromString(
+        positiveInfinity: "inf", negativeInfinity: "-inf", nan: "nan")
+    let layer = try decoder.decode(HaloLayer.self, from: Data(json.utf8))
+    #expect(layer.opacity == stored)
 }
