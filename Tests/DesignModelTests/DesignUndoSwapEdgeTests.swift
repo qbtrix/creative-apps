@@ -1,8 +1,8 @@
 // DesignUndoSwapEdgeTests.swift: adversarial cases for undoSwapsDocument and
 // redoSwapsDocument (#271): repeated New File, long round trips, coalesced runs
 // next to a New File step, the history limit, and Open clearing the history.
-// New File over a file that already matches a fresh one changes nothing, so it
-// records no step and no swap.
+// New File over an unsaved file that already matches a fresh one changes
+// nothing, so it records no step and no swap (with a location it does: #492).
 // Runs on Linux and macOS.
 import DesignModel
 import Testing

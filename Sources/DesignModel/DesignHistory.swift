@@ -15,7 +15,8 @@
 //
 // A run of edits with the same coalescing key (one node's frame, nudges) is one
 // step; an undo or redo ends the run. A new edit clears Redo. The history keeps
-// the last 100 steps. An edit that changed nothing records nothing.
+// the last 100 steps. An edit that changed nothing records nothing; New File
+// over a file with a location changes that location, so it always records (#492).
 // ponytail: one whole-document snapshot per step (copy-on-write, so edits share
 // the nodes they didn't touch); switch to per-node diffs if files get large.
 // Linux-safe.
@@ -99,11 +100,13 @@ extension DesignWorkspace {
     /// Records the edit just made as one step named `name`, undone by putting back `before`. Does
     /// nothing when the edit left the pages and selection as they were. With a `coalescing` key
     /// equal to the last step's, that step already puts back the state before this run.
-    /// `swapsDocument` marks a step that replaces the whole document.
+    /// `swapsDocument` marks a step that replaces the whole document; it records even over equal
+    /// pages while the document has a location, since the swap clears it (#492).
     mutating func record(
         _ name: String, before: DesignSnapshot, coalescing: String? = nil, swapsDocument: Bool = false
     ) {
         guard pages != before.pages || selectedPageID != before.selectedPageID || selectedNodeID != before.selectedNodeID
+            || (swapsDocument && documentURL != nil)
         else { return }
         history.redo.removeAll()
         if let coalescing, history.undo.last?.coalescing == coalescing { return }
