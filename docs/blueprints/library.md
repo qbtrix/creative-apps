@@ -1632,3 +1632,120 @@ Checklist:
 - [x] Every protocol has a fake, and the smoke test calls every one.
 - [x] Every journey step in section 4 maps to a method in 5.7 or a menu
       item in 6.2, and every method names the file and feature that owns it.
+
+---
+
+## 6. Look
+
+Library uses the suite look as it is: `docs/design.md` (Component order,
+Visual language, Pro density, Studio rows and chips, Window structure).
+The house reference for every inspector control is Flare's easing editor
+(`docs/blueprints/flare-easing-editor.md`): filled 28 pt bar rows
+(`StudioScrubRow` / `InspectorSliderRow`), 24 pt `ChoiceChips`, uppercase
+group headers, accent only for selected or active, flat, never glass. This
+section lists only what Library adds, then each screen and its parts.
+
+### 6.1 What Library adds to docs/design.md
+
+These are Library rules; the feature that first builds each one moves its
+row into `docs/design.md` (under a new "Catalog apps (Library)" section)
+in the same PR.
+
+| Rule | Value | Why |
+|---|---|---|
+| Window | `SuiteWindow` (sidebar, content, inspector), following the system appearance; one `Window` scene, not `WindowGroup` (decision D2) | Library is a browser of many documents, not a canvas editor, so it keeps the system window; one catalog means one window |
+| Loupe surround | `SuiteColor.canvasSurround` in both appearances, inside the content area only | A photo is judged against neutral grey; design.md allows a fixed surround for a media app chosen on purpose |
+| Thumbnails | Aspect-fit inside the cell (`ThumbnailGrid`), never cropped to fill; the cell is `cellSize` wide and 3/4 of it tall; the cell background is `SuiteColor.canvasSurround` | Culling judges the whole frame |
+| Cull marks | Rating: stars badge. Pick: `flag.fill` badge. Reject: the cell's image at 40% and an `xmark.circle` badge, label "Rejected" | State colors are never the only cue (design.md, State colors) |
+| Unreadable photo | Placeholder cell with `exclamationmark.triangle` in `stateWarning` and the reason as help | An error appears where it happened |
+| Develop rows | `InspectorSliderRow` (the bar slider `StudioScrubRow` wraps), Exposure with `decimals: 2` and unit "EV", the others `decimals: 0`; each row's reset is the section's Reset icon (`InspectorSection`), shown only while that slider is off 0 | Same look as Flare's easing rows; whole numbers read faster |
+| Histogram | 120 pt tall well, `SuiteRadius.medium`, three channel areas at 40% (red, green, blue through the system colors) with their sum in `.primary` at 20%, clipping triangles top-left (shadows) and top-right (highlights) in `stateWarning` when any pixel clips, each labelled ("Shadows clipped", "Highlights clipped") | The only colored chrome is data |
+| Crop mode | `CropShade` outside the frame, `SelectionOutline` on it, a thirds grid at 0.5 pt `.primary` 40% while dragging, eight handles at 10 pt with 28 pt hit targets (the curve-handle sizes) | Same handle anatomy as the curve editor |
+| Progress | Import and export show a progress row in the content (import) or the sheet (export) within 100 ms (QB-L9), with a Cancel for export; never a modal spinner | design.md, Motion: never block input |
+| Notices | Import results and catalog problems show as an inline notice at the top of the content: symbol and state color, one sentence, at most one action (Show, Show in Finder, Try Again); dismissible | Errors appear near the problem and never as an alert at launch |
+
+### 6.2 Screens and their components
+
+Components are SuiteUI unless named `Library*`. **needs-ui** marks a part
+SuiteUI does not have; section 6.4 lists them as issues to file.
+
+| Screen | Region | Contents | Components |
+|---|---|---|---|
+| Main window, grid | Sidebar | Library section: All Photos, Favorites, Recently Added with counts | `SuiteWindow`, `SidebarItem` / `SidebarRow` |
+| | Content | Notice (import result, catalog problem); import progress row; the grid; status pills under it | **needs-ui** `InlineNotice`; **needs-ui** `ProgressRow`; `ThumbnailGrid` (**needs-ui**: visible ids, per-cell loading state and identifier, reject and unreadable badges); `ViewerStatusBar` pills (S7, #340): "24 photos", "3 selected", thumbnail size |
+| | Inspector | Tabs Info and Develop; Info: `InspectorHeader` (name or "3 Photos", facts: date, size, file kind), Metadata section (existing) | `SegmentedTabs`, `InspectorHeader`, `InspectorSection`, `InspectorRow`, `InspectorPickerRow`; with nothing selected, the collection's `InspectorHeader` and "N photos" (replacing today's `SurfaceCard`, which design.md keeps out of inspectors) |
+| Main window, empty | Content | "No Photos", Import Folder… as the one prominent button; Load Sample Photos stays in File | `EmptyStateView` |
+| Loupe | Content | The photo on `CanvasViewport` (no checkerboard) at fit, 100% or a step; Space-drag or drag pans when zoomed; readout "IMG_0003 · 3 of 24" | `CanvasViewport`, `GlassPanel`; pills: zoom %, pixel size, "3 of 24" |
+| Develop tab | Inspector | Histogram; TONE section: Exposure, Contrast, Highlights, Shadows; COLOR section: Temperature, Tint; Reset All; with several photos selected, "Mixed" where they differ (the bar's `mixed:`) | **needs-ui** `HistogramView`; `InspectorSection` (Reset icon), `InspectorSliderRow`, `InspectorAction` |
+| Crop mode | Content and inspector | The frame over the photo; CROP section: aspect `ChoiceChips` (Original, Free, 1:1 / 4:5, 3:2, 16:9: three columns, two rows), Straighten row (−45 to 45, `decimals: 1`, unit °), Apply (primary) and Cancel; Reset Crop | `CropShade`, `SelectionOutline`, **needs-ui** `CropHandles` (eight handles and the thirds grid, keyboard nudge), `ChoiceChips`, `InspectorSliderRow`, `InspectorAction` |
+| Export sheet | Sheet | "Export 3 Photos"; Size `ChoiceChips` (1024, 2048, 4096 / Original) plus a Long Edge `ScrubField` in px; Quality bar 0–100; Folder row with Choose…; Export (primary), Cancel; while running: progress row and Cancel; done: success row with Show in Finder; failures: list of name and reason, Try Again | `Form` in a `.sheet`, `ChoiceChips`, `ScrubField`, `InspectorSliderRow`, **needs-ui** `ProgressRow`, `InspectorAction` |
+| Menu bar | | below | `LibraryCommands` |
+
+**Menu bar** (spine writes every item; areas fill the actions; an item that
+can't act yet is disabled by a nil action):
+
+- **Library**: About, Hide, Quit (no Settings window in v1).
+- **File**: Import Folder… ⇧⌘I, Load Sample Photos, Export… ⇧⌘E, Close ⌘W.
+- **Edit**: Undo <step> ⌘Z, Redo <step> ⇧⌘Z, Select All ⌘A, Deselect ⇧⌘A.
+- **View**: Grid G, Loupe Return, Zoom In ⌘+ (in the grid: Larger
+  Thumbnails), Zoom Out ⌘− (Smaller Thumbnails), Zoom to Fit ⌘0, Actual Size
+  ⌘1, Sort By ▸ (Capture Date, Name, Rating), Show Inspector ⌥⌘I. A menu item
+  whose title changes with the mode is allowed by the HIG; the shortcut
+  stays on one item.
+- **Photo**: Copy Settings ⇧⌘C, Paste Settings ⇧⌘V, Reset Develop, Crop R
+  (a toggle: "Done Cropping" while cropping), Reset Crop.
+- **Metadata**: Set Rating ▸ (No Stars 0, 1 Star … 5 Stars), Set Flag ▸
+  (Pick P, Reject X, Clear Flag U), Set Label ▸ (None, Red … Purple), Auto
+  Advance (a checkmark).
+- **Window**, **Help**: system.
+
+The single keys (0–5, P, X, U, R, G, Return) act only while the grid or
+loupe has focus, through the content's `onKeyPress`, never while a field is
+being typed in. Whether a menu item can show an unmodified key equivalent
+without stealing it from text fields is checked against current AppKit
+docs by the spine (open question Q5).
+
+### 6.3 Snapshots each feature adds
+
+Every new visible state gets a snapshot in its own file in
+`Tests/AppSnapshotTests/` (Light and Dark), named
+`library-<state>-<light|dark>.png`; once QH-2 (#331) lands, each is also a
+golden with the rubric's tolerance.
+
+| Feature | Snapshot states |
+|---|---|
+| spine | `library-empty` (with Import Folder…), `library-inspector-none`, `library-notice-damaged` |
+| import | `library-importing` (progress row), `library-imported`, `library-import-failures` |
+| thumbnails | `library-grid-thumbnails`, `library-grid-loading`, `library-grid-unreadable` |
+| cull | `library-rated` (stars, pick, reject dimmed) |
+| loupe-viewport | `library-loupe-fit`, `library-loupe-100` |
+| persist | `library-restored` |
+| develop | `library-develop`, `library-develop-render`, `library-develop-mixed`, `library-develop-error` |
+| crop | `library-crop`, `library-crop-straightened` |
+| export | `library-export`, `library-exporting`, `library-export-failed`, `library-export-done` |
+| status-and-layout | `library-grid-status`, `library-inspector` (#185) |
+
+### 6.4 SuiteUI parts Library needs (to file as `needs-ui`, `line:suiteui`)
+
+Not filed by this blueprint (the captain approves first); each gets its
+issue when the blueprint merges.
+
+| Id | Part | What Library needs | Needed by |
+|---|---|---|---|
+| S-L1 | `HistogramView` | Draws three channel arrays of bin heights (0...1) and two clipping flags with labels, 120 pt tall, in a well; accessibility value a short summary ("Mean 0.42, highlights clipped") | develop |
+| S-L2 | `ThumbnailGrid` additions | `onVisibleChange([ID])` as cells appear and disappear; a per-cell state (loading, ready, unreadable with help) as the cell's accessibility value; a per-cell identifier from an id prefix; a `dimmed` badge state for rejects; aspect-fit inside the cell | thumbnails, cull |
+| S-L3 | `CropHandles` | Eight handles and an inside drag over a rect at a zoom, reporting `(handle, dx, dy)` in document pixels; thirds grid while dragging; arrow keys nudge the focused handle (Shift 10) | crop |
+| S-L4 | `InlineNotice` | Symbol, state color, one sentence, one optional action, a close button; content layer, flat | import, persist, export |
+| S-L5 | `ProgressRow` | "Importing 3 of 27" text, a determinate bar, an optional Cancel; shows only after 100 ms | import, export |
+| existing | #330 FrameProbe, #331 and #332 goldens, #333 journey files and velocity drags, #340 status pills | as in Flare | perf journeys, goldens, journey files, status bar |
+
+Until a part lands, the feature uses a plain SwiftUI placeholder (CLAUDE.md)
+and keeps going; the journey asserts behavior, not the part's look.
+
+Checklist:
+
+- [x] Every screen lists the SuiteUI component of each region, or names
+      the needs-ui part and its id.
+- [x] Every new rule says why, and which feature moves it into
+      `docs/design.md`.
+- [x] Every visible state in section 4 has a snapshot in 6.3.
