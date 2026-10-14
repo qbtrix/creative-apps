@@ -210,10 +210,11 @@ public struct HaloProject: Sendable, Equatable {
         if selectedComposition?.layers.contains(where: { $0.id == id }) == true { selectedLayerID = id }
     }
 
-    /// Sets the selected layer's opacity, clamped to 0...1; NaN is ignored.
+    /// Sets the selected layer's opacity; HaloLayer clamps it to 0...1. NaN is
+    /// ignored here, so a bad inspector entry keeps the current opacity.
     public mutating func setSelectedLayerOpacity(_ opacity: Double) {
         guard !opacity.isNaN else { return }
-        updateSelectedLayer { $0.opacity = min(max(opacity, 0), 1) }
+        updateSelectedLayer { $0.opacity = opacity }
     }
 
     /// Sets how the selected layer blends with the layers under it.

@@ -67,8 +67,13 @@ public struct HaloLayer: Identifiable, Sendable, Hashable {
     public var inFrame: Int
     public var outFrame: Int
     public var color: HaloLayerColor
-    /// 0 (transparent) to 1 (opaque); the init clamps it.
-    public var opacity: Double
+    /// 0 (transparent) to 1 (opaque). Every assignment, the init's included,
+    /// clamps it to 0...1, and a NaN falls back to 1, the default.
+    public var opacity: Double {
+        get { storedOpacity }
+        set { storedOpacity = Self.clampedOpacity(newValue) }
+    }
+    private var storedOpacity: Double
     public var blendMode: BlendMode
     /// The area a solid fills, in composition pixels; nil fills the whole frame.
     public var rect: HaloLayerRect?
@@ -84,10 +89,13 @@ public struct HaloLayer: Identifiable, Sendable, Hashable {
         self.inFrame = inFrame
         self.outFrame = outFrame
         self.color = color
-        self.opacity = opacity.isNaN ? 1 : min(max(opacity, 0), 1)
+        self.storedOpacity = Self.clampedOpacity(opacity)
         self.blendMode = blendMode
         self.rect = rect
     }
+
+    /// `value` in 0...1; NaN becomes 1, so a bad value never hides the layer.
+    static func clampedOpacity(_ value: Double) -> Double { value.isNaN ? 1 : min(max(value, 0), 1) }
 
     /// Whether the layer shows at `frame`: from `inFrame` up to, not including, `outFrame`.
     public func isVisible(at frame: Int) -> Bool { frame >= inFrame && frame < outFrame }
