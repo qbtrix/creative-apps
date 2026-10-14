@@ -32,7 +32,7 @@ Next: wait for the r1 fix PR (AutosaveTests.quitWritesWhenDirty, feature-done) t
 ## Rounds
 | round | CI run | CI | audit vs baseline | lenses | confirmed | fixed by | clean |
 |---|---|---|---|---|---|---|---|
-| 1 | 38600685744 (5e1870d) | red: macOS swift test, 1 of 1670 failed (AutosaveTests.quitWritesWhenDirty, 76 s vs 60 s window); Linux green; journeys not reached | not measured (journeys did not run) | none run: CI red, fix first | 1 (flaky time window in MP-5 test) | r1 fix PR | no |
+| 1 | 38600685744 (5e1870d) | red: macOS swift test, 1 of 1670 failed (AutosaveTests.quitWritesWhenDirty, 76 s vs 60 s window); Linux green; journeys not reached | not measured (journeys did not run) | none run: CI red, fix first | 1 (flaky time window in MP-5 test) | #764 | no |
 
 ## Decisions
 - The packet's single chain MP-1..MP-6 exists only because every task edits docs/c4/model.json. MP-1..3 edit flare-model-sources (line 72), MP-4..6 edit flare-app-sources (line 52); 20 lines apart, so the two sub-chains merge cleanly. Real code deps: MP-5 needs MP-2 (autosaveDue, recoveryData), MP-6 needs MP-3 (restoreRecovery). Waves: 1 = MP-1 + MP-4, 2 = MP-2, 3 = MP-3 + MP-5, 4 = MP-6.

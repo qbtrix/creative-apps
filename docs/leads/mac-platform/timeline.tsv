@@ -15,3 +15,4 @@ utc	stage	event	ref	note
 2026-10-14T16:44Z	4	stage-start	round1	waiting for CI on 5e1870d
 2026-10-14T16:50Z	4	ci-run	38600685744	red: AutosaveTests.quitWritesWhenDirty only; everything compiled on macOS
 2026-10-14T16:50Z	4	round-findings	round1	1 finding, fix batch r1-b1
+2026-10-14T16:53Z	4	pr-opened	#764	r1-b1 bracket quit-time recovery date, feature-done
