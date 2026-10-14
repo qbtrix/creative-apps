@@ -4,7 +4,7 @@ Issue: #777 · Packet: docs/blueprints/halo/features/foundation.md (on branch `d
 Run: act-1a13b78bcdb-qu60 · Session: session_01Dc9GDxc9HxLtv9XMcFgSWh · Started: 2026-10-14T17:33Z
 Stage: 3 wave 2
 Base: 52928d1dbbdd72b849f7fdb6363991f35b1adbeb
-Next: build FD-2 from origin/dev
+Next: chain builder runs FD-2 → FD-3 → FD-4 (stacked); FD-13a (pure move) builds in parallel
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -22,7 +22,8 @@ Next: build FD-2 from origin/dev
 | FD-10 | 9 | edit / endCoalescing / dismissRefusal / takeLayerID; mutators under edit; HB-9 | HaloProject, HaloTimeline + tests | HaloEditTests, HaloFoundationBudgetTests | | |
 | FD-11 | 10 | HaloCommand, unavailableHelp, title, nine Availability files | HaloCommand.swift, Availability/ x9 + test | HaloCommandTests | | |
 | FD-12 | 10 | viewerDrawList, viewerSummary, row key frames, status suffix; HB-6 | HaloViewerState, HaloTimeline, HaloStatusText + tests | HaloViewerStateTests, HaloTimelineCostTests | | |
-| FD-13 | 11 | App: window/viewer split, HaloLaunch, HaloControls, stub rasterizer | Sources/HaloApp x6 | snapshot halo-window-launch-* | | |
+| FD-13a | 2 | App: HaloWindow and HaloViewer move to own files (pure move) | HaloApp.swift, HaloWindow.swift, HaloViewer.swift | snapshots unchanged | | building |
+| FD-13b | 11 | HaloLaunch, HaloControls, stub rasterizer | Sources/HaloApp | macOS build, H-J13 | | |
 | FD-14 | 12 | perform(_:) routes by area to nine HaloWindow+Area files | Sources/HaloApp x10 | macOS build, H-J13 | | |
 | FD-15 | 13 | Stub views, inspector LAYERS + layer header, key diamonds, refusal caption | Sources/HaloApp x11 + 3 snapshots | halo-inspector-layer-selected-*, halo-timeline-keys-*, halo-refusal-* | | |
 | FD-16 | 13 | Menus on HaloCommand | Sources/HaloApp x5 | testEveryMenuOpens | | |
@@ -42,6 +43,9 @@ Next: build FD-2 from origin/dev
 - The container had no Swift: installed 6.3.3 with scripts/cloud-setup.sh; baseline scripts/ci on 52928d1: CI: PASS in 2m34s.
 
 - 18:00Z–22:05Z: paused by the plan usage limit; resumed from this record.
+
+- Packet re-read from dev after #789/#791 merged it (FD-2 takes the error types, FD-13 split into 13a/13b, HaloCommand cases listed). FD-13a has no Model dependency, so it runs beside FD-2.
+- After the pause, one chain builder takes several serial Model tasks in a row (context stays warm, next task starts stacked as soon as a PR opens).
 
 ## Open
 - none

@@ -14,3 +14,4 @@ utc	stage	event	ref	note
 2026-10-14T22:08Z	3	pr-merged	#785	FD-1
 2026-10-14T22:08Z	3	pr-merged	#784	FD-19
 2026-10-14T22:08Z	3	heartbeat	-	resumed after usage pause
+2026-10-14T22:09Z	3	stage-start	wave 2	FD-2..4 chain, FD-13a
