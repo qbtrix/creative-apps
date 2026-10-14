@@ -212,6 +212,7 @@ public struct FlareWorkspace: Sendable, Equatable {
     /// own group. Afterwards a selected scene that no longer exists (an undone Add Scene, a redone Delete Scene)
     /// gives way to its neighbour, clamped to the scene list, a selected layer the edited owner no longer has is
     /// deselected, and a playhead past a shortened timeline moves to its last frame (#615).
+    /// A symbol being edited in place that no longer exists ends the edit, as `exitSymbol` does (#603).
     mutating func step(_ label: String? = nil, _ body: (inout CommandEngine) throws -> Void) {
         guard var next = engine else { return refuse(.noDocument) }
         let order = scenes.map(\.id)
@@ -224,6 +225,7 @@ public struct FlareWorkspace: Sendable, Equatable {
         }
         engine = next
         layerError = nil
+        if editingSymbolID != nil, editingSymbol == nil { exitSymbol() }
         if let id = selectedSceneID, selectedScene == nil { selectNeighbour(of: id, in: order) }
         if let id = selectedLayerID, ownerLayers?.contains(where: { $0.id == id }) != true {
             selectedLayerID = nil
