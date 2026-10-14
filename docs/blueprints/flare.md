@@ -1612,3 +1612,40 @@ weighed, not as open options.
 - **The suite model provider** (Phase 3) has no date, so IN-8 has none.
 - **Belt allowlist.** The logic mandates' `swift test --filter Budget` check
   needs `swift` on the factory's command allowlist (see the process doc).
+
+---
+
+## 11. Pseudo-C4 (`flare/c4-planned.json`)
+
+`docs/blueprints/flare/c4-planned.json` is Flare's planned C4 model in the
+shape of `docs/c4/model.json`: every L3 component Flare v1 needs, read from
+section 2, the task tables in section 7 and the four feature packets. Each
+component has a name, a description, the source paths it owns, its
+relationships (on the component, and flattened into the model's
+`relationships` list), `"authored": true`, and a status:
+
+- **existing**: every path it lists is on `origin/dev` (956d946, 2026-10-14).
+- **planned**: none of them is yet. A component is never half and half; one
+  that would be is split, so a status flips once, in the PR that adds its
+  first file.
+
+What it holds:
+
+| Container | Existing | Planned |
+|---|---|---|
+| FlareModel (`Sources/FlareModel/`) | workspace and services, contracts, stage gestures, Edit menu, animate, playback, scenes and layers, symbols, machines, files, export state, fakes, live easing | assist state, fake assist, large fixtures, live stage, live keys, live scenes, live onion and library, live interact, live export, live assist |
+| FlareApp (`Sources/FlareApp/`) | today's shell (`FlareApp`, `FlareCommands`, layer items, easing inspector), stage path and playback driver | rasterizer, autosave and recovery, window and intents, stage, inspector, timeline, panels, interactions, file and edit, export, assist views |
+| SuiteUI (the parts Flare uses; `line:suiteui` owns them) | window shell, editor shell, canvas and marks, inspector parts, timeline strip, segmented tabs | vector marks (S12), transport (S7), layer list (S15), node graph (S14), frame probe (QH-1) |
+| FlareCore (creative-core) | document, engine, timeline and format; edit commands; hit test and shape bounds; exporters | render list, hit query, world bounds, builders and onion (LC-1 to LC-4, LC-9); machine commands and player (LC-11, LC-12) |
+
+The FlareModel and FlareApp components together own every file under
+`Sources/FlareModel/` and `Sources/FlareApp/` on dev exactly once, the same
+rule `scripts/ci` applies to `docs/c4/model.json`. FlareCore paths are in
+creative-core and list only the files the LC tasks name; their status comes
+from section 0, not from this repo.
+
+This file is a plan, not the gate. `docs/c4/model.json` stays the checked
+model: there each Flare target is still one component, and its description
+grows in the PR that adds the behavior (section 2, C4 deltas). When a
+component's first file lands, the PR that adds it may flip its status here;
+nothing reads this file in CI.
