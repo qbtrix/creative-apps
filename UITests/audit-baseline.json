@@ -3,5 +3,6 @@
   "flare": { "contrast": 3, "identifier": 15, "offscreen": 15 },
   "halo": { "contrast": 2, "identifier": 10, "offscreen": 8, "unnamed": 5 },
   "library": { "contrast": 2, "identifier": 16, "offscreen": 16, "unnamed": 1 },
-  "photo": { "identifier": 23 }
+  "photo": { "identifier": 23 },
+  "suiteui": { "contrast": 0, "disabled-dim": 0, "identifier": 0, "offscreen": 0, "overlap": 0, "unnamed": 0 }
 }

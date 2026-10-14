@@ -8,7 +8,14 @@
 # list it in the scheme. Every bundle also compiles the app audit
 # (UITests/Audit.swift, and the engine and checks in Tests/AppAuditTests, the
 # Linux test target that tests them; a new check file there is picked up
-# without touching this file; docs/blueprints/app-audit.md).
+# without touching this file; docs/blueprints/app-audit.md). Each bundle
+# compiles UITests/Journey*.swift (the shared steps and input helpers) and
+# UITests/<target>*.swift, so a feature adds its own
+# UITests/<X>JourneyTests+<Area>.swift without touching this file, plus the
+# three Foundation-only contract files a journey decodes suite.perf and
+# suite.controls with. SuiteJourneyTests runs SuiteUI's gallery inside Library
+# (-SuiteGallery) and also compiles SuiteControlInventory, the live rules SJ0
+# judges suite.controls by (docs/blueprints/suiteui.md, 4.1).
 name: CreativeApps
 options:
   bundleIdPrefix: org.creativesuite
@@ -25,17 +32,24 @@ targetTemplates:
     type: bundle.ui-testing
     platform: macOS
     sources:
-      - UITests/Journey.swift
-      - UITests/Audit.swift
+      - path: UITests
+        includes: ["Journey*.swift", "Audit.swift", "${target_name}*.swift"]
       - path: Tests/AppAuditTests
         excludes: ["*Tests.swift", "**/*Tests.swift"]
-      - UITests/${target_name}.swift
+      - Sources/SuiteUI/Contracts/ContractTypes.swift
+      - Sources/SuiteUI/Contracts/FrameProbeRecording.swift
+      - Sources/SuiteUI/Contracts/ControlInventorying.swift
 targets:
   FlareJourneyTests: { templates: [Journey] }
   DesignJourneyTests: { templates: [Journey] }
   PhotoJourneyTests: { templates: [Journey] }
   LibraryJourneyTests: { templates: [Journey] }
   HaloJourneyTests: { templates: [Journey] }
+  # A target's sources are appended to the template's.
+  SuiteJourneyTests:
+    templates: [Journey]
+    sources:
+      - Sources/SuiteUI/ControlInventory.swift
 schemes:
   Journeys:
     build:
@@ -45,5 +59,7 @@ schemes:
         PhotoJourneyTests: [test]
         LibraryJourneyTests: [test]
         HaloJourneyTests: [test]
+        SuiteJourneyTests: [test]
     test:
-      targets: [FlareJourneyTests, DesignJourneyTests, PhotoJourneyTests, LibraryJourneyTests, HaloJourneyTests]
+      targets:
+        [FlareJourneyTests, DesignJourneyTests, PhotoJourneyTests, LibraryJourneyTests, HaloJourneyTests, SuiteJourneyTests]
