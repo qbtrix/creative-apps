@@ -198,3 +198,72 @@ path geometry (planned, ───────▶  → live | fakes; workspace,  
 Every existing file under `Sources/DesignModel/`, `Sources/DesignApp/` and
 `UITests/Design*.swift` sits in exactly one component of the JSON (checked by
 a script while writing this; section 10 records it).
+
+---
+
+## 3. Usage map
+
+Ranked the way `docs/priorities.md` ranks every app: what nearly every
+session uses first, then weekly work, then specialist work. Clean-room: only
+public sources, no other app opened. No public study measures per-feature
+use in vector UI tools, so the tiers come from what beginner courses teach
+first, what "learn these shortcuts first" sheets repeat, and the surveys
+below; rows marked *inferred* have no direct source and are the first to move
+if data turns up.
+
+Sources (the first two are the ones `docs/priorities.md` used for Design):
+
+- [S1] State of design systems 2022-23: https://sympli.io/blog/state-of-design-systems-2022-2023 (components, shared styles and variables as weekly team work).
+- [S2] UX tools survey 2022: https://designcompass.org/en/2022/12/07/ux-tools-2022-survey/ (UI design as the main daily activity of the respondents).
+- [S3] Design tools survey 2024, method and results (2,220 designers, Nov 2024 to Jan 2025): https://www.uxtools.co/survey/introduction/methodology (UI design and basic prototyping as the most common jobs; tool-level, not feature-level).
+- [S4] Apple Human Interface Guidelines, keyboard shortcuts and the standard Edit menu: https://developer.apple.com/design/human-interface-guidelines/keyboards (Cut, Copy, Paste, Duplicate, Undo, Redo, Select All as expected on every Mac editor).
+- [S5] Beginner shortcut cheat sheets for vector UI tools, read as a set (the same five actions top every list: frame tool, duplicate, group and ungroup, align, Option-drag to copy). Not linked here because their titles name products; the pattern is common to all of them.
+- [S6] W3C SVG 2: https://www.w3.org/TR/SVG2/ (what an exported file must carry: viewBox, rect, ellipse, path, text, clipPath, opacity).
+
+### Tier 1: nearly every session (`p1`)
+
+| # | Feature | Source | State on dev | Issue |
+|---|---|---|---|---|
+| 1 | Zoom in and out, fit page, pan | S5, priorities | built | – |
+| 2 | Zoom to selection | priorities, *inferred* | missing | new gap (F1) |
+| 3 | Click and Shift-click select | S5 | built (#725) | – |
+| 4 | Marquee select | S5 | missing | new gap (F1); #413 closed without it |
+| 5 | Move, resize and nudge one layer | S5 | built | #542, #607 bugs |
+| 6 | Move, resize, nudge and delete several layers | S5, *inferred* | missing | new gap (F1) |
+| 7 | Draw frames, rectangles, ellipses | S5, S2 | built | #266 frame names |
+| 8 | Place and edit text | S2 | built | #268 size jump, #613 |
+| 9 | Text family, size, weight, alignment | priorities (#267) | missing | #267 |
+| 10 | Inspector X, Y, W, H and fill | priorities (#18) | built | #276 |
+| 11 | Corner radius | priorities | in flight | #532 / PR #753 |
+| 12 | Fill opacity, stroke color and width | priorities | missing | #752 |
+| 13 | Layers: select, hide, lock | priorities (#45) | built | #589 group rows |
+| 14 | Layers: rename, reorder and nest by drag; Arrange | priorities (#45), S5 | Model only | new gap (F4) |
+| 15 | Duplicate and Option-drag | S5, S4 | missing | #414 |
+| 16 | Group and ungroup | S5 | missing | #416 |
+| 17 | Cut, copy and paste, also between files | S4 | missing | #415 |
+| 18 | Align one layer | S5 | built (#716) | – |
+| 19 | Align several, distribute | S5 | missing | #714 |
+| 20 | Undo and redo named for each step | S4 | built | #275 (system undo in text fields) |
+| 21 | Save, Save As, reopen | priorities, *inferred* | built | – |
+| 22 | Unsaved state and close prompt | S4, *inferred* | missing | #270, #275 |
+| 23 | Open errors named | *inferred* | built, no journey | new journey (F5) |
+
+### Tier 2: weekly (`p2`)
+
+| Feature | Source | State | Issue |
+|---|---|---|---|
+| Export PNG (1x, 2x, 3x), SVG, PDF | priorities, S6 | missing | #418 |
+| Components and instances | S1 | missing | #19 |
+| Variables with light and dark modes | S1 | missing | #20 |
+| Pen tool: corners, smooth points, close | S5, *inferred* | disabled with a reason | new gap (wave 3) |
+| Pages | priorities | built | – |
+
+### Tier 3: specialist (`p3`)
+
+| Feature | Source | State | Issue |
+|---|---|---|---|
+| Wide-gamut color variables | priorities | missing | #21 |
+| Auto Layout (direction, gap, padding) with the layout math | S1, *inferred* | missing | #752 (last bullet; not v1) |
+| Smart guides and snapping | *inferred* | missing | none (first item after v1) |
+| Boolean operations, masks | *inferred* | missing | none |
+| Prototype links and a player | S3 | missing | none |
