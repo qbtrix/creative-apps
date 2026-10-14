@@ -52,14 +52,40 @@ public enum HaloProperty: String, CaseIterable, Codable, Sendable {
         }
     }
 
-    /// The value as the row shows it: "960.0 px", "100%", "45°".
+    /// What the row shows per stored unit: scale and opacity are stored as
+    /// factors (1 = 100%) and shown in percent.
+    public var displayFactor: Double {
+        switch self {
+        case .scaleX, .scaleY, .opacity: 100
+        case .x, .y, .anchorX, .anchorY, .rotation: 1
+        }
+    }
+
+    /// The unit `InspectorSliderRow` shows after the value.
+    public var unit: String {
+        switch self {
+        case .x, .y, .anchorX, .anchorY: " px"
+        case .scaleX, .scaleY, .opacity: "%"
+        case .rotation: "°"
+        }
+    }
+
+    /// Places shown: one for pixels, whole for percent and degrees
+    /// (docs/design.md, Editor shell).
+    public var decimals: Int {
+        switch self {
+        case .x, .y, .anchorX, .anchorY: 1
+        case .scaleX, .scaleY, .opacity, .rotation: 0
+        }
+    }
+
+    /// The value as the row shows it and VoiceOver reads it: "960.0 px",
+    /// "100%", "45°"; "–" for a value that isn't finite.
     public func text(_ value: Double) -> String {
         guard value.isFinite else { return "–" }
-        switch self {
-        case .x, .y, .anchorX, .anchorY: return "\((value * 10).rounded() / 10) px"
-        case .scaleX, .scaleY, .opacity: return "\(Int((value * 100).rounded()))%"
-        case .rotation: return "\(Int(value.rounded()))°"
-        }
+        let shown = value * displayFactor
+        if decimals == 0 { return "\(Int(shown.rounded()))\(unit)" }
+        return "\((shown * 10).rounded() / 10)\(unit)"
     }
 }
 

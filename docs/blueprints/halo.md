@@ -638,6 +638,13 @@ goes through `edit`; every read is a computed property.
 | `HaloRenderJob.swift` (render-out) | `startRender(_ settings:)`, `renderProgress(frame:)`, `cancelRender()`, `finishRender(_ outcome:)` |
 | `HaloTextEdits.swift` (text-layers) | `setText(_:)`, `setFontSize(_:)` |
 
+The state types the stored properties use (`HaloPlaybackState`,
+`HaloViewerDragState`, `HaloFileState`, `HaloRenderJobState`) are declared
+with `HaloProject` in W0, all `Sendable` and `Equatable` with public
+memberwise inits; `HaloKeySegment` (a key and the next one on a track, with
+its preset or "Custom") is declared by the easing feature in
+`HaloKeySelection.swift`.
+
 ### W0 change to `HaloLayer`
 
 The contracts read three new stored fields on `HaloLayer`, all added in W0
@@ -715,14 +722,40 @@ public enum HaloProperty: String, CaseIterable, Codable, Sendable {
         }
     }
 
-    /// The value as the row shows it: "960.0 px", "100%", "45°".
+    /// What the row shows per stored unit: scale and opacity are stored as
+    /// factors (1 = 100%) and shown in percent.
+    public var displayFactor: Double {
+        switch self {
+        case .scaleX, .scaleY, .opacity: 100
+        case .x, .y, .anchorX, .anchorY, .rotation: 1
+        }
+    }
+
+    /// The unit `InspectorSliderRow` shows after the value.
+    public var unit: String {
+        switch self {
+        case .x, .y, .anchorX, .anchorY: " px"
+        case .scaleX, .scaleY, .opacity: "%"
+        case .rotation: "°"
+        }
+    }
+
+    /// Places shown: one for pixels, whole for percent and degrees
+    /// (docs/design.md, Editor shell).
+    public var decimals: Int {
+        switch self {
+        case .x, .y, .anchorX, .anchorY: 1
+        case .scaleX, .scaleY, .opacity, .rotation: 0
+        }
+    }
+
+    /// The value as the row shows it and VoiceOver reads it: "960.0 px",
+    /// "100%", "45°"; "–" for a value that isn't finite.
     public func text(_ value: Double) -> String {
         guard value.isFinite else { return "–" }
-        switch self {
-        case .x, .y, .anchorX, .anchorY: return "\((value * 10).rounded() / 10) px"
-        case .scaleX, .scaleY, .opacity: return "\(Int((value * 100).rounded()))%"
-        case .rotation: return "\(Int(value.rounded()))°"
-        }
+        let shown = value * displayFactor
+        if decimals == 0 { return "\(Int(shown.rounded()))\(unit)" }
+        return "\((shown * 10).rounded() / 10)\(unit)"
     }
 }
 
@@ -1603,3 +1636,84 @@ import HaloModel
     }
 }
 ```
+
+
+---
+
+## 6. Look
+
+Halo adds no new visual language. It is a `SuiteWindow` app (`docs/design.md`,
+Window structure) whose inspector uses the Studio rows and chips of Flare's
+easing editor, the house reference: `StudioScrubRow` and
+`InspectorSliderRow` bars, `KeyframeButton`, `ChoiceChips`, `CurveEditor`,
+`InspectorPickerRow`, `InspectorColorRow`, small-caps group headers. Colors
+mean what they mean everywhere: accent is selected or active,
+`SuiteColor.keyframed` (amber) is a key, the recording ring is unused (Halo
+has no auto-key in v1).
+
+### What Halo adds to `docs/design.md`
+
+To be added to `docs/design.md` by W0's last task (one short "Halo" subsection
+under Canvas apps), not by this blueprint, since other architects edit that
+file in parallel:
+
+1. **Viewer.** The artboard is drawn by `CanvasSurface`; layers paint in one
+   SwiftUI `Canvas` inside it, flat (content, no glass). The selected layer
+   shows `SelectionOutline` around its world bounds' axis-aligned box. While
+   a rendered frame is shown it replaces the vector drawing inside the same
+   artboard, with a small note under the status bar when it is stale.
+2. **Transport** sits on the status row under the viewer, left of the
+   pills: `TransportCapsule` (#340) with go to start, step back, play/pause,
+   step forward, go to end and a loop toggle. Timecode in `SuiteFont.timecode`
+   ("00:00:01:12" primary, " / 10 s at 30 fps" secondary).
+3. **Timeline lanes** follow the Visual language's Timeline rules: one lane
+   per layer with its span bar (the clip block, slate blue, radius `lane`),
+   key diamonds on it (idle `textSecondary`, selected `accent`, at the
+   playhead `stateKeyed`), easing shown by the diamond's shape (#428:
+   diamond linear, rounded eased, square hold; needs SuiteUI, below).
+4. **Inspector order** for a selected layer: header (layer name; kind, span,
+   parent), TRANSFORM (Position X, Position Y, Scale X, Scale Y, Rotation,
+   Opacity, Anchor X, Anchor Y, each a bar with its `KeyframeButton`), LAYER
+   (Parent, Blend), EASING (the selected layer's key segments, chips, curve),
+   TEXT for a text layer. With no layer selected: the composition header and
+   rows, then the layer list.
+5. **Numbers** show their unit and places from `HaloProperty` (`unit`,
+   `decimals`, `displayFactor`): "960.0 px", "100%", "45°".
+
+### Screens and their components
+
+Components are SuiteUI unless named `Halo*`. "Needs" lists a SuiteUI gap
+(existing issue, or one to file as `needs-ui` on `line:suiteui`); the Halo
+view uses the placeholder named until it lands.
+
+| Screen / region | Contents | Uses | Needs (placeholder meanwhile) |
+|---|---|---|---|
+| Window | Compositions sidebar, viewer content, inspector | `SuiteWindow`, `SidebarSection`, `SidebarItem`, `SidebarRow` (rename), `ToolbarAction` | #577 rename message on the row, for #139 (the alert stays meanwhile) |
+| Viewer empty | "No Composition", New Composition… | `EmptyStateView` | – |
+| Viewer | Artboard, layers, selection, drag, rendered frame | `CanvasSurface`, `SelectionOutline`, `HaloViewerCanvas` (a SwiftUI `Canvas`) | a rotated selection box with handles (#273 moves Design's handles into SuiteUI; v1 uses the axis-aligned `SelectionOutline`); an anchor-point mark (#706; v1 draws none) |
+| Status row | Zoom, size, layer count pills; timecode; transport | `ViewerStatusBar` | `TransportCapsule` (#340; meanwhile plain `Button`s with SF Symbols in an `HStack` inside the status bar's trailing slot) |
+| Timeline | Lanes, spans, diamonds, playhead, scrub, key select | `TimelineStrip`, `TimelineTrack` | key shape by easing and a selected-keys set (Flare S10/S11, not filed: file `needs-ui`; meanwhile plain diamonds and selection shown in the inspector's EASING rows); keyboard and VoiceOver for keys (#63); diamonds on a selected span (#62) |
+| Inspector, composition | Header, Size, Frame Rate, Duration rows, layer list | `InspectorHeader`, `InspectorSection`, `InspectorRow`, `SidebarRow` in a system `List` (reorder with `.onMove`, rename) | – |
+| Inspector, TRANSFORM | 8 bars, each with stopwatch and diamond | `InspectorSliderRow` (unit, decimals, `keyed:`), `KeyframeButton` | values read empty in XCUITest (#262): journeys read the row's `accessibilityValue` from `HaloPropertyRow.text`, set by the Halo view |
+| Inspector, LAYER | Parent, Blend | `InspectorPickerRow` | – |
+| Inspector, EASING | Key segment rows ("Position X 0 → 24"), preset chips, curve, four numbers | `ChoiceChips`, `CurveEditor`, `StudioScrubRow`, group header text style (as `FlareEasingInspector`) | – |
+| Inspector, TEXT | Text field, size bar, color | `TextField` (system), `InspectorSliderRow`, `InspectorColorRow` | – |
+| New Composition sheet | Name, width, height, rate, duration, problems, Create | system `Form`, `TextField`, `Picker` | – (#286 adds `.accessibilityLabel`s in the Halo view) |
+| Render sheet | Format (PNG sequence, Movie), size (Full, Half), destination, Render; progress row "Frame 48 of 240" with Cancel; success with Reveal in Finder; failure with the frame and reason | system `Form`, `Picker(.segmented)`, `ProgressView`, `Button` | – |
+| Alerts | Open and save failures, close with unsaved changes | system `.alert` | – |
+| Menus | File: New Composition…, Open… ⌘O, Open Recent, Save ⌘S, Save As… ⇧⌘S, Render… ⇧⌘R, Render Frame ⌘R. Edit: Undo <step> ⌘Z, Redo <step> ⇧⌘Z, plus the system items. Composition: New ⌥⌘N, Duplicate ⌘D, Delete ⌘⌫. Layer: New ▸ (Solid, Shape, Text, Null), Duplicate ⇧⌘D, Rename, Delete ⌫, Bring Forward ⌘], Send Backward ⌘[. Animation: Play/Pause Space, Loop, Next Frame →, Previous Frame ←, Go to Start Home, Go to End End, Set In Point I, Set Out Point O, Keyframe Easing ▸ (the five presets). Every item works or is disabled with `unavailableHelp(for:)` | `CommandMenu`, `CommandGroup(replacing: .undoRedo)`, `CommandGroup(replacing: .newItem)` | – |
+
+`Duplicate` is ⌘D for compositions today (shipped). Layer > Duplicate takes
+⇧⌘D so the two don't collide; section 9 asks the captain whether ⌘D should
+follow the focus instead.
+
+### Snapshots and goldens this adds
+
+Each feature adds its PNGs (`<app>-<state>-<light|dark>.png`) in its own
+`Tests/AppSnapshotTests/Halo<Area>Snapshots.swift`, and its goldens once
+QH-2 (#331) and QH-2b (#332) land: `halo-viewer-three-layers`,
+`halo-viewer-keyed-frame-12`, `halo-playback-transport`,
+`halo-inspector-transform-keyed`, `halo-inspector-easing`,
+`halo-timeline-keys`, `halo-layer-list`, `halo-render-sheet-progress`,
+`halo-text-layer`, `halo-opened-project` (names follow the open issues where
+they already name one).
