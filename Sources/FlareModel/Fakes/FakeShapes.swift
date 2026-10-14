@@ -1,8 +1,8 @@
 // FakeShapes.swift: ShapeBuilding by hand (docs/blueprints/flare.md, 6.3). Rectangles and ellipses are polygons, a pen
-// path is straight segments with dragged anchors marked smooth; a click on its last anchor adds nothing, it closes on
-// 3 distinct anchors, and one with fewer than 2 distinct points doesn't commit. Each write is one group named by
-// section 2, of real FlareCore commands or `FixtureEdit` where FlareCore has none (path edit, text and instance
-// move, instance delete).
+// path is straight segments with dragged anchors marked smooth; a click within `anchorTolerance` of its last anchor adds
+// nothing, it closes on 3 anchors that far apart, and one whose extent is under it doesn't commit (#561). Each write
+// is one group named by section 2, of real FlareCore commands or `FixtureEdit` where FlareCore has none (path edit,
+// text and instance move, instance delete).
 // Box gestures follow the not-animated / animated rule; a delete that empties a layer removes the layer. The pasteboard holds `AddLayer` envelopes from
 // `CommandRegistry.builtIn`. With `unavailable` set, reads are empty and every write throws it.
 #if canImport(FoundationEssentials)
@@ -23,8 +23,11 @@ public struct FakeShapes: ShapeBuilding {
     public static let ellipseSides = 32
     /// How near the first pen anchor a click closes the path, in scene points.
     public static let closeDistance = 4.0
-    /// What `commit` throws for a pen path with fewer than two distinct points, which has no extent.
-    public static let degeneratePath = "A path needs two distinct points."
+    /// How near two pen anchors are the same anchor, and the smallest extent a pen path commits at, in scene points:
+    /// `FlareWorkspace.clickSlop` at scale 1, so a click's sub-point jitter stacks no anchor and commits no layer.
+    public static let anchorTolerance = 1.0
+    /// What `commit` throws for a pen path whose extent is under `anchorTolerance`.
+    public static let degeneratePath = "A path needs two points at least a point apart."
 
     private func available() throws { if let unavailable { throw NotBuilt(reason: unavailable) } }
     public func unavailableHelp(for tool: FlareTool) -> String? { unavailable }
@@ -50,7 +53,8 @@ public struct FakeShapes: ShapeBuilding {
     private func pen(at point: Point, dragged: Bool, previous: ShapeDraft?) -> ShapeDraft {
         var draft = previous.flatMap { $0.tool == .pen && !$0.isClosed ? $0 : nil }
             ?? ShapeDraft(tool: .pen, shape: FlareShape(points: []))
-        if draft.anchors.last == point { return draft }  // a click on the last anchor adds no zero-length segment
+        // A click near the last anchor adds no near zero-length segment.
+        if let last = draft.anchors.last, Self.near(last, point) { return draft }
         let (dx, dy) = (point.x - (draft.anchors.first?.x ?? .infinity), point.y - (draft.anchors.first?.y ?? 0))
         if Self.distinct(draft.anchors) >= 3, (dx * dx + dy * dy).squareRoot() <= Self.closeDistance {
             draft.isClosed = true
@@ -70,7 +74,7 @@ public struct FakeShapes: ShapeBuilding {
         case .rectangle: "Rectangle"; case .ellipse: "Ellipse"; case .pen: "Path"
         case .select, .directSelect: throw CommandError.invalidDocument("Select doesn't draw.")
         }
-        if draft.tool == .pen, Self.distinct(draft.anchors) < 2 || Self.distinct(draft.shape.points) < 2 {
+        if draft.tool == .pen, !Self.spans(draft.anchors) || !Self.spans(draft.shape.points) {
             throw CommandError.invalidDocument(Self.degeneratePath)
         }
         let owner = LayerOwner.scene(sceneID)
@@ -295,9 +299,21 @@ public struct FakeShapes: ShapeBuilding {
     private static func end(_ e: PathElement) -> Point? {
         switch e { case .move(let p), .line(let p), .quad(_, let p), .cubic(_, _, let p): p; case .close: nil }
     }
-    /// How many different points `points` holds.
+    /// How many points of `points` are not `near` an earlier one.
     private static func distinct(_ points: [Point]) -> Int {
-        points.enumerated().filter { !points.prefix($0.offset).contains($0.element) }.count
+        points.enumerated().filter { p in !points.prefix(p.offset).contains { near($0, p.element) } }.count
+    }
+    /// Whether `a` and `b` are under `anchorTolerance` apart.
+    private static func near(_ a: Point, _ b: Point) -> Bool {
+        let dx = a.x - b.x, dy = a.y - b.y
+        return dx * dx + dy * dy < anchorTolerance * anchorTolerance
+    }
+    /// Whether `points` are all finite and span at least `anchorTolerance` across or down.
+    private static func spans(_ points: [Point]) -> Bool {
+        let xs = points.map(\.x), ys = points.map(\.y)
+        guard (xs + ys).allSatisfy(\.isFinite), let x0 = xs.min(), let x1 = xs.max(), let y0 = ys.min(), let y1 = ys.max()
+        else { return false }
+        return x1 - x0 >= anchorTolerance || y1 - y0 >= anchorTolerance
     }
     /// `a / b`, or 1 when that is not a finite number.
     private static func ratio(_ a: Double, _ b: Double) -> Double { b != 0 && (a / b).isFinite ? a / b : 1 }
