@@ -153,14 +153,6 @@ extension FlareWorkspace {
 
     private mutating func refuseMachine(_ message: String) { machineError = message }
 
-    static func machineMessage(_ error: any Error) -> String {
-        switch error {
-        case CommandError.invalidDocument(let message): message
-        case let error as NotBuilt: error.reason
-        default: "The machine could not be changed (\(error))."
-        }
-    }
-
     private static func machineName(_ name: String) -> String? {
         let trimmed = String(name.drop(while: \.isWhitespace).reversed().drop(while: \.isWhitespace).reversed())
         return trimmed.isEmpty ? nil : trimmed
