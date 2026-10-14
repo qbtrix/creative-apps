@@ -1874,8 +1874,9 @@ and maximum (360) width, in three places:
    content width is the window minus the sidebar and inspector; the grid's
    column count is `max(1, ⌊(W − 2·12 + 12) / (cell + 2·xs + 12)⌋)` (the
    `ThumbnailGrid` padding and spacing, `SuiteSpacing.m` = 12) and equals
-   SuiteUI's `GridSelection.columns` for the same width, so arrow keys and
-   the drawn grid agree; the default cell (160 pt) gives at least 2 columns
+   SuiteUI's `GridSelection.columns` for the same width (that comparison is
+   macOS-only, in `LibraryLayoutSnapshots.swift`), so arrow keys and the
+   drawn grid agree; the default cell (160 pt) gives at least 2 columns
    at the content minimum (440 pt); the loupe's fit scale leaves
    `SuiteSize.canvasInset` on the tighter axis.
 2. **Journey** J12 `testLayoutAtWidths` (macOS, on the 1024 × 768 runner, so
@@ -2130,3 +2131,39 @@ Checklist:
       one (`check_waves.py`).
 - [x] Every feature names the creative-core work it waits on: an existing
       issue (closed ones named), "none", or a one-line spec for a new one.
+
+---
+
+## 9. Critic rounds
+
+(Recorded below after the critic runs.)
+
+---
+
+## 10. Decisions and open questions for the captain
+
+### 10.1 Calls this blueprint makes (recommended; the captain may overturn any)
+
+| # | Decision | Recommended | Alternative |
+|---|---|---|---|
+| D1 | Where the catalog lives in v1 | A JSON file, `catalog.json`, `"version": 1`, behind `CatalogCoding` and `CatalogStoring`, so moving to the SQLite catalog later swaps one live conformance | Wait for CoreCatalog (creative-core#157): it needs a `Package.swift` change (protected) to give LibraryModel CoreCatalog and GRDB, and GRDB on Linux CI is unproven here |
+| D2 | Windows | One `Window` scene: one catalog, one window, so two windows can never overwrite each other's file | `WindowGroup` with a shared catalog object, which breaks "one value-type model per window" and needs a reference type |
+| D3 | A protocol for culling | Yes, so key handling and rules are built in parallel (section 5.1) | No protocol, like Flare decision 14 |
+| D4 | Import and the files | Import is not an undo step; Library never moves, renames or deletes a user's file; no Remove from Catalog in v1 | An undoable import and a Remove from Catalog command (see Q1) |
+| D5 | Issue dependency lines | Rewrite #210, #211, #212, #423's `Depends on` to the spine (section 8.1) | Keep the chain, which serializes wave 2 into four waves |
+| D6 | Catalog state access | `public internal(set)`, as Flare's LM-0a3, so per-feature extension files can write it; the app still can't | `public private(set)` with every mutation in `LibraryCatalog.swift`, which makes it a file every feature edits |
+| D7 | Loupe background | `canvasSurround` in both appearances; the rest of the window follows the system | Follow the system everywhere (a white surround in Light changes how a photo reads) |
+| D8 | Debug budgets for pixel loops | Release target × 20 (Photo's measured debug factor for CoreRaster loops); × 10 for the rest, as the rubric says | × 10 everywhere, which would fail pixel rows on debug CI for no real regression |
+| D9 | #185 and #291 | In v1 (status pills and identifiers), though tier 3 | Leave them p3 after v1 |
+| D10 | Thumbnail cache | Memory only (an LRU of 600), rebuilt each launch | A disk cache next to the catalog; faster relaunch of a big catalog, more to get wrong |
+
+### 10.2 Open questions
+
+| # | Question | Why it matters | Recommendation |
+|---|---|---|---|
+| Q1 | Should v1 let a person remove photos from the catalog (for example all rejects)? | Culling ends in "get rid of the rejects"; without it rejects stay in the grid forever. No issue asks for it | Yes, as "Remove Rejected from Catalog" (never deleting files), one undo step, added to the cull feature; it is small |
+| Q2 | Is 4:5 meant to flip with the photo's orientation (5:4 on a landscape)? | `CropAspect.ratio(for:)` flips 3:2, 4:5 and 16:9 to the photo's orientation | Keep the flip; the chips' titles stay as written |
+| Q3 | If QB-LIB-6's model half misses on CI, may develop file the fused-pass core issue? | Four separate CoreRaster passes over a 512 px preview may not fit 8 ms in release | Yes, with the spec in section 8.3 |
+| Q4 | May the blueprint's merge be followed by filing S-L1 to S-L5 as `needs-ui` issues on `line:suiteui`? | The UI track's placeholders are fine, but SuiteUI should start early | Yes, filed by the first feature lead that needs each |
+| Q5 | Single-key menu equivalents (0–5, P, X, U, R, G) | An unmodified key equivalent can fire while a text field is focused; the content's `onKeyPress` cannot | Keys through `onKeyPress` only; menu items show no key equivalent unless current AppKit docs confirm text fields win. The spine checks this with the docs tools |
+| Q6 | Exposure range | ±5 stops is wider than CoreRaster's other sliders (which are −100…100) | Keep ±5 EV, step 0.01, two decimals |
