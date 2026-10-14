@@ -5,7 +5,8 @@
 // panel, and keeps the picture rendered (CanvasRenderer) whenever the
 // workspace's revision moves. Canvas drags carry
 // the pen's pressure (PointerPressure) and, while they last, AppKit's mouse
-// event coalescing is off so every pointer sample arrives. Files go through
+// event coalescing is off so every pointer sample arrives; StrokePacer hands
+// them to the workspace once per display frame. Files go through
 // ImageIOCodec; the open and save panels are AppKit's. Save writes over the
 // open file in its own format; a new image or a HEIC goes to Save As, which
 // asks where (PNG or JPEG by the name's extension) and makes that file the
@@ -24,6 +25,7 @@ import UniformTypeIdentifiers
 struct PhotoWindow: View {
     @State private var model = PhotoWorkspace()
     @State private var renderer = CanvasRenderer()
+    @State private var pacer = StrokePacer()
     @State private var zoom = 1.0
     @State private var viewport = CGSize.zero
     /// A new image waits to be fitted until the canvas has a size.
@@ -90,6 +92,8 @@ struct PhotoWindow: View {
     }
 
     private func perform(_ intent: PhotoIntent) {
+        // Drag samples still waiting for the display frame land first.
+        if case .drag = intent {} else { pacer.flush() }
         switch intent {
         case .newImage:
             // 1920 x 1080 is a size CoreRaster always accepts, so this never throws.
@@ -110,11 +114,11 @@ struct PhotoWindow: View {
         case .drag(let from, let to):
             // Every pointer sample while drawing, not AppKit's merged ones; the drag's end turns merging back on.
             NSEvent.isMouseCoalescingEnabled = false
-            model.drag(
-                from: Mask.Point(x: from.x, y: from.y), to: Mask.Point(x: to.x, y: to.y),
-                pressure: PointerPressure.current)
+            let move = (Mask.Point(x: from.x, y: from.y), Mask.Point(x: to.x, y: to.y), PointerPressure.current)
+            pacer.add(move) { model.drags($0) }
         case .endDrag:
             NSEvent.isMouseCoalescingEnabled = true
+            pacer.stop()
             model.endDrag()
         case .toolOption(let edit): model.setToolOption(edit)
         case .adjust(let edit): model.adjust(edit)

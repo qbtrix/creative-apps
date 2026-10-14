@@ -1,7 +1,8 @@
 // PhotoStroke.swift: what each tool does with a drag on the canvas. The canvas
 // sends every pointer move as `drag(from:to:pressure:)` in canvas pixels (a
-// click is a drag that doesn't move) and `endDrag()` when the pointer lifts;
-// one drag is one undo step.
+// click is a drag that doesn't move), or a display frame's moves at once as
+// `drags(_:)`, one revision for all of them, and `endDrag()` when the pointer
+// lifts; one drag is one undo step.
 //
 //   brush, eraser  a round stroke through the pointer samples on the selected
 //                  layer: a centripetal Catmull-Rom curve, so sparse samples
@@ -70,6 +71,15 @@ extension PhotoWorkspace {
             moveSelectedLayer(current, to: end)
         }
         stroke = current
+    }
+
+    /// Several pointer moves in order, as one change to the canvas: one
+    /// revision whose damage covers them all, however many samples a display
+    /// frame brought.
+    public mutating func drags(_ moves: [(from: Mask.Point, to: Mask.Point, pressure: Double)]) {
+        let start = revision
+        for move in moves { drag(from: move.from, to: move.to, pressure: move.pressure) }
+        foldRevisions(since: start)
     }
 
     /// Ends the drag: records its undo step, or for a click, clears what a

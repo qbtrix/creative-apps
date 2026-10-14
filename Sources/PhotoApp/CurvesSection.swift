@@ -9,7 +9,9 @@
 // AdjustmentsPanel is the Adjust tab's sections for a workspace. It keeps the
 // histogram as presentation state and counts it off the main actor only when
 // curvesHistogramKey changes (pixels, layers, exposure, levels), never during
-// a curve drag. Values in, intents out.
+// a curve drag, and not during a canvas drag either: a brush stroke changes
+// the pixels every frame, so the count waits for the drag's end. Values in,
+// intents out.
 import CoreRaster
 import PhotoModel
 import SuiteUI
@@ -41,7 +43,9 @@ struct AdjustmentsPanel: View {
         AdjustmentsInspector(
             settings: model.adjustments, onEdit: { perform(.adjust($0)) }, histogram: histogram,
             onEditEnd: { perform(.endAdjust) })
-        .task(id: model.curvesHistogramKey) {
+        // Nil while dragging, so a brush stroke never recounts; its end does, once.
+        .task(id: model.isDragging ? nil : model.curvesHistogramKey) {
+            guard !model.isDragging else { return }
             let workspace = model
             let counted = await Task.detached(priority: .userInitiated) { workspace.curvesHistogram() }.value
             if !Task.isCancelled { histogram = counted }
