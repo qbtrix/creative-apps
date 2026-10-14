@@ -67,6 +67,7 @@ extension EditorTopBar {
         .menuIndicator(.hidden)
         .fixedSize()
         .help(title)
+        .accessibilityIdentifier("suite.document-menu")
     }
 }
 

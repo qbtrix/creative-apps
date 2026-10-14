@@ -49,6 +49,11 @@ struct LibraryLoupe: View {
                 }
                 return .handled
             }
+            // Focusable, it is one accessibility element; with no role it reads
+            // as static text, and the app audit measured the photo as its ink.
+            // A labelled container keeps the position readout inside it.
+            .accessibilityElement(children: .contain)
+            .accessibilityLabel("Loupe")
             .accessibilityIdentifier("library.loupe")
     }
 }

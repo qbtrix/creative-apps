@@ -31,6 +31,7 @@ struct DesignCanvas: View {
                 "No File Open", systemImage: "square.on.square.dashed",
                 message: "Create a file to lay out frames, shapes and text.",
                 action: ToolbarAction("New File", systemImage: "plus") { perform(.newFile) })
+            .accessibilityIdentifier("design.new-file")
         }
     }
 

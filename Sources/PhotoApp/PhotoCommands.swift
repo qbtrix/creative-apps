@@ -5,9 +5,12 @@
 // Layer Above and Below; View: Zoom In, Zoom Out, Actual Size, Fit on Screen.
 // The focused window publishes a PhotoMenu (what can run now, and where to
 // send it) as a focused scene value; an item that can't run is disabled, never
-// hidden. Select > All is disabled while a sheet or the rename alert is up, so
-// Command-A reaches the focused text field and selects its text (#575). Every
-// top bar command is here too.
+// hidden. Select > All owns Command-A, so while a text field is being edited
+// (a sheet's, the rename alert's, an inspector number) it selects that field's
+// text instead, and it never selects the canvas while a sheet or alert is up
+// (#575). A disabled item would swallow the key, so it is disabled only for a
+// focused window with no image. Every top bar command is here too.
+import AppKit
 import PhotoModel
 import SwiftUI
 
@@ -34,6 +37,16 @@ struct PhotoMenu {
 
     /// Select > All acts on the canvas, so not while a sheet is up.
     var canSelectAll: Bool { hasImage && !isPresenting }
+
+    /// Command-A: all of the focused text field's text while one is being
+    /// edited, else the canvas when it can be selected.
+    @MainActor func selectAll() {
+        if (NSApp.keyWindow?.firstResponder as? NSTextView)?.isEditable == true {
+            _ = NSApp.sendAction(#selector(NSText.selectAll(_:)), to: nil, from: nil)
+        } else if canSelectAll {
+            perform(.selectAll)
+        }
+    }
 
     init() {}
 
@@ -98,7 +111,9 @@ struct PhotoCommands: Commands {
             Button("Fill Selection") { menu.perform(.fillSelection) }.disabled(!menu.canEditSelection)
         }
         CommandMenu("Select") {
-            Button("All") { menu.perform(.selectAll) }.keyboardShortcut("a").disabled(!menu.canSelectAll)
+            // Off only for a focused window with no image: a sheet's window may
+            // not carry the focused value, and its field still needs Command-A.
+            Button("All") { menu.selectAll() }.keyboardShortcut("a").disabled(focused.map { !$0.hasImage } ?? false)
             Button("Deselect") { menu.perform(.deselect) }.keyboardShortcut("d").disabled(!menu.canDeselect)
         }
         CommandMenu("Image") {

@@ -12,7 +12,8 @@
 // parent of the selection selects the parent (#121). Each layer is SuiteUI's
 // SidebarRow with an eye and a lock toggle (`layerToggles`); a click flips
 // that layer's own flag, one undo step (#45). A layer hidden by itself or by
-// a group around it reads dimmed, and a child of a hidden or locked group
+// a group around it reads dimmed (SuiteColor.textSecondary, which keeps 4.5:1
+// on a highlighted row), and a child of a hidden or locked group
 // shows the group's state in its toggles. Each row carries the identifier
 // `design.layer.<id>`: a leaf row is a container with its toggles inside, and a
 // group's row, its disclosure's label, reads as one checkbox, so the identifier
@@ -86,12 +87,14 @@ struct DesignLayersPanel: View {
     private var pageActions: some View {
         HStack(spacing: 0) {
             EditorBarItem(ToolbarAction("Add Page", systemImage: "plus") { perform(.addPage) }, showsTitle: false)
+                .accessibilityIdentifier("design.page.add")
             EditorBarItem(
                 ToolbarAction(
                     "Delete Page", systemImage: "trash",
                     unavailableHelp: model.canDeletePage ? nil : "A file keeps at least one page.") {
                     perform(.deletePage)
                 }, showsTitle: false)
+            .accessibilityIdentifier("design.page.delete")
             Spacer(minLength: 0)
         }
     }
@@ -169,7 +172,7 @@ private struct DesignLayerRow: View {
         )
         .lineLimit(1)
         .truncationMode(.middle)
-        .foregroundStyle(model.isHiddenInTree(id) ? SuiteColor.secondaryText : Color.primary)
+        .foregroundStyle(model.isHiddenInTree(id) ? SuiteColor.textSecondary : Color.primary)
         .simultaneousGesture(TapGesture().modifiers(.shift).onEnded { perform(.toggleSelect(id)) })
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("design.layer.\(id)")
