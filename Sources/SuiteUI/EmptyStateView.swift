@@ -1,6 +1,8 @@
 // EmptyStateView.swift: what a pane shows when it has nothing to show. Built
 // on the system ContentUnavailableView. Says what to do next and, when there
-// is one, offers the button that does it (the one prominent action).
+// is one, offers the button that does it (the one prominent action, listed in
+// `suite.controls` with role "primary" when it has an identifier; disabled,
+// saying why, while it can't run).
 import SwiftUI
 
 public struct EmptyStateView: View {
@@ -26,6 +28,9 @@ public struct EmptyStateView: View {
                 Button(action.title, action: action.perform)
                     .buttonStyle(.borderedProminent)
                     .controlSize(.large)
+                    .disabled(!action.isEnabled)
+                    .help(action.help)
+                    .suiteControl(action, role: "primary")
             }
         }
     }
