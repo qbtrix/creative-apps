@@ -19,7 +19,8 @@ struct DesignPlacedText: Sendable, Equatable {
 }
 
 extension DesignWorkspace {
-    /// Starts editing a text node, selecting it. Refused for an unknown, non-text or locked node.
+    /// Starts editing a text node, selecting it. Refused for an unknown or non-text node, and
+    /// for one that is locked or inside a locked group (#535).
     public mutating func beginTextEdit(_ id: String) throws(DesignTreeError) {
         let node = try textNode(id)
         if editingTextID == id { return }
@@ -43,7 +44,7 @@ extension DesignWorkspace {
             guard !isBlank else { return rewind(to: placed.before) }
             _ = pages.update(id) { $0.text = draft }
             record("Add Text", before: placed.before)
-        } else if !isBlank, let node = findNode(id), !node.isLocked, node.text != draft {
+        } else if !isBlank, !isLockedInTree(id), let node = findNode(id), node.text != draft {
             let before = snapshot
             _ = pages.update(id) { $0.text = draft }
             record("Edit Text", before: before)
@@ -59,7 +60,7 @@ extension DesignWorkspace {
     }
 
     /// Sets a text node's text as the step "Edit Text". Refused for an unknown, non-text or
-    /// locked node, and for empty or whitespace text.
+    /// locked node (its own lock or a group's), and for empty or whitespace text.
     public mutating func setText(_ id: String, _ text: String) throws(DesignTreeError) {
         _ = try textNode(id)
         guard !text.allSatisfy(\.isWhitespace) else { throw .emptyText }
@@ -76,7 +77,7 @@ extension DesignWorkspace {
     private func textNode(_ id: String) throws(DesignTreeError) -> DesignNode {
         guard let node = findNode(id) else { throw .unknownID(id) }
         guard node.kind == .text else { throw .notText(id) }
-        guard !node.isLocked else { throw .locked(id) }
+        guard !isLockedInTree(id) else { throw .locked(id) }
         return node
     }
 }
