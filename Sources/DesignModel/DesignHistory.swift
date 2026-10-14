@@ -14,7 +14,8 @@
 // document's back (nil until it is saved), and Save writes the right file (#436).
 //
 // A run of edits with the same coalescing key (one node's frame, nudges) is one
-// step; an undo or redo ends the run. A new edit clears Redo. The history keeps
+// step; an undo or redo ends the run, and so does endEditRun, which the
+// inspector sends when a scrub drag or field entry ends (#536). A new edit clears Redo. The history keeps
 // the last 100 steps. An edit that changed nothing records nothing; New File
 // over a file with a location changes that location, so it always records (#492).
 // ponytail: one whole-document snapshot per step (copy-on-write, so edits share
@@ -138,6 +139,10 @@ extension DesignWorkspace {
         (selectedPageID, selectedNodeIDs, expandedNodeIDs) = (snapshot.selectedPageID, snapshot.selectedNodeIDs, snapshot.expandedNodeIDs)
         (pageCount, nodeCount) = (snapshot.pageCount, snapshot.nodeCount)
     }
+
+    /// Ends the edit run in progress (one scrub drag, one committed field entry), so the next
+    /// coalescing edit, even to the same field of the same node, is its own undo step (#536).
+    public mutating func endEditRun() { endRun() }
 
     /// Stops the last step from absorbing the next edit.
     private mutating func endRun() {
