@@ -8,7 +8,7 @@ lists its tasks, owned files and acceptance tests.
 
 | wave | feature | packet | covers | waits on | feature issue |
 |---|---|---|---|---|---|
-| 1 | Never lose work, and play and draw at full quality on the Mac | `mac-platform.md` | #739, #373, #372, #370 | nothing | #741 |
+| 1 | Never lose work, and play and draw at full quality on the Mac | `mac-platform.md` | #739, #373, #372, #370 | nothing | #754 |
 | 2 | Export on preview data | `export-preview.md` | #324 | mac-platform (both edit `docs/c4/model.json`) | filed when wave 2 opens |
 | 2 | Draw and select on real documents | `live-stage.md` | #357, #740 | creative-core #213, #214, #215, #182, #173, #216 | filed when wave 2 opens |
 | 2 | Key, retime and ease on real documents | `live-keys.md` | #13, #358 | creative-core #171, #216, #219 | filed when wave 2 opens |
