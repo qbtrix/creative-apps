@@ -468,3 +468,257 @@ one (Q1); it is one constant, `SuiteIdentity.prefix`.
 **Threads.** Store reads and writes, thumbnail writes and hand-off file I/O
 run off the main thread in each process; the main thread only applies the
 decoded value. Nothing in the suite store blocks a window.
+
+---
+
+## 3. Usage map
+
+`docs/priorities.md` ranks features inside each app. The suite's own
+features rank the same way: tier 1 is touched in nearly every session, tier
+2 weekly, tier 3 occasionally or once. A dependency is never ranked below
+what needs it. Clean-room as priorities.md: public sources only, no other
+app opened or run, and no product named.
+
+Sources added for the suite rows (public, platform guidance and surveys):
+
+- Apple HIG, Onboarding: "design a flow that's fast, fun, and optional … If
+  you let people skip the tutorial … don't present it again on subsequent
+  launches" (https://developer.apple.com/design/human-interface-guidelines/onboarding).
+- Apple HIG, File management, Drag and drop, Settings, The menu bar
+  (https://developer.apple.com/design/human-interface-guidelines/file-management,
+  …/drag-and-drop, …/settings, …/the-menu-bar): recents and Open Recent,
+  dropping files, one Settings window per app opened with Command-comma.
+- The surveys priorities.md already cites: the 2019 motion design survey
+  (most respondents use several creative apps together in one project), the
+  photo editing software survey (a catalog plus an editor as the common
+  pair), and the 2022 UX tools survey (designers hand assets to animation
+  and prototyping tools).
+
+No public study counts how often people switch apps or paste between them.
+Rows marked *inferred* rest on the platform guidance and on the shape of
+the apps' own tier-1 loops; they are the first to move if usage data turns
+up.
+
+### Tier 1: nearly every session (`p1`)
+
+| # | Feature | Why tier 1 | Source |
+|---|---|---|---|
+| 1 | Packaging: one bundle, shared frameworks, document types | Nothing else can ship without it ("p1 by dependency") | captain's brief |
+| 2 | Home: recents across apps, open one | Every session starts by finding work; the menu bar's Open Recent is the platform's first route back to work | HIG File management |
+| 3 | New document by type (home tiles and presets) | Every new piece of work starts here | each app's tier 1 ("open or create a document", CLAUDE.md Journeys first) |
+| 4 | Switch between apps, state kept | The captain's brief: switching is instant; mixed-app projects are the norm | motion survey; brief |
+| 5 | One recents list (home and each app's Open Recent) | Same as 2, from inside an app | HIG File management |
+| 6 | Finder routing: double-click a suite document opens the right app | The platform's main route to a file; Photo's Q7 asks for it | HIG File management; #768 Q7 |
+| 7 | Copy and paste between apps (colours, vector art, images, text) | Copy and paste is in every app's tier 1 (#415, #384, Photo PV-2); across apps it is the cheapest connection. *Inferred* | priorities.md (Flare 5, Design 7) |
+
+### Tier 2: weekly (`p2`)
+
+| # | Feature | Why | Source |
+|---|---|---|---|
+| 8 | Library → Photo → Library round trip | The catalog-plus-editor pair; Library's "rare deep edit" | photo survey; #769 section 1.1 |
+| 9 | Open In ▸ (another app that reads this document) | The route for 8, 15 and for images | *inferred* |
+| 10 | Drag and drop between apps and from the Finder onto the home | Second route after paste | HIG Drag and drop |
+| 11 | Shared colour library | Designers reuse brand colours across files and tools | UX tools survey; Design #20 |
+| 12 | Shared asset library (vector art, images, animations) | Reuse across apps; Flare's "shared suite library" Later item | UX tools survey; flare.md section 1 |
+| 13 | Settings window (one, per-app panes) | ⌘, must work in every app (no dead menu items); few options | HIG Settings |
+| 14 | Updater | Weekly to monthly; must exist before the first public build | *inferred* |
+
+### Tier 3: specialist or occasional (`p3`)
+
+| # | Feature | Why | Source |
+|---|---|---|---|
+| 15 | Linked placement (Design asset in Flare or Halo, update when it changes) | A pro workflow on top of 12 | *inferred* |
+| 16 | Flare animation in Halo | Halo calls it Later (H10); specialist | #767 section 1 |
+| 17 | Onboarding | Once per install, skippable | HIG Onboarding |
+| 18 | Size measured and budgeted in CI | Release quality; no user touches it, but it gates packaging (1) | captain's brief |
+
+Size measurement (18) is built with packaging (1) because packaging's
+acceptance needs it; its rank says it never blocks a tier-1 journey.
+
+---
+
+## 4. Journeys
+
+### 4.1 How the journeys run
+
+- **Bundle.** `UITests/AfterGlowJourneyTests*.swift`, one `XCTestCase` per
+  file, in the `AfterGlowJourneyTests` bundle that BU-3 adds to
+  `project.yml`. They need the per-file journey template of SuiteUI QH-4
+  (#333, SuiteUI wave 1), which compiles `UITests/<target>*.swift`; until it
+  lands the suite's first journeys live in `UITests/AfterGlowJourneyTests.swift`.
+- **Launch.** `Journey` launches `.build/apps/AfterGlow.app` by path with
+  `-ApplePersistenceIgnoreState YES`, `-SuiteSupportDir <tmp>` (a fresh store
+  per test), `-SuiteSkipOnboarding YES` (except SJ18), `-SuiteFixture <name>`
+  and, for perf, `-SuitePerfProbe YES`. The launcher passes `-SuiteSupportDir`,
+  `-SuitePerfProbe` and each app's fixture flag on to an app it launches cold
+  (`NSWorkspace.OpenConfiguration.arguments`). An embedded app is driven
+  through `XCUIApplication(bundleIdentifier:)` once it runs. `tearDown`
+  terminates every suite process.
+- **Fixtures** (`SuiteFixtures`, SuiteModel, written into the tmp store at
+  launch; each app's documents come from that app's own fixtures):
+
+| Fixture | Contents |
+|---|---|
+| `empty` | no recents, no assets |
+| `weekOfWork` | 8 recents over 7 days: `Logo.design`, `Cards.design`, `Bounce.flare`, `Intro.halo`, `beach.ora`, `Title.flare`, `Sunset.png`, `Logo animated.flare`; thumbnails; files written into `<tmp>/Documents` from each app's fixture (`cards`, `bounce`, a Halo comp, a two-layer `.ora`) |
+| `missing` | `weekOfWork` with `Cards.design` deleted from disk |
+| `roundTrip` | a Library catalog of 3 photos (Library's `LibrarySample` seed 2026) and an empty Photo |
+| `assets` | 6 colours (two in Display P3), 2 vector assets (from Design's `cards`), 1 image, 1 animation (`bounce`) |
+
+- **Waiting and timing.** As the Flare blueprint: state changes are awaited
+  with `waitForExistence` or a value predicate (2 s); timing claims come
+  only from probe marks. Cross-process timings use marks from two processes
+  on the same clock (`mach_continuous_time`, system wide), written by the
+  launcher's and the app's `FrameProbe` and read from both `suite.perf`
+  values.
+- **Identifiers.** Every control the suite adds carries `afterglow.<area>.<name>`
+  (home, assets, settings, onboarding, update) or `suite.<name>` (the shared
+  menus inside the apps).
+- Every step shoots the window; the audit runs on every shot under the new
+  `afterglow` key in `UITests/audit-baseline.json`, starting at 0 for every
+  check (adding an app at 0 is not a loosening; app-audit.md).
+
+### 4.2 Tier-1 journeys
+
+Each row: the test (file, owning feature), the fixture, steps (each a
+shot), what it asserts, and the empty, error and loading states it passes
+through.
+
+**SJ0 `testLaunchShowsHomeAndEveryMenu`** (`AfterGlowJourneyTests.swift`, home) · `weekOfWork`
+1. Launch. The home window is frontmost: sidebar (Home, Assets, then one
+   row per app), the New row (five tiles), Recents grid, running apps strip
+   (empty).
+2. `openEachMenu()`: AfterGlow, File, Edit, View, Window, Help.
+3. Read `suite.controls`; click each enabled `afterglow.*` control, Escape.
+
+Asserts: 8 recent cards newest first; every menu's item count equals
+section 6.2's list; every enabled control changed the shot or a value, every
+disabled one has a reason. *Empty:* none here (SJ1b). *Error:* none.
+*Loading:* the probe's `recents-ready` mark precedes the first shot.
+
+**SJ1 `testHomeFindsAndOpensRecentWork`** (`+Home`, home) · `weekOfWork`, then `missing`, then `empty`
+1. Launch; type "logo" in the search field → 2 cards (`Logo.design`,
+   `Logo animated.flare`).
+2. Click the Design filter chip → 1 card.
+3. Return on the card → Design comes forward with "Logo.design" as its
+   window title; the launcher stays running.
+4. ⌃⌘0 → the home is frontmost again.
+5. Relaunch on `missing`: the `Cards.design` card shows "Missing" with the
+   warning symbol; Return on it → inline "Cards.design was moved or deleted."
+   with Locate… and Remove from Recents; Remove → 7 cards.
+6. Relaunch on `empty`: the empty state.
+
+Asserts: counts per step; Design's `XCUIApplication` state is
+`runningForeground` and its window title; the home's after ⌃⌘0. *Empty:*
+"No recent work yet. Start something new above, or open a file." with
+Open… as the one prominent button. *Error:* the missing-file message in
+place, never an alert. *Loading:* a card whose thumbnail has not loaded
+shows its app's symbol on the `panel` fill (snapshot `afterglow-home-loading`).
+
+**SJ2 `testNewDocumentByType`** (`+New`, home) · `empty`
+1. Click the "Vertical 9:16" preset chip under New Animation → Flare comes
+   forward with a new untitled animation.
+2. ⌃⌘0; New Design → Design's new untitled file.
+3. ⌃⌘0; New Image → Photo's New Image sheet.
+4. ⌃⌘0; New Composition → Halo's New Composition sheet.
+5. ⌃⌘0; Import Photos… → Library comes forward with its Import Folder panel.
+
+Asserts: each app frontmost with the named window or sheet; Flare's info
+card reads 1080 × 1920 (once Flare's F11b #350/#351 land; until then the
+window title "Untitled" only). *Empty:* the empty home is the start state.
+*Error:* launched with `-SuiteFixture empty -SuiteHideApp halo` (test-only
+flag that makes the router treat Halo as missing): the Halo tile is
+disabled with "Halo is missing from AfterGlow. Reinstall AfterGlow to get
+it back." *Loading:* while an app launches cold, its tile shows a progress
+ring after 100 ms (probe mark `tile-progress`, QB-L9).
+
+**SJ3 `testSwitchKeepsEachAppAsLeft`** (`+Switch`, switching) · `weekOfWork`
+1. Open `Bounce.flare` from the home; in Flare go to frame 12, select Ball,
+   zoom to 200%.
+2. ⌃⌘2 → Design comes forward (opens with no document: its empty state).
+3. ⌃⌘1 → Flare comes forward.
+4. Window > Switch To > Home (⌃⌘0); in the running strip click Flare.
+5. In Flare ⌘W (close the last window), then ⌃⌘1.
+
+Asserts: after 3 and 4, Flare's frame readout 12, selection Ball, zoom pill
+200%, same window; after 5 Flare is still running (it never quit) and
+opens a window (the empty state, as a reopen). The strip lists Flare and
+Design with a running dot. *Empty:* Design's own empty state at step 2.
+*Error:* switching to an app that crashed since: the strip drops it within
+1 s and ⌃⌘<n> launches it cold (Model test `SwitchRunStateTests`; the
+journey kills Design with `terminate()` and asserts the strip). *Loading:*
+the cold launch at step 2 shows the menu item's progress in the home strip
+(probe `switch-cold`).
+
+**SJ4 `testOneRecentsList`** (`+Recents`, recents-open-in) · `empty`
+1. New Design; draw a rectangle; ⌘S (`-DesignSaveTo <tmp>/Card.design`).
+2. ⌃⌘0 → the home's first card is `Card.design` with a thumbnail.
+3. New Animation; ⌘S (`-FlareSaveTo <tmp>/Hop.flare`).
+4. In Flare, File > Open Recent → `Hop.flare` only; in Design → `Card.design`
+   only.
+5. In Design, File > Open Recent > Clear Menu → the home shows only
+   `Hop.flare`.
+
+Asserts: the lists at each step; the thumbnail file exists in the store.
+*Empty:* Open Recent's "No Recent Files" state in a fresh app (before step
+1). *Error:* save fails (read-only folder) → nothing is added (the app's own
+"Not saved" state). *Loading:* none (the list is local).
+
+**SJ5 `testFinderOpenRoutesToTheRightApp`** (`+Routing`, recents-open-in) · `weekOfWork`
+1. The test runner opens `<tmp>/Documents/Cards.design` with
+   `NSWorkspace.open(_:withApplicationAt:configuration:)` at `AfterGlow.app`.
+2. The same for `Bounce.flare`, `Intro.halo`, `beach.ora`, `Sunset.png`.
+3. The same for `notes.txt`.
+
+Asserts: each file's app is frontmost with that window title; the launcher
+opened no window for steps 1–2 (its window count is unchanged); `Sunset.png`
+opens in Photo. *Error:* step 3 shows the home with "AfterGlow can't open
+“notes.txt”. It isn't a suite document or an image." *Empty:* none.
+*Loading:* the app's own open progress (QB-L9 in that app).
+
+**SJ6 `testCopyPasteBetweenApps`** (`+Paste`, clipboard-drag) · `weekOfWork`
+1. In Design (`Cards.design`) select the blue card; ⌘C.
+2. ⌃⌘1; in Flare (new animation) ⌘V.
+3. In Design, the card's FILL row > Copy Color; in Flare select the pasted
+   layer, FILL row > Paste Color.
+4. In Library (fixture photos) select a photo in the loupe; ⌘C; ⌃⌘3; in
+   Photo File > New from Clipboard (or ⌘V on the empty state).
+5. In Flare, with an image on the pasteboard, open the Edit menu.
+
+Asserts: Flare's layer list gains "Card" with the card's fill hex and a
+path of the same bounds (±0.5 pt); after 3 the fill hex equals Design's;
+Photo's new image has the photo's pixel size; at 5 Paste is disabled with
+"Flare can't paste images yet." Each paste is one undo step ("Undo Paste").
+*Empty:* paste with an empty pasteboard is disabled "Nothing to paste."
+*Error:* a damaged suite envelope falls back to the next representation
+(SVG, then PNG) and says nothing; with none readable, the disabled reason.
+*Loading:* pasting a 24 MP image shows progress after 100 ms (probe
+`paste-progress`).
+
+### 4.3 Tier-2 and tier-3 journeys
+
+| # | Test (file, feature) | Fixture | Steps | Asserts; empty / error / loading |
+|---|---|---|---|---|
+| SJ10 | `testEditInPhotoAndBack` (`+RoundTrip`, photo-round-trip) | `roundTrip` | Library loupe on photo 2; Photo menu Edit in Photo (⌘E); in Photo raise exposure via a Photo tool; ⌘S; ⌃⌘4 | Photo's title "IMG_0002 (Library edit)"; Library shows a stack of 2 with the edited copy first and the original unchanged byte for byte; the edit's thumbnail differs from the original's. Error: original missing → "The original of IMG_0002 is missing. Locate it in Library first."; Photo closed without saving → the session ends, nothing added; loading: progress in Library's status pill while Photo opens (probe) |
+| SJ11 | `testOpenIn` (`+OpenIn`, recents-open-in) | `weekOfWork` | In Photo with `Sunset.png`, File > Open In ▸; pick Library | the submenu lists Library only (Photo excluded); Library imports the file and selects it. Empty: a document no other app reads → the submenu item is disabled "No other app opens PNG files." |
+| SJ12 | `testSettingsFromAnyApp` (`+Settings`, settings) | `empty` | In Flare ⌘, ; change General > Units to Centimeters; open Design; its rulers | the AfterGlow Settings window opens at the Flare pane; Design's ruler unit reads cm within 500 ms (QB-S8); ⌘, in the launcher opens General |
+| SJ13 | `testSharedColoursAndAssets` (`+Assets`, shared-assets) | `assets` | Home > Assets; add a colour from Design's colour popover ("Add to Suite Colours"); in Flare the FILL popover's Suite Colours section; click it | the Assets page count +1; Flare shows the same 7 swatches; the fill equals the swatch exactly (sRGB and P3 kept). Empty: "No assets yet. Use Add to Assets in any app." |
+| SJ14 | `testDragBetweenApps` (`+Drag`, clipboard-drag) | `weekOfWork` | drag the `Sunset.png` card from the home onto Photo's empty canvas; drag a Library thumbnail onto Photo | Photo opens it / adds it as a layer; the drag source shows a drag preview (probe) |
+| SJ15 | `testCheckForUpdates` (`+Update`, updater) | `-SuiteUpdateFeed file://<tmp>/feed.json` with a newer version | AfterGlow > Check for Updates… | the offer sheet with version and notes; Later closes it; a bad signature fixture → "This update couldn't be verified, so it wasn't installed." Loading: progress within 100 ms |
+| SJ16 | `testPlaceLinkedDesignAsset` (`+Links`, linked-assets) | `assets` | Assets page: drag the vector asset into Flare's stage; in Design edit the asset and Update Asset; back in Flare | Flare's layer shows the link badge; then "Update available"; Update → one undo step "Undo Update Linked Asset"; Missing source → "Linked asset is missing; using the last copy." |
+| SJ17 | `testOpenFlareInHalo` (`+FlareInHalo`, flare-in-halo) | `weekOfWork` | In Flare with `Bounce.flare`, File > Open In ▸ Halo | Halo makes a composition 1920 × 1080, 24 fps, 48 frames with one animation layer "Bounce"; Halo's frame 12 equals Flare's PNG export of frame 12 (QB-SV4) |
+| SJ18 | `testFirstLaunchOnboarding` (`+Onboarding`, onboarding) | `empty`, no skip flag | launch; Continue ×2 choosing "Photos"; Open Sample | the home orders Library and Photo first; relaunch shows no onboarding; Settings > General > Show Welcome Again brings it back |
+| SJ19 | `testEveryControlActsOrSaysWhy` (`+EveryControl`, home) | `weekOfWork` | the `suite.controls` sweep for home, Assets, Settings | as Flare's J29; never cited by the matrix |
+
+### 4.4 Perf journeys (`+Perf`, each feature its own)
+
+| # | Test | Measures | Budget (section 7.1) |
+|---|---|---|---|
+| SP1 | `testSwitchToRunningAppLatency` | 30 switches ⌃⌘1/⌃⌘2 between two running apps; marks: key event in the source, `didBecomeActive` and first frame of the key window in the target | QB-S1 |
+| SP2 | `testColdOpenEachApp` | home tile → first frame of the app's window, each app once, after a purge of the app's process | QB-S2 |
+| SP3 | `testHomeFirstFrameAndRecents` | AfterGlow launch → first frame; first frame → `recents-ready` with 200 recents | QB-S3 |
+| SP4 | `testRecentsSearchKeystrokes` | 20 keystrokes in search over 200 recents | QB-S4 |
+| SP5 | `testPasteAcrossApps` | ⌘V of a 50-shape Design selection in Flare; of a 24 MP image in Photo | QB-S5 |
+| SP6 | `testRoutedOpen` | `NSWorkspace.open` at the launcher → first frame of the document window, app running and app cold | QB-S6 |
+| SP7 | `testRoundTripLatency` | Edit in Photo → Photo's first frame with the image; Photo ⌘S → Library's thumbnail updated | QB-S7 |
+| SP8 | `testPreferencePropagation` | a setting changed in Settings → the change applied in each running app | QB-S8 |
