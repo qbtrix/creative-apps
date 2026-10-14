@@ -235,6 +235,14 @@ final class PhotoJourneyTests: XCTestCase {
         photo.drag(on: "suite.canvas", from: CGVector(dx: 0.2, dy: 0.3), to: CGVector(dx: 0.3, dy: 0.3), step: "cloned")
         XCTAssert(photo.app.buttons["Undo Clone"].waitForExistence(timeout: 5), "the clone stroke made no Clone step")
 
+        // Heal (#422): sample the sky, then paint over the sun's edge so it takes the tone it lands on.
+        tools["Heal"].click()
+        XCUIElement.perform(withKeyModifiers: .option) {
+            photo.element("suite.canvas").coordinate(withNormalizedOffset: CGVector(dx: 0.2, dy: 0.6)).click()
+        }
+        photo.drag(on: "suite.canvas", from: CGVector(dx: 0.6, dy: 0.37), to: CGVector(dx: 0.66, dy: 0.4), step: "healed")
+        XCTAssert(photo.app.buttons["Undo Heal"].waitForExistence(timeout: 5), "the heal stroke made no Heal step")
+
         tools["Eraser"].click()
         // The eraser shows its own size, hardness and opacity, and no color (#26).
         for option in ["size", "hardness", "opacity"] {

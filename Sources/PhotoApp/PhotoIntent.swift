@@ -44,6 +44,7 @@ extension PhotoTool: PaletteTool {
         case .brush: "Brush"
         case .eraser: "Eraser"
         case .clone: "Clone"
+        case .heal: "Heal"
         case .crop: "Crop"
         }
     }
@@ -55,6 +56,7 @@ extension PhotoTool: PaletteTool {
         case .brush: "paintbrush.pointed"
         case .eraser: "eraser"
         case .clone: "square.on.square"
+        case .heal: "bandage"
         case .crop: "crop"
         }
     }
@@ -66,6 +68,7 @@ extension PhotoTool: PaletteTool {
         case .brush: "b"
         case .eraser: "e"
         case .clone: "s"
+        case .heal: "j"
         case .crop: "c"
         }
     }

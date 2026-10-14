@@ -129,7 +129,7 @@ struct PhotoImageMenu: View {
 
 /// The canvas: the rendered picture (TileCanvas) on the checkerboard with the selection and
 /// a pending crop over it, or the empty state. Drags go to the active tool;
-/// with the canvas focused, V M B E C pick tools, Delete clears the selection
+/// with the canvas focused, V M B E S J C pick tools, Delete clears the selection
 /// (Shift-Delete fills it), Return applies a crop and Escape cancels it or
 /// deselects. Dropping an image file opens it. While the Straighten sheet is
 /// open the picture turns by its angle under StraightenMarks.
