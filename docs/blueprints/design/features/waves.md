@@ -170,6 +170,41 @@ agrees; J10's stroke reaches width 4 with three → presses from the default
 width 1; the `crowd` count is 2,000 layers (40 frames, each 48 rectangles
 and one text).
 
+## Critic round
+
+One read-only critic agent tried to refute the seven packets: task size,
+owned files overlapping within a wave or between side-by-side tasks, the
+shared-file rule and protected paths, tests that cannot fail or whose
+numbers are wrong against the fixtures, closed or duplicate issues, facts
+against `dev`, and the lead contract. It found 5 blocking, 12 major and 18
+minor problems, all fixed in the packets:
+
+| # | finding | fix |
+|---|---|---|
+| 1 | the #542 guard on `apply` would stop every several-layer drag step | the guard sits on the public entry points only (select-several S-5) |
+| 2 | J12 "drag C above B" is a no-op on `cards` (C is already above B), and L-1's index put C below B | "drag B above C"; L-1 moves B to index 2 (the blueprint's J12 has the same slip) |
+| 3 | "Pair into E1" throws `.intoItself`, not `.notAContainer` | "A into E1" |
+| 4 | the marquee inside a hidden Pair returned its children | `LiveMarquee` returns [] under a hidden or locked parent |
+| 5 | the saved marker was the undo count: wrong after undo-then-edit and at the 100-step cap; a new file read dirty | step serials that only increase; tests for both cases |
+| 6 | FH-2 edited `newFile` in `DesignWorkspace.swift`, layers-panel's file | the marker lives in `DesignHistory`; no workspace edit |
+| 7 | D0-5a used the pasteboard bridge before D0-5d | `DesignWindow.swift` chains D0-5a → D0-5d → D0-7a; D0-5d fills the cases |
+| 8 | D0-5b drew several-layer handles on `.live` (dead) and contradicted the unchanged PNG | handles only when `transformHelp` is nil; S-6 owns the PNG change |
+| 9 | design-seams said the lane dispatches no CI for it | the `feature-done` merge dispatches it |
+| 10 | ST-3 breaks `DesignCompactSelectionTests` | added to ST-3 |
+| 11, 12 | wrong Pen reason and a help sentence no refusal has | the real sentences |
+| 13 | file version 2 breaks the version-1 byte checks D2-1b did not own | added to D2-1b |
+| 14, 15 | `layerDrop` ignored the removal of the dragged layer; L-2 tested a stub | it takes the dragged id; L-2 follows L-1 |
+| 16 | D0-2.5 likely over 400 lines | the contract law is D0-2.6 |
+| 17 | waves.md said no later feature edits the seams | reworded as a deliberate change |
+| 18–36 | tests that could not fail (A's zero offset, `.live == .live`, blank rename already refused), unnamed refusals, opacity scale, LL task names, L-6 ordering, an unowned fuzz file, `didSave` duplicated, App-only logic, run ending after a save, which File ids, who closes #288, #753's corner sentence and its C4 edit, the `ScrubField` mixed issue's overlap, 5.5 vs 5.4 paste rule, fixture ids in C-3 | each fixed in place |
+
+Checked clean: the lead contract below is byte-identical to
+`docs/factory/lead.md`; every cited issue is open except #413 and #745
+(both said so); no issue is closed by two features; no shared or protected
+path is edited; the five wave-1 features own disjoint files; the fixture
+numbers (J5's marquee, "Mixed" fields, clamps, the `crowd` count) hold; no
+product names.
+
 ## The lead contract
 
 Every feature lead and every task below codes against this. It is handed
