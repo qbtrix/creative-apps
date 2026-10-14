@@ -5,7 +5,8 @@
 // back (`didSave`, `saveFailed`). `isDirty` compares the document with the one last opened or saved, so undoing
 // back to the save is clean again. The Open Recent list keeps file paths, most recent first (`noteRecent`,
 // `clearRecent`). Autosave is due `autosaveDelay` seconds after the last edit while the document is dirty
-// (`autosaveDue`), and `recoveryData()` is the dirty document's file bytes. The app does the file panels and the disk.
+// (`autosaveDue`), and `recoveryData()` is the dirty document's file bytes; `restoreRecovery` lands a recovered
+// document again as unsaved, untitled work. The app does the file panels and the disk.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -137,6 +138,14 @@ extension FlareWorkspace {
     public func recoveryData() -> Data? {
         guard isDirty, let document else { return nil }
         return try? FlareFormat.encode(document)
+    }
+
+    /// Lands a recovered document as unsaved work: `load`, then no saved document and no file name, so `isDirty`
+    /// is true and `title` reads "Untitled"; `recent` is untouched and the undo history starts empty.
+    public mutating func restoreRecovery(_ document: Document) {
+        load(document)
+        savedDocument = nil
+        fileName = nil
     }
 
     /// Clears a shown open or save failure once its alert is dismissed.
