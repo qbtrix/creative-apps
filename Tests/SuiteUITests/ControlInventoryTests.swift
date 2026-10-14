@@ -2,11 +2,13 @@
 // misses (a duplicate id), its document is sorted and round-trips through
 // JSON with its roles, a ToolbarAction registers only with an identifier and
 // with its tooltip as the reason, suiteReduceMotion follows the system until
-// set, and nested .suiteProbes() publish one suite.controls and one
-// suite.perf element in a hosted view's accessibility tree. macOS only.
+// set, and nested .suiteProbes() place one suite.controls and one suite.perf
+// element in a hosted view, counted through SuiteProbeElementsKey: SwiftUI
+// builds the accessibility tree only for an assistive client, so walking it
+// here found nothing. macOS only.
 import AppKit
 import Foundation
-import SuiteUI
+@testable import SuiteUI
 import SwiftUI
 import Testing
 
@@ -72,36 +74,30 @@ import Testing
 
     @MainActor @Test func nestedProbesPublishOneOfEachElement() {
         let flag = [SuiteFrameProbe.launchFlag]
-        let view = Text(verbatim: "Canvas").suiteProbes(arguments: flag).suiteProbes(arguments: flag)
-        let host = NSHostingView(rootView: view)
+        let nested = Self.placed(Text(verbatim: "Canvas").suiteProbes(arguments: flag).suiteProbes(arguments: flag))
+        #expect(nested.filter { $0 == SuiteControlsElement.identifier }.count == 1)
+        #expect(nested.filter { $0 == SuitePerfElement.identifier }.count == 1)
+        #expect(nested.count == 2)
+        #expect(Self.placed(Text(verbatim: "Canvas").suiteProbes(arguments: [])).isEmpty)
+    }
+
+    /// The probe elements `view` places once hosted in a window and laid out.
+    @MainActor static func placed(_ view: some View) -> [String] {
+        let seen = PlacedProbes()
+        let host = NSHostingView(rootView: view.onPreferenceChange(SuiteProbeElementsKey.self) { ids in
+            MainActor.assumeIsolated { seen.ids = ids }
+        })
         let window = NSWindow(
             contentRect: CGRect(x: 0, y: 0, width: 200, height: 100), styleMask: [.titled], backing: .buffered,
             defer: false)
         window.contentView = host
         host.layoutSubtreeIfNeeded()
-        let ids = Self.identifiers(in: host, depth: 0)
-        #expect(ids.filter { $0 == SuiteControlsElement.identifier }.count == 1)
-        #expect(ids.filter { $0 == SuitePerfElement.identifier }.count == 1)
-
-        let quiet = NSHostingView(rootView: Text(verbatim: "Canvas").suiteProbes(arguments: []))
-        quiet.frame = CGRect(x: 0, y: 0, width: 200, height: 100)
-        quiet.layoutSubtreeIfNeeded()
-        #expect(!Self.identifiers(in: quiet, depth: 0).contains(SuiteControlsElement.identifier))
+        RunLoop.main.run(until: Date().addingTimeInterval(0.1))
+        host.layoutSubtreeIfNeeded()
+        return seen.ids
     }
+}
 
-    /// Every accessibility identifier under `element`, depth first. Asked by
-    /// selector, so any NSObject node answers whichever accessibility protocol it adopts.
-    @MainActor static func identifiers(in element: Any, depth: Int) -> [String] {
-        guard depth < 32, let node = element as? NSObject else { return [] }
-        let own = ask(node, "accessibilityIdentifier") as? String
-        let children = (ask(node, "accessibilityChildren") as? [Any] ?? [])
-            .flatMap { identifiers(in: $0, depth: depth + 1) }
-        return (own.map { $0.isEmpty ? [] : [$0] } ?? []) + children
-    }
-
-    @MainActor static func ask(_ node: NSObject, _ name: String) -> Any? {
-        let selector = NSSelectorFromString(name)
-        guard node.responds(to: selector) else { return nil }
-        return node.perform(selector)?.takeUnretainedValue()
-    }
+@MainActor private final class PlacedProbes {
+    var ids: [String] = []
 }
