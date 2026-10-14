@@ -325,8 +325,8 @@ from disk):
 | J14 | `testCloseWithUnsavedChanges` (`+Files`, F5) | cards | draw; ⌘W; Cancel; ⌘W; Don't Save | the alert names the file; Cancel keeps the window; Don't Save closes it | – |
 | J15 | `testEveryControlActsOrSaysWhy` (`+EveryControl`, D0-6) | cards | read `suite.controls`, click each enabled `design.*` control, Escape, ⌘Z | every enabled control changed the shot or a value; every disabled one has a reason. A sweep, never cited by the matrix | – |
 | J16 | `testOpenBadFiles` (`+Files`, F5) | bad files | launch with `-DesignOpenFile` on each | the alert reads "It is not a Design file.", "It was made by a newer version of Design (file version 99).", "It has no pages.", "It uses the id node-2 more than once."; the window stays empty | error |
-| P1 | `testCanvasDragLatency` (`+Perf`, F1) | crowd | four velocity drags of 600 pt at 300 pt/s: move a layer, draw a rectangle, resize, marquee; one Space-pan | at least 60 samples each; QB-L1 (section 7) | – |
-| P2 | `testScrubLatency` (`+Perf`, F3) | crowd | velocity drag on the Opacity bar and the X scrub field | at least 60 samples; QB-L2 | – |
+| P1 | `testCanvasDragLatency` (`+Perf`, F1) | crowd | four velocity drags of 600 pt at 300 pt/s: move a layer, draw a rectangle, resize, marquee; one Space-pan; ⌘+ and ⌘− ten times each | at least 60 samples per drag series; QB-L1 and QD-S1 to QD-S5 (section 7) | – |
+| P2 | `testScrubLatency` (`+Perf`, F3) | crowd | velocity drag on the Opacity bar and the X scrub field; type 30 characters into the inline text editor | at least 60 samples per series; QB-L2 and QD-S6 | – |
 | P3 | `testLayerListScroll` (`+Perf`, F4) | crowd | scroll Layers end to end, all frames expanded | QD-L5 | – |
 | P4 | `testOpenLargeFile` (`+Perf`, F5) | crowd saved then reopened | ⌘O | progress within QB-L9; no stall over QB-L12 | loading |
 
@@ -1561,3 +1561,103 @@ help, never hidden.
 - **Page**: Add Page, Rename Page…, Delete Page.
 - **Object**: Group ⌘G, Ungroup ⇧⌘G; Arrange ▸ Bring to Front ⇧⌘], Bring Forward ⌘], Send Backward ⌘[, Send to Back ⇧⌘[; Align ▸ the six edges, Distribute Horizontally, Distribute Vertically; Create Component ⌥⌘K (wave 3).
 - **View**: Zoom In ⌘=, Zoom Out ⌘−, Fit Page ⌘0, Zoom to Selection ⌥⌘2; Light / Dark preview (wave 3); Variables… (wave 3).
+
+---
+
+## 7. Quality bar
+
+Every row says what measures it and where it runs: **Linux** (`scripts/ci`,
+so every PR), **macOS CI** (the `macOS` job on `dev`), or **local** (a Mac
+with Xcode: `scripts/ui-test`, then `.build/ui-screens/perf-*.json` and
+`contact-sheet.html`). Gates follow `docs/review-rubric.md` "How gates are
+set": a screen-side row ships report-only, and after ten green CI runs its
+gate is the CI p95 × 1.5, never tighter than the device target.
+
+### 7.1 Speed budgets, input to screen, per interactive tool
+
+Each tool has two halves. The **model half** is the Model work one input
+causes, timed on Linux now (`Tests/DesignModelTests/DesignBudgetTests.swift`,
+median and p95 of 200 runs on the `crowd` fixture; debug CI gates are 10 ×
+the device target, as the rubric does). The **screen half** is frames late
+from the event to the first frame that shows it, read from SuiteUI's
+`FrameProbe` (#330) by the perf journeys P1 to P4 through `perf()` (#333).
+Until #330 lands the screen half cannot be measured anywhere, so those rows
+are recorded as blocked in each lead's RECORD.md and the model half gates
+alone (section 9, Q3).
+
+| id | Tool or input | Model half: device / Linux debug gate | Screen half (device target) | Test |
+|---|---|---|---|---|
+| QD-S1 | Move tool: one drag step on a frame with 50 children (rewind, translate, preview) | ≤ 1 ms / ≤ 10 ms | p95 ≤ 2 frames late (QB-L1) | `DesignBudgetTests.moveStep`; P1 move |
+| QD-S2 | Frame, Rectangle, Ellipse: one draw step | ≤ 1 ms / ≤ 10 ms | p95 ≤ 2 frames late | `drawStep`; P1 draw |
+| QD-S3 | Resize handle: one step, one layer and 20 layers | ≤ 1 ms / ≤ 10 ms | p95 ≤ 2 frames late | `resizeStep`; P1 resize |
+| QD-S4 | Marquee: one step (query 2,000 layers, set selection) | ≤ 1 ms / ≤ 10 ms | p95 ≤ 2 frames late | `marqueeStep`; P1 marquee |
+| QD-S5 | Space-pan and zoom keys | none (view state) | pan p95 ≤ 2 frames late; a zoom key repaints within 2 frames | P1 pan, zoom |
+| QD-S6 | Text tool: one keystroke in the inline editor | `setTextDraft` ≤ 0.1 ms / ≤ 1 ms | p95 ≤ 2 frames late | `textDraftStep`; P2 typing |
+| QD-S7 | Inspector scrub (opacity, radius, stroke width, X) | `setStyle` / `setNodeFrame` step ≤ 0.5 ms / ≤ 5 ms, coalesced to one step | p95 ≤ 2 frames late (QB-L2) | `scrubStep`; P2 |
+| QD-S8 | Hit test per pointer move | ≤ 0.5 ms / ≤ 5 ms on 2,000 layers | – | `hitTest` |
+| QD-S9 | Any command that changes the document (`apply` plus one history record) | ≤ 1 ms / ≤ 10 ms | – | `applyStep` |
+| QD-S10 | Layers list with every row expanded (2,000 rows) | row build ≤ 5 ms / ≤ 50 ms | scroll p95 frame interval ≤ 1.5 refreshes (QB-L10) | `layerRows`; P3 |
+| QD-S11 | Open and save the `crowd` file | decode and encode ≤ 50 ms / ≤ 500 ms | progress within 100 ms (QB-L9); no main-thread stall over 2 refreshes (QB-L12) | `fileRoundTrip`; P4 |
+| QD-S12 | Export (wave 3): SVG of the Desktop frame of `crowd`; PNG at 2x | SVG ≤ 100 ms / ≤ 1 s | PNG progress within 100 ms; 2x PNG of 1440 × 1024 written ≤ 1 s | `svgExport`; `testExportPNGSVGPDF` |
+
+### 7.2 App-audit checks that apply
+
+All six checks in `Tests/AppAuditTests/Checks/` run on every Design journey
+shot (macOS CI; locally through `scripts/ui-test`); the baseline only goes
+down.
+
+| Check | Design today | Target | How Design gets there |
+|---|---|---|---|
+| `identifier` | 20 | 0 | Each feature gives `design.<area>.<name>` identifiers to the controls of the views it owns; the SuiteUI part (top bar, rail, tabs, inspector rows) comes from SuiteUI issues (#288 lists both) |
+| `disabled-dim` | 0 | 0 | Disabled-with-reason controls use SuiteUI's dimming, never a custom opacity |
+| `overlap` | 0 | 0 | The layout journey (7.3) shoots each width |
+| `contrast` | 0 | 0 | Secondary text only through `SuiteColor.textSecondary` |
+| `offscreen` | 0 | 0 | The layout journey at 880 × 560 and 1024 × 768 |
+| `unnamed` | 0 | 0 | Every icon-only control keeps a title (the rail, Align row, row toggles) |
+
+### 7.3 Layout spec
+
+Checked at five window sizes: 880 × 560 (`SuiteSize.windowMinimum`),
+1024 × 768 (the CI runner's display), 1280 × 800, 1440 × 900 and
+1920 × 1080. `testLayoutAtWidths` (`+Layout`, D0-6) launches with
+`-DesignWindowSize <w>x<h>` (D0-6 adds the argument) on `cards` with "A"
+selected, shoots each size, and asserts from element frames, to 0.5 pt:
+
+1. Rail, canvas and panel sit side by side with no gap or overlap; the panel
+   is 280 pt; the canvas is at least 440 pt wide (`contentMinimum`).
+2. Top bar items don't overlap and none is cut off; at 880 the items keep
+   their titles or collapse to icons with their titles as tooltips, never
+   truncated text.
+3. In the Properties tab, the value column's leading edge is the same x in
+   every section (Frame, Corner radius, Fill, Stroke, Text) and the locked
+   hint sits in that column (#276).
+4. In Layers, every row's eye and lock toggles share one x for the eyes and
+   one for the locks, whatever the row's depth.
+5. The status pills are on one line, untruncated, from 1024 up; at 880 the
+   message pill is the one that shortens.
+6. The audit's `overlap` and `offscreen` counts for these shots are 0.
+
+### 7.4 Fidelity: output equals a reference
+
+| id | Check | Reference | Runs |
+|---|---|---|---|
+| QD-V1 | Save is stable: open then save gives the same bytes, for every fixture and for a version-1 file written before D0-1 | the fixture's committed JSON in `Tests/DesignModelTests/Fixtures/` | Linux |
+| QD-V2 | The canvas draws what the file holds: the `cards` canvas matches its golden within QB-V2 (channel 2/255, ≤ 0.5% pixels), Dark and Dark + Increase Contrast | `Tests/AppSnapshotTests/Golden/design-canvas-cards-*.png` (#331, #332) | macOS CI |
+| QD-V3 | Curves stay curves: an ellipse, a rounded rectangle and (wave 3) a pen curve reach the drawing layer as curve elements, never line segments | element kinds of the built `Path` | macOS CI (`DesignArtworkPathTests`) |
+| QD-V4 | Grouping and ungrouping move nothing: every leaf frame is equal before and after, and the canvas golden is unchanged | the pre-group frames; the golden | Linux; macOS CI |
+| QD-V5 | Duplicate and paste copy faithfully: the copy equals the original except ids, the offset and the lock | the original subtree | Linux |
+| QD-V6 | Align and distribute land exactly: three rectangles at x 10, 50, 200 aligned left all have x 10; widths 20, 40, 20 spanning 0...300 distribute to equal gaps (≤ 1e-9) | #714's numbers | Linux |
+| QD-V7 | Text doesn't jump: the committed text's frame equals the editor's at 25%, 50%, 100% and 200% zoom (#268) | the editor frame | macOS CI (`DesignTextScaleTests`) |
+| QD-V8 | SVG export (wave 3) equals a reference document for the `cards` Desktop frame: viewBox, one element per visible layer, clipPath for the frame, escaped text, opacity and stroke attributes | `Tests/DesignModelTests/Fixtures/cards-desktop.svg` | Linux |
+| QD-V9 | PNG export (wave 3) of a frame equals the canvas golden of that frame (QB-V4) | the QD-V2 golden | macOS CI |
+
+### 7.5 Feel
+
+The rubric's QB-F1 to QB-F6 apply to every feature. Design's tests for
+them: `DesignToolsTests` (an enabled tool's drag changes the document; a
+disabled one has help), `DesignContractLawTests` (help nil exactly when the
+write changes something, for every conformance), each journey reading the
+Edit menu's undo name after every gesture (QB-F3), the keyboard step on one
+Studio row and one scrub field in J10 (QB-F4), and goldens for the marquee
+and the several-layer selection box under Increase Contrast (QB-F5, once
+#332 lands).
