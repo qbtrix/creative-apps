@@ -33,7 +33,7 @@ folded in".
 gate never compiles; the macOS job compiles them on `dev` after the lane
 merges. So: copy the shape of the W0 stubs they replace, check every SwiftUI
 and AppKit API with the `apple-docs` MCP before use (`List`, `.onMove`,
-`.onDeleteCommand`, `NSAlert.beginSheetModal(for:)`; say so in the PR), keep
+`.onDeleteCommand`, `.alert(_:isPresented:actions:)` with a `TextField`; say so in the PR), keep
 views dumb (no assignment or binding to Model state), and put every decision
 in LP-1 and LP-2's Model files: names, indexes, the move offset, selection
 after a delete, and every reason a command is off.
@@ -194,7 +194,7 @@ pass`, `Head:`. LP-4 also carries `feature-done`.
 | id | issue | what | owned files | depends on | size |
 |---|---|---|---|---|---|
 | LP-1 | #770 (part) | The four edits, the two one-place moves and `moveTarget`, each one named step through `edit`; duplicate selects the copy; delete un-parents children through `services.keying.setParent(nil, …)` with the `.notBuilt` fallback and selects the layer that took its place | `Sources/HaloModel/HaloLayerEdits.swift`, `Tests/HaloModelTests/HaloLayerEditsTests.swift` | – | ~360 |
-| LP-2 | #770 (part) | Turn the Layer commands on: `HaloAvailability+Layers.swift` answers state for Duplicate, Rename, Delete, Bring Forward, Send Backward (New stays as W0 wrote it); `HaloWindow+Layers.swift` routes each to LP-1 (⌫ from the viewer and timeline, `.renameLayer(id, name)` and `.moveLayer(id, index)` included) and shows Layer > Rename… as a window-modal `NSAlert` with an `NSTextField` accessory, titled "Rename Layer", buttons Rename and Cancel, whose Rename calls `renameLayer` (needs no state in a W0 file); the edit budget rows | `Sources/HaloModel/Availability/HaloAvailability+Layers.swift`, `Sources/HaloApp/HaloWindow+Layers.swift`, `Tests/HaloModelTests/HaloLayerAvailabilityTests.swift`, `Tests/HaloModelTests/HaloLayerEditsBudgetTests.swift` | LP-1 | ~260 |
+| LP-2 | #770 (part) | Turn the Layer commands on: `HaloAvailability+Layers.swift` answers state for Duplicate, Rename, Delete, Bring Forward, Send Backward (New stays as W0 wrote it); `HaloWindow+Layers.swift` routes each to LP-1 (⌫ from the viewer and timeline, `.renameLayer(id, name)` and `.moveLayer(id, index)` included) and shows Layer > Rename… as a SwiftUI `.alert` titled "Rename Layer" with a `TextField`, buttons Rename and Cancel, from the `layersScene(_:)` hook's own `@State` (needs no state in a W0 file); the edit budget rows | `Sources/HaloModel/Availability/HaloAvailability+Layers.swift`, `Sources/HaloApp/HaloWindow+Layers.swift`, `Tests/HaloModelTests/HaloLayerAvailabilityTests.swift`, `Tests/HaloModelTests/HaloLayerEditsBudgetTests.swift` | LP-1 | ~260 |
 | LP-3 | #770 (part) | `HaloLayerList` replaces W0's stub's body: a system `List` of `SidebarRow`s (select; rename on the row, whose `onRename` sends `.renameLayer(id, name)`), `.onMove` sending `.moveLayer(id, index)` with the index from `HaloProject.moveTarget`, `.onDeleteCommand` sending `.deleteLayer`, the refusal caption under the named row, the empty text; each row `halo.layers.row.<id>` through `.haloControl`; snapshots | `Sources/HaloApp/HaloLayerList.swift`, `Tests/AppSnapshotTests/HaloLayersSnapshots.swift` | LP-1 | ~240 |
 | LP-4 | #770 (closes; `feature-done`) | H-J9 `testLayerHousekeeping`, eight steps above, on `-HaloFixture three-layers` | `UITests/HaloJourneyTests+Layers.swift` | LP-2, LP-3, #333 | ~170 |
 
@@ -263,23 +263,23 @@ change this feature:
   fallback for the W0 live stub, tested with a test-local stub so the test
   holds whichever of layer-panel and layer-keys lands first. #770's "leaves
   its children where they are on screen" means at the playhead.
-- **The empty text lives in the layer list.** H-J9's empty state names "the
-  timeline's empty text", but `HaloTimelineView.swift` is W0's and then
-  easing's, and W0's FD-15 doesn't add it (today's view has none). The list
-  (this feature's file) shows "No layers yet. Add one from Layer > New." and
-  H-J9 reads it there; the timeline's own copy of the line is for easing's
-  packet to add when it replaces `HaloTimelineView`.
+- **The empty text shows in both places.** W0's FD-15 now has the timeline
+  show "No layers yet. Add one from Layer > New." for a layer-less
+  composition (the blueprint's H-J9 empty state), and this feature's list
+  shows the same line, so H-J9 can read either; it reads the list's.
 - **The empty-name error comes from Layer > Rename….** `SidebarRow`'s inline
   rename trims the name and drops an empty one before calling `onRename`
   (`SidebarRow.commitRename`), so the row can never send "". The refusal is
   reached through the Rename prompt, and its message shows under the row as a
   Halo caption (W0's refusal pattern) until SuiteUI #577 gives rows a
   message slot.
-- **The prompt is an `NSAlert`.** Layer > Rename… needs a text prompt, and an
-  area file can't add SwiftUI state to `HaloWindow`. A window-modal system
-  alert from `HaloWindow+Layers.swift` needs none. If W0's `HaloWindow`
-  already carries a layer-rename presentation flag, LP-2 uses a SwiftUI
-  `.alert` with a `TextField` through it instead.
+- **The prompt lives in the Layers hook.** W0's FD-14 gives each area file
+  a window hook, `layersScene(_:)`, which may wrap the content in a small view
+  struct of its own holding `@State`. LP-2 puts the Rename Layer prompt there
+  as a SwiftUI `.alert` with a `TextField` (Rename, Cancel), so no flag lives
+  in `HaloWindow` and no AppKit alert is needed. `HaloLayerList` has W0's slot
+  initializer `init(model:perform:)`, and `HaloCommand` has
+  `.renameLayer(id, name)` and `.moveLayer(id, to:)` (FD-11).
 - **Extra files beyond 8.3's seven:** `HaloLayerAvailabilityTests.swift` and
   `HaloLayerEditsBudgetTests.swift` (new, unique names). #770's body names
   only `HaloLayerEditsTests`; the packet wins.

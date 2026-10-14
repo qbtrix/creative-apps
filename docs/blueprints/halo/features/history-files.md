@@ -53,8 +53,9 @@ never edits `Sources/SuiteUI/**`, `project.yml`, `UITests/Journey*.swift`,
 `HaloFileMenu.swift` and `HaloLaunch.swift`. It reaches the window through
 the routes and slots FD-14 and FD-16 made: `perform(_:)` routes `.undo` and
 `.redo` to `HaloWindow+Edit.swift` and the files area to
-`HaloWindow+File.swift`; the window's title and its file modifiers
-(exporter, importer, alerts, launch-file task) come from that file too.
+`HaloWindow+File.swift`; the window's title (`fileWindowTitle`) and its file modifiers (exporter,
+importer, alerts, progress row, launch-file task) come from that file too,
+through the `fileScene(_:)` hook FD-14 gives every area file.
 
 ## Journey steps
 
@@ -180,7 +181,7 @@ step(current, &from, &to):  guard let s = from.popLast() else nil
 
 undo():                                            # HF-2; redo() mirrors it
   guard let back = services.history.undo(document, in: &history) else return
-  document = back; refusal = nil; file.unsaved = true
+  restore(back); file.unsaved = true               # W0's restore: no step, clears refusal
   # selection rides in the document; the playhead lives in each composition.
   # Selection, scrubbing and playback never call edit, so they are never steps.
 
@@ -318,18 +319,15 @@ bodies:
   above 0" becomes 1–8192 and the four shipped rates. The test names #208
   and #209 give (`HaloUndoTests`, `HaloFileTests`, `HaloEditMenuSnapshots`,
   `HaloFileSnapshots`) and their PNG names are kept.
-- **`restore` is not in W0's slice.** Blueprint section 2 says `document` is
-  written by `HaloProject.swift` "through `edit` and `restore`"; FD-10 has
-  no `restore`. `HaloHistory.swift` (undo, redo) and `HaloFiles.swift`
-  (`finishOpen`) write `document` directly through `internal(set)`, each in
-  one place, and nothing else does.
-- **Who sets `unsaved`.** The blueprint lists `HaloFiles.swift` as the only
-  writer of `file`, but every edit must mark the project unsaved and edits
-  run through W0's `edit`. This packet needs FD-10's `edit` to set
-  `file.unsaved = true` when it records a step (one line in
-  `HaloProject.swift`). HF-6's "New Layer after `didSave` reads Edited"
-  test fails if it doesn't; the lead then comments on the foundation issue
-  and stops HF-6 rather than editing a W0 file.
+- **`restore` and the unsaved mark are W0's.** The blueprint names a
+  `restore` that FD-10 lacked, and lists `HaloFiles.swift` as the only
+  writer of `file` although every edit must mark the project unsaved.
+  Foundation's FD-10 now has both: `restore(_:)` (internal; replaces the
+  document without a step and clears the refusal), which `undo()`, `redo()`
+  and `finishOpen` use, and `edit` setting `file.unsaved = true` when it
+  records a step. HF-6's "New Layer after `didSave` reads Edited" test
+  proves it; if it fails on `dev`, the lead comments on #777 rather than
+  editing a W0 file.
 - **The `.halo` type.** #209 asks for a type conforming to JSON. An exported
   type only maps the extension when the bundle's Info.plist declares it,
   and that plist is written by `scripts/bundle-apps` and `project.yml`

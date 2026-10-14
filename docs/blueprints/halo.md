@@ -458,7 +458,7 @@ text-layers), so Render Frame and Render… draw text through it.
 | `two-comps` | "Intro" (the `three-layers` composition) and "Outro" (the `keyed` composition, with Ball and its keys) | H-J10 |
 | `reference` | 1920 × 1080, 30 fps, 300 frames, 50 layers (solids, shapes, text), every property keyed at 10 frames: 4,000 keys | HB-1 to HB-5, HB-7, HB-11, HB-12, H-P1 to H-P4 |
 | `crowd` | 300 layers, 5,000 keys, 1920 × 1080, 30 fps, 300 frames | HB-6, HB-8 to HB-10, H-J10's large-file step, H-P5, layout checks |
-| `huge` | 2,000 layers, every property keyed every 2 frames over 120 frames: about 960,000 keys, a file of about 60 MB | QB-L12 in H-J10's large-file step (the main thread never stalls over 2 refreshes while it opens) |
+| `huge` | 2,000 layers, every property keyed every 2 frames over 120 frames: about 960,000 keys (fewer if needed to stay at or under 48 MiB encoded, whole-number values; foundation FD-9) | QB-L12 in H-J10's large-file step (the main thread never stalls over 2 refreshes while it opens) |
 
 ---
 
