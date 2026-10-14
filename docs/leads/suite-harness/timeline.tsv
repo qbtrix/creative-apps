@@ -29,3 +29,5 @@ utc	stage	event	ref	note
 2026-10-14T23:05Z	3	pr-merged	#875	SH-6 gallery
 2026-10-14T23:05Z	3	stage-start	wave5	SH-7 journeys on 4a5e73f (wf_7f5a50a4-569)
 2026-10-14T23:08Z	3	heartbeat	wave5	SH-7 building (wf_7f5a50a4-569)
+2026-10-14T23:16Z	3	pr-merged	#877	SH-7 journeys
+2026-10-14T23:16Z	3	stage-start	wave6	SH-8 SJ25 + budgets, feature-done (wf_7ef7854a-36b)
