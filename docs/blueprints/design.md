@@ -340,11 +340,15 @@ Tier-2 journeys, written with their packets: `testExportPNGSVGPDF`
 ## 5. Contracts
 
 The use cases as Swift, so the UI track and the logic track build in
-parallel. Everything here compiles on Linux: it was built against
-DesignModel on `origin/dev` 956d946 with Swift 6.3.3 (the CI image), with the
-section 5.1 schema patched in, and a scratch test ran the fakes (marquee,
-align, distribute, duplicate, group, clipboard, pen close). None of it is
-committed by this PR; tasks D0-1 to D0-3 and D2-1 land it (section 8).
+parallel. Everything in this section compiles on Linux: it was built
+against DesignModel on `origin/dev` 956d946 with Swift 6.3.3 (the CI image),
+with the 5.1 schema patched in, and a scratch test ran the fakes on a
+`cards`-shaped tree (align top, distribute, duplicate inside a frame, group
+and the shared-parent refusal, ungroup, copy and paste into a frame, pasteHelp
+on foreign bytes, per-layer coalescing keys, marquee inside a frame, move
+into a group, send to back, X on two layers, the helps, `NotBuilt`'s help,
+`init(id:copying:)`, pen close). None of it is committed by this PR; the
+wave-0 and wave-2 tasks land it (section 8.2).
 
 ### The rules
 
@@ -352,50 +356,69 @@ committed by this PR; tasks D0-1 to D0-3 and D2-1 land it (section 8).
   returns a `DesignEdit` (the page's new tree, the new selection, the undo
   name and an optional coalescing key) or throws `DesignRefusal`.
   `DesignWorkspace.apply` records it as exactly one named step; a refusal
-  records nothing. That keeps today's invariant ("every document edit
-  records exactly one named undo step") without each use case knowing about
-  history.
-- **Help law.** For every write `w` with a help read `wHelp`, `wHelp(...) ==
-  nil` exactly when `w(...)` succeeds and changes something. The disabled
-  tooltip is `DesignRefusal.help`. `DesignContractLawTests` (D0-2) runs the
-  law over every conformance in `.fake` and `.live` on the `cards` fixture.
+  records nothing. Today's invariant ("every document edit records exactly
+  one named undo step") holds without a use case knowing about history.
+- **Help law.** For a write `w` and its help `wHelp` on the same page and
+  ids: when `wHelp` is nil, `w` throws nothing except `.unchanged` (the value
+  equals the current one); when it is not nil, `w` throws and `wHelp` is that
+  refusal's `help`. A help never depends on the value being written. Read-only
+  commands (Copy, Zoom to Selection) have a help that is nil exactly when the
+  read succeeds. `DesignContractLawTests` (D0-2) checks every conformance in
+  `.fake` and `.live` on the `cards` fixture, command by command.
+- **Runs.** Coalescing keys are `DesignEdit.runKey(base, ids)`, so a run is
+  one selection's run; D0-1 also ends the edit run on every selection change
+  and D0-3 on `endDrag`, so nudging A, then selecting B and nudging it, is two
+  steps (today's per-layer keys behave the same).
 - **Ids.** A use case that adds nodes takes a `DesignIDMint` built from the
-  workspace's held-id index, so ids never repeat (#296, #303, #433 stay
-  fixed).
-- **`.live` and `.fake`.** `.live` holds `NotBuilt` for each use case until
-  its feature lands, so its controls are disabled with "<Feature> isn't
-  built yet." and never act; `.fake` is for snapshots and fake-mode
-  journeys. Existing single-layer behaviour (move, resize, nudge, delete,
-  align one layer, the file codec) keeps running on today's code until its
-  live type replaces it, so nothing that works today regresses.
+  held-id index, so ids never repeat (#296, #303, #433 stay fixed). Copies use
+  `DesignNode(id:copying:)`, which keeps every field.
+- **Nothing that works today goes off.** With exactly one layer selected,
+  `.delete`, `.nudge` and `.align` keep today's single-layer methods whatever
+  the service holds, and Open and Save keep `DesignFile.swift` until F5 moves
+  the codec behind `DocumentFiling`. `.live` holds `NotBuilt` (D0-2), then
+  the Live stubs (D0-2b, D2-2), and each feature fills its own stub, so a
+  control that isn't ready is disabled with "<Feature> isn't built yet." and
+  never acts. `.fake` is for snapshots and fake-mode journeys.
+- **Fakes act anywhere in the tree** (the `cards` layers sit inside a frame)
+  but ignore locks and hidden layers and use the simplest rule. They are never
+  shipped as `.live`.
 - **No engine type in a contract.** Design has no creative-core document; the
   contracts use DesignModel's own value types only.
 
 ### 5.1 Schema (D0-1, D2-1)
 
-D0-1 adds to `DesignNode` (all with defaults, so every file written today
-still opens; `init(from:)` uses `decodeIfPresent` for each, and a test opens
-a file saved before the fields existed):
+D0-1 adds to `DesignNode`, all with defaults so every file written today
+still opens (`init(from:)` uses `decodeIfPresent` for each; a test decodes a
+version-1 JSON string written before the fields existed):
 
 ```swift
 public var cornerRadius: Double = 0          // #753 adds this first; D0-1 keeps its name
 public var opacity: Double = 1               // 0...1
 public var stroke: DesignStroke? = nil
 public var textStyle: DesignTextStyle = .default
+
+/// `node` with every field kept and the id replaced (duplicate, paste). Copies each field D0-1 and D2-1 add.
+public init(id: String, copying node: DesignNode) {
+    self.init(id: id, name: node.name, kind: node.kind, frame: node.frame, children: node.children,
+              isHidden: node.isHidden, isLocked: node.isLocked, fill: node.fill, text: node.text)
+    (cornerRadius, opacity, stroke, textStyle) = (node.cornerRadius, node.opacity, node.stroke, node.textStyle)
+    (path, componentID, fillVariableID) = (node.path, node.componentID, node.fillVariableID)  // from D2-1
+}
 ```
 
-and gives `DesignPage` a public memberwise `init(id:name:frameWidth:frameHeight:nodes:)`
-(fixtures and the contract law tests outside the module need one; none
-exists today). `DesignWorkspace` gains `public internal(set) var services:
-DesignServices = .live` and `public internal(set) var marquee: DesignRect?`.
+It also gives `DesignPage` a public `init(id:name:frameWidth:frameHeight:nodes:)`
+(fixtures and law tests need one; none exists today) and the workspace
+`public internal(set) var marquee: DesignRect?`. D0-2 adds `public
+internal(set) var services: DesignServices = .live` with the type it names.
 
-D2-1 adds `case path` to `DesignNodeKind` (with its symbol `scribble`, its
-fill label in `DesignInspectorContent.swift`, which is the one other switch
-over the kind), `public var path: DesignPath? = nil` and `public var
-componentID: String? = nil` on `DesignNode`, and `components` and
-`variables` to the file. The file version becomes 2; version 1 files still
-open, and a version-1 build refuses a version-2 file with its existing
-"made by a newer version" message.
+D2-1 adds `case path` to `DesignNodeKind` with every switch over the kind in
+the same PR (its symbol `scribble` in `DesignNode.swift`, its fill label in
+`DesignInspectorContent.swift`, and a placeholder case in `DesignArtwork`'s
+switch in `DesignCanvasMarks.swift`, which D2-4 replaces with real drawing),
+`path: DesignPath?`, `componentID: String?` and `fillVariableID: String?` on
+`DesignNode`, and `components` and `variables` to the file. The file version
+becomes 2; version 1 still opens, and an older build refuses a version-2 file
+with its existing "made by a newer version" message.
 
 ### 5.2 Shared types (`Contracts/EditContracts.swift`, D0-2)
 
@@ -404,10 +427,15 @@ open, and a version-1 build refuses a version-2 file with its existing
 // ids it mints. A use case never touches the workspace: it reads one page and
 // returns a DesignEdit, which DesignWorkspace.apply records as exactly one named
 // undo step (or merges into the run with the same coalescing key). A refused
-// call throws DesignRefusal and the workspace records nothing. For every write
-// `w` with a help read `wHelp`, `wHelp(...) == nil` exactly when `w(...)`
-// succeeds and changes something (DesignContractLawTests checks every fake and
-// live conformance against that law). Linux-safe.
+// call throws DesignRefusal and the workspace records nothing.
+//
+// The help law, for a write `w` and its help read `wHelp` on the same page and
+// ids: when `wHelp` is nil, `w` throws nothing but `.unchanged` (a value equal
+// to the current one); when it is not nil, `w` throws and `wHelp` equals that
+// refusal's `help`. A help never depends on the value being written.
+// DesignContractLawTests checks every fake and live conformance on `cards`.
+// Coalescing keys are `runKey(base, ids)`, so a run never spans two
+// selections. Linux-safe.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -427,6 +455,11 @@ public struct DesignEdit: Sendable, Equatable {
 
     public init(name: String, nodes: [DesignNode], selection: [String], coalescingKey: String? = nil) {
         (self.name, self.nodes, self.selection, self.coalescingKey) = (name, nodes, selection, coalescingKey)
+    }
+
+    /// The coalescing key for a run of `base` edits on exactly these layers: "move-node-3,node-4".
+    public static func runKey(_ base: String, _ ids: [String]) -> String {
+        "\(base)-\(ids.sorted().joined(separator: ","))"
     }
 }
 
@@ -529,7 +562,10 @@ public struct DesignTextStyle: Sendable, Hashable, Codable {
 }
 
 /// The style properties the inspector edits, for help lookups.
-public enum DesignStyleProperty: String, CaseIterable, Sendable { case cornerRadius, opacity, stroke, textStyle }
+public enum DesignStyleProperty: String, CaseIterable, Sendable { case frame, fill, cornerRadius, opacity, stroke, textStyle }
+
+/// One of the inspector's X, Y, W and H fields; with several layers selected it sets each layer's own value.
+public enum DesignFrameField: String, CaseIterable, Sendable { case x, y, width, height }
 
 /// One pen anchor: where it sits and its two curve handles, absolute page points. No handle is a corner.
 public struct DesignAnchor: Sendable, Hashable, Codable {
@@ -629,7 +665,7 @@ public enum DesignArrangeStep: String, CaseIterable, Sendable {
 
 Already-built use cases keep their workspace methods and get no new
 protocol: new file, pages (add, rename, delete), add a node, draw, text
-edit, the row toggles, the frame and fill rows, undo and redo.
+edit, the row toggles, undo and redo.
 
 ```swift
 // Contracts/UseCases.swift: one protocol per Design use case. Reads take the
@@ -656,7 +692,7 @@ public protocol MarqueeSelecting: Sendable {
 /// Move, resize, nudge and delete for one or more selected layers.
 public protocol SelectionTransforming: Sendable {
     func transformHelp(_ ids: [String], on page: DesignPage) -> String?
-    /// Coalescing "move": every selected layer with its subtree, by `delta` from the gesture start.
+    /// Coalescing "move" (`runKey`): every selected layer with its subtree, by `delta` from the gesture start.
     func move(_ ids: [String], by delta: DesignPoint, on page: DesignPage) throws(DesignRefusal) -> DesignEdit
     /// Coalescing "resize": the selection's box by `handle`; each layer scales inside the box.
     func resize(_ ids: [String], handle: DesignHandle, by delta: DesignPoint, modifiers: DesignModifiers,
@@ -705,8 +741,8 @@ public protocol LayerClipboard: Sendable {
     func copyHelp(_ ids: [String], on page: DesignPage) -> String?
     /// The selected layers, children included, as bytes for the pasteboard.
     func encode(_ ids: [String], on page: DesignPage) throws(DesignRefusal) -> Data
-    /// Whether `data` holds layers `paste` can add. Paste is disabled otherwise.
-    func canPaste(_ data: Data) -> Bool
+    /// Why Paste is off for these pasteboard bytes (nil: the pasteboard holds none of our type).
+    func pasteHelp(_ data: Data?) -> String?
     /// Single "Paste". Fresh ids; into `parentID` (a selected frame) or the top level; offset by
     /// (10, 10) when a copy would land exactly on a layer with the same name and frame.
     func paste(_ data: Data, into parentID: String?, on page: DesignPage,
@@ -723,9 +759,14 @@ public protocol LayerOrdering: Sendable {
     func arrange(_ step: DesignArrangeStep, _ ids: [String], on page: DesignPage) throws(DesignRefusal) -> DesignEdit
 }
 
-/// The inspector's style rows: corner radius, opacity, stroke and text style.
+/// The inspector's rows for one or several layers: X, Y, W, H, fill, corner radius, opacity,
+/// stroke and text style. With several layers a value goes to each of them (a "Mixed" row too).
 public protocol StyleEditing: Sendable {
     func styleHelp(_ property: DesignStyleProperty, _ ids: [String], on page: DesignPage) -> String?
+    /// Coalescing "frame": X and Y move each layer with its subtree; W and H at least 1.
+    func setFrame(_ field: DesignFrameField, to value: Double, _ ids: [String], on page: DesignPage) throws(DesignRefusal) -> DesignEdit
+    /// Coalescing "fill".
+    func setFill(_ color: DesignColor, _ ids: [String], on page: DesignPage) throws(DesignRefusal) -> DesignEdit
     /// Coalescing "radius". Clamped to 0...half the shorter side; rectangles and frames only.
     func setCornerRadius(_ radius: Double, _ ids: [String], on page: DesignPage) throws(DesignRefusal) -> DesignEdit
     /// Coalescing "opacity". Clamped to 0...1.
@@ -738,6 +779,8 @@ public protocol StyleEditing: Sendable {
 
 /// What View > Zoom to Selection shows.
 public protocol ViewFraming: Sendable {
+    /// "Select a layer first." with nothing visible selected; nil exactly when `rectToShow` is not nil.
+    func framingHelp(_ ids: [String], on page: DesignPage) -> String?
     /// The union of the visible selected layers' frames; nil with none (the command is then off).
     func rectToShow(_ ids: [String], on page: DesignPage) -> DesignRect?
 }
@@ -812,6 +855,9 @@ public protocol VariableEditing: Sendable {
     func set(_ id: String, _ mode: DesignMode, to value: DesignVariableValue,
              in variables: [DesignVariable]) throws(DesignRefusal) -> [DesignVariable]
     func resolve(_ id: String, in mode: DesignMode, variables: [DesignVariable]) -> DesignVariableValue?
+    /// Single "Bind Fill" (nil: "Unbind Fill"). Binds each layer's fill to a color variable.
+    func bind(_ variableID: String?, _ ids: [String], on page: DesignPage,
+              variables: [DesignVariable]) throws(DesignRefusal) -> DesignEdit
 }
 ```
 
@@ -823,7 +869,9 @@ its use case on the selected page and calling `apply`.
 ```swift
 // DesignActions.swift: the workspace methods the window, the menus and the canvas call for every
 // command that runs a use case, and the help each control shows. `help(c) == nil` exactly when
-// `run(c)` changes the document. Each successful run applies one DesignEdit as one named undo step
+// `run(c)` would not refuse (the help law in EditContracts.swift). With exactly one layer selected,
+// `.delete`, `.nudge` and `.align` keep today's single-layer methods whatever the service says, so
+// nothing that works today goes off while `.live` still holds NotBuilt. Each successful run applies one DesignEdit as one named undo step
 // (merged into the run with the same coalescing key); a refusal records nothing. Linux-safe.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
@@ -840,12 +888,15 @@ public enum DesignCommand: Hashable, Sendable {
     case arrange(DesignArrangeStep)
 }
 
-/// One inspector style change on the selection.
+/// One inspector change on every selected layer (one or several).
 public enum DesignStyleChange: Hashable, Sendable {
+    case frame(DesignFrameField, Double), fill(DesignColor)
     case cornerRadius(Double), opacity(Double), stroke(DesignStroke?), textStyle(DesignTextStyle)
 
     public var property: DesignStyleProperty {
         switch self {
+        case .frame: .frame
+        case .fill: .fill
         case .cornerRadius: .cornerRadius
         case .opacity: .opacity
         case .stroke: .stroke
@@ -864,7 +915,8 @@ extension DesignWorkspace {
     public func copySelection() throws(DesignRefusal) -> Data
     /// Copy, then delete as one step named "Cut".
     public mutating func cutSelection() throws(DesignRefusal) -> Data
-    public func canPaste(_ data: Data) -> Bool
+    /// Why Paste is off for the pasteboard's bytes of our type (nil when it holds none).
+    public func pasteHelp(_ data: Data?) -> String?
     /// Into the selected frame, else the top level of the selected page.
     public mutating func paste(_ data: Data) throws(DesignRefusal)
     /// The pasteboard type the bridge reads and writes.
@@ -876,9 +928,10 @@ extension DesignWorkspace {
     public func styleHelp(_ property: DesignStyleProperty) -> String?
     public mutating func setStyle(_ change: DesignStyleChange) throws(DesignRefusal)
 
-    /// What View > Zoom to Selection shows; nil turns the command off.
+    /// What View > Zoom to Selection shows, and why it is off.
     public var zoomToSelectionRect: DesignRect?
-    /// Edit > Select All: every visible, unlocked layer at the selection's level (the top of the page when nothing is selected).
+    public var zoomToSelectionHelp: String?
+    /// Edit > Select All: every visible, unlocked layer at the selection's level (the page's top level when nothing is selected).
     public mutating func selectAll()
 
     /// Swaps the services (the window does it once, from `-DesignServices fake`).
@@ -892,13 +945,6 @@ extension DesignWorkspace {
 ```
 
 ### 5.6 Services and NotBuilt (`DesignServices.swift`, D0-2)
-
-As compiled. In D0-2, `.fake` holds `NotBuilt` for `export`, `pen`,
-`components` and `variables` (their fakes need the D2-1 schema); D2-1 swaps
-in the four tier-2 fakes. `.live.filing` stays `NotBuilt` only on paper:
-D0-2 sets it to `LiveFiling`, today's codec moved behind the protocol by F5
-(until F5, `filing` is not called; `DesignFile.swift` keeps serving Open and
-Save).
 
 ```swift
 // DesignServices.swift: the use cases a workspace runs on. `.live` is what the
@@ -932,16 +978,18 @@ public struct DesignServices: Sendable, Equatable {
 
     public static func == (a: DesignServices, b: DesignServices) -> Bool { a.name == b.name }
 
+    /// As D2-3 leaves it; in D0-2 the export, pen, components and variables slots are NotBuilt.
     public static let fake = DesignServices(
         name: "fake", marquee: FakeMarquee(), transforming: FakeTransforming(), aligning: FakeAligning(),
         duplicating: FakeDuplicating(), grouping: FakeGrouping(), clipboard: FakeClipboard(), ordering: FakeOrdering(),
         styling: FakeStyling(), framing: FakeFraming(), filing: FakeFiling(), export: FakeExport(), pen: FakePen(),
         components: FakeComponents(), variables: FakeVariables())
 
-    /// Each feature swaps its NotBuilt for its live type in the PR that makes it work.
+    /// D0-2's `.live`: every slot NotBuilt. D0-2b replaces the tier-1 slots with the Live stubs
+    /// (`LiveFiling` serving today's codec) and D2-3 the tier-2 ones, so no feature edits this file.
     public static let live = DesignServices(
         name: "live", marquee: NotBuilt("Marquee selection"), transforming: NotBuilt("Editing several layers"),
-        aligning: NotBuilt("Align and distribute"), duplicating: NotBuilt("Duplicate"), grouping: NotBuilt("Group"),
+        aligning: NotBuilt("Aligning several layers"), duplicating: NotBuilt("Duplicate"), grouping: NotBuilt("Group"),
         clipboard: NotBuilt("Copy and paste"), ordering: NotBuilt("Reordering layers"), styling: NotBuilt("Style editing"),
         framing: NotBuilt("Zoom to Selection"), filing: NotBuilt("Saving"), export: NotBuilt("Export"),
         pen: NotBuilt("The Pen tool"), components: NotBuilt("Components"), variables: NotBuilt("Variables"))
@@ -993,7 +1041,7 @@ extension NotBuilt: LayerClipboard {
     public var pasteboardType: String { "org.creativesuite.design.layers" }
     public func copyHelp(_ ids: [String], on page: DesignPage) -> String? { help }
     public func encode(_ ids: [String], on page: DesignPage) throws(DesignRefusal) -> Data { throw refusal }
-    public func canPaste(_ data: Data) -> Bool { false }
+    public func pasteHelp(_ data: Data?) -> String? { help }
     public func paste(_ data: Data, into parentID: String?, on page: DesignPage,
                       mint: inout DesignIDMint) throws(DesignRefusal) -> DesignEdit { throw refusal }
 }
@@ -1007,6 +1055,8 @@ extension NotBuilt: LayerOrdering {
 
 extension NotBuilt: StyleEditing {
     public func styleHelp(_ property: DesignStyleProperty, _ ids: [String], on page: DesignPage) -> String? { help }
+    public func setFrame(_ field: DesignFrameField, to value: Double, _ ids: [String], on page: DesignPage) throws(DesignRefusal) -> DesignEdit { throw refusal }
+    public func setFill(_ color: DesignColor, _ ids: [String], on page: DesignPage) throws(DesignRefusal) -> DesignEdit { throw refusal }
     public func setCornerRadius(_ radius: Double, _ ids: [String], on page: DesignPage) throws(DesignRefusal) -> DesignEdit { throw refusal }
     public func setOpacity(_ opacity: Double, _ ids: [String], on page: DesignPage) throws(DesignRefusal) -> DesignEdit { throw refusal }
     public func setStroke(_ stroke: DesignStroke?, _ ids: [String], on page: DesignPage) throws(DesignRefusal) -> DesignEdit { throw refusal }
@@ -1014,6 +1064,7 @@ extension NotBuilt: StyleEditing {
 }
 
 extension NotBuilt: ViewFraming {
+    public func framingHelp(_ ids: [String], on page: DesignPage) -> String? { help }
     public func rectToShow(_ ids: [String], on page: DesignPage) -> DesignRect? { nil }
 }
 
@@ -1056,29 +1107,42 @@ extension NotBuilt: VariableEditing {
     public func set(_ id: String, _ mode: DesignMode, to value: DesignVariableValue,
                     in variables: [DesignVariable]) throws(DesignRefusal) -> [DesignVariable] { throw refusal }
     public func resolve(_ id: String, in mode: DesignMode, variables: [DesignVariable]) -> DesignVariableValue? { nil }
+    public func bind(_ variableID: String?, _ ids: [String], on page: DesignPage,
+                     variables: [DesignVariable]) throws(DesignRefusal) -> DesignEdit { throw refusal }
 }
 ```
 
-### 5.7 Fakes (`Fakes/DesignFakes.swift`, D0-2; tier 2 in D2-1)
+### 5.7 Fakes (`Fakes/FakeSupport.swift` and `Fakes/DesignFakes.swift`, D0-2; tier 2 in D2-2)
 
 ```swift
-// Fakes/DesignFakes.swift: one fixture fake per use case, so views, snapshots
-// and journeys (`-DesignServices fake`) build before the live conformance. A
-// fake keeps its protocol's undo case and the help law, but acts on the page's
-// top-level layers only and ignores locks and hidden layers: it is a stand-in,
-// never shipped as `.live`. Linux-safe.
-#if canImport(FoundationEssentials)
-import FoundationEssentials
-#else
-import Foundation
-#endif
+// Fakes/FakeSupport.swift: tree helpers the fixture fakes share. Internal, so the
+// tier-2 fakes (D2-3) use them too. They walk the whole tree, so a fake acts on
+// layers inside frames and groups exactly as the journeys select them. Linux-safe.
 
-/// The top-level layers of `page` named in `ids`, in paint order.
-private func topLevel(_ ids: [String], _ page: DesignPage) -> [DesignNode] {
-    page.nodes.filter { ids.contains($0.id) }
+/// The nodes of `page` named in `ids`, in the order of `ids`; unknown ids are skipped.
+func fakeFind(_ ids: [String], _ page: DesignPage) -> [DesignNode] {
+    ids.compactMap { page.nodes.node($0) }
 }
 
-private func union(_ frames: [DesignRect]) -> DesignRect? {
+/// The id of the parent all of `ids` share (nil: the top level), or `.notSameParent`.
+func fakeSharedParent(_ ids: [String], _ page: DesignPage) throws(DesignRefusal) -> String? {
+    let parents = Set(ids.map { page.nodes.ancestors(of: $0)?.last ?? "" })
+    guard parents.count == 1, let parent = parents.first else { throw .notSameParent }
+    return parent.isEmpty ? nil : parent
+}
+
+/// Runs `body` on the children of `parentID` (the top level when nil) in a copy of the tree.
+func fakeSiblings(_ parentID: String?, _ nodes: [DesignNode], _ body: (inout [DesignNode]) -> Void) -> [DesignNode] {
+    var tree = nodes
+    if let parentID {
+        _ = tree.update(parentID) { body(&$0.children) }
+    } else {
+        body(&tree)
+    }
+    return tree
+}
+
+func fakeUnion(_ frames: [DesignRect]) -> DesignRect? {
     guard let first = frames.first else { return nil }
     return frames.dropFirst().reduce(first) { box, f in
         let (x, y) = (Swift.min(box.x, f.x), Swift.min(box.y, f.y))
@@ -1086,25 +1150,45 @@ private func union(_ frames: [DesignRect]) -> DesignRect? {
     }
 }
 
-/// Changes the named top-level layers; throws `.nothingSelected` when none is top-level, `.unchanged` when nothing moved.
-private func change(_ ids: [String], _ page: DesignPage, _ name: String, key: String? = nil,
-                    _ body: (inout DesignNode) -> Void) throws(DesignRefusal) -> DesignEdit {
-    guard !topLevel(ids, page).isEmpty else { throw .nothingSelected }
+/// Changes the named layers anywhere in the tree as one edit. Nothing named: `.nothingSelected`;
+/// nothing changed: `.unchanged`.
+func fakeChange(_ ids: [String], _ page: DesignPage, _ name: String, key: String? = nil,
+                _ body: (inout DesignNode) -> Void) throws(DesignRefusal) -> DesignEdit {
+    guard !fakeFind(ids, page).isEmpty else { throw .nothingSelected }
     var nodes = page.nodes
-    for index in nodes.indices where ids.contains(nodes[index].id) { body(&nodes[index]) }
+    for id in ids { _ = nodes.update(id, body) }
     guard nodes != page.nodes else { throw .unchanged }
-    return DesignEdit(name: name, nodes: nodes, selection: ids, coalescingKey: key)
+    return DesignEdit(name: name, nodes: nodes, selection: ids, coalescingKey: key.map { DesignEdit.runKey($0, ids) })
 }
 
-/// The help law for a fake write: nil exactly when `body` succeeds.
-private func help(_ body: () throws(DesignRefusal) -> DesignEdit) -> String? {
-    do { _ = try body(); return nil } catch { return error.help }
+/// The help for `body` under the help law: nil when it succeeds or only reports `.unchanged`.
+func fakeHelp(_ body: () throws(DesignRefusal) -> DesignEdit) -> String? {
+    do { _ = try body(); return nil } catch .unchanged { return nil } catch { return error.help }
 }
+
+func fakeSelectedHelp(_ ids: [String], _ page: DesignPage) -> String? {
+    fakeFind(ids, page).isEmpty ? DesignRefusal.nothingSelected.help : nil
+}
+```
+
+```swift
+// Fakes/DesignFakes.swift: one fixture fake per tier-1 use case, so views,
+// snapshots and journeys (`-DesignServices fake`) build before the live type.
+// A fake keeps its protocol's undo case and the help law and acts anywhere in
+// the tree, but ignores locks and hidden layers and takes the simplest rule
+// (a marquee picks what it touches at the level it started in). It is a
+// stand-in, never shipped as `.live`. Linux-safe.
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
+import Foundation
+#endif
 
 public struct FakeMarquee: MarqueeSelecting {
     public init() {}
     public func layers(touching rect: DesignRect, in parentID: String?, on page: DesignPage) -> [String] {
-        page.nodes.filter { n in
+        let level = parentID.flatMap { page.nodes.node($0)?.children } ?? page.nodes
+        return level.filter { n in
             n.frame.x <= rect.maxX && rect.x <= n.frame.maxX && n.frame.y <= rect.maxY && rect.y <= n.frame.maxY
         }.map(\.id)
     }
@@ -1112,15 +1196,13 @@ public struct FakeMarquee: MarqueeSelecting {
 
 public struct FakeTransforming: SelectionTransforming {
     public init() {}
-    public func transformHelp(_ ids: [String], on page: DesignPage) -> String? {
-        topLevel(ids, page).isEmpty ? DesignRefusal.nothingSelected.help : nil
-    }
+    public func transformHelp(_ ids: [String], on page: DesignPage) -> String? { fakeSelectedHelp(ids, page) }
     public func move(_ ids: [String], by delta: DesignPoint, on page: DesignPage) throws(DesignRefusal) -> DesignEdit {
-        try change(ids, page, "Move", key: "move") { $0.translate(by: delta) }
+        try fakeChange(ids, page, "Move", key: "move") { $0.translate(by: delta) }
     }
     public func resize(_ ids: [String], handle: DesignHandle, by delta: DesignPoint, modifiers: DesignModifiers,
                        on page: DesignPage) throws(DesignRefusal) -> DesignEdit {
-        try change(ids, page, "Resize", key: "resize") {
+        try fakeChange(ids, page, "Resize", key: "resize") {
             $0.frame = $0.frame.resized(handle, by: delta, keepAspect: modifiers.contains(.shift), fromCenter: modifiers.contains(.option))
         }
     }
@@ -1132,24 +1214,26 @@ public struct FakeTransforming: SelectionTransforming {
         case .left: DesignPoint(x: -step, y: 0)
         case .right: DesignPoint(x: step, y: 0)
         }
-        return try change(ids, page, "Nudge", key: "nudge") { $0.translate(by: delta) }
+        return try fakeChange(ids, page, "Nudge", key: "nudge") { $0.translate(by: delta) }
     }
     public func delete(_ ids: [String], on page: DesignPage) throws(DesignRefusal) -> DesignEdit {
-        guard !topLevel(ids, page).isEmpty else { throw .nothingSelected }
-        return DesignEdit(name: "Delete", nodes: page.nodes.filter { !ids.contains($0.id) }, selection: [])
+        guard !fakeFind(ids, page).isEmpty else { throw .nothingSelected }
+        var nodes = page.nodes
+        for id in ids { _ = nodes.remove(id) }
+        return DesignEdit(name: "Delete", nodes: nodes, selection: [])
     }
 }
 
 public struct FakeAligning: LayerAligning {
     public init() {}
     public func alignHelp(_ edge: DesignAlignEdge, _ ids: [String], on page: DesignPage) -> String? {
-        help { () throws(DesignRefusal) in try align(edge, ids, on: page) }
+        fakeSelectedHelp(ids, page)
     }
     public func align(_ edge: DesignAlignEdge, _ ids: [String], on page: DesignPage) throws(DesignRefusal) -> DesignEdit {
-        let page1 = DesignRect(x: 0, y: 0, width: page.frameWidth, height: page.frameHeight)
-        let selected = topLevel(ids, page)
-        guard let box = selected.count == 1 ? page1 : union(selected.map(\.frame)) else { throw .nothingSelected }
-        return try change(ids, page, edge.title) { node in
+        let selected = fakeFind(ids, page)
+        let whole = DesignRect(x: 0, y: 0, width: page.frameWidth, height: page.frameHeight)
+        guard let box = selected.count == 1 ? whole : fakeUnion(selected.map(\.frame)) else { throw .nothingSelected }
+        return try fakeChange(ids, page, edge.title) { node in
             let f = node.frame
             let x: Double = switch edge {
             case .left: box.x
@@ -1167,11 +1251,11 @@ public struct FakeAligning: LayerAligning {
         }
     }
     public func distributeHelp(_ axis: DesignDistributeAxis, _ ids: [String], on page: DesignPage) -> String? {
-        help { () throws(DesignRefusal) in try distribute(axis, ids, on: page) }
+        fakeFind(ids, page).count >= 3 ? nil : DesignRefusal.tooFew(needed: 3).help
     }
     public func distribute(_ axis: DesignDistributeAxis, _ ids: [String], on page: DesignPage) throws(DesignRefusal) -> DesignEdit {
         let horizontal = axis == .horizontal
-        let selected = topLevel(ids, page).sorted { horizontal ? $0.frame.x < $1.frame.x : $0.frame.y < $1.frame.y }
+        let selected = fakeFind(ids, page).sorted { horizontal ? $0.frame.x < $1.frame.x : $0.frame.y < $1.frame.y }
         guard selected.count >= 3, let first = selected.first, let last = selected.last else { throw .tooFew(needed: 3) }
         let start = horizontal ? first.frame.maxX : first.frame.maxY
         let end = horizontal ? last.frame.x : last.frame.y
@@ -1183,7 +1267,7 @@ public struct FakeAligning: LayerAligning {
             targets[node.id] = cursor
             cursor += (horizontal ? node.frame.width : node.frame.height) + gap
         }
-        return try change(ids, page, axis.title) { node in
+        return try fakeChange(ids, page, axis.title) { node in
             guard let to = targets[node.id] else { return }
             node.translate(by: horizontal ? DesignPoint(x: to - node.frame.x, y: 0) : DesignPoint(x: 0, y: to - node.frame.y))
         }
@@ -1192,63 +1276,65 @@ public struct FakeAligning: LayerAligning {
 
 public struct FakeDuplicating: LayerDuplicating {
     public init() {}
-    public func duplicateHelp(_ ids: [String], on page: DesignPage) -> String? {
-        topLevel(ids, page).isEmpty ? DesignRefusal.nothingSelected.help : nil
-    }
+    public func duplicateHelp(_ ids: [String], on page: DesignPage) -> String? { fakeSelectedHelp(ids, page) }
     public func duplicate(_ ids: [String], offset: DesignPoint, on page: DesignPage,
                           mint: inout DesignIDMint) throws(DesignRefusal) -> DesignEdit {
-        guard !topLevel(ids, page).isEmpty else { throw .nothingSelected }
-        var (nodes, copies) = ([DesignNode](), [String]())
-        for node in page.nodes {
-            nodes.append(node)
-            guard ids.contains(node.id) else { continue }
-            var copy = copySubtree(node, mint: &mint)
+        guard !fakeFind(ids, page).isEmpty else { throw .nothingSelected }
+        var nodes = page.nodes
+        var copies: [String] = []
+        for original in fakeFind(ids, page) {
+            var copy = copySubtree(original, mint: &mint)
             copy.translate(by: offset)
             copy.isLocked = false
-            nodes.append(copy)
+            let parent = page.nodes.ancestors(of: original.id)?.last
+            nodes = fakeSiblings(parent, nodes) { siblings in
+                let at = siblings.firstIndex { $0.id == original.id }.map { $0 + 1 } ?? siblings.count
+                siblings.insert(copy, at: at)
+            }
             copies.append(copy.id)
         }
         return DesignEdit(name: "Duplicate", nodes: nodes, selection: copies)
     }
     public func copySubtree(_ node: DesignNode, mint: inout DesignIDMint) -> DesignNode {
-        var children: [DesignNode] = []
-        for child in node.children { children.append(copySubtree(child, mint: &mint)) }
-        var copy = DesignNode(id: mint.nextNodeID(), name: node.name, kind: node.kind, frame: node.frame,
-                              children: children, isHidden: node.isHidden, isLocked: node.isLocked,
-                              fill: node.fill, text: node.text)
-        copy.cornerRadius = node.cornerRadius
-        copy.opacity = node.opacity
-        copy.stroke = node.stroke
-        copy.textStyle = node.textStyle
-        return copy
+        var copy = node
+        copy.children = node.children.map { copySubtree($0, mint: &mint) }
+        return DesignNode(id: mint.nextNodeID(), copying: copy)
     }
 }
 
 public struct FakeGrouping: LayerGrouping {
     public init() {}
     public func groupHelp(_ ids: [String], on page: DesignPage) -> String? {
-        topLevel(ids, page).isEmpty ? DesignRefusal.nothingSelected.help : nil
+        fakeHelp { () throws(DesignRefusal) in var mint = DesignIDMint(taken: [], after: 0); return try group(ids, on: page, mint: &mint) }
     }
     public func group(_ ids: [String], on page: DesignPage, mint: inout DesignIDMint) throws(DesignRefusal) -> DesignEdit {
-        let members = topLevel(ids, page)
-        guard let box = union(members.map(\.frame)),
-              let top = page.nodes.lastIndex(where: { ids.contains($0.id) }) else { throw .nothingSelected }
-        let group = DesignNode(id: mint.nextNodeID(), name: "Group", kind: .group, frame: box, children: members)
-        var nodes = page.nodes
-        nodes.insert(group, at: top + 1)
-        nodes.removeAll { ids.contains($0.id) }
-        return DesignEdit(name: "Group", nodes: nodes, selection: [group.id])
+        let members = fakeFind(ids, page)
+        guard let box = fakeUnion(members.map(\.frame)) else { throw .nothingSelected }
+        let parent = try fakeSharedParent(ids, page)
+        var made = DesignNode(id: mint.nextNodeID(), name: "Group", kind: .group, frame: box)
+        let nodes = fakeSiblings(parent, page.nodes) { siblings in
+            made.children = siblings.filter { ids.contains($0.id) }
+            let top = siblings.lastIndex { ids.contains($0.id) } ?? siblings.count - 1
+            siblings.insert(made, at: top + 1)
+            siblings.removeAll { ids.contains($0.id) }
+        }
+        return DesignEdit(name: "Group", nodes: nodes, selection: [made.id])
     }
     public func ungroupHelp(_ ids: [String], on page: DesignPage) -> String? {
-        topLevel(ids, page).contains { $0.kind == .group } ? nil : DesignRefusal.notAGroup(ids.last ?? "The selection").help
+        fakeFind(ids, page).contains { $0.kind == .group } ? nil : DesignRefusal.notAGroup(ids.last ?? "The selection").help
     }
     public func ungroup(_ ids: [String], on page: DesignPage) throws(DesignRefusal) -> DesignEdit {
-        guard topLevel(ids, page).contains(where: { $0.kind == .group }) else { throw .notAGroup(ids.last ?? "The selection") }
-        var (nodes, selection) = ([DesignNode](), [String]())
-        for node in page.nodes {
-            guard ids.contains(node.id), node.kind == .group else { nodes.append(node); continue }
-            nodes += node.children
-            selection += node.children.map(\.id)
+        let groups = fakeFind(ids, page).filter { $0.kind == .group }
+        guard !groups.isEmpty else { throw .notAGroup(ids.last ?? "The selection") }
+        var nodes = page.nodes
+        var selection: [String] = []
+        for group in groups {
+            let parent = page.nodes.ancestors(of: group.id)?.last
+            nodes = fakeSiblings(parent, nodes) { siblings in
+                guard let at = siblings.firstIndex(where: { $0.id == group.id }) else { return }
+                siblings.replaceSubrange(at...at, with: group.children)
+            }
+            selection += group.children.map(\.id)
         }
         return DesignEdit(name: "Ungroup", nodes: nodes, selection: selection)
     }
@@ -1257,15 +1343,18 @@ public struct FakeGrouping: LayerGrouping {
 public struct FakeClipboard: LayerClipboard {
     public init() {}
     public var pasteboardType: String { "org.creativesuite.design.layers" }
-    public func copyHelp(_ ids: [String], on page: DesignPage) -> String? {
-        topLevel(ids, page).isEmpty ? DesignRefusal.nothingSelected.help : nil
-    }
+    public func copyHelp(_ ids: [String], on page: DesignPage) -> String? { fakeSelectedHelp(ids, page) }
     public func encode(_ ids: [String], on page: DesignPage) throws(DesignRefusal) -> Data {
-        let nodes = topLevel(ids, page)
+        let nodes = fakeFind(ids, page)
         guard !nodes.isEmpty else { throw .nothingSelected }
         do { return try JSONEncoder().encode(nodes) } catch { throw .unreadable }
     }
-    public func canPaste(_ data: Data) -> Bool { (try? JSONDecoder().decode([DesignNode].self, from: data)) != nil }
+    public func pasteHelp(_ data: Data?) -> String? {
+        guard let data, let nodes = try? JSONDecoder().decode([DesignNode].self, from: data), !nodes.isEmpty else {
+            return DesignRefusal.unreadable.help
+        }
+        return nil
+    }
     public func paste(_ data: Data, into parentID: String?, on page: DesignPage,
                       mint: inout DesignIDMint) throws(DesignRefusal) -> DesignEdit {
         guard let nodes = try? JSONDecoder().decode([DesignNode].self, from: data), !nodes.isEmpty else { throw .unreadable }
@@ -1275,36 +1364,42 @@ public struct FakeClipboard: LayerClipboard {
             copy.translate(by: DesignPoint(x: 10, y: 10))
             pasted.append(copy)
         }
-        return DesignEdit(name: "Paste", nodes: page.nodes + pasted, selection: pasted.map(\.id))
+        let tree = fakeSiblings(parentID, page.nodes) { $0 += pasted }
+        return DesignEdit(name: "Paste", nodes: tree, selection: pasted.map(\.id))
     }
 }
 
 public struct FakeOrdering: LayerOrdering {
     public init() {}
     public func moveHelp(_ id: String, into parentID: String?, at index: Int, on page: DesignPage) -> String? {
-        help { () throws(DesignRefusal) in try move(id, into: parentID, at: index, on: page) }
+        fakeHelp { () throws(DesignRefusal) in try move(id, into: parentID, at: index, on: page) }
     }
     public func move(_ id: String, into parentID: String?, at index: Int, on page: DesignPage) throws(DesignRefusal) -> DesignEdit {
-        guard parentID == nil else { throw .notAContainer(parentID ?? "") }
-        guard let from = page.nodes.firstIndex(where: { $0.id == id }) else { throw .unknownID(id) }
         var nodes = page.nodes
-        let node = nodes.remove(at: from)
-        nodes.insert(node, at: Swift.min(Swift.max(index, 0), nodes.count))
+        guard let node = nodes.remove(id) else { throw .unknownID(id) }
+        if let parentID {
+            guard parentID != id, node.children.node(parentID) == nil else { throw .intoItself(node.name) }
+            guard let parent = nodes.node(parentID), parent.kind.holdsChildren else { throw .notAContainer(parentID) }
+        }
+        nodes = fakeSiblings(parentID, nodes) { $0.insert(node, at: Swift.min(Swift.max(index, 0), $0.count)) }
         guard nodes != page.nodes else { throw .unchanged }
         return DesignEdit(name: "Move Layer", nodes: nodes, selection: [id])
     }
     public func arrangeHelp(_ step: DesignArrangeStep, _ ids: [String], on page: DesignPage) -> String? {
-        help { () throws(DesignRefusal) in try arrange(step, ids, on: page) }
+        fakeSelectedHelp(ids, page)
     }
     public func arrange(_ step: DesignArrangeStep, _ ids: [String], on page: DesignPage) throws(DesignRefusal) -> DesignEdit {
-        guard let id = ids.last, let from = page.nodes.firstIndex(where: { $0.id == id }) else { throw .nothingSelected }
+        guard let id = ids.last, page.nodes.node(id) != nil else { throw .nothingSelected }
+        let parent = page.nodes.ancestors(of: id)?.last
+        let level = parent.flatMap { page.nodes.node($0)?.children } ?? page.nodes
+        guard let from = level.firstIndex(where: { $0.id == id }) else { throw .unknownID(id) }
         let to = switch step {
-        case .bringToFront: page.nodes.count - 1
-        case .bringForward: from + 1
-        case .sendBackward: from - 1
+        case .bringToFront: level.count - 1
+        case .bringForward: Swift.min(from + 1, level.count - 1)
+        case .sendBackward: Swift.max(from - 1, 0)
         case .sendToBack: 0
         }
-        var edit = try move(id, into: nil, at: to, on: page)
+        var edit = try move(id, into: parent, at: to, on: page)
         edit.name = step.title
         return edit
     }
@@ -1313,27 +1408,42 @@ public struct FakeOrdering: LayerOrdering {
 public struct FakeStyling: StyleEditing {
     public init() {}
     public func styleHelp(_ property: DesignStyleProperty, _ ids: [String], on page: DesignPage) -> String? {
-        topLevel(ids, page).isEmpty ? DesignRefusal.nothingSelected.help : nil
+        fakeSelectedHelp(ids, page)
+    }
+    public func setFrame(_ field: DesignFrameField, to value: Double, _ ids: [String], on page: DesignPage) throws(DesignRefusal) -> DesignEdit {
+        try fakeChange(ids, page, "Change Frame", key: "frame") { node in
+            guard value.isFinite else { return }
+            switch field {
+            case .x: node.translate(by: DesignPoint(x: value - node.frame.x, y: 0))
+            case .y: node.translate(by: DesignPoint(x: 0, y: value - node.frame.y))
+            case .width: node.frame.width = Swift.max(value, 1)
+            case .height: node.frame.height = Swift.max(value, 1)
+            }
+        }
+    }
+    public func setFill(_ color: DesignColor, _ ids: [String], on page: DesignPage) throws(DesignRefusal) -> DesignEdit {
+        try fakeChange(ids, page, "Change Fill", key: "fill") { $0.fill = color }
     }
     public func setCornerRadius(_ radius: Double, _ ids: [String], on page: DesignPage) throws(DesignRefusal) -> DesignEdit {
-        try change(ids, page, "Change Corner Radius", key: "radius") {
+        try fakeChange(ids, page, "Change Corner Radius", key: "radius") {
             $0.cornerRadius = Swift.min(Swift.max(radius, 0), Swift.min($0.frame.width, $0.frame.height) / 2)
         }
     }
     public func setOpacity(_ opacity: Double, _ ids: [String], on page: DesignPage) throws(DesignRefusal) -> DesignEdit {
-        try change(ids, page, "Change Opacity", key: "opacity") { $0.opacity = Swift.min(Swift.max(opacity, 0), 1) }
+        try fakeChange(ids, page, "Change Opacity", key: "opacity") { $0.opacity = Swift.min(Swift.max(opacity, 0), 1) }
     }
     public func setStroke(_ stroke: DesignStroke?, _ ids: [String], on page: DesignPage) throws(DesignRefusal) -> DesignEdit {
-        try change(ids, page, "Change Stroke", key: "stroke") { $0.stroke = stroke }
+        try fakeChange(ids, page, "Change Stroke", key: "stroke") { $0.stroke = stroke }
     }
     public func setTextStyle(_ style: DesignTextStyle, _ ids: [String], on page: DesignPage) throws(DesignRefusal) -> DesignEdit {
-        try change(ids, page, "Change Text Style", key: "text-style") { $0.textStyle = style }
+        try fakeChange(ids, page, "Change Text Style", key: "text-style") { $0.textStyle = style }
     }
 }
 
 public struct FakeFraming: ViewFraming {
     public init() {}
-    public func rectToShow(_ ids: [String], on page: DesignPage) -> DesignRect? { union(topLevel(ids, page).map(\.frame)) }
+    public func framingHelp(_ ids: [String], on page: DesignPage) -> String? { fakeSelectedHelp(ids, page) }
+    public func rectToShow(_ ids: [String], on page: DesignPage) -> DesignRect? { fakeUnion(fakeFind(ids, page).map(\.frame)) }
 }
 
 /// Keeps documents in memory as JSON; refuses bytes that don't decode.
@@ -1351,9 +1461,13 @@ public struct FakeFiling: DocumentFiling {
 ```
 
 ```swift
-// Fakes/DesignTierTwoFakes.swift (D2-1): the tier-2 fakes. Same rules as DesignFakes.swift.
-// Uses `union` and `topLevel`, which D0-2 puts in Fakes/FakeSupport.swift (internal, not private)
-// rather than at the top of DesignFakes.swift as compiled here.
+// Fakes/DesignTierTwoFakes.swift (D2-2): the tier-2 fixture fakes. Same rules
+// as DesignFakes.swift. Linux-safe.
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
+import Foundation
+#endif
 
 public struct FakeExport: ExportPlanning {
     public init() {}
@@ -1362,7 +1476,7 @@ public struct FakeExport: ExportPlanning {
     }
     public func plan(_ ids: [String], on page: DesignPage, format: DesignExportFormat, scale: Int,
                      existing: Set<String>) throws(DesignRefusal) -> [DesignExportItem] {
-        let items = ids.isEmpty ? page.nodes.filter { $0.kind == .frame } : topLevel(ids, page)
+        let items = ids.isEmpty ? page.nodes.filter { $0.kind == .frame } : fakeFind(ids, page)
         guard !items.isEmpty else { throw .nothingSelected }
         let k = format == .png ? Swift.max(scale, 1) : 1
         return items.map {
@@ -1371,7 +1485,7 @@ public struct FakeExport: ExportPlanning {
         }
     }
     public func svg(for id: String, on page: DesignPage) throws(DesignRefusal) -> String {
-        guard let node = topLevel([id], page).first else { throw .unknownID(id) }
+        guard let node = page.nodes.node(id) else { throw .unknownID(id) }
         return "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 \(node.frame.width) \(node.frame.height)\"/>"
     }
 }
@@ -1397,9 +1511,7 @@ public struct FakePen: PathDrawing {
     }
     /// The anchors' box (handles ignored); the live type bounds the curves exactly.
     public func bounds(of path: DesignPath) -> DesignRect? {
-        guard let first = path.anchors.first?.point else { return nil }
-        let rest = path.anchors.dropFirst().map { DesignRect(x: $0.point.x, y: $0.point.y, width: 0, height: 0) }
-        return union([DesignRect(x: first.x, y: first.y, width: 0, height: 0)] + rest)
+        fakeUnion(path.anchors.map { DesignRect(x: $0.point.x, y: $0.point.y, width: 0, height: 0) })
     }
     public func commit(_ draft: DesignPath, into parentID: String?, on page: DesignPage,
                        mint: inout DesignIDMint) throws(DesignRefusal) -> DesignEdit {
@@ -1407,25 +1519,26 @@ public struct FakePen: PathDrawing {
         var node = DesignNode(id: mint.nextNodeID(), name: "Path", kind: .path,
                               frame: DesignRect(x: box.x, y: box.y, width: Swift.max(box.width, 1), height: Swift.max(box.height, 1)))
         node.path = draft
-        return DesignEdit(name: "Add Path", nodes: page.nodes + [node], selection: [node.id])
+        let added = node
+        return DesignEdit(name: "Add Path", nodes: fakeSiblings(parentID, page.nodes) { $0.append(added) }, selection: [node.id])
     }
 }
 
 public struct FakeComponents: ComponentLibrary {
     public init() {}
     public func createHelp(_ ids: [String], on page: DesignPage) -> String? {
-        topLevel(ids, page).first?.kind == .frame ? nil : "Select a frame to make it a component."
+        fakeFind(ids, page).last?.kind == .frame ? nil : "Select a frame to make it a component."
     }
     public func create(from id: String, on page: DesignPage, library: [DesignComponent],
                        mint: inout DesignIDMint) throws(DesignRefusal) -> (edit: DesignEdit, library: [DesignComponent]) {
-        guard let frame = topLevel([id], page).first, frame.kind == .frame else { throw .nothingSelected }
+        guard let frame = page.nodes.node(id), frame.kind == .frame else { throw .nothingSelected }
         let component = DesignComponent(id: "component-\(library.count + 1)", name: frame.name,
                                         width: frame.frame.width, height: frame.frame.height, nodes: frame.children)
         var nodes = page.nodes
-        for index in nodes.indices where nodes[index].id == id {
-            nodes[index].kind = .instance
-            nodes[index].componentID = component.id
-            nodes[index].children = []
+        _ = nodes.update(id) {
+            $0.kind = .instance
+            $0.componentID = component.id
+            $0.children = []
         }
         return (DesignEdit(name: "Create Component", nodes: nodes, selection: [id]), library + [component])
     }
@@ -1469,6 +1582,11 @@ public struct FakeVariables: VariableEditing {
     }
     public func resolve(_ id: String, in mode: DesignMode, variables: [DesignVariable]) -> DesignVariableValue? {
         variables.first { $0.id == id }?.value(in: mode)
+    }
+    public func bind(_ variableID: String?, _ ids: [String], on page: DesignPage,
+                     variables: [DesignVariable]) throws(DesignRefusal) -> DesignEdit {
+        if let variableID, !variables.contains(where: { $0.id == variableID }) { throw .unknownID(variableID) }
+        return try fakeChange(ids, page, variableID == nil ? "Unbind Fill" : "Bind Fill") { $0.fillVariableID = variableID }
     }
 }
 ```
