@@ -81,6 +81,13 @@ final class DesignJourneyTests: XCTestCase {
         design.drag(on: "suite.canvas", from: CGVector(dx: 0.75, dy: 0.725), to: CGVector(dx: 0.85, dy: 0.8), step: "resized")
         XCTAssert(design.app.buttons["Undo Resize"].waitForExistence(timeout: 5), "the handle drag didn't resize")
         design.shot("inspector")
+        // Shift-click the rectangle: it joins the ellipse in the selection, and the inspector says so (#413).
+        XCUIElement.perform(withKeyModifiers: .shift) {
+            design.drag(on: "suite.canvas", from: CGVector(dx: 0.2, dy: 0.2), to: CGVector(dx: 0.2, dy: 0.2))
+        }
+        let both = design.app.descendants(matching: .any).matching(NSPredicate(format: "label == %@ OR value == %@", "2 Layers", "2 Layers")).firstMatch
+        XCTAssert(both.waitForExistence(timeout: 5), "Shift-click didn't add the rectangle to the selection")
+        design.shot("multi-select")
         // With the ellipse holding the selection, the Layers tab still checks the current page.
         tab("Layers", in: design)
         XCTAssert(design.element("design.current-page").waitForExistence(timeout: 5), "Layers lost the current page's mark")

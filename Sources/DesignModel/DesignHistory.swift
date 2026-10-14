@@ -30,7 +30,7 @@ import Foundation
 struct DesignSnapshot: Sendable, Equatable {
     var pages: [DesignPage]
     var selectedPageID: String?
-    var selectedNodeID: String?
+    var selectedNodeIDs: [String]
     var expandedNodeIDs: Set<String>
     var pageCount: Int
     var nodeCount: Int
@@ -93,7 +93,7 @@ extension DesignWorkspace {
 
     var snapshot: DesignSnapshot {
         DesignSnapshot(
-            pages: pages, selectedPageID: selectedPageID, selectedNodeID: selectedNodeID,
+            pages: pages, selectedPageID: selectedPageID, selectedNodeIDs: selectedNodeIDs,
             expandedNodeIDs: expandedNodeIDs, pageCount: pageCount, nodeCount: nodeCount, heldIDs: held.ids)
     }
 
@@ -105,7 +105,7 @@ extension DesignWorkspace {
     mutating func record(
         _ name: String, before: DesignSnapshot, coalescing: String? = nil, swapsDocument: Bool = false
     ) {
-        guard pages != before.pages || selectedPageID != before.selectedPageID || selectedNodeID != before.selectedNodeID
+        guard pages != before.pages || selectedPageID != before.selectedPageID || selectedNodeIDs != before.selectedNodeIDs
             || (swapsDocument && documentURL != nil)
         else { return }
         history.redo.removeAll()
@@ -125,9 +125,9 @@ extension DesignWorkspace {
         if step.swapsDocument { documentURL = step.documentURL }
         pages = snapshot.pages
         held.replace(with: snapshot.heldIDs)
-        (selectedPageID, selectedNodeID) = (snapshot.selectedPageID, snapshot.selectedNodeID)
+        (selectedPageID, selectedNodeIDs) = (snapshot.selectedPageID, snapshot.selectedNodeIDs)
         (pageCount, nodeCount) = (Swift.max(pageCount, snapshot.pageCount), Swift.max(nodeCount, snapshot.nodeCount))
-        if let page = selectedPage, let id = selectedNodeID { expandAncestors(of: id, in: page.nodes) }
+        if let page = selectedPage { for id in selectedNodeIDs { expandAncestors(of: id, in: page.nodes) } }
     }
 
     /// A gesture or discarded text edit: the document goes back to `snapshot` exactly, counters
@@ -135,7 +135,7 @@ extension DesignWorkspace {
     mutating func rewind(to snapshot: DesignSnapshot) {
         pages = snapshot.pages
         held.replace(with: snapshot.heldIDs)
-        (selectedPageID, selectedNodeID, expandedNodeIDs) = (snapshot.selectedPageID, snapshot.selectedNodeID, snapshot.expandedNodeIDs)
+        (selectedPageID, selectedNodeIDs, expandedNodeIDs) = (snapshot.selectedPageID, snapshot.selectedNodeIDs, snapshot.expandedNodeIDs)
         (pageCount, nodeCount) = (snapshot.pageCount, snapshot.nodeCount)
     }
 

@@ -1,5 +1,5 @@
 // DesignWorkspace.swift: the state behind Design's window: pages with their node
-// trees, the selected page and node, the expanded Layers rows, the tool, the
+// trees, the selected page and layers, the expanded Layers rows, the tool, the
 // inline text edit and the undo history. Linux-safe. DesignApp changes it only
 // through the methods here and in the extensions beside it (DesignHistory,
 // DesignCanvasEditing, DesignDrawing, DesignText, DesignFile).
@@ -78,7 +78,13 @@ public struct DesignWorkspace: Sendable, Equatable {
     /// Pages of the open file; empty when no file is open.
     public internal(set) var pages: [DesignPage] = []
     public internal(set) var selectedPageID: String?
-    public internal(set) var selectedNodeID: String?
+    /// The selected layers on the selected page, in the order they were selected (DesignSelection).
+    public internal(set) var selectedNodeIDs: [String] = []
+    /// The primary selection: the last layer selected. Setting it replaces the whole selection.
+    public internal(set) var selectedNodeID: String? {
+        get { selectedNodeIDs.last }
+        set { selectedNodeIDs = newValue.map { [$0] } ?? [] }
+    }
     public internal(set) var expandedNodeIDs: Set<String> = []
     public internal(set) var tool: DesignTool = .move
     /// The text node being edited inline, and its live text (DesignText).
@@ -201,7 +207,7 @@ public struct DesignWorkspace: Sendable, Equatable {
         expandAncestors(of: id, in: page.nodes)
     }
 
-    /// Clears the node selection; the page stays selected.
+    /// Clears the node selection, every selected layer (Escape, a click on empty canvas); the page stays selected.
     public mutating func deselect() {
         commitTextEdit()
         selectedNodeID = nil
@@ -216,7 +222,8 @@ public struct DesignWorkspace: Sendable, Equatable {
     public func isExpanded(_ id: String) -> Bool { expandedNodeIDs.contains(id) }
 
     /// Shows or hides a node's children in Layers. Refused for an id on no page. Collapsing a
-    /// row that encloses the selection selects that row, so the selection never hides (#121).
+    /// row drops the selected layers it encloses, and selects that row when none is left, so the
+    /// selection never hides (#121).
     public mutating func setExpanded(_ id: String, _ isExpanded: Bool) throws(DesignTreeError) {
         guard pages.contains(where: { $0.nodes.node(id) != nil }) else { throw .unknownID(id) }
         guard !isExpanded else {
@@ -224,9 +231,11 @@ public struct DesignWorkspace: Sendable, Equatable {
             return
         }
         expandedNodeIDs.remove(id)
-        if let selected = selectedNodeID, selectedPage?.nodes.ancestors(of: selected)?.contains(id) == true {
-            selectItem(id)
-        }
+        // Selected layers the collapse hides leave the selection; when none is left, the row is selected.
+        let hidden = selectedNodeIDs.filter { selectedPage?.nodes.ancestors(of: $0)?.contains(id) == true }
+        guard !hidden.isEmpty else { return }
+        selectedNodeIDs.removeAll { hidden.contains($0) }
+        if selectedNodeIDs.isEmpty { selectItem(id) }
     }
 
     /// Flips a node's Layers disclosure. Refused for an id on no page.

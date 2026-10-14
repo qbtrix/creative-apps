@@ -1,6 +1,8 @@
 // DesignCanvas.swift: the canvas of Design's editor shell: the selected page on
 // SuiteUI's CanvasViewport (rulers, checkerboard, zoom), with its nodes painted
-// by DesignArtwork and the selection's outline and handles over them, or the
+// by DesignArtwork and the selection's outline and handles over them (with
+// several layers selected, an outline on each, SuiteUI's dashed SelectionOutline
+// around them all, and no handles), or the
 // empty state with a New File button when nothing is open. Pointer drags go to
 // the workspace as `.drag` with the modifier keys held, and the release as
 // `.endDrag`; the workspace decides what a press hits and which tool acts. The
@@ -36,6 +38,8 @@ struct DesignCanvas: View {
         let painted = page.painted
         // A hidden node, or one inside a hidden frame, is not on the canvas, so it has no outline.
         let selected = painted.first { $0.node.id == model.selectedNodeID }?.node
+        let selectedIDs = Set(model.selectedNodeIDs)
+        let outlined = painted.map(\.node).filter { selectedIDs.contains($0.id) }
         return CanvasViewport(
             documentSize: CGSize(width: page.frameWidth, height: page.frameHeight), zoom: zoom,
             pointer: model.tool.pointer, onSize: onViewport, onZoom: onZoom,
@@ -44,8 +48,12 @@ struct DesignCanvas: View {
         ) {
             DesignArtwork(painted: painted, zoom: zoom, editingTextID: model.editingTextID)
         } overlay: {
-            // The text being edited shows its editor's box instead of handles.
-            if let selected, selected.id != model.editingTextID {
+            if model.hasMultipleSelection {
+                ForEach(outlined) { node in DesignSelectionMarks(rect: node.frame, zoom: zoom, handles: false) }
+                // The box around them all is SuiteUI's dashed outline, apart from each layer's own.
+                if let bounds = model.selectionBounds { SelectionOutline(rect: bounds.cgRect, zoom: zoom) }
+            } else if let selected, selected.id != model.editingTextID {
+                // The text being edited shows its editor's box instead of handles.
                 DesignSelectionMarks(rect: selected.frame, zoom: zoom, handles: model.lockHelp(selected.id) == nil)
             }
             DesignTextOverlay(model: model, zoom: zoom, perform: perform)

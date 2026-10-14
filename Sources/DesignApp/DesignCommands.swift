@@ -51,7 +51,7 @@ struct DesignMenu {
         undoHelp = editing ? Self.finishEditing : model.canUndo ? nil : "Nothing to undo."
         redoHelp = editing ? Self.finishEditing : model.canRedo ? nil : "Nothing to redo."
         canDeletePage = model.canDeletePage
-        canDeleteLayer = !editing && (model.selectedNode.map { model.lockHelp($0.id) == nil } ?? false)
+        canDeleteLayer = !editing && !model.hasMultipleSelection && (model.selectedNode.map { model.lockHelp($0.id) == nil } ?? false)
         alignHelp = model.alignHelps
     }
 
