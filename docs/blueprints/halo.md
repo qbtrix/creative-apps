@@ -564,3 +564,1042 @@ claims come from the frame probe's JSON once #330 lands (section 7).
 | H-P2 | `testInspectorScrubLatency` (`+Perf`, core-loop) | `reference` | drag the Rotation bar | HB-U2 |
 | H-P3 | `testPlayheadScrubLatency` (`+Perf`, core-loop) | `reference` | drag the playhead end to end | HB-U3 |
 | H-P4 | `testPlaybackHoldsRate` (`+Perf`, core-loop) | `reference` | play 5 s at 30 fps | HB-U4 |
+
+---
+
+## 5. Contracts
+
+One Swift protocol per use case, with a fake for each, so a feature's views
+can be built and journeyed on the fake while its logic is built on the
+live type, and the two meet by swapping one file. They are written to
+compile on Linux in HaloModel: Foundation through the FoundationEssentials
+pattern, FlareCore and CoreRaster only, value types, `Sendable`, Swift 6.
+
+**Proof.** The code below is copied from
+`docs/blueprints/halo/contracts/`, and `docs/blueprints/halo/contracts/check.sh`
+builds it with today's HaloModel and creative-core `main` in a throwaway
+package and runs `Tests/HaloContractTests.swift` (7 tests on the fakes). Run
+on 2026-10-14 with Swift 6.3.3 on Ubuntu 24.04 against creative-core
+4cac701: `CONTRACTS: PASS`, no warnings. W0 copies these files into
+`Sources/HaloModel/` (the fakes split one file per contract, the live stubs
+one file per contract under `Live/`).
+
+**Rules every conformance keeps.**
+
+- Reads take values; writes take the composition `inout` and throw
+  `HaloEditError`, changing nothing when they throw (fakes do it by writing
+  to a copy).
+- No contract records undo. `HaloProject.edit(_:coalesceKey:_:)` does
+  (section 2), so fakes and live types are tested without a project.
+- Every service has `unavailableHelp`: nil once it works. The W0 live
+  stubs return the reason, so every control that needs one is disabled
+  with that text until its feature lands.
+- One conformance suite per contract (`Tests/HaloModelTests/<Contract>ContractTests.swift`,
+  W0) runs the same expectations against the fake and, once it exists, the
+  live type: `@Test(arguments: [HaloServices.fake, .live])` style. A live
+  type is done when it passes its suite.
+
+### Use cases at a glance
+
+| Use case | Protocol | Fake | Live file (feature) | Journeys |
+|---|---|---|---|---|
+| See the layers at the playhead | `FrameDrawing` | `FakeFrameDrawing` (no parenting) | `Live/LiveFrameDrawing.swift` (viewer-playback) | H-J2, H-J3 |
+| Where a layer is, through parents | `LayerPlacing` | `FakeLayerPlacing` (no parenting) | `Live/LiveLayerPlacing.swift` (layer-keys) | H-J5, H-J6, H-J23 |
+| Key a property in the inspector | `PropertyKeying` | `FakePropertyKeying` | `Live/LivePropertyKeying.swift` (layer-keys) | H-J6, H-J12 |
+| Drag a layer to key its position | `ViewerDragging` | `FakeViewerDragging` | `Live/LiveViewerDragging.swift` (layer-keys) | H-J5, H-J12 |
+| Ease keys | `KeyEasing` | `FakeKeyEasing` | `Live/LiveKeyEasing.swift` (easing) | H-J7, H-J12 |
+| Undo and redo | `ProjectHistory` | `FakeProjectHistory` | `Live/LiveProjectHistory.swift` (history-files) | H-J8, all Edit-menu asserts |
+| Save and open | `ProjectFiles` | `FakeProjectFiles` (no validation) | `Live/LiveProjectFiles.swift` (history-files) | H-J10, H-J11 |
+| Play | `PlaybackClock` | `FakePlaybackClock` | `Live/LivePlaybackClock.swift` (viewer-playback) | H-J4 |
+| Render a frame to pixels | `FrameRendering` (+ `TextRasterizing`) | `FakeFrameRendering`, `FakeTextRasterizer` | `Live/LiveFrameRendering.swift` (viewer-playback); `HaloTextRasterizer.swift` in HaloApp (text-layers) | H-J20, H-J22 |
+| Render a composition to files | `CompositionRendering` (+ `RenderSink`) | `FakeCompositionRendering` | `Live/LiveCompositionRendering.swift` (render-out); sinks `HaloPNGWriter.swift`, `HaloMovieWriter.swift` in HaloApp | H-J21 |
+
+Composition management, timecode, in and out points, layer housekeeping and
+text edits are engine-direct workspace methods (section 2), tested on
+`HaloProject` itself.
+
+### The workspace methods views call
+
+Each lives in the extension file its feature owns (section 8). Every write
+goes through `edit`; every read is a computed property.
+
+| File (feature) | Methods |
+|---|---|
+| `HaloViewerState.swift` (W0) | `var viewerDrawList: HaloDrawList?` (drawing at the playhead plus the drag offset), `var viewerSummary: String` |
+| `HaloCommand.swift` (W0) | `enum HaloCommand`, `func unavailableHelp(for: HaloCommand) -> String?`, `func title(for: HaloCommand) -> String` (Undo and Redo carry the step name) |
+| `HaloPlayback.swift` (viewer-playback) | `play(at now: Double)`, `pause()`, `togglePlay(at:)`, `setLoops(_:)`, `tick(now:)`, `stepFrame(by:)`, `goToStart()`, `goToEnd()` |
+| `HaloViewerDrag.swift` (layer-keys) | `beginViewerDrag(at: HaloPoint)`, `moveViewerDrag(to: HaloPoint)`, `endViewerDrag()`, `cancelViewerDrag()` |
+| `HaloKeying.swift` (layer-keys) | `var propertyRows: [HaloPropertyRow]`, `setProperty(_:to:)` (coalesced per row), `endPropertyScrub()`, `toggleAnimation(_:)`, `toggleKey(_:)`, `setParent(_:)`, `var parentChoices: [(id: String, name: String)]` |
+| `HaloLayerEdits.swift` (layer-panel) | `deleteSelectedLayer()`, `renameLayer(_:to:)`, `moveLayer(_:to:)`, `duplicateSelectedLayer()` |
+| `HaloHistory.swift` (history-files) | `undo()`, `redo()`, `var undoTitle: String?`, `var redoTitle: String?` |
+| `HaloFiles.swift` (history-files) | `fileData() throws -> Data`, `open(_ data: Data, name: String) throws`, `didSave(as name: String)`, `var title: String`, `var recent: [String]` |
+| `HaloKeySelection.swift` (easing) | `var keySegments: [HaloKeySegment]`, `selectKey(_:extending:)`, `clearKeySelection()`, `setEasing(_ preset: HaloEasingPreset)`, `setCustomEasing(_:coalesceKey:)` |
+| `HaloRenderFrame.swift` (render-out) | `renderCurrentFrame()`, `var renderedFrameNote: String?` |
+| `HaloRenderJob.swift` (render-out) | `startRender(_ settings:)`, `renderProgress(frame:)`, `cancelRender()`, `finishRender(_ outcome:)` |
+| `HaloTextEdits.swift` (text-layers) | `setText(_:)`, `setFontSize(_:)` |
+
+### W0 change to `HaloLayer`
+
+The contracts read three new stored fields on `HaloLayer`, all added in W0
+with `Codable` on the layer and composition types (the file
+`docs/blueprints/halo/contracts/W0/HaloLayer.swift` is `HaloLayer.swift` as
+W0 leaves it):
+
+```swift
+    /// W0: keyframe tracks by `HaloProperty.rawValue`, each sorted by frame
+    /// with one key per frame. A property with no track uses its default.
+    public var tracks: [String: [HaloKeyframe]] = [:]
+    /// W0: the layer this one follows; nil for none. Never a cycle.
+    public var parentID: String?
+    /// W0: a text layer's words and size; nil for other kinds (tier 2, #430).
+    public var text: HaloTextContent?
+```
+
+`withID` (used by Duplicate Composition) copies all three, and
+`duplicateComposition` remaps `parentID` to the copy's ids.
+
+### 5.1 Values (`Contracts/HaloValues.swift`)
+
+```swift
+// Contracts/HaloValues.swift: the value types every Halo contract speaks.
+// Linux-safe. FlareCore's keyframe, easing, matrix and point are used as they
+// are (never mirrored), under Halo names so HaloApp never has to import
+// FlareCore, whose Path and Color clash with SwiftUI's.
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
+import Foundation
+#endif
+import CoreRaster
+import FlareCore
+
+public typealias HaloKeyframe = FlareCore.Keyframe
+public typealias HaloEasing = FlareCore.Easing
+public typealias HaloMatrix = FlareCore.Matrix
+public typealias HaloPoint = FlareCore.Point
+
+/// An animatable layer property. The raw value is the track key in
+/// `HaloLayer.tracks`, the same names FlareCore's `Layer.sample` uses.
+public enum HaloProperty: String, CaseIterable, Codable, Sendable {
+    case x, y, scaleX, scaleY, rotation, opacity, anchorX, anchorY
+
+    /// The inspector row's label.
+    public var title: String {
+        switch self {
+        case .x: "Position X"
+        case .y: "Position Y"
+        case .scaleX: "Scale X"
+        case .scaleY: "Scale Y"
+        case .rotation: "Rotation"
+        case .opacity: "Opacity"
+        case .anchorX: "Anchor X"
+        case .anchorY: "Anchor Y"
+        }
+    }
+
+    /// The values a row accepts; a write outside is clamped, never refused.
+    public var range: ClosedRange<Double> {
+        switch self {
+        case .x, .y, .anchorX, .anchorY: -100_000...100_000
+        case .scaleX, .scaleY: -100...100
+        case .rotation: -36_000...36_000
+        case .opacity: 0...1
+        }
+    }
+
+    /// One arrow-key step; Shift is ten, Option a tenth (ScrubField's rule).
+    public var step: Double {
+        switch self {
+        case .x, .y, .anchorX, .anchorY, .rotation: 1
+        case .scaleX, .scaleY, .opacity: 0.01
+        }
+    }
+
+    /// The value as the row shows it: "960.0 px", "100%", "45°".
+    public func text(_ value: Double) -> String {
+        guard value.isFinite else { return "–" }
+        switch self {
+        case .x, .y, .anchorX, .anchorY: return "\((value * 10).rounded() / 10) px"
+        case .scaleX, .scaleY, .opacity: return "\(Int((value * 100).rounded()))%"
+        case .rotation: return "\(Int(value.rounded()))°"
+        }
+    }
+}
+
+/// Whether a property is animated, and whether a key sits at the playhead.
+/// HaloApp maps it one to one onto SuiteUI's `KeyState`.
+public enum HaloKeyState: Sendable, Hashable {
+    /// No track, or a track with one key: the value is that key's.
+    case notAnimated
+    /// Two or more keys, none at the playhead.
+    case animated
+    /// Two or more keys and one at the playhead.
+    case keyedHere
+}
+
+/// One inspector row: a property of the selected layer at the playhead.
+public struct HaloPropertyRow: Identifiable, Sendable, Hashable {
+    public var id: HaloProperty { property }
+    public var property: HaloProperty
+    public var value: Double
+    public var text: String
+    public var keyState: HaloKeyState
+    public init(property: HaloProperty, value: Double, text: String, keyState: HaloKeyState) {
+        self.property = property; self.value = value; self.text = text; self.keyState = keyState
+    }
+}
+
+/// One key: which layer, which property, which frame.
+public struct HaloKeyRef: Hashable, Sendable, Codable {
+    public var layerID: String
+    public var property: HaloProperty
+    public var frame: Int
+    public init(layerID: String, property: HaloProperty, frame: Int) {
+        self.layerID = layerID; self.property = property; self.frame = frame
+    }
+}
+
+/// The easing presets the menu, the chips and the timeline diamonds name.
+/// Each is FlareCore's own `Easing` value; a curve matching none is custom.
+public enum HaloEasingPreset: String, CaseIterable, Sendable {
+    case linear, easeIn, easeOut, easeInOut, hold
+
+    public var title: String {
+        switch self {
+        case .linear: "Linear"
+        case .easeIn: "Ease In"
+        case .easeOut: "Ease Out"
+        case .easeInOut: "Ease In and Out"
+        case .hold: "Hold"
+        }
+    }
+
+    public var easing: HaloEasing {
+        switch self {
+        case .linear: .linear
+        case .easeIn: .easeIn
+        case .easeOut: .easeOut
+        case .easeInOut: .easeInOut
+        case .hold: .hold
+        }
+    }
+
+    /// The preset `easing` equals; nil for a custom curve.
+    public init?(_ easing: HaloEasing) {
+        guard let match = Self.allCases.first(where: { $0.easing == easing }) else { return nil }
+        self = match
+    }
+}
+
+/// A text layer's words and size (tier 2, #430). Color is the layer's.
+public struct HaloTextContent: Codable, Sendable, Hashable {
+    public var string: String
+    /// In composition pixels.
+    public var fontSize: Double
+    public init(string: String = "Text", fontSize: Double = 72) {
+        self.string = string; self.fontSize = fontSize
+    }
+}
+
+/// One layer as the viewer and the renderer draw it at a frame.
+public struct HaloDrawItem: Sendable, Hashable {
+    public var layerID: String
+    public var kind: HaloLayerKind
+    /// The layer's own box in layer space: a solid's rectangle (the whole
+    /// composition when it has none), a shape's ellipse box, a text's line box.
+    public var bounds: HaloLayerRect
+    /// Layer space to composition space, parents included.
+    public var matrix: HaloMatrix
+    /// 0...1, the layer's own sampled opacity (parents don't pass it on).
+    public var opacity: Double
+    public var color: HaloLayerColor
+    public var blendMode: BlendMode
+    /// The words of a text layer; nil otherwise.
+    public var text: HaloTextContent?
+    public init(
+        layerID: String, kind: HaloLayerKind, bounds: HaloLayerRect, matrix: HaloMatrix, opacity: Double,
+        color: HaloLayerColor, blendMode: BlendMode, text: HaloTextContent? = nil
+    ) {
+        self.layerID = layerID; self.kind = kind; self.bounds = bounds; self.matrix = matrix
+        self.opacity = opacity; self.color = color; self.blendMode = blendMode; self.text = text
+    }
+}
+
+/// What one frame of a composition draws, bottom layer first. Nulls and
+/// layers outside their in and out points are absent.
+public struct HaloDrawList: Sendable, Hashable {
+    public var width: Int
+    public var height: Int
+    public var frame: Int
+    public var items: [HaloDrawItem]
+    public init(width: Int, height: Int, frame: Int, items: [HaloDrawItem]) {
+        self.width = width; self.height = height; self.frame = frame; self.items = items
+    }
+
+    /// The list with one layer moved by `delta` composition pixels: the live
+    /// preview of a viewer drag before mouse-up. Other layers are untouched.
+    public func offsetting(_ layerID: String, by delta: HaloPoint) -> HaloDrawList {
+        var copy = self
+        for i in copy.items.indices where copy.items[i].layerID == layerID {
+            copy.items[i].matrix = HaloMatrix.translation(x: delta.x, y: delta.y) * copy.items[i].matrix
+        }
+        return copy
+    }
+}
+
+/// The document part of a project: what undo restores and a file holds.
+/// Selection rides along so undo puts it back; the playhead lives in each
+/// composition and is restored with it.
+public struct HaloDocumentState: Codable, Sendable, Hashable {
+    public var compositions: [HaloComposition]
+    public var selectedCompositionID: String?
+    public var selectedLayerID: String?
+    /// The number in the next composition id; only goes up.
+    public var nextCompositionNumber: Int
+    public init(
+        compositions: [HaloComposition] = [], selectedCompositionID: String? = nil, selectedLayerID: String? = nil,
+        nextCompositionNumber: Int = 1
+    ) {
+        self.compositions = compositions; self.selectedCompositionID = selectedCompositionID
+        self.selectedLayerID = selectedLayerID; self.nextCompositionNumber = nextCompositionNumber
+    }
+}
+
+/// One undo step: its name ("New Layer") and the document before it.
+public struct HaloHistoryEntry: Sendable, Hashable {
+    public var name: String
+    public var before: HaloDocumentState
+    /// Steps with the same non-nil key in a row share one entry (a scrub).
+    public var coalesceKey: String?
+    public init(name: String, before: HaloDocumentState, coalesceKey: String? = nil) {
+        self.name = name; self.before = before; self.coalesceKey = coalesceKey
+    }
+}
+
+/// Undo and redo stacks, newest last. Only a `ProjectHistory` changes them.
+public struct HaloHistory: Sendable, Hashable {
+    public var undo: [HaloHistoryEntry]
+    public var redo: [HaloHistoryEntry]
+    public init(undo: [HaloHistoryEntry] = [], redo: [HaloHistoryEntry] = []) {
+        self.undo = undo; self.redo = redo
+    }
+    /// "Undo New Layer"; nil when there is nothing to undo.
+    public var undoTitle: String? { undo.last.map { "Undo \($0.name)" } }
+    /// "Redo New Layer"; nil when there is nothing to redo.
+    public var redoTitle: String? { redo.last.map { "Redo \($0.name)" } }
+}
+
+/// Where playback is after a tick.
+public struct HaloPlaybackTick: Sendable, Hashable {
+    public var frame: Int
+    /// True once play-once has shown the last frame; the window stops then.
+    public var ended: Bool
+    public init(frame: Int, ended: Bool) { self.frame = frame; self.ended = ended }
+}
+
+/// What Render… writes (tier 2, #429).
+public struct HaloRenderSettings: Sendable, Hashable {
+    public enum Format: String, CaseIterable, Sendable { case pngSequence, movie }
+    public var format: Format
+    /// Half size halves width and height, rounded down to even.
+    public var halfSize: Bool
+    public init(format: Format, halfSize: Bool = false) { self.format = format; self.halfSize = halfSize }
+}
+
+/// The frames one render writes and what each is called.
+public struct HaloRenderPlan: Sendable, Hashable {
+    public var width: Int
+    public var height: Int
+    public var framesPerSecond: Int
+    /// Composition frames in order, 0 through the last.
+    public var frames: [Int]
+    /// "Intro_0001.png" for each frame of a PNG sequence; one "Intro.mp4" for a movie.
+    public var fileNames: [String]
+    public init(width: Int, height: Int, framesPerSecond: Int, frames: [Int], fileNames: [String]) {
+        self.width = width; self.height = height; self.framesPerSecond = framesPerSecond
+        self.frames = frames; self.fileNames = fileNames
+    }
+}
+
+/// How a render ended.
+public enum HaloRenderOutcome: Sendable, Hashable {
+    case finished(frames: Int)
+    /// Stopped by Cancel after writing `frames` frames.
+    case cancelled(frames: Int)
+    case failed(frame: Int, message: String)
+}
+
+/// Why an edit was refused. `message` is the text the window shows.
+public enum HaloEditError: Error, Sendable, Hashable {
+    case noComposition
+    case unknownLayer(String)
+    case notANumber(HaloProperty)
+    case parentCycle(String)
+    case noKeySelected
+    case notBuilt(String)
+
+    public var message: String {
+        switch self {
+        case .noComposition: "Create a composition first."
+        case .unknownLayer: "That layer no longer exists."
+        case .notANumber(let p): "\(p.title) needs a number."
+        case .parentCycle(let name): "\(name) can't follow a layer that follows it."
+        case .noKeySelected: "Select a key on the timeline first."
+        case .notBuilt(let what): "\(what) isn't built yet."
+        }
+    }
+}
+
+/// Why a project file didn't open. The open project stays as it was.
+public enum HaloFileError: Error, Sendable, Hashable {
+    case notAHaloFile
+    case newerVersion(Int)
+    case damaged(String)
+    case tooLarge
+
+    public var message: String {
+        switch self {
+        case .notAHaloFile: "This file isn't a Halo project."
+        case .newerVersion(let v): "This project was saved by a newer Halo (format \(v)). Update Halo to open it."
+        case .damaged(let detail): "This project is damaged: \(detail)."
+        case .tooLarge: "This project is larger than Halo can open (64 MB)."
+        }
+    }
+}
+```
+
+### 5.2 The protocols (`Contracts/HaloContracts.swift`)
+
+```swift
+// Contracts/HaloContracts.swift: one protocol per Halo use case, so the
+// views (on the fakes) and the logic (the live types) are built in parallel.
+// Reads take values; writes take the composition `inout` and throw
+// `HaloEditError`, leaving it unchanged when they throw. None of them records
+// undo: HaloProject wraps each write in `edit(_:coalesceKey:_:)`, which hands
+// the state before it to `ProjectHistory`. Linux-safe.
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
+import Foundation
+#endif
+import CoreRaster
+
+/// What every service shares: whether its controls can act yet.
+public protocol HaloService: Sendable {
+    /// Nil once the use case works; otherwise the tooltip of every control
+    /// that needs it, which stays disabled (CLAUDE.md, no dead controls).
+    var unavailableHelp: String? { get }
+}
+
+extension HaloService {
+    public var unavailableHelp: String? { nil }
+}
+
+/// #37: the viewer's picture of a composition at a frame.
+public protocol FrameDrawing: HaloService {
+    /// Every layer visible at `frame`, bottom first, at its sampled transform
+    /// through its parents. Nulls never appear; a layer in a parent cycle
+    /// draws as if it had no parent.
+    func drawList(_ composition: HaloComposition, at frame: Int) -> HaloDrawList
+}
+
+/// #38: where a layer is at a frame, through its parents.
+public protocol LayerPlacing: HaloService {
+    /// The property's value at `frame`: its track sampled with FlareCore's
+    /// `Timeline.value(of:at:)`, or the layer's default with no track. Nil for
+    /// an unknown layer.
+    func value(_ property: HaloProperty, of layerID: String, in composition: HaloComposition, at frame: Int) -> Double?
+    /// Layer space to composition space, parents applied outermost last. Nil
+    /// for an unknown layer.
+    func worldMatrix(of layerID: String, in composition: HaloComposition, at frame: Int) -> HaloMatrix?
+    /// The layers `layerID` may follow: every other layer except those that
+    /// already follow it, in timeline order.
+    func parentCandidates(for layerID: String, in composition: HaloComposition) -> [String]
+}
+
+/// #38: the inspector's TRANSFORM rows, the stopwatch and the key diamond.
+public protocol PropertyKeying: HaloService {
+    /// One row per property in `HaloProperty.allCases` order; empty for an
+    /// unknown layer.
+    func rows(for layerID: String, in composition: HaloComposition, at frame: Int) -> [HaloPropertyRow]
+    /// Not animated: sets the one value (key at frame 0, or the static value).
+    /// Animated: writes a key at `frame`. NaN or infinity throws
+    /// `.notANumber`; other values clamp to `property.range`.
+    func setValue(
+        _ value: Double, for property: HaloProperty, of layerID: String, at frame: Int,
+        in composition: inout HaloComposition) throws
+    /// The stopwatch. Off to on: keys at `frame` and at the last frame with
+    /// the current value (so the row turns animated). On to off: drops the
+    /// track and keeps the value at `frame`.
+    func toggleAnimation(
+        _ property: HaloProperty, of layerID: String, at frame: Int, in composition: inout HaloComposition) throws
+    /// The diamond: adds a key at `frame` with the sampled value, or removes
+    /// the one there. A track left with one key is not animated.
+    func toggleKey(
+        _ property: HaloProperty, of layerID: String, at frame: Int, in composition: inout HaloComposition) throws
+    /// Parent picker. Nil clears it. A cycle throws `.parentCycle`. The child
+    /// keeps its place on screen at `frame` (its position is rewritten in the
+    /// parent's space).
+    func setParent(
+        _ parentID: String?, of layerID: String, at frame: Int, in composition: inout HaloComposition) throws
+}
+
+/// #207: drag a layer in the viewer to key its position.
+public protocol ViewerDragging: HaloService {
+    /// The topmost layer under `point` (composition pixels) that draws at
+    /// `frame`. Nulls are never hit; nil over empty space.
+    func hit(_ composition: HaloComposition, at frame: Int, point: HaloPoint) -> String?
+    /// Mouse-up: moves the layer by `delta` in composition pixels, writing
+    /// its x and y through `PropertyKeying`'s rule (keys when animated). A
+    /// zero delta changes nothing and does not throw.
+    func commitMove(
+        _ layerID: String, by delta: HaloPoint, at frame: Int, in composition: inout HaloComposition) throws
+}
+
+/// #428: ease keys.
+public protocol KeyEasing: HaloService {
+    /// Every key of the layer, by property then frame: the timeline's diamonds.
+    func keys(of layerID: String, in composition: HaloComposition) -> [HaloKeyRef]
+    /// The easing from `key` to the next key; nil when the key doesn't exist.
+    func easing(of key: HaloKeyRef, in composition: HaloComposition) -> HaloEasing?
+    /// Sets `easing` on every key in `keys`. Empty throws `.noKeySelected`;
+    /// a key that doesn't exist throws `.unknownLayer` and changes nothing.
+    func setEasing(_ easing: HaloEasing, on keys: Set<HaloKeyRef>, in composition: inout HaloComposition) throws
+}
+
+/// #208: undo and redo of whole-document steps.
+public protocol ProjectHistory: HaloService {
+    /// How many steps undo keeps; the oldest drops past it.
+    var limit: Int { get }
+    /// Adds a step named `name` whose undo returns `before`, and clears redo.
+    /// With a non-nil `coalesceKey` equal to the newest step's, the newest
+    /// step keeps its own `before` and nothing is added.
+    func record(_ name: String, before: HaloDocumentState, coalesceKey: String?, in history: inout HaloHistory)
+    /// The state to return to, moving the step onto redo with `current`.
+    /// Nil when there is nothing to undo.
+    func undo(_ current: HaloDocumentState, in history: inout HaloHistory) -> HaloDocumentState?
+    /// The state to go forward to, moving the step back onto undo. Nil when
+    /// there is nothing to redo.
+    func redo(_ current: HaloDocumentState, in history: inout HaloHistory) -> HaloDocumentState?
+}
+
+/// #209: the project file.
+public protocol ProjectFiles: HaloService {
+    /// JSON with sorted keys and `"format": "halo"`, `"version": 1`.
+    func encode(_ state: HaloDocumentState) throws -> Data
+    /// Checks everything `encode` promises (unique composition ids and
+    /// names, in point before out point, sizes and rates in range, sorted
+    /// unique keys, no parent cycle) and throws `HaloFileError` otherwise.
+    func decode(_ data: Data) throws -> HaloDocumentState
+}
+
+/// #37: which frame to show while playing.
+public protocol PlaybackClock: HaloService {
+    /// The frame `elapsed` seconds after play began on `startFrame`. Loop
+    /// wraps to 0; play-once stops on the last frame with `ended` true.
+    func tick(
+        startFrame: Int, elapsed: Double, framesPerSecond: Int, durationFrames: Int, loops: Bool) -> HaloPlaybackTick
+}
+
+/// #451, #430: a frame as pixels (CoreRaster), the reference the viewer and
+/// every rendered file must match.
+public protocol FrameRendering: HaloService {
+    /// Renders `list` at 1/`scale` size (1 = full). `text` draws text layers;
+    /// with nil they are skipped and counted in `skippedLayerCount`.
+    func render(_ list: HaloDrawList, scale: Int, text: (any TextRasterizing)?) throws -> HaloRenderedFrame
+}
+
+/// #430: words to pixels. HaloApp supplies the CoreText one; tests use a fake.
+public protocol TextRasterizing: Sendable {
+    /// The text in `color` on a transparent buffer just big enough for it,
+    /// linear light, premultiplied; its (0, 0) is the line box's top left.
+    func rasterize(_ text: HaloTextContent, color: HaloLayerColor) throws -> PixelBuffer
+}
+
+/// #429: where rendered frames go. HaloApp supplies the PNG and movie writers.
+public protocol RenderSink {
+    mutating func begin(_ plan: HaloRenderPlan) throws
+    mutating func write(_ frame: HaloRenderedFrame, named fileName: String) throws
+    /// Called once, after the last frame or on cancel (`cancelled` true),
+    /// when the sink removes a partly written movie.
+    mutating func finish(cancelled: Bool) throws
+}
+
+/// #429: render a whole composition to files.
+public protocol CompositionRendering: HaloService {
+    /// The frames and names for `settings`. Throws `.noComposition` for a
+    /// composition with no frames.
+    func plan(_ composition: HaloComposition, settings: HaloRenderSettings) throws -> HaloRenderPlan
+    /// Sends every planned frame to `sink` in order, checking `isCancelled`
+    /// before each one. A sink error stops at that frame.
+    func run(
+        _ plan: HaloRenderPlan, of composition: HaloComposition, into sink: inout some RenderSink,
+        isCancelled: () -> Bool
+    ) -> HaloRenderOutcome
+}
+```
+
+### 5.3 Defaults shared by fake and live (`HaloLayerDefaults.swift`)
+
+```swift
+// HaloLayerDefaults.swift (W0): a layer's own box and the value each
+// property has with no track, shared by the fakes and the live types so
+// they agree. The defaults put the anchor and the position at the box's
+// center, so an unkeyed layer's world matrix is the identity. Linux-safe.
+
+extension HaloLayer {
+    /// The layer's box in layer space (composition pixels, top-left origin).
+    public func bounds(in composition: HaloComposition) -> HaloLayerRect {
+        let w = Double(composition.width), h = Double(composition.height)
+        switch kind {
+        case .solid: return rect ?? HaloLayerRect(x: 0, y: 0, width: w, height: h)
+        case .shape: return rect ?? HaloLayerRect(x: w / 2 - 100, y: h / 2 - 100, width: 200, height: 200)
+        case .text:
+            let content = text ?? HaloTextContent()
+            let width = content.fontSize * 0.6 * Double(max(content.string.count, 1))
+            return HaloLayerRect(x: w / 2 - width / 2, y: h / 2 - content.fontSize / 2, width: width, height: content.fontSize)
+        case .null: return HaloLayerRect(x: w / 2, y: h / 2, width: 0, height: 0)
+        }
+    }
+
+    /// The value `property` has when the layer has no track for it.
+    public func defaultValue(_ property: HaloProperty, in composition: HaloComposition) -> Double {
+        let box = bounds(in: composition)
+        switch property {
+        case .x, .anchorX: return box.x + box.width / 2
+        case .y, .anchorY: return box.y + box.height / 2
+        case .scaleX, .scaleY: return 1
+        case .rotation: return 0
+        case .opacity: return opacity
+        }
+    }
+}
+```
+
+### 5.4 Wiring (`HaloServices.swift`) and the W0 live stubs
+
+```swift
+// HaloServices.swift (W0): one existential per Halo contract. HaloProject
+// takes it at init; `.fake` runs the views on fakes, `.live` is what the app
+// ships. W0 fills `.live` with `HaloNotBuilt`, which says why for every
+// control; each feature swaps its own live type in by editing only its own
+// Live/<Name>.swift file, because W0 already names `LiveFrameDrawing` and the
+// rest here as typealiases of `HaloNotBuilt`.
+public struct HaloServices: Sendable {
+    public var drawing: any FrameDrawing
+    public var placing: any LayerPlacing
+    public var keying: any PropertyKeying
+    public var dragging: any ViewerDragging
+    public var easing: any KeyEasing
+    public var history: any ProjectHistory
+    public var files: any ProjectFiles
+    public var clock: any PlaybackClock
+    public var rendering: any FrameRendering
+    public var compositionRendering: any CompositionRendering
+
+    public init(
+        drawing: any FrameDrawing, placing: any LayerPlacing, keying: any PropertyKeying,
+        dragging: any ViewerDragging, easing: any KeyEasing, history: any ProjectHistory, files: any ProjectFiles,
+        clock: any PlaybackClock, rendering: any FrameRendering, compositionRendering: any CompositionRendering
+    ) {
+        self.drawing = drawing; self.placing = placing; self.keying = keying; self.dragging = dragging
+        self.easing = easing; self.history = history; self.files = files; self.clock = clock
+        self.rendering = rendering; self.compositionRendering = compositionRendering
+    }
+
+    public static let fake = HaloServices(
+        drawing: FakeFrameDrawing(), placing: FakeLayerPlacing(), keying: FakePropertyKeying(),
+        dragging: FakeViewerDragging(), easing: FakeKeyEasing(), history: FakeProjectHistory(),
+        files: FakeProjectFiles(), clock: FakePlaybackClock(), rendering: FakeFrameRendering(),
+        compositionRendering: FakeCompositionRendering())
+
+    public static let live = HaloServices(
+        drawing: LiveFrameDrawing(), placing: LiveLayerPlacing(), keying: LivePropertyKeying(),
+        dragging: LiveViewerDragging(), easing: LiveKeyEasing(), history: LiveProjectHistory(),
+        files: LiveProjectFiles(), clock: LivePlaybackClock(), rendering: LiveFrameRendering(),
+        compositionRendering: LiveCompositionRendering())
+}
+```
+
+Each live stub (one shown; all ten are in `contracts/LiveStubs.swift`):
+
+```swift
+public struct LivePropertyKeying: PropertyKeying {
+    public init() {}
+    public var unavailableHelp: String? { "Keys arrive with the layer inspector (#38)." }
+    public func rows(for layerID: String, in composition: HaloComposition, at frame: Int) -> [HaloPropertyRow] { [] }
+    public func setValue(_ value: Double, for property: HaloProperty, of layerID: String, at frame: Int, in composition: inout HaloComposition) throws {
+        throw HaloEditError.notBuilt("Keying")
+    }
+    public func toggleAnimation(_ property: HaloProperty, of layerID: String, at frame: Int, in composition: inout HaloComposition) throws {
+        throw HaloEditError.notBuilt("Keying")
+    }
+    public func toggleKey(_ property: HaloProperty, of layerID: String, at frame: Int, in composition: inout HaloComposition) throws {
+        throw HaloEditError.notBuilt("Keying")
+    }
+    public func setParent(_ parentID: String?, of layerID: String, at frame: Int, in composition: inout HaloComposition) throws {
+        throw HaloEditError.notBuilt("Parenting")
+    }
+}
+```
+
+### 5.5 The fakes (`Fakes/`)
+
+```swift
+// Fakes/HaloFakes.swift: a small, predictable conformance of every Halo
+// contract, so HaloApp's views, snapshots and journeys run before the live
+// types land. Fakes ignore parenting and draw text as a box; everything else
+// follows the contract's doc comment. Linux-safe. Never used by `.live`.
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
+import Foundation
+#endif
+import CoreRaster
+import FlareCore
+
+public struct FakeLayerPlacing: LayerPlacing {
+    public init() {}
+    public func value(_ property: HaloProperty, of layerID: String, in composition: HaloComposition, at frame: Int) -> Double? {
+        guard let layer = composition.layers.first(where: { $0.id == layerID }) else { return nil }
+        if let track = layer.tracks[property.rawValue], let v = Timeline.value(of: track, at: Double(frame)) { return v }
+        return layer.defaultValue(property, in: composition)
+    }
+    public func worldMatrix(of layerID: String, in composition: HaloComposition, at frame: Int) -> HaloMatrix? {
+        func v(_ p: HaloProperty) -> Double { value(p, of: layerID, in: composition, at: frame) ?? 0 }
+        guard composition.layers.contains(where: { $0.id == layerID }) else { return nil }
+        return HaloMatrix.translation(x: v(.x), y: v(.y)) * HaloMatrix.rotation(degrees: v(.rotation))
+            * HaloMatrix.scale(x: v(.scaleX), y: v(.scaleY)) * HaloMatrix.translation(x: -v(.anchorX), y: -v(.anchorY))
+    }
+    public func parentCandidates(for layerID: String, in composition: HaloComposition) -> [String] {
+        composition.layers.map(\.id).filter { $0 != layerID }
+    }
+}
+
+public struct FakeFrameDrawing: FrameDrawing {
+    public init() {}
+    public func drawList(_ composition: HaloComposition, at frame: Int) -> HaloDrawList {
+        let placing = FakeLayerPlacing()
+        let items = composition.layers.reversed().filter { $0.kind != .null && $0.isVisible(at: frame) }.map { layer in
+            HaloDrawItem(
+                layerID: layer.id, kind: layer.kind, bounds: layer.bounds(in: composition),
+                matrix: placing.worldMatrix(of: layer.id, in: composition, at: frame) ?? .identity,
+                opacity: placing.value(.opacity, of: layer.id, in: composition, at: frame) ?? 1,
+                color: layer.color, blendMode: layer.blendMode, text: layer.text)
+        }
+        return HaloDrawList(width: composition.width, height: composition.height, frame: frame, items: items)
+    }
+}
+
+public struct FakePropertyKeying: PropertyKeying {
+    public init() {}
+    public func rows(for layerID: String, in composition: HaloComposition, at frame: Int) -> [HaloPropertyRow] {
+        guard let layer = composition.layers.first(where: { $0.id == layerID }) else { return [] }
+        let placing = FakeLayerPlacing()
+        return HaloProperty.allCases.map { p in
+            let value = placing.value(p, of: layerID, in: composition, at: frame) ?? 0
+            let track = layer.tracks[p.rawValue] ?? []
+            let state: HaloKeyState =
+                track.count < 2 ? .notAnimated : track.contains { $0.frame == frame } ? .keyedHere : .animated
+            return HaloPropertyRow(property: p, value: value, text: p.text(value), keyState: state)
+        }
+    }
+    public func setValue(
+        _ value: Double, for property: HaloProperty, of layerID: String, at frame: Int,
+        in composition: inout HaloComposition
+    ) throws {
+        guard value.isFinite else { throw HaloEditError.notANumber(property) }
+        let v = min(max(value, property.range.lowerBound), property.range.upperBound)
+        try change(layerID, in: &composition) { layer in
+            let track = layer.tracks[property.rawValue] ?? []
+            if track.count >= 2 { layer.tracks[property.rawValue] = Self.keyed(track, frame: frame, value: v) }
+            else if property == .opacity, track.isEmpty { layer.opacity = v }
+            else { layer.tracks[property.rawValue] = [HaloKeyframe(frame: track.first?.frame ?? 0, value: v)] }
+        }
+    }
+    public func toggleAnimation(
+        _ property: HaloProperty, of layerID: String, at frame: Int, in composition: inout HaloComposition
+    ) throws {
+        let v = FakeLayerPlacing().value(property, of: layerID, in: composition, at: frame) ?? 0
+        let last = composition.lastFrame
+        try change(layerID, in: &composition) { layer in
+            let track = layer.tracks[property.rawValue] ?? []
+            if track.count >= 2 { layer.tracks[property.rawValue] = [HaloKeyframe(frame: 0, value: v)] }
+            else { layer.tracks[property.rawValue] = Self.keyed(Self.keyed([], frame: frame, value: v), frame: frame == last ? 0 : last, value: v) }
+        }
+    }
+    public func toggleKey(
+        _ property: HaloProperty, of layerID: String, at frame: Int, in composition: inout HaloComposition
+    ) throws {
+        let v = FakeLayerPlacing().value(property, of: layerID, in: composition, at: frame) ?? 0
+        try change(layerID, in: &composition) { layer in
+            var track = layer.tracks[property.rawValue] ?? []
+            if track.contains(where: { $0.frame == frame }) { track.removeAll { $0.frame == frame } }
+            else { track = Self.keyed(track, frame: frame, value: v) }
+            layer.tracks[property.rawValue] = track
+        }
+    }
+    public func setParent(
+        _ parentID: String?, of layerID: String, at frame: Int, in composition: inout HaloComposition
+    ) throws {
+        if let parentID, parentID == layerID { throw HaloEditError.parentCycle(layerID) }
+        try change(layerID, in: &composition) { $0.parentID = parentID }
+    }
+
+    /// `track` with a key at `frame` set to `value`, kept sorted.
+    static func keyed(_ track: [HaloKeyframe], frame: Int, value: Double) -> [HaloKeyframe] {
+        var t = track.filter { $0.frame != frame }
+        t.append(HaloKeyframe(frame: frame, value: value, easing: track.first { $0.frame == frame }?.easing ?? .linear))
+        return t.sorted { $0.frame < $1.frame }
+    }
+
+    func change(_ layerID: String, in composition: inout HaloComposition, _ body: (inout HaloLayer) -> Void) throws {
+        guard let i = composition.layers.firstIndex(where: { $0.id == layerID }) else {
+            throw HaloEditError.unknownLayer(layerID)
+        }
+        body(&composition.layers[i])
+    }
+}
+
+public struct FakeViewerDragging: ViewerDragging {
+    public init() {}
+    public func hit(_ composition: HaloComposition, at frame: Int, point: HaloPoint) -> String? {
+        for item in FakeFrameDrawing().drawList(composition, at: frame).items.reversed() {
+            guard let local = try? item.matrix.inverted().apply(point) else { continue }
+            let b = item.bounds
+            if local.x >= b.x, local.x <= b.x + b.width, local.y >= b.y, local.y <= b.y + b.height { return item.layerID }
+        }
+        return nil
+    }
+    public func commitMove(
+        _ layerID: String, by delta: HaloPoint, at frame: Int, in composition: inout HaloComposition
+    ) throws {
+        guard delta.x != 0 || delta.y != 0 else { return }
+        let placing = FakeLayerPlacing(), keying = FakePropertyKeying()
+        guard let x = placing.value(.x, of: layerID, in: composition, at: frame),
+            let y = placing.value(.y, of: layerID, in: composition, at: frame)
+        else { throw HaloEditError.unknownLayer(layerID) }
+        var copy = composition
+        try keying.setValue(x + delta.x, for: .x, of: layerID, at: frame, in: &copy)
+        try keying.setValue(y + delta.y, for: .y, of: layerID, at: frame, in: &copy)
+        composition = copy
+    }
+}
+
+public struct FakeKeyEasing: KeyEasing {
+    public init() {}
+    public func keys(of layerID: String, in composition: HaloComposition) -> [HaloKeyRef] {
+        guard let layer = composition.layers.first(where: { $0.id == layerID }) else { return [] }
+        return HaloProperty.allCases.flatMap { p in
+            (layer.tracks[p.rawValue] ?? []).map { HaloKeyRef(layerID: layerID, property: p, frame: $0.frame) }
+        }
+    }
+    public func easing(of key: HaloKeyRef, in composition: HaloComposition) -> HaloEasing? {
+        composition.layers.first { $0.id == key.layerID }?.tracks[key.property.rawValue]?.first { $0.frame == key.frame }?.easing
+    }
+    public func setEasing(_ easing: HaloEasing, on keys: Set<HaloKeyRef>, in composition: inout HaloComposition) throws {
+        guard !keys.isEmpty else { throw HaloEditError.noKeySelected }
+        var copy = composition
+        for key in keys {
+            guard let l = copy.layers.firstIndex(where: { $0.id == key.layerID }),
+                let k = copy.layers[l].tracks[key.property.rawValue]?.firstIndex(where: { $0.frame == key.frame })
+            else { throw HaloEditError.unknownLayer(key.layerID) }
+            copy.layers[l].tracks[key.property.rawValue]?[k].easing = easing
+        }
+        composition = copy
+    }
+}
+
+public struct FakeProjectHistory: ProjectHistory {
+    public let limit = 100
+    public init() {}
+    public func record(_ name: String, before: HaloDocumentState, coalesceKey: String?, in history: inout HaloHistory) {
+        if let coalesceKey, history.undo.last?.coalesceKey == coalesceKey { return }
+        history.undo.append(HaloHistoryEntry(name: name, before: before, coalesceKey: coalesceKey))
+        if history.undo.count > limit { history.undo.removeFirst() }
+        history.redo = []
+    }
+    public func undo(_ current: HaloDocumentState, in history: inout HaloHistory) -> HaloDocumentState? {
+        guard let step = history.undo.popLast() else { return nil }
+        history.redo.append(HaloHistoryEntry(name: step.name, before: current))
+        return step.before
+    }
+    public func redo(_ current: HaloDocumentState, in history: inout HaloHistory) -> HaloDocumentState? {
+        guard let step = history.redo.popLast() else { return nil }
+        history.undo.append(HaloHistoryEntry(name: step.name, before: current))
+        return step.before
+    }
+}
+
+public struct FakeProjectFiles: ProjectFiles {
+    public init() {}
+    public func encode(_ state: HaloDocumentState) throws -> Data {
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.sortedKeys]
+        return try encoder.encode(state)
+    }
+    public func decode(_ data: Data) throws -> HaloDocumentState {
+        do { return try JSONDecoder().decode(HaloDocumentState.self, from: data) } catch {
+            throw HaloFileError.notAHaloFile
+        }
+    }
+}
+
+public struct FakePlaybackClock: PlaybackClock {
+    public init() {}
+    public func tick(
+        startFrame: Int, elapsed: Double, framesPerSecond: Int, durationFrames: Int, loops: Bool
+    ) -> HaloPlaybackTick {
+        guard durationFrames > 0, framesPerSecond > 0, elapsed.isFinite, elapsed > 0 else {
+            return HaloPlaybackTick(frame: max(0, min(startFrame, durationFrames - 1)), ended: false)
+        }
+        let ahead = Int(min(elapsed * Double(framesPerSecond), 1e9))
+        let raw = startFrame + ahead
+        if loops { return HaloPlaybackTick(frame: raw % durationFrames, ended: false) }
+        return raw >= durationFrames - 1
+            ? HaloPlaybackTick(frame: durationFrames - 1, ended: true) : HaloPlaybackTick(frame: raw, ended: false)
+    }
+}
+
+/// Fills the frame with the top item's color: enough for the viewer to show
+/// "a rendered frame" and for render loops to count frames.
+public struct FakeFrameRendering: FrameRendering {
+    public init() {}
+    public func render(_ list: HaloDrawList, scale: Int, text: (any TextRasterizing)?) throws -> HaloRenderedFrame {
+        let s = max(scale, 1)
+        let top = list.items.last.map { RGBA(r: Float($0.color.red), g: Float($0.color.green), b: Float($0.color.blue), a: 1) }
+        let pixels = try PixelBuffer(width: max(1, list.width / s), height: max(1, list.height / s), fill: top ?? .clear)
+        let skipped = text == nil ? list.items.filter { $0.kind == .text }.count : 0
+        return HaloRenderedFrame(pixels: pixels, frame: list.frame, skippedLayerCount: skipped)
+    }
+}
+
+public struct FakeTextRasterizer: TextRasterizing {
+    public init() {}
+    public func rasterize(_ text: HaloTextContent, color: HaloLayerColor) throws -> PixelBuffer {
+        let w = max(1, Int(text.fontSize * 0.6 * Double(max(text.string.count, 1))))
+        return try PixelBuffer(
+            width: w, height: max(1, Int(text.fontSize)),
+            fill: RGBA(r: Float(color.red), g: Float(color.green), b: Float(color.blue), a: 1))
+    }
+}
+
+public struct FakeCompositionRendering: CompositionRendering {
+    public init() {}
+    public func plan(_ composition: HaloComposition, settings: HaloRenderSettings) throws -> HaloRenderPlan {
+        guard composition.durationFrames > 0 else { throw HaloEditError.noComposition }
+        let even = { (n: Int) in max(2, n / 2 / 2 * 2) }
+        let w = settings.halfSize ? even(composition.width) : composition.width
+        let h = settings.halfSize ? even(composition.height) : composition.height
+        let frames = Array(0..<composition.durationFrames)
+        let names: [String] = switch settings.format {
+        case .movie: ["\(composition.name).mp4"]
+        case .pngSequence: frames.map { f in
+            let n = String(f + 1)
+            return "\(composition.name)_\(String(repeating: "0", count: max(0, 4 - n.count)))\(n).png"
+        }
+        }
+        return HaloRenderPlan(width: w, height: h, framesPerSecond: composition.framesPerSecond, frames: frames, fileNames: names)
+    }
+    public func run(
+        _ plan: HaloRenderPlan, of composition: HaloComposition, into sink: inout some RenderSink,
+        isCancelled: () -> Bool
+    ) -> HaloRenderOutcome {
+        do { try sink.begin(plan) } catch { return .failed(frame: 0, message: "\(error)") }
+        for (i, frame) in plan.frames.enumerated() {
+            if isCancelled() {
+                try? sink.finish(cancelled: true)
+                return .cancelled(frames: i)
+            }
+            do {
+                let list = FakeFrameDrawing().drawList(composition, at: frame)
+                let image = try FakeFrameRendering().render(list, scale: 1, text: nil)
+                let name = plan.fileNames.count == plan.frames.count ? plan.fileNames[i] : plan.fileNames.first ?? ""
+                try sink.write(image, named: name)
+            } catch {
+                try? sink.finish(cancelled: true)
+                return .failed(frame: frame, message: "\(error)")
+            }
+        }
+        do { try sink.finish(cancelled: false) } catch { return .failed(frame: plan.frames.last ?? 0, message: "\(error)") }
+        return .finished(frames: plan.frames.count)
+    }
+}
+```
+
+### 5.6 The proof tests (`contracts/Tests/HaloContractTests.swift`)
+
+```swift
+import Testing
+import HaloModel
+
+@Suite struct HaloContractTests {
+    func keyed() -> HaloComposition {
+        var solid = HaloLayer(
+            id: "s", name: "Solid 1", kind: .solid, inFrame: 0, outFrame: 60,
+            color: HaloLayerColor(red: 1, green: 0, blue: 0), rect: HaloLayerRect(x: 0, y: 0, width: 100, height: 100))
+        solid.tracks["x"] = [HaloKeyframe(frame: 0, value: 50), HaloKeyframe(frame: 30, value: 150)]
+        let null = HaloLayer(id: "n", name: "Null 1", kind: .null, inFrame: 0, outFrame: 60, color: HaloLayerColor(red: 0, green: 0, blue: 0))
+        return HaloComposition(id: "c", name: "Intro", width: 400, height: 200, framesPerSecond: 24, durationFrames: 60, layers: [null, solid])
+    }
+
+    @Test func fakeDrawListSkipsNullsAndInterpolates() {
+        let list = FakeFrameDrawing().drawList(keyed(), at: 15)
+        #expect(list.items.map(\.layerID) == ["s"])
+        #expect(FakeLayerPlacing().value(.x, of: "s", in: keyed(), at: 15) == 100)
+    }
+
+    @Test func fakeEaseInBendsTheCurve() throws {
+        var comp = keyed()
+        try FakeKeyEasing().setEasing(.easeIn, on: [HaloKeyRef(layerID: "s", property: .x, frame: 0)], in: &comp)
+        #expect((FakeLayerPlacing().value(.x, of: "s", in: comp, at: 15) ?? 0) < 100)
+        #expect(HaloEasingPreset(FakeKeyEasing().easing(of: HaloKeyRef(layerID: "s", property: .x, frame: 0), in: comp) ?? .linear) == .easeIn)
+    }
+
+    @Test func fakeDragKeysAnimatedPosition() throws {
+        var comp = keyed()
+        #expect(FakeViewerDragging().hit(comp, at: 0, point: HaloPoint(x: 50, y: 50)) == "s")
+        try FakeViewerDragging().commitMove("s", by: HaloPoint(x: 10, y: 0), at: 15, in: &comp)
+        #expect(comp.layers[1].tracks["x"]?.map(\.frame) == [0, 15, 30])
+    }
+
+    @Test func fakeHistoryCoalescesAndUndoes() {
+        let history = FakeProjectHistory()
+        var h = HaloHistory()
+        let a = HaloDocumentState(), b = HaloDocumentState(nextCompositionNumber: 2)
+        history.record("Change Rotation", before: a, coalesceKey: "rot", in: &h)
+        history.record("Change Rotation", before: b, coalesceKey: "rot", in: &h)
+        #expect(h.undo.count == 1)
+        #expect(h.undoTitle == "Undo Change Rotation")
+        #expect(history.undo(b, in: &h) == a)
+        #expect(h.redoTitle == "Redo Change Rotation")
+    }
+
+    @Test func fakeFilesRoundTrip() throws {
+        let state = HaloDocumentState(compositions: [keyed()], selectedCompositionID: "c", nextCompositionNumber: 2)
+        let files = FakeProjectFiles()
+        #expect(try files.decode(files.encode(state)) == state)
+    }
+
+    @Test func fakeRenderRunsEveryFrame() throws {
+        struct Count: RenderSink {
+            var names: [String] = []
+            var finished = false
+            mutating func begin(_ plan: HaloRenderPlan) throws {}
+            mutating func write(_ frame: HaloRenderedFrame, named fileName: String) throws { names.append(fileName) }
+            mutating func finish(cancelled: Bool) throws { finished = !cancelled }
+        }
+        let r = FakeCompositionRendering()
+        let plan = try r.plan(keyed(), settings: HaloRenderSettings(format: .pngSequence))
+        var sink = Count()
+        #expect(r.run(plan, of: keyed(), into: &sink, isCancelled: { false }) == .finished(frames: 60))
+        #expect(sink.names.first == "Intro_0001.png" && sink.names.last == "Intro_0060.png")
+    }
+
+    @Test func liveStubsSayWhy() {
+        #expect(HaloServices.live.drawing.unavailableHelp != nil)
+        #expect(HaloServices.fake.drawing.unavailableHelp == nil)
+        #expect(FakePlaybackClock().tick(startFrame: 50, elapsed: 1, framesPerSecond: 24, durationFrames: 60, loops: true).frame == 14)
+    }
+}
+```
