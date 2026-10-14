@@ -172,21 +172,11 @@ public enum PhotoRenderer {
         let reusable = previous.flatMap { $0.width == canvas.width && $0.height == canvas.height && !onWhite ? $0 : nil }
         let damage = reusable.map { workspace.damage(since: $0.revision) } ?? .all
         var bytes = reusable?.rgba8 ?? [UInt8](repeating: 0, count: canvas.width * canvas.height * 4)
-        let tiles = tiles(of: canvas, in: damage)
-        try await withThrowingTaskGroup(of: (PixelRect, [UInt8]).self) { group in
-            for tile in tiles {
-                group.addTask {
-                    var picture = try workspace.rendered(tile)
-                    if onWhite { picture = try picture.onWhite() }
-                    return (tile, try picture.rgba8())
-                }
-            }
-            for try await (tile, tileBytes) in group {
-                for row in 0..<tile.height {
-                    let from = row * tile.width * 4
-                    let to = ((tile.y + row) * canvas.width + tile.x) * 4
-                    bytes.replaceSubrange(to..<(to + tile.width * 4), with: tileBytes[from..<(from + tile.width * 4)])
-                }
+        for (tile, tileBytes) in try await renderedTiles(workspace, tiles(of: canvas, in: damage), onWhite: onWhite) {
+            for row in 0..<tile.height {
+                let from = row * tile.width * 4
+                let to = ((tile.y + row) * canvas.width + tile.x) * 4
+                bytes.replaceSubrange(to..<(to + tile.width * 4), with: tileBytes[from..<(from + tile.width * 4)])
             }
         }
         let elapsed = clock.now - started
@@ -194,6 +184,28 @@ public enum PhotoRenderer {
         return PhotoFrame(
             width: canvas.width, height: canvas.height, rgba8: bytes, revision: workspace.revision,
             milliseconds: milliseconds)
+    }
+
+    /// `rects` of `workspace` as straight display bytes (premultiplied with
+    /// `premultiplied`), each rendered in its own child task.
+    static func renderedTiles(
+        _ workspace: PhotoWorkspace, _ rects: [PixelRect], onWhite: Bool = false, premultiplied: Bool = false
+    ) async throws -> [(PixelRect, [UInt8])] {
+        try await withThrowingTaskGroup(of: (PixelRect, [UInt8]).self) { group in
+            for tile in rects {
+                group.addTask {
+                    var picture = try workspace.rendered(tile)
+                    if onWhite { picture = try picture.onWhite() }
+                    var bytes = try picture.rgba8()
+                    if premultiplied { Self.premultiply(&bytes) }
+                    return (tile, bytes)
+                }
+            }
+            var done: [(PixelRect, [UInt8])] = []
+            done.reserveCapacity(rects.count)
+            for try await tile in group { done.append(tile) }
+            return done
+        }
     }
 
     /// The canvas tiles (PixelBuffer.tileSize square, clipped to the canvas)
