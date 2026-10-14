@@ -2199,3 +2199,135 @@ and keeps going (CLAUDE.md).
    source says "using the last copy" in `textSecondary`.
 5. **A hand-off is never silent**: the target app comes forward; if it
    takes longer than 100 ms the source shows progress (QB-L9).
+
+---
+
+## 7. Quality bar
+
+Every item names what measures it and where it runs: **Linux** (`scripts/ci`,
+any PR), **macOS CI** (the `macos` job on `dev`: snapshots, journeys, the
+audit, the size report), or **local** (`scripts/ui-test` on a Mac). Ids
+`QB-S…` are the suite's rows; they join `docs/review-rubric.md` section 6
+when the switching feature's last task lands (it owns that file in its
+wave, section 8). Gates follow the rubric's "How gates are set": a new perf
+row ships report-only, and after ten green CI runs its gate is the measured
+CI p95 × 1.5, never tighter than the device target, written as a constant in
+`UITests/Journey+Budgets.swift`.
+
+### 7.1 Input-to-screen budgets (interactive)
+
+Cross-process times pair a mark from the process that took the input with a
+mark from the process that drew the result. Both stamp
+`mach_continuous_time` (one system-wide clock), so the difference is valid
+across processes; frames late are counted against the target process's
+display refreshes, as the rubric counts them.
+
+| id | Interaction | Device target | CI gate | Test |
+|---|---|---|---|---|
+| QB-S1 | Switch to a running app (⌃⌘<n>, home row, Switch To menu): key event → first frame of the target's key window drawn frontmost | p95 ≤ 6 refreshes (100 ms at 60 Hz) | report-only, then set from CI | SP1, 30 switches, at least 30 samples or the test fails as invalid |
+| QB-S2 | First open of an app per session (cold launch from the home): click → first frame of its window | ≤ 700 ms median, ≤ 1 s p95 | report-only, then set from CI | SP2, each app 5 times after terminating it |
+| QB-S3 | AfterGlow cold launch → home first frame; first frame → recents shown (200 recents) | ≤ 500 ms; ≤ 100 ms | report-only | SP3 |
+| QB-S4 | Type in recents search → filtered grid drawn | p95 ≤ 2 frames late | placeholder 3 | SP4, 20 keystrokes |
+| QB-S5 | Paste across apps → pasted item drawn (50 shapes from Design into Flare; a 24 MP image into Photo) | ≤ 100 ms; ≤ 300 ms, with progress shown by 100 ms (QB-L9) | report-only | SP5 |
+| QB-S6 | Routed open (Finder or Open In) → document window's first frame; target running / cold | ≤ 300 ms / ≤ 1 s | report-only | SP6 |
+| QB-S7 | Edit in Photo → Photo shows the image (24 MP, Photo running); Photo Save → Library's thumbnail updated | ≤ 1 s; ≤ 1 s | report-only | SP7 |
+| QB-S8 | A setting changed → applied in every running app | ≤ 500 ms | report-only | SP8 |
+| QB-S9 | Drag a card or asset across apps: the drag image follows the pointer; the drop target highlights | p95 ≤ 2 frames late in the source; highlight ≤ 1 frame after enter | report-only | SJ14 with the probe |
+| QB-L9 | Any action that waits (cold open, round trip, update check, large paste) shows progress | ≤ 100 ms after the command, by the probe mark | as the rubric | the journeys' `*-progress` marks |
+
+**Model budgets** (Linux and macOS, `Tests/SuiteModelTests/Budget.swift`,
+debug gate ×10 like the rubric):
+
+| id | Call | Device target | Debug gate |
+|---|---|---|---|
+| QB-SM1 | `RecentsList.note` into 200 items; `merging` two lists of 200 | ≤ 0.2 ms; ≤ 2 ms | ≤ 2 ms; ≤ 20 ms |
+| QB-SM2 | `HomeBuilding.home` over 200 recents with a query | ≤ 2 ms | ≤ 20 ms |
+| QB-SM3 | `AssetIndex.search` over 5,000 assets | ≤ 5 ms | ≤ 50 ms |
+| QB-SM4 | `HandOffCodec` encode + decode | ≤ 0.2 ms | ≤ 2 ms |
+| QB-SM5 | `PasteboardCoding.bestItem` over 6 representations | ≤ 0.1 ms | ≤ 1 ms |
+| QB-SM6 | `FileStore` write with a revision race: two tasks each note 500 recents into one temp store | no entry lost (1,000 present), each write ≤ 5 ms median | ≤ 50 ms |
+
+### 7.2 App audit
+
+All six checks of `docs/blueprints/app-audit.md` apply to every AfterGlow
+shot (home, Assets, Settings, onboarding, update sheet): `disabled-dim`,
+`overlap`, `contrast`, `identifier`, `offscreen`, `unnamed`. The launcher
+gets the key `afterglow` in `UITests/audit-baseline.json` with every count
+at 0 (a new app at 0 is not a loosening), so any violation fails the
+journeys from the first run. The suite commands added inside the apps are
+audited under each app's own key; their PRs must not raise those counts.
+
+### 7.3 Layout spec
+
+The home's column math is `HomeLayout` (section 5.4): sidebar 200 pt,
+margins 24 pt, gap 16 pt, card 168–240 pt. Tiles share the row:
+`min(240, (content − 4 × 16) / 5)`.
+
+| Window width | Content | Grid columns | Card width | Tile width |
+|---|---|---|---|---|
+| 880 (minimum) | 632 | 3 | 200 | 113 |
+| 1000 (launch) | 752 | 4 | 176 | 137 |
+| 1280 | 1032 | 5 | 193 | 193 |
+| 1728 | 1480 | 8 | 171 | 240 |
+
+Checked, at each of the four widths:
+
+1. **Linux**, `HomeLayoutTests`: the table above, exactly; columns never 0;
+   card width within 168–240 for every width from 880 to 2560 in 1 pt
+   steps.
+2. **macOS CI**, `AfterGlowHomeLayoutTests` (AppSnapshotTests): the home on
+   the `weekOfWork` fixture rendered at the four widths; frames read through
+   anchor preferences. The tile row, the RECENT header and the grid share
+   one left edge (±0.5 pt); no card or tile crosses the content's right
+   edge; no two cards overlap; card origins sit on the 4 pt grid; the
+   sidebar is 200 pt. The same check for Settings (fixed 560 pt wide: every
+   `Form` row's leading labels align, ±0.5 pt) and onboarding (720 × 520:
+   Continue and Skip inside the window with 24 pt margins).
+3. **macOS CI**, journey `testHomeAtEveryWidth` (`+Layout`, home): resizes
+   the window to the four widths and shoots each; the audit's `offscreen`
+   and `overlap` stay at 0.
+
+### 7.4 Fidelity (output equals a reference)
+
+| id | Check | Reference | Test |
+|---|---|---|---|
+| QB-SV1 | A home thumbnail is the app's own picture of the document: the 512 px PNG equals the app's export of the first frame or page scaled to 512 px | the app's PNG export, QB-V2 tolerance | `ThumbnailFidelityTests` per app (macOS, each app's adoption task) |
+| QB-SV2 | Colours cross apps exactly: a colour copied from Design, pasted in Flare, added to Suite Colours and placed in Photo keeps its space and components (no conversion on the way) | `SuiteColorValue` equality, both sRGB and Display P3 | Linux `PasteboardColorTests`; SJ6 and SJ13 read the hex |
+| QB-SV3 | Vector art crosses apps: Design's selection pasted into Flare draws the same as Design's own render of it | Design's PNG export of the selection, QB-V2 tolerance; curves stay curves (QB-V1) | `CrossAppVectorGoldenTests` (AppSnapshotTests, clipboard-drag) |
+| QB-SV4 | Flare in Halo: Halo's frame N of an imported animation equals Flare's PNG export of frame N | Flare's export, QB-V2 tolerance, N = 0, 12, 47 | `FlareInHaloGoldenTests` (flare-in-halo) |
+| QB-SV5 | Round trip keeps the original: after SJ10, the original file's bytes are unchanged; with no edit, the returned copy equals the original's pixels | SHA-256 of the original; pixel equality (tolerance 0) | `RoundTripFidelityTests` (macOS) and SJ10 |
+| QB-SV6 | A linked asset placed in Flare draws the same as the asset's payload rendered by Design | Design's render, QB-V2 tolerance | `LinkedAssetGoldenTests` (linked-assets) |
+| QB-SV7 | Every new component and screen has goldens: home, Assets, Settings tabs, onboarding pages, update sheet, in Light, Dark and both with Increase Contrast (QB-V5) | committed goldens | `AfterGlowSnapshots` (AppSnapshotTests) |
+| QB-SV8 | Hand-off files and the store files round trip byte for byte (encode → decode → encode) | the first encoding | Linux `StoreRoundTripTests` |
+
+### 7.5 Size budget
+
+`scripts/size-report` (BU-5) measures, on every macOS CI run on `dev`:
+bytes of each app executable, each framework, each embedded app bundle, the
+launcher, the whole `AfterGlow.app` and the tarball; and the SuiteUI symbols
+defined in each app executable (`nm -U`). `SizeBudget.evaluate` decides.
+
+| Entry | Budget (provisional) | Gate |
+|---|---|---|
+| Each app executable (`Contents/Helpers/<X>.app/Contents/MacOS/<X>`) | its own code and Model only; at most 60% of today's size for that app (today 2.9 to 5.8 MB) | report-only for the first ten runs, then the measured maximum × 1.10, never above the provisional number |
+| `SuiteUI.framework` | ≤ 4 MB | as above |
+| `CreativeEngines.framework` | ≤ 6 MB | as above |
+| `SuiteModel.framework` + `SuiteShell.framework` | ≤ 2 MB together | as above |
+| Launcher executable | ≤ 2 MB | as above |
+| Whole `AfterGlow.app` (uncompressed) | ≤ the sum of today's five executables + 10% (BU-0 records the sum) | as above |
+| `app-builds.tar.gz` | ≤ 15 MB | as above |
+| SuiteUI symbols defined in any app executable | 0 | hard from the first run after BU-4 |
+
+Detailed size work (dead-code stripping, asset compression, per-framework
+trimming) is a later phase; this gate only stops growth and proves the
+split worked.
+
+### 7.6 Reliability
+
+| Check | Measured by |
+|---|---|
+| No work lost when switching: SJ3's state after two switches equals the state before | SJ3 asserts the frame, selection and zoom values |
+| A crash in one app leaves the others running with their documents | journey `testCrashIsolation` (`+Switch`): kill Flare's process; Design's window, document and dirty dot unchanged; the home drops Flare from the running rows within 1 s |
+| Two processes writing the store at once lose nothing | QB-SM6 (Linux) |
+| An expired or newer-format hand-off never acts | Linux `HandOffCodecTests` (main.swift's checks, moved) |
+| Quit from the updater runs each app's unsaved-changes flow; a Cancel stops the update | journey `testUpdateWaitsForUnsavedWork` (`+Update`): a dirty Design document, Install → Design's save prompt → Cancel → the update stops with "Update postponed: Design has unsaved changes." |
