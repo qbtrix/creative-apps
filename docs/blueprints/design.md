@@ -878,6 +878,8 @@ extension DesignWorkspace {
 
     /// What View > Zoom to Selection shows; nil turns the command off.
     public var zoomToSelectionRect: DesignRect?
+    /// Edit > Select All: every visible, unlocked layer at the selection's level (the top of the page when nothing is selected).
+    public mutating func selectAll()
 
     /// Swaps the services (the window does it once, from `-DesignServices fake`).
     public mutating func useServices(_ services: DesignServices)
@@ -1488,3 +1490,74 @@ public struct FakeVariables: VariableEditing {
 | `PathDrawing` | `testPenCornersAndCurves` | F7 |
 | `ComponentLibrary` | `testComponentsCreateAndInsert` | F8 |
 | `VariableEditing` | `testVariablesLightAndDark` | F9 |
+
+---
+
+## 6. Look
+
+Design keeps everything `docs/design.md` already says for an editor shell
+(dark `EditorShell`, hidden title bar, flat bars, glass only where SuiteUI
+puts it). The house reference for inspector rows is Flare's easing editor
+(`docs/blueprints/flare-easing-editor.md`): Studio rows, `StudioScrubRow` for
+numbers with a range, `ChoiceChips` for a few named choices, SuiteUI
+components only, every drag or typed value ending in one `onEnd` so it is one
+undo step.
+
+### What Design adds to docs/design.md
+
+These rules land in `docs/design.md` (a Design section) with the first wave-1
+PR that needs them; this blueprint does not edit that shared file.
+
+1. **Exact coordinates stay `ScrubField`; ranged values are Studio rows.** X,
+   Y, W, H keep their scrub fields (pixels to one decimal). Corner radius,
+   opacity (shown as a whole percent) and stroke width use `StudioScrubRow`.
+   Text weight and alignment are `ChoiceChips`; family is a menu `Picker`;
+   colors are `InspectorColorWellRow` (swatch plus hex).
+2. **Several layers selected.** The header reads "<n> Layers"; a row whose
+   value differs reads "Mixed" in secondary text (no marker); typing or
+   scrubbing sets every selected layer; one undo step.
+3. **Frame names sit above their frame**, outside it, in caption type, one
+   size at any zoom, clipped by nothing (#266).
+4. **Selection marks.** One layer: outline and handles (today's). Several:
+   each layer's outline, the dashed `SelectionOutline` around them all, and
+   the 8 handles on that box. Marquee: a 1 pt accent outline over a 10%
+   accent fill, in the overlay, never clipped by the page.
+5. **Rename in place.** A layer or page row renames on double-click or
+   Return, through `SidebarRow`'s rename (SuiteUI #577, #108); an empty name
+   is refused and the old one stays.
+6. **Status line** gains the selection count ("2 Layers") next to zoom and
+   page size; the top bar's save status shows the unsaved dot (#270, needs
+   SuiteUI #339).
+
+### Screens and their components
+
+Components are SuiteUI unless named `Design*`. "Needs" names a SuiteUI issue
+the screen waits on; until it lands the screen uses the plain placeholder
+CLAUDE.md asks for.
+
+| Screen | Region or state | Uses | Needs |
+|---|---|---|---|
+| Main window | Top bar: "Design" menu, document menu, New, Open, Save, Undo, Redo, zoom out, fit, zoom in; Export… (wave 3, the one filled primary); save status | `EditorTopBar`, `EditorBarMenu`, `EditorBarItem`, `EditorBarDivider` | #339 (outlined items, primary, save status) |
+| Main window | Tool rail: Move V, Frame F, Rectangle R, Ellipse O, Text T, Pen P (disabled with its reason until wave 3) | `ToolbarGroup(style: .rail)` | – |
+| Main window | Canvas: page, artwork, frame names, selection marks, marquee, inline text editor, pen draft (wave 3); empty state with New File | `CanvasViewport`, `SelectionOutline`, `CanvasMarks`, `EmptyStateView`, `DesignArtwork`, `DesignSelectionMarks`, `DesignTextOverlay`, `DesignPenMarks` | #273 (handles into SuiteUI; not blocking), #706 (anchor mark, wave 3), #264 (ruler unit reads px) |
+| Main window | Status line: zoom, page size, selection count, last message, tool | `ViewerStatusBar` | #340 (pills; name and API kept) |
+| Properties tab | One layer: header, Align row, Layer (Hidden, Locked), Frame (X, Y, W, H), Corner radius, Fill (color, opacity), Stroke (color, width, add and remove), Text (family, size, weight, alignment) | `InspectorHeader`, `InspectorSection`, `InspectorAction`, `ScrubField`, `StudioScrubRow`, `InspectorColorWellRow`, `ChoiceChips`, `Picker`, `Toggle(.checkbox)` | #745 / #718 (public `onEnd` on `ScrubField` and the color row; Design has a local end today) |
+| Properties tab | Several layers: "<n> Layers", Align row with Distribute, rows reading "Mixed" | as above, plus `InspectorAction` for Distribute | – |
+| Properties tab | Page only: page name, size (read only) | `InspectorHeader`, `InspectorRow` | – |
+| Properties tab | Nothing open: "No Selection" with how to start | `EmptyStateView` | – |
+| Layers tab | Pages (rename, add, delete, current checkmark), layer tree (rename, drag to reorder and nest, eye, lock, dimmed when hidden), context menu (Rename, Duplicate, Group, Delete, Arrange) | `List` in the sidebar style, `SidebarRow`, `DisclosureGroup`, `EditorBarItem` | #589 (group row toggles), #577 and #108 (rename), #73 (context menus), #111 |
+| Layers tab | Assets section (wave 3): components with Insert | `SidebarSection`, `SidebarRow`, `InspectorAction`, `EmptyStateView` ("No components yet. Select a frame and choose Create Component.") | – |
+| Alerts | Open failure (reason from `DesignFileError`), close with unsaved changes (Save, Don't Save, Cancel) | system alert | – |
+| Export sheet (wave 3) | Format (PNG, SVG, PDF) as `ChoiceChips`, scale 1x/2x/3x, the item list, progress with Cancel, an error row naming the failed file | `ChoiceChips`, `InspectorSection`, `ProgressView`, `InspectorAction` | – |
+| Variables sheet (wave 3) | `Grid` of Name, Light, Dark; add, rename, delete; Light/Dark preview switch in the top bar | `Grid`, `InspectorColorWellRow`, `ScrubField`, `Picker(.segmented)` | – |
+
+### Menu bar
+
+Every top bar command is here; an item that can't run is disabled with its
+help, never hidden.
+
+- **File**: New File ⌘N, Open… ⌘O, Save ⌘S, Save As… ⇧⌘S, Export… ⇧⌘E (wave 3), Close ⌘W (with the unsaved prompt).
+- **Edit**: Undo <step> ⌘Z, Redo <step> ⇧⌘Z, Cut ⌘X, Copy ⌘C, Paste ⌘V, Duplicate ⌘D, Delete ⌫, Select All ⌘A. In a focused text field Undo, Redo, Cut, Copy, Paste and Select All act on the text (#275, #415).
+- **Page**: Add Page, Rename Page…, Delete Page.
+- **Object**: Group ⌘G, Ungroup ⇧⌘G; Arrange ▸ Bring to Front ⇧⌘], Bring Forward ⌘], Send Backward ⌘[, Send to Back ⇧⌘[; Align ▸ the six edges, Distribute Horizontally, Distribute Vertically; Create Component ⌥⌘K (wave 3).
+- **View**: Zoom In ⌘=, Zoom Out ⌘−, Fit Page ⌘0, Zoom to Selection ⌥⌘2; Light / Dark preview (wave 3); Variables… (wave 3).
