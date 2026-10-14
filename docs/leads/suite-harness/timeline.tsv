@@ -7,3 +7,4 @@ utc	stage	event	ref	note
 2026-10-14T18:01Z	3	pr-merged	#786	SH-2 token sheet
 2026-10-14T18:01Z	3	stage-end	wave1	base now 718f3da
 2026-10-14T18:01Z	3	stage-start	wave2	SH-3, SH-4, SH-9 (wf_6a181509-6c9)
+2026-10-14T18:01Z	3	heartbeat	wave2	builders running
