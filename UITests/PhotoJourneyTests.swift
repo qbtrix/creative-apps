@@ -226,6 +226,14 @@ final class PhotoJourneyTests: XCTestCase {
         XCTAssert(photo.app.windows["tools.png"].waitForExistence(timeout: 30), "tools.png didn't open")
         let tools = photo.element("suite.tools").buttons
 
+        // Clone (#647): Option-click the yellow sun to sample it, then paint it onto the sky.
+        tools["Clone"].click()
+        XCUIElement.perform(withKeyModifiers: .option) {
+            photo.element("suite.canvas").coordinate(withNormalizedOffset: CGVector(dx: 0.7, dy: 0.37)).click()
+        }
+        photo.drag(on: "suite.canvas", from: CGVector(dx: 0.2, dy: 0.3), to: CGVector(dx: 0.3, dy: 0.3), step: "cloned")
+        XCTAssert(photo.app.buttons["Undo Clone"].waitForExistence(timeout: 5), "the clone stroke made no Clone step")
+
         tools["Eraser"].click()
         // The eraser shows its own size, hardness and opacity, and no color (#26).
         for option in ["size", "hardness", "opacity"] {

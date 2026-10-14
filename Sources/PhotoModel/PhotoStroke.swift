@@ -16,6 +16,11 @@
 //                  scales them (color and alpha) toward transparent. Undo keeps
 //                  the tiles the stroke painted, as they were, so no event
 //                  walks the whole layer ("Paint", "Erase").
+//   clone          with Option held at the press (`sampling`), or with no
+//                  source yet, the press samples the clone source and the
+//                  drag paints nothing; otherwise clone dabs (PhotoRetouch)
+//                  at the brush's size along the pointer samples on the
+//                  selected layer, one undo step ("Clone").
 //   marquee        the rectangle from the press to the pointer is the
 //                  selection; a click deselects.
 //   crop           the same rectangle is the pending crop (Apply Crop commits
@@ -33,7 +38,7 @@ import CoreRaster
 struct PhotoStroke: Sendable, Equatable {
     var tool: PhotoTool
     var start: Mask.Point
-    /// Brush and eraser: the layer; by tile index, each painted tile as it
+    /// Brush, eraser and clone: the layer; by tile index, each painted tile as it
     /// was before the stroke and its pixels' coverage so far (row-major, the
     /// tile's size); and the last four pointer samples and their pressures.
     var layerID: PhotoLayer.ID?
@@ -52,7 +57,10 @@ struct PhotoStroke: Sendable, Equatable {
 extension PhotoWorkspace {
     /// The active tool's drag from `start` to `end`, in canvas pixels.
     /// `pressure` (0...1, a tablet's; a mouse sends 1) scales the brush.
-    public mutating func drag(from start: Mask.Point, to end: Mask.Point, pressure: Double = 1) {
+    /// `sampling` (Option held) makes the clone tool's press sample its source.
+    public mutating func drag(
+        from start: Mask.Point, to end: Mask.Point, pressure: Double = 1, sampling: Bool = false
+    ) {
         guard let canvas else { return }
         let begun = stroke == nil
         var current = stroke ?? PhotoStroke(tool: tool, start: start, layerID: selectedLayerID)
@@ -61,6 +69,17 @@ extension PhotoWorkspace {
         case .brush, .eraser:
             if begun { paint(&current, adding: start, pressure: pressure) }
             paint(&current, adding: end, pressure: pressure)
+        case .clone:
+            if begun, sampling || cloneSource == nil {
+                setCloneSource(at: start)
+                current.layerID = nil
+            } else if let id = current.layerID {
+                let from = current.samples.last?.point ?? start
+                current.samples = [PhotoStroke.Sample(point: end, pressure: 1)]
+                stamp(
+                    along: [from, end], size: brushOptions.size, layer: id, before: &current.before,
+                    coverage: &current.coverage)
+            }
         case .marquee:
             selection = Self.dragRect(current.start, end, in: canvas)
         case .crop:
@@ -82,6 +101,9 @@ extension PhotoWorkspace {
             paint(&done, adding: nil, pressure: 1)
             guard let id = done.layerID, !done.before.isEmpty else { return }
             record(.tiles(layer: id, done.before), named: done.tool == .brush ? "Paint" : "Erase")
+        case .clone:
+            guard let id = done.layerID, !done.before.isEmpty else { return }
+            record(.tiles(layer: id, done.before), named: "Clone")
         case .marquee, .crop:
             break
         case .move:

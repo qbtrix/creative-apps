@@ -112,7 +112,7 @@ struct PhotoWindow: View {
             NSEvent.isMouseCoalescingEnabled = false
             model.drag(
                 from: Mask.Point(x: from.x, y: from.y), to: Mask.Point(x: to.x, y: to.y),
-                pressure: PointerPressure.current)
+                pressure: PointerPressure.current, sampling: NSEvent.modifierFlags.contains(.option))
         case .endDrag:
             NSEvent.isMouseCoalescingEnabled = true
             model.endDrag()
