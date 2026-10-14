@@ -41,7 +41,7 @@ public struct FlareServices: Sendable {
             library: FakeLibrary(),
             machines: FakeMachines(),
             preview: FakePreview(),
-            export: NotBuilt(reason: "Not built yet (LM-0c3)."),
+            export: FakeExport(),
             assist: NotBuilt(reason: "Not built yet (LM-0c4)."),
             isPreview: true)
     }
