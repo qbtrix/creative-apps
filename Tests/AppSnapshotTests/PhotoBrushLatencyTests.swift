@@ -100,7 +100,7 @@ import Testing
 
 /// SwiftUI's State storage for the window's workspace: `model.drag(...)` in
 /// PhotoWindow reads the value, mutates the copy and writes it back.
-private final class StateBox {
+final class StateBox {
     private(set) var value: PhotoWorkspace
 
     init(_ value: PhotoWorkspace) { self.value = value }
@@ -118,13 +118,13 @@ private final class StateBox {
     }
 }
 
-private func milliseconds(_ duration: Duration) -> Double { duration / .milliseconds(1) }
+func milliseconds(_ duration: Duration) -> Double { duration / .milliseconds(1) }
 
 /// The nearest-rank percentile `p` (0...1) of `values`; 0 when empty.
-private func percentile(_ values: [Double], _ p: Double) -> Double {
+func percentile(_ values: [Double], _ p: Double) -> Double {
     let sorted = values.sorted()
     guard !sorted.isEmpty else { return 0 }
     return sorted[min(Int((p * Double(sorted.count - 1)).rounded()), sorted.count - 1)]
 }
 
-private func format(_ value: Double) -> String { String(format: "%.1f", value) }
+func format(_ value: Double) -> String { String(format: "%.1f", value) }
