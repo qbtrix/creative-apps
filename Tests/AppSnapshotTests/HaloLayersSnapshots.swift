@@ -1,5 +1,5 @@
 // HaloLayersSnapshots.swift: HaloViewer with a composition holding three
-// layers, so the readout shows the layer count, in Light and Dark. Writes
+// layers, so the status bar shows the layer count, in Light and Dark. Writes
 // halo-layers-light.png and halo-layers-dark.png. macOS only.
 import HaloModel
 import SwiftUI

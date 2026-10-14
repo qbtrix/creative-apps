@@ -1,6 +1,6 @@
 // HaloApp.swift: Halo, the motion graphics app. The window is SuiteWindow
 // with the project's compositions in the sidebar, HaloViewer as content and
-// the selected composition's settings and layers in the inspector; the
+// HaloCompositionInspector (settings and layers) in the inspector; the
 // viewer's timeline strip scrubs the playhead and sets in and out points. New
 // Composition opens NewCompositionSheet; a double-click on a sidebar row
 // renames it; a refused rename opens RenameRefusalAlert with the typed name
@@ -46,10 +46,8 @@ struct HaloWindow: View {
                 onSetOutPoint: { _ = model.setSelectedLayerOutPoint() })
         } inspector: {
             if let comp = model.selectedComposition {
-                VStack(alignment: .leading, spacing: SuiteSpacing.m) {
-                    SurfaceCard(title: comp.name, detail: "\(comp.width) × \(comp.height) · \(comp.framesPerSecond) fps")
-                    HaloLayerList(layers: comp.layers, selection: model.selectedLayerID, onSelect: { model.selectLayer($0) })
-                }
+                HaloCompositionInspector(
+                    comp: comp, selectedLayerID: model.selectedLayerID, onSelectLayer: { model.selectLayer($0) })
             } else {
                 EmptyStateView("No Selection", systemImage: "rectangle.stack", message: "Select a composition to see its settings.")
             }
@@ -96,9 +94,9 @@ struct HaloWindow: View {
     }
 }
 
-/// The main content: the composition viewer with its playhead timecode and
-/// layer count readout over the timeline strip (HaloTimelineView), or the
-/// empty state.
+/// The main content: the composition viewer over a status bar of its zoom,
+/// size, playhead timecode and layer count, then the timeline strip
+/// (HaloTimelineView), or the empty state.
 struct HaloViewer: View {
     let model: HaloProject
     var onNew: @MainActor () -> Void = {}
@@ -106,15 +104,18 @@ struct HaloViewer: View {
     var onSelectLayer: @MainActor (HaloLayer.ID) -> Void = { _ in }
     var onSetInPoint: @MainActor () -> Void = {}
     var onSetOutPoint: @MainActor () -> Void = {}
+    /// The viewer's size, for the zoom CanvasSurface fits the artboard at.
+    @State private var viewport = CGSize.zero
 
     var body: some View {
         if let comp = model.selectedComposition {
+            let artboard = CGSize(width: comp.width, height: comp.height)
             VStack(spacing: 0) {
-                CanvasSurface(artboard: CGSize(width: comp.width, height: comp.height), overlayAlignment: .bottom) {
-                    GlassPanel {
-                        Text("\(comp.playheadTimecode)  ·  \(comp.durationSeconds.formatted()) s at \(comp.framesPerSecond) fps  ·  \(comp.layerSummary)")
-                            .font(SuiteFont.monospacedDigits)
-                    }
+                CanvasSurface(artboard: artboard)
+                    .onGeometryChange(for: CGSize.self) { $0.size } action: { viewport = $0 }
+                ViewerStatusBar(zoom: ViewerZoom.fitScale(artboard: artboard, in: viewport), size: comp.sizeText) {
+                    Text(comp.statusTimecode)
+                    Text(comp.layerSummary)
                 }
                 Divider()
                 HaloTimelineView(

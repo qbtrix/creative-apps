@@ -1,5 +1,6 @@
 // HaloLayerList.swift: the selected composition's layers, top first, as a
-// system List of SuiteUI sidebar rows in the inspector. Picking a row calls
+// system List of SuiteUI sidebar rows, flush under the inspector's Layers
+// section (which draws the title, so the list has none). Picking a row calls
 // `onSelect`; the selection itself lives in HaloProject.
 import HaloModel
 import SuiteUI
@@ -12,11 +13,10 @@ struct HaloLayerList: View {
 
     var body: some View {
         List(selection: Binding(get: { selection }, set: { id in if let id { onSelect(id) } })) {
-            Section("Layers") {
-                ForEach(layers) { layer in
-                    SidebarRow(SidebarItem(id: layer.id, title: layer.name, systemImage: layer.kind.systemImage))
-                }
+            ForEach(layers) { layer in
+                SidebarRow(SidebarItem(id: layer.id, title: layer.name, systemImage: layer.kind.systemImage))
             }
         }
+        .scrollContentBackground(.hidden)
     }
 }
