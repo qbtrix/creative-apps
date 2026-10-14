@@ -2999,7 +2999,7 @@ acceptance: equals Flare's PNG export of that frame."
 |---|---|---|---|---|
 | 0 | targets (BU-S, BU-0, BU-1) | #763 green | targets | BU-0, BU-1 supervisor; BU-S is a local spike (docs only) |
 | 1 | bundle, suite-contracts | wave 0 | bundle | bundle BU-4, BU-6 supervisor; the rest lane |
-| 2 | home, switching | wave 1 (suite-contracts); SuiteUI #331–#333 for goldens and the journey template; #330 FrameProbe and #782 named marks (`suite.controls`, `recents-ready`, the perf rows); `AppTile`, `ThumbnailBadges`, `SidebarRow` accessory (`needs-ui`, placeholders until then); A-x-0 and A-x-1 for the cross-app journeys | home | lane |
+| 2 | home, switching | wave 1 (suite-contracts); SuiteUI #778 (suite-harness): #331–#333 for goldens and the journey template, #330 FrameProbe, #775 `suite.controls`; #782 named marks (`recents-ready`, the perf rows); `AppTile`, `ThumbnailBadges`, `SidebarRow` accessory (`needs-ui`, placeholders until then); A-x-0 and A-x-1 for the cross-app journeys | home | lane |
 | 3 | settings, recents-open-in, clipboard-drag | wave 2; the two size tokens (`needs-ui`); app saves #205, #209, PV-1; #415, #384, #418; the SVG core issue; A-x-2, A-x-3, A-x-4 | recents-open-in | lane |
 | 4 | photo-round-trip, shared-assets, onboarding, updater | wave 3; Library v1, Photo PV-1; `SwatchChip` (`needs-ui`); Q2 for the updater; A-LI-6, A-PH-6, A-x-5 | shared-assets | lane |
 | 5 | linked-assets, flare-in-halo | wave 4; the two core issues; Halo H10 | linked-assets | lane |
