@@ -1937,7 +1937,7 @@ edit and no audit loosening, and confirmed the Linux run and that 5.3 is
 After round 2 the Linux check was rerun (`contracts: every fake ran`), 5.3
 was regenerated from `Contracts.swift`, and the owned-file script was rerun:
 no path shared within a wave, and every SuiteUI source, test and Suite
-snapshot file on dev owned from its first wave on. No third round was run:
-round 2's one blocking finding was a missing shape, now written as code and
-compiled, and the round budget (`docs/factory/lead.md`: stop once a round
-needs no new lens) did not call for one.
+snapshot file on dev owned from its first wave on. No third round was run: round 2's one blocking finding was a missing
+document shape, now written as code, compiled and exercised on Linux, and
+every other finding was a local correction. The captain's review is the
+next check.
