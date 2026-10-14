@@ -10,3 +10,4 @@ utc	stage	event	ref	note
 2026-10-14T18:01Z	3	heartbeat	wave2	builders running
 2026-10-14T22:08Z	3	heartbeat	wave2	resumed after usage pause; checking wave 2 PRs
 2026-10-14T22:09Z	3	stage-start	wave2	relaunched SH-3, SH-4, SH-9 (wf_c36a8d40-129) on base 1098ff2; first run died in usage pause
+2026-10-14T22:19Z	3	stage-end	wave2	SH-3/4/9 built and pushed; no PRs: dev Linux gate red (core owner: API), reported on #763

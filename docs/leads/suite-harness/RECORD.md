@@ -4,16 +4,16 @@ Issue: #778 · Packet: docs/blueprints/suiteui/features/suite-harness.md (on bra
 Run: act-1a13b7e0908-fybz · Session: claude/suite-harness-lead-wwxtgn · Started: 2026-10-14T18:00Z
 Stage: 3 wave 2
 Base: 1098ff2d6c135020391cef770f4de11dfde9465a
-Next: wait for wave 2 PRs (SH-3, SH-4, SH-9; workflow wf_c36a8d40-129), then wave 3 (SH-5, SH-10)
+Next: when dev's Linux gate builds again (#763, FlareModel vs core `owner:` API), rebase lead/suite-harness-sh-3/-sh-4/-sh-9 on origin/dev, rerun scripts/ci, open the three PRs; then wave 3 (SH-5, SH-10)
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
 |---|---|---|---|---|---|---|
 | SH-1 | 1 | contract types, EditRun, probe/inventory/golden contracts + Fakes (#773) | Sources/SuiteUI/Contracts/{ContractTypes,FrameProbeRecording,ControlInventorying,GoldenComparing}.swift, Tests/SuiteUITests/{EditRunTests,HarnessFakeTests}.swift | EditRunTests, HarnessFakeTests | #787 | merged |
 | SH-2 | 1 | token sheet for waves 2-4 + contrast pairs (#774) | Sources/SuiteUI/Tokens.swift, Tests/SuiteUITests/TokensTests.swift | TokensTests.geometry, .contrast | #786 | merged |
-| SH-3 | 2 | secondary text 4.5:1 on light cards/panels (#283) | Tokens.swift, TokensTests.swift | TokensTests.contrast | | building |
-| SH-4 | 2 | SuiteFrameProbe + suite.perf publisher (#330) | Sources/SuiteUI/FrameProbe.swift, Tests/SuiteUITests/FrameProbeTests.swift | FrameProbeTests.referenceTable, .summaryWithinBudget | | building |
-| SH-9 | 2 | GoldenImage compare + recording rule (#331) | Tests/AppSnapshotTests/GoldenImage.swift, GoldenImageTests.swift, Golden/README.md | GoldenImageTests.reference, .compareWithinBudget | | building |
+| SH-3 | 2 | secondary text 4.5:1 on light cards/panels (#283) | Tokens.swift, TokensTests.swift | TokensTests.contrast | | built, blocked by dev-red (branch lead/suite-harness-sh-3 @3155de3) |
+| SH-4 | 2 | SuiteFrameProbe + suite.perf publisher (#330) | Sources/SuiteUI/FrameProbe.swift, Tests/SuiteUITests/FrameProbeTests.swift | FrameProbeTests.referenceTable, .summaryWithinBudget | | built, blocked by dev-red (branch lead/suite-harness-sh-4 @9c86942) |
+| SH-9 | 2 | GoldenImage compare + recording rule (#331) | Tests/AppSnapshotTests/GoldenImage.swift, GoldenImageTests.swift, Golden/README.md | GoldenImageTests.reference, .compareWithinBudget | | built, blocked by dev-red (branch lead/suite-harness-sh-9 @6fb1ff7) |
 | SH-5 | 3 | SuiteControlInventory, SuiteEnvironment, ToolbarAction.identifier (#775) | ControlInventory.swift, SuiteEnvironment.swift, ToolbarGroup.swift, EditorTopBar.swift, InspectorAction.swift, EmptyStateView.swift, ControlInventoryTests.swift | ControlInventoryTests | | todo |
 | SH-10 | 3 | SnapshotHost at 2x in four appearances (#332) | Tests/AppSnapshotTests/SnapshotHost.swift, SnapshotHostTests.swift, Sources/SuiteUI/Glass.swift | SnapshotHostTests | | todo |
 | SH-6 | 4 | gallery, index, six stubs, SuiteWindow hook (#776) | SuiteGallery.swift, Gallery/*.swift, SuiteWindow.swift, SuiteGalleryTests.swift | SuiteGalleryTests | | todo |
@@ -31,6 +31,7 @@ Next: wait for wave 2 PRs (SH-3, SH-4, SH-9; workflow wf_c36a8d40-129), then wav
 - Captain questions Q1/Q2/Q3/Q9 built as the packet assumes (its table).
 
 ## Open
+- BLOCKER: scripts/ci fails on dev 1098ff2 (Linux swift build): creative-core main changed keyframe commands to `owner: LayerOwner`; FlareModel fakes still pass `sceneID:`. line:flare, not ours. Reported on #763 (issuecomment-6179761284); builders commented on #283, #330, #331.
 - Wave 2's first run (wf_6a181509-6c9) died in the 18:00Z usage pause with no branch or PR; relaunched as wf_c36a8d40-129 from base 1098ff2.
 - Builder branches are `lead/suite-harness-<id>` (a `lead/suite-harness/<id>` ref can't coexist with the lead branch).
 - SH-7 edits `project.yml` (not on the protected list) — fine for the lane.
