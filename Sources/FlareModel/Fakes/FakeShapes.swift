@@ -331,11 +331,12 @@ public struct FakeShapes: ShapeBuilding {
         else { return false }
         return x1 - x0 >= tolerance || y1 - y0 >= tolerance
     }
-    /// `a / b`, or 1 when that is not a finite number.
-    /// Scale on a layer turned off a multiple of 90° (#560): the world box's handles sit off the layer's sides, so
-    /// the gesture works on the layer's own (oriented) box instead. The oriented handle of the same kind nearest the
-    /// grabbed one moves with the pointer's drag, mapped into the layer's axes (an edge takes only the part along its
-    /// normal), and the opposite oriented handle stays put. Nil when the layer is square to the world or can't invert.
+    /// Scale on a layer turned off a multiple of 90° (#560, #625). The stage shows the layer's world box, so the
+    /// gesture works on that box: its handle opposite the grip stays put, and the layer's own scaleX/scaleY are picked so
+    /// its new world box lands as near as it can to the one the pointer asks for. An edge handle scales the layer evenly,
+    /// so its edge follows the pointer exactly along its axis. A turned box can't take every shape (at 45° it is always
+    /// square), so a corner keeps each local stretch between the two world stretches: it never flips, blows up near 45°
+    /// or flattens the layer. Nil when the layer is square to the world.
     private static func obliqueScale(_ h: Int, to: Point, layer: Layer, t: Transform, document: Document,
                                      sceneID: String, frame: Int, box: Rect) -> [String: Double]? {
         let quarter = t.rotation.remainder(dividingBy: 90)
@@ -349,24 +350,48 @@ public struct FakeShapes: ShapeBuilding {
             let r = Rect(minX: path.minX - half, minY: path.minY - half, maxX: path.maxX + half, maxY: path.maxY + half)
             points += corners(r).map { (back * item.transform).apply($0) }
         }
-        guard let local = Rect(enclosing: points) else { return nil }
-        let handle = ((h % 8) + 8) % 8, grip = Self.handle(handle, on: box), m = t.matrix
-        func gap(_ i: Int) -> Double {
-            let p = m.apply(Self.handle(i, on: local))
-            return (p.x - grip.x) * (p.x - grip.x) + (p.y - grip.y) * (p.y - grip.y)
-        }
-        guard let near = stride(from: handle % 2, to: 8, by: 2).min(by: { gap($0) < gap($1) }) else { return nil }
-        let g = Self.handle(near, on: local), f = Self.handle(near + 4, on: local)
-        // The drag in the layer's own units: through the inverse of its turn and scale, not its offset.
-        let origin = back.apply(Point(x: 0, y: 0)), moved = back.apply(Point(x: to.x - grip.x, y: to.y - grip.y))
-        let d = Point(x: moved.x - origin.x, y: moved.y - origin.y)
-        let sx = near % 4 == 1 ? 1 : ratio(g.x - f.x + d.x, g.x - f.x)
-        let sy = near % 4 == 3 ? 1 : ratio(g.y - f.y + d.y, g.y - f.y)
-        // Keep `f` where it is: x' + R·S'·f = the scene point of f now.
-        let pinned = m.apply(f), turn = Matrix.rotation(degrees: t.rotation)
-        let p = turn.apply(Point(x: t.scaleX * sx * f.x, y: t.scaleY * sy * f.y))
-        return ["x": pinned.x - p.x, "y": pinned.y - p.y, "scaleX": t.scaleX * sx, "scaleY": t.scaleY * sy]
+        guard let local = Rect(enclosing: points), let own = Rect(enclosing: points.map(t.matrix.apply)) else { return nil }
+        let handle = ((h % 8) + 8) % 8, grip = Self.handle(handle, on: box), fixed = Self.handle(handle + 4, on: box)
+        // The world stretch the pointer asks of the box about its fixed handle; an edge leaves its other axis at 1.
+        let kx = handle % 4 == 1 ? 1 : abs(ratio(to.x - fixed.x, grip.x - fixed.x))
+        let ky = handle % 4 == 3 ? 1 : abs(ratio(to.y - fixed.y, grip.y - fixed.y))
+        // The world box's size from the local stretch f: width = a·f, height = b·f.
+        let turn = Matrix.rotation(degrees: t.rotation), (c, s) = (abs(turn.a), abs(turn.b))
+        let (u, v) = (abs(t.scaleX) * local.width, abs(t.scaleY) * local.height)
+        let a = (c * u, s * v), b = (s * u, c * v)
+        let f = handle % 2 == 1 ? (x: handle % 4 == 1 ? ky : kx, y: handle % 4 == 1 ? ky : kx)
+            : fit(a, b, to: (kx * (a.0 + a.1), ky * (b.0 + b.1)), within: (min(kx, ky), max(kx, ky)))
+        let (sx, sy) = (t.scaleX * f.x, t.scaleY * f.y)
+        guard let moved = Rect(enclosing: points.map((turn * Matrix.scale(x: sx, y: sy)).apply)) else { return nil }
+        // The layer's own fixed handle goes where the box's stretch takes it: for a lone layer, it stays put.
+        let from = Self.handle(handle + 4, on: own), anchor = Self.handle(handle + 4, on: moved)
+        let target = Point(x: fixed.x + kx * (from.x - fixed.x), y: fixed.y + ky * (from.y - fixed.y))
+        return ["x": target.x - anchor.x, "y": target.y - anchor.y, "scaleX": sx, "scaleY": sy]
     }
+    /// The local stretch f, both parts within `range`, whose world size (a·f, b·f) lands nearest `target`; of equally
+    /// near ones (at 45° there are many), the most even. A convex fit on a box: the exact answer if it lies inside,
+    /// else the best point on the box's sides, or on its diagonal.
+    private static func fit(_ a: (Double, Double), _ b: (Double, Double), to target: (Double, Double),
+                            within range: (Double, Double)) -> (x: Double, y: Double) {
+        let (lo, hi) = range, (tx, ty) = target
+        func clamp(_ x: Double) -> Double { min(max(x, lo), hi) }
+        func miss(_ f: (x: Double, y: Double)) -> Double {
+            let dx = a.0 * f.x + a.1 * f.y - tx, dy = b.0 * f.x + b.1 * f.y - ty
+            return dx * dx + dy * dy
+        }
+        let det = a.0 * b.1 - a.1 * b.0, (p, q) = (a.0 + a.1, b.0 + b.1), even = clamp(ratio(p * tx + q * ty, p * p + q * q))
+        var tries: [(x: Double, y: Double)] = [(ratio(tx * b.1 - a.1 * ty, det), ratio(a.0 * ty - b.0 * tx, det)), (even, even)]
+        for side in [lo, hi] {
+            tries.append((side, clamp(ratio(a.1 * (tx - a.0 * side) + b.1 * (ty - b.0 * side), a.1 * a.1 + b.1 * b.1))))
+            tries.append((clamp(ratio(a.0 * (tx - a.1 * side) + b.0 * (ty - b.1 * side), a.0 * a.0 + b.0 * b.0)), side))
+        }
+        let slack = 1e-12 * max(1, hi)
+        let inside = tries.filter { [$0.x, $0.y].allSatisfy { $0.isFinite && $0 >= lo - slack && $0 <= hi + slack } }
+        let least = inside.map(miss).min() ?? 0
+        let near = inside.filter { miss($0) <= least + 1e-9 * max(1, least) }
+        return near.min { abs($0.x - $0.y) < abs($1.x - $1.y) } ?? (even, even)
+    }
+    /// `a / b`, or 1 when that is not a finite number.
     private static func ratio(_ a: Double, _ b: Double) -> Double { b != 0 && (a / b).isFinite ? a / b : 1 }
     /// Handle `h` (0...7 clockwise from top-left, taken mod 8) on `box`, where the stage draws it.
     public static func handle(_ h: Int, on box: Rect) -> Point {
