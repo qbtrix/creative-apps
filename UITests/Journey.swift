@@ -1,5 +1,7 @@
 // Journey.swift: the shared steps of the human-like UI tests. Every
-// <X>JourneyTests target compiles this file next to its own journey file.
+// <X>JourneyTests target compiles UITests/Journey*.swift (this file and
+// Journey+Input.swift, the input and probe helpers) next to its own
+// UITests/<X>JourneyTests*.swift journey files (project.yml).
 //
 // A Journey launches the release bundle scripts/bundle-apps wrote to
 // .build/apps/<X>App.app (the apps stay SwiftPM targets; no Xcode app target
@@ -12,7 +14,9 @@
 // (`suite.sidebar`, `suite.inspector`, the `suite.tools` palette, the
 // `suite.canvas` of an editor shell) and everything else by the titles a
 // person reads: button labels, menu names. Launch arguments let a journey skip
-// system panels (Photo's `-PhotoOpenFile` and `-PhotoExportTo`).
+// system panels (Photo's `-PhotoOpenFile` and `-PhotoExportTo`). `name:`
+// shoots and audits under another name than the app's: SuiteUI's gallery runs
+// inside Library as `suiteui`, so its shots never count under `library`.
 // The first failed step stops the test, so later shots never show a wrong state.
 // Every window shot is also audited (Audit.swift); an audit failure doesn't
 // stop the journey. The class's last test (in run order, which is by name)
@@ -26,12 +30,13 @@ struct Journey {
     let test: XCTestCase
 
     /// Launches `.build/apps/<appName>App.app` fresh, with no restored windows
-    /// and `arguments` added to its launch arguments.
-    init(_ appName: String, _ test: XCTestCase, arguments: [String] = []) {
+    /// and `arguments` added to its launch arguments. Shots and the audit tally
+    /// go under `name`; nil means the app's name in lower case.
+    init(_ appName: String, _ test: XCTestCase, name: String? = nil, arguments: [String] = []) {
         // This file is UITests/Journey.swift, so its grandparent is the repo root.
         let root = URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent()
         app = XCUIApplication(url: root.appending(path: ".build/apps/\(appName)App.app"))
-        name = appName.lowercased()
+        self.name = name ?? appName.lowercased()
         self.test = test
         test.continueAfterFailure = false
         app.launchArguments = ["-ApplePersistenceIgnoreState", "YES"] + arguments
@@ -154,7 +159,7 @@ struct Journey {
     }
 
     /// "New Composition…" becomes "new-composition".
-    private func slug(_ title: String) -> String {
+    func slug(_ title: String) -> String {
         title.lowercased().split { !$0.isLetter && !$0.isNumber }.joined(separator: "-")
     }
 }
