@@ -92,7 +92,7 @@ public struct HaloProject: Sendable, Equatable {
     public mutating func newComposition(_ settings: CompositionSettings) -> Bool {
         guard let frames = settings.durationFrames else { return false }
         let comp = HaloComposition(
-            id: takeCompositionID(), name: uniqueName(settings.name.trimmed), width: settings.width,
+            id: takeCompositionID(), name: uniqueName(settings.name.normalizedName), width: settings.width,
             height: settings.height, framesPerSecond: settings.framesPerSecond, durationFrames: frames)
         compositions.append(comp)
         selectedCompositionID = comp.id
@@ -131,17 +131,17 @@ public struct HaloProject: Sendable, Equatable {
             refusedRename = RefusedRename(id: id, name: name, problem: problem)
             return false
         }
-        compositions[index].name = name.trimmed
+        compositions[index].name = name.normalizedName
         refusedRename = nil
         return true
     }
 
     /// Why renaming composition `id` to `name` would be refused, as the alert
     /// says it; nil when the rename would succeed. Names that look the same
-    /// (surrounding whitespace, letter case, composed or decomposed accents)
-    /// count as taken.
+    /// (whitespace, invisible format characters, letter case, composed or
+    /// decomposed accents) count as taken.
     public func renameProblem(_ id: String, to name: String) -> String? {
-        let name = name.trimmed
+        let name = name.normalizedName
         guard compositions.contains(where: { $0.id == id }) else { return "The composition no longer exists." }
         if name.isEmpty { return "Enter a name for the composition." }
         let key = name.nameKey
