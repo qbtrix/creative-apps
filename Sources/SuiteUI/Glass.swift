@@ -3,7 +3,9 @@
 // glass. With `suiteSnapshotRendering` set in the environment it draws a flat,
 // bordered stand-in instead, because ImageRenderer drops glass views from the
 // image entirely, content and all; AppSnapshotTests sets it so palettes and
-// panels still show up in the PNGs.
+// panels still show up in the PNGs. The stand-in is drawn shapes and system
+// colors only, so it renders at the host's scale: SnapshotHost draws it at 2×
+// with its 1 pt border exactly 2 px (SnapshotHostTests.glassStandIn).
 import SwiftUI
 
 extension EnvironmentValues {
