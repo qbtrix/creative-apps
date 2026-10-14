@@ -14,6 +14,8 @@ import Foundation
 /// (NSRunningApplication.activate, else NSWorkspace.openApplication).
 public protocol AppSwitching: Sendable {
     func runState(of app: SuiteApp) async -> AppRunState
+    /// Yields a counter each time any app's run state changes (launch, quit, crash).
+    func changes() async -> AsyncStream<Int>
     /// Brings the app forward, launching it if needed; never opens a document.
     func switchTo(_ app: SuiteApp, reason: SwitchReason) async throws(SuiteError) -> SwitchReceipt
 }
@@ -25,6 +27,8 @@ public protocol RecentWork: Sendable {
     func note(_ ref: SuiteDocumentRef, event: RecentEvent, at date: Date, thumbnail: String?) async throws(SuiteError)
     func remove(fileID: String) async throws(SuiteError)
     func clear(app: SuiteApp) async throws(SuiteError)
+    /// Yields the new revision after any process writes `recents.json`.
+    func changes() async -> AsyncStream<Int>
 }
 
 /// UC-3 New document by type (tier 1). Pure: presets come from each app's
@@ -40,6 +44,8 @@ public protocol DocumentRouting: Sendable {
     func route(fileName: String) throws(SuiteError) -> SuiteApp
     /// Other apps that read this type, default first, never `from` itself.
     func openInTargets(for type: SuiteTypeID, from app: SuiteApp) -> [SuiteApp]
+    /// nil when Open In has targets; else why the submenu is disabled.
+    func openInRefusal(for type: SuiteTypeID, from app: SuiteApp) -> SuiteError?
 }
 
 /// UC-5 Send a hand-off to another process (tier 1: home opens and new
@@ -86,6 +92,9 @@ public protocol AssetLibrary: Sendable {
     func update(_ id: String, payload: Data?, color: SuiteColorValue?, at date: Date) async throws(SuiteError) -> SuiteAsset
     func remove(_ id: String) async throws(SuiteError)
     func payload(of asset: SuiteAsset) async throws(SuiteError) -> Data
+    /// Assets added from this document, so its app can offer Update Asset.
+    func assets(fromFileID fileID: String) async throws(SuiteError) -> [SuiteAsset]
+    func changes() async -> AsyncStream<Int>
 }
 
 /// UC-9 Placed assets keep their link (tier 3). Pure over the index.
@@ -107,6 +116,7 @@ public protocol PreferencesStoring: Sendable {
     func load() async throws(SuiteError) -> SuitePreferences
     /// Writes `revision + 1`; `.staleRevision` when another writer won (the caller reloads).
     func save(_ preferences: SuitePreferences) async throws(SuiteError) -> SuitePreferences
+    func changes() async -> AsyncStream<Int>
 }
 
 /// UC-12 Open the one Settings window at a pane from any app (tier 2).
@@ -129,6 +139,7 @@ public protocol UpdateChecking: Sendable {
     /// Downloads and verifies; returns the local path of the verified zip.
     func download(_ offer: UpdateOffer) async throws(SuiteError) -> String
     /// Asks every running suite app to quit (each runs its own unsaved flow), then replaces and relaunches.
+    /// `.updatePostponed(app)` when an app cancelled its quit; nothing is replaced.
     func install(zipAt path: String) async throws(SuiteError)
 }
 
@@ -142,4 +153,14 @@ public protocol ThumbnailPublishing: Sendable {
 public protocol HomeBuilding: Sendable {
     func home(recents: RecentsList, running: [SuiteApp], query: String, filter: SuiteApp?,
               order: [SuiteApp], missingApps: Set<SuiteApp>, missingFiles: Set<String>, now: Date) -> HomeState
+}
+
+/// UC-18 Act on a hand-off (every app, tier 1). Each `<X>Model` conforms
+/// (adoption issue A-x-1); `.suiteApp(_:host:)` in SuiteShell hands every
+/// received hand-off to it. SuiteShell never sees an app Model, only this.
+public protocol SuiteDocumentHost: Sendable {
+    /// nil when the app can act on it now; else the reason it refuses.
+    func refusal(for handOff: HandOff) async -> SuiteError?
+    /// Open, new, edit, place, import or return: the app does it and says how it ended.
+    func accept(_ handOff: HandOff) async throws(SuiteError) -> HandOffState
 }

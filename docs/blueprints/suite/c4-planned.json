@@ -234,7 +234,7 @@
               {
                 "id": "suite-store",
                 "name": "Suite store",
-                "description": "SuiteLocations (the support folder, -SuiteSupportDir override) and FileStore: revisioned JSON files written by atomic replace; a stale write re-reads, merges with the caller's pure merge, and retries.",
+                "description": "SuiteLocations (the support folder, -SuiteSupportDir override) and FileStore: revisioned JSON files written by atomic replace under an exclusive lock file, merged with the caller's pure merge.",
                 "technology": "Swift 6, Foundation (FoundationEssentials), Linux and macOS",
                 "paths": [
                   "Sources/SuiteModel/Store/"
@@ -245,7 +245,7 @@
               {
                 "id": "suite-contracts",
                 "name": "Contracts",
-                "description": "One protocol per suite use case (blueprint section 5): switching, recents, new documents, routing, hand-offs, round trip, pasteboard, assets, links, animation import, preferences, settings route, onboarding, updates, thumbnails, size budget.",
+                "description": "One protocol per suite use case (blueprint section 5): switching, recents, new documents, routing, hand-offs, round trip, pasteboard, assets, links, animation import, preferences, settings route, onboarding, updates, thumbnails, home, and SuiteDocumentHost, which each app Model conforms to so it can act on hand-offs.",
                 "technology": "Swift 6, Foundation (FoundationEssentials), Linux and macOS",
                 "paths": [
                   "Sources/SuiteModel/Contracts/"
@@ -256,7 +256,7 @@
               {
                 "id": "suite-fakes",
                 "name": "Fakes and fixtures",
-                "description": "A fake per contract with an unavailable reason, and SuiteFixtures (empty, week of work, round trip, assets) for snapshots and journeys.",
+                "description": "A fake per contract with an unavailable reason, and SuiteFixtures: the journeys' store contents, written into the live store by the launcher.",
                 "technology": "Swift 6, Foundation (FoundationEssentials), Linux and macOS",
                 "paths": [
                   "Sources/SuiteModel/Fakes/"
@@ -322,7 +322,7 @@
               {
                 "id": "suite-home",
                 "name": "Home state",
-                "description": "Home sections (new tiles and presets, recents grid, running apps strip), search and filter, HomeLayout column math.",
+                "description": "Home sections (new tiles and presets, recents grid, running apps strip), search and filter, HomeLayout column math, and HomeModel, the home window's observable view-model.",
                 "technology": "Swift 6, Foundation (FoundationEssentials), Linux and macOS",
                 "paths": [
                   "Sources/SuiteModel/Home/"
@@ -517,10 +517,11 @@
               {
                 "id": "shell-adoption",
                 "name": "Adoption modifier",
-                "description": "The .suiteApp(_:) modifier each app adds to its scene, and the settings route to the launcher.",
+                "description": "The .suiteApp(_:host:) modifier each app adds to its scene, SuiteAppDelegate (receives hand-off files through application(_:open:) and passes them to the app's SuiteDocumentHost), and the settings route to the launcher.",
                 "technology": "Swift 6, SwiftUI and AppKit, macOS 26",
                 "paths": [
                   "Sources/SuiteShell/SuiteAppModifier.swift",
+                  "Sources/SuiteShell/SuiteAppDelegate.swift",
                   "Sources/SuiteShell/SettingsRoute.swift"
                 ],
                 "status": "planned",
@@ -547,7 +548,8 @@
                 "technology": "Swift 6, SwiftUI and AppKit, macOS 26",
                 "paths": [
                   "Sources/AfterGlowApp/AfterGlowApp.swift",
-                  "Sources/AfterGlowApp/LauncherRouter.swift"
+                  "Sources/AfterGlowApp/LauncherRouter.swift",
+                  "Sources/AfterGlowApp/LauncherCommands*.swift"
                 ],
                 "status": "planned",
                 "authored": true

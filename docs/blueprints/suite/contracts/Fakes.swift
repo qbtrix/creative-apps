@@ -11,9 +11,21 @@ import FoundationEssentials
 import Foundation
 #endif
 
+/// Holds the continuations of `changes()` streams for an actor fake.
+struct ChangeFeed {
+    private var continuations: [AsyncStream<Int>.Continuation] = []
+    mutating func stream() -> AsyncStream<Int> {
+        let (s, c) = AsyncStream<Int>.makeStream()
+        continuations.append(c)
+        return s
+    }
+    func send(_ revision: Int) { for c in continuations { c.yield(revision) } }
+}
+
 public actor FakeSwitching: AppSwitching {
     public private(set) var states: [SuiteApp: AppRunState]
     public private(set) var ticks: UInt64 = 0
+    var feed = ChangeFeed()
     let unavailable: String?
     public init(running: [SuiteApp] = [], missing: Set<SuiteApp> = [], unavailable: String? = nil) {
         var s: [SuiteApp: AppRunState] = [:]
@@ -23,21 +35,25 @@ public actor FakeSwitching: AppSwitching {
         self.unavailable = unavailable
     }
     public func runState(of app: SuiteApp) -> AppRunState { states[app] ?? .notRunning }
+    public func changes() -> AsyncStream<Int> { feed.stream() }
     public func switchTo(_ app: SuiteApp, reason: SwitchReason) throws(SuiteError) -> SwitchReceipt {
         if let unavailable { throw .notAvailable(unavailable) }
         let before = states[app] ?? .notRunning
         if before == .missing { throw .appMissing(app) }
         ticks += 1
-        if case .running = before {} else { states[app] = .running(windows: 1) }
+        if case .running = before {} else { states[app] = .running(windows: 1); feed.send(Int(ticks)) }
         if case .running = before { return SwitchReceipt(app: app, wasRunning: true, requestedAt: ticks) }
         return SwitchReceipt(app: app, wasRunning: false, requestedAt: ticks)
     }
     /// Test hook: the app quit or crashed.
-    public func terminate(_ app: SuiteApp) { states[app] = .notRunning }
+    public func terminate(_ app: SuiteApp) { states[app] = .notRunning; ticks += 1; feed.send(Int(ticks)) }
 }
 
 public actor FakeRecents: RecentWork {
-    public private(set) var stored: RecentsList
+    public private(set) var stored: RecentsList {
+        didSet { if stored.revision != oldValue.revision { feed.send(stored.revision) } }
+    }
+    var feed = ChangeFeed()
     let unavailable: String?
     public init(_ list: RecentsList = RecentsList(), unavailable: String? = nil) { stored = list; self.unavailable = unavailable }
     public func list() throws(SuiteError) -> RecentsList { if let unavailable { throw .notAvailable(unavailable) }; return stored }
@@ -55,6 +71,7 @@ public actor FakeRecents: RecentWork {
         if let unavailable { throw .notAvailable(unavailable) }
         stored.clear(app: app); stored.revision += 1
     }
+    public func changes() -> AsyncStream<Int> { feed.stream() }
 }
 
 public struct FakeCreating: DocumentCreating {
@@ -102,6 +119,10 @@ public struct FakeRouting: DocumentRouting {
     public func openInTargets(for type: SuiteTypeID, from app: SuiteApp) -> [SuiteApp] {
         (registry.type(type)?.readers ?? []).filter { $0 != app }
     }
+
+    public func openInRefusal(for type: SuiteTypeID, from app: SuiteApp) -> SuiteError? {
+        openInTargets(for: type, from: app).isEmpty ? .noOtherReader(typeName: registry.type(type)?.name ?? "these") : nil
+    }
 }
 
 public actor FakeHandOffs: HandOffSending, HandOffReceiving {
@@ -133,10 +154,17 @@ public actor FakeHandOffs: HandOffSending, HandOffReceiving {
 public actor FakeRoundTrips: RoundTripEditing {
     public private(set) var sessions: [String: RoundTripSession] = [:]
     let unavailable: String?
-    public init(unavailable: String? = nil) { self.unavailable = unavailable }
+    let missingOriginals: Set<String>   // fileIDs whose original is gone
+    public init(missingOriginals: Set<String> = [], unavailable: String? = nil) {
+        self.missingOriginals = missingOriginals; self.unavailable = unavailable
+    }
 
     public func begin(_ source: RoundTripSource, id: String, at date: Date) throws(SuiteError) -> RoundTripSession {
         if let unavailable { throw .notAvailable(unavailable) }
+        if missingOriginals.contains(source.original.fileID) {
+            let name = source.original.displayName.split(separator: ".").first.map(String.init) ?? source.original.displayName
+            throw .originalMissing(name: name)
+        }
         let base = source.original.displayName.split(separator: ".").first.map(String.init) ?? source.original.displayName
         let s = RoundTripSession(id: id, source: source, title: "\(base) (Library edit)", state: .open, startedAt: date)
         sessions[id] = s
@@ -169,12 +197,12 @@ public struct FakePasteboard: PasteboardCoding {
 
     /// What each app can take, best first.
     public static let accepts: [SuiteApp: [SuiteTypeID]] = [
-        .flare: [.assetEnvelope, .flareLayers, .svg, .plainText],
-        .design: [.assetEnvelope, .designLayers, .svg, .png, .plainText],
-        .photo: [.assetEnvelope, .png, .jpeg, .heic, .plainText],
-        .library: [.png, .jpeg, .heic],
-        .halo: [.assetEnvelope, .plainText],
-        .launcher: [.assetEnvelope, .svg, .png],
+        .flare: [.assetEnvelope, .flareLayers, .svg, .plainText, .fileURL],
+        .design: [.assetEnvelope, .designLayers, .svg, .png, .plainText, .fileURL],
+        .photo: [.assetEnvelope, .png, .jpeg, .heic, .plainText, .fileURL],
+        .library: [.png, .jpeg, .heic, .fileURL],
+        .halo: [.assetEnvelope, .plainText, .fileURL],
+        .launcher: [.fileURL, .assetEnvelope, .svg, .png],
     ]
 
     public func representations(of item: SuiteClipItem) -> [TypedData] {
@@ -193,7 +221,7 @@ public struct FakePasteboard: PasteboardCoding {
             let e = AssetEnvelope(name: "#" + c.hex, kind: .color, from: .launcher, color: c)
             return representations(of: .envelope(e))
         case .text(let t): return [TypedData(type: .plainText, data: Data(t.utf8))]
-        case .files: return []
+        case .files(let refs): return refs.map { TypedData(type: .fileURL, data: Data(("file://" + $0.path).utf8)) }
         }
     }
 
@@ -208,6 +236,18 @@ public struct FakePasteboard: PasteboardCoding {
             case .svg: return .vector(svg: String(decoding: rep.data, as: UTF8.self), name: "Pasted art")
             case .png, .jpeg, .heic: return .image(png: rep.data, pixelWidth: 0, pixelHeight: 0)
             case .plainText: return .text(String(decoding: rep.data, as: UTF8.self))
+            case .fileURL:
+                let routing = FakeRouting()
+                let refs = offered.filter { $0.type == .fileURL }.compactMap { r -> SuiteDocumentRef? in
+                    let path = String(String(decoding: r.data, as: UTF8.self).dropFirst("file://".count))
+                    let name = path.split(separator: "/").last.map(String.init) ?? path
+                    guard let target = try? routing.route(fileName: name),
+                          let type = routing.registry.type(forExtension: name.split(separator: ".").last.map(String.init) ?? "")
+                    else { return nil }
+                    return SuiteDocumentRef(path: path, fileID: path, app: target, type: type.id, displayName: name)
+                }
+                if refs.isEmpty { continue }
+                return .files(refs)
             default: continue   // an app's own layer types are read by that app's model, not here
             }
         }
@@ -223,7 +263,10 @@ public struct FakePasteboard: PasteboardCoding {
 }
 
 public actor FakeAssets: AssetLibrary {
-    public private(set) var stored: AssetIndex
+    public private(set) var stored: AssetIndex {
+        didSet { if stored.revision != oldValue.revision { feed.send(stored.revision) } }
+    }
+    var feed = ChangeFeed()
     var payloads: [String: Data] = [:]
     let unavailable: String?
     public init(_ index: AssetIndex = AssetIndex(), unavailable: String? = nil) { stored = index; self.unavailable = unavailable }
@@ -259,6 +302,11 @@ public actor FakeAssets: AssetLibrary {
         guard let p = asset.payload, let d = payloads[p] else { throw .fileMissing(name: asset.name) }
         return d
     }
+    public func assets(fromFileID fileID: String) throws(SuiteError) -> [SuiteAsset] {
+        if let unavailable { throw .notAvailable(unavailable) }
+        return stored.assets.filter { $0.source?.fileID == fileID }
+    }
+    public func changes() -> AsyncStream<Int> { feed.stream() }
 }
 
 public struct FakeLinking: AssetLinking {
@@ -288,7 +336,10 @@ public struct FakeAnimationSource: AnimationSourceReading {
 }
 
 public actor FakePreferences: PreferencesStoring {
-    public private(set) var stored: SuitePreferences
+    public private(set) var stored: SuitePreferences {
+        didSet { if stored.revision != oldValue.revision { feed.send(stored.revision) } }
+    }
+    var feed = ChangeFeed()
     let unavailable: String?
     public init(_ p: SuitePreferences = SuitePreferences(), unavailable: String? = nil) { stored = p; self.unavailable = unavailable }
     public func load() throws(SuiteError) -> SuitePreferences { if let unavailable { throw .notAvailable(unavailable) }; return stored }
@@ -300,6 +351,7 @@ public actor FakePreferences: PreferencesStoring {
         stored = next
         return next
     }
+    public func changes() -> AsyncStream<Int> { feed.stream() }
 }
 
 public actor FakeSettingsRoute: SettingsRouting {
@@ -343,8 +395,10 @@ public actor FakeUpdates: UpdateChecking {
     public private(set) var installed: [String] = []
     let unavailable: String?
     let validSignatures: Set<String>
-    public init(feed: Data = Data("[]".utf8), validSignatures: Set<String> = [], unavailable: String? = nil) {
-        self.feed = feed; self.validSignatures = validSignatures; self.unavailable = unavailable
+    let refusesQuit: SuiteApp?          // an app whose unsaved-changes prompt is cancelled
+    public init(feed: Data = Data("[]".utf8), validSignatures: Set<String> = [], refusesQuit: SuiteApp? = nil,
+                unavailable: String? = nil) {
+        self.feed = feed; self.validSignatures = validSignatures; self.refusesQuit = refusesQuit; self.unavailable = unavailable
     }
     public func check(current: SuiteVersion) throws(SuiteError) -> UpdateOffer? {
         if let unavailable { throw .notAvailable(unavailable) }
@@ -354,7 +408,10 @@ public actor FakeUpdates: UpdateChecking {
         guard validSignatures.contains(offer.signature) else { throw .updateNotVerified }
         return "/tmp/AfterGlow-\(offer.version.major).\(offer.version.minor).\(offer.version.patch).zip"
     }
-    public func install(zipAt path: String) throws(SuiteError) { installed.append(path) }
+    public func install(zipAt path: String) throws(SuiteError) {
+        if let app = refusesQuit { throw .updatePostponed(app) }
+        installed.append(path)
+    }
 }
 
 public actor FakeThumbnails: ThumbnailPublishing {
@@ -391,5 +448,80 @@ public struct FakeHome: HomeBuilding {
     static func age(of date: Date, now: Date) -> String {
         let days = Int(now.timeIntervalSince(date) / 86_400)
         return days <= 0 ? "Today" : days == 1 ? "Yesterday" : "\(days) days ago"
+    }
+}
+
+/// A host that records what it was asked to do; refuses the verbs it doesn't take.
+public actor FakeDocumentHost: SuiteDocumentHost {
+    public let app: SuiteApp
+    public let verbs: Set<HandOffVerb>
+    public private(set) var accepted: [HandOff] = []
+    public init(app: SuiteApp, verbs: Set<HandOffVerb>) { self.app = app; self.verbs = verbs }
+    public func refusal(for handOff: HandOff) -> SuiteError? {
+        verbs.contains(handOff.verb) ? nil : .notAvailable("\(app.displayName) can't do that yet.")
+    }
+    public func accept(_ handOff: HandOff) throws(SuiteError) -> HandOffState {
+        if let r = refusal(for: handOff) { throw r }
+        accepted.append(handOff)
+        return handOff.verb == .edit ? .accepted : .returned
+    }
+}
+
+/// The journeys' fixtures as store files (section 4.1). The launcher writes them
+/// into `-SuiteSupportDir` with `FileStore`, then every process runs on `.live`,
+/// so what one app writes the others read. Document files come from
+/// `UITests/Fixtures/suite/` (each app line's fixture export, A-x-0).
+public enum SuiteFixtures {
+    public static let names = ["empty", "weekOfWork", "missing", "roundTrip", "assets", "crowd"]
+
+    public struct Store: Equatable, Sendable {
+        public var recents: RecentsList
+        public var assets: AssetIndex
+        public var preferences: SuitePreferences
+    }
+
+    public static let weekOfWorkFiles: [(String, SuiteApp, SuiteTypeID)] = [
+        ("Logo.design", .design, .designDocument), ("Cards.design", .design, .designDocument),
+        ("Bounce.flare", .flare, .flareAnimation), ("Intro.halo", .halo, .haloProject),
+        ("beach.ora", .photo, .photoOpenRaster), ("Title.flare", .flare, .flareAnimation),
+        ("Sunset.png", .photo, .png), ("Logo animated.flare", .flare, .flareAnimation),
+    ]
+
+    /// nil for an unknown name. `documents` is the folder holding the fixture documents.
+    public static func store(_ name: String, documents: String, now: Date) -> Store? {
+        func ref(_ f: (String, SuiteApp, SuiteTypeID)) -> SuiteDocumentRef {
+            SuiteDocumentRef(path: documents + "/" + f.0, fileID: f.0, app: f.1, type: f.2, displayName: f.0)
+        }
+        let done = SuitePreferences(onboardingDoneVersion: 1)
+        switch name {
+        case "empty", "roundTrip":
+            return Store(recents: RecentsList(), assets: AssetIndex(), preferences: done)
+        case "weekOfWork", "missing":
+            let items = weekOfWorkFiles.enumerated().map { i, f in
+                RecentItem(ref: ref(f), lastUsed: now - Double(i) * 75_600, thumbnail: "thumbnails/\(f.0).png")
+            }
+            return Store(recents: RecentsList(revision: 1, items: items), assets: AssetIndex(), preferences: done)
+        case "assets":
+            let colors = [("Brand blue", SuiteColorSpace.sRGB, 0.094, 0.467, 0.949), ("Ink", .sRGB, 0.1, 0.1, 0.12),
+                          ("Paper", .sRGB, 0.98, 0.97, 0.94), ("Coral", .sRGB, 1, 0.42, 0.36),
+                          ("Vivid green", .displayP3, 0.2, 0.9, 0.3), ("Vivid red", .displayP3, 1, 0.1, 0.1)]
+            var assets = colors.enumerated().map { i, c in
+                SuiteAsset(id: "c\(i)", kind: .color, name: c.0, color: SuiteColorValue(space: c.1, red: c.2, green: c.3, blue: c.4),
+                           modifiedAt: now - Double(i))
+            }
+            assets.append(SuiteAsset(id: "v0", kind: .vector, name: "Card", payload: "assets/v0/1.svg", modifiedAt: now - 10))
+            assets.append(SuiteAsset(id: "v1", kind: .vector, name: "Badge", payload: "assets/v1/1.svg", modifiedAt: now - 11))
+            assets.append(SuiteAsset(id: "i0", kind: .image, name: "Sunset", payload: "assets/i0/1.png", modifiedAt: now - 12))
+            assets.append(SuiteAsset(id: "a0", kind: .animation, name: "Bounce", payload: "assets/a0/1.flare", modifiedAt: now - 13))
+            return Store(recents: RecentsList(), assets: AssetIndex(revision: 1, assets: assets), preferences: done)
+        case "crowd":
+            let items = (0..<200).map { i in
+                RecentItem(ref: SuiteDocumentRef(path: documents + "/Doc \(i).flare", fileID: "crowd\(i)", app: .flare,
+                                                 type: .flareAnimation, displayName: "Doc \(i).flare"), lastUsed: now - Double(i))
+            }
+            return Store(recents: RecentsList(revision: 1, items: items), assets: AssetIndex(), preferences: done)
+        default:
+            return nil
+        }
     }
 }

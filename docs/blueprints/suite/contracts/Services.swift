@@ -39,6 +39,15 @@ public struct SuiteServices: Sendable {
         self.home = home; self.isPreview = isPreview
     }
 
+    /// Members a process supplies itself: Halo's animation reader (it links FlareCore)
+    /// and the launcher's updater (it owns the bundle). SuiteShell can see neither.
+    public func with(animations: (any AnimationSourceReading)? = nil, updates: (any UpdateChecking)? = nil) -> SuiteServices {
+        var s = self
+        if let animations { s.animations = animations }
+        if let updates { s.updates = updates }
+        return s
+    }
+
     /// Every member a fake, seeded from a fixture's recents and assets.
     public static func fake(recents: RecentsList = RecentsList(), assets: AssetIndex = AssetIndex(),
                             running: [SuiteApp] = [], missing: Set<SuiteApp> = []) -> SuiteServices {

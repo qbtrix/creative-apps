@@ -75,6 +75,7 @@ public struct SuiteTypeID: RawRepresentable, Hashable, Codable, Sendable {
     public static let heic = SuiteTypeID(rawValue: "public.heic")
     public static let svg = SuiteTypeID(rawValue: "public.svg-image")
     public static let plainText = SuiteTypeID(rawValue: "public.utf8-plain-text")
+    public static let fileURL = SuiteTypeID(rawValue: "public.file-url")
 }
 
 /// One file type the suite reads: who owns it and who else can open it.
@@ -155,6 +156,10 @@ public enum SuiteError: Error, Equatable, Sendable {
     case timedOut
     case updateNotVerified
     case ioFailed(String)
+    case noOtherReader(typeName: String)
+    case originalMissing(name: String)
+    case linkMissing
+    case updatePostponed(SuiteApp)
 
     public var message: String {
         switch self {
@@ -170,6 +175,10 @@ public enum SuiteError: Error, Equatable, Sendable {
         case .timedOut: "This took too long. Try again."
         case .updateNotVerified: "This update couldn't be verified, so it wasn't installed."
         case .ioFailed(let d): "Couldn't save: \(d)."
+        case .noOtherReader(let t): "No other app opens \(t) files."
+        case .originalMissing(let n): "The original of \(n) is missing. Locate it in Library first."
+        case .linkMissing: "Linked asset is missing; using the last copy."
+        case .updatePostponed(let a): "Update postponed: \(a.displayName) has unsaved changes."
         }
     }
 }
@@ -607,18 +616,29 @@ public struct HomeState: Equatable, Sendable {
 }
 
 /// Column math for the home's tile row and recents grid (section 7.3).
+/// Widths are whole multiples of 4 pt, so every origin sits on the 4 pt grid.
 public enum HomeLayout {
     public static let sidebar = 200.0, margin = 24.0, gap = 16.0, cardMin = 168.0, cardMax = 240.0
+    public static let tileMax = 240.0, tileChipsMin = 160.0
+
+    static func content(_ windowWidth: Double) -> Double { max(windowWidth - sidebar - 2 * margin, cardMin) }
+    static func four(_ v: Double) -> Double { (v / 4).rounded(.down) * 4 }
 
     public static func columns(windowWidth: Double) -> Int {
-        let content = windowWidth - sidebar - 2 * margin
-        guard content > cardMin else { return 1 }
-        return max(1, Int((content + gap) / (cardMin + gap)))
+        max(1, Int((content(windowWidth) + gap) / (cardMin + gap)))
     }
 
     public static func cardWidth(windowWidth: Double) -> Double {
         let n = Double(columns(windowWidth: windowWidth))
-        let content = max(windowWidth - sidebar - 2 * margin, cardMin)
-        return min(cardMax, ((content - gap * (n - 1)) / n).rounded(.down))
+        return min(cardMax, four((content(windowWidth) - gap * (n - 1)) / n))
     }
+
+    /// Five tiles in one row.
+    public static func tileWidth(windowWidth: Double) -> Double {
+        min(tileMax, four((content(windowWidth) - 4 * gap) / 5))
+    }
+
+    /// Below this width a tile shows its presets as a menu, not chips.
+    public static func tileShowsChips(windowWidth: Double) -> Bool { tileWidth(windowWidth: windowWidth) >= tileChipsMin }
 }
+

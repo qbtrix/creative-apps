@@ -67,7 +67,16 @@ expect(home.running == [.design], "running strip")
 let emptyHome = services.home.home(recents: RecentsList(), running: [], query: "", filter: nil, order: SuiteApp.apps,
                                    missingApps: [], missingFiles: [], now: now)
 expect(emptyHome.emptyMessage?.hasPrefix("No recent work yet") == true, "empty home")
-expect(HomeLayout.columns(windowWidth: 880) == 3 && HomeLayout.columns(windowWidth: 1728) >= 7, "home columns")
+let widths: [(Double, Int, Double, Double)] = [(880, 3, 200, 112), (1000, 4, 176, 136), (1280, 5, 192, 192), (1728, 8, 168, 240)]
+for (w, n, card, tile) in widths {
+    expect(HomeLayout.columns(windowWidth: w) == n && HomeLayout.cardWidth(windowWidth: w) == card
+           && HomeLayout.tileWidth(windowWidth: w) == tile, "layout at \(w)")
+}
+for w in stride(from: 880.0, through: 2560, by: 1) {
+    let c = HomeLayout.cardWidth(windowWidth: w), n = Double(HomeLayout.columns(windowWidth: w))
+    expect(c >= 168 && c <= 240 && c.truncatingRemainder(dividingBy: 4) == 0 && n * c + (n - 1) * 16 <= w - 248, "fit at \(w)")
+}
+expect(!HomeLayout.tileShowsChips(windowWidth: 880) && HomeLayout.tileShowsChips(windowWidth: 1280), "tile chips")
 
 // Pasteboard: Design art into Flare, image into Flare refused, colour exact, damaged falls back.
 let pb = FakePasteboard()
@@ -147,5 +156,34 @@ expect(SuiteApp.flare.bundleID == "org.creativesuite.flare" && SuiteApp.launcher
 expect(SuiteApp.halo.bundlePath == "Contents/Helpers/Halo.app", "bundle path")
 expect(Set(SuiteApp.allCases.map(\.switchDigit)).count == 6, "switch digits unique")
 
+// Round-1 critic fixes: open-in refusal, file drops, missing original, postponed update, hosts, fixtures, change streams.
+expect(routing.openInRefusal(for: .designDocument, from: .design)?.message == "No other app opens Design Document files.", "open in refusal")
+let drop = pb.representations(of: .files([ref("Sunset.png", .photo, .png)]))
+if case .files(let refs)? = pb.bestItem(from: drop, for: .launcher) { expect(refs.first?.app == .photo, "drop routes png") } else { expect(false, "drop") }
+let rtMissing = FakeRoundTrips(missingOriginals: ["IMG_0002.jpg"])
+do throws(SuiteError) { _ = try await rtMissing.begin(src, id: "r2", at: now); expect(false, "missing original") }
+catch { expect(error.message == "The original of IMG_0002 is missing. Locate it in Library first.", "original missing text") }
+let upBlocked = FakeUpdates(feed: feed, validSignatures: ["good"], refusesQuit: .design)
+do throws(SuiteError) { try await upBlocked.install(zipAt: "/tmp/x.zip"); expect(false, "postponed") }
+catch { expect(error.message == "Update postponed: Design has unsaved changes.", "postponed text") }
+let host = FakeDocumentHost(app: .flare, verbs: [.open, .new])
+expect(await host.refusal(for: h) == nil, "host takes new")
+expect(try await host.accept(h) == .returned, "host accepted")
+let week = SuiteFixtures.store("weekOfWork", documents: "/tmp/Documents", now: now)
+expect(week?.recents.items.count == 8 && week?.recents.items.first?.ref.displayName == "Logo.design", "weekOfWork store")
+expect(SuiteFixtures.store("crowd", documents: "/d", now: now)?.recents.items.count == 200, "crowd 200")
+expect(SuiteFixtures.store("assets", documents: "/d", now: now)?.assets.assets.count == 10, "assets fixture")
+let feedRecents = FakeRecents()
+let stream = await feedRecents.changes()
+try await feedRecents.note(ref("New.flare", .flare, .flareAnimation), event: .saved, at: now, thumbnail: nil)
+var first: Int?
+for await r in stream { first = r; break }
+expect(first == 1, "recents change stream")
+let hm = HomeModel(services: SuiteServices.fake(recents: list, running: [.design]))
+await hm.reload(now: now)
+hm.search("bounce", now: now)
+expect(hm.state.cards.count == 1, "home model search")
+expect(SuiteError.linkMissing.message == "Linked asset is missing; using the last copy.", "link missing text")
+
 print(failures == 0 ? "contracts: PASS" : "contracts: \(failures) FAILED")
-if failures > 0 { fatalError("contracts failed") }
+// check.sh fails unless this prints "contracts: PASS".
