@@ -618,3 +618,1022 @@ from disk, so the UI test target never builds a document file:
 | `layered` | `sample` plus "Paint" (a red stroke, Multiply, 60%), "Curves 1" (an adjustment layer), and a mask on Paint | PV-5, PV-6 views and snapshots |
 | `large` | 4000 × 3000 noise and gradients, three layers | PJ-P1–P3, model budgets |
 | `limit` (tests only) | 16 MP, eight layers each with a mask | `PhotoBudgetTests` |
+
+---
+
+## 5. Contracts
+
+One Swift protocol per v2 use case, with a fake for each, so a feature's
+views and its logic can be built in parallel (the view on the fake, the
+logic as the live conformance) and meet in `PhotoServices`.
+
+**Checked on Linux.** Every block below was compiled on 2026-10-14, as
+written, inside PhotoModel on dev 956d946 with creative-core `main` 4cac701,
+Swift 6.3.3 on Ubuntu 24.04 (`swift build --build-tests`), and the 309
+existing Photo model tests passed with it in place. PV-0's first task lands
+exactly these files and repeats that build.
+
+**How a contract is used.** A contract is a pure service over value types.
+The workspace method a view calls (section 5.3) checks availability, calls
+the contract inside one recorded history step, and writes the result to its
+own state; a throw leaves everything unchanged. So the undo name, the
+coalescing and the "one gesture, one step" rule (QB-F3) live in the
+workspace, never in a conformance, and fakes and live conformances are
+interchangeable. Every protocol refines `PhotoUseCase`, whose
+`unavailableHelp` is the tooltip of the controls that need it.
+
+**Engine-direct (no protocol)**, because there would be one conformer and
+the code already exists: the history list and jump (`PhotoHistory`, PV-4),
+the brush cursor diameter (PV-4), Duplicate Layer (copies a layer and its
+tiles), and opening flat files (`PhotoImageCodec`, existing).
+
+### 5.1 The protocols and shared values (`Sources/PhotoModel/Contracts/`)
+
+**Shared values** (`Contracts/PhotoContractTypes.swift`)
+
+```swift
+// Contracts/PhotoContractTypes.swift: what every Photo v2 use-case contract
+// shares. A contract is a pure service over value types: it takes pixels,
+// layers and geometry and returns new ones. PhotoWorkspace owns state and
+// history; it calls a contract inside one recorded step, so a contract never
+// records undo itself and a throw leaves the workspace unchanged.
+// Linux-safe.
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
+import Foundation
+#endif
+import CoreRaster
+
+/// Every contract says whether it can run yet. Its text is the tooltip of
+/// every control that needs it ("Not built yet (PV-5)."); nil once it works.
+public protocol PhotoUseCase: Sendable {
+    var unavailableHelp: String? { get }
+}
+
+/// A use case refused for a reason the person can fix, in the words the
+/// window shows ("Nothing to paste.", "Merge Down needs a pixel layer below.").
+public struct PhotoRefusal: Error, Equatable, Sendable {
+    public var message: String
+    public init(_ message: String) { self.message = message }
+}
+
+/// Modifier keys held during a canvas drag.
+public struct DragModifiers: OptionSet, Hashable, Sendable {
+    public let rawValue: Int
+    public init(rawValue: Int) { self.rawValue = rawValue }
+    /// Keep the ratio, add to a selection, snap an angle to 15 degrees.
+    public static let shift = DragModifiers(rawValue: 1)
+    /// From the center, subtract from a selection.
+    public static let option = DragModifiers(rawValue: 2)
+}
+
+/// Pixels placed on the canvas: a buffer and where its top-left pixel sits.
+public struct PlacedPixels: Sendable, Equatable {
+    public var pixels: TiledPixels
+    public var x: Int
+    public var y: Int
+    public init(pixels: TiledPixels, x: Int, y: Int) {
+        self.pixels = pixels; self.x = x; self.y = y
+    }
+}
+
+/// One layer with what it draws: pixels for a pixel layer (nil for an
+/// adjustment layer) and its mask, a buffer the layer's size whose alpha is
+/// the coverage (nil for none).
+public struct LayerContent: Sendable, Equatable {
+    public var layer: PhotoLayer
+    public var pixels: TiledPixels?
+    public var mask: TiledPixels?
+    public init(layer: PhotoLayer, pixels: TiledPixels?, mask: TiledPixels? = nil) {
+        self.layer = layer; self.pixels = pixels; self.mask = mask
+    }
+}
+```
+
+**PV-1 documents and recovery** (`Contracts/DocumentContracts.swift`)
+
+```swift
+// Contracts/DocumentContracts.swift: the layered document (PV-1). A document
+// is a package of files: a manifest and one 8-bit sRGB PNG per pixel layer
+// and per mask, written through the PhotoImageCodec the app already has, so
+// the format code runs and is tested on Linux. Recovery keeps the latest
+// autosaved package. Linux-safe.
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
+import Foundation
+#endif
+import CoreRaster
+
+/// A document as files, by path from the package root: "document.json",
+/// "layers/layer-3.png", "masks/layer-3.png", "thumbnail.png".
+public struct PhotoPackage: Sendable, Equatable {
+    public var files: [String: Data]
+    public init(files: [String: Data]) { self.files = files }
+}
+
+/// Everything a document keeps, in 8-bit straight-alpha sRGB like an opened
+/// file. A mask is stored as an image whose alpha is the coverage.
+public struct PhotoDocumentSnapshot: Sendable, Equatable {
+    public var canvas: CanvasSize
+    /// Top first, with kind, mask flags, blend, opacity and offset.
+    public var layers: [PhotoLayer]
+    /// One image per pixel layer, its own size.
+    public var pixels: [PhotoLayer.ID: DecodedImage]
+    /// One image per layer that has a mask, the layer's size.
+    public var masks: [PhotoLayer.ID: DecodedImage]
+    /// The Adjust tab's whole-image adjustments.
+    public var adjustments: AdjustmentSettings
+    public var selectedLayerID: PhotoLayer.ID?
+    public init(canvas: CanvasSize, layers: [PhotoLayer], pixels: [PhotoLayer.ID: DecodedImage],
+                masks: [PhotoLayer.ID: DecodedImage] = [:], adjustments: AdjustmentSettings = AdjustmentSettings(),
+                selectedLayerID: PhotoLayer.ID? = nil) {
+        self.canvas = canvas; self.layers = layers; self.pixels = pixels; self.masks = masks
+        self.adjustments = adjustments; self.selectedLayerID = selectedLayerID
+    }
+}
+
+/// Why a package didn't open; `message` is the alert's text.
+public enum ArchiveError: Error, Equatable, Sendable {
+    case notADocument
+    case newerVersion(Int)
+    case damaged(String)
+    case tooLarge
+
+    public var message: String {
+        switch self {
+        case .notADocument: "This file isn't a Photo document."
+        case .newerVersion(let v): "This document was made by a newer Photo (format \(v)). Update Photo to open it."
+        case .damaged(let detail): "This document is damaged: \(detail)."
+        case .tooLarge: "This document is larger than Photo can open."
+        }
+    }
+}
+
+/// PV-1: write and read the layered document.
+public protocol DocumentArchiving: PhotoUseCase {
+    /// The format version this conformance writes; a newer one fails to open.
+    var formatVersion: Int { get }
+    /// The package for `snapshot`, every image through `codec` as PNG.
+    func encode(_ snapshot: PhotoDocumentSnapshot, codec: any PhotoImageCodec) throws -> PhotoPackage
+    /// The snapshot in `package`. Throws `ArchiveError` and nothing else.
+    func decode(_ package: PhotoPackage, codec: any PhotoImageCodec) throws -> PhotoDocumentSnapshot
+}
+
+/// One autosaved document.
+public struct RecoveryEntry: Sendable, Equatable {
+    /// The document's name when it had one, for "Restore <name> from <time>?".
+    public var documentName: String?
+    /// Seconds since 1970 when it was written.
+    public var savedAt: Double
+    public var package: PhotoPackage
+    public init(documentName: String?, savedAt: Double, package: PhotoPackage) {
+        self.documentName = documentName; self.savedAt = savedAt; self.package = package
+    }
+}
+
+/// PV-1: keep the latest autosave of the open document until it is saved or
+/// closed cleanly. One entry per window; a newer write replaces it.
+public protocol RecoveryStoring: PhotoUseCase {
+    func write(_ entry: RecoveryEntry, window: String) throws
+    /// The entries a crash left behind, newest first.
+    func leftBehind() throws -> [RecoveryEntry]
+    func discard(window: String) throws
+    func discardAll() throws
+}
+
+/// What the open file is, so Save knows what to write.
+public enum PhotoFileKind: Hashable, Sendable {
+    /// A layered Photo document.
+    case document
+    /// A flat image file in a format Photo writes (PNG, JPEG).
+    case image(ImageFormat)
+    /// A flat file Photo reads but doesn't write (HEIC before PV-8): Save is Save As.
+    case readOnly
+}
+
+/// What File > Save does now.
+public enum SaveAction: Hashable, Sendable {
+    /// Write the document over its file.
+    case writeDocument
+    /// Write the flat image over its file (one pixel layer, no masks or adjustment layers).
+    case writeImage(ImageFormat)
+    /// The open file is flat but the image has layers: ask "Keep layers?"
+    /// (Save as Photo Document, or Flatten into the file's format).
+    case askKeepLayers(ImageFormat)
+    /// A new or read-only image: Save As.
+    case saveAs
+}
+```
+
+**PV-2 clipboard and merging** (`Contracts/EditContracts.swift`)
+
+```swift
+// Contracts/EditContracts.swift: Cut, Copy and Paste of pixels, and the layer
+// commands that make or combine layers: Merge Down and Flatten (PV-2).
+// Duplicate Layer needs no contract (it copies a layer and its tiles).
+// Linux-safe.
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
+import Foundation
+#endif
+import CoreRaster
+
+/// Pixels on their way to or from the pasteboard.
+public struct ClipboardImage: Sendable, Equatable {
+    public var image: DecodedImage
+    /// Where on the canvas they were copied from; nil from another app.
+    public var source: PixelRect?
+    public init(image: DecodedImage, source: PixelRect?) {
+        self.image = image; self.source = source
+    }
+}
+
+/// PV-2: what Copy takes and where Paste puts it.
+public protocol PixelClipboard: PhotoUseCase {
+    /// The layer's pixels inside the selection, each weighted by `mask` when
+    /// given (a feathered or lasso selection), cut to the bounds of what is
+    /// not transparent. The whole layer when `selection` is nil. Nil when
+    /// every pixel there is transparent ("Nothing to copy.").
+    func copy(_ content: PlacedPixels, selection: PixelRect?, mask: Mask?) throws -> ClipboardImage?
+    /// Where a pasted image lands: on its source rect when that still
+    /// overlaps the canvas, else centered on `center` (the view's center in
+    /// canvas pixels). Never off the canvas entirely.
+    func placement(of image: ClipboardImage, canvas: CanvasSize, center: Mask.Point) -> PixelRect
+}
+
+/// PV-2: combine layers into one pixel layer.
+public protocol LayerMerging: PhotoUseCase {
+    /// `upper` composited onto `lower` with upper's blend mode, opacity and
+    /// mask (an adjustment layer applies its adjustment), as one pixel layer
+    /// that keeps lower's id, name, blend and opacity and covers both
+    /// layers' bounds. Throws `PhotoRefusal("Merge Down needs a pixel layer
+    /// below.")` when `lower` is an adjustment layer.
+    func mergeDown(_ upper: LayerContent, onto lower: LayerContent) throws -> PlacedPixels
+    /// Every visible layer, bottom-up, then `adjustments`, as one canvas-size
+    /// layer: the same pixels Export writes before its format's background.
+    /// Each layer sits at its own `offsetX`, `offsetY`.
+    func flatten(_ layers: [LayerContent], canvas: CanvasSize, adjustments: AdjustmentSettings) throws -> TiledPixels
+}
+```
+
+**PV-3 crop** (`Contracts/CropContracts.swift`)
+
+```swift
+// Contracts/CropContracts.swift: a crop rectangle from typed numbers and an
+// aspect lock (PV-3, #544). Every result lies inside the canvas, at least
+// 1 x 1, and keeps the aspect when one is set. Linux-safe.
+import CoreRaster
+
+/// The crop's shape lock.
+public enum CropAspect: Hashable, Sendable {
+    case free
+    /// The canvas's own width : height.
+    case original
+    /// Width : height, both at least 1. `portrait` swaps them.
+    case ratio(Int, Int)
+
+    public static let presets: [CropAspect] = [.free, .original, .ratio(1, 1), .ratio(3, 2), .ratio(4, 3), .ratio(16, 9)]
+
+    public var title: String {
+        switch self {
+        case .free: "Free"
+        case .original: "Original"
+        case .ratio(let w, let h): "\(w):\(h)"
+        }
+    }
+}
+
+/// One of the four numbers the crop options show.
+public enum CropField: Hashable, Sendable, CaseIterable {
+    case x, y, width, height
+}
+
+/// PV-3: crop geometry.
+public protocol CropSizing: PhotoUseCase {
+    /// `crop` with `field` set to `value`, clamped to the canvas. With an
+    /// aspect, setting width moves height (and the reverse) about the
+    /// top-left corner; X and Y move without resizing.
+    func setting(_ field: CropField, to value: Int, in crop: PixelRect, aspect: CropAspect,
+                 canvas: CanvasSize) -> PixelRect
+    /// The rect a crop drag from `anchor` to `point` makes, keeping `aspect`
+    /// (the larger of the two sides wins) and clamped to the canvas.
+    func dragged(from anchor: Mask.Point, to point: Mask.Point, aspect: CropAspect, canvas: CanvasSize) -> PixelRect
+    /// `crop` reshaped to `aspect` about its center, as large as fits inside
+    /// both it and the canvas; the largest centered rect when `crop` is nil.
+    func applying(_ aspect: CropAspect, to crop: PixelRect?, canvas: CanvasSize) -> PixelRect
+    /// `aspect` with its sides swapped (3:2 becomes 2:3); free and original stay.
+    func swapped(_ aspect: CropAspect, canvas: CanvasSize) -> CropAspect
+}
+```
+
+**PV-5 selections and masks** (`Contracts/SelectionContracts.swift`)
+
+```swift
+// Contracts/SelectionContracts.swift: selections as coverage masks and layer
+// masks (PV-5, #421). A selection is a canvas-size CoreRaster Mask; a
+// rectangle selection stays pixel-exact (coverage 0 or 1). A layer mask is a
+// buffer the layer's size whose alpha is the coverage, so the brush, eraser
+// and tile undo work on it unchanged. Linux-safe.
+import CoreRaster
+
+/// What a selection drag draws, in canvas pixels.
+public enum SelectionShape: Sendable, Equatable {
+    case rectangle(PixelRect)
+    case ellipse(PixelRect)
+    /// A freehand outline, closed from the last point to the first.
+    case lasso([Mask.Point])
+}
+
+/// How a new shape meets the selection there is: Shift adds, Option subtracts.
+public enum SelectionCombine: Hashable, Sendable {
+    case replace, add, subtract
+
+    public init(_ modifiers: DragModifiers) {
+        self = modifiers.contains(.shift) ? .add : modifiers.contains(.option) ? .subtract : .replace
+    }
+}
+
+/// PV-5: build and change the selection.
+public protocol SelectionShaping: PhotoUseCase {
+    /// The coverage of `shape` on a `canvas`-size mask, antialiased except
+    /// for a rectangle. Throws `PhotoRefusal` for a lasso under 3 points.
+    func mask(for shape: SelectionShape, canvas: CanvasSize) throws -> Mask
+    /// `new` combined into `current`. Nil when nothing is left selected.
+    func combine(_ current: Mask?, with new: Mask, _ mode: SelectionCombine) throws -> Mask?
+    /// Everything not selected; the whole canvas when `mask` is nil.
+    func inverted(_ mask: Mask?, canvas: CanvasSize) throws -> Mask?
+    /// The edge softened over `radius` pixels (0...250); 0 returns `mask`.
+    func feathered(_ mask: Mask, radius: Double) throws -> Mask
+    /// The smallest whole-pixel rect holding every covered pixel; nil when empty.
+    func bounds(of mask: Mask) -> PixelRect?
+    /// The marching-ants outline: closed polylines along coverage 0.5, in
+    /// canvas pixels, for the overlay.
+    func outline(of mask: Mask) -> [[Mask.Point]]
+}
+
+/// PV-5: layer masks.
+public protocol LayerMasking: PhotoUseCase {
+    /// A mask for a layer at `layerBounds` (canvas pixels): the selection's
+    /// coverage where it overlaps, 0 elsewhere; all 1 (reveal all) when
+    /// `selection` is nil.
+    func mask(from selection: Mask?, layerBounds: PixelRect) throws -> TiledPixels
+    /// `pixels` with every alpha multiplied by the mask's: Apply Mask.
+    func applying(_ mask: TiledPixels, to pixels: TiledPixels) throws -> TiledPixels
+    /// `region`, a part of the layer at `origin` in layer pixels, multiplied
+    /// by the mask there: what the renderer composites. Equals `region` for
+    /// an all-1 mask, bit for bit.
+    func masked(_ region: PixelBuffer, at origin: (x: Int, y: Int), by mask: TiledPixels) throws -> PixelBuffer
+}
+
+/// The Marquee tool's options.
+public enum SelectionShapeKind: String, Hashable, Sendable, CaseIterable {
+    case rectangle, ellipse, lasso
+}
+
+public struct SelectionOptions: Hashable, Sendable {
+    public var shape: SelectionShapeKind
+    /// Pixels, 0...250, applied to each new shape.
+    public var feather: Double
+    public init(shape: SelectionShapeKind = .rectangle, feather: Double = 0) {
+        self.shape = shape; self.feather = feather
+    }
+}
+```
+
+**PV-6 adjustment layers, PV-7 transform** (`Contracts/LayerContracts.swift`)
+
+```swift
+// Contracts/LayerContracts.swift: adjustment layers (PV-6, #580) and the
+// free transform and flips (PV-7). Linux-safe.
+import CoreRaster
+
+/// PV-6: an adjustment in the stack changes the layers under it.
+public protocol AdjustmentLayering: PhotoUseCase {
+    /// The sections an adjustment layer can hold: exposure, levels, curves
+    /// and hue/saturation (blur reads neighbours, so it stays whole-image).
+    var kinds: [AdjustmentKind] { get }
+    /// `below` (the stack composited so far, a region of the canvas) with
+    /// `settings`' enabled sections applied, mixed back by `opacity`,
+    /// `blendMode` and `mask` (the same region's coverage in alpha; nil for
+    /// none). With opacity 1, normal blend and no mask, equals
+    /// `settings` applied to `below` bit for bit.
+    func applying(_ settings: AdjustmentSettings, to below: PixelBuffer, opacity: Double,
+                  blendMode: BlendMode, mask: PixelBuffer?) throws -> PixelBuffer
+}
+
+/// A handle of the transform box.
+public enum TransformHandle: Hashable, Sendable, CaseIterable {
+    case topLeft, top, topRight, right, bottomRight, bottom, bottomLeft, left
+    /// Inside the box: move.
+    case inside
+    /// Just outside a corner: rotate.
+    case rotate
+}
+
+/// A layer's pending transform: scale about the box's top-left, then turn
+/// clockwise about the box's center, then move.
+public struct LayerTransform: Hashable, Sendable {
+    public var scaleX: Double
+    public var scaleY: Double
+    public var degrees: Double
+    public var dx: Double
+    public var dy: Double
+    public init(scaleX: Double = 1, scaleY: Double = 1, degrees: Double = 0, dx: Double = 0, dy: Double = 0) {
+        self.scaleX = scaleX; self.scaleY = scaleY; self.degrees = degrees; self.dx = dx; self.dy = dy
+    }
+    public static let identity = LayerTransform()
+}
+
+/// Edit > Free Transform in progress on one layer.
+public struct TransformDraft: Hashable, Sendable {
+    public var layerID: PhotoLayer.ID
+    /// The layer's bounds (or the selection's, when one is set) before the transform.
+    public var box: PixelRect
+    public var transform: LayerTransform
+    public init(layerID: PhotoLayer.ID, box: PixelRect, transform: LayerTransform = .identity) {
+        self.layerID = layerID; self.box = box; self.transform = transform
+    }
+}
+
+public enum FlipAxis: Hashable, Sendable {
+    case horizontal, vertical
+}
+
+/// PV-7: free transform and flips.
+public protocol LayerTransforming: PhotoUseCase {
+    /// The handle under `point` (canvas pixels) within `tolerance` canvas
+    /// pixels (the app passes 6 pt divided by zoom); nil outside the box.
+    func handle(at point: Mask.Point, in draft: TransformDraft, tolerance: Double) -> TransformHandle?
+    /// `draft` after dragging `handle` from `start` to `point`: a side or
+    /// corner scales with the opposite side fixed (Shift keeps the ratio,
+    /// Option scales about the center), inside moves, rotate turns (Shift
+    /// snaps to 15 degrees). Scale never reaches 0 or flips sign by a drag.
+    func dragged(_ draft: TransformDraft, handle: TransformHandle, from start: Mask.Point,
+                 to point: Mask.Point, modifiers: DragModifiers) -> TransformDraft
+    /// The four box corners after the transform, clockwise from top-left,
+    /// for the overlay.
+    func corners(of draft: TransformDraft) -> [Mask.Point]
+    /// The layer's pixels with the transform applied (lanczos3), placed at
+    /// their new bounds. The identity gives back `content` bit for bit.
+    func applied(_ draft: TransformDraft, to content: PlacedPixels) throws -> PlacedPixels
+    /// `content` mirrored across its own center line, exactly (no filtering);
+    /// twice gives back the input bit for bit.
+    func flipped(_ content: PlacedPixels, _ axis: FlipAxis) throws -> PlacedPixels
+}
+```
+
+**PV-8 export size, PV-9 eyedropper** (`Contracts/OutputContracts.swift`)
+
+```swift
+// Contracts/OutputContracts.swift: export at a size (PV-8) and the
+// eyedropper's sample (PV-9). Linux-safe.
+import CoreRaster
+
+/// How big Export writes the image.
+public enum ExportSize: Hashable, Sendable {
+    /// 1...400 percent of the canvas.
+    case percent(Double)
+    /// The longer side in pixels, 1...16384, the other side in proportion.
+    case longestSide(Int)
+}
+
+/// The Export sheet's choices.
+public struct ExportOptions: Hashable, Sendable {
+    public var format: ImageFormat
+    /// 0...1, for the formats that take one (JPEG, HEIC).
+    public var quality: Double
+    public var size: ExportSize
+    public init(format: ImageFormat = .png, quality: Double = 0.9, size: ExportSize = .percent(100)) {
+        self.format = format; self.quality = quality; self.size = size
+    }
+}
+
+/// PV-8: the size Export writes.
+public protocol ExportSizing: PhotoUseCase {
+    /// The output size for `canvas` at `size`, each side rounded and at
+    /// least 1. Throws `PhotoRefusal("Export is limited to 16384 pixels a
+    /// side.")` past `PhotoWorkspace.maxSide`.
+    func outputSize(for canvas: CanvasSize, _ size: ExportSize) throws -> CanvasSize
+    /// `image` resampled to `size` (lanczos3 down, bilinear up); `image`
+    /// itself when the size is unchanged.
+    func resized(_ image: DecodedImage, to size: CanvasSize) throws -> DecodedImage
+}
+
+/// How many pixels the eyedropper averages.
+public enum SampleSize: Int, Hashable, Sendable, CaseIterable {
+    case point = 1, threeByThree = 3, fiveByFive = 5
+
+    public var title: String {
+        switch self {
+        case .point: "Point"
+        case .threeByThree: "3 × 3"
+        case .fiveByFive: "5 × 5"
+        }
+    }
+}
+
+/// A sampled color, 8-bit sRGB like ToolOptions' color.
+public struct SampledColor: Hashable, Sendable {
+    public var red: UInt8
+    public var green: UInt8
+    public var blue: UInt8
+    public init(red: UInt8, green: UInt8, blue: UInt8) {
+        self.red = red; self.green = green; self.blue = blue
+    }
+}
+
+/// PV-9: the eyedropper.
+public protocol ColorSampling: PhotoUseCase {
+    /// The mean color of the `size` x `size` square centered on (x, y) in
+    /// `picture` (the composited image around the point, with the point at
+    /// `center` in it), over the pixels that are inside it and not fully
+    /// transparent, straight alpha, encoded to sRGB. Nil when there are none.
+    func sample(_ picture: PixelBuffer, center: (x: Int, y: Int), size: SampleSize) -> SampledColor?
+}
+```
+
+### 5.2 Services and fakes
+
+`Sources/PhotoModel/PhotoServices.swift` (PV-0). `.live` is built the same
+way from `Live<X>.make()` in each feature's `Live/` file, each returning a
+`NotBuilt` stand-in (`unavailableHelp` = "Not built yet (PV-n).") until its
+feature replaces it. `LiveServicesTests` (PV-0) fails when a member of
+`.live` is a `Fake` type, and lists which are still `NotBuilt`.
+
+```swift
+// PhotoServices.swift: one value per v2 use case, the seam between the
+// window and the logic. `.fake` runs every contract on its fake, so views and
+// journeys are built before the logic (`-PhotoFixture`). `.live` takes each
+// member from its Live file, where a feature that isn't built yet returns
+// its NotBuilt stand-in, whose `unavailableHelp` disables the controls that
+// need it. Linux-safe.
+public struct PhotoServices: Sendable {
+    public var archive: any DocumentArchiving
+    public var recovery: any RecoveryStoring
+    public var clipboard: any PixelClipboard
+    public var merging: any LayerMerging
+    public var crop: any CropSizing
+    public var selection: any SelectionShaping
+    public var masking: any LayerMasking
+    public var adjustmentLayers: any AdjustmentLayering
+    public var transform: any LayerTransforming
+    public var exportSizing: any ExportSizing
+    public var sampling: any ColorSampling
+
+    public init(archive: any DocumentArchiving, recovery: any RecoveryStoring, clipboard: any PixelClipboard,
+                merging: any LayerMerging, crop: any CropSizing, selection: any SelectionShaping,
+                masking: any LayerMasking, adjustmentLayers: any AdjustmentLayering,
+                transform: any LayerTransforming, exportSizing: any ExportSizing, sampling: any ColorSampling) {
+        self.archive = archive; self.recovery = recovery; self.clipboard = clipboard; self.merging = merging
+        self.crop = crop; self.selection = selection; self.masking = masking
+        self.adjustmentLayers = adjustmentLayers; self.transform = transform
+        self.exportSizing = exportSizing; self.sampling = sampling
+    }
+
+    /// Every use case on its fake: deterministic, instant, no file system.
+    public static let fake = PhotoServices(
+        archive: FakeArchive(), recovery: FakeRecovery(), clipboard: FakeClipboard(), merging: FakeMerging(),
+        crop: FakeCrop(), selection: FakeSelection(), masking: FakeMasking(),
+        adjustmentLayers: FakeAdjustmentLayers(), transform: FakeTransform(), exportSizing: FakeExportSizing(),
+        sampling: FakeSampling())
+}
+```
+
+The fakes, `Sources/PhotoModel/Fakes/PhotoFakes.swift` (PV-0; the first PR
+may split it per contract to stay under 400 lines). Each does the least
+that still changes something a journey can see:
+
+```swift
+// Fakes/PhotoFakes.swift: a fake per v2 contract, for building views and
+// journeys before the logic. Each is deterministic and does the least that
+// still changes something a journey can see, so no control looks dead on
+// fakes. None reads the file system. The real behavior is the Live types';
+// a test fails if `.live` holds any Fake (LiveServicesTests). Linux-safe.
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
+import Foundation
+#endif
+import CoreRaster
+import Synchronization
+
+/// The fakes' text when a fake refuses on purpose.
+enum FakeText {
+    static let nothing = "Nothing to copy."
+}
+
+/// Writes the manifest as plain lines and each image as raw bytes, no codec.
+public struct FakeArchive: DocumentArchiving {
+    public var unavailableHelp: String? { nil }
+    public var formatVersion: Int { 1 }
+    public init() {}
+
+    public func encode(_ snapshot: PhotoDocumentSnapshot, codec: any PhotoImageCodec) throws -> PhotoPackage {
+        var files: [String: Data] = ["document.txt": Data("fake \(snapshot.canvas.width)x\(snapshot.canvas.height)".utf8)]
+        for (id, image) in snapshot.pixels { files["layers/\(id).raw"] = Data(image.rgba8) }
+        FakeArchiveStore.shared.withLock { $0 = snapshot }
+        return PhotoPackage(files: files)
+    }
+
+    public func decode(_ package: PhotoPackage, codec: any PhotoImageCodec) throws -> PhotoDocumentSnapshot {
+        guard package.files["document.txt"] != nil, let last = FakeArchiveStore.shared.withLock({ $0 }) else {
+            throw ArchiveError.notADocument
+        }
+        return last
+    }
+}
+
+/// The last snapshot FakeArchive wrote, so decode gives it back.
+enum FakeArchiveStore {
+    static let shared = Mutex<PhotoDocumentSnapshot?>(nil)
+}
+
+/// Keeps entries in memory per window.
+public final class FakeRecovery: RecoveryStoring {
+    private let entries = Mutex<[String: RecoveryEntry]>([:])
+    public var unavailableHelp: String? { nil }
+    public init() {}
+    public func write(_ entry: RecoveryEntry, window: String) throws { entries.withLock { $0[window] = entry } }
+    public func leftBehind() throws -> [RecoveryEntry] {
+        entries.withLock { $0.values.sorted { $0.savedAt > $1.savedAt } }
+    }
+    public func discard(window: String) throws { _ = entries.withLock { $0.removeValue(forKey: window) } }
+    public func discardAll() throws { entries.withLock { $0 = [:] } }
+}
+
+/// Copies a 64 x 64 red square; pastes at the center.
+public struct FakeClipboard: PixelClipboard {
+    public var unavailableHelp: String? { nil }
+    public init() {}
+    public func copy(_ content: PlacedPixels, selection: PixelRect?, mask: Mask?) throws -> ClipboardImage? {
+        let red: [UInt8] = [255, 59, 48, 255]
+        let bytes = Array((0..<(64 * 64)).map { _ in red }.joined())
+        return ClipboardImage(image: DecodedImage(rgba8: bytes, width: 64, height: 64), source: selection)
+    }
+    public func placement(of image: ClipboardImage, canvas: CanvasSize, center: Mask.Point) -> PixelRect {
+        PixelRect(x: (canvas.width - image.image.width) / 2, y: (canvas.height - image.image.height) / 2,
+                  width: image.image.width, height: image.image.height)
+    }
+}
+
+/// Merge Down keeps the lower layer's pixels; Flatten keeps the bottom layer's.
+public struct FakeMerging: LayerMerging {
+    public var unavailableHelp: String? { nil }
+    public init() {}
+    public func mergeDown(_ upper: LayerContent, onto lower: LayerContent) throws -> PlacedPixels {
+        guard let pixels = lower.pixels else { throw PhotoRefusal("Merge Down needs a pixel layer below.") }
+        return PlacedPixels(pixels: pixels, x: lower.layer.offsetX, y: lower.layer.offsetY)
+    }
+    public func flatten(_ layers: [LayerContent], canvas: CanvasSize, adjustments: AdjustmentSettings) throws
+        -> TiledPixels
+    {
+        if let bottom = layers.last?.pixels { return bottom }
+        return try TiledPixels(width: canvas.width, height: canvas.height)
+    }
+}
+
+/// Free aspect only; numbers clamp to the canvas.
+public struct FakeCrop: CropSizing {
+    public var unavailableHelp: String? { nil }
+    public init() {}
+    public func setting(_ field: CropField, to value: Int, in crop: PixelRect, aspect: CropAspect,
+                        canvas: CanvasSize) -> PixelRect {
+        var r = crop
+        switch field {
+        case .x: r.x = value
+        case .y: r.y = value
+        case .width: r.width = value
+        case .height: r.height = value
+        }
+        return r.intersection(canvas.rect) ?? crop
+    }
+    public func dragged(from anchor: Mask.Point, to point: Mask.Point, aspect: CropAspect, canvas: CanvasSize)
+        -> PixelRect
+    {
+        PixelRect(from: anchor, to: point).intersection(canvas.rect) ?? canvas.rect
+    }
+    public func applying(_ aspect: CropAspect, to crop: PixelRect?, canvas: CanvasSize) -> PixelRect {
+        crop ?? canvas.rect
+    }
+    public func swapped(_ aspect: CropAspect, canvas: CanvasSize) -> CropAspect { aspect }
+}
+
+/// Every shape selects its bounding rectangle.
+public struct FakeSelection: SelectionShaping {
+    public var unavailableHelp: String? { nil }
+    public init() {}
+    public func mask(for shape: SelectionShape, canvas: CanvasSize) throws -> Mask {
+        let rect: PixelRect
+        switch shape {
+        case .rectangle(let r), .ellipse(let r): rect = r
+        case .lasso(let points):
+            guard let first = points.first else { throw PhotoRefusal("Draw around the area to select.") }
+            rect = points.reduce(PixelRect(from: first, to: first)) { $0.union(PixelRect(from: $1, to: $1)) }
+        }
+        return try Mask.rectangle(width: canvas.width, height: canvas.height, x: Double(rect.x), y: Double(rect.y),
+                                  w: Double(rect.width), h: Double(rect.height))
+    }
+    public func combine(_ current: Mask?, with new: Mask, _ mode: SelectionCombine) throws -> Mask? {
+        guard var current, mode != .replace else { return mode == .subtract ? current : new }
+        if mode == .add { try current.add(new) } else { try current.subtract(new) }
+        return current
+    }
+    public func inverted(_ mask: Mask?, canvas: CanvasSize) throws -> Mask? {
+        guard var mask else { return try Mask(width: canvas.width, height: canvas.height, fill: 1) }
+        mask.invert()
+        return mask
+    }
+    public func feathered(_ mask: Mask, radius: Double) throws -> Mask { mask }
+    public func bounds(of mask: Mask) -> PixelRect? {
+        mask.area > 0 ? PixelRect(x: 0, y: 0, width: mask.width, height: mask.height) : nil
+    }
+    public func outline(of mask: Mask) -> [[Mask.Point]] {
+        guard let b = bounds(of: mask) else { return [] }
+        let (x0, y0, x1, y1) = (Double(b.x), Double(b.y), Double(b.maxX), Double(b.maxY))
+        return [[.init(x: x0, y: y0), .init(x: x1, y: y0), .init(x: x1, y: y1), .init(x: x0, y: y1)]]
+    }
+}
+
+/// Masks reveal everything; nothing is hidden.
+public struct FakeMasking: LayerMasking {
+    public var unavailableHelp: String? { nil }
+    public init() {}
+    public func mask(from selection: Mask?, layerBounds: PixelRect) throws -> TiledPixels {
+        try TiledPixels(width: layerBounds.width, height: layerBounds.height, fill: RGBA(r: 1, g: 1, b: 1, a: 1))
+    }
+    public func applying(_ mask: TiledPixels, to pixels: TiledPixels) throws -> TiledPixels { pixels }
+    public func masked(_ region: PixelBuffer, at origin: (x: Int, y: Int), by mask: TiledPixels) throws
+        -> PixelBuffer
+    { region }
+}
+
+/// An adjustment layer brightens by one stop, whatever its settings.
+public struct FakeAdjustmentLayers: AdjustmentLayering {
+    public var unavailableHelp: String? { nil }
+    public var kinds: [AdjustmentKind] { [.exposure, .levels, .curves, .hueSaturation] }
+    public init() {}
+    public func applying(_ settings: AdjustmentSettings, to below: PixelBuffer, opacity: Double,
+                         blendMode: BlendMode, mask: PixelBuffer?) throws -> PixelBuffer {
+        try below.exposure(stops: 1)
+    }
+}
+
+/// Only moves: any handle drag translates the box; applying moves the pixels.
+public struct FakeTransform: LayerTransforming {
+    public var unavailableHelp: String? { nil }
+    public init() {}
+    public func handle(at point: Mask.Point, in draft: TransformDraft, tolerance: Double) -> TransformHandle? {
+        .inside
+    }
+    public func dragged(_ draft: TransformDraft, handle: TransformHandle, from start: Mask.Point,
+                        to point: Mask.Point, modifiers: DragModifiers) -> TransformDraft {
+        var next = draft
+        next.transform.dx += point.x - start.x
+        next.transform.dy += point.y - start.y
+        return next
+    }
+    public func corners(of draft: TransformDraft) -> [Mask.Point] {
+        let b = draft.box, t = draft.transform
+        let (x0, y0) = (Double(b.x) + t.dx, Double(b.y) + t.dy)
+        let (x1, y1) = (x0 + Double(b.width), y0 + Double(b.height))
+        return [.init(x: x0, y: y0), .init(x: x1, y: y0), .init(x: x1, y: y1), .init(x: x0, y: y1)]
+    }
+    public func applied(_ draft: TransformDraft, to content: PlacedPixels) throws -> PlacedPixels {
+        let t = draft.transform
+        guard t.dx.isFinite, t.dy.isFinite, abs(t.dx) < 1e6, abs(t.dy) < 1e6 else { return content }
+        return PlacedPixels(pixels: content.pixels, x: content.x + Int(t.dx.rounded()),
+                            y: content.y + Int(t.dy.rounded()))
+    }
+    public func flipped(_ content: PlacedPixels, _ axis: FlipAxis) throws -> PlacedPixels { content }
+}
+
+/// Percent sizes only; a resize returns a gray image of the asked size.
+public struct FakeExportSizing: ExportSizing {
+    public var unavailableHelp: String? { nil }
+    public init() {}
+    public func outputSize(for canvas: CanvasSize, _ size: ExportSize) throws -> CanvasSize {
+        guard case .percent(let p) = size, p.isFinite, p > 0, p <= 400 else { return canvas }
+        return CanvasSize(width: max(Int((Double(canvas.width) * p / 100).rounded()), 1),
+                          height: max(Int((Double(canvas.height) * p / 100).rounded()), 1))
+    }
+    public func resized(_ image: DecodedImage, to size: CanvasSize) throws -> DecodedImage {
+        DecodedImage(rgba8: [UInt8](repeating: 128, count: size.width * size.height * 4),
+                     width: size.width, height: size.height)
+    }
+}
+
+/// Always samples the fixtures' sun yellow.
+public struct FakeSampling: ColorSampling {
+    public var unavailableHelp: String? { nil }
+    public init() {}
+    public func sample(_ picture: PixelBuffer, center: (x: Int, y: Int), size: SampleSize) -> SampledColor? {
+        SampledColor(red: 255, green: 204, blue: 0)
+    }
+}
+```
+
+### 5.3 What each feature adds to the workspace
+
+PV-0 adds the stored state (the only edit to `PhotoWorkspace.swift` and
+`PhotoLayer.swift` in v2); each feature adds its methods in its own
+extension file, named in the comment. These are the calls views make. The
+bodies below are the stubs used to compile the signatures; each feature
+writes the real ones.
+
+Stored state added to `PhotoWorkspace` (and to its `==`, except `services`,
+which isn't `Equatable`):
+
+```swift
+    // v2 state (PV-0). Each is written only by the extension file named.
+    /// The use cases (PhotoServices); `.live` in the app, `.fake` under -PhotoFixture.
+    public internal(set) var services: PhotoServices = .fake
+    /// The selection's coverage when it isn't an exact rectangle (PhotoSelectionMask.swift).
+    public internal(set) var selectionMask: Mask?
+    /// The Marquee tool's shape and feather (PhotoSelectionMask.swift).
+    public internal(set) var selectionOptions = SelectionOptions()
+    /// Each masked layer's mask, its own size, coverage in alpha (PhotoMask.swift).
+    public internal(set) var masks: [PhotoLayer.ID: TiledPixels] = [:]
+    /// Brush and eraser paint on the selected layer's mask (PhotoMask.swift).
+    public internal(set) var editsMask = false
+    /// The crop's aspect lock (PhotoCropSize.swift).
+    public internal(set) var cropAspect = CropAspect.free
+    /// Free Transform in progress (PhotoTransform.swift).
+    public internal(set) var transformDraft: TransformDraft?
+    /// The eyedropper's sample size (PhotoEyedropper.swift).
+    public internal(set) var sampleSize = SampleSize.point
+    /// The Export sheet's last choices (PhotoExportOptions.swift).
+    public internal(set) var exportOptions = ExportOptions()
+    /// What the open file is, for Save (PhotoDocumentFile.swift).
+    public internal(set) var fileKind: PhotoFileKind?
+    /// The history position at the last save; nil when never saved (PhotoDocumentFile.swift).
+    public internal(set) var savedHistoryIndex: Int?
+    /// A one-line refusal or note for the status line ("Nothing to paste.").
+    public internal(set) var statusMessage: String?
+```
+
+Added to `PhotoLayer` (with `PhotoLayerKind` beside it) and to
+`AdjustmentSettings` (`Equatable` becomes `Hashable`, so a layer can hold
+settings):
+
+```swift
+    /// Pixels, or an adjustment applied to the layers below (PV-6).
+    public internal(set) var kind = PhotoLayerKind.pixels
+    /// Whether the layer has a mask in `PhotoWorkspace.masks` (PV-5).
+    public internal(set) var hasMask = false
+    /// A disabled mask is kept but not applied (Shift-click its badge).
+    public internal(set) var isMaskEnabled = true
+
+/// What a layer holds.
+public enum PhotoLayerKind: Hashable, Sendable {
+    case pixels
+    case adjustment(AdjustmentSettings)
+}
+```
+
+Added to `PhotoHistory` (PV-0): a `.selection(PixelRect?, Mask?)` edit, so a
+selection change is one "Select" step (#421), and `PhotoStack` keeps
+`masks` beside `pixels`, so every whole-stack step restores masks too.
+
+The methods, by feature:
+
+```swift
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
+import Foundation
+#endif
+import CoreRaster
+
+/// Where the Adjust tab's edits go (PV-6).
+public enum AdjustTarget: Hashable, Sendable {
+    case image
+    case layer(PhotoLayer.ID, AdjustmentSettings)
+}
+
+// PV-0 (PhotoWorkspace.swift)
+extension PhotoWorkspace {
+    public func toolHelp(_ tool: PhotoTool) -> String? { nil }
+    public init(services: PhotoServices) { self.init(); self.services = services }
+}
+
+// PV-1 (PhotoDocumentFile.swift, PhotoRecovery.swift)
+extension PhotoWorkspace {
+    public var isDirty: Bool { savedHistoryIndex != historyIndex }
+    public var saveAction: SaveAction { .saveAs }
+    public func snapshot() throws -> PhotoDocumentSnapshot { throw PhotoRefusal("") }
+    public func documentPackage(codec: any PhotoImageCodec) throws -> PhotoPackage { PhotoPackage(files: [:]) }
+    public mutating func openDocument(_ package: PhotoPackage, name: String, codec: any PhotoImageCodec) throws {}
+    public mutating func didSave(as name: String, kind: PhotoFileKind) {}
+    public static let autosaveDelay: Double = 30
+    public func autosaveDue(lastEdit: Double, lastAutosave: Double?, now: Double) -> Bool { false }
+    public func recoveryEntry(now: Double, codec: any PhotoImageCodec) throws -> RecoveryEntry? { nil }
+    public mutating func restore(_ entry: RecoveryEntry, codec: any PhotoImageCodec) throws {}
+}
+
+// PV-2 (PhotoClipboard.swift, PhotoLayerOps.swift)
+extension PhotoWorkspace {
+    public var copyHelp: String? { nil }
+    public func copySelection() throws -> ClipboardImage? { nil }
+    public mutating func cutSelection() throws -> ClipboardImage? { nil }
+    public mutating func paste(_ image: ClipboardImage, viewCenter: Mask.Point) throws {}
+    public var duplicateHelp: String? { nil }
+    public mutating func duplicateSelectedLayer() {}
+    public var mergeDownHelp: String? { nil }
+    public mutating func mergeDown() throws {}
+    public var flattenHelp: String? { nil }
+    public mutating func flattenImage() throws {}
+}
+
+// PV-3 (PhotoCropSize.swift)
+extension PhotoWorkspace {
+    public var cropFieldsEnabled: Bool { false }
+    public mutating func setCropField(_ field: CropField, to value: Int) {}
+    public mutating func setCropAspect(_ aspect: CropAspect) {}
+    public mutating func swapCropAspect() {}
+}
+
+// PV-5 (PhotoSelectionMask.swift, PhotoMask.swift)
+extension PhotoWorkspace {
+    public mutating func setSelectionShape(_ shape: SelectionShapeKind) {}
+    public mutating func setFeather(_ radius: Double) {}
+    public mutating func invertSelection() {}
+    public var selectionOutline: [[Mask.Point]] { [] }
+    public var maskHelp: String? { nil }
+    public mutating func addMaskFromSelection() throws {}
+    public mutating func deleteMask() {}
+    public mutating func applyMask() throws {}
+    public mutating func toggleMaskEnabled() {}
+    public mutating func setEditsMask(_ on: Bool) {}
+}
+
+// PV-6 (PhotoAdjustmentLayer.swift)
+extension PhotoWorkspace {
+    public var adjustTarget: AdjustTarget { .image }
+    public mutating func addAdjustmentLayer(_ kind: AdjustmentKind) {}
+    public mutating func adjustLayer(_ id: PhotoLayer.ID, _ edit: AdjustmentEdit) {}
+}
+
+// PV-7 (PhotoTransform.swift)
+/// A free transform worked out by `transformed()`, waiting for `commitTransform`.
+public struct TransformResult: Sendable {
+    public let layerID: PhotoLayer.ID
+    public let placed: PlacedPixels
+    /// The workspace revision it was worked out from.
+    public let revision: Int
+}
+
+extension PhotoWorkspace {
+    public var transformHelp: String? { nil }
+    public mutating func beginTransform() throws {}
+    public mutating func setTransform(_ transform: LayerTransform) {}
+    public var transformCorners: [Mask.Point] { [] }
+    /// Works the transform out without changing anything, off the main actor
+    /// (like `straightened`); nil with no transform in progress.
+    public func transformed() throws -> TransformResult? { nil }
+    /// Applies `result` as one "Free Transform" step unless the image changed
+    /// meanwhile; returns whether it did.
+    public mutating func commitTransform(_ result: TransformResult) -> Bool { false }
+    public mutating func cancelTransform() {}
+    public mutating func flipLayer(_ axis: FlipAxis) throws {}
+    public mutating func flipCanvas(_ axis: FlipAxis) throws {}
+}
+
+// PV-8 (PhotoExportOptions.swift)
+extension PhotoWorkspace {
+    public mutating func setExportOptions(_ options: ExportOptions) {}
+    public func exportSize(_ options: ExportOptions) throws -> CanvasSize { CanvasSize(width: 1, height: 1) }
+    public func export(_ options: ExportOptions, codec: any PhotoImageCodec) async throws -> Data { Data() }
+}
+
+// PV-9 (PhotoEyedropper.swift)
+extension PhotoWorkspace {
+    public mutating func setSampleSize(_ size: SampleSize) {}
+    @discardableResult
+    public mutating func sample(at point: Mask.Point) -> Bool { false }
+}
+```
+
+### 5.4 Which contract each journey is built from
+
+| Journey | Contracts | Workspace calls |
+|---|---|---|
+| PJ-1 save and reopen | `DocumentArchiving` | `saveAction`, `documentPackage(codec:)`, `didSave(as:kind:)`, `openDocument(_:name:codec:)`, `isDirty` |
+| PJ-2 unsaved prompt, Open Recent | – (AppKit's recent list) | `isDirty` |
+| PJ-3 restore after a crash | `RecoveryStoring`, `DocumentArchiving` | `autosaveDue(lastEdit:lastAutosave:now:)`, `recoveryEntry(now:codec:)`, `restore(_:codec:)` |
+| PJ-4 bad documents | `DocumentArchiving` (`ArchiveError.message`) | `openDocument` |
+| PJ-5 copy, cut, paste | `PixelClipboard` | `copyHelp`, `copySelection()`, `cutSelection()`, `paste(_:viewCenter:)` |
+| PJ-6 paste from another app | `PixelClipboard.placement` | `paste(_:viewCenter:)` (opens a new image with none open) |
+| PJ-7 duplicate, merge, flatten | `LayerMerging` | `duplicateSelectedLayer()`, `mergeDownHelp`, `mergeDown()`, `flattenHelp`, `flattenImage()` |
+| PJ-8 typed crop | `CropSizing` | `cropFieldsEnabled`, `setCropField(_:to:)`, `setCropAspect(_:)`, `swapCropAspect()`, `drag` (crop) |
+| PJ-9 adjustment layer | `AdjustmentLayering` | `addAdjustmentLayer(_:)`, `adjustTarget`, `adjustLayer(_:_:)`, the existing layer methods |
+| PJ-10 history | – (engine-direct) | `historySteps`, `historyIndex`, `jumpToHistoryStep(_:)` |
+| PJ-11 brush cursor | – (engine-direct) | `brushCursorDiameter` |
+| PJ-12 selections | `SelectionShaping` | `setSelectionShape(_:)`, `setFeather(_:)`, `invertSelection()`, `selectionOutline`, `drag` (marquee) |
+| PJ-13 layer masks | `LayerMasking`, `SelectionShaping` | `maskHelp`, `addMaskFromSelection()`, `deleteMask()`, `applyMask()`, `toggleMaskEnabled()`, `setEditsMask(_:)` |
+| PJ-14 transform and flip | `LayerTransforming` | `transformHelp`, `beginTransform()`, `drag` (transform mode), `setTransform(_:)`, `transformCorners`, `transformed()`, `commitTransform(_:)`, `cancelTransform()`, `flipLayer(_:)`, `flipCanvas(_:)` |
+| PJ-15 export size and formats | `ExportSizing` | `setExportOptions(_:)`, `exportSize(_:)`, `export(_:codec:)` |
+| PJ-16 eyedropper | `ColorSampling` | `setSampleSize(_:)`, `sample(at:)`, `drag` (eyedropper) |
+| PJ-17 layout | – | – (views only) |
