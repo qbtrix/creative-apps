@@ -2,9 +2,9 @@
 
 Issue: #754 · Packet: docs/blueprints/flare/features/mac-platform.md
 Run: act-1a13b14336c-tqna · Session: claude/mac-platform-lead-7jx22z · Started: 2026-10-14T15:43Z
-Stage: 4 round 1
-Base: 5e1870dd5c64fe959238d708539ca45843accf95
-Next: wait for the r1 fix PR (AutosaveTests.quitWritesWhenDirty, feature-done) to merge, then round 2 on the CI run it triggers
+Stage: 4 round 2
+Base: 45940829251fced6d9c90c642655b1cf0c845e3e
+Next: wait for the next CI run on dev containing 4594082 (lane: UI merge, 10th merge or daily). Green: comment Belt-Contact-Sheet on #754. Red only on PhotoBrushLatencyTests: note on #763 and keep waiting. Red in Flare files: fix batch.
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -33,11 +33,13 @@ Next: wait for the r1 fix PR (AutosaveTests.quitWritesWhenDirty, feature-done) t
 | round | CI run | CI | audit vs baseline | lenses | confirmed | fixed by | clean |
 |---|---|---|---|---|---|---|---|
 | 1 | 38600685744 (5e1870d) | red: macOS swift test, 1 of 1670 failed (AutosaveTests.quitWritesWhenDirty, 76 s vs 60 s window); Linux green; journeys not reached | not measured (journeys did not run) | none run: CI red, fix first | 1 (flaky time window in MP-5 test) | #764 | no |
+| 2 | 38602105363 (4594082) | red: macOS swift test, 1 of 1670 failed, PhotoBrushLatencyTests.aBrushDragEventBecomesAFrameWithinBudget (line:photo timing budget, 8.4 ms vs 3.0; 1.0 ms on the previous run). All mac-platform tests pass. Linux green; journeys not reached | not measured (journeys did not run) | none: no ui-screens, and this feature changes no screen | 0 in feature files | - | no (outside red) |
 
 ## Decisions
 - The packet's single chain MP-1..MP-6 exists only because every task edits docs/c4/model.json. MP-1..3 edit flare-model-sources (line 72), MP-4..6 edit flare-app-sources (line 52); 20 lines apart, so the two sub-chains merge cleanly. Real code deps: MP-5 needs MP-2 (autosaveDue, recoveryData), MP-6 needs MP-3 (restoreRecovery). Waves: 1 = MP-1 + MP-4, 2 = MP-2, 3 = MP-3 + MP-5, 4 = MP-6.
 - gh CLI has no valid token in this session; builders open PRs and set labels through the GitHub MCP tools.
 
 ## Open
+- dev-red #763: PhotoBrushLatencyTests budget (line:photo), triaged there; re-run of the failed job gave 403, so the feature waits on the next lane-dispatched CI run.
 - Round 1 critic panel skipped: the run stopped at swift test, so no ui-screens or audit exist for this head.
 - none
