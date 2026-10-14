@@ -1918,3 +1918,212 @@ Checklist:
       (`scripts/ui-test`); none is "feels fast".
 - [x] The layout spec names the widths, the tolerance and the test for each.
 - [x] Every fidelity test names its reference and tolerance.
+
+---
+
+## 8. Coverage and waves
+
+The data behind this section is `docs/blueprints/library/waves.json`;
+`python3 docs/blueprints/library/check_waves.py` fails when two features in
+one wave own the same file (or one owns a folder or prefix holding the
+other's), when a feature depends on one in its own or a later wave, or when
+an open `line:library` issue is in no feature. It printed `waves: OK` on
+2026-10-14. The tables below are generated from that file.
+
+### 8.1 Coverage matrix: every open `line:library` issue
+
+| Issue | Title (short) | Tier | Feature | How |
+|---|---|---|---|---|
+| #31 | Collections and filters | p2 | not v1: filters-collections | not v1 (wave 5) |
+| #32 | Develop panel with histogram | p1 | develop | sliders, histogram, copy and paste |
+| #33 | Grid thumbnails by resampling | p1 | thumbnails | whole issue |
+| #156 | Loupe on a hidden photo after a collection switch | p2 bug | spine | fixed in `LibraryCatalog.swift` by the spine, or by open PR #217 if it merges first |
+| #185 | Pro density inspector and status bar | p3 | status-and-layout | status pills and inspector header; pulled into v1 (design.md requires the readout) |
+| #210 | Import a folder | p1 | import | whole issue; its `LibraryCommands.swift` edit becomes the spine's File menu item plus `LibraryWindow+Import.swift` |
+| #211 | Rate, pick, reject with keys | p1 | cull | keys, Metadata menu, `cull(_:)` on ids, undo (`PhotoFlag` already landed in #750) |
+| #212 | Keep the catalog across relaunch | p1 | persist | whole issue; the file also carries `develop` and `crop` from the start |
+| #235 | load renames a photo whose id a duplicate took | p2 bug | spine | fixed in `uniquingIDs` by the spine (two passes, as the issue proposes) |
+| #291 | 16 controls without identifiers | p3 | status-and-layout | what is left after each feature names its own controls; pulled into v1 (journeys need it) |
+| #423 | Render develop settings to pixels | p1 | develop | render in loupe and grid; its catalog-file part is done by persist |
+| #424 | Export JPEG at a set size | p1 | export | whole issue |
+| #425 | Crop and straighten | p1 | crop | whole issue |
+| #426 | Auto-advance | p1 | cull | whole issue |
+| #427 | Camera raw files | p2 | not v1: raw | not v1 (wave 5, pending evidence) |
+| #724 | Loupe rating keys and zoom | p2 | cull, loupe-viewport | keys → cull; zoom, photo on the artboard, real size → loupe-viewport |
+| #744 | Keywords and camera details | p2 | not v1: metadata-more | not v1 (wave 5) |
+
+17 of 17 open issues are mapped. Nothing is dropped: the three "not v1"
+issues have a wave-5 feature so their packets can follow v1 directly.
+
+**Issue dependency lines to edit (captain).** The issues were filed as a
+chain (#210 after #33, #211 after #210, #212 after #211, #423 after #212).
+With the contracts and fakes in the spine, those features no longer wait on
+each other: #33, #210, #211, #212 and #724's zoom all run in wave 2. Each
+issue's `Depends on` line should read "the spine" (as `docs/priorities.md`
+asks: fix the line, don't serialize the work). Their "Files likely
+involved" lists are superseded by the owned files below; each packet says so.
+
+### 8.2 Features
+
+| Feature | Wave | What it delivers | Issues | Journeys | Depends on (features) |
+|---|---|---|---|---|---|
+| `spine` | 1 | Contracts, fakes, live stubs, catalog state, undo, launch arguments, and the app split into per-feature files | #156, #235 | J0, J10, J11 | – |
+| `import` | 2 | Import a folder: scan, metadata, path ids, skip known, progress, failures | #210 | J1, P6 | `spine` |
+| `thumbnails` | 2 | Real grid thumbnails: buckets, visible requests, LRU, placeholders | #33 | J2, P1 | `spine` |
+| `cull` | 2 | Cull from the keyboard with undo and Auto Advance, in grid and loupe | #211, #426, #724 | J4, P2 | `spine` |
+| `persist` | 2 | The catalog file: JSON v1 with develop and crop, restore at launch, set aside a damaged file | #212 | J8, J9, P7 | `spine` |
+| `loupe-viewport` | 2 | Loupe on CanvasViewport: zoom, pan, real photo size, latest-wins render, prefetch | #724 | J3, P4 | `spine` |
+| `develop` | 3 | Develop sliders, histogram, render to pixels in loupe and grid, copy and paste settings | #32, #423 | J5, P3 | `spine`, `loupe-viewport`, `thumbnails` |
+| `status-and-layout` | 3 | Status pills, inspector header (#185), the remaining identifiers (#291), layout tests | #185, #291 | J12 | `spine`, `thumbnails`, `loupe-viewport` |
+| `crop` | 4 | Crop and straighten in the loupe, applied in render, thumbnail and export | #425 | J6, P5 | `develop` |
+| `export` | 4 | Export JPEG at a set long edge and quality, never overwriting | #424 | J7 | `develop`, `import` |
+| `filters-collections` | 5 | Filter by flag and rating, collections you make, smart rules (not v1) | #31 | – | `cull` |
+| `metadata-more` | 5 | Keywords and camera details (not v1) | #744 | – | `import` |
+| `raw` | 5 | Camera raw files through the system decoder (not v1) | #427 | – | `import`, `thumbnails` |
+
+### 8.3 Waves, owned files and what each waits on
+
+A feature may touch only its owned files (paths below are from the repo
+root; a path ending in `/` or `+` covers everything under or starting with
+it). In one wave no two features share a file. A later wave may take a file
+an earlier wave owned; the packet says so.
+
+#### Wave 1: the spine (waits on nothing)
+
+**`spine`** (#156, #235). Contracts, fakes, live stubs, catalog state, undo, launch arguments, and the app split into per-feature files.
+
+- Engine (creative-core): none.
+- SuiteUI: none (#333 for its own journey file; until then it edits LibraryJourneyTests.swift).
+- Note: Creates every stub file later features replace; lands as several stacked PRs. Coordinates with open PR #217 (#156).
+- Owned files: `Sources/LibraryModel/LibraryCatalog.swift`, `Sources/LibraryModel/PhotoItem.swift`, `Sources/LibraryModel/LibraryOrder.swift`, `Sources/LibraryModel/CatalogHistory.swift`, `Sources/LibraryModel/LibraryServices.swift`, `Sources/LibraryModel/Contracts/`, `Sources/LibraryModel/Fakes/`, `Sources/LibraryModel/Live/`, `Sources/LibraryModel/LibraryFixtures.swift`, `Sources/LibraryModel/LibraryLaunch.swift`, `Sources/LibraryModel/LibrarySample.swift`, `Sources/LibraryApp/LibraryApp.swift`, `Sources/LibraryApp/LibraryWindow.swift`, `Sources/LibraryApp/LibraryCommands.swift`, `Sources/LibraryApp/LibraryMenus.swift`, `Sources/LibraryApp/LibraryWindow+`, `Sources/LibraryApp/LibraryBrowser.swift`, `Sources/LibraryApp/LibraryGrid.swift`, `Sources/LibraryApp/DisplayImage+Image.swift`, `Sources/LibraryApp/LibraryInspector.swift`, `Sources/LibraryApp/DevelopInspector.swift`, `Sources/LibraryApp/LibraryCropOverlay.swift`, `Sources/LibraryApp/LibraryExportSheet.swift`, `Sources/LibraryApp/LibraryStatusBar.swift`, `Sources/LibraryApp/Platform/`, `Tests/LibraryModelTests/LibraryHistoryTests.swift`, `Tests/LibraryModelTests/LibraryServicesTests.swift`, `Tests/LibraryModelTests/LibraryLaunchTests.swift`, `Tests/LibraryModelTests/LibraryOrderTests.swift`, `Tests/LibraryModelTests/LibraryCatalogTests.swift`, `Tests/LibraryModelTests/LibraryPhotoIDTests.swift`, `Tests/AppSnapshotTests/LibraryShellSnapshots.swift`, `UITests/Journey+Library.swift`, `UITests/LibraryJourneyTests.swift`, `UITests/LibraryJourneyTests+Shell.swift`.
+
+#### Wave 2: the loop on real files (after the spine)
+
+**`import`** (#210). Import a folder: scan, metadata, path ids, skip known, progress, failures.
+
+- Engine (creative-core): none (decode is ImageIO in LibraryApp).
+- SuiteUI: S-L4 InlineNotice, S-L5 ProgressRow (placeholders until then); #330, #333.
+- Owned files: `Sources/LibraryModel/LibraryImport.swift`, `Sources/LibraryModel/Live/LiveImporter.swift`, `Sources/LibraryApp/Platform/ImageIODecoder.swift`, `Sources/LibraryApp/LibraryWindow+Import.swift`, `Sources/LibraryApp/LibraryBrowser.swift`, `Tests/LibraryModelTests/LibraryImportTests.swift`, `Tests/AppSnapshotTests/LibraryImportSnapshots.swift`, `Tests/AppSnapshotTests/LibraryDecodeTests.swift`, `UITests/LibraryJourneyTests+Import.swift`, `UITests/LibraryJourneyTests+PerfImport.swift`.
+
+**`thumbnails`** (#33). Real grid thumbnails: buckets, visible requests, LRU, placeholders.
+
+- Engine (creative-core): none (resized and rgba8 landed: creative-core #132, #143).
+- SuiteUI: S-L2 ThumbnailGrid additions; #330, #333.
+- Note: Live thumbnails read files through services.decoder, which is FakeDecoder in tests and the live ImageIODecoder once import lands.
+- Owned files: `Sources/LibraryModel/LibraryThumbnails.swift`, `Sources/LibraryModel/Live/LiveThumbnails.swift`, `Sources/LibraryApp/LibraryGrid.swift`, `Sources/LibraryApp/DisplayImage+Image.swift`, `Sources/LibraryApp/LibraryWindow+Thumbnails.swift`, `Tests/LibraryModelTests/LibraryThumbnailTests.swift`, `Tests/AppSnapshotTests/LibraryThumbnailSnapshots.swift`, `Tests/AppSnapshotTests/LibraryGridSnapshots.swift`, `UITests/LibraryJourneyTests+Grid.swift`, `UITests/LibraryJourneyTests+PerfGrid.swift`.
+
+**`cull`** (#211, #426, #724). Cull from the keyboard with undo and Auto Advance, in grid and loupe.
+
+- Engine (creative-core): none.
+- SuiteUI: S-L2 (reject badge); #330, #333.
+- Note: #724's keys only; its zoom and photo size go to loupe-viewport.
+- Owned files: `Sources/LibraryModel/LibraryCulling.swift`, `Sources/LibraryModel/Live/LiveCulling.swift`, `Sources/LibraryModel/MetadataEditing.swift`, `Sources/LibraryApp/LibraryWindow+Cull.swift`, `Tests/LibraryModelTests/LibraryRatingTests.swift`, `Tests/LibraryModelTests/LibraryAutoAdvanceTests.swift`, `Tests/LibraryModelTests/LibraryMetadataTests.swift`, `Tests/AppSnapshotTests/LibraryRatingSnapshots.swift`, `Tests/AppSnapshotTests/LibraryAutoAdvanceSnapshots.swift`, `UITests/LibraryJourneyTests+Cull.swift`, `UITests/LibraryJourneyTests+PerfCull.swift`.
+
+**`persist`** (#212). The catalog file: JSON v1 with develop and crop, restore at launch, set aside a damaged file.
+
+- Engine (creative-core): none for v1 (JSON); creative-core#157 only if decision D1 picks the SQLite catalog.
+- SuiteUI: S-L4 InlineNotice; #330, #333.
+- Note: Writes the develop and crop objects from the start (their types come from the spine), so #423's and #425's catalog parts are done here.
+- Owned files: `Sources/LibraryModel/LibraryPersistence.swift`, `Sources/LibraryModel/Live/LiveCatalogCoding.swift`, `Sources/LibraryApp/Platform/CatalogStore.swift`, `Sources/LibraryApp/LibraryWindow+Persist.swift`, `Tests/LibraryModelTests/LibraryPersistTests.swift`, `Tests/LibraryModelTests/Golden/catalog-v1.json`, `Tests/AppSnapshotTests/LibraryRestoreSnapshots.swift`, `UITests/LibraryJourneyTests+Persist.swift`, `UITests/LibraryJourneyTests+PerfLaunch.swift`.
+
+**`loupe-viewport`** (#724). Loupe on CanvasViewport: zoom, pan, real photo size, latest-wins render, prefetch.
+
+- Engine (creative-core): none.
+- SuiteUI: #330, #333.
+- Note: #724's zoom, photo on the artboard and real size.
+- Owned files: `Sources/LibraryModel/LoupeState.swift`, `Sources/LibraryModel/LoupeZoom.swift`, `Sources/LibraryModel/LibraryLoupeImage.swift`, `Sources/LibraryModel/RenderQueue.swift`, `Sources/LibraryModel/Live/LiveLoupeImaging.swift`, `Sources/LibraryApp/LibraryLoupe.swift`, `Sources/LibraryApp/LibraryWindow+Loupe.swift`, `Tests/LibraryModelTests/LibraryLoupeTests.swift`, `Tests/LibraryModelTests/LibraryLoupeZoomTests.swift`, `Tests/LibraryModelTests/LibraryRenderQueueTests.swift`, `Tests/LibraryModelTests/LibraryLoupeImageTests.swift`, `Tests/AppSnapshotTests/LibraryLoupeSnapshots.swift`, `UITests/LibraryJourneyTests+Loupe.swift`, `UITests/LibraryJourneyTests+PerfLoupe.swift`.
+
+#### Wave 3: develop and the readouts (after wave 2)
+
+**`develop`** (#32, #423). Develop sliders, histogram, render to pixels in loupe and grid, copy and paste settings.
+
+- Engine (creative-core): none (creative-core#231 closed by #246); a new core issue only if QB-LIB-6's model half misses: PixelBuffer.developed(temperature:tint:exposure:contrast:highlights:shadows:), one pass over storage, equal to the chained calls within 1e-6.
+- SuiteUI: S-L1 HistogramView; #330, #333.
+- Note: Owns LibraryBudgetTests.swift (the first budget rows); later features add their rows in their own wave.
+- Owned files: `Sources/LibraryModel/LibraryDevelop.swift`, `Sources/LibraryModel/Live/LiveDevelop.swift`, `Sources/LibraryApp/DevelopInspector.swift`, `Sources/LibraryApp/LibraryWindow+Develop.swift`, `Tests/LibraryModelTests/LibraryDevelopTests.swift`, `Tests/LibraryModelTests/LibraryDevelopRenderTests.swift`, `Tests/LibraryModelTests/LibraryBudgetTests.swift`, `Tests/AppSnapshotTests/LibraryDevelopSnapshots.swift`, `Tests/AppSnapshotTests/LibraryDevelopRenderSnapshots.swift`, `UITests/LibraryJourneyTests+Develop.swift`, `UITests/LibraryJourneyTests+PerfDevelop.swift`.
+
+**`status-and-layout`** (#185, #291). Status pills, inspector header (#185), the remaining identifiers (#291), layout tests.
+
+- Engine (creative-core): none.
+- SuiteUI: #340 status pills; #330, #333.
+- Note: Identifiers in other features' views are each feature's own job; this one clears what is left of #291's list.
+- Owned files: `Sources/LibraryModel/LibraryStatusText.swift`, `Sources/LibraryModel/LibraryLayout.swift`, `Sources/LibraryApp/LibraryStatusBar.swift`, `Sources/LibraryApp/LibraryInspector.swift`, `Tests/LibraryModelTests/LibraryStatusTextTests.swift`, `Tests/LibraryModelTests/LibraryLayoutTests.swift`, `Tests/AppSnapshotTests/LibraryLayoutSnapshots.swift`, `Tests/AppSnapshotTests/LibraryInspectorSnapshots.swift`, `UITests/LibraryJourneyTests+Layout.swift`.
+
+#### Wave 4: crop and export (after develop)
+
+**`crop`** (#425). Crop and straighten in the loupe, applied in render, thumbnail and export.
+
+- Engine (creative-core): none (creative-core#230 closed by #251).
+- SuiteUI: S-L3 CropHandles; #330, #333.
+- Note: Edits LiveDevelop.swift (crop after tone), which develop owned in wave 3.
+- Owned files: `Sources/LibraryModel/LibraryCrop.swift`, `Sources/LibraryModel/Live/LiveCrop.swift`, `Sources/LibraryModel/Live/LiveDevelop.swift`, `Sources/LibraryApp/LibraryCropOverlay.swift`, `Sources/LibraryApp/LibraryWindow+Crop.swift`, `Tests/LibraryModelTests/LibraryCropTests.swift`, `Tests/AppSnapshotTests/LibraryCropSnapshots.swift`, `UITests/LibraryJourneyTests+Crop.swift`, `UITests/LibraryJourneyTests+PerfCrop.swift`.
+
+**`export`** (#424). Export JPEG at a set long edge and quality, never overwriting.
+
+- Engine (creative-core): none.
+- SuiteUI: S-L5 ProgressRow; #330, #333.
+- Note: Its last task (the QB-V4 test with a cropped photo) waits for crop to merge.
+- Owned files: `Sources/LibraryModel/LibraryExport.swift`, `Sources/LibraryModel/Live/LiveExporter.swift`, `Sources/LibraryApp/Platform/JPEGWriter.swift`, `Sources/LibraryApp/LibraryExportSheet.swift`, `Sources/LibraryApp/LibraryWindow+Export.swift`, `Tests/LibraryModelTests/LibraryExportPlanTests.swift`, `Tests/AppSnapshotTests/LibraryExportSnapshots.swift`, `Tests/AppSnapshotTests/LibraryExportFidelityTests.swift`, `UITests/LibraryJourneyTests+Export.swift`.
+
+#### Wave 5: after v1 (tier 2, not v1)
+
+**`filters-collections`** (#31). Filter by flag and rating, collections you make, smart rules (not v1).
+
+- Engine (creative-core): none.
+- SuiteUI: none.
+- Note: Not v1. Needs one menu item added to LibraryCommands.swift; it takes that file for this wave.
+- Owned files: `Sources/LibraryModel/LibraryCollections.swift`, `Sources/LibraryModel/LibraryFilter.swift`, `Sources/LibraryApp/LibraryWindow.swift`, `Sources/LibraryApp/LibraryWindow+Filters.swift`, `Tests/LibraryModelTests/LibraryCollectionsTests.swift`, `Tests/AppSnapshotTests/LibraryCollectionsSnapshots.swift`, `UITests/LibraryJourneyTests+Filters.swift`, `Sources/LibraryApp/LibraryCommands.swift`.
+
+**`metadata-more`** (#744). Keywords and camera details (not v1).
+
+- Engine (creative-core): none.
+- SuiteUI: none.
+- Note: Not v1. Camera details come from the Exif the import scan already reads.
+- Owned files: `Sources/LibraryModel/LibraryKeywords.swift`, `Sources/LibraryApp/MetadataInspector.swift`, `Tests/LibraryModelTests/LibraryKeywordTests.swift`, `Tests/AppSnapshotTests/LibraryMetadataSnapshots.swift`.
+
+**`raw`** (#427). Camera raw files through the system decoder (not v1).
+
+- Engine (creative-core): none.
+- SuiteUI: S-L2 (RAW badge).
+- Note: Not v1, pending evidence (docs/priorities.md).
+- Owned files: `Sources/LibraryModel/RawFileTypes.swift`, `Sources/LibraryApp/Platform/RawDecoding.swift`, `Tests/LibraryModelTests/LibraryRawImportTests.swift`, `Tests/AppSnapshotTests/LibraryRawSnapshots.swift`, `UITests/LibraryJourneyTests+Raw.swift`.
+
+#### Order at a glance
+
+```
+wave 1   spine ─────────────────────────────────────────────────────────┐
+wave 2   import · thumbnails · cull · persist · loupe-viewport          │ (#333 for journey files,
+wave 3   develop (needs loupe-viewport, thumbnails) · status-and-layout │  #330 for perf rows)
+wave 4   crop (needs develop) · export (needs develop, import)          │
+         ── v1: J0–J12 green live, P1–P7 reporting, audit 0 ──          │
+wave 5   filters-collections · metadata-more · raw                      ┘
+```
+
+- **Journey files before #333.** Until SuiteUI's QH-4 (#333) merges, the
+  Journey template compiles only `UITests/LibraryJourneyTests.swift`. Then
+  in each wave exactly one feature may add journey steps, to that file: the
+  spine in wave 1, import in wave 2, develop in wave 3, export in wave 4.
+  The others ship Model tests and snapshots and add their `+<Area>` file as
+  soon as #333 lands. `check_waves.py` treats the `+<Area>` files as owned
+  already.
+- **No engine waits for v1.** Every CoreRaster call v1 needs is on
+  creative-core `main` (section 0.2). The one possible core issue is the
+  fused develop pass, filed only if QB-LIB-6's model budget fails (develop's
+  row above has its one-line spec).
+- **SuiteUI waits are soft.** Each `needs-ui` part has a placeholder path
+  (CLAUDE.md); a feature never blocks on one. The harness issues (#330,
+  #331, #332, #333) block only the perf rows, goldens and journey files.
+- **Live order.** Fakes first (UI track), then each feature's last task
+  replaces its `Live/` stub, which turns its journeys from
+  `-LibraryFixture` to live files. v1 is done when J0–J12 run live, P1–P7
+  report numbers, every Library audit count is 0, and the captain has
+  looked at the contact sheet.
+
+Checklist:
+
+- [x] Every open `line:library` issue maps to a feature or says "not v1"
+      (`check_waves.py`).
+- [x] Every feature has owned files, and no two features in a wave share
+      one (`check_waves.py`).
+- [x] Every feature names the creative-core work it waits on: an existing
+      issue (closed ones named), "none", or a one-line spec for a new one.
