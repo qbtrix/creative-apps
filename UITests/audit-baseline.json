@@ -1,7 +1,7 @@
 {
-  "design": { "identifier": 23 },
+  "design": { "identifier": 20 },
   "flare": { "contrast": 3, "identifier": 15, "offscreen": 15 },
   "halo": { "contrast": 2, "identifier": 10, "offscreen": 8, "unnamed": 5 },
   "library": { "contrast": 2, "identifier": 16, "offscreen": 16, "unnamed": 1 },
-  "photo": { "identifier": 28 }
+  "photo": { "identifier": 23 }
 }
