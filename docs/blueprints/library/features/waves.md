@@ -10,7 +10,7 @@ features) get their packets once wave 2 has landed.
 
 | wave | feature | packet | covers | waits on | feature issue |
 |---|---|---|---|---|---|
-| 1 | Contracts, fakes, catalog state, undo, launch arguments, the app split | `spine.md` | #235 (and the fix for #156, see below) | nothing | #SPINE |
+| 1 | Contracts, fakes, catalog state, undo, launch arguments, the app split | `spine.md` | #235 (and the fix for #156, see below) | nothing | filed after this PR merges |
 | 2 | Import a folder | `import.md` | #210 | spine | file when ready |
 | 2 | Real grid thumbnails | `thumbnails.md` | #33 | spine, #779 (S-L2), #333 | file when ready |
 | 2 | Cull from the keyboard with undo and Auto Advance | `cull.md` | #211, #426, #724 (keys) | spine, #333 | file when ready |
@@ -19,20 +19,22 @@ features) get their packets once wave 2 has landed.
 
 ## File when ready
 
-The lead playbook (`docs/factory/lead.md`, stage 0) stops a lead whose
-`Depends on:` issue is still open, so these are filed only when every issue
-in their line has merged or closed. Each issue gets the title "Feature:
+Belt launches a lead the moment a feature issue exists, so no feature issue
+is filed before its packet is on `dev`: the spine's is filed once this
+packet PR has merged. The lead playbook (`docs/factory/lead.md`, stage 0)
+also stops a lead whose `Depends on:` issue is still open, so the wave-2
+issues are filed only when every issue in their line has merged or closed. Each issue gets the title "Feature:
 <name> (<feature>)", labels `feature-lead`, `line:library` and `p1`, a link
 to its packet, the issues it covers, one `Depends on:` line and the lead
 contract below.
 
 | feature | file when these have closed | its `Depends on:` line |
 |---|---|---|
-| import | #SPINE | `Depends on: #SPINE` |
-| thumbnails | #SPINE, #779, #333 | `Depends on: #SPINE, #779, #333` |
-| cull | #SPINE, #333 | `Depends on: #SPINE, #333` |
-| persist | #SPINE, #333 | `Depends on: #SPINE, #333` |
-| loupe-viewport | #SPINE, #333 | `Depends on: #SPINE, #333` |
+| import | the spine issue | `Depends on: #<spine issue>` |
+| thumbnails | the spine issue, #779, #333 | `Depends on: #<spine issue>, #779, #333` |
+| cull | the spine issue, #333 | `Depends on: #<spine issue>, #333` |
+| persist | the spine issue, #333 | `Depends on: #<spine issue>, #333` |
+| loupe-viewport | the spine issue, #333 | `Depends on: #<spine issue>, #333` |
 
 If #333 is slow, the supervisor may file cull, persist and loupe-viewport
 without it: every task but their journey task can land, and the journey task
@@ -56,11 +58,21 @@ no #333: it owns `UITests/LibraryJourneyTests.swift` in wave 2 (blueprint
   `InlineNotice` (spine, import, persist), #781 S-L5 `ProgressRow` (import).
   Swapping a placeholder for the component is a one-file fix in the owning
   feature, or a `gap` issue once the feature has finished.
+- **The spine's area hooks.** Wave-2 areas need lifecycle (import on
+  launch, restore and save, loupe focus changes), per-area state and the
+  model, all in `LibraryWindow.swift`, which no wave-2 feature owns. The
+  spine's SA-4 gives each area a state class, no-op hook methods and the
+  model in wave 1, and passes the model and `LibraryMenu` into the grid and
+  the loupe, so each wave-2 feature edits only its own files (spine packet,
+  Area hooks).
 - **Inside wave 2:** every (L) journey step imports written files through
   the live importer, so the (L) task of thumbnails (TH-8), cull (CU-7's L
   run), persist (PE-6) and loupe-viewport (LV-10) waits for import's IM-6 to
-  merge. `check_waves.py` forbids same-wave feature dependencies, so this is
-  a task order, not a feature dependency.
+  merge. Every (L) launch passes a fresh `-LibraryCatalogDir` from the
+  spine's `LibraryFiles.freshCatalogDir()`. `check_waves.py` forbids same-wave feature dependencies, so this is
+  a task order, not a feature dependency. The same holds for persist's J8
+  (cull's CU-5 for the rating keys, loupe-viewport's LV-7 for the loupe
+  help) and loupe-viewport's slow `preview` step (thumbnails' TH-6).
 
 ## Perf tasks
 
@@ -84,9 +96,9 @@ file (next section).
 |---|---|---|
 | spine | `Sources/LibraryModel/LibraryReadouts.swift`, `Sources/LibraryModel/LibraryKeys.swift`, `Sources/LibraryModel/Fakes/FakeRendering.swift` (under its `Fakes/`), `Tests/LibraryModelTests/LibraryValuesTests.swift`, `LibraryPhotoItemTests.swift`, `LibraryContractsTests.swift`, `LibraryFakesTests.swift`, `LibraryFakeRenderingTests.swift`, `LibraryCollectionSwitchTests.swift`, `LibraryReadoutsTests.swift`, `LibraryKeysTests.swift`, `UITests/LibraryJourneyTests+Files.swift` | `UITests/Journey+Library.swift` becomes `UITests/LibraryJourneyTests+Files.swift`: `UITests/Journey*.swift` is SuiteUI's |
 | import | `Tests/LibraryModelTests/LibraryLiveImporterTests.swift`; takes `UITests/LibraryJourneyTests+Files.swift` in wave 2 (to move the helpers there if #333 merges mid-wave) | – |
-| thumbnails | `Tests/LibraryModelTests/LibraryThumbnailResultTests.swift`, `LibraryLiveThumbnailsTests.swift` | – |
+| thumbnails | `Tests/LibraryModelTests/LibraryThumbnailResultTests.swift`, `LibraryLiveThumbnailsTests.swift` | `Sources/LibraryApp/DisplayImage+Image.swift` stays the spine's: SA-1 lands `Image(display:)` there, since the loupe draws with it in the same wave |
 | cull | – | – |
-| persist | `Tests/LibraryModelTests/LibraryCatalogCodingTests.swift`, `LibraryPersistGolden.swift` | `Tests/LibraryModelTests/Golden/catalog-v1.json` is not created (review note: no resource in the protected `Package.swift`; the golden is a Swift string literal) |
+| persist | `Tests/LibraryModelTests/LibraryCatalogCodingTests.swift`, `LibraryPersistGolden.swift`, `Tests/AppSnapshotTests/LibraryCatalogStoreTests.swift` | `Tests/LibraryModelTests/Golden/catalog-v1.json` is not created (review note: no resource in the protected `Package.swift`; the golden is a Swift string literal) |
 | loupe-viewport | `Tests/LibraryModelTests/LibraryLiveLoupeTests.swift` | – |
 
 `waves.json` is left as merged; `check_waves.py` still passes on it. A later
@@ -133,6 +145,58 @@ them), `UITests/LibraryJourneyTests*.swift` and its own docs.
 | `loupeArtboard` removal sits with the spine but its files are loupe-viewport's | Loupe-viewport removes it (LV-7); blueprint 5.5 says so (one-line fix) |
 | `check.sh`'s scratch manifest has no platforms | `platforms: [.macOS("26.0")]` added (one line) |
 | #156 and open PR #217 | #156 was closed by #769's merge, but #217 is still open and the bug is on `dev`. Spine SP-9 lands the fix only if #217 hasn't merged first, with `Refs #156`; whichever lands second rebases |
+
+## Critic round
+
+One critic agent tried to refute the six packets against the blueprint, the
+code and these rules. It confirmed that wave 2's owned files are disjoint,
+that no packet touches a shared file, and that every covered issue is open.
+It found 4 blocking, 14 major and 9 minor problems, all fixed in the packets:
+
+- **Compile order.** SP-7 stored a `CatalogHistory` before SP-11 declared
+  it. SP-11 is now the value type, landing before SP-7; SP-14 adds the
+  catalog methods.
+- **Redeclaration.** SP-13 redeclared the contract's `cullSummary` and
+  contradicted its text. SP-13 now uses the contract's version, and its
+  help is `availability.help`.
+- **Hidden edits.** Wave-2 areas needed lifecycle, state and the model in
+  `LibraryWindow.swift`, and the grid and loupe were built in import's
+  `LibraryBrowser.swift`. The spine now provides the area hooks and passes
+  `model` and `menu` down.
+- **A test that couldn't pass.** TH-1's memory test held 240 MB of visible
+  images under a 128 MB cap. It now uses 512 px images, never evicts a
+  visible image, and an empty visible list evicts nothing.
+- **Undeclared state.** Import kept a pending folder no file declared; the
+  folder is now a parameter. Cull counted order rebuilds with nothing to
+  count; that test now checks behavior.
+- **Journeys that would hang or race:**
+  - J1 step 6 would stop at the open panel; it now passes
+    `-LibraryImportFolder`.
+  - J1 step 2 asserted a racy `loading` state; it now checks the cell count.
+  - An import on launch could race the restore; `beginImport` now waits for
+    the catalog to load.
+  - The loupe's canvas would have swallowed the arrow keys; it now passes
+    `onKey`.
+  - J2 clicked a menu title that doesn't exist in the grid; it now uses
+    Larger Thumbnails.
+  - J2 asserted fixed pixel sizes; it now compares them.
+- **Missing task orders inside wave 2:**
+  - J8 needs cull's keys and the loupe's help.
+  - The slow `preview` step needs thumbnails' area.
+- **Tasks with no test of their own.** IM-4 now carries the decode tests.
+  PE-4 gets `LibraryCatalogStoreTests`.
+- **Persist details:**
+  - The golden needs `.withoutEscapingSlashes` and must be pasted from the
+    encoder's actual output.
+  - The flush on quit uses a synchronous `writeNow`.
+- **Smaller fixes:**
+  - SP-8 depends on SP-12.
+  - The fail-mode wording in cull's tests is corrected.
+  - Inspector edits never auto-advance.
+  - The (L) launches use `freshCatalogDir()` from SJ-2.
+  - The `Closes #724` task comments on how J3 and J4 cover #724's
+    acceptance.
+  - The spine's issue number is filled in after merge.
 
 ## SuiteUI coordination
 

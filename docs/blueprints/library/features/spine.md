@@ -155,7 +155,7 @@ Methods and values the spine adds (blueprint 5.7):
 | `init(services: LibraryServices = .fake())`, hand-written `==` over every stored property but `services` | `LibraryCatalog.swift` |
 | `rebuildOrder()`; `sortedItems` reads `order`; `select`, `open`, `showLoupe`, `stepLoupe`, `showGrid` use `order` | `LibraryOrder.swift` |
 | `recordEdit(_ name: String, coalesceKey: String? = nil, ids: Set<String>, _ edit: (inout PhotoItem) -> Void)` (internal), `undo()`, `redo()`, `undoTitle`, `redoTitle`, `endCoalescing()` | `CatalogHistory.swift` |
-| `PhotoItem.cullSummary`, `cellValue(for:)`, `cellHelp(for:)`, `loupeValue`, `histogramValue`, `catalogValue`, `notice: LibraryNoticeContent?`, `help(for member: String) -> String?` | `LibraryReadouts.swift` (new) |
+| `cellValue(for:)`, `cellHelp(for:)`, `loupeValue`, `histogramValue`, `catalogValue`, `notice: LibraryNoticeContent?`, `help(for member: String) -> String?` | `LibraryReadouts.swift` (new) |
 | `LibraryKey` (`rating(Int)`, `pick`, `reject`, `unflag`, `crop`, `grid`, `confirm`, `first`, `last`), `LibraryKey(character:)`; `LibraryControlState` and `controlsJSON(_:)` | `LibraryKeys.swift` (new) |
 | `LibraryLaunch(arguments:)`: `fixture`, `catalogDir`, `importFolder`, `importOnLaunch`, `exportTo`, `fakeMode`, `perfProbe`, `testValues`, `reduceMotion`, `windowSize` | `LibraryLaunch.swift` |
 | `LibraryFixtures.photos(named:)`: `empty`, `samples`, `shoot`, `shoot-unimported`, `large` | `LibraryFixtures.swift` |
@@ -166,8 +166,10 @@ the state (thumbnails, loupe-viewport, develop, persist) never edit
 
 - `cellValue(for:)`: `unreadable` when `availability != .available`, else
   `ready W×H` when `thumbnails[id]` is set, else `loading`; then a space and
-  `cullSummary` when it is not empty.
-- `loupeValue`: nil outside the loupe; else `preview` or `full` from
+  the contract's `PhotoItem.cullSummary` ("3 stars, Picked, Red"; "No
+  stars" when unrated; it lands verbatim with `PhotoItem.swift` in SP-2).
+- `loupeValue`: nil outside the loupe; `unreadable` first when the loupe
+  photo's file can't be read; else `preview` or `full` from
   `loupeRender?.quality` (`loading` when nil), the render's `W×H`, the
   checksum when `showsTestValues`, the zoom (`fit`, `100%`, or the scale as a
   whole percent), then `cullSummary`.
@@ -177,7 +179,8 @@ the state (thumbnails, loupe-viewport, develop, persist) never edit
 - `catalogValue`: `saved` when `saveRevision == savedRevision`, else `dirty`.
   Every catalog change bumps `saveRevision`: `recordEdit`, `load`, and the
   features' own changes (`appendImported`, `setDevelop`, …).
-- `cellHelp(for:)`: "The file is missing." for `.missing`, the reason for
+- `cellHelp(for:)`: the contract's `availability.help`: "The file is
+  missing." for `.missing`, "Library can't read this file: <reason>." for
   `.unreadable(reason)`, else nil.
 - `notice`: what the content's notice slot shows, first match wins:
   `catalogState.message` (error; action `.showCatalogInFinder` for
@@ -187,9 +190,6 @@ the state (thumbnails, loupe-viewport, develop, persist) never edit
   `source` (`.catalog`, `.import`, `.cull`). The spine's slot draws it;
   import (which owns `LibraryBrowser.swift` in wave 2) restyles it, and the
   close button calls the source's dismiss closure from `LibraryMenu`.
-- `cullSummary`: "3 stars", "1 star", then ", Picked" or ", Rejected", then
-  ", Red" (the label's title); empty for an unrated, unflagged, unlabelled
-  photo. Stars are omitted at 0.
 
 **`LibraryMenu`** (`LibraryMenus.swift`, SA-3). One sub-struct per area,
 every member optional (nil disables the item, or ignores the key), so an
@@ -203,7 +203,7 @@ never edits the menu bar, the window or another area's file:
 | `thumbnails` (`+Thumbnails`, thumbnails) | `visibleChanged([String])`, `cellSizeChanged(Int, scale: Int)` |
 | `cull` (`+Cull`, cull) | `key(LibraryKey)`, `setRating(Int)`, `setFlag(PhotoFlag)`, `setLabel(PhotoLabel?)`, `toggleAutoAdvance`, `autoAdvance: Bool`, `dismissCullError` |
 | `persist` (`+Persist`, persist) | `showCatalogInFinder` |
-| `view` (`+Loupe`, loupe-viewport) | `grid`, `loupe`, `zoomIn`, `zoomOut`, `zoomToFit`, `actualSize`, `setSort`, `sort`, `first`, `last`, `zoomInTitle`, `zoomOutTitle` |
+| `view` (`+Loupe`, loupe-viewport) | `grid`, `loupe`, `zoomIn`, `zoomOut`, `zoomToFit`, `actualSize`, `setSort`, `sort`, `first`, `last`, `zoomInTitle`, `zoomOutTitle`, `zoomTo(Double)` (the canvas's pinch and its own zoom keys), `fitMeasured(Double)` (the fit scale the loupe view measured) |
 | `photo` (`+Develop`, develop; `+Crop`, crop) | `copySettings`, `pasteSettings`, `resetDevelop` (develop); `toggleCrop`, `cropTitle`, `applyCrop`, `resetCrop` (crop) |
 | `export` (`+Export`, export) | `export`, `exportHelp` |
 
@@ -215,6 +215,35 @@ In and Zoom Out in the grid); loupe-viewport replaces it in wave 2. The
 spine's `+Cull` stub routes `setRating`, `setFlag` and `setLabel` to the
 existing catalog methods so the #750 inspector and `testRateASelectedPhoto`
 keep working; cull replaces it in wave 2.
+
+**Area hooks** (SA-4). A Swift extension can't add stored properties or
+view modifiers to a body it doesn't own, so the spine gives every area what
+it needs once, in `LibraryWindow.swift`, and each area fills only its own
+file:
+
+- `model` is `internal` (not `private`), so the extensions in
+  `LibraryWindow+<Area>.swift` call its methods.
+- One `@State var areas = LibraryAreas()`: a `final class` holding one
+  `final class <Area>AreaState` per area (`ImportAreaState`,
+  `PersistAreaState`, `LoupeAreaState`, …). The spine declares each as an
+  empty class in its area file; the area adds its own properties there (the
+  loupe's `RenderQueue` and measured fit scale, persist's save debounce
+  task). Never Model state: the app-state rule still holds.
+- Lifecycle hooks the body calls, each a stub method in its area file that
+  does nothing in wave 1: `importAreaLaunch()` and `persistAreaLaunch()`
+  from `.task`; `persistAreaChanged()` from `.onChange(of:
+  model.saveRevision)`; `persistAreaFlush()` from
+  `NSApplication.willTerminateNotification`; `loupeAreaFocusChanged()` from
+  `.onChange(of: model.focusedItemID)`; `importAreaCatalogReady()` from
+  `.onChange(of: model.catalogState)` (import-on-launch waits for the
+  restore).
+- `LibraryBrowser(model:menu:)`, `LibraryGrid(model:menu:)` and
+  `LibraryLoupe(model:menu:)` take the model and the whole `LibraryMenu`
+  (`menu` defaults to an all-nil `LibraryMenu.disabled`, so
+  `LibraryBrowser(model:)` in the shared snapshot file still compiles). The
+  grid calls `menu.thumbnails`, the loupe `menu.view`, so thumbnails and
+  loupe-viewport change only their own view files and area files, never
+  `LibraryBrowser.swift` (import's in wave 2).
 
 ## Pseudocode
 
@@ -283,26 +312,29 @@ the shape of a view that already builds and keep each change small.
 | SP-4 | – | Fakes: support, platform, importer (progress first), thumbnails, culling, coding | `Sources/LibraryModel/Fakes/FakeSupport.swift`, `Sources/LibraryModel/Fakes/FakePlatform.swift`, `Sources/LibraryModel/Fakes/FakeUseCases.swift`, `Tests/LibraryModelTests/LibraryFakesTests.swift` | SP-3 |
 | SP-5 | – | Fakes: loupe, develop, crop, exporter | `Sources/LibraryModel/Fakes/FakeRendering.swift`, `Tests/LibraryModelTests/LibraryFakeRenderingTests.swift` | SP-3 |
 | SP-6 | – | The eight live stubs and `LibraryServices` (`.fake`, `.live`) | `Sources/LibraryModel/Live/` (8 files), `Sources/LibraryModel/LibraryServices.swift`, `Tests/LibraryModelTests/LibraryServicesTests.swift` | SP-4, SP-5 |
-| SP-7 | – | Every stored property, the state enums, `init(services:)`, the hand-written `==` | `Sources/LibraryModel/LibraryCatalog.swift`, `Tests/LibraryModelTests/LibraryCatalogTests.swift` | SP-6 |
-| SP-8 | – | The cached `order` and `Budget.swift` | `Sources/LibraryModel/LibraryOrder.swift`, `Sources/LibraryModel/LibraryCatalog.swift`, `Tests/LibraryModelTests/LibraryOrderTests.swift`, `Tests/LibraryModelTests/Budget.swift` | SP-7 |
+| SP-7 | – | Every stored property, the state enums, `init(services:)`, the hand-written `==` | `Sources/LibraryModel/LibraryCatalog.swift`, `Tests/LibraryModelTests/LibraryCatalogTests.swift` | SP-6, SP-11 |
+| SP-8 | – | The cached `order` and `Budget.swift` | `Sources/LibraryModel/LibraryOrder.swift`, `Sources/LibraryModel/LibraryCatalog.swift`, `Tests/LibraryModelTests/LibraryOrderTests.swift`, `Tests/LibraryModelTests/Budget.swift` | SP-7, SP-12 |
 | SP-9 | #156 (refs; skip if #217 merged) | Leave the loupe when the new collection hides its photo | `Sources/LibraryModel/LibraryCatalog.swift`, `Tests/LibraryModelTests/LibraryCollectionSwitchTests.swift` | SP-8 |
 | SP-10 | #235 (closes) | `uniquingIDs` in two passes | `Sources/LibraryModel/LibraryCatalog.swift`, `Tests/LibraryModelTests/LibraryPhotoIDTests.swift` | SP-9 |
-| SP-11 | – | `CatalogHistory`: named steps, coalescing, undo and redo | `Sources/LibraryModel/CatalogHistory.swift`, `Tests/LibraryModelTests/LibraryHistoryTests.swift` | SP-8 |
+| SP-11 | – | The `CatalogHistory` value type: named steps of before and after photos, coalescing, the undo and redo stacks (no catalog methods yet, so SP-7 can store it) | `Sources/LibraryModel/CatalogHistory.swift`, `Tests/LibraryModelTests/LibraryHistoryTests.swift` | SP-2 |
+| SP-14 | – | The catalog side of undo: `recordEdit`, `undo`, `redo`, `undoTitle`, `redoTitle`, `endCoalescing` | `Sources/LibraryModel/CatalogHistory.swift`, `Tests/LibraryModelTests/LibraryHistoryTests.swift` | SP-8, SP-11 |
 | SP-12 | – | Launch arguments and fixtures (`shoot`, `shoot-unimported`, `large`); samples get `pixelSize` 4032 × 3024 | `Sources/LibraryModel/LibraryLaunch.swift`, `Sources/LibraryModel/LibraryFixtures.swift`, `Sources/LibraryModel/LibrarySample.swift`, `Tests/LibraryModelTests/LibraryLaunchTests.swift` | SP-6 |
-| SP-13 | – | Readouts (`cullSummary`, `cellValue`, `loupeValue`, `histogramValue`, `catalogValue`, `help(for:)`), keys and the controls JSON | `Sources/LibraryModel/LibraryReadouts.swift`, `Sources/LibraryModel/LibraryKeys.swift`, `Tests/LibraryModelTests/LibraryReadoutsTests.swift`, `Tests/LibraryModelTests/LibraryKeysTests.swift` | SP-7 |
-| SA-1 | – | The pure split: scene, window, browser, grid, image helper, inspector in their own files; no behavior change | `Sources/LibraryApp/LibraryApp.swift`, `Sources/LibraryApp/LibraryWindow.swift`, `Sources/LibraryApp/LibraryBrowser.swift`, `Sources/LibraryApp/LibraryGrid.swift`, `Sources/LibraryApp/DisplayImage+Image.swift`, `Sources/LibraryApp/LibraryInspector.swift` | – |
+| SP-13 | – | Readouts (`cellValue`, `cellHelp`, `loupeValue`, `histogramValue`, `catalogValue`, `help(for:)`), keys and the controls JSON | `Sources/LibraryModel/LibraryReadouts.swift`, `Sources/LibraryModel/LibraryKeys.swift`, `Tests/LibraryModelTests/LibraryReadoutsTests.swift`, `Tests/LibraryModelTests/LibraryKeysTests.swift` | SP-7 |
+| SA-1 | – | The pure split: scene, window, browser, grid, inspector in their own files, and `Image(display: DisplayImage)` in `DisplayImage+Image.swift` (thumbnails and the loupe both draw with it in wave 2); no other behavior change | `Sources/LibraryApp/LibraryApp.swift`, `Sources/LibraryApp/LibraryWindow.swift`, `Sources/LibraryApp/LibraryBrowser.swift`, `Sources/LibraryApp/LibraryGrid.swift`, `Sources/LibraryApp/DisplayImage+Image.swift`, `Sources/LibraryApp/LibraryInspector.swift` | – |
 | SA-2 | – | One `Window` scene (D2); services from the launch arguments; the three platform stubs | `Sources/LibraryApp/LibraryApp.swift`, `Sources/LibraryApp/LibraryWindow.swift`, `Sources/LibraryApp/Platform/ImageIODecoder.swift`, `Sources/LibraryApp/Platform/JPEGWriter.swift`, `Sources/LibraryApp/Platform/CatalogStore.swift` | SA-1, SP-12 |
 | SA-3 | – | `LibraryMenu` with one sub-struct per area, and every v1 menu item (6.2) with its help | `Sources/LibraryApp/LibraryMenus.swift`, `Sources/LibraryApp/LibraryCommands.swift` | SA-2 |
-| SA-4 | – | The nine area files (`LibraryWindow+Edit` … `+Export`), each a stub returning its sub-struct; Edit wires undo, redo and samples, Loupe keeps today's View items; the window's `onKeyPress` routes every single key | `Sources/LibraryApp/LibraryWindow.swift`, `Sources/LibraryApp/LibraryWindow+Edit.swift`, `+Import`, `+Thumbnails`, `+Cull`, `+Persist`, `+Loupe`, `+Develop`, `+Crop`, `+Export` (`.swift` each) | SA-3, SP-11, SP-13 |
+| SA-4 | – | The nine area files (`LibraryWindow+Edit` … `+Export`), each a stub returning its sub-struct, its empty `<Area>AreaState` and its no-op hooks; Edit wires undo, redo and samples, Loupe keeps today's View items; `model` internal, `areas`, the hook calls in the body; the window's `onKeyPress` routes every single key | `Sources/LibraryApp/LibraryWindow.swift`, `Sources/LibraryApp/LibraryWindow+Edit.swift`, `+Import`, `+Thumbnails`, `+Cull`, `+Persist`, `+Loupe`, `+Develop`, `+Crop`, `+Export` (`.swift` each) | SA-3, SP-14, SP-13 |
 | SA-5 | – | Content: Import Folder… empty state, the notice slot, the Preview data pill, the export sheet's presentation | `Sources/LibraryApp/LibraryBrowser.swift`, `Sources/LibraryApp/LibraryStatusBar.swift`, `Sources/LibraryApp/LibraryExportSheet.swift`, `Sources/LibraryApp/LibraryWindow.swift` | SA-4 |
 | SA-6 | – | Inspector tabs and header; Develop and Crop stubs; the crop overlay stub in the loupe; the loupe photo's value | `Sources/LibraryApp/LibraryInspector.swift`, `Sources/LibraryApp/DevelopInspector.swift`, `Sources/LibraryApp/CropInspector.swift`, `Sources/LibraryApp/LibraryCropOverlay.swift`, `Sources/LibraryApp/LibraryLoupe.swift` | SA-4 |
 | SA-7 | – | `library.controls` on the window, identifiers on the spine's controls, and the spine's snapshots | `Sources/LibraryApp/LibraryControls.swift`, `Sources/LibraryApp/LibraryWindow.swift`, `Tests/AppSnapshotTests/LibraryShellSnapshots.swift` | SA-5, SA-6 |
 | SJ-1 | – | The four journeys on `-LibraryFixture samples`; J0; J10's app-owned items | `UITests/LibraryJourneyTests.swift` | SA-7 |
-| SJ-2 | – (`feature-done`) | J11 and the `LibraryFiles` helpers (in `LibraryJourneyTests.swift`, or `+Shell.swift` and `+Files.swift` once #333 has merged) | `UITests/LibraryJourneyTests.swift`, `UITests/LibraryJourneyTests+Shell.swift`, `UITests/LibraryJourneyTests+Files.swift` | SJ-1 |
+| SJ-2 | – (`feature-done`) | J11 and the `LibraryFiles` helpers, `freshCatalogDir()` included, which every (L) launch in later waves passes as `-LibraryCatalogDir` (in `LibraryJourneyTests.swift`, or `+Shell.swift` and `+Files.swift` once #333 has merged) | `UITests/LibraryJourneyTests.swift`, `UITests/LibraryJourneyTests+Shell.swift`, `UITests/LibraryJourneyTests+Files.swift` | SJ-1 |
 
 Order. SP-1 to SP-6 are a chain (each compiles on the one before). SP-7,
-SP-8, SP-9 and SP-10 stack on `LibraryCatalog.swift`. SP-11, SP-12 and SP-13
-can run beside them once their base is in. SA-1 needs nothing and can go
+SP-8, SP-9 and SP-10 stack on `LibraryCatalog.swift`. SP-11 (the history
+value type) lands before SP-7, which stores it; SP-14 adds the catalog's undo
+methods after SP-8. SP-12 and SP-13 can run beside the catalog chain once
+their base is in. SA-1 needs nothing and can go
 first; the app chain SA-2 to SA-7 stacks on `LibraryWindow.swift`. Sizes:
 SP-6 is about 270 lines of stubs and wiring plus its tests (10 files);
 SA-4 is 10 files of about 20 lines each plus the key routing. If a task nears
@@ -334,18 +366,19 @@ or closes it as superseded; the lead comments once on #217 saying so.
 | SP-8 | `LibraryOrderTests`: `order` equals the old `sortedItems` ids after load, each sort, each collection, and a rating change under `.rating`; `orderRebuildWithinBudget`: rebuilding `order` for `large` (10,000) has median ≤ 50 ms in debug (5 ms release target, QB-LIB-3 model half), printed as a `LIBRARY-BUDGET` line; every existing grid, cell-size and emptiness test passes unchanged | the cache goes stale after a change, or the rebuild misses its budget |
 | SP-9 | `LibraryCollectionSwitchTests`: the issue's repro (open B, choose Favorites) gives grid, no focused photo, empty selection; a still-shown photo keeps the loupe | the loupe stays on a hidden photo |
 | SP-10 | `LibraryPhotoIDTests`: loading `["a#2", "a", "a"]` keeps `a#2` and renames the second `a` to `a#3`; every existing id test passes | a photo's own id is taken by an earlier duplicate |
-| SP-11 | `LibraryHistoryTests`: a recorded rating edit gives `undoTitle == "Undo Set Rating"`, undo restores the photo exactly and leaves the loupe where it was, redo reapplies; three edits with one `coalesceKey` are one step until `endCoalescing()`; a no-op edit records nothing; a new edit clears redo | a gesture becomes two steps, undo moves the loupe, or a no-op is recorded |
+| SP-11 | `LibraryHistoryTests` (the value type): pushing two steps and popping gives them back in reverse; a push clears redo; two pushes with one open `coalesceKey` keep one step whose `after` is the second's; an empty history has no top | the stack order or coalescing is wrong |
+| SP-14 | `LibraryHistoryTests`: a recorded rating edit gives `undoTitle == "Undo Set Rating"`, undo restores the photo exactly and leaves the loupe where it was, redo reapplies; three edits with one `coalesceKey` are one step until `endCoalescing()`; a no-op edit records nothing; a new edit clears redo | a gesture becomes two steps, undo moves the loupe, or a no-op is recorded |
 | SP-12 | `LibraryLaunchTests`: the blueprint's argument table parses (every flag, `-LibraryFakeMode bogus` is `.ok`, `-LibraryWindowSize 0x5` is nil); `shoot` has 24 photos, 8 portrait 4000 × 6000, `IMG_0024` first by capture date and `IMG_0001` first by name; `shoot-unimported` gives 24 fake photos and an empty catalog; `large` has 10,000 unique ids; samples have `pixelSize` 4032 × 3024 | a fixture's shape or order differs, or a flag is dropped |
-| SP-13 | `LibraryReadoutsTests`: a 3-star picked red photo's `cullSummary` is "3 stars, Picked, Red"; `cellValue` reads `loading`, then `ready 256×171 …` after a thumbnail is set, `unreadable` for a missing file; `loupeValue` under `showsTestValues` includes the 16-digit checksum and `100%` at `.actual`; `histogramValue` of `.empty` is `mean 0.0000`; `catalogValue` flips to `dirty` when `saveRevision` moves; `cellHelp` of a missing photo is "The file is missing."; `notice` prefers a damaged catalog over an import notice over `cullError`. `LibraryKeysTests`: "3" is `rating(3)`, "P" and "p" are `pick`, "7" is nil; `controlsJSON` of one enabled and one disabled control round-trips through `JSONDecoder` with the reason | a value's text differs from blueprint 4.1, or a key maps to the wrong area |
+| SP-13 | `LibraryReadoutsTests`: `cellValue` reads `loading No stars`, then `ready 256×171 3 stars, Picked, Red` after a thumbnail is set on a 3-star picked red photo, `unreadable …` for a missing file; `loupeValue` under `showsTestValues` includes the 16-digit checksum and `100%` at `.actual`; `histogramValue` of `.empty` is `mean 0.0000`; `catalogValue` flips to `dirty` when `saveRevision` moves; `cellHelp` of a missing photo is "The file is missing."; `notice` prefers a damaged catalog over an import notice over `cullError`. `LibraryKeysTests`: "3" is `rating(3)`, "P" and "p" are `pick`, "7" is nil; `controlsJSON` of one enabled and one disabled control round-trips through `JSONDecoder` with the reason | a value's text differs from blueprint 4.1 or the contract, or a key maps to the wrong area |
 | SA-1 | The next macOS run: `library-grid-*`, `library-loupe-*`, `library-empty-*`, `library-metadata-*` PNGs unchanged; the existing journeys pass | the split changes a pixel or breaks a call site |
 | SA-2 | macOS: `testLaunchShowsWindowShell` passes; File > New Window is gone (one `Window` scene); with `-LibraryFixture samples` the grid shows 60 photos at launch | a second window can open, or the fixture isn't loaded |
 | SA-3 | J10 (SJ-1) lists every 6.2 item; on Linux, `LibraryKeysTests` already covers the key table the help tags name | an item is missing or a nil closure leaves an item enabled |
-| SA-4 | J0 step 3 (Undo and Redo disabled on launch); `testRateASelectedPhoto` still rates (the stub culling area keeps the inspector working) | a stub breaks today's behavior, or a key reaches the wrong area |
+| SA-4 | J0 step 3 (Undo and Redo disabled on launch); `testRateASelectedPhoto` still rates (the stub culling area keeps the inspector working); `testLoupeStepsAndReturnsToTheGrid` still steps and returns | a stub breaks today's behavior, or a key reaches the wrong area |
 | SA-5 | `LibraryShellSnapshots` (SA-7) `library-empty-import`, `library-notice-damaged`, `library-notice-newer`, `library-preview-data` | the empty state still offers Load Sample Photos, or a notice or the pill is missing |
 | SA-6 | `LibraryShellSnapshots` `library-inspector-none`; `testLoupeStepsAndReturnsToTheGrid` reads `library.loupe.photo`'s value ending in the photo's `cullSummary` | the inspector still shows a `SurfaceCard`, or the loupe has no value |
 | SA-7 | `LibraryShellSnapshots` (Light and Dark, five states); J11 (SJ-2) reads `library.controls` | a snapshot is missing or the JSON doesn't decode |
 | SJ-1 | J0, J10 and the four switched journeys pass on the macOS run | a journey still clicks "Load Sample Photos" in the content |
-| SJ-2 | J11 passes; a helper smoke step writes `writeShoot` into a temp folder and finds 24 `.jpg` files starting `FF D8` | an enabled control does nothing, a disabled one has no reason, or the helpers write nothing |
+| SJ-2 | J11 passes; a helper smoke step writes `writeShoot` into a temp folder and finds 24 `.jpg` files starting `FF D8`, and two `freshCatalogDir()` calls give two different empty folders | an enabled control does nothing, a disabled one has no reason, or the helpers write nothing |
 
 ## Quality tests
 

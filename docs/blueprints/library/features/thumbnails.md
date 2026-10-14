@@ -38,11 +38,14 @@ the cell builder; cull only changes Model state.
    `LibraryFiles.writeShoot` with `-LibraryImportOnLaunch`. Shot `grid`.
    Expect every visible cell's value (`library.grid.cell.<id>`) to start with
    `ready` within 2 s; the first cell (capture order) is `IMG_0024`; a
-   portrait cell's value reports a height above its width (`ready 341×512`
-   at the 512 bucket).
-2. (F, L) View > Zoom In three times (160 → 280 pt). Shot `grid-larger`.
-   Expect fewer columns and every visible cell `ready` at the next bucket
-   (long side 512 → 1024 at 2x).
+   portrait cell's value reports a height above its width (for example
+   `ready 341×512` at 2x, `ready 171×256` at 1x: the journey compares the
+   two numbers, never fixed ones).
+2. (F, L) View > Larger Thumbnails (Command-+; in the grid the Zoom In item
+   carries that title) three times (160 → 280 pt). Shot `grid-larger`.
+   Expect fewer columns and every visible cell `ready` with a larger long
+   side than in step 1 (the next bucket: 512 → 1024 at 2x, 256 → 512 at
+   1x).
 3. (F, L) View > Sort By > Name. Shot `grid-by-name`. Expect the first
    cell's caption `IMG_0001`.
 4. (F, L) Click a cell, Shift-click the fourth after it. Expect five cells
@@ -54,7 +57,7 @@ States: loading (placeholder cells valued `loading`) → ready; unreadable
 
 | Screen | Empty | Error | Loading |
 |---|---|---|---|
-| Grid cell | – | the file is missing or unreadable: the placeholder fill with `exclamationmark.triangle` in `stateWarning`, help `cellHelp(for:)` ("The file is missing.", or "not an image file"), value `unreadable …` | the caption on the placeholder fill (`canvasSurround`), value `loading`, until its thumbnail arrives |
+| Grid cell | – | the file is missing or unreadable: the placeholder fill with `exclamationmark.triangle` in `stateWarning`, help `cellHelp(for:)` (the contract's `availability.help`: "The file is missing.", or "Library can't read this file: not an image file."), value `unreadable …` | the caption on the placeholder fill (`canvasSurround`), value `loading`, until its thumbnail arrives |
 | Grid | the spine's empty states | – | cells off screen request nothing |
 | Reject | – | – | – (a rejected photo's cell: its image at 40% and the `xmark.circle` badge labelled "Rejected", through #779's `dimmed`) |
 
@@ -77,14 +80,15 @@ extension LibraryCatalog {
     /// ThumbnailBucket for the cell; also sets `thumbnailLongSide`.
     public mutating func thumbnailLongSide(forCell cellWidth: Int, scale: Int) -> Int
     /// Requests for the visible ids that have no current image and no pending
-    /// request; evicts held images outside visible ± two screens of `order`,
+    /// request; evicts held images outside visible ± two screens of `order`
+    /// (never a visible one; an empty `visible`, as when the loupe opens, evicts nothing),
     /// farthest first, until `thumbnails` holds ≤ heldThumbnailBytes.
     public mutating func requestThumbnails(visible: [String]) -> [ThumbnailRequest]
     /// Dropped unless the request is still pending with the same token.
     public mutating func setThumbnail(_ image: DisplayImage, for request: ThumbnailRequest)
     /// Clears the pending request; marks the photo `.missing` or `.unreadable(reason)`.
     public mutating func failThumbnail(_ request: ThumbnailRequest, _ error: LibraryError)
-    /// Drops the held image of `id` (after its develop settings change).
+    /// Drops the held image and any pending request of `id` (after its develop settings change).
     public mutating func invalidateThumbnail(_ id: String)
 }
 ```
@@ -109,10 +113,15 @@ requestThumbnails(visible):                                     # TH-1
                                                     # removes the held image first (invalidateThumbnail)
     if pendingThumbnails[id]?.token == token: continue
     req = ThumbnailRequest(id, side, token); pendingThumbnails[id] = req; out.append(req)
+  if visible.isEmpty: return out                               # the loupe is open: keep everything (its preview)
   keep = ids within visible's span in `order` ± 2 × visible.count
-  while bytes(thumbnails) > heldThumbnailBytes or (id not in keep and held): evict farthest from the visible span
+  evict held ids not in keep; then, while bytes(thumbnails) > heldThumbnailBytes,
+    evict the held id farthest from the visible span that is not itself visible
+  (the visible images alone always fit: 60 cells × 1 MB at the 512 bucket; at
+   the 1024 bucket a 320 pt grid shows at most about 30 cells × 4 MB = 120 MB)
   return out
-setThumbnail(image, req):  guard pendingThumbnails[req.id] == req else return; thumbnails[req.id] = image; pending -= id
+setThumbnail(image, req):  guard pendingThumbnails[req.id] == req,
+                             req.token == ThumbnailToken.of(photo(req.id).develop, req.longSide) else return; thumbnails[req.id] = image; pending -= id
 failThumbnail(req, err):   pending -= id; availability = err == .missingFile ? .missing : .unreadable(err.message)
 
 LiveThumbnails.thumbnail(photo, longSide):                      # TH-3
@@ -133,9 +142,10 @@ LibraryWindow+Thumbnails (TH-6, macOS):
        -> MainActor: model.setThumbnail(result, for: req) | model.failThumbnail(req, error)
   thumbnails.cellSizeChanged(width, scale) -> model.thumbnailLongSide(forCell: width, scale: scale); re-request visible
   scale from the window's displayScale (1 or 2)
-LibraryGrid (TH-5): ThumbnailItem(image: model.thumbnails[id].map(Image.init(display:)), caption, badges(dimmed: flag == .reject),
+LibraryGrid (TH-5): ThumbnailItem(image: model.thumbnails[id].map(Image.init(display:))   # the spine's helper (SA-1), caption, badges(dimmed: flag == .reject),
                      accessibilityValue: model.cellValue(for: id), help: model.cellHelp(for: id))
-                     with cellIdentifierPrefix "library.grid.cell.", onVisibleChange -> menus.thumbnails.visibleChanged
+                     with cellIdentifierPrefix "library.grid.cell.", onVisibleChange -> menu.thumbnails.visibleChanged
+                     (LibraryGrid(model:menu:) from the spine; LibraryBrowser.swift, import's in wave 2, is not edited)
 ```
 
 ## Tasks
@@ -151,7 +161,7 @@ when it runs).
 | TH-2 | #33 (part) | Results: stale drops, failures to availability, invalidate | `Sources/LibraryModel/LibraryThumbnails.swift`, `Tests/LibraryModelTests/LibraryThumbnailResultTests.swift` | TH-1 |
 | TH-3 | #33 (part) | `LiveThumbnails` actor: decode, develop, lanczos3, LRU ≤ 256 MB; QB-LIB-V5 | `Sources/LibraryModel/Live/LiveThumbnails.swift`, `Tests/LibraryModelTests/LibraryLiveThumbnailsTests.swift` | spine |
 | TH-4 | #33 (part) | The grid model budgets | `Tests/LibraryModelTests/LibraryGridBudgetTests.swift` | TH-1 |
-| TH-5 | #33 (part) | Cells show images, values, help, identifiers, reject and unreadable marks; `DisplayImage` → `Image`; snapshots | `Sources/LibraryApp/LibraryGrid.swift`, `Sources/LibraryApp/DisplayImage+Image.swift`, `Tests/AppSnapshotTests/LibraryThumbnailSnapshots.swift`, `Tests/AppSnapshotTests/LibraryGridSnapshots.swift` | TH-2, #779 |
+| TH-5 | #33 (part) | Cells show images (through the spine's `Image(display:)`), values, help, identifiers, reject and unreadable marks; snapshots | `Sources/LibraryApp/LibraryGrid.swift`, `Tests/AppSnapshotTests/LibraryThumbnailSnapshots.swift`, `Tests/AppSnapshotTests/LibraryGridSnapshots.swift` | TH-2, #779 |
 | TH-6 | #33 (part) | The thumbnails area: visible ids to requests to tasks, cell size and scale | `Sources/LibraryApp/LibraryWindow+Thumbnails.swift` | TH-2, TH-3 |
 | TH-7 | #33 (closes) | J2 (F) steps | `UITests/LibraryJourneyTests+Grid.swift` | TH-5, TH-6, #333 |
 | TH-8 | – | J2 (L) step 1 on written files | `UITests/LibraryJourneyTests+Grid.swift` | TH-7, import IM-6 |
@@ -165,8 +175,8 @@ TH-3 and TH-4's model work can start before #779 merges; TH-5 cannot.
 
 | id | test | fails when |
 |---|---|---|
-| TH-1 | `LibraryThumbnailTests`: `thumbnailLongSide(forCell: 160, scale: 2)` is 512 and `(280, 2)` is 1024; 30 visible ids give 30 requests, and asking again gives none; a photo `.missing` gets no request; after `requestThumbnails` over every screen of `large` in turn (60 ids at a time, 1024 px images of 4 MB), the held bytes never exceed 128 MB and the visible ones are all held (QB-LIB-8 model half) | a request repeats, a missing file is requested, or memory grows past the cap |
-| TH-2 | `LibraryThumbnailResultTests`: a result whose photo's develop changed after the request is dropped; a result for a request no longer pending is dropped; `failThumbnail(.missingFile)` makes `cellValue` start `unreadable` and `cellHelp` "The file is missing."; `invalidateThumbnail` makes the next `requestThumbnails` ask again | a stale picture is shown, a failure leaves the cell loading, or an invalidated photo isn't redrawn |
+| TH-1 | `LibraryThumbnailTests`: `thumbnailLongSide(forCell: 160, scale: 2)` is 512 and `(280, 2)` is 1024; 30 visible ids give 30 requests, and asking again gives none; a photo `.missing` gets no request; after `requestThumbnails` over every screen of `large` in turn (60 ids at a time at the 512 bucket, about 1 MB each; then 30 at a time at the 1024 bucket, 4 MB each), the held bytes never exceed 128 MB and the visible ones are all held (QB-LIB-8 model half); `requestThumbnails(visible: [])` evicts nothing | a request repeats, a missing file is requested, a visible image is evicted, or memory grows past the cap |
+| TH-2 | `LibraryThumbnailResultTests`: a result whose photo's develop changed after the request is dropped; a result for a request no longer pending is dropped; `failThumbnail(.missingFile)` makes `cellValue` start `unreadable` and `cellHelp` "The file is missing."; `invalidateThumbnail` drops the held image and any pending request, so the next `requestThumbnails` asks again; a result whose token no longer matches the photo's settings is dropped even while its request is still pending | a stale picture is shown, a failure leaves the cell loading, or an invalidated photo isn't redrawn |
 | TH-3 | `LibraryLiveThumbnailsTests` over a test decoder giving a fixed 1200 × 800 gradient: the 256 px thumbnail vs the hand-run pipeline (decode full size, `LiveDevelop().render`, `resized(.lanczos3)` to 256 × 171) has mean absolute difference ≤ 1/255 and max ≤ 8/255 (QB-LIB-V5); a portrait photo gives 171 × 256; a sample (no path) equals `SampleImage` at 256; after 300 distinct 1024 px thumbnails the actor's byte count is ≤ `cacheBytes`; `invalidate` makes the next call decode again (decoder call count); `LiveThumbnails.unavailable == nil` | the picture drifts from the pipeline, the cache grows unbounded, or invalidation is ignored |
 | TH-4 | `LibraryGridBudgetTests` (rows below) | a model half misses its debug gate |
 | TH-5 | `LibraryThumbnailSnapshots` (three states, Light and Dark) and `LibraryGridSnapshots` redrawn with images; a portrait image is aspect-fit inside its landscape cell | a state is missing, a picture is cropped to fill, or a reject isn't dimmed |

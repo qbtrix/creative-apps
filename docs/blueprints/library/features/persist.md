@@ -49,9 +49,11 @@ journey's `-LibraryCatalogDir`.
    `relaunched`. Expect 6 cells, the first `4 stars`, the second `Picked`,
    the third `Red`, Favorites 1.
 3. Delete `day2/`; relaunch. Shot `missing-files`. Expect those two cells
-   `unreadable` with help "The file is missing." (cell values once #779 has
-   merged; before it, the loupe value and its help); they can still be
-   rated: press 1 on one and its value contains `1 star`.
+   `unreadable` with help "The file is missing." (cell values and help
+   once #779 has merged; before it, open the photo in the loupe: the
+   spine's `loupeValue` starts `unreadable` and loupe-viewport's LV-7 shows
+   `availability.help` as the loupe photo's help); they can still be rated:
+   press 1 on one (cull's key, CU-5) and its value contains `1 star`.
 
 **J9 · `testDamagedCatalogIsSetAside`**
 1. Write `not json` as `catalog.json`; launch. Shot `catalog-damaged`. Expect
@@ -107,8 +109,10 @@ extension LibraryCatalog {
 `CatalogStore` (`LibraryApp/Platform`) replaces the spine's stub. No contract
 signature changes.
 
-**The v1 file.** One object, keys sorted, two-space indent, a trailing
-newline, so equal catalogs encode to equal bytes:
+**The v1 file.** One object, keys sorted, the encoder's pretty layout, a
+trailing newline, so equal catalogs encode to equal bytes. The shape (the
+layout below is illustrative: `.prettyPrinted` puts every array element and
+object member on its own line):
 
 ```json
 {
@@ -133,14 +137,19 @@ newline, so equal catalogs encode to equal bytes:
 `captureDate` is seconds since 1970 (a number, so no date-format API is
 needed on Linux). `develop` is omitted when neutral; `crop`, `label`, `path`
 are omitted when nil; a missing `develop` decodes as neutral. Before using
-`JSONEncoder.OutputFormatting.sortedKeys` and `.prettyPrinted` from
-`FoundationEssentials`, check the current docs (CLAUDE.md, docs MCP).
+`JSONEncoder.OutputFormatting` `[.sortedKeys, .prettyPrinted,
+.withoutEscapingSlashes]` from `FoundationEssentials`, check the current docs
+(CLAUDE.md, docs MCP): without `.withoutEscapingSlashes` every path's `/`
+is written `\/`. The encoder's output plus `"\n"` is the file. The golden
+literal in `LibraryPersistGolden.swift` is pasted from that actual output
+(not from the sample above), and PE-2's PR body says it matched on Linux;
+the macOS CI run checks the same test there.
 
 ## Pseudocode
 
 ```
 LiveCatalogCoding.encode(photos):                                  # PE-2
-  JSONEncoder(sortedKeys, prettyPrinted).encode(FileV1(version: 1, photos.map(Record.init)))
+  JSONEncoder([.sortedKeys, .prettyPrinted, .withoutEscapingSlashes]).encode(FileV1(version: 1, photos.map(Record.init))) + "\n"
 decode(data):
   guard let top = try? JSONSerialization-free probe: decode { version: Int } else throw damagedCatalog
   if version > 1: throw newerCatalog(version)
@@ -155,23 +164,25 @@ restore(photos?):                                                   # PE-1
 saveRequest(): guard catalogState.canSave, saveRevision != savedRevision else nil; return (saveRevision, items)
 
 LibraryWindow+Persist (PE-5, macOS):
-  on appear: model.beginRestore()
+  persistAreaLaunch() (the spine's .task hook): model.beginRestore()
     Task.detached { data = try await store.read() }
       nil -> model.restore(nil)
       data -> do { photos = try coding.decode(data); model.restore(photos)
                    missing = paths not on disk (FileManager, off main); model.markMissing(missing) }
               catch damagedCatalog { _ = try await store.setAside(); model.failRestore(.damagedCatalog("")) }
               catch newerCatalog(v) { model.failRestore(.newerCatalog(version: v)) }
-  onChange(of: model.saveRevision): debounce 500 ms, then save()
+  persistAreaChanged() (the spine's onChange(of: saveRevision) hook): debounce 500 ms in PersistAreaState, then save()
   save(): guard let (rev, photos) = model.saveRequest(); Task.detached { data = try coding.encode(photos);
            try await store.write(data) } -> model.didSave(revision: rev) | model.failSave(error)
-  NSApplication.willTerminateNotification: encode and write synchronously on the main thread (the one
-    allowed blocking write; ≤ 50 ms for 10,000 records by QB-LIB-2's encode budget)
+  persistAreaFlush() (the spine's willTerminate hook): encode and CatalogStore.writeNow(data), synchronous on
+    the main thread (the one allowed blocking write; ≤ 50 ms for 10,000 records by QB-LIB-2's encode budget;
+    CatalogStoring.write is async, so the flush uses the platform type's own synchronous method)
   persist.showCatalogInFinder = catalogState == .damaged ? { NSWorkspace reveal catalog.json.bad } : nil
   window accessibility value library.catalog = model.catalogValue (the spine set it; it now changes)
 
 CatalogStore(dir) (PE-4, macOS):  dir = -LibraryCatalogDir ?? Application Support/Library (created)
-  read: file missing -> nil; write: Data.write(options: .atomic); setAside: remove old .bad, move -> .bad
+  read: file missing -> nil; write: Data.write(options: .atomic); writeNow(data): the same, synchronous (not in
+  the protocol; only the flush calls it); setAside: remove old .bad, move -> .bad
 ```
 
 ## Tasks
@@ -186,13 +197,13 @@ when it runs).
 | PE-1 | #212 (part) | Restore, fail, save requests, revisions, missing files on the catalog | `Sources/LibraryModel/LibraryPersistence.swift`, `Tests/LibraryModelTests/LibraryPersistTests.swift` | spine |
 | PE-2 | #212 (part) | `LiveCatalogCoding` v1 with develop and crop; the golden; `unavailable = nil` | `Sources/LibraryModel/Live/LiveCatalogCoding.swift`, `Tests/LibraryModelTests/LibraryCatalogCodingTests.swift`, `Tests/LibraryModelTests/LibraryPersistGolden.swift` | spine |
 | PE-3 | #212 (part) | The catalog budgets: decode and encode 10,000 | `Tests/LibraryModelTests/LibraryCatalogBudgetTests.swift` | PE-2 |
-| PE-4 | #212 (part) | `CatalogStore`: folder, atomic write, set aside | `Sources/LibraryApp/Platform/CatalogStore.swift` | spine |
+| PE-4 | #212 (part) | `CatalogStore`: folder, atomic write, `writeNow`, set aside, with its tests | `Sources/LibraryApp/Platform/CatalogStore.swift`, `Tests/AppSnapshotTests/LibraryCatalogStoreTests.swift` | spine |
 | PE-5 | #212 (part) | The persist area: load at launch, missing files, save after changes, flush on quit, Show in Finder; `library-restored` | `Sources/LibraryApp/LibraryWindow+Persist.swift`, `Tests/AppSnapshotTests/LibraryRestoreSnapshots.swift` | PE-1, PE-2, PE-4 |
-| PE-6 | #212 (closes) | J8 and J9 | `UITests/LibraryJourneyTests+Persist.swift` | PE-5, #333, import IM-6 |
+| PE-6 | #212 (closes) | J8 and J9 | `UITests/LibraryJourneyTests+Persist.swift` | PE-5, #333, import IM-6, cull CU-5 (J8 rates with keys), loupe-viewport LV-7 (J8 step 3's loupe help before #779) |
 | PE-7 | – | P7 `testLaunchLargeCatalog` (perf, report-only) | `UITests/LibraryJourneyTests+PerfLaunch.swift` | PE-6, #330, #782 |
 
-`LibraryCatalogCodingTests.swift` and `LibraryPersistGolden.swift` are new
-test files (not in `waves.json`); no other feature names them. The
+`LibraryCatalogCodingTests.swift`, `LibraryPersistGolden.swift` and
+`Tests/AppSnapshotTests/LibraryCatalogStoreTests.swift` are new test files (not in `waves.json`); no other feature names them. The
 blueprint's `Tests/LibraryModelTests/Golden/catalog-v1.json` is not created.
 PE-1, PE-2 and PE-4 start side by side.
 
@@ -203,7 +214,7 @@ PE-1, PE-2 and PE-4 start side by side.
 | PE-1 | `LibraryPersistTests`: after `beginRestore`, `restore([3 photos])` gives 3 items, `.ready`, `catalogValue == "saved"`; `restore(nil)` on a fixture catalog keeps its photos; one rating makes `saveRequest()` non-nil with the new revision and `dirty`; `didSave` of an older revision after a newer change stays `dirty`; `failRestore(.newerCatalog(version: 2))` makes `saveRequest()` nil whatever changes; `failRestore(.damagedCatalog(""))` gives `.damaged` and saving works; `markMissing` makes `cellValue` start `unreadable` and the photo still rateable | a save is lost or written over a newer file, or a restore keeps stale state |
 | PE-2 | `LibraryCatalogCodingTests`: encode → decode → encode is byte-equal for `shoot` with develop and a crop on one photo; the fixed three-photo catalog encodes byte-equal to `LibraryPersistGolden.catalogV1`, and that text with its `develop` objects removed decodes to neutral settings (QB-LIB-V7); `not json`, `[]`, `{}` and `{"version": 1}` without photos throw `damagedCatalog`; `{"version": 2}` throws `newerCatalog(version: 2)`; `LiveCatalogCoding.unavailable == nil` | bytes drift between runs, a field is lost, or a bad file decodes |
 | PE-3 | `LibraryCatalogBudgetTests` (rows below) | a model half misses its debug gate |
-| PE-4 | J9 on the macOS run (the `.bad` rename, the untouched newer file) | — (code covered by J8 and J9) |
+| PE-4 | `LibraryCatalogStoreTests` (macOS, a temp folder): `read()` is nil with no file; `write` then `read` round-trips and leaves no temporary file behind; `writeNow` writes the same bytes; `setAside()` renames to `catalog.json.bad`, replacing an older `.bad`, and the next `read()` is nil; a folder that doesn't exist is created | a write is not atomic, an old `.bad` blocks the rename, or a missing file throws |
 | PE-5 | `LibraryRestoreSnapshots` `library-restored`, Light and Dark; J8 step 2 on the macOS run | the launch flashes "No Photos" before the restore, or a change is never saved |
 | PE-6 | J8 and J9 pass | any expectation fails |
 | PE-7 | P7 attaches 5 runs, each with its `launch-grid` mark | a run is missing its mark |

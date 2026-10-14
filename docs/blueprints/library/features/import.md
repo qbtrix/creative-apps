@@ -38,8 +38,10 @@ starts). Steps 1–5 are live (L), step 6 runs on fakes (F).
 1. Write 24 JPEGs (4 of them in `day2/`), 1 PNG, 1 HEIC,
    `LibraryFiles.broken` and a `notes.txt` into a temp folder; launch with
    `-LibraryImportFolder` on it and an empty `-LibraryCatalogDir`.
-2. Click **Import Folder…**. Shot `importing`. Expect cells with the value
-   `loading` before the import ends (batches arrive through `added`).
+2. Click **Import Folder…**. Shot `importing`. Expect the grid's cell count
+   to grow to 26 (27 small files can arrive in one batch, so the journey
+   doesn't assert an in-between state; batching is IM-2's clock-driven
+   Model test, and cell values wait on #779, which import doesn't need).
 3. Wait for the progress row to go. Shot `imported`. Expect 26 cells, All
    Photos 26, the first cell the earliest written, and the notice "Imported
    26 photos. 1 file couldn't be imported." whose **Show** lists
@@ -49,8 +51,10 @@ starts). Steps 1–5 are live (L), step 6 runs on fakes (F).
 5. Relaunch with `-LibraryImportFolder` on `LibraryFiles.unreadableFolder()`
    and import. Shot `import-denied`. Expect "Library can't read <folder>.
    Check that you have access to it." as an error notice.
-6. (F) Relaunch with `-LibraryFixture shoot-unimported -LibraryFakeMode slow`
-   (the spine's fixture: the fakes hold `shoot`, the catalog is empty); File
+6. (F) Relaunch with `-LibraryFixture shoot-unimported -LibraryFakeMode slow
+   -LibraryImportFolder /fake-shoot` (the spine's fixture: the fakes hold
+   `shoot`, the catalog is empty; the folder argument skips the open panel,
+   and the fake decoder finds the fixture in any folder); File
    > Import Folder…. Shot `import-progress`. Expect `library.import.progress`
    reading "Importing 1 of 24" within 2 s (the spine's `FakeImporter`
    reports progress before its 2 s wait, review note on J1 step 6).
@@ -80,14 +84,17 @@ adds the catalog methods (blueprint 5.7) in `LibraryImport.swift`:
 
 ```swift
 extension LibraryCatalog {
-    /// The known ids to skip, and state .running(0 of 0); nil while an import runs.
-    public mutating func beginImport(_ folder: String) -> Set<String>?
+    /// The known ids to skip, and state .running(0 of 0); nil while an import runs
+    /// or while the catalog file is still loading (`catalogState == .loading`).
+    public mutating func beginImport() -> Set<String>?
     public mutating func showImportProgress(_ progress: ImportProgress)
     /// A batch from `added`: photos whose id is already in the catalog are ignored.
     public mutating func appendImported(_ photos: [PhotoItem])
     /// Appends what `appendImported` missed, sets `importNotice`, state .idle.
-    public mutating func finishImport(_ result: ImportResult)
-    public mutating func failImport(_ error: LibraryError)
+    /// `folder` is the folder's last path component, kept by the import area
+    /// (the spine declares no stored folder, and `ImportResult` has none).
+    public mutating func finishImport(_ result: ImportResult, folder: String)
+    public mutating func failImport(_ error: LibraryError, folder: String)
     public mutating func dismissImportNotice()
     /// "An import is already running." while one runs, else the importer's unavailable reason.
     public var importHelp: String? { get }
@@ -103,17 +110,16 @@ contract signature changes.
 ## Pseudocode
 
 ```
-beginImport(folder):                                        # IM-1
-  guard importState == .idle else return nil
+beginImport():                                              # IM-1
+  guard importState == .idle, catalogState != .loading else return nil   # never race the restore
   importState = .running(ImportProgress(done: 0, total: 0)); importNotice = nil
-  pendingFolder = lastPathComponent(folder)                 # kept in importState's notice
   return Set(items.map(\.id))
 appendImported(batch):  new = batch.filter { id not in items }; items += new;
   recount(); rebuildOrder(); saveRevision += 1              # never an undo step (D4)
-finishImport(result):  appendImported(result.added)
+finishImport(result, folder):  appendImported(result.added)
   importNotice = ImportNotice(folder, added: result.added.count, alreadyKnown, failures)
   importState = .idle
-failImport(error):     importNotice = ImportNotice(folder, error: error); importState = .idle
+failImport(error, folder): importNotice = ImportNotice(folder, error: error); importState = .idle
 
 LiveImporter.importFolder(folder, known, progress, added):  # IM-2
   scan = try await decoder.scan(folder)                     # throws unreadableFolder
@@ -146,12 +152,13 @@ ImageIODecoder.decode(path, maxLongSide):
 
 LibraryWindow+Import (IM-6, macOS):
   import(): folder = launch.importFolder ?? NSOpenPanel (directories only)
-    guard let known = model.beginImport(folder) else return
+    guard let known = model.beginImport() else return; name = lastPathComponent(folder)
     Task.detached { result = try await services.importer.importFolder(folder, known,
          progress: { p in Task { @MainActor in model.showImportProgress(p) } },
          added:    { b in Task { @MainActor in model.appendImported(b) } }) }
-      success -> MainActor model.finishImport(result); failure -> model.failImport(error as? LibraryError ?? .invalid(…))
-  on appear: if launch.importOnLaunch, import()
+      success -> MainActor model.finishImport(result, folder: name); failure -> model.failImport(error as? LibraryError ?? .invalid(…), folder: name)
+  importAreaLaunch() / importAreaCatalogReady() (the spine's hooks): once catalogState has left .loading,
+    if launch.importOnLaunch and not yet done (ImportAreaState.didLaunchImport), import()
   menu sub-struct: importFolder = model.importHelp == nil ? import : nil
 ```
 
@@ -167,8 +174,7 @@ runs).
 | IM-1 | #210 (part) | The import state machine on the catalog: begin, progress, batches, finish, fail, dismiss, help | `Sources/LibraryModel/LibraryImport.swift`, `Tests/LibraryModelTests/LibraryImportTests.swift` | spine |
 | IM-2 | #210 (part) | `LiveImporter`: skip known, capture-date order, path ids, batches, throttled progress, cancel; `unavailable = nil` | `Sources/LibraryModel/Live/LiveImporter.swift`, `Tests/LibraryModelTests/LibraryLiveImporterTests.swift` | spine |
 | IM-3 | #210 (part) | The import model budgets | `Tests/LibraryModelTests/LibraryImportBudgetTests.swift` | IM-1, IM-2 |
-| IM-4 | #210 (part) | `ImageIODecoder`: scan with metadata and orientation, decode to sRGB RGBA8 | `Sources/LibraryApp/Platform/ImageIODecoder.swift` | spine |
-| IM-5 | #210 (part) | QB-LIB-V6 decode fidelity on macOS | `Tests/AppSnapshotTests/LibraryDecodeTests.swift` | IM-4 |
+| IM-4 | #210 (part) | `ImageIODecoder`: scan with metadata and orientation, decode to sRGB RGBA8, with its QB-LIB-V6 tests | `Sources/LibraryApp/Platform/ImageIODecoder.swift`, `Tests/AppSnapshotTests/LibraryDecodeTests.swift` | spine |
 | IM-6 | #210 (part) | The import area: File > Import Folder…, open panel or `-LibraryImportFolder`, the task off the main actor, import on launch | `Sources/LibraryApp/LibraryWindow+Import.swift` | IM-1, IM-2, IM-4 |
 | IM-7 | #210 (part) | The progress row and the notice (placeholders until #780 and #781) and their snapshots | `Sources/LibraryApp/LibraryBrowser.swift`, `Tests/AppSnapshotTests/LibraryImportSnapshots.swift` | IM-1 |
 | IM-8 | #210 (closes) | J1; delete the skipped `testImportRateAndRelaunch` | `UITests/LibraryJourneyTests.swift`, `UITests/LibraryJourneyTests+Import.swift`, `UITests/LibraryJourneyTests+Files.swift` | IM-6, IM-7 |
@@ -184,11 +190,10 @@ IM-2 and IM-4 can start side by side; IM-7 needs only IM-1.
 
 | id | test | fails when |
 |---|---|---|
-| IM-1 | `LibraryImportTests`: `beginImport` returns every id and a second call returns nil until `finishImport`; `appendImported` of a batch holding an existing id adds only the new ones and updates All Photos and `order`; `finishImport` of 26 added and 1 failure sets the notice's `message` to "Imported 26 photos. 1 file couldn't be imported." and state `.idle`; `failImport(.unreadableFolder("Shots"))` gives the error notice and `isError`; an import adds no undo step (`undoTitle` unchanged); `importHelp` is "An import is already running." while running | a duplicate gets in, the state doesn't return to idle, the text differs, or import becomes undoable |
+| IM-1 | `LibraryImportTests`: `beginImport()` returns every id, a second call returns nil until `finishImport`, and it returns nil while `catalogState == .loading` (so an import on launch never races the restore); `appendImported` of a batch holding an existing id adds only the new ones and updates All Photos and `order`; `finishImport(_:folder:)` of 26 added and 1 failure sets the notice's `message` to "Imported 26 photos. 1 file couldn't be imported." and state `.idle`; `failImport(.unreadableFolder("Shots"), folder: "Shots")` gives the error notice and `isError`; an import adds no undo step (`undoTitle` unchanged); `importHelp` is "An import is already running." while running | a duplicate gets in, the state doesn't return to idle, the text differs, or import becomes undoable |
 | IM-2 | `LibraryLiveImporterTests` over a test decoder that scans 120 candidates (3 known, 2 failures) on a test clock: the result has 117 photos in capture-date order with `id == path` and the file stem as name; `added` batches are ≤ 50 and their concatenation equals the result; `progress` is called ≤ 30 times a simulated second and ends at total; an empty folder throws `noPhotos`; a scan error passes `unreadableFolder` through; `LiveImporter.unavailable == nil` | a known path is re-imported, the order or ids differ, batches are too big, or progress floods |
 | IM-3 | `LibraryImportBudgetTests` (rows below) | a model half misses its debug gate |
-| IM-4 | IM-5's tests; J1 steps 1–5 on the macOS run | — (code covered by IM-5 and J1) |
-| IM-5 | `LibraryDecodeTests` (macOS): a generated JPEG with Exif orientation 6 and a red marker top-left before rotation scans as portrait and decodes with the marker top-left of the upright image; a Display P3 PNG of P3 (1, 0, 0) decodes to sRGB within 2/255 of the clipped expected value; a `.jpg` of the bytes `not an image` is a scan failure with reason "not an image file"; `decode(maxLongSide: 512)` of a 4000 × 3000 file is 512 × 384; a hidden file and a file inside a package are not listed | orientation or color is wrong, a broken file throws instead of failing, or the size isn't fitted |
+| IM-4 | `LibraryDecodeTests` (macOS): a generated JPEG with Exif orientation 6 and a red marker top-left before rotation scans as portrait and decodes with the marker top-left of the upright image; a Display P3 PNG of P3 (1, 0, 0) decodes to sRGB within 2/255 of the clipped expected value; a `.jpg` of the bytes `not an image` is a scan failure with reason "not an image file"; `decode(maxLongSide: 512)` of a 4000 × 3000 file is 512 × 384; a hidden file and a file inside a package are not listed | orientation or color is wrong, a broken file throws instead of failing, or the size isn't fitted |
 | IM-6 | J1 steps 2–5 on the macOS run | the import blocks the main thread, a second import starts, or import on launch doesn't run |
 | IM-7 | `LibraryImportSnapshots`: the five states above, Light and Dark; the progress row carries `library.import.progress` with the text as its value | a state is missing or the row has no identifier |
 | IM-8 | J1 passes; `testImportRateAndRelaunch` is gone | any J1 expectation fails |
@@ -201,7 +206,7 @@ IM-2 and IM-4 can start side by side; IM-7 needs only IM-1.
 | QB-L9 model half | `beginImport` on a 10,000-photo catalog ≤ 10 ms (1 ms release) | `LibraryImportBudgetTests.beginImportWithinBudget` |
 | QB-LIB-1 model half | `finishImport` of 200 into 10,000 ≤ 50 ms (5 ms release); planning 10,000 candidates against 10,000 known ≤ 200 ms (20 ms release) | `LibraryImportBudgetTests.finishImportWithinBudget`, `.planAgainstKnownWithinBudget` |
 | QB-LIB-1, QB-L9 probe | `progress` ≤ 100 ms after the command; first 20 cells `thumb-ready` ≤ 2 s; all 200 records ≤ 10 s; report-only | P6 (IM-9) |
-| QB-LIB-V6 | orientation and color within 2/255 | `LibraryDecodeTests` (IM-5) |
+| QB-LIB-V6 | orientation and color within 2/255 | `LibraryDecodeTests` (IM-4) |
 | QB-F2 | progress and errors shown in place (the content's row and notice, never an alert) | J1 steps 3–6 |
 | QB-F5 | the progress row's appear animation has duration 0 under `-LibraryReduceMotion` | J1 step 6 relaunched with `-LibraryReduceMotion` reads the probe (once #330 lands; a step in IM-9) |
 

@@ -155,16 +155,25 @@ LiveLoupeImaging.render(photo, settings, longSide, quality):    # LV-5
   return RenderedPhoto(image: buffer.rgba8, histogram: try develop.histogram(of: buffer), quality)
 
 LibraryWindow+Loupe (LV-8, macOS):
-  onChange(model.focusedItemID) in the loupe: model.loupeFocusChanged(); render(.full); prefetch
+  loupeAreaFocusChanged() (the spine's onChange(of: focusedItemID) hook), in the loupe:
+    model.loupeFocusChanged(); render(.full); prefetch
+  LoupeAreaState (the spine's empty class in this file) gains: let queue = RenderQueue(); var fitScale = 1.0
   render(q): guard let req = model.loupeRequest(longSide: screenLongSide(px), quality: q)
     queue.submit(token: req.token) { result = try await services.loupe.render(req.photo, settings, req.longSide, q)
       -> MainActor model.showLoupeRender(result, token) | model.failLoupeRender(error, token) }
   prefetch: Task { await services.loupe.prefetch(model.neighboursToPrefetch(), longSide) }
   view: grid, loupe, setSort, sort, zoomIn/Out (loupe: stepZoom(±1, fitScale); grid: stepCellSize(±1)),
-        zoomToFit, actualSize (nil in the grid), first, last (nil outside the loupe), the titles
-LibraryLoupe (LV-7): CanvasViewport(documentSize: photo.pixelSize, zoom: model.loupeZoom.scale(fit: measuredFit),
-    checkerboard: false, onSize: measure fit, onZoom: { model.zoomLoupe(.scale($0)) }) { Image(loupeRender) or placeholder }
-  readout GlassPanel model.loupeReadout; value model.loupeValue; help model.loupeError
+        zoomToFit, actualSize (nil in the grid), first, last (nil outside the loupe), the titles,
+        zoomTo(s) -> model.zoomLoupe(|s - fitScale| < 0.0001 ? .fit : .scale(s)), fitMeasured(f) -> areas.loupe.fitScale = f
+LibraryLoupe(model:menu:) (LV-7; the spine passes both, so LibraryBrowser.swift, import's in wave 2, is not edited):
+  CanvasViewport(documentSize: photo.pixelSize, zoom: model.loupeZoom.scale(fit: measuredFit), checkerboard: false,
+    onSize: { measure fit; menu.view.fitMeasured?(fit) }, onZoom: { menu.view.zoomTo?($0) },
+    onKey: { key in Left/Right -> step(∓1/±1) .handled; Escape, G -> menu.view.grid .handled; else .ignored })
+    { Image(display: loupeRender.image) or placeholder }
+  (CanvasViewport takes focus once onZoom is set and pans on arrow keys unless onKey handles them first,
+   CanvasViewport.swift: so onKey keeps Left and Right stepping photos; its own Command-0 arrives through
+   onZoom at the fit scale, which zoomTo maps back to .fit)
+  readout GlassPanel model.loupeReadout; value model.loupeValue; help photo.availability.help ?? model.loupeError
   the preview-to-full swap has no animation (and none under Reduce Motion)
 ```
 
@@ -185,7 +194,7 @@ Every task is one PR to `dev`: at most 400 changed lines and 15 files, label
 | LV-6 | – | The loupe model budgets | `Tests/LibraryModelTests/LibraryLoupeBudgetTests.swift` | LV-2, LV-4 |
 | LV-7 | #724 (part) | The loupe on `CanvasViewport` at the photo's real size; picture, placeholder, error help; remove `loupeArtboard`; snapshots | `Sources/LibraryApp/LibraryLoupe.swift`, `Sources/LibraryModel/LoupeState.swift`, `Tests/LibraryModelTests/LibraryLoupeTests.swift`, `Tests/AppSnapshotTests/LibraryLoupeSnapshots.swift` | LV-1, LV-2, LV-4 |
 | LV-8 | #724 (part or closes) | The loupe area: the View menu, renders through the queue, prefetch, Home and End | `Sources/LibraryApp/LibraryWindow+Loupe.swift` | LV-3, LV-5, LV-7 |
-| LV-9 | – | J3 (F) steps | `UITests/LibraryJourneyTests+Loupe.swift` | LV-8, #333 |
+| LV-9 | – | J3 (F) steps | `UITests/LibraryJourneyTests+Loupe.swift` | LV-8, #333; thumbnails TH-6 for step 1's slow `preview` sub-step (the preview is the held grid thumbnail) |
 | LV-10 | – | J3 (L) step 1 on written files | `UITests/LibraryJourneyTests+Loupe.swift` | LV-9, import IM-6 |
 | LV-11 | – | P4 `testLoupeStepLatency` with `XCTMemoryMetric` (perf, report-only) | `UITests/LibraryJourneyTests+PerfLoupe.swift` | LV-9, #330, #782 |
 
@@ -203,7 +212,7 @@ other feature names it. LV-4 and LV-7 share `LoupeState.swift` and
 | LV-4 | `LibraryLoupeTests` (existing, extended): End shows "24 of 24", Home "1 of 24"; both do nothing in the grid; the readout is "IMG_0003 · 3 of 24"; every existing loupe test passes | Home or End move in the grid, or the readout lacks the name |
 | LV-5 | `LibraryLiveLoupeTests` over a counting test decoder: rendering 5 photos in turn leaves at most 3 decoded buffers (QB-LIB-8 model half); `prefetch` of the two neighbours then a render of one decodes nothing more; a sample (no path) equals `SampleImage`; neutral settings return the decode unchanged; `.preview` decodes at 512; `LiveLoupeImaging.unavailable == nil` | the cache grows past 3, prefetch is wasted, or a sample is decoded |
 | LV-6 | `LibraryLoupeBudgetTests` (rows below) | a model half misses its debug gate |
-| LV-7 | `LibraryLoupeSnapshots` (four states, Light and Dark); a portrait photo draws taller than wide; no source names `loupeArtboard` | the photo is drawn on a fixed 4032 × 3024 board, or a state is missing |
+| LV-7 | `LibraryLoupeSnapshots` (four states, Light and Dark); a portrait photo draws taller than wide; no source names `loupeArtboard`; on the macOS run `testLoupeStepsAndReturnsToTheGrid` still steps with Right and returns with Escape | the photo is drawn on a fixed 4032 × 3024 board, a state is missing, or the canvas swallows the arrow keys |
 | LV-8 | J3 steps 2–5 on the macOS run | a menu item stays enabled with nothing to do, Home or End go nowhere, or renders pile up |
 | LV-9 | J3 (F) steps 1–5 | any expectation fails |
 | LV-10 | J3 step 1 (L) | a written file doesn't reach `full` within 2 s |

@@ -8,7 +8,7 @@ and the inspector's stars, flag and label go through the same path.
 
 **Covers:** #211 (closes with CU-4), #426 (closes with CU-3), #724 (its
 keys only; CU-5's PR says `Part of #724`, or `Closes #724` if
-loupe-viewport's #724 part has already merged). `PhotoFlag` with reject
+loupe-viewport's #724 part has already merged). #724's own acceptance names `LibraryLoupeTests` cases for 3 and X and a 3 press in `testLoupeStepsAndReturnsToTheGrid`; those files are loupe-viewport's and import's in wave 2, so the task that says `Closes #724` comments on #724 that J4 (keys in the loupe, `LibraryRatingTests` in the loupe) and J3 cover that acceptance. `PhotoFlag` with reject
 landed in #750; the keys, the Metadata menu, undo and the ids API are left.
 
 **Depends on:** the spine feature issue; #333 (J4 lives in
@@ -86,7 +86,7 @@ extension LibraryCatalog {
     /// `change.undoName`; in the loupe with Auto Advance on, moves to
     /// `services.culling.advance(from:before:after:)` for a rating or flag.
     /// A throw sets `cullError` and changes nothing.
-    public mutating func cull(_ change: CullChange)
+    public mutating func cull(_ change: CullChange, advance: Bool = true)
     /// The change a single key makes: 0–5, P, X, U; nil for other keys.
     public static func cullChange(for key: LibraryKey) -> CullChange?
     public mutating func setAutoAdvance(_ on: Bool)
@@ -97,8 +97,12 @@ extension LibraryCatalog {
 ```
 
 `MetadataEditing.swift`'s `setRating`, `setFlag`, `setLabel` and
-`clickStar` call `cull(_:)`, so the inspector and the menu record the same
-undo steps as the keys. `LiveCulling` replaces the spine's stub (which
+`clickStar` call `cull(_:advance: false)`, so the inspector and the menu
+record the same undo steps as the keys but never move the loupe (a click
+on a star is not a culling key press; in the loupe it rates the loupe's
+photo, as the keys do). `cull(_ change:)` is `cull(change, advance: true)`.
+
+`LiveCulling` replaces the spine's stub (which
 already applies the plain rules) with the full Auto Advance rule and sets
 `unavailable` to nil. Blueprint 5.7 names the key method
 `cullKey(_ key: Character)`; the spine's `LibraryKey` already parses the
@@ -162,10 +166,10 @@ uses loupe-viewport's Home; until that merges, P2 presses Left 23 times.
 
 | id | test | fails when |
 |---|---|---|
-| CU-1 | `LibraryRatingTests`: in the loupe `cull(.rating(3))` changes only the loupe photo, in the grid every selected photo; one call is one undo step named "Set Rating", and P, X, U, a label give "Pick", "Reject", "Clear Flag", "Set Label"; undo restores every photo exactly; with no targets nothing changes and `cullHelp` is "Select a photo to rate it."; on `.fake(mode: .fail)` the catalog is unchanged, no step is recorded and `cullError` is "Rating is unavailable in this preview."; `cullChange(for:)` maps `.rating(3)`, `.pick`, `.reject`, `.unflag` to their changes and `.grid`, `.crop`, `.first` to nil | a change hits the wrong photos, a gesture is two steps, a refused change leaves a trace, or a key maps wrong |
+| CU-1 | `LibraryRatingTests`: in the loupe `cull(.rating(3))` changes only the loupe photo, in the grid every selected photo; one call is one undo step named "Set Rating", and P, X, U, a label give "Pick", "Reject", "Clear Flag", "Set Label"; undo restores every photo exactly; with no targets nothing changes and `cullHelp` is "Select a photo to rate it."; on `.fake(mode: .fail)` `items` and `history` are unchanged (no step recorded) and `cullError` is "Rating is unavailable in this preview."; `cullChange(for:)` maps `.rating(3)`, `.pick`, `.reject`, `.unflag` to their changes and `.grid`, `.crop`, `.first` to nil | a change hits the wrong photos, a gesture is two steps, a refused change leaves a trace, or a key maps wrong |
 | CU-2 | `LibraryAutoAdvanceTests` (live): the next photo after `id`; the last stays on itself; when a rating hides the photo (a filtered order without it), the photo that took its place; an empty order gives nil; live equals `FakeCulling` wherever the fake's plain rule applies (no filter) | the rule moves to the wrong photo or disagrees with the fake |
 | CU-3 | `LibraryAutoAdvanceTests`: with Auto Advance on, a rating in the loupe on `IMG_0001` (name order) focuses `IMG_0002`; a label does not advance; off, nothing moves; in the grid the selection never moves; undo after an advance restores the rating and leaves the loupe on `IMG_0002` (#426) | Auto Advance fires on a label or in the grid, or undo moves the loupe |
-| CU-4 | `LibraryMetadataTests` (existing, extended): `clickStar(4)` then undo restores, Undo reads "Undo Set Rating"; `setFlag(.reject)` reads "Undo Reject"; every existing metadata test passes | an inspector edit bypasses undo |
+| CU-4 | `LibraryMetadataTests` (existing, extended): `clickStar(4)` then undo restores, Undo reads "Undo Set Rating"; in the loupe with Auto Advance on, `clickStar(4)` does not move the loupe; `setFlag(.reject)` reads "Undo Reject"; every existing metadata test passes | an inspector edit bypasses undo |
 | CU-5 | `LibraryRatingSnapshots` and `LibraryAutoAdvanceSnapshots`; J4 steps 2–7 on the macOS run | a key reaches nothing, Auto Advance's checkmark doesn't follow the model, or the notice is missing |
 | CU-6 | `LibraryMetadataSnapshots` redrawn; the inspector's stars, flag and label carry `library.metadata.*` identifiers (the audit's `identifier` count for the inspector drops) | a control has no identifier |
 | CU-7 | J4 passes on fakes and live | any expectation fails |
@@ -175,7 +179,7 @@ uses loupe-viewport's Home; until that merges, P2 presses Left 23 times.
 
 | quality row | budget (CI gate, debug) | test |
 |---|---|---|
-| QB-LIB-4 model half | `cull` on one photo of `large` (10,000) ≤ 10 ms (1 ms release); it rebuilds `order` only when the sort is by rating or the collection is Favorites | `LibraryCullBudgetTests.cullOneWithinBudget`, `.orderRebuiltOnlyWhenNeeded` (counts rebuilds) |
+| QB-LIB-4 model half | `cull` on one photo of `large` (10,000) ≤ 10 ms (1 ms release); it rebuilds `order` only when the sort is by rating or the collection is Favorites | `LibraryCullBudgetTests.cullOneWithinBudget` (under the name sort, where a rebuild would blow the 10 ms gate: rebuilding `order` alone for 10,000 is the spine's 50 ms row), `.orderFollowsARatingUnderRatingSort` (under the rating sort the changed photo moves in `order`) |
 | QB-LIB-5 model half | `cull` with Auto Advance in the loupe on `large` ≤ 10 ms (1 ms release); `stepLoupe` itself is loupe-viewport's row | `LibraryCullBudgetTests.advanceWithinBudget` |
 | QB-LIB-4, QB-LIB-5 probe | p95 ≤ 2 frames late to the badge or the next photo's preview; report-only | P2 (CU-8) |
 | QB-F3 | each key, menu item and inspector click is one named step | `LibraryRatingTests`, `LibraryMetadataTests`, J4 steps 4 and 7 |
