@@ -132,3 +132,69 @@ links, comments, a shared library across files.
 | Auto Layout section of #752 | Not v1 | Storing direction, gap and padding without the layout math gives controls that change nothing on the canvas, which breaks "no dead controls". Ship it with the math (Q2) |
 | Close prompt for unsaved changes | v1 | Losing work is worse than any missing feature; #275 already names it |
 | Pages | Already built | Tier 2 in priorities, but it shipped with the tree |
+
+---
+
+## 2. Pseudo-C4 (drawn before code)
+
+The same three layers as `docs/engineering.md`: creative-core, then
+DesignModel (Linux, where the tests live), then DesignApp on SuiteUI. Design
+has no engine of its own in creative-core; its tree, edits and file format
+live in DesignModel, which depends only on CoreColor. The machine-readable
+form is `docs/blueprints/design/c4-planned.json`, in the shape of
+`docs/c4/model.json` plus `"status"` and `"authored": true` on each element.
+It is a plan, not the gate's model: the features that add files update
+`docs/c4/model.json`'s descriptions (section 8.3 names which).
+
+```
+creative-core                     creative-apps
+CoreColor ─────────────────────▶  DesignModel ─────────────────▶ DesignApp ◀── SuiteUI
+(existing)                        contracts → services/actions   EditorShell window,
+path geometry (planned, ───────▶  → live | fakes; workspace,     canvas, panel, menus,
+ needs a core issue; Pen only)     tree, history, file codec      pasteboard, export
+                                                                 ▲
+                                               UITests/DesignJourneyTests*.swift
+```
+
+### L2 containers
+
+| Container | Status | Responsibility | Owned paths | Relationships |
+|---|---|---|---|---|
+| DesignModel | existing | State, logic and use cases; Linux-safe | `Sources/DesignModel/` | uses CoreColor; read and called by DesignApp |
+| DesignApp | existing | The SwiftUI window, reads the Model, sends intents | `Sources/DesignApp/` | builds on SuiteUI; calls DesignModel |
+| SuiteUI | existing (another line) | Shell, rows, canvas viewport, probes | `Sources/SuiteUI/` | used by DesignApp; Design asks for parts with `needs-ui` |
+| Design journeys | existing | XCUITest journeys and the app audit | `UITests/DesignJourneyTests*.swift` | launch `.build/apps/DesignApp.app` |
+| CoreColor | existing (creative-core) | Color spaces | creative-core | used by DesignModel |
+| Shared path geometry | planned (creative-core) | Path type, exact curve bounds, hit test, SVG path data | creative-core, needs a new issue | used by `LivePen` (wave 3) only |
+
+### L3 components of DesignModel
+
+| Component | Status | Responsibility | Owned paths | Relationships |
+|---|---|---|---|---|
+| Workspace | existing | Pages, selection, tool, text edit, file URL, held ids; from D0-1 also `services`, `marquee` and the saved marker | `DesignWorkspace.swift`, `DesignSelection.swift`, `DesignHeldIDs.swift` | applies every edit through History |
+| Node tree | existing | Node and geometry types; D0-1 adds style fields, D2-1 the path and component fields | `DesignNode.swift` | encoded by File codec |
+| History | existing | Named undo steps, coalescing, document swaps; F5 adds the saved marker | `DesignHistory.swift` | called by Workspace and Services |
+| Canvas gestures | existing | Tool routing for pointer drags; D0-3 adds marquee, several-layer and Option-drag routes | `DesignCanvasEditing.swift`, `DesignDrawing.swift`, `DesignText.swift` | calls Services |
+| Inspector logic | existing | Header lines, locks, row toggles, align one layer | `DesignInspectorContent.swift`, `DesignLocking.swift`, `DesignLayerToggles.swift`, `DesignAlign.swift` | read by the panel |
+| File codec | existing | JSON open and save, refusal reasons | `DesignFile.swift` | F5 moves the codec into `Live/LiveFiling.swift` |
+| Use-case contracts | planned | One protocol per use case, `DesignEdit`, `DesignRefusal`, `DesignIDMint`, value types (section 5) | `Contracts/` | conformed to by Live and Fakes |
+| Services and actions | planned | `DesignServices` (`.live`, `.fake`), `NotBuilt`, and `DesignActions`: one workspace method and one help per command, applying a `DesignEdit` as one step | `DesignServices.swift`, `DesignActions.swift` | called by the window's `perform` and the canvas gestures |
+| Fixture fakes and fixtures | planned | A fake per use case; named fixture documents | `Fakes/`, `DesignFixtures.swift` | used by snapshots and `-DesignServices fake` journeys |
+| Live conformances | planned | The real use cases, one file each | `Live/` | swapped into `.live` by their feature |
+
+### L3 components of DesignApp
+
+| Component | Status | Responsibility | Owned paths | Relationships |
+|---|---|---|---|---|
+| Window shell | existing | Scene, `DesignWindow` (`perform`, launch arguments, close prompt from F5), `DesignEditor`, `DesignIntent` | `DesignApp.swift`, `DesignWindow.swift`, `DesignEditor.swift`, `DesignIntent.swift` | calls Services and actions |
+| Canvas | existing | `DesignCanvas` on `CanvasViewport`, artwork, selection marks and marquee (split into `DesignSelectionMarks.swift` by D0-4), inline text editor | `DesignCanvas.swift`, `DesignCanvasMarks.swift`, `DesignSelectionMarks.swift`, `DesignTextEditor.swift` | copy and paste hooks call the Pasteboard bridge |
+| Panel | existing | Tabs, inspector, Align row, style sections (F3), Layers list, Assets section (wave 3) | `DesignPanel.swift`, `DesignInspector.swift`, `DesignAlignBar.swift`, `DesignLayersPanel.swift`, `DesignInspectorStyle.swift`, `DesignAssetsPanel.swift` | values in, intents out |
+| Menus | existing | File, Edit (`DesignEditMenu.swift` from D0-5), Page, Object, View | `DesignCommands.swift`, `DesignObjectMenu.swift`, `DesignEditMenu.swift` | publish `DesignMenu` helps |
+| Pasteboard bridge | planned | System pasteboard read and write under the clipboard's type | `DesignPasteboardBridge.swift` | calls `LayerClipboard` through actions |
+| Export sheet and rasterizer | planned (wave 3) | Export sheet, PNG and PDF from the artwork view, file writing | `DesignExportSheet.swift`, `DesignRasterizer.swift` | renders the Canvas artwork |
+| Pen marks | planned (wave 3) | Anchors and handles of the pen draft | `DesignPenMarks.swift` | needs SuiteUI #706 |
+| Variables sheet | planned (wave 3) | Variables grid and the mode switch | `DesignVariablesSheet.swift` | calls `VariableEditing` |
+
+Every existing file under `Sources/DesignModel/`, `Sources/DesignApp/` and
+`UITests/Design*.swift` sits in exactly one component of the JSON (checked by
+a script while writing this; section 10 records it).
