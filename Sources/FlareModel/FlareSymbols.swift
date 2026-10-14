@@ -63,12 +63,12 @@ extension FlareWorkspace {
     }
 
     /// Edit Symbol: edits the symbol `id` in place from its first frame. From the scene, the playhead's frame is
-    /// kept for `exitSymbol`. An unknown id is ignored.
+    /// kept for `exitSymbol`. An unknown id is ignored. A refusal from the old context is cleared (#686).
     public mutating func editSymbol(_ id: String) {
         guard document?.symbols.contains(where: { $0.id == id }) == true else { return }
         if editingSymbolID == nil { symbolReturnFrame = currentFrame }
         cancelDrag()
-        (editingSymbolID, selection, selectedLayerID) = (id, [], nil)
+        (editingSymbolID, selection, selectedLayerID, layerError) = (id, [], nil, nil)
         (currentFrame, isPlaying, playClock) = (0, false, 0)
     }
 
@@ -80,11 +80,12 @@ extension FlareWorkspace {
         editSymbol(layer.instances[k].symbolID)
     }
 
-    /// Exit Symbol (Escape or the breadcrumb): back to the scene at the frame it left.
+    /// Exit Symbol (Escape or the breadcrumb): back to the scene at the frame it left. A refusal from inside the
+    /// symbol, such as "Exit the symbol…", is cleared (#686).
     public mutating func exitSymbol() {
         guard editingSymbolID != nil else { return }
         cancelDrag()
-        (editingSymbolID, selection, selectedLayerID) = (nil, [], nil)
+        (editingSymbolID, selection, selectedLayerID, layerError) = (nil, [], nil, nil)
         (isPlaying, playClock) = (false, 0)
         currentFrame = min(symbolReturnFrame, max(timelineFrames - 1, 0))
     }
