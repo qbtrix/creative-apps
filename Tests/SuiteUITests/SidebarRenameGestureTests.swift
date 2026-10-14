@@ -100,7 +100,7 @@ private func callNames(in text: some StringProtocol) -> (modifiers: Set<String>,
     let modifiers: Set = [
         "toggleStyle", "buttonStyle", "labelStyle", "foregroundStyle", "disabled", "help", "accessibilityLabel", "badge",
     ]
-    let calls: Set = ["View", "HStack", "Spacer", "ForEach", "Toggle", "Binding", "Label"]
+    let calls: Set = ["View", "HStack", "Spacer", "ForEach", "Toggle", "Binding", "Label", "Text", "SidebarToggleIcon"]
     #expect(names.modifiers.subtracting(modifiers).isEmpty, "new modifier in body: can it rename from a toggle? (#54)")
     #expect(names.calls.subtracting(calls).isEmpty, "new view or call in body: can it rename from a toggle? (#54)")
 }
@@ -128,4 +128,17 @@ private func callNames(in text: some StringProtocol) -> (modifiers: Set<String>,
         names.modifiers.subtracting(modifiers).isEmpty,
         "new modifier on the title: does it grow the rename hit area over the toggles or blank space? (#308)")
     #expect(names.calls.subtracting(calls).isEmpty, "new view or call in the title: can it rename elsewhere? (#308)")
+}
+
+/// #53: a toggle's icon lays out both its symbols, so flipping a toggle can't
+/// change its width and shift the toggles before it.
+@Test func toggleIconLaysOutBothSymbols() throws {
+    let source = try sidebarRowSource()
+    let body = try #require(region(of: source, from: "public var body: some View {", to: "private var title: some View"))
+    #expect(squeezed(body).contains("icon:{SidebarToggleIcon(toggle:toggle)}"))
+    #expect(!body.contains("toggle.systemImage"), "an icon drawn from the current symbol alone changes width (#53)")
+    let icon = try #require(region(of: source, from: "private struct SidebarToggleIcon", to: ".accessibilityHidden"))
+    let flat = squeezed(icon)
+    #expect(flat.contains("Image(systemName:toggle.onSymbol)") && flat.contains("Image(systemName:toggle.offSymbol)"))
+    #expect(!flat.contains(".frame("), "no hand-sized frame: both symbols set the width")
 }
