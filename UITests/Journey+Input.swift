@@ -9,7 +9,29 @@
 // files into every bundle). Perf numbers are report-only until their gates
 // land: `perf()` attaches the document as "perf-<test>" and `expectValid`
 // fails a series under 60 samples, which says nothing about its timing.
+// A journey class that conforms to `PerfBudgeted` (SuiteJourneyTests, in
+// SuiteJourneyTests+Budgets.swift) names its gates; `perf()` reads them and
+// attaches each measured series against its gate as "perf-budgets-<test>",
+// failing only a gate marked `enforced`.
 import XCTest
+
+/// One perf gate (blueprint suiteui 7.1): the p95 a row's series may reach,
+/// in frames late (`latency`) or in refreshes between drawn frames
+/// (`intervals`). `limit` nil means the gate is set from CI later; a miss
+/// fails only once `enforced` (after ten green runs, a one-line PR).
+struct PerfBudget: Sendable {
+    enum Measure: String, Sendable { case latency, intervals, fade }
+    let row: String
+    let series: [String]
+    let measure: Measure
+    let limit: Double?
+    var enforced = false
+}
+
+/// A journey class whose perf series have gates; `perf()` reads them.
+protocol PerfBudgeted {
+    static var perfBudgets: [PerfBudget] { get }
+}
 
 extension Journey {
     /// Fewer samples than this and a series' summary is not valid (blueprint section 7).
@@ -53,7 +75,31 @@ extension Journey {
     func perf() -> ProbeDocument? {
         guard let document = decodeLabel(of: "suite.perf", as: ProbeDocument.self) else { return nil }
         attachJSON(document, as: "perf-\(slug(test.name))")
+        if let budgeted = test as? any PerfBudgeted { checkBudgets(type(of: budgeted).perfBudgets, in: document) }
         return document
+    }
+
+    /// Attaches every measured series against its gate as
+    /// "perf-budgets-<test>" (`series: p95 / limit`); fails an enforced miss.
+    private func checkBudgets(_ budgets: [PerfBudget], in document: ProbeDocument) {
+        var report: [String: String] = [:]
+        for budget in budgets {
+            for series in budget.series {
+                let p95: Double? = switch budget.measure {
+                case .latency: document.latency[series].map { Double($0.p95FramesLate) }
+                case .intervals: document.intervals[series]?.p95Refreshes
+                case .fade: nil
+                }
+                guard let p95 else { continue }
+                let limit = budget.limit.map { "\($0)" } ?? "unset"
+                let mode = budget.enforced ? "gate" : "report-only"
+                report["\(budget.row) \(series)"] = "p95 \(p95) / \(limit) (\(mode))"
+                if budget.enforced, let gate = budget.limit {
+                    XCTAssertLessThanOrEqual(p95, gate, "\(budget.row) \(series): p95 \(p95) over its gate \(gate)")
+                }
+            }
+        }
+        if !report.isEmpty { attachJSON(report, as: "perf-budgets-\(slug(test.name))") }
     }
 
     /// Fails when `series` has fewer than `minimumSamples` samples in `document`.
