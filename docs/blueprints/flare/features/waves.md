@@ -1,40 +1,43 @@
 # Flare features: waves
 
 The open `p1` logic work on `line:flare` (refreshed in section 0 of
-`docs/blueprints/flare.md`, 2026-10-14) grouped into five features, one
+`docs/blueprints/flare.md`, 2026-10-14) grouped into four features, one
 feature-lead session each. A wave starts when everything it waits on has
 merged. Two features in the same wave never own the same file. Each packet
 lists its tasks, owned files and acceptance tests.
 
 | wave | feature | packet | covers | waits on | feature issue |
 |---|---|---|---|---|---|
-| 1 | Never lose work, and play and draw at full quality on the Mac | `mac-platform.md` | #739, #373, #372, #370 | nothing | #754 |
-| 2 | Export on preview data | `export-preview.md` | #324 | mac-platform (both edit `docs/c4/model.json`) | filed when wave 2 opens |
-| 2 | Draw and select on real documents | `live-stage.md` | #357, #740 | creative-core #213, #214, #215, #182, #173, #216 | filed when wave 2 opens |
-| 2 | Key, retime and ease on real documents | `live-keys.md` | #13, #358 | creative-core #171, #216, #219 | filed when wave 2 opens |
-| 2 | Scenes and guides on real documents | `live-scenes.md` | #362 | creative-core #217, #219 | filed when wave 2 opens |
+| 1 | Never lose work, and draw at full quality on the Mac | `mac-platform.md` | #739, #373, #370 | nothing | #754 |
+| 2 | Draw and select on real documents | `live-stage.md` | #357, #740 | creative-core #213, #214, #215, #182, #173, #216 | filed when its engine issues merge |
+| 2 | Key, retime and ease on real documents | `live-keys.md` | #13, #358 | creative-core #171, #216, #219 | filed when its engine issues merge |
+| 2 | Scenes and guides on real documents | `live-scenes.md` | #362 | creative-core #217, #219 | filed when its engine issues merge |
+
+Shipped while these packets were written, so no packet: LM-0c3 fake export
+and the warnings scan (#324, in #747) and LA-2 `PlaybackDriver` (#372, in
+#751).
 
 ## Why this order
 
-- **mac-platform goes first.** It waits on nothing, and it is the only wave-1
-  feature, because it owns `docs/c4/model.json` (three new FlareApp files and
-  the new FlareFiles behavior have to be named in the C4 descriptions).
-- **export-preview** waits on nothing in the engine either. It sits in wave 2
-  only because it also edits `docs/c4/model.json` (the warnings scan and the
-  export fakes). Its lead can start the day mac-platform's last PR merges.
+- **mac-platform goes first.** It waits on nothing. It is the only feature
+  that edits `docs/c4/model.json` (two new FlareApp files and the new
+  FlareFiles behavior have to be named in the C4 descriptions).
 - **live-stage, live-keys and live-scenes** wait on creative-core. On
-  creative-core `main` cfad97f none of LC-1 to LC-10 had landed. Each packet
-  marks the tasks that need no engine change (ST-6 needs only #182; KY-1,
-  KY-5 and SN-1 need nothing), so a lead can start those before the rest of
-  its engine issues merge. None of the three edits `docs/c4/model.json`: the
+  creative-core `main` cfad97f none of LC-1 to LC-10 had landed. The lead
+  playbook (`docs/factory/lead.md`, stage 0) stops a lead whose `Depends on:`
+  issue is still open, so each feature issue is filed once the engine issues
+  in its "waits on" cell have merged; the three can then run side by side.
+  Some tasks need no engine change (ST-7; KY-1, KY-5 and SN-1), and if the
+  engine is slow the supervisor can split those into a smaller feature of
+  their own. None of the three edits `docs/c4/model.json`: the
   `flare-model-sources` description already covers "their live conformances
   over FlareCore".
-- **Files across wave 2.** export-preview owns `FlareServices.swift`,
-  `Fakes/FlareFixtures.swift`, the export fakes, `ExportScan.swift`,
-  `FlareExport.swift` and `docs/c4/model.json`. The
-  three live features own only their own files under `Sources/FlareModel/Live/`
-  and their own test files, plus `Fakes/FakeShapes.swift` (live-stage ST-7,
-  which moves its box math into `Live/`). Nothing is shared.
+- **Files across the waves.** mac-platform owns `FlareFiles.swift`,
+  `Sources/FlareApp/StagePath.swift`, `Sources/FlareApp/FlareAutosave.swift`,
+  their tests and `docs/c4/model.json`. The three live features own only
+  their own files under `Sources/FlareModel/Live/` and their own test files,
+  plus `Fakes/FakeShapes.swift` (live-stage ST-7, which moves its box math
+  into `Live/`). Nothing is shared, within a wave or across them.
 
 ## Not in a packet yet (later features)
 

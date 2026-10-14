@@ -92,7 +92,7 @@ test files call it), and `LiveShapes` passes `LiveStage`'s list. So the two
 can't drift and no live type ever creates a fake (IN-9's check). The helper
 sits under `Live/`, where the `flare-model-sources` description ("their live
 conformances over FlareCore") already covers it, so ST-7 needs no
-`docs/c4/model.json` edit, which export-preview owns in this wave.
+`docs/c4/model.json` edit, and none of the three live features edits it.
 
 ## Pseudocode
 

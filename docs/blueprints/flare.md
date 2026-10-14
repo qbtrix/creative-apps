@@ -29,17 +29,19 @@ matrix · 6 Contracts · 7 Tasks · 8 Order · 9 Decisions · 10 Still open
 
 ## 0. Status on dev (2026-10-14)
 
-Read on `origin/dev` e823592 and creative-core `main` cfad97f (the revision
+Read on `origin/dev` e823592 (checked again at 65e2707) and creative-core `main` cfad97f (the revision
 `Package.swift` resolves). The rest of this blueprint is the plan as approved
 at G0; this section says how far dev has got and where names moved.
 
 **Shipped.** The LM-0 chain up to LM-0c2 (#314–#323, plus the splits #473
 LM-0a2c, #547 LM-0a3b and #605 LM-0c2b), LM-1 (#356, open, save data, file
 name and dirty flag only), LM-6 `LiveEasing` (#359), LM-7 playback (#360) and
-LM-15 `MachineLayout` (#327), with about 60 follow-up fixes (#603–#710:
+LM-15 `MachineLayout` (#327), LM-0c3 fake export, the shared warnings
+scan and fixture `showcase` (#324, in #747), LA-2 `PlaybackDriver` with a
+Linux-tested `PlaybackTicker` in `FlarePlaybackTicks.swift` (#372, in #751),
+and about 60 follow-up fixes (#603–#710:
 editing in place, locked layers, playback edge cases, plain refusal text).
-`FlareServices.fake` holds every fake except `export` and `assist`, still
-`NotBuilt`; `FlareServices.live` is all `NotBuilt`. On the UI side nothing of
+`FlareServices.fake` holds every fake except `assist`, still `NotBuilt`; `FlareServices.live` is all `NotBuilt`. On the UI side nothing of
 section 7.3 has started: the window is still `SuiteWindow` with the sidebar
 and the easing inspector (`FlareApp.swift`, `FlareCommands.swift`,
 `FlareEasingInspector.swift`, `FlareLayerItems.swift`). SuiteUI already has
@@ -52,8 +54,11 @@ and the easing inspector (`FlareApp.swift`, `FlareCommands.swift`,
 - `StageHitTesting` takes `editing symbolID:` (#641); section 6.2 now shows it.
 - `ExportState`, `AssistState` and `LoadState` live in
   `Sources/FlareModel/FlareWorkspaceState.swift`, not in `FlareExport.swift`
-  and `FlareAssist.swift`; those two files still hold the workspace's export
-  and assist methods when LM-0c3 and LM-0c4 build them.
+  and `FlareAssist.swift`; `FlareExport.swift` holds the workspace's export
+  methods (LM-0c3), and `FlareAssist.swift` will hold assist's (LM-0c4).
+- The display-link tick math is in the Model: `PlaybackTicker` and
+  `FlareWorkspace.tick(target:ticker:)` in `FlarePlaybackTicks.swift`;
+  `Sources/FlareApp/PlaybackDriver.swift` only owns the link.
 - The Ellipse tool works on the workspace itself in
   `Sources/FlareModel/FlareDrawing.swift`, a stopgap until LC-4's
   ellipse builder in `PathBuilders.swift` (qbtrix/creative-core#182). Machine refusal text sits in
@@ -74,11 +79,10 @@ reorder or canvas commands, onion frames, or `SetKeyframe` and `MoveGuide`
 merges. Every live conformance except `LiveEasing` waits on them.
 
 **What is left, as feature packets.** The open p1 logic work is grouped into
-five features in `docs/blueprints/flare/features/` (`waves.md` gives the
-order): wave 1 `mac-platform` (#370, #372, #373, #739) alone, since it owns
-`docs/c4/model.json`; wave 2 `export-preview` (#324) and, as their engine
-issues land, `live-stage` (#357, #740), `live-keys` (#13, #358) and
-`live-scenes` (#362).
+four features in `docs/blueprints/flare/features/` (`waves.md` gives the
+order): wave 1 `mac-platform` (#370, #373, #739), which waits on nothing;
+wave 2, as their engine issues land, `live-stage` (#357, #740), `live-keys`
+(#13, #358) and `live-scenes` (#362).
 
 **Later features (UI and integrate, not in a packet yet).** The Flare UI on
 fakes: F1a #346, F1b #347, F3c #375, F5 #391, F6b #348, F6c #349, F7b #376,
