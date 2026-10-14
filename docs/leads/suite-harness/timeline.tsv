@@ -25,3 +25,6 @@ utc	stage	event	ref	note
 2026-10-14T22:56Z	3	pr-merged	#871	SH-5 control inventory
 2026-10-14T22:56Z	3	stage-end	wave3	base now 03e7408
 2026-10-14T22:56Z	3	stage-start	wave4	SH-6 gallery, SH-5b snapshot (wf_057ab058-258)
+2026-10-14T23:05Z	3	pr-merged	#874	SH-5b empty-state snapshot
+2026-10-14T23:05Z	3	pr-merged	#875	SH-6 gallery
+2026-10-14T23:05Z	3	stage-start	wave5	SH-7 journeys on 4a5e73f (wf_7f5a50a4-569)

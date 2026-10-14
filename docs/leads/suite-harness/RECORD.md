@@ -2,9 +2,9 @@
 
 Issue: #778 · Packet: docs/blueprints/suiteui/features/suite-harness.md (on branch `docs/suiteui-feature-packets` until the packet PR merges)
 Run: act-1a13b7e0908-fybz · Session: claude/suite-harness-lead-wwxtgn · Started: 2026-10-14T18:00Z
-Stage: 3 wave 4
-Base: 03e7408 (wave 4)
-Next: wait for SH-6 and SH-5b PRs (wf_057ab058-258) and their lane merges; then wave 5 (SH-7 journeys)
+Stage: 3 wave 5
+Base: 4a5e73f (wave 5)
+Next: wait for SH-7's PR (wf_7f5a50a4-569) and its lane merge; then wave 6 (SH-8, feature-done); watch for the dev CI run the UI merges dispatch
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -16,9 +16,9 @@ Next: wait for SH-6 and SH-5b PRs (wf_057ab058-258) and their lane merges; then 
 | SH-9 | 2 | GoldenImage compare + recording rule (#331) | Tests/AppSnapshotTests/GoldenImage.swift, GoldenImageTests.swift, Golden/README.md | GoldenImageTests.reference, .compareWithinBudget | #866 | merged |
 | SH-5 | 3 | SuiteControlInventory, SuiteEnvironment, ToolbarAction.identifier (#775) | ControlInventory.swift, SuiteEnvironment.swift, ToolbarGroup.swift, EditorTopBar.swift, InspectorAction.swift, EmptyStateView.swift, ControlInventoryTests.swift | ControlInventoryTests | #871 | merged |
 | SH-10 | 3 | SnapshotHost at 2x in four appearances (#332) | Tests/AppSnapshotTests/SnapshotHost.swift, SnapshotHostTests.swift, Sources/SuiteUI/Glass.swift | SnapshotHostTests | #869 | merged |
-| SH-6 | 4 | gallery, index, six stubs, SuiteWindow hook (#776) | SuiteGallery.swift, Gallery/*.swift, SuiteWindow.swift, SuiteGalleryTests.swift | SuiteGalleryTests | | building (wf_057ab058-258) |
-| SH-5b | 4 | snapshot of EmptyStateView with an unavailable action (follow-up to #871) | Tests/AppSnapshotTests/SuiteEmptyStateSnapshots.swift | the snapshot | | building (wf_057ab058-258) |
-| SH-7 | 5 | journey template, SuiteJourneyTests bundle, helpers, SJ0, smoke, suiteui audit key (#333) | project.yml, UITests/Journey.swift, Journey+Input.swift, SuiteJourneyTests.swift, SuiteJourneyTests+Smoke.swift, audit-baseline.json | SJ0, smoke | | todo |
+| SH-6 | 4 | gallery, index, six stubs, SuiteWindow hook (#776) | SuiteGallery.swift, Gallery/*.swift, SuiteWindow.swift, SuiteGalleryTests.swift | SuiteGalleryTests | #875 | merged |
+| SH-5b | 4 | snapshot of EmptyStateView with an unavailable action (follow-up to #871) | Tests/AppSnapshotTests/SuiteEmptyStateSnapshots.swift | the snapshot | #874 | merged |
+| SH-7 | 5 | journey template, SuiteJourneyTests bundle, helpers, SJ0, smoke, suiteui audit key (#333) | project.yml, UITests/Journey.swift, Journey+Input.swift, SuiteJourneyTests.swift, SuiteJourneyTests+Smoke.swift, audit-baseline.json | SJ0, smoke |  | building (wf_7f5a50a4-569) |
 | SH-8 | 6 | SJ25 + journey budget constants (feature-done) | UITests/SuiteJourneyTests.swift, SuiteJourneyTests+Budgets.swift | SJ25 | | todo |
 
 ## Rounds
