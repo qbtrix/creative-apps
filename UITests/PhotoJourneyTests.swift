@@ -16,9 +16,10 @@
 // folder given with -PhotoSaveTo, so no save panel) checks the window then
 // holds the copy and Save writes it, and that Command-1 shows 100%. The
 // history journey pans by scroll and by arrow key, and checks a brush drag
-// paints after Space is let go (Space is pan mode only while held). Run order
-// is by name, so testTier1UndoRedoZoomPan runs last and attaches the audit
-// counts.
+// paints after Space is let go (Space is pan mode only while held). The hitch
+// journey paints fast strokes across a 4000 x 3000 photo under XCTest's hitch
+// metric, report only. Run order is by name, so testTier1UndoRedoZoomPan runs
+// last and attaches the audit counts.
 import CoreGraphics
 import ImageIO
 import UniformTypeIdentifiers
@@ -34,6 +35,33 @@ final class PhotoJourneyTests: XCTestCase {
         photo.app.typeKey("n", modifierFlags: .command)
         photo.shot("new-image")
         photo.clickEachTool()
+    }
+
+    /// Fast brush strokes across a 4000 x 3000 photo under XCTest's hitch
+    /// metric (macOS 26): frames that reached the screen after their refresh.
+    /// Report only, no baseline yet (docs/review-rubric.md, How gates are
+    /// set): the counts print as `measured [...]` lines in the xcodebuild log.
+    /// A runner that can't collect hitches gives an expected failure, not a
+    /// red journey; the strokes must still paint. No shot, so the audit sees
+    /// no new screen.
+    @MainActor func testBrushStrokeHitchesOnALargePhoto() throws {
+        let file = try Self.folder().appending(path: "large.png")
+        try Self.writeTestPhoto(to: file, width: 4000, height: 3000)
+        let photo = Journey("Photo", self, arguments: ["-PhotoOpenFile", file.path])
+        XCTAssert(photo.app.windows["large.png"].waitForExistence(timeout: 60), "large.png didn't open")
+        photo.element("suite.tools").buttons["Brush"].click()
+        let canvas = photo.element("suite.canvas")
+        XCTAssert(canvas.waitForExistence(timeout: 10), "no suite.canvas to paint on")
+        let options = XCTMeasureOptions()
+        options.iterationCount = 3
+        XCTExpectFailure("the hosted runner may not collect hitches", options: .nonStrict()) {
+            measure(metrics: [XCTHitchMetric(application: photo.app)], options: options) {
+                canvas.coordinate(withNormalizedOffset: CGVector(dx: 0.1, dy: 0.35)).click(
+                    forDuration: 0.05, thenDragTo: canvas.coordinate(withNormalizedOffset: CGVector(dx: 0.9, dy: 0.65)),
+                    withVelocity: .fast, thenHoldForDuration: 0)
+            }
+        }
+        expect("Undo Paint", photo, "the measured strokes didn't paint")
     }
 
     @MainActor func testCurvesDragAndNudge() throws {
@@ -569,9 +597,9 @@ final class PhotoJourneyTests: XCTestCase {
         return folder
     }
 
-    /// An 800 x 600 PNG that reads like a photo: a sky gradient and a sun.
-    private static func writeTestPhoto(to url: URL) throws {
-        let (width, height) = (800, 600)
+    /// A PNG that reads like a photo, a sky gradient and a sun, drawn on an
+    /// 800 x 600 plan and scaled to `width` x `height`.
+    private static func writeTestPhoto(to url: URL, width: Int = 800, height: Int = 600) throws {
         guard let space = CGColorSpace(name: CGColorSpace.sRGB),
             let context = CGContext(
                 data: nil, width: width, height: height, bitsPerComponent: 8, bytesPerRow: 0, space: space,
@@ -582,7 +610,8 @@ final class PhotoJourneyTests: XCTestCase {
                          CGColor(srgbRed: 0.98, green: 0.62, blue: 0.42, alpha: 1)] as CFArray,
                 locations: [0, 1])
         else { throw CocoaError(.fileWriteUnknown) }
-        context.drawLinearGradient(gradient, start: CGPoint(x: 0, y: height), end: CGPoint(x: 0, y: 0), options: [])
+        context.scaleBy(x: CGFloat(width) / 800, y: CGFloat(height) / 600)
+        context.drawLinearGradient(gradient, start: CGPoint(x: 0, y: 600), end: CGPoint(x: 0, y: 0), options: [])
         context.setFillColor(CGColor(srgbRed: 1, green: 0.86, blue: 0.3, alpha: 1))
         context.fillEllipse(in: CGRect(x: 470, y: 290, width: 180, height: 180))
         guard let image = context.makeImage(),
