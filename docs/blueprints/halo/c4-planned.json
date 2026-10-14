@@ -1,0 +1,733 @@
+{
+  "version": "1.0",
+  "scope": "creative-apps/halo (planned)",
+  "generated_at": "2026-10-14T00:00:00Z",
+  "source_path": ".",
+  "authored": true,
+  "note": "Halo blueprint, section 2. Same shape as docs/c4/model.json, finer: L3 components inside HaloModel and HaloApp with the files each owns. status is existing when any of its paths is on origin/dev 956d946, planned otherwise. Not read by scripts/ci; docs/c4/model.json stays the gate.",
+  "model": {
+    "people": [
+      {
+        "id": "motion-designer",
+        "name": "Motion designer",
+        "description": "Makes short animated graphics: titles, stings, social posts.",
+        "status": "existing",
+        "authored": true
+      }
+    ],
+    "systems": [
+      {
+        "id": "creative-apps",
+        "name": "creative-apps",
+        "status": "existing",
+        "authored": true,
+        "description": "Halo's part of the macOS app shells.",
+        "containers": [
+          {
+            "id": "halo-model",
+            "name": "HaloModel",
+            "description": "Linux-safe state and logic behind Halo's window: the project document, selection, playhead and playback, keys and easing, undo history, file state and render state, plus one contract per use case with its fake and live conformance. Calls FlareCore for keys, easing, sampling and matrices and CoreRaster for pixels.",
+            "technology": "Swift 6, Foundation (FoundationEssentials), Linux and macOS",
+            "status": "existing",
+            "authored": true,
+            "components": [
+              {
+                "id": "halo-project",
+                "name": "Project and compositions",
+                "description": "HaloProject: the window's one value-type state. Holds the document (compositions, selection, id counter) as a HaloDocumentState, the services, and every stored property v1 needs (history, playback, viewer drag, selected keys, file, rendered frame, render job, last refusal), each written only by its own extension file. Composition new, duplicate, rename (look-alike names refused), delete, select; the New Composition draft and settings; status text; `edit(_:coalesceKey:_:)`, the one place an edit records undo.",
+                "paths": [
+                  "Sources/HaloModel/HaloProject.swift",
+                  "Sources/HaloModel/CompositionSettings.swift",
+                  "Sources/HaloModel/CompositionDraft.swift",
+                  "Sources/HaloModel/NameKey.swift",
+                  "Sources/HaloModel/RefusedRename.swift",
+                  "Sources/HaloModel/CompositionDeleteCommand.swift",
+                  "Sources/HaloModel/HaloStatusText.swift"
+                ],
+                "status": "existing",
+                "authored": true,
+                "relationships": [
+                  {
+                    "target": "halo-services",
+                    "description": "reads its services",
+                    "style": "sync"
+                  },
+                  {
+                    "target": "halo-contracts",
+                    "description": "stores HaloDocumentState and HaloHistory",
+                    "style": "sync"
+                  }
+                ]
+              },
+              {
+                "id": "halo-layers",
+                "name": "Layers",
+                "description": "HaloLayer (kind, span, color, opacity, CoreRaster blend mode, solid rectangle, and from W0 keyframe tracks keyed by HaloProperty, parent id and text content; Codable) and each kind's own box and default property values.",
+                "paths": [
+                  "Sources/HaloModel/HaloLayer.swift",
+                  "Sources/HaloModel/HaloLayerDefaults.swift"
+                ],
+                "status": "existing",
+                "authored": true,
+                "relationships": [
+                  {
+                    "target": "flarecore",
+                    "description": "stores FlareCore Keyframe tracks",
+                    "style": "sync"
+                  },
+                  {
+                    "target": "coreraster",
+                    "description": "stores CoreRaster BlendMode",
+                    "style": "sync"
+                  }
+                ]
+              },
+              {
+                "id": "halo-timeline",
+                "name": "Timeline and playback",
+                "description": "Each composition's playhead and timecode, the strip's rows with key frames, in and out points at the playhead (I and O), and from W1 play, pause, loop, step and the tick that advances the playhead through PlaybackClock.",
+                "paths": [
+                  "Sources/HaloModel/HaloTimeline.swift",
+                  "Sources/HaloModel/HaloPlayback.swift"
+                ],
+                "status": "existing",
+                "authored": true,
+                "relationships": [
+                  {
+                    "target": "halo-contracts",
+                    "description": "advances through PlaybackClock",
+                    "style": "sync"
+                  }
+                ]
+              },
+              {
+                "id": "halo-commands",
+                "name": "Commands and availability",
+                "description": "HaloCommand: every menu, toolbar and key command of v1, with its title, and HaloProject.unavailableHelp(for:): nil when it can act now, else the reason the control shows. Read from each service's unavailableHelp and the state, so a command turns on when its feature's live type lands.",
+                "paths": [
+                  "Sources/HaloModel/HaloCommand.swift"
+                ],
+                "status": "planned",
+                "authored": true,
+                "relationships": [
+                  {
+                    "target": "halo-services",
+                    "description": "reads each service's unavailableHelp",
+                    "style": "sync"
+                  }
+                ]
+              },
+              {
+                "id": "halo-contracts",
+                "name": "Use-case contracts",
+                "description": "One protocol per use case (FrameDrawing, LayerPlacing, PropertyKeying, ViewerDragging, KeyEasing, ProjectHistory, ProjectFiles, PlaybackClock, FrameRendering, TextRasterizing, RenderSink, CompositionRendering) and the values they speak (HaloProperty, HaloDrawList, HaloDocumentState, HaloHistory, HaloKeyRef, HaloEasingPreset, the render plan and the error enums). FlareCore's Keyframe, Easing, Matrix and Point under Halo names.",
+                "paths": [
+                  "Sources/HaloModel/Contracts/"
+                ],
+                "status": "planned",
+                "authored": true,
+                "relationships": [
+                  {
+                    "target": "flarecore",
+                    "description": "names FlareCore Keyframe, Easing, Matrix and Point",
+                    "style": "sync"
+                  },
+                  {
+                    "target": "coreraster",
+                    "description": "names PixelBuffer and BlendMode",
+                    "style": "sync"
+                  }
+                ]
+              },
+              {
+                "id": "halo-services",
+                "name": "Services and live conformances",
+                "description": "HaloServices: one existential per contract with its .fake and .live values. Live/ holds one file per contract: a W0 stub that says why its controls are disabled, replaced whole by its feature with the real conformance over FlareCore and CoreRaster.",
+                "paths": [
+                  "Sources/HaloModel/HaloServices.swift",
+                  "Sources/HaloModel/Live/"
+                ],
+                "status": "planned",
+                "authored": true,
+                "relationships": [
+                  {
+                    "target": "halo-contracts",
+                    "description": "conforms to",
+                    "style": "sync"
+                  },
+                  {
+                    "target": "flarecore",
+                    "description": "samples tracks, eases, multiplies matrices",
+                    "style": "sync"
+                  },
+                  {
+                    "target": "coreraster",
+                    "description": "composites, masks and converts pixels",
+                    "style": "sync"
+                  }
+                ]
+              },
+              {
+                "id": "halo-fakes",
+                "name": "Fakes and fixtures",
+                "description": "One fake per contract, small and predictable, for views, snapshots and journeys before the live types land; HaloFixtures builds the named fixture projects (empty, three-layers, keyed, parented, two-comps, reference, crowd) in code.",
+                "paths": [
+                  "Sources/HaloModel/Fakes/",
+                  "Sources/HaloModel/HaloFixtures.swift"
+                ],
+                "status": "planned",
+                "authored": true,
+                "relationships": [
+                  {
+                    "target": "halo-contracts",
+                    "description": "conforms to",
+                    "style": "sync"
+                  }
+                ]
+              },
+              {
+                "id": "halo-viewer-model",
+                "name": "Viewer state",
+                "description": "The viewer's draw list at the playhead (FrameDrawing plus the live drag offset), the viewer hit and drag: begin on the topmost layer under the pointer, move as a preview that never records undo, commit on mouse-up as one 'Move' step through ViewerDragging.",
+                "paths": [
+                  "Sources/HaloModel/HaloViewerState.swift",
+                  "Sources/HaloModel/HaloViewerDrag.swift"
+                ],
+                "status": "planned",
+                "authored": true,
+                "relationships": [
+                  {
+                    "target": "halo-contracts",
+                    "description": "calls FrameDrawing and ViewerDragging",
+                    "style": "sync"
+                  },
+                  {
+                    "target": "halo-project",
+                    "description": "records the Move step through edit",
+                    "style": "sync"
+                  }
+                ]
+              },
+              {
+                "id": "halo-keying",
+                "name": "Keys and easing",
+                "description": "The inspector's property rows for the selected layer at the playhead; set value, stopwatch, key-here diamond and parent, each one named step (scrubs coalesce); selected keys on the timeline and setting their easing as one 'Keyframe Easing' step.",
+                "paths": [
+                  "Sources/HaloModel/HaloKeying.swift",
+                  "Sources/HaloModel/HaloKeySelection.swift"
+                ],
+                "status": "planned",
+                "authored": true,
+                "relationships": [
+                  {
+                    "target": "halo-contracts",
+                    "description": "calls PropertyKeying, LayerPlacing and KeyEasing",
+                    "style": "sync"
+                  },
+                  {
+                    "target": "halo-project",
+                    "description": "records steps through edit",
+                    "style": "sync"
+                  }
+                ]
+              },
+              {
+                "id": "halo-layer-edits",
+                "name": "Layer housekeeping",
+                "description": "Delete, rename, reorder and duplicate a layer of the selected composition, each one named step; a parent that is deleted leaves its children in place.",
+                "paths": [
+                  "Sources/HaloModel/HaloLayerEdits.swift"
+                ],
+                "status": "planned",
+                "authored": true,
+                "relationships": [
+                  {
+                    "target": "halo-project",
+                    "description": "records steps through edit",
+                    "style": "sync"
+                  }
+                ]
+              },
+              {
+                "id": "halo-history",
+                "name": "Undo and redo",
+                "description": "undo() and redo() of whole-document steps through ProjectHistory, their menu titles, and the rule that selection, scrubbing and playback are not steps.",
+                "paths": [
+                  "Sources/HaloModel/HaloHistory.swift"
+                ],
+                "status": "planned",
+                "authored": true,
+                "relationships": [
+                  {
+                    "target": "halo-contracts",
+                    "description": "calls ProjectHistory",
+                    "style": "sync"
+                  }
+                ]
+              },
+              {
+                "id": "halo-files",
+                "name": "Project files",
+                "description": "fileData() and open(_:) through ProjectFiles, the file name, unsaved flag, the last save or open error, and the Open Recent list. Opening clears history.",
+                "paths": [
+                  "Sources/HaloModel/HaloFiles.swift"
+                ],
+                "status": "planned",
+                "authored": true,
+                "relationships": [
+                  {
+                    "target": "halo-contracts",
+                    "description": "calls ProjectFiles",
+                    "style": "sync"
+                  }
+                ]
+              },
+              {
+                "id": "halo-frames",
+                "name": "Rendered frames",
+                "description": "FrameRenderer composites a frame with CoreRaster (today: axis-aligned solids; from W1 every v1 layer kind at its world transform, through FrameRendering) and the rendered frame Render Frame shows in the viewer, with when it goes stale.",
+                "paths": [
+                  "Sources/HaloModel/FrameRenderer.swift",
+                  "Sources/HaloModel/HaloRenderFrame.swift"
+                ],
+                "status": "existing",
+                "authored": true,
+                "relationships": [
+                  {
+                    "target": "coreraster",
+                    "description": "composites, masks, blends",
+                    "style": "sync"
+                  },
+                  {
+                    "target": "flarecore",
+                    "description": "flattens and transforms outlines",
+                    "style": "sync"
+                  }
+                ]
+              },
+              {
+                "id": "halo-render-out",
+                "name": "Render to files",
+                "description": "The Render… job: settings, the plan, progress ('Frame 48 of 240'), cancel and the outcome, driving CompositionRendering into a RenderSink the app supplies.",
+                "paths": [
+                  "Sources/HaloModel/HaloRenderJob.swift"
+                ],
+                "status": "planned",
+                "authored": true,
+                "relationships": [
+                  {
+                    "target": "halo-contracts",
+                    "description": "calls CompositionRendering",
+                    "style": "sync"
+                  }
+                ]
+              },
+              {
+                "id": "halo-text",
+                "name": "Text layers",
+                "description": "Set a text layer's string and size, each one named step; an empty string is refused.",
+                "paths": [
+                  "Sources/HaloModel/HaloTextEdits.swift"
+                ],
+                "status": "planned",
+                "authored": true,
+                "relationships": [
+                  {
+                    "target": "halo-project",
+                    "description": "records steps through edit",
+                    "style": "sync"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "halo-app",
+            "name": "HaloApp",
+            "description": "The Halo app: the SwiftUI scene, the window and its views built from SuiteUI, the menus, and the macOS-only platform pieces (file type, PNG and movie writers, text rasterizer, frame image). Reads HaloModel and calls its methods; never writes its state (scripts/ci app-state rule).",
+            "technology": "Swift 6, SwiftUI, macOS 26",
+            "status": "existing",
+            "authored": true,
+            "components": [
+              {
+                "id": "halo-scene",
+                "name": "App scene and launch",
+                "description": "The App scene (WindowGroup, commands) and the launch arguments that pick services and data for journeys: -HaloFixture, -HaloSample, -HaloOpenFile, -HaloSaveTo, -HaloRenderTo, -HaloWindowSize, -HaloPerfProbe.",
+                "paths": [
+                  "Sources/HaloApp/HaloApp.swift",
+                  "Sources/HaloApp/HaloLaunch.swift"
+                ],
+                "status": "existing",
+                "authored": true,
+                "relationships": [
+                  {
+                    "target": "halo-window",
+                    "description": "shows",
+                    "style": "sync"
+                  },
+                  {
+                    "target": "halo-menus",
+                    "description": "installs",
+                    "style": "sync"
+                  }
+                ]
+              },
+              {
+                "id": "halo-window",
+                "name": "Window and command router",
+                "description": "HaloWindow: the one @State model, every presentation flag v1 needs, and perform(_ command: HaloCommand), which routes each command to its area file (HaloWindow+Viewer, +Playback, +Keys, +Layers, +Edit, +File, +Easing, +Render, +Text). W0 writes the router and stub area files; each feature owns one area file.",
+                "paths": [
+                  "Sources/HaloApp/HaloWindow.swift",
+                  "Sources/HaloApp/HaloWindow+Viewer.swift",
+                  "Sources/HaloApp/HaloWindow+Playback.swift",
+                  "Sources/HaloApp/HaloWindow+Keys.swift",
+                  "Sources/HaloApp/HaloWindow+Layers.swift",
+                  "Sources/HaloApp/HaloWindow+Edit.swift",
+                  "Sources/HaloApp/HaloWindow+File.swift",
+                  "Sources/HaloApp/HaloWindow+Easing.swift",
+                  "Sources/HaloApp/HaloWindow+Render.swift",
+                  "Sources/HaloApp/HaloWindow+Text.swift"
+                ],
+                "status": "planned",
+                "authored": true,
+                "relationships": [
+                  {
+                    "target": "halo-project",
+                    "description": "reads state, calls methods",
+                    "style": "sync"
+                  },
+                  {
+                    "target": "halo-commands",
+                    "description": "asks each command's availability",
+                    "style": "sync"
+                  },
+                  {
+                    "target": "suiteui",
+                    "description": "SuiteWindow shell",
+                    "style": "sync"
+                  }
+                ]
+              },
+              {
+                "id": "halo-menus",
+                "name": "Menus",
+                "description": "Composition, Layer, File, Edit and Animation menus. Every item sends a HaloCommand through the focused window and is disabled, with the Model's reason as help, when it can't act.",
+                "paths": [
+                  "Sources/HaloApp/HaloCommands.swift",
+                  "Sources/HaloApp/HaloCompositionCommands.swift",
+                  "Sources/HaloApp/HaloFileMenu.swift",
+                  "Sources/HaloApp/HaloEditMenu.swift",
+                  "Sources/HaloApp/HaloAnimationMenu.swift"
+                ],
+                "status": "existing",
+                "authored": true,
+                "relationships": [
+                  {
+                    "target": "halo-window",
+                    "description": "sends commands to",
+                    "style": "sync"
+                  }
+                ]
+              },
+              {
+                "id": "halo-viewer",
+                "name": "Viewer",
+                "description": "The viewer: the artboard (CanvasSurface) with the draw list painted in a SwiftUI Canvas, the selection outline, the drag gesture, the rendered-frame image, the status bar and the transport; the display-link playback driver.",
+                "paths": [
+                  "Sources/HaloApp/HaloViewer.swift",
+                  "Sources/HaloApp/HaloViewerCanvas.swift",
+                  "Sources/HaloApp/HaloViewerGestures.swift",
+                  "Sources/HaloApp/HaloTransport.swift",
+                  "Sources/HaloApp/HaloPlaybackDriver.swift"
+                ],
+                "status": "existing",
+                "authored": true,
+                "relationships": [
+                  {
+                    "target": "halo-viewer-model",
+                    "description": "reads the draw list, calls the drag",
+                    "style": "sync"
+                  },
+                  {
+                    "target": "suiteui",
+                    "description": "CanvasSurface, SelectionOutline, ViewerStatusBar, TransportCapsule",
+                    "style": "sync"
+                  }
+                ]
+              },
+              {
+                "id": "halo-timeline-view",
+                "name": "Timeline view",
+                "description": "The strip under the viewer: one lane per layer with its span and key diamonds, the playhead, scrub, I and O, key selection and the key context menu.",
+                "paths": [
+                  "Sources/HaloApp/HaloTimelineView.swift"
+                ],
+                "status": "existing",
+                "authored": true,
+                "relationships": [
+                  {
+                    "target": "halo-timeline",
+                    "description": "reads rows, calls scrub and points",
+                    "style": "sync"
+                  },
+                  {
+                    "target": "suiteui",
+                    "description": "TimelineStrip",
+                    "style": "sync"
+                  }
+                ]
+              },
+              {
+                "id": "halo-inspector",
+                "name": "Inspector",
+                "description": "The inspector: the composition header and rows, the layer list (select, rename, reorder, delete), the selected layer's TRANSFORM rows with keyframe buttons, parent and blend pickers, the EASING group (chips and curve) and the TEXT section.",
+                "paths": [
+                  "Sources/HaloApp/HaloCompositionInspector.swift",
+                  "Sources/HaloApp/HaloLayerList.swift",
+                  "Sources/HaloApp/HaloLayerInspector.swift",
+                  "Sources/HaloApp/HaloEasingInspector.swift",
+                  "Sources/HaloApp/HaloTextInspector.swift"
+                ],
+                "status": "existing",
+                "authored": true,
+                "relationships": [
+                  {
+                    "target": "halo-keying",
+                    "description": "reads rows, calls keying",
+                    "style": "sync"
+                  },
+                  {
+                    "target": "suiteui",
+                    "description": "InspectorHeader, InspectorSection, StudioScrubRow, KeyframeButton, InspectorPickerRow, ChoiceChips, CurveEditor, InspectorColorRow",
+                    "style": "sync"
+                  }
+                ]
+              },
+              {
+                "id": "halo-sheets",
+                "name": "Sheets and alerts",
+                "description": "New Composition sheet, the rename refusal alert (until SuiteUI #577), and the Render… sheet with progress and Cancel.",
+                "paths": [
+                  "Sources/HaloApp/NewCompositionSheet.swift",
+                  "Sources/HaloApp/RenameRefusalAlert.swift",
+                  "Sources/HaloApp/HaloRenderSheet.swift"
+                ],
+                "status": "existing",
+                "authored": true,
+                "relationships": [
+                  {
+                    "target": "halo-render-out",
+                    "description": "reads the job, starts and cancels it",
+                    "style": "sync"
+                  }
+                ]
+              },
+              {
+                "id": "halo-platform",
+                "name": "Platform pieces",
+                "description": "macOS-only conformances and conversions with no SwiftUI: the .halo UTType, the rendered frame as a CGImage (from CoreRaster rgba8), the PNG sequence writer (ImageIO) and movie writer (AVFoundation) as RenderSinks, and the CoreText TextRasterizing.",
+                "paths": [
+                  "Sources/HaloApp/HaloDocumentType.swift",
+                  "Sources/HaloApp/HaloFrameImage.swift",
+                  "Sources/HaloApp/HaloPNGWriter.swift",
+                  "Sources/HaloApp/HaloMovieWriter.swift",
+                  "Sources/HaloApp/HaloTextRasterizer.swift"
+                ],
+                "status": "planned",
+                "authored": true,
+                "relationships": [
+                  {
+                    "target": "halo-contracts",
+                    "description": "conforms to RenderSink and TextRasterizing",
+                    "style": "sync"
+                  },
+                  {
+                    "target": "coreraster",
+                    "description": "reads rgba8 display bytes",
+                    "style": "sync"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "halo-tests",
+            "name": "Halo tests",
+            "description": "HaloModelTests (Linux and macOS), Halo's snapshot, golden and latency files in AppSnapshotTests (macOS), and Halo's UI journeys.",
+            "technology": "Swift Testing; XCTest UI tests (XcodeGen)",
+            "status": "existing",
+            "authored": true,
+            "components": [
+              {
+                "id": "halo-model-tests",
+                "name": "HaloModelTests",
+                "description": "Model behavior, contract conformance suites run against both the fake and the live type, fixtures, budgets (HaloBudgetTests) and Linux fidelity checks (render reference pixels, file round trip).",
+                "paths": [
+                  "Tests/HaloModelTests/"
+                ],
+                "status": "existing",
+                "authored": true,
+                "relationships": [
+                  {
+                    "target": "halo-model",
+                    "description": "tests",
+                    "style": "sync"
+                  }
+                ]
+              },
+              {
+                "id": "halo-snapshots",
+                "name": "Halo snapshots and goldens",
+                "description": "Halo*Snapshots.swift PNGs in Light and Dark, goldens once QH-2 (#331) lands, HaloViewerFidelityTests (viewer equals render) and HaloViewerLatencyTests.",
+                "paths": [
+                  "Tests/AppSnapshotTests/Halo"
+                ],
+                "status": "existing",
+                "authored": true,
+                "relationships": [
+                  {
+                    "target": "halo-app",
+                    "description": "renders views of",
+                    "style": "sync"
+                  }
+                ]
+              },
+              {
+                "id": "halo-journeys",
+                "name": "Halo journeys",
+                "description": "UITests/HaloJourneyTests.swift and, once QH-4 (#333) lands, one HaloJourneyTests+<Area>.swift per feature: the tier-1 journeys H-J0 to H-J12 with a whole-window shot per step and the app audit on every shot.",
+                "paths": [
+                  "UITests/HaloJourneyTests"
+                ],
+                "status": "existing",
+                "authored": true,
+                "relationships": [
+                  {
+                    "target": "halo-app",
+                    "description": "drives the release bundle of",
+                    "style": "sync"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "suiteui",
+            "name": "SuiteUI",
+            "description": "The shared design system (Sources/SuiteUI).",
+            "status": "existing",
+            "authored": true,
+            "components": [
+              {
+                "id": "suiteui-sources",
+                "name": "SuiteUI sources",
+                "description": "The shared design system (Sources/SuiteUI).",
+                "paths": [
+                  "Sources/SuiteUI/"
+                ],
+                "status": "existing",
+                "authored": true,
+                "relationships": []
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "creative-core",
+        "name": "creative-core",
+        "status": "existing",
+        "authored": true,
+        "description": "The engines (github.com/qbtrix/creative-core).",
+        "containers": [
+          {
+            "id": "flarecore",
+            "name": "FlareCore",
+            "description": "creative-core: Keyframe, Easing, Timeline sampling and playback frames, Matrix, Transform, Point, Path flattening.",
+            "status": "existing",
+            "authored": true,
+            "components": [
+              {
+                "id": "flarecore-sources",
+                "name": "FlareCore sources",
+                "description": "creative-core: Keyframe, Easing, Timeline sampling and playback frames, Matrix, Transform, Point, Path flattening.",
+                "paths": [],
+                "status": "existing",
+                "authored": true,
+                "relationships": []
+              }
+            ]
+          },
+          {
+            "id": "coreraster",
+            "name": "CoreRaster",
+            "description": "creative-core: PixelBuffer, composite (same size and at an offset) with the W3C blend modes, Mask (rectangle, ellipse, polygon), rotate, resize, rgba8 display bytes.",
+            "status": "existing",
+            "authored": true,
+            "components": [
+              {
+                "id": "coreraster-sources",
+                "name": "CoreRaster sources",
+                "description": "creative-core: PixelBuffer, composite (same size and at an offset) with the W3C blend modes, Mask (rectangle, ellipse, polygon), rotate, resize, rgba8 display bytes.",
+                "paths": [],
+                "status": "existing",
+                "authored": true,
+                "relationships": []
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "relationships": [
+      {
+        "source": "motion-designer",
+        "target": "halo-app",
+        "description": "makes and renders compositions in",
+        "style": "sync"
+      },
+      {
+        "source": "halo-app",
+        "target": "halo-model",
+        "description": "reads state and calls its methods",
+        "style": "sync"
+      },
+      {
+        "source": "halo-app",
+        "target": "suiteui",
+        "description": "builds its window from SuiteUI components",
+        "style": "sync"
+      },
+      {
+        "source": "halo-app",
+        "target": "coreraster",
+        "description": "reads rendered frames as rgba8 display bytes",
+        "style": "sync"
+      },
+      {
+        "source": "halo-model",
+        "target": "flarecore",
+        "description": "keys, easing, sampling, matrices",
+        "style": "sync"
+      },
+      {
+        "source": "halo-model",
+        "target": "coreraster",
+        "description": "composites frames",
+        "style": "sync"
+      },
+      {
+        "source": "halo-tests",
+        "target": "halo-model",
+        "description": "tests on Linux and macOS",
+        "style": "sync"
+      },
+      {
+        "source": "halo-tests",
+        "target": "halo-app",
+        "description": "snapshots and drives through journeys",
+        "style": "sync"
+      }
+    ]
+  }
+}
