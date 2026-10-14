@@ -310,3 +310,87 @@ Checklist:
       `Sources/LibraryApp/` is in exactly one component (checked by the
       script in section 9).
 - [x] No component writes another line's target.
+
+---
+
+## 3. Usage map
+
+Ranked from `docs/priorities.md` (Library section), which is the source of
+the tiers; this section adds the order inside each tier and the rows that
+file did not list. The method is the same clean-room one: public sources
+only, nothing opened or run. No public study counts per-feature use in
+photo catalog apps, so most rows are *inferred* from what beginner courses
+teach first and what keyboard cheat sheets repeat; those are the first to
+move if usage data turns up.
+
+Sources:
+
+- S1. `docs/priorities.md`, Library section, and the surveys it cites:
+  photo editing habits of 18-25s (2024),
+  https://petapixel.com/2024/06/21/one-third-of-18-to-25-year-olds-edit-their-photos-for-social-media ;
+  photo editing software survey, https://shotkit.com/photo-editing-software-survey/ .
+- S2. CIPA DC-008, Exchangeable image file format (Exif), the published
+  spec for capture date (`DateTimeOriginal`), orientation and camera
+  fields: https://www.cipa.jp/e/std/std-sec.html .
+- S3. IPTC Photo Metadata Standard (ratings, keywords and labels as people
+  exchange them): https://iptc.org/standards/photo-metadata/ .
+- S4. ISO 16684-1, Extensible Metadata Platform (where a rating and a
+  label live in a file's metadata), https://www.iso.org/standard/75163.html .
+- S5. Apple Human Interface Guidelines, macOS (keyboard, undo, menus):
+  https://developer.apple.com/design/human-interface-guidelines/ .
+
+Within a tier the order is the order a session meets the feature.
+
+### Tier 1: nearly every session (`p1`)
+
+| # | Feature | Evidence | Issues |
+|---|---|---|---|
+| 1 | Import a folder (PNG, JPEG, HEIC), capture date from Exif, skip known files | S1 (tier 1 in priorities); S2 for the date | #210 |
+| 2 | Grid of real thumbnails, sorted by capture date | S1 | #33 |
+| 3 | Loupe: one photo large, Left and Right, back to the grid | S1 | #29 (closed), #724 (zoom) |
+| 4 | Cull from the keyboard: 0 to 5 stars, pick, reject, unflag | S1; S3 and S4 define the rating scale people exchange | #211, #724 (keys in the loupe) |
+| 5 | Auto Advance after a rating or flag | S1 | #426 |
+| 6 | Undo and redo of every change, named | S5 (every Mac editor); *inferred* as tier 1 | spine (no issue yet) |
+| 7 | Develop: exposure, white balance (temperature, tint), contrast, highlights, shadows, with a histogram | S1 | #32, #423 |
+| 8 | Crop and straighten | S1 (*inferred* there) | #425 |
+| 9 | Export JPEG at a set long edge and quality | S1 | #424 |
+| 10 | The catalog is there after relaunch | S1 (*inferred* there) | #212 |
+| 11 | Loupe zoom to 100% to check focus, and pan | *inferred*: checking sharpness is part of culling | #724 |
+
+### Tier 2: weekly (`p2`)
+
+| # | Feature | Evidence | Issues |
+|---|---|---|---|
+| 1 | Filter the grid by flag or rating | S1 | #31 |
+| 2 | Copy and paste develop settings across photos | S1 | #32 (rides along; cheap once settings exist) |
+| 3 | Metadata panel: camera details, keywords | S1; S2 and S3 for the fields | #744 |
+| 4 | Collections you make | S1 | #31 |
+| 5 | Compare two photos side by side | S1 | not filed (later) |
+| 6 | Camera raw files | S1 ("pending evidence") | #427 |
+| 7 | Color labels from the keyboard | *inferred* | not filed (later) |
+
+### Tier 3: specialist or occasional (`p3`)
+
+| # | Feature | Evidence | Issues |
+|---|---|---|---|
+| 1 | Keywords at scale, smart collections | S1 | #31 (smart rules), later |
+| 2 | Local masks, denoise | S1 | not filed (later) |
+| 3 | Density polish of the inspector and status bar | design rule, not usage | #185 (the status bar is pulled into v1 as a design requirement, section 1.4) |
+| 4 | Identifiers on every control | test plumbing | #291 (pulled into v1: the journeys need it) |
+
+### Calls against the tiers
+
+| Row | Call | Why |
+|---|---|---|
+| Undo (tier 1, no issue) | v1, built by the spine | No issue asks for it, but a cull without undo loses work on one wrong key, and the rubric (QB-F3) requires one named undo step per gesture |
+| Copy and paste settings (tier 2) | v1, inside the develop feature | #32 already includes it, and it is a few lines once settings are a value type |
+| Loupe zoom (tier 1, inferred) | v1 | Culling is judging focus; fit-to-window cannot show it |
+| Filters (tier 2) | later | The cull works on the whole folder; filters are the first item after v1 |
+| Status bar and identifiers (tier 3) | v1 | Required by docs/design.md and by the journeys, not by usage |
+
+Checklist:
+
+- [x] Every tier-1 item of `docs/priorities.md` (Library) appears in tier 1
+      above, with the same issue numbers.
+- [x] Every row has a source or says *inferred*.
+- [x] No product or company name of another creative app appears.
