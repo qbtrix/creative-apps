@@ -214,6 +214,15 @@ something. One that can't act yet is disabled and says why:
   refuses exactly this list (PROTECTED in scripts/fast-lane.sh; its tests
   read this bullet), so every path here goes in backticks and nothing else.
 
+## Feature leads
+
+A session started from a `feature-lead` issue is a lead: it follows
+`docs/factory/lead.md` (packet, build waves, Anatomy loop, contact sheet) and
+its workflow templates in `docs/factory/workflows/`. Every PR a lead or its
+agents open carries `Belt-Lead: <run id>` and `Feature: <feature>` lines
+above the `Fast-Check:` / `Head:` lines. `Belt-Lead:` PRs don't wait for
+`belt/review`; the lead's critic panel is their review.
+
 ## Fast lane
 
 Crew PRs merge into `dev` at once; `main` moves only when full CI passes on
@@ -249,8 +258,9 @@ Crew PRs merge into `dev` at once; `main` moves only when full CI passes on
   audit) loses the label with a comment saying why and waits for review.
 - Full CI (`Linux`, `macOS` with snapshots and the UI journeys) runs on `dev`
   once a feature is built, not per merge: when the supervisor or Belt
-  dispatches it, when the lane merges a PR labelled `feature-done`, and once a
-  day. Green: `main` fast-forwards to that exact SHA. Red: one issue titled
+  dispatches it, when the lane merges a PR labelled `feature-done` or one
+  touching `Sources/*App`, `Sources/SuiteUI`, `Tests/App*` or `UITests`, after
+  every 10 merged PRs (at most once per lane run), and once a day. Green: `main` fast-forwards to that exact SHA. Red: one issue titled
   "dev is red" (label `dev-red`) names the failing jobs and the culprit range
   `main..<sha>`. SwiftUI breakage can sit on `dev` until that run, so the range
   can span several PRs. The lane keeps merging while the issue is open; the
