@@ -20,3 +20,5 @@ utc	stage	event	ref	note
 2026-10-14T17:02Z	4	ci-run	38602105363	red: PhotoBrushLatencyTests only (line:photo); all feature tests green
 2026-10-14T17:02Z	4	round-findings	round2	0 in feature; outside red noted on #763, rerun 403
 2026-10-14T17:44Z	4	heartbeat	-	waiting on next dev CI run; heartbeat job ended at its time limit, heartbeats now via check-ins
+2026-10-14T22:15Z	0	stage-end	1098ff2	resumed as #793 (run act-1a13c789856-0qa9), base verified
+2026-10-14T22:15Z	5	stage-start	-	no dev CI since 4594082; feature-done status PR next
