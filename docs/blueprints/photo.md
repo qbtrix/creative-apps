@@ -303,9 +303,10 @@ Flare's LM-0a3 and F1 did:
   (`.selection` step; masks in `PhotoStack`). No later feature edits those
   three files.
 - **Drags carry what the tools need.** Today's `drag(from:to:pressure:sampling:)`
-  and `drags(_:)` carry only Option (as `sampling`). PV-0 widens both to
-  `modifiers: DragModifiers` and the canvas `zoom`, and `PhotoWindow`,
-  `StrokePacer` and the canvas gesture pass them, so Shift-drag (add, keep
+  and `drags(_:)` carry only Option (as `sampling`). PV-0 adds
+  `drag(from:to:pressure:modifiers:zoom:)` and its batch form, keeps the old
+  two as wrappers so the existing tests compile unchanged, and
+  `PhotoWindow`, `StrokePacer` and the canvas gesture call the new ones, so Shift-drag (add, keep
   ratio, snap), Option-drag (subtract, from center) and zoom-aware handle
   tolerances reach PV-5 and PV-7 without touching those files again.
 - **Drags route by component.** `PhotoStroke.drag` sends marquee drags to
@@ -1662,14 +1663,16 @@ Stored state added to `PhotoWorkspace` (and to its `==`, except `services`,
 which isn't `Equatable`):
 
 ```swift
-    // v2 state (PV-0). Each is written only by the extension file named.
+    // v2 state (PV-0). Each belongs to the extension file named; besides it,
+    // start() resets them all, PhotoHistory restores masks and the selection on
+    // undo, and PhotoStroke paints into a mask through paintTarget().
     /// The use cases (PhotoServices); `.live` in the app, `.fake` under -PhotoFixture.
     public internal(set) var services: PhotoServices = .live
     /// The selection's coverage when it isn't an exact rectangle (PhotoSelectionMask.swift).
     public internal(set) var selectionMask: Mask?
     /// The Marquee tool's shape and feather (PhotoSelectionMask.swift).
     public internal(set) var selectionOptions = SelectionOptions()
-    /// Each masked layer's mask, its own size, coverage in alpha (PhotoMask.swift).
+    /// Each masked layer's mask, its own size, coverage as gray, alpha 1 (PhotoMask.swift).
     public internal(set) var masks: [PhotoLayer.ID: TiledPixels] = [:]
     /// Brush and eraser paint on the selected layer's mask (PhotoMask.swift).
     public internal(set) var editsMask = false
@@ -1778,14 +1781,16 @@ extension PhotoWorkspace {
     /// pixels; nil, with `statusMessage` "Pick a pixel layer to paint on.",
     /// on an adjustment layer without a mask target.
     public func paintTarget() -> PaintTarget? { selectedLayerID.map(PaintTarget.pixels) }
-    /// One pointer event (PV-0 widens today's `drag(from:to:pressure:sampling:)`;
-    /// `sampling` becomes `modifiers.contains(.option)`). `zoom` is points per
-    /// canvas pixel, for hit tolerances.
+    /// One pointer event with its modifier keys and the canvas zoom (points
+    /// per canvas pixel, for hit tolerances). Today's
+    /// `drag(from:to:pressure:sampling:)` and `drags(_:)` stay as thin
+    /// wrappers (`sampling` is `[.option]`, zoom 1), so the ~60 existing test
+    /// calls compile unchanged; the window and StrokePacer call these.
     public mutating func drag(from start: Mask.Point, to point: Mask.Point, pressure: Double = 1,
-                              modifiers: DragModifiers, zoom: Double) {}
-    /// A display frame's events at once (today's `drags`), each with its modifiers.
+                              modifiers: DragModifiers, zoom: Double = 1) {}
+    /// A display frame's events at once, each with its modifiers.
     public mutating func drags(_ events: [(from: Mask.Point, to: Mask.Point, pressure: Double, modifiers: DragModifiers)],
-                               zoom: Double) {}
+                               zoom: Double = 1) {}
     /// Delete and Fill weight each pixel by the selection's coverage; Select
     /// All, Deselect and Apply Crop set or clear `selectionMask` too (PV-0
     /// routes them through PhotoSelectionMask.swift).
@@ -1823,7 +1828,7 @@ extension PhotoWorkspace {
 
 // PV-1 (PhotoDocumentFile.swift, PhotoRecovery.swift)
 extension PhotoWorkspace {
-    public var isDirty: Bool { savedStepID != currentStepID }
+    public var isDirty: Bool { canvas != nil && savedStepID != currentStepID }
     public var saveAction: SaveAction { .saveAs }
     public func snapshot() throws -> PhotoDocumentSnapshot { throw PhotoRefusal("") }
     public func documentPackage(codec: any PhotoImageCodec) throws -> PhotoPackage { PhotoPackage(files: [:]) }
@@ -2619,3 +2624,19 @@ the 11 open `line:photo` issues and their labels match 0.4 and 8.1, every
 file in 8.3 sits in exactly one `c4-planned.json` component, and neither file
 names another company's product. After the fixes the code was compiled
 again and the 309 Photo model tests passed.
+
+### Round 3 (2026-10-14): verification of round 2; 3 major, all fixed
+
+A third pass checked D1–D14 only. Thirteen held. D3 had left `masks`
+described as "coverage in alpha" in 5.3, and three new problems came from
+the round-2 fixes:
+
+| # | Severity | Finding | Fix |
+|---|---|---|---|
+| E1 | major | `isDirty` read true with no image open (nil against step 0), so closing an empty window would prompt | `isDirty` is false without a canvas (5.3) |
+| E2 | major | Making `modifiers:` and `zoom:` required on `drag` would break about 60 existing calls in 15 test files PV-0 doesn't list | New overloads; the old signatures stay as wrappers (2.4, 5.3) |
+| E3 | major | "Each is written only by the extension file named" was false once paint, undo and `start()` write masks and the selection | The comment names every writer (5.3); `masks` reads "coverage as gray" |
+
+The `photo-model-history` description in `c4-planned.json` now names step ids
+and the mask-tiles step. The code was compiled again after the fixes. Round
+3 found no blocking item, so the critic loop stops here.
