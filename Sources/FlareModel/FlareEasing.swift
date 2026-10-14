@@ -7,11 +7,19 @@
 // `endEasingHandleDrag()` bumps the serial in that key, so the next move starts
 // a new step. The stored selection is dropped when the layer selection changes
 // (FlareWorkspace.selectedLayerID) and ignored once its keyframes are gone.
+// The selected layer is looked up in the edited owner's layers, so inside a
+// symbol the editor reads the symbol's own timeline (#643). SetKeyframeEasing
+// still names a scene layer, so an easing change inside a symbol is refused.
 import FlareCore
 
 extension FlareWorkspace: EasingEditing {
+    static let easingInSymbolMessage = "Exit the symbol to change its easing."
+
+    /// The selected layer in the scene or symbol being edited.
+    private var easingLayer: Layer? { ownerLayers?.first { $0.id == selectedLayerID } }
+
     public var easingSegments: [EasingSegment] {
-        guard let layer = selectedScene?.layers.first(where: { $0.id == selectedLayerID }) else { return [] }
+        guard let layer = easingLayer else { return [] }
         return layer.tracks.keys.sorted().flatMap { property in
             let frames = (layer.tracks[property] ?? []).map(\.frame).sorted()
             return zip(frames, frames.dropFirst()).map {
@@ -25,9 +33,7 @@ extension FlareWorkspace: EasingEditing {
     }
 
     public var currentEasing: Easing? {
-        guard let segment = selectedEasingSegment,
-              let layer = selectedScene?.layers.first(where: { $0.id == selectedLayerID })
-        else { return nil }
+        guard let segment = selectedEasingSegment, let layer = easingLayer else { return nil }
         return layer.tracks[segment.property]?.first { $0.frame == segment.startFrame }?.easing
     }
 
@@ -61,6 +67,7 @@ extension FlareWorkspace: EasingEditing {
     /// Gives the selected segment's start keyframe `easing` as one undo step,
     /// or as part of the open step when `coalesceKey` matches the last one.
     private mutating func setEasing(_ easing: Easing, coalesceKey: String?) {
+        guard editingSymbolID == nil else { return refuse(.refused(Self.easingInSymbolMessage)) }
         guard let sceneID = selectedSceneID, let layerID = selectedLayerID, let segment = selectedEasingSegment
         else { return }
         let command = SetKeyframeEasing(
