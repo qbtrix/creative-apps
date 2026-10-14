@@ -67,7 +67,9 @@ extension FlareWorkspace {
         guard let id = selectedSceneID else { return refuse(.noDocument) }
         guard fps > 0 else { return refuse(.command(.invalidFPS(fps))) }
         guard durationFrames >= 0 else { return refuse(.command(.invalidDuration(durationFrames))) }
-        if let label = selectedScene?.labels.filter({ $0.value > durationFrames }).min(by: { $0.key < $1.key }) {
+        // Name the furthest label (ties by name), so typing the frame it names is accepted (#632).
+        if let label = selectedScene?.labels.filter({ $0.value > durationFrames })
+            .max(by: { ($0.value, $1.key) < ($1.value, $0.key) }) {
             return refuse(.refused("Length must reach frame \(label.value), where the label \u{201C}\(label.key)\u{201D} sits."))
         }
         let scenes = services.scenes
