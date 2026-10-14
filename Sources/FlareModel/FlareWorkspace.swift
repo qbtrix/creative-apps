@@ -157,10 +157,13 @@ public struct FlareWorkspace: Sendable, Equatable {
     }
 
     /// Selects a layer of the edited owner (the symbol being edited in place, else the selected scene) by id. An
-    /// unknown id is ignored.
+    /// unknown id is ignored. A refusal saying to unlock the layer that was selected clears once that is no longer
+    /// what blocks the tool, so it never stays up while the tool draws (#699).
     public mutating func selectLayer(_ id: String) {
         guard ownerLayers?.contains(where: { $0.id == id }) == true else { return }
+        let blocked = lockedHelp(tool)
         selectedLayerID = id
+        if let blocked, layerError == .refused(blocked), lockedHelp(tool) != blocked { layerError = nil }
     }
 
     /// Selects a sidebar row: a scene or a layer of the edited owner.
