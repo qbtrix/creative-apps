@@ -6,6 +6,11 @@ conversion from FlareCore paths and colors to CoreGraphics. (The display-link
 playback clock, LA-2 #372, shipped in #751 while this packet was written.)
 **Line:** `line:flare` · **Wave:** 1 (`waves.md`) · **Lead branch:** `lead/mac-platform`
 
+**Status:** built on `dev`. MP-1 #757, MP-2 #759, MP-3 #760, MP-4 #756,
+MP-5 #761, MP-6 #762, and the round-1 test fix #764. Feature issue #793
+(resumes #754). Nothing is wired into the window yet; F17a #205 and F17c
+#393 add the menu and the restore alert.
+
 **Covers:** #739 (LM-1b), #373 (LA-3), #370 (LA-0). Each closes
 through the task PR that names it in the table below.
 
