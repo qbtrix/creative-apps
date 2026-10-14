@@ -344,8 +344,9 @@ public struct FakeShapes: ShapeBuilding {
     /// gesture works on that box: its handle opposite the grip stays put, and the layer's own scaleX/scaleY are picked so
     /// its new world box lands as near as it can to the one the pointer asks for. An edge handle scales the layer evenly,
     /// so its edge follows the pointer exactly along its axis. A turned box can't take every shape (at 45° it is always
-    /// square), so a corner keeps each local stretch between the two world stretches: it never flips, blows up near 45°
-    /// or flattens the layer. Nil when the layer is square to the world.
+    /// square), so a corner keeps each local stretch between the two world stretches: it never blows up near 45° or
+    /// flattens the layer. A grip dragged through the fixed handle mirrors the layer, as at 0° (#655). Nil when the
+    /// layer is square to the world.
     private static func obliqueScale(_ h: Int, to: Point, layer: Layer, t: Transform, document: Document,
                                      sceneID: String, frame: Int, box: Rect) -> [String: Double]? {
         let quarter = t.rotation.remainder(dividingBy: 90)
@@ -361,20 +362,34 @@ public struct FakeShapes: ShapeBuilding {
         }
         guard let local = Rect(enclosing: points), let own = Rect(enclosing: points.map(t.matrix.apply)) else { return nil }
         let handle = ((h % 8) + 8) % 8, grip = Self.handle(handle, on: box), fixed = Self.handle(handle + 4, on: box)
-        // The world stretch the pointer asks of the box about its fixed handle; an edge leaves its other axis at 1.
-        let kx = handle % 4 == 1 ? 1 : abs(ratio(to.x - fixed.x, grip.x - fixed.x))
-        let ky = handle % 4 == 3 ? 1 : abs(ratio(to.y - fixed.y, grip.y - fixed.y))
+        // The signed world stretch the pointer asks of the box about its fixed handle; an edge leaves its other axis
+        // at 1. Below 0 the grip has crossed the fixed handle and the box mirrors on that axis (#655).
+        let wx = handle % 4 == 1 ? 1 : ratio(to.x - fixed.x, grip.x - fixed.x)
+        let wy = handle % 4 == 3 ? 1 : ratio(to.y - fixed.y, grip.y - fixed.y)
+        let (kx, ky) = (abs(wx), abs(wy))
         // The world box's size from the local stretch f: width = a·f, height = b·f.
         let turn = Matrix.rotation(degrees: t.rotation), (c, s) = (abs(turn.a), abs(turn.b))
         let (u, v) = (abs(t.scaleX) * local.width, abs(t.scaleY) * local.height)
         let a = (c * u, s * v), b = (s * u, c * v)
-        let f = handle % 2 == 1 ? (x: handle % 4 == 1 ? ky : kx, y: handle % 4 == 1 ? ky : kx)
+        // The local axis nearest world x; the other is nearest world y.
+        let alongX = c >= s
+        var f = handle % 2 == 1 ? (x: handle % 4 == 1 ? ky : kx, y: handle % 4 == 1 ? ky : kx)
             : fit(a, b, to: (kx * (a.0 + a.1), ky * (b.0 + b.1)), within: (min(kx, ky), max(kx, ky)))
-        let (sx, sy) = (t.scaleX * f.x, t.scaleY * f.y)
+        // An edge dropped on the opposite edge zeroes only the local axis nearest its world axis, as at 0°, so the
+        // layer keeps a size a later drag can grow (#655).
+        if handle % 2 == 1, f.x == 0, f.y == 0 {
+            f = (handle % 4 == 3) == alongX ? (0, 1) : (1, 0)
+        }
+        // A world axis that crossed its fixed handle mirrors the local axis nearest it; both crossing is a half turn.
+        let flipX = (wx < 0 && alongX) || (wy < 0 && !alongX), flipY = (wy < 0 && alongX) || (wx < 0 && !alongX)
+        let (sx, sy) = (t.scaleX * f.x * (flipX ? -1 : 1), t.scaleY * f.y * (flipY ? -1 : 1))
         guard let moved = Rect(enclosing: points.map((turn * Matrix.scale(x: sx, y: sy)).apply)) else { return nil }
-        // The layer's own fixed handle goes where the box's stretch takes it: for a lone layer, it stays put.
-        let from = Self.handle(handle + 4, on: own), anchor = Self.handle(handle + 4, on: moved)
-        let target = Point(x: fixed.x + kx * (from.x - fixed.x), y: fixed.y + ky * (from.y - fixed.y))
+        // The layer's own fixed handle goes where the box's stretch takes it: for a lone layer, it stays put. On a
+        // mirrored axis the moved box meets it with its grip side.
+        let from = Self.handle(handle + 4, on: own), stay = Self.handle(handle + 4, on: moved)
+        let swap = Self.handle(handle, on: moved)
+        let anchor = Point(x: wx < 0 ? swap.x : stay.x, y: wy < 0 ? swap.y : stay.y)
+        let target = Point(x: fixed.x + wx * (from.x - fixed.x), y: fixed.y + wy * (from.y - fixed.y))
         return ["x": target.x - anchor.x, "y": target.y - anchor.y, "scaleX": sx, "scaleY": sy]
     }
     /// The local stretch f, both parts within `range`, whose world size (a·f, b·f) lands nearest `target`; of equally
