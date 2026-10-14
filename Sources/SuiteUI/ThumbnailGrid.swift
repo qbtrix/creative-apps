@@ -137,7 +137,8 @@ public struct ThumbnailGrid<ID: Hashable>: View {
 }
 
 /// One thumbnail: the image (or a flat placeholder) with its badges, and the
-/// caption under it. Selection is an accent ring and a light accent fill.
+/// caption under it. Selection is an accent ring on the image, an accent
+/// hairline just outside it, and a light accent fill.
 private struct ThumbnailCell<ID: Hashable>: View {
     let item: ThumbnailItem<ID>
     let size: CGSize
@@ -152,6 +153,7 @@ private struct ThumbnailCell<ID: Hashable>: View {
                 .overlay(
                     RoundedRectangle(cornerRadius: SuiteRadius.small)
                         .strokeBorder(isSelected ? SuiteColor.accent : SuiteColor.separator, lineWidth: isSelected ? 2 : 1))
+                .overlay { if isSelected { outerHairline } }
             Text(item.caption)
                 .font(SuiteFont.caption)
                 .foregroundStyle(isSelected ? Color.primary : SuiteColor.secondaryText)
@@ -164,6 +166,16 @@ private struct ThumbnailCell<ID: Hashable>: View {
         .help(item.caption)
         .accessibilityElement(children: .combine)
         .accessibilityAddTraits(isSelected ? .isSelected : [])
+    }
+
+    /// A 1 pt accent line a focus-ring gap outside the image, over the cell's
+    /// fill, so the selection still reads when the ring on the image's edge
+    /// matches the photo (a blue sky or sea).
+    private var outerHairline: some View {
+        let out = SuiteSize.focusRingGap + 0.5
+        return RoundedRectangle(cornerRadius: SuiteRadius.small + out)
+            .stroke(SuiteColor.accent, lineWidth: 1)
+            .padding(-out)
     }
 
     @ViewBuilder private var thumbnail: some View {

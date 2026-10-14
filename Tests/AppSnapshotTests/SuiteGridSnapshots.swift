@@ -1,7 +1,9 @@
 // SuiteGridSnapshots.swift: SuiteUI's ThumbnailGrid over sample data, a mix
 // of placeholder cells (no image) and colored cells with badges, unselected
 // and with three cells selected, in Light and Dark. Writes
-// suiteui-grid-{light,dark}.png and suiteui-grid-selected-{light,dark}.png.
+// suiteui-grid-{light,dark}.png and suiteui-grid-selected-{light,dark}.png,
+// plus suiteui-grid-selected-blue-{light,dark}.png: selected blue and teal
+// cells next to an unselected blue one, where the selection must still read.
 // macOS only.
 import SuiteUI
 import SwiftUI
@@ -16,6 +18,19 @@ import Testing
             try snapshot(GridSample(items: items, selection: []), name: "suiteui-grid-\(suffix)", scheme: scheme)
             try snapshot(
                 GridSample(items: items, selection: ["2", "3", "8"]), name: "suiteui-grid-selected-\(suffix)", scheme: scheme)
+        }
+    }
+
+    @Test func selectedOnBlueAndTeal() throws {
+        let colors: [[Color]] = [[.blue, .blue], [.teal, .teal], [.blue, .teal], [.blue, .blue]]
+        let items = colors.enumerated().map { index, pair in
+            ThumbnailItem(id: "\(index + 1)", image: Self.swatch(pair), caption: "IMG_\(4900 + index + 1).heic")
+        }
+        for scheme in [ColorScheme.light, .dark] {
+            let suffix = scheme == .dark ? "dark" : "light"
+            try snapshot(
+                GridSample(items: items, selection: ["1", "2", "3"]), name: "suiteui-grid-selected-blue-\(suffix)",
+                scheme: scheme)
         }
     }
 
