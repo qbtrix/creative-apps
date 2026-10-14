@@ -15,15 +15,55 @@ private func state(_ id: String, _ start: Int, _ end: Int) -> MachineState {
     MachineState(id: id, name: id, sceneID: "scene-1", startFrame: start, endFrame: end)
 }
 
-@Test func buttonHasThreeLabelsAndNoMachineAndTheMachineVariantIsJ19sResult() throws {
-    let button = FlareFixtures.button, wired = FlareFixtures.buttonWithMachine
-    try FlareFormat.validate(button)
-    try FlareFormat.validate(wired)
-    #expect(FlareFixtures.named("button") == button && FlareFixtures.named("button with machine") == wired)
+@Test func buttonHasThreeLabelsAndNoMachineAndTheStatesVariantIsJ19sResult() throws {
+    let button = FlareFixtures.button, states = FlareFixtures.buttonWithStates, wired = FlareFixtures.buttonWithMachine
+    for doc in [button, states, wired] { try FlareFormat.validate(doc) }
+    #expect(FlareFixtures.named("button") == button && FlareFixtures.named("button with states") == states
+        && FlareFixtures.named("button with machine") == wired)
     #expect(button.scenes.first?.labels == ["idle": 0, "hover": 24, "pressed": 48] && button.stateMachines.isEmpty)
+    // J19 through the fakes, from `button`, lands exactly on `button with states`.
+    var e = CommandEngine(document: button)
+    let id = try machines.addMachine(named: "Button", firstState: state("idle", 0, 23), in: &e)
+    try machines.addState(state("hover", 24, 47), to: id, in: &e)
+    try machines.addState(state("pressed", 48, 71), to: id, in: &e)
+    try machines.renameMachine(id, to: "Hover button", in: &e)
+    #expect(e.document == states)
     let machine = try #require(wired.stateMachines.first)
     #expect(machine.name == "Hover button" && machine.initialState == "idle")
-    #expect(machine.states.map(\.id) == ["idle", "hover", "pressed"] && machines.issues(wired, machineID: machine.id).isEmpty)
+    #expect(machine.states == states.stateMachines.first?.states && machines.issues(wired, machineID: machine.id).isEmpty)
+}
+
+@Test func journeyJ20RunsOnItsFixtureWithOnlyTheDocumentedRefusal() throws {
+    // docs/blueprints/flare.md section 7, J20 (`testTransitionsInputsAndRefusals`), step by step on `button with states`.
+    var e = CommandEngine(document: try #require(FlareFixtures.named("button with states")))
+    let m = "machine-1"
+    func hover(_ on: Bool) -> [Condition] { [Condition(input: "hover", op: .equal, value: .bool(on))] }
+    func inputs() -> [MachineInput] { e.document.stateMachines.first?.inputs ?? [] }
+    func transitions() -> [FlareTransition] { e.document.stateMachines.first?.transitions ?? [] }
+    try machines.addInput(MachineInput(name: "hover", defaultValue: .bool(false)), to: m, in: &e)
+    #expect(inputs() == [MachineInput(name: "hover", defaultValue: .bool(false))])
+    try machines.updateInput(MachineInput(name: "hover", defaultValue: .bool(true)), in: m, in: &e)
+    #expect(inputs().first?.defaultValue == .bool(true))
+    try machines.updateInput(MachineInput(name: "hover", defaultValue: .bool(false)), in: m, in: &e)
+    #expect(inputs().first?.defaultValue == .bool(false))
+    try machines.addTransition(FlareTransition(from: "idle", to: "hover", trigger: "pointer", conditions: hover(true)), to: m, in: &e)
+    try machines.updateTransition(at: 0, to: FlareTransition(from: "idle", to: "hover", trigger: "pointer", conditions: hover(false)),
+                                  in: m, in: &e)
+    #expect(transitions().first?.conditions == hover(false))
+    try machines.updateTransition(at: 0, to: FlareTransition(from: "idle", to: "hover", trigger: "pointer", conditions: hover(true)),
+                                  in: m, in: &e)
+    #expect(transitions() == [FlareTransition(from: "idle", to: "hover", trigger: "pointer", conditions: hover(true))])
+    let graph = e.document
+    #expect(throws: CommandError.invalidDocument("hover is used by the transition idle → hover.")) {
+        try machines.removeState("hover", from: m, in: &e)
+    }
+    #expect(e.document == graph)
+    try machines.addInput(MachineInput(name: "speed", defaultValue: .number(1)), to: m, in: &e)
+    #expect(inputs().map(\.name) == ["hover", "speed"])
+    try machines.removeInput(named: "speed", from: m, in: &e)
+    #expect(inputs().map(\.name) == ["hover"])
+    try machines.addTransition(FlareTransition(from: "hover", to: "pressed", trigger: "click"), to: m, in: &e)
+    #expect(transitions().count == 2 && machines.issues(e.document, machineID: m).isEmpty)
 }
 
 @Test func addMachineMakesTheFirstStateInitialInOneNamedStep() throws {

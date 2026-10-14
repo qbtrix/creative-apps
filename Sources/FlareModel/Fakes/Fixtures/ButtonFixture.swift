@@ -1,8 +1,9 @@
 // ButtonFixture.swift: `button`, the fixture the Interactions journeys open (J19–J21). One 550 × 400 scene, 72 frames
 // at 24 fps, labelled idle (0), hover (24) and pressed (48), and one Button layer whose scale rests at 1 while idle,
-// grows to 1.08 for hover and dips to 0.92 when pressed. It has no machine: J19 builds it. `buttonWithMachine` adds
-// that result as J20 wires it: "Hover button" with the three states, a bool input hover (default false), and the
-// transitions idle → hover on "pointer" when hover == true, hover → idle when hover == false, hover → pressed on "click".
+// grows to 1.08 for hover and dips to 0.92 when pressed. It has no machine: J19 builds it. `buttonWithStates` is J19's
+// result, the one J20 opens: "Hover button" with the three states, no inputs and no transitions. `buttonWithMachine`
+// is the wired machine J21 previews: those states, a bool input hover (default false), and the transitions
+// idle → hover on "pointer" when hover == true, hover → idle when hover == false, hover → pressed on "click".
 import FlareCore
 
 extension FlareFixtures {
@@ -18,20 +19,28 @@ extension FlareFixtures {
                                             labels: ["idle": 0, "hover": 24, "pressed": 48])])
     }()
 
-    public static let buttonWithMachine: Document = {
+    public static let buttonWithStates: Document = {
         func state(_ id: String, _ start: Int) -> MachineState {
             MachineState(id: id, name: id, sceneID: "scene-1", startFrame: start, endFrame: start + 23)
         }
-        func hover(_ on: Bool) -> [Condition] { [Condition(input: "hover", op: .equal, value: .bool(on))] }
         var document = button
-        document.stateMachines = [StateMachine(
-            id: "machine-1", name: "Hover button", states: [state("idle", 0), state("hover", 24), state("pressed", 48)],
-            transitions: [
-                FlareTransition(from: "idle", to: "hover", trigger: "pointer", conditions: hover(true)),
-                FlareTransition(from: "hover", to: "idle", trigger: "pointer", conditions: hover(false)),
-                FlareTransition(from: "hover", to: "pressed", trigger: "click"),
-            ],
-            initialState: "idle", inputs: [MachineInput(name: "hover", defaultValue: .bool(false))])]
+        document.stateMachines = [StateMachine(id: "machine-1", name: "Hover button",
+                                               states: [state("idle", 0), state("hover", 24), state("pressed", 48)],
+                                               initialState: "idle")]
+        return document
+    }()
+
+    public static let buttonWithMachine: Document = {
+        func hover(_ on: Bool) -> [Condition] { [Condition(input: "hover", op: .equal, value: .bool(on))] }
+        var document = buttonWithStates
+        guard var machine = document.stateMachines.first else { return document }
+        machine.transitions = [
+            FlareTransition(from: "idle", to: "hover", trigger: "pointer", conditions: hover(true)),
+            FlareTransition(from: "hover", to: "idle", trigger: "pointer", conditions: hover(false)),
+            FlareTransition(from: "hover", to: "pressed", trigger: "click"),
+        ]
+        machine.inputs = [MachineInput(name: "hover", defaultValue: .bool(false))]
+        document.stateMachines = [machine]
         return document
     }()
 }
