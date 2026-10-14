@@ -37,7 +37,8 @@ waves 0 and 1; nothing later touches `Package.swift`, `project.yml`,
   `SuiteTypeRegistry.standard`; exported types with no document role (the
   hand-off and the three pasteboard-only types) equal
   `SuiteTypeRegistry.declaredOnly`, which suite-contracts SC-1a adds.
-- The journey bundle compiles one glob, `UITests/AfterGlowJourneyTests*.swift`.
+- The journey bundle compiles one glob, `UITests/AfterGlowJourneyTests*.swift`,
+  which SuiteUI's template (SH-7, #333) already gives every journey target.
   The blueprint's `UITests/Journey+Suite.swift` would match SuiteUI's
   `UITests/Journey*.swift` template glob and land in all five app bundles,
   which can't see `SuiteApp` (review); home's harness file is
@@ -82,14 +83,19 @@ No screen. The states are the build's:
 ## Contract slice
 
 `Packaging.swift` (blueprint 5.6) moves into `Sources/SuiteModel/Packaging/`
-unchanged except for the live checker:
+with two additions (a report-only set on the budget and `hard` on a
+finding) and the live checker. This is the one statement of the contract;
+BU-0's JSON uses these keys.
 
 ```swift
 public enum SizeEntryKind: String, Codable, Sendable { case executable, framework, appBundle, wholeBundle, tarball }
-public struct SizeEntry: Codable, Equatable, Sendable { name, kind, bytes, suiteUISymbols: Int? }
-public struct SizeReport: Codable, Equatable, Sendable { commit: String, entries: [SizeEntry] }
-public struct SizeBudget: Codable, Equatable, Sendable { limits: [String: Int], reportOnly: Set<String> }
-public struct SizeFinding: Equatable, Sendable { entry: String, bytes: Int, limit: Int, hard: Bool }
+public struct SizeEntry: Codable, Equatable, Sendable { name: String, kind: SizeEntryKind, bytes: Int }      // as 5.6
+public struct SizeReport: Codable, Equatable, Sendable { commit: String, entries: [SizeEntry],
+                                                          suiteUISymbols: [String: Int] }             // as 5.6: app name -> count
+public struct SizeBudget: Codable, Equatable, Sendable { limits: [String: Int], maxSuiteUISymbols: Int,   // as 5.6
+                                                          reportOnly: Set<String> }                  // added: names never hard
+public struct SizeFinding: Equatable, Sendable { name: String, measured: Int, limit: Int,               // as 5.6
+                                                 hard: Bool }                                         // added
 public protocol SizeBudgetChecking: Sendable { func evaluate(_ r: SizeReport, against b: SizeBudget) -> [SizeFinding] }
 public struct SizeGate: SizeBudgetChecking { public init() }          // BU-2: FakeSizeBudget's rule, as the live type
 public enum BundleLayout {                                            // BU-2
@@ -111,14 +117,18 @@ other. suite-contracts' `SuiteApp.bundlePath` must agree with it; RO-1
 SizeGate.evaluate(report, budget):                                  # BU-2
   for entry in report.entries:
     limit = budget.limits[entry.name] ?? continue
-    if entry.bytes > limit: finding(entry, hard: !budget.reportOnly.contains(entry.name))
-    if entry.kind == .executable, (entry.suiteUISymbols ?? 0) > budget.symbolLimit: finding(..., hard: !reportOnly)
+    if entry.bytes > limit: SizeFinding(entry.name, entry.bytes, limit, hard: !budget.reportOnly.contains(entry.name))
+  for (app, n) in report.suiteUISymbols sorted where n > budget.maxSuiteUISymbols:
+    SizeFinding("\(app) SuiteUI symbols", n, budget.maxSuiteUISymbols, hard: !budget.reportOnly.contains("\(app) SuiteUI symbols"))
 SizeGateTests.reportFromEnvironment: if SUITE_SIZE_REPORT set: decode it; #expect(no hard finding)
 
 BuildGraphTests (Linux, line scan, no YAML library):                # BU-3
-  pkg = target names in Package.swift: .target(name:), .executableTarget(name:), model(...) expansions
+  pkg = target names in Package.swift: .target(name:), .executableTarget(name:), and the expansions of
+        model("<X>", …) (<X>Model) and apps.map { …"\($0)App"… } over the `apps` array literal (<X>App)
+  #expect(pkg macOS non-test set == the literal list: SuiteUI, SuiteModel, SuiteShell, AfterGlowApp,
+          FlareModel…HaloModel, FlareApp…HaloApp)        # so a scan that misses a form fails here first
   yml = names at the fixed indent under `targets:` in project.yml
-  #expect(pkg macOS release set ⊆ yml release set); extra yml-only names allowed: CreativeEngines, *JourneyTests
+  #expect(pkg set ⊆ yml release set); yml-only names allowed: CreativeEngines, *JourneyTests
   check: the same scan over project.yml's text with SuiteShell's lines removed in memory reports "SuiteShell missing from project.yml"
 
 bundle-apps (macOS):                                                # BU-4
@@ -143,8 +153,8 @@ BU-4 must have merged first, see the done check).
 | id | issue | what | owned files | depends on | merges |
 |---|---|---|---|---|---|
 | BU-2 | #813 | `SizeReport`, `SizeBudget`, `SizeFinding`, `SizeGate`, `BundleLayout`; `SizeGateTests` reads `SUITE_SIZE_REPORT` when set | `Sources/SuiteModel/Packaging/` (`SizeReport.swift`, `SizeGate.swift`, `BundleLayout.swift`), `Tests/SuiteModelTests/Packaging/SizeGateTests.swift`, `Tests/SuiteModelTests/Packaging/BundleLayoutTests.swift` | BU-1a #810 | lane |
-| BU-3 | #814 | Route R1: the `Release` graph in `project.yml` (four frameworks, five apps as application targets with the helper run path, the launcher) and the `AfterGlowJourneyTests` bundle (the template's files, `UITests/AfterGlowJourneyTests*.swift`, `Sources/SuiteModel/Values/`); `CreativeEngines.swift` re-exporting FlareCore, CoreRaster, CoreColor; `BuildGraphTests` | `project.yml`, `Bundle/Engines/CreativeEngines.swift`, `Tests/SuiteModelTests/BuildGraphTests.swift` | #333 (SH-7), BU-1a | supervisor |
-| BU-5a | #815 | `AfterGlow.plist`: bundle id, every document type of 2.6 (Editor, Owner; images Alternate), exported and imported types, `LSMinimumSystemVersion` 26.0; `PlistShapeTests` | `Bundle/Info/AfterGlow.plist`, `Tests/SuiteModelTests/PlistShapeTests.swift` | BU-1a | lane |
+| BU-3 | #814 | Route R1: the `Release` graph in `project.yml` (four frameworks, five apps as application targets with the helper run path, the launcher) and the `AfterGlowJourneyTests` bundle in the template's list (SH-7's template already compiles `UITests/Journey*.swift` and `UITests/AfterGlowJourneyTests*.swift` for it; BU-3 adds only `Sources/SuiteModel/Values/`); `CreativeEngines.swift` re-exporting FlareCore, CoreRaster, CoreColor; `BuildGraphTests` | `project.yml`, `Bundle/Engines/CreativeEngines.swift`, `Tests/SuiteModelTests/BuildGraphTests.swift` | #333 (SH-7), BU-1a | supervisor |
+| BU-5a | #815 | `AfterGlow.plist`: bundle id, every document type of 2.6 (Editor, Owner; images Alternate), exported types (OpenRaster exported under the suite id unless the system declares one), `LSMinimumSystemVersion` 26.0; `PlistShapeTests` | `Bundle/Info/AfterGlow.plist`, `Tests/SuiteModelTests/PlistShapeTests.swift` | BU-1a | lane |
 | BU-5b | #816 | The five app plists: each app's own types (Owner for its format, Alternate for images it reads), the hand-off type as Viewer, `org.creativesuite.<x>`, icon file name | `Bundle/Info/Flare.plist`, `Design.plist`, `Photo.plist`, `Library.plist`, `Halo.plist`, `Tests/SuiteModelTests/PlistShapeAppsTests.swift` | BU-5a | lane |
 | BU-5c | #817 | Placeholder icons (Q4): six 1024 px PNGs, a coloured rounded square with the app's initial; `Bundle/Icons/README.md` says how they were made and that art is pending | `Bundle/Icons/{AfterGlow,Flare,Design,Photo,Library,Halo}.png`, `Bundle/Icons/README.md`, `Tests/SuiteModelTests/IconFilesTests.swift` | BU-5b | lane |
 | BU-4 | #818 | `scripts/bundle-apps` assembles, signs and verifies `AfterGlow.app`, symlinks the old paths, registers with `lsregister`; `scripts/size-report` adds the AfterGlow rows | `scripts/bundle-apps`, `scripts/size-report` | BU-3, BU-5c, BU-0 #809 | supervisor |
@@ -173,8 +183,8 @@ feature does not wait.
 | id | test | fails when |
 |---|---|---|
 | BU-2 | `SizeGateTests`: an over-budget report (inline JSON in the test) with the 7.5 budget gives one hard finding naming `CreativeEngines.framework`; a report-only row over its limit gives a soft finding; an executable with 1 SuiteUI symbol and limit 0 is a finding; with `SUITE_SIZE_REPORT` unset the env test is skipped, set to the over fixture it fails. `BundleLayoutTests`: Flare's executable path and run path, the launcher's, and the four frameworks | a hard row passes, a soft row fails the gate, or a path is wrong |
-| BU-3 | `BuildGraphTests`: every macOS target of `Package.swift` is a target of `project.yml`'s release graph; on `project.yml`'s text with the `SuiteShell` target lines removed (in memory) the scan reports `SuiteShell`; `AfterGlowJourneyTests` lists `UITests/AfterGlowJourneyTests*.swift` and `Sources/SuiteModel/Values/` | a target is dropped from either file, or the journey bundle misses its sources |
-| BU-5a | `PlistShapeTests` (Linux, Foundation's XML property list decoding): `CFBundleIdentifier` is `org.creativesuite.afterglow`; the document types are exactly flare, design, halo, ora (Editor, Owner), png, jpeg, heic (Editor, Alternate) with their extensions; exported types are flare, design, halo, the hand-off (`aghandoff`) and the three pasteboard-only ids; `LSMinimumSystemVersion` is 26.0 | a type is missing, an image is Owner, or a version differs |
+| BU-3 | `BuildGraphTests`: every macOS target of `Package.swift` is a target of `project.yml`'s release graph; on `project.yml`'s text with the `SuiteShell` target lines removed (in memory) the scan reports `SuiteShell`; with `"Halo"` removed from the `apps` literal in memory the scan reports `HaloApp`; the Package.swift set equals the literal list; `AfterGlowJourneyTests` lists `Sources/SuiteModel/Values/` | a target is dropped from either file, a target form goes unscanned, or the journey bundle misses its sources |
+| BU-5a | `PlistShapeTests` (Linux, Foundation's XML property list decoding): `CFBundleIdentifier` is `org.creativesuite.afterglow`; the document types are exactly flare, design, halo, ora (Editor, Owner), png, jpeg, heic (Editor, Alternate) with their extensions; exported types are flare, design, halo, OpenRaster (`org.creativesuite.photo.openraster`, the registry's id, unless BU-S finds macOS 26 declares a system type; then imported, and the registry id changes in the same PR), the hand-off (`aghandoff`) and the three pasteboard-only ids; `LSMinimumSystemVersion` is 26.0 | a type is missing, an image is Owner, or a version differs |
 | BU-5b | `PlistShapeAppsTests`: each app plist's bundle id is `org.creativesuite.<x>`; it is Owner of its own format only; Photo and Library read the three image types as Alternate; every app opens the hand-off type as Viewer | an app claims another's format, or misses the hand-off |
 | BU-5c | `IconFilesTests`: every `CFBundleIconFile` named in the six plists has `Bundle/Icons/<name>.png`, 1024 × 1024 (read from the PNG header) | an icon is missing or the wrong size |
 | BU-4 | the dev macOS run: `bundle-apps` passes its own `otool -L` and `codesign --verify --deep --strict` checks; every existing app journey is green through the symlinks; `size-report` has the framework rows and per-app symbol counts | a helper links a framework statically, signing fails, or a journey breaks |

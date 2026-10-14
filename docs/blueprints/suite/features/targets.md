@@ -51,9 +51,11 @@ feature, on the dev CI build:
    "AfterGlow" with a placeholder home ("The AfterGlow home arrives with the
    home feature.").
 2. Every launcher menu of section 6.2 exists: File (New ▸ with its five
-   items, Open…, Open Recent ▸), Edit (Remove from Recents), View (Show
-   Sidebar, Show Inspector, Larger and Smaller Thumbnails), Window (Switch
-   To ▸, Assets), AfterGlow (Check for Updates…, Settings…). Each item the
+   items, Open…, Open Recent ▸; Close ⌘W is the system's), Edit (Undo and
+   Redo are the system's; Cut, Copy, Paste as "Add from Clipboard", Delete
+   as "Remove from Recents" or "Remove Asset" by page, Select All), View
+   (Show Sidebar, Show Inspector, Larger and Smaller Thumbnails), Window
+   (Switch To ▸, Assets), AfterGlow (Check for Updates…, Settings…). Each item the
    feature hasn't built yet is disabled with "Not connected yet (home)." (or
    switching, assets, updater, settings).
 3. AfterGlow > Settings… (⌘,) opens the Settings window with one line:
@@ -83,7 +85,9 @@ public enum SuiteIdentity {
 
 // Sources/SuiteShell/SuiteCommands.swift (BU-1a stub; switching SW-3c owns it from wave 2)
 public struct SuiteCommands: Commands {            // Window > Switch To ▸, six items, each disabled
-    public init() {}                                // with SuiteIdentity.notConnected("switching")
+    public init(app: SuiteApp = .launcher) {}       // with SuiteIdentity.notConnected("switching"); the
+                                                    // signature switching SW-3c keeps, so AfterGlowApp.swift
+                                                    // (frozen after BU-1b) compiles before and after it
     public var body: some Commands { ... }
 }
 
@@ -107,7 +111,7 @@ BU-1b AfterGlowApp.swift (frozen after this task):
     body:
       Window("AfterGlow", id: "home") { HomeWindow() }
         launch and minimum size: the ones SuiteWindow already uses (#715: 1000 × 640, minimum 880)
-        .commands { SuiteCommands(); LauncherCommandsHome(); LauncherCommandsAssets(); LauncherCommandsUpdate() }
+        .commands { SuiteCommands(app: .launcher); LauncherCommandsHome(); LauncherCommandsAssets(); LauncherCommandsUpdate() }
       Settings { SettingsView() } .commands { LauncherCommandsSettings() }
       Window("Welcome to AfterGlow", id: "onboarding") { OnboardingWindow() }
   (UpdateSheet is presented by HomeWindow from wave 2; BU-1b only creates its file)
@@ -136,7 +140,7 @@ PRs carry `fast-lane`; BU-1b also carries `feature-done`.
 |---|---|---|---|---|---|
 | TG-0 | #807 | C4: the planned `SuiteModel`, `SuiteShell`, `AfterGlowApp`, bundle, tests and journeys containers and components of `docs/blueprints/suite/c4-planned.json`, folded into the model | `docs/c4/model.json` | – | supervisor (its own commit) |
 | BU-S | #808 | Local spike on a Mac: shape B's cold launch and activation (20 runs each, `ProcessInfo.systemUptime` stamps) and resident memory against shape A's second scene; `application(_:open:)` receives a file with no window open on macOS 26; a cross-app XCUITest drag works on the runner; whether Launch Services indexes a nested `Contents/Helpers/*.app` | `docs/blueprints/suite/spike.md` | – | lane (docs), run by the supervisor on a Mac |
-| BU-0 | #809 | `scripts/size-report` for today's five bundles, its fixture test, and a `macos` step that runs it after `scripts/bundle-apps`, uploads `size-report` and adds the table to the job summary (report only) | `scripts/size-report`, `Tests/size_report/test_size_report.sh`, `Tests/size_report/fixture/` (two tiny fake bundles), `.github/workflows/ci.yml` | – | supervisor |
+| BU-0 | #809 | `scripts/size-report` for today's five bundles, its fixture test (run in the same `macos` step, since `nm` and `swift demangle` need Mach-O), and a `macos` step that runs it after `scripts/bundle-apps`, uploads `size-report` and adds the table to the job summary (report only). Its JSON keys are bundle's `SizeReport` exactly: `commit`, `entries` (`name`, `kind`, `bytes`) and `suiteUISymbols` (app name to count) | `scripts/size-report`, `Tests/size_report/test_size_report.sh`, `Tests/size_report/fixture/` (two tiny fake bundles), `.github/workflows/ci.yml` | – | supervisor |
 | BU-1a | #810 | The four targets in `Package.swift` with one source file each, so Linux builds `SuiteModel` and the macOS job builds `SuiteShell` and `AfterGlowApp` | `Package.swift`, `Sources/SuiteModel/Values/SuiteIdentity.swift`, `Sources/SuiteShell/SuiteCommands.swift` (stub), `Sources/AfterGlowApp/AfterGlowApp.swift` (minimal `@main`), `Tests/SuiteModelTests/SuiteIdentityTests.swift` | TG-0 | supervisor |
 | BU-1b | #811 | The launcher's scenes and placeholders: home `Window`, `Settings`, onboarding `Window`, the update sheet's file, the stub delegate, and one `Commands` stub per launcher feature holding its 6.2 items disabled with their reason | `Sources/AfterGlowApp/AfterGlowApp.swift`, `HomeWindow.swift`, `AssetsPage.swift`, `SettingsView.swift`, `OnboardingWindow.swift`, `UpdateSheet.swift`, `LauncherRouter.swift`, `LauncherCommands+Home.swift`, `LauncherCommands+Settings.swift`, `LauncherCommands+Assets.swift`, `LauncherCommands+Update.swift` (all under `Sources/AfterGlowApp/`), `Tests/SuiteModelTests/LauncherMenuStubTests.swift` | BU-1a | lane |
 
@@ -157,9 +161,9 @@ their waves.
 |---|---|---|
 | TG-0 | `scripts/ci`'s C4 step on BU-1a's branch rebased on TG-0: `CI: PASS`; `jq . docs/c4/model.json` succeeds | a new Sources file has no owner or two owners |
 | BU-S | `spike.md` holds, for shape B and shape A, 20 samples of cold launch and of activation with p50 and p95, resident memory of five apps vs one process, and a yes/no with the log line for each of the three confirmations | any number or confirmation is missing (the supervisor's review); a "no" on `application(_:open:)` reopens blueprint 2.6 before switching starts |
-| BU-0 | `bash Tests/size_report/test_size_report.sh`: on the fixture the JSON has one executable row per bundle with bytes > 0 and a `suiteUISymbols` count; with one bundle's executable removed the script exits 1 | a row is missing, a count is absent, or a missing bundle passes |
+| BU-0 | `bash Tests/size_report/test_size_report.sh`, run by the `macos` step: on the fixture the JSON has one executable row per bundle with bytes > 0 and a `suiteUISymbols` count; with one bundle's executable removed the script exits 1 | a row is missing, a count is absent, or a missing bundle passes |
 | BU-1a | `SuiteIdentityTests` (Linux): the prefix is `org.creativesuite`, the launcher id `org.creativesuite.afterglow`, and `notConnected("home")` reads "Not connected yet (home)."; `scripts/ci` PASS with `SuiteModel` in the Linux build | a target is missing on Linux, or the strings drift |
-| BU-1b | `LauncherMenuStubTests` (Linux, reads the four `LauncherCommands+*.swift` files and `AfterGlowApp.swift` as text): every launcher item of blueprint 6.2 appears exactly once with `.disabled(true)` and `notConnected(<its feature>)`, and `AfterGlowApp.swift` declares the three scenes and the four command groups; the macOS job on dev builds `AfterGlowApp` | an item is missing, doubled or enabled with no reason, or a scene is missing |
+| BU-1b | `LauncherMenuStubTests` (Linux, reads the four `LauncherCommands+*.swift` files, `Sources/SuiteShell/SuiteCommands.swift` and `AfterGlowApp.swift` as text): every launcher item of blueprint 6.2 that is not the system's appears exactly once (Switch To ▸ in `SuiteCommands.swift`; Delete in the home stub; Cut, Copy, Paste and Select All in the assets stub) with `.disabled(true)` and `notConnected(<its feature>)`, and `AfterGlowApp.swift` declares the three scenes and the four command groups; the macOS job on dev builds `AfterGlowApp` | an item is missing, doubled or enabled with no reason, or a scene is missing |
 
 ## Quality tests
 

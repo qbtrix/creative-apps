@@ -15,8 +15,8 @@ acceptance tests.
 | 0 | The suite's targets exist, today's size is measured | `targets.md` | #807, #808, #809, #810, #811 | nothing | filed when this packet PR merges |
 | 1 | One AfterGlow.app with shared frameworks and document types | `bundle.md` | #813, #814, #815, #816, #817, #818 (and #819, after ten runs) | targets; #333 for BU-3 | file when ready |
 | 1 | Shared values, contracts, fakes, store and live slots | `suite-contracts.md` | #820–#834 | targets | file when ready |
-| 2 | The AfterGlow home | `home.md` | #841–#849; app lines #836–#840 | suite-contracts, bundle, #778; #782 for HM-3c | file when ready |
-| 2 | Switch between apps, hand-offs | `switching.md` | #852–#860; app lines #861–#865 | suite-contracts, bundle, #778; #845 (home HM-2b) for SW-4a/b; #782 for SW-4c | file when ready |
+| 2 | The AfterGlow home | `home.md` | #841–#848, #870; app lines #836–#840 (follow-up #849) | suite-contracts, bundle, #778; #782 for the follow-up | file when ready |
+| 2 | Switch between apps, hand-offs | `switching.md` | #852–#857, #860; app lines #861–#865 (follow-ups #858, #859) | suite-contracts, bundle, #778; #845 (home HM-2b) for SW-4a; #782 for SW-4c | file when ready |
 
 #763 (dev is red) is lane-wide, not a dependency: the lane keeps merging
 while it is open, and no feature names it on its `Depends on:` line.
@@ -39,8 +39,8 @@ start a lead that stops.
 | switching | Feature: switching | p1 | the suite-contracts and bundle feature issues, #778 | those three are closed |
 
 bundle and suite-contracts run side by side, and so do home and switching.
-Inside wave 2 one task edge crosses features: switching's SW-4a and SW-4b
-wait on home's HM-2b (#845). The switching lead builds SW-1 to SW-3c first,
+Inside wave 2 one task edge crosses features: switching's SW-4a waits on
+home's HM-2b (#845). The switching lead builds SW-1 to SW-3c first,
 so it never idles on it; if #845 is still open when SW-3c is in, it records
 that in RECORD.md and waits.
 
@@ -91,7 +91,7 @@ that in RECORD.md and waits.
 | `Bundle/` | – | bundle | – |
 | `Tests/SuiteModelTests/` | per-task files | per-task files | per-task files (none shared) |
 | `Tests/SuiteModelTests/LauncherMenuStubTests.swift` | BU-1b | – | home (HM-2c) |
-| `Tests/AppSnapshotTests/` | – | `SuiteLiveServicesTests.swift` (SC-5b → SC-5c) | home: `AfterGlowHome*.swift`; switching: `SuiteShell*Tests.swift` |
+| `Tests/AppSnapshotTests/` | – | `SuiteLiveServicesTests.swift` (SC-5b → SC-5c) | home: `AfterGlowHome*.swift`, `Golden/afterglow/` (HM-4); switching: `SuiteShell*Tests.swift` |
 | `UITests/AfterGlowJourneyTests*.swift` | – | – | home: `.swift`, `+Harness`, `+Smoke`, `+Home`, `+Layout`, `+EveryControl`, `+PerfHome`, `+BudgetsHome`; switching: `+Switch`, `+New`, `+PerfSwitch`, `+BudgetsSwitch` |
 | `UITests/audit-baseline.json` | – | – | home (HM-0, the `afterglow` key at 0) |
 | `docs/review-rubric.md` | – | – | switching (SW-5) |
@@ -121,7 +121,12 @@ its exact files: the fixture exports #836 (Design), #837 (Flare), #838
 adoptions #861 (Flare), #862 (Design), #863 (Photo), #864 (Library) and
 #865 (Halo), filed by switching. Within one app they are sequenced: A-x-0
 touches only tests and fixtures, A-x-1 the app's `<X>App.swift`, its
-`<X>DocumentHost.swift` and its journey file.
+`<X>DocumentHost.swift` and its journey file. Library's A-LI-0 also edits
+`LibraryApp.swift` (one line), so A-LI-1 #864 depends on it.
+
+**Follow-ups outside a done check.** Each is filed now and merges whenever
+its wait clears, so no lead idles on it: #819 (BU-6, ten dev runs), #849
+(HM-3c, #782), #858 (SW-4b, three apps' adoptions), #859 (SW-4c, #782).
 
 ## Collision hotspots and how each is handled
 
@@ -129,7 +134,7 @@ touches only tests and fixtures, A-x-1 the app's `<X>App.swift`, its
 |---|---|
 | `docs/review-rubric.md`: SW-5 vs Flare QH-7 #396 | SW-5 appends its own subsection and touches no Flare row; whichever lands second rebases |
 | `Sources/SuiteUI/Tokens.swift` vs SuiteUI SH-2's token sheet (#774, closed) | no suite task edits it; the settings and onboarding size tokens are wave 3 `needs-ui` issues |
-| `Sources/SuiteUI/ThumbnailGrid.swift` vs #779 S-L2 | #804 is built after #779 |
+| `Sources/SuiteUI/ThumbnailGrid.swift` vs #779 S-L2 and lists-and-layers LL-12 | #804 is built after #779 and LL-12 |
 | `Sources/SuiteUI/SidebarRow.swift` vs #73, #108, #577 | #805 is built after the lists-and-layers chain (LL-7, #108) |
 | `Package.swift`, `project.yml`, `scripts/bundle-apps` vs the SuiteUI gallery #776 | SH-6 (#776) owns only `Sources/SuiteUI/**` and its test; BU-3 rebases onto SH-7's `project.yml`; BU-1a and BU-4 are supervisor-merged |
 | `UITests/audit-baseline.json` vs CI's Audit-lower job (commits straight to dev) | HM-0 adds one key at 0 and rebases right before its last `scripts/ci` |
@@ -161,6 +166,38 @@ touches only tests and fixtures, A-x-1 the app's `<X>App.swift`, its
   (round trip, update download, large paste).
 - clipboard-drag owns `UITests/Fixtures/suite/large.png` (SP5), through a
   Photo adoption issue.
+
+## Critic round (packets)
+
+One critic agent tried to refute the five packets: tasks over 400 lines or
+15 files, owned files overlapping inside a wave, the shared-file rule, C4
+owners, tests that can't fail, and the 59 issues it checked (all open, all
+matching their tasks). It found 2 blocking, 11 major and 13 minor items, and
+every one is fixed in the packets:
+
+- Blocking: the SC-1 chain couldn't compile (`HandOff` needs `SettingsPane`
+  and `AssetLink`; both moved to SC-1a). `SuiteCommands` changed its
+  initializer under the frozen `AfterGlowApp.swift` (pinned as
+  `init(app: SuiteApp = .launcher)` from BU-1a on).
+- Major: hand-off files go through `FileStore.writeData`, with no revision
+  envelope; pure service members can't throw, so `.live` carries `pending`
+  reasons and the views disable controls from it; one `SlotContext` slot
+  signature; `StoreRecents` waits on `ChangeFeed`; the seeder skips fixture
+  documents not yet exported; the home's menus reach `HomeModel` through a
+  focused value; `BuildGraphTests` expands `apps.map` and checks a literal
+  list; the home's golden baselines are a task (HM-4 #870); one
+  `Packaging.swift` contract; tiles stay disabled while hand-offs are
+  pending; `feature-done` sits on each feature's true last PR, and the
+  waits that can't clear in a lead's 8 hours are follow-ups (#819, #849,
+  #858, #859).
+- Minor: the stub test reads `SuiteCommands.swift` and the Edit stubs exist;
+  15 service members, 14 slot files; one `FixtureSeeder` signature; test
+  inputs generated inline; locale formatting imports
+  FoundationInternationalization; `HomeMenu`'s inputs named; OpenRaster
+  exported under the suite id; the journey bundle relies on the template's
+  glob; #804 after LL-12 too; BU-0's test runs on macOS; A-LI-0 names its
+  files and Library's real 60-photo sample; the shortcut test checks
+  `SwitchMenu`'s digits instead of literal text.
 
 ## The lead contract
 

@@ -59,18 +59,39 @@ they are split here into 15 tasks.
    are not document types equal `declaredOnly`.
 5. **Fixture seeding has an owner.** The blueprint has the launcher seed the
    store from `-SuiteFixture <name>` but no file for it. SC-4c adds
-   `FixtureSeeder.seed(_ name:, store:, documentsFrom:, now:)` in `Store/`:
-   it writes `SuiteFixtures.store(...)` with `FileStore`, copies the fixture
-   documents into `<support>/Documents` (skipping `Cards.design` for
-   `missing`), and copies `<documentsFrom>/thumbnails/<file name>.png` to
+   `FixtureSeeder.seed(_ name:, into:, documentsFrom:, documentsTo:, now:)`
+   in `Store/`: it writes `SuiteFixtures.store(...)` with `FileStore`, copies
+   the fixture documents into `<support>/Documents` (skipping `Cards.design`
+   for `missing`, and skipping any source not yet exported by its app line,
+   which then shows as Missing), and copies `<documentsFrom>/thumbnails/<file name>.png` to
    `thumbnails/<fileKey>.png`. Journeys pass the folder with a new flag,
    `-SuiteFixtureDocuments <path to UITests/Fixtures/suite>` (the app can't
    know the repo path). The launcher's call site is home's
    `LauncherRouter+Services.swift` (HM-2a).
-6. **Not-connected reasons come from one table.** `SuiteServices.slotFeatures:
-   [String: String]` (member name to the feature that connects it) and
-   `SuiteIdentity.notConnected(_:)` (BU-1a) make every slot's reason
-   "Not connected yet (<feature>).", tested on Linux.
+6. **Not-connected reasons come from one table, and the views can read
+   them.** `SuiteServices.slotFeatures: [String: String]` (each of the 15
+   members, `sending` and `receiving` included, to the feature that
+   connects it) and `SuiteIdentity.notConnected(_:)` (BU-1a) make every
+   reason "Not connected yet (<feature>).". Throwing members that are not
+   live yet hold their fake with `unavailable:`, so they throw that
+   sentence. Pure members (`creating`, `routing`, `pasteboard`, `linking`,
+   `onboarding`, `home`) have no throwing call, so their slot returns the
+   reference fake, and the services carry
+   `pending: [String: String]` (member to its reason) for every member not
+   live yet. A view disables a control whose member is pending and shows
+   that reason. `.fake` has `pending` empty.
+8. **One slot signature.** `SuiteServices.live(support:app:arguments:)`
+   builds a `SlotContext(store: FileStore, support: String, app: SuiteApp,
+   arguments: [String])` once, and every slot is
+   `func <member>Slot(_ c: SlotContext) -> any <Contract>`. Wave-2 features
+   swap a slot's body (the `AppLauncher` needs `arguments`, `StoreHandOffs`
+   needs `app`) without touching `SuiteServices+Live.swift`.
+9. **Hand-off files are raw.** `FileStore` also has `readData(_:)` and
+   `writeData(_:_:)`, atomic and under the lock but with no revision
+   envelope, so a `.aghandoff` file is exactly `HandOffCodec`'s bytes.
+10. **`SettingsPane`, `AssetKind`, `AssetLink` and `LinkStatus` move to
+   SC-1a** (`Values/SuiteApp.swift` and `Values/Links.swift`), because
+   `HandOff` (SC-1b) holds a `SettingsPane?` and an `AssetLink?`.
 7. **`StoreRecents` is a SuiteModel type,** not SuiteShell code, so the live
    recents logic is tested on Linux: a `FileStore`-backed `RecentWork` with an
    `onWrite` hook. SuiteShell's `RecentsSlot` builds it; switching's SW-3a
@@ -108,7 +129,7 @@ The whole of blueprint section 5, as moved. File by file:
 ```
 Sources/SuiteModel/
   Values/SuiteIdentity.swift   prefix, launcherBundleID, notConnected            (BU-1a; SC-1a keeps it)
-  Values/SuiteApp.swift        SuiteApp: displayName, bundleID, bundlePath, switchDigit
+  Values/SuiteApp.swift        SuiteApp: displayName, bundleID, bundlePath, switchDigit; SettingsPane
   Values/SuiteTypes.swift      SuiteTypeID, SuiteDocumentType, SuiteTypeRegistry (+ declaredOnly)
   Values/SuiteDocumentRef.swift  fileID(forPath:), fileKey(_:)                     (correction 1)
   Values/SuiteError.swift      the 16 cases and their messages
@@ -118,10 +139,10 @@ Sources/SuiteModel/
   Values/HandOff.swift         HandOffVerb, HandOffState, HandOff (+ newID)       (correction 2)
   Values/RoundTrip.swift       RoundTripSource, RoundTripState, RoundTripSession
   Values/SuiteColor.swift      SuiteColorSpace, SuiteColorValue
-  Values/Assets.swift          AssetKind, SuiteAsset, AssetDraft, AssetIndex
-  Values/Links.swift           AssetLink, LinkStatus
+  Values/Assets.swift          SuiteAsset, AssetDraft, AssetIndex
+  Values/Links.swift           AssetKind, AssetLink, LinkStatus                  (SC-1a)
   Values/Clip.swift            TypedData, AssetEnvelope, SuiteClipItem
-  Values/Preferences.swift     LengthUnit, SettingsPane, SuitePreferences
+  Values/Preferences.swift     LengthUnit, SuitePreferences
   Values/Onboarding.swift      OnboardingFocus, OnboardingPage
   Values/Update.swift          SuiteVersion, UpdateOffer
   Values/AnimationSummary.swift
@@ -134,10 +155,10 @@ Sources/SuiteModel/
   Contracts/<Protocol>.swift   ×18
   Fakes/ChangeFeed.swift, Fakes/Fake<Name>.swift ×17, Fakes/SuiteFixtures.swift
   Store/SuiteLocations.swift, Store/FileStore.swift, Store/FixtureSeeder.swift (correction 5)
-  SuiteServices.swift          SuiteServices, .fake, with(animations:updates:), slotFeatures
+  SuiteServices.swift          SuiteServices, .fake, with(animations:updates:), slotFeatures, pending
 Sources/SuiteShell/
-  SuiteServices+Live.swift     extension SuiteServices { public static func live(...) -> SuiteServices }
-  Live/<Member>Slot.swift ×14  each returns its member: the live type, or the fake with its not-connected reason
+  SuiteServices+Live.swift     SlotContext; extension SuiteServices { public static func live(support:app:arguments:) -> SuiteServices }
+  Live/<Member>Slot.swift ×14  one per member, `sending` and `receiving` sharing HandOffSlot: the live type, or the fake
 ```
 
 New or changed signatures (everything else exactly as in the contracts folder):
@@ -151,6 +172,8 @@ public struct FileStore: Sendable {                                             
     public func read<T: Codable & Sendable>(_ name: String, as: T.Type) throws(SuiteError) -> (value: T?, revision: Int)
     public func write<T: Codable & Sendable>(_ name: String, _ value: T, expecting revision: Int) throws(SuiteError) -> Int
     public func update<T: Codable & Sendable>(_ name: String, empty: T, merge: (T) -> T) throws(SuiteError) -> (value: T, revision: Int)
+    public func readData(_ name: String) throws(SuiteError) -> Data?                       // raw, no envelope (hand-offs)
+    public func writeData(_ name: String, _ data: Data) throws(SuiteError)                 // atomic, under the lock
 }                                                   // update = lock, read, merge, write revision + 1, unlock
 public enum SuiteLocations {                                                               // SC-4a
     public static func supportFolder(arguments: [String], home: String) -> String         // -SuiteSupportDir wins
@@ -159,7 +182,11 @@ public actor StoreRecents: RecentWork {                                         
     public init(store: FileStore, onWrite: @escaping @Sendable (String) -> Void = { _ in })
     public func externalChange() async                                                       // the watcher calls it; re-reads, yields
 }
-extension SuiteServices { public static let slotFeatures: [String: String] }               // SC-4b
+extension SuiteServices {                                                                  // SC-4b
+    public static let slotFeatures: [String: String]       // 15 members -> feature
+    public var pending: [String: String]                   // member -> "Not connected yet (<feature>)."; empty for .fake
+}
+public struct SlotContext: Sendable { store: FileStore, support: String, app: SuiteApp, arguments: [String] }  // SC-5b, SuiteShell
 public enum FixtureSeeder { public static func seed(_ name: String, into store: FileStore,
                             documentsFrom: String, documentsTo: String, now: Date) throws(SuiteError) }  // SC-4c
 ```
@@ -187,13 +214,17 @@ FixtureSeeder.seed(name, store, from, to, now):               # SC-4c
   store.write recents.json, assets/index.json, preferences.json
   for (file, app, type) in weekOfWorkFiles where name in [weekOfWork, missing, roundTrip]:
     if name == missing and file == "Cards.design": skip
+    if from/file is absent: skip it (the card shows Missing until its app line exports it)
     copy from/file -> to/file ; copy from/thumbnails/file.png -> thumbnails/<fileKey(fileID(to/file))>.png if present
 
-SuiteServices+Live.live(support):                             # SC-5b, SC-5c
-  store = FileStore(folder: support)
-  SuiteServices(switching: switchingSlot(), recents: recentsSlot(store), ..., isPreview: false)
-  each <member>Slot(): Fake<Name>(unavailable: SuiteIdentity.notConnected(SuiteServices.slotFeatures["<member>"]))
-  except recentsSlot: StoreRecents(store: store)
+SuiteServices+Live.live(support, app, arguments):             # SC-5b, SC-5c
+  c = SlotContext(store: FileStore(folder: support), support, app, arguments)
+  s = SuiteServices(switching: switchingSlot(c), recents: recentsSlot(c), ..., isPreview: false)
+  s.pending = slotFeatures minus the members whose slot is live, each mapped to notConnected(feature)
+  throwing member slot, not live: Fake<Name>(unavailable: notConnected(slotFeatures["<member>"]))
+  pure member slot, not live: the reference fake (FakeRouting(), FakeHome(), ...)
+  recentsSlot: StoreRecents(store: c.store)                    # live from SC-5b
+  live-ness is one line per slot file: `let isLive = false`; `live(...)` builds `pending` from those flags
 ```
 
 ## Tasks
@@ -204,20 +235,20 @@ Every task is one PR to `dev`: at most 400 changed lines and 15 files, label
 
 | id | issue | what | owned files (under `Sources/SuiteModel/` unless a path says otherwise) | depends on |
 |---|---|---|---|---|
-| SC-1a | #820 | Identity, types, document refs (`fileKey`), errors; `declaredOnly` | `Values/SuiteIdentity.swift`, `Values/SuiteApp.swift`, `Values/SuiteTypes.swift`, `Values/SuiteDocumentRef.swift`, `Values/SuiteError.swift`, `Tests/SuiteModelTests/ValuesIdentityTests.swift` | BU-1a #810 |
+| SC-1a | #820 | Identity, types, document refs (`fileKey`), errors; `declaredOnly` | `Values/SuiteIdentity.swift`, `Values/SuiteApp.swift` (with `SettingsPane`), `Values/SuiteTypes.swift`, `Values/SuiteDocumentRef.swift`, `Values/SuiteError.swift`, `Values/Links.swift` (`AssetKind`, `AssetLink`, `LinkStatus`), `Tests/SuiteModelTests/ValuesIdentityTests.swift` | BU-1a #810 |
 | SC-1b | #821 | Recents values and `RecentsList`; presets; switching values; `HandOff` (`newID`) and `HandOffCodec` (id check) | `Values/Recents.swift`, `Values/NewDocumentPreset.swift`, `Values/Switching.swift`, `Values/HandOff.swift`, `Recents/RecentsList.swift`, `HandOff/HandOffCodec.swift`, `Tests/SuiteModelTests/ValuesRecentsTests.swift`, `Tests/SuiteModelTests/ValuesHandOffTests.swift` | SC-1a |
-| SC-1c | #822 | Round-trip, colour, asset, link and clipboard values | `Values/RoundTrip.swift`, `Values/SuiteColor.swift`, `Values/Assets.swift`, `Values/Links.swift`, `Values/Clip.swift`, `Tests/SuiteModelTests/ValuesExchangeTests.swift` | SC-1a |
+| SC-1c | #822 | Round-trip, colour, asset and clipboard values | `Values/RoundTrip.swift`, `Values/SuiteColor.swift`, `Values/Assets.swift`, `Values/Clip.swift`, `Tests/SuiteModelTests/ValuesExchangeTests.swift` | SC-1a |
 | SC-1d | #823 | Preferences, onboarding, version and offer, `UpdateFeed`, `AnimationSummary`, home values and `HomeLayout` | `Values/Preferences.swift`, `Values/Onboarding.swift`, `Values/Update.swift`, `Values/AnimationSummary.swift`, `Values/HomeValues.swift`, `Update/UpdateFeed.swift`, `Home/HomeLayout.swift`, `Tests/SuiteModelTests/ValuesSettingsTests.swift`, `Tests/SuiteModelTests/ValuesHomeLayoutTests.swift` | SC-1b |
 | SC-2a | #824 | The nine tier-1 contracts | `Contracts/AppSwitching.swift`, `RecentWork.swift`, `DocumentCreating.swift`, `DocumentRouting.swift`, `HandOffSending.swift`, `HandOffReceiving.swift`, `ThumbnailPublishing.swift`, `HomeBuilding.swift`, `SuiteDocumentHost.swift`, `Tests/SuiteModelTests/ContractShapeTests.swift` | SC-1b, SC-1d |
 | SC-2b | #825 | The other nine contracts | `Contracts/RoundTripEditing.swift`, `PasteboardCoding.swift`, `AssetLibrary.swift`, `AssetLinking.swift`, `AnimationSourceReading.swift`, `PreferencesStoring.swift`, `SettingsRouting.swift`, `OnboardingFlowing.swift`, `UpdateChecking.swift`, `Tests/SuiteModelTests/ContractShapeMoreTests.swift` | SC-1c, SC-1d |
 | SC-3a | #826 | `ChangeFeed` and the tier-1 fakes (thumbnails by `fileKey`) | `Fakes/ChangeFeed.swift`, `FakeSwitching.swift`, `FakeRecents.swift`, `FakeCreating.swift`, `FakeRouting.swift`, `FakeHandOffs.swift`, `FakeThumbnails.swift`, `FakeHome.swift`, `FakeDocumentHost.swift`, `Tests/SuiteModelTests/FakesTier1Tests.swift` | SC-2a |
 | SC-3b | #827 | Round-trip, pasteboard (file-URL fix), asset and link fakes | `Fakes/FakeRoundTrips.swift`, `FakePasteboard.swift`, `FakeAssets.swift`, `FakeLinking.swift`, `Tests/SuiteModelTests/FakesExchangeTests.swift` | SC-2b, SC-3a |
 | SC-3c | #828 | Animation, preferences, settings route, onboarding and update fakes; `SuiteFixtures` (all seven fixtures, thumbnails by `fileKey`) | `Fakes/FakeAnimationSource.swift`, `FakePreferences.swift`, `FakeSettingsRoute.swift`, `FakeOnboarding.swift`, `FakeUpdates.swift`, `SuiteFixtures.swift`, `Tests/SuiteModelTests/FakesSettingsTests.swift`, `Tests/SuiteModelTests/SuiteFixturesTests.swift` | SC-2b, SC-3a |
-| SC-4a | #829 | `SuiteLocations` and `FileStore` (revision, atomic replace, lock file, merge) | `Store/SuiteLocations.swift`, `Store/FileStore.swift`, `Tests/SuiteModelTests/StoreTests.swift` | SC-1a |
-| SC-4b | #830 | `SuiteServices` (`.fake`, `with`, `isPreview`, `slotFeatures`); the timing helper; QB-SM6 across two processes; QB-SV8; the Model journey | `SuiteServices.swift`, `Tests/SuiteModelTests/SuiteServicesTests.swift`, `Tests/SuiteModelTests/Budget.swift`, `Tests/SuiteModelTests/Budget+Store.swift`, `Tests/SuiteModelTests/StoreRoundTripTests.swift`, `Tests/SuiteModelTests/SuiteContractsJourneyTests.swift` | SC-3b, SC-3c, SC-4a |
+| SC-4a | #829 | `SuiteLocations` and `FileStore` (revision, atomic replace, lock file, merge; raw `readData`/`writeData`) | `Store/SuiteLocations.swift`, `Store/FileStore.swift`, `Tests/SuiteModelTests/StoreTests.swift` | SC-1a |
+| SC-4b | #830 | `SuiteServices` (`.fake`, `with`, `isPreview`, `slotFeatures`, `pending`); the timing helper; QB-SM6 across two processes; QB-SV8; the Model journey | `SuiteServices.swift`, `Tests/SuiteModelTests/SuiteServicesTests.swift`, `Tests/SuiteModelTests/Budget.swift`, `Tests/SuiteModelTests/Budget+Store.swift`, `Tests/SuiteModelTests/StoreRoundTripTests.swift`, `Tests/SuiteModelTests/SuiteContractsJourneyTests.swift` | SC-3b, SC-3c, SC-4a |
 | SC-4c | #831 | `FixtureSeeder` (store files, documents, thumbnails by `fileKey`, `missing`) | `Store/FixtureSeeder.swift`, `Tests/SuiteModelTests/FixtureSeederTests.swift` | SC-3c, SC-4a |
-| SC-5a | #832 | `StoreRecents`, the live `RecentWork` | `Recents/StoreRecents.swift`, `Tests/SuiteModelTests/StoreRecentsTests.swift` | SC-2a, SC-4a |
-| SC-5b | #833 | `SuiteServices.live` and the first seven slots (switching, recents (live), creating, routing, hand-off, thumbnails, home); the other seven members inline fakes for now | `Sources/SuiteShell/SuiteServices+Live.swift`, `Sources/SuiteShell/Live/SwitchingSlot.swift`, `RecentsSlot.swift`, `CreatingSlot.swift`, `RoutingSlot.swift`, `HandOffSlot.swift`, `ThumbnailsSlot.swift`, `HomeSlot.swift`, `Tests/AppSnapshotTests/SuiteLiveServicesTests.swift` | SC-4b, SC-5a |
+| SC-5a | #832 | `StoreRecents`, the live `RecentWork` | `Recents/StoreRecents.swift`, `Tests/SuiteModelTests/StoreRecentsTests.swift` | SC-2a, SC-3a (`ChangeFeed`), SC-4a |
+| SC-5b | #833 | `SlotContext`, `SuiteServices.live(support:app:arguments:)` with `pending`, and the first seven slots (switching, recents (live), creating, routing, hand-off, thumbnails, home); the other seven members inline fakes for now | `Sources/SuiteShell/SuiteServices+Live.swift`, `Sources/SuiteShell/Live/SwitchingSlot.swift`, `RecentsSlot.swift`, `CreatingSlot.swift`, `RoutingSlot.swift`, `HandOffSlot.swift`, `ThumbnailsSlot.swift`, `HomeSlot.swift`, `Tests/AppSnapshotTests/SuiteLiveServicesTests.swift` | SC-4b, SC-5a |
 | SC-5c | #834 | The other seven slots (round trips, pasteboard, assets, linking, preferences, settings, onboarding); `animations` and `updates` stay with `with(animations:updates:)` | `Sources/SuiteShell/SuiteServices+Live.swift`, `Sources/SuiteShell/Live/RoundTripSlot.swift`, `PasteboardSlot.swift`, `AssetsSlot.swift`, `LinkingSlot.swift`, `PreferencesSlot.swift`, `SettingsSlot.swift`, `OnboardingSlot.swift`, `Tests/AppSnapshotTests/SuiteLiveServicesTests.swift` | SC-5b |
 
 Chains (same file, in order): `SuiteServices+Live.swift` and
@@ -242,7 +273,7 @@ packet.
 
 | id | test | fails when |
 |---|---|---|
-| SC-1a | `ValuesIdentityTests`: bundle ids and `bundlePath` per app (`Contents/Helpers/Flare.app` and so on, written out in the test; recents-open-in RO-1 later checks them against bundle's `BundleLayout`); `defaultApp` for each registry type; `fileID(forPath: "/a/./b/../Logo.design")` == `"path:/a/Logo.design"`; `fileKey` is 16 hex digits, stable for a pinned input (`fileKey("path:/a/Logo.design")` equals the value written in the test), and differs for 200 distinct crowd ids; `declaredOnly` has the four ids and none is in `standard`; every `SuiteError.message` equals blueprint 5.4's sentence | a sentence, an id, the identity rule or the key drifts, or two crowd ids collide |
+| SC-1a | `ValuesIdentityTests`: bundle ids and `bundlePath` per app (`Contents/Helpers/Flare.app` and so on, written out in the test; recents-open-in RO-1 later checks them against bundle's `BundleLayout`); `defaultApp` for each registry type; `fileID(forPath: "/a/./b/../Logo.design")` == `"path:/a/Logo.design"`; `fileKey` is 16 hex digits, stable for a pinned input (`fileKey("path:/a/Logo.design")` equals the value written in the test), and differs for 200 distinct ids generated in the test (`path:/tmp/Doc <i>.flare`); `declaredOnly` has the four ids and none is in `standard`; every `SuiteError.message` equals blueprint 5.4's sentence | a sentence, an id, the identity rule or the key drifts, or two ids collide |
 | SC-1b | `ValuesRecentsTests` (main.swift's recents checks): dedupe, newest first, cap 200, filter and search, `merging` keeps the newest per file; `ValuesHandOffTests`: encode → decode → encode is byte-equal; format 2 is refused with the "newer AfterGlow" sentence; an id with `/` is `damaged("hand-off id")`; `newID()` is 36 lowercase characters and two calls differ; `isExpired` at 7 days + 1 s | the cap or order breaks, a nested id decodes, or a newer format is accepted |
 | SC-1c | `ValuesExchangeTests`: `SuiteColorValue` hex for sRGB and Display P3 keeps its space; `AssetIndex` add/update bumps the revision; `AssetEnvelope` JSON round trip | a colour converts space, or a revision doesn't move |
 | SC-1d | `ValuesSettingsTests`: `autosaveSeconds` clamps to 10…600; `SuiteVersion("1.2")` == 1.2.0 and "1.x" is nil; `UpdateFeed` parses the feed fixture (inline); `ValuesHomeLayoutTests`: the 7.3 table exactly at 880, 1000, 1280, 1728, and the sweep 880…2560 (columns ≥ 1, card 168–240 and a multiple of 4, the row fits) | a width row differs, a card leaves the grid, or a clamp fails |
@@ -250,12 +281,12 @@ packet.
 | SC-3a | `FakesTier1Tests`: `FakeSwitching` refuses a missing app with `appMissing`, `terminate` yields a change; `FakeRecents` keeps a thumbnail on re-note; `FakeRouting` routes all eight `weekOfWork` names and refuses `notes.txt` with the 5.4 sentence; `FakeHandOffs.send` switches the target; `FakeThumbnails` writes `thumbnails/<fileKey>.png`; `FakeHome` empty and no-match messages; `FakeDocumentHost` refuses an unknown verb | any behavior blueprint 5.5 states differs |
 | SC-3b | `FakesExchangeTests`: a damaged envelope falls back to SVG then PNG; Flare refuses an image with "Flare can't paste images yet."; an empty pasteboard is `nothingToPaste`; a dropped `file://<path>/Logo.design` gives a ref whose `fileID == SuiteDocumentRef.fileID(forPath:)` and dedupes against a recents entry for the same path; `FakeRoundTrips` refuses a missing original with `originalMissing`; `FakeLinking` reports `updateAvailable` and `missing` | the file-URL branch keeps a raw path, or a fallback order changes |
 | SC-3c | `FakesSettingsTests`: a stale preferences revision is refused; onboarding's "Photos" puts Library and Photo first in `homeOrder`; a forged update signature is `updateNotVerified`; a refusing app gives `updatePostponed`. `SuiteFixturesTests`: every name in `SuiteFixtures.names` builds (unknown is nil); `weekOfWork` has 8 items newest first with thumbnails `thumbnails/<fileKey>.png`; `crowd` 200; `assets` 6 colours (2 P3), 2 vectors with source `Cards.design`, 1 image, 1 animation | a fixture's contents drift from blueprint 4.1 |
-| SC-4a | `StoreTests`: write then read returns the value and revision 1; a write expecting a stale revision throws `staleRevision` and leaves the file; `update` merges and bumps; a crash between temp write and rename leaves the old file readable; `supportFolder` honours `-SuiteSupportDir` | a stale write lands, or a partial file is ever read |
-| SC-4b | `SuiteServicesTests`: `.fake` has `isPreview` true; `with(animations:updates:)` swaps only those two; `slotFeatures` names a feature for each of the 14 slot members. `Budget+Store` (QB-SM6): the test binary relaunched twice with `Process`, each noting 500 recents into one temp store, ends with 1,000 items and a median write ≤ 50 ms (debug gate). `StoreRoundTripTests` (QB-SV8): recents, assets, preferences and a hand-off encode → decode → encode byte-equal. `SuiteContractsJourneyTests`: steps 1–5 above | an entry is lost across processes, a store file doesn't round trip, or a journey step differs |
-| SC-4c | `FixtureSeederTests`: seeding `weekOfWork` from a temp source folder writes the three store files, copies 8 documents and their thumbnails to `thumbnails/<fileKey>.png`; `missing` skips `Cards.design`; an unknown name throws "No fixture named …" | a thumbnail lands under a file name, or `missing` copies the card |
+| SC-4a | `StoreTests`: write then read returns the value and revision 1; a write expecting a stale revision throws `staleRevision` and leaves the file; `update` merges and bumps; a crash between temp write and rename leaves the old file readable; `writeData` then `readData` returns the same bytes with no envelope; `supportFolder` honours `-SuiteSupportDir` | a stale write lands, or a partial file is ever read |
+| SC-4b | `SuiteServicesTests`: `.fake` has `isPreview` true; `with(animations:updates:)` swaps only those two; `slotFeatures` names a feature for each of the 15 members; `.fake`'s `pending` is empty. `Budget+Store` (QB-SM6): the test binary relaunched twice with `Process`, each noting 500 recents into one temp store, ends with 1,000 items and a median write ≤ 50 ms (debug gate). `StoreRoundTripTests` (QB-SV8): recents, assets, preferences and a hand-off encode → decode → encode byte-equal. `SuiteContractsJourneyTests`: steps 1–5 above | an entry is lost across processes, a store file doesn't round trip, or a journey step differs |
+| SC-4c | `FixtureSeederTests`: seeding `weekOfWork` from a temp source folder writes the three store files, copies 8 documents and their thumbnails to `thumbnails/<fileKey>.png`; `missing` skips `Cards.design`; with `Intro.halo` absent from the source the seed still succeeds and writes 7 documents; an unknown name throws "No fixture named …" | a thumbnail lands under a file name, `missing` copies the card, or an absent source fails the seed |
 | SC-5a | `StoreRecentsTests`: note, remove, clear app go to `recents.json` with a new revision each; two `StoreRecents` on one folder see each other's writes after `externalChange()`; `onWrite` is called with `recents.json` once per write; `changes()` yields | a write is lost, or another instance's write is never seen |
-| SC-5b | `SuiteLiveServicesTests` (macOS, AppSnapshotTests): `SuiteServices.live(support: <tmp>)` has `isPreview` false; `recents` notes and lists through the temp folder; every not-yet-live member throws `notAvailable` whose message is "Not connected yet (<its feature>)."; the macOS job builds `SuiteShell` | a slot is live too early, a reason is wrong, or recents isn't live |
-| SC-5c | `SuiteLiveServicesTests` extended to all 14 slot members; `animations` and `updates` are the fakes until `with(animations:updates:)` is called | a member is missing or a reason is wrong |
+| SC-5b | `SuiteLiveServicesTests` (macOS, AppSnapshotTests): `SuiteServices.live(support: <tmp>, app: .launcher, arguments: [])` has `isPreview` false; `recents` notes and lists through the temp folder and is absent from `pending`; every other member is in `pending` with "Not connected yet (<its feature>)."; each throwing one (switching, sending, receiving, thumbnails and the SC-5c ones) throws `notAvailable` with that sentence; the macOS job builds `SuiteShell` | a slot is live too early, a reason is wrong, or recents isn't live |
+| SC-5c | `SuiteLiveServicesTests` extended to all 15 members (14 slot files); `animations` and `updates` are the fakes until `with(animations:updates:)` is called | a member is missing or a reason is wrong |
 
 ## Quality tests
 

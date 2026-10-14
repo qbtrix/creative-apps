@@ -14,10 +14,13 @@ hand-off transport, journey launch arguments), 4.2 (SJ1 steps 3–4, SJ2,
 SJ3), 4.4 (SP1, SP2), 5.1 (UC-1, UC-5, UC-18), 5.8, 6.2 (Switch To), 7.1
 (QB-S1, QB-S2, QB-SM4), 7.6, 8.2 (F4).
 
-**Covers:** #852, #853, #854, #855, #856, #857,
-#858, #859, #860, and the app-line adoption issues it files:
+**Covers:** #852, #853, #854, #855, #856, #860, #857, and the app-line
+adoption issues it files:
 #861, #862, #863, #864, #865. Suite tasks close
 through their PRs; the adoption issues through their lines' PRs.
+**Follow-ups, outside the done check:** #858 (SW-4b, SJ2), which waits on
+Photo's, Library's and Halo's adoptions, and #859 (SW-4c, perf), which
+waits on #782. Both are filed now and merge when their waits clear.
 
 **Depends on:** suite-contracts and bundle (wave 1; their feature issues
 are named in `waves.md`) and #778 (SuiteUI suite-harness: #333 journey
@@ -133,7 +136,8 @@ open class SuiteAppDelegate: NSObject, NSApplicationDelegate {      // apps adop
     open func application(_ app: NSApplication, open urls: [URL])
 }
 extension Scene { public func suiteApp(_ app: SuiteApp, host: any SuiteDocumentHost) -> some Scene }
-public struct SuiteCommands: Commands { public init(app: SuiteApp) }   // Switch To ▸, Open In ▸ (stub), Settings… (stub)
+public struct SuiteCommands: Commands { public init(app: SuiteApp = .launcher) }   // the signature BU-1a's stub already has, so the
+                                                                                   // frozen AfterGlowApp.swift keeps compiling
 ```
 
 ## Pseudocode
@@ -159,7 +163,8 @@ runState: running apps by bundle id; window count from the app's own probe value
   "has windows" comes from the run state the app posts on StoreWatcher ("<app>.windows" notification)
 
 StoreHandOffs.send(h):                                               # SW-2
-  store.write("handoffs/\(h.id).aghandoff", HandOffCodec.encode(h)) ; return try await deliver(path, h.to)
+  store.writeData("handoffs/\(h.id).aghandoff", HandOffCodec.encode(h))   # raw bytes, no revision envelope (SC-4a)
+  return try await deliver(path, h.to)
 StoreHandOffs.receive(data, now): decode; expired -> settle(.expired), throw ; else .accepted
 SuiteAppDelegate.application(_:open:):                                # SW-3b
   for url where ext == "aghandoff": h = receive(data); state = try await host.accept(h); settle(h.id, state)
@@ -172,8 +177,8 @@ LauncherDelegate (LauncherRouter.swift): a document URL -> FakeRouting rule -> d
 
 Every task is one PR to `dev`: at most 400 changed lines and 15 files, label
 `fast-lane`, body lines `Belt-Lead:`, `Feature: switching`, `Fast-Check:
-pass`, `Head:`. SW-4a carries `feature-done` (SW-4c may follow if #782 is
-late; see the done check).
+pass`, `Head:`. SW-4a, the last PR of the feature, carries `feature-done`; SW-5
+lands before it; SW-4b and SW-4c are follow-ups outside the done check.
 
 | id | issue | what | owned files | depends on |
 |---|---|---|---|---|
@@ -185,7 +190,7 @@ late; see the done check).
 | SW-4a | #857 | Journeys SJ3, `testOpenRecentBringsAppForward`, `testCrashIsolation` | `UITests/AfterGlowJourneyTests+Switch.swift` | SW-3c, HM-0 #841, HM-2b #845, A-FL-1 #861, A-DE-1 #862, A-FL-0 #837, A-DE-0 #836 |
 | SW-4b | #858 | Journey SJ2 (every tile, the missing-app error) | `UITests/AfterGlowJourneyTests+New.swift` | SW-4a, A-PH-1 #863, A-LI-1 #864, A-HA-1 #865 |
 | SW-4c | #859 | SP1, SP2; the switching budget constants (report only) | `UITests/AfterGlowJourneyTests+PerfSwitch.swift`, `UITests/AfterGlowJourneyTests+BudgetsSwitch.swift` | SW-4a, #782 |
-| SW-5 | #860 | Every QB-S and QB-SM row of blueprint 7.1 into `docs/review-rubric.md` section 6 as an appended "AfterGlow" subsection, report only, each naming its test and its feature's budget file | `docs/review-rubric.md` | SW-4a |
+| SW-5 | #860 | Every QB-S and QB-SM row of blueprint 7.1 into `docs/review-rubric.md` section 6 as an appended "AfterGlow" subsection, report only, each naming its test and its feature's budget file | `docs/review-rubric.md` | SW-1 |
 
 Adoption issues this feature files (`needs-suite`, each built by its line):
 
@@ -194,12 +199,13 @@ Adoption issues this feature files (`needs-suite`, each built by its line):
 | A-FL-1 | #861 | flare | `FlareModel` conforms to `SuiteDocumentHost` (`.open` a `.flare`, `.new` from a preset's width, height and fps); `FlareApp` adds `.suiteApp(.flare, host:)`, `@NSApplicationDelegateAdaptor(SuiteAppDelegate.self)` and `SuiteCommands(app: .flare)`; Flare's menu journey counts updated | `Sources/FlareModel/FlareDocumentHost.swift`, `Tests/FlareModelTests/FlareDocumentHostTests.swift`, `Sources/FlareApp/FlareApp.swift`, `UITests/FlareJourneyTests.swift` | SW-3c #856, #346 (the window on `EditorShell`) |
 | A-DE-1 | #862 | design | Same for Design (`.open` a `.design`, `.new` blank) | `Sources/DesignModel/DesignDocumentHost.swift`, `Tests/DesignModelTests/DesignDocumentHostTests.swift`, `Sources/DesignApp/DesignApp.swift`, `UITests/DesignJourneyTests.swift` | SW-3c |
 | A-PH-1 | #863 | photo | Same for Photo (`.open` an image or `.ora`; `.new` shows the New Image sheet); Photo's PV-1 delegate subclasses `SuiteAppDelegate` when it lands | `Sources/PhotoModel/PhotoDocumentHost.swift`, `Tests/PhotoModelTests/PhotoDocumentHostTests.swift`, `Sources/PhotoApp/PhotoApp.swift`, `UITests/PhotoJourneyTests.swift` | SW-3c |
-| A-LI-1 | #864 | library | Same for Library (`.new` with `library.import` opens Import Folder; `.open` of images is recents-open-in's A-LI-2) | `Sources/LibraryModel/LibraryDocumentHost.swift`, `Tests/LibraryModelTests/LibraryDocumentHostTests.swift`, `Sources/LibraryApp/LibraryApp.swift`, `UITests/LibraryJourneyTests.swift` | SW-3c |
+| A-LI-1 | #864 | library | Same for Library (`.new` with `library.import` opens Import Folder; `.open` of images is recents-open-in's A-LI-2) | `Sources/LibraryModel/LibraryDocumentHost.swift`, `Tests/LibraryModelTests/LibraryDocumentHostTests.swift`, `Sources/LibraryApp/LibraryApp.swift`, `UITests/LibraryJourneyTests.swift` | SW-3c, A-LI-0 #840 (same `LibraryApp.swift`) |
 | A-HA-1 | #865 | halo | Same for Halo (`.open` a `.halo`; `.new` shows New Composition) | `Sources/HaloModel/HaloDocumentHost.swift`, `Tests/HaloModelTests/HaloDocumentHostTests.swift`, `Sources/HaloApp/HaloApp.swift`, `UITests/HaloJourneyTests.swift` | SW-3c, #209 for `.open` |
 
 Order: SW-1 and SW-2 at once; SW-3a after SW-1; SW-3b after SW-2 and
-SW-3a; SW-3c after SW-3b; then the adoption issues on their lines; SW-4a
-when they and home's #845 are in; SW-4b, SW-4c and SW-5 after SW-4a. Sizes:
+SW-3a; SW-3c after SW-3b; SW-5 any time after SW-1; then the adoption
+issues on their lines; SW-4a when Flare's and Design's and home's #845 are
+in; SW-4b and SW-4c after SW-4a as follow-ups. Sizes:
 SW-1 ~300, SW-2 ~280, SW-3a ~350, SW-3b ~380, SW-3c ~330, SW-4a ~330,
 SW-4b ~220, SW-4c ~220, SW-5 ~60.
 
@@ -221,7 +227,7 @@ and journey file is edited only by its own line's adoption issue.
 | SW-2 | `HandOffStoreTests`: `send` writes exactly `handoffs/<uuid>.aghandoff` and calls `deliver` with that path; `receive` of a 7-day-old pending file settles it `expired` and throws "This request expired."; `settle(.returned)` then `sweep` deletes it; a format-2 file is refused; `Budget+HandOff` QB-SM4 encode + decode ≤ 2 ms debug | a path nests, an expired request acts, or a settled file lingers |
 | SW-3a | `SuiteShellSwitchingTests` (macOS): `AppLauncher` on a bundle without Halo (or with `-SuiteHideApp halo`) reports Halo `missing`; `StoreWatcher.post("recents.json")` reaches an observer within 1 s; a `StoreRecents` behind the recents slot sees another instance's write after the post | a missing app reads as not running, or a cross-process write is never seen |
 | SW-3b | `SuiteShellHandOffTests` (macOS): `SuiteAppDelegate` given a hand-off URL calls `host.accept` with the decoded hand-off and settles it with the host's state; given an expired one never calls the host; `LauncherDelegate` given `Cards.design` opens no launcher window and delivers to Design | a hand-off acts twice, or the launcher opens a window for a routed file |
-| SW-3c | `SuiteCommandsTests` (Linux, reads `Sources/*App/*.swift` and `SuiteCommands.swift` as text): ⌃⌘0–⌃⌘5 are bound once each, only in `SuiteCommands.swift`; no app source binds `.control` + `.command` with a digit; `SettingsRoute` and `OpenInMenu` stubs carry "Not connected yet (settings)." and "… (recents-open-in)." | a shortcut clashes or doubles, or a stub is enabled with no reason |
+| SW-3c | `SuiteCommandsTests` (Linux): `SwitchMenu.items` gives digits 0–5 once each (the shortcuts are built from them in a loop, so the digits are checked on the model, not as text); a text scan of `Sources/*App/*.swift` and `Sources/SuiteShell/*.swift` other than `SuiteCommands.swift` finds no `.keyboardShortcut` whose modifiers hold both `.control` and `.command`; the `SettingsRoute` and `OpenInMenu` stubs carry "Not connected yet (settings)." and "… (recents-open-in)."; `SuiteCommands.swift` declares `init(app: SuiteApp = .launcher)` | a shortcut clashes or doubles, or a stub is enabled with no reason |
 | SW-4a | SJ3, `testOpenRecentBringsAppForward`, `testCrashIsolation` on the dev macOS run, asserting the states above; the audit under each app's key and `afterglow` unchanged | state is lost across switches, Show <App> Window is disabled with no window, or a crash takes another app's document |
 | SW-4b | SJ2: each app frontmost with its named window or sheet; the hidden-Halo tile disabled with its sentence | a tile opens the wrong app or nothing |
 | SW-4c | SP1 (30 switches, at least 30 samples) and SP2 (each app 20 cold opens) write p50 and p95 to the run's perf JSON; too few samples fail as invalid | marks are missing or too few |
@@ -244,8 +250,8 @@ and journey file is edited only by its own line's adoption issue.
 - **Journeys green:** the dev macOS run triggered by SW-4a (`feature-done`)
   is green, with SJ3, `testOpenRecentBringsAppForward` and
   `testCrashIsolation` passing and every app journey still green with the
-  adopted menus. SW-4b runs once Photo, Library and Halo have adopted; SW-4c
-  once #782 lands; the contact sheet says which are pending.
+  adopted menus. SW-4b (#858) and SW-4c (#859) are follow-ups; the contact
+  sheet says which waits are still open.
 - **Audit zero new:** `afterglow` stays at 0; no app key rises from its
   Switch To menu.
 - **Contact sheet:** `Belt-Contact-Sheet: <run link>` on the feature issue,
