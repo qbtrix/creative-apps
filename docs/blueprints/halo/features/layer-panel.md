@@ -93,19 +93,22 @@ and `HaloLayerAvailabilityTests`, including undo of each edit.
 | Screen | Empty | Error | Loading |
 |---|---|---|---|
 | Layer list (inspector, LAYERS) | a composition with no layers: "No layers yet. Add one from Layer > New." in `SuiteFont.caption`, secondary text, `halo.layers.empty`; no composition: the list is not shown (W0's "No Selection") | a refused rename: the old name stays and `refusal.message` ("Enter a name.") shows in `SuiteFont.caption` under the row whose id `refusal.control` names (`halo.layers.row.<layer id>`) | none |
-| Rename prompt (Layer > Rename…) | the field holds the current name, selected | an empty or blank name closes the prompt and shows the row's refusal above | none |
+| Rename prompt (Layer > Rename…) | shown while `HaloWindow`'s `request` is `.renameLayer(id)`; the field holds the current name, selected | an empty or blank name closes the prompt and shows the row's refusal above | none |
 | Layer menu | no composition: Duplicate, Rename, Delete, Bring Forward, Send Backward disabled with "Create a composition first."; no layer: "Select a layer first." | top layer: Bring Forward "This layer is already at the top."; bottom layer: Send Backward "This layer is already at the bottom." | none |
-| Viewer and timeline | after the last delete: "Frame 0: no layers"; the timeline shows its ruler and no lanes (its own empty text is easing's, see Review notes) | none | none |
+| Viewer and timeline | after the last delete: "Frame 0: no layers"; the timeline shows its ruler, no lanes and W0's (FD-15) "No layers yet. Add one from Layer > New." | none | none |
 
 ## Contract slice
 
 No new protocol and no service: layer housekeeping is engine-direct
 (section 2). Everything below is new in HaloModel. Command cases are W0's
-(FD-11): views act only through `perform(_:)`, and commands that carry a
-value have payload cases. Written here as `.duplicateLayer`, `.deleteLayer`,
+(FD-11, which lists every v1 case; features never add one): views act only
+through `perform(_:)`. This feature routes `.duplicateLayer`, `.deleteLayer`,
 `.bringLayerForward`, `.sendLayerBackward`, the menu's payload-free Rename
-item (`.beginRenameLayer`), `.renameLayer(id, name)` (FD-11 names it) and
-`.moveLayer(id, index)` for the list's drag; use W0's spellings.
+item `.beginRenameLayer`, `.renameLayer(String, String)` (id, name),
+`.moveLayer(String, to: Int)` for the list's drag and `.selectLayer(String?)`
+for a row click. The Rename prompt uses W0's window request seam:
+`HaloWindowRequest.renameLayer(String)` (FD-11) in `HaloWindow`'s one
+`@State var request` (FD-14).
 
 ```swift
 // HaloLayerEdits.swift (LP-1). Every write is one `edit` step; all act on
@@ -163,10 +166,12 @@ moveTarget(from, toOffset, count) = from in 0..<count ? (toOffset > from ? toOff
 bring forward = moveLayer(sel, to: i - 1) if i > 0; send backward = moveLayer(sel, to: i + 1) if i < last
 
 deleteSelectedLayer():
+  let keying = services.keying                 # copy first: edit is mutating, so reading
+                                               # self.services inside its closure overlaps self
   edit("Delete Layer", control: "halo.layers.list") { doc in
     guard sel else throw .noLayerSelected
     for child in layers where child.parentID == sel:         # before removing the parent
-      do { try services.keying.setParent(nil, of: child.id, at: comp.playheadFrame, in: &comp) }
+      do { try keying.setParent(nil, of: child.id, at: comp.playheadFrame, in: &comp) }
       catch HaloEditError.notBuilt { child.parentID = nil }  # W0 live stub: clear, keep values
     remove sel at i
     doc.selectedLayerID = layers[safe: i]?.id ?? layers.last?.id }   # nil when empty
@@ -194,21 +199,16 @@ pass`, `Head:`. LP-4 also carries `feature-done`.
 | id | issue | what | owned files | depends on | size |
 |---|---|---|---|---|---|
 | LP-1 | #770 (part) | The four edits, the two one-place moves and `moveTarget`, each one named step through `edit`; duplicate selects the copy; delete un-parents children through `services.keying.setParent(nil, …)` with the `.notBuilt` fallback and selects the layer that took its place | `Sources/HaloModel/HaloLayerEdits.swift`, `Tests/HaloModelTests/HaloLayerEditsTests.swift` | – | ~360 |
-| LP-2 | #770 (part) | Turn the Layer commands on: `HaloAvailability+Layers.swift` answers state for Duplicate, Rename, Delete, Bring Forward, Send Backward (New stays as W0 wrote it); `HaloWindow+Layers.swift` routes each to LP-1 (⌫ from the viewer and timeline, `.renameLayer(id, name)` and `.moveLayer(id, index)` included) and shows Layer > Rename… as a SwiftUI `.alert` titled "Rename Layer" with a `TextField`, buttons Rename and Cancel, from the `layersScene(_:)` hook's own `@State` (needs no state in a W0 file); the edit budget rows | `Sources/HaloModel/Availability/HaloAvailability+Layers.swift`, `Sources/HaloApp/HaloWindow+Layers.swift`, `Tests/HaloModelTests/HaloLayerAvailabilityTests.swift`, `Tests/HaloModelTests/HaloLayerEditsBudgetTests.swift` | LP-1 | ~260 |
+| LP-2 | #770 (part) | Turn the Layer commands on: `HaloAvailability+Layers.swift` answers state for Duplicate, Rename, Delete, Bring Forward, Send Backward (New stays as W0 wrote it); `HaloWindow+Layers.swift` routes each to LP-1 (⌫ from the viewer and timeline, `.renameLayer(id, name)` and `.moveLayer(id, to:)` included); `.beginRenameLayer` sets W0's `request = .renameLayer(selected id)`, and the `layersScene(_:)` hook shows a SwiftUI `.alert` titled "Rename Layer" while `request` is `.renameLayer(id)`, with a `TextField` (only the draft text lives in the hook's own `@State`), buttons Rename (sends `.renameLayer(id, draft)`) and Cancel, each setting `request = nil`; the edit budget rows | `Sources/HaloModel/Availability/HaloAvailability+Layers.swift`, `Sources/HaloApp/HaloWindow+Layers.swift`, `Tests/HaloModelTests/HaloLayerAvailabilityTests.swift`, `Tests/HaloModelTests/HaloLayerEditsBudgetTests.swift` | LP-1 | ~260 |
 | LP-3 | #770 (part) | `HaloLayerList` replaces W0's stub's body: a system `List` of `SidebarRow`s (select; rename on the row, whose `onRename` sends `.renameLayer(id, name)`), `.onMove` sending `.moveLayer(id, index)` with the index from `HaloProject.moveTarget`, `.onDeleteCommand` sending `.deleteLayer`, the refusal caption under the named row, the empty text; each row `halo.layers.row.<id>` through `.haloControl`; snapshots | `Sources/HaloApp/HaloLayerList.swift`, `Tests/AppSnapshotTests/HaloLayersSnapshots.swift` | LP-1 | ~240 |
 | LP-4 | #770 (closes; `feature-done`) | H-J9 `testLayerHousekeeping`, eight steps above, on `-HaloFixture three-layers` | `UITests/HaloJourneyTests+Layers.swift` | LP-2, LP-3, #333 | ~170 |
 
 LP-2 and LP-3 touch disjoint files and can build side by side after LP-1.
 LP-2 lands its availability file and its routes in one PR so no Layer item
-is ever enabled before it acts (QB-F1). LP-3 keeps the init that W0's one call
-site in `HaloCompositionInspector.swift` uses and replaces only the body.
-FD-15 gives the slot views `init(model: HaloProject, perform: @escaping
-(HaloCommand) -> Void)` but does not name `HaloLayerList` among them, and
-FD-11 names `.renameLayer(String, String)` but no move payload. The lead
-checks both on the merged W0 code at stage 1. If the list's init has no
-`perform`, or `HaloCommand` has no move case, that is a W0 gap: the lead
-records it on this feature issue and asks the supervisor. It does not edit
-`HaloCommand.swift`, `HaloCompositionInspector.swift` or `HaloWindow.swift`. The H-J9 journey
+is ever enabled before it acts (QB-F1). LP-3 keeps W0's slot initializer `init(model:perform:)`, which
+`HaloCompositionInspector.swift`'s one call site uses, and replaces only the
+body. It does not edit `HaloCommand.swift`,
+`HaloCompositionInspector.swift` or `HaloWindow.swift`. The H-J9 journey
 stays on `-HaloFixture`: no live service changes what it reads, and core-loop
 (W3) flips it and adds ⌘Z.
 
@@ -216,7 +216,7 @@ stays on `-HaloFixture`: no live service changes what it reads, and core-loop
 
 | id | test | fails when |
 |---|---|---|
-| LP-1 | `HaloLayerEditsTests` on `three-layers` (`.fake`), Badge selected: Duplicate gives names Title, Badge copy, Badge, Background, Rig; the copy is selected, its id is new and not among the ids before, its tracks, `parentID`, text, span, opacity and blend equal Badge's; `history.undoTitle` reads "Undo Duplicate Layer" and `services.history.undo(document, in: &history)` returns the four-layer document. Duplicate, undo that way, duplicate again: the second copy's id differs from the first. `renameLayer(badge, to: "  Badge\t2 ")` stores "Badge 2", one step "Rename Layer"; to `"   "` keeps "Badge", sets `refusal` to (`halo.layers.row.<badge id>`, "Enter a name.") and records nothing; to "Badge" records nothing. `moveLayer(badge, to: 3)` gives Title, Background, Rig, Badge, one step "Move Layer", and `viewerSummary` reads "Frame 0: Badge, Background"; `to: 99` clamps to 3; `moveTarget(from: 1, toOffset: 4, count: 4)` is 3, `(from: 2, toOffset: 0)` is 0, `(from: 7, …)` nil; Bring Forward on Title and Send Backward on Rig record nothing. Delete Badge leaves Title, Background, Rig with Background selected, "Undo Delete Layer"; delete Rig (bottom) selects Background; deleting all four leaves no selection and "Frame 0: no layers"; delete with nothing selected sets "Select a layer first." and records nothing. On `parented`, scrub to 12, parent Ball to Rig with `services.keying.setParent`, select Rig, delete: Ball's `parentID` is nil, its world anchor point equals the one before the delete within 1e-6 and its Position X at 12 reads 560.0; one step; undo returns Rig and Ball's parent. The same with `keying` replaced by a test-local stub that throws `.notBuilt("Parenting")`: Ball's `parentID` is nil and its `tracks` are unchanged. On `.live` the delete succeeds and Ball's `parentID` is nil (true with the stub or layer-keys' live type) | a copy reuses an id or lands below, a blank name is stored or recorded, a move lands off by one, a delete leaves a dangling `parentID`, moves a child on screen on `.fake`, or fails on `.live` before layer-keys |
+| LP-1 | `HaloLayerEditsTests` on `three-layers` (`.fake`), Badge selected: Duplicate gives names Title, Badge copy, Badge, Background, Rig; the copy is selected, its id is new and not among the ids before, its tracks, `parentID`, text, span, opacity and blend equal Badge's; `history.undoTitle` reads "Undo Duplicate Layer" and `services.history.undo(document, in: &history)` returns the four-layer document. Duplicate, undo that way, duplicate again: the second copy's id differs from the first. `renameLayer(badge, to: "  Badge\t2 ")` stores "Badge 2", one step "Rename Layer"; to `"   "` keeps "Badge", sets `refusal` to (`halo.layers.row.<badge id>`, "Enter a name.") and records nothing; to "Badge" records nothing. `moveLayer(badge, to: 3)` gives Title, Background, Rig, Badge, one step "Move Layer", and `viewerSummary` reads "Frame 0: Badge, Background"; `to: 99` clamps to 3; `moveTarget(from: 1, toOffset: 4, count: 4)` is 3, `(from: 2, toOffset: 0)` is 0, `(from: 7, …)` nil; Bring Forward on Title and Send Backward on Rig record nothing. Delete Badge leaves Title, Background, Rig with Background selected, "Undo Delete Layer"; delete Rig (bottom) selects Background; deleting all four leaves no selection and "Frame 0: no layers"; delete with nothing selected sets "Select a layer first." and records nothing. On `parented` (ids looked up by name with `try #require`), with Ball's `parentID` set to Rig's id directly in the test's copy of the fixture (no `setParent` call, so the case runs on `.live` before layer-keys' LK-3), scrub to 12, select Rig, delete: Ball's `parentID` is nil, its world anchor point equals the one before the delete within 1e-6 and its Position X at 12 reads 560.0; one step; undo returns Rig and Ball's parent. The same with `keying` replaced by a test-local stub that throws `.notBuilt("Parenting")`: Ball's `parentID` is nil and its `tracks` are unchanged. On `.live` the delete succeeds and Ball's `parentID` is nil (true with the stub or layer-keys' live type) | a copy reuses an id or lands below, a blank name is stored or recorded, a move lands off by one, a delete leaves a dangling `parentID`, moves a child on screen on `.fake`, or fails on `.live` before layer-keys |
 | LP-2 | `HaloLayerAvailabilityTests` on `.fake` and `.live`: `HaloProject()` with no composition gives "Create a composition first." for the five; `empty` gives "Select a layer first."; `three-layers` with Badge selected gives nil for all five; Title selected: Bring Forward "This layer is already at the top.", Send Backward nil; Rig selected: Send Backward "This layer is already at the bottom."; Layer > New is nil whenever a composition exists. `title(for: .undo)` on `.fake` reads "Undo Duplicate Layer", "Undo Rename Layer", "Undo Move Layer", "Undo Delete Layer" after each edit. W0's `HaloCommandTests` still passes (every command enabled or disabled with help) | a Layer command is on with nothing selected, off when it can act, at an end with no reason, or still reads "Not built yet (#770)." |
 | LP-3 | Snapshots (macOS) on `three-layers` built as `-HaloFixture` builds it: `halo-layer-list-light/dark.png` (four rows, Badge selected), `halo-layer-list-refused-light/dark.png` ("Enter a name." under Badge after `renameLayer(badge, to: "")`), `halo-layer-list-empty-light/dark.png` (every layer deleted: the empty text). `halo-layers-light/dark.png` from W0 stay as they are unless the row look changed (list them if so) | the caption sits under the wrong row or is missing, the empty text is missing, or the list hides while a layer is selected |
 | LP-4 | H-J9 on the `dev` CI run: every assert in steps 1 to 8 | any step's assert |
@@ -273,13 +273,22 @@ change this feature:
   reached through the Rename prompt, and its message shows under the row as a
   Halo caption (W0's refusal pattern) until SuiteUI #577 gives rows a
   message slot.
-- **The prompt lives in the Layers hook.** W0's FD-14 gives each area file
-  a window hook, `layersScene(_:)`, which may wrap the content in a small view
-  struct of its own holding `@State`. LP-2 puts the Rename Layer prompt there
-  as a SwiftUI `.alert` with a `TextField` (Rename, Cancel), so no flag lives
-  in `HaloWindow` and no AppKit alert is needed. `HaloLayerList` has W0's slot
+- **The prompt rides W0's request seam.** `.beginRenameLayer`'s route sets
+  `HaloWindow`'s one `request` to `.renameLayer(id)` (FD-11, FD-14); the
+  `layersScene(_:)` hook presents the Rename Layer `.alert` with a
+  `TextField` (Rename, Cancel) from it and sets `request = nil` when done.
+  Only the field's draft text lives in the hook's own `@State`; no dialog
+  flag does, and no AppKit alert is needed. `HaloLayerList` has W0's slot
   initializer `init(model:perform:)`, and `HaloCommand` has
-  `.renameLayer(id, name)` and `.moveLayer(id, to:)` (FD-11).
+  `.renameLayer(String, String)` and `.moveLayer(String, to: Int)` (FD-11).
+- **No overlapping access in delete.** `deleteSelectedLayer` copies
+  `services.keying` to a local before `edit { }`, since reading `self` inside
+  the closure of a mutating call on `self` overlaps.
+- **The parented delete test builds its state.** LP-1 sets Ball's
+  `parentID` in the fixture copy instead of calling `setParent`, which
+  `.live` can't do before layer-keys' LK-3.
+- **Layer ids in tests.** Ids look like "comp-1-layer-1"; LP-1 and LP-3
+  look Badge, Ball and Rig up by name and pass the id.
 - **Extra files beyond 8.3's seven:** `HaloLayerAvailabilityTests.swift` and
   `HaloLayerEditsBudgetTests.swift` (new, unique names). #770's body names
   only `HaloLayerEditsTests`; the packet wins.

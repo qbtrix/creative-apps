@@ -200,8 +200,8 @@ Every task is one PR to `dev`: at most 400 changed lines and 15 files, label
 | EZ-3 | #428 (part) | `setEasing(_:)` as one "Keyframe Easing" step; `setCustomEasing(_:coalesceKey:)`, `moveEasingHandle`, `easingHandles`, `easingCurve(count:)`; HF-4; the Model journey | `Sources/HaloModel/HaloKeySelection.swift`, `Tests/HaloModelTests/HaloEasingTests.swift` | EZ-2 | ~320 |
 | EZ-4 | #428 (part) | HB-7 | `Tests/HaloModelTests/HaloEasingBudgetTests.swift` | EZ-3 | ~70 |
 | EZ-5 | #428 (part) | `HaloAvailability+Easing.swift` turns on the five Keyframe Easing commands when a key is picked | `Sources/HaloModel/Availability/HaloAvailability+Easing.swift`, `Tests/HaloModelTests/HaloEasingAvailabilityTests.swift` | EZ-3 | ~110 |
-| EZ-6 | #428 (part) | App: the EASING group (segment rows with their easing as value, `ChoiceChips` for the five presets, `CurveEditor` id `halo.easing`, X1 Y1 X2 Y2 `StudioScrubRow`s, the two empty texts, the refusal caption), every control through `.haloControl`; `HaloWindow+Easing.swift` routes the five commands to `setEasing` and gives the group its closures | `Sources/HaloApp/HaloEasingInspector.swift`, `Sources/HaloApp/HaloWindow+Easing.swift`, `Tests/AppSnapshotTests/HaloEasingSnapshots.swift` | EZ-5 | ~330 |
-| EZ-7 | #428 (part) | App: a diamond click calls `selectLaneKeys` (Shift from `NSEvent.modifierFlags` extends); the strip's context menu holds the five presets for the picked keys, each disabled with `unavailableHelp(for:)` as help; plain diamonds until #771; everything the view does today kept | `Sources/HaloApp/HaloTimelineView.swift` | EZ-6 | ~140 |
+| EZ-6 | #428 (part) | App: `HaloEasingInspector(model:perform:)`, W0's slot replaced whole: the EASING group (segment rows with their easing as value, `ChoiceChips` for the five presets, `CurveEditor` id `halo.easing`, X1 Y1 X2 Y2 `StudioScrubRow`s, the two empty texts, the refusal caption), every control through `.haloControl`, every action through `perform` with FD-11's cases (`.selectKey(ref, extending:)`, `.clearKeySelection`, `.setEasing(preset)`, `.setCustomEasing(easing)` from the number rows, `.moveEasingHandle(index:x:y:)` from the curve, `.endEasingDrag` from `CurveEditor.onEnd` and `StudioScrubRow.onEnd`); `HaloWindow+Easing.swift` routes each to its Model method (`.endEasingDrag` → `endCoalescing()`, index 0/1 → `.first`/`.second`) | `Sources/HaloApp/HaloEasingInspector.swift`, `Sources/HaloApp/HaloWindow+Easing.swift`, `Tests/AppSnapshotTests/HaloEasingSnapshots.swift` | EZ-5 | ~330 |
+| EZ-7 | #428 (part) | App: `HaloTimelineView(model:perform:)` is W0's slot view (FD-14 calls it; its call site never changes): a diamond click sends `perform(.selectLaneKeys(layerID:frame:extending:))` (Shift from `NSEvent.modifierFlags` extends); the strip's context menu holds the five presets for the picked keys, each sending `.setEasing(preset)` and disabled with `unavailableHelp(for:)` as help; plain diamonds until #771; everything the view does today kept, still through `perform` | `Sources/HaloApp/HaloTimelineView.swift` | EZ-6 | ~140 |
 | EZ-8 | #428 (closes; `feature-done`) | H-J7 `testEaseKeys`, steps 1 to 8, on `-HaloSample keyed` | `UITests/HaloJourneyTests+Easing.swift` | EZ-6, EZ-7, #333 | ~190 |
 
 The Model chain is EZ-1 → EZ-2 → EZ-3 → (EZ-4 ∥ EZ-5); the app chain is
@@ -210,14 +210,18 @@ EZ-6 needs EZ-5 so its chips and menu read real availability. The 8.3 list's
 `HaloEasingTests` stays the HF-4 and journey file; the selection tests and
 the availability tests get their own new files so no task passes 400 lines.
 
-**Inspector slot.** W0 (FD-15) gives every slot view one initializer,
-`init(model: HaloProject, perform: @escaping (HaloCommand) -> Void)`, and
-`HaloCommand` (FD-11) carries payload cases such as `.setEasing(preset)` and
-`.selectKey(ref, extending:)`. EZ-6 replaces the body of
-`HaloEasingInspector` and routes those commands in `HaloWindow+Easing.swift`;
-it never edits `HaloLayerInspector.swift`. If a command it needs has no case
-yet, that is a one-case addition to W0's `HaloCommand.swift`, which no W2
-feature owns: comment on the feature issue and the supervisor adds it.
+**Slot views.** W0 (FD-14) calls every slot view, `HaloEasingInspector` and
+`HaloTimelineView` among them, as `init(model: HaloProject, perform:
+@escaping (HaloCommand) -> Void)`; a slot reads everything from `model` and
+acts only through `perform`, with no closures of its own. `HaloCommand`
+(FD-11) already lists every easing case: `.setEasing(HaloEasingPreset)`,
+`.selectKey(HaloKeyRef, extending:)`, `.selectLaneKeys(layerID:frame:extending:)`,
+`.clearKeySelection`, `.setCustomEasing(HaloEasing)`,
+`.moveEasingHandle(index:x:y:)` and `.endEasingDrag`. EZ-6 replaces
+`HaloEasingInspector` whole and routes those cases in
+`HaloWindow+Easing.swift`; EZ-7 replaces `HaloTimelineView` whole. Neither
+edits `HaloLayerInspector.swift`, `HaloWindow.swift` or `HaloCommand.swift`;
+features never add cases.
 
 **The W0 stub check.** FD-7's `HaloServicesTests` checks an invariant (a
 live service either has nil help or throws `.notBuilt` with help), so
@@ -228,8 +232,8 @@ assert lives in `KeyEasingContractTests`, which EZ-1 rewrites.
 
 | id | test | fails when |
 |---|---|---|
-| EZ-1 | `KeyEasingContractTests` over `[fake, live]` on `keyed`: `keys(of: "Ball")` is x 0, x 24, opacity 0, opacity 12 in that order; `setEasing(.easeIn)` on x 0 makes `easing(of:)` `.easeIn` and Position X at 12 below 560; an empty set throws `.noKeySelected`; a key at x 7 throws `.unknownLayer("Ball")` and the composition is unchanged; `.cubicBezier(1.4, 0, 0.58, 1)` is stored with x1 1.0; `.cubicBezier(.nan, …)` throws and changes nothing; `LiveKeyEasing().unavailableHelp == nil` | the live type misses a key, eases the wrong key, lands a partial or non-finite change, or still says it isn't built |
-| EZ-2 | `HaloKeySelectionTests` on `keyed` (`.fake`): Ball's `keySegments` titles are "Position X 0 → 24" and "Opacity 0 → 12", both "Linear"; Floor's are empty; `selectKey(x 0)` picks one, Shift on opacity 0 picks two, Shift on x 0 again leaves opacity 0; a key at x 24 (a track's last) changes nothing; `selectLaneKeys("Ball", 0)` picks x 0 and opacity 0, at 12 picks none; selecting Floor empties `pickedSegment`; `history` is unchanged after every call | a row is missing, a last key can be picked, Shift doesn't toggle, or a pick records a step |
+| EZ-1 | `KeyEasingContractTests` over `[fake, live]` on `keyed`, with `let ball = try #require(keyed.layers.first { $0.name == "Ball" }).id` (ids look like "comp-1-layer-1", never a name): `keys(of: ball)` is x 0, x 24, opacity 0, opacity 12 in that order; `setEasing(.easeIn)` on x 0 makes `easing(of:)` `.easeIn` and Position X at 12 below 560; an empty set throws `.noKeySelected`; a key at x 7 throws `.unknownLayer(ball)` (the id, as the rule throws `key.layerID`) and the composition is unchanged; `.cubicBezier(1.4, 0, 0.58, 1)` is stored with x1 1.0; `.cubicBezier(.nan, …)` throws and changes nothing; `LiveKeyEasing().unavailableHelp == nil` | the live type misses a key, eases the wrong key, lands a partial or non-finite change, or still says it isn't built |
+| EZ-2 | `HaloKeySelectionTests` on `keyed` (`.fake`), Ball's and Floor's ids looked up by name with `try #require`: Ball's `keySegments` titles are "Position X 0 → 24" and "Opacity 0 → 12", both "Linear"; Floor's are empty; `selectKey(x 0)` picks one, Shift on opacity 0 picks two, Shift on x 0 again leaves opacity 0; a key at x 24 (a track's last) changes nothing; `selectLaneKeys(layerID: ball, frame: 0, extending: false)` picks x 0 and opacity 0, at 12 picks none; selecting Floor empties `pickedSegment`; `history` is unchanged after every call | a row is missing, a last key can be picked, Shift doesn't toggle, or a pick records a step |
 | EZ-3 | `HaloEasingTests` on `keyed` over `[.fake, .live]`: HF-4 (below); with x 0 picked, Ease In gives x at 12 below 560, Ease Out above, Linear exactly 560, Hold 160 at 23 and 960 at 24; Ease In on two picked keys (x 0, opacity 0) is one step titled "Undo Keyframe Easing" and one `undo()` restores both to Linear; Ease In twice is one step; 30 `moveEasingHandle` calls are one step and after `endCoalescing()` the next is a new one; after a handle move `pickedPreset` is nil and the row reads "Custom"; the easing survives `fileData()` then `services.files.decode` and `finishOpen`; `testEaseKeysJourney` walks steps 1 to 8 | an easing samples wrong, a gesture is zero or two steps, or easing is lost on save |
 | EZ-4 | `HaloEasingBudgetTests.easingStep` (below) | over budget |
 | EZ-5 | `HaloEasingAvailabilityTests` on `keyed` over `[.fake, .live]`: with Ball selected and nothing picked, each of the five commands reads "Pick a key in the EASING list first."; after `selectKey(x 0)` all five are nil; with no layer "Select a layer first."; on `empty` with no composition "Create a composition first."; W0's `HaloCommandTests` invariant still holds | an item turns on with nothing picked, stays off with a pick, or has no help |
@@ -290,6 +294,13 @@ change this feature:
 - **⌘Z is allowed here.** W1 journeys other than history-files' may only
   read the Undo title; easing is W2 and filed after history-files, so H-J7
   presses ⌘Z.
+- **Slots act through `perform`.** EZ-6 once had `HaloWindow+Easing` hand
+  the group closures; that contradicts W0's one slot initializer, so every
+  action goes through `perform` with FD-11's easing cases, and EZ-7 treats
+  `HaloTimelineView` as the slot view it is.
+- **Layer ids in tests.** Tests looked layers up as "Ball"; ids look like
+  "comp-1-layer-1", so EZ-1 and EZ-2 look the id up by name and
+  `.unknownLayer` carries that id.
 - **No shared docs.** The `halo-keying` C4 description already names
   selected keys and "Keyframe Easing"; this feature edits neither
   `docs/c4/model.json` nor `docs/design.md`.
