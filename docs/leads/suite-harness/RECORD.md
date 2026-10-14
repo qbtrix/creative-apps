@@ -4,7 +4,7 @@ Issue: #778 · Packet: docs/blueprints/suiteui/features/suite-harness.md (on bra
 Run: act-1a13b7e0908-fybz · Session: claude/suite-harness-lead-wwxtgn · Started: 2026-10-14T18:00Z
 Stage: 3 wave 6
 Base: eb633ad7d98b1da789315dd2080e467675ac557e (wave 6)
-Next: wait for SH-8's PR (feature-done, wf_7ef7854a-36b) to merge; its merge dispatches ci.yml on dev; then Anatomy round 1 on that run
+Next: wait for the lane to merge #878 (feature-done); its merge dispatches ci.yml on dev; then Anatomy round 1 on that run. Known non-feature red on dev: PhotoBrushLatencyTests (#763)
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -19,7 +19,7 @@ Next: wait for SH-8's PR (feature-done, wf_7ef7854a-36b) to merge; its merge dis
 | SH-6 | 4 | gallery, index, six stubs, SuiteWindow hook (#776) | SuiteGallery.swift, Gallery/*.swift, SuiteWindow.swift, SuiteGalleryTests.swift | SuiteGalleryTests | #875 | merged |
 | SH-5b | 4 | snapshot of EmptyStateView with an unavailable action (follow-up to #871) | Tests/AppSnapshotTests/SuiteEmptyStateSnapshots.swift | the snapshot | #874 | merged |
 | SH-7 | 5 | journey template, SuiteJourneyTests bundle, helpers, SJ0, smoke, suiteui audit key (#333) | project.yml, UITests/Journey.swift, Journey+Input.swift, SuiteJourneyTests.swift, SuiteJourneyTests+Smoke.swift, audit-baseline.json | SJ0, smoke | #877 | merged |
-| SH-8 | 6 | SJ25 + journey budget constants (feature-done) | UITests/SuiteJourneyTests.swift, SuiteJourneyTests+Budgets.swift | SJ25 |  | building, feature-done (wf_7ef7854a-36b) |
+| SH-8 | 6 | SJ25 + journey budget constants (feature-done) | UITests/SuiteJourneyTests.swift, SuiteJourneyTests+Budgets.swift | SJ25 | #878 | open, feature-done, gate pass @db5713e |
 
 ## Rounds
 | round | CI run | CI | audit vs baseline | lenses | confirmed | fixed by | clean |
