@@ -22,7 +22,7 @@ lists-and-layers feature (#577, #108, #73, #589, #111): until those land,
 rename is by double-click only (no Return, no "Rename" action), the rows
 have no context menu, and J12's group-row eye step is an `XCTSkip` naming
 #589. When lists-and-layers merges, a `line:design` follow-up (filed by
-its LL-9 and LL-11) adopts the rest. P3 needs #330 and #333
+LL-9; the rename keys and context menus come from LL-6, LL-7 and LL-8) adopts the rest. P3 needs #330 and #333
 (suite-harness). No creative-core issue.
 
 Blueprint sections: 4 (J12, P3), 5.4 (`LayerOrdering`), 6 (rule 5, the
@@ -36,7 +36,9 @@ In `UITests/DesignJourneyTests+Layers.swift`, class
 1. **J12** `testLayersRenameReorderNest`: double-click the A row, type
    "Avatar", Return: the row reads "Avatar" ("Undo Rename Layer"); rename it
    to an empty name: refused, the row keeps "Avatar", nothing recorded;
-   drag C above B: the order reads C above B ("Undo Move Layer"); drag
+   drag B above C (Layers lists Desktop front to back as Hidden, Locked, Pair,
+   Title, C, B, A, so C starts right above B): the order reads B above C
+   ("Undo Move Layer"); drag
    Title into Pair: Title is nested under Pair; select B, Object > Arrange >
    Send to Back: B is last ("Undo Send to Back"); hide Pair from its own
    row's eye and ⌘Z (`XCTSkip` naming #589 until the SuiteUI half lands);
@@ -72,7 +74,8 @@ Model additions in `DesignLayerToggles.swift`:
 
 ```swift
 /// The Layers rows' drop target for a drop at `row` and `position` (above, below, into).
-public func layerDrop(onto rowID: String, _ position: DesignDropPosition) -> (parentID: String?, index: Int)?
+/// `index` counts the new parent's children after `draggedID` is removed, as `LayerOrdering.move` expects.
+public func layerDrop(_ draggedID: String, onto rowID: String, _ position: DesignDropPosition) -> (parentID: String?, index: Int)?
 public enum DesignDropPosition: Sendable { case above, below, into }
 ```
 
@@ -94,10 +97,11 @@ LiveOrdering.move(id, into p, at i, page):
 arrange(step, ids): group ids by parent; per parent, move the selected block:
   front: to the end; forward: each one place up (topmost first); backward, back: mirror
 
-layerDrop(row, pos):
+layerDrop(dragged, row, pos):
   above → (parent(row), index(row) + 1)   # rows list front to back, children back to front
   below → (parent(row), index(row))
   into  → row is a frame or group ? (row, children.count) : nil
+  if dragged sits in the same parent at an index below the result: index -= 1   # counted after removal
 
 lock(id) while editingTextID is id or inside id: commitTextEdit(); then lock    # #613
 ```
@@ -113,16 +117,18 @@ carries `feature-done`. Paths drop `Sources/DesignModel/` and
 | id | issue | what | owned files | depends on | size |
 |---|---|---|---|---|---|
 | L-1 | gap "rename, reorder, nest, Arrange" (Model part) | `LiveOrdering`: move with its refusals; arrange | `Live/LiveOrdering.swift`; tests `DesignOrderingTests.swift` | – | ~300, 2 |
-| L-2 | gap (Model part) | `layerDrop` and `DesignDropPosition` | `DesignLayerToggles.swift`; tests `DesignLayerDropTests.swift` | – | ~150, 2 |
-| L-3 | #613 (closes) | A lock commits an open text edit first; rename trims and refuses empty names | `DesignWorkspace.swift`; tests `DesignLockTextEditTests.swift`, `DesignRenameTests.swift` | – | ~180, 3 |
+| L-2 | gap (Model part) | `layerDrop` and `DesignDropPosition` | `DesignLayerToggles.swift`; tests `DesignLayerDropTests.swift` | L-1 | ~150, 2 |
+| L-3 | #613 (closes) | A lock commits an open text edit first; rename trims the name (blank names are already refused) | `DesignWorkspace.swift`; tests `DesignLockTextEditTests.swift`, `DesignRenameTests.swift` | – | ~180, 3 |
 | L-4 | gap (view part); #288 (part) | Layers rows: rename on double-click through `SidebarRow`'s rename, drag to reorder and nest through `layerDrop` and `moveLayer`, the empty page state, row ids `design.layer.<id>` | `DesignLayersPanel.swift`; snapshots `DesignLayersSnapshots.swift` | L-1, L-2, L-3 | ~300, 2 |
 | L-5 | gap (closes) | J12 | `UITests/DesignJourneyTests+Layers.swift` | L-4 | ~250, 1 |
 | L-6 | #589 (Design half), or LL-9's follow-up | J12's group-row eye step without the skip, once lists-and-layers LL-9 has merged; until then this task waits and the lead records it as blocked in RECORD.md | `UITests/DesignJourneyTests+Layers.swift` | L-5; lists-and-layers LL-9 | ~30, 1 |
 | L-7 | – | QD-S10 model budget; P3 | tests `DesignLayersBudgetTests.swift`; `UITests/DesignJourneyTests+PerfLayers.swift` | L-5 | ~150, 2; `feature-done` |
 
-L-1, L-2 and L-3 run side by side. L-6 is the only task that waits on
-another line; if LL-9 has not merged when L-7 is ready, L-7 still ships
-with `feature-done` and L-6 becomes a `line:design` issue the lead files
+L-1 and L-3 run side by side; L-2 follows L-1 (its test reads
+`LiveOrdering`'s refusals). L-6 is the only task that waits on another
+line. When LL-9 has merged by the time L-5 lands, L-7 depends on L-6 so the
+`feature-done` PR is the last; if LL-9 has not merged when L-7 is ready,
+L-7 ships with `feature-done` and L-6 becomes a `line:design` issue the lead files
 ("Design: J12 hides a group from its row's eye", `Depends on:` the
 lists-and-layers feature issue), so the feature does not stall on SuiteUI.
 
@@ -130,9 +136,9 @@ lists-and-layers feature issue), so the feature does not stall on SuiteUI.
 
 | id | test | fails when |
 |---|---|---|
-| L-1 | `DesignOrderingTests` on `cards`, `.live`: move C to index 1 of Desktop puts it above B; move Title into Pair at 2 nests it last; Pair into E1 throws `.notAContainer("E1")`; Pair into its own child throws `.intoItself("Pair")`; Locked throws `.locked("Locked")`; a move to the same place throws `.unchanged`; Send to Back on B makes it Desktop's first child; Bring Forward on A and B keeps their relative order; Bring to Front on the frontmost is `.unchanged` and its help is "Nothing would change."; each is one named step; the contract law on `.live` | a refusal is missing, the order is wrong, or a cycle is created |
-| L-2 | `DesignLayerDropTests`: above, below and into on a frame row, a group row and a rectangle row give the documented targets; into a rectangle is nil; a drop onto the dragged row's own child is refused by `moveLayerHelp` | a drop maps to the wrong parent or index |
-| L-3 | `DesignLockTextEditTests`: #613's repro: lock the group mid edit: the text reads "Typed", the undo names are "Undo Lock Layer" then "Undo Edit Text", `editingTextID == nil`. `DesignRenameTests`: "  Avatar " becomes "Avatar"; "" and "   " throw `.emptyName` and record nothing; page rename the same | the typing is lost, or an empty name lands |
+| L-1 | `DesignOrderingTests` on `cards`, `.live`: move B to index 2 of Desktop puts it above C (after B is removed, Desktop's children are A, C, Title, …); move Title into Pair at 2 nests it last; A into E1 throws `.notAContainer("E1")`; Pair into its own child throws `.intoItself("Pair")`; Locked throws `.locked("Locked")`; a move to the same place throws `.unchanged`; Send to Back on B makes it Desktop's first child; Bring Forward on A and B keeps their relative order; Send to Back on A (already Desktop's first child) is `.unchanged` and its help is "Nothing would change."; each is one named step; the contract law on `.live` | a refusal is missing, the order is wrong, or a cycle is created |
+| L-2 | `DesignLayerDropTests`: above, below and into on a frame row, a group row and a rectangle row give the documented targets; into a rectangle is nil; dragging A (Desktop's first child) above B gives (Desktop, 1), which after A's removal lands right above B; dragging C below A gives (Desktop, 0); a drop onto the dragged row's own child is refused by `moveLayerHelp` on `.live` (L-1's type) | a drop maps to the wrong parent or index |
+| L-3 | `DesignLockTextEditTests`: #613's repro: lock the group mid edit: the text reads "Typed", the undo names are "Undo Lock Layer" then "Undo Edit Text", `editingTextID == nil`. `DesignRenameTests`: "  Avatar " becomes "Avatar" for a layer and a page (the new part: `renameNode` and `renamePage` already refuse blank names on `dev`, which the test keeps covering); a rename to the same trimmed name records nothing | the typing is lost, a name keeps its spaces, or a no-op rename records a step |
 | L-4 | `DesignLayersSnapshots` adds `design-layers-renaming` (the A row in rename) and `design-layers-nested` (Title inside Pair, expanded); today's `design-layers-*` PNGs unchanged otherwise; 7.3 item 4 (eye and lock columns share one x at every depth) asserted on the hosted view's frames | the columns drift with depth, or a row is missing |
 | L-5 | J12 passes on the macOS run with its group-row step skipped by name; it fails if a step records more than one undo step or the empty rename changes the row | an undo name, order or name differs |
 | L-6 | J12's group-row step runs: Pair's eye hides Pair ("Undo Hide Layer"), ⌘Z shows it | the eye is not its own element |
