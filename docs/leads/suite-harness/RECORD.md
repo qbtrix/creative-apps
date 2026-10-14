@@ -3,8 +3,8 @@
 Issue: #778 · Packet: docs/blueprints/suiteui/features/suite-harness.md (on branch `docs/suiteui-feature-packets` until the packet PR merges)
 Run: act-1a13b7e0908-fybz · Session: claude/suite-harness-lead-wwxtgn · Started: 2026-10-14T18:00Z
 Stage: 3 wave 2
-Base: 718f3da6a6542b2a19c3221f302b3cef4e9212d6
-Next: wait for wave 2 PRs (SH-3, SH-4, SH-9; workflow wf_6a181509-6c9), then wave 3 (SH-5, SH-10)
+Base: 1098ff2d6c135020391cef770f4de11dfde9465a
+Next: wait for wave 2 PRs (SH-3, SH-4, SH-9; workflow wf_c36a8d40-129), then wave 3 (SH-5, SH-10)
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -31,4 +31,6 @@ Next: wait for wave 2 PRs (SH-3, SH-4, SH-9; workflow wf_6a181509-6c9), then wav
 - Captain questions Q1/Q2/Q3/Q9 built as the packet assumes (its table).
 
 ## Open
+- Wave 2's first run (wf_6a181509-6c9) died in the 18:00Z usage pause with no branch or PR; relaunched as wf_c36a8d40-129 from base 1098ff2.
+- Builder branches are `lead/suite-harness-<id>` (a `lead/suite-harness/<id>` ref can't coexist with the lead branch).
 - SH-7 edits `project.yml` (not on the protected list) — fine for the lane.
