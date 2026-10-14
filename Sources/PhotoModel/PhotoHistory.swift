@@ -6,7 +6,9 @@
 // holds no pixels; edits that add, remove or resize layers keep the whole
 // stack. A run of edits with the same coalescing key (one slider's drag, one
 // layer's opacity) is one step, until endAdjust closes it at the gesture's end. A new edit clears Redo; the history keeps the
-// last `limit` steps. Linux-safe.
+// last `limit` steps. The history list reads both stacks as one row of named
+// steps, from how the image began ("New Image", "Open") to the last redo, and
+// jumping to a step undoes or redoes up to it. Linux-safe.
 import CoreRaster
 
 /// The state an edit puts back.
@@ -38,6 +40,9 @@ struct PhotoHistory: Sendable, Equatable {
     }
 
     static let limit = 50
+    /// The first step: how the image began, or the newest step the limit
+    /// dropped, since the oldest state left is the one after it.
+    var baseName = "New Image"
     var undo: [Step] = []
     var redo: [Step] = []
 }
@@ -62,6 +67,25 @@ extension PhotoWorkspace {
         history.undo.append(Step(name: step.name, edit: apply(step.edit), coalescing: nil))
     }
 
+    /// Every step's name, oldest first: how the image began, each edit that
+    /// can be undone, then each that can be redone. Empty with no image.
+    public var historySteps: [String] {
+        guard canvas != nil else { return [] }
+        return [history.baseName] + history.undo.map(\.name) + history.redo.reversed().map(\.name)
+    }
+
+    /// The index in `historySteps` of the step the image is at now; later
+    /// steps are the ones Redo makes again.
+    public var historyIndex: Int { history.undo.count }
+
+    /// Undoes or redoes until the image is at `historySteps[index]`. Ignored
+    /// out of range, mid-drag or at the current step.
+    public mutating func jumpToHistoryStep(_ index: Int) {
+        guard stroke == nil, historySteps.indices.contains(index) else { return }
+        while historyIndex > index { undo() }
+        while historyIndex < index { redo() }
+    }
+
     /// Ends the run the last undo step is coalescing (a slider's or a curve's
     /// drag), so the next edit, even to the same section, is a new step. The
     /// inspector calls it when a gesture ends: one gesture, one undo step.
@@ -78,7 +102,11 @@ extension PhotoWorkspace {
         history.redo.removeAll()
         if let coalescing, history.undo.last?.coalescing == coalescing { return }
         history.undo.append(Step(name: name, edit: edit, coalescing: coalescing))
-        if history.undo.count > PhotoHistory.limit { history.undo.removeFirst(history.undo.count - PhotoHistory.limit) }
+        let over = history.undo.count - PhotoHistory.limit
+        if over > 0 {
+            history.baseName = history.undo[over - 1].name
+            history.undo.removeFirst(over)
+        }
     }
 
     /// Records the layer list as it is, before a property or order change.
