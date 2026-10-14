@@ -429,7 +429,7 @@ Page names are the gallery's (section 6.2). "Log reads" means the label of
 | # | Test (file) | Page | Steps (each one shot) | Asserts | Empty · error · loading |
 |---|---|---|---|---|---|
 | SJ0 | `testGalleryOpensEveryPage` (`SuiteJourneyTests.swift`) | `index`, then each | launch with `-SuiteGallery index -SuitePerfProbe`; open each page from the index list; launch with `-SuiteGallery nosuch` | each page's root `suite.gallery.<page>` exists; `suite.controls` parses and lists every `suite.gallery.*` control on the page, each enabled or with a non-empty reason; the second launch shows an `EmptyStateView` reading "No gallery page named nosuch." | empty: unknown page message · error: none · loading: none |
-| SJ1 | `testShellsFitAtEveryWidth` (`+Chrome`) | `window`, then `editor` | for each page, drag the window's bottom-right corner to widths 900 (`SuiteSize.windowMinimum`), 1024, 1280 and 1440 pt; shot at each | every `suite.*` region frame (sidebar, inspector, canvas, tools, timeline) lies inside the window with 1 pt slack; no two regions overlap by more than 1 pt; content is at least `SuiteSize.contentMinimum.width` wide; the right panel is exactly `editorPanelWidth`; the app audit's `offscreen` and `overlap` counts on these shots are 0 | none · none · none |
+| SJ1 | `testShellsFitAtEveryWidth` (`+Chrome`) | `window`, then `editor` | for each page, drag the window's bottom-right corner to widths 880 (`SuiteSize.windowMinimum.width` on dev), 1024, 1280 and 1440 pt; shot at each | every `suite.*` region frame (sidebar, inspector, canvas, tools, timeline) lies inside the window with 1 pt slack; no two regions overlap by more than 1 pt; content is at least `SuiteSize.contentMinimum.width` wide; the right panel is exactly `editorPanelWidth`; the app audit's `offscreen` and `overlap` counts on these shots are 0 | none · none · none |
 | SJ2 | `testEditorShellTimelineSlot` (`+Chrome`) | `editor`, `editor-plain` | drag the slot's divider up 120 pt; drag it to the top of the window; double-click the divider (collapse); double-click again (restore); open `editor-plain` | slot height grows by 120 (±1); stops at its maximum (canvas keeps `contentMinimum.height`); collapse leaves only the slot's toolbar row and the canvas grows by the difference; restore returns the last height; `editor-plain` (no timeline) has no divider element and its canvas fills the shell exactly as today | empty: shell without timeline · error: none · loading: none |
 | SJ3 | `testTopBarCommandsAndSaveStatus` (`+Chrome`) | `editor` | click New (outlined); hover Export (primary); click Undo (icon-only); hover the disabled Redo; set the page's save state to unsaved, then failed, then saved | log reads `command new`; exactly one element is primary and it is the right-most; Undo's label is "Undo" with no visible title; Redo's tooltip is its `unavailableHelp`; save status reads "Saved", then the unsaved dot with label "Unsaved changes", then "Not saved" with the warning triangle | empty: none · error: "Not saved" · loading: none |
 | SJ4 | `testToolRailSelectsAndExplains` (`+Chrome`) | `editor` | click the second tool; click the canvas, press the first tool's key; hover the disabled tool; click it | log reads `tool b`, then `tool a`; the selected tool's value is "selected"; the disabled tool's tooltip is its reason and clicking it leaves the log unchanged | empty: none · error: none · loading: none |
@@ -1315,3 +1315,73 @@ public struct FakeGoldenComparing: GoldenComparing {
     }
 }
 ```
+
+---
+
+## 6. Look
+
+### 6.1 The house reference
+
+Flare's easing editor (`Sources/FlareApp/FlareEasingInspector.swift`) is
+the look every SuiteUI component is held to: Studio caps headers
+(`SuiteFont.sectionCaps`, uppercased, tracked), 28 pt filled number rows
+(`StudioScrubRow`, the one bar slider), 24 pt filled preset chips in three
+columns (`ChoiceChips`), the 180 pt `CurveEditor` well, values in semibold
+tabular figures, color only for state (accent selected, amber keyed), and
+one `onEnd` per drag, nudge or typed value. `docs/design.md` already writes
+that look down (Visual language, Studio rows and chips); where its Visual
+language tables and its Studio section differ (34 pt bars and 6 pt gaps
+against 28 pt rows and 4 pt gaps), the Studio section wins, as it says, and
+the code on dev follows it (`InspectorRows.swift`: 28 pt rows, 4 pt apart).
+
+### 6.2 What SuiteUI adds to `docs/design.md`
+
+These are the additions each feature lands in `docs/design.md` with its own
+code (Component order table plus a paragraph under Anatomy of the controls).
+This blueprint does not edit the shared doc.
+
+| Addition | Rule | Lands with |
+|---|---|---|
+| Timeline slot | A 1 pt `hairline` divider with an 8 pt grab zone above the slot; the slot's own top row is the chip toolbar (`ChipRow`, 28 pt plus 4 pt above and below = the 36 pt collapsed height); minimum open height 120 pt; the canvas never drops under `SuiteSize.contentMinimum.height`; double-click the divider or press ⌥⌘T to collapse and restore; the pointer is the row-resize cursor over the grab zone | editor-chrome |
+| Save status | Already in Anatomy (Top bar); add the accessibility labels "Saved", "Unsaved changes", "Not saved" | editor-chrome |
+| Transport capsule | Already in Anatomy; add: disabled as a group, with one reason ("Nothing to play.") when the duration is 0; loop is a toggle button whose value is On or Off | editor-chrome |
+| Tabs capsule | Already in Anatomy (Tabs and the tool rail) | editor-chrome |
+| Layer list | `LayerList` rows are `SidebarRow`s in a flat panel list (no split view): eye and lock toggles in their fixed column, a dimmed row (title and symbol in `textSecondary`) for hidden or locked, rename by double-clicking the title or pressing Return on the focused row, a refused rename keeps the field open with the message under it in `stateError` with the exclamation symbol, drag to reorder with a 2 pt `accent` insertion line, context menu actions from `ToolbarAction`s | lists-and-layers |
+| Selection handles | Already in Anatomy (Stage marks); add: the hit square is `selectionHandleHit` in view points at every zoom; the rotate zone is a 16 pt quarter-ring outside each corner with the rotate pointer | canvas-marks |
+| Path, motion path, ghosts | Already in Anatomy (Stage marks) | canvas-marks |
+| Point mark | A 12 pt ring with a 6 pt cross, 1.5 pt ink (white) over a 3 pt paper (black) halo, fixed on screen at any zoom, hidden from accessibility, never hit | canvas-marks |
+| Grid mark | Hairlines in white at 50 % over a black 1 px shadow, `cells` × `cells`, clipped to its rect | canvas-marks |
+| Timeline keys and playhead | Already in Anatomy (Timeline); add: the selected key moves with ← and →, ⌫ deletes it, a drag shows the key's new frame in a time pill while dragging | timeline |
+| Node graph | Nodes are `card`-filled rounded rects at `SuiteRadius.control`, 120 × 56 pt, title in `inspectorTitle`, detail in `pill` type; arrows 1.5 pt `textSecondary` with a 6 pt head, condition chips (`ChipRow` look, not interactive) at the arrow's middle; the initial node has a 2 pt leading bar; the active node (preview) takes the `stateSelected` tint and outline; a warning badge is the triangle in `stateWarning` with its text as the accessibility label | node-graph |
+| Gallery pages | Plain `List` index; each page a `Form`-free stack of the real components on the right background (`panel` for inspector pages, `canvasSurround` for canvas pages, the dark `EditorShell` for editor pages) and the log row at the bottom in `SuiteFont.timecode` | suite-harness |
+
+**New tokens**, all landed once by suite-harness in `Tokens.swift` so no
+later wave edits that file: `timelineSlotMinimum` 120, `timelineSlotToolbar`
+36, `timelineGrab` 8, `rotateZone` 16, `pointMarkRing` 12, `pointMarkCross`
+6, `pointMarkInk` 1.5, `pointMarkPaper` 3, `nodeSize` 120 × 56, `nodeGap`
+32, `arrowHead` 6, `arrowStroke` 1.5, `insertionLine` 2. TokensTests'
+geometry test lists each one.
+
+### 6.3 Screens (gallery pages) and the components each uses or needs
+
+SuiteUI's screens are its gallery pages (section 4.1). "Needs" names a
+component that does not exist yet and the issue that builds it.
+
+| Page | Shell | Uses (on dev) | Needs | Journeys |
+|---|---|---|---|---|
+| `index` | `SuiteWindow` content | `List`, `EmptyStateView` | `SuiteGallery` (new) | SJ0 |
+| `window` | `SuiteWindow` | `SidebarSection`, `SidebarRow`, `InspectorHeader`, `InspectorSection`, `EmptyStateView` | – | SJ1 |
+| `editor`, `editor-plain` | `EditorShell` | `EditorTopBar`, `EditorBarItem`, `EditorBarMenu`, `ToolbarGroup(.rail)`, `CanvasViewport`, `SegmentedTabs`, `ViewerStatusBar` | `EditorShell(timeline:)` #342, `EditorBarItem(.primary)` and save status #339, `TransportCapsule` #340, capsule tabs and rail colors #341 | SJ1–SJ6, SJ8 |
+| `empty` | `SuiteWindow` content | `EmptyStateView` | its primary button style #339 | SJ7 |
+| `canvas`, `canvas-pt` | `EditorShell` | `CanvasViewport`, `Ruler`, `ViewerStatusBar` | the ruler corner unit #264 | SJ9, SP2 |
+| `marks` | `EditorShell` | `CanvasViewport`, `SelectionOutline`, `CropShade` | `SelectionHandles`, `PathMarks`, `MotionPathMarks`, `GhostLayer` #273, `CanvasPointMark` #706 #737, `CanvasGrid` #530 | SJ10, SJ21, SP5 |
+| `inspector` | panel (`panel` fill) | `InspectorHeader`, `InspectorSection`, `InspectorSliderRow`, `ScrubField`, `InspectorPickerRow`, `InspectorColorRow`, `InspectorAction`, `KeyframeButton`, `PresetGrid`, `ChoiceChips`, `ChipRow`, toggle rows | `onEnd` on the exact field and the color rows #718, the Reset hit area #622 #285, readable values #262 | SJ11–SJ15, SP1 |
+| `curves` | panel | `CurveEditor`, `ToneCurveEditor`, `StudioScrubRow` | goldens and the probe mark #343 | SJ16, SJ20 |
+| `layers`, `layers-300` | panel | `SidebarRow`, `SidebarItem`, `SidebarToggle` | `LayerList` and dimmed rows #146, keyboard rename #108, refusable rename #577, context menus #73, child toggles #589 | SJ17, SJ22, SP4 |
+| `grid`, `grid-2000` | `SuiteWindow` content | `ThumbnailGrid`, `EmptyStateView` | – | SJ18, SP4 |
+| `timeline`, `timeline-long` | `EditorShell` slot | `TimelineStrip`, `ChipRow`, `TransportCapsule` | the restyle #62, key selection and drag #63 | SJ19, SP3 |
+| `graph`, `graph-loop` | `EditorShell` canvas | `ChipRow` look, `EmptyStateView` | `NodeGraph` #344 | SJ23 |
+
+Every page renders in Dark (editor pages always), and the window pages also
+in Light; every component additionally has goldens in all four appearances
+(section 7.4).
