@@ -1,4 +1,9 @@
 // Exercises every Fake once on Linux, so the contracts are not only declared but callable.
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
+import Foundation
+#endif
 var run = EditRun()
 precondition(run.change() && !run.change() && run.end() && !run.end() && run.ends == 1)
 let spec = ScrubSpec(range: 0...360, step: 1, unit: "°")
@@ -19,7 +24,7 @@ let tools = [ToolFace(id: "a", title: "Select", shortcut: "v"), ToolFace(id: "b"
 precondition(FakeToolPicking().tool(forKey: "V", in: tools) == "a" && FakeToolPicking().violations(in: tools) == ["b"])
 precondition(FakeCanvasNavigating().zoomedIn(from: 1) == 2)
 precondition(FakeCanvasNavigating().fit(document: PlaneExtent(width: 0, height: 0), in: PlaneExtent(width: 800, height: 600), margin: 32) == 1)
-precondition(FakeHandleGeometry().hit(PlanePoint(x: 100, y: 100), around: PlaneRect(x: 0, y: 0, width: 100, height: 100), hitSize: 12) == .bottomRight)
+precondition(FakeHandleGeometry().hit(PlanePoint(x: 100, y: 100), around: PlaneRect(x: 0, y: 0, width: 100, height: 100), hitSize: 12, rotateZone: 16) == .bottomRight)
 precondition(FakeGridSelecting().click(3, .plain, current: GridPick<Int>(), order: [1, 2, 3]).selection == [3])
 precondition(FakeListEditing().reordered(["a", "b", "c"], moving: "c", to: 0) == ["c", "a", "b"])
 precondition(FakeListEditing().commitRename("Hero", original: "Ball", validate: { _ in nil }) == .renamed("Hero"))
@@ -34,8 +39,15 @@ var probe = FakeFrameProbe(); probe.record(ProbeSample(series: "s", eventTime: 0
 precondition(probe.summary(of: "s", refreshInterval: 1.0 / 60).count == 1)
 probe.drew("scroll", at: 0); probe.drew("scroll", at: 1.0 / 60)
 precondition(probe.intervals(of: "scroll", refreshInterval: 1.0 / 60).count == 1)
+probe.mark("fade-start", series: "chip", at: 0); probe.mark("fade-end", series: "chip", at: 0.14)
+let doc = try JSONDecoder().decode(ProbeDocument.self, from: probe.encoded(refreshInterval: 1.0 / 60))
+precondition(doc.marks.count == 2 && doc.intervals["scroll"]?.count == 1 && doc.latency["s"]?.count == 1)
 var inv = FakeControlInventory(); inv.register(ControlEntry(id: "x", enabled: false))
 precondition(inv.violations() == ["x"])
+let controls = try JSONDecoder().decode(ControlDocument.self, from: inv.encoded())
+precondition(controls.controls.map(\.id) == ["x"])
+precondition(FakeEasingHandleNudging().nudged(PlanePoint(x: 0.5, y: 1), dx: 0, dy: 1, coarse: true).y == 1.1)
+precondition(FakeCurvePointEditing().isOutOfWell(PlanePoint(x: -1, y: 5), extent: PlaneExtent(width: 180, height: 180)))
 let img = RGBAImage(width: 1, height: 1, bytes: [0, 0, 0, 255])
 precondition(FakeGoldenComparing().compare(img, to: img, tolerance: .standard).passes)
 print("contracts: every fake ran")

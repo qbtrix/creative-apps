@@ -353,10 +353,11 @@ public protocol HandleGeometryProviding: Sendable {
     /// Each handle's hit rect in view points around `rect` (view points at the current zoom). The hit size
     /// is `SuiteSize.selectionHandleHit` (12 pt) at every zoom; a rotate zone (`rotateZone`, 16 pt) sits just
     /// outside each corner.
-    func handles(around rect: PlaneRect, hitSize: Double) -> [HandleKind: PlaneRect]
+    /// Each rotate zone's rect bounds its quarter ring of `rotateZone` points.
+    func handles(around rect: PlaneRect, hitSize: Double, rotateZone: Double) -> [HandleKind: PlaneRect]
     /// The handle under `point`, corners before edges before rotate zones; nil when none. Where hit squares
     /// overlap (a rect smaller than the hit size) the corner nearest the point wins.
-    func hit(_ point: PlanePoint, around rect: PlaneRect, hitSize: Double) -> HandleKind?
+    func hit(_ point: PlanePoint, around rect: PlaneRect, hitSize: Double, rotateZone: Double) -> HandleKind?
     /// `rect` after dragging `handle` by `delta`, the opposite side fixed; `keepAspect` (⇧) scales evenly.
     func resized(_ rect: PlaneRect, handle: HandleKind, by delta: PlanePoint, keepAspect: Bool) -> PlaneRect
     /// Degrees turned about `center` from `start` to `end`, clockwise positive (y-down), ⇧ snaps to 15°.
@@ -368,14 +369,14 @@ public protocol HandleGeometryProviding: Sendable {
 public struct FakeHandleGeometry: HandleGeometryProviding {
     public init() {}
     private func square(_ p: PlanePoint, _ s: Double) -> PlaneRect { PlaneRect(x: p.x - s / 2, y: p.y - s / 2, width: s, height: s) }
-    public func handles(around rect: PlaneRect, hitSize: Double) -> [HandleKind: PlaneRect] {
+    public func handles(around rect: PlaneRect, hitSize: Double, rotateZone: Double) -> [HandleKind: PlaneRect] {
         [.topLeft: square(rect.origin, hitSize),
          .topRight: square(PlanePoint(x: rect.maxX, y: rect.minY), hitSize),
          .bottomRight: square(PlanePoint(x: rect.maxX, y: rect.maxY), hitSize),
          .bottomLeft: square(PlanePoint(x: rect.minX, y: rect.maxY), hitSize)]
     }
-    public func hit(_ point: PlanePoint, around rect: PlaneRect, hitSize: Double) -> HandleKind? {
-        handles(around: rect, hitSize: hitSize).first { $0.value.contains(point) }?.key
+    public func hit(_ point: PlanePoint, around rect: PlaneRect, hitSize: Double, rotateZone: Double) -> HandleKind? {
+        handles(around: rect, hitSize: hitSize, rotateZone: rotateZone).first { $0.value.contains(point) }?.key
     }
     public func resized(_ rect: PlaneRect, handle: HandleKind, by delta: PlanePoint, keepAspect: Bool) -> PlaneRect {
         guard handle == .bottomRight else { return rect }
@@ -608,6 +609,8 @@ public protocol CurvePointEditing: Sendable {
     func removed(_ index: Int, from points: [PlanePoint]) -> [PlanePoint]?
     /// Arrow nudges of 0.01, ⇧ 0.1.
     func nudged(_ index: Int, dx: Int, dy: Int, coarse: Bool, in points: [PlanePoint]) -> [PlanePoint]
+    /// Whether a drag at `location` (points, in a well of `extent`) has left the well, which removes a middle point.
+    func isOutOfWell(_ location: PlanePoint, extent: PlaneExtent) -> Bool
 }
 
 /// Appends without sorting and never refuses a removal.
@@ -629,6 +632,29 @@ public struct FakeCurvePointEditing: CurvePointEditing {
         let s = coarse ? 0.1 : 0.01
         return moved(index, to: PlanePoint(x: points[index].x + Double(dx) * s, y: points[index].y + Double(dy) * s), in: points)
     }
+    /// Out only past the well's edge, with no margin (the live rule has one).
+    public func isOutOfWell(_ location: PlanePoint, extent: PlaneExtent) -> Bool {
+        location.x < 0 || location.y < 0 || location.x > extent.width || location.y > extent.height
+    }
+}
+
+// UC15b · SJ20 · Contracts/EasingHandleNudging.swift
+/// The easing curve's two Bezier handles: x stays in 0...1, y may overshoot (no bound), not sorted.
+public protocol EasingHandleNudging: Sendable {
+    /// One arrow press on the focused handle: 0.01, ⇧ 0.1; x clamped to 0...1.
+    func nudged(_ handle: PlanePoint, dx: Int, dy: Int, coarse: Bool) -> PlanePoint
+    /// What VoiceOver and the gallery log say for a handle ("0.42, 1.10").
+    func describe(_ handle: PlanePoint) -> String
+}
+
+/// Does not clamp x.
+public struct FakeEasingHandleNudging: EasingHandleNudging {
+    public init() {}
+    public func nudged(_ handle: PlanePoint, dx: Int, dy: Int, coarse: Bool) -> PlanePoint {
+        let s = coarse ? 0.1 : 0.01
+        return PlanePoint(x: handle.x + Double(dx) * s, y: handle.y + Double(dy) * s)
+    }
+    public func describe(_ handle: PlanePoint) -> String { "\(handle.x), \(handle.y)" }
 }
 
 // UC16 · SJ23 · Contracts/GraphGeometry.swift
@@ -689,28 +715,57 @@ public struct FrameIntervalSummary: Hashable, Sendable, Codable {
     }
 }
 
+/// One in-app moment. Fades record a pair: `fade-start` and `fade-end` with the same series.
+public struct ProbeMark: Hashable, Sendable, Codable {
+    public var name: String            // "preview-before-mouse-up", "progress-shown", "fade-start", "fade-end", ...
+    public var series: String
+    public var time: Double
+    public init(name: String, series: String, time: Double) { self.name = name; self.series = series; self.time = time }
+}
+
+/// The `suite.perf` document. Published under `-SuitePerfProbe` as the accessibility **label** (values can
+/// read empty, #262) of a hidden element with identifier `suite.perf`; journeys decode it with this same
+/// type, which the Journey template compiles from `Contracts/` (section 4.1).
+public struct ProbeDocument: Hashable, Sendable, Codable {
+    public var refreshInterval: Double
+    public var samples: [ProbeSample]
+    public var drawn: [String: [Double]]
+    public var marks: [ProbeMark]
+    public var latency: [String: ProbeSummary]           // per series, computed in the app
+    public var intervals: [String: FrameIntervalSummary] // per series, computed in the app
+    public init(refreshInterval: Double, samples: [ProbeSample], drawn: [String: [Double]], marks: [ProbeMark],
+                latency: [String: ProbeSummary], intervals: [String: FrameIntervalSummary]) {
+        self.refreshInterval = refreshInterval; self.samples = samples; self.drawn = drawn; self.marks = marks
+        self.latency = latency; self.intervals = intervals
+    }
+}
+
 public protocol FrameProbeRecording: Sendable {
     mutating func record(_ sample: ProbeSample)
     /// A frame of `series` drawn at the target timestamp `time` (scrolls, playback).
     mutating func drew(_ series: String, at time: Double)
-    /// An in-app moment: "preview-before-mouse-up", "progress-shown", "animation-ended" and the like.
-    mutating func mark(_ name: String, at time: Double)
+    /// An in-app moment; every call is kept, in order.
+    mutating func mark(_ name: String, series: String, at time: Double)
     /// Frames late = refreshes between the event and the refresh that showed it, at `refreshInterval` seconds.
     func summary(of series: String, refreshInterval: Double) -> ProbeSummary
     func intervals(of series: String, refreshInterval: Double) -> FrameIntervalSummary
-    /// The `suite.perf` JSON.
-    func encoded() throws -> Data
+    /// Everything recorded, with both summaries for every series.
+    func document(refreshInterval: Double) -> ProbeDocument
+    /// The `suite.perf` JSON: `document(refreshInterval:)` encoded.
+    func encoded(refreshInterval: Double) throws -> Data
 }
 
 /// Keeps samples, frames and marks; reports every sample as 0 frames late.
 public struct FakeFrameProbe: FrameProbeRecording {
     public private(set) var samples: [ProbeSample] = []
-    public private(set) var marks: [String: Double] = [:]
+    public private(set) var marks: [ProbeMark] = []
     public init() {}
     public private(set) var drawn: [String: [Double]] = [:]
     public mutating func record(_ sample: ProbeSample) { samples.append(sample) }
     public mutating func drew(_ series: String, at time: Double) { drawn[series, default: []].append(time) }
-    public mutating func mark(_ name: String, at time: Double) { marks[name] = time }
+    public mutating func mark(_ name: String, series: String, at time: Double) {
+        marks.append(ProbeMark(name: name, series: series, time: time))
+    }
     public func summary(of series: String, refreshInterval: Double) -> ProbeSummary {
         let n = samples.filter { $0.series == series }.count
         return ProbeSummary(count: n, p50FramesLate: 0, p95FramesLate: 0, valid: n >= 60)
@@ -720,7 +775,14 @@ public struct FakeFrameProbe: FrameProbeRecording {
         let n = max((drawn[series]?.count ?? 0) - 1, 0)
         return FrameIntervalSummary(count: n, p95Refreshes: 1, dropped: 0, jitterP95: 0, valid: n >= 60)
     }
-    public func encoded() throws -> Data { try JSONEncoder().encode(samples) }
+    public func document(refreshInterval: Double) -> ProbeDocument {
+        let series = Set(samples.map(\.series)), drawnSeries = Set(drawn.keys)
+        return ProbeDocument(
+            refreshInterval: refreshInterval, samples: samples, drawn: drawn, marks: marks,
+            latency: Dictionary(uniqueKeysWithValues: series.map { ($0, summary(of: $0, refreshInterval: refreshInterval)) }),
+            intervals: Dictionary(uniqueKeysWithValues: drawnSeries.map { ($0, intervals(of: $0, refreshInterval: refreshInterval)) }))
+    }
+    public func encoded(refreshInterval: Double) throws -> Data { try JSONEncoder().encode(document(refreshInterval: refreshInterval)) }
 }
 
 // UC18 · SJ0, every app's every-control sweep · Contracts/ControlInventorying.swift
@@ -728,7 +790,17 @@ public struct ControlEntry: Hashable, Sendable, Codable {
     public var id: String
     public var enabled: Bool
     public var reason: String?
-    public init(id: String, enabled: Bool, reason: String? = nil) { self.id = id; self.enabled = enabled; self.reason = reason }
+    public var role: String?              // "primary" for the one prominent action; nil otherwise
+    public init(id: String, enabled: Bool, reason: String? = nil, role: String? = nil) {
+        self.id = id; self.enabled = enabled; self.reason = reason; self.role = role
+    }
+}
+
+/// The `suite.controls` document, published like `suite.perf` (label of a hidden element `suite.controls`).
+/// `role` lets a journey find the one primary action without reading a style.
+public struct ControlDocument: Hashable, Sendable, Codable {
+    public var controls: [ControlEntry]   // sorted by id
+    public init(controls: [ControlEntry]) { self.controls = controls }
 }
 
 public protocol ControlInventorying: Sendable {
@@ -736,7 +808,8 @@ public protocol ControlInventorying: Sendable {
     mutating func unregister(_ id: String)
     /// Ids that break "no dead controls": disabled with no reason, or an id registered twice.
     func violations() -> [String]
-    /// The `suite.controls` JSON, sorted by id.
+    func document() -> ControlDocument
+    /// The `suite.controls` JSON: `document()` encoded.
     func encoded() throws -> Data
 }
 
@@ -749,7 +822,8 @@ public struct FakeControlInventory: ControlInventorying {
     public func violations() -> [String] {
         entries.values.filter { !$0.enabled && ($0.reason ?? "").isEmpty }.map(\.id).sorted()
     }
-    public func encoded() throws -> Data { try JSONEncoder().encode(entries.values.sorted { $0.id < $1.id }) }
+    public func document() -> ControlDocument { ControlDocument(controls: entries.values.sorted { $0.id < $1.id }) }
+    public func encoded() throws -> Data { try JSONEncoder().encode(document()) }
 }
 
 // UC19 · QB-V2–V5 · Contracts/GoldenComparing.swift (conformance in Tests/AppSnapshotTests/GoldenImage.swift)

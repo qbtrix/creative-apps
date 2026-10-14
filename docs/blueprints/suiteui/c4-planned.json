@@ -330,9 +330,9 @@
           {
             "id": "suite-journeys",
             "name": "Journey harness",
-            "status": "planned",
+            "status": "existing",
             "authored": true,
-            "description": "The shared XCUITest steps every app's journeys use (UITests/Journey.swift, existing) plus the planned input, velocity-drag and perf helpers, the project.yml template that compiles every UITests/<target>*.swift file (#333), and SuiteJourneyTests, a bundle that launches a SuiteWindow app under -SuiteGallery and walks section 4's journeys.",
+            "description": "Existing: the shared XCUITest steps every app's journeys use (UITests/Journey.swift). Planned: the input, velocity-drag and perf helpers, the project.yml template that compiles every UITests/<target>*.swift file (#333), and SuiteJourneyTests, a bundle that launches a SuiteWindow app under -SuiteGallery and walks section 4's journeys.",
             "technology": "Swift 6, XCTest UI testing, XcodeGen, macOS 26",
             "tags": [
               "internal",
@@ -351,7 +351,7 @@
                   "UITests/Journey.swift",
                   "UITests/Journey+Input.swift",
                   "project.yml",
-                  "UITests/SuiteBudgets.swift"
+                  "UITests/SuiteJourneyTests+Budgets.swift"
                 ]
               },
               {
