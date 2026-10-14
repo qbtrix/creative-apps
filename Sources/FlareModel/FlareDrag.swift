@@ -87,9 +87,10 @@ extension FlareWorkspace {
     }
 
     /// One "Move" by (`dx`, `dy`) scene points: Select writes the layers' x and y, Direct Select the items' geometry,
-    /// each layer's items by the offset in that layer's space (`layerMoves`).
+    /// each layer's items by the offset in that layer's space (`layerMoves`). Select refuses a symbol's layers.
     mutating func commitMove(_ moving: [StageAddress], dx: Double, dy: Double) {
         guard let sceneID = selectedSceneID, let document, dx.isFinite, dy.isFinite else { return }
+        if selectKeysSymbol(moving) { return refuse(.refused(Self.moveInSymbolMessage)) }
         let shapes = services.shapes, frame = currentFrame, layers = layerIDs(of: moving), tool = tool, autoKey = autoKey
         let box = selectionBox(of: moving)
         let moves = tool == .select ? [] : Self.layerMoves(moving, dx: dx, dy: dy, in: document, frame: frame)
@@ -121,11 +122,17 @@ extension FlareWorkspace {
         return moves
     }
 
+    /// Whether a Select move of `moving` would key a symbol's layers. The box commit keys scene layers only, so it
+    /// would key the scene layer that shares their id instead (#674).
+    private func selectKeysSymbol(_ moving: [StageAddress]) -> Bool {
+        tool == .select && moving.contains { $0.owner != selectedSceneID.map(LayerOwner.scene) }
+    }
+
     private static func sameLayer(_ a: StageAddress, _ b: StageAddress) -> Bool { a.owner == b.owner && a.layerID == b.layerID }
 
     /// The stage at the playhead with `moving` shifted by (`dx`, `dy`).
     private func movePreview(_ moving: [StageAddress], dx: Double, dy: Double) -> StageDrawList? {
-        guard let sceneID = selectedSceneID, let document else { return nil }
+        guard let sceneID = selectedSceneID, let document, !selectKeysSymbol(moving) else { return nil }
         var list = services.stage.drawList(document, sceneID: sceneID, frame: currentFrame, editing: editingSymbolID)
         let layers = Set(moving.map(\.layerID)), tool = tool
         for (i, item) in list.items.enumerated() where tool == .select ? layers.contains(item.address.layerID) : moving.contains(item.address) {
