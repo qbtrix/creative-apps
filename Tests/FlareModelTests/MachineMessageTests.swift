@@ -60,3 +60,31 @@ private func validation(_ rule: String) -> CommandError {
         == "hover is the initial state.")
     #expect(FlareWorkspace.machineMessage(NotBuilt(reason: "Not connected yet (IN-6).")) == "Not connected yet (IN-6).")
 }
+
+/// A workspace whose machine "M" starts at `label`, a frame label of the scene.
+private func workspace(firstState label: String) -> FlareWorkspace {
+    var doc = FlareFixtures.button
+    doc.scenes[0].labels[label] = 0
+    var w = FlareWorkspace(services: .fake())
+    w.load(doc)
+    w.addMachine(named: "M", firstStateLabel: label)
+    return w
+}
+
+/// A quote, a backslash and a tab in a state label or input name read as typed, never as Swift escapes (#680).
+@Test(arguments: ["say \"hi\"", "C:\\x", "tab\there"])
+func statesAndInputsWithQuotesBackslashesOrTabsReadAsTyped(_ name: String) {
+    var w = workspace(firstState: name)
+    w.addMachineState(fromLabel: name)
+    #expect(w.machineError == "\(name) is already a state.")
+    w.addMachineInput(MachineInput(name: name, defaultValue: .bool(false)))
+    w.addMachineInput(MachineInput(name: name, defaultValue: .bool(false)))
+    #expect(w.machineError == "\(name) is already an input.")
+}
+
+@Test func escapedIDsInEngineValidationTextReadAsTyped() {
+    for id in ["say \"hi\"", "C:\\x", "tab\there", "nul\0", "it's", "caf\u{E9}", "line\nbreak"] {
+        #expect(FlareWorkspace.machineMessage(validation("unknown initial state \(id)"))
+            == "\(id) isn\u{2019}t a state of this machine.")
+    }
+}
