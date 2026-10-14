@@ -136,6 +136,9 @@ public struct FakeShapes: ShapeBuilding {
                 let alongX = abs(turn.a) >= abs(turn.b), edge = handle % 2 == 1
                 let sx = edge && (handle % 4 == 1) == alongX ? 1 : Self.ratio(onto.x, from.x)
                 let sy = edge && (handle % 4 == 3) == alongX ? 1 : Self.ratio(onto.y, from.y)
+                // Square to the world, a zero axis leaves the box 0 wide (or tall), and every later drag reads that
+                // side as 0 and can't grow it: leave the layer as it was, as for 0 x 0 below (#688).
+                if sx == 0 || sy == 0 { continue }
                 let o = back.apply(Point(x: t.x - fixed.x, y: t.y - fixed.y))
                 let p = turn.apply(Point(x: o.x * sx, y: o.y * sy))
                 values = ["x": fixed.x + p.x, "y": fixed.y + p.y, "scaleX": t.scaleX * sx, "scaleY": t.scaleY * sy]
