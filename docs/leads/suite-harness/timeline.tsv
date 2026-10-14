@@ -18,3 +18,7 @@ utc	stage	event	ref	note
 2026-10-14T22:42Z	3	pr-opened	#867	SH-4 frame probe
 2026-10-14T22:42Z	3	pr-merged	#866	SH-9 golden compare
 2026-10-14T22:42Z	3	stage-start	wave3	SH-10 on 7c08072 (wf_390e2b07-a27); SH-5 waits on #867
+2026-10-14T22:49Z	3	pr-merged	#867	SH-4 frame probe
+2026-10-14T22:49Z	3	pr-opened	#869	SH-10 snapshot host
+2026-10-14T22:49Z	3	pr-merged	#869	SH-10 snapshot host
+2026-10-14T22:49Z	3	heartbeat	wave3	SH-5 building on 6c236ef (wf_2f6279db-069)
