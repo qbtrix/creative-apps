@@ -4,7 +4,7 @@ Issue: #778 · Packet: docs/blueprints/suiteui/features/suite-harness.md (on bra
 Run: act-1a13b7e0908-fybz · Session: claude/suite-harness-lead-wwxtgn · Started: 2026-10-14T18:00Z
 Stage: 4 round 1
 Base: 640d08d83c35cbb12bd71f59b24583857b2863b4 (round 1)
-Next: when CI run 38654031210 (dev 640d08d) completes, read its jobs, download ui-screens + snapshots, read audit-*.json, run critic-panel.js (lenses incl. first-use clarity)
+Next: wait for fix PRs r1-b1..b4 (wf_732cefb0-9da) to merge; then open a small feature-done PR (packet status line) so the lane dispatches round 2's CI
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -24,9 +24,12 @@ Next: when CI run 38654031210 (dev 640d08d) completes, read its jobs, download u
 ## Rounds
 | round | CI run | CI | audit vs baseline | lenses | confirmed | fixed by | clean |
 |---|---|---|---|---|---|---|---|
-| 1 | 38654031210 @640d08d | running | | | | | |
+| 1 | 38654031210 @640d08d | red: macOS scripts/ci, 5 feature tests (FrameProbe budget, ControlInventory nested probes, SnapshotHost IC + glass, GoldenImage p95); Linux green | n/a: journeys didn't run | none (no ui-screens; CI-failure round) | 5 test failures | r1-b1..b4 (wf_732cefb0-9da) | no |
 
 ## Decisions
+- Round 1: macOS scripts/ci failed before the UI journeys, so no ui-screens/audit exist; the round's findings are the feature's 5 failing tests, fixed in 4 disjoint batches. Critic panel runs once a run has screens.
+- Fix PRs don't carry feature-done (four in parallel, unknown merge order); after all merge, one small feature-done PR dispatches the next CI.
+- PhotoBrushLatencyTests keeps failing on dev (#763); not this feature's, it alone would keep the done run red.
 - The lane runs scripts/fast-lane.sh from main (ee57a15, stuck since 10:14Z while dev is red), which dispatches CI only after a feature-done merge; dev's dispatch-on-UI-merge (#741) isn't live. So no CI ran for waves 2-5. SH-8 carries feature-done as planned, and its merge starts round 1's CI. Later rounds' fix batches carry feature-done on their last PR so each round gets a run.
 - #871's checker found EmptyStateView's new disabled-action state had no snapshot; #871 had already merged, so SH-5b adds it in wave 4 (own file, disjoint from SH-6).
 - PR bodies opened or edited through the GitHub MCP/proxy get a Claude Code footer re-appended server-side (#869 tried a REST PATCH; it came back). The lane's squash commits are clean, so not reworked.

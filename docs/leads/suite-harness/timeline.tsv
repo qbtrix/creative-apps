@@ -35,3 +35,4 @@ utc	stage	event	ref	note
 2026-10-14T23:28Z	3	pr-merged	#878	SH-8, feature-done
 2026-10-14T23:28Z	3	stage-end	waves	all SH tasks merged
 2026-10-14T23:28Z	4	ci-run	38654031210	round 1 CI on 640d08d (dispatched by #878)
+2026-10-14T23:48Z	4	round-findings	38654031210	round 1 red: 5 feature tests on macOS; 4 fix batches (wf_732cefb0-9da)
