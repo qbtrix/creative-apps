@@ -2,3 +2,6 @@ utc	stage	event	ref	note
 2026-10-14T17:33Z	0	stage-start	#777	base 52928d1
 2026-10-14T17:40Z	0	stage-end	#777	depends on: none
 2026-10-14T17:40Z	1	stage-start	#777	packet ed58c3a
+2026-10-14T17:40Z	1	stage-end	#777	tasks copied
+2026-10-14T17:52Z	2	stage-end	#777	15 waves on two chains
+2026-10-14T17:52Z	3	stage-start	wave 1	FD-1, FD-19
