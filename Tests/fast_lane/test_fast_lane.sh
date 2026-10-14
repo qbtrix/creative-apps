@@ -327,6 +327,8 @@ gh() {
       n="${2#*/pulls/}"; n="${n%%/*}"
       if [[ -e "$sw/files.$n.json" ]]; then jq -r "${!#}" "$sw/files.$n.json"
       else jq -rn '[{filename: "Sources/FlareModel/FlareWorkspace.swift", status: "modified"}]' | jq -r "${!#}"; fi ;;
+    "run list "*) cat "$sw/ci_head" 2>/dev/null || echo cihead ;;
+    "api "*"/compare/cihead...dev"*) cat "$sw/ci_ahead" 2>/dev/null || echo 0 ;;
     "api "*"/compare/"*) [[ "$2" != *bad ]] || return 1; echo mb ;;
     "api "*"/git/trees/"*)
       u="${2#*/git/trees/}"; u="${u%%\?*}"
@@ -344,6 +346,9 @@ gh() {
 sweep() {
   rm -rf "$sw"; mkdir -p "$sw"; : >"$sw/calls"
   local n
+  [[ -z "${SWEEP_AHEAD:-}" ]] || echo "$SWEEP_AHEAD" >"$sw/ci_ahead"
+  [[ -z "${SWEEP_CI_HEAD+x}" ]] || printf '%s' "$SWEEP_CI_HEAD" >"$sw/ci_head"
+  [[ -z "${SWEEP_FILES:-}" ]] || for n in 4 7; do printf '%s\n' "$SWEEP_FILES" >"$sw/files.$n.json"; done
   for n in 4 5 6 7; do jq --argjson n "$n" '.number = $n' <<<"$BASE_PR" | jq "$MARKED" >"$sw/$n.json"; done
   jq '.baseRefName = "main"' "$sw/5.json" >"$sw/x" && mv "$sw/x" "$sw/5.json"
   jq '.mergeable = "CONFLICTING" | .mergeStateStatus = "DIRTY"' "$sw/6.json" >"$sw/x" && mv "$sw/x" "$sw/6.json"
@@ -362,6 +367,36 @@ expect "never merges the conflicting PR" "$(grep -c '^pr merge 6' "$sw/calls")" 
 expect "routine merges start no CI" "$(grep -c '^workflow run' "$sw/calls")" 0
 sweep 4 7
 expect "feature-done merges dispatch CI on dev once" "$(grep -c '^workflow run ci.yml .*--ref dev' "$sw/calls")" 1
+
+# dispatch_reason: feature-done, then a UI change, then the 10-merge count.
+reason() {  # reason <name> <want> <feature> <ui> <since>
+  local got; got=$(dispatch_reason "$3" "$4" "$5")
+  if [[ "$got" == "$2" ]]; then echo "ok   dispatch: $1"; else echo "FAIL dispatch: $1: want '$2', got '$got'"; fail=1; fi
+}
+reason "feature-done" "merged a feature-done PR" 1 0 ""
+reason "UI change" "merged a UI change" 0 1 ""
+reason "10 merges since CI" "10 merged PRs since the last CI run" 0 0 10
+reason "9 merges wait" "" 0 0 9
+reason "unknown count waits" "" 0 0 ""
+# UI_RE: what counts as a UI change.
+for f in Sources/FlareApp/FlareApp.swift Sources/SuiteUI/Tokens.swift Tests/AppSnapshotTests/A.swift \
+    Tests/AppAuditTests/AuditCore.swift UITests/PhotoJourneyTests.swift; do
+  if grep -qE "$UI_RE" <<<"$f"; then echo "ok   UI path: $f"; else echo "FAIL UI path: $f"; fail=1; fi
+done
+for f in Sources/FlareModel/FlareWorkspace.swift Tests/FlareModelTests/T.swift docs/factory/lead.md Sources/HaloModel/HaloAppState.swift; do
+  if grep -qE "$UI_RE" <<<"$f"; then echo "FAIL not UI: $f"; fail=1; else echo "ok   not UI: $f"; fi
+done
+UI_FILES='[{"filename": "Sources/SuiteUI/Tokens.swift", "status": "modified"}]'
+SWEEP_FILES="$UI_FILES" sweep
+expect "UI merges dispatch CI on dev once" "$(grep -c '^workflow run ci.yml .*--ref dev' "$sw/calls")" 1
+SWEEP_AHEAD=9 sweep
+expect "9 merged PRs since the last CI run start no CI" "$(grep -c '^workflow run' "$sw/calls")" 0
+SWEEP_AHEAD=10 sweep
+expect "the 10th merged PR since the last CI run dispatches once" "$(grep -c '^workflow run ci.yml .*--ref dev' "$sw/calls")" 1
+SWEEP_CI_HEAD="" sweep
+expect "a base with no CI run yet dispatches once" "$(grep -c '^workflow run ci.yml .*--ref dev' "$sw/calls")" 1
+SWEEP_AHEAD=10 SWEEP_FILES="$UI_FILES" sweep 4
+expect "every rule at once still dispatches once" "$(grep -c '^workflow run' "$sw/calls")" 1
 
 # The audit through a sweep: #8 raises a count, #9 lowers one, #10 renames
 # scripts/ci away, #11's merge base can't be read, #12 drops Overlap() and
