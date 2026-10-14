@@ -2176,3 +2176,41 @@ and reader of stored entries in PhotoModel (CRC-32 included), and PNGs go
 through the app's ImageIO codec as today. If the captain would rather have
 the container in creative-core (Library or Design may want it), that is
 section 9, question 1.
+
+---
+
+## 9. Open questions for the captain
+
+Each has a recommendation; the blueprint is written as if it is accepted.
+
+1. **The document format.** Recommended: OpenRaster (`.ora`, a published
+   open spec) as a zip of stored entries, with Photo's extra data in
+   `photo/document.json`, written by a small pure-Swift zip writer in
+   PhotoModel. Other readers of OpenRaster then see the pixel layers (not
+   adjustment layers or masks). Alternatives: a private package directory
+   (needs document-type entries in the app's Info.plist, which
+   `scripts/bundle-apps` writes, a protected path), or the container in
+   creative-core for other apps to share. Either way, opening `.ora` files
+   from other apps that compress their entries is not v2.
+2. **Ranks.** Move #580 (adjustment layers) and #544 (typed crop) from `p2`
+   to `p1`, and file PV-1 and PV-2 as `p1` (section 3).
+3. **Bit depth.** v2 keeps 8-bit sRGB per layer on disk (what opening a file
+   gives today), so the round trip is exact only in 8 bits (PF-2: within
+   1/255 of the in-memory Float picture after tone edits). 16-bit layers
+   are tier 3.
+4. **Save of a flat file with layers.** Recommended: ask "Keep layers?"
+   (Save as Photo Document, the default, or Flatten into the file's
+   format), never flatten silently. The alternative, always Save As a
+   document, surprises someone who only cropped a JPEG.
+5. **Window model.** Keep `WindowGroup` with one model per window, as
+   Flare's decision 4 did, with the unsaved alert done by the window; not
+   `DocumentGroup`.
+6. **#274** (share the open and save panel plumbing with Design) touches the
+   code PV-0 moves. Hold it until PV-1 merges, or let PV-1 absorb Photo's
+   side of it.
+7. **Exported document type.** Double-clicking an `.ora` in Finder to open
+   Photo needs an exported type in Info.plist (`scripts/bundle-apps`,
+   protected). Open from the File menu, Open Recent and drop work without
+   it. File a separate issue to add it, or leave it?
+8. **Engine issues.** File CR-1 to CR-4 on creative-core when the PV-5 and
+   PV-7 packets are written; CR-5 and CR-6 only if PB-13 or PB-3 fail.
