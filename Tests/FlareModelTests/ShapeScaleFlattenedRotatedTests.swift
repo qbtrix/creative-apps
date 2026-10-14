@@ -9,7 +9,7 @@ private let shadow = StageAddress(owner: .scene("scene-1"), layerID: "shadow", i
 
 private func engine(rotated degrees: Double) throws -> CommandEngine {
     var engine = CommandEngine(document: FlareFixtures.bounce)
-    try engine.perform(SetKeyframe(sceneID: "scene-1", layerID: "shadow", property: "rotation",
+    try engine.perform(SetKeyframe(owner: .scene("scene-1"), layerID: "shadow", property: "rotation",
                                    keyframe: Keyframe(frame: 0, value: degrees)))
     return engine
 }
@@ -83,7 +83,7 @@ func everyHandleDraggedOutwardGrowsTheFlattenedLayer(_ degrees: Double) throws {
 func aCornerOutwardOnAKeyedFlatLayerNeverCollapses(_ degrees: Double, _ h: Int) throws {
     // The issue's last rows: scaleX keyed to 0, the state an edge drop leaves, then a corner dragged outward.
     var e = try engine(rotated: degrees)
-    try e.perform(SetKeyframe(sceneID: "scene-1", layerID: "shadow", property: "scaleX", keyframe: Keyframe(frame: 0, value: 0)))
+    try e.perform(SetKeyframe(owner: .scene("scene-1"), layerID: "shadow", property: "scaleX", keyframe: Keyframe(frame: 0, value: 0)))
     let before = try box(e), (dx, dy) = outward(h)
     try drag(h, in: &e) { b in
         let g = FakeShapes.handle(h, on: b)

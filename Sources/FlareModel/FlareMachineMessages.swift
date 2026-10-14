@@ -34,6 +34,8 @@ extension FlareWorkspace {
         case .symbolNotFound: "That symbol is no longer in the library."
         case .symbolInUse: "An instance still uses that symbol."
         case .invalidGuidePosition: "A guide needs a position on the canvas."
+        case .invalidTransform: "An instance\u{2019}s position, scale and rotation must be numbers."
+        case .emptyName: "Type a name."
         case .swatchNotFound: "That swatch is no longer in the palette."
         case .emptySwatchName: "Type a name for the swatch."
         case .invalidColor: "Each color channel must be between 0 and 1."

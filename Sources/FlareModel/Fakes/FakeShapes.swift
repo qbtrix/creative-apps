@@ -170,7 +170,7 @@ public struct FakeShapes: ShapeBuilding {
                     let keys = layer.tracks[property] ?? []
                     let at = keys.count >= 2 || autoKey ? frame : keys.first?.frame ?? 0
                     let easing = keys.first { $0.frame == at }?.easing ?? .linear
-                    try engine.perform(SetKeyframe(sceneID: sceneID, layerID: layer.id, property: property,
+                    try engine.perform(SetKeyframe(owner: .scene(sceneID), layerID: layer.id, property: property,
                                                    keyframe: Keyframe(frame: at, value: value, easing: easing)))
                 }
             }

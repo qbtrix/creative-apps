@@ -55,7 +55,7 @@ public struct FakeProperties: PropertyAnimating {
                 let keys = layer.tracks[property] ?? []
                 let at = keys.count >= 2 || autoKey ? frame : keys.first?.frame ?? 0
                 let easing = keys.first { $0.frame == at }?.easing ?? .linear
-                try engine.perform(SetKeyframe(sceneID: sceneID, layerID: layer.id, property: property,
+                try engine.perform(SetKeyframe(owner: .scene(sceneID), layerID: layer.id, property: property,
                                                keyframe: Keyframe(frame: at, value: value, easing: easing)),
                                    coalesceKey: coalesceKey)
             }
@@ -73,14 +73,14 @@ public struct FakeProperties: PropertyAnimating {
         let value = Self.value(property, of: layer, at: frame)
         func key(_ at: Int, _ engine: inout CommandEngine) throws {
             let easing = keys.first { $0.frame == at }?.easing ?? .linear
-            try engine.perform(SetKeyframe(sceneID: sceneID, layerID: layerID, property: property,
+            try engine.perform(SetKeyframe(owner: .scene(sceneID), layerID: layerID, property: property,
                                            keyframe: Keyframe(frame: at, value: value, easing: easing)))
         }
         if keys.count >= 2 {
             // Stop: one key at frame 0 holding the value at the playhead.
             try engine.group("Stop Animating \(Self.title(property))") { engine in
                 for k in keys where k.frame != 0 {
-                    try engine.perform(RemoveKeyframe(sceneID: sceneID, layerID: layerID, property: property, frame: k.frame))
+                    try engine.perform(RemoveKeyframe(owner: .scene(sceneID), layerID: layerID, property: property, frame: k.frame))
                 }
                 try key(0, &engine)
             }
@@ -100,9 +100,9 @@ public struct FakeProperties: PropertyAnimating {
         let sceneID = try Self.scene(owner)
         guard let layer = try Self.layers([layerID], owner: owner, in: engine.document).first else { return }
         if layer.tracks[property]?.contains(where: { $0.frame == frame }) == true {
-            try engine.perform(RemoveKeyframe(sceneID: sceneID, layerID: layerID, property: property, frame: frame))
+            try engine.perform(RemoveKeyframe(owner: .scene(sceneID), layerID: layerID, property: property, frame: frame))
         } else {
-            try engine.perform(SetKeyframe(sceneID: sceneID, layerID: layerID, property: property,
+            try engine.perform(SetKeyframe(owner: .scene(sceneID), layerID: layerID, property: property,
                                            keyframe: Keyframe(frame: frame, value: Self.value(property, of: layer, at: frame))))
         }
     }

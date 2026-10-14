@@ -12,10 +12,10 @@ private let tolerance = 1e-6
 
 private func rotated(_ degrees: Double, scaleX: Double = 1) throws -> CommandEngine {
     var engine = CommandEngine(document: FlareFixtures.bounce)
-    try engine.perform(SetKeyframe(sceneID: "scene-1", layerID: "shadow", property: "rotation",
+    try engine.perform(SetKeyframe(owner: .scene("scene-1"), layerID: "shadow", property: "rotation",
                                    keyframe: Keyframe(frame: 0, value: degrees)))
     if scaleX != 1 {
-        try engine.perform(SetKeyframe(sceneID: "scene-1", layerID: "shadow", property: "scaleX",
+        try engine.perform(SetKeyframe(owner: .scene("scene-1"), layerID: "shadow", property: "scaleX",
                                        keyframe: Keyframe(frame: 0, value: scaleX)))
     }
     return engine

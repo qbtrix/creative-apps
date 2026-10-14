@@ -79,7 +79,7 @@ extension FlareWorkspace: EasingEditing {
         guard let sceneID = selectedSceneID, let layerID = selectedLayerID, let segment = selectedEasingSegment
         else { return }
         let command = SetKeyframeEasing(
-            sceneID: sceneID, layerID: layerID, property: segment.property, frame: segment.startFrame, easing: easing)
+            owner: .scene(sceneID), layerID: layerID, property: segment.property, frame: segment.startFrame, easing: easing)
         apply(command, coalesceKey: coalesceKey)
     }
 }

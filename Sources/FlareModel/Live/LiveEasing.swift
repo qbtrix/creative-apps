@@ -19,7 +19,7 @@ public struct LiveEasing: KeyframeEasing {
 
     public func setEasing(_ easing: Easing, at key: KeyRef, owner: LayerOwner,
                           coalesceKey: String?, in engine: inout CommandEngine) throws {
-        guard case .scene(let sceneID) = owner else { throw CommandError.invalidDocument(FakeProperties.symbolKeys) }
+        guard case .scene = owner else { throw CommandError.invalidDocument(FakeProperties.symbolKeys) }
         guard let layer = engine.document.layers(of: owner)?.first(where: { $0.id == key.layerID }) else {
             throw CommandError.layerNotFound(key.layerID)
         }
@@ -27,7 +27,7 @@ public struct LiveEasing: KeyframeEasing {
             ?? layer.tracks.filter { $0.value.contains { $0.frame == key.frame } }.keys.sorted()
         guard !properties.isEmpty else { throw CommandError.keyframeNotFound(property: "", frame: key.frame) }
         let commands = properties.map {
-            SetKeyframeEasing(sceneID: sceneID, layerID: key.layerID, property: $0, frame: key.frame, easing: easing)
+            SetKeyframeEasing(owner: owner, layerID: key.layerID, property: $0, frame: key.frame, easing: easing)
         }
         guard coalesceKey == nil, commands.count > 1 else {
             for command in commands { try engine.perform(command, coalesceKey: coalesceKey) }

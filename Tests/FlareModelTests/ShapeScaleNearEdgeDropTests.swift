@@ -10,7 +10,7 @@ private let shadow = StageAddress(owner: .scene("scene-1"), layerID: "shadow", i
 private func engine(rotated degrees: Double) throws -> CommandEngine {
     var engine = CommandEngine(document: FlareFixtures.bounce)
     if degrees != 0 {
-        try engine.perform(SetKeyframe(sceneID: "scene-1", layerID: "shadow", property: "rotation",
+        try engine.perform(SetKeyframe(owner: .scene("scene-1"), layerID: "shadow", property: "rotation",
                                        keyframe: Keyframe(frame: 0, value: degrees)))
     }
     return engine
