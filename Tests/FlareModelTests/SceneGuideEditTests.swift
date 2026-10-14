@@ -144,3 +144,10 @@ func everyEditActionActsInOneStepOrSaysWhyNot(services: FlareServices) throws {
         }
     }
 }
+
+@Test func renamingASceneToItsCurrentNameIsANoOp() {
+    var w = workspace(FlareFixtures.bounce)
+    w.renameScene("scene-1", to: "Scene 1")
+    w.renameScene("scene-1", to: "  Scene 1 ")
+    #expect(!w.canUndo && !w.isDirty && w.document == FlareFixtures.bounce && w.layerError == nil)
+}
