@@ -45,7 +45,8 @@
         "Tests/AppSnapshotTests/LibraryShellSnapshots.swift",
         "UITests/Journey+Library.swift",
         "UITests/LibraryJourneyTests.swift",
-        "UITests/LibraryJourneyTests+Shell.swift"
+        "UITests/LibraryJourneyTests+Shell.swift",
+        "Tests/LibraryModelTests/LibraryBudget.swift"
       ],
       "core": "none",
       "suiteui": "none (#333 for its own journey file; until then it edits LibraryJourneyTests.swift)",
@@ -74,7 +75,9 @@
         "Tests/AppSnapshotTests/LibraryImportSnapshots.swift",
         "Tests/AppSnapshotTests/LibraryDecodeTests.swift",
         "UITests/LibraryJourneyTests+Import.swift",
-        "UITests/LibraryJourneyTests+PerfImport.swift"
+        "UITests/LibraryJourneyTests+PerfImport.swift",
+        "UITests/LibraryJourneyTests.swift",
+        "Tests/LibraryModelTests/LibraryImportBudgetTests.swift"
       ],
       "core": "none (decode is ImageIO in LibraryApp)",
       "suiteui": "S-L4 InlineNotice, S-L5 ProgressRow (placeholders until then); #330, #333",
@@ -85,7 +88,7 @@
         "J1",
         "P6"
       ],
-      "notes": ""
+      "notes": "Owns LibraryJourneyTests.swift in its wave, for its journey steps if #333 has not merged."
     },
     {
       "id": "thumbnails",
@@ -104,7 +107,8 @@
         "Tests/AppSnapshotTests/LibraryThumbnailSnapshots.swift",
         "Tests/AppSnapshotTests/LibraryGridSnapshots.swift",
         "UITests/LibraryJourneyTests+Grid.swift",
-        "UITests/LibraryJourneyTests+PerfGrid.swift"
+        "UITests/LibraryJourneyTests+PerfGrid.swift",
+        "Tests/LibraryModelTests/LibraryGridBudgetTests.swift"
       ],
       "core": "none (resized and rgba8 landed: creative-core #132, #143)",
       "suiteui": "S-L2 ThumbnailGrid additions; #330, #333",
@@ -137,7 +141,8 @@
         "Tests/AppSnapshotTests/LibraryRatingSnapshots.swift",
         "Tests/AppSnapshotTests/LibraryAutoAdvanceSnapshots.swift",
         "UITests/LibraryJourneyTests+Cull.swift",
-        "UITests/LibraryJourneyTests+PerfCull.swift"
+        "UITests/LibraryJourneyTests+PerfCull.swift",
+        "Tests/LibraryModelTests/LibraryCullBudgetTests.swift"
       ],
       "core": "none",
       "suiteui": "S-L2 (reject badge); #330, #333",
@@ -148,7 +153,7 @@
         "J4",
         "P2"
       ],
-      "notes": "#724's keys only; its zoom and photo size go to loupe-viewport."
+      "notes": "#724's keys only; its zoom and photo size go to loupe-viewport. The grid's reject mark (dimmed cell, xmark badge) is drawn by thumbnails, which owns the cell builder; cull changes only Model state."
     },
     {
       "id": "persist",
@@ -166,7 +171,8 @@
         "Tests/LibraryModelTests/Golden/catalog-v1.json",
         "Tests/AppSnapshotTests/LibraryRestoreSnapshots.swift",
         "UITests/LibraryJourneyTests+Persist.swift",
-        "UITests/LibraryJourneyTests+PerfLaunch.swift"
+        "UITests/LibraryJourneyTests+PerfLaunch.swift",
+        "Tests/LibraryModelTests/LibraryCatalogBudgetTests.swift"
       ],
       "core": "none for v1 (JSON); creative-core#157 only if decision D1 picks the SQLite catalog",
       "suiteui": "S-L4 InlineNotice; #330, #333",
@@ -201,7 +207,8 @@
         "Tests/LibraryModelTests/LibraryLoupeImageTests.swift",
         "Tests/AppSnapshotTests/LibraryLoupeSnapshots.swift",
         "UITests/LibraryJourneyTests+Loupe.swift",
-        "UITests/LibraryJourneyTests+PerfLoupe.swift"
+        "UITests/LibraryJourneyTests+PerfLoupe.swift",
+        "Tests/LibraryModelTests/LibraryLoupeBudgetTests.swift"
       ],
       "core": "none",
       "suiteui": "#330, #333",
@@ -229,11 +236,12 @@
         "Sources/LibraryApp/LibraryWindow+Develop.swift",
         "Tests/LibraryModelTests/LibraryDevelopTests.swift",
         "Tests/LibraryModelTests/LibraryDevelopRenderTests.swift",
-        "Tests/LibraryModelTests/LibraryBudgetTests.swift",
         "Tests/AppSnapshotTests/LibraryDevelopSnapshots.swift",
         "Tests/AppSnapshotTests/LibraryDevelopRenderSnapshots.swift",
         "UITests/LibraryJourneyTests+Develop.swift",
-        "UITests/LibraryJourneyTests+PerfDevelop.swift"
+        "UITests/LibraryJourneyTests+PerfDevelop.swift",
+        "UITests/LibraryJourneyTests.swift",
+        "Tests/LibraryModelTests/LibraryDevelopBudgetTests.swift"
       ],
       "core": "none (creative-core#231 closed by #246); a new core issue only if QB-LIB-6's model half misses: PixelBuffer.developed(temperature:tint:exposure:contrast:highlights:shadows:), one pass over storage, equal to the chained calls within 1e-6",
       "suiteui": "S-L1 HistogramView; #330, #333",
@@ -246,7 +254,7 @@
         "J5",
         "P3"
       ],
-      "notes": "Owns LibraryBudgetTests.swift (the first budget rows); later features add their rows in their own wave."
+      "notes": "Owns LibraryJourneyTests.swift in its wave, for its journey steps if #333 has not merged."
     },
     {
       "id": "status-and-layout",
@@ -295,7 +303,8 @@
         "Tests/LibraryModelTests/LibraryCropTests.swift",
         "Tests/AppSnapshotTests/LibraryCropSnapshots.swift",
         "UITests/LibraryJourneyTests+Crop.swift",
-        "UITests/LibraryJourneyTests+PerfCrop.swift"
+        "UITests/LibraryJourneyTests+PerfCrop.swift",
+        "Tests/LibraryModelTests/LibraryCropBudgetTests.swift"
       ],
       "core": "none (creative-core#230 closed by #251)",
       "suiteui": "S-L3 CropHandles; #330, #333",
@@ -324,7 +333,9 @@
         "Tests/LibraryModelTests/LibraryExportPlanTests.swift",
         "Tests/AppSnapshotTests/LibraryExportSnapshots.swift",
         "Tests/AppSnapshotTests/LibraryExportFidelityTests.swift",
-        "UITests/LibraryJourneyTests+Export.swift"
+        "UITests/LibraryJourneyTests+Export.swift",
+        "UITests/LibraryJourneyTests.swift",
+        "Tests/LibraryModelTests/LibraryExportBudgetTests.swift"
       ],
       "core": "none",
       "suiteui": "S-L5 ProgressRow; #330, #333",
@@ -335,7 +346,7 @@
       "journeys": [
         "J7"
       ],
-      "notes": "Its last task (the QB-V4 test with a cropped photo) waits for crop to merge."
+      "notes": "Its last task (the QB-V4 test with a cropped photo) waits for crop to merge. Owns LibraryJourneyTests.swift in its wave, for its journey steps if #333 has not merged."
     },
     {
       "id": "filters-collections",

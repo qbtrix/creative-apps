@@ -1800,11 +1800,13 @@ locally. Three harnesses do the measuring, all named in rubric section 6:
   (import or export progress row first drawn), `thumb-ready` (a cell's
   image first drawn), `render-preview` and `render-full` (a loupe picture of
   a given token first drawn), `launch-grid` (first grid frame after launch).
-- **Model budget** (Linux and macOS, `swift test`):
-  `Tests/LibraryModelTests/LibraryBudgetTests.swift`, wall time over 20 runs
-  on the `large` fixture or a named buffer, reporting median and p95 as one
-  `LIBRARY-BUDGET` line per row and writing them to
-  `.build/snapshots/library-budgets.txt`, so the contact sheet shows them.
+- **Model budget** (Linux and macOS, `swift test`): one file per feature,
+  `Tests/LibraryModelTests/Library<Area>BudgetTests.swift`, over the
+  spine's helper `LibraryBudget.swift` (same folder): wall time over 20 runs
+  on the `large` fixture or a named buffer, median and p95, printed as one
+  `LIBRARY-BUDGET` line per row and written to
+  `.build/snapshots/library-budget-<area>.txt`, so the contact sheet shows
+  them.
   CI runs debug; the debug gate is the release target × 10 (rubric), and
   pixel loops get × 20, the factor Photo measured for CoreRaster loops in
   debug (`PhotoBrushLatencyTests`), which is recorded here as decision D8.
@@ -1995,7 +1997,7 @@ an earlier wave owned; the packet says so.
 - Engine (creative-core): none.
 - SuiteUI: none (#333 for its own journey file; until then it edits LibraryJourneyTests.swift).
 - Note: Creates every stub file later features replace; lands as several stacked PRs. Coordinates with open PR #217 (#156).
-- Owned files: `Sources/LibraryModel/LibraryCatalog.swift`, `Sources/LibraryModel/PhotoItem.swift`, `Sources/LibraryModel/LibraryOrder.swift`, `Sources/LibraryModel/CatalogHistory.swift`, `Sources/LibraryModel/LibraryServices.swift`, `Sources/LibraryModel/Contracts/`, `Sources/LibraryModel/Fakes/`, `Sources/LibraryModel/Live/`, `Sources/LibraryModel/LibraryFixtures.swift`, `Sources/LibraryModel/LibraryLaunch.swift`, `Sources/LibraryModel/LibrarySample.swift`, `Sources/LibraryApp/LibraryApp.swift`, `Sources/LibraryApp/LibraryWindow.swift`, `Sources/LibraryApp/LibraryCommands.swift`, `Sources/LibraryApp/LibraryMenus.swift`, `Sources/LibraryApp/LibraryWindow+`, `Sources/LibraryApp/LibraryBrowser.swift`, `Sources/LibraryApp/LibraryGrid.swift`, `Sources/LibraryApp/DisplayImage+Image.swift`, `Sources/LibraryApp/LibraryInspector.swift`, `Sources/LibraryApp/DevelopInspector.swift`, `Sources/LibraryApp/LibraryCropOverlay.swift`, `Sources/LibraryApp/LibraryExportSheet.swift`, `Sources/LibraryApp/LibraryStatusBar.swift`, `Sources/LibraryApp/Platform/`, `Tests/LibraryModelTests/LibraryHistoryTests.swift`, `Tests/LibraryModelTests/LibraryServicesTests.swift`, `Tests/LibraryModelTests/LibraryLaunchTests.swift`, `Tests/LibraryModelTests/LibraryOrderTests.swift`, `Tests/LibraryModelTests/LibraryCatalogTests.swift`, `Tests/LibraryModelTests/LibraryPhotoIDTests.swift`, `Tests/AppSnapshotTests/LibraryShellSnapshots.swift`, `UITests/Journey+Library.swift`, `UITests/LibraryJourneyTests.swift`, `UITests/LibraryJourneyTests+Shell.swift`.
+- Owned files: `Sources/LibraryModel/LibraryCatalog.swift`, `Sources/LibraryModel/PhotoItem.swift`, `Sources/LibraryModel/LibraryOrder.swift`, `Sources/LibraryModel/CatalogHistory.swift`, `Sources/LibraryModel/LibraryServices.swift`, `Sources/LibraryModel/Contracts/`, `Sources/LibraryModel/Fakes/`, `Sources/LibraryModel/Live/`, `Sources/LibraryModel/LibraryFixtures.swift`, `Sources/LibraryModel/LibraryLaunch.swift`, `Sources/LibraryModel/LibrarySample.swift`, `Sources/LibraryApp/LibraryApp.swift`, `Sources/LibraryApp/LibraryWindow.swift`, `Sources/LibraryApp/LibraryCommands.swift`, `Sources/LibraryApp/LibraryMenus.swift`, `Sources/LibraryApp/LibraryWindow+`, `Sources/LibraryApp/LibraryBrowser.swift`, `Sources/LibraryApp/LibraryGrid.swift`, `Sources/LibraryApp/DisplayImage+Image.swift`, `Sources/LibraryApp/LibraryInspector.swift`, `Sources/LibraryApp/DevelopInspector.swift`, `Sources/LibraryApp/LibraryCropOverlay.swift`, `Sources/LibraryApp/LibraryExportSheet.swift`, `Sources/LibraryApp/LibraryStatusBar.swift`, `Sources/LibraryApp/Platform/`, `Tests/LibraryModelTests/LibraryHistoryTests.swift`, `Tests/LibraryModelTests/LibraryServicesTests.swift`, `Tests/LibraryModelTests/LibraryLaunchTests.swift`, `Tests/LibraryModelTests/LibraryOrderTests.swift`, `Tests/LibraryModelTests/LibraryCatalogTests.swift`, `Tests/LibraryModelTests/LibraryPhotoIDTests.swift`, `Tests/AppSnapshotTests/LibraryShellSnapshots.swift`, `UITests/Journey+Library.swift`, `UITests/LibraryJourneyTests.swift`, `UITests/LibraryJourneyTests+Shell.swift`, `Tests/LibraryModelTests/LibraryBudget.swift`.
 
 #### Wave 2: the loop on real files (after the spine)
 
@@ -2003,35 +2005,36 @@ an earlier wave owned; the packet says so.
 
 - Engine (creative-core): none (decode is ImageIO in LibraryApp).
 - SuiteUI: S-L4 InlineNotice, S-L5 ProgressRow (placeholders until then); #330, #333.
-- Owned files: `Sources/LibraryModel/LibraryImport.swift`, `Sources/LibraryModel/Live/LiveImporter.swift`, `Sources/LibraryApp/Platform/ImageIODecoder.swift`, `Sources/LibraryApp/LibraryWindow+Import.swift`, `Sources/LibraryApp/LibraryBrowser.swift`, `Tests/LibraryModelTests/LibraryImportTests.swift`, `Tests/AppSnapshotTests/LibraryImportSnapshots.swift`, `Tests/AppSnapshotTests/LibraryDecodeTests.swift`, `UITests/LibraryJourneyTests+Import.swift`, `UITests/LibraryJourneyTests+PerfImport.swift`.
+- Note: Owns LibraryJourneyTests.swift in its wave, for its journey steps if #333 has not merged.
+- Owned files: `Sources/LibraryModel/LibraryImport.swift`, `Sources/LibraryModel/Live/LiveImporter.swift`, `Sources/LibraryApp/Platform/ImageIODecoder.swift`, `Sources/LibraryApp/LibraryWindow+Import.swift`, `Sources/LibraryApp/LibraryBrowser.swift`, `Tests/LibraryModelTests/LibraryImportTests.swift`, `Tests/AppSnapshotTests/LibraryImportSnapshots.swift`, `Tests/AppSnapshotTests/LibraryDecodeTests.swift`, `UITests/LibraryJourneyTests+Import.swift`, `UITests/LibraryJourneyTests+PerfImport.swift`, `UITests/LibraryJourneyTests.swift`, `Tests/LibraryModelTests/LibraryImportBudgetTests.swift`.
 
 **`thumbnails`** (#33). Real grid thumbnails: buckets, visible requests, LRU, placeholders.
 
 - Engine (creative-core): none (resized and rgba8 landed: creative-core #132, #143).
 - SuiteUI: S-L2 ThumbnailGrid additions; #330, #333.
 - Note: Live thumbnails read files through services.decoder, which is FakeDecoder in tests and the live ImageIODecoder once import lands.
-- Owned files: `Sources/LibraryModel/LibraryThumbnails.swift`, `Sources/LibraryModel/Live/LiveThumbnails.swift`, `Sources/LibraryApp/LibraryGrid.swift`, `Sources/LibraryApp/DisplayImage+Image.swift`, `Sources/LibraryApp/LibraryWindow+Thumbnails.swift`, `Tests/LibraryModelTests/LibraryThumbnailTests.swift`, `Tests/AppSnapshotTests/LibraryThumbnailSnapshots.swift`, `Tests/AppSnapshotTests/LibraryGridSnapshots.swift`, `UITests/LibraryJourneyTests+Grid.swift`, `UITests/LibraryJourneyTests+PerfGrid.swift`.
+- Owned files: `Sources/LibraryModel/LibraryThumbnails.swift`, `Sources/LibraryModel/Live/LiveThumbnails.swift`, `Sources/LibraryApp/LibraryGrid.swift`, `Sources/LibraryApp/DisplayImage+Image.swift`, `Sources/LibraryApp/LibraryWindow+Thumbnails.swift`, `Tests/LibraryModelTests/LibraryThumbnailTests.swift`, `Tests/AppSnapshotTests/LibraryThumbnailSnapshots.swift`, `Tests/AppSnapshotTests/LibraryGridSnapshots.swift`, `UITests/LibraryJourneyTests+Grid.swift`, `UITests/LibraryJourneyTests+PerfGrid.swift`, `Tests/LibraryModelTests/LibraryGridBudgetTests.swift`.
 
 **`cull`** (#211, #426, #724). Cull from the keyboard with undo and Auto Advance, in grid and loupe.
 
 - Engine (creative-core): none.
 - SuiteUI: S-L2 (reject badge); #330, #333.
-- Note: #724's keys only; its zoom and photo size go to loupe-viewport.
-- Owned files: `Sources/LibraryModel/LibraryCulling.swift`, `Sources/LibraryModel/Live/LiveCulling.swift`, `Sources/LibraryModel/MetadataEditing.swift`, `Sources/LibraryApp/LibraryWindow+Cull.swift`, `Tests/LibraryModelTests/LibraryRatingTests.swift`, `Tests/LibraryModelTests/LibraryAutoAdvanceTests.swift`, `Tests/LibraryModelTests/LibraryMetadataTests.swift`, `Tests/AppSnapshotTests/LibraryRatingSnapshots.swift`, `Tests/AppSnapshotTests/LibraryAutoAdvanceSnapshots.swift`, `UITests/LibraryJourneyTests+Cull.swift`, `UITests/LibraryJourneyTests+PerfCull.swift`.
+- Note: #724's keys only; its zoom and photo size go to loupe-viewport. The grid's reject mark (dimmed cell, xmark badge) is drawn by thumbnails, which owns the cell builder; cull changes only Model state.
+- Owned files: `Sources/LibraryModel/LibraryCulling.swift`, `Sources/LibraryModel/Live/LiveCulling.swift`, `Sources/LibraryModel/MetadataEditing.swift`, `Sources/LibraryApp/LibraryWindow+Cull.swift`, `Tests/LibraryModelTests/LibraryRatingTests.swift`, `Tests/LibraryModelTests/LibraryAutoAdvanceTests.swift`, `Tests/LibraryModelTests/LibraryMetadataTests.swift`, `Tests/AppSnapshotTests/LibraryRatingSnapshots.swift`, `Tests/AppSnapshotTests/LibraryAutoAdvanceSnapshots.swift`, `UITests/LibraryJourneyTests+Cull.swift`, `UITests/LibraryJourneyTests+PerfCull.swift`, `Tests/LibraryModelTests/LibraryCullBudgetTests.swift`.
 
 **`persist`** (#212). The catalog file: JSON v1 with develop and crop, restore at launch, set aside a damaged file.
 
 - Engine (creative-core): none for v1 (JSON); creative-core#157 only if decision D1 picks the SQLite catalog.
 - SuiteUI: S-L4 InlineNotice; #330, #333.
 - Note: Writes the develop and crop objects from the start (their types come from the spine), so #423's and #425's catalog parts are done here.
-- Owned files: `Sources/LibraryModel/LibraryPersistence.swift`, `Sources/LibraryModel/Live/LiveCatalogCoding.swift`, `Sources/LibraryApp/Platform/CatalogStore.swift`, `Sources/LibraryApp/LibraryWindow+Persist.swift`, `Tests/LibraryModelTests/LibraryPersistTests.swift`, `Tests/LibraryModelTests/Golden/catalog-v1.json`, `Tests/AppSnapshotTests/LibraryRestoreSnapshots.swift`, `UITests/LibraryJourneyTests+Persist.swift`, `UITests/LibraryJourneyTests+PerfLaunch.swift`.
+- Owned files: `Sources/LibraryModel/LibraryPersistence.swift`, `Sources/LibraryModel/Live/LiveCatalogCoding.swift`, `Sources/LibraryApp/Platform/CatalogStore.swift`, `Sources/LibraryApp/LibraryWindow+Persist.swift`, `Tests/LibraryModelTests/LibraryPersistTests.swift`, `Tests/LibraryModelTests/Golden/catalog-v1.json`, `Tests/AppSnapshotTests/LibraryRestoreSnapshots.swift`, `UITests/LibraryJourneyTests+Persist.swift`, `UITests/LibraryJourneyTests+PerfLaunch.swift`, `Tests/LibraryModelTests/LibraryCatalogBudgetTests.swift`.
 
 **`loupe-viewport`** (#724). Loupe on CanvasViewport: zoom, pan, real photo size, latest-wins render, prefetch.
 
 - Engine (creative-core): none.
 - SuiteUI: #330, #333.
 - Note: #724's zoom, photo on the artboard and real size.
-- Owned files: `Sources/LibraryModel/LoupeState.swift`, `Sources/LibraryModel/LoupeZoom.swift`, `Sources/LibraryModel/LibraryLoupeImage.swift`, `Sources/LibraryModel/RenderQueue.swift`, `Sources/LibraryModel/Live/LiveLoupeImaging.swift`, `Sources/LibraryApp/LibraryLoupe.swift`, `Sources/LibraryApp/LibraryWindow+Loupe.swift`, `Tests/LibraryModelTests/LibraryLoupeTests.swift`, `Tests/LibraryModelTests/LibraryLoupeZoomTests.swift`, `Tests/LibraryModelTests/LibraryRenderQueueTests.swift`, `Tests/LibraryModelTests/LibraryLoupeImageTests.swift`, `Tests/AppSnapshotTests/LibraryLoupeSnapshots.swift`, `UITests/LibraryJourneyTests+Loupe.swift`, `UITests/LibraryJourneyTests+PerfLoupe.swift`.
+- Owned files: `Sources/LibraryModel/LoupeState.swift`, `Sources/LibraryModel/LoupeZoom.swift`, `Sources/LibraryModel/LibraryLoupeImage.swift`, `Sources/LibraryModel/RenderQueue.swift`, `Sources/LibraryModel/Live/LiveLoupeImaging.swift`, `Sources/LibraryApp/LibraryLoupe.swift`, `Sources/LibraryApp/LibraryWindow+Loupe.swift`, `Tests/LibraryModelTests/LibraryLoupeTests.swift`, `Tests/LibraryModelTests/LibraryLoupeZoomTests.swift`, `Tests/LibraryModelTests/LibraryRenderQueueTests.swift`, `Tests/LibraryModelTests/LibraryLoupeImageTests.swift`, `Tests/AppSnapshotTests/LibraryLoupeSnapshots.swift`, `UITests/LibraryJourneyTests+Loupe.swift`, `UITests/LibraryJourneyTests+PerfLoupe.swift`, `Tests/LibraryModelTests/LibraryLoupeBudgetTests.swift`.
 
 #### Wave 3: develop and the readouts (after wave 2)
 
@@ -2039,8 +2042,8 @@ an earlier wave owned; the packet says so.
 
 - Engine (creative-core): none (creative-core#231 closed by #246); a new core issue only if QB-LIB-6's model half misses: PixelBuffer.developed(temperature:tint:exposure:contrast:highlights:shadows:), one pass over storage, equal to the chained calls within 1e-6.
 - SuiteUI: S-L1 HistogramView; #330, #333.
-- Note: Owns LibraryBudgetTests.swift (the first budget rows); later features add their rows in their own wave.
-- Owned files: `Sources/LibraryModel/LibraryDevelop.swift`, `Sources/LibraryModel/Live/LiveDevelop.swift`, `Sources/LibraryApp/DevelopInspector.swift`, `Sources/LibraryApp/LibraryWindow+Develop.swift`, `Tests/LibraryModelTests/LibraryDevelopTests.swift`, `Tests/LibraryModelTests/LibraryDevelopRenderTests.swift`, `Tests/LibraryModelTests/LibraryBudgetTests.swift`, `Tests/AppSnapshotTests/LibraryDevelopSnapshots.swift`, `Tests/AppSnapshotTests/LibraryDevelopRenderSnapshots.swift`, `UITests/LibraryJourneyTests+Develop.swift`, `UITests/LibraryJourneyTests+PerfDevelop.swift`.
+- Note: Owns LibraryJourneyTests.swift in its wave, for its journey steps if #333 has not merged.
+- Owned files: `Sources/LibraryModel/LibraryDevelop.swift`, `Sources/LibraryModel/Live/LiveDevelop.swift`, `Sources/LibraryApp/DevelopInspector.swift`, `Sources/LibraryApp/LibraryWindow+Develop.swift`, `Tests/LibraryModelTests/LibraryDevelopTests.swift`, `Tests/LibraryModelTests/LibraryDevelopRenderTests.swift`, `Tests/AppSnapshotTests/LibraryDevelopSnapshots.swift`, `Tests/AppSnapshotTests/LibraryDevelopRenderSnapshots.swift`, `UITests/LibraryJourneyTests+Develop.swift`, `UITests/LibraryJourneyTests+PerfDevelop.swift`, `UITests/LibraryJourneyTests.swift`, `Tests/LibraryModelTests/LibraryDevelopBudgetTests.swift`.
 
 **`status-and-layout`** (#185, #291). Status pills, inspector header (#185), the remaining identifiers (#291), layout tests.
 
@@ -2056,14 +2059,14 @@ an earlier wave owned; the packet says so.
 - Engine (creative-core): none (creative-core#230 closed by #251).
 - SuiteUI: S-L3 CropHandles; #330, #333.
 - Note: Edits LiveDevelop.swift (crop after tone), which develop owned in wave 3.
-- Owned files: `Sources/LibraryModel/LibraryCrop.swift`, `Sources/LibraryModel/Live/LiveCrop.swift`, `Sources/LibraryModel/Live/LiveDevelop.swift`, `Sources/LibraryApp/LibraryCropOverlay.swift`, `Sources/LibraryApp/LibraryWindow+Crop.swift`, `Tests/LibraryModelTests/LibraryCropTests.swift`, `Tests/AppSnapshotTests/LibraryCropSnapshots.swift`, `UITests/LibraryJourneyTests+Crop.swift`, `UITests/LibraryJourneyTests+PerfCrop.swift`.
+- Owned files: `Sources/LibraryModel/LibraryCrop.swift`, `Sources/LibraryModel/Live/LiveCrop.swift`, `Sources/LibraryModel/Live/LiveDevelop.swift`, `Sources/LibraryApp/LibraryCropOverlay.swift`, `Sources/LibraryApp/LibraryWindow+Crop.swift`, `Tests/LibraryModelTests/LibraryCropTests.swift`, `Tests/AppSnapshotTests/LibraryCropSnapshots.swift`, `UITests/LibraryJourneyTests+Crop.swift`, `UITests/LibraryJourneyTests+PerfCrop.swift`, `Tests/LibraryModelTests/LibraryCropBudgetTests.swift`.
 
 **`export`** (#424). Export JPEG at a set long edge and quality, never overwriting.
 
 - Engine (creative-core): none.
 - SuiteUI: S-L5 ProgressRow; #330, #333.
-- Note: Its last task (the QB-V4 test with a cropped photo) waits for crop to merge.
-- Owned files: `Sources/LibraryModel/LibraryExport.swift`, `Sources/LibraryModel/Live/LiveExporter.swift`, `Sources/LibraryApp/Platform/JPEGWriter.swift`, `Sources/LibraryApp/LibraryExportSheet.swift`, `Sources/LibraryApp/LibraryWindow+Export.swift`, `Tests/LibraryModelTests/LibraryExportPlanTests.swift`, `Tests/AppSnapshotTests/LibraryExportSnapshots.swift`, `Tests/AppSnapshotTests/LibraryExportFidelityTests.swift`, `UITests/LibraryJourneyTests+Export.swift`.
+- Note: Its last task (the QB-V4 test with a cropped photo) waits for crop to merge. Owns LibraryJourneyTests.swift in its wave, for its journey steps if #333 has not merged.
+- Owned files: `Sources/LibraryModel/LibraryExport.swift`, `Sources/LibraryModel/Live/LiveExporter.swift`, `Sources/LibraryApp/Platform/JPEGWriter.swift`, `Sources/LibraryApp/LibraryExportSheet.swift`, `Sources/LibraryApp/LibraryWindow+Export.swift`, `Tests/LibraryModelTests/LibraryExportPlanTests.swift`, `Tests/AppSnapshotTests/LibraryExportSnapshots.swift`, `Tests/AppSnapshotTests/LibraryExportFidelityTests.swift`, `UITests/LibraryJourneyTests+Export.swift`, `UITests/LibraryJourneyTests.swift`, `Tests/LibraryModelTests/LibraryExportBudgetTests.swift`.
 
 #### Wave 5: after v1 (tier 2, not v1)
 
