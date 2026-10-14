@@ -1792,3 +1792,33 @@ Waits on: wave 2 merged.
 | D0, F1–F5, D2, F6, F8, F9 | none |
 | F7 `pen` | needs a new core issue: shared path geometry (spec in 8.2) |
 | #21 (not v1) | none new: CoreColor's existing conversion, per #21's body |
+
+---
+
+## 9. Open questions for the captain
+
+1. **Q1 Journey files.** Wave 0 needs SuiteUI #333's template change so each
+   feature owns its own journey file. If #333 is not merged when wave 0
+   starts, may D0-6 make the one-line `project.yml` change itself (leaving
+   the input and perf helpers to #333)?
+2. **Q2 Auto Layout.** #752's last bullet stores direction, gap, padding and
+   alignment with no layout math, which leaves controls that change nothing
+   on the canvas. Proposal: drop that bullet from v1 and file one tier-3
+   issue for Auto Layout with its math. Agree?
+3. **Q3 Screen-side budgets.** No input-to-screen number can be measured
+   until SuiteUI #330 (`FrameProbe`, now `p3`) lands. Proposal: raise #330
+   to `p1` by dependency (Design and Flare both need it) and let wave 1 gate
+   on the model half meanwhile. Agree?
+4. **Q4 Autosave and recovery.** Flare's v1 has a recovery file. This
+   blueprint leaves Design's out of v1 (the close prompt covers the common
+   loss). In or out?
+5. **Q5 Pen tool tier.** The Pen sits in wave 3 and waits on a new core
+   issue for shared path geometry. Should Design instead take a dependency on
+   FlareCore's existing path type (a `Package.swift` change, which is a
+   protected path), or wait for the shared module?
+6. **Q6 Housekeeping.** Close PR #719 (its fix shipped as #749)? File the
+   gap issues listed in 8.1 when wave 0 starts, or now?
+7. **Q7 Status of the existing selection handles.** SuiteUI #273 moves
+   Design's handles into SuiteUI for Flare and Halo. F1 edits
+   `DesignSelectionMarks.swift`; should F1 wait for #273 to avoid doing the
+   several-layer box twice?
