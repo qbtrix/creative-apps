@@ -1,8 +1,9 @@
 // SuiteGridSnapshots.swift: SuiteUI's ThumbnailGrid over sample data, a mix
 // of placeholder cells (no image) and colored cells with badges, unselected
-// and with three cells selected, in Light and Dark. Writes
-// suiteui-grid-{light,dark}.png and suiteui-grid-selected-{light,dark}.png.
-// macOS only.
+// and with three cells selected, in Light and Dark, plus a row of blue and teal
+// photos with two selected (issue #101: the selection must read on them).
+// Writes suiteui-grid-{light,dark}.png, suiteui-grid-selected-{light,dark}.png
+// and suiteui-grid-selected-blue-{light,dark}.png. macOS only.
 import SuiteUI
 import SwiftUI
 import Testing
@@ -16,6 +17,17 @@ import Testing
             try snapshot(GridSample(items: items, selection: []), name: "suiteui-grid-\(suffix)", scheme: scheme)
             try snapshot(
                 GridSample(items: items, selection: ["2", "3", "8"]), name: "suiteui-grid-selected-\(suffix)", scheme: scheme)
+            try snapshot(
+                GridSample(items: Self.blueItems(), selection: ["blue", "teal"]),
+                name: "suiteui-grid-selected-blue-\(suffix)", scheme: scheme)
+        }
+    }
+
+    /// Sky and sea: a selected blue and teal photo beside an unselected blue
+    /// one, so a selection that blends into the image shows.
+    private static func blueItems() -> [ThumbnailItem<String>] {
+        [("blue", [Color.blue, .blue]), ("teal", [.teal, .teal]), ("sky", [.blue, .cyan])].map { id, colors in
+            ThumbnailItem(id: id, image: swatch(colors), caption: "\(id).heic")
         }
     }
 
