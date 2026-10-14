@@ -8,7 +8,8 @@
 // of the track, so it is as easy to hit at any inspector width. A discrete
 // step (arrow key, VoiceOver) goes through steppedPosition, which steps out of
 // the band in one press instead of landing back on 1 (#584), and from a typed
-// gamma inside the band steps from that value, never across 1 (#593).
+// gamma inside the band steps from that value, never across 1, at any step
+// size (#593, #597).
 // Invariants: both directions clamp to their range, NaN gives the identity,
 // and the endpoints and midpoint map exactly. Linux-safe.
 #if canImport(FoundationEssentials)
@@ -72,10 +73,11 @@ public enum GammaTrack {
     /// midpoint (gamma exactly 1) a step that would land inside the detent
     /// jumps to the first position on its grid past the band, so a press
     /// always leaves 1. From a typed gamma inside the band but off 1 (1.05),
-    /// a step that stays in the band goes to 1 when it heads toward the
-    /// midpoint, since 1 is the nearest step that way, and otherwise to the
-    /// first whole step from the typed position past the band, so a press
-    /// never crosses 1 to the far side (#593). Any other step is
+    /// a step toward the midpoint goes to 1 whatever its size, even a Shift
+    /// step that would end past the band on the far side (#597), and a step
+    /// away that stays in the band goes to the first whole step from the
+    /// typed position past the band, so a press never crosses 1 (#593).
+    /// Any other step is
     /// position + delta, clamped, so a press into the band from outside still
     /// snaps to 1 (snappedGamma). NaN, zero and infinite deltas leave the
     /// position where it is (clamped; a NaN position is the midpoint).
@@ -83,10 +85,12 @@ public enum GammaTrack {
         let start = position.isNaN ? 0 : clamp(position)
         guard delta.isFinite, delta != 0 else { return start }
         let next = clamp(start + delta)
-        guard abs(start) <= detent, abs(next) <= detent else { return next }
+        guard abs(start) <= detent else { return next }
+        // Toward the midpoint from a typed in-band gamma: 1, at any step size.
+        if start != 0, (delta > 0) != (start > 0) { return 0 }
+        guard abs(next) <= detent else { return next }
         let pastBand = clamp(delta > 0 ? detent + delta : -detent + delta)
         guard start != 0 else { return pastBand }
-        guard (delta > 0) == (start > 0) else { return 0 }
         return steppedPastDetent(from: start, by: delta) ?? pastBand
     }
 

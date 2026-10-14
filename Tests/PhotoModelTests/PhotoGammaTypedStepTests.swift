@@ -61,3 +61,36 @@ import Testing
         #expect(position >= start)
     }
 }
+
+/// A coarse (Shift-sized) step from a typed in-band gamma toward 1 stops at 1
+/// instead of ending past the band on the far side (#597).
+@Suite struct PhotoGammaTypedCoarseStepTests {
+    private func stepped(from gamma: Double, by delta: Double) -> Double {
+        GammaTrack.snappedGamma(atPosition: GammaTrack.steppedPosition(
+            from: GammaTrack.position(ofGamma: gamma), by: delta))
+    }
+
+    @Test func aShiftDecrementFromJustAboveOneStopsAtOne() {
+        #expect(stepped(from: 1.05, by: -10 * GammaTrack.step) == 1)
+        #expect(stepped(from: 1.09, by: -0.08) == 1)
+    }
+
+    @Test func aShiftIncrementFromJustBelowOneStopsAtOne() {
+        #expect(stepped(from: 0.95, by: 10 * GammaTrack.step) == 1)
+        #expect(stepped(from: 0.92, by: 0.08) == 1)
+    }
+
+    @Test(arguments: [0.1, -0.1, 0.5, -0.5, 2, -2])
+    func aCoarseStepFromATypedValueNeverCrossesOne(_ delta: Double) {
+        for gamma in [1.05, 0.95] {
+            let result = stepped(from: gamma, by: delta)
+            #expect(delta > 0 ? result >= gamma : result <= gamma)
+            #expect(gamma > 1 ? result >= 1 : result <= 1)
+        }
+    }
+
+    @Test func aShiftStepAwayFromOneStillLeavesTheBand() {
+        #expect(stepped(from: 1.05, by: 10 * GammaTrack.step) > 1.1)
+        #expect(stepped(from: 0.95, by: -10 * GammaTrack.step) < 0.91)
+    }
+}
