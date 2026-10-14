@@ -60,7 +60,8 @@ struct ToolOptionsSection: View {
         let options = model.toolOptions
         InspectorSection("Tool Options") {
             switch model.tool {
-            case .brush, .eraser:
+            case .brush, .eraser, .clone:
+                if model.tool == .clone { hint("Option-click to set the source, then paint to clone from it.") }
                 InspectorSliderRow("Size", value: options.size, in: ToolOptions.sizeRange, unit: "px", decimals: 0) {
                     perform(.toolOption(.size($0)))
                 }
