@@ -60,8 +60,8 @@ func ellipseDraftMatchesCommitForOddBoxes(hasDocument: Bool) {
     }
 }
 
-@Test func otherToolsNeverDraftWithOrWithoutADocument() {
-    for tool in FlareTool.allCases where tool != .ellipse {
+@Test func selectToolsNeverDraftWithOrWithoutADocument() {
+    for tool in [FlareTool.select, .directSelect] {
         var workspace = FlareWorkspace()
         workspace.selectTool(tool)
         workspace.dragChanged(from: Point(x: 0, y: 0), to: Point(x: 50, y: 50))

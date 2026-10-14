@@ -30,7 +30,7 @@ public struct FakeShapes: ShapeBuilding {
                       previous: ShapeDraft?) -> ShapeDraft? {
         guard unavailable == nil, start.isFinite, end.isFinite else { return nil }
         switch tool {
-        case .select: return nil
+        case .select, .directSelect: return nil
         case .pen: return pen(at: start, dragged: start != end, previous: previous)
         case .rectangle, .ellipse:
             var dx = end.x - start.x, dy = end.y - start.y
@@ -63,7 +63,7 @@ public struct FakeShapes: ShapeBuilding {
         try available()
         let kind = switch draft.tool {
         case .rectangle: "Rectangle"; case .ellipse: "Ellipse"; case .pen: "Path"
-        case .select: throw CommandError.invalidDocument("Select doesn't draw.")
+        case .select, .directSelect: throw CommandError.invalidDocument("Select doesn't draw.")
         }
         let owner = LayerOwner.scene(sceneID)
         let layers = engine.document.layers(of: owner) ?? []

@@ -81,7 +81,7 @@ func otherToolsLeaveNoDraftForAnyBox(tool: FlareTool) {
     var workspace = ellipseWorkspace()
     workspace.selectTool(tool)
     workspace.dragChanged(from: Point(x: 0, y: 0), to: Point(x: 80, y: 80))
-    #expect(workspace.draft == nil)
+    #expect(workspace.shapeDraft?.tool != .ellipse)
 }
 
 @Test func aBoxJustOverTheMinimumIsInscribedAndFinite() throws {

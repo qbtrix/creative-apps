@@ -1,26 +1,47 @@
-// FlareToolsTests.swift: the no-dead-tools check for Flare's palette. Each
-// FlareTool is either disabled with help saying why, or its drag on an open
-// stage changes the workspace, and an enabled tool must be one the stage
-// actually drags. The fixture is a new animation; when a tool
-// needs more under the pointer to show its effect, grow the fixture, never
-// weaken the check. Runs on Linux and macOS.
+// FlareToolsTests.swift: no dead tools (QB-F1). Each FlareTool has `toolHelp` saying why it is disabled, or its
+// gesture changes the workspace and the stage drags it. Select tools start on `bounce`'s Ball; grow the fixture
+// when a tool needs more under the pointer, never weaken the check. Runs on Linux and macOS.
 import FlareCore
-import FlareModel
+@testable import FlareModel
 import Testing
+
+private func opened(_ tool: FlareTool, services: FlareServices = .fake()) -> FlareWorkspace {
+    var workspace = FlareWorkspace(services: services)
+    workspace.load([.select, .directSelect].contains(tool) ? FlareFixtures.bounce : FlareFixtures.empty)
+    workspace.selectTool(tool)
+    return workspace
+}
+
+/// Ball's centre at frame 0, then 40 points right and down.
+private func gesture(_ workspace: inout FlareWorkspace) {
+    workspace.dragChanged(from: Point(x: 80, y: 100), to: Point(x: 120, y: 140))
+    workspace.endDrag()
+}
 
 @Test(arguments: FlareTool.allCases)
 func flareToolActsOrIsDisabled(_ tool: FlareTool) {
-    var before = FlareWorkspace()
-    before.newDocument()
-    before.selectTool(tool)
-    guard tool.isEnabled else {
-        #expect(tool.unavailableHelp?.isEmpty == false, "\(tool) is disabled with no help saying why")
+    let before = opened(tool)
+    if let help = before.toolHelp(tool) {
+        #expect(!help.isEmpty, "\(tool) is disabled with no help saying why")
         return
     }
     var after = before
-    after.drag(from: Point(x: 40, y: 40), to: Point(x: 200, y: 160))
-    let changed = after != before
-    #expect(changed, "\(tool) is shown enabled, but a drag on the stage changes nothing")
+    gesture(&after)
+    #expect(after != before, "\(tool) is shown enabled, but a drag on the stage changes nothing")
+}
+
+/// Every tool's Model gesture works on the fakes, so wiring the stage is all that keeps it disabled.
+@Test(arguments: FlareTool.allCases)
+func flareToolGestureChangesTheWorkspaceOnTheFakes(_ tool: FlareTool) {
+    let before = opened(tool)
+    var after = before
+    gesture(&after)
+    #expect(after != before, "\(tool)'s gesture does nothing, so enabling it would leave a dead control")
+}
+
+@Test(arguments: FlareTool.allCases)
+func aToolWhoseServiceIsOffSaysTheServiceReason(_ tool: FlareTool) {
+    #expect(opened(tool, services: .live).toolHelp(tool) == "Not connected yet (IN-1).")
 }
 
 /// The tools whose stage gesture reaches `drag` in FlareApp. A Model drag
@@ -32,7 +53,7 @@ private let toolsTheStageDrags: Set<FlareTool> = []
 @Test(arguments: FlareTool.allCases)
 func flareToolIsEnabledOnlyWithAStagePath(_ tool: FlareTool) {
     #expect(
-        !tool.isEnabled || toolsTheStageDrags.contains(tool),
+        opened(tool).toolHelp(tool) != nil || toolsTheStageDrags.contains(tool),
         "\(tool) is shown enabled, but the stage never sends it a drag"
     )
 }

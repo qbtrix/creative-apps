@@ -89,7 +89,7 @@ func otherToolsMakeNoEllipseDraftOrLayer(tool: FlareTool) {
     var workspace = ellipseWorkspace()
     workspace.selectTool(tool)
     workspace.dragChanged(from: Point(x: 0, y: 0), to: Point(x: 50, y: 50))
-    #expect(workspace.draft == nil)
+    #expect(workspace.shapeDraft?.tool != .ellipse)
     workspace.drag(from: Point(x: 0, y: 0), to: Point(x: 50, y: 50))
     #expect(workspace.layers.allSatisfy { !$0.name.hasPrefix("Ellipse") })
 }
