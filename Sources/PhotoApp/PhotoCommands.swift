@@ -5,7 +5,9 @@
 // Layer Above and Below; View: Zoom In, Zoom Out, Actual Size, Fit on Screen.
 // The focused window publishes a PhotoMenu (what can run now, and where to
 // send it) as a focused scene value; an item that can't run is disabled, never
-// hidden. Every top bar command is here too.
+// hidden. Select > All is disabled while a sheet or the rename alert is up, so
+// Command-A reaches the focused text field and selects its text (#575). Every
+// top bar command is here too.
 import PhotoModel
 import SwiftUI
 
@@ -27,11 +29,17 @@ struct PhotoMenu {
     /// A layer sits below the selected one (Send Backward, Select Layer Below).
     var canSendBackward = false
     var selectedLayer: PhotoLayer.ID?
+    /// A sheet or alert covers the canvas; its text fields own Command-A.
+    var isPresenting = false
+
+    /// Select > All acts on the canvas, so not while a sheet is up.
+    var canSelectAll: Bool { hasImage && !isPresenting }
 
     init() {}
 
-    init(model: PhotoWorkspace, perform: @escaping PhotoPerform) {
+    init(model: PhotoWorkspace, isPresenting: Bool = false, perform: @escaping PhotoPerform) {
         self.perform = perform
+        self.isPresenting = isPresenting
         hasImage = model.canvas != nil
         canUndo = model.canUndo
         canRedo = model.canRedo
@@ -90,7 +98,7 @@ struct PhotoCommands: Commands {
             Button("Fill Selection") { menu.perform(.fillSelection) }.disabled(!menu.canEditSelection)
         }
         CommandMenu("Select") {
-            Button("All") { menu.perform(.selectAll) }.keyboardShortcut("a").disabled(!menu.hasImage)
+            Button("All") { menu.perform(.selectAll) }.keyboardShortcut("a").disabled(!menu.canSelectAll)
             Button("Deselect") { menu.perform(.deselect) }.keyboardShortcut("d").disabled(!menu.canDeselect)
         }
         CommandMenu("Image") {
