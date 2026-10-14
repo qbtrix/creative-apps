@@ -77,7 +77,7 @@ public protocol KeyframeEditing: Sendable {
                   coalesceKey: String?, in engine: inout CommandEngine) throws
     /// Grouped "Delete Keyframe".
     func removeKeys(_ keys: Set<KeyRef>, owner: LayerOwner, in engine: inout CommandEngine) throws
-    /// Single ("Insert Frame").
+    /// Single ("Insert Frame"). Grows the scene when a shifted key would pass its last frame.
     func insertFrames(_ count: Int, at frame: Int, layerIDs: [String], owner: LayerOwner,
                       in engine: inout CommandEngine) throws
     /// Single ("Remove Frame").
