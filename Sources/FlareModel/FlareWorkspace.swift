@@ -89,6 +89,8 @@ public struct FlareWorkspace: Sendable, Equatable {
     var easingSelection: EasingSegment?
     /// Part of a handle drag's coalesce key; bumped to end the drag.
     var easingDragSerial = 0
+    /// Part of a property scrub's coalesce key; bumped to end the scrub.
+    var propertyScrubSerial = 0
 
     public init(services: FlareServices = .live) {
         self.services = services

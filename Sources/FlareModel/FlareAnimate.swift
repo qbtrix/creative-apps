@@ -25,18 +25,22 @@ extension FlareWorkspace {
     public mutating func toggleAutoKey() { autoKey.toggle() }
 
     /// Sets `property` on the inspector's layers at the playhead, during a scrub that began at `dragStart`. Values of
-    /// one scrub share one step; the next scrub begins where this one ended, so it gets a step of its own.
+    /// one scrub share one step until `endPropertyScrub()`, so the next scrub gets a step of its own even when it
+    /// starts from the same value (#574).
     public mutating func setProperty(_ property: String, to value: Double, dragStart start: Double) {
         guard let owner = propertyOwner else { return refuse(.noDocument) }
         let layers = propertyLayerIDs
         guard !layers.isEmpty else { return refuse(.refused("Select a layer first.")) }
         let properties = services.properties, frame = currentFrame, autoKey = autoKey
-        let key = "property-\(property)-\(layers)-\(frame)-\(start)"
+        let key = "property-\(property)-\(layers)-\(frame)-\(start)-\(propertyScrubSerial)"
         step {
             try properties.setValue(value, of: property, owner: owner, layerIDs: layers, frame: frame,
                                     autoKey: autoKey, coalesceKey: key, in: &$0)
         }
     }
+
+    /// Ends the current scrub: the next `setProperty` starts a new undo step.
+    public mutating func endPropertyScrub() { propertyScrubSerial &+= 1 }
 
     /// The stopwatch: animates a not-animated property, or stops animating an animated one, on the one layer.
     public mutating func toggleAnimated(_ property: String) {
