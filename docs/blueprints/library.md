@@ -394,3 +394,256 @@ Checklist:
       above, with the same issue numbers.
 - [x] Every row has a source or says *inferred*.
 - [x] No product or company name of another creative app appears.
+
+---
+
+## 4. Journeys
+
+### 4.1 How the journeys run
+
+- **Files.** Today `project.yml` compiles exactly `UITests/Journey.swift`
+  and `UITests/LibraryJourneyTests.swift`, so every feature would edit one
+  file. SuiteUI's QH-4 (#333) widens the template to `UITests/Journey*.swift`
+  and `UITests/<target>*.swift`. After it, each feature owns
+  `UITests/LibraryJourneyTests+<Area>.swift` with its own `XCTestCase`
+  class, and `UITests/LibraryJourneyTests.swift` keeps only the existing
+  tests. Until #333 merges, at most one feature per wave may add journey
+  steps (section 8.3 names it), and the rest ship model tests and snapshots
+  and add their journey after #333.
+- **Shared Library helpers** live in `UITests/Journey+Library.swift`
+  (owned by the spine): `LibraryFiles.write(_ count:in:)` writes generated
+  JPEG, PNG and HEIC files with Exif `DateTimeOriginal` and a
+  per-file color through ImageIO in the test process, plus
+  `LibraryFiles.broken(in:)` (a `.jpg` holding the bytes `not an image`) and
+  `LibraryFiles.readOnlyFolder()`. Every journey gets a fresh temporary
+  catalog folder.
+- **Launch arguments** (parsed in `LibraryLaunch.swift`, Linux-tested):
+
+| Argument | Effect |
+|---|---|
+| `-LibraryFixture <name>` | Fake services and that fixture's catalog (UI track). Without it the services are live |
+| `-LibraryCatalogDir <path>` | Where `catalog.json` lives (default: Application Support/Library) |
+| `-LibraryImportFolder <path>` | File > Import Folder… imports this folder instead of showing the open panel |
+| `-LibraryExportTo <path>` | The export sheet's folder; Export writes there without a panel |
+| `-LibraryFakeMode ok\|fail\|slow` | Fakes only: every call succeeds, fails with its error, or waits 2 s first |
+| `-LibraryPerfProbe` | Exposes `suite.perf` (SuiteUI QH-1, #330) |
+| `-LibraryWindowSize <w>x<h>` | The window's initial content size, for the layout journey |
+
+- **Fixtures** (`LibraryFixtures`, built in code):
+
+| Fixture | Contents | Used by |
+|---|---|---|
+| `empty` | no photos | J0 |
+| `samples` | today's 60 seeded samples (`LibrarySample`), now with pixel sizes | existing journeys, snapshots |
+| `shoot` | 24 photos: 16 landscape 6000 × 4000, 8 portrait 4000 × 6000, dates one minute apart, no ratings | J2–J7 on fakes |
+| `large` | 10,000 records over 365 days, fake decoder | P1, P7, model budgets |
+
+- **Identifiers.** Every Library control and mark gets `library.<area>.<name>`
+  (`library.grid`, `library.grid.cell.<id>`, `library.loupe.photo`,
+  `library.develop.exposure`, `library.crop.frame`,
+  `library.export.longEdge`, ...). Accessibility values carry state a test
+  reads: a grid cell's value is `loading`, `ready` or `unreadable`; the
+  loupe photo's value is `preview` or `full` plus the render's checksum
+  (`full 3f9a…`), so a journey can tell that the pixels changed.
+- **Waiting.** No journey asserts timing through an XCUI query. States are
+  awaited with `waitForExistence` or a value predicate (10 s for import and
+  export, 2 s otherwise); timing comes from the probe's JSON (section 7).
+- Every step takes a `shot`, so each journey's PNGs reach the contact sheet.
+
+### 4.2 Tier-1 journeys
+
+Each journey first runs on fakes (`-LibraryFixture`) and its feature's
+last task flips it to live services with real files. The states column
+names every empty, loading and error state the journey passes through;
+each also has a snapshot (section 6.3).
+
+**J0 · `testLaunchShowsEmptyCatalog`** (`LibraryJourneyTests+Shell.swift`, spine)
+1. Launch with an empty `-LibraryCatalogDir`. Shot `empty`.
+   Expect `expectWindowShell()`; the empty state "No Photos" with
+   **Import Folder…** as its one prominent button; the sidebar counts read 0.
+2. Open File. Shot `file-menu-empty`. Expect Import Folder… enabled;
+   Export… disabled.
+3. Open Edit. Expect Undo and Redo disabled.
+States: empty (catalog).
+
+**J1 · `testImportAFolder`** (`+Import.swift`, import)
+1. Write 24 JPEGs (4 of them in a subfolder `day2/`), 1 PNG, 1 HEIC, one
+   broken `.jpg` and a `notes.txt` into a temp folder; launch with
+   `-LibraryImportFolder` on it.
+2. Click **Import Folder…** in the empty state. Shot `importing`. Expect the
+   progress row `library.import.progress` ("Importing 3 of 27") while it
+   runs; the grid shows placeholder cells with value `loading` as records
+   arrive.
+3. Wait for the progress row to go. Shot `imported`. Expect 26 cells; All
+   Photos reads 26; the grid is in capture-date order (first cell's date
+   label is the earliest written); the failure banner reads "1 file couldn't
+   be imported." with **Show** listing `broken.jpg: not an image file`;
+   `notes.txt` is not mentioned (not an image type, skipped silently, as
+   import of a folder means images only).
+4. Import the same folder again. Shot `import-again`. Expect the message
+   "No new photos in <folder>." and still 26 cells.
+5. Relaunch with `-LibraryImportFolder` on a read-only folder holding no
+   readable files; import. Shot `import-denied`. Expect the banner
+   "Library can't read <folder>. Check that you have access to it."
+States: empty → loading (progress row, placeholder cells) → loaded;
+error (broken file, unreadable folder); nothing new.
+
+**J2 · `testGridShowsThumbnailsAndSorts`** (`+Grid.swift`, thumbnails)
+1. Launch on `shoot`. Shot `grid`. Expect every visible cell's value to
+   become `ready` within 2 s; portrait cells are taller than wide inside
+   the cell (the image keeps its aspect).
+2. View > Larger Thumbnails twice. Shot `grid-larger`. Expect fewer
+   columns; cells re-render at the next size bucket (value `ready` again).
+3. View > Sort By > Name. Shot `grid-by-name`. Expect the first cell's
+   caption is the alphabetically first name.
+4. Select a cell, Shift-click another four along. Expect the status pill
+   reads "5 selected".
+States: loading (placeholder cells) → ready.
+
+**J3 · `testLoupeStepsZoomsAndReturns`** (`+Loupe.swift`, loupe-viewport;
+grows the existing `testLoupeStepsAndReturnsToTheGrid`, which stays as is)
+1. Launch on `shoot`; double-click the first cell. Shot `loupe`. Expect
+   `library.loupe.photo` with value starting `preview`, then `full` within
+   2 s; the readout "1 of 24"; the zoom pill reads "Fit".
+2. Press Right twice. Shot `loupe-step`. Expect "3 of 24".
+3. View > Actual Size (Command-1). Shot `loupe-100`. Expect the zoom pill
+   "100%".
+4. Drag the photo 200 pt left. Shot `loupe-pan`. Expect the photo frame's
+   x moved left by 200 (±2).
+5. View > Zoom to Fit (Command-0), then Escape. Shot `loupe-grid`. Expect
+   the grid with the third photo selected.
+States: loading (`preview` before `full`).
+
+**J4 · `testCullWithKeysAndAutoAdvance`** (`+Cull.swift`, cull)
+1. Launch on `shoot`; open the first photo in the loupe. Metadata > Auto
+   Advance is checked by default.
+2. Press 3. Shot `cull-rated`. Expect "2 of 24"; going back with Left shows
+   3 stars on photo 1 (its value reads "3 stars").
+3. Press P on photo 2, then X on photo 3. Shot `cull-flagged`. Expect "4 of
+   24"; Favorites count 1; photo 3's value includes "Rejected".
+4. Edit > Undo. Shot `cull-undo`. Expect the Edit menu read "Undo Reject"
+   before, photo 3 no longer rejected, and the loupe still on "4 of 24"
+   (undo does not move, #426).
+5. Uncheck Metadata > Auto Advance; press 5. Expect still "4 of 24", 5
+   stars.
+6. Escape; select photos 5 and 6 in the grid; press 2. Shot `cull-grid`.
+   Expect both read 2 stars and the selection did not move.
+7. Press U on them; Edit menu reads "Undo Clear Flag".
+States: none beyond the loaded grid; the refusal of a key with nothing
+selected is "nothing happens and the Metadata items are disabled".
+
+**J5 · `testDevelopSlidersAndHistogram`** (`+Develop.swift`, develop)
+1. Launch on `shoot` (live after integration); open photo 1 in the loupe;
+   click the inspector's **Develop** tab. Shot `develop`. Expect the
+   histogram `library.develop.histogram` and six rows: Exposure,
+   Temperature, Tint, Contrast, Highlights, Shadows, all at 0.
+2. Drag Exposure right. Shot `develop-exposure`. Expect the row's value
+   above 0; the loupe photo's checksum changed; the histogram's value
+   (its mean as text) went up.
+3. Focus Contrast, press Right three times then Shift-Right. Expect 3, then
+   13 (step 1, Shift ×10).
+4. Edit menu reads "Undo Contrast"; undo once; Contrast reads 3 (the
+   Shift step was one step).
+5. Photo > Copy Settings (Shift-Command-C); Right; Photo > Paste Settings
+   (Shift-Command-V). Shot `develop-pasted`. Expect photo 2's Exposure
+   equals photo 1's; Edit menu "Undo Paste Settings".
+6. Click Exposure's reset. Expect 0 and the checksum back to the
+   undeveloped photo's.
+States: loading (the loupe shows `preview` while a render is under way);
+error: a render that throws keeps the last picture and shows "Couldn't
+render this photo: <reason>." under the histogram (fake mode `fail`).
+
+**J6 · `testCropAndStraighten`** (`+Crop.swift`, crop)
+1. Launch on `shoot`; open photo 1 (6000 × 4000) in the loupe; Photo > Crop
+   (R). Shot `crop`. Expect `library.crop.frame` with a thirds grid, aspect
+   chips and the Straighten row.
+2. Click the **1:1** chip. Expect the frame's value "4000 × 4000".
+3. Set Straighten to 5 (focus it, type 5, Return). Shot `crop-straighten`.
+   Expect the frame shrank (value width under 4000) and the angle reads 5°.
+4. Press Return. Shot `crop-applied`. Expect the loupe photo's value
+   reports a square size; the grid cell (Escape) is square; the Edit menu
+   reads "Undo Crop".
+5. Undo; R; drag the frame's corner; Escape. Expect no change and no new
+   undo step.
+States: none beyond the loaded photo.
+
+**J7 · `testExportJPEGsAtASize`** (`+Export.swift`, export)
+1. Launch on `shoot` (live after integration) with `-LibraryExportTo` on a
+   temp folder; select photos 1 and 2; File > Export… (Shift-Command-E).
+   Shot `export-sheet`. Expect long edge 2048, quality 85, "2 photos".
+2. Set long edge 1024, quality 80; click **Export**. Shot `exporting`.
+   Expect the progress row "Exporting 1 of 2" with Cancel.
+3. Wait for done. Shot `exported`. Expect "Exported 2 photos." with
+   **Show in Finder**; two files `IMG_0001.jpg` and `IMG_0002.jpg` exist,
+   start with the JPEG marker `FF D8`, and have a long edge of 1024.
+4. Export the same two again. Expect `IMG_0001 2.jpg` and `IMG_0002 2.jpg`;
+   nothing overwritten.
+5. Point `-LibraryExportTo` at a read-only folder (relaunch) and export.
+   Shot `export-failed`. Expect "2 photos couldn't be exported." with each
+   name and reason, and **Try Again**.
+6. Select all 24 at Original Size; Export; Cancel after the first file.
+   Expect "Exported 1 of 24. Export was cancelled." and fewer than 24 files.
+7. With nothing selected and the grid showing, File > Export… is disabled.
+States: loading (progress row), error (per-file failures), cancelled.
+
+**J8 · `testCatalogSurvivesRelaunch`** (`+Persist.swift`, persist; replaces
+the skipped `testImportRateAndRelaunch`)
+1. Import a written folder of 6 JPEGs (live); rate photo 1 four stars,
+   pick photo 2, set photo 3's Exposure to +1, crop photo 4 to 1:1.
+2. Terminate the app (`XCUIApplication.terminate()`) and relaunch with the
+   same `-LibraryCatalogDir`. Shot `relaunched`.
+3. Expect 6 cells, photo 1 "4 stars", Favorites 1, photo 3's loupe
+   checksum equals the one before quitting, photo 4's cell square.
+4. Delete `day2/` from disk for a catalog that holds it, relaunch. Expect
+   those cells' value `unreadable` and help "The file is missing:
+   <path>"; they can still be rated.
+States: loading at launch (grid placeholders while thumbnails rebuild);
+error: missing file.
+
+**J9 · `testDamagedCatalogIsSetAside`** (`+Persist.swift`, persist)
+1. Write `not json` as `catalog.json` in the catalog folder; launch.
+   Shot `catalog-damaged`. Expect the empty state plus the message
+   "Library couldn't read its catalog and started a new one. The old file
+   is catalog.json.bad." with **Show in Finder**; the file was renamed.
+2. Write `{"version": 2}`; relaunch. Expect "This catalog was made by a
+   newer Library. Update Library to open it." and the file left untouched
+   (not renamed: a newer app can still read it), and nothing saved over it.
+States: error (damaged, newer version).
+
+**J10 · `testEveryMenuOpens`** (existing, spine updates it): every menu
+opens and the item count of each equals section 6.2's menu list.
+
+**J11 · `testEveryControlActsOrSaysWhy`** (`+Shell.swift`, spine): reads
+the `suite.controls` value (SuiteUI, with #330), clicks each enabled
+`library.*` control, Escape and Command-Z after each; every enabled control
+changed the shot or a value, every disabled one has a reason. A sweep, not
+feature coverage.
+
+**J12 · `testLayoutAtWidths`** (`+Layout.swift`, status-and-layout
+feature): see section 7.3.
+
+### 4.3 Perf journeys
+
+| # | Test (file, feature) | Fixture | Steps | Measures (section 7) |
+|---|---|---|---|---|
+| P1 | `testGridScrollLarge` (`+Perf.swift`, thumbnails) | `large` | scroll the grid end to end at a set velocity | QB-LIB-3 |
+| P2 | `testCullKeyLatency` (`+Perf.swift`, cull) | `shoot` | 60 rating keys in the grid, then 60 in the loupe with Auto Advance | QB-LIB-4, QB-LIB-5 |
+| P3 | `testDevelopSliderLatency` (`+Perf.swift`, develop) | `shoot` live | velocity drag on Exposure across its range | QB-L2, QB-LIB-6 |
+| P4 | `testLoupeStepLatency` (`+Perf.swift`, loupe-viewport) | `shoot` live | Right 23 times | QB-LIB-5 |
+| P5 | `testCropDragLatency` (`+Perf.swift`, crop) | `shoot` | velocity drag of the crop corner | QB-L1 |
+| P6 | `testImportProgressAndThroughput` (`+Perf.swift`, import) | 200 written 4000 × 3000 JPEGs | import | QB-L9, QB-LIB-1 |
+| P7 | `testLaunchLargeCatalog` (`+Perf.swift`, persist) | `large` saved, relaunched | launch | QB-LIB-2, QB-L12 |
+
+Every perf journey asserts at least 60 samples (else it fails as invalid)
+and attaches `perf-<test>.json`. They ship report-only (rubric 6, How
+gates are set), and need #330 (FrameProbe) and #333 (velocity drags).
+
+Checklist:
+
+- [x] Every tier-1 row of section 3 has a journey: import J1, grid J2,
+      loupe and zoom J3, cull and auto-advance J4, undo J4–J7, develop J5,
+      crop J6, export J7, persistence J8 and J9.
+- [x] Every journey names its XCUITest, its file and the feature that owns
+      it.
+- [x] Every empty, loading and error state a tier-1 journey passes through
+      is named in its States line.
