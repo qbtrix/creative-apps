@@ -333,3 +333,74 @@ Flare's LM-0a3 and F1 did:
   `PhotoTool.unavailableHelp` stays as the fallback text. `PhotoToolsTests`
   changes in the same PR to read `toolHelp` and to run each tool on
   `.fake`, where every tool works.
+
+---
+
+## 3. Usage map
+
+Ranked the way `docs/priorities.md` ranks: what people do in nearly every
+session (tier 1), weekly (tier 2), occasionally or as specialists (tier 3).
+Clean-room: public sources only, no other app opened or run, no product
+named. No public study counts per-feature use in raster editors, so as in
+`docs/priorities.md` the tiers come from what every beginner course teaches
+first and what every shortcut list repeats; rows marked *inferred* have no
+direct source and move first if usage data turns up.
+
+**Sources.** From `docs/priorities.md`: the photo editing habits survey of
+18–25 year olds (https://petapixel.com/2024/06/21/one-third-of-18-to-25-year-olds-edit-their-photos-for-social-media)
+and the photo editing software survey
+(https://shotkit.com/photo-editing-software-survey/). Added here:
+
+- The OpenRaster file layout and layer stack specifications
+  (https://www.openraster.org/baseline/file-layout-spec.html,
+  https://www.openraster.org/baseline/layer-stack-spec.html): a published,
+  open spec whose stated goal is saving layered work "without destructive
+  pixel operations"; it is the evidence that keeping layers on save is a
+  baseline expectation of a raster editor.
+- Public beginner raster-editing course outlines (university short courses,
+  library tech training, online certificates; named here only by kind,
+  because their titles name a product). Read together, their order is
+  constant: the interface and opening a file; selections; layers and layer
+  masks; adjustment layers for tone and color; retouching (clone, heal);
+  then export. Masks and adjustment layers appear in the first or second
+  class of every outline read.
+- W3C Compositing and Blending Level 1 (https://www.w3.org/TR/compositing-1/),
+  already the spec behind CoreRaster's blend modes, for what a layer's blend
+  and opacity mean when layers merge or flatten.
+
+### Tier 1: nearly every session
+
+| # | Job | v1 | v2 adds | Source |
+|---|---|---|---|---|
+| 1 | Open, save, export with format and quality | open, save flat, Save As, export PNG and JPEG | **save and reopen with layers kept**; Open Recent; the unsaved dot and close prompt | priorities.md; OpenRaster spec (layers survive save) |
+| 2 | Never lose work | – | **autosave and restore after a crash** | *inferred*: losing work outranks any feature (the same call as Flare's decision 4) |
+| 3 | Crop, straighten, resize | crop drag, straighten, Image Size, rotate | **typed crop size and aspect lock** (#544) | priorities.md; the course outlines (cropping to a size for a post or print) |
+| 4 | Tone and color | exposure, levels, curves, hue/saturation (whole image) | – (see 6) | priorities.md |
+| 5 | Undo, redo, zoom, pan | all | – | priorities.md (*inferred*) |
+| 6 | Layers: stack, opacity, adjustment layers | stack, opacity, blend, order | **adjustment layers** (#580) | priorities.md; course outlines (adjustment layers in class one or two) |
+| 7 | Get pixels into and between layers | – | **Cut, Copy, Paste as a new layer, paste from another app, Duplicate Layer, Merge Down, Flatten** | *inferred*: the standard Edit commands every Mac editor has (`docs/design.md`, Commands), and the only way to combine two photos |
+
+### Tier 2: weekly
+
+| # | Job | v1 | v2 | Source |
+|---|---|---|---|---|
+| 8 | Heal and clone | both tools | – (core op tracked, section 8.4) | priorities.md |
+| 9 | Selections and masks | rectangle marquee | **ellipse, lasso, add, subtract, invert, feather; layer masks** (#421) | priorities.md; course outlines |
+| 10 | Brush and eraser | both, with options | **the brush cursor circle** (#588); **eyedropper** (*inferred*: a brush color needs a way to pick it from the image) | priorities.md (#26) |
+| 11 | History beyond one step | model only | **the History tab** (#644) | priorities.md (#25) |
+| 12 | Transform | quarter turns, straighten | **free transform of a layer, flip layer and canvas** | priorities.md |
+| 13 | Export at a size and in more formats | PNG, JPEG at full size | **a percent or longest side; TIFF and HEIC** | *inferred* from the photo editing survey (photos edited to share go out at a size a service takes) |
+
+### Tier 3: specialist or occasional (not v2)
+
+Blend modes beyond today's 16 and layer styles; text; paths and a pen;
+print setup; specialist controls; gradients and fills; magic wand and refine
+edge; skew, distort, perspective and warp; layer groups and clipping masks;
+camera raw (Library); 16-bit layers (section 9, question 3).
+
+### Priority labels for v2 work
+
+Following `docs/priorities.md`'s rules: PV-1, PV-2, PV-3 and PV-6 are `p1`;
+PV-0 is `p1` by dependency; PV-4, PV-5, PV-7, PV-8 and PV-9 are `p2`; PV-10
+takes each bug's own label (#255 `p1`, the rest `p3`, #289 `p2`). #580 and
+#544 move from `p2` to `p1` with this blueprint (section 9, question 2).
