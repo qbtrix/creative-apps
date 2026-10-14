@@ -1754,3 +1754,150 @@ named `photo-<state>-<scheme>.png`: `photo-unsaved`, `photo-keep-layers`
 (PV-5); `photo-adjustment-layer`, `photo-adjust-target` (PV-6);
 `photo-transform-box` (PV-7); `photo-export-options` (PV-8);
 `photo-eyedropper-options` (PV-9); `photo-adjustments-aligned` (PV-10).
+
+---
+
+## 7. Quality bar
+
+Every row says what is measured, by which test, where it runs, and the
+number it must meet. Nothing here is a judgment call at review time. The
+`QB-` rows are `docs/review-rubric.md` section 6; `PB-` rows are Photo's.
+
+### 7.1 Input-to-screen budgets for each interactive tool
+
+Photo measures latency at three depths, because the frame probe (QB-L1,
+SuiteUI's #330) isn't built yet:
+
+- **Model step** (Linux and macOS, `swift test`): wall time of the
+  workspace call one pointer event or key makes, on the `large` fixture
+  (4000 × 3000, three layers), median and p95 of 60 events. Gate in
+  `Tests/PhotoModelTests/PhotoBudgetTests.swift`, one `@Test` per row. The
+  debug gate is the device target × 10, as the rubric's model budgets are.
+- **Event to picture** (macOS, `Tests/AppSnapshotTests`): the model step
+  plus `PhotoRenderer.update` of the damaged tiles plus `CanvasTiles.apply`,
+  done the way the window does it, exactly as `PhotoBrushLatencyTests`
+  measures the brush today. Release p50 gate 8 ms (half a 60 Hz frame, the
+  other half left for SwiftUI and Core Animation, the brush test's rule);
+  debug reports only. Each feature adds its rows to a new file
+  `Photo<Feature>LatencyTests.swift` and its line to the contact sheet as
+  `<TOOL>-LATENCY`.
+- **Frames late** (macOS journeys, QB-L1, QB-L2): report-only through the
+  hitch metric (`XCTHitchMetric`, as `testBrushStrokeHitchesOnALargePhoto`
+  does) until #330 lands; then the perf journeys PJ-P1 and PJ-P2 read
+  `suite.perf` and the gate is set from CI (the rubric's "How gates are
+  set": ten green runs, p95 × 1.5, never tighter than 2 frames).
+
+| id | Interaction | Model step (device / debug gate) | Event to picture (release p50) | Frames late | Feature |
+|---|---|---|---|---|---|
+| PB-1 | Brush, eraser drag event | ≤ 0.3 ms / ≤ 3 ms (today's `dragBudget`) | ≤ 8 ms (exists) | QB-L1, PJ-P1 | existing |
+| PB-2 | Clone, heal drag event (64 px dab) | ≤ 1 ms / ≤ 10 ms | ≤ 8 ms | QB-L1, PJ-P1 | existing (new rows) |
+| PB-3 | Brush drag inside an ellipse selection (coverage weighting) | ≤ 0.5 ms / ≤ 5 ms | ≤ 8 ms | QB-L1 | PV-5 |
+| PB-4 | Paint on a layer mask | ≤ 0.3 ms / ≤ 3 ms | ≤ 8 ms | QB-L1 | PV-5 |
+| PB-5 | Marquee rectangle and ellipse drag (outline only; the mask is built on mouse-up) | ≤ 0.1 ms / ≤ 1 ms | ≤ 4 ms (overlay only, no tiles) | QB-L1, PJ-P1 | PV-5 |
+| PB-6 | Lasso drag event (append a point) | ≤ 0.05 ms / ≤ 0.5 ms | ≤ 4 ms | QB-L1 | PV-5 |
+| PB-7 | Selection mouse-up: build the mask (ellipse, or a 1,000-point lasso) on 12 MP | ≤ 60 ms / ≤ 600 ms | – | QB-F2 (outline drawn before mouse-up) | PV-5 |
+| PB-8 | Crop drag and a typed crop field | ≤ 0.05 ms / ≤ 0.5 ms | ≤ 4 ms | QB-L1 | PV-3 |
+| PB-9 | Move tool drag | ≤ 0.1 ms / ≤ 1 ms | ≤ 8 ms | QB-L1 | existing (new row) |
+| PB-10 | Free Transform handle drag (box only; pixels are transformed on Return) | ≤ 0.05 ms / ≤ 0.5 ms | ≤ 8 ms (preview: the layer's picture scaled and turned on the GPU, like Straighten's) | QB-L1, PJ-P1 | PV-7 |
+| PB-11 | Free Transform commit on a 12 MP layer, off the main actor | ≤ 1.5 s / ≤ 15 s | "Transforming…" within 100 ms | QB-L9 | PV-7 |
+| PB-12 | Flip layer or canvas, 12 MP | ≤ 60 ms / ≤ 600 ms | – | – | PV-7 |
+| PB-13 | Adjustment slider drag event with an adjustment layer in a 3-layer stack (one 256 px tile) | ≤ 4 ms / ≤ 40 ms | ≤ 8 ms per damaged tile batch | QB-L2, PJ-P2 | PV-6 |
+| PB-14 | Eyedropper click (5 × 5 sample) | ≤ 1 ms / ≤ 10 ms | ≤ 4 ms (color well only) | – | PV-9 |
+| PB-15 | Copy of a 12 MP layer; Paste as a new layer | ≤ 120 ms / ≤ 1.2 s each | the new layer drawn in ≤ 1 frame after the model step | – | PV-2 |
+| PB-16 | Merge Down of two 12 MP layers; Flatten of three | ≤ 400 ms / ≤ 4 s | "Merging…" within 100 ms | QB-L9 | PV-2 |
+| PB-17 | History jump of 10 steps | ≤ 50 ms / ≤ 500 ms | ≤ 1 frame for the damaged tiles | – | PV-4 |
+| PB-18 | Save a 3-layer 12 MP document (encode through a codec stub on Linux; ImageIO on macOS) | ≤ 2 s / ≤ 20 s | "Saving…" within 100 ms; the window stays responsive | QB-L9, QB-L12 | PV-1 |
+| PB-19 | Open the same document | ≤ 2 s / ≤ 20 s | "Opening…" within 100 ms | QB-L9, QB-L12, PJ-P3 | PV-1 |
+| PB-20 | Autosave of the same document, off the main actor | ≤ 2 s / ≤ 20 s; the main actor blocked ≤ 1 frame (the snapshot copy only) | – | QB-L12 | PV-1 |
+| PB-21 | Export 12 MP at 50 % as JPEG | ≤ 1.5 s / ≤ 15 s | "Exporting…" within 100 ms | QB-L8, QB-L9 | PV-8 |
+| PB-22 | Pan and zoom (Space-drag, pinch) | – (view only) | ≤ 4 ms (no tiles re-rendered) | QB-L1, PJ-P1 | existing (new row) |
+
+Perf journeys (report-only until #330; owner in brackets):
+
+| # | Test | Steps | Measures |
+|---|---|---|---|
+| PJ-P1 | `testCanvasDragLatency` (`+Perf`, PV-0) | on `large`: velocity-controlled drags across 600 pt at 300 pt/s for brush, ellipse marquee, crop, transform handle, Space-pan | at least 60 samples per series; frames late p95 (QB-L1) |
+| PJ-P2 | `testSliderScrubLatency` (`+Perf`, PV-0) | Exposure bar drag on `large`, then the same on an adjustment layer once PV-6 lands | at least 60 samples; QB-L2 |
+| PJ-P3 | `testOpenLargeDocument` (`+Perf`, PV-1) | save `large` as a document, reopen it | the "Opening…" mark within QB-L9; no main-thread stall over QB-L12 |
+
+### 7.2 App-audit checks that apply
+
+All six checks in `docs/blueprints/app-audit.md` run on every Photo shot:
+`disabled-dim`, `overlap`, `contrast`, `identifier`, `offscreen`, `unnamed`.
+Photo's baseline today is `identifier: 23`, everything else 0. The v2 rule,
+checked on the contact sheet of every feature's CI run (`docs/factory/lead.md`
+stage 4, "Audit"):
+
+- No v2 feature raises any Photo count. Every new control carries a
+  `photo.<area>.<name>` identifier, a label, and a disabled look from the
+  system or SuiteUI, so `identifier`, `unnamed` and `disabled-dim` stay where
+  they are; the new overlay marks are `accessibilityHidden` and never
+  controls.
+- PV-10 lowers `identifier` from 23 to the count left in SuiteUI's own
+  components (Photo's views all get identifiers); CI's `Audit lower` job
+  writes the new number.
+- The new sheets and dialogs (Keep layers?, Restore, export options) are
+  audited as their own layers: `offscreen` at the 1024 × 768 runner proves
+  they fit.
+
+### 7.3 Fidelity tests (output equals a reference)
+
+Linux unless marked macOS. "Bit for bit" compares `PixelBuffer` storage.
+
+| id | Check | Test | Feature |
+|---|---|---|---|
+| PF-1 | Save then open gives back every layer's 8-bit bytes, masks, kinds, blend, opacity, offsets, visibility and the global adjustments exactly | `PhotoDocumentRoundTripTests` (with an in-memory lossless codec on Linux; ImageIO on macOS in `PhotoPackageIOTests`) | PV-1 |
+| PF-2 | A document's composite after reopening equals the composite before saving within 1/255 per channel (the 8-bit storage) | `PhotoDocumentRoundTripTests.compositeSurvives` | PV-1 |
+| PF-3 | Copy then Paste in place: the new layer's pixels equal the source's inside the selection bit for bit | `PhotoClipboardTests` | PV-2 |
+| PF-4 | Merge Down and Flatten equal `composite()` of the same layers bit for bit (they are the same pixels Export writes) | `PhotoLayerOpsTests` | PV-2 |
+| PF-5 | A typed crop then Apply equals CoreRaster `cropped` of each layer at that rect | `PhotoCropSizeTests` | PV-3 |
+| PF-6 | A rectangle selection's mask is exactly 0 or 1 and equals today's `PixelRect` behavior for Delete and Fill | `PhotoSelectionMaskTests` | PV-5 |
+| PF-7 | An all-1 mask composites bit for bit like no mask; Delete Mask restores the exact pixels; Apply Mask equals pixels × coverage | `PhotoMaskTests` | PV-5 |
+| PF-8 | An adjustment layer at opacity 1, normal, no mask, over the whole stack equals the same settings as whole-image adjustments, bit for bit; at opacity 0 it equals no layer | `PhotoAdjustmentLayerTests` | PV-6 |
+| PF-9 | Free Transform at identity changes no pixel; flip twice is the input bit for bit; flip horizontal equals a reference mirror built pixel by pixel; scale 2 then 0.5 is within 2/255 of the input away from edges | `PhotoTransformTests` | PV-7 |
+| PF-10 | Export at 50 % equals CoreRaster `resized(lanczos3)` of the composite, encoded; at 100 % equals today's export bytes | `PhotoExportOptionsTests` | PV-8 |
+| PF-11 | The eyedropper's 3 × 3 sample equals the mean of those nine composited pixels, encoded | `PhotoEyedropperTests` | PV-9 |
+| PF-12 | The live canvas's damaged tiles equal the full-frame reference with adjustment layers and masks in the stack (extends today's tile tests) | `PhotoTileUpdateTests` | PV-5, PV-6 |
+| PF-13 | Goldens of each new overlay and panel state in Dark and Dark + Increase Contrast, tolerance 2/255 and 0.5 % (QB-V2, QB-V5) | macOS, `GoldenImage` once #331 and #332 land; PNGs for eyes until then | every UI feature |
+
+### 7.4 Layout spec (alignment at several window widths)
+
+Measured by PJ-17 `testLayoutAtWidths` (PV-10) from the accessibility frames
+of identified elements, at window widths 1024 (the runner's display and
+`SuiteSize.windowMinimum`'s width bound), 1280, 1440 and 1920 points, each
+launched with a new `-PhotoWindowWidth <pt>` argument (PV-0) on `layered`
+with the Adjust tab open. Tolerance 1 pt.
+
+1. The panel is exactly `SuiteSize.editorPanelWidth` (280) wide and its
+   right edge is the window's; the rail's width is constant across widths.
+2. The canvas fills the rest: rail width + canvas width + panel width =
+   window width.
+3. Every bar slider in the Adjust tab (`photo.adjust.*`, `photo.tool.*`)
+   has the same minX and the same width (#79), and every value field the
+   same maxX.
+4. Section headers share one minX; labels inside bars share one minX.
+5. The crop options' four `ScrubField`s line up as a 2 × 2 grid: equal
+   widths, X over W and Y over H share minX.
+6. No identified element lies outside the window (the audit's `offscreen`)
+   and no two controls overlap (`overlap`), at every width.
+7. The top bar's items keep one baseline (equal midY) and none is clipped:
+   below 1280 the lowest-priority labels collapse to icons, never
+   off-screen.
+
+Model half (Linux): `PhotoLayoutTests` (PV-10) asserts the inspector's text
+constants fit: the no-image message keeps "File > New Image" on one line
+(#252), the three empty-state names agree (#253).
+
+### 7.5 Feel (rubric rows that every feature meets)
+
+- **QB-F1** No dead controls: `PhotoToolsTests` (reading `toolHelp`, PV-0)
+  and a model test per feature that each new menu item either changes the
+  workspace or returns a reason.
+- **QB-F2** Live feedback: selection outline, crop rect, transform box and
+  brush cursor draw while dragging; refusals show in the status line.
+- **QB-F3** One gesture, one named step; every journey asserts the Edit
+  menu's title after each edit (the names are in section 4).
+- **QB-F4** Keyboard parity: crop fields type; transform W %, H % and angle
+  type and arrow-step; Feather arrow-steps; every new tool has a one-key
+  shortcut (I); every new menu command has its shortcut (Command-J, -E,
+  Shift-Command-E for Flatten, Command-T, Shift-Command-I for Invert).
