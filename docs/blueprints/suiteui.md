@@ -395,6 +395,10 @@ no app change and no manifest change:
   last thing a host would have received, for example `value 45 · ends 1`.
   The label, not the value, because XCUITest reads many SwiftUI values as
   empty (#262).
+- Two more flags serve the gallery only: `-SuiteGalleryFakes` runs a page
+  on the section 5 Fakes instead of the live rules (for UI work before a
+  conformance lands), and `-SuiteGalleryWidth <points>` pins an inspector
+  page's panel width (SJ24).
 - Every control on a page carries a `suite.gallery.<page>.<name>`
   identifier. `ControlInventory` (probes) publishes every control's
   identifier, enabled state and reason as `suite.controls` under
@@ -452,6 +456,8 @@ Page names are the gallery's (section 6.2). "Log reads" means the label of
 | SJ17 | `testLayerListToggleRenameReorder` (`+Lists`) | `layers` | click Ball's eye; click Shadow's lock; double-click Ball's title, type `Hero`, Return; focus Shadow, press Return, type `Taken`, Return; press Escape; drag Shadow above Hero; click a child row's eye (#589) | log `toggle eye ball`; Shadow's row is dimmed (title in secondary text, its value includes "locked"); log `rename ball Hero`; `Taken` is refused with the page's message inline under the row and the draft stays; Escape restores "Shadow"; log `move shadow 0`; the child's eye is its own element and logs `toggle eye child` | empty: "No layers yet." text · error: refused rename · loading: none |
 | SJ18 | `testThumbnailGridSelectsByClickAndKeys` (`+Lists`) | `grid` | click item 3; ⇧-click item 6; ⌘-click item 4; press → | log selection `3,5,6`, then `3,4,5,6`… exactly as `GridSelection` gives; → moves the anchor one item | empty: no items shows the page's empty state · error: none · loading: an item without an image shows its caption on the placeholder fill |
 | SJ19 | `testTimelineScrubSelectAndDragKeys` (`+Timeline`) | `timeline`, `timeline-long` | drag the ruler to frame 30; click Ball's key at 12; press →; drag the selected key 5 frames right; press ⌫ on it; toggle the page's recording; open `timeline-long` (10,000 frames) and scroll to the end | log `scrub 30`; `select ball 12`, then `select ball 24` (#63); `move ball 24→29 ends 1`; `delete ball 29`; the playhead pill reads 30; the recording ring element exists while on; `timeline-long` draws ruler labels at the end (#219) | empty: no tracks shows "No layers yet." · error: a drag past the end clamps to the last frame · loading: none |
+| SJ24 | `testInspectorRowsAlignAtEveryWidth` (`+Inspector`) | `inspector` | launch with `-SuiteGalleryWidth` 200, 240, 280 and 360 in turn; shot each | every row's leading and trailing edges equal (±0.5 pt); every value's trailing edge equal; every label and value frame inside its row (QB-S19) | empty: none · error: none · loading: none |
+| SJ25 | `testEveryControlMeetsHitSize` (`SuiteJourneyTests.swift`) | each page | read `suite.controls` on each page; measure each listed control's frame | every control is at least 20 × 20 pt, and the ones the token table lists at their hit size (QB-S20) | empty: a page with no controls passes with a count of 0 · error: none · loading: none |
 
 ### 4.3 Tier-2 and tier-3 journeys
 
@@ -1340,11 +1346,14 @@ the code on dev follows it (`InspectorRows.swift`: 28 pt rows, 4 pt apart).
 
 ### 6.2 What SuiteUI adds to `docs/design.md`
 
-These are the additions each feature lands in `docs/design.md` with its own
-code (Component order table plus a paragraph under Anatomy of the controls).
-This blueprint does not edit the shared doc.
+These are the additions to `docs/design.md` (Component order table plus a
+paragraph under Anatomy of the controls). The feature in the last column
+builds to the row; until the shared doc carries it, the row here is the
+rule. `docs/design.md` is one file several features would edit, so a single
+feature, suite-record in wave 4 (section 8), lands every row at once, and
+no other SuiteUI feature edits it. This blueprint does not edit it.
 
-| Addition | Rule | Lands with |
+| Addition | Rule | Built by |
 |---|---|---|
 | Timeline slot | A 1 pt `hairline` divider with an 8 pt grab zone above the slot; the slot's own top row is the chip toolbar (`ChipRow`, 28 pt plus 4 pt above and below = the 36 pt collapsed height); minimum open height 120 pt; the canvas never drops under `SuiteSize.contentMinimum.height`; double-click the divider or press ⌥⌘T to collapse and restore; the pointer is the row-resize cursor over the grab zone | editor-chrome |
 | Save status | Already in Anatomy (Top bar); add the accessibility labels "Saved", "Unsaved changes", "Not saved" | editor-chrome |
@@ -1486,3 +1495,181 @@ count that rises in any app is that feature's finding, not the app's.
 | QB-F4 keyboard parity | every value the pointer changes changes from the keyboard too | SJ11, SJ12, SJ14–SJ17, SJ19 each do it once |
 | QB-F5 Reduce Motion, Increase Contrast | fades instant, the preview dot stops; outlines appear | QB-S9, goldens in the IC appearances |
 | QB-F6 geometry holds | sizes and radii match the tokens | `TokensTests.geometry`, goldens |
+
+---
+
+## 8. Coverage and waves
+
+### 8.1 Coverage matrix: every open `line:suiteui` issue
+
+41 open issues on 2026-10-14. "Feature" is the packet that closes it (8.3);
+"not v1" says why.
+
+| Issue | Tier | What | Feature | Note |
+|---|---|---|---|---|
+| #331 | p1 | Golden compare | suite-harness | root of the golden chain |
+| #332 | p1 | Snapshot host, scale 2, four appearances | suite-harness | after #331 in the same feature |
+| #333 | p1 | Journey files and helpers | suite-harness | its smoke file becomes `UITests/SuiteJourneyTests+Smoke.swift`, not a Flare file, so the SuiteUI line stays in its own files (the packet restates the acceptance) |
+| #330 | p3 | `FrameProbe` | suite-harness | p3 by its own tier, but every budget in section 7 needs it |
+| #283 | p2 | Secondary text on light cards | suite-harness | a `Tokens.swift` change; that file is harness-owned |
+| #339 | p2 | Outlined bar items, `.primary`, save status, empty-state primary | editor-chrome | p1 by dependency for Flare F1a/F1b |
+| #340 | p1 | `TransportCapsule` (pills already merged in #522) | editor-chrome | |
+| #341 | p3 | Capsule tabs, rail colors | editor-chrome | |
+| #342 | p1 | `EditorShell(timeline:)` | editor-chrome | |
+| #718 | – | Public `onEnd` on `ScrubField`, the color rows | inspector-controls | the fuller of the two |
+| #745 | – | Same ask as #718 | inspector-controls | duplicate: closed by the #718 PR (`Closes #718, closes #745`) |
+| #591 | – | Track-owned discrete step | inspector-controls | Photo's Gamma |
+| #88 | p3 | Log slider mapping | inspector-controls | largely met by `ScrubTrack` (#505); closes with #591's PR after its test shows the field reads the value |
+| #622 | – | Reset hit area ≥ 20 pt | inspector-controls | same header as #285; one PR |
+| #285 | p2 | Header button under Reset | inspector-controls | |
+| #262 | p3 | Empty accessibility values | inspector-controls | |
+| #343 | p1 | `CurveEditor` goldens and probe mark | inspector-controls | the editor exists (#257); this is its proof |
+| #146 | p1 | `LayerList`, dimmed rows | lists-and-layers | |
+| #108 | p2 | Keyboard rename | lists-and-layers | the double-click half was fixed by #167; the packet keeps only the keyboard and accessibility routes |
+| #73 | p2 | Row context menus | lists-and-layers | |
+| #577 | p3 | Refusable rename keeps the draft | lists-and-layers | |
+| #589 | – | Child row's toggles reachable | lists-and-layers | |
+| #111 | p3 | App-owned expansion | lists-and-layers | |
+| #284 | p2 | Sidebar header contrast | lists-and-layers | title fixed by #599; the packet adds the audit proof and closes it; Design's own `Section("Pages")` goes to `line:design` |
+| #249 | p3 | Nesting snapshot draws real rows | lists-and-layers | |
+| #308 | p3 | Rename guard: behavioural journey | lists-and-layers | one SJ17 step covers #308, #311, #312 |
+| #311 | p3 | Rename guard: optional-chained helper | lists-and-layers | closed by #308's journey |
+| #312 | p3 | Rename guard: outside label style | lists-and-layers | closed by #308's journey |
+| #273 | p1 | Selection handles and the vector marks | canvas-marks | adds `PathMarks`, `MotionPathMarks`, `GhostLayer` (0.4) |
+| #706 | – | Point mark | canvas-marks | one mark for both |
+| #737 | – | Source crosshair | canvas-marks | duplicate of #706's mark: closed by the same PR |
+| #530 | – | Grid mark | canvas-marks | |
+| #264 | p3 | Ruler corner unit | canvas-marks | |
+| #62 | p1 | Timeline restyle | timeline | absorbs #61 (closed) and #219 |
+| #63 | p1 | Key drag, keyboard keys (`needs-human`) | timeline | `needs-human` came from a run blocked on #62; the packet asks the captain to lift it |
+| #219 | p3 | Blank long timelines | timeline | closed by #62's PR |
+| #344 | p3 | `NodeGraph` | node-graph | Flare's Interactions editor, last in Flare's order |
+| #345 | p3 | C4 description names the new components | suite-record | the one SuiteUI edit of `docs/c4/model.json` |
+| #7 | p3 | Command palette | not v1 | no tier-1 or tier-2 step shows it (section 3.3) |
+| #274 | p3 | Shared open and save panel plumbing | not v1 | each app keeps its own until a second app needs the same shape; refactor issues are p3 |
+| #272 | p3 | Design lint misses computed font sizes | not v1 for SuiteUI | the lint lives in `scripts/` (protected); it is the captain's or a scripts issue's, not this line's |
+
+Every row of 0.4 (no issue yet) lands with the feature named there.
+
+### 8.2 Waves
+
+A wave starts when everything it waits on has merged. No two features in a
+wave own the same file (8.3 lists them; a file may pass from one feature to
+another between waves). SuiteUI knows no engine, so **no SuiteUI feature
+waits on creative-core**: every "core" cell is "none".
+
+| Wave | Feature | Covers | Waits on | creative-core | App features it unblocks |
+|---|---|---|---|---|---|
+| 1 | suite-harness | #331, #332, #333, #330, #283; gallery, control inventory, contracts, token sheet, `Journey(name:)`, the `suiteui` audit key | nothing | none | every app's goldens; every app's second journey file (Flare's `FlareJourneyTests+<Area>.swift` plan needs #333); Flare's perf journeys (QH-5, QH-6) |
+| 2 | editor-chrome | #339, #340, #341, #342 | wave 1 (#332 for goldens; the gallery) | none | Flare F1a #346 and F1b #347 (the window on `EditorShell`), Flare's transport and playback UI; Design and Photo's primary Export and save status |
+| 2 | inspector-controls | #718, #745, #591, #88, #622, #285, #262, #343 | wave 1 | none | Design's undo runs (#536), Photo's Gamma (#584), Flare's inspector (F6a #348 and after), Flare and Halo easing |
+| 2 | lists-and-layers | #146, #108, #73, #577, #589, #111, #284, #249, #308, #311, #312 | wave 1 | none | Flare's layers and scenes panel (F11a), Halo's rename refusal (#139) and composition menu (#35), Design's Layers (#50, #549) |
+| 2 | canvas-marks | #273, #706, #737, #530, #264 | wave 1 | none | Flare's stage (F3a #12 and its select and direct-select tasks), Design's handles, Photo's Clone and Heal (#647, #422) and Straighten (#419) |
+| 3 | timeline | #62, #219, #63 | wave 2's editor-chrome (#62 depends on #342) | none | Flare's timeline (F7a, F8 #377), Halo's timeline (#36) |
+| 3 | node-graph | #344 | wave 1 | none | Flare's Interactions editor (F13a and after) |
+| 4 | suite-record | #345; section 6.2's rows into `docs/design.md` | waves 1–3 | none | nothing waits on it; it brings the shared docs up to date |
+
+Why this order:
+
+- **The harness goes alone, first.** Every later feature proves its work
+  with goldens (#331, #332), runs journeys from its own file (#333), shows
+  its components on a gallery page and registers its controls. The gallery's
+  pages are created as empty stubs here (one file per later feature, like
+  Flare's F1 area stubs), and every token the later waves need is added here,
+  so no later feature edits `Tokens.swift`, `SuiteGallery.swift` or
+  `project.yml`.
+- **Wave 2 is wide.** Four features with disjoint files run side by side;
+  each is the SuiteUI half of a p1 app feature that is otherwise ready.
+  Editor chrome is first among equals: Flare's whole UI track starts with
+  F1a and F1b on `EditorShell`.
+- **Timeline waits on the slot.** #62's own `Depends on:` line names #342.
+  If the captain drops that line (Q4: the strip's restyle doesn't need the
+  slot, only its gallery page does), timeline moves to wave 2 with no file
+  conflict.
+- **Node graph waits only on the harness** but is tier 3 and last in
+  Flare's order, so it shares wave 3 rather than crowding wave 2.
+- **suite-record is last** because it describes what the others built.
+
+### 8.3 Owned files per feature
+
+Test files are listed by name; `Golden/<area>/` is each feature's own
+baseline folder. A file under "harness, then" passes to the named feature
+at the next wave.
+
+**suite-harness (wave 1)**
+- `Sources/SuiteUI/Contracts/` (every file of section 5), `Sources/SuiteUI/SuiteGallery.swift`, `Sources/SuiteUI/Gallery/GalleryIndex.swift`, and the stubs `Gallery/GalleryChrome.swift`, `GalleryInspector.swift`, `GalleryLists.swift`, `GalleryCanvas.swift`, `GalleryTimeline.swift`, `GalleryGraph.swift` (harness, then their features)
+- `Sources/SuiteUI/FrameProbe.swift`, `Sources/SuiteUI/ControlInventory.swift`, `Sources/SuiteUI/Tokens.swift`
+- `Sources/SuiteUI/SuiteWindow.swift` (the `-SuiteGallery` hook; harness, then lists-and-layers)
+- `Sources/SuiteUI/ToolbarGroup.swift`, `EditorTopBar.swift`, `InspectorAction.swift`, `EmptyStateView.swift` (only to register `ToolbarAction`-built controls with the inventory; harness, then editor-chrome or inspector-controls)
+- `project.yml`, `UITests/Journey.swift`, `UITests/Journey+Input.swift`, `UITests/SuiteJourneyTests.swift`, `UITests/SuiteJourneyTests+Smoke.swift`, `UITests/audit-baseline.json` (the `suiteui` key at 0 only)
+- `Tests/AppSnapshotTests/GoldenImage.swift`, `GoldenImageTests.swift`, `SnapshotHost.swift`, `SnapshotHostTests.swift`, `Golden/README.md`
+- `Tests/SuiteUITests/TokensTests.swift`, `FrameProbeTests.swift`, `ControlInventoryTests.swift`, `EditRunTests.swift`, `ContractFakesTests.swift`
+
+**editor-chrome (wave 2)**
+- `Sources/SuiteUI/EditorShell.swift`, `EditorTopBar.swift`, `SegmentedTabs.swift`, `ToolbarGroup.swift`, `ShellLayout.swift`, `TransportCapsule.swift`, `ViewerStatusBar.swift`, `EmptyStateView.swift`, `SurfaceCard.swift`, `GlassPanel.swift`, `Gallery/GalleryChrome.swift`
+- `UITests/SuiteJourneyTests+Chrome.swift`
+- `Tests/SuiteUITests/EditorShellTests.swift`, `ShellLayoutTests.swift`, `TransportTests.swift`, `ToolPickingTests.swift`, `StatusPillTests.swift`
+- `Tests/AppSnapshotTests/SuiteEditorShellSnapshots.swift`, `SuiteEditorBarDimmingTests.swift`, `SuiteStatusSnapshots.swift`, `SuiteWindowLaunchSnapshots.swift`, `SuiteWindowMinimumSnapshots.swift`, `SuiteTopBarSnapshots.swift`, `SuiteTabsSnapshots.swift`, `SuiteTransportSnapshots.swift`, `Golden/chrome/`
+
+**inspector-controls (wave 2)**
+- `Sources/SuiteUI/InspectorRows.swift`, `InspectorHeader.swift`, `InspectorAction.swift`, `ColorWell.swift`, `KeyframeButton.swift`, `ScrubField.swift`, `ScrubValue.swift`, `NumericInput.swift`, `StudioScrubRow.swift`, `PresetGrid.swift`, `ChipRow.swift`, `ChoiceChips.swift`, `CurveEditor.swift`, `ToneCurveEditor.swift`, `Gallery/GalleryInspector.swift`
+- `UITests/SuiteJourneyTests+Inspector.swift`
+- `Tests/SuiteUITests/ScrubValueTests.swift`, `ScrubReferenceTests.swift`, `NumericInputTests.swift`, `SliderBarTests.swift`, `KeyframeButtonTests.swift`, `PresetGridTests.swift`, `CurveEditorTests.swift`, `ToneCurveEditorTests.swift`, `HexColorTests.swift`
+- `Tests/AppSnapshotTests/SuiteInspectorSnapshots.swift`, `SuiteProInspectorSnapshots.swift`, `SuiteSliderSnapshots.swift`, `SuiteHeaderSnapshots.swift`, `SuiteKeyframeSnapshots.swift`, `SuitePresetsSnapshots.swift`, `SuiteCurveEditorSnapshots.swift`, `SuiteToneCurveSnapshots.swift`, `Golden/inspector/`
+
+**lists-and-layers (wave 2)**
+- `Sources/SuiteUI/SidebarRow.swift`, `SidebarSection.swift`, `SuiteWindow.swift`, `LayerList.swift`, `ListEditing.swift`, `ThumbnailGrid.swift`, `GridSelection.swift`, `Gallery/GalleryLists.swift`
+- `UITests/SuiteJourneyTests+Lists.swift`
+- `Tests/SuiteUITests/SidebarTests.swift`, `SidebarEdgeTests.swift`, `SidebarNestingTests.swift`, `SidebarRenameGestureTests.swift`, `LayerListTests.swift`, `ListEditingTests.swift`, `GridSelectionTests.swift`, `GridSelectionEdgeTests.swift`, `GridSelectionExtendTests.swift`, `GridSelectionOverflowTests.swift`, `GridSelectionToggleTests.swift`, `GridSelectionToggleFuzzTests.swift`, `GridSelectionReferenceTests.swift`
+- `Tests/AppSnapshotTests/SuiteSidebarSnapshots.swift`, `SuiteSidebarNestingSnapshots.swift`, `SuiteSidebarToggleColumnSnapshots.swift`, `SuiteGridSnapshots.swift`, `SuiteGridSmallSnapshots.swift`, `SuiteLayerListSnapshots.swift`, `Golden/lists/`
+
+**canvas-marks (wave 2)**
+- `Sources/SuiteUI/CanvasMarks.swift`, `CanvasMarks+Vector.swift`, `CanvasMarks+Points.swift`, `HandleGeometry.swift`, `CanvasViewport.swift`, `CanvasSurface.swift`, `Ruler.swift`, `ZoomMath.swift`, `Gallery/GalleryCanvas.swift`
+- `UITests/SuiteJourneyTests+Canvas.swift`
+- `Tests/SuiteUITests/CanvasPanTests.swift`, `ZoomMathTests.swift`, `RulerMarksTests.swift`, `RulerLabelPlacementTests.swift`, `RulerLabelSweepTests.swift`, `RulerLabelWidthTests.swift`, `CanvasMarksTests.swift`, `HandleGeometryTests.swift`
+- `Tests/AppSnapshotTests/SuiteMarksSnapshots.swift`, `Golden/canvas/`
+
+**timeline (wave 3)**
+- `Sources/SuiteUI/TimelineStrip.swift`, `FrameMapping.swift`, `TimelineKeys.swift`, `Gallery/GalleryTimeline.swift`
+- `UITests/SuiteJourneyTests+Timeline.swift`
+- `Tests/SuiteUITests/FrameMappingTests.swift`, `FrameMappingEdgeTests.swift`, `FrameMappingOverflowTests.swift`, `FrameMappingSweepTests.swift`, `TimelineKeysTests.swift`, `TimelineKeyDragTests.swift`
+- `Tests/AppSnapshotTests/SuiteTimelineSnapshots.swift`, `Golden/timeline/`
+
+**node-graph (wave 3)**
+- `Sources/SuiteUI/NodeGraph.swift`, `NodeGraphGeometry.swift`, `Gallery/GalleryGraph.swift`
+- `UITests/SuiteJourneyTests+Graph.swift`
+- `Tests/SuiteUITests/NodeGraphTests.swift`, `Tests/AppSnapshotTests/SuiteGraphSnapshots.swift`, `Golden/graph/`
+
+**suite-record (wave 4)**
+- `docs/c4/model.json` (the `suiteui` container and `suiteui-sources` descriptions only), `docs/design.md` (section 6.2's rows only)
+
+Checks on this list: within wave 2 the four features' lists share no path
+(`ToolbarGroup.swift`, `EditorTopBar.swift`, `InspectorAction.swift`,
+`EmptyStateView.swift` and `SuiteWindow.swift` were the harness's in wave
+1 and belong to exactly one wave-2 feature each); within wave 3 timeline
+and node-graph share none. `Sources/SuiteUI/SnapshotRendering`-style shared
+test helpers do not exist today; a feature that needs a shared test helper
+adds it in its own file, never in another feature's.
+
+### 8.4 What every packet will carry
+
+Per `docs/factory/lead.md`: the feature issue (`feature-lead`,
+`line:suiteui`, one `Depends on:` line), its tasks with ids, one behaviour
+each, files, the test, the gallery page and journey step it adds, the
+goldens it adds, and a size under 400 lines and 15 files. Packets are
+written after the captain approves this blueprint, not before.
+
+---
+
+## 9. Open questions for the captain
+
+| # | Question | Recommendation | What changes if not |
+|---|---|---|---|
+| Q1 | Add a Linux target for SuiteUI's pure rules and contracts (a `Package.swift` change, protected)? | Yes: a `SuiteUILogic` target with `Contracts/` and the rule files (`ScrubValue`, `NumericInput`, `FrameMapping`, `GridSelection`, `ZoomMath`, `RulerTicks`, and the planned `ShellLayout`, `HandleGeometry`, `ListEditing`, `TimelineKeys`, `NodeGraphGeometry`, `FrameProbe` math), which SuiteUI re-exports. Then `scripts/ci` tests them on every PR, and app Models may reuse them | Contracts stay in `Sources/SuiteUI/Contracts/`, compiled only by the macOS job; this blueprint's Linux run in `docs/blueprints/suiteui/contracts/` is the only Linux proof, rerun by hand |
+| Q2 | Gallery behind `-SuiteGallery` in `SuiteWindow`, or a separate gallery app target? | The flag: no protected file changes, and it runs inside a real app bundle | A `SuiteGalleryApp` target needs `Package.swift` and `scripts/bundle-apps` (both protected) |
+| Q3 | A `suiteui` key in `UITests/audit-baseline.json`, every check at 0? | Yes | Gallery shots would count under `library` and raise its baseline |
+| Q4 | Drop #342 from #62's `Depends on:` line so the timeline restyle runs in wave 2? | Yes, if Flare's timeline UI is wanted sooner; the gallery page can host the strip in a panel until the slot lands | Timeline stays in wave 3 as planned |
+| Q5 | Lift `needs-human` on #63? | Yes: the label came from a run blocked on #62, not from a design question | #63 stays out of the timeline packet |
+| Q6 | Close #745 as a duplicate of #718 and #737 of #706 now? | Yes | The packets close them with the same PRs anyway |
+| Q7 | Who owns `docs/design.md` edits for SuiteUI: one wave-4 feature (this plan) or each feature as it lands? | One feature: four wave-2 features would otherwise edit one file | Waves 2 and 3 serialize on `docs/design.md` |
+| Q8 | `design.md`'s Visual language tables (34 pt bars, 6 pt gaps, 16/8 section spacing) disagree with its Studio rows section and the code (28, 4, 12/4). Should suite-record rewrite the tables to the Studio values? | Yes, so the doc has one number per thing | Readers keep needing the "this section wins" sentence |
