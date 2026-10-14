@@ -76,8 +76,11 @@ extension DesignWorkspace {
     public var isDirty: Bool { get }
     /// "Saved" after a save, "Edited" with unsaved changes, nil with no file open.
     public var saveStateText: String? { get }
-    /// Called by the window after a successful write; marks the current step as saved.
-    public mutating func markSaved(to url: URL)
+    /// `DesignFile.swift`'s existing `didSave(to:)` also marks the current step as saved
+    /// and ends the edit run, so the next nudge starts a new step.
+    public mutating func didSave(to url: URL)
+    /// Where Edit > Undo and Redo go: the focused text field's own undo, or the document's.
+    public func undoTarget(textFieldFocused: Bool) -> DesignUndoTarget   // .field / .document
     /// The close prompt's message, or nil when the window may close at once.
     public var closePrompt: String? { get }   // "Do you want to save the changes you made to “Untitled”?"
 }
@@ -88,17 +91,21 @@ the codec moves there from `DesignFile.swift` (same bytes, sorted keys,
 same `DesignFileError` reasons); `DesignFile.swift` keeps the workspace's
 `open` and `save` entry points and calls `services.filing`. A new history
 entry, a swap (New File, Open) or an undo or redo past the saved step all
-update `isDirty` from one saved marker: the id of the history step that
-was current when the file was written.
+update `isDirty` from one saved marker: the serial of the history step that
+was current when the file was written. Serials only ever increase (a
+counter in `DesignHistory`), so the 100-step cap and an undo followed by a
+new edit can never make a dirty document read clean.
 
 ## Pseudocode
 
 ```
-saved marker: savedStep: Int?   # the undo stack's count at the last save or open; nil = never
-isDirty = isOpen && (history.undo.count != savedStep || a coalescing run merged into the saved step)
-  # a run that merges into the top step after a save bumps a run counter, so it counts as an edit
-open / newFile: savedStep = history.undo.count     (newFile: unsaved until saved → nil; dirty only after an edit)
-markSaved(url): documentURL = url; savedStep = history.undo.count; runSinceSave = false
+DesignHistory: nextSerial: Int (only increases); Step.serial: Int; savedSerial: Int? = 0
+current serial = undo.last?.serial ?? 0          # a fresh history (load, Open) is serial 0, clean
+record(step): step.serial = next(); a merge into the top step re-stamps it with next()
+  a step with swapsDocument (New File) also sets savedSerial = its serial: an untouched new file is clean
+isDirty = isOpen && currentSerial != savedSerial
+didSave(url) (DesignFile.swift, existing): documentURL = url; savedSerial = currentSerial; endEditRun()
+# no edit to DesignWorkspace.swift: load() already resets `history`, newFile records through record()
 
 closePrompt: isDirty ? "Do you want to save the changes you made to “\(title)”?" : nil
 window close (DesignWindow):
@@ -123,14 +130,15 @@ carries `feature-done`. Paths drop `Sources/DesignModel/` and
 | id | issue | what | owned files | depends on | size |
 |---|---|---|---|---|---|
 | FH-1 | – | The codec moves into `LiveFiling`; `DesignFile.swift` calls `services.filing`; same bytes | `Live/LiveFiling.swift`, `DesignFile.swift`; tests `DesignFilingTests.swift` | – | ~260, 3 |
-| FH-2 | #270 (Model part), #275 (Model part) | The saved marker, `isDirty`, `saveStateText`, `markSaved`, `closePrompt` | `DesignHistory.swift`; tests `DesignDirtyTests.swift` | – | ~200, 2 |
-| FH-3 | #275 (view part) | Edit > Undo and Redo act on a focused text field (`DesignCommands.swift`); the window's close prompt (`DesignWindow.swift`); `markSaved` after each successful write | `DesignCommands.swift`, `DesignWindow.swift`; snapshots `DesignFileMenuSnapshots.swift` | FH-1, FH-2 | ~280, 3 |
-| FH-4 | #270 (view part); #288 (part) | The save state and unsaved dot as plain text in the status line (`design.status.save`) until EC-4; the File menu ids | `DesignEditor.swift`; snapshots `DesignFileSnapshots.swift` | FH-2 | ~140, 2 |
+| FH-2 | #270 (Model part), #275 (Model part) | Step serials and the saved marker, `isDirty`, `saveStateText`, `didSave` marking the save, `closePrompt`, `undoTarget` | `DesignHistory.swift`, `DesignFile.swift` (`didSave` only); tests `DesignDirtyTests.swift`, `DesignUndoTargetTests.swift` | FH-1 | ~240, 4 |
+| FH-3 | #275 (view part) | Edit > Undo and Redo act on a focused text field (`DesignCommands.swift`); the window's close prompt (`DesignWindow.swift`), routed through the Model's `undoTarget` | `DesignCommands.swift`, `DesignWindow.swift`; snapshots `DesignFileMenuSnapshots.swift` | FH-1, FH-2 | ~280, 3 |
+| FH-4 | #270 (view part); #288 (part) | The save state and unsaved dot as plain text in the status line (`design.status.save`) until EC-4; ids on the top bar's New, Open and Save items (`DesignEditor.swift`; the menu bar is FH-3's) | `DesignEditor.swift`; snapshots `DesignFileSnapshots.swift` | FH-2 | ~140, 2 |
 | FH-5 | #275, #270 (close both) | J13, J14 | `UITests/DesignJourneyTests+Files.swift` | FH-3, FH-4 | ~250, 1 |
 | FH-6 | gap "open bad files journey" (closes) | J16 | `UITests/DesignJourneyTests+Files.swift` | FH-5 | ~120, 1 |
 | FH-7 | – | P4 | `UITests/DesignJourneyTests+PerfFiles.swift` | FH-6 | ~100, 1; `feature-done` |
 
-FH-1 and FH-2 run side by side; FH-3 and FH-4 touch disjoint files.
+FH-2 follows FH-1 (both touch `DesignFile.swift`); FH-3 and FH-4 touch
+disjoint files and run side by side.
 `DesignJourneyTests+Files.swift` passes FH-5 → FH-6. QD-S11's model half
 is design-seams' `DesignBudgetTests.fileRoundTrip`, which FH-1 keeps
 passing through `LiveFiling`.
@@ -140,8 +148,8 @@ passing through `LiveFiling`.
 | id | test | fails when |
 |---|---|---|
 | FH-1 | `DesignFilingTests`: for every fixture, `LiveFiling.encode` equals today's `DesignFile` bytes (a string literal of `empty`'s file pinned in the test) and `decode(encode(f)) == f` (QD-V1); the four bad files give `.unreadable`, `.unsupportedVersion(99)`, `.noPages`, `.duplicateID("node-2")`; a refused open keeps the workspace's pages; `DesignFileTests` and `DesignLoadTests` still pass unchanged | a byte changes, a reason changes, or a refused open replaces the document |
-| FH-2 | `DesignDirtyTests`: a new file is clean; one edit is dirty; `markSaved` is clean; undo past the save is dirty, redo back is clean; a coalescing run (five nudges) after a save is dirty, and undo once is clean; Open is clean; a refused edit leaves it clean; `closePrompt` is nil when clean and names "Untitled" for a fixture and the file's name for a saved file; `saveStateText` reads "Saved", "Edited", nil | a run after a save reads clean, undoing to the save reads dirty, or the prompt names the wrong file |
-| FH-3 | `DesignFileMenuSnapshots` adds `design-file-menu-close` (Close ⌘W present); the menu's Undo routing is a pure function in `DesignCommands.swift` (`undoTarget(fieldFocused:) -> .field / .document`) tested by a hosted-view test in the same snapshot file; J13 and J14 (FH-5) prove the behavior | Undo in a field reaches the document, or a clean window prompts |
+| FH-2 | `DesignDirtyTests`: a new file is clean; one edit is dirty; `didSave` is clean; undo past the save is dirty, redo back is clean; undo past the save then a new edit is dirty; 101 edits after a save (the cap is 100) is dirty; a coalescing run (five nudges) after a save is dirty, and undo once is clean (`didSave` ended the run); `DesignUndoTargetTests`: a focused field gives `.field`, else `.document`; Open is clean; a refused edit leaves it clean; `closePrompt` is nil when clean and names "Untitled" for a fixture and the file's name for a saved file; `saveStateText` reads "Saved", "Edited", nil | a run after a save reads clean, undoing to the save reads dirty, or the prompt names the wrong file |
+| FH-3 | `DesignFileMenuSnapshots` adds `design-file-menu-close` (Close ⌘W present); the menu's Undo routing reads the Model's `undoTarget` (tested on Linux in FH-2); J13 and J14 (FH-5) prove the behavior | Undo in a field reaches the document, or a clean window prompts |
 | FH-4 | `DesignFileSnapshots` adds `design-file-edited` (the dot and "Edited") and `design-file-saved` ("Saved") | the dot shows on a clean file or hides on a dirty one |
 | FH-5 | J13 and J14 pass on the macOS run; J13 fails if ⌘Z in the X field changes the document's undo name; J14 fails if Cancel closes the window or a clean window prompts | a step's state differs |
 | FH-6 | J16 passes; it fails if any alert's words differ or the window holds a document after a refused open | a reason differs |
