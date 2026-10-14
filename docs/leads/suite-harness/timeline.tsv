@@ -22,3 +22,6 @@ utc	stage	event	ref	note
 2026-10-14T22:49Z	3	pr-opened	#869	SH-10 snapshot host
 2026-10-14T22:49Z	3	pr-merged	#869	SH-10 snapshot host
 2026-10-14T22:49Z	3	heartbeat	wave3	SH-5 building on 6c236ef (wf_2f6279db-069)
+2026-10-14T22:56Z	3	pr-merged	#871	SH-5 control inventory
+2026-10-14T22:56Z	3	stage-end	wave3	base now 03e7408
+2026-10-14T22:56Z	3	stage-start	wave4	SH-6 gallery, SH-5b snapshot (wf_057ab058-258)

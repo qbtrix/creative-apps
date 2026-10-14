@@ -2,9 +2,9 @@
 
 Issue: #778 · Packet: docs/blueprints/suiteui/features/suite-harness.md (on branch `docs/suiteui-feature-packets` until the packet PR merges)
 Run: act-1a13b7e0908-fybz · Session: claude/suite-harness-lead-wwxtgn · Started: 2026-10-14T18:00Z
-Stage: 3 wave 3 (SH-10 merged; SH-5 building)
-Base: 6c236ef4d4c6fdc37d1a140bc69b596ade946c93 (SH-5)
-Next: wait for SH-5's PR (wf_2f6279db-069) and its lane merge; then wave 4 (SH-6 gallery) on the new dev SHA
+Stage: 3 wave 4
+Base: 03e7408 (wave 4)
+Next: wait for SH-6 and SH-5b PRs (wf_057ab058-258) and their lane merges; then wave 5 (SH-7 journeys)
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -14,9 +14,10 @@ Next: wait for SH-5's PR (wf_2f6279db-069) and its lane merge; then wave 4 (SH-6
 | SH-3 | 2 | secondary text 4.5:1 on light cards/panels (#283) | Tokens.swift, TokensTests.swift | TokensTests.contrast | #850 | merged |
 | SH-4 | 2 | SuiteFrameProbe + suite.perf publisher (#330) | Sources/SuiteUI/FrameProbe.swift, Tests/SuiteUITests/FrameProbeTests.swift | FrameProbeTests.referenceTable, .summaryWithinBudget | #867 | merged |
 | SH-9 | 2 | GoldenImage compare + recording rule (#331) | Tests/AppSnapshotTests/GoldenImage.swift, GoldenImageTests.swift, Golden/README.md | GoldenImageTests.reference, .compareWithinBudget | #866 | merged |
-| SH-5 | 3 | SuiteControlInventory, SuiteEnvironment, ToolbarAction.identifier (#775) | ControlInventory.swift, SuiteEnvironment.swift, ToolbarGroup.swift, EditorTopBar.swift, InspectorAction.swift, EmptyStateView.swift, ControlInventoryTests.swift | ControlInventoryTests | | building (wf_2f6279db-069) |
+| SH-5 | 3 | SuiteControlInventory, SuiteEnvironment, ToolbarAction.identifier (#775) | ControlInventory.swift, SuiteEnvironment.swift, ToolbarGroup.swift, EditorTopBar.swift, InspectorAction.swift, EmptyStateView.swift, ControlInventoryTests.swift | ControlInventoryTests | #871 | merged |
 | SH-10 | 3 | SnapshotHost at 2x in four appearances (#332) | Tests/AppSnapshotTests/SnapshotHost.swift, SnapshotHostTests.swift, Sources/SuiteUI/Glass.swift | SnapshotHostTests | #869 | merged |
-| SH-6 | 4 | gallery, index, six stubs, SuiteWindow hook (#776) | SuiteGallery.swift, Gallery/*.swift, SuiteWindow.swift, SuiteGalleryTests.swift | SuiteGalleryTests | | todo |
+| SH-6 | 4 | gallery, index, six stubs, SuiteWindow hook (#776) | SuiteGallery.swift, Gallery/*.swift, SuiteWindow.swift, SuiteGalleryTests.swift | SuiteGalleryTests | | building (wf_057ab058-258) |
+| SH-5b | 4 | snapshot of EmptyStateView with an unavailable action (follow-up to #871) | Tests/AppSnapshotTests/SuiteEmptyStateSnapshots.swift | the snapshot | | building (wf_057ab058-258) |
 | SH-7 | 5 | journey template, SuiteJourneyTests bundle, helpers, SJ0, smoke, suiteui audit key (#333) | project.yml, UITests/Journey.swift, Journey+Input.swift, SuiteJourneyTests.swift, SuiteJourneyTests+Smoke.swift, audit-baseline.json | SJ0, smoke | | todo |
 | SH-8 | 6 | SJ25 + journey budget constants (feature-done) | UITests/SuiteJourneyTests.swift, SuiteJourneyTests+Budgets.swift | SJ25 | | todo |
 
@@ -25,6 +26,7 @@ Next: wait for SH-5's PR (wf_2f6279db-069) and its lane merge; then wave 4 (SH-6
 |---|---|---|---|---|---|---|---|
 
 ## Decisions
+- #871's checker found EmptyStateView's new disabled-action state had no snapshot; #871 had already merged, so SH-5b adds it in wave 4 (own file, disjoint from SH-6).
 - PR bodies opened or edited through the GitHub MCP/proxy get a Claude Code footer re-appended server-side (#869 tried a REST PATCH; it came back). The lane's squash commits are clean, so not reworked.
 - Wave 3 starts per task as its dependency merges: SH-10 needs only SH-9 (#866), SH-5 needs SH-4 (#867).
 - FlareEasingDragCostTests.handleDragP95UnderBudget flaked twice under agent load (8.6-8.7 ms vs 5 ms); reruns passed. Watch on the macOS job.
