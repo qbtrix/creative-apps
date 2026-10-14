@@ -86,7 +86,7 @@ extension FlareWorkspace {
     mutating func commitMove(_ moving: [StageAddress], dx: Double, dy: Double) {
         guard let sceneID = selectedSceneID, let document, dx.isFinite, dy.isFinite else { return }
         let shapes = services.shapes, frame = currentFrame, layers = layerIDs(of: moving), tool = tool, autoKey = autoKey
-        let box = services.hits.bounds(document, sceneID: sceneID, frame: frame, of: moving)
+        let box = selectionBox(of: moving)
         let moves = tool == .select ? [] : Self.layerMoves(moving, dx: dx, dy: dy, in: document, frame: frame)
         step { engine in
             guard tool == .select else {

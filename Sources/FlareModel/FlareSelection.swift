@@ -6,10 +6,20 @@ extension FlareWorkspace {
     /// The layers the stage selection touches, in selection order, each once.
     public var selectedLayerIDs: [String] { layerIDs(of: selection) }
 
-    /// The selection box: the selected items' world bounds at the playhead, strokes included; nil with no selection.
-    public var selectionBounds: Rect? {
-        guard let sceneID = selectedSceneID, let document, !selection.isEmpty else { return nil }
-        return services.hits.bounds(document, sceneID: sceneID, frame: currentFrame, of: selection)
+    /// The selection box at the playhead, strokes included; nil with no selection. Select frames the selected layers
+    /// (every item on them), Direct Select the selected items (#565).
+    public var selectionBounds: Rect? { selectionBox(of: selection) }
+
+    /// The world bounds of what a move of `items` changes: their layers' items under Select, else `items` alone.
+    func selectionBox(of items: [StageAddress]) -> Rect? {
+        guard let sceneID = selectedSceneID, let document, !items.isEmpty else { return nil }
+        var framed = items
+        if tool == .select {
+            // The hit tester's own view of the stage: the scene, not a symbol being edited.
+            framed = services.stage.drawList(document, sceneID: sceneID, frame: currentFrame, editing: nil).items
+                .map(\.address).filter { a in items.contains { $0.owner == a.owner && $0.layerID == a.layerID } }
+        }
+        return services.hits.bounds(document, sceneID: sceneID, frame: currentFrame, of: framed)
     }
 
     func layerIDs(of items: [StageAddress]) -> [String] {
