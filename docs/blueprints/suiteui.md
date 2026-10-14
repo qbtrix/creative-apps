@@ -371,3 +371,104 @@ blueprint or issues.
 | `FrameProbe` (#330) | all | Perf budgets (tier 3 in every app). It ships in wave 1 anyway: section 7's budgets cannot be measured without it, and it is small |
 | App-owned expansion (#111), the rename-guard tests (#249, #308, #311, #312) | D | Polish and test plumbing |
 | Command palette (#7) | all | No tier-1 or tier-2 step needs it: not v1 |
+
+---
+
+## 4. Journeys
+
+### 4.1 Where SuiteUI's journeys run
+
+SuiteUI has no app, and `Package.swift` (protected) has no gallery target.
+So the harness feature adds a **gallery behind a launch flag** that needs
+no app change and no manifest change:
+
+- `SuiteWindow` checks its process arguments once. With `-SuiteGallery
+  <page>` it shows `SuiteGallery(page:)` in place of the app's sidebar,
+  content and inspector. Without the flag nothing changes. Every
+  `SuiteWindow` app can host it; the journeys launch **Library**, whose
+  window stays a `SuiteWindow` in every app plan (Flare and Halo may move to
+  `EditorShell`). Pages that need the editor look draw an `EditorShell`
+  inside the gallery, so both shells are covered.
+- Each page holds real SuiteUI components over the page's own `@State`
+  (allowed: SuiteUI is not under the app-state rule) and a **log**: a `Text`
+  with identifier `suite.gallery.log` whose accessibility *label* is the
+  last thing a host would have received, for example `value 45 · ends 1`.
+  The label, not the value, because XCUITest reads many SwiftUI values as
+  empty (#262).
+- Every control on a page carries a `suite.gallery.<page>.<name>`
+  identifier. `ControlInventory` (probes) publishes every control's
+  identifier, enabled state and reason as `suite.controls` under
+  `-SuitePerfProbe`, the same flag that publishes `suite.perf`.
+- `project.yml` gains one bundle, `SuiteJourneyTests`, from the same
+  `Journey` template; after #333 the template compiles
+  `UITests/<target>*.swift`, so each feature owns its own
+  `UITests/SuiteJourneyTests+<Area>.swift` (section 8 lists them).
+  `Journey("Library", self, arguments: ["-SuiteGallery", page])` launches
+  it; shots are named `library-gallery-<page>-<step>`, so they never
+  collide with Library's own journey shots, and the audit counts them
+  under `library` (question Q3).
+
+Question Q2 offers the alternative: a dedicated gallery executable target.
+
+**Waiting.** No journey asserts timing through an XCUI query. State is
+awaited with `waitForExistence` or a label predicate (2 s); timing comes
+from `suite.perf` (section 7). Every step takes a `shot`, so every step is
+audited.
+
+**States.** Each journey names the empty, error and loading states it
+passes through. For a component, *empty* is "no items or no document",
+*error* is "input refused or invalid, nothing changed", *loading* is
+"content not ready yet" (a thumbnail without pixels, a probe with no
+samples). "none" means the component has no such state, said on purpose.
+
+### 4.2 Tier-1 journeys
+
+Page names are the gallery's (section 6.2). "Log reads" means the label of
+`suite.gallery.log`. ⇧ Shift, ⌥ Option, ⌘ Command.
+
+| # | Test (file) | Page | Steps (each one shot) | Asserts | Empty · error · loading |
+|---|---|---|---|---|---|
+| SJ0 | `testGalleryOpensEveryPage` (`SuiteJourneyTests.swift`) | `index`, then each | launch with `-SuiteGallery index -SuitePerfProbe`; open each page from the index list; launch with `-SuiteGallery nosuch` | each page's root `suite.gallery.<page>` exists; `suite.controls` parses and lists every `suite.gallery.*` control on the page, each enabled or with a non-empty reason; the second launch shows an `EmptyStateView` reading "No gallery page named nosuch." | empty: unknown page message · error: none · loading: none |
+| SJ1 | `testShellsFitAtEveryWidth` (`+Chrome`) | `window`, then `editor` | for each page, drag the window's bottom-right corner to widths 900 (`SuiteSize.windowMinimum`), 1024, 1280 and 1440 pt; shot at each | every `suite.*` region frame (sidebar, inspector, canvas, tools, timeline) lies inside the window with 1 pt slack; no two regions overlap by more than 1 pt; content is at least `SuiteSize.contentMinimum.width` wide; the right panel is exactly `editorPanelWidth`; the app audit's `offscreen` and `overlap` counts on these shots are 0 | none · none · none |
+| SJ2 | `testEditorShellTimelineSlot` (`+Chrome`) | `editor`, `editor-plain` | drag the slot's divider up 120 pt; drag it to the top of the window; double-click the divider (collapse); double-click again (restore); open `editor-plain` | slot height grows by 120 (±1); stops at its maximum (canvas keeps `contentMinimum.height`); collapse leaves only the slot's toolbar row and the canvas grows by the difference; restore returns the last height; `editor-plain` (no timeline) has no divider element and its canvas fills the shell exactly as today | empty: shell without timeline · error: none · loading: none |
+| SJ3 | `testTopBarCommandsAndSaveStatus` (`+Chrome`) | `editor` | click New (outlined); hover Export (primary); click Undo (icon-only); hover the disabled Redo; set the page's save state to unsaved, then failed, then saved | log reads `command new`; exactly one element is primary and it is the right-most; Undo's label is "Undo" with no visible title; Redo's tooltip is its `unavailableHelp`; save status reads "Saved", then the unsaved dot with label "Unsaved changes", then "Not saved" with the warning triangle | empty: none · error: "Not saved" · loading: none |
+| SJ4 | `testToolRailSelectsAndExplains` (`+Chrome`) | `editor` | click the second tool; click the canvas, press the first tool's key; hover the disabled tool; click it | log reads `tool b`, then `tool a`; the selected tool's value is "selected"; the disabled tool's tooltip is its reason and clicking it leaves the log unchanged | empty: none · error: none · loading: none |
+| SJ5 | `testTransportPlaysStepsAndLoops` (`+Chrome`) | `editor` | click Play; click Pause; click step forward twice; click Go to End; click step forward; toggle Loop; click step forward | Play's label becomes "Pause" while playing; log reads `frame f+2` after the steps; at the end, step forward stays on the last frame with loop off and wraps to 0 with loop on; timecode text reads `00:01 / 00:02` style (current / total) | empty: duration 0 disables every button with "Nothing to play." · error: none · loading: none |
+| SJ6 | `testStatusPills` (`+Chrome`) | `editor` | read the pills; click the toggle pill; click it again; switch the page's warning on | zoom pill text equals `ViewerZoom.percentText` of the page zoom; size pill "1920 × 1080"; toggle pill value On, then Off, log `toggle onion`; the warning pill shows its triangle and label | empty: no trailing pills · error: warning pill · loading: none |
+| SJ7 | `testEmptyStateOffersAction` (`+Chrome`) | `empty` | read it; click its button; open the variant without an action | title, message and one primary button; log `action new`; the variant has no button | empty: itself · error: none · loading: none |
+| SJ8 | `testSegmentedTabsSwitch` (`+Chrome`) | `editor` | click the second tab; press ← with the tabs focused | log `tab layers`, then `tab adjust`; the selected tab's value is "selected" | none · none · none |
+| SJ9 | `testCanvasZoomPanAndDrag` (`+Canvas`) | `canvas` | ⌘+ twice; ⌘0; drag 100 pt right from the artboard's corner; Space-drag 100 pt; press → with the canvas focused; open `canvas-pt` | zoom pill 200 %, then the fit value; log `drag (0,0)→(100,0) ends 1` in document pixels at 100 %; the Space-drag moves the scroll position and adds no drag to the log; → scrolls a tenth of the viewport; `canvas-pt`'s ruler corner reads "pt" (#264) | empty: a 0 × 0 document fits at the smallest zoom and draws no artboard · error: none · loading: none |
+| SJ10 | `testSelectionHandlesAtEveryZoom` (`+Canvas`) | `marks` | at zoom 25 %, 100 % and 400 %: drag the bottom-right handle 50 pt out; ⇧-drag it; drag the rotate zone a quarter turn | log names `handle bottomRight` and the new rect each time; each handle's hit frame is at least 12 × 12 pt at every zoom; ⇧ keeps the aspect ratio (±1 px); the rotate drag logs `rotate 90` (±1) | empty: no selection draws no handles · error: none · loading: none |
+| SJ11 | `testBarSliderScrubTypeAndStep` (`+Inspector`) | `inspector` | drag the Rotation bar 40 pt right; ⇧-drag 4 pt; ⌥-drag 10 pt; click the value, type 72, Return; click, type `abc`, Return; click, type 9, Escape; focus it, press → twice, ⇧→, End, Home; hover the disabled row | values +40, +40, +1 steps as `ScrubValue` says; 72; still 72 after `abc`; still 72 after Escape; then 73, 74, 84, the maximum, the minimum; log `ends n` grows by exactly one per drag, typed commit and key press; the disabled row's tooltip is its reason and dragging it changes nothing | empty: "Mixed" shows no marker · error: `abc` keeps the old value · loading: none |
+| SJ12 | `testExactFieldAndColorRowEnd` (`+Inspector`) | `inspector` | drag the X field 30 pt; press ↑; click the FILL hex, type `FF3B30`, Return; type `zz`, Return; pick a color in the system panel | X +30 then +1, log `ends` +1 each (#718); fill reads `#FF3B30`, log `color #FF3B30 ends` +1; `zz` keeps `#FF3B30`; the panel pick logs one end when the panel closes | empty: none · error: `zz` refused · loading: none |
+| SJ13 | `testSectionsPickersTogglesAndReset` (`+Inspector`) | `inspector` | click the TRANSFORM header; click it again; change a value; click Reset; choose "Round" in the Cap picker; click the checkbox row; hover the disabled action | the section collapses and expands; Reset appears only while the section differs and its hit frame is at least 20 × 20 pt and overlaps no other control (#622, #285); log `reset transform`; picker value "Round"; checkbox value toggles; the action's tooltip is its reason | empty: an empty section shows its header only · error: none · loading: none |
+| SJ14 | `testKeyframeButtonStates` (`+Inspector`) | `inspector` | click Rotation's stopwatch; set the page to animated; set it to keyed-here; click the diamond | log `key add`, then `key remove`; values "Not animated", "Animated", "Keyed at this frame"; the row's frame width is the same in all three states | none · none · none |
+| SJ15 | `testPresetsAndChips` (`+Inspector`) | `inspector` | click "Ease Out"; press → and Space; click the Onion chip twice | one preset on at a time, log `preset ease-out`, then the neighbour; chip value On, then Off | empty: no preset matches (selected nil) shows none on · error: none · loading: none |
+| SJ16 | `testToneCurveAddMoveRemove` (`+Inspector`) | `curves` | click inside the well; drag the new point 20 pt up; press ↑; press Tab; drag a middle point out of the well; press Delete on the focused point | log points count +1, then moved, nudged by 0.01, focus moved, count −1, count −1; log `ends` +1 per gesture, nudge and delete | empty: two end points only cannot be deleted · error: none · loading: histogram missing draws no bars |
+| SJ17 | `testLayerListToggleRenameReorder` (`+Lists`) | `layers` | click Ball's eye; click Shadow's lock; double-click Ball's title, type `Hero`, Return; focus Shadow, press Return, type `Taken`, Return; press Escape; drag Shadow above Hero; click a child row's eye (#589) | log `toggle eye ball`; Shadow's row is dimmed (title in secondary text, its value includes "locked"); log `rename ball Hero`; `Taken` is refused with the page's message inline under the row and the draft stays; Escape restores "Shadow"; log `move shadow 0`; the child's eye is its own element and logs `toggle eye child` | empty: "No layers yet." text · error: refused rename · loading: none |
+| SJ18 | `testThumbnailGridSelectsByClickAndKeys` (`+Lists`) | `grid` | click item 3; ⇧-click item 6; ⌘-click item 4; press → | log selection `3,5,6`, then `3,4,5,6`… exactly as `GridSelection` gives; → moves the anchor one item | empty: no items shows the page's empty state · error: none · loading: an item without an image shows its caption on the placeholder fill |
+| SJ19 | `testTimelineScrubSelectAndDragKeys` (`+Timeline`) | `timeline`, `timeline-long` | drag the ruler to frame 30; click Ball's key at 12; press →; drag the selected key 5 frames right; press ⌫ on it; toggle the page's recording; open `timeline-long` (10,000 frames) and scroll to the end | log `scrub 30`; `select ball 12`, then `select ball 24` (#63); `move ball 24→29 ends 1`; `delete ball 29`; the playhead pill reads 30; the recording ring element exists while on; `timeline-long` draws ruler labels at the end (#219) | empty: no tracks shows "No layers yet." · error: a drag past the end clamps to the last frame · loading: none |
+
+### 4.3 Tier-2 and tier-3 journeys
+
+| # | Test (file) | Page | Steps | Asserts |
+|---|---|---|---|---|
+| SJ20 | `testEasingCurveHandles` (`+Inspector`) | `curves` | drag handle 1; Tab; press ↑; ⇧↑ | one `ends` per gesture; values change by 0.01 and 0.1; the preview dot is absent under the page's Reduce Motion switch (probe mark, #343) |
+| SJ21 | `testPointAndGridMarks` (`+Canvas`) | `marks` | show the point mark at zoom 1 and 4 over light and dark pixels; show the grid | the mark's on-screen size is the same at both zooms; it takes no click (the drag under it logs); the grid draws `cells` lines (#706, #737, #530) |
+| SJ22 | `testRowContextMenus` (`+Lists`) | `layers` | right-click Ball; choose Duplicate; right-click again; hover the disabled Delete | log `menu duplicate ball`; Delete is disabled and its reason is the item's help (#73) |
+| SJ23 | `testNodeGraphDrawsAndSelects` (`+Graph`) | `graph` | click node B; click the arrow A→B; open `graph-loop` | log `select node b`, `select edge a-b`; each arrow's ends lie on its nodes' edges (±1 pt); the self-loop draws outside its node; the warning badge has its triangle and label (#344) |
+
+### 4.4 Perf journeys (report-only first, section 7)
+
+| # | Test (file) | Page | Steps | Measures |
+|---|---|---|---|---|
+| SP1 | `testBarSliderScrubLatency` (`+Perf`) | `inspector` | velocity-controlled drag across a bar slider, 300 pt/s | frames late, at least 60 samples |
+| SP2 | `testCanvasDragLatency` (`+Perf`) | `canvas` | drag on the canvas, then Space-pan, 300 pt/s | frames late per series |
+| SP3 | `testTimelineScrubLatency` (`+Perf`) | `timeline-long` | drag the playhead across the ruler | frames late |
+| SP4 | `testListAndGridScroll` (`+Perf`) | `layers-300`, `grid-2000` | scroll each end to end | frame interval p95 |
+| SP5 | `testHandleDragLatency` (`+Perf`) | `marks` | drag a handle at 300 pt/s | frames late |
+
+`+Perf` is owned by the harness feature: it writes the five tests against
+pages the later features fill, each `XCTSkip` until its page exists, and
+each feature turns its own on (one line, `skipUnless(page:)`) in its own
+journey file, not in `+Perf` (section 8).
