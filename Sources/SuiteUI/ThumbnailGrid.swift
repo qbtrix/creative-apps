@@ -137,7 +137,10 @@ public struct ThumbnailGrid<ID: Hashable>: View {
 }
 
 /// One thumbnail: the image (or a flat placeholder) with its badges, and the
-/// caption under it. Selection is an accent ring and a light accent fill.
+/// caption under it. Selection is a neutral rounded plate (`valueFill`) behind
+/// and around the image and caption, plus the caption in `accentText`. The
+/// plate's contrast comes from the grid around it, not from the image, so a
+/// blue or teal photo can't hide it; the image keeps its plain hairline.
 private struct ThumbnailCell<ID: Hashable>: View {
     let item: ThumbnailItem<ID>
     let size: CGSize
@@ -149,18 +152,16 @@ private struct ThumbnailCell<ID: Hashable>: View {
                 .frame(width: size.width, height: size.height)
                 .clipShape(RoundedRectangle(cornerRadius: SuiteRadius.small))
                 .overlay(alignment: .bottomLeading) { badges }
-                .overlay(
-                    RoundedRectangle(cornerRadius: SuiteRadius.small)
-                        .strokeBorder(isSelected ? SuiteColor.accent : SuiteColor.separator, lineWidth: isSelected ? 2 : 1))
+                .overlay(RoundedRectangle(cornerRadius: SuiteRadius.small).strokeBorder(SuiteColor.separator, lineWidth: 1))
             Text(item.caption)
                 .font(SuiteFont.caption)
-                .foregroundStyle(isSelected ? Color.primary : SuiteColor.secondaryText)
+                .foregroundStyle(isSelected ? SuiteColor.accentText : SuiteColor.secondaryText)
                 .lineLimit(1)
                 .truncationMode(.middle)
                 .frame(width: size.width)
         }
         .padding(SuiteSpacing.xs)
-        .background(isSelected ? SuiteColor.accent.opacity(0.15) : .clear, in: RoundedRectangle(cornerRadius: SuiteRadius.medium))
+        .background(isSelected ? SuiteColor.valueFill : .clear, in: RoundedRectangle(cornerRadius: SuiteRadius.medium))
         .help(item.caption)
         .accessibilityElement(children: .combine)
         .accessibilityAddTraits(isSelected ? .isSelected : [])

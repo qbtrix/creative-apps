@@ -1,8 +1,10 @@
 // SuiteGridSnapshots.swift: SuiteUI's ThumbnailGrid over sample data, a mix
 // of placeholder cells (no image) and colored cells with badges, unselected
-// and with three cells selected, in Light and Dark. Writes
-// suiteui-grid-{light,dark}.png and suiteui-grid-selected-{light,dark}.png.
-// macOS only.
+// and with three cells selected, in Light and Dark, plus flat blue and teal
+// cells selected beside unselected ones (issue #101: selection must read on
+// thumbnails of the accent's own hue). Writes suiteui-grid-{light,dark}.png,
+// suiteui-grid-selected-{light,dark}.png and
+// suiteui-grid-selected-cool-{light,dark}.png. macOS only.
 import SuiteUI
 import SwiftUI
 import Testing
@@ -16,6 +18,17 @@ import Testing
             try snapshot(GridSample(items: items, selection: []), name: "suiteui-grid-\(suffix)", scheme: scheme)
             try snapshot(
                 GridSample(items: items, selection: ["2", "3", "8"]), name: "suiteui-grid-selected-\(suffix)", scheme: scheme)
+            try snapshot(
+                GridSample(items: Self.coolItems(), selection: ["blue", "teal"]),
+                name: "suiteui-grid-selected-cool-\(suffix)", scheme: scheme)
+        }
+    }
+
+    /// Flat blue and teal cells, each selected and unselected, so the plate
+    /// is judged where an accent ring on the image would vanish.
+    private static func coolItems() -> [ThumbnailItem<String>] {
+        [("blue", Color.blue), ("teal", .teal), ("blue-off", .blue), ("teal-off", .teal)].map { id, color in
+            ThumbnailItem(id: id, image: swatch([color, color]), caption: "\(id).heic")
         }
     }
 
