@@ -10,3 +10,6 @@ utc	stage	event	ref	note
 2026-10-14T16:38Z	3	pr-merged	#760	MP-3 restore
 2026-10-14T16:38Z	3	pr-merged	#761	MP-5 autosave writer
 2026-10-14T16:38Z	3	stage-start	wave4	MP-6 base 5c167aa
+2026-10-14T16:44Z	3	pr-merged	#762	MP-6 launch recovery, feature-done
+2026-10-14T16:44Z	3	stage-end	wave4	all 6 tasks merged
+2026-10-14T16:44Z	4	stage-start	round1	waiting for CI on 5e1870d
