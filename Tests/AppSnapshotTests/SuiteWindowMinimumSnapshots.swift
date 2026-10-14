@@ -1,5 +1,5 @@
 // SuiteWindowMinimumSnapshots.swift: a SuiteWindow at the window minimum
-// (900 x 560 pt), its sidebar, content and inspector all shown, so the shot
+// (SuiteSize.windowMinimum), its sidebar, content and inspector all shown, so the shot
 // shows the split view fitting the window with nothing clipped (#215). The
 // window sits at the top leading corner of the 1440x900 frame. Writes
 // suiteui-window-minimum-light.png and suiteui-window-minimum-dark.png.

@@ -10,7 +10,8 @@
 // (SuiteColor.accent); the sidebar keeps the system's selection style, which
 // dims when the window isn't key. The sidebar and inspector carry the accessibility
 // identifiers `suite.sidebar` and `suite.inspector`; the UI journeys in
-// UITests/ find them by those names.
+// UITests/ find them by those names. The window opens at SuiteSize.windowLaunch
+// and shrinks to SuiteSize.windowMinimum, both derived from the column tokens.
 import SwiftUI
 
 public struct SuiteWindow<Content: View, Inspector: View>: View {
@@ -80,7 +81,11 @@ public struct SuiteWindow<Content: View, Inspector: View>: View {
                 min: SuiteSize.sidebarWidth.min, ideal: SuiteSize.sidebarWidth.ideal, max: SuiteSize.sidebarWidth.max)
         } detail: {
             content
-                .frame(minWidth: SuiteSize.contentMinimum.width, minHeight: SuiteSize.contentMinimum.height)
+                // An explicit ideal so the content's own ideal width can't widen the
+                // detail column past the window and clip the side columns (#579).
+                .frame(
+                    minWidth: SuiteSize.contentMinimum.width, idealWidth: SuiteSize.contentIdealWidth,
+                    maxWidth: .infinity, minHeight: SuiteSize.contentMinimum.height, maxHeight: .infinity)
                 .tint(SuiteColor.accent)
                 .inspector(isPresented: $showsInspector) {
                     inspector
@@ -115,7 +120,10 @@ public struct SuiteWindow<Content: View, Inspector: View>: View {
                 .help(showsInspector ? "Hide Inspector" : "Show Inspector")
             }
         }
-        .frame(minWidth: SuiteSize.windowMinimum.width, minHeight: SuiteSize.windowMinimum.height)
+        // The window opens at its ideal size: the launch size the column tokens add up to.
+        .frame(
+            minWidth: SuiteSize.windowMinimum.width, idealWidth: SuiteSize.windowLaunch.width,
+            minHeight: SuiteSize.windowMinimum.height, idealHeight: SuiteSize.windowLaunch.height)
     }
 
     /// Drag reorder for one section's rows; nil (reorder off) without `onMove`.
