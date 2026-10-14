@@ -11,3 +11,6 @@ utc	stage	event	ref	note
 2026-10-14T18:51Z	-	heartbeat	-	waiting on builders
 2026-10-14T19:09Z	-	heartbeat	-	waiting on builders
 2026-10-14T19:27Z	-	heartbeat	-	waiting on builders
+2026-10-14T22:08Z	3	pr-merged	#785	FD-1
+2026-10-14T22:08Z	3	pr-merged	#784	FD-19
+2026-10-14T22:08Z	3	heartbeat	-	resumed after usage pause
