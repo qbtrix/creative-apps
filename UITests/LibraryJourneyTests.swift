@@ -34,6 +34,19 @@ final class LibraryJourneyTests: XCTestCase {
         library.shot("loupe-back-to-grid")
     }
 
+    /// Selecting a photo swaps the collection card for its metadata inspector;
+    /// a star rates it.
+    @MainActor func testRateASelectedPhoto() {
+        let library = Journey("Library", self)
+        library.click("Load Sample Photos")
+        let photo = library.app.splitGroups.descendants(matching: .any)
+            .matching(NSPredicate(format: "label BEGINSWITH %@", "IMG_")).firstMatch
+        XCTAssert(photo.waitForExistence(timeout: 10), "no sample photo in the grid")
+        photo.click()
+        library.shot("photo-inspector")
+        library.click("4 Stars", in: .window, step: "photo-rated")
+    }
+
     @MainActor func testImportRateAndRelaunch() throws {
         throw XCTSkip("journey arrives with #210 (import), #211 (rate) and #212 (relaunch)")
     }

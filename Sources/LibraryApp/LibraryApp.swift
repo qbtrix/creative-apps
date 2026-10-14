@@ -1,6 +1,7 @@
 // LibraryApp.swift: Library, the photo catalog app. The window is SuiteWindow
-// with the collections in the sidebar, LibraryBrowser as content and the
-// selected collection in the inspector. Views only read LibraryCatalog and
+// with the collections in the sidebar, LibraryBrowser as content and, in the
+// inspector, the selected photos' MetadataInspector or else the selected
+// collection. Views only read LibraryCatalog and
 // call its methods; all state lives in LibraryModel (scripts/ci checks this).
 // The menu bar (LibraryCommands) reaches the window through a focused value.
 import LibraryModel
@@ -32,7 +33,11 @@ struct LibraryWindow: View {
                 model: model, onLoadSamples: { model.loadSamples() }, onSelect: { model.select($0) },
                 onOpen: { model.open($0) }, onStep: { model.stepLoupe(by: $0) }, onGrid: { model.showGrid() })
         } inspector: {
-            if let collection = model.selectedCollection {
+            if let metadata = model.selectedMetadata {
+                MetadataInspector(
+                    metadata: metadata, onStar: { model.clickStar($0) }, onFlag: { model.setFlag($0) },
+                    onLabel: { model.setLabel($0) })
+            } else if let collection = model.selectedCollection {
                 SurfaceCard(title: collection.name, detail: "\(collection.count) photos")
             }
         }
@@ -111,7 +116,7 @@ extension ThumbnailItem where ID == String {
             id: photo.id, image: Self.image(rgba: photo.pixel), caption: photo.name,
             badges: ThumbnailBadges(
                 rating: photo.rating, isFlagged: photo.isFlagged,
-                colorLabel: photo.label.map { (name: $0.rawValue, color: Self.labelColors[$0] ?? .secondary) }))
+                colorLabel: photo.label.map { (name: $0.rawValue, color: $0.color) }))
     }
 
     /// A one-pixel sRGB image from RGBA8 bytes; the cell and the loupe stretch it to fill.
@@ -125,6 +130,4 @@ extension ThumbnailItem where ID == String {
         else { return nil }
         return Image(decorative: pixel, scale: 1)
     }
-
-    private static let labelColors: [PhotoLabel: Color] = [.red: .red, .yellow: .yellow, .green: .green, .blue: .blue, .purple: .purple]
 }

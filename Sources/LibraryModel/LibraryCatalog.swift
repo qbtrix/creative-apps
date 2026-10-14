@@ -68,10 +68,7 @@ public struct LibraryCatalog: Sendable, Equatable {
         selection = []
         mode = .grid
         focusedItemID = nil
-        let counts = ["all": items.count, "favorites": items.filter(\.isFlagged).count, "recent": recentItems.count]
-        for index in collections.indices {
-            collections[index].count = counts[collections[index].id] ?? 0
-        }
+        recount()
     }
 
     public mutating func setSort(_ newSort: LibrarySort) { sort = newSort }
@@ -120,6 +117,24 @@ public struct LibraryCatalog: Sendable, Equatable {
             selection = [id]
         }
         mode = .grid
+    }
+
+    /// Applies `edit` to every selected photo, then keeps the counts and the
+    /// selection true to the collection (unflagging in Favorites drops a photo).
+    mutating func editSelected(_ edit: (inout PhotoItem) -> Void) {
+        guard !selection.isEmpty else { return }
+        for index in items.indices where selection.contains(items[index].id) {
+            edit(&items[index])
+        }
+        recount()
+        select(selection)
+    }
+
+    private mutating func recount() {
+        let counts = ["all": items.count, "favorites": items.filter(\.isFlagged).count, "recent": recentItems.count]
+        for index in collections.indices {
+            collections[index].count = counts[collections[index].id] ?? 0
+        }
     }
 
     /// The photos with every id unique; the first photo with an id keeps it.

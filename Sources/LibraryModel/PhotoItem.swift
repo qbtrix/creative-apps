@@ -1,6 +1,8 @@
 // PhotoItem.swift: one photo in the Library catalog, plus the sort orders and
 // the browse mode. Linux-safe value types. The color stands in for pixels
-// until import reads real files (L2); it is sRGB from CoreColor.
+// until import reads real files (L2); it is sRGB from CoreColor. Rating, flag
+// and label change only through LibraryCatalog's metadata edits
+// (MetadataEditing.swift), which keep the rating in 0...5.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -20,23 +22,27 @@ public struct PhotoItem: Identifiable, Sendable, Hashable {
     public let name: String
     public let captureDate: Date
     public let color: Color3  // flat sRGB, each component in 0...1
-    public let rating: Int  // stars, 0...5
-    public let isFlagged: Bool  // a pick: Favorites shows these
-    public let label: PhotoLabel?
+    public internal(set) var rating: Int  // stars, 0...5
+    public internal(set) var flag: PhotoFlag
+    public internal(set) var label: PhotoLabel?
 
     /// `id` defaults to the name; two photos may share a name but not an id.
+    /// `isFlagged` makes it a pick unless `flag` says otherwise.
     public init(
         id: String? = nil, name: String, captureDate: Date, color: Color3, rating: Int = 0,
-        isFlagged: Bool = false, label: PhotoLabel? = nil
+        isFlagged: Bool = false, label: PhotoLabel? = nil, flag: PhotoFlag? = nil
     ) {
         self.id = id ?? name
         self.name = name
         self.captureDate = captureDate
         self.color = color.clampedToUnit()
         self.rating = min(max(rating, 0), 5)
-        self.isFlagged = isFlagged
+        self.flag = flag ?? (isFlagged ? .pick : .none)
         self.label = label
     }
+
+    /// A pick: Favorites shows these.
+    public var isFlagged: Bool { flag == .pick }
 
     /// The color as one opaque RGBA8 pixel, the thumbnail the grid draws.
     public var pixel: [UInt8] {
@@ -46,8 +52,7 @@ public struct PhotoItem: Identifiable, Sendable, Hashable {
     /// The same photo under another id.
     func withID(_ newID: String) -> PhotoItem {
         PhotoItem(
-            id: newID, name: name, captureDate: captureDate, color: color, rating: rating,
-            isFlagged: isFlagged, label: label)
+            id: newID, name: name, captureDate: captureDate, color: color, rating: rating, label: label, flag: flag)
     }
 }
 
