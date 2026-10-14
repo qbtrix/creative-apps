@@ -2,9 +2,9 @@
 
 Issue: #778 · Packet: docs/blueprints/suiteui/features/suite-harness.md (on branch `docs/suiteui-feature-packets` until the packet PR merges)
 Run: act-1a13b7e0908-fybz · Session: claude/suite-harness-lead-wwxtgn · Started: 2026-10-14T18:00Z
-Stage: 3 wave 2
-Base: 5eef022a7fb0916bf601ea3864a368035982a2bb
-Next: wave 2 branches being rebased on 5eef022 and opened as PRs (dev Linux build fixed by #801); then wave 3 (SH-5, SH-10)
+Stage: 3 wave 3 (SH-10 building; SH-5 waits on #867)
+Base: 7c080729 (SH-10); SH-5 starts on the dev SHA that contains #867
+Next: when #867 (SH-4) merges, start SH-5 on that dev SHA; wait for SH-10's PR (wf_390e2b07-a27); then wave 4 (SH-6)
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -12,10 +12,10 @@ Next: wave 2 branches being rebased on 5eef022 and opened as PRs (dev Linux buil
 | SH-1 | 1 | contract types, EditRun, probe/inventory/golden contracts + Fakes (#773) | Sources/SuiteUI/Contracts/{ContractTypes,FrameProbeRecording,ControlInventorying,GoldenComparing}.swift, Tests/SuiteUITests/{EditRunTests,HarnessFakeTests}.swift | EditRunTests, HarnessFakeTests | #787 | merged |
 | SH-2 | 1 | token sheet for waves 2-4 + contrast pairs (#774) | Sources/SuiteUI/Tokens.swift, Tests/SuiteUITests/TokensTests.swift | TokensTests.geometry, .contrast | #786 | merged |
 | SH-3 | 2 | secondary text 4.5:1 on light cards/panels (#283) | Tokens.swift, TokensTests.swift | TokensTests.contrast | #850 | merged |
-| SH-4 | 2 | SuiteFrameProbe + suite.perf publisher (#330) | Sources/SuiteUI/FrameProbe.swift, Tests/SuiteUITests/FrameProbeTests.swift | FrameProbeTests.referenceTable, .summaryWithinBudget | | built, blocked by dev-red (branch lead/suite-harness-sh-4 @9c86942) |
-| SH-9 | 2 | GoldenImage compare + recording rule (#331) | Tests/AppSnapshotTests/GoldenImage.swift, GoldenImageTests.swift, Golden/README.md | GoldenImageTests.reference, .compareWithinBudget | #866 | open, gate pass @bff823b |
+| SH-4 | 2 | SuiteFrameProbe + suite.perf publisher (#330) | Sources/SuiteUI/FrameProbe.swift, Tests/SuiteUITests/FrameProbeTests.swift | FrameProbeTests.referenceTable, .summaryWithinBudget | #867 | open, gate pass @feab7cc |
+| SH-9 | 2 | GoldenImage compare + recording rule (#331) | Tests/AppSnapshotTests/GoldenImage.swift, GoldenImageTests.swift, Golden/README.md | GoldenImageTests.reference, .compareWithinBudget | #866 | merged |
 | SH-5 | 3 | SuiteControlInventory, SuiteEnvironment, ToolbarAction.identifier (#775) | ControlInventory.swift, SuiteEnvironment.swift, ToolbarGroup.swift, EditorTopBar.swift, InspectorAction.swift, EmptyStateView.swift, ControlInventoryTests.swift | ControlInventoryTests | | todo |
-| SH-10 | 3 | SnapshotHost at 2x in four appearances (#332) | Tests/AppSnapshotTests/SnapshotHost.swift, SnapshotHostTests.swift, Sources/SuiteUI/Glass.swift | SnapshotHostTests | | todo |
+| SH-10 | 3 | SnapshotHost at 2x in four appearances (#332) | Tests/AppSnapshotTests/SnapshotHost.swift, SnapshotHostTests.swift, Sources/SuiteUI/Glass.swift | SnapshotHostTests | | building (wf_390e2b07-a27) |
 | SH-6 | 4 | gallery, index, six stubs, SuiteWindow hook (#776) | SuiteGallery.swift, Gallery/*.swift, SuiteWindow.swift, SuiteGalleryTests.swift | SuiteGalleryTests | | todo |
 | SH-7 | 5 | journey template, SuiteJourneyTests bundle, helpers, SJ0, smoke, suiteui audit key (#333) | project.yml, UITests/Journey.swift, Journey+Input.swift, SuiteJourneyTests.swift, SuiteJourneyTests+Smoke.swift, audit-baseline.json | SJ0, smoke | | todo |
 | SH-8 | 6 | SJ25 + journey budget constants (feature-done) | UITests/SuiteJourneyTests.swift, SuiteJourneyTests+Budgets.swift | SJ25 | | todo |
@@ -25,6 +25,8 @@ Next: wave 2 branches being rebased on 5eef022 and opened as PRs (dev Linux buil
 |---|---|---|---|---|---|---|---|
 
 ## Decisions
+- Wave 3 starts per task as its dependency merges: SH-10 needs only SH-9 (#866), SH-5 needs SH-4 (#867).
+- FlareEasingDragCostTests.handleDragP95UnderBudget flaked twice under agent load (8.6-8.7 ms vs 5 ms); reruns passed. Watch on the macOS job.
 - Waves follow the packet's own chain: {SH-1,SH-2} → {SH-3,SH-4,SH-9} → {SH-5,SH-10} → SH-6 → SH-7 → SH-8.
 - Packet merged to dev in #788 after wave 1 started; wave 1 read it from `docs/suiteui-feature-packets`.
 - The GitHub MCP server appends a Claude Code footer to PR bodies; the lane strips attribution from the squash commit (CLAUDE.md), so wave 1's #786/#787 merged with it. Noted, not reworked.

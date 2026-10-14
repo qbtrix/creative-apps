@@ -15,3 +15,6 @@ utc	stage	event	ref	note
 2026-10-14T22:37Z	3	pr-opened	#850	SH-3 secondary text contrast
 2026-10-14T22:40Z	3	pr-opened	#866	SH-9 GoldenImage compare
 2026-10-14T22:41Z	3	pr-merged	#850	SH-3 secondary text contrast
+2026-10-14T22:42Z	3	pr-opened	#867	SH-4 frame probe
+2026-10-14T22:42Z	3	pr-merged	#866	SH-9 golden compare
+2026-10-14T22:42Z	3	stage-start	wave3	SH-10 on 7c08072 (wf_390e2b07-a27); SH-5 waits on #867
