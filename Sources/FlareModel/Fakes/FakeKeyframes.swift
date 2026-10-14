@@ -2,7 +2,8 @@
 // `Layer.tracks`; moves, removes, frame inserts and removes, and labels are FlareCore's `MoveKeyframe`,
 // `RemoveKeyframe`, `ShiftKeyframes`, `SetFrameLabel` and `RemoveFrameLabel`. A summary key (no property) stands for
 // every track keyed at its frame. A move runs on a copy of the engine, so one that would land a key on another key
-// throws and changes nothing. Keyframe commands take scene layers only, so a symbol owner throws until
+// throws and changes nothing. A frame insert that pushes a key past the scene's last frame grows the scene in the same
+// step (`SetSceneTiming`), so the final pose still plays. Keyframe commands take scene layers only, so a symbol owner throws until
 // they take an owner (LC-5). With `unavailable` set, reads are empty and every write throws it.
 import FlareCore
 
@@ -75,10 +76,22 @@ public struct FakeKeyframes: KeyframeEditing {
         try available()
         let sceneID = try Self.scene(owner)
         let layers = try Self.frameEdit(count, at: frame, layerIDs: layerIDs, owner: owner, in: engine.document)
+        let shifted = layers.compactMap(Self.lastFrame).filter { $0 >= frame }
+        guard let scene = engine.document.scenes.first(where: { $0.id == sceneID }) else { throw CommandError.sceneNotFound(sceneID) }
+        // The scene grows so a key pushed past its last frame still plays (#596).
+        var duration = scene.durationFrames
+        if let last = shifted.max() {
+            let (end, overflow) = last.addingReportingOverflow(count)
+            guard !overflow, end < Int.max else { throw CommandError.invalidFrame(count) }
+            duration = max(duration, end + 1)
+        }
         try engine.group("Insert Frame") { engine in
             for layer in layers {
                 guard let last = Self.lastFrame(of: layer), last >= frame else { continue }
                 try engine.perform(ShiftKeyframes(sceneID: sceneID, layerID: layer.id, fromFrame: frame, toFrame: last, delta: count))
+            }
+            if duration != scene.durationFrames {
+                try engine.perform(SetSceneTiming(sceneID: sceneID, fps: scene.fps, durationFrames: duration))
             }
         }
     }
