@@ -88,7 +88,7 @@ public struct FakeShapes: ShapeBuilding {
         return draft
     }
 
-    public func commit(_ draft: ShapeDraft, sceneID: String, aboveLayerID: String?,
+    public func commit(_ draft: ShapeDraft, owner: LayerOwner, aboveLayerID: String?,
                        in engine: inout CommandEngine) throws -> String {
         try available()
         let kind = switch draft.tool {
@@ -99,7 +99,6 @@ public struct FakeShapes: ShapeBuilding {
         if draft.tool == .pen, !Self.spans(draft.anchors, tolerance) || !Self.spans(draft.shape.points, tolerance) {
             throw CommandError.invalidDocument(Self.degeneratePath)
         }
-        let owner = LayerOwner.scene(sceneID)
         let above = try Self.anchor(aboveLayerID, owner: owner, in: engine.document)
         let taken = Self.taken(engine.document)
         var n = 1

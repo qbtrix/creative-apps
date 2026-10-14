@@ -76,12 +76,13 @@ extension FlareWorkspace {
     /// Escape: drops the gesture, its draft (a pen path too), marquee and preview.
     public mutating func cancelDrag() { (gesture, draft, marquee, dragPreview) = (nil, nil, nil, nil) }
 
-    /// Adds `draft` as a new layer above the selected one and selects it.
+    /// Adds `draft` as a new layer of the edited owner (the symbol edited in place, else the scene) above the
+    /// selected layer, and selects it.
     mutating func commit(_ draft: ShapeDraft) {
-        guard let sceneID = selectedSceneID else { return refuse(.noDocument) }
+        guard let owner = propertyOwner else { return refuse(.noDocument) }
         let shapes = services.shapes, above = selectedLayerID
         var added: String?
-        step { added = try shapes.commit(draft, sceneID: sceneID, aboveLayerID: above, in: &$0) }
+        step { added = try shapes.commit(draft, owner: owner, aboveLayerID: above, in: &$0) }
         if let added, layerError == nil { setSelection([]); selectedLayerID = added }
     }
 

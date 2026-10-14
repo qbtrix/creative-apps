@@ -46,12 +46,17 @@ extension FlareWorkspace {
     /// The edited owner's layers, top first.
     public var layers: [Layer] { ownerLayers?.reversed() ?? [] }
 
+    /// The ids and names of every scene and symbol layer, which a new layer's id and name skip.
+    var takenLayerNames: Set<String> {
+        let all = scenes.flatMap(\.layers) + (document?.symbols.flatMap(\.layers) ?? [])
+        return Set(all.flatMap { [$0.id, $0.name] })
+    }
+
     /// Adds "Layer N" with the smallest N no layer in the document uses as a
     /// name or id, above the selected layer (on top without one), and selects it.
     public mutating func addLayer() {
         guard let owner = propertyOwner, let ownerLayers else { return refuse(.noDocument) }
-        let all = scenes.flatMap(\.layers) + (document?.symbols.flatMap(\.layers) ?? [])
-        let taken = Set(all.flatMap { [$0.id, $0.name] })
+        let taken = takenLayerNames
         var n = 1
         while taken.contains("layer-\(n)") || taken.contains("Layer \(n)") { n += 1 }
         let layer = Layer(id: "layer-\(n)", name: "Layer \(n)")

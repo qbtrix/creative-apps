@@ -33,9 +33,9 @@ public protocol ShapeBuilding: Sendable {
     func unavailableHelp(for tool: FlareTool) -> String?
     func draft(_ tool: FlareTool, from start: Point, to end: Point, modifiers: DragModifiers,
                previous: ShapeDraft?) -> ShapeDraft?
-    /// Grouped "Add Rectangle", "Add Ellipse" or "Add Path". Adds the draft as a new
-    /// layer above `aboveLayerID` and returns the new layer's id. Throws on a locked layer.
-    func commit(_ draft: ShapeDraft, sceneID: String, aboveLayerID: String?,
+    /// Grouped "Add Rectangle", "Add Ellipse" or "Add Path". Adds the draft as a new layer of `owner` (a scene, or
+    /// the symbol edited in place) above `aboveLayerID` and returns the new layer's id. Throws on a locked layer.
+    func commit(_ draft: ShapeDraft, owner: LayerOwner, aboveLayerID: String?,
                 in engine: inout CommandEngine) throws -> String
     /// The layer values a box gesture would give, for the live preview and the commit.
     func boxResult(_ gesture: BoxGesture, layers: [String], document: Document, sceneID: String,
