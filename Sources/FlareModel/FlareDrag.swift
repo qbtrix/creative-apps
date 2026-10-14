@@ -81,18 +81,42 @@ extension FlareWorkspace {
         if let added, layerError == nil { setSelection([]); selectedLayerID = added }
     }
 
-    /// One "Move" by (`dx`, `dy`) scene points: Select writes the layers' x and y, Direct Select the items' geometry.
+    /// One "Move" by (`dx`, `dy`) scene points: Select writes the layers' x and y, Direct Select the items' geometry,
+    /// each layer's items by the offset in that layer's space (`layerMoves`).
     mutating func commitMove(_ moving: [StageAddress], dx: Double, dy: Double) {
         guard let sceneID = selectedSceneID, let document, dx.isFinite, dy.isFinite else { return }
         let shapes = services.shapes, frame = currentFrame, layers = layerIDs(of: moving), tool = tool, autoKey = autoKey
         let box = services.hits.bounds(document, sceneID: sceneID, frame: frame, of: moving)
+        let moves = tool == .select ? [] : Self.layerMoves(moving, dx: dx, dy: dy, in: document, frame: frame)
         step { engine in
-            guard tool == .select else { return try shapes.translate(moving, dx: dx, dy: dy, in: &engine) }
+            guard tool == .select else {
+                return try engine.group("Move") { engine in
+                    for move in moves { try shapes.translate(move.items, dx: move.dx, dy: move.dy, in: &engine) }
+                }
+            }
             try shapes.commitBox(.move(dx: dx, dy: dy), layers: layers, sceneID: sceneID, frame: frame,
                                  box: box ?? Rect(minX: 0, minY: 0, maxX: 0, maxY: 0), autoKey: autoKey, in: &engine)
         }
         if layerError == nil { setSelection(moving) }
     }
+
+    /// `items` grouped by layer, each with the scene offset (`dx`, `dy`) mapped through the inverse of its layer's scale
+    /// and rotation at `frame`, so the item lands where the preview drew it (#554). A layer that can't invert (scale
+    /// 0, so nothing on it shows) moves nothing.
+    static func layerMoves(_ items: [StageAddress], dx: Double, dy: Double, in document: Document,
+                           frame: Int) -> [(items: [StageAddress], dx: Double, dy: Double)] {
+        var moves: [(items: [StageAddress], dx: Double, dy: Double)] = []
+        for item in items where !moves.contains(where: { $0.items.first.map { Self.sameLayer($0, item) } ?? false }) {
+            guard let layer = document.layers(of: item.owner)?.first(where: { $0.id == item.layerID }) else { continue }
+            let m = layer.placement(at: Double(frame)).transform.matrix
+            guard let back = try? Matrix(a: m.a, b: m.b, c: m.c, d: m.d, tx: 0, ty: 0).inverted() else { continue }
+            let local = back.apply(Point(x: dx, y: dy))
+            moves.append((items.filter { Self.sameLayer($0, item) }, local.x, local.y))
+        }
+        return moves
+    }
+
+    private static func sameLayer(_ a: StageAddress, _ b: StageAddress) -> Bool { a.owner == b.owner && a.layerID == b.layerID }
 
     /// The stage at the playhead with `moving` shifted by (`dx`, `dy`).
     private func movePreview(_ moving: [StageAddress], dx: Double, dy: Double) -> StageDrawList? {
