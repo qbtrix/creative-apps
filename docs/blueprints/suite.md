@@ -247,7 +247,7 @@ values, so a shared store never needs to load five engines.
 |---|---|---|
 | shell-live | `SuiteServices.live` and one slot file per member (each feature swaps its own) | `SuiteServices+Live.swift`, `Live/` |
 | shell-apps | Open or activate an app (`NSWorkspace.openApplication(at:configuration:)`, `NSRunningApplication.activate`), run states, the Switch To commands | `AppLauncher.swift`, `SuiteCommands.swift` |
-| shell-handoff | Write a hand-off file and open it with the target app (`NSWorkspace.open(_:withApplicationAt:configuration:)`); receive one in `onOpenURL` | `HandOffTransport.swift` |
+| shell-handoff | Write a hand-off file and open it with the target app (`NSWorkspace.open(_:withApplicationAt:configuration:)`); `SuiteAppDelegate` receives it (shell-adoption) | `HandOffTransport.swift` |
 | shell-store-watch | Post and observe `DistributedNotificationCenter` changes for recents, assets and preferences | `StoreWatcher.swift` |
 | shell-pasteboard | Map `SuiteClipItem` to `NSPasteboard` items and drag providers, and back | `PasteboardBridge.swift`, `DragBridge.swift` |
 | shell-documents | Record opens and saves into recents, write thumbnails, the Open In submenu | `SuiteDocumentsBridge.swift`, `ThumbnailWriter.swift`, `OpenInMenu.swift` |
@@ -269,7 +269,7 @@ values, so a shared store never needs to load five engines.
 | From | To | What |
 |---|---|---|
 | each `<X>Model` | SuiteModel | conforms to `SuiteDocumentHost` (acts on hand-offs); declares its document kinds and pasteboard representations; reads preferences |
-| each `<X>App` | SuiteShell | `.suiteApp(.<x>)` on its scene; Open In and Switch To menus; records recents |
+| each `<X>App` | SuiteShell | `.suiteApp(.<x>, host:)` on its scene, `SuiteAppDelegate`; Open In and Switch To menus; records recents |
 | AfterGlowApp | SuiteShell, SuiteModel, SuiteUI | home, settings, onboarding, updater |
 | SuiteShell | SuiteModel, SuiteUI | live conformances; menu commands built from SuiteUI parts |
 | every process | suite store | JSON files under `~/Library/Application Support/AfterGlow/` |
@@ -464,7 +464,7 @@ Either way the file opens in Flare; QB-S6 times it.
 
 | Identifier | Extension | Conforms to | Opened by | Note |
 |---|---|---|---|---|
-| `org.creativesuite.flare.animation` | `flare` | `public.data`, `public.content` | Flare; Halo (Open In, import) | JSON inside, not declared as `public.json` so text editors don't claim it |
+| `org.creativesuite.flare.animation` | `flare` | `public.data`, `public.content` | Flare; Halo (Open In, from wave 5) | JSON inside, not declared as `public.json` so text editors don't claim it |
 | `org.creativesuite.design.document` | `design` | `public.data`, `public.content` | Design | |
 | `org.creativesuite.halo.project` | `halo` | `public.data`, `public.content` | Halo | Halo's `HaloDocumentType.swift` uses this id (#767 names the file, not the id) |
 | OpenRaster (imported) | `ora` | `public.image`, `public.zip-archive` | Photo | Photo v2's format (#768). BU-5 checks whether macOS 26 declares it; if not, imported as `org.creativesuite.photo.openraster` |
@@ -589,13 +589,14 @@ acceptance needs it; its rank says it never blocks a tier-1 journey.
 
 | Fixture | Contents |
 |---|---|
-| `empty` | no recents, no assets |
+| `empty` | no recents, no assets, onboarding done |
+| `firstLaunch` | as `empty` with default preferences, so onboarding shows |
 | `weekOfWork` | 8 recents over 7 days, newest first: `Logo.design` (Design `cards`, one page renamed), `Cards.design` (Design `cards`), `Bounce.flare` (Flare `bounce`), `Intro.halo` (a Halo two-layer comp), `beach.ora` (Photo two-layer), `Title.flare` (Flare `empty` plus one rectangle), `Sunset.png` (Photo's 1600 × 1067 test image), `Logo animated.flare` (Flare `bounce` renamed); a thumbnail per file; and Library's three sample photos imported (as `roundTrip`), so SJ6 and SJ14 have a catalog |
 | `missing` | `weekOfWork` with `Cards.design` deleted from disk |
-| `roundTrip` | a Library catalog of 3 photos (Library's `LibrarySample` seed 2026) and an empty Photo |
+| `roundTrip` | a Library catalog of 3 photos and an empty Photo. The catalog is Library's own: the launcher forwards `-LibraryCatalogDir <tmp>/Library` and `-LibrarySample 2026` (adoption A-LI-0 adds the second; the first is in #769), so no journey touches the runner's real catalog |
 | `assets` | 6 colours (two in Display P3), 2 vector assets (`Card`, `Badge`, SVG from Design's `cards`), 1 image (`Sunset`), 1 animation (`Bounce`) |
 | `crowd` | 200 recents (`Doc 0.flare` … `Doc 199.flare`) for SP3 and SP4; SP5's 50-shape Design selection is Design's `cards` duplicated to 50 shapes, its 24 MP image is `UITests/Fixtures/suite/large.png` (6000 × 4000) |
-| flags | `-SuiteUpdateFeed <file URL>` (SJ15: `feed-newer.json` signed with the test key, `feed-forged.json`); `-SuiteHideApp <app>` (SJ2); SJ18's samples ship in `Bundle/Samples/` (BU-5: one per app, copies of the fixtures) |
+| flags | `-SuiteUpdateFeed <file URL>` (SJ15: `feed-newer.json` signed with the test key, `feed-forged.json`); `-SuiteHideApp <app>` (SJ2); SJ18's samples ship in `Bundle/Samples/` (OB-1 owns them, copies of the A-x-0 fixture files; BU-4's `bundle-apps` copies `Bundle/Samples/` into the bundle from the start) |
 
 - **Waiting and timing.** As the Flare blueprint: state changes are awaited
   with `waitForExistence` or a value predicate (2 s); timing claims come
@@ -627,7 +628,7 @@ through.
 
 Asserts: 8 recent cards newest first; every menu holds the items section
 6.2 lists for it (system-added items such as Services are not counted); every enabled control changed the shot or a value, every
-disabled one has a reason. *Empty:* none here (SJ1b). *Error:* none.
+disabled one has a reason. *Empty:* none here (SJ1 step 6 covers it). *Error:* none.
 *Loading:* the probe's `recents-ready` mark precedes the first shot.
 
 **SJ1 `testHomeFindsAndOpensRecentWork`** (`+Home`, home) · `weekOfWork`, then `missing`, then `empty`
@@ -646,16 +647,18 @@ Asserts: counts per step; Design's `XCUIApplication` state is
 `runningForeground` and its window title; the home's after ⌃⌘0. Steps 3
 and 4 need the live hand-off transport, so they run as
 `testOpenRecentBringsAppForward` in `+Switch` (switching); the home feature
-ships steps 1, 2, 5 and 6 on the fakes, where step 3 asserts the fake's
-sent hand-off through `suite.controls`. *Empty:*
+ships steps 1, 2, 5 and 6 on the live store (recents are live from SC-5),
+where step 3 asserts the sent hand-off file exists in the store's
+`handoffs/` folder until switching lands. *Empty:*
 "No recent work yet. Start something new above, or open a file." with
 Open… as the one prominent button. *Error:* the missing-file message in
 place, never an alert. *Loading:* a card whose thumbnail has not loaded
 shows its app's symbol on the `panel` fill (snapshot `afterglow-home-loading`).
 
 **SJ2 `testNewDocumentByType`** (`+New`, switching: it needs the live hand-off transport) · `empty`
-1. Click the "Vertical 9:16" preset chip under New Animation → Flare comes
-   forward with a new untitled animation.
+1. Open New Animation's preset menu (at 1000 pt tiles show presets as a
+   menu, 7.3) and choose "Vertical 9:16" → Flare comes forward with a new
+   untitled animation.
 2. ⌃⌘0; New Design → Design's new untitled file.
 3. ⌃⌘0; New Image → Photo's New Image sheet.
 4. ⌃⌘0; New Composition → Halo's New Composition sheet.
@@ -706,9 +709,11 @@ Asserts: the lists at each step; the thumbnail file exists in the store.
 "Not saved" state). *Loading:* none (the list is local).
 
 **SJ5 `testFinderOpenRoutesToTheRightApp`** (`+Routing`, recents-open-in) · `weekOfWork`
-1. CI registers the bundle first (`lsregister -f .build/apps/AfterGlow.app`;
-   the old `<X>App.app` paths are symlinks into it, so no second copy holds
-   the same bundle ids). The test runner opens `<tmp>/Documents/Cards.design`
+1. `setUp` registers the bundle (`lsregister -f .build/apps/AfterGlow.app`
+   run with `Process`; the old `<X>App.app` paths are symlinks into it, so
+   no second copy holds the same bundle ids) and starts each target app
+   through the launcher (so each gets `-SuiteSupportDir`); every open below
+   is then an event to a running app. The test runner opens `<tmp>/Documents/Cards.design`
    with `NSWorkspace.open(_:)` (Launch Services picks the app), then again
    with `open(_:withApplicationAt:configuration:)` at `AfterGlow.app` (the
    launcher's router).
@@ -757,7 +762,7 @@ same bounds; Each paste is one undo step ("Undo Paste").
 | SJ15 | `testCheckForUpdates` (`+Update`, updater) | `-SuiteUpdateFeed file://<tmp>/feed.json` with a newer version | AfterGlow > Check for Updates… | the offer sheet with version and notes; Later closes it; a bad signature fixture → "This update couldn't be verified, so it wasn't installed." Loading: progress within 100 ms |
 | SJ16 | `testPlaceLinkedDesignAsset` (`+Links`, linked-assets) | `assets` | Assets page: select Card, Place In ▸ Flare; in Design open `Cards.design`, change the card's fill, Object > Update Asset (enabled because `assets(fromFileID:)` lists Card); back in Flare; then the same with Place In ▸ Halo (`testPlaceLinkedInHalo`) | Flare's layer shows the link badge; then "Update available"; Update → one undo step "Undo Update Linked Asset"; Missing source → "Linked asset is missing; using the last copy." (`SuiteError.linkMissing`) |
 | SJ17 | `testOpenFlareInHalo` (`+FlareInHalo`, flare-in-halo) | `weekOfWork` | In Flare with `Bounce.flare`, File > Open In ▸ Halo | Halo makes a composition 1920 × 1080, 24 fps, 48 frames with one animation layer "Bounce"; Halo's frame 12 equals Flare's PNG export of frame 12 (QB-SV4) |
-| SJ18 | `testFirstLaunchOnboarding` (`+Onboarding`, onboarding) | `empty`, no skip flag | launch; Continue ×2 choosing "Photos"; Open Sample | the home orders Library and Photo first; relaunch shows no onboarding; Settings > General > Show Welcome Again brings it back |
+| SJ18 | `testFirstLaunchOnboarding` (`+Onboarding`, onboarding) | `firstLaunch` (default preferences), no skip flag | launch; Continue ×2 choosing "Photos"; Open Sample | the home orders Library and Photo first; relaunch shows no onboarding; Settings > General > Show Welcome Again brings it back |
 | SJ19 | `testEveryControlActsOrSaysWhy` (`+EveryControl`, home) | `weekOfWork` | the `suite.controls` sweep for home, Assets, Settings | as Flare's J29; never cited by the matrix |
 
 ### 4.4 Perf journeys (`+Perf`, each feature its own)
@@ -801,7 +806,7 @@ same text the Model test does.
 
 | UC | Protocol | Tier | Fake | Live (who builds it) | Feature |
 |---|---|---|---|---|---|
-| 1 | `AppSwitching` | 1 | `FakeSwitching` (run states, a missing app, a terminate hook) | SuiteShell `AppLauncher`: `NSRunningApplication.activate`, else `NSWorkspace.openApplication(at:configuration:)` at `SuiteApp.bundlePath` | switching |
+| 1 | `AppSwitching` | 1 | `FakeSwitching` (run states, a missing app, a terminate hook) | SuiteShell `AppLauncher`: `NSRunningApplication.activate` when the app has a window; `NSWorkspace.openApplication(at:configuration:)` when it is not running or has no window (that sends the reopen event, so a window appears); `SwitchRunStateTests` covers both | switching |
 | 2 | `RecentWork` | 1 | `FakeRecents` | `FileStore` over `recents.json` + `StoreWatcher` | recents-open-in |
 | 3 | `DocumentCreating` | 1 | `FakeCreating` (also the reference: tiles and presets) | same type, moved to `Home/` | home |
 | 4 | `DocumentRouting` | 1 | `FakeRouting` (reference) | same type, in `Routing/` | recents-open-in |
@@ -837,7 +842,8 @@ UC-8 SJ13; UC-9 SJ16; UC-10 SJ17; UC-11 SJ12, SP8; UC-12 SJ12; UC-13 SJ18;
 UC-14 SJ15; UC-15 SJ4; UC-16 SJ0, SJ1, SP3, SP4; UC-17 the size gate
 (section 7.5); UC-18 SJ1, SJ2, SJ5, SJ10, SJ11, SJ16, SJ17.
 
-**Which services a launch gets.** Snapshots and Model tests: `.fake`.
+**Which services a launch gets.** Snapshots and Model tests: `.fake`
+(`isPreview` true, the "Preview data" pill).
 Journeys: `.live` everywhere, the store seeded by `-SuiteFixture <name>`
 (section 4.1), so processes share it. No arguments (a person's launch):
 `.live`, built by SuiteShell from its slot
@@ -1044,7 +1050,8 @@ public struct SuiteServices: Sendable {
     public var updates: any UpdateChecking
     public var thumbnails: any ThumbnailPublishing
     public var home: any HomeBuilding
-    /// True while any member is a fake; drives a "Preview data" pill in the home.
+    /// True only for `.fake(...)` (snapshots, Model tests); `.live` sets false even while
+    /// a slot still holds a not-connected fake, whose controls say so themselves.
     public var isPreview: Bool
 
     public init(switching: any AppSwitching, recents: any RecentWork, creating: any DocumentCreating,
@@ -1189,7 +1196,7 @@ public struct SuiteTypeRegistry: Sendable {
 
     public static let standard = SuiteTypeRegistry(types: [
         SuiteDocumentType(id: .flareAnimation, name: "Flare Animation", extensions: ["flare"],
-                          owner: .flare, readers: [.flare, .halo]),
+                          owner: .flare, readers: [.flare]),   // flare-in-halo (FH-1) adds .halo
         SuiteDocumentType(id: .designDocument, name: "Design Document", extensions: ["design"],
                           owner: .design, readers: [.design]),
         SuiteDocumentType(id: .haloProject, name: "Halo Project", extensions: ["halo"],
@@ -1220,7 +1227,7 @@ public struct SuiteTypeRegistry: Sendable {
 /// A document on disk, as every app and the launcher refer to it.
 public struct SuiteDocumentRef: Hashable, Codable, Sendable {
     public var path: String          // absolute path
-    public var fileID: String        // stable identity (volume and file number from the app; the path when unknown)
+    public var fileID: String        // `SuiteDocumentRef.fileID(forPath:)`, the one rule every process uses
     public var app: SuiteApp         // the app that last opened or saved it
     public var type: SuiteTypeID
     public var displayName: String   // file name with extension
@@ -1228,6 +1235,16 @@ public struct SuiteDocumentRef: Hashable, Codable, Sendable {
     public init(path: String, fileID: String, app: SuiteApp, type: SuiteTypeID, displayName: String, bookmark: Data? = nil) {
         self.path = path; self.fileID = fileID; self.app = app; self.type = type
         self.displayName = displayName; self.bookmark = bookmark
+    }
+
+    /// The one identity rule (v1): the standardized absolute path. A moved file
+    /// becomes a new entry; Locate… on the old card re-points it.
+    public static func fileID(forPath path: String) -> String {
+        var parts: [Substring] = []
+        for p in path.split(separator: "/") where p != "." {
+            if p == "..", !parts.isEmpty { parts.removeLast() } else if p != ".." { parts.append(p) }
+        }
+        return "path:/" + parts.joined(separator: "/")
     }
 }
 
@@ -1355,8 +1372,8 @@ public enum SwitchReason: String, Codable, Sendable { case shortcut, menu, home,
 public struct SwitchReceipt: Equatable, Sendable {
     public var app: SuiteApp
     public var wasRunning: Bool
-    public var requestedAt: UInt64      // mach_continuous_time ticks; the probe pairs it with the target's frame
-    public init(app: SuiteApp, wasRunning: Bool, requestedAt: UInt64) {
+    public var requestedAt: Double      // system uptime seconds (ProcessInfo.systemUptime, NSEvent.timestamp's clock)
+    public init(app: SuiteApp, wasRunning: Bool, requestedAt: Double) {
         self.app = app; self.wasRunning = wasRunning; self.requestedAt = requestedAt
     }
 }
@@ -1767,7 +1784,7 @@ struct ChangeFeed {
 
 public actor FakeSwitching: AppSwitching {
     public private(set) var states: [SuiteApp: AppRunState]
-    public private(set) var ticks: UInt64 = 0
+    public private(set) var ticks: Double = 0
     var feed = ChangeFeed()
     let unavailable: String?
     public init(running: [SuiteApp] = [], missing: Set<SuiteApp> = [], unavailable: String? = nil) {
@@ -2215,7 +2232,7 @@ public actor FakeDocumentHost: SuiteDocumentHost {
 /// so what one app writes the others read. Document files come from
 /// `UITests/Fixtures/suite/` (each app line's fixture export, A-x-0).
 public enum SuiteFixtures {
-    public static let names = ["empty", "weekOfWork", "missing", "roundTrip", "assets", "crowd"]
+    public static let names = ["empty", "firstLaunch", "weekOfWork", "missing", "roundTrip", "assets", "crowd"]
 
     public struct Store: Equatable, Sendable {
         public var recents: RecentsList
@@ -2233,12 +2250,15 @@ public enum SuiteFixtures {
     /// nil for an unknown name. `documents` is the folder holding the fixture documents.
     public static func store(_ name: String, documents: String, now: Date) -> Store? {
         func ref(_ f: (String, SuiteApp, SuiteTypeID)) -> SuiteDocumentRef {
-            SuiteDocumentRef(path: documents + "/" + f.0, fileID: f.0, app: f.1, type: f.2, displayName: f.0)
+            let path = documents + "/" + f.0
+            return SuiteDocumentRef(path: path, fileID: SuiteDocumentRef.fileID(forPath: path), app: f.1, type: f.2, displayName: f.0)
         }
         let done = SuitePreferences(onboardingDoneVersion: 1)
         switch name {
         case "empty", "roundTrip":
             return Store(recents: RecentsList(), assets: AssetIndex(), preferences: done)
+        case "firstLaunch":
+            return Store(recents: RecentsList(), assets: AssetIndex(), preferences: SuitePreferences())
         case "weekOfWork", "missing":
             let items = weekOfWorkFiles.enumerated().map { i, f in
                 RecentItem(ref: ref(f), lastUsed: now - Double(i) * 75_600, thumbnail: "thumbnails/\(f.0).png")
@@ -2252,14 +2272,15 @@ public enum SuiteFixtures {
                 SuiteAsset(id: "c\(i)", kind: .color, name: c.0, color: SuiteColorValue(space: c.1, red: c.2, green: c.3, blue: c.4),
                            modifiedAt: now - Double(i))
             }
-            assets.append(SuiteAsset(id: "v0", kind: .vector, name: "Card", payload: "assets/v0/1.svg", modifiedAt: now - 10))
-            assets.append(SuiteAsset(id: "v1", kind: .vector, name: "Badge", payload: "assets/v1/1.svg", modifiedAt: now - 11))
+            let cards = ref(("Cards.design", .design, .designDocument))
+            assets.append(SuiteAsset(id: "v0", kind: .vector, name: "Card", payload: "assets/v0/1.svg", source: cards, modifiedAt: now - 10))
+            assets.append(SuiteAsset(id: "v1", kind: .vector, name: "Badge", payload: "assets/v1/1.svg", source: cards, modifiedAt: now - 11))
             assets.append(SuiteAsset(id: "i0", kind: .image, name: "Sunset", payload: "assets/i0/1.png", modifiedAt: now - 12))
             assets.append(SuiteAsset(id: "a0", kind: .animation, name: "Bounce", payload: "assets/a0/1.flare", modifiedAt: now - 13))
             return Store(recents: RecentsList(), assets: AssetIndex(revision: 1, assets: assets), preferences: done)
         case "crowd":
             let items = (0..<200).map { i in
-                RecentItem(ref: SuiteDocumentRef(path: documents + "/Doc \(i).flare", fileID: "crowd\(i)", app: .flare,
+                RecentItem(ref: SuiteDocumentRef(path: documents + "/Doc \(i).flare", fileID: SuiteDocumentRef.fileID(forPath: documents + "/Doc \(i).flare"), app: .flare,
                                                  type: .flareAnimation, displayName: "Doc \(i).flare"), lastUsed: now - Double(i))
             }
             return Store(recents: RecentsList(revision: 1, items: items), assets: AssetIndex(), preferences: done)
@@ -2345,7 +2366,9 @@ public struct FakeSizeBudget: SizeBudgetChecking {
 Views in `Sources/AfterGlowApp/` stay dumb (the app-state rule): each screen
 reads an `@Observable` model in SuiteModel whose state is
 `public private(set)` and calls its methods. `HomeModel` is the worked
-example; `AssetsModel`, `SettingsModel`, `OnboardingModel` and
+example (load with a file-existence check, search, filter, select, open,
+new from a tile or preset, switch, Locate…, remove, and `observe()` over
+the recents and run-state change streams); `AssetsModel`, `SettingsModel`, `OnboardingModel` and
 `UpdateModel` follow it in their features.
 
 ```swift
@@ -2376,8 +2399,12 @@ public final class HomeModel {
     var order = SuiteApp.apps
     var missingApps: Set<SuiteApp> = []
     var missingFiles: Set<String> = []
+    let fileExists: @Sendable (String) -> Bool
 
-    public init(services: SuiteServices) { self.services = services }
+    /// `fileExists` is `FileManager.default.fileExists(atPath:)` in the app; tests pass a set.
+    public init(services: SuiteServices, fileExists: @escaping @Sendable (String) -> Bool) {
+        self.services = services; self.fileExists = fileExists
+    }
 
     public func reload(now: Date) async {
         do { recents = try await services.recents.list() } catch { message = error }
@@ -2392,7 +2419,43 @@ public final class HomeModel {
         }
         running = r
         missingApps = missing
+        missingFiles = Set(recents.items.filter { !fileExists($0.ref.path) }.map(\.ref.fileID))
         rebuild(now: now)
+    }
+
+    /// Reloads whenever another process writes recents or an app starts or quits.
+    /// The window runs it in a `.task`, so it ends when the window closes.
+    public func observe(now: @escaping @Sendable () -> Date) async {
+        let recentChanges = await services.recents.changes()
+        let runChanges = await services.switching.changes()
+        await withTaskGroup(of: Void.self) { group in
+            group.addTask { for await _ in recentChanges { await self.reload(now: now()) } }
+            group.addTask { for await _ in runChanges { await self.reload(now: now()) } }
+        }
+    }
+
+    /// A tile or one of its presets (UC-3, UC-5).
+    public func newDocument(_ preset: NewDocumentPreset, now: Date) async {
+        let h = services.creating.handOff(for: preset, id: "new-\(preset.id)-\(Int(now.timeIntervalSince1970))", at: now)
+        do { _ = try await services.sending.send(h) } catch { message = error }
+    }
+
+    /// A running row or the Switch To menu (UC-1).
+    public func switchTo(_ app: SuiteApp) async {
+        do { _ = try await services.switching.switchTo(app, reason: .home) } catch { message = error }
+    }
+
+    /// Locate… on a missing card: re-point it to the file the person chose.
+    public func locate(_ fileID: String, newPath: String, now: Date) async {
+        guard let item = recents.items.first(where: { $0.ref.fileID == fileID }) else { return }
+        var ref = item.ref
+        ref.path = newPath
+        ref.fileID = SuiteDocumentRef.fileID(forPath: newPath)
+        do {
+            try await services.recents.remove(fileID: fileID)
+            try await services.recents.note(ref, event: .opened, at: now, thumbnail: item.thumbnail)
+        } catch { message = error }
+        await reload(now: now)
     }
 
     public func search(_ text: String, now: Date) { query = text; rebuild(now: now) }
@@ -2562,8 +2625,8 @@ audit, the size report), or **local** (`scripts/ui-test` on a Mac). Ids
 when the switching feature's last task lands (it owns that file in its
 wave, section 8). Gates follow the rubric's "How gates are set": a new perf
 row ships report-only, and after ten green CI runs its gate is the measured
-CI p95 × 1.5, never tighter than the device target, written as a constant in
-`UITests/Journey+Budgets.swift`.
+CI p95 × 1.5, never tighter than the device target, written as a constant in a
+per-feature `UITests/SuiteBudgets+<Area>.swift`.
 
 ### 7.1 Input-to-screen budgets (interactive)
 
@@ -2586,7 +2649,7 @@ display refreshes, as the rubric counts them.
 | QB-S9 | Drag a card or file onto another app: the drop target highlights (the drag image itself is drawn by the system, which no app probe sees) | highlight ≤ 1 frame after the drag enters, by the target's probe | report-only | SJ14 with the probe |
 | QB-L9 | Any action that waits (cold open, round trip, update check, large paste) shows progress | ≤ 100 ms after the command, by the probe mark | as the rubric | the journeys' `*-progress` marks |
 
-**Model budgets** (Linux and macOS, `Tests/SuiteModelTests/Budget.swift`,
+**Model budgets** (Linux and macOS, `Tests/SuiteModelTests/Budget+<Area>.swift` over SC-4's `Budget.swift` helper,
 debug gate ×10 like the rubric):
 
 | id | Call | Device target | Debug gate |
@@ -2636,9 +2699,9 @@ Checked, at each of the four widths:
    anchor preferences. The tile row, the RECENT header and the grid share
    one left edge (±0.5 pt); no card or tile crosses the content's right
    edge; no two cards overlap; card origins sit on the 4 pt grid; the
-   sidebar is 200 pt. The same check for Settings (fixed 560 pt wide: every
-   `Form` row's leading labels align, ±0.5 pt) and onboarding (720 × 520:
-   Continue and Skip inside the window with 24 pt margins).
+   sidebar is 200 pt. The same kind of check, in their own snapshot files,
+   for Settings (ST-2: every `Form` row's leading labels align, ±0.5 pt) and
+   onboarding (OB-1: Continue and Skip inside the window with 24 pt margins).
 3. **macOS CI**, journey `testHomeAtEveryWidth` (`+Layout`, home): resizes
    the window to 880 and 1000, the widths that fit the 1024 × 768 runner
    (app-audit.md, #263), and shoots each; the audit's `offscreen` and
@@ -2770,16 +2833,16 @@ its own Model and SuiteShell tasks don't.
 |---|---|---|---|
 | BU-0 | Measure today: `scripts/size-report` and a `macos` step that uploads `size-report` for the five current bundles (**supervisor merges**) | `scripts/size-report`, `.github/workflows/ci.yml` | the artifact on the next dev run; the numbers recorded in the PR body (QB section 7.5 baselines) |
 | BU-S | Spike, run locally on a Mac (`scripts/ui-test`), no protected path: time shape B (cold launch, activation, memory of today's bundles) against shape A's equivalent (section 2.5); confirm `application(_:open:)` receives a file with no window open; confirm a cross-app XCUITest drag works on the runner | `docs/blueprints/suite/spike.md` | the numbers; decides Q12 |
-| BU-1 | New targets with placeholders (**supervisor merges**): `SuiteModel`, `SuiteModelTests`, `SuiteShell`, `AfterGlowApp` (its `@main` with the home `Window`, `Settings`, onboarding window and update sheet, each pointing at a placeholder view in its own file, and one `Commands` stub per launcher menu feature); the C4 containers from `c4-planned.json`. Every placeholder sits on a path a component owns, so the C4 check passes | `Package.swift`, `docs/c4/model.json`, `Sources/SuiteModel/Values/SuiteIdentity.swift`, `Sources/SuiteShell/SuiteCommands.swift` (stub; SW-3 owns it from wave 2), `Sources/AfterGlowApp/AfterGlowApp.swift`, `HomeWindow.swift`, `AssetsPage.swift`, `SettingsView.swift`, `OnboardingWindow.swift`, `UpdateSheet.swift`, `LauncherCommands+Home.swift`, `LauncherCommands+Settings.swift`, `LauncherCommands+Assets.swift`, `LauncherCommands+Update.swift` (all under `Sources/AfterGlowApp/`), `Tests/SuiteModelTests/SuiteModelTests.swift` | `scripts/ci` PASS on Linux; the macOS job builds the four targets |
+| BU-1 | New targets with placeholders (**supervisor merges**): `SuiteModel`, `SuiteModelTests`, `SuiteShell`, `AfterGlowApp` (its `@main` with the home `Window`, `Settings`, onboarding window and update sheet, each pointing at a placeholder view in its own file, and one `Commands` stub per launcher menu feature, each already holding its section 6.2 items disabled with "Not connected yet (<feature>).", so SJ0's menu check holds from wave 2); the C4 containers from `c4-planned.json`. Every placeholder sits on a path a component owns, so the C4 check passes | `Package.swift`, `docs/c4/model.json`, `Sources/SuiteModel/Values/SuiteIdentity.swift`, `Sources/SuiteShell/SuiteCommands.swift` (stub; SW-3 owns it from wave 2), `Sources/AfterGlowApp/AfterGlowApp.swift`, `HomeWindow.swift`, `AssetsPage.swift`, `SettingsView.swift`, `OnboardingWindow.swift`, `UpdateSheet.swift`, `LauncherCommands+Home.swift`, `LauncherCommands+Settings.swift`, `LauncherCommands+Assets.swift`, `LauncherCommands+Update.swift` (all under `Sources/AfterGlowApp/`), `Tests/SuiteModelTests/SuiteModelTests.swift` | `scripts/ci` PASS on Linux; the macOS job builds the four targets |
 
 **F1 `bundle`** (wave 1) · tier 1 · waits on F0
 
 | Task | Behavior | Owned files | Proof |
 |---|---|---|---|
 | BU-2 | `BundleLayout`, `SizeReport`, `SizeBudget`, `SizeGateTests` | `Sources/SuiteModel/Packaging/`, `Tests/SuiteModelTests/Packaging/` | Linux tests (main.swift's size checks, moved) |
-| BU-3 | Release graph in `project.yml` (route R1: four frameworks, five apps, the launcher) and the `AfterGlowJourneyTests` bundle; `CreativeEngines.swift`; `BuildGraphTests` (Package.swift vs project.yml) | `project.yml`, `Bundle/Engines/CreativeEngines.swift`, `Tests/SuiteModelTests/BuildGraphTests.swift` | Linux `BuildGraphTests`; macOS dev run builds the graph; `otool -L` of each app lists the four frameworks |
-| BU-4 | `scripts/bundle-apps` assembles `AfterGlow.app` (helpers, frameworks, inside-out signing, symlinks for the old `<X>App.app` paths) (**supervisor merges**) | `scripts/bundle-apps` | `codesign --verify --deep --strict` passes; every existing journey still green; SuiteUI symbols per app 0 in `size-report` |
-| BU-5 | Info.plists and document types: `Bundle/Info/{AfterGlow,Flare,Design,Photo,Library,Halo}.plist` (types of 2.6), placeholder icons | `Bundle/Info/`, `Bundle/Icons/` | `plutil -lint`; `PlistShapeTests` (Linux, reads the XML) |
+| BU-3 | Release graph in `project.yml` (route R1: four frameworks, five apps, the launcher) and the `AfterGlowJourneyTests` bundle, which compiles the Journey template's files plus `UITests/Journey+Suite.swift`, `UITests/SuiteBudgets*.swift`, `UITests/AfterGlowJourneyTests*.swift` and `Sources/SuiteModel/Values/` (for `SuiteApp`); `CreativeEngines.swift`; `BuildGraphTests` (Package.swift vs project.yml) | `project.yml`, `Bundle/Engines/CreativeEngines.swift`, `Tests/SuiteModelTests/BuildGraphTests.swift` | Linux `BuildGraphTests` |
+| BU-4 | `scripts/bundle-apps` assembles `AfterGlow.app` (helpers, frameworks, inside-out signing, symlinks for the old `<X>App.app` paths) (**supervisor merges**) | `scripts/bundle-apps`, `scripts/size-report` (extended to `AfterGlow.app`), the `lsregister` step | `codesign --verify --deep --strict` passes; `otool -L` of each app lists the four frameworks; every existing journey still green; SuiteUI symbols per app counted in `size-report` |
+| BU-5 | Info.plists and document types: `Bundle/Info/{AfterGlow,Flare,Design,Photo,Library,Halo}.plist` (types of 2.6), placeholder icons | `Bundle/Info/`, `Bundle/Icons/`, `Tests/SuiteModelTests/PlistShapeTests.swift` | `plutil -lint`; `PlistShapeTests` (Linux, reads the XML) |
 | BU-6 | Turn the size gate on in CI after ten runs; record BU-0 vs after (**supervisor merges**) | `.github/workflows/ci.yml`, `Tests/SuiteModelTests/Fixtures/size-budget.json` | an over-budget fixture report fails `SizeGateTests` |
 
 Engine: none on route R1. If BU-3 cannot link the engines once, **needs a
@@ -2795,8 +2858,8 @@ executable depending on it links `libCreativeEngines` dynamically
 | SC-1 | Values and the type registry, plus the pure helpers in their later folders (`Recents/RecentsList.swift`, `Home/HomeLayout.swift`, `Update/UpdateFeed.swift`, `HandOff/HandOffCodec.swift`; each owned by its feature from that feature's wave) | `Sources/SuiteModel/Values/` (except `SuiteIdentity.swift`'s placeholder, which it fills), those four files, `Tests/SuiteModelTests/ValuesTests.swift` | recents, version, colour, hand-off codec checks from main.swift |
 | SC-2 | The 18 contracts of `Contracts.swift`, one file each | `Sources/SuiteModel/Contracts/` | compiles; `ContractShapeTests` |
 | SC-3 | Fakes and `SuiteFixtures` (all five fixtures of 4.1, so later features never edit them) | `Sources/SuiteModel/Fakes/`, `Tests/SuiteModelTests/FakesTests.swift` | each fake's behavior test |
-| SC-4 | `SuiteServices` and `FileStore` (revisioned atomic JSON under a lock file, merge) | `Sources/SuiteModel/SuiteServices.swift`, `Sources/SuiteModel/Store/`, `Tests/SuiteModelTests/StoreTests.swift`, `Tests/SuiteModelTests/Budget+Store.swift` | QB-SM6 (two processes), QB-SV8 |
-| SC-5 | `SuiteServices.live` and one slot file per member, each the fake with "Not connected yet (<feature>)." | `Sources/SuiteShell/SuiteServices+Live.swift`, `Sources/SuiteShell/Live/` (14 slot files: every member but `animations` and `updates`, which HaloApp and AfterGlowApp supply through `with(animations:updates:)`; one `HandOffSlot` for sending and receiving) | macOS build; the "Preview data" pill logic tested on Linux |
+| SC-4 | `SuiteServices` and `FileStore` (revisioned atomic JSON under a lock file, merge) | `Sources/SuiteModel/SuiteServices.swift`, `Sources/SuiteModel/Store/`, `Tests/SuiteModelTests/StoreTests.swift`, `Tests/SuiteModelTests/Budget+Store.swift`, `Tests/SuiteModelTests/Budget.swift` (the shared timing helper; features add `Budget+<Area>.swift`) | QB-SM6 (two processes), QB-SV8 |
+| SC-5 | `SuiteServices.live` and one slot file per member, each the fake with "Not connected yet (<feature>).", except `RecentsSlot`, which already holds the live `FileStore`-backed `RecentWork` (read, note, remove, clear, `changes()`), so wave 2's home and switching journeys read the seeded store; recents-open-in adds the recording rules, Open Recent and thumbnails on top | `Sources/SuiteShell/SuiteServices+Live.swift`, `Sources/SuiteShell/Live/` (14 slot files: every member but `animations` and `updates`, which HaloApp and AfterGlowApp supply through `with(animations:updates:)`; one `HandOffSlot` for sending and receiving) | macOS build; the "Preview data" pill logic tested on Linux |
 
 Engine: none.
 
@@ -2806,7 +2869,7 @@ Engine: none.
 |---|---|---|---|
 | HM-0 | `Journey+Suite.swift`: `Journey(bundlePath:bundleID:auditKey:)`, `attach(_:)`, per-process audit keys (4.1) | `UITests/Journey+Suite.swift` | the first AfterGlow journey runs |
 | HM-1 | `HomeBuilder` (live `HomeBuilding`), `HomeLayout`, `HomeModel`, locale ages | `Sources/SuiteModel/Home/`, `Tests/SuiteModelTests/Home*.swift`, `Tests/SuiteModelTests/Budget+Home.swift`, `Sources/SuiteShell/Live/HomeSlot.swift`, `Sources/SuiteShell/Live/CreatingSlot.swift` | QB-SM2; `HomeLayoutTests` |
-| HM-2 | Home window: sidebar, New row, recents grid, search, filter, inspector, empty state; the launcher's File and View menus | `Sources/AfterGlowApp/Home*.swift` (includes `HomeWindow.swift`), `Sources/AfterGlowApp/LauncherCommands+Home.swift` | snapshots `afterglow-home-*` (QB-SV7) |
+| HM-2 | Home window: sidebar, New row, recents grid, search, filter, inspector, empty state, the file drop target (through `PasteboardCoding`'s fake until clipboard-drag); the launcher's File, Edit (Delete routes by the current page) and View menus | `Sources/AfterGlowApp/Home*.swift` (includes `HomeWindow.swift`), `Sources/AfterGlowApp/LauncherCommands+Home.swift` | snapshots `afterglow-home-*` (QB-SV7) |
 | HM-3 | Journeys SJ0, SJ1 (steps 1, 2, 5, 6), `testHomeAtEveryWidth`, SJ19, SP3, SP4; the `afterglow` audit key at 0 | `UITests/AfterGlowJourneyTests.swift`, `UITests/AfterGlowJourneyTests+Home.swift`, `+Layout.swift`, `+EveryControl.swift`, `+PerfHome.swift`, `UITests/SuiteBudgets+Home.swift`, `UITests/audit-baseline.json`, `Tests/AppSnapshotTests/AfterGlowHome*.swift` | the journeys; layout spec 7.3; QB-S3, QB-S4 |
 | HM-4 | `needs-ui` issues for `AppTile`, `ThumbnailBadges`, `SidebarRow` accessory; the "AfterGlow" section of `docs/design.md` (6.4) | `docs/design.md` | review |
 
@@ -2818,9 +2881,10 @@ Engine: none.
 |---|---|---|---|
 | SW-1 | Switch requests, run states, Switch To menu model | `Sources/SuiteModel/Switching/`, `Tests/SuiteModelTests/Switch*.swift` | `SwitchRunStateTests` |
 | SW-2 | Hand-off lifecycle in the store (expiry, settle) | `Sources/SuiteModel/HandOff/`, `Tests/SuiteModelTests/HandOff*.swift`, `Tests/SuiteModelTests/Budget+HandOff.swift` | `HandOffCodecTests`, QB-SM4 |
-| SW-3 | `AppLauncher`, `HandOffTransport`, `StoreWatcher`, `SuiteCommands`, `.suiteApp(_:host:)`, `SuiteAppDelegate`, the launcher's `LauncherRouter` (argument forwarding of 2.6); stubs of `SettingsRoute.swift` and `OpenInMenu.swift` | `Sources/SuiteShell/AppLauncher.swift`, `HandOffTransport.swift`, `StoreWatcher.swift`, `SuiteCommands.swift`, `SuiteAppModifier.swift`, `SuiteAppDelegate.swift`, `SettingsRoute.swift` and `OpenInMenu.swift` (stubs; settings and recents-open-in own them from wave 3), `Sources/SuiteShell/Live/SwitchingSlot.swift`, `Live/HandOffSlot.swift`, `Sources/AfterGlowApp/LauncherRouter.swift` | macOS build; `SuiteCommandsTests` (no ⌃⌘ digit clash, each bound once) |
+| SW-3 | `AppLauncher`, `HandOffTransport`, `StoreWatcher`, `SuiteCommands`, `.suiteApp(_:host:)`, `SuiteAppDelegate`, the launcher's `LauncherRouter` (argument forwarding of 2.6; it dispatches each hand-off verb to a `LauncherRouter+<Area>.swift` extension, so later features add a file and never edit this one); stubs of `SettingsRoute.swift` and `OpenInMenu.swift` | `Sources/SuiteShell/AppLauncher.swift`, `HandOffTransport.swift`, `StoreWatcher.swift`, `SuiteCommands.swift`, `SuiteAppModifier.swift`, `SuiteAppDelegate.swift`, `SettingsRoute.swift` and `OpenInMenu.swift` (stubs; settings and recents-open-in own them from wave 3), `Sources/SuiteShell/Live/SwitchingSlot.swift`, `Live/HandOffSlot.swift`, `Sources/AfterGlowApp/LauncherRouter.swift` | macOS build; `SuiteCommandsTests` (no ⌃⌘ digit clash, each bound once) |
 | SW-4 | Journeys SJ2, SJ3, `testOpenRecentBringsAppForward`, `testCrashIsolation`, SP1, SP2; every QB-S and QB-SM row into `docs/review-rubric.md` at once, report-only (later gates are one-line constant changes in each feature's `SuiteBudgets+<Area>.swift`) | `UITests/AfterGlowJourneyTests+Switch.swift`, `+New.swift`, `+PerfSwitch.swift`, `UITests/SuiteBudgets+Switch.swift`, `docs/review-rubric.md` | the journeys; QB-S1, QB-S2 report-only |
-| A-x-0 ×5 | `needs-suite` on each line: a fixture export test that writes the app's `weekOfWork` documents into `UITests/Fixtures/suite/` and fails when they drift | `Tests/<X>ModelTests/SuiteFixtureExportTests.swift`, `UITests/Fixtures/suite/<its files>` | the files exist and decode |
+| A-LI-0 | `needs-suite` on Library: `-LibrarySample <seed>` imports Library's sample photos into the catalog at `-LibraryCatalogDir` | Library's launch-argument file (named in the issue) | SJ6, SJ10, SJ14 have photos |
+| A-x-0 ×5 | `needs-suite` on each line: a fixture export test that writes the app's `weekOfWork` documents (and their 512 px thumbnails; Photo also `large.png`) into `UITests/Fixtures/suite/` and fails when they drift; the `missing` fixture is `weekOfWork` with the launcher skipping the copy of `Cards.design` | `Tests/<X>ModelTests/SuiteFixtureExportTests.swift`, `UITests/Fixtures/suite/<its files>` | the files exist and decode |
 | A-x-1 ×5 | `needs-suite` on each line: `<X>Model` conforms to `SuiteDocumentHost` (open, new from preset, and the verbs it takes); `<X>App` adds `.suiteApp(.x, host:)`, `@NSApplicationDelegateAdaptor(SuiteAppDelegate.self)` (Photo subclasses it for PV-1) and `SuiteCommands()`; its menu journey's item counts updated | `Sources/<X>Model/<X>DocumentHost.swift`, `Tests/<X>ModelTests/<X>DocumentHostTests.swift`, `Sources/<X>App/<X>App.swift`, its menu journey file | host tests on Linux; `testSwitchToMenu` |
 
 Engine: none.
@@ -2831,7 +2895,7 @@ Engine: none.
 |---|---|---|---|
 | ST-1 | `SuitePreferences` store and per-app keys | `Sources/SuiteModel/Preferences/`, `Tests/SuiteModelTests/Preferences*.swift`, `Sources/SuiteShell/Live/PreferencesSlot.swift` | stale-revision and clamp tests |
 | ST-2 | Settings scene: General and five app tabs; `SettingsModel`; the launcher's Settings menu | `Sources/AfterGlowApp/Settings*.swift` (includes `SettingsView.swift`), `Sources/AfterGlowApp/LauncherCommands+Settings.swift`, `Tests/AppSnapshotTests/AfterGlowSettingsSnapshots.swift` | goldens; layout 7.3 |
-| ST-3 | Route ⌘, from any app; apply changes on notification | `Sources/SuiteShell/SettingsRoute.swift`, `Sources/SuiteShell/Live/SettingsSlot.swift` | SJ12 |
+| ST-3 | Route ⌘, from any app; the launcher opens Settings at the pane of an `.openSettings` hand-off; apply changes on notification | `Sources/SuiteShell/SettingsRoute.swift`, `Sources/SuiteShell/Live/SettingsSlot.swift`, `Sources/AfterGlowApp/LauncherRouter+Settings.swift` | SJ12 |
 | ST-4 | Journeys SJ12, SP8 | `UITests/AfterGlowJourneyTests+Settings.swift`, `+PerfSettings.swift`, `UITests/SuiteBudgets+Settings.swift` | QB-S8 |
 | A-x-4 ×5 | `needs-suite`: each app reads units and (if it autosaves) the interval | `Sources/<X>Model/<X>SuitePreferences.swift` | each app's Model test |
 
@@ -2840,7 +2904,7 @@ Engine: none.
 | Task | Behavior | Owned files | Proof |
 |---|---|---|---|
 | RO-1 | Recents rules (when to record, missing files), routing as live types | `Sources/SuiteModel/Recents/`, `Sources/SuiteModel/Routing/`, `Tests/SuiteModelTests/Recents*.swift`, `Routing*.swift`, `TypeRegistryPlistTests.swift`, `Budget+Recents.swift` | QB-SM1; registry equals `Bundle/Info` plists |
-| RO-2 | `SuiteDocumentsBridge`, `ThumbnailWriter`, `OpenInMenu`; the recents, routing and thumbnails slots | `Sources/SuiteShell/SuiteDocumentsBridge.swift`, `ThumbnailWriter.swift`, `OpenInMenu.swift`, `Live/RecentsSlot.swift`, `Live/RoutingSlot.swift`, `Live/ThumbnailsSlot.swift` | macOS build |
+| RO-2 | `SuiteDocumentsBridge`, `ThumbnailWriter`, `OpenInMenu`; the routing and thumbnails slots (`RecentsSlot` is live since SC-5; RO-2 owns it from wave 3) | `Sources/SuiteShell/SuiteDocumentsBridge.swift`, `ThumbnailWriter.swift`, `OpenInMenu.swift`, `Live/RecentsSlot.swift`, `Live/RoutingSlot.swift`, `Live/ThumbnailsSlot.swift` | macOS build |
 | RO-3 | Journeys SJ4, SJ5, SJ11, SP6 | `UITests/AfterGlowJourneyTests+Recents.swift`, `+Routing.swift`, `+OpenIn.swift`, `+PerfRouting.swift`, `UITests/SuiteBudgets+Routing.swift` | the journeys; QB-S6 |
 | A-x-2 ×5 | `needs-suite`: each app records opens and saves, shows the shared list in File > Open Recent (Flare's `recent`, Halo's `HaloRecentFile`, Photo's system list give way), publishes a thumbnail; Library accepts an `.open` of images as an import | `Sources/<X>App/<X>SuiteDocuments.swift`, its File menu file, `Tests/AppSnapshotTests/<X>ThumbnailFidelityTests.swift` | QB-SV1 per app |
 
@@ -2889,7 +2953,7 @@ replace it later; that is a later decision, not a dependency.
 
 | Task | Behavior | Owned files | Proof |
 |---|---|---|---|
-| OB-1 | Onboarding flow live, `OnboardingModel`; three pages; samples | `Sources/SuiteModel/Onboarding/`, `Sources/AfterGlowApp/Onboarding*.swift` (includes `OnboardingWindow.swift`), `Sources/SuiteShell/Live/OnboardingSlot.swift`, `Tests/SuiteModelTests/Onboarding*.swift`, `Tests/AppSnapshotTests/AfterGlowOnboardingSnapshots.swift` | goldens per page |
+| OB-1 | Onboarding flow live, `OnboardingModel`; three pages; samples | `Bundle/Samples/`, `Sources/SuiteModel/Onboarding/`, `Sources/AfterGlowApp/Onboarding*.swift` (includes `OnboardingWindow.swift`), `Sources/SuiteShell/Live/OnboardingSlot.swift`, `Tests/SuiteModelTests/Onboarding*.swift`, `Tests/AppSnapshotTests/AfterGlowOnboardingSnapshots.swift` | goldens per page |
 | OB-2 | Journey SJ18 | `UITests/AfterGlowJourneyTests+Onboarding.swift` | SJ18 |
 
 **F11 `updater`** (wave 4) · tier 2 · waits on F5; the captain's choice of feed host and signing key (Q2)
@@ -2919,7 +2983,7 @@ Halo's half is app-line work.
 
 | Task | Behavior | Owned files | Proof |
 |---|---|---|---|
-| FH-1 | `AnimationSummary` rules; Open In ▸ Halo for `.flare` | `Sources/SuiteModel/Animation/`, `Tests/SuiteModelTests/Animation*.swift` | summary tests on a fixture |
+| FH-1 | `AnimationSummary` rules; adds `.halo` to the `.flare` readers in `SuiteTypeRegistry` (until then Open In from Flare says why it is disabled) | `Sources/SuiteModel/Animation/`, `Tests/SuiteModelTests/Animation*.swift`, `Sources/SuiteModel/Values/SuiteTypeRegistry.swift` (one line; wave 5, no other owner then) | summary tests on a fixture |
 | FH-2 | Journey SJ17; `FlareInHaloGoldenTests` | `UITests/AfterGlowJourneyTests+FlareInHalo.swift`, `Tests/AppSnapshotTests/FlareInHaloGoldenTests.swift` | QB-SV4 |
 | A-HA-8 | `needs-suite` on Halo: an animation layer that samples a FlareCore scene; the live `AnimationSourceReading`, supplied by HaloApp through `with(animations:)` | Halo's own files (named in the issue) | Halo's tests |
 
@@ -2935,7 +2999,7 @@ acceptance: equals Flare's PNG export of that frame."
 |---|---|---|---|---|
 | 0 | targets (BU-S, BU-0, BU-1) | #763 green | targets | BU-0, BU-1 supervisor; BU-S is a local spike (docs only) |
 | 1 | bundle, suite-contracts | wave 0 | bundle | bundle BU-4, BU-6 supervisor; the rest lane |
-| 2 | home, switching | wave 1 (suite-contracts); SuiteUI #331–#333 for goldens and the journey template; `AppTile`, `ThumbnailBadges`, `SidebarRow` accessory (`needs-ui`, placeholders until then); A-x-0 and A-x-1 for the cross-app journeys | home | lane |
+| 2 | home, switching | wave 1 (suite-contracts); SuiteUI #331–#333 for goldens and the journey template; #330 FrameProbe and #782 named marks (`suite.controls`, `recents-ready`, the perf rows); `AppTile`, `ThumbnailBadges`, `SidebarRow` accessory (`needs-ui`, placeholders until then); A-x-0 and A-x-1 for the cross-app journeys | home | lane |
 | 3 | settings, recents-open-in, clipboard-drag | wave 2; the two size tokens (`needs-ui`); app saves #205, #209, PV-1; #415, #384, #418; the SVG core issue; A-x-2, A-x-3, A-x-4 | recents-open-in | lane |
 | 4 | photo-round-trip, shared-assets, onboarding, updater | wave 3; Library v1, Photo PV-1; `SwatchChip` (`needs-ui`); Q2 for the updater; A-LI-6, A-PH-6, A-x-5 | shared-assets | lane |
 | 5 | linked-assets, flare-in-halo | wave 4; the two core issues; Halo H10 | linked-assets | lane |
@@ -2962,15 +3026,15 @@ updater both depend on preferences (F5, wave 3) but own nothing of it.
 
 **Supervisor merges** (protected paths): BU-0 (`scripts/size-report`,
 `.github/workflows/ci.yml`), BU-1 (`Package.swift`), BU-4
-(`scripts/bundle-apps`), BU-6 (`.github/workflows/ci.yml`). Everything else
+(`scripts/bundle-apps`, `scripts/size-report`), BU-6 (`.github/workflows/ci.yml`). Everything else
 takes the fast lane.
 
 ### 8.4 What this needs from the app blueprints
 
 | From | Needs | Where they stand |
 |---|---|---|
-| SuiteUI (#765) | `AppTile`, `ThumbnailBadges` app and missing badges, `SidebarRow` trailing accessory, `SwatchChip`, `LayerList` accessory (6.3); #333's per-file journey template; #330 FrameProbe with cross-process marks (`mach_continuous_time`) | none planned; filed as `needs-ui` by the features that need them |
-| Flare (dev) | A-FL-1 `.suiteApp(.flare)` after #346; A-FL-2 the shared recents replaces `FlareWorkspace.recent` as the source of Open Recent (the Model keeps its API); A-FL-3 read SVG and the envelope on paste (#384); A-FL-5 SUITE COLOURS in FILL; A-FL-7 linked layers | #346, #384, #205 open; no conflict with the mac-platform packet (it owns `FlareFiles.swift`, A-FL-2 lands after it) |
+| SuiteUI (#765) | `AppTile`, `ThumbnailBadges` app and missing badges, `SidebarRow` trailing accessory, `SwatchChip`, `LayerList` accessory (6.3); #333's per-file journey template; #330 FrameProbe and #782 named marks, stamped on the system uptime clock (`ProcessInfo.systemUptime`) | none planned; filed as `needs-ui` by the features that need them |
+| Flare (dev) | A-FL-1 `.suiteApp(.flare, host:)` after #346; A-FL-2 the shared recents replaces `FlareWorkspace.recent` as the source of Open Recent (the Model keeps its API); A-FL-3 read SVG and the envelope on paste (#384); A-FL-5 SUITE COLOURS in FILL; A-FL-7 linked layers | #346, #384, #205 open; no conflict with the mac-platform packet (it owns `FlareFiles.swift`, A-FL-2 lands after it) |
 | Design (#766) | A-DE-1; A-DE-2 recents and thumbnail on save; A-DE-3 envelope and SVG on copy (beside `org.creativesuite.design.layers`); A-DE-5 Add to Assets and SUITE COLOURS; the SVG writer of F6 `export` (#418) | Design's F2 `copy-group` and F6 `export` are the hosts; autosave out of v1 (its Q4) conflicts with the suite policy (Q6 below) |
 | Photo (#768) | A-PH-1; A-PH-2 the shared recents instead of the system list; A-PH-3 paste envelope images (PV-2); A-PH-6 round-trip document mode; Q7's exported type is answered by BU-5 | PV-1 documents and PV-2 edit are the hosts |
 | Library (#769) | A-LI-1; A-LI-2 accept `.open` of images as import; A-LI-3 copy a photo as PNG; A-LI-6 Edit in Photo and stacking the returned copy | Library calls the round trip "later" (section 1.4); the suite schedules it in wave 4, after Library v1 |
@@ -3087,3 +3151,33 @@ measured, overlapping owned files, missing open issues, product names.
 | 28 | minor | "Finder", "Spotlight", "Launchpad", "Quick Look" | Kept: they are the operating system's own features that every Mac app integrates with, not another company's creative product; no other product name found |
 | 29 | minor | Counts and placements inconsistent (SC-2, contents, rule 4, helper folders, YAML parsing, restore vs start empty) | Fixed; `BuildGraphTests` scans lines; "start empty" applies only when the person picks it |
 | 30 | minor | `onOpenURL` with no window; `terminate()` isn't a crash; SJ5 bypassed routing | `SuiteAppDelegate.application(_:open:)`; `SIGKILL`; SJ5 opens through Launch Services after `lsregister` |
+
+### Round 2 (20 findings: 3 blocking, 13 major, 4 minor)
+
+| # | Severity | Finding | Fix |
+|---|---|---|---|
+| 1 | blocking | The live recents store arrived in wave 3, so wave 2's home and switching journeys had nothing to read | SC-5's `RecentsSlot` is live from wave 1; RO adds recording, Open Recent and thumbnails |
+| 2 | blocking | Library's catalog was never seeded | A-LI-0 adds `-LibrarySample`; the launcher forwards it with `-LibraryCatalogDir` |
+| 3 | blocking | `HomeModel` lacked new, switch, observe, missing-at-load, Locate | Added and checked in main.swift |
+| 4 | major | SJ2 clicked chips the 1000 pt tile doesn't show | SJ2 uses the tile's preset menu |
+| 5 | major | SJ5's cold launches skipped argument forwarding; `lsregister` unowned | Targets started through the launcher first; `lsregister` from `setUp`, also in BU-4 |
+| 6 | major | Activation doesn't reopen a window | `openApplication` when the app has no window (reopen event) |
+| 7 | major | Two clocks | `requestedAt` is system-uptime seconds; 8.4 corrected |
+| 8 | major | SJ18 could never show onboarding | `firstLaunch` fixture |
+| 9 | major | SJ16's Update Asset always disabled | Fixture assets carry `source` = `Cards.design` |
+| 10 | major | `fileID` computed two ways | One rule, `SuiteDocumentRef.fileID(forPath:)`, used by fixtures, apps and Locate… |
+| 11 | major | Launcher halves of settings and drops unowned | `LauncherRouter+Settings.swift` (ST-3); the home's drop target in HM-2 |
+| 12 | major | SJ0 checked menu items of later waves | BU-1's stubs carry every 6.2 item disabled with its reason; Delete routes by page |
+| 13 | major | Wave 2 didn't wait for the probe | #330 and #782 in wave 2's waits |
+| 14 | major | The AfterGlow journey bundle wouldn't compile its helpers | BU-3 lists the files and `Values/` |
+| 15 | major | "Preview data" pill would never clear | `isPreview` true only for `.fake` |
+| 16 | major | Samples shipped before their files existed | OB-1 owns `Bundle/Samples/`; BU-4 copies the folder |
+| 17 | minor | Owners missing for `size-report` changes, budget helper, plist test, fixture extras | Listed in BU-4, SC-4, BU-5, A-x-0 |
+| 18 | minor | Stale text (`onOpenURL`, `.suiteApp` without `host:`, "SJ1b") | Fixed |
+| 19 | minor | BU-3's proof uncheckable at merge | `otool` proof moved to BU-4 |
+| 20 | minor | Settings and onboarding layout checks in the home's file; Open In ▸ Halo enabled before Halo can import | Checks in ST-2 and OB-1; FH-1 adds `.halo` to the registry |
+
+Round 2's blocking items were each a missing wire, not a wrong design, and
+each fix is local to the row named. Per the brief, a second round ran
+because the first found blocking items; the fixes of round 2 are recorded
+here for the captain's review rather than a third round.

@@ -24,7 +24,7 @@ struct ChangeFeed {
 
 public actor FakeSwitching: AppSwitching {
     public private(set) var states: [SuiteApp: AppRunState]
-    public private(set) var ticks: UInt64 = 0
+    public private(set) var ticks: Double = 0
     var feed = ChangeFeed()
     let unavailable: String?
     public init(running: [SuiteApp] = [], missing: Set<SuiteApp> = [], unavailable: String? = nil) {
@@ -472,7 +472,7 @@ public actor FakeDocumentHost: SuiteDocumentHost {
 /// so what one app writes the others read. Document files come from
 /// `UITests/Fixtures/suite/` (each app line's fixture export, A-x-0).
 public enum SuiteFixtures {
-    public static let names = ["empty", "weekOfWork", "missing", "roundTrip", "assets", "crowd"]
+    public static let names = ["empty", "firstLaunch", "weekOfWork", "missing", "roundTrip", "assets", "crowd"]
 
     public struct Store: Equatable, Sendable {
         public var recents: RecentsList
@@ -490,12 +490,15 @@ public enum SuiteFixtures {
     /// nil for an unknown name. `documents` is the folder holding the fixture documents.
     public static func store(_ name: String, documents: String, now: Date) -> Store? {
         func ref(_ f: (String, SuiteApp, SuiteTypeID)) -> SuiteDocumentRef {
-            SuiteDocumentRef(path: documents + "/" + f.0, fileID: f.0, app: f.1, type: f.2, displayName: f.0)
+            let path = documents + "/" + f.0
+            return SuiteDocumentRef(path: path, fileID: SuiteDocumentRef.fileID(forPath: path), app: f.1, type: f.2, displayName: f.0)
         }
         let done = SuitePreferences(onboardingDoneVersion: 1)
         switch name {
         case "empty", "roundTrip":
             return Store(recents: RecentsList(), assets: AssetIndex(), preferences: done)
+        case "firstLaunch":
+            return Store(recents: RecentsList(), assets: AssetIndex(), preferences: SuitePreferences())
         case "weekOfWork", "missing":
             let items = weekOfWorkFiles.enumerated().map { i, f in
                 RecentItem(ref: ref(f), lastUsed: now - Double(i) * 75_600, thumbnail: "thumbnails/\(f.0).png")
@@ -509,14 +512,15 @@ public enum SuiteFixtures {
                 SuiteAsset(id: "c\(i)", kind: .color, name: c.0, color: SuiteColorValue(space: c.1, red: c.2, green: c.3, blue: c.4),
                            modifiedAt: now - Double(i))
             }
-            assets.append(SuiteAsset(id: "v0", kind: .vector, name: "Card", payload: "assets/v0/1.svg", modifiedAt: now - 10))
-            assets.append(SuiteAsset(id: "v1", kind: .vector, name: "Badge", payload: "assets/v1/1.svg", modifiedAt: now - 11))
+            let cards = ref(("Cards.design", .design, .designDocument))
+            assets.append(SuiteAsset(id: "v0", kind: .vector, name: "Card", payload: "assets/v0/1.svg", source: cards, modifiedAt: now - 10))
+            assets.append(SuiteAsset(id: "v1", kind: .vector, name: "Badge", payload: "assets/v1/1.svg", source: cards, modifiedAt: now - 11))
             assets.append(SuiteAsset(id: "i0", kind: .image, name: "Sunset", payload: "assets/i0/1.png", modifiedAt: now - 12))
             assets.append(SuiteAsset(id: "a0", kind: .animation, name: "Bounce", payload: "assets/a0/1.flare", modifiedAt: now - 13))
             return Store(recents: RecentsList(), assets: AssetIndex(revision: 1, assets: assets), preferences: done)
         case "crowd":
             let items = (0..<200).map { i in
-                RecentItem(ref: SuiteDocumentRef(path: documents + "/Doc \(i).flare", fileID: "crowd\(i)", app: .flare,
+                RecentItem(ref: SuiteDocumentRef(path: documents + "/Doc \(i).flare", fileID: SuiteDocumentRef.fileID(forPath: documents + "/Doc \(i).flare"), app: .flare,
                                                  type: .flareAnimation, displayName: "Doc \(i).flare"), lastUsed: now - Double(i))
             }
             return Store(recents: RecentsList(revision: 1, items: items), assets: AssetIndex(), preferences: done)

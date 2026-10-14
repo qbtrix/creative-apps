@@ -98,7 +98,7 @@ public struct SuiteTypeRegistry: Sendable {
 
     public static let standard = SuiteTypeRegistry(types: [
         SuiteDocumentType(id: .flareAnimation, name: "Flare Animation", extensions: ["flare"],
-                          owner: .flare, readers: [.flare, .halo]),
+                          owner: .flare, readers: [.flare]),   // flare-in-halo (FH-1) adds .halo
         SuiteDocumentType(id: .designDocument, name: "Design Document", extensions: ["design"],
                           owner: .design, readers: [.design]),
         SuiteDocumentType(id: .haloProject, name: "Halo Project", extensions: ["halo"],
@@ -129,7 +129,7 @@ public struct SuiteTypeRegistry: Sendable {
 /// A document on disk, as every app and the launcher refer to it.
 public struct SuiteDocumentRef: Hashable, Codable, Sendable {
     public var path: String          // absolute path
-    public var fileID: String        // stable identity (volume and file number from the app; the path when unknown)
+    public var fileID: String        // `SuiteDocumentRef.fileID(forPath:)`, the one rule every process uses
     public var app: SuiteApp         // the app that last opened or saved it
     public var type: SuiteTypeID
     public var displayName: String   // file name with extension
@@ -137,6 +137,16 @@ public struct SuiteDocumentRef: Hashable, Codable, Sendable {
     public init(path: String, fileID: String, app: SuiteApp, type: SuiteTypeID, displayName: String, bookmark: Data? = nil) {
         self.path = path; self.fileID = fileID; self.app = app; self.type = type
         self.displayName = displayName; self.bookmark = bookmark
+    }
+
+    /// The one identity rule (v1): the standardized absolute path. A moved file
+    /// becomes a new entry; Locate… on the old card re-points it.
+    public static func fileID(forPath path: String) -> String {
+        var parts: [Substring] = []
+        for p in path.split(separator: "/") where p != "." {
+            if p == "..", !parts.isEmpty { parts.removeLast() } else if p != ".." { parts.append(p) }
+        }
+        return "path:/" + parts.joined(separator: "/")
     }
 }
 
@@ -264,8 +274,8 @@ public enum SwitchReason: String, Codable, Sendable { case shortcut, menu, home,
 public struct SwitchReceipt: Equatable, Sendable {
     public var app: SuiteApp
     public var wasRunning: Bool
-    public var requestedAt: UInt64      // mach_continuous_time ticks; the probe pairs it with the target's frame
-    public init(app: SuiteApp, wasRunning: Bool, requestedAt: UInt64) {
+    public var requestedAt: Double      // system uptime seconds (ProcessInfo.systemUptime, NSEvent.timestamp's clock)
+    public init(app: SuiteApp, wasRunning: Bool, requestedAt: Double) {
         self.app = app; self.wasRunning = wasRunning; self.requestedAt = requestedAt
     }
 }

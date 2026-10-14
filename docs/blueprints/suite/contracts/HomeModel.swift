@@ -25,8 +25,12 @@ public final class HomeModel {
     var order = SuiteApp.apps
     var missingApps: Set<SuiteApp> = []
     var missingFiles: Set<String> = []
+    let fileExists: @Sendable (String) -> Bool
 
-    public init(services: SuiteServices) { self.services = services }
+    /// `fileExists` is `FileManager.default.fileExists(atPath:)` in the app; tests pass a set.
+    public init(services: SuiteServices, fileExists: @escaping @Sendable (String) -> Bool) {
+        self.services = services; self.fileExists = fileExists
+    }
 
     public func reload(now: Date) async {
         do { recents = try await services.recents.list() } catch { message = error }
@@ -41,7 +45,43 @@ public final class HomeModel {
         }
         running = r
         missingApps = missing
+        missingFiles = Set(recents.items.filter { !fileExists($0.ref.path) }.map(\.ref.fileID))
         rebuild(now: now)
+    }
+
+    /// Reloads whenever another process writes recents or an app starts or quits.
+    /// The window runs it in a `.task`, so it ends when the window closes.
+    public func observe(now: @escaping @Sendable () -> Date) async {
+        let recentChanges = await services.recents.changes()
+        let runChanges = await services.switching.changes()
+        await withTaskGroup(of: Void.self) { group in
+            group.addTask { for await _ in recentChanges { await self.reload(now: now()) } }
+            group.addTask { for await _ in runChanges { await self.reload(now: now()) } }
+        }
+    }
+
+    /// A tile or one of its presets (UC-3, UC-5).
+    public func newDocument(_ preset: NewDocumentPreset, now: Date) async {
+        let h = services.creating.handOff(for: preset, id: "new-\(preset.id)-\(Int(now.timeIntervalSince1970))", at: now)
+        do { _ = try await services.sending.send(h) } catch { message = error }
+    }
+
+    /// A running row or the Switch To menu (UC-1).
+    public func switchTo(_ app: SuiteApp) async {
+        do { _ = try await services.switching.switchTo(app, reason: .home) } catch { message = error }
+    }
+
+    /// Locate… on a missing card: re-point it to the file the person chose.
+    public func locate(_ fileID: String, newPath: String, now: Date) async {
+        guard let item = recents.items.first(where: { $0.ref.fileID == fileID }) else { return }
+        var ref = item.ref
+        ref.path = newPath
+        ref.fileID = SuiteDocumentRef.fileID(forPath: newPath)
+        do {
+            try await services.recents.remove(fileID: fileID)
+            try await services.recents.note(ref, event: .opened, at: now, thumbnail: item.thumbnail)
+        } catch { message = error }
+        await reload(now: now)
     }
 
     public func search(_ text: String, now: Date) { query = text; rebuild(now: now) }

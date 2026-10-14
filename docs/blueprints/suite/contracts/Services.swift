@@ -23,7 +23,8 @@ public struct SuiteServices: Sendable {
     public var updates: any UpdateChecking
     public var thumbnails: any ThumbnailPublishing
     public var home: any HomeBuilding
-    /// True while any member is a fake; drives a "Preview data" pill in the home.
+    /// True only for `.fake(...)` (snapshots, Model tests); `.live` sets false even while
+    /// a slot still holds a not-connected fake, whose controls say so themselves.
     public var isPreview: Bool
 
     public init(switching: any AppSwitching, recents: any RecentWork, creating: any DocumentCreating,

@@ -37,7 +37,7 @@ expect((try? routing.route(fileName: "Cards.design")) == .design, "route design"
 expect((try? routing.route(fileName: "Sunset.PNG")) == .photo, "route png to photo")
 do throws(SuiteError) { _ = try routing.route(fileName: "notes.txt"); expect(false, "txt refused") }
 catch { expect(error.message.contains("can't open \u{201C}notes.txt\u{201D}"), "txt message") }
-expect(routing.openInTargets(for: .flareAnimation, from: .flare) == [.halo], "open in halo")
+expect(routing.openInTargets(for: .flareAnimation, from: .flare).isEmpty, "halo added by FH-1, not before")
 expect(routing.openInTargets(for: .png, from: .photo) == [.library], "open in library")
 
 // Hand-off codec round trip, newer format refused.
@@ -179,10 +179,23 @@ try await feedRecents.note(ref("New.flare", .flare, .flareAnimation), event: .sa
 var first: Int?
 for await r in stream { first = r; break }
 expect(first == 1, "recents change stream")
-let hm = HomeModel(services: SuiteServices.fake(recents: list, running: [.design]))
+let hmServices = SuiteServices.fake(recents: list, running: [.design])
+let hm = HomeModel(services: hmServices, fileExists: { $0 != "/tmp/Documents/Logo.design" })
 await hm.reload(now: now)
+expect(hm.state.cards.first { $0.item.ref.displayName == "Logo.design" }?.isMissing == true, "missing found at load")
 hm.search("bounce", now: now)
 expect(hm.state.cards.count == 1, "home model search")
+await hm.newDocument(FakeCreating.presets[.flare]![2], now: now)
+expect(await hmServices.switching.runState(of: .flare) == .running(windows: 1), "new launches flare")
+await hm.switchTo(.halo)
+expect(hm.message == nil, "switch ok")
+await hm.locate("Logo.design", newPath: "/tmp/Moved/Logo.design", now: now)
+expect(hm.message == nil, "locate ok")
+expect(SuiteDocumentRef.fileID(forPath: "/a/./b/../c.flare") == "path:/a/c.flare", "file id rule")
+let firstLaunch = SuiteFixtures.store("firstLaunch", documents: "/d", now: now)
+expect(firstLaunch.map { ob.shouldShow($0.preferences, version: 1) } == true, "firstLaunch shows onboarding")
+let af = SuiteFixtures.store("assets", documents: "/d", now: now)
+expect(af?.assets.assets.filter { $0.source?.displayName == "Cards.design" }.count == 2, "assets from Cards.design")
 expect(SuiteError.linkMissing.message == "Linked asset is missing; using the last copy.", "link missing text")
 
 print(failures == 0 ? "contracts: PASS" : "contracts: \(failures) FAILED")
