@@ -33,6 +33,8 @@ public enum SuiteSpacing {
     public static let pillGap: CGFloat = 4
     /// How far a bar slider's value marker stays off the row's top and bottom.
     public static let markerInset: CGFloat = 6
+    /// The gap between two nodes of a node graph.
+    public static let nodeGap: CGFloat = 32
 
     /// The whole scale in order, for tests and the gallery.
     public static let scale: [CGFloat] = [xxs, xs, s, m, l, xl, xxl]
@@ -157,6 +159,29 @@ public enum SuiteSize {
     public static let curveHandle: CGFloat = 10
     public static let curveHandleHit: CGFloat = 28
     public static let curvePreviewDot: CGFloat = 6
+    /// The least hit of an icon-only button (an inspector section's Reset):
+    /// docs/design.md's 20 pt floor.
+    public static let iconButtonHit: CGFloat = 20
+    /// The editor's timeline slot: its least open height, its collapsed height
+    /// (the chip row, 28, with 4 above and below), and the grab zone above its
+    /// 1 pt hairline divider.
+    public static let timelineSlotMinimum: CGFloat = 120
+    public static let timelineSlotToolbar: CGFloat = 36
+    public static let timelineGrab: CGFloat = 8
+    /// The quarter-ring outside each selection corner that rotates.
+    public static let rotateZone: CGFloat = 16
+    /// The point mark: its ring and cross, the ink's line width and the paper
+    /// halo's width under it.
+    public static let pointMarkRing: CGFloat = 12
+    public static let pointMarkCross: CGFloat = 6
+    public static let pointMarkInk: CGFloat = 1.5
+    public static let pointMarkPaper: CGFloat = 3
+    /// The node graph: one node, an arrow's head and its line width.
+    public static let nodeSize = CGSize(width: 120, height: 56)
+    public static let arrowHead: CGFloat = 6
+    public static let arrowStroke: CGFloat = 1.5
+    /// The accent line that shows where a dragged row will land.
+    public static let insertionLine: CGFloat = 2
 }
 
 /// Text styles. macOS has no Dynamic Type; these are the system text styles,

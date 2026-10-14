@@ -158,6 +158,46 @@ import Testing
         #expect(abs(Self.contrast(0xFFFFFF, P.accentFill.dark) - 5.05) < 0.01)
     }
 
+    /// The token sheet for waves 2 to 4 (SuiteUI blueprint section 6.2, #774): the timeline
+    /// slot, the rotate zone, the point mark, the node graph, the insertion line and the
+    /// 20 pt icon-button hit, each at its value, so no later wave edits Tokens.swift.
+    @Test func geometry() {
+        let sizes = [
+            SuiteSize.timelineSlotMinimum, SuiteSize.timelineSlotToolbar, SuiteSize.timelineGrab,
+            SuiteSize.rotateZone, SuiteSize.pointMarkRing, SuiteSize.pointMarkCross, SuiteSize.pointMarkInk,
+            SuiteSize.pointMarkPaper, SuiteSize.arrowHead, SuiteSize.arrowStroke, SuiteSize.insertionLine,
+            SuiteSize.iconButtonHit,
+        ]
+        #expect(sizes == [120, 36, 8, 16, 12, 6, 1.5, 3, 6, 1.5, 2, 20])
+        #expect(SuiteSize.nodeSize == CGSize(width: 120, height: 56))
+        #expect(SuiteSpacing.nodeGap == 32)
+        // The slot's collapsed height is its chip row with 4 pt above and below.
+        #expect(SuiteSize.timelineSlotToolbar == SuiteSize.chip + 2 * SuiteSpacing.xs)
+        #expect(SuiteSize.timelineSlotMinimum > SuiteSize.timelineSlotToolbar)
+        // The point mark's paper halo shows on both sides of its ink.
+        #expect(SuiteSize.pointMarkPaper > SuiteSize.pointMarkInk)
+        // docs/design.md's hit floor: never under 20.
+        #expect(SuiteSize.iconButtonHit == 20)
+    }
+
+    /// QB-S32: the new token pairs at docs/design.md's ratios, in all four appearances.
+    @Test func contrast() {
+        for look in 0..<4 {
+            // Node text (title and detail) on a `card`-filled node: text, 4.5:1.
+            for text in [P.textPrimary, P.textSecondary] {
+                #expect(Self.contrast(text.values[look], P.card.values[look]) >= 4.5, "node text in \(look)")
+            }
+            // The refused-rename message, `stateError` under the row on the panel: text, 4.5:1.
+            #expect(Self.contrast(P.stateError.values[look], P.panel.values[look]) >= 4.5, "rename error in \(look)")
+            // The timeline slot divider, a 1 pt `hairline` on the editor's `panel`. docs/design.md
+            // makes hairlines structure between bars and panels with no minimum (the slot is also
+            // found by its toolbar row and the row-resize pointer); it must still differ from the panel.
+            #expect(Self.contrast(P.hairline.values[look], P.panel.values[look]) > 1.1, "slot divider in \(look)")
+        }
+        // The point mark: white ink over its black paper halo, a non-text mark, 3:1 on any pixels.
+        #expect(Self.contrast(0xFFFFFF, 0x000000) >= 3)
+    }
+
     /// Every hex row in docs/design.md's Visual language tables is in SuitePalette with those values.
     @Test func paletteMatchesTheDesignDoc() throws {
         let doc = URL(fileURLWithPath: #filePath).deletingLastPathComponent()
