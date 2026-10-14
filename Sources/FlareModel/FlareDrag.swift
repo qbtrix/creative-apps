@@ -1,6 +1,6 @@
 // FlareDrag.swift: stage gestures (docs/blueprints/flare.md, section 2). A pointer move sets only `draft`, `marquee` or
 // `dragPreview`; `endDrag` commits once, through the contract's one named group. A pen draft lasts until its path
-// closes. A move under `clickSlop` stage points is a click (#470).
+// closes, and a click refused on a locked layer keeps it (#692). A move under `clickSlop` stage points is a click (#470).
 import FlareCore
 
 /// The gesture under way: `base` is the pen draft it carries on from, `moving`
@@ -52,7 +52,8 @@ extension FlareWorkspace {
         }
         gesture?.end = end; gesture?.modifiers = modifiers; gesture?.stageScale = stageScale
         guard selectedScene != nil, let g = gesture else { return draft = nil }
-        if lockedHelp(tool) != nil { return draft = nil }
+        // A refused gesture leaves a pen path in progress alone, so it can carry on once drawing can (#692).
+        if lockedHelp(tool) != nil { return draft = tool == .pen ? g.base : nil }
         let shapes = services.shapes
         switch tool {
         case .ellipse:
@@ -75,7 +76,10 @@ extension FlareWorkspace {
         guard let g = gesture else { return }
         let pending = draft
         cancelDrag()
-        if let reason = lockedHelp(tool) { return refuse(.refused(reason)) }
+        if let reason = lockedHelp(tool) {
+            if tool == .pen { draft = g.base }
+            return refuse(.refused(reason))
+        }
         switch tool {
         case .ellipse: commitEllipse(from: g.start, to: g.end, stageScale: g.stageScale)
         case .rectangle: if let pending { commit(pending) }
