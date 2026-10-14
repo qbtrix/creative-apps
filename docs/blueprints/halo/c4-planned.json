@@ -432,11 +432,12 @@
               {
                 "id": "halo-viewer",
                 "name": "Viewer",
-                "description": "The viewer: the artboard (CanvasSurface) with the draw list painted in a SwiftUI Canvas, the selection outline, the drag gesture, the rendered-frame image, the status bar and the transport; the display-link playback driver.",
+                "description": "The viewer: the artboard (CanvasSurface) with the draw list painted in a SwiftUI Canvas, the selection outline, the drag gesture, the rendered-frame image (HaloRenderedFrameView), the status bar and the transport; the display-link playback driver.",
                 "paths": [
                   "Sources/HaloApp/HaloViewer.swift",
                   "Sources/HaloApp/HaloViewerCanvas.swift",
                   "Sources/HaloApp/HaloViewerGestures.swift",
+                  "Sources/HaloApp/HaloRenderedFrameView.swift",
                   "Sources/HaloApp/HaloTransport.swift",
                   "Sources/HaloApp/HaloPlaybackDriver.swift"
                 ],
