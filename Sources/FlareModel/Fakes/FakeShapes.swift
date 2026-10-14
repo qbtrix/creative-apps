@@ -144,6 +144,9 @@ public struct FakeShapes: ShapeBuilding {
                 let p = Matrix.rotation(degrees: degrees).apply(Point(x: t.x - c.x, y: t.y - c.y))
                 values = ["x": c.x + p.x, "y": c.y + p.y, "rotation": t.rotation + degrees]
             }
+            // A corner dropped on the opposite corner would leave the layer 0 x 0, and no later drag could grow it:
+            // leave the layer as it was, as an edge dropped on the opposite edge keeps one axis (#655, #682).
+            if values["scaleX"] == 0, values["scaleY"] == 0 { continue }
             if values.values.allSatisfy(\.isFinite) { result[layer.id] = values }
         }
         return result
