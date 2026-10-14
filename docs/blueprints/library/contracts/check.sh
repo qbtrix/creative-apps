@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # check.sh: proves the Library blueprint's contracts (section 5) compile on
-# Linux in Swift 6 mode against creative-core main, and that the fakes drive
+# Linux in Swift 6 mode against creative-core dev 4cac701, and that the fakes drive
 # every contract. Copies this folder over today's Sources/LibraryModel in a
 # scratch package (PhotoItem.swift here is the spine's version of the file)
 # and runs the smoke tests plus every existing LibraryModel test. Usage: docs/blueprints/library/contracts/check.sh
@@ -29,6 +29,7 @@ cat >"$pkg/Package.swift" <<'SWIFT'
 import PackageDescription
 let package = Package(
     name: "contracts",
+    platforms: [.macOS("26.0")],
     dependencies: [.package(path: "../core")],
     targets: [
         .target(name: "LibraryModel", dependencies: [.product(name: "CoreRaster", package: "core"), .product(name: "CoreColor", package: "core")]),

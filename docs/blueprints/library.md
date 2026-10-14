@@ -12,7 +12,7 @@ decided is listed as an open question for the captain (section 10).
 Sources read on 2026-10-14: creative-apps `origin/dev` 956d946 (LibraryApp,
 LibraryModel, their tests, `UITests/LibraryJourneyTests.swift`, SuiteUI,
 `docs/`), the 17 open issues labelled `line:library`, the merged Library PRs
-(#148 to #750), and creative-core `main` 4cac701 (CoreRaster, CoreCatalog,
+(#148 to #750), and creative-core `dev` 4cac701 (CoreRaster, CoreCatalog,
 CoreAsset). The look is `docs/design.md`; the quality ids (`QB-…`) are
 `docs/review-rubric.md` section 6; ids this blueprint adds are `QB-LIB-…`
 and live only here until a feature lands them in the rubric.
@@ -28,8 +28,8 @@ can be verified from this file, the repo or CI, not when it sounds right.
 
 ## 0. Status on dev (2026-10-14)
 
-Read on `origin/dev` 956d946 and creative-core `main` 4cac701 (the revision
-`Package.swift` resolves; it tracks `main`).
+Read on `origin/dev` 956d946 and creative-core `dev` 4cac701 (`Package.swift`
+resolves `main` cfad97f; CoreRaster and CoreColor are the same in both).
 
 ### 0.1 What is built
 
@@ -121,7 +121,7 @@ Checklist:
 
 - [x] Every Library source file on dev is named in 0.1 or 0.4.
 - [x] Every open `line:library` issue is in 0.3 (17 of 17).
-- [x] Every engine API in 0.2 was read in creative-core `main` 4cac701.
+- [x] Every engine API in 0.2 was read in creative-core `dev` 4cac701.
 
 ---
 
@@ -764,7 +764,7 @@ live conformances. The code below is the whole contract layer: it is also
 in `docs/blueprints/library/contracts/`, and
 `docs/blueprints/library/contracts/check.sh` copies it over today's
 `Sources/LibraryModel` and runs `swift test` on Linux in Swift 6 mode
-against creative-core `main`: the six smoke tests in
+against creative-core `dev` 4cac701: the six smoke tests in
 `ContractSmokeTests.swift` (every contract through `LibraryServices.fake`;
 every fake called once; every notice's exact text; the fakes showing each
 change a journey's (F) steps assert; every live stub's reason; samples on
@@ -1927,7 +1927,7 @@ public internal(set) var develop: DevelopSettings     // neutral until developed
 public internal(set) var availability: PhotoAvailability  // .available, .missing, .unreadable(reason)
 ```
 
-`LibraryCatalog.loupeArtboard` goes away: the loupe reads the photo's own
+`LibraryCatalog.loupeArtboard` goes away (loupe-viewport removes it): the loupe reads the photo's own
 `pixelSize` (#724's "real photo size").
 
 ### 5.6 `LibraryCatalog`: every stored property, declared once (spine)
