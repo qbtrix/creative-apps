@@ -353,7 +353,12 @@ public struct FakeShapes: ShapeBuilding {
     private static func obliqueScale(_ h: Int, to: Point, layer: Layer, t: Transform, document: Document,
                                      sceneID: String, frame: Int, box: Rect) -> [String: Double]? {
         let quarter = t.rotation.remainder(dividingBy: 90)
-        guard quarter.isFinite, abs(quarter) > 1e-9, let back = try? t.matrix.inverted() else { return nil }
+        // A layer an edge drop flattened (#673) has a zero scale, and its matrix can't be inverted (#679). Invert it as
+        // if that scale were 1 instead: the content's coordinate on the zero axis comes back as 0, and every use below
+        // scales it by 0 again, so the box math is unchanged.
+        let open = Transform(x: t.x, y: t.y, scaleX: t.scaleX == 0 ? 1 : t.scaleX, scaleY: t.scaleY == 0 ? 1 : t.scaleY,
+                             rotation: t.rotation)
+        guard quarter.isFinite, abs(quarter) > 1e-9, let back = try? open.matrix.inverted() else { return nil }
         // The layer's content in its own space: each drawn item's box (stroke included), as FakeHits bounds it.
         var points: [Point] = []
         for item in FakeStage().drawList(document, sceneID: sceneID, frame: frame, editing: nil).items
