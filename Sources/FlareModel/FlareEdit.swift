@@ -28,8 +28,8 @@ extension FlareWorkspace {
 
     /// Why `action` can't run, as its menu item's tooltip; nil when it can. Paste reads `pasteboard`, Flare's data.
     public func editHelp(_ action: FlareEditAction, pasteboard: Data? = nil) -> String? {
-        guard let scene = selectedScene else { return FlareLayerError.noDocument.message }
-        let targets = scene.layers.filter { editLayerIDs.contains($0.id) }
+        guard let ownerLayers else { return FlareLayerError.noDocument.message }
+        let targets = ownerLayers.filter { editLayerIDs.contains($0.id) }
         let locked = targets.first(where: \.isLocked).map { Self.unlockMessage($0.name) }
         let shapes = services.shapes.unavailableHelp(for: .select)
         switch action {
@@ -38,7 +38,7 @@ extension FlareWorkspace {
         case .deselect: return selection.isEmpty && selectedLayerID == nil ? "Nothing is selected." : nil
         case .paste:
             guard let pasteboard, !pasteboard.isEmpty else { return FakeShapes.nothingToPaste }
-            return shapes ?? scene.layers.first { $0.id == pasteTarget && $0.isLocked }.map { Self.unlockMessage($0.name) }
+            return shapes ?? ownerLayers.first { $0.id == pasteTarget && $0.isLocked }.map { Self.unlockMessage($0.name) }
         case .copy, .duplicate: return targets.isEmpty ? "Select a layer first." : shapes
         case .cut: return targets.isEmpty ? "Select a layer first." : locked ?? shapes
         case .delete:
@@ -50,8 +50,8 @@ extension FlareWorkspace {
     /// Copies the edited layers; returns the pasteboard data, or nil with the reason in `layerError`.
     public mutating func copy() -> Data? {
         if let reason = editHelp(.copy) { refuse(.refused(reason)); return nil }
-        guard let sceneID = selectedSceneID, let document else { return nil }
-        let data = try? services.shapes.copy(layers: editLayerIDs, owner: .scene(sceneID), from: document)
+        guard let owner = propertyOwner, let document else { return nil }
+        let data = try? services.shapes.copy(layers: editLayerIDs, owner: owner, from: document)
         layerError = data == nil ? .refused("These layers could not be copied.") : nil
         return data
     }
@@ -67,10 +67,10 @@ extension FlareWorkspace {
     /// Pastes `data` above the topmost edited layer, offset by `pasteOffset`, as one "Paste" step, and selects it.
     public mutating func paste(_ data: Data?) {
         if let reason = editHelp(.paste, pasteboard: data) { return refuse(.refused(reason)) }
-        guard let sceneID = selectedSceneID, let data else { return }
+        guard let owner = propertyOwner, let data else { return }
         let shapes = services.shapes, above = pasteTarget
         var added: [String] = []
-        step { added = try shapes.paste(data, owner: .scene(sceneID), aboveLayerID: above, offset: Self.pasteOffset, in: &$0) }
+        step { added = try shapes.paste(data, owner: owner, aboveLayerID: above, offset: Self.pasteOffset, in: &$0) }
         if layerError == .command(.invalidDocument(FakeShapes.nothingToPaste)) { return refuse(.refused(FakeShapes.nothingToPaste)) }
         if layerError == nil { selectLayers(added) }
     }
@@ -78,10 +78,10 @@ extension FlareWorkspace {
     /// Duplicates the edited layers, each above its original, as one "Duplicate" step, and selects the copies.
     public mutating func duplicate() {
         if let reason = editHelp(.duplicate) { return refuse(.refused(reason)) }
-        guard let sceneID = selectedSceneID else { return }
+        guard let owner = propertyOwner else { return }
         let shapes = services.shapes, layers = editLayerIDs
         var added: [String] = []
-        step { added = try shapes.duplicate(layers: layers, owner: .scene(sceneID), in: &$0) }
+        step { added = try shapes.duplicate(layers: layers, owner: owner, in: &$0) }
         if layerError == nil { selectLayers(added) }
     }
 
@@ -106,14 +106,21 @@ extension FlareWorkspace {
         setSelection([])
     }
 
-    /// The layer a paste lands above: the topmost edited layer, or nil for the top of the scene.
+    /// The layer a paste lands above: the topmost edited layer, or nil for the top of the edited owner.
     private var pasteTarget: String? {
-        selectedScene?.layers.last { editLayerIDs.contains($0.id) }?.id
+        ownerLayers?.last { editLayerIDs.contains($0.id) }?.id
     }
 
-    /// Every selectable item of the selected scene at the playhead.
+    /// Every selectable item of the edited owner at the playhead. In a symbol the hit tester (scene only) can't
+    /// list them, so they are the symbol's own drawn items, bounded, off text and locked layers, like a marquee.
     private func everything() -> [StageAddress] {
         guard let sceneID = selectedSceneID, let document else { return [] }
+        if let symbolID = editingSymbolID {
+            let locked = Set(ownerLayers?.filter(\.isLocked).map(\.id) ?? [])
+            let items = services.stage.drawList(document, sceneID: sceneID, frame: currentFrame, editing: symbolID).items
+                .filter { !$0.isText && $0.path.bounds != nil && !locked.contains($0.address.layerID) }.map(\.address)
+            return items.enumerated().filter { !items.prefix($0.offset).contains($0.element) }.map(\.element)
+        }
         let all = Rect(minX: -.greatestFiniteMagnitude, minY: -.greatestFiniteMagnitude,
                        maxX: .greatestFiniteMagnitude, maxY: .greatestFiniteMagnitude)
         return services.hits.marquee(document, sceneID: sceneID, frame: currentFrame, rect: all)
@@ -127,9 +134,9 @@ extension FlareWorkspace {
 
     /// Removes the edited layers, top first, in one step named `label`, and clears the selection.
     private mutating func removeEditLayers(_ label: String) {
-        guard let scene = selectedScene else { return refuse(.noDocument) }
-        let targets = editLayerIDs, owner = LayerOwner.scene(scene.id)
-        let ids = scene.layers.reversed().map(\.id).filter { targets.contains($0) }
+        guard let owner = propertyOwner, let ownerLayers else { return refuse(.noDocument) }
+        let targets = editLayerIDs
+        let ids = ownerLayers.reversed().map(\.id).filter { targets.contains($0) }
         step(label) { engine in
             for id in ids { try engine.perform(RemoveLayer(owner: owner, layerID: id)) }
         }

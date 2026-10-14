@@ -154,13 +154,14 @@ public struct FlareWorkspace: Sendable, Equatable {
         if let next = after ?? before ?? scenes.first?.id { selectScene(next) }
     }
 
-    /// Selects a layer of the selected scene by id. An unknown id is ignored.
+    /// Selects a layer of the edited owner (the symbol being edited in place, else the selected scene) by id. An
+    /// unknown id is ignored.
     public mutating func selectLayer(_ id: String) {
-        guard selectedScene?.layers.contains(where: { $0.id == id }) == true else { return }
+        guard ownerLayers?.contains(where: { $0.id == id }) == true else { return }
         selectedLayerID = id
     }
 
-    /// Selects a sidebar row: a scene or a layer of the selected scene.
+    /// Selects a sidebar row: a scene or a layer of the edited owner.
     public mutating func selectItem(_ id: String) {
         if scenes.contains(where: { $0.id == id }) {
             selectScene(id)
@@ -209,8 +210,8 @@ public struct FlareWorkspace: Sendable, Equatable {
     /// With a `label`, `body` runs inside `engine.group(label)`: only for
     /// workspace-level compositions such as Cut, since a contract opens its
     /// own group. Afterwards a selected scene that no longer exists (an undone Add Scene, a redone Delete Scene)
-    /// gives way to its neighbour, clamped to the scene list, a selected layer that no longer exists is deselected, and
-    /// a playhead past a shortened timeline moves to its last frame (#615).
+    /// gives way to its neighbour, clamped to the scene list, a selected layer the edited owner no longer has is
+    /// deselected, and a playhead past a shortened timeline moves to its last frame (#615).
     mutating func step(_ label: String? = nil, _ body: (inout CommandEngine) throws -> Void) {
         guard var next = engine else { return refuse(.noDocument) }
         let order = scenes.map(\.id)
@@ -224,7 +225,7 @@ public struct FlareWorkspace: Sendable, Equatable {
         engine = next
         layerError = nil
         if let id = selectedSceneID, selectedScene == nil { selectNeighbour(of: id, in: order) }
-        if let id = selectedLayerID, selectedScene?.layers.contains(where: { $0.id == id }) != true {
+        if let id = selectedLayerID, ownerLayers?.contains(where: { $0.id == id }) != true {
             selectedLayerID = nil
         }
         clampPlayhead()
