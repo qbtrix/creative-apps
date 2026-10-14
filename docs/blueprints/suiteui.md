@@ -213,3 +213,76 @@ so it is the last wave).
 shape), lint changes in `scripts/` (#272, a protected path), a tree deeper
 than two levels, a node graph you can drag nodes in (Flare's blueprint keeps
 positions computed), and any component that no app's v1 shows.
+
+---
+
+## 2. Pseudo-C4 (drawn before code)
+
+The machine-readable copy is `docs/blueprints/suiteui/c4-planned.json`, in
+the shape of `docs/c4/model.json` (systems, containers, components with
+`name`, `description`, `paths`, and `relationships`), with `"status":
+"planned"` or `"existing"` and `"authored": true` on every container and
+component. It is a plan: the C4 gate keeps reading `docs/c4/model.json`,
+where SuiteUI stays one component (`suiteui-sources`, path
+`Sources/SuiteUI/`) so every new file below is owned without editing the
+shared model. The description there is brought up to date once, by #345 in
+the last wave (section 8). Check: every one of the 36 files on dev sits in
+exactly one L3 component's `paths` below (the script that wrote the JSON
+asserts it), and every relationship names ids that exist.
+
+### 2.1 L2: containers
+
+```
+             Flare · Design · Photo · Library · Halo  (<X>App, macOS)
+                              │ build every view from
+                              ▼
+ ┌──────────────────────── SuiteUI (Sources/SuiteUI, macOS) ───────────────────────┐
+ │ tokens+glass ◀── every component                                                │
+ │ window shell ──▶ rows and lists, gallery      editor shell ──▶ tools, canvas,   │
+ │ canvas ──▶ canvas marks, probes                 viewer chrome, timeline slot     │
+ │ inspector ──▶ number entry, chips             curves · grid · content · graph   │
+ │ contracts (Foundation only) ◀── conformed to by every rule file                 │
+ └──────────────────────────────────────────────────────────────────────────────────┘
+        ▲ tested by                 ▲ rendered by               ▲ launched by
+  SuiteUITests (macOS)     Suite snapshots + goldens     Journey harness: Journey*.swift,
+                           (AppSnapshotTests/Suite*)     project.yml, SuiteJourneyTests
+                                                         ──▶ App audit (not SuiteUI's)
+  SuiteUI logic (Linux): proposed only, Q1
+```
+
+| Container | Status | Responsibility | Owned paths | Relationships |
+|---|---|---|---|---|
+| SuiteUI | existing | The component library and tokens. Knows no Model or engine | `Sources/SuiteUI/` | used by the five apps; tested by the three below |
+| SuiteUITests | existing | Unit tests of rules and components | `Tests/SuiteUITests/` | tests SuiteUI |
+| Suite snapshots and goldens | existing (PNGs), planned (goldens) | Every component state as a PNG; planned: compared against committed baselines in four appearances | `Tests/AppSnapshotTests/Suite*.swift`, `GoldenImage*.swift`, `SnapshotHost*.swift`, `Golden/` | renders SuiteUI |
+| Journey harness | existing (`Journey.swift`), planned (the rest) | The shared XCUITest steps, the template that picks up every journey file, and SuiteUI's own journeys | `UITests/Journey.swift`, `UITests/Journey+Input.swift`, `UITests/SuiteJourneyTests*.swift`, `project.yml` | launches a SuiteWindow app under `-SuiteGallery`; reads the probes; runs the app audit |
+| SuiteUI logic (Linux) | planned, proposal | Compile `Contracts/` and the pure rule files on Linux so `scripts/ci` tests them | none until Q1 is decided (`Package.swift` is protected) | would hold `suiteui-contracts` |
+| App audit | existing, not SuiteUI's | The audit checks every shot runs | `Tests/AppAuditTests/`, `UITests/Audit.swift` | run by the journey harness |
+
+### 2.2 L3: components inside SuiteUI
+
+| Component | Status | Responsibility | Owned paths (`Sources/SuiteUI/`) | Relationships |
+|---|---|---|---|---|
+| Tokens and glass | existing | Every raw value and the one glass modifier | `Tokens.swift`, `Glass.swift`, `GlassPanel.swift` | used by every component |
+| Window shell | existing | `SuiteWindow`; planned: the `-SuiteGallery` hook, app-owned expansion, row context menus | `SuiteWindow.swift` | draws Rows and lists; shows the gallery |
+| Editor shell | existing + planned | `EditorShell`, the top bar family, `SegmentedTabs`; planned: timeline slot, `.primary`, save status, capsule tabs, `ShellLayout` | `EditorShell.swift`, `EditorTopBar.swift`, `SegmentedTabs.swift`, `ShellLayout.swift` (planned) | hosts Tools, Canvas, Viewer chrome, Timeline; conforms to `ShellLayingOut` |
+| Tool palette | existing | `ToolbarAction`, `PaletteTool`, `ToolbarGroup` (floating, rail) | `ToolbarGroup.swift` | hosted by both shells; conforms to `ToolPicking` |
+| Canvas | existing | `CanvasSurface`, `CanvasViewport`, `Ruler`, `ZoomMath` | `CanvasSurface.swift`, `CanvasViewport.swift`, `Ruler.swift`, `ZoomMath.swift` | draws Canvas marks; reports to Probes; conforms to `CanvasNavigating` |
+| Canvas marks | existing + planned | `SelectionOutline`, `CropShade`; planned: `SelectionHandles`, `PathMarks`, `MotionPathMarks`, `GhostLayer`, guide marks, `CanvasPointMark`, `CanvasGrid`, `HandleGeometry` | `CanvasMarks.swift`, `CanvasMarks+Vector.swift`, `CanvasMarks+Points.swift`, `HandleGeometry.swift` (last three planned) | drawn by Canvas; conforms to `HandleGeometryProviding` |
+| Inspector rows | existing | Header, section, rows, the color row, action, keyframe button | `InspectorHeader.swift`, `InspectorRows.swift`, `ColorWell.swift`, `InspectorAction.swift`, `KeyframeButton.swift` | uses Number entry and Presets; conforms to `HexColorEditing`, `KeyframeFacing` |
+| Number entry | existing | `ScrubField` and the bar slider, `ScrubValue`, `NumericInput`, `StudioScrubRow` | `ScrubField.swift`, `ScrubValue.swift`, `NumericInput.swift`, `StudioScrubRow.swift` | reports to Probes; conforms to `ValueScrubbing` |
+| Presets and chips | existing | `PresetGrid`, `ChipRow`, `ChoiceChips` | `PresetGrid.swift`, `ChipRow.swift`, `ChoiceChips.swift` | used by Inspector and the timeline toolbar; conforms to `PresetNavigating` |
+| Curve editors | existing | `CurveEditor`, `ToneCurveEditor` | `CurveEditor.swift`, `ToneCurveEditor.swift` | conforms to `CurvePointEditing` |
+| Rows and lists | existing + planned | Sidebar rows and sections; planned: `LayerList`, `ListEditing` | `SidebarRow.swift`, `SidebarSection.swift`, `LayerList.swift`, `ListEditing.swift` (last two planned) | drawn by Window shell and app panels; conforms to `ListEditing` |
+| Thumbnail grid | existing | `ThumbnailGrid`, `GridSelection` | `ThumbnailGrid.swift`, `GridSelection.swift` | conforms to `GridSelecting` |
+| Timeline | existing + planned | `TimelineStrip`, `FrameMapping`; planned: restyle, `TimelineKeys` | `TimelineStrip.swift`, `FrameMapping.swift`, `TimelineKeys.swift` (planned) | hosted by Editor shell's slot; conforms to `TimelineMapping`, `KeyEditing` |
+| Viewer chrome | existing + planned | `ViewerStatusBar`; planned: `TransportCapsule` | `ViewerStatusBar.swift`, `TransportCapsule.swift` (planned) | hosted by both shells; conforms to `StatusPillComposing`, `TransportStepping` |
+| Content surfaces | existing | `SurfaceCard`, `EmptyStateView` | `SurfaceCard.swift`, `EmptyStateView.swift` | view only (section 5.4) |
+| Node graph | planned | `NodeGraph`, `NodeGraphGeometry` | `NodeGraph.swift`, `NodeGraphGeometry.swift` | conforms to `GraphGeometry` |
+| Probes | planned | `FrameProbe`, `ControlInventory` | `FrameProbe.swift`, `ControlInventory.swift` | fed by Canvas, Number entry, Timeline, Tools; read by the journey harness; conform to `FrameProbeRecording`, `ControlInventorying` |
+| Component gallery | planned | `SuiteGallery` and one page per family | `SuiteGallery.swift`, `Gallery/` | shown by Window shell; launched by SuiteUI's journeys |
+| Component contracts | planned | Section 5's protocols, value types, live conformances and Fakes, Foundation only | `Contracts/` | conformed to by the rule files; the Fakes back the gallery's UI-first pages |
+
+Golden comparison (`GoldenComparing`) belongs to the snapshot container, not
+to SuiteUI: its conformance lives in `Tests/AppSnapshotTests/GoldenImage.swift`
+and its contract in `Contracts/` so it can be unit-tested with the rest.
