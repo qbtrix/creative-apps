@@ -3,8 +3,8 @@
 Issue: #778 · Packet: docs/blueprints/suiteui/features/suite-harness.md (on branch `docs/suiteui-feature-packets` until the packet PR merges)
 Run: act-1a13b7e0908-fybz · Session: claude/suite-harness-lead-wwxtgn · Started: 2026-10-14T18:00Z
 Stage: 3 wave 2
-Base: 1098ff2d6c135020391cef770f4de11dfde9465a
-Next: when dev's Linux gate builds again (#763, FlareModel vs core `owner:` API), rebase lead/suite-harness-sh-3/-sh-4/-sh-9 on origin/dev, rerun scripts/ci, open the three PRs; then wave 3 (SH-5, SH-10)
+Base: 5eef022a7fb0916bf601ea3864a368035982a2bb
+Next: wave 2 branches being rebased on 5eef022 and opened as PRs (dev Linux build fixed by #801); then wave 3 (SH-5, SH-10)
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -31,7 +31,7 @@ Next: when dev's Linux gate builds again (#763, FlareModel vs core `owner:` API)
 - Captain questions Q1/Q2/Q3/Q9 built as the packet assumes (its table).
 
 ## Open
-- BLOCKER: scripts/ci fails on dev 1098ff2 (Linux swift build): creative-core main changed keyframe commands to `owner: LayerOwner`; FlareModel fakes still pass `sceneID:`. line:flare, not ours. Reported on #763 (issuecomment-6179761284); builders commented on #283, #330, #331.
+- RESOLVED by #801: scripts/ci fails on dev 1098ff2 (Linux swift build): creative-core main changed keyframe commands to `owner: LayerOwner`; FlareModel fakes still pass `sceneID:`. line:flare, not ours. Reported on #763 (issuecomment-6179761284); builders commented on #283, #330, #331.
 - Wave 2's first run (wf_6a181509-6c9) died in the 18:00Z usage pause with no branch or PR; relaunched as wf_c36a8d40-129 from base 1098ff2.
 - Builder branches are `lead/suite-harness-<id>` (a `lead/suite-harness/<id>` ref can't coexist with the lead branch).
 - SH-7 edits `project.yml` (not on the protected list) — fine for the lane.
