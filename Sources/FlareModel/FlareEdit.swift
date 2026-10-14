@@ -111,19 +111,12 @@ extension FlareWorkspace {
         ownerLayers?.last { editLayerIDs.contains($0.id) }?.id
     }
 
-    /// Every selectable item of the edited owner at the playhead. In a symbol the hit tester (scene only) can't
-    /// list them, so they are the symbol's own drawn items, bounded, off text and locked layers, like a marquee.
+    /// Every selectable item of the edited owner at the playhead: a marquee over the whole stage.
     private func everything() -> [StageAddress] {
         guard let sceneID = selectedSceneID, let document else { return [] }
-        if let symbolID = editingSymbolID {
-            let locked = Set(ownerLayers?.filter(\.isLocked).map(\.id) ?? [])
-            let items = services.stage.drawList(document, sceneID: sceneID, frame: currentFrame, editing: symbolID).items
-                .filter { !$0.isText && $0.path.bounds != nil && !locked.contains($0.address.layerID) }.map(\.address)
-            return items.enumerated().filter { !items.prefix($0.offset).contains($0.element) }.map(\.element)
-        }
         let all = Rect(minX: -.greatestFiniteMagnitude, minY: -.greatestFiniteMagnitude,
                        maxX: .greatestFiniteMagnitude, maxY: .greatestFiniteMagnitude)
-        return services.hits.marquee(document, sceneID: sceneID, frame: currentFrame, rect: all)
+        return services.hits.marquee(document, sceneID: sceneID, frame: currentFrame, editing: editingSymbolID, rect: all)
     }
 
     /// Selects the items of `layers` on the stage, and the last of them in the panel.

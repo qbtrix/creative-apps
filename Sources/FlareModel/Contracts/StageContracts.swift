@@ -72,13 +72,28 @@ public protocol StageRendering: Sendable {
                   editing symbolID: String?) -> StageDrawList
 }
 
-/// What is under the pointer, inside a marquee, and the selection's bounds.
+/// What is under the pointer, inside a marquee, and the selection's bounds. `editing` is the symbol being edited in
+/// place, as in `StageRendering`: its own items are hit, never the scene's (#641); nil hits the scene.
 public protocol StageHitTesting: Sendable {
     /// `tolerance` is in scene points (the app passes 4 pt divided by zoom).
     /// Hidden and locked layers and text items are never hit.
-    func hit(_ document: Document, sceneID: String, frame: Int, at point: Point,
+    func hit(_ document: Document, sceneID: String, frame: Int, editing symbolID: String?, at point: Point,
              tolerance: Double) -> StageAddress?
-    func marquee(_ document: Document, sceneID: String, frame: Int, rect: Rect) -> [StageAddress]
+    func marquee(_ document: Document, sceneID: String, frame: Int, editing symbolID: String?, rect: Rect) -> [StageAddress]
     /// World bounds including stroke width; nil for an empty selection.
-    func bounds(_ document: Document, sceneID: String, frame: Int, of items: [StageAddress]) -> Rect?
+    func bounds(_ document: Document, sceneID: String, frame: Int, editing symbolID: String?,
+                of items: [StageAddress]) -> Rect?
+}
+
+extension StageHitTesting {
+    /// The scene's items, no symbol edited.
+    public func hit(_ document: Document, sceneID: String, frame: Int, at point: Point, tolerance: Double) -> StageAddress? {
+        hit(document, sceneID: sceneID, frame: frame, editing: nil, at: point, tolerance: tolerance)
+    }
+    public func marquee(_ document: Document, sceneID: String, frame: Int, rect: Rect) -> [StageAddress] {
+        marquee(document, sceneID: sceneID, frame: frame, editing: nil, rect: rect)
+    }
+    public func bounds(_ document: Document, sceneID: String, frame: Int, of items: [StageAddress]) -> Rect? {
+        bounds(document, sceneID: sceneID, frame: frame, editing: nil, of: items)
+    }
 }

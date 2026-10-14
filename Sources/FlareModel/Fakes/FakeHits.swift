@@ -1,4 +1,5 @@
-// FakeHits.swift: StageHitTesting by bounding box on FakeStage's draw list, instances included (blueprint 6.3).
+// FakeHits.swift: StageHitTesting by bounding box on FakeStage's draw list (the edited symbol's while one is edited),
+// instances included (blueprint 6.3).
 // A world box is the path's box grown by half its stroke width, then taken through the item's transform, so the
 // stroke scales with its shape. Text items and locked layers are never hit nor bounded (hidden ones are not listed);
 // with `unavailable` set, nothing is.
@@ -9,16 +10,16 @@ public struct FakeHits: StageHitTesting {
     public var unavailable: String?
     public init(unavailable: String? = nil) { self.unavailable = unavailable }
 
-    public func hit(_ document: Document, sceneID: String, frame: Int, at point: Point,
+    public func hit(_ document: Document, sceneID: String, frame: Int, editing symbolID: String?, at point: Point,
                     tolerance: Double) -> StageAddress? {
         let pad = tolerance.isFinite ? max(tolerance, 0) : 0
         let probe = Rect(minX: point.x - pad, minY: point.y - pad, maxX: point.x + pad, maxY: point.y + pad)
-        return hittable(document, sceneID, frame).last { Self.overlap($0.rect, probe) }?.address
+        return hittable(document, sceneID, frame, symbolID).last { Self.overlap($0.rect, probe) }?.address
     }
 
-    public func marquee(_ document: Document, sceneID: String, frame: Int, rect: Rect) -> [StageAddress] {
+    public func marquee(_ document: Document, sceneID: String, frame: Int, editing symbolID: String?, rect: Rect) -> [StageAddress] {
         var found: [StageAddress] = []
-        for box in hittable(document, sceneID, frame) where !found.contains(box.address) && Self.overlap(box.rect, rect) {
+        for box in hittable(document, sceneID, frame, symbolID) where !found.contains(box.address) && Self.overlap(box.rect, rect) {
             found.append(box.address)
         }
         return found
@@ -29,15 +30,17 @@ public struct FakeHits: StageHitTesting {
         a.minX <= b.maxX && a.maxX >= b.minX && a.minY <= b.maxY && a.maxY >= b.minY
     }
 
-    public func bounds(_ document: Document, sceneID: String, frame: Int, of items: [StageAddress]) -> Rect? {
-        let boxes = hittable(document, sceneID, frame).filter { items.contains($0.address) }.map(\.rect)
+    public func bounds(_ document: Document, sceneID: String, frame: Int, editing symbolID: String?,
+                       of items: [StageAddress]) -> Rect? {
+        let boxes = hittable(document, sceneID, frame, symbolID).filter { items.contains($0.address) }.map(\.rect)
         return Rect(enclosing: boxes.flatMap { [Point(x: $0.minX, y: $0.minY), Point(x: $0.maxX, y: $0.maxY)] })
     }
 
-    /// Every hittable item's world box, bottom first.
-    private func hittable(_ document: Document, _ sceneID: String, _ frame: Int) -> [(address: StageAddress, rect: Rect)] {
+    /// Every hittable item's world box, bottom first: the scene's, or the symbol `symbolID`'s while it is edited.
+    private func hittable(_ document: Document, _ sceneID: String, _ frame: Int,
+                          _ symbolID: String?) -> [(address: StageAddress, rect: Rect)] {
         guard unavailable == nil else { return [] }
-        return FakeStage().drawList(document, sceneID: sceneID, frame: frame, editing: nil).items.compactMap { item in
+        return FakeStage().drawList(document, sceneID: sceneID, frame: frame, editing: symbolID).items.compactMap { item in
             guard !item.isText, let rect = Self.worldBox(item) else { return nil }
             let layer = document.layers(of: item.address.owner)?.first { $0.id == item.address.layerID }
             return layer?.isLocked == true ? nil : (item.address, rect)

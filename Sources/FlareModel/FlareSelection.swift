@@ -15,21 +15,21 @@ extension FlareWorkspace {
         guard let sceneID = selectedSceneID, let document, !items.isEmpty else { return nil }
         var framed = items
         if tool == .select {
-            // The hit tester's own view of the stage: the scene, not a symbol being edited.
-            framed = services.stage.drawList(document, sceneID: sceneID, frame: currentFrame, editing: nil).items
+            // The hit tester's own view of the stage: the scene, or the symbol being edited (#641).
+            framed = services.stage.drawList(document, sceneID: sceneID, frame: currentFrame, editing: editingSymbolID).items
                 .map(\.address).filter { a in items.contains { $0.owner == a.owner && $0.layerID == a.layerID } }
         }
-        return services.hits.bounds(document, sceneID: sceneID, frame: currentFrame, of: framed)
+        return services.hits.bounds(document, sceneID: sceneID, frame: currentFrame, editing: editingSymbolID, of: framed)
     }
 
     func layerIDs(of items: [StageAddress]) -> [String] {
         items.map(\.layerID).enumerated().filter { !items.prefix($0.offset).map(\.layerID).contains($0.element) }.map(\.element)
     }
 
-    /// The topmost item within `hitSlop` stage points of `point`, or nil.
+    /// The topmost item within `hitSlop` stage points of `point`, or nil: the edited symbol's, else the scene's.
     func hit(at point: Point, stageScale: Double) -> StageAddress? {
         guard let sceneID = selectedSceneID, let document, point.isFinite else { return nil }
-        return services.hits.hit(document, sceneID: sceneID, frame: currentFrame, at: point,
+        return services.hits.hit(document, sceneID: sceneID, frame: currentFrame, editing: editingSymbolID, at: point,
                                  tolerance: Self.hitSlop / Self.usable(stageScale))
     }
 
@@ -48,7 +48,7 @@ extension FlareWorkspace {
         if g.isClick { return select(hit(at: g.start, stageScale: g.stageScale), extending: extending) }
         guard g.moving.isEmpty else { return commitMove(g.moving, dx: g.end.x - g.start.x, dy: g.end.y - g.start.y) }
         guard let rect = Rect(enclosing: [g.start, g.end]) else { return }
-        let found = services.hits.marquee(document, sceneID: sceneID, frame: currentFrame, rect: rect)
+        let found = services.hits.marquee(document, sceneID: sceneID, frame: currentFrame, editing: editingSymbolID, rect: rect)
         setSelection(extending ? selection + found.filter { !selection.contains($0) } : found)
     }
 
