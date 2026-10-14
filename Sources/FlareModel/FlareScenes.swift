@@ -21,11 +21,11 @@ extension FlareWorkspace {
     }
 
     /// Renames a scene. Surrounding whitespace is dropped; a name with nothing else is refused, and the scene's
-    /// current name is a no-op that adds no undo step.
+    /// current name adds no undo step but, like any accepted rename, clears an earlier refusal (#629).
     public mutating func renameScene(_ id: String, to name: String) {
         let trimmed = String(name.drop(while: \.isWhitespace).reversed().drop(while: \.isWhitespace).reversed())
         guard !trimmed.isEmpty else { return refuse(.refused("Type a name for the scene.")) }
-        guard self.scenes.first(where: { $0.id == id })?.name != trimmed else { return }
+        guard self.scenes.first(where: { $0.id == id })?.name != trimmed else { layerError = nil; return }
         let scenes = services.scenes
         step { try scenes.renameScene(id, to: trimmed, in: &$0) }
     }

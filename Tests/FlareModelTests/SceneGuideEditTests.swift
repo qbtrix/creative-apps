@@ -151,3 +151,11 @@ func everyEditActionActsInOneStepOrSaysWhyNot(services: FlareServices) throws {
     w.renameScene("scene-1", to: "  Scene 1 ")
     #expect(!w.canUndo && !w.isDirty && w.document == FlareFixtures.bounce && w.layerError == nil)
 }
+
+@Test func retypingTheCurrentSceneNameAfterAnEmptyOneClearsTheError() {
+    var w = workspace(FlareFixtures.bounce)
+    w.renameScene("scene-1", to: "   ")
+    #expect(w.layerError?.message == "Type a name for the scene.")
+    w.renameScene("scene-1", to: "Scene 1")
+    #expect(w.layerError == nil && !w.canUndo && !w.isDirty)
+}
