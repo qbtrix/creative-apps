@@ -26,3 +26,5 @@ utc	stage	event	ref	note
 2026-10-14T22:22Z	4	pr-merged	#801	r3-b1 FlareModel builds against core main LayerOwner
 2026-10-14T22:25Z	5	pr-opened	#806	feature-done packet status
 2026-10-14T22:25Z	5	pr-merged	#806	feature-done; waiting on dispatched dev CI
+2026-10-14T22:32Z	4	ci-run	38647662189	red: Photo timing budgets only (Linux copy cost, macOS latency); all feature tests green
+2026-10-14T22:45Z	4	round-findings	round3	0 in feature; gap #851 filed on line:photo, noted on #763
