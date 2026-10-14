@@ -2485,7 +2485,51 @@ Checklist:
 
 ## 9. Critic rounds
 
-(Recorded below after the critic runs.)
+Two rounds, each one subagent told to refute the blueprint against the
+code, the engine, the rubric and the open issues (a journey with no
+component, a contract a journey can't be built from, a budget that can't be
+measured, overlapping owned files, a missing issue, a product name, factual
+errors, contradictions, rule breaks). Each verified its findings with
+evidence before reporting. Neither found a product name of another
+creative app, a protected path, or a banned no-crash word in the contract
+code. The fixes are in the commits after each round on this branch.
+
+### Round 1: 1 blocking, 20 major, 15 minor (all fixed)
+
+| Kind | Findings | Fix |
+|---|---|---|
+| Journeys vs fakes (**blocking**) | Journeys asserted states the fakes couldn't produce (Auto Advance, checksum and histogram changes, crop shrink, square cells), and "live on a fixture" had no meaning: a fixture has no files | Two modes per step, (F) fake and (L) live, with `LibraryFiles.writeShoot` and `-LibraryImportOnLaunch` for live setup (4.1); fakes made honest stand-ins that show each change (5.4); steps needing real math marked (L); decision D12 |
+| Journeys in the wrong wave | J0 expected import enabled in wave 1; J2 and J3 asserted status pills built in wave 3; J12 checked wave-4 crop chips and export sheet; J8 used develop and crop | J0 reads the expected state from `library.controls`; pill asserts moved to J12; chips and sheet to J6 and J7; J8 split, round trips moved to J5 step 7 and J6 step 7 |
+| Views a feature must edit but didn't own | Cull needed values on the loupe; crop's overlay and section had no host | The spine embeds `cullSummary`, the crop overlay and `CropInspector` stubs in wave 1 (8.3) |
+| Live stubs | `LiveDevelop` stub threw on the histogram, breaking the live loupe in wave 2; path-less samples had no live picture | Stub returns an empty histogram; `SampleImage` draws samples for fakes and live alike |
+| Missing parts | `library.controls` had no owner; per-row reset, plain-drag pan, free status pills and named probe marks don't exist in SuiteUI | `LibraryControls.swift` (spine); S-L6, S-L7, S-L8; scroll pan; section-level reset |
+| Contract gaps | `ImportNotice`, `ExportSummary` had no fields or text; no retry; J1 used a readable folder for "can't read"; `LibraryCatalog`'s `Equatable` breaks with `services` | `StateValues.swift` with exact `message` text and tests; `retryExport()`; `unreadableFolder()`; hand-written `==` |
+| Budgets and fidelity | QB-V4's 1/255 couldn't hold across two pipelines; perf rows with fewer than 60 samples; export perf had no harness; pixel budgets would fail in debug | QB-V4 split into exact, WYSIWYG (rubric tolerance) and JPEG; per-series and single-mark sample rules; P8; pixel rows report-only in debug, gated in release (D8) |
+| Rubric | Two appearances instead of four; no QB-F5 | Four appearances once #332 lands; QB-F5 with `-LibraryReduceMotion` |
+| Ownership and facts | Unowned existing files; a snapshot name clash; a "fixed" surround that isn't; 512 px too small for a 320 pt cell at 2x; exposure range wording; helpers that wouldn't compile before #333; menu single keys | Every file owned (`check_waves.py` now cross-checks C4); `library-empty-import`; D7 reworded; `ThumbnailBucket` with 1024; helpers in `LibraryJourneyTests.swift` until #333; single keys settled in 6.2 |
+
+### Round 2: 0 blocking, 19 major, 15 minor (all fixed)
+
+Round 1 had a blocking item, so a second round ran on the revised text.
+It confirmed the three checkers pass, `gen_section8.py` reproduces section
+8 exactly, and jscpd stays under its threshold with the contract files
+added to `Sources/`.
+
+| Kind | Findings | Fix |
+|---|---|---|
+| Not drivable by XCUITest | Space can't be held through a drag | J3 and P4 pan by scroll; Space-drag math is a Model test (`panLoupe`) |
+| Same-wave live setup | (L) steps of four wave-2 features import files, which import builds in the same wave | Stated as a task order inside wave 2 in 4.1 and each feature's note |
+| Stubs vs shipped behavior | Throwing stubs would break the #750 inspector and the sample grid and loupe | Stubs apply the plain cull rules and draw samples; only file work throws (smoke test `liveStubsKeepSamplesWorking`) |
+| Existing journeys | Four journeys click the content's "Load Sample Photos", which moves to File | The spine switches them to `-LibraryFixture samples` |
+| Not observable | Re-import still failed the broken file; no streaming of records; shape not in any value; fake lift too small; checksum flag missing; no "saved" state before quit; no Home key; a passing `preview` state | J1 deletes the broken file first; `added` batch callback and `appendImported`; pixel sizes in cell and loupe values; one byte level per slider step; `-LibraryTestValues`; `library.catalog` and a flush on quit; Home and End; `preview` asserted under `-LibraryFakeMode slow` |
+| Ownership | `MetadataInspector.swift` unowned in v1 (most of #291); J0 edited by import | Cull owns it in wave 2; J0 needs no edit |
+| Memory and staleness | The catalog's thumbnail dictionary was unbounded; thumbnail results carried no token | 128 MB cap with eviction in `requestThumbnails`; `ThumbnailRequest` token |
+| Fidelity and numbers | QB-LIB-V5 compared against a same-wave feature; J6 compared the wrong side of `straightenCrop` | Hand-run pipeline reference; the crop's height (3545 px at 5°) |
+| Minor | Bucket and sort steps that couldn't show a change; U on unflagged photos; J5 fail-mode wording; launch lines; `FakeCrop` mode; smoke tests not calling every fake; `ViewerStatusBar` facts; stale comments; slider-group names; `importOnLaunch` type; unpinned core revision; who closes #724; missing preview snapshot, Reduce Motion switch, preview-data pill, export sheet host | Fixed in place: three Zoom Ins, a `shoot` capture order unlike name order, P before U, launch lines, every fake called (`everyFakeAnswers`), `init(zoom:size:trailing:)` and S-L7 narrowed, comments, `isAdjustmentNeutral`, `Bool`, `check.sh` pinned to 4cac701, "Part of" / "Closes" rule, `library-loupe-preview`, `-LibraryReduceMotion`, the spine owns the pill and the sheet's presentation |
+
+No third round: round 2 found nothing blocking (the stop rule set for this
+blueprint). After both rounds: `check_c4.py` and `check_waves.py` clean,
+`contracts/check.sh` 69 of 69 tests passing with no warnings.
 
 ---
 
