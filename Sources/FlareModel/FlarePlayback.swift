@@ -59,9 +59,14 @@ extension FlareWorkspace {
         if isPlaying { pause() } else { play() }
     }
 
-    /// The transport's loop toggle; a running play keeps going under the new rule.
+    /// The transport's loop toggle; a running play keeps going under the new rule from where the playhead is. The
+    /// clock is rebased onto the current pass, keeping the time into the frame, so a looping play past its first pass
+    /// that turns Loop off plays on to the last frame instead of jumping there (#614).
     public mutating func setLoops(_ on: Bool) {
         loops = on
+        guard isPlaying, canPlay else { return }
+        let pass = Double(timelineFrames) / Double(playbackFPS)
+        playClock = playClock.truncatingRemainder(dividingBy: pass)
     }
 
     /// Moves the clock by `elapsed` seconds and the playhead with it. Looping wraps to the first frame; without loop
