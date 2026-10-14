@@ -4,7 +4,8 @@
 // text for each FormatError. A save hands the app the file's bytes (`saveData`), and the app reports the write
 // back (`didSave`, `saveFailed`). `isDirty` compares the document with the one last opened or saved, so undoing
 // back to the save is clean again. The Open Recent list keeps file paths, most recent first (`noteRecent`,
-// `clearRecent`). The app does the file panels and the disk; the autosave due time follows in a later PR on #739.
+// `clearRecent`). Autosave is due `autosaveDelay` seconds after the last edit while the document is dirty
+// (`autosaveDue`), and `recoveryData()` is the dirty document's file bytes. The app does the file panels and the disk.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -120,6 +121,23 @@ extension FlareWorkspace {
 
     /// Empties the Open Recent list (File > Open Recent > Clear Menu).
     public mutating func clearRecent() { recent = [] }
+
+    /// Seconds after the last edit before the app writes the recovery file.
+    public static let autosaveDelay: Double = 30
+
+    /// The app keeps the time of the last edit; due only while the document is dirty, once `autosaveDelay`
+    /// seconds have passed. Never due for a missing or non-finite time.
+    public func autosaveDue(lastEdit: Double?, now: Double) -> Bool {
+        guard isDirty, let lastEdit, now.isFinite, lastEdit.isFinite else { return false }
+        return now - lastEdit >= Self.autosaveDelay
+    }
+
+    /// The encoded document while dirty, with the save path's encoder; nil when clean, when there is no
+    /// document, or when it can't be written.
+    public func recoveryData() -> Data? {
+        guard isDirty, let document else { return nil }
+        return try? FlareFormat.encode(document)
+    }
 
     /// Clears a shown open or save failure once its alert is dismissed.
     public mutating func dismissFileError() {
