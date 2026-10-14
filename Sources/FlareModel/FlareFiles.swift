@@ -3,8 +3,8 @@
 // (`finishOpen`); a bad file leaves the open document as it was and says why in `loadState`, with section 3.3's
 // text for each FormatError. A save hands the app the file's bytes (`saveData`), and the app reports the write
 // back (`didSave`, `saveFailed`). `isDirty` compares the document with the one last opened or saved, so undoing
-// back to the save is clean again. The app does the file panels and the disk; the Open Recent list and the
-// autosave due time follow in a later PR on #356.
+// back to the save is clean again. The Open Recent list keeps file paths, most recent first (`noteRecent`,
+// `clearRecent`). The app does the file panels and the disk; the autosave due time follows in a later PR on #739.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -106,6 +106,20 @@ extension FlareWorkspace {
     public mutating func saveFailed(_ reason: String) {
         saveError = Self.sentence("Flare couldn't save this animation", reason)
     }
+
+    /// The most entries the Open Recent list keeps.
+    public static let recentLimit = 10
+
+    /// The app calls this after a successful open or save, with the file's path (not its display name),
+    /// so two files with one name in different folders stay two entries and the menu can reopen each.
+    /// The path moves to the front; the oldest entry past `recentLimit` drops off.
+    public mutating func noteRecent(_ path: String) {
+        recent = [path] + recent.filter { $0 != path }
+        recent = Array(recent.prefix(Self.recentLimit))
+    }
+
+    /// Empties the Open Recent list (File > Open Recent > Clear Menu).
+    public mutating func clearRecent() { recent = [] }
 
     /// Clears a shown open or save failure once its alert is dismissed.
     public mutating func dismissFileError() {
