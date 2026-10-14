@@ -1,6 +1,7 @@
 // DesignCommands.swift: Design's menu bar. File: New File, Open…, Save, Save As…;
 // Edit: Undo and Redo named for the edit, Delete Layer; Page: Add Page, Delete
-// Page; View: Zoom In, Zoom Out, Fit Page. Every top bar command is here too.
+// Page; Object: the Align submenu (DesignObjectMenu); View: Zoom In, Zoom Out,
+// Fit Page. Every top bar command is here too.
 //
 // The focused window publishes a DesignMenu (what can run now, and where to send
 // it) as a focused scene value. An item that can't run is disabled, never hidden.
@@ -26,6 +27,8 @@ struct DesignMenu {
     var canDeletePage = false
     /// A layer is selected and unlocked, the only kind Delete Layer can remove, and no text is being edited.
     var canDeleteLayer = false
+    /// Why each Align command can't run, keyed by edge; an edge left out can run.
+    var alignHelp = DesignWorkspace().alignHelps
 
     var canUndo: Bool { undoHelp == nil }
     var canRedo: Bool { redoHelp == nil }
@@ -49,6 +52,7 @@ struct DesignMenu {
         redoHelp = editing ? Self.finishEditing : model.canRedo ? nil : "Nothing to redo."
         canDeletePage = model.canDeletePage
         canDeleteLayer = !editing && (model.selectedNode.map { model.lockHelp($0.id) == nil } ?? false)
+        alignHelp = model.alignHelps
     }
 
     private static let finishEditing = "Finish editing the text first."
@@ -87,6 +91,7 @@ struct DesignCommands: Commands {
             DesignDeleteLayerItem(menu: menu)
         }
         CommandMenu("Page") { DesignPageMenu(menu: menu) }
+        CommandMenu("Object") { DesignObjectMenu(menu: menu) }
         CommandGroup(after: .toolbar) {
             DesignViewMenu(menu: menu)
             Divider()

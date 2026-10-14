@@ -1,6 +1,6 @@
 // DesignInspector.swift: the Properties tab of Design's panel. A selected
 // layer shows its header (name, then kind unless the name says it, then size),
-// then Layer (Hidden and Locked checkboxes), Frame (X, Y, W and H as scrub
+// then Align (DesignAlignBar), then Layer (Hidden and Locked checkboxes), Frame (X, Y, W and H as scrub
 // fields) and Fill (the color well; a text layer's is its text color, a group
 // has none). A locked layer, or one inside a locked group, can't be edited, so
 // Frame and Fill are disabled and a line says why. With only a page selected it shows the page's size,
@@ -17,7 +17,9 @@ struct DesignInspector: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 0) {
                 if let node = model.selectedNode {
-                    DesignNodeProperties(node: node, lockHelp: model.lockHelp(node.id), perform: perform).id(node.id)
+                    DesignNodeProperties(
+                        node: node, lockHelp: model.lockHelp(node.id), alignHelp: model.alignHelps, perform: perform
+                    ).id(node.id)
                 } else if let page = model.selectedPage {
                     DesignPageProperties(page: page).id(page.id)
                 }
@@ -32,6 +34,8 @@ private struct DesignNodeProperties: View {
     let node: DesignNode
     /// Why the layer can't be edited (it or a group around it is locked), or nil.
     let lockHelp: String?
+    /// Why each Align command can't run, keyed by edge.
+    let alignHelp: [DesignAlignEdge: String]
     let perform: DesignPerform
 
     /// How far X and Y can be set, and the most W and H can be, in points.
@@ -41,6 +45,7 @@ private struct DesignNodeProperties: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             InspectorHeader(node.name, details: node.inspectorDetails)
+            DesignAlignBar(help: alignHelp, perform: perform)
             InspectorSection("Layer") {
                 InspectorRow("") {
                     Toggle("Hidden", isOn: Binding(get: { node.isHidden }, set: { perform(.setHidden(node.id, $0)) }))
