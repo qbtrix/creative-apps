@@ -73,10 +73,12 @@ No other W2 feature (easing, text-layers) owns any file below.
    new folder "Bounce""; Render; the progress row reads "Frame n of 48";
    success reads "Rendered 48 frames." with Reveal in Finder; the test lists
    `<tmp>/Bounce/`: exactly 48 files `Bounce_0001.png` … `Bounce_0048.png`,
-   each 960 × 540 (read with ImageIO in the test). Then Render… again, Movie,
-   Full, Render, and Cancel as soon as the progress row shows: the result
-   reads "Cancelled. No movie was written." and `<tmp>` holds no `.mp4`.
-   (RO-10)
+   each 960 × 540 (read with ImageIO in the test). Then quit and relaunch on
+   `-HaloSample reference -HaloRenderTo <tmp>` (300 frames of 50 keyed
+   layers, so the movie can't finish before the click lands); Render…,
+   Movie, Full, Render, and Cancel as soon as the progress row shows "Frame
+   n of 300": the result reads "Cancelled. No movie was written." and
+   `<tmp>` holds no `.mp4`. (RO-10)
 
 Both run on `-HaloSample`: the live renderer exists (viewer-playback) and
 RO-1 lands `LiveCompositionRendering` before either journey. The Model half
@@ -221,7 +223,7 @@ pass`, `Head:`. RO-10 also carries `feature-done`. Sizes are estimates.
 | RO-7 | #429 (part) | `HaloMovieWriter`: H.264 `.mp4` at the plan's size and fps, BT.709 color tagged, frame i at `CMTime(value: i, timescale: fps)`, the session ended at `frames / fps`; transparent areas become black; `finish(cancelled: true)` cancels and removes the file; HF-8 | `Sources/HaloApp/HaloMovieWriter.swift`, `Tests/AppSnapshotTests/HaloMovieWriterTests.swift` | RO-6 | ~300 |
 | RO-8 | #429 (part) | `HaloRenderSheet` (system `Form`, `Picker(.segmented)` for format and size, destination from `-HaloRenderTo` or a folder picker, the summary, Render; progress row with Cancel; result with Reveal in Finder or the failure; Close); Render…'s route opens it; the detached run with a progress sink in `HaloWindow+Render.swift`; the sheet is presented from the `renderScene(_:)` hook while `renderJob != nil`; snapshots | `Sources/HaloApp/HaloRenderSheet.swift`, `Sources/HaloApp/HaloWindow+Render.swift`, `Tests/AppSnapshotTests/HaloRenderSheetSnapshots.swift` | RO-5, RO-6, RO-7 | ~370 |
 | RO-9 | #451 (closes) | Journey H-J20 on `-HaloSample parented` | `UITests/HaloJourneyTests+RenderFrame.swift` | RO-5, #333 | ~120 |
-| RO-10 | #429 (closes), `feature-done` | Journey H-J21 on `-HaloSample keyed -HaloRenderTo <tmp>`: PNG sequence half size, then a cancelled movie | `UITests/HaloJourneyTests+Render.swift` | RO-8, RO-9, #333 | ~180 |
+| RO-10 | #429 (closes), `feature-done` | Journey H-J21: PNG sequence half size on `-HaloSample keyed -HaloRenderTo <tmp>`, then a cancelled movie on a relaunch with `-HaloSample reference` | `UITests/HaloJourneyTests+Render.swift` | RO-8, RO-9, #333 | ~180 |
 
 RO-1 and RO-2 share no file and can run in the first build wave. The Model
 chain is (RO-1 → RO-3) ∥ RO-2 → RO-4; the app chain is RO-5 → RO-6 → RO-7 →
@@ -253,12 +255,12 @@ Frame and Render… turn on.
 | RO-2 | `HaloRenderFrameTests` on `parented` (`.fake`): at 12, `renderCurrentFrame()` gives a 480 × 270 frame 12, `renderedFrameSummary` "Rendered frame 12 at 480 × 270", no note, `history.undo` unchanged; scrub 12 → 13: stale, note "Rendered frame is out of date."; scrub back to 12 with no edit: not stale, no note; a Position X edit on Ball (or New Layer, whichever W1 method exists): stale; ⌘R again: not stale. On `two-comps`: render Intro, select Outro: `shownRenderedFrame == nil`; back to Intro: shown, not stale. Playing hides it. On `three-layers` at 30 with `services.text = nil`: the note equals `renderedFrame.frame.note` and is non-nil; with the fake rasterizer: nil | staleness misses a scrub or an edit, sticks after scrubbing back, a stale note hides, a frame from another composition shows, or Render Frame records an undo step |
 | RO-3 | `HaloRenderJobTests` on `keyed` (`.fake`): `openRenderSheet` sets settings and no plan; `startRender(.pngSequence, half)` returns 48 frames at 960 × 540 and the progress text reads "Frame 0 of 48" at once; `renderProgress(frame: 12)` → "Frame 12 of 48", then 11 leaves 12, 99 caps at 48; `finishRender(.finished(frames: 48))` → "Rendered 48 frames."; `cancelRender()` at 12 → "Cancelled after 12 frames." and a late `renderProgress(frame: 13)` changes nothing, a following `.cancelled(frames: 13)` → "Cancelled after 13 frames."; a movie cancel → "Cancelled. No movie was written."; `.failed(frame: 5, message: "Disk full")` → "Render stopped at frame 5: Disk full."; a second `startRender` while running returns nil; `closeRenderSheet` while running keeps the job; `renderOutputName` gives "Bounce", then "Bounce 2" with "Bounce" existing, and "Bounce.mp4" / "Bounce 2.mp4"; `renderSummary` reads "48 PNG files, 960 × 540, into a new folder "Bounce"" and "One movie, 1920 × 1080, 24 fps, "Bounce.mp4"" | a text is wrong, progress goes back or past the end, a late hop moves a cancelled job, two renders start, or a name collides |
 | RO-4 | `HaloRenderAvailabilityTests`: on `HaloProject(services: .fake)` with no composition both commands read "Create a composition first."; on `keyed` both are nil (enabled) on `.fake` and on `.live`; while a render runs Render… reads "A render is already running." and Render Frame stays enabled; with a stub `CompositionRendering` whose help is "x", Render… reads "x". `HaloRenderBudgetTests.renderPreview` (HB-12) and `.renderSequence` (HB-13) record their numbers and fail only on too few samples | a command turns on with no composition, stays off when it can act, or a second render can start |
-| RO-5 | Snapshots `halo-rendered-frame-light.png`, `halo-rendered-frame-dark.png` (`HaloViewer(model:)` on `keyed` at 12 after `renderCurrentFrame()`: Ball over Floor) and `halo-rendered-frame-stale-light/dark.png` (after a scrub to 13: the note) | the image is missing, mis-placed in the artboard, or the stale note doesn't show |
+| RO-5 | Snapshots `halo-rendered-frame-light.png`, `halo-rendered-frame-dark.png` (`HaloViewer(model:)` on a `HaloProject(services: .fake)` loaded with the `keyed` fixture, at 12 after `renderCurrentFrame()`: Ball over Floor; `HaloViewer(model:)` alone would default to live services) and `halo-rendered-frame-stale-light/dark.png` (after a scrub to 13: the note) | the image is missing, mis-placed in the artboard, or the stale note doesn't show |
 | RO-6 | `HaloPNGWriterTests` (macOS, HF-7): `keyed` half through `LiveCompositionRendering` into `HaloPNGWriter`: `Bounce_0007.png` decoded with `CGImageSource` (bytes read from the image's data provider row by row, not drawn into a context, which would premultiply) equals `render` of frame 6 at 960 × 540 as `rgba8(colorSpace:)` byte for byte; a 40 × 20 composition with one 50% opaque solid over nothing round-trips its straight alpha (128) exactly; `begin` on a path that is a file throws | a byte differs, alpha is premultiplied or dropped, or a frame is written over a file |
 | RO-7 | `HaloMovieWriterTests` (macOS, HF-8): `keyed` full as a movie: `AVURLAsset` loads duration exactly 2 s (48/24) and an `AVAssetReader` counts 48 video samples; frame 0 decoded is within 4/255 per channel of the PNG writer's frame 0 on at least 99% of pixels; `finish(cancelled: true)` after 3 frames leaves no file at the URL | a frame is dropped or doubled, duration drifts, colors are off beyond tolerance, or a partial movie stays |
 | RO-8 | Snapshots `halo-render-sheet-light/dark.png` (settings, PNG, Half, summary), `halo-render-sheet-progress-light/dark.png` (`keyed` at "Frame 12 of 48" with Cancel), `halo-render-sheet-done-light/dark.png` (Reveal in Finder), `halo-render-sheet-failed-light/dark.png` ("Render stopped at frame 5: Disk full."); each state set through the Model's public methods | a state is missing a control, Render is enabled with no destination, or a view assigns Model state (app-state lint) |
 | RO-9 | H-J20 on the `dev` CI run | any step's assert, including a skipped-layer note for Rig |
-| RO-10 | H-J21 on the `dev` CI run: 48 files with exact names at 960 × 540; no `.mp4` after Cancel | a file is missing, extra, mis-sized or misnamed, or a partial movie stays |
+| RO-10 | H-J21 on the `dev` CI run: 48 files with exact names at 960 × 540 on `keyed`; no `.mp4` after Cancel on `reference` | a file is missing, extra, mis-sized or misnamed, or a partial movie stays |
 
 ## Quality tests
 
@@ -321,5 +323,10 @@ Where the packet differs from the blueprint or the issue bodies:
 - **File names.** A composition name may hold "/" or ":", which a file name
   can't; the plan replaces both with "-". PNG frames go into a new folder
   named after the composition ("Bounce", then "Bounce 2"), as #429 asks.
+- **Cancel races on a short movie.** `keyed`'s 48 frames can finish before
+  XCUITest clicks Cancel, so H-J21's cancel step relaunches on `reference`
+  (300 frames); the PNG step stays on `keyed`.
+- **RO-5's snapshot services.** It builds `HaloProject(services: .fake)`
+  with the `keyed` fixture, since a bare model defaults to live services.
 - **Cancel.** The run stops before the next frame; the frame being written
   finishes. PNG frames already written stay; a movie is removed.

@@ -75,9 +75,9 @@ needs these payload cases: `.setProperty(HaloProperty, Double)`,
 `.toggleKey(HaloProperty)`, `.setParent(String?)`, `.setBlendMode(BlendMode)`,
 and for the viewer `.beginViewerDrag(x:y:)`, `.moveViewerDrag(x:y:)` (in
 composition pixels, as Doubles), `.endViewerDrag` and `.cancelViewerDrag`.
-At stage 1 the lead checks them against the merged W0 code. A missing case
-is a W0 gap: the lead comments on the feature issue and the supervisor adds
-it. The lead never edits `HaloCommand.swift`.
+FD-11 lists every v1 case, these and `.setPropertyText(HaloProperty,
+String)` included, so features never add one. The lead never edits
+`HaloCommand.swift`.
 
 ## Journey steps
 
@@ -124,7 +124,7 @@ with `.fake`, and again with `.live` and `FakeProjectHistory` swapped in.
 
 | Screen | Empty | Error | Loading |
 |---|---|---|---|
-| Inspector, TRANSFORM | no layer: W0's "Select a layer to see its properties." stays; a null shows all eight rows | a refused edit's `refusal.message` in `SuiteFont.caption` under the row its id names ("Rotation needs a number." under `halo.inspector.row.rotation`); on `.live` before LK-2 every row is disabled with "Keys arrive with the layer inspector (#38)." | none |
+| Inspector, TRANSFORM | no layer: W0's "Select a layer to see its properties." stays; a null shows all eight rows | a refused edit's `refusal.message` in `SuiteFont.caption` under the row its id names ("Rotation needs a number." under `halo.inspector.row.rotation`); on `.live` before LK-2b every row is disabled with "Keys arrive with the layer inspector (#38)." | none |
 | Keyframe button | "Not animated" (no diamond), "Animated" (hollow diamond, Add Key), "Keyed at this frame" (filled, Remove Key) from `HaloKeyState` | – | – |
 | Inspector, LAYER | Parent None; Blend Normal | a cycle (a stale menu only) shows "<name> can't follow a layer that follows it." under `halo.inspector.parent` | none |
 | Viewer drag | a drag that starts over no layer or in the surround moves nothing, selects nothing and adds no step | a null, or a layer outside its span, is never hit | the preview while the pointer moves (`viewerDrag` through `viewerDrawList`); Escape cancels it, with no step |
@@ -193,8 +193,9 @@ HaloKeyRules.value(p, layer, c, f):                                     # LK-1; 
 worldMatrix(id): m = local(id); walk parentID outward with a seen-set; m = local(parent) * m
 local = T(x, y) * R(rotation) * S(scaleX, scaleY) * T(-anchorX, -anchorY)
 
-keyState(track, f) = track.count < 2 ? .notAnimated : track has f ? .keyedHere : .animated  # LK-2
-setValue(v, p, id, f): guard v.isFinite else throw .notANumber(p); v = clamp(v, p.range)
+keyState(track, f) = track.count < 2 ? .notAnimated : track has f ? .keyedHere : .animated  # LK-2a
+setValue(v, p, id, f):                                                  # LK-2b
+  guard v.isFinite else throw .notANumber(p); v = clamp(v, p.range)
   track.count >= 2 ? key(track, f, v) : setStatic(v, p)     # opacity → layer.opacity, no track; else [Key(0, v)]
 toggleAnimation: animated ? setStatic(value at f) : keys at f and (f == last ? 0 : last) with value at f
 toggleKey: key at f ? remove : add key(f, value at f); a track left with < 2 keys → setStatic(its value)
@@ -237,10 +238,11 @@ Each carries the label `fast-lane` and the body lines `Belt-Lead:`,
 | id | issue | what | owned files | depends on | size |
 |---|---|---|---|---|---|
 | LK-1 | #38 (part) | `HaloKeyRules`: sampling, local and world matrices, `follows`; `LiveLayerPlacing` real; `FakeLayerPlacing` calls the rules; suite on `[fake, live]` with HF-3 and HF-5's chain | `Sources/HaloModel/Live/HaloKeyRules.swift`, `Sources/HaloModel/Live/LiveLayerPlacing.swift`, `Sources/HaloModel/Fakes/FakeLayerPlacing.swift`, `Tests/HaloModelTests/LayerPlacingContractTests.swift` | – | ~300 |
-| LK-2 | #38 (part) | The not-animated rule in `HaloKeyRules` (`keyState`, `rows`, `setValue`, `toggleAnimation`, `toggleKey`); `LivePropertyKeying` real except `setParent` (still `.notBuilt("Parenting")`); `FakePropertyKeying` calls the rules; suite on `[fake, live]` | `Sources/HaloModel/Live/HaloKeyRules.swift`, `Sources/HaloModel/Live/LivePropertyKeying.swift`, `Sources/HaloModel/Fakes/FakePropertyKeying.swift`, `Tests/HaloModelTests/PropertyKeyingContractTests.swift` | LK-1 | ~360 |
-| LK-3 | #38 (part) | `setParent` in the rules (cycle refused, the child kept on screen); `LivePropertyKeying.setParent` real; HF-5's second half on `[fake, live]` | `Sources/HaloModel/Live/HaloKeyRules.swift`, `Sources/HaloModel/Live/LivePropertyKeying.swift`, `Sources/HaloModel/Fakes/FakePropertyKeying.swift`, `Tests/HaloModelTests/PropertyKeyingContractTests.swift` | LK-2 | ~200 |
-| LK-4 | #207 (part) | `LiveViewerDragging`: `hit` over the rules' world matrices (not `FrameDrawing`, which is viewer-playback's), `commitMove` through `HaloKeyRules.setValue` in the parent's space; `FakeViewerDragging` wraps it; suite on `[fake, live]` | `Sources/HaloModel/Live/LiveViewerDragging.swift`, `Sources/HaloModel/Fakes/FakeViewerDragging.swift`, `Tests/HaloModelTests/ViewerDraggingContractTests.swift` | LK-2 | ~260 |
-| LK-5 | #38 (part) | `propertyRows`, `setProperty(_:to:)` coalesced per row, `setProperty(_:text:)` and its refusal, `endPropertyScrub()`, the shown-value helpers | `Sources/HaloModel/HaloKeying.swift`, `Tests/HaloModelTests/HaloKeyingTests.swift` | LK-2 | ~280 |
+| LK-2a | #38 (part) | The read half of the not-animated rule in `HaloKeyRules` (`keyState`, `rows`); `LivePropertyKeying`'s rows real (its writes still throw `.notBuilt`, its help unchanged); `FakePropertyKeying`'s rows and key states move onto the rules; the rows half of the suite on `[fake, live]` | `Sources/HaloModel/Live/HaloKeyRules.swift`, `Sources/HaloModel/Live/LivePropertyKeying.swift`, `Sources/HaloModel/Fakes/FakePropertyKeying.swift`, `Tests/HaloModelTests/PropertyKeyingContractTests.swift` | LK-1 | ~200 |
+| LK-2b | #38 (part) | The write half in `HaloKeyRules` (`setValue`, `toggleAnimation`, `toggleKey`); `LivePropertyKeying` real except `setParent` (still `.notBuilt("Parenting")`), help nil; `FakePropertyKeying`'s writes move onto the rules; the writes half of the suite on `[fake, live]` | `Sources/HaloModel/Live/HaloKeyRules.swift`, `Sources/HaloModel/Live/LivePropertyKeying.swift`, `Sources/HaloModel/Fakes/FakePropertyKeying.swift`, `Tests/HaloModelTests/PropertyKeyingContractTests.swift` | LK-2a | ~240 |
+| LK-3 | #38 (part) | `setParent` in the rules (cycle refused, the child kept on screen); `LivePropertyKeying.setParent` real; HF-5's second half on `[fake, live]` | `Sources/HaloModel/Live/HaloKeyRules.swift`, `Sources/HaloModel/Live/LivePropertyKeying.swift`, `Sources/HaloModel/Fakes/FakePropertyKeying.swift`, `Tests/HaloModelTests/PropertyKeyingContractTests.swift` | LK-2b | ~200 |
+| LK-4 | #207 (part) | `LiveViewerDragging`: `hit` over the rules' world matrices (not `FrameDrawing`, which is viewer-playback's), `commitMove` through `HaloKeyRules.setValue` in the parent's space; `FakeViewerDragging` wraps it; suite on `[fake, live]` | `Sources/HaloModel/Live/LiveViewerDragging.swift`, `Sources/HaloModel/Fakes/FakeViewerDragging.swift`, `Tests/HaloModelTests/ViewerDraggingContractTests.swift` | LK-2b | ~260 |
+| LK-5 | #38 (part) | `propertyRows`, `setProperty(_:to:)` coalesced per row, `setProperty(_:text:)` and its refusal, `endPropertyScrub()`, the shown-value helpers | `Sources/HaloModel/HaloKeying.swift`, `Tests/HaloModelTests/HaloKeyingTests.swift` | LK-2b | ~280 |
 | LK-6 | #38 (part) | `toggleAnimation`, `toggleKey`, `setParent`, `parentChoices`, `blendChoices`; the keys area file turns on the stopwatch, diamond, Parent, Blend and viewer drag when the state and services allow | `Sources/HaloModel/HaloKeying.swift`, `Sources/HaloModel/Availability/HaloAvailability+Keys.swift`, `Tests/HaloModelTests/HaloKeyToggleTests.swift`, `Tests/HaloModelTests/HaloKeysAvailabilityTests.swift` | LK-3, LK-4, LK-5 | ~330 |
 | LK-7 | #207 (part) | `compositionPoint`, `beginViewerDrag`, `moveViewerDrag` (preview only), `endViewerDrag` (one "Move"), `cancelViewerDrag` | `Sources/HaloModel/HaloViewerDrag.swift`, `Tests/HaloModelTests/HaloKeyByDragTests.swift` | LK-4 | ~260 |
 | LK-8 | – | Budgets HB-1, HB-3, HB-4 on `reference`, over `.fake` and `.live` | `Tests/HaloModelTests/HaloKeysBudgetTests.swift` | LK-5, LK-7 | ~150 |
@@ -251,13 +253,15 @@ Each carries the label `fast-lane` and the body lines `Belt-Lead:`,
 | LK-13 | – | H-J6 on `-HaloFixture keyed` | `UITests/HaloJourneyTests+Inspector.swift` | LK-10, #333 | ~170 |
 | LK-14 | – (`feature-done`) | H-J23 on `-HaloFixture parented` | `UITests/HaloJourneyTests+Parent.swift` | LK-10, LK-12, LK-13, #333 | ~140 |
 
-The Model chain is LK-1 → LK-2 → (LK-3 ∥ LK-4 ∥ LK-5), LK-4 → LK-7, LK-6
+The Model chain is LK-1 → LK-2a → LK-2b → (LK-3 ∥ LK-4 ∥ LK-5), LK-4 → LK-7, LK-6
 after LK-3, LK-4 and LK-5, and LK-8 after LK-5 and LK-7. The app chain is
 LK-9 → (LK-10 ∥ LK-11) → the journeys. Tasks that share a file chain
 through depends-on. LK-9 writes `HaloWindow+Keys.swift` once with every
 route, so LK-10 and LK-11 can run side by side. The 8.3 list's
 `HaloKeyingTests` keeps the rows, scrub and typed value; the toggle and
-availability tests get new files so no task passes 400 lines.
+availability tests get new files so no task passes 400 lines. LK-2 is split
+in two because moving `FakePropertyKeying`'s ~110 lines of rules into
+`HaloKeyRules` counts as both a delete and an add.
 
 **Coordination.** `FakeFrameDrawing` calls `FakeLayerPlacing`, so it picks
 up the rules with no edit. viewer-playback's `LiveFrameDrawing` needs the
@@ -273,14 +277,15 @@ or disabled with help), so LK-6 doesn't edit it.
 | id | test | fails when |
 |---|---|---|
 | LK-1 | `LayerPlacingContractTests` on `[fake, live]`. On `keyed`: Ball's x is 160 at 0, 360 at 6, 560 at 12 and 960 at 30 (held past the last key); its opacity is 0.5 at 6; Floor's x is `Floor.bounds(in:).midX`. HF-3: every property of every layer of `reference` at frames 0…299 equals `Timeline.value(of:at:)` on its track, or `defaultValue` with no track. HF-5: a three-deep chain (translate (100, 0); rotate 90° about the anchor; scale 2) equals the matrix multiplied by hand within 1e-9. `parentCandidates` for Ball on `parented` leaves out Ball. An unknown id gives nil. A file-made cycle a→b→a returns a matrix | live sampling differs from FlareCore, the matrix order is wrong, or a cycle hangs |
-| LK-2 | `PropertyKeyingContractTests` on `[fake, live]`, on `keyed`. Rows: Ball's Position X at 12 is "560.0 px" `.keyedHere`; at 6 it is `.animated` and Opacity reads "50%"; Floor's Rotation is `.notAnimated`. `setValue(1000, .x)` on Ball at 6 gives keys [0, 6, 24]. Floor's x set at 30 stays one key at frame 0, `.notAnimated`. Floor's opacity 0.5 writes `layer.opacity` with no track. NaN throws `.notANumber(.x)` and leaves the composition equal; 200,000 clamps to 100,000. The stopwatch on Floor's rotation at 6 keys [6, 47], at 47 keys [0, 47], and off at 20 leaves one key at 0 holding the value at 20. The diamond on Ball's opacity at 20 adds a key with value 1, and again removes it. Removing Ball's x key at 0 leaves x not animated at 960 | a not-animated write adds a key, opacity gets a track, the stopwatch leaves one diamond, or NaN lands |
+| LK-2a | `PropertyKeyingContractTests` (rows) on `[fake, live]`, on `keyed` (`keyed` keys Ball's x at 0 and 24 and its opacity at 12; each test looks Ball's and Floor's ids up by name with `try #require`). Rows: Ball's Position X at 12 is "560.0 px" `.animated`, and its Opacity at 12 is `.keyedHere`; at 6 Position X is `.animated` and Opacity reads "50%"; Floor's Rotation is `.notAnimated`; an unknown id gives `[]` | a key state is wrong, a percent row is off by 100, or live rows differ from the fake's |
+| LK-2b | `PropertyKeyingContractTests` (writes) on `[fake, live]`, on `keyed`. `setValue(1000, .x)` on Ball at 6 gives keys [0, 6, 24]. Floor's x set at 30 stays one key at frame 0, `.notAnimated`. Floor's opacity 0.5 writes `layer.opacity` with no track. NaN throws `.notANumber(.x)` and leaves the composition equal; 200,000 clamps to 100,000. The stopwatch on Floor's rotation at 6 keys [6, 47], at 47 keys [0, 47], and off at 20 leaves one key at 0 holding the value at 20. The diamond on Ball's opacity at 20 adds a key with value 1, and again removes it. Removing Ball's x key at 0 leaves x not animated at 960 | a not-animated write adds a key, opacity gets a track, the stopwatch leaves one diamond, or NaN lands |
 | LK-3 | Same suite on `parented`. Parenting Ball to Rig at 0, and separately at 30, keeps Ball's anchor on screen within 1e-6. After parenting at 0, setting Rig's x to 1060 at 0 puts Ball's anchor at screen x 260 while Ball's own x stays 160; `setParent(nil)` at 0 then stores Ball's x as 260. Rig → Ball throws `.parentCycle("Rig")` ("Rig can't follow a layer that follows it."); Ball → Ball throws `.parentCycle("Ball")`; an unknown id throws `.unknownLayer`. Each refusal leaves the composition equal | a child jumps on parenting or unparenting, or a cycle is stored |
 | LK-4 | `ViewerDraggingContractTests` on `[fake, live]`. On `three-layers`, Title's box center hits Title at 30. At 12 (before Title's span) the same point hits Badge or Background, whichever is topmost under it, never Title or Rig. On `empty`, every point gives nil. `commitMove` on `keyed`: Ball at 12 by (100, 0) gives x keys [0, 12, 24] with 660 at 12; Floor at 0 by (0, 50) leaves y one key at 0 = old + 50; a zero delta leaves the composition equal. A child of a Rig with scale X 2 moved by (100, 0) changes its own x by 50 | the hit picks a null, a hidden or a lower layer, or a parented move lands in the wrong space |
 | LK-5 | `HaloKeyingTests` on `.fake`, and on `.live` with `FakeProjectHistory`, on `keyed` with Ball selected at 12. `propertyRows` has 8 rows in `allCases` order, and `[]` with no layer. Three `setProperty(.rotation, to:)` calls make 1 step, "Undo Change Rotation"; after `endPropertyScrub()` a fourth makes 2. `setProperty(.rotation, text: "abc")` sets `refusal` to `HaloRefusal(control: "halo.inspector.row.rotation", message: "Rotation needs a number.")`, leaves the document equal and adds no step. "45°" stores 45 as its own step, even right after a scrub; " 50 %" on Opacity stores 0.5. `shown` is 50 for opacity 0.5, and `stored(fromShown: 50)` is 0.5 | a scrub makes several steps, a refusal changes the document, or percent rows are off by 100 |
 | LK-6 | `HaloKeyToggleTests` (same setup). The stopwatch on Rotation at 6 is "Undo Animate Rotation" with keys [6, 47], and again "Undo Stop Animating Rotation". The Opacity diamond at 20 is "Undo Add Key", then "Undo Remove Key". `setParent` is "Undo Set Parent". A cycle sets the refusal on `halo.inspector.parent`. On `parented`, Ball's `parentChoices` are Floor and Rig, with no Ball; after Ball → Rig, Rig's choices have no Ball. `blendChoices` has 16 entries, including "Multiply" and "Color Dodge". `HaloKeysAvailabilityTests`: no composition gives "Create a composition first."; no layer gives "Select a layer first."; on `.fake` and `.live` with a layer every keys command is nil; a stub keying service's `unavailableHelp` comes through | a toggle names the wrong step, a picker offers a cycle, or a keys control turns on without its service |
 | LK-7 | `HaloKeyByDragTests` (replaces #207's cases). `compositionPoint(480, 270, 960, 540)` on 1920 × 1080 is (960, 540); a side of 0 gives nil. On `keyed` at 12, a begin at Ball's center selects Ball. Two moves shift `viewerDrawList`'s Ball item by the delta and leave `history.undo` unchanged. The end adds one "Undo Move" with x 660 at 12, so x at 6 is 410. A begin on empty space leaves the selection and `viewerDrag` unchanged. A cancel leaves the document equal with no step. A click (begin, end) selects with no step | the preview records, a drag makes zero or two steps, or the mapping is off |
 | LK-8 | `HaloKeysBudgetTests` with W0's `HaloBudget`: median and p95 of 200 runs on `reference` within the gates below | a step goes over budget |
-| LK-9 | Snapshot `halo-inspector-light.png` and `halo-inspector-dark.png` (#38's names): `keyed`, Ball at 12, Position X keyed here, Opacity animated, EASING and TEXT slots present. `halo-inspector-refusal-light.png` and `-dark.png`: the caption under Rotation after `setProperty(.rotation, text: "abc")` | rows misalign, a key state is lost, the caption is missing, or a slot is dropped |
+| LK-9 | Snapshot `halo-inspector-light.png` and `halo-inspector-dark.png` (#38's names): `keyed`, Ball at 12, Position X animated (hollow diamond), Opacity keyed here (filled), EASING and TEXT slots present. `halo-inspector-refusal-light.png` and `-dark.png`: the caption under Rotation after `setProperty(.rotation, text: "abc")` | rows misalign, a key state is lost, the caption is missing, or a slot is dropped |
 | LK-10 | Snapshot `halo-inspector-layer-light.png` and `-dark.png` (`parented`, Ball → Rig, Multiply). `halo-inspector-narrow-light.png` and `-dark.png`: the inspector at `SuiteSize.inspectorWidth.min` (200 pt) with TRANSFORM and no truncated label | a picker is missing, or TRANSFORM clips at the minimum width |
 | LK-11 | Snapshot `halo-key-by-drag-light.png` and `-dark.png` (#207's names): `HaloViewer` on `keyed` at 15, mid-drag by (100, 0). It shows layers once viewer-playback's canvas has landed; before that, only the artboard | the viewer stops compiling or the gesture covers the surround |
 | LK-12 to LK-14 | H-J5, H-J6 and H-J23 on the `dev` CI run; the last test in run order still launches a Journey | any step's assert |
@@ -355,6 +360,13 @@ own checks:
 - **No shared docs.** The supervisor folds in the `halo-services`
   description (now also `HaloKeyRules`) and the inspector rows in
   `docs/design.md`.
+- **Layer ids in tests.** Ids look like "comp-1-layer-1", not names: every
+  Model test looks a fixture layer's id up by name (`try #require(keyed.layers.first { $0.name == "Ball" }).id`) and passes that. Errors that
+  carry a name (`.parentCycle("Rig")`) take the layer's name, as the
+  message does.
+- **`keyed` at 12.** Ball's x keys are at 0 and 24 and its opacity is keyed
+  at 12, so at 12 Position X is animated (560.0 px) and Opacity is keyed
+  here; LK-2a and LK-9 assert exactly that.
 - **Viewer summary.** The `halo.viewer.artboard` value lists names only
   (`<name>: <string>` for text), so the journeys read positions from the
   TRANSFORM rows.

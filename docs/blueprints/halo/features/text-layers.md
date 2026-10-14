@@ -88,7 +88,7 @@ menu after each commit instead. The Model half runs on Linux first:
 | Screen | Empty | Error | Loading |
 |---|---|---|---|
 | Inspector, TEXT | no text layer selected: no TEXT section (the view draws nothing when `selectedText` is nil); the text commands are disabled with "Select a text layer first." (no composition: "Create a composition first.") | an empty or all-blank commit keeps the old string, sets the refusal "Enter some text." on `halo.inspector.text.string`, shown in `SuiteFont.caption` under the field, and the field shows the stored string again | none (measuring is synchronous and cheap) |
-| Viewer | a new text layer reads "Text" at 72 with the estimated box until its first text edit (see Review notes) | none (drawing never fails) | none |
+| Viewer | a new text layer reads "Text" at 72 in the box W0 measured at creation (FD-10; the estimate only when `services.text` is nil; see Review notes) | none (drawing never fails) | none |
 | Rendered frame | `services.text` nil (Linux tests only): text layers skipped and counted, as viewer-playback's renderer already does | a rasterizer throw is the renderer's failure path (viewer-playback, render-out) | none |
 
 ## Contract slice
@@ -164,7 +164,8 @@ HaloTextRasterizer.measure(t):                    # TX-4, CoreText
   return HaloLayerRect(x: 0, y: 0, width: ceil(width), height: ceil(ascent + descent))
 HaloTextRasterizer.rasterize(t, color):
   box = measure(t); a CGContext of box's size, linear sRGB, float, premultiplied
-  draw the line with its baseline at descent from the bottom, in the color converted to linear
+  draw the line with its baseline at descent from the bottom (height − descent from the top:
+  viewer-playback's pinned baseline rule), in the color converted to linear
   copy rows top first into a PixelBuffer (linear light, premultiplied, (0,0) = box top left)
 ```
 
@@ -180,8 +181,8 @@ pass`, `Head:`. TX-7 also carries `feature-done` and `Closes #430`.
 | TX-2 | #430 (part) | `setLayerColor` ("Change Color") for text, solid and shape; `selectedLayerColor`; `HaloLayerColor(bytes:)` and `bytes` | `Sources/HaloModel/HaloTextEdits.swift`, `Tests/HaloModelTests/HaloTextColorTests.swift` | TX-1 | ~140 |
 | TX-3 | #430 (part) | `HaloAvailability+Text.swift` replaced whole: the text area's commands answer state only ("Create a composition first.", "Select a text layer first.") | `Sources/HaloModel/Availability/HaloAvailability+Text.swift`, `Tests/HaloModelTests/HaloTextAvailabilityTests.swift` | TX-2 | ~110 |
 | TX-4 | #430 (part) | `HaloTextRasterizer` on CoreText replaces W0's stub: `measure` (typographic line box) and `rasterize` (linear light, premultiplied, box-sized) | `Sources/HaloApp/HaloTextRasterizer.swift`, `Tests/AppSnapshotTests/HaloTextRasterizerTests.swift` | – | ~260 |
-| TX-5 | #430 (part) | HF-10 macOS half: the ink lies inside the stored box, and the viewer's drawing of a text layer matches `render` of it as HF-1 compares solids | `Tests/AppSnapshotTests/HaloTextFidelityTests.swift` | TX-1, TX-4 | ~200 |
-| TX-6 | #430 (part) | App: `HaloTextInspector` (TEXT header; system `TextField` with a view-local draft committed on Return and focus loss; `InspectorSliderRow` for size with `sizeText` as its accessibility value; `InspectorColorRow(_:hex:onChange:)`; the refusal caption); `HaloWindow+Text` routes the text commands and passes the closures; snapshots | `Sources/HaloApp/HaloTextInspector.swift`, `Sources/HaloApp/HaloWindow+Text.swift`, `Tests/AppSnapshotTests/HaloTextLayerSnapshots.swift` | TX-3, TX-4 | ~300 |
+| TX-5 | #430 (part) | HF-10 macOS half with CoreText: the ink lies inside the stored box, and the viewer's drawing of a text layer matches `render` of it as HF-1 compares solids (the baseline rule itself is pinned and tested by viewer-playback's VP-9) | `Tests/AppSnapshotTests/HaloTextFidelityTests.swift` | TX-1, TX-4 | ~200 |
+| TX-6 | #430 (part) | App: `HaloTextInspector` (TEXT header; system `TextField` with a view-local draft committed on Return and focus loss; `InspectorSliderRow` for size with `sizeText` as its accessibility value; `InspectorColorRow(_:hex:onChange:)`; the refusal caption), W0's slot `init(model:perform:)` replaced whole, acting only through `perform` with FD-11's `.setText(String)`, `.setFontSize(Double)`, `.endTextSizeScrub` and `.setLayerColor(HaloLayerColor)`; `HaloWindow+Text` routes those cases to the Model methods; snapshots | `Sources/HaloApp/HaloTextInspector.swift`, `Sources/HaloApp/HaloWindow+Text.swift`, `Tests/AppSnapshotTests/HaloTextLayerSnapshots.swift` | TX-3, TX-4 | ~300 |
 | TX-7 | #430 (closes, `feature-done`) | Journey H-J22 on `-HaloSample empty` | `UITests/HaloJourneyTests+Text.swift` | TX-5, TX-6, #333 | ~150 |
 
 TX-1 and TX-4 share no file and can start in the first build wave. The Model
@@ -199,7 +200,7 @@ and init spellings W0's router and layer-keys' TEXT slot call.
 | TX-2 | `HaloTextColorTests`: on the text layer `setLayerColor(0.2, 0.4, 0.6)` records one "Change Color" and `selectedLayerColor` reads it; two calls in a row are one step; on `keyed`'s Ball (solid) and on a shape it works; on `three-layers`' Rig (null) nothing changes and nothing records; `(1.5, -1, 0.5)` stores (1, 0, 0.5); a NaN component changes nothing; `HaloLayerColor(bytes: 51, 102, 153)` equals (0.2, 0.4, 0.6) and `.bytes` of (0.2, 0.4, 0.6) is (51, 102, 153) | a color edit isn't one named step, a null gets a color, or an out-of-range or NaN component is stored |
 | TX-3 | `HaloTextAvailabilityTests` on `.fake` and `.live`: `HaloProject()` with no composition: each text command reads "Create a composition first."; `empty` with no layer, then with Solid 1 selected: "Select a text layer first."; with Text 1 selected: nil for all three; `three-layers` with Title selected: nil; and no text command reads "Not built yet" | a text control is enabled with nothing to edit, or stays disabled on a text layer |
 | TX-4 | `HaloTextRasterizerTests` (macOS): `measure` of "Hello" at 96 has x 0, y 0, whole-number width and height, height ≥ 96 and < 160; width grows from "Hello" to "Hello Halo"; `rasterize` returns a buffer exactly the box's size; "Hello" in white has ink (alpha > 0.5) in both its left and right quarters; a covered pixel of sRGB (1, 0.5, 0) reads linear (1, 0.214, 0, 1) within 1/255, and a half-covered edge pixel's color channels are no greater than its alpha (premultiplied); "Wj", "Ågy" and "—" at 12, 96 and 400: `CTLineGetImageBounds` lies inside `measure`'s box within 1 px | the box is fractional or off-origin, the buffer is mis-sized, the text is clipped or offset, or pixels come out gamma-encoded or unpremultiplied |
-| TX-5 | `HaloTextFidelityTests` (macOS) on `empty` plus a black solid, a white text layer "Hello" at 96 via `setText` and `setFontSize` with `HaloTextRasterizer`: the rendered frame's ink bounding box lies inside the stored box at full size within 1 px (QB-V4); the viewer's canvas (the shared snapshot host, linear light) against `services.rendering.render(_:width:height:text:)` at 1920 × 1080: channel ≤ 2/255 on all but ≤ 0.5% of pixels, upright and with Rotation keyed to 30 | ink lands outside the box the viewer and hit test use, or the viewer and the render disagree |
+| TX-5 | `HaloTextFidelityTests` (macOS) on `empty` plus a black solid, a white text layer "Hello" at 96 via `setText` and `setFontSize` with `HaloTextRasterizer`: the rendered frame's ink bounding box lies inside the stored box at full size within 1 px (QB-V4); the viewer's canvas (the shared snapshot host, linear light) against `services.rendering.render(_:width:height:text:)` at 1920 × 1080: channel ≤ 2/255 on all but ≤ 0.5% of pixels, upright and with Rotation keyed to 30. Both sides follow viewer-playback's pinned baseline rule (line box top-left at `bounds.origin`, first baseline at `bounds.y + ascent`, the rasterizer's baseline at `height − descent`), so a correct CoreText rasterizer passes; if the viewer-vs-render half fails, the lead files a `line:halo` bug on viewer-playback's `HaloViewerCanvas.swift` and does not fix it here | ink lands outside the box the viewer and hit test use, or the viewer and the render disagree |
 | TX-6 | Snapshots in `HaloTextLayerSnapshots`: `halo-text-layer-light/dark.png` (the viewer showing "Hello" at 96 and the TEXT section: field, "96 px" bar, color row); `halo-text-refused-light/dark.png` (the caption "Enter some text." under the field holding "Hello"). The macOS build on `dev` compiles both files | the TEXT section is missing, shows for a non-text layer, or has no refusal caption |
 | TX-7 | H-J22 above on the `dev` CI run | any step's assert |
 
@@ -264,6 +265,19 @@ this feature:
   only when `services.text` is nil), so every text layer the app makes
   starts measured. Fixtures still carry the estimate; HF-10's tests use
   layers made or edited through the Model.
+- **The baseline rule is viewer-playback's, and pinned.** TX-5 used to
+  rely on a baseline rule no file of its own set. viewer-playback now pins
+  it (VP-5, VP-8) and tests it with a test rasterizer box (VP-9): a text
+  item's line box top-left is `bounds.origin`, the canvas draws resolved
+  `Text` with its first baseline at `bounds.y + ascent` of the font measured
+  by the same rule the rasterizer uses (`measure` height = ascent + descent;
+  baseline at `height − descent`). TX-4's rasterizer follows it, and TX-5
+  only checks CoreText ink inside the box and viewer against render with
+  CoreText. A failure there is a bug the lead files on viewer-playback's
+  canvas, not a fix in this feature.
+- **The TEXT slot acts through `perform`.** `HaloTextInspector` has W0's
+  one initializer `init(model:perform:)`; it sends FD-11's text cases and
+  takes no closures.
 - **C4.** The `halo-text` description ("string and size") doesn't mention
   color; the supervisor folds "and the layer color" in. No new `Sources/`
   file is added, so the C4 lint passes as is.

@@ -37,8 +37,8 @@ compiles; the macOS job compiles them on `dev` after the lane merges. Copy
 the import and shape of `Sources/DesignApp/DesignWindow.swift`, which
 already saves, opens, honors `-DesignSaveTo` and `-DesignOpenFile` and shows
 a file alert. Every decision that can be pure is in HaloModel (HF-1 to
-HF-7): titles, availability, the recent list, validation and the error
-text. Checked with the `apple-docs` MCP for this packet (2026-10-14):
+HF-7, plus HF-9's save decision): titles, availability, the recent list,
+validation, the error text and where a save goes. Checked with the `apple-docs` MCP for this packet (2026-10-14):
 `UTType(exportedAs:conformingTo:)` asserts that the app owns and declares
 the type, and `UTType(filenameExtension:conformingTo:)` "may provide a
 dynamic type" when nothing declares the extension; `fileExporter(isPresented:document:contentType:defaultFilename:onCompletion:)`
@@ -55,7 +55,13 @@ the routes and slots FD-14 and FD-16 made: `perform(_:)` routes `.undo` and
 `.redo` to `HaloWindow+Edit.swift` and the files area to
 `HaloWindow+File.swift`; the window's title (`fileWindowTitle`) and its file modifiers (exporter,
 importer, alerts, progress row, launch-file task) come from that file too,
-through the `fileScene(_:)` hook FD-14 gives every area file.
+through the `fileScene(_:)` hook FD-14 gives every area file. The three
+dialogs ride W0's window request seam: `HaloWindow` holds one `@State var
+request: HaloWindowRequest?` (FD-14; the enum is FD-11's, in
+`HaloCommand.swift`), the files route sets it to `.saveAs`, `.open` or
+`.confirmUnsaved(then:)`, and `fileScene(_:)` presents the exporter, the
+importer or the unsaved-changes alert from it and sets `request = nil` when
+done. No dialog flag lives in the hook's own `@State`.
 
 ## Journey steps
 
@@ -150,8 +156,11 @@ extension HaloProject {
     public var redoTitle: String? { get }
 }
 
-// HaloFiles.swift (HF-6)
+// HaloFiles.swift (HF-6; HF-9 adds the save decision)
+public enum HaloSaveTarget: Equatable, Sendable { case write(path: String), ask }
 extension HaloProject {
+    public func saveTarget(launchPath: String?, saveAs: Bool) -> HaloSaveTarget   // HF-9
+    public static func fileName(fromPath path: String) -> String                   // HF-9: "/t/Spot.halo" → "Spot"
     public func fileData() throws -> Data
     public mutating func beginOpen(name: String, path: String)
     public mutating func finishOpen(_ result: Result<HaloDocumentState, HaloFileError>)
@@ -209,12 +218,27 @@ windowTitle:             file.name ?? (compositions.isEmpty ? "Halo" : "Untitled
 saveStatus:              unsaved && error != nil ? "Not saved" : unsaved ? "Edited"
                          : file.path == nil ? "Untitled" : "Saved"
 
+saveTarget(launchPath, saveAs):                    # HF-9 (Model)
+  launchPath.map(.write) ?? (saveAs ? .ask : file.path.map(.write) ?? .ask)
+fileName(fromPath):  last path component without ".halo"
+
 HaloWindow+File (app):                             # HF-9, HF-10
-  save:   url = -HaloSaveTo ?? file.path ?? (fileExporter, HaloProjectDocument(data))
-          write fileData() atomically; didSave(name w/o ".halo", path) | didFailSave(reason)
-  open:   unsaved ? alert(Save, Don't Save, Cancel) : go
-          go: beginOpen; Task.detached { try services.files.decode(Data(contentsOf:)) }
-              then on the main actor finishOpen(result); an unreadable file → .damaged(reason)
+  route .save / .saveAs:
+          switch model.saveTarget(launchPath: -HaloSaveTo, saveAs: cmd == .saveAs)
+            .write(p): write fileData() atomically; didSave(fileName(fromPath: p), p) | didFailSave(reason)
+            .ask:      request = .saveAs            # W0's seam on HaloWindow
+  route .open / .openRecent(path):
+          unsaved ? request = .confirmUnsaved(then: cmd)
+                  : (.open → request = .open; .openRecent(p) → go(p))
+  fileScene(content):                              # reads request; every exit sets request = nil
+    .fileExporter(isPresented: request == .saveAs, HaloProjectDocument(fileData()))
+          → on a URL: write as .write(url.path) above; request = nil
+    .fileImporter(isPresented: request == .open, [.halo]) → go(url.path); request = nil
+    .alert("Save changes to <title>?", isPresented: request is .confirmUnsaved(then)):
+          Save → save as above, then run `then` without asking again; Don't Save → run `then`
+          without asking; Cancel → nothing. Each sets request = nil.
+  go(path): beginOpen; Task.detached { try services.files.decode(Data(contentsOf:)) }
+            then on the main actor finishOpen(result); an unreadable file → .damaged(reason)
   launch: -HaloOpenFile → open; setRecent(UserDefaults "HaloRecentFiles"); write it back
           on every change of model.recent
 ```
@@ -233,10 +257,10 @@ Every task is one PR to `dev`: at most 400 changed lines and 15 files, label
 | HF-4 | #209 (part) | The envelope: `HaloFileEnvelope` and `HaloFileFormat` move to `Live/`; `LiveProjectFiles` encodes and unwraps through them; `FakeProjectFiles` becomes a thin wrapper that skips content checks; the suite runs on `[fake, live]`; HF-6 | `Sources/HaloModel/Live/HaloFileEnvelope.swift`, `Sources/HaloModel/Live/LiveProjectFiles.swift`, `Sources/HaloModel/Fakes/FakeProjectFiles.swift`, `Tests/HaloModelTests/ProjectFilesContractTests.swift` | – | ~260 |
 | HF-5 | #209 (part) | Content validation and counter raising in `LiveProjectFiles.decode` | `Sources/HaloModel/Live/HaloFileValidation.swift`, `Sources/HaloModel/Live/LiveProjectFiles.swift`, `Tests/HaloModelTests/HaloFileValidationTests.swift` | HF-4 | ~320 |
 | HF-6 | #209 (part) | `HaloFiles.swift`: `fileData`, `beginOpen`, `finishOpen` (clears history), `didSave`, `didFailSave`, `recent`, `setRecent`, `windowTitle`, `saveStatus` | `Sources/HaloModel/HaloFiles.swift`, `Tests/HaloModelTests/HaloFileTests.swift` | HF-2, HF-5 | ~340 |
-| HF-7 | – | `+Files` turns Open…, Open Recent, Save and Save As… on; HB-10 on `crowd`; `huge` opens on live | `Sources/HaloModel/Availability/HaloAvailability+Files.swift`, `Tests/HaloModelTests/HaloFilesCommandTests.swift`, `Tests/HaloModelTests/HaloFilesBudgetTests.swift` | HF-6 | ~230 |
+| HF-7 | – | `+Files` turns Open…, Open Recent, Save and Save As… on; HB-10 on `crowd`; `huge` encodes within 48 MiB (size only) | `Sources/HaloModel/Availability/HaloAvailability+Files.swift`, `Tests/HaloModelTests/HaloFilesCommandTests.swift`, `Tests/HaloModelTests/HaloFilesBudgetTests.swift` | HF-6 | ~230 |
 | HF-8 | #208 (closes) | App: `HaloWindow+Edit.swift` routes `.undo` and `.redo` to `undo()` and `redo()`; the Edit menu snapshot | `Sources/HaloApp/HaloWindow+Edit.swift`, `Tests/AppSnapshotTests/HaloEditMenuSnapshots.swift` | HF-3 | ~120 |
-| HF-9 | – | App: `HaloDocumentType.swift` (the `.halo` type and `HaloProjectDocument: FileDocument` for the exporter); Save and Save As… (`-HaloSaveTo` skips the panel); the window title from `windowTitle`; `halo.file` carries `saveStatus`; the failed-save alert | `Sources/HaloApp/HaloDocumentType.swift`, `Sources/HaloApp/HaloWindow+File.swift` | HF-7 | ~240 |
-| HF-10 | #209 (closes) | App: Open… (`fileImporter`), Open Recent, `-HaloOpenFile`, the detached decode between `beginOpen` and `finishOpen`, the progress row, the open-error alert, the unsaved-changes alert, the recent list in `UserDefaults`; snapshots | `Sources/HaloApp/HaloWindow+File.swift`, `Tests/AppSnapshotTests/HaloFileSnapshots.swift` | HF-9 | ~300 |
+| HF-9 | – | Model: `saveTarget(launchPath:saveAs:)` and `fileName(fromPath:)`. App: `HaloDocumentType.swift` (the `.halo` type and `HaloProjectDocument: FileDocument` for the exporter); Save and Save As… through `saveTarget` (`-HaloSaveTo` skips the panel; `.ask` sets W0's `request = .saveAs`, which `fileScene` presents as the exporter and clears); the window title from `windowTitle`; `halo.file` carries `saveStatus`; the failed-save alert | `Sources/HaloModel/HaloFiles.swift`, `Tests/HaloModelTests/HaloSaveTargetTests.swift`, `Sources/HaloApp/HaloDocumentType.swift`, `Sources/HaloApp/HaloWindow+File.swift` | HF-7 | ~300 |
+| HF-10 | #209 (closes) | App: Open… (`request = .open`, presented by `fileScene` as the `fileImporter`), Open Recent, `-HaloOpenFile`, the detached decode between `beginOpen` and `finishOpen`, the progress row, the open-error alert, the unsaved-changes alert (`request = .confirmUnsaved(then:)`; Save, Don't Save, Cancel each clear it), the recent list in `UserDefaults`; snapshots | `Sources/HaloApp/HaloWindow+File.swift`, `Tests/AppSnapshotTests/HaloFileSnapshots.swift` | HF-9 | ~300 |
 | HF-11 | – | Journey H-J8 on `-HaloSample empty` | `UITests/HaloJourneyTests+History.swift` | HF-8, #333 | ~150 |
 | HF-12 | – (`feature-done`) | Journeys H-J10 and H-J11 on live services | `UITests/HaloJourneyTests+Files.swift`, `UITests/HaloJourneyTests+FileErrors.swift` | HF-10, HF-11, #333 | ~280 |
 
@@ -253,13 +277,13 @@ never adds a mutator.
 |---|---|---|
 | HF-1 | `ProjectHistoryContractTests` on `[fake, live]`: the proof test `fakeHistoryCoalescesEndsAndClearsRedo`; three records with key "rot" are one entry keeping the first `before`; `endCoalescing` makes the fourth a new entry; a coalesced record after an undo still empties redo; the 101st record drops the oldest (`undo.first.name` is the 2nd step's); `undo` then `redo` returns the current state exactly; both return nil on empty stacks; `LiveProjectHistory().unavailableHelp == nil` | coalescing keeps redo, the cap is not 100, or fake and live disagree |
 | HF-2 | `HaloUndoTests` on `.live`: on `empty`, New Layer then `undo()` removes Solid 1 and restores `selectedLayerID` to nil; on `two-comps` with Outro selected, Delete Composition then `undo()` restores `compositions` (Outro back at index 1 with Ball and its keys), `selectedCompositionID` and `selectedLayerID` exactly (#127); `redo()` deletes it again; `undoTitle` "Undo Delete Composition" and `redoTitle` nil after redo; selecting a layer and scrubbing the playhead to 30 leave `history.undo.count` unchanged; 101 New Layers keep 100 steps; `undo()` after `didSave` sets `file.unsaved` | a step restores less than the whole document, selection or scrub records a step, or undo leaves the file "Saved" |
-| HF-3 | `HaloHistoryCommandTests`: on `.live` `empty`, `.undo` reads "Nothing to undo." and `.redo` "Nothing to redo."; after New Layer `.undo` is enabled and `title(for: .undo)` is "Undo New Layer"; after `beginOpen` both read "A project is opening."; with a services whose history is the W0 stub, its help shows | Undo is enabled with nothing to undo, or disabled with no help |
+| HF-3 | `HaloHistoryCommandTests`: on `.live` `empty`, `.undo` reads "Nothing to undo." and `.redo` "Nothing to redo."; after New Layer `.undo` is enabled and `title(for: .undo)` is "Undo New Layer"; after `beginOpen` both read "A project is opening."; on a `HaloProject(services:)` whose `history` is a test-local stub with `unavailableHelp` "x" (HF-1 already made the live one real), both read "x" | Undo is enabled with nothing to undo, or disabled with no help |
 | HF-4 | `ProjectFilesContractTests` on `[fake, live]`: `fakeFilesRoundTripAndRefuse`; the file starts `{"format":"halo","project":` (sorted keys) and has `"version":1`; 64 MiB + 1 byte throws `.tooLarge` before parsing, and a valid file padded with spaces to exactly 64 MiB opens; HF-6: for every fixture but `huge`, `encode(decode(encode(f)))` equals `encode(f)` byte for byte and the decoded document equals `f` | the envelope differs between fake and live, or a fixture changes on a round trip |
 | HF-5 | `HaloFileValidationTests` (live), one mutated `two-comps` per rule: two compositions with id "comp-1"; Intro and "intro"; width 0 and 8193; 23 fps; a layer with in 50 and out 10; a track with frames [0, 24, 24]; a key value of `.infinity`; Ball's parent is Floor and Floor's is Ball; a parent id from the other composition; `selectedLayerID` "nope". Each throws `.damaged` whose reason names the item ("two compositions share the id comp-1", …). A file whose `nextCompositionNumber` is 2 with ids comp-1 and comp-5 decodes with 6. The H-J11 file `{"compositions":[{"id":"a"}]}` throws `.damaged` with a non-empty reason that names a key | a damaged file opens, a valid one is refused, or a new composition after open reuses an id |
 | HF-6 | `HaloFileTests` on `.live`: `two-comps` `fileData()`, `beginOpen(name: "Spot", path: "/t/Spot.halo")`, `finishOpen(.success(decoded))`: the document equals the fixture, `history` is empty, `windowTitle` "Spot", `saveStatus` "Saved", `recent.first` is Spot at that path; `finishOpen(.failure(.newerVersion(2)))` leaves document and history equal and `file.error` the message; New Layer after `didSave` reads "Edited"; `didFailSave("…")` reads "Not saved" and keeps the title; 11 saves to distinct paths keep 10, newest first; saving the 3rd path again moves it first with no duplicate; `windowTitle` is "Halo" on `HaloProject()` and "Untitled Project" on `empty` | opening keeps old history, a failed open changes the project, the recent list grows past 10 or repeats a path |
-| HF-7 | `HaloFilesCommandTests`: on `.live` `HaloProject()` Save and Save As… read "Create a composition first." and Open Recent "No recent projects."; on `empty` Save and Open… are enabled; after `beginOpen` all four read "A project is opening.". `HaloFilesBudgetTests.hugeOpensOnLive`: `huge` encodes to at most 48 MiB and decodes on `LiveProjectFiles` to 2,000 layers without `.tooLarge` | a file command is dead or acts during an open, or `huge` can't open |
+| HF-7 | `HaloFilesCommandTests`: on `.live` `HaloProject()` Save and Save As… read "Create a composition first." and Open Recent "No recent projects."; on `empty` Save and Open… are enabled; after `beginOpen` all four read "A project is opening.". `HaloFilesBudgetTests.hugeFitsTheLimit`: `huge` encodes to at most 48 MiB (encode only: a debug Linux decode of 2,000 layers is too slow for the gate; H-J10 opens `huge` in the real app). `crowd` decodes on `LiveProjectFiles` without `.tooLarge` inside HB-10 | a file command is dead or acts during an open, or `huge` outgrows the limit |
 | HF-8 | Snapshot `HaloEditMenuSnapshots` (macOS): the Undo and Redo items drawn as buttons after New Layer: "Undo New Layer" enabled, "Redo" disabled (`halo-edit-menu-light.png`, `halo-edit-menu-dark.png`); H-J8 (HF-11) presses ⌘Z through the real menu | ⌘Z doesn't reach `undo()` or the title is wrong |
-| HF-9 | H-J10's first steps (HF-12): ⌘S with `-HaloSaveTo` writes the file without a panel, title "Spot", `halo.file` "Saved". A save into a folder the test makes read-only shows the alert and "Not saved" (H-J10's last step) | Save shows a panel under `-HaloSaveTo`, or a failed save reads "Saved" |
+| HF-9 | `HaloSaveTargetTests` (Linux, its own PR): on `.live` `empty`, `saveTarget(launchPath: "/t/Spot.halo", saveAs: false)` is `.write("/t/Spot.halo")`, with no launch path and no file `.ask`, after `didSave(name: "Spot", path: "/t/Spot.halo")` `.write` that path, and with `saveAs: true` `.ask`; `fileName(fromPath: "/t/Spot.halo")` is "Spot"; after that `didSave` `windowTitle` is "Spot" and `saveStatus` "Saved", and after `didFailSave("…")` "Not saved" with the title kept. Then H-J10's first steps (HF-12): ⌘S with `-HaloSaveTo` writes the file without a panel, title "Spot", `halo.file` "Saved". A save into a folder the test makes read-only shows the alert and "Not saved" (H-J10's last step) | Save As doesn't ask, Save asks with a known path, Save shows a panel under `-HaloSaveTo`, or a failed save reads "Saved" |
 | HF-10 | Snapshots `HaloFileSnapshots`: `HaloViewer` after `finishOpen` of `two-comps` (`halo-opened-project-light.png`, `-dark.png`, as #209 names them) and the progress row after `beginOpen` (`halo-file-opening-light.png`, `-dark.png`); H-J10 and H-J11 (HF-12) | an open runs on the main actor with no progress row, or an error alert is missing |
 | HF-11 | H-J8 on the `dev` CI run | any step's assert |
 | HF-12 | H-J10 and H-J11 on the `dev` CI run | any step's assert |
@@ -298,8 +322,10 @@ bodies:
 - **`huge` can't hit `tooLarge`.** W0 keeps `huge` at most 48 MiB with
   whole-number values (FD-9 asserts it), so H-J10's large-file step tests
   the progress row and a large open, never the limit. H-J11's 64 MiB + 1
-  byte file is the only `tooLarge` check; HF-7 asserts `huge` opens on live
-  and HB-10 stays on `crowd`.
+  byte file is the only `tooLarge` check; HF-7 asserts only that `huge`
+  encodes within 48 MiB (decoding 2,000 layers in a debug Linux test is too
+  slow for the gate), HB-10 stays on `crowd`, and H-J10 opens `huge` in the
+  real app.
 - **Progress row timing.** H-J10's row appears at `beginOpen`, before the
   detached decode starts, so the first shot has it however fast the decode.
 - **H-J8 scope.** layer-panel's H-J9 no longer presses ⌘Z (undo isn't built
@@ -336,6 +362,16 @@ bodies:
   when undeclared) for both panels, the way `DesignWindow` handles
   `.design`, and HF-9 files an issue asking for the declaration. Journeys
   use `-HaloSaveTo` and `-HaloOpenFile` and never depend on it.
+- **Dialogs ride W0's request seam.** Save As…'s exporter, Open…'s
+  importer and the unsaved-changes alert are presented by `fileScene(_:)`
+  from `HaloWindow`'s one `request: HaloWindowRequest?` (`.saveAs`,
+  `.open`, `.confirmUnsaved(then:)`), which the files route sets and the
+  hook clears; the hook keeps no flag of its own.
+- **HF-9 has its own test.** The save decision (`saveTarget`, `fileName`)
+  is Model code with `HaloSaveTargetTests` in HF-9's PR, so HF-9 doesn't
+  lean only on HF-12's journey.
+- **HF-3's stub.** HF-1 has made the live history real by HF-3, so the
+  "service's help shows" case uses a test-local stub history.
 - **Closing with unsaved changes.** SwiftUI owns the window's delegate, so
   HF-10 checks with `apple-docs` for a supported close hook. If there is
   none, the alert guards Open… and Open Recent only, and HF-10 files a
