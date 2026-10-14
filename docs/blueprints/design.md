@@ -132,6 +132,7 @@ links, comments, a shared library across files.
 | Auto Layout section of #752 | Not v1 | Storing direction, gap and padding without the layout math gives controls that change nothing on the canvas, which breaks "no dead controls". Ship it with the math (Q2) |
 | Close prompt for unsaved changes | v1 | Losing work is worse than any missing feature; #275 already names it |
 | Pages | Already built | Tier 2 in priorities, but it shipped with the tree |
+| Variables (#20) | Tier 2, wave 3 | Priorities puts shared color variables in tier 2 and light and dark modes in tier 3; #20 is labelled `p2` and holds both, so the mode switch rides along with it rather than splitting the issue |
 
 ---
 
@@ -144,7 +145,8 @@ live in DesignModel, which depends only on CoreColor. The machine-readable
 form is `docs/blueprints/design/c4-planned.json`, in the shape of
 `docs/c4/model.json` plus `"status"` and `"authored": true` on each element.
 It is a plan, not the gate's model: the features that add files update
-`docs/c4/model.json`'s descriptions (section 8.3 names which).
+`docs/c4/model.json`'s descriptions (the notes under section 8.2's wave
+tables name which task does it).
 
 ```
 creative-core                     creative-apps
@@ -171,10 +173,10 @@ path geometry (planned, ───────▶  → live | fakes; workspace,  
 
 | Component | Status | Responsibility | Owned paths | Relationships |
 |---|---|---|---|---|
-| Workspace | existing | Pages, selection, tool, text edit, file URL, held ids; from D0-1 also `services`, `marquee` and the saved marker | `DesignWorkspace.swift`, `DesignSelection.swift`, `DesignHeldIDs.swift` | applies every edit through History |
+| Workspace | existing | Pages, selection, tool, text edit, file URL, held ids; `marquee` from D0-1, `services` from D0-2 | `DesignWorkspace.swift`, `DesignSelection.swift`, `DesignHeldIDs.swift` | applies every edit through History |
 | Node tree | existing | Node and geometry types; D0-1 adds style fields, D2-1 the path and component fields | `DesignNode.swift` | encoded by File codec |
 | History | existing | Named undo steps, coalescing, document swaps; F5 adds the saved marker | `DesignHistory.swift` | called by Workspace and Services |
-| Canvas gestures | existing | Tool routing for pointer drags; D0-3 adds marquee, several-layer and Option-drag routes | `DesignCanvasEditing.swift`, `DesignDrawing.swift`, `DesignText.swift` | calls Services |
+| Canvas gestures | existing | Tool routing for pointer drags; D0-3 adds the marquee (rule in 8.2, D0-3), several-layer and Option-drag routes | `DesignCanvasEditing.swift`, `DesignDrawing.swift`, `DesignText.swift` | calls Services |
 | Inspector logic | existing | Header lines, locks, row toggles, align one layer | `DesignInspectorContent.swift`, `DesignLocking.swift`, `DesignLayerToggles.swift`, `DesignAlign.swift` | read by the panel |
 | File codec | existing | JSON open and save, refusal reasons | `DesignFile.swift` | F5 moves the codec into `Live/LiveFiling.swift` |
 | Use-case contracts | planned | One protocol per use case, `DesignEdit`, `DesignRefusal`, `DesignIDMint`, value types (section 5) | `Contracts/` | conformed to by Live and Fakes |
@@ -187,9 +189,9 @@ path geometry (planned, ───────▶  → live | fakes; workspace,  
 | Component | Status | Responsibility | Owned paths | Relationships |
 |---|---|---|---|---|
 | Window shell | existing | Scene, `DesignWindow` (`perform`, launch arguments, close prompt from F5), `DesignEditor`, `DesignIntent` | `DesignApp.swift`, `DesignWindow.swift`, `DesignEditor.swift`, `DesignIntent.swift` | calls Services and actions |
-| Canvas | existing | `DesignCanvas` on `CanvasViewport`, artwork, selection marks and marquee (split into `DesignSelectionMarks.swift` by D0-4), inline text editor | `DesignCanvas.swift`, `DesignCanvasMarks.swift`, `DesignSelectionMarks.swift`, `DesignTextEditor.swift` | copy and paste hooks call the Pasteboard bridge |
+| Canvas | existing | `DesignCanvas` on `CanvasViewport`, artwork, selection marks and marquee (split into `DesignSelectionMarks.swift` by D0-5b), frame names in the unclipped overlay (`DesignFrameLabels.swift`, slot from D0-5b, filled by F3), inline text editor | `DesignCanvas.swift`, `DesignCanvasMarks.swift`, `DesignSelectionMarks.swift`, `DesignFrameLabels.swift`, `DesignTextEditor.swift` | copy and paste hooks call the Pasteboard bridge |
 | Panel | existing | Tabs, inspector, Align row, style sections (F3), Layers list, Assets section (wave 3) | `DesignPanel.swift`, `DesignInspector.swift`, `DesignAlignBar.swift`, `DesignLayersPanel.swift`, `DesignInspectorStyle.swift`, `DesignAssetsPanel.swift` | values in, intents out |
-| Menus | existing | File, Edit (`DesignEditMenu.swift` from D0-5), Page, Object, View | `DesignCommands.swift`, `DesignObjectMenu.swift`, `DesignEditMenu.swift` | publish `DesignMenu` helps |
+| Menus | existing | File, Edit (`DesignEditMenu.swift` from D0-6), Page, Object, View | `DesignCommands.swift`, `DesignObjectMenu.swift`, `DesignEditMenu.swift` | publish `DesignMenu` helps |
 | Pasteboard bridge | planned | System pasteboard read and write under the clipboard's type | `DesignPasteboardBridge.swift` | calls `LayerClipboard` through actions |
 | Export sheet and rasterizer | planned (wave 3) | Export sheet, PNG and PDF from the artwork view, file writing | `DesignExportSheet.swift`, `DesignRasterizer.swift` | renders the Canvas artwork |
 | Pen marks | planned (wave 3) | Anchors and handles of the pen draft | `DesignPenMarks.swift` | needs SuiteUI #706 |
@@ -213,7 +215,7 @@ if data turns up.
 
 Sources (the first two are the ones `docs/priorities.md` used for Design):
 
-- [S1] State of design systems 2022-23: https://sympli.io/blog/state-of-design-systems-2022-2023 (components, shared styles and variables as weekly team work).
+- [S1] "State of design systems 2022-23" (the report `docs/priorities.md` cites; named by title only here): components, shared styles and variables as weekly team work.
 - [S2] UX tools survey 2022: https://designcompass.org/en/2022/12/07/ux-tools-2022-survey/ (UI design as the main daily activity of the respondents).
 - [S3] Design tools survey 2024, method and results (2,220 designers, Nov 2024 to Jan 2025): https://www.uxtools.co/survey/introduction/methodology (UI design and basic prototyping as the most common jobs; tool-level, not feature-level).
 - [S4] Apple Human Interface Guidelines, keyboard shortcuts and the standard Edit menu: https://developer.apple.com/design/human-interface-guidelines/keyboards (Cut, Copy, Paste, Duplicate, Undo, Redo, Select All as expected on every Mac editor).
@@ -280,9 +282,12 @@ modifiers, velocity drags, `perf()`). Each Design feature then owns its own
 `UITests/DesignJourneyTests+<Area>.swift` with its own `XCTestCase` class.
 If #333 is still open when wave 0 starts, D0-6 makes the same one-line
 template change itself (project.yml is not protected) and the helpers stay
-with #333 (section 9, Q1).
+with #333 (section 9, Q1). J6 and the other new journeys go in their own
+files; `testAlignALayer` and the other existing tests in
+`UITests/DesignJourneyTests.swift` stay as they are (only D0-6 edits that
+file, for J1's menu list).
 
-**Modes.** A journey launches with `-DesignFixture <name>` (D0-6: the window
+**Modes.** A journey launches with `-DesignFixture <name>` (D0-5a: the window
 opens that fixture as an unsaved file). It runs on `-DesignServices fake`
 while its feature builds the UI, and on the live services once the feature's
 live type lands; the feature's last PR removes the flag. Every step takes a
@@ -293,14 +298,14 @@ live type lands; the feature's last PR removes the flag. Every step takes a
 awaited with `waitForExistence` or a value predicate (5 s, as today), and
 timing comes from the probe's JSON (section 7).
 
-**Fixtures** (`DesignFixtures`, DesignModel, D0-6; built in code, never read
-from disk):
+**Fixtures** (`DesignFixtures`, DesignModel, D0-4; built in code, never read
+from disk; frames in page points, children listed back to front):
 
 | Fixture | Contents | Used by |
 |---|---|---|
 | `empty` | New File: one page, the "Desktop" frame | J1–J4 |
-| `cards` | Desktop frame 1440 × 1024; inside it rectangles "A" (100, 100, 100 × 80), "B" (300, 140, 200 × 80), "C" (700, 100, 100 × 120); text "Title" (100, 40, 200 × 32); group "Pair" holding two ellipses; rectangle "Locked" (locked); rectangle "Hidden" (hidden) | J5–J15 |
-| `two-pages` | `cards` plus a second page "Mobile" 390 × 844 with a frame "Phone" | J12, J16 |
+| `cards` | one page 1440 × 1024 holding only the frame "Desktop" (0, 0, 1440 × 1024), whose children are: rectangle "A" (100, 100, 100 × 80); rectangle "B" (300, 140, 200 × 80); rectangle "C" (700, 100, 100 × 120); text "Title" (100, 40, 200 × 32); group "Pair" (900, 400, 300 × 100) holding ellipses "E1" (900, 400, 100 × 100) and "E2" (1100, 400, 100 × 100); rectangle "Locked" (400, 600, 100 × 100, locked); rectangle "Hidden" (600, 600, 100 × 100, hidden) | J4–J15 |
+| `two-pages` | `cards` plus a second page "Mobile" 390 × 844 with a frame "Phone" | J12 |
 | `crowd` | 2,000 layers: 40 frames of 49 rectangles and one text each | P1–P4, model budgets |
 | bad files | written by the test into its temp folder: `not json`, `{"version":99,"pages":[]}`, `{"version":1,"pages":[]}`, a file repeating an id | J16 |
 
@@ -309,21 +314,21 @@ from disk):
 | # | Test (file, feature) | Fixture | Steps (each one shot) | Asserts | Empty, error and loading states passed |
 |---|---|---|---|---|---|
 | J0 | `testLaunchShowsWindowShell` (`DesignJourneyTests.swift`, exists) | none | launch | `expectEditorShell()`; canvas empty state with New File; panel "No Selection" | empty: no file open |
-| J1 | `testEveryMenuOpens` (exists; D0-5 extends) | empty | open File, Edit, Page, Object, View; Page > Add Page | each menu's items equal section 6's menu list, enabled or disabled with a tooltip; "Undo Add Page" | empty selection: Edit and Object items disabled with reasons |
+| J1 | `testEveryMenuOpens` (exists; D0-6 extends) | empty | open File, Edit, Page, Object, View; Page > Add Page | each menu holds the items section 6 lists without a wave marker, each enabled or disabled with a tooltip (D0-6 writes that list into the test; a later feature that adds an item adds it there); "Undo Add Page" | empty selection: Edit and Object items disabled with reasons |
 | J2 | `testNewFileAndEveryTool` (exists) | empty | ⌘N; `clickEachTool()` | each enabled tool picked; Pen listed disabled with its reason | – |
 | J3 | `testDrawShapesAddTextAndSave` (exists; the core loop) | empty | Frame, Rectangle, Ellipse drags; move; resize; Shift-click; Layers eye; Text "Hello"; undo; redo; ⌘S to `-DesignSaveTo`; relaunch with `-DesignOpenFile` | each step's undo name; the reopened file shows its layers | empty canvas, text edit open |
-| J4 | `testZoomPanFitAndZoomToSelection` (`+Select`, F1) | cards | ⌘+ twice; Space-drag 200 pt; ⌘0; select "C"; View > Zoom to Selection (⌥⌘2); Escape; check Zoom to Selection is off | zoom pill 200% after two steps from 100%; ruler origin label changed after the pan; "Fit" zoom after ⌘0; after Zoom to Selection "C" is centered (its frame's center within 2 pt of the canvas center, read from `design.canvas.selection` frame) | nothing selected: Zoom to Selection disabled with "Select a layer first." |
-| J5 | `testMarqueeMoveResizeSeveral` (`+Select`, F1) | cards | drag a marquee from empty canvas around "A" and "B"; drag "A" 40 pt right; drag the box's bottom-right handle out 20 pt; ⇧→; ⌫; ⌘Z | header reads "2 Layers" after the marquee and "Locked" is not included; "Undo Move" then "Undo Resize", "Undo Nudge", "Undo Delete" each one step; after ⌘Z both layers are back | marquee over only locked and hidden layers selects nothing (Escape state) |
-| J6 | `testAlignAndDistributeSeveral` (`+Select`, F1; replaces `testAlignALayer` steps for several) | cards | select A, B, C; Align Top from the inspector; Object > Distribute Horizontally; select A and B; Distribute | Edit menu "Undo Align Top", then "Undo Distribute Horizontally"; with two selected Distribute is disabled with "Select 3 or more layers." | refusal: disabled with reason |
+| J4 | `testZoomPanFitAndZoomToSelection` (`+Select`, F1) | cards | read the zoom pill (the fitted percent f); ⌘+ twice; Space-drag 200 pt; ⌘0; select "C"; View > Zoom to Selection (⌥⌘2); Escape | after ⌘+ twice the pill reads the second `ViewerZoom` stop above f; the ruler's first label changed after the pan; after ⌘0 the pill reads f again; after Zoom to Selection the pill reads the stop that fits "C" and "C"'s frame center (`design.canvas.selection`) is within 2 pt of the canvas center. The centering assert needs the new SuiteUI `CanvasViewport` "show a document rect" input (section 8.2, F1); until it lands that one assert is an `XCTSkip` naming the issue | nothing selected: Zoom to Selection disabled with "Select a layer first." |
+| J5 | `testMarqueeMoveResizeSeveral` (`+Select`, F1) | cards | drag from Desktop's empty background at (80, 80) to (520, 240) (a marquee inside Desktop, rule D0-3); drag "A" 40 pt right; drag the box's bottom-right handle out 20 pt; ⇧→; ⌫; ⌘Z; then a marquee from (380, 580) to (720, 720) over "Locked" and "Hidden" | header reads "2 Layers" after the first marquee; "Undo Move" then "Undo Resize", "Undo Nudge", "Undo Delete" each one step; after ⌘Z both layers are back; the last marquee selects nothing and the header reads "Desktop"'s page | marquee over only locked and hidden layers selects nothing |
+| J6 | `testAlignAndDistributeSeveral` (`+Select`, F1) | cards | select A, B, C; Align Top from the inspector; Object > Distribute Horizontally; select A and B; Distribute | Edit menu "Undo Align Top", then "Undo Distribute Horizontally"; with two selected Distribute is disabled with "Select 3 or more layers." | refusal: disabled with reason |
 | J7 | `testDuplicateAndOptionDrag` (`+Arrange`, F2) | cards | select "A"; ⌘D; Option-drag "A" 100 pt down; select "Locked" from Layers; ⌘D | Layers shows "A" three times; "Undo Duplicate" after each; the copy of "Locked" is unlocked; nothing selected: Duplicate disabled with "Select a layer first." | empty selection |
-| J8 | `testCutCopyPasteAcrossWindows` (`+Arrange`, F2) | cards | select "Pair"; ⌘C; ⌘V; ⌘X on "B"; ⌘N (a second window); ⌘V; rename "A" in Layers, select its text, ⌘C, ⌘V | pasted "Pair" offset 10, 10 with two children; "Undo Paste", "Undo Cut"; the second window holds "B"; the rename field pasted text and the layer count is unchanged | Paste disabled with "The pasteboard holds no Design layers." after copying plain text |
-| J9 | `testGroupAndUngroup` (`+Arrange`, F2) | cards | select A and B; ⌘G; ⇧⌘G; select A and "Title" across parents | group row with two children and "Undo Group"; after ⇧⌘G the row is gone and "Undo Ungroup"; across parents Group is disabled with "Select layers that share a parent." | refusal |
+| J8 | `testCutCopyPasteAcrossFiles` (`+Arrange`, F2) | cards, then empty | select "Pair"; ⌘C; ⌘V; select "B"; ⌘X; relaunch with `-DesignFixture empty`; ⌘V; select the pasted "B", click the inspector's X field, ⌘A, ⌘C, ⌘V, Return | pasted "Pair" offset 10, 10 with two children; "Undo Paste", "Undo Cut"; after the relaunch the new file holds "B" (the pasteboard outlives the app); in the X field ⌘C and ⌘V acted on the text and the layer count is unchanged | Paste disabled with "The pasteboard holds no Design layers." after copying plain text |
+| J9 | `testGroupAndUngroup` (`+Arrange`, F2) | cards | select A and B; ⌘G; ⇧⌘G; select "A", then Shift-click "E1" in Layers (inside "Pair") | group row with two children and "Undo Group"; after ⇧⌘G the row is gone and "Undo Ungroup"; with A and E1 Group is disabled with "Select layers that share a parent." | refusal |
 | J10 | `testInspectorStyleRows` (`+Style`, F3) | cards | select "A"; Corner radius 12 by typing; drag Opacity to 50%; add a stroke, width 4 with → four times; select "Hidden" from Layers | each value reads back; one undo step per row ("Undo Change Corner Radius", "Undo Change Opacity", "Undo Change Stroke"); keyboard parity on the width row; a hidden layer's rows are disabled with "Show Hidden to change it." | disabled with reason |
 | J11 | `testTextFontAndSize` (`+Style`, F3) | cards | select "Title"; size 32; weight Bold; alignment Center; zoom to 50%; double-click "Title", type, Return | rows read back; the committed text's frame equals the editor's frame within 1 pt (no jump, #268); "Undo Edit Text" | text edit open |
 | J12 | `testLayersRenameReorderNest` (`+Layers`, F4) | two-pages | double-click "A" row, type "Avatar", Return; drag "C" above "B"; drag "Title" into "Pair"; Object > Arrange > Send to Back on "B"; hide "Pair" from its own row's eye; rename page "Mobile" to "Phone screens" | row reads "Avatar" ("Undo Rename Layer"); order C above B; "Title" nested under Pair; B last; Pair's eye toggled (#589); page renamed; each one step | empty-name rename refused, the row keeps its old name |
 | J13 | `testUndoInTextFieldsAndDirtyState` (`+Files`, F5) | cards | type in the X field and press ⌘Z inside the field; Escape; draw a rectangle; check the dot; ⌘S | ⌘Z in the field undid the typing, not a document step (#275); the top bar shows the unsaved dot after the draw and "Saved" after ⌘S (#270) | save in progress shows "Saving…" when slower than 100 ms (QB-L9) |
 | J14 | `testCloseWithUnsavedChanges` (`+Files`, F5) | cards | draw; ⌘W; Cancel; ⌘W; Don't Save | the alert names the file; Cancel keeps the window; Don't Save closes it | – |
-| J15 | `testEveryControlActsOrSaysWhy` (`+EveryControl`, D0-6) | cards | read `suite.controls`, click each enabled `design.*` control, Escape, ⌘Z | every enabled control changed the shot or a value; every disabled one has a reason. A sweep, never cited by the matrix | – |
+| J15 | `testEveryControlActsOrSaysWhy` (`+EveryControl`, D0-7) | cards | read `suite.controls`, click each enabled `design.*` control, Escape, ⌘Z | every enabled control changed the shot or a value; every disabled one has a reason. A sweep, never cited by the matrix | – |
 | J16 | `testOpenBadFiles` (`+Files`, F5) | bad files | launch with `-DesignOpenFile` on each | the alert reads "It is not a Design file.", "It was made by a newer version of Design (file version 99).", "It has no pages.", "It uses the id node-2 more than once."; the window stays empty | error |
 | P1 | `testCanvasDragLatency` (`+PerfCanvas`, F1) | crowd | four velocity drags of 600 pt at 300 pt/s: move a layer, draw a rectangle, resize, marquee; one Space-pan; ⌘+ and ⌘− ten times each | at least 60 samples per drag series; QB-L1 and QD-S1 to QD-S5 (section 7) | – |
 | P2 | `testScrubLatency` (`+PerfScrub`, F3) | crowd | velocity drag on the Opacity bar and the X scrub field; type 30 characters into the inline text editor | at least 60 samples per series; QB-L2 and QD-S6 | – |
