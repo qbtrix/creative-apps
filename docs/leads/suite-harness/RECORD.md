@@ -11,7 +11,7 @@ Next: wave 2 branches being rebased on 5eef022 and opened as PRs (dev Linux buil
 |---|---|---|---|---|---|---|
 | SH-1 | 1 | contract types, EditRun, probe/inventory/golden contracts + Fakes (#773) | Sources/SuiteUI/Contracts/{ContractTypes,FrameProbeRecording,ControlInventorying,GoldenComparing}.swift, Tests/SuiteUITests/{EditRunTests,HarnessFakeTests}.swift | EditRunTests, HarnessFakeTests | #787 | merged |
 | SH-2 | 1 | token sheet for waves 2-4 + contrast pairs (#774) | Sources/SuiteUI/Tokens.swift, Tests/SuiteUITests/TokensTests.swift | TokensTests.geometry, .contrast | #786 | merged |
-| SH-3 | 2 | secondary text 4.5:1 on light cards/panels (#283) | Tokens.swift, TokensTests.swift | TokensTests.contrast | | built, blocked by dev-red (branch lead/suite-harness-sh-3 @3155de3) |
+| SH-3 | 2 | secondary text 4.5:1 on light cards/panels (#283) | Tokens.swift, TokensTests.swift | TokensTests.contrast | #850 | open, gate pass @489e41b |
 | SH-4 | 2 | SuiteFrameProbe + suite.perf publisher (#330) | Sources/SuiteUI/FrameProbe.swift, Tests/SuiteUITests/FrameProbeTests.swift | FrameProbeTests.referenceTable, .summaryWithinBudget | | built, blocked by dev-red (branch lead/suite-harness-sh-4 @9c86942) |
 | SH-9 | 2 | GoldenImage compare + recording rule (#331) | Tests/AppSnapshotTests/GoldenImage.swift, GoldenImageTests.swift, Golden/README.md | GoldenImageTests.reference, .compareWithinBudget | | built, blocked by dev-red (branch lead/suite-harness-sh-9 @6fb1ff7) |
 | SH-5 | 3 | SuiteControlInventory, SuiteEnvironment, ToolbarAction.identifier (#775) | ControlInventory.swift, SuiteEnvironment.swift, ToolbarGroup.swift, EditorTopBar.swift, InspectorAction.swift, EmptyStateView.swift, ControlInventoryTests.swift | ControlInventoryTests | | todo |
