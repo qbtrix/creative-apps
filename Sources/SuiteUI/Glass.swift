@@ -5,7 +5,9 @@
 // image entirely, content and all; AppSnapshotTests sets it so palettes and
 // panels still show up in the PNGs. The stand-in is drawn shapes and system
 // colors only, so it renders at the host's scale: SnapshotHost draws it at 2×
-// with its 1 pt border exactly 2 px (SnapshotHostTests.glassStandIn).
+// with its 1 pt border exactly 2 px (SnapshotHostTests.glassStandIn). Its fill
+// is the card step of the ladder, not the system surface color, which matches
+// the window background in Light and Dark and so drew nothing visible.
 import SwiftUI
 
 extension EnvironmentValues {
@@ -35,7 +37,7 @@ private struct SuiteGlass<S: Shape>: ViewModifier {
     func body(content: Content) -> some View {
         if snapshot {
             content
-                .background(SuiteColor.surface.opacity(0.92), in: shape)
+                .background(SuiteColor.card.opacity(0.92), in: shape)
                 .overlay(shape.stroke(SuiteColor.separator, lineWidth: 1))
         } else {
             content.glassEffect(.regular, in: shape)
