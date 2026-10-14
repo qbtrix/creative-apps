@@ -135,12 +135,14 @@ public struct FlareWorkspace: Sendable, Equatable {
     }
 
     /// Selects a scene by id. An id not in the document is ignored. Selecting
-    /// another scene clears the layer selection.
+    /// another scene clears the layer selection, stops playback and keeps the
+    /// playhead on the new scene's timeline (#615).
     public mutating func selectScene(_ id: String) {
         guard scenes.contains(where: { $0.id == id }), id != selectedSceneID else { return }
         selectedSceneID = id
         selectedLayerID = nil
         cancelDrag(); selection = []
+        pause(); clampPlayhead()
     }
 
     /// Selects the scene that took removed scene `id`'s place in `order`, or the last one when it was last; with no
@@ -207,7 +209,8 @@ public struct FlareWorkspace: Sendable, Equatable {
     /// With a `label`, `body` runs inside `engine.group(label)`: only for
     /// workspace-level compositions such as Cut, since a contract opens its
     /// own group. Afterwards a selected scene that no longer exists (an undone Add Scene, a redone Delete Scene)
-    /// gives way to its neighbour, clamped to the scene list, and a selected layer that no longer exists is deselected.
+    /// gives way to its neighbour, clamped to the scene list, a selected layer that no longer exists is deselected, and
+    /// a playhead past a shortened timeline moves to its last frame (#615).
     mutating func step(_ label: String? = nil, _ body: (inout CommandEngine) throws -> Void) {
         guard var next = engine else { return refuse(.noDocument) }
         let order = scenes.map(\.id)
@@ -224,6 +227,7 @@ public struct FlareWorkspace: Sendable, Equatable {
         if let id = selectedLayerID, selectedScene?.layers.contains(where: { $0.id == id }) != true {
             selectedLayerID = nil
         }
+        clampPlayhead()
     }
 
     public static func == (lhs: Self, rhs: Self) -> Bool {
