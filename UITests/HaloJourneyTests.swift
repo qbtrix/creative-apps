@@ -15,6 +15,13 @@ final class HaloJourneyTests: XCTestCase {
         halo.click("Create", in: .sheet, step: "new-composition")
     }
 
+    @MainActor func testScrubTheTimeline() {
+        let halo = Journey("Halo", self)
+        halo.click("New Composition…")
+        halo.click("Create", in: .sheet, step: "timeline")
+        halo.drag(on: "halo.timeline", from: CGVector(dx: 0.3, dy: 0.5), to: CGVector(dx: 0.6, dy: 0.5), step: "timeline-scrub")
+    }
+
     @MainActor func testEveryMenuOpens() {
         let halo = Journey("Halo", self)
         halo.click("New Composition…")

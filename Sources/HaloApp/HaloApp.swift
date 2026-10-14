@@ -1,6 +1,7 @@
 // HaloApp.swift: Halo, the motion graphics app. The window is SuiteWindow
 // with the project's compositions in the sidebar, HaloViewer as content and
-// the selected composition's settings and layers in the inspector. New
+// the selected composition's settings and layers in the inspector; the
+// viewer's timeline strip scrubs the playhead and sets in and out points. New
 // Composition opens NewCompositionSheet; a double-click on a sidebar row
 // renames it; a refused rename opens RenameRefusalAlert with the typed name
 // kept. The Composition menu (HaloCompositionCommands) and Layer > New
@@ -39,7 +40,10 @@ struct HaloWindow: View {
             onRename: { id, name in _ = model.renameComposition(id, to: name) },
             actions: [newComposition]
         ) {
-            HaloViewer(model: model, onNew: { showsNewComposition = true })
+            HaloViewer(
+                model: model, onNew: { showsNewComposition = true }, onScrub: { model.scrub(to: $0) },
+                onSelectLayer: { model.selectLayer($0) }, onSetInPoint: { _ = model.setSelectedLayerInPoint() },
+                onSetOutPoint: { _ = model.setSelectedLayerOutPoint() })
         } inspector: {
             if let comp = model.selectedComposition {
                 VStack(alignment: .leading, spacing: SuiteSpacing.m) {
@@ -92,19 +96,30 @@ struct HaloWindow: View {
     }
 }
 
-/// The main content: the composition viewer with its timecode and layer count
-/// readout, or the empty state.
+/// The main content: the composition viewer with its playhead timecode and
+/// layer count readout over the timeline strip (HaloTimelineView), or the
+/// empty state.
 struct HaloViewer: View {
     let model: HaloProject
     var onNew: @MainActor () -> Void = {}
+    var onScrub: @MainActor (Int) -> Void = { _ in }
+    var onSelectLayer: @MainActor (HaloLayer.ID) -> Void = { _ in }
+    var onSetInPoint: @MainActor () -> Void = {}
+    var onSetOutPoint: @MainActor () -> Void = {}
 
     var body: some View {
         if let comp = model.selectedComposition {
-            CanvasSurface(artboard: CGSize(width: comp.width, height: comp.height), overlayAlignment: .bottom) {
-                GlassPanel {
-                    Text("00:00:00:00  ·  \(comp.durationSeconds.formatted()) s at \(comp.framesPerSecond) fps  ·  \(comp.layerSummary)")
-                        .font(SuiteFont.monospacedDigits)
+            VStack(spacing: 0) {
+                CanvasSurface(artboard: CGSize(width: comp.width, height: comp.height), overlayAlignment: .bottom) {
+                    GlassPanel {
+                        Text("\(comp.playheadTimecode)  ·  \(comp.durationSeconds.formatted()) s at \(comp.framesPerSecond) fps  ·  \(comp.layerSummary)")
+                            .font(SuiteFont.monospacedDigits)
+                    }
                 }
+                Divider()
+                HaloTimelineView(
+                    composition: comp, rows: model.timelineRows, onScrub: onScrub, onSelectLayer: onSelectLayer,
+                    onSetInPoint: onSetInPoint, onSetOutPoint: onSetOutPoint)
             }
         } else {
             EmptyStateView(

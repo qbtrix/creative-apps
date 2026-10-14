@@ -1,5 +1,6 @@
 // HaloProject.swift: the state behind Halo's window (motion graphics). Holds
 // the project's compositions, the selected one and the selected layer in it.
+// Each composition keeps its own playhead (HaloTimeline.swift).
 // Linux-safe: no UI imports. HaloApp changes it only through the methods here.
 // The selected layer, when set, is always a layer of the selected composition.
 // Composition ids are never reused and names stay unique; once a project has a
@@ -18,6 +19,9 @@ public struct HaloComposition: Identifiable, Sendable, Hashable {
     public var durationFrames: Int
     /// The composition's layers, top first.
     public var layers: [HaloLayer]
+    /// The frame the viewer shows, in 0..<durationFrames; HaloProject's
+    /// `scrub(to:)` keeps it there.
+    public var playheadFrame: Int = 0
 
     public init(
         id: String, name: String, width: Int, height: Int, framesPerSecond: Int, durationFrames: Int,
@@ -220,6 +224,13 @@ public struct HaloProject: Sendable, Equatable {
     /// Sets how the selected layer blends with the layers under it.
     public mutating func setSelectedLayerBlendMode(_ mode: BlendMode) {
         updateSelectedLayer { $0.blendMode = mode }
+    }
+
+    /// Changes the selected composition in place; nothing without one. The
+    /// timeline's methods (HaloTimeline.swift) go through here.
+    mutating func updateSelectedComposition(_ change: (inout HaloComposition) -> Void) {
+        guard let c = compositions.firstIndex(where: { $0.id == selectedCompositionID }) else { return }
+        change(&compositions[c])
     }
 
     private mutating func updateSelectedLayer(_ change: (inout HaloLayer) -> Void) {
