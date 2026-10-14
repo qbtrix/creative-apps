@@ -11,8 +11,8 @@
 // out, never mixed at run time, so TokensTests.contrast can check every pair
 // the design table promises. Editors (EditorShell) force Dark, so they
 // resolve the Dark columns in both system appearances. A few roles stay
-// system colors (window background, separators, `.secondary` for SuiteWindow
-// apps' lists), and the older names (`panelRaised`, `field`, `studioFill`,
+// system colors (window background, the content-layer surface, separators),
+// and the older names (`panelRaised`, `field`, `studioFill`,
 // `selectedWell`, `keyframed`) now read the ladder until their callers move.
 import AppKit
 import SwiftUI
@@ -323,8 +323,11 @@ public enum SuiteColor {
     /// Flat fill for cards in the content layer (never glass).
     public static var surface: Color { Color(nsColor: .controlBackgroundColor) }
     public static var separator: Color { Color(nsColor: .separatorColor) }
-    /// Secondary text in SuiteWindow apps' lists; inspector rows use textSecondary.
-    public static var secondaryText: Color { .secondary }
+    /// Secondary text in SuiteWindow apps' lists, cards and sheets: the
+    /// palette's textSecondary, so it clears 4.5:1 on card, panel and surface
+    /// in every appearance (#283; the system `.secondary` measured about 4:1
+    /// on light cards).
+    public static let secondaryText = textSecondary
 
     // The graphite ladder: around the canvas, bars, panels, the info card,
     // rows, their hover, a bar slider's fill at rest and while dragged, a

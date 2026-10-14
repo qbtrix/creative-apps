@@ -1,6 +1,7 @@
 // TokensTests.swift: checks on SuiteUI's tokens and value types: the
 // Visual language geometry (QB-F6) and, in ContrastTests.swift, the color
 // table's contrast (QB-V6). macOS only.
+import AppKit
 import SuiteUI
 import SwiftUI
 import Testing
@@ -196,6 +197,32 @@ import Testing
         }
         // The point mark: white ink over its black paper halo, a non-text mark, 3:1 on any pixels.
         #expect(Self.contrast(0xFFFFFF, 0x000000) >= 3)
+        // #283: secondaryText is the palette's textSecondary, no longer the system `.secondary`,
+        // and clears 4.5:1 on `card`, `panel` and `surface` (SurfaceCard's fill, where #283
+        // measured about 4:1) in all four appearances.
+        #expect(SuiteColor.secondaryText == SuiteColor.textSecondary)
+        let looks: [NSAppearance.Name] = [.darkAqua, .aqua, .accessibilityHighContrastDarkAqua, .accessibilityHighContrastAqua]
+        for (look, name) in looks.enumerated() {
+            let surface = Self.resolved(.controlBackgroundColor, in: name)
+            #expect(surface != nil, "surface in \(name.rawValue)")
+            let backgrounds = [P.card.values[look], P.panel.values[look]] + (surface.map { [$0] } ?? [])
+            for background in backgrounds {
+                #expect(Self.contrast(P.textSecondary.values[look], background) >= 4.5, "secondaryText on \(background) in \(look)")
+            }
+        }
+    }
+
+    /// A system color's sRGB hex (0xRRGGBB) under the named appearance, nil if it has no sRGB form.
+    static func resolved(_ color: NSColor, in name: NSAppearance.Name) -> UInt32? {
+        guard let appearance = NSAppearance(named: name) else { return nil }
+        var hex: UInt32?
+        appearance.performAsCurrentDrawingAppearance {
+            guard let srgb = color.usingColorSpace(.sRGB) else { return }
+            hex = [srgb.redComponent, srgb.greenComponent, srgb.blueComponent].reduce(UInt32(0)) { value, channel in
+                value << 8 | UInt32((min(max(channel, 0), 1) * 255).rounded())
+            }
+        }
+        return hex
     }
 
     /// Every hex row in docs/design.md's Visual language tables is in SuitePalette with those values.
