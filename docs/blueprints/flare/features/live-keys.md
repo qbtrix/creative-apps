@@ -1,0 +1,171 @@
+# Feature packet: live-keys
+
+**Feature:** key, retime and ease on real documents. The inspector's
+TRANSFORM rows with section 2's not-animated rule, the stopwatch and the
+keyframe button, fill and stroke, and the timeline's rows, key moves,
+deletes, frame inserts and removes and labels run on FlareCore for scene
+layers and for a symbol's own layers while it is edited in place.
+**Line:** `line:flare` · **Wave:** 2 (`waves.md`) · **Lead branch:** `lead/live-keys`
+
+**Covers:** #13 (LM-4), #358 (LM-5). #13 closes with KY-4, #358 with KY-7.
+
+**Depends on:** qbtrix/creative-core#171 (LC-5, keyframe commands take
+`owner:`), qbtrix/creative-core#216 (LC-7, `SetShapeStroke`),
+qbtrix/creative-core#219 (LC-10, `SetKeyframe` merge). None had landed on
+creative-core `main` cfad97f (2026-10-14). KY-1 and KY-5 are reads and need
+none of them, so the lead can start those at once; the rest wait on the
+issue named in their row.
+
+Where it starts from: `FakeProperties` and `FakeKeyframes` already run on the
+real `CommandEngine` for scene layers. What the live types add is the symbol
+owner (they throw `FakeProperties.symbolKeys` today), stroke through
+`SetShapeStroke` instead of `FixtureEdit`, and one merged command per scrub.
+The live files may call shared helpers, but must not contain `FixtureEdit`
+(live-stage's ST-5 scan fails on it). `LiveEasing` (#359) already shipped and
+is reused, not rebuilt. Blueprint sections: 2 (where a property's value
+lives, one undo step), 6.2 (`PropertyAnimating`, `KeyframeEditing`), 7.5
+(LM-4, LM-5).
+
+## Journey steps
+
+J6 (move and key by drag), J7 (inspector keys), J8 (fill and stroke), J11
+(retime, delete, insert and label) and J12 (easing) are the journeys; their
+UI is F5 (#391), F6a (#186), F6b (#348), F8 (#377) and F9 (#378). This
+feature proves their Model half on the live types, in
+`Tests/FlareModelTests/LiveKeysJourneyTests.swift` (KY-8):
+
+1. On `bounce`, Ball X reads `.animated` and Shadow X `.notAnimated`; Ball
+   and Shadow together read X as `nil` (Mixed).
+2. Shadow X set at frame 30 with auto-key off edits its one key: it stays
+   `.notAnimated` and reads the new value at 0 and at 30.
+3. The stopwatch on Shadow X at frame 0 keys 0 and 47: `.animated`.
+4. 120 `setValue` calls on Ball rotation with one coalesce key are one undo
+   entry holding one command.
+5. Ball's fill set to `FF3B30`, then stroke width 4, cap and join Round; one
+   undo restores only the join.
+6. Ball's key at 24 moved to 28 is one "Undo Move Keyframe"; onto 36 it
+   throws and changes nothing; the key at 12 deleted; two frames inserted at
+   10 move 28 to 30; one removed moves it to 29; a label "hit" at 29.
+7. Inside the "wave" symbol of `character`, the hand's rotation key moves
+   and undoes exactly (the owner path), and `LiveEasing` sets Ease Out on its
+   first segment.
+
+## Screens and states
+
+| Screen | Empty | Error | Loading |
+|---|---|---|---|
+| Properties TRANSFORM rows | no layer selected: `properties` returns `[]` and the inspector shows SCENE | a write on a locked layer throws "Unlock <layer> to draw on it."; a non-finite value throws and changes nothing; a value outside the row's range is clamped first | none |
+| Keyframe button | `.notAnimated` (idle), `.animated`, `.keyedHere` per section 2 | – | – |
+| FILL and STROKE | no shape on the selection: the fill write is a no-op that adds no undo entry | negative stroke width throws (LC-7's validation) | – |
+| Timeline rows | a scene with no layers: `rows` is `[]` ("No layers yet." empty text, F7a) | a key move onto another key or past the last frame throws, nothing changes | – |
+
+## Contract slice
+
+No contract changes. The live types conform to `PropertyAnimating` and
+`KeyframeEditing` in `Sources/FlareModel/Contracts/AnimateContracts.swift`:
+
+```swift
+public struct LiveProperties: PropertyAnimating { public init() }
+//   properties(_:owner:layerIDs:frame:) -> [AnimatedProperty]
+//   setValue(_:of:owner:layerIDs:frame:autoKey:coalesceKey:in:)      coalescible
+//   toggleAnimated(_:owner:layerID:frame:lastFrame:in:)               grouped "Animate <Title>" / "Stop Animating <Title>"
+//   toggleKey(_:owner:layerID:frame:in:)                              single
+//   setFill(_:of:in:)  grouped "Set Fill" ; setStroke(_:of:in:)  grouped "Set Stroke"
+public struct LiveKeyframes: KeyframeEditing { public init() }
+//   rows(_:owner:), labels(_:sceneID:)
+//   moveKeys(_:by:owner:coalesceKey:in:)  coalescible, throws on a collision
+//   removeKeys(_:owner:in:)  grouped "Delete Keyframe"
+//   insertFrames / removeFrames  single ; setLabel  single
+```
+
+FlareCore calls: `Layer.placement(at:)`, `Layer.standardDefaults`,
+`SetKeyframe`, `RemoveKeyframe`, `MoveKeyframe` (with `owner:` after LC-5,
+`SetKeyframe` merging after LC-10), `SetShapeFill`, `SetShapeStroke` (LC-7),
+`ShiftKeyframes`, `SetSceneTiming`, `SetFrameLabel`, `RemoveFrameLabel`.
+
+## Pseudocode
+
+```
+properties(doc, owner, layerIDs, frame):                         # KY-1
+  layers = doc.layers(of: owner).filter(layerIDs)
+  for row in FakeProperties.rows:                                # same rows, ranges, units
+    values = layers.map { $0.placement(at: Double(frame)).value(row.name) }
+    keys   = layers.map { $0.tracks[row.name] ?? [] }
+    state  = keys.count(>=2)==0 ? .notAnimated : (any key at frame ? .keyedHere : .animated)
+    value  = values.allEqual ? values[0] : nil                   # nil = Mixed
+  return rows
+
+setValue(v, prop, owner, ids, frame, autoKey, coalesceKey):      # KY-2
+  guard v.isFinite; v = clamp(v, row.range)
+  for id in ids:
+    keys = track(id, prop)
+    target = keys.count >= 2 || autoKey ? frame : (keys.first?.frame ?? 0)
+    engine.perform(SetKeyframe(owner, id, prop, target, v), coalesceKey: coalesceKey)   # top level, merges (LC-10)
+
+toggleAnimated(prop, owner, id, frame, lastFrame):               # KY-3
+  if notAnimated: group("Animate <Title>") { key frame; if one key left and frame==it: key lastFrame same value }
+  else:           group("Stop Animating <Title>") { remove all keys; key 0 with value at frame }
+toggleKey: key at frame ? RemoveKeyframe : SetKeyframe(sampled value)
+
+setFill / setStroke(items):                                      # KY-4
+  shapes = items expanded (layer -> all its shapes; direct item -> that shape)
+  group("Set Fill" | "Set Stroke") { SetShapeFill | SetShapeStroke per shape }
+
+rows(doc, owner):  per layer: union of track key frames, segments between them, easings by start frame   # KY-5
+moveKeys(keys, delta):  try on a copy of the engine first; collision or past the end -> throw, no change   # KY-6
+  then perform MoveKeyframe(owner, ...) per key with coalesceKey
+insertFrames / removeFrames: ShiftKeyframes; grow the scene with SetSceneTiming in the same step when needed  # KY-7
+setLabel: SetFrameLabel / RemoveFrameLabel
+```
+
+## Tasks
+
+Every task is one PR to `dev`: at most 400 changed lines and 15 files, label
+`fast-lane`, body lines `Belt-Lead:`, `Feature: live-keys`, `Fast-Check:
+pass`, `Head:`. KY-8 also carries `feature-done`.
+
+| id | issue | what | owned files | depends on |
+|---|---|---|---|---|
+| KY-1 | #13 (part) | `LiveProperties.properties`: values, key states, Mixed, owner-aware reads | `Sources/FlareModel/Live/LiveProperties.swift`, `Tests/FlareModelTests/LivePropertiesTests.swift` | – |
+| KY-2 | #13 (part) | `setValue` by section 2's rule, clamped, one merged command per scrub | `Sources/FlareModel/Live/LiveProperties.swift`, `Tests/FlareModelTests/LivePropertiesSetTests.swift` | KY-1, creative-core#171, creative-core#219 |
+| KY-3 | #13 (part) | Stopwatch and keyframe button: `toggleAnimated`, `toggleKey` | `Sources/FlareModel/Live/LiveProperties+Keys.swift`, `Tests/FlareModelTests/LivePropertiesKeysTests.swift` | KY-2 |
+| KY-4 | #13 (closes) | `setFill` and `setStroke` | `Sources/FlareModel/Live/LiveProperties+Paint.swift`, `Tests/FlareModelTests/LivePropertiesPaintTests.swift` | KY-3, creative-core#216 |
+| KY-5 | #358 (part) | `LiveKeyframes.rows` and `labels` | `Sources/FlareModel/Live/LiveKeyframes.swift`, `Tests/FlareModelTests/LiveKeyframesTests.swift` | – |
+| KY-6 | #358 (part) | `moveKeys` (collision and past-the-end refusals) and `removeKeys` | `Sources/FlareModel/Live/LiveKeyframes+Edit.swift`, `Tests/FlareModelTests/LiveKeyframesEditTests.swift` | KY-5, creative-core#171 |
+| KY-7 | #358 (closes) | `insertFrames`, `removeFrames` (labels move with a whole-scene shift, the scene grows) and `setLabel` | `Sources/FlareModel/Live/LiveKeyframes+Frames.swift`, `Tests/FlareModelTests/LiveKeyframesFramesTests.swift` | KY-6 |
+| KY-8 | – | The model journey (steps 1–7, with `LiveEasing`) and the QB-L7 budget | `Tests/FlareModelTests/LiveKeysJourneyTests.swift`, `Tests/FlareModelTests/LiveKeysBudgetTests.swift` | KY-4, KY-7 |
+
+KY-1 to KY-4 and KY-5 to KY-7 are two chains that can run side by side. The
+issues list one source and one test file each; the packet splits them into
+extension files so no PR passes 400 lines, and the PRs say so. No file here
+is owned by another feature.
+
+## Acceptance test per task
+
+| id | test | fails when |
+|---|---|---|
+| KY-1 | `LivePropertiesTests`: equals `FakeProperties.properties` on `bounce` for Ball, Shadow and both, at frames 0, 12, 30 and 47; Ball and Shadow give X `nil`; inside "wave" the hand's rotation reads its keyed value at 12 (the fake throws here, the live type must not) | a value, a key state or Mixed differs from the fake, or the symbol owner fails |
+| KY-2 | `LivePropertiesSetTests`: keys at 0 and 24 (x 0 and 120) give `placement(at: 12).x == 60`; Shadow X at 30 with auto-key off stays `.notAnimated` and moves at 0; with auto-key on it becomes `.animated`; 120 calls with one key are 1 undo entry holding 1 command; NaN throws and changes nothing; 2e6 clamps to 10 000 | a not-animated edit adds a key, a scrub leaves 2 entries or 2 commands, or a NaN lands |
+| KY-3 | `LivePropertiesKeysTests`: the stopwatch on Shadow X at 0 gives keys at 0 and 47 named "Undo Animate X"; off again leaves one key at 0 with the value at the playhead; `toggleKey` adds then removes the key at 20 (one entry each) | the stopwatch leaves one diamond, or off loses the value |
+| KY-4 | `LivePropertiesPaintTests`: fill `FF3B30` on Ball sets every shape in one "Undo Set Fill"; stroke width 4, cap and join Round each one entry and one undo restores only the join; a direct-selected item's fill changes only that shape; width -1 throws | a second entry, a shape left out, or a bad stroke passes |
+| KY-5 | `LiveKeyframesTests`: equals `FakeKeyframes.rows` and `.labels` on `bounce` and `character`; inside "wave" the hand's row lists keys 0, 12, 23 | a row, key, segment or easing differs from the fake |
+| KY-6 | `LiveKeyframesEditTests`: Ball's 24 → 28 is one "Undo Move Keyframe"; 24 onto 36 throws and the document and undo count are unchanged; past frame 47 throws; 50 coalesced one-frame steps are one entry; deleting 12 is one "Undo Delete Keyframe"; a symbol key moves and undoes exactly | a collision lands, a drag leaves several entries, or the owner path breaks |
+| KY-7 | `LiveKeyframesFramesTests`: two frames inserted at 10 move 28 to 30; a key pushed past 47 grows the scene in the same entry; one removed moves it to 29; on every layer a label at 29 moves with it; `setLabel("hit", 29)` then `nil` removes it; each step is one entry | keys, labels or the scene length are wrong, or a step is two entries |
+| KY-8 | `LiveKeysJourneyTests.testMoveAndKey`, `.testInspectorKeysTransform`, `.testFillAndStroke`, `.testRetimeDeleteInsertAndLabel`, `.testEasingInsideASymbol` walk steps 1–7 with a real `CommandEngine` | any step's values or undo names differ from J6–J8, J11 and J12 |
+
+## Quality tests
+
+| quality row | budget (CI gate, debug) | test |
+|---|---|---|
+| QB-L7 one drag step through the engine | ≤ 10 ms per `setValue` scrub step (perform and validate) on `bounce` | `LiveKeysBudgetTests.scrubStepWithinBudget` (median of 120 steps) |
+| QB-F3 one gesture, one step | a scrub, a key drag and each menu action are one named entry; scrubbing never adds a second | `LivePropertiesSetTests`, `LiveKeyframesEditTests` (undo counts) |
+| QB-L3 hook | a key drag of 50 steps holds one command (merge), so timeline scrubs stay cheap | `LiveKeyframesEditTests.coalescedDragIsOneEntry` |
+
+## Done check
+
+- **Journeys green:** the macOS run on `dev` triggered by the `feature-done`
+  PR (KY-8) is green, `FlareJourneyTests` included.
+- **Audit zero new:** no Flare count over `UITests/audit-baseline.json`.
+- **Contact sheet:** `Belt-Contact-Sheet: <run link>` on the feature issue;
+  no Flare screen changes (the live types are not wired until IN-1 and
+  IN-2), and the comment says so.
