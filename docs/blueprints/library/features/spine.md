@@ -135,10 +135,15 @@ public internal(set) var catalogState: CatalogFileState      // .ready
 public internal(set) var saveRevision: Int, savedRevision: Int
 public internal(set) var saveError: String?
 public internal(set) var showsTestValues: Bool                // -LibraryTestValues
+public internal(set) var cullError: String?                   // a refused cull change (cull fills it)
 public struct ThumbnailRequest: Hashable, Sendable { id: String; longSide: Int; token: Int }
 ```
 
-`ThumbnailRequest` is declared here (thumbnails fills its use). Existing
+`ThumbnailRequest` is declared here (thumbnails fills its use).
+`cullError` is one property more than blueprint 5.6 lists: `-LibraryFakeMode
+fail` makes `FakeCulling` refuse a change (5.1, "show a refused change"), and
+without a stored home for the message cull would have to edit
+`LibraryCatalog.swift` in wave 2. Existing
 stored properties (`collections`, `selectedCollectionID`, `items`, `sort`,
 `cellSize`, `selection`, `mode`, `focusedItemID`) become `public
 internal(set)` too, and `editSelected` and `recount` become `internal`.
@@ -150,7 +155,7 @@ Methods and values the spine adds (blueprint 5.7):
 | `init(services: LibraryServices = .fake())`, hand-written `==` over every stored property but `services` | `LibraryCatalog.swift` |
 | `rebuildOrder()`; `sortedItems` reads `order`; `select`, `open`, `showLoupe`, `stepLoupe`, `showGrid` use `order` | `LibraryOrder.swift` |
 | `recordEdit(_ name: String, coalesceKey: String? = nil, ids: Set<String>, _ edit: (inout PhotoItem) -> Void)` (internal), `undo()`, `redo()`, `undoTitle`, `redoTitle`, `endCoalescing()` | `CatalogHistory.swift` |
-| `PhotoItem.cullSummary`, `cellValue(for:)`, `loupeValue`, `histogramValue`, `catalogValue`, `help(for member: String) -> String?` | `LibraryReadouts.swift` (new) |
+| `PhotoItem.cullSummary`, `cellValue(for:)`, `cellHelp(for:)`, `loupeValue`, `histogramValue`, `catalogValue`, `notice: LibraryNoticeContent?`, `help(for member: String) -> String?` | `LibraryReadouts.swift` (new) |
 | `LibraryKey` (`rating(Int)`, `pick`, `reject`, `unflag`, `crop`, `grid`, `confirm`, `first`, `last`), `LibraryKey(character:)`; `LibraryControlState` and `controlsJSON(_:)` | `LibraryKeys.swift` (new) |
 | `LibraryLaunch(arguments:)`: `fixture`, `catalogDir`, `importFolder`, `importOnLaunch`, `exportTo`, `fakeMode`, `perfProbe`, `testValues`, `reduceMotion`, `windowSize` | `LibraryLaunch.swift` |
 | `LibraryFixtures.photos(named:)`: `empty`, `samples`, `shoot`, `shoot-unimported`, `large` | `LibraryFixtures.swift` |
@@ -170,9 +175,46 @@ the state (thumbnails, loupe-viewport, develop, persist) never edit
   over 0...255, divided by 255, four decimals; `mean 0.0000` for an empty
   histogram (never NaN).
 - `catalogValue`: `saved` when `saveRevision == savedRevision`, else `dirty`.
+  Every catalog change bumps `saveRevision`: `recordEdit`, `load`, and the
+  features' own changes (`appendImported`, `setDevelop`, …).
+- `cellHelp(for:)`: "The file is missing." for `.missing`, the reason for
+  `.unreadable(reason)`, else nil.
+- `notice`: what the content's notice slot shows, first match wins:
+  `catalogState.message` (error; action `.showCatalogInFinder` for
+  `.damaged`), then `importNotice` (error or warning by `isError`; action
+  `.showFailures` when it has failures), then `cullError` (error, no
+  action). `LibraryNoticeContent` is `message`, `isError`, `action`,
+  `source` (`.catalog`, `.import`, `.cull`). The spine's slot draws it;
+  import (which owns `LibraryBrowser.swift` in wave 2) restyles it, and the
+  close button calls the source's dismiss closure from `LibraryMenu`.
 - `cullSummary`: "3 stars", "1 star", then ", Picked" or ", Rejected", then
   ", Red" (the label's title); empty for an unrated, unflagged, unlabelled
   photo. Stars are omitted at 0.
+
+**`LibraryMenu`** (`LibraryMenus.swift`, SA-3). One sub-struct per area,
+every member optional (nil disables the item, or ignores the key), so an
+area fills its own sub-struct in its own `LibraryWindow+<Area>.swift` and
+never edits the menu bar, the window or another area's file:
+
+| Sub-struct (area file) | Members |
+|---|---|
+| `edit` (`+Edit`, spine) | `undo`, `redo`, `undoTitle`, `redoTitle`, `selectAll`, `deselect`, `loadSamples` |
+| `file` (`+Import`, import) | `importFolder`, `importHelp`, `showImportFailures`, `dismissImportNotice` |
+| `thumbnails` (`+Thumbnails`, thumbnails) | `visibleChanged([String])`, `cellSizeChanged(Int, scale: Int)` |
+| `cull` (`+Cull`, cull) | `key(LibraryKey)`, `setRating(Int)`, `setFlag(PhotoFlag)`, `setLabel(PhotoLabel?)`, `toggleAutoAdvance`, `autoAdvance: Bool`, `dismissCullError` |
+| `persist` (`+Persist`, persist) | `showCatalogInFinder` |
+| `view` (`+Loupe`, loupe-viewport) | `grid`, `loupe`, `zoomIn`, `zoomOut`, `zoomToFit`, `actualSize`, `setSort`, `sort`, `first`, `last`, `zoomInTitle`, `zoomOutTitle` |
+| `photo` (`+Develop`, develop; `+Crop`, crop) | `copySettings`, `pasteSettings`, `resetDevelop` (develop); `toggleCrop`, `cropTitle`, `applyCrop`, `resetCrop` (crop) |
+| `export` (`+Export`, export) | `export`, `exportHelp` |
+
+The `photo` sub-struct is built by two areas: `LibraryWindow` merges the
+develop half and the crop half, so develop (wave 3) and crop (wave 4) each
+fill only their own half. The spine's `+Loupe` stub keeps today's View
+items working (Grid, Loupe, Sort By, Larger and Smaller Thumbnails as Zoom
+In and Zoom Out in the grid); loupe-viewport replaces it in wave 2. The
+spine's `+Cull` stub routes `setRating`, `setFlag` and `setLabel` to the
+existing catalog methods so the #750 inspector and `testRateASelectedPhoto`
+keep working; cull replaces it in wave 2.
 
 ## Pseudocode
 
@@ -187,6 +229,7 @@ rebuildOrder():                                            # SP-8
 recordEdit(name, coalesceKey, ids, edit):                  # SP-11
   before = items for ids;  apply edit;  after = items for ids
   if before == after: return                               # no step for a no-op
+  saveRevision += 1
   if coalesceKey != nil && history.top.coalesceKey == coalesceKey && history.open:
      history.top.after = after                             # one step per drag
   else history.push(Step(name, before, after, coalesceKey)); history.redo = []
@@ -210,9 +253,9 @@ LibraryWindow.onKeyPress (macOS, SA-4):
   guard grid or loupe has focus, no text field focused
   switch LibraryKey(press):
     rating/pick/reject/unflag -> menus.cull.key?(key)      # cull fills in wave 2
-    first/last                -> menus.loupe.first?() / last?()   # loupe-viewport, wave 2
-    crop                      -> menus.crop.toggle?()      # crop, wave 4
-    confirm                   -> menus.crop.apply?() ?? (grid: open the anchor)
+    first/last                -> menus.view.first?() / last?()    # loupe-viewport, wave 2
+    crop                      -> menus.photo.toggleCrop?() # crop, wave 4
+    confirm                   -> menus.photo.applyCrop?() ?? (grid: .ignored, so ThumbnailGrid opens the anchor)
     grid                      -> menus.view.grid?()
   nil closure -> .ignored
 
@@ -293,7 +336,7 @@ or closes it as superseded; the lead comments once on #217 saying so.
 | SP-10 | `LibraryPhotoIDTests`: loading `["a#2", "a", "a"]` keeps `a#2` and renames the second `a` to `a#3`; every existing id test passes | a photo's own id is taken by an earlier duplicate |
 | SP-11 | `LibraryHistoryTests`: a recorded rating edit gives `undoTitle == "Undo Set Rating"`, undo restores the photo exactly and leaves the loupe where it was, redo reapplies; three edits with one `coalesceKey` are one step until `endCoalescing()`; a no-op edit records nothing; a new edit clears redo | a gesture becomes two steps, undo moves the loupe, or a no-op is recorded |
 | SP-12 | `LibraryLaunchTests`: the blueprint's argument table parses (every flag, `-LibraryFakeMode bogus` is `.ok`, `-LibraryWindowSize 0x5` is nil); `shoot` has 24 photos, 8 portrait 4000 × 6000, `IMG_0024` first by capture date and `IMG_0001` first by name; `shoot-unimported` gives 24 fake photos and an empty catalog; `large` has 10,000 unique ids; samples have `pixelSize` 4032 × 3024 | a fixture's shape or order differs, or a flag is dropped |
-| SP-13 | `LibraryReadoutsTests`: a 3-star picked red photo's `cullSummary` is "3 stars, Picked, Red"; `cellValue` reads `loading`, then `ready 256×171 …` after a thumbnail is set, `unreadable` for a missing file; `loupeValue` under `showsTestValues` includes the 16-digit checksum and `100%` at `.actual`; `histogramValue` of `.empty` is `mean 0.0000`; `catalogValue` flips to `dirty` when `saveRevision` moves. `LibraryKeysTests`: "3" is `rating(3)`, "P" and "p" are `pick`, "7" is nil; `controlsJSON` of one enabled and one disabled control round-trips through `JSONDecoder` with the reason | a value's text differs from blueprint 4.1, or a key maps to the wrong area |
+| SP-13 | `LibraryReadoutsTests`: a 3-star picked red photo's `cullSummary` is "3 stars, Picked, Red"; `cellValue` reads `loading`, then `ready 256×171 …` after a thumbnail is set, `unreadable` for a missing file; `loupeValue` under `showsTestValues` includes the 16-digit checksum and `100%` at `.actual`; `histogramValue` of `.empty` is `mean 0.0000`; `catalogValue` flips to `dirty` when `saveRevision` moves; `cellHelp` of a missing photo is "The file is missing."; `notice` prefers a damaged catalog over an import notice over `cullError`. `LibraryKeysTests`: "3" is `rating(3)`, "P" and "p" are `pick`, "7" is nil; `controlsJSON` of one enabled and one disabled control round-trips through `JSONDecoder` with the reason | a value's text differs from blueprint 4.1, or a key maps to the wrong area |
 | SA-1 | The next macOS run: `library-grid-*`, `library-loupe-*`, `library-empty-*`, `library-metadata-*` PNGs unchanged; the existing journeys pass | the split changes a pixel or breaks a call site |
 | SA-2 | macOS: `testLaunchShowsWindowShell` passes; File > New Window is gone (one `Window` scene); with `-LibraryFixture samples` the grid shows 60 photos at launch | a second window can open, or the fixture isn't loaded |
 | SA-3 | J10 (SJ-1) lists every 6.2 item; on Linux, `LibraryKeysTests` already covers the key table the help tags name | an item is missing or a nil closure leaves an item enabled |
