@@ -91,6 +91,8 @@ public struct FlareWorkspace: Sendable, Equatable {
     var easingDragSerial = 0
     /// Part of a property scrub's coalesce key; bumped to end the scrub.
     var propertyScrubSerial = 0
+    /// Part of a guide drag's coalesce key; bumped to end the drag.
+    var guideDragSerial = 0
 
     public init(services: FlareServices = .live) {
         self.services = services
