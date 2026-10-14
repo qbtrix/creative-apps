@@ -462,13 +462,13 @@ Page names are the gallery's (section 6.2). "Log reads" means the label of
 
 | # | Test (file) | Page | Steps | Measures |
 |---|---|---|---|---|
-| SP1 | `testBarSliderScrubLatency` (`+Perf`) | `inspector` | velocity-controlled drag across a bar slider, 300 pt/s | frames late, at least 60 samples |
-| SP2 | `testCanvasDragLatency` (`+Perf`) | `canvas` | drag on the canvas, then Space-pan, 300 pt/s | frames late per series |
-| SP3 | `testTimelineScrubLatency` (`+Perf`) | `timeline-long` | drag the playhead across the ruler | frames late |
-| SP4 | `testListAndGridScroll` (`+Perf`) | `layers-300`, `grid-2000` | scroll each end to end | frame interval p95 |
-| SP5 | `testHandleDragLatency` (`+Perf`) | `marks` | drag a handle at 300 pt/s | frames late |
+| SP1 | `testBarSliderScrubLatency` (`+Inspector`) | `inspector` | velocity-controlled drag across a bar slider, 300 pt/s | frames late, at least 60 samples |
+| SP2 | `testCanvasDragLatency` (`+Canvas`) | `canvas` | drag on the canvas, then Space-pan, 300 pt/s | frames late per series |
+| SP3 | `testTimelineScrubLatency` (`+Timeline`) | `timeline-long` | drag the playhead across the ruler | frames late |
+| SP4 | `testListAndGridScroll` (`+Lists`) | `layers-300`, `grid-2000` | scroll each end to end | frame interval p95 |
+| SP5 | `testHandleDragLatency` (`+Canvas`) | `marks` | drag a handle at 300 pt/s | frames late |
 
-`+Perf` is owned by the harness feature: it writes the five tests against
-pages the later features fill, each `XCTSkip` until its page exists, and
-each feature turns its own on (one line, `skipUnless(page:)`) in its own
-journey file, not in `+Perf` (section 8).
+Each perf test lives in the journey file of the feature that owns its page.
+The harness feature supplies only the helpers they call
+(`UITests/Journey+Input.swift`: velocity drag, `perf()`, the 60-sample
+validity check), so no two features share a perf file.
