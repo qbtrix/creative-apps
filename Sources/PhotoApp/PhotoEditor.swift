@@ -1,7 +1,7 @@
 // PhotoEditor.swift: what a Photo window shows, laid out on SuiteUI's
 // EditorShell: the top bar (the document menu with New Image, Open…, Save,
 // Save As… and Export…; file commands, the Image menu, undo and redo, zoom),
-// the tool rail, the canvas with its rulers, the Adjust | Layers panel
+// the tool rail, the canvas with its rulers (and the Clone source's mark), the Adjust | Layers panel
 // and the status line (zoom, image size, the active tool, render time). Values in, intents
 // out: it reads the workspace and sends every action to `perform`, so the
 // same view draws the live window and the snapshots. A control that can't act
@@ -128,8 +128,9 @@ struct PhotoImageMenu: View {
 }
 
 /// The canvas: the rendered picture on the checkerboard with the selection and
-/// a pending crop over it, or the empty state. Drags go to the active tool;
-/// with the canvas focused, V M B E C pick tools, Delete clears the selection
+/// a pending crop over it, and with Clone its sampled source, or the empty
+/// state. Drags go to the active tool (Option-click with Clone samples the
+/// source, in PhotoWindow); with the canvas focused, V M B E S C pick tools, Delete clears the selection
 /// (Shift-Delete fills it), Return applies a crop and Escape cancels it or
 /// deselects. Dropping an image file opens it. While the Straighten sheet is
 /// open the picture turns by its angle under StraightenMarks.
@@ -157,6 +158,9 @@ struct PhotoCanvas: View {
                 } overlay: {
                     if let selection = model.selection { SelectionOutline(rect: selection.cgRect, zoom: zoom) }
                     if let crop = model.pendingCrop { CropShade(rect: crop.cgRect, documentSize: size, zoom: zoom) }
+                    if model.tool == .clone, let source = model.cloneSource {
+                        CloneSourceMark(point: CGPoint(x: source.point.x, y: source.point.y), zoom: zoom)
+                    }
                     if let straighten,
                         let frame = model.straightenFrame(degrees: straighten.degrees, cropToFit: straighten.cropToFit)
                     {
@@ -192,6 +196,31 @@ struct PhotoCanvas: View {
             perform(.tool(tool))
         }
         return .handled
+    }
+}
+
+/// Where the Clone tool copies from: a white ring over a black one with a
+/// cross, so it reads on any pixels. A plain placeholder until SuiteUI has a
+/// canvas point mark (#706).
+struct CloneSourceMark: View {
+    let point: CGPoint
+    let zoom: Double
+
+    var body: some View {
+        let center = CGPoint(x: point.x * zoom, y: point.y * zoom), radius = SuiteSpacing.s
+        let mark = Path { path in
+            path.addEllipse(in: CGRect(x: center.x - radius, y: center.y - radius, width: radius * 2, height: radius * 2))
+            path.move(to: CGPoint(x: center.x - radius - SuiteSpacing.xs, y: center.y))
+            path.addLine(to: CGPoint(x: center.x + radius + SuiteSpacing.xs, y: center.y))
+            path.move(to: CGPoint(x: center.x, y: center.y - radius - SuiteSpacing.xs))
+            path.addLine(to: CGPoint(x: center.x, y: center.y + radius + SuiteSpacing.xs))
+        }
+        ZStack {
+            mark.stroke(SuiteColor.overlayInk, lineWidth: 3)
+            mark.stroke(SuiteColor.overlayPaper, lineWidth: 1)
+        }
+        .allowsHitTesting(false)
+        .accessibilityHidden(true)
     }
 }
 

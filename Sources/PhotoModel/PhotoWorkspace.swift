@@ -20,7 +20,7 @@ import CoreRaster
 
 /// The tools on Photo's tool rail.
 public enum PhotoTool: String, CaseIterable, Sendable {
-    case move, marquee, brush, eraser, crop
+    case move, marquee, brush, eraser, clone, crop
 
     /// Why the rail shows this tool disabled, as its tooltip; nil once the
     /// tool works. Every tool works: the canvas sends its drags to `drag`.

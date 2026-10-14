@@ -107,6 +107,9 @@ struct PhotoWindow: View {
         case .undo: model.undo()
         case .redo: model.redo()
         case .tool(let tool): model.selectTool(tool)
+        case .drag(_, let to) where model.tool == .clone && NSEvent.modifierFlags.contains(.option):
+            // Option-click with Clone samples the source instead of cloning.
+            model.setCloneSource(at: Mask.Point(x: to.x, y: to.y))
         case .drag(let from, let to):
             // Every pointer sample while drawing, not AppKit's merged ones; the drag's end turns merging back on.
             NSEvent.isMouseCoalescingEnabled = false

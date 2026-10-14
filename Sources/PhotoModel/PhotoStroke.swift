@@ -20,6 +20,9 @@
 //                  selection; a click deselects.
 //   crop           the same rectangle is the pending crop (Apply Crop commits
 //                  it); a click drops it.
+//   clone          clones from the sampled source (PhotoRetouch) along the
+//                  drag with the brush's size, hardness and opacity ("Clone");
+//                  with no source sampled it changes nothing.
 //   move           shifts the selected layer by the drag, in whole pixels
 //                  ("Move Layer").
 //
@@ -33,7 +36,7 @@ import CoreRaster
 struct PhotoStroke: Sendable, Equatable {
     var tool: PhotoTool
     var start: Mask.Point
-    /// Brush and eraser: the layer; by tile index, each painted tile as it
+    /// Brush, eraser and clone: the layer; by tile index, each painted tile as it
     /// was before the stroke and its pixels' coverage so far (row-major, the
     /// tile's size); and the last four pointer samples and their pressures.
     var layerID: PhotoLayer.ID?
@@ -65,6 +68,8 @@ extension PhotoWorkspace {
             selection = Self.dragRect(current.start, end, in: canvas)
         case .crop:
             pendingCrop = Self.dragRect(current.start, end, in: canvas)
+        case .clone:
+            cloneDrag(&current, to: end)
         case .move:
             if begun { current.layersBefore = layers }
             moveSelectedLayer(current, to: end)
@@ -82,6 +87,8 @@ extension PhotoWorkspace {
             paint(&done, adding: nil, pressure: 1)
             guard let id = done.layerID, !done.before.isEmpty else { return }
             record(.tiles(layer: id, done.before), named: done.tool == .brush ? "Paint" : "Erase")
+        case .clone:
+            recordClone(done)
         case .marquee, .crop:
             break
         case .move:

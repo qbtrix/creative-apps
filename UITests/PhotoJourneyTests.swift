@@ -7,7 +7,8 @@
 // testTier1UndoRedoZoomPan and testTier1Layers. Edits are checked by their
 // undo names, sizes and layer counts by the panel header, values XCUITest
 // can't read by the canvas pixels; tier-1 files are named tools.png, a name
-// the audit knows. Another journey edits with every other tool,
+// the audit knows. Another journey edits with every other tool (Clone
+// samples with an Option-click and drags one "Undo Clone" step),
 // one straightens the image by 3 degrees from the Image menu, and the Curves
 // journey drags the curve up and nudges it with an arrow key, each one
 // "Undo Curves" step that changes the canvas. Curves, Levels and
@@ -233,6 +234,15 @@ final class PhotoJourneyTests: XCTestCase {
         }
         XCTAssertFalse(photo.element("photo.tool.color").exists, "the eraser shows a color")
         photo.drag(on: "suite.canvas", from: CGVector(dx: 0.1, dy: 0.8), to: CGVector(dx: 0.5, dy: 0.5), step: "erased")
+
+        // Clone (#647): Option-click the sun to sample it, then drag to copy it into the sky.
+        tools["Clone"].click()
+        let canvas = photo.element("suite.canvas")
+        XCUIElement.perform(withKeyModifiers: .option) {
+            canvas.coordinate(withNormalizedOffset: CGVector(dx: 0.7, dy: 0.38)).click()
+        }
+        photo.drag(on: "suite.canvas", from: CGVector(dx: 0.3, dy: 0.3), to: CGVector(dx: 0.35, dy: 0.35), step: "cloned")
+        XCTAssert(photo.app.buttons["Undo Clone"].waitForExistence(timeout: 5), "the clone drag made no Clone step")
 
         tools["Marquee"].click()
         photo.drag(on: "suite.canvas", from: CGVector(dx: 0.55, dy: 0.15), to: CGVector(dx: 0.85, dy: 0.45), step: "selected")

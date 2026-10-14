@@ -1,5 +1,7 @@
-// PhotoRetouch.swift: the clone stamp (#422, the model's first slice; the
-// tool rail and Heal come later). `setCloneSource(at:)` samples a source
+// PhotoRetouch.swift: the clone stamp (#422; Heal comes later). The Clone
+// tool's canvas Option-click calls `setCloneSource(at:)`, its drags clone
+// through `drag` (PhotoStroke), and `clone(along:size:)` is one whole stroke
+// at once. `setCloneSource(at:)` samples a source
 // point on the canvas. The first clone stroke after that fixes the offset from
 // where it starts to the source, in whole pixels, and later strokes keep it
 // until the source is sampled again. A stroke lays round dabs of the given
@@ -34,8 +36,9 @@ extension PhotoWorkspace {
     /// Samples the clone source at `point` (canvas pixels) and forgets the
     /// offset, so the next stroke sets it again. Ignored with no image open or
     /// a point off the canvas.
+    /// Also ignored while a clone drag is under way, so its offset holds.
     public mutating func setCloneSource(at point: Mask.Point) {
-        guard let canvas, point.x.isFinite, point.y.isFinite, point.x >= 0, point.y >= 0,
+        guard stroke?.tool != .clone, let canvas, point.x.isFinite, point.y.isFinite, point.x >= 0, point.y >= 0,
             point.x < Double(canvas.width), point.y < Double(canvas.height)
         else { return }
         cloneSource = CloneSource(point: point, offset: nil)
@@ -47,30 +50,53 @@ extension PhotoWorkspace {
     /// a size that isn't finite; the size clamps to the brush's range. Records
     /// nothing when no pixel changed.
     public mutating func clone(along points: [Mask.Point], size: Double) {
+        guard let first = points.first else { return }
+        var current = PhotoStroke(tool: .clone, start: first, layerID: selectedLayerID)
+        cloneDabs(&current, along: points, size: size)
+        recordClone(current)
+    }
+
+    /// The clone tool's drag: clones from the last pointer sample to `end`
+    /// with the brush's size, so the paint shows while the pointer moves;
+    /// `endDrag` records the whole drag as one "Clone".
+    mutating func cloneDrag(_ current: inout PhotoStroke, to end: Mask.Point) {
+        let from = current.samples.last?.point ?? current.start
+        current.samples = [PhotoStroke.Sample(point: end, pressure: 1)]
+        cloneDabs(&current, along: [from, end], size: brushOptions.size)
+    }
+
+    /// Records a finished clone stroke as one undo step, if it changed a pixel.
+    mutating func recordClone(_ done: PhotoStroke) {
+        guard let id = done.layerID, !done.before.isEmpty else { return }
+        record(.tiles(layer: id, done.before), named: "Clone")
+    }
+
+    /// Lays clone dabs along `points` on the stroke's layer, keeping each
+    /// changed tile as it was before the stroke in `current.before`. The
+    /// first dabs after sampling fix the source offset.
+    private mutating func cloneDabs(_ current: inout PhotoStroke, along points: [Mask.Point], size: Double) {
         guard let source = cloneSource, let first = points.first, size.isFinite,
             points.allSatisfy({ $0.x.isFinite && $0.y.isFinite && abs($0.x) < 1e7 && abs($0.y) < 1e7 }),
-            let id = selectedLayerID, let at = index(of: id), var tiled = pixels.removeValue(forKey: id)
+            let id = current.layerID, let at = index(of: id), var tiled = pixels.removeValue(forKey: id)
         else { return }
         let offset =
             source.offset ?? (Int((source.point.x - first.x).rounded()), Int((source.point.y - first.y).rounded()))
         cloneSource = CloneSource(point: source.point, offset: offset)
         let diameter = min(max(size, ToolOptions.sizeRange.lowerBound), ToolOptions.sizeRange.upperBound)
         let layer = layers[at]
-        var before: [Int: PixelBuffer] = [:], coverage: [Int: [Float]] = [:]
         var touched = PixelRect(x: 0, y: 0, width: 0, height: 0)
         for center in Self.dabCenters(points, spacing: max(diameter / 4, 1)) {
             let dab = Mask.Point(x: center.x - Double(layer.offsetX), y: center.y - Double(layer.offsetY))
             // Every index is inside the layer and every value finite, so a dab can't throw.
             if let area = try? cloneDab(
-                at: dab, radius: diameter / 2, offset: offset, on: &tiled, before: &before, coverage: &coverage)
+                at: dab, radius: diameter / 2, offset: offset, on: &tiled, before: &current.before,
+                coverage: &current.coverage)
             {
                 touched = touched.union(area.offsetBy(layer.offsetX, layer.offsetY))
             }
         }
         pixels[id] = tiled
-        guard !before.isEmpty else { return }
-        record(.tiles(layer: id, before), named: "Clone")
-        touch(.region(touched))
+        if !touched.isEmpty { touch(.region(touched)) }
     }
 
     /// `points` with dabs filled in so no two in a row are more than

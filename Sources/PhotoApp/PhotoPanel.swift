@@ -50,7 +50,8 @@ struct PhotoPanel: View {
 }
 
 /// The active tool's options: size, hardness and opacity for the brush (plus
-/// its color) and the eraser, each tool's own; what to do with a selection;
+/// its color) and the eraser, each tool's own, and the brush's for Clone with
+/// how to use it; what to do with a selection;
 /// applying a crop.
 struct ToolOptionsSection: View {
     let model: PhotoWorkspace
@@ -60,7 +61,13 @@ struct ToolOptionsSection: View {
         let options = model.toolOptions
         InspectorSection("Tool Options") {
             switch model.tool {
-            case .brush, .eraser:
+            case .brush, .eraser, .clone:
+                if model.tool == .clone {
+                    hint(
+                        model.cloneSource == nil
+                            ? "Option-click the image to set the source, then drag to clone it onto the selected layer."
+                            : "Drag to clone from the source. Option-click to set a new one.")
+                }
                 InspectorSliderRow("Size", value: options.size, in: ToolOptions.sizeRange, unit: "px", decimals: 0) {
                     perform(.toolOption(.size($0)))
                 }
