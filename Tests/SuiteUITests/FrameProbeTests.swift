@@ -99,6 +99,27 @@ import Testing
         #expect(try JSONDecoder().decode(ProbeDocument.self, from: Data(full.json(refreshInterval: 1.0 / 60).utf8)) == document)
     }
 
+    /// The summary's percentiles equal a sort-and-pick reference, with small lates and with outliers
+    /// thousands of frames late, at every count from 1 sample up.
+    @Test func summaryMatchesSortedReference() {
+        let r = 1.0 / 60
+        for (n, outlier) in [(1, 0), (2, 0), (59, 0), (100, 0), (997, 0), (100, 50_000), (5_000, 9_000)] {
+            var probe = SuiteFrameProbe()
+            var lates: [Int] = []
+            for i in 0..<n {
+                let late = outlier > 0 && i % 10 == 3 ? outlier + i : (i * 37) % 23
+                lates.append(late)
+                let event = Double(i)
+                probe.record(ProbeSample(series: "drag", eventTime: event, shownAt: event + (Double(late) + 0.5) * r))
+            }
+            lates.sort()
+            func rank(_ p: Double) -> Int { lates[min(max(Int((p * Double(n)).rounded(.up)), 1), n) - 1] }
+            let summary = probe.summary(of: "drag", refreshInterval: r)
+            #expect(summary.count == n && summary.p50FramesLate == rank(0.5) && summary.p95FramesLate == rank(0.95),
+                    "\(n) samples, outlier \(outlier)")
+        }
+    }
+
     // QB-S16: summary over 10,000 samples, median and p95 of 100 runs ≤ 20 ms (the debug gate; target 2 ms).
     @Test func summaryWithinBudget() {
         var probe = SuiteFrameProbe()

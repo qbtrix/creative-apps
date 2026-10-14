@@ -1,6 +1,7 @@
 // FrameProbe.swift: SuiteFrameProbe, the live FrameProbeRecording (UC17,
 // QH-1, #330). It keeps input samples, drawn frames and marks, and turns them
-// into frames late (p50, p95 by nearest rank) and frame intervals (p95 in
+// into frames late (p50, p95 by nearest rank, counted per value rather than
+// sorted, so 10,000 samples summarize in budget) and frame intervals (p95 in
 // refreshes, dropped refreshes, jitter). A non-finite time is dropped when
 // recorded, a refresh interval that is not a positive number gives
 // `valid: false` and never divides, and a disabled probe records nothing.
@@ -69,10 +70,38 @@ public struct SuiteFrameProbe: FrameProbeRecording {
         }
         var lates: [Int] = []
         lates.reserveCapacity(samples.count)
-        for sample in samples where sample.series == series { lates.append(Self.framesLate(sample, refreshInterval: r)) }
-        lates.sort()
-        return ProbeSummary(count: lates.count, p50FramesLate: Self.nearestRank(lates, 0.5) ?? 0,
-                            p95FramesLate: Self.nearestRank(lates, 0.95) ?? 0, valid: lates.count >= Self.minimumCount)
+        var most = 0
+        for sample in samples where sample.series == series {
+            let late = Self.framesLate(sample, refreshInterval: r)
+            lates.append(late)
+            if late > most { most = late }
+        }
+        let ranks = Self.nearestRanks(lates, most: most, 0.5, 0.95)
+        return ProbeSummary(count: lates.count, p50FramesLate: ranks.0, p95FramesLate: ranks.1,
+                            valid: lates.count >= Self.minimumCount)
+    }
+
+    /// Two nearest-rank percentiles (p ≤ q) of non-negative values whose largest is `most`, without sorting:
+    /// a count per value, walked once. Falls back to one sort when `most` is too large to count.
+    static func nearestRanks(_ values: [Int], most: Int, _ p: Double, _ q: Double) -> (Int, Int) {
+        guard !values.isEmpty else { return (0, 0) }
+        let rankP = min(max(Int((p * Double(values.count)).rounded(.up)), 1), values.count)
+        let rankQ = min(max(Int((q * Double(values.count)).rounded(.up)), 1), values.count)
+        guard most < max(values.count, 4096) else {
+            let sorted = values.sorted()
+            return (sorted[rankP - 1], sorted[rankQ - 1])
+        }
+        var counts = [Int](repeating: 0, count: most + 1)
+        for value in values { counts[value] += 1 }
+        var seen = 0, atP = 0, value = 0
+        while value <= most {
+            let before = seen
+            seen += counts[value]
+            if before < rankP, seen >= rankP { atP = value }
+            if seen >= rankQ { return (atP, value) }
+            value += 1
+        }
+        return (atP, most)
     }
 
     public func intervals(of series: String, refreshInterval r: Double) -> FrameIntervalSummary {
