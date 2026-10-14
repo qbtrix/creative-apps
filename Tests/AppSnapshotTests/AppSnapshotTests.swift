@@ -122,7 +122,7 @@ private struct Gallery: View {
     }
 }
 
-private extension ColorScheme {
+extension ColorScheme {
     var name: String { self == .dark ? "dark" : "light" }
 }
 
