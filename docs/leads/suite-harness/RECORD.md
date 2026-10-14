@@ -2,9 +2,9 @@
 
 Issue: #778 · Packet: docs/blueprints/suiteui/features/suite-harness.md (on branch `docs/suiteui-feature-packets` until the packet PR merges)
 Run: act-1a13b7e0908-fybz · Session: claude/suite-harness-lead-wwxtgn · Started: 2026-10-14T18:00Z
-Stage: 2 plan
+Stage: 3 wave 1
 Base: 52928d1dbbdd72b849f7fdb6363991f35b1adbeb
-Next: run wave 1 (SH-1, SH-2) with build-wave.js
+Next: wait for wave 1 PRs (SH-1, SH-2), then lane merge; workflow run wf_14cd7949-cae
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |

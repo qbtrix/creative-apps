@@ -2,3 +2,4 @@ utc	stage	event	ref	note
 2026-10-14T18:00Z	0	stage-start	#778	base 52928d1
 2026-10-14T18:05Z	1	stage-end	#778	packet read from docs/suiteui-feature-packets
 2026-10-14T18:06Z	2	stage-end	#778	6 waves planned
+2026-10-14T18:15Z	3	stage-start	wave1	SH-1, SH-2 builders launched (wf_14cd7949-cae)
