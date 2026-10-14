@@ -39,8 +39,8 @@ public struct FlareServices: Sendable {
             easing: FakeEasing(),
             onion: FakeOnion(),
             library: FakeLibrary(),
-            machines: NotBuilt(reason: "Not built yet (LM-0c2)."),
-            preview: NotBuilt(reason: "Not built yet (LM-0c2)."),
+            machines: FakeMachines(),
+            preview: FakePreview(),
             export: NotBuilt(reason: "Not built yet (LM-0c3)."),
             assist: NotBuilt(reason: "Not built yet (LM-0c4)."),
             isPreview: true)

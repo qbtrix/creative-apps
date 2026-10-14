@@ -7,7 +7,8 @@ public enum FlareFixtures {
     public static let empty = Document(scenes: [FlareScene(id: "scene-1", name: "Scene 1")])
 
     /// Every fixture by its `-FlareFixture` name, in menu order.
-    public static let all: [(name: String, document: Document)] = [("empty", empty), ("bounce", bounce), ("character", character)]
+    public static let all: [(name: String, document: Document)] = [("empty", empty), ("bounce", bounce), ("character", character), ("button", button),
+                                                                    ("button with machine", buttonWithMachine)]
 
     /// The fixture called `name`, or nil.
     public static func named(_ name: String) -> Document? {
