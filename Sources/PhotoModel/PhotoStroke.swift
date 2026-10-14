@@ -22,6 +22,8 @@
 //                  drag paints nothing; otherwise clone dabs (PhotoRetouch)
 //                  at the brush's size along the pointer samples on the
 //                  selected layer, one undo step ("Clone").
+//   heal           the same as clone, but each dab takes its tone from where
+//                  it lands (PhotoRetouch), one undo step ("Heal").
 //   marquee        the rectangle from the press to the pointer is the
 //                  selection; a click deselects.
 //   crop           the same rectangle is the pending crop (Apply Crop commits
@@ -70,7 +72,7 @@ extension PhotoWorkspace {
         case .brush, .eraser:
             if begun { paint(&current, adding: start, pressure: pressure) }
             paint(&current, adding: end, pressure: pressure)
-        case .clone:
+        case .clone, .heal:
             if begun, sampling || cloneSource == nil {
                 setCloneSource(at: start)
                 current.layerID = nil
@@ -79,7 +81,7 @@ extension PhotoWorkspace {
                 current.samples = [PhotoStroke.Sample(point: end, pressure: 1)]
                 stamp(
                     along: [from, end], size: brushOptions.size, layer: id, before: &current.before,
-                    coverage: &current.coverage)
+                    coverage: &current.coverage, healing: current.tool == .heal)
             }
         case .marquee:
             selection = Self.dragRect(current.start, end, in: canvas)
@@ -111,9 +113,9 @@ extension PhotoWorkspace {
             paint(&done, adding: nil, pressure: 1)
             guard let id = done.layerID, !done.before.isEmpty else { return }
             record(.tiles(layer: id, done.before), named: done.tool == .brush ? "Paint" : "Erase")
-        case .clone:
+        case .clone, .heal:
             guard let id = done.layerID, !done.before.isEmpty else { return }
-            record(.tiles(layer: id, done.before), named: "Clone")
+            record(.tiles(layer: id, done.before), named: done.tool == .heal ? "Heal" : "Clone")
         case .marquee, .crop:
             break
         case .move:

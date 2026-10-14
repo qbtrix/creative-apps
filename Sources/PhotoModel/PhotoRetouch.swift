@@ -1,5 +1,5 @@
-// PhotoRetouch.swift: the clone stamp (#422; Heal comes later). The Clone
-// tool drives it through `drag` (PhotoStroke): Option-click, or a first drag
+// PhotoRetouch.swift: the clone stamp and heal (#422). The Clone and Heal
+// tools drive it through `drag` (PhotoStroke): Option-click, or a first drag
 // with no source, samples the source; a drag after that clones. `setCloneSource(at:)` samples a source
 // point on the canvas. The first clone stroke after that fixes the offset from
 // where it starts to the source, in whole pixels, and later strokes keep it
@@ -11,10 +11,14 @@
 // before the stroke, so a stroke never re-clones its own paint; a source
 // pixel off the layer leaves the pixel alone. One stroke is one undo step
 // ("Clone"), kept as the tiles it changed. Sampling a source is not a
-// document edit, so it is not undoable.
+// document edit, so it is not undoable. Heal is the same stroke, except each
+// dab shifts the source pixels by the mean color under the dab minus the mean
+// at the source (both before the stroke), so the patch keeps the source's
+// texture and takes its tone from where it lands ("Heal").
 //
-// ponytail: the copy runs pixel by pixel here, like the brush's capsules;
-// CoreRaster's clone through a mask (creative-core #232) replaces it once the
+// ponytail: the copy runs pixel by pixel here, like the brush's capsules,
+// and Heal's tone match is one mean shift per dab, not a blend across the
+// patch; CoreRaster's clone and heal (creative-core #232) replace them once the
 // pinned core has it. Linux-safe.
 import CoreRaster
 
@@ -58,11 +62,12 @@ extension PhotoWorkspace {
     /// Lays clone dabs along `points` on layer `id`, fixing the source offset
     /// on the first stroke. `before` keeps each tile it changed as it was
     /// before the stroke and `coverage` its pixels' coverage, so a stroke
-    /// painted over several calls (a drag) reads and blends like one. Records
-    /// no undo step.
+    /// painted over several calls (a drag) reads and blends like one.
+    /// `healing` matches each dab's tone to where it lands. Records no undo
+    /// step.
     mutating func stamp(
         along points: [Mask.Point], size: Double, layer id: PhotoLayer.ID, before: inout [Int: PixelBuffer],
-        coverage: inout [Int: [Float]]
+        coverage: inout [Int: [Float]], healing: Bool = false
     ) {
         guard let source = cloneSource, let first = points.first, size.isFinite,
             points.allSatisfy({ $0.x.isFinite && $0.y.isFinite && abs($0.x) < 1e7 && abs($0.y) < 1e7 }),
@@ -78,7 +83,8 @@ extension PhotoWorkspace {
             let dab = Mask.Point(x: center.x - Double(layer.offsetX), y: center.y - Double(layer.offsetY))
             // Every index is inside the layer and every value finite, so a dab can't throw.
             if let area = try? cloneDab(
-                at: dab, radius: diameter / 2, offset: offset, on: &tiled, before: &before, coverage: &coverage)
+                at: dab, radius: diameter / 2, offset: offset, healing: healing, on: &tiled, before: &before,
+                coverage: &coverage)
             {
                 touched = touched.union(area.offsetBy(layer.offsetX, layer.offsetY))
             }
@@ -103,10 +109,11 @@ extension PhotoWorkspace {
         return centers
     }
 
-    /// One round dab at `center` (layer pixels) copying from `offset` away.
-    /// Returns the layer region it changed, or nil when it changed nothing.
+    /// One round dab at `center` (layer pixels) copying from `offset` away,
+    /// shifted to this spot's tone when `healing`. Returns the layer region it
+    /// changed, or nil when it changed nothing.
     private func cloneDab(
-        at center: Mask.Point, radius: Double, offset: (x: Int, y: Int), on tiled: inout TiledPixels,
+        at center: Mask.Point, radius: Double, offset: (x: Int, y: Int), healing: Bool, on tiled: inout TiledPixels,
         before: inout [Int: PixelBuffer], coverage: inout [Int: [Float]]
     ) throws -> PixelRect? {
         let box = PixelRect(
@@ -119,6 +126,7 @@ extension PhotoWorkspace {
         let opacity = Float(brushOptions.opacityPercent / 100)
         // Coverage falls from 1 to 0 over the outer (1 - hardness) of the radius, never under a pixel.
         let softness = max((1 - hardness) * radius, min(1, radius))
+        let shift = healing ? try toneShift(over: area, offset: offset, in: tiled, before: before) : (r: 0, g: 0, b: 0)
         var changed = PixelRect(x: 0, y: 0, width: 0, height: 0)
         for i in tiled.tileIndices(in: area) where tiled.tiles.indices.contains(i) {
             let rect = tiled.tileRect(i)
@@ -135,8 +143,12 @@ extension PhotoWorkspace {
                     let c = Float(t * t * (3 - 2 * t))
                     let j = (y - rect.y) * rect.width + (x - rect.x)
                     guard c > cover[j],
-                        let s = try sourcePixel(x: x + offset.x, y: y + offset.y, in: tiled, before: before)
+                        let raw = try sourcePixel(x: x + offset.x, y: y + offset.y, in: tiled, before: before)
                     else { continue }
+                    // Heal: the shift is premultiplied, so it scales with the source's alpha; channels stay in 0...alpha.
+                    let s = healing ? RGBA(
+                        r: min(max(raw.r + shift.r * raw.a, 0), raw.a), g: min(max(raw.g + shift.g * raw.a, 0), raw.a),
+                        b: min(max(raw.b + shift.b * raw.a, 0), raw.a), a: raw.a) : raw
                     cover[j] = c
                     let a = c * opacity, keep = 1 - a
                     let p = try base.pixel(x: x - rect.x, y: y - rect.y)
@@ -152,6 +164,25 @@ extension PhotoWorkspace {
             if !painted, !saved { before[i] = nil }
         }
         return changed.isEmpty ? nil : changed
+    }
+
+    /// Heal's color shift for a dab over `area` (layer pixels): the mean
+    /// before the stroke there minus the mean at `offset`, over the pixels
+    /// whose source is on the layer.
+    private func toneShift(
+        over area: PixelRect, offset: (x: Int, y: Int), in tiled: TiledPixels, before: [Int: PixelBuffer]
+    ) throws -> (r: Float, g: Float, b: Float) {
+        var sum: (r: Float, g: Float, b: Float) = (0, 0, 0), count: Float = 0
+        for y in area.y..<area.maxY {
+            for x in area.x..<area.maxX {
+                guard let here = try sourcePixel(x: x, y: y, in: tiled, before: before),
+                    let there = try sourcePixel(x: x + offset.x, y: y + offset.y, in: tiled, before: before)
+                else { continue }
+                sum = (sum.r + here.r - there.r, sum.g + here.g - there.g, sum.b + here.b - there.b)
+                count += 1
+            }
+        }
+        return count > 0 ? (sum.r / count, sum.g / count, sum.b / count) : (0, 0, 0)
     }
 
     /// The layer pixel at (`x`, `y`) as it was before the stroke; nil off the layer.
