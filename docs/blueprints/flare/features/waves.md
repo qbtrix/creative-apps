@@ -33,7 +33,8 @@ lists its tasks, owned files and acceptance tests.
   `Fakes/FlareFixtures.swift`, the export fakes, `ExportScan.swift`,
   `FlareExport.swift` and `docs/c4/model.json`. The
   three live features own only their own files under `Sources/FlareModel/Live/`
-  and their own test files. Nothing is shared.
+  and their own test files, plus `Fakes/FakeShapes.swift` (live-stage ST-7,
+  which moves its box math into `Live/`). Nothing is shared.
 
 ## Not in a packet yet (later features)
 

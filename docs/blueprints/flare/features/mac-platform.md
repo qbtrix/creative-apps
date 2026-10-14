@@ -83,7 +83,7 @@ public func autosaveDue(lastEdit: Double?, now: Double) -> Bool
 /// The encoded document while dirty, nil when clean or when there is no document.
 public func recoveryData() -> Data?
 /// Lands a recovered document as unsaved work: `load`, then no saved document and no file name,
-/// so `isDirty` is true and the title reads "Untitled Animation"; `recent` is untouched.
+/// so `isDirty` is true and `title` reads "Untitled"; `recent` is untouched.
 public mutating func restoreRecovery(_ document: Document)
 ```
 
@@ -175,7 +175,7 @@ the packet splits the tests per task and the issue body says so.
 |---|---|---|
 | MP-1 | `FlareRecentTests`: `noteRecent` A, B, then A gives `[A, B]`; 11 distinct paths keep 10 with the oldest gone; `/x/a.flare` and `/y/a.flare` stay two entries; `clearRecent` empties it; a new document leaves `recent` as it was | the list is not most-recent-first, grows past 10, merges two folders' files, or a new document clears it |
 | MP-2 | `FlareAutosaveDueTests`: an edit at 0 is not due at 29.9 and due at 30.0; clean is never due; after `didSave` not due; undo back to the saved document not due; NaN times not due; `recoveryData()` decodes to `document`, nil when clean | due early, due while clean, or the bytes don't round-trip |
-| MP-3 | `FlareRecoveryRestoreTests`: `restoreRecovery(bounce)` gives `document == bounce`, `isDirty == true`, `fileName == nil`, the untitled title, and `recent` unchanged; `canUndo` is false. `MacPlatformJourneyTests` runs steps 1–3 on `bounce` | the restore comes back clean or named, or touches Open Recent |
+| MP-3 | `FlareRecoveryRestoreTests`: `restoreRecovery(bounce)` gives `document == bounce`, `isDirty == true`, `fileName == nil`, `title == "Untitled"`, and `recent` unchanged; `canUndo` is false. `MacPlatformJourneyTests` runs steps 1–3 on `bounce` | the restore comes back clean or named, or touches Open Recent |
 | MP-4 | `StagePathTests`: for an ellipse built by hand as 4 cubics and a pen path with 2 cubics and 1 line, `CGPath.applyWithBlock` counts exactly 4 and 2 `addCurveToPoint` and 1 `addLineToPoint`; a translate-by-(10, 20) matrix moves `boundingBoxOfPath` by (10, 20); `cgColor` of (1, 0.5, 0, 0.25) has those sRGB components; a NaN point is skipped | a cubic is flattened, an element is lost, the matrix is ignored or a color is converted in the wrong space |
 | MP-5 | `PlaybackDriverTests`: ticks at 10.0, 10.0 + 1/60, 10.0 + 2/60 give nil, 1/60, 1/60 (exact to 1e-12) whatever the wall clock; `reset()` then a tick 5 s later gives nil, not 5; a non-increasing timestamp gives nil; `stop()` invalidates the link | elapsed comes from wall time, a pause gap is counted, or the link keeps running |
 | MP-6 | `AutosaveTests` (temp folder): a due model writes the recovery file once; a clean model writes nothing; the write is atomic (no partial file after a thrown write); `remove()` after a clean save leaves no file; a quit-time write happens when dirty | no write when due, a write when clean, or the file outlives a clean save |

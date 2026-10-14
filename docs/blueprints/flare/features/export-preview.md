@@ -110,6 +110,7 @@ workspace (EP-5):
   finishExport(.success(r)) -> .finished(r); (.failure(CancellationError)) -> .idle
   finishExport(.failure(e)) -> .failed(text), text = (e as? LocalizedError)?.errorDescription
                                ?? "The export didn't finish. Try again."   # never "\(e)", which prints case names
+                               # LocalizedError is in FoundationEssentials (checked with swift 6.3.3 on Linux)
 ```
 
 The app runs `services.export.export(...)` in a task and reports back through

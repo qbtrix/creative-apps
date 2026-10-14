@@ -34,6 +34,8 @@ own extension file, and the last task of each chain (KY-4, KY-7) adds
 `extension LiveProperties: PropertyAnimating {}` or
 `extension LiveKeyframes: KeyframeEditing {}` in its own file.
 
+**Reading the fakes' tables.** `LiveProperties` reuses `FakeProperties.rows` and its key-state rule as pure static reads. That is allowed: IN-9's test checks that no member of `FlareServices.live` *is* a `Fake*` type, and a live type must never create a fake or run a fake's engine code. (live-stage's ST-7 moves the box math for exactly that reason: it creates a `FakeStage`.)
+
 **Counting commands.** `CommandEngine`'s undo stack is internal to
 FlareCore, so a test can't count the commands inside one entry. "One entry"
 is tested as: after the gesture one `undo()` restores the document exactly
@@ -129,7 +131,7 @@ toggleAnimated(prop, owner, id, frame, lastFrame):               # KY-3
 toggleKey: key at frame ? RemoveKeyframe : SetKeyframe(sampled value)
 
 setFill / setStroke(items):                                      # KY-4
-  shapes = items expanded (layer -> all its shapes; direct item -> that shape)
+  shapes = the `.shape(i)` addresses the caller passes (the workspace sends one per shape of a selected layer)
   group("Set Fill" | "Set Stroke") { SetShapeFill | SetShapeStroke per shape }
 
 rows(doc, owner):  per layer: union of track key frames, segments between them, easings by start frame   # KY-5
@@ -148,7 +150,7 @@ pass`, `Head:`. KY-9 also carries `feature-done`.
 | id | issue | what | owned files | depends on |
 |---|---|---|---|---|
 | KY-1 | #13 (part) | `LiveProperties.properties`: values, key states, Mixed, owner-aware reads | `Sources/FlareModel/Live/LiveProperties.swift`, `Tests/FlareModelTests/LivePropertiesTests.swift` | – |
-| KY-2 | #13 (part) | `setValue` by section 2's rule, clamped, one merged command per scrub | `Sources/FlareModel/Live/LiveProperties.swift`, `Tests/FlareModelTests/LivePropertiesSetTests.swift` | KY-1, creative-core#171, creative-core#219 |
+| KY-2 | #13 (part) | `setValue` by section 2's rule (no clamp; NaN refused), one merged command per scrub | `Sources/FlareModel/Live/LiveProperties.swift`, `Tests/FlareModelTests/LivePropertiesSetTests.swift` | KY-1, creative-core#171, creative-core#219 |
 | KY-3 | #13 (part) | Stopwatch and keyframe button: `toggleAnimated`, `toggleKey` | `Sources/FlareModel/Live/LiveProperties+Keys.swift`, `Tests/FlareModelTests/LivePropertiesKeysTests.swift` | KY-2 |
 | KY-4 | #13 (closes) | `setFill` and `setStroke`, and the `PropertyAnimating` conformance | `Sources/FlareModel/Live/LiveProperties+Paint.swift`, `Tests/FlareModelTests/LivePropertiesPaintTests.swift` | KY-3, creative-core#216 |
 | KY-5 | #358 (part) | `LiveKeyframes.rows` and `labels` | `Sources/FlareModel/Live/LiveKeyframes.swift`, `Tests/FlareModelTests/LiveKeyframesTests.swift` | – |
@@ -171,7 +173,7 @@ is owned by another feature.
 | KY-3 | `LivePropertiesKeysTests`: the stopwatch on Shadow X at 0 gives keys at 0 and 47 named "Undo Animate X"; off again leaves one key at 0 with the value at the playhead; `toggleKey` adds then removes the key at 20 (one entry each) | the stopwatch leaves one diamond, or off loses the value |
 | KY-4 | `LivePropertiesPaintTests`: fill `FF3B30` on Ball sets every shape in one "Undo Set Fill"; stroke width 4, cap and join Round each one entry and one undo restores only the join; a direct-selected item's fill changes only that shape; width -1 throws | a second entry, a shape left out, or a bad stroke passes |
 | KY-5 | `LiveKeyframesTests`: equals `FakeKeyframes.rows` and `.labels` on `bounce` and `character`; inside "wave" the hand's row lists keys 0, 12, 23 | a row, key, segment or easing differs from the fake |
-| KY-6 | `LiveKeyframesEditTests`: Ball's 24 → 28 is one "Undo Move Keyframe"; 24 onto 36 throws and the document and undo count are unchanged; past frame 47 throws; 50 coalesced one-frame steps are one entry (one `undo()` restores the key); deleting 12 is one "Undo Delete Keyframe"; a symbol key moves and undoes exactly | a collision lands, a drag leaves several entries, or the owner path breaks |
+| KY-6 | `LiveKeyframesEditTests`: Ball's 24 → 28 is one "Undo Move Keyframe"; 24 onto 36 throws and the document, `canUndo` and `undoActionName` are unchanged; past frame 47 throws; 50 coalesced one-frame steps are one entry (one `undo()` restores the key); deleting 12 is one "Undo Delete Keyframe"; a symbol key moves and undoes exactly | a collision lands, a drag leaves several entries, or the owner path breaks |
 | KY-7 | `LiveKeyframesFramesTests`: two frames inserted at 10 move 28 to 30; a key pushed past 47 grows the scene in the same entry; one removed moves it to 29; on every layer a label at 29 moves with it; `setLabel("hit", 29)` then `nil` removes it; each step is one entry | keys, labels or the scene length are wrong, or a step is two entries |
 | KY-8 | `LiveEasingTests` (extended): Ease Out on the hand's first segment inside "wave" is one entry and undoes exactly; the existing scene-layer tests still pass; a symbol layer that doesn't exist throws `layerNotFound` | the symbol owner still throws, or scene easing changes |
 | KY-9 | `LiveKeysJourneyTests.testMoveAndKey`, `.testInspectorKeysTransform`, `.testFillAndStroke`, `.testRetimeDeleteInsertAndLabel`, `.testEasingInsideASymbol` walk steps 1–7 with a real `CommandEngine` | any step's values or undo names differ from J6–J8, J11 and J12 |
