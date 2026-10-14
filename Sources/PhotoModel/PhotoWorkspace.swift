@@ -85,6 +85,9 @@ public struct PhotoWorkspace: Sendable {
         layers.first { $0.id == selectedLayerID }
     }
 
+    /// Whether a drag is under way, from its first `drag` to `endDrag`.
+    public var isDragging: Bool { stroke != nil }
+
     /// Whether Delete Layer can run: the last layer can't be removed.
     public var canRemoveLayer: Bool { layers.count > 1 }
 
@@ -253,6 +256,18 @@ public struct PhotoWorkspace: Sendable {
         if !adjustmentsOnly { contentRevision += 1 }
         damageLog.append((revision, damage))
         if damageLog.count > Self.damageLogLimit { damageLog.removeFirst(damageLog.count - Self.damageLogLimit) }
+    }
+
+    /// Folds every revision after `start` into one, `start + 1`, whose damage
+    /// covers them all: everything, when the log already dropped some of them.
+    mutating func foldRevisions(since start: Int) {
+        guard revision > start + 1 else { return }
+        let folded = damageLog.filter { $0.revision > start }
+        let damage =
+            folded.count == revision - start ? folded.reduce(PhotoDamage.none) { $0.union($1.damage) } : .all
+        damageLog.removeLast(folded.count)
+        revision = start + 1
+        damageLog.append((revision, damage))
     }
 
     // MARK: Helpers
