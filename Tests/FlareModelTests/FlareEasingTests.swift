@@ -152,4 +152,9 @@ struct FlareEasingTests {
         #expect(workspace.currentEasing == .linear)
         #expect(workspace.canUndo == false)
     }
+
+    @Test func lockedLayerGivesAnUnavailableReason() {
+        #expect(workspace(locked: true).easingUnavailableReason == "Unlock Ball to change its easing.")
+        #expect(workspace().easingUnavailableReason == nil)
+    }
 }

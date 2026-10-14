@@ -13,14 +13,16 @@ public struct FakeEasingEditing: EasingEditing, Equatable {
 
     public let easingSegments: [EasingSegment]
     public private(set) var selectedEasingSegment: EasingSegment?
+    public let easingUnavailableReason: String?
     private var easings: [EasingSegment: Easing]
     private var history: [Change] = []
     /// The handle being dragged; moves of it fold into one undo step.
     private var dragging: EasingHandle?
 
     /// x 0-24 Ease (selected), x 24-48 Linear, y 0-24 Hold, opacity 12-36
-    /// Ease In-Out.
-    public init() {
+    /// Ease In-Out. With `unavailableReason`, every edit is refused.
+    public init(unavailableReason: String? = nil) {
+        easingUnavailableReason = unavailableReason
         let fixture: [(EasingSegment, Easing)] = [
             (EasingSegment(property: "opacity", startFrame: 12, endFrame: 36), .easeInOut),
             (EasingSegment(property: "x", startFrame: 0, endFrame: 24), .ease),
@@ -47,7 +49,7 @@ public struct FakeEasingEditing: EasingEditing, Equatable {
     }
 
     public mutating func moveEasingHandle(_ handle: EasingHandle, to point: Point) {
-        guard let easing = currentEasing, let next = EasingCurve.moving(easing, handle, to: point) else { return }
+        guard easingUnavailableReason == nil, let easing = currentEasing, let next = EasingCurve.moving(easing, handle, to: point) else { return }
         if dragging == handle, let segment = selectedEasingSegment {
             easings[segment] = next
         } else {
@@ -70,7 +72,8 @@ public struct FakeEasingEditing: EasingEditing, Equatable {
 
     /// Records the selected segment's easing for undo, then replaces it.
     private mutating func set(_ easing: Easing) {
-        guard let segment = selectedEasingSegment, let old = easings[segment] else { return }
+        guard easingUnavailableReason == nil, let segment = selectedEasingSegment, let old = easings[segment]
+        else { return }
         history.append(Change(segment: segment, easing: old))
         easings[segment] = easing
     }

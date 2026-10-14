@@ -8,6 +8,8 @@
 // mutates the editor. Every drag, nudge or typed value ends in `onEndDrag`,
 // so each is one undo step. Owns presentation state only: the hovered row.
 // It brings no side gutter of its own; the inspector it sits in supplies one.
+// When the editor gives an `easingUnavailableReason` (inside a symbol, on a
+// locked layer), the EASING controls show disabled under that reason (#668).
 import FlareCore
 import FlareModel
 import SuiteUI
@@ -79,6 +81,15 @@ struct FlareEasingInspector<Editor: EasingEditing>: View {
 
     @ViewBuilder private var easing: some View {
         if let easing = editor.currentEasing, let handles = editor.currentEasingHandles {
+            let reason = editor.easingUnavailableReason
+            if let reason {
+                Text(reason)
+                    .font(SuiteFont.inspectorMeta)
+                    .foregroundStyle(SuiteColor.secondaryText)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.bottom, SuiteSpacing.xs)
+                    .accessibilityIdentifier("flare.easing.unavailable")
+            }
             VStack(spacing: SuiteSpacing.xs) {
                 CurveEditor(
                     samples: editor.easingCurveSamples(count: 129).map { CGPoint(x: $0.x, y: $0.y) },
@@ -97,6 +108,7 @@ struct FlareEasingInspector<Editor: EasingEditing>: View {
                 scrubRow("X2", .second, handles.second, x: true)
                 scrubRow("Y2", .second, handles.second, x: false)
             }
+            .disabled(reason != nil)
         } else {
             Text(editor.easingSegments.isEmpty ? "Key a property to shape its easing." : "Pick a keyframe above.")
                 .font(SuiteFont.inspectorMeta)

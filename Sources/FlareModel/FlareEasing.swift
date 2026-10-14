@@ -9,7 +9,9 @@
 // (FlareWorkspace.selectedLayerID) and ignored once its keyframes are gone.
 // The selected layer is looked up in the edited owner's layers, so inside a
 // symbol the editor reads the symbol's own timeline (#643). SetKeyframeEasing
-// still names a scene layer, so an easing change inside a symbol is refused.
+// still names a scene layer, so an easing change inside a symbol is refused,
+// and `easingUnavailableReason` says so up front, as it does for a locked
+// layer, so the view disables the controls instead of offering them (#668).
 import FlareCore
 
 extension FlareWorkspace: EasingEditing {
@@ -17,6 +19,12 @@ extension FlareWorkspace: EasingEditing {
 
     /// The selected layer in the scene or symbol being edited.
     private var easingLayer: Layer? { ownerLayers?.first { $0.id == selectedLayerID } }
+
+    public var easingUnavailableReason: String? {
+        if editingSymbolID != nil { return Self.easingInSymbolMessage }
+        guard let layer = easingLayer, layer.isLocked else { return nil }
+        return "Unlock \(layer.name) to change its easing."
+    }
 
     public var easingSegments: [EasingSegment] {
         guard let layer = easingLayer else { return [] }

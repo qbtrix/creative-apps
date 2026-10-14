@@ -5,7 +5,8 @@
 // step curve), and flare-easing-editor-2x-dark.png, the same panel drawn at
 // twice the size through scaleEffect so the curve's sharpness can be judged
 // (the shared snapshot helper is fixed at scale 1; the bottom rows fall
-// outside the 900 px frame there).
+// outside the 900 px frame there). flare-easing-editor-unavailable-dark.png
+// shows the controls disabled under the reason given inside a symbol (#668).
 import FlareModel
 import SuiteUI
 import SwiftUI
@@ -27,6 +28,9 @@ import Testing
         hold.selectEasingSegment(EasingSegment(property: "y", startFrame: 0, endFrame: 24))
         #expect(hold.currentEasingPreset == .hold)
         try snapshot(EasingPanel(editor: hold, focus: nil), name: "flare-easing-editor-hold-dark", scheme: .dark)
+
+        let inSymbol = FakeEasingEditing(unavailableReason: "Exit the symbol to change its easing.")
+        try snapshot(EasingPanel(editor: inSymbol, focus: nil), name: "flare-easing-editor-unavailable-dark", scheme: .dark)
     }
 }
 

@@ -44,3 +44,31 @@ private func editingWaveHand() -> FlareWorkspace {
     w.exitSymbol()
     #expect(w.easingSegments.isEmpty)
 }
+
+// #668: inside a symbol the editor says why its easing controls can't act, so the view disables them.
+@Test func insideASymbolTheEasingControlsCarryAReason() {
+    var w = editingWaveHand()
+    guard let segment = w.easingSegments.first else { Issue.record("no segment"); return }
+    w.selectEasingSegment(segment)
+    #expect(w.currentEasing != nil)
+    #expect(w.easingUnavailableReason == FlareWorkspace.easingInSymbolMessage)
+    w.exitSymbol()
+    #expect(w.easingUnavailableReason == nil)
+}
+
+@Test func aSceneLayersEasingHasNoUnavailableReason() {
+    var w = FlareWorkspace(services: .fake())
+    w.load(FlareFixtures.character)
+    #expect(w.easingUnavailableReason == nil)
+    #expect(FakeEasingEditing().easingUnavailableReason == nil)
+}
+
+@Test func aFakeWithAReasonRefusesItsEdits() {
+    var fake = FakeEasingEditing(unavailableReason: FlareWorkspace.easingInSymbolMessage)
+    let before = fake.currentEasing
+    fake.setEasingPreset(.hold)
+    fake.moveEasingHandle(.first, to: Point(x: 0.4, y: 0.1))
+    #expect(fake.currentEasing == before)
+    #expect(!fake.canUndo)
+    #expect(fake.easingUnavailableReason == FlareWorkspace.easingInSymbolMessage)
+}
