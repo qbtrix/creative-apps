@@ -1,0 +1,453 @@
+{
+  "version": "1.0",
+  "scope": "creative-apps: Design (planned)",
+  "generated_at": "2026-10-14T00:00:00Z",
+  "source_path": ".",
+  "authored": true,
+  "model": {
+    "people": [
+      {
+        "id": "designer",
+        "name": "Designer",
+        "description": "Lays out screens and graphics, styles, reuses and exports them.",
+        "status": "existing",
+        "authored": true
+      }
+    ],
+    "systems": [
+      {
+        "id": "creative-apps",
+        "name": "creative-apps",
+        "description": "Design's part of the suite: its Model, its App and the SuiteUI it builds on.",
+        "tags": [
+          "internal"
+        ],
+        "containers": [
+          {
+            "id": "design-model",
+            "name": "DesignModel",
+            "description": "Linux-safe state, logic and use cases behind Design's window. Foundation and CoreColor only, value types.",
+            "technology": "Swift 6, Foundation",
+            "tags": [
+              "internal"
+            ],
+            "status": "existing",
+            "authored": true,
+            "components": [
+              {
+                "id": "design-model-workspace",
+                "name": "Workspace",
+                "description": "DesignWorkspace: the open file's pages, the selected page and layers (DesignSelection), expanded rows, tool, text edit, file URL, held-id index (DesignHeldIDs), the marquee rectangle (D0-1) and the services it runs on (D0-2). Every document edit lands here as one named undo step.",
+                "technology": "Swift 6, Foundation",
+                "paths": [
+                  "Sources/DesignModel/DesignWorkspace.swift",
+                  "Sources/DesignModel/DesignSelection.swift",
+                  "Sources/DesignModel/DesignHeldIDs.swift"
+                ],
+                "status": "existing",
+                "authored": true
+              },
+              {
+                "id": "design-model-tree",
+                "name": "Node tree",
+                "description": "DesignNode, DesignPage, DesignRect, DesignColor and the tree walks (rows, ancestors, hit, add, remove). D0-1 adds corner radius, opacity, stroke and text style; D2-1 adds the path kind, path and component reference.",
+                "technology": "Swift 6, Foundation",
+                "paths": [
+                  "Sources/DesignModel/DesignNode.swift"
+                ],
+                "status": "existing",
+                "authored": true
+              },
+              {
+                "id": "design-model-history",
+                "name": "History",
+                "description": "Model-owned undo and redo: one snapshot per named step, coalescing runs, New File swaps; F5 adds the saved marker behind the unsaved dot and the close prompt.",
+                "technology": "Swift 6, Foundation",
+                "paths": [
+                  "Sources/DesignModel/DesignHistory.swift"
+                ],
+                "status": "existing",
+                "authored": true
+              },
+              {
+                "id": "design-model-canvas",
+                "name": "Canvas gestures",
+                "description": "drag(from:to:modifiers:) and endDrag routed to the tool: hit testing, handles, move, resize, nudge, delete, draw, text placement and inline text. D0-3 adds the marquee (a drag on a frame's empty background selects inside it), several-layer and Option-drag routes through the services.",
+                "technology": "Swift 6, Foundation",
+                "paths": [
+                  "Sources/DesignModel/DesignCanvasEditing.swift",
+                  "Sources/DesignModel/DesignDrawing.swift",
+                  "Sources/DesignModel/DesignText.swift"
+                ],
+                "status": "existing",
+                "authored": true
+              },
+              {
+                "id": "design-model-inspector",
+                "name": "Inspector logic",
+                "description": "What the inspector and Layers rows show and why a control is off: header lines, locks, eye and lock toggles, align to frame or page, corner radius for one layer (DesignCorners, from #753).",
+                "technology": "Swift 6, Foundation",
+                "paths": [
+                  "Sources/DesignModel/DesignInspectorContent.swift",
+                  "Sources/DesignModel/DesignLocking.swift",
+                  "Sources/DesignModel/DesignLayerToggles.swift",
+                  "Sources/DesignModel/DesignAlign.swift",
+                  "Sources/DesignModel/DesignCorners.swift"
+                ],
+                "status": "existing",
+                "authored": true
+              },
+              {
+                "id": "design-model-file",
+                "name": "File codec",
+                "description": "Design's JSON file: all-or-nothing open, same bytes for the same document, a reason per refusal. F5 moves the codec into Live/LiveFiling.swift behind DocumentFiling.",
+                "technology": "Swift 6, Foundation",
+                "paths": [
+                  "Sources/DesignModel/DesignFile.swift"
+                ],
+                "status": "existing",
+                "authored": true
+              },
+              {
+                "id": "design-model-contracts",
+                "name": "Use-case contracts",
+                "description": "One protocol per use case (marquee, transform, align, duplicate, group, clipboard, ordering, style, framing, filing, export, pen, components, variables), DesignEdit, DesignRefusal, DesignIDMint and the style and tier-2 value types. Linux-safe.",
+                "technology": "Swift 6, Foundation",
+                "paths": [
+                  "Sources/DesignModel/Contracts/"
+                ],
+                "status": "planned",
+                "authored": true
+              },
+              {
+                "id": "design-model-services",
+                "name": "Services and actions",
+                "description": "DesignServices (.live and .fake), NotBuilt, and the workspace methods that run a use case and apply its DesignEdit as one undo step (DesignActions), with the help string each control shows.",
+                "technology": "Swift 6, Foundation",
+                "paths": [
+                  "Sources/DesignModel/DesignServices.swift",
+                  "Sources/DesignModel/DesignActions.swift"
+                ],
+                "status": "planned",
+                "authored": true
+              },
+              {
+                "id": "design-model-fakes",
+                "name": "Fixture fakes and fixtures",
+                "description": "A fake per use case and the named fixture documents snapshots and journeys launch on (-DesignServices fake, -DesignFixture <name>).",
+                "technology": "Swift 6, Foundation",
+                "paths": [
+                  "Sources/DesignModel/Fakes/",
+                  "Sources/DesignModel/DesignFixtures.swift"
+                ],
+                "status": "planned",
+                "authored": true
+              },
+              {
+                "id": "design-model-live",
+                "name": "Live conformances",
+                "description": "The real use cases, one file each, swapped into DesignServices.live by the feature that builds them.",
+                "technology": "Swift 6, Foundation",
+                "paths": [
+                  "Sources/DesignModel/Live/"
+                ],
+                "status": "planned",
+                "authored": true
+              }
+            ]
+          },
+          {
+            "id": "design-app",
+            "name": "DesignApp",
+            "description": "The SwiftUI app on SuiteUI's EditorShell. Reads DesignModel and sends it intents; never writes its state.",
+            "technology": "Swift 6, SwiftUI, macOS 26",
+            "tags": [
+              "internal",
+              "macos-only"
+            ],
+            "status": "existing",
+            "authored": true,
+            "components": [
+              {
+                "id": "design-app-shell",
+                "name": "Window shell",
+                "description": "DesignApp scene, DesignWindow (the one model, presentation state, perform for every intent, launch arguments), DesignEditor (top bar, rail, status line), DesignIntent and DesignControls (the suite.controls list for the every-control journey).",
+                "technology": "Swift 6, SwiftUI, macOS 26",
+                "paths": [
+                  "Sources/DesignApp/DesignApp.swift",
+                  "Sources/DesignApp/DesignWindow.swift",
+                  "Sources/DesignApp/DesignEditor.swift",
+                  "Sources/DesignApp/DesignIntent.swift",
+                  "Sources/DesignApp/DesignControls.swift"
+                ],
+                "status": "existing",
+                "authored": true
+              },
+              {
+                "id": "design-app-canvas",
+                "name": "Canvas",
+                "description": "DesignCanvas on CanvasViewport, artwork painting (DesignCanvasMarks), selection marks and the marquee (DesignSelectionMarks, split out in D0-5b), frame names in the unclipped overlay (DesignFrameLabels) and the inline text editor.",
+                "technology": "Swift 6, SwiftUI, macOS 26",
+                "paths": [
+                  "Sources/DesignApp/DesignCanvas.swift",
+                  "Sources/DesignApp/DesignCanvasMarks.swift",
+                  "Sources/DesignApp/DesignTextEditor.swift",
+                  "Sources/DesignApp/DesignSelectionMarks.swift",
+                  "Sources/DesignApp/DesignFrameLabels.swift"
+                ],
+                "status": "existing",
+                "authored": true
+              },
+              {
+                "id": "design-app-panel",
+                "name": "Panel",
+                "description": "Properties and Layers tabs: DesignPanel, DesignInspector, the Align row, the style sections (DesignInspectorStyle, F3), the Layers list and, in wave 3, the Assets section.",
+                "technology": "Swift 6, SwiftUI, macOS 26",
+                "paths": [
+                  "Sources/DesignApp/DesignPanel.swift",
+                  "Sources/DesignApp/DesignInspector.swift",
+                  "Sources/DesignApp/DesignAlignBar.swift",
+                  "Sources/DesignApp/DesignLayersPanel.swift",
+                  "Sources/DesignApp/DesignInspectorStyle.swift",
+                  "Sources/DesignApp/DesignAssetsPanel.swift"
+                ],
+                "status": "existing",
+                "authored": true
+              },
+              {
+                "id": "design-app-menus",
+                "name": "Menus",
+                "description": "The menu bar: File, Edit (DesignEditMenu from D0-6), Page, Object (Align, Distribute, Arrange, Group), View; every top bar command is also here.",
+                "technology": "Swift 6, SwiftUI, macOS 26",
+                "paths": [
+                  "Sources/DesignApp/DesignCommands.swift",
+                  "Sources/DesignApp/DesignObjectMenu.swift",
+                  "Sources/DesignApp/DesignEditMenu.swift"
+                ],
+                "status": "existing",
+                "authored": true
+              },
+              {
+                "id": "design-app-pasteboard",
+                "name": "Pasteboard bridge",
+                "description": "Moves the clipboard use case's bytes to and from the system pasteboard under Design's type; the canvas and Layers copy and paste hooks call it.",
+                "technology": "Swift 6, SwiftUI, macOS 26",
+                "paths": [
+                  "Sources/DesignApp/DesignPasteboardBridge.swift"
+                ],
+                "status": "planned",
+                "authored": true
+              },
+              {
+                "id": "design-app-export",
+                "name": "Export sheet and rasterizer",
+                "description": "File > Export sheet; renders PNG and PDF from the same artwork view the canvas draws; writes the SVG text the Model makes.",
+                "technology": "Swift 6, SwiftUI, macOS 26",
+                "paths": [
+                  "Sources/DesignApp/DesignExportSheet.swift",
+                  "Sources/DesignApp/DesignRasterizer.swift"
+                ],
+                "status": "planned",
+                "authored": true
+              },
+              {
+                "id": "design-app-pen",
+                "name": "Pen marks",
+                "description": "The pen draft's anchors and handles over the canvas.",
+                "technology": "Swift 6, SwiftUI, macOS 26",
+                "paths": [
+                  "Sources/DesignApp/DesignPenMarks.swift"
+                ],
+                "status": "planned",
+                "authored": true
+              },
+              {
+                "id": "design-app-variables",
+                "name": "Variables sheet",
+                "description": "The Variables sheet (Name, Light, Dark) and the canvas mode switch.",
+                "technology": "Swift 6, SwiftUI, macOS 26",
+                "paths": [
+                  "Sources/DesignApp/DesignVariablesSheet.swift"
+                ],
+                "status": "planned",
+                "authored": true
+              }
+            ]
+          },
+          {
+            "id": "suiteui",
+            "name": "SuiteUI",
+            "description": "Shared design system. Design needs: a new CanvasViewport \"show a document rect\" input (F1), #333 journey files, #330 frame probe, #331/#332 goldens, #589 group rows, #577/#108/#73 sidebar rename and context menus, #339 save status, #706 point mark.",
+            "technology": "Swift 6, SwiftUI, macOS 26",
+            "tags": [
+              "internal",
+              "macos-only"
+            ],
+            "status": "existing",
+            "authored": true,
+            "components": []
+          },
+          {
+            "id": "design-journeys",
+            "name": "Design journeys",
+            "description": "XCUITest journeys UITests/DesignJourneyTests*.swift (one file per feature once #333 lands) and the app audit.",
+            "technology": "Swift 6, XCTest, macOS 26",
+            "tags": [
+              "internal",
+              "macos-only",
+              "test"
+            ],
+            "status": "existing",
+            "authored": true,
+            "components": [
+              {
+                "id": "design-journeys-files",
+                "name": "Journey files",
+                "description": "One XCTestCase file per feature area.",
+                "technology": "Swift 6, XCTest",
+                "paths": [
+                  "UITests/DesignJourneyTests.swift",
+                  "UITests/DesignJourneyTests+"
+                ],
+                "status": "existing",
+                "authored": true
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "creative-core",
+        "name": "creative-core",
+        "description": "Engines (github.com/qbtrix/creative-core).",
+        "tags": [
+          "external"
+        ],
+        "containers": [
+          {
+            "id": "corecolor",
+            "name": "CoreColor library",
+            "description": "Color spaces and conversions; Design's only engine dependency today.",
+            "technology": "Swift 6, SwiftPM",
+            "tags": [
+              "external"
+            ],
+            "status": "existing",
+            "authored": true,
+            "components": []
+          },
+          {
+            "id": "core-path-geometry",
+            "name": "Shared path geometry",
+            "description": "Needs a new core issue: a Linux-safe path type (move, line, cubic, close) with exact curve bounds, hit test within a tolerance and SVG path data, shared by Flare and Design. The Pen tool (wave 3) waits on it.",
+            "technology": "Swift 6, SwiftPM",
+            "tags": [
+              "external"
+            ],
+            "status": "planned",
+            "authored": true,
+            "components": []
+          }
+        ]
+      }
+    ],
+    "relationships": [
+      {
+        "source": "designer",
+        "target": "design-app",
+        "description": "draws, arranges, styles, saves and exports",
+        "style": "sync"
+      },
+      {
+        "source": "design-app",
+        "target": "suiteui",
+        "description": "builds its window from SuiteUI components",
+        "style": "sync"
+      },
+      {
+        "source": "design-app",
+        "target": "design-model",
+        "description": "reads state and calls its methods",
+        "style": "sync"
+      },
+      {
+        "source": "design-model",
+        "target": "corecolor",
+        "description": "uses CoreColor (wide gamut is tier 3, #21)",
+        "style": "sync"
+      },
+      {
+        "source": "design-model-live",
+        "target": "core-path-geometry",
+        "description": "LivePen bounds and hit tests paths (planned)",
+        "style": "sync"
+      },
+      {
+        "source": "design-app-shell",
+        "target": "design-model-services",
+        "description": "perform(intent) calls a DesignActions method",
+        "style": "sync"
+      },
+      {
+        "source": "design-model-services",
+        "target": "design-model-contracts",
+        "description": "runs a use case and applies its DesignEdit",
+        "style": "sync"
+      },
+      {
+        "source": "design-model-services",
+        "target": "design-model-history",
+        "description": "records each DesignEdit as one named step",
+        "style": "sync"
+      },
+      {
+        "source": "design-model-live",
+        "target": "design-model-contracts",
+        "description": "conforms to the use cases",
+        "style": "sync"
+      },
+      {
+        "source": "design-model-fakes",
+        "target": "design-model-contracts",
+        "description": "conforms to the use cases",
+        "style": "sync"
+      },
+      {
+        "source": "design-model-canvas",
+        "target": "design-model-services",
+        "description": "routes marquee, several-layer and Option-drag gestures",
+        "style": "sync"
+      },
+      {
+        "source": "design-model-file",
+        "target": "design-model-tree",
+        "description": "encodes and checks the tree",
+        "style": "sync"
+      },
+      {
+        "source": "design-app-canvas",
+        "target": "design-app-pasteboard",
+        "description": "copy and paste hooks",
+        "style": "sync"
+      },
+      {
+        "source": "design-app-pasteboard",
+        "target": "design-model-services",
+        "description": "encode and paste through LayerClipboard",
+        "style": "sync"
+      },
+      {
+        "source": "design-app-export",
+        "target": "design-app-canvas",
+        "description": "renders the same artwork view",
+        "style": "sync"
+      },
+      {
+        "source": "design-journeys",
+        "target": "design-app",
+        "description": "launch the bundle and click through it",
+        "style": "sync"
+      }
+    ]
+  }
+}

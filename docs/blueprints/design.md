@@ -1,0 +1,2093 @@
+# Design blueprint
+
+Design is the suite's vector app for UI and graphic design: pages of frames,
+shapes and text you draw, arrange, style, reuse and export. This blueprint is
+the gate before the next round of feature code. It records what exists on
+`dev`, the v1 line, the planned components, every tier-1 journey, the
+use-case contracts with their fakes, the look, the quality bar, and the
+features grouped into waves with owned files. Feature packets
+(`docs/blueprints/design/features/`) come after the captain approves it.
+
+Read on `origin/dev` 956d946 (2026-10-14), the open and closed `line:design`
+issues, and the docs this repo already has: `CLAUDE.md`, `docs/design.md`,
+`docs/priorities.md`, `docs/engineering.md`, `docs/review-rubric.md`,
+`docs/factory/lead.md`, `docs/blueprints/app-audit.md`, and
+`docs/blueprints/flare.md` with its packets as the worked example. The quality
+ids (QB-…) are section 6 of `docs/review-rubric.md`; this doc adds Design's
+own rows as QD-….
+
+Contents: 0 Status on dev · 1 Brief · 2 Pseudo-C4 · 3 Usage map · 4 Journeys ·
+5 Contracts · 6 Look · 7 Quality bar · 8 Coverage and waves · 9 Open
+questions · 10 Critic rounds
+
+---
+
+## 0. Status on dev
+
+### What exists
+
+Design is further along than Flare was at its blueprint: the core loop
+(create, see, edit with each enabled tool, undo, save, reopen) works end to
+end and a journey proves it.
+
+| Area | On dev | Where |
+|---|---|---|
+| Window | `EditorShell` window (top bar, tool rail, canvas with rulers, Properties and Layers tabs, status line), dark, hidden title bar, one window per file | `DesignApp.swift`, `DesignEditor.swift`, `DesignWindow.swift` |
+| Files | New File (a 1440 × 1024 page with a "Desktop" frame), Open, Save, Save As; JSON with sorted keys, `version: 1`; all-or-nothing open with a reason per refusal (`DesignFileError`); Open never replaces a window's file (it opens another window); `-DesignOpenFile` and `-DesignSaveTo` for journeys | `DesignFile.swift`, `DesignWindow.swift` |
+| Pages | Add, rename (Model only), delete (refuses the last), select | `DesignWorkspace.swift`, `DesignLayersPanel.swift`, Page menu |
+| Tree | Frames and groups hold children; absolute page points; depth-first paint order; ids unique across the file, never reused, minted from a held-id index (#433) | `DesignNode.swift`, `DesignHeldIDs.swift` |
+| Tools | Move (V), Frame (F), Rectangle (R), Ellipse (O), Text (T) work; Pen (P) is disabled with "Drawing paths isn't built yet."; a drawing tool returns to Move after one shape | `DesignWorkspace.swift` (`DesignTool`), `DesignDrawing.swift`, `DesignCanvasEditing.swift` |
+| Canvas | Click select, Shift-click add or remove (#725), move with subtree, 8 resize handles (Shift keeps aspect, Option from center; corners only, outside, on a small box), arrow nudge (Shift 10), Delete; locked and hidden subtrees never hit; zoom in, zoom out, fit page (window state), Space-drag pan (CanvasViewport) | `DesignCanvasEditing.swift`, `DesignCanvas.swift`, `DesignCanvasMarks.swift` |
+| Text | Text click places "Text" and opens an inline editor; commit is one step; empty or cancelled placement leaves nothing | `DesignText.swift`, `DesignTextEditor.swift` |
+| Inspector | Header (name, kind, size), Align row (one layer to its frame or page, #716), Layer (Hidden, Locked), Frame (X, Y, W, H scrub fields, one step per run), Fill (color well and hex; text color for text); "Multiple layers selected" with several; locked layers disabled with a reason | `DesignInspector.swift`, `DesignAlignBar.swift`, `DesignInspectorContent.swift`, `DesignLocking.swift` |
+| Layers | Pages list with Add Page and Delete Page, then the tree front to back, disclosure follows the Model's expanded set, eye and lock toggles (one step each), current page checkmark | `DesignLayersPanel.swift`, `DesignLayerToggles.swift` |
+| Undo | Model-owned history, 100 steps, one named step per edit, coalescing runs (frame edits, nudges), New File undoable with its file URL (#436), refused or no-op edits record nothing | `DesignHistory.swift` |
+| Menus | File (New File, Open…, Save, Save As…), Edit (Undo/Redo named, Delete Layer), Page (Add, Delete), Object (Align submenu), View (Zoom In, Zoom Out, Fit Page) | `DesignCommands.swift`, `DesignObjectMenu.swift` |
+| Tests | 65 Model test files on Linux (fuzz, edge and undo suites), 13 snapshot files (`design-*`), 5 journeys: `testLaunchShowsWindowShell`, `testNewFileAndEveryTool`, `testEveryMenuOpens`, `testAlignALayer`, `testDrawShapesAddTextAndSave` | `Tests/DesignModelTests/`, `Tests/AppSnapshotTests/Design*`, `UITests/DesignJourneyTests.swift` |
+| Audit | Baseline `design: { identifier: 20 }`; no other check counts | `UITests/audit-baseline.json` |
+
+In flight: #753 (corner radius for rectangles and frames, closes #532's first
+bullet; it adds `DesignCorners.swift` with `setCornerRadius`, its help and a
+switch over the node kinds, and `DesignTreeError.noCorners`) and #719 (end the inspector edit run; its fix shipped as #749, so #719
+looks superseded). Neither is merged; section 8 assumes #753 merges first and
+builds on its `cornerRadius` field.
+
+### What the open issues cover
+
+21 open issues carry `line:design` (listed with their feature in section 8.1):
+the rest of tier 1 (#714 align several and distribute, #414 duplicate, #415
+clipboard, #416 group, #532 and #752 inspector style rows, #267 text style,
+#268 text size jump, #275 undo inside text fields and the close prompt, #270
+save state), tier 2 (#418 export, #19 components, #20 variables), tier 3
+(#21 wide gamut), five small bugs (#542, #607, #613, #276, #266) and two
+quality items shared with SuiteUI (#288 identifiers, #589 group rows).
+
+### What is missing (no open issue yet)
+
+| Gap | Tier | Why it is a gap |
+|---|---|---|
+| Marquee select | 1 | #413 ("Shift-click and a marquee") closed after Shift-click alone; the canvas has no marquee |
+| Move, resize, nudge and delete several layers | 1 | `DesignSelection.swift`: "editing several layers at once is a later issue"; with two selected there are no handles and the inspector shows nothing editable |
+| Zoom to selection | 1 | priorities tier 1 item 1; View has no such command |
+| Rename a layer or page from the panel | 1 | `renameNode` and `renamePage` exist in the Model, no view calls them |
+| Reorder and nest by dragging in Layers; Arrange (forward, backward, front, back) | 1 | `moveNode` only appends to a parent; no view calls it |
+| Unsaved-changes state and close prompt | 1 | #270 and #275 mention it; no Model flag exists |
+| Opening a bad file has no journey | 1 | `DesignFileError` reasons are Model-tested only |
+| A public `DesignPage` init | 1 (by dependency) | fixtures and fakes outside the module can't build a page (found compiling section 5) |
+
+---
+
+## 1. Brief
+
+### The problem
+
+People who design screens, icons, social posts and slides need a fast,
+native, free vector tool that saves plain files. Today Design can draw boxes,
+ellipses and text on pages and save them, but a working session also needs
+selecting many things at once, duplicating, grouping, copy and paste, style
+(radius, stroke, opacity, type), and tidy layers. Without those, nobody can
+finish a real screen in it.
+
+### Who uses it
+
+- **Interface designers** laying out app and web screens in frames, nesting
+  and aligning parts, reusing a button as a component (tier 2).
+- **Graphic designers** making posts, banners and simple illustrations:
+  shapes, type, color, export to PNG and SVG (export is tier 2).
+- **Developers and students** opening a file to read sizes and colors, or
+  sketching a layout; they need it to be fast and obvious.
+
+### Non-goals
+
+Raster painting and photo retouching (Photo), animation and timelines
+(Flare), compositing (Halo), real-time multi-user editing or cloud sync,
+interactive prototype players, a plugin or scripting API, an iPad build,
+code generation, and reading or writing any closed file format.
+
+### The v1 line
+
+| In v1 (tier 1, the everyday loop) | Out of v1 |
+|---|---|
+| Zoom, pan, fit page, zoom to selection | Rulers in other units (#264 is SuiteUI's) |
+| Click, Shift-click and marquee select; move, resize, nudge and delete one or several layers | Rotation, skew, flip |
+| Draw frames, rectangles, ellipses; place and edit text | Polygon, star, line and arrow tools |
+| Inspector: X, Y, W, H, corner radius, fill, layer opacity, stroke color and width, text family, size, weight and alignment | Gradients, images as fills, shadows and blurs, blend modes, per-corner radius, dashed strokes |
+| Layers: select, rename, reorder and nest by drag, hide, lock; Arrange menu | Auto Layout values and the layout math (#752's last bullet: section 9, Q2) |
+| Duplicate and Option-drag, group and ungroup, cut, copy and paste (also between windows) | Boolean operations, masks, constraints |
+| Align (one layer to its frame, several to each other) and distribute | Smart guides and snapping (first item after v1) |
+| Undo and redo named for each step; save, Save As, reopen; unsaved-changes dot and close prompt; open errors named | Version history, autosave and crash recovery (section 9, Q4) |
+
+**Tier 2, after the loop (still v1.x, waves 2 and 3):** export to PNG, SVG and
+PDF (#418), the Pen tool, components and instances (#19), variables with light
+and dark modes (#20).
+
+**Tier 3, not v1:** wide-gamut variables (#21), Auto Layout, prototyping
+links, comments, a shared library across files.
+
+### Calls made against the priorities list
+
+| Item | Call | Why |
+|---|---|---|
+| Marquee | v1 | Selecting several layers is how align, group and duplicate are reached; #413 promised it |
+| Pen tool | Tier 2, wave 3 | Basic shapes and frames cover UI layout; a path also needs exact curve bounds from creative-core (section 8.4). The tool stays on the rail, disabled with its reason |
+| Auto Layout section of #752 | Not v1 | Storing direction, gap and padding without the layout math gives controls that change nothing on the canvas, which breaks "no dead controls". Ship it with the math (Q2) |
+| Close prompt for unsaved changes | v1 | Losing work is worse than any missing feature; #275 already names it |
+| Pages | Already built | Tier 2 in priorities, but it shipped with the tree |
+| Variables (#20) | Tier 2, wave 3 | Priorities puts shared color variables in tier 2 and light and dark modes in tier 3; #20 is labelled `p2` and holds both, so the mode switch rides along with it rather than splitting the issue |
+
+---
+
+## 2. Pseudo-C4 (drawn before code)
+
+The same three layers as `docs/engineering.md`: creative-core, then
+DesignModel (Linux, where the tests live), then DesignApp on SuiteUI. Design
+has no engine of its own in creative-core; its tree, edits and file format
+live in DesignModel, which depends only on CoreColor. The machine-readable
+form is `docs/blueprints/design/c4-planned.json`, in the shape of
+`docs/c4/model.json` plus `"status"` and `"authored": true` on each element.
+It is a plan, not the gate's model: the features that add files update
+`docs/c4/model.json`'s descriptions (the notes under section 8.2's wave
+tables name which task does it).
+
+```
+creative-core                     creative-apps
+CoreColor ─────────────────────▶  DesignModel ─────────────────▶ DesignApp ◀── SuiteUI
+(existing)                        contracts → services/actions   EditorShell window,
+path geometry (planned, ───────▶  → live | fakes; workspace,     canvas, panel, menus,
+ needs a core issue; Pen only)     tree, history, file codec      pasteboard, export
+                                                                 ▲
+                                               UITests/DesignJourneyTests*.swift
+```
+
+### L2 containers
+
+| Container | Status | Responsibility | Owned paths | Relationships |
+|---|---|---|---|---|
+| DesignModel | existing | State, logic and use cases; Linux-safe | `Sources/DesignModel/` | uses CoreColor; read and called by DesignApp |
+| DesignApp | existing | The SwiftUI window, reads the Model, sends intents | `Sources/DesignApp/` | builds on SuiteUI; calls DesignModel |
+| SuiteUI | existing (another line) | Shell, rows, canvas viewport, probes | `Sources/SuiteUI/` | used by DesignApp; Design asks for parts with `needs-ui` |
+| Design journeys | existing | XCUITest journeys and the app audit | `UITests/DesignJourneyTests*.swift` | launch `.build/apps/DesignApp.app` |
+| CoreColor | existing (creative-core) | Color spaces | creative-core | used by DesignModel |
+| Shared path geometry | planned (creative-core) | Path type, exact curve bounds, hit test, SVG path data | creative-core, needs a new issue | used by `LivePen` (wave 3) only |
+
+### L3 components of DesignModel
+
+| Component | Status | Responsibility | Owned paths | Relationships |
+|---|---|---|---|---|
+| Workspace | existing | Pages, selection, tool, text edit, file URL, held ids; `marquee` from D0-1, `services` from D0-2 | `DesignWorkspace.swift`, `DesignSelection.swift`, `DesignHeldIDs.swift` | applies every edit through History |
+| Node tree | existing | Node and geometry types; D0-1 adds style fields, D2-1 the path and component fields | `DesignNode.swift` | encoded by File codec |
+| History | existing | Named undo steps, coalescing, document swaps; F5 adds the saved marker | `DesignHistory.swift` | called by Workspace and Services |
+| Canvas gestures | existing | Tool routing for pointer drags; D0-3 adds the marquee (rule in 8.2, D0-3), several-layer and Option-drag routes | `DesignCanvasEditing.swift`, `DesignDrawing.swift`, `DesignText.swift` | calls Services |
+| Inspector logic | existing | Header lines, locks, row toggles, align one layer, corner radius for one layer (`DesignCorners.swift`, from #753) | `DesignInspectorContent.swift`, `DesignLocking.swift`, `DesignLayerToggles.swift`, `DesignAlign.swift`, `DesignCorners.swift` | read by the panel |
+| File codec | existing | JSON open and save, refusal reasons | `DesignFile.swift` | F5 moves the codec into `Live/LiveFiling.swift` |
+| Use-case contracts | planned | One protocol per use case, `DesignEdit`, `DesignRefusal`, `DesignIDMint`, value types (section 5) | `Contracts/` | conformed to by Live and Fakes |
+| Services and actions | planned | `DesignServices` (`.live`, `.fake`), `NotBuilt`, and `DesignActions`: one workspace method and one help per command, applying a `DesignEdit` as one step | `DesignServices.swift`, `DesignActions.swift` | called by the window's `perform` and the canvas gestures |
+| Fixture fakes and fixtures | planned | A fake per use case; named fixture documents | `Fakes/`, `DesignFixtures.swift` | used by snapshots and `-DesignServices fake` journeys |
+| Live conformances | planned | The real use cases, one file each | `Live/` | swapped into `.live` by their feature |
+
+### L3 components of DesignApp
+
+| Component | Status | Responsibility | Owned paths | Relationships |
+|---|---|---|---|---|
+| Window shell | existing | Scene, `DesignWindow` (`perform`, launch arguments, close prompt from F5), `DesignEditor`, `DesignIntent`, `DesignControls` (D0-5a) | `DesignApp.swift`, `DesignWindow.swift`, `DesignEditor.swift`, `DesignIntent.swift`, `DesignControls.swift` | calls Services and actions |
+| Canvas | existing | `DesignCanvas` on `CanvasViewport`, artwork, selection marks and marquee (split into `DesignSelectionMarks.swift` by D0-5b), frame names in the unclipped overlay (`DesignFrameLabels.swift`, slot from D0-5b, filled by F3), inline text editor | `DesignCanvas.swift`, `DesignCanvasMarks.swift`, `DesignSelectionMarks.swift`, `DesignFrameLabels.swift`, `DesignTextEditor.swift` | copy and paste hooks call the Pasteboard bridge |
+| Panel | existing | Tabs, inspector, Align row, style sections (F3), Layers list, Assets section (wave 3) | `DesignPanel.swift`, `DesignInspector.swift`, `DesignAlignBar.swift`, `DesignLayersPanel.swift`, `DesignInspectorStyle.swift`, `DesignAssetsPanel.swift` | values in, intents out |
+| Menus | existing | File, Edit (`DesignEditMenu.swift` from D0-6), Page, Object, View | `DesignCommands.swift`, `DesignObjectMenu.swift`, `DesignEditMenu.swift` | publish `DesignMenu` helps |
+| Pasteboard bridge | planned | System pasteboard read and write under the clipboard's type | `DesignPasteboardBridge.swift` | calls `LayerClipboard` through actions |
+| Export sheet and rasterizer | planned (wave 3) | Export sheet, PNG and PDF from the artwork view, file writing | `DesignExportSheet.swift`, `DesignRasterizer.swift` | renders the Canvas artwork |
+| Pen marks | planned (wave 3) | Anchors and handles of the pen draft | `DesignPenMarks.swift` | needs SuiteUI #706 |
+| Variables sheet | planned (wave 3) | Variables grid and the mode switch | `DesignVariablesSheet.swift` | calls `VariableEditing` |
+
+Every existing file under `Sources/DesignModel/`, `Sources/DesignApp/` and
+`UITests/Design*.swift`, plus #753's `DesignCorners.swift`, sits in exactly
+one component of the JSON, and no path is listed twice (checked by a script
+while writing this; section 10, round 2, records it).
+
+---
+
+## 3. Usage map
+
+Ranked the way `docs/priorities.md` ranks every app: what nearly every
+session uses first, then weekly work, then specialist work. Clean-room: only
+public sources, no other app opened. No public study measures per-feature
+use in vector UI tools, so the tiers come from what beginner courses teach
+first, what "learn these shortcuts first" sheets repeat, and the surveys
+below; rows marked *inferred* have no direct source and are the first to move
+if data turns up.
+
+Sources (the first two are the ones `docs/priorities.md` used for Design):
+
+- [S1] "State of design systems 2022-23" (the report `docs/priorities.md` cites; named by title only here): components, shared styles and variables as weekly team work.
+- [S2] UX tools survey 2022: https://designcompass.org/en/2022/12/07/ux-tools-2022-survey/ (UI design as the main daily activity of the respondents).
+- [S3] Design tools survey 2024, method and results (2,220 designers, Nov 2024 to Jan 2025): https://www.uxtools.co/survey/introduction/methodology (UI design and basic prototyping as the most common jobs; tool-level, not feature-level).
+- [S4] Apple Human Interface Guidelines, keyboard shortcuts and the standard Edit menu: https://developer.apple.com/design/human-interface-guidelines/keyboards (Cut, Copy, Paste, Duplicate, Undo, Redo, Select All as expected on every Mac editor).
+- [S5] Beginner shortcut cheat sheets for vector UI tools, read as a set (the same five actions top every list: frame tool, duplicate, group and ungroup, align, Option-drag to copy). Not linked here because their titles name products; the pattern is common to all of them.
+- [S6] W3C SVG 2: https://www.w3.org/TR/SVG2/ (what an exported file must carry: viewBox, rect, ellipse, path, text, clipPath, opacity).
+
+### Tier 1: nearly every session (`p1`)
+
+| # | Feature | Source | State on dev | Issue |
+|---|---|---|---|---|
+| 1 | Zoom in and out, fit page, pan | S5, priorities | built | – |
+| 2 | Zoom to selection | priorities, *inferred* | missing | new gap (F1) |
+| 3 | Click and Shift-click select | S5 | built (#725) | – |
+| 4 | Marquee select | S5 | missing | new gap (F1); #413 closed without it |
+| 5 | Move, resize and nudge one layer | S5 | built | #542, #607 bugs |
+| 6 | Move, resize, nudge and delete several layers | S5, *inferred* | missing | new gap (F1) |
+| 7 | Draw frames, rectangles, ellipses | S5, S2 | built | #266 frame names |
+| 8 | Place and edit text | S2 | built | #268 size jump, #613 |
+| 9 | Text family, size, weight, alignment | priorities (#267) | missing | #267 |
+| 10 | Inspector X, Y, W, H and fill | priorities (#18) | built | #276 |
+| 11 | Corner radius | priorities | in flight | #532 / PR #753 |
+| 12 | Fill opacity, stroke color and width | priorities | missing | #752 |
+| 13 | Layers: select, hide, lock | priorities (#45) | built | #589 group rows |
+| 14 | Layers: rename, reorder and nest by drag; Arrange | priorities (#45), S5 | Model only | new gap (F4) |
+| 15 | Duplicate and Option-drag | S5, S4 | missing | #414 |
+| 16 | Group and ungroup | S5 | missing | #416 |
+| 17 | Cut, copy and paste, also between files | S4 | missing | #415 |
+| 18 | Align one layer | S5 | built (#716) | – |
+| 19 | Align several, distribute | S5 | missing | #714 |
+| 20 | Undo and redo named for each step | S4 | built | #275 (system undo in text fields) |
+| 21 | Save, Save As, reopen | priorities, *inferred* | built | – |
+| 22 | Unsaved state and close prompt | S4, *inferred* | missing | #270, #275 |
+| 23 | Open errors named | *inferred* | built, no journey | new journey (F5) |
+
+### Tier 2: weekly (`p2`)
+
+| Feature | Source | State | Issue |
+|---|---|---|---|
+| Export PNG (1x, 2x, 3x), SVG, PDF | priorities, S6 | missing | #418 |
+| Components and instances | S1 | missing | #19 |
+| Variables with light and dark modes | S1 | missing | #20 |
+| Pen tool: corners, smooth points, close | S5, *inferred* | disabled with a reason | new gap (wave 3) |
+| Pages | priorities | built | – |
+
+### Tier 3: specialist (`p3`)
+
+| Feature | Source | State | Issue |
+|---|---|---|---|
+| Wide-gamut color variables | priorities | missing | #21 |
+| Auto Layout (direction, gap, padding) with the layout math | S1, *inferred* | missing | #752 (last bullet; not v1) |
+| Smart guides and snapping | *inferred* | missing | none (first item after v1) |
+| Boolean operations, masks | *inferred* | missing | none |
+| Prototype links and a player | S3 | missing | none |
+
+---
+
+## 4. Journeys
+
+**Files.** `project.yml`'s Journey template compiles `UITests/Journey.swift`
+plus `UITests/<target>.swift` only, so today every feature would append to
+one file. SuiteUI #333 (QH-4) changes the template to `UITests/Journey*.swift`
+plus `UITests/<target>*.swift` and adds `Journey+Input.swift` (keys with
+modifiers, velocity drags, `perf()`). Each Design feature then owns its own
+`UITests/DesignJourneyTests+<Area>.swift` with its own `XCTestCase` class.
+If #333 is still open when wave 0 starts, D0-7 makes the same one-line
+template change itself (project.yml is not protected) and the helpers stay
+with #333 (section 9, Q1). J6 and the other new journeys go in their own
+files; `testAlignALayer` and the other existing tests in
+`UITests/DesignJourneyTests.swift` stay as they are (only D0-6 edits that
+file, for J1's menu list).
+
+**Modes.** A journey launches with `-DesignFixture <name>` (D0-5a: the window
+opens that fixture as an unsaved file); a step that saves passes
+`-DesignSaveTo <tmp>` and a step that opens passes `-DesignOpenFile <tmp>`, so
+no journey drives a system file panel. It runs on `-DesignServices fake`
+while its feature builds the UI, and on the live services once the feature's
+live type lands; the feature's last PR removes the flag. Two asserts are live-only, because
+the style fake ignores hidden layers and `FakeFiling` has no version check:
+J10's hidden-layer reason and J16 (J5's last marquee works on fakes: the
+marquee fake skips locked and hidden layers); a fake-mode run skips them
+with a message naming the fake. Every step takes a
+`shot`. Controls carry identifiers `design.<area>.<name>`; titles that change
+(Undo names) are found by identifier (`design.bar.undo`).
+
+**Waiting.** No journey asserts timing through an XCUI query: state is
+awaited with `waitForExistence` or a value predicate (5 s, as today), and
+timing comes from the probe's JSON (section 7).
+
+**Fixtures** (`DesignFixtures`, DesignModel, D0-4; built in code, never read
+from disk; frames in page points, children listed back to front):
+
+| Fixture | Contents | Used by |
+|---|---|---|
+| `empty` | New File: one page, the "Desktop" frame | J1–J3, J8 |
+| `cards` | one page 1440 × 1024 holding only the frame "Desktop" (0, 0, 1440 × 1024), whose children are: rectangle "A" (100, 100, 100 × 80); rectangle "B" (300, 140, 200 × 80); rectangle "C" (700, 100, 100 × 120); text "Title" (100, 40, 200 × 32); group "Pair" (900, 400, 300 × 100) holding ellipses "E1" (900, 400, 100 × 100) and "E2" (1100, 400, 100 × 100); rectangle "Locked" (400, 600, 100 × 100, locked); rectangle "Hidden" (600, 600, 100 × 100, hidden) | J4–J15 |
+| `two-pages` | `cards` plus a second page "Mobile" 390 × 844 with a frame "Phone" | J12 |
+| `crowd` | 2,000 layers: 40 frames, each holding 48 rectangles and one text | P1–P4, model budgets |
+| bad files | written by the test into its temp folder: `not json`, `{"version":99,"pages":[]}`, `{"version":1,"pages":[]}`, a file repeating an id | J16 |
+
+### Tier-1 journeys
+
+| # | Test (file, feature) | Fixture | Steps (each one shot) | Asserts | Empty, error and loading states passed |
+|---|---|---|---|---|---|
+| J0 | `testLaunchShowsWindowShell` (`DesignJourneyTests.swift`, exists) | none | launch | `expectEditorShell()`; canvas empty state with New File; panel "No Selection" | empty: no file open |
+| J1 | `testEveryMenuOpens` (exists; D0-6 extends) | empty | open File, Edit, Page, Object, View; Page > Add Page | each menu holds the items section 6 lists without a wave marker (D0-6 writes that list into the test; D2-4 adds the tier-2 items; no wave-1 feature adds a menu item); each Design item is enabled or disabled with a tooltip; the system's own Cut, Copy, Paste and Select All are only checked enabled or disabled; "Undo Add Page" | empty selection: Edit and Object items disabled with reasons |
+| J2 | `testNewFileAndEveryTool` (exists) | empty | ⌘N; `clickEachTool()` | each enabled tool picked; Pen listed disabled with its reason | – |
+| J3 | `testDrawShapesAddTextAndSave` (exists; the core loop) | empty | Frame, Rectangle, Ellipse drags; move; resize; Shift-click; Layers eye; Text "Hello"; undo; redo; ⌘S to `-DesignSaveTo`; relaunch with `-DesignOpenFile` | each step's undo name; the reopened file shows its layers | empty canvas, text edit open |
+| J4 | `testZoomPanFitAndZoomToSelection` (`+Select`, F1) | cards | read the zoom pill (the fitted percent f); select "C"; ⌘+ twice; Space-drag 200 pt left; ⌘0; View > Zoom to Selection (⌥⌘2); Escape | after ⌘+ twice the pill reads the second `ViewerZoom` stop above f; after the pan the `design.canvas.selection` element (D0-5b) moved about 200 pt left; after ⌘0 the pill reads f again; after Zoom to Selection the pill reads the stop that fits "C" and "C"'s frame center (`design.canvas.selection`) is within 2 pt of the canvas center. The centering assert needs the new SuiteUI `CanvasViewport` "show a document rect" input (section 8.2, F1); until it lands that one assert is an `XCTSkip` naming the issue | nothing selected: Zoom to Selection disabled with "Select a layer first." |
+| J5 | `testMarqueeMoveResizeSeveral` (`+Select`, F1) | cards | drag from Desktop's empty background at (80, 80) to (520, 240) (a marquee inside Desktop, rule D0-3); drag "A" 40 pt right; drag the box's bottom-right handle out 20 pt; ⇧→; ⌫; ⌘Z; then a marquee from (380, 580) to (720, 720) over "Locked" and "Hidden" | header reads "2 Layers" after the first marquee; "Undo Move" then "Undo Resize", "Undo Nudge", "Undo Delete" each one step; after ⌘Z both layers are back; the last marquee selects nothing (the inspector shows the page) | marquee over only locked and hidden layers selects nothing |
+| J6 | `testAlignAndDistributeSeveral` (`+Select`, F1) | cards | select A, B, C; Align Top from the inspector; Object > Distribute Horizontally; select A and B; Distribute | Edit menu "Undo Align Top", then "Undo Distribute Horizontally"; with two selected Distribute is disabled with "Select three or more layers to distribute." (#714's words) | refusal: disabled with reason |
+| J7 | `testDuplicateAndOptionDrag` (`+Arrange`, F2) | cards | select "A"; ⌘D; Option-drag "A" 100 pt down; select "Locked" from Layers; ⌘D | Layers shows "A" three times; "Undo Duplicate" after each; the copy of "Locked" is unlocked; nothing selected: Duplicate disabled with "Select a layer first." | empty selection |
+| J8 | `testCutCopyPasteAcrossFiles` (`+Arrange`, F2) | cards, then empty | select "Pair"; ⌘C; ⌘V; select "B"; ⌘X; relaunch with `-DesignFixture empty`; ⌘V; select the pasted "B", click the inspector's X field, ⌘A, ⌘C, ⌘V, Return; copy the X field's text and check Edit > Paste with the canvas focused | pasted "Pair" lands in Desktop (the parent it came from, #415), offset 10, 10, with two children; "Undo Paste", "Undo Cut"; after the relaunch the new file holds "B" (the pasteboard outlives the app); in the X field ⌘C and ⌘V acted on the text and the layer count is unchanged; with plain text on the pasteboard, Paste on the canvas is disabled (the system item has no tooltip; `DesignPasteboardTests` checks `pasteHelp`'s words) | Paste disabled |
+| J9 | `testGroupAndUngroup` (`+Arrange`, F2) | cards | select A and B; ⌘G; ⇧⌘G; select "A", then Shift-click "E1" in Layers (inside "Pair") | group row with two children and "Undo Group"; after ⇧⌘G the row is gone and "Undo Ungroup"; with A and E1 Group is disabled with "Select layers that share a parent." | refusal |
+| J10 | `testInspectorStyleRows` (`+Style`, F3) | cards | select "A"; Corner radius 12 by typing; drag Opacity to 50%; add a stroke, width 4 with → four times; select "Hidden" from Layers | each value reads back; one undo step per row ("Undo Change Corner Radius", "Undo Change Opacity", "Undo Change Stroke"); keyboard parity on the width row; a hidden layer's rows are disabled with "Show Hidden to change it." | disabled with reason |
+| J11 | `testTextFontAndSize` (`+Style`, F3) | cards | select "Title"; size 32; weight Bold; alignment Center; zoom to 50%; double-click "Title", type, Return | rows read back; the committed text's frame equals the editor's frame within 1 pt (no jump, #268); "Undo Edit Text" | text edit open |
+| J12 | `testLayersRenameReorderNest` (`+Layers`, F4) | two-pages | double-click "A" row, type "Avatar", Return; drag "C" above "B"; drag "Title" into "Pair"; Object > Arrange > Send to Back on "B"; hide "Pair" from its own row's eye; rename page "Mobile" to "Phone screens" | row reads "Avatar" ("Undo Rename Layer"); order C above B; "Title" nested under Pair; B last; Pair's eye toggled (#589); page renamed; each one step | empty-name rename refused, the row keeps its old name |
+| J13 | `testUndoInTextFieldsAndDirtyState` (`+Files`, F5) | cards with `-DesignSaveTo <tmp>` | type in the X field and press ⌘Z inside the field; Escape; draw a rectangle; check the dot; ⌘S | ⌘Z in the field undid the typing, not a document step (#275); the top bar shows the unsaved dot after the draw and "Saved" after ⌘S, with no panel (#270) | unsaved state |
+| J14 | `testCloseWithUnsavedChanges` (`+Files`, F5) | cards | draw; ⌘W; Cancel; ⌘W; Don't Save | the alert names the file; Cancel keeps the window; Don't Save closes it | – |
+| J15 | `testEveryControlActsOrSaysWhy` (`+EveryControl`, D0-7) | cards | read `suite.controls` (published by D0-5a's `DesignControls`: every `design.*` control's id, enabled state and reason), click each enabled `design.*` control, Escape, ⌘Z | every enabled control changed the shot or a value; every disabled one has a reason. A sweep, never cited by the matrix | – |
+| J16 | `testOpenBadFiles` (`+Files`, F5) | bad files | launch with `-DesignOpenFile` on each | the alert reads "It is not a Design file.", "It was made by a newer version of Design (file version 99).", "It has no pages.", "It uses the id node-2 more than once."; the window stays empty | error |
+| P1 | `testCanvasDragLatency` (`+PerfCanvas`, F1) | crowd | four velocity drags of 600 pt at 300 pt/s: move a layer, draw a rectangle, resize, marquee; one Space-pan; ⌘+ and ⌘− ten times each | at least 60 samples per drag series; QB-L1 and QD-S1 to QD-S5 (section 7) | – |
+| P2 | `testScrubLatency` (`+PerfScrub`, F3) | crowd | velocity drag on the Opacity bar and the X scrub field; type 30 characters into the inline text editor | at least 60 samples per series; QB-L2 and QD-S6 | – |
+| P3 | `testLayerListScroll` (`+PerfLayers`, F4) | crowd | scroll Layers end to end, all frames expanded | QD-S10 | – |
+| P4 | `testOpenLargeFile` (`+PerfFiles`, F5) | crowd with `-DesignSaveTo <tmp>`, then `-DesignOpenFile <tmp>` | ⌘S; relaunch on the saved file | progress within QB-L9; no stall over QB-L12 | loading |
+
+Tier-2 journeys, written with their packets: `testExportPNGSVGPDF`
+(`+Export`; from #418 (c), plus Cancel and a read-only folder),
+`testPenCornersAndCurves` (`+Pen`), `testComponentsCreateAndInsert`
+(`+Components`) and `testVariablesLightAndDark` (`+Variables`).
+
+---
+
+## 5. Contracts
+
+The use cases as Swift, so the UI track and the logic track build in
+parallel. Everything in this section compiles on Linux: it was built
+against DesignModel on `origin/dev` 956d946 with Swift 6.3.3 (the CI image),
+with the 5.1 schema patched in, and a scratch test ran the fakes on a
+`cards`-shaped tree (align top, distribute, duplicate inside a frame, group
+and the shared-parent refusal, ungroup, copy and paste into a frame, pasteHelp
+on foreign bytes, per-layer coalescing keys, marquee inside a frame, move
+into a group, send to back, X on two layers, the helps, `NotBuilt`'s help,
+`init(id:copying:)`, pen close). None of it is committed by this PR; the
+wave-0 and wave-2 tasks land it (section 8.2).
+
+### The rules
+
+- **A use case never touches the workspace.** It reads one `DesignPage` and
+  returns a `DesignEdit` (the page's new tree, the new selection, the undo
+  name and an optional coalescing key) or throws `DesignRefusal`.
+  `DesignWorkspace.apply` records it as exactly one named step; a refusal
+  records nothing. Today's invariant ("every document edit records exactly
+  one named undo step") holds without a use case knowing about history.
+- **Help law.** For a write `w` and its help `wHelp` on the same page and
+  ids: when `wHelp` is nil, `w` throws nothing except `.unchanged` (the value
+  equals the current one); when it is not nil, `w` throws, either the refusal
+  whose `help` it is, or `.unchanged` when the help says the layer is already
+  there (single-layer Align's "already at the left edge"). A help never depends on the value being written. Read-only
+  commands (Copy, Zoom to Selection) have a help that is nil exactly when the
+  read succeeds. `DesignContractLawTests` (D0-2) checks every conformance in
+  `.fake` and `.live` on the `cards` fixture, command by command.
+- **Runs.** Coalescing keys are `DesignEdit.runKey(base, ids)`, so a run is
+  one selection's run; D0-1 also ends the edit run on every selection change
+  and D0-3 on `endDrag`, so nudging A, then selecting B and nudging it, is two
+  steps (today's per-layer keys behave the same).
+- **Ids.** A use case that adds nodes takes a `DesignIDMint` built from the
+  held-id index, so ids never repeat (#296, #303, #433 stay fixed). Copies use
+  `DesignNode(id:copying:)`, which keeps every field.
+- **Nothing that works today goes off.** With exactly one layer selected,
+  delete, nudge, align, move and resize drags, and the X, Y, W, H, Fill and
+  corner radius rows keep today's single-layer methods (`setNodeFrame`,
+  `setFill`, #753's `setCornerRadius`) whatever the service holds, and Open and Save keep `DesignFile.swift` until F5 moves
+  the codec behind `DocumentFiling`. `.live` holds `NotBuilt` (D0-2), then
+  the Live stubs (D0-2b, D2-2), and each feature fills its own stub, so a
+  control that isn't ready is disabled with "<Feature> isn't built yet." and
+  never acts. `.fake` is for snapshots and fake-mode journeys.
+- **Fakes act anywhere in the tree** (the `cards` layers sit inside a frame)
+  but ignore locks and hidden layers and use the simplest rule. They are never
+  shipped as `.live`.
+- **No engine type in a contract.** Design has no creative-core document; the
+  contracts use DesignModel's own value types only.
+
+### 5.1 Schema (D0-1, D2-1)
+
+D0-1 adds to `DesignNode`, all with defaults so every file written today
+still opens (`init(from:)` uses `decodeIfPresent` for each; a test decodes a
+version-1 JSON string written before the fields existed):
+
+```swift
+public var cornerRadius: Double = 0          // #753 adds this first; D0-1 keeps its name
+public var opacity: Double = 1               // 0...1
+public var stroke: DesignStroke? = nil
+public var textStyle: DesignTextStyle = .default
+
+/// `node` with every field kept and the id replaced (duplicate, paste). Copies each field D0-1 and D2-1 add.
+public init(id: String, copying node: DesignNode) {
+    self.init(id: id, name: node.name, kind: node.kind, frame: node.frame, children: node.children,
+              isHidden: node.isHidden, isLocked: node.isLocked, fill: node.fill, text: node.text)
+    (cornerRadius, opacity, stroke, textStyle) = (node.cornerRadius, node.opacity, node.stroke, node.textStyle)
+    (path, componentID, fillVariableID) = (node.path, node.componentID, node.fillVariableID)  // from D2-1
+}
+```
+
+It also gives `DesignPage` a public `init(id:name:frameWidth:frameHeight:nodes:)`
+(fixtures and law tests need one; none exists today) and the workspace
+`public internal(set) var marquee: DesignRect?`. D0-2 adds `public
+internal(set) var services: DesignServices = .live` with the type it names.
+
+D2-1 adds `case path` to `DesignNodeKind` with every switch over the kind in
+the same PR (its symbol `scribble` in `DesignNode.swift`, its fill label in
+`DesignInspectorContent.swift`, its corner help in #753's `DesignCorners.swift`
+("A path has no corners to round."), and a placeholder case in
+`DesignArtwork`'s switch in `DesignCanvasMarks.swift`, which D2-4 replaces
+with real drawing),
+`path: DesignPath?`, `componentID: String?` and `fillVariableID: String?` on
+`DesignNode`, and `components` and `variables` to the file. The file version
+becomes 2; version 1 still opens, and an older build refuses a version-2 file
+with its existing "made by a newer version" message.
+
+### 5.2 Shared types (`Contracts/EditContracts.swift`, D0-2)
+
+```swift
+// Contracts/EditContracts.swift: what every Design use case returns and the
+// ids it mints. A use case never touches the workspace: it reads one page and
+// returns a DesignEdit, which DesignWorkspace.apply records as exactly one named
+// undo step (or merges into the run with the same coalescing key). A refused
+// call throws DesignRefusal and the workspace records nothing.
+//
+// The help law, for a write `w` and its help read `wHelp` on the same page and
+// ids: when `wHelp` is nil, `w` throws nothing but `.unchanged` (a value equal
+// to the current one); when it is not nil, `w` throws, either the refusal whose
+// `help` it is, or `.unchanged` when the help says the layer is already there
+// (single-layer Align's "already at the left edge"). A help never depends on
+// the value being written.
+// DesignContractLawTests checks every fake and live conformance on `cards`.
+// Coalescing keys are `runKey(base, ids)`, so a run never spans two
+// selections. Linux-safe.
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
+import Foundation
+#endif
+
+/// One edit to the selected page: its whole new node tree and selection, named for Undo.
+public struct DesignEdit: Sendable, Equatable {
+    /// The undo step's name, without "Undo": "Duplicate", "Group", "Align Left".
+    public var name: String
+    /// The selected page's top-level nodes after the edit, back to front.
+    public var nodes: [DesignNode]
+    /// The selected layers after the edit, primary last.
+    public var selection: [String]
+    /// A run of edits with the same key is one undo step (a scrub, a drag); nil never merges.
+    public var coalescingKey: String?
+
+    public init(name: String, nodes: [DesignNode], selection: [String], coalescingKey: String? = nil) {
+        (self.name, self.nodes, self.selection, self.coalescingKey) = (name, nodes, selection, coalescingKey)
+    }
+
+    /// The coalescing key for a run of `base` edits on exactly these layers: "move-node-3,node-4".
+    public static func runKey(_ base: String, _ ids: [String]) -> String {
+        "\(base)-\(ids.sorted().joined(separator: ","))"
+    }
+}
+
+/// Why a use case refused. `help` is the sentence a disabled control shows as its tooltip.
+public enum DesignRefusal: Error, Equatable, Sendable {
+    case nothingSelected
+    case locked(String)
+    case hidden(String)
+    case notSameParent
+    case tooFew(needed: Int)
+    case notAGroup(String)
+    case notAContainer(String)
+    case intoItself(String)
+    case notAFrame(String)
+    case noCorners(String)
+    case notText(String)
+    case tooFewToDistribute
+    case nothingToExport
+    case emptyName
+    case nameTaken(String)
+    case unknownID(String)
+    case unreadable
+    case unchanged
+    /// The use case has no live conformance yet (DesignServices.live before its feature lands).
+    case notBuilt(String)
+
+    public var help: String {
+        switch self {
+        case .nothingSelected: "Select a layer first."
+        case .locked(let name): "Unlock \(name) to change it."
+        case .hidden(let name): "Show \(name) to change it."
+        case .notSameParent: "Select layers that share a parent."
+        case .tooFew(let needed): "Select \(needed == 2 ? "two" : "\(needed)") or more layers."
+        case .tooFewToDistribute: "Select three or more layers to distribute."
+        case .notAFrame(let name): "\(name) isn't a frame."
+        case .noCorners(let name): "\(name) has no corners to round."
+        case .notText(let name): "\(name) isn't a text layer."
+        case .nothingToExport: "There's nothing on this page to export."
+        case .emptyName: "A name can't be empty."
+        case .nameTaken(let name): "\(name) is already used."
+        case .notAGroup(let name): "\(name) isn't a group."
+        case .notAContainer(let name): "\(name) can't hold other layers."
+        case .intoItself(let name): "\(name) can't go inside itself."
+        case .unknownID(let id): "\(id) isn't on this page."
+        case .unreadable: "The pasteboard holds no Design layers."
+        case .unchanged: "Nothing would change."
+        case .notBuilt(let feature): "\(feature) isn't built yet."
+        }
+    }
+}
+
+/// Mints node ids no page or node of the file holds. The workspace makes one from its held-id
+/// index and counter before a use case runs, and takes `counter` back after a successful edit.
+public struct DesignIDMint: Sendable, Equatable {
+    /// Every id the file held when the mint was made.
+    public let taken: Set<String>
+    /// The highest "node-N" handed out so far.
+    public private(set) var counter: Int
+    /// The ids this mint handed out, in order.
+    public private(set) var minted: [String] = []
+
+    public init(taken: Set<String>, after counter: Int) {
+        (self.taken, self.counter) = (taken, Swift.max(counter, 0))
+    }
+
+    /// The next "node-N" that is neither taken nor minted. Never repeats an id.
+    public mutating func nextNodeID() -> String {
+        repeat { counter += 1 } while taken.contains("node-\(counter)")
+        let id = "node-\(counter)"
+        minted.append(id)
+        return id
+    }
+}
+```
+
+### 5.3 Value types (`Contracts/StyleTypes.swift`, D0-2)
+
+```swift
+// Contracts/StyleTypes.swift: the style values DesignNode gains in task D0-1
+// (corner radius, opacity, stroke, text style) and the tier-2 values (paths,
+// components, variables) that D2-1 adds to the file. Value types, Codable, so
+// they go into a file as they are. Linux-safe.
+
+/// A stroke drawn centered on the shape's outline.
+public struct DesignStroke: Sendable, Hashable, Codable {
+    public var color: DesignColor
+    /// Points; 0 draws nothing. The inspector clamps it to 0...1000.
+    public var width: Double
+
+    public init(color: DesignColor, width: Double) {
+        (self.color, self.width) = (color, width)
+    }
+
+    public static let `default` = DesignStroke(color: .black, width: 1)
+}
+
+public enum DesignTextAlignment: String, CaseIterable, Sendable, Codable { case leading, center, trailing }
+
+/// How a text layer's text is set. The app measures and draws it; the Model only stores it.
+public struct DesignTextStyle: Sendable, Hashable, Codable {
+    /// A family name the system font list offers; "System" is the system font.
+    public var family: String
+    /// Points, 1...1000.
+    public var size: Double
+    /// 100...900 in steps of 100, as CSS and OpenType name weights.
+    public var weight: Int
+    public var alignment: DesignTextAlignment
+
+    public init(family: String, size: Double, weight: Int, alignment: DesignTextAlignment) {
+        (self.family, self.size, self.weight, self.alignment) = (family, size, weight, alignment)
+    }
+
+    public static let `default` = DesignTextStyle(family: "System", size: 16, weight: 400, alignment: .leading)
+}
+
+/// The style properties the inspector edits, for help lookups.
+public enum DesignStyleProperty: String, CaseIterable, Sendable { case frame, fill, cornerRadius, opacity, stroke, textStyle }
+
+/// One of the inspector's X, Y, W and H fields; with several layers selected it sets each layer's own value.
+public enum DesignFrameField: String, CaseIterable, Sendable { case x, y, width, height }
+
+/// One pen anchor: where it sits and its two curve handles, absolute page points. No handle is a corner.
+public struct DesignAnchor: Sendable, Hashable, Codable {
+    public var point: DesignPoint
+    public var handleIn: DesignPoint?
+    public var handleOut: DesignPoint?
+
+    public init(point: DesignPoint, handleIn: DesignPoint? = nil, handleOut: DesignPoint? = nil) {
+        (self.point, self.handleIn, self.handleOut) = (point, handleIn, handleOut)
+    }
+}
+
+/// A pen path: anchors joined by cubic segments (a straight one when both handles are absent).
+public struct DesignPath: Sendable, Hashable, Codable {
+    public var anchors: [DesignAnchor]
+    public var isClosed: Bool
+
+    public init(anchors: [DesignAnchor], isClosed: Bool) {
+        (self.anchors, self.isClosed) = (anchors, isClosed)
+    }
+}
+
+/// A component: a named master tree that instances draw. Its nodes are relative to its own top-left.
+public struct DesignComponent: Sendable, Hashable, Codable, Identifiable {
+    public let id: String
+    public var name: String
+    public var width: Double
+    public var height: Double
+    public var nodes: [DesignNode]
+
+    public init(id: String, name: String, width: Double, height: Double, nodes: [DesignNode]) {
+        (self.id, self.name, self.width, self.height, self.nodes) = (id, name, width, height, nodes)
+    }
+}
+
+public enum DesignMode: String, CaseIterable, Sendable, Codable { case light, dark }
+
+public enum DesignVariableValue: Sendable, Hashable, Codable {
+    case color(DesignColor)
+    case number(Double)
+}
+
+/// A named value with one value per mode.
+public struct DesignVariable: Sendable, Hashable, Codable, Identifiable {
+    public let id: String
+    public var name: String
+    public var light: DesignVariableValue
+    public var dark: DesignVariableValue
+
+    public init(id: String, name: String, light: DesignVariableValue, dark: DesignVariableValue) {
+        (self.id, self.name, self.light, self.dark) = (id, name, light, dark)
+    }
+
+    public func value(in mode: DesignMode) -> DesignVariableValue { mode == .light ? light : dark }
+}
+
+public enum DesignExportFormat: String, CaseIterable, Sendable { case png, svg, pdf }
+
+/// One file an export writes.
+public struct DesignExportItem: Sendable, Equatable {
+    public var nodeID: String
+    /// "Card.png", "Card 2.png": unique in the folder.
+    public var fileName: String
+    /// The item's size in points, and in pixels at the export scale (equal for SVG and PDF).
+    public var width: Double
+    public var height: Double
+    public var pixelWidth: Int
+    public var pixelHeight: Int
+
+    public init(nodeID: String, fileName: String, width: Double, height: Double, pixelWidth: Int, pixelHeight: Int) {
+        (self.nodeID, self.fileName, self.width, self.height) = (nodeID, fileName, width, height)
+        (self.pixelWidth, self.pixelHeight) = (pixelWidth, pixelHeight)
+    }
+}
+
+public enum DesignDistributeAxis: String, CaseIterable, Sendable {
+    case horizontal, vertical
+
+    public var title: String { self == .horizontal ? "Distribute Horizontally" : "Distribute Vertically" }
+}
+
+public enum DesignArrangeStep: String, CaseIterable, Sendable {
+    case bringToFront, bringForward, sendBackward, sendToBack
+
+    public var title: String {
+        switch self {
+        case .bringToFront: "Bring to Front"
+        case .bringForward: "Bring Forward"
+        case .sendBackward: "Send Backward"
+        case .sendToBack: "Send to Back"
+        }
+    }
+}
+```
+
+### 5.4 The use-case protocols (`Contracts/UseCases.swift`, D0-2)
+
+Already-built use cases keep their workspace methods and get no new
+protocol: new file, pages (add, rename, delete), add a node, draw, text
+edit, the row toggles, undo and redo.
+
+```swift
+// Contracts/UseCases.swift: one protocol per Design use case. Reads take the
+// page; writes take the page (and a mint when they add nodes) and return a
+// DesignEdit or throw DesignRefusal. Each write's comment names its undo case:
+// **single "Name"** (one step), or **coalescing "key"** (a run with that key is
+// one step). Linux-safe.
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
+import Foundation
+#endif
+
+// MARK: Tier 1
+
+/// Marquee: which layers a dragged rectangle on empty canvas selects.
+public protocol MarqueeSelecting: Sendable {
+    /// The visible, unlocked layers `rect` touches, in paint order. Candidates are the children of
+    /// `parentID` (the frame the marquee started in), or the page's top-level layers when nil. A
+    /// hidden or locked layer, or one inside a hidden or locked layer, is never picked.
+    func layers(touching rect: DesignRect, in parentID: String?, on page: DesignPage) -> [String]
+}
+
+/// Move, resize, nudge and delete for one or more selected layers.
+public protocol SelectionTransforming: Sendable {
+    func transformHelp(_ ids: [String], on page: DesignPage) -> String?
+    /// Coalescing "move" (`runKey`): every selected layer with its subtree, by `delta` from the gesture start.
+    func move(_ ids: [String], by delta: DesignPoint, on page: DesignPage) throws(DesignRefusal) -> DesignEdit
+    /// Coalescing "resize": the selection's box by `handle`; each layer scales inside the box.
+    func resize(_ ids: [String], handle: DesignHandle, by delta: DesignPoint, modifiers: DesignModifiers,
+                on page: DesignPage) throws(DesignRefusal) -> DesignEdit
+    /// Coalescing "nudge": 1 pt, or 10 pt with `large`.
+    func nudge(_ ids: [String], _ direction: DesignDirection, large: Bool, on page: DesignPage) throws(DesignRefusal) -> DesignEdit
+    /// Single "Delete" (one layer: "Delete <Kind>").
+    func delete(_ ids: [String], on page: DesignPage) throws(DesignRefusal) -> DesignEdit
+}
+
+/// Align to the selection's bounds (or the enclosing frame or page for one layer), and distribute.
+public protocol LayerAligning: Sendable {
+    func alignHelp(_ edge: DesignAlignEdge, _ ids: [String], on page: DesignPage) -> String?
+    /// Single, named `edge.title`. Locked layers count toward the bounds but don't move.
+    func align(_ edge: DesignAlignEdge, _ ids: [String], on page: DesignPage) throws(DesignRefusal) -> DesignEdit
+    func distributeHelp(_ axis: DesignDistributeAxis, _ ids: [String], on page: DesignPage) -> String?
+    /// Single, named `axis.title`. Needs three or more layers (`.tooFewToDistribute`); the outer two stay.
+    func distribute(_ axis: DesignDistributeAxis, _ ids: [String], on page: DesignPage) throws(DesignRefusal) -> DesignEdit
+}
+
+/// Duplicate (Command-D) and the copy an Option-drag moves.
+public protocol LayerDuplicating: Sendable {
+    func duplicateHelp(_ ids: [String], on page: DesignPage) -> String?
+    /// Single "Duplicate". Each copy sits right above its original in the same parent, moved by
+    /// `offset` (10, 10 for Command-D; zero for Option-drag), unlocked; the copies are the selection.
+    func duplicate(_ ids: [String], offset: DesignPoint, on page: DesignPage,
+                   mint: inout DesignIDMint) throws(DesignRefusal) -> DesignEdit
+    /// `node` and its subtree with fresh ids from `mint`; everything else equal. The clipboard reuses it.
+    func copySubtree(_ node: DesignNode, mint: inout DesignIDMint) -> DesignNode
+}
+
+/// Group (Command-G) and Ungroup (Shift-Command-G).
+public protocol LayerGrouping: Sendable {
+    func groupHelp(_ ids: [String], on page: DesignPage) -> String?
+    /// Single "Group". The group's frame is the union; it takes the topmost layer's place; nothing moves.
+    func group(_ ids: [String], on page: DesignPage, mint: inout DesignIDMint) throws(DesignRefusal) -> DesignEdit
+    func ungroupHelp(_ ids: [String], on page: DesignPage) -> String?
+    /// Single "Ungroup". Each selected group's children take its place, in order; the children are the selection.
+    func ungroup(_ ids: [String], on page: DesignPage) throws(DesignRefusal) -> DesignEdit
+}
+
+/// Cut, Copy and Paste of layers through the system pasteboard (the app moves the bytes).
+public protocol LayerClipboard: Sendable {
+    /// The pasteboard type the app reads and writes.
+    var pasteboardType: String { get }
+    func copyHelp(_ ids: [String], on page: DesignPage) -> String?
+    /// The selected layers, children included, and the id of the parent they came from, as bytes.
+    func encode(_ ids: [String], on page: DesignPage) throws(DesignRefusal) -> Data
+    /// Why Paste is off for these pasteboard bytes (nil: the pasteboard holds none of our type).
+    func pasteHelp(_ data: Data?) -> String?
+    /// Single "Paste". Fresh ids. Into `parentID` when the caller passes one (a selected frame);
+    /// else into the parent the copies came from when it is on `page`; else the top level (#415).
+    /// Offset by (10, 10) when a copy would land exactly on a layer with the same name and frame.
+    func paste(_ data: Data, into parentID: String?, on page: DesignPage,
+               mint: inout DesignIDMint) throws(DesignRefusal) -> DesignEdit
+}
+
+/// Stacking order and nesting from the Layers panel and Object > Arrange.
+public protocol LayerOrdering: Sendable {
+    func moveHelp(_ id: String, into parentID: String?, at index: Int, on page: DesignPage) -> String?
+    /// Single "Move Layer". `index` counts the new parent's children back to front, after removal.
+    func move(_ id: String, into parentID: String?, at index: Int, on page: DesignPage) throws(DesignRefusal) -> DesignEdit
+    func arrangeHelp(_ step: DesignArrangeStep, _ ids: [String], on page: DesignPage) -> String?
+    /// Single, named `step.title`. Within each layer's own parent.
+    func arrange(_ step: DesignArrangeStep, _ ids: [String], on page: DesignPage) throws(DesignRefusal) -> DesignEdit
+}
+
+/// The inspector's rows for one or several layers: X, Y, W, H, fill, corner radius, opacity,
+/// stroke and text style. With several layers a value goes to each of them (a "Mixed" row too).
+public protocol StyleEditing: Sendable {
+    func styleHelp(_ property: DesignStyleProperty, _ ids: [String], on page: DesignPage) -> String?
+    /// Coalescing "frame": X and Y move each layer with its subtree; W and H at least 1.
+    func setFrame(_ field: DesignFrameField, to value: Double, _ ids: [String], on page: DesignPage) throws(DesignRefusal) -> DesignEdit
+    /// Coalescing "fill".
+    func setFill(_ color: DesignColor, _ ids: [String], on page: DesignPage) throws(DesignRefusal) -> DesignEdit
+    /// Coalescing "radius". Clamped to 0...half the shorter side. Rectangles and frames take it; in a
+    /// mixed selection the others are skipped, and a selection with none of them throws `.noCorners`.
+    func setCornerRadius(_ radius: Double, _ ids: [String], on page: DesignPage) throws(DesignRefusal) -> DesignEdit
+    /// Coalescing "opacity". Clamped to 0...1. The layer's opacity: it fades the fill, stroke and text,
+    /// and for a frame or group everything inside it.
+    func setOpacity(_ opacity: Double, _ ids: [String], on page: DesignPage) throws(DesignRefusal) -> DesignEdit
+    /// Coalescing "stroke". nil removes the stroke; width clamped to 0...1000.
+    func setStroke(_ stroke: DesignStroke?, _ ids: [String], on page: DesignPage) throws(DesignRefusal) -> DesignEdit
+    /// Coalescing "text-style". Size clamped to 1...1000, weight to 100...900. Text layers take it;
+    /// others in a mixed selection are skipped, and a selection with none throws `.notText`.
+    func setTextStyle(_ style: DesignTextStyle, _ ids: [String], on page: DesignPage) throws(DesignRefusal) -> DesignEdit
+}
+
+/// What View > Zoom to Selection shows.
+public protocol ViewFraming: Sendable {
+    /// "Select a layer first." with nothing visible selected; nil exactly when `rectToShow` is not nil.
+    func framingHelp(_ ids: [String], on page: DesignPage) -> String?
+    /// The union of the visible selected layers' frames; nil with none (the command is then off).
+    func rectToShow(_ ids: [String], on page: DesignPage) -> DesignRect?
+}
+
+/// The file codec behind Open, Save and Save As.
+public protocol DocumentFiling: Sendable {
+    /// Same document, same bytes (sorted keys). Refuses what `decode` would refuse.
+    func encode(_ document: DesignDocument) throws(DesignFileError) -> Data
+    /// All or nothing: a refused file throws and the caller keeps what it had.
+    func decode(_ data: Data) throws(DesignFileError) -> DesignDocument
+}
+
+/// What a file holds. `components` and `variables` stay empty until wave 2 (D2-1).
+public struct DesignDocument: Sendable, Equatable {
+    public var pages: [DesignPage]
+    public var components: [DesignComponent]
+    public var variables: [DesignVariable]
+
+    public init(pages: [DesignPage], components: [DesignComponent] = [], variables: [DesignVariable] = []) {
+        (self.pages, self.components, self.variables) = (pages, components, variables)
+    }
+}
+
+// MARK: Tier 2
+
+/// File > Export: what to write and the SVG text (PNG and PDF are rendered by DesignApp).
+public protocol ExportPlanning: Sendable {
+    func exportHelp(_ ids: [String], on page: DesignPage) -> String?
+    /// The selected layers, or every top-level frame when `ids` is empty; names made unique against `existing`.
+    func plan(_ ids: [String], on page: DesignPage, format: DesignExportFormat, scale: Int,
+              existing: Set<String>) throws(DesignRefusal) -> [DesignExportItem]
+    /// The layer as an SVG document: viewBox in its points, hidden layers left out, frames clip.
+    func svg(for id: String, on page: DesignPage) throws(DesignRefusal) -> String
+}
+
+/// The Pen tool: click for corners, drag for smooth points, click the first anchor to close.
+public protocol PathDrawing: Sendable {
+    /// The draft after a press at `point`; closes it when `point` is within `tolerance` of the first anchor.
+    func press(at point: DesignPoint, draft: DesignPath?, tolerance: Double) -> DesignPath
+    /// The draft's last anchor made smooth, its out handle at `point` and its in handle mirrored.
+    func dragHandle(to point: DesignPoint, draft: DesignPath) -> DesignPath
+    /// The tight bounds of the path's curves (not of its handles).
+    func bounds(of path: DesignPath) -> DesignRect?
+    /// Single "Add Path". Refused with fewer than two anchors.
+    func commit(_ draft: DesignPath, into parentID: String?, on page: DesignPage,
+                mint: inout DesignIDMint) throws(DesignRefusal) -> DesignEdit
+}
+
+/// Components and instances.
+public protocol ComponentLibrary: Sendable {
+    func createHelp(_ ids: [String], on page: DesignPage) -> String?
+    /// Single "Create Component": the selected frame becomes the component and its first instance.
+    func create(from id: String, on page: DesignPage, library: [DesignComponent],
+                mint: inout DesignIDMint) throws(DesignRefusal) -> (edit: DesignEdit, library: [DesignComponent])
+    /// Single "Insert <name>": an instance centered on `center`, selected.
+    func insert(_ componentID: String, centeredOn center: DesignPoint, on page: DesignPage,
+                library: [DesignComponent], mint: inout DesignIDMint) throws(DesignRefusal) -> DesignEdit
+    /// What an instance draws: the component's nodes moved to the instance's frame; nil when it is missing.
+    func resolve(_ instance: DesignNode, library: [DesignComponent]) -> [DesignNode]?
+}
+
+/// Variables with a light and a dark value.
+public protocol VariableEditing: Sendable {
+    /// Single "Add Variable". Refused when the name is empty or taken.
+    func add(named name: String, value: DesignVariableValue, to variables: [DesignVariable],
+             id: String) throws(DesignRefusal) -> [DesignVariable]
+    /// Single "Rename Variable".
+    func rename(_ id: String, to name: String, in variables: [DesignVariable]) throws(DesignRefusal) -> [DesignVariable]
+    /// Single "Delete Variable". Layers bound to it keep their own fill.
+    func remove(_ id: String, from variables: [DesignVariable]) throws(DesignRefusal) -> [DesignVariable]
+    /// Coalescing "variable-<id>-<mode>".
+    func set(_ id: String, _ mode: DesignMode, to value: DesignVariableValue,
+             in variables: [DesignVariable]) throws(DesignRefusal) -> [DesignVariable]
+    func resolve(_ id: String, in mode: DesignMode, variables: [DesignVariable]) -> DesignVariableValue?
+    /// Single "Bind Fill" (nil: "Unbind Fill"). Binds each layer's fill to a color variable.
+    func bind(_ variableID: String?, _ ids: [String], on page: DesignPage,
+              variables: [DesignVariable]) throws(DesignRefusal) -> DesignEdit
+}
+```
+
+### 5.5 Workspace actions (`DesignActions.swift`, D0-3)
+
+What the views call. Signatures only; D0-3 writes the bodies, each running
+its use case on the selected page and calling `apply`.
+
+```swift
+// DesignActions.swift: the workspace methods the window, the menus and the canvas call for every
+// command that runs a use case, and the help each control shows, under the help law in
+// EditContracts.swift: a nil help means `run` refuses with nothing but `.unchanged`. With exactly one
+// layer selected, delete, nudge, align, move and resize drags, and the frame, fill and corner radius
+// rows keep today's single-layer methods whatever the service holds (single-layer Align's "already
+// there" help is that method's `.unchanged`, shown as a reason), so nothing that works today goes off
+// while `.live` holds NotBuilt. Each successful run applies one DesignEdit as one named undo step
+// (merged into the run with the same coalescing key); a refusal records nothing. Linux-safe.
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
+import Foundation
+#endif
+
+/// A command on the selection that a menu item, a top bar item or a key runs.
+public enum DesignCommand: Hashable, Sendable {
+    case duplicate, group, ungroup, delete
+    case nudge(DesignDirection, large: Bool)
+    case align(DesignAlignEdge)
+    case distribute(DesignDistributeAxis)
+    case arrange(DesignArrangeStep)
+}
+
+/// One inspector change on every selected layer (one or several).
+public enum DesignStyleChange: Hashable, Sendable {
+    case frame(DesignFrameField, Double), fill(DesignColor)
+    case cornerRadius(Double), opacity(Double), stroke(DesignStroke?), textStyle(DesignTextStyle)
+
+    public var property: DesignStyleProperty {
+        switch self {
+        case .frame: .frame
+        case .fill: .fill
+        case .cornerRadius: .cornerRadius
+        case .opacity: .opacity
+        case .stroke: .stroke
+        case .textStyle: .textStyle
+        }
+    }
+}
+
+extension DesignWorkspace {
+    /// Why `command` can't run now (the help law).
+    public func help(_ command: DesignCommand) -> String?
+    public mutating func run(_ command: DesignCommand) throws(DesignRefusal)
+
+    public func copyHelp() -> String?
+    /// The selected layers as pasteboard bytes; the document doesn't change.
+    public func copySelection() throws(DesignRefusal) -> Data
+    /// Copy, then delete as one step named "Cut".
+    public mutating func cutSelection() throws(DesignRefusal) -> Data
+    /// Why Paste is off for the pasteboard's bytes of our type (nil when it holds none).
+    public func pasteHelp(_ data: Data?) -> String?
+    /// Into the selected frame, else the top level of the selected page.
+    public mutating func paste(_ data: Data) throws(DesignRefusal)
+    /// The pasteboard type the bridge reads and writes.
+    public var pasteboardType: String
+
+    public func moveLayerHelp(_ id: String, into parentID: String?, at index: Int) -> String?
+    public mutating func moveLayer(_ id: String, into parentID: String?, at index: Int) throws(DesignRefusal)
+
+    public func styleHelp(_ property: DesignStyleProperty) -> String?
+    public mutating func setStyle(_ change: DesignStyleChange) throws(DesignRefusal)
+
+    /// What View > Zoom to Selection shows, and why it is off.
+    public var zoomToSelectionRect: DesignRect?
+    public var zoomToSelectionHelp: String?
+    /// Edit > Select All: every visible, unlocked layer at the selection's level (the page's top level when nothing is selected).
+    public mutating func selectAll()
+
+    /// Swaps the services (the window does it once, from `-DesignServices fake`).
+    public mutating func useServices(_ services: DesignServices)
+
+    /// A mint over the file's ids, for a use case that adds nodes.
+    func mint() -> DesignIDMint
+    /// Records `edit` on the selected page as one step and takes the mint's counter.
+    mutating func apply(_ edit: DesignEdit, mint: DesignIDMint? = nil)
+}
+```
+
+### 5.6 Services and NotBuilt (`DesignServices.swift`, D0-2)
+
+```swift
+// DesignServices.swift: the use cases a workspace runs on. `.live` is what the
+// shipping app uses: each use case's live type once its feature lands, and
+// NotBuilt before that, so the control is disabled with "<Feature> isn't built
+// yet." and never acts. `.fake` is the fixture set the snapshots and the
+// journeys launched with `-DesignServices fake` use. Two service sets are equal
+// when their names are, so DesignWorkspace stays Equatable. Linux-safe.
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
+import Foundation
+#endif
+
+public struct DesignServices: Sendable, Equatable {
+    public let name: String
+    public var marquee: any MarqueeSelecting
+    public var transforming: any SelectionTransforming
+    public var aligning: any LayerAligning
+    public var duplicating: any LayerDuplicating
+    public var grouping: any LayerGrouping
+    public var clipboard: any LayerClipboard
+    public var ordering: any LayerOrdering
+    public var styling: any StyleEditing
+    public var framing: any ViewFraming
+    public var filing: any DocumentFiling
+    public var export: any ExportPlanning
+    public var pen: any PathDrawing
+    public var components: any ComponentLibrary
+    public var variables: any VariableEditing
+
+    public static func == (a: DesignServices, b: DesignServices) -> Bool { a.name == b.name }
+
+    /// As D2-2 leaves it; in D0-2 the export, pen, components and variables slots are NotBuilt.
+    public static let fake = DesignServices(
+        name: "fake", marquee: FakeMarquee(), transforming: FakeTransforming(), aligning: FakeAligning(),
+        duplicating: FakeDuplicating(), grouping: FakeGrouping(), clipboard: FakeClipboard(), ordering: FakeOrdering(),
+        styling: FakeStyling(), framing: FakeFraming(), filing: FakeFiling(), export: FakeExport(), pen: FakePen(),
+        components: FakeComponents(), variables: FakeVariables())
+
+    /// D0-2's `.live`: every slot NotBuilt. D0-2b replaces the tier-1 slots with the Live stubs
+    /// (`LiveFiling` alone wraps today's codec; the others forward to NotBuilt) and D2-2 the tier-2 ones, so no feature edits this file.
+    public static let live = DesignServices(
+        name: "live", marquee: NotBuilt("Marquee selection"), transforming: NotBuilt("Editing several layers"),
+        aligning: NotBuilt("Aligning several layers"), duplicating: NotBuilt("Duplicate"), grouping: NotBuilt("Group"),
+        clipboard: NotBuilt("Copy and paste"), ordering: NotBuilt("Reordering layers"), styling: NotBuilt("Style editing"),
+        framing: NotBuilt("Zoom to Selection"), filing: NotBuilt("Saving"), export: NotBuilt("Export"),
+        pen: NotBuilt("The Pen tool"), components: NotBuilt("Components"), variables: NotBuilt("Variables"))
+}
+
+/// Every use case, refusing with `.notBuilt(feature)`; every help says so.
+public struct NotBuilt: Sendable {
+    public let feature: String
+    public init(_ feature: String) { self.feature = feature }
+    var refusal: DesignRefusal { .notBuilt(feature) }
+    var help: String { refusal.help }
+}
+
+extension NotBuilt: MarqueeSelecting {
+    public func layers(touching rect: DesignRect, in parentID: String?, on page: DesignPage) -> [String] { [] }
+}
+
+extension NotBuilt: SelectionTransforming {
+    public func transformHelp(_ ids: [String], on page: DesignPage) -> String? { help }
+    public func move(_ ids: [String], by delta: DesignPoint, on page: DesignPage) throws(DesignRefusal) -> DesignEdit { throw refusal }
+    public func resize(_ ids: [String], handle: DesignHandle, by delta: DesignPoint, modifiers: DesignModifiers,
+                       on page: DesignPage) throws(DesignRefusal) -> DesignEdit { throw refusal }
+    public func nudge(_ ids: [String], _ direction: DesignDirection, large: Bool, on page: DesignPage) throws(DesignRefusal) -> DesignEdit { throw refusal }
+    public func delete(_ ids: [String], on page: DesignPage) throws(DesignRefusal) -> DesignEdit { throw refusal }
+}
+
+extension NotBuilt: LayerAligning {
+    public func alignHelp(_ edge: DesignAlignEdge, _ ids: [String], on page: DesignPage) -> String? { help }
+    public func align(_ edge: DesignAlignEdge, _ ids: [String], on page: DesignPage) throws(DesignRefusal) -> DesignEdit { throw refusal }
+    public func distributeHelp(_ axis: DesignDistributeAxis, _ ids: [String], on page: DesignPage) -> String? { help }
+    public func distribute(_ axis: DesignDistributeAxis, _ ids: [String], on page: DesignPage) throws(DesignRefusal) -> DesignEdit { throw refusal }
+}
+
+extension NotBuilt: LayerDuplicating {
+    public func duplicateHelp(_ ids: [String], on page: DesignPage) -> String? { help }
+    public func duplicate(_ ids: [String], offset: DesignPoint, on page: DesignPage,
+                          mint: inout DesignIDMint) throws(DesignRefusal) -> DesignEdit { throw refusal }
+    public func copySubtree(_ node: DesignNode, mint: inout DesignIDMint) -> DesignNode { node }
+}
+
+extension NotBuilt: LayerGrouping {
+    public func groupHelp(_ ids: [String], on page: DesignPage) -> String? { help }
+    public func group(_ ids: [String], on page: DesignPage, mint: inout DesignIDMint) throws(DesignRefusal) -> DesignEdit { throw refusal }
+    public func ungroupHelp(_ ids: [String], on page: DesignPage) -> String? { help }
+    public func ungroup(_ ids: [String], on page: DesignPage) throws(DesignRefusal) -> DesignEdit { throw refusal }
+}
+
+extension NotBuilt: LayerClipboard {
+    public var pasteboardType: String { "org.creativesuite.design.layers" }
+    public func copyHelp(_ ids: [String], on page: DesignPage) -> String? { help }
+    public func encode(_ ids: [String], on page: DesignPage) throws(DesignRefusal) -> Data { throw refusal }
+    public func pasteHelp(_ data: Data?) -> String? { help }
+    public func paste(_ data: Data, into parentID: String?, on page: DesignPage,
+                      mint: inout DesignIDMint) throws(DesignRefusal) -> DesignEdit { throw refusal }
+}
+
+extension NotBuilt: LayerOrdering {
+    public func moveHelp(_ id: String, into parentID: String?, at index: Int, on page: DesignPage) -> String? { help }
+    public func move(_ id: String, into parentID: String?, at index: Int, on page: DesignPage) throws(DesignRefusal) -> DesignEdit { throw refusal }
+    public func arrangeHelp(_ step: DesignArrangeStep, _ ids: [String], on page: DesignPage) -> String? { help }
+    public func arrange(_ step: DesignArrangeStep, _ ids: [String], on page: DesignPage) throws(DesignRefusal) -> DesignEdit { throw refusal }
+}
+
+extension NotBuilt: StyleEditing {
+    public func styleHelp(_ property: DesignStyleProperty, _ ids: [String], on page: DesignPage) -> String? { help }
+    public func setFrame(_ field: DesignFrameField, to value: Double, _ ids: [String], on page: DesignPage) throws(DesignRefusal) -> DesignEdit { throw refusal }
+    public func setFill(_ color: DesignColor, _ ids: [String], on page: DesignPage) throws(DesignRefusal) -> DesignEdit { throw refusal }
+    public func setCornerRadius(_ radius: Double, _ ids: [String], on page: DesignPage) throws(DesignRefusal) -> DesignEdit { throw refusal }
+    public func setOpacity(_ opacity: Double, _ ids: [String], on page: DesignPage) throws(DesignRefusal) -> DesignEdit { throw refusal }
+    public func setStroke(_ stroke: DesignStroke?, _ ids: [String], on page: DesignPage) throws(DesignRefusal) -> DesignEdit { throw refusal }
+    public func setTextStyle(_ style: DesignTextStyle, _ ids: [String], on page: DesignPage) throws(DesignRefusal) -> DesignEdit { throw refusal }
+}
+
+extension NotBuilt: ViewFraming {
+    public func framingHelp(_ ids: [String], on page: DesignPage) -> String? { help }
+    public func rectToShow(_ ids: [String], on page: DesignPage) -> DesignRect? { nil }
+}
+
+extension NotBuilt: DocumentFiling {
+    public func encode(_ document: DesignDocument) throws(DesignFileError) -> Data { throw .noFile }
+    public func decode(_ data: Data) throws(DesignFileError) -> DesignDocument { throw .unreadable }
+}
+
+extension NotBuilt: ExportPlanning {
+    public func exportHelp(_ ids: [String], on page: DesignPage) -> String? { help }
+    public func plan(_ ids: [String], on page: DesignPage, format: DesignExportFormat, scale: Int,
+                     existing: Set<String>) throws(DesignRefusal) -> [DesignExportItem] { throw refusal }
+    public func svg(for id: String, on page: DesignPage) throws(DesignRefusal) -> String { throw refusal }
+}
+
+extension NotBuilt: PathDrawing {
+    public func press(at point: DesignPoint, draft: DesignPath?, tolerance: Double) -> DesignPath {
+        draft ?? DesignPath(anchors: [], isClosed: false)
+    }
+    public func dragHandle(to point: DesignPoint, draft: DesignPath) -> DesignPath { draft }
+    public func bounds(of path: DesignPath) -> DesignRect? { nil }
+    public func commit(_ draft: DesignPath, into parentID: String?, on page: DesignPage,
+                       mint: inout DesignIDMint) throws(DesignRefusal) -> DesignEdit { throw refusal }
+}
+
+extension NotBuilt: ComponentLibrary {
+    public func createHelp(_ ids: [String], on page: DesignPage) -> String? { help }
+    public func create(from id: String, on page: DesignPage, library: [DesignComponent],
+                       mint: inout DesignIDMint) throws(DesignRefusal) -> (edit: DesignEdit, library: [DesignComponent]) { throw refusal }
+    public func insert(_ componentID: String, centeredOn center: DesignPoint, on page: DesignPage,
+                       library: [DesignComponent], mint: inout DesignIDMint) throws(DesignRefusal) -> DesignEdit { throw refusal }
+    public func resolve(_ instance: DesignNode, library: [DesignComponent]) -> [DesignNode]? { nil }
+}
+
+extension NotBuilt: VariableEditing {
+    public func add(named name: String, value: DesignVariableValue, to variables: [DesignVariable],
+                    id: String) throws(DesignRefusal) -> [DesignVariable] { throw refusal }
+    public func rename(_ id: String, to name: String, in variables: [DesignVariable]) throws(DesignRefusal) -> [DesignVariable] { throw refusal }
+    public func remove(_ id: String, from variables: [DesignVariable]) throws(DesignRefusal) -> [DesignVariable] { throw refusal }
+    public func set(_ id: String, _ mode: DesignMode, to value: DesignVariableValue,
+                    in variables: [DesignVariable]) throws(DesignRefusal) -> [DesignVariable] { throw refusal }
+    public func resolve(_ id: String, in mode: DesignMode, variables: [DesignVariable]) -> DesignVariableValue? { nil }
+    public func bind(_ variableID: String?, _ ids: [String], on page: DesignPage,
+                     variables: [DesignVariable]) throws(DesignRefusal) -> DesignEdit { throw refusal }
+}
+```
+
+### 5.7 Fakes (`Fakes/FakeSupport.swift` and `Fakes/DesignFakes.swift`, D0-2; tier 2 in D2-2)
+
+```swift
+// Fakes/FakeSupport.swift: tree helpers the fixture fakes share. Internal, so the
+// tier-2 fakes (D2-2) use them too. They walk the whole tree, so a fake acts on
+// layers inside frames and groups exactly as the journeys select them. Linux-safe.
+
+/// The nodes of `page` named in `ids`, in the order of `ids`; unknown ids are skipped.
+func fakeFind(_ ids: [String], _ page: DesignPage) -> [DesignNode] {
+    ids.compactMap { page.nodes.node($0) }
+}
+
+/// The id of the parent all of `ids` share (nil: the top level), or `.notSameParent`.
+func fakeSharedParent(_ ids: [String], _ page: DesignPage) throws(DesignRefusal) -> String? {
+    let parents = Set(ids.map { page.nodes.ancestors(of: $0)?.last ?? "" })
+    guard parents.count == 1, let parent = parents.first else { throw .notSameParent }
+    return parent.isEmpty ? nil : parent
+}
+
+/// Runs `body` on the children of `parentID` (the top level when nil) in a copy of the tree.
+func fakeSiblings(_ parentID: String?, _ nodes: [DesignNode], _ body: (inout [DesignNode]) -> Void) -> [DesignNode] {
+    var tree = nodes
+    if let parentID {
+        _ = tree.update(parentID) { body(&$0.children) }
+    } else {
+        body(&tree)
+    }
+    return tree
+}
+
+func fakeUnion(_ frames: [DesignRect]) -> DesignRect? {
+    guard let first = frames.first else { return nil }
+    return frames.dropFirst().reduce(first) { box, f in
+        let (x, y) = (Swift.min(box.x, f.x), Swift.min(box.y, f.y))
+        return DesignRect(x: x, y: y, width: Swift.max(box.maxX, f.maxX) - x, height: Swift.max(box.maxY, f.maxY) - y)
+    }
+}
+
+/// Changes the named layers anywhere in the tree as one edit. Nothing named: `.nothingSelected`;
+/// nothing changed: `.unchanged`.
+func fakeChange(_ ids: [String], _ page: DesignPage, _ name: String, key: String? = nil,
+                _ body: (inout DesignNode) -> Void) throws(DesignRefusal) -> DesignEdit {
+    guard !fakeFind(ids, page).isEmpty else { throw .nothingSelected }
+    var nodes = page.nodes
+    for id in ids { _ = nodes.update(id, body) }
+    guard nodes != page.nodes else { throw .unchanged }
+    return DesignEdit(name: name, nodes: nodes, selection: ids, coalescingKey: key.map { DesignEdit.runKey($0, ids) })
+}
+
+/// The help for `body` under the help law: nil when it succeeds or only reports `.unchanged`.
+func fakeHelp(_ body: () throws(DesignRefusal) -> DesignEdit) -> String? {
+    do { _ = try body(); return nil } catch .unchanged { return nil } catch { return error.help }
+}
+
+func fakeSelectedHelp(_ ids: [String], _ page: DesignPage) -> String? {
+    fakeFind(ids, page).isEmpty ? DesignRefusal.nothingSelected.help : nil
+}
+```
+
+```swift
+// Fakes/DesignFakes.swift: one fixture fake per tier-1 use case, so views,
+// snapshots and journeys (`-DesignServices fake`) build before the live type.
+// A fake keeps its protocol's undo case and the help law and acts anywhere in
+// the tree with the simplest rule: the marquee skips locked and hidden layers
+// (it picks what it touches at the level it started in); the other fakes
+// ignore locks. It is a
+// stand-in, never shipped as `.live`. Linux-safe.
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
+import Foundation
+#endif
+
+public struct FakeMarquee: MarqueeSelecting {
+    public init() {}
+    public func layers(touching rect: DesignRect, in parentID: String?, on page: DesignPage) -> [String] {
+        let level = parentID.flatMap { page.nodes.node($0)?.children } ?? page.nodes
+        return level.filter { n in
+            !n.isHidden && !n.isLocked && n.frame.x <= rect.maxX && rect.x <= n.frame.maxX && n.frame.y <= rect.maxY && rect.y <= n.frame.maxY
+        }.map(\.id)
+    }
+}
+
+public struct FakeTransforming: SelectionTransforming {
+    public init() {}
+    public func transformHelp(_ ids: [String], on page: DesignPage) -> String? { fakeSelectedHelp(ids, page) }
+    public func move(_ ids: [String], by delta: DesignPoint, on page: DesignPage) throws(DesignRefusal) -> DesignEdit {
+        try fakeChange(ids, page, "Move", key: "move") { $0.translate(by: delta) }
+    }
+    public func resize(_ ids: [String], handle: DesignHandle, by delta: DesignPoint, modifiers: DesignModifiers,
+                       on page: DesignPage) throws(DesignRefusal) -> DesignEdit {
+        try fakeChange(ids, page, "Resize", key: "resize") {
+            $0.frame = $0.frame.resized(handle, by: delta, keepAspect: modifiers.contains(.shift), fromCenter: modifiers.contains(.option))
+        }
+    }
+    public func nudge(_ ids: [String], _ direction: DesignDirection, large: Bool, on page: DesignPage) throws(DesignRefusal) -> DesignEdit {
+        let step = large ? 10.0 : 1.0
+        let delta = switch direction {
+        case .up: DesignPoint(x: 0, y: -step)
+        case .down: DesignPoint(x: 0, y: step)
+        case .left: DesignPoint(x: -step, y: 0)
+        case .right: DesignPoint(x: step, y: 0)
+        }
+        return try fakeChange(ids, page, "Nudge", key: "nudge") { $0.translate(by: delta) }
+    }
+    public func delete(_ ids: [String], on page: DesignPage) throws(DesignRefusal) -> DesignEdit {
+        guard !fakeFind(ids, page).isEmpty else { throw .nothingSelected }
+        var nodes = page.nodes
+        for id in ids { _ = nodes.remove(id) }
+        return DesignEdit(name: "Delete", nodes: nodes, selection: [])
+    }
+}
+
+public struct FakeAligning: LayerAligning {
+    public init() {}
+    public func alignHelp(_ edge: DesignAlignEdge, _ ids: [String], on page: DesignPage) -> String? {
+        fakeSelectedHelp(ids, page)
+    }
+    public func align(_ edge: DesignAlignEdge, _ ids: [String], on page: DesignPage) throws(DesignRefusal) -> DesignEdit {
+        let selected = fakeFind(ids, page)
+        let whole = DesignRect(x: 0, y: 0, width: page.frameWidth, height: page.frameHeight)
+        guard let box = selected.count == 1 ? whole : fakeUnion(selected.map(\.frame)) else { throw .nothingSelected }
+        return try fakeChange(ids, page, edge.title) { node in
+            let f = node.frame
+            let x: Double = switch edge {
+            case .left: box.x
+            case .center: box.x + (box.width - f.width) / 2
+            case .right: box.maxX - f.width
+            case .top, .middle, .bottom: f.x
+            }
+            let y: Double = switch edge {
+            case .top: box.y
+            case .middle: box.y + (box.height - f.height) / 2
+            case .bottom: box.maxY - f.height
+            case .left, .center, .right: f.y
+            }
+            node.translate(by: DesignPoint(x: x - f.x, y: y - f.y))
+        }
+    }
+    public func distributeHelp(_ axis: DesignDistributeAxis, _ ids: [String], on page: DesignPage) -> String? {
+        fakeFind(ids, page).count >= 3 ? nil : DesignRefusal.tooFewToDistribute.help
+    }
+    public func distribute(_ axis: DesignDistributeAxis, _ ids: [String], on page: DesignPage) throws(DesignRefusal) -> DesignEdit {
+        let horizontal = axis == .horizontal
+        let selected = fakeFind(ids, page).sorted { horizontal ? $0.frame.x < $1.frame.x : $0.frame.y < $1.frame.y }
+        guard selected.count >= 3, let first = selected.first, let last = selected.last else { throw .tooFewToDistribute }
+        let start = horizontal ? first.frame.maxX : first.frame.maxY
+        let end = horizontal ? last.frame.x : last.frame.y
+        let inner = selected.dropFirst().dropLast()
+        let gap = (end - start - inner.reduce(0) { $0 + (horizontal ? $1.frame.width : $1.frame.height) }) / Double(inner.count + 1)
+        var targets: [String: Double] = [:]
+        var cursor = start + gap
+        for node in inner {
+            targets[node.id] = cursor
+            cursor += (horizontal ? node.frame.width : node.frame.height) + gap
+        }
+        return try fakeChange(ids, page, axis.title) { node in
+            guard let to = targets[node.id] else { return }
+            node.translate(by: horizontal ? DesignPoint(x: to - node.frame.x, y: 0) : DesignPoint(x: 0, y: to - node.frame.y))
+        }
+    }
+}
+
+public struct FakeDuplicating: LayerDuplicating {
+    public init() {}
+    public func duplicateHelp(_ ids: [String], on page: DesignPage) -> String? { fakeSelectedHelp(ids, page) }
+    public func duplicate(_ ids: [String], offset: DesignPoint, on page: DesignPage,
+                          mint: inout DesignIDMint) throws(DesignRefusal) -> DesignEdit {
+        guard !fakeFind(ids, page).isEmpty else { throw .nothingSelected }
+        var nodes = page.nodes
+        var copies: [String] = []
+        for original in fakeFind(ids, page) {
+            var copy = copySubtree(original, mint: &mint)
+            copy.translate(by: offset)
+            copy.isLocked = false
+            let parent = page.nodes.ancestors(of: original.id)?.last
+            nodes = fakeSiblings(parent, nodes) { siblings in
+                let at = siblings.firstIndex { $0.id == original.id }.map { $0 + 1 } ?? siblings.count
+                siblings.insert(copy, at: at)
+            }
+            copies.append(copy.id)
+        }
+        return DesignEdit(name: "Duplicate", nodes: nodes, selection: copies)
+    }
+    public func copySubtree(_ node: DesignNode, mint: inout DesignIDMint) -> DesignNode {
+        var copy = node
+        copy.children = node.children.map { copySubtree($0, mint: &mint) }
+        return DesignNode(id: mint.nextNodeID(), copying: copy)
+    }
+}
+
+public struct FakeGrouping: LayerGrouping {
+    public init() {}
+    public func groupHelp(_ ids: [String], on page: DesignPage) -> String? {
+        fakeHelp { () throws(DesignRefusal) in var mint = DesignIDMint(taken: [], after: 0); return try group(ids, on: page, mint: &mint) }
+    }
+    public func group(_ ids: [String], on page: DesignPage, mint: inout DesignIDMint) throws(DesignRefusal) -> DesignEdit {
+        let members = fakeFind(ids, page)
+        guard let box = fakeUnion(members.map(\.frame)) else { throw .nothingSelected }
+        let parent = try fakeSharedParent(ids, page)
+        var made = DesignNode(id: mint.nextNodeID(), name: "Group", kind: .group, frame: box)
+        let nodes = fakeSiblings(parent, page.nodes) { siblings in
+            made.children = siblings.filter { ids.contains($0.id) }
+            let top = siblings.lastIndex { ids.contains($0.id) } ?? siblings.count - 1
+            siblings.insert(made, at: top + 1)
+            siblings.removeAll { ids.contains($0.id) }
+        }
+        return DesignEdit(name: "Group", nodes: nodes, selection: [made.id])
+    }
+    public func ungroupHelp(_ ids: [String], on page: DesignPage) -> String? {
+        fakeFind(ids, page).contains { $0.kind == .group } ? nil : DesignRefusal.notAGroup(ids.last ?? "The selection").help
+    }
+    public func ungroup(_ ids: [String], on page: DesignPage) throws(DesignRefusal) -> DesignEdit {
+        let groups = fakeFind(ids, page).filter { $0.kind == .group }
+        guard !groups.isEmpty else { throw .notAGroup(ids.last ?? "The selection") }
+        var nodes = page.nodes
+        var selection: [String] = []
+        for group in groups {
+            let parent = page.nodes.ancestors(of: group.id)?.last
+            nodes = fakeSiblings(parent, nodes) { siblings in
+                guard let at = siblings.firstIndex(where: { $0.id == group.id }) else { return }
+                siblings.replaceSubrange(at...at, with: group.children)
+            }
+            selection += group.children.map(\.id)
+        }
+        return DesignEdit(name: "Ungroup", nodes: nodes, selection: selection)
+    }
+}
+
+public struct FakeClipboard: LayerClipboard {
+    /// What the fake puts on the pasteboard: the layers and the parent they came from.
+    struct Payload: Codable {
+        var parentID: String?
+        var nodes: [DesignNode]
+    }
+
+    public init() {}
+    public var pasteboardType: String { "org.creativesuite.design.layers" }
+    public func copyHelp(_ ids: [String], on page: DesignPage) -> String? { fakeSelectedHelp(ids, page) }
+    public func encode(_ ids: [String], on page: DesignPage) throws(DesignRefusal) -> Data {
+        let nodes = fakeFind(ids, page)
+        guard let first = nodes.first else { throw .nothingSelected }
+        let payload = Payload(parentID: page.nodes.ancestors(of: first.id)?.last, nodes: nodes)
+        do { return try JSONEncoder().encode(payload) } catch { throw .unreadable }
+    }
+    public func pasteHelp(_ data: Data?) -> String? {
+        guard let data, let payload = try? JSONDecoder().decode(Payload.self, from: data), !payload.nodes.isEmpty else {
+            return DesignRefusal.unreadable.help
+        }
+        return nil
+    }
+    public func paste(_ data: Data, into parentID: String?, on page: DesignPage,
+                      mint: inout DesignIDMint) throws(DesignRefusal) -> DesignEdit {
+        guard let payload = try? JSONDecoder().decode(Payload.self, from: data), !payload.nodes.isEmpty else { throw .unreadable }
+        let target = parentID ?? payload.parentID.flatMap { page.nodes.node($0) == nil ? nil : $0 }
+        var pasted: [DesignNode] = []
+        for node in payload.nodes {
+            var copy = FakeDuplicating().copySubtree(node, mint: &mint)
+            copy.translate(by: DesignPoint(x: 10, y: 10))
+            pasted.append(copy)
+        }
+        let tree = fakeSiblings(target, page.nodes) { $0 += pasted }
+        return DesignEdit(name: "Paste", nodes: tree, selection: pasted.map(\.id))
+    }
+}
+
+public struct FakeOrdering: LayerOrdering {
+    public init() {}
+    public func moveHelp(_ id: String, into parentID: String?, at index: Int, on page: DesignPage) -> String? {
+        fakeHelp { () throws(DesignRefusal) in try move(id, into: parentID, at: index, on: page) }
+    }
+    public func move(_ id: String, into parentID: String?, at index: Int, on page: DesignPage) throws(DesignRefusal) -> DesignEdit {
+        var nodes = page.nodes
+        guard let node = nodes.remove(id) else { throw .unknownID(id) }
+        if let parentID {
+            guard parentID != id, node.children.node(parentID) == nil else { throw .intoItself(node.name) }
+            guard let parent = nodes.node(parentID), parent.kind.holdsChildren else { throw .notAContainer(parentID) }
+        }
+        nodes = fakeSiblings(parentID, nodes) { $0.insert(node, at: Swift.min(Swift.max(index, 0), $0.count)) }
+        guard nodes != page.nodes else { throw .unchanged }
+        return DesignEdit(name: "Move Layer", nodes: nodes, selection: [id])
+    }
+    public func arrangeHelp(_ step: DesignArrangeStep, _ ids: [String], on page: DesignPage) -> String? {
+        fakeSelectedHelp(ids, page)
+    }
+    public func arrange(_ step: DesignArrangeStep, _ ids: [String], on page: DesignPage) throws(DesignRefusal) -> DesignEdit {
+        guard let id = ids.last, page.nodes.node(id) != nil else { throw .nothingSelected }
+        let parent = page.nodes.ancestors(of: id)?.last
+        let level = parent.flatMap { page.nodes.node($0)?.children } ?? page.nodes
+        guard let from = level.firstIndex(where: { $0.id == id }) else { throw .unknownID(id) }
+        let to = switch step {
+        case .bringToFront: level.count - 1
+        case .bringForward: Swift.min(from + 1, level.count - 1)
+        case .sendBackward: Swift.max(from - 1, 0)
+        case .sendToBack: 0
+        }
+        var edit = try move(id, into: parent, at: to, on: page)
+        edit.name = step.title
+        return edit
+    }
+}
+
+public struct FakeStyling: StyleEditing {
+    public init() {}
+    public func styleHelp(_ property: DesignStyleProperty, _ ids: [String], on page: DesignPage) -> String? {
+        fakeSelectedHelp(ids, page)
+    }
+    public func setFrame(_ field: DesignFrameField, to value: Double, _ ids: [String], on page: DesignPage) throws(DesignRefusal) -> DesignEdit {
+        try fakeChange(ids, page, "Change Frame", key: "frame") { node in
+            guard value.isFinite else { return }
+            switch field {
+            case .x: node.translate(by: DesignPoint(x: value - node.frame.x, y: 0))
+            case .y: node.translate(by: DesignPoint(x: 0, y: value - node.frame.y))
+            case .width: node.frame.width = Swift.max(value, 1)
+            case .height: node.frame.height = Swift.max(value, 1)
+            }
+        }
+    }
+    public func setFill(_ color: DesignColor, _ ids: [String], on page: DesignPage) throws(DesignRefusal) -> DesignEdit {
+        try fakeChange(ids, page, "Change Fill", key: "fill") { $0.fill = color }
+    }
+    public func setCornerRadius(_ radius: Double, _ ids: [String], on page: DesignPage) throws(DesignRefusal) -> DesignEdit {
+        try fakeChange(ids, page, "Change Corner Radius", key: "radius") {
+            $0.cornerRadius = Swift.min(Swift.max(radius, 0), Swift.min($0.frame.width, $0.frame.height) / 2)
+        }
+    }
+    public func setOpacity(_ opacity: Double, _ ids: [String], on page: DesignPage) throws(DesignRefusal) -> DesignEdit {
+        try fakeChange(ids, page, "Change Opacity", key: "opacity") { $0.opacity = Swift.min(Swift.max(opacity, 0), 1) }
+    }
+    public func setStroke(_ stroke: DesignStroke?, _ ids: [String], on page: DesignPage) throws(DesignRefusal) -> DesignEdit {
+        try fakeChange(ids, page, "Change Stroke", key: "stroke") { $0.stroke = stroke }
+    }
+    public func setTextStyle(_ style: DesignTextStyle, _ ids: [String], on page: DesignPage) throws(DesignRefusal) -> DesignEdit {
+        try fakeChange(ids, page, "Change Text Style", key: "text-style") { $0.textStyle = style }
+    }
+}
+
+public struct FakeFraming: ViewFraming {
+    public init() {}
+    public func framingHelp(_ ids: [String], on page: DesignPage) -> String? { fakeSelectedHelp(ids, page) }
+    public func rectToShow(_ ids: [String], on page: DesignPage) -> DesignRect? { fakeUnion(fakeFind(ids, page).map(\.frame)) }
+}
+
+/// Keeps documents in memory as JSON; refuses bytes that don't decode.
+public struct FakeFiling: DocumentFiling {
+    public init() {}
+    public func encode(_ document: DesignDocument) throws(DesignFileError) -> Data {
+        do { return try JSONEncoder().encode(document.pages) } catch { throw .unreadable }
+    }
+    public func decode(_ data: Data) throws(DesignFileError) -> DesignDocument {
+        guard let pages = try? JSONDecoder().decode([DesignPage].self, from: data) else { throw .unreadable }
+        guard !pages.isEmpty else { throw .noPages }
+        return DesignDocument(pages: pages)
+    }
+}
+```
+
+```swift
+// Fakes/DesignTierTwoFakes.swift (D2-2): the tier-2 fixture fakes. Same rules
+// as DesignFakes.swift. Linux-safe.
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
+import Foundation
+#endif
+
+public struct FakeExport: ExportPlanning {
+    public init() {}
+    public func exportHelp(_ ids: [String], on page: DesignPage) -> String? {
+        do { _ = try plan(ids, on: page, format: .png, scale: 1, existing: []); return nil } catch { return error.help }
+    }
+    public func plan(_ ids: [String], on page: DesignPage, format: DesignExportFormat, scale: Int,
+                     existing: Set<String>) throws(DesignRefusal) -> [DesignExportItem] {
+        let items = ids.isEmpty ? page.nodes.filter { $0.kind == .frame } : fakeFind(ids, page)
+        guard !items.isEmpty else { throw ids.isEmpty ? .nothingToExport : .nothingSelected }
+        let k = format == .png ? Swift.max(scale, 1) : 1
+        return items.map {
+            DesignExportItem(nodeID: $0.id, fileName: "\($0.name).\(format.rawValue)", width: $0.frame.width, height: $0.frame.height,
+                             pixelWidth: Int($0.frame.width.rounded()) * k, pixelHeight: Int($0.frame.height.rounded()) * k)
+        }
+    }
+    public func svg(for id: String, on page: DesignPage) throws(DesignRefusal) -> String {
+        guard let node = page.nodes.node(id) else { throw .unknownID(id) }
+        return "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 \(node.frame.width) \(node.frame.height)\"/>"
+    }
+}
+
+public struct FakePen: PathDrawing {
+    public init() {}
+    public func press(at point: DesignPoint, draft: DesignPath?, tolerance: Double) -> DesignPath {
+        var path = draft ?? DesignPath(anchors: [], isClosed: false)
+        if let first = path.anchors.first, path.anchors.count > 1,
+           Swift.abs(first.point.x - point.x) <= tolerance, Swift.abs(first.point.y - point.y) <= tolerance {
+            path.isClosed = true
+        } else {
+            path.anchors.append(DesignAnchor(point: point))
+        }
+        return path
+    }
+    public func dragHandle(to point: DesignPoint, draft: DesignPath) -> DesignPath {
+        var path = draft
+        guard let last = path.anchors.last else { return path }
+        let mirrored = DesignPoint(x: 2 * last.point.x - point.x, y: 2 * last.point.y - point.y)
+        path.anchors[path.anchors.count - 1] = DesignAnchor(point: last.point, handleIn: mirrored, handleOut: point)
+        return path
+    }
+    /// The anchors' box (handles ignored); the live type bounds the curves exactly.
+    public func bounds(of path: DesignPath) -> DesignRect? {
+        fakeUnion(path.anchors.map { DesignRect(x: $0.point.x, y: $0.point.y, width: 0, height: 0) })
+    }
+    public func commit(_ draft: DesignPath, into parentID: String?, on page: DesignPage,
+                       mint: inout DesignIDMint) throws(DesignRefusal) -> DesignEdit {
+        guard draft.anchors.count >= 2, let box = bounds(of: draft) else { throw .tooFew(needed: 2) }
+        var node = DesignNode(id: mint.nextNodeID(), name: "Path", kind: .path,
+                              frame: DesignRect(x: box.x, y: box.y, width: Swift.max(box.width, 1), height: Swift.max(box.height, 1)))
+        node.path = draft
+        let added = node
+        return DesignEdit(name: "Add Path", nodes: fakeSiblings(parentID, page.nodes) { $0.append(added) }, selection: [node.id])
+    }
+}
+
+public struct FakeComponents: ComponentLibrary {
+    public init() {}
+    public func createHelp(_ ids: [String], on page: DesignPage) -> String? {
+        guard let node = fakeFind(ids, page).last else { return DesignRefusal.nothingSelected.help }
+        return node.kind == .frame ? nil : DesignRefusal.notAFrame(node.name).help
+    }
+    public func create(from id: String, on page: DesignPage, library: [DesignComponent],
+                       mint: inout DesignIDMint) throws(DesignRefusal) -> (edit: DesignEdit, library: [DesignComponent]) {
+        guard let frame = page.nodes.node(id) else { throw .nothingSelected }
+        guard frame.kind == .frame else { throw .notAFrame(frame.name) }
+        let component = DesignComponent(id: "component-\(library.count + 1)", name: frame.name,
+                                        width: frame.frame.width, height: frame.frame.height, nodes: frame.children)
+        var nodes = page.nodes
+        _ = nodes.update(id) {
+            $0.kind = .instance
+            $0.componentID = component.id
+            $0.children = []
+        }
+        return (DesignEdit(name: "Create Component", nodes: nodes, selection: [id]), library + [component])
+    }
+    public func insert(_ componentID: String, centeredOn center: DesignPoint, on page: DesignPage,
+                       library: [DesignComponent], mint: inout DesignIDMint) throws(DesignRefusal) -> DesignEdit {
+        guard let component = library.first(where: { $0.id == componentID }) else { throw .unknownID(componentID) }
+        var node = DesignNode(id: mint.nextNodeID(), name: component.name, kind: .instance,
+                              frame: DesignRect(x: center.x - component.width / 2, y: center.y - component.height / 2,
+                                                width: component.width, height: component.height))
+        node.componentID = componentID
+        return DesignEdit(name: "Insert \(component.name)", nodes: page.nodes + [node], selection: [node.id])
+    }
+    public func resolve(_ instance: DesignNode, library: [DesignComponent]) -> [DesignNode]? {
+        library.first { $0.id == instance.componentID }?.nodes
+    }
+}
+
+public struct FakeVariables: VariableEditing {
+    public init() {}
+    public func add(named name: String, value: DesignVariableValue, to variables: [DesignVariable],
+                    id: String) throws(DesignRefusal) -> [DesignVariable] {
+        guard !name.allSatisfy(\.isWhitespace) else { throw .emptyName }
+        guard !variables.contains(where: { $0.name == name }) else { throw .nameTaken(name) }
+        return variables + [DesignVariable(id: id, name: name, light: value, dark: value)]
+    }
+    public func rename(_ id: String, to name: String, in variables: [DesignVariable]) throws(DesignRefusal) -> [DesignVariable] {
+        guard let index = variables.firstIndex(where: { $0.id == id }) else { throw .unknownID(id) }
+        guard !name.allSatisfy(\.isWhitespace) else { throw .emptyName }
+        guard !variables.contains(where: { $0.name == name && $0.id != id }) else { throw .nameTaken(name) }
+        var result = variables
+        result[index].name = name
+        return result
+    }
+    public func remove(_ id: String, from variables: [DesignVariable]) throws(DesignRefusal) -> [DesignVariable] {
+        guard variables.contains(where: { $0.id == id }) else { throw .unknownID(id) }
+        return variables.filter { $0.id != id }
+    }
+    public func set(_ id: String, _ mode: DesignMode, to value: DesignVariableValue,
+                    in variables: [DesignVariable]) throws(DesignRefusal) -> [DesignVariable] {
+        guard let index = variables.firstIndex(where: { $0.id == id }) else { throw .unknownID(id) }
+        var result = variables
+        if mode == .light { result[index].light = value } else { result[index].dark = value }
+        return result
+    }
+    public func resolve(_ id: String, in mode: DesignMode, variables: [DesignVariable]) -> DesignVariableValue? {
+        variables.first { $0.id == id }?.value(in: mode)
+    }
+    public func bind(_ variableID: String?, _ ids: [String], on page: DesignPage,
+                     variables: [DesignVariable]) throws(DesignRefusal) -> DesignEdit {
+        if let variableID, !variables.contains(where: { $0.id == variableID }) { throw .unknownID(variableID) }
+        return try fakeChange(ids, page, variableID == nil ? "Unbind Fill" : "Bind Fill") { $0.fillVariableID = variableID }
+    }
+}
+```
+
+### 5.8 Which journey each contract serves
+
+| Contract | Journeys | Feature |
+|---|---|---|
+| `MarqueeSelecting` | J5, P1 | F1 |
+| `SelectionTransforming` | J5, P1 | F1 |
+| `LayerAligning` | J6 | F1 |
+| `ViewFraming` | J4 | F1 |
+| `LayerDuplicating` | J7 | F2 |
+| `LayerGrouping` | J9 | F2 |
+| `LayerClipboard` | J8 | F2 |
+| `StyleEditing` | J10, J11, P2 | F3 |
+| `LayerOrdering` | J12, P3 | F4 |
+| `DocumentFiling` | J3, J13, J14, J16, P4 | F5 |
+| `ExportPlanning` | `testExportPNGSVGPDF` | F6 |
+| `PathDrawing` | `testPenCornersAndCurves` | F7 |
+| `ComponentLibrary` | `testComponentsCreateAndInsert` | F8 |
+| `VariableEditing` | `testVariablesLightAndDark` | F9 |
+
+---
+
+## 6. Look
+
+Design keeps everything `docs/design.md` already says for an editor shell
+(dark `EditorShell`, hidden title bar, flat bars, glass only where SuiteUI
+puts it). The house reference for inspector rows is Flare's easing editor
+(`docs/blueprints/flare-easing-editor.md`): Studio rows, `StudioScrubRow` for
+numbers with a range, `ChoiceChips` for a few named choices, SuiteUI
+components only, every drag or typed value ending in one `onEnd` so it is one
+undo step.
+
+### What Design adds to docs/design.md
+
+These rules land in `docs/design.md` (a Design section) with the first wave-1
+PR that needs them; this blueprint does not edit that shared file.
+
+1. **Exact coordinates stay `ScrubField`; ranged values are Studio rows.** X,
+   Y, W, H keep their scrub fields (pixels to one decimal). Corner radius,
+   opacity (a whole percent: `unit: "%", decimals: 0`) and stroke width use
+   the bar slider `InspectorSliderRow`, the Studio row with a unit and a
+   `mixed` state (`StudioScrubRow` itself is fixed at two decimals and no
+   unit).
+   Text weight and alignment are `ChoiceChips`; family is a menu `Picker`;
+   colors are `InspectorColorWellRow` (swatch plus hex).
+2. **Several layers selected.** The header reads "<n> Layers"; a row whose
+   value differs reads "Mixed" in secondary text (no marker; the bar slider's
+   `mixed:`, and for the X, Y, W, H scrub fields a `mixed` state SuiteUI
+   doesn't have yet: a new `needs-ui` issue, filed by D0-5a's lead, with a
+   plain "Mixed" text placeholder meanwhile); typing or
+   scrubbing sets every selected layer; one undo step.
+3. **Frame names sit above their frame**, outside it, in caption type, one
+   size at any zoom. They draw in the canvas overlay (`DesignFrameLabels`),
+   which `CanvasViewport` does not clip, so a frame at the page's top edge
+   keeps its name (#266).
+4. **Selection marks.** One layer: outline and handles (today's). Several:
+   each layer's outline, the dashed `SelectionOutline` around them all, and
+   the 8 handles on that box. Marquee: a 1 pt accent outline over a 10%
+   accent fill, in the overlay, never clipped by the page.
+5. **Rename in place.** A layer or page row renames on double-click or
+   Return, through `SidebarRow`'s rename (SuiteUI #577, #108); an empty name
+   is refused and the old one stays.
+6. **Status line** gains the selection count ("2 Layers") next to zoom and
+   page size (D0-5a); the top bar's save status shows the unsaved dot (F5,
+   #270, needs SuiteUI #339).
+
+### Screens and their components
+
+Components are SuiteUI unless named `Design*`. "Needs" names a SuiteUI issue
+the screen waits on; until it lands the screen uses the plain placeholder
+CLAUDE.md asks for.
+
+| Screen | Region or state | Uses | Needs |
+|---|---|---|---|
+| Main window | Top bar: "Design" menu, document menu, New, Open, Save, Undo, Redo, zoom out, fit, zoom in; Export… (wave 3, the one filled primary); save status | `EditorTopBar`, `EditorBarMenu`, `EditorBarItem`, `EditorBarDivider` | #339 (outlined items, primary, save status) |
+| Main window | Tool rail: Move V, Frame F, Rectangle R, Ellipse O, Text T, Pen P (disabled with its reason until wave 3) | `ToolbarGroup(style: .rail)` | – |
+| Main window | Canvas: page, artwork, frame names, selection marks, marquee, inline text editor, pen draft (wave 3); empty state with New File | `CanvasViewport`, `SelectionOutline`, `CanvasMarks`, `EmptyStateView`, `DesignArtwork`, `DesignSelectionMarks`, `DesignFrameLabels`, `DesignTextOverlay`, `DesignPenMarks` | a new SuiteUI issue: `CanvasViewport` scrolls to show a document rect the host gives (Zoom to Selection, F1); #273 (handles into SuiteUI; not blocking); #706 (anchor mark, wave 3); #264 (ruler unit reads px) |
+| Main window | Status line: zoom, page size, selection count, last message, tool | `ViewerStatusBar` | #340 (pills; name and API kept) |
+| Properties tab | One layer: header, Align row, Layer (Hidden, Locked, Opacity), Frame (X, Y, W, H), Corner radius, Fill (color), Stroke (color, width, add and remove), Text (family, size, weight, alignment) | `InspectorHeader`, `InspectorSection`, `InspectorAction`, `ScrubField`, `InspectorSliderRow`, `InspectorColorWellRow`, `ChoiceChips`, `Picker`, `Toggle(.checkbox)` | #745 / #718 (public `onEnd` on `ScrubField` and the color row; Design has a local end today) |
+| Properties tab | Several layers: "<n> Layers", Align row with Distribute, rows reading "Mixed" | as above, plus `InspectorAction` for Distribute | a new `needs-ui` issue: a `mixed` state on `ScrubField` |
+| Properties tab | Page only: page name, size (read only) | `InspectorHeader`, `InspectorRow` | – |
+| Properties tab | Nothing open: "No Selection" with how to start | `EmptyStateView` | – |
+| Layers tab | Pages (rename, add, delete, current checkmark), layer tree (rename, drag to reorder and nest, eye, lock, dimmed when hidden), context menu (Rename, Duplicate, Group, Delete, Arrange) | `List` in the sidebar style, `SidebarRow`, `DisclosureGroup`, `EditorBarItem` | #589 (group row toggles), #577 and #108 (rename), #73 (context menus), #111 |
+| Layers tab | Assets section (wave 3): components with Insert | `SidebarSection`, `SidebarRow`, `InspectorAction`, `EmptyStateView` ("No components yet. Select a frame and choose Create Component.") | – |
+| Alerts | Open failure (reason from `DesignFileError`), close with unsaved changes (Save, Don't Save, Cancel) | system alert | – |
+| Export sheet (wave 3) | Format (PNG, SVG, PDF) as `ChoiceChips`, scale 1x/2x/3x, the item list, progress with Cancel, an error row naming the failed file | `ChoiceChips`, `InspectorSection`, `ProgressView`, `InspectorAction` | – |
+| Variables sheet (wave 3) | `Grid` of Name, Light, Dark; add, rename, delete; Light/Dark preview switch in the top bar | `Grid`, `InspectorColorWellRow`, `ScrubField`, `Picker(.segmented)` | – |
+
+### Menu bar
+
+Every top bar command is here; an item that can't run is disabled with its
+help, never hidden.
+
+- **File**: New File ⌘N, Open… ⌘O, Save ⌘S, Save As… ⇧⌘S, Export… ⇧⌘E (wave 3), Close ⌘W (with the unsaved prompt).
+- **Edit**: Undo <step> ⌘Z, Redo <step> ⇧⌘Z, Cut ⌘X, Copy ⌘C, Paste ⌘V, Select All ⌘A (the system's items), Duplicate ⌘D, Delete Layer (no key equivalent, as today: the canvas and Layers take ⌫, so text fields keep it). In a focused text field Undo, Redo, Cut, Copy, Paste and Select All act on the text (#275, #415).
+- **Page**: Add Page, Rename Page…, Delete Page.
+- **Object**: Group ⌘G, Ungroup ⇧⌘G; Arrange ▸ Bring to Front ⇧⌘], Bring Forward ⌘], Send Backward ⌘[, Send to Back ⇧⌘[; Align ▸ the six edges; Distribute Horizontally, Distribute Vertically (top level, as J6 uses them); Create Component ⌥⌘K (wave 3).
+- **View**: Zoom In ⌘=, Zoom Out ⌘−, Fit Page ⌘0, Zoom to Selection ⌥⌘2; Light / Dark preview (wave 3); Variables… (wave 3).
+
+---
+
+## 7. Quality bar
+
+Every row says what measures it and where it runs: **Linux** (`scripts/ci`,
+so every PR), **macOS CI** (the `macOS` job on `dev`), or **local** (a Mac
+with Xcode: `scripts/ui-test`, then `.build/ui-screens/perf-*.json` and
+`contact-sheet.html`). Gates follow `docs/review-rubric.md` "How gates are
+set": a screen-side row ships report-only, and after ten green CI runs its
+gate is the CI p95 × 1.5, never tighter than the device target.
+
+### 7.1 Speed budgets, input to screen, per interactive tool
+
+Each tool has two halves. The **model half** is the Model work one input
+causes, timed on Linux now (`Tests/DesignModelTests/DesignBudgetTests.swift`,
+median and p95 of 200 runs on the `crowd` fixture; debug CI gates are 10 ×
+the device target, as the rubric does). D0-4 adds the timing helper
+(`Tests/DesignModelTests/DesignBudget.swift`) and QD-S8, QD-S9 and QD-S11;
+each feature puts its rows in its own `Design<Area>BudgetTests.swift`, so
+the test names below are `<file>.<test>`. The **screen half** is frames late
+from the event to the first frame that shows it, read from SuiteUI's
+`FrameProbe` (#330) by the perf journeys P1 to P4 through `perf()` and the
+velocity drags of `Journey+Input.swift` (#333). Until both land, P1 to P4
+cannot run even report-only: each lead records them as blocked in RECORD.md
+with the issue numbers, and the model half gates alone (section 9, Q3).
+
+| id | Tool or input | Model half: device / Linux debug gate | Screen half (device target) | Test |
+|---|---|---|---|---|
+| QD-S1 | Move tool: one drag step on a frame with 50 children (rewind, translate, preview) | ≤ 1 ms / ≤ 10 ms | p95 ≤ 2 frames late (QB-L1) | `DesignSelectBudgetTests.moveStep`; P1 move |
+| QD-S2 | Frame, Rectangle, Ellipse: one draw step | ≤ 1 ms / ≤ 10 ms | p95 ≤ 2 frames late | `DesignSelectBudgetTests.drawStep`; P1 draw |
+| QD-S3 | Resize handle: one step, one layer and 20 layers | ≤ 1 ms / ≤ 10 ms | p95 ≤ 2 frames late | `DesignSelectBudgetTests.resizeStep`; P1 resize |
+| QD-S4 | Marquee: one step (query 2,000 layers, set selection) | ≤ 1 ms / ≤ 10 ms | p95 ≤ 2 frames late | `DesignSelectBudgetTests.marqueeStep`; P1 marquee |
+| QD-S5 | Space-pan and zoom keys | none (view state) | pan p95 ≤ 2 frames late; a zoom key repaints within 2 frames | P1 pan, zoom |
+| QD-S6 | Text tool: one keystroke in the inline editor | `setTextDraft` ≤ 0.1 ms / ≤ 1 ms | p95 ≤ 2 frames late | `DesignStyleBudgetTests.textDraftStep`; P2 typing |
+| QD-S7 | Inspector scrub (opacity, radius, stroke width, X) | `setStyle` / `setNodeFrame` step ≤ 0.5 ms / ≤ 5 ms, coalesced to one step | p95 ≤ 2 frames late (QB-L2) | `DesignStyleBudgetTests.scrubStep`; P2 |
+| QD-S8 | Hit test per pointer move | ≤ 0.5 ms / ≤ 5 ms on 2,000 layers | – | `DesignBudgetTests.hitTest` |
+| QD-S9 | Any command that changes the document (`apply` plus one history record) | ≤ 1 ms / ≤ 10 ms | – | `DesignBudgetTests.applyStep` |
+| QD-S10 | Layers list with every row expanded (2,000 rows) | row build ≤ 5 ms / ≤ 50 ms | scroll p95 frame interval ≤ 1.5 refreshes (QB-L10) | `DesignLayersBudgetTests.layerRows`; P3 |
+| QD-S11 | Open and save the `crowd` file | decode and encode ≤ 50 ms / ≤ 500 ms | progress within 100 ms (QB-L9); no main-thread stall over 2 refreshes (QB-L12) | `DesignBudgetTests.fileRoundTrip`; P4 |
+| QD-S12 | Export (wave 3): SVG of the Desktop frame of `crowd`; PNG at 2x | SVG ≤ 100 ms / ≤ 1 s | PNG progress within 100 ms (needs #330's progress mark); 2x PNG of 1440 × 1024 written ≤ 1 s (the journey's wall time) | `DesignExportBudgetTests.svgExport`; `testExportPNGSVGPDF` |
+
+### 7.2 App-audit checks that apply
+
+All six checks in `Tests/AppAuditTests/Checks/` run on every Design journey
+shot (macOS CI; locally through `scripts/ui-test`); the baseline only goes
+down.
+
+| Check | Design today | Target | How Design gets there |
+|---|---|---|---|
+| `identifier` | 20 | 0 | Each feature gives `design.<area>.<name>` identifiers to the controls of the views it owns; the SuiteUI part (top bar, rail, tabs, inspector rows) comes from SuiteUI issues (#288 lists both) |
+| `disabled-dim` | 0 | 0 | Disabled-with-reason controls use SuiteUI's dimming, never a custom opacity |
+| `overlap` | 0 | 0 | The layout journey (7.3) shoots each width |
+| `contrast` | 0 | 0 | Secondary text only through `SuiteColor.textSecondary` |
+| `offscreen` | 0 | 0 | The layout journey at 880 × 560 and 1024 × 768 |
+| `unnamed` | 0 | 0 | Every icon-only control keeps a title (the rail, Align row, row toggles) |
+
+### 7.3 Layout spec
+
+Checked at five window sizes. On the CI runner (a 1024 × 768 display, where a
+1280-wide window runs off-screen, app-audit #263) only 880 × 560
+(`SuiteSize.windowMinimum`) and 1024 × 720 (the largest that fits under the
+menu bar); 1280 × 800, 1440 × 900 and 1920 × 1080 are **local only**
+(`scripts/ui-test` on a large display), and the test skips them when the
+display is smaller. `testLayoutAtWidths` (`+Layout`, D0-7) launches with
+`-DesignWindowSize <w>x<h>` (D0-5a adds the argument) on `cards` with "A"
+selected, shoots each size, and asserts from element frames, to 0.5 pt:
+
+1. Rail, canvas and panel sit side by side with no gap or overlap; the panel
+   is 280 pt; the canvas is at least 440 pt wide (`contentMinimum`).
+2. Top bar items don't overlap and none is cut off; at 880 the items keep
+   their titles or collapse to icons with their titles as tooltips, never
+   truncated text.
+3. In the Properties tab, the value column's leading edge is the same x in
+   every section (Frame, Corner radius, Fill, Stroke, Text) and the locked
+   hint sits in that column (#276).
+4. In Layers, every row's eye and lock toggles share one x for the eyes and
+   one for the locks, whatever the row's depth.
+5. The status pills are on one line, untruncated, from 1024 up; at 880 the
+   message pill is the one that shortens.
+6. The audit's `overlap` and `offscreen` counts for these shots are 0 (CI
+   sizes in CI, all five locally).
+
+### 7.4 Fidelity: output equals a reference
+
+| id | Check | Reference | Runs |
+|---|---|---|---|
+| QD-V1 | Save is stable: for every fixture, `encode(decode(encode(doc))) == encode(doc)` byte for byte; a version-1 JSON string written before D0-1 decodes to the same tree with the new fields at their defaults | the fixture built in code; the version-1 string in the test | Linux |
+| QD-V2 | The canvas draws what the file holds: the `cards` canvas matches its golden within QB-V2 (channel 2/255, ≤ 0.5% pixels), Dark and Dark + Increase Contrast | `Tests/AppSnapshotTests/Golden/design-canvas-cards-*.png` | macOS CI, **blocked on SuiteUI #331 and #332** (no golden harness exists yet); until then the plain snapshot PNGs are judged by eye |
+| QD-V3 | Curves stay curves: an ellipse, a rounded rectangle and (wave 3) a pen curve reach the drawing layer as curve elements, never line segments | element kinds of the built `Path` | macOS CI (`Tests/AppSnapshotTests/DesignArtworkPathTests.swift`, no golden needed) |
+| QD-V4 | Grouping and ungrouping move nothing: every leaf frame is equal before and after (Linux), and the canvas golden is unchanged (macOS CI, blocked on #331 and #332 like QD-V2) | the pre-group frames; the golden | Linux; macOS CI |
+| QD-V5 | Duplicate and paste copy faithfully: the copy equals the original except ids, the offset and the lock | the original subtree | Linux |
+| QD-V6 | Align and distribute land exactly: three rectangles at x 10, 50, 200 aligned left all have x 10; widths 20, 40, 20 spanning 0...300 distribute to equal gaps (≤ 1e-9) | #714's numbers | Linux |
+| QD-V7 | Text doesn't jump: the committed text's frame equals the editor's at 25%, 50%, 100% and 200% zoom (#268) | the editor frame | macOS CI (`Tests/AppSnapshotTests/DesignTextScaleTests.swift`) |
+| QD-V8 | SVG export (wave 3) equals a reference document for the `cards` Desktop frame: viewBox, one element per visible layer, clipPath for the frame, escaped text, opacity and stroke attributes | a string literal in `DesignSVGTests.swift` | Linux |
+| QD-V9 | PNG export (wave 3) of a frame equals the canvas golden of that frame (QB-V4) | the QD-V2 golden | macOS CI, blocked on #331 and #332 |
+
+### 7.5 Feel
+
+The rubric's QB-F1 to QB-F6 apply to every feature. Design's tests for
+them: `DesignToolsTests` (an enabled tool's drag changes the document; a
+disabled one has help), `DesignContractLawTests` (the help law of section 5,
+for every conformance), each journey reading the
+Edit menu's undo name after every gesture (QB-F3), the keyboard step on one
+bar slider and one scrub field in J10 (QB-F4), and goldens for the marquee
+and the several-layer selection box under Increase Contrast (QB-F5, once
+both #331 and #332 land).
+
+---
+
+## 8. Coverage and waves
+
+### 8.1 Every open line:design issue
+
+| Issue | Title (short) | Tier | Feature |
+|---|---|---|---|
+| #752 | Fill opacity, stroke, Auto Layout | p1 | F3 `style-rows` (opacity as a layer opacity, Q9; stroke); Auto Layout bullet: not v1 (Q2) |
+| #714 | Align several, distribute | p1 | F1 `select-several` |
+| #613 | Lock mid text edit drops the typing | p3 | F4 `layers-panel` (lock commits the edit first, in `DesignWorkspace.swift`) |
+| #607 | Arrows nudge a layer in a hidden group | p3 | F1 `select-several` (`DesignCanvasEditing.swift`) |
+| #589 | Group row's toggles unreachable | quality | F4 `layers-panel`, after the SuiteUI side of #589 |
+| #542 | Edit mid drag leaves a stray undo step | p3 | F1 `select-several` (`DesignCanvasEditing.swift`) |
+| #532 | Corner radius, stroke, Auto Layout | p1 | Radius: PR #753 (before wave 0); rest is #752 → F3 |
+| #418 | Export PNG, SVG, PDF | p2 | F6 `export` (wave 3) |
+| #416 | Group and ungroup | p1 | F2 `copy-group` |
+| #415 | Cut, copy, paste | p1 | F2 `copy-group` |
+| #414 | Duplicate, Option-drag | p1 | F2 `copy-group` |
+| #288 | Controls without identifiers | p2 | Spread: D0-5a, D0-5b and D0-6 (window, top bar, canvas, menus), then each wave-1 feature for the views it owns; the SuiteUI part goes to SuiteUI. Closes when the `identifier` count is 0 |
+| #276 | Locked hint in the gutter | p3 | F3 `style-rows` |
+| #275 | System undo lost in text fields; close prompt | p1 | F5 `files-history` |
+| #270 | Save stays bright after saving | p3 | F5 `files-history` |
+| #268 | Text jumps size on commit | p1 | F3 `style-rows` |
+| #267 | Stroke, opacity, text size | p1 | F3 `style-rows` (Align is done, #716) |
+| #266 | Frame names inside the frame | p2 | F3 `style-rows` (the artwork painter) |
+| #21 | Wide-gamut variables | p3 | Not v1 |
+| #20 | Variables, light and dark | p2 | F9 `variables` (wave 3) |
+| #19 | Components panel | p2 | F8 `components` (wave 3) |
+
+Gaps with no issue (each lead files a `gap` issue when it starts): marquee,
+several-layer transform and zoom to selection, plus the `CanvasViewport`
+"show a document rect" `needs-ui` issue (F1); rename, reorder, nest and
+Arrange (F4); the open-error journey (F5); the Pen tool (F7); the public
+`DesignPage` init (D0-1). Open PR #719 duplicates the fix that shipped as
+#749 and can close (Q6).
+
+### 8.2 Waves
+
+A wave starts when everything it waits on has merged. No two features in a
+wave own the same file; across waves a file changes hands only after the
+earlier wave merged; tasks inside one feature run in order and may pass a
+file along. "Tests" means new files in `Tests/DesignModelTests/` unless a
+path says otherwise; journeys are `UITests/DesignJourneyTests+<Area>.swift`;
+snapshots are in `Tests/AppSnapshotTests/`. Paths drop the
+`Sources/DesignModel/` and `Sources/DesignApp/` prefixes where the file name
+says which target (`Live/`, `Contracts/`, `Fakes/` are DesignModel).
+
+#### Wave 0: `design-seams` (one feature, tasks in order)
+
+Waits on: PR #753 merged (it adds `cornerRadius`); SuiteUI #333 for the
+journey template, or D0-7 makes the one-line template change (Q1). Engine:
+none.
+
+| Task | Behavior | Owned files |
+|---|---|---|
+| D0-1 | Style schema (5.1) with version-1 files still opening; `DesignNode(id:copying:)`; public `DesignPage` init; `marquee` on the workspace; every selection change ends the edit run | `DesignNode.swift`, `DesignWorkspace.swift`, `DesignSelection.swift`, `DesignFile.swift`; tests `DesignStyleSchemaTests.swift` |
+| D0-2 | Contracts, `DesignServices` (`.live` all `NotBuilt`), `services` on the workspace, tier-1 fakes, the contract law | `Contracts/EditContracts.swift`, `Contracts/StyleTypes.swift`, `Contracts/UseCases.swift`, `DesignServices.swift`, `DesignWorkspace.swift`, `Fakes/FakeSupport.swift`, `Fakes/DesignFakes.swift`; tests `DesignContractLawTests.swift`, `DesignIDMintTests.swift` |
+| D0-2b | One stub per tier-1 live type, and `.live` naming them, so no later feature edits `DesignServices.swift`: `LiveFiling` alone wraps today's codec, the others forward to `NotBuilt` | `Live/LiveMarquee.swift`, `Live/LiveTransforming.swift`, `Live/LiveAligning.swift`, `Live/LiveFraming.swift`, `Live/LiveDuplicating.swift`, `Live/LiveGrouping.swift`, `Live/LiveClipboard.swift`, `Live/LiveOrdering.swift`, `Live/LiveStyling.swift`, `Live/LiveFiling.swift`, `DesignServices.swift` |
+| D0-3 | `DesignActions` (5.5), with today's single-layer methods behind `.delete`, `.nudge` and `.align` for one layer; the gesture routes: **marquee rule** (a Move press on a frame's empty background, no child under the pointer, that then drags starts a marquee over that frame's children unless the frame is already selected, when it moves; a click there without moving selects the frame; a press off every frame starts a marquee over the page's top level), several-layer move and resize, Option-drag copies; `endDrag` ends the edit run | `DesignActions.swift`, `DesignCanvasEditing.swift`; tests `DesignActionsTests.swift`, `DesignGestureRouteTests.swift` |
+| D0-4 | Fixtures (`empty`, `cards`, `two-pages`, `crowd`); the budget helper and the shared budget rows QD-S8, QD-S9, QD-S11 | `DesignFixtures.swift`; tests `DesignFixturesTests.swift`, `DesignBudget.swift`, `DesignBudgetTests.swift` |
+| D0-5a | Every new intent and `perform` for it; launch arguments `-DesignServices`, `-DesignFixture`, `-DesignWindowSize`; Zoom to Selection sets the zoom and keeps the rect to show in the window's state (D0-5b passes it on); the several-layer inspector shell (header, Align row with Distribute, rows reading "Mixed", each control's help from the actions); the status line's selection count; `DesignControls`, published as the `suite.controls` accessibility value under the perf flag (each `design.*` control's id, enabled state and reason, for J15) | `DesignIntent.swift`, `DesignWindow.swift`, `DesignEditor.swift`, `DesignInspector.swift`, `DesignAlignBar.swift`, `DesignControls.swift` |
+| D0-5b | Canvas: the marquee mark; selection marks split into their own file, identified `design.canvas.selection`; an empty frame-name overlay slot (`DesignFrameLabels`); the `show` rect parameter, passed from the window's state (unused until F1); the pasteboard bridge and the copy, cut and paste hooks on the canvas and Layers; rename presentation state in Layers | `DesignCanvas.swift`, `DesignCanvasMarks.swift`, `DesignSelectionMarks.swift`, `DesignFrameLabels.swift`, `DesignPasteboardBridge.swift`, `DesignLayersPanel.swift` |
+| D0-6 | Menus: Edit adds Duplicate after the stock pasteboard group, which stays, so Cut, Copy, Paste and Select All keep working in text fields and reach layers through the D0-5b focus hooks; Page adds Rename Page…; Object adds Group, Ungroup, Arrange, Distribute; View adds Zoom to Selection; every Design item disabled with its help (the system's pasteboard items are disabled by the system, with no tooltip) | `DesignCommands.swift`, `DesignEditMenu.swift`, `DesignObjectMenu.swift`; snapshots `DesignEditMenuSnapshots.swift`, `DesignPageMenuSnapshots.swift`; `UITests/DesignJourneyTests.swift` (J1's item list) |
+| D0-7 | The every-control sweep and the layout journey | `UITests/DesignJourneyTests+EveryControl.swift`, `UITests/DesignJourneyTests+Layout.swift`; `project.yml` only if #333 is open |
+
+D0-2 and D0-5b update `docs/c4/model.json`'s `design-model-sources` and
+`design-app-sources` descriptions (contracts, services, fakes, live types;
+selection marks, frame labels and the pasteboard bridge). The Edit menu's
+text-field behaviour follows current docs for SwiftUI's focused copy, cut and
+paste hooks (CLAUDE.md "check current docs"); Undo and Redo inside text
+fields are F5's (#275).
+
+#### Wave 1: the rest of tier 1 (five features side by side)
+
+Waits on: wave 0 merged. Engine: none for any of the five (Design's tree,
+edits and file live in DesignModel; CoreColor is not needed until #21).
+
+| Feature | Covers | Owned files | Waits on (besides wave 0) |
+|---|---|---|---|
+| F1 `select-several` | marquee, several-layer move, resize, nudge, delete; align several and distribute (#714); Zoom to Selection; #542, #607; J4, J5, J6, P1 | `Live/LiveMarquee.swift`, `Live/LiveTransforming.swift`, `Live/LiveAligning.swift`, `Live/LiveFraming.swift`, `DesignAlign.swift`, `DesignCanvasEditing.swift`, `DesignCanvas.swift`, `DesignSelectionMarks.swift`, `DesignAlignBar.swift`; tests `DesignMarqueeTests.swift`, `DesignSeveralTransformTests.swift`, `DesignDistributeTests.swift`, `DesignFramingTests.swift`, `DesignSelectBudgetTests.swift`; snapshots `DesignMarqueeSnapshots.swift`, `DesignAlignSnapshots.swift`, `DesignMultiSelectSnapshots.swift`; journeys `+Select`, `+PerfCanvas` | a new SuiteUI issue, filed by the F1 lead: `CanvasViewport` scrolls to show a document rect the host passes (J4's centering assert waits on it); SuiteUI #330 and #333 for P1 |
+| F2 `copy-group` | duplicate and Option-drag (#414), group and ungroup (#416), cut, copy, paste (#415); J7, J8, J9 | `Live/LiveDuplicating.swift`, `Live/LiveGrouping.swift`, `Live/LiveClipboard.swift`; tests `DesignDuplicateTests.swift`, `DesignGroupTests.swift`, `DesignPasteboardTests.swift`; snapshots `DesignDuplicateSnapshots.swift`, `DesignGroupSnapshots.swift`, `DesignPasteboardSnapshots.swift`; journey `+Arrange` | nothing |
+| F3 `style-rows` | opacity and stroke (#752), text family, size, weight, alignment (#267), several layers' rows set each layer ("Mixed"), no jump on commit (#268), hint column (#276), frame names in the overlay (#266), drawing radius, stroke and opacity; J10, J11, P2 | `Live/LiveStyling.swift`, `DesignCorners.swift`, `DesignInspector.swift`, `DesignInspectorStyle.swift`, `DesignInspectorContent.swift`, `DesignCanvasMarks.swift`, `DesignFrameLabels.swift`, `DesignTextEditor.swift`, `DesignText.swift`; tests `DesignStyleTests.swift`, `DesignStyleBudgetTests.swift`; snapshots `DesignInspectorSnapshots.swift`, `DesignTextSnapshots.swift`, `DesignStyleSnapshots.swift`, `DesignArtworkPathTests.swift`, `DesignTextScaleTests.swift`; journeys `+Style`, `+PerfScrub` | SuiteUI #745 or #718 (public `onEnd`; Design's local end works meanwhile); #330 and #333 for P2 |
+| F4 `layers-panel` | rename layers and pages, drag to reorder and nest, Arrange, group-row toggles (#589), lock commits a text edit (#613); J12, P3 | `Live/LiveOrdering.swift`, `DesignLayersPanel.swift`, `DesignLayerToggles.swift`, `DesignWorkspace.swift`; tests `DesignOrderingTests.swift`, `DesignRenameTests.swift`, `DesignLockTextEditTests.swift`, `DesignLayersBudgetTests.swift`; snapshots `DesignLayersSnapshots.swift`; journeys `+Layers`, `+PerfLayers` | SuiteUI #589, #577, #108, #73 (until they land: mouse rename only, no context menu, and J12's group-row eye step is an `XCTSkip` naming #589); #330 and #333 for P3 |
+| F5 `files-history` | system Undo and Redo inside text fields and the close prompt (#275), save status and the unsaved dot (#270), the codec behind `DocumentFiling`, the open-error journey; J13, J14, J16, P4 | `Live/LiveFiling.swift`, `DesignFile.swift`, `DesignHistory.swift`, `DesignCommands.swift`, `DesignWindow.swift`, `DesignEditor.swift`; tests `DesignDirtyTests.swift`, `DesignFilingTests.swift`; snapshots `DesignFileSnapshots.swift`, `DesignFileMenuSnapshots.swift`; journeys `+Files`, `+PerfFiles` | SuiteUI #339 (save status in the top bar; a plain status text meanwhile); #330 and #333 for P4 |
+
+#### Wave 2: `design-seams-2` (one feature, tasks in order)
+
+Waits on: wave 1 merged (it edits files wave 1 owns). Engine: none.
+
+| Task | Behavior | Owned files |
+|---|---|---|
+| D2-1 | Tier-2 schema (5.1): `path` kind with every switch over the kind (a placeholder case in the canvas), `path`, `componentID`, `fillVariableID`, file `components` and `variables`, file version 2 with version 1 still opening; history snapshots carry components and variables | `DesignNode.swift`, `DesignInspectorContent.swift`, `DesignCorners.swift`, `DesignCanvasMarks.swift`, `DesignFile.swift`, `DesignHistory.swift`, `DesignWorkspace.swift`; tests `DesignTierTwoSchemaTests.swift` |
+| D2-2 | Tier-2 fakes and live stubs; `.fake` and `.live` name them | `Fakes/DesignTierTwoFakes.swift`, `Live/LiveExport.swift`, `Live/LivePen.swift`, `Live/LiveComponents.swift`, `Live/LiveVariables.swift`, `DesignServices.swift`; tests `DesignContractLawTierTwoTests.swift` |
+| D2-3 | Actions and routes: export plan, pen press, drag and finish, create and insert component, variable edits and binding, light and dark mode, `displayFill(of:)` and `resolvedChildren(of:)` for the canvas | `DesignActions.swift`, `DesignCanvasEditing.swift`; tests `DesignActionsTierTwoTests.swift` |
+| D2-4 | The canvas draws paths, resolved instances and bound fills; the pen draft slot in the overlay; Export…, Create Component, Variables… and Light / Dark in the menus and top bar; the window presents the Export and Variables sheets from two placeholder views it creates (`DesignExportSheet`, `DesignVariablesSheet`, each an empty view F6 and F9 fill), and keeps the visible canvas center for Insert; J1's tier-2 items | `DesignCanvasMarks.swift`, `DesignCanvas.swift`, `DesignIntent.swift`, `DesignWindow.swift`, `DesignCommands.swift`, `DesignObjectMenu.swift`, `DesignEditor.swift`, `DesignExportSheet.swift`, `DesignVariablesSheet.swift`; `UITests/DesignJourneyTests.swift`; `docs/c4/model.json` (names the wave-3 files, so no wave-3 feature edits it) |
+
+#### Wave 3: tier 2 (four features side by side)
+
+Waits on: wave 2 merged.
+
+| Feature | Covers | Owned files | Engine work it waits on |
+|---|---|---|---|
+| F6 `export` | #418: PNG 1x/2x/3x, SVG, PDF; progress, Cancel, per-file errors | `Live/LiveExport.swift`, `Live/DesignSVG.swift`, `DesignExportSheet.swift`, `DesignRasterizer.swift`; tests `DesignExportTests.swift`, `DesignSVGTests.swift`, `DesignExportBudgetTests.swift`; snapshots `DesignExportSnapshots.swift`; journey `+Export` | none (the SVG writer is DesignModel's, per #418; PNG and PDF render the artwork view) |
+| F7 `pen` | Pen tool: corners, smooth points, close, Return and Escape finish; enable the tool | `Live/LivePen.swift`, `DesignPenMarks.swift`, `DesignCanvas.swift`, `DesignWorkspace.swift` (the tool's help); tests `DesignPenTests.swift`; snapshots `DesignPenSnapshots.swift`; journey `+Pen` | **Needs a new core issue:** "Shared path geometry: a Linux-safe path (move, line, cubic, close) with exact cubic bounds, a hit test within a tolerance and SVG path data, for Flare and Design." Also SuiteUI #706 (anchor mark) |
+| F8 `components` | #19: create from a frame, Assets section, insert, instances draw the component | `Live/LiveComponents.swift`, `DesignPanel.swift`, `DesignAssetsPanel.swift`; tests `DesignComponentsTests.swift`; snapshots `DesignComponentsSnapshots.swift`; journey `+Components` | none |
+| F9 `variables` | #20: Variables sheet, light and dark values, fills bound to a variable (drawn through D2-3's `displayFill`), preview mode | `Live/LiveVariables.swift`, `DesignVariablesSheet.swift`, `DesignInspector.swift`; tests `DesignVariablesTests.swift`; snapshots `DesignVariablesSnapshots.swift`; journey `+Variables` | none (CoreColor wide gamut is #21, not v1) |
+
+### 8.3 Why this order
+
+- **Wave 0 takes every shared file once.** `DesignIntent.swift`,
+  `DesignCommands.swift`, `DesignWindow.swift`, `DesignServices.swift` and
+  `DesignNode.swift` are where parallel features would collide. Wave 0 puts
+  every tier-1 case, menu item, service slot and stored field in place,
+  backed by `NotBuilt`, so no control is dead (each says "<Feature> isn't
+  built yet.") and wave 1 only fills its own `Live/` files and its own
+  views. This is Flare's LM-0a3 move ("every stored property in one PR") for
+  Design.
+- **Wave 1 is the everyday loop**, in five features with disjoint files;
+  each can ship in any order. F1 and F2 together finish the "several
+  layers" story that priorities item 7 says comes first.
+- **Wave 2 repeats the seam for tier 2**, once wave 1 has let go of the
+  shared files, so wave 3's four features run side by side.
+- **Only F7 waits on creative-core**, and only for path geometry. If that
+  issue is slow, F7 waits alone; nothing else depends on it.
+
+### 8.4 Engine work
+
+| Feature | creative-core work |
+|---|---|
+| D0, F1–F5, D2, F6, F8, F9 | none |
+| F7 `pen` | needs a new core issue: shared path geometry (spec in 8.2) |
+| #21 (not v1) | none new: CoreColor's existing conversion, per #21's body |
+
+---
+
+## 9. Open questions for the captain
+
+1. **Q1 Journey files.** Wave 0 needs SuiteUI #333's template change so each
+   feature owns its own journey file. If #333 is not merged when wave 0
+   starts, may D0-7 make the one-line `project.yml` change itself (leaving
+   the input and perf helpers to #333)?
+2. **Q2 Auto Layout.** #752's last bullet stores direction, gap, padding and
+   alignment with no layout math, which leaves controls that change nothing
+   on the canvas. Proposal: drop that bullet from v1 and file one tier-3
+   issue for Auto Layout with its math. Agree?
+3. **Q3 Screen-side budgets.** No input-to-screen number can be measured
+   until SuiteUI #330 (`FrameProbe`, now `p3`) lands. Proposal: raise #330
+   to `p1` by dependency (Design and Flare both need it) and let wave 1 gate
+   on the model half meanwhile. Agree?
+4. **Q4 Autosave and recovery.** Flare's v1 has a recovery file. This
+   blueprint leaves Design's out of v1 (the close prompt covers the common
+   loss). In or out?
+5. **Q5 Pen tool tier.** The Pen sits in wave 3 and waits on a new core
+   issue for shared path geometry. Should Design instead take a dependency on
+   FlareCore's existing path type (a `Package.swift` change, which is a
+   protected path), or wait for the shared module?
+6. **Q6 Housekeeping.** Close PR #719 (its fix shipped as #749)? File the
+   gap issues listed in 8.1 when wave 0 starts, or now?
+7. **Q7 Status of the existing selection handles.** SuiteUI #273 moves
+   Design's handles into SuiteUI for Flare and Halo. F1 edits
+   `DesignSelectionMarks.swift`; should F1 wait for #273 to avoid doing the
+   several-layer box twice?
+8. **Q8 Dragging a frame's background.** The marquee rule (D0-3) means a drag
+   that starts on an unselected frame's empty background draws a marquee
+   inside it instead of moving the frame; the frame moves once selected (a
+   click, or its Layers row). That is how most layout tools behave for a
+   frame that fills the page, and it is the only way to reach the marquee on
+   `cards`. Agree?
+9. **Q9 Opacity.** #752 asks for fill opacity; this blueprint ships one layer
+   opacity (it fades fill, stroke, text and a frame's contents, in the Layer
+   section) because that is what export and the canvas can draw the same way.
+   A separate fill alpha would come with gradients. Agree?
+
+---
+
+## 10. Critic rounds
+
+### Round 1 (one critic subagent, read-only, 2026-10-14)
+
+It found 6 blocking, 12 major and 9 minor items. All 21 open issues were in
+8.1, and it found no product name in the text. It could not compile section 5
+itself, because it had no toolchain. Every item below was checked against the
+code and fixed in this branch. After the fixes, section 5 was rebuilt against
+DesignModel, and its fakes ran on a `cards`-shaped tree on Swift 6.3.3.
+
+| # | Severity | Finding | Fix |
+|---|---|---|---|
+| 1 | blocking | A marquee can't start "on empty canvas": the Desktop frame fills the page, so a press hits it and moves it | Marquee rule in D0-3 (a drag on a frame's empty background selects inside it); J5 coordinates; Q8 |
+| 2 | blocking | Fakes acted on top-level layers only, so every `cards` layer (inside Desktop) was refused | Fakes walk the tree (`Fakes/FakeSupport.swift`); scratch test on a `cards` tree |
+| 3 | blocking | The several-layer inspector had no Align row, and the file belonged to F3 while F1 needed it | D0-5a builds the several-layer shell (Align with Distribute, "Mixed" rows) |
+| 4 | blocking | Zoom to Selection can't center: `CanvasViewport` keeps its scroll position private, and `DesignWindow` belonged to F5 | D0-5a does the zoom and hands a `show` rect to the canvas (F1's file); new SuiteUI issue named; J4's centering assert waits on it |
+| 5 | blocking | Nobody owned text-field Cut, Copy, Paste and Select All, and replacing the pasteboard group would break them | D0-6 keeps the stock pasteboard group, and layers answer through focus hooks; Undo and Redo in fields stay F5's (#275) |
+| 6 | blocking | `.live` all `NotBuilt` would disable today's Delete, nudge and Align after wave 0 | Single-layer `.delete`, `.nudge` and `.align` keep today's methods (rules in 5, the D0-3 row) |
+| 7 | major | J8's ⌘N replaces the document in the same window; its rename step needed F4 | J8 relaunches on `empty` (the pasteboard outlives the app) and uses the X field for the text check |
+| 8 | major | `cards` had no frames for Pair, Locked and Hidden; J9's across-parents pair shared a parent | Exact frames and parents; J9 uses A with E1 inside Pair |
+| 9 | major | Frame names above the frame are clipped by the artboard | `DesignFrameLabels` overlay slot (D0-5b), filled by F3 |
+| 10 | major | "Mixed" rows setting several layers had no contract | `StyleEditing.setFrame` and `setFill` over ids; `DesignStyleChange.frame` and `.fill`; F3 covers it |
+| 11 | major | The help law was untestable as written, and the fakes broke it (`.unchanged`, Copy, no framing or paste help) | Law restated (nil help: no refusal except `.unchanged`); `framingHelp`, `pasteHelp`, `zoomToSelectionHelp` added |
+| 12 | major | Fixed coalescing keys merged edits to different layers | `DesignEdit.runKey(base, ids)`; selection change and `endDrag` end the run |
+| 13 | major | QD-V1 byte equality couldn't hold for old files; fixtures were said to come from disk | Round-trip equality on encode, decode equality for old files; fixtures and references live in code |
+| 14 | major | Goldens and perf rows depended on #330, #331, #332 and #333 without saying so; `DesignTextScaleTests` was listed as a Linux test | Marked blocked with the issue numbers; test moved to `Tests/AppSnapshotTests` |
+| 15 | major | Adding `case path` in D2-1 broke `DesignArtwork`'s switch until D2-4 | D2-1 adds a placeholder case in the canvas in the same PR |
+| 16 | major | D0-1 used `DesignServices` before D0-2; D0-4 used fixtures before D0-6 | `services` moved into D0-2; fixtures are D0-4, before the app tasks D0-5a and D0-5b |
+| 17 | major | Wave 3: F7 needed `DesignCanvas.swift`; F9 had no binding field, no bind method and no drawing | F7 owns `DesignCanvas.swift`; `fillVariableID`, `VariableEditing.bind`, D2-3's `displayFill` and D2-4's drawing |
+| 18 | major | J4's zoom numbers ignored the fit on open; the pill never reads "Fit" | J4 asserts stops relative to the fitted percent |
+| 19–27 | minor | §5.6 contradicted 8.2; the saved marker's owner was inconsistent; cross-references to 8.3 and 10 were wrong; J1 counted items not built yet; `two-pages` usage; J6 edited a shared file; the status-line count's owner; #20's tier; S1's link was a product domain | Each fixed: `.fake` and `.live` comments; F5 owns the marker; references fixed; J1 lists only built items; `two-pages` is J12 only; J6 in `+Select`; the count is D0-5a's; a Calls row for #20; S1 cited by title |
+
+### Round 2 (a second critic subagent, read-only, 2026-10-14)
+
+It checked round 1's 27 fixes against the text and the code, then looked for
+new gaps. It found 1 blocking, 13 major and 10 minor items. All 21 open
+issues were in 8.1, and it found no product name or product domain. Every
+item was checked and fixed. The revised section 5 was compiled again against
+DesignModel on Swift 6.3.3 with the 5.1 schema patched in. A scratch test ran
+on a `cards` tree: the distribute refusal text, a marquee over only locked
+and hidden layers selecting nothing, paste landing in the source parent, the
+create-component refusal, and the "two or more" wording. Two scripts checked
+the rest: no owned file is shared inside wave 1 or wave 3, and every
+existing Design file plus #753's `DesignCorners.swift` sits in exactly one
+C4 component.
+
+| # | Severity | Finding | Fix |
+|---|---|---|---|
+| 1 | blocking | Round 1's "keep today's methods" covered only delete, nudge and align. The one-layer frame, fill and radius rows, and move and resize drags, would go off behind `NotBuilt` until F3 | Those are added to the list in 5's rules and in `DesignActions`' header |
+| 2 | major | The help law was worded three ways (5, 5.5, 7.5); single-layer Align's "already there" didn't fit | One wording in 5, 5.2, 5.5 and 7.5; "already there" is the law's `.unchanged` case |
+| 3 | major | Tier-2 fakes broke the law (create and export helps vs their refusals) | New refusals `.notAFrame`, `.nothingToExport`; export's help derives from `plan` |
+| 4 | major | #753's `DesignCorners.swift` had no owner, no C4 component and wasn't in D2-1's switch list; no refusal for "no corners" or "not text" | Added to inspector logic, F3 and D2-1; `.noCorners`, `.notText`; mixed selections skip what can't take the change |
+| 5 | major | Paste destination contradicted #415 (the source parent) | The pasteboard carries the source parent; paste falls back to the top level; J8 asserts it |
+| 6 | major | The system's pasteboard items can't show a tooltip | J1 and J8 check only enabled or disabled; `pasteHelp`'s words are checked in the Model test |
+| 7 | major | "Delete ⌫" contradicted today's "Delete Layer" with no key equivalent | §6 keeps "Delete Layer", no key equivalent |
+| 8 | major | J13 and P4 would open system file panels | `-DesignSaveTo` and `-DesignOpenFile` in both; the Modes paragraph says so |
+| 9 | major | J15's `suite.controls` had no producer | D0-5a's `DesignControls.swift` |
+| 10 | major | J4 read a ruler label that is hidden from accessibility; `design.canvas.selection` had no producer | J4 measures the selection element's move; D0-5b gives it the identifier |
+| 11 | major | Layout sizes above 1024 × 768 can't be measured on the CI runner | CI checks 880 × 560 and 1024 × 720; the larger sizes are local only |
+| 12 | major | `StudioScrubRow` has no unit or mixed state; `ScrubField` has no mixed state | Ranged rows use `InspectorSliderRow(unit:decimals:mixed:)`; a new `needs-ui` issue for `ScrubField` |
+| 13 | major | Wave-3 sheets needed D2-4's window files | D2-4 presents two placeholder sheet views that F6 and F9 own and fill |
+| 14 | major | Fake mode couldn't pass J5's last marquee, J10's hidden reason or J16 | The marquee fake skips locked and hidden layers; J10's reason and J16 are live-only |
+| 15–24 | minor | Leftover D2-3 references; `LiveFiling` described two ways; Distribute in two places; J1's file was owned only by D0-6; #714's wording; fixture counts and ranges; unmarked blocked items; D0-5a used a parameter that only D0-5b adds; what opacity means; variable names not kept unique, no record of the C4 check, and Insert's center | All fixed in place; opacity is a layer opacity (Q9); D2-4 owns J1's file for the tier-2 items and keeps the visible center for Insert |
+
+After round 2 no blocking item is open. The open questions in section 9 are
+the captain's.
