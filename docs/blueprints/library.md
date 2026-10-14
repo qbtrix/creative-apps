@@ -1749,3 +1749,134 @@ Checklist:
 - [x] Every new rule says why, and which feature moves it into
       `docs/design.md`.
 - [x] Every visible state in section 4 has a snapshot in 6.3.
+
+---
+
+## 7. Quality bar
+
+Every item here is a number with a test that measures it, on CI or
+locally. Three harnesses do the measuring, all named in rubric section 6:
+
+- **Probe** (macOS, perf journeys): SuiteUI's `FrameProbe` (#330) under
+  `-LibraryPerfProbe`, read by `perf()` (#333), attached as
+  `perf-<test>.json`. Frames late = display refreshes between the input
+  event and the first frame that shows it. Marks Library adds: `progress`
+  (import or export progress row first drawn), `thumb-ready` (a cell's
+  image first drawn), `render-preview` and `render-full` (a loupe picture of
+  a given token first drawn), `launch-grid` (first grid frame after launch).
+- **Model budget** (Linux and macOS, `swift test`):
+  `Tests/LibraryModelTests/LibraryBudgetTests.swift`, wall time over 20 runs
+  on the `large` fixture or a named buffer, reporting median and p95 as one
+  `LIBRARY-BUDGET` line per row and writing them to
+  `.build/snapshots/library-budgets.txt`, so the contact sheet shows them.
+  CI runs debug; the debug gate is the release target × 10 (rubric), and
+  pixel loops get × 20, the factor Photo measured for CoreRaster loops in
+  debug (`PhotoBrushLatencyTests`), which is recorded here as decision D8.
+- **Fidelity** (Linux for pixels the Model makes; macOS for ImageIO):
+  exact or toleranced comparisons against a reference, listed in 7.4.
+
+Per rubric section 6, every probe row ships **report-only** (asserts only
+that it collected at least 60 samples) and gets its CI gate after ten green
+CI runs (measured p95 × 1.5, never tighter than the target), written in
+`UITests/Journey+Budgets.swift`. Model budgets gate from their first PR.
+
+### 7.1 Input-to-screen budgets, per interactive tool
+
+| id | Interaction | Target (device, release) | Measured by | Model half (release; debug gate) |
+|---|---|---|---|---|
+| QB-LIB-3 | Scroll the grid of a 10,000-photo catalog end to end | p95 frame interval ≤ 1.5 refreshes; every visible cell `thumb-ready` within 500 ms of stopping | P1 probe | rebuilding `order` for 10,000 ≤ 5 ms (50 ms); `requestThumbnails` for 60 visible ≤ 0.5 ms (5 ms) |
+| QB-LIB-4 | Rating, flag or label key in the grid; click to select | p95 ≤ 2 frames late to the badge or selection drawn | P2 probe | `cull` on one photo of 10,000 ≤ 1 ms (10 ms); it rebuilds `order` only when the sort or collection depends on the change |
+| QB-LIB-5 | Left or Right in the loupe (and Auto Advance) | the next photo's preview (its thumbnail, scaled) on screen p95 ≤ 2 frames late; `render-full` p95 ≤ 150 ms after the key when the neighbour was prefetched | P4, P2 probe | `stepLoupe` ≤ 0.1 ms (1 ms) with `order` cached |
+| QB-L1 | Pan the zoomed loupe; drag a crop handle | p95 ≤ 2 frames late | P4 (pan series), P5 probe | `dragCrop` ≤ 0.2 ms (2 ms) |
+| QB-L2 | Drag a develop slider: the bar's marker | p95 ≤ 2 frames late | P3 probe | `setDevelop` ≤ 0.1 ms (1 ms) |
+| QB-LIB-6 | Drag a develop slider: the loupe picture follows | p95 ≤ 100 ms from a slider event to a `render-preview` at least that new; `render-full` ≤ 400 ms after mouse-up for a 6000 × 4000 photo | P3 probe | preview render (512 px long side, all six sliders) ≤ 8 ms (160 ms); full render (2048 px) ≤ 120 ms (2.4 s); histogram of 2048 px ≤ 10 ms (200 ms) |
+| QB-L9 | Import or export starts | `progress` mark ≤ 100 ms after the command | P6, J7 probe | `beginImport`, `beginExport` ≤ 1 ms (10 ms) |
+| QB-LIB-1 | Import 200 JPEGs of 4000 × 3000 | the first 20 cells `thumb-ready` ≤ 2 s after the command; all records in ≤ 10 s; the main thread never stalls more than 2 refreshes | P6 probe | `finishImport` of 200 into 10,000 ≤ 5 ms (50 ms); planning 10,000 candidates against 10,000 known ≤ 20 ms (200 ms) |
+| QB-LIB-2 | Launch on a 10,000-photo catalog | `launch-grid` ≤ 1 s after launch; no main-thread stall over 2 refreshes while the catalog decodes | P7 probe | `LiveCatalogCoding.decode` of 10,000 ≤ 100 ms (1 s); `encode` ≤ 50 ms (500 ms) |
+| QB-LIB-7 | Export 10 photos of 6000 × 4000 at long edge 2048 | ≤ 15 s; progress advances after each file | J7 with `-LibraryPerfProbe` (report-only) | `plan` for 1,000 photos ≤ 5 ms (50 ms) |
+| QB-LIB-8 | Memory | Peak resident memory ≤ 1.5 GB while scrolling the 10,000 catalog and stepping the loupe through 24 photos | P1 and P4 with `XCTMemoryMetric` | thumbnail LRU holds at most 600 images (`LibraryThumbnailTests` counts); the loupe actor holds at most 3 decoded screen-size buffers (`LibraryLoupeImageTests` counts) |
+
+Why the loupe has two numbers: a 6000 × 4000 photo is 384 MB as Float32,
+and one CoreRaster adjustment pass over a screen-size copy takes tens of
+milliseconds, so no full-size render can follow a drag at 60 Hz. The design
+answer (section 2.5, `RenderQueue`) is the Photo rule: render a 512 px
+preview while the pointer moves, keep only the latest request, and settle to
+the screen-size render on mouse-up. QB-L2 holds the slider itself to the
+usual 2 frames; QB-LIB-6 holds the picture to "never more than 100 ms
+behind". If the model half misses its budget, the fix is a fused develop
+pass in CoreRaster (open question Q3), not a looser budget.
+
+### 7.2 App-audit checks
+
+All six checks in `docs/blueprints/app-audit.md` apply to every Library
+screen: `disabled-dim`, `overlap`, `contrast`, `identifier`, `offscreen`,
+`unnamed`. The baseline today is contrast 2, identifier 16, offscreen 16,
+unnamed 1.
+
+- No Library PR raises a count (the lane refuses it).
+- Each feature's journeys must leave its own new screens at zero for every
+  check: its packet lists the screens and the contact sheet's audit table
+  proves it per run.
+- **v1 exit**: every `library` count is 0. Identifier goes to 0 through
+  #291 and S-L2's per-cell identifiers; offscreen through the layout
+  feature (7.3), unnamed and contrast through the status-and-layout
+  feature's fixes.
+- No new check is proposed: the audit grows from faults (app-audit.md,
+  Growing the audit). If a Library fault slips past all six, its fix PR
+  proposes the check.
+
+### 7.3 Layout spec
+
+Checked at the window widths 880 (`SuiteSize.windowMinimum.width`), 1024,
+1280, 1440 and 1920, with the inspector at its minimum (200), ideal (240)
+and maximum (360) width, in three places:
+
+1. **Model math** (Linux), `Tests/LibraryModelTests/LibraryLayoutTests.swift`
+   over `LibraryLayout` (status-and-layout feature): for each width, the
+   grid's column count is `max(1, ⌊(W − 2·inset + gap) / (cell + gap)⌋)`
+   with SuiteUI's inset and gap, every cell size from 80 to 320 gives at
+   least 2 columns at the content minimum (440 pt) up to cell 200 and at
+   least 1 above it, and the loupe's fit scale leaves `SuiteSize.canvasInset`
+   on the tighter axis.
+2. **Journey** J12 `testLayoutAtWidths` (macOS, on the 1024 × 768 runner, so
+   widths 880 and 1024 only), launched with `-LibraryWindowSize`: reads XCUI
+   frames and asserts, within 0.5 pt: every grid cell in a column shares its
+   left edge; gaps between columns are equal; the status pills share one
+   baseline row and none is clipped; every inspector row's label left edge
+   is equal and every value's right edge is equal; in the loupe at fit the
+   photo's left and right margins differ by at most 1 pt, and so do top and
+   bottom; the crop chips have equal widths; the export sheet lies inside
+   the display. The audit's `overlap` and `offscreen` run on every shot.
+3. **Snapshots** at 1280, 1440 and 1920
+   (`Tests/AppSnapshotTests/LibraryLayoutSnapshots.swift`,
+   `library-layout-<width>-<light|dark>.png`), for the widths the runner
+   display can't show; goldens once #331 lands.
+
+### 7.4 Fidelity tests (output equals a reference)
+
+| id | Check | Reference and tolerance | Test (target) |
+|---|---|---|---|
+| QB-LIB-V1 | Neutral settings change nothing | the input buffer, bit for bit; `render` returns without touching a pixel (counted) | `LibraryDevelopRenderTests` (Linux) |
+| QB-LIB-V2 | Develop order and math | the same buffer run through CoreRaster's calls by hand in the order white balance, exposure, contrast, highlights and shadows: bit for bit. Exposure +1 doubles a linear 0.18 grey within 1e-4; temperature +50 makes red above blue on grey and keeps its Rec. 709 luminance within 1e-3 | `LibraryDevelopRenderTests` (Linux) |
+| QB-LIB-V3 | Histogram is the picture's | CoreRaster `Histogram(of:bins:256,encoding:.sRGB)` of the rendered buffer, exactly; each channel sums to the pixel count | `LibraryDevelopTests` (Linux) |
+| QB-LIB-V4 | Crop size and edges | 600 × 400 at rect width 0.5 renders 300 px wide; 1:1 on 6000 × 4000 is 4000 × 4000; a 10° straighten's crop has alpha 1 in every pixel (no transparent corner) | `LibraryCropTests` (Linux) |
+| QB-V4 | What you see is what you export | export of a developed, cropped photo at long edge 1024, before JPEG encoding, equals the loupe's `.full` render at long side 1024 within 1/255 per channel; after JPEG at quality 95 and decoding, PSNR ≥ 40 dB against it | `LibraryExportFidelityTests` (macOS, `Tests/AppSnapshotTests/`, uses the real `JPEGWriter` and `ImageIODecoder`) |
+| QB-LIB-V5 | Thumbnail matches the loupe | the 256 px thumbnail vs the loupe's `.full` render resized to 256 with lanczos3: mean absolute difference ≤ 1/255, max ≤ 8/255 | `LibraryThumbnailTests` (Linux, fake decoder giving a fixed gradient) |
+| QB-LIB-V6 | Decode orientation and color | a generated JPEG with Exif orientation 6 decodes as portrait, its red marker pixel lands top-left; a Display P3 PNG decodes to sRGB within 2/255 of the expected value | `LibraryDecodeTests` (macOS, `Tests/AppSnapshotTests/`) |
+| QB-LIB-V7 | Catalog file round trip | encode → decode → encode is byte-equal; a fixed three-photo catalog encodes byte-equal to the committed `Tests/LibraryModelTests/Golden/catalog-v1.json` (with `develop` and `crop`), and that file without `develop` objects decodes to neutral settings | `LibraryPersistTests` (Linux) |
+| QB-V5 | Every new visible state has a golden | the PNGs of 6.3, rubric tolerance (channel 2/255, ≤ 0.5% pixels) | `GoldenImage` once #331 and #332 land; PNGs for eyes until then |
+
+Feel (rubric QB-F1–F6) applies as written: J11 is the no-dead-controls
+sweep (QB-F1); J1, J5 and J7 show progress and errors in place (QB-F2);
+J4–J6 read the Edit menu after each gesture (QB-F3); J4 and J5 drive
+everything from the keyboard once (QB-F4).
+
+Checklist:
+
+- [x] Every interactive tool (grid scroll and select, cull keys, loupe
+      step, pan, crop drag, develop slider, import, export, launch) has a
+      budget with a target and the test that measures it.
+- [x] Every budget is measurable on CI (probe or model budget) or locally
+      (`scripts/ui-test`); none is "feels fast".
+- [x] The layout spec names the widths, the tolerance and the test for each.
+- [x] Every fidelity test names its reference and tolerance.
