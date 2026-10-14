@@ -404,3 +404,217 @@ Following `docs/priorities.md`'s rules: PV-1, PV-2, PV-3 and PV-6 are `p1`;
 PV-0 is `p1` by dependency; PV-4, PV-5, PV-7, PV-8 and PV-9 are `p2`; PV-10
 takes each bug's own label (#255 `p1`, the rest `p3`, #289 `p2`). #580 and
 #544 move from `p2` to `p1` with this blueprint (section 9, question 2).
+
+---
+
+## 4. Journeys
+
+### 4.1 Rules for every v2 journey
+
+- **Files.** Each feature owns `UITests/PhotoJourneyTests+<Area>.swift`, one
+  `XCTestCase` class, once SuiteUI's QH-4 (#333) makes the journey template
+  compile `UITests/<target>*.swift`. Until #333 merges, two features of one
+  wave can't both add journeys, so section 8 makes every wave-1 feature wait
+  on #333 for its journey task only (its model and view tasks don't).
+- **Launch.** Live journeys write their input with the existing
+  `writeTestPhoto(to:)` helper and open it with `-PhotoOpenFile`; saves go to
+  `-PhotoSaveTo <folder>`, exports to `-PhotoExportTo <folder>`. Two new
+  arguments (PV-0): `-PhotoFixture <name>` runs `.fake` services on a fixture
+  (section 5.4) and shows a "Preview data" pill; `-PhotoRecoveryDir <folder>`
+  points autosave at the test's folder (PV-1).
+- **Finding things.** Every v2 control carries `photo.<area>.<name>`
+  (`photo.file.recent`, `photo.crop.width`, `photo.layer.mask-badge`).
+  Journeys find controls by identifier, menus by title.
+- **Waiting.** State is awaited with `waitForExistence` or a value predicate
+  (5 s, 30 s for open and save of the large photo). No journey times anything
+  through an XCUI query; timings come from the model budgets (section 7.1).
+- **Every step takes a `shot`** and so runs the app audit.
+- **The v1 journeys stay** (section 0.1, V1–V12) and must stay green; a v2
+  feature that changes a v1 step updates that step in the same PR.
+
+### 4.2 Tier-1 journeys
+
+Each step names what the person does and what the test asserts. States
+lists every empty, error and loading state the journey passes through.
+
+**PJ-1 `testSaveLayeredDocumentAndReopen`** (`+Documents`, PV-1)
+
+1. Launch with `-PhotoOpenFile beach.png -PhotoSaveTo <tmp>`. Assert the
+   title is `beach.png` and there is no unsaved dot (`photo.bar.saved`
+   value "Saved").
+2. Layer > New Layer; brush a stroke; Layer opacity to 50; blend Multiply.
+   Assert `photo.bar.saved` value "Edited" (the dot) and the window's
+   document-edited state is set.
+3. File > Save. Assert a "Keep layers?" choice appears, because the open
+   file is a PNG: **Save as Photo Document** (default) or **Flatten into
+   PNG**. Choose Save as Photo Document. Assert the title reads
+   `beach.agphoto`, "Saved", and the file exists in `<tmp>`.
+4. Close the window (Command-W): no prompt. File > Open Recent >
+   `beach.agphoto`. Assert 2 layers, the top named "Layer 1" with opacity
+   reads 50 and blend "Multiply", and the shot matches step 3's canvas.
+5. Command-Z. Assert the Edit menu reads "Redo" only (a reopened document
+   has an empty history, "Open" as its first step).
+
+States: loading, "Opening…" note when the decode takes over 100 ms (the
+30 MB fixture variant in PJ-P3); error none here (see PJ-4).
+
+**PJ-2 `testUnsavedPromptAndOpenRecent`** (`+Documents`, PV-1)
+
+1. Launch on `beach.png`. Brush a stroke. Command-W.
+2. Assert the system's unsaved-changes alert with Save, Don't Save, Cancel.
+   Cancel: the window stays, still "Edited".
+3. Command-W, Don't Save: the window closes. File > Open Recent lists
+   `beach.png` first. Open it: the stroke is gone.
+4. File > Open Recent > Clear Menu: the submenu shows its empty state
+   (only Clear Menu, disabled).
+
+States: empty (Open Recent with nothing), none loading, error none.
+
+**PJ-3 `testRestoreAfterCrash`** (`+Recovery`, PV-1)
+
+1. Launch on `beach.png` with `-PhotoRecoveryDir <tmp>`. New Layer, brush a
+   stroke. Wait until `photo.bar.saved` value reads "Edited, autosaved"
+   (autosave runs 5 s after the last edit under `-PhotoRecoveryDir`, 30 s
+   otherwise).
+2. Terminate the app (`app.terminate()`, no quit path), relaunch with the
+   same `-PhotoRecoveryDir` and no file.
+3. Assert the restore offer: "Restore beach.png from <time>?" with Restore
+   and Discard (`photo.recovery.restore`, `photo.recovery.discard`).
+4. Restore. Assert 2 layers and "Edited" (a restored document is unsaved).
+5. Command-Q, Don't Save; relaunch: no offer (a clean close discards the
+   recovery file).
+
+States: empty (no recovery file: no offer, the empty canvas), loading (the
+offer appears only after the recovery directory is read, off the main
+thread), error ("The unsaved image couldn't be restored: <reason>." in the
+offer's place, with Discard only, when the package is damaged).
+
+**PJ-4 `testOpenBadDocuments`** (`+Documents`, PV-1)
+
+For each file written by the test: a `.agphoto` whose manifest is `not json`;
+one with `"format": 2`; one missing a layer image; a 20 MP layer over the
+limit. Open each with `-PhotoOpenFile`.
+
+Assert the alert text is `ArchiveError.message` for the case ("This file
+isn't a Photo document.", "…made by a newer Photo (format 2)…", "This
+document is damaged: layers/layer-2.png is missing.", "This document is
+larger than Photo can open."), and the empty state stays (or the document
+that was open stays open).
+
+States: error (four), empty (after each alert).
+
+**PJ-5 `testCopyPasteAsNewLayer`** (`+Edit`, PV-2)
+
+1. Launch on `beach.png`. With no selection, assert Edit > Cut and Copy are
+   enabled (they take the whole layer), Paste is disabled with
+   "Nothing to paste." when the pasteboard holds no image (the test clears
+   it first).
+2. Marquee (M) a rectangle over the sun. Command-C. Assert Paste enabled.
+3. Command-V. Assert a new layer "Pasted Layer" above Background, selected,
+   and its bounds (layer info line) equal the selection's rect; the Edit
+   menu reads "Undo Paste".
+4. Select Background, Command-X. Assert the sun area of Background is
+   transparent where cut (the canvas shot differs) and "Undo Cut".
+5. Command-Z twice: Background whole, the pasted layer gone.
+
+States: empty (nothing selected: whole layer; nothing on the pasteboard:
+Paste disabled with its reason), error ("Nothing to copy." in the status
+line when the selected area is fully transparent).
+
+**PJ-6 `testPasteFromAnotherApp`** (`+Edit`, PV-2)
+
+1. The test writes a 200 × 100 PNG to `NSPasteboard.general` from the test
+   runner. Launch on `beach.png` (800 × 600).
+2. Edit > Paste. Assert a new layer of 200 × 100 centered on the view's
+   center (offset 300, 250 at Fit), "Undo Paste".
+3. With no image open (a fresh launch, empty canvas), Edit > Paste. Assert
+   a new image opens from the pasteboard, 200 × 100, titled "Untitled".
+
+States: empty (the no-image case above), error (a pasteboard image over
+16 MP pastes scaled to fit, with a status note "Pasted at 50%.").
+
+**PJ-7 `testDuplicateMergeAndFlatten`** (`+LayerOps`, PV-2)
+
+1. Launch on `beach.png`. Layer > Duplicate Layer (Command-J). Assert
+   "Background copy" above Background, selected, "Undo Duplicate Layer".
+2. Set its blend to Screen, opacity 60. Layer > Merge Down (Command-E).
+   Assert one layer named "Background" and the canvas shot equals step 2's
+   canvas shot (merge keeps the look), "Undo Merge Down".
+3. New Layer, brush; Layer > Flatten Image. Assert one layer, "Undo
+   Flatten Image".
+4. With one layer, assert Merge Down is disabled with "There's no layer
+   below to merge into." and Flatten Image is disabled with "The image
+   already has one layer."
+
+States: empty (the disabled reasons), error (Merge Down onto an adjustment
+layer: disabled with "Merge Down needs a pixel layer below.").
+
+**PJ-8 `testTypedCropSizeAndAspect`** (`+Crop`, PV-3)
+
+1. Launch on `beach.png` (800 × 600). Crop tool (C). Assert the crop options
+   show X, Y, W, H (empty: "Drag on the image, or type a size") and the
+   aspect chips Free, Original, 1:1, 3:2, 4:3, 16:9.
+2. Choose 1:1. Assert a centered 600 × 600 pending crop (W and H read 600).
+3. Type W 400, Return. Assert H reads 400 (locked), X and Y keep the
+   top-left.
+4. Choose 3:2, click the swap button (`photo.crop.swap`). Assert the chip
+   reads 2:3 and H > W.
+5. Choose Free; drag on the canvas from 10,10 to 210,110. Assert W 200 and
+   H 100 (±1 at Fit).
+6. Type X 700, Return. Assert X reads 600 (clamped so the crop stays on the
+   canvas). Return applies: canvas 200 × 100, "Undo Crop".
+
+States: empty (no pending crop: the fields show placeholders and are
+disabled until a crop exists or an aspect is chosen), error (a typed 0 or a
+non-number keeps the old value and beeps; covered by the model tests).
+
+**PJ-9 `testAdjustmentLayer`** (`+AdjustmentLayers`, PV-6)
+
+1. Launch on `beach.png`. Layers tab. Layer > New Adjustment Layer > Curves.
+   Assert a row "Curves 1" with the adjustment symbol above Background,
+   selected; the Adjust tab shows only the Curves section, titled
+   "Curves 1"; "Undo New Adjustment Layer".
+2. Drag the curve's midpoint up. Assert the canvas shot differs from step 1
+   and the Edit menu reads "Undo Curves".
+3. Hide the row's eye: the canvas equals step 1's shot. Show it again.
+4. New Layer above it, brush: the brush stroke is not affected (above the
+   adjustment). Send Backward the adjustment twice to the bottom: the canvas
+   equals step 1's (nothing below it).
+5. Opacity 0 on the adjustment: canvas equals step 1. Command-Z restores
+   the opacity.
+6. Select Background: the Adjust tab shows the whole-image sections again,
+   headed "Image".
+
+States: empty (an adjustment layer at the bottom changes nothing; its
+row's info line says "Nothing below to adjust."), error (Brush on an
+adjustment layer: the canvas refuses with "Pick a pixel layer to paint on."
+in the status line, the stroke does nothing).
+
+### 4.3 Tier-2 journeys
+
+Written in full in each feature's packet; named here so the coverage matrix
+can point at them.
+
+| # | Test (file, feature) | Steps | Asserts | States |
+|---|---|---|---|---|
+| PJ-10 | `testHistoryTabJump` (`+History`, PV-4) | four edits; History tab; click step 2; New Layer | rows "Open", then each edit; rows after 2 dimmed; clicking 2 undoes two steps; a new edit removes the dimmed rows | empty: a new image lists only "New Image" |
+| PJ-11 | `testBrushCursorFollowsSize` (`+History`, PV-4) | Brush; hover the canvas; size 40, then 120; Move tool | `photo.canvas.brush-cursor` exists, its frame width is 40 × zoom, then 120 × zoom (±1 pt); gone with Move | none |
+| PJ-12 | `testEllipseLassoAddSubtract` (`+Select`, PV-5) | Marquee shape Ellipse; drag; Shift-drag a rectangle; Option-drag a lasso; Select > Invert; Feather 10; brush | the marching-ants element exists after each; the info line reads the selection's bounds; brush paints only inside (a pixel outside unchanged); each change is one "Undo Select" step | empty: Invert with nothing selected selects all |
+| PJ-13 | `testLayerMaskFromSelection` (`+Mask`, PV-5) | ellipse select; Layer > Add Mask from Selection; paint black on the mask; Shift-click the badge; Layer > Apply Mask | `photo.layer.mask-badge` on the row; the pixels outside are hidden, not deleted (disable shows them); Apply makes them transparent; one step each | error: Add Mask on an adjustment layer with nothing selected reveals all |
+| PJ-14 | `testFreeTransformAndFlip` (`+Transform`, PV-7) | Command-T; drag the bottom-right handle out by half; drag outside a corner a quarter turn with Shift; Return; Layer > Flip Horizontal; Image > Flip Canvas Vertical | the transform box element; W% reads 150, angle 90; Return gives "Undo Free Transform"; Escape in a second round leaves the layer as it was; flips are exact (`testFlip…` model goldens) | loading: a transform over 12 MP shows "Transforming…" |
+| PJ-15 | `testExportAtSizeAsTIFFAndHEIC` (`+Export`, PV-8) | Export; TIFF; size 50%; Export; HEIC quality 70; longest side 400; Export | files exist with TIFF and HEIC headers; TIFF is 400 × 300; HEIC's longer side 400 | error: a longest side over 16384 disables Export with the reason; loading: "Exporting…" |
+| PJ-16 | `testEyedropperPicksColor` (`+Sample`, PV-9) | Eyedropper (I); click the sun; 5 × 5; click the sky; B | the brush color well's hex reads the sun's color, then the sky's mean; picking is not an undo step | empty: a click on a transparent pixel keeps the color and says "Nothing to sample here." |
+| PJ-17 | `testLayoutAtWidths` (`+Layout`, PV-10) | relaunch at each width in section 7.4 | the layout rules of section 7.4 at each width | none |
+
+### 4.4 Fixtures
+
+Built in code in `Sources/PhotoModel/PhotoFixtures.swift` (PV-0), never read
+from disk, so the UI test target never builds a document file:
+
+| Fixture | Contents | Used by |
+|---|---|---|
+| `empty` | no image | the empty states |
+| `sample` | 800 × 600 sky, a yellow sun disc at (560, 220) r 60, a green field; one Background layer (the `writeTestPhoto` picture) | most journeys |
+| `layered` | `sample` plus "Paint" (a red stroke, Multiply, 60%), "Curves 1" (an adjustment layer), and a mask on Paint | PV-5, PV-6 views and snapshots |
+| `large` | 4000 × 3000 noise and gradients, three layers | PJ-P1–P3, model budgets |
+| `limit` (tests only) | 16 MP, eight layers each with a mask | `PhotoBudgetTests` |
