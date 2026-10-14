@@ -258,7 +258,7 @@ name everything below, so no later feature edits `docs/c4/model.json`.
 | Component | Status | Responsibility | Owned paths | Relationships |
 |---|---|---|---|---|
 | workspace | existing (v2 adds state in PV-0) | `PhotoWorkspace`: the open image, layers (top first) with kind and mask flags, pixels and masks as tiles, selection (rect plus optional coverage mask), tool and tool options, pending crop and aspect, transform draft, sample size, services, the saved marker | `PhotoWorkspace.swift`, `PhotoLayer.swift`, `PixelRect.swift`, `TiledPixels.swift`, `ToolOptions.swift`, `PhotoInspectorContent.swift`, `PhotoLayerMenu.swift` | calls contracts through `services`; records every edit in history |
-| history | existing (PV-0 adds the selection step and masks in the stack) | Named undo and redo by tiles, layer lists or whole stacks; the history list and jump | `PhotoHistory.swift` | read by the History tab (PV-4) |
+| history | existing (PV-0 adds step ids, the selection and mask-tiles steps, and masks in the stack) | Named undo and redo by tiles, layer lists or whole stacks; the history list and jump; each History tab row (PV-4) | `PhotoHistory.swift`, `PhotoHistoryRows.swift` (PV-4) | read by the History tab (PV-4) |
 | render | existing (PV-0 extracts the per-layer step) | Composite visible layers bottom-up, then the global adjustments; damaged tiles only for the live canvas; the curve's samples and histogram | `PhotoRender.swift`, `PhotoTileUpdate.swift`, `PhotoLayerComposite.swift` (new in PV-0: one layer's contribution, the hook PV-6 and PV-5 fill), `AdjustmentSettings.swift`, `GammaTrack.swift`, `HueSaturation.swift` | uses CoreRaster `composite`; calls `adjustmentLayers` and `masking` |
 | tools | existing (PV-0 routes drags) | Each tool's drag: brush, eraser, clone, heal, move; routes marquee, crop, eyedropper and transform drags to their components; weights paint by the selection's coverage | `PhotoStroke.swift`, `PhotoRetouch.swift`, `PhotoSelection.swift` | calls select-mask, crop, transform, eyedropper |
 | image-ops | existing | Open and export through `PhotoImageCodec`; Image Size, Rotate, Straighten | `PhotoImageFile.swift`, `PhotoImageOps.swift`, `PhotoStraighten.swift` | uses CoreRaster resample and rotate |
@@ -302,20 +302,36 @@ Flare's LM-0a3 and F1 did:
   `PhotoLayer` (`kind`, `hasMask`, `isMaskEnabled`) and `PhotoHistory`
   (`.selection` step; masks in `PhotoStack`). No later feature edits those
   three files.
+- **Drags carry what the tools need.** Today's `drag(from:to:pressure:sampling:)`
+  and `drags(_:)` carry only Option (as `sampling`). PV-0 widens both to
+  `modifiers: DragModifiers` and the canvas `zoom`, and `PhotoWindow`,
+  `StrokePacer` and the canvas gesture pass them, so Shift-drag (add, keep
+  ratio, snap), Option-drag (subtract, from center) and zoom-aware handle
+  tolerances reach PV-5 and PV-7 without touching those files again.
 - **Drags route by component.** `PhotoStroke.drag` sends marquee drags to
   `selectionDrag` (`PhotoSelectionMask.swift`), crop to `cropDrag`
   (`PhotoCropSize.swift`), eyedropper to `sampleDrag`
   (`PhotoEyedropper.swift`), and any drag while `transformDraft != nil` to
   `transformDrag` (`PhotoTransform.swift`). PV-0 moves today's marquee and
   crop code into those files unchanged and creates the other two as
-  no-op stubs; each feature then owns its file. Brush, eraser, clone and heal
-  multiply each dab by `selectionCoverage(x:y:)`, which PV-0 defines as 1
-  (no change), and paint into `paintTarget()` (the selected layer's pixels
-  today; its mask while `editsMask`), both stubs in `PhotoSelectionMask.swift`
-  and `PhotoMask.swift` that PV-5 fills.
+  stubs; each feature then owns its file. The eyedropper's stub is already
+  real: it calls `services.sampling` and sets the brush color, so the tool
+  works on `.fake` (as `PhotoToolsTests` requires) and stays disabled on
+  `.live` until PV-9 replaces `LiveSampling`.
+- **Paint goes through one target and the selection's coverage.** Brush,
+  eraser, clone and heal write into `paintTarget()` (PV-0, in
+  `PhotoStroke.swift`): `.pixels(id)`, `.mask(id)` while `editsMask` and the
+  layer has a mask, or nil with "Pick a pixel layer to paint on." on an
+  adjustment layer. A mask's coverage is its gray with alpha 1, so the brush
+  paints black to hide and white to reveal, the eraser paints white, and
+  `PhotoHistory` gets a `.maskTiles` step beside `.tiles`. Every dab, and
+  Delete and Fill, is weighted by `selectionCoverage(x:y:)`, a stub in
+  `PhotoSelectionMask.swift` that returns 1 inside today's rectangle; Select
+  All, Deselect and Apply Crop also set or clear `selectionMask` there. PV-5
+  fills these in its own file and only sets `editsMask`.
 - **Rendering routes by layer.** `PhotoLayerComposite.swift` holds one
   layer's contribution (today: composite its pixels). PV-6 adds adjustment
-  layers to it in wave 2, PV-5 adds masks in wave 3.
+  layers to it in wave 2, PV-5 adds masks in wave 4.
 - **Intents and menus route by area.** `PhotoIntent` gains one case per
   area holding that area's own enum, declared in the area's
   `PhotoWindow+<Area>.swift` (empty enum plus an empty `switch`). PV-0
@@ -427,9 +443,10 @@ takes each bug's own label (#255 `p1`, the rest `p3`, #289 `p2`). #580 and
   on #333 for its journey task only (its model and view tasks don't).
 - **Launch.** Live journeys write their input with the existing
   `writeTestPhoto(to:)` helper, which PV-0 moves out of `PhotoJourneyTests`
-  (where it is `private static`) into `UITests/PhotoJourney+Fixtures.swift`
+  (where it is `private static`) into `UITests/PhotoJourneyTests+Fixtures.swift`
   as an internal function every Photo journey class can call (PV-0 owns
-  both files), and open it with `-PhotoOpenFile`; saves go to
+  both files; the move waits on #333, since today `project.yml` compiles only
+  `UITests/PhotoJourneyTests.swift`), and open it with `-PhotoOpenFile`; saves go to
   `-PhotoSaveTo <folder>`, exports to `-PhotoExportTo <folder>`. Two new
   arguments (PV-0): `-PhotoFixture <name>` runs `.fake` services on a fixture
   (section 5.4) and shows a "Preview data" pill; `-PhotoRecoveryDir <folder>`
@@ -474,7 +491,9 @@ States: loading, "Opening…" note when the decode takes over 100 ms (the
 **PJ-2 `testUnsavedPromptAndOpenRecent`** (`+Documents`, PV-1)
 
 1. Launch on `beach.png`. Brush a stroke. Command-W.
-2. Assert the system's unsaved-changes alert with Save, Don't Save, Cancel.
+2. Assert the unsaved-changes alert with Save, Don't Save, Cancel (an
+   `NSAlert` the window shows, worded like the system's document alert,
+   since Photo uses `WindowGroup`, section 9 question 5).
    Cancel: the window stays, still "Edited".
 3. Command-W, Don't Save: the window closes. File > Open Recent lists
    `beach.png` first. Open it: the stroke is gone.
@@ -713,8 +732,8 @@ public struct PlacedPixels: Sendable, Equatable {
 }
 
 /// One layer with what it draws: pixels for a pixel layer (nil for an
-/// adjustment layer) and its mask, a buffer the layer's size whose alpha is
-/// the coverage (nil for none).
+/// adjustment layer) and its mask, a buffer the layer's size whose gray is
+/// the coverage, alpha 1 (nil for none).
 public struct LayerContent: Sendable, Equatable {
     public var layer: PhotoLayer
     public var pixels: TiledPixels?
@@ -752,7 +771,7 @@ public struct PhotoPackage: Sendable, Equatable {
 }
 
 /// Everything a document keeps, in 8-bit straight-alpha sRGB like an opened
-/// file. A mask is stored as an image whose alpha is the coverage.
+/// file. A mask is stored as a gray image whose gray is the coverage.
 public struct PhotoDocumentSnapshot: Sendable, Equatable {
     public var canvas: CanvasSize
     /// Top first, with kind, mask flags, blend, opacity and offset.
@@ -962,8 +981,9 @@ public protocol CropSizing: PhotoUseCase {
 // Contracts/SelectionContracts.swift: selections as coverage masks and layer
 // masks (PV-5, #421). A selection is a canvas-size CoreRaster Mask; a
 // rectangle selection stays pixel-exact (coverage 0 or 1). A layer mask is a
-// buffer the layer's size whose alpha is the coverage, so the brush, eraser
-// and tile undo work on it unchanged. Linux-safe.
+// buffer the layer's size whose gray (red channel) is the coverage, alpha
+// always 1, so the brush paints black to hide and white to reveal and tile
+// undo keeps its tiles (PhotoHistory's mask-tiles step). Linux-safe.
 import CoreRaster
 
 /// What a selection drag draws, in canvas pixels.
@@ -1004,10 +1024,10 @@ public protocol SelectionShaping: PhotoUseCase {
 /// PV-5: layer masks.
 public protocol LayerMasking: PhotoUseCase {
     /// A mask for a layer at `layerBounds` (canvas pixels): the selection's
-    /// coverage where it overlaps, 0 elsewhere; all 1 (reveal all) when
+    /// coverage as gray where it overlaps, black elsewhere; all white (reveal all) when
     /// `selection` is nil.
     func mask(from selection: Mask?, layerBounds: PixelRect) throws -> TiledPixels
-    /// `pixels` with every alpha multiplied by the mask's: Apply Mask.
+    /// `pixels` with every alpha multiplied by the mask's gray: Apply Mask.
     func applying(_ mask: TiledPixels, to pixels: TiledPixels) throws -> TiledPixels
     /// `region`, a part of the layer at `origin` in layer pixels, multiplied
     /// by the mask there: what the renderer composites. Equals `region` for
@@ -1044,7 +1064,7 @@ public protocol AdjustmentLayering: PhotoUseCase {
     var kinds: [AdjustmentKind] { get }
     /// `below` (the stack composited so far, a region of the canvas) with
     /// `settings`' enabled sections applied, mixed back by `opacity`,
-    /// `blendMode` and `mask` (the same region's coverage in alpha; nil for
+    /// `blendMode` and `mask` (the same region of the layer mask, coverage as gray; nil for
     /// none). With opacity 1, normal blend and no mask, equals
     /// `settings` applied to `below` bit for bit.
     func applying(_ settings: AdjustmentSettings, to below: PixelBuffer, opacity: Double,
@@ -1663,8 +1683,8 @@ which isn't `Equatable`):
     public internal(set) var exportOptions = ExportOptions()
     /// What the open file is, for Save (PhotoDocumentFile.swift).
     public internal(set) var fileKind: PhotoFileKind?
-    /// The history step the file on disk shows (`PhotoHistory.currentStepID`);
-    /// nil when no file holds the image. `start()` sets it for an opened file.
+    /// The history step last saved, opened or created (`currentStepID`), so a
+    /// new blank image and a just-opened file are clean; nil with no image.
     public internal(set) var savedStepID: Int?
     /// A one-line refusal or note for the status line ("Nothing to paste.");
     /// `clearStatus()` drops it (the window calls it 4 s later).
@@ -1696,10 +1716,14 @@ Changed in `PhotoHistory` (PV-0):
   "Select" step (#421);
 - `PhotoStack` keeps `masks` beside `pixels`, so every whole-stack step
   restores masks too;
-- every recorded step gets an id from a counter that never repeats, and
-  `currentStepID` is the newest undo entry's id (0 at the start). The dirty
-  marker compares it with `savedStepID`, so it stays right past the 50-step
-  limit and after an undo followed by a new edit (an index would not);
+- every recorded step gets an id from a counter that never repeats;
+  `currentStepID` is the newest undo entry's id, or `baseStepID` with
+  nothing to undo, and `baseStepID` (0 at the start) takes the id of each
+  step the 50-step limit trims, as `baseName` does. The dirty marker
+  compares `currentStepID` with `savedStepID`, so it stays right after an
+  undo followed by a new edit, and after undoing everything past a trim
+  (an index would not);
+- a `.maskTiles(layer:, [Int: PixelBuffer])` step for mask paint;
 - `apply(.layers)`'s guard (today `Set(list.map(\.id)) == Set(pixels.keys)`,
   `PhotoHistory.swift:139`) and the invariant at the top of
   `PhotoWorkspace.swift` change to "`pixels` holds one buffer per **pixel**
@@ -1708,17 +1732,17 @@ Changed in `PhotoHistory` (PV-0):
 
 Also PV-0, so later features stay inside their files:
 
-- `start()` resets every v2 field (selection mask, masks, transform draft,
-  status message, file kind) and sets `savedStepID` to the current step for
-  an opened file, so a just-opened or a new blank image is clean.
+- `start()` resets every v2 field (selection mask, masks, `editsMask`,
+  transform draft, status message, file kind) and sets `savedStepID` to the
+  current step, so a just-opened file or a new blank image is clean (no
+  prompt when it is closed untouched).
 - Crop, Image Size, Rotate, Straighten and Delete Layer call
   `layerGeometryChanged(_:_:)` for each layer they change; PV-2 (Duplicate,
   Merge Down) and PV-7 (transform, flips) call it from their own files. It is
   a no-op until PV-5 fills it in `PhotoMask.swift` to keep each mask the size
   and place of its layer.
-- `paintTargetID()` refuses an adjustment layer with "Pick a pixel layer to
-  paint on." (PJ-9) from the start, since PV-0 adds layer kinds; PV-5 adds
-  the mask target.
+- `paintTarget()` refuses an adjustment layer with "Pick a pixel layer to
+  paint on." (PJ-9) from the start, since PV-0 adds layer kinds.
 
 The methods, by feature:
 
@@ -1729,6 +1753,14 @@ import FoundationEssentials
 import Foundation
 #endif
 import CoreRaster
+
+/// Where a paint stroke writes. A mask's coverage is its gray (red
+/// channel), alpha always 1, so the brush paints black to hide and white to
+/// reveal, the eraser paints white, and tile undo works as on pixels.
+public enum PaintTarget: Hashable, Sendable {
+    case pixels(PhotoLayer.ID)
+    case mask(PhotoLayer.ID)
+}
 
 /// Where the Adjust tab's edits go (PV-6).
 public enum AdjustTarget: Hashable, Sendable {
@@ -1741,10 +1773,23 @@ extension PhotoWorkspace {
     public func toolHelp(_ tool: PhotoTool) -> String? { nil }
     public init(services: PhotoServices) { self.init(); self.services = services }
     public mutating func clearStatus() { statusMessage = nil }
-    /// The paint target for brush, eraser, clone and heal: nil, with
-    /// `statusMessage` "Pick a pixel layer to paint on.", on an adjustment
-    /// layer (PV-0 writes this check; PV-5 adds the mask case in PhotoMask.swift).
-    func paintTargetID() -> PhotoLayer.ID? { selectedLayerID }
+    /// Where brush, eraser, clone and heal write (PV-0, in PhotoStroke.swift):
+    /// the selected layer's mask while `editsMask` and it has one, else its
+    /// pixels; nil, with `statusMessage` "Pick a pixel layer to paint on.",
+    /// on an adjustment layer without a mask target.
+    public func paintTarget() -> PaintTarget? { selectedLayerID.map(PaintTarget.pixels) }
+    /// One pointer event (PV-0 widens today's `drag(from:to:pressure:sampling:)`;
+    /// `sampling` becomes `modifiers.contains(.option)`). `zoom` is points per
+    /// canvas pixel, for hit tolerances.
+    public mutating func drag(from start: Mask.Point, to point: Mask.Point, pressure: Double = 1,
+                              modifiers: DragModifiers, zoom: Double) {}
+    /// A display frame's events at once (today's `drags`), each with its modifiers.
+    public mutating func drags(_ events: [(from: Mask.Point, to: Mask.Point, pressure: Double, modifiers: DragModifiers)],
+                               zoom: Double) {}
+    /// Delete and Fill weight each pixel by the selection's coverage; Select
+    /// All, Deselect and Apply Crop set or clear `selectionMask` too (PV-0
+    /// routes them through PhotoSelectionMask.swift).
+    func selectionCoverage(x: Int, y: Int) -> Float { 1 }
 }
 
 /// A geometry change every layer's extras (its mask) must follow (PV-0 calls
@@ -1769,8 +1814,10 @@ extension PhotoWorkspace {
 // PV-0 (PhotoHistory.swift): every recorded step gets a new id from a counter
 // that never goes back or repeats; trimming the oldest steps keeps the ids.
 extension PhotoWorkspace {
-    /// The id of the step the image is at: the newest undo entry's, or 0 at
-    /// the start ("New Image", "Open").
+    /// The id of the step the image is at: the newest undo entry's, or
+    /// `baseStepID` with nothing to undo. `baseStepID` is 0 at "New Image" or
+    /// "Open" and takes the id of each step the 50-step limit trims, the way
+    /// `baseName` does, so undoing everything after a trim still reads dirty.
     public var currentStepID: Int { 0 }
 }
 
@@ -1972,11 +2019,12 @@ means it doesn't exist yet (section 6.3).
 | Layers tab | any image | `List` rows (until **`LayerList`**, Flare's S15, unfiled), `InspectorPickerRow` (blend), `InspectorSliderRow` (opacity), `InspectorAction` | existing, PV-5, PV-6 |
 | Layers tab | adjustment and mask marks | SF Symbols in the row, **row accessory slot** in `LayerList` | PV-5, PV-6 |
 | History tab | steps | `List` of rows (`SidebarRow`), later steps in the secondary text color with a `clock.arrow.circlepath` symbol on the current one | PV-4 |
-| History tab | empty | `EmptyStateView` ("No edits yet. Each change you make is listed here.") | PV-4 |
+| History tab | no image open | `EmptyStateView` ("No image open. Its edits will be listed here.") | PV-4 |
+| History tab | image with no edits | one row, "New Image" or "Open", current | PV-4 |
 | Export sheet | – | `Picker` (segmented: PNG, JPEG, TIFF, HEIC), `InspectorSliderRow` (Quality %, Size %), `ScrubField` (Longest side px), a `Picker` for the size kind, the output size line | PV-8 |
 | Keep layers? | Save of a flat file with layers | system `.confirmationDialog`: Save as Photo Document (default), Flatten into PNG, Cancel | PV-1 |
 | Restore offer | launch after a crash | system alert: Restore, Discard | PV-1 |
-| Unsaved changes | close or quit | the system's document alert | PV-1 |
+| Unsaved changes | close or quit | an `NSAlert` with Save, Don't Save, Cancel, worded like the system's document alert | PV-1 |
 | Open failure | bad package | system alert with `ArchiveError.message` | PV-1 |
 
 ### 6.3 SuiteUI components v2 needs (`needs-ui`, `line:suiteui`)
@@ -2027,9 +2075,14 @@ SuiteUI's #330) isn't built yet:
   workspace call one pointer event or key makes, on the `large` fixture
   (4000 × 3000, three layers), median and p95 of 60 events. One `@Test`
   per row, in the owning feature's `Photo<Feature>BudgetTests.swift` (the
-  last column below). CI runs debug, so CI gates on the debug number (the
-  device target × 10, as the rubric's model budgets do); the device target
-  is checked locally with `swift test -c release --filter Budget`.
+  table after this one). The device target is checked locally in a release
+  build (`swift test -c release --filter Budget`). CI runs debug, where
+  CoreRaster's per-pixel loops run about 20 times slower
+  (`PhotoBrushLatencyTests.swift`'s measurement), so CI gates a row on its
+  debug number only when the row is geometry (no per-pixel loop): PB-5,
+  PB-6, PB-8, PB-10, PB-14, PB-17, at the device target × 10. The rows that
+  touch pixels (marked "report" in the debug column) are reported on the
+  contact sheet in CI and gated only in release.
 - **Event to picture** (macOS, `Tests/AppSnapshotTests`): the model step
   plus `PhotoRenderer.update` of the damaged tiles plus `CanvasTiles.apply`,
   done the way the window does it, exactly as `PhotoBrushLatencyTests`
@@ -2052,27 +2105,27 @@ SuiteUI's #330) isn't built yet:
 
 | id | Interaction | Model step (device / debug gate) | Event to picture (release p50) | Frames late | Feature |
 |---|---|---|---|---|---|
-| PB-1 | Brush, eraser drag event | ≤ 0.3 ms / ≤ 3 ms (today's `dragBudget`) | ≤ 8 ms (exists) | QB-L1, PJ-P1 | existing |
-| PB-2 | Clone, heal drag event (64 px dab) | ≤ 1 ms / ≤ 10 ms | ≤ 8 ms | QB-L1, PJ-P1 | existing (new rows) |
-| PB-3 | Brush drag inside an ellipse selection (coverage weighting) | ≤ 0.5 ms / ≤ 5 ms | ≤ 8 ms | QB-L1 | PV-5 |
-| PB-4 | Paint on a layer mask | ≤ 0.3 ms / ≤ 3 ms | ≤ 8 ms | QB-L1 | PV-5 |
+| PB-1 | Brush, eraser drag event | ≤ 3 ms in both builds (exists: `dragBudget` in `ST/PhotoBrushLatencyTests.swift`, macOS) | ≤ 8 ms (exists) | QB-L1, PJ-P1 | existing |
+| PB-2 | Clone, heal drag event (64 px dab) | ≤ 1 ms / report | ≤ 8 ms | QB-L1, PJ-P1 | existing (new rows) |
+| PB-3 | Brush drag inside an ellipse selection (coverage weighting) | ≤ 0.5 ms / report | ≤ 8 ms | QB-L1 | PV-5 |
+| PB-4 | Paint on a layer mask | ≤ 0.3 ms / report | ≤ 8 ms | QB-L1 | PV-5 |
 | PB-5 | Marquee rectangle and ellipse drag (outline only; the mask is built on mouse-up) | ≤ 0.1 ms / ≤ 1 ms | ≤ 4 ms (overlay only, no tiles) | QB-L1, PJ-P1 | PV-5 |
 | PB-6 | Lasso drag event (append a point) | ≤ 0.05 ms / ≤ 0.5 ms | ≤ 4 ms | QB-L1 | PV-5 |
-| PB-7 | Selection mouse-up: build the mask (ellipse, or a 1,000-point lasso) on 12 MP | ≤ 60 ms / ≤ 600 ms | – | QB-F2 (outline drawn before mouse-up) | PV-5 |
+| PB-7 | Selection mouse-up: build the mask (ellipse, or a 1,000-point lasso) on 12 MP | ≤ 60 ms / report | – | QB-F2 (outline drawn before mouse-up) | PV-5 |
 | PB-8 | Crop drag and a typed crop field | ≤ 0.05 ms / ≤ 0.5 ms | ≤ 4 ms | QB-L1 | PV-3 |
-| PB-9 | Move tool drag | ≤ 0.1 ms / ≤ 1 ms | ≤ 8 ms | QB-L1 | existing (new row) |
+| PB-9 | Move tool drag | ≤ 0.1 ms / report | ≤ 8 ms | QB-L1 | existing (new row) |
 | PB-10 | Free Transform handle drag (box only; pixels are transformed on Return) | ≤ 0.05 ms / ≤ 0.5 ms | ≤ 8 ms (preview: the layer's picture scaled and turned on the GPU, like Straighten's) | QB-L1, PJ-P1 | PV-7 |
-| PB-11 | Free Transform commit on a 12 MP layer, off the main actor | ≤ 1.5 s / ≤ 15 s | "Transforming…" within 100 ms | QB-L9 | PV-7 |
-| PB-12 | Flip layer or canvas, 12 MP | ≤ 60 ms / ≤ 600 ms | – | – | PV-7 |
-| PB-13 | Adjustment slider drag event with an adjustment layer in a 3-layer stack (one 256 px tile) | ≤ 4 ms / ≤ 40 ms | ≤ 8 ms per damaged tile batch | QB-L2, PJ-P2 | PV-6 |
+| PB-11 | Free Transform commit on a 12 MP layer, off the main actor | ≤ 1.5 s / report | "Transforming…" within 100 ms | QB-L9 | PV-7 |
+| PB-12 | Flip layer or canvas, 12 MP | ≤ 60 ms / report | – | – | PV-7 |
+| PB-13 | Adjustment slider drag event with an adjustment layer in a 3-layer stack (one 256 px tile) | ≤ 4 ms / report | ≤ 8 ms per damaged tile batch | QB-L2, PJ-P2 | PV-6 |
 | PB-14 | Eyedropper click (5 × 5 sample) | ≤ 1 ms / ≤ 10 ms | ≤ 4 ms (color well only) | – | PV-9 |
-| PB-15 | Copy of a 12 MP layer; Paste as a new layer | ≤ 120 ms / ≤ 1.2 s each | the new layer drawn in ≤ 1 frame after the model step | – | PV-2 |
-| PB-16 | Merge Down of two 12 MP layers; Flatten of three | ≤ 400 ms / ≤ 4 s | "Merging…" within 100 ms | QB-L9 | PV-2 |
+| PB-15 | Copy of a 12 MP layer; Paste as a new layer | ≤ 120 ms / report | the new layer drawn in ≤ 1 frame after the model step | – | PV-2 |
+| PB-16 | Merge Down of two 12 MP layers; Flatten of three | ≤ 400 ms / report | "Merging…" within 100 ms | QB-L9 | PV-2 |
 | PB-17 | History jump of 10 steps | ≤ 50 ms / ≤ 500 ms | ≤ 1 frame for the damaged tiles | – | PV-4 |
-| PB-18 | Save a 3-layer 12 MP document (encode through a codec stub on Linux; ImageIO on macOS) | ≤ 2 s / ≤ 20 s | "Saving…" within 100 ms; the window stays responsive | QB-L9, QB-L12 | PV-1 |
-| PB-19 | Open the same document | ≤ 2 s / ≤ 20 s | "Opening…" within 100 ms | QB-L9, QB-L12, PJ-P3 | PV-1 |
-| PB-20 | Autosave of the same document, off the main actor | ≤ 2 s / ≤ 20 s; the snapshot copy taken on the main actor ≤ 1.6 ms / ≤ 16 ms | – | QB-L12 | PV-1 |
-| PB-21 | Export 12 MP at 50 % as JPEG | ≤ 1.5 s / ≤ 15 s | "Exporting…" within 100 ms | QB-L8, QB-L9 | PV-8 |
+| PB-18 | Save a 3-layer 12 MP document (encode through a codec stub on Linux; ImageIO on macOS) | ≤ 2 s / report | "Saving…" within 100 ms; the window stays responsive | QB-L9, QB-L12 | PV-1 |
+| PB-19 | Open the same document | ≤ 2 s / report | "Opening…" within 100 ms | QB-L9, QB-L12, PJ-P3 | PV-1 |
+| PB-20 | Autosave of the same document, off the main actor | ≤ 2 s / report; the snapshot copy taken on the main actor ≤ 1.6 ms / ≤ 16 ms | – | QB-L12 | PV-1 |
+| PB-21 | Export 12 MP at 50 % as JPEG | ≤ 1.5 s / report | "Exporting…" within 100 ms | QB-L8, QB-L9 | PV-8 |
 | PB-22 | Pan and zoom (Space-drag, pinch) | – (view only) | ≤ 4 ms (no tiles re-rendered) | QB-L1, PJ-P1 | existing (new row) |
 
 Where each row is tested (model step / event to picture), so every cell has
@@ -2080,7 +2133,8 @@ a file and an owner:
 
 | Rows | Model step file | Event-to-picture file | Owner |
 |---|---|---|---|
-| PB-1, PB-2, PB-9 | `MT/PhotoBudgetTests.swift` | `ST/PhotoBrushLatencyTests.swift` (exists; PB-2 and PB-9 add series) | PV-0 |
+| PB-1 | `ST/PhotoBrushLatencyTests.swift` (exists, macOS) | the same file (exists) | existing |
+| PB-2, PB-9 | `MT/PhotoBudgetTests.swift` | `ST/PhotoBrushLatencyTests.swift` (adds series) | PV-0 |
 | PB-22 | – | report-only through the hitch journey and PJ-P1 | PV-0 |
 | PB-15, PB-16 | `MT/PhotoEditBudgetTests.swift` | – (the new layer's tiles are PB-1's path) | PV-2 |
 | PB-8 | `MT/PhotoCropBudgetTests.swift` | overlay only: report-only through PJ-P1 | PV-3 |
@@ -2137,7 +2191,7 @@ Linux unless marked macOS. "Bit for bit" compares `PixelBuffer` storage.
 | PF-9 | Free Transform at identity changes no pixel; flip twice is the input bit for bit; flip horizontal equals a reference mirror built pixel by pixel; scale 2 then 0.5 is within 2/255 of the input away from edges | `PhotoTransformTests` | PV-7 |
 | PF-10 | Export at 50 % equals CoreRaster `resized(lanczos3)` of the composite, encoded; at 100 % equals today's export bytes | `PhotoExportOptionsTests` | PV-8 |
 | PF-11 | The eyedropper's 3 × 3 sample equals the mean of those nine composited pixels, encoded | `PhotoEyedropperTests` | PV-9 |
-| PF-12 | The live canvas's damaged tiles equal the full-frame reference with adjustment layers and masks in the stack (extends today's tile tests) | `PhotoTileUpdateTests` | PV-5, PV-6 |
+| PF-12 | The live canvas's damaged tiles equal the full-frame reference with adjustment layers and masks in the stack (as today's `PhotoTileUpdateTests` do without them) | `PhotoAdjustmentLayerTileTests` (PV-6), `PhotoMaskTileTests` (PV-5) | PV-5, PV-6 |
 | PF-13 | Goldens of each new overlay and panel state in Dark and Dark + Increase Contrast, tolerance 2/255 and 0.5 % (QB-V2, QB-V5) | macOS, `GoldenImage` once #331 and #332 land; PNGs for eyes until then | every UI feature |
 
 ### 7.4 Layout spec (alignment at several window widths)
@@ -2148,8 +2202,11 @@ of identified elements, at window widths 880 (`SuiteSize.windowMinimum`,
 1024 × 768, so wider windows would fail the audit's `offscreen` check
 there), each launched with a new `-PhotoWindowWidth <pt>` argument (PV-0)
 on `layered` with the Adjust tab open. Tolerance 1 pt. The same test runs at
-1280, 1440 and 1920 locally with `scripts/ui-test` on a larger display
-(`PHOTO_LAYOUT_WIDE=1`); CI skips those widths with a message.
+1280, 1440 and 1920 locally on a larger display, run as
+`TEST_RUNNER_PHOTO_LAYOUT_WIDE=1 scripts/ui-test` (xcodebuild hands a
+variable to the UI test runner only with the `TEST_RUNNER_` prefix, which it
+strips; PV-10 checks this against Apple's documentation first); CI skips
+those widths with a message.
 
 1. The panel is exactly `SuiteSize.editorPanelWidth` (280) wide and its
    right edge is the window's; the rail's width is constant across widths.
@@ -2236,13 +2293,13 @@ hands; the later wave starts from the merged result.
 | 1 | PV-1 documents: layered save and open, Open Recent, unsaved state, recovery | p1 | PV-0; journeys #333 | nothing |
 | 1 | PV-2 edit and layer commands: Cut, Copy, Paste, Duplicate, Merge Down, Flatten | p1 | PV-0; journeys #333 | nothing |
 | 1 | PV-3 crop precision (#544) | p1 | PV-0; journeys #333 | nothing |
-| 1 | PV-10 polish (#79, #252, #253, #289; moves #255, #586) | bugs | PV-0; journeys #333 | nothing |
-| 2 | PV-6 adjustment layers (#580) | p1 | wave 1 (PV-2 hands over `PhotoCommands+Layer.swift`, PV-10 `AdjustmentsInspector.swift`) | nothing; optional CR-5 |
-| 2 | PV-4 history tab and brush cursor (#644, #588) | p2 | wave 1 (tiers: p1 first) | nothing |
-| 2 | PV-7 transform and flip | p2 | wave 1 (PV-2 hands over `PhotoCommands+Edit.swift`) | CR-1, CR-2 |
-| 2 | PV-8 export size, TIFF, HEIC | p2 | wave 1 | nothing |
-| 2 | PV-9 eyedropper | p2 | wave 1 | nothing |
-| 3 | PV-5 selections and masks (#421) | p2 | PV-6 (hands over `PhotoLayerComposite.swift`, `PhotoLayersTab.swift`, `PhotoCommands+Layer.swift`) | CR-3, CR-4; optional CR-6 |
+| 2 | PV-6 adjustment layers (#580) | p1 | PV-2 (hands over `PhotoCommands+Layer.swift`); it needn't wait for PV-1 or PV-3 | nothing; optional CR-5 |
+| 3 | PV-4 history tab and brush cursor (#644, #588) | p2 | every p1 (waves 1 and 2) | nothing |
+| 3 | PV-7 transform and flip | p2 | every p1 (PV-2 hands over `PhotoCommands+Edit.swift`) | CR-1, CR-2 |
+| 3 | PV-8 export size, TIFF, HEIC | p2 | every p1 | nothing |
+| 3 | PV-9 eyedropper | p2 | every p1 | nothing |
+| 3 | PV-10 polish (#79, #252, #253, #289; moves #255, #586) | p2, p3 bugs | every p1 (PV-6 hands over `AdjustmentsInspector.swift`, `CurvesSection.swift`) | nothing |
+| 4 | PV-5 selections and masks (#421) | p2 | PV-6 (hands over `PhotoLayerComposite.swift`, `PhotoLayersTab.swift`, `PhotoCommands+Layer.swift`) and wave 3 | CR-3, CR-4; optional CR-6 |
 
 Why this order:
 
@@ -2251,14 +2308,15 @@ Why this order:
   behavior a person sees except the eyedropper tool on the rail (disabled,
   "Not built yet (PV-9).") and nothing when run on `.live`; the existing
   309 model tests and twelve journeys are its regression gate.
-- **The tier-1 work next** (`docs/priorities.md`: nothing `p2` starts on a
-  line while a `p1` is open and unblocked). PV-1, PV-2 and PV-3 are
-  independent. PV-10 rides along because its bugs touch only files nobody
-  else in wave 1 owns.
-- **PV-6 is p1 but in wave 2** because it shares `PhotoCommands+Layer.swift`
-  with PV-2 and `AdjustmentsInspector.swift` with PV-10. If wave 1 runs
-  long, PV-6 can start as soon as PV-2 and PV-10 merge, without waiting for
-  PV-1 and PV-3.
+- **Every p1 next, in waves 1 and 2** (`docs/priorities.md`: nothing `p2`
+  starts on a line while a `p1` is open and unblocked). PV-1, PV-2 and PV-3
+  are independent. PV-6 is p1 but shares `PhotoCommands+Layer.swift` with
+  PV-2, so it starts as soon as PV-2 merges, without waiting for PV-1 or
+  PV-3.
+- **Then the p2 features and the polish bugs together (wave 3)**: they share
+  no file. PV-10's bugs are p3 apart from #289 (p2); running them beside the
+  p2 work is the one place this plan doesn't follow the pick order exactly
+  (section 9, question 9).
 - **PV-5 last**: it needs PV-6's layer kinds in the render hook to put
   masks on adjustment layers (#580's third question), and it waits on the
   most engine work.
@@ -2284,11 +2342,13 @@ owns it.
   `M/Live/LiveExportSizing.swift`, `M/Live/LiveSampling.swift`;
   edits `M/PhotoWorkspace.swift`, `M/PhotoLayer.swift`, `M/AdjustmentSettings.swift`,
   `M/PhotoHistory.swift`, `M/PhotoStroke.swift`, `M/PhotoSelection.swift`,
+  `M/PhotoImageOps.swift`, `M/PhotoStraighten.swift` (the geometry hook),
   `M/PhotoRender.swift`; new `M/PhotoLayerComposite.swift`,
   `M/PhotoSelectionMask.swift` (today's marquee drag moved in),
   `M/PhotoCropSize.swift` (today's crop drag moved in), and the stubs
   `M/PhotoMask.swift`, `M/PhotoTransform.swift`, `M/PhotoEyedropper.swift`.
 - App: edits `A/PhotoApp.swift`, `A/PhotoIntent.swift`, `A/PhotoWindow.swift`,
+  `A/StrokePacer.swift` (modifiers per event),
   `A/PhotoCommands.swift`, `A/PhotoEditor.swift`, `A/PhotoPanel.swift`; new
   `A/PhotoWindow+File.swift` (today's open and save moved in),
   `A/PhotoWindow+Export.swift` (today's export moved in), the stubs
@@ -2308,7 +2368,7 @@ owns it.
   edits `MT/PhotoToolsTests.swift`; `ST/PhotoSeamsSnapshots.swift`
   (Preview data pill), edits the Photo snapshot files whose views moved;
   `UT/PhotoJourneyTests+Perf.swift` (PJ-P1, PJ-P2; after #333),
-  `UT/PhotoJourney+Fixtures.swift` (shared helpers), edits
+  `UT/PhotoJourneyTests+Fixtures.swift` (shared helpers), edits
   `UT/PhotoJourneyTests.swift` (uses them).
 - Docs: `docs/c4/model.json` (the `photo-model-sources` and
   `photo-app-sources` descriptions name everything in section 2, once).
@@ -2351,7 +2411,7 @@ owns it.
 - `ST/PhotoCropOptionsSnapshots.swift`
 - `UT/PhotoJourneyTests+Crop.swift`
 
-**PV-10 polish** (wave 1)
+**PV-10 polish** (wave 3)
 
 - `M/PhotoInspectorContent.swift`
 - `A/PhotoStatusLine.swift`, `A/PhotoEditor.swift`, `A/AdjustmentsInspector.swift`,
@@ -2376,7 +2436,7 @@ owns it.
 - `UT/PhotoJourneyTests+AdjustmentLayers.swift`, `UT/PhotoJourneyTests+PerfAdjustmentLayers.swift`
   (PJ-P2's adjustment-layer series)
 
-**PV-4 history tab and brush cursor** (wave 2)
+**PV-4 history tab and brush cursor** (wave 3)
 
 - `M/PhotoHistoryRows.swift` (new: each row's name and whether it is current
   or undone, from `historySteps` and `historyIndex`)
@@ -2389,7 +2449,7 @@ owns it.
   above before its PR says "Closes #644".
 - `UT/PhotoJourneyTests+History.swift`
 
-**PV-7 transform and flip** (wave 2)
+**PV-7 transform and flip** (wave 3)
 
 - `M/PhotoTransform.swift`, `M/Live/LiveTransform.swift`
 - `A/PhotoWindow+Transform.swift`, `A/TransformOptions.swift`, `A/TransformOverlay.swift`,
@@ -2398,7 +2458,7 @@ owns it.
 - `ST/PhotoTransformSnapshots.swift`, `ST/PhotoTransformLatencyTests.swift`
 - `UT/PhotoJourneyTests+Transform.swift`
 
-**PV-8 export size and formats** (wave 2)
+**PV-8 export size and formats** (wave 3)
 
 - `M/PhotoExportOptions.swift`, `M/PhotoImageFile.swift`, `M/Live/LiveExportSizing.swift`
 - `A/PhotoWindow+Export.swift`, `A/ExportSheet.swift`, `A/ImageIOCodec.swift`
@@ -2406,7 +2466,7 @@ owns it.
 - `ST/PhotoExportOptionsSnapshots.swift`
 - `UT/PhotoJourneyTests+Export.swift`
 
-**PV-9 eyedropper** (wave 2)
+**PV-9 eyedropper** (wave 3)
 
 - `M/PhotoEyedropper.swift`, `M/Live/LiveSampling.swift`
 - `A/PhotoWindow+Sample.swift`, `A/SampleOptions.swift`
@@ -2414,13 +2474,14 @@ owns it.
 - `ST/PhotoEyedropperSnapshots.swift`
 - `UT/PhotoJourneyTests+Sample.swift`
 
-**PV-5 selections and masks** (wave 3)
+**PV-5 selections and masks** (wave 4)
 
 - `M/PhotoSelectionMask.swift`, `M/PhotoMask.swift`, `M/PhotoLayerComposite.swift`,
   `M/Live/LiveSelection.swift`
 - `A/PhotoWindow+Select.swift`, `A/SelectOptions.swift`, `A/SelectionOverlay.swift`,
   `A/PhotoLayersTab.swift`, `A/PhotoCommands+Select.swift`, `A/PhotoCommands+Layer.swift`
 - `MT/PhotoSelectionMaskTests.swift` (the name #421 gives), `MT/PhotoMaskTests.swift`,
+  `MT/PhotoMaskTileTests.swift`,
   `MT/PhotoSelectionBudgetTests.swift`
 - `ST/PhotoSelectionMaskSnapshots.swift` (the name #421 gives), `ST/PhotoSelectionLatencyTests.swift`
 - `UT/PhotoJourneyTests+Select.swift`, `UT/PhotoJourneyTests+Mask.swift`
@@ -2486,6 +2547,9 @@ Each has a recommendation; the blueprint is written as if it is accepted.
    it. File a separate issue to add it, or leave it?
 8. **Engine issues.** File CR-1 to CR-4 on creative-core when the PV-5 and
    PV-7 packets are written; CR-5 and CR-6 only if PB-13 or PB-3 fail.
+9. **Polish beside p2.** PV-10's p3 bugs run in wave 3 beside the p2
+   features, since they share no file. Strict pick order would put them
+   after PV-5; say if you want that.
 
 ---
 
@@ -2513,7 +2577,7 @@ name in either file.
 | C8 | major | `.fake` as the workspace default could write fake bytes to a user's file; the fakes shared global state across parallel tests | `.live` is the default; `.fake` makes new instances per read; `FakeArchive` keeps its own state (5.2, recompiled) |
 | C9 | major | v2 state had no reset on open or new, the saved marker no initial value, the status message no way to clear | `start()` resets every v2 field and marks an opened file saved; `clearStatus()` (5.3) |
 | C10 | major | Release-only gates that CI never runs, cells with no test or owner, 100 ms marks that need the frame probe | Every row has a file and owner; release gates are local, CI gates the debug number; marks are report-only until #330 (7.1) |
-| C11 | major | `writeTestPhoto` is private to one class, and the fixture description didn't match its picture | PV-0 moves it to `UITests/PhotoJourney+Fixtures.swift`; the `sample` fixture is that picture (4.1, 4.4) |
+| C11 | major | `writeTestPhoto` is private to one class, and the fixture description didn't match its picture | PV-0 moves it to `UITests/PhotoJourneyTests+Fixtures.swift`; the `sample` fixture is that picture (4.1, 4.4) |
 | C12 | major | #273 has no rotation, which the transform box needs | A new `needs-ui` issue on top of #273 (6.3) |
 | C13 | major | `PhotoHistoryRows.swift` was in no C4 component | Added to `photo-model-history` in `c4-planned.json` |
 | C14 | minor | PJ-4's expected message named the wrong path | `data/layer-2.png` |
@@ -2525,3 +2589,33 @@ name in either file.
 After the fixes the contracts, fakes, `NotBuilt` stand-ins and workspace
 stubs were compiled again (`swift build --build-tests`), and the 309 Photo
 model tests passed with `.live` as the default.
+
+### Round 2 (2026-10-14): 4 blocking, 6 major, 4 minor; all fixed
+
+The critic first checked every round-1 fix: C2–C8, C10, C12 and C14–C18
+held; C1, C11 and C13 were wrong or half done, C9 partial (all four are
+covered below).
+
+| # | Severity | Finding | Fix |
+|---|---|---|---|
+| D1 | blocking | `UITests/PhotoJourney+Fixtures.swift` matches neither today's journey template nor #333's `PhotoJourneyTests*.swift` pattern, so it would never compile | Renamed `UITests/PhotoJourneyTests+Fixtures.swift`; the move waits on #333 (4.1, 8.3) |
+| D2 | blocking | Drags carry only Option (`sampling`) and no zoom, so Shift and Option selection modes, ratio and angle snaps and zoom-aware handles couldn't be built from PV-5's and PV-7's files | PV-0 widens `drag` and `drags` to `modifiers:` and `zoom:` and owns `StrokePacer.swift` for it (2.4, 5.3) |
+| D3 | blocking | Mask paint had no target type, no undo step, and source-over paint can't lower an alpha coverage | `PaintTarget` (`.pixels` or `.mask`) in PV-0's `PhotoStroke.swift`; masks keep coverage as gray with alpha 1 (black hides, white reveals); a `.maskTiles` history step (2.4, 5.1, 5.3) |
+| D4 | blocking | C1's step id fell back to 0 when everything was undone after a trim, reading clean with an edit applied | `baseStepID` takes each trimmed step's id, like `baseName` (5.3) |
+| D5 | major | Delete, Fill, Select All, Deselect and Apply Crop ignored the selection mask, in a file PV-5 doesn't own | PV-0 routes them through `PhotoSelectionMask.swift` (2.4) |
+| D6 | major | PV-0's no-op eyedropper would fail its own `PhotoToolsTests` on `.fake` | PV-0's eyedropper drag calls `services.sampling` and sets the color (2.4) |
+| D7 | major | Wave 2 ran p2 features beside a p1, against `docs/priorities.md` | Wave 2 is PV-6 alone; the p2 features and PV-10 are wave 3; PV-5 is wave 4; the polish exception is question 9 (8.2) |
+| D8 | major | Debug gates at × 10 when CoreRaster's loops run about × 20 in debug; PB-1's source was wrong | CI gates only the geometry rows in debug; pixel rows report in CI and gate in release locally; PB-1 cites `dragBudget` in the macOS test (7.1) |
+| D9 | major | `PHOTO_LAYOUT_WIDE=1` wouldn't reach the UI test runner | `TEST_RUNNER_PHOTO_LAYOUT_WIDE=1`, checked against Apple's documentation in PV-10 (7.4) |
+| D10 | major | A new image read as dirty while the text said clean | `start()` sets `savedStepID` for new images too (5.3) |
+| D11 | minor | PF-12 named a test file no feature owns | `PhotoAdjustmentLayerTileTests` (PV-6), `PhotoMaskTileTests` (PV-5) |
+| D12 | minor | `start()` didn't reset `editsMask` | Added (5.3) |
+| D13 | minor | 2.2's history row left out `PhotoHistoryRows.swift` | Added |
+| D14 | minor | "System alert" for unsaved changes against question 5's `WindowGroup`; two different History empty states | An `NSAlert` worded like the system's; the empty states split into no image and no edits (4.2, 6.2) |
+
+Confirmed by round 2: no shortcut collision (Command-J, Command-E,
+Command-T, Shift-Command-I and I are free; Shift-Command-E stays Export),
+the 11 open `line:photo` issues and their labels match 0.4 and 8.1, every
+file in 8.3 sits in exactly one `c4-planned.json` component, and neither file
+names another company's product. After the fixes the code was compiled
+again and the 309 Photo model tests passed.
