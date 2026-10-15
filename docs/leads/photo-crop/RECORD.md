@@ -4,7 +4,7 @@ Issue: #1076 · Packet: docs/blueprints/photo/features/photo-crop.md
 Run: act-1a13f70ddc3-29wr · Session: lead session (claude/photo-crop-feature-lead-e7vpmg) · Started: 2026-10-15T12:03Z
 Stage: 5 finish (contact-sheet run pending; PJ-8 fix r5-b1 in flight)
 Base: e6fdf149c0a0a17fd2a23bdbe687f56d4591ae72
-Next: r5-b1 merged (359fac2); read dev CI run 38799320916 (head 3dc283e) or the first later completed run containing 359fac2. (#1238, branch lead/photo-crop-r5-b1: crop field rows carry accessibilityValue so PJ-8 reads 600 px). Then read the first completed dev CI run containing it. If PJ-8, PJ-P1 and PJ-P2 pass and Photo's audit has no crop count over baseline, comment `Belt-Contact-Sheet: <run link>` on #1076 with one line per journey, the PB-8 number and the audit counts, then Stage: done. Other Photo journeys red in run 38792928305 belong to other features (tier1, edit, layer ops, launch contrast).
+Next: r5-b1 merged (359fac2); read the first completed dev CI run containing 359fac2 (38799320916 at 3dc283e does not contain it). (#1238, branch lead/photo-crop-r5-b1: crop field rows carry accessibilityValue so PJ-8 reads 600 px). Then read the first completed dev CI run containing it. If PJ-8, PJ-P1 and PJ-P2 pass and Photo's audit has no crop count over baseline, comment `Belt-Contact-Sheet: <run link>` on #1076 with one line per journey, the PB-8 number and the audit counts, then Stage: done. Other Photo journeys red in run 38792928305 belong to other features (tier1, edit, layer ops, launch contrast).
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
