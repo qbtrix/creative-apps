@@ -21,7 +21,7 @@ Waves: 1 = CP-1 (independent). 2 = CP-2 (waits CP-1). 3 = CP-3, CP-4 (independen
 ## Rounds
 | round | CI run | CI | audit vs baseline | lenses | confirmed | fixed by | clean |
 |---|---|---|---|---|---|---|---|
-| 1 | 38742226941 (head 20d6a1c) | red: our gridAligned (frames[photo.crop.x] nil); Halo keyedFrame6 not ours (#1163) | n/a (journeys did not run) | clarity, design, layout, controls | 5 major + 6 minor (fields read 0 px; two captions; layout shift; Swap dead under 1:1; swapped orientation unreadable; X/Y 0 refused; empty tooltips; Original unexplained; disabled reasons disagree) | r1-b1 (gridAligned), r1-b2 (panel clarity) | no |
+| 1 | 38742226941 (head 20d6a1c) | red: our gridAligned (frames[photo.crop.x] nil); Halo keyedFrame6 not ours (#1163) | n/a (journeys did not run) | clarity, design, layout, controls | 5 major + 6 minor (fields read 0 px; two captions; layout shift; Swap dead under 1:1; swapped orientation unreadable; X/Y 0 refused; empty tooltips; Original unexplained; disabled reasons disagree) | r1-b1 #1164 (gridAligned via anchor preference), r1-b2 (panel clarity) | no |
 
 ## Decisions
 - Round 1: X/Y accept 0 (the packet's 'under 1 is refused' meant sizes; an X/Y range starting at 0 that refuses 0 is a dead value).
@@ -34,6 +34,7 @@ Waves: 1 = CP-1 (independent). 2 = CP-2 (waits CP-1). 3 = CP-3, CP-4 (independen
 - Wave 1 has one task, so it runs as one worktree subagent, not the build-wave workflow.
 
 ## Open
+- Issue comments posted from this session get a Generated-by footer re-appended server-side (PATCH can't remove it); the #763 comment carries one. PR bodies can be cleaned.
 - #1148 needs-ui: per-chip identifiers on ChoiceChips; until then PJ-8 finds aspect chips by title.
 - Round 1 check: setCropField refuses X/Y 0 (contract: value under 1 is refused for every field), so X 0 beeps; judge in the critic panel.
 - Round 1 check: gridAligned reads the accessibility tree of a hosting view; may need a harness fix if empty on macOS.
