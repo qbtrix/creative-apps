@@ -14,6 +14,9 @@ struct ToolOptionsSection: View {
     let model: PhotoWorkspace
     let perform: PhotoPerform
 
+    /// The Eyedropper's one-line hint, like each other tool's.
+    static let eyedropperHint = "Click the image to pick a color for the brush."
+
     var body: some View {
         let options = model.toolOptions
         InspectorSection("Tool Options") {
@@ -56,6 +59,7 @@ struct ToolOptionsSection: View {
                 hint("Drag over the image to move the selected layer.")
                 TransformOptions(model: model, perform: perform)
             case .eyedropper:
+                hint(Self.eyedropperHint)
                 SampleOptions(model: model, perform: perform)
             }
         }
