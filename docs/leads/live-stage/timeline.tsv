@@ -5,3 +5,4 @@ utc	stage	event	ref	note
 2026-10-15T01:05Z	1	stage-end	#798	packet read, core APIs present
 2026-10-15T01:05Z	2	stage-end	#798	4 waves planned
 2026-10-15T01:06Z	3	stage-start	#798	wave 1 ST-1 ST-3 ST-6 ST-7
+2026-10-15T02:02Z	3	heartbeat	#798	wave 1 building
