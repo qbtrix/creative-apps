@@ -34,3 +34,4 @@ utc	stage	event	ref	note
 2026-10-15T04:26Z	3	pr-merged	#969	S-7a
 2026-10-15T04:26Z	3	pr-opened	#972	S-7c paint target, 300 lines 5 files
 2026-10-15T04:26Z	3	stage-start	S-7b	builder stacked on S-7c
+2026-10-15T04:32Z	3	ci-run	38679533707	first run with #956: photo compiles, journeys ran, audit at baseline; red from halo/library (#763)

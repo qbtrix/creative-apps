@@ -46,7 +46,7 @@ packet chains every task on the one before it (shared files or new types).
 
 ## Open
 - needs-ui filed: #952 SelectionPathOutline, #953 BrushCursorMark, #954 LayerList symbol and accessory. SelectionHandles with rotation is SuiteUI canvas-marks CM-4 (#273), no new issue.
-- Watch: first app-code merge is #956 (ce3e768). Check the first completed macOS CI run on dev at or after ce3e768 for PhotoIntent/PhotoPanel compile errors.
+- #956 app code verified: run 38679533707 (723, 54e16aa) macOS scripts/ci green (compile + snapshots); all 12 Photo journeys ran; photo audit at or under baseline (identifier 16 vs 23). Run red from halo (identifier 14>8) and library (identifier 21>16), not this feature; dev-red #763.
 - S-6b: a coalesced step gets a fresh id; PhotoStack keeps masks but not selectionMask (S-7c may add it).
 - dev CI was red before this feature (runs 717-722 fail in UI journeys of other lines; Linux green). Not ours; the dev-red issue tracks it.
 - docs/c4/model.json PhotoModel description should mention contracts, fakes, services and drag routing; the packet defers it to the supervisor (no c4 edit in this feature).
