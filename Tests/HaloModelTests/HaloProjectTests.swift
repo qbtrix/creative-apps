@@ -29,3 +29,41 @@ import Testing
     project.selectComposition("comp-9")
     #expect(project.selectedCompositionID == "comp-1")
 }
+
+@Test func liveAndFakeProjectsStartEmpty() {
+    for project in [HaloProject(), HaloProject(services: .fake)] {
+        #expect(project.compositions.isEmpty)
+        #expect(project.selectedCompositionID == nil && project.selectedLayerID == nil)
+        #expect(project.document == HaloDocumentState())
+        #expect(project.history == HaloHistory() && project.refusal == nil && project.renderedFrame == nil)
+        #expect(project.playback == HaloPlaybackState() && project.playback.loops)
+        #expect(project.file == HaloFileState() && project.selectedKeys.isEmpty && project.viewerDrag == nil)
+    }
+    #expect(HaloProject().services.drawing is LiveFrameDrawing)
+    #expect(HaloProject(services: .fake).services.drawing is FakeFrameDrawing)
+}
+
+@Test func equalityComparesStateButNotServices() {
+    var live = HaloProject(), fake = HaloProject(services: .fake)
+    #expect(live == fake)
+    live.newComposition()
+    #expect(live != fake)
+    fake.newComposition()
+    #expect(live == fake)
+    fake.newLayer(.solid)
+    #expect(live != fake)
+}
+
+@Test func accessorsReadThroughTheDocument() {
+    var project = HaloProject(services: .fake)
+    project.newComposition()
+    project.newComposition()
+    project.newLayer(.text)
+    #expect(project.compositions == project.document.compositions)
+    #expect(project.selectedCompositionID == project.document.selectedCompositionID)
+    #expect(project.selectedCompositionID == "comp-2")
+    #expect(project.selectedLayerID == project.document.selectedLayerID && project.selectedLayerID != nil)
+    #expect(project.document.nextCompositionNumber == 3)
+    project.selectComposition("comp-1")
+    #expect(project.document.selectedCompositionID == "comp-1" && project.document.selectedLayerID == nil)
+}
