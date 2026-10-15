@@ -22,3 +22,6 @@ utc	stage	event	ref	note
 2026-10-15T02:24Z	3	stage-start	wave 5	KY-9 from 87daea2
 2026-10-15T02:28Z	3	heartbeat	wave 5	KY-9 building
 2026-10-15T02:38Z	3	pr-opened	#936	KY-9 feature-done
+2026-10-15T02:40Z	3	pr-merged	#936	KY-9 feature-done
+2026-10-15T02:40Z	3	stage-end	waves	all 9 tasks merged
+2026-10-15T02:40Z	4	stage-start	round 1	waiting on dev CI containing 899d424
