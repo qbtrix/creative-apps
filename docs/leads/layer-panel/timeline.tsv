@@ -29,3 +29,4 @@ utc	stage	event	ref	note
 2026-10-15T11:40Z	4	ci-run	38727890123	same Library build break; reported on #763
 2026-10-15T12:06Z	4	ci-run	38731305776	Library fixed; viewer-playback test compile error blocks journeys; not counted
 2026-10-15T12:13Z	4	ci-run	38732179619	playback test compile error (#1097) still blocks journeys; reported on #763
+2026-10-15T12:34Z	4	heartbeat	#763	waiting on the playback test compile fix (#1097)
