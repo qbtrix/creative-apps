@@ -199,6 +199,19 @@ every one is fixed in the packets:
   files and Library's real 60-photo sample; the shortcut test checks
   `SwitchMenu`'s digits instead of literal text.
 
+
+## Longest build chain
+
+Each packet was re-cut to `docs/factory/packets.md` (shared docs in one
+final task, a task waits only on merged code it needs, each wave lists its
+independent tasks). Longest depends-on chain in tasks, before and after;
+a chain over 3 has its reason in the packet's Build waves section.
+
+- bundle: 5 before, 4 after.
+- home: 7 before, 5 after.
+- suite-contracts: 9 before, 9 after.
+- switching: 6 before, 4 after.
+
 ## The lead contract
 
 Every feature lead and every task below codes against this. It is handed

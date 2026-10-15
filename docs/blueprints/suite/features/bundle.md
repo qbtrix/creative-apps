@@ -155,9 +155,9 @@ BU-4 must have merged first, see the done check).
 | BU-2 | #813 | `SizeReport`, `SizeBudget`, `SizeFinding`, `SizeGate`, `BundleLayout`; `SizeGateTests` reads `SUITE_SIZE_REPORT` when set | `Sources/SuiteModel/Packaging/` (`SizeReport.swift`, `SizeGate.swift`, `BundleLayout.swift`), `Tests/SuiteModelTests/Packaging/SizeGateTests.swift`, `Tests/SuiteModelTests/Packaging/BundleLayoutTests.swift` | BU-1a #810 | lane |
 | BU-3 | #814 | Route R1: the `Release` graph in `project.yml` (four frameworks, five apps as application targets with the helper run path, the launcher) and the `AfterGlowJourneyTests` bundle in the template's list (SH-7's template already compiles `UITests/Journey*.swift` and `UITests/AfterGlowJourneyTests*.swift` for it; BU-3 adds only `Sources/SuiteModel/Values/`); `CreativeEngines.swift` re-exporting FlareCore, CoreRaster, CoreColor; `BuildGraphTests` | `project.yml`, `Bundle/Engines/CreativeEngines.swift`, `Tests/SuiteModelTests/BuildGraphTests.swift` | #333 (SH-7), BU-1a | supervisor |
 | BU-5a | #815 | `AfterGlow.plist`: bundle id, every document type of 2.6 (Editor, Owner; images Alternate), exported types (OpenRaster exported under the suite id unless the system declares one), `LSMinimumSystemVersion` 26.0; `PlistShapeTests` | `Bundle/Info/AfterGlow.plist`, `Tests/SuiteModelTests/PlistShapeTests.swift` | BU-1a | lane |
-| BU-5b | #816 | The five app plists: each app's own types (Owner for its format, Alternate for images it reads), the hand-off type as Viewer, `org.creativesuite.<x>`, icon file name | `Bundle/Info/Flare.plist`, `Design.plist`, `Photo.plist`, `Library.plist`, `Halo.plist`, `Tests/SuiteModelTests/PlistShapeAppsTests.swift` | BU-5a | lane |
-| BU-5c | #817 | Placeholder icons (Q4): six 1024 px PNGs, a coloured rounded square with the app's initial; `Bundle/Icons/README.md` says how they were made and that art is pending | `Bundle/Icons/{AfterGlow,Flare,Design,Photo,Library,Halo}.png`, `Bundle/Icons/README.md`, `Tests/SuiteModelTests/IconFilesTests.swift` | BU-5b | lane |
-| BU-4 | #818 | `scripts/bundle-apps` assembles, signs and verifies `AfterGlow.app`, symlinks the old paths, registers with `lsregister`; `scripts/size-report` adds the AfterGlow rows | `scripts/bundle-apps`, `scripts/size-report` | BU-3, BU-5c, BU-0 #809 | supervisor |
+| BU-5b | #816 | The five app plists: each app's own types (Owner for its format, Alternate for images it reads), the hand-off type as Viewer, `org.creativesuite.<x>`, icon file name | `Bundle/Info/Flare.plist`, `Design.plist`, `Photo.plist`, `Library.plist`, `Halo.plist`, `Tests/SuiteModelTests/PlistShapeAppsTests.swift` | BU-1a | lane |
+| BU-5c | #817 | Placeholder icons (Q4): six 1024 px PNGs, a coloured rounded square with the app's initial; `Bundle/Icons/README.md` says how they were made and that art is pending | `Bundle/Icons/{AfterGlow,Flare,Design,Photo,Library,Halo}.png`, `Bundle/Icons/README.md`, `Tests/SuiteModelTests/IconFilesTests.swift` | BU-5a, BU-5b | lane |
+| BU-4 | #818 | `scripts/bundle-apps` assembles, signs and verifies `AfterGlow.app`, symlinks the old paths, registers with `lsregister`; `scripts/size-report` adds the AfterGlow rows | `scripts/bundle-apps`, `scripts/size-report` | BU-3, BU-5a, BU-5b, BU-5c, BU-0 #809 | supervisor |
 | BU-6 | #819 | After ten green dev runs since BU-4: set the budgets (measured maximum × 1.10, never above 7.5's provisional numbers; symbols 0 after one report-only run) and fail the `macos` job on a hard finding | `.github/workflows/ci.yml`, `Bundle/size-budget.json` | BU-4, BU-2 | supervisor, later |
 
 Test fixtures are inline strings or read by path from `#filePath` (the
@@ -165,8 +165,10 @@ plists, `project.yml`); nothing non-Swift goes inside `Tests/SuiteModelTests/`,
 where SwiftPM would warn about unhandled resources and `Package.swift` can't
 change to declare them.
 
-Order: BU-2, BU-3 and BU-5a at once; BU-5b after BU-5a;
-BU-5c after BU-5b; BU-4 after BU-3 and BU-5c. Sizes: BU-2 ~300 lines / 6
+Order: BU-2, BU-3, BU-5a and BU-5b at once (BU-5b's test reads only the
+five app plists, so it does not wait for BU-5a); BU-5c after BU-5a and
+BU-5b, whose plists name the icons its test checks; BU-4 after BU-3 and the
+plists and icons it copies. Sizes: BU-2 ~300 lines / 6
 files, BU-3 ~250 / 4, BU-5a ~300 / 2, BU-5b ~320 / 6, BU-5c ~80 / 8
 (six binaries), BU-4 ~300 / 2.
 
@@ -177,6 +179,25 @@ CoreRaster and CoreColor; acceptance: an executable depending on it links
 `libCreativeEngines` dynamically (`otool -L`)") with `needs-core`, keep
 BU-4 on today's static engines, and record it in RECORD.md. The rest of the
 feature does not wait.
+
+## Build waves
+
+No task edits a shared doc (`docs/c4/model.json`, `docs/design.md`, the
+blueprint or `waves.md`); every new file sits in a folder its C4 component
+already covers, so rule (a) adds no task. BU-1a (#810), BU-0 (#809) and
+#333 are outside this packet.
+
+- Wave 1: BU-2, BU-3, BU-5a, BU-5b. Independent in this wave: all four.
+- Wave 2: BU-5c (lane, `feature-done`). Independent in this wave: BU-5c
+  alone.
+- Wave 3: BU-4 (supervisor). Independent in this wave: BU-4 alone.
+- Wave 4: BU-6 (supervisor, after ten green dev runs; not in the done
+  check). Independent in this wave: BU-6 alone.
+
+Longest chain: BU-5a → BU-5c → BU-4 → BU-6 (4).
+Chain of 4: `IconFilesTests` reads `CFBundleIconFile` from the plists BU-5a
+adds; `scripts/bundle-apps` copies `Bundle/Icons/*.png`; BU-6 sets
+`Bundle/size-budget.json` from ten dev runs of the bundle BU-4 builds.
 
 ## Acceptance test per task
 
