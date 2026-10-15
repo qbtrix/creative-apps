@@ -5,7 +5,11 @@
 // took about a minute. The cost test compares two composites onto the same
 // 64 MB picture, a one-pixel strip 16 tiles wide and one a single tile wide,
 // so it measures the per-tile copy, not the machine: both pay one picture
-// copy (the result), and the old loop made the wide strip pay 16. The tiled
+// copy (the result), and the old loop made the wide strip pay 16. The bound
+// is 8x, half those 16 copies: the fixed code measures 1.2-1.5x on Linux and
+// about 4.6x on the macOS runner under parallel test load, and the old loop
+// measured 16.2x. The suite is serialized and each strip takes the fastest
+// of nine runs, so scheduler stalls drop out. The tiled
 // path Merge Down and Flatten use gives the same pixels as the picture path,
 // blend, opacity and an offset that straddles the picture's tiles included.
 // Runs on Linux and macOS.
@@ -13,7 +17,7 @@ import CoreRaster
 @testable import PhotoModel
 import Testing
 
-@Suite struct PhotoCompositeCostTests {
+@Suite(.serialized) struct PhotoCompositeCostTests {
     @Test func aLayerCostsAboutOnePictureCopyNotOnePerTile() throws {
         let picture = try PixelBuffer(width: 4096, height: 1024, fill: RGBA(r: 0.2, g: 0.3, b: 0.4, a: 1))
         let fill = RGBA(r: 0.5, g: 0.1, b: 0.1, a: 0.5)
@@ -21,13 +25,13 @@ import Testing
         let narrow = try TiledPixels(width: PixelBuffer.tileSize, height: 1, fill: fill)
         #expect(wide.tiles.count == 16)
         #expect(narrow.tiles.count == 1)
-        let wideCost = try fastest(of: 5) { try composite(wide, onto: picture) }
-        let narrowCost = try fastest(of: 5) { try composite(narrow, onto: picture) }
+        let wideCost = try fastest(of: 9) { try composite(wide, onto: picture) }
+        let narrowCost = try fastest(of: 9) { try composite(narrow, onto: picture) }
         // Both pay one picture copy; the per-tile loop made the wide strip pay
-        // 16 (about 16x). 4x is a quarter of that and far above noise, and the
-        // fastest of five runs drops scheduler stalls. The 1 ms floor guards
-        // a machine so fast the narrow run rounds to nothing.
-        #expect(wideCost <= 4 * max(narrowCost, 1),
+        // 16 (measured 16.2x). 8x is half of that, above the ~4.6x the fixed
+        // code shows on a loaded macOS runner. The 1 ms floor guards a machine
+        // so fast the narrow run rounds to nothing.
+        #expect(wideCost <= 8 * max(narrowCost, 1),
                 "16-tile strip \(wideCost) ms, 1-tile strip \(narrowCost) ms")
     }
 
