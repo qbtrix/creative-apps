@@ -102,13 +102,17 @@ public struct FolioPage: Identifiable, Hashable, Codable, Sendable {
     public var rotation: FolioRotation
     /// The printed page label when the file has one ("iv", "A-3"), else nil.
     public var label: String?
+    /// The visible part of the page after Crop, in page space; nil shows it all.
+    public var crop: FolioRect?
     public init(id: FolioPageID, origin: FolioPageOrigin, size: FolioSize,
-                rotation: FolioRotation = .r0, label: String? = nil) {
-        self.id = id; self.origin = origin; self.size = size; self.rotation = rotation; self.label = label
+                rotation: FolioRotation = .r0, label: String? = nil, crop: FolioRect? = nil) {
+        self.id = id; self.origin = origin; self.size = size; self.rotation = rotation
+        self.label = label; self.crop = crop
     }
-    /// The size as shown, after rotation.
+    /// The size as shown, after crop and rotation.
     public var displaySize: FolioSize {
-        rotation == .r90 || rotation == .r270 ? FolioSize(width: size.height, height: size.width) : size
+        let s = crop.map { FolioSize(width: $0.width, height: $0.height) } ?? size
+        return rotation == .r90 || rotation == .r270 ? FolioSize(width: s.height, height: s.width) : s
     }
 }
 
@@ -335,6 +339,8 @@ public struct FolioPermissions: Hashable, Codable, Sendable {
 /// every edit is testable on Linux.
 public struct FolioDocumentState: Hashable, Codable, Sendable {
     public var title: String
+    /// Info dictionary author; empty when the file has none.
+    public var author: String = ""
     public var pages: [FolioPage]
     public var annotations: [FolioAnnotation]
     public var fields: [FolioFormField]
@@ -399,6 +405,11 @@ public struct FolioWriteOptions: Hashable, Sendable {
 }
 
 public enum FolioImageFormat: String, CaseIterable, Codable, Sendable { case png, jpeg }
+
+/// Text export formats: plain text, rich text, and a word-processing
+/// document (Office Open XML). Text, paragraph order and basic styling,
+/// never the page layout.
+public enum FolioTextFormat: String, CaseIterable, Codable, Sendable { case plain, rtf, docx }
 
 public struct FolioImageExport: Hashable, Sendable {
     public var format: FolioImageFormat

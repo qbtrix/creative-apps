@@ -103,6 +103,11 @@ private func open(_ f: FolioFixtureFile, password: String? = nil) async throws -
     #expect(try s.organizing.parseRange("1-2, 3", pageCount: 3) == [1, 2, 3])
     #expect(try s.organizing.parseRange("2-", pageCount: 3) == [2, 3])
     #expect(throws: FolioEditError.pageRange("This document has pages 1 to 3.")) { try s.organizing.parseRange("4", pageCount: 3) }
+    try s.organizing.crop([doc.pages[0].id], to: FolioRect(x: 36, y: 36, width: 540, height: 720), in: &doc)
+    #expect(doc.pages[0].displaySize == FolioSize(width: 540, height: 720))   // the moved, unrotated page
+    #expect(throws: FolioEditError.invalidValue("Keep at least 1 inch of the page on each side.")) {
+        try s.organizing.crop([doc.pages[0].id], to: FolioRect(x: 0, y: 0, width: 10, height: 10), in: &doc)
+    }
     let parts = try s.organizing.split(doc, after: [1])
     #expect(parts.map(\.pages.count) == [1, 2])
 }
@@ -135,6 +140,8 @@ private func open(_ f: FolioFixtureFile, password: String? = nil) async throws -
     #expect(opened.state.fields.isEmpty)
     let images = try await s.exporting.images(of: doc.pages, annotations: doc.annotations, as: FolioImageExport(format: .png, ppi: 144))
     #expect(images.first.map { String(decoding: $0, as: UTF8.self) } == "PNG 0 1224x1584 0")
+    let docx = try await s.exporting.text(of: doc, as: .docx)
+    #expect(String(decoding: docx, as: UTF8.self).hasPrefix("PKMEMBERSHIP APPLICATION"))
 }
 
 @Test func recognizeScannedPages() async throws {   // P-J12

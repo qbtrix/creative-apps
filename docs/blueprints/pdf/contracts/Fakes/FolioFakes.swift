@@ -217,8 +217,15 @@ public struct FakePageExporting: PageExporting {
             return Data("\(format.format.rawValue.uppercased()) \(p.id.raw) \(Int(d.width * s))x\(Int(d.height * s)) \(n)".utf8)
         }
     }
-    public func plainText(of doc: FolioDocumentState) async -> String {
-        doc.pages.map { (library.page($0)?.lines ?? []).joined(separator: "\n") }.joined(separator: "\u{0C}")
+    /// Plain: the lines, pages split by a form feed. Rich text and
+    /// word-processing: the same text after a "{\\rtf1" or "PK" marker.
+    public func text(of doc: FolioDocumentState, as format: FolioTextFormat) async throws(FolioWriteError) -> Data {
+        let plain = doc.pages.map { (library.page($0)?.lines ?? []).joined(separator: "\n") }.joined(separator: "\u{0C}")
+        switch format {
+        case .plain: return Data(plain.utf8)
+        case .rtf: return Data(("{\\rtf1 " + plain + "}").utf8)
+        case .docx: return Data(("PK" + plain).utf8)
+        }
     }
 }
 
@@ -572,6 +579,19 @@ public struct FakePageOrganizing: PageOrganizing {
         let id = FolioPageID(doc.nextPageID); doc.nextPageID += 1
         doc.pages.insert(FolioPage(id: id, origin: .blank, size: size), at: min(max(0, index), doc.pages.count))
         return id
+    }
+    public func crop(_ pages: [FolioPageID], to rect: FolioRect?, in doc: inout FolioDocumentState) throws(FolioEditError) {
+        try Self.check(pages, doc)
+        if let r = rect, r.width < 72 || r.height < 72 {
+            throw .invalidValue("Keep at least 1 inch of the page on each side.")
+        }
+        let set = Set(pages)
+        for i in doc.pages.indices where set.contains(doc.pages[i].id) {
+            guard let r = rect else { doc.pages[i].crop = nil; continue }
+            let s = doc.pages[i].size
+            let x = min(max(0, r.x), s.width - 72), y = min(max(0, r.y), s.height - 72)
+            doc.pages[i].crop = FolioRect(x: x, y: y, width: min(r.width, s.width - x), height: min(r.height, s.height - y))
+        }
     }
     public func extract(_ pages: [FolioPageID], from doc: FolioDocumentState) throws(FolioEditError) -> FolioDocumentState {
         try Self.check(pages, doc)

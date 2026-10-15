@@ -131,6 +131,9 @@ public protocol PageOrganizing: Sendable {
     /// then get a " 2" suffix.
     func insert(_ other: FolioOpened, at index: Int, in doc: inout FolioDocumentState) throws(FolioEditError) -> [FolioPageID]
     func insertBlank(size: FolioSize, at index: Int, in doc: inout FolioDocumentState) throws(FolioEditError) -> FolioPageID
+    /// Crops pages to `rect` (page space, before rotation), clamped to each
+    /// page; refuses a rect under 72 pt on a side. nil removes the crop.
+    func crop(_ pages: [FolioPageID], to rect: FolioRect?, in doc: inout FolioDocumentState) throws(FolioEditError)
     /// A new document of just these pages, in document order (Extract).
     func extract(_ pages: [FolioPageID], from doc: FolioDocumentState) throws(FolioEditError) -> FolioDocumentState
     /// Splits after each page number in `after` (1-based), into parts.
@@ -176,15 +179,18 @@ public protocol DocumentWriting: Sendable {
     func write(_ doc: FolioDocumentState, options: FolioWriteOptions) async throws(FolioWriteError) -> Data
 }
 
-/// UC-12 Export pages as pictures, or the text as plain text.
+/// UC-12 Export pages as pictures, or the text as plain text, rich text or a
+/// word-processing document.
 /// Live: `FolioApp/Live/PDFKitExporting.swift`.
 public protocol PageExporting: Sendable {
     var unavailableHelp: String? { get }
     /// One encoded image per page, in the order given, annotations drawn.
     func images(of pages: [FolioPage], annotations: [FolioAnnotation], as format: FolioImageExport)
         async throws(FolioWriteError) -> [Data]
-    /// Each page's text, pages separated by a form feed.
-    func plainText(of doc: FolioDocumentState) async -> String
+    /// The document's text in reading order. Plain text separates pages with a
+    /// form feed; rich text and word-processing keep paragraphs, bold, italic
+    /// and size where the PDF's text layer has them.
+    func text(of doc: FolioDocumentState, as format: FolioTextFormat) async throws(FolioWriteError) -> Data
 }
 
 /// UC-13 Recognize text on a scanned page (OCR), so it can be found,
