@@ -3,7 +3,8 @@
 // a PNG the test writes (-PhotoOpenFile) and export to -PhotoExportTo, so no
 // panel opens. Tier 1 (docs/priorities.md): testOpenImagePaintAndSave (two
 // Exposure drags as two undo steps, Save, PNG and JPEG export, reopen),
-// testTier1CropResize, testTier1Tone,
+// testTier1CropResize (Escape cancels a pending crop, Return applies one),
+// testTier1Tone,
 // testTier1UndoRedoZoomPan and testTier1Layers. Edits are checked by their
 // undo names, sizes and layer counts by the panel header, values XCUITest
 // can't read by the canvas pixels; tier-1 files are named tools.png, a name
@@ -19,7 +20,7 @@
 // history journey pans by scroll and by arrow key, and checks a brush drag
 // paints after Space is let go (Space is pan mode only while held). The hitch
 // journey paints fast strokes across a 4000 x 3000 photo under XCTest's hitch
-// metric, report only. Run order is by name, so testTier1UndoRedoZoomPan runs
+// metric, report only. testFixtureLaunch launches on -PhotoFixture. Run order is by name, so testTier1UndoRedoZoomPan runs
 // last and attaches the audit counts.
 import CoreGraphics
 import ImageIO
@@ -27,6 +28,27 @@ import UniformTypeIdentifiers
 import XCTest
 
 final class PhotoJourneyTests: XCTestCase {
+    /// `-PhotoFixture sample` opens the sample picture on the fakes: the status
+    /// line shows "Preview data" and the Eyedropper (enabled by the fake
+    /// sampling service, disabled on `.live`) is on. An unknown name says so.
+    @MainActor func testFixtureLaunch() {
+        let photo = Journey("Photo", self, arguments: ["-PhotoFixture", "sample"])
+        XCTAssert(photo.element("suite.tools").waitForExistence(timeout: 30), "no tool rail (suite.tools)")
+        XCTAssert(photo.element("photo.status.preview").waitForExistence(timeout: 10), "-PhotoFixture sample shows no Preview data pill")
+        expectHeader("800 × 600 px", photo, "-PhotoFixture sample didn't open the 800 × 600 px sample")
+        let eyedropper = photo.element("suite.tools").buttons["Eyedropper"]
+        XCTAssert(eyedropper.waitForExistence(timeout: 5), "the rail has no Eyedropper")
+        XCTAssert(eyedropper.isEnabled, "the Eyedropper is disabled under -PhotoFixture (the window is on .live?)")
+        photo.shot("fixture-sample")
+
+        photo.app.terminate()
+        let unknown = Journey("Photo", self, arguments: ["-PhotoFixture", "nope"])
+        let message = unknown.element("photo.status.message")
+        XCTAssert(message.waitForExistence(timeout: 30), "-PhotoFixture nope shows no status message")
+        let text = [message.label, message.value as? String ?? ""].joined(separator: " ")
+        XCTAssert(text.contains("No fixture named nope."), "the status message reads \(text), not No fixture named nope.")
+    }
+
     @MainActor func testLaunchShowsWindowShell() {
         Journey("Photo", self).expectEditorShell()
     }
@@ -325,6 +347,14 @@ final class PhotoJourneyTests: XCTestCase {
         photo.shot("crop-tool-key")
         photo.drag(on: "suite.canvas", from: CGVector(dx: 0.25, dy: 0.25), to: CGVector(dx: 0.75, dy: 0.75), step: "crop-chosen")
         XCTAssert(apply.isEnabled, "Apply Crop is still disabled after dragging a crop")
+        // Escape cancels the pending crop (the .dismiss intent): no crop, no step, same size.
+        photo.app.typeKey(.escape, modifierFlags: [])
+        XCTAssert(Self.waitUntil { !apply.isEnabled }, "Escape didn't cancel the pending crop (Apply Crop is still enabled)")
+        XCTAssertFalse(photo.app.buttons["Undo Crop"].exists, "Escape applied the crop instead of cancelling it")
+        expectHeader("400 × 300 px", photo, "Escape changed the image size")
+        photo.shot("crop-cancelled")
+        photo.drag(on: "suite.canvas", from: CGVector(dx: 0.25, dy: 0.25), to: CGVector(dx: 0.75, dy: 0.75))
+        XCTAssert(apply.isEnabled, "Apply Crop is still disabled after dragging the crop again")
         photo.app.typeKey(.return, modifierFlags: [])
         expect("Undo Crop", photo, "Return didn't apply the crop")
         XCTAssert(labelled("400 × 300 px", photo).waitForNonExistence(timeout: 5), "the crop didn't change the image size")
