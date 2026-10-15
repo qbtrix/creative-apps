@@ -14,3 +14,4 @@ utc	stage	event	ref	note
 2026-10-15T08:57Z	4	round-findings	38708263577	HaloLayerListTests: List insets rows; journeys skipped
 2026-10-15T09:02Z	4	pr-opened	#1058	round 1 fix: layer rows back on a stack, drag and drop reorder
 2026-10-15T09:33Z	4	heartbeat	38711122431	macOS scripts/ci green after #1058; ui-test running
+2026-10-15T09:37Z	4	round-findings	38711122431	list fixed; H-J9 fails step 3 (rename double-click); audit under baseline; critic panel started

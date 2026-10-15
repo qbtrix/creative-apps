@@ -4,7 +4,7 @@ Issue: #1038 · Packet: docs/blueprints/halo/features/layer-panel.md
 Run: act-1a13e9a2019-lau7 · Session: session_01NGHcmJbQja1RSYvcMZR3TD · Started: 2026-10-15T08:07Z
 Stage: 4 round 1
 Base: e8de2ff5d8ed3515af321c805cc2bebab17050a4
-Next: wait for the round 1 fix PR (branch layer-panel/r1-list-inset) to merge, then the first dev run containing it (the journeys only run once scripts/ci passes on macOS); read H-J9 there and run the critic panel on its screens
+Next: merge the round 1 batch 2 fix (branch layer-panel/r1-row-rename) and act on the critic panel (workflow run wf_94afa3d2-a87); round 2 reads the first dev run containing both
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -20,6 +20,7 @@ Journeys: H-J9 (8 steps, packet "Journey steps"). Quality bars: QB-F1 no dead co
 | round | CI run | CI | audit vs baseline | lenses | confirmed | fixed by | clean |
 |---|---|---|---|---|---|---|---|
 | 1 | 38708263577 (f5bd765) | red: macOS scripts/ci, HaloLayerListTests (4 expectations: List insets rows, icon at 21 pt, tint off both edges); journeys skipped | not run | – (blocker found before the panel) | list inset (LP-3) | #1058 | no |
+| 1b | 38711122431 (2fc9b59) | red: H-J9 step 3, double-click opens no rename field (row is a Button); W0 Halo journeys pass but testLayoutAtWidths (#1040); SuiteUI gallery (#763) | halo identifier 1 (10), contrast 0 (2), offscreen 0 (8), unnamed 0 (5): under | clarity, journey, design, layout, controls | row rename (LP-3) + panel pending | layer-panel/r1-row-rename | no |
 
 ## Decisions
 - Identifiers keep W0's shipped `halo.layer.*` prefix (`halo.layer.row.<id>`, `halo.layer.empty`, `halo.layer.new`; W0's journey reads `halo.layer.row.comp-1-layer-2`), so the packet's `halo.layers.list/row/refusal/empty` become `halo.layer.list/row/refusal/empty`.
