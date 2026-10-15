@@ -90,8 +90,8 @@ struct LiveRecovery: RecoveryStoring {
 
     /// The names of the folder's .ora files; none when the folder is missing.
     private func recoveryFiles() throws -> [String] {
-        var isFolder = false
-        guard FileManager.default.fileExists(atPath: directory.path, isDirectory: &isFolder), isFolder else { return [] }
+        var isFolder: ObjCBool = false
+        guard FileManager.default.fileExists(atPath: directory.path, isDirectory: &isFolder), isFolder.boolValue else { return [] }
         return try FileManager.default.contentsOfDirectory(atPath: directory.path)
             .filter { $0.hasSuffix(".\(Self.fileExtension)") }
     }
