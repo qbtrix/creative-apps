@@ -7,3 +7,6 @@ utc	stage	event	ref	note
 2026-10-15T08:31Z	3	pr-merged	#1043	HF-4 envelope
 2026-10-15T08:31Z	3	pr-merged	#1042	HF-1 live history
 2026-10-15T08:31Z	3	stage-start	wave 2	HF-5 HF-6 base 62a8577
+2026-10-15T08:54Z	3	pr-merged	#1046	HF-6 file state
+2026-10-15T08:54Z	3	pr-merged	#1048	HF-5 validation
+2026-10-15T08:54Z	3	stage-start	wave 3	HF-2 HF-3 HF-7 HF-9 base 064ca8d
