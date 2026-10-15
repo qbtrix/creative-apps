@@ -13,3 +13,6 @@ utc	stage	event	ref	note
 2026-10-15T03:30Z	3	pr-merged	#948	S-2
 2026-10-15T03:30Z	3	pr-opened	#950	S-3 fakes, 367 lines 5 files
 2026-10-15T03:30Z	3	stage-start	S-4	builder stacked on S-3
+2026-10-15T03:36Z	3	pr-merged	#950	S-3
+2026-10-15T03:36Z	3	pr-opened	#951	S-4 services, 246 lines 11 files
+2026-10-15T03:36Z	3	stage-start	S-6a	builder stacked on S-4
