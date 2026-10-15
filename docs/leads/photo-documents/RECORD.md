@@ -4,7 +4,7 @@ Issue: #1074 · Packet: docs/blueprints/photo/features/photo-documents.md
 Run: act-1a1404bf04c-bp6m · Session: claude/photo-documents-lead-ezrcev · Started: 2026-10-15T10:40Z
 Stage: 4 round 2
 Base: b555f566067a4e692fe3416920af9a77f844a882
-Next: wait for E, G, F1, F2, F4 PRs; start F3 (plain-word ArchiveError messages + PJ-4 assertions) after F1 merges; round 3 on the CI run containing them
+Next: lead runs the gate serially at low load for fixes E (agent-a54bdc1e...), G (agent-a930a085...), F1 (agent-a86f5ccb...) in their worktrees, then pushes and opens their PRs; F2, F4 still building; F3 after F1 merges
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -76,3 +76,5 @@ Waves (packet's Build waves, checked against dev at 00e546a):
 - Merged in round 1: #1233 perf, #1234 D-12, #1235 D-11, #1239 fix B, #1240 fix A. #1236 (another session) raised the macOS job to 90 min.
 - Decision: the restore offer stays an alert at launch (packet PJ-3) despite design.md "alerts never at launch"; recorded exception, critic finding #9 (minor) not fixed.
 - Filed needs-ui #1252 (ScrubField marker over its label) for line:suiteui.
+- Container load (~40 on 4 cores, five parallel gates) fails timing budgets in other lines (Flare p95, Library, Halo, Stage). Decision: the lead reruns finished fixers' gates one at a time once load < 6, instead of more parallel reruns.
+- F1 texts: save "Couldn't Save beach.ora" / "<reason>. Choose another folder with File > Save As…"; open "Couldn't Open <file>" / ArchiveError.message; recovery offer NSAlert sheet with informative text; Keep layers? names beach.ora and beach.png. Packet line 107 still quotes the old save text (packet edit belongs to the finish PR).
