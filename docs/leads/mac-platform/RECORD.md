@@ -3,8 +3,8 @@
 Issue: #793 (resumes #754) · Packet: docs/blueprints/flare/features/mac-platform.md
 Run: act-1a13c789856-0qa9 (first run act-1a13b14336c-tqna) · Session: claude/mac-platform-lead-lxlcta (first: claude/mac-platform-lead-7jx22z) · Started: 2026-10-14T15:43Z, resumed 2026-10-14T22:15Z
 Stage: 4 round 3
-Base: 1098ff2d6c135020391cef770f4de11dfde9465a
-Next: read run 38704216123 (dev 92db316, contains 4594082 and SuiteUI fix #1039). Green: contact sheet on #754. Red outside Flare mac-platform files: note on #763 and wait for the next dev run (round 4 is the last).
+Base: a5182b48a42c17aaf8862bf3bd053250c64d7014
+Next: wait for the r3-b1 fix PR (FlareAutosave restore keeps the file, encode off main; feature-done) to merge, then round 4 (the last) on the CI run it triggers, same 4 lenses.
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -44,7 +44,7 @@ Next: read run 38704216123 (dev 92db316, contains 4594082 and SuiteUI fix #1039)
 | 3b | 38647662189 (190e45d, #806 feature-done) | red outside: Linux PhotoBrushCopyCostTests mouse-up 19.36 vs 16 ms; macOS PhotoBrushLatencyTests strokeStart 3.9 vs 3.0 ms. All mac-platform tests green on both; journeys not reached | not measured (journeys did not run) | none: no ui-screens, feature changes no screen | 0 in feature files | gap #851 (line:photo) | no (outside red) |
 | 3 | none yet (1098ff2) | Linux gate red locally: dev's FlareModel no longer builds against creative-core main 98be31a (key commands take owner: LayerOwner, new CommandError cases .invalidTransform, .emptyName) | - | none: build first | 1 (build break, line:flare) | #801 (merged 22:22Z) | no |
 | 2 | 38602105363 (4594082) | red: macOS swift test, 1 of 1670 failed, PhotoBrushLatencyTests.aBrushDragEventBecomesAFrameWithinBudget (line:photo timing budget, 8.4 ms vs 3.0; 1.0 ms on the previous run). All mac-platform tests pass. Linux green; journeys not reached | not measured (journeys did not run) | none: no ui-screens, and this feature changes no screen | 0 in feature files | - | no (outside red) |
-| 3 | 38704216123 (92db316) | red outside feature: scripts/ci PASS on macOS (all mac-platform suites green); ui-test failed only Photo testFixtureLaunch/testLaunchShowsWindowShell, Halo testLayoutAtWidths, Suite testGalleryOpensEveryPage; all FlareJourneyTests pass (testDrawKeyAndSave skipped) | flare contrast 0/3, identifier 14/15, offscreen 0/15: under baseline | clarity, journey, controls, quality (running) | | | |
+| 3 | 38704216123 (92db316) | red outside feature: scripts/ci PASS on macOS (all mac-platform suites green); ui-test failed only Photo testFixtureLaunch/testLaunchShowsWindowShell, Halo testLayoutAtWidths, Suite testGalleryOpensEveryPage; all FlareJourneyTests pass (testDrawKeyAndSave skipped) | flare contrast 0/3, identifier 14/15, offscreen 0/15: under baseline | clarity, journey, controls, quality | 2: major (Restore deletes the recovery file, a second crash loses the work), minor (autosave encodes on main); 1 refuted | r3-b1 fix PR | no |
 
 ## Decisions
 - Resume (#793): dev moved 4594082 -> 1098ff2 with docs/SuiteUI/Halo merges only, and no CI ran on it. The feature-done PR is a docs-only status update so the lane dispatches the CI run that judges the feature.

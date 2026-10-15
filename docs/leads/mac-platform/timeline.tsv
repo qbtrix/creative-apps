@@ -61,3 +61,4 @@ utc	stage	event	ref	note
 2026-10-15T08:21Z	4	heartbeat	#763	session resumed after idle; dev red outside feature in runs to 38700713285; waiting on 38704216123
 2026-10-15T08:21Z	4	stage-start	round3	run 38704216123 on 92db316
 2026-10-15T08:39Z	4	ci-run	38704216123	red outside feature only; Flare journeys green, audit under baseline; critic panel running
+2026-10-15T08:41Z	4	round-findings	round3	1 major + 1 minor confirmed, fix batch r3-b1 on a5182b4
