@@ -9,6 +9,16 @@
 # lowered baselines: on a refused push (dev moved) it fetches dev and
 # regenerates on top, up to 3 retries. GITHUB_TOKEN pushes start no workflow.
 #
+# Transition guard: the lane runs its script from main, which moves only on a
+# green dev, so for a while a PR that edits a generated file directly can still
+# merge. Nothing it wrote is overwritten: a direct model.json edit is folded
+# into the parts (c4-assemble --absorb, a three-way merge per part against the
+# newest commit where model.json matched its parts) and both are committed; a
+# direct waves.md edit (scripts/waves render --guard: its last commit left it
+# different from that commit's own data) is left as is, and the run fails and
+# opens or updates one issue naming the commit. A part changed both in its
+# file and in model.json is the same: left, failed, reported.
+#
 # Triggers: a push to dev that touches a source of these files. The lane
 # squash-merges with GITHUB_TOKEN, which fires no push event, so a schedule
 # sweeps too (a no-op run when nothing changed; free on a public repo).
@@ -28,6 +38,7 @@ on:
 
 permissions:
   contents: write  # push the generated files to dev
+  issues: write    # report a direct edit it would not overwrite
 
 concurrency:
   group: generated
@@ -42,29 +53,56 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: dev
+          fetch-depth: 0  # the guards read the history of the generated files
       - name: Assemble and commit the generated files
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
         run: |
           title="chore(generated): assemble docs/c4/model.json and waves.md from their parts"
           run_url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          report=""
+          # GitHub runs this with bash -e: each status is caught with ||.
           for attempt in 1 2 3 4; do
-            python3 scripts/c4-assemble || exit 1
-            python3 scripts/waves render || exit 1
-            git add docs/c4/model.json 'docs/blueprints/*/features/waves.md'
+            report=""
+            if ! python3 scripts/c4-assemble --check >/dev/null; then
+              status=0; out=$(python3 scripts/c4-assemble --absorb) || status=$?
+              echo "$out"
+              if [[ $status -eq 2 ]]; then report="$out"; elif [[ $status -ne 0 ]]; then exit 1; fi
+            fi
+            status=0; out=$(python3 scripts/waves render --guard) || status=$?
+            echo "$out"
+            if [[ $status -eq 2 ]]; then report="$report${report:+$'\n'}$out"; elif [[ $status -ne 0 ]]; then exit 1; fi
+            git add docs/c4/model.json docs/c4/parts 'docs/blueprints/*/features/waves.md'
             if git diff --cached --quiet; then
-              echo "Generated: nothing to commit; dev's generated files match their parts." >>"$GITHUB_STEP_SUMMARY"
-              exit 0
+              echo "Generated: nothing to commit." >>"$GITHUB_STEP_SUMMARY"
+              break
             fi
             files=$(git diff --cached --name-only)
             git commit -q -m "$title" -m "Written by $run_url from the parts on dev $(git rev-parse --short HEAD)." -m "$files"
             if git push origin HEAD:refs/heads/dev; then
               printf 'Generated: pushed %s to dev.\n\n%s\n' "$(git rev-parse --short HEAD)" "$files" >>"$GITHUB_STEP_SUMMARY"
-              exit 0
+              break
             fi
             echo "Push $attempt refused (dev moved); generating again on top of the new dev."
             git fetch -q origin dev
             git checkout -q --detach FETCH_HEAD
+            [[ $attempt -eq 4 ]] && { echo "::error::Could not push the generated files to dev after 3 retries."; exit 1; }
           done
-          echo "::error::Could not push the generated files to dev after 3 retries."
+          [[ -z "$report" ]] && exit 0
+          # One open issue carries every report: comment on it, or open it.
+          issue_title="Generated files: a direct edit on dev needs a hand merge"
+          body=$(printf '%s\n\nThe Generated workflow left these files as they are and failed (%s at %s). Move each change into its source (the component part in docs/c4/parts/, the feature'"'"'s .wave.json or the app'"'"'s waves.in.md) in a supervisor-merged PR that also runs scripts/c4-assemble and scripts/waves render, so the generated file matches its parts again; the next run then goes on. Never edit docs/c4/model.json or a waves.md directly.\n' \
+            "$report" "$run_url" "$(git rev-parse --short HEAD)")
+          n=$(gh issue list --state open --search "in:title \"$issue_title\"" --json number,title \
+            --jq "[.[] | select(.title == \"$issue_title\")][0].number // empty")
+          first=$(head -n 1 <<<"$report")
+          if [[ -z "$n" ]]; then gh issue create --title "$issue_title" --body "$body"
+          elif gh issue view "$n" --json body,comments --jq '[.body] + [.comments[].body] | join("\n")' | grep -qF "$first"; then
+            echo "Already reported on #$n."
+          else gh issue comment "$n" --body "$body"; fi
+          printf 'Generated: left a direct edit; see the issue.\n\n%s\n' "$report" >>"$GITHUB_STEP_SUMMARY"
+          echo "::error::A generated file was edited directly; it was left as is (see the issue)."
           exit 1

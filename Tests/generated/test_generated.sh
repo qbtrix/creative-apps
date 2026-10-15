@@ -7,8 +7,11 @@
 # model, the part problems that fail (bad JSON, missing order, id/name mismatch,
 # duplicate id, unknown relationship end); waves rendering, --check, --dry-run,
 # and the checks (same-wave clash, a prefix clash, a dependency in the same
-# wave, a missing field, a bad status). Also: the real repo's parts assemble to
-# a model with the same components. No network; needs bash and python3.
+# wave, a missing field, a bad status). Also: the real repo's parts assemble, and
+# the Generated workflow's guards on a scratch git repo: c4-assemble --absorb keeps
+# a part edit, folds a direct model.json edit into the parts, and refuses a part
+# changed both ways; waves render --guard regenerates after a data edit and leaves
+# a direct waves.md edit, naming its commit. No network; needs bash, git, python3.
 #
 # Run: bash Tests/generated/test_generated.sh   (exit 0 = all pass)
 set -uo pipefail
@@ -170,6 +173,69 @@ feature draw '{"title": "Draw", "wave": 1, "status": "done", "feature_issue": "#
 expect "an unknown status fails" 1 '"status" must be one of' python3 "$waves" --root "$w" check
 feature draw '{"wave": 1, "status": "built", "feature_issue": "#3", "covers": "#12", "waits_on": "seam"}'
 expect "a missing title fails" 1 'needs a text "title"' python3 "$waves" --root "$w" render --dry-run
+
+# --- the Generated workflow's guards (git history) ----------------------------
+# A scratch repo with scripts/ copied in; commit <msg> commits everything.
+g="$tmp/g"
+mkdir -p "$g/scripts" "$g/docs/c4"
+cp "$asm" "$waves" "$g/scripts/"
+commit() { git -C "$g" add -A && git -C "$g" -c user.name=t -c user.email=t@t commit -q -m "$1"; }
+git -C "$g" init -q
+cp "$tmp/want.json" "$g/docs/c4/model.json"
+python3 "$g/scripts/c4-assemble" --split
+mkdir -p "$g/docs/blueprints/app/features"
+cp "$w/docs/blueprints/app/waves.in.md" "$g/docs/blueprints/app/"
+feature() { printf '%s\n' "$2" >"$g/docs/blueprints/app/features/$1.wave.json"; }
+feature seam '{"title": "The seam", "wave": 1, "status": "planned", "feature_issue": "#1", "covers": "#10", "waits_on": "nothing"}'
+feature draw '{"title": "Draw", "wave": 2, "status": "planned", "feature_issue": "#3", "covers": "#12", "waits_on": "seam"}'
+python3 "$g/scripts/waves" render >/dev/null
+commit "consistent base"
+edit() {  # edit <file> <python expression on the parsed JSON d>
+  python3 - "$1" "$2" <<'PY'
+import json, sys
+p, expr = sys.argv[1], sys.argv[2]
+d = json.load(open(p))
+exec(expr)
+open(p, "w").write(json.dumps(d, indent=2, ensure_ascii=False) + "\n")
+PY
+}
+P="$g/docs/c4/parts/zeta/z-app"
+# A normal PR: a part edited, model.json untouched (stale). Absorb keeps the part.
+edit "$P/z-app-a.json" 'd["paths"] = ["Sources/A3/"]'
+commit "part edit"
+expect "absorb keeps a part edit when model.json was not edited" 0 "no direct edits" python3 "$g/scripts/c4-assemble" --absorb
+grep -q '"Sources/A3/"' "$g/docs/c4/model.json" && ok "absorb then writes model.json from the edited part" || bad "part edit lost"
+commit "generated"
+# A direct model.json edit plus a different part edit: both land.
+edit "$g/docs/c4/model.json" 'd["model"]["systems"][0]["containers"][0]["components"][0]["paths"] = ["Sources/B9/"]; d["model"]["systems"][0]["containers"][0]["components"].append({"id": "z-app-new", "paths": ["Sources/N/"]})'
+edit "$P/z-app-a.json" 'd["paths"] = ["Sources/A4/"]'
+commit "direct model.json edit and a part edit"
+expect "absorb folds a direct model.json edit into the parts" 0 "z-app-b.json written" python3 "$g/scripts/c4-assemble" --absorb
+grep -q '"Sources/B9/"' "$P/z-app-b.json" && [[ -f "$P/z-app-new.json" ]] && ok "the direct edits became parts (an edited one and a new one)" || bad "direct edit not in parts"
+grep -q '"Sources/B9/"' "$g/docs/c4/model.json" && grep -q '"Sources/A4/"' "$g/docs/c4/model.json" && grep -q '"z-app-new"' "$g/docs/c4/model.json" \
+  && ok "model.json keeps both the direct edit and the part edit" || bad "absorb lost an edit"
+expect "after absorb, model.json matches its parts" 0 "matches its parts" python3 "$g/scripts/c4-assemble" --root "$g" --check
+commit "generated"
+# The same part changed both ways: exit 2, nothing written.
+edit "$g/docs/c4/model.json" 'd["model"]["systems"][0]["containers"][0]["components"][0]["paths"] = ["Sources/X/"]'
+edit "$P/z-app-b.json" 'd["paths"] = ["Sources/Y/"]'
+commit "conflict"
+cp "$P/z-app-b.json" "$tmp/before.json"
+expect "a part changed in its file and in model.json is a conflict" 2 "zeta/z-app/z-app-b.json changed both" python3 "$g/scripts/c4-assemble" --absorb
+cmp -s "$P/z-app-b.json" "$tmp/before.json" && grep -q '"Sources/X/"' "$g/docs/c4/model.json" && ok "a conflict writes nothing" || bad "conflict wrote"
+# waves: a data edit regenerates; a direct waves.md edit is left and named.
+WM="$g/docs/blueprints/app/features/waves.md"
+feature draw '{"title": "Draw", "wave": 2, "status": "built", "feature_issue": "#3", "covers": "#12", "waits_on": "seam"}'
+commit "lead marks draw built"
+expect "guard regenerates a waves.md after a data edit" 0 "waves: OK" python3 "$g/scripts/waves" render --guard
+grep -q '| Draw | .* | built |' "$WM" && ok "the data edit reached waves.md" || bad "waves.md not regenerated"
+commit "generated"
+printf 'Hand note.\n' >>"$WM"
+feature seam '{"title": "The seam", "wave": 1, "status": "built", "feature_issue": "#1", "covers": "#10", "waits_on": "nothing"}'
+commit "direct waves.md edit"
+expect "guard leaves a direct waves.md edit and names its commit" 2 "edited directly by $(git -C "$g" rev-parse --short=7 HEAD) (direct waves.md edit); left as is" \
+  python3 "$g/scripts/waves" render --guard
+tail -1 "$WM" | grep -q "^Hand note.$" && ok "the direct edit is still there" || bad "guard overwrote a direct edit"
 
 if [[ $fail -ne 0 ]]; then echo "generated: FAIL"; exit 1; fi
 echo "generated: all pass"

@@ -26,6 +26,12 @@
 #   scripts/c4-assemble --out FILE      write FILE instead (scripts/ci checks this copy)
 #   scripts/c4-assemble --check         exit 1 if docs/c4/model.json differs from the parts
 #   scripts/c4-assemble --split         (one-time) write parts from docs/c4/model.json
+#   scripts/c4-assemble --absorb        fold direct edits of model.json into the parts,
+#                                       then write model.json: a three-way merge per part
+#                                       against the newest commit (git) where the two
+#                                       matched. A part changed both ways exits 2 and
+#                                       writes nothing (the Generated workflow's guard
+#                                       while PRs that edit model.json can still merge)
 #   --root DIR                          the repo root (default: this script's parent)
 # Problems (bad JSON, a missing or non-integer order, a duplicate id, a
 # relationship whose end is unknown, an id that differs from its file name)
@@ -130,30 +136,122 @@ def assemble(parts):
                 problems.append(f"relationship {r.get('source')} -> {r.get('target')}: unknown {end} {r.get(end)!r}")
     return model, problems
 
-def split(model_path, parts):
-    m = json.load(open(model_path, encoding="utf-8"))
+def split_parts(m):
+    """{relative part path: part} for a whole model, siblings ordered 10, 20, ..."""
     rels = m["model"].get("relationships", [])
-    by_source = {}
+    by_source, out = {}, {}
     for r in rels:
         by_source.setdefault(r["source"], []).append(r)
-    def put(path, obj):
-        os.makedirs(os.path.dirname(path), exist_ok=True)
-        with open(path, "w", encoding="utf-8") as f:
-            f.write(dump(obj))
     def with_rels(obj, order):
-        out = {**obj, "order": order}
+        part = {**obj, "order": order}
         if obj["id"] in by_source:
-            out["relationships"] = by_source.pop(obj["id"])
-        return out
-    put(os.path.join(parts, "model.json"), {**strip(m, "model"), "model": strip(m["model"], "systems", "relationships")})
+            part["relationships"] = by_source.pop(obj["id"])
+        return part
+    out["model.json"] = {**strip(m, "model"), "model": strip(m["model"], "systems", "relationships")}
     for si, s in enumerate(m["model"]["systems"]):
-        put(os.path.join(parts, s["id"], "system.json"), with_rels(strip(s, "containers"), (si + 1) * 10))
+        out[f"{s['id']}/system.json"] = with_rels(strip(s, "containers"), (si + 1) * 10)
         for ci, c in enumerate(s["containers"]):
-            put(os.path.join(parts, s["id"], c["id"], "container.json"), with_rels(strip(c, "components"), (ci + 1) * 10))
+            out[f"{s['id']}/{c['id']}/container.json"] = with_rels(strip(c, "components"), (ci + 1) * 10)
             for ki, k in enumerate(c["components"]):
-                put(os.path.join(parts, s["id"], c["id"], k["id"] + ".json"), with_rels(k, (ki + 1) * 10))
+                out[f"{s['id']}/{c['id']}/{k['id']}.json"] = with_rels(k, (ki + 1) * 10)
     if by_source:
         sys.exit(f"split: relationships from unknown sources {sorted(by_source)}")
+    return out
+
+def write_part(parts, rel, obj):
+    path = os.path.join(parts, rel)
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    with open(path, "w", encoding="utf-8") as f:
+        f.write(dump(obj))
+
+def split(model_path, parts):
+    for rel, obj in split_parts(json.load(open(model_path, encoding="utf-8"))).items():
+        write_part(parts, rel, obj)
+
+def read_parts(parts):
+    out = {}
+    for d, _, files in os.walk(parts):
+        for fn in sorted(files):
+            if fn.endswith(".json"):
+                rel = os.path.relpath(os.path.join(d, fn), parts).replace(os.sep, "/")
+                out[rel] = json.load(open(os.path.join(d, fn), encoding="utf-8"))
+    return out
+
+def consistent_base(root):
+    """(sha, parts) of the newest commit whose docs/c4/model.json matched its parts, or None."""
+    import subprocess, tarfile, io, tempfile
+    shas = subprocess.run(["git", "-C", root, "log", "--format=%H", "-n", "200", "--", "docs/c4"],
+                          capture_output=True, text=True, check=True).stdout.split()
+    for sha in shas:
+        tar = subprocess.run(["git", "-C", root, "archive", sha, "docs/c4"], capture_output=True, check=True).stdout
+        with tempfile.TemporaryDirectory() as tmp:
+            archive = tarfile.open(fileobj=io.BytesIO(tar))
+            try:
+                archive.extractall(tmp, filter="data")
+            except TypeError:  # Python before 3.12 (macOS's 3.9): our own git archive
+                archive.extractall(tmp)
+            parts = os.path.join(tmp, "docs", "c4", "parts")
+            if not os.path.isdir(parts):
+                return None  # before the fragments existed
+            model, problems = assemble(parts)
+            try:
+                have = open(os.path.join(tmp, "docs", "c4", "model.json"), encoding="utf-8").read()
+            except OSError:
+                have = None
+            if not problems and have == dump(model):
+                return sha, read_parts(parts)
+    return None
+
+def absorb(root):
+    """Folds direct edits of docs/c4/model.json into the parts: a three-way merge per
+    part between the last consistent commit (base), model.json split into parts (mine)
+    and the parts on disk (theirs). Returns (exit code, lines to print)."""
+    parts = os.path.join(root, "docs", "c4", "parts")
+    found = consistent_base(root)
+    if found is None:
+        return 2, ["absorb: no commit where docs/c4/model.json matched its parts; merge by hand"]
+    sha, base = found
+    mine = split_parts(json.load(open(os.path.join(root, "docs", "c4", "model.json"), encoding="utf-8")))
+    cur = read_parts(parts)
+    def norm(x):
+        return None if x is None else strip(x, "order")
+    writes, deletes, conflicts, last_order = {}, [], [], {}
+    for rel in list(mine) + [r for r in base if r not in mine] + [r for r in cur if r not in mine and r not in base]:
+        b, m, c = base.get(rel), mine.get(rel), cur.get(rel)
+        parent = rel.rsplit("/", 1)[0] if "/" in rel else ""
+        if norm(m) == norm(b) or norm(m) == norm(c):
+            keep = c
+        elif norm(c) == norm(b):
+            keep = m
+            if m is None:
+                deletes.append(rel)
+            else:
+                if rel == "model.json":
+                    order = None
+                elif c is not None or b is not None:
+                    order = (c or b).get("order")
+                else:
+                    order = last_order.get(parent, 0) + 1
+                writes[rel] = m if order is None else {**m, "order": order}
+                keep = writes[rel]
+        else:
+            conflicts.append(rel)
+            continue
+        if keep is not None and isinstance(keep.get("order"), int):
+            last_order[parent] = keep["order"]
+    if conflicts:
+        return 2, [f"absorb: docs/c4/parts/{r} changed both in its part and in model.json since {sha[:7]}; merge by hand"
+                   for r in conflicts]
+    for rel, obj in writes.items():
+        write_part(parts, rel, obj)
+    for rel in deletes:
+        os.remove(os.path.join(parts, rel))
+        d = os.path.dirname(os.path.join(parts, rel))
+        while d != parts and os.path.isdir(d) and not os.listdir(d):
+            os.rmdir(d)
+            d = os.path.dirname(d)
+    return 0, [f"absorb: docs/c4/parts/{r} {'removed' if r in deletes else 'written'} from a direct model.json edit (base {sha[:7]})"
+               for r in list(writes) + deletes]
 
 def main(argv):
     root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -168,16 +266,21 @@ def main(argv):
                 root = argv[i + 1]
             i += 2
             continue
-        if a in ("--check", "--split"):
+        if a in ("--check", "--split", "--absorb"):
             mode = a[2:]
         else:
-            sys.exit(f"usage: scripts/c4-assemble [--check | --split | --out FILE] [--root DIR] (unknown {a!r})")
+            sys.exit(f"usage: scripts/c4-assemble [--check | --split | --absorb | --out FILE] [--root DIR] (unknown {a!r})")
         i += 1
     parts = os.path.join(root, "docs", "c4", "parts")
     target = os.path.join(root, "docs", "c4", "model.json")
     if mode == "split":
         split(target, parts)
         return 0
+    if mode == "absorb":
+        code, lines = absorb(root)
+        print("\n".join(lines) if lines else "absorb: model.json has no direct edits; the parts stand")
+        if code:
+            return code
     model, problems = assemble(parts)
     if problems:
         print("\n".join(problems))
