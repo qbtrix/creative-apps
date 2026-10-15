@@ -245,7 +245,8 @@ public struct SuiteHex: Hashable, Sendable {
     public var values: [UInt32] { [dark, light, darkContrast, lightContrast] }
 
     /// The value for `appearance`: the closest of the four, so a vibrant dark
-    /// appearance reads Dark and anything unknown reads Light.
+    /// appearance reads Dark, a high-contrast one reads its Increase Contrast
+    /// column, and anything unknown reads Light.
     public func value(for appearance: NSAppearance) -> UInt32 {
         switch Self.match(appearance) {
         case .darkAqua: dark
@@ -255,9 +256,28 @@ public struct SuiteHex: Hashable, Sendable {
         }
     }
 
+    /// The appearance as one of the four table columns. A plain-first
+    /// `bestMatch` answers `.aqua` for a high-contrast appearance, so Increase
+    /// Contrast read Light: a system name maps directly (vibrant to its
+    /// non-vibrant column), and any other appearance tries the high-contrast
+    /// names first, then splits light from dark.
     private static func match(_ appearance: NSAppearance) -> NSAppearance.Name? {
-        appearance.bestMatch(from: [.aqua, .darkAqua, .accessibilityHighContrastAqua, .accessibilityHighContrastDarkAqua])
+        if let column = columns[appearance.name] { return column }
+        let contrast: [NSAppearance.Name] = [.accessibilityHighContrastAqua, .accessibilityHighContrastDarkAqua]
+        if let found = appearance.bestMatch(from: contrast + [.aqua, .darkAqua]), contrast.contains(found) {
+            return found
+        }
+        return appearance.bestMatch(from: [.aqua, .darkAqua])
     }
+
+    private static let columns: [NSAppearance.Name: NSAppearance.Name] = [
+        .aqua: .aqua, .vibrantLight: .aqua,
+        .darkAqua: .darkAqua, .vibrantDark: .darkAqua,
+        .accessibilityHighContrastAqua: .accessibilityHighContrastAqua,
+        .accessibilityHighContrastVibrantLight: .accessibilityHighContrastAqua,
+        .accessibilityHighContrastDarkAqua: .accessibilityHighContrastDarkAqua,
+        .accessibilityHighContrastVibrantDark: .accessibilityHighContrastDarkAqua,
+    ]
 
     /// This color at `alpha`, or at `darkAlpha` in the dark appearances.
     func color(alpha: CGFloat = 1, darkAlpha: CGFloat? = nil) -> Color {
