@@ -6,8 +6,9 @@
 // reads 660.0 px and `Animate Position X` "Keyed at this frame". At 0 it drags
 // Floor 50 px down from its center: Position Y moves by 50 and `Animate
 // Position Y` stays "Not animated". A drag in the surround changes nothing.
-// Positions come from the TRANSFORM rows (`halo.inspector.row.x`, `.y`, whose
-// value is the row text, "560.0 px"), never the viewer summary. The artboard
+// Positions come from the TRANSFORM rows (`halo.inspector.row.x`, `.y`,
+// sliders whose value is their position in px, 560, as H-J23 reads them),
+// never the viewer summary. The artboard
 // has no element of its own: it is found from `halo.viewer`'s frame the way
 // CanvasSurface lays it out (fit inside a SuiteSize.canvasInset of 64 pt,
 // at most one point per pixel, centered; testLayoutAtWidths checks that), and
@@ -146,14 +147,16 @@ extension HaloJourneyTests {
         XCTAssert(pill.waitForExistence(timeout: 5), "the playhead isn't at \(timecode)")
     }
 
-    /// The pixels TRANSFORM row `raw` reads ("560.0 px" gives 560), once its
-    /// text settles; 0 (and a failure) when it reads no number.
+    /// The pixels TRANSFORM row `raw` reads, once it settles: the row is a
+    /// slider (InspectorSliderRow's accessibility representation), so
+    /// XCUITest reads its position in px (560), or its text ("560.0 px");
+    /// 0 (and a failure) when it reads no number.
     func pixels(_ raw: String) -> Double {
         let row = halo.element("halo.inspector.row.\(raw)")
         XCTAssert(row.waitForExistence(timeout: 5), "no halo.inspector.row.\(raw)")
         var last: Double?
         for _ in 0..<10 {
-            let now = number(in: (row.value as? String) ?? "") ?? number(in: row.label)
+            let now = (row.value as? NSNumber)?.doubleValue ?? number(in: (row.value as? String) ?? "")
             if let now, now == last { return now }
             last = now
             Thread.sleep(forTimeInterval: 0.2)
