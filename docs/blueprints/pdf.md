@@ -833,6 +833,7 @@ Drags use page points mapped through `folio.page.<n>`'s frame and the zoom
 | P-J9 | nothing to undo or redo: disabled with "Nothing to undo." / "Nothing to redo." | – | – |
 | P-J10, P-J11 | a new document from images is "Untitled" until saved | save to a read-only folder: subtitle "Not saved ⚠" and the sentence; the source file moved away: `sourceMissing`; open errors per `FolioOpenError` | save shows progress after 100 ms; the window stays usable and the save is atomic (temp file, then replace) |
 | P-J14 | – | – | every live step's progress as above |
+| P-J22, P-J23 | New from Images with nothing picked changes nothing; a new document is "Untitled" | a file that isn't an image is named and skipped; Reduce when the result isn't smaller writes nothing and says so | both sheets show progress with Cancel; the window stays usable |
 
 ### 5.3 Tier-2 journeys (v1, after the core loop)
 
@@ -843,3 +844,366 @@ Drags use page points mapped through `folio.page.<n>`'s frame and the zoom
 | P-J24 | `testPrint` (`+Print`, export-convert) | `letter` | ⌘P; Cancel | the system print panel appears with 3 pages; Cancel returns with no change |
 | P-J25 | `testEditLineInPlace` (`+ContentEdit`, content-edit; conditional) | `-FolioSample letter` | E; click "2. Rent."'s line; change "first" to "fifth"; Escape; ⌘S; reopen | the line reads "…due on the fifth day." in the same font (the page value names the font); Find "first day" finds 1 (page 1 line 3 only); a character missing from the font names itself in the help |
 | P-J26 | `testRedactAndVerify` (`+ContentEdit`, content-edit; conditional) | `-FolioSample letter`, `-FolioSaveTo <tmp>/Redacted.pdf` | D; drag over "Landlord" on page 1; Tools > Apply Redactions…, Apply; open Redacted.pdf; ⌘F "Landlord" | the sheet lists "1 area on page 1"; the new file has no hit for "Landlord" on page 1 (page 3 still has its own); copying the area yields no text (PF-13) |
+
+---
+
+## 6. Contracts
+
+One Swift protocol per use case, each with a fake, so a feature's views can
+be built and journeyed on the fake while its logic or its PDFKit type is
+built, and the two meet by swapping one slot in `FolioServices`. They are
+written for `FolioModel`: Linux-safe, Foundation through the
+FoundationEssentials pattern, no engine, value types, `Sendable`, Swift 6
+language mode, typed throws.
+
+**Proof.** The files are in `docs/blueprints/pdf/contracts/`
+(`Contracts/FolioValues.swift`, `Contracts/FolioContracts.swift`,
+`Fakes/FolioFakes.swift`, `FolioServices.swift`) with ten proof tests in
+`Tests/FolioContractTests.swift`, one per tier-1 journey group (open and
+find, open refusals, highlight and note, fill in Tab order, sign into a
+field, organize and combine and crop and split, undo coalescing, save round
+trip with flatten and password and export, recognize a scan, permissions).
+`docs/blueprints/pdf/contracts/check.sh` builds them as a `FolioModel`
+target plus a test target in a throwaway package and runs the tests. Run on
+2026-10-15 with Swift 6.1.2 on Ubuntu 24.04: `CONTRACTS: PASS`, no errors,
+no warnings, 10 of 10 tests. W0 copies the files into `Sources/FolioModel/`
+(the fakes one file per contract).
+
+**Rules every conformance keeps.**
+
+- Reads take values; writes take the document `inout` and throw
+  `FolioEditError`, changing nothing when they throw (the fakes write to a
+  copy where a partial change could happen).
+- No contract records undo. `FolioWorkspace.edit(_:coalesceKey:_:)` wraps
+  every write: it copies the document, runs the write, and on success hands
+  the old value to `DocumentHistory.record`, so fakes and live types are
+  tested without a workspace.
+- Platform contracts (`DocumentOpening`, `PageImaging`, `PageTextReading`,
+  `DocumentWriting`, `PageExporting`, `TextRecognizing`, `SignatureStoring`)
+  carry `unavailableHelp`: nil once the service works. W0's live stubs in
+  FolioApp return "Not built yet.", so every control that needs one is
+  disabled with that sentence until its feature lands.
+- Platform calls are `async`; the workspace stays synchronous: the window
+  calls `begin…` on the workspace, awaits the service off the main actor,
+  then calls `finish…` with the result (Halo's open pattern), so a 500-page
+  open never blocks a frame (QB-L12).
+- **No copies between fake and live.** For the pure use cases the fake *is*
+  the reference behaviour: the feature that lands the live type moves the
+  code to `Live/Live<Contract>.swift` and the fake becomes a one-line
+  wrapper, so `scripts/ci`'s duplicate gate never sees two copies.
+- One conformance suite per contract (`Tests/FolioModelTests/<Contract>ContractTests.swift`,
+  W0) runs the same expectations against the fake and, once it exists, the
+  live type (`@Test(arguments:)` over both). A live type is done when it
+  passes its suite.
+
+### 6.1 Use cases at a glance
+
+| Use case | Protocol | Fake | Live (feature) | Journeys |
+|---|---|---|---|---|
+| UC-1 Open a PDF or images | `DocumentOpening` | `FakeDocumentOpening` (reads the fake file; passwords, not-PDF, too large) | `FolioApp/Live/PDFKitOpening.swift` (reader), `PDFKitImageOpening.swift` (export-convert) | P-J1, P-J11, P-J22 |
+| UC-2 See a page | `PageImaging` | `FakePageImaging` (white page, grey band per line) | `FolioApp/Live/PDFKitImaging.swift` (reader) | P-J1 and every shot |
+| UC-3 Page text | `PageTextReading` | `FakePageTextReading` (fixed grid: 72 pt in, 14 pt lines, 6 pt glyphs) | `FolioApp/Live/PDFKitText.swift` (reader) | P-J2, P-J3 |
+| UC-4 Find | `TextFinding` | `FakeTextFinding` (reference) | `FolioModel/Live/LiveTextFinding.swift` (find) | P-J2 |
+| UC-5 Select text | `TextSelecting` | `FakeTextSelecting` (reference) | `FolioModel/Live/LiveTextSelecting.swift` (markup) | P-J3 |
+| UC-6 Mark up | `Annotating` | `FakeAnnotating` (reference) | `FolioModel/Live/LiveAnnotating.swift` (markup); `FolioApp/Live/PDFKitAnnotations.swift` maps to and from PDF annotations | P-J3, P-J4 |
+| UC-7 Fill forms | `FormFilling` | `FakeFormFilling` (reference) | `FolioModel/Live/LiveFormFilling.swift` (forms); `FolioApp/Live/PDFKitFields.swift` maps widgets | P-J5 |
+| UC-8 Make and place a signature | `Signing` | `FakeSigning` (reference) | `FolioModel/Live/LiveSigning.swift` (sign) | P-J6 |
+| UC-8b Keep signatures | `SignatureStoring` | `FakeSignatureStore` (an actor in memory; can fail on save) | `FolioModel/Live/LiveSignatureStore.swift` (sign; JSON in the folder the app names) | P-J6 |
+| UC-9 Organize pages | `PageOrganizing` | `FakePageOrganizing` (reference) | `FolioModel/Live/LivePageOrganizing.swift` (pages) | P-J7, P-J8 |
+| UC-10 Undo and redo | `DocumentHistory` | `FakeDocumentHistory` (reference) | `FolioModel/Live/LiveDocumentHistory.swift` (history-files) | P-J9 and every Edit-menu assert |
+| UC-11 Save | `DocumentWriting` | `FakeDocumentWriting` (writes the fake file; flatten and password) | `FolioApp/Live/PDFKitWriting.swift` (history-files) | P-J10, P-J14 |
+| UC-12 Export | `PageExporting` | `FakePageExporting` (describes each image; text with format markers) | `FolioApp/Live/PDFKitExporting.swift` (export-convert) | P-J21, P-J23 |
+| UC-13 Recognize text | `TextRecognizing` | `FakeTextRecognizing` (returns a scan page's known lines) | `FolioApp/Live/VisionRecognizing.swift` (ocr) | P-J20 |
+| (W4) Replace a line, redact | `TextReplacing`, `Redacting` in `Contracts/FolioContentEditContracts.swift` | written by content-edit with its fakes | `FolioModel/Live/LiveTextReplacing.swift`, `LiveRedacting.swift` over CorePDF | P-J25, P-J26 |
+
+Reduce File Size is `DocumentWriting.write` with `maxImagePPI` set; Print
+is the system print operation on the saved bytes; document properties and
+zoom, page and view mode are workspace methods (pure value edits, tested on
+`FolioWorkspace`).
+
+### 6.2 The workspace methods views call
+
+Each lives in the extension file its feature owns (section 9). Every write
+goes through `edit`; every read is a computed property. `FolioWorkspace` is
+a `struct` the window keeps in `@State` (Halo's `HaloProject` pattern).
+
+| File (feature) | Methods |
+|---|---|
+| `FolioWorkspace.swift` (foundation) | `init(services:launch:)`, `edit(_ name: String, coalesceKey: String?, _ change: (inout FolioDocumentState) throws(FolioEditError) -> Void)` (internal), `endCoalescing()`, `var refusal: FolioRefusal?`, `dismissRefusal()`, `pageText(_:) -> FolioPageText?`, `didLoadText(_:for:)`, `var tool: FolioTool`, `selectTool(_:)` |
+| `FolioPageSummary.swift` (foundation) | `pageSummary(_ number: Int) -> String` (the accessibility value of `folio.page.<n>`) |
+| `Workspace/FolioWorkspace+Read.swift` (reader) | `beginOpen(name:)`, `finishOpen(_: Result<FolioOpened, FolioOpenError>)`, `var needsPassword: Bool`, `setZoom(_: FolioZoom)`, `zoomIn()`, `zoomOut()`, `setViewMode(_: FolioViewMode)`, `go(toPage:)`, `go(toLabel:) throws(FolioEditError)`, `back()`, `forward()`, `didScroll(toPage:)`, `var statusPills: [String]`, `var recent: [FolioRecentFile]`, `setRecent(_:)` |
+| `Workspace/FolioWorkspace+Find.swift` (find) | `setFindText(_:)`, `setMatchCase(_:)`, `setWholeWords(_:)`, `findNext()`, `findPrevious()`, `closeFind()`, `var findHits: [FolioSearchHit]`, `var findCurrent: Int?`, `var findStatus: String` |
+| `Workspace/FolioWorkspace+Markup.swift` (markup) | `beginTextDrag(at:on:)`, `moveTextDrag(to:)`, `endTextDrag()`, `selectWord(at:on:)`, `selectAllText(on:)`, `var textSelection: FolioTextSelection`, `copyText() -> String`, `mark(_: FolioMarkupStyle)`, `addNote(at:on:)`, `addTextBox(at:on:)`, `setMarkText(_:)`, `beginInk(at:on:)`, `addInkPoint(_:)`, `endInk()`, `beginShape(_:at:on:)`, `moveShape(to:)`, `endShape()`, `selectMark(_:)`, `moveSelectedMark(dx:dy:)`, `resizeSelectedMark(to:)`, `setMarkColor(_:)`, `setLineWidth(_:)`, `deleteSelectedMarks()`, `var marks: [FolioMarkRow]` |
+| `Workspace/FolioWorkspace+Forms.swift` (forms) | `focusField(_:)`, `focusNextField(backward:)`, `setField(_:to:)` (coalesced per field), `checkForm() -> [FolioFieldID]`, `clearForm()`, `var focusedField: FolioFieldID?`, `var formBanner: String?` |
+| `Workspace/FolioWorkspace+Sign.swift` (sign) | `beginSignatures()`, `finishSignatures(_: [FolioSignature])`, `addSignature(strokes:isInitials:) throws(FolioEditError)`, `addSignature(typed:isInitials:) throws(FolioEditError)`, `addSignature(image:aspect:isInitials:)`, `removeSignature(_:)`, `chooseSignature(_:)`, `placeSignature(at:on:)`, `var signatures: [FolioSignature]`, `var signaturesToSave: [FolioSignature]?` |
+| `Workspace/FolioWorkspace+Pages.swift` (pages) | `selectPages(_:extending:)`, `rotateSelectedPages(clockwise:)`, `deleteSelectedPages()`, `moveSelectedPages(to:)`, `nudgeSelectedPages(by:)`, `insertBlankPage()`, `beginInsert(at:)`, `finishInsert(_: Result<FolioOpened, FolioOpenError>)`, `extract(range:) throws(FolioEditError) -> FolioDocumentState`, `split(after:) throws(FolioEditError) -> [FolioDocumentState]`, `cropSelectedPages(to:)`, `var selectedPages: [FolioPageID]` |
+| `Workspace/FolioWorkspace+History.swift` (history-files) | `undo()`, `redo()`, `var undoTitle: String?`, `var redoTitle: String?` |
+| `Workspace/FolioWorkspace+Files.swift` (history-files) | `beginSave(options:)`, `finishSave(_: Result<Data, FolioWriteError>, name:path:)`, `var saveState: FolioSaveState` (`edited`, `saved`, `failed(String)`), `setTitle(_:)`, `setAuthor(_:)` |
+| `Workspace/FolioWorkspace+Export.swift` (export-convert) | `beginExport(_: FolioExportRequest)`, `exportProgress(page:)`, `finishExport(_:)`, `cancelExport()`, `beginReduce(level:)`, `finishReduce(original:reduced:)` |
+| `Workspace/FolioWorkspace+OCR.swift` (ocr) | `var pagesWithoutText: [FolioPageID]`, `beginRecognize(pages:languages:)`, `didRecognize(_: FolioPageText, for:)`, `finishRecognize(_: FolioRecognizeError?)` |
+
+The state types these read (`FolioZoom`, `FolioViewMode`, `FolioRefusal`,
+`FolioRecentFile`, `FolioMarkRow`, `FolioSaveState`, `FolioExportRequest`)
+are declared with `FolioWorkspace` in W0, `Sendable` and `Equatable` with
+public memberwise inits, so W0 owns them and each feature only fills them.
+
+### 6.3 The protocols (`Contracts/FolioContracts.swift`)
+
+```swift
+// Contracts/FolioContracts.swift: one protocol per Folio use case.
+// Linux-safe. Rules every conformance keeps:
+// - Reads take values. Writes take the document `inout` and throw
+//   FolioEditError, leaving it unchanged when they throw.
+// - No contract records undo: FolioWorkspace.edit(_:_:) does, around a call.
+// - `unavailableHelp` is nil once the service works; until then every control
+//   that needs it is disabled with that sentence (CLAUDE.md, No dead controls).
+// - Platform work (PDFKit, Vision, CoreGraphics) lives only in live types in
+//   FolioApp; everything else has a Linux live type in FolioModel/Live.
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
+import Foundation
+#endif
+
+/// UC-1 Open a PDF (or make one from images) and read its pages, fields,
+/// annotations and outline into a FolioDocumentState.
+/// Live: `FolioApp/Live/PDFKitOpening.swift` (PDFDocument(data:), unlock(withPassword:)).
+public protocol DocumentOpening: Sendable {
+    var unavailableHelp: String? { get }
+    /// Opens PDF bytes. Throws `.needsPassword` for a locked file opened with
+    /// nil, `.wrongPassword` for a bad one, `.notPDF`, `.damaged`, `.tooLarge`.
+    func open(_ data: Data, name: String, password: String?) async throws(FolioOpenError) -> FolioOpened
+    /// Makes a document of one page per image (PNG, JPEG or HEIC bytes), each
+    /// page the image's size at 72 ppi capped to fit A4 or Letter.
+    func open(images: [Data], name: String) async throws(FolioOpenError) -> FolioOpened
+}
+
+/// UC-2 See a page: the page's picture without Folio's own annotations
+/// (the view draws those from the Model, so edits never wait on a render).
+/// Live: `FolioApp/Live/PDFKitImaging.swift` (PDFPage.thumbnail(of:for:)).
+public protocol PageImaging: Sendable {
+    var unavailableHelp: String? { get }
+    /// A picture at most `maxPixels` on its long side, rotation applied.
+    /// nil when the page's source is gone.
+    func image(of page: FolioPage, maxPixels: Int) async -> FolioBitmap?
+}
+
+/// UC-3 The text on a page, line by line with each Character's box.
+/// Live: `FolioApp/Live/PDFKitText.swift` (PDFPage.string, characterBounds(at:)).
+public protocol PageTextReading: Sendable {
+    var unavailableHelp: String? { get }
+    func text(of page: FolioPage) async -> FolioPageText
+}
+
+/// UC-4 Find text across the document. Pure: works on page text.
+/// Live: `FolioModel/Live/LiveTextFinding.swift`.
+public protocol TextFinding: Sendable {
+    /// Hits in page order, then reading order. An empty query finds nothing.
+    func find(_ query: FolioSearchQuery, pages: [FolioPageID], text: [FolioPageID: FolioPageText]) -> [FolioSearchHit]
+}
+
+/// UC-5 Select text by dragging, double-click a word. Pure.
+/// Live: `FolioModel/Live/LiveTextSelecting.swift`.
+public protocol TextSelecting: Sendable {
+    /// Characters between the two points in reading order on one page.
+    func select(from: FolioPoint, to: FolioPoint, on page: FolioPageID, text: FolioPageText) -> FolioTextSelection
+    /// The word under the point, or an empty selection.
+    func word(at point: FolioPoint, on page: FolioPageID, text: FolioPageText) -> FolioTextSelection
+}
+
+/// UC-6 Mark up: highlight, underline, strike out, notes, text boxes, ink,
+/// shapes, images; move, resize, recolor, comment, delete. Pure.
+/// Live: `FolioModel/Live/LiveAnnotating.swift`.
+public protocol Annotating: Sendable {
+    /// Text markup over a selection; refuses an empty one (`.emptySelection`).
+    func mark(_ selection: FolioTextSelection, style: FolioMarkupStyle, color: FolioColor,
+              in doc: inout FolioDocumentState) throws(FolioEditError) -> [FolioAnnotationID]
+    /// Any other body placed at `rect` on `page`.
+    func add(_ body: FolioAnnotationBody, rect: FolioRect, color: FolioColor, on page: FolioPageID,
+             in doc: inout FolioDocumentState) throws(FolioEditError) -> FolioAnnotationID
+    func move(_ id: FolioAnnotationID, dx: Double, dy: Double, in doc: inout FolioDocumentState) throws(FolioEditError)
+    func setRect(_ id: FolioAnnotationID, to rect: FolioRect, in doc: inout FolioDocumentState) throws(FolioEditError)
+    func setColor(_ id: FolioAnnotationID, to color: FolioColor, in doc: inout FolioDocumentState) throws(FolioEditError)
+    /// The text of a note or text box, or the comment on any other kind.
+    func setText(_ id: FolioAnnotationID, to text: String, in doc: inout FolioDocumentState) throws(FolioEditError)
+    func delete(_ ids: [FolioAnnotationID], in doc: inout FolioDocumentState) throws(FolioEditError)
+    /// The topmost annotation whose rect holds the point (4 pt slop), or nil.
+    func hit(_ point: FolioPoint, on page: FolioPageID, in doc: FolioDocumentState) -> FolioAnnotationID?
+}
+
+/// UC-7 Fill a form: type, check, choose; Tab order; required fields. Pure.
+/// Live: `FolioModel/Live/LiveFormFilling.swift`.
+public protocol FormFilling: Sendable {
+    /// Sets one field. A radio option sets its whole group; a value the field
+    /// can't take is refused with `.invalidValue("<sentence>")`.
+    func set(_ field: FolioFieldID, to value: FolioFieldValue, in doc: inout FolioDocumentState) throws(FolioEditError)
+    /// Tab order: page order, then top to bottom, then left to right; skips
+    /// read-only fields; wraps. nil when the form has no fillable field.
+    func next(after field: FolioFieldID?, backward: Bool, in doc: FolioDocumentState) -> FolioFieldID?
+    /// Required fields still empty, in Tab order.
+    func missingRequired(in doc: FolioDocumentState) -> [FolioFieldID]
+    /// Every field back to empty (Clear Form).
+    func clear(in doc: inout FolioDocumentState) throws(FolioEditError)
+}
+
+/// UC-8 Make a signature or initials and place it. Pure.
+/// Live: `FolioModel/Live/LiveSigning.swift`.
+public protocol Signing: Sendable {
+    /// From pad strokes in view points: trims to the ink box, scales into the
+    /// unit box, keeps the aspect. Refuses fewer than 2 points of ink.
+    func make(strokes: [[FolioPoint]], isInitials: Bool, id: FolioSignatureID) throws(FolioEditError) -> FolioSignature
+    func make(typed name: String, isInitials: Bool, id: FolioSignatureID) throws(FolioEditError) -> FolioSignature
+    /// Places a signature centered on `point`, `width` points wide. Inside an
+    /// empty signature field it fits that field instead.
+    func place(_ signature: FolioSignature, at point: FolioPoint, width: Double, on page: FolioPageID,
+               in doc: inout FolioDocumentState) throws(FolioEditError) -> FolioAnnotationID
+}
+
+/// UC-8b Keep signatures between launches.
+/// Live: `FolioModel/Live/LiveSignatureStore.swift` (a JSON file the app's
+/// folder holds; the macOS app passes the URL).
+public protocol SignatureStoring: Sendable {
+    var unavailableHelp: String? { get }
+    func load() async -> [FolioSignature]
+    func save(_ signatures: [FolioSignature]) async throws(FolioWriteError)
+}
+
+/// UC-9 Organize pages: reorder, rotate, delete, insert blank, combine
+/// files, extract and split. Pure.
+/// Live: `FolioModel/Live/LivePageOrganizing.swift`.
+public protocol PageOrganizing: Sendable {
+    /// Moves the pages, keeping their order, so the first lands at `index`
+    /// of the document as it is after they are taken out.
+    func move(_ pages: [FolioPageID], to index: Int, in doc: inout FolioDocumentState) throws(FolioEditError)
+    func rotate(_ pages: [FolioPageID], clockwise: Bool, in doc: inout FolioDocumentState) throws(FolioEditError)
+    /// Deletes pages and their annotations and fields. Refuses all of them (`.lastPage`).
+    func delete(_ pages: [FolioPageID], in doc: inout FolioDocumentState) throws(FolioEditError)
+    /// Inserts every page of another opened file at `index` (Combine);
+    /// returns the new page ids. Its fields keep their names unless taken,
+    /// then get a " 2" suffix.
+    func insert(_ other: FolioOpened, at index: Int, in doc: inout FolioDocumentState) throws(FolioEditError) -> [FolioPageID]
+    func insertBlank(size: FolioSize, at index: Int, in doc: inout FolioDocumentState) throws(FolioEditError) -> FolioPageID
+    /// Crops pages to `rect` (page space, before rotation), clamped to each
+    /// page; refuses a rect under 72 pt on a side. nil removes the crop.
+    func crop(_ pages: [FolioPageID], to rect: FolioRect?, in doc: inout FolioDocumentState) throws(FolioEditError)
+    /// A new document of just these pages, in document order (Extract).
+    func extract(_ pages: [FolioPageID], from doc: FolioDocumentState) throws(FolioEditError) -> FolioDocumentState
+    /// Splits after each page number in `after` (1-based), into parts.
+    func split(_ doc: FolioDocumentState, after: [Int]) throws(FolioEditError) -> [FolioDocumentState]
+    /// "1-3, 5, 8-" style text to 1-based page numbers, sorted, unique.
+    func parseRange(_ text: String, pageCount: Int) throws(FolioEditError) -> [Int]
+}
+
+/// UC-10 Undo and redo: a stack of named document snapshots. Pure.
+/// Live: `FolioModel/Live/LiveDocumentHistory.swift`.
+public protocol DocumentHistory: Sendable {
+    /// Records `before` under `name`. Two records in a row with the same
+    /// non-nil `coalesceKey` make one step (a drag, typing in one field).
+    func record(_ before: FolioDocumentState, name: String, coalesceKey: String?, in history: inout FolioHistory)
+    /// Ends coalescing, so the next record is its own step.
+    func endCoalescing(_ history: inout FolioHistory)
+    func undo(_ current: FolioDocumentState, in history: inout FolioHistory) -> FolioDocumentState?
+    func redo(_ current: FolioDocumentState, in history: inout FolioHistory) -> FolioDocumentState?
+}
+
+public struct FolioHistory: Equatable, Sendable {
+    public struct Step: Equatable, Sendable {
+        public var name: String
+        public var state: FolioDocumentState
+        public var coalesceKey: String?
+        public init(name: String, state: FolioDocumentState, coalesceKey: String?) {
+            self.name = name; self.state = state; self.coalesceKey = coalesceKey
+        }
+    }
+    public var undoSteps: [Step] = []
+    public var redoSteps: [Step] = []
+    public var limit: Int
+    public var coalescing = false
+    public init(limit: Int = 100) { self.limit = max(1, limit) }
+    public var undoName: String? { undoSteps.last?.name }
+    public var redoName: String? { redoSteps.last?.name }
+}
+
+/// UC-11 Save: the document as PDF bytes, from its sources plus the edits.
+/// Live: `FolioApp/Live/PDFKitWriting.swift` (PDFDocument.write(to:withOptions:)).
+public protocol DocumentWriting: Sendable {
+    var unavailableHelp: String? { get }
+    func write(_ doc: FolioDocumentState, options: FolioWriteOptions) async throws(FolioWriteError) -> Data
+}
+
+/// UC-12 Export pages as pictures, or the text as plain text, rich text or a
+/// word-processing document.
+/// Live: `FolioApp/Live/PDFKitExporting.swift`.
+public protocol PageExporting: Sendable {
+    var unavailableHelp: String? { get }
+    /// One encoded image per page, in the order given, annotations drawn.
+    func images(of pages: [FolioPage], annotations: [FolioAnnotation], as format: FolioImageExport)
+        async throws(FolioWriteError) -> [Data]
+    /// The document's text in reading order. Plain text separates pages with a
+    /// form feed; rich text and word-processing keep paragraphs, bold, italic
+    /// and size where the PDF's text layer has them.
+    func text(of doc: FolioDocumentState, as format: FolioTextFormat) async throws(FolioWriteError) -> Data
+}
+
+/// UC-13 Recognize text on a scanned page (OCR), so it can be found,
+/// selected and highlighted. Live: `FolioApp/Live/VisionRecognizing.swift`
+/// (RecognizeTextRequest, accurate level).
+public protocol TextRecognizing: Sendable {
+    var unavailableHelp: String? { get }
+    /// Languages offered in the Recognize Text sheet, BCP 47 tags.
+    var languages: [String] { get }
+    func recognize(_ page: FolioPage, languages: [String]) async throws(FolioRecognizeError) -> FolioPageText
+}
+```
+
+### 6.4 Values and fakes
+
+`Contracts/FolioValues.swift` (shown in full in the file) declares, all
+`Hashable`, `Codable` where they cross a file and `Sendable`:
+`FolioPoint`, `FolioSize` (`.letter`, `.a4`), `FolioRect`, `FolioRotation`,
+`FolioColor` (clamped sRGB), `FolioSourceID`, `FolioPageID`,
+`FolioPageOrigin` (`.source(id, index:)`, `.blank`), `FolioPage` (size,
+rotation, label, crop, `displaySize`), `FolioTextLine` (text plus one
+rect per Character), `FolioTextOrigin` (`embedded`, `recognized`, `none`),
+`FolioPageText`, `FolioTextSpan`, `FolioTextSelection`, `FolioSearchQuery`,
+`FolioSearchHit`, `FolioAnnotationID`, `FolioMarkupStyle`, `FolioShape`,
+`FolioAnnotationBody` (`markup`, `note`, `freeText`, `ink`, `shape`,
+`signature`, `image`), `FolioAnnotation`, `FolioFieldID`, `FolioFieldKind`
+(`text(multiline:maxLength:)`, `checkbox`, `radio(group:option:)`,
+`choice(options:editable:)`, `signature`), `FolioFieldValue`,
+`FolioFormField`, `FolioSignatureID`, `FolioSignatureKind` (`drawn`,
+`typed`, `image`), `FolioSignature`, `FolioOutlineItem`, `FolioPermissions`,
+`FolioDocumentState`, `FolioOpened`, `FolioBitmap`, `FolioWriteOptions`
+(flatten, passwords, permissions, `maxImagePPI`, keep OCR text),
+`FolioImageFormat`, `FolioTextFormat` (`plain`, `rtf`, `docx`),
+`FolioImageExport`, and the typed errors `FolioOpenError`,
+`FolioEditError`, `FolioWriteError`, `FolioRecognizeError`, each with the
+`message` sentence the person reads. `String.folioTrimmed` stands in for
+`trimmingCharacters`, which FoundationEssentials lacks.
+
+`Fakes/FolioFakes.swift` holds the fake file format (`FolioFixtureFile`,
+JSON starting `%FOLIO-FAKE-PDF-1` so the fake opener can tell it from a
+real PDF), the fixed glyph layout (`FolioFakeLayout`), the
+`FolioFakeLibrary` the platform fakes read, and one fake per contract.
+`FolioServices.swift` holds `FolioServices` and the named fixtures
+(`FolioFixtures.letter`, `.form`, `.scan`, `.locked`, `.marked`, `.long`).
+
+### 6.5 Can every tier-1 journey be built from these?
+
+| Journey | Contract calls (in order) | Proof test |
+|---|---|---|
+| P-J1 Open and read | `DocumentOpening.open`, `PageImaging.image` per visible page, `PageTextReading.text`; zoom and pages are `FolioLayout` | `openReadAndFind` |
+| P-J2 Find | `PageTextReading.text` per page, `TextFinding.find` | `openReadAndFind` |
+| P-J3 Highlight | `TextSelecting.select`, `Annotating.mark`, `setColor`, `setText`, `delete`; `word(at:)` | `highlightAndNote` |
+| P-J4 Notes, text box, pen, shape | `Annotating.add` (`.note`, `.freeText`, `.ink`, `.shape`), `hit`, `move`, `DocumentHistory.undo` | `highlightAndNote`, `undoRedoCoalesces` |
+| P-J5 Fill | `FormFilling.next`, `set`, `missingRequired`, `clear` | `fillFormInTabOrder` |
+| P-J6 Sign | `Signing.make(strokes:)`, `make(typed:)`, `SignatureStoring.save`, `load`, `Signing.place` | `signIntoField` |
+| P-J7 Organize | `PageOrganizing.move`, `rotate`, `delete`, `insertBlank`, `crop` | `organizeAndCombine` |
+| P-J8 Combine, extract | `DocumentOpening.open`, `PageOrganizing.insert`, `parseRange`, `extract`, `split` | `organizeAndCombine` |
+| P-J9 Undo | `DocumentHistory.record`, `endCoalescing`, `undo`, `redo` | `undoRedoCoalesces` |
+| P-J10 Save, reopen, flatten, password | `DocumentWriting.write`, `DocumentOpening.open` with and without the password | `saveRoundTripAndFlatten` |
+| P-J11 Open problems | `DocumentOpening.open` throwing each `FolioOpenError` | `openRefusals` |
+| P-J22 New from Images | `DocumentOpening.open(images:)` | (W0's `DocumentOpeningContractTests`; the fake reads "IMG w x h" bytes) |
+| P-J23 Reduce size | `DocumentWriting.write` with `maxImagePPI`; byte counts compared in the workspace | `saveRoundTripAndFlatten` (write path); PF-11 for the size |
+| P-J20 (tier 2) Recognize | `TextRecognizing.recognize`, then `TextFinding.find` on the result | `recognizeScannedPages` |
+| P-J12 Every control | `FolioCommand.unavailableHelp(for:)` over every service's `unavailableHelp` | W0's `FolioCommandTests` |
