@@ -8,8 +8,11 @@
 // keys held (DragModifiers) and the zoom, and, while they last, AppKit's mouse
 // event coalescing is off so every pointer sample arrives; StrokePacer hands
 // them to the workspace once per display frame. Its workspace runs on
-// `fileServices(.live)`. Open, Save, Save As and their launch arguments live in
-// PhotoWindow+File.swift, Export's write in PhotoWindow+Export.swift.
+// `fileServices(.live)`, or under `-PhotoFixture` on the fixture's fakes
+// (`launchOptions`, read once from the process; S-12), whose picture it
+// renders and fits as the window appears. Open, Save, Save As and their
+// launch arguments live in PhotoWindow+File.swift, Export's write in
+// PhotoWindow+Export.swift.
 //
 // Each v2 area's intents go to its PhotoWindow+<Area>.swift (file, edit,
 // crop, history, select, adjustment layer, transform, export, sample), and
@@ -25,7 +28,7 @@ import SuiteUI
 import SwiftUI
 
 struct PhotoWindow: View {
-    @State var model = PhotoWorkspace(services: PhotoWindow.fileServices(.live))
+    @State var model = PhotoWindow.launchWorkspace()
     @State var renderer = CanvasRenderer()
     @State var pacer = StrokePacer()
     @State var zoom = 1.0
@@ -59,6 +62,14 @@ struct PhotoWindow: View {
 
     /// The launch file opens in the first window only.
     @MainActor static var launchFileOpened = false
+
+    /// This process's `-PhotoFixture` and `-PhotoWindowWidth`, read once.
+    nonisolated static let launchOptions = PhotoLaunchOptions(arguments: ProcessInfo.processInfo.arguments)
+
+    /// The fixture on the fakes under `-PhotoFixture`, else a workspace on `fileServices(.live)`.
+    nonisolated static func launchWorkspace() -> PhotoWorkspace {
+        PhotoWorkspace.launch(launchOptions) ?? PhotoWorkspace(services: fileServices(.live))
+    }
 
     var body: some View {
         PhotoEditor(
@@ -107,6 +118,7 @@ struct PhotoWindow: View {
             }
             .task {
                 PointerPressure.watch()
+                showLaunchImage()
                 openLaunchFile()
             }
             .modifier(PhotoFileArea(model: model, perform: perform))
@@ -191,6 +203,14 @@ struct PhotoWindow: View {
     }
 
     // MARK: Zoom
+
+    /// A fixture's picture is there before any change, so render and fit it once.
+    private func showLaunchImage() {
+        guard model.canvas != nil else { return }
+        renderer.show(model)
+        fitPending = true
+        fit()
+    }
 
     private func setZoom(_ scale: Double) {
         zoom = min(max(scale.isFinite ? scale : 1, ViewerZoom.stops[0]), ViewerZoom.stops[ViewerZoom.stops.count - 1])

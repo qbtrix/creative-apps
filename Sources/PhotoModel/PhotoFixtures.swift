@@ -8,7 +8,10 @@
 // three layers of gradients and noise, built from shared one-color tiles so it
 // costs a few buffers, not 12 M pixels each. The blueprint's test-only
 // `limit` (about 4 GB) is left out. Each fixture opens with a clean history.
-// Linux-safe.
+// PhotoLaunchOptions reads `-PhotoFixture <name>` and `-PhotoWindowWidth <pt>`
+// from the arguments the app passes in; `launch(_:)` builds the window's
+// workspace from them (S-12), and `isPreviewData` tells the status line to
+// show its "Preview data" pill. Linux-safe.
 import CoreRaster
 
 /// A built-in document (blueprint 4.4).
@@ -16,7 +19,54 @@ public enum PhotoFixture: String, CaseIterable, Sendable {
     case empty, sample, layered, large
 }
 
+/// The launch arguments a Photo window reads (S-12).
+public struct PhotoLaunchOptions: Equatable, Sendable {
+    /// `-PhotoFixture <name>` when the name is a fixture.
+    public var fixture: PhotoFixture?
+    /// `-PhotoFixture <name>` when the name isn't one.
+    public var unknownFixture: String?
+    /// `-PhotoWindowWidth <pt>`, kept only within 880...4096.
+    public var windowWidth: Double?
+
+    /// Reads the flags anywhere in `arguments`; a flag with no value after it is ignored.
+    public init(arguments: [String]) {
+        var rest = arguments[...]
+        while let argument = rest.popFirst() {
+            switch argument {
+            case "-PhotoFixture":
+                guard let name = rest.popFirst() else { break }
+                fixture = PhotoFixture(rawValue: name)
+                unknownFixture = fixture == nil ? name : nil
+            case "-PhotoWindowWidth":
+                guard let text = rest.popFirst() else { break }
+                windowWidth = Double(text).flatMap { (880...4096).contains($0) ? $0 : nil }
+            default: break
+            }
+        }
+    }
+}
+
 extension PhotoWorkspace {
+    /// The workspace a window opens with: the fixture on `.fake`, an empty
+    /// `.fake` workspace saying "No fixture named <name>." for an unknown
+    /// name, and nil without `-PhotoFixture`, so the window stays on `.live`.
+    public static func launch(_ options: PhotoLaunchOptions) -> PhotoWorkspace? {
+        if let name = options.fixture {
+            if let workspace = try? fixture(name) { return workspace }
+            var workspace = PhotoWorkspace(services: .fake)
+            workspace.statusMessage = "The \(name.rawValue) fixture couldn't be built."
+            return workspace
+        }
+        guard let unknown = options.unknownFixture else { return nil }
+        var workspace = PhotoWorkspace(services: .fake)
+        workspace.statusMessage = "No fixture named \(unknown)."
+        return workspace
+    }
+
+    /// The workspace runs on the fakes (`-PhotoFixture`), not the user's
+    /// files: the status line shows a "Preview data" pill.
+    public var isPreviewData: Bool { services.archive is FakeArchive }
+
     /// The fixture on `.fake` services (blueprint 4.4; `limit` is left out, see S-5).
     public static func fixture(_ name: PhotoFixture) throws -> PhotoWorkspace {
         var workspace = PhotoWorkspace(services: .fake)
