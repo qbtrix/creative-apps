@@ -4,7 +4,7 @@ Issue: #812 · Packet: docs/blueprints/photo/features/photo-seams.md
 Run: act-1a13d5e8ca4-huz5 · Session: cloud lead session · Started: 2026-10-15T02:23Z
 Stage: 4 round 2
 Base: c4ec07810683a4bc7d62dcc5205705229f248a71
-Next: round 2 critic panel on run 38694361192 (fdb7c8a) with the round 1 lenses
+Next: wait for r2 fix PRs to merge; then a feature-done status PR for round 3's CI
 
 ## Tasks
 
@@ -39,7 +39,7 @@ packet chains every task on the one before it (shared files or new types).
 | round | CI run | CI | audit vs baseline | lenses | confirmed | fixed by | clean |
 |---|---|---|---|---|---|---|---|
 | 1 | 38687993459 (727, 8f78bad) | photo green (12 journeys pass; macOS scripts/ci green); run red from SuiteUI testGalleryOpensEveryPage and Halo testLayoutAtWidths (#763) | photo all at or under (identifier 16 vs 23) | clarity, journey, design, layout, controls, quality | 6 (2 major: preview pill not a warning pill; no Escape-cancels-crop journey. 4 minor: refusal names no place; refusal in warning not error style; no -PhotoFixture launch journey; clone/heal re-stamp the previous dab). 3 refuted (NotBuilt wording by design; Help menu and SuiteUI slider marker outside feature) | #1012 (r1-b1 status line), #1010 (r1-b2 model; heal release p50 0.60 -> 0.31 ms), #1011 (r1-b3 journeys) | no |
-| 2 | 38694361192 (fdb7c8a) | photo green (13 journeys incl. testFixtureLaunch and crop-cancelled; macOS scripts/ci green); run red from SuiteUI testGalleryOpensEveryPage, Halo testLayoutAtWidths and testNewComposition (#763) | photo all at or under (identifier 16 vs 23, 93 steps) | same six | pending | – | – |
+| 2 | 38694361192 (fdb7c8a) | photo green (13 journeys incl. testFixtureLaunch and crop-cancelled; macOS scripts/ci green); run red from SuiteUI testGalleryOpensEveryPage, Halo testLayoutAtWidths and testNewComposition (#763) | photo all at or under (identifier 16 vs 23, 93 steps) | same six | 14 kept; in scope: 1 major (fixture launch not fitted) + 8 minor (eyedropper hint x3, pill tooltip, refusal type role, step-5 journey gaps x2, budget step); out of scope v1 -> gap issues #1024 tile-edge lines (p1), #1025 clone source, #1026 selection unit, #1027 render pill | r2-b1 PhotoWindow, r2-b2 status line + options, r2-b3 journeys + budget | no |
 
 ## Decisions
 - Waves of one task each, in the packet's chain order; the next builder starts once the previous PR has merged into dev.
@@ -55,6 +55,7 @@ packet chains every task on the one before it (shared files or new types).
 - Lead step after S-4 merges: file the four needs-ui issues of blueprint 6.3 (SelectionPathOutline, SelectionHandles with rotation, BrushCursorMark, LayerList row symbol and accessory).
 
 ## Open
+- gap issues from round 2 (v1 behaviour, outside photo-seams): #1024 (tile-edge lines at fractional zoom, p1), #1025, #1026, #1027.
 - needs-ui filed: #952 SelectionPathOutline, #953 BrushCursorMark, #954 LayerList symbol and accessory. SelectionHandles with rotation is SuiteUI canvas-marks CM-4 (#273), no new issue.
 - Quality finding for round 1 (quality lens): S-13a times 6 px steps with a 64 px brush, so many events put down no dab; heal release p50 0.56 ms but p95 4.6 ms, likely the real per-dab cost (> PB-2 1 ms). Round 1 fix: time events that each dab (step >= dab spacing); if heal misses PB-2 per dab, file a line:photo gap for heal speed.
 - Quality watch for round 1: S-10b stores CanvasViewport hover in @State, so every pointer move redraws PhotoCanvas; check PB-1 brush latency and the hitch journey (testBrushStrokeHitchesOnALargePhoto).

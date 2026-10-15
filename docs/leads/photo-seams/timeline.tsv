@@ -75,3 +75,4 @@ utc	stage	event	ref	note
 2026-10-15T06:44Z	4	pr-opened	#1013	feature-done: packet status, refusal text in docs
 2026-10-15T07:12Z	4	pr-merged	#1013	feature-done, dispatched round 2 CI
 2026-10-15T07:12Z	4	ci-run	38694361192	photo green incl. new journeys; audit at baseline; red from suiteui+halo (#763)
+2026-10-15T07:23Z	4	round-findings	round 2	1 major + 8 minor in scope; 4 v1 gaps filed #1024-#1027; fix batches r2-b1..b3 started
