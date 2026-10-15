@@ -11,9 +11,9 @@ both curve editors run on their contracts with goldens.
 **Covers:** #718 (`onEnd` on the exact field and color rows; closes with
 IC-3), #591 and #88 (track-owned step and the log-mapped row; IC-4), #622
 and #285 (Reset hit area, Reset over the header button; IC-6), #262
-(readable values; IC-8), #343 (S13 `CurveEditor` goldens and probe mark;
-IC-8). IC-1, IC-2, IC-5, IC-7, IC-9 to IC-18 have no issue of their own
-(IC-2 says "Part of #718", IC-7 "Part of #262").
+(readable values; IC-7), #343 (S13 `CurveEditor` goldens and probe mark;
+IC-8). IC-1, IC-2, IC-5, IC-9 to IC-18 have no issue of their own
+(IC-2 says "Part of #718", IC-8 "Part of #262").
 
 **Not covered:** #745 was the same ask as #718 and is already closed (it
 closed when #765 merged), so no task names it.
@@ -50,8 +50,9 @@ AppKit (the color panel and key handling); keep new AppKit use there.
 
 ## Journey steps
 
-In `UITests/SuiteJourneyTests+Inspector.swift`, on the `inspector` and
-`curves` pages, as section 4.2 and 4.3 write them. The log is the label of
+SJ11–SJ15 in `UITests/SuiteJourneyTests+Inspector.swift` (IC-13), SJ16,
+SJ20, SJ24 and the SP tests in `UITests/SuiteJourneyTests+InspectorCurves.swift`
+(IC-14), on the `inspector` and `curves` pages, as section 4.2 and 4.3 write them. The log is the label of
 `suite.gallery.log`; `ends n` counts `onEnd` calls.
 
 1. **SJ11** `testBarSliderScrubTypeAndStep`: drag Rotation 40 pt, ⇧-drag 4,
@@ -183,7 +184,9 @@ reason equals its `.help`), emits its probe series and moves its fades from
 `accessibilityReduceMotion` to `suiteReduceMotion` (today in `ChipRow`,
 `CurveEditor`, `ScrubField`, `InspectorRows`, `KeyframeButton`,
 `InspectorAction`). No task edits `docs/c4/model.json`, `docs/design.md`,
-`Tokens.swift` or `project.yml`.
+`Tokens.swift` or `project.yml`, and none edits a blueprint or `waves.md`:
+this packet edits no shared doc (`packets.md`, rule (a)), so it has no docs
+task and IC-18 stays the final task.
 
 | id | issue | what | owned files | depends on |
 |---|---|---|---|---|
@@ -193,30 +196,59 @@ reason equals its `.help`), emits its probe series and moves its fades from
 | IC-4 | #591, #88 (closes both) | `ScrubTrack.stepped` decides arrow, VoiceOver and Slider steps; `ScrubTrack` conforms to `TrackStepping`; the log-mapped row snapshot | `Sources/SuiteUI/ScrubValue.swift`, `Sources/SuiteUI/ScrubField.swift`, `Tests/SuiteUITests/ScrubValueTests.swift`, `Tests/AppSnapshotTests/SuiteSliderSnapshots.swift` | IC-1, IC-2 |
 | IC-5 | – | `SuiteValueScrubbing` over `ScrubValue` and `NumericInput`; the 60-row reference table (QB-S27) | `Sources/SuiteUI/ScrubValue.swift`, `Sources/SuiteUI/NumericInput.swift`, `Tests/SuiteUITests/ScrubReferenceTests.swift`, `Tests/SuiteUITests/NumericInputTests.swift` | IC-4 |
 | IC-6 | #622, #285 (closes both) | Reset beside the header, hit ≥ `iconButtonHit`, no overlap; `InspectorRows` and `InspectorAction` on `suiteReduceMotion`; goldens of the section header and of the inspector title and info card | `Sources/SuiteUI/InspectorRows.swift`, `Sources/SuiteUI/InspectorAction.swift`, `Tests/SuiteUITests/InspectorSectionTests.swift`, `Tests/AppSnapshotTests/SuiteInspectorSnapshots.swift`, `Tests/AppSnapshotTests/SuiteHeaderSnapshots.swift` | – |
-| IC-7 | #262 (part) | Bar rows read their value (`accessibilityRepresentation` with a `Slider`); `bar-slider` and `slider-key` series | `Sources/SuiteUI/ScrubField.swift`, `Sources/SuiteUI/StudioScrubRow.swift`, `Tests/SuiteUITests/SliderBarTests.swift` | IC-4 |
-| IC-8 | #343, #262 (closes both) | `CurveEditor`: `EasingHandleNudging` conformance, `EditRun`, readable handle values, the preview dot's Reduce Motion probe mark, `curve-drag` | `Sources/SuiteUI/CurveEditor.swift`, `Tests/SuiteUITests/CurveEditorTests.swift`, `Tests/AppSnapshotTests/SuiteCurveEditorSnapshots.swift` | IC-1, IC-7 |
+| IC-7 | #262 (closes) | Bar rows read their value (`accessibilityRepresentation` with a `Slider`); `bar-slider` and `slider-key` series | `Sources/SuiteUI/ScrubField.swift`, `Sources/SuiteUI/StudioScrubRow.swift`, `Tests/SuiteUITests/SliderBarTests.swift` | IC-4 |
+| IC-8 | #343 (closes), #262 (part) | `CurveEditor`: `EasingHandleNudging` conformance, `EditRun`, readable handle values, the preview dot's Reduce Motion probe mark, `curve-drag` | `Sources/SuiteUI/CurveEditor.swift`, `Tests/SuiteUITests/CurveEditorTests.swift`, `Tests/AppSnapshotTests/SuiteCurveEditorSnapshots.swift` | IC-1 |
 | IC-9 | – | `ToneCurveEditor` on `CurvePointEditing`, `EditRun`, `curve-drag` | `Sources/SuiteUI/ToneCurveEditor.swift`, `Tests/SuiteUITests/ToneCurveEditorTests.swift`, `Tests/AppSnapshotTests/SuiteToneCurveSnapshots.swift` | IC-1 |
 | IC-10 | – | `KeyframeButton` on `KeyframeFacing`, `suiteReduceMotion`, registration | `Sources/SuiteUI/KeyframeButton.swift`, `Tests/SuiteUITests/KeyframeButtonTests.swift`, `Tests/AppSnapshotTests/SuiteKeyframeSnapshots.swift` | IC-1 |
 | IC-11 | – | `PresetGrid` on `PresetNavigating` (`GridArrow` in place of `KeyEquivalent`); chips' fades and `press` series | `Sources/SuiteUI/PresetGrid.swift`, `Sources/SuiteUI/ChipRow.swift`, `Sources/SuiteUI/ChoiceChips.swift`, `Tests/SuiteUITests/PresetGridTests.swift`, `Tests/AppSnapshotTests/SuitePresetsSnapshots.swift` | IC-1 |
 | IC-12 | – | The `inspector` and `curves` gallery pages, their log, `-SuiteGalleryWidth`, the Reduce Motion switch, the Fakes path | `Sources/SuiteUI/Gallery/GalleryInspector.swift` | IC-3, IC-5, IC-6, IC-8, IC-9, IC-10, IC-11 |
-| IC-13 | – | SJ11 to SJ15 | `UITests/SuiteJourneyTests+Inspector.swift` | IC-12 |
-| IC-14 | – | SJ16, SJ20, SJ24, SP1, SP6, SP7, `testChipPressLatency` | `UITests/SuiteJourneyTests+Inspector.swift` | IC-13 |
-| IC-15 | – | Baselines: bar slider, exact field, color row in four appearances | `Tests/AppSnapshotTests/Golden/inspector/` (12 PNGs) | IC-14's CI run |
-| IC-16 | – | Baselines: section header and Reset, keyframe button, presets in four appearances | `Tests/AppSnapshotTests/Golden/inspector/` (12 PNGs) | IC-15 |
-| IC-17 | – | Baselines: chips, easing curve, tone curve in four appearances | `Tests/AppSnapshotTests/Golden/inspector/` (12 PNGs) | IC-16 |
-| IC-18 | – | Baselines: inspector title and info card in four appearances; `feature-done` | `Tests/AppSnapshotTests/Golden/inspector/` (8 PNGs) | IC-17 |
+| IC-13 | – | SJ11 to SJ15 | `UITests/SuiteJourneyTests+Inspector.swift` | IC-7, IC-12 |
+| IC-14 | – | SJ16, SJ20, SJ24, SP1, SP6, SP7, `testChipPressLatency` | `UITests/SuiteJourneyTests+InspectorCurves.swift` | IC-7, IC-12 |
+| IC-15 | – | Baselines: bar slider, exact field, color row in four appearances | `Tests/AppSnapshotTests/Golden/inspector/` (12 PNGs) | IC-3, IC-4, IC-6, IC-7 (a CI run with their actuals) |
+| IC-16 | – | Baselines: section header and Reset, keyframe button, presets in four appearances | `Tests/AppSnapshotTests/Golden/inspector/` (12 PNGs) | IC-6, IC-10, IC-11 (a CI run with their actuals) |
+| IC-17 | – | Baselines: chips, easing curve, tone curve in four appearances | `Tests/AppSnapshotTests/Golden/inspector/` (12 PNGs) | IC-8, IC-9, IC-11 (a CI run with their actuals) |
+| IC-18 | – | Baselines: inspector title and info card in four appearances; `feature-done` | `Tests/AppSnapshotTests/Golden/inspector/` (8 PNGs) | IC-6, IC-13, IC-14, IC-15, IC-16, IC-17 |
 
 Sizes: IC-1 ~380 lines; IC-2 ~120; IC-3 ~220; IC-4 ~250; IC-5 ~330 (the
 table is data); IC-6 ~200; IC-7 ~180; IC-8 ~260; IC-9 ~220; IC-10 ~150;
 IC-11 ~250; IC-12 ~380; IC-13 ~350; IC-14 ~330. If IC-12 passes 400, the
-`curves` page moves to IC-12b in the same file, chained.
+`curves` page moves to IC-12b in the same file, chained (the longest
+chain then grows by one).
 
-`ScrubField.swift` is edited by IC-2, IC-4 and IC-7, and `ScrubValue.swift`
-by IC-4 and IC-5: those run as chains (IC-2 → IC-4 → IC-5 and IC-4 → IC-7 →
-IC-8). IC-1, IC-2, IC-6, IC-9, IC-10 and IC-11 have no shared file and start
-together. `InspectorHeader.swift` and `SuiteProInspectorSnapshots.swift` are this
+Links: `ScrubField.swift` is edited by IC-2, IC-4 and IC-7 (IC-4 changes
+the key and VoiceOver paths IC-2 rewires through `EditRun`, and IC-7's
+`Slider` steps through IC-4's `stepped`), and `ScrubValue.swift` by IC-4
+and IC-5 (`SuiteValueScrubbing.pressed` calls IC-4's track-aware
+`ScrubValue.pressed`): those run as chains IC-2 → IC-4 → IC-5 and IC-2 →
+IC-4 → IC-7. IC-3, IC-4 and IC-8 to IC-11 conform to IC-1's contracts.
+IC-8 owns its own files and does not wait for IC-7. IC-8 says "see #262";
+IC-7, in the later wave, closes it. IC-12's
+pages draw every component and swap each conformance for IC-1's Fakes.
+IC-13 and IC-14 drive IC-12's pages and read IC-7's slider value and
+series; each owns its own journey file (`project.yml` compiles
+`UITests/SuiteJourneyTests*.swift`), so they build side by side. Each
+baseline task commits the actuals of the snapshot tests of the tasks it
+names; the PNGs of IC-15 to IC-18 do not overlap. IC-18 waits for the other
+baselines and both journey tasks, because its `feature-done` run is the done
+check. `InspectorHeader.swift` and `SuiteProInspectorSnapshots.swift` are this
 feature's in wave 2; no task changes them (IC-6 records the title and info
 card goldens from `SuiteHeaderSnapshots.swift`).
+
+## Build waves
+
+- Wave 1: IC-1, IC-2, IC-6, IC-9, IC-10, IC-11. Independent in this wave: all six.
+- Wave 2: IC-3, IC-4, IC-8, IC-16. Independent in this wave: all four.
+- Wave 3: IC-5, IC-7, IC-17. Independent in this wave: all three.
+- Wave 4: IC-12, IC-15. Independent in this wave: both.
+- Wave 5: IC-13, IC-14. Independent in this wave: both.
+- Wave 6: IC-18 (`feature-done`, final; no shared doc to edit).
+
+Longest chain: IC-2 → IC-4 → IC-5 → IC-12 → IC-13 → IC-18 (6).
+Chain of 6: IC-4 edits the key and VoiceOver paths of `ScrubField.swift`
+that IC-2 rewires; `SuiteValueScrubbing` (IC-5) calls IC-4's track-aware
+`ScrubValue.pressed` in `ScrubValue.swift`; `GalleryInspector.swift` (IC-12)
+swaps `SuiteValueScrubbing` for its Fake; SJ11–SJ15 (IC-13) drive IC-12's
+pages; IC-18's `feature-done` run must show those journeys green.
 
 ## Acceptance test per task
 

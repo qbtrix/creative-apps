@@ -46,8 +46,9 @@ shows. Raw values only through tokens: the slot tokens
 
 ## Journey steps
 
-All in `UITests/SuiteJourneyTests+Chrome.swift`, on the `editor`,
-`editor-plain` and `empty` pages, as section 4.2 writes them:
+SJ1–SJ4 in `UITests/SuiteJourneyTests+Chrome.swift` (EC-10), SJ5–SJ8,
+SP9 and SP10 in `UITests/SuiteJourneyTests+ChromePanels.swift` (EC-11), on
+the `editor`, `editor-plain` and `empty` pages, as section 4.2 writes them:
 
 1. **SJ1** `testEditorShellFitsAtEveryWidth`: widths 880, 1024, 1280, 1440;
    regions inside the window (1 pt slack), no overlap over 1 pt, content ≥
@@ -191,7 +192,8 @@ task registers its controls with `.suiteControl` (with a test that the
 entry's reason equals its `.help`), emits its probe series, and moves its
 fades to `suiteReduceMotion` with `fade-start`/`fade-end` marks. No task
 edits `docs/c4/model.json`, `docs/design.md`, `Tokens.swift` or
-`project.yml`.
+`project.yml`, and none edits a blueprint or `waves.md`: this packet edits
+no shared doc, so it has no docs task.
 
 | id | issue | what | owned files | depends on |
 |---|---|---|---|---|
@@ -205,9 +207,9 @@ edits `docs/c4/model.json`, `docs/design.md`, `Tokens.swift` or
 | EC-8 | – | `SuiteToolPicking` behind `ToolbarGroup`: key pick, help, violations; `press` series and tool fades | `Sources/SuiteUI/ToolbarGroup.swift`, `Tests/SuiteUITests/ToolPickingTests.swift` | EC-1, EC-7 |
 | EC-9 | – | The `editor`, `editor-plain` and `empty` gallery pages, their log, page switches (save state, warning, `frameCount` 0, Reduce Motion) and the `-SuiteGalleryFakes` path | `Sources/SuiteUI/Gallery/GalleryChrome.swift` | EC-3, EC-4, EC-5, EC-6, EC-8 |
 | EC-10 | – | SJ1, SJ2, SJ3, SJ4 | `UITests/SuiteJourneyTests+Chrome.swift` | EC-9 |
-| EC-11 | – | SJ5, SJ6, SJ7, SJ8, SP9, SP10 | `UITests/SuiteJourneyTests+Chrome.swift` | EC-10 |
-| EC-12 | – | Baselines from the CI artifact: shell, top bar and transport in the four appearances | `Tests/AppSnapshotTests/Golden/chrome/` (12 PNGs) | EC-11's CI run |
-| EC-13 | – | Baselines: status pills, tabs and rail in the four appearances; `feature-done` | `Tests/AppSnapshotTests/Golden/chrome/` (12 PNGs) | EC-12 |
+| EC-11 | – | SJ5, SJ6, SJ7, SJ8, SP9, SP10 | `UITests/SuiteJourneyTests+ChromePanels.swift` | EC-9 |
+| EC-12 | – | Baselines from the CI artifact: shell, top bar and transport in the four appearances | `Tests/AppSnapshotTests/Golden/chrome/` (12 PNGs) | EC-3, EC-4, EC-5, EC-6, EC-7, EC-8 and their CI run |
+| EC-13 | – | Baselines: status pills, tabs and rail in the four appearances; `feature-done` | `Tests/AppSnapshotTests/Golden/chrome/` (12 PNGs) | EC-6, EC-7, EC-8, EC-10, EC-11, EC-12 |
 
 Sizes: EC-1 ~250 lines; EC-2 ~180; EC-3 ~300; EC-4 ~250; EC-5 ~300; EC-6
 ~200; EC-7 ~180; EC-8 ~200; EC-9 ~350; EC-10 ~300; EC-11 ~350; EC-12 and
@@ -215,11 +217,34 @@ EC-13 PNGs only. EC-12 and EC-13 split the goldens so neither passes 15
 files; `Golden/chrome/` is this feature's folder, and the two PRs never
 hold the same PNG.
 
-Inside the feature: EC-1, EC-4 and EC-7 start at once; then EC-2, EC-5,
-EC-6, EC-8; then EC-3; then EC-9 to EC-13 in a chain. EC-7 and EC-8 share
-`ToolbarGroup.swift`, EC-10 and EC-11 share the journey file: chains, never
-parallel. `SurfaceCard.swift` and `GlassPanel.swift` are this feature's in
-wave 2 but no task changes them.
+Inside the feature: EC-7 and EC-8 share `ToolbarGroup.swift`, so EC-8
+waits for EC-7 (it waits for EC-1 anyway, so the chain is no longer). EC-10
+and EC-11 each own their journey file (`project.yml` compiles
+`UITests/SuiteJourneyTests*.swift`), so they build side by side. EC-12
+needs the shell, top bar and transport snapshot tests recording actuals on
+a CI run, and also EC-6, EC-7 and EC-8: the shell sample fills its rail,
+panel and status slots with `ToolbarGroup`, `SegmentedTabs` and
+`ViewerStatusBar`, so its PNGs are final only once those three merge. EC-13
+needs the rest of them, all of EC-12's PNGs (its check
+reads every `chrome` golden) and both journey tasks, because the
+`feature-done` run it triggers must show SJ1–SJ8 green.
+`SurfaceCard.swift` and `GlassPanel.swift` are this feature's in wave 2 but
+no task changes them.
+
+## Build waves
+
+- Wave 1: EC-1, EC-4, EC-7. Independent in this wave: all three.
+- Wave 2: EC-2, EC-5, EC-6, EC-8. Independent in this wave: all four.
+- Wave 3: EC-3. Independent in this wave: EC-3 alone.
+- Wave 4: EC-9, EC-12. Independent in this wave: both.
+- Wave 5: EC-10, EC-11. Independent in this wave: both.
+- Wave 6: EC-13 (`feature-done`, final; no shared doc to edit).
+
+Longest chain: EC-1 → EC-2 → EC-3 → EC-9 → EC-10 → EC-13 (6).
+Chain of 6: `SuiteShellLayout` (EC-2) implements EC-1's `ShellLayingOut`,
+`EditorShell` (EC-3) calls `SuiteShellLayout`, `GalleryChrome.swift` (EC-9)
+builds `EditorShell(timeline:)`, SJ1–SJ4 (EC-10) drive EC-9's pages, and
+EC-13's `feature-done` run must show those journeys green.
 
 ## Acceptance test per task
 
