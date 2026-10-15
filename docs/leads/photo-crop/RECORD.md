@@ -2,9 +2,9 @@
 
 Issue: #1076 · Packet: docs/blueprints/photo/features/photo-crop.md
 Run: act-1a13f70ddc3-29wr · Session: lead session (claude/photo-crop-feature-lead-e7vpmg) · Started: 2026-10-15T12:03Z
-Stage: 3 wave 4 (rounds 1-4 done) (wave 4 still waits on photo-journey-kit #1073)
-Base: 469520e8def2fe925a065aa8d5febda827851131
-Next: lane merges #1216 then #1217 (oldest first; #1217 carries feature-done); read the CI run it dispatches; then the feature-done CI run, contact sheet on #1076. Base bd1b046. Old note: when #1073 lands when #1073 closes (UITests/PhotoJourneyTests+Fixtures.swift on dev), build CP-5 and CP-7 together; meanwhile read the first dev CI run containing 469520e (#1151) for round-1 material.
+Stage: 5 finish (wave 4 still waits on photo-journey-kit #1073)
+Base: e6fdf149c0a0a17fd2a23bdbe687f56d4591ae72
+Next: read the dev CI run containing e6fdf14 (feature-done); green -> Belt-Contact-Sheet on #1076; red -> fix if budget allows, else gap issues; then the feature-done CI run, contact sheet on #1076. Base bd1b046. Old note: when #1073 lands when #1073 closes (UITests/PhotoJourneyTests+Fixtures.swift on dev), build CP-5 and CP-7 together; meanwhile read the first dev CI run containing 469520e (#1151) for round-1 material.
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -13,8 +13,8 @@ Next: lane merges #1216 then #1217 (oldest first; #1217 carries feature-done); r
 | CP-2 | 2 | Workspace setCropField/setCropAspect/swapCropAspect/cropFieldsEnabled/cropFieldValue/cropAspectBadge; drag keeps lock | Sources/PhotoModel/PhotoCropSize.swift, Tests/PhotoModelTests/PhotoCropSizeTests.swift | PhotoCropSizeTests (incl. dragUpdatesEveryEvent, typedCropMatchesCropped) | #1141 | merged |
 | CP-3 | 3 | Budget PB-8 (crop drag + typed field) on large | Tests/PhotoModelTests/PhotoCropBudgetTests.swift | PhotoCropBudgetTests.cropDragAndField | #1149 | merged |
 | CP-4 | 3 | Crop options: 2x2 ScrubField grid, six aspect chips, Swap, Apply (no .defaultAction), Cancel; window crop intents | Sources/PhotoApp/CropOptions.swift, Sources/PhotoApp/PhotoWindow+Crop.swift, Tests/AppSnapshotTests/PhotoCropOptionsSnapshots.swift | PhotoCropOptionsSnapshots (+gridAligned) | #1151 | merged |
-| CP-5 | 4 | Aspect pill on crop overlay; journey PJ-8 (feature-done) | Sources/PhotoApp/CropOverlay.swift, UITests/PhotoJourneyTests+Crop.swift | PJ-8 testTypedCropSizeAndAspect | #1217 | open (lane), feature-done |
-| CP-7 | 4 | Perf journeys PJ-P1 (brush, crop, pan) and PJ-P2 (Exposure scrub) | UITests/PhotoJourneyTests+Perf.swift | testCanvasDragLatency, testSliderScrubLatency | #1216 | open (lane) |
+| CP-5 | 4 | Aspect pill on crop overlay; journey PJ-8 (feature-done) | Sources/PhotoApp/CropOverlay.swift, UITests/PhotoJourneyTests+Crop.swift | PJ-8 testTypedCropSizeAndAspect | #1217 | merged (feature-done) |
+| CP-7 | 4 | Perf journeys PJ-P1 (brush, crop, pan) and PJ-P2 (Exposure scrub) | UITests/PhotoJourneyTests+Perf.swift | testCanvasDragLatency, testSliderScrubLatency | #1216 | merged |
 
 Waves: 1 = CP-1 (independent). 2 = CP-2 (waits CP-1). 3 = CP-3, CP-4 (independent of each other; both wait CP-2). 4 = CP-5, CP-7 (independent of each other; both wait photo-journey-kit; CP-5 waits CP-4).
 
