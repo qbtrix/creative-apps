@@ -24,3 +24,4 @@ utc	stage	event	ref	note
 2026-10-15T13:35Z	3	pr-opened	#1223	D-7 save/open in window
 2026-10-15T17:40Z	3	pr-merged	#1223	D-7
 2026-10-15T17:41Z	3	ci-run	38774988270	macOS red: LiveRecovery ObjCBool (ours, #1210); fixer started
+2026-10-15T17:34Z	3	heartbeat	-	waiting
