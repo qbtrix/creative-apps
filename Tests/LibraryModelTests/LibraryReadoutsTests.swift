@@ -154,3 +154,13 @@ private func image(_ width: Int, _ height: Int) -> DisplayImage? {
     catalog.services.unavailable["importer"] = "Import isn't connected yet (import)."
     #expect(catalog.help(for: "importer") == "Import isn't connected yet (import).")
 }
+
+@Test func canLoadSamplesIsFalseOnlyForANewerCatalog() {
+    var catalog = LibraryCatalog()
+    catalog.catalogState = .ready
+    #expect(catalog.canLoadSamples)
+    catalog.catalogState = .damaged
+    #expect(catalog.canLoadSamples)
+    catalog.catalogState = .newer(version: 2)
+    #expect(!catalog.canLoadSamples)
+}

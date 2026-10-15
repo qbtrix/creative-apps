@@ -21,13 +21,13 @@ final class LibraryShellJourneyTests: XCTestCase {
         addTeardownBlock { try? FileManager.default.removeItem(at: folder) }
         let library = Journey("Library", self, arguments: ["-LibraryCatalogDir", folder.path])
         library.expectWindowShell()
-        library.shot("empty")
 
         // Step 1: "No Photos" with Import Folder… as its one button, every sidebar count 0.
         let window = library.app.windows.firstMatch
         XCTAssert(Self.text("No Photos", in: window).waitForExistence(timeout: 10), "no \"No Photos\" empty state")
         let button = library.element("library.import")
         XCTAssert(button.waitForExistence(timeout: 5), "no Import Folder… button (library.import)")
+        library.shot("empty")
         XCTAssertEqual(button.label, "Import Folder…", "the empty state's button")
         XCTAssertEqual(window.buttons.matching(identifier: "library.import").count, 1, "more than one Import Folder…")
         XCTAssertFalse(window.buttons["Load Sample Photos"].exists, "Load Sample Photos is a button, not only in File")
