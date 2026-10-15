@@ -64,3 +64,5 @@ utc	stage	event	ref	note
 2026-10-15T08:41Z	4	round-findings	round3	1 major + 1 minor confirmed, fix batch r3-b1 on a5182b4
 2026-10-15T08:47Z	4	pr-opened	#1051	r3-b1 restore keeps the recovery file, encode off main, feature-done
 2026-10-15T09:04Z	4	heartbeat	#1051	waiting on lane merge / round 4 CI
+2026-10-15T09:09Z	4	pr-merged	#1051	r3-b1
+2026-10-15T09:09Z	4	ci-run	38709336067	red outside feature (HaloLayerListTests); all mac-platform suites green incl. the #1051 fix
