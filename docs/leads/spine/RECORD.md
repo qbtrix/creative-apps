@@ -2,9 +2,9 @@
 
 Issue: #1044 · Packet: docs/blueprints/library/features/spine.md
 Run: act-1a13f18aaa0-lfw5 · Session: session_01DtSRhNqsphGfKkvV5eLsWW · Started: 2026-10-15T10:25Z
-Stage: 3 wave 9
-Base: 265b1fe07f0eae0aefb7cad8f0276c7c7c97f7a6
-Next: wait for SA-4 to merge; then wave 10 (SA-5, SA-6)
+Stage: 3 wave 10
+Base: 63519525c1826d4b27b3b6bf0355faf525b9aa6b
+Next: wait for SA-5 and SA-6 to merge; then wave 11 (SA-7)
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -26,9 +26,9 @@ Next: wait for SA-4 to merge; then wave 10 (SA-5, SA-6)
 | SP-9 | 8 | Leave the loupe when the collection hides its photo (only if #217 unmerged) | LibraryCatalog.swift | LibraryCollectionSwitchTests | #1138 | merged |
 | SP-14 | 8 | recordEdit, undo, redo, titles, endCoalescing | CatalogHistory.swift | LibraryHistoryTests | #1139 | merged |
 | SA-3 | 8 | LibraryMenu per area, every v1 menu item with help | LibraryMenus, LibraryCommands, LibraryWindow | J10 | #1140 | merged |
-| SA-4 | 9 | Nine area files, hooks, menu: params, key routing | LibraryWindow*, Browser, Grid, Loupe | J0 step 3, existing journeys |  | building |
-| SA-5 | 10 | Import Folder… empty state, notice slot, Preview pill, export sheet | Browser, StatusBar, ExportSheet, Window | LibraryShellSnapshots | | planned |
-| SA-6 | 10 | Inspector tabs/header, Develop/Crop stubs, crop overlay, loupe value | Inspector, DevelopInspector, CropInspector, CropOverlay, Loupe | LibraryShellSnapshots, loupe journey | | planned |
+| SA-4 | 9 | Nine area files, hooks, menu: params, key routing | LibraryWindow*, Browser, Grid, Loupe | J0 step 3, existing journeys | #1142 | merged |
+| SA-5 | 10 | Import Folder… empty state, notice slot, Preview pill, export sheet | Browser, StatusBar, ExportSheet, Window | LibraryShellSnapshots |  | building |
+| SA-6 | 10 | Inspector tabs/header, Develop/Crop stubs, crop overlay, loupe value | Inspector, DevelopInspector, CropInspector, CropOverlay, Loupe | LibraryShellSnapshots, loupe journey |  | building |
 | SA-7 | 11 | library.controls, identifiers, spine snapshots | LibraryControls, Window, LibraryShellSnapshots | snapshots | | planned |
 | SJ-1 | 12 | Four journeys on samples, J0, J10 | UITests/LibraryJourneyTests.swift | macOS journeys | | planned |
 | SJ-2 | 13 | J11, LibraryFiles helpers (feature-done) | UITests/LibraryJourneyTests+Shell/+Files | J11 | | planned |
@@ -64,6 +64,7 @@ Taken from the packet's Build waves; checked against dev bcf5a09.
 - SP-9 runs: #217 still open at wave 8 start (12:12Z).
 - SP-14 leaves setRating/setFlag/setLabel/clickStar outside the undo history (their files weren't in SP-14's list); the cull feature routes them through cull/recordEdit in wave 2, as blueprint 5.7 says.
 - Commented once on #217 that #1138 supersedes it.
+- SA-4 kept LibraryLoupe(photo:position:menu:...) rather than (model:menu:), so SA-6 owns the one loupe call line in LibraryBrowser.swift (passing the loupe value and crop draft); SA-5 leaves that line alone. They run in parallel; a lane conflict gets a rebase.
 
 ## Open
 - PR #217 (fix for #156) is open at stage 0; SP-9 lands only if it is still unmerged when wave 8 starts.
