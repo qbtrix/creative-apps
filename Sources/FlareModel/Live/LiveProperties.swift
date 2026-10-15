@@ -3,7 +3,9 @@
 // `Layer.standardDefaults`; key states follow section 2's rule (`FakeProperties.keyState`, a static read). Layers whose
 // values or states differ give a Mixed row (nil value, not animated). Reads and `setValue` (KY-2) work on any owner,
 // scene or symbol. The stopwatch and keyframe button live in LiveProperties+Keys.swift (KY-3); fill, stroke and the
-// `PropertyAnimating` conformance live in LiveProperties+Paint.swift (KY-4).
+// `PropertyAnimating` conformance live in LiveProperties+Paint.swift (KY-4). A coalesced multi-layer scrub is one undo
+// entry, but FlareCore merges only into the entry's last command, so the entry holds one command per layer per step: a
+// known memory cost, not a correctness issue.
 import FlareCore
 
 public struct LiveProperties: Sendable {
@@ -26,11 +28,12 @@ public struct LiveProperties: Sendable {
 
     /// Section 2's rule: with two or more keys on the track, or auto-key on, the value is keyed at `frame`; otherwise
     /// the track's one key (frame 0 when there is none) takes it, keeping its easing. A non-finite value throws
-    /// "<Title> needs a number." and changes nothing; there is no clamp. Each layer's write is a top-level
+    /// "<Title> needs a number." and a frame before 0 throws `invalidFrame`, changing nothing; there is no clamp. Each layer's write is a top-level
     /// `SetKeyframe` with `coalesceKey`, so a scrub is one entry; with no key, several layers are one "Set Keyframe".
     public func setValue(_ value: Double, of property: String, owner: LayerOwner, layerIDs: [String], frame: Int,
                          autoKey: Bool, coalesceKey: String?, in engine: inout CommandEngine) throws {
         guard value.isFinite else { throw CommandError.invalidDocument("\(FakeProperties.title(property)) needs a number.") }
+        guard frame >= 0 else { throw CommandError.invalidFrame(frame) }
         let targets = try Self.editable(layerIDs, owner: owner, in: engine.document)
         let writes: [SetKeyframe] = targets.map { layer in
             let track = layer.tracks[property] ?? []
@@ -42,7 +45,10 @@ public struct LiveProperties: Sendable {
         if coalesceKey == nil, writes.count > 1 {
             try engine.group("Set Keyframe") { engine in for write in writes { try engine.perform(write) } }
         } else {
-            for write in writes { try engine.perform(write, coalesceKey: coalesceKey) }
+            // Tried on a copy, so a later layer that throws leaves no key and no entry behind.
+            var trial = engine
+            for write in writes { try trial.perform(write, coalesceKey: coalesceKey) }
+            engine = trial
         }
     }
 

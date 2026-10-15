@@ -79,6 +79,7 @@ private func row(_ name: String, _ id: String, at frame: Int, in engine: Command
                                       autoKey: false, coalesceKey: "scrub-rotation", in: &engine)
     }
     #expect(layer("ball", in: engine)?.tracks["rotation"] == [Keyframe(frame: 0, value: 360)])
+    #expect(engine.undoActionName == "Undo Set Keyframe")
     try engine.undo()
     #expect(engine.document == doc)
     #expect(engine.canUndo == before)
@@ -131,4 +132,14 @@ func aNonFiniteValueThrowsAndChangesNothing(value: Double) {
         try live.setValue(1, of: "x", owner: scene, layerIDs: ["background"], frame: 0, autoKey: false, coalesceKey: nil, in: &engine)
     }
     #expect(engine.document == FlareFixtures.bounce)
+}
+
+@Test func aCoalescedWriteOnSeveralLayersThatThrowsChangesNothing() {
+    var engine = CommandEngine(document: FlareFixtures.bounce)
+    #expect(throws: CommandError.invalidFrame(-1)) {
+        try LiveProperties().setValue(5, of: "x", owner: scene, layerIDs: ["shadow", "ball"], frame: -1, autoKey: false,
+                                      coalesceKey: "s", in: &engine)
+    }
+    #expect(engine.document == FlareFixtures.bounce)
+    #expect(!engine.canUndo)
 }

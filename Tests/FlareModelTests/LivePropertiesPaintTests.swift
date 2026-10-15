@@ -67,9 +67,11 @@ private func layer(_ id: String, owner: LayerOwner = scene, in engine: CommandEn
     let live = LiveProperties()
     try live.setFill(red, of: shapes(of: "ball", in: doc), in: &engine)
     let filled = engine.document
-    #expect(throws: CommandError.self) {
+    let refusal = CommandError.invalidDocument("Stroke width can't be negative.")
+    #expect(throws: refusal) {
         try live.setStroke(Stroke(width: -1), of: shapes(of: "ball", in: doc), in: &engine)
     }
+    #expect(FlareLayerError.command(refusal).message == "Stroke width can't be negative.")
     #expect(engine.document == filled)
     #expect(engine.canUndo)
     #expect(engine.undoActionName == "Undo Set Fill")
