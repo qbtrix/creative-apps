@@ -107,7 +107,8 @@ private struct PhotoMenuKey: FocusedValueKey {
 /// Composes the menus; each menu's items live in PhotoCommands+<Menu>.swift.
 struct PhotoCommands: Commands {
     @FocusedValue(\.photoMenu) var focused
-    /// The focused window's Open Recent files (PhotoWindow+File.swift).
+    /// The focused window's Open Recent files (PhotoWindow+File.swift);
+    /// nil with no window, when the menu shows the saved list instead.
     @FocusedValue(\.photoRecentFiles) var recentFiles
 
     var menu: PhotoMenu { focused ?? PhotoMenu() }
