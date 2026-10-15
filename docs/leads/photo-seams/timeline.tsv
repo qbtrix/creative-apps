@@ -25,3 +25,7 @@ utc	stage	event	ref	note
 2026-10-15T03:53Z	3	pr-opened	#959	S-6b step ids, 213 lines 3 files
 2026-10-15T03:53Z	3	stage-start	S-5	builder stacked on S-6b
 2026-10-15T04:05Z	-	heartbeat	#812	waiting on builders or the lane
+2026-10-15T04:09Z	3	pr-merged	#959	S-6b
+2026-10-15T04:09Z	3	pr-opened	#966	S-5 fixtures, 206 lines 2 files
+2026-10-15T04:09Z	3	pr-merged	#966	S-5
+2026-10-15T04:09Z	3	stage-start	S-7a	builder stacked on S-5
