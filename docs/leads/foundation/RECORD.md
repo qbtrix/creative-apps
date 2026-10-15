@@ -2,9 +2,9 @@
 
 Issue: #777 · Packet: docs/blueprints/halo/features/foundation.md (on branch `docs/halo-feature-packets` until its PR merges)
 Run: act-1a13b78bcdb-qu60 · Session: session_01Dc9GDxc9HxLtv9XMcFgSWh · Started: 2026-10-14T17:33Z
-Stage: 5 finish (feature-done #1028 on the lane)
+Stage: 5 finish (contact sheet posted; feature-done run red on one SuiteUI-owned fault, round budget spent)
 Base: 52928d1dbbdd72b849f7fdb6363991f35b1adbeb
-Next: when #1028 merges, wait for the dev CI run containing it; green → comment Belt-Contact-Sheet on #777 with the run link, one line per journey and the audit counts; red → say so on #777 (round budget spent) with gap issues
+Next: nothing for this lead. When SuiteUI #1034 lands, the next dev CI run should turn testLayoutAtWidths green with no Halo change; a resumed lead only re-checks that run and posts a green Belt-Contact-Sheet line on #777
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -33,6 +33,7 @@ Next: when #1028 merges, wait for the dev CI run containing it; green → commen
 ## Rounds
 | round | CI run | CI | audit vs baseline | lenses | confirmed | fixed by | clean |
 |---|---|---|---|---|---|---|---|
+| final | 38698770785 (c0c7116, feature-done #1028) | red: testLayoutAtWidths only (selected TimelineStrip track runs under the sidebar, SuiteUI #1034); H-J0, H-J1, H-J13, menus, scrub pass; SuiteUI gallery journey also red (not Halo) | halo offscreen 0, contrast 0, identifier 1, unnamed 0 | – | 1 (SuiteUI) | #1034 | no |
 | 4 | 38694361192 (fdb7c8a, has #1007–#1009) | red: H-J1 'no Width field by its label' (regression from #1009's LabeledContent), testLayoutAtWidths raw-frame check: halo.timeline.track at x 8 in a window at 12 (detail column bleeds 4 pt, SuiteUI #1014); H-J0, H-J13, menus, scrub pass; Halo snapshots and HaloLayerListTests pass | halo offscreen 0, contrast 0, identifier 1, unnamed 0: at or under baseline | clarity, layout, controls, design | 2 journey + 9 panel (2 major: live timeline lanes clipped ~168 pt short, a regression from #1007's safe-area padding; 7 minor) | #1023 (journeys + timeline clipping, closes #1019); gap issues #1015–#1018, #1020–#1022; #1019 (timeline clipping) closes with the r4 fix; #1014 | no |
 | 3 | 38687993459 (8f78bad, has #982–#984 and #996) | red only on testLayoutAtWidths: halo.timeline.track (8, 568) starts 4 pt left of the 880 window (the selected track row runs under the floating sidebar); H-J0, H-J1, H-J13, menus, scrub pass | halo offscreen 0 (≤ 8), contrast 0, identifier 1, unnamed 0: at or under baseline | clarity, layout, controls, design | track edge + 10 panel (4 major: ruler unit, Open Recent dead, diamonds dead, LAYERS misaligned; 6 minor) | #1007 (track + 1, 5); E #1008 (3, 6, 7, 8, 9); F #1009 (2, 4, 10) | no |
 | 3a | 38682385432 (e8e5b52, after #962 revert; before #982–#984) | red: H-J1 (halo.inspector not found after Create), H-J13 (layer row click selects nothing), testLayoutAtWidths (no layer selected at 880); H-J0, scrub, menus pass | halo offscreen 16 > 8: the 880 window from testLayoutAtWidths leaks into later journeys (sidebar -68, inspector to 956); Halo's content column is a rigid 672 pt at both 1000 and 880; contrast 0, identifier 2 | journeys + audit (panel waits for the run with round 2 fixes) | 4 Halo-owned | #996 | no |
@@ -83,6 +84,7 @@ Next: when #1028 merges, wait for the dev CI run containing it; green → commen
 - Round 4 panel's major timeline clipping is a regression from round 3's #1007, so it rides the r4 fix instead of a gap issue; the 7 minor findings become gap issues (budget spent).
 
 ## Open
+- #1034 (needs-ui): TimelineStrip's selected track frame bleeds under the sidebar; blocks testLayoutAtWidths and so the green feature-done run.
 - Gap issues from round 4 (line:halo, p2): #1015 refusal names its action, #1016 null layer help, #1017 Keyframe Easing submenu, #1018 Help menu, #1020 layer row type size, #1021 timecode emphasis, #1022 sheet field edges.
 - #1014 (needs-ui): SuiteWindow's detail column starts ~4 pt left of the window under the floating sidebar.
 - #976 (needs-ui): ViewerStatusBar pills override disabled dimming; sidebar section add button looks disabled.

@@ -119,3 +119,7 @@ utc	stage	event	ref	note
 2026-10-15T07:25Z	5	pr-opened	#1028	feature-done
 2026-10-15T07:33Z	-	heartbeat	-	waiting on builders
 2026-10-15T07:51Z	-	heartbeat	-	waiting on builders
+2026-10-15T07:53Z	5	pr-merged	#1028	feature-done
+2026-10-15T07:53Z	5	ci-run	38698770785	red: testLayoutAtWidths (SuiteUI #1034); audit at/under baseline
+2026-10-15T07:53Z	5	stage-end	finish	Belt-Contact-Sheet posted on #777 (red noted)
+2026-10-15T07:53Z	5	stopped	#777	round budget spent; waits on #1034
