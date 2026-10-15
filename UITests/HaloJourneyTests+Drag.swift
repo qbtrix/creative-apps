@@ -8,11 +8,11 @@
 // Position Y` stays "Not animated". A drag in the surround changes nothing.
 // Positions come from the TRANSFORM rows (`halo.inspector.row.x`, `.y`,
 // sliders whose value is their position in px, 560, as H-J23 reads them),
-// never the viewer summary. The artboard
-// has no element of its own: it is found from `halo.viewer`'s frame the way
-// CanvasSurface lays it out (fit inside a SuiteSize.canvasInset of 64 pt,
-// at most one point per pixel, centered; testLayoutAtWidths checks that), and
-// every drag is aimed in points from the viewer's top left. XCUITest drags
+// never the viewer summary. The artboard is
+// `halo.viewer.canvas`'s frame (the drawn layers, laid out on the artboard
+// as the viewer's gestures are; run 38814195169 aimed from `halo.viewer`'s
+// clipped frame and pressed above Ball), and every drag is aimed in points
+// from the viewer's top left. XCUITest drags
 // can land a point off, so a check allows ±2 px or one point's worth of
 // pixels, whichever is more (the artboard is small at the runner's size).
 // Undo stays disabled until history-files lands, so the Edit menu's item
@@ -44,6 +44,8 @@ extension HaloJourneyTests {
         steps.drag(from: (ballX, ballY), by: (100, 0))
         let tolerance = steps.tolerance()
         let movedX = steps.pixels("x")
+        // Where the press landed against what the window held, when it missed.
+        if abs(movedX - 660) > tolerance { halo.attachTree(as: "drag-ball-tree") }
         XCTAssertEqual(movedX, 660, accuracy: tolerance, "Ball's Position X after a 100 px drag (±\(tolerance) px)")
         steps.expectKeyState("Position X", "Keyed at this frame")
         steps.expectEditItem("Undo Move")
@@ -76,22 +78,24 @@ extension HaloJourneyTests {
 @MainActor private struct ViewerDragSteps {
     let halo: Journey
 
-    /// The fixture's composition size in pixels.
-    private static let composition = CGSize(width: 1920, height: 1080)
+    /// The fixture's composition width in pixels.
+    private static let compositionWidth: CGFloat = 1920
     /// SuiteSize.canvasInset: the surround CanvasSurface keeps on every side.
     private static let inset: CGFloat = 64
 
     private var viewer: XCUIElement { halo.element("halo.viewer") }
 
     /// Points per composition pixel, and the artboard's top left in points
-    /// from the viewer's top left (CanvasSurface's fit; scale 0 when the
-    /// viewer has no room).
+    /// from the viewer's top left, read from `halo.viewer.canvas`, the drawn
+    /// layers laid out on the artboard (as the viewer's gestures are). The
+    /// viewer's own frame can't stand in: XCUITest reads it clipped to the
+    /// content column, which isn't the region the artboard centers in.
+    /// Scale 0 with no canvas.
     private func fit() -> (scale: CGFloat, origin: CGPoint) {
-        let (frame, composition, inset) = (viewer.frame, Self.composition, Self.inset)
-        let room = CGSize(width: max(frame.width - inset * 2, 0), height: max(frame.height - inset * 2, 0))
-        let scale = min(room.width / composition.width, room.height / composition.height, 1)
-        let size = CGSize(width: composition.width * scale, height: composition.height * scale)
-        return (scale, CGPoint(x: (frame.width - size.width) / 2, y: (frame.height - size.height) / 2))
+        let canvas = halo.element("halo.viewer.canvas")
+        guard canvas.waitForExistence(timeout: 5) else { return (0, .zero) }
+        let (board, frame) = (canvas.frame, viewer.frame)
+        return (board.width / Self.compositionWidth, CGPoint(x: board.minX - frame.minX, y: board.minY - frame.minY))
     }
 
     /// The pixel slack a check allows: 2 px, or one point's worth when that is more.
