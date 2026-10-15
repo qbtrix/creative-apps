@@ -6,6 +6,9 @@
 // in the lane under the ruler.
 // The strip's track buttons come from SuiteUI with no identifier of their
 // own, so the strip passes `halo.timeline.track` down to each of them (#290).
+// A lane speaks its key count as its value, which XCUITest reads empty
+// (#262), so each row's `keysReadout` ("Ball: 3 keyframes") is also the label
+// of a hidden `halo.timeline.keys` element (HaloReadout.swift).
 // The strip sits in the column's safe area. HaloTimelineLayout fits its lanes
 // to the width the strip is laid out at, measured with onGeometryChange (the
 // GeometryReader's width only until then, and in snapshots), less the name
@@ -88,6 +91,9 @@ struct HaloTimelineView: View {
                     .onGeometryChange(for: Double.self) { Double($0.size.width) } action: { stripWidth = $0 }
             }
             .frame(height: height)
+            .background(alignment: .topLeading) {
+                ForEach(rows) { HaloReadoutElement(identifier: "halo.timeline.keys", text: $0.keysReadout) }
+            }
             if rows.isEmpty {
                 Label("No layers yet. Add one from Layer > New.", systemImage: "square.stack.3d.up")
                     .font(SuiteFont.caption)

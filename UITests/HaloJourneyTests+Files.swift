@@ -178,13 +178,12 @@ final class HaloFilesJourneyTests: XCTestCase {
         XCTAssert(waitFor { found() == count }, "the layer list has \(found()) rows, not \(count)")
     }
 
-    /// `layer`'s timeline lane reads "`keys` keyframes": the value of the
-    /// `halo.timeline.track` labelled `layer`, as H-J6's expectLane reads it.
+    /// `layer`'s timeline lane reads "`keys` keyframes": its
+    /// `halo.timeline.keys` readout (the lane's value reads empty, #262), as
+    /// H-J6's expectLane reads it.
     @MainActor private func expectLane(_ layer: String, keys: Int, _ halo: Journey) {
         let expected = "\(keys) keyframes"
-        let tracks = halo.app.descendants(matching: .any).matching(
-            NSPredicate(format: "identifier == 'halo.timeline.track' AND label == %@", layer))
-        func values() -> [String] { tracks.allElementsBoundByIndex.compactMap { $0.value as? String } }
+        func values() -> [String] { halo.laneKeys(layer) }
         XCTAssert(waitFor { values().contains(expected) }, "\(layer)'s lane reads \(values()), not \(expected)")
     }
 

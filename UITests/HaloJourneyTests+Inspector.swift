@@ -13,7 +13,8 @@
 // the stopwatch's value is the key state. The Rotation bar is
 // `halo.inspector.row.rotation`, a slider whose value is the row's text
 // ("12°") or its position, both in degrees. A lane is the timeline element
-// labelled with the layer's name whose value counts its keys. Undo stays
+// labelled with the layer's name; its key count is read from its
+// `halo.timeline.keys` readout (HaloJourneyTests+Readouts.swift). Undo stays
 // history-files': Edit's "Undo Add Key" item is only looked up, never
 // pressed. One shot per step, `halo-inspector-<step>`. The name sorts
 // before testScrubTheTimeline, which must stay the class's last test.
@@ -117,12 +118,11 @@ extension HaloJourneyTests {
             NSPredicate(format: "identifier == 'halo.inspector.header' AND label CONTAINS %@", text)).firstMatch
     }
 
-    /// `layer`'s lane in the timeline reads "`keys` keyframes" within three seconds.
+    /// `layer`'s lane in the timeline reads "`keys` keyframes" within three
+    /// seconds: its `halo.timeline.keys` readout (the lane's value reads empty, #262).
     @MainActor private func expectLane(_ layer: String, keys: Int, _ halo: Journey) {
         let expected = "\(keys) keyframes"
-        let tracks = halo.app.descendants(matching: .any).matching(
-            NSPredicate(format: "identifier == 'halo.timeline.track' AND label == %@", layer))
-        func values() -> [String] { tracks.allElementsBoundByIndex.compactMap { $0.value as? String } }
+        func values() -> [String] { halo.laneKeys(layer) }
         XCTAssert(waitUntil { values().contains(expected) }, "\(layer)'s lane reads \(values()), not \(expected)")
     }
 
