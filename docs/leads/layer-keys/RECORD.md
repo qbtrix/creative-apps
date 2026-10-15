@@ -3,8 +3,8 @@
 Issue: #1036 · Packet: docs/blueprints/halo/features/layer-keys.md
 Run: act-1a13eb691a3-wg4n · Session: e0e565d9-6109-5c52-89fd-c254398040f9 · Started: 2026-10-15T08:39Z
 Stage: 4 round 1
-Base: 9af4454347be12947f59fd882c706d833ae6a245
-Next: run 38734211999 on 35a875b carries the playback test fix (#1136) and every layer-keys PR; when it finishes, read failures in our files, download ui-screens + snapshots, run the critic panel.
+Base: 35a875b
+Next: round 1: a fixer root-causes HaloViewerFidelityTests.keyedFrame6 (branch layer-keys/r1-fidelity); the critic panel wf_5fe6ad8b-ef3 reviews the snapshots (no ui-screens: journeys did not run). Then a fix batch.
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -30,7 +30,7 @@ Waves as in the packet. Independent per wave: W1 LK-1; W2 LK-2a; W3 LK-2b; W4 LK
 ## Rounds
 | round | CI run | CI | audit vs baseline | lenses | confirmed | fixed by | clean |
 |---|---|---|---|---|---|---|---|
-| 1 | 38732179619 (9af4454) | red: not ours (AppSnapshotTests: HaloPlaybackDriverTests.swift:18 circular reference, viewer-playback #1097; on #763). HaloApp with all keys views compiled (Build complete) | – (journeys did not run) | – | – | – | pending |
+| 1 | 38734211999 (35a875b) | red: swift test fails only HaloViewerFidelityTests.keyedFrame6 (keyed frame 6, 40000 px differ; HF-1 from #1125); journeys did not run. All our snapshots rendered. (Earlier 38732179619: playback test compile, fixed by #1136) | – (no ui-screens) | clarity, journey, design, layout, controls | pending | – | no |
 
 ## Decisions
 - Depends on #777 and #333: both closed, so the lead runs.
