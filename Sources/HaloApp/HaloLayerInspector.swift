@@ -13,6 +13,7 @@ struct HaloLayerInspector: View {
         if let header = model.selectedLayerHeader {
             VStack(alignment: .leading, spacing: 0) {
                 InspectorHeader(header.name, details: [header.kind, header.frames, header.parent.map { "Parent: \($0)" } ?? ""])
+                    .accessibilityIdentifier("halo.inspector.header")
                 Text("Properties arrive with the layer inspector (#38).")
                     .font(SuiteFont.caption)
                     .foregroundStyle(SuiteColor.textSecondary)

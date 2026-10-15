@@ -7,6 +7,10 @@
 // under a Layers section. All text comes from HaloModel; views only read it.
 // The read-only values carry `halo.inspector.composition.*` identifiers so a
 // journey reads them; they aren't controls, so they stay out of halo.controls.
+// The header is `halo.inspector.header` (here and in HaloLayerInspector), one
+// element reading "name, size, rate · length". The inspector as a whole is
+// SuiteWindow's `suite.inspector`: an id on this root merged into that
+// element and was overwritten, so a journey never found `halo.inspector`.
 import HaloModel
 import SuiteUI
 import SwiftUI
@@ -21,6 +25,7 @@ struct HaloCompositionInspector: View {
                 HaloLayerInspector(model: model, perform: perform)
             } else if let comp = model.selectedComposition {
                 InspectorHeader(comp.name, details: comp.headerDetails)
+                    .accessibilityIdentifier("halo.inspector.header")
                 InspectorSection("Composition") {
                     InspectorRow("Size") {
                         Text(comp.sizeText).font(SuiteFont.inspectorValue)
@@ -40,7 +45,5 @@ struct HaloCompositionInspector: View {
                 HaloLayerList(model: model, perform: perform)
             }
         }
-        .accessibilityElement(children: .contain)
-        .accessibilityIdentifier("halo.inspector")
     }
 }

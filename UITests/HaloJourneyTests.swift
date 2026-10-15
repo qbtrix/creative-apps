@@ -16,14 +16,18 @@
 // selected (blueprint 7.3): L1 is the audit on each `halo-layout-<w>` shot, L2
 // finds the artboard in the viewer's pixels (white on the surround) and checks
 // it is centered within 1 pt with its 16:9 aspect within 0.5%, L6 that it is
-// at least 160 pt wide at the minimum size. Run order is by name, so
+// at least 160 pt wide at the minimum size; it also checks every halo.*
+// control lies inside the window and the viewer is narrower at 880 than at
+// 1024 (the content column follows the window). Every other journey launches
+// pinned at the runner's launch size (`launch`), so a sized launch never
+// carries over. Run order is by name, so
 // testScrubTheTimeline runs last and attaches the audit counts.
 import AppKit
 import XCTest
 
 final class HaloJourneyTests: XCTestCase {
     @MainActor func testLaunchShowsWindowShell() {
-        let halo = Journey("Halo", self)
+        let halo = launch()
         halo.expectWindowShell()
         XCTAssert(Self.contains("No Composition", in: halo.app.splitGroups.firstMatch).exists, "the viewer doesn't say No Composition")
         XCTAssert(halo.element("halo.viewer.newComposition").exists, "the empty viewer offers no New Composition…")
@@ -31,7 +35,7 @@ final class HaloJourneyTests: XCTestCase {
     }
 
     @MainActor func testNewComposition() {
-        let halo = Journey("Halo", self)
+        let halo = launch()
         halo.click("New Composition…", step: "new-composition-sheet")
         let sheet = halo.app.sheets.firstMatch
         enter("abc", into: "Width", in: sheet)
@@ -48,16 +52,19 @@ final class HaloJourneyTests: XCTestCase {
         halo.app.menuItems["24 fps"].click()
         halo.shot("new-composition-filled")
         halo.click("Create", in: .sheet, step: "new-composition")
-        let inspector = halo.element("halo.inspector")
-        XCTAssert(inspector.waitForExistence(timeout: 5), "no composition inspector after Create")
-        XCTAssert(inspector.staticTexts["Frame Rate"].exists, "the inspector has no Frame Rate row")
-        XCTAssert(Self.contains("1080 × 1920", in: inspector).exists, "the inspector header doesn't read 1080 × 1920")
-        XCTAssert(Self.contains("24 fps · 10 s", in: inspector).exists, "the inspector header doesn't read 24 fps · 10 s")
+        // The header is one element reading "Comp 1, 1080 × 1920, 24 fps · 10 s".
+        let header = halo.element("halo.inspector.header")
+        XCTAssert(header.waitForExistence(timeout: 5), "no composition inspector header after Create")
+        XCTAssert(header.label.contains("1080 × 1920"), "the inspector header doesn't read 1080 × 1920: \(header.label)")
+        XCTAssert(header.label.contains("24 fps · 10 s"), "the inspector header doesn't read 24 fps · 10 s: \(header.label)")
+        let inspector = halo.element("suite.inspector")
+        XCTAssert(Self.contains("Frame Rate", in: inspector).exists, "the inspector has no Frame Rate row")
+        XCTAssert(halo.element("halo.inspector.composition.size").exists, "the inspector has no Size value")
         XCTAssert(Self.contains("Comp 1", in: halo.element("suite.sidebar")).exists, "the sidebar has no Comp 1 row")
     }
 
     @MainActor func testScrubTheTimeline() {
-        let halo = Journey("Halo", self)
+        let halo = launch()
         halo.click("New Composition…")
         halo.click("Create", in: .sheet, step: "timeline")
         // The ruler is the timeline's top 24 pt, so the drag stays near its top.
@@ -74,7 +81,7 @@ final class HaloJourneyTests: XCTestCase {
     }
 
     @MainActor func testEveryMenuOpens() {
-        let halo = Journey("Halo", self)
+        let halo = launch()
         halo.click("New Composition…")
         halo.click("Create", in: .sheet)
         halo.openEachMenu()
@@ -96,7 +103,7 @@ final class HaloJourneyTests: XCTestCase {
 
     /// H-J13 (QB-F1): every enabled control acts, every disabled one says why.
     @MainActor func testEveryControlActsOrSaysWhy() {
-        let halo = Journey("Halo", self, arguments: ["-HaloFixture", "keyed", "-HaloControlsProbe", "-SuitePerfProbe"])
+        let halo = launch(["-HaloFixture", "keyed", "-HaloControlsProbe", "-SuitePerfProbe"])
         XCTAssert(halo.app.windows.firstMatch.waitForExistence(timeout: 30), "no window opened")
         halo.shot("controls")
         let listed = Self.decode(halo.element("halo.controls"))
@@ -136,6 +143,7 @@ final class HaloJourneyTests: XCTestCase {
         let sizes = [CGSize(width: 880, height: 560), CGSize(width: 1024, height: 768), CGSize(width: 1280, height: 800),
                      CGSize(width: 1440, height: 900), CGSize(width: 1920, height: 1080)]
         let screen = NSScreen.screens.first?.frame.size ?? .zero
+        var viewerWidths: [Int: CGFloat] = [:]
         for size in sizes {
             let width = Int(size.width)
             let halo = Journey("Halo", self, arguments: ["-HaloFixture", "keyed", "-HaloWindowSize", "\(width)x\(Int(size.height))"])
@@ -144,10 +152,17 @@ final class HaloJourneyTests: XCTestCase {
             if size.width <= screen.width {
                 XCTAssertEqual(window.frame.width, size.width, accuracy: 2, "-HaloWindowSize \(width) wasn't the window's width")
             }
-            halo.click("Ball")
-            XCTAssert(Self.contains("Frames 0–47", in: halo.element("halo.inspector")).waitForExistence(timeout: 5),
-                "no layer selected at \(width)")
+            let row = halo.element("halo.layer.row.comp-1-layer-2")
+            XCTAssert(row.waitForExistence(timeout: 5), "no Ball row in the inspector's layers at \(width)")
+            row.click()
+            let ball = halo.app.descendants(matching: .any).matching(
+                NSPredicate(format: "identifier == 'halo.inspector.header' AND label CONTAINS %@", "Frames 0–47")).firstMatch
+            XCTAssert(ball.waitForExistence(timeout: 5), "clicking the Ball row selected no layer at \(width)")
             halo.shot("layout-\(width)")
+            let outside = haloControls(in: halo).filter { !window.frame.contains($0.frame) }
+            XCTAssert(outside.isEmpty, "halo controls outside the \(width) window \(window.frame): "
+                + outside.map { "\($0.identifier) \($0.frame)" }.joined(separator: ", "))
+            viewerWidths[width] = halo.element("halo.viewer").frame.width
             let timeline = halo.element("halo.timeline").frame
             XCTAssertLessThanOrEqual(timeline.maxY, window.frame.maxY, "the timeline runs off the window at \(width)")
             guard let artboard = artboardFrame(in: halo.element("halo.viewer")) else {
@@ -163,6 +178,9 @@ final class HaloJourneyTests: XCTestCase {
                 XCTAssertGreaterThanOrEqual(artboard.width, 160, "L6: the artboard is under 160 pt wide at the minimum")
             }
         }
+        // The content follows the window: nothing in it holds the column at a fixed width.
+        let (narrow, wide) = (viewerWidths[880] ?? 0, viewerWidths[1024] ?? 0)
+        XCTAssertLessThan(narrow, wide, "the viewer is \(narrow) pt at 880 and \(wide) pt at 1024: the content column is rigid")
     }
 
     @MainActor func testKeyLayerAndSave() throws {
@@ -215,6 +233,24 @@ final class HaloJourneyTests: XCTestCase {
     }
 
     // MARK: - Helpers
+
+    /// SuiteSize.windowLaunch, the size a plain launch opens at on the runner.
+    private static let runnerSize = "1000x640"
+
+    /// Launches Halo with `arguments` at the runner's launch size, pinned with
+    /// `-HaloWindowSize`, so no earlier sized launch can change this one's window.
+    @MainActor private func launch(_ arguments: [String] = []) -> Journey {
+        Journey("Halo", self, arguments: arguments + ["-HaloWindowSize", Self.runnerSize])
+    }
+
+    /// The window's `halo.*` controls (onScreenControlIDs' types), timeline tracks included.
+    @MainActor private func haloControls(in halo: Journey) -> [XCUIElement] {
+        let types: [XCUIElement.ElementType] = [.button, .popUpButton, .textField, .checkBox, .slider, .cell]
+        return types.flatMap { type in
+            halo.app.windows.firstMatch.descendants(matching: type)
+                .matching(NSPredicate(format: "identifier BEGINSWITH 'halo.'")).allElementsBoundByIndex
+        }
+    }
 
     /// Clicks the sheet's field labelled `label`, selects its text and types `text`.
     @MainActor private func enter(_ text: String, into label: String, in sheet: XCUIElement) {
