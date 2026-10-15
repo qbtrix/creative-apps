@@ -4,7 +4,7 @@ Issue: #1073 · Packet: docs/blueprints/photo/features/photo-journey-kit.md
 Run: act-1a1406baff9-fu36 · Session: cloud lead session · Started: 2026-10-15T16:36Z
 Stage: 4 round 3 (round 4 next, last in budget)
 Base: 9f28a9f7dcb6e9d584a7c80847e8ef0108fa5e17
-Next: round 4 = the next dev CI run containing cdcfb62 (#1243); if its macOS job is green, that is the done check: post Belt-Contact-Sheet on #1073. If red only outside this feature, stop after round 4 per budget and say so on #1073.
+Next: round 4 = run 38808325928 (75492b1, contains cdcfb62) (#1243); if its macOS job is green, that is the done check: post Belt-Contact-Sheet on #1073. If red only outside this feature, stop after round 4 per budget and say so on #1073.
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
