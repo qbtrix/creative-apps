@@ -2,7 +2,9 @@
 // `viewerNotice` captioned under it while layers can't be drawn, a status bar
 // with HaloTransport, HaloTimelineView and a refusal's caption, or the empty
 // state. The status bar's tooltips (HaloStatusText) say what the timecode's
-// four parts count and that the pills are zoom and pixel size. Space, ←, →,
+// four parts count and that the pills are zoom and pixel size. A narrow
+// column drops the layer count, then the transport, then the timecode, so the
+// content adds no width to SuiteWindow's minimum. Space, ←, →,
 // Home, End, I, O and ⌫ become HaloCommands sent to `perform`. Views only read HaloProject; state lives in HaloModel.
 import HaloModel
 import SuiteUI
@@ -31,15 +33,15 @@ struct HaloViewer: View {
                         .background(SuiteColor.panel)
                         .accessibilityIdentifier("halo.viewer.notice")
                 }
-                ViewerStatusBar(zoom: ViewerZoom.fitScale(artboard: artboard, in: viewport), size: comp.sizeText) {
-                    Text(comp.statusTimecode).help(comp.statusTimecodeHelp)
-                    Text(comp.layerSummary).help("Layers in this composition.")
-                    HaloTransport(model: model, perform: perform)
+                // The widest bar that fits, so the status bar never holds the
+                // content column wider than SuiteWindow's minimum: the layer
+                // count goes first, then the transport, then the timecode.
+                ViewThatFits(in: .horizontal) {
+                    statusBar(comp, artboard: artboard, timecode: true, layers: true, transport: true)
+                    statusBar(comp, artboard: artboard, timecode: true, layers: false, transport: true)
+                    statusBar(comp, artboard: artboard, timecode: true, layers: false, transport: false)
+                    statusBar(comp, artboard: artboard, timecode: false, layers: false, transport: false)
                 }
-                // ViewerStatusBar's zoom and size pills take no help of their
-                // own; the bar's tooltip names them, and each trailing pill
-                // keeps its own.
-                .help(HaloComposition.viewerPillsHelp)
                 Divider()
                 HaloTimelineView(model: model, perform: perform)
                 if let refusal = model.refusal, !refusal.control.hasPrefix("halo.inspector") {
@@ -63,6 +65,20 @@ struct HaloViewer: View {
                     perform(.newComposition)
                 })
         }
+    }
+
+    /// The status bar with the trailing pills asked for. ViewerStatusBar's
+    /// zoom and size pills take no help of their own; the bar's tooltip names
+    /// them, and each trailing pill keeps its own.
+    private func statusBar(
+        _ comp: HaloComposition, artboard: CGSize, timecode: Bool, layers: Bool, transport: Bool
+    ) -> some View {
+        ViewerStatusBar(zoom: ViewerZoom.fitScale(artboard: artboard, in: viewport), size: comp.sizeText) {
+            if timecode { Text(comp.statusTimecode).help(comp.statusTimecodeHelp) }
+            if layers { Text(comp.layerSummary).help("Layers in this composition.") }
+            if transport { HaloTransport(model: model, perform: perform) }
+        }
+        .help(HaloComposition.viewerPillsHelp)
     }
 
     /// The command a viewer key sends; nil for any other key.
