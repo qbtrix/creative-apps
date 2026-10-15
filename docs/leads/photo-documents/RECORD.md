@@ -3,8 +3,8 @@
 Issue: #1074 · Packet: docs/blueprints/photo/features/photo-documents.md
 Run: act-1a1404bf04c-bp6m · Session: claude/photo-documents-lead-ezrcev · Started: 2026-10-15T10:40Z
 Stage: 4 round 1
-Base: 6018826c90376f7b4ea46336d85e8da510c90f4d
-Next: wait for fix D (recovery dir) and fix C (restore off main) to merge; round 2 on the CI run that contains them
+Base: b555f566067a4e692fe3416920af9a77f844a882
+Next: round 2 on the first CI run whose head contains b555f56 (fixes C, D); run 38799320916 on 3dc283e predates them
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
