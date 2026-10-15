@@ -10,3 +10,6 @@ utc	stage	event	ref	note
 2026-10-15T03:23Z	3	pr-opened	#948	S-2 contracts, 256 lines 4 files
 2026-10-15T03:23Z	3	stage-start	S-3	builder stacked on S-2
 2026-10-15T03:25Z	-	heartbeat	#812	waiting on builders or the lane
+2026-10-15T03:30Z	3	pr-merged	#948	S-2
+2026-10-15T03:30Z	3	pr-opened	#950	S-3 fakes, 367 lines 5 files
+2026-10-15T03:30Z	3	stage-start	S-4	builder stacked on S-3
