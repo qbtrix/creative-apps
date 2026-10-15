@@ -228,6 +228,9 @@ public struct FlareWorkspace: Sendable, Equatable {
             if let label { try next.group(label, body) } else { try body(&next) }
         } catch let error as CommandError {
             return refuse(.command(error))
+        } catch let error as NotBuilt {
+            // A service that is not built yet says why, as NotBuilt's contract asks (#800).
+            return refuse(.refused(error.reason))
         } catch {
             return refuse(.command(.invalidDocument("\(error)")))
         }
