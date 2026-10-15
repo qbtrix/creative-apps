@@ -20,36 +20,22 @@ struct LiveClipboard: PixelClipboard {
         let pixels = content.pixels
         let bounds = PixelRect(x: content.x, y: content.y, width: pixels.width, height: pixels.height)
         guard let region = (selection ?? bounds).intersection(bounds) else { return nil }
-        var buffer = try PixelBuffer(width: region.width, height: region.height)
-        // The region's pixels with any alpha, in region pixels.
-        var minX = region.width, minY = region.height, maxX = -1, maxY = -1
         let layerArea = region.offsetBy(-content.x, -content.y)
-        for index in pixels.tileIndices(in: layerArea) where pixels.tiles.indices.contains(index) {
-            let tileRect = pixels.tileRect(index)
-            guard let area = tileRect.intersection(layerArea) else { continue }
-            let tile = pixels.tiles[index]
-            for y in area.y..<area.maxY {
-                for x in area.x..<area.maxX {
-                    var pixel = try tile.pixel(x: x - tileRect.x, y: y - tileRect.y)
-                    if let mask {
-                        let c = (try? mask.coverage(x: x + content.x, y: y + content.y)) ?? 0
-                        pixel = RGBA(r: pixel.r * c, g: pixel.g * c, b: pixel.b * c, a: pixel.a * c)
-                    }
-                    guard pixel.a > 0 else { continue }
-                    let rx = x - layerArea.x, ry = y - layerArea.y
-                    try buffer.setPixel(x: rx, y: ry, pixel)
-                    minX = min(minX, rx); minY = min(minY, ry); maxX = max(maxX, rx); maxY = max(maxY, ry)
-                }
-            }
-        }
-        guard maxX >= minX, maxY >= minY else { return nil }
-        let kept = try buffer.cropped(x: minX, y: minY, width: maxX - minX + 1, height: maxY - minY + 1)
-        let bytes = try kept.rgba8()
+        // Each layer tile's part of the region, encoded across the cores.
+        let indices = pixels.tileIndices(in: layerArea).filter { pixels.tiles.indices.contains($0) }
+        let shift = (x: content.x, y: content.y)
+        let pieces = try PhotoLayerComposite.inParallel(indices.count) { job in
+            try Self.piece(of: pixels, tile: indices[job], in: layerArea, mask: mask, shift: shift)
+        }.compactMap { $0 }
+        // The pixels with any alpha, in layer pixels, as 8-bit bytes.
+        guard let kept = pieces.compactMap(\.kept).reduce(nil, { $0?.union($1) ?? $1 }) else { return nil }
+        var bytes = [UInt8](repeating: 0, count: kept.width * kept.height * 4)
+        for piece in pieces { Self.copyRows(of: piece, into: &bytes, at: kept) }
         // A faint pixel can round to alpha 0 in 8 bits: cut again on the bytes.
         guard let trim = Self.opaqueBounds(bytes, width: kept.width, height: kept.height) else { return nil }
         let image = DecodedImage(
             rgba8: Self.crop(bytes, width: kept.width, to: trim), width: trim.width, height: trim.height)
-        let source = trim.offsetBy(region.x + minX, region.y + minY)
+        let source = trim.offsetBy(kept.x + content.x, kept.y + content.y)
         return ClipboardImage(image: image, source: source)
     }
 
@@ -62,6 +48,53 @@ struct LiveClipboard: PixelClipboard {
         let x = max(Double(1 - w), min(Double(canvas.width - 1), (cx - Double(w) / 2).rounded(.down)))
         let y = max(Double(1 - h), min(Double(canvas.height - 1), (cy - Double(h) / 2).rounded(.down)))
         return PixelRect(x: Int(x), y: Int(y), width: w, height: h)
+    }
+
+    /// One layer tile's part of a copy: its pixels inside `layerArea`, each
+    /// weighted by `mask` (canvas pixels, layer pixel plus `shift`) when there
+    /// is one and cleared when that leaves no alpha, encoded as 8-bit bytes,
+    /// with the bounds of what has alpha.
+    struct Piece: Sendable {
+        let area: PixelRect, kept: PixelRect?, bytes: [UInt8]
+    }
+
+    static func piece(of pixels: TiledPixels, tile index: Int, in layerArea: PixelRect, mask: Mask?,
+                      shift: (x: Int, y: Int)) throws -> Piece? {
+        let rect = pixels.tileRect(index)
+        guard pixels.tiles.indices.contains(index), let area = rect.intersection(layerArea) else { return nil }
+        var piece = try pixels.tiles[index].cropped(
+            x: area.x - rect.x, y: area.y - rect.y, width: area.width, height: area.height)
+        var minX = area.maxX, minY = area.maxY, maxX = -1, maxY = -1
+        for y in area.y..<area.maxY {
+            for x in area.x..<area.maxX {
+                var pixel = try piece.pixel(x: x - area.x, y: y - area.y)
+                if let mask {
+                    let c = (try? mask.coverage(x: x + shift.x, y: y + shift.y)) ?? 0
+                    pixel = RGBA(r: pixel.r * c, g: pixel.g * c, b: pixel.b * c, a: pixel.a * c)
+                    if pixel.a > 0 { try piece.setPixel(x: x - area.x, y: y - area.y, pixel) }
+                }
+                guard pixel.a > 0 else {
+                    if pixel != .clear { try piece.setPixel(x: x - area.x, y: y - area.y, .clear) }
+                    continue
+                }
+                minX = min(minX, x); minY = min(minY, y); maxX = max(maxX, x); maxY = max(maxY, y)
+            }
+        }
+        let kept = maxX >= minX && maxY >= minY
+            ? PixelRect(x: minX, y: minY, width: maxX - minX + 1, height: maxY - minY + 1) : nil
+        return Piece(area: area, kept: kept, bytes: try piece.rgba8())
+    }
+
+    /// `piece`'s bytes inside `rect` written into `bytes`, which hold `rect`.
+    static func copyRows(of piece: Piece, into bytes: inout [UInt8], at rect: PixelRect) {
+        guard let overlap = piece.area.intersection(rect) else { return }
+        let count = overlap.width * 4
+        for y in overlap.y..<overlap.maxY {
+            let from = ((y - piece.area.y) * piece.area.width + overlap.x - piece.area.x) * 4
+            let to = ((y - rect.y) * rect.width + overlap.x - rect.x) * 4
+            guard from >= 0, from + count <= piece.bytes.count, to >= 0, to + count <= bytes.count else { continue }
+            bytes.replaceSubrange(to..<(to + count), with: piece.bytes[from..<(from + count)])
+        }
     }
 
     /// The bounds of the bytes' pixels with alpha above 0, or nil when none.

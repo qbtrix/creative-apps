@@ -2,7 +2,8 @@
 // each layer through PhotoLayerComposite, the renderer's per-layer step, with
 // the live adjustment-layer and mask services (photo-edit review note 2), so
 // they pick up adjustment layers and masks wherever the render does, and the
-// picture after a merge is the render's own arithmetic. Linux-safe.
+// picture after a merge is the render's own arithmetic. The picture stays in
+// tiles throughout, composited across the cores. Linux-safe.
 import CoreRaster
 
 /// Merge Down: `lower`'s pixels placed in the union of both layers' bounds,
@@ -34,27 +35,31 @@ struct LiveMerging: LayerMerging {
         var plain = PhotoLayer(id: lower.layer.id, name: lower.layer.name)
         plain.offsetX = lower.layer.offsetX
         plain.offsetY = lower.layer.offsetY
-        var buffer = try Self.composite(
-            LayerContent(layer: plain, pixels: lowerPixels), onto: PixelBuffer(width: bounds.width, height: bounds.height),
+        var merged = try Self.composite(
+            LayerContent(layer: plain, pixels: lowerPixels), onto: TiledPixels(width: bounds.width, height: bounds.height),
             origin: (bounds.x, bounds.y))
         if upper.layer.isVisible && upper.layer.opacity > 0 {
-            buffer = try Self.composite(upper, onto: buffer, origin: (bounds.x, bounds.y))
+            merged = try Self.composite(upper, onto: merged, origin: (bounds.x, bounds.y))
         }
-        return PlacedPixels(pixels: TiledPixels(buffer), x: bounds.x, y: bounds.y)
+        return PlacedPixels(pixels: merged, x: bounds.x, y: bounds.y)
     }
 
     func flatten(_ layers: [LayerContent], canvas: CanvasSize, adjustments: AdjustmentSettings) throws -> TiledPixels {
-        var picture = try PixelBuffer(width: canvas.width, height: canvas.height)
+        var picture = try TiledPixels(width: canvas.width, height: canvas.height)
         for content in layers.reversed() where content.layer.isVisible && content.layer.opacity > 0 {
             picture = try Self.composite(content, onto: picture, origin: (0, 0))
         }
-        return TiledPixels(try adjustments.applied(to: picture))
+        guard adjustments.blurMargin == 0 else { return TiledPixels(try adjustments.applied(to: picture.flattened())) }
+        // Every adjustment but the blur is per pixel, so it runs tile by tile.
+        let tiles = picture.tiles
+        picture.tiles = try PhotoLayerComposite.inParallel(tiles.count) { try adjustments.applied(to: tiles[$0]) }
+        return picture
     }
 
     /// `content` through the renderer's per-layer step with the live services.
     private static func composite(
-        _ content: LayerContent, onto below: PixelBuffer, origin: (x: Int, y: Int)
-    ) throws -> PixelBuffer {
+        _ content: LayerContent, onto below: TiledPixels, origin: (x: Int, y: Int)
+    ) throws -> TiledPixels {
         try PhotoLayerComposite.composite(
             content, onto: below, origin: origin,
             adjusting: LiveAdjustmentLayers.make(), masking: LiveSelection.masking())
