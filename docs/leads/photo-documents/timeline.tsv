@@ -46,3 +46,4 @@ utc	stage	event	ref	note
 2026-10-15T19:38Z	3	stage-start	wave 8	D-11, D-12 on 6018826
 2026-10-15T19:40Z	3	heartbeat	-	waiting
 2026-10-15T19:49Z	3	pr-opened	#1233	perf: save/open within PB-18/19
+2026-10-15T19:57Z	3	pr-opened	#1234	D-12 journeys PJ-3, PJ-P3

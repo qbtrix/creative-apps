@@ -21,7 +21,7 @@ Next: wait for D-11, D-12 and the perf fix; read the macOS CI run containing #12
 | D-9 | 6 | PhotoAutosave + wiring | A/PhotoAutosave.swift, A/PhotoWindow+File.swift, ST/PhotoAutosaveTests.swift | PhotoAutosaveTests | #1230 | merged |
 | D-10 | 7 | App delegate: Open Recent/Finder opens, unsaved prompt on close/quit | A/PhotoApp.swift, A/PhotoWindow+File.swift, ST/PhotoUnsavedPromptTests.swift | PhotoUnsavedPromptTests | #1232 | merged |
 | D-11 | 8 | Journeys PJ-1, PJ-1b, PJ-2, PJ-4 | UT/PhotoJourneyTests+Documents.swift | macOS run | – | building |
-| D-12 | 8 | Journeys PJ-3, PJ-P3  | UT/PhotoJourneyTests+Recovery.swift, UT/PhotoJourneyTests+PerfDocuments.swift | macOS run | – | building |
+| D-12 | 8 | Journeys PJ-3, PJ-P3  | UT/PhotoJourneyTests+Recovery.swift, UT/PhotoJourneyTests+PerfDocuments.swift | macOS run | #1234 | open |
 
 Waves (packet's Build waves, checked against dev at 00e546a):
 - Wave 1: D-1, D-3 — independent of each other.
@@ -67,3 +67,4 @@ Waves (packet's Build waves, checked against dev at 00e546a):
 - Fix-batch item: Open Recent with no window shows an empty submenu (menu reads the focused window's list); fall back to the saved PhotoRecentFiles list and route through D-10's open queue.
 - feature-done goes on a separate final PR (wave.json status built) after the Anatomy loop, not on D-12; D-11/D-12 are plain journey PRs.
 - Perf fix #1233 (f160f36): release save 13.8 s -> 1.6 s, open 4.2 s -> 0.6 s, autosave 16 s -> 3.3 s (alone, quiet). PB-20 still over: disk write of the ~190 MB raw-codec test file + LiveMerging.flatten ~0.5 s. Candidate gap issue if not closed by round 4.
+- Fix-batch item (audit): Keep layers? buttons (Save as Photo Document / Flatten into PNG / Cancel) and the top bar's document menu have no accessibility identifiers; add photo.file.keep-layers.* ids.
