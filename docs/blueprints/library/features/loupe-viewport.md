@@ -184,23 +184,38 @@ Every task is one PR to `dev`: at most 400 changed lines and 15 files, label
 `Fast-Check: pass`, `Head:`. The last task to merge carries `feature-done`
 (LV-10, or LV-11 when it runs).
 
-| id | issue | what | owned files | depends on |
-|---|---|---|---|---|
-| LV-1 | #724 (part) | Zoom: fit, actual, steps, titles | `Sources/LibraryModel/LoupeZoom.swift`, `Tests/LibraryModelTests/LibraryLoupeZoomTests.swift` | spine |
-| LV-2 | – | The loupe's picture state: focus change, requests, latest wins, failures, neighbours | `Sources/LibraryModel/LibraryLoupeImage.swift`, `Tests/LibraryModelTests/LibraryLoupeImageTests.swift` | spine |
-| LV-3 | – | `RenderQueue`: one running, the latest waiting | `Sources/LibraryModel/RenderQueue.swift`, `Tests/LibraryModelTests/LibraryRenderQueueTests.swift` | spine |
-| LV-4 | – | Home and End; the readout with the photo's name | `Sources/LibraryModel/LoupeState.swift`, `Tests/LibraryModelTests/LibraryLoupeTests.swift` | spine |
-| LV-5 | – | `LiveLoupeImaging`: decode, develop, histogram, three-photo cache, prefetch; `unavailable = nil` | `Sources/LibraryModel/Live/LiveLoupeImaging.swift`, `Tests/LibraryModelTests/LibraryLiveLoupeTests.swift` | spine |
-| LV-6 | – | The loupe model budgets | `Tests/LibraryModelTests/LibraryLoupeBudgetTests.swift` | LV-2, LV-4 |
-| LV-7 | #724 (part) | The loupe on `CanvasViewport` at the photo's real size; picture, placeholder, error help; remove `loupeArtboard`; snapshots | `Sources/LibraryApp/LibraryLoupe.swift`, `Sources/LibraryModel/LoupeState.swift`, `Tests/LibraryModelTests/LibraryLoupeTests.swift`, `Tests/AppSnapshotTests/LibraryLoupeSnapshots.swift` | LV-1, LV-2, LV-4 |
-| LV-8 | #724 (part or closes) | The loupe area: the View menu, renders through the queue, prefetch, Home and End | `Sources/LibraryApp/LibraryWindow+Loupe.swift` | LV-3, LV-5, LV-7 |
-| LV-9 | – | J3 (F) steps | `UITests/LibraryJourneyTests+Loupe.swift` | LV-8, #333; thumbnails TH-6 for step 1's slow `preview` sub-step (the preview is the held grid thumbnail) |
-| LV-10 | – | J3 (L) step 1 on written files | `UITests/LibraryJourneyTests+Loupe.swift` | LV-9, import IM-6 |
-| LV-11 | – | P4 `testLoupeStepLatency` with `XCTMemoryMetric` (perf, report-only) | `UITests/LibraryJourneyTests+PerfLoupe.swift` | LV-9, #330, #782 |
+| id | issue | what | owned files | depends on | size |
+|---|---|---|---|---|---|
+| LV-1 | #724 (part) | Zoom: fit, actual, steps, titles | `Sources/LibraryModel/LoupeZoom.swift`, `Tests/LibraryModelTests/LibraryLoupeZoomTests.swift` | spine | ~200, 2 |
+| LV-2 | – | The loupe's picture state: focus change, requests, latest wins, failures, neighbours | `Sources/LibraryModel/LibraryLoupeImage.swift`, `Tests/LibraryModelTests/LibraryLoupeImageTests.swift` | spine | ~260, 2 |
+| LV-3 | – | `RenderQueue`: one running, the latest waiting | `Sources/LibraryModel/RenderQueue.swift`, `Tests/LibraryModelTests/LibraryRenderQueueTests.swift` | spine | ~140, 2 |
+| LV-4 | – | Home and End; the readout with the photo's name | `Sources/LibraryModel/LoupeState.swift`, `Tests/LibraryModelTests/LibraryLoupeTests.swift` | spine | ~120, 2 |
+| LV-5 | – | `LiveLoupeImaging`: decode, develop, histogram, three-photo cache, prefetch; `unavailable = nil` | `Sources/LibraryModel/Live/LiveLoupeImaging.swift`, `Tests/LibraryModelTests/LibraryLiveLoupeTests.swift` | spine | ~300, 2 |
+| LV-6 | – | The loupe model budgets | `Tests/LibraryModelTests/LibraryLoupeBudgetTests.swift` | LV-2 | ~100, 1 |
+| LV-7 | #724 (part) | The loupe on `CanvasViewport` at the photo's real size; picture, placeholder, error help; remove `loupeArtboard`; snapshots | `Sources/LibraryApp/LibraryLoupe.swift`, `Sources/LibraryModel/LoupeState.swift`, `Tests/LibraryModelTests/LibraryLoupeTests.swift`, `Tests/AppSnapshotTests/LibraryLoupeSnapshots.swift` | LV-1, LV-2, LV-4 | ~280, 4 |
+| LV-8 | #724 (part or closes) | The loupe area: the View menu, renders through the queue, prefetch, Home and End | `Sources/LibraryApp/LibraryWindow+Loupe.swift` | LV-1, LV-2, LV-3, LV-4, LV-7 | ~220, 1 |
+| LV-9 | – | J3 (F) steps | `UITests/LibraryJourneyTests+Loupe.swift` | LV-8, #333; thumbnails TH-6 for step 1's slow `preview` sub-step (the preview is the held grid thumbnail) | ~180, 1 |
+| LV-10 | – | J3 (L) step 1 on written files | `UITests/LibraryJourneyTests+Loupe.swift` | LV-5, LV-9, import IM-6 | ~80, 1 |
+| LV-11 | – | P4 `testLoupeStepLatency` with `XCTMemoryMetric` (perf, report-only) | `UITests/LibraryJourneyTests+PerfLoupe.swift` | LV-5, LV-8, import IM-6, #330, #333, #782 | ~160, 1 |
 
 `LibraryLiveLoupeTests.swift` is a new test file (not in `waves.json`); no
 other feature names it. LV-4 and LV-7 share `LoupeState.swift` and
 `LibraryLoupeTests.swift`, stacked. LV-1 to LV-5 start side by side.
+The fake-mode tasks (LV-6 to LV-9) need only the spine's `LoupeImaging`
+stub and its no-op `prefetch`; the live ones (LV-10, LV-11) need LV-5's
+decoder and import's IM-6. No task edits a shared doc (`docs/c4/model.json`,
+`docs/design.md`, a blueprint or a `waves.md`), so there is no docs task.
+
+## Build waves
+
+- Wave 1: LV-1, LV-2, LV-3, LV-4, LV-5. Independent in this wave: all five.
+- Wave 2: LV-6, LV-7. Independent in this wave: both.
+- Wave 3: LV-8. Independent in this wave: LV-8 alone.
+- Wave 4: LV-9, LV-11 (both wait on #333; LV-11 also on #330 and #782). Independent in this wave: both.
+- Wave 5: LV-10 (after import's IM-6). Independent in this wave: LV-10 alone.
+
+Longest chain: LV-4 → LV-7 → LV-8 → LV-9 → LV-10 (5).
+Chain of 5: LV-7 reads LV-4's `loupeReadout` and edits its `LoupeState.swift`; LV-8 fills the `fitMeasured` and `zoomTo` that LV-7's `LibraryLoupe` calls, and J3 steps 2–5 need that canvas; LV-9's J3 drives LV-8's View menu; LV-10 adds the (L) step to LV-9's J3 in `UITests/LibraryJourneyTests+Loupe.swift`.
 
 ## Acceptance test per task
 

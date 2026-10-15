@@ -190,7 +190,7 @@ CatalogStore(dir) (PE-4, macOS):  dir = -LibraryCatalogDir ?? Application Suppor
 Every task is one PR to `dev`: at most 400 changed lines and 15 files, label
 `fast-lane`, body lines `Belt-Lead:`, `Feature: persist`, `Fast-Check:
 pass`, `Head:`. The last task to merge carries `feature-done` (PE-6, or PE-7
-when it runs).
+when it runs and merges after PE-6).
 
 | id | issue | what | owned files | depends on |
 |---|---|---|---|---|
@@ -200,12 +200,27 @@ when it runs).
 | PE-4 | #212 (part) | `CatalogStore`: folder, atomic write, `writeNow`, set aside, with its tests | `Sources/LibraryApp/Platform/CatalogStore.swift`, `Tests/AppSnapshotTests/LibraryCatalogStoreTests.swift` | spine |
 | PE-5 | #212 (part) | The persist area: load at launch, missing files, save after changes, flush on quit, Show in Finder; `library-restored` | `Sources/LibraryApp/LibraryWindow+Persist.swift`, `Tests/AppSnapshotTests/LibraryRestoreSnapshots.swift` | PE-1, PE-2, PE-4 |
 | PE-6 | #212 (closes) | J8 and J9 | `UITests/LibraryJourneyTests+Persist.swift` | PE-5, #333, import IM-6, cull CU-5 (J8 rates with keys), loupe-viewport LV-7 (J8 step 3's loupe help before #779) |
-| PE-7 | – | P7 `testLaunchLargeCatalog` (perf, report-only) | `UITests/LibraryJourneyTests+PerfLaunch.swift` | PE-6, #330, #782 |
+| PE-7 | – | P7 `testLaunchLargeCatalog` (perf, report-only) | `UITests/LibraryJourneyTests+PerfLaunch.swift` | PE-5, #333, #330, #782 |
 
 `LibraryCatalogCodingTests.swift`, `LibraryPersistGolden.swift` and
 `Tests/AppSnapshotTests/LibraryCatalogStoreTests.swift` are new test files (not in `waves.json`); no other feature names them. The
 blueprint's `Tests/LibraryModelTests/Golden/catalog-v1.json` is not created.
 PE-1, PE-2 and PE-4 start side by side.
+
+## Build waves
+
+- Wave 1: PE-1, PE-2, PE-4. Independent in this wave: all three.
+- Wave 2: PE-3, PE-5. Independent in this wave: both.
+- Wave 3: PE-6, PE-7. Independent in this wave: both.
+
+Longest chain: PE-1 → PE-5 → PE-6 (3).
+
+PE-3 times `LiveCatalogCoding` (PE-2). PE-5 calls the restore and save
+methods (PE-1), decodes with `LiveCatalogCoding` (PE-2) and flushes with
+`CatalogStore.writeNow` (PE-4). PE-6 and PE-7 drive the persist area (PE-5);
+P7 writes its own 10,000-record file and uses nothing from
+`LibraryJourneyTests+Persist.swift`, so it does not wait for PE-6. No task
+edits a shared doc, so there is no docs task.
 
 ## Acceptance test per task
 

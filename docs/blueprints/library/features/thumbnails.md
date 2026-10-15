@@ -159,17 +159,45 @@ when it runs).
 |---|---|---|---|---|
 | TH-1 | #33 (part) | Buckets, visible requests, tokens, eviction under 128 MB | `Sources/LibraryModel/LibraryThumbnails.swift`, `Tests/LibraryModelTests/LibraryThumbnailTests.swift` | spine |
 | TH-2 | #33 (part) | Results: stale drops, failures to availability, invalidate | `Sources/LibraryModel/LibraryThumbnails.swift`, `Tests/LibraryModelTests/LibraryThumbnailResultTests.swift` | TH-1 |
-| TH-3 | #33 (part) | `LiveThumbnails` actor: decode, develop, lanczos3, LRU ≤ 256 MB; QB-LIB-V5 | `Sources/LibraryModel/Live/LiveThumbnails.swift`, `Tests/LibraryModelTests/LibraryLiveThumbnailsTests.swift` | spine |
+| TH-3 | #33 (part) | `LiveThumbnails` actor: decode, develop, lanczos3, LRU ≤ 256 MB; QB-LIB-V5 | `Sources/LibraryModel/Live/LiveThumbnails.swift`, `Tests/LibraryModelTests/LibraryLiveThumbnailsTests.swift` | TH-1 |
 | TH-4 | #33 (part) | The grid model budgets | `Tests/LibraryModelTests/LibraryGridBudgetTests.swift` | TH-1 |
 | TH-5 | #33 (part) | Cells show images (through the spine's `Image(display:)`), values, help, identifiers, reject and unreadable marks; snapshots | `Sources/LibraryApp/LibraryGrid.swift`, `Tests/AppSnapshotTests/LibraryThumbnailSnapshots.swift`, `Tests/AppSnapshotTests/LibraryGridSnapshots.swift` | TH-2, #779 |
-| TH-6 | #33 (part) | The thumbnails area: visible ids to requests to tasks, cell size and scale | `Sources/LibraryApp/LibraryWindow+Thumbnails.swift` | TH-2, TH-3 |
+| TH-6 | #33 (part) | The thumbnails area: visible ids to requests to tasks, cell size and scale | `Sources/LibraryApp/LibraryWindow+Thumbnails.swift` | TH-2 |
 | TH-7 | #33 (closes) | J2 (F) steps | `UITests/LibraryJourneyTests+Grid.swift` | TH-5, TH-6, #333 |
-| TH-8 | – | J2 (L) step 1 on written files | `UITests/LibraryJourneyTests+Grid.swift` | TH-7, import IM-6 |
-| TH-9 | – | P1 `testGridScrollLarge` with `XCTMemoryMetric` (perf, report-only) | `UITests/LibraryJourneyTests+PerfGrid.swift` | TH-7, #330, #782 |
+| TH-8 | – | J2 (L) step 1 on written files | `UITests/LibraryJourneyTests+Grid.swift` | TH-3, TH-7, import IM-6 |
+| TH-9 | – | P1 `testGridScrollLarge` with `XCTMemoryMetric` (perf, report-only) | `UITests/LibraryJourneyTests+PerfGrid.swift` | TH-5, TH-6, #330, #333, #782 |
 
 `LibraryThumbnailResultTests.swift` and `LibraryLiveThumbnailsTests.swift`
 are new test files (not in `waves.json`); no other feature names them. TH-1,
 TH-3 and TH-4's model work can start before #779 merges; TH-5 cannot.
+
+TH-3 depends on TH-1 because its cache key uses `ThumbnailToken.of`, which
+TH-1 adds. TH-6 talks to `services.thumbnails` through the spine's
+`ThumbnailProviding` and the fakes, so it does not wait for `LiveThumbnails`;
+TH-8's live step does. TH-5 calls the spine's `menu.thumbnails` stub, so it
+does not wait for TH-6. TH-9 lives in its own file and needs the working grid
+(TH-5, TH-6), not TH-7's journey.
+
+## Build waves
+
+- Wave 1: TH-1. Independent in this wave: TH-1 alone.
+- Wave 2: TH-2, TH-3, TH-4. Independent in this wave: all three.
+- Wave 3: TH-5 (also #779), TH-6. Independent in this wave: both.
+- Wave 4: TH-7 (also #333), TH-9 (also #330, #333, #782). Independent in this wave: both.
+- Wave 5: TH-8 (also import IM-6; `feature-done` unless TH-9 merges last). Independent in this wave: TH-8 alone.
+
+No task edits a shared doc (`docs/c4/model.json`, `docs/design.md`, a
+blueprint or `waves.md`), so there is no shared-doc task.
+
+Longest chain: TH-1 → TH-2 → TH-5 → TH-7 → TH-8 (5).
+Chain of 5: TH-2 adds `setThumbnail` and `failThumbnail` to TH-1's
+`LibraryThumbnails.swift` and its test needs `requestThumbnails`; TH-5's
+snapshots set images and failures through them; TH-7's J2 drives TH-5's cell
+values; TH-8 adds the (L) launch to TH-7's test in `LibraryJourneyTests+Grid.swift`.
+Chain of 4: TH-1 → TH-2 → TH-5 → TH-9, since P1 scrolls TH-5's cells.
+Via TH-6 too (TH-1 → TH-2 → TH-6 → TH-7 → TH-8, and TH-1 → TH-2 → TH-6 → TH-9):
+TH-6 calls TH-2's `setThumbnail` and `failThumbnail`, and J2 and P1 need
+TH-6's requests for cells to reach `ready`.
 
 ## Acceptance test per task
 

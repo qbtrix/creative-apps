@@ -221,6 +221,21 @@ the SuiteUI lead.
 - **#423 and #425**: their catalog-file parts are done by persist; the
   issues close with develop (wave 3) and crop (wave 4).
 
+
+## Longest build chain
+
+Each packet was re-cut to `docs/factory/packets.md` (shared docs in one
+final task, a task waits only on merged code it needs, each wave lists its
+independent tasks). Longest depends-on chain in tasks, before and after;
+a chain over 3 has its reason in the packet's Build waves section.
+
+- cull: 5 before, 4 after.
+- import: 4 before, 3 after.
+- loupe-viewport: 5 before, 5 after.
+- persist: 4 before, 3 after.
+- spine: 13 before, 13 after.
+- thumbnails: 5 before, 5 after.
+
 ## The lead contract
 
 Every feature lead and every task below codes against this. It is handed
