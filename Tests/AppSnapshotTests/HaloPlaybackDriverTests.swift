@@ -15,7 +15,8 @@ import Testing
 @MainActor
 private final class HaloPlayer {
     var model: HaloProject
-    lazy var driver = HaloPlaybackDriver { [weak self] now in
+    // Typed, so the closure's own `driver` doesn't make its inference circular.
+    lazy var driver: HaloPlaybackDriver = HaloPlaybackDriver { [weak self] now in
         guard let self else { return }
         self.model.tick(now: now)
         if !self.model.playback.playing { self.driver.stop() }
