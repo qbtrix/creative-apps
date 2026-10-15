@@ -2,9 +2,9 @@
 
 Issue: #799 · Packet: docs/blueprints/flare/features/live-keys.md
 Run: act-1a13d0020ff-4x51 · Session: cse_01BKSKFkuR1aFXhWhZAhsegU · Started: 2026-10-15T00:00Z
-Stage: 4 round 4
+Stage: 5 finish
 Base: a45f1cbe6a5c49a11296e40bac32b48bb4b264fd
-Next: round 4 (last) panel on a45f1cb; judge on the next dev CI run after 38677546546; then stage 5
+Next: wait for #970 (feature-done) to merge and the dev CI run containing it; green -> Belt-Contact-Sheet on #799; red outside Flare -> say so on #799
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -25,7 +25,7 @@ Next: round 4 (last) panel on a45f1cb; judge on the next dev CI run after 386775
 | 1 | 38673821944 (3af1c0e: #936, #942) | red, not ours: SuiteUI SidebarRenameGestureTests (#938), on #763; every live-keys suite green on macOS | not run (scripts/ci failed before journeys) | clarity, journey, contract, quality | 12 (2 major: symbol keys past the symbol's end; non-atomic coalesced multi-layer setValue), 1 refuted | #942 (r1-b1), #943 (r1-b2) | no |
 | 2 | 38674789740 (1cca8d0) | red, not ours: same SuiteUI SidebarRenameGestureTests (#763); live-keys suites green | not run | clarity, journey, contract, quality | 6 (1 major: no test that a multi-command coalesced drag/scrub stays one entry), 1 refuted | #949 (r2-b1), #947 (r2-b2) | no |
 | 3 | 38677546546 (21db0dd) | red, not ours: Library and Halo journeys (#763, being fixed in #962-#964); macOS scripts/ci PASS, Flare journeys pass | flare contrast 0/3, identifier 14/15, offscreen 15/15 (at or under) | clarity, journey, contract, quality | 2 minor (no-op Set Frame Label entry; no live-vs-fake write test), 2 refuted; panel clean | #955 (r3-b1) | feature-clean (panel, Flare journeys, audit); dev CI red from other lines, so not clean by rule |
-| 4 | (pending: next dev run after 38677546546) | pending | pending | clarity, journey, contract, quality | 6 (2 major: Opacity row units -> gap #967; one-shape fill test -> r4-b1), 1 refuted | r4-b1; gap #967, #968 | no (last round) |
+| 4 | (pending: next dev run after 38677546546) | pending | pending | clarity, journey, contract, quality | 6 (2 major: Opacity row units -> gap #967; one-shape fill test -> r4-b1), 1 refuted | #970 (r4-b1); gap #967, #968, #971 | no (last round) |
 
 ## Decisions
 - Base is c111439 (dev one commit past the briefed bcc3197, which is its ancestor: #896, a Flare test pin).
@@ -44,6 +44,7 @@ Next: round 4 (last) panel on a45f1cb; judge on the next dev CI run after 386775
 - Fix PRs carry feature-done too, since they land after KY-9 (#936) and the lane dispatches CI for them.
 
 ## Open
+- gap #971: FakeKeyframes still refuses a key past the scene end with invalidFrame; LiveKeyframes uses pastSceneEnd (#970).
 - gap #967: the Opacity row stores 0...1 but says "%" with 0 decimals (fake and live; spec decision).
 - gap #968: Mixed shows for equal values when only the key states differ (packet KY-1 vs flare.md wording).
 - needs-core (for the supervisor to file on qbtrix/creative-core; this session's GitHub scope is creative-apps only): a command that sets a symbol's durationFrames, so insertFrames inside a symbol can grow it in the same step. Until then LiveKeyframes refuses a shift past the symbol's end (#943).

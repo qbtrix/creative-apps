@@ -46,3 +46,6 @@ utc	stage	event	ref	note
 2026-10-15T04:08Z	4	pr-merged	#955	r3-b1 (21db0dd, in run 38677546546)
 2026-10-15T04:08Z	4	stage-start	round 4	panel on a45f1cb
 2026-10-15T04:12Z	4	round-findings	round 4	6 confirmed (2 major); r4-b1 fix batch; gap #967 #968
+2026-10-15T04:17Z	4	pr-opened	#970	r4-b1 feature-done
+2026-10-15T04:17Z	4	stage-end	rounds	4 rounds done; gaps #967 #968 #971
+2026-10-15T04:17Z	5	stage-start	finish	waiting on #970 and its dev CI run
