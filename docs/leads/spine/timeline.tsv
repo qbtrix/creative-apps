@@ -29,3 +29,4 @@ utc	stage	event	ref	note
 2026-10-15T13:06Z	3	stage-start	wave11	SA-7 on a6c2135; #1150 merged
 2026-10-15T13:07Z	3	ci-run	38737961079	SA-3/SA-4 compile; Halo red blocks journeys
 2026-10-15T13:15Z	3	pr-merged	#1154	SA-7 merged; wave 12 SJ-1b starts
+2026-10-15T13:23Z	3	pr-merged	#1158	SJ-1b merged; wave 13 SJ-2 starts

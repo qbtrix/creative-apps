@@ -2,9 +2,9 @@
 
 Issue: #1044 · Packet: docs/blueprints/library/features/spine.md
 Run: act-1a13f18aaa0-lfw5 · Session: session_01DtSRhNqsphGfKkvV5eLsWW · Started: 2026-10-15T10:25Z
-Stage: 3 wave 12
+Stage: 3 wave 13
 Base: a6c2135c8fe69127e98ad5a2b0b63d58284603f2
-Next: wait for SJ-1b; then wave 13 (SJ-2, feature-done)
+Next: wait for SJ-2 (feature-done) to merge and its CI run on dev; then Anatomy round 1
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -30,8 +30,8 @@ Next: wait for SJ-1b; then wave 13 (SJ-2, feature-done)
 | SA-5 | 10 | Import Folder… empty state, notice slot, Preview pill, export sheet | Browser, StatusBar, ExportSheet, Window | LibraryShellSnapshots | #1150 | merged |
 | SA-6 | 10 | Inspector tabs/header, Develop/Crop stubs, crop overlay, loupe value | Inspector, DevelopInspector, CropInspector, CropOverlay, Loupe | LibraryShellSnapshots, loupe journey | #1147 | merged |
 | SA-7 | 11 | library.controls, identifiers, spine snapshots | LibraryControls, Window, LibraryShellSnapshots | snapshots | #1154 | merged |
-| SJ-1 | 12 | Four journeys on samples, J0, J10 | UITests/LibraryJourneyTests.swift | macOS journeys | #1152 (SJ-1a) merged; SJ-1b | building |
-| SJ-2 | 13 | J11, LibraryFiles helpers (feature-done) | UITests/LibraryJourneyTests+Shell/+Files | J11 | | planned |
+| SJ-1 | 12 | Four journeys on samples, J0, J10 | UITests/LibraryJourneyTests.swift | macOS journeys | #1152 + #1158 | merged |
+| SJ-2 | 13 | J11, LibraryFiles helpers (feature-done) | UITests/LibraryJourneyTests+Shell/+Files | J11 |  | building |
 
 ## Waves
 Taken from the packet's Build waves; checked against dev bcf5a09.
