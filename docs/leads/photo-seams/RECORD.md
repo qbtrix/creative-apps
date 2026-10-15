@@ -2,9 +2,9 @@
 
 Issue: #812 · Packet: docs/blueprints/photo/features/photo-seams.md
 Run: act-1a13d5e8ca4-huz5 · Session: cloud lead session · Started: 2026-10-15T02:23Z
-Stage: 3 wave 5
+Stage: 3 wave 6
 Base: c4ec07810683a4bc7d62dcc5205705229f248a71
-Next: wait for the S-6a builder (stacked on S-4, now on dev)
+Next: wait for #956; S-6b builder stacks on lead/photo-seams-S-6a
 
 ## Tasks
 
@@ -18,7 +18,7 @@ packet chains every task on the one before it (shared files or new types).
 | S-2 | 2 | selection, layer and output contracts (5.1) | M/Contracts/{Selection,Layer,Output}Contracts.swift | PhotoContractsLayerTests | #948 | merged |
 | S-3 | 3 | fakes (5.2) | M/Fakes/Fake{Documents,Edit,Geometry,Output}.swift | PhotoFakesTests | #950 | merged |
 | S-4 | 4 | PhotoServices, NotBuilt, Live/ stubs | M/PhotoServices.swift, M/Live/*.swift | LiveServicesTests | #951 | merged |
-| S-6a | 5 | v2 stored state, layer kinds, .eyedropper, toolHelp, insertLayer, geometry hook decl | M/PhotoWorkspace, PhotoLayer, AdjustmentSettings, PhotoMask, PhotoStroke; A/PhotoIntent, A/PhotoPanel | PhotoV2StateTests | – | todo |
+| S-6a | 5 | v2 stored state, layer kinds, .eyedropper, toolHelp, insertLayer, geometry hook decl | M/PhotoWorkspace, PhotoLayer, AdjustmentSettings, PhotoMask, PhotoStroke; A/PhotoIntent, A/PhotoPanel | PhotoV2StateTests | #956 | open |
 | S-6b | 6 | step ids, isDirty, .selection/.maskTiles steps | M/PhotoHistory.swift | PhotoStepIDTests | – | todo |
 | S-5 | 7 | fixtures empty/sample/layered/large | M/PhotoFixtures.swift | PhotoFixturesTests | – | todo |
 | S-7a | 8 | drags with modifiers and zoom, routing, eyedropper stub | M/PhotoStroke, PhotoSelectionMask, PhotoCropSize, PhotoTransform, PhotoEyedropper | PhotoToolsTests, PhotoDragRoutingTests | – | todo |
@@ -45,3 +45,4 @@ packet chains every task on the one before it (shared files or new types).
 
 ## Open
 - needs-ui filed: #952 SelectionPathOutline, #953 BrushCursorMark, #954 LayerList symbol and accessory. SelectionHandles with rotation is SuiteUI canvas-marks CM-4 (#273), no new issue.
+- S-6a adds `extension CurvePoint: @retroactive Codable`; it must go if creative-core makes CurvePoint Codable. The "I" key still selects the disabled Eyedropper until S-10a.
