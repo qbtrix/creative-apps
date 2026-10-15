@@ -24,6 +24,7 @@ Journeys: H-J9 (8 steps, packet "Journey steps"). Quality bars: QB-F1 no dead co
 | 2 | 38721434364 (c7e5c17) | red: macOS scripts/ci green (HaloLayerListTests pass with the round 1 look); H-J9 stops at step 2: #1078's expectClosed asserts app.menus gone after a menu choice and it never is. Other Halo reds not ours: Files testSaveAndReopen, History testUndoRedoEveryEdit (inspector 192 pt), testEveryControlActsOrSaysWhy (transport.end), testLayoutAtWidths (#1040); SuiteUI gallery (#763) | not read (no new feature screens) | panel deferred to the run with H-J9 screens | menu wait (#1078) | #1104 (feature-done, merged 11:08) | no |
 | (3) | 38726261412 (2b98fdb) | red, not judged: macOS swift build fails in Sources/LibraryApp/LibraryInspector.swift (Library line, #763); no tests ran | – | – | – | – | not counted |
 | (3) | 38727890123 (9caed05) | red, not judged: same Library build break (since #1096); reported on #763 | – | – | – | – | not counted |
+| (3) | 38731305776 (7f61259) | red, not judged: Library builds now; swift test fails to compile Tests/AppSnapshotTests/HaloPlaybackDriverTests.swift:18 (circular reference, viewer-playback's); journeys skipped | – | – | – | – | not counted |
 
 ## Decisions
 - Identifiers keep W0's shipped `halo.layer.*` prefix (`halo.layer.row.<id>`, `halo.layer.empty`, `halo.layer.new`; W0's journey reads `halo.layer.row.comp-1-layer-2`), so the packet's `halo.layers.list/row/refusal/empty` become `halo.layer.list/row/refusal/empty`.
