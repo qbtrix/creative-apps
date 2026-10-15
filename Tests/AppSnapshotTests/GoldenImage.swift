@@ -14,7 +14,8 @@ import SuiteUI
 import SwiftUI
 import Testing
 
-/// The compare: different sizes or a malformed buffer fail with share 1.
+/// The compare: different sizes or a malformed buffer fail with share 1. Identical rows are
+/// skipped with one memcmp each, and the diff image is built only when the compare fails.
 struct GoldenImage: GoldenComparing, Sendable {
     func compare(_ actual: RGBAImage, to baseline: RGBAImage, tolerance: GoldenTolerance) -> GoldenResult {
         let pixels = Self.pixelCount(actual)
@@ -22,19 +23,38 @@ struct GoldenImage: GoldenComparing, Sendable {
               actual.bytes.count == pixels * 4, baseline.bytes.count == pixels * 4
         else { return GoldenResult(passes: false, differing: max(pixels, 1), share: 1, diff: nil) }
         let limit = Int(tolerance.channel)
+        let rowBytes = actual.width * 4
         var differing = 0
         actual.bytes.withUnsafeBufferPointer { a in
             baseline.bytes.withUnsafeBufferPointer { b in
-                var i = 0
-                while i < a.count {
-                    if Self.differs(a, b, at: i, limit: limit) { differing += 1 }
-                    i += 4
+                guard let pa = a.baseAddress, let pb = b.baseAddress else { return }
+                var row = 0
+                while row < a.count {
+                    // Identical rows (nearly all of a golden) cost one memcmp; only a row that differs is walked.
+                    if memcmp(pa + row, pb + row, rowBytes) != 0 {
+                        differing += Self.countDiffering(pa + row, pb + row, bytes: rowBytes, limit: limit)
+                    }
+                    row += rowBytes
                 }
             }
         }
         let share = Double(differing) / Double(pixels)
-        let diff = differing > 0 ? Self.diffImage(actual, baseline, limit: limit) : nil
-        return GoldenResult(passes: share <= tolerance.maxShare, differing: differing, share: share, diff: diff)
+        let passes = share <= tolerance.maxShare
+        // The diff image is for a failure report only; a passing compare never builds it.
+        let diff = passes ? nil : Self.diffImage(actual, baseline, limit: limit)
+        return GoldenResult(passes: passes, differing: differing, share: share, diff: diff)
+    }
+
+    /// Pixels in `bytes` (a whole number of RGBA pixels) whose channels differ by more than `limit`.
+    private static func countDiffering(_ a: UnsafePointer<UInt8>, _ b: UnsafePointer<UInt8>,
+                                       bytes: Int, limit: Int) -> Int {
+        var count = 0
+        var i = 0
+        while i < bytes {
+            if differs(a, b, at: i, limit: limit) { count += 1 }
+            i += 4
+        }
+        return count
     }
 
     /// width × height, or 0 when either is not positive or the product overflows.
@@ -45,7 +65,7 @@ struct GoldenImage: GoldenComparing, Sendable {
         return count
     }
 
-    private static func differs(_ a: UnsafeBufferPointer<UInt8>, _ b: UnsafeBufferPointer<UInt8>,
+    private static func differs(_ a: UnsafePointer<UInt8>, _ b: UnsafePointer<UInt8>,
                                 at i: Int, limit: Int) -> Bool {
         abs(Int(a[i]) - Int(b[i])) > limit || abs(Int(a[i + 1]) - Int(b[i + 1])) > limit
             || abs(Int(a[i + 2]) - Int(b[i + 2])) > limit || abs(Int(a[i + 3]) - Int(b[i + 3])) > limit
@@ -57,6 +77,7 @@ struct GoldenImage: GoldenComparing, Sendable {
         actual.bytes.withUnsafeBufferPointer { a in
             baseline.bytes.withUnsafeBufferPointer { b in
                 out.withUnsafeMutableBufferPointer { o in
+                    guard let a = a.baseAddress, let b = b.baseAddress else { return }
                     var i = 0
                     while i < o.count {
                         if differs(a, b, at: i, limit: limit) {
