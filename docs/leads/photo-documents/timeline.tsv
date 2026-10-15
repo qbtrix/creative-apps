@@ -21,3 +21,4 @@ utc	stage	event	ref	note
 2026-10-15T13:10Z	3	pr-merged	#1212	D-6
 2026-10-15T13:11Z	3	stage-start	wave 4	D-5, D-7 on 66d2f04
 2026-10-15T17:16Z	3	heartbeat	-	waiting
+2026-10-15T13:35Z	3	pr-opened	#1223	D-7 save/open in window
