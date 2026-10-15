@@ -15,7 +15,9 @@
 // default (and writes it back on every change) and opens `-HaloOpenFile`
 // once. The hidden `halo.file` element's label and value are
 // `model.saveStatus` (journeys read the label: XCUITest reads SwiftUI values
-// as empty, #262); the title is `model.windowTitle`. SwiftUI offers no hook to confirm a window
+// as empty, #262); the title is `model.windowTitle`, and the title bar's
+// subtitle (`.navigationSubtitle`) is `model.windowSubtitle`, "Edited" or
+// "Not saved" while the work isn't on disk, else empty. SwiftUI offers no hook to confirm a window
 // close, so closing is not guarded yet (#1065 asks SuiteWindow for one).
 import HaloModel
 import SuiteUI
@@ -33,6 +35,7 @@ extension HaloWindow {
 
     func fileScene(_ content: some View) -> some View {
         content
+            .navigationSubtitle(model.windowSubtitle ?? "")
             .background { HaloFileElement(status: model.saveStatus) }
             .overlay { HaloOpenProgress(model: model) }
             .fileExporter(

@@ -6,27 +6,33 @@
 // deletes Intro, then ⌘Z, ⌘Z and ⇧⌘Z. After each edit the Edit menu's first
 // item names the step; a timeline scrub in between adds none. The sidebar is
 // read by its row titles top first, the selected composition by the
-// inspector header (`halo.inspector.header`), the layer count by the status
-// bar's readout (`layerSummary`, "1 layer"), each matched by label or value
-// (XCUITest can read a SwiftUI value as empty, #262). A disabled menu item is
+// inspector header (`halo.inspector.header`), the layer count by the
+// `halo.layer.row.*` rows in `halo.layer.list`, each matched by label or
+// value (XCUITest can read a SwiftUI value as empty, #262). The window is
+// 1000 by 640 so it fits CI's 1024 by 768 display (at that width the status
+// bar drops its layer readout). After the first edit the title bar's
+// subtitle reads Edited. Every menu is closed (not fading) before a shot. A disabled menu item is
 // checked as disabled only: XCUITest doesn't read SwiftUI .help on menu items
 // reliably, so its reason ("A project keeps at least one composition.") is
 // proven by HaloModelTests' HaloCommandTests over HaloAvailability+Composition.
 // One shot per step, `halo-history-<step>`.
+import AppKit
 import XCTest
 
 final class HaloHistoryJourneyTests: XCTestCase {
     /// H-J8: every composition and new-layer edit undone and redone from the keyboard.
     @MainActor func testUndoRedoEveryEdit() {
-        // 1280 wide, so the status bar keeps its layer count.
-        let halo = Journey("Halo", self, arguments: ["-HaloSample", "empty", "-HaloWindowSize", "1280x800"])
+        // Fits CI's 1024 by 768 display.
+        let halo = Journey("Halo", self, arguments: ["-HaloSample", "empty", "-HaloWindowSize", "1000x640"])
         XCTAssert(halo.app.windows.firstMatch.waitForExistence(timeout: 30), "no window opened")
         expectSidebar(["Comp 1"], halo)
+        expectFitsScreen(halo)
 
         // 1. Layer > New > Solid.
         choose(["Layer", "New", "Solid"], halo)
         XCTAssert(text("Solid 1", in: halo.element("halo.layer.list")).waitForExistence(timeout: 5), "no Solid 1 row")
         expectUndo("Undo New Layer", halo)
+        XCTAssert(subtitle("Edited", halo).waitForExistence(timeout: 5), "the title bar shows no Edited subtitle")
         halo.shot("history-1-new-layer")
 
         // 2. Double-click Comp 1 in the sidebar, type Intro, Return.
@@ -75,7 +81,7 @@ final class HaloHistoryJourneyTests: XCTestCase {
         expectSidebar(["Intro", "Comp 2"], halo)
         expectSelected("Intro", halo)
         XCTAssert(text("Solid 1", in: halo.element("halo.layer.list")).waitForExistence(timeout: 5), "Intro lost Solid 1")
-        XCTAssert(text("1 layer", in: halo.app.windows.firstMatch).waitForExistence(timeout: 5), "the readout isn't 1 layer")
+        XCTAssert(waitFor { self.layerRowCount(halo) == 1 }, "Intro has \(layerRowCount(halo)) layer rows, not 1")
         expectUndo("Undo New Composition", halo)
         halo.shot("history-8-undo-delete")
 
@@ -148,7 +154,7 @@ final class HaloHistoryJourneyTests: XCTestCase {
     @MainActor private func expectDisabled(_ path: [String], _ halo: Journey) {
         let item = menuItem(path, halo)
         XCTAssertFalse(item.isEnabled, "\(path.joined(separator: " > ")) is enabled")
-        halo.press(.escape)
+        closeMenu(halo)
     }
 
     /// The Edit menu's first item reads `title`; the menu is closed again.
@@ -157,7 +163,45 @@ final class HaloHistoryJourneyTests: XCTestCase {
         let first = edit.menus.firstMatch.children(matching: .menuItem).firstMatch
         XCTAssert(first.waitForExistence(timeout: 3), "the Edit menu shows no items")
         XCTAssertEqual(first.title, title, "the Edit menu's first item")
+        closeMenu(halo)
+    }
+
+    /// The window lies inside the main screen, and the sidebar, inspector
+    /// and New Composition… button lie inside the window without overlap.
+    @MainActor private func expectFitsScreen(_ halo: Journey) {
+        let window = halo.app.windows.firstMatch.frame
+        if let screen = NSScreen.main?.frame {
+            XCTAssert(screen.contains(window), "the window \(window) runs off the screen \(screen)")
+        }
+        let sidebar = halo.element("suite.sidebar").frame
+        let inspector = halo.element("suite.inspector").frame
+        let new = halo.element("halo.composition.new").frame
+        for (name, frame) in [("sidebar", sidebar), ("inspector", inspector), ("New Composition…", new)] {
+            XCTAssert(window.contains(frame), "the \(name) \(frame) runs out of the window \(window)")
+        }
+        XCTAssertFalse(sidebar.intersects(inspector), "the sidebar overlaps the inspector")
+        XCTAssertGreaterThanOrEqual(inspector.width, 200, "the inspector is squeezed to \(inspector.width) pt")
+    }
+
+    /// Escape, then waits until no menu is up, so the next shot shows no
+    /// fading menu over the sidebar.
+    @MainActor private func closeMenu(_ halo: Journey) {
         halo.press(.escape)
+        XCTAssert(halo.app.menus.firstMatch.waitForNonExistence(timeout: 2), "a menu stayed open after Escape")
+    }
+
+    /// The number of distinct `halo.layer.row.*` rows in the layer list.
+    @MainActor private func layerRowCount(_ halo: Journey) -> Int {
+        let rows = halo.element("halo.layer.list").descendants(matching: .any)
+            .matching(NSPredicate(format: "identifier BEGINSWITH %@", "halo.layer.row.")).allElementsBoundByIndex
+        return Set(rows.map(\.identifier)).count
+    }
+
+    /// The title bar's subtitle reading `status`: a text in the window that
+    /// isn't the hidden `halo.file` element.
+    @MainActor private func subtitle(_ status: String, _ halo: Journey) -> XCUIElement {
+        halo.app.windows.firstMatch.staticTexts.matching(NSPredicate(
+            format: "(label == %@ OR value == %@) AND identifier != %@", status, status, "halo.file")).firstMatch
     }
 
     /// Whether `condition` holds within three seconds.
