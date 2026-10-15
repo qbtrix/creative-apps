@@ -27,10 +27,10 @@ Next: when SJ-1a merges, put fast-lane back on #1150; then wave 11 (SA-7)
 | SP-14 | 8 | recordEdit, undo, redo, titles, endCoalescing | CatalogHistory.swift | LibraryHistoryTests | #1139 | merged |
 | SA-3 | 8 | LibraryMenu per area, every v1 menu item with help | LibraryMenus, LibraryCommands, LibraryWindow | J10 | #1140 | merged |
 | SA-4 | 9 | Nine area files, hooks, menu: params, key routing | LibraryWindow*, Browser, Grid, Loupe | J0 step 3, existing journeys | #1142 | merged |
-| SA-5 | 10 | Import Folder… empty state, notice slot, Preview pill, export sheet | Browser, StatusBar, ExportSheet, Window | LibraryShellSnapshots | #1150 | held (label off until SJ-1a merges) |
+| SA-5 | 10 | Import Folder… empty state, notice slot, Preview pill, export sheet | Browser, StatusBar, ExportSheet, Window | LibraryShellSnapshots | #1150 | queued (label back) |
 | SA-6 | 10 | Inspector tabs/header, Develop/Crop stubs, crop overlay, loupe value | Inspector, DevelopInspector, CropInspector, CropOverlay, Loupe | LibraryShellSnapshots, loupe journey | #1147 | merged |
 | SA-7 | 11 | library.controls, identifiers, spine snapshots | LibraryControls, Window, LibraryShellSnapshots | snapshots | | planned |
-| SJ-1 | 12 | Four journeys on samples, J0, J10 | UITests/LibraryJourneyTests.swift | macOS journeys | | planned |
+| SJ-1 | 12 | Four journeys on samples, J0, J10 | UITests/LibraryJourneyTests.swift | macOS journeys | #1152 (SJ-1a) | merged; J0/J10 pending |
 | SJ-2 | 13 | J11, LibraryFiles helpers (feature-done) | UITests/LibraryJourneyTests+Shell/+Files | J11 | | planned |
 
 ## Waves

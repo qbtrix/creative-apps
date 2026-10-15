@@ -25,3 +25,4 @@ utc	stage	event	ref	note
 2026-10-15T12:38Z	3	ci-run	38734211999	SA-2 compiles on macOS; red is Halo only
 2026-10-15T12:47Z	3	stage-start	wave10	SA-5 SA-6 on 6351952; SA-4 #1142 merged
 2026-10-15T12:59Z	3	pr-merged	#1147	SA-6 merged; #1150 held for SJ-1a
+2026-10-15T13:05Z	3	pr-merged	#1152	SJ-1a merged; fast-lane back on #1150
