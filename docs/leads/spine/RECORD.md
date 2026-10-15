@@ -47,6 +47,7 @@ Taken from the packet's Build waves; checked against dev bcf5a09.
 ## Rounds
 | round | CI run | CI | audit vs baseline | lenses | confirmed | fixed by | clean |
 |---|---|---|---|---|---|---|---|
+| 0 (pre-loop) | 38726261412 (2b98fdb) | red: macOS build | – | – | SA-1 #1096: LibraryInspector calls mutating methods on a let model | fixer lead/spine-fix-inspector | no |
 
 ## Decisions
 - Builder branches are `lead/spine-<id>`, not `lead/spine/<id>`: git can't hold `lead/spine` and `lead/spine/<x>` refs together.
@@ -57,6 +58,7 @@ Taken from the packet's Build waves; checked against dev bcf5a09.
 - SP-10 adds a second case [a, a, a#2] because the packet's example already passed on the old code.
 - `gh` GraphQL is blocked in cloud sessions: builders open PRs with `gh api` REST (POST pulls, then POST issues/<n>/labels).
 - W4 is split into W4a SP-4 then W4b SP-5: FakeRendering's fakes call FakeBehavior (FakeSupport.swift, SP-4's file), so SP-5 needs SP-4 merged; the packet marked them independent.
+- Lesson for app builders: a split-out view with `let model: LibraryCatalog` must take mutations as closures (the catalog is a struct); SA-1 broke the macOS build this way. Every later SA prompt says so.
 
 ## Open
 - PR #217 (fix for #156) is open at stage 0; SP-9 lands only if it is still unmerged when wave 8 starts.
