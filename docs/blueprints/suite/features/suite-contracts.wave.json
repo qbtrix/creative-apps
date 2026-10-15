@@ -1,0 +1,9 @@
+{
+  "title": "Shared values, contracts, fakes, store and live slots",
+  "wave": 1,
+  "order": 20,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "covers": "#820–#834",
+  "waits_on": "targets"
+}

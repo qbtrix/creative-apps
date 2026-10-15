@@ -1,0 +1,9 @@
+{
+  "id": "creative-apps",
+  "name": "creative-apps",
+  "description": "The macOS app shells of the creative suite: five SwiftUI apps (Flare, Design, Photo, Library, Halo), each over a Linux-safe Model target, plus the SuiteUI design system.",
+  "tags": [
+    "internal"
+  ],
+  "order": 10
+}

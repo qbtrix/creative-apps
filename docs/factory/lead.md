@@ -81,9 +81,12 @@ user sees, and a size estimate under 400 lines and 15 files. Split anything
 bigger.
 
 A task waits on another only when it needs that task's merged code
-(`packets.md`, rule (b)). Shared docs (`docs/c4/model.json`,
-`docs/design.md`, the blueprint, `waves.md`) go in the one final task
-(rule (a)). If the packet chains tasks that don't need each other, unchain
+(`packets.md`, rule (b)). Shared prose (`docs/design.md`, the blueprint,
+the app's `waves.in.md`) goes in the one final task (rule (a)). The C4 model
+and `waves.md` are generated: a task that adds a component adds its part in
+`docs/c4/parts/` in the same PR as its code, and no task edits
+`docs/c4/model.json` or a `waves.md` (`packets.md`, "Fragments, not shared
+files"). If the packet chains tasks that don't need each other, unchain
 them and record it under Decisions. For every wave, RECORD.md lists which
 tasks are independent and, for each task that waits on another, which one
 and why.
@@ -140,8 +143,12 @@ file each as a `gap` issue on the line and finish anyway.
 ### 5. Finish
 
 1. The last PR of the feature carries the `feature-done` label (a small last
-   fix, the packet's status line, or the RECORD summary in the packet). The
-   lane merges it and dispatches CI on `dev`.
+   fix, the packet's status line, or the RECORD summary in the packet). It
+   marks the feature built in its own data only:
+   `docs/blueprints/<app>/features/<feature>.wave.json` gets
+   `"status": "built"` and the feature issue; the Generated workflow
+   reprints `waves.md` on `dev`. The lane merges it and dispatches CI on
+   `dev`.
 2. When that run is green, comment on the feature issue:
    `Belt-Contact-Sheet: <run link>` plus one line per journey and the audit
    counts. A red run is round work, not done: back to stage 4 if the budget

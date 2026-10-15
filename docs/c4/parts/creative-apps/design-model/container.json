@@ -1,0 +1,18 @@
+{
+  "id": "design-model",
+  "name": "DesignModel",
+  "description": "Linux-safe state and logic behind Design's window: pages, the node tree on each page (with fills and text) and which Layers rows are expanded, the selection, the tool, the model-owned undo history, the canvas gestures and the file codec. Foundation only, value types.",
+  "technology": "Swift 6, Foundation",
+  "tags": [
+    "internal"
+  ],
+  "order": 50,
+  "relationships": [
+    {
+      "source": "design-model",
+      "target": "corecolor",
+      "description": "uses CoreColor from creative-core",
+      "style": "sync"
+    }
+  ]
+}

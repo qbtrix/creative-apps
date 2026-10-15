@@ -1,0 +1,9 @@
+{
+  "title": "Duplicate, group, cut, copy and paste",
+  "wave": 1,
+  "order": 20,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "covers": "#414, #416, #415",
+  "waits_on": "design-window"
+}

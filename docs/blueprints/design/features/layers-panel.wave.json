@@ -1,0 +1,9 @@
+{
+  "title": "The Layers panel",
+  "wave": 1,
+  "order": 40,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "covers": "#613, #589 (Design half); gap: rename, reorder, nest, Arrange",
+  "waits_on": "design-window"
+}

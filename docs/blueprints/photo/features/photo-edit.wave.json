@@ -1,0 +1,15 @@
+{
+  "title": "Cut, Copy, Paste, Duplicate, Merge Down, Flatten",
+  "wave": 1,
+  "order": 20,
+  "status": "building",
+  "feature_issue": "#1075",
+  "covers": "–",
+  "waits_on": "photo-seams (journey tasks only: photo-journey-kit); nothing",
+  "cells": {
+    "PV": "PV-2",
+    "tier": "p1",
+    "waits on (this repo)": "photo-seams (journey tasks only: photo-journey-kit)",
+    "waits on (creative-core)": "nothing"
+  }
+}

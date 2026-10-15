@@ -1,0 +1,37 @@
+{
+  "title": "Status pills, inspector header (#185), the remaining identifiers (#291), layout tests",
+  "wave": 3,
+  "order": 20,
+  "status": "planned",
+  "feature_issue": "later (packet after wave 2 lands)",
+  "covers": "#185, #291",
+  "waits_on": "spine, thumbnails, loupe-viewport",
+  "issues": [
+    185,
+    291
+  ],
+  "owned": [
+    "Sources/LibraryModel/LibraryStatusText.swift",
+    "Sources/LibraryModel/LibraryLayout.swift",
+    "Sources/LibraryApp/LibraryStatusBar.swift",
+    "Sources/LibraryApp/LibraryInspector.swift",
+    "Tests/LibraryModelTests/LibraryStatusTextTests.swift",
+    "Tests/LibraryModelTests/LibraryLayoutTests.swift",
+    "Tests/AppSnapshotTests/LibraryLayoutSnapshots.swift",
+    "Tests/AppSnapshotTests/LibraryInspectorSnapshots.swift",
+    "UITests/LibraryJourneyTests+Layout.swift"
+  ],
+  "core": "none",
+  "suiteui": "S-L7 optional zoom and size pills; #330, #333",
+  "depends": [
+    "spine",
+    "thumbnails",
+    "loupe-viewport"
+  ],
+  "journeys": [
+    "J12"
+  ],
+  "notes": "Identifiers in other features' views are each feature's own job; this one clears what is left of #291's list.",
+  "quality": "layout spec 7.3, audit exit 7.2, QB-V5",
+  "library_title": "Status pills, inspector header (#185), the remaining identifiers (#291), layout tests"
+}

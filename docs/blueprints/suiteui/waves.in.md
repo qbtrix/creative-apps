@@ -1,0 +1,194 @@
+# SuiteUI features: waves
+
+The SuiteUI blueprint (`docs/blueprints/suiteui.md`, merged in #765)
+grouped into features, one feature-lead session each. This file covers
+waves 1 and 2, which have packets; waves 3 and 4 are listed at the end and
+get packets once wave 2 has landed. A wave starts when everything it waits
+on has merged. Two features in the same wave never own the same file. Each
+packet lists its tasks, owned files and acceptance tests.
+
+SuiteUI knows no engine, so **no SuiteUI feature waits on creative-core**.
+
+Rows whose wave reads `SP1` to `SP3` belong to the shell-parity track, a
+cross-app plan whose order and shared files are in
+`docs/blueprints/suite/features/shell-parity-waves.md`; they follow that
+file's waves, not this one's.
+
+<!-- waves-table: wave | feature | packet | covers | waits on | feature issue | status -->
+
+## File when ready
+
+Each wave-2 feature issue is filed once #778 is closed (its `feature-done`
+PR merged and its CI run green), with labels `feature-lead`, `line:suiteui`
+and its tier, a link to its packet, the issues it covers, and one line:
+`Depends on: #778 (suite-harness, closed)`. The lead playbook
+(`docs/factory/lead.md`, stage 0) stops a lead whose `Depends on:` issue is
+still open, so filing them earlier would only start leads that stop.
+
+| feature | title | tier | waits on |
+|---|---|---|---|
+| editor-chrome | Feature: editor-chrome | p1 (#340, #342; first: Flare F1a and F1b wait on it) | #778 |
+| inspector-controls | Feature: inspector-controls | p1 (#343) | #778 |
+| lists-and-layers | Feature: lists-and-layers | p1 (#146) | #778 |
+| canvas-marks | Feature: canvas-marks | p1 (#273) | #778 |
+
+All four can run side by side: their owned files are disjoint (checked in
+"Files across the waves" below).
+
+## Why this order
+
+- **The harness goes alone, first.** Every later feature proves its work
+  with goldens (#331, #332), runs journeys from its own file (#333), shows
+  its components on a gallery page and registers its controls. The gallery
+  page stubs and every token the later waves need land here, so no wave-2
+  feature edits `Tokens.swift`, `SuiteGallery.swift`, `SuiteEnvironment.swift`
+  or `project.yml`.
+- **Wave 2 is wide.** Four features with disjoint files; each is the SuiteUI
+  half of p1 app work that is otherwise ready. Editor chrome is first among
+  equals: Flare's whole UI track starts with F1a #346 and F1b #347 on
+  `EditorShell`.
+- **What each unblocks** (also in each packet):
+
+| feature | app features it unblocks |
+|---|---|
+| suite-harness | every SuiteUI wave-2 feature; every app's goldens and second journey file (Flare's `FlareJourneyTests+<Area>.swift` plan needs #333); Flare's perf journeys QH-5 and QH-6 (they need #330 and #333) |
+| editor-chrome | Flare F1a #346, F1b #347, F7b #376 (transport); Design's and Photo's primary Export and save status |
+| inspector-controls | Design's one-undo-step edit runs (follow-up of closed #536, on the #749 workaround today); Photo's Gamma from the keyboard (follow-up of closed #584); Flare F6a #186, F6b #348, F6c #349, F9 #378 |
+| lists-and-layers | Flare F11a #350; Halo's inline rename refusal (#139) and composition context menu (follow-up of closed #35); Design's Layers toggles and expansion (follow-ups of closed #50 and PR #549) |
+| canvas-marks | Flare's stage (#12, F3c #375, F4b #390); Design adopting the shared handles; Photo swapping `CloneSourceMark` and `StraightenMarks` (follow-ups of closed #647, #422, #419); Halo's viewer |
+
+An app feature that needs one of these depends on that SuiteUI feature's
+issue (its `Depends on:` line names it, or the open `needs-ui` issue the
+packet covers until the feature issue is filed).
+
+## Files across the waves
+
+- **Wave 1, suite-harness** owns `Sources/SuiteUI/Contracts/` (its four
+  files), `SuiteEnvironment.swift`, `SuiteGallery.swift`, `Gallery/` (index
+  and the six stubs), `FrameProbe.swift`, `ControlInventory.swift`,
+  `Tokens.swift`, `Glass.swift`, `SuiteWindow.swift`, `ToolbarGroup.swift`,
+  `EditorTopBar.swift`, `InspectorAction.swift`, `EmptyStateView.swift`,
+  `project.yml`, `UITests/Journey.swift`, `UITests/Journey+Input.swift`,
+  `UITests/SuiteJourneyTests.swift`, `UITests/SuiteJourneyTests+Smoke.swift`,
+  `UITests/SuiteJourneyTests+Budgets.swift`, `UITests/audit-baseline.json`
+  (the `suiteui` key only), `GoldenImage*.swift`, `SnapshotHost*.swift`,
+  `Golden/README.md`, and `TokensTests`, `FrameProbeTests`,
+  `ControlInventoryTests`, `EditRunTests`, `HarnessFakeTests`,
+  `SuiteGalleryTests`.
+- **Hand-overs to wave 2:** `ToolbarGroup.swift`, `EditorTopBar.swift`,
+  `EmptyStateView.swift` and `Gallery/GalleryChrome.swift` to editor-chrome;
+  `InspectorAction.swift` and `Gallery/GalleryInspector.swift` to
+  inspector-controls; `SuiteWindow.swift` and `Gallery/GalleryLists.swift` to
+  lists-and-layers; `Gallery/GalleryCanvas.swift` to canvas-marks. The other
+  harness files stay with no wave-2 feature.
+- **Wave 2** features own only their packet's files: their own
+  `Contracts/*.swift`, their components, their `Gallery/Gallery<Area>.swift`,
+  their `UITests/SuiteJourneyTests+<Area>.swift`, their `Tests/SuiteUITests`
+  and `Tests/AppSnapshotTests/Suite*` files and `Golden/<area>/`. No two
+  share a path (the critic checked every task table against the others).
+  `ScrubValue.swift` is inspector-controls'; canvas-marks only calls
+  `ViewerZoom.fitScale` from it.
+- **Nobody** in waves 1 or 2 edits `docs/c4/model.json` or `docs/design.md`:
+  `suiteui-sources` (path `Sources/SuiteUI/`) already owns every new file,
+  and suite-record (wave 4, #345) folds in the descriptions and section
+  6.2's design rows. Nobody edits `Package.swift` (Q1 is unanswered).
+
+## Open captain calls
+
+| call | where it bites | packet's default |
+|---|---|---|
+| Q1 Linux target for SuiteUI's rules | contracts compile only in the macOS job | no `Package.swift` edit; contracts stay Foundation-only and are checked by hand on Linux |
+| Q2 gallery behind a flag or its own target | suite-harness SH-6 to SH-8 | the flag |
+| Q3 `suiteui` audit key at 0 | SH-7 | yes (adding an app at 0 does not loosen the audit) |
+| Q9 one publisher of `suite.controls` | Flare F1b #347 | SuiteUI's `ControlInventory`; a note is on #347 |
+| The gallery ships in release builds (review of #765) | every app bundle | keep it: the journeys run release bundles (`scripts/bundle-apps` builds `-c release`), so `#if DEBUG` would hide it from them; the flag is parsed in one function so a later gate is one line |
+| Q4 drop #342 from #62's `Depends on:` | timeline (wave 3) | timeline waits on editor-chrome |
+| Q5 lift `needs-human` on #63 | timeline (wave 3) | asked again when the timeline packet is written |
+
+## Cross-line notes (no SuiteUI wave edits these)
+
+- `Package.swift` (protected): only if Q1 is approved.
+- `Sources/FlareApp/FlareControls.swift`: Flare F1b #347 feeds
+  `ControlInventory` instead of publishing its own `suite.controls` (Q9).
+- Design's own selection marks: Design adopts `SelectionHandles` in a
+  `line:design` task (filed by canvas-marks CM-4).
+- Photo's `CloneSourceMark` and `StraightenMarks`: swapped in `line:photo`
+  tasks (filed by CM-7 and CM-8).
+- Design's `Section("Pages")` contrast (#284's remainder) and Design's
+  group-eye journey (#589's second bullet): `line:design` issues filed by
+  LL-11 and LL-9.
+- `docs/blueprints/flare.md` section 7.2's QH-4 row still names
+  `FlareJourneyTests+Smoke.swift`; #333 now makes
+  `UITests/SuiteJourneyTests+Smoke.swift` (a comment on #333 says so). The
+  Flare row is Flare's to correct; no Flare task reads that file.
+- `Sources/SuiteUI/Contracts/ContractTypes.swift`, `FrameProbeRecording.swift`
+  and `ControlInventorying.swift` are compiled into every app's journey
+  bundle after SH-7, so they stay Foundation-only for good.
+
+## Critic round
+
+One read-only critic agent tried to refute the five packets: task size,
+owned files overlapping within a wave or inside a feature without a chain,
+the shared-file rule and protected paths, tests that cannot fail, closed or
+duplicate issues, facts against `dev`, and contradictions with the
+blueprint and the review of #765. It found 8 major and 5 minor problems,
+none blocking, all fixed in the packets:
+
+| # | finding | fix |
+|---|---|---|
+| 1 | `.suiteProbes()` would nest (window, gallery, `EditorShell`) and publish two `suite.controls` elements | it publishes only at the outermost call; `ControlInventoryTests` proves it (SH-5) |
+| 2 | no task owned the gallery's page list, and canvas-marks adds `surface` pages | each `Gallery<Area>.swift` declares its own pages; SH-6 lists the 18 blueprint names and tests uniqueness |
+| 3 | the `window` page's internal init was named only in lists-and-layers | in SH-6's task and test |
+| 4 | no task said component snapshots call `assertGolden`; three baseline tasks had no snapshot owner | the rule is in every wave-2 packet; IC-6 owns `SuiteHeaderSnapshots`, LL-12 `SuiteGridSmallSnapshots`, CM-10 a new `SuiteSurfaceSnapshots` |
+| 5 | CM-4's pixel check could not reach `SnapshotHost` from `SuiteUITests` | moved into `SuiteMarksSnapshots` |
+| 6 | CM-2's ⇧-resize number contradicted its rule | 250 × 125 |
+| 7 | LL-11 pinned `secondaryText`, the faint system grey #284 reported | pins `textSecondary`, as #599 left it |
+| 8 | `LayerList` never got the refusable rename SJ17 needs | LL-5 depends on LL-6 and uses the `String?` form |
+| 9 | EC-6 restated pills already on `dev` (#522) | rescoped to routing the text through `SuiteStatusPills` and mapping `PillStyle` onto `StatusPillStyle` |
+| 10 | SH-3 tested the wrong backgrounds and a system color with no hex | `secondaryText` on palette values, tested on `card`, `panel` and `surface` |
+| 11 | SH-9's 0.01 threshold made the one-pixel case pass | fails at `.standard` (0.005) |
+| 12 | #549 is a pull request | "PR #549" |
+| 13 | IC-18's PNG count; no split fallback for LL-13 and CM-11; `SuiteGallery`'s init | 8 PNGs; LL-13b and CM-11b; the init takes a `GalleryRequest` |
+
+Checked clean: no shared path between the four wave-2 features, every
+in-feature file share is a chain, no protected path, no `docs/c4/model.json`
+or `docs/design.md` edit, every token a wave-2 task needs is in SH-2, every
+covered issue is open (#745 is closed and not covered), no product names.
+
+## Later waves (no packet yet)
+
+| wave | feature | covers | waits on |
+|---|---|---|---|
+| 3 | timeline | #62, #219, #63 (`needs-human`, Q5), and the newer #771 (key shape by easing, selected-keys set) and #772 (lane accessibility value) | editor-chrome (#62's `Depends on:` names #342; Q4) |
+| 3 | node-graph | #344 | suite-harness |
+| 4 | suite-record | #345; section 6.2's rows into `docs/design.md` | waves 1–3 |
+
+Not v1 (blueprint 8.1): #7, #274, #272.
+
+
+## Longest build chain
+
+Each packet was re-cut to `docs/factory/packets.md` (shared docs in one
+final task, a task waits only on merged code it needs, each wave lists its
+independent tasks). Longest depends-on chain in tasks, before and after;
+a chain over 3 has its reason in the packet's Build waves section.
+
+- canvas-marks: 11 before, 6 after.
+- editor-chrome: 8 before, 6 after.
+- inspector-controls: 11 before, 6 after.
+- lists-and-layers: 12 before, 8 after.
+
+## The lead contract
+
+Every feature lead and every task below codes against this. It is handed
+verbatim to every session, and each feature issue carries it.
+
+1. **Feature issue.** One GitHub issue per feature, labels `feature-lead` and `line:<app>`. Body links the packet `docs/blueprints/<app>/features/<feature>.md` and has one `Depends on:` line.
+2. **Run.** Belt runs one cloud session per feature issue (a lead), from the trusted launch folder, with the repo's Auto settings (creative-apps#733, creative-core#263). A lead holds one in-flight slot however many PRs it opens.
+3. **Status channel.** The lead pushes `docs/leads/<feature>/RECORD.md` and `timeline.tsv` to branch `lead/<feature>` after every stage. Belt reads the branch's last commit time; nothing else is polled besides PRs and issue comments.
+4. **Swarm PRs.** Base `dev`, label `fast-lane`, at most 400 lines and 15 files. Body lines: `Belt-Lead: <run id>`, `Feature: <feature>`, then `Fast-Check: pass` and `Head: <full sha>` after `scripts/ci` passes. The lane merges them. Nobody merges into dev by hand or by an agent.
+5. **Review policy (decision for the captain).** `Belt-Lead:` PRs do not need the `belt/review` status. The lead's own critic panel is the review. Only `Belt-Run:` and `Belt-Test:` PRs keep it.
+6. **Done.** All three: a `Belt-Lead:` PR labelled `feature-done` has merged; the CI run it triggered on dev is green; the lead commented on the feature issue with a line starting `Belt-Contact-Sheet:` and the run link.
+7. **Stall.** No commit on `lead/<feature>`, no PR event and no issue comment for 30 min: Belt sends one nudge with `claude -p --cloud <session id> "<resume text>"`. A second stall: relaunch with a resume brief that says "read RECORD.md, continue from the last stage". A third: label the issue `needs-human` and stop.
+8. **Timeouts.** Lead runs: 8 h wall clock, no 1 h no-PR rule. Task runs keep today's 4 h and 1 h.
+9. **Brief rules.** Step one checks out the integration branch and verifies the base SHA. Set the repo-local identity "Prakash Dalai" / `86671543+prakashUXtech@users.noreply.github.com`. No attribution line anywhere, comments included. Fixers run the full harness before handing back. The Anatomy loop stops after 2 clean rounds or 4 rounds total; once a round is clean, add no new critics. One critic lens is first-use clarity: "what does each number and label mean to someone new?". Agents never treat a chat message as a reason to stop or skip a merge; questions go to the supervisor.

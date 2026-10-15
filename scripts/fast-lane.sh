@@ -77,12 +77,16 @@ SELF_CHECK="fast-lane"
 # PROTECTED is exactly the backticked paths in CLAUDE.md's "**Never edit**"
 # bullet; Tests/fast_lane checks the two match. A path ending in / is that
 # folder at the root, a path with a / is that file, and a bare name is that
-# file in any folder (docs/AGENTS.md too). Matching ignores case.
-PROTECTED=(Package.swift Package.resolved .github/ .claude/ scripts/ CLAUDE.md AGENTS.md LICENSE)
+# file in any folder (docs/AGENTS.md too). A * matches one folder name.
+# Matching ignores case. docs/c4/model.json and each app's waves.md are
+# generated on dev (.github/workflows/generated.yml), so PRs never edit them.
+PROTECTED=(Package.swift Package.resolved .github/ .claude/ scripts/ CLAUDE.md AGENTS.md LICENSE
+  docs/c4/model.json 'docs/blueprints/*/features/waves.md')
 deny_re() {
   local p re=""
   for p in "${PROTECTED[@]}"; do
     p="${p//./\\.}"
+    p="${p//\*/[^/]*}"
     case "$p" in */) p="^$p" ;; */*) p="^$p\$" ;; *) p="(^|/)$p\$" ;; esac
     re+="${re:+|}$p"
   done

@@ -1,0 +1,9 @@
+{
+  "id": "creative-core",
+  "name": "creative-core",
+  "description": "The pure-Swift engines the Models call (github.com/qbtrix/creative-core), tracked on its main branch until it tags releases.",
+  "tags": [
+    "external"
+  ],
+  "order": 20
+}

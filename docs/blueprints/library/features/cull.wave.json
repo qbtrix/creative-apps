@@ -1,0 +1,42 @@
+{
+  "title": "Cull from the keyboard with undo and Auto Advance",
+  "wave": 2,
+  "order": 30,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "covers": "#211, #426, #724 (keys)",
+  "waits_on": "spine, #333",
+  "issues": [
+    211,
+    426,
+    724
+  ],
+  "owned": [
+    "Sources/LibraryModel/LibraryCulling.swift",
+    "Sources/LibraryModel/Live/LiveCulling.swift",
+    "Sources/LibraryModel/MetadataEditing.swift",
+    "Sources/LibraryApp/LibraryWindow+Cull.swift",
+    "Tests/LibraryModelTests/LibraryRatingTests.swift",
+    "Tests/LibraryModelTests/LibraryAutoAdvanceTests.swift",
+    "Tests/LibraryModelTests/LibraryMetadataTests.swift",
+    "Tests/AppSnapshotTests/LibraryRatingSnapshots.swift",
+    "Tests/AppSnapshotTests/LibraryAutoAdvanceSnapshots.swift",
+    "UITests/LibraryJourneyTests+Cull.swift",
+    "UITests/LibraryJourneyTests+PerfCull.swift",
+    "Tests/LibraryModelTests/LibraryCullBudgetTests.swift",
+    "Sources/LibraryApp/MetadataInspector.swift",
+    "Tests/AppSnapshotTests/LibraryMetadataSnapshots.swift"
+  ],
+  "core": "none",
+  "suiteui": "S-L2 (reject badge); #330, #333",
+  "depends": [
+    "spine"
+  ],
+  "journeys": [
+    "J4",
+    "P2"
+  ],
+  "notes": "#724's keys only; its zoom and photo size go to loupe-viewport. The grid's reject mark (dimmed cell, xmark badge) is drawn by thumbnails, which owns the cell builder; cull changes only Model state. Owns MetadataInspector.swift in wave 2: it routes the stars, flag and label through cull(_:) and gives every control an identifier (most of #291's list); metadata-more takes the file in wave 5. Its (L) steps wait for import to merge. Its PR that lands the loupe keys says 'Part of #724'; whichever of cull and loupe-viewport merges its #724 part last says 'Closes #724'.",
+  "quality": "QB-LIB-4, QB-LIB-5, QB-F3, QB-F4",
+  "library_title": "Cull from the keyboard with undo and Auto Advance, in grid and loupe"
+}

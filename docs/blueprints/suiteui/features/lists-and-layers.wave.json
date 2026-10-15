@@ -1,0 +1,9 @@
+{
+  "title": "Sidebar and layer rows",
+  "wave": 2,
+  "order": 30,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "covers": "#146, #577, #108, #73, #589, #111, #249, #284, #308, #311, #312",
+  "waits_on": "#778 (suite-harness)"
+}

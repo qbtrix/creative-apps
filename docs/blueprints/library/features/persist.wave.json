@@ -1,0 +1,37 @@
+{
+  "title": "The catalog file",
+  "wave": 2,
+  "order": 40,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "covers": "#212",
+  "waits_on": "spine, #333",
+  "issues": [
+    212
+  ],
+  "owned": [
+    "Sources/LibraryModel/LibraryPersistence.swift",
+    "Sources/LibraryModel/Live/LiveCatalogCoding.swift",
+    "Sources/LibraryApp/Platform/CatalogStore.swift",
+    "Sources/LibraryApp/LibraryWindow+Persist.swift",
+    "Tests/LibraryModelTests/LibraryPersistTests.swift",
+    "Tests/LibraryModelTests/Golden/catalog-v1.json",
+    "Tests/AppSnapshotTests/LibraryRestoreSnapshots.swift",
+    "UITests/LibraryJourneyTests+Persist.swift",
+    "UITests/LibraryJourneyTests+PerfLaunch.swift",
+    "Tests/LibraryModelTests/LibraryCatalogBudgetTests.swift"
+  ],
+  "core": "none for v1 (JSON); creative-core#157 only if decision D1 picks the SQLite catalog",
+  "suiteui": "S-L4 InlineNotice; #330, #333",
+  "depends": [
+    "spine"
+  ],
+  "journeys": [
+    "J8",
+    "J9",
+    "P7"
+  ],
+  "notes": "Writes the develop and crop objects from the start (their types come from the spine), so #423's and #425's catalog parts are done here. Its (L) steps wait for import to merge. Flushes on quit and exposes library.catalog = saved or dirty.",
+  "quality": "QB-LIB-2, QB-L12, QB-LIB-V7",
+  "library_title": "The catalog file: JSON v1 with develop and crop, restore at launch, set aside a damaged file"
+}

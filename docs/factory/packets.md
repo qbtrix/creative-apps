@@ -11,6 +11,31 @@ six tasks in one chain, each editing its own line of `docs/c4/model.json`),
 so the swarm had nothing to run side by side and a feature took 8 to 16
 hours. Every rule below exists to give the lead independent tasks.
 
+## Fragments, not shared files
+
+Two files every feature used to edit are now generated, so tasks never
+chain or conflict through them:
+
+- **The C4 model.** `docs/c4/model.json` is assembled by
+  `scripts/c4-assemble` from one file per component in `docs/c4/parts/`
+  (`<system>/<container>/<component>.json`, with the container's own
+  `container.json`). A task that changes what a component covers edits only
+  that component's part; **a new component is a new part file in the same
+  task that adds its code**, with an `order` that places it among its
+  siblings.
+- **Waves.** Each app's `features/waves.md` is printed by `scripts/waves`
+  from the app's `waves.in.md` (the prose) and one data file per feature,
+  `features/<feature>.wave.json` (title, wave, status, feature issue,
+  covers, waits on, depends, owned files). A new packet adds its own
+  `.wave.json`; a lead marking its feature built edits only that file
+  (`status` and `feature_issue`).
+
+No task ever edits `docs/c4/model.json` or a `waves.md`: the lane refuses
+them, and on `dev` the Generated workflow rewrites both from their parts.
+`scripts/ci` fails when the parts don't assemble or a feature's data breaks
+the wave checks (two features of one wave owning a file, a dependency in the
+same or a later wave).
+
 ## The shape
 
 Sections in this order. Keep the headings; the lead and the critics look
@@ -45,7 +70,7 @@ for them by name.
    ```
    - Wave 1: EZ-1, EZ-4, EZ-5. Independent in this wave: all three.
    - Wave 2: EZ-2, EZ-6. Independent in this wave: both.
-   - Wave 3: EZ-3, EZ-7, EZ-9 (shared docs, final).
+   - Wave 3: EZ-3, EZ-7, EZ-9 (blueprint prose and design.md, final).
    Longest chain: EZ-1 → EZ-2 → EZ-3 (3).
    ```
 8. **Acceptance test per task.** `| id | test | fails when |`, one row per
@@ -58,14 +83,18 @@ for them by name.
 
 ## The three rules
 
-**(a) Shared docs go in ONE final task.** Edits to `docs/c4/model.json`,
-`docs/design.md`, a blueprint (`docs/blueprints/<app>.md`) or a `waves.md`
-all go in the feature's last task, the one that carries `feature-done`
-(or a docs-only task right before it when that task would pass 400 lines
-or 15 files). No build task owns a shared doc, so no two build tasks chain
-through one. A new file inside a target's folder is already covered by its
-C4 component; a description that needs a new sentence gets it in the final
-task.
+**(a) Shared prose goes in ONE final task; fragments go with their code.**
+Edits to `docs/design.md`, a blueprint (`docs/blueprints/<app>.md`) or an
+app's `waves.in.md` all go in the feature's last task, the one that carries
+`feature-done` (or a docs-only task right before it when that task would
+pass 400 lines or 15 files). No build task owns shared prose, so no two
+build tasks chain through it. A C4 part and the feature's `.wave.json` are
+fragments, not shared docs: the task that adds a component adds its part,
+a task that changes what its component covers edits that part, and the
+`feature-done` task sets the feature's `status` to `built`. Two tasks that
+edit the same part are owned-file overlap (rule (c)), so give a new area its
+own component part rather than chain. A new file inside a target's folder
+is already covered by its C4 component.
 
 **(b) Depend only on merged code you need.** Task B depends on task A only
 when B cannot be built and pass `scripts/ci` without A merged: B calls a
@@ -101,8 +130,11 @@ with the task ids. It refutes; it doesn't rewrite.
 2. **A link that isn't needed.** A depends-on whose task doesn't call
    anything the other adds, doesn't need its behavior in a test, and
    doesn't share an owned file.
-3. **Shared-doc edits outside the final task.** `docs/c4/model.json`,
-   `docs/design.md`, a blueprint or a `waves.md` in any task but the last.
+3. **Shared-prose edits outside the final task.** `docs/design.md`, a
+   blueprint or a `waves.in.md` in any task but the last; any task that
+   lists the generated `docs/c4/model.json` or a `waves.md` at all (it
+   edits the C4 part or the feature's `.wave.json` instead); a new
+   component whose part is not in the task that adds its code.
 4. **Owned files overlapping inside a wave.** Two tasks of one wave that
    list the same file.
 5. **A missing link.** A task that uses something another task adds, or

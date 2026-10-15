@@ -1,0 +1,18 @@
+{
+  "id": "flare-model",
+  "name": "FlareModel",
+  "description": "Linux-safe state and logic behind Flare's window. FlareWorkspace: the open FlareCore document, selected scene and drawing tool. Foundation only, value types.",
+  "technology": "Swift 6, Foundation",
+  "tags": [
+    "internal"
+  ],
+  "order": 30,
+  "relationships": [
+    {
+      "source": "flare-model",
+      "target": "flarecore",
+      "description": "uses FlareCore from creative-core",
+      "style": "sync"
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "id": "corecolor",
+  "name": "CoreColor library",
+  "description": "Color spaces and conversions.",
+  "technology": "Swift 6, SwiftPM",
+  "tags": [
+    "external"
+  ],
+  "order": 20
+}

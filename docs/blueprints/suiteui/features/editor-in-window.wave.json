@@ -1,0 +1,11 @@
+{
+  "title": "`SuiteWindow` can hold a canvas editor: sidebar slot, subtitle, document actions, inspector width, `-SuiteWindowSize`, `EditorDetail`, `SidebarActionRow`, the app switcher, the journeys' window and geometry checks, the parity journey",
+  "wave": "SP1",
+  "order": 10,
+  "status": "building",
+  "feature_issue": "#1079",
+  "covers": "the 2026-10-15 captain decisions (one shell, one tool box, the app switcher), SuiteUI half",
+  "waits_on": "nothing (#933 for the geometric test EW-5b)",
+  "track": "shell parity: docs/blueprints/suite/features/shell-parity-waves.md, wave 1",
+  "longest_chain": "4 (EW-1 → EW-8 → EW-5 → EW-5b)"
+}

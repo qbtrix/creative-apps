@@ -1,0 +1,10 @@
+{
+  "id": "halo-app-sources",
+  "name": "HaloApp sources",
+  "description": "The Halo app (motion graphics): the SwiftUI App scene and views in Sources/HaloApp, built from SuiteUI: the window, the Layer and Composition menus, the composition inspector (Pro density header, Composition rows and layer list), the viewer's status bar and timeline strip (scrub, select a layer, I and O set in and out points), the New Composition sheet, and the alert for a refused rename.",
+  "technology": "Swift 6, SwiftUI, macOS 26",
+  "paths": [
+    "Sources/HaloApp/"
+  ],
+  "order": 10
+}

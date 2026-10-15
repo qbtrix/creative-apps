@@ -1,0 +1,9 @@
+{
+  "title": "Select and edit several layers",
+  "wave": 1,
+  "order": 10,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "covers": "#714, #542, #607; gaps: marquee, several layers, Zoom to Selection",
+  "waits_on": "design-window"
+}

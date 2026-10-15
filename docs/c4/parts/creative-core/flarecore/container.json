@@ -1,0 +1,10 @@
+{
+  "id": "flarecore",
+  "name": "FlareCore library",
+  "description": "Animation document model, commands with undo, timeline, file format and export.",
+  "technology": "Swift 6, SwiftPM",
+  "tags": [
+    "external"
+  ],
+  "order": 10
+}

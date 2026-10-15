@@ -1,0 +1,41 @@
+{
+  "title": "The loupe on CanvasViewport",
+  "wave": 2,
+  "order": 50,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "covers": "#724 (zoom, real size)",
+  "waits_on": "spine, #333",
+  "issues": [
+    724
+  ],
+  "owned": [
+    "Sources/LibraryModel/LoupeState.swift",
+    "Sources/LibraryModel/LoupeZoom.swift",
+    "Sources/LibraryModel/LibraryLoupeImage.swift",
+    "Sources/LibraryModel/RenderQueue.swift",
+    "Sources/LibraryModel/Live/LiveLoupeImaging.swift",
+    "Sources/LibraryApp/LibraryLoupe.swift",
+    "Sources/LibraryApp/LibraryWindow+Loupe.swift",
+    "Tests/LibraryModelTests/LibraryLoupeTests.swift",
+    "Tests/LibraryModelTests/LibraryLoupeZoomTests.swift",
+    "Tests/LibraryModelTests/LibraryRenderQueueTests.swift",
+    "Tests/LibraryModelTests/LibraryLoupeImageTests.swift",
+    "Tests/AppSnapshotTests/LibraryLoupeSnapshots.swift",
+    "UITests/LibraryJourneyTests+Loupe.swift",
+    "UITests/LibraryJourneyTests+PerfLoupe.swift",
+    "Tests/LibraryModelTests/LibraryLoupeBudgetTests.swift"
+  ],
+  "core": "none",
+  "suiteui": "#330, #333",
+  "depends": [
+    "spine"
+  ],
+  "journeys": [
+    "J3",
+    "P4"
+  ],
+  "notes": "#724's zoom, photo on the artboard and real size. Adds Home and End (first and last photo) and scroll pan. Its (L) steps wait for import to merge. Its #724 PR says 'Part of #724' unless it merges after cull's, then 'Closes #724'.",
+  "quality": "QB-LIB-5, QB-L1 (pan), QB-LIB-8",
+  "library_title": "Loupe on CanvasViewport: zoom, pan, real photo size, latest-wins render, prefetch"
+}

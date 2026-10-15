@@ -1,0 +1,9 @@
+{
+  "title": "Style rows and drawing them",
+  "wave": 1,
+  "order": 30,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "covers": "#752, #267, #268, #276, #266",
+  "waits_on": "design-window"
+}

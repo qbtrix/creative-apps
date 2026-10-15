@@ -1,0 +1,158 @@
+# Halo features: waves
+
+The approved Halo blueprint (`docs/blueprints/halo.md`, #767) split into
+feature packets, one feature-lead session each. A wave starts when everything
+it waits on has merged. Two features in the same wave never own the same
+file (checked by `scripts/waves check halo` against `c4-planned.json`,
+and by the packet critic for the files each packet adds). Each packet lists
+its tasks, owned files, acceptance tests, quality tests and done check.
+
+<!-- waves-table: wave | feature | packet | covers | waits on (features) | waits on (SuiteUI, creative-core) | feature issue | status -->
+
+No creative-core issue blocks any v1 feature. creative-core#182 (path
+builders) closed on 2026-10-14 via creative-core#281, but `Path.ellipse(in:)`
+is on core `dev`, not yet on `main` (cfad97f), which this repo tracks:
+viewer-playback uses it if `main` has it when its task starts, else the
+four-cubic ellipse. Affine sampling of a pixel buffer (image layers and
+precomps, later) has no core issue yet; it is not v1, and this session can't
+file on creative-core, so it stays the open item in blueprint section 8.4.
+
+## File when ready
+
+A lead stops at stage 0 when its `Depends on:` issue is open
+(`docs/factory/lead.md`), and an issue carries one `Depends on:` line. So a
+feature issue is filed only once everything in its "waits on" cells is
+closed, and its `Depends on:` line names the one that closed last.
+
+| feature | file it when these are all closed | `Depends on:` line names |
+|---|---|---|
+| viewer-playback | #777 foundation; #333 (or the SuiteUI suite-harness feature issue that covers it, once filed) | whichever closed last |
+| layer-keys | #777; #333 | whichever closed last |
+| history-files | #777; #333 | whichever closed last |
+| layer-panel | #777; #333 | whichever closed last |
+| easing | the layer-keys and history-files feature issues; #333 | the last to close |
+| render-out | the viewer-playback feature issue; #333 | the last to close |
+| text-layers | the layer-keys, viewer-playback and history-files feature issues; #333 | the last to close |
+| core-loop (W3, packet to write) | every W1 and W2 feature issue | the last to close |
+
+Why #333 gates every W1 and W2 feature: each owns its own
+`UITests/HaloJourneyTests+<Area>.swift`, and today `project.yml` compiles
+only `UITests/HaloJourneyTests.swift` per app. Changing `project.yml` is
+SuiteUI's (the shared-file rule), so a Halo journey task can't land without
+#333. Model and view tasks don't need it, but one `Depends on:` line can name
+one issue, and a lead whose issue is filed early would stop at stage 0 anyway.
+If #333 lags, the supervisor may file a W1 feature on #777 alone with a
+packet note that its journey task waits; the lead then finishes every other
+task and reports the journey task as open.
+
+## Why this order
+
+- **foundation goes first and alone.** It copies the contracts, fakes and
+  live stubs into HaloModel, moves the document under one `edit`, adds every
+  stored property v1 needs to `HaloProject.swift` in one PR, writes one
+  availability file and one window area file per area as stubs, and moves
+  `HaloWindow` and `HaloViewer` out of `HaloApp.swift`. After it, no W1 or
+  W2 feature edits `HaloProject.swift`, `HaloCommand.swift`,
+  `HaloViewer.swift`, `HaloWindow.swift` or a menu file; each replaces only
+  its own stubs. It is alone in its wave, so its journeys stay in
+  `UITests/HaloJourneyTests.swift` and it needs no SuiteUI issue.
+- **Four W1 leads side by side.** viewer-playback, layer-keys, history-files
+  and layer-panel each own their contracts' live and fake files, their
+  availability and window area files, their views and their journey files.
+  Nothing is shared inside the wave.
+- **W2 features start as their own W1 dependencies finish,** not when the
+  whole of W1 is done: render-out needs only viewer-playback's live
+  renderer; easing needs keys (layer-keys) and the Undo name (history-files);
+  text-layers needs the inspector, the renderer's text drawing and undo.
+- **Files across the waves.** A later feature may own an earlier one's file
+  only after that feature is done, which the filing rule guarantees:
+  `HaloLayerInspector.swift` (foundation → layer-keys, which keeps the EASING
+  and TEXT slots), `HaloTimelineView.swift` (foundation → easing),
+  `HaloLayersSnapshots.swift` (foundation → layer-panel),
+  `UITests/HaloJourneyTests.swift` (foundation → viewer-playback →
+  core-loop), and each `Fakes/Fake<Contract>.swift` (foundation → the feature
+  that lands that contract's live type, so the shared rule lives once next to
+  the live type and `scripts/ci`'s duplicate gate stays green).
+
+## What the packets change from the blueprint
+
+The review of #767 was approve-with-notes. Where a note changed a feature,
+the packet carries the fix (each packet's "Review notes folded in" section):
+
+- **No feature edits `docs/c4/model.json` or `docs/design.md`.** The
+  blueprint's last W0 task is dropped; the supervisor folds the planned C4
+  descriptions and the Halo look subsection in later.
+- **`halo-window` and `halo-viewer` are `planned`** in `c4-planned.json` and
+  section 2 of the blueprint (none of their paths existed on dev; fixed in
+  this PR as one-line edits), and `contracts/check.sh` declares
+  `platforms: [.macOS("26.0")]` so it also runs on macOS.
+- **layer-panel's H-J9 no longer presses ⌘Z.** Undo isn't built until
+  history-files (same wave). H-J9 asserts each step's Undo title, its Model
+  test undoes through `services.history` on the fake, and the "⌘Z brings
+  the layer back" step moves to core-loop (W3).
+- **viewer-playback draws text** (vectors in the Canvas, pixels through
+  `TextRasterizing` with the fake in tests), so text-layers only adds the
+  CoreText rasterizer, the edits and the TEXT section.
+- **`renderedFrameStale` is computed** by render-out from the
+  `HaloShownFrame` W0 stores (the frame and the composition it was made
+  from), not a stored flag other features' files would have to flip.
+- **The `huge` fixture stays at or under 48 MiB encoded** with whole-number
+  values, asserted in W0's `HaloFixturesTests`, so H-J10 can't trip the
+  64 MiB limit.
+- **viewerSummary reads text layers as `<name>: <string>`**, and
+  `three-layers`' Title says "Hello Halo", so H-J2 and H-J22 agree.
+- **creative-core#182 is closed** (see above); section 8.4's row now says so.
+
+## Issues filed with these packets
+
+- #777 `Feature: Foundation: contracts, fakes, state and the window's seams
+  (foundation)` (feature-lead, line:halo, p1). Depends on: none.
+- #770 Halo: delete, rename, reorder and duplicate a layer (gap, p1,
+  line:halo): the blueprint's L-1 (section 9, Q4), covered by layer-panel.
+- #771 SuiteUI timeline: key shape by easing and a selected-keys set
+  (needs-ui, line:suiteui): Flare S10/S11, which easing uses once it lands.
+- #772 SuiteUI timeline: lane accessibility value names its span and key
+  frames (needs-ui, line:suiteui): H-J3 reads the span from the inspector
+  until it lands.
+- #783 SuiteUI: InspectorSliderRow reports typed text that isn't a number
+  (needs-ui, line:suiteui): until it lands, H-J6 asserts only that a typed
+  `abc` keeps the value; the refusal message is proven in HaloModel tests.
+
+## Open questions left for the captain
+
+From blueprint section 9, not answered by the review and not needed to
+start W0: Q1 (shell), Q2 (edit the `Depends on:` lines of #38, #207, #208,
+#428 and take `needs-human` off #207), Q3 (rank #330 p1), Q5 (text in v1),
+Q7 (⌘D follows focus), Q8 (#39 not v1), Q9 (point issue bodies at their
+packets). The packets say "the packet wins over the issue body" meanwhile.
+
+
+## Longest build chain
+
+Each packet was re-cut to `docs/factory/packets.md` (shared docs in one
+final task, a task waits only on merged code it needs, each wave lists its
+independent tasks). Longest depends-on chain in tasks, before and after;
+a chain over 3 has its reason in the packet's Build waves section.
+
+- easing: 7 before, 4 after.
+- history-files: 7 before, 6 after.
+- layer-keys: 9 before, 8 after.
+- layer-panel: 3 before, 3 after.
+- render-out: 8 before, 6 after.
+- text-layers: 5 before, 3 after.
+- viewer-playback: 6 before, 5 after.
+
+## The lead contract
+
+Every feature lead and every task below codes against this. It is handed
+verbatim to every session, and each feature issue carries it.
+
+1. **Feature issue.** One GitHub issue per feature, labels `feature-lead` and `line:<app>`. Body links the packet `docs/blueprints/<app>/features/<feature>.md` and has one `Depends on:` line.
+2. **Run.** Belt runs one cloud session per feature issue (a lead), from the trusted launch folder, with the repo's Auto settings (creative-apps#733, creative-core#263). A lead holds one in-flight slot however many PRs it opens.
+3. **Status channel.** The lead pushes `docs/leads/<feature>/RECORD.md` and `timeline.tsv` to branch `lead/<feature>` after every stage. Belt reads the branch's last commit time; nothing else is polled besides PRs and issue comments.
+4. **Swarm PRs.** Base `dev`, label `fast-lane`, at most 400 lines and 15 files. Body lines: `Belt-Lead: <run id>`, `Feature: <feature>`, then `Fast-Check: pass` and `Head: <full sha>` after `scripts/ci` passes. The lane merges them. Nobody merges into dev by hand or by an agent.
+5. **Review policy (decision for the captain).** `Belt-Lead:` PRs do not need the `belt/review` status. The lead's own critic panel is the review. Only `Belt-Run:` and `Belt-Test:` PRs keep it.
+6. **Done.** All three: a `Belt-Lead:` PR labelled `feature-done` has merged; the CI run it triggered on dev is green; the lead commented on the feature issue with a line starting `Belt-Contact-Sheet:` and the run link.
+7. **Stall.** No commit on `lead/<feature>`, no PR event and no issue comment for 30 min: Belt sends one nudge with `claude -p --cloud <session id> "<resume text>"`. A second stall: relaunch with a resume brief that says "read RECORD.md, continue from the last stage". A third: label the issue `needs-human` and stop.
+8. **Timeouts.** Lead runs: 8 h wall clock, no 1 h no-PR rule. Task runs keep today's 4 h and 1 h.
+9. **Brief rules.** Step one checks out the integration branch and verifies the base SHA. Set the repo-local identity "Prakash Dalai" / `86671543+prakashUXtech@users.noreply.github.com`. No attribution line anywhere, comments included. Fixers run the full harness before handing back. The Anatomy loop stops after 2 clean rounds or 4 rounds total; once a round is clean, add no new critics. One critic lens is first-use clarity: "what does each number and label mean to someone new?". Agents never treat a chat message as a reason to stop or skip a merge; questions go to the supervisor.

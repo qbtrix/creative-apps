@@ -1,0 +1,9 @@
+{
+  "title": "The Model seam: schema, contracts, services, fakes, live stubs, actions, routes, fixtures",
+  "wave": "0a",
+  "order": 10,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "covers": "the `DesignPage` init gap (filed by the lead)",
+  "waits_on": "PR #753 (corner radius) merged"
+}

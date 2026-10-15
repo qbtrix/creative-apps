@@ -1,0 +1,47 @@
+{
+  "title": "The core loop, live, measured",
+  "wave": "W3",
+  "order": 10,
+  "status": "planned",
+  "feature_issue": "later",
+  "covers": "the H-J12 `XCTSkip`",
+  "waits_on": "every W1 and W2 feature; #333; #330 for H-P1 to H-P5 (report-only until then)",
+  "cells": {
+    "waits on (features)": "every W1 and W2 feature",
+    "waits on (SuiteUI, creative-core)": "#333; #330 for H-P1 to H-P5 (report-only until then)"
+  },
+  "depends": [
+    "viewer-playback",
+    "layer-keys",
+    "history-files",
+    "layer-panel",
+    "easing",
+    "render-out",
+    "text-layers"
+  ],
+  "owned": [
+    "UITests/HaloJourneyTests.swift",
+    "UITests/HaloJourneyTests+Perf.swift",
+    "UITests/HaloJourneyTests+Files.swift",
+    "UITests/HaloJourneyTests+FileErrors.swift",
+    "Tests/AppSnapshotTests/HaloViewerLatencyTests.swift",
+    "Tests/AppSnapshotTests/HaloLayoutTests.swift",
+    "UITests/HaloJourneyTests+Viewer.swift",
+    "UITests/HaloJourneyTests+Playback.swift",
+    "UITests/HaloJourneyTests+Drag.swift",
+    "UITests/HaloJourneyTests+Inspector.swift",
+    "UITests/HaloJourneyTests+Parent.swift",
+    "UITests/HaloJourneyTests+History.swift",
+    "UITests/HaloJourneyTests+Layers.swift",
+    "UITests/HaloJourneyTests+Easing.swift",
+    "UITests/HaloJourneyTests+Text.swift",
+    "UITests/HaloJourneyTests+RenderFrame.swift",
+    "UITests/HaloJourneyTests+Render.swift"
+  ],
+  "core": "none",
+  "waits_ui": [
+    "#333",
+    "#330 FrameProbe for H-P1 to H-P5 (report-only until then)"
+  ],
+  "note": "H-J12 live; H-P1 to H-P5; layout L3 to L5; flips every fixture journey still on `-HaloFixture` to `-HaloSample`. Its feature issue is filed only once every W1 and W2 feature is done, because it edits their journey files."
+}

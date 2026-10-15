@@ -1,0 +1,34 @@
+{
+  "title": "Text layers",
+  "wave": "W2",
+  "order": 30,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "covers": "#430",
+  "waits_on": "layer-keys, viewer-playback, history-files; #333",
+  "cells": {
+    "waits on (features)": "layer-keys, viewer-playback, history-files",
+    "waits on (SuiteUI, creative-core)": "#333"
+  },
+  "depends": [
+    "layer-keys",
+    "viewer-playback",
+    "history-files"
+  ],
+  "owned": [
+    "Sources/HaloModel/HaloTextEdits.swift",
+    "Sources/HaloModel/Availability/HaloAvailability+Text.swift",
+    "Sources/HaloApp/HaloTextInspector.swift",
+    "Sources/HaloApp/HaloTextRasterizer.swift",
+    "Sources/HaloApp/HaloWindow+Text.swift",
+    "Tests/HaloModelTests/HaloTextLayerTests.swift",
+    "Tests/AppSnapshotTests/HaloTextLayerSnapshots.swift",
+    "Tests/AppSnapshotTests/HaloTextFidelityTests.swift",
+    "UITests/HaloJourneyTests+Text.swift"
+  ],
+  "core": "none: scaled and rotated text is drawn with CoreRaster's `resized` and `rotated(degrees:)`, then `composite` at an offset (v1 has no skew)",
+  "waits_ui": [
+    "#333"
+  ],
+  "note": "H-J22; HF-10. Waits on layer-keys (inspector), viewer-playback (the renderer's text hook) and history-files (Undo name)."
+}
