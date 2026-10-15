@@ -1207,3 +1207,170 @@ real PDF), the fixed glyph layout (`FolioFakeLayout`), the
 | P-J23 Reduce size | `DocumentWriting.write` with `maxImagePPI`; byte counts compared in the workspace | `saveRoundTripAndFlatten` (write path); PF-11 for the size |
 | P-J20 (tier 2) Recognize | `TextRecognizing.recognize`, then `TextFinding.find` on the result | `recognizeScannedPages` |
 | P-J12 Every control | `FolioCommand.unavailableHelp(for:)` over every service's `unavailableHelp` | W0's `FolioCommandTests` |
+
+---
+
+## 7. Look
+
+The captain's look decisions of 2026-10-15 (PR #973) apply as written:
+Folio opens in `SuiteWindow` (sidebar, content, a trailing inspector the
+person can hide with ⌥⌘I; chrome in system Liquid Glass, content flat;
+title bar kept; follows the system appearance), its tools are Flare's
+floating glass palette (`ToolbarGroup`, `.floating` style, one capsule
+over the content), and the app switcher row sits centered in the window
+toolbar with Folio's item current. Folio is a reading app before it is an
+editor, so it follows the system's Light and Dark appearance like Library,
+not the always-dark editor look; the page itself is document content and
+is always drawn as the PDF says (white paper stays white), on the
+`canvasSurround` token around it.
+
+Content vs. control (design.md, Layers): **content** is the pages, the
+thumbnails grid and the find results list; **control** is the toolbar,
+sidebar, inspector, the floating palette, the find bar (a `GlassPanel`
+over the top of the page view, the one other glass surface) and sheets.
+
+### 7.1 The main window (reading, 1440 × 900)
+
+```
+┌──────────────────────────────────────────────────────────────────────────────────────────┐
+│ ● ● ●  ▤ │ ◁ ▷ │ Lease.pdf — Edited        ⌂   ✦   ▱   ◐   ▦   ◎  [▣]   │ ⌕  ⬆ Share  ⓘ │ ← toolbar (glass)
+├───────────────┬──────────────────────────────────────────────────────────┬───────────────┤   switcher row centered:
+│ PAGES ▾       │   ┌─────────────────────────────┐                         │ DOCUMENT      │   Home, Flare, Design, Photo,
+│ ┌─────┐       │   │ RESIDENTIAL LEASE AGREEMENT │                         │ ┌───────────┐ │   Library, Halo, Folio (current,
+│ │ ▓▓▓ │ 1     │   │ ███████ This lease is made  │      ╭──────────────╮   │ │Pages     3│ │   in the capsule)
+│ │ ▓▓  │       │   │ between the Landlord and... │      │ ↖ ⌶ ▮ U̲ S̶ ✎ │   │ │Size Letter│ │
+│ └─────┘       │   │ 1. Term. The term begins... │      │ ☐ T ✍ ✋     │   │ │Text  Yes  │ │ ← inspector:
+│ ┌─────┐       │   │ 2. Rent. Rent is due on...  │      ╰──────────────╯   │ └───────────┘ │   InspectorHeader + info card
+│ │ ▓▓  │ 2     │   │                    [note ▣] │  ↑ floating palette      │ MARKS         │   with nothing selected;
+│ └─────┘       │   └─────────────────────────────┘    (ToolbarGroup        │ Highlight  1  │   the selected mark's rows
+│ ┌─────┐       │   ┌─────────────────────────────┐     .floating, glass)   │ Notes      1  │   when one is
+│ │ ▓   │ 3     │   │ 3. Deposit. The deposit...  │                         │               │
+│ └─────┘       │                                                            │               │
+│ OUTLINE ▸     │                                                            │               │
+│ MARKS ▸       │  (Page 1 of 3)  (110%)  (Letter 8.5 × 11 in)      ViewerStatusBar pills       │
+└───────────────┴──────────────────────────────────────────────────────────┴───────────────┘
+```
+
+| Region | Component | Status |
+|---|---|---|
+| Window | `SuiteWindow` (sidebar, detail, inspector), the `-SuiteWindowSize` argument | existing; the sidebar slot, window subtitle and `EditorDetail` arrive with editor-in-window (#973) |
+| App switcher | `AppSwitcher` in `SuiteWindow`'s toolbar | planned by #973; **needs a seventh item** (`suite.switcher.folio`, ⌃⌘6): a `needs-ui` issue plus the suite's `SuiteApp.folio` (section 9.5) |
+| Save state | window subtitle ("Edited", "Saved", "Not saved ⚠") | planned by #973 |
+| Toolbar items | `ToolbarAction`: sidebar toggle, back and forward (page history), zoom menu, Find (⌘F), Share, inspector toggle; one prominent action at most: none while reading | existing |
+| Sidebar | `SidebarSection` + `SidebarRow` for Outline and Marks; thumbnails are a `ThumbnailGrid` (one column in the sidebar) | existing; ThumbnailGrid **needs** a page-number caption, a drop-insertion indicator and multi-select with Shift and ⌘ (`needs-ui`, section 9.5) |
+| Page view | content: Folio's own view (`PageView/`), pages on `SuiteColor.canvasSurround`, centered, a 16 pt gap between pages | Folio-owned content view, no look-alike control in it |
+| Tool palette | `ToolbarGroup(style: .floating)` | existing (Flare) |
+| Status | `ViewerStatusBar` pills: page n of m, zoom, page size; the trailing slot shows "Text recognized" or "No text: Recognize…" as a warning pill | existing |
+| Inspector | `InspectorHeader` (document name, info card: pages, size, text layer, permissions), `InspectorSection`, `InspectorColorRow`, `InspectorSliderRow` (line width, opacity), `InspectorPickerRow` (font size, shape), `InspectorAction` | existing |
+| Empty state | `EmptyStateView`: "No PDF Open" · "Open a PDF or drop one here." · Open… (prominent), Create from Images… | existing |
+
+### 7.2 Find (⌘F)
+
+```
+┌──────────────────────────────── page view ──────────────────────────────┐
+│  ╭──────────────────────────────────────────────────────────────────╮   │
+│  │ ⌕ first day          ✕ │ 2 of 2 │ ‹ › │ Aa  ⎵W │ Done           │   │ ← GlassPanel over the top edge
+│  ╰──────────────────────────────────────────────────────────────────╯   │
+│   ┌───────────────────────────┐                                         │
+│   │ 1. Term. The term begins  │                                         │
+│   │ on the ▒first day▒ of ... │  ← every hit tinted; the current one    │
+│   └───────────────────────────┘     outlined in accent (shape cue)      │
+└─────────────────────────────────────────────────────────────────────────┘
+ sidebar while searching: RESULTS (2) · rows "p. 1  …begins on the first day of the month."
+```
+
+Uses `.searchable`-style field inside `GlassPanel` (existing), `List` rows
+in the sidebar (system), `Toggle` buttons for Match Case and Whole Words
+(system, `.toggleStyle(.button)`). Hits use `stateSelected` tint; the
+current hit adds a 2 pt `accent` outline (colour plus shape).
+
+### 7.3 Organize pages (View > Page Grid, ⌘4)
+
+```
+┌───────────────┬───────────────────────────────────────────────────────────┬──────────────┐
+│ PAGES         │  ┌─────┐  ┌─────┐  ┌─────┐  ┌─────┐  ┌─────┐                │ PAGE 3       │
+│ (sidebar      │  │ ▓▓▓ │  │ ▓▓  │  │╔═══╗│  │ ▓▓  │  │     │                │ ┌──────────┐ │
+│  hidden in    │  │ ▓▓  │  │ ▓   │  │║▓▓ ║│  │ ▓   │  │     │                │ │Size  A4  │ │
+│  the grid)    │  └─────┘  └─────┘  │╚═══╝│  └─────┘  └─────┘                │ │Rotation 0│ │
+│               │     1        2     └─────┘     4    ▏   5  ← drop line      │ └──────────┘ │
+│               │                       3 (selected: accent outline)         │ ↻ Rotate     │
+│               │  ╭─────────────────────────────────────╮                    │ ⊕ Insert…    │
+│               │  │ ↻  ↺  ⊕ Blank  ⊕ File…  ⇪ Extract  🗑 │ ← floating group │ 🗑 Delete     │
+│               │  ╰─────────────────────────────────────╯                    │              │
+└───────────────┴───────────────────────────────────────────────────────────┴──────────────┘
+```
+
+`ThumbnailGrid` in the detail (existing; the caption, drop indicator and
+multi-select are the `needs-ui` above), the floating `ToolbarGroup` for page
+commands (existing), `InspectorAction` rows for the selected page
+(existing).
+
+### 7.4 Fill and sign
+
+```
+   ┌─────────────────────────────────────────┐
+   │ MEMBERSHIP APPLICATION                  │
+   │ Name   [Ada Lovelace_______________]    │ ← fields drawn by Folio over the page:
+   │ Email  [____________________________] * │   focus ring = 2 pt accent; required
+   │ Plan   (•) Basic   ( ) Plus             │   empty field after "Check Form" =
+   │ [✓] Agree to terms                      │   stateWarning outline + triangle
+   │ Signature ┌──────────────────────┐      │
+   │           │   𝓐𝓭𝓪 𝓛𝓸𝓿𝓮𝓵𝓪𝓬𝓮      │ ← placed signature (selected: handles)
+   │           └──────────────────────┘      │
+   └─────────────────────────────────────────┘
+
+ Sign tool (S) → popover from the palette:
+   ╭──────────────────────────────╮
+   │ SIGNATURES                   │
+   │  𝓐𝓭𝓪 𝓛𝓸𝓿𝓮𝓵𝓪𝓬𝓮        ✕      │ ← rows: system List
+   │  A.L.  (initials)     ✕      │
+   │ ＋ New Signature…            │
+   ╰──────────────────────────────╯
+
+ New Signature sheet: Picker (segmented: Draw · Type · Image), a pad
+ (content: a flat Canvas, 3:1), Clear, Save as initials (checkbox), Done.
+```
+
+Form fields are Folio's own content views over the page (a text field
+drawn on paper is document content), but each one is a real `TextField`,
+`Toggle(.checkbox)`, radio `Picker(.radioGroup)` or `Picker(.menu)` placed
+at the field's rect, so keyboard, focus ring and VoiceOver are the
+system's (no look-alike). The signature pad is a SwiftUI `Canvas` (content),
+the sheet a system sheet with `Picker`, `Toggle(.checkbox)`, `Button`.
+
+### 7.5 Export, Reduce Size, Recognize Text
+
+Each is a sheet on the document window (design.md, Commands: "Export lives
+at File > Export, opening a sheet"): a `Form` with `Picker` rows (Format:
+PDF, PNG, JPEG, Text; Pages: All, Current, Range [field]; Resolution 72,
+150, 300 ppi), a `Slider` for JPEG quality, `Toggle(.checkbox)` for
+Flatten, Password fields as `SecureField`, and one prominent button
+(Export…, Reduce, Recognize). Progress inside the sheet with a system
+`ProgressView` and Cancel; the result line uses `stateSuccess` with a
+checkmark or `stateError` with an exclamation and the error's sentence.
+
+### 7.6 Commands and menus
+
+| Menu | Items (shortcut) | Owner feature |
+|---|---|---|
+| File | New from Images… (⇧⌘N), Open… (⌘O), Open Recent ▸, Close (⌘W), Save (⌘S), Save As… (⇧⌘S), Export… (⌥⌘E), Reduce File Size…, Print… (⌘P) | reader, history-files, export-convert |
+| Edit | Undo (⌘Z), Redo (⇧⌘Z), Cut, Copy (⌘C copies selected text or mark), Paste, Delete (⌫), Select All (⌘A: all text on the page), Find ▸ Find… (⌘F), Find Next (⌘G), Find Previous (⇧⌘G) | history-files, markup, find |
+| View | Single Page, Continuous (⌘1, ⌘2), Two Pages (⌘3), Page Grid (⌘4), Actual Size (⌘0), Zoom In (⌘+), Zoom Out (⌘−), Fit Width (⌘9), Fit Page, Show Sidebar (⌃⌘S), Show Inspector (⌥⌘I), Go to Page… (⌥⌘G) | reader, pages |
+| Markup | Highlight (⌃⌘H), Underline (⌃⌘U), Strike Out (⌃⌘K), Add Note (⌃⌘N), Add Text Box (⌃⌘T), Pen, Shape ▸, Sign ▸ | markup, sign |
+| Form | Next Field (⇥), Previous Field (⇧⇥), Check Form, Clear Form | forms |
+| Page | Rotate Right (⌘R), Rotate Left (⌘L), Insert Blank Page (⇧⌘B), Insert from File… (⇧⌘I), Delete Page (⌘⌫), Extract Pages…, Split… | pages |
+| Tools | Recognize Text… | ocr |
+| Window | Switch To ▸ (suite), the system's items | suite |
+
+Tool shortcuts while the page view has focus (design.md, Canvas apps):
+V Select, T Text Select, H Highlight, U Underline, K Strike Out, N Note,
+X Text Box, P Pen, R Shape, S Sign, Space-drag Hand.
+
+### 7.7 SuiteUI Folio needs (filed as `needs-ui` by the named feature)
+
+| Need | For | Filed by |
+|---|---|---|
+| `AppSwitcher` seventh item and ⌃⌘6, once `SuiteApp` gains `.folio` | the switcher row | foundation (with the suite line's `SuiteApp.folio` task) |
+| `ThumbnailGrid`: page caption, multi-select (Shift, ⌘), drag reorder with a drop line, keyboard reorder (⌥⌘← →) | sidebar and Page Grid | pages |
+| A pad view for drawing a signature: a flat drawing well with Clear, keyboard alternative "Type instead" | signature sheet | sign; placeholder: a SwiftUI `Canvas` in FolioApp until it lands |
+| `ViewerStatusBar` trailing slot accepting a button pill ("Recognize…") | the no-text pill | ocr; placeholder: a menu item and the inspector row |
