@@ -1,0 +1,10 @@
+{
+  "id": "updater",
+  "name": "Updater",
+  "description": "Check, offer sheet, progress, install and relaunch.",
+  "technology": "Swift 6, SwiftUI and AppKit, macOS 26",
+  "paths": [
+    "Sources/AfterGlowApp/Update*.swift"
+  ],
+  "order": 60
+}

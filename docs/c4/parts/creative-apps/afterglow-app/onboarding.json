@@ -1,0 +1,10 @@
+{
+  "id": "onboarding",
+  "name": "Onboarding",
+  "description": "Three first-launch pages.",
+  "technology": "Swift 6, SwiftUI and AppKit, macOS 26",
+  "paths": [
+    "Sources/AfterGlowApp/Onboarding*.swift"
+  ],
+  "order": 50
+}

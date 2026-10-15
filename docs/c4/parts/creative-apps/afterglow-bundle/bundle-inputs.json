@@ -1,0 +1,10 @@
+{
+  "id": "bundle-inputs",
+  "name": "Bundle inputs",
+  "description": "Info.plists per bundle, icons, entitlements, and Bundle/Engines/CreativeEngines.swift (re-exports FlareCore, CoreRaster, CoreColor for the one shared engine framework).",
+  "technology": "plist, Swift",
+  "paths": [
+    "Bundle/"
+  ],
+  "order": 10
+}

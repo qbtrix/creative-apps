@@ -1,0 +1,11 @@
+{
+  "id": "afterglow-journeys",
+  "name": "AfterGlow journeys",
+  "description": "XCUITest bundle AfterGlowJourneyTests: drives the launcher and the apps through it; every shot audited.",
+  "technology": "Swift 6, XCTest, macOS 26",
+  "tags": [
+    "internal",
+    "test"
+  ],
+  "order": 170
+}

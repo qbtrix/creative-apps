@@ -1,0 +1,10 @@
+{
+  "id": "suite-model-tests-sources",
+  "name": "SuiteModelTests sources",
+  "description": "as the container",
+  "technology": "Swift 6, Foundation (FoundationEssentials), Linux and macOS",
+  "paths": [
+    "Tests/SuiteModelTests/"
+  ],
+  "order": 10
+}
