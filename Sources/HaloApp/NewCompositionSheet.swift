@@ -50,9 +50,10 @@ struct NewCompositionSheet: View {
             }
             .formStyle(.columns)
             ForEach(draft.problems, id: \.self) { problem in
-                Label(problem, systemImage: "exclamationmark.triangle")
+                // An error, not a warning: stateError with the circle, like HaloRefusalCaption.
+                Label(problem, systemImage: "exclamationmark.circle")
                     .font(SuiteFont.caption)
-                    .foregroundStyle(SuiteColor.secondaryText)
+                    .foregroundStyle(SuiteColor.stateError)
             }
             HStack {
                 Spacer()
