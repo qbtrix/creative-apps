@@ -39,3 +39,4 @@ utc	stage	event	ref	note
 2026-10-15T00:31Z	5	ci-run	38658150595	red outside: SnapshotHostTests only; feature tests green; next run 38660293042 has #888 and #891
 2026-10-15T00:47Z	5	ci-run	38660293042	red outside: SnapshotHostTests only; Photo budgets green; feature tests green
 2026-10-15T01:09Z	5	ci-run	38662225263	red outside: SuiteUI TokensTests + SnapshotHostTests; feature tests green
+2026-10-15T01:30Z	5	heartbeat	-	no dev CI run after 38662225263; waiting on a green run (SuiteUI #778 owns the red)
