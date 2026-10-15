@@ -16,3 +16,5 @@ utc	stage	event	ref	note
 2026-10-15T03:36Z	3	pr-merged	#950	S-3
 2026-10-15T03:36Z	3	pr-opened	#951	S-4 services, 246 lines 11 files
 2026-10-15T03:36Z	3	stage-start	S-6a	builder stacked on S-4
+2026-10-15T03:36Z	3	pr-merged	#951	S-4
+2026-10-15T03:36Z	3	needs-ui	#952 #953 #954	blueprint 6.3 lead step
