@@ -14,7 +14,7 @@
 // focused value and its project as `haloProject` (the menus read titles and
 // availability from it), opens on HaloLaunch's project and, under
 // `-HaloControlsProbe`, publishes the `halo.controls` JSON
-// (HaloControls.swift). Views only read HaloProject and call its methods; all
+// (HaloControls.swift). The toolbar's New Composition… is `halo.composition.new`. Views only read HaloProject and call its methods; all
 // state lives in HaloModel (scripts/ci checks this).
 import HaloModel
 import SuiteUI
@@ -32,7 +32,9 @@ struct HaloWindow: View {
     @State var request: HaloWindowRequest?
 
     var body: some View {
-        let newComposition = ToolbarAction("New Composition…", systemImage: "plus") { perform(.newComposition) }
+        let newComposition = ToolbarAction("New Composition…", systemImage: "plus", identifier: "halo.composition.new") {
+            perform(.newComposition)
+        }
         scenes(
             SuiteWindow(
                 title: fileWindowTitle,

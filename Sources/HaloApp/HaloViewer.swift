@@ -42,7 +42,9 @@ struct HaloViewer: View {
             EmptyStateView(
                 "No Composition", systemImage: "sparkles.rectangle.stack",
                 message: "Create a composition to layer and animate footage, shapes and text.",
-                action: ToolbarAction("New Composition…", systemImage: "plus") { perform(.newComposition) })
+                action: ToolbarAction("New Composition…", systemImage: "plus", identifier: "halo.viewer.newComposition") {
+                    perform(.newComposition)
+                })
         }
     }
 

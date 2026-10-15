@@ -2,7 +2,11 @@
 // the every-control journey (H-J13, QB-F1). A control applies
 // `.haloControl(id:enabled:help:)` in its own file: the modifier sets its
 // accessibility identifier and adds its entry to HaloControlsKey, a preference
-// key, so a control joins the list without touching this file. Under
+// key, so a control joins the list without touching this file. It also
+// registers the control with SuiteUI's `.suiteControl`, so under
+// `-SuitePerfProbe` it is in `suite.controls` too: that inventory travels by
+// environment and so reaches the toolbar, sidebar and inspector columns,
+// which a preference may not leave. Under
 // `-HaloControlsProbe` the window root reads the preference and publishes it
 // as the `halo.controls` JSON: SuiteUI's ControlDocument, one entry per id
 // (the last one placed), sorted by id, as the accessibility label (values can
@@ -24,7 +28,7 @@ extension View {
     /// disabled control says why in `help`.
     func haloControl(id: String, enabled: Bool, help: String?) -> some View {
         let entry = ControlEntry(id: id, enabled: enabled, reason: enabled ? nil : help)
-        return accessibilityIdentifier(id)
+        return suiteControl(id: id, enabled: enabled, reason: entry.reason)
             .transformPreference(HaloControlsKey.self) { $0.append(entry) }
     }
 
