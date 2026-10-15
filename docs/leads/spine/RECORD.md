@@ -2,9 +2,9 @@
 
 Issue: #1044 · Packet: docs/blueprints/library/features/spine.md
 Run: act-1a13f18aaa0-lfw5 · Session: session_01DtSRhNqsphGfKkvV5eLsWW · Started: 2026-10-15T10:25Z
-Stage: 3 wave 7
-Base: 5c008acdfbd123e1beb832fb8a031d38760f908a
-Next: wait for SP-8, SP-13, SA-2 to merge; then wave 8 (SP-9, SP-14, SA-3)
+Stage: 3 wave 8
+Base: cc37444c336095b91b1ee2b69a2f11686b8c1f05
+Next: wait for SP-9, SP-14, SA-3 to merge; comment once on #217; then wave 9 (SA-4)
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -20,12 +20,12 @@ Next: wait for SP-8, SP-13, SA-2 to merge; then wave 8 (SP-9, SP-14, SA-3)
 | SP-6 | 5 | Eight live stubs, LibraryServices | Live/*, LibraryServices.swift | LibraryServicesTests | #1116 | merged |
 | SP-7 | 6 | Stored properties, state enums, init(services:), hand-written == | LibraryCatalog.swift | LibraryCatalogTests | #1123 | merged |
 | SP-12 | 6 | Launch arguments and fixtures | LibraryLaunch, LibraryFixtures, LibrarySample | LibraryLaunchTests | #1121 | merged |
-| SP-8 | 7 | Cached `order`, Budget.swift | LibraryOrder.swift, LibraryCatalog.swift | LibraryOrderTests |  | building |
-| SP-13 | 7 | Readouts, keys, controls JSON | LibraryReadouts.swift, LibraryKeys.swift | LibraryReadoutsTests, LibraryKeysTests |  | building |
-| SA-2 | 7 | One Window scene, services from launch args, platform stubs | LibraryApp.swift, LibraryWindow.swift, Platform/* | macOS testLaunchShowsWindowShell |  | building |
-| SP-9 | 8 | Leave the loupe when the collection hides its photo (only if #217 unmerged) | LibraryCatalog.swift | LibraryCollectionSwitchTests | | planned |
-| SP-14 | 8 | recordEdit, undo, redo, titles, endCoalescing | CatalogHistory.swift | LibraryHistoryTests | | planned |
-| SA-3 | 8 | LibraryMenu per area, every v1 menu item with help | LibraryMenus, LibraryCommands, LibraryWindow | J10 | | planned |
+| SP-8 | 7 | Cached `order`, Budget.swift | LibraryOrder.swift, LibraryCatalog.swift | LibraryOrderTests | #1127 | merged |
+| SP-13 | 7 | Readouts, keys, controls JSON | LibraryReadouts.swift, LibraryKeys.swift | LibraryReadoutsTests, LibraryKeysTests | #1128 | merged |
+| SA-2 | 7 | One Window scene, services from launch args, platform stubs | LibraryApp.swift, LibraryWindow.swift, Platform/* | macOS testLaunchShowsWindowShell | #1130 | merged |
+| SP-9 | 8 | Leave the loupe when the collection hides its photo (only if #217 unmerged) | LibraryCatalog.swift | LibraryCollectionSwitchTests |  | building |
+| SP-14 | 8 | recordEdit, undo, redo, titles, endCoalescing | CatalogHistory.swift | LibraryHistoryTests |  | building |
+| SA-3 | 8 | LibraryMenu per area, every v1 menu item with help | LibraryMenus, LibraryCommands, LibraryWindow | J10 |  | building |
 | SA-4 | 9 | Nine area files, hooks, menu: params, key routing | LibraryWindow*, Browser, Grid, Loupe | J0 step 3, existing journeys | | planned |
 | SA-5 | 10 | Import Folder… empty state, notice slot, Preview pill, export sheet | Browser, StatusBar, ExportSheet, Window | LibraryShellSnapshots | | planned |
 | SA-6 | 10 | Inspector tabs/header, Develop/Crop stubs, crop overlay, loupe value | Inspector, DevelopInspector, CropInspector, CropOverlay, Loupe | LibraryShellSnapshots, loupe journey | | planned |
@@ -61,6 +61,7 @@ Taken from the packet's Build waves; checked against dev bcf5a09.
 - Lesson for app builders: a split-out view with `let model: LibraryCatalog` must take mutations as closures (the catalog is a struct); SA-1 broke the macOS build this way. Every later SA prompt says so.
 - #1120 (fix for SA-1's let-model break) merged 11:48; the next macOS run on dev proves it.
 - SA-2 also adds DisplayImage+Image.swift (moved from SA-1) and a Model init that applies LibraryLaunch (showsTestValues is internal(set), so the app can't set it).
+- SP-9 runs: #217 still open at wave 8 start (12:12Z).
 
 ## Open
 - PR #217 (fix for #156) is open at stage 0; SP-9 lands only if it is still unmerged when wave 8 starts.
