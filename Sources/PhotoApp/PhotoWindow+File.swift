@@ -18,11 +18,14 @@
 // their kind. Each successful open and save is noted in Open Recent.
 // `-PhotoOpenFile <path>` opens a file at launch; `-PhotoRecoveryDir
 // <folder>` keeps autosaves there. PhotoFileSession is the file state the
-// window and PhotoFileArea share; D-9 and D-10 add theirs to it. PhotoFileArea
+// window and PhotoFileArea share; D-10 adds its own to it. PhotoFileArea
 // puts `model.saveStatus` in the environment for the top bar's
 // `photo.bar.saved`, keeps the window's edited dot (`isDocumentEdited`) on
 // `model.isDirty`, and shows "Saving…" (`photo.file.saving`) or "Opening…"
 // (`photo.file.opening`) over the window once `files.working` has run 100 ms.
+// It runs the window's PhotoAutosave (D-9): a tick every second, discarded on
+// a clean close; the first window offers what a crash left behind, and
+// Restore and Discard are FileIntents.
 import AppKit
 import CoreRaster
 import Observation
@@ -39,6 +42,10 @@ enum FileIntent {
     case flatten(ImageFormat)
     /// Open Recent > Clear Menu.
     case clearRecent
+    /// The launch offer: Restore its image into the window.
+    case restore(RecoveryOffer)
+    /// The launch offer: Discard what the crash left behind.
+    case discardRecovery
 }
 
 /// Long file work running off the main actor, for the window's notes.
@@ -62,6 +69,27 @@ final class PhotoFileSession {
     var working: PhotoFileWork?
     /// Open Recent's files, newest first.
     private(set) var recentFiles: [URL] = PhotoFileSession.storedRecent()
+    /// The window's autosave, made on its workspace's recovery store when the window appears.
+    private(set) var autosave: PhotoAutosave?
+    /// The launch's restore offer while it waits for Restore or Discard.
+    var recoveryOffer: RecoveryOffer?
+    /// Only the first window of a launch looks for what a crash left behind.
+    private static var recoveryChecked = false
+
+    /// The window's autosave, made on `store` the first time.
+    func startAutosave(_ store: any RecoveryStoring) -> PhotoAutosave {
+        if let autosave { return autosave }
+        let made = PhotoAutosave(window: UUID().uuidString, delay: PhotoWorkspace.autosaveDelay, store: store)
+        autosave = made
+        return made
+    }
+
+    /// The first window's launch: offers the newest autosave a crash left behind.
+    func offerRecovery(_ model: PhotoWorkspace) async {
+        guard !Self.recoveryChecked else { return }
+        Self.recoveryChecked = true
+        recoveryOffer = await startAutosave(model.services.recovery).launch(model: model)
+    }
 
     /// Notes `url` in Open Recent: the system's list, and Photo's own (an app
     /// with no declared document types may not get the system's).
@@ -113,6 +141,19 @@ extension PhotoWindow {
             guard let url = documentURL else { return saveAs() }
             write(to: url, as: format, quality: exportQuality, saving: true)
         case .clearRecent: files.clearRecent()
+        case .restore(let offer):
+            files.recoveryOffer = nil
+            let autosave = files.startAutosave(model.services.recovery)
+            do {
+                try autosave.restore(offer, into: &model, codec: ImageIOCodec())
+                documentURL = nil
+            } catch {
+                autosave.discardLeftBehind()  // it holds nothing to keep (packet note 3)
+                problem = (error as? ArchiveError)?.message ?? "The image can't be restored. \(Self.reason(error))"
+            }
+        case .discardRecovery:
+            files.recoveryOffer = nil
+            files.startAutosave(model.services.recovery).discardLeftBehind()
         }
     }
 
@@ -251,6 +292,7 @@ extension PhotoWindow {
         if documentURL == opened {
             documentURL = url
             model.didSave(as: url.lastPathComponent, kind: kind)
+            files.autosave?.didSave(model: model)
         }
         files.saveFailed = false
         files.working = nil
@@ -284,8 +326,8 @@ struct PhotoFileArea: ViewModifier {
 
     func body(content: Content) -> some View {
         content
-            // D-9 feeds `autosaved` from its autosave.
-            .environment(\.photoSaveStatus, model.saveStatus(autosaved: false, saveFailed: files.saveFailed))
+            .environment(\.photoSaveStatus, model.saveStatus(
+                autosaved: files.autosave?.autosaved ?? false, saveFailed: files.saveFailed))
             .background { PhotoWindowEdited(edited: model.isDirty) }
             .overlay { PhotoFileWorkNote(work: files.working) }
             .focusedSceneValue(\.photoRecentFiles, files.recentFiles)
@@ -303,6 +345,29 @@ struct PhotoFileArea: ViewModifier {
             // A clean image has nothing left unsaved, so "Not saved" goes.
             .onChange(of: model.isDirty) {
                 if !model.isDirty { files.saveFailed = false }
+            }
+            .onChange(of: model.revision) { files.autosave?.noteEdit(at: Date.now.timeIntervalSince1970) }
+            // Ticks every second with this revision's workspace; the next revision restarts it.
+            .task(id: model.revision) {
+                let autosave = files.startAutosave(model.services.recovery)
+                while !Task.isCancelled {
+                    do { try await Task.sleep(for: .seconds(1)) } catch { return }
+                    await autosave.tick(model: model, now: Date.now.timeIntervalSince1970, codec: ImageIOCodec())
+                }
+            }
+            .task { await files.offerRecovery(model) }
+            // A clean close leaves nothing to recover; D-10 asks before a dirty one closes.
+            .onDisappear { if !model.isDirty { files.autosave?.discard() } }
+            .alert(
+                files.recoveryOffer?.message ?? "",
+                isPresented: Binding(get: { files.recoveryOffer != nil }, set: { if !$0 { files.recoveryOffer = nil } }),
+                presenting: files.recoveryOffer
+            ) { offer in
+                Button("Restore") { perform(.file(.restore(offer))) }
+                    .keyboardShortcut(.defaultAction)
+                    .accessibilityIdentifier("photo.recovery.restore")
+                Button("Discard", role: .destructive) { perform(.file(.discardRecovery)) }
+                    .accessibilityIdentifier("photo.recovery.discard")
             }
     }
 }
