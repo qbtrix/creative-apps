@@ -6,11 +6,17 @@ rate and length, and add, drag and remove ruler guides, all as FlareCore
 commands with exact undo.
 **Line:** `line:flare` · **Wave:** 2 (`waves.md`) · **Lead branch:** `lead/live-scenes`
 
+**Status:** built on `dev`. SN-1 #876, SN-2 #879, SN-3 #880, SN-4 #882,
+SN-5 #886, and the Anatomy fixes #889, #890, #892, #896 (round 1), #905,
+#908 (round 2), #910, #911 (round 3) and this PR (round 4). Feature issue
+#800. Nothing is wired into the window yet; IN-4 swaps `LiveScenes` into
+`FlareServices.live`.
+
 **Covers:** #362 (LM-9). It closes with SN-5.
 
 **Depends on:** qbtrix/creative-core#217 (LC-8 `SetSceneCanvas`,
 `RenameScene`, `ReorderScene`), qbtrix/creative-core#219 (LC-10 `MoveGuide`
-merge). Neither had landed on creative-core `main` cfad97f (2026-10-14).
+merge). Both are on creative-core `main` 98be31a.
 SN-1 uses commands that exist today (`AddScene`, `RemoveScene`,
 `SetSceneTiming`, `AddGuide`, `RemoveGuide`) and can start at once.
 

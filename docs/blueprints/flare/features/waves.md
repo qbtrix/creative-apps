@@ -11,7 +11,7 @@ lists its tasks, owned files and acceptance tests.
 | 1 | Never lose work, and draw at full quality on the Mac | `mac-platform.md` | #739, #373, #370 | nothing | #793 (built) |
 | 2 | Draw and select on real documents | `live-stage.md` | #357, #740 | creative-core #213, #214, #215, #182, #173, #216 | filed when its engine issues merge |
 | 2 | Key, retime and ease on real documents | `live-keys.md` | #13, #358 | creative-core #171, #216, #219 | filed when its engine issues merge |
-| 2 | Scenes and guides on real documents | `live-scenes.md` | #362 | creative-core #217, #219 | filed when its engine issues merge |
+| 2 | Scenes and guides on real documents | `live-scenes.md` | #362 | nothing | #800 (built) |
 
 Shipped while these packets were written, so no packet: LM-0c3 fake export
 and the warnings scan (#324, in #747) and LA-2 `PlaybackDriver` (#372, in
