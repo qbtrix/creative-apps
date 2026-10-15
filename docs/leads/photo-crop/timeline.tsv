@@ -29,3 +29,5 @@ utc	stage	event	ref	note
 2026-10-15T13:47Z	4	round-findings	round 1	5 major, 6 minor; batches r1-b1, r1-b2
 2026-10-15T13:49Z	-	heartbeat	-	waiting on lane/CI
 2026-10-15T13:49Z	4	pr-opened	#1164	r1-b1 gridAligned (last red test on dev)
+2026-10-15T13:55Z	4	pr-merged	#1164	r1-b1
+2026-10-15T13:55Z	4	pr-opened	#1170	r1-b2 panel clarity

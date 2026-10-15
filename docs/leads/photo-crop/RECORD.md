@@ -21,9 +21,11 @@ Waves: 1 = CP-1 (independent). 2 = CP-2 (waits CP-1). 3 = CP-3, CP-4 (independen
 ## Rounds
 | round | CI run | CI | audit vs baseline | lenses | confirmed | fixed by | clean |
 |---|---|---|---|---|---|---|---|
-| 1 | 38742226941 (head 20d6a1c) | red: our gridAligned (frames[photo.crop.x] nil); Halo keyedFrame6 not ours (#1163) | n/a (journeys did not run) | clarity, design, layout, controls | 5 major + 6 minor (fields read 0 px; two captions; layout shift; Swap dead under 1:1; swapped orientation unreadable; X/Y 0 refused; empty tooltips; Original unexplained; disabled reasons disagree) | r1-b1 #1164 (gridAligned via anchor preference), r1-b2 (panel clarity) | no |
+| 1 | 38742226941 (head 20d6a1c) | red: our gridAligned (frames[photo.crop.x] nil); Halo keyedFrame6 not ours (#1163) | n/a (journeys did not run) | clarity, design, layout, controls | 5 major + 6 minor (fields read 0 px; two captions; layout shift; Swap dead under 1:1; swapped orientation unreadable; X/Y 0 refused; empty tooltips; Original unexplained; disabled reasons disagree) | r1-b1 #1164 merged (gridAligned via anchor preference), r1-b2 #1170 (panel clarity) | no |
 
 ## Decisions
+- r1-b2: fields follow cropFieldsEnabled, so a locked shape with no pending crop takes typing (model supported it; matches the caption). Kept.
+- r1-b2: per-chip help (Original's ratio) needs ChoiceChips help support; cropAspectHelp exists in the model, unused on screen. Minor, left.
 - Round 1: X/Y accept 0 (the packet's 'under 1 is refused' meant sizes; an X/Y range starting at 0 that refuses 0 is a dead value).
 - Round 1: until ScrubField has a placeholder (needs-ui), the empty fields show the whole image's rect, read with the caption.
 - Round 1: light/dark crop snapshots are byte-identical because the editor shell is dark in both; outside this feature, not fixed.
@@ -34,6 +36,8 @@ Waves: 1 = CP-1 (independent). 2 = CP-2 (waits CP-1). 3 = CP-3, CP-4 (independen
 - Wave 1 has one task, so it runs as one worktree subagent, not the build-wave workflow.
 
 ## Open
+- #1169 needs-ui: ScrubField placeholder for a nil value.
+- CropOptions.emptyCaption is unused by the view but still asserted by PhotoCropOptionsSnapshots; remove both in a later batch.
 - Issue comments posted from this session get a Generated-by footer re-appended server-side (PATCH can't remove it); the #763 comment carries one. PR bodies can be cleaned.
 - #1148 needs-ui: per-chip identifiers on ChoiceChips; until then PJ-8 finds aspect chips by title.
 - Round 1 check: setCropField refuses X/Y 0 (contract: value under 1 is refused for every field), so X 0 beeps; judge in the critic panel.
