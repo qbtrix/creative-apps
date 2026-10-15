@@ -4,7 +4,9 @@
 // fixes a height. The row owns only presentation state (the rename draft);
 // toggles and renames go out through closures, and a nil closure turns that
 // gesture off. Each toggle icon lays out both of its symbols and draws one,
-// so it is as wide in every state and the toggles form a column (#53).
+// so it is as wide in every state and the toggles form a column (#53). The
+// icon is hidden from accessibility, so each toggle carries its own
+// identifier, `suite.sidebar.<item id>.<toggle id>` (the app audit, #262).
 import SwiftUI
 
 public struct SidebarItem: Identifiable, Hashable, Sendable {
@@ -64,6 +66,12 @@ public struct SidebarToggle: Identifiable, Hashable, Sendable {
 
     /// The SF Symbol for the current state.
     public var systemImage: String { isOn ? onSymbol : offSymbol }
+
+    /// The toggle's accessibility identifier in the row of item `itemID`:
+    /// the same whatever its state or title, and unique across rows.
+    public func identifier(in itemID: SidebarItem.ID) -> String {
+        "suite.sidebar.\(itemID).\(id)"
+    }
 }
 
 /// Where a click lands in a row: the title label, the blank space between
@@ -105,6 +113,7 @@ public struct SidebarRow: View {
                 .disabled(onToggle == nil)
                 .help(toggle.title)
                 .accessibilityLabel(toggle.title)
+                .accessibilityIdentifier(toggle.identifier(in: item.id))
             }
         }
         .badge(item.count ?? 0)

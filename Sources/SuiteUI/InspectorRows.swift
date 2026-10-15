@@ -3,7 +3,9 @@
 // easing editor). InspectorSection is a system DisclosureGroup under a small
 // caps header (12 pt above, 4 below, no hairline): the whole header toggles
 // it, the chevron shows on hover or while collapsed, and a Reset icon shows
-// while `onReset` is given. Its rows sit 4 pt apart, inset 12 pt from the
+// while `onReset` is given. The header button's identifier is
+// `suite.inspector.section.<title slug>`, its Reset's that plus `.reset`
+// (the app audit, #262). Its rows sit 4 pt apart, inset 12 pt from the
 // panel's edges. InspectorRow is the filled 28 pt Studio row every other row
 // shares: the label inside on the left in secondary text,
 // the value on the right, the hover fill; an empty label puts a checkbox and
@@ -43,6 +45,14 @@ public struct InspectorSection<Content: View>: View {
         }
         .disclosureGroupStyle(InspectorDisclosureStyle(title: title, onReset: onReset))
         .padding(.horizontal, SuiteSpacing.m)
+    }
+
+    /// The header's accessibility identifier for a section titled `title`:
+    /// its words in lower case joined by hyphens ("Hue/Saturation" gives
+    /// `suite.inspector.section.hue-saturation`).
+    nonisolated public static func headerIdentifier(_ title: String) -> String {
+        let words = title.lowercased().split { !$0.isLetter && !$0.isNumber }
+        return "suite.inspector.section." + words.joined(separator: "-")
     }
 }
 
@@ -85,6 +95,7 @@ private struct InspectorSectionHeader: View {
             .buttonStyle(.plain)
             .accessibilityAddTraits(.isHeader)
             .accessibilityValue(isExpanded ? "Expanded" : "Collapsed")
+            .accessibilityIdentifier(InspectorSection<EmptyView>.headerIdentifier(title))
             if let onReset {
                 Button(action: onReset) {
                     Image(systemName: "arrow.counterclockwise").imageScale(.small).contentShape(.rect)
@@ -92,6 +103,7 @@ private struct InspectorSectionHeader: View {
                 .buttonStyle(.plain)
                 .help("Reset \(title)")
                 .accessibilityLabel("Reset \(title)")
+                .accessibilityIdentifier(InspectorSection<EmptyView>.headerIdentifier(title) + ".reset")
             }
         }
         .font(SuiteFont.sectionCaps)
