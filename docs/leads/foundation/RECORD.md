@@ -2,9 +2,9 @@
 
 Issue: #777 · Packet: docs/blueprints/halo/features/foundation.md (on branch `docs/halo-feature-packets` until its PR merges)
 Run: act-1a13b78bcdb-qu60 · Session: session_01Dc9GDxc9HxLtv9XMcFgSWh · Started: 2026-10-14T17:33Z
-Stage: 4 round 4 (waiting on the dev CI run containing 4c405d0: #1007, #1008, #1009)
+Stage: 4 round 4 (last by budget; r4 fixer + panel running)
 Base: 52928d1dbbdd72b849f7fdb6363991f35b1adbeb
-Next: when the three round 3 PRs merge, round 4 (the last by budget) runs on the dev CI run containing them with the same four lenses; open findings after round 4 become gap issues, then the feature-done CI and the contact sheet
+Next: merge the r4 fix (H-J1 Width label regression from #1009; layout L1 judged by visible frame like the audit), file round 4 panel findings as gap issues (no more rounds), then a small feature-done PR (packet status line) and the contact sheet once its dev CI run is green
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -33,6 +33,7 @@ Next: when the three round 3 PRs merge, round 4 (the last by budget) runs on the
 ## Rounds
 | round | CI run | CI | audit vs baseline | lenses | confirmed | fixed by | clean |
 |---|---|---|---|---|---|---|---|
+| 4 | 38694361192 (fdb7c8a, has #1007–#1009) | red: H-J1 'no Width field by its label' (regression from #1009's LabeledContent), testLayoutAtWidths raw-frame check: halo.timeline.track at x 8 in a window at 12 (detail column bleeds 4 pt, SuiteUI #1014); H-J0, H-J13, menus, scrub pass; Halo snapshots and HaloLayerListTests pass | halo offscreen 0, contrast 0, identifier 1, unnamed 0: at or under baseline | clarity, layout, controls, design | 2 journey + panel pending | r4 fixer; #1014 | no |
 | 3 | 38687993459 (8f78bad, has #982–#984 and #996) | red only on testLayoutAtWidths: halo.timeline.track (8, 568) starts 4 pt left of the 880 window (the selected track row runs under the floating sidebar); H-J0, H-J1, H-J13, menus, scrub pass | halo offscreen 0 (≤ 8), contrast 0, identifier 1, unnamed 0: at or under baseline | clarity, layout, controls, design | track edge + 10 panel (4 major: ruler unit, Open Recent dead, diamonds dead, LAYERS misaligned; 6 minor) | #1007 (track + 1, 5); E #1008 (3, 6, 7, 8, 9); F #1009 (2, 4, 10) | no |
 | 3a | 38682385432 (e8e5b52, after #962 revert; before #982–#984) | red: H-J1 (halo.inspector not found after Create), H-J13 (layer row click selects nothing), testLayoutAtWidths (no layer selected at 880); H-J0, scrub, menus pass | halo offscreen 16 > 8: the 880 window from testLayoutAtWidths leaks into later journeys (sidebar -68, inspector to 956); Halo's content column is a rigid 672 pt at both 1000 and 880; contrast 0, identifier 2 | journeys + audit (panel waits for the run with round 2 fixes) | 4 Halo-owned | #996 | no |
 | 2 | 38679533707 (54e16aa) | red: H-J0, testScrubTheTimeline, testEveryMenuOpens pass; H-J1 (halo.inspector not found after Create), H-J13 (toolbar halo.composition.new not found), testLayoutAtWidths (no layer selected at 880) fail; -HaloWindowSize now sticks | halo offscreen 14 > 8 (#933); contrast 1 ≤ 2; identifier 2 ≤ 10; unnamed 0 ≤ 5 | clarity, layout, controls, design | 3 journey (all SuiteWindow / #962) + 14 panel (6 major, 8 minor) | journey: none (SuiteWindow, #962 revert); panel: batches A #984 (2,3,4), B #982 (6,7,13), C #983 (5,8,10,11,12); #976 (8, 9 SuiteUI roots); 1, 14 kept by packet | no |
@@ -77,7 +78,10 @@ Next: when the three round 3 PRs merge, round 4 (the last by budget) runs on the
 
 - Supervisor (after #975): the remaining Halo failures are the feature's own. Lead's measurement backs part of that: Halo's detail column stays 672 pt whatever the window (Library's is 648), and #961's window sizer leaks an 880 frame into later journeys.
 
+- Round 4: Halo's raw-frame L1 check is stricter than the packet's L1, which is the app audit (visible frame, 1 pt slack). The r4 fix aligns it to the audit's rule; the 4 pt column bleed is SuiteUI's (#1014). Round 4 is the last: its panel findings become gap issues.
+
 ## Open
+- #1014 (needs-ui): SuiteWindow's detail column starts ~4 pt left of the window under the floating sidebar.
 - #976 (needs-ui): ViewerStatusBar pills override disabled dimming; sidebar section add button looks disabled.
 - #981 (needs-ui): per-pill tooltips on ViewerStatusBar (Halo uses one bar-level tooltip meanwhile).
 - To file (needs-ui): TimelineStrip should reserve or hide its horizontal scroller; a compact EmptyStateView for short panes (from #982). SuiteUI has no LayerList component yet (from #983; pill dimming is #976).
