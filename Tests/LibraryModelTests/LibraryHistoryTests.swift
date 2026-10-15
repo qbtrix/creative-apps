@@ -1,13 +1,13 @@
 // LibraryHistoryTests.swift: CatalogHistory, the undo and redo stacks of named
-// before-and-after steps, and coalescing a drag into one step. Runs on Linux
-// and macOS.
+// before-and-after steps, coalescing a drag into one step, and the catalog's
+// recordEdit, undo and redo. Runs on Linux and macOS.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
 import Foundation
 #endif
 import CoreColor
-import LibraryModel
+@testable import LibraryModel
 import Testing
 
 private func photo(_ name: String, rating: Int = 0) -> PhotoItem {
@@ -89,4 +89,102 @@ private func step(_ name: String, from: Int, to: Int, key: String? = nil) -> Cat
     _ = history.popRedo()
     history.push(step("Exposure", from: 1, to: 2, key: "exposure"))
     #expect(history.undo.count == 2)
+}
+
+/// Three photos rated 1, 2 and 3 stars; P2 is open in the loupe and selected.
+private func catalogWithLoupe() -> LibraryCatalog {
+    var catalog = LibraryCatalog()
+    catalog.load((1...3).map {
+        PhotoItem(
+            name: "P\($0)", captureDate: Date(timeIntervalSince1970: 1_767_225_600 + Double($0)),
+            color: Color3(0, 0, 0), rating: $0)
+    })
+    catalog.open("P2")
+    catalog.select(["P2"])
+    return catalog
+}
+
+@Test func aRecordedRatingEditUndoesAndRedoesWithoutMovingTheLoupe() {
+    var catalog = catalogWithLoupe()
+    let original = catalog.items
+    #expect(catalog.undoTitle == nil && catalog.redoTitle == nil)
+
+    catalog.recordEdit("Set Rating", ids: ["P2"]) { $0.rating = 5 }
+    #expect(catalog.undoTitle == "Undo Set Rating")
+    #expect(catalog.items.map(\.rating) == [1, 5, 3])
+    #expect(catalog.saveRevision == 1)
+    let edited = catalog.items
+
+    catalog.undo()
+    #expect(catalog.items == original)
+    #expect(catalog.mode == .loupe && catalog.focusedItemID == "P2")
+    #expect(catalog.undoTitle == nil && catalog.redoTitle == "Redo Set Rating")
+    #expect(catalog.saveRevision == 2)
+
+    catalog.redo()
+    #expect(catalog.items == edited)
+    #expect(catalog.mode == .loupe && catalog.focusedItemID == "P2")
+    #expect(catalog.undoTitle == "Undo Set Rating" && catalog.redoTitle == nil)
+    #expect(catalog.saveRevision == 3)
+}
+
+@Test func editsWithOneCoalesceKeyAreOneStepUntilEndCoalescing() {
+    var catalog = catalogWithLoupe()
+    for stars in [4, 5, 0] {
+        catalog.recordEdit("Set Rating", coalesceKey: "stars", ids: ["P1"]) { $0.rating = stars }
+    }
+    #expect(catalog.history.undo.count == 1)
+    #expect(catalog.saveRevision == 3)
+    catalog.endCoalescing()
+    catalog.recordEdit("Set Rating", coalesceKey: "stars", ids: ["P1"]) { $0.rating = 2 }
+    #expect(catalog.history.undo.count == 2)
+
+    catalog.undo()
+    catalog.undo()
+    #expect(catalog.items.map(\.rating) == [1, 2, 3])
+}
+
+@Test func aNoOpEditRecordsNothing() {
+    var catalog = catalogWithLoupe()
+    catalog.recordEdit("Set Rating", ids: ["P3"]) { $0.rating = 3 }
+    catalog.recordEdit("Set Rating", ids: []) { $0.rating = 0 }
+    catalog.recordEdit("Set Rating", ids: ["missing"]) { $0.rating = 0 }
+    #expect(catalog.undoTitle == nil)
+    #expect(catalog.saveRevision == 0)
+}
+
+@Test func aNewEditClearsRedo() {
+    var catalog = catalogWithLoupe()
+    catalog.recordEdit("Set Rating", ids: ["P1"]) { $0.rating = 4 }
+    catalog.undo()
+    #expect(catalog.redoTitle == "Redo Set Rating")
+    catalog.recordEdit("Pick", ids: ["P1"]) { $0.flag = .pick }
+    #expect(catalog.redoTitle == nil)
+    #expect(catalog.undoTitle == "Undo Pick")
+    catalog.redo()
+    #expect(catalog.items.map(\.rating) == [1, 2, 3])
+    #expect(catalog.saveRevision == 3)
+}
+
+@Test func undoAndRedoWithNothingToDoChangeNothing() {
+    var catalog = catalogWithLoupe()
+    let before = catalog
+    catalog.undo()
+    catalog.redo()
+    #expect(catalog == before)
+}
+
+@Test func undoingAnUnflagInFavoritesShowsThePhotoAgain() {
+    var catalog = LibraryCatalog()
+    catalog.load([
+        PhotoItem(name: "F", captureDate: Date(timeIntervalSince1970: 0), color: Color3(0, 0, 0), isFlagged: true)
+    ])
+    catalog.selectCollection("favorites")
+    catalog.select(["F"])
+    catalog.recordEdit("Unflag", ids: ["F"]) { $0.flag = .none }
+    #expect(catalog.order.isEmpty && catalog.selection.isEmpty)
+    #expect(catalog.selectedCollection?.count == 0)
+    catalog.undo()
+    #expect(catalog.order == ["F"])
+    #expect(catalog.selectedCollection?.count == 1)
 }
