@@ -44,7 +44,7 @@ struct LiveRecovery: RecoveryStoring {
 
     func leftBehind() throws -> [RecoveryEntry] {
         var entries: [(name: String, entry: RecoveryEntry)] = []
-        for name in try recoveryFiles() {
+        for name in recoveryFiles() {
             let url = directory.appendingPathComponent(name)
             guard let entry = try? Self.entry(at: url) else {
                 try? FileManager.default.removeItem(at: url)
@@ -63,7 +63,7 @@ struct LiveRecovery: RecoveryStoring {
     }
 
     func discardAll() throws {
-        for name in try recoveryFiles() {
+        for name in recoveryFiles() {
             try FileManager.default.removeItem(at: directory.appendingPathComponent(name))
         }
     }
@@ -88,12 +88,14 @@ struct LiveRecovery: RecoveryStoring {
         return directory.appendingPathComponent("\(name).\(Self.fileExtension)", isDirectory: false)
     }
 
-    /// The names of the folder's .ora files; none when the folder is missing.
-    private func recoveryFiles() throws -> [String] {
-        var isFolder = false
-        guard FileManager.default.fileExists(atPath: directory.path, isDirectory: &isFolder), isFolder else { return [] }
-        return try FileManager.default.contentsOfDirectory(atPath: directory.path)
-            .filter { $0.hasSuffix(".\(Self.fileExtension)") }
+    /// The names of the folder's .ora files; none when the folder can't be
+    /// listed (it is missing, or a file stands in its place), since then no
+    /// window left anything behind. Listing the folder directly, rather than
+    /// asking fileExists(atPath:isDirectory:), keeps this the same on macOS
+    /// (an ObjCBool flag) and Linux (a Bool flag).
+    private func recoveryFiles() -> [String] {
+        guard let names = try? FileManager.default.contentsOfDirectory(atPath: directory.path) else { return [] }
+        return names.filter { $0.hasSuffix(".\(Self.fileExtension)") }
     }
 
     /// The entry in the file at `url`; its info entry is taken out of the package.
