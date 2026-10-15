@@ -2,9 +2,9 @@
 
 Issue: #798 · Packet: docs/blueprints/flare/features/live-stage.md
 Run: act-1a13d374bd1-s92z · Session: claude/live-stage-lead-gljfd4 · Started: 2026-10-15T00:40Z
-Stage: 4 round 2
-Base: 04ae98a764d312627e9705bf4b4e71e075d55271
-Next: wait for #957 #958 #960 to merge, then round 3 (same five lenses) on the next dev CI run containing them
+Stage: 4 round 3
+Base: 3033a12d599ff66ce4ebd5536ff9809d12e1d9cf
+Next: read round 3 panel and the local scripts/ci x2 on 3033a12; a clean round 3 ends the loop (2 clean in a row). Then the feature-done PR once dev CI can go green
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
