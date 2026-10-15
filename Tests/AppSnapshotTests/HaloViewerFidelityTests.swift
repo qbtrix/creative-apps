@@ -181,7 +181,24 @@ import Testing
         _ canvas: RGBAImage, _ render: RGBAImage, name: String, sourceLocation: SourceLocation = #_sourceLocation
     ) {
         let result = GoldenImage().compare(canvas, to: render, tolerance: .standard)
-        #expect(result.passes, "\(name): \(result.differing) pixels differ (share \(result.share))", sourceLocation: sourceLocation)
+        #expect(
+            result.passes,
+            "\(name): \(result.differing) pixels differ (share \(result.share)); \(firstDifference(canvas, render))",
+            sourceLocation: sourceLocation)
+    }
+
+    /// Where the two first differ by over 2/255 and both RGBA values there,
+    /// so a failing run names which side is off without its images.
+    private static func firstDifference(_ canvas: RGBAImage, _ render: RGBAImage) -> String {
+        guard canvas.width == render.width, canvas.height == render.height,
+            canvas.bytes.count == render.bytes.count
+        else { return "sizes differ" }
+        for i in stride(from: 0, to: canvas.bytes.count - 3, by: 4)
+        where (0..<4).contains(where: { abs(Int(canvas.bytes[i + $0]) - Int(render.bytes[i + $0])) > 2 }) {
+            let x = (i / 4) % canvas.width, y = (i / 4) / canvas.width
+            return "first at (\(x), \(y)): canvas \(Array(canvas.bytes[i..<i + 4])) render \(Array(render.bytes[i..<i + 4]))"
+        }
+        return "no pixel over 2/255"
     }
 
     struct Bounds: Equatable {
