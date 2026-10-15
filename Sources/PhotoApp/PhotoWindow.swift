@@ -3,7 +3,8 @@
 // panel tab, the open file's URL, sheets and alerts, the Straighten draft the
 // canvas previews, and the v2 presentation flags), turns every PhotoIntent
 // into a workspace method or a panel, and keeps the picture rendered (CanvasRenderer) whenever the
-// workspace's revision moves. Canvas drags carry
+// workspace's revision moves, and clears the status line's message 4 s after
+// it appears. Canvas drags carry
 // the pen's pressure (PointerPressure) and, while they last, AppKit's mouse
 // event coalescing is off so every pointer sample arrives; StrokePacer hands
 // them to the workspace once per display frame. Its workspace runs on
@@ -70,6 +71,12 @@ struct PhotoWindow: View {
             .onChange(of: model.canvas) {
                 fitPending = true
                 fit()
+            }
+            // The status line's message goes 4 s after it appears; a new message restarts the wait.
+            .task(id: model.statusMessage) {
+                guard model.statusMessage != nil else { return }
+                do { try await Task.sleep(for: .seconds(4)) } catch { return }
+                model.clearStatus()
             }
             .sheet(isPresented: $isExporting) {
                 ExportSheet(

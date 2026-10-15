@@ -1,0 +1,72 @@
+// PhotoTopBar.swift: the Photo window's top bar on SuiteUI's EditorTopBar:
+// the document menu (New Image, Open…, Save, Save As…, Export…), then Open,
+// Save, Export, the Image menu, Undo and Redo, then zoom. A command that
+// can't act now is disabled with a tooltip saying why; each carries a
+// `photo.bar.*` accessibility identifier for the UI journeys and the app
+// audit, and Undo and Redo keep theirs whatever edit they name.
+import PhotoModel
+import SuiteUI
+import SwiftUI
+
+/// The top bar: the document menu, Open, Save, Export, the Image menu, Undo
+/// and Redo, then zoom.
+struct PhotoTopBar: View {
+    let model: PhotoWorkspace
+    let perform: PhotoPerform
+
+    var body: some View {
+        let noImage = model.canvas == nil ? "Open or create an image first." : nil
+        EditorTopBar(app: "Photo", document: model.canvas == nil ? nil : model.documentName ?? "Untitled") {
+            Button("New Image") { perform(.newImage) }
+            Button("Open…") { perform(.open) }
+            Divider()
+            Button("Save") { perform(.save) }.disabled(noImage != nil)
+            Button("Save As…") { perform(.saveAs) }.disabled(noImage != nil).accessibilityIdentifier("photo.bar.save-as")
+            Button("Export…") { perform(.export(.openSheet)) }.disabled(noImage != nil)
+        } content: {
+            EditorBarItem(ToolbarAction("Open", systemImage: "folder") { perform(.open) })
+                .accessibilityIdentifier("photo.bar.open")
+            EditorBarItem(ToolbarAction("Save", systemImage: "square.and.arrow.down", unavailableHelp: noImage) {
+                perform(.save)
+            })
+            .accessibilityIdentifier("photo.bar.save")
+            EditorBarItem(ToolbarAction("Export", systemImage: "square.and.arrow.up", unavailableHelp: noImage) {
+                perform(.export(.openSheet))
+            })
+            .accessibilityIdentifier("photo.bar.export")
+            EditorBarMenu("Image", systemImage: "photo", unavailableHelp: noImage) {
+                PhotoImageMenu(perform: perform)
+            }
+            .accessibilityIdentifier("photo.bar.image")
+            EditorBarDivider()
+            EditorBarItem(
+                ToolbarAction(
+                    model.undoActionName, systemImage: "arrow.uturn.backward",
+                    unavailableHelp: model.canUndo ? nil : "Nothing to undo.") { perform(.undo) },
+                showsTitle: false)
+            .accessibilityIdentifier("photo.bar.undo")
+            EditorBarItem(
+                ToolbarAction(
+                    model.redoActionName, systemImage: "arrow.uturn.forward",
+                    unavailableHelp: model.canRedo ? nil : "Nothing to redo.") { perform(.redo) },
+                showsTitle: false)
+            .accessibilityIdentifier("photo.bar.redo")
+            Spacer(minLength: SuiteSpacing.s)
+            EditorBarItem(
+                ToolbarAction("Zoom Out", systemImage: "minus.magnifyingglass", unavailableHelp: noImage) {
+                    perform(.zoomOut)
+                }, showsTitle: false)
+            .accessibilityIdentifier("photo.bar.zoom-out")
+            EditorBarItem(
+                ToolbarAction("Fit on Screen", systemImage: "arrow.up.left.and.arrow.down.right", unavailableHelp: noImage) {
+                    perform(.fit)
+                }, showsTitle: false)
+            .accessibilityIdentifier("photo.bar.fit")
+            EditorBarItem(
+                ToolbarAction("Zoom In", systemImage: "plus.magnifyingglass", unavailableHelp: noImage) {
+                    perform(.zoomIn)
+                }, showsTitle: false)
+            .accessibilityIdentifier("photo.bar.zoom-in")
+        }
+    }
+}
