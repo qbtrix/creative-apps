@@ -2,15 +2,15 @@
 
 Issue: #1036 · Packet: docs/blueprints/halo/features/layer-keys.md
 Run: act-1a13eb691a3-wg4n · Session: e0e565d9-6109-5c52-89fd-c254398040f9 · Started: 2026-10-15T08:39Z
-Stage: 3 wave 1
-Base: 62a857755d8d554b311bb2e056d8562b27dfea26
-Next: wait for LK-1's PR to merge, then start wave 2 (LK-2a) from the new origin/dev.
+Stage: 3 wave 2
+Base: 6f32c27c6dfc3d515147baa1df6745abdc49710d
+Next: wait for LK-2a's PR to merge, then start wave 3 (LK-2b).
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
 |---|---|---|---|---|---|---|
-| LK-1 | 1 | HaloKeyRules sampling, matrices, follows; LiveLayerPlacing real; FakeLayerPlacing on the rules | Live/HaloKeyRules, Live/LiveLayerPlacing, Fakes/FakeLayerPlacing, LayerPlacingContractTests | LayerPlacingContractTests [fake, live], HF-3, HF-5 | – | building |
-| LK-2a | 2 | read half: keyState, rows; LivePropertyKeying rows real | Live/HaloKeyRules, Live/LivePropertyKeying, Fakes/FakePropertyKeying, PropertyKeyingContractTests | PropertyKeyingContractTests (rows) | – | waits LK-1 |
+| LK-1 | 1 | HaloKeyRules sampling, matrices, follows; LiveLayerPlacing real; FakeLayerPlacing on the rules | Live/HaloKeyRules, Live/LiveLayerPlacing, Fakes/FakeLayerPlacing, LayerPlacingContractTests | LayerPlacingContractTests [fake, live], HF-3, HF-5 | #1054 | merged |
+| LK-2a | 2 | read half: keyState, rows; LivePropertyKeying rows real | Live/HaloKeyRules, Live/LivePropertyKeying, Fakes/FakePropertyKeying, PropertyKeyingContractTests | PropertyKeyingContractTests (rows) | – | building |
 | LK-2b | 3 | write half: setValue, toggleAnimation, toggleKey | same as LK-2a | PropertyKeyingContractTests (writes) | – | waits LK-2a |
 | LK-3 | 4 | setParent in the rules, cycle refused, child kept on screen | same as LK-2a | PropertyKeyingContractTests on parented | – | waits LK-2b |
 | LK-4 | 4 | LiveViewerDragging hit and commitMove; fake wraps it | Live/LiveViewerDragging, Fakes/FakeViewerDragging, ViewerDraggingContractTests | ViewerDraggingContractTests | – | waits LK-2b |
@@ -38,6 +38,9 @@ Waves as in the packet. Independent per wave: W1 LK-1; W2 LK-2a; W3 LK-2b; W4 LK
 - LK-6 waits on LK-3 (live setParent), LK-4 (drag availability needs the live dragging), LK-5 (shares HaloKeying.swift).
 - The container had no Swift; the lead installed swift-6.3.3-RELEASE (CI's version) into /opt/swift. Base gate: CI: PASS.
 - Single-task waves run as one worktree subagent; waves of 3 use build-wave.js.
+
+- LK-1: FakeLayerPlacing wraps LiveLayerPlacing (jscpd flagged identical bodies); FakeLayerPlacing.follows stays as a forwarder because HaloFileValidation (not ours) calls it.
+- Packet value `Floor.bounds(in:).midX` does not exist (HaloLayerRect has no midX); LK-1 used box.x + width/2.
 
 ## Open
 - #207 keeps `needs-human`; the captain decides (packet note). LK-11 says `Closes #207`.
