@@ -376,6 +376,8 @@ blueprint or issues.
 | App-owned expansion (#111), the rename-guard tests (#249, #308, #311, #312) | D | Polish and test plumbing |
 | Command palette (#7) | all | No tier-1 or tier-2 step needs it: not v1 |
 
+Later, from the suite blueprint (captain, 2026-10-15): fling to dock (21) and math in number fields (24), with SuiteUI's part of the Shelf (19), in `docs/blueprints/suite.md` section 3a.
+
 ---
 
 ## 4. Journeys

@@ -272,6 +272,8 @@ Sources (the first two are the ones `docs/priorities.md` used for Design):
 | Boolean operations, masks | *inferred* | missing | none |
 | Prototype links and a player | S3 | missing | none |
 
+Later, from the suite blueprint (captain, 2026-10-15): drag out to export as PNG or SVG (20) and palette from a reference (22), in `docs/blueprints/suite.md` section 3a.
+
 ---
 
 ## 4. Journeys

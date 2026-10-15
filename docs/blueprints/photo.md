@@ -424,6 +424,8 @@ print setup; specialist controls; gradients and fills; magic wand and refine
 edge; skew, distort, perspective and warp; layer groups and clipping masks;
 camera raw (Library); 16-bit layers (section 9, question 3).
 
+Later, from the suite blueprint (captain, 2026-10-15): drag out to export (20) and palette from a reference (22), in `docs/blueprints/suite.md` section 3a.
+
 ### Priority labels for v2 work
 
 Following `docs/priorities.md`'s rules: PV-1, PV-2, PV-3 and PV-6 are `p1`;
