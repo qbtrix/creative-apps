@@ -33,7 +33,7 @@ packet chains every task on the one before it (shared files or new types).
 | S-11b | 17 | panel split 2: Layers tab, History stub | A/PhotoPanel, PhotoLayersTab, PhotoHistoryTab | PhotoLayerRowSnapshots | #991 | open |
 | S-12 | 18 | -PhotoFixture, -PhotoWindowWidth, Preview data pill | M/PhotoFixtures, A/PhotoApp, PhotoWindow, PhotoStatusLine | PhotoLaunchOptionsTests; photo-preview-pill-dark.png | – | todo |
 | S-13a | 11 | PB-2 clone/heal and PB-9 move budgets (model half) | MT/PhotoBudgetTests | PhotoBudgetTests | #979 | merged |
-| S-13b | 19 | PB-2 event-to-picture latency series (feature-done) | ST/PhotoBrushLatencyTests | PhotoBrushLatencyTests | – | todo |
+| S-13b | 19 | PB-2 event-to-picture latency series | ST/PhotoBrushLatencyTests | PhotoBrushLatencyTests | – | todo |
 
 ## Rounds
 | round | CI run | CI | audit vs baseline | lenses | confirmed | fixed by | clean |
@@ -42,7 +42,7 @@ packet chains every task on the one before it (shared files or new types).
 ## Decisions
 - Waves of one task each, in the packet's chain order; the next builder starts once the previous PR has merged into dev.
 - S-7c clips brush, eraser, clone and heal to an existing selection rect (coverage 0 outside). Kept: the packet says coverage is 1 inside the rect; no v1 journey paints with a selection active (checked UITests/PhotoJourneyTests.swift). Crop undo does not restore selectionMask: left to PV-5 (add selectionMask to PhotoStack).
-- S-13 split in two: its model half (PhotoBudgetTests) runs beside the app chain as the packet allows; the latency series carries feature-done last.
+- S-13 split in two: its model half (PhotoBudgetTests) ran beside the app chain as the packet allows. S-13b (latency series) does not carry feature-done: the Anatomy rounds need a CI run first, so feature-done goes on a final packet status-line PR after the rounds (lead.md stage 5).
 - S-8a: flat .export became .export(.openSheet) (a case name clash); area modifiers take PhotoPerform (@MainActor); confirmTransform/dismissTransform are app stubs returning false until PV-7.
 - S-10a: existing editor snapshots should not change (they already ran on .live with the Eyedropper disabled); the 4 s clearStatus task lives in PhotoWindow; status message id photo.status.message.
 - S-7b reference digests were recorded on Linux; if a macOS model test disagrees, check PhotoLayerCompositeTests first.
