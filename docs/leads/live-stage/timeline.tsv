@@ -28,3 +28,4 @@ utc	stage	event	ref	note
 2026-10-15T03:02Z	4	ci-run	38671960461	red, pre-existing UI journeys; live suites green; triage on #763
 2026-10-15T03:06Z	4	round-findings	round 1	1 major 3 minor, fix batches r1-b1 r1-b2
 2026-10-15T03:13Z	4	heartbeat	#798	waiting on dev CI or round work
+2026-10-15T03:14Z	4	pr-opened	#945 #946	round 1 fixes
