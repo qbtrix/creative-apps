@@ -93,3 +93,5 @@ utc	stage	event	ref	note
 2026-10-15T09:09Z	4	ci-run	38709336067	red on HaloLayerListTests in scripts/ci; journeys skipped; all Photo tests pass
 2026-10-15T09:10Z	-	heartbeat	#812	waiting on builders or the lane
 2026-10-15T09:30Z	-	heartbeat	#812	waiting on builders or the lane
+2026-10-15T09:38Z	5	ci-run	38711122431	journeys ran: 13/14 photo pass; testFixtureLaunch test lookup -> r4-b1
+2026-10-15T09:38Z	5	stage-end	#812	contact sheet posted; 4 of 4 rounds used
