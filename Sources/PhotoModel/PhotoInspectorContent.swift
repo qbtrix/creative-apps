@@ -36,10 +36,16 @@ extension PhotoWorkspace {
 
     /// The panel header's fact lines under the title: the canvas size, then
     /// the color space and the layer count. None with no canvas or no
-    /// selected layer.
+    /// selected layer. A selected pixel layer whose bounds differ from the
+    /// canvas (a paste) adds its size and origin, e.g.
+    /// "Pasted Layer 200 × 100 px at 300, 250".
     public var inspectorHeaderDetails: [String] {
-        guard let canvas, selectedLayer != nil else { return [] }
-        return Self.headerDetails(width: canvas.width, height: canvas.height, layerCount: layers.count)
+        guard let canvas, let layer = selectedLayer else { return [] }
+        let details = Self.headerDetails(width: canvas.width, height: canvas.height, layerCount: layers.count)
+        guard let rect = bounds(of: layer),
+            rect != PixelRect(x: 0, y: 0, width: canvas.width, height: canvas.height)
+        else { return details }
+        return details + ["\(layer.name) \(Self.sizeText(width: rect.width, height: rect.height)) at \(rect.x), \(rect.y)"]
     }
 
     /// The header lines for a `width` × `height` image with `layerCount`

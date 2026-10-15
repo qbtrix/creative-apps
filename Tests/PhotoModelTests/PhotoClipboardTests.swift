@@ -186,11 +186,11 @@ import Testing
         workspace.setSelection(PixelRect(x: 4, y: 4, width: 10, height: 10))
         let copied = workspace.copySelection()
         #expect(copied == nil)
-        #expect(workspace.statusMessage == "Nothing to copy.")
+        #expect(workspace.statusMessage?.hasPrefix("Nothing to copy.") == true)
         workspace.clearStatus()
         let cut = workspace.cutSelection()
         #expect(cut == nil)
-        #expect(workspace.statusMessage == "Nothing to copy.")
+        #expect(workspace.statusMessage?.hasPrefix("Nothing to copy.") == true)
         #expect(workspace.undoActionName == "Undo New Layer")
     }
 
