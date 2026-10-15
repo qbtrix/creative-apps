@@ -2,9 +2,9 @@
 
 Issue: #812 · Packet: docs/blueprints/photo/features/photo-seams.md
 Run: act-1a13d5e8ca4-huz5 · Session: cloud lead session · Started: 2026-10-15T02:23Z
-Stage: 5 finish (contact sheet posted; r4-b1 test fix in flight)
+Stage: done (budget spent; contact sheet posted)
 Base: c4ec07810683a4bc7d62dcc5205705229f248a71
-Next: confirm r4-b1 (test-only, fast-lane) merges; the next dev run shows testFixtureLaunch green. Done check open: dev CI is red from other lines (#763)
+Next: nothing for this lead. The next macOS run on dev should show testFixtureLaunch green (#1071). The done check's green run waits on SuiteUI/Halo (#763).
 
 ## Tasks
 
@@ -43,7 +43,7 @@ packet chains every task on the one before it (shared files or new types).
 | 3 | 38700713285 (1dcd1a6) | macOS scripts/ci red on SuiteUI FrameProbeTests.summaryWithinBudget (24.4 ms vs 20 ms timing, not this feature; noted on #763); every Photo test passed; UI journeys skipped, so no screens | – | – | – | – | wait for a run with journeys |
 | 3b | 38704216123 (731, 92db316) | red in this feature's file: testFixtureLaunch (zoom pill not found by label) and testLaunchShowsWindowShell (help tag not shown on hover), both #1031 test lookups; other failures SuiteUI/Halo (#763) | photo all at or under (identifier 16 vs 23, 92 steps) | same six | 2 kept (major: PhotoToolsTests QB-F1 check vacuous for stroke tools; minor: rail disabled tool dimmed twice in SuiteUI -> needs-ui #1049), 2 refuted | #1050 (r3-b1 journey lookups), #1053 (r3-b2 PhotoToolsTests bite) | no |
 | 4 | 38709336067 (53e02c6) | macOS scripts/ci red on HaloLayerListTests (row inset, selected tint; Halo line, not this feature); every Photo test passed incl. #1053's tools tests; UI journeys skipped | – | – | – | – | wait for a run with journeys |
-| 4b | 38711122431 (2fc9b59) | journeys ran: 13/14 Photo pass; testFixtureLaunch fails on a test-side lookup ('No Image Open' read by label only; the screen shows it) -> r4-b1; others SuiteUI/Halo (#763) | photo all at or under (identifier 16 vs 23, 94 steps) | (budget spent) | 1 (test lookup) | r4-b1 | no |
+| 4b | 38711122431 (2fc9b59) | journeys ran: 13/14 Photo pass; testFixtureLaunch fails on a test-side lookup ('No Image Open' read by label only; the screen shows it) -> r4-b1; others SuiteUI/Halo (#763) | photo all at or under (identifier 16 vs 23, 94 steps) | (budget spent) | 1 (test lookup) | #1071 (merged) | no |
 
 ## Decisions
 - Waves of one task each, in the packet's chain order; the next builder starts once the previous PR has merged into dev.
@@ -59,7 +59,7 @@ packet chains every task on the one before it (shared files or new types).
 - Lead step after S-4 merges: file the four needs-ui issues of blueprint 6.3 (SelectionPathOutline, SelectionHandles with rotation, BrushCursorMark, LayerList row symbol and accessory).
 
 ## Open
-- Contact sheet: #812 comment 6189072197 (run 38711122431). Done check not met: dev CI red from SuiteUI/Halo (#763); Photo's last red journey is the r4-b1 test lookup.
+- Contact sheet: #812 comment 6189072197 (run 38711122431). Done check not met: dev CI red from SuiteUI/Halo (#763); Photo's last red journey was a test lookup, fixed by #1071 (merged).
 - needs-ui #1049: ToolbarGroup dims a disabled rail tool twice (about 15% vs 40%).
 - #1032 heal dab barely meets PB-2 (release median 0.75-0.97 ms vs 1 ms).
 - gap issues from round 2 (v1 behaviour, outside photo-seams): #1024 (tile-edge lines at fractional zoom, p1), #1025, #1026, #1027.
