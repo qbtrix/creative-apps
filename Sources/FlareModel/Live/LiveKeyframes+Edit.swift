@@ -55,6 +55,7 @@ extension LiveKeyframes {
 
     static let beforeFrameZero = "A key can't move before frame 0."
     static let pastSymbolEnd = "A key can't move past the symbol's last frame."
+    static let insertPastSymbolEnd = "A symbol can't get longer yet, so frames can't be inserted before its last key."
 
     /// The owner's length in frames, its scene's or its symbol's; a missing owner throws.
     static func length(of owner: LayerOwner, in document: Document) throws -> Int {
