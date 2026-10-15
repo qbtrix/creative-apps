@@ -59,3 +59,4 @@ utc	stage	event	ref	note
 2026-10-15T14:05Z	4	heartbeat	38746333198	still red on viewer-playback tests; journeys skipped
 2026-10-15T14:17Z	4	heartbeat	38748468768	running on 3d42e80
 2026-10-15T14:39Z	4	ci-run	38748468768	red in swift build: LibraryApp LibraryWindow+Cull/Loupe (another line); journeys skipped
+2026-10-15T15:08Z	5	heartbeat	38757068610	last run in progress (111c440); finish after it
