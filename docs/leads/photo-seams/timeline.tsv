@@ -48,3 +48,5 @@ utc	stage	event	ref	note
 2026-10-15T04:51Z	3	stage-start	S-9	builder stacked on S-8b
 2026-10-15T04:51Z	3	pr-merged	#979	S-13a
 2026-10-15T04:51Z	3	pr-merged	#985	S-8b
+2026-10-15T04:57Z	3	pr-opened	#986	S-9 menu split, 224 lines 7 files
+2026-10-15T04:57Z	3	stage-start	S-10a	builder stacked on S-9
