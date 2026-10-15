@@ -2,9 +2,9 @@
 
 Issue: #1036 · Packet: docs/blueprints/halo/features/layer-keys.md
 Run: act-1a13eb691a3-wg4n · Session: e0e565d9-6109-5c52-89fd-c254398040f9 · Started: 2026-10-15T08:39Z
-Stage: 3 wave 4
-Base: 39368fcd91cfad0b08f01350a7483073f785632f
-Next: wave 4 runs in a Workflow (scratchpad build-wave.js); if the session restarted, check PRs on layer-keys/lk-3, lk-4, lk-5 and relaunch only the missing ones.
+Stage: 3 wave 5
+Base: 98e4db15a3ebfb5d0f68dd8a464088bf56679f71
+Next: wave 5 (LK-6, LK-7) runs in a Workflow; on resume check PRs on layer-keys/lk-6, lk-7 and relaunch only the missing ones; then wave 6 (LK-8, LK-9, LK-11).
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -12,11 +12,11 @@ Next: wave 4 runs in a Workflow (scratchpad build-wave.js); if the session resta
 | LK-1 | 1 | HaloKeyRules sampling, matrices, follows; LiveLayerPlacing real; FakeLayerPlacing on the rules | Live/HaloKeyRules, Live/LiveLayerPlacing, Fakes/FakeLayerPlacing, LayerPlacingContractTests | LayerPlacingContractTests [fake, live], HF-3, HF-5 | #1054 | merged |
 | LK-2a | 2 | read half: keyState, rows; LivePropertyKeying rows real | Live/HaloKeyRules, Live/LivePropertyKeying, Fakes/FakePropertyKeying, PropertyKeyingContractTests | PropertyKeyingContractTests (rows) | #1064 | merged |
 | LK-2b | 3 | write half: setValue, toggleAnimation, toggleKey | same as LK-2a | PropertyKeyingContractTests (writes) | #1077 | merged |
-| LK-3 | 4 | setParent in the rules, cycle refused, child kept on screen | same as LK-2a | PropertyKeyingContractTests on parented | – | building |
-| LK-4 | 4 | LiveViewerDragging hit and commitMove; fake wraps it | Live/LiveViewerDragging, Fakes/FakeViewerDragging, ViewerDraggingContractTests | ViewerDraggingContractTests | – | building |
-| LK-5 | 4 | propertyRows, setProperty to/text, endPropertyScrub, shown helpers | HaloKeying.swift, HaloKeyingTests | HaloKeyingTests | – | building |
-| LK-6 | 5 | toggles, setParent, choices; keys availability | HaloKeying.swift, Availability/HaloAvailability+Keys, HaloKeyToggleTests, HaloKeysAvailabilityTests | both suites | – | waits LK-3,4,5 |
-| LK-7 | 5 | compositionPoint and viewer drag begin/move/end/cancel | HaloViewerDrag.swift, HaloKeyByDragTests | HaloKeyByDragTests | – | waits LK-4 |
+| LK-3 | 4 | setParent in the rules, cycle refused, child kept on screen | same as LK-2a | PropertyKeyingContractTests on parented | #1088 | merged |
+| LK-4 | 4 | LiveViewerDragging hit and commitMove; fake wraps it | Live/LiveViewerDragging, Fakes/FakeViewerDragging, ViewerDraggingContractTests | ViewerDraggingContractTests | #1086 | merged |
+| LK-5 | 4 | propertyRows, setProperty to/text, endPropertyScrub, shown helpers | HaloKeying.swift, HaloKeyingTests | HaloKeyingTests | #1091 | merged |
+| LK-6 | 5 | toggles, setParent, choices; keys availability | HaloKeying.swift, Availability/HaloAvailability+Keys, HaloKeyToggleTests, HaloKeysAvailabilityTests | both suites | – | building |
+| LK-7 | 5 | compositionPoint and viewer drag begin/move/end/cancel | HaloViewerDrag.swift, HaloKeyByDragTests | HaloKeyByDragTests | – | building |
 | LK-8 | 6 | budgets HB-1, HB-3, HB-4 | HaloKeysBudgetTests | HaloKeysBudgetTests | – | waits LK-5,7 |
 | LK-9 | 6 | keys routes; TRANSFORM rows, key buttons, refusal caption | HaloApp/HaloWindow+Keys, HaloApp/HaloLayerInspector, HaloInspectorSnapshots | halo-inspector(-refusal) snapshots | – | waits LK-6,7 |
 | LK-11 | 6 | HaloViewerGestures drag and Escape | HaloApp/HaloViewerGestures, HaloKeyByDragSnapshots | halo-key-by-drag snapshots | – | waits LK-7 |
@@ -46,6 +46,11 @@ Waves as in the packet. Independent per wave: W1 LK-1; W2 LK-2a; W3 LK-2b; W4 LK
 
 - LK-2b: fake writes go through the wrapped LivePropertyKeying; HaloKeyRules.change is internal so the fake setParent uses it until LK-3.
 - Session restarts kill in-flight builders silently; the lead now records the next action so a resume relaunches only missing PRs.
+
+- LK-4: a non-invertible parent (scale 0) moves by the raw delta rather than throwing (packet silent). FakeViewerDragging now wraps LiveViewerDragging.
+- LK-5: setProperty with no selected layer is a no-op (no refusal); HaloProject.propertyRowControl(_:) builds row ids.
+- LK-5 PR body briefly carried a tool-appended attribution footer; it is gone now; builders re-read and strip it after opening.
+- Flake seen: FlareEasingDragCostTests.handleDragP95UnderBudget (5.04 ms vs 5 ms under load), not ours.
 
 ## Open
 - #207 keeps `needs-human`; the captain decides (packet note). LK-11 says `Closes #207`.
