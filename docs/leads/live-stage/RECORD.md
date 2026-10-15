@@ -4,7 +4,7 @@ Issue: #798 · Packet: docs/blueprints/flare/features/live-stage.md
 Run: act-1a13d374bd1-s92z · Session: claude/live-stage-lead-gljfd4 · Started: 2026-10-15T00:40Z
 Stage: 5 finish (waiting on a green dev run; other lines red)
 Base: 3033a12d599ff66ce4ebd5536ff9809d12e1d9cf
-Next: when a dev CI run containing a45f1cb (#965) is green, comment on #798 with 'Belt-Contact-Sheet: <run link>', one line per Flare journey and the flare audit counts. No live-stage code is needed. Lead stopped at its 8 h wall clock (08:40Z); latest run 38704216123 on 92db316 red only on Halo layout 880, SuiteUI window identifier, Photo fixture launch and eyedropper help
+Next: when a dev CI run containing a45f1cb (#965) is green, comment on #798 with 'Belt-Contact-Sheet: <run link>', one line per Flare journey and the flare audit counts. No live-stage code is needed. Resumed 09:09Z after the second nudge; runs 38708263577, 38708650547, 38709336067 red on other lines (latest: macOS swift test HaloLayerListTests.selectedRowSpansTheColumnInTheSelectedTint)
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
