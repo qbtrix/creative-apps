@@ -9,7 +9,8 @@
 // spike hits both sides alike. A stroke's ends get the same care: its first
 // event used to copy the whole layer for undo (26 to 76 ms) and its mouse-up
 // to diff the whole layer against that copy (0.1 s optimized, seconds in
-// debug). Runs on Linux and macOS.
+// debug); its mouse-up is timed as the median of several strokes, so one
+// load spike on a shared runner can't fail it. Runs on Linux and macOS.
 import CoreRaster
 import PhotoModel
 import Testing
@@ -54,18 +55,27 @@ import Testing
     @Test func mouseUpKeepsUndoWithoutWalkingTheLayer() throws {
         var workspace = try whiteImage(4000, 3000)
         let id = try #require(workspace.selectedLayerID)
-        let original = workspace
         workspace.selectTool(.brush)
-        workspace.drag(from: point(200, 1500), to: point(200, 1500))
-        for step in 0..<30 { workspace.drag(from: point(200, 1500), to: point(212 + 12 * Double(step), 1520)) }
-        let ms = timed(&workspace) { $0.endDrag() }
-        #expect(ms <= 16, "mouse-up took \(ms) ms; a 60 Hz frame is 16")
-        let painted = workspace.pixels[id]
-        #expect(painted != original.pixels[id] && workspace.undoActionName == "Undo Paint")
-        workspace.undo()
-        #expect(workspace.pixels[id] == original.pixels[id])
-        workspace.redo()
-        #expect(workspace.pixels[id] == painted)
+        // One mouse-up is one sample, and a shared runner's load spike can
+        // land on it; the median of several strokes' mouse-ups can't be one
+        // spike, while a whole-layer walk would slow every one of them.
+        var mouseUps: [Double] = []
+        for stroke in 0..<7 {
+            let y = 300 + 400 * Double(stroke)
+            let before = workspace.pixels[id]
+            workspace.drag(from: point(200, y), to: point(200, y))
+            for step in 0..<30 { workspace.drag(from: point(200, y), to: point(212 + 12 * Double(step), y + 20)) }
+            mouseUps.append(timed(&workspace) { $0.endDrag() })
+            let painted = workspace.pixels[id]
+            #expect(painted != before && workspace.undoActionName == "Undo Paint")
+            workspace.undo()
+            #expect(workspace.pixels[id] == before)
+            workspace.redo()
+            #expect(workspace.pixels[id] == painted)
+        }
+        let ms = (median(mouseUps) * 100).rounded() / 100
+        print("BRUSH-MOUSE-UP ms: median \(ms) of \(mouseUps.map { ($0 * 100).rounded() / 100 })")
+        #expect(median(mouseUps) <= 16, "median mouse-up of \(mouseUps.count) strokes: \(ms) ms; a 60 Hz frame is 16")
     }
 }
 

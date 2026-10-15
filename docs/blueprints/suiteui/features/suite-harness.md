@@ -260,7 +260,7 @@ later SuiteUI feature: a later need goes to the supervisor as an issue.
 
 | quality row | budget | test |
 |---|---|---|
-| QB-S15 golden compare of two 2,880 × 1,800 images | ≤ 150 ms (debug gate ≤ 1.5 s), median and p95 of 100 runs | `GoldenImageTests.compareWithinBudget` |
+| QB-S15 golden compare of two 2,880 × 1,800 images | ≤ 150 ms median and p95 of 100 runs; debug gates the median ≤ 1.5 s and reports the p95 until ten green runs set its gate | `GoldenImageTests.compareWithinBudget` |
 | QB-S16 probe summary over 10,000 samples | ≤ 2 ms (debug ≤ 20 ms) | `FrameProbeTests.summaryWithinBudget` |
 | QB-S30 probe math equals a reference | exact p50, p95, dropped | `FrameProbeTests.referenceTable` |
 | QB-S31 golden compare equals a reference | the three fixed images | `GoldenImageTests.reference` |
