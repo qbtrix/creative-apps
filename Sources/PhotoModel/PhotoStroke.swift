@@ -1,8 +1,16 @@
 // PhotoStroke.swift: what each tool does with a drag on the canvas. The canvas
-// sends every pointer move as `drag(from:to:pressure:)` in canvas pixels (a
-// click is a drag that doesn't move), or a display frame's moves at once as
-// `drags(_:)`, one revision for all of them, and `endDrag()` when the pointer
-// lifts; one drag is one undo step.
+// sends every pointer move as `drag(from:to:pressure:modifiers:zoom:)` in
+// canvas pixels (a click is a drag that doesn't move), with its modifier keys
+// and the zoom, or a display frame's moves at once as `drags(_:zoom:)`, one
+// revision for all of them, and `endDrag()` when the pointer lifts; one drag
+// is one undo step. Today's `drag(from:to:pressure:sampling:)` and
+// `drags(_:)` stay as wrappers (`sampling` is Option, zoom 1).
+//
+// Drags route by component: with a Free Transform in progress every drag goes
+// to `transformDrag` (PhotoTransform.swift); otherwise by tool, marquee to
+// `selectionDrag` (PhotoSelectionMask.swift), crop to `cropDrag`
+// (PhotoCropSize.swift), eyedropper to `sampleDrag` (PhotoEyedropper.swift),
+// and the rest paint or move here.
 //
 //   brush, eraser  a round stroke through the pointer samples on the selected
 //                  layer: a centripetal Catmull-Rom curve, so sparse samples
@@ -17,7 +25,7 @@
 //                  scales them (color and alpha) toward transparent. Undo keeps
 //                  the tiles the stroke painted, as they were, so no event
 //                  walks the whole layer ("Paint", "Erase").
-//   clone          with Option held at the press (`sampling`), or with no
+//   clone          with Option held at the press, or with no
 //                  source yet, the press samples the clone source and the
 //                  drag paints nothing; otherwise clone dabs (PhotoRetouch)
 //                  at the brush's size along the pointer samples on the
@@ -25,9 +33,11 @@
 //   heal           the same as clone, but each dab takes its tone from where
 //                  it lands (PhotoRetouch), one undo step ("Heal").
 //   marquee        the rectangle from the press to the pointer is the
-//                  selection; a click deselects.
+//                  selection; a click deselects (PhotoSelectionMask.swift).
 //   crop           the same rectangle is the pending crop (Apply Crop commits
-//                  it); a click drops it.
+//                  it); a click drops it (PhotoCropSize.swift).
+//   eyedropper     the color under the pointer becomes the brush color, never
+//                  an undo step (PhotoEyedropper.swift).
 //   move           shifts the selected layer by the drag, in whole pixels
 //                  ("Move Layer").
 //
@@ -50,6 +60,9 @@ struct PhotoStroke: Sendable, Equatable {
     var samples: [Sample] = []
     /// Move: the layer list before the drag.
     var layersBefore: [PhotoLayer] = []
+    /// Marquee: the modifier keys `selectionDrag` saw last (Shift adds,
+    /// Option subtracts, PV-5).
+    var modifiers: DragModifiers = []
 
     struct Sample: Sendable, Equatable {
         var point: Mask.Point
@@ -58,14 +71,26 @@ struct PhotoStroke: Sendable, Equatable {
 }
 
 extension PhotoWorkspace {
-    /// The active tool's drag from `start` to `end`, in canvas pixels.
-    /// `pressure` (0...1, a tablet's; a mouse sends 1) scales the brush.
-    /// `sampling` (Option held) makes the clone tool's press sample its source.
+    /// `drag(from:to:pressure:modifiers:zoom:)` with Option for `sampling`, at zoom 1.
     public mutating func drag(
         from start: Mask.Point, to end: Mask.Point, pressure: Double = 1, sampling: Bool = false
     ) {
+        drag(from: start, to: end, pressure: pressure, modifiers: sampling ? [.option] : [], zoom: 1)
+    }
+
+    /// The active tool's drag from `start` to `end`, in canvas pixels.
+    /// `pressure` (0...1, a tablet's; a mouse sends 1) scales the brush.
+    /// `modifiers` are the keys held (Option at the press makes the clone
+    /// tool sample its source); `zoom` is points per canvas pixel, for hit
+    /// tolerances.
+    public mutating func drag(
+        from start: Mask.Point, to end: Mask.Point, pressure: Double = 1, modifiers: DragModifiers,
+        zoom: Double = 1
+    ) {
         guard let canvas else { return }
+        if transformDraft != nil { return transformDrag(from: start, to: end, modifiers: modifiers, zoom: zoom) }
         let begun = stroke == nil
+        if begun, tool == .eyedropper { return sampleDrag(at: end) }
         var current = stroke ?? PhotoStroke(tool: tool, start: start, layerID: selectedLayerID)
         stroke = nil
         switch current.tool {
@@ -73,7 +98,7 @@ extension PhotoWorkspace {
             if begun { paint(&current, adding: start, pressure: pressure) }
             paint(&current, adding: end, pressure: pressure)
         case .clone, .heal:
-            if begun, sampling || cloneSource == nil {
+            if begun, modifiers.contains(.option) || cloneSource == nil {
                 setCloneSource(at: start)
                 current.layerID = nil
             } else if let id = current.layerID {
@@ -84,9 +109,9 @@ extension PhotoWorkspace {
                     coverage: &current.coverage, healing: current.tool == .heal)
             }
         case .marquee:
-            selection = Self.dragRect(current.start, end, in: canvas)
+            selectionDrag(&current, to: end, modifiers: modifiers, zoom: zoom, in: canvas)
         case .crop:
-            pendingCrop = Self.dragRect(current.start, end, in: canvas)
+            cropDrag(current, to: end, modifiers: modifiers, zoom: zoom, in: canvas)
         case .move:
             if begun { current.layersBefore = layers }
             moveSelectedLayer(current, to: end)
@@ -99,10 +124,19 @@ extension PhotoWorkspace {
     /// Several pointer moves in order, as one change to the canvas: one
     /// revision whose damage covers them all, however many samples a display
     /// frame brought.
-    public mutating func drags(_ moves: [(from: Mask.Point, to: Mask.Point, pressure: Double, sampling: Bool)]) {
+    public mutating func drags(
+        _ events: [(from: Mask.Point, to: Mask.Point, pressure: Double, modifiers: DragModifiers)], zoom: Double = 1
+    ) {
         let start = revision
-        for move in moves { drag(from: move.from, to: move.to, pressure: move.pressure, sampling: move.sampling) }
+        for event in events {
+            drag(from: event.from, to: event.to, pressure: event.pressure, modifiers: event.modifiers, zoom: zoom)
+        }
         foldRevisions(since: start)
+    }
+
+    /// `drags(_:zoom:)` with Option for `sampling`, at zoom 1.
+    public mutating func drags(_ moves: [(from: Mask.Point, to: Mask.Point, pressure: Double, sampling: Bool)]) {
+        drags(moves.map { (from: $0.from, to: $0.to, pressure: $0.pressure, modifiers: $0.sampling ? .option : []) })
     }
 
     /// Ends the drag: records its undo step, or for a click, clears what a
@@ -161,7 +195,7 @@ extension PhotoWorkspace {
 
     /// A drag's rectangle clipped to the canvas; nil for a click or a drag
     /// that stays outside.
-    private static func dragRect(_ a: Mask.Point, _ b: Mask.Point, in canvas: CanvasSize) -> PixelRect? {
+    static func dragRect(_ a: Mask.Point, _ b: Mask.Point, in canvas: CanvasSize) -> PixelRect? {
         let dx = b.x - a.x, dy = b.y - a.y
         guard dx * dx + dy * dy >= 1 else { return nil }
         return PixelRect(from: a, to: b).intersection(canvas.rect)
