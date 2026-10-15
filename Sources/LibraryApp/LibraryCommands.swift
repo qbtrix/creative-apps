@@ -7,9 +7,10 @@
 // grid), Zoom to Fit ⌘0, Actual Size ⌘1, Sort By. Photo: Copy Settings ⇧⌘C,
 // Paste Settings ⇧⌘V, Reset Develop, Crop, Reset Crop. Metadata: Set Rating,
 // Set Flag, Set Label, Auto Advance. An item whose action is nil is disabled,
-// never hidden, and its help says why. Single keys (0-5, P, X, U, R, G,
-// Return) act only while the grid or loupe has focus, so their items take no
-// key equivalent and name the key in their help instead ("Pick (P)").
+// never hidden, and its help says why. Single keys (R, G, and 0-5, P, X and U
+// once the cull area routes them) act only while the grid or loupe has focus,
+// so their items take no key equivalent and name the key in their help
+// instead ("Pick (P)"); a key with no route yet goes unnamed.
 import LibraryModel
 import SwiftUI
 
@@ -95,7 +96,7 @@ struct LibraryCommands: Commands {
             reason: why(nil, "The grid is already showing."), key: "G")
         LibraryMenuItem(
             title: "Loupe", systemImage: "rectangle", action: view.loupe,
-            reason: why(nil, "The loupe is already showing, or there are no photos."), key: "Return")
+            reason: why(nil, "The loupe is already showing, or there are no photos."))
         Divider()
         LibraryMenuItem(
             title: view.zoomInTitle, systemImage: "plus.magnifyingglass", action: view.zoomIn,
@@ -137,17 +138,20 @@ struct LibraryCommands: Commands {
     @ViewBuilder private var metadataItems: some View {
         let cull = menu.cull
         let reason = why("culling", "Select photos first.")
+        // A key goes in the help only while the cull area routes single keys.
+        let routes = cull.key != nil
+        let named: (String) -> String? = { routes ? $0 : nil }
         Menu("Set Rating") {
             ForEach(0...5, id: \.self) { stars in
                 LibraryMenuItem(
                     title: stars == 0 ? "No Stars" : stars == 1 ? "1 Star" : "\(stars) Stars",
-                    action: bind(cull.setRating, stars), reason: reason, key: "\(stars)")
+                    action: bind(cull.setRating, stars), reason: reason, key: named("\(stars)"))
             }
         }
         Menu("Set Flag") {
-            LibraryMenuItem(title: "Pick", action: bind(cull.setFlag, .pick), reason: reason, key: "P")
-            LibraryMenuItem(title: "Reject", action: bind(cull.setFlag, .reject), reason: reason, key: "X")
-            LibraryMenuItem(title: "Clear Flag", action: bind(cull.setFlag, PhotoFlag.none), reason: reason, key: "U")
+            LibraryMenuItem(title: "Pick", action: bind(cull.setFlag, .pick), reason: reason, key: named("P"))
+            LibraryMenuItem(title: "Reject", action: bind(cull.setFlag, .reject), reason: reason, key: named("X"))
+            LibraryMenuItem(title: "Clear Flag", action: bind(cull.setFlag, PhotoFlag.none), reason: reason, key: named("U"))
         }
         Menu("Set Label") {
             LibraryMenuItem(title: "None", action: bind(cull.setLabel, nil), reason: reason)

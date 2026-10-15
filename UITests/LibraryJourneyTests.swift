@@ -20,20 +20,46 @@ final class LibraryJourneyTests: XCTestCase {
         library.shot("sample-photos")
     }
 
-    /// J10: every menu opens, and each app menu holds Library's items from
-    /// blueprint 6.2 (by title prefix: titles change with the mode).
+    /// J10: every menu opens, and each app menu holds exactly Library's items
+    /// from blueprint 6.2 (by title prefix: titles change with the mode) plus
+    /// the system's own; the app menu has no Settings (none in v1).
     @MainActor func testEveryMenuOpens() {
         let library = Journey("Library", self, arguments: ["-LibraryFixture", "samples"])
         library.openEachMenu()
         let bar = library.app.menuBars.firstMatch.menuBarItems
         // Index 0 is the Apple menu; index 1 is the app's own menu, whatever its name.
         XCTAssert(bar.element(boundBy: 1).waitForExistence(timeout: 5), "no app menu")
-        expect(bar.element(boundBy: 1), holds: [["About"], ["Hide"], ["Quit"]], library)
+        let appTitles = expect(bar.element(boundBy: 1), holds: [["About"], ["Hide"], ["Quit"]], exactly: false, library)
+        XCTAssertFalse(
+            appTitles.contains { $0.hasPrefix("Settings") || $0.hasPrefix("Preferences") },
+            "the app menu has a Settings item: \(appTitles)")
         for (title, items) in Self.menus {
             let menu = bar[title]
             XCTAssert(menu.waitForExistence(timeout: 5), "no \(title) menu")
-            expect(menu, holds: items, library)
+            expect(menu, holds: items, exactly: true, library)
         }
+    }
+
+    /// Metadata's Set Rating, Set Flag and Set Label need a selection, and
+    /// View > Sort By needs photos: each is disabled until it can act.
+    @MainActor func testMetadataAndSortWaitForPhotos() {
+        let empty = Journey("Library", self, arguments: ["-LibraryFixture", "empty"])
+        XCTAssert(empty.app.windows.firstMatch.waitForExistence(timeout: 30), "no window opened")
+        expectSortBy(enabled: false, empty)
+        expectCulling(enabled: false, empty)
+        empty.app.terminate()
+
+        let library = Journey("Library", self, arguments: ["-LibraryFixture", "samples"])
+        let photo = samplePhoto(in: library)
+        XCTAssert(photo.waitForExistence(timeout: 10), "no sample photo in the grid")
+        expectSortBy(enabled: true, library)
+        let edit = library.app.menuBars.firstMatch.menuBarItems["Edit"]
+        edit.click()
+        let deselect = edit.menuItems["Deselect"]
+        if deselect.waitForExistence(timeout: 3), deselect.isEnabled { deselect.click() } else { library.press(.escape) }
+        expectCulling(enabled: false, library)
+        photo.click()
+        expectCulling(enabled: true, library)
     }
 
     @MainActor func testLoupeStepsAndReturnsToTheGrid() {
@@ -41,11 +67,23 @@ final class LibraryJourneyTests: XCTestCase {
         let view = library.app.menuBars.firstMatch.menuBarItems["View"]
         view.click()
         view.menuItems["Loupe"].click()
-        XCTAssert(library.app.descendants(matching: .any)["library.loupe"].waitForExistence(timeout: 10), "no loupe")
+        let loupe = library.app.descendants(matching: .any)["library.loupe"]
+        XCTAssert(loupe.waitForExistence(timeout: 10), "no loupe")
+        let position = library.element("library.loupe.position")
+        XCTAssert(position.waitForExistence(timeout: 5), "no loupe position (library.loupe.position)")
+        let start = position.label
         library.shot("loupe")
         library.app.typeKey(.rightArrow, modifierFlags: [])
+        let next = library.app.descendants(matching: .any).matching(NSPredicate(
+            format: "identifier == 'library.loupe.position' AND label != %@", start)).firstMatch
+        XCTAssert(next.waitForExistence(timeout: 5), "Right didn't step the loupe from \(start)")
+        let name = Self.photoName(in: next.label)
         library.shot("loupe-next")
         library.app.typeKey(.escape, modifierFlags: [])
+        XCTAssert(loupe.waitForNonExistence(timeout: 5), "Escape left it still in the loupe")
+        let cell = gridCell(named: name, in: library)
+        XCTAssert(cell.waitForExistence(timeout: 5), "no grid cell for \(name) after Escape")
+        XCTAssert(cell.isSelected, "the grid came back without \(name), the loupe's photo, selected")
         library.shot("loupe-back-to-grid")
     }
 
@@ -55,9 +93,13 @@ final class LibraryJourneyTests: XCTestCase {
         let library = Journey("Library", self, arguments: ["-LibraryFixture", "samples"])
         let photo = samplePhoto(in: library)
         XCTAssert(photo.waitForExistence(timeout: 10), "no sample photo in the grid")
+        let name = Self.photoName(in: photo.label)
         photo.click()
         library.shot("photo-inspector")
         library.click("4 Stars", in: .window, step: "photo-rated")
+        let rated = library.app.splitGroups.descendants(matching: .button).matching(NSPredicate(
+            format: "label CONTAINS %@ AND label CONTAINS %@", name, "4 stars")).firstMatch
+        XCTAssert(rated.waitForExistence(timeout: 5), "no 4 stars on \(name)'s grid cell")
     }
 
     @MainActor func testImportRateAndRelaunch() throws {
@@ -75,15 +117,29 @@ final class LibraryJourneyTests: XCTestCase {
         ("Edit", [["Undo"], ["Redo"], ["Select All"], ["Deselect"]]),
         ("View", [
             ["Grid"], ["Loupe"], ["Zoom In", "Larger Thumbnails"], ["Zoom Out", "Smaller Thumbnails"],
-            ["Zoom to Fit"], ["Actual Size"], ["Sort By"],
+            ["Zoom to Fit"], ["Actual Size"], ["Sort By"], ["Show Inspector", "Hide Inspector"],
         ]),
         ("Photo", [["Copy Settings"], ["Paste Settings"], ["Reset Develop"], ["Crop", "Done Cropping"], ["Reset Crop"]]),
         ("Metadata", [["Set Rating"], ["Set Flag"], ["Set Label"], ["Auto Advance"]]),
     ]
 
+    /// Items macOS adds to File, Edit and View on its own; `expect` lets
+    /// them sit beside Library's.
+    private static let systemItems: Set<String> = [
+        "Close", "Close All", "Close Window", "Page Setup…", "Print…",
+        "Find", "Spelling and Grammar", "Substitutions", "Transformations", "Speech",
+        "Start Dictation…", "Start Dictation", "Emoji & Symbols", "AutoFill", "Writing Tools",
+        "Show Toolbar", "Hide Toolbar", "Customize Toolbar…", "Show Sidebar", "Hide Sidebar",
+        "Enter Full Screen", "Exit Full Screen", "Show Tab Bar", "Hide Tab Bar", "Show All Tabs",
+    ]
+
     /// Opens `menu` and checks each of `items` has a top-level item whose
-    /// title starts with one of its prefixes; closes it again.
-    @MainActor private func expect(_ menu: XCUIElement, holds items: [[String]], _ library: Journey) {
+    /// title starts with one of its prefixes and, `exactly`, that every other
+    /// item is the system's; closes it again. Returns the titles it read.
+    @discardableResult
+    @MainActor private func expect(
+        _ menu: XCUIElement, holds items: [[String]], exactly: Bool, _ library: Journey
+    ) -> [String] {
         let name = menu.title
         menu.click()
         let children = menu.menus.firstMatch.children(matching: .menuItem)
@@ -95,6 +151,52 @@ final class LibraryJourneyTests: XCTestCase {
                 titles.contains { title in prefixes.contains { title.hasPrefix($0) } },
                 "the \(name) menu has no \(prefixes.joined(separator: " or ")): \(titles)")
         }
+        if exactly {
+            let extra = titles.filter { title in
+                !Self.systemItems.contains(title) && !items.contains { $0.contains { title.hasPrefix($0) } }
+            }
+            XCTAssert(extra.isEmpty, "the \(name) menu has items outside blueprint 6.2: \(extra)")
+        }
+        return titles
+    }
+
+    /// Opens View and checks Sort By's enabled state; closes it again.
+    @MainActor private func expectSortBy(enabled: Bool, _ library: Journey) {
+        let view = library.app.menuBars.firstMatch.menuBarItems["View"]
+        view.click()
+        let sort = view.menuItems["Sort By"]
+        XCTAssert(sort.waitForExistence(timeout: 3), "the View menu has no Sort By")
+        XCTAssertEqual(sort.isEnabled, enabled, "View > Sort By enabled")
+        library.press(.escape)
+    }
+
+    /// Opens each of Metadata's Set Rating, Set Flag and Set Label and checks
+    /// one item in each is `enabled`; closes the menu again.
+    @MainActor private func expectCulling(enabled: Bool, _ library: Journey) {
+        for (submenu, item) in [("Set Rating", "3 Stars"), ("Set Flag", "Pick"), ("Set Label", "Red")] {
+            let metadata = library.app.menuBars.firstMatch.menuBarItems["Metadata"]
+            metadata.click()
+            let parent = metadata.menuItems[submenu]
+            XCTAssert(parent.waitForExistence(timeout: 3), "the Metadata menu has no \(submenu)")
+            parent.hover()
+            let child = parent.menuItems[item]
+            XCTAssert(child.waitForExistence(timeout: 3), "Metadata > \(submenu) has no \(item)")
+            XCTAssertEqual(child.isEnabled, enabled, "Metadata > \(submenu) > \(item) enabled")
+            library.press(.escape)
+            library.press(.escape)
+            _ = library.app.menus.firstMatch.waitForNonExistence(timeout: 2)
+        }
+    }
+
+    /// "IMG_0034" from a cell or loupe label that names it; "" when none does.
+    private static func photoName(in label: String) -> String {
+        label.range(of: "IMG_[0-9]+", options: .regularExpression).map { String(label[$0]) } ?? ""
+    }
+
+    /// The grid cell whose label names `name`.
+    @MainActor private func gridCell(named name: String, in library: Journey) -> XCUIElement {
+        library.app.splitGroups.descendants(matching: .button)
+            .matching(NSPredicate(format: "label CONTAINS %@", name)).firstMatch
     }
 
     /// The grid's first sample photo. A cell's label leads with its badges
