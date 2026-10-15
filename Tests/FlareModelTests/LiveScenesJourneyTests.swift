@@ -71,8 +71,12 @@ private func isPlainSentence(_ text: String?) -> Bool {
     expectOneStep(&w, "Move Scene") { $0.moveScene(from: 1, to: 0) }
     #expect(w.scenes.map(\.name) == ["Outro", "Scene 1"])
 
+    // J16: select Scene 1, then remove Outro, which is not the selected scene.
+    w.selectScene("scene-1")
+    #expect(w.selectedSceneID == "scene-1")
     expectOneStep(&w, "Delete Scene") { $0.removeScene(id) }
     #expect(w.scenes.map(\.name) == ["Scene 1"])
+    #expect(w.selectedSceneID == "scene-1")
 
     // Step 3: the only scene stays; the workspace refuses it and nothing changes.
     let last = w.document
