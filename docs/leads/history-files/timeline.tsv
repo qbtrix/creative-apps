@@ -48,3 +48,4 @@ utc	stage	event	ref	note
 2026-10-15T11:30Z	4	ci-run	38726261412	running on 2b98fdb (has #1108, not #1114)
 2026-10-15T11:44Z	4	ci-run	38727890123	red: LibraryApp build break (#1096), journeys did not run
 2026-10-15T12:06Z	4	ci-run	38731305776	red before journeys: HaloPlaybackDriverTests compile (#1097, viewer-playback); noted on #763
+2026-10-15T12:27Z	4	ci-run	38734211999	running on 35a875b (has #1136 playback-test fix and #1114)
