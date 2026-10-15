@@ -18,3 +18,4 @@ utc	stage	event	ref	note
 2026-10-15T11:51Z	3	stage-start	wave7	SP-8 SP-13 SA-2 on 5c008ac; #1120 #1121 #1123 merged
 2026-10-15T12:02Z	3	heartbeat	-	waiting on builders or the lane
 2026-10-15T12:02Z	3	ci-run	38731305776	supervisor flagged #763; fix #1120 already on dev, commented on #763; watching run on 7f61259
+2026-10-15T12:06Z	3	ci-run	38731305776	LibraryApp compiles; red is Halo #1097, noted on #763
