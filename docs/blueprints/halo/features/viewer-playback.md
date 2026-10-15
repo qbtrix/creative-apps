@@ -18,7 +18,11 @@ by #1136. Then the macOS test run: the driver runs on an injected link with
 a fake one in tests (#1145); HF-1 renders off the main actor (#1160);
 half-opaque layers mix in linear light on the canvas, as in the render
 (#1163, closes #1161); the driver suite's limit covers main-actor queueing
-(#1171, #1155).
+(#1171, #1155). Anatomy rounds 1–3: the canvas render matches in linear
+light (#1194); journeys read the viewer's summaries by label (#1211); H-J2
+and H-J4 match the Model's naming and timing (#1246, #1259); Loop shows its
+state (#1247); the transport has 24 pt hit targets (#1258); the status
+readout names the frame (#1260). SuiteUI asks: #1257, #273, #340.
 
 **Covers:** #37, #457. #457 closes with VP-4b; #37 closes with VP-12, the
 `feature-done` PR. The other tasks say "Part of #37" or "Part of the
