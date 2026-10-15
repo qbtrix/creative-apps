@@ -25,8 +25,6 @@
 // unknown name's empty window). Run order is by name, so testTier1UndoRedoZoomPan runs
 // last and attaches the audit counts.
 import CoreGraphics
-import ImageIO
-import UniformTypeIdentifiers
 import XCTest
 
 final class PhotoJourneyTests: XCTestCase {
@@ -34,7 +32,7 @@ final class PhotoJourneyTests: XCTestCase {
     /// line shows "Preview data" and the Eyedropper (enabled by the fake
     /// sampling service, disabled on `.live`) is on. An unknown name says so.
     @MainActor func testFixtureLaunch() {
-        let photo = Journey("Photo", self, arguments: ["-PhotoFixture", "sample"])
+        let photo = Journey("Photo", self, arguments: photoArguments(fixture: "sample"))
         XCTAssert(photo.element("suite.tools").waitForExistence(timeout: 30), "no tool rail (suite.tools)")
         XCTAssert(photo.element("photo.status.preview").waitForExistence(timeout: 10), "-PhotoFixture sample shows no Preview data pill")
         expectHeader("800 × 600 px", photo, "-PhotoFixture sample didn't open the 800 × 600 px sample")
@@ -49,7 +47,7 @@ final class PhotoJourneyTests: XCTestCase {
         XCTAssert(staticText("pick a color", photo).waitForExistence(timeout: 5), "the Eyedropper shows no pick-a-color hint")
 
         photo.app.terminate()
-        let unknown = Journey("Photo", self, arguments: ["-PhotoFixture", "nope"])
+        let unknown = Journey("Photo", self, arguments: photoArguments(fixture: "nope"))
         let message = unknown.element("photo.status.message")
         XCTAssert(message.waitForExistence(timeout: 30), "-PhotoFixture nope shows no status message")
         let text = [message.label, message.value as? String ?? ""].joined(separator: " ")
@@ -111,8 +109,8 @@ final class PhotoJourneyTests: XCTestCase {
     /// no new screen.
     @MainActor func testBrushStrokeHitchesOnALargePhoto() throws {
         let file = try Self.folder().appending(path: "large.png")
-        try Self.writeTestPhoto(to: file, width: 4000, height: 3000)
-        let photo = Journey("Photo", self, arguments: ["-PhotoOpenFile", file.path])
+        try writeTestPhoto(to: file, width: 4000, height: 3000)
+        let photo = Journey("Photo", self, arguments: photoArguments(open: file))
         XCTAssert(photo.app.windows["large.png"].waitForExistence(timeout: 60), "large.png didn't open")
         photo.element("suite.tools").buttons["Brush"].click()
         let canvas = photo.element("suite.canvas")
@@ -131,8 +129,8 @@ final class PhotoJourneyTests: XCTestCase {
 
     @MainActor func testCurvesDragAndNudge() throws {
         let file = try Self.folder().appending(path: "curves.png")
-        try Self.writeTestPhoto(to: file)
-        let photo = Journey("Photo", self, arguments: ["-PhotoOpenFile", file.path])
+        try writeTestPhoto(to: file)
+        let photo = Journey("Photo", self, arguments: photoArguments(open: file))
         XCTAssert(photo.app.windows["curves.png"].waitForExistence(timeout: 30), "curves.png didn't open")
         photo.shot("curves-opened")
         let canvas = photo.element("suite.canvas")
@@ -163,9 +161,9 @@ final class PhotoJourneyTests: XCTestCase {
         let exports = folder.appending(path: "exports")
         try FileManager.default.createDirectory(at: exports, withIntermediateDirectories: true)
         let file = folder.appending(path: "journey.png")
-        try Self.writeTestPhoto(to: file)
+        try writeTestPhoto(to: file)
         let original = try Data(contentsOf: file)
-        let arguments = ["-PhotoOpenFile", file.path, "-PhotoExportTo", exports.path]
+        let arguments = photoArguments(open: file, exportTo: exports)
         let photo = Journey("Photo", self, arguments: arguments)
         XCTAssert(photo.app.windows["journey.png"].waitForExistence(timeout: 30), "journey.png didn't open")
         photo.shot("opened")
@@ -247,9 +245,9 @@ final class PhotoJourneyTests: XCTestCase {
         let saves = folder.appending(path: "saves")
         try FileManager.default.createDirectory(at: saves, withIntermediateDirectories: true)
         let file = folder.appending(path: "tools.PNG")
-        try Self.writeTestPhoto(to: file)
+        try writeTestPhoto(to: file)
         let original = try Data(contentsOf: file)
-        let photo = Journey("Photo", self, arguments: ["-PhotoOpenFile", file.path, "-PhotoSaveTo", saves.path])
+        let photo = Journey("Photo", self, arguments: photoArguments(open: file, saveTo: saves))
         XCTAssert(photo.app.windows["tools.PNG"].waitForExistence(timeout: 30), "tools.PNG didn't open")
 
         // Shift-Command-S writes a PNG copy, and the window and panel header now name it.
@@ -286,8 +284,8 @@ final class PhotoJourneyTests: XCTestCase {
 
     @MainActor func testEveryToolEditsTheImage() throws {
         let file = try Self.folder().appending(path: "tools.png")
-        try Self.writeTestPhoto(to: file)
-        let photo = Journey("Photo", self, arguments: ["-PhotoOpenFile", file.path])
+        try writeTestPhoto(to: file)
+        let photo = Journey("Photo", self, arguments: photoArguments(open: file))
         XCTAssert(photo.app.windows["tools.png"].waitForExistence(timeout: 30), "tools.png didn't open")
         let tools = photo.element("suite.tools").buttons
 
@@ -330,8 +328,8 @@ final class PhotoJourneyTests: XCTestCase {
 
     @MainActor func testStraighten() throws {
         let file = try Self.folder().appending(path: "straighten.png")
-        try Self.writeTestPhoto(to: file)
-        let photo = Journey("Photo", self, arguments: ["-PhotoOpenFile", file.path])
+        try writeTestPhoto(to: file)
+        let photo = Journey("Photo", self, arguments: photoArguments(open: file))
         XCTAssert(photo.app.windows["straighten.png"].waitForExistence(timeout: 30), "straighten.png didn't open")
         XCTAssert(photo.app.staticTexts["800 × 600 px"].waitForExistence(timeout: 5), "the status bar shows no image size")
 
@@ -592,8 +590,8 @@ final class PhotoJourneyTests: XCTestCase {
     /// Launches Photo on a fresh test photo named tools.png and shoots `step`.
     @MainActor private func openTestPhoto(step: String) throws -> Journey {
         let file = try Self.folder().appending(path: "tools.png")
-        try Self.writeTestPhoto(to: file)
-        let photo = Journey("Photo", self, arguments: ["-PhotoOpenFile", file.path])
+        try writeTestPhoto(to: file)
+        let photo = Journey("Photo", self, arguments: photoArguments(open: file))
         XCTAssert(photo.app.windows["tools.png"].waitForExistence(timeout: 30), "tools.png didn't open")
         photo.shot(step)
         return photo
@@ -697,30 +695,6 @@ final class PhotoJourneyTests: XCTestCase {
         let folder = FileManager.default.temporaryDirectory.appending(path: "photo-journey-\(UUID().uuidString)")
         try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
         return folder
-    }
-
-    /// A PNG that reads like a photo, a sky gradient and a sun, drawn on an
-    /// 800 x 600 plan and scaled to `width` x `height`.
-    private static func writeTestPhoto(to url: URL, width: Int = 800, height: Int = 600) throws {
-        guard let space = CGColorSpace(name: CGColorSpace.sRGB),
-            let context = CGContext(
-                data: nil, width: width, height: height, bitsPerComponent: 8, bytesPerRow: 0, space: space,
-                bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue),
-            let gradient = CGGradient(
-                colorsSpace: space,
-                colors: [CGColor(srgbRed: 0.16, green: 0.42, blue: 0.86, alpha: 1),
-                         CGColor(srgbRed: 0.98, green: 0.62, blue: 0.42, alpha: 1)] as CFArray,
-                locations: [0, 1])
-        else { throw CocoaError(.fileWriteUnknown) }
-        context.scaleBy(x: CGFloat(width) / 800, y: CGFloat(height) / 600)
-        context.drawLinearGradient(gradient, start: CGPoint(x: 0, y: 600), end: CGPoint(x: 0, y: 0), options: [])
-        context.setFillColor(CGColor(srgbRed: 1, green: 0.86, blue: 0.3, alpha: 1))
-        context.fillEllipse(in: CGRect(x: 470, y: 290, width: 180, height: 180))
-        guard let image = context.makeImage(),
-            let destination = CGImageDestinationCreateWithURL(url as CFURL, UTType.png.identifier as CFString, 1, nil)
-        else { throw CocoaError(.fileWriteUnknown) }
-        CGImageDestinationAddImage(destination, image, nil)
-        guard CGImageDestinationFinalize(destination) else { throw CocoaError(.fileWriteUnknown) }
     }
 
     /// Waits up to 5 seconds for `condition` to hold.
