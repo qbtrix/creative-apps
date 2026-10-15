@@ -19,7 +19,7 @@ Journeys: H-J9 (8 steps, packet "Journey steps"). Quality bars: QB-F1 no dead co
 ## Rounds
 | round | CI run | CI | audit vs baseline | lenses | confirmed | fixed by | clean |
 |---|---|---|---|---|---|---|---|
-| 1 | 38708263577 (f5bd765) | red: macOS scripts/ci, HaloLayerListTests (4 expectations: List insets rows, icon at 21 pt, tint off both edges); journeys skipped | not run | – (blocker found before the panel) | list inset (LP-3) | layer-panel/r1-list-inset | no |
+| 1 | 38708263577 (f5bd765) | red: macOS scripts/ci, HaloLayerListTests (4 expectations: List insets rows, icon at 21 pt, tint off both edges); journeys skipped | not run | – (blocker found before the panel) | list inset (LP-3) | #1058 | no |
 
 ## Decisions
 - Identifiers keep W0's shipped `halo.layer.*` prefix (`halo.layer.row.<id>`, `halo.layer.empty`, `halo.layer.new`; W0's journey reads `halo.layer.row.comp-1-layer-2`), so the packet's `halo.layers.list/row/refusal/empty` become `halo.layer.list/row/refusal/empty`.

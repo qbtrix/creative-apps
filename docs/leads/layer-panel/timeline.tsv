@@ -12,3 +12,4 @@ utc	stage	event	ref	note
 2026-10-15T08:49Z	3	stage-end	e8de2ff	all four tasks merged
 2026-10-15T08:49Z	4	ci-run	38708263577	f5bd765, LP-1..3, running
 2026-10-15T08:57Z	4	round-findings	38708263577	HaloLayerListTests: List insets rows; journeys skipped
+2026-10-15T09:02Z	4	pr-opened	#1058	round 1 fix: layer rows back on a stack, drag and drop reorder
