@@ -113,3 +113,26 @@ func liveGarbagePasteThrowsNothingToPaste(_ text: String) {
     }
     #expect(engine.document == locked)
 }
+
+/// Bounce with Ball renamed `name`, built directly so no undo entry precedes the duplicate.
+private func bounce(ballNamed name: String) -> Document {
+    var document = FlareFixtures.bounce
+    for s in document.scenes.indices {
+        for l in document.scenes[s].layers.indices where document.scenes[s].layers[l].id == "ball" {
+            document.scenes[s].layers[l].name = name
+        }
+    }
+    return document
+}
+
+// One " copy" or " copy N" comes off before the new suffix, live and fake alike.
+@Test(arguments: [("Ball", "Ball copy"), ("Ball copy", "Ball copy 2"), ("Ball copy 2", "Ball copy"),
+                  ("Ball copy copy", "Ball copy copy 2"), ("Ball copy copy 2", "Ball copy copy")])
+func liveDuplicateNamesTheCopyAsTheFakeDoes(_ name: String, _ expected: String) throws {
+    var live = CommandEngine(document: bounce(ballNamed: name)), fake = live
+    let liveAdded = try shapes.duplicate(layers: ["ball"], owner: scene, in: &live)
+    let fakeAdded = try FakeShapes().duplicate(layers: ["ball"], owner: scene, in: &fake)
+    let liveName = layers(live).first { liveAdded.contains($0.id) }?.name
+    let fakeName = layers(fake).first { fakeAdded.contains($0.id) }?.name
+    #expect(liveName == expected && fakeName == expected)
+}

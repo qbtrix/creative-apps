@@ -131,12 +131,14 @@ extension LiveShapes {
     /// The fake's copy rule: "<base> copy", then "<base> copy 2" and on, the lowest whose name and "<id>-copy-n" id
     /// are both free document-wide, where base is the layer's name less a trailing " copy" or " copy N".
     private static func copyName(_ layer: Layer, in document: Document) -> (name: String, id: String) {
+        // One suffix comes off: " copy N" whole, else " copy"; "Ball copy copy 2" keeps "Ball copy".
         var base = layer.name
         if let space = base.lastIndex(of: " "), Int(base[base.index(after: space)...]) != nil,
            base[..<space].hasSuffix(" copy") {
-            base = String(base[..<space])
+            base = String(base[..<space].dropLast(" copy".count))
+        } else if base.hasSuffix(" copy") {
+            base.removeLast(" copy".count)
         }
-        if base.hasSuffix(" copy") { base.removeLast(" copy".count) }
         let taken = Set((document.scenes.flatMap(\.layers) + document.symbols.flatMap(\.layers)).flatMap { [$0.id, $0.name] })
         var n = 1
         while taken.contains(n == 1 ? "\(base) copy" : "\(base) copy \(n)") || taken.contains("\(layer.id)-copy-\(n)") {
