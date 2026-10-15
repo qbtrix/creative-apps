@@ -256,18 +256,20 @@ public struct SuiteHex: Hashable, Sendable {
         }
     }
 
-    /// The appearance as one of the four table columns. A plain-first
-    /// `bestMatch` answers `.aqua` for a high-contrast appearance, so Increase
-    /// Contrast read Light: a system name maps directly (vibrant to its
-    /// non-vibrant column), and any other appearance tries the high-contrast
-    /// names first, then splits light from dark.
+    /// The appearance as one of the four table columns. A high-contrast
+    /// name or a vibrant one maps straight to its column. A plain `.aqua` or
+    /// `.darkAqua` name is not enough: AppKit applies Increase Contrast to the
+    /// light or dark appearance a view is given, so such an appearance can
+    /// carry the base name. Those, and any other appearance, ask `bestMatch`
+    /// with the high-contrast names first, then split light from dark.
     private static func match(_ appearance: NSAppearance) -> NSAppearance.Name? {
-        if let column = columns[appearance.name] { return column }
+        let name = appearance.name
+        if name != .aqua, name != .darkAqua, let column = columns[name] { return column }
         let contrast: [NSAppearance.Name] = [.accessibilityHighContrastAqua, .accessibilityHighContrastDarkAqua]
         if let found = appearance.bestMatch(from: contrast + [.aqua, .darkAqua]), contrast.contains(found) {
             return found
         }
-        return appearance.bestMatch(from: [.aqua, .darkAqua])
+        return columns[name] ?? appearance.bestMatch(from: [.aqua, .darkAqua])
     }
 
     private static let columns: [NSAppearance.Name: NSAppearance.Name] = [
