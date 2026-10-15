@@ -102,24 +102,27 @@ public struct SuiteGallery: View {
 
     public var body: some View {
         let name = opened ?? request.page
-        GalleryPageView(name: name)
-            .id(name)
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .safeAreaInset(edge: .top, alignment: .leading) {
-                if name != GalleryIndex.name {
-                    Button {
-                        opened = GalleryIndex.name
-                    } label: {
-                        Label("Gallery Index", systemImage: "chevron.backward")
-                    }
-                    .help("Gallery Index")
-                    .suiteControl(id: "suite.gallery.back", enabled: true, reason: nil)
-                    .padding(SuiteSpacing.s)
+        // The back button sits in the page's own stack, not a safe-area inset:
+        // from the inset, its `.suiteControl` never reached the window's
+        // `suite.controls` while the index rows in the page did (SJ0).
+        VStack(alignment: .leading, spacing: 0) {
+            if name != GalleryIndex.name {
+                Button {
+                    opened = GalleryIndex.name
+                } label: {
+                    Label("Gallery Index", systemImage: "chevron.backward")
                 }
+                .help("Gallery Index")
+                .suiteControl(id: "suite.gallery.back", enabled: true, reason: nil)
+                .padding(SuiteSpacing.s)
             }
-            .environment(\.galleryRequest, request)
-            .environment(\.openGalleryPage, { page in opened = page })
-            .suiteProbes()
+            GalleryPageView(name: name)
+                .id(name)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+        }
+        .environment(\.galleryRequest, request)
+        .environment(\.openGalleryPage, { page in opened = page })
+        .suiteProbes()
     }
 }
 
