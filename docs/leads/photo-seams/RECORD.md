@@ -2,9 +2,9 @@
 
 Issue: #812 · Packet: docs/blueprints/photo/features/photo-seams.md
 Run: act-1a13d5e8ca4-huz5 · Session: cloud lead session · Started: 2026-10-15T02:23Z
-Stage: 3 wave 14 (S-10a)
+Stage: 3 wave 15 (S-10b)
 Base: c4ec07810683a4bc7d62dcc5205705229f248a71
-Next: wait for #986; S-10a stacks on lead/photo-seams-S-9; first macOS run containing #978 (ed953ba) not dispatched yet, watch it
+Next: wait for #987; S-10b stacks on lead/photo-seams-S-10a; no macOS run yet contains #978 (726 started before it)
 
 ## Tasks
 
@@ -26,8 +26,8 @@ packet chains every task on the one before it (shared files or new types).
 | S-7b | 10 | PhotoLayerComposite hook; geometry hook calls | M/PhotoRender, PhotoLayerComposite, PhotoImageOps, PhotoStraighten | PhotoLayerCompositeTests | #974 | merged |
 | S-8a | 11 | PhotoIntent sub-enums, nine area files | A/PhotoIntent, PhotoWindow, PhotoWindow+*.swift | app-state rule; V1–V12 | #978 | merged |
 | S-8b | 12 | open/save/export into area files; fileServices | A/PhotoWindow{,+File,+Export}.swift | V2, V5, V6 | #985 | merged |
-| S-9 | 13 | menu bar split per menu | A/PhotoCommands{,+File,+Edit,+Select,+Image,+Layer,+View}.swift | V4; PhotoSelectAllMenuTests | #986 | open |
-| S-10a | 14 | top bar, status line, PhotoRailTool | A/PhotoEditor, PhotoTopBar, PhotoStatusLine, PhotoRailTool; ST/PhotoEditorSnapshots | photo-status-message-dark.png | – | todo |
+| S-9 | 13 | menu bar split per menu | A/PhotoCommands{,+File,+Edit,+Select,+Image,+Layer,+View}.swift | V4; PhotoSelectAllMenuTests | #986 | merged |
+| S-10a | 14 | top bar, status line, PhotoRailTool | A/PhotoEditor, PhotoTopBar, PhotoStatusLine, PhotoRailTool; ST/PhotoEditorSnapshots | photo-status-message-dark.png | #987 | open |
 | S-10b | 15 | overlays, hover, Return/Escape, StrokePacer modifiers | A/PhotoEditor, PhotoWindow, *Overlay.swift, StrokePacer; ST/PhotoStrokePacerTests | PhotoStrokePacerTests; V7, V9 | – | todo |
 | S-11a | 16 | panel split 1: Adjust tab, tool options | A/PhotoPanel, PhotoAdjustTab, PhotoToolOptions, *Options.swift | snapshots unchanged | – | todo |
 | S-11b | 17 | panel split 2: Layers tab, History stub | A/PhotoPanel, PhotoLayersTab, PhotoHistoryTab | PhotoLayerRowSnapshots | – | todo |
@@ -44,6 +44,7 @@ packet chains every task on the one before it (shared files or new types).
 - S-7c clips brush, eraser, clone and heal to an existing selection rect (coverage 0 outside). Kept: the packet says coverage is 1 inside the rect; no v1 journey paints with a selection active (checked UITests/PhotoJourneyTests.swift). Crop undo does not restore selectionMask: left to PV-5 (add selectionMask to PhotoStack).
 - S-13 split in two: its model half (PhotoBudgetTests) runs beside the app chain as the packet allows; the latency series carries feature-done last.
 - S-8a: flat .export became .export(.openSheet) (a case name clash); area modifiers take PhotoPerform (@MainActor); confirmTransform/dismissTransform are app stubs returning false until PV-7.
+- S-10a: existing editor snapshots should not change (they already ran on .live with the Eyedropper disabled); the 4 s clearStatus task lives in PhotoWindow; status message id photo.status.message.
 - S-7b reference digests were recorded on Linux; if a macOS model test disagrees, check PhotoLayerCompositeTests first.
 - Builder branches are lead/photo-seams-<id> (a dash: lead/photo-seams already exists). The next builder stacks on the previous branch and opens its PR after rebasing onto dev once the previous PR merged.
 - Lead step after S-4 merges: file the four needs-ui issues of blueprint 6.3 (SelectionPathOutline, SelectionHandles with rotation, BrushCursorMark, LayerList row symbol and accessory).
