@@ -43,6 +43,17 @@ public struct HaloTimelineLayout: Sendable, Hashable {
         return max(0, width - labelColumn - divider - trailingRoom)
     }
 
+    /// The width to fit every frame into, from the width the strip was
+    /// actually laid out at (`strip`, measured in the live window) or, before
+    /// that is known, the container's `container` width. The measured width
+    /// is the one that shows: a container width can count room under a
+    /// floating sidebar or inspector, and lanes fitted to it run past the
+    /// strip's edge and lose their last frames (#1019).
+    public func laneFitWidth(strip: Double?, container: Double) -> Double {
+        guard let strip, strip.isFinite, strip > 0 else { return laneFitWidth(width: container) }
+        return laneFitWidth(width: strip)
+    }
+
     /// The ruler and one lane per row; an empty timeline keeps one lane's
     /// height for its hint.
     public func contentHeight(rows: Int) -> Double {
