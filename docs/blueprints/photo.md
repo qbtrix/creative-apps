@@ -322,7 +322,7 @@ Flare's LM-0a3 and F1 did:
 - **Paint goes through one target and the selection's coverage.** Brush,
   eraser, clone and heal write into `paintTarget()` (PV-0, in
   `PhotoStroke.swift`): `.pixels(id)`, `.mask(id)` while `editsMask` and the
-  layer has a mask, or nil with "Pick a pixel layer to paint on." on an
+  layer has a mask, or nil with "Select an image layer in the Layers tab to paint on." on an
   adjustment layer. A mask's coverage is its gray with alpha 1, so the brush
   paints black to hide and white to reveal, the eraser paints white, and
   `PhotoHistory` gets a `.maskTiles` step beside `.tiles`. Every dab, and
@@ -621,7 +621,7 @@ non-number keeps the old value and beeps; covered by the model tests).
 
 States: empty (an adjustment layer at the bottom changes nothing; its
 row's info line says "Nothing below to adjust."), error (Brush on an
-adjustment layer: the canvas refuses with "Pick a pixel layer to paint on."
+adjustment layer: the canvas refuses with "Select an image layer in the Layers tab to paint on."
 in the status line, the stroke does nothing).
 
 ### 4.3 Tier-2 journeys
@@ -1744,8 +1744,8 @@ Also PV-0, so later features stay inside their files:
   Merge Down) and PV-7 (transform, flips) call it from their own files. It is
   a no-op until PV-5 fills it in `PhotoMask.swift` to keep each mask the size
   and place of its layer.
-- `paintTarget()` refuses an adjustment layer with "Pick a pixel layer to
-  paint on." (PJ-9) from the start, since PV-0 adds layer kinds.
+- `paintTarget()` refuses an adjustment layer with "Select an image layer in the Layers tab
+  to paint on." (PJ-9) from the start, since PV-0 adds layer kinds.
 
 The methods, by feature:
 
@@ -1778,7 +1778,7 @@ extension PhotoWorkspace {
     public mutating func clearStatus() { statusMessage = nil }
     /// Where brush, eraser, clone and heal write (PV-0, in PhotoStroke.swift):
     /// the selected layer's mask while `editsMask` and it has one, else its
-    /// pixels; nil, with `statusMessage` "Pick a pixel layer to paint on.",
+    /// pixels; nil, with `statusMessage` "Select an image layer in the Layers tab to paint on.",
     /// on an adjustment layer without a mask target.
     public func paintTarget() -> PaintTarget? { selectedLayerID.map(PaintTarget.pixels) }
     /// One pointer event with its modifier keys and the canvas zoom (points
@@ -1994,7 +1994,7 @@ None needs a new token.
    edited dot too.
 7. **Refusals go to the status line**, left of the pills, in the warning
    color with `exclamationmark.triangle`, for 4 s or until the next action
-   ("Nothing to paste.", "Pick a pixel layer to paint on."). Alerts only
+   ("Nothing to paste.", "Select an image layer in the Layers tab to paint on."). Alerts only
    for open and save failures and for the "Keep layers?" choice.
 8. **Long work shows a note** in the canvas's top-left after 100 ms
    (the existing Straightening note's style): "Opening…", "Saving…",
