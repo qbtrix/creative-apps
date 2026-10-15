@@ -59,3 +59,4 @@ utc	stage	event	ref	note
 2026-10-15T20:16Z	4	pr-merged	#1240	fix A
 2026-10-15T20:16Z	4	pr-merged	#1239	fix B
 2026-10-15T20:16Z	4	pr-merged	#1233 #1234 #1235	perf, D-12, D-11
+2026-10-15T20:27Z	4	pr-opened	#1241	fix D journey recovery dir
