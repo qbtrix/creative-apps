@@ -2,9 +2,9 @@
 
 Issue: #799 · Packet: docs/blueprints/flare/features/live-keys.md
 Run: act-1a13d0020ff-4x51 · Session: cse_01BKSKFkuR1aFXhWhZAhsegU · Started: 2026-10-15T00:00Z
-Stage: 3 wave 2
-Base: 207c54c89748f0b75b1f7ae9c209c8ac1b164348
-Next: wait for wave 2 PRs (KY-2, KY-6) to merge, then start wave 3 (KY-3, KY-7) on the new origin/dev
+Stage: 3 wave 3
+Base: 0a455dfca4ea3b97b7220f01342d7a564535e0ce
+Next: wait for wave 3 PRs (KY-3, KY-7) to merge, then start wave 4 (KY-4) on the new origin/dev
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -12,10 +12,10 @@ Next: wait for wave 2 PRs (KY-2, KY-6) to merge, then start wave 3 (KY-3, KY-7) 
 | KY-1 | 1 | `LiveProperties` struct + `properties` reads (values, key states, Mixed, any owner) | Live/LiveProperties.swift, LivePropertiesTests.swift | LivePropertiesTests | #900 | merged |
 | KY-5 | 1 | `LiveKeyframes` struct + `rows`, `labels` | Live/LiveKeyframes.swift, LiveKeyframesTests.swift | LiveKeyframesTests | #902 | merged |
 | KY-8 | 1 | `LiveEasing` owner path for symbol layers | Live/LiveEasing.swift, LiveEasingTests.swift | LiveEasingTests | #906 | merged |
-| KY-2 | 2 | `setValue` (section 2 rule, NaN refused, merged scrub) | Live/LiveProperties.swift, LivePropertiesSetTests.swift | LivePropertiesSetTests | | building |
-| KY-6 | 2 | `moveKeys`, `removeKeys` | Live/LiveKeyframes+Edit.swift, LiveKeyframesEditTests.swift | LiveKeyframesEditTests | | building |
-| KY-3 | 3 | `toggleAnimated`, `toggleKey` | Live/LiveProperties+Keys.swift, LivePropertiesKeysTests.swift | LivePropertiesKeysTests | | waiting KY-2 |
-| KY-7 | 3 | `insertFrames`, `removeFrames`, `setLabel` + `KeyframeEditing` | Live/LiveKeyframes+Frames.swift, LiveKeyframesFramesTests.swift | LiveKeyframesFramesTests | | waiting KY-6 |
+| KY-2 | 2 | `setValue` (section 2 rule, NaN refused, merged scrub) | Live/LiveProperties.swift, LivePropertiesSetTests.swift | #913 | merged |
+| KY-6 | 2 | `moveKeys`, `removeKeys` | Live/LiveKeyframes+Edit.swift, LiveKeyframesEditTests.swift | #912 | merged |
+| KY-3 | 3 | `toggleAnimated`, `toggleKey` | Live/LiveProperties+Keys.swift, LivePropertiesKeysTests.swift |  | building |
+| KY-7 | 3 | `insertFrames`, `removeFrames`, `setLabel` + `KeyframeEditing` | Live/LiveKeyframes+Frames.swift, LiveKeyframesFramesTests.swift |  | building |
 | KY-4 | 4 | `setFill`, `setStroke` + `PropertyAnimating` | Live/LiveProperties+Paint.swift, LivePropertiesPaintTests.swift | LivePropertiesPaintTests | | waiting KY-3 |
 | KY-9 | 5 | model journey steps 1–7 + QB-L7 budget (feature-done) | LiveKeysJourneyTests.swift, LiveKeysBudgetTests.swift | both | | waiting KY-4, KY-7, KY-8 |
 
