@@ -138,6 +138,11 @@ struct LibraryWindow: View {
         allowed ? perform : nil
     }
 
+    /// A one-argument menu action, nil (so the item disables) when it can't run.
+    func enabled<Value>(_ allowed: Bool, _ perform: @escaping @MainActor (Value) -> Void) -> (@MainActor (Value) -> Void)? {
+        allowed ? perform : nil
+    }
+
     static func symbol(for collectionID: String) -> String {
         switch collectionID {
         case "favorites": "heart"
