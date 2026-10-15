@@ -4,16 +4,20 @@
 // run: the empty state shows "No Photos" with Import Folder… as its one
 // button, and the File and Edit menus agree with `library.controls` (the
 // window's hidden JSON list of its controls, SuiteUI's ControlDocument).
-// A disabled control's reason is its help tag, read by hovering it.
+// A disabled control's reason is its help tag, read by hovering it. J11
+// (QB-F1, mirroring Halo's H-J13) launches on `-LibraryFixture samples
+// -SuitePerfProbe`, merges `library.controls` with the `library.*` entries of
+// `suite.controls` (which reaches the toolbar, sidebar and inspector columns a
+// preference may not leave), clicks every enabled control (then Escape and
+// Command-Z) and checks it changed the window or a value, and that every
+// disabled one says why.
 import XCTest
 
 final class LibraryShellJourneyTests: XCTestCase {
     /// J0: an empty catalog shows its empty state, and File and Edit offer
     /// only what can act.
     @MainActor func testLaunchShowsEmptyCatalog() throws {
-        let folder = FileManager.default.temporaryDirectory
-            .appending(path: "library-j0-\(UUID().uuidString)", directoryHint: .isDirectory)
-        try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        let folder = try LibraryFiles.freshCatalogDir()
         addTeardownBlock { try? FileManager.default.removeItem(at: folder) }
         let library = Journey("Library", self, arguments: ["-LibraryCatalogDir", folder.path])
         library.expectWindowShell()
@@ -62,6 +66,74 @@ final class LibraryShellJourneyTests: XCTestCase {
             XCTAssertFalse(item.isEnabled, "Edit > \(title) is enabled on launch")
         }
         library.press(.escape)
+    }
+
+    /// J11 (QB-F1): every enabled control acts, every disabled one says why.
+    @MainActor func testEveryControlActsOrSaysWhy() {
+        let library = Journey("Library", self, arguments: ["-LibraryFixture", "samples", "-SuitePerfProbe"])
+        XCTAssert(library.app.windows.firstMatch.waitForExistence(timeout: 30), "no window opened")
+        library.shot("controls")
+        let listed = Self.decode(library.element("library.controls"))
+        XCTAssertNotNil(listed, "no library.controls JSON")
+        let suite = Self.decode(library.element("suite.controls"))?.controls.filter { $0.id.hasPrefix("library.") } ?? []
+        var entries: [String: ControlEntry] = [:]
+        for entry in suite + (listed?.controls ?? []) { entries[entry.id] = entry }
+        XCTAssertFalse(entries.isEmpty, "neither library.controls nor suite.controls lists a library control")
+        attach(entries.values.sorted { $0.id < $1.id }, as: "library-controls")
+        for id in Self.onScreenControlIDs(library) {
+            XCTAssertNotNil(entries[id], "\(id) is on screen but in neither library.controls nor suite.controls")
+        }
+        for entry in entries.values.sorted(by: { $0.id < $1.id }) {
+            guard entry.enabled else {
+                XCTAssertFalse((entry.reason ?? "").isEmpty, "\(entry.id) is disabled and doesn't say why")
+                continue
+            }
+            let control = library.element(entry.id)
+            XCTAssert(control.waitForExistence(timeout: 5), "\(entry.id) is listed but not on screen")
+            let before = library.app.windows.firstMatch.screenshot().pngRepresentation
+            let values = Self.values(library)
+            control.click()
+            Thread.sleep(forTimeInterval: 0.5)
+            let after = library.app.windows.firstMatch.screenshot().pngRepresentation
+            let changed = before != after || values != Self.values(library)
+            library.shot("control-\(library.slug(entry.id))")
+            XCTAssert(changed, "\(entry.id) is enabled but clicking it changed nothing")
+            library.press(.escape)
+            library.press(character: "z", .command)
+        }
+    }
+
+    /// The probes a click may change without changing the shot: the two
+    /// control lists' JSON.
+    @MainActor private static func values(_ library: Journey) -> [String] {
+        ["library.controls", "suite.controls"].map { id in
+            let probe = library.element(id)
+            return probe.exists ? probe.label : ""
+        }
+    }
+
+    /// The `library.*` identifiers of the window's buttons, pop-ups, fields,
+    /// checkboxes, sliders and rows.
+    @MainActor private static func onScreenControlIDs(_ library: Journey) -> Set<String> {
+        let window = library.app.windows.firstMatch
+        let types: [XCUIElement.ElementType] = [.button, .popUpButton, .textField, .checkBox, .slider, .cell]
+        var ids = Set<String>()
+        for type in types {
+            let query = window.descendants(matching: type).matching(NSPredicate(format: "identifier BEGINSWITH 'library.'"))
+            for element in query.allElementsBoundByIndex { ids.insert(element.identifier) }
+        }
+        return ids
+    }
+
+    /// Attaches `value` as pretty JSON named `name`, kept even when the test passes.
+    private func attach(_ value: some Encodable, as name: String) {
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
+        guard let json = try? encoder.encode(value) else { return }
+        let attachment = XCTAttachment(data: json, uniformTypeIdentifier: "public.json")
+        attachment.name = name
+        attachment.lifetime = .keepAlways
+        add(attachment)
     }
 
     /// Opens the menu bar's `title` menu and returns it.
