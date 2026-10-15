@@ -4,7 +4,7 @@ Issue: #793 (resumes #754) · Packet: docs/blueprints/flare/features/mac-platfor
 Run: act-1a13c789856-0qa9 (first run act-1a13b14336c-tqna) · Session: claude/mac-platform-lead-lxlcta (first: claude/mac-platform-lead-7jx22z) · Started: 2026-10-14T15:43Z, resumed 2026-10-14T22:15Z
 Stage: done, re-checking (round budget spent; waiting for a green dev CI run containing 190e45d)
 Base: 1098ff2d6c135020391cef770f4de11dfde9465a
-Next: watch the next dev CI run after 38662225263 (SuiteUI TokensTests/SnapshotHostTests Increase Contrast failures, #778 lead). Green -> edit the Belt-Contact-Sheet comment on #793 (id 6180953518) to it, mark done. No Flare change pending.
+Next: watch dev CI run 38667485578 (c3fd66f, in progress) and later. Green -> edit the Belt-Contact-Sheet comment on #793 (id 6180953518) to it, mark done. Red so far only in SuiteUI Increase Contrast tests (#778 lead). No Flare change pending.
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -33,6 +33,7 @@ Next: watch the next dev CI run after 38662225263 (SuiteUI TokensTests/SnapshotH
 | round | CI run | CI | audit vs baseline | lenses | confirmed | fixed by | clean |
 |---|---|---|---|---|---|---|---|
 | 1 | 38600685744 (5e1870d) | red: macOS swift test, 1 of 1670 failed (AutosaveTests.quitWritesWhenDirty, 76 s vs 60 s window); Linux green; journeys not reached | not measured (journeys did not run) | none run: CI red, fix first | 1 (flaky time window in MP-5 test) | #764 | no |
+| re-check | 38667087530 (c3fd66f) | red outside: macOS TokensTests + SnapshotHostTests (Increase Contrast, #778 lead). All mac-platform tests green | not measured | - | 0 in feature files | - | no (outside red) |
 | re-check | 38662225263 (1502416) | red outside: macOS TokensTests.valueFollowsTheAppearance and SnapshotHostTests (Increase Contrast, line:suiteui, #778 lead). Linux green. All mac-platform tests green | not measured | - | 0 in feature files | - | no (outside red) |
 | re-check | 38660293042 (4b65610) | red outside: macOS SnapshotHostTests (appearances, tokenValueForEachAppearance, lightContrastSwatch; #778 lead). Photo budgets pass after #888. Linux green. All mac-platform tests green | not measured | - | 0 in feature files | - | no (outside red) |
 | re-check | 38658150595 (1854d6c) | red outside: macOS SnapshotHostTests.appearances only (#778 lead fixing in #891). Linux green. All mac-platform tests green | not measured | - | 0 in feature files | - | no (outside red) |
