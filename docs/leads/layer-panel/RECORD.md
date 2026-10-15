@@ -2,17 +2,17 @@
 
 Issue: #1038 · Packet: docs/blueprints/halo/features/layer-panel.md
 Run: act-1a13e9a2019-lau7 · Session: session_01NGHcmJbQja1RSYvcMZR3TD · Started: 2026-10-15T08:07Z
-Stage: 3 wave 2
-Base: 62a857755d8d554b311bb2e056d8562b27dfea26
-Next: wait for LP-2's and LP-3's PRs (branches layer-panel/lp-2, layer-panel/lp-3) to merge, then start wave 3 (LP-4) on the new origin/dev
+Stage: 3 wave 3
+Base: a5182b48a42c17aaf8862bf3bd053250c64d7014
+Next: wait for LP-4's PR (branch layer-panel/lp-4) to merge and for the dev CI run containing #1045/#1047/LP-4; then round 1 of the Anatomy loop
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
 |---|---|---|---|---|---|---|
 | LP-1 | 1 | delete, rename, move (+ forward/backward, `moveTarget`), duplicate: each one named `edit` step; delete un-parents through `keying.setParent(nil, …)` with the `.notBuilt` fallback | `Sources/HaloModel/HaloLayerEdits.swift`, `Tests/HaloModelTests/HaloLayerEditsTests.swift` | `HaloLayerEditsTests` | #1041 | merged (a2313a5) |
 | LP-2 | 2 | Layer commands' availability and routes; Rename Layer prompt from `request`; edit budgets | `Sources/HaloModel/Availability/HaloAvailability+Layers.swift`, `Sources/HaloApp/HaloWindow+Layers.swift`, `Tests/HaloModelTests/HaloLayerAvailabilityTests.swift`, `Tests/HaloModelTests/HaloLayerEditsBudgetTests.swift` | `HaloLayerAvailabilityTests`, `HaloLayerEditsBudgetTests` | #1045 | merged |
-| LP-3 | 2 | `HaloLayerList` as a `List` of `SidebarRow`s: select, rename, `.onMove`, `.onDeleteCommand`, refusal caption, empty text; snapshots | `Sources/HaloApp/HaloLayerList.swift`, `Tests/AppSnapshotTests/HaloLayersSnapshots.swift` | snapshots `halo-layer-list{,-refused,-empty}-{light,dark}.png` | – | building |
-| LP-4 | 3 | H-J9 `testLayerHousekeeping`, eight steps; `feature-done` | `UITests/HaloJourneyTests+Layers.swift` | H-J9 on the dev CI run | – | waits on LP-2, LP-3 |
+| LP-3 | 2 | `HaloLayerList` as a `List` of `SidebarRow`s: select, rename, `.onMove`, `.onDeleteCommand`, refusal caption, empty text; snapshots | `Sources/HaloApp/HaloLayerList.swift`, `Tests/AppSnapshotTests/HaloLayersSnapshots.swift` | snapshots `halo-layer-list{,-refused,-empty}-{light,dark}.png` | #1047 | merged |
+| LP-4 | 3 | H-J9 `testLayerHousekeeping`, eight steps; `feature-done` | `UITests/HaloJourneyTests+Layers.swift` | H-J9 on the dev CI run | – | building (fast-lane only, no feature-done) |
 
 Journeys: H-J9 (8 steps, packet "Journey steps"). Quality bars: QB-F1 no dead controls, QB-F3 one named step, QB-F4 keyboard parity, HB-9 edit budget (≤ 20 ms debug CI), audit zero new.
 
@@ -31,6 +31,8 @@ Journeys: H-J9 (8 steps, packet "Journey steps"). Quality bars: QB-F1 no dead co
 - Wave 2 has 2 independent tasks: two worktree subagents started together, not the build-wave workflow.
 - LP-2 (#1045): `.selectLayer(nil)` stays off with "A layer stays selected until you pick another." (no Model method clears the selection); Rename is the alert's default button (Return renames).
 - The GitHub MCP appends an attribution footer to PR bodies; the lead strips it with update_pull_request after each PR opens.
+- `feature-done` moves from LP-4 to the feature's final PR (an Anatomy fix or the packet status line, which closes #770): LP-2/LP-3's SwiftUI first compiles on the dev macOS run, and any fix must land before the feature-done CI run.
+- LP-3 (#1047): a refused layer rename also shows in W0's viewer caption (`halo.refusal`), since HaloViewer shows any non-inspector refusal; candidate for the critic round.
 
 ## Open
 - none
