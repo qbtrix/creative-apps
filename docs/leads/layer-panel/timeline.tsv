@@ -22,3 +22,4 @@ utc	stage	event	ref	note
 2026-10-15T10:38Z	4	pr-opened	#1092	feature-done packet status: main lane only dispatches CI on feature-done merges
 2026-10-15T11:00Z	4	ci-run	38721434364	c7e5c17 (has #1078) running; 38721854074 (7f0bec6, from #1092 feature-done) queued
 2026-10-15T11:03Z	4	round-findings	38721434364	round 2: list pixel tests green; H-J9 stops at step 2 on the menu-closed assert (#1078); fix with feature-done
+2026-10-15T11:08Z	4	pr-opened	#1104	round 2 fix: H-J9 menu wait best-effort; feature-done to dispatch CI
