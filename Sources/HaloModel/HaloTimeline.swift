@@ -1,6 +1,6 @@
 // HaloTimeline.swift: the selected composition's timeline: the playhead and
 // its timecode, the layers active at a frame, the rows the viewer's timeline
-// strip draws, and setting a layer's in and out points at the playhead (the
+// strip draws (each with its layer's key frames for the diamonds), and setting a layer's in and out points at the playhead (the
 // I and O keys, each one undo step or a refusal under the timeline).
 // Linux-safe: no UI imports. The playhead stays in
 // 0..<durationFrames; a layer stays visible for at least one frame.
@@ -12,6 +12,8 @@ public struct HaloTimelineRow: Identifiable, Sendable, Hashable {
     /// From the layer's in point to its out point, the frame it stops showing.
     public let span: ClosedRange<Int>
     public let isSelected: Bool
+    /// Every frame any of the layer's tracks has a key on, ascending, once each.
+    public let keyFrames: [Int]
 }
 
 extension HaloComposition {
@@ -48,8 +50,15 @@ extension HaloComposition {
         layers.map { layer in
             HaloTimelineRow(
                 id: layer.id, name: layer.name, span: layer.inFrame...max(layer.inFrame, layer.outFrame),
-                isSelected: layer.id == selectedLayerID)
+                isSelected: layer.id == selectedLayerID, keyFrames: layer.keyFrames)
         }
+    }
+}
+
+extension HaloLayer {
+    /// The union of its tracks' key frames, ascending, once each.
+    public var keyFrames: [Int] {
+        Set(tracks.values.flatMap { $0.map(\.frame) }).sorted()
     }
 }
 
