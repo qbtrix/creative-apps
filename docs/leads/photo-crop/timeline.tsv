@@ -38,3 +38,4 @@ utc	stage	event	ref	note
 2026-10-15T14:47Z	4	heartbeat	-	no new dev CI run; #1073 still open
 2026-10-15T15:13Z	4	ci-run	38757068610	red only on Halo keyedFrame6 (not ours); Photo green; round 2 panel running
 2026-10-15T15:17Z	4	round-findings	round 2	2 major + minors; batch r2-b1
+2026-10-15T15:25Z	4	pr-opened	#1186	r2-b1 crop controls act or say why
