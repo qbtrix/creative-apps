@@ -79,6 +79,21 @@ private func frames(_ engine: CommandEngine, _ owner: LayerOwner, _ layerID: Str
     #expect(merged && a.to == 14)
 }
 
+/// A summary-diamond drag moves every track's key, so each coalesced step runs several commands; the whole drag is
+/// still one named entry that one undo restores.
+@Test func coalescedSummaryDragIsOneEntry() throws {
+    var engine = CommandEngine(document: FlareFixtures.bounce)
+    for step in 0..<50 {
+        let frame = step < 9 ? 12 + step : 21 - (step - 9) % 2  // out to 21, then back and forth between 20 and 21
+        try live.moveKeys([KeyRef(layerID: "ball", property: nil, frame: frame)], by: frame == 21 ? -1 : 1, owner: scene,
+                          coalesceKey: "drag-2", in: &engine)
+    }
+    for property in ["x", "y", "scaleX", "scaleY"] { #expect(frames(engine, scene, "ball", property) == [0, 20, 24, 36, 47]) }
+    #expect(engine.undoActionName == "Undo Move Keyframe")
+    try engine.undo()
+    #expect(engine.document == FlareFixtures.bounce && !engine.canUndo)
+}
+
 @Test func deleteSummaryKeyIsOneUndoStep() throws {
     var engine = CommandEngine(document: FlareFixtures.bounce)
     try live.removeKeys([KeyRef(layerID: "ball", property: nil, frame: 12)], owner: scene, in: &engine)
