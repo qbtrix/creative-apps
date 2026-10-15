@@ -1,10 +1,13 @@
 // HaloTimelineView.swift: Halo's timeline: a TimelineStrip track per layer,
 // its span bar from in to out point and a diamond on each key frame. The
-// ruler scrubs, a track selects its layer, a diamond its lane's keys; a click
-// gives it focus so HaloViewer's keys reach it. No layers: how to add one,
+// ruler scrubs, a track selects its layer, a diamond its lane's keys (its
+// layer while key picking can't act); a click gives it focus so HaloViewer's
+// keys reach it. The tooltip is the Model's timelineHelp. No layers: how to add one,
 // in the lane under the ruler.
 // The strip's track buttons come from SuiteUI with no identifier of their
 // own, so the strip passes `halo.timeline.track` down to each of them (#290).
+// The strip sits in the column's safe area and has none of its own, so the
+// selected track's background stays out from under the sidebar (#777).
 // HaloTimelineLayout sizes it: the lanes fit the width less the name column,
 // the divider and the trailing room, so the strip never scrolls sideways and
 // no scroller covers the ruler; the height is the lanes, at least the slot
@@ -50,7 +53,7 @@ struct HaloTimelineView: View {
         .accessibilityElement(children: .contain)
         .accessibilityLabel("Timeline")
         .accessibilityIdentifier("halo.timeline")
-        .help("Drag the ruler to move the playhead. I sets the selected layer's in point, O its out point.")
+        .help(model.timelineHelp)
     }
 
     private func content(_ rows: [HaloTimelineRow]) -> some View {
@@ -71,13 +74,21 @@ struct HaloTimelineView: View {
                     },
                     onSelectKeyframe: { id, frame in
                         hasFocus = true
-                        perform(.selectLaneKeys(layerID: id, frame: frame, extending: false))
+                        perform(model.keyClickCommand(layerID: id, frame: frame))
                     },
                     onSelectTrack: { id in
                         hasFocus = true
                         perform(.selectLayer(id))
                     })
                     .accessibilityIdentifier("halo.timeline.track")
+                    // The strip's selected-track background ignores the safe
+                    // area, so beside the floating sidebar it ran under it
+                    // and past the window's edge. Padding by the insets and
+                    // ignoring them keeps the strip where it was with no safe
+                    // area left to bleed into.
+                    .padding(.leading, geometry.safeAreaInsets.leading)
+                    .padding(.trailing, geometry.safeAreaInsets.trailing)
+                    .ignoresSafeArea(.all, edges: .horizontal)
             }
             .frame(height: height)
             if rows.isEmpty {
