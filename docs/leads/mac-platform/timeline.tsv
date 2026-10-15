@@ -47,3 +47,4 @@ utc	stage	event	ref	note
 2026-10-15T03:20Z	5	ci-run	38674789740	red outside: SuiteUI SidebarRenameGestureTests only; feature tests green; 715-717 superseded; 38675308731 running
 2026-10-15T03:42Z	5	ci-run	38675308731	swift test green, all Flare journeys green; red in Halo, Library, SuiteUI journeys; 720-721 cancelled; 38677546546 running
 2026-10-15T04:09Z	5	ci-run	38677546546	same as 719: Flare green, red only Halo/Library/SuiteUI journeys
+2026-10-15T04:30Z	5	heartbeat	38681586835	no new finished run (723-724 superseded/cancelled); 725 pending
