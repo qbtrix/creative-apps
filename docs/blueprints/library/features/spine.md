@@ -243,7 +243,8 @@ file:
   `LibraryBrowser(model:)` in the shared snapshot file still compiles). The
   grid calls `menu.thumbnails`, the loupe `menu.view`, so thumbnails and
   loupe-viewport change only their own view files and area files, never
-  `LibraryBrowser.swift` (import's in wave 2).
+  `LibraryBrowser.swift` (import's in wave 2). SA-4 makes this change in all three files,
+  the loupe's call site in `LibraryBrowser.swift` included.
 
 ## Pseudocode
 
@@ -255,7 +256,7 @@ rebuildOrder():                                            # SP-8
   call sites: load, setSort, selectCollection, recount after editSelected/recordEdit
   (only when sort == .rating or the collection is Favorites, i.e. the change can reorder or hide)
 
-recordEdit(name, coalesceKey, ids, edit):                  # SP-11
+recordEdit(name, coalesceKey, ids, edit):                  # SP-14 (SP-11 is only the value type)
   before = items for ids;  apply edit;  after = items for ids
   if before == after: return                               # no step for a no-op
   saveRevision += 1
@@ -263,7 +264,7 @@ recordEdit(name, coalesceKey, ids, edit):                  # SP-11
      history.top.after = after                             # one step per drag
   else history.push(Step(name, before, after, coalesceKey)); history.redo = []
   recount(); rebuildOrder() when needed; select(selection)
-undo(): pop step, put `before` back by id, push on redo; never moves the loupe (#426)
+undo(): pop step, put `before` back by id, push on redo; never moves the loupe (#426)   # SP-14
 redo(): the reverse
 undoTitle = history.top.map { "Undo " + $0.name }
 
@@ -304,40 +305,50 @@ Every task is one PR to `dev`: at most 400 changed lines and 15 files, label
 Linux; app tasks (SA, SJ) build only in the macOS job on `dev`, so they copy
 the shape of a view that already builds and keep each change small.
 
-| id | issue | what | owned files | depends on |
-|---|---|---|---|---|
-| SP-1 | – | Shared values and the notice and file-state texts, verbatim | `Sources/LibraryModel/Contracts/LibraryValues.swift`, `Sources/LibraryModel/Contracts/StateValues.swift`, `Tests/LibraryModelTests/LibraryValuesTests.swift` | – |
-| SP-2 | – | Develop values; `PhotoItem` grows `path`, `pixelSize`, `develop`, `availability` with defaults | `Sources/LibraryModel/Contracts/DevelopValues.swift`, `Sources/LibraryModel/PhotoItem.swift`, `Tests/LibraryModelTests/LibraryPhotoItemTests.swift` | SP-1 |
-| SP-3 | – | The protocols (with the `initial` comment fix) and `SampleImage` | `Sources/LibraryModel/Contracts/LibraryContracts.swift`, `Sources/LibraryModel/SampleImage.swift`, `Tests/LibraryModelTests/LibraryContractsTests.swift` | SP-2 |
-| SP-4 | – | Fakes: support, platform, importer (progress first), thumbnails, culling, coding | `Sources/LibraryModel/Fakes/FakeSupport.swift`, `Sources/LibraryModel/Fakes/FakePlatform.swift`, `Sources/LibraryModel/Fakes/FakeUseCases.swift`, `Tests/LibraryModelTests/LibraryFakesTests.swift` | SP-3 |
-| SP-5 | – | Fakes: loupe, develop, crop, exporter | `Sources/LibraryModel/Fakes/FakeRendering.swift`, `Tests/LibraryModelTests/LibraryFakeRenderingTests.swift` | SP-3 |
-| SP-6 | – | The eight live stubs and `LibraryServices` (`.fake`, `.live`) | `Sources/LibraryModel/Live/` (8 files), `Sources/LibraryModel/LibraryServices.swift`, `Tests/LibraryModelTests/LibraryServicesTests.swift` | SP-4, SP-5 |
-| SP-7 | – | Every stored property, the state enums, `init(services:)`, the hand-written `==` | `Sources/LibraryModel/LibraryCatalog.swift`, `Tests/LibraryModelTests/LibraryCatalogTests.swift` | SP-6, SP-11 |
-| SP-8 | – | The cached `order` and `Budget.swift` | `Sources/LibraryModel/LibraryOrder.swift`, `Sources/LibraryModel/LibraryCatalog.swift`, `Tests/LibraryModelTests/LibraryOrderTests.swift`, `Tests/LibraryModelTests/Budget.swift` | SP-7, SP-12 |
-| SP-9 | #156 (refs; skip if #217 merged) | Leave the loupe when the new collection hides its photo | `Sources/LibraryModel/LibraryCatalog.swift`, `Tests/LibraryModelTests/LibraryCollectionSwitchTests.swift` | SP-8 |
-| SP-10 | #235 (closes) | `uniquingIDs` in two passes | `Sources/LibraryModel/LibraryCatalog.swift`, `Tests/LibraryModelTests/LibraryPhotoIDTests.swift` | SP-9 |
-| SP-11 | – | The `CatalogHistory` value type: named steps of before and after photos, coalescing, the undo and redo stacks (no catalog methods yet, so SP-7 can store it) | `Sources/LibraryModel/CatalogHistory.swift`, `Tests/LibraryModelTests/LibraryHistoryTests.swift` | SP-2 |
-| SP-14 | – | The catalog side of undo: `recordEdit`, `undo`, `redo`, `undoTitle`, `redoTitle`, `endCoalescing` | `Sources/LibraryModel/CatalogHistory.swift`, `Tests/LibraryModelTests/LibraryHistoryTests.swift` | SP-8, SP-11 |
-| SP-12 | – | Launch arguments and fixtures (`shoot`, `shoot-unimported`, `large`); samples get `pixelSize` 4032 × 3024 | `Sources/LibraryModel/LibraryLaunch.swift`, `Sources/LibraryModel/LibraryFixtures.swift`, `Sources/LibraryModel/LibrarySample.swift`, `Tests/LibraryModelTests/LibraryLaunchTests.swift` | SP-6 |
-| SP-13 | – | Readouts (`cellValue`, `cellHelp`, `loupeValue`, `histogramValue`, `catalogValue`, `help(for:)`), keys and the controls JSON | `Sources/LibraryModel/LibraryReadouts.swift`, `Sources/LibraryModel/LibraryKeys.swift`, `Tests/LibraryModelTests/LibraryReadoutsTests.swift`, `Tests/LibraryModelTests/LibraryKeysTests.swift` | SP-7 |
-| SA-1 | – | The pure split: scene, window, browser, grid, inspector in their own files, and `Image(display: DisplayImage)` in `DisplayImage+Image.swift` (thumbnails and the loupe both draw with it in wave 2); no other behavior change | `Sources/LibraryApp/LibraryApp.swift`, `Sources/LibraryApp/LibraryWindow.swift`, `Sources/LibraryApp/LibraryBrowser.swift`, `Sources/LibraryApp/LibraryGrid.swift`, `Sources/LibraryApp/DisplayImage+Image.swift`, `Sources/LibraryApp/LibraryInspector.swift` | – |
-| SA-2 | – | One `Window` scene (D2); services from the launch arguments; the three platform stubs | `Sources/LibraryApp/LibraryApp.swift`, `Sources/LibraryApp/LibraryWindow.swift`, `Sources/LibraryApp/Platform/ImageIODecoder.swift`, `Sources/LibraryApp/Platform/JPEGWriter.swift`, `Sources/LibraryApp/Platform/CatalogStore.swift` | SA-1, SP-12 |
-| SA-3 | – | `LibraryMenu` with one sub-struct per area, and every v1 menu item (6.2) with its help | `Sources/LibraryApp/LibraryMenus.swift`, `Sources/LibraryApp/LibraryCommands.swift` | SA-2 |
-| SA-4 | – | The nine area files (`LibraryWindow+Edit` … `+Export`), each a stub returning its sub-struct, its empty `<Area>AreaState` and its no-op hooks; Edit wires undo, redo and samples, Loupe keeps today's View items; `model` internal, `areas`, the hook calls in the body; the window's `onKeyPress` routes every single key | `Sources/LibraryApp/LibraryWindow.swift`, `Sources/LibraryApp/LibraryWindow+Edit.swift`, `+Import`, `+Thumbnails`, `+Cull`, `+Persist`, `+Loupe`, `+Develop`, `+Crop`, `+Export` (`.swift` each) | SA-3, SP-14, SP-13 |
-| SA-5 | – | Content: Import Folder… empty state, the notice slot, the Preview data pill, the export sheet's presentation | `Sources/LibraryApp/LibraryBrowser.swift`, `Sources/LibraryApp/LibraryStatusBar.swift`, `Sources/LibraryApp/LibraryExportSheet.swift`, `Sources/LibraryApp/LibraryWindow.swift` | SA-4 |
-| SA-6 | – | Inspector tabs and header; Develop and Crop stubs; the crop overlay stub in the loupe; the loupe photo's value | `Sources/LibraryApp/LibraryInspector.swift`, `Sources/LibraryApp/DevelopInspector.swift`, `Sources/LibraryApp/CropInspector.swift`, `Sources/LibraryApp/LibraryCropOverlay.swift`, `Sources/LibraryApp/LibraryLoupe.swift` | SA-4 |
-| SA-7 | – | `library.controls` on the window, identifiers on the spine's controls, and the spine's snapshots | `Sources/LibraryApp/LibraryControls.swift`, `Sources/LibraryApp/LibraryWindow.swift`, `Tests/AppSnapshotTests/LibraryShellSnapshots.swift` | SA-5, SA-6 |
-| SJ-1 | – | The four journeys on `-LibraryFixture samples`; J0; J10's app-owned items | `UITests/LibraryJourneyTests.swift` | SA-7 |
-| SJ-2 | – (`feature-done`) | J11 and the `LibraryFiles` helpers, `freshCatalogDir()` included, which every (L) launch in later waves passes as `-LibraryCatalogDir` (in `LibraryJourneyTests.swift`, or `+Shell.swift` and `+Files.swift` once #333 has merged) | `UITests/LibraryJourneyTests.swift`, `UITests/LibraryJourneyTests+Shell.swift`, `UITests/LibraryJourneyTests+Files.swift` | SJ-1 |
+| id | issue | what | owned files | depends on | size |
+|---|---|---|---|---|---|
+| SP-1 | – | Shared values and the notice and file-state texts, verbatim | `Sources/LibraryModel/Contracts/LibraryValues.swift`, `Sources/LibraryModel/Contracts/StateValues.swift`, `Tests/LibraryModelTests/LibraryValuesTests.swift` | – | ~200 lines, 3 files |
+| SP-2 | – | Develop values; `PhotoItem` grows `path`, `pixelSize`, `develop`, `availability` with defaults | `Sources/LibraryModel/Contracts/DevelopValues.swift`, `Sources/LibraryModel/PhotoItem.swift`, `Tests/LibraryModelTests/LibraryPhotoItemTests.swift` | SP-1 | ~150 lines, 3 files |
+| SP-3 | – | The protocols (with the `initial` comment fix) and `SampleImage` | `Sources/LibraryModel/Contracts/LibraryContracts.swift`, `Sources/LibraryModel/SampleImage.swift`, `Tests/LibraryModelTests/LibraryContractsTests.swift` | SP-2 | ~150 lines, 3 files |
+| SP-4 | – | Fakes: support, platform, importer (progress first), thumbnails, culling, coding | `Sources/LibraryModel/Fakes/FakeSupport.swift`, `Sources/LibraryModel/Fakes/FakePlatform.swift`, `Sources/LibraryModel/Fakes/FakeUseCases.swift`, `Tests/LibraryModelTests/LibraryFakesTests.swift` | SP-3 | ~300 lines, 4 files |
+| SP-5 | – | Fakes: loupe, develop, crop, exporter | `Sources/LibraryModel/Fakes/FakeRendering.swift`, `Tests/LibraryModelTests/LibraryFakeRenderingTests.swift` | SP-3 | ~200 lines, 2 files |
+| SP-6 | – | The eight live stubs and `LibraryServices` (`.fake`, `.live`) | `Sources/LibraryModel/Live/` (8 files), `Sources/LibraryModel/LibraryServices.swift`, `Tests/LibraryModelTests/LibraryServicesTests.swift` | SP-4, SP-5 | ~270 lines, 10 files |
+| SP-7 | – | Every stored property, the state enums, `init(services:)`, the hand-written `==` | `Sources/LibraryModel/LibraryCatalog.swift`, `Tests/LibraryModelTests/LibraryCatalogTests.swift` | SP-6, SP-11, SP-10 | ~150 lines, 2 files |
+| SP-8 | – | The cached `order` and `Budget.swift` | `Sources/LibraryModel/LibraryOrder.swift`, `Sources/LibraryModel/LibraryCatalog.swift`, `Tests/LibraryModelTests/LibraryOrderTests.swift`, `Tests/LibraryModelTests/Budget.swift` | SP-7, SP-12 | ~150 lines, 4 files |
+| SP-9 | #156 (refs; skip if #217 merged) | Leave the loupe when the new collection hides its photo | `Sources/LibraryModel/LibraryCatalog.swift`, `Tests/LibraryModelTests/LibraryCollectionSwitchTests.swift` | SP-8 | ~40 lines, 2 files |
+| SP-10 | #235 (closes) | `uniquingIDs` in two passes | `Sources/LibraryModel/LibraryCatalog.swift`, `Tests/LibraryModelTests/LibraryPhotoIDTests.swift` | – | ~40 lines, 2 files |
+| SP-11 | – | The `CatalogHistory` value type: named steps of before and after photos, coalescing, the undo and redo stacks (no catalog methods yet, so SP-7 can store it) | `Sources/LibraryModel/CatalogHistory.swift`, `Tests/LibraryModelTests/LibraryHistoryTests.swift` | – | ~120 lines, 2 files |
+| SP-14 | – | The catalog side of undo: `recordEdit`, `undo`, `redo`, `undoTitle`, `redoTitle`, `endCoalescing` | `Sources/LibraryModel/CatalogHistory.swift`, `Tests/LibraryModelTests/LibraryHistoryTests.swift` | SP-8, SP-11 | ~150 lines, 2 files |
+| SP-12 | – | Launch arguments and fixtures (`shoot`, `shoot-unimported`, `large`); samples get `pixelSize` 4032 × 3024 | `Sources/LibraryModel/LibraryLaunch.swift`, `Sources/LibraryModel/LibraryFixtures.swift`, `Sources/LibraryModel/LibrarySample.swift`, `Tests/LibraryModelTests/LibraryLaunchTests.swift` | SP-6 | ~200 lines, 4 files |
+| SP-13 | – | Readouts (`cellValue`, `cellHelp`, `loupeValue`, `histogramValue`, `catalogValue`, `help(for:)`), keys and the controls JSON | `Sources/LibraryModel/LibraryReadouts.swift`, `Sources/LibraryModel/LibraryKeys.swift`, `Tests/LibraryModelTests/LibraryReadoutsTests.swift`, `Tests/LibraryModelTests/LibraryKeysTests.swift` | SP-7 | ~250 lines, 4 files |
+| SA-1 | – | The pure split: scene, window, browser, grid, inspector in their own files, and `Image(display: DisplayImage)` in `DisplayImage+Image.swift` (thumbnails and the loupe both draw with it in wave 2); no other behavior change | `Sources/LibraryApp/LibraryApp.swift`, `Sources/LibraryApp/LibraryWindow.swift`, `Sources/LibraryApp/LibraryBrowser.swift`, `Sources/LibraryApp/LibraryGrid.swift`, `Sources/LibraryApp/DisplayImage+Image.swift`, `Sources/LibraryApp/LibraryInspector.swift` | – | ~250 lines moved, 6 files |
+| SA-2 | – | One `Window` scene (D2); services from the launch arguments; the three platform stubs | `Sources/LibraryApp/LibraryApp.swift`, `Sources/LibraryApp/LibraryWindow.swift`, `Sources/LibraryApp/Platform/ImageIODecoder.swift`, `Sources/LibraryApp/Platform/JPEGWriter.swift`, `Sources/LibraryApp/Platform/CatalogStore.swift` | SA-1, SP-12 | ~120 lines, 5 files |
+| SA-3 | – | `LibraryMenu` with one sub-struct per area, and every v1 menu item (6.2) with its help | `Sources/LibraryApp/LibraryMenus.swift`, `Sources/LibraryApp/LibraryCommands.swift`, `Sources/LibraryApp/LibraryWindow.swift` (its one `LibraryMenu` construction) | SA-2, SP-13 | ~250 lines, 3 files |
+| SA-4 | – | The nine area files (`LibraryWindow+Edit` … `+Export`), each a stub returning its sub-struct, its empty `<Area>AreaState` and its no-op hooks; Edit wires undo, redo and samples, Loupe keeps today's View items; `model` internal, `areas`, the hook calls in the body; the window's `onKeyPress` routes every single key | `Sources/LibraryApp/LibraryWindow.swift`, `Sources/LibraryApp/LibraryBrowser.swift`, `Sources/LibraryApp/LibraryGrid.swift`, `Sources/LibraryApp/LibraryLoupe.swift` (the `menu:` parameter and its pass-through only), `Sources/LibraryApp/LibraryWindow+Edit.swift`, `+Import`, `+Thumbnails`, `+Cull`, `+Persist`, `+Loupe`, `+Develop`, `+Crop`, `+Export` (`.swift` each) | SA-2, SA-3, SP-13, SP-14 | ~13 files of ~20 lines plus the key routing |
+| SA-5 | – | Content: Import Folder… empty state, the notice slot, the Preview data pill, the export sheet's presentation | `Sources/LibraryApp/LibraryBrowser.swift`, `Sources/LibraryApp/LibraryStatusBar.swift`, `Sources/LibraryApp/LibraryExportSheet.swift`, `Sources/LibraryApp/LibraryWindow.swift` | SA-4 | ~150 lines, 4 files |
+| SA-6 | – | Inspector tabs and header; Develop and Crop stubs; the crop overlay stub in the loupe; the loupe photo's value | `Sources/LibraryApp/LibraryInspector.swift`, `Sources/LibraryApp/DevelopInspector.swift`, `Sources/LibraryApp/CropInspector.swift`, `Sources/LibraryApp/LibraryCropOverlay.swift`, `Sources/LibraryApp/LibraryLoupe.swift` | SA-4, SP-13 | ~200 lines, 5 files |
+| SA-7 | – | `library.controls` on the window, identifiers on the spine's controls, and the spine's snapshots | `Sources/LibraryApp/LibraryControls.swift`, `Sources/LibraryApp/LibraryWindow.swift`, `Tests/AppSnapshotTests/LibraryShellSnapshots.swift` | SA-5, SA-6 | ~150 lines, 3 files |
+| SJ-1 | – | The four journeys on `-LibraryFixture samples`; J0; J10's app-owned items | `UITests/LibraryJourneyTests.swift` | SA-7 | ~250 lines, 1 file |
+| SJ-2 | – (`feature-done`) | J11 and the `LibraryFiles` helpers, `freshCatalogDir()` included, which every (L) launch in later waves passes as `-LibraryCatalogDir` (in `LibraryJourneyTests.swift`, or `+Shell.swift` and `+Files.swift` once #333 has merged) | `UITests/LibraryJourneyTests.swift`, `UITests/LibraryJourneyTests+Shell.swift`, `UITests/LibraryJourneyTests+Files.swift` | SJ-1 | ~200 lines, 3 files |
 
-Order. SP-1 to SP-6 are a chain (each compiles on the one before). SP-7,
-SP-8, SP-9 and SP-10 stack on `LibraryCatalog.swift`. SP-11 (the history
-value type) lands before SP-7, which stores it; SP-14 adds the catalog's undo
-methods after SP-8. SP-12 and SP-13 can run beside the catalog chain once
-their base is in. SA-1 needs nothing and can go
-first; the app chain SA-2 to SA-7 stacks on `LibraryWindow.swift`. Sizes:
-SP-6 is about 270 lines of stubs and wiring plus its tests (10 files);
-SA-4 is 10 files of about 20 lines each plus the key routing. If a task nears
+Order. A link means the task needs that task's merged code. SP-1 to SP-6
+are a chain (each compiles on the types of the one before; SP-6 builds both
+fake files). SP-10 and SP-11 need nothing new and go first: SP-10 changes
+only `uniquingIDs` and its test, and SP-11 stores today's `PhotoItem`. SP-7
+stores the services and the history, and edits `LibraryCatalog.swift` after
+SP-10; SP-8 and SP-9 stack on that file and on `order`. SP-12 needs the
+fakes' mode and `LibraryServices.fake`, and SP-8's budget test needs its
+`large` fixture. SP-13 needs the stored state; SP-14 needs `rebuildOrder` and
+the history type. On the app side SA-1 needs nothing; SA-2 needs the split
+and `LibraryLaunch`; SA-3 needs `LibraryKey` and `help(for:)` (SP-13) and
+comes after SA-2, because swapping `LibraryMenu` for its per-area form
+changes the one construction in `LibraryWindow.swift`; SA-4, SA-5 and SA-7
+stack on `LibraryWindow.swift`, and SA-4 also needs `LibraryMenu` and the
+undo methods; SA-4 adds the `menu:` parameter to the browser, grid and loupe,
+so SA-6 (the loupe's value and crop overlay on `LibraryLoupe(model:menu:)`)
+comes after it and builds beside SA-5. Sizes are in the table: SP-6 is about
+270 lines of stubs and wiring plus its tests (10 files); SA-4 is 13 files of
+about 20 lines each plus the key routing. If a task nears
 400 lines, the lead splits it by file before opening the PR.
 
 Existing test files the spine owns (`LibraryCellSizeFuzzTests`,
@@ -348,9 +359,32 @@ loupe and metadata tests (`LibraryLoupeTests`, `LibraryMetadataTests`) and
 the four existing `Library*Snapshots.swift` files belong to wave-2 features
 and must also pass and compile unchanged.
 
-**#217.** If PR #217 merges before SP-9, SP-9 is dropped and SP-7 to SP-10
-rebase onto it. If SP-9 merges first, #217 conflicts and its author rebases
-or closes it as superseded; the lead comments once on #217 saying so.
+**#217.** If PR #217 merges before SP-9, SP-9 is dropped and any of SP-7, SP-8
+and SP-10 not yet merged rebase onto it. If SP-9 merges first, #217
+conflicts and its author rebases or closes it as superseded; the lead comments once on #217 saying so.
+
+## Build waves
+
+No spine task edits a shared doc (see **Shared docs** above), so SJ-2, the
+`feature-done` task, carries no doc edit either.
+
+- Wave 1: SP-1, SP-10, SP-11, SA-1. Independent in this wave: all four.
+- Wave 2: SP-2. Independent in this wave: SP-2 alone.
+- Wave 3: SP-3. Independent in this wave: SP-3 alone.
+- Wave 4: SP-4, SP-5. Independent in this wave: both.
+- Wave 5: SP-6. Independent in this wave: SP-6 alone.
+- Wave 6: SP-7, SP-12. Independent in this wave: both.
+- Wave 7: SP-8, SP-13, SA-2. Independent in this wave: all three.
+- Wave 8: SP-9, SP-14, SA-3. Independent in this wave: all three.
+- Wave 9: SA-4. Independent in this wave: SA-4 alone.
+- Wave 10: SA-5, SA-6. Independent in this wave: both.
+- Wave 11: SA-7. Independent in this wave: SA-7 alone.
+- Wave 12: SJ-1. Independent in this wave: SJ-1 alone.
+- Wave 13: SJ-2 (`feature-done`, final). Independent in this wave: SJ-2 alone.
+
+Longest chain: SP-1 → SP-2 → SP-3 → SP-4 → SP-6 → SP-7 → SP-8 → SP-14 → SA-4 → SA-5 → SA-7 → SJ-1 → SJ-2 (13).
+
+Chain of 13: `PhotoItem` needs `PixelSize` (SP-1), the protocols take `DevelopSettings` (SP-2), the fakes conform to the protocols (SP-3), `LibraryServices.fake` builds the fakes (SP-4), the catalog stores `LibraryServices` (SP-6), `order` and its call sites live in `LibraryCatalog.swift` (SP-7), `recordEdit` calls `rebuildOrder` (SP-8), the Edit area wires `undo` and `undoTitle` (SP-14), SA-5 edits the window that builds `LibraryMenu` (SA-4), the snapshots draw SA-5's states, J0 reads `library.controls` (SA-7), and J11 shares `LibraryJourneyTests.swift` until #333 (SJ-1).
 
 ## Acceptance test per task
 

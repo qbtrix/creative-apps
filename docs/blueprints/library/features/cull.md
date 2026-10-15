@@ -143,24 +143,42 @@ MetadataInspector (CU-6): stars, flag and label call cull through the existing c
 
 Every task is one PR to `dev`: at most 400 changed lines and 15 files, label
 `fast-lane`, body lines `Belt-Lead:`, `Feature: cull`, `Fast-Check: pass`,
-`Head:`. The last task to merge carries `feature-done` (CU-7, or CU-8 when
-it runs).
+`Head:`. The last task to merge carries `feature-done` (CU-7 or CU-8,
+whichever merges last; CU-8 only when it runs).
 
-| id | issue | what | owned files | depends on |
-|---|---|---|---|---|
-| CU-1 | #211 (part) | `cull(_:)` on targets with one undo step, refused changes, help, key mapping | `Sources/LibraryModel/LibraryCulling.swift`, `Tests/LibraryModelTests/LibraryRatingTests.swift` | spine |
-| CU-2 | #426 (part) | `LiveCulling` with the full Auto Advance rule; `unavailable = nil` | `Sources/LibraryModel/Live/LiveCulling.swift`, `Tests/LibraryModelTests/LibraryAutoAdvanceTests.swift` | spine |
-| CU-3 | #426 (closes) | Auto Advance in `cull` and `setAutoAdvance`; undo never moves the loupe; the cull budgets | `Sources/LibraryModel/LibraryCulling.swift`, `Tests/LibraryModelTests/LibraryAutoAdvanceTests.swift`, `Tests/LibraryModelTests/LibraryCullBudgetTests.swift` | CU-1, CU-2 |
-| CU-4 | #211 (closes) | The inspector's and the menu's edits go through `cull` (undo steps named) | `Sources/LibraryModel/MetadataEditing.swift`, `Tests/LibraryModelTests/LibraryMetadataTests.swift` | CU-1 |
-| CU-5 | #724 (part) | The cull area: single keys, the Metadata menu, Auto Advance, the refused-change notice | `Sources/LibraryApp/LibraryWindow+Cull.swift`, `Tests/AppSnapshotTests/LibraryRatingSnapshots.swift`, `Tests/AppSnapshotTests/LibraryAutoAdvanceSnapshots.swift` | CU-3, CU-4 |
-| CU-6 | – | `MetadataInspector` identifiers and routing; its snapshots | `Sources/LibraryApp/MetadataInspector.swift`, `Tests/AppSnapshotTests/LibraryMetadataSnapshots.swift` | CU-4 |
-| CU-7 | – | J4 steps 1–8 (F), then (L) once import's IM-6 has merged | `UITests/LibraryJourneyTests+Cull.swift` | CU-5, CU-6, #333, import IM-6 for (L) |
-| CU-8 | – | P2 `testCullKeyLatency` (perf, report-only) | `UITests/LibraryJourneyTests+PerfCull.swift` | CU-7, #330, #782 |
+| id | issue | what | owned files | depends on | size |
+|---|---|---|---|---|---|
+| CU-1 | #211 (part) | `cull(_:)` on targets with one undo step, refused changes, help, key mapping | `Sources/LibraryModel/LibraryCulling.swift`, `Tests/LibraryModelTests/LibraryRatingTests.swift` | spine | ~260, 2 |
+| CU-2 | #426 (part) | `LiveCulling` with the full Auto Advance rule; `unavailable = nil` | `Sources/LibraryModel/Live/LiveCulling.swift`, `Tests/LibraryModelTests/LibraryAutoAdvanceTests.swift` | spine | ~220, 2 |
+| CU-3 | #426 (closes) | Auto Advance in `cull` and `setAutoAdvance`; undo never moves the loupe; the cull budgets | `Sources/LibraryModel/LibraryCulling.swift`, `Tests/LibraryModelTests/LibraryAutoAdvanceTests.swift`, `Tests/LibraryModelTests/LibraryCullBudgetTests.swift` | CU-1, CU-2 | ~300, 3 |
+| CU-4 | #211 (closes) | The inspector's and the menu's edits go through `cull` (undo steps named) | `Sources/LibraryModel/MetadataEditing.swift`, `Tests/LibraryModelTests/LibraryMetadataTests.swift` | CU-1 | ~140, 2 |
+| CU-5 | #724 (part) | The cull area: single keys, the Metadata menu, Auto Advance, the refused-change notice | `Sources/LibraryApp/LibraryWindow+Cull.swift`, `Tests/AppSnapshotTests/LibraryRatingSnapshots.swift`, `Tests/AppSnapshotTests/LibraryAutoAdvanceSnapshots.swift` | CU-3 | ~300, 3 |
+| CU-6 | – | `MetadataInspector` identifiers and routing; its snapshots | `Sources/LibraryApp/MetadataInspector.swift`, `Tests/AppSnapshotTests/LibraryMetadataSnapshots.swift` | spine | ~150, 2 |
+| CU-7 | – | J4 steps 1–8 (F), then (L) once import's IM-6 has merged | `UITests/LibraryJourneyTests+Cull.swift` | CU-5, #333, import IM-6 for (L) | ~200, 1 |
+| CU-8 | – | P2 `testCullKeyLatency` (perf, report-only) | `UITests/LibraryJourneyTests+PerfCull.swift` | CU-5, #333, #330, #782, import IM-6 for (L) | ~120, 1 |
 
 CU-1 and CU-3 share `LibraryCulling.swift`, stacked; CU-2 and CU-3 share
-`LibraryAutoAdvanceTests.swift`, stacked. CU-1, CU-2 and CU-4's model work
-start side by side once the spine has merged. P2's Home after every 23 keys
+`LibraryAutoAdvanceTests.swift`, stacked. CU-1 adds `cull(_:advance:)` with
+its `advance` parameter, so CU-4 needs only CU-1; CU-3 makes the parameter
+move the loupe. CU-5 calls `cull`, `cullHelp` and `setAutoAdvance`, not
+`MetadataEditing`, so it does not wait on CU-4. CU-6 routes through the
+inspector's existing closures and adds identifiers, so it needs only the
+spine. J4 and P2 drive the keys (CU-5), not the inspector, so CU-7 and CU-8
+build side by side. P2's Home after every 23 keys
 uses loupe-viewport's Home; until that merges, P2 presses Left 23 times.
+
+The packet edits no shared doc (`docs/c4/model.json`, `docs/design.md`, a
+blueprint or `waves.md`), so it has no docs task.
+
+## Build waves
+
+- Wave 1: CU-1, CU-2, CU-6. Independent in this wave: all three.
+- Wave 2: CU-3, CU-4. Independent in this wave: both.
+- Wave 3: CU-5. Independent in this wave: CU-5 alone.
+- Wave 4: CU-7, CU-8 (final; `feature-done` on the last to merge). Independent in this wave: both.
+
+Longest chain: CU-1 → CU-3 → CU-5 → CU-7 (4).
+Chain of 4: CU-3 adds Auto Advance inside CU-1's `cull` in `LibraryCulling.swift`, CU-5's `LibraryWindow+Cull.swift` calls CU-3's `setAutoAdvance`, and J4 in CU-7 presses CU-5's keys and menu.
 
 ## Acceptance test per task
 

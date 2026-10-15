@@ -167,7 +167,7 @@ LibraryWindow+Import (IM-6, macOS):
 Every task is one PR to `dev`: at most 400 changed lines and 15 files, label
 `fast-lane`, body lines `Belt-Lead:`, `Feature: import`, `Fast-Check: pass`,
 `Head:`. The last task to merge carries `feature-done` (IM-8, or IM-9 when it
-runs).
+runs and merges after IM-8).
 
 | id | issue | what | owned files | depends on |
 |---|---|---|---|---|
@@ -175,16 +175,35 @@ runs).
 | IM-2 | #210 (part) | `LiveImporter`: skip known, capture-date order, path ids, batches, throttled progress, cancel; `unavailable = nil` | `Sources/LibraryModel/Live/LiveImporter.swift`, `Tests/LibraryModelTests/LibraryLiveImporterTests.swift` | spine |
 | IM-3 | #210 (part) | The import model budgets | `Tests/LibraryModelTests/LibraryImportBudgetTests.swift` | IM-1, IM-2 |
 | IM-4 | #210 (part) | `ImageIODecoder`: scan with metadata and orientation, decode to sRGB RGBA8, with its QB-LIB-V6 tests | `Sources/LibraryApp/Platform/ImageIODecoder.swift`, `Tests/AppSnapshotTests/LibraryDecodeTests.swift` | spine |
-| IM-6 | #210 (part) | The import area: File > Import Folder…, open panel or `-LibraryImportFolder`, the task off the main actor, import on launch | `Sources/LibraryApp/LibraryWindow+Import.swift` | IM-1, IM-2, IM-4 |
+| IM-6 | #210 (part) | The import area: File > Import Folder…, open panel or `-LibraryImportFolder`, the task off the main actor, import on launch | `Sources/LibraryApp/LibraryWindow+Import.swift` | IM-1 |
 | IM-7 | #210 (part) | The progress row and the notice (placeholders until #780 and #781) and their snapshots | `Sources/LibraryApp/LibraryBrowser.swift`, `Tests/AppSnapshotTests/LibraryImportSnapshots.swift` | IM-1 |
-| IM-8 | #210 (closes) | J1; delete the skipped `testImportRateAndRelaunch` | `UITests/LibraryJourneyTests.swift`, `UITests/LibraryJourneyTests+Import.swift`, `UITests/LibraryJourneyTests+Files.swift` | IM-6, IM-7 |
-| IM-9 | – | P6 `testImportProgressAndThroughput` (perf, report-only) | `UITests/LibraryJourneyTests+PerfImport.swift` | IM-8, #330, #782, #333 |
+| IM-8 | #210 (closes) | J1; delete the skipped `testImportRateAndRelaunch` | `UITests/LibraryJourneyTests.swift`, `UITests/LibraryJourneyTests+Import.swift`, `UITests/LibraryJourneyTests+Files.swift` | IM-2, IM-4, IM-6, IM-7 |
+| IM-9 | – | P6 `testImportProgressAndThroughput` (perf, report-only) | `UITests/LibraryJourneyTests+PerfImport.swift` | IM-2, IM-4, IM-6, IM-7, #330, #782, #333 |
 
 `LibraryLiveImporterTests.swift` is a new test file (not in `waves.json`); no
 other feature names it. IM-8 owns `LibraryJourneyTests+Files.swift` in wave 2
 only to move the spine's `LibraryFiles` helpers there if #333 merges during
 wave 2 (the other wave-2 features read the helpers, never edit them). IM-1,
-IM-2 and IM-4 can start side by side; IM-7 needs only IM-1.
+IM-2 and IM-4 can start side by side; IM-6 and IM-7 need only IM-1 (they call
+its catalog methods; the importer and decoder are the spine's stubs behind
+`PhotoImporting` and `PhotoDecoding` until IM-2 and IM-4 merge). IM-8 and
+IM-9 run the live import, so they wait on IM-2, IM-4, IM-6 and IM-7; IM-9
+adds its own file and needs nothing from IM-8. IM-6 alone is not the live
+import: another feature's (L) step that imports through the live importer
+(thumbnails TH-8, cull CU-7 and CU-8, persist PE-6, loupe-viewport LV-10 and
+LV-11) waits on IM-2, IM-4 and IM-6 all merged, which IM-8 merging implies.
+
+## Build waves
+
+- Wave 1: IM-1, IM-2, IM-4. Independent in this wave: all three.
+- Wave 2: IM-3, IM-6, IM-7. Independent in this wave: all three.
+- Wave 3: IM-8, IM-9 (IM-9 also waits on #330, #782 and #333; the last to
+  merge carries `feature-done`). Independent in this wave: both.
+
+Longest chain: IM-1 → IM-6 → IM-8 (3).
+
+No task edits a shared doc (`docs/c4/model.json`, `docs/design.md`, the
+blueprint or `waves.md`), so there is no shared-doc task.
 
 ## Acceptance test per task
 
@@ -194,7 +213,7 @@ IM-2 and IM-4 can start side by side; IM-7 needs only IM-1.
 | IM-2 | `LibraryLiveImporterTests` over a test decoder that scans 120 candidates (3 known, 2 failures) on a test clock: the result has 117 photos in capture-date order with `id == path` and the file stem as name; `added` batches are ≤ 50 and their concatenation equals the result; `progress` is called ≤ 30 times a simulated second and ends at total; an empty folder throws `noPhotos`; a scan error passes `unreadableFolder` through; `LiveImporter.unavailable == nil` | a known path is re-imported, the order or ids differ, batches are too big, or progress floods |
 | IM-3 | `LibraryImportBudgetTests` (rows below) | a model half misses its debug gate |
 | IM-4 | `LibraryDecodeTests` (macOS): a generated JPEG with Exif orientation 6 and a red marker top-left before rotation scans as portrait and decodes with the marker top-left of the upright image; a Display P3 PNG of P3 (1, 0, 0) decodes to sRGB within 2/255 of the clipped expected value; a `.jpg` of the bytes `not an image` is a scan failure with reason "not an image file"; `decode(maxLongSide: 512)` of a 4000 × 3000 file is 512 × 384; a hidden file and a file inside a package are not listed | orientation or color is wrong, a broken file throws instead of failing, or the size isn't fitted |
-| IM-6 | J1 steps 2–5 on the macOS run | the import blocks the main thread, a second import starts, or import on launch doesn't run |
+| IM-6 | At its own merge: J1 step 6 on the fakes (needs only IM-6 and IM-7) shows `library.import.progress` after the `-LibraryImportFolder` launch. Live: IM-8's J1 steps 2–5 on the macOS run | the import blocks the main thread, a second import starts, or import on launch doesn't run |
 | IM-7 | `LibraryImportSnapshots`: the five states above, Light and Dark; the progress row carries `library.import.progress` with the text as its value | a state is missing or the row has no identifier |
 | IM-8 | J1 passes; `testImportRateAndRelaunch` is gone | any J1 expectation fails |
 | IM-9 | P6 attaches `perf-testImportProgressAndThroughput.json` with 5 runs, each with a `progress` and a `thumb-ready` mark | a run is missing its marks |
