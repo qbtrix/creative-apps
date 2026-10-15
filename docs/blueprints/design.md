@@ -1667,6 +1667,25 @@ public struct FakeVariables: VariableEditing {
 
 ## 6. Look
 
+**Captain decision 2026-10-15: one shell and one tool box for all five
+apps.** Design moves from `EditorShell` onto `SuiteWindow`, the shell Flare
+and Halo have: the window keeps its title bar and follows the system
+appearance, the chrome is system Liquid Glass and the canvas stays flat.
+The tools, their shortcuts, the tool options, the canvas with rulers, the
+status line and the panel contents stay. Pages and the layer tree (today's
+Layers tab) go in the sidebar; Properties fills the inspector, which no
+longer needs tabs; New, Open, Save, Undo, Redo and the zoom commands go in
+the window toolbar, the save state in the window's subtitle; the status
+line sits under the canvas. The tool rail becomes Flare's floating tool box
+(`ToolbarGroup` `.floating`, one glass capsule over the canvas). Where this
+section and its tables say "dark `EditorShell`, hidden title bar", the top
+bar or the Layers tab, read them through this paragraph.
+The packets are `docs/blueprints/suiteui/features/editor-in-window.md`,
+`docs/blueprints/design/features/shell-parity.md`,
+`docs/blueprints/photo/features/shell-parity.md` and
+`docs/blueprints/suiteui/features/editor-shell-removal.md`; the waves are in
+`docs/blueprints/suite/features/shell-parity-waves.md`.
+
 Design keeps everything `docs/design.md` already says for an editor shell
 (dark `EditorShell`, hidden title bar, flat bars, glass only where SuiteUI
 puts it). The house reference for inspector rows is Flare's easing editor

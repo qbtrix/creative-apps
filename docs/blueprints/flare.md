@@ -431,6 +431,29 @@ No new container or component: every new file sits under the existing
 
 ## 3. Screen inventory
 
+**Captain decision 2026-10-15: one shell, one tool box and an app switcher
+for all five apps.** After using the dev build of every app, the captain
+kept the shell Flare and Halo have today: `SuiteWindow`, a
+`NavigationSplitView` with scenes and layers in the sidebar, the stage as
+the detail and a trailing inspector the user can hide. The chrome
+(toolbar, sidebar, inspector) is system Liquid Glass, the content stays
+flat, and the window keeps its title bar and follows the system
+appearance. Flare's tool box, `ToolbarGroup`'s `.floating` style (one glass
+capsule over the canvas, as `Sources/FlareApp/FlareApp.swift` draws it), is
+the standard for every app with tools. Every window also shows the suite's
+app switcher, centered in its toolbar. So Flare's window does not move to
+`EditorShell`, and F1a (#346) and F1b (#347) target `SuiteWindow`:
+
+- The top bar's actions go to the window toolbar.
+- The right panel's tabs go to the inspector.
+- Scenes and layers stay in the sidebar.
+- The timeline sits under the stage in the content.
+
+Where 3.1, the rows after it, 7.3 and the waves in section 8 say
+`FlareEditor` on `EditorShell`, dark, hidden title bar, top bar or docked
+rail, read them through this paragraph. The packets are in
+`docs/blueprints/suite/features/shell-parity-waves.md`.
+
 One window (with the Interactions editor as a mode of it), sheets and
 popovers, and the menu bar.
 Components are SuiteUI unless named `Flare*`.

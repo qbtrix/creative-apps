@@ -1949,6 +1949,28 @@ extension PhotoWorkspace {
 
 ## 6. Look
 
+**Captain decision 2026-10-15: one shell and one tool box for all five
+apps.** Photo moves from `EditorShell` onto `SuiteWindow`, the shell Flare
+and Halo have: the window keeps its title bar and follows the system
+appearance, the chrome is system Liquid Glass and the canvas stays flat.
+The tools, their shortcuts, the tool options, the canvas with rulers and
+checkerboard, the status line and the panel contents stay. The layer list
+(and the History list once PV-4 builds it) goes in the sidebar; the Adjust
+content (the image header, the tool options, the adjustment sections) and
+the selected layer's blend mode and opacity fill the inspector; Open, Save,
+Export, Undo, Redo and the zoom commands go in the window toolbar, the save
+state (rule 6) in the window's subtitle; the Image menu stays in the menu
+bar; the status line sits under the canvas. The tool rail becomes Flare's
+floating tool box (`ToolbarGroup` `.floating`, one glass capsule over the
+canvas). Where this section says dark in both appearances, hidden title
+bar, top bar, docked rail or the panel's tabs, read it through this
+paragraph.
+The packets are `docs/blueprints/suiteui/features/editor-in-window.md`,
+`docs/blueprints/design/features/shell-parity.md`,
+`docs/blueprints/photo/features/shell-parity.md` and
+`docs/blueprints/suiteui/features/editor-shell-removal.md`; the waves are in
+`docs/blueprints/suite/features/shell-parity-waves.md`.
+
 Photo already follows `docs/design.md`'s Editor shell: dark in both
 appearances, hidden title bar, the 48 pt top bar, the docked rail, the
 canvas with rulers and a checkerboard, the 280 pt right panel with
