@@ -26,3 +26,4 @@ utc	stage	event	ref	note
 2026-10-15T02:40Z	3	stage-end	waves	all 9 tasks merged
 2026-10-15T02:40Z	4	stage-start	round 1	waiting on dev CI containing 899d424
 2026-10-15T02:46Z	4	ci-run	38672480053	dev 24ef33c contains #936; pending
+2026-10-15T02:52Z	4	round-findings	round 1	12 confirmed (2 major), fix batches r1-b1 r1-b2

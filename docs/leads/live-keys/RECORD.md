@@ -4,7 +4,7 @@ Issue: #799 · Packet: docs/blueprints/flare/features/live-keys.md
 Run: act-1a13d0020ff-4x51 · Session: cse_01BKSKFkuR1aFXhWhZAhsegU · Started: 2026-10-15T00:00Z
 Stage: 4 round 1
 Base: 899d4243f4b53b42088452afee969d1856a5c7f0
-Next: wait for CI run 38672480053 (dev 24ef33c, contains #936) and judge round 1 on it
+Next: wait for fix PRs r1-b1, r1-b2 to merge; then round 2 on the dev CI run containing them (lenses fixed: clarity, journey, contract, quality)
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -22,6 +22,7 @@ Next: wait for CI run 38672480053 (dev 24ef33c, contains #936) and judge round 1
 ## Rounds
 | round | CI run | CI | audit vs baseline | lenses | confirmed | fixed by | clean |
 |---|---|---|---|---|---|---|---|
+| 1 | 38672480053 (cancelled; waiting on the next run containing 899d424) | pending | pending | clarity, journey, contract, quality | 12 (2 major: symbol keys past the symbol's end; non-atomic coalesced multi-layer setValue), 1 refuted | r1-b1, r1-b2 | no |
 
 ## Decisions
 - Base is c111439 (dev one commit past the briefed bcc3197, which is its ancestor: #896, a Flare test pin).
@@ -36,6 +37,8 @@ Next: wait for CI run 38672480053 (dev 24ef33c, contains #936) and judge round 1
 
 - PhotoBrushCopyCostTests.aStrokesFirstEventCopiesOnlyWhatItsDabsTouch is a timing test that failed once under parallel builders' load (median 8.7 vs 3) and passed on rerun of the same head; not this feature's.
 
+- Round lenses are code lenses (no Flare screen changes in this feature): clarity (user-facing strings), journey, contract, quality.
+- Fix PRs carry feature-done too, since they land after KY-9 (#936) and the lane dispatches CI for them.
+
 ## Open
-- Nit for a round fix: LiveKeyframes+Edit.swift header (line 7) still says the KeyframeEditing conformance "comes in KY-7".
 - none
