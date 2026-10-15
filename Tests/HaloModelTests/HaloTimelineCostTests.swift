@@ -1,9 +1,10 @@
 // HaloTimelineCostTests.swift: the timeline's quality bar (QB-L10, model half,
 // docs/review-rubric.md): building the strip's rows for 300 layers, which the
 // viewer does on every scrub, and one scrub step (QB-L3's model side) each stay
-// under 5 ms in release and 50 ms in debug (CI). The quietest p95 of three
-// rounds of 100 counts, since scripts/ci runs suites in parallel.
-import HaloModel
+// under 5 ms in release and 50 ms in debug (CI); so do HB-6's rows on the
+// `crowd` fixture (300 layers, 5,000 keys, key frames included). The quietest
+// p95 of three rounds of 100 counts, since scripts/ci runs suites in parallel.
+@testable import HaloModel
 import Testing
 
 #if DEBUG
@@ -36,5 +37,16 @@ struct HaloTimelineCostTests {
         #expect(rows.first?.isSelected == true)
         #expect(p95("scrub") { project.scrub(to: 2000) } <= budget)
         #expect(project.selectedComposition?.playheadFrame == 1799)
+    }
+
+    /// HB-6 (blueprint 7.1): the rows, key frames included, for `crowd`.
+    @Test func timelineRowsCrowd() throws {
+        var project = HaloProject(services: .fake)
+        project.restore(try #require(HaloFixtures.project("crowd")))
+        var rows: [HaloTimelineRow] = []
+        #expect(p95("crowd") { rows = project.timelineRows } <= budget)
+        #expect(rows.count == 300)
+        #expect(rows.first?.keyFrames == Array(stride(from: 0, to: 300, by: 30)))
+        #expect(rows.last?.keyFrames == [])
     }
 }

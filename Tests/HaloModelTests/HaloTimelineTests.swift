@@ -1,8 +1,9 @@
 // HaloTimelineTests.swift: the selected composition's timeline: timecodes at
 // 24 and 30 fps, scrubbing clamped to the composition, the layers active at a
-// frame, the strip's rows, and in and out points set at the playhead (an out
-// point before the in point is refused). Runs on Linux and macOS.
-import HaloModel
+// frame, the strip's rows with each layer's key frames, in and out points set
+// at the playhead (an out point before the in point is refused), and the
+// layer header's frames with the out point exclusive. Runs on Linux and macOS.
+@testable import HaloModel
 import Testing
 
 /// A 2-second composition at `fps` with a solid selected.
@@ -123,4 +124,30 @@ private func project(fps: Int = 24) -> HaloProject {
     #expect(rows.map(\.name) == ["Shape 1", "Solid 1"])
     #expect(rows.map(\.span) == [5...48, 0...48])
     #expect(rows.map(\.isSelected) == [false, true])
+}
+
+/// `name` loaded on the fake services, first composition selected.
+private func fixture(_ name: String) throws -> HaloProject {
+    var project = HaloProject(services: .fake)
+    project.restore(try #require(HaloFixtures.project(name)))
+    return project
+}
+
+@Test func rowsCarryEachLayersKeyFrames() throws {
+    let rows = try fixture("keyed").timelineRows
+    #expect(rows.map(\.name) == ["Ball", "Floor"])
+    #expect(rows.map(\.keyFrames) == [[0, 12, 24], []])
+}
+
+@Test func headerReadsFramesWithTheOutPointExclusive() throws {
+    var project = try fixture("three-layers")
+    project.selectLayer("comp-1-layer-4")
+    #expect(project.selectedLayerHeader == HaloLayerHeader(name: "Title", kind: "Text", frames: "Frames 24–71", parent: nil))
+    project.selectLayer("comp-1-layer-3")
+    project.scrub(to: 20)
+    project.setSelectedLayerInPoint()
+    project.scrub(to: 50)
+    project.setSelectedLayerOutPoint()
+    #expect(project.selectedLayerHeader?.frames == "Frames 20–50")
+    #expect(project.selectedLayer?.outFrame == 51)
 }
