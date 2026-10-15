@@ -4,7 +4,7 @@ Issue: #793 (resumes #754) · Packet: docs/blueprints/flare/features/mac-platfor
 Run: act-1a13c789856-0qa9 (first run act-1a13b14336c-tqna) · Session: claude/mac-platform-lead-lxlcta (first: claude/mac-platform-lead-7jx22z) · Started: 2026-10-14T15:43Z, resumed 2026-10-14T22:15Z
 Stage: done, re-checking (round budget spent; waiting for a green dev CI run containing 190e45d)
 Base: 1098ff2d6c135020391cef770f4de11dfde9465a
-Next: watch dev CI run 38682385432 (e8e5b52, #975 reverts SuiteUI #962/#963) and later. Green -> edit the Belt-Contact-Sheet comment on #793 (id 6180953518), mark done. No Flare change pending.
+Next: watch the next completed dev CI run after 38682385432. Green -> edit the Belt-Contact-Sheet comment on #793 (id 6180953518), mark done. As of 726 every Flare journey and mac-platform test is green; red only in Halo, Library, SuiteUI journeys. No Flare change pending.
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
