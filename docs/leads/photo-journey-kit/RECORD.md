@@ -23,4 +23,4 @@ Next: wait for a dev CI run (after the LiveRecovery compile fix) whose macOS job
 - KT-1 touches only UITests/, which compiles only on macOS: the Linux gate covers lints only; the macOS run on dev the lane dispatches (UITests path + feature-done) is the real check.
 
 ## Open
-- dev-red #763: macOS jobs die before ui-test, so the smoke journey has not run yet; reported on #763 (comment 6198081972).
+- dev-red #763: macOS jobs die before ui-test (runs 763-767 all stop in scripts/ci), so the smoke journey has not run yet; the LiveRecovery compile fix is open as #1224 (photo-documents)
