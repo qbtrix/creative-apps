@@ -10,3 +10,6 @@ utc	stage	event	ref	note
 2026-10-14T23:57Z	3	pr-merged	#882	SN-4 guides
 2026-10-14T23:57Z	3	stage-start	wave3	SN-5 on 5de7e13
 2026-10-15T00:02Z	3	heartbeat	wave3	SN-5 builder running (wf_63903b8d-5ef)
+2026-10-15T00:05Z	3	pr-merged	#886	SN-5 SceneEditing conformance and model journeys (feature-done)
+2026-10-15T00:05Z	3	stage-end	wave3	all five tasks merged
+2026-10-15T00:05Z	4	stage-start	round1	waiting on dev CI for 62395be

@@ -2,9 +2,9 @@
 
 Issue: #800 · Packet: docs/blueprints/flare/features/live-scenes.md
 Run: act-1a13ca4f89e-0ft1 · Session: claude/live-scenes-lead-d0sj3t · Started: 2026-10-14
-Stage: 3 wave 3
-Base: 5de7e13da4c2f56e017354128042f556a02e1d26
-Next: wait for SN-5 (feature-done) to merge, then stage 4 on the CI run it triggers
+Stage: 4 round 1
+Base: 62395be0c94c10861eaa7518dc7a7fa0d6143447
+Next: read the dev CI run triggered by #886 (feature-done, 62395be); judge round 1 on it
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -13,7 +13,7 @@ Next: wait for SN-5 (feature-done) to merge, then stage 4 on the CI run it trigg
 | SN-2 | 2 | renameScene, reorderScene on LC-8 RenameScene/ReorderScene, clamped index | Live/LiveScenes+Order.swift, LiveScenesOrderTests.swift | LiveScenesOrderTests | #879 | merged |
 | SN-3 | 2 | setCanvas (LC-8 SetSceneCanvas), setTiming | Live/LiveScenes+Canvas.swift, LiveScenesCanvasTests.swift | LiveScenesCanvasTests | #880 | merged |
 | SN-4 | 2 | guides add/remove; drag is one merged MoveGuide (LC-10); QB-L7 budget | Live/LiveScenes+Guides.swift, LiveScenesGuidesTests.swift | LiveScenesGuidesTests | #882 | merged |
-| SN-5 | 3 | SceneEditing conformance, model journey steps 1-4, refusalsArePlainText, liveEqualsFake (feature-done) | Live/LiveScenes+SceneEditing.swift, LiveScenesJourneyTests.swift | LiveScenesJourneyTests | | building |
+| SN-5 | 3 | SceneEditing conformance, model journey steps 1-4, refusalsArePlainText, liveEqualsFake (feature-done) | Live/LiveScenes+SceneEditing.swift, LiveScenesJourneyTests.swift | LiveScenesJourneyTests | #886 | merged |
 
 Journeys (model half, SN-5): J2 new from preset, J16 scenes, J14 guides; steps 1-4 of the packet.
 Quality bars: QB-F3 one gesture one step, QB-L7 <= 10 ms per moveGuide step (median of 50), QB-F2 plain refusals.
@@ -29,4 +29,4 @@ Quality bars: QB-F3 one gesture one step, QB-L7 <= 10 ms per moveGuide step (med
 - No Flare screen changes: the live type is not wired until IN-4, so the Anatomy loop judges on CI + audit, not new screens.
 
 ## Open
-- none
+- dev-red #763 open before this feature: macOS fails in SuiteUI (SnapshotHost, FrameProbe, ControlInventory, GoldenImage) and Photo (PhotoBrushLatency); no Flare or LiveScenes test in run 38654031210 failed.
