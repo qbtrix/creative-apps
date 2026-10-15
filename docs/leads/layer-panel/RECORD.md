@@ -35,4 +35,4 @@ Journeys: H-J9 (8 steps, packet "Journey steps"). Quality bars: QB-F1 no dead co
 - LP-3 (#1047): a refused layer rename also shows in W0's viewer caption (`halo.refusal`), since HaloViewer shows any non-inspector refusal; candidate for the critic round.
 
 ## Open
-- none
+- dev is red before this feature (#763, run 38704216123 on 92db316): Halo `testLayoutAtWidths` (timeline track under the sidebar at 880 pt; fixed by SuiteUI #1040, waiting on a human Mac-Check) and SuiteUI `testGalleryOpensEveryPage` (Hide Sidebar identifier). Neither is in this feature's files; the done check's green dev run needs #1040 merged.
