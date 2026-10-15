@@ -19,7 +19,7 @@ Next: wait for D-10 and the perf fix; read the macOS run containing #1230; rerun
 | D-7 | 4 | Save routing, Keep layers?, open .ora/flat, errors, Not saved, fileServices, Open Recent | A/PhotoWindow+File.swift, A/PhotoCommands+File.swift | V5/V6, app-state rule | #1223 | merged |
 | D-8 | 5 | Save status in top bar, edited dot, Saving…/Opening… notes; snapshots | A/PhotoTopBar.swift, A/PhotoWindow+File.swift, ST/PhotoDocumentsSnapshots.swift | PhotoDocumentsSnapshots | #1228 | merged |
 | D-9 | 6 | PhotoAutosave + wiring | A/PhotoAutosave.swift, A/PhotoWindow+File.swift, ST/PhotoAutosaveTests.swift | PhotoAutosaveTests | #1230 | merged |
-| D-10 | 7 | App delegate: Open Recent/Finder opens, unsaved prompt on close/quit | A/PhotoApp.swift, A/PhotoWindow+File.swift, ST/PhotoUnsavedPromptTests.swift | PhotoUnsavedPromptTests | – | building |
+| D-10 | 7 | App delegate: Open Recent/Finder opens, unsaved prompt on close/quit | A/PhotoApp.swift, A/PhotoWindow+File.swift, ST/PhotoUnsavedPromptTests.swift | PhotoUnsavedPromptTests | #1232 | open |
 | D-11 | 8 | Journeys PJ-1, PJ-1b, PJ-2, PJ-4 | UT/PhotoJourneyTests+Documents.swift | macOS run | – | waits D-10 |
 | D-12 | 8 | Journeys PJ-3, PJ-P3 (feature-done if last) | UT/PhotoJourneyTests+Recovery.swift, UT/PhotoJourneyTests+PerfDocuments.swift | macOS run | – | waits D-10 |
 
@@ -63,3 +63,5 @@ Waves (packet's Build waves, checked against dev at 00e546a):
 - D-9 for D-10: files.autosave: PhotoAutosave? (startAutosave), files.recoveryOffer; FileIntent .restore(RecoveryOffer), .discardRecovery. Clean close discards on onDisappear; didSave hook removes the file. Quit: willQuit per dirty window before asking; Don't Save -> discard(); Save -> save().
 - Fix-batch item: PhotoAutosave.restore decodes on main (QB-L12); add Model restore(from snapshot) using openDocument(_ snapshot:name:) and decode off main in PhotoAutosave.
 - design.md says "alerts never at launch" but the packet/PJ-3 require the restore alert; D-9 followed the packet (Decision).
+- D-10 for journeys: unsaved alert "Do you want to save the changes made to the document “beach.png”?" / "Your changes will be lost if you don't save them."; buttons Save (photo.unsaved.save, default), Don't Save (photo.unsaved.dontSave), Cancel (photo.unsaved.cancel); NSAlert sheet. WindowGroup id "photo". Text in PhotoModel/PhotoUnsavedPrompt.swift.
+- Fix-batch item: Open Recent with no window shows an empty submenu (menu reads the focused window's list); fall back to the saved PhotoRecentFiles list and route through D-10's open queue.
