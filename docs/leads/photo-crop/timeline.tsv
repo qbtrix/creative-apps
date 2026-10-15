@@ -67,3 +67,4 @@ utc	stage	event	ref	note
 2026-10-15T20:12Z	5	pr-opened	#1238	r5-b1 crop field rows keep their value (PJ-8)
 2026-10-15T20:41Z	5	pr-merged	#1238	r5-b1
 2026-10-15T20:41Z	5	ci-run	38799320916	in progress, head 3dc283e
+2026-10-15T21:10Z	5	ci-run	38807718380	in progress, head cdcfb62
