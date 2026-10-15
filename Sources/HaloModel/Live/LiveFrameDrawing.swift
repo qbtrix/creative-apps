@@ -1,11 +1,12 @@
-// Live/LiveFrameDrawing.swift: the W0 stub of the viewer's FrameDrawing.
-// It draws nothing and says why; the viewer feature (#37) replaces this file
-// whole with the live type. Linux-safe.
+// Live/LiveFrameDrawing.swift: the viewer's live FrameDrawing (#37). The
+// draw list comes from HaloDrawRules, each layer placed by `placing`
+// (LiveLayerPlacing unless a test passes another). Linux-safe.
 
 public struct LiveFrameDrawing: FrameDrawing {
-    public init() {}
-    public var unavailableHelp: String? { "Layers don't draw in the viewer yet (#37)." }
+    private let placing: any LayerPlacing
+    public init(placing: any LayerPlacing = LiveLayerPlacing()) { self.placing = placing }
+    public var unavailableHelp: String? { nil }
     public func drawList(_ composition: HaloComposition, at frame: Int) -> HaloDrawList {
-        HaloDrawList(width: composition.width, height: composition.height, frame: frame, items: [])
+        HaloDrawRules.drawList(composition, at: frame, placing: placing)
     }
 }
