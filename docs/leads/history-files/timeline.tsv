@@ -1,0 +1,6 @@
+utc	stage	event	ref	note
+2026-10-15T08:08Z	0	stage-start	#1037	base 92db316
+2026-10-15T08:08Z	0	stage-end	#1037	deps #777 #333 closed
+2026-10-15T08:08Z	1	stage-end	packet	tasks copied
+2026-10-15T08:08Z	2	stage-end	plan	6 waves from packet
+2026-10-15T08:08Z	3	stage-start	wave 1	HF-1 HF-4
