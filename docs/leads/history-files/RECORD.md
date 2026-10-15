@@ -4,7 +4,7 @@ Issue: #1037 · Packet: docs/blueprints/halo/features/history-files.md
 Run: act-1a13e9a2037-pkqb · Session: claude/history-files-lead-j2c6lo · Started: 2026-10-15T08:08Z
 Stage: 4 round 1
 Base: 3e475173ee796f7e37c5108d93db7557a91da177
-Next: read CI run 38713326810 (dev 3e47517, contains every PR): H-J8, H-J10, H-J11, audit-halo, ui-screens; then the critic panel
+Next: wait for fix-batch wf_c714e674-222 (r1-b1, r1-b2) PRs and critic-panel wf_dd6cb011-757; fold confirmed critic findings into a round-1 follow-up batch; then round 2 on the CI run containing the fixes
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -25,6 +25,7 @@ Next: read CI run 38713326810 (dev 3e47517, contains every PR): H-J8, H-J10, H-J
 ## Rounds
 | round | CI run | CI | audit vs baseline | lenses | confirmed | fixed by | clean |
 |---|---|---|---|---|---|---|---|
+| 1 | 38713326810 | red: H-J8 (menu help tag unreadable), H-J10/H-J11 (halo.file value reads empty, #262); others not ours | at/under baseline (contrast 1, identifier 1, offscreen 4) | clarity, journey, design, layout, controls | pending | r1-b1, r1-b2 | no |
 
 ## Decisions
 - Brief named base 1dcd1a6; origin/dev had moved one commit (92db316, a SuiteUI perf test, #1039) that is a descendant. Used 92db316.
