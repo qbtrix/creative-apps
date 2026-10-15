@@ -56,3 +56,4 @@ utc	stage	event	ref	note
 2026-10-15T07:00Z	5	heartbeat	-	no completed dev CI run after 38687993459
 2026-10-15T07:27Z	5	ci-run	38694361192	red outside: Halo testLayoutAtWidths/testNewComposition + SuiteUI gallery identifier; Flare green
 2026-10-15T07:53Z	5	ci-run	38698770785	red outside: Halo testLayoutAtWidths + SuiteUI gallery identifier; Flare green
+2026-10-15T08:20Z	5	ci-run	38700713285	red outside: SuiteUI FrameProbeTests timing only; Flare green
