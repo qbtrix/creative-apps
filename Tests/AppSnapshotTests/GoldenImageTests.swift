@@ -85,6 +85,23 @@ import Testing
         #expect(RGBAImage(png: diffPNG) == result.diff)
     }
 
+    /// A passing compare builds no diff image; a failing one does, and counts every differing row.
+    @Test func diffOnlyOnFailure() throws {
+        let compare = GoldenImage()
+        let base = Self.solid(10, 10)
+        let off = Self.onePixelOff(base)
+        let passing = compare.compare(off, to: base, tolerance: GoldenTolerance(maxShare: 0.01))
+        #expect(passing.passes && passing.differing == 1 && passing.diff == nil)
+
+        var spread = base
+        for (x, y) in [(0, 0), (9, 0), (3, 5), (9, 9)] { spread.bytes[(y * 10 + x) * 4 + 3] = 0 }
+        let failing = compare.compare(spread, to: base, tolerance: .standard)
+        #expect(!failing.passes && failing.differing == 4 && failing.share == 0.04)
+        let diff = try #require(failing.diff)
+        let last = (9 * 10 + 9) * 4
+        #expect(Array(diff.bytes[last..<last + 4]) == [255, 0, 255, 255])
+    }
+
     @Test func compareWithinBudget() {
         let width = 2_880, height = 1_800
         let bytes = (0..<(width * height * 4)).map { UInt8(truncatingIfNeeded: $0 &* 7) }
