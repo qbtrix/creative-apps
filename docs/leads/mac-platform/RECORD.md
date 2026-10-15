@@ -2,9 +2,9 @@
 
 Issue: #793 (resumes #754) · Packet: docs/blueprints/flare/features/mac-platform.md
 Run: act-1a13c789856-0qa9 (first run act-1a13b14336c-tqna) · Session: claude/mac-platform-lead-lxlcta (first: claude/mac-platform-lead-7jx22z) · Started: 2026-10-14T15:43Z, resumed 2026-10-14T22:15Z
-Stage: done (round budget spent; dev CI red only outside the feature)
+Stage: done, re-checking (round budget spent; waiting for a green dev CI run containing 190e45d)
 Base: 1098ff2d6c135020391cef770f4de11dfde9465a
-Next: nothing for this lead. A relaunch only re-checks: the next green dev CI run containing 190e45d judges the feature; no Flare change is pending.
+Next: watch dev CI runs 706 (1854d6c, in progress) and the one after #888 (96d1ede, Photo and golden budgets as medians). First green run containing 190e45d: edit the Belt-Contact-Sheet comment on #793 (id 6180953518) to point at it. No Flare change pending.
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -33,6 +33,7 @@ Next: nothing for this lead. A relaunch only re-checks: the next green dev CI ru
 | round | CI run | CI | audit vs baseline | lenses | confirmed | fixed by | clean |
 |---|---|---|---|---|---|---|---|
 | 1 | 38600685744 (5e1870d) | red: macOS swift test, 1 of 1670 failed (AutosaveTests.quitWritesWhenDirty, 76 s vs 60 s window); Linux green; journeys not reached | not measured (journeys did not run) | none run: CI red, fix first | 1 (flaky time window in MP-5 test) | #764 | no |
+| re-check | 38657968912 (62395be) | red outside: macOS SnapshotHostTests.appearances only (line:suiteui, #778 lead). Photo latency passed. Linux green. All mac-platform tests green | not measured | - | 0 in feature files | - | no (outside red) |
 | 4 | 38654031210 (640d08d) | red outside: macOS PhotoBrushLatencyTests strokeStart 3.9 vs 3.0 ms (#851); GoldenImageTests p95, SnapshotHostTests, FrameProbeTests, ControlInventoryTests (line:suiteui, suite-harness #778). Linux green. All mac-platform tests green; journeys not reached | not measured (journeys did not run) | none: no ui-screens, feature changes no screen | 0 in feature files | - (outside: #851, #778 lead) | no (outside red); budget spent |
 | 3b | 38647662189 (190e45d, #806 feature-done) | red outside: Linux PhotoBrushCopyCostTests mouse-up 19.36 vs 16 ms; macOS PhotoBrushLatencyTests strokeStart 3.9 vs 3.0 ms. All mac-platform tests green on both; journeys not reached | not measured (journeys did not run) | none: no ui-screens, feature changes no screen | 0 in feature files | gap #851 (line:photo) | no (outside red) |
 | 3 | none yet (1098ff2) | Linux gate red locally: dev's FlareModel no longer builds against creative-core main 98be31a (key commands take owner: LayerOwner, new CommandError cases .invalidTransform, .emptyName) | - | none: build first | 1 (build break, line:flare) | #801 (merged 22:22Z) | no |

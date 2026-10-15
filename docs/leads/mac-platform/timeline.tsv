@@ -34,3 +34,5 @@ utc	stage	event	ref	note
 2026-10-14T23:32Z	4	ci-run	38654031210	red outside: Photo budget (#851) and SuiteUI harness tests (#778); all feature tests green, Linux green
 2026-10-14T23:50Z	5	stage-end	#793	Belt-Contact-Sheet comment posted; 4 rounds spent, gaps named
 2026-10-14T23:50Z	5	stopped	-	lead done
+2026-10-15T00:15Z	5	stage-start	-	Belt relaunch nudge; re-check only
+2026-10-15T00:15Z	5	ci-run	38657968912	red outside: SnapshotHostTests only (suite-harness); feature tests green; #888 merged (Photo budgets)
