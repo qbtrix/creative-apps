@@ -6,3 +6,7 @@ utc	stage	event	ref	note
 2026-10-15T12:03Z	3	stage-start	wave 1	CP-1
 2026-10-15T12:18Z	-	heartbeat	-	waiting on lane/CI
 2026-10-15T12:33Z	-	heartbeat	-	waiting on lane/CI
+2026-10-15T12:38Z	3	pr-opened	#1132	CP-1 LiveCropSizing
+2026-10-15T12:38Z	3	pr-merged	#1132	CP-1
+2026-10-15T12:38Z	3	stage-end	wave 1	dev 265b1fe
+2026-10-15T12:38Z	3	stage-start	wave 2	CP-2
