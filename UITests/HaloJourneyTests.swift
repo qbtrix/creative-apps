@@ -99,11 +99,11 @@ final class HaloJourneyTests: XCTestCase {
         XCTAssert(header("Badge", halo).waitForExistence(timeout: 5), "clicking Badge's lane didn't select Badge")
         halo.press(.home)
         step(20, halo)
-        expectTimecode("00:00:00:20", halo)
+        expectTimecode("00:00:00:20 · frame 20", halo)
         halo.shot("scrub-frame-20")
         halo.press(character: "i", step: "scrub-in-20")
         step(30, halo)
-        expectTimecode("00:00:02:02", halo)
+        expectTimecode("00:00:02:02 · frame 50", halo)
         halo.press(character: "o")
         XCTAssert(
             header("Frames 20–50", halo).waitForExistence(timeout: 5),

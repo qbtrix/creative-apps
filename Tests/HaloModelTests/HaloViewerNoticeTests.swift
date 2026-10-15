@@ -38,7 +38,7 @@ struct HaloViewerNoticeTests {
         #expect(
             comp.statusTimecodeHelp
                 == "Hours:minutes:seconds:frames at the playhead (frame 45 of 0–299), then the length and frame rate.")
-        #expect(comp.statusTimecode == "00:00:01:15 / 10 s at 30 fps")
+        #expect(comp.statusTimecode == "00:00:01:15 · frame 45 / 10 s at 30 fps")
     }
 
     @Test func zoomAndSizePillsSayWhatTheyShow() {
