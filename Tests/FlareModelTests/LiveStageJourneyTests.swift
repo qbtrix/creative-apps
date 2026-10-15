@@ -89,8 +89,8 @@ private func pen(_ clicks: [(Point, Point)]) -> ShapeDraft? {
     let canvas = Rect(minX: -10, minY: -10, maxX: 560, maxY: 410)
     #expect(hits.marquee(bounce, sceneID: "scene-1", frame: 0, rect: canvas) == [shadow, ball])
 
-    // 5. A scale from the bottom-right handle (4) keeps the top-left corner within 1e-9; a rotate turns about the
-    // box center. Each is one named entry.
+    // 5. A scale from the bottom-right handle (4) keeps the top-left corner within 1e-9; a rotate of Ball and Shadow
+    // turns both about their box's center. Each is one named entry.
     var engine = CommandEngine(document: bounce)
     func box() throws -> Rect { try #require(hits.bounds(engine.document, sceneID: "scene-1", frame: 0, of: [ball])) }
     let start = try box()
@@ -103,14 +103,26 @@ private func pen(_ clicks: [(Point, Point)]) -> ShapeDraft? {
     #expect(abs(scaled.minX - start.minX) <= 1e-9 && abs(scaled.minY - start.minY) <= 1e-9)
     #expect(abs(scaled.maxX - (start.maxX + 50)) <= 1e-9 && abs(scaled.maxY - (start.maxY + 20)) <= 1e-9)
 
+    // Rotate Ball and Shadow together: their shared box's center is neither layer's origin, so each origin must turn
+    // 30 degrees about that center, not stay put, and each layer's rotation grows by 30.
+    func place(_ id: String) throws -> [String: Double] {
+        try #require(engine.document.layers(of: owner)?.first { $0.id == id }).sample(at: 0)
+    }
+    let pair = try #require(hits.bounds(engine.document, sceneID: "scene-1", frame: 0, of: [ball, shadow]))
+    let c = pt((pair.minX + pair.maxX) / 2, (pair.minY + pair.maxY) / 2)
+    let old = try ["ball": place("ball"), "shadow": place("shadow")]
+    #expect(old.values.allSatisfy { abs(($0["x"] ?? 0) - c.x) > 1 || abs(($0["y"] ?? 0) - c.y) > 1 })
     before = engine
-    try shapes.commitBox(.rotate(degrees: 30), layers: ["ball"], sceneID: "scene-1", frame: 0, box: scaled,
+    try shapes.commitBox(.rotate(degrees: 30), layers: ["ball", "shadow"], sceneID: "scene-1", frame: 0, box: pair,
                          autoKey: false, in: &engine)
     try expectOneStep(&engine, named: "Rotate", from: before)
-    let turned = try box()
-    let center = { (r: Rect) in pt((r.minX + r.maxX) / 2, (r.minY + r.maxY) / 2) }
-    #expect(abs(center(turned).x - center(scaled).x) <= 1e-9 && abs(center(turned).y - center(scaled).y) <= 1e-9)
-    #expect(engine.document.layers(of: owner)?.first { $0.id == "ball" }?.sample(at: 0)["rotation"] == 30)
+    let (cos30, sin30) = (3.0.squareRoot() / 2, 0.5)
+    for (id, was) in old {
+        let (dx, dy) = ((was["x"] ?? 0) - c.x, (was["y"] ?? 0) - c.y), now = try place(id)
+        #expect(abs((now["x"] ?? .nan) - (c.x + dx * cos30 - dy * sin30)) <= 1e-9, "\(id) x")
+        #expect(abs((now["y"] ?? .nan) - (c.y + dx * sin30 + dy * cos30)) <= 1e-9, "\(id) y")
+        #expect(now["rotation"] == (was["rotation"] ?? 0) + 30, "\(id) rotation")
+    }
 
     // 6. Copy Ball, paste above it: "Ball copy" above Ball, 10 pt right, in one "Undo Paste".
     let copied = try shapes.copy(layers: ["ball"], owner: owner, from: engine.document)

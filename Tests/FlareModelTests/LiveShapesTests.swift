@@ -95,3 +95,20 @@ private func draft(_ tool: FlareTool, _ a: Point, _ b: Point, _ keys: DragModifi
     }
     #expect(engine.document == FlareFixtures.bounce && !engine.canUndo)
 }
+
+/// QB-F3 for each drawing tool: one commit on an empty document is one named entry, and one undo() gives back the
+/// empty document with nothing left to undo.
+@Test(arguments: [FlareTool.rectangle, .ellipse, .pen])
+func oneCommitIsOneNamedEntryThatOneUndoReverts(_ tool: FlareTool) throws {
+    var engine = CommandEngine(document: FlareFixtures.empty)
+    var shape = try #require(draft(tool, p(100, 100), p(300, 200)))
+    if tool == .pen {
+        for point in [p(300, 100), p(200, 250)] { shape = try #require(draft(.pen, point, point, [], shape)) }
+    }
+    _ = try live.commit(shape, owner: scene, aboveLayerID: nil, in: &engine)
+    #expect((engine.document.layers(of: scene) ?? []).count == 1)
+    let name = switch tool { case .rectangle: "Rectangle"; case .ellipse: "Ellipse"; default: "Path" }
+    #expect(engine.undoActionName == "Undo Add \(name)")
+    try engine.undo()
+    #expect(engine.document == FlareFixtures.empty && !engine.canUndo)
+}
