@@ -240,6 +240,12 @@ Crew PRs merge into `dev` at once; `main` moves only when full CI passes on
   path touched (the files above), mergeable, no red or running check on the
   head, and proof the head passed the gate: the `Fast-Check: pass` /
   `Head: <sha>` lines for the current head, or a passing CI check on it.
+- A PR that changes or renames a shared shell file (`MAC_GATED` in
+  scripts/fast-lane.sh: SuiteWindow, EditorShell, ToolbarGroup and Tokens in
+  Sources/SuiteUI) also needs a `Mac-Check: <run url>` line naming a completed
+  CI run on its current head with a green `macOS` job. Push, run
+  `gh workflow run ci.yml -R qbtrix/creative-apps --ref <head branch>`, wait,
+  add the line. The lane comments with these steps and keeps the label.
 - UI code takes the lane on the Linux check alone. A human reviews the
   snapshots after the next feature CI and files fixes as new issues.
 - Each lane run merges every eligible PR, oldest first. A PR that conflicts

@@ -20,7 +20,10 @@
 # no looser app audit (audit_loosens), MERGEABLE, no red or running check on the
 # head, and proof the head passed the gate: a passing check from CI_WORKFLOWS on
 # the head, or the worker's marker in the PR body, a line `Fast-Check: pass`
-# followed by the line `Head: <full head sha>` for the current head. A Belt PR
+# followed by the line `Head: <full head sha>` for the current head. A PR that
+# changes or renames a MAC_GATED shared shell file also needs a body line
+# `Mac-Check: <CI run url>` naming a completed CI run on its head whose macOS
+# job succeeded (mac_gate). A Belt PR
 # (a body line starting `Belt-Run:` or `Belt-Test:`) also needs Belt's
 # `belt/review` commit status at success on its head while REQUIRE_BELT_REVIEW=1.
 # A fast-lane PR based on main is retargeted to BASE_BRANCH. A PR that conflicts
@@ -38,10 +41,11 @@
 #
 # `decide` is the pure decision function (no network). It reads a PR JSON file,
 # a file-list file (one path per line), a check-rollup JSON file and, when the
-# PR touches the app audit, two audit_snapshot directories (merge base, head).
+# PR touches the app audit, two audit_snapshot directories (merge base, head),
+# and, when it touches MAC_GATED, the `gh run view` JSON of its Mac-Check run.
 # It logs each rule to stderr and prints one line to stdout:
 #   skip|<why>  retarget|<from base>  not-eligible|<reasons>  red|<checks>
-#   conflict|<head sha>  pending|<why>  eligible|<lines>|<files>|<proof>
+#   conflict|<head sha>  pending|<why>  mac-gate|<what to do>  eligible|<lines>|<files>|<proof>
 # Tests/fast_lane/test_fast_lane.sh sources this file and feeds `decide` fixtures.
 #
 # Usage: scripts/fast-lane.sh [--dry-run] [PR ...]   (no PR: every open fast-lane PR)
@@ -104,6 +108,18 @@ AUDIT_RE="^(UITests/audit-baseline\\.json\$|$AUDIT_DIRS/)"
 AUDIT_REGISTRY_RE="^$AUDIT_DIRS/AuditCore\\.swift\$"
 AUDIT_REASON="loosens the app audit: needs the captain's review"
 
+# Shared shell files every app's window is built from. SwiftUI can't build on
+# Linux, so a change here can pass scripts/ci and still break every app's UI
+# journeys: #962 moved SuiteWindow's inspector, merged on the Linux gate, broke
+# Flare, Library, Halo and Suite on dev (run 38679533707) and was reverted in
+# #975. A PR that changes or renames one merges only with proof from macOS: a
+# body line `Mac-Check: <run url>` for a completed CI run on its head whose
+# macOS job succeeded. Not PROTECTED: agents may edit these, with that proof.
+MAC_GATED=(Sources/SuiteUI/SuiteWindow.swift Sources/SuiteUI/EditorShell.swift
+  Sources/SuiteUI/ToolbarGroup.swift Sources/SuiteUI/Tokens.swift)
+MAC_CHECK_LINE="Mac-Check:"
+MAC_JOB="macOS"
+
 # The worker's proof that scripts/ci passed on the head: this line, then `Head: <sha>`.
 MARKER_LINE="Fast-Check: pass"
 HEAD_LINE="Head: "
@@ -138,6 +154,52 @@ has_marker() {
     prev == mark && $0 == head { found = 1 }
     { prev = $0 }
     END { exit !found }'
+}
+
+# mac_check_url <pr.json>: the URL on the body's last `Mac-Check:` line, trimmed.
+mac_check_url() {
+  jq -r '.body // ""' "$1" | tr -d '\r' | awk -v mark="$MAC_CHECK_LINE" '
+    { sub(/^[ \t]+/, ""); sub(/[ \t]+$/, "") }
+    index($0, mark) == 1 { url = substr($0, length(mark) + 1); sub(/^[ \t]+/, "", url) }
+    END { print url }'
+}
+
+# mac_run_id <url>: the run id when <url> is a workflow run of REPO, else nothing.
+mac_run_id() {
+  local re="^https://github\.com/${REPO//./\\.}/actions/runs/([0-9]+)(/.*)?\$"
+  if [[ "${1,,}" =~ ${re,,} ]]; then echo "${BASH_REMATCH[1]}"; fi
+}
+
+# mac_gate <pr.json> <files.txt> <run.json>: nothing when the PR touches no
+# MAC_GATED path or its Mac-Check run proves the head on macOS; otherwise what
+# is wrong and what to do. <run.json> is `gh run view <id> --json
+# workflowName,status,headSha,jobs` for the Mac-Check run ({} when unread).
+mac_gate() {
+  local pr="$1" files="$2" run="${3:-}" gated head branch url why=""
+  gated=$(grep -Fx -f <(printf '%s\n' "${MAC_GATED[@]}") "$files" | sort -u | paste -sd, - || true)
+  [[ -n "$gated" ]] || return 0
+  head=$(jq -r '.headRefOid' "$pr")
+  branch=$(jq -r '.headRefName // "<head branch>"' "$pr")
+  url=$(mac_check_url "$pr")
+  local runjson='{}'
+  [[ -z "$run" || ! -s "$run" ]] || runjson=$(cat "$run")
+  if [[ -z "$url" ]]; then
+    why="no $MAC_CHECK_LINE line"
+  elif [[ -z "$(mac_run_id "$url")" ]]; then
+    why="$MAC_CHECK_LINE $url is not a workflow run URL of $REPO"
+  else
+    why=$(jq -r --arg wf "${CI_WORKFLOWS[0]}" --arg job "$MAC_JOB" --arg head "$head" '
+      ([.jobs[]? | select(.name == $job)] | last) as $j
+      | if (.workflowName // "") == "" then "its run could not be read"
+        elif .workflowName != $wf then "its run is the \(.workflowName) workflow, not \($wf)"
+        elif ((.status // "") | ascii_downcase) != "completed" then "its run has not completed"
+        elif $j == null then "its run has no \($job) job"
+        elif (($j.conclusion // "") | ascii_downcase) != "success" then "its \($job) job is \($j.conclusion // "unfinished")"
+        elif (.headSha // "") != $head then "its run is on \(.headSha // "no head"), not the head \($head)"
+        else empty end' <<<"$runjson" 2>/dev/null || echo "its run could not be read")
+  fi
+  [[ -n "$why" ]] || return 0
+  echo "changes ${gated//,/, }, shared by every app's window, so it needs a green macOS run on its head $head: $why. Push, run \`gh workflow run ci.yml -R $REPO --ref $branch\`, wait for it to finish, then add the line \`$MAC_CHECK_LINE <run url>\` with that run's URL to the PR body"
 }
 
 # audit_fetch <sha> <dir> <path>: <path> at <sha> into <dir>/<path>.
@@ -250,7 +312,8 @@ audit_loosens() {
   (( lists <= 1 )) || echo "AppAudit.checks is declared $lists times"
 }
 
-# decide <pr.json> <files.txt> <checks.json> [<audit before dir> <audit after dir>]
+# decide <pr.json> <files.txt> <checks.json> [<audit before dir> <audit after dir> [<mac run.json>]]
+# (pass "" "" for the audit dirs when the PR doesn't touch the audit)
 decide() {
   local pr="$1" files="$2" checks="$3"
   local state draft base has_label author adds dels nfiles lines mergeable mstate head
@@ -369,6 +432,10 @@ decide() {
     echo "pending|no passing CI check and no $MARKER_LINE marker for head $head"; return
   fi
   if (( belt )) && [[ "$review" != "SUCCESS" ]]; then echo "pending|waiting for review"; return; fi
+  local mac
+  mac=$(mac_gate "$pr" "$files" "${6:-}")
+  log "mac gate: ${mac:-ok}"
+  if [[ -n "$mac" ]]; then echo "mac-gate|$mac"; return; fi
   local proof="Fast-Check marker"
   (( nci == 0 )) || proof="$ngreen checks green"
   echo "eligible|$lines|$nfiles|$proof"
@@ -434,10 +501,23 @@ evaluate() {
     fi
     audit=("$tmp/before" "$tmp/after")
   fi
+  # A MAC_GATED change brings the run its Mac-Check line names (mac_gate judges it).
+  local mac=() id
+  if grep -qFx -f <(printf '%s\n' "${MAC_GATED[@]}") "$tmp/files.txt"; then
+    id=$(mac_run_id "$(mac_check_url "$tmp/pr.json")")
+    if [[ -n "$id" ]]; then
+      gh run view "$id" -R "$REPO" --json workflowName,status,conclusion,headSha,jobs >"$tmp/mac.json" 2>/dev/null \
+        || echo '{}' >"$tmp/mac.json"
+    else
+      echo '{}' >"$tmp/mac.json"
+    fi
+    (( ${#audit[@]} )) || audit=("" "")
+    mac=("$tmp/mac.json")
+  fi
 
   echo "PR #$n:" >&2
   local decision kind rest
-  decision=$(decide "$tmp/pr.json" "$tmp/files.txt" "$tmp/checks.json" ${audit[@]+"${audit[@]}"})
+  decision=$(decide "$tmp/pr.json" "$tmp/files.txt" "$tmp/checks.json" ${audit[@]+"${audit[@]}"} ${mac[@]+"${mac[@]}"})
   echo "decision: $decision"
   kind="${decision%%|*}"; rest="${decision#*|}"
 
@@ -454,6 +534,10 @@ evaluate() {
     conflict)
       # Usually an earlier merge in this sweep. Belt's fixer rebases it; the label stays.
       comment_once "$n" "Fast lane: not merged, this PR conflicts with $BASE_BRANCH at head $rest. Rebase on origin/$BASE_BRANCH, rerun scripts/ci, and update the Fast-Check marker."
+      ;;
+    mac-gate)
+      # The label stays: once the Mac-Check line names a green run on the head, a later sweep merges it.
+      comment_once "$n" "Fast lane: waiting for macOS proof. This PR $rest."
       ;;
     not-eligible)
       write gh pr edit "$n" -R "$REPO" --remove-label "$LABEL" || log "could not remove label"
@@ -530,7 +614,7 @@ main() {
   while (( $# )); do
     case "$1" in
       --dry-run) DRY_RUN=1 ;;
-      -h|--help) sed -n '2,48p' "$0"; return 0 ;;
+      -h|--help) sed -n '2,52p' "$0"; return 0 ;;
       *) prs+=("$1") ;;
     esac
     shift

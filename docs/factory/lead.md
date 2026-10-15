@@ -37,6 +37,14 @@ Hand this to every session (the lead and each agent it starts) verbatim.
   touching `Sources/*App`, `Sources/SuiteUI`, `Tests/App*` or `UITests`, or
   the 10th merged PR since the last CI run. So a wave that touches UI gets
   its CI run without you asking.
+- **Shared shell files need macOS proof.** A PR that changes or renames a
+  `MAC_GATED` file in `scripts/fast-lane.sh` (`SuiteWindow.swift`,
+  `EditorShell.swift`, `ToolbarGroup.swift`, `Tokens.swift` in `Sources/SuiteUI/`)
+  merges only with a body line `Mac-Check: <run url>` for a completed CI run
+  on its current head whose `macOS` job succeeded (see #962, #975). Push, run
+  `gh workflow run ci.yml -R qbtrix/creative-apps --ref <head branch>` (or ask
+  the supervisor, since you get a 403), wait for it, add the line; push again
+  and you need a new run.
 - **You can read runs.** `gh run list --workflow ci.yml --branch dev`, then
   `gh run download <id> -n ui-screens` (whole-window PNGs, `contact-sheet.html`,
   `audit-*.json`) and `-n snapshots`; or the GitHub MCP `actions_*` and
