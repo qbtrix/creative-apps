@@ -15,3 +15,5 @@ utc	stage	event	ref	note
 2026-10-15T12:46Z	3	stage-end	wave 2	dev 61d9c13
 2026-10-15T12:46Z	3	stage-start	wave 3	CP-3, CP-4
 2026-10-15T12:48Z	-	heartbeat	-	waiting on lane/CI
+2026-10-15T12:59Z	3	pr-opened	#1149	CP-3 PB-8 budget
+2026-10-15T12:59Z	3	pr-opened	#1151	CP-4 crop options
