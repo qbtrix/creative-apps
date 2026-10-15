@@ -30,7 +30,7 @@ Waves as in the packet. Independent per wave: W1 LK-1; W2 LK-2a; W3 LK-2b; W4 LK
 ## Rounds
 | round | CI run | CI | audit vs baseline | lenses | confirmed | fixed by | clean |
 |---|---|---|---|---|---|---|---|
-| 1 | 38734211999 (35a875b) | red: swift test fails only HaloViewerFidelityTests.keyedFrame6 (keyed frame 6, 40000 px differ; HF-1 from #1125); journeys did not run. All our snapshots rendered. (Earlier 38732179619: playback test compile, fixed by #1136) | – (no ui-screens) | clarity, journey, design, layout, controls | pending | – | no |
+| 1 | 38734211999 (35a875b) | red: swift test fails only HaloViewerFidelityTests.keyedFrame6 (keyed frame 6, 40000 px differ; HF-1 from #1125); journeys did not run. All our snapshots rendered. (Earlier 38732179619: playback test compile, fixed by #1136) | – (no ui-screens) | clarity, journey, design, layout, controls | 3 major (one finding: narrow TRANSFORM labels clip), 6 minor | r1-narrow fixer (narrow + layer snapshot at frame 0); SuiteUI slider ticks/marker → #1146 | no |
 
 ## Decisions
 - Depends on #777 and #333: both closed, so the lead runs.
@@ -67,7 +67,10 @@ Waves as in the packet. Independent per wave: W1 LK-1; W2 LK-2a; W3 LK-2b; W4 LK
 - LK-12, LK-13: HaloJourneyTests helpers are private to their file, so each journey extension carries small private helpers. LK-12 finds the artboard from halo.viewer's frame (no artboard element) and allows max(2 px, one point) since a point is 5-9 comp px at 1000x640. LK-13 reads lane key counts from halo.timeline.track values; #262 (empty values on the runner) is its risk.
 - LK-14 opened before LK-13 merges: separate file; the lane merges oldest first, so the feature-done run holds all three journeys.
 
+- Round 1 minors not fixed: refusal text "Rotation needs a number." kept (packet LK-5 acceptance fixes that text); drag hint caption/ghost key (new behavior beyond the packet; noted for core-loop); SuiteUI tick/marker → #1146.
+
 ## Open
+- #1146 (needs-ui): InspectorSliderRow ticks under text, marker outside row at top of range, label/value at narrow widths.
 - CI on the feature-done head 9af4454: swift build (all HaloApp keys views) passes on macOS; swift test stops compiling AppSnapshotTests at viewer-playback's HaloPlaybackDriverTests.swift:18 (#1097). Reported on #763 by others; not ours to fix. Journeys and audit wait on it.
 - dev-red #763: macOS build fails in Sources/LibraryApp/LibraryInspector.swift:14-15 (mutating member on let model), not this feature; it hides any Halo compile error until fixed. Run 38726261412.
 - #207 keeps `needs-human`; the captain decides (packet note). LK-11 says `Closes #207`.
