@@ -4,7 +4,7 @@ Issue: #800 · Packet: docs/blueprints/flare/features/live-scenes.md
 Run: act-1a13ca4f89e-0ft1 · Session: claude/live-scenes-lead-d0sj3t · Started: 2026-10-14
 Stage: 4 round 2
 Base: c111439f2255b6691c16c8c053cf6f956a981c69
-Next: wait for round 2 critic panel (wf_56188411-21f); round 2 judged on Linux gate c111439 (CI: PASS) and run 38660293042 (red only on SuiteUI SnapshotHostTests)
+Next: wait for round 2 fix PRs (wf_155ca337-d9f) to merge, then round 3 with the same five lenses
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -22,6 +22,7 @@ Quality bars: QB-F3 one gesture one step, QB-L7 <= 10 ms per moveGuide step (med
 | round | CI run | CI | audit vs baseline | lenses | confirmed | fixed by | clean |
 |---|---|---|---|---|---|---|---|
 | 1 | 38657968912 | red (SuiteUI SnapshotHostTests only, #763) | not run (journeys skipped after scripts/ci failed) | clarity, journey, quality, contract, tests | 1 major (QB-F2 refusals from LiveScenes show case names), 3 minor (setCanvas group breaks drag coalescing on refusal, empty-name divergence unpinned, drag budget prints no p50/p95) | #890 #889 #896 #892 (all merged) | no |
+| 2 | 38660293042 + Linux gate c111439 | red (SuiteUI SnapshotHostTests only, #763); Linux PASS | not run | clarity, journey, quality, contract, tests | 1 major (#890 catch-all hides NotBuilt reasons), 3 minor (specific engine causes and fake sentences hidden; J16 select step missing) | r2-b1, r2-b2 (wf_155ca337-d9f) | no |
 
 ## Decisions
 - Base moved from the brief's aa166cb to bfd0328 (one SuiteUI snapshot test on top; aa166cb is an ancestor).
