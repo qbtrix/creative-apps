@@ -2,9 +2,9 @@
 
 Issue: #1044 · Packet: docs/blueprints/library/features/spine.md
 Run: act-1a13f18aaa0-lfw5 · Session: session_01DtSRhNqsphGfKkvV5eLsWW · Started: 2026-10-15T10:25Z
-Stage: 4 round 2
+Stage: 5 finish
 Base: 111c44093b7959930d078ce21656fa174613a1b0
-Next: round 2 on the CI run containing #1175
+Next: wait for the dev CI run triggered by #1187 (feature-done); green -> Belt-Contact-Sheet comment on #1044; red -> read the failing jobs
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |

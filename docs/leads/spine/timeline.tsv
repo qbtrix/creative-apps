@@ -42,3 +42,4 @@ utc	stage	event	ref	note
 2026-10-15T15:03Z	4	heartbeat	-	waiting on dev CI containing 9dea98e
 2026-10-15T15:13Z	4	stage-start	round2	run 38757068610: Library green, Halo red; panel starting
 2026-10-15T15:17Z	4	round-clean	round2	panel clean (7 minor); final fix batch with feature-done next
+2026-10-15T15:30Z	5	pr-merged	#1187	feature-done PR merged
