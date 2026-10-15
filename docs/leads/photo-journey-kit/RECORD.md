@@ -4,7 +4,7 @@ Issue: #1073 · Packet: docs/blueprints/photo/features/photo-journey-kit.md
 Run: act-1a1406baff9-fu36 · Session: cloud lead session · Started: 2026-10-15T16:36Z
 Stage: 4 round 1
 Base: 9f28a9f7dcb6e9d584a7c80847e8ef0108fa5e17
-Next: wait for a dev CI run (after the LiveRecovery compile fix) whose macOS job reaches scripts/ui-test; read PhotoJourneyKitTests.testWrittenPhotoOpens, V1-V12 and the Photo audit counts in it
+Next: read dev CI run 38782884668 (f9846c9, first after the LiveRecovery fix #1226): macOS ui-test, PhotoJourneyKitTests.testWrittenPhotoOpens, V1-V12, Photo audit
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -23,4 +23,4 @@ Next: wait for a dev CI run (after the LiveRecovery compile fix) whose macOS job
 - KT-1 touches only UITests/, which compiles only on macOS: the Linux gate covers lints only; the macOS run on dev the lane dispatches (UITests path + feature-done) is the real check.
 
 ## Open
-- dev-red #763: macOS jobs die before ui-test (runs 763-767 all stop in scripts/ci), so the smoke journey has not run yet; the LiveRecovery compile fix is open as #1224 (photo-documents)
+- dev-red #763: macOS jobs die before ui-test (runs 763-767 all stop in scripts/ci), so the smoke journey has not run yet; the LiveRecovery compile fix merged as #1226; run 38782884668 queued on it

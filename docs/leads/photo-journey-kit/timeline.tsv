@@ -11,3 +11,4 @@ utc	stage	event	ref	note
 2026-10-15T17:23Z	4	ci-run	38774988270	red: LiveRecovery compile error (#1210), not ours
 2026-10-15T17:23Z	4	heartbeat	#763	reported failures on dev-red; waiting for a run that reaches ui-test
 2026-10-15T17:45Z	4	heartbeat	38777072611	still red on LiveRecovery compile; fix #1224 open; waiting
+2026-10-15T18:06Z	4	ci-run	38782884668	queued on f9846c9 after LiveRecovery fix #1226
