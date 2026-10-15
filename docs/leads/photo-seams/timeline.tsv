@@ -43,3 +43,6 @@ utc	stage	event	ref	note
 2026-10-15T04:45Z	3	pr-opened	#979	S-13a budgets, 89 lines 1 file; heal p95 4.6 ms noted
 2026-10-15T04:45Z	3	pr-opened	#978	S-8a intents and area files, 332 lines 13 files
 2026-10-15T04:45Z	3	stage-start	S-8b	builder stacked on S-8a
+2026-10-15T04:51Z	3	pr-merged	#978	S-8a
+2026-10-15T04:51Z	3	pr-opened	#985	S-8b file and export areas, 235 lines 3 files
+2026-10-15T04:51Z	3	stage-start	S-9	builder stacked on S-8b
