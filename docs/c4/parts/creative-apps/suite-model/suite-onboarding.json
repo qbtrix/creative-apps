@@ -1,0 +1,10 @@
+{
+  "id": "suite-onboarding",
+  "name": "Onboarding",
+  "description": "Onboarding pages, the person's choices, and when to show them.",
+  "technology": "Swift 6, Foundation (FoundationEssentials), Linux and macOS",
+  "paths": [
+    "Sources/SuiteModel/Onboarding/"
+  ],
+  "order": 170
+}

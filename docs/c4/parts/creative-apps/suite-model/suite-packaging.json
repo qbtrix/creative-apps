@@ -1,0 +1,10 @@
+{
+  "id": "suite-packaging",
+  "name": "Packaging",
+  "description": "BundleLayout (where each executable and framework sits, run paths), SizeReport and SizeBudget with evaluate.",
+  "technology": "Swift 6, Foundation (FoundationEssentials), Linux and macOS",
+  "paths": [
+    "Sources/SuiteModel/Packaging/"
+  ],
+  "order": 190
+}

@@ -1,0 +1,10 @@
+{
+  "id": "shell-handoff",
+  "name": "Hand-off transport",
+  "description": "Writes a hand-off file and opens it with the target app; receives one through onOpenURL.",
+  "technology": "Swift 6, SwiftUI and AppKit, macOS 26",
+  "paths": [
+    "Sources/SuiteShell/HandOffTransport.swift"
+  ],
+  "order": 30
+}

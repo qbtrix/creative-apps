@@ -1,0 +1,10 @@
+{
+  "id": "suite-animation",
+  "name": "Animation import",
+  "description": "AnimationSummary of a .flare file (size, rate, length, scenes) for Halo's Open In.",
+  "technology": "Swift 6, Foundation (FoundationEssentials), Linux and macOS",
+  "paths": [
+    "Sources/SuiteModel/Animation/"
+  ],
+  "order": 150
+}

@@ -1,0 +1,10 @@
+{
+  "id": "shell-store-watch",
+  "name": "Store watcher",
+  "description": "Posts and observes the org.creativesuite.suite.changed distributed notification.",
+  "technology": "Swift 6, SwiftUI and AppKit, macOS 26",
+  "paths": [
+    "Sources/SuiteShell/StoreWatcher.swift"
+  ],
+  "order": 40
+}

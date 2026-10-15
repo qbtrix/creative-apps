@@ -1,0 +1,11 @@
+{
+  "id": "shell-apps",
+  "name": "App launching and Switch To",
+  "description": "Open or activate an embedded app (NSWorkspace.openApplication, NSRunningApplication.activate), run states, the Switch To commands.",
+  "technology": "Swift 6, SwiftUI and AppKit, macOS 26",
+  "paths": [
+    "Sources/SuiteShell/AppLauncher.swift",
+    "Sources/SuiteShell/SuiteCommands.swift"
+  ],
+  "order": 20
+}

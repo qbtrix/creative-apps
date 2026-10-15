@@ -1,0 +1,11 @@
+{
+  "id": "shell-pasteboard",
+  "name": "Pasteboard and drag bridges",
+  "description": "Maps SuiteClipItem to NSPasteboard items and drag item providers and back.",
+  "technology": "Swift 6, SwiftUI and AppKit, macOS 26",
+  "paths": [
+    "Sources/SuiteShell/PasteboardBridge.swift",
+    "Sources/SuiteShell/DragBridge.swift"
+  ],
+  "order": 50
+}
