@@ -4,7 +4,7 @@ Issue: #798 · Packet: docs/blueprints/flare/features/live-stage.md
 Run: act-1a13d374bd1-s92z · Session: claude/live-stage-lead-gljfd4 · Started: 2026-10-15T00:40Z
 Stage: 5 finish (waiting on a green dev run; other lines red)
 Base: 3033a12d599ff66ce4ebd5536ff9809d12e1d9cf
-Next: when a dev CI run containing a45f1cb (#965) is green, comment on #798 with 'Belt-Contact-Sheet: <run link>', one line per Flare journey and the flare audit counts. No more live-stage code is needed. Status comment: #798 issuecomment-6187265834
+Next: resumed after Belt nudge 08:23Z; wait for run 38704216123 on 92db316 (contains a45f1cb); green -> Belt-Contact-Sheet on #798
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
