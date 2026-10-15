@@ -2,7 +2,8 @@
 // units and decimals are `FakeProperties.rows`; values come from FlareCore's `Layer.sample(at:)`, falling back to
 // `Layer.standardDefaults`; key states follow section 2's rule (`FakeProperties.keyState`, a static read). Layers whose
 // values or states differ give a Mixed row (nil value, not animated). Reads and `setValue` (KY-2) work on any owner,
-// scene or symbol. The other writes and the `PropertyAnimating` conformance come in KY-3 and KY-4.
+// scene or symbol. The stopwatch and keyframe button live in LiveProperties+Keys.swift (KY-3); fill, stroke and the
+// `PropertyAnimating` conformance live in LiveProperties+Paint.swift (KY-4).
 import FlareCore
 
 public struct LiveProperties: Sendable {

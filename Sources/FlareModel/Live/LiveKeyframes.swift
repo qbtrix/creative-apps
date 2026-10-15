@@ -1,8 +1,9 @@
 // LiveKeyframes.swift: the live timeline reads (docs/blueprints/flare/features/live-keys.md, task KY-5). A row per
 // layer of any owner (a scene or a symbol): its summary diamonds are the union of every track's key frames, a segment
 // joins each pair of consecutive diamonds, and a segment's easing is the first track (by name) that tweens out of its
-// start key with a non-linear easing. Labels are the scene's own. Writes and the `KeyframeEditing` conformance come
-// in KY-6 and KY-7. Agrees with `FakeKeyframes` on the fixtures.
+// start key with a non-linear easing. Labels are the scene's own. Key moves and deletes live in LiveKeyframes+Edit.swift
+// (KY-6); frame inserts and removes, labels and the `KeyframeEditing` conformance live in LiveKeyframes+Frames.swift
+// (KY-7). Agrees with `FakeKeyframes` on the fixtures.
 import FlareCore
 
 public struct LiveKeyframes: Sendable {
