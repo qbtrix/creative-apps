@@ -53,7 +53,7 @@ struct ToolOptionsSection: View {
                 }
                 SelectOptions(model: model, perform: perform)
             case .crop:
-                hint("Drag over the image to choose the crop, then apply it.")
+                // CropOptions draws the crop's one instruction line itself.
                 CropOptions(model: model, perform: perform)
             case .move:
                 hint("Drag over the image to move the selected layer.")
