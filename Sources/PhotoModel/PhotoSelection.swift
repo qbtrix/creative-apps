@@ -77,7 +77,7 @@ extension PhotoWorkspace {
     /// Replaces each selected pixel of the selected layer with `pixel(old)`,
     /// weighted by the selection's coverage there, as one undo step named
     /// `name` that keeps the tiles it changed.
-    private mutating func editSelection(named name: String, _ pixel: (RGBA) -> RGBA) {
+    mutating func editSelection(named name: String, _ pixel: (RGBA) -> RGBA) {
         guard let selection, let id = selectedLayerID, let at = index(of: id), let bounds = bounds(of: layers[at]),
             let area = selection.intersection(bounds), var tiled = pixels[id]
         else { return }
