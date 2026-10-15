@@ -1,11 +1,12 @@
-// PhotoCommands.swift: Photo's menu bar. File: New Image, Open…, Save, Save
-// As…, Export…; Edit: Undo and Redo named for the edit, Delete Selection, Fill
-// Selection; Select: All, Deselect; Image: Image Size…, Rotate, Straighten…;
-// Layer: New, Delete, Rename…, Show/Hide, Bring Forward, Send Backward, Select
-// Layer Above and Below; View: Zoom In, Zoom Out, Actual Size, Fit on Screen.
-// The focused window publishes a PhotoMenu (what can run now, and where to
-// send it) as a focused scene value; an item that can't run is disabled, never
-// hidden. Select > All owns Command-A, so while a text field is being edited
+// PhotoCommands.swift: Photo's menu bar, composed in order from one file per
+// menu (PhotoCommands+File, +Edit, +Select, +Image, +Layer, +View). File: New
+// Image, Open…, Save, Save As…, Export…; Edit: Undo and Redo named for the
+// edit, Delete Selection, Fill Selection; Select: All, Deselect; Image: Image
+// Size…, Rotate, Straighten…; Layer: New, Delete, Rename…, Show/Hide, Bring
+// Forward, Send Backward, Select Layer Above and Below; View: Zoom In, Zoom
+// Out, Actual Size, Fit on Screen. The focused window publishes a PhotoMenu
+// (what can run now, and where to send it) as a focused scene value; an item
+// that can't run is disabled, never hidden. Select > All owns Command-A, so while a text field is being edited
 // (a sheet's, the rename alert's, an inspector number) it selects that field's
 // text instead, and it never selects the canvas while a sheet or alert is up
 // (#575). A disabled item would swallow the key, so it is disabled only for a
@@ -83,84 +84,18 @@ private struct PhotoMenuKey: FocusedValueKey {
     typealias Value = PhotoMenu
 }
 
+/// Composes the menus; each menu's items live in PhotoCommands+<Menu>.swift.
 struct PhotoCommands: Commands {
-    @FocusedValue(\.photoMenu) private var focused
+    @FocusedValue(\.photoMenu) var focused
 
-    private var menu: PhotoMenu { focused ?? PhotoMenu() }
+    var menu: PhotoMenu { focused ?? PhotoMenu() }
 
     var body: some Commands {
-        CommandGroup(replacing: .newItem) {
-            Button("New Image") { menu.perform(.newImage) }.keyboardShortcut("n")
-            Button("Open…") { menu.perform(.open) }.keyboardShortcut("o")
-        }
-        CommandGroup(replacing: .saveItem) {
-            Button("Save") { menu.perform(.save) }.keyboardShortcut("s").disabled(!menu.hasImage)
-            Button("Save As…") { menu.perform(.saveAs) }.keyboardShortcut("s", modifiers: [.command, .shift])
-                .disabled(!menu.hasImage)
-            Button("Export…") { menu.perform(.export(.openSheet)) }.keyboardShortcut("e", modifiers: [.command, .shift])
-                .disabled(!menu.hasImage)
-        }
-        CommandGroup(replacing: .undoRedo) {
-            Button(menu.undoTitle) { menu.perform(.undo) }.keyboardShortcut("z").disabled(!menu.canUndo)
-            Button(menu.redoTitle) { menu.perform(.redo) }.keyboardShortcut("z", modifiers: [.command, .shift])
-                .disabled(!menu.canRedo)
-        }
-        CommandGroup(after: .pasteboard) {
-            Divider()
-            Button("Delete Selection") { menu.perform(.deleteSelection) }.disabled(!menu.canEditSelection)
-            Button("Fill Selection") { menu.perform(.fillSelection) }.disabled(!menu.canEditSelection)
-        }
-        CommandMenu("Select") {
-            // Off only for a focused window with no image: a sheet's window may
-            // not carry the focused value, and its field still needs Command-A.
-            Button("All") { menu.selectAll() }.keyboardShortcut("a").disabled(focused.map { !$0.hasImage } ?? false)
-            Button("Deselect") { menu.perform(.deselect) }.keyboardShortcut("d").disabled(!menu.canDeselect)
-        }
-        CommandMenu("Image") {
-            PhotoImageMenu(perform: menu.perform).disabled(!menu.hasImage)
-        }
-        CommandMenu("Layer") {
-            PhotoLayerMenu(menu: menu)
-        }
-        CommandGroup(after: .toolbar) {
-            Button("Zoom In") { menu.perform(.zoomIn) }.keyboardShortcut("=").disabled(!menu.hasImage)
-            Button("Zoom Out") { menu.perform(.zoomOut) }.keyboardShortcut("-").disabled(!menu.hasImage)
-            Button("Actual Size") { menu.perform(.actualSize) }.keyboardShortcut("1").disabled(!menu.hasImage)
-            Button("Fit on Screen") { menu.perform(.fit) }.keyboardShortcut("0").disabled(!menu.hasImage)
-            Divider()
-        }
-    }
-}
-
-/// The Layer menu's items, a view so the snapshot tests can draw them.
-struct PhotoLayerMenu: View {
-    let menu: PhotoMenu
-
-    var body: some View {
-        Button("New Layer", systemImage: "plus") { menu.perform(.addLayer) }
-            .keyboardShortcut("n", modifiers: [.command, .shift])
-            .disabled(!menu.hasImage)
-        Button("Delete Layer", systemImage: "trash") { menu.perform(.deleteLayer) }
-            .disabled(!menu.canDeleteLayer)
-        Divider()
-        Button("Rename Layer…", systemImage: "pencil") { menu.perform(.renameLayer) }
-            .disabled(!menu.canEditLayer)
-        Button(menu.visibilityTitle, systemImage: menu.visibilityTitle == "Show Layer" ? "eye" : "eye.slash") {
-            if let selected = menu.selectedLayer { menu.perform(.toggleVisibility(selected)) }
-        }
-        .disabled(!menu.canEditLayer)
-        Divider()
-        Button("Bring Forward", systemImage: "square.2.layers.3d.top.filled") { menu.perform(.bringForward) }
-            .keyboardShortcut("]")
-            .disabled(!menu.canBringForward)
-        Button("Send Backward", systemImage: "square.2.layers.3d.bottom.filled") { menu.perform(.sendBackward) }
-            .keyboardShortcut("[")
-            .disabled(!menu.canSendBackward)
-        Button("Select Layer Above", systemImage: "arrow.up") { menu.perform(.selectLayerAbove) }
-            .keyboardShortcut("]", modifiers: [.command, .option])
-            .disabled(!menu.canBringForward)
-        Button("Select Layer Below", systemImage: "arrow.down") { menu.perform(.selectLayerBelow) }
-            .keyboardShortcut("[", modifiers: [.command, .option])
-            .disabled(!menu.canSendBackward)
+        fileMenu
+        editMenu
+        selectMenu
+        imageMenu
+        layerMenu
+        viewMenu
     }
 }
