@@ -120,6 +120,8 @@ struct PhotoWindow: View {
                 TextField("Name", text: $renameText).accessibilityIdentifier("photo.layer.name")
                 Button("Rename", action: commitRename)
                 Button("Cancel", role: .cancel) {}
+            } message: {
+                Text("Enter a new name for the layer.")
             }
             .alert(
                 problem?.title ?? "",
