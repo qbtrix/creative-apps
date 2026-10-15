@@ -9,12 +9,11 @@
 // write into a temporary folder, within 2 s; and its main-actor part, copying
 // the PhotoWorkspace value (copy-on-write: no pixel is converted), within
 // 1.6 ms in release and 16 ms in debug. The copy touches no pixels, so it is
-// gated in both builds; the rest convert every pixel, so as in
-// PhotoBudgetTests they are gated in a release build
-// (`swift test -c release -Xswiftc -enable-testing --filter
-// PhotoDocumentsBudgetTests`, which `@testable` needs) and only reported in
-// debug, which is what CI runs. Each is timed once, since one debug round of
-// a whole-document pass costs seconds. Runs on Linux and macOS.
+// gated in both builds. The rest convert every pixel and cost minutes each in
+// debug, so they run, gated, only in a release build (`swift test -c release
+// -Xswiftc -enable-testing --filter PhotoDocumentsBudgetTests`, which
+// `@testable` needs) and are skipped in debug, which is what CI runs. Each is
+// timed once. Runs on Linux and macOS.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -25,12 +24,12 @@ import CoreRaster
 import Testing
 
 #if DEBUG
-/// Debug reports the whole-document passes; it gates only the copy.
-private let gated = false
+/// Debug skips the whole-document passes; it gates only the copy.
+private let releaseBuild = false
 /// The main-actor copy's bound in debug.
 private let copyBudget = Duration.milliseconds(16)
 #else
-private let gated = true
+private let releaseBuild = true
 /// The main-actor copy's bound in release.
 private let copyBudget = Duration.microseconds(1600)
 #endif
@@ -52,17 +51,19 @@ private let passBudget = Duration.seconds(2)
         return workspace
     }
 
-    @Test func saveDocument() throws {
+    @Test(.enabled(if: releaseBuild, "whole-document passes run in release only"))
+    func saveDocument() throws {
         let workspace = try document()
         var file = Data()
         let cost = try clock.measure {
             file = try archive.container(try archive.encode(try workspace.snapshot(), codec: RawCodec()))
         }
         #expect(file.count > 3 * 4000 * 3000 * 4, "three 12 MP layers written")
-        check("PB-18 save", cost, within: passBudget, gate: gated)
+        check("PB-18 save", cost, within: passBudget)
     }
 
-    @Test func openDocument() throws {
+    @Test(.enabled(if: releaseBuild, "whole-document passes run in release only"))
+    func openDocument() throws {
         let original = try document()
         let file = try archive.container(try archive.encode(try original.snapshot(), codec: RawCodec()))
         var opened = PhotoWorkspace(services: .fake)
@@ -73,7 +74,7 @@ private let passBudget = Duration.seconds(2)
         #expect(opened.layers.map(\.name) == original.layers.map(\.name))
         #expect(opened.canvas == CanvasSize(width: 4000, height: 3000))
         #expect(!opened.isDirty)
-        check("PB-19 open", cost, within: passBudget, gate: gated)
+        check("PB-19 open", cost, within: passBudget)
     }
 
     @Test func autosaveSnapshotCopy() throws {
@@ -81,7 +82,8 @@ private let passBudget = Duration.seconds(2)
         var copy = PhotoWorkspace(services: .fake)
         let copyCost = clock.measure { copy = workspace }
         #expect(copy.layers == workspace.layers && copy.isDirty)
-        check("PB-20 workspace copy", copyCost, within: copyBudget, gate: true)
+        check("PB-20 workspace copy", copyCost, within: copyBudget)
+        guard releaseBuild else { return }
 
         let folder = FileManager.default.temporaryDirectory
             .appendingPathComponent("PhotoDocumentsBudgetTests-\(UUID().uuidString)", isDirectory: true)
@@ -96,13 +98,13 @@ private let passBudget = Duration.seconds(2)
         }
         #expect(wrote, "a dirty image has an entry to write")
         #expect(FileManager.default.fileExists(atPath: store.file(for: "budget").path))
-        check("PB-20 autosave write", writeCost, within: passBudget, gate: gated)
+        check("PB-20 autosave write", writeCost, within: passBudget)
     }
 
-    /// Prints the one timed call and, when `gate`, holds it to `budget`.
-    private func check(_ name: String, _ cost: Duration, within budget: Duration, gate: Bool) {
-        print("PhotoBudget \(name) \(ms(cost)) ms (1 event, \(gate ? "gated" : "report only"))")
-        if gate { #expect(cost <= budget, "\(name): \(cost)") }
+    /// Prints the one timed call and holds it to `budget`.
+    private func check(_ name: String, _ cost: Duration, within budget: Duration) {
+        print("PhotoBudget \(name) \(ms(cost)) ms (1 event, gated)")
+        #expect(cost <= budget, "\(name): \(cost)")
     }
 }
 
