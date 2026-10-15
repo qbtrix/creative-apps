@@ -51,3 +51,4 @@ utc	stage	event	ref	note
 2026-10-15T04:17Z	5	stage-start	finish	waiting on #970 and its dev CI run
 2026-10-15T04:35Z	5	heartbeat	ci	waiting
 2026-10-15T04:53Z	5	heartbeat	ci	waiting
+2026-10-15T04:55Z	5	ci-run	38681586835	red: Flare easing journey broken by SuiteUI #962 (reverted #975, #977), others on #763; Flare audit under baseline
