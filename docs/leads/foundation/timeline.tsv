@@ -43,3 +43,4 @@ utc	stage	event	ref	note
 2026-10-15T02:10Z	3	stage-start	wave 10	FD-11, FD-12, FD-13b→14
 2026-10-15T02:19Z	-	heartbeat	-	waiting on builders
 2026-10-15T02:20Z	3	pr-opened	#924	FD-11 HaloCommand
+2026-10-15T02:21Z	3	pr-opened	#926	FD-12 viewer state
