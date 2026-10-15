@@ -71,17 +71,21 @@ final class LibraryJourneyTests: XCTestCase {
         XCTAssert(loupe.waitForExistence(timeout: 10), "no loupe")
         let position = library.element("library.loupe.position")
         XCTAssert(position.waitForExistence(timeout: 5), "no loupe position (library.loupe.position)")
-        let start = position.label
+        let start = Self.text(of: position)
+        XCTAssert(start.contains(" of "), "the loupe position reads \(start), not \"<name>  ·  n of m\"")
         library.shot("loupe")
         // The loupe's keys act while it has focus; a menu click may leave focus
         // elsewhere, so click the photo first, as a person would.
         let photo = library.element("library.loupe.photo")
         if photo.waitForExistence(timeout: 3) { photo.click() } else { loupe.click() }
         library.app.typeKey(.rightArrow, modifierFlags: [])
-        let next = library.app.descendants(matching: .any).matching(NSPredicate(
-            format: "identifier == 'library.loupe.position' AND label != %@", start)).firstMatch
-        XCTAssert(next.waitForExistence(timeout: 5), "Right didn't step the loupe from \(start)")
-        let name = Self.photoName(in: next.label)
+        var now = start
+        for _ in 0..<25 where now == start {
+            Thread.sleep(forTimeInterval: 0.2)
+            now = Self.text(of: position)
+        }
+        XCTAssert(now != start, "Right didn't step the loupe from \(start)")
+        let name = Self.photoName(in: now)
         library.shot("loupe-next")
         library.app.typeKey(.escape, modifierFlags: [])
         XCTAssert(loupe.waitForNonExistence(timeout: 5), "Escape left it still in the loupe")
@@ -202,6 +206,13 @@ final class LibraryJourneyTests: XCTestCase {
             library.press(.escape)
             _ = library.app.menus.firstMatch.waitForNonExistence(timeout: 2)
         }
+    }
+
+    /// What a plain SwiftUI Text reads: XCUITest gives it an empty label and
+    /// its string as the value, so the label only when the value is empty.
+    @MainActor private static func text(of element: XCUIElement) -> String {
+        let value = (element.value as? String) ?? ""
+        return value.isEmpty ? element.label : value
     }
 
     /// "IMG_0034" from a cell or loupe label that names it; "" when none does.
