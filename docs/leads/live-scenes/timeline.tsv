@@ -9,3 +9,4 @@ utc	stage	event	ref	note
 2026-10-14T23:57Z	3	pr-merged	#880	SN-3 canvas and timing
 2026-10-14T23:57Z	3	pr-merged	#882	SN-4 guides
 2026-10-14T23:57Z	3	stage-start	wave3	SN-5 on 5de7e13
+2026-10-15T00:02Z	3	heartbeat	wave3	SN-5 builder running (wf_63903b8d-5ef)
