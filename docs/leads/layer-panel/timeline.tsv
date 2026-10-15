@@ -26,3 +26,4 @@ utc	stage	event	ref	note
 2026-10-15T11:18Z	4	ci-run	38726261412	#1104 merged 11:08; its run 38725369437 cancelled by concurrency; 2b98fdb (contains #1104) queued
 2026-10-15T11:29Z	4	heartbeat	38726261412	waiting on the dev run containing #1104
 2026-10-15T11:35Z	4	ci-run	38726261412	red: Library build break, no tests ran; not counted
+2026-10-15T11:40Z	4	ci-run	38727890123	same Library build break; reported on #763

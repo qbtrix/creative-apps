@@ -23,6 +23,7 @@ Journeys: H-J9 (8 steps, packet "Journey steps"). Quality bars: QB-F1 no dead co
 | 1b | 38711122431 (2fc9b59) | red: H-J9 step 3, double-click opens no rename field (row is a Button); W0 Halo journeys pass but testLayoutAtWidths (#1040); SuiteUI gallery (#763) | halo identifier 1 (10), contrast 0 (2), offscreen 0 (8), unnamed 0 (5): under | clarity, journey, design, layout, controls | row rename (LP-3); panel 11 confirmed (4 major): selected icon 2.5:1 in Dark, journey shots under a fading Edit menu, row help, null help, row font, empty inset (ours, batch 3); (#38) caption, inspector scroll (not ours); back to List (rejected) | #1070 (merged 3894890), batch 3 #1078 (merged 09:49) | no |
 | 2 | 38721434364 (c7e5c17) | red: macOS scripts/ci green (HaloLayerListTests pass with the round 1 look); H-J9 stops at step 2: #1078's expectClosed asserts app.menus gone after a menu choice and it never is. Other Halo reds not ours: Files testSaveAndReopen, History testUndoRedoEveryEdit (inspector 192 pt), testEveryControlActsOrSaysWhy (transport.end), testLayoutAtWidths (#1040); SuiteUI gallery (#763) | not read (no new feature screens) | panel deferred to the run with H-J9 screens | menu wait (#1078) | #1104 (feature-done, merged 11:08) | no |
 | (3) | 38726261412 (2b98fdb) | red, not judged: macOS swift build fails in Sources/LibraryApp/LibraryInspector.swift (Library line, #763); no tests ran | – | – | – | – | not counted |
+| (3) | 38727890123 (9caed05) | red, not judged: same Library build break (since #1096); reported on #763 | – | – | – | – | not counted |
 
 ## Decisions
 - Identifiers keep W0's shipped `halo.layer.*` prefix (`halo.layer.row.<id>`, `halo.layer.empty`, `halo.layer.new`; W0's journey reads `halo.layer.row.comp-1-layer-2`), so the packet's `halo.layers.list/row/refusal/empty` become `halo.layer.list/row/refusal/empty`.
@@ -44,6 +45,7 @@ Journeys: H-J9 (8 steps, packet "Journey steps"). Quality bars: QB-F1 no dead co
 - A run that fails to build in another line's code (Library, 38726261412) can't judge this feature, so it doesn't count against the 4-round budget.
 
 ## Open
+- dev's macOS build is broken by Library #1096 (LibraryInspector.swift, mutating member on a let model); reported on #763 at 11:40Z. Rounds wait on it.
 - Panel finding, not this feature's files: the selected layer's inspector shows "Properties arrive with the layer inspector (#38)." (HaloLayerInspector.swift, W0's placeholder that layer-keys #38 replaces whole). File as gap at finish if still on dev.
 - Panel finding, not this feature's files: the inspector column (HaloCompositionInspector.swift) may not scroll, so many layers would fall off the window. File as gap at finish.
 - dev is red before this feature (#763, run 38704216123 on 92db316): Halo `testLayoutAtWidths` (timeline track under the sidebar at 880 pt; fixed by SuiteUI #1040, waiting on a human Mac-Check) and SuiteUI `testGalleryOpensEveryPage` (Hide Sidebar identifier). Neither is in this feature's files; the done check's green dev run needs #1040 merged.
