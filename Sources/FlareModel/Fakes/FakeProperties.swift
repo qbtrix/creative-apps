@@ -120,7 +120,7 @@ public struct FakeProperties: PropertyAnimating {
         try available()
         let shapes = items.filter { if case .shape = $0.item { true } else { false } }
         guard !shapes.isEmpty else { return }
-        try engine.group("Set Stroke") { engine in
+        try engine.group(stroke == nil ? "Remove Stroke" : "Set Stroke") { engine in
             try engine.perform(FixtureEdit("Set Stroke", from: engine.document) { doc in
                 for a in shapes {
                     guard case .shape(let i) = a.item else { continue }

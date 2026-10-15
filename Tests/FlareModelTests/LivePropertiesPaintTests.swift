@@ -109,3 +109,34 @@ private func layer(_ id: String, owner: LayerOwner = scene, in engine: CommandEn
     #expect(engine.document == doc)
     #expect(!engine.canUndo)
 }
+
+/// A non-finite width says the width needs a number, not that it is negative; a NaN color channel refuses with a
+/// sentence the person sees as-is, before any command. Neither adds an undo entry.
+@Test func aNonFiniteStrokeWidthOrColorThrowsASentenceAndAddsNoEntry() throws {
+    let doc = FlareFixtures.bounce
+    var engine = CommandEngine(document: doc)
+    let live = LiveProperties(), items = shapes(of: "ball", in: doc)
+    let width = CommandError.invalidDocument("Stroke width needs a number.")
+    #expect(throws: width) { try live.setStroke(Stroke(width: .nan), of: items, in: &engine) }
+    #expect(throws: width) { try live.setStroke(Stroke(width: .infinity), of: items, in: &engine) }
+    #expect(FlareLayerError.command(width).message == "Stroke width needs a number.")
+    let color = CommandError.invalidDocument("Each stroke color channel needs a number.")
+    #expect(throws: color) {
+        try live.setStroke(Stroke(color: FlareColor(r: .nan, g: 0, b: 0), width: 2), of: items, in: &engine)
+    }
+    #expect(FlareLayerError.command(color).message == "Each stroke color channel needs a number.")
+    #expect(engine.document == doc)
+    #expect(!engine.canUndo)
+}
+
+@Test func removingAStrokeIsNamedRemoveStroke() throws {
+    let doc = FlareFixtures.bounce
+    var engine = CommandEngine(document: doc)
+    let live = LiveProperties(), items = shapes(of: "ball", in: doc)
+    try live.setStroke(Stroke(width: 3), of: items, in: &engine)
+    try live.setStroke(nil, of: items, in: &engine)
+    #expect(layer("ball", in: engine)?.shapes.allSatisfy { $0.stroke == nil } == true)
+    #expect(engine.undoActionName == "Undo Remove Stroke")
+    try engine.undo()
+    #expect(layer("ball", in: engine)?.shapes.allSatisfy { $0.stroke == Stroke(width: 3) } == true)
+}

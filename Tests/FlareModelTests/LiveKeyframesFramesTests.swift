@@ -139,13 +139,15 @@ private func moved() throws -> CommandEngine {
     #expect(engine.document == FlareFixtures.character && !engine.canUndo)
 }
 
-/// "wave" is 24 frames (0-23) and FlareCore has no command that grows a symbol, so an insert that would push a key
-/// past its last frame refuses and changes nothing.
+/// "wave" is 24 frames (0-23) and FlareCore has no command that grows a symbol, so an insert that would push the
+/// hand's last key past 23 refuses with an insert sentence (not the key-move one) and changes nothing.
 @Test func insertPastASymbolEndThrowsAndChangesNothing() throws {
     var engine = CommandEngine(document: FlareFixtures.character)
-    #expect(throws: CommandError.invalidDocument("A key can't move past the symbol's last frame.")) {
+    let sentence = "A symbol can't get longer yet, so frames can't be inserted before its last key."
+    #expect(throws: CommandError.invalidDocument(sentence)) {
         try live.insertFrames(3, at: 5, layerIDs: ["hand"], owner: wave, in: &engine)
     }
+    #expect(FlareLayerError.command(.invalidDocument(sentence)).message == sentence)
     #expect(throws: CommandError.symbolNotFound("nope")) {
         try live.insertFrames(1, at: 0, layerIDs: [], owner: .symbol("nope"), in: &engine)
     }

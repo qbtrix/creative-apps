@@ -23,7 +23,7 @@ extension LiveKeyframes {
             let (to, overflow) = last.addingReportingOverflow(count)
             guard !overflow, to < Int.max else { throw CommandError.invalidFrame(count) }
             // FlareCore has no command that grows a symbol, so a key pushed past its last frame refuses.
-            if edit.scene == nil, to >= edit.length { throw CommandError.invalidDocument(Self.pastSymbolEnd) }
+            if edit.scene == nil, to >= edit.length { throw CommandError.invalidDocument(Self.insertPastSymbolEnd) }
             shifts.append(ShiftKeyframes(owner: owner, layerID: layer.id, fromFrame: frame, toFrame: last, delta: count))
             length = max(length, to + 1)
         }
