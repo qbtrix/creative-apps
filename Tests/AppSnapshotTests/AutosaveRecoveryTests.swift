@@ -1,6 +1,7 @@
 // AutosaveRecoveryTests.swift: MP-6's launch recovery (docs/blueprints/flare/features/mac-platform.md). Each test
 // gets its own temp folder. A recovery file of bounce gives the offer "Restore the unsaved animation from <time>?"
-// with the file's date; Restore lands bounce dirty and untitled and removes the file; Discard removes it; a damaged
+// with the file's date; Restore lands bounce dirty and untitled and keeps the file (a second crash still recovers it)
+// until a clean save removes it; Discard removes it; a damaged
 // file is removed with no offer; no file gives no offer; the read and decode run off the main thread. macOS only.
 #if os(macOS)
 import FlareCore
@@ -67,6 +68,19 @@ private final class ThreadProbe: Sendable {
         #expect(model.document == FlareFixtures.bounce)
         #expect(model.isDirty)
         #expect(model.title == "Untitled")
+        #expect(exists(file), "Restore keeps the file until the next save or Discard")
+
+        // A tick with no new edit leaves the file alone.
+        await autosave.tick(model: model, now: 1_000)
+        #expect(exists(file))
+
+        // A second crash before the next edit or save: the next launch still offers bounce.
+        let relaunched = await FlareAutosave(recovery: file).launch()
+        let again = try #require(relaunched)
+        #expect(again.document == FlareFixtures.bounce)
+
+        // A clean save removes it.
+        autosave.didSave()
         #expect(exists(file) == false)
     }
 

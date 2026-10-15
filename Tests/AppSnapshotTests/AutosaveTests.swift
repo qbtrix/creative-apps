@@ -1,11 +1,12 @@
 // AutosaveTests.swift: MP-5's autosave writer and recovery file (docs/blueprints/flare/features/mac-platform.md).
 // Each test gets its own temp folder. A due, dirty model writes the recovery file once per edit; a clean model
 // writes nothing; the write is atomic, so a failed write leaves no file at the url; a clean save removes the file;
-// quitting while dirty writes it once more. macOS only.
+// quitting while dirty writes it once more; the encode and write run off the main thread. macOS only.
 #if os(macOS)
 import FlareCore
 import FlareModel
 import Foundation
+import Synchronization
 import Testing
 
 @testable import FlareApp
@@ -32,6 +33,15 @@ private func edited() throws -> FlareWorkspace {
     var model = try opened()
     model.addLayer()
     return model
+}
+
+/// Records, from inside the autosave's encode and write, whether each call ran on the main thread.
+private final class ThreadProbe: Sendable {
+    let onMain = Mutex<[Bool]>([])
+    func record() {
+        let main = Thread.isMainThread
+        onMain.withLock { $0.append(main) }
+    }
 }
 
 @MainActor
@@ -137,6 +147,20 @@ private func edited() throws -> FlareWorkspace {
         #expect(data == model.recoveryData())
         #expect(date >= before.addingTimeInterval(-2))
         #expect(date <= after.addingTimeInterval(2))
+    }
+
+    @Test func writesOffMain() async throws {
+        let model = try edited()
+        let file = recoveryFile()
+        let autosave = FlareAutosave(recovery: file)
+        autosave.noteEdit(at: 0)
+        let probe = ThreadProbe()
+        await autosave.tick(model: model, now: 30, offMain: { probe.record() })
+        #expect(probe.onMain.withLock { $0 } == [false])
+        let written = await file.read()
+        let (data, _) = try #require(written)
+        #expect(data == model.recoveryData())
+        file.remove()
     }
 
     @Test func missingFileReadsNil() async {
