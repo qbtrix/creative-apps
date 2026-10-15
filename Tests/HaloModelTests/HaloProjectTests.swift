@@ -44,8 +44,12 @@ import Testing
 }
 
 @Test func equalityComparesStateButNotServices() {
-    var live = HaloProject(), fake = HaloProject(services: .fake)
+    // Services that record history alike but draw differently.
+    var mixed = HaloServices.fake
+    mixed.drawing = LiveFrameDrawing()
+    var live = HaloProject(services: mixed), fake = HaloProject(services: .fake)
     #expect(live == fake)
+    #expect(HaloProject() == HaloProject(services: .fake))
     live.newComposition()
     #expect(live != fake)
     fake.newComposition()

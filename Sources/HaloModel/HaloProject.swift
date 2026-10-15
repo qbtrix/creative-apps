@@ -116,7 +116,7 @@ public struct HaloProject: Sendable, Equatable {
     /// What the New Composition sheet starts with: 1080p, 30 fps, 10 seconds,
     /// named after the next id ("Comp 3").
     public var suggestedSettings: CompositionSettings {
-        CompositionSettings(name: uniqueName("Comp \(document.nextCompositionNumber)"))
+        CompositionSettings(name: document.uniqueName("Comp \(document.nextCompositionNumber)"))
     }
 
     /// Whether Delete can remove a composition: never the last one.
@@ -127,58 +127,69 @@ public struct HaloProject: Sendable, Equatable {
         newComposition(suggestedSettings)
     }
 
-    /// Adds a composition from valid `settings` and selects it; a taken name gets a number.
+    /// Adds a composition from valid `settings` and selects it; a taken name
+    /// gets a number. One step, "New Composition".
     @discardableResult
     public mutating func newComposition(_ settings: CompositionSettings) -> Bool {
         guard let frames = settings.durationFrames else { return false }
-        let comp = HaloComposition(
-            id: takeCompositionID(), name: uniqueName(settings.name.normalizedName), width: settings.width,
-            height: settings.height, framesPerSecond: settings.framesPerSecond, durationFrames: frames)
-        document.compositions.append(comp)
-        document.selectedCompositionID = comp.id
-        document.selectedLayerID = nil
-        return true
+        return edit("New Composition", control: "halo.composition.new") { doc in
+            let comp = HaloComposition(
+                id: doc.takeCompositionID(), name: doc.uniqueName(settings.name.normalizedName), width: settings.width,
+                height: settings.height, framesPerSecond: settings.framesPerSecond, durationFrames: frames)
+            doc.compositions.append(comp)
+            doc.selectedCompositionID = comp.id
+            doc.selectedLayerID = nil
+        }
     }
 
     /// Copies a composition and its layers in under the original, named
     /// "<name> copy" ("<name> copy 2", ...), and selects the copy; a copied
     /// layer's parent is the copy of its parent. An unknown id is refused.
+    /// One step, "Duplicate Composition".
     @discardableResult
     public mutating func duplicateComposition(_ id: String) -> Bool {
-        guard let index = document.compositions.firstIndex(where: { $0.id == id }) else { return false }
-        let original = document.compositions[index]
-        let newID = takeCompositionID()
-        var newIDs: [String: String] = [:]
-        for layer in original.layers {
-            let suffix = layer.id.hasPrefix(original.id) ? String(layer.id.dropFirst(original.id.count)) : "-\(layer.id)"
-            newIDs[layer.id] = newID + suffix
+        guard document.compositions.contains(where: { $0.id == id }) else { return false }
+        return edit("Duplicate Composition", control: "halo.sidebar") { doc in
+            guard let index = doc.compositions.firstIndex(where: { $0.id == id }) else { return }
+            let original = doc.compositions[index]
+            let newID = doc.takeCompositionID()
+            var newIDs: [String: String] = [:]
+            for layer in original.layers {
+                let suffix =
+                    layer.id.hasPrefix(original.id) ? String(layer.id.dropFirst(original.id.count)) : "-\(layer.id)"
+                newIDs[layer.id] = newID + suffix
+            }
+            // Each copied layer follows the copy of its parent, never the original.
+            let layers = original.layers.map { layer in
+                var copy = layer.withID(newIDs[layer.id] ?? newID + "-\(layer.id)")
+                copy.parentID = layer.parentID.flatMap { newIDs[$0] }
+                return copy
+            }
+            let copy = HaloComposition(
+                id: newID, name: doc.uniqueName("\(original.name) copy"), width: original.width,
+                height: original.height, framesPerSecond: original.framesPerSecond,
+                durationFrames: original.durationFrames, layers: layers)
+            doc.compositions.insert(copy, at: index + 1)
+            doc.selectedCompositionID = newID
+            doc.selectedLayerID = nil
         }
-        // Each copied layer follows the copy of its parent, never the original.
-        let layers = original.layers.map { layer in
-            var copy = layer.withID(newIDs[layer.id] ?? newID + "-\(layer.id)")
-            copy.parentID = layer.parentID.flatMap { newIDs[$0] }
-            return copy
-        }
-        let copy = HaloComposition(
-            id: newID, name: uniqueName("\(original.name) copy"), width: original.width, height: original.height,
-            framesPerSecond: original.framesPerSecond, durationFrames: original.durationFrames, layers: layers)
-        document.compositions.insert(copy, at: index + 1)
-        document.selectedCompositionID = newID
-        document.selectedLayerID = nil
-        return true
     }
 
     /// Renames a composition; an empty or taken name, or an unknown id, is
     /// refused. Refusing a known composition keeps the typed name and the
-    /// reason in `refusedRename`; a rename that succeeds clears it.
+    /// reason in `refusedRename`; a rename that succeeds clears it. One step,
+    /// "Rename Composition", unless the name is unchanged.
     @discardableResult
     public mutating func renameComposition(_ id: String, to name: String) -> Bool {
-        guard let index = document.compositions.firstIndex(where: { $0.id == id }) else { return false }
+        guard document.compositions.contains(where: { $0.id == id }) else { return false }
         if let problem = renameProblem(id, to: name) {
             refusedRename = RefusedRename(id: id, name: name, problem: problem)
             return false
         }
-        document.compositions[index].name = name.normalizedName
+        edit("Rename Composition", control: "halo.sidebar") { doc in
+            guard let index = doc.compositions.firstIndex(where: { $0.id == id }) else { return }
+            doc.compositions[index].name = name.normalizedName
+        }
         refusedRename = nil
         return true
     }
@@ -204,37 +215,25 @@ public struct HaloProject: Sendable, Equatable {
     }
 
     /// Deletes a composition, never the last one; deleting the selected one
-    /// selects its neighbor below (or above, at the end).
+    /// selects its neighbor below (or above, at the end). One step, "Delete
+    /// Composition".
     @discardableResult
     public mutating func deleteComposition(_ id: String) -> Bool {
-        guard canDeleteComposition, let index = document.compositions.firstIndex(where: { $0.id == id }) else { return false }
-        document.compositions.remove(at: index)
-        if refusedRename?.id == id { refusedRename = nil }
-        if selectedCompositionID == id {
-            document.selectedCompositionID = document.compositions[min(index, document.compositions.count - 1)].id
-            document.selectedLayerID = nil
+        guard canDeleteComposition, document.compositions.contains(where: { $0.id == id }) else { return false }
+        edit("Delete Composition", control: "halo.sidebar") { doc in
+            guard let index = doc.compositions.firstIndex(where: { $0.id == id }) else { return }
+            doc.compositions.remove(at: index)
+            if doc.selectedCompositionID == id, !doc.compositions.isEmpty {
+                doc.selectedCompositionID = doc.compositions[min(index, doc.compositions.count - 1)].id
+                doc.selectedLayerID = nil
+            }
         }
+        if refusedRename?.id == id { refusedRename = nil }
         return true
     }
 
-    /// The next unused composition id.
-    private mutating func takeCompositionID() -> String {
-        defer { document.nextCompositionNumber += 1 }
-        return "comp-\(document.nextCompositionNumber)"
-    }
-
-    /// `base`, or `base` with the first free number after it ("Comp 1 copy 2").
-    /// Names compare as `renameProblem` compares them, so a look-alike is taken.
-    private func uniqueName(_ base: String) -> String {
-        let keys = Set(document.compositions.map(\.name.nameKey))
-        guard keys.contains(base.nameKey) else { return base }
-        var number = 2
-        while keys.contains("\(base) \(number)".nameKey) { number += 1 }
-        return "\(base) \(number)"
-    }
-
     /// Selects a composition by id. An unknown id is ignored; selecting
-    /// another composition clears the layer selection.
+    /// another composition clears the layer selection. Not an undo step.
     public mutating func selectComposition(_ id: String) {
         guard document.compositions.contains(where: { $0.id == id }), id != selectedCompositionID else { return }
         document.selectedCompositionID = id
@@ -243,48 +242,153 @@ public struct HaloProject: Sendable, Equatable {
 
     /// Adds a layer of `kind` on top of the selected composition, spanning its
     /// whole duration and named by kind ("Solid 1", "Solid 2"), and selects
-    /// it. Does nothing with no composition selected.
+    /// it. A text layer says "Text" in the box `services.text` measures (the
+    /// estimate without one). One step, "New Layer"; nothing with no
+    /// composition selected.
     public mutating func newLayer(_ kind: HaloLayerKind) {
-        guard let index = document.compositions.firstIndex(where: { $0.id == selectedCompositionID }) else { return }
-        let comp = document.compositions[index]
-        let number = comp.layers.filter { $0.kind == kind }.count + 1
-        let layer = HaloLayer(
-            id: "\(comp.id)-layer-\(comp.layers.count + 1)", name: "\(kind.title) \(number)", kind: kind,
-            inFrame: 0, outFrame: comp.durationFrames, color: kind.defaultColor)
-        document.compositions[index].layers.insert(layer, at: 0)
-        document.selectedLayerID = layer.id
+        guard let compID = selectedComposition?.id else { return }
+        let rasterizer = services.text
+        edit("New Layer", control: "halo.layer.new") { doc in
+            guard let index = doc.compositions.firstIndex(where: { $0.id == compID }) else { return }
+            let comp = doc.compositions[index]
+            let number = comp.layers.filter { $0.kind == kind }.count + 1
+            var layer = HaloLayer(
+                id: doc.takeLayerID(in: comp.id), name: "\(kind.title) \(number)", kind: kind,
+                inFrame: 0, outFrame: comp.durationFrames, color: kind.defaultColor)
+            if kind == .text {
+                let words = HaloTextContent()
+                let box = rasterizer?.measure(words)
+                layer.text = HaloTextContent(
+                    string: words.string, fontSize: words.fontSize, width: box?.width, height: box?.height)
+            }
+            doc.compositions[index].layers.insert(layer, at: 0)
+            doc.selectedLayerID = layer.id
+        }
     }
 
     /// Selects a layer of the selected composition by id. An unknown id is
-    /// ignored.
+    /// ignored. Not an undo step.
     public mutating func selectLayer(_ id: String) {
         if selectedComposition?.layers.contains(where: { $0.id == id }) == true { document.selectedLayerID = id }
     }
 
-    /// Sets the selected layer's opacity; HaloLayer clamps it to 0...1. NaN is
-    /// ignored here, so a bad inspector entry keeps the current opacity.
+    /// Sets the selected layer's opacity in its one static home,
+    /// `HaloLayer.opacity`, which clamps it to 0...1. NaN is refused, so a bad
+    /// inspector entry keeps the current opacity. One step, "Change Opacity".
     public mutating func setSelectedLayerOpacity(_ opacity: Double) {
-        guard !opacity.isNaN else { return }
-        updateSelectedLayer { $0.opacity = opacity }
+        editSelectedLayer("Change Opacity", control: "halo.inspector.row.opacity") { layer in
+            guard !opacity.isNaN else { throw HaloEditError.notANumber(.opacity) }
+            layer.opacity = opacity
+        }
     }
 
-    /// Sets how the selected layer blends with the layers under it.
+    /// Sets how the selected layer blends with the layers under it. One step,
+    /// "Change Blend Mode".
     public mutating func setSelectedLayerBlendMode(_ mode: BlendMode) {
-        updateSelectedLayer { $0.blendMode = mode }
+        editSelectedLayer("Change Blend Mode", control: "halo.inspector.row.blend") { $0.blendMode = mode }
     }
 
-    /// Changes the selected composition in place; nothing without one. The
-    /// timeline's methods (HaloTimeline.swift) go through here.
+    /// Changes the selected composition in place, not as an undo step (the
+    /// playhead); nothing without one.
     mutating func updateSelectedComposition(_ change: (inout HaloComposition) -> Void) {
         guard let c = document.compositions.firstIndex(where: { $0.id == selectedCompositionID }) else { return }
         change(&document.compositions[c])
     }
 
-    private mutating func updateSelectedLayer(_ change: (inout HaloLayer) -> Void) {
-        guard let c = document.compositions.firstIndex(where: { $0.id == selectedCompositionID }),
-            let l = document.compositions[c].layers.firstIndex(where: { $0.id == selectedLayerID })
-        else { return }
-        change(&document.compositions[c].layers[l])
+    /// One step named `name` that changes the selected layer; `.noLayerSelected`
+    /// without one. True when it wasn't refused.
+    @discardableResult
+    mutating func editSelectedLayer(
+        _ name: String, control: String, _ change: (inout HaloLayer, HaloComposition) throws -> Void
+    ) -> Bool {
+        edit(name, control: control) { doc in
+            guard let c = doc.compositions.firstIndex(where: { $0.id == doc.selectedCompositionID }),
+                let l = doc.compositions[c].layers.firstIndex(where: { $0.id == doc.selectedLayerID })
+            else { throw HaloEditError.noLayerSelected }
+            let comp = doc.compositions[c]
+            try change(&doc.compositions[c].layers[l], comp)
+        }
+    }
+
+    @discardableResult
+    mutating func editSelectedLayer(_ name: String, control: String, _ change: (inout HaloLayer) throws -> Void) -> Bool {
+        editSelectedLayer(name, control: control) { layer, _ in try change(&layer) }
+    }
+
+    // MARK: Edit, the one place undo is recorded
+
+    /// Runs `body` on a copy of the document. A throw sets `refusal` (the
+    /// error's message under `control`) and changes nothing; otherwise the
+    /// refusal clears and, when the copy differs, it becomes the document, the
+    /// state before is recorded as one step named `name` (merged into the
+    /// newest step with the same `coalesceKey`) and the file is unsaved.
+    /// True when the body didn't throw.
+    @discardableResult
+    mutating func edit(
+        _ name: String, control: String, coalesceKey: String? = nil, _ body: (inout HaloDocumentState) throws -> Void
+    ) -> Bool {
+        var copy = document
+        do { try body(&copy) } catch {
+            refusal = HaloRefusal(
+                control: control, message: (error as? HaloEditError)?.message ?? "That change couldn't be made.")
+            return false
+        }
+        refusal = nil
+        guard copy != document else { return true }
+        let before = document
+        document = copy
+        services.history.record(name, before: before, coalesceKey: coalesceKey, in: &history)
+        file.unsaved = true
+        return true
+    }
+
+    /// Replaces the document without recording a step (undo, redo, open),
+    /// clears the refusal and ends coalescing.
+    mutating func restore(_ state: HaloDocumentState) {
+        document = state
+        refusal = nil
+        endCoalescing()
+    }
+
+    /// Ends the newest step's coalescing, so the next scrub of the same row
+    /// is its own step. Called at the end of every drag, typed value or nudge.
+    public mutating func endCoalescing() {
+        services.history.endCoalescing(in: &history)
+    }
+
+    /// Forgets the refused edit's message.
+    public mutating func dismissRefusal() {
+        refusal = nil
+    }
+
+    /// The next unused layer id in `compositionID` ("comp-1-layer-7"); never
+    /// reused, even after a delete.
+    mutating func takeLayerID(in compositionID: String) -> String {
+        document.takeLayerID(in: compositionID)
+    }
+}
+
+extension HaloDocumentState {
+    /// The next unused composition id ("comp-3").
+    mutating func takeCompositionID() -> String {
+        defer { nextCompositionNumber += 1 }
+        return "comp-\(nextCompositionNumber)"
+    }
+
+    /// The next unused layer id in `compositionID`; the counter only goes up.
+    mutating func takeLayerID(in compositionID: String) -> String {
+        defer { nextLayerNumber += 1 }
+        return "\(compositionID)-layer-\(nextLayerNumber)"
+    }
+
+    /// `base`, or `base` with the first free number after it ("Comp 1 copy 2").
+    /// Names compare as `renameProblem` compares them, so a look-alike is taken.
+    func uniqueName(_ base: String) -> String {
+        let keys = Set(compositions.map(\.name.nameKey))
+        guard keys.contains(base.nameKey) else { return base }
+        var number = 2
+        while keys.contains("\(base) \(number)".nameKey) { number += 1 }
+        return "\(base) \(number)"
     }
 }
 
