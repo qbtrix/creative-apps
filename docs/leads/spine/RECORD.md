@@ -2,9 +2,9 @@
 
 Issue: #1044 · Packet: docs/blueprints/library/features/spine.md
 Run: act-1a13f18aaa0-lfw5 · Session: session_01DtSRhNqsphGfKkvV5eLsWW · Started: 2026-10-15T10:25Z
-Stage: 5 finish (resumed: waiting for a dev run that executes the journeys)
+Stage: done (journeys 8/9 green; loupe-step journey on gap #1215; dev CI red in other lines, no contact sheet)
 Base: 111c44093b7959930d078ce21656fa174613a1b0
-Next: wait for a dev CI run containing 43c26c3 where the macOS job reaches the journeys; green -> Belt-Contact-Sheet on #1044; Library journey failure -> gap issue (round budget spent)
+Next: nothing; Belt-Contact-Sheet waits on a green dev run (other lines) and #1215's loupe journey
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -86,3 +86,4 @@ Taken from the packet's Build waves; checked against dev bcf5a09.
 - gap #1214 (contract/packet texts), #1215 (status bar zoom, Show Inspector shortcut, confirm journeys after #1208).
 - Resume 17:5xZ: dev runs 38774988270, 38776323445, 38777072611 fail to compile Sources/PhotoModel/Live/LiveRecovery.swift:94 (Photo line, ObjCBool); Library not reached.
 - Run 38782884668 (f9846c9): compiles again; red on PhotoCompositeCostTests (Photo); Library suites green; journeys not executed.
+- Run 38792928305 (c93a7f8): Library journeys 8/9 pass; testLoupeStepsAndReturnsToTheGrid fails (empty XCUI label, #262-like); noted on #1215 and #1044.
