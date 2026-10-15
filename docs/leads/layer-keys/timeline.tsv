@@ -7,3 +7,6 @@ utc	stage	event	ref	note
 2026-10-15T08:54Z	3	pr-merged	#1054	LK-1
 2026-10-15T09:08Z	3	stage-end	wave1	dev 6f32c27
 2026-10-15T09:08Z	3	stage-start	wave2	LK-2a
+2026-10-15T09:16Z	3	pr-merged	#1064	LK-2a
+2026-10-15T09:30Z	3	stage-end	wave2	dev 3e47517
+2026-10-15T09:30Z	3	stage-start	wave3	LK-2b
