@@ -4,7 +4,7 @@ Issue: #1037 · Packet: docs/blueprints/halo/features/history-files.md
 Run: act-1a13e9a2037-pkqb · Session: claude/history-files-lead-j2c6lo · Started: 2026-10-15T08:08Z
 Stage: 4 round 1
 Base: bcf5a099960d2ceb59394cdd38c0b83c7640b7cc
-Next: wait for fix-batch wf_e5588495-b46 (r1-b3, feature-done) to merge; round 2 on the dev CI run containing #1083, #1084 and r1-b3
+Next: find the dev CI run whose head contains 910dafa (#1089 feature-done, r1-b3) and run round 2 on it (same 5 lenses)
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -25,7 +25,7 @@ Next: wait for fix-batch wf_e5588495-b46 (r1-b3, feature-done) to merge; round 2
 ## Rounds
 | round | CI run | CI | audit vs baseline | lenses | confirmed | fixed by | clean |
 |---|---|---|---|---|---|---|---|
-| 1 | 38713326810 | red: H-J8 (menu help tag unreadable), H-J10/H-J11 (halo.file value reads empty, #262); others not ours | at/under baseline (contrast 1, identifier 1, offscreen 4) | clarity, journey, design, layout, controls | 8 (4 major, 4 minor) | r1-b1, r1-b2, r1-b3 (next) | no |
+| 1 | 38713326810 | red: H-J8 (menu help tag unreadable), H-J10/H-J11 (halo.file value reads empty, #262); others not ours | at/under baseline (contrast 1, identifier 1, offscreen 4) | clarity, journey, design, layout, controls | 8 (4 major, 4 minor; 1 major + 2 minor filed as #1081, #1082) | #1084, #1083, #1089 | no |
 
 ## Decisions
 - Brief named base 1dcd1a6; origin/dev had moved one commit (92db316, a SuiteUI perf test, #1039) that is a descendant. Used 92db316.

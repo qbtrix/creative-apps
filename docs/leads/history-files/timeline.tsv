@@ -36,3 +36,4 @@ utc	stage	event	ref	note
 2026-10-15T10:25Z	4	pr-merged	#1083	r1-b2 H-J8 help tag
 2026-10-15T10:25Z	4	pr-merged	#1084	r1-b1 halo.file label
 2026-10-15T10:25Z	4	stage-start	r1-b3	critic majors, feature-done
+2026-10-15T10:34Z	4	pr-merged	#1089	r1-b3 feature-done
