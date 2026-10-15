@@ -20,8 +20,8 @@ Next: wait for D-10 and the perf fix; read the macOS run containing #1230; rerun
 | D-8 | 5 | Save status in top bar, edited dot, Saving…/Opening… notes; snapshots | A/PhotoTopBar.swift, A/PhotoWindow+File.swift, ST/PhotoDocumentsSnapshots.swift | PhotoDocumentsSnapshots | #1228 | merged |
 | D-9 | 6 | PhotoAutosave + wiring | A/PhotoAutosave.swift, A/PhotoWindow+File.swift, ST/PhotoAutosaveTests.swift | PhotoAutosaveTests | #1230 | merged |
 | D-10 | 7 | App delegate: Open Recent/Finder opens, unsaved prompt on close/quit | A/PhotoApp.swift, A/PhotoWindow+File.swift, ST/PhotoUnsavedPromptTests.swift | PhotoUnsavedPromptTests | – | building |
-| D-11 | 8 | Journeys PJ-1, PJ-1b, PJ-2, PJ-4 | UT/PhotoJourneyTests+Documents.swift | macOS run | – | waits D-10, photo-journey-kit (#1073) |
-| D-12 | 8 | Journeys PJ-3, PJ-P3 (feature-done if last) | UT/PhotoJourneyTests+Recovery.swift, UT/PhotoJourneyTests+PerfDocuments.swift | macOS run | – | waits D-10, photo-journey-kit (#1073) |
+| D-11 | 8 | Journeys PJ-1, PJ-1b, PJ-2, PJ-4 | UT/PhotoJourneyTests+Documents.swift | macOS run | – | waits D-10 |
+| D-12 | 8 | Journeys PJ-3, PJ-P3 (feature-done if last) | UT/PhotoJourneyTests+Recovery.swift, UT/PhotoJourneyTests+PerfDocuments.swift | macOS run | – | waits D-10 |
 
 Waves (packet's Build waves, checked against dev at 00e546a):
 - Wave 1: D-1, D-3 — independent of each other.
@@ -45,7 +45,7 @@ Waves (packet's Build waves, checked against dev at 00e546a):
 - Kept the packet's waves unchanged: every listed wait is a real code dependency (packet "Links").
 
 ## Open
-- photo-journey-kit (#1073) is still building; D-11 and D-12 wait on it.
+- photo-journey-kit (#1073) closed (#1199); D-11 and D-12 wait only on D-10.
 - D-2 notes: layer-<i> counts every layer bottom-up from 1; maxOpenPixels (16 MP) is checked after PNG decode.
 - QB-L12 gap: PhotoPackageIO.read returns a PhotoPackage and openDocument decodes PNGs on main; D-7 must decode off main (or a fix adds a Model openDocument(snapshot:)).
 - D-7 may add openDocument(_ snapshot:name:) to PhotoDocumentFile.swift so the window decodes off main (QB-L12); same line, D-3's merged file.
