@@ -66,3 +66,5 @@ utc	stage	event	ref	note
 2026-10-15T07:52Z	5	stopped	#799	all work merged; waiting on a green dev run (blocked by other lines); near the 8 h limit
 2026-10-15T08:23Z	5	stage-start	resume	Belt nudge; watching dev CI 38704216123
 2026-10-15T08:23Z	5	ci-run	38700713285	red on SuiteUI FrameProbeTests.summaryWithinBudget (p95 24 ms vs 20); no Flare failure
+2026-10-15T08:38Z	5	ci-run	38704216123	Flare green; red on Halo, Photo and Suite journeys
+2026-10-15T08:38Z	5	stopped	#799	8 h limit reached; all work merged; done waits on a green dev run
