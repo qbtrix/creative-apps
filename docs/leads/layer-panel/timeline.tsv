@@ -32,3 +32,4 @@ utc	stage	event	ref	note
 2026-10-15T12:34Z	4	heartbeat	#763	waiting on the playback test compile fix (#1097)
 2026-10-15T12:35Z	4	ci-run	38734211999	playback fixed (#1136); HaloViewerFidelityTests (#1125) fails, journeys skipped; reported on #763
 2026-10-15T12:46Z	4	ci-run	38734664378	still HaloViewerFidelityTests (#1125); journeys skipped; not counted
+2026-10-15T13:17Z	4	ci-run	38738075349	fidelity test (#1125) plus playback driver timeouts (#1097) block journeys; resumed after Belt stall nudge

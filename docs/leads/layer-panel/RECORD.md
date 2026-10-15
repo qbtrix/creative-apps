@@ -2,9 +2,9 @@
 
 Issue: #1038 · Packet: docs/blueprints/halo/features/layer-panel.md
 Run: act-1a13e9a2019-lau7 · Session: session_01NGHcmJbQja1RSYvcMZR3TD · Started: 2026-10-15T08:07Z
-Stage: 4 round 2
+Stage: 4 round 3 (waiting on dev CI)
 Base: e8de2ff5d8ed3515af321c805cc2bebab17050a4
-Next: wait for the next dev CI run after 38726261412 (the Library build break must be fixed first); it is round 3: H-J9 steps 3-8, audit, five-lens panel
+Next: wait for a dev run whose macOS job reaches scripts/ui-test (blocked on #763: HaloViewerFidelityTests #1125, HaloPlaybackDriverTests timeouts #1097); that run is round 3: H-J9 steps 3-8, audit, five-lens panel. A background loop pushes a heartbeat every 15 min.
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -27,6 +27,7 @@ Journeys: H-J9 (8 steps, packet "Journey steps"). Quality bars: QB-F1 no dead co
 | (3) | 38731305776 (7f61259) | red, not judged: Library builds now; swift test fails to compile Tests/AppSnapshotTests/HaloPlaybackDriverTests.swift:18 (circular reference, viewer-playback's); journeys skipped | – | – | – | – | not counted |
 | (3) | 38732179619 (9af4454) | red, not judged: same playback test compile error (#1097); reported on #763 with the likely fix | – | – | – | – | not counted |
 | (3) | 38734211999 (35a875b) | red, not judged: #1136 fixed the playback test; HaloViewerFidelityTests.keyedFrame6 (#1125, HF-1) differs by 40000 px, so scripts/ci fails and journeys skip; reported on #763 | – | – | – | – | not counted |
+| (3) | 38734664378, 38737961079, 38738075349 (e6e46c2, 79bd068) | red, not judged: HaloViewerFidelityTests.keyedFrame6 (#1125) and, from 79bd068, 5 HaloPlaybackDriverTests time out at 60 s (#1097); journeys skipped | – | – | – | – | not counted |
 
 ## Decisions
 - Identifiers keep W0's shipped `halo.layer.*` prefix (`halo.layer.row.<id>`, `halo.layer.empty`, `halo.layer.new`; W0's journey reads `halo.layer.row.comp-1-layer-2`), so the packet's `halo.layers.list/row/refusal/empty` become `halo.layer.list/row/refusal/empty`.
