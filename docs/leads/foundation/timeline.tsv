@@ -32,3 +32,12 @@ utc	stage	event	ref	note
 2026-10-15T01:25Z	-	heartbeat	-	waiting on builders
 2026-10-15T01:43Z	-	heartbeat	-	waiting on builders
 2026-10-15T02:01Z	-	heartbeat	-	waiting on builders
+2026-10-15T02:10Z	3	pr-merged	#894	FD-5
+2026-10-15T02:10Z	3	pr-merged	#895	FD-6
+2026-10-15T02:10Z	3	pr-merged	#897	FD-7
+2026-10-15T02:10Z	3	pr-merged	#898	FD-8
+2026-10-15T02:10Z	3	pr-merged	#899	FD-9
+2026-10-15T02:10Z	3	pr-merged	#903	FD-10a
+2026-10-15T02:10Z	3	pr-merged	#904	FD-10b
+2026-10-15T02:10Z	3	pr-merged	#893	FD-13a
+2026-10-15T02:10Z	3	stage-start	wave 10	FD-11, FD-12, FD-13b→14
