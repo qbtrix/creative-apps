@@ -6,6 +6,12 @@ Pen, box move, scale and rotate, path edit, delete, duplicate, copy and paste)
 run on FlareCore instead of the fakes.
 **Line:** `line:flare` · **Wave:** 2 (`waves.md`) · **Lead branch:** `lead/live-stage`
 
+**Status:** built on `dev`. ST-1 #916, ST-2 #923, ST-3 #915, ST-4 #920,
+ST-5 #929, ST-6 #917, ST-7 #918, ST-8 #925, ST-9 #931, ST-10 #934, and the
+Anatomy fixes #945, #946 (round 1) and #957, #958, #960 (round 2); round 3
+was clean. Feature issue #798. Nothing is wired into the window yet; IN-1
+(#397) swaps the live types into `FlareServices.live`.
+
 **Covers:** #357 (LM-2), #740 (LM-3b). #357 closes with ST-5, #740 with ST-9.
 
 **Depends on:** qbtrix/creative-core#213 (LC-1 render list),
@@ -13,8 +19,8 @@ qbtrix/creative-core#214 (LC-2 topmost hit and marquee),
 qbtrix/creative-core#215 (LC-3 world bounds), qbtrix/creative-core#182 (LC-4
 path builders), qbtrix/creative-core#173 (LC-6 instance commands),
 qbtrix/creative-core#216 (LC-7 `SetShapeStroke`, `SetShapePath`,
-`DuplicateLayer`; it follows LC-6). None had landed on creative-core `main`
-cfad97f (2026-10-14). The lead's first stage checks each one; a task whose
+`DuplicateLayer`; it follows LC-6). All are on creative-core `main`
+98be31a. The lead's first stage checks each one; a task whose
 engine issue is still open waits, and the others go ahead (ST-3 needs only
 #214, ST-6 only #182).
 
