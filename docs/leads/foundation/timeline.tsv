@@ -112,3 +112,4 @@ utc	stage	event	ref	note
 2026-10-15T07:11Z	4	round-findings	round 4	r4 fixer + last panel
 2026-10-15T07:15Z	-	heartbeat	-	waiting on builders
 2026-10-15T07:15Z	4	round-findings	round 4	panel 9 (2 major = #1007 regression, in r4 fix; 7 minor → gap)
+2026-10-15T07:16Z	4	round-findings	round 4	gap issues #1015-#1022 filed
