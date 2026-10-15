@@ -33,3 +33,5 @@ utc	stage	event	ref	note
 2026-10-15T18:07Z	4	ci-run	38782884668	macOS on f9846c9 in progress (first compile of D-6/D-7)
 2026-10-15T18:20Z	3	pr-opened	#1228	D-8 save status UI
 2026-10-15T18:20Z	4	ci-run	38782884668	macOS builds; red on PhotoCompositeCostTests (not ours)
+2026-10-15T18:20Z	3	pr-merged	#1228	D-8
+2026-10-15T18:20Z	3	stage-start	wave 6	D-9 on 215e399
