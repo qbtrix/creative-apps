@@ -49,3 +49,4 @@ utc	stage	event	ref	note
 2026-10-15T04:17Z	4	pr-opened	#970	r4-b1 feature-done
 2026-10-15T04:17Z	4	stage-end	rounds	4 rounds done; gaps #967 #968 #971
 2026-10-15T04:17Z	5	stage-start	finish	waiting on #970 and its dev CI run
+2026-10-15T04:35Z	5	heartbeat	ci	waiting
