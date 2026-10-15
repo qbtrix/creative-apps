@@ -4,7 +4,7 @@ Issue: #777 · Packet: docs/blueprints/halo/features/foundation.md (on branch `d
 Run: act-1a13b78bcdb-qu60 · Session: session_01Dc9GDxc9HxLtv9XMcFgSWh · Started: 2026-10-14T17:33Z
 Stage: 4 round 2 (fix batch r2 building; critic panel running)
 Base: 52928d1dbbdd72b849f7fdb6363991f35b1adbeb
-Next: collect the round 2 critic panel (clarity, layout, controls, design) and the r2 fixer PR (halo.inspector container id, layout 880 selection, toolbar halo.composition.new); then round 3 on the CI run containing them
+Next: wait for the #962 revert to merge, then re-judge round 2 on the next dev CI run. The r2 fixer only fixes the toolbar halo.composition.new lookup if it is Halo's own fault; the critic panel's findings are judged against that new run
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -33,7 +33,7 @@ Next: collect the round 2 critic panel (clarity, layout, controls, design) and t
 ## Rounds
 | round | CI run | CI | audit vs baseline | lenses | confirmed | fixed by | clean |
 |---|---|---|---|---|---|---|---|
-| 2 | 38679533707 (54e16aa) | red: H-J0, testScrubTheTimeline, testEveryMenuOpens pass; H-J1 (halo.inspector not found after Create), H-J13 (toolbar halo.composition.new not found), testLayoutAtWidths (no layer selected at 880) fail; -HaloWindowSize now sticks | halo offscreen 14 > 8 (#933); contrast 1 ≤ 2; identifier 2 ≤ 10; unnamed 0 ≤ 5 | clarity, layout, controls, design | 3 journey + panel pending | r2 fixer | no |
+| 2 | 38679533707 (54e16aa) | red: H-J0, testScrubTheTimeline, testEveryMenuOpens pass; H-J1 (halo.inspector not found after Create), H-J13 (toolbar halo.composition.new not found), testLayoutAtWidths (no layer selected at 880) fail; -HaloWindowSize now sticks | halo offscreen 14 > 8 (#933); contrast 1 ≤ 2; identifier 2 ≤ 10; unnamed 0 ≤ 5 | clarity, layout, controls, design | 3 journey (2 of them caused by SuiteUI #962, being reverted) + panel pending | r2 fixer (toolbar id only) | re-judge |
 | 1 | 38675308731 (1025fcc) | red: Halo journeys H-J0, H-J1, H-J13, testLayoutAtWidths, testScrubTheTimeline fail; testEveryMenuOpens passes | halo offscreen 14 > 8 (SuiteUI #933 split-view overflow: sidebar rows x -28/-8, inspector to x 1036 in a 12–1012 window); identifier 1 (system Hide Sidebar) < 10; unnamed 0 < 5 | CI + audit + screens (panel not run: blockers already confirmed by the journeys) | 5: layer row click doesn't select (major); H-J0 query misses EmptyStateView title; H-J1 no problem line for abc; -HaloWindowSize ignored (1000 not 880); offscreen over baseline (blocker, SuiteUI #933) | #961 (4); #933 (offscreen) | no |
 | 1a | 38673821944 (3af1c0e) | red: macOS `swift test` failed on SuiteUITests.rowBodyAndItsTogglesCarryNoDoubleClickGesture (not foundation: #938's ids, fixed by #944); UI journeys skipped | not measured | – | – | – | no |
 
@@ -68,6 +68,8 @@ Next: collect the round 2 critic panel (clarity, layout, controls, design) and t
 
 - Round 1 finding offscreen 14 > 8 is SuiteUI #933 (SuiteWindow owns the column widths; a Halo PR can't edit SuiteUI). Measurements posted on #933 and the plan on #777; the baseline is not raised.
 - Artifacts download through the proxy with plain curl on api.github.com/.../actions/artifacts/<id>/zip (gh is unauthenticated here).
+
+- Supervisor: SuiteUI #962 (inspector moved outside the split view) broke H-J1's halo.inspector lookup and the 880 layout selection in run 38679533707; it is being reverted, so round 2 is re-judged on the next run and only Halo-owned faults are fixed.
 
 ## Open
 - SuiteUI #933: split view wider than the window; blocks halo offscreen ≤ 8 and so H-J13 / testScrubTheTimeline.
