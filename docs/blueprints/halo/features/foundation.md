@@ -8,11 +8,15 @@ per area, and ships launch arguments and fixtures so the four W1 leads can
 build side by side without touching a shared file.
 **Line:** `line:halo` · **Wave:** W0 (`waves.md`) · **Lead branch:** `lead/foundation`
 
-**Status (2026-10-14):** the lead (`lead/foundation`) is building. FD-19
-merged as #784 (closing #149) and FD-1 as #785; FD-1 left the error types
-(`HaloEditError`, `HaloRefusal`, `HaloFileError`) to FD-2. Rows changed
-after the lead copied its plan are marked *(revised)*; the lead re-reads
-those rows before starting each one.
+**Status (2026-10-15):** built on `dev`. All 19 tasks merged (FD-1 to FD-19,
+with FD-10 and FD-13 each split in two): #784, #785, #794, #795, #796, #893,
+#894, #895, #897, #898, #899, #903, #904, #924, #926, #927, #930, #935, #937,
+#940, #941. The Anatomy
+loop ran four rounds (#961, #982 to #984, #996, #1007 to #1009, #1023). The
+halo audit reads offscreen 0, contrast 0, identifier 1 and unnamed 0, at or
+under its baseline. Open after the round budget: `gap` issues #1015 to #1018
+and #1020 to #1022, and SuiteUI `needs-ui` #976, #981 and #1014. The lead's
+record is `docs/leads/foundation/RECORD.md` on `lead/foundation`.
 
 **Covers:** #286, #290, #149. Each closes through the task PR named in the
 table below. The rest of the tasks have no issue of their own; they close
