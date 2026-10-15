@@ -47,3 +47,4 @@ utc	stage	event	ref	note
 2026-10-15T12:50Z	4	ci-run	38734211999	red: HaloViewerFidelityTests.keyedFrame6 only; snapshots ok; journeys not run
 2026-10-15T12:52Z	4	heartbeat	round1	fixer on keyedFrame6; critic panel on snapshots
 2026-10-15T13:00Z	4	round-findings	round1	1 major (narrow clip), minors; fixer r1-narrow; #1146 filed
+2026-10-15T13:05Z	4	round-findings	round1	keyedFrame6 = viewer-playback canvas opacity in sRGB; reported on #763

@@ -70,6 +70,7 @@ Waves as in the packet. Independent per wave: W1 LK-1; W2 LK-2a; W3 LK-2b; W4 LK
 - Round 1 minors not fixed: refusal text "Rotation needs a number." kept (packet LK-5 acceptance fixes that text); drag hint caption/ghost key (new behavior beyond the packet; noted for core-loop); SuiteUI tick/marker → #1146.
 
 ## Open
+- keyedFrame6 (HF-1, #1125) root cause: HaloViewerCanvas.swift:73 opacity blended in sRGB under ImageRenderer vs linear render; viewer-playback's code. Posted on #763; not ours to fix. Blocks the journeys until fixed.
 - #1146 (needs-ui): InspectorSliderRow ticks under text, marker outside row at top of range, label/value at narrow widths.
 - CI on the feature-done head 9af4454: swift build (all HaloApp keys views) passes on macOS; swift test stops compiling AppSnapshotTests at viewer-playback's HaloPlaybackDriverTests.swift:18 (#1097). Reported on #763 by others; not ours to fix. Journeys and audit wait on it.
 - dev-red #763: macOS build fails in Sources/LibraryApp/LibraryInspector.swift:14-15 (mutating member on let model), not this feature; it hides any Halo compile error until fixed. Run 38726261412.
