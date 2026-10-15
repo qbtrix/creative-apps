@@ -2,9 +2,9 @@
 
 Issue: #1076 · Packet: docs/blueprints/photo/features/photo-crop.md
 Run: act-1a13f70ddc3-29wr · Session: lead session (claude/photo-crop-feature-lead-e7vpmg) · Started: 2026-10-15T12:03Z
-Stage: 5 finish (wave 4 still waits on photo-journey-kit #1073)
+Stage: 5 finish (feature-done merged; waiting on a green dev CI run)
 Base: e6fdf149c0a0a17fd2a23bdbe687f56d4591ae72
-Next: the feature-done run 38776323445 is red at swift build in LiveRecovery.swift (#1210, photo-documents, reported on #763); wait for the first green dev run containing e6fdf14; green -> Belt-Contact-Sheet on #1076; red -> fix if budget allows, else gap issues; then the feature-done CI run, contact sheet on #1076. Base bd1b046. Old note: when #1073 lands when #1073 closes (UITests/PhotoJourneyTests+Fixtures.swift on dev), build CP-5 and CP-7 together; meanwhile read the first dev CI run containing 469520e (#1151) for round-1 material.
+Next: find the first completed dev CI run whose head contains e6fdf14 and #1229 (d912409). Green: comment `Belt-Contact-Sheet: <run link>` on #1076 with one line per journey (PJ-8, PJ-P1, PJ-P2, V1-V12), the PB-8 number and Photo's audit counts, then Stage: done. Red in PJ-8/PJ-P1/PJ-P2 or the crop audit: the round budget is spent, so file gap issues and say so in the comment. Red elsewhere: report on #763 and wait.
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
