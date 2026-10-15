@@ -84,3 +84,7 @@ utc	stage	event	ref	note
 2026-10-15T04:47Z	4	pr-opened	#982	round 2 batch B timeline geometry
 2026-10-15T04:48Z	4	pr-opened	#983	round 2 batch C inspector
 2026-10-15T04:49Z	4	pr-opened	#984	round 2 batch A clarity
+2026-10-15T04:50Z	4	pr-merged	#982	batch B
+2026-10-15T04:50Z	4	pr-merged	#983	batch C
+2026-10-15T04:50Z	4	pr-merged	#984	batch A
+2026-10-15T04:50Z	4	stage-start	round 3	waiting on CI for f2ef824

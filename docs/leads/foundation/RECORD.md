@@ -2,7 +2,7 @@
 
 Issue: #777 · Packet: docs/blueprints/halo/features/foundation.md (on branch `docs/halo-feature-packets` until its PR merges)
 Run: act-1a13b78bcdb-qu60 · Session: session_01Dc9GDxc9HxLtv9XMcFgSWh · Started: 2026-10-14T17:33Z
-Stage: 4 round 2 (fix PRs #982, #983, #984 on the lane)
+Stage: 4 round 3 (waiting on the dev CI run containing f2ef824: #975 revert, #982, #983, #984)
 Base: 52928d1dbbdd72b849f7fdb6363991f35b1adbeb
 Next: when #982–#984 and the #962 revert are on dev, run round 3 on the first completed dev CI run containing them; same lenses (clarity, layout, controls, design). Ruler "Frames" tooltip still open (A skipped it: B's file)
 
