@@ -20,7 +20,7 @@ Journeys: H-J9 (8 steps, packet "Journey steps"). Quality bars: QB-F1 no dead co
 | round | CI run | CI | audit vs baseline | lenses | confirmed | fixed by | clean |
 |---|---|---|---|---|---|---|---|
 | 1 | 38708263577 (f5bd765) | red: macOS scripts/ci, HaloLayerListTests (4 expectations: List insets rows, icon at 21 pt, tint off both edges); journeys skipped | not run | – (blocker found before the panel) | list inset (LP-3) | #1058 | no |
-| 1b | 38711122431 (2fc9b59) | red: H-J9 step 3, double-click opens no rename field (row is a Button); W0 Halo journeys pass but testLayoutAtWidths (#1040); SuiteUI gallery (#763) | halo identifier 1 (10), contrast 0 (2), offscreen 0 (8), unnamed 0 (5): under | clarity, journey, design, layout, controls | row rename (LP-3) + panel pending | layer-panel/r1-row-rename | no |
+| 1b | 38711122431 (2fc9b59) | red: H-J9 step 3, double-click opens no rename field (row is a Button); W0 Halo journeys pass but testLayoutAtWidths (#1040); SuiteUI gallery (#763) | halo identifier 1 (10), contrast 0 (2), offscreen 0 (8), unnamed 0 (5): under | clarity, journey, design, layout, controls | row rename (LP-3); panel 11 confirmed (4 major): selected icon 2.5:1 in Dark, journey shots under a fading Edit menu, row help, null help, row font, empty inset (ours, batch 3); (#38) caption, inspector scroll (not ours); back to List (rejected) | layer-panel/r1-row-rename, batch 3 after it | no |
 
 ## Decisions
 - Identifiers keep W0's shipped `halo.layer.*` prefix (`halo.layer.row.<id>`, `halo.layer.empty`, `halo.layer.new`; W0's journey reads `halo.layer.row.comp-1-layer-2`), so the packet's `halo.layers.list/row/refusal/empty` become `halo.layer.list/row/refusal/empty`.
@@ -36,6 +36,10 @@ Journeys: H-J9 (8 steps, packet "Journey steps"). Quality bars: QB-F1 no dead co
 - `feature-done` moves from LP-4 to the feature's final PR (an Anatomy fix or the packet status line, which closes #770): LP-2/LP-3's SwiftUI first compiles on the dev macOS run, and any fix must land before the feature-done CI run.
 - LP-3 (#1047): a refused layer rename also shows in W0's viewer caption (`halo.refusal`), since HaloViewer shows any non-inspector refusal; candidate for the critic round.
 - Round 1 fix: drop the List (macOS insets rows even with zero row insets) and reorder with `.draggable`/`.dropDestination` on W0's stack, which passed HaloLayerListTests; dropping on row i moves to index i.
+- Rejected round 1 panel finding "go back to a system List(selection:)": the macOS run proved List insets rows (38708263577); W0's stack is what passes HaloLayerListTests.
+- Skipped minor: re-hosting the halo-layer-list snapshots inside an InspectorSection (W0's snapshot shape; HaloLayerListTests draws the list alone too).
 
 ## Open
+- Panel finding, not this feature's files: the selected layer's inspector shows "Properties arrive with the layer inspector (#38)." (HaloLayerInspector.swift, W0's placeholder that layer-keys #38 replaces whole). File as gap at finish if still on dev.
+- Panel finding, not this feature's files: the inspector column (HaloCompositionInspector.swift) may not scroll, so many layers would fall off the window. File as gap at finish.
 - dev is red before this feature (#763, run 38704216123 on 92db316): Halo `testLayoutAtWidths` (timeline track under the sidebar at 880 pt; fixed by SuiteUI #1040, waiting on a human Mac-Check) and SuiteUI `testGalleryOpensEveryPage` (Hide Sidebar identifier). Neither is in this feature's files; the done check's green dev run needs #1040 merged.
