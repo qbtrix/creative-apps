@@ -93,7 +93,9 @@ public struct TimelineStrip<ID: Hashable & Sendable>: View {
                 }
                 .buttonStyle(.plain)
                 .frame(height: SuiteSize.timelineLane)
-                .background(track.isSelected ? SuiteColor.accent.opacity(0.15) : Color.clear)
+                // `ignoresSafeAreaEdges: []`: a color background ignores every safe-area edge by default,
+                // so under a floating sidebar the selected row reached 208 pt left of the strip (#1034).
+                .background(track.isSelected ? SuiteColor.accent.opacity(0.15) : Color.clear, ignoresSafeAreaEdges: [])
                 .accessibilityAddTraits(track.isSelected ? .isSelected : [])
             }
         }
@@ -190,7 +192,7 @@ public struct TimelineStrip<ID: Hashable & Sendable>: View {
             context.stroke(rule, with: .color(SuiteColor.separator), lineWidth: 1)
         }
         .frame(height: SuiteSize.timelineLane)
-        .background(track.isSelected ? SuiteColor.accent.opacity(0.08) : Color.clear)
+        .background(track.isSelected ? SuiteColor.accent.opacity(0.08) : Color.clear, ignoresSafeAreaEdges: [])
         .contentShape(Rectangle())
         .onTapGesture { location in
             let x = Double(location.x - timelineInset)

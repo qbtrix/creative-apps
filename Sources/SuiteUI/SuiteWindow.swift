@@ -16,7 +16,8 @@
 // whole body is the SuiteGallery instead (SuiteGallery.swift); the internal
 // `galleryPage:` init skips that check, so the gallery's `window` page never
 // recurses. The window applies `.suiteProbes()`; its toolbar buttons carry
-// identifiers (`suite.inspectorToggle`, and each action's `identifier`).
+// identifiers (`suite.sidebarToggle`, which replaces the system's sidebar toggle,
+// `suite.inspectorToggle`, and each action's `identifier`).
 import SwiftUI
 
 public struct SuiteWindow<Content: View, Inspector: View>: View {
@@ -33,6 +34,7 @@ public struct SuiteWindow<Content: View, Inspector: View>: View {
     /// The gallery this window shows instead of the app; nil shows the app.
     let galleryRequest: GalleryRequest?
     @State private var showsInspector = true
+    @State private var columns: NavigationSplitViewVisibility = .all
 
     /// `title` names the open document (or the app when none is open).
     /// `actions` become the window's trailing toolbar items. `onToggle` gets a
@@ -104,7 +106,7 @@ public struct SuiteWindow<Content: View, Inspector: View>: View {
     }
 
     private var splitView: some View {
-        NavigationSplitView {
+        NavigationSplitView(columnVisibility: $columns) {
             List(selection: Binding(get: { selection }, set: { id in if let id { onSelect(id) } })) {
                 ForEach(sections) { section in
                     Section {
@@ -117,6 +119,9 @@ public struct SuiteWindow<Content: View, Inspector: View>: View {
             }
             .listStyle(.sidebar)
             .accessibilityIdentifier("suite.sidebar")
+            // The system's sidebar toggle has no accessibility identifier and can't be given one
+            // (the app audit, #262); the toolbar's own `suite.sidebarToggle` replaces it.
+            .toolbar(removing: .sidebarToggle)
             .navigationSplitViewColumnWidth(
                 min: SuiteSize.sidebarWidth.min, ideal: SuiteSize.sidebarWidth.ideal, max: SuiteSize.sidebarWidth.max)
         } detail: {
@@ -145,6 +150,16 @@ public struct SuiteWindow<Content: View, Inspector: View>: View {
         }
         .navigationTitle(title)
         .toolbar {
+            ToolbarItem(placement: .navigation) {
+                let hidden = columns == .detailOnly
+                Button {
+                    columns = hidden ? .all : .detailOnly
+                } label: {
+                    Label(hidden ? "Show Sidebar" : "Hide Sidebar", systemImage: "sidebar.leading")
+                }
+                .help(hidden ? "Show Sidebar" : "Hide Sidebar")
+                .suiteControl(id: "suite.sidebarToggle", enabled: true, reason: nil)
+            }
             ToolbarItemGroup(placement: .primaryAction) {
                 ForEach(actions) { action in
                     Button(action: action.perform) {
