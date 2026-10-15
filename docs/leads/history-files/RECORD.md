@@ -26,7 +26,7 @@ Next: wait for fix-batch wf_949106a3-bad (r2-b1, feature-done) and critic-panel 
 | round | CI run | CI | audit vs baseline | lenses | confirmed | fixed by | clean |
 |---|---|---|---|---|---|---|---|
 | 1 | 38713326810 | red: H-J8 (menu help tag unreadable), H-J10/H-J11 (halo.file value reads empty, #262); others not ours | at/under baseline (contrast 1, identifier 1, offscreen 4) | clarity, journey, design, layout, controls | 8 (4 major, 4 minor; 1 major + 2 minor filed as #1081, #1082) | #1084, #1083, #1089 | no |
-| 2 | 38721434364 | red: H-J11 passes; H-J8 width check (inspector 192 < 200, SuiteUI), H-J10 sidebar click; others not ours | under baseline (offscreen 0) | same 5 | pending | r2-b1 | no |
+| 2 | 38721434364 | red: H-J11 passes; H-J8 width check (inspector 192 < 200, SuiteUI), H-J10 sidebar click; others not ours | under baseline (offscreen 0) | same 5 | 7 (2 major, 5 minor) | r2-b1; r2-b2 next | no |
 
 ## Decisions
 - Brief named base 1dcd1a6; origin/dev had moved one commit (92db316, a SuiteUI perf test, #1039) that is a descendant. Used 92db316.
@@ -46,6 +46,7 @@ Next: wait for fix-batch wf_949106a3-bad (r2-b1, feature-done) and critic-panel 
 - Round 1 critic: in-scope majors (unsaved state not visible; failed save should read "Not saved" without an edit; journeys launch 1280 wide on a 1024 display) + minor (menu fade in shots) go to batch r1-b3 after r1-b1/b2 merge (same files). Packet contradiction on "Not saved": took the Screens table and HF-9 proof (error first) over the pseudocode.
 - Out-of-scope W0-file findings filed as gap issues: #1081 (File menu drops New Window), #1082 (open-error wording, menu symbols).
 - r1-b3: didFailSave also sets unsaved, so a failed save reads "Not saved" with no edit while a failed open keeps its status; it carries feature-done again because #1068's run was red.
+- Round 2 critic: in-scope -> r2-b2 after r2-b1 merges: decoder damage reason in words (major; validation reasons keep ids, the packet names them), unsaved-alert Save on an untitled project (major), journeys check the packet readouts "1 layer" / "2000 layers" (minor). Two W0 message texts added to #1082. Progress panel centring (minor) left as is.
 
 ## Open
 - #1081, #1082 gap (W0 files)
