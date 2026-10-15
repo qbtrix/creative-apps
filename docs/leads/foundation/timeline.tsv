@@ -75,3 +75,5 @@ utc	stage	event	ref	note
 2026-10-15T03:58Z	-	heartbeat	-	waiting on builders
 2026-10-15T04:16Z	-	heartbeat	-	waiting on builders
 2026-10-15T04:20Z	-	heartbeat	-	waiting on builders
+2026-10-15T04:32Z	4	ci-run	38679533707	red: 3 Halo journeys + offscreen (#933)
+2026-10-15T04:32Z	4	round-findings	round 2	fixer + critic panel started

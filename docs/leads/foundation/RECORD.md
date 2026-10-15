@@ -2,9 +2,9 @@
 
 Issue: #777 · Packet: docs/blueprints/halo/features/foundation.md (on branch `docs/halo-feature-packets` until its PR merges)
 Run: act-1a13b78bcdb-qu60 · Session: session_01Dc9GDxc9HxLtv9XMcFgSWh · Started: 2026-10-14T17:33Z
-Stage: 4 round 2 (waiting on the dev CI run that contains #961, 4cc8a90)
+Stage: 4 round 2 (fix batch r2 building; critic panel running)
 Base: 52928d1dbbdd72b849f7fdb6363991f35b1adbeb
-Next: once #961 merges (it touches Sources/HaloApp and UITests, so the lane dispatches CI), run round 2 on the dev CI run that contains it: journeys, audit-halo-*, screens, critic panel incl. clarity lens. offscreen waits on SuiteUI #933
+Next: collect the round 2 critic panel (clarity, layout, controls, design) and the r2 fixer PR (halo.inspector container id, layout 880 selection, toolbar halo.composition.new); then round 3 on the CI run containing them
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -33,6 +33,7 @@ Next: once #961 merges (it touches Sources/HaloApp and UITests, so the lane disp
 ## Rounds
 | round | CI run | CI | audit vs baseline | lenses | confirmed | fixed by | clean |
 |---|---|---|---|---|---|---|---|
+| 2 | 38679533707 (54e16aa) | red: H-J0, testScrubTheTimeline, testEveryMenuOpens pass; H-J1 (halo.inspector not found after Create), H-J13 (toolbar halo.composition.new not found), testLayoutAtWidths (no layer selected at 880) fail; -HaloWindowSize now sticks | halo offscreen 14 > 8 (#933); contrast 1 ≤ 2; identifier 2 ≤ 10; unnamed 0 ≤ 5 | clarity, layout, controls, design | 3 journey + panel pending | r2 fixer | no |
 | 1 | 38675308731 (1025fcc) | red: Halo journeys H-J0, H-J1, H-J13, testLayoutAtWidths, testScrubTheTimeline fail; testEveryMenuOpens passes | halo offscreen 14 > 8 (SuiteUI #933 split-view overflow: sidebar rows x -28/-8, inspector to x 1036 in a 12–1012 window); identifier 1 (system Hide Sidebar) < 10; unnamed 0 < 5 | CI + audit + screens (panel not run: blockers already confirmed by the journeys) | 5: layer row click doesn't select (major); H-J0 query misses EmptyStateView title; H-J1 no problem line for abc; -HaloWindowSize ignored (1000 not 880); offscreen over baseline (blocker, SuiteUI #933) | #961 (4); #933 (offscreen) | no |
 | 1a | 38673821944 (3af1c0e) | red: macOS `swift test` failed on SuiteUITests.rowBodyAndItsTogglesCarryNoDoubleClickGesture (not foundation: #938's ids, fixed by #944); UI journeys skipped | not measured | – | – | – | no |
 
