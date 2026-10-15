@@ -64,3 +64,4 @@ utc	stage	event	ref	note
 2026-10-15T19:17Z	5	heartbeat	#1076	status comment posted near 8 h; no dev CI run since #1229
 2026-10-15T19:43Z	5	ci-run	38792928305	started, head c93a7f8 contains feature-done and both fixes
 2026-10-15T20:05Z	5	ci-run	38792928305	journeys ran: PJ-P1, PJ-P2 pass; PJ-8 red (field value lost by combined a11y row); fixer r5-b1
+2026-10-15T20:12Z	5	pr-opened	#1238	r5-b1 crop field rows keep their value (PJ-8)
