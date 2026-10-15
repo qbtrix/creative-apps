@@ -32,3 +32,4 @@ utc	stage	event	ref	note
 2026-10-15T09:59Z	4	heartbeat	38713326810	macOS job still running
 2026-10-15T10:17Z	4	ci-run	38713326810	red: H-J8, H-J10, H-J11 (XCUITest value/help reads)
 2026-10-15T10:17Z	4	round-findings	round 1	fix batch r1-b1 r1-b2 + critic panel running
+2026-10-15T10:21Z	4	round-findings	round 1	critic: 8 confirmed, 4 major; gaps #1081 #1082

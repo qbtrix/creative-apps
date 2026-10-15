@@ -25,7 +25,7 @@ Next: wait for fix-batch wf_c714e674-222 (r1-b1, r1-b2) PRs and critic-panel wf_
 ## Rounds
 | round | CI run | CI | audit vs baseline | lenses | confirmed | fixed by | clean |
 |---|---|---|---|---|---|---|---|
-| 1 | 38713326810 | red: H-J8 (menu help tag unreadable), H-J10/H-J11 (halo.file value reads empty, #262); others not ours | at/under baseline (contrast 1, identifier 1, offscreen 4) | clarity, journey, design, layout, controls | pending | r1-b1, r1-b2 | no |
+| 1 | 38713326810 | red: H-J8 (menu help tag unreadable), H-J10/H-J11 (halo.file value reads empty, #262); others not ours | at/under baseline (contrast 1, identifier 1, offscreen 4) | clarity, journey, design, layout, controls | 8 (4 major, 4 minor) | r1-b1, r1-b2, r1-b3 (next) | no |
 
 ## Decisions
 - Brief named base 1dcd1a6; origin/dev had moved one commit (92db316, a SuiteUI perf test, #1039) that is a descendant. Used 92db316.
@@ -42,8 +42,11 @@ Next: wait for fix-batch wf_c714e674-222 (r1-b1, r1-b2) PRs and critic-panel wf_
 - HF-12 builder started early too; it opens its feature-done PR only after #1066 and HF-11 merge.
 - HF-12: saveStatus reads "Not saved" only with unsaved edits, so H-J10's read-only step makes an edit before ⌘S (critic round to judge).
 - Run 38711122431 (2fc9b59, has HF-9 app code): swift build+test CI: PASS on macOS; journey failures there are other lines (Photo fixture launch, Halo testLayoutAtWidths, H-J9 rename, SuiteUI gallery audit), #763.
+- Round 1 critic: in-scope majors (unsaved state not visible; failed save should read "Not saved" without an edit; journeys launch 1280 wide on a 1024 display) + minor (menu fade in shots) go to batch r1-b3 after r1-b1/b2 merge (same files). Packet contradiction on "Not saved": took the Screens table and HF-9 proof (error first) over the pseudocode.
+- Out-of-scope W0-file findings filed as gap issues: #1081 (File menu drops New Window), #1082 (open-error wording, menu symbols).
 
 ## Open
+- #1081, #1082 gap (W0 files)
 - #1065 needs-ui: close guard for unsaved changes on SuiteWindow (no SwiftUI close hook)
 - #1059 needs-ui: .halo exported type declaration (project.yml, bundle-apps)
 - none
