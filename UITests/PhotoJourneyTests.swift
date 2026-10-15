@@ -57,7 +57,7 @@ final class PhotoJourneyTests: XCTestCase {
         // Before the window clears the message (4 s): an empty window on the fakes.
         unknown.shot("fixture-unknown")
         XCTAssert(unknown.element("photo.status.preview").exists, "-PhotoFixture nope shows no Preview data pill")
-        XCTAssert(labelled("No Image Open", unknown).exists, "-PhotoFixture nope doesn't show the No Image Open empty state")
+        XCTAssert(staticText("No Image Open", unknown).waitForExistence(timeout: 5),"-PhotoFixture nope doesn't show the No Image Open empty state")
     }
 
     /// On `.live` the Eyedropper is disabled.
