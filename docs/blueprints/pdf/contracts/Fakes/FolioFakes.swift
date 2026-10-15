@@ -421,7 +421,17 @@ public struct FakeTextSelecting: TextSelecting {
         guard let (li, _) = Self.position(point, text), !text.lines[li].text.isEmpty else { return Self.empty }
         return Self.span(page, text, li, 0, text.lines[li].text.count)
     }
+    static let ligatures: [Character: String] = ["\u{FB00}": "ff", "\u{FB01}": "fi", "\u{FB02}": "fl",
+                                                 "\u{FB03}": "ffi", "\u{FB04}": "ffl", "\u{FB05}": "st", "\u{FB06}": "st"]
+    static func clean(_ s: String) -> String {
+        var out = ""
+        for c in s where c != "\u{00AD}" { out += ligatures[c] ?? String(c) }
+        return out
+    }
     public func copyText(_ selection: FolioTextSelection, text: FolioPageText) -> String {
+        Self.clean(rawCopy(selection, text: text))
+    }
+    func rawCopy(_ selection: FolioTextSelection, text: FolioPageText) -> String {
         var out = ""
         for span in selection.spans where text.lines.indices.contains(span.line) {
             let chars = Array(text.lines[span.line].text)

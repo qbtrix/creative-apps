@@ -76,7 +76,8 @@ public protocol TextSelecting: Sendable {
     /// The whole line under the point (triple-click), or an empty selection.
     func line(at point: FolioPoint, on page: FolioPageID, text: FolioPageText) -> FolioTextSelection
     /// The selection as copied text: lines inside a paragraph joined with a
-    /// space, a line break after each paragraph.
+    /// space, a line break after each paragraph, typographic ligatures
+    /// (U+FB00 to U+FB06) spelled out as letters, soft hyphens dropped.
     func copyText(_ selection: FolioTextSelection, text: FolioPageText) -> String
 }
 

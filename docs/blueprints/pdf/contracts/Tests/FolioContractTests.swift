@@ -80,6 +80,10 @@ private func png(_ w: UInt32, _ h: UInt32) -> Data {
     let joined = FolioFakeLayout.text(["one two", "three"], continued: [0], pageHeight: 792, origin: .embedded)
     let both = s.selecting.select(from: FolioPoint(x: 73, y: 712), to: FolioPoint(x: 72 + 6 * 4 + 1, y: 698), on: page.id, text: joined)
     #expect(s.selecting.copyText(both, text: joined) == "one two three")
+    // Ligatures spelled out, soft hyphens dropped.
+    let lig = FolioFakeLayout.text(["\u{FB01}nal re\u{00AD}view"], pageHeight: 792, origin: .embedded)
+    let all = s.selecting.line(at: FolioPoint(x: 80, y: 712), on: page.id, text: lig)
+    #expect(s.selecting.copyText(all, text: lig) == "final review")
 }
 
 @Test func fillFormInTabOrder() async throws {   // P-J5
