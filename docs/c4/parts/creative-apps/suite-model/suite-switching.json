@@ -1,0 +1,10 @@
+{
+  "id": "suite-switching",
+  "name": "Switching",
+  "description": "Switch requests and receipts, run states, the Switch To menu model.",
+  "technology": "Swift 6, Foundation (FoundationEssentials), Linux and macOS",
+  "paths": [
+    "Sources/SuiteModel/Switching/"
+  ],
+  "order": 90
+}

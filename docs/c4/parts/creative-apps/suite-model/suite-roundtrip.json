@@ -1,0 +1,10 @@
+{
+  "id": "suite-roundtrip",
+  "name": "Round trip",
+  "description": "Library to Photo to Library edit sessions and their states.",
+  "technology": "Swift 6, Foundation (FoundationEssentials), Linux and macOS",
+  "paths": [
+    "Sources/SuiteModel/RoundTrip/"
+  ],
+  "order": 120
+}

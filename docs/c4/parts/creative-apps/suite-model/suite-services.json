@@ -1,0 +1,10 @@
+{
+  "id": "suite-services",
+  "name": "Services",
+  "description": "SuiteServices: one member per contract, .fake and the slots SuiteShell fills for .live.",
+  "technology": "Swift 6, Foundation (FoundationEssentials), Linux and macOS",
+  "paths": [
+    "Sources/SuiteModel/SuiteServices.swift"
+  ],
+  "order": 50
+}

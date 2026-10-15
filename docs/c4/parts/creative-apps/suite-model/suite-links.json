@@ -1,0 +1,10 @@
+{
+  "id": "suite-links",
+  "name": "Links",
+  "description": "AssetLink and its status (current, update available, missing) for placed assets.",
+  "technology": "Swift 6, Foundation (FoundationEssentials), Linux and macOS",
+  "paths": [
+    "Sources/SuiteModel/Links/"
+  ],
+  "order": 140
+}

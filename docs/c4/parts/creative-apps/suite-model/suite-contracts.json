@@ -1,0 +1,10 @@
+{
+  "id": "suite-contracts",
+  "name": "Contracts",
+  "description": "One protocol per suite use case (blueprint section 5): switching, recents, new documents, routing, hand-offs, round trip, pasteboard, assets, links, animation import, preferences, settings route, onboarding, updates, thumbnails, home, and SuiteDocumentHost, which each app Model conforms to so it can act on hand-offs.",
+  "technology": "Swift 6, Foundation (FoundationEssentials), Linux and macOS",
+  "paths": [
+    "Sources/SuiteModel/Contracts/"
+  ],
+  "order": 30
+}
