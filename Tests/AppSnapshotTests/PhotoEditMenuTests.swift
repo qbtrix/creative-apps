@@ -2,7 +2,10 @@
 // E-7). With no image Copy is disabled with "Open an image first."; an empty
 // pasteboard disables Paste with "Nothing to paste."; Command-C in the Image
 // Size sheet's field and in a focused panel text field copies the text, never
-// the image; with no text focused Copy acts on the image. A spy text view
+// the image; with no text focused Copy acts on the image. Every Edit item has
+// the system's symbol, Select All follows Paste, Merge Down's symbol is not a
+// save glyph, and with no window or no image on the pasteboard the items are
+// off with a reason unless text has focus. A spy text view
 // stands in for the field editor, so the general pasteboard is never touched.
 // macOS only.
 import AppKit
@@ -66,6 +69,46 @@ private final class TextSpy: NSTextView {
         menu.edit(.copy, focusedText: field)
         menu.edit(.paste, focusedText: field)
         #expect(field.received == ["copy", "paste"] && !editsImage(sent))
+    }
+
+    @Test func everyEditItemHasTheSystemsSymbol() {
+        #expect(PhotoEditItem.allCases.allSatisfy { !$0.systemImage.isEmpty })
+        #expect(PhotoEditItem.cut.systemImage == "scissors")
+        #expect(PhotoEditItem.copy.systemImage == "document.on.document")
+        #expect(PhotoEditItem.paste.systemImage == "document.on.clipboard")
+        #expect(PhotoEditItem.undo.systemImage == "arrow.uturn.backward")
+        #expect(PhotoEditItem.redo.systemImage == "arrow.uturn.forward")
+    }
+
+    @Test func selectAllFollowsPasteInThePasteboardGroup() {
+        #expect(PhotoEditItem.pasteboardGroup == [.cut, .copy, .paste, .selectAll])
+    }
+
+    @Test func mergeDownIsNotASaveSymbol() {
+        for intent in [EditIntent.duplicateLayer, .mergeDown, .flattenImage] {
+            #expect(!PhotoLayerMenu.systemImage(intent).hasPrefix("square.and.arrow"))
+        }
+        #expect(PhotoLayerMenu.systemImage(.mergeDown) != "square.2.layers.3d.bottom.filled")
+    }
+
+    @Test func cutCopyPasteAreDisabledWithTheirReasonsWithNoWindow() {
+        let menu = PhotoMenu()
+        for intent in [EditIntent.cut, .copy, .paste] {
+            #expect(menu.isEditDisabled(intent, pasteboard: empty))
+            #expect(menu.editHelp(intent, pasteboard: empty) != nil)
+            #expect(!menu.isEditDisabled(intent, pasteboard: empty, textHasFocus: true))
+        }
+    }
+
+    @Test func pasteIsDisabledWhenThePasteboardHoldsNoImage() throws {
+        var model = PhotoWorkspace()
+        try model.newCanvas(width: 800, height: 600)
+        let menu = PhotoMenu(model: model, perform: { _ in })
+        let text = PhotoPasteboardState(hasImage: false, isEmpty: false)
+        #expect(menu.isEditDisabled(.paste, pasteboard: text))
+        #expect(menu.editHelp(.paste, pasteboard: text) == "The pasteboard has no image.")
+        // A focused text field still gets Command-V.
+        #expect(!menu.isEditDisabled(.paste, pasteboard: text, textHasFocus: true))
     }
 
     @Test func copyActsOnTheImageWithNoTextFocused() throws {
