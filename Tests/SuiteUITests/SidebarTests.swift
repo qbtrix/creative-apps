@@ -17,6 +17,14 @@ import Testing
     #expect(off.systemImage == "eye.slash")
 }
 
+@Test func sidebarToggleIdentifierNamesItsRowAndKeepsAcrossStates() {
+    let on = SidebarToggle(id: "visible", title: "Hide Layer", onSymbol: "eye", offSymbol: "eye.slash", isOn: true)
+    let off = SidebarToggle(id: "visible", title: "Show Layer", onSymbol: "eye", offSymbol: "eye.slash", isOn: false)
+    #expect(on.identifier(in: "layer-1") == "suite.sidebar.layer-1.visible")
+    #expect(off.identifier(in: "layer-1") == on.identifier(in: "layer-1"))
+    #expect(on.identifier(in: "layer-2") != on.identifier(in: "layer-1"))
+}
+
 @Test func sidebarItemKeepsItsTogglesAndChildrenInOrder() {
     let lock = SidebarToggle(id: "l", title: "Lock", onSymbol: "lock", offSymbol: "lock.open", isOn: false)
     let child = SidebarItem(id: "c", title: "Child", systemImage: "square")
