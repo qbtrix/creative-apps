@@ -26,5 +26,10 @@
   "waits_ui": [
     "#333 (journey files)"
   ],
-  "note": "H-J9."
+  "note": "H-J9.",
+  "journeys": [
+    "HaloJourneyTests.testEveryMenuOpens",
+    "HaloJourneyTests.testLayerHousekeeping",
+    "HaloJourneyTests.testLayoutAtWidths"
+  ]
 }

@@ -31,11 +31,13 @@
     "loupe-viewport",
     "thumbnails"
   ],
-  "journeys": [
+  "journeys": [],
+  "notes": "Owns LibraryJourneyTests.swift in its wave, for its journey steps if #333 has not merged.",
+  "quality": "QB-L2, QB-LIB-6, QB-LIB-V1, QB-LIB-V2, QB-LIB-V3, QB-F3",
+  "library_title": "Develop sliders, histogram, render to pixels in loupe and grid, copy and paste settings",
+  "journey_ids": [
     "J5",
     "P3"
   ],
-  "notes": "Owns LibraryJourneyTests.swift in its wave, for its journey steps if #333 has not merged.",
-  "quality": "QB-L2, QB-LIB-6, QB-LIB-V1, QB-LIB-V2, QB-LIB-V3, QB-F3",
-  "library_title": "Develop sliders, histogram, render to pixels in loupe and grid, copy and paste settings"
+  "journeys_none": "no packet yet: the blueprint names its journeys by id (J5, P3) but no XCUITest method"
 }

@@ -5,5 +5,32 @@
   "status": "planned",
   "feature_issue": "file when ready",
   "covers": "#752, #267, #268, #276, #266",
-  "waits_on": "design-window"
+  "waits_on": "design-window",
+  "owned": [
+    "Sources/DesignModel/Live/LiveStyling.swift",
+    "Tests/DesignModelTests/DesignStyleTests.swift",
+    "Sources/DesignModel/DesignInspectorContent.swift",
+    "Tests/DesignModelTests/DesignInspectorSharedValueTests.swift",
+    "Sources/DesignModel/DesignText.swift",
+    "Tests/DesignModelTests/DesignTextScaleModelTests.swift",
+    "Tests/DesignModelTests/DesignCompactSelectionTests.swift",
+    "Sources/DesignApp/DesignInspector.swift",
+    "Tests/AppSnapshotTests/DesignInspectorSnapshots.swift",
+    "Tests/AppSnapshotTests/DesignStyleSnapshots.swift",
+    "Sources/DesignApp/DesignCanvasMarks.swift",
+    "Sources/DesignApp/DesignFrameLabels.swift",
+    "Sources/DesignApp/DesignTextEditor.swift",
+    "Tests/AppSnapshotTests/DesignTextSnapshots.swift",
+    "Tests/AppSnapshotTests/DesignArtworkPathTests.swift",
+    "Tests/AppSnapshotTests/DesignTextScaleTests.swift",
+    "UITests/DesignJourneyTests+Style.swift",
+    "Tests/DesignModelTests/DesignStyleBudgetTests.swift",
+    "UITests/DesignJourneyTests+PerfScrub.swift"
+  ],
+  "journeys": [
+    "DesignJourneyTests.testInspectorStyleRows",
+    "DesignJourneyTests.testLayoutAtWidths",
+    "DesignJourneyTests.testScrubLatency",
+    "DesignJourneyTests.testTextFontAndSize"
+  ]
 }

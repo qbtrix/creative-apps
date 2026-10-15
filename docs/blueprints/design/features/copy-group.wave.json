@@ -5,5 +5,22 @@
   "status": "planned",
   "feature_issue": "file when ready",
   "covers": "#414, #416, #415",
-  "waits_on": "design-window"
+  "waits_on": "design-window",
+  "owned": [
+    "Sources/DesignModel/Live/LiveDuplicating.swift",
+    "Tests/DesignModelTests/DesignDuplicateTests.swift",
+    "Sources/DesignModel/Live/LiveGrouping.swift",
+    "Tests/DesignModelTests/DesignGroupTests.swift",
+    "Sources/DesignModel/Live/LiveClipboard.swift",
+    "Tests/DesignModelTests/DesignPasteboardTests.swift",
+    "Tests/AppSnapshotTests/DesignDuplicateSnapshots.swift",
+    "Tests/AppSnapshotTests/DesignGroupSnapshots.swift",
+    "Tests/AppSnapshotTests/DesignPasteboardSnapshots.swift",
+    "UITests/DesignJourneyTests+Arrange.swift"
+  ],
+  "journeys": [
+    "DesignJourneyTests.testCutCopyPasteAcrossFiles",
+    "DesignJourneyTests.testDuplicateAndOptionDrag",
+    "DesignJourneyTests.testGroupAndUngroup"
+  ]
 }

@@ -5,5 +5,24 @@
   "status": "planned",
   "feature_issue": "file when ready",
   "covers": "#613, #589 (Design half); gap: rename, reorder, nest, Arrange",
-  "waits_on": "design-window"
+  "waits_on": "design-window",
+  "owned": [
+    "Sources/DesignModel/Live/LiveOrdering.swift",
+    "Tests/DesignModelTests/DesignOrderingTests.swift",
+    "Sources/DesignModel/DesignLayerToggles.swift",
+    "Tests/DesignModelTests/DesignLayerDropTests.swift",
+    "Sources/DesignModel/DesignWorkspace.swift",
+    "Tests/DesignModelTests/DesignLockTextEditTests.swift",
+    "Tests/DesignModelTests/DesignRenameTests.swift",
+    "Sources/DesignApp/DesignLayersPanel.swift",
+    "Tests/AppSnapshotTests/DesignLayersSnapshots.swift",
+    "UITests/DesignJourneyTests+Layers.swift",
+    "Tests/DesignModelTests/DesignLayersBudgetTests.swift",
+    "UITests/DesignJourneyTests+PerfLayers.swift"
+  ],
+  "journeys": [
+    "DesignJourneyTests.testLayerListScroll",
+    "DesignJourneyTests.testLayersRenameReorderNest",
+    "DesignJourneyTests.testLayoutAtWidths"
+  ]
 }

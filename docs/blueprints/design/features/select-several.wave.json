@@ -5,5 +5,37 @@
   "status": "planned",
   "feature_issue": "file when ready",
   "covers": "#714, #542, #607; gaps: marquee, several layers, Zoom to Selection",
-  "waits_on": "design-window"
+  "waits_on": "design-window",
+  "owned": [
+    "Sources/DesignModel/Live/LiveMarquee.swift",
+    "Tests/DesignModelTests/DesignMarqueeTests.swift",
+    "Sources/DesignModel/Live/LiveTransforming.swift",
+    "Tests/DesignModelTests/DesignSeveralTransformTests.swift",
+    "Sources/DesignModel/Live/LiveAligning.swift",
+    "Sources/DesignModel/DesignAlign.swift",
+    "Tests/DesignModelTests/DesignDistributeTests.swift",
+    "Sources/DesignModel/Live/LiveFraming.swift",
+    "Tests/DesignModelTests/DesignFramingTests.swift",
+    "Sources/DesignModel/DesignCanvasEditing.swift",
+    "Sources/DesignModel/DesignActions.swift",
+    "Sources/DesignModel/DesignActions+Edit.swift",
+    "Tests/DesignModelTests/DesignMidDragEditTests.swift",
+    "Tests/DesignModelTests/DesignHiddenNudgeTests.swift",
+    "Tests/DesignModelTests/DesignHeldIDsFuzzTests.swift",
+    "Sources/DesignApp/DesignCanvas.swift",
+    "Sources/DesignApp/DesignSelectionMarks.swift",
+    "Sources/DesignApp/DesignAlignBar.swift",
+    "Tests/AppSnapshotTests/DesignMarqueeSnapshots.swift",
+    "Tests/AppSnapshotTests/DesignAlignSnapshots.swift",
+    "Tests/AppSnapshotTests/DesignMultiSelectSnapshots.swift",
+    "UITests/DesignJourneyTests+Select.swift",
+    "Tests/DesignModelTests/DesignSelectBudgetTests.swift",
+    "UITests/DesignJourneyTests+PerfCanvas.swift"
+  ],
+  "journeys": [
+    "DesignJourneyTests.testAlignAndDistributeSeveral",
+    "DesignJourneyTests.testCanvasDragLatency",
+    "DesignJourneyTests.testMarqueeMoveResizeSeveral",
+    "DesignJourneyTests.testZoomPanFitAndZoomToSelection"
+  ]
 }

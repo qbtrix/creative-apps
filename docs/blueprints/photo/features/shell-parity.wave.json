@@ -13,5 +13,33 @@
     "waits on (creative-core)": "nothing"
   },
   "track": "shell parity: docs/blueprints/suite/features/shell-parity-waves.md, wave 2",
-  "longest_chain": "3 (PS-1 → PS-3 → PS-4)"
+  "longest_chain": "3 (PS-1 → PS-3 → PS-4)",
+  "owned": [
+    "Sources/PhotoModel/PhotoToolbarItems.swift",
+    "Tests/PhotoModelTests/PhotoToolbarItemsTests.swift",
+    "Sources/PhotoApp/PhotoLayersTab.swift",
+    "Sources/PhotoApp/PhotoLayerList.swift",
+    "Sources/PhotoApp/PhotoLayerSettings.swift",
+    "Tests/AppSnapshotTests/PhotoLayerRowSnapshots.swift",
+    "UITests/PhotoJourneyTests.swift",
+    "Sources/PhotoApp/PhotoEditor.swift",
+    "Sources/PhotoApp/PhotoPanel.swift",
+    "Sources/PhotoApp/PhotoWindow.swift",
+    "Sources/PhotoApp/PhotoWindow+*.swift",
+    "Sources/PhotoApp/PhotoApp.swift",
+    "Tests/AppSnapshotTests/PhotoEditorSnapshots.swift",
+    "Tests/AppSnapshotTests/PhotoProInspectorSnapshots.swift",
+    "Sources/PhotoApp/PhotoTopBar.swift",
+    "Sources/PhotoApp/PhotoCommands+Image.swift",
+    "Sources/PhotoApp/PhotoRailTool.swift",
+    "Sources/PhotoApp/PhotoPaletteTool.swift",
+    "Sources/PhotoModel/PhotoFixtures.swift",
+    "Tests/PhotoModelTests/PhotoLaunchOptionsTests.swift",
+    "UITests/PhotoJourneyTests+Shell.swift"
+  ],
+  "journeys": [
+    "PhotoJourneyTests.testLaunchShowsWindowShell",
+    "PhotoJourneyTests.testNewImageAndEveryTool",
+    "PhotoJourneyTests.testTier1Layers"
+  ]
 }

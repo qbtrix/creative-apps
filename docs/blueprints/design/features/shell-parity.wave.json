@@ -7,5 +7,24 @@
   "covers": "the 2026-10-15 captain decisions (one shell, one tool box, the app switcher), Design half",
   "waits_on": "editor-in-window (SuiteUI, #1079)",
   "track": "shell parity: docs/blueprints/suite/features/shell-parity-waves.md, wave 2",
-  "longest_chain": "3 (DS-1 → DS-3 → DS-4)"
+  "longest_chain": "3 (DS-1 → DS-3 → DS-4)",
+  "owned": [
+    "Sources/DesignModel/DesignToolbarItems.swift",
+    "Tests/DesignModelTests/DesignToolbarItemsTests.swift",
+    "Sources/DesignApp/DesignLayersPanel.swift",
+    "Tests/AppSnapshotTests/DesignLayersSnapshots.swift",
+    "UITests/DesignJourneyTests.swift",
+    "Sources/DesignApp/DesignEditor.swift",
+    "Sources/DesignApp/DesignPanel.swift",
+    "Sources/DesignApp/DesignIntent.swift",
+    "Sources/DesignApp/DesignWindow.swift",
+    "Sources/DesignApp/DesignApp.swift",
+    "Tests/AppSnapshotTests/DesignAlignSnapshots.swift",
+    "Tests/AppSnapshotTests/DesignInspectorSnapshots.swift",
+    "UITests/DesignJourneyTests+Shell.swift"
+  ],
+  "journeys": [
+    "DesignJourneyTests.testLaunchShowsWindowShell",
+    "DesignJourneyTests.testNewFileAndEveryTool"
+  ]
 }

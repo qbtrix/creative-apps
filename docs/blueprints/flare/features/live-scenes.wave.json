@@ -5,5 +5,19 @@
   "status": "built",
   "feature_issue": "#800",
   "covers": "#362",
-  "waits_on": "nothing"
+  "waits_on": "nothing",
+  "owned": [
+    "Sources/FlareModel/Live/LiveScenes.swift",
+    "Tests/FlareModelTests/LiveScenesTests.swift",
+    "Sources/FlareModel/Live/LiveScenes+Order.swift",
+    "Tests/FlareModelTests/LiveScenesOrderTests.swift",
+    "Sources/FlareModel/Live/LiveScenes+Canvas.swift",
+    "Tests/FlareModelTests/LiveScenesCanvasTests.swift",
+    "Sources/FlareModel/Live/LiveScenes+Guides.swift",
+    "Tests/FlareModelTests/LiveScenesGuidesTests.swift",
+    "Sources/FlareModel/Live/LiveScenes+SceneEditing.swift",
+    "Tests/FlareModelTests/LiveScenesJourneyTests.swift"
+  ],
+  "journeys": [],
+  "journeys_none": "Model only: its packet names no XCUITest; the journey is a Linux Model journey, Tests/FlareModelTests/LiveScenesJourneyTests.swift"
 }

@@ -11,5 +11,23 @@
     "tier": "p1",
     "waits on (this repo)": "photo-seams (journey tasks only: photo-journey-kit)",
     "waits on (creative-core)": "nothing"
-  }
+  },
+  "owned": [
+    "Sources/PhotoModel/Live/LiveCrop.swift",
+    "Tests/PhotoModelTests/LiveCropSizingTests.swift",
+    "Sources/PhotoModel/PhotoCropSize.swift",
+    "Tests/PhotoModelTests/PhotoCropSizeTests.swift",
+    "Tests/PhotoModelTests/PhotoCropBudgetTests.swift",
+    "Sources/PhotoApp/CropOptions.swift",
+    "Sources/PhotoApp/PhotoWindow+Crop.swift",
+    "Tests/AppSnapshotTests/PhotoCropOptionsSnapshots.swift",
+    "Sources/PhotoApp/CropOverlay.swift",
+    "UITests/PhotoJourneyTests+Crop.swift",
+    "UITests/PhotoJourneyTests+Perf.swift"
+  ],
+  "journeys": [
+    "PhotoJourneyTests.testCanvasDragLatency",
+    "PhotoJourneyTests.testSliderScrubLatency",
+    "PhotoJourneyTests.testTypedCropSizeAndAspect"
+  ]
 }

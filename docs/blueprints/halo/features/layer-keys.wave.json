@@ -39,5 +39,10 @@
   "waits_ui": [
     "#333 (journey files)"
   ],
-  "note": "H-J5, H-J6, H-J23; HB-1, HB-3, HB-4; HF-3, HF-5."
+  "note": "H-J5, H-J6, H-J23; HB-1, HB-3, HB-4; HF-3, HF-5.",
+  "journeys": [
+    "HaloJourneyTests.testDragLayerToKeyPosition",
+    "HaloJourneyTests.testInspectorKeysTransform",
+    "HaloJourneyTests.testParentAndBlend"
+  ]
 }

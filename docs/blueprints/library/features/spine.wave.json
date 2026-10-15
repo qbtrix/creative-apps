@@ -64,11 +64,20 @@
   "suiteui": "none for its own work; the cell values it declares are shown once S-L2 lands (a hard wait for journey steps that read them); #333 for its own journey file (until then it edits LibraryJourneyTests.swift)",
   "depends": [],
   "journeys": [
-    "J0",
-    "J10",
-    "J11"
+    "LibraryJourneyTests.testEveryControlActsOrSaysWhy",
+    "LibraryJourneyTests.testEveryMenuOpens",
+    "LibraryJourneyTests.testLaunchShowsEmptyCatalog",
+    "LibraryJourneyTests.testLaunchShowsWindowShell",
+    "LibraryJourneyTests.testLoadSamplePhotos",
+    "LibraryJourneyTests.testLoupeStepsAndReturnsToTheGrid",
+    "LibraryJourneyTests.testRateASelectedPhoto"
   ],
   "notes": "Creates every stub file later features replace; lands as several stacked PRs. Coordinates with open PR #217 (#156). In wave 1 it also adds PhotoItem.cullSummary as the accessibility value of the loupe photo (LibraryLoupe.swift) and the grid cells, and embeds the LibraryCropOverlay and CropInspector stubs, so later features never edit another's view. Existing tests it owns are kept passing (the hand-written == keeps whole-catalog comparisons working). It also presents LibraryExportSheet from LibraryWindow while exportState is not idle, shows the Preview data pill while services are fakes, and switches today's four journeys to -LibraryFixture samples.",
   "quality": "QB-F1 (J11), QB-F3 (undo), QB-V5",
-  "library_title": "Contracts, fakes, live stubs, catalog state, undo, launch arguments, and the app split into per-feature files"
+  "library_title": "Contracts, fakes, live stubs, catalog state, undo, launch arguments, and the app split into per-feature files",
+  "journey_ids": [
+    "J0",
+    "J10",
+    "J11"
+  ]
 }

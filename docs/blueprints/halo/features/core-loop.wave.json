@@ -43,5 +43,7 @@
     "#333",
     "#330 FrameProbe for H-P1 to H-P5 (report-only until then)"
   ],
-  "note": "H-J12 live; H-P1 to H-P5; layout L3 to L5; flips every fixture journey still on `-HaloFixture` to `-HaloSample`. Its feature issue is filed only once every W1 and W2 feature is done, because it edits their journey files."
+  "note": "H-J12 live; H-P1 to H-P5; layout L3 to L5; flips every fixture journey still on `-HaloFixture` to `-HaloSample`. Its feature issue is filed only once every W1 and W2 feature is done, because it edits their journey files.",
+  "journeys": [],
+  "journeys_none": "no packet yet: waves data names the H-J12 XCTSkip in HaloJourneyTests.swift and H-P1 to H-P5, but no XCUITest method"
 }

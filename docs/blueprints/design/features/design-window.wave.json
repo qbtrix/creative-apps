@@ -5,5 +5,39 @@
   "status": "planned",
   "feature_issue": "file when ready",
   "covers": "#288 (part)",
-  "waits_on": "design-seams; #778 suite-harness"
+  "waits_on": "design-seams; #778 suite-harness",
+  "owned": [
+    "Sources/DesignModel/DesignWindowOptions.swift",
+    "Sources/DesignApp/DesignIntent.swift",
+    "Sources/DesignApp/DesignWindow.swift",
+    "Sources/DesignApp/DesignEditor.swift",
+    "Tests/DesignModelTests/DesignWindowOptionsTests.swift",
+    "Tests/AppSnapshotTests/DesignStatusSnapshots.swift",
+    "Sources/DesignApp/DesignCanvas.swift",
+    "Sources/DesignApp/DesignCanvasMarks.swift",
+    "Sources/DesignApp/DesignSelectionMarks.swift",
+    "Sources/DesignApp/DesignFrameLabels.swift",
+    "Tests/AppSnapshotTests/DesignCanvasSeamSnapshots.swift",
+    "Sources/DesignApp/DesignInspector.swift",
+    "Sources/DesignApp/DesignAlignBar.swift",
+    "Tests/AppSnapshotTests/DesignSeveralInspectorSnapshots.swift",
+    "Sources/DesignApp/DesignPasteboardBridge.swift",
+    "Sources/DesignApp/DesignLayersPanel.swift",
+    "Tests/AppSnapshotTests/DesignPasteboardBridgeTests.swift",
+    "Sources/DesignApp/DesignCommands.swift",
+    "Sources/DesignApp/DesignEditMenu.swift",
+    "Sources/DesignApp/DesignObjectMenu.swift",
+    "Tests/AppSnapshotTests/DesignEditMenuSnapshots.swift",
+    "Tests/AppSnapshotTests/DesignPageMenuSnapshots.swift",
+    "UITests/DesignJourneyTests.swift",
+    "Sources/DesignApp/DesignPanel.swift",
+    "Tests/DesignModelTests/DesignControlIDTests.swift",
+    "UITests/DesignJourneyTests+EveryControl.swift",
+    "UITests/DesignJourneyTests+Layout.swift"
+  ],
+  "journeys": [
+    "DesignJourneyTests.testEveryControlActsOrSaysWhy",
+    "DesignJourneyTests.testEveryMenuOpens",
+    "DesignJourneyTests.testLayoutAtWidths"
+  ]
 }

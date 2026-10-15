@@ -27,11 +27,16 @@
     "spine"
   ],
   "journeys": [
-    "J8",
-    "J9",
-    "P7"
+    "LibraryJourneyTests.testCatalogSurvivesRelaunch",
+    "LibraryJourneyTests.testDamagedCatalogIsSetAside",
+    "LibraryJourneyTests.testLaunchLargeCatalog"
   ],
   "notes": "Writes the develop and crop objects from the start (their types come from the spine), so #423's and #425's catalog parts are done here. Its (L) steps wait for import to merge. Flushes on quit and exposes library.catalog = saved or dirty.",
   "quality": "QB-LIB-2, QB-L12, QB-LIB-V7",
-  "library_title": "The catalog file: JSON v1 with develop and crop, restore at launch, set aside a damaged file"
+  "library_title": "The catalog file: JSON v1 with develop and crop, restore at launch, set aside a damaged file",
+  "journey_ids": [
+    "J8",
+    "J9",
+    "P7"
+  ]
 }

@@ -28,10 +28,12 @@
     "thumbnails",
     "loupe-viewport"
   ],
-  "journeys": [
-    "J12"
-  ],
+  "journeys": [],
   "notes": "Identifiers in other features' views are each feature's own job; this one clears what is left of #291's list.",
   "quality": "layout spec 7.3, audit exit 7.2, QB-V5",
-  "library_title": "Status pills, inspector header (#185), the remaining identifiers (#291), layout tests"
+  "library_title": "Status pills, inspector header (#185), the remaining identifiers (#291), layout tests",
+  "journey_ids": [
+    "J12"
+  ],
+  "journeys_none": "no packet yet: the blueprint names its journeys by id (J12) but no XCUITest method"
 }

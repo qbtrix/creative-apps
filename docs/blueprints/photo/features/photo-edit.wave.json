@@ -11,5 +11,29 @@
     "tier": "p1",
     "waits on (this repo)": "photo-seams (journey tasks only: photo-journey-kit)",
     "waits on (creative-core)": "nothing"
-  }
+  },
+  "owned": [
+    "Sources/PhotoModel/Live/LiveEdit.swift",
+    "Tests/PhotoModelTests/LiveClipboardTests.swift",
+    "Sources/PhotoModel/Live/LiveMerging.swift",
+    "Tests/PhotoModelTests/LiveMergingTests.swift",
+    "Sources/PhotoModel/PhotoClipboard.swift",
+    "Tests/PhotoModelTests/PhotoClipboardTests.swift",
+    "Sources/PhotoModel/PhotoLayerOps.swift",
+    "Tests/PhotoModelTests/PhotoLayerOpsTests.swift",
+    "Tests/PhotoModelTests/PhotoEditBudgetTests.swift",
+    "Sources/PhotoApp/PhotoPasteboard.swift",
+    "Tests/AppSnapshotTests/PhotoPasteboardTests.swift",
+    "Sources/PhotoApp/PhotoWindow+Edit.swift",
+    "Sources/PhotoApp/PhotoCommands+Edit.swift",
+    "Sources/PhotoApp/PhotoCommands+Layer.swift",
+    "Tests/AppSnapshotTests/PhotoEditSnapshots.swift",
+    "UITests/PhotoJourneyTests+Edit.swift",
+    "UITests/PhotoJourneyTests+LayerOps.swift"
+  ],
+  "journeys": [
+    "PhotoJourneyTests.testCopyPasteAsNewLayer",
+    "PhotoJourneyTests.testDuplicateMergeAndFlatten",
+    "PhotoJourneyTests.testPasteFromAnotherApp"
+  ]
 }

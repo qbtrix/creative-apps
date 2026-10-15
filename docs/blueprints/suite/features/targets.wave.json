@@ -5,5 +5,30 @@
   "status": "building",
   "feature_issue": "#873",
   "covers": "#807, #808, #809, #810, #811",
-  "waits_on": "nothing"
+  "waits_on": "nothing",
+  "owned": [
+    "docs/blueprints/suite/spike.md",
+    "scripts/size-report",
+    "Tests/size_report/test_size_report.sh",
+    "Tests/size_report/fixture/",
+    ".github/workflows/ci.yml",
+    "Package.swift",
+    "Sources/SuiteModel/Values/SuiteIdentity.swift",
+    "Sources/SuiteShell/SuiteCommands.swift",
+    "Sources/AfterGlowApp/AfterGlowApp.swift",
+    "Tests/SuiteModelTests/SuiteIdentityTests.swift",
+    "Sources/AfterGlowApp/HomeWindow.swift",
+    "Sources/AfterGlowApp/AssetsPage.swift",
+    "Sources/AfterGlowApp/SettingsView.swift",
+    "Sources/AfterGlowApp/OnboardingWindow.swift",
+    "Sources/AfterGlowApp/UpdateSheet.swift",
+    "Sources/AfterGlowApp/LauncherRouter.swift",
+    "Sources/AfterGlowApp/LauncherCommands+Home.swift",
+    "Sources/AfterGlowApp/LauncherCommands+Settings.swift",
+    "Sources/AfterGlowApp/LauncherCommands+Assets.swift",
+    "Sources/AfterGlowApp/LauncherCommands+Update.swift",
+    "Tests/SuiteModelTests/LauncherMenuStubTests.swift"
+  ],
+  "journeys": [],
+  "journeys_none": "no journey yet: its packet says the first AfterGlow journey comes with the home (wave 2)"
 }

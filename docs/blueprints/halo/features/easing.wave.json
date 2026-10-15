@@ -32,5 +32,8 @@
     "#333",
     "timeline key shapes and selection (Flare S10/S11, to file as needs-ui; plain diamonds meanwhile)"
   ],
-  "note": "H-J7; HB-7; HF-4. Waits on layer-keys (keys to ease) and history-files (the journey reads the Undo name)."
+  "note": "H-J7; HB-7; HF-4. Waits on layer-keys (keys to ease) and history-files (the journey reads the Undo name).",
+  "journeys": [
+    "HaloJourneyTests.testEaseKeys"
+  ]
 }

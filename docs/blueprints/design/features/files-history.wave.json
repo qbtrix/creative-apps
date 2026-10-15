@@ -5,5 +5,29 @@
   "status": "planned",
   "feature_issue": "file when ready",
   "covers": "#275, #270; gap: open bad files journey",
-  "waits_on": "design-window"
+  "waits_on": "design-window",
+  "owned": [
+    "Sources/DesignModel/Live/LiveFiling.swift",
+    "Sources/DesignModel/DesignFile.swift",
+    "Tests/DesignModelTests/DesignFilingTests.swift",
+    "Sources/DesignModel/DesignHistory.swift",
+    "Tests/DesignModelTests/DesignDirtyTests.swift",
+    "Tests/DesignModelTests/DesignUndoTargetTests.swift",
+    "Sources/DesignApp/DesignCommands.swift",
+    "Sources/DesignApp/DesignWindow.swift",
+    "Tests/AppSnapshotTests/DesignFileMenuSnapshots.swift",
+    "Sources/DesignApp/DesignEditor.swift",
+    "Tests/AppSnapshotTests/DesignFileSnapshots.swift",
+    "UITests/DesignJourneyTests+Files.swift",
+    "UITests/DesignJourneyTests+BadFiles.swift",
+    "UITests/DesignJourneyTests+PerfFiles.swift",
+    "docs/blueprints/design.md"
+  ],
+  "journeys": [
+    "DesignJourneyTests.testCloseWithUnsavedChanges",
+    "DesignJourneyTests.testDrawShapesAddTextAndSave",
+    "DesignJourneyTests.testOpenBadFiles",
+    "DesignJourneyTests.testOpenLargeFile",
+    "DesignJourneyTests.testUndoInTextFieldsAndDirtyState"
+  ]
 }
