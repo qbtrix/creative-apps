@@ -36,3 +36,7 @@ utc	stage	event	ref	note
 2026-10-14T23:28Z	3	stage-end	waves	all SH tasks merged
 2026-10-14T23:28Z	4	ci-run	38654031210	round 1 CI on 640d08d (dispatched by #878)
 2026-10-14T23:48Z	4	round-findings	38654031210	round 1 red: 5 feature tests on macOS; 4 fix batches (wf_732cefb0-9da)
+2026-10-15T00:02Z	4	pr-merged	#881	r1-b1 frame probe summary speed
+2026-10-15T00:02Z	4	pr-merged	#883	r1-b2 nested probes test
+2026-10-15T00:02Z	4	pr-merged	#884	r1-b3 snapshot host IC + glass stand-in
+2026-10-15T00:02Z	4	pr-opened	#885	r1-b4 golden compare speed

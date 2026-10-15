@@ -4,7 +4,7 @@ Issue: #778 · Packet: docs/blueprints/suiteui/features/suite-harness.md (on bra
 Run: act-1a13b7e0908-fybz · Session: claude/suite-harness-lead-wwxtgn · Started: 2026-10-14T18:00Z
 Stage: 4 round 1
 Base: 640d08d83c35cbb12bd71f59b24583857b2863b4 (round 1)
-Next: wait for fix PRs r1-b1..b4 (wf_732cefb0-9da) to merge; then open a small feature-done PR (packet status line) so the lane dispatches round 2's CI
+Next: when #885 merges, open the feature-done PR from lead/suite-harness-status (packet status line, gated) so the lane dispatches round 2's CI
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -24,7 +24,7 @@ Next: wait for fix PRs r1-b1..b4 (wf_732cefb0-9da) to merge; then open a small f
 ## Rounds
 | round | CI run | CI | audit vs baseline | lenses | confirmed | fixed by | clean |
 |---|---|---|---|---|---|---|---|
-| 1 | 38654031210 @640d08d | red: macOS scripts/ci, 5 feature tests (FrameProbe budget, ControlInventory nested probes, SnapshotHost IC + glass, GoldenImage p95); Linux green | n/a: journeys didn't run | none (no ui-screens; CI-failure round) | 5 test failures | r1-b1..b4 (wf_732cefb0-9da) | no |
+| 1 | 38654031210 @640d08d | red: macOS scripts/ci, 5 feature tests (FrameProbe budget, ControlInventory nested probes, SnapshotHost IC + glass, GoldenImage p95); Linux green | n/a: journeys didn't run | none (no ui-screens; CI-failure round) | 5 test failures | #881 #883 #884 #885 | no |
 
 ## Decisions
 - Round 1: macOS scripts/ci failed before the UI journeys, so no ui-screens/audit exist; the round's findings are the feature's 5 failing tests, fixed in 4 disjoint batches. Critic panel runs once a run has screens.
