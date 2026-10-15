@@ -20,7 +20,9 @@
 // control lies inside the window and the viewer is narrower at 880 than at
 // 1024 (the content column follows the window). Every other journey launches
 // pinned at the runner's launch size (`launch`), so a sized launch never
-// carries over. Run order is by name, so
+// carries over. H-J3 (testScrubTheTimeline, viewer-playback VP-11) drags the
+// ruler on `-HaloSample three-layers`, then sets Badge's span to 20–50 from
+// the keys and reads the timecode, header and artboard. Run order is by name, so
 // testScrubTheTimeline runs last and attaches the audit counts.
 import AppKit
 import XCTest
@@ -63,10 +65,13 @@ final class HaloJourneyTests: XCTestCase {
         XCTAssert(Self.contains("Comp 1", in: halo.element("suite.sidebar")).exists, "the sidebar has no Comp 1 row")
     }
 
+    /// H-J3 (viewer-playback VP-11): the shipped ruler drag, then Badge's
+    /// span set from the keys: Home, → 20, I, → 30, O, → 10.
     @MainActor func testScrubTheTimeline() {
-        let halo = launch()
-        halo.click("New Composition…")
-        halo.click("Create", in: .sheet, step: "timeline")
+        let halo = launch(["-HaloSample", "three-layers"])
+        XCTAssert(halo.app.windows.firstMatch.waitForExistence(timeout: 30), "no window opened")
+        XCTAssert(halo.element("halo.timeline").waitForExistence(timeout: 10), "no timeline (halo.timeline)")
+        halo.shot("timeline")
         // The ruler is the timeline's top 24 pt, so the drag stays near its top.
         halo.drag(on: "halo.timeline", from: CGVector(dx: 0.3, dy: 0.05), to: CGVector(dx: 0.6, dy: 0.05), step: "timeline-scrub")
         let window = halo.app.windows.firstMatch.frame
@@ -78,6 +83,63 @@ final class HaloJourneyTests: XCTestCase {
         }
         let timeline = halo.element("halo.timeline").frame
         XCTAssertLessThanOrEqual(timeline.height, window.height * 0.4 + 1, "the timeline takes over 40% of the window")
+        setBadgeSpanFromTheKeys(halo)
+    }
+
+    /// H-J3's keys: clicking Badge's lane selects it and focuses the
+    /// timeline, so HaloViewer routes Home and → (VP-10), I and O. Badge's
+    /// header reads in…out−1: O at 50 stores outFrame 51 (W0's
+    /// selectedLayerHeader), so it reads "Frames 20–50", and at 60 the
+    /// artboard (W0's viewerSummary) no longer names Badge.
+    @MainActor private func setBadgeSpanFromTheKeys(_ halo: Journey) {
+        let lane = halo.app.descendants(matching: .any).matching(
+            NSPredicate(format: "identifier == 'halo.timeline.track' AND label == 'Badge'")).firstMatch
+        XCTAssert(lane.waitForExistence(timeout: 5), "no Badge lane in the timeline")
+        lane.click()
+        XCTAssert(header("Badge", halo).waitForExistence(timeout: 5), "clicking Badge's lane didn't select Badge")
+        halo.press(.home)
+        step(20, halo)
+        expectTimecode("00:00:00:20", halo)
+        halo.shot("scrub-frame-20")
+        halo.press(character: "i", step: "scrub-in-20")
+        step(30, halo)
+        expectTimecode("00:00:02:02", halo)
+        halo.press(character: "o")
+        XCTAssert(
+            header("Frames 20–50", halo).waitForExistence(timeout: 5),
+            "Badge's header doesn't read Frames 20–50: \(halo.element("halo.inspector.header").label)")
+        halo.shot("scrub-out-50")
+        step(10, halo)
+        let summary = "Frame 60: Background, Title: Hello Halo"
+        let artboard = halo.app.descendants(matching: .any).matching(
+            NSPredicate(format: "identifier == 'halo.viewer' AND value == %@", summary)).firstMatch
+        XCTAssert(
+            artboard.waitForExistence(timeout: 5),
+            "the artboard reads \(String(describing: halo.element("halo.viewer").value)), not \(summary)")
+        halo.shot("scrub-frame-60")
+    }
+
+    /// Presses → `count` times.
+    @MainActor private func step(_ count: Int, _ halo: Journey) {
+        for _ in 0..<count { halo.press(.rightArrow) }
+    }
+
+    /// The inspector header whose label contains `text`.
+    @MainActor private func header(_ text: String, _ halo: Journey) -> XCUIElement {
+        halo.app.descendants(matching: .any).matching(
+            NSPredicate(format: "identifier == 'halo.inspector.header' AND label CONTAINS %@", text)).firstMatch
+    }
+
+    /// The status row's timecode pill (statusTimecode: the playhead's
+    /// timecode, then the length and rate) starts with `timecode`, within
+    /// five seconds. A plain Text may read as a static text whose value holds
+    /// the string, so only static texts are matched by value (see `contains`).
+    @MainActor private func expectTimecode(_ timecode: String, _ halo: Journey) {
+        let staticText = NSNumber(value: XCUIElement.ElementType.staticText.rawValue)
+        let predicate = NSPredicate(
+            format: "label BEGINSWITH %@ OR (elementType == %@ AND value BEGINSWITH %@)", timecode, staticText, timecode)
+        let pill = halo.app.windows.firstMatch.descendants(matching: .any).matching(predicate).firstMatch
+        XCTAssert(pill.waitForExistence(timeout: 5), "the status timecode doesn't read \(timecode)")
     }
 
     @MainActor func testEveryMenuOpens() {
