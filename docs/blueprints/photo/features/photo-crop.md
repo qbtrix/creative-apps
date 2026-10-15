@@ -124,7 +124,7 @@ Pending-crop changes stay outside history, as today; only Apply records
 
 Every task is one PR to `dev`: at most 400 changed lines and 15 files, label
 `fast-lane`, body lines `Belt-Lead:`, `Feature: photo-crop`, `Fast-Check:
-pass`, `Head:`. The last one carries `feature-done`.
+pass`, `Head:`. The last one to merge carries `feature-done`.
 
 | id | issue | what | owned files | depends on | size |
 |---|---|---|---|---|---|
@@ -133,12 +133,32 @@ pass`, `Head:`. The last one carries `feature-done`.
 | CP-3 | – | Budget PB-8 (crop drag and a typed field) on `large` | `MT/PhotoCropBudgetTests.swift` | CP-2 | ~100, 1 |
 | CP-4 | #544 (part) | Crop options: four `ScrubField`s two per row in a `Grid`, the six aspect `ChoiceChips`, Swap, Apply Crop (its `.defaultAction` shortcut removed), Cancel; the window's crop intents | `A/CropOptions.swift`, `A/PhotoWindow+Crop.swift`, `ST/PhotoCropOptionsSnapshots.swift` | CP-2 | ~300, 3 |
 | CP-5 | #544 (closes) | The aspect pill on the crop overlay; journey PJ-8 | `A/CropOverlay.swift`, `UT/PhotoJourneyTests+Crop.swift` | CP-4, photo-journey-kit | ~240, 2 |
-| CP-7 | – | Perf journeys PJ-P1 (brush, crop, Space-pan series) and PJ-P2 (Exposure scrub) | `UT/PhotoJourneyTests+Perf.swift` | CP-5, photo-journey-kit | ~200, 1 |
+| CP-7 | – | Perf journeys PJ-P1 (brush, crop, Space-pan series) and PJ-P2 (Exposure scrub) | `UT/PhotoJourneyTests+Perf.swift` | photo-journey-kit | ~200, 1 |
 
-Chain: CP-1 → CP-2, then CP-3 beside CP-4 → CP-5 → CP-7. CP-7 carries
-`feature-done`. If CP-4 passes 400 lines, split it into CP-4a
-(`CropOptions.swift` and its snapshots) and CP-4b (`PhotoWindow+Crop.swift`),
-in that order.
+CP-7 needs nothing this packet adds: its brush, crop-drag, Space-pan and
+Exposure series drive controls that exist before photo-crop, so it builds in
+the first wave. CP-5 closes the chain and carries `feature-done`; if CP-7 is
+still open when CP-5 is ready (both wait on photo-journey-kit), CP-7 merges
+first or carries the label itself, so the `feature-done` run has PJ-P1 and
+PJ-P2. No task edits a shared doc (`docs/c4/model.json`, `docs/design.md`,
+the blueprint, `waves.md`): every new file sits in a target folder its C4
+component already covers, so there is no docs task. If CP-4 passes 400
+lines, split it into CP-4a (`CropOptions.swift` and its snapshots) and CP-4b
+(`PhotoWindow+Crop.swift`), in that order; CP-5 then depends on CP-4b.
+
+## Build waves
+
+- Wave 1: CP-1, CP-7. Independent in this wave: both.
+- Wave 2: CP-2. Independent in this wave: CP-2 alone.
+- Wave 3: CP-3, CP-4. Independent in this wave: both.
+- Wave 4: CP-5 (`feature-done`, final). Independent in this wave: CP-5 alone.
+
+Longest chain: CP-1 → CP-2 → CP-4 → CP-5 (4).
+Chain of 4: CP-2's test needs CP-1's `LiveCropSizing` for the locked drag
+(`FakeCrop` ignores the aspect); CP-4's `CropOptions.swift` calls CP-2's
+`setCropField`, `setCropAspect`, `swapCropAspect` and `cropFieldValue`;
+CP-5's PJ-8 types into CP-4's `photo.crop.*` fields and its pill reads
+CP-2's `cropAspectBadge`.
 
 ## Acceptance test per task
 

@@ -69,6 +69,16 @@ One PR to `dev`, at most 400 lines and 15 files, label `fast-lane` and
 |---|---|---|---|---|---|
 | KT-1 | – | Move `writeTestPhoto`, add `photoArguments`, the smoke journey; `PhotoJourneyTests` calls them | `UITests/PhotoJourneyTests.swift`, `UITests/PhotoJourneyTests+Fixtures.swift` | #333 closed | ~150, 2 |
 
+KT-1 edits no shared doc (`docs/c4/model.json`, `docs/design.md`, a
+blueprint or `waves.md`): its files sit under `UITests/`, which no C4
+component owns. So it is both the build task and the final task.
+
+## Build waves
+
+- Wave 1: KT-1 (final, `feature-done`). Independent in this wave: KT-1, the only task; it waits only on #333.
+
+Longest chain: KT-1 (1).
+
 ## Acceptance test per task
 
 | id | test | fails when |

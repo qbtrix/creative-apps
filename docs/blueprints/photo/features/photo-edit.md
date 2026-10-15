@@ -163,7 +163,7 @@ flattenImage(): record "Flatten Image": one Background layer = services.merging.
 
 Every task is one PR to `dev`: at most 400 changed lines and 15 files, label
 `fast-lane`, body lines `Belt-Lead:`, `Feature: photo-edit`, `Fast-Check:
-pass`, `Head:`. The last one carries `feature-done`.
+pass`, `Head:`. E-10, alone in the last wave, carries `feature-done`.
 
 | id | issue | what | owned files | depends on | size |
 |---|---|---|---|---|---|
@@ -172,15 +172,39 @@ pass`, `Head:`. The last one carries `feature-done`.
 | E-3 | – | Workspace Cut, Copy, Paste (new layer; new image when none; oversized scaled) | `M/PhotoClipboard.swift`, `MT/PhotoClipboardTests.swift` | E-1 | ~330, 2 |
 | E-4 | – | Duplicate Layer, Merge Down, Flatten Image and their help | `M/PhotoLayerOps.swift`, `MT/PhotoLayerOpsTests.swift` | E-2 | ~320, 2 |
 | E-5 | – | Budgets PB-15, PB-16 on `large` | `MT/PhotoEditBudgetTests.swift` | E-3, E-4 | ~140, 1 |
-| E-6 | – | `PhotoPasteboard` read and write | `A/PhotoPasteboard.swift`, `ST/PhotoPasteboardTests.swift` | E-1 | ~180, 2 |
+| E-6 | – | `PhotoPasteboard` read and write | `A/PhotoPasteboard.swift`, `ST/PhotoPasteboardTests.swift` | – | ~180, 2 |
 | E-7 | – | Edit menu Cut, Copy, Paste with their help, the focus rule; the window's edit intents | `A/PhotoWindow+Edit.swift`, `A/PhotoCommands+Edit.swift` | E-3, E-6 | ~240, 2 |
 | E-8 | – | Layer menu Duplicate (Command-J), Merge Down (Command-E), Flatten Image; "Merging…"; snapshots | `A/PhotoWindow+Edit.swift`, `A/PhotoCommands+Layer.swift`, `ST/PhotoEditSnapshots.swift` | E-4, E-7 | ~280, 3 |
-| E-9 | – | Journeys PJ-5, PJ-6 | `UT/PhotoJourneyTests+Edit.swift` | E-8, photo-journey-kit | ~260, 1 |
+| E-9 | – | Journeys PJ-5, PJ-6 | `UT/PhotoJourneyTests+Edit.swift` | E-7, photo-journey-kit | ~260, 1 |
 | E-10 | – | Journey PJ-7 | `UT/PhotoJourneyTests+LayerOps.swift` | E-8, photo-journey-kit | ~180, 1 |
 
-Chains: E-1 → E-2 (share `LiveEdit.swift`); E-7 → E-8 (share
-`PhotoWindow+Edit.swift`). E-3, E-6 can run beside E-2; E-9 and E-10 run
-side by side last.
+Links: E-2 fills the `merging()` line of the `LiveEdit.swift` stub whose
+`clipboard()` line E-1 fills (the same file). E-3's PF-3 test copies and
+pastes on `.live`, so it needs E-1's `LiveClipboard`. E-4's merges and help
+on `.live` read `services.merging`, `NotBuiltMerging` until E-2. E-5 times
+E-3's and E-4's methods on `.live`. E-6 needs only `ClipboardImage`, which
+photo-seams' `EditContracts.swift` already has. E-7 calls E-3's methods and
+E-6's `PhotoPasteboard`. E-8 calls E-4's methods and adds its cases to the
+`EditIntent` enum and `PhotoEditArea` in `A/PhotoWindow+Edit.swift`, which E-7
+edits. E-9 runs E-7's Edit menu; E-10 runs E-8's Layer menu.
+
+## Build waves
+
+- Wave 1: E-1, E-6. Independent in this wave: both.
+- Wave 2: E-2, E-3. Independent in this wave: both.
+- Wave 3: E-4, E-7. Independent in this wave: both.
+- Wave 4: E-5, E-8, E-9. Independent in this wave: all three.
+- Wave 5: E-10 (final, `feature-done`).
+
+Longest chain: E-1 → E-3 → E-7 → E-8 → E-10 (5).
+Chain of 5: E-3 calls E-1's `LiveClipboard` (PF-3 on `.live`), E-7 calls E-3's
+Cut, Copy and Paste, E-8 adds cases to E-7's `EditIntent` in
+`A/PhotoWindow+Edit.swift` (an enum takes no cases from another file, and a
+new area would edit photo-seams' `PhotoIntent.swift` and `PhotoWindow.swift`),
+and E-10 runs E-8's Layer menu.
+
+Shared docs: this packet edits none (`docs/c4/model.json`, `docs/design.md`,
+the blueprint, `waves.md`), so it has no docs task.
 
 ## Acceptance test per task
 

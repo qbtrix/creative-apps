@@ -144,16 +144,40 @@ Every task is one PR to `dev`: at most 400 changed lines and 15 files, label
 |---|---|---|---|---|---|
 | AL-1 | #580 (part) | `LiveAdjustmentLayering.applying` | `M/Live/LiveAdjustmentLayers.swift`, `MT/LiveAdjustmentLayeringTests.swift` | – | ~220, 2 |
 | AL-2 | #580 (part) | The adjustment case of `PhotoLayerComposite`; render and damaged tiles with adjustment layers (PF-12); Flatten through the hook | `M/PhotoLayerComposite.swift`, `MT/PhotoAdjustmentLayerTileTests.swift` | AL-1 | ~260, 2 |
-| AL-3 | #580 (part) | Workspace: add, target, adjust, end gesture, header and info lines | `M/PhotoAdjustmentLayer.swift`, `MT/PhotoAdjustmentLayerTests.swift` | AL-2 | ~340, 2 |
-| AL-4 | – | Budget PB-13 (model step) and its event-to-picture series | `MT/PhotoAdjustmentLayerBudgetTests.swift`, `ST/PhotoAdjustmentLayerLatencyTests.swift` | AL-3 | ~200, 2 |
-| AL-5 | #580 (part) | Layer > New Adjustment Layer submenu with its help; the window's adjustment-layer intents | `A/PhotoCommands+Layer.swift`, `A/PhotoWindow+AdjustmentLayer.swift` | AL-3 | ~180, 2 |
-| AL-6 | #580 (part) | Layer rows: kind symbol, identifiers, the info line; snapshot | `A/PhotoLayersTab.swift`, `ST/PhotoAdjustmentLayerSnapshots.swift` | AL-5 | ~200, 2 |
-| AL-7 | #580 (part) | The Adjust tab edits the target: header and info line, only the layer's sections, Curves reads and writes the target's curve | `A/PhotoAdjustTab.swift`, `A/AdjustmentsInspector.swift`, `A/CurvesSection.swift`, `ST/PhotoAdjustTargetSnapshots.swift` | AL-6 | ~300, 4 |
-| AL-8 | #580 (closes) | Journeys PJ-9 and the adjustment series of PJ-P2 | `UT/PhotoJourneyTests+AdjustmentLayers.swift`, `UT/PhotoJourneyTests+PerfAdjustmentLayers.swift` | AL-7 | ~260, 2 |
+| AL-3 | #580 (part) | Workspace: add, target, adjust, end gesture, header and info lines | `M/PhotoAdjustmentLayer.swift`, `MT/PhotoAdjustmentLayerTests.swift` | – | ~340, 2 |
+| AL-4 | – | Budget PB-13 (model step) and its event-to-picture series | `MT/PhotoAdjustmentLayerBudgetTests.swift`, `ST/PhotoAdjustmentLayerLatencyTests.swift` | AL-2, AL-3 | ~200, 2 |
+| AL-5 | #580 (part) | Layer > New Adjustment Layer submenu with its help; the window's adjustment-layer intents | `A/PhotoCommands+Layer.swift`, `A/PhotoWindow+AdjustmentLayer.swift` | AL-1, AL-3 | ~180, 2 |
+| AL-6 | #580 (part) | Layer rows: kind symbol, identifiers, the info line; snapshot | `A/PhotoLayersTab.swift`, `ST/PhotoAdjustmentLayerSnapshots.swift` | AL-1, AL-3 | ~200, 2 |
+| AL-7 | #580 (part) | The Adjust tab edits the target: header and info line, only the layer's sections, Curves reads and writes the target's curve | `A/PhotoAdjustTab.swift`, `A/AdjustmentsInspector.swift`, `A/CurvesSection.swift`, `ST/PhotoAdjustTargetSnapshots.swift` | AL-3, AL-5 | ~300, 4 |
+| AL-8 | #580 (closes) | Journeys PJ-9 and the adjustment series of PJ-P2 | `UT/PhotoJourneyTests+AdjustmentLayers.swift`, `UT/PhotoJourneyTests+PerfAdjustmentLayers.swift` | AL-2, AL-4, AL-6, AL-7 | ~260, 2 |
 
-Chain: AL-1 → AL-2 → AL-3, then AL-4 beside AL-5 → AL-6 → AL-7 → AL-8
-(AL-5 to AL-7 each change what the window shows, so they go in turn). AL-8
-carries `feature-done`.
+AL-3 codes against the `AdjustmentLayering` contract and its fake, so it
+needs neither AL-1 nor AL-2. Its tests build on
+`PhotoWorkspace(services: .fake)` (`FakeAdjustmentLayers`: four kinds, no
+help), not on `whiteImage()` or `.live`: on `.live` the service stays
+NotBuilt until AL-1, with no kinds and a help line, so the add is refused.
+AL-5 and AL-6 need AL-1: the menu check and the row snapshot build on
+`PhotoWorkspace()`, which runs on `.live`. AL-6 reads `layerInfo` and the
+layer's kind, so it needs AL-3 but not AL-5's menu. AL-8 carries `feature-done`. No task edits
+a shared doc (`docs/c4/model.json`, `docs/design.md`, the blueprint or
+`waves.md`): every file is already owned by its target's C4 component, so
+there is no docs task.
+
+## Build waves
+
+- Wave 1: AL-1, AL-3. Independent in this wave: both.
+- Wave 2: AL-2, AL-5, AL-6. Independent in this wave: all three.
+- Wave 3: AL-4, AL-7. Independent in this wave: both.
+- Wave 4: AL-8 (feature-done, final).
+
+Longest chain: AL-3 → AL-5 → AL-7 → AL-8 (4), tied with AL-1 → AL-2 → AL-4 → AL-8 (4).
+
+Chain of 4: AL-5 calls `addAdjustmentLayer` and `adjustmentLayerKinds` from
+AL-3; AL-7 sends the intents AL-5 adds in `A/PhotoWindow+AdjustmentLayer.swift`;
+PJ-9 in AL-8 drives the Adjust tab AL-7 builds.
+Chain of 4: AL-2's tile test needs AL-1's `applying`; AL-4 times the
+`PhotoLayerComposite` case AL-2 fills; AL-8's `feature-done` run reports
+AL-4's PB-13 number on the contact sheet.
 
 ## Acceptance test per task
 
