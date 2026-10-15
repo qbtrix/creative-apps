@@ -78,3 +78,4 @@ Waves (packet's Build waves, checked against dev at 00e546a):
 - Filed needs-ui #1252 (ScrubField marker over its label) for line:suiteui.
 - Container load (~40 on 4 cores, five parallel gates) fails timing budgets in other lines (Flare p95, Library, Halo, Stage). Decision: the lead reruns finished fixers' gates one at a time once load < 6, instead of more parallel reruns.
 - F1 texts: save "Couldn't Save beach.ora" / "<reason>. Choose another folder with File > Save As…"; open "Couldn't Open <file>" / ArchiveError.message; recovery offer NSAlert sheet with informative text; Keep layers? names beach.ora and beach.png. Packet line 107 still quotes the old save text (packet edit belongs to the finish PR).
+- F4 #1255: debug runs PB-18/19/20 on 400x300, report-only (debug ~22 us/px/pass, 2-13x over the 10x scaled bound); +3.4 s debug wall time.

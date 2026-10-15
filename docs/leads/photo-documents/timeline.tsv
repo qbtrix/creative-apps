@@ -73,3 +73,4 @@ utc	stage	event	ref	note
 2026-10-15T22:26Z	4	heartbeat	fixes	E, G, F1 committed; gates queued at low load
 2026-10-15T22:32Z	4	heartbeat	-	waiting
 2026-10-15T22:34Z	4	pr-opened	#1254	fix F2 save status help + inset
+2026-10-15T22:36Z	4	pr-opened	#1255	fix F4 debug budgets report-only (+3.4 s)
