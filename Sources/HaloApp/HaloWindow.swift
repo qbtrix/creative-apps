@@ -47,9 +47,8 @@ struct HaloWindow: View {
             ) {
                 HaloViewer(model: model, perform: perform)
             } inspector: {
-                if let comp = model.selectedComposition {
-                    HaloCompositionInspector(
-                        comp: comp, selectedLayerID: model.selectedLayerID, onSelectLayer: { perform(.selectLayer($0)) })
+                if model.selectedComposition != nil {
+                    HaloCompositionInspector(model: model, perform: perform)
                 } else {
                     EmptyStateView(
                         "No Selection", systemImage: "rectangle.stack", message: "Select a composition to see its settings.")

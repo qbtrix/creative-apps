@@ -19,9 +19,13 @@ import Testing
         project.newLayer(.text)
         let comp = try #require(project.selectedComposition)
         #expect(comp.layers.count == 2)
+        // No layer selected, so the composition's own rows show.
+        var document = project.document
+        document.selectedLayerID = nil
+        let shown = HaloProject(services: .live, document: document)
         for scheme in [ColorScheme.light, .dark] {
             try snapshot(
-                HaloCompositionInspector(comp: comp, selectedLayerID: project.selectedLayerID)
+                HaloCompositionInspector(model: shown)
                     .frame(width: SuiteSize.inspectorWidth.ideal, height: 900, alignment: .topLeading)
                     .background(SuiteColor.panel)
                     .padding(SuiteSpacing.xxl),
