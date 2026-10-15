@@ -107,6 +107,19 @@ import Testing
         })
     }
 
+    /// PJ-8 reads each combined row's label: its name, then its number in pixels.
+    @Test func fieldRowsLabelTheirNameAndNumber() throws {
+        #expect(PhotoWorkspace(services: .live).cropFieldAccessibilityLabel(.width) == "Width, 0 pixels")
+        var workspace = try image()
+        #expect(workspace.cropFieldAccessibilityLabel(.height) == "Height, 600 pixels")
+        workspace.setCropAspect(.ratio(1, 1))
+        #expect(workspace.cropFieldAccessibilityLabel(.width) == "Width, 600 pixels")
+        #expect(workspace.cropFieldAccessibilityLabel(.x) == "X, 100 pixels")
+        #expect(workspace.cropFieldAccessibilityLabel(.y) == "Y, 0 pixels")
+        #expect(typed(&workspace, .width, 1))
+        #expect(workspace.cropFieldAccessibilityLabel(.height) == "Height, 1 pixel")
+    }
+
     @Test func everyFieldSaysWhatItMeasures() {
         let workspace = PhotoWorkspace(services: .live)
         let helps = CropField.allCases.map { workspace.cropFieldHelp($0) }
