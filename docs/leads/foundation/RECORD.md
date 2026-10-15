@@ -2,9 +2,9 @@
 
 Issue: #777 · Packet: docs/blueprints/halo/features/foundation.md (on branch `docs/halo-feature-packets` until its PR merges)
 Run: act-1a13b78bcdb-qu60 · Session: session_01Dc9GDxc9HxLtv9XMcFgSWh · Started: 2026-10-14T17:33Z
-Stage: 4 round 1 (waiting on a dev CI run that contains #944)
+Stage: 4 round 1 (fix batch r1 building)
 Base: 52928d1dbbdd72b849f7fdb6363991f35b1adbeb
-Next: find the first CI run on dev whose head contains 8cd8339 (#944); read macOS job, audit-halo-*.json, ui-screens/snapshots; critic panel
+Next: wait for fixer PR lead/foundation-r1-fix (layer row select, H-J0 query, H-J1 problem line, -HaloWindowSize); then round 2 on the CI run that contains it. offscreen waits on SuiteUI #933
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -33,6 +33,7 @@ Next: find the first CI run on dev whose head contains 8cd8339 (#944); read macO
 ## Rounds
 | round | CI run | CI | audit vs baseline | lenses | confirmed | fixed by | clean |
 |---|---|---|---|---|---|---|---|
+| 1 | 38675308731 (1025fcc) | red: Halo journeys H-J0, H-J1, H-J13, testLayoutAtWidths, testScrubTheTimeline fail; testEveryMenuOpens passes | halo offscreen 14 > 8 (SuiteUI #933 split-view overflow: sidebar rows x -28/-8, inspector to x 1036 in a 12–1012 window); identifier 1 (system Hide Sidebar) < 10; unnamed 0 < 5 | CI + audit + screens (panel not run: blockers already confirmed by the journeys) | 5: layer row click doesn't select (major); H-J0 query misses EmptyStateView title; H-J1 no problem line for abc; -HaloWindowSize ignored (1000 not 880); offscreen over baseline (blocker, SuiteUI #933) | r1 fixer (4); #933 (offscreen) | no |
 | 1a | 38673821944 (3af1c0e) | red: macOS `swift test` failed on SuiteUITests.rowBodyAndItsTogglesCarryNoDoubleClickGesture (not foundation: #938's ids, fixed by #944); UI journeys skipped | not measured | – | – | – | no |
 
 ## Decisions
@@ -64,5 +65,9 @@ Next: find the first CI run on dev whose head contains 8cd8339 (#944); read macO
 
 - Run 38673821944 compiled every Halo SwiftUI file and passed the Halo snapshot suites (halo(), HaloCompositionSnapshots); its only failure was a SuiteUI test fixed on dev by #944, so round 1 waits for the next run instead of fixing it here.
 
+- Round 1 finding offscreen 14 > 8 is SuiteUI #933 (SuiteWindow owns the column widths; a Halo PR can't edit SuiteUI). Measurements posted on #933 and the plan on #777; the baseline is not raised.
+- Artifacts download through the proxy with plain curl on api.github.com/.../actions/artifacts/<id>/zip (gh is unauthenticated here).
+
 ## Open
+- SuiteUI #933: split view wider than the window; blocks halo offscreen ≤ 8 and so H-J13 / testScrubTheTimeline.
 - docs/c4/model.json "HaloApp sources" description still names only the Layer and Composition menus; the supervisor folds C4 descriptions in (packet: no shared docs).
