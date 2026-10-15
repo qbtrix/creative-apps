@@ -2,7 +2,8 @@
 // an open from `beginOpen` to `finishOpen` (which replaces the document and
 // clears history, or leaves the project as it was), what a save or a failed
 // save leaves, the recent list (newest first, 10 at most, no repeated path),
-// and the window title and save status. The only writer of `file`, besides
+// the window title and save status, and where Save writes (`saveTarget`,
+// HF-9). The only writer of `file`, besides
 // `edit` marking it unsaved.
 // W0's `HaloFileState.opening` is a Bool, so the file being opened rides at
 // the head of `file.recent` until `finishOpen`; `recent` hides it.
@@ -12,6 +13,12 @@ import FoundationEssentials
 #else
 import Foundation
 #endif
+
+/// Where Save or Save As… goes: straight to a file, or to the save panel.
+public enum HaloSaveTarget: Equatable, Sendable {
+    case write(path: String)
+    case ask
+}
 
 extension HaloProject {
     /// How many projects Open Recent lists.
@@ -89,6 +96,22 @@ extension HaloProject {
     public var saveStatus: String {
         if file.unsaved { return file.error != nil ? "Not saved" : "Edited" }
         return file.path == nil ? "Untitled" : "Saved"
+    }
+
+    /// A launch path (`-HaloSaveTo`) always wins; Save As… asks; Save writes
+    /// the file the project was opened from or last saved to, else asks.
+    public func saveTarget(launchPath: String?, saveAs: Bool) -> HaloSaveTarget {
+        if let launchPath { return .write(path: launchPath) }
+        if !saveAs, let path = file.path { return .write(path: path) }
+        return .ask
+    }
+
+    /// The path's last component without ".halo": "/t/Spot.halo" is "Spot".
+    public static func fileName(fromPath path: String) -> String {
+        let last = path.split(separator: "/").last.map(String.init) ?? path
+        let suffix = ".halo"
+        guard last.count > suffix.count, last.lowercased().hasSuffix(suffix) else { return last }
+        return String(last.dropLast(suffix.count))
     }
 
     /// Puts `entry` first, drops its path from further down, keeps 10.
