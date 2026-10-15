@@ -2,9 +2,9 @@
 
 Issue: #799 · Packet: docs/blueprints/flare/features/live-keys.md
 Run: act-1a13d0020ff-4x51 · Session: cse_01BKSKFkuR1aFXhWhZAhsegU · Started: 2026-10-15T00:00Z
-Stage: 5 finish
+Stage: 5 finish (blocked: dev CI red outside Flare)
 Base: a45f1cbe6a5c49a11296e40bac32b48bb4b264fd
-Next: wait for a green dev CI run containing #970 (db2f53a); then comment Belt-Contact-Sheet on #799 and finish. Latest: 38687993459 red only on Halo testLayoutAtWidths and Suite testGalleryOpensEveryPage (#763); Flare green
+Next: when a dev CI run containing #970 (db2f53a) is green, comment on #799 "Belt-Contact-Sheet: <run link>" with the journey lines and Flare audit counts, then mark done. Nothing else is left for live-keys. Last checked run 38698770785 (c0c7116): Flare journeys pass, Flare audit under baseline; red only on HaloJourneyTests.testLayoutAtWidths and SuiteJourneyTests.testGalleryOpensEveryPage (#763).
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -44,6 +44,7 @@ Next: wait for a green dev CI run containing #970 (db2f53a); then comment Belt-C
 - Fix PRs carry feature-done too, since they land after KY-9 (#936) and the lane dispatches CI for them.
 
 ## Open
+- Done condition 6 not met yet: needs a green dev CI run containing #970. Runs 38687993459, 38694361192 and 38698770785 all contain it, and each is red only on Halo and SuiteUI journeys (#763). Status posted on #799 (comment 6185666854).
 - gap #971: FakeKeyframes still refuses a key past the scene end with invalidFrame; LiveKeyframes uses pastSceneEnd (#970).
 - gap #967: the Opacity row stores 0...1 but says "%" with 0 decimals (fake and live; spec decision).
 - gap #968: Mixed shows for equal values when only the key states differ (packet KY-1 vs flare.md wording).
