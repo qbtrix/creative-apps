@@ -4,7 +4,7 @@ Issue: #800 · Packet: docs/blueprints/flare/features/live-scenes.md
 Run: act-1a13ca4f89e-0ft1 · Session: claude/live-scenes-lead-d0sj3t · Started: 2026-10-14
 Stage: 5 finish
 Base: cba1813739a5be03f353698cc2c61e76bc8c6103
-Next: read dev CI run 38667087530 (c3fd66f, from feature-done #914); green -> Belt-Contact-Sheet comment on #800
+Next: watch dev CI runs (ci.yml, branch dev) newer than 38667087530; on the first green one, comment Belt-Contact-Sheet on #800 and mark done. Red only on SuiteUI = not ours (dev-red #763).
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -36,5 +36,6 @@ Quality bars: QB-F3 one gesture one step, QB-L7 <= 10 ms per moveGuide step (med
 - No Flare screen changes: the live type is not wired until IN-4, so the Anatomy loop judges on CI + audit, not new screens.
 
 ## Open
+- Feature-done run 38667087530 (c3fd66f) red only on SuiteUI SnapshotHostTests/TokensTests (dev-red #763, triaged twice); waiting on the SuiteUI line for a green dev run. Status comment on #800.
 - Round budget used: 4 rounds (round 4 clean); no gap issues left open.
 - dev-red #763 open before this feature: macOS fails in SuiteUI (SnapshotHost, FrameProbe, ControlInventory, GoldenImage) and Photo (PhotoBrushLatency); no Flare or LiveScenes test in run 38654031210 failed.
