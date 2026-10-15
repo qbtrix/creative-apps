@@ -124,7 +124,7 @@ final class PhotoEditJourneyTests: XCTestCase {
         photo.app.terminate()
 
         // No image open: Paste opens a clean 200 x 100 "Untitled" image.
-        photo = Journey("Photo", self)
+        photo = Journey("Photo", self, arguments: photoArguments())
         XCTAssert(photo.app.windows["Photo"].waitForExistence(timeout: 30), "the empty Photo window didn't open")
         choose("Paste", photo)
         XCTAssert(photo.app.windows["Untitled"].waitForExistence(timeout: 15), "Paste with no image opened no Untitled image")
@@ -138,7 +138,7 @@ final class PhotoEditJourneyTests: XCTestCase {
         // Error: a 6000 x 4000 image (24 MP) is over the open limit, so it opens
         // scaled to 5016 x 3344. Decoding and a lanczos3 resize take a while: a long wait.
         try putOnPasteboard(Self.magentaPNG(width: 6000, height: 4000))
-        photo = Journey("Photo", self)
+        photo = Journey("Photo", self, arguments: photoArguments())
         XCTAssert(photo.app.windows["Photo"].waitForExistence(timeout: 30), "the empty Photo window didn't open")
         choose("Paste", photo)
         expectStatus("Pasted at 84%.", photo, timeout: 180)

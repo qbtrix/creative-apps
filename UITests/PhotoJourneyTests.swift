@@ -60,7 +60,7 @@ final class PhotoJourneyTests: XCTestCase {
 
     /// On `.live` the Eyedropper is disabled.
     @MainActor func testLaunchShowsWindowShell() {
-        let photo = Journey("Photo", self)
+        let photo = Journey("Photo", self, arguments: photoArguments())
         photo.expectEditorShell()
         let eyedropper = photo.element("suite.tools").buttons["Eyedropper"]
         XCTAssert(eyedropper.waitForExistence(timeout: 5), "the rail has no Eyedropper")
@@ -94,7 +94,7 @@ final class PhotoJourneyTests: XCTestCase {
     }
 
     @MainActor func testNewImageAndEveryTool() {
-        let photo = Journey("Photo", self)
+        let photo = Journey("Photo", self, arguments: photoArguments())
         photo.app.typeKey("n", modifierFlags: .command)
         photo.shot("new-image")
         photo.clickEachTool()
@@ -151,7 +151,7 @@ final class PhotoJourneyTests: XCTestCase {
     }
 
     @MainActor func testEveryMenuOpens() {
-        let photo = Journey("Photo", self)
+        let photo = Journey("Photo", self, arguments: photoArguments())
         photo.app.typeKey("n", modifierFlags: .command)
         photo.openEachMenu()
     }
@@ -229,7 +229,7 @@ final class PhotoJourneyTests: XCTestCase {
 
         // The saved file reopens, with no history.
         photo.app.terminate()
-        let reopened = Journey("Photo", self, arguments: arguments)
+        let reopened = Journey("Photo", self, arguments: photoArguments(open: file, exportTo: exports))
         XCTAssert(reopened.app.windows["journey.png"].waitForExistence(timeout: 30), "the saved journey.png didn't reopen")
         expectHeader("800 × 600 px", reopened, "the reopened journey.png isn't 800 × 600 px")
         expect("photo.bar.undo", reopened, "the reopened window has no Undo button")
