@@ -2,9 +2,9 @@
 
 Issue: #1036 · Packet: docs/blueprints/halo/features/layer-keys.md
 Run: act-1a13eb691a3-wg4n · Session: e0e565d9-6109-5c52-89fd-c254398040f9 · Started: 2026-10-15T08:39Z
-Stage: 3 wave 5
-Base: 98e4db15a3ebfb5d0f68dd8a464088bf56679f71
-Next: LK-6 (wf_1ebfb340-bd6) and LK-8 + LK-11 (wf_3d8e0165-ff3) run; on resume check PRs on layer-keys/lk-6, lk-8, lk-11 and relaunch missing ones; when LK-6 merges start LK-9.
+Stage: 3 wave 6
+Base: 1dcd22169847a05c50024fdbccc66a670404d79d
+Next: LK-8 + LK-11 (wf_3d8e0165-ff3) and LK-9 (wf_cdd9dfba-e9a) run; on resume check PRs on layer-keys/lk-8, lk-9, lk-11; then wave 7 (LK-10, LK-12, LK-13).
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -15,10 +15,10 @@ Next: LK-6 (wf_1ebfb340-bd6) and LK-8 + LK-11 (wf_3d8e0165-ff3) run; on resume c
 | LK-3 | 4 | setParent in the rules, cycle refused, child kept on screen | same as LK-2a | PropertyKeyingContractTests on parented | #1088 | merged |
 | LK-4 | 4 | LiveViewerDragging hit and commitMove; fake wraps it | Live/LiveViewerDragging, Fakes/FakeViewerDragging, ViewerDraggingContractTests | ViewerDraggingContractTests | #1086 | merged |
 | LK-5 | 4 | propertyRows, setProperty to/text, endPropertyScrub, shown helpers | HaloKeying.swift, HaloKeyingTests | HaloKeyingTests | #1091 | merged |
-| LK-6 | 5 | toggles, setParent, choices; keys availability | HaloKeying.swift, Availability/HaloAvailability+Keys, HaloKeyToggleTests, HaloKeysAvailabilityTests | both suites | – | building |
+| LK-6 | 5 | toggles, setParent, choices; keys availability | HaloKeying.swift, Availability/HaloAvailability+Keys, HaloKeyToggleTests, HaloKeysAvailabilityTests | both suites | #1109 | merged |
 | LK-7 | 5 | compositionPoint and viewer drag begin/move/end/cancel | HaloViewerDrag.swift, HaloKeyByDragTests | HaloKeyByDragTests | #1105 | merged |
 | LK-8 | 6 | budgets HB-1, HB-3, HB-4 | HaloKeysBudgetTests | HaloKeysBudgetTests | – | building |
-| LK-9 | 6 | keys routes; TRANSFORM rows, key buttons, refusal caption | HaloApp/HaloWindow+Keys, HaloApp/HaloLayerInspector, HaloInspectorSnapshots | halo-inspector(-refusal) snapshots | – | waits LK-6,7 |
+| LK-9 | 6 | keys routes; TRANSFORM rows, key buttons, refusal caption | HaloApp/HaloWindow+Keys, HaloApp/HaloLayerInspector, HaloInspectorSnapshots | halo-inspector(-refusal) snapshots | – | building |
 | LK-11 | 6 | HaloViewerGestures drag and Escape | HaloApp/HaloViewerGestures, HaloKeyByDragSnapshots | halo-key-by-drag snapshots | – | building |
 | LK-10 | 7 | LAYER group Parent and Blend; narrow snapshot | HaloApp/HaloLayerInspector, HaloInspectorSnapshots | halo-inspector-layer, -narrow snapshots | – | waits LK-9 |
 | LK-12 | 7 | H-J5 drag journey | UITests/HaloJourneyTests+Drag | H-J5 | – | waits LK-9,11 |
@@ -53,6 +53,9 @@ Waves as in the packet. Independent per wave: W1 LK-1; W2 LK-2a; W3 LK-2b; W4 LK
 - Flake seen: FlareEasingDragCostTests.handleDragP95UnderBudget (5.04 ms vs 5 ms under load), not ours.
 
 - LK-8 and LK-11 start before LK-6 merges: they need only LK-5 and LK-7 (merged), per packets.md rule (b). LK-9 still waits on LK-6.
+
+- LK-6: setParent availability also checks placing; setBlendMode needs only a composition and a layer.
+- PR bodies opened over REST get an attribution footer re-added by the tooling; builders strip it with the GitHub MCP update_pull_request.
 
 ## Open
 - #207 keeps `needs-human`; the captain decides (packet note). LK-11 says `Closes #207`.
