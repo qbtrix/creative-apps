@@ -17,9 +17,9 @@ Next: LK-8 + LK-11 (wf_3d8e0165-ff3) and LK-9 (wf_cdd9dfba-e9a) run; on resume c
 | LK-5 | 4 | propertyRows, setProperty to/text, endPropertyScrub, shown helpers | HaloKeying.swift, HaloKeyingTests | HaloKeyingTests | #1091 | merged |
 | LK-6 | 5 | toggles, setParent, choices; keys availability | HaloKeying.swift, Availability/HaloAvailability+Keys, HaloKeyToggleTests, HaloKeysAvailabilityTests | both suites | #1109 | merged |
 | LK-7 | 5 | compositionPoint and viewer drag begin/move/end/cancel | HaloViewerDrag.swift, HaloKeyByDragTests | HaloKeyByDragTests | #1105 | merged |
-| LK-8 | 6 | budgets HB-1, HB-3, HB-4 | HaloKeysBudgetTests | HaloKeysBudgetTests | – | building |
+| LK-8 | 6 | budgets HB-1, HB-3, HB-4 | HaloKeysBudgetTests | HaloKeysBudgetTests | – | finishing (gate flaky under load) |
 | LK-9 | 6 | keys routes; TRANSFORM rows, key buttons, refusal caption | HaloApp/HaloWindow+Keys, HaloApp/HaloLayerInspector, HaloInspectorSnapshots | halo-inspector(-refusal) snapshots | – | building |
-| LK-11 | 6 | HaloViewerGestures drag and Escape | HaloApp/HaloViewerGestures, HaloKeyByDragSnapshots | halo-key-by-drag snapshots | – | building |
+| LK-11 | 6 | HaloViewerGestures drag and Escape | HaloApp/HaloViewerGestures, HaloKeyByDragSnapshots | halo-key-by-drag snapshots | #1115 | merged |
 | LK-10 | 7 | LAYER group Parent and Blend; narrow snapshot | HaloApp/HaloLayerInspector, HaloInspectorSnapshots | halo-inspector-layer, -narrow snapshots | – | waits LK-9 |
 | LK-12 | 7 | H-J5 drag journey | UITests/HaloJourneyTests+Drag | H-J5 | – | waits LK-9,11 |
 | LK-13 | 7 | H-J6 inspector journey | UITests/HaloJourneyTests+Inspector | H-J6 | – | waits LK-9 |
@@ -56,6 +56,9 @@ Waves as in the packet. Independent per wave: W1 LK-1; W2 LK-2a; W3 LK-2b; W4 LK
 
 - LK-6: setParent availability also checks placing; setBlendMode needs only a composition and a layer.
 - PR bodies opened over REST get an attribution footer re-added by the tooling; builders strip it with the GitHub MCP update_pull_request.
+
+- LK-11: no `halo.viewer.artboard` control id added (H-J13 would click empty artboard); the overlay is accessibility-hidden and laid out like HaloDrawnLayers so it covers only the artboard. Escape needs focus: overlay is focusable with no focus effect.
+- LK-8: the gate failed after rebase only on other lines' timing tests (Flare easing drag, Library metadata) at load 16 on 4 cores; a finisher reruns it.
 
 ## Open
 - #207 keeps `needs-human`; the captain decides (packet note). LK-11 says `Closes #207`.
