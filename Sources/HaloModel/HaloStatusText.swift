@@ -25,8 +25,18 @@ extension HaloComposition {
     public var headerDetails: [String] { [sizeText, "\(frameRateText) · \(durationText)"] }
 
     /// The viewer status bar's trailing text: the playhead's timecode
-    /// (HaloTimeline), then the length and rate ("00:00:00:00 / 10 s at 30 fps").
-    public var statusTimecode: String { "\(playheadTimecode) / \(durationText) at \(frameRateText)" }
+    /// (HaloTimeline) and frame, then the length and rate
+    /// ("00:00:00:20 · frame 20 / 3 s at 24 fps"). The timecode leads, so
+    /// journeys can match on its prefix; the frame matches the ruler.
+    public var statusTimecode: String { statusPlayheadText + statusLengthText }
+
+    /// The readout's current part, drawn in the primary text color
+    /// ("00:00:00:20 · frame 20").
+    public var statusPlayheadText: String { "\(playheadTimecode) · frame \(playheadFrame)" }
+
+    /// The readout's total part, drawn secondary after the current part
+    /// (" / 3 s at 24 fps").
+    public var statusLengthText: String { " / \(durationText) at \(frameRateText)" }
 
     /// The timecode pill's tooltip: what its four parts count and the frame
     /// the playhead is on ("Hours:minutes:seconds:frames at the playhead
