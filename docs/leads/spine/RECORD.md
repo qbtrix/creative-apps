@@ -2,9 +2,9 @@
 
 Issue: #1044 · Packet: docs/blueprints/library/features/spine.md
 Run: act-1a13f18aaa0-lfw5 · Session: session_01DtSRhNqsphGfKkvV5eLsWW · Started: 2026-10-15T10:25Z
-Stage: 2 plan
+Stage: 3 wave 1
 Base: bcf5a099960d2ceb59394cdd38c0b83c7640b7cc
-Next: build wave 1 (SP-1, SP-10, SP-11, SA-1) with build-wave.js on the base above
+Next: wait for wave 1 PRs (workflow wf_3b908c8c-d1c) to merge; then wave 2 (SP-2)
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -51,6 +51,7 @@ Taken from the packet's Build waves; checked against dev bcf5a09.
 ## Decisions
 - Builder branches are `lead/spine-<id>`, not `lead/spine/<id>`: git can't hold `lead/spine` and `lead/spine/<x>` refs together.
 - #333 is closed and project.yml compiles `UITests/<target>*.swift`, so SJ-2 puts J11 in `LibraryJourneyTests+Shell.swift` and helpers in `+Files.swift`.
+- SA-1 leaves out `DisplayImage+Image.swift`: `DisplayImage` lands in SP-1 in the same wave, so SA-2 adds it.
 - `gh` GraphQL is blocked in cloud sessions: builders open PRs with `gh api` REST (POST pulls, then POST issues/<n>/labels).
 
 ## Open

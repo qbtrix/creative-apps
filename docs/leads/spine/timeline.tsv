@@ -2,3 +2,4 @@ utc	stage	event	ref	note
 2026-10-15T10:26Z	0	stage-start	#1044	base bcf5a09 verified
 2026-10-15T10:35Z	1	stage-end	spine.md	packet read, 23 tasks
 2026-10-15T10:35Z	2	stage-end	RECORD.md	13 waves planned
+2026-10-15T10:32Z	3	stage-start	wave1	SP-1 SP-10 SP-11 SA-1 building
