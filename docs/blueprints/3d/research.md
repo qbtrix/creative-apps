@@ -886,7 +886,7 @@ Collected 2026-10-15 from public sources only.
 | 3 | Crashes, instability and data loss | 4: review sites, forums, Q&A, tracker | 654 open "crash" issues; 72% negative of 74 reviews (search snippet) |
 | 4 | Mac, Apple silicon and iPad support | 3: forums, Q&A, vendor forum | 988,635 views (S-FORUM Mac thread, Part 1) |
 | 5 | Learning curve, interface and navigation | 3: review sites, forums, Q&A | 705,494 views ("focus on selected object"); origin/pivot ~1.5M views across 3 questions |
-| 6 | File interchange (import/export) | 3: Q&A, forums, tracker | 381,292 views (how to import a closed commercial scene file, .max) |
+| 6 | File interchange (import/export) | 3: Q&A, forums, tracker | 381,292 views (how to import a closed commercial scene file) |
 | 7 | Modeling-tool reliability (booleans, precision) | 3: Q&A, forums, tracker | 200,196 views ("Boolean modifier not working"); 259 open "boolean" issues |
 | 8 | Add-on breakage across versions | 1: forums | 210 posts, 33,585 views |
 
@@ -980,7 +980,7 @@ Cost ranks first on breadth, but nearly all of its numbers are search snippets; 
 ### I7. File interchange (import/export)
 
 - S-QA (score / views):
-  - 39 / 381,292: how to import a closed commercial scene file (.max) (/14808).
+  - 39 / 381,292: how to import a closed commercial scene file  (/14808).
   - 43 / 338,461: Import .mtl (/5110).
   - 67 / 317,674: FBX export has no materials/textures (/57531).
   - 33 / 312,395: STEP (/126324).
