@@ -13,6 +13,12 @@
       "target": "flarecore",
       "description": "uses FlareCore from creative-core",
       "style": "sync"
+    },
+    {
+      "source": "flare-model",
+      "target": "suite-model",
+      "description": "declares document kinds and pasteboard representations; reads preferences",
+      "style": "sync"
     }
   ]
 }

@@ -7,5 +7,25 @@
     "internal",
     "macos-only"
   ],
-  "order": 140
+  "order": 140,
+  "relationships": [
+    {
+      "source": "afterglow-app",
+      "target": "suite-shell",
+      "description": "uses the launcher, hand-off, store and routing services",
+      "style": "sync"
+    },
+    {
+      "source": "afterglow-app",
+      "target": "suite-model",
+      "description": "reads home state, preferences, assets, onboarding and update logic",
+      "style": "sync"
+    },
+    {
+      "source": "afterglow-app",
+      "target": "suiteui",
+      "description": "builds its windows from SuiteUI",
+      "style": "sync"
+    }
+  ]
 }

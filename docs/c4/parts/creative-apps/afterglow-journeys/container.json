@@ -7,5 +7,13 @@
     "internal",
     "test"
   ],
-  "order": 170
+  "order": 170,
+  "relationships": [
+    {
+      "source": "afterglow-journeys",
+      "target": "afterglow-app",
+      "description": "launches and drives",
+      "style": "test"
+    }
+  ]
 }
