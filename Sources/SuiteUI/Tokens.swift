@@ -117,6 +117,14 @@ public enum SuiteSize {
     public static let inspectorWidth: (min: CGFloat, ideal: CGFloat, max: CGFloat) = (200, 240, 360)
     public static let contentMinimum = CGSize(width: 440, height: 360)
     public static let contentIdealWidth: CGFloat = 560
+    /// What the split view's detail column adds around SuiteWindow's content
+    /// frame. The inspector sits in that column, and the column measured the
+    /// content frame's minimum plus the inspector's minimum plus an 8 pt
+    /// divider: 648 pt for a 440 pt minimum, in every window from 900 to
+    /// 1000 pt wide (#933; 708 for #579's 480 and 220). SuiteWindow sizes its
+    /// content frame this much under the content sizes, so the column comes
+    /// out at contentMinimum and the three columns fit windowMinimum.
+    public static let detailInspectorAllowance: CGFloat = inspectorWidth.min + 8
     public static let windowMinimum = CGSize(
         width: sidebarWidth.ideal + contentMinimum.width + inspectorWidth.ideal, height: 560)
     public static let windowLaunch = CGSize(
