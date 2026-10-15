@@ -2,9 +2,9 @@
 
 Issue: #1036 · Packet: docs/blueprints/halo/features/layer-keys.md
 Run: act-1a13eb691a3-wg4n · Session: e0e565d9-6109-5c52-89fd-c254398040f9 · Started: 2026-10-15T08:39Z
-Stage: 3 wave 8
-Base: 94c18ec29e2ce324d404c39d376a7257437949cd
-Next: LK-14 (feature-done) builds in wf_8cc1f1db-e64; on resume check PR on layer-keys/lk-14. After it merges, stage 4 round 1 on the CI run it triggers (dev is red from LibraryInspector, #763).
+Stage: 4 round 1
+Base: 9af4454347be12947f59fd882c706d833ae6a245
+Next: wait for a dev macOS run where AppSnapshotTests compiles (blocked by viewer-playback's HaloPlaybackDriverTests circular reference, #763); then download ui-screens + snapshots and run the critic panel. Runs on 9af4454: 38732179619 (red), 38732320210 (dispatched).
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -22,14 +22,15 @@ Next: LK-14 (feature-done) builds in wf_8cc1f1db-e64; on resume check PR on laye
 | LK-11 | 6 | HaloViewerGestures drag and Escape | HaloApp/HaloViewerGestures, HaloKeyByDragSnapshots | halo-key-by-drag snapshots | #1115 | merged |
 | LK-10 | 7 | LAYER group Parent and Blend; narrow snapshot | HaloApp/HaloLayerInspector, HaloInspectorSnapshots | halo-inspector-layer, -narrow snapshots | #1119 | merged |
 | LK-12 | 7 | H-J5 drag journey | UITests/HaloJourneyTests+Drag | H-J5 | #1122 | merged |
-| LK-13 | 7 | H-J6 inspector journey | UITests/HaloJourneyTests+Inspector | H-J6 | #1126 | open |
-| LK-14 | 8 | H-J23 parent journey, feature-done | UITests/HaloJourneyTests+Parent | H-J23 | – | building |
+| LK-13 | 7 | H-J6 inspector journey | UITests/HaloJourneyTests+Inspector | H-J6 | #1126 | merged |
+| LK-14 | 8 | H-J23 parent journey, feature-done | UITests/HaloJourneyTests+Parent | H-J23 | #1129 | merged |
 
 Waves as in the packet. Independent per wave: W1 LK-1; W2 LK-2a; W3 LK-2b; W4 LK-3, LK-4, LK-5; W5 LK-6, LK-7; W6 LK-8, LK-9, LK-11; W7 LK-10, LK-12, LK-13; W8 LK-14.
 
 ## Rounds
 | round | CI run | CI | audit vs baseline | lenses | confirmed | fixed by | clean |
 |---|---|---|---|---|---|---|---|
+| 1 | 38732179619 (9af4454) | red: not ours (AppSnapshotTests: HaloPlaybackDriverTests.swift:18 circular reference, viewer-playback #1097; on #763). HaloApp with all keys views compiled (Build complete) | – (journeys did not run) | – | – | – | pending |
 
 ## Decisions
 - Depends on #777 and #333: both closed, so the lead runs.
@@ -67,6 +68,7 @@ Waves as in the packet. Independent per wave: W1 LK-1; W2 LK-2a; W3 LK-2b; W4 LK
 - LK-14 opened before LK-13 merges: separate file; the lane merges oldest first, so the feature-done run holds all three journeys.
 
 ## Open
+- CI on the feature-done head 9af4454: swift build (all HaloApp keys views) passes on macOS; swift test stops compiling AppSnapshotTests at viewer-playback's HaloPlaybackDriverTests.swift:18 (#1097). Reported on #763 by others; not ours to fix. Journeys and audit wait on it.
 - dev-red #763: macOS build fails in Sources/LibraryApp/LibraryInspector.swift:14-15 (mutating member on let model), not this feature; it hides any Halo compile error until fixed. Run 38726261412.
 - #207 keeps `needs-human`; the captain decides (packet note). LK-11 says `Closes #207`.
 - #783 (needs-ui): typed text that isn't a number never reaches the Model; H-J6 asserts only that the value is kept.

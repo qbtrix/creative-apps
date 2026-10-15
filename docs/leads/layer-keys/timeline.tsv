@@ -38,3 +38,8 @@ utc	stage	event	ref	note
 2026-10-15T11:56Z	3	pr-opened	#1126	LK-13
 2026-10-15T11:58Z	3	stage-start	wave8	LK-14 feature-done
 2026-10-15T12:05Z	3	heartbeat	wave8	LK-14 building
+2026-10-15T11:56Z	3	pr-merged	#1126	LK-13
+2026-10-15T12:06Z	3	pr-merged	#1129	LK-14 feature-done
+2026-10-15T12:07Z	3	stage-end	wave8	dev 9af4454
+2026-10-15T12:15Z	4	stage-start	round1	
+2026-10-15T12:15Z	4	ci-run	38732179619	red: HaloPlaybackDriverTests circular ref (viewer-playback, #763); HaloApp builds
