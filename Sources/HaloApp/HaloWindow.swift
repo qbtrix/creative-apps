@@ -4,14 +4,16 @@
 // Composition opens NewCompositionSheet; a double-click on a sidebar row
 // renames it; a refused rename opens RenameRefusalAlert with the typed name
 // kept. It publishes the Composition menu's actions and Layer > New's action
-// as focused scene values. Views only read HaloProject and call its methods;
-// all state lives in HaloModel (scripts/ci checks this).
+// as focused scene values. It opens on HaloLaunch's project (a fixture under
+// `-HaloFixture` or `-HaloSample`) and, under `-HaloControlsProbe`, publishes
+// the `halo.controls` JSON (HaloControls.swift). Views only read HaloProject
+// and call its methods; all state lives in HaloModel (scripts/ci checks this).
 import HaloModel
 import SuiteUI
 import SwiftUI
 
 struct HaloWindow: View {
-    @State private var model = HaloProject()
+    @State private var model = HaloLaunch.project
     @State private var showsNewComposition = false
 
     var body: some View {
@@ -52,6 +54,7 @@ struct HaloWindow: View {
             onDismiss: { model.dismissRefusedRename() }))
         .focusedSceneValue(\.haloCompositionActions, compositionActions)
         .focusedSceneValue(\.haloNewLayer, newLayer)
+        .haloControlsProbe(HaloLaunch.current.controlsProbe)
     }
 
     /// The Composition menu's actions for the selected composition.
