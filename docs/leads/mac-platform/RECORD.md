@@ -2,9 +2,9 @@
 
 Issue: #793 (resumes #754) · Packet: docs/blueprints/flare/features/mac-platform.md
 Run: act-1a13c789856-0qa9 (first run act-1a13b14336c-tqna) · Session: claude/mac-platform-lead-lxlcta (first: claude/mac-platform-lead-7jx22z) · Started: 2026-10-14T15:43Z, resumed 2026-10-14T22:15Z
-Stage: 4 round 4 (last)
+Stage: 5 finish (round budget spent; contract done waits on a green dev run containing #1051)
 Base: a5182b48a42c17aaf8862bf3bd053250c64d7014
-Next: read the round 4 panel; file any open finding as a gap issue (line:flare); then stage 5: Belt-Contact-Sheet comment on #754 (dev red outside the feature, say so) and the final RECORD.
+Next: nothing to build. When a dev CI run containing f5bd765 (#1051) is green, add that run link to the Belt-Contact-Sheet comment on #754; until then dev-red #763 belongs to the Photo, Halo and SuiteUI lines.
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -45,7 +45,7 @@ Next: read the round 4 panel; file any open finding as a gap issue (line:flare);
 | 3 | none yet (1098ff2) | Linux gate red locally: dev's FlareModel no longer builds against creative-core main 98be31a (key commands take owner: LayerOwner, new CommandError cases .invalidTransform, .emptyName) | - | none: build first | 1 (build break, line:flare) | #801 (merged 22:22Z) | no |
 | 2 | 38602105363 (4594082) | red: macOS swift test, 1 of 1670 failed, PhotoBrushLatencyTests.aBrushDragEventBecomesAFrameWithinBudget (line:photo timing budget, 8.4 ms vs 3.0; 1.0 ms on the previous run). All mac-platform tests pass. Linux green; journeys not reached | not measured (journeys did not run) | none: no ui-screens, and this feature changes no screen | 0 in feature files | - | no (outside red) |
 | 3 | 38704216123 (92db316) | red outside feature: scripts/ci PASS on macOS (all mac-platform suites green); ui-test failed only Photo testFixtureLaunch/testLaunchShowsWindowShell, Halo testLayoutAtWidths, Suite testGalleryOpensEveryPage; all FlareJourneyTests pass (testDrawKeyAndSave skipped) | flare contrast 0/3, identifier 14/15, offscreen 0/15: under baseline | clarity, journey, controls, quality | 2: major (Restore deletes the recovery file, a second crash loses the work), minor (autosave encodes on main); 1 refuted | #1051 | no |
-| 4 | 38709336067 (53e02c6, contains #1051) | red outside feature: macOS scripts/ci compiled the fix and every mac-platform suite passed (restoreLandsTheDocument, writesOffMain included); only HaloLayerListTests (line:halo) failed, journeys skipped | last measured r3: under baseline | clarity, journey, controls, quality (running) | | | |
+| 4 | 38709336067 (53e02c6, contains #1051) | red outside feature: macOS scripts/ci compiled the fix and every mac-platform suite passed (restoreLandsTheDocument, writesOffMain included); only HaloLayerListTests (line:halo) failed, journeys skipped | last measured r3: under baseline | clarity, journey, controls, quality | 1 minor (recovery offer text lacks reason and consequence); 0 refuted | gap #1062 | yes for the feature (CI red outside it) |
 
 ## Decisions
 - Resume (#793): dev moved 4594082 -> 1098ff2 with docs/SuiteUI/Halo merges only, and no CI ran on it. The feature-done PR is a docs-only status update so the lane dispatches the CI run that judges the feature.
@@ -53,6 +53,8 @@ Next: read the round 4 panel; file any open finding as a gap issue (line:flare);
 - gh CLI has no valid token in this session; builders open PRs and set labels through the GitHub MCP tools.
 
 ## Open
+- Contract rule 6 not met: no green dev CI yet. Every red run since the merges failed outside this feature (r2 PhotoBrushLatencyTests; r3 Photo/Halo/SuiteUI journeys; r4 HaloLayerListTests). Contact sheet posted on #754 (comment 6188591552) saying so.
+- gap #1062 (p2, line:flare): recovery offer text should say why and what Discard does.
 - 2026-10-15: dev runs 38682385432..38700713285 all red, every failure outside this feature (SuiteUI FrameProbeTests timing, SuiteWindow #962 toolbar/columns breaking Flare testEditEasingOfAKeyframeSegment, Library loupe, Halo layout); all mac-platform tests pass in each. Tracked on #763 by the other leads.
 - #851 (gap, p1, line:photo): Photo brush timing budgets fail dev CI on shared runners; blocks a green dev run for every feature.
 - creative-core main moved under dev (Package.swift tracks branch main, Package.resolved is gitignored): fixed by #801. No one else had an issue or PR for it.
