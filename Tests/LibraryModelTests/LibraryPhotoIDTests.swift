@@ -39,6 +39,14 @@ private func photo(_ name: String, id: String? = nil, minute: Double = 0, flagge
     #expect(ids.prefix(2) == ["A", "A#2"])
 }
 
+@Test func aPhotosOwnIDIsNeverTakenByAnEarlierDuplicate() {
+    var catalog = LibraryCatalog()
+    catalog.load([photo("a#2"), photo("a"), photo("a")])
+    #expect(catalog.items.map(\.id) == ["a#2", "a", "a#3"])
+    catalog.load([photo("a"), photo("a"), photo("a#2")])
+    #expect(catalog.items.map(\.id) == ["a", "a#3", "a#2"])
+}
+
 @Test func selectionAndLoupeTellSameNamedPhotosApart() {
     var catalog = LibraryCatalog()
     catalog.load([photo("IMG_0001"), photo("IMG_0001", minute: 1)])
