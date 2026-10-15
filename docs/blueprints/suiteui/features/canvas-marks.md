@@ -20,9 +20,10 @@ the probe (#775, #330), the stub `Gallery/GalleryCanvas.swift` (#776), the
 journey bundle (#333) and goldens (#331, #332). No creative-core issue.
 
 **This packet supersedes the "Touch only these files" list** of #273 (S12):
-its marks are split over `CanvasMarks+Vector.swift` and
-`CanvasMarks+Points.swift` and gain contract, gallery and Fake-test files
-(review of #765).
+its marks are split over `CanvasMarks+Vector.swift` (handles),
+`CanvasMarks+Path.swift`, `CanvasMarks+Motion.swift`,
+`CanvasMarks+Points.swift` and `CanvasMarks+Grid.swift`, one file per task,
+and gain contract, gallery and Fake-test files (review of #765).
 
 **App features it unblocks:** Flare's stage (#12, F3c #375, F4b #390:
 selection handles, path and motion-path marks, ghosts), Design adopting the
@@ -67,8 +68,9 @@ with `apple-docs`.
 
 ## Journey steps
 
-In `UITests/SuiteJourneyTests+Canvas.swift`, on the `canvas`, `canvas-pt`,
-`marks` and `surface` pages:
+In `UITests/SuiteJourneyTests+Canvas.swift` (SJ9, SJ10, SJ26) and
+`UITests/SuiteJourneyTests+CanvasMarks.swift` (SJ21, SP2, SP5), on the
+`canvas`, `canvas-pt`, `marks` and `surface` pages:
 
 1. **SJ9** `testCanvasZoomPanAndDrag`: ⌘= twice (pill 200 %, the ⌘= proof
    above); ⌘0 (100 %; the page's 400 × 300 document fits at 100 %); drag
@@ -178,7 +180,11 @@ controls (hidden from accessibility, no hit), so only `CanvasViewport` and
 the page's switches register with `.suiteControl`. No task edits
 `docs/c4/model.json`, `docs/design.md`, `Tokens.swift`, `project.yml` or
 `ScrubValue.swift` (inspector-controls' file; `ViewerZoom.fitScale` is only
-called).
+called). The one shared doc it edits is `docs/blueprints/suiteui.md`: the
+split files below are not in the blueprint's Canvas marks row or its
+canvas-marks file list, so CM-16, the final task, adds them there
+(`packets.md`, rule (a)). `SuiteGridSnapshots.swift` is lists-and-layers'
+(LL-12); CM-8's grid snapshots take `SuiteCanvasGridSnapshots.swift`.
 
 | id | issue | what | owned files | depends on |
 |---|---|---|---|---|
@@ -186,29 +192,50 @@ called).
 | CM-2 | – | `SuiteHandleGeometry` (QB-S13) | `Sources/SuiteUI/HandleGeometry.swift`, `Tests/SuiteUITests/HandleGeometryTests.swift`, `Tests/SuiteUITests/HandleBudgetTests.swift` | CM-1 |
 | CM-3 | – | `SuiteCanvasNavigating` over `ZoomMath` | `Sources/SuiteUI/ZoomMath.swift`, `Tests/SuiteUITests/ZoomMathTests.swift`, `Tests/SuiteUITests/CanvasPanTests.swift` | CM-1 |
 | CM-4 | #273 (part) | `SelectionHandles`: draw, hit, resize, ⇧ aspect, rotate zones, `handle-drag`; files the `line:design` adoption task | `Sources/SuiteUI/CanvasMarks+Vector.swift`, `Tests/SuiteUITests/CanvasMarksTests.swift`, `Tests/AppSnapshotTests/SuiteMarksSnapshots.swift` | CM-2 |
-| CM-5 | #273 (part) | `PathMarks` (smooth and corner anchors differ in shape) and the guide marks | `Sources/SuiteUI/CanvasMarks+Vector.swift`, `Tests/SuiteUITests/CanvasMarksTests.swift`, `Tests/AppSnapshotTests/SuiteMarksSnapshots.swift` | CM-4 |
-| CM-6 | #273 (closes) | `MotionPathMarks` and `GhostLayer` | `Sources/SuiteUI/CanvasMarks+Vector.swift`, `Tests/SuiteUITests/CanvasMarksTests.swift`, `Tests/AppSnapshotTests/SuiteMarksSnapshots.swift` | CM-5 |
+| CM-5 | #273 (part) | `PathMarks` (smooth and corner anchors differ in shape) and the guide marks | `Sources/SuiteUI/CanvasMarks+Path.swift`, `Tests/SuiteUITests/CanvasPathMarksTests.swift`, `Tests/AppSnapshotTests/SuitePathMarksSnapshots.swift` | – |
+| CM-6 | #273 (closes) | `MotionPathMarks` and `GhostLayer` | `Sources/SuiteUI/CanvasMarks+Motion.swift`, `Tests/SuiteUITests/CanvasMotionMarksTests.swift`, `Tests/AppSnapshotTests/SuiteMotionMarksSnapshots.swift` | – |
 | CM-7 | #706, #737 (closes both) | `CanvasPointMark`; files the `line:photo` swap of `CloneSourceMark` | `Sources/SuiteUI/CanvasMarks+Points.swift`, `Tests/SuiteUITests/CanvasPointMarksTests.swift`, `Tests/AppSnapshotTests/SuitePointMarkSnapshots.swift` | – |
-| CM-8 | #530 | `CanvasGrid`; files the `line:photo` swap of `StraightenMarks` | `Sources/SuiteUI/CanvasMarks+Points.swift`, `Tests/SuiteUITests/CanvasPointMarksTests.swift`, `Tests/AppSnapshotTests/SuitePointMarkSnapshots.swift` | CM-7 |
-| CM-9 | #264 | The ruler corner's unit; `canvas-drag` series; the viewport's registration | `Sources/SuiteUI/CanvasViewport.swift`, `Sources/SuiteUI/Ruler.swift`, `Tests/SuiteUITests/RulerMarksTests.swift`, `Tests/AppSnapshotTests/CanvasViewportSnapshots.swift` | CM-3 |
+| CM-8 | #530 | `CanvasGrid`; files the `line:photo` swap of `StraightenMarks` | `Sources/SuiteUI/CanvasMarks+Grid.swift`, `Tests/SuiteUITests/CanvasGridTests.swift`, `Tests/AppSnapshotTests/SuiteCanvasGridSnapshots.swift` | – |
+| CM-9 | #264 | The ruler corner's unit; `canvas-drag` series; the viewport's registration | `Sources/SuiteUI/CanvasViewport.swift`, `Sources/SuiteUI/Ruler.swift`, `Tests/SuiteUITests/RulerMarksTests.swift`, `Tests/AppSnapshotTests/CanvasViewportSnapshots.swift` | – |
 | CM-10 | – | `CanvasSurface.fitted`, the `suite.canvas.artboard` identifier, its goldens | `Sources/SuiteUI/CanvasSurface.swift`, `Tests/SuiteUITests/CanvasSurfaceTests.swift`, `Tests/AppSnapshotTests/SuiteSurfaceSnapshots.swift` | – |
-| CM-11 | – | The `canvas`, `canvas-pt`, `marks`, `surface` and `surface-empty` gallery pages (the last two declared in `GalleryCanvas.pages`, SH-6's per-area list), their log and the Fakes path | `Sources/SuiteUI/Gallery/GalleryCanvas.swift` | CM-6, CM-8, CM-9, CM-10 |
+| CM-11 | – | The `canvas`, `canvas-pt`, `marks`, `surface` and `surface-empty` gallery pages (the last two declared in `GalleryCanvas.pages`, SH-6's per-area list), their log and the Fakes path | `Sources/SuiteUI/Gallery/GalleryCanvas.swift` | CM-3, CM-4, CM-5, CM-6, CM-7, CM-8, CM-9, CM-10 |
 | CM-12 | – | SJ9 (with the ⌘= proof), SJ10, SJ26 | `UITests/SuiteJourneyTests+Canvas.swift` | CM-11 |
-| CM-13 | – | SJ21, SP2, SP5 | `UITests/SuiteJourneyTests+Canvas.swift` | CM-12 |
-| CM-14 | – | Baselines: viewport and rulers (px, pt), selection handles, path marks in four appearances | `Tests/AppSnapshotTests/Golden/canvas/` (12 PNGs) | CM-13's CI run |
-| CM-15 | – | Baselines: motion path and ghosts, point mark, grid in four appearances | `Tests/AppSnapshotTests/Golden/canvas/` (12 PNGs) | CM-14 |
-| CM-16 | – | Baselines: `CanvasSurface` in four appearances; `feature-done` | `Tests/AppSnapshotTests/Golden/canvas/` (4 PNGs) | CM-15 |
+| CM-13 | – | SJ21, SP2, SP5 | `UITests/SuiteJourneyTests+CanvasMarks.swift` | CM-11 |
+| CM-14 | – | Baselines: viewport and rulers (px, pt), selection handles, path marks in four appearances | `Tests/AppSnapshotTests/Golden/canvas/` (12 PNGs) | CM-4, CM-5, CM-9 (a CI run with their actuals) |
+| CM-15 | – | Baselines: motion path and ghosts, point mark, grid in four appearances | `Tests/AppSnapshotTests/Golden/canvas/` (12 PNGs) | CM-6, CM-7, CM-8 (a CI run with their actuals) |
+| CM-16 | – | Baselines: `CanvasSurface` in four appearances; `feature-done` | `Tests/AppSnapshotTests/Golden/canvas/` (4 PNGs), `docs/blueprints/suiteui.md` (the Canvas marks row and the canvas-marks file list: add the split files of CM-5 to CM-8, CM-10 and CM-13) | CM-10, CM-12, CM-13, CM-14, CM-15 |
 
 Sizes: CM-1 ~260 lines; CM-2 ~320; CM-3 ~180; CM-4 ~330; CM-5 ~280; CM-6
 ~250; CM-7 ~200; CM-8 ~160; CM-9 ~150; CM-10 ~170; CM-11 ~380 (if it passes 400, the `surface` pages move to CM-11b in the same file, chained); CM-12
 ~360; CM-13 ~250.
 
-Chains: `CanvasMarks+Vector.swift`, `CanvasMarksTests.swift` and
-`SuiteMarksSnapshots.swift` CM-4 → CM-5 → CM-6; `CanvasMarks+Points.swift`
-and its tests CM-7 → CM-8; the journey file CM-12 → CM-13. CM-1, CM-7 and
-CM-10 start at once. `CanvasMarks.swift` (`SelectionOutline`, `CropShade`)
-and the `RulerLabel*Tests` are this feature's in wave 2 and must keep
-passing unchanged.
+Links: CM-2 and CM-3 conform to CM-1's protocols; CM-4 takes its hit
+rects from CM-2's `SuiteHandleGeometry`; CM-11's pages draw every mark,
+CM-9's viewport and CM-10's surface, and swap CM-2's and CM-3's types for
+CM-1's Fakes; CM-12 and CM-13 drive CM-11's pages; each baseline task
+commits the actuals of the tasks it names. Each mark task has its own source,
+test and snapshot file, so none waits on another, and the two journey files
+let CM-12 and CM-13 build together. `CanvasViewport` already pans and zooms
+through `ZoomMath`, so CM-9 does not wait on CM-3. The `Golden/canvas/`
+PNGs of CM-14, CM-15 and CM-16 do not overlap. `CanvasMarks.swift`
+(`SelectionOutline`, `CropShade`) and the `RulerLabel*Tests` belong to
+this feature (SuiteUI's wave 2) and must keep passing unchanged.
+
+## Build waves
+
+- Wave 1: CM-1, CM-5, CM-6, CM-7, CM-8, CM-9, CM-10. Independent in this wave: all seven.
+- Wave 2: CM-2, CM-3, CM-15. Independent in this wave: all three.
+- Wave 3: CM-4.
+- Wave 4: CM-11, CM-14. Independent in this wave: both.
+- Wave 5: CM-12, CM-13. Independent in this wave: both.
+- Wave 6: CM-16 (`feature-done`, final; the only task that edits `docs/blueprints/suiteui.md`).
+
+Longest chain: CM-1 → CM-2 → CM-4 → CM-11 → CM-12 → CM-16 (6).
+Chain of 6: `SuiteHandleGeometry` (CM-2) conforms to CM-1's
+`HandleGeometryProviding`; `SelectionHandles` (CM-4) hits through it; the
+`marks` page (CM-11) draws `SelectionHandles`; SJ10 (CM-12) drives that
+page; CM-16's `feature-done` run is the done check, so the journeys must be
+merged first.
 
 ## Acceptance test per task
 
@@ -218,16 +245,16 @@ passing unchanged.
 | CM-2 | `HandleGeometryTests`: every handle's hit rect is 12 × 12 at zoom 0.25, 1 and 4 (view points); on a 4 × 4 pt rect the corner nearest the point wins; dragging bottomRight by (50, 0) with ⇧ from 200 × 100 gives 250 × 125 (±1; the larger relative change, 1.25, on both sides); a drag past the opposite side gives width 0, never negative; a quarter turn gives 90 and with snap 13° gives 15 | a hit size scales with zoom, an overlap picks an edge, or a rect goes negative |
 | CM-3 | `ZoomMathTests`: `zoomedIn` from 1 is ZoomMath's next stop (1.5 then 2, as `ViewerZoom.stops` gives); NaN clamps to 1; a 0 × 0 document fits at 1; a viewport with no room gives 0.1; `CanvasPanTests`: → pans a tenth, ⇧→ a whole viewport | a stop, a fit or a pan step is wrong, or a zero divides |
 | CM-4 | `CanvasMarksTests`: `SelectionHandles` draws 8 handles and hit rects come from `SuiteHandleGeometry`; one end per drag; `SuiteMarksSnapshots` handles at 25, 100 and 400 %, and its hairline check (in `Tests/AppSnapshotTests`, where `SnapshotHost` lives; `SuiteUITests` cannot reach it) that outline lines are 2 device px and handles sit on the pixel grid at scale 2 | a drag ends twice, or a handle is off the pixel grid |
-| CM-5 | `CanvasMarksTests`: a smooth anchor and a corner anchor draw different shapes; guide marks span the viewport; snapshots added | anchors look the same |
-| CM-6 | `CanvasMarksTests`: `MotionPathMarks` draws one dot per frame point; `GhostLayer` draws at its opacity; snapshots added | a point or the opacity is wrong |
+| CM-5 | `CanvasPathMarksTests`: a smooth anchor and a corner anchor draw different shapes; guide marks span the viewport; snapshots added | anchors look the same |
+| CM-6 | `CanvasMotionMarksTests`: `MotionPathMarks` draws one dot per frame point; `GhostLayer` draws at its opacity; snapshots added | a point or the opacity is wrong |
 | CM-7 | `CanvasPointMarksTests`: the mark's on-screen size is the same at zoom 1 and 4; it takes no hit and is hidden from accessibility; `SuitePointMarkSnapshots` over light and dark pixels at zoom 1 and 4 (#737's acceptance, #706's) | the size scales, or the mark takes a click |
-| CM-8 | `CanvasPointMarksTests`: a 3-cell grid draws 2 lines each way, 0 cells draws none; snapshots over a light and a dark image in Light and Dark | the line count is off, or 0 cells draws |
+| CM-8 | `CanvasGridTests`: a 3-cell grid draws 2 lines each way, 0 cells draws none; `SuiteCanvasGridSnapshots` over a light and a dark image in Light and Dark | the line count is off, or 0 cells draws |
 | CM-9 | `RulerMarksTests`: the corner reads the given unit, "px" by default; `CanvasViewportSnapshots` adds the "pt" corner and the existing PNGs are unchanged | the default changes Design's or Photo's rulers |
 | CM-10 | `CanvasSurfaceTests`: `fitted` centres a 400 × 300 artboard in 800 × 600 at scale 1, in 200 × 150 (less the inset) at the smaller scale, never above 1, and a 0 × 0 artboard as 1 × 1 with no division; `SuiteSurfaceSnapshots` records the surface and the empty variant; `LibraryLoupeSnapshots` unchanged | the rect is off-centre, scales up, or divides by zero |
 | CM-11 | SJ0 opens the five canvas pages with `violations()` empty; each builds with `-SuiteGalleryFakes` | a control is unregistered or reasonless |
 | CM-12 | SJ9, SJ10, SJ26 pass on CI | any assert, including the ⌘= step |
 | CM-13 | SJ21 passes; SP2 and SP5 hold ≥ 60 samples each | an assert fails or a series is short |
-| CM-14–16 | The next CI run's goldens pass against the baselines; no `canvas` known issue left | a baseline is missing or differs |
+| CM-14–16 | The next CI run's goldens pass against the baselines; no `canvas` known issue left; after CM-16, every file this packet owns is in suiteui.md's canvas-marks file list | a baseline is missing or differs, or the blueprint misses a file |
 
 ## Quality tests
 

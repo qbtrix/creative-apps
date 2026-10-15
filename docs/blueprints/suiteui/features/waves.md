@@ -166,6 +166,19 @@ covered issue is open (#745 is closed and not covered), no product names.
 
 Not v1 (blueprint 8.1): #7, #274, #272.
 
+
+## Longest build chain
+
+Each packet was re-cut to `docs/factory/packets.md` (shared docs in one
+final task, a task waits only on merged code it needs, each wave lists its
+independent tasks). Longest depends-on chain in tasks, before and after;
+a chain over 3 has its reason in the packet's Build waves section.
+
+- canvas-marks: 11 before, 6 after.
+- editor-chrome: 8 before, 6 after.
+- inspector-controls: 11 before, 6 after.
+- lists-and-layers: 12 before, 8 after.
+
 ## The lead contract
 
 Every feature lead and every task below codes against this. It is handed

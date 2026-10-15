@@ -11,7 +11,7 @@ journeys.
 
 **Covers:** #146 (S15 `LayerList` and dimmed rows; closes with LL-5), #577
 (refusable rename; LL-6), #108 (keyboard rename; LL-7), #73 (row context
-menus; LL-8), #589 and #111 (child toggles, app-owned expansion; LL-9),
+menus; LL-8a, LL-8b), #589 and #111 (child toggles, app-owned expansion; LL-9),
 #249 (nesting snapshot; LL-10), #284 (header contrast; LL-11), #308, #311
 and #312 (the rename guard's behavioural journey; LL-14). LL-1 to LL-3,
 LL-12, LL-13, LL-15 to LL-17 have no issue of their own (LL-4 says "Part of
@@ -29,7 +29,7 @@ and adds contract, gallery and Fake-test files to each covered issue
 
 **App features it unblocks:** Flare's layers and scenes panel (F11a #350),
 Halo's inline rename refusal (#139 drops its modal alert once LL-6 lands)
-and its composition context menu (the follow-up of closed #35, after LL-8),
+and its composition context menu (the follow-up of closed #35, after LL-8a),
 Design's Layers group toggles and expansion (follow-ups of closed #50 and
 PR #549, after LL-9).
 
@@ -55,7 +55,8 @@ unit-tested), and the views call them. Check every SwiftUI API with
 
 ## Journey steps
 
-In `UITests/SuiteJourneyTests+Lists.swift`, on the `window`, `layers`,
+In `UITests/SuiteJourneyTests+Lists.swift` (SJ22 and SP4 in
+`UITests/SuiteJourneyTests+ListMenus.swift`), on the `window`, `layers`,
 `layers-300`, `grid` and `grid-2000` pages:
 
 1. **SJ1b** `testWindowShellFitsAtEveryWidth`: widths 880, 1024, 1280, 1440:
@@ -117,10 +118,10 @@ Public API this feature adds (additive; existing calls compile unchanged):
 
 ```swift
 SidebarItem(..., isDimmed: Bool = false)                                     // LL-4
-LayerList(rows:, onToggle:, onRename:, onMove:)   // LL-5; contextActions: added by LL-8
+LayerList(rows:, onToggle:, onRename:, onMove:)   // LL-5; contextActions: added by LL-8b
 SidebarRow(..., onRename: (@MainActor (String) -> String?)?)                 // LL-6, the Void form kept
 SuiteWindow(..., onRename: (@MainActor (SidebarItem.ID, String) -> String?)?,   // LL-6, an overload; the Void form kept
-            contextActions: ((SidebarItem.ID) -> [ToolbarAction])? = nil,   // LL-8
+            contextActions: ((SidebarItem.ID) -> [ToolbarAction])? = nil,   // LL-8a
             expanded: Set<SidebarItem.ID>? = nil, onExpand: (@MainActor (SidebarItem.ID, Bool) -> Void)? = nil)  // LL-9
 ```
 
@@ -146,7 +147,7 @@ LayerList (LL-5)
   List(.plain) of SidebarRow; eye and lock in their fixed column; drag: dropIndex -> reordered -> onMove(id, index);
   insertion line `insertionLine` pt in accent at the drop index; probe drew("layers-scroll") per drawn frame while scrolling
 
-SidebarNode (LL-8, LL-9)
+SidebarNode (LL-8a, LL-9); LayerList rows take the same menu (LL-8b)
   .contextMenu { ForEach(actions) { Button(title, systemImage).disabled(!enabled).help(help) } } only when actions non-empty
   DisclosureGroup(isExpanded: expanded.map { Binding(get: contains(id), set: onExpand?(id, $0)) } ?? own @State)
   parent row: label split so its toggles are separate accessibility elements (apple-docs: accessibilityElement(children:),
@@ -174,28 +175,64 @@ interval series. No task edits `docs/c4/model.json`, `docs/design.md`,
 | LL-5 | #146 (closes) | `LayerList`: flat rows, eye and lock column, rename through LL-6's refusable `String?` form (SJ17 refuses `Taken` on it), drag to reorder with the insertion line, `layers-scroll` | `Sources/SuiteUI/LayerList.swift`, `Tests/SuiteUITests/LayerListTests.swift`, `Tests/AppSnapshotTests/SuiteLayerListSnapshots.swift` | LL-2, LL-6 |
 | LL-6 | #577 | A rename the app can refuse: the draft stays, the message shows inline; threaded through `SidebarSection` and `SuiteWindow` | `Sources/SuiteUI/SidebarRow.swift`, `Sources/SuiteUI/SidebarSection.swift`, `Sources/SuiteUI/SuiteWindow.swift`, `Tests/SuiteUITests/SidebarRenameRefusalTests.swift`, `Tests/AppSnapshotTests/SuiteSidebarSnapshots.swift` | LL-2, LL-4 |
 | LL-7 | #108 | Rename from Return on the focused row and from a "Rename" accessibility action | `Sources/SuiteUI/SidebarRow.swift`, `Tests/SuiteUITests/SidebarKeyboardRenameTests.swift` | LL-6 |
-| LL-8 | #73 | Row context menus from `ToolbarAction`s, disabled with help | `Sources/SuiteUI/SidebarSection.swift`, `Sources/SuiteUI/SuiteWindow.swift`, `Sources/SuiteUI/LayerList.swift`, `Tests/SuiteUITests/SidebarContextMenuTests.swift` | LL-5, LL-6 |
-| LL-9 | #589, #111 (closes both) | App-owned expansion; a parent row's toggles are their own elements; files the `line:design` follow-up for #589's Design journey | `Sources/SuiteUI/SidebarSection.swift`, `Sources/SuiteUI/SuiteWindow.swift`, `Tests/SuiteUITests/SidebarNestingTests.swift` | LL-8 |
+| LL-8a | #73 (part) | Row context menus from `ToolbarAction`s, disabled with help, on `SuiteWindow`'s sidebar rows | `Sources/SuiteUI/SidebarSection.swift`, `Sources/SuiteUI/SuiteWindow.swift`, `Tests/SuiteUITests/SidebarContextMenuTests.swift` | LL-6 |
+| LL-8b | #73 | The same row context menus on `LayerList` rows (`contextActions:`) | `Sources/SuiteUI/LayerList.swift`, `Tests/SuiteUITests/SidebarContextMenuTests.swift` | LL-5, LL-8a |
+| LL-9 | #589, #111 (closes both) | App-owned expansion; a parent row's toggles are their own elements; files the `line:design` follow-up for #589's Design journey | `Sources/SuiteUI/SidebarSection.swift`, `Sources/SuiteUI/SuiteWindow.swift`, `Tests/SuiteUITests/SidebarNestingTests.swift` | LL-8a |
 | LL-10 | #249 | The nesting snapshot draws through `SidebarNode` in a sidebar `List`, expanded through LL-9's seam, so reverting the two-level cap changes the PNG | `Tests/AppSnapshotTests/SuiteSidebarNestingSnapshots.swift` | LL-9 |
 | LL-11 | #284 | The section header's text stays `SuiteColor.textSecondary` (from #599, `SidebarSection.swift:31`; not `secondaryText`, the system grey #284 measured) and a test pins it; files the `line:design` issue for Design's `Section("Pages")` | `Sources/SuiteUI/SidebarSection.swift`, `Tests/SuiteUITests/SidebarEdgeTests.swift` | LL-9 |
 | LL-12 | – | `ThumbnailGrid` through `SuiteGridSelecting`; `grid-scroll`; item registration; goldens of both grid sizes | `Sources/SuiteUI/ThumbnailGrid.swift`, `Tests/AppSnapshotTests/SuiteGridSnapshots.swift`, `Tests/AppSnapshotTests/SuiteGridSmallSnapshots.swift` | LL-3 |
-| LL-13 | – | The `window`, `layers`, `layers-300`, `grid` and `grid-2000` gallery pages, their log and the Fakes path | `Sources/SuiteUI/Gallery/GalleryLists.swift` | LL-5, LL-7, LL-9, LL-11, LL-12 |
-| LL-14 | #308, #311, #312 (closes all three) | SJ1b, SJ17 (with the rename-guard steps), SJ18 | `UITests/SuiteJourneyTests+Lists.swift` | LL-13 |
-| LL-15 | – | SJ22, SP4 | `UITests/SuiteJourneyTests+Lists.swift` | LL-14 |
-| LL-16 | – | Baselines: sidebar row (plain, dimmed, refused), layer list, nesting in four appearances | `Tests/AppSnapshotTests/Golden/lists/` (12 PNGs) | LL-15's CI run |
-| LL-17 | – | Baselines: grid, small grid in four appearances; `feature-done` | `Tests/AppSnapshotTests/Golden/lists/` (8 PNGs) | LL-16 |
+| LL-13 | – | The `window`, `layers`, `layers-300`, `grid` and `grid-2000` gallery pages, their log and the Fakes path | `Sources/SuiteUI/Gallery/GalleryLists.swift` | LL-5, LL-8b, LL-9, LL-12 |
+| LL-14 | #308, #311, #312 (closes all three) | SJ1b, SJ17 (with the rename-guard steps), SJ18 | `UITests/SuiteJourneyTests+Lists.swift` | LL-7, LL-11, LL-13 |
+| LL-15 | – | SJ22, SP4 | `UITests/SuiteJourneyTests+ListMenus.swift` | LL-13 |
+| LL-16 | – | Baselines: sidebar row (plain, dimmed, refused), layer list, nesting in four appearances | `Tests/AppSnapshotTests/Golden/lists/` (12 PNGs) | LL-5, LL-10 (the CI run after both merged) |
+| LL-17 | – | Baselines: grid, small grid in four appearances; `feature-done` | `Tests/AppSnapshotTests/Golden/lists/` (8 PNGs) | LL-12's CI run, LL-14, LL-15, LL-16 |
 
 Sizes: LL-1 ~200 lines; LL-2 ~260; LL-3 ~300 (the reference is data);
-LL-4 ~90; LL-5 ~330; LL-6 ~340; LL-7 ~150; LL-8 ~220; LL-9 ~280; LL-10
+LL-4 ~90; LL-5 ~330; LL-6 ~340; LL-7 ~150; LL-8a ~150; LL-8b ~70; LL-9 ~280; LL-10
 ~120; LL-11 ~60; LL-12 ~150; LL-13 ~380 (if it passes 400, the `grid` pages move to LL-13b in the same file, chained); LL-14 ~360; LL-15 ~200.
 
-Chains (shared files): `SidebarRow.swift` LL-4 → LL-6 → LL-7; LL-5 after LL-6 (it uses the refusable rename);
-`SidebarSection.swift` and `SuiteWindow.swift` LL-6 → LL-8 → LL-9 → LL-11;
-`LayerList.swift` LL-5 → LL-8; `ListBudgetTests.swift` LL-2 → LL-3;
-`SuiteSidebarSnapshots.swift` LL-4 → LL-6; the journey file LL-14 → LL-15.
-LL-1, LL-4 start at once. `SuiteSidebarToggleColumnSnapshots.swift`, `SuiteWindowLaunchSnapshots.swift`,
+Links (rule (b), see `docs/factory/packets.md`): `SidebarRow.swift` LL-4 → LL-6 → LL-7, and
+`SuiteSidebarSnapshots.swift` LL-4 → LL-6; LL-6 and LL-5 call LL-2's
+`SuiteListEditing`; LL-5 uses LL-6's refusable rename; `SidebarSection.swift`
+and `SuiteWindow.swift` LL-6 → LL-8a → LL-9 → LL-11; `LayerList.swift`
+LL-5 → LL-8b, which reuses LL-8a's menu and test file; `ListBudgetTests.swift`
+LL-2 → LL-3; LL-12 calls LL-3's `SuiteGridSelecting`; LL-13's pages call
+`LayerList` (LL-5, LL-8b), the expansion seam (LL-9) and `ThumbnailGrid`
+(LL-12); SJ17 needs LL-7's Return rename and SJ1b LL-11's header pin, so
+LL-14 waits for them; SJ22 and SP4 have their own journey file, so LL-15
+needs only LL-13's pages. LL-16 and LL-17 commit the actuals of a macOS run
+on `dev` after their snapshot tasks: LL-16 commits LL-4's, LL-5's, LL-6's
+and LL-10's (LL-4 and LL-6 are ancestors of LL-5 and LL-10), and LL-17
+LL-12's; LL-17 carries `feature-done`, so its
+run must hold every journey.
+`SuiteSidebarToggleColumnSnapshots.swift`, `SuiteWindowLaunchSnapshots.swift`,
 `SuiteWindowMinimumSnapshots.swift` and the other `Sidebar*`/`GridSelection*`
 tests are this feature's in wave 2 and must keep passing unchanged.
+
+## Build waves
+
+The packet edits no shared doc (`docs/c4/model.json`, `docs/design.md`, a
+blueprint or `waves.md`), so no docs task is added.
+
+- Wave 1: LL-1, LL-4. Independent in this wave: both.
+- Wave 2: LL-2. Independent in this wave: LL-2 alone.
+- Wave 3: LL-3, LL-6. Independent in this wave: both.
+- Wave 4: LL-5, LL-7, LL-8a, LL-12. Independent in this wave: all four.
+- Wave 5: LL-8b, LL-9. Independent in this wave: both.
+- Wave 6: LL-10, LL-11, LL-13. Independent in this wave: all three.
+- Wave 7: LL-14, LL-15, LL-16. Independent in this wave: all three.
+- Wave 8: LL-17 (`feature-done`, final).
+
+Longest chain: LL-1 → LL-2 → LL-6 → LL-5 → LL-8b → LL-13 → LL-14 → LL-17 (8);
+LL-1 → LL-2 → LL-6 → LL-8a → LL-9 → LL-13 → LL-14 → LL-17 is as long.
+Chain of 8: `SuiteListEditing` (LL-2) conforms to LL-1's `ListEditing`;
+`SidebarRow`'s rename (LL-6) commits through `SuiteListEditing`; `LayerList`
+(LL-5) renames through LL-6's refusable `String?` form; LL-8b adds
+`contextActions:` to LL-5's `LayerList.swift`; the `layers` page (LL-13)
+passes those menus; SJ17 and SJ18 (LL-14) drive LL-13's pages; LL-17's
+`feature-done` run is the done check for LL-14's journeys. The other path
+has LL-8a and LL-9 edit `SidebarSection.swift` and `SuiteWindow.swift`
+after LL-6, and the `window` page pass LL-9's `expanded:`/`onExpand:`.
 
 ## Acceptance test per task
 
@@ -208,7 +245,8 @@ tests are this feature's in wave 2 and must keep passing unchanged.
 | LL-5 | `LayerListTests`: a drop index maps through `reordered` to one `onMove(id, index)`; eye and lock toggles call `onToggle` with their ids; `SuiteLayerListSnapshots` shows rows, a dimmed row and the insertion line; Design's sidebar still renders (its snapshots unchanged); jscpd stays under 0.8 % (`scripts/ci`) | a drop moves the wrong row, or LayerList duplicates `SidebarRow` code |
 | LL-6 | `SidebarRenameRefusalTests`: a refused commit keeps the draft and sets the message; typing clears the message; an accepted commit closes the field; Escape and focus loss both cancel and clear; the `Void` `onRename` form still renames; `SuiteSidebarSnapshots` adds the refused row in Light and Dark | the field closes on a refusal, or the old form stops compiling |
 | LL-7 | `SidebarKeyboardRenameTests`: Return on the focused row starts a rename only when `onRename` is set; the row exposes an accessibility action named "Rename"; a double-click on a toggle still never renames (the existing `SidebarRenameGestureTests` pass) | Return renames a row without `onRename`, or the action is missing |
-| LL-8 | `SidebarContextMenuTests`: an item with no actions builds no menu; a disabled action is disabled with its `unavailableHelp` as help; existing `SuiteWindow` initializers compile unchanged | a menu appears with no actions, or a disabled item has no reason |
+| LL-8a | `SidebarContextMenuTests`: an item with no actions builds no menu; a disabled action is disabled with its `unavailableHelp` as help; existing `SuiteWindow` initializers compile unchanged | a menu appears with no actions, or a disabled item has no reason |
+| LL-8b | `SidebarContextMenuTests`, the `LayerList` cases: a row with no actions builds no menu; a disabled action is disabled with its `unavailableHelp` as help; the `LayerList(rows:onToggle:onRename:onMove:)` call compiles unchanged | a menu appears with no actions, or a disabled item has no reason |
 | LL-9 | `SidebarNestingTests`: with `expanded` given, the disclosure follows it and a click calls `onExpand(id, true)`; with `onExpand` nil the group keeps its own state; the two-level cap holds; the parent row's toggles are separate accessibility children (checked in a hosted view's accessibility tree) | the app's set is ignored, or the toggles merge into one element |
 | LL-10 | `SuiteSidebarNestingSnapshots` renders the real `SidebarNode` with Level 1 expanded: the chevron, the system indent and Level 3 lined up with Level 2; changing `secondLevelRows` back to `children` in `SidebarSection.swift` changes the PNG (stated in the PR, checked on the CI artifact) | the snapshot still hand-draws rows |
 | LL-11 | `SidebarEdgeTests`: the section header's foreground is `SuiteColor.textSecondary`; SJ1b's `contrast` count on the `window` page is 0 | the header falls back to the list's own faint style |
