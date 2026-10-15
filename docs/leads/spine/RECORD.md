@@ -4,7 +4,7 @@ Issue: #1044 · Packet: docs/blueprints/library/features/spine.md
 Run: act-1a13f18aaa0-lfw5 · Session: session_01DtSRhNqsphGfKkvV5eLsWW · Started: 2026-10-15T10:25Z
 Stage: 4 round 1
 Base: 541ca81f0a4795b0a01d4df371832c645a0956cf
-Next: round 2: wait for the dev CI run containing #1165 and #1168
+Next: merge the ternary fix; round 2 reruns on the CI run that contains it
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -49,6 +49,7 @@ Taken from the packet's Build waves; checked against dev bcf5a09.
 |---|---|---|---|---|---|---|---|
 | 0 (pre-loop) | 38726261412 (2b98fdb) | red: macOS build | – | – | SA-1 #1096: LibraryInspector calls mutating methods on a let model | fixer lead/spine-fix-inspector | no |
 | 1 | 38742226941 (20d6a1c) | red (Halo, Photo tests; not spine) | no audit (journeys didn't run) | clarity, journey, design, layout, controls | 18 (7 major) | r1-b1, r1-b2 (fixing) | no |
+| 2 | 38748468768 (3d42e80) | red: macOS build broke in LibraryWindow+Cull/+Loupe (closure ternaries from #1168) | – | (panel not run: no build) | 1 blocker | fixer lead/spine-fix-ternary | no |
 
 ## Decisions
 - Builder branches are `lead/spine-<id>`, not `lead/spine/<id>`: git can't hold `lead/spine` and `lead/spine/<x>` refs together.
@@ -70,6 +71,7 @@ Taken from the packet's Build waves; checked against dev bcf5a09.
 - SJ-2 ships without feature-done: the Anatomy loop needs a CI run first, and its fixes (or, if clean, a packet status-line PR) form the feature's last PR, which carries feature-done.
 - Round 1 skipped minors that change contract or packet text: the '(import)' area id in reasons, catalog.json.bad's folder, the newer notice's version number, and an always-on status bar; they become gap issues if still open at finish.
 - r1-b2 adds InspectorCommands (⌃⌘I, Apple's built-in) for View > Show Inspector; SuiteWindow's toolbar keeps ⌥⌘I. Blueprint 6.2 says ⌥⌘I: noted for the gap list.
+- Lesson: blind SwiftUI must not pick between a closure literal and nil in a ternary inside a memberwise init (type checker gives up); use the typed enabled(_:_:) helper.
 
 ## Open
 - PR #217 (fix for #156) is open at stage 0; SP-9 lands only if it is still unmerged when wave 8 starts.
