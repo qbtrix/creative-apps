@@ -60,3 +60,4 @@ utc	stage	event	ref	note
 2026-10-15T14:45Z	4	heartbeat	round1	waiting a dev run past swift test
 2026-10-15T15:01Z	4	heartbeat	round1	waiting a dev run past swift test
 2026-10-15T15:18Z	4	heartbeat	round1	waiting a dev run past swift test
+2026-10-15T15:22Z	4	ci-run	38757068610	red only on keyedFrame6; filed #1185
