@@ -60,7 +60,17 @@ final class HaloJourneyTests: XCTestCase {
         let halo = Journey("Halo", self)
         halo.click("New Composition…")
         halo.click("Create", in: .sheet, step: "timeline")
-        halo.drag(on: "halo.timeline", from: CGVector(dx: 0.3, dy: 0.5), to: CGVector(dx: 0.6, dy: 0.5), step: "timeline-scrub")
+        // The ruler is the timeline's top 24 pt, so the drag stays near its top.
+        halo.drag(on: "halo.timeline", from: CGVector(dx: 0.3, dy: 0.05), to: CGVector(dx: 0.6, dy: 0.05), step: "timeline-scrub")
+        let window = halo.app.windows.firstMatch.frame
+        let ruler = halo.app.descendants(matching: .any).matching(NSPredicate(format: "label == 'Frame Ruler'")).firstMatch
+        XCTAssert(ruler.waitForExistence(timeout: 5), "no Frame Ruler in the timeline")
+        XCTAssert(window.contains(ruler.frame), "the ruler \(ruler.frame) runs outside the window \(window)")
+        for bar in halo.app.windows.firstMatch.scrollBars.allElementsBoundByIndex where bar.isHittable {
+            XCTAssertFalse(bar.frame.intersects(ruler.frame), "a scroll bar \(bar.frame) covers the ruler \(ruler.frame)")
+        }
+        let timeline = halo.element("halo.timeline").frame
+        XCTAssertLessThanOrEqual(timeline.height, window.height * 0.4 + 1, "the timeline takes over 40% of the window")
     }
 
     @MainActor func testEveryMenuOpens() {
@@ -138,6 +148,8 @@ final class HaloJourneyTests: XCTestCase {
             XCTAssert(Self.contains("Frames 0–47", in: halo.element("halo.inspector")).waitForExistence(timeout: 5),
                 "no layer selected at \(width)")
             halo.shot("layout-\(width)")
+            let timeline = halo.element("halo.timeline").frame
+            XCTAssertLessThanOrEqual(timeline.maxY, window.frame.maxY, "the timeline runs off the window at \(width)")
             guard let artboard = artboardFrame(in: halo.element("halo.viewer")) else {
                 XCTFail("no artboard found in the viewer at \(width)")
                 continue
