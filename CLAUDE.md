@@ -249,9 +249,13 @@ Crew PRs merge into `dev` at once; `main` moves only when full CI passes on
   later sweep when that run passes. A run with a new failure is refused by
   test name and waits for your next push. A `Mac-Check: <run url>` line a
   supervisor adds counts too.
-- Any other PR touching `Sources/*App/` merges only once its head compiles on
-  macOS: the lane dispatches a build-only CI run (`ci.yml` with `build_only`,
-  `swift build`, no tests) once per head, comments its URL, and merges when it
+- Any other PR changing Swift that Linux `scripts/ci` doesn't compile
+  (`MAC_ONLY` in scripts/fast-lane.sh: `Sources/*App`, `Sources/SuiteUI`,
+  `Tests/SuiteUITests`, `Tests/AppSnapshotTests`, `UITests`, and
+  `project.yml`; its tests derive the list from the manifests) merges only
+  once its head compiles on macOS: the lane dispatches a build-only CI run
+  (`ci.yml` with `build_only`: every target with its tests, then the journey
+  bundles; nothing runs) once per head, comments its URL, and merges when it
   succeeds. A failed build waits for your next push.
 - Otherwise UI code takes the lane on the Linux check alone. A human reviews
   the snapshots after the next feature CI and files fixes as new issues.

@@ -26,7 +26,7 @@
 # (mac_gate): the run a body line
 # `Mac-Check: <run url>` names, or else the latest CI run on the head, which
 # the lane dispatches itself when there is none. Any other PR that touches
-# APP_RE (Sources/*App/) needs a passing build-only CI run on its head
+# MAC_ONLY (code only macOS compiles) needs a passing build-only CI run on its head
 # (build_gate), also dispatched by the lane. A Belt PR
 # (a body line starting `Belt-Run:` or `Belt-Test:`) also needs Belt's
 # `belt/review` commit status at success on its head while REQUIRE_BELT_REVIEW=1.
@@ -47,7 +47,7 @@
 # a file-list file (one path per line), a check-rollup JSON file and, when the
 # PR touches the app audit, two audit_snapshot directories (merge base, head),
 # and, when it touches MAC_GATED, the `gh run view` JSON of its Mac-Check run
-# and of the latest CI run on its head, and when it touches APP_RE, its
+# and of the latest CI run on its head, and when it touches MAC_ONLY, its
 # latest build-only run.
 # It logs each rule to stderr and prints one line to stdout:
 #   skip|<why>  retarget|<from base>  not-eligible|<reasons>  red|<checks>
@@ -131,12 +131,25 @@ MAC_GATED=(Sources/SuiteUI/SuiteWindow.swift Sources/SuiteUI/EditorShell.swift
   Sources/SuiteUI/ToolbarGroup.swift Sources/SuiteUI/Tokens.swift)
 MAC_CHECK_LINE="Mac-Check:"
 MAC_JOB="macOS"
-# App code compiles only on macOS. A PR touching Sources/*App/ that isn't
-# MAC_GATED merges only once a build-only CI run (ci.yml's `build_only` input:
-# `swift build`, no tests) compiled its head; the lane dispatches it, once per
-# head. Lesson 114: the Library spine's app PRs merged on the Linux gate, dev
-# stopped compiling on macOS (run 38727890123) and every line's Mac run broke.
-APP_RE='^Sources/[A-Za-z0-9_]+App/'
+# Code only macOS compiles: Linux scripts/ci never builds it. A PR touching
+# it that isn't MAC_GATED merges only once a build-only CI run (ci.yml's
+# `build_only` input: every SwiftPM target with its tests, then the journey
+# bundles; nothing runs) compiled its head; the lane dispatches it, once per
+# head. Lesson 114: app PRs merged on the Linux gate and dev stopped compiling
+# on macOS (run 38727890123); then a snapshot test did (run 38732179619, #1097).
+# MAC_ONLY is the source folder of every target in Package.swift's
+# `#if os(macOS)` block, every project.yml source no Linux target compiles,
+# and project.yml itself; Tests/fast_lane derives that list from the two
+# manifests (`swift package dump-package` with the block switched on) and
+# checks it matches. A `*` stands for part of one name; each entry is a
+# folder or a file. Only Swift files and project.yml count (build_apps).
+MAC_ONLY=(Sources/SuiteUI 'Sources/*App' Tests/SuiteUITests Tests/AppSnapshotTests UITests project.yml)
+mac_only_re() {
+  local p re=""
+  for p in "${MAC_ONLY[@]}"; do p="${p//./\\.}"; re+="${re:+|}${p//\*/[A-Za-z0-9_]+}"; done
+  echo "^($re)(/|\$)"
+}
+MAC_ONLY_RE=$(mac_only_re)
 BUILD_JOB="macOS build"    # the build-only job's name in ci.yml
 BUILD_TITLE="macOS build"  # ci.yml's run-name for a build-only run
 # After dispatching, look this many times, 5s apart, for the new run's URL to comment.
@@ -334,13 +347,15 @@ mac_add_failures() {
     "$1" >"$1.x" && mv "$1.x" "$1"
 }
 
-# build_apps <files.txt>: the app folders (Sources/<X>App) among <files.txt>, joined by ", ".
+# build_apps <files.txt>: the MAC_ONLY folders among <files.txt>, joined by
+# ", ". Only what a compiler reads counts: Swift files, and project.yml
+# (a data file such as UITests/audit-baseline.json is read at run time).
 build_apps() {
-  grep -oE "${APP_RE}" "$1" | sed 's:/$::' | sort -u | paste -sd, - | sed 's/,/, /g' || true
+  grep -E "$MAC_ONLY_RE" "$1" | grep -E '(\.swift|^project\.yml)$' | grep -oE "$MAC_ONLY_RE" | sed 's:/$::' | sort -u | paste -sd, - | sed 's/,/, /g' || true
 }
 
 # build_gate <pr.json> <files.txt> <mac-check run.json> <build run.json>:
-# nothing when the PR touches no app code, else a line like mac_gate's. A green
+# nothing when the PR touches no MAC_ONLY code, else a line like mac_gate's. A green
 # Mac-Check run on the head (it builds every app) counts; otherwise the latest
 # build-only run on the head ({} when none: dispatch one).
 build_gate() {
@@ -361,7 +376,7 @@ build_gate() {
   st=$(jq -r '(.status // "" | ascii_downcase) + " " + (.conclusion // "" | ascii_downcase)' <<<"$run")
   case "$st" in
     "completed success") echo "ok|$BUILD_JOB $url" ;;
-    completed*) echo "refuse|changes app code ($apps), and its head $head doesn't build on macOS: $url (${st#completed }). Fix it and push; the lane builds the new head on macOS again" ;;
+    completed*) echo "refuse|changes code only macOS compiles ($apps), and its head $head doesn't build on macOS: $url (${st#completed }). Fix it and push; the lane builds the new head on macOS again" ;;
     *) echo "wait|$url" ;;
   esac
 }
@@ -763,7 +778,7 @@ evaluate() {
       if [[ "$kind" == mac-dispatch ]]; then
         comment_once "$n" "Fast lane: this PR changes $what, shared by every app's window, so it needs a green macOS run on its head $head. The lane dispatched CI on $branch: $url. A later sweep merges this PR once that run's macOS job passes on this head; a new push gets a new run."
       else
-        comment_once "$n" "Fast lane: this PR changes app code ($what), which compiles only on macOS, so its head $head must build there first. The lane dispatched a macOS build on $branch: $url. A later sweep merges this PR once it compiles; a new push gets a new build."
+        comment_once "$n" "Fast lane: this PR changes code only macOS compiles ($what), so its head $head must build there first. The lane dispatched a macOS build on $branch: $url. A later sweep merges this PR once it compiles; a new push gets a new build."
       fi
       ;;
     mac-gate)

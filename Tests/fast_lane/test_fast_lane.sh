@@ -68,15 +68,15 @@ check "C4 parts, feature data and packets stay eligible" "eligible|150|2|5 check
   . $'docs/c4/parts/creative-apps/halo-model/halo-model-sources.json\ndocs/blueprints/halo/features/easing.wave.json\ndocs/blueprints/halo/features/easing.md\ndocs/blueprints/halo/waves.in.md\ndocs/blueprints/halo/features/nested/waves.md' .
 check "app code first gets a macOS build (lesson 114; taste review still happens after merge)" "build-dispatch|Sources/FlareApp|feat/x" \
   . $'Sources/FlareApp/FlareApp.swift\nSources/FlareModel/FlareWorkspace.swift' .
-check "SuiteUI outside MAC_GATED is eligible" "eligible|150|2|5 checks green" \
+check "SuiteUI outside MAC_GATED first gets a macOS build" "build-dispatch|Sources/SuiteUI, Tests/SuiteUITests|feat/x" \
   . $'Sources/SuiteUI/GlassPanel.swift\nTests/SuiteUITests/GlassPanelTests.swift' .
 check "models and tests stay eligible" "eligible|150|2|5 checks green" \
-  . $'Sources/PhotoModel/PhotoWorkspace.swift\nTests/AppSnapshotTests/AppSnapshotTests.swift' .
+  . $'Sources/PhotoModel/PhotoWorkspace.swift\nTests/PhotoModelTests/PhotoWorkspaceTests.swift' .
 check "a model named like an app is allowed" "eligible|150|2|5 checks green" \
   . $'Sources/HaloModel/HaloAppState.swift\nTests/HaloModelTests/HaloProjectTests.swift' .
-check "SuiteUI with only the worker's marker is eligible" "eligible|150|2|Fast-Check marker" \
+check "a model with only the worker's marker is eligible" "eligible|150|2|Fast-Check marker" \
   "$(printf '.body = "Closes #1\\n\\nFast-Check: pass\\nHead: %s"' "$HEAD_SHA")" \
-  $'Sources/SuiteUI/GlassPanel.swift\nTests/SuiteUITests/GlassPanelTests.swift' '[]'
+  $'Sources/PhotoModel/PhotoWorkspace.swift\nTests/PhotoModelTests/PhotoWorkspaceTests.swift' '[]'
 check "too big (lines)" "not-eligible|too big: 401 lines" '.additions = 401 | .deletions = 0' "$BASE_FILES" .
 check "too big (files)" "not-eligible|too big: 150 lines, 16 files" '.changedFiles = 16' "$BASE_FILES" .
 check "non-allowlisted author" "not-eligible|author someone is not on the fast-lane allowlist" \
@@ -290,7 +290,7 @@ build() {
   got=$(decide "$tmp/pr.json" "$tmp/files.txt" "$tmp/bchecks.json" "" "" "$tmp/run.json" "$tmp/run.json" "$tmp/build.json" 2>/dev/null)
   if [[ "$got" == "$2"* ]]; then echo "ok   build: $1 -> ${got:0:110}"; else echo "FAIL build: $1: want '$2*', got '$got'"; fail=1; fi
 }
-BREFUSE="mac-gate|changes app code (Sources/LibraryApp), and its head $HEAD_SHA doesn't build on macOS: $BUILD_URL"
+BREFUSE="mac-gate|changes code only macOS compiles (Sources/LibraryApp), and its head $HEAD_SHA doesn't build on macOS: $BUILD_URL"
 build "app code with no build on the head: the lane dispatches one" "build-dispatch|Sources/LibraryApp|feat/x" "$MARKED" "$APP" -
 build "a build on an older head counts as none" "build-dispatch|Sources/LibraryApp|feat/x" "$MARKED" "$APP" ".headSha = \"$OLD_HEAD\""
 build "every app folder is named" "build-dispatch|Sources/FlareApp, Sources/LibraryApp|feat/x" "$MARKED" \
@@ -307,7 +307,18 @@ build "a red macOS build check is the gate's to name, not just red" "$BREFUSE (f
     {"__typename":"CheckRun","name":"Linux","workflowName":"","status":"COMPLETED","conclusion":"SKIPPED"},
     {"__typename":"CheckRun","name":"macOS","workflowName":"","status":"COMPLETED","conclusion":"SKIPPED"}]'
 build "a model-only PR needs no build" "eligible|150|2|Fast-Check marker" "$MARKED" "$BASE_FILES" -
-build "SuiteUI outside MAC_GATED needs no build" "eligible|150|2|Fast-Check marker" "$MARKED" 'Sources/SuiteUI/GlassPanel.swift' -
+# Every path Linux scripts/ci doesn't compile gets the build, each on its own
+# (run 38732179619: a snapshot test broke the macOS build, #1097).
+build "only a snapshot test (#1097): the build" "build-dispatch|Tests/AppSnapshotTests|feat/x" "$MARKED" 'Tests/AppSnapshotTests/HaloPlaybackDriverTests.swift' -
+build "only a UI journey: the build" "build-dispatch|UITests|feat/x" "$MARKED" 'UITests/HaloJourneyTests+Layers.swift' -
+build "only a SuiteUI test: the build" "build-dispatch|Tests/SuiteUITests|feat/x" "$MARKED" 'Tests/SuiteUITests/TokensTests.swift' -
+build "only SuiteUI outside MAC_GATED: the build" "build-dispatch|Sources/SuiteUI|feat/x" "$MARKED" 'Sources/SuiteUI/GlassPanel.swift' -
+build "only project.yml: the build" "build-dispatch|project.yml|feat/x" "$MARKED" 'project.yml' -
+build "only an app: the build" "build-dispatch|Sources/PhotoApp|feat/x" "$MARKED" 'Sources/PhotoApp/PhotoApp.swift' -
+build "the audit baseline is data, not code: no build" "eligible|150|2|Fast-Check marker" "$MARKED" 'UITests/audit-baseline.json' -
+build "the audit's checks compile on Linux: no build" "eligible|150|2|Fast-Check marker" "$MARKED" 'Tests/AppAuditTests/Checks/Overlap.swift' -
+build "a doc about project.yml: no build" "eligible|150|2|Fast-Check marker" "$MARKED" $'docs/project.yml.md\nproject.yml.bak' -
+build "a lookalike folder: no build" "eligible|150|2|Fast-Check marker" "$MARKED" $'Sources/SuiteUIKit/A.swift\nTests/AppSnapshotTestsOld/A.swift\nSources/App/A.swift' -
 build "a model named like an app needs no build" "eligible|150|2|Fast-Check marker" "$MARKED" 'Sources/HaloModel/HaloAppState.swift' -
 build "the build gate does not outrank the marker" "pending|no passing CI check" ".body = \"x\"" "$APP" .
 build "a supervisor's green Mac-Check run covers the build" "eligible|150|2|Fast-Check marker, Mac-Check: $RUN_URL" "$MAC_PR" "$APP" - '[]' .
@@ -317,6 +328,38 @@ echo '{}' >"$tmp/run.json"; jq . <<<"$GREEN_BUILD" >"$tmp/build.json"
 got=$(decide "$tmp/pr.json" "$tmp/files.txt" "$tmp/empty.json" "" "" "$tmp/run.json" "$tmp/run.json" "$tmp/build.json" 2>/dev/null)
 if [[ "$got" == "mac-dispatch|Sources/SuiteUI/Tokens.swift|feat/x" ]]; then echo "ok   build: a gated PR with app code takes the full Mac run only -> $got"
 else echo "FAIL build: a gated PR with app code: got '$got'"; fail=1; fi
+# MAC_ONLY is derived from the manifests: the source folders of the targets
+# Package.swift declares only under `#if os(macOS)` (swift package dump-package
+# with that block switched on, minus without it), every project.yml source no
+# Linux target compiles, and project.yml itself. Each must match MAC_ONLY_RE,
+# each MAC_ONLY entry must match one of them, and no Linux target may match.
+if command -v swift >/dev/null 2>&1; then
+  root="$here/../.."
+  dump() { (cd "$1" && swift package dump-package 2>/dev/null) | jq -r '.targets[]
+    | .path // ((if .type == "test" then "Tests/" else "Sources/" end) + .name)'; }
+  mkdir -p "$tmp/allmac"; sed 's/^#if os(macOS)$/#if true/' "$root/Package.swift" >"$tmp/allmac/Package.swift"
+  linux_dirs=$(dump "$root" | sort -u)
+  all_dirs=$(dump "$tmp/allmac" | sort -u)
+  yml_dirs=$(grep -oE '^ *- (path: )?(Sources|Tests|UITests)[^ ,]*' "$root/project.yml" | sed -E 's/^ *- (path: )?//' \
+    | while IFS= read -r p; do
+        under=0; while IFS= read -r d; do [[ "$p" == "$d" || "$p" == "$d"/* ]] && under=1; done <<<"$linux_dirs"
+        (( under )) || { if [[ "$p" == UITests* ]]; then echo UITests; else echo "$p" | cut -d/ -f1-2; fi; }
+      done)
+  derived=$( { comm -13 <(echo "$linux_dirs") <(echo "$all_dirs"); echo "$yml_dirs"; echo project.yml; } | grep . | sort -u)
+  bad=""
+  [[ $(echo "$linux_dirs" | wc -l) -ge 5 && $(echo "$derived" | wc -l) -ge 5 ]] || bad+=" the manifests didn't parse;"
+  while IFS= read -r d; do grep -qE "$MAC_ONLY_RE" <<<"$d" || bad+=" $d is macOS-only but not in MAC_ONLY;"; done <<<"$derived"
+  for e in "${MAC_ONLY[@]}"; do
+    re="^${e//./\\.}\$"; re="${re//\*/[A-Za-z0-9_]+}"
+    grep -qE "$re" <<<"$derived" || bad+=" MAC_ONLY's $e is not macOS-only in the manifests;"
+  done
+  while IFS= read -r d; do ! grep -qE "$MAC_ONLY_RE" <<<"$d/x.swift" || bad+=" Linux target $d matches MAC_ONLY;"; done <<<"$linux_dirs"
+  if [[ -z "$bad" ]]; then echo "ok   build: MAC_ONLY matches the manifests ($(echo "$derived" | paste -sd' ' -))"
+  else echo "FAIL build: MAC_ONLY vs the manifests:$bad"; fail=1; fi
+else
+  echo "skip build: no swift here to read Package.swift; MAC_ONLY vs the manifests unchecked"
+fi
+
 # Belt PRs (a body line starting Belt-Run: or Belt-Test:) also need Belt's
 # belt/review commit status at success on the head; other PRs ignore it.
 BELT='.body = "Closes #1\n\nBelt-Run: act-1"'
@@ -542,6 +585,8 @@ sweep() {
   local n
   [[ -z "${SWEEP_AHEAD:-}" ]] || echo "$SWEEP_AHEAD" >"$sw/ci_ahead"
   [[ -z "${SWEEP_CI_HEAD+x}" ]] || printf '%s' "$SWEEP_CI_HEAD" >"$sw/ci_head"
+  # SuiteUI files get the macOS build: their head already compiled.
+  [[ -z "${SWEEP_FILES:-}" ]] || jq -c '[.]' <<<"$GREEN_BUILD" >"$sw/runs.$HEAD_SHA.json"
   [[ -z "${SWEEP_FILES:-}" ]] || for n in 4 7; do printf '%s\n' "$SWEEP_FILES" >"$sw/files.$n.json"; done
   for n in 4 5 6 7; do jq --argjson n "$n" '.number = $n' <<<"$BASE_PR" | jq "$MARKED" >"$sw/$n.json"; done
   jq '.baseRefName = "main"' "$sw/5.json" >"$sw/x" && mv "$sw/x" "$sw/5.json"
@@ -719,4 +764,13 @@ expect "build: once it compiled the head, a later sweep merges it" "$(grep -c '^
 expect "build: the merge comment names the build" \
   "$(grep -c '^pr comment 30 .*merged into dev.*macOS build https://github.com/qbtrix/creative-apps/actions/runs/830' "$sw/calls")" 1
 expect "build: still one build for its head" "$(grep -c -- '--ref b30$' "$sw/calls")" 1
+# #36 touches only Tests/AppSnapshotTests (#1097's break): it gets the build too.
+rm -rf "$sw"; mkdir -p "$sw"; : >"$sw/calls"
+pr_at 36 h36 '[{"filename": "Tests/AppSnapshotTests/HaloPlaybackDriverTests.swift", "status": "modified"}]'
+jq '.headRefName = "b36"' "$sw/36.json" >"$sw/x" && mv "$sw/x" "$sw/36.json"
+lane_sweep
+expect "build: a PR touching only a snapshot test gets one build, not a merge" \
+  "$(grep -c -- '-f build_only=true --ref b36$' "$sw/calls"),$(grep -c '^pr merge 36' "$sw/calls")" "1,0"
+expect "build: its comment names the folder" \
+  "$(grep -c '^pr comment 36 .*changes code only macOS compiles (Tests/AppSnapshotTests)' "$sw/calls")" 1
 exit "$fail"
