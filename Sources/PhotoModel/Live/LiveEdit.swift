@@ -1,11 +1,11 @@
 // Live/LiveEdit.swift: the live edit use cases (PV-2). `LiveClipboard` is
-// Copy and Paste placement; Merge Down and Flatten are still a NotBuilt
-// stand-in. Linux-safe.
+// Copy and Paste placement; `LiveMerging` (LiveMerging.swift) is Merge Down
+// and Flatten. Linux-safe.
 import CoreRaster
 
 enum LiveEdit {
     static func clipboard() -> any PixelClipboard { LiveClipboard() }
-    static func merging() -> any LayerMerging { NotBuiltMerging() }
+    static func merging() -> any LayerMerging { LiveMerging() }
 }
 
 /// Copy takes the layer's pixels inside the selection (the whole layer with
