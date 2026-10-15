@@ -63,3 +63,5 @@ utc	stage	event	ref	note
 2026-10-15T15:22Z	4	ci-run	38757068610	red only on keyedFrame6; filed #1185
 2026-10-15T15:35Z	4	heartbeat	round1	waiting #1185 fix / a dev run past swift test
 2026-10-15T15:55Z	4	heartbeat	round1	waiting
+2026-10-15T16:13Z	5	ci-run	38762922782	red only on keyedFrame6 (#1185)
+2026-10-15T16:14Z	5	stopped	#1036	wall clock; closing comment posted; blocked on #1185

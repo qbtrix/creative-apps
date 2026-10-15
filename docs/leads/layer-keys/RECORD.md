@@ -2,9 +2,9 @@
 
 Issue: #1036 · Packet: docs/blueprints/halo/features/layer-keys.md
 Run: act-1a13eb691a3-wg4n · Session: e0e565d9-6109-5c52-89fd-c254398040f9 · Started: 2026-10-15T08:39Z
-Stage: 4 round 1
-Base: 35a875b
-Next: dev red on others' code (viewer-playback keyedFrame6 + driver timeouts; Photo crop; now LibraryWindow+Cull/Loupe build at 3d42e80). Round 2 on the first dev run past swift test. Wall clock ends 16:39Z: if still blocked by ~16:15, comment the state on #1036 and stop.
+Stage: 5 finish (blocked: dev red on #1185, not ours)
+Base: a476a74
+Next: when #1185 merges, run round 2 (same lenses + audit) on the first dev run past swift test, then post Belt-Contact-Sheet on #1036.
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
