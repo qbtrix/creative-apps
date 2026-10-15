@@ -40,12 +40,20 @@ struct LibraryWindow: View {
     }
 
     private var menu: LibraryMenu {
-        LibraryMenu(
-            sort: model.sort, loadSamples: { model.loadSamples() }, setSort: { model.setSort($0) },
-            larger: stepCellSize(1, allowed: model.canShowLargerThumbnails),
-            smaller: stepCellSize(-1, allowed: model.canShowSmallerThumbnails),
-            showGrid: enabled(model.mode == .loupe) { model.showGrid() },
-            showLoupe: enabled(model.mode == .grid && !model.isSelectedCollectionEmpty) { model.showLoupe() })
+        let inGrid = model.mode == .grid
+        return LibraryMenu(
+            edit: LibraryMenu.Edit(loadSamples: { model.loadSamples() }),
+            cull: LibraryMenu.Cull(
+                setRating: { model.setRating($0) }, setFlag: { model.setFlag($0) }, setLabel: { model.setLabel($0) }),
+            view: LibraryMenu.Viewing(
+                grid: enabled(model.mode == .loupe) { model.showGrid() },
+                loupe: enabled(inGrid && !model.isSelectedCollectionEmpty) { model.showLoupe() },
+                zoomIn: stepCellSize(1, allowed: inGrid && model.canShowLargerThumbnails),
+                zoomOut: stepCellSize(-1, allowed: inGrid && model.canShowSmallerThumbnails),
+                setSort: { model.setSort($0) }, sort: model.sort,
+                zoomInTitle: inGrid ? "Larger Thumbnails" : "Zoom In",
+                zoomOutTitle: inGrid ? "Smaller Thumbnails" : "Zoom Out"),
+            reasons: model.services.unavailable)
     }
 
     /// A thumbnail size step for the View menu, nil at the size limit.
