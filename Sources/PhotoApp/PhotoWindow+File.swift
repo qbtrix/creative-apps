@@ -18,14 +18,16 @@
 // their kind. Each successful open and save is noted in Open Recent.
 // `-PhotoOpenFile <path>` opens a file at launch; `-PhotoRecoveryDir
 // <folder>` keeps autosaves there. PhotoFileSession is the file state the
-// window and PhotoFileArea share; D-10 adds its own to it. PhotoFileArea
+// window and PhotoFileArea share. PhotoFileArea
 // puts `model.saveStatus` in the environment for the top bar's
 // `photo.bar.saved`, keeps the window's edited dot (`isDocumentEdited`) on
 // `model.isDirty`, and shows "Saving…" (`photo.file.saving`) or "Opening…"
 // (`photo.file.opening`) over the window once `files.working` has run 100 ms.
 // It runs the window's PhotoAutosave (D-9): a tick every second, discarded on
 // a clean close; the first window offers what a crash left behind, and
-// Restore and Discard are FileIntents.
+// Restore and Discard are FileIntents. D-10: PhotoWindowEditedView is the
+// window's hook for Quit and Finder opens (PhotoApp.swift); its close guard
+// asks PhotoUnsavedPrompt's alert before a dirty window closes.
 import AppKit
 import CoreRaster
 import Observation
@@ -67,6 +69,8 @@ final class PhotoFileSession {
     var saveFailed = false
     /// A save or an open is running off the main actor.
     var working: PhotoFileWork?
+    /// Saves that landed, so the unsaved prompt's Save knows it did.
+    var saves = 0
     /// Open Recent's files, newest first.
     private(set) var recentFiles: [URL] = PhotoFileSession.storedRecent()
     /// The window's autosave, made on its workspace's recovery store when the window appears.
@@ -293,6 +297,7 @@ extension PhotoWindow {
             documentURL = url
             model.didSave(as: url.lastPathComponent, kind: kind)
             files.autosave?.didSave(model: model)
+            files.saves += 1
         }
         files.saveFailed = false
         files.working = nil
@@ -323,12 +328,13 @@ struct PhotoFileArea: ViewModifier {
     let model: PhotoWorkspace
     let files: PhotoFileSession
     let perform: PhotoPerform
+    @Environment(\.openWindow) private var openWindow
 
     func body(content: Content) -> some View {
         content
             .environment(\.photoSaveStatus, model.saveStatus(
                 autosaved: files.autosave?.autosaved ?? false, saveFailed: files.saveFailed))
-            .background { PhotoWindowEdited(edited: model.isDirty) }
+            .background { PhotoWindowEdited(model: model, files: files, perform: perform) }
             .overlay { PhotoFileWorkNote(work: files.working) }
             .focusedSceneValue(\.photoRecentFiles, files.recentFiles)
             .confirmationDialog(
@@ -356,7 +362,8 @@ struct PhotoFileArea: ViewModifier {
                 }
             }
             .task { await files.offerRecovery(model) }
-            // A clean close leaves nothing to recover; D-10 asks before a dirty one closes.
+            .task { if let url = PhotoOpenQueue.shared.windowAppeared(openWindow) { perform(.openFile(url)) } }
+            // A clean close leaves nothing to recover; a dirty one asked first (Don't Save discards).
             .onDisappear { if !model.isDirty { files.autosave?.discard() } }
             .alert(
                 files.recoveryOffer?.message ?? "",
@@ -403,25 +410,125 @@ struct PhotoFileWorkNote: View {
     }
 }
 
-/// Sets the hosting window's edited dot (`isDocumentEdited`) to `edited`.
+/// The window's hook (PhotoWindowEditedView).
 struct PhotoWindowEdited: NSViewRepresentable {
-    let edited: Bool
+    let model: PhotoWorkspace
+    let files: PhotoFileSession
+    let perform: PhotoPerform
 
     func makeNSView(context: Context) -> PhotoWindowEditedView { PhotoWindowEditedView() }
 
-    func updateNSView(_ view: PhotoWindowEditedView, context: Context) { view.edited = edited }
+    func updateNSView(_ view: PhotoWindowEditedView, context: Context) { view.update(model, files: files, perform: perform) }
 }
 
-/// An invisible view that keeps its window's edited dot on `edited`, also
-/// once it moves into a window.
-final class PhotoWindowEditedView: NSView {
-    var edited = false {
-        didSet { window?.isDocumentEdited = edited }
+/// An invisible view that keeps its window's edited dot on the image's dirty
+/// state, puts its close guard in front of the window's delegate, and answers
+/// the unsaved-changes prompt for its window.
+final class PhotoWindowEditedView: NSView, PhotoUnsavedWindow {
+    /// The visible Photo windows' hooks, front to back.
+    static var shown: [PhotoWindowEditedView] {
+        let views = all.allObjects
+        return NSApp.orderedWindows.filter { $0.isVisible }.compactMap { window in views.first { $0.window === window } }
+    }
+
+    private static let all = NSHashTable<PhotoWindowEditedView>.weakObjects()
+    private(set) var workspace: PhotoWorkspace?
+    private(set) var files: PhotoFileSession?
+    private(set) var send: PhotoPerform?
+    private let closeGuard = PhotoWindowCloseGuard()
+
+    var isDirty: Bool { workspace?.isDirty ?? false }
+    var isEmpty: Bool { workspace?.canvas == nil }
+
+    func update(_ workspace: PhotoWorkspace, files: PhotoFileSession, perform: @escaping PhotoPerform) {
+        self.workspace = workspace
+        self.files = files
+        send = perform
+        attach()
     }
 
     override func viewDidMoveToWindow() {
         super.viewDidMoveToWindow()
-        window?.isDocumentEdited = edited
+        attach()
+    }
+
+    /// The edited dot, and the close guard in front of SwiftUI's delegate.
+    private func attach() {
+        guard let window else { return }
+        Self.all.add(self)
+        window.isDocumentEdited = isDirty
+        guard window.delegate !== closeGuard else { return }
+        closeGuard.original = window.delegate
+        closeGuard.hook = self
+        window.delegate = closeGuard
+    }
+
+    func prepareToQuit() async {
+        guard let workspace, let autosave = files?.autosave else { return }
+        await autosave.willQuit(model: workspace, codec: ImageIOCodec())
+    }
+
+    func ask() async -> PhotoUnsavedPrompt.Answer {
+        guard let window, let message = workspace?.unsavedPromptMessage else { return .cancel }
+        window.makeKeyAndOrderFront(nil)
+        let alert = NSAlert()
+        alert.alertStyle = .warning
+        alert.messageText = message
+        alert.informativeText = PhotoUnsavedPrompt.informativeText
+        for choice in PhotoUnsavedPrompt.choices {
+            alert.addButton(withTitle: choice.title).setAccessibilityIdentifier(choice.identifier)
+        }
+        let response = await alert.beginSheetModal(for: window)
+        return PhotoUnsavedPrompt.answer(
+            forButton: response.rawValue - NSApplication.ModalResponse.alertFirstButtonReturn.rawValue)
+    }
+
+    /// Runs Save (maybe Keep layers? or the panel) and waits; true once it landed.
+    func save() async -> Bool {
+        guard let files, let send else { return false }
+        let before = files.saves
+        send(.save)
+        while files.working != nil || files.keepLayers != nil {
+            do { try await Task.sleep(for: .milliseconds(50)) } catch { return false }
+        }
+        return files.saves != before
+    }
+
+    func discardChanges() { files?.autosave?.discard() }
+}
+
+/// The window's delegate in front of SwiftUI's: asks before a dirty window
+/// closes and passes every other delegate call to the original.
+@MainActor final class PhotoWindowCloseGuard: NSObject, NSWindowDelegate {
+    /// SwiftUI's delegate; AppKit calls `responds(to:)` on the main thread.
+    nonisolated(unsafe) weak var original: (any NSWindowDelegate)?
+    weak var hook: PhotoWindowEditedView?
+    /// The prompt is up, or its answer is closing the window.
+    private var asking = false, confirmed = false
+
+    func windowShouldClose(_ sender: NSWindow) -> Bool {
+        if asking { return false }
+        guard !confirmed, let hook, PhotoUnsavedFlow.asksOnClose(hook) else {
+            return original?.windowShouldClose?(sender) ?? true
+        }
+        asking = true
+        Task {
+            let closes = await PhotoUnsavedFlow.close(hook)
+            asking = false
+            guard closes else { return }
+            confirmed = true
+            sender.performClose(nil)
+            confirmed = false
+        }
+        return false
+    }
+
+    nonisolated override func responds(to aSelector: Selector!) -> Bool {
+        super.responds(to: aSelector) || original?.responds(to: aSelector) == true
+    }
+
+    nonisolated override func forwardingTarget(for aSelector: Selector!) -> Any? {
+        original?.responds(to: aSelector) == true ? original : super.forwardingTarget(for: aSelector)
     }
 }
 
