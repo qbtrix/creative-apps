@@ -7,6 +7,7 @@ import Testing
 
 private let live = LiveScenes()
 private let red = FlareColor(r: 1, g: 0, b: 0)
+private let nanRed = FlareColor(r: .nan, g: 0, b: 0)
 
 @Test func setCanvasIsOneSetCanvasStepThatMatchesTheFake() throws {
     var engine = CommandEngine(document: FlareFixtures.bounce)
@@ -21,11 +22,12 @@ private let red = FlareColor(r: 1, g: 0, b: 0)
     #expect(engine.document == FlareFixtures.bounce && !engine.canUndo)
 }
 
-@Test(arguments: [(0.0, 1920.0), (1080.0, 0.0), (-5.0, 1920.0), (Double.infinity, 1920.0)])
-func aBadCanvasSizeThrowsAndChangesNothing(width: Double, height: Double) {
+@Test(arguments: [(0.0, 1920.0, red), (1080.0, 0.0, red), (-5.0, 1920.0, red), (Double.infinity, 1920.0, red),
+                   (1080.0, 1920.0, nanRed)])
+func aBadCanvasSizeThrowsAndChangesNothing(width: Double, height: Double, background: FlareColor) {
     var engine = CommandEngine(document: FlareFixtures.bounce)
     #expect(throws: CommandError.self) {
-        try live.setCanvas("scene-1", width: width, height: height, background: red, in: &engine)
+        try live.setCanvas("scene-1", width: width, height: height, background: background, in: &engine)
     }
     #expect(engine.document == FlareFixtures.bounce && !engine.canUndo)
 }
@@ -79,22 +81,25 @@ func aBadCanvasSizeThrowsAndChangesNothing(width: Double, height: Double) {
     #expect(engine.document == FlareFixtures.bounce && !engine.canUndo)
 }
 
-/// A refused canvas edit in the middle of a guide drag leaves the drag one "Move Guide" entry, as the fake does.
-private func dragAcrossARefusedCanvas(_ scenes: some SceneEditing) throws -> CommandEngine {
+/// A refused canvas edit (a zero width or a NaN background) in the middle of a guide drag leaves the drag one
+/// "Move Guide" entry, as the fake does.
+private func dragAcrossARefusedCanvas(_ scenes: some SceneEditing, width: Double,
+                                      background: FlareColor) throws -> CommandEngine {
     var engine = CommandEngine(document: FlareFixtures.bounce)
     _ = try scenes.addGuide(.horizontal, at: 300, sceneID: "scene-1", in: &engine)
     try scenes.moveGuide(at: 0, to: 310, sceneID: "scene-1", coalesceKey: "drag", in: &engine)
     #expect(throws: CommandError.self) {
-        try scenes.setCanvas("scene-1", width: 0, height: 1920, background: red, in: &engine)
+        try scenes.setCanvas("scene-1", width: width, height: 1920, background: background, in: &engine)
     }
     try scenes.moveGuide(at: 0, to: 320, sceneID: "scene-1", coalesceKey: "drag", in: &engine)
     try engine.undo()
     return engine
 }
 
-@Test func refusedCanvasKeepsADragOneEntry() throws {
-    let engine = try dragAcrossARefusedCanvas(live)
-    let fake = try dragAcrossARefusedCanvas(FakeScenes())
+@Test(arguments: [(0.0, red), (1080.0, nanRed)])
+func refusedCanvasKeepsADragOneEntry(width: Double, background: FlareColor) throws {
+    let engine = try dragAcrossARefusedCanvas(live, width: width, background: background)
+    let fake = try dragAcrossARefusedCanvas(FakeScenes(), width: width, background: background)
     #expect(engine.document == fake.document)
     #expect(engine.document.scenes.first?.guides.first?.position == 300)
 }
