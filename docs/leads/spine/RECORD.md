@@ -56,6 +56,7 @@ Taken from the packet's Build waves; checked against dev bcf5a09.
 - SP-11's `CatalogHistory.push` does the coalescing itself; SP-14's recordEdit calls `push` (the pseudocode's `history.top.after = after` can't compile on a read-only `top`).
 - SP-10 adds a second case [a, a, a#2] because the packet's example already passed on the old code.
 - `gh` GraphQL is blocked in cloud sessions: builders open PRs with `gh api` REST (POST pulls, then POST issues/<n>/labels).
+- W4 is split into W4a SP-4 then W4b SP-5: FakeRendering's fakes call FakeBehavior (FakeSupport.swift, SP-4's file), so SP-5 needs SP-4 merged; the packet marked them independent.
 
 ## Open
 - PR #217 (fix for #156) is open at stage 0; SP-9 lands only if it is still unmerged when wave 8 starts.

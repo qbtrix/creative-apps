@@ -7,3 +7,4 @@ utc	stage	event	ref	note
 2026-10-15T10:57Z	3	stage-end	wave1	#1093 #1094 #1095 #1096 merged
 2026-10-15T11:05Z	3	pr-merged	#1103	SP-2
 2026-10-15T11:06Z	3	stage-start	wave3	SP-3 building on b1a93e4
+2026-10-15T11:08Z	3	heartbeat	-	waiting on builders or the lane
