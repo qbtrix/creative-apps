@@ -1,11 +1,14 @@
 // PhotoSelection.swift: what Photo does with the marquee selection and a
 // pending crop. Select All covers the canvas and Deselect drops the
-// selection. Delete Selection clears the selected pixels of the selected layer
-// to transparent and Fill Selection paints them the tool color; each is one
-// undo step that keeps only the changed tiles. Apply Crop cuts every layer to
-// the pending crop (keeping each layer where it was on screen), makes that the
-// canvas size and drops the selection: one undo step that keeps the whole
-// stack, since the size changes. The selection is a whole-pixel rectangle.
+// selection, both through `setSelection` (PhotoSelectionMask.swift), which
+// clears the selection mask too. Delete Selection clears the selected pixels
+// of the selected layer to transparent and Fill Selection paints them the tool
+// color, each pixel weighted by `selectionCoverage`; each is one undo step
+// that keeps only the changed tiles. Apply Crop cuts every layer to the
+// pending crop (keeping each layer where it was on screen), tells each layer's
+// extras through `layerGeometryChanged`, makes that the canvas size and drops
+// the selection: one undo step that keeps the whole stack, since the size
+// changes. The selection is a whole-pixel rectangle.
 // ponytail: rectangles only; a CoreRaster Mask once lasso or ellipse arrive.
 // Linux-safe.
 import CoreRaster
@@ -22,11 +25,11 @@ extension PhotoWorkspace {
 
     public mutating func selectAll() {
         guard let canvas else { return }
-        selection = canvas.rect
+        setSelection(canvas.rect)
     }
 
     public mutating func deselect() {
-        selection = nil
+        setSelection(nil)
     }
 
     /// Clears the selected pixels of the selected layer to transparent.
@@ -45,6 +48,7 @@ extension PhotoWorkspace {
         guard let crop = pendingCrop else { return }
         record(.stack(stackState), named: "Crop")
         for (at, layer) in layers.enumerated() {
+            layerGeometryChanged(layer.id, .cropped(crop))
             guard let tiled = pixels[layer.id], let bounds = bounds(of: layer) else { continue }
             if let kept = bounds.intersection(crop),
                 let cut = try? tiled.flattened().cropped(
@@ -61,7 +65,7 @@ extension PhotoWorkspace {
             }
         }
         canvas = CanvasSize(width: crop.width, height: crop.height)
-        selection = nil
+        setSelection(nil)
         pendingCrop = nil
         touch(.all)
     }
@@ -71,12 +75,14 @@ extension PhotoWorkspace {
     }
 
     /// Replaces each selected pixel of the selected layer with `pixel(old)`,
-    /// as one undo step named `name` that keeps the tiles it changed.
+    /// weighted by the selection's coverage there, as one undo step named
+    /// `name` that keeps the tiles it changed.
     private mutating func editSelection(named name: String, _ pixel: (RGBA) -> RGBA) {
         guard let selection, let id = selectedLayerID, let at = index(of: id), let bounds = bounds(of: layers[at]),
             let area = selection.intersection(bounds), var tiled = pixels[id]
         else { return }
         let local = area.offsetBy(-layers[at].offsetX, -layers[at].offsetY)
+        let weight = coverageWeight(offsetX: layers[at].offsetX, offsetY: layers[at].offsetY)
         var before: [Int: PixelBuffer] = [:]
         for i in tiled.tileIndices(in: local) where tiled.tiles.indices.contains(i) {
             let rect = tiled.tileRect(i), old = tiled.tiles[i]
@@ -84,7 +90,9 @@ extension PhotoWorkspace {
             for y in (part.y - rect.y)..<(part.maxY - rect.y) {
                 for x in (part.x - rect.x)..<(part.maxX - rect.x) {
                     // Inside the tile by construction, and the new pixels are finite.
-                    if let p = try? old.pixel(x: x, y: y) { try? tiled.tiles[i].setPixel(x: x, y: y, pixel(p)) }
+                    guard let p = try? old.pixel(x: x, y: y) else { continue }
+                    let w = weight?(rect.x + x, rect.y + y) ?? 1
+                    try? tiled.tiles[i].setPixel(x: x, y: y, w >= 1 ? pixel(p) : Self.mix(p, pixel(p), w))
                 }
             }
             if tiled.tiles[i] != old { before[i] = old }
@@ -93,5 +101,13 @@ extension PhotoWorkspace {
         record(.tiles(layer: id, before), named: name)
         pixels[id] = tiled
         touch(.region(area))
+    }
+
+    /// `old` moved toward `new` by `w` (0 keeps `old`, 1 gives `new`).
+    static func mix(_ old: RGBA, _ new: RGBA, _ w: Float) -> RGBA {
+        let k = min(max(w, 0), 1)
+        return RGBA(
+            r: old.r + (new.r - old.r) * k, g: old.g + (new.g - old.g) * k, b: old.b + (new.b - old.b) * k,
+            a: old.a + (new.a - old.a) * k)
     }
 }
