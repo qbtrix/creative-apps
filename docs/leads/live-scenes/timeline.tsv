@@ -34,3 +34,4 @@ utc	stage	event	ref	note
 2026-10-15T01:50Z	5	ci-run	38667087530	Linux green; macOS red only SuiteUI SnapshotHost+Tokens; all Flare green; waiting for a green dev run
 2026-10-15T01:56Z	5	ci-run	38667485578	re-dispatch on c3fd66f: same SuiteUI-only red; watching for the next run
 2026-10-15T02:11Z	5	heartbeat	finish	waiting for a green dev CI run newer than 38667485578
+2026-10-15T02:27Z	5	ci-run	38669151941	scripts/ci green on macOS; 6 UI journeys red (Flare audit identifier 16>15 Show Sidebar, Design, Library, Halo, Suite), none in live-scenes files; triaged on #763
