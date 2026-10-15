@@ -10,8 +10,9 @@
 // reasons. Last, it relaunches on `-PhotoFixture layered` (Paint, Curves 1,
 // Background, top first) with Paint selected: Merge Down needs a pixel layer
 // below. Undo steps are read from the top bar's Undo button, as
-// PhotoJourneyTests does; a disabled menu item's reason is its help tag, read
-// by hovering it, as HaloLayersJourneyTests does. The list rows carry no
+// PhotoJourneyTests does; a disabled menu item's reason is its help, read from
+// `photo.menu.reasons` (expectMenuReason), since its help tag reads as no
+// text. The list rows carry no
 // identifier, so the copy's selection is read from its row: the blend and
 // opacity just set show beside "Background copy". Merge Down and Flatten
 // Image each report how soon "Merging…" showed (PB-16, report-only).
@@ -168,7 +169,7 @@ final class PhotoLayerOpsJourneyTests: XCTestCase {
         entry.click()
     }
 
-    /// `menu`'s item `item` is disabled and its help tag reads `help`; the menu is closed again.
+    /// `menu`'s item `item` is disabled and its help reads `help` (expectMenuReason); the menu is closed again.
     @MainActor private func expectDisabled(_ item: String, in menu: String, help: String, _ photo: Journey) {
         let bar = photo.app.menuBars.firstMatch.menuBarItems[menu]
         XCTAssert(bar.waitForExistence(timeout: 5), "no \(menu) menu")
@@ -177,9 +178,7 @@ final class PhotoLayerOpsJourneyTests: XCTestCase {
         XCTAssert(entry.waitForExistence(timeout: 3), "the \(menu) menu has no \(item)")
         XCTAssertFalse(entry.isEnabled, "\(menu) > \(item) is enabled")
         entry.hover()
-        let tag = photo.app.helpTags.matching(
-            NSPredicate(format: "label CONTAINS %@ OR title CONTAINS %@ OR value CONTAINS %@", help, help, help))
-        XCTAssert(tag.firstMatch.waitForExistence(timeout: 5), "\(menu) > \(item) doesn't say \(help)")
+        expectMenuReason(item, in: menu, help: help, photo)
         photo.press(.escape)
         _ = photo.app.menus.firstMatch.waitForNonExistence(timeout: 2)
     }

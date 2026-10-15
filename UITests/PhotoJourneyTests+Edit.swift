@@ -228,7 +228,7 @@ final class PhotoEditJourneyTests: XCTestCase {
         if close { closeMenu(photo) }
     }
 
-    /// Edit > `item` is disabled and its help tag holds `help` (the item's help is "<item>: <help>").
+    /// Edit > `item` is disabled and its help is "<item>: <help>" (expectMenuReason).
     @MainActor private func expectDisabled(_ item: String, help: String, _ photo: Journey) {
         var entry = editItem(item, photo)
         for _ in 0..<5 where entry.isEnabled {
@@ -238,9 +238,7 @@ final class PhotoEditJourneyTests: XCTestCase {
         }
         XCTAssertFalse(entry.isEnabled, "Edit > \(item) is enabled")
         entry.hover()
-        let tag = photo.app.helpTags.matching(
-            NSPredicate(format: "label CONTAINS %@ OR title CONTAINS %@ OR value CONTAINS %@", help, help, help))
-        XCTAssert(tag.firstMatch.waitForExistence(timeout: 5), "Edit > \(item) doesn't say \(help)")
+        expectMenuReason(item, in: "Edit", help: help, photo)
         photo.shot("edit-\(photo.slug(item))-disabled", screen: true)
         closeMenu(photo)
     }

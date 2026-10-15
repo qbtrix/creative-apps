@@ -109,7 +109,7 @@ struct PhotoPasteboardMenu: View {
         return Button(title, systemImage: item.systemImage) { menu.edit(intent) }
             .keyboardShortcut(key)
             .disabled(menu.isEditDisabled(intent, pasteboard: held, textHasFocus: textFocused))
-            .help(menu.editHelp(intent, pasteboard: held).map { "\(title): \($0)" } ?? title)
+            .help(menu.editHelpText(title, intent, pasteboard: held))
     }
 }
 
@@ -149,6 +149,21 @@ extension PhotoMenu {
         case .mergeDown: mergeDownHelp
         case .flattenImage: flattenHelp
         }
+    }
+
+    /// An item's help as its menu shows it: "Paste: Nothing to paste.", or
+    /// its title when it can act.
+    func editHelpText(_ title: String, _ intent: EditIntent, pasteboard: PhotoPasteboardState) -> String {
+        editHelp(intent, pasteboard: pasteboard).map { "\(title): \($0)" } ?? title
+    }
+
+    /// The Edit and Layer items' help, one line each, for `photo.menu.reasons`.
+    func editHelpLines(pasteboard: PhotoPasteboardState) -> String {
+        let items: [(String, EditIntent)] = [
+            ("Cut", .cut), ("Copy", .copy), ("Paste", .paste),
+            ("Duplicate Layer", .duplicateLayer), ("Merge Down", .mergeDown), ("Flatten Image", .flattenImage),
+        ]
+        return items.map { editHelpText($0.0, $0.1, pasteboard: pasteboard) }.joined(separator: "\n")
     }
 
     /// On while text has focus or a sheet is up, so the field gets the key.

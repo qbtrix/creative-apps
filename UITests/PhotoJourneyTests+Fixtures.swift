@@ -7,7 +7,9 @@
 // temp folder unless the journey passes `recoveryDir:` (PJ-3 does, to relaunch
 // on its autosave), so one journey's autosave never reaches the shared
 // Application Support/Photo/Recovery and offers a restore to every later
-// launch. PhotoJourneyKitTests.testWrittenPhotoOpens proves both: the
+// launch. expectMenuReason reads a menu item's help from the window's
+// `photo.menu.reasons`, since XCUITest reads no text from a help tag.
+// PhotoJourneyKitTests.testWrittenPhotoOpens proves both: the
 // arguments are spelled right, and a written beach.png opens to the v1 open
 // state, shot as "kit-opened".
 import CoreGraphics
@@ -56,6 +58,20 @@ func photoArguments(
     arguments += ["-PhotoRecoveryDir", recovery.path]
     if let windowWidth { arguments += ["-PhotoWindowWidth", "\(windowWidth)"] }
     return arguments
+}
+
+/// The Edit or Layer menu's `item` says `help` ("Paste: Nothing to paste."),
+/// read from the window's `photo.menu.reasons`: XCUITest reads a menu item's
+/// help tag as no text (run 38808431710's hierarchy has the tag, sized to its
+/// words, with no label, title or value). The menus build their help from
+/// the same `PhotoMenu.editHelpText`.
+@MainActor func expectMenuReason(_ item: String, in menu: String, help: String, _ photo: Journey) {
+    let reasons = photo.app.descendants(matching: .any).matching(NSPredicate(
+        format: "identifier == 'photo.menu.reasons' AND label CONTAINS %@", "\(item): \(help)")).firstMatch
+    let shown = photo.element("photo.menu.reasons")
+    XCTAssert(
+        reasons.waitForExistence(timeout: 5),
+        "\(menu) > \(item) doesn't say \(help) (photo.menu.reasons reads \(shown.exists ? shown.label : "nothing"))")
 }
 
 final class PhotoJourneyKitTests: XCTestCase {

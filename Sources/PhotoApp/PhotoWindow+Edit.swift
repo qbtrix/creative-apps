@@ -10,7 +10,9 @@
 // (PhotoMergeNote). The workspace refuses with its reason in the status line
 // (the Layer menu disables them with that reason first). PhotoEditArea
 // watches the general pasteboard's change count and publishes what it holds
-// (`photoPasteboard`) for the Edit menu.
+// (`photoPasteboard`) for the Edit menu, and puts the Edit and Layer items'
+// help in a hidden `photo.menu.reasons` (PhotoReadout), since XCUITest reads
+// a menu item's help tag as no text.
 import AppKit
 import CoreRaster
 import PhotoModel
@@ -140,6 +142,12 @@ struct PhotoEditArea: ViewModifier {
         content
             .overlay { PhotoMergeNote(progress: model.progress) }
             .focusedSceneValue(\.photoPasteboard, pasteboard)
+            // The Edit and Layer items' help again: a journey can't read a menu item's help tag.
+            .background(alignment: .topLeading) {
+                PhotoReadout(
+                    identifier: "photo.menu.reasons",
+                    text: PhotoMenu(model: model, perform: perform).editHelpLines(pasteboard: pasteboard))
+            }
             // Another app can change the pasteboard at any time and says
             // nothing, so its change count is checked four times a second.
             .task {

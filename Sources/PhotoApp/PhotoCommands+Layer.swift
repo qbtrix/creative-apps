@@ -80,7 +80,7 @@ struct PhotoLayerMenu: View {
         return Button(title, systemImage: Self.systemImage(intent)) { menu.perform(.edit(intent)) }
             .keyboardShortcut(Self.shortcut(intent))
             .disabled(help != nil)
-            .help(help.map { "\(title): \($0)" } ?? title)
+            .help(menu.editHelpText(title, intent, pasteboard: PhotoPasteboardState()))
     }
 }
 
