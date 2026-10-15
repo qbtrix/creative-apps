@@ -44,3 +44,4 @@ utc	stage	event	ref	note
 2026-10-15T15:17Z	4	round-clean	round2	panel clean (7 minor); final fix batch with feature-done next
 2026-10-15T15:30Z	5	pr-merged	#1187	feature-done PR merged
 2026-10-15T15:42Z	5	ci-run	38761014883	feature-done run red on Halo keyedFrame6 only; status posted on #1044
+2026-10-15T15:49Z	5	ci-run	38761718706	still red only on Halo keyedFrame6; waiting
