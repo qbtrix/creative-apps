@@ -31,3 +31,5 @@ utc	stage	event	ref	note
 2026-10-15T17:52Z	3	heartbeat	-	waiting
 2026-10-15T18:04Z	3	heartbeat	-	wave 5 building
 2026-10-15T18:07Z	4	ci-run	38782884668	macOS on f9846c9 in progress (first compile of D-6/D-7)
+2026-10-15T18:20Z	3	pr-opened	#1228	D-8 save status UI
+2026-10-15T18:20Z	4	ci-run	38782884668	macOS builds; red on PhotoCompositeCostTests (not ours)
