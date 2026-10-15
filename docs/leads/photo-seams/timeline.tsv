@@ -64,3 +64,4 @@ utc	stage	event	ref	note
 2026-10-15T05:26Z	3	stage-start	S-12	builder stacked on S-11b
 2026-10-15T05:33Z	3	pr-opened	#992	S-12 launch fixtures and preview pill, 173 lines 6 files
 2026-10-15T05:33Z	3	stage-start	S-13b	builder stacked on S-12
+2026-10-15T05:33Z	3	pr-merged	#991 #992	S-11b, S-12

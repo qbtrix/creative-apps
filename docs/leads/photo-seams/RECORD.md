@@ -33,7 +33,7 @@ packet chains every task on the one before it (shared files or new types).
 | S-11b | 17 | panel split 2: Layers tab, History stub | A/PhotoPanel, PhotoLayersTab, PhotoHistoryTab | PhotoLayerRowSnapshots | #991 | merged |
 | S-12 | 18 | -PhotoFixture, -PhotoWindowWidth, Preview data pill | M/PhotoFixtures, A/PhotoApp, PhotoWindow, PhotoStatusLine | PhotoLaunchOptionsTests; photo-preview-pill-dark.png | #992 | merged |
 | S-13a | 11 | PB-2 clone/heal and PB-9 move budgets (model half) | MT/PhotoBudgetTests | PhotoBudgetTests | #979 | merged |
-| S-13b | 19 | PB-2 event-to-picture latency series | ST/PhotoBrushLatencyTests | PhotoBrushLatencyTests | – | todo |
+| S-13b | 19 | PB-2 event-to-picture latency series (feature-done) | ST/PhotoBrushLatencyTests | PhotoBrushLatencyTests | – | todo |
 
 ## Rounds
 | round | CI run | CI | audit vs baseline | lenses | confirmed | fixed by | clean |
@@ -42,7 +42,7 @@ packet chains every task on the one before it (shared files or new types).
 ## Decisions
 - Waves of one task each, in the packet's chain order; the next builder starts once the previous PR has merged into dev.
 - S-7c clips brush, eraser, clone and heal to an existing selection rect (coverage 0 outside). Kept: the packet says coverage is 1 inside the rect; no v1 journey paints with a selection active (checked UITests/PhotoJourneyTests.swift). Crop undo does not restore selectionMask: left to PV-5 (add selectionMask to PhotoStack).
-- S-13 split in two: its model half (PhotoBudgetTests) ran beside the app chain as the packet allows. S-13b (latency series) does not carry feature-done: the Anatomy rounds need a CI run first, so feature-done goes on a final packet status-line PR after the rounds (lead.md stage 5).
+- S-13 split in two: its model half (PhotoBudgetTests) ran beside the app chain as the packet allows. S-13b carries feature-done: the lane script on main (ee57a15, stuck while dev is red) dispatches CI only after a feature-done merge, so that merge starts round 1's run. Each later round's last fix PR carries feature-done again to get its run.
 - S-8a: flat .export became .export(.openSheet) (a case name clash); area modifiers take PhotoPerform (@MainActor); confirmTransform/dismissTransform are app stubs returning false until PV-7.
 - S-10a: existing editor snapshots should not change (they already ran on .live with the Eyedropper disabled); the 4 s clearStatus task lives in PhotoWindow; status message id photo.status.message.
 - S-12: PhotoLaunchOptions, PhotoWorkspace.launch(_:), isPreviewData (services.archive is FakeArchive); -PhotoWindowWidth only sets defaultSize, so a saved frame still wins (Halo used a window sizer).
@@ -54,7 +54,6 @@ packet chains every task on the one before it (shared files or new types).
 - needs-ui filed: #952 SelectionPathOutline, #953 BrushCursorMark, #954 LayerList symbol and accessory. SelectionHandles with rotation is SuiteUI canvas-marks CM-4 (#273), no new issue.
 - Quality finding for round 1 (quality lens): S-13a times 6 px steps with a 64 px brush, so many events put down no dab; heal release p50 0.56 ms but p95 4.6 ms, likely the real per-dab cost (> PB-2 1 ms). Round 1 fix: time events that each dab (step >= dab spacing); if heal misses PB-2 per dab, file a line:photo gap for heal speed.
 - Quality watch for round 1: S-10b stores CanvasViewport hover in @State, so every pointer move redraws PhotoCanvas; check PB-1 brush latency and the hitch journey (testBrushStrokeHitchesOnALargePhoto).
-- No CI run dispatched on dev after run 726 (e8e5b52) although #978-#989 touched Sources/PhotoApp; lane logs show no dispatch line in their tails. The app chain since #978 is unverified on macOS until a run: the feature-done merge dispatches one regardless.
 - #956 app code verified: run 38679533707 (723, 54e16aa) macOS scripts/ci green (compile + snapshots); all 12 Photo journeys ran; photo audit at or under baseline (identifier 16 vs 23). Run red from halo (identifier 14>8) and library (identifier 21>16), not this feature; dev-red #763.
 - S-6b: a coalesced step gets a fresh id; PhotoStack keeps masks but not selectionMask (S-7c may add it).
 - dev CI was red before this feature (runs 717-722 fail in UI journeys of other lines; Linux green). Not ours; the dev-red issue tracks it.
