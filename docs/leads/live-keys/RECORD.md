@@ -4,7 +4,7 @@ Issue: #799 · Packet: docs/blueprints/flare/features/live-keys.md
 Run: act-1a13d0020ff-4x51 · Session: cse_01BKSKFkuR1aFXhWhZAhsegU · Started: 2026-10-15T00:00Z
 Stage: 5 finish
 Base: a45f1cbe6a5c49a11296e40bac32b48bb4b264fd
-Next: wait for the dev CI run containing #977 (and #970); green -> Belt-Contact-Sheet on #799
+Next: wait for a green dev CI run containing #970 (db2f53a); then comment Belt-Contact-Sheet on #799 and finish. Latest: 38687993459 red only on Halo testLayoutAtWidths and Suite testGalleryOpensEveryPage (#763); Flare green
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
