@@ -69,26 +69,26 @@ inside the visible frame and every frame inside the window.
 
 New, in `UITests/PhotoJourneyTests+Shell.swift`:
 
-1. Launch with `-SuiteWindowSize 1024x768`. The window shows the title
+1. [PS-5, PS-J1] Launch with `-SuiteWindowSize 1024x768`. The window shows the title
    "Photo", an empty sidebar list titled Layers, and a toolbar with the app switcher centered (Photo's item in the capsule) where Open is
    enabled and Save, Export, Undo, Redo and zoom are disabled with their
    reasons. The canvas shows its empty state with Open… and no palette. The
    inspector shows the no-image state. Shot `shell-empty`.
-2. Open the journey's 800 × 600 test photo with `-PhotoOpenFile`. The title
+2. [PS-5, PS-J2] Open the journey's 800 × 600 test photo with `-PhotoOpenFile`. The title
    is the file's name and the subtitle is empty or "Saved". The sidebar
    shows its one layer, the floating palette sits at the canvas's leading
    edge, and the inspector shows the header ("<file>, 800 × 600 px, sRGB · 1
    layer"), Tool Options, the Layer section and the adjustments. Shot
    `shell-open`.
-3. Pick Marquee and drag from the image's left edge to 30% across, then
+3. [PS-5, PS-J3] Pick Marquee and drag from the image's left edge to 30% across, then
    View > Fit on Screen. Shot `shell-selection`, then `expectShellGeometry()`
    with the palette checked against the rulers and against the image grown
    by `anchorHit / 2`.
-4. Brush a stroke. The subtitle reads "Edited" and the toolbar's Undo reads
+4. [PS-5, PS-J4] Brush a stroke. The subtitle reads "Edited" and the toolbar's Undo reads
    "Undo Paint". Click it, and the subtitle no longer reads "Edited".
-5. The sidebar's New Layer adds "Layer 1". Its eye hides it, and the
+5. [PS-5, PS-J5] The sidebar's New Layer adds "Layer 1". Its eye hides it, and the
    inspector's Layer section shows its blend mode and opacity.
-6. The same launch with `-AppleInterfaceStyle Dark`: shots `shell-open-dark`
+6. [PS-5, PS-J6] The same launch with `-AppleInterfaceStyle Dark`: shots `shell-open-dark`
    and `shell-selection-dark`, then `expectShellGeometry()` again.
 
 ## Screens and states
@@ -105,9 +105,16 @@ New, in `UITests/PhotoJourneyTests+Shell.swift`:
 | Status line | `PhotoStatusLine` | the same view in `EditorDetail`'s status slot |
 | Appearance | dark in both | follows the system; the chrome is glass and the canvas stays flat |
 
-The five states: empty, open (one layer), a selection (marching ants at the
-image's edge), several layers (one hidden), and narrow (the window at its
-minimum of 944 pt, where nothing is clipped).
+The five states and the PNGs that show them: empty
+(`photo-empty-light.png`, `photo-empty-dark.png`, journey shot
+`photo-shell-empty`), open with one layer (`photo-open-light.png`,
+`photo-open-dark.png`, `photo-shell-open`, `photo-shell-open-dark`), a
+selection with marching ants at the image's edge (`photo-shell-selection`,
+`photo-shell-selection-dark`), several layers with one hidden (the
+`PhotoLayerRowSnapshots` PNGs PS-2 re-records, and `testTier1Layers`'
+shots), and narrow (the window at its minimum of 944 pt, where nothing is
+clipped: the dev run's `photo-launch` at the runner's size). PS-3
+re-records `photo-empty-*`, `photo-open-*` and `PhotoEditorSnapshots`.
 
 ## Contract slice
 
@@ -161,19 +168,23 @@ the lines `Belt-Lead:`, `Feature: photo-shell-parity`, `Fast-Check: pass`
 and `Head:`, and the label `fast-lane`. PS-5 also carries `feature-done`.
 Each UI PR lists the PNGs it changed.
 
-| id | behavior | owned files | depends on | size |
-|---|---|---|---|---|
-| PS-1 | `PhotoToolbarItem`: the toolbar's eight commands and the save state | `Sources/PhotoModel/PhotoToolbarItems.swift` (new), `Tests/PhotoModelTests/PhotoToolbarItemsTests.swift` (new) | – (#812 closed) | ~200 lines, 2 files |
-| PS-2 | The Layers tab splits into `PhotoLayerList` (the rows, plus a `SidebarActionRow` in place of the `EditorBarItem` row) and `PhotoLayerSettings` (blend mode and opacity). The tab composes the two, so only the action row looks different. | `Sources/PhotoApp/PhotoLayersTab.swift`, `Sources/PhotoApp/PhotoLayerList.swift` (new), `Sources/PhotoApp/PhotoLayerSettings.swift` (new), `Tests/AppSnapshotTests/PhotoLayerRowSnapshots.swift`, `UITests/PhotoJourneyTests.swift` (one assertion) | – (#812 closed) | ~230, 5 |
-| PS-3 | The move: `PhotoEditor` on `SuiteWindow` and `EditorDetail` with the floating palette, file headers that no longer name `EditorShell`, `PhotoLayerList` in the sidebar, `PhotoPanel` without tabs (`PhotoPanelTab` goes), the subtitle, the toolbar from PS-1 (`PhotoTopBar` no longer used). `PhotoWindow` drops its tab state and fits through `EditorDetailLayout`. The scene drops the hidden title bar and adds `SidebarCommands`. The journey changes listed under Journey steps. | `Sources/PhotoApp/PhotoEditor.swift`, `Sources/PhotoApp/PhotoPanel.swift`, `Sources/PhotoApp/PhotoLayersTab.swift` (deleted: its two halves are used directly), `Sources/PhotoApp/PhotoWindow.swift`, the one `Sources/PhotoApp/PhotoWindow+*.swift` file that holds `fit()`, `Sources/PhotoApp/PhotoApp.swift`, `UITests/PhotoJourneyTests.swift`, `Tests/AppSnapshotTests/PhotoEditorSnapshots.swift`, `Tests/AppSnapshotTests/PhotoProInspectorSnapshots.swift` | PS-1, PS-2 | ~380, 9 |
-| PS-4 | Subtract. Delete `PhotoTopBar.swift`, first moving `PhotoImageMenu` into the Image menu's commands file if it still lives there. Rename `PhotoRailTool` to `PhotoPaletteTool` with its test. Retire photo-seams' `-PhotoWindowWidth` (its 880 pt floor sits under the new 944 pt minimum) in favor of `-SuiteWindowSize`, with its parse and its test cases. | `Sources/PhotoApp/PhotoTopBar.swift` (deleted), `Sources/PhotoApp/PhotoCommands+Image.swift`, `Sources/PhotoApp/PhotoRailTool.swift` → `PhotoPaletteTool.swift`, `Sources/PhotoApp/PhotoEditor.swift`, the `PhotoRailTool` test file photo-seams S-10a added, `Sources/PhotoModel/PhotoFixtures.swift` and `Tests/PhotoModelTests/PhotoLaunchOptionsTests.swift` (the width flag only), and the `PhotoApp.swift` / `PhotoWindow.swift` lines that read it | PS-3 | ~260 (mostly deletions), 9 |
-| PS-5 | The shell journey (steps 1 to 6) with the geometric test | `UITests/PhotoJourneyTests+Shell.swift` (new) | PS-3 | ~170, 1 |
+| id | issue | what | owned files | depends on | size |
+|---|---|---|---|---|---|
+| PS-1 | – | `PhotoToolbarItem`: the toolbar's eight commands and the save state | `Sources/PhotoModel/PhotoToolbarItems.swift` (new), `Tests/PhotoModelTests/PhotoToolbarItemsTests.swift` (new) | – (#812 closed) | ~200 lines, 2 files |
+| PS-2 | – | The Layers tab splits into `PhotoLayerList` (the rows, plus a `SidebarActionRow` in place of the `EditorBarItem` row) and `PhotoLayerSettings` (blend mode and opacity). The tab composes the two, so only the action row looks different. | `Sources/PhotoApp/PhotoLayersTab.swift`, `Sources/PhotoApp/PhotoLayerList.swift` (new), `Sources/PhotoApp/PhotoLayerSettings.swift` (new), `Tests/AppSnapshotTests/PhotoLayerRowSnapshots.swift`, `UITests/PhotoJourneyTests.swift` (one assertion) | – (#812 closed) | ~230, 5 |
+| PS-3 | – | The move: `PhotoEditor` on `SuiteWindow` and `EditorDetail` with the floating palette, file headers that no longer name `EditorShell`, `PhotoLayerList` in the sidebar, `PhotoPanel` without tabs (`PhotoPanelTab` goes), the subtitle, the toolbar from PS-1 (`PhotoTopBar` no longer used). `PhotoWindow` drops its tab state and fits through `EditorDetailLayout`. The scene drops the hidden title bar and adds `SidebarCommands`. The journey changes listed under Journey steps. | `Sources/PhotoApp/PhotoEditor.swift`, `Sources/PhotoApp/PhotoPanel.swift`, `Sources/PhotoApp/PhotoLayersTab.swift` (deleted: its two halves are used directly), `Sources/PhotoApp/PhotoWindow.swift`, the one `Sources/PhotoApp/PhotoWindow+*.swift` file that holds `fit()`, `Sources/PhotoApp/PhotoApp.swift`, `UITests/PhotoJourneyTests.swift`, `Tests/AppSnapshotTests/PhotoEditorSnapshots.swift`, `Tests/AppSnapshotTests/PhotoProInspectorSnapshots.swift` | PS-1, PS-2 | ~380, 9 |
+| PS-4 | – | Subtract. Delete `PhotoTopBar.swift`, first moving `PhotoImageMenu` into the Image menu's commands file if it still lives there. Rename `PhotoRailTool` to `PhotoPaletteTool` with its test. Retire photo-seams' `-PhotoWindowWidth` (its 880 pt floor sits under the new 944 pt minimum) in favor of `-SuiteWindowSize`, with its parse and its test cases. | `Sources/PhotoApp/PhotoTopBar.swift` (deleted), `Sources/PhotoApp/PhotoCommands+Image.swift`, `Sources/PhotoApp/PhotoRailTool.swift` → `PhotoPaletteTool.swift`, `Sources/PhotoApp/PhotoEditor.swift`, the `PhotoRailTool` test file photo-seams S-10a added, `Sources/PhotoModel/PhotoFixtures.swift` and `Tests/PhotoModelTests/PhotoLaunchOptionsTests.swift` (the width flag only), and the `PhotoApp.swift` / `PhotoWindow.swift` lines that read it | PS-3 | ~260 (mostly deletions), 9 |
+| PS-5 | – | The shell journey (steps 1 to 6) with the geometric test | `UITests/PhotoJourneyTests+Shell.swift` (new) | PS-3 | ~170, 1 |
 
-**Build waves.** PS-1 and PS-2 are independent and run as one wave. PS-3
-comes next. PS-4 and PS-5 share no file and run together as the last wave.
-The longest chain is 3 tasks. PS-3 can't be split further, for the same
-reason as Design's DS-3: the layer list has to leave the panel in the same
-commit that puts it in the sidebar.
+## Build waves
+
+- Wave 1: PS-1, PS-2. Independent in this wave: both.
+- Wave 2: PS-3. Independent in this wave: PS-3 alone.
+- Wave 3: PS-4, PS-5. Independent in this wave: both.
+
+Longest chain: PS-1 → PS-3 → PS-4 (3), and PS-2 → PS-3 → PS-5 (3). PS-3
+can't be split further, for the same reason as Design's DS-3: the layer
+list has to leave the panel in the same commit that puts it in the sidebar.
 
 **Why PS-3 carries the journeys' changes.** Once PS-3 merges, Photo shows no
 palette until an image is open. The launch check and any step that clicks a

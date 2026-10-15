@@ -35,16 +35,19 @@ other shell-parity task touches that file.
 No new journey. The journeys that prove this feature are the ones already
 on `dev` once wave 2 is in:
 
-1. Every journey of all five apps runs green on the dev macOS run that ER-2
+1. [ER-2, ER-J1] Every journey of all five apps runs green on the dev macOS run that ER-2
    (`feature-done`) triggers.
-2. `SuiteJourneyTests+EditorWindow` and `SuiteJourneyTests+Parity`
+2. [ER-1, ER-J2] `SuiteJourneyTests+EditorWindow` and `SuiteJourneyTests+Parity`
    (editor-in-window) run green and shoot the four tool apps in one shell
    with one tool box.
 
 ## Screens and states
 
 Nothing on screen changes, because the deleted code must already be
-unused. `snapshot()` only writes PNGs, so "unchanged" isn't a test: the
+unused. The PNGs that show it: the `suiteui-launch`, `design-shell-open`,
+`photo-shell-open` and `parity-*` journey shots, compared with the previous
+green run; `suiteui-editor-shell-light.png` and `-dark.png` go with their
+test. `snapshot()` only writes PNGs, so "unchanged" isn't a test: the
 lead compares the run's `*-launch.png` shots with the previous green run by
 eye and records any difference as a finding. What fails automatically is
 the build and every journey.
@@ -86,13 +89,19 @@ Every task is one PR to `dev`, at most 400 changed lines and 15 files, with
 the lines `Belt-Lead:`, `Feature: editor-shell-removal`, `Fast-Check: pass`
 and `Head:`, and the label `fast-lane`. ER-2 also carries `feature-done`.
 
-| id | behavior | owned files | depends on | size |
-|---|---|---|---|---|
-| ER-1 | Delete the editor shell, its top bar family, the `.rail` style, their tests and the journey's old launch check | `Sources/SuiteUI/EditorShell.swift` (deleted), `Sources/SuiteUI/EditorTopBar.swift` (deleted), `Sources/SuiteUI/ToolbarGroup.swift`, `Sources/SuiteUI/SuiteEnvironment.swift` and `Sources/SuiteUI/Tokens.swift` (comments only), `Tests/AppSnapshotTests/SuiteEditorShellSnapshots.swift` (deleted), `Tests/AppSnapshotTests/SuiteEditorBarDimmingTests.swift` (deleted), `Tests/SuiteUITests/EditorShellTests.swift`, `UITests/Journey.swift` | – (both app features closed) | ~380 lines, mostly deletions; 8 files |
-| ER-2 | Delete the tokens only the top bar read, and rewrite `docs/design.md` for one shell | `Sources/SuiteUI/Tokens.swift`, `Tests/SuiteUITests/TokensTests.swift`, `docs/design.md` | ER-1 | ~180, 3 |
+| id | issue | what | owned files | depends on | size |
+|---|---|---|---|---|---|
+| ER-1 | – | Delete the editor shell, its top bar family, the `.rail` style, their tests and the journey's old launch check | `Sources/SuiteUI/EditorShell.swift` (deleted), `Sources/SuiteUI/EditorTopBar.swift` (deleted), `Sources/SuiteUI/ToolbarGroup.swift`, `Sources/SuiteUI/SuiteEnvironment.swift` and `Sources/SuiteUI/Tokens.swift` (comments only), `Tests/AppSnapshotTests/SuiteEditorShellSnapshots.swift` (deleted), `Tests/AppSnapshotTests/SuiteEditorBarDimmingTests.swift` (deleted), `Tests/SuiteUITests/EditorShellTests.swift`, `UITests/Journey.swift` | – (both app features closed) | ~380 lines, mostly deletions; 8 files |
+| ER-2 | – | Delete the tokens only the top bar read, and rewrite `docs/design.md` for one shell | `Sources/SuiteUI/Tokens.swift`, `Tests/SuiteUITests/TokensTests.swift`, `docs/design.md` | ER-1 | ~180, 3 |
 
-**Build waves.** Two tasks in a chain: ER-2's tokens are read by the views
-ER-1 deletes, so ER-2 can't build before ER-1 merges.
+## Build waves
+
+- Wave 1: ER-1. Independent in this wave: ER-1 alone.
+- Wave 2: ER-2 (`feature-done`; the one `docs/design.md` edit, rule (a)).
+  Independent in this wave: ER-2 alone.
+
+Longest chain: ER-1 → ER-2 (2). ER-2's tokens are read by the views ER-1
+deletes, so ER-2 can't build before ER-1 merges.
 
 ## Acceptance test per task
 

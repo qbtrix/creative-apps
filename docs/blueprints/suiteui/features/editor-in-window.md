@@ -94,7 +94,7 @@ All of them in `UITests/SuiteJourneyTests+EditorWindow.swift` (EW-5), on
 the new gallery page `editor-window` inside Library
 (`-SuiteGallery editor-window -SuiteWindowSize 1024x768`):
 
-1. The window opens with a title, the subtitle "Edited", a sidebar holding
+1. [EW-5, EW-J1] The window opens with a title, the subtitle "Edited", a sidebar holding
    an app-style list (two sections, Pages and Layers, with a
    `SidebarActionRow` under Pages), a toolbar holding New and Open as
    document actions beside the title, then Save, Undo (disabled, tooltip
@@ -103,13 +103,13 @@ the new gallery page `editor-window` inside Library
    rulers and a 1600 × 1000 artboard, the floating palette at its leading edge,
    and the status line, and an inspector 304 pt wide.
    `expectEditorWindow()` passes; shot `launch`.
-2. `clickEachTool()`: every enabled tool in the palette is clicked and shot.
-3. `expectShellGeometry()` passes at 1024 × 768 (see Quality tests).
-4. Option-Command-I hides the inspector: the detail grows and the palette
+2. [EW-5, EW-J2] `clickEachTool()`: every enabled tool in the palette is clicked and shot.
+3. [EW-5 (EW-5b if skipped), EW-J3] `expectShellGeometry()` passes at 1024 × 768 (see Quality tests).
+4. [EW-5, EW-J4] Option-Command-I hides the inspector: the detail grows and the palette
    stays put; shot `inspector-hidden`. Show it again.
-5. The same page under `-AppleInterfaceStyle Dark`: shots `launch-dark`,
+5. [EW-5, EW-J5] The same page under `-AppleInterfaceStyle Dark`: shots `launch-dark`,
    then `expectShellGeometry()` again.
-6. The switcher (`suite.switcher`) is centered in the toolbar with six
+6. [EW-5, EW-J6] The switcher (`suite.switcher`) is centered in the toolbar with six
    items: `suite.switcher.home`, `.flare`, `.design`, `.photo`, `.library`
    and `.halo`. Library's is the current item (the gallery runs inside
    Library) and carries the selected trait. Each item's help is the app's
@@ -120,7 +120,7 @@ the new gallery page `editor-window` inside Library
 
 And in `UITests/SuiteJourneyTests+Parity.swift` (EW-6):
 
-7. `testAppsSideBySide` launches Flare, Design, Photo and Halo one after
+7. [EW-6, EW-J7] `testAppsSideBySide` launches Flare, Design, Photo and Halo one after
    another at `-SuiteWindowSize 1024x768`. Flare opens New Sample
    Animation, Design and Photo use ⌘N (no test file is needed), and Halo
    launches with `-HaloSample`. The name sorts before
@@ -138,11 +138,11 @@ And in `UITests/SuiteJourneyTests+Parity.swift` (EW-6):
 
 ## Screens and states
 
-| Screen | Normal | Empty | Narrow (window minimum) | Dark |
-|---|---|---|---|---|
-| `editor-window` gallery page | step 1 | the canvas slot shows an `EmptyStateView` and no palette (an editor shows its palette only over an open document, as Flare does) | the window at its minimum: the sidebar ideal (200) + the content minimum (440) + the 304 pt inspector = 944; nothing is clipped | the chrome is system glass in Dark; the canvas surround, rulers and status line follow the Dark tokens |
-| `SuiteWindow` with sections (Flare, Halo, Library) | unchanged by EW-1: the `suiteui-window-*` and `SuiteWindowLaunchSnapshots` goldens do not move. EW-8 adds the switcher to their toolbars; that is the only change in their journey shots. | – | unchanged | unchanged |
-| App switcher (`AppSwitcher`) | one centered row of monochrome line icons, about 80 pt between centers, no labels, no bar or background behind it. The current item sits in a 90 × 48 capsule of system glass (dark translucent, with the glass's hairline rim and top highlight) and its icon is `textPrimary`, even while it is disabled (the current app's own item never switches anywhere); the others are `textSecondary`, and the system's disabled dimming applies to them only. | – (always six items) | the spacing steps down from 80 toward 40 so that no toolbar item overflows at 1024 pt | the capsule is the system's dark glass in both appearances; the icons follow the appearance's text colors |
+| Screen | Normal | Empty | Narrow (window minimum) | Dark | Snapshot PNGs |
+|---|---|---|---|---|---|
+| `editor-window` gallery page | step 1 | the canvas slot shows an `EmptyStateView` and no palette (an editor shows its palette only over an open document, as Flare does) | the window at its minimum: the sidebar ideal (200) + the content minimum (440) + the 304 pt inspector = 944; nothing is clipped | the chrome is system glass in Dark; the canvas surround, rulers and status line follow the Dark tokens | `suiteui-editor-detail-light.png`, `-dark.png` (EW-2); `suiteui-window-slot-light.png`, `-dark.png` (EW-1); journey shots `suiteui-launch`, `suiteui-launch-dark`, `suiteui-inspector-hidden` |
+| `SuiteWindow` with sections (Flare, Halo, Library) | unchanged by EW-1: the `suiteui-window-*` and `SuiteWindowLaunchSnapshots` goldens do not move. EW-8 adds the switcher to their toolbars; that is the only change in their journey shots. | – | unchanged | unchanged | their existing `*-launch` journey shots |
+| App switcher (`AppSwitcher`) | one centered row of monochrome line icons, about 80 pt between centers, no labels, no bar or background behind it. The current item sits in a 90 × 48 capsule of system glass (dark translucent, with the glass's hairline rim and top highlight) and its icon is `textPrimary`, even while it is disabled (the current app's own item never switches anywhere); the others are `textSecondary`, and the system's disabled dimming applies to them only. | – (always six items) | the spacing steps down from 80 toward 40 so that no toolbar item overflows at 1024 pt | the capsule is the system's dark glass in both appearances; the icons follow the appearance's text colors | `suiteui-app-switcher-light.png`, `-dark.png` (EW-7); journey crops `suiteui-switcher`, `suiteui-switcher-dark` |
 
 ## Contract slice
 
@@ -288,27 +288,32 @@ the lines `Belt-Lead:`, `Feature: editor-in-window`, `Fast-Check: pass` and
 carries `feature-done`, so the feature never closes with the geometric test
 skipped.
 
-| id | behavior | owned files | depends on | size |
-|---|---|---|---|---|
-| EW-1 | `SuiteWindow` gets its sidebar slot, subtitle and inspector width, and handles `-SuiteWindowSize`. Today's sections list moves out unchanged into `SuiteSidebarList`. | `Sources/SuiteUI/SuiteWindow.swift`, `Sources/SuiteUI/SuiteSidebarList.swift` (new), `Sources/SuiteUI/SuiteWindowSizer.swift` (new), `Tests/SuiteUITests/SuiteWindowSizeTests.swift` (new), `Tests/AppSnapshotTests/SuiteWindowSlotSnapshots.swift` (new) | – | ~340 lines, 5 files |
-| EW-2 | `EditorDetail` and `EditorDetailLayout`: the canvas, the floating palette clear of the rulers, the status line, `suite.viewport` and `suite.status`, and the fit that keeps a fitted artboard clear of the palette. `CanvasViewport`'s own ⌘0 uses the same fit. | `Sources/SuiteUI/EditorDetail.swift` (new), `Sources/SuiteUI/CanvasViewport.swift` (its ⌘0 only), `Tests/SuiteUITests/EditorDetailLayoutTests.swift` (new), `Tests/AppSnapshotTests/SuiteEditorDetailSnapshots.swift` (new) | – | ~320, 4 |
-| EW-3 | `SidebarActionRow`: icon-only `ToolbarAction`s in a row. A disabled one is dimmed and says why, and each carries its `identifier` and `.suiteControl`. It is what replaces the `EditorBarItem(…, showsTitle: false)` rows in Design's and Photo's lists. | `Sources/SuiteUI/SidebarActionRow.swift` (new), `Tests/AppSnapshotTests/SuiteSidebarActionRowSnapshots.swift` (new) | – | ~140, 2 |
-| EW-4 | The journeys' shared steps (geometry against the display's visible frame, see above): `expectEditorWindow()`, `shot(_:element:audit:)` (one element's picture, and skipping the audit for shots of other apps), and `expectShellGeometry()` built on the Linux-tested `ShellGeometry` | `UITests/Journey.swift`, `UITests/Journey+Geometry.swift` (new), `Tests/AppAuditTests/ShellGeometry.swift` (new), `Tests/AppAuditTests/ShellGeometryTests.swift` (new) | – | ~320, 4 |
-| EW-7 | `AppSwitcher`, `AppSwitcherItem`, `AppSwitcherState` with its placeholder, the `suiteSwitcher` environment value and the four switcher tokens | `Sources/SuiteUI/AppSwitcher.swift` (new), `Sources/SuiteUI/Tokens.swift`, `Tests/SuiteUITests/AppSwitcherTests.swift` (new), `Tests/AppSnapshotTests/SuiteAppSwitcherSnapshots.swift` (new) | – | ~300, 4 |
-| EW-8 | `SuiteWindow` shows the switcher in a centered toolbar slot: the environment's state, or the placeholder | `Sources/SuiteUI/SuiteWindow.swift` | EW-1, EW-7 | ~40, 1 |
-| EW-5 | The `editor-window` gallery page and its journey (steps 1 to 6) | `Sources/SuiteUI/Gallery/GalleryEditorWindow.swift` (new), `Sources/SuiteUI/SuiteGallery.swift` (one line: the new area in `areas`), `UITests/SuiteJourneyTests+EditorWindow.swift` (new) | EW-2, EW-3, EW-4, EW-8; its geometric steps on #933 (skipped until then) | ~330, 3 |
-| EW-5b | Only if EW-5 merged with the #933 skip: the skip goes and the geometric steps run | `UITests/SuiteJourneyTests+EditorWindow.swift` | EW-5, #933's fix merged | ~10, 1 |
-| EW-6 | The parity journey (step 7): Flare, Design, Photo and Halo side by side, with their palettes and switchers | `UITests/SuiteJourneyTests+Parity.swift` (new) | EW-4, EW-8 | ~140, 1 |
+| id | issue | what | owned files | depends on | size |
+|---|---|---|---|---|---|
+| EW-1 | – | `SuiteWindow` gets its sidebar slot, subtitle and inspector width, and handles `-SuiteWindowSize`. Today's sections list moves out unchanged into `SuiteSidebarList`. | `Sources/SuiteUI/SuiteWindow.swift`, `Sources/SuiteUI/SuiteSidebarList.swift` (new), `Sources/SuiteUI/SuiteWindowSizer.swift` (new), `Tests/SuiteUITests/SuiteWindowSizeTests.swift` (new), `Tests/AppSnapshotTests/SuiteWindowSlotSnapshots.swift` (new) | – | ~340 lines, 5 files |
+| EW-2 | – | `EditorDetail` and `EditorDetailLayout`: the canvas, the floating palette clear of the rulers, the status line, `suite.viewport` and `suite.status`, and the fit that keeps a fitted artboard clear of the palette. `CanvasViewport`'s own ⌘0 uses the same fit. | `Sources/SuiteUI/EditorDetail.swift` (new), `Sources/SuiteUI/CanvasViewport.swift` (its ⌘0 only), `Tests/SuiteUITests/EditorDetailLayoutTests.swift` (new), `Tests/AppSnapshotTests/SuiteEditorDetailSnapshots.swift` (new) | – | ~320, 4 |
+| EW-3 | – | `SidebarActionRow`: icon-only `ToolbarAction`s in a row. A disabled one is dimmed and says why, and each carries its `identifier` and `.suiteControl`. It is what replaces the `EditorBarItem(…, showsTitle: false)` rows in Design's and Photo's lists. | `Sources/SuiteUI/SidebarActionRow.swift` (new), `Tests/AppSnapshotTests/SuiteSidebarActionRowSnapshots.swift` (new) | – | ~140, 2 |
+| EW-4 | – | The journeys' shared steps (geometry against the display's visible frame, see above): `expectEditorWindow()`, `shot(_:element:audit:)` (one element's picture, and skipping the audit for shots of other apps), and `expectShellGeometry()` built on the Linux-tested `ShellGeometry` | `UITests/Journey.swift`, `UITests/Journey+Geometry.swift` (new), `Tests/AppAuditTests/ShellGeometry.swift` (new), `Tests/AppAuditTests/ShellGeometryTests.swift` (new) | – | ~320, 4 |
+| EW-7 | – | `AppSwitcher`, `AppSwitcherItem`, `AppSwitcherState` with its placeholder, the `suiteSwitcher` environment value and the four switcher tokens | `Sources/SuiteUI/AppSwitcher.swift` (new), `Sources/SuiteUI/Tokens.swift`, `Tests/SuiteUITests/AppSwitcherTests.swift` (new), `Tests/AppSnapshotTests/SuiteAppSwitcherSnapshots.swift` (new) | – | ~300, 4 |
+| EW-8 | – | `SuiteWindow` shows the switcher in a centered toolbar slot: the environment's state, or the placeholder | `Sources/SuiteUI/SuiteWindow.swift` | EW-1, EW-7 | ~40, 1 |
+| EW-5 | – | The `editor-window` gallery page and its journey (steps 1 to 6) | `Sources/SuiteUI/Gallery/GalleryEditorWindow.swift` (new), `Sources/SuiteUI/SuiteGallery.swift` (one line: the new area in `areas`), `UITests/SuiteJourneyTests+EditorWindow.swift` (new) | EW-2, EW-3, EW-4, EW-8; its geometric steps on #933 (skipped until then) | ~330, 3 |
+| EW-5b | – | Only if EW-5 merged with the #933 skip: the skip goes and the geometric steps run | `UITests/SuiteJourneyTests+EditorWindow.swift` | EW-5, #933's fix merged | ~10, 1 |
+| EW-6 | – | The parity journey (step 7): Flare, Design, Photo and Halo side by side, with their palettes and switchers | `UITests/SuiteJourneyTests+Parity.swift` (new) | EW-4, EW-8 | ~140, 1 |
 
-**Build waves.** EW-1, EW-2, EW-3, EW-4 and EW-7 are independent (no
-shared file), so the lead runs them as one build wave. EW-8 is the second
-wave: it edits `SuiteWindow.swift` after EW-1 and needs EW-7's view. EW-5
-and EW-6 share no file and run together as the third wave. The longest
-build chain is three tasks (EW-1, EW-8, EW-5); EW-8 is kept apart from
-EW-1 because EW-1 is already about 340 lines. EW-5b makes it four, and the
-reason is written here: it isn't build work but the wait on #933, a
-ten-line removal of a skip that the lead can't fold into EW-5 without
-holding all of wave 3 on someone else's fix.
+## Build waves
+
+- Wave 1: EW-1, EW-2, EW-3, EW-4, EW-7. Independent in this wave: all five.
+- Wave 2: EW-8. Independent in this wave: EW-8 alone.
+- Wave 3: EW-5, EW-6. Independent in this wave: both.
+- Wave 4: EW-5b (only if EW-5 merged with the #933 skip). Independent in
+  this wave: EW-5b alone.
+
+Longest chain: EW-1 → EW-8 → EW-5 → EW-5b (4).
+Chain of 4: EW-8 edits `SuiteWindow.swift` after EW-1 (kept apart because
+EW-1 is already about 340 lines), EW-5's page needs the switcher EW-8 puts
+in the window, and EW-5b is not build work but the wait on #933: a
+ten-line removal of a skip that can't be folded into EW-5 without holding
+wave 3 on someone else's fix. Without EW-5b the chain is 3.
 
 **Note on EW-8 and the three apps already on `SuiteWindow`.** The switcher
 lands in Flare's, Halo's and Library's toolbars too, with no edit in their

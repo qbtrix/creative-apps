@@ -55,24 +55,24 @@ inside the visible frame and every frame inside the window.
 
 New, in `UITests/DesignJourneyTests+Shell.swift`:
 
-1. Launch with `-SuiteWindowSize 1024x768`. The window shows the title
+1. [DS-4, DS-J1] Launch with `-SuiteWindowSize 1024x768`. The window shows the title
    "Design", a sidebar with Pages and Layers, and a toolbar with the app switcher centered (Design's item in the capsule) where New and
    Open are enabled and Save, Undo, Redo and zoom are disabled with their
    reasons. The canvas shows its empty state with New File and no palette.
    The inspector reads "No Selection". Shot `shell-empty`.
-2. ⌘N. The page fits in the canvas, the floating palette (Move, Frame,
+2. [DS-4, DS-J2] ⌘N. The page fits in the canvas, the floating palette (Move, Frame,
    Rectangle, Ellipse, Text, Pen) sits at the canvas's leading edge, the
    title is "Untitled" and the status line shows zoom, page size and "Move".
    Shot `shell-open`.
-3. Pick Rectangle and drag from 2% to 25% across the page, starting at its
+3. [DS-4, DS-J3] Pick Rectangle and drag from 2% to 25% across the page, starting at its
    left edge, so the shape's left handles sit on the page's edge. Then
    View > Fit Page. Shot `shell-handles`, then `expectShellGeometry()` with
    the palette checked against the rulers and against the page grown by its
    handles.
-4. Click the sidebar's Layers row of the rectangle: the inspector shows its
+4. [DS-4, DS-J4] Click the sidebar's Layers row of the rectangle: the inspector shows its
    Properties, and the toolbar's Undo reads "Undo Add Rectangle". Click it,
    and the rectangle is gone.
-5. The same launch with `-AppleInterfaceStyle Dark`: shots `shell-open-dark`
+5. [DS-4, DS-J5] The same launch with `-AppleInterfaceStyle Dark`: shots `shell-open-dark`
    and `shell-handles-dark`, then `expectShellGeometry()` again.
 
 ## Screens and states
@@ -89,9 +89,14 @@ New, in `UITests/DesignJourneyTests+Shell.swift`:
 | Status line | `ViewerStatusBar` under the shell | the same view in `EditorDetail`'s status slot |
 | Appearance | dark in both | follows the system; the chrome is glass and the canvas stays flat |
 
-The four states: empty (no file), open (a page and no selection), selected
-(one layer, with handles), and narrow (the window at its minimum of 944 pt,
-where nothing is clipped).
+The four states and the PNGs that show them: empty (no file:
+`design-empty-light.png`, `design-empty-dark.png`, journey shot
+`design-shell-empty`), open (a page and no selection: `design-open-light.png`,
+`design-open-dark.png`, `design-shell-open`, `design-shell-open-dark`),
+selected (one layer, with handles: `design-shell-handles`,
+`design-shell-handles-dark`), and narrow (the window at its minimum of 944 pt,
+where nothing is clipped: the dev run's `design-launch` at the runner's
+size). DS-3 re-records `design-empty-*` and `design-open-*`.
 
 ## Contract slice
 
@@ -147,18 +152,23 @@ the lines `Belt-Lead:`, `Feature: design-shell-parity`, `Fast-Check: pass`
 and `Head:`, and the label `fast-lane`. DS-4 also carries `feature-done`.
 Each UI PR lists the PNGs it changed.
 
-| id | behavior | owned files | depends on | size |
-|---|---|---|---|---|
-| DS-1 | `DesignToolbarItem`: the toolbar's eight commands, with titles, symbols, identifiers and the reason each can't run | `Sources/DesignModel/DesignToolbarItems.swift` (new), `Tests/DesignModelTests/DesignToolbarItemsTests.swift` (new) | – | ~180 lines, 2 files |
-| DS-2 | The page actions under Pages become a `SidebarActionRow`. Nothing else in the Layers panel changes, so it works the same in today's tab and in the sidebar. The core journey asserts both page actions. | `Sources/DesignApp/DesignLayersPanel.swift`, `Tests/AppSnapshotTests/DesignLayersSnapshots.swift`, `UITests/DesignJourneyTests.swift` | – (editor-in-window merged) | ~70, 3 |
-| DS-3 | The move: `DesignEditor` on `SuiteWindow` and `EditorDetail` with the floating palette, and the headers of the files it touches stop naming `EditorShell`. `DesignTopBar`, `DesignPanel` and `DesignPanelTab` go (`DesignPanelHint` stays in `DesignPanel.swift`). `DesignWindow` drops its tab state and its `.navigationTitle` and fits through `EditorDetailLayout`. The scene drops the hidden title bar and adds `SidebarCommands`. The journey changes listed under Journey steps. | `Sources/DesignApp/DesignEditor.swift`, `Sources/DesignApp/DesignPanel.swift`, `Sources/DesignApp/DesignIntent.swift`, `Sources/DesignApp/DesignWindow.swift`, `Sources/DesignApp/DesignApp.swift`, `UITests/DesignJourneyTests.swift`, `Tests/AppSnapshotTests/DesignAlignSnapshots.swift`, `Tests/AppSnapshotTests/DesignInspectorSnapshots.swift`, `Tests/AppSnapshotTests/DesignLayersSnapshots.swift` | DS-1, DS-2 | ~360, 9 |
-| DS-4 | The shell journey (steps 1 to 5) with the geometric test | `UITests/DesignJourneyTests+Shell.swift` (new) | DS-3 | ~150, 1 |
+| id | issue | what | owned files | depends on | size |
+|---|---|---|---|---|---|
+| DS-1 | – | `DesignToolbarItem`: the toolbar's eight commands, with titles, symbols, identifiers and the reason each can't run | `Sources/DesignModel/DesignToolbarItems.swift` (new), `Tests/DesignModelTests/DesignToolbarItemsTests.swift` (new) | – | ~180 lines, 2 files |
+| DS-2 | – | The page actions under Pages become a `SidebarActionRow`. Nothing else in the Layers panel changes, so it works the same in today's tab and in the sidebar. The core journey asserts both page actions. | `Sources/DesignApp/DesignLayersPanel.swift`, `Tests/AppSnapshotTests/DesignLayersSnapshots.swift`, `UITests/DesignJourneyTests.swift` | – (editor-in-window merged) | ~70, 3 |
+| DS-3 | – | The move: `DesignEditor` on `SuiteWindow` and `EditorDetail` with the floating palette, and the headers of the files it touches stop naming `EditorShell`. `DesignTopBar`, `DesignPanel` and `DesignPanelTab` go (`DesignPanelHint` stays in `DesignPanel.swift`). `DesignWindow` drops its tab state and its `.navigationTitle` and fits through `EditorDetailLayout`. The scene drops the hidden title bar and adds `SidebarCommands`. The journey changes listed under Journey steps. | `Sources/DesignApp/DesignEditor.swift`, `Sources/DesignApp/DesignPanel.swift`, `Sources/DesignApp/DesignIntent.swift`, `Sources/DesignApp/DesignWindow.swift`, `Sources/DesignApp/DesignApp.swift`, `UITests/DesignJourneyTests.swift`, `Tests/AppSnapshotTests/DesignAlignSnapshots.swift`, `Tests/AppSnapshotTests/DesignInspectorSnapshots.swift`, `Tests/AppSnapshotTests/DesignLayersSnapshots.swift` | DS-1, DS-2 | ~360, 9 |
+| DS-4 | – | The shell journey (steps 1 to 5) with the geometric test | `UITests/DesignJourneyTests+Shell.swift` (new) | DS-3 | ~150, 1 |
 
-**Build waves.** DS-1 and DS-2 are independent and run as one wave. DS-3
-comes next, then DS-4. That chain is 3 tasks long, the most this packet
-allows. DS-3 can't be split further: the Layers tab leaves the panel in the
-same commit that puts it in the sidebar, or the layers disappear from the
-window in between.
+## Build waves
+
+- Wave 1: DS-1, DS-2. Independent in this wave: both.
+- Wave 2: DS-3. Independent in this wave: DS-3 alone.
+- Wave 3: DS-4. Independent in this wave: DS-4 alone.
+
+Longest chain: DS-1 → DS-3 → DS-4 (3), and DS-2 → DS-3 → DS-4 (3). DS-3
+can't be split further: the Layers tab leaves the panel in the same commit
+that puts it in the sidebar, or the layers disappear from the window in
+between.
 
 **Why DS-3 carries the journey's launch check.** Once DS-3 merges, Design
 shows no `suite.tools` at launch (the palette waits for a file). The old

@@ -16,16 +16,19 @@ The captain's two decisions of 2026-10-15, recorded in section 6 of
    `waves.md`, not started) wires it to the same `SwitchMenu` items as
    Window > Switch To, and its journeys click it (`switching.md`, SW-3d).
 
-Then `EditorShell`, `EditorTopBar` and `.rail` are deleted. That is four
+Then `EditorShell`, `EditorTopBar` and `.rail` are deleted. The packets follow
+`docs/factory/packets.md` (lesson 105): each has a `## Build waves` section with
+its independent tasks and longest chain, and only the final task of
+editor-shell-removal (ER-2) edits a shared doc (`docs/design.md`). That is four
 features, one feature-lead session each. A wave starts when everything it
 waits on has merged. Two features in the same wave never own the same file.
 
-| wave | feature | line | packet | waits on | feature issue |
-|---|---|---|---|---|---|
-| 1 | `SuiteWindow` can hold a canvas editor: sidebar slot, subtitle, document actions, inspector width, `-SuiteWindowSize`, `EditorDetail`, `SidebarActionRow`, the app switcher, the journeys' window and geometry checks, the parity journey | `line:suiteui` | `docs/blueprints/suiteui/features/editor-in-window.md` | nothing | filed when this packet PR merges |
-| 2 | Design opens in `SuiteWindow` with the floating tool box | `line:design` | `docs/blueprints/design/features/shell-parity.md` | editor-in-window | file when ready |
-| 2 | Photo opens in `SuiteWindow` with the floating tool box | `line:photo` | `docs/blueprints/photo/features/shell-parity.md` | editor-in-window, #812 (photo-seams) | file when ready |
-| 3 | Delete `EditorShell`, `EditorTopBar`, `.rail` and their tokens; rewrite `docs/design.md`'s Editor shell section | `line:suiteui` | `docs/blueprints/suiteui/features/editor-shell-removal.md` | Design shell-parity, Photo shell-parity | file when ready |
+| wave | feature | line | packet | waits on | longest chain | feature issue |
+|---|---|---|---|---|---|---|
+| 1 | `SuiteWindow` can hold a canvas editor: sidebar slot, subtitle, document actions, inspector width, `-SuiteWindowSize`, `EditorDetail`, `SidebarActionRow`, the app switcher, the journeys' window and geometry checks, the parity journey | `line:suiteui` | `docs/blueprints/suiteui/features/editor-in-window.md` | nothing | 4 (EW-1 → EW-8 → EW-5 → EW-5b; 3 without the #933 wait) | filed when this packet PR merges |
+| 2 | Design opens in `SuiteWindow` with the floating tool box | `line:design` | `docs/blueprints/design/features/shell-parity.md` | editor-in-window | 3 (DS-1 → DS-3 → DS-4) | file when ready |
+| 2 | Photo opens in `SuiteWindow` with the floating tool box | `line:photo` | `docs/blueprints/photo/features/shell-parity.md` | editor-in-window, #812 (photo-seams) | 3 (PS-1 → PS-3 → PS-4) | file when ready |
+| 3 | Delete `EditorShell`, `EditorTopBar`, `.rail` and their tokens; rewrite `docs/design.md`'s Editor shell section | `line:suiteui` | `docs/blueprints/suiteui/features/editor-shell-removal.md` | Design shell-parity, Photo shell-parity | 2 (ER-1 → ER-2) | file when ready |
 
 **SuiteWindow's base.** The packets build on `SuiteWindow` as it was before
 #962, with the inspector inside the split view's detail column. #962 broke
