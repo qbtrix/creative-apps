@@ -4,7 +4,7 @@ Issue: #1074 · Packet: docs/blueprints/photo/features/photo-documents.md
 Run: act-1a1404bf04c-bp6m · Session: claude/photo-documents-lead-ezrcev · Started: 2026-10-15T10:40Z
 Stage: 4 round 1
 Base: 6018826c90376f7b4ea46336d85e8da510c90f4d
-Next: attribute run 38792928305's Photo journey failures (diagnoser running); then fix batch for ours; wait #1233-#1235 and fixes A, B
+Next: wait for fixes A, B, D and #1233-#1235 to merge; then fix C (restore decode off main); round 2 on the CI run containing them
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -36,7 +36,7 @@ Waves (packet's Build waves, checked against dev at 00e546a):
 ## Rounds
 | round | CI run | CI | audit vs baseline | lenses | confirmed | fixed by | clean |
 |---|---|---|---|---|---|---|---|
-| 1 | 38792928305 (c93a7f8, D-7..D-9) | macOS timed out at 45 min in ui-test; scripts/ci PASS; 11 Photo journeys red | photo contrast 1 > 0 (_NS:58 on launch) | (diagnosis first) | pending | – | no |
+| 1 | 38792928305 (c93a7f8, D-7..D-9) | red: ui-test timeout 45 min; 11 Photo journeys red | photo contrast 1 > 0 (_NS:58 = restore alert text) | attribution diagnoser | 9 ours: restore alert from shared recovery dir (#1230) blocks later journeys; 2 not ours (crop #1202, edit #1218 -> #763) | fix D recovery dir; A ids; B Open Recent | no |
 
 ## Decisions
 - Waves have at most 2 independent tasks, so each wave runs as one worktree subagent per task (lead.md stage 3), not build-wave.js.
@@ -71,3 +71,4 @@ Waves (packet's Build waves, checked against dev at 00e546a):
 - Fix-batch item (audit): Keep layers? buttons (Save as Photo Document / Flatten into PNG / Cancel) and the top bar's document menu have no accessibility identifiers; add photo.file.keep-layers.* ids.
 - Early fix batch started from builders' findings (before round 1 CI): A ids on Keep layers?/document menu (lead/photo-documents-fix-ids), B Open Recent with no window (lead/photo-documents-fix-recent). C restore off main waits on A (both touch PhotoWindow+File.swift).
 - D-11 journeys quit + relaunch to use Open Recent (no-window menu was empty); fix B makes the packet's path work.
+- Lesson: journeys must isolate every persistent folder the app writes (recovery dir); an alert left by one journey blocks clicks and sheets for every later launch.
