@@ -7,7 +7,9 @@
 // draws its on state (system highlight, accent ink) so a person can see
 // whether looping is on. It owns the HaloPlaybackDriver: running while
 // `model.playback.playing`, stopped otherwise or once the transport leaves
-// the screen; each refresh sends `.tick(now)` through `perform`.
+// the screen; each refresh sends `.tick(now)` through `perform`. Each
+// control takes at least a SuiteSize.pillHit square (24 pt) to click, not
+// just its 10 pt glyph, until TransportCapsule (#340) replaces this row.
 import HaloModel
 import SuiteUI
 import SwiftUI
@@ -41,6 +43,10 @@ struct HaloTransport: View {
                 control(for: item)
                     .labelStyle(.iconOnly)
                     .buttonStyle(.borderless)
+                    // A pill control's hit target: at least pillHit square
+                    // (design.md, Symbols and controls), clickable across it.
+                    .frame(minWidth: SuiteSize.pillHit, minHeight: SuiteSize.pillHit)
+                    .contentShape(Rectangle())
                     .disabled(help != nil)
                     // Its own ink, so the status bar pill's textSecondary can't
                     // draw a disabled button as live: tertiary while disabled,
