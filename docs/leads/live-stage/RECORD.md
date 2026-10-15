@@ -2,9 +2,9 @@
 
 Issue: #798 · Packet: docs/blueprints/flare/features/live-stage.md
 Run: act-1a13d374bd1-s92z · Session: claude/live-stage-lead-gljfd4 · Started: 2026-10-15T00:40Z
-Stage: 4 round 1
-Base: 1fdabfde31be793e42b372c608206cff58c4b8e1
-Next: wait for #945 and #946 to merge, then round 2 on the first dev CI run containing both
+Stage: 4 round 2
+Base: 04ae98a764d312627e9705bf4b4e71e075d55271
+Next: read dev CI run 38675308731 (1025fcc: #945, #938, #939, #944; #946 is test-only and Linux-green), then round 2 panel with the same lenses
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
