@@ -2,9 +2,9 @@
 
 Issue: #1076 · Packet: docs/blueprints/photo/features/photo-crop.md
 Run: act-1a13f70ddc3-29wr · Session: lead session (claude/photo-crop-feature-lead-e7vpmg) · Started: 2026-10-15T12:03Z
-Stage: 5 finish (feature-done merged; waiting on a green dev CI run)
+Stage: 5 finish (contact-sheet run pending; PJ-8 fix r5-b1 in flight)
 Base: e6fdf149c0a0a17fd2a23bdbe687f56d4591ae72
-Next: read dev CI run 38792928305 (head c93a7f8, contains e6fdf14 and #1229; in progress at 19:43Z) or the first later completed one. Green: comment `Belt-Contact-Sheet: <run link>` on #1076 with one line per journey (PJ-8, PJ-P1, PJ-P2, V1-V12), the PB-8 number and Photo's audit counts, then Stage: done. Red in PJ-8/PJ-P1/PJ-P2 or the crop audit: the round budget is spent, so file gap issues and say so in the comment. Red elsewhere: report on #763 and wait.
+Next: land r5-b1 (branch lead/photo-crop-r5-b1: crop field rows carry accessibilityValue so PJ-8 reads 600 px). Then read the first completed dev CI run containing it. If PJ-8, PJ-P1 and PJ-P2 pass and Photo's audit has no crop count over baseline, comment `Belt-Contact-Sheet: <run link>` on #1076 with one line per journey, the PB-8 number and the audit counts, then Stage: done. Other Photo journeys red in run 38792928305 belong to other features (tier1, edit, layer ops, launch contrast).
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -23,6 +23,7 @@ Waves: 1 = CP-1 (independent). 2 = CP-2 (waits CP-1). 3 = CP-3, CP-4 (independen
 |---|---|---|---|---|---|---|---|
 | 1 | 38742226941 (head 20d6a1c) | red: our gridAligned (frames[photo.crop.x] nil); Halo keyedFrame6 not ours (#1163) | n/a (journeys did not run) | clarity, design, layout, controls | 5 major + 6 minor (fields read 0 px; two captions; layout shift; Swap dead under 1:1; swapped orientation unreadable; X/Y 0 refused; empty tooltips; Original unexplained; disabled reasons disagree) | r1-b1 #1164 merged (gridAligned via anchor preference), r1-b2 #1170 merged (panel clarity) | no |
 | 1 check | 38746333198 (head e6490aa) | gridAligned passes; Photo green; remaining red is Halo only (keyedFrame6, HaloPlaybackDriverTests), not ours | n/a | – | – | – | – |
+| finish | 38792928305 (head c93a7f8, cancelled after journeys) | scripts/ci PASS; journeys ran | testEveryToolEditsTheImage passed (crop contrast fixed) | – | PJ-8 red: photo.crop.width reads 'W, Width' (combined a11y row lost its value, from #1202); PJ-P1, PJ-P2 passed | r5-b1 | no |
 | 2 | 38757068610 (head 111c440) | red only on Halo keyedFrame6 (not ours); Photo green | n/a (journeys did not run) | clarity, design, layout, controls | 2 major (locked field snaps back; Apply on a whole-image crop) + minors (reasons disagree, chip group tooltip empty, caption casing) | r2-b1 #1186 merged | no |
 | 3 | 38761014883 (head 86fe18c) | red only on Halo keyedFrame6 (not ours); all crop suites green | n/a (journeys did not run) | clarity, design, layout, controls | 4 minor (Swap tooltip bare; caption says 'shape'; uneven row gaps; half-width Apply/Cancel) | r3-b1 #1192 merged | yes |
 | 4 | 38767265986 (head d95c756) | scripts/ci PASS on macOS; journeys ran; Photo journey testEveryToolEditsTheImage red on audit; Library/Halo journey failures not ours | photo contrast 3 over baseline 0 (dimmed X/Y labels of disabled crop fields on photo-crop-pending, photo-cropped) | clarity, design, layout, controls | panel clean: 4 minor (caption names ratio, Swap fallback title, 13 pt shift, chip-grid gaps) → gap #1203-#1205 | r4-b1 #1202 merged (audit contrast, combined field elements) | no (audit) |
