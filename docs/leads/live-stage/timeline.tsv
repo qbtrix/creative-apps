@@ -43,3 +43,4 @@ utc	stage	event	ref	note
 2026-10-15T04:05Z	4	round-clean	round 3	2 clean in a row, loop ends
 2026-10-15T04:05Z	4	stage-end	#798	3 rounds
 2026-10-15T04:05Z	5	pr-opened	#965	feature-done packet status
+2026-10-15T04:09Z	4	heartbeat	#798	waiting on dev CI or round work
