@@ -18,3 +18,4 @@ utc	stage	event	ref	note
 2026-10-15T19:51Z	4	heartbeat	38792928305	macOS scripts/ci passed; ui-test running (first run to reach it since #1199)
 2026-10-15T20:07Z	4	ci-run	38792928305	cancelled in ui-test; smoke journey passed; 11 Photo journeys fail on app UI (not ours)
 2026-10-15T20:07Z	4	round-findings	#763	round 1 not clean: CI red outside feature files; reported on dev-red
+2026-10-15T20:34Z	4	heartbeat	38799320916	run on 3dc283e in progress; #1241 changed photoArguments (recovery isolation); round 2 waits for a run with b555f56

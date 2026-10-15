@@ -4,7 +4,7 @@ Issue: #1073 · Packet: docs/blueprints/photo/features/photo-journey-kit.md
 Run: act-1a1406baff9-fu36 · Session: cloud lead session · Started: 2026-10-15T16:36Z
 Stage: 4 round 1
 Base: 9f28a9f7dcb6e9d584a7c80847e8ef0108fa5e17
-Next: wait for the next dev CI run that finishes ui-test and uploads ui-screens (round 2): smoke + V1-V12 + Photo audit, then the critic panel on screens
+Next: round 2 on the first dev CI run containing b555f56 (#1238-#1242, recovery-folder isolation); 38799320916 on 3dc283e predates them. Read smoke + V1-V12 + Photo audit, ui-screens, critic panel
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -17,6 +17,7 @@ Next: wait for the next dev CI run that finishes ui-test and uploads ui-screens 
 | 1 | 38792928305 (c93a7f8; earlier 763-767 never reached ui-test) | red, cancelled mid ui-test: 11/21 Photo journeys fail on app UI (Layers tab, sheets, fields) from photo window changes, not #1199's files | Photo contrast 1 vs 0 on photo-launch (_NS:58, not this feature) | none run: no ui-screens uploaded | PhotoJourneyKitTests.testWrittenPhotoOpens PASSED; photoArguments open/saveTo/fixture journeys pass | reported on #763 (6201226875) | no |
 
 ## Decisions
+- #1241 (photo-documents) changed photoArguments to always pass a fresh -PhotoRecoveryDir and updated the smoke test's asserts: it isolates the autosave restore offer that broke round 1's journeys. Accepted as is; no KT follow-up needed.
 - Round 1 V1-V12 failures are not this feature's: #1199 changed no step or assertion, the argument arrays are identical, and journeys using the same helpers pass; the failing ones need Photo window UI changed by #1223/#1228/#1230. Reported on dev-red, no fix batch here.
 - Round 1 waits for a run that reaches ui-test: the feature is UITests only, so a run that stops in swift test can't judge it. Code-level read of #1199 found no issue.
 - Depends on #333: closed (PR #877), so the feature proceeds.
