@@ -14,10 +14,10 @@
 // Open Recent > Spot asks to save, Don't Save reopens the saved file. Then
 // `huge` is saved and reopened: the first shot after that launch has the
 // `halo.file.progress` row (HB-U5), then the list holds Solid 2000 down to
-// Solid 1. Last, a save with no edit into a folder the test made read-only
-// shows the save alert, and `halo.file` and the subtitle read "Not saved".
-// The window is 1000 by 640 so it fits CI's 1024 by 768 display (at that
-// width the status bar drops its layer readout, so rows are counted). Every
+// Solid 1 and the status bar reads "2000 layers". Last, a save with no edit
+// into a folder the test made read-only shows the save alert, and
+// `halo.file` and the subtitle read "Not saved". The window is 1000 by 640
+// so it fits CI's 1024 by 768 display. Every
 // file lives in this test's own temp folder, passed by absolute path. One
 // shot per step, `halo-files-<step>`.
 import XCTest
@@ -105,6 +105,8 @@ final class HaloFilesJourneyTests: XCTestCase {
         XCTAssert(
             halo.element("halo.layer.row.comp-1-layer-2000").waitForExistence(timeout: 120), "Huge opened no Solid 2000")
         expectLayerRows(["comp-1-layer-1"], halo)
+        XCTAssert(text("2000 layers", in: halo.app, exactly: true).waitForExistence(timeout: 5),
+                  "the status bar doesn't read 2000 layers")
         XCTAssertFalse(progress.exists, "the progress row outlived the open")
         halo.shot("files-5-huge")
         quit(halo)

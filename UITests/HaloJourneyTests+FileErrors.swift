@@ -40,6 +40,7 @@ final class HaloFileErrorsJourneyTests: XCTestCase {
             if item.message == damaged {
                 let reason = text(of: title).dropFirst(damaged.count).trimmingCharacters(in: .punctuationCharacters)
                 XCTAssertFalse(reason.isEmpty, "the damaged alert gives no reason: \(text(of: title))")
+                XCTAssertFalse(reason.contains("["), "the damaged alert's reason isn't in words: \(reason)")
             } else {
                 XCTAssertEqual(text(of: title), item.message, "the \(item.file) alert's title")
             }

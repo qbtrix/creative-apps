@@ -8,9 +8,9 @@
 // read by its row titles top first, the selected composition by the
 // inspector header (`halo.inspector.header`), the layer count by the
 // `halo.layer.row.*` rows in `halo.layer.list`, each matched by label or
-// value (XCUITest can read a SwiftUI value as empty, #262). The window is
-// 1000 by 640 so it fits CI's 1024 by 768 display (at that width the status
-// bar drops its layer readout). After the first edit the title bar's
+// value (XCUITest can read a SwiftUI value as empty, #262), and by the
+// status bar's readout ("1 layer"). The window is 1000 by 640 so it fits
+// CI's 1024 by 768 display. After the first edit the title bar's
 // subtitle reads Edited. Every menu is closed (not fading) before a shot. A disabled menu item is
 // checked as disabled only: XCUITest doesn't read SwiftUI .help on menu items
 // reliably, so its reason ("A project keeps at least one composition.") is
@@ -82,6 +82,9 @@ final class HaloHistoryJourneyTests: XCTestCase {
         expectSelected("Intro", halo)
         XCTAssert(text("Solid 1", in: halo.element("halo.layer.list")).waitForExistence(timeout: 5), "Intro lost Solid 1")
         XCTAssert(waitFor { self.layerRowCount(halo) == 1 }, "Intro has \(layerRowCount(halo)) layer rows, not 1")
+        XCTAssert(
+            halo.app.staticTexts.matching(NSPredicate(format: "label == %@ OR value == %@", "1 layer", "1 layer"))
+                .firstMatch.waitForExistence(timeout: 5), "the status bar doesn't read 1 layer")
         expectUndo("Undo New Composition", halo)
         halo.shot("history-8-undo-delete")
 

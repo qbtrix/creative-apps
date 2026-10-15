@@ -51,41 +51,79 @@ enum HaloFileFormat {
         return project
     }
 
-    /// A short reason for a decoding failure, naming where in the project
-    /// it happened: "it is missing name in compositions[0]".
+    /// A short reason for a decoding failure, naming where in the project it
+    /// happened in words: "the first composition is missing its name".
     static func reason(_ error: DecodingError) -> String {
         switch error {
         case .keyNotFound(let key, let context):
-            "it is missing \(key.stringValue)\(place(context.codingPath))"
+            "\(place(context.codingPath) ?? "it") is missing its \(words(key.stringValue))"
         case .valueNotFound(_, let context):
-            "it has no value at \(path(context.codingPath))"
+            "\(place(context.codingPath) ?? "it") has no value"
         case .typeMismatch(_, let context):
-            "it has the wrong kind of value at \(path(context.codingPath))"
+            "\(place(context.codingPath) ?? "it") has a value of the wrong kind"
         case .dataCorrupted(let context):
-            context.codingPath.isEmpty ? "it isn't valid JSON" : "it has a bad value at \(path(context.codingPath))"
+            context.codingPath.isEmpty
+                ? "its contents can't be read" : "\(place(context.codingPath) ?? "it") has a value of the wrong kind"
         @unknown default:
             "it can't be read"
         }
     }
 
-    /// " in compositions[0]", or "" at the top of the project.
-    private static func place(_ codingPath: [any CodingKey]) -> String {
-        let spot = path(codingPath)
-        return spot == "the project" ? "" : " in \(spot)"
+    /// The coding path in words, or nil at the top of the project:
+    /// compositions[0].layers[2] is "the first composition's third layer",
+    /// a layer's tracks.x[1] its "second x keyframe". The envelope's
+    /// "project" key is dropped.
+    private static func place(_ codingPath: [any CodingKey]) -> String? {
+        var keys = codingPath.map(\.stringValue)
+        var indexes = codingPath.map(\.intValue)
+        if keys.first == "project", indexes.first == .some(nil) {
+            keys.removeFirst()
+            indexes.removeFirst()
+        }
+        var parts: [String] = []
+        var at = 0
+        while at < keys.count {
+            let next = at + 1 < keys.count ? indexes[at + 1] : nil
+            if let index = indexes[at] {
+                parts.append("\(ordinal(index + 1)) item")
+            } else if let index = next {
+                let underTracks = at > 0 && keys[at - 1] == "tracks"
+                let thing = underTracks ? "\(words(keys[at])) keyframe" : singular(words(keys[at]))
+                parts.append("\(ordinal(index + 1)) \(thing)")
+                at += 1
+            } else if keys[at] != "tracks" || at + 1 == keys.count {
+                parts.append(words(keys[at]))
+            }
+            at += 1
+        }
+        return parts.isEmpty ? nil : "the " + parts.joined(separator: "'s ")
     }
 
-    /// "compositions[0].layers[2]", dropping the envelope's "project" key.
-    private static func path(_ codingPath: [any CodingKey]) -> String {
+    /// A coding key in words: "framesPerSecond" is "frames per second",
+    /// "parentID" is "parent id".
+    static func words(_ key: String) -> String {
         var text = ""
-        for (offset, key) in codingPath.enumerated() {
-            if offset == 0 && key.stringValue == "project" { continue }
-            if let index = key.intValue, key.stringValue == "Index \(index)" {
-                text += "[\(index)]"
-            } else {
-                text += text.isEmpty ? key.stringValue : ".\(key.stringValue)"
-            }
+        var previous: Character?
+        for character in key {
+            if character.isUppercase, let previous, previous.isLowercase { text.append(" ") }
+            text.append(character)
+            previous = character
         }
-        return text.isEmpty ? "the project" : text
+        return text.lowercased()
+    }
+
+    /// "compositions" is "composition".
+    private static func singular(_ word: String) -> String {
+        word.hasSuffix("s") ? String(word.dropLast()) : word
+    }
+
+    /// 1 is "first", 12 is "12th", 23 is "23rd".
+    static func ordinal(_ number: Int) -> String {
+        let named = ["first", "second", "third", "fourth", "fifth", "sixth", "seventh", "eighth", "ninth", "tenth"]
+        if number >= 1, number <= named.count { return named[number - 1] }
+        let teen = (number % 100) / 10 == 1
+        let suffix = teen ? "th" : [1: "st", 2: "nd", 3: "rd"][number % 10] ?? "th"
+        return "\(number)\(suffix)"
     }
 
     /// Just enough to tell a Halo file and its version.
