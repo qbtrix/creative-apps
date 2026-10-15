@@ -2,9 +2,9 @@
 
 Issue: #1073 · Packet: docs/blueprints/photo/features/photo-journey-kit.md
 Run: act-1a1406baff9-fu36 · Session: cloud lead session · Started: 2026-10-15T16:36Z
-Stage: 4 round 1
+Stage: 4 round 2
 Base: 9f28a9f7dcb6e9d584a7c80847e8ef0108fa5e17
-Next: round 2 on the first dev CI run containing b555f56 (#1238-#1242, recovery-folder isolation); 38799320916 on 3dc283e predates them. Read smoke + V1-V12 + Photo audit, ui-screens, critic panel
+Next: wait for the round-2 fixer PR (F2-1, labels fast-lane + feature-done) to merge; round 3 on the dev CI run that contains it (and b555f56)
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -15,8 +15,11 @@ Next: round 2 on the first dev CI run containing b555f56 (#1238-#1242, recovery-
 | round | CI run | CI | audit vs baseline | lenses | confirmed | fixed by | clean |
 |---|---|---|---|---|---|---|---|
 | 1 | 38792928305 (c93a7f8; earlier 763-767 never reached ui-test) | red, cancelled mid ui-test: 11/21 Photo journeys fail on app UI (Layers tab, sheets, fields) from photo window changes, not #1199's files | Photo contrast 1 vs 0 on photo-launch (_NS:58, not this feature) | none run: no ui-screens uploaded | PhotoJourneyKitTests.testWrittenPhotoOpens PASSED; photoArguments open/saveTo/fixture journeys pass | reported on #763 (6201226875) | no |
+| 2 | 38799320916 (3dc283e, before #1241) | red: 21 Photo journeys fail; shot photo-kit-opened shows a stale 'Restore beach.png' offer over the window (modal true), the cause #1241 fixes | Photo contrast 1 vs 0 (_NS:58, also on photo-launch: not this feature) | first-use clarity, journey correctness (lead's read of photo-kit-opened.png + audit; one screen, so no full panel) | F2-1: testWrittenPhotoOpens passes and shoots 'the v1 open state' with a modal over the window (false green) | fixer PR (pending) | no |
 
 ## Decisions
+- Round 2 panel ran as the lead's own read: the feature adds one screen (photo-kit-opened), so the clarity and correctness lenses fit in one pass; the other failures are outside this feature's files and are already on #763 / fixed by #1238-#1242.
+- F2-1's fixer PR also carries feature-done: #1199's triggered CI was red for other features' reasons, so the done check needs a later feature-done merge whose run is green.
 - #1241 (photo-documents) changed photoArguments to always pass a fresh -PhotoRecoveryDir and updated the smoke test's asserts: it isolates the autosave restore offer that broke round 1's journeys. Accepted as is; no KT follow-up needed.
 - Round 1 V1-V12 failures are not this feature's: #1199 changed no step or assertion, the argument arrays are identical, and journeys using the same helpers pass; the failing ones need Photo window UI changed by #1223/#1228/#1230. Reported on dev-red, no fix batch here.
 - Round 1 waits for a run that reaches ui-test: the feature is UITests only, so a run that stops in swift test can't judge it. Code-level read of #1199 found no issue.
