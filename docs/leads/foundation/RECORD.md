@@ -2,9 +2,9 @@
 
 Issue: #777 · Packet: docs/blueprints/halo/features/foundation.md (on branch `docs/halo-feature-packets` until its PR merges)
 Run: act-1a13b78bcdb-qu60 · Session: session_01Dc9GDxc9HxLtv9XMcFgSWh · Started: 2026-10-14T17:33Z
-Stage: 4 round 1 (CI run 38673821944 on 3af1c0e, contains #941, in progress)
+Stage: 4 round 1 (waiting on a dev CI run that contains #944)
 Base: 52928d1dbbdd72b849f7fdb6363991f35b1adbeb
-Next: once #941 merges, find the CI run on dev it dispatched; read jobs, audit-halo-*.json, ui-screens/snapshots; run the critic panel (clarity lens included). Risks flagged by the FD-17/18 builder: TimelineStrip track ids (needs-ui if missing), halo.controls reach (merged with suite.controls), -HaloWindowSize vs restored frames, L2 0.5% at 880x560, menu submenu hover reads
+Next: find the first CI run on dev whose head contains 8cd8339 (#944); read macOS job, audit-halo-*.json, ui-screens/snapshots; critic panel
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -33,6 +33,7 @@ Next: once #941 merges, find the CI run on dev it dispatched; read jobs, audit-h
 ## Rounds
 | round | CI run | CI | audit vs baseline | lenses | confirmed | fixed by | clean |
 |---|---|---|---|---|---|---|---|
+| 1a | 38673821944 (3af1c0e) | red: macOS `swift test` failed on SuiteUITests.rowBodyAndItsTogglesCarryNoDoubleClickGesture (not foundation: #938's ids, fixed by #944); UI journeys skipped | not measured | – | – | – | no |
 
 ## Decisions
 - The packet is read from `origin/docs/halo-feature-packets` (ed58c3a); the issue says so until that PR merges.
@@ -60,6 +61,8 @@ Next: once #941 merges, find the CI run on dev it dispatched; read jobs, audit-h
 - FD-15 changed HaloCompositionInspectorSnapshots.swift (FD-17's file) only so it compiles with the new init; halo-open/-layers/-timeline snapshots change because the status bar now has the transport.
 
 - FD-17's .haloControl also registers through SuiteUI's .suiteControl so controls in the toolbar, columns and inspector reach the probe; H-J13 merges halo.* entries of suite.controls with halo.controls. Expected audit: unnamed 5→0, identifier 10→3.
+
+- Run 38673821944 compiled every Halo SwiftUI file and passed the Halo snapshot suites (halo(), HaloCompositionSnapshots); its only failure was a SuiteUI test fixed on dev by #944, so round 1 waits for the next run instead of fixing it here.
 
 ## Open
 - docs/c4/model.json "HaloApp sources" description still names only the Layer and Composition menus; the supervisor folds C4 descriptions in (packet: no shared docs).
