@@ -69,6 +69,78 @@ enum HaloKeyRules {
         }
     }
 
+    /// Section 2's not-animated rule, write side: a finite `v`, clamped to
+    /// `p.range`, keys `f` on an animated track (two keys or more) and
+    /// otherwise replaces the one static value. Throws `.notANumber(p)` for
+    /// NaN or infinity and `.unknownLayer` for an unknown id, changing nothing.
+    static func setValue(_ v: Double, for p: HaloProperty, of id: String, at f: Int, in c: inout HaloComposition) throws {
+        guard v.isFinite else { throw HaloEditError.notANumber(p) }
+        let clamped = min(max(v, p.range.lowerBound), p.range.upperBound)
+        try change(id, in: &c) { layer in
+            let track = layer.tracks[p.rawValue] ?? []
+            if track.count >= 2 { layer.tracks[p.rawValue] = keyed(track, frame: f, value: clamped) }
+            else { setStatic(clamped, p, of: &layer) }
+        }
+    }
+
+    /// The stopwatch: an animated `p` goes static at its value at `f`; a
+    /// static one gets keys at `f` and at the last frame (frame 0 when `f`
+    /// is the last), both holding its value at `f`.
+    static func toggleAnimation(_ p: HaloProperty, of id: String, at f: Int, in c: inout HaloComposition) throws {
+        let last = c.lastFrame
+        try change(id, in: &c, at: f, p) { layer, v in
+            if (layer.tracks[p.rawValue] ?? []).count >= 2 { setStatic(v, p, of: &layer) }
+            else { layer.tracks[p.rawValue] = keyed(keyed([], frame: f, value: v), frame: f == last ? 0 : last, value: v) }
+        }
+    }
+
+    /// The key diamond: removes the key at `f`, or adds one holding the
+    /// value at `f`. A track left with fewer than two keys goes static at
+    /// its remaining value.
+    static func toggleKey(_ p: HaloProperty, of id: String, at f: Int, in c: inout HaloComposition) throws {
+        try change(id, in: &c, at: f, p) { layer, v in
+            var track = layer.tracks[p.rawValue] ?? []
+            if track.contains(where: { $0.frame == f }) { track.removeAll { $0.frame == f } }
+            else { track = keyed(track, frame: f, value: v) }
+            if track.count < 2 { setStatic(track.first?.value ?? v, p, of: &layer) }
+            else { layer.tracks[p.rawValue] = track }
+        }
+    }
+
+    /// The not-animated home of a value: `opacity` on the layer with no
+    /// track, every other property a one-key track at frame 0.
+    private static func setStatic(_ v: Double, _ p: HaloProperty, of layer: inout HaloLayer) {
+        if p == .opacity {
+            layer.opacity = v
+            layer.tracks[p.rawValue] = nil
+        } else {
+            layer.tracks[p.rawValue] = [HaloKeyframe(frame: 0, value: v)]
+        }
+    }
+
+    /// `track` with a key at `frame` set to `value` (its easing kept), sorted.
+    private static func keyed(_ track: [HaloKeyframe], frame: Int, value: Double) -> [HaloKeyframe] {
+        var t = track.filter { $0.frame != frame }
+        t.append(HaloKeyframe(frame: frame, value: value, easing: track.first { $0.frame == frame }?.easing ?? .linear))
+        return t.sorted { $0.frame < $1.frame }
+    }
+
+    /// Runs `body` on layer `id`, passing `p`'s value at `f` before the change.
+    private static func change(
+        _ id: String, in c: inout HaloComposition, at f: Int, _ p: HaloProperty,
+        _ body: (inout HaloLayer, Double) -> Void
+    ) throws {
+        guard let found = layer(id, in: c) else { throw HaloEditError.unknownLayer(id) }
+        let v = value(p, of: found, in: c, at: f)
+        try change(id, in: &c) { body(&$0, v) }
+    }
+
+    /// Runs `body` on layer `id`; throws `.unknownLayer` for an unknown id.
+    static func change(_ id: String, in c: inout HaloComposition, _ body: (inout HaloLayer) -> Void) throws {
+        guard let i = c.layers.firstIndex(where: { $0.id == id }) else { throw HaloEditError.unknownLayer(id) }
+        body(&c.layers[i])
+    }
+
     /// Every other layer except those that already follow `id`, in timeline order.
     static func parentCandidates(for id: String, in c: HaloComposition) -> [String] {
         c.layers.map(\.id).filter { $0 != id && !follows($0, id, in: c) }

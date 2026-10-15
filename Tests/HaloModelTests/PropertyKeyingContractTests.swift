@@ -1,16 +1,16 @@
 // PropertyKeyingContractTests.swift: what every PropertyKeying promises
-// (#38). The rows run over the fake and the live type (`rowKeyings`), which
-// share HaloKeyRules; the writes run over `propertyKeyings`, which the live
-// type joins once its writes are built. Positions are measured with
-// FakeLayerPlacing, which the live keying must agree with. Runs on Linux and
-// macOS.
+// (#38). Rows and writes run over the fake and the live type
+// (`propertyKeyings`), which share HaloKeyRules; parenting runs over
+// `parentKeyings`, which the live type joins once it is built. Positions are
+// measured with FakeLayerPlacing, which the live keying must agree with.
+// Runs on Linux and macOS.
 import HaloModel
 import Testing
 
-let propertyKeyings: [any PropertyKeying] = [FakePropertyKeying()]
-let rowKeyings: [any PropertyKeying] = [FakePropertyKeying(), LivePropertyKeying()]
+let propertyKeyings: [any PropertyKeying] = [FakePropertyKeying(), LivePropertyKeying()]
+let parentKeyings: [any PropertyKeying] = [FakePropertyKeying()]
 
-@Test(arguments: rowKeyings)
+@Test(arguments: propertyKeyings)
 func rowsFollowPropertyOrderAndKeyState(keying: any PropertyKeying) {
     let comp = keyedPair()
     let rows = keying.rows(for: "s", in: comp, at: 30)
@@ -27,15 +27,21 @@ private func keyedFixture() throws -> HaloComposition {
     try #require(HaloFixtures.project("keyed")?.compositions.first)
 }
 
+/// The index and id of the layer called `name` in `comp`.
+private func layer(_ name: String, in comp: HaloComposition) throws -> (index: Int, id: String) {
+    let i = try #require(comp.layers.firstIndex { $0.name == name })
+    return (i, comp.layers[i].id)
+}
+
 /// The row for `p` of the layer called `name` at frame `f`.
 private func row(
     _ p: HaloProperty, of name: String, in comp: HaloComposition, at f: Int, keying: any PropertyKeying
 ) throws -> HaloPropertyRow {
-    let id = try #require(comp.layers.first { $0.name == name }).id
+    let id = try layer(name, in: comp).id
     return try #require(keying.rows(for: id, in: comp, at: f).first { $0.property == p })
 }
 
-@Test(arguments: rowKeyings)
+@Test(arguments: propertyKeyings)
 func keyedBallRowsShowTextAndKeyState(keying: any PropertyKeying) throws {
     let comp = try keyedFixture()
     let x12 = try row(.x, of: "Ball", in: comp, at: 12, keying: keying)
@@ -57,16 +63,16 @@ func keyedBallRowsShowTextAndKeyState(keying: any PropertyKeying) throws {
     }
 }
 
-@Test func liveWritesStillRefuseUntilBuilt() {
+@Test func liveParentingStillRefusesUntilBuilt() {
     var comp = keyedPair()
     let before = comp
-    #expect(throws: HaloEditError.notBuilt("Keying")) {
-        try LivePropertyKeying().setValue(10, for: .x, of: "s", at: 0, in: &comp)
+    #expect(throws: HaloEditError.notBuilt("Parenting")) {
+        try LivePropertyKeying().setParent("n", of: "s", at: 0, in: &comp)
     }
-    #expect(comp == before && LivePropertyKeying().unavailableHelp != nil)
+    #expect(comp == before && LivePropertyKeying().unavailableHelp == nil)
 }
 
-@Test(arguments: propertyKeyings)
+@Test(arguments: parentKeyings)
 func parentingFollowsAndRefusesCycles(keying: any PropertyKeying) throws {
     var comp = keyedPair()
     let placing = FakeLayerPlacing()
@@ -109,4 +115,54 @@ func aValueThatIsNotANumberThrowsAndChangesNothing(keying: any PropertyKeying) {
     }
     #expect(throws: HaloEditError.notANumber(.x)) { try keying.setValue(.infinity, for: .x, of: "s", at: 15, in: &comp) }
     #expect(comp == before)
+}
+
+@Test(arguments: propertyKeyings)
+func aValueKeysAnAnimatedTrackAndReplacesAStaticOne(keying: any PropertyKeying) throws {
+    var comp = try keyedFixture()
+    let ball = try layer("Ball", in: comp), floor = try layer("Floor", in: comp)
+    try keying.setValue(1000, for: .x, of: ball.id, at: 6, in: &comp)
+    #expect(comp.layers[ball.index].tracks["x"]?.map(\.frame) == [0, 6, 24])
+    try keying.setValue(500, for: .x, of: floor.id, at: 30, in: &comp)
+    #expect(comp.layers[floor.index].tracks["x"] == [HaloKeyframe(frame: 0, value: 500)])
+    #expect(try row(.x, of: "Floor", in: comp, at: 30, keying: keying).keyState == .notAnimated)
+    try keying.setValue(0.5, for: .opacity, of: floor.id, at: 30, in: &comp)
+    #expect(comp.layers[floor.index].opacity == 0.5 && comp.layers[floor.index].tracks["opacity"] == nil)
+    try keying.setValue(200_000, for: .x, of: floor.id, at: 0, in: &comp)
+    #expect(comp.layers[floor.index].tracks["x"] == [HaloKeyframe(frame: 0, value: 100_000)])
+    let before = comp
+    #expect(throws: HaloEditError.notANumber(.x)) { try keying.setValue(.nan, for: .x, of: ball.id, at: 6, in: &comp) }
+    #expect(throws: HaloEditError.unknownLayer("gone")) { try keying.setValue(1, for: .x, of: "gone", at: 0, in: &comp) }
+    #expect(comp == before)
+}
+
+@Test(arguments: propertyKeyings)
+func theStopwatchKeysTwoFramesAndGoesBackToOneValue(keying: any PropertyKeying) throws {
+    let start = try keyedFixture()
+    let floor = try layer("Floor", in: start)
+    var comp = start
+    try keying.toggleAnimation(.rotation, of: floor.id, at: 6, in: &comp)
+    #expect(comp.layers[floor.index].tracks["rotation"]?.map(\.frame) == [6, 47])
+    comp = start
+    try keying.toggleAnimation(.rotation, of: floor.id, at: 47, in: &comp)
+    #expect(comp.layers[floor.index].tracks["rotation"]?.map(\.frame) == [0, 47])
+    try keying.setValue(90, for: .rotation, of: floor.id, at: 47, in: &comp)
+    let at20 = try row(.rotation, of: "Floor", in: comp, at: 20, keying: keying).value
+    try keying.toggleAnimation(.rotation, of: floor.id, at: 20, in: &comp)
+    #expect(comp.layers[floor.index].tracks["rotation"] == [HaloKeyframe(frame: 0, value: at20)])
+    #expect(try row(.rotation, of: "Floor", in: comp, at: 20, keying: keying).keyState == .notAnimated)
+}
+
+@Test(arguments: propertyKeyings)
+func theDiamondAddsAndRemovesAKeyAndOneKeyLeftGoesStatic(keying: any PropertyKeying) throws {
+    var comp = try keyedFixture()
+    let ball = try layer("Ball", in: comp)
+    try keying.toggleKey(.opacity, of: ball.id, at: 20, in: &comp)
+    #expect(comp.layers[ball.index].tracks["opacity"]?.last == HaloKeyframe(frame: 20, value: 1))
+    #expect(try row(.opacity, of: "Ball", in: comp, at: 20, keying: keying).keyState == .keyedHere)
+    try keying.toggleKey(.opacity, of: ball.id, at: 20, in: &comp)
+    #expect(comp.layers[ball.index].tracks["opacity"]?.map(\.frame) == [0, 12])
+    try keying.toggleKey(.x, of: ball.id, at: 0, in: &comp)
+    #expect(comp.layers[ball.index].tracks["x"] == [HaloKeyframe(frame: 0, value: 960)])
+    #expect(try row(.x, of: "Ball", in: comp, at: 0, keying: keying).keyState == .notAnimated)
 }
