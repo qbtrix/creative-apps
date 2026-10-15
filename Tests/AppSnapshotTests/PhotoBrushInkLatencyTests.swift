@@ -15,8 +15,8 @@
 // refresh for every app alike, so the commit is the part the app controls.
 // Frame pacing: the longest gap between two pictures while the stroke runs.
 //
-// Budgets, release only (a debug build runs CoreRaster's per-pixel loops about
-// 20x slower, so there the line is a report): input to ink p95 <= 16.7 ms,
+// Budgets, release only, with the display awake (a debug build runs
+// CoreRaster's per-pixel loops about 20x slower, so there the line is a report): input to ink p95 <= 16.7 ms,
 // one 60 Hz frame; no gap between pictures over two frames (33.3 ms). Report:
 // one BRUSH-INK line in .build/snapshots/photo-brush-ink.txt. macOS only.
 import AppKit
@@ -30,8 +30,10 @@ import Testing
 @MainActor @Suite struct PhotoBrushInkLatencyTests {
     static let config = PhotoBrushLatencyTests.config
     static let frame = 1000.0 / 60
-    static let latencyBudget: Double? = config == "release" ? frame : nil
-    static let hitchBudget: Double? = config == "release" ? 2 * frame : nil
+    /// A sleeping display (a locked Mac) shows no frames, so nothing is timed against them.
+    static let timed = config == "release" && !(NSScreen.main.map { _ in CGDisplayIsAsleep(CGMainDisplayID()) != 0 } ?? false)
+    static let latencyBudget: Double? = timed ? frame : nil
+    static let hitchBudget: Double? = timed ? 2 * frame : nil
     static let path = (0..<120).map { Mask.Point(x: 400 + 16 * Double($0), y: 1500 + 250 * sin(Double($0) / 12)) }
 
     /// What the stroke saw, sample by sample.
@@ -64,23 +66,15 @@ import Testing
             record.pending = []
             renderer.show(state.value)
         }
-        await withCheckedContinuation { (done: CheckedContinuation<Void, Never>) in
-            var i = 0
-            let timer = Timer(timeInterval: 1 / 120, repeats: true) { timer in
-                MainActor.assumeIsolated {
-                    guard i < Self.path.count else {
-                        timer.invalidate()
-                        return done.resume()
-                    }
-                    record.input.append(record.clock.now)
-                    record.applied.append(nil)
-                    record.pending.append(i)
-                    let to = Self.path[i]
-                    pacer.add((from: i == 0 ? to : Self.path[i - 1], to: to, pressure: 1, modifiers: []), apply: apply)
-                    i += 1
-                }
-            }
-            RunLoop.main.add(timer, forMode: .common)
+        // Each sample arrives 1/120 s after the last; the sleep yields to the
+        // main run loop, so the pacer's display link and the renders run between.
+        let started = record.clock.now
+        for (i, to) in Self.path.enumerated() {
+            try await Task.sleep(until: started + .microseconds(8_333 * i), clock: record.clock)
+            record.input.append(record.clock.now)
+            record.applied.append(nil)
+            record.pending.append(i)
+            pacer.add((from: i == 0 ? to : Self.path[i - 1], to: to, pressure: 1, modifiers: []), apply: apply)
         }
         pacer.stop()
         try await shown(state.value.revision, renderer)
@@ -98,7 +92,8 @@ import Testing
         let gaps = zip(times.dropFirst(), times).map { milliseconds($0 - $1) }
         let longest = gaps.max() ?? 0
         let report = [
-            "BRUSH-INK config=\(Self.config) canvas=4000x3000 brush=64px input=120Hz samples=\(latency.count)",
+            "BRUSH-INK config=\(Self.config) display=\(NSScreen.main?.maximumFramesPerSecond ?? 0)Hz canvas=4000x3000",
+            "brush=64px input=120Hz samples=\(latency.count)",
             "pictures=\(record.pictures.count) | input to ink p50 \(format(percentile(latency, 0.5)))",
             "p95 \(format(percentile(latency, 0.95))) max \(format(latency.max() ?? 0)) ms",
             "| picture gap p95 \(format(percentile(gaps, 0.95))) max \(format(longest)) ms,",
