@@ -1,0 +1,11 @@
+{
+  "id": "suite-shell",
+  "name": "SuiteShell",
+  "description": "macOS glue every app process links: live conformances needing AppKit or Launch Services, shared menu commands, the adoption modifier.",
+  "technology": "Swift 6, SwiftUI and AppKit, macOS 26",
+  "tags": [
+    "internal",
+    "macos-only"
+  ],
+  "order": 130
+}

@@ -1,0 +1,10 @@
+{
+  "id": "suite-update",
+  "name": "Updates",
+  "description": "Update feed parsing, version comparison, the offer and the install plan.",
+  "technology": "Swift 6, Foundation (FoundationEssentials), Linux and macOS",
+  "paths": [
+    "Sources/SuiteModel/Update/"
+  ],
+  "order": 180
+}

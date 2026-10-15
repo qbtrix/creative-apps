@@ -1,0 +1,10 @@
+{
+  "id": "suite-preferences",
+  "name": "Preferences",
+  "description": "SuitePreferences (General and a pane per app), defaults, change records.",
+  "technology": "Swift 6, Foundation (FoundationEssentials), Linux and macOS",
+  "paths": [
+    "Sources/SuiteModel/Preferences/"
+  ],
+  "order": 160
+}

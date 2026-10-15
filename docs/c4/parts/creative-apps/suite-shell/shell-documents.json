@@ -1,0 +1,12 @@
+{
+  "id": "shell-documents",
+  "name": "Documents bridge",
+  "description": "Records opens and saves in recents, writes thumbnails, builds the Open In submenu.",
+  "technology": "Swift 6, SwiftUI and AppKit, macOS 26",
+  "paths": [
+    "Sources/SuiteShell/SuiteDocumentsBridge.swift",
+    "Sources/SuiteShell/ThumbnailWriter.swift",
+    "Sources/SuiteShell/OpenInMenu.swift"
+  ],
+  "order": 60
+}
