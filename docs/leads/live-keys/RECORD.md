@@ -22,7 +22,7 @@ Next: wait for fix PRs r1-b1, r1-b2 to merge; then round 2 on the dev CI run con
 ## Rounds
 | round | CI run | CI | audit vs baseline | lenses | confirmed | fixed by | clean |
 |---|---|---|---|---|---|---|---|
-| 1 | 38672480053 (cancelled; waiting on the next run containing 899d424) | pending | pending | clarity, journey, contract, quality | 12 (2 major: symbol keys past the symbol's end; non-atomic coalesced multi-layer setValue), 1 refuted | r1-b1, r1-b2 | no |
+| 1 | 38673821944 (3af1c0e: #936, #942) | red, not ours: SuiteUI SidebarRenameGestureTests (#938), on #763; every live-keys suite green on macOS | not run (scripts/ci failed before journeys) | clarity, journey, contract, quality | 12 (2 major: symbol keys past the symbol's end; non-atomic coalesced multi-layer setValue), 1 refuted | r1-b1, r1-b2 | no |
 
 ## Decisions
 - Base is c111439 (dev one commit past the briefed bcc3197, which is its ancestor: #896, a Flare test pin).
@@ -41,4 +41,5 @@ Next: wait for fix PRs r1-b1, r1-b2 to merge; then round 2 on the dev CI run con
 - Fix PRs carry feature-done too, since they land after KY-9 (#936) and the lane dispatches CI for them.
 
 ## Open
+- dev-red #763: macOS fails on SuiteUI SidebarRenameGestureTests (from #938); triage comment posted. live-keys done needs a green dev run after that is fixed.
 - none
