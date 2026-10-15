@@ -17,3 +17,7 @@ utc	stage	event	ref	note
 2026-10-15T12:48Z	-	heartbeat	-	waiting on lane/CI
 2026-10-15T12:59Z	3	pr-opened	#1149	CP-3 PB-8 budget
 2026-10-15T12:59Z	3	pr-opened	#1151	CP-4 crop options
+2026-10-15T13:00Z	3	pr-merged	#1149	CP-3
+2026-10-15T13:00Z	3	pr-merged	#1151	CP-4
+2026-10-15T13:00Z	3	stage-end	wave 3	dev 469520e
+2026-10-15T13:00Z	3	stage-start	wave 4	waiting on #1073 (its dep #333 is closed)
