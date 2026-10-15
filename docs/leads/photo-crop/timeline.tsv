@@ -47,3 +47,5 @@ utc	stage	event	ref	note
 2026-10-15T16:44Z	4	heartbeat	-	waiting on run 38767265986 (contains #1192)
 2026-10-15T16:52Z	4	ci-run	38767265986	macOS scripts/ci PASS; journeys ran; photo audit contrast 3 over baseline (ours)
 2026-10-15T16:52Z	4	stage-start	round 4	fixer r4-b1 + panel
+2026-10-15T16:59Z	4	pr-opened	#1202	r4-b1 audit contrast
+2026-10-15T16:59Z	4	round-findings	round 4	audit over baseline (fixing in #1202); panel minors filed as gap #1203-#1207

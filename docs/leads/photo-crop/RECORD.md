@@ -4,7 +4,7 @@ Issue: #1076 · Packet: docs/blueprints/photo/features/photo-crop.md
 Run: act-1a13f70ddc3-29wr · Session: lead session (claude/photo-crop-feature-lead-e7vpmg) · Started: 2026-10-15T12:03Z
 Stage: 4 round 4 (wave 4 still waits on photo-journey-kit #1073)
 Base: 469520e8def2fe925a065aa8d5febda827851131
-Next: round 4 is the last by budget: land r4-b1 (audit contrast) and the round 4 panel's fixes; file leftovers as gap issues; when #1073 closes (UITests/PhotoJourneyTests+Fixtures.swift on dev), build CP-5 and CP-7 together; meanwhile read the first dev CI run containing 469520e (#1151) for round-1 material.
+Next: rounds done (4 of 4). Wait for #1202 to merge and a dev run to show photo contrast at 0; when #1073 lands when #1073 closes (UITests/PhotoJourneyTests+Fixtures.swift on dev), build CP-5 and CP-7 together; meanwhile read the first dev CI run containing 469520e (#1151) for round-1 material.
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -25,7 +25,7 @@ Waves: 1 = CP-1 (independent). 2 = CP-2 (waits CP-1). 3 = CP-3, CP-4 (independen
 | 1 check | 38746333198 (head e6490aa) | gridAligned passes; Photo green; remaining red is Halo only (keyedFrame6, HaloPlaybackDriverTests), not ours | n/a | – | – | – | – |
 | 2 | 38757068610 (head 111c440) | red only on Halo keyedFrame6 (not ours); Photo green | n/a (journeys did not run) | clarity, design, layout, controls | 2 major (locked field snaps back; Apply on a whole-image crop) + minors (reasons disagree, chip group tooltip empty, caption casing) | r2-b1 #1186 merged | no |
 | 3 | 38761014883 (head 86fe18c) | red only on Halo keyedFrame6 (not ours); all crop suites green | n/a (journeys did not run) | clarity, design, layout, controls | 4 minor (Swap tooltip bare; caption says 'shape'; uneven row gaps; half-width Apply/Cancel) | r3-b1 #1192 merged | yes |
-| 4 | 38767265986 (head d95c756) | scripts/ci PASS on macOS; journeys ran; Photo journey testEveryToolEditsTheImage red on audit; Library/Halo journey failures not ours | photo contrast 3 over baseline 0 (dimmed X/Y labels of disabled crop fields on photo-crop-pending, photo-cropped) | clarity, design, layout, controls | pending | r4-b1 (audit contrast) | no |
+| 4 | 38767265986 (head d95c756) | scripts/ci PASS on macOS; journeys ran; Photo journey testEveryToolEditsTheImage red on audit; Library/Halo journey failures not ours | photo contrast 3 over baseline 0 (dimmed X/Y labels of disabled crop fields on photo-crop-pending, photo-cropped) | clarity, design, layout, controls | panel clean: 4 minor (caption names ratio, Swap fallback title, 13 pt shift, chip-grid gaps) → gap #1203-#1205 | r4-b1 #1202 (audit contrast, combined field elements) | no (audit) |
 
 ## Decisions
 - r1-b2: fields follow cropFieldsEnabled, so a locked shape with no pending crop takes typing (model supported it; matches the caption). Kept.
@@ -40,6 +40,7 @@ Waves: 1 = CP-1 (independent). 2 = CP-2 (waits CP-1). 3 = CP-3, CP-4 (independen
 - Wave 1 has one task, so it runs as one worktree subagent, not the build-wave workflow.
 
 ## Open
+- gap issues filed at the round budget: #1203 (13 pt shift), #1204 (caption/Swap wording), #1205 (chip-grid gaps), #1206 (per-chip tooltips), #1207 (status bar selection px / selection under crop).
 - Round 2 minors left alone: overlay has no handles/accent edge (CP-5 / SuiteUI CropShade); status bar 'Selection 220 × 160' lacks px and a prior selection stays drawn under a pending crop (PhotoInspectorContent, not this feature's files). File as gap if still open at finish.
 - #1169 needs-ui: ScrubField placeholder for a nil value.
 - CropOptions.emptyCaption is unused by the view but still asserted by PhotoCropOptionsSnapshots; remove both in a later batch.
