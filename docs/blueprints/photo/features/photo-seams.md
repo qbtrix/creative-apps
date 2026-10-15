@@ -15,8 +15,13 @@ S-11b #991, S-12 #992, S-13 #979 (model budgets) and #997 (latency series).
 Anatomy round 1 (CI run 727): fixes #1010 (refusal names the Layers tab;
 clone and heal stop re-stamping the previous dab), #1011 (Escape-cancels-crop
 and `-PhotoFixture` journeys), #1012 (warning pill, refusals in the error
-style). Needs-ui filed: #952, #953, #954. The paint refusal now reads
-"Select an image layer in the Layers tab to paint on."
+style). Anatomy round 2 (CI run 38694361192): fixes #1029 (a fixture launch
+stays fitted while the window settles), #1030 (Eyedropper hint, Preview data
+tooltip, refusal in the caption type) and #1031 (fitted-picture, unknown-fixture
+and `.live` Eyedropper journey checks; the clone and heal budget times 20 px
+moves). Needs-ui filed: #952, #953, #954. Gaps filed from the rounds (v1
+behaviour or follow-ups): #1024, #1025, #1026, #1027, #1032. The paint
+refusal now reads "Select an image layer in the Layers tab to paint on."
 
 **Covers:** no open issue (blueprint 8.1: PV-0 has none). It is the critical
 path: photo-documents, photo-edit and photo-crop (wave 1) and
