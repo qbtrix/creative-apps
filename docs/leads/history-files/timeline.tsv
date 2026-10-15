@@ -60,3 +60,5 @@ utc	stage	event	ref	note
 2026-10-15T14:17Z	4	heartbeat	38748468768	running on 3d42e80
 2026-10-15T14:39Z	4	ci-run	38748468768	red in swift build: LibraryApp LibraryWindow+Cull/Loupe (another line); journeys skipped
 2026-10-15T15:08Z	5	heartbeat	38757068610	last run in progress (111c440); finish after it
+2026-10-15T15:38Z	5	stage-end	#1037	Belt-Contact-Sheet posted; not done: dev CI red outside feature (#763), H-J8/H-J10 unverified after fixes
+2026-10-15T15:38Z	5	stopped	-	lead stops; resume from Next

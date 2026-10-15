@@ -2,9 +2,9 @@
 
 Issue: #1037 · Packet: docs/blueprints/halo/features/history-files.md
 Run: act-1a13e9a2037-pkqb · Session: claude/history-files-lead-j2c6lo · Started: 2026-10-15T08:08Z
-Stage: 4 round 4
+Stage: 5 finish (blocked: dev CI red outside this feature)
 Base: bcf5a099960d2ceb59394cdd38c0b83c7640b7cc
-Next: round 4 (last) waits for a dev run where swift test passes so H-J8/H-J10/H-J11 run; at ~15:15 UTC finish (stage 5) either way: Belt-Contact-Sheet comment on #1037 with the latest run, journey status and audit, then push final RECORD
+Next: when #763 clears, read the first green dev run: H-J8 and H-J10 have not run since their fixes (#1108, #1114, #1159); any failure there is this feature's. Contact sheet posted on #1037 (comment 6195985619).
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -28,7 +28,7 @@ Next: round 4 (last) waits for a dev run where swift test passes so H-J8/H-J10/H
 | 1 | 38713326810 | red: H-J8 (menu help tag unreadable), H-J10/H-J11 (halo.file value reads empty, #262); others not ours | at/under baseline (contrast 1, identifier 1, offscreen 4) | clarity, journey, design, layout, controls | 8 (4 major, 4 minor; 1 major + 2 minor filed as #1081, #1082) | #1084, #1083, #1089 | no |
 | 2 | 38721434364 | red: H-J11 passes; H-J8 width check (inspector 192 < 200, SuiteUI), H-J10 sidebar click; others not ours | under baseline (offscreen 0) | same 5 | 7 (2 major, 5 minor) | #1108 (r2-b1), #1114 (r2-b2) | no |
 | 3 | 38727890123 (9caed05) | red before tests: swift build fails in LibraryApp/LibraryInspector.swift (#1096, #763), not ours | n/a (journeys skipped: viewer-playback swift test failures, #763) | same 5, code + snapshots | 5 minor, 0 major/blocker (panel clean) | r3-b1 (journey keys, snapshot); #1156 gap | panel clean, CI not ours-red |
-| 4 | 38743186679 (8e83ac0, has #1159) | swift test red on viewer-playback (fidelity, driver) and gridAligned; HaloEditMenuSnapshots + HaloFileSnapshots pass; journeys skipped | n/a | no new panel (round 3 clean, no new screens) | - | - | pending journeys |
+| 4 | 38743186679 (8e83ac0, has #1159) | swift test red on viewer-playback (fidelity, driver) and gridAligned; HaloEditMenuSnapshots + HaloFileSnapshots pass; journeys skipped | n/a | no new panel (round 3 clean, no new screens) | - | - | no (journeys skipped) |
 
 ## Decisions
 - Brief named base 1dcd1a6; origin/dev had moved one commit (92db316, a SuiteUI perf test, #1039) that is a descendant. Used 92db316.
