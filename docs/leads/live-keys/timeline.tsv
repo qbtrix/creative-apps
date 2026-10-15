@@ -59,3 +59,4 @@ utc	stage	event	ref	note
 2026-10-15T06:23Z	5	heartbeat	ci	waiting on a green dev run
 2026-10-15T06:42Z	5	heartbeat	ci	waiting on a green dev run
 2026-10-15T07:00Z	5	heartbeat	ci	waiting on a green dev run
+2026-10-15T07:10Z	5	ci-run	38694361192	Flare green; red on Halo/Suite only (#763)
