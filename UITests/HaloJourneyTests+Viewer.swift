@@ -10,7 +10,9 @@
 // XCUITest reads values empty, #262), which proves the
 // live drawing rather than the layer list: 2, 3, then 4 layers drawn (the
 // null draws nothing). A new layer goes on top, so the list's first row is
-// Solid 1. One shot per step, `halo-viewer-<step>`.
+// the new solid. HaloProject.newLayer names it by kind and that kind's count
+// plus one, and Background is already a solid, so it is Solid 2. One shot
+// per step, `halo-viewer-<step>`.
 import XCTest
 
 final class HaloViewerJourneyTests: XCTestCase {
@@ -34,13 +36,13 @@ final class HaloViewerJourneyTests: XCTestCase {
         expectCanvas("3 layers drawn", halo)
         halo.shot("viewer-frame-30")
 
-        // 3. Layer > New > Solid: Solid 1 on top, drawn last.
+        // 3. Layer > New > Solid: Solid 2 (Background is the first solid) on top, drawn last.
         choose(["Layer", "New", "Solid"], halo)
-        expectArtboard("Frame 30: Background, Badge, Title: Hello Halo, Solid 1", halo)
+        expectArtboard("Frame 30: Background, Badge, Title: Hello Halo, Solid 2", halo)
         expectCanvas("4 layers drawn", halo)
         XCTAssert(
-            waitFor { self.firstRowLabel(halo).contains("Solid 1") },
-            "the layer list's first row reads \(firstRowLabel(halo)), not Solid 1")
+            waitFor { self.firstRowLabel(halo).contains("Solid 2") },
+            "the layer list's first row reads \(firstRowLabel(halo)), not Solid 2")
         halo.shot("viewer-solid-on-top")
     }
 

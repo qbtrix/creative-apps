@@ -80,7 +80,7 @@ and four new test files. `FakeLayerPlacing` stays layer-keys'.
    three-layers`: scrub to 12; scrub to 30; Layer > New > Solid. The
    artboard value reads "Frame 12: Background, Badge", then "Frame 30:
    Background, Badge, Title: Hello Halo", then "Frame 30: Background, Badge,
-   Title: Hello Halo, Solid 1", and the layer list's first row is "Solid 1".
+   Title: Hello Halo, Solid 2", and the layer list's first row is "Solid 2".
    Because `viewerSummary` reads the layers, not the drawing, the canvas's own
    value proves the live drawing: `halo.viewer.canvas` reads "2 layers
    drawn", "3 layers drawn", then "4 layers drawn". (VP-12)
@@ -366,7 +366,7 @@ of VP-8, VP-10 and VP-12 state the audit counts they expect (unchanged).
 - **Contact sheet:** the lead comments on the feature issue with
   `Belt-Contact-Sheet: <run link>`, one line per journey and the audit
   counts. Expected new shots: `halo-` steps of H-J2 (layers appear at 12 and
-  30, then Solid 1 on top), H-J3 (Badge's span 20–50), H-J4 (playing,
+  30, then Solid 2 on top), H-J3 (Badge's span 20–50), H-J4 (playing,
   paused, end); the snapshot PNGs listed under VP-8 and VP-10.
 
 ## Review notes folded in

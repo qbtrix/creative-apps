@@ -17,9 +17,12 @@
 // by prefix) then reads f − 2. With Loop off a play from 0 runs 3 s and stops
 // on the last frame, so after 4 s the button reads Paused at 00:00:02:23.
 // Before the last Space the lane is clicked again, so a Loop button that took
-// focus can't take the key. One shot per step, `halo-playback-<step>`; the
-// playing shot is taken in the play-once pass, so its audit can't stretch the
-// 1 s wait.
+// focus can't take the key. The play-once pass lasts 3 s, and XCUITest waits
+// for the app to idle after a key (over 3 s while the display link runs), so
+// the pass may be over before the button can be read: from Go to Start, the
+// stop on 00:00:02:23 with Loop still Off proves that Space played it. One
+// shot per step, `halo-playback-<step>`; the playing shot is taken in the
+// first, looping, pass.
 import XCTest
 
 final class HaloPlaybackJourneyTests: XCTestCase {
@@ -40,6 +43,7 @@ final class HaloPlaybackJourneyTests: XCTestCase {
         // 1. Space plays; 1 s later Space pauses.
         halo.press(.space)
         expectPlay(true, halo)
+        halo.shot("playback-playing")
         Thread.sleep(forTimeInterval: 1)
         halo.press(.space)
         expectPlay(false, halo)
@@ -70,15 +74,14 @@ final class HaloPlaybackJourneyTests: XCTestCase {
         expectLoop("Off", halo)
         halo.shot("playback-loop-off")
 
-        // 5. Animation > Go to Start, then Space: one pass, stopped on the last frame.
+        // 5. Animation > Go to Start, then Space: one pass, stopped on the
+        // last frame. Not read as Playing: the 3 s pass can end before
+        // XCUITest's idle wait after the key does, and the stop on the last
+        // frame, from frame 0, is what proves the pass.
         choose(["Animation", "Go to Start"], halo)
         expectTimecode("00:00:00:00", halo)
         focusTimeline(halo)
         halo.press(.space)
-        expectPlay(true, halo)
-        // Shot here, not in the 1 s pass: a shot's audit takes time, and a
-        // looping pass could wrap past the last frame before the pause.
-        halo.shot("playback-playing")
         Thread.sleep(forTimeInterval: 4)
         expectTimecode("00:00:02:23", halo)
         expectPlay(false, halo)
