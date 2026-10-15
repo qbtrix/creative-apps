@@ -85,3 +85,4 @@ Taken from the packet's Build waves; checked against dev bcf5a09.
 - needs-ui #1183 (ThumbnailGrid help + reject badge), #1184 (ViewerStatusBar band, optional zoom) from round 2.
 - gap #1214 (contract/packet texts), #1215 (status bar zoom, Show Inspector shortcut, confirm journeys after #1208).
 - Resume 17:5xZ: dev runs 38774988270, 38776323445, 38777072611 fail to compile Sources/PhotoModel/Live/LiveRecovery.swift:94 (Photo line, ObjCBool); Library not reached.
+- Run 38782884668 (f9846c9): compiles again; red on PhotoCompositeCostTests (Photo); Library suites green; journeys not executed.
