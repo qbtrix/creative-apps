@@ -213,9 +213,16 @@ final class HaloJourneyTests: XCTestCase {
         field.typeText(text)
     }
 
-    /// The first element under `root` whose label contains `text`.
+    /// The first element under `root` whose label contains `text`, or static
+    /// text whose value does: a plain SwiftUI Text (an empty state's title, a
+    /// problem line) reads as a static text with an empty label and its string
+    /// as its value. Only static texts are searched by value, whose value is
+    /// always a string, so CONTAINS never meets a checkbox's number.
     @MainActor private static func contains(_ text: String, in root: XCUIElement) -> XCUIElement {
-        root.descendants(matching: .any).matching(NSPredicate(format: "label CONTAINS %@", text)).firstMatch
+        let staticText = NSNumber(value: XCUIElement.ElementType.staticText.rawValue)
+        let predicate = NSPredicate(
+            format: "label CONTAINS %@ OR (elementType == %@ AND value CONTAINS %@)", text, staticText, text)
+        return root.descendants(matching: .any).matching(predicate).firstMatch
     }
 
     /// The ControlDocument in `probe`'s label; nil when it's missing or isn't one.
