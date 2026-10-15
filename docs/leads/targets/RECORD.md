@@ -4,7 +4,7 @@ Issue: #873 · Packet: docs/blueprints/suite/features/targets.md
 Run: act-1a13f70dda7-kche · Session: claude/feature-lead-targets-w8ietz · Started: 2026-10-15T12:10Z
 Stage: 3 wave 2
 Base: b073dac (dev after TG-0c)
-Next: when #1143 merges, rebase lead/targets-bu-1b on origin/dev, rerun scripts/ci, open BU-1b with fast-lane + feature-done
+Next: (resume) if #1143 has merged: git fetch origin; git switch -c lead/targets-bu-1b-r origin/lead/targets-bu-1b; git rebase --onto origin/dev 38e2c9983da6c6b6b8bcf2af503aa540e036c6d8; scripts/ci until CI: PASS; push and open BU-1b (base dev, labels fast-lane + feature-done, Closes #811, Belt-Lead/Feature/Fast-Check/Head lines; strip any auto-added attribution footer). Then wait for the lane and the dev CI run it triggers (stage 4). If #1143 is still open: wait on the supervisor.
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -32,6 +32,7 @@ Next: when #1143 merges, rebase lead/targets-bu-1b on origin/dev, rerun scripts/
 - BU-S needs a Mac: not run by this lead (packet).
 
 ## Open
+- 2026-10-15T19:41Z: lead hit its 8 h budget waiting ~7 h on the supervisor to merge #1143 (BU-1a) and #1133 (BU-0); both merge clean on dev 6018826. BU-1b is ready on lead/targets-bu-1b (f789ca0, one commit over BU-1a 38e2c99).
 - Waiting on the supervisor to merge #1143 (BU-1a) and #1133 (BU-0).
 - BU-1b: shared-assets must handle ⌘X/C/V/A in text fields (the stub replaces .pasteboard with disabled items); fine today, no text fields.
 - Branches are lead/targets-<task>: git can't hold lead/targets/<task> next to lead/targets.
