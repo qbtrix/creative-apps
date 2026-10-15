@@ -1,6 +1,6 @@
 // HaloRenderTests.swift: rendering a composition's solids into one frame with
 // CoreRaster: blend order, opacity, in and out points, rectangles, the preview
-// size and the skipped-layer note. Runs on Linux and macOS.
+// size and the undrawn-text note. Runs on Linux and macOS.
 import CoreRaster
 import HaloModel
 import Testing
@@ -102,15 +102,27 @@ private func bytes(_ frame: HaloRenderedFrame?, x: Int = 0, y: Int = 0) throws -
 }
 
 @Test func otherLayerKindsAreSkippedWithANote() throws {
-    var project = HaloProject()
+    // .live with no text rasterizer: the text is skipped, the null never counts.
+    var project = HaloProject(services: .live)
     project.newComposition()
     project.newLayer(.solid)
     project.newLayer(.text)
     project.newLayer(.null)
     let frame = project.renderSelectedFrame(at: 0)
-    #expect(frame?.skippedLayerCount == 2)
-    #expect(frame?.note == "Only solids render for now; 2 layers skipped.")
+    #expect(frame?.skippedLayerCount == 1)
+    #expect(frame?.note == "1 text layer not drawn.")
     // The solid under them still renders.
+    #expect(try bytes(frame).last == 255)
+}
+
+@Test func aNullOverASolidLeavesNoNote() throws {
+    // #457: a null plus a solid said a layer was skipped.
+    var project = HaloProject(services: .live)
+    project.newComposition()
+    project.newLayer(.solid)
+    project.newLayer(.null)
+    let frame = try #require(project.renderSelectedFrame(at: 0))
+    #expect(frame.skippedLayerCount == 0 && frame.note == nil)
     #expect(try bytes(frame).last == 255)
 }
 

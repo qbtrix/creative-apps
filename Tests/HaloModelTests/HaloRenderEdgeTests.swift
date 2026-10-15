@@ -160,18 +160,21 @@ private func pixel(_ frame: HaloRenderedFrame?, x: Int, y: Int) throws -> RGBA {
     #expect(Array(try bytes(frame).prefix(4)) == [255, 0, 0, 255])
 }
 
-@Test func onlyVisibleNonSolidsCountAsSkipped() {
+@Test func onlyVisibleTextCountsAsSkipped() {
     let c = comp([
         layer("shape", .shape), layer("text", .text, frames: 20..<30), layer("null", .null), layer("solid"),
+        layer("text2", .text, frames: 25..<30),
     ])
-    #expect(c.renderFrame(at: 0)?.skippedLayerCount == 2)
-    #expect(c.renderFrame(at: 25)?.skippedLayerCount == 3)
-    #expect(c.renderFrame(at: 25)?.note == "Only solids render for now; 3 layers skipped.")
+    #expect(c.renderFrame(at: 0)?.skippedLayerCount == 0)
+    #expect(c.renderFrame(at: 0)?.note == nil)
+    #expect(c.renderFrame(at: 20)?.note == "1 text layer not drawn.")
+    #expect(c.renderFrame(at: 25)?.skippedLayerCount == 2)
+    #expect(c.renderFrame(at: 25)?.note == "2 text layers not drawn.")
 }
 
 @Test func aSkippedLayerDoesNotChangeThePixels() {
     let solids = comp([layer("a", color: blue, mode: .screen), layer("b")]).renderFrame(at: 0)
-    let mixed = comp([layer("s", .shape), layer("a", color: blue, mode: .screen), layer("t", .text), layer("b")])
+    let mixed = comp([layer("n", .null), layer("a", color: blue, mode: .screen), layer("t", .text), layer("b")])
         .renderFrame(at: 0)
     #expect(mixed?.pixels == solids?.pixels)
 }
