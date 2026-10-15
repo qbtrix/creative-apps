@@ -256,8 +256,7 @@ Chains (same file, in order): `SuiteServices+Live.swift` and
 Sizes, each under 400 lines: SC-1a ~330, SC-1b ~320, SC-1c ~260, SC-1d ~330,
 SC-2a ~220 (10 files), SC-2b ~200 (10), SC-3a ~330 (10), SC-3b ~330, SC-3c
 ~330, SC-4a ~300, SC-4b ~380, SC-4c ~200, SC-5a ~220, SC-5b ~250 (9), SC-5c
-~180 (9). Three lanes run side by side: SC-1c with SC-1b; SC-4a once SC-1a
-is in; the fakes after the contracts.
+~180 (9). Which tasks build side by side is in Build waves below.
 
 **Ownership after this feature.** `Recents/` goes to recents-open-in
 (wave 3), `HandOff/` to switching (wave 2), `Home/` to home (wave 2),
@@ -268,6 +267,33 @@ is in; the fakes after the contracts.
 their own slot file. `Values/`, `Contracts/`, `Fakes/` and `Store/` have no
 owner in wave 2; a later feature that needs a change there names it in its
 packet.
+
+## Build waves
+
+No task edits a shared doc (`docs/c4/model.json`, `docs/design.md`, a
+blueprint or a `waves.md`): every file is in `Sources/SuiteModel/`,
+`Sources/SuiteShell/` or a test target, and each target's folder is already
+its C4 component. So no docs task is added; SC-5c stays the final task.
+
+- Wave 1: SC-1a. Independent in this wave: SC-1a alone.
+- Wave 2: SC-1b, SC-1c, SC-4a. Independent in this wave: all three.
+- Wave 3: SC-1d. Independent in this wave: SC-1d alone.
+- Wave 4: SC-2a, SC-2b. Independent in this wave: both.
+- Wave 5: SC-3a. Independent in this wave: SC-3a alone.
+- Wave 6: SC-3b, SC-3c, SC-5a. Independent in this wave: all three.
+- Wave 7: SC-4b, SC-4c. Independent in this wave: both.
+- Wave 8: SC-5b. Independent in this wave: SC-5b alone.
+- Wave 9: SC-5c (final, `feature-done`). Independent in this wave: SC-5c alone.
+
+Longest chain: SC-1a → SC-1b → SC-1d → SC-2a → SC-3a → SC-3b → SC-4b → SC-5b → SC-5c (9).
+Chain of 9: each link is a type the next task uses. SC-1b's `RecentItem`
+and `HandOff` hold SC-1a's `SuiteDocumentRef`, `SettingsPane` and
+`AssetLink`; SC-1d's `HomeValues.swift` holds SC-1b's `RecentItem` and
+`NewDocumentPreset`; SC-2a's `HomeBuilding` returns SC-1d's `HomeState`;
+SC-3a's fakes conform to SC-2a's contracts; SC-3b's `FakeAssets` streams
+through SC-3a's `ChangeFeed`; SC-4b's `SuiteServices.fake` builds SC-3b's
+fakes; SC-5b's `live` reads SC-4b's `slotFeatures` and `pending`; SC-5c's
+slots take SC-5b's `SlotContext` and edit its `SuiteServices+Live.swift`.
 
 ## Acceptance test per task
 

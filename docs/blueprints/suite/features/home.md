@@ -184,15 +184,15 @@ a follow-up outside the done check. UI PRs list their snapshot PNGs.
 | id | issue | what | owned files | depends on |
 |---|---|---|---|---|
 | HM-1a | #842 | `HomeBuilder` (locale ages) and the live home slot; QB-SM2 | `Sources/SuiteModel/Home/HomeBuilder.swift`, `Sources/SuiteShell/Live/HomeSlot.swift`, `Tests/SuiteModelTests/HomeBuilderTests.swift`, `Tests/SuiteModelTests/Budget+Home.swift` | SC-3a #826, SC-4b #830, SC-5b #833 |
-| HM-1b | #843 | `HomeModel` (5.7 plus `makeID`, `homeOrder`, undo of Remove, thumbnail steps, `launching`) and `SuiteCreating` with the live creating slot | `Sources/SuiteModel/Home/HomeModel.swift`, `Sources/SuiteModel/Home/SuiteCreating.swift`, `Sources/SuiteShell/Live/CreatingSlot.swift`, `Tests/SuiteModelTests/HomeModelTests.swift` | HM-1a |
+| HM-1b | #843 | `HomeModel` (5.7 plus `makeID`, `homeOrder`, undo of Remove, thumbnail steps, `launching`) and `SuiteCreating` with the live creating slot | `Sources/SuiteModel/Home/HomeModel.swift`, `Sources/SuiteModel/Home/SuiteCreating.swift`, `Sources/SuiteShell/Live/CreatingSlot.swift`, `Tests/SuiteModelTests/HomeModelTests.swift` | SC-3a #826, SC-4b #830, SC-5b #833 |
 | HM-0 | #841 | The AfterGlow journey harness: `Journey(bundlePath:bundleID:auditKey:)`, `attach(_:)` by bundle id with per-process audit keys, the suite launch flags, `tearDown` ends every suite process; a smoke test; the `afterglow` audit key at 0 | `UITests/AfterGlowJourneyTests+Harness.swift`, `UITests/AfterGlowJourneyTests+Smoke.swift`, `UITests/audit-baseline.json` | BU-3 #814, BU-4 #818, #333 |
 | HM-2a | #844 | The home window: sidebar, toolbar, search, chips, recents grid, empty and missing states, running strip; services wiring and fixture seeding; the updater stub; probes and control registration; the window publishes its `HomeModel` with `.focusedSceneValue(\.homeModel, model)` (the key is declared in `HomeWindow.swift`) so the launcher's menus reach it; home snapshots | `Sources/AfterGlowApp/HomeWindow.swift`, `HomeSidebar.swift`, `HomeGrid.swift`, `HomeRunningStrip.swift`, `LauncherRouter+Services.swift`, `UpdateService.swift` (all under `Sources/AfterGlowApp/`), `Tests/AppSnapshotTests/AfterGlowHomeSnapshots.swift` | HM-1b, SC-4c #831, #775 |
 | HM-2b | #845 | The New row (tiles, presets as chips or a menu by `tileShowsChips`, disabled reasons, progress hook), the inspector (Open, Open In ▸ disabled until recents-open-in, Show in Finder, Remove from Recents), the file drop target; the layout snapshot test | `Sources/AfterGlowApp/HomeNewRow.swift`, `HomeInspector.swift`, `HomeDropTarget.swift`, `Tests/AppSnapshotTests/AfterGlowHomeLayoutTests.swift` | HM-2a |
 | HM-2c | #846 | The launcher's File (New ▸, Open…, Open Recent ▸ with Clear Menu), Edit (Undo, Delete routing by page: Remove from Recents) and View (Show Sidebar, Show Inspector ⌥⌘I, Larger ⌘+, Smaller ⌘−) menus over `HomeMenu`; `LauncherCommandsHome` reads the model through `@FocusedValue(\.homeModel)` (no window: every item disabled "Open the AfterGlow window first." except New and Open…, which open it) | `Sources/AfterGlowApp/LauncherCommands+Home.swift`, `Sources/SuiteModel/Home/HomeMenu.swift`, `Tests/SuiteModelTests/HomeMenuTests.swift`, `Tests/SuiteModelTests/LauncherMenuStubTests.swift` | HM-1b, HM-2a, BU-1b #811 |
 | HM-4 | #870 | The home's golden baselines, reviewed from the dev run that contains HM-2a and HM-2b | `Tests/AppSnapshotTests/Golden/afterglow/` (SH-9's `Golden/<area>/` folder) | HM-2a, HM-2b and their dev CI run |
-| HM-3a | #847 | Journeys SJ0 and SJ1 (steps 1, 2, 5, 6) | `UITests/AfterGlowJourneyTests.swift`, `UITests/AfterGlowJourneyTests+Home.swift` | HM-0, HM-2c, HM-4, A-DE-0 #836 |
-| HM-3b | #848 | `testHomeAtEveryWidth` and SJ19 | `UITests/AfterGlowJourneyTests+Layout.swift`, `UITests/AfterGlowJourneyTests+EveryControl.swift` | HM-3a |
-| HM-3c | #849 | SP3, SP4 and the home's budget constants (report only); the `recents-ready` mark in the grid | `UITests/AfterGlowJourneyTests+PerfHome.swift`, `UITests/AfterGlowJourneyTests+BudgetsHome.swift`, `Sources/AfterGlowApp/HomeGrid.swift` | HM-3a, #782 |
+| HM-3a | #847 | Journeys SJ0 and SJ1 (steps 1, 2, 5, 6) | `UITests/AfterGlowJourneyTests.swift`, `UITests/AfterGlowJourneyTests+Home.swift` | HM-0, HM-2b, HM-2c, A-DE-0 #836 |
+| HM-3b | #848 | `testHomeAtEveryWidth` and SJ19 | `UITests/AfterGlowJourneyTests+Layout.swift`, `UITests/AfterGlowJourneyTests+EveryControl.swift` | HM-3a, HM-4 |
+| HM-3c | #849 | SP3, SP4 and the home's budget constants (report only); the `recents-ready` mark in the grid | `UITests/AfterGlowJourneyTests+PerfHome.swift`, `UITests/AfterGlowJourneyTests+BudgetsHome.swift`, `Sources/AfterGlowApp/HomeGrid.swift` | HM-0, HM-2a, #782 |
 
 App-line issues this feature files (`needs-suite`, built by their lines;
 each names its files):
@@ -214,11 +214,20 @@ present `Cards.design` from a missing one), so HM-3a waits on A-DE-0 alone.
 The rest are filed here because the fixture documents are one set; their
 first readers are switching's SW-4a (SJ3 opens `Bounce.flare`) and wave 3.
 
-Order: HM-1a → HM-1b → HM-2a → HM-2b → HM-4 (after their dev run); HM-2c after HM-2a;
-HM-0 as soon as BU-3 and BU-4 are in; HM-3a after HM-0, the views and the
-fixtures; HM-3b, HM-3c after HM-3a. Sizes: HM-1a ~250, HM-1b ~360, HM-0
+Order: HM-1a, HM-1b and HM-0 at once. HM-1b does not wait for HM-1a:
+`HomeModel` reads the home through `HomeBuilding`, and its tests run on
+`.fake`'s `FakeHome`; `HomeBuilder` takes any `DocumentCreating`, so HM-1a
+does not wait for `SuiteCreating`. HM-2a after HM-1b (`HomeWindow` holds a
+`HomeModel`); HM-2b after HM-2a (its views and layout test sit in
+`HomeWindow`); HM-2c after HM-1b and HM-2a (the `\.homeModel` key);
+HM-4 after the dev run that holds HM-2a and HM-2b; HM-3a after HM-0, the
+views (SJ0 counts HM-2b's tiles), the menus (HM-2c: Edit > Undo) and
+A-DE-0; HM-3c after HM-0 and HM-2a, whose `HomeGrid.swift` it edits.
+HM-3b's own tests need only the harness and the views, but it carries
+`feature-done`, so it waits on HM-3a and HM-4: its dev run must hold SJ0,
+SJ1 and the goldens. Sizes: HM-1a ~250, HM-1b ~360, HM-0
 ~250, HM-2a ~380 (7 files), HM-2b ~350, HM-2c ~300, HM-3a ~300, HM-3b ~220,
-HM-3c ~200. Chains on one file: `HomeGrid.swift` HM-2a → HM-3c.
+HM-3c ~200.
 
 **Files shared with other features, and why it's safe.**
 `LauncherMenuStubTests.swift` (BU-1b's, wave 0) is edited by HM-2c only in
@@ -228,6 +237,27 @@ before its last `scripts/ci`. `UpdateService.swift` and
 `LauncherRouter+Services.swift` are created here; the updater owns
 `UpdateService.swift` from wave 4. `HomeSlot.swift` and `CreatingSlot.swift`
 come from suite-contracts (wave 1). Switching (wave 2) owns none of these.
+
+## Build waves
+
+No task edits a shared doc (`docs/c4/model.json`, `docs/design.md`, the
+blueprint or `waves.md`); every new file sits in a folder its C4 component
+already covers, so rule (a) adds no task. The app-line rows (A-x-0) are
+built by their own lines and are not in these waves.
+
+- Wave 1: HM-1a, HM-1b, HM-0. Independent in this wave: all three.
+- Wave 2: HM-2a. Independent in this wave: HM-2a alone.
+- Wave 3: HM-2b, HM-2c, HM-3c (follow-up, once #782 lands). Independent in this wave: all three.
+- Wave 4: HM-4 (after the dev run that holds HM-2a and HM-2b), HM-3a. Independent in this wave: both.
+- Wave 5: HM-3b (`feature-done`, final; it merges after every other task of the done check, HM-1a included). Independent in this wave: HM-3b alone.
+
+Longest chain: HM-1b → HM-2a → HM-2b → HM-3a → HM-3b (5); HM-1b → HM-2a →
+HM-2b → HM-4 → HM-3b is as long.
+Chain of 5: `HomeWindow.swift` holds HM-1b's `HomeModel`; HM-2b's
+`HomeNewRow` and `AfterGlowHomeLayoutTests` sit in HM-2a's `HomeWindow`;
+SJ0 counts HM-2b's tiles and HM-4's goldens are shot from HM-2b's screens;
+HM-3b carries `feature-done`, so its dev run must hold HM-3a's journeys and
+HM-4's goldens.
 
 ## Acceptance test per task
 

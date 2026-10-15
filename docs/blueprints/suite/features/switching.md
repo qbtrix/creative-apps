@@ -185,12 +185,12 @@ lands before it; SW-4b and SW-4c are follow-ups outside the done check.
 | SW-1 | #852 | `SwitchPlanner`, `SwitchMenu`, `LaunchArguments` | `Sources/SuiteModel/Switching/SwitchPlanner.swift`, `SwitchMenu.swift`, `LaunchArguments.swift`, `Tests/SuiteModelTests/SwitchRunStateTests.swift`, `Tests/SuiteModelTests/SwitchMenuTests.swift`, `Tests/SuiteModelTests/SwitchLaunchArgumentsTests.swift` | SC-1b #821 |
 | SW-2 | #853 | `StoreHandOffs`: write, deliver, receive, settle, expire, sweep; QB-SM4 | `Sources/SuiteModel/HandOff/StoreHandOffs.swift`, `Tests/SuiteModelTests/HandOffStoreTests.swift`, `Tests/SuiteModelTests/Budget+HandOff.swift` | SC-4a #829, SC-2a #824 |
 | SW-3a | #854 | `AppLauncher` (live `AppSwitching`, `-SuiteHideApp`), `StoreWatcher`, the live switching slot, the watcher on the recents slot | `Sources/SuiteShell/AppLauncher.swift`, `StoreWatcher.swift`, `Live/SwitchingSlot.swift`, `Live/RecentsSlot.swift`, `Tests/AppSnapshotTests/SuiteShellSwitchingTests.swift` | SW-1, SC-5b #833 |
-| SW-3b | #855 | `HandOffTransport`, `SuiteAppDelegate`, the live hand-off slot, the launcher's `LauncherRouter` (file routing, no window; verb dispatch to `LauncherRouter+<Area>.swift`) | `Sources/SuiteShell/HandOffTransport.swift`, `SuiteAppDelegate.swift`, `Live/HandOffSlot.swift`, `Sources/AfterGlowApp/LauncherRouter.swift`, `Tests/AppSnapshotTests/SuiteShellHandOffTests.swift` | SW-2, SW-3a |
+| SW-3b | #855 | `HandOffTransport`, `SuiteAppDelegate`, the live hand-off slot, the launcher's `LauncherRouter` (file routing, no window; verb dispatch to `LauncherRouter+<Area>.swift`) | `Sources/SuiteShell/HandOffTransport.swift`, `SuiteAppDelegate.swift`, `Live/HandOffSlot.swift`, `Sources/AfterGlowApp/LauncherRouter.swift`, `Tests/AppSnapshotTests/SuiteShellHandOffTests.swift` | SW-1, SW-2 |
 | SW-3c | #856 | `SuiteCommands` (Switch To ▸ from `SwitchMenu`; Open In ▸ and Settings… through stubs), `.suiteApp(_:host:)`, the `SettingsRoute` and `OpenInMenu` stubs; the shortcut clash test | `Sources/SuiteShell/SuiteCommands.swift`, `SuiteAppModifier.swift`, `SettingsRoute.swift` (stub), `OpenInMenu.swift` (stub), `Tests/SuiteModelTests/SuiteCommandsTests.swift` | SW-3a, SW-3b |
 | SW-4a | #857 | Journeys SJ3, `testOpenRecentBringsAppForward`, `testCrashIsolation` | `UITests/AfterGlowJourneyTests+Switch.swift` | SW-3c, HM-0 #841, HM-2b #845, A-FL-1 #861, A-DE-1 #862, A-FL-0 #837, A-DE-0 #836 |
-| SW-4b | #858 | Journey SJ2 (every tile, the missing-app error) | `UITests/AfterGlowJourneyTests+New.swift` | SW-4a, A-PH-1 #863, A-LI-1 #864, A-HA-1 #865 |
-| SW-4c | #859 | SP1, SP2; the switching budget constants (report only) | `UITests/AfterGlowJourneyTests+PerfSwitch.swift`, `UITests/AfterGlowJourneyTests+BudgetsSwitch.swift` | SW-4a, #782 |
-| SW-5 | #860 | Every QB-S and QB-SM row of blueprint 7.1 into `docs/review-rubric.md` section 6 as an appended "AfterGlow" subsection, report only, each naming its test and its feature's budget file | `docs/review-rubric.md` | SW-1 |
+| SW-4b | #858 | Journey SJ2 (every tile, the missing-app error) | `UITests/AfterGlowJourneyTests+New.swift` | SW-3c, HM-0 #841, HM-2b #845, A-FL-1 #861, A-DE-1 #862, A-FL-0 #837, A-DE-0 #836, A-PH-1 #863, A-LI-1 #864, A-HA-1 #865 |
+| SW-4c | #859 | SP1, SP2; the switching budget constants (report only) | `UITests/AfterGlowJourneyTests+PerfSwitch.swift`, `UITests/AfterGlowJourneyTests+BudgetsSwitch.swift` | SW-3c, HM-0 #841, HM-2b #845, A-FL-1 #861, A-DE-1 #862, A-FL-0 #837, A-DE-0 #836, #782 |
+| SW-5 | #860 | Every QB-S and QB-SM row of blueprint 7.1 into `docs/review-rubric.md` section 6 as an appended "AfterGlow" subsection, report only, each naming its test and its feature's budget file | `docs/review-rubric.md` | – |
 
 Adoption issues this feature files (`needs-suite`, each built by its line):
 
@@ -202,10 +202,15 @@ Adoption issues this feature files (`needs-suite`, each built by its line):
 | A-LI-1 | #864 | library | Same for Library (`.new` with `library.import` opens Import Folder; `.open` of images is recents-open-in's A-LI-2) | `Sources/LibraryModel/LibraryDocumentHost.swift`, `Tests/LibraryModelTests/LibraryDocumentHostTests.swift`, `Sources/LibraryApp/LibraryApp.swift`, `UITests/LibraryJourneyTests.swift` | SW-3c, A-LI-0 #840 (same `LibraryApp.swift`) |
 | A-HA-1 | #865 | halo | Same for Halo (`.open` a `.halo`; `.new` shows New Composition) | `Sources/HaloModel/HaloDocumentHost.swift`, `Tests/HaloModelTests/HaloDocumentHostTests.swift`, `Sources/HaloApp/HaloApp.swift`, `UITests/HaloJourneyTests.swift` | SW-3c, #209 for `.open` |
 
-Order: SW-1 and SW-2 at once; SW-3a after SW-1; SW-3b after SW-2 and
-SW-3a; SW-3c after SW-3b; SW-5 any time after SW-1; then the adoption
-issues on their lines; SW-4a when Flare's and Design's and home's #845 are
-in; SW-4b and SW-4c after SW-4a as follow-ups. Sizes:
+Order: the Build waves below. SW-3b doesn't need SW-3a: `HandOffTransport`
+opens the hand-off file with the target app through Launch Services and
+calls nothing in `AppLauncher` or `StoreWatcher`. It needs SW-1: that open
+cold-launches an app that isn't running, so it passes
+`LaunchArguments.forward` too. SW-5 only names tests, so
+it needs no code. SW-4b and SW-4c don't need SW-4a's journey file; they
+carry its outside waits instead (home's #845, the adoptions, the fixtures)
+and stay follow-ups outside the done check. The adoption issues land on
+their lines after SW-3c. Sizes:
 SW-1 ~300, SW-2 ~280, SW-3a ~350, SW-3b ~380, SW-3c ~330, SW-4a ~330,
 SW-4b ~220, SW-4c ~220, SW-5 ~60.
 
@@ -218,6 +223,29 @@ owns `RecentsSlot.swift` from wave 3. `SettingsRoute.swift` and
 and recents-open-in from wave 3. Home (the other wave-2 feature) owns no
 file in this list, and nothing home owns appears here. Each app's `<X>App.swift`
 and journey file is edited only by its own line's adoption issue.
+
+**Shared docs.** No task edits `docs/c4/model.json`, `docs/design.md`,
+`docs/blueprints/suite.md` or `waves.md`: the new files sit in the
+`SuiteModel`, `SuiteShell`, `AfterGlowApp` and journeys components that
+targets' TG-0 (see #807) adds, so the feature needs no docs task. `docs/review-rubric.md`
+(SW-5) is not a shared doc under rule (a).
+
+## Build waves
+
+- Wave 1: SW-1, SW-2, SW-5. Independent in this wave: all three.
+- Wave 2: SW-3a, SW-3b. Independent in this wave: both.
+- Wave 3: SW-3c. Independent in this wave: SW-3c alone.
+- Wave 4: SW-4a (`feature-done`), SW-4b, SW-4c (follow-ups, each once its
+  outside waits clear). Independent in this wave: all three.
+
+Longest chain: SW-1 → SW-3a → SW-3c → SW-4a (4), and SW-2 → SW-3b → SW-3c →
+SW-4a (4).
+Chain of 4: `AppLauncher` (SW-3a) calls `SwitchPlanner` and
+`LaunchArguments` (SW-1), `HandOffTransport` (SW-3b) uses
+`LaunchArguments` (SW-1) and `SuiteAppDelegate` (SW-3b) calls
+`StoreHandOffs` (SW-2); `SuiteCommands` and `SuiteAppModifier` (SW-3c) use
+`StoreWatcher` and set `SuiteAppDelegate.host`; the journeys (SW-4a) drive
+the Switch To menu SW-3c adds.
 
 ## Acceptance test per task
 
