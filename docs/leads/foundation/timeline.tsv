@@ -70,3 +70,5 @@ utc	stage	event	ref	note
 2026-10-15T03:47Z	4	ci-run	38675308731	red: Halo journeys; offscreen 14>8 (#933)
 2026-10-15T03:47Z	4	round-findings	round 1	4 Halo fixes + #933
 2026-10-15T03:57Z	4	pr-opened	#961	round 1 fixes: layer row select, journey text query, window sizer
+2026-10-15T03:58Z	4	pr-merged	#961	round 1 fixes
+2026-10-15T03:58Z	4	stage-start	round 2	waiting on CI for 4cc8a90

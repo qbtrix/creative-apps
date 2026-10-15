@@ -2,7 +2,7 @@
 
 Issue: #777 · Packet: docs/blueprints/halo/features/foundation.md (on branch `docs/halo-feature-packets` until its PR merges)
 Run: act-1a13b78bcdb-qu60 · Session: session_01Dc9GDxc9HxLtv9XMcFgSWh · Started: 2026-10-14T17:33Z
-Stage: 4 round 1 (fix batch #961 on the lane)
+Stage: 4 round 2 (waiting on the dev CI run that contains #961, 4cc8a90)
 Base: 52928d1dbbdd72b849f7fdb6363991f35b1adbeb
 Next: once #961 merges (it touches Sources/HaloApp and UITests, so the lane dispatches CI), run round 2 on the dev CI run that contains it: journeys, audit-halo-*, screens, critic panel incl. clarity lens. offscreen waits on SuiteUI #933
 
