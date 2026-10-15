@@ -1,13 +1,12 @@
 // PhotoEditor.swift: what a Photo window shows, laid out on SuiteUI's
-// EditorShell: the top bar (the document menu with New Image, Open…, Save,
-// Save As… and Export…; file commands, the Image menu, undo and redo, zoom),
-// the tool rail, the canvas with its rulers, the Adjust | Layers panel
-// and the status line (zoom, image size, the active tool, render time). Values in, intents
+// EditorShell: the top bar (PhotoTopBar.swift), the tool rail (each tool a
+// PhotoRailTool carrying the workspace's `toolHelp`), the canvas with its
+// rulers, the Adjust | Layers panel and the status line (PhotoStatusLine.swift:
+// the status message, zoom, image size, the active tool, render time). Values in, intents
 // out: it reads the workspace and sends every action to `perform`, so the
 // same view draws the live window and the snapshots. A control that can't act
-// now is disabled with a tooltip saying why. Every top bar command carries a
-// `photo.bar.*` accessibility identifier for the UI journeys and the app
-// audit; Undo and Redo keep theirs whatever edit they name. The canvas shows
+// now is disabled with a tooltip saying why, and a disabled tool's shortcut
+// key does nothing. The canvas shows
 // no scrollers: AppKit's scroller parts are unnamed buttons (the app audit's
 // unnamed check), and a zoomed image still pans by scrolling.
 import PhotoModel
@@ -32,7 +31,9 @@ struct PhotoEditor: View {
         EditorShell {
             PhotoTopBar(model: model, perform: perform)
         } rail: {
-            ToolbarGroup(tools: PhotoTool.allCases, selected: model.tool, style: .rail) { perform(.tool($0)) }
+            ToolbarGroup(
+                tools: PhotoRailTool.rail(model), selected: PhotoRailTool(model.tool, in: model), style: .rail
+            ) { perform(.tool($0.tool)) }
         } canvas: {
             PhotoCanvas(
                 model: model, tiles: tiles, zoom: zoom, onViewport: onViewport, onZoom: onZoom, perform: perform,
@@ -41,74 +42,7 @@ struct PhotoEditor: View {
         } panel: {
             PhotoPanel(model: model, tab: tab, onTab: onTab, perform: perform)
         } status: {
-            ViewerStatusBar(zoom: model.canvas == nil ? 0 : zoom, size: model.viewerSizeText) {
-                if let note { Text(note) }
-                if model.canvas != nil { Text(model.tool.title) }
-                if let renderMilliseconds { Text("\(Int(renderMilliseconds.rounded())) ms render") }
-            }
-        }
-    }
-}
-
-/// The top bar: the document menu, Open, Save, Export, the Image menu, Undo
-/// and Redo, then zoom.
-struct PhotoTopBar: View {
-    let model: PhotoWorkspace
-    let perform: PhotoPerform
-
-    var body: some View {
-        let noImage = model.canvas == nil ? "Open or create an image first." : nil
-        EditorTopBar(app: "Photo", document: model.canvas == nil ? nil : model.documentName ?? "Untitled") {
-            Button("New Image") { perform(.newImage) }
-            Button("Open…") { perform(.open) }
-            Divider()
-            Button("Save") { perform(.save) }.disabled(noImage != nil)
-            Button("Save As…") { perform(.saveAs) }.disabled(noImage != nil).accessibilityIdentifier("photo.bar.save-as")
-            Button("Export…") { perform(.export(.openSheet)) }.disabled(noImage != nil)
-        } content: {
-            EditorBarItem(ToolbarAction("Open", systemImage: "folder") { perform(.open) })
-                .accessibilityIdentifier("photo.bar.open")
-            EditorBarItem(ToolbarAction("Save", systemImage: "square.and.arrow.down", unavailableHelp: noImage) {
-                perform(.save)
-            })
-            .accessibilityIdentifier("photo.bar.save")
-            EditorBarItem(ToolbarAction("Export", systemImage: "square.and.arrow.up", unavailableHelp: noImage) {
-                perform(.export(.openSheet))
-            })
-            .accessibilityIdentifier("photo.bar.export")
-            EditorBarMenu("Image", systemImage: "photo", unavailableHelp: noImage) {
-                PhotoImageMenu(perform: perform)
-            }
-            .accessibilityIdentifier("photo.bar.image")
-            EditorBarDivider()
-            EditorBarItem(
-                ToolbarAction(
-                    model.undoActionName, systemImage: "arrow.uturn.backward",
-                    unavailableHelp: model.canUndo ? nil : "Nothing to undo.") { perform(.undo) },
-                showsTitle: false)
-            .accessibilityIdentifier("photo.bar.undo")
-            EditorBarItem(
-                ToolbarAction(
-                    model.redoActionName, systemImage: "arrow.uturn.forward",
-                    unavailableHelp: model.canRedo ? nil : "Nothing to redo.") { perform(.redo) },
-                showsTitle: false)
-            .accessibilityIdentifier("photo.bar.redo")
-            Spacer(minLength: SuiteSpacing.s)
-            EditorBarItem(
-                ToolbarAction("Zoom Out", systemImage: "minus.magnifyingglass", unavailableHelp: noImage) {
-                    perform(.zoomOut)
-                }, showsTitle: false)
-            .accessibilityIdentifier("photo.bar.zoom-out")
-            EditorBarItem(
-                ToolbarAction("Fit on Screen", systemImage: "arrow.up.left.and.arrow.down.right", unavailableHelp: noImage) {
-                    perform(.fit)
-                }, showsTitle: false)
-            .accessibilityIdentifier("photo.bar.fit")
-            EditorBarItem(
-                ToolbarAction("Zoom In", systemImage: "plus.magnifyingglass", unavailableHelp: noImage) {
-                    perform(.zoomIn)
-                }, showsTitle: false)
-            .accessibilityIdentifier("photo.bar.zoom-in")
+            PhotoStatusLine(model: model, zoom: zoom, note: note, renderMilliseconds: renderMilliseconds)
         }
     }
 }
@@ -129,7 +63,7 @@ struct PhotoImageMenu: View {
 
 /// The canvas: the rendered picture (TileCanvas) on the checkerboard with the selection and
 /// a pending crop over it, or the empty state. Drags go to the active tool;
-/// with the canvas focused, V M B E S J C pick tools, Delete clears the selection
+/// with the canvas focused, V M B E S J C I pick enabled tools, Delete clears the selection
 /// (Shift-Delete fills it), Return applies a crop and Escape cancels it or
 /// deselects. Dropping an image file opens it. While the Straighten sheet is
 /// open the picture turns by its angle under StraightenMarks.
@@ -184,7 +118,10 @@ struct PhotoCanvas: View {
         case .escape:
             perform(model.pendingCrop != nil ? .cancelCrop : .deselect)
         default:
-            guard let tool = PhotoTool.allCases.first(where: { $0.shortcut.map(String.init) == press.characters.lowercased() })
+            // A disabled tool's key does nothing, as its rail button does.
+            guard
+                let tool = PhotoTool.allCases.first(where: { $0.shortcut.map(String.init) == press.characters.lowercased() }),
+                model.toolHelp(tool) == nil
             else { return .ignored }
             perform(.tool(tool))
         }

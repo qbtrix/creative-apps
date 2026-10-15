@@ -1,7 +1,9 @@
 // PhotoEditorSnapshots.swift: the Photo window (PhotoEditor) in each state
 // its core loop reaches: an opened photo, layers composited, a brush and an
 // eraser stroke, a marquee selection, a pending crop, a moved layer, exposure
-// +1, the Layers tab and the export sheet. Each writes
+// +1, the Layers tab, the export sheet and a refusal in the status line
+// (photo-status-message-dark.png only); the rail's tool help is checked here
+// too. Each other state writes
 // photo-<state>-light.png and photo-<state>-dark.png; the editor is dark in
 // both on purpose. The canvas picture is rendered the way the window renders
 // it (the workspace's tiles on their layers).
@@ -109,6 +111,29 @@ func photoTiles(_ model: PhotoWorkspace) throws -> CanvasTiles? {
         var model = try opened()
         model.adjust(.exposure(1))
         try shoot("exposure-plus1", model)
+    }
+
+    /// A brush drag on the `layered` fixture's adjustment layer refuses, and
+    /// the status line shows why, left of the pills.
+    @Test func statusMessage() throws {
+        var model = try PhotoWorkspace.fixture(.layered)
+        let curves = try #require(model.layers.first { $0.name == "Curves 1" })
+        model.selectLayer(curves.id)
+        drag(&model, .brush, (200, 200), (300, 260))
+        #expect(model.statusMessage == "Pick a pixel layer to paint on.")
+        try snapshot(
+            PhotoEditor(model: model, tiles: try photoTiles(model), renderMilliseconds: 8, zoom: 1),
+            name: "photo-status-message-dark", scheme: .dark)
+    }
+
+    /// The rail's Eyedropper carries the sampling service's help: disabled on
+    /// `.live`, enabled on `.fake`.
+    @Test func railEyedropperHelp() {
+        let live = PhotoWorkspace(services: .live)
+        #expect(PhotoRailTool(.eyedropper, in: live).unavailableHelp == live.toolHelp(.eyedropper))
+        #expect(PhotoRailTool(.eyedropper, in: live).unavailableHelp == "Not built yet (PV-9).")
+        #expect(PhotoRailTool(.eyedropper, in: PhotoWorkspace(services: .fake)).unavailableHelp == nil)
+        #expect(PhotoRailTool.rail(live).map(\.tool) == PhotoTool.allCases)
     }
 
     @Test func exportSheet() throws {
