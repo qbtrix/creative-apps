@@ -2,19 +2,19 @@
 
 Issue: #873 · Packet: docs/blueprints/suite/features/targets.md
 Run: act-1a13f70dda7-kche · Session: claude/feature-lead-targets-w8ietz · Started: 2026-10-15T12:10Z
-Stage: 3 wave 1
-Base: 7f6125962f93be8898cec4fd2a78e75bac280b39
-Next: check the wave-1 PRs (TG-0a/b/c lane, BU-0 supervisor); when TG-0a/b/c merge, open BU-1a and TG-0d
+Stage: 3 wave 2
+Base: b073dac (dev after TG-0c)
+Next: check TG-0d (lane) and BU-1a (supervisor) PRs; when BU-1a merges, build BU-1b (feature-done)
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
 |---|---|---|---|---|---|---|
-| TG-0a | 1 | C4 parts: suite-model container + 14 components (no relationships) | docs/c4/parts/creative-apps/suite-model/ (15) | scripts/ci C4 step, c4-assemble | | building |
-| TG-0b | 1 | C4 parts: 5 more suite-model components, suite-shell container + 7 components | suite-model/ (5), suite-shell/ (8) | scripts/ci | | building |
-| TG-0c | 1 | C4 parts: afterglow-app (6), afterglow-bundle, suite-model-tests, afterglow-journeys containers | afterglow-app/, afterglow-bundle/, suite-model-tests/, afterglow-journeys/ (13) | scripts/ci | | building |
-| BU-0 | 1 | scripts/size-report, its fixture test, macos step + artifact (supervisor merges) | scripts/size-report, Tests/size_report/, .github/workflows/ci.yml | Tests/size_report/test_size_report.sh (macos) | | building |
-| TG-0d | 2 | C4: the 23 planned relationships on new and existing container parts | 15 container.json parts | c4-assemble resolves every end | | waits TG-0a/b/c |
-| BU-1a | 2 | Package.swift: SuiteModel(+Tests), SuiteShell, AfterGlowApp, one file each (supervisor merges) | Package.swift + 4 files | SuiteIdentityTests | | waits TG-0a/b/c |
+| TG-0a | 1 | C4 parts: suite-model container + 14 components (no relationships) | docs/c4/parts/creative-apps/suite-model/ (15) | scripts/ci C4 step, c4-assemble | #1131 | merged 63aa0a5 |
+| TG-0b | 1 | C4 parts: 5 more suite-model components, suite-shell container + 7 components | suite-model/ (5), suite-shell/ (8) | scripts/ci | #1134 | merged 802a4ed |
+| TG-0c | 1 | C4 parts: afterglow-app (6), afterglow-bundle, suite-model-tests, afterglow-journeys containers | afterglow-app/, afterglow-bundle/, suite-model-tests/, afterglow-journeys/ (13) | scripts/ci | #1135 | merged b073dac |
+| BU-0 | 1 | scripts/size-report, its fixture test, macos step + artifact (supervisor merges) | scripts/size-report, Tests/size_report/, .github/workflows/ci.yml | Tests/size_report/test_size_report.sh (macos) | #1133 | open, supervisor merges |
+| TG-0d | 2 | C4: the 23 planned relationships on new and existing container parts | 15 container.json parts | c4-assemble resolves every end | | building |
+| BU-1a | 2 | Package.swift: SuiteModel(+Tests), SuiteShell, AfterGlowApp, one file each (supervisor merges) | Package.swift + 4 files | SuiteIdentityTests | | building |
 | BU-1b | 3 | launcher scenes, placeholders, disabled menu stubs (lane, feature-done) | 11 under Sources/AfterGlowApp/ + LauncherMenuStubTests | LauncherMenuStubTests | | waits BU-1a |
 | BU-S | – | packaging spike on a Mac | docs/blueprints/suite/spike.md | supervisor review | – | supervisor/captain; not in done check |
 
@@ -31,4 +31,6 @@ Next: check the wave-1 PRs (TG-0a/b/c lane, BU-0 supervisor); when TG-0a/b/c mer
 - BU-S needs a Mac: not run by this lead (packet).
 
 ## Open
+- Branches are lead/targets-<task>: git can't hold lead/targets/<task> next to lead/targets.
+- BU-1a also creates Values/SuiteApp.swift (minimal enum) so SuiteCommands' init(app:) compiles; SC-1a #820 extends that file.
 - BU-0 and BU-1a touch protected paths: plain PRs, the supervisor merges.
