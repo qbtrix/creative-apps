@@ -2,17 +2,17 @@
 
 Issue: #1044 · Packet: docs/blueprints/library/features/spine.md
 Run: act-1a13f18aaa0-lfw5 · Session: session_01DtSRhNqsphGfKkvV5eLsWW · Started: 2026-10-15T10:25Z
-Stage: 3 wave 1
-Base: bcf5a099960d2ceb59394cdd38c0b83c7640b7cc
-Next: wait for wave 1 PRs (workflow wf_3b908c8c-d1c) to merge; then wave 2 (SP-2)
+Stage: 3 wave 2
+Base: 98e4db1 (wave 2)
+Next: wait for SP-2's PR to merge; then wave 3 (SP-3)
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
 |---|---|---|---|---|---|---|
-| SP-1 | 1 | Shared values, notice and file-state texts, verbatim | Contracts/LibraryValues.swift, Contracts/StateValues.swift | LibraryValuesTests | | planned |
-| SP-10 | 1 | `uniquingIDs` in two passes (closes #235) | LibraryCatalog.swift | LibraryPhotoIDTests | | planned |
-| SP-11 | 1 | `CatalogHistory` value type | CatalogHistory.swift | LibraryHistoryTests | | planned |
-| SA-1 | 1 | Pure split of the app into scene, window, browser, grid, inspector, DisplayImage+Image | LibraryApp/* (6 files) | next macOS run, PNGs unchanged | | planned |
+| SP-1 | 1 | Shared values, notice and file-state texts, verbatim | Contracts/LibraryValues.swift, Contracts/StateValues.swift | LibraryValuesTests | #1094 | merged |
+| SP-10 | 1 | `uniquingIDs` in two passes (closes #235) | LibraryCatalog.swift | LibraryPhotoIDTests | #1093 | merged |
+| SP-11 | 1 | `CatalogHistory` value type | CatalogHistory.swift | LibraryHistoryTests | #1095 | merged |
+| SA-1 | 1 | Pure split of the app into scene, window, browser, grid, inspector, DisplayImage+Image | LibraryApp/* (6 files) | next macOS run, PNGs unchanged | #1096 | merged |
 | SP-2 | 2 | Develop values; PhotoItem grows path, pixelSize, develop, availability | Contracts/DevelopValues.swift, PhotoItem.swift | LibraryPhotoItemTests | | planned |
 | SP-3 | 3 | Protocols (+ `initial` comment fix), SampleImage | Contracts/LibraryContracts.swift, SampleImage.swift | LibraryContractsTests | | planned |
 | SP-4 | 4 | Fakes: support, platform, use cases (progress first) | Fakes/FakeSupport, FakePlatform, FakeUseCases | LibraryFakesTests | | planned |
@@ -52,6 +52,9 @@ Taken from the packet's Build waves; checked against dev bcf5a09.
 - Builder branches are `lead/spine-<id>`, not `lead/spine/<id>`: git can't hold `lead/spine` and `lead/spine/<x>` refs together.
 - #333 is closed and project.yml compiles `UITests/<target>*.swift`, so SJ-2 puts J11 in `LibraryJourneyTests+Shell.swift` and helpers in `+Files.swift`.
 - SA-1 leaves out `DisplayImage+Image.swift`: `DisplayImage` lands in SP-1 in the same wave, so SA-2 adds it.
+- The cloud GitHub write path appends a `---` / Generated-by footer to PR bodies after the Head: line; the lane strips attribution from the squash (fast-lane.sh) and merged wave 1 with it, so builders leave it.
+- SP-11's `CatalogHistory.push` does the coalescing itself; SP-14's recordEdit calls `push` (the pseudocode's `history.top.after = after` can't compile on a read-only `top`).
+- SP-10 adds a second case [a, a, a#2] because the packet's example already passed on the old code.
 - `gh` GraphQL is blocked in cloud sessions: builders open PRs with `gh api` REST (POST pulls, then POST issues/<n>/labels).
 
 ## Open
