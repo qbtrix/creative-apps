@@ -2,9 +2,9 @@
 
 Issue: #1038 · Packet: docs/blueprints/halo/features/layer-panel.md
 Run: act-1a13e9a2019-lau7 · Session: session_01NGHcmJbQja1RSYvcMZR3TD · Started: 2026-10-15T08:07Z
-Stage: 4 round 3 (waiting on dev CI)
+Stage: 5 finish (dev CI never reached the journeys after round 2)
 Base: e8de2ff5d8ed3515af321c805cc2bebab17050a4
-Next: wait for a dev run whose macOS job reaches scripts/ui-test (blocked on #763: HaloViewerFidelityTests #1125, HaloPlaybackDriverTests timeouts #1097); that run is round 3: H-J9 steps 3-8, audit, five-lens panel. A background loop pushes a heartbeat every 15 min.
+Next: finish (stage 5) at the 8 h limit (~16:07Z) unless a dev run reaches scripts/ui-test first: then read H-J9 and run the panel. Gap issues filed: #1177, #1178, #1179. Post the status comment on #1038.
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -28,6 +28,7 @@ Journeys: H-J9 (8 steps, packet "Journey steps"). Quality bars: QB-F1 no dead co
 | (3) | 38732179619 (9af4454) | red, not judged: same playback test compile error (#1097); reported on #763 with the likely fix | – | – | – | – | not counted |
 | (3) | 38734211999 (35a875b) | red, not judged: #1136 fixed the playback test; HaloViewerFidelityTests.keyedFrame6 (#1125, HF-1) differs by 40000 px, so scripts/ci fails and journeys skip; reported on #763 | – | – | – | – | not counted |
 | (3) | 38734664378, 38737961079, 38738075349 (e6e46c2, 79bd068) | red, not judged: HaloViewerFidelityTests.keyedFrame6 (#1125) and, from 79bd068, 5 HaloPlaybackDriverTests time out at 60 s (#1097); journeys skipped | – | – | – | – | not counted |
+| (3) | 38742226941 to 38748468768 (20d6a1c to 3d42e80) | red, not judged: fidelity/playback tests, then a new Library build break (LibraryWindow+Cull.swift:14, +Loupe.swift:13, compiler crash); journeys skipped on every run | – | – | – | – | not counted |
 
 ## Decisions
 - Identifiers keep W0's shipped `halo.layer.*` prefix (`halo.layer.row.<id>`, `halo.layer.empty`, `halo.layer.new`; W0's journey reads `halo.layer.row.comp-1-layer-2`), so the packet's `halo.layers.list/row/refusal/empty` become `halo.layer.list/row/refusal/empty`.
@@ -49,6 +50,7 @@ Journeys: H-J9 (8 steps, packet "Journey steps"). Quality bars: QB-F1 no dead co
 - A run that fails to build in another line's code (Library, 38726261412) can't judge this feature, so it doesn't count against the 4-round budget.
 
 ## Open
+- Gap issues filed: #1177 (H-J9 unverified past step 2 on macOS, p1), #1178 (inspector column doesn't scroll, p2), #1179 ("(#38)" placeholder caption, p2).
 - dev's macOS build is broken by Library #1096 (LibraryInspector.swift, mutating member on a let model); reported on #763 at 11:40Z. Rounds wait on it.
 - Panel finding, not this feature's files: the selected layer's inspector shows "Properties arrive with the layer inspector (#38)." (HaloLayerInspector.swift, W0's placeholder that layer-keys #38 replaces whole). File as gap at finish if still on dev.
 - Panel finding, not this feature's files: the inspector column (HaloCompositionInspector.swift) may not scroll, so many layers would fall off the window. File as gap at finish.
