@@ -78,3 +78,23 @@ func aBadCanvasSizeThrowsAndChangesNothing(width: Double, height: Double) {
     try engine.undo()
     #expect(engine.document == FlareFixtures.bounce && !engine.canUndo)
 }
+
+/// A refused canvas edit in the middle of a guide drag leaves the drag one "Move Guide" entry, as the fake does.
+private func dragAcrossARefusedCanvas(_ scenes: some SceneEditing) throws -> CommandEngine {
+    var engine = CommandEngine(document: FlareFixtures.bounce)
+    _ = try scenes.addGuide(.horizontal, at: 300, sceneID: "scene-1", in: &engine)
+    try scenes.moveGuide(at: 0, to: 310, sceneID: "scene-1", coalesceKey: "drag", in: &engine)
+    #expect(throws: CommandError.self) {
+        try scenes.setCanvas("scene-1", width: 0, height: 1920, background: red, in: &engine)
+    }
+    try scenes.moveGuide(at: 0, to: 320, sceneID: "scene-1", coalesceKey: "drag", in: &engine)
+    try engine.undo()
+    return engine
+}
+
+@Test func refusedCanvasKeepsADragOneEntry() throws {
+    let engine = try dragAcrossARefusedCanvas(live)
+    let fake = try dragAcrossARefusedCanvas(FakeScenes())
+    #expect(engine.document == fake.document)
+    #expect(engine.document.scenes.first?.guides.first?.position == 300)
+}
