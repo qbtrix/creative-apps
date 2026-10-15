@@ -78,3 +78,5 @@ utc	stage	event	ref	note
 2026-10-15T07:23Z	4	round-findings	round 2	1 major + 8 minor in scope; 4 v1 gaps filed #1024-#1027; fix batches r2-b1..b3 started
 2026-10-15T07:39Z	4	pr-merged	#1029 #1030	round 2 fixes
 2026-10-15T07:39Z	4	gap	#1032	heal headroom against PB-2
+2026-10-15T07:42Z	4	pr-merged	#1031	round 2 fixes done
+2026-10-15T07:42Z	4	pr-opened	#1033	feature-done: round 2 status

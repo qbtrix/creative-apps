@@ -2,9 +2,9 @@
 
 Issue: #812 · Packet: docs/blueprints/photo/features/photo-seams.md
 Run: act-1a13d5e8ca4-huz5 · Session: cloud lead session · Started: 2026-10-15T02:23Z
-Stage: 4 round 2
+Stage: 4 round 3 (waiting on CI)
 Base: c4ec07810683a4bc7d62dcc5205705229f248a71
-Next: wait for r2 fix PRs to merge; then a feature-done status PR for round 3's CI
+Next: wait for #1033 (feature-done, round 2 status) to merge and its CI run; round 3 with the same six lenses (round 3 of max 4)
 
 ## Tasks
 
