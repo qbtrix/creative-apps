@@ -61,6 +61,28 @@ private func layer(_ id: String, owner: LayerOwner = scene, in engine: CommandEn
     #expect(engine.undoActionName == "Undo Set Fill")
 }
 
+/// Both of character's legs shapes change in one entry, so a write that acts only on the first address, or makes one
+/// entry per shape, fails here.
+@Test func fillAndStrokeOnBothLegsShapesAreOneEntryEach() throws {
+    let doc = FlareFixtures.character
+    let items = [0, 1].map { StageAddress(owner: scene, layerID: "legs", item: .shape($0)) }
+    var engine = CommandEngine(document: doc)
+    #expect(layer("legs", in: engine)?.shapes.count == 2)
+    try LiveProperties().setFill(red, of: items, in: &engine)
+    #expect(layer("legs", in: engine)?.shapes.map(\.fill) == [red, red])
+    #expect(engine.undoActionName == "Undo Set Fill")
+    try engine.undo()
+    #expect(engine.document == doc)
+    #expect(!engine.canUndo)
+    let wide = Stroke(width: 4)
+    try LiveProperties().setStroke(wide, of: items, in: &engine)
+    #expect(layer("legs", in: engine)?.shapes.map(\.stroke) == [wide, wide])
+    #expect(engine.undoActionName == "Undo Set Stroke")
+    try engine.undo()
+    #expect(engine.document == doc)
+    #expect(!engine.canUndo)
+}
+
 @Test func aNegativeStrokeWidthThrowsAndChangesNothing() throws {
     let doc = FlareFixtures.bounce
     var engine = CommandEngine(document: doc)

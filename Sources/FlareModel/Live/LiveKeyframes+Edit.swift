@@ -5,7 +5,8 @@
 // symbol edited in place has its own length, flare.md LM-0c1). Several keys move as one "Move Keyframe" step, or merge
 // into the drag's entry under `coalesceKey`: a coalesced drag of several keys is one undo entry but holds one command
 // per key per step, since FlareCore merges only into the entry's last command. A remove is `RemoveKeyframe(owner:)` per
-// key, grouped as one "Delete Keyframe". Agrees with `FakeKeyframes` on scenes; the `KeyframeEditing` conformance is
+// key, grouped as one "Delete Keyframe". Agrees with `FakeKeyframes` on scenes, except that a scene key moved past the
+// last frame throws a key sentence where the fake throws `invalidFrame`; the `KeyframeEditing` conformance is
 // in LiveKeyframes+Frames.swift.
 import FlareCore
 
@@ -23,9 +24,9 @@ extension LiveKeyframes {
         }
         if targets.contains(where: { $0 < 0 }) { throw CommandError.invalidDocument(Self.beforeFrameZero) }
         // A key past the owner's last frame would never play (#636).
-        if delta > 0, let past = targets.filter({ $0 >= length }).max() {
+        if delta > 0, targets.contains(where: { $0 >= length }) {
             if case .symbol = owner { throw CommandError.invalidDocument(Self.pastSymbolEnd) }
-            throw CommandError.invalidFrame(past)
+            throw CommandError.invalidDocument(Self.pastSceneEnd)
         }
         // The leading edge moves first, so no key passes over one that has not moved yet.
         let ordered = moving.sorted { delta > 0 ? $0.frame > $1.frame : $0.frame < $1.frame }
@@ -54,6 +55,7 @@ extension LiveKeyframes {
     }
 
     static let beforeFrameZero = "A key can't move before frame 0."
+    static let pastSceneEnd = "A key can't move past the scene's last frame."
     static let pastSymbolEnd = "A key can't move past the symbol's last frame."
     static let insertPastSymbolEnd = "A symbol can't get longer yet, so frames can't be inserted before its last key."
 

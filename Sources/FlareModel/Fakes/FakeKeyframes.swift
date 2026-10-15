@@ -5,9 +5,9 @@
 // throws and changes nothing; a move that would land a key past the scene's last frame refuses too, so its pose still
 // plays. A frame insert that pushes a key past the scene's last frame grows the scene in the same step
 // (`SetSceneTiming`), so the final pose still plays. A frame insert or remove on every layer of the scene also moves the
-// labels at or after its frame by the same count, and drops a label inside a removed run (#637). Keyframe commands take
-// scene layers only, so a symbol owner throws until they take an owner (LC-5). With `unavailable` set, reads are empty
-// and every write throws it.
+// labels at or after its frame by the same count, and drops a label inside a removed run (#637). The fake stays
+// scene-only by choice, so a symbol owner throws; symbol keys are `LiveKeyframes`' job, over FlareCore's owner-taking
+// commands. With `unavailable` set, reads are empty and every write throws it.
 import FlareCore
 
 public struct FakeKeyframes: KeyframeEditing {

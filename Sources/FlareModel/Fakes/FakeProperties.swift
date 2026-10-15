@@ -1,8 +1,8 @@
 // FakeProperties.swift: PropertyAnimating over the real engine (docs/blueprints/flare.md, 6.3), with section 2's
 // not-animated rule. No track or one key is not animated: an edit sets that one key (adding it at frame 0 when there is
 // none), or keys the playhead with auto-key on. Two or more keys are animated: an edit keys the playhead. Keys are
-// FlareCore's `SetKeyframe` and `RemoveKeyframe`, which take scene layers only, so a symbol owner throws until they
-// take an owner (LC-5). Stroke has no FlareCore command, so it is one `FixtureEdit`. With `unavailable` set, reads are
+// FlareCore's `SetKeyframe` and `RemoveKeyframe` on scene layers: the fake stays scene-only by choice, so a symbol
+// owner throws; symbol keys are `LiveProperties`' job. Stroke has no FlareCore command, so it is one `FixtureEdit`. With `unavailable` set, reads are
 // empty and every write throws it.
 import FlareCore
 
@@ -11,7 +11,7 @@ public struct FakeProperties: PropertyAnimating {
     public var unavailable: String?
     public init(unavailable: String? = nil) { self.unavailable = unavailable }
 
-    /// What a key write on a symbol's layer throws until FlareCore's keyframe commands take an owner.
+    /// What the scene-only fakes throw for a key write on a symbol's layer; the live types write those keys.
     public static let symbolKeys = "Keys inside a symbol aren't supported yet."
 
     /// The inspector's TRANSFORM rows, in order: name, title, range, unit, decimals. Opacity is stored 0...1.
