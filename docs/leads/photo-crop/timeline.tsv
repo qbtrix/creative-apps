@@ -56,3 +56,4 @@ utc	stage	event	ref	note
 2026-10-15T17:17Z	3	pr-merged	#1216	CP-7
 2026-10-15T17:17Z	3	pr-merged	#1217	CP-5 feature-done
 2026-10-15T17:17Z	5	stage-start	finish	waiting on the feature-done CI run
+2026-10-15T17:25Z	5	ci-run	38776323445	feature-done run red at swift build: LiveRecovery.swift ObjCBool (#1210, not ours); reported on #763

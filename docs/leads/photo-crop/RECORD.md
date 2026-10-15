@@ -4,7 +4,7 @@ Issue: #1076 · Packet: docs/blueprints/photo/features/photo-crop.md
 Run: act-1a13f70ddc3-29wr · Session: lead session (claude/photo-crop-feature-lead-e7vpmg) · Started: 2026-10-15T12:03Z
 Stage: 5 finish (wave 4 still waits on photo-journey-kit #1073)
 Base: e6fdf149c0a0a17fd2a23bdbe687f56d4591ae72
-Next: read the dev CI run containing e6fdf14 (feature-done); green -> Belt-Contact-Sheet on #1076; red -> fix if budget allows, else gap issues; then the feature-done CI run, contact sheet on #1076. Base bd1b046. Old note: when #1073 lands when #1073 closes (UITests/PhotoJourneyTests+Fixtures.swift on dev), build CP-5 and CP-7 together; meanwhile read the first dev CI run containing 469520e (#1151) for round-1 material.
+Next: the feature-done run 38776323445 is red at swift build in LiveRecovery.swift (#1210, photo-documents, reported on #763); wait for the first green dev run containing e6fdf14; green -> Belt-Contact-Sheet on #1076; red -> fix if budget allows, else gap issues; then the feature-done CI run, contact sheet on #1076. Base bd1b046. Old note: when #1073 lands when #1073 closes (UITests/PhotoJourneyTests+Fixtures.swift on dev), build CP-5 and CP-7 together; meanwhile read the first dev CI run containing 469520e (#1151) for round-1 material.
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
