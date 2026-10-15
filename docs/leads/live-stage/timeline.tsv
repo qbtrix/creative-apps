@@ -65,3 +65,4 @@ utc	stage	event	ref	note
 2026-10-15T08:39Z	5	stopped	#798	8 h wall clock; contact sheet waits on green dev
 2026-10-15T09:09Z	5	ci-run	38709336067	red on Halo unit test; resumed after second nudge, watching for green
 2026-10-15T09:27Z	5	heartbeat	#798	waiting on a green dev run with a45f1cb
+2026-10-15T09:46Z	5	heartbeat	#798	waiting on a green dev run with a45f1cb
