@@ -1,6 +1,7 @@
 // LibraryWindow.swift: the Library window. It is SuiteWindow with the
-// collections in the sidebar, LibraryBrowser as content and LibraryInspector
-// in the inspector. It owns the LibraryCatalog, hands its values and methods
+// collections in the sidebar, LibraryBrowser as content (with LibraryStatusBar
+// under it on preview data), LibraryInspector in the inspector, and
+// LibraryExportSheet while an export is under way. It owns the LibraryCatalog, hands its values and methods
 // to the views, and publishes the menu bar's LibraryMenu as a focused value.
 // The catalog starts from the launch arguments: a fixture's fakes and photos,
 // or the live services over the Platform adapters.
@@ -49,17 +50,26 @@ struct LibraryWindow: View {
             selection: model.selectedCollectionID,
             onSelect: { model.selectCollection($0) }
         ) {
-            LibraryBrowser(
-                model: model, menu: menu, onLoadSamples: { model.loadSamples() }, onSelect: { model.select($0) },
-                onOpen: { model.open($0) }, onStep: { model.stepLoupe(by: $0) }, onGrid: { model.showGrid() })
-                // On the content, so it hears keys only while the grid or the loupe has focus.
-                .onKeyPress(phases: .down) { press in route(press) }
+            VStack(spacing: 0) {
+                LibraryBrowser(
+                    model: model, menu: menu, onSelect: { model.select($0) }, onOpen: { model.open($0) },
+                    onStep: { model.stepLoupe(by: $0) }, onGrid: { model.showGrid() })
+                    // On the content, so it hears keys only while the grid or the loupe has focus.
+                    .onKeyPress(phases: .down) { press in route(press) }
+                if model.services.isPreview {
+                    LibraryStatusBar(model: model)
+                }
+            }
         } inspector: {
             LibraryInspector(
                 model: model, onStar: { model.clickStar($0) }, onFlag: { model.setFlag($0) },
                 onLabel: { model.setLabel($0) })
         }
         .focusedSceneValue(\.libraryMenu, menu)
+        // The export area moves `exportState` off `.idle`; nothing does in wave 1.
+        .sheet(isPresented: Binding(get: { model.exportState != .idle }, set: { _ in })) {
+            LibraryExportSheet()
+        }
         .task {
             importAreaLaunch()
             persistAreaLaunch()
