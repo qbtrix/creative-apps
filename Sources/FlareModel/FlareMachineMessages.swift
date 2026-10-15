@@ -2,7 +2,8 @@
 // refusal gets a short reason; the engine's validation failures, which arrive as `invalidDocument` carrying the step
 // label and the format error's debug text, are read back into the broken rule. A message the fake wrote for a person
 // passes through, and anything else gets a generic line, so a raw debug description never reaches the Inspector. The
-// rule is unescaped first, so a quote, backslash or tab in a label or input name reads as typed (#680).
+// rule is unescaped first, so a quote, backslash or tab in a label or input name reads as typed (#680). The
+// per-refusal sentences are `commandSentence`, which FlareLayerError's messages share (#800).
 import FlareCore
 
 extension FlareWorkspace {
@@ -18,8 +19,14 @@ extension FlareWorkspace {
     }
 
     private static func machineMessage(_ error: CommandError) -> String {
+        if case .invalidDocument(let message) = error { return validationMessage(message) }
+        return commandSentence(error) ?? machineRefused
+    }
+
+    /// The plain sentence for an engine refusal, shared by Machines and the layer and timeline paths (#800); nil for
+    /// `invalidDocument`, whose text each path reads its own way, and for refusals with no cause a person can act on.
+    static func commandSentence(_ error: CommandError) -> String? {
         switch error {
-        case .invalidDocument(let message): validationMessage(message)
         case .sceneNotFound: "This scene is no longer in the document."
         case .layerNotFound: "This layer is no longer in the document."
         case .duplicateID(let id): "\(id) is already used."
@@ -40,8 +47,9 @@ extension FlareWorkspace {
         case .emptySwatchName: "Type a name for the swatch."
         case .invalidColor: "Each color channel must be between 0 and 1."
         case .invalidIndex: "That item is no longer there."
-        case .notExecuted, .nothingToUndo, .nothingToRedo, .groupInProgress, .unknownCommand, .malformedCommand:
-            machineRefused
+        case .invalidDocument, .notExecuted, .nothingToUndo, .nothingToRedo, .groupInProgress, .unknownCommand,
+             .malformedCommand:
+            nil
         }
     }
 

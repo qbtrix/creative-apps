@@ -28,10 +28,17 @@ public enum FlareLayerError: Error, Equatable, Sendable {
         case .command(.sceneNotFound): "This scene is no longer in the document."
         case .command(.layerNotFound): "This layer is no longer in the document."
         case .command(.emptyName): "Type a name first."
-        // Only the workspace's own sentences pass through; engine text never reaches the person.
-        case .command(.invalidDocument(let reason)) where reason == FakeScenes.lastSceneMessage: reason
-        case .command: "That change could not be made."
+        // Only sentences written for a person pass through; engine text never reaches the person (#800).
+        case .command(.invalidDocument(let reason)) where Self.readsAsSentence(reason): reason
+        case .command(let error): FlareWorkspace.commandSentence(error) ?? "That change could not be made."
         }
+    }
+
+    /// True for text written for a person, "Rotation needs a number.", rather than engine text such as
+    /// "scene scene-1: canvas size must be finite and > 0": it starts with a capital, ends a sentence and has no "(".
+    static func readsAsSentence(_ text: String) -> Bool {
+        guard let first = text.first, first.isUppercase, let last = text.last else { return false }
+        return ".?!".contains(last) && !text.contains("(")
     }
 }
 
