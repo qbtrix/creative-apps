@@ -16,3 +16,5 @@ utc	stage	event	ref	note
 2026-10-15T18:58Z	4	heartbeat	0672506	composite bound fix #1229 on dev; no CI run since 38782884668 yet
 2026-10-15T19:20Z	4	ci-run	38792928305	in progress on c93a7f8
 2026-10-15T19:51Z	4	heartbeat	38792928305	macOS scripts/ci passed; ui-test running (first run to reach it since #1199)
+2026-10-15T20:07Z	4	ci-run	38792928305	cancelled in ui-test; smoke journey passed; 11 Photo journeys fail on app UI (not ours)
+2026-10-15T20:07Z	4	round-findings	#763	round 1 not clean: CI red outside feature files; reported on dev-red

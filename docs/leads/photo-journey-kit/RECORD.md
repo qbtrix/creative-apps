@@ -4,7 +4,7 @@ Issue: #1073 · Packet: docs/blueprints/photo/features/photo-journey-kit.md
 Run: act-1a1406baff9-fu36 · Session: cloud lead session · Started: 2026-10-15T16:36Z
 Stage: 4 round 1
 Base: 9f28a9f7dcb6e9d584a7c80847e8ef0108fa5e17
-Next: when run 38792928305 (c93a7f8) finishes ui-test: read PhotoJourneyKitTests.testWrittenPhotoOpens, V1-V12, Photo audit; download ui-screens; judge round 1
+Next: wait for the next dev CI run that finishes ui-test and uploads ui-screens (round 2): smoke + V1-V12 + Photo audit, then the critic panel on screens
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -14,9 +14,10 @@ Next: when run 38792928305 (c93a7f8) finishes ui-test: read PhotoJourneyKitTests
 ## Rounds
 | round | CI run | CI | audit vs baseline | lenses | confirmed | fixed by | clean |
 |---|---|---|---|---|---|---|---|
-| 1 | 38772608478, 38773966980, 38774988270 | red, not this feature (macOS scripts/ci: two Photo timing budgets, LiveRecovery.swift compile error from #1210); ui-test skipped | not measured | - | - | - | pending |
+| 1 | 38792928305 (c93a7f8; earlier 763-767 never reached ui-test) | red, cancelled mid ui-test: 11/21 Photo journeys fail on app UI (Layers tab, sheets, fields) from photo window changes, not #1199's files | Photo contrast 1 vs 0 on photo-launch (_NS:58, not this feature) | none run: no ui-screens uploaded | PhotoJourneyKitTests.testWrittenPhotoOpens PASSED; photoArguments open/saveTo/fixture journeys pass | reported on #763 (6201226875) | no |
 
 ## Decisions
+- Round 1 V1-V12 failures are not this feature's: #1199 changed no step or assertion, the argument arrays are identical, and journeys using the same helpers pass; the failing ones need Photo window UI changed by #1223/#1228/#1230. Reported on dev-red, no fix batch here.
 - Round 1 waits for a run that reaches ui-test: the feature is UITests only, so a run that stops in swift test can't judge it. Code-level read of #1199 found no issue.
 - Depends on #333: closed (PR #877), so the feature proceeds.
 - One task, one wave: KT-1 is both build and final task (feature-done), per the packet; run as one worktree subagent, not build-wave.js (fewer than 3 tasks).
