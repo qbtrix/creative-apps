@@ -66,6 +66,30 @@ import Testing
         }
     }
 
+    /// SuiteHex picks each named AppKit appearance's own value, with no
+    /// SwiftUI in between.
+    @Test func tokenValueForEachAppearance() throws {
+        let token = SuitePalette.hairline
+        for appearance in SnapshotAppearance.allCases {
+            let named = try #require(NSAppearance(named: appearance.appearanceName))
+            let value = token.value(for: named)
+            #expect(value == appearance.value(of: token),
+                    "\(appearance.appearanceName.rawValue) read \(String(value, radix: 16))")
+        }
+    }
+
+    /// A 1 × 1 pt swatch of one token in light-ic draws the token's Light +
+    /// Increase Contrast value: the plainest proof the host's appearance
+    /// reaches SwiftUI's color resolution.
+    @Test func lightContrastSwatch() throws {
+        let appearance = SnapshotAppearance.lightContrast
+        let want = Self.rgba(SuitePalette.hairline.lightContrast)
+        let image = try #require(SnapshotHost(appearance: appearance)
+            .image(Rectangle().fill(SuiteColor.hairline), size: CGSize(width: 1, height: 1)))
+        let drawn = Self.pixel(image, 0, 0)
+        #expect(!Self.differs(drawn, want), "\(appearance.appearanceName.rawValue) drew \(drawn), want \(want)")
+    }
+
     /// The contrast and scheme views read match the host's appearance, so a
     /// view that branches on Increase Contrast draws its increased branch.
     @Test func contrastEnvironment() throws {
