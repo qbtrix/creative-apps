@@ -1,6 +1,6 @@
 // HaloViewerNoticeTests.swift: the first-use text around Halo's viewer. The
-// artboard's caption says why it is blank only while there are layers the
-// not-yet-built frame drawer can't show, and the status bar's tooltips name
+// artboard's caption says why it is blank only while there are layers a
+// frame drawer that can't draw would leave out (the live drawer draws), and the status bar's tooltips name
 // what the timecode's four parts and the zoom and size pills mean. Runs on
 // Linux and macOS.
 @testable import HaloModel
@@ -14,10 +14,10 @@ private func fixture(_ name: String, on services: HaloServices) throws -> HaloPr
 }
 
 struct HaloViewerNoticeTests {
-    @Test func liveDrawingWithLayersCaptionsTheBlankArtboard() throws {
-        #expect(HaloServices.live.drawing.unavailableHelp != nil)
+    @Test func liveDrawingDrawsSoTheArtboardHasNoCaption() throws {
+        #expect(HaloServices.live.drawing.unavailableHelp == nil)
         let project = try fixture("three-layers", on: .live)
-        #expect(project.viewerNotice == "Layers aren't drawn in the viewer yet.")
+        #expect(project.viewerNotice == nil)
     }
 
     @Test func noNoticeWithoutLayersOrWithoutAComposition() throws {
