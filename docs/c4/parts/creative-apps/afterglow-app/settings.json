@@ -1,0 +1,10 @@
+{
+  "id": "settings",
+  "name": "Settings",
+  "description": "One Settings window: General and one pane per app.",
+  "technology": "Swift 6, SwiftUI and AppKit, macOS 26",
+  "paths": [
+    "Sources/AfterGlowApp/Settings*.swift"
+  ],
+  "order": 40
+}

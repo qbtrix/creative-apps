@@ -1,0 +1,10 @@
+{
+  "id": "afterglow-journeys-sources",
+  "name": "AfterGlow journey files",
+  "description": "as the container",
+  "technology": "Swift 6, XCTest, macOS 26",
+  "paths": [
+    "UITests/AfterGlowJourneyTests*.swift"
+  ],
+  "order": 10
+}

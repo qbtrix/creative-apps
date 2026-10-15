@@ -1,0 +1,10 @@
+{
+  "id": "home",
+  "name": "Home window",
+  "description": "New tiles and presets, recents grid with search and app filter, running apps strip.",
+  "technology": "Swift 6, SwiftUI and AppKit, macOS 26",
+  "paths": [
+    "Sources/AfterGlowApp/Home*.swift"
+  ],
+  "order": 20
+}

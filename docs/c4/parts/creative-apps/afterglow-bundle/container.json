@@ -1,0 +1,11 @@
+{
+  "id": "afterglow-bundle",
+  "name": "AfterGlow bundle",
+  "description": "The packaged artifact's inputs: Info.plists with document and exported types, icons, the engine re-export file, the release graph in project.yml, scripts/bundle-apps and scripts/size-report (protected: supervisor merges).",
+  "technology": "plist, XcodeGen, bash",
+  "tags": [
+    "internal",
+    "macos-only"
+  ],
+  "order": 150
+}

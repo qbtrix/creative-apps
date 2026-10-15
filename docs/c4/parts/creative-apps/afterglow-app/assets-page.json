@@ -1,0 +1,10 @@
+{
+  "id": "assets-page",
+  "name": "Assets page",
+  "description": "The shared asset and colour library in the home sidebar.",
+  "technology": "Swift 6, SwiftUI and AppKit, macOS 26",
+  "paths": [
+    "Sources/AfterGlowApp/Assets*.swift"
+  ],
+  "order": 30
+}

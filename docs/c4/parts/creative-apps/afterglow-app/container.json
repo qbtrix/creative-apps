@@ -1,0 +1,11 @@
+{
+  "id": "afterglow-app",
+  "name": "AfterGlowApp",
+  "description": "The launcher executable inside AfterGlow.app: home, assets page, settings, onboarding, updater, file router.",
+  "technology": "Swift 6, SwiftUI and AppKit, macOS 26",
+  "tags": [
+    "internal",
+    "macos-only"
+  ],
+  "order": 140
+}

@@ -1,0 +1,11 @@
+{
+  "id": "suite-model-tests",
+  "name": "SuiteModelTests",
+  "description": "Model tests, contract conformance suites, model budgets, BuildGraphTests (Package.swift vs project.yml) and the registry-vs-plist check.",
+  "technology": "Swift 6, Foundation (FoundationEssentials), Linux and macOS",
+  "tags": [
+    "internal",
+    "test"
+  ],
+  "order": 160
+}
