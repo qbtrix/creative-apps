@@ -23,7 +23,9 @@ struct LibraryWindow: View {
                 model: model, onLoadSamples: { model.loadSamples() }, onSelect: { model.select($0) },
                 onOpen: { model.open($0) }, onStep: { model.stepLoupe(by: $0) }, onGrid: { model.showGrid() })
         } inspector: {
-            LibraryInspector(model: model)
+            LibraryInspector(
+                model: model, onStar: { model.clickStar($0) }, onFlag: { model.setFlag($0) },
+                onLabel: { model.setLabel($0) })
         }
         .focusedSceneValue(\.libraryMenu, menu)
     }
