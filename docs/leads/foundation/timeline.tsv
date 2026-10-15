@@ -50,3 +50,7 @@ utc	stage	event	ref	note
 2026-10-15T02:28Z	3	pr-opened	#930	FD-14
 2026-10-15T02:28Z	3	stage-start	wave 13	FD-15, FD-16
 2026-10-15T02:37Z	3	pr-opened	#935	FD-16 menus
+2026-10-15T02:40Z	3	pr-merged	#930	FD-14
+2026-10-15T02:40Z	3	pr-merged	#935	FD-16
+2026-10-15T02:40Z	3	pr-opened	#937	FD-15
+2026-10-15T02:40Z	3	stage-start	wave 14	FD-17→FD-18

@@ -2,9 +2,9 @@
 
 Issue: #777 · Packet: docs/blueprints/halo/features/foundation.md (on branch `docs/halo-feature-packets` until its PR merges)
 Run: act-1a13b78bcdb-qu60 · Session: session_01Dc9GDxc9HxLtv9XMcFgSWh · Started: 2026-10-14T17:33Z
-Stage: 3 wave 13
+Stage: 3 wave 14
 Base: 52928d1dbbdd72b849f7fdb6363991f35b1adbeb
-Next: FD-15 and FD-16 builders run stacked on FD-14 (#930); then FD-17 (#286, #290), then FD-18 with feature-done. Handoff notes for every app API are kept in the lead scratchpad (handoff-fd10.md); key ones are in Decisions.
+Next: chain builder does FD-17 (stacked on FD-15 #937) then FD-18 (fast-lane + feature-done); then find the dev CI run the lane dispatches and start round 1 of the Anatomy loop
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -24,11 +24,11 @@ Next: FD-15 and FD-16 builders run stacked on FD-14 (#930); then FD-17 (#286, #2
 | FD-12 | 10 | viewerDrawList, viewerSummary, row key frames, status suffix; HB-6 | HaloViewerState, HaloTimeline, HaloStatusText + tests | HaloViewerStateTests, HaloTimelineCostTests | | #926 | merged |
 | FD-13a | 2 | App: HaloWindow and HaloViewer move to own files (pure move) | HaloApp.swift, HaloWindow.swift, HaloViewer.swift | snapshots unchanged | #893 | merged |
 | FD-13b | 11 | HaloLaunch, HaloControls, stub rasterizer | Sources/HaloApp | macOS build, H-J13 | | #927 | merged |
-| FD-14 | 12 | perform(_:) routes by area to nine HaloWindow+Area files | Sources/HaloApp x10 | macOS build, H-J13 | #930 | open, lane |
+| FD-14 | 12 | perform(_:) routes by area to nine HaloWindow+Area files | Sources/HaloApp x10 | macOS build, H-J13 | #930 | merged |
 | FD-15 | 13 | Stub views, inspector LAYERS + layer header, key diamonds, refusal caption | Sources/HaloApp x11 + 3 snapshots | halo-inspector-layer-selected-*, halo-timeline-keys-*, halo-refusal-* |  | building |
 | FD-16 | 13 | Menus on HaloCommand | Sources/HaloApp x5 | testEveryMenuOpens |  | building |
-| FD-17 | 14 | Accessibility labels and halo.* identifiers (#286, #290) | Sources/HaloApp x5 + 2 snapshots | H-J1, audit unnamed 0 | | |
-| FD-18 | 15 | Journeys H-J0, H-J1, H-J13, layout (feature-done) | UITests/HaloJourneyTests.swift | the journeys | | |
+| FD-17 | 14 | Accessibility labels and halo.* identifiers (#286, #290) | Sources/HaloApp x5 + 2 snapshots | H-J1, audit unnamed 0 | | building |
+| FD-18 | 15 | Journeys H-J0, H-J1, H-J13, layout (feature-done) | UITests/HaloJourneyTests.swift | the journeys | | building |
 
 ## Rounds
 | round | CI run | CI | audit vs baseline | lenses | confirmed | fixed by | clean |
@@ -56,6 +56,8 @@ Next: FD-15 and FD-16 builders run stacked on FD-14 (#930); then FD-17 (#286, #2
 - FD-13b added `HaloProject(services:document:)` (new file HaloProjectLaunch.swift) so the app can open fixtures; `restore` stays internal.
 - FD-14: `perform` is `@MainActor (HaloCommand) -> Void`; it does not gate on unavailableHelp so Model refusals (I/O with no layer) still show; window title kept as today's so H-J0 and the launch snapshot don't move.
 - The halo.controls probe is a hidden element whose accessibility label is SuiteUI's ControlDocument JSON (same as suite.controls); FD-18 checks inspector controls reach it.
+
+- FD-15 changed HaloCompositionInspectorSnapshots.swift (FD-17's file) only so it compiles with the new init; halo-open/-layers/-timeline snapshots change because the status bar now has the transport.
 
 ## Open
 - docs/c4/model.json "HaloApp sources" description still names only the Layer and Composition menus; the supervisor folds C4 descriptions in (packet: no shared docs).
