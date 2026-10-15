@@ -19,3 +19,4 @@ utc	stage	event	ref	note
 2026-10-15T09:42Z	4	pr-merged	#1070	row rename double-click fix
 2026-10-15T09:49Z	4	pr-opened	#1078	round 1 batch 3: icon contrast, inspector-sized names, row help, empty inset, menu closed before shots
 2026-10-15T10:12Z	4	heartbeat	#1078	merged 09:49; its lane run 38715724809 was cancelled before dispatch, so no dev CI yet; waiting for the next lane dispatch
+2026-10-15T10:38Z	4	pr-opened	#1092	feature-done packet status: main lane only dispatches CI on feature-done merges

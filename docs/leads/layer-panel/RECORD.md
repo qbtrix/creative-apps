@@ -4,7 +4,7 @@ Issue: #1038 · Packet: docs/blueprints/halo/features/layer-panel.md
 Run: act-1a13e9a2019-lau7 · Session: session_01NGHcmJbQja1RSYvcMZR3TD · Started: 2026-10-15T08:07Z
 Stage: 4 round 1
 Base: e8de2ff5d8ed3515af321c805cc2bebab17050a4
-Next: wait for batch 3 (branch layer-panel/r1-panel) to merge; round 2 reads the first dev run containing it (H-J9 past step 3?) and reruns the same five lenses
+Next: wait for #1092 (feature-done, packet status) to merge and the dev CI run it dispatches; that run is round 2 (same five lenses). If red in this feature's files, the next fix PR carries feature-done again.
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -38,6 +38,7 @@ Journeys: H-J9 (8 steps, packet "Journey steps"). Quality bars: QB-F1 no dead co
 - Round 1 fix: drop the List (macOS insets rows even with zero row insets) and reorder with `.draggable`/`.dropDestination` on W0's stack, which passed HaloLayerListTests; dropping on row i moves to index i.
 - Rejected round 1 panel finding "go back to a system List(selection:)": the macOS run proved List insets rows (38708263577); W0's stack is what passes HaloLayerListTests.
 - Skipped minor: re-hosting the halo-layer-list snapshots inside an InspectorSection (W0's snapshot shape; HaloLayerListTests draws the list alone too).
+- The lane runs main's scripts/fast-lane.sh (ee57a15), which dispatches CI only after a feature-done merge (the UI and 10-merge rules are dev-only, and main is held while dev is red). So each round's PR carries feature-done to get its CI run; #1092 (packet status line) is the first.
 
 ## Open
 - Panel finding, not this feature's files: the selected layer's inspector shows "Properties arrive with the layer inspector (#38)." (HaloLayerInspector.swift, W0's placeholder that layer-keys #38 replaces whole). File as gap at finish if still on dev.
