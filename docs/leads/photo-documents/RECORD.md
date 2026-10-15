@@ -14,7 +14,7 @@ Next: wait for wave 3 PRs (D-4b, D-6) to merge, then start wave 4 (D-5, D-7)
 | D-2 | 2 | LiveArchive encode/decode; LiveDocuments.archive() | M/Live/LiveArchive.swift, M/Live/LiveDocuments.swift, MT/PhotoDocumentRoundTripTests.swift | PhotoDocumentRoundTripTests | #1201 | merged |
 | D-4a | 2 | autosaveDue, recoveryEntry, restore, RecoveryOffer | M/PhotoRecovery.swift, MT/PhotoRecoveryTests.swift | PhotoRecoveryTests | #1200 | merged |
 | D-4b | 3 | LiveRecovery folder I/O; LiveDocuments.recovery(directory:) | M/Live/LiveRecovery.swift, M/Live/LiveDocuments.swift, MT/LiveRecoveryTests.swift | LiveRecoveryTests | #1210 | open |
-| D-6 | 3 | PhotoPackageIO off-main read/write; PF-1 through ImageIO | A/PhotoPackageIO.swift, ST/PhotoPackageIOTests.swift | PhotoPackageIOTests (macOS) | – | building |
+| D-6 | 3 | PhotoPackageIO off-main read/write; PF-1 through ImageIO | A/PhotoPackageIO.swift, ST/PhotoPackageIOTests.swift | PhotoPackageIOTests (macOS) | #1212 | open |
 | D-5 | 4 | Budgets PB-18/19/20 | MT/PhotoDocumentsBudgetTests.swift | PhotoDocumentsBudgetTests | – | waits D-4a, D-4b |
 | D-7 | 4 | Save routing, Keep layers?, open .ora/flat, errors, Not saved, fileServices, Open Recent | A/PhotoWindow+File.swift, A/PhotoCommands+File.swift | V5/V6, app-state rule | – | waits D-6, D-4b |
 | D-8 | 5 | Save status in top bar, edited dot, Saving…/Opening… notes; snapshots | A/PhotoTopBar.swift, A/PhotoWindow+File.swift, ST/PhotoDocumentsSnapshots.swift | PhotoDocumentsSnapshots | – | waits D-7 |
@@ -47,3 +47,4 @@ Waves (packet's Build waves, checked against dev at 00e546a):
 ## Open
 - photo-journey-kit (#1073) is still building; D-11 and D-12 wait on it.
 - D-2 notes: layer-<i> counts every layer bottom-up from 1; maxOpenPixels (16 MP) is checked after PNG decode.
+- QB-L12 gap: PhotoPackageIO.read returns a PhotoPackage and openDocument decodes PNGs on main; D-7 must decode off main (or a fix adds a Model openDocument(snapshot:)).
