@@ -7,10 +7,17 @@
 // Each row spans the section's full width, the same edges as the Composition
 // rows, with its icon and name SuiteSpacing.m inside, and SuiteSpacing.xs
 // between rows; the stack sizes itself, so it never scrolls inside the
-// inspector's scroll view. Each row is a plain Button around SuiteUI's
-// SidebarRow: a click sends `selectLayer`, a double-click on the name renames
-// it on the row (SidebarRow trims the name and drops an empty one, then the
-// row sends `renameLayer(id, name)`). Each row drags its layer id, and a layer
+// inspector's scroll view. Each row is SuiteUI's SidebarRow with no Button
+// around it: a macOS Button tracks the mouse itself, so SidebarRow's
+// double-click never fired, and it folds its label into one accessibility
+// element, hiding the name and the rename field. A click anywhere on the row
+// sends `selectLayer` through a simultaneous tap, so SidebarRow's double-click
+// on the name still renames it on the row (SidebarRow trims the name and drops
+// an empty one, then the row sends `renameLayer(id, name)`); a double-click
+// also selects. The row is one accessibility element that contains the name
+// and the rename field, named by the layer, with the button trait and a
+// default action that selects. Rows are not Tab stops; the stack is.
+// Each row drags its layer id, and a layer
 // id dropped on row i sends `moveLayer(id, to: i)`, so dropping on the bottom
 // row puts the layer at the bottom; the view does no offset math. The stack
 // takes focus on a click, like the timeline, so Delete (⌫) there sends
@@ -75,7 +82,7 @@ struct HaloLayerList: View {
     }
 }
 
-/// One layer row: the select button around SidebarRow (rename on the name),
+/// One layer row: SidebarRow selected by a click (rename on the name),
 /// dragging its layer id, then its refusal caption, if any.
 private struct HaloLayerRow: View {
     let layer: HaloLayer
@@ -85,26 +92,27 @@ private struct HaloLayerRow: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            Button { perform(.selectLayer(layer.id)) } label: {
-                SidebarRow(
-                    SidebarItem(id: layer.id, title: layer.name, systemImage: layer.kind.systemImage),
-                    onRename: { name in perform(.renameLayer(layer.id, name)) })
-                .labelStyle(HaloLayerLabelStyle(selected: selected))
-                .padding(.horizontal, SuiteSpacing.m)
-                .frame(maxWidth: .infinity, minHeight: SuiteSize.studioRow, alignment: .leading)
-                .background(selected ? SuiteColor.selectedTint : Color.clear, in: .rect(cornerRadius: SuiteRadius.row))
-                .overlay {
-                    if selected {
-                        RoundedRectangle(cornerRadius: SuiteRadius.row).strokeBorder(SuiteColor.accent, lineWidth: 1)
-                    }
+            SidebarRow(
+                SidebarItem(id: layer.id, title: layer.name, systemImage: layer.kind.systemImage),
+                onRename: { name in perform(.renameLayer(layer.id, name)) })
+            .labelStyle(HaloLayerLabelStyle(selected: selected))
+            .padding(.horizontal, SuiteSpacing.m)
+            .frame(maxWidth: .infinity, minHeight: SuiteSize.studioRow, alignment: .leading)
+            .background(selected ? SuiteColor.selectedTint : Color.clear, in: .rect(cornerRadius: SuiteRadius.row))
+            .overlay {
+                if selected {
+                    RoundedRectangle(cornerRadius: SuiteRadius.row).strokeBorder(SuiteColor.accent, lineWidth: 1)
                 }
-                .contentShape(Rectangle())
             }
-            .buttonStyle(.plain)
+            .contentShape(Rectangle())
+            .simultaneousGesture(TapGesture().onEnded { perform(.selectLayer(layer.id)) })
             .draggable(layer.id)
             .help(layer.kind.layerTitle)
+            .accessibilityElement(children: .contain)
+            .accessibilityLabel(layer.name)
             .accessibilityValue(layer.kind.layerTitle)
-            .accessibilityAddTraits(selected ? .isSelected : [])
+            .accessibilityAddTraits(selected ? [.isButton, .isSelected] : .isButton)
+            .accessibilityAction { perform(.selectLayer(layer.id)) }
             .haloControl(id: "halo.layer.row.\(layer.id)", enabled: true, help: nil)
             .tag(layer.id)
             if let refusal {
