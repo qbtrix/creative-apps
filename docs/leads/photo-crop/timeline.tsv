@@ -69,3 +69,4 @@ utc	stage	event	ref	note
 2026-10-15T20:41Z	5	ci-run	38799320916	in progress, head 3dc283e
 2026-10-15T21:10Z	5	ci-run	38807718380	in progress, head cdcfb62
 2026-10-15T21:40Z	5	ci-run	38807718380	PJ-8 still red after #1238; fixer r5-b2
+2026-10-15T21:47Z	5	pr-opened	#1251	r5-b2 crop field rows expose their number to XCUI
