@@ -90,3 +90,4 @@ utc	stage	event	ref	note
 2026-10-15T08:51Z	4	pr-opened	#1053	r3-b2 PhotoToolsTests
 2026-10-15T08:55Z	4	pr-merged	#1053	r3-b2
 2026-10-15T08:55Z	4	pr-opened	#1055	feature-done: round 3 status
+2026-10-15T09:09Z	4	ci-run	38709336067	red on HaloLayerListTests in scripts/ci; journeys skipped; all Photo tests pass

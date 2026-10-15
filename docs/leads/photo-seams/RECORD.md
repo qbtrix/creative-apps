@@ -4,7 +4,7 @@ Issue: #812 · Packet: docs/blueprints/photo/features/photo-seams.md
 Run: act-1a13d5e8ca4-huz5 · Session: cloud lead session · Started: 2026-10-15T02:23Z
 Stage: 4 round 4 (waiting on CI; last round)
 Base: c4ec07810683a4bc7d62dcc5205705229f248a71
-Next: wait for #1055 (feature-done, round 3 status) to merge and its CI run; round 4 panel with the same six lenses; then finish: contact sheet comment on #812 (any open findings become gap issues)
+Next: wait (until about 10:00Z) for the next dev CI run containing 53e02c6 that reaches the journeys; read Photo's journeys and audit, then finish: contact sheet comment on #812, final RECORD
 
 ## Tasks
 
@@ -42,6 +42,7 @@ packet chains every task on the one before it (shared files or new types).
 | 2 | 38694361192 (fdb7c8a) | photo green (13 journeys incl. testFixtureLaunch and crop-cancelled; macOS scripts/ci green); run red from SuiteUI testGalleryOpensEveryPage, Halo testLayoutAtWidths and testNewComposition (#763) | photo all at or under (identifier 16 vs 23, 93 steps) | same six | 14 kept; in scope: 1 major (fixture launch not fitted) + 8 minor (eyedropper hint x3, pill tooltip, refusal type role, step-5 journey gaps x2, budget step); out of scope v1 -> gap issues #1024 tile-edge lines (p1), #1025 clone source, #1026 selection unit, #1027 render pill | #1029 (r2-b1 fit), #1030 (r2-b2 hint, tooltip, caption type), #1031 (r2-b3 journeys + 20 px budget) | no |
 | 3 | 38700713285 (1dcd1a6) | macOS scripts/ci red on SuiteUI FrameProbeTests.summaryWithinBudget (24.4 ms vs 20 ms timing, not this feature; noted on #763); every Photo test passed; UI journeys skipped, so no screens | – | – | – | – | wait for a run with journeys |
 | 3b | 38704216123 (731, 92db316) | red in this feature's file: testFixtureLaunch (zoom pill not found by label) and testLaunchShowsWindowShell (help tag not shown on hover), both #1031 test lookups; other failures SuiteUI/Halo (#763) | photo all at or under (identifier 16 vs 23, 92 steps) | same six | 2 kept (major: PhotoToolsTests QB-F1 check vacuous for stroke tools; minor: rail disabled tool dimmed twice in SuiteUI -> needs-ui #1049), 2 refuted | #1050 (r3-b1 journey lookups), #1053 (r3-b2 PhotoToolsTests bite) | no |
+| 4 | 38709336067 (53e02c6) | macOS scripts/ci red on HaloLayerListTests (row inset, selected tint; Halo line, not this feature); every Photo test passed incl. #1053's tools tests; UI journeys skipped | – | – | – | – | wait for a run with journeys |
 
 ## Decisions
 - Waves of one task each, in the packet's chain order; the next builder starts once the previous PR has merged into dev.
