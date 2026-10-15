@@ -27,8 +27,9 @@ exceeded", so SwiftPM linking behavior is marked for the spike in section
 2.5 instead of taken from docs.
 
 Contents: 0 Status on dev · 1 Brief · 2 Pseudo-C4 and packaging · 3 Usage
-map · 4 Journeys · 5 Contracts · 6 Look · 7 Quality bar · 8 Coverage and
-waves · 9 Decisions for the captain · 10 Critic rounds
+map · 3a Features from the future · 4 Journeys · 5 Contracts · 6 Look ·
+7 Quality bar · 8 Coverage and waves · 9 Decisions for the captain ·
+10 Critic rounds
 
 Files: this document; `docs/blueprints/suite/c4-planned.json` (section 2 as
 data); `docs/blueprints/suite/contracts/` (section 5 as Swift that compiles
@@ -552,6 +553,284 @@ up.
 
 Size measurement (18) is built with packaging (1) because packaging's
 acceptance needs it; its rank says it never blocks a tier-1 journey.
+
+---
+
+## 3a. Features from the future (captain, 2026-10-15)
+
+The captain's list of features for after v1, written down now so that the
+v1 contracts leave room for them. All seven are **planned**: nothing here
+is built, no issue is filed, and none moves a tier-1 or tier-2 row in
+section 3. They are numbered on from section 3's rows (19 to 25). Behavior
+is described in our own words from the captain's notes; no other app was
+opened, studied or named.
+
+Platform facts were checked with the `apple-docs` MCP tools on 2026-10-15
+and are cited as "Apple docs: <page>". One fact was not found there (the
+system-wide shortcut in 19); it is marked for a spike instead of taken from
+memory.
+
+| # | Feature | Line | Tier | State |
+|---|---|---|---|---|
+| 19 | The Shelf: reference cards from any screen | `line:suite` (cards, store, capture), `line:suiteui` (card and panel views), each app (place on canvas) | 3 | planned |
+| 20 | Drag out to export | `line:design`, `line:photo`, `line:flare` | 2 (cheap: export exists) | planned |
+| 21 | Fling to dock | `line:suiteui` | 3 | planned |
+| 22 | Palette from a reference | `line:design`, `line:photo` | 3 | planned |
+| 23 | Search photos by the text in them | `line:library` | 3 | planned |
+| 24 | Math in number fields | `line:suiteui` | 2 (cheap: one parser, every field) | planned |
+| 25 | A scratch shelf that cleans itself | `line:suite` (Home) | 3 | planned |
+
+### 19. The Shelf (the headline feature)
+
+**What the user does.** Anywhere on the Mac, one keyboard shortcut starts a
+capture: drag out a region, or click a window. The result is a card, a
+small borderless picture that floats above every AfterGlow window. The user
+drags a card onto any canvas (Design, Photo, Flare, Halo) and it becomes an
+image layer there; the card stays on the Shelf. Text in a card can be
+selected and copied as text. All cards live in the Shelf panel (Window >
+Shelf), where they can be reopened, renamed, pinned or deleted. **Lock and
+fade:** a pinned card can be set to any opacity and locked, which makes it
+click-through: clicks and drags pass to the canvas under it, so the user
+traces over a reference in Flare (rotoscoping) or lines a layout up with a
+mockup in Design. Unlock from the Shelf panel or the card's menu-bar item,
+since a locked card cannot be clicked.
+
+**Why it matters.** Gathering references is the first step of most creative
+work, and today it means screenshots on the desktop, then importing each
+one into each app. The Shelf is shared by all five apps, which is the point:
+grab once, use anywhere. It is also the one AfterGlow feature that reaches
+outside the suite and pulls the rest of the Mac into it.
+
+**Mac capability.**
+
+- Region capture: `SCScreenshotManager.captureImage(in:)` returns a
+  `CGImage` for a rect in screen points across displays, macOS 15.2+
+  (Apple docs: ScreenCaptureKit > SCScreenshotManager >
+  captureImage(in:completionHandler:)).
+- Window capture: the system picker in single-window mode, so the user
+  picks a window without AfterGlow listing others' windows (Apple docs:
+  ScreenCaptureKit > SCContentSharingPicker, SCContentSharingPickerMode
+  .singleWindow); AfterGlow's own cards are left out of every capture with
+  `SCContentSharingPickerConfiguration.excludedWindowIDs`.
+- Permission: screen recording is checked with
+  `CGPreflightScreenCaptureAccess()` and asked for with
+  `CGRequestScreenCaptureAccess()` (Apple docs: Core Graphics). Denied,
+  the shortcut shows one alert with the System Settings route; nothing is
+  captured silently.
+- The floating card: an `NSPanel` at window level `.floating` ("useful for
+  floating palettes") with `collectionBehavior` `.canJoinAllSpaces` and
+  `.fullScreenAuxiliary` so it follows the user across Spaces and over a
+  full-screen canvas (Apple docs: AppKit > NSPanel; NSWindow.Level
+  .floating; NSWindow.CollectionBehavior).
+- Lock and fade: `NSWindow.ignoresMouseEvents` ("whether the window is
+  transparent to mouse events") plus the window's alpha (Apple docs: AppKit
+  > NSWindow > ignoresMouseEvents).
+- Selectable text: VisionKit's `ImageAnalysisOverlayView` with
+  `.textSelection` over the card's image, analysed by `ImageAnalyzer`, all on
+  device, macOS 13+ (Apple docs: VisionKit > ImageAnalysisOverlayView;
+  Enabling Live Text interactions with images).
+- The global shortcut: Apple's docs search returned no current page for a
+  system-wide hot key. The spike decides between the user binding an
+  AfterGlow capture action in System Settings and an older system-wide
+  hot-key API, and records the page it relied on.
+
+**Line.** `line:suite`: the card value, the Shelf store under the suite
+store (section 2.6), capture and the card panels in `SuiteShell`.
+`line:suiteui`: the card chrome and the Shelf panel (`needs-ui`). Each app's
+line: accepting a card drop as an image layer (Design, Photo, Flare, Halo,
+one small task each, through the drop route of row 10).
+
+**Waits on.** Packaging (row 1) and the suite store (2.6); drag and drop
+between apps (row 10) and the shared asset library (row 12), whose image
+asset a card becomes when placed; each app's image layer; the shortcut
+spike.
+
+### 20. Drag out to export (Design, Photo, Flare)
+
+**What the user does.** Drags a layer, the selection, or the current frame
+out of the window and drops it on the Finder, a Mail message or any app
+that takes images. It arrives as a PNG named after the layer and document.
+In Design the drag can carry SVG instead (Option held at the start of the
+drag). No dialog appears; File > Export stays for size, scale, format and
+every other setting.
+
+**Why it matters.** Most exports are "this one thing, as a picture, over
+there". A drag does that in one move and the result lands where it is
+needed, not in a folder the user then has to find.
+
+**Mac capability.** File promises: an `NSFilePromiseProvider` on the drag
+gives the file's type and name, and its delegate writes the file only when
+the drop lands, into the destination folder it is handed (Apple docs:
+AppKit > NSFilePromiseProvider; NSFilePromiseProviderDelegate >
+filePromiseProvider(_:writePromiseTo:completionHandler:); Supporting Drag
+and Drop Through File Promises). So nothing is rendered for a drag that is
+cancelled.
+
+**Line.** `line:design`, `line:photo`, `line:flare`, each for its own
+canvas; the render is each app's existing export at default settings.
+
+**Waits on.** Each app's PNG export (and Design's SVG export); row 10's drag
+bridge in `SuiteShell` if it ships first, so the three apps share one
+promise provider.
+
+### 21. Fling to dock (SuiteUI)
+
+**What the user does.** With two fingers on the trackpad, starting on the
+title strip of the floating tool box or a floating panel, the user throws
+it toward a window edge. It slides there and tucks away into a slim tab on
+that edge. A click on the tab, or dragging the tab inward, brings the panel
+back where it was. Window > Show Tool Box (and each panel's menu item) does
+the same from the keyboard, so nothing is reachable only by gesture.
+
+**Why it matters.** Panels cover the canvas. Tucking one away with a flick,
+and getting it back with a click, keeps the canvas big without closing
+anything or hunting through menus.
+
+**How a fling is told apart from scroll and pan.** A two-finger trackpad
+move arrives as scroll events with a gesture phase, the same events a
+scroll view and a canvas pan read (Apple docs: AppKit > NSEvent > phase;
+momentumPhase). A fling is all of these, and anything else is left to
+scroll or pan untouched:
+
+1. The gesture's first event (phase `.began`) is over the panel's title
+   strip. Panel content and the canvas never start a fling, so scrolling a
+   layer list and panning the canvas never move a panel.
+2. The events have precise deltas (`hasPreciseScrollingDeltas`), so a
+   mouse wheel never flings.
+3. The fingers lift with momentum: a `momentumPhase` of `.began` follows,
+   and the release speed is over a threshold set in the Model. A slow move
+   that stops without momentum does nothing.
+4. The direction points at an edge within 30° of straight; the nearest
+   such edge is the target.
+
+The rules are a pure function in a Model over (start region, precise
+deltas, phases, velocity), so they are tested on Linux. With Reduce Motion
+on, the panel moves to the edge without the slide.
+
+**Line.** `line:suiteui` (the floating panel and tool box are SuiteUI's).
+
+**Waits on.** SuiteUI's floating tool box and panels (section 6, one tool
+box for all five apps); a Linux-testable home for the recognizer rules.
+
+### 22. Palette from a reference (Design, Photo)
+
+**What the user does.** Chooses Extract Colours on an image layer, a
+selection, a placed reference or a Shelf card. A popover shows the five to
+eight main colours, largest area first; the user unticks any they don't
+want and adds the rest to Suite Colours, the shared swatches every app
+reads (row 11, SJ13).
+
+**Why it matters.** A palette usually starts from a reference: a photo, a
+brand sheet, a mockup. Picking colours one by one with an eyedropper is
+slow and misses the ones that matter by area.
+
+**Mac capability.** Core Image's `CIFilter.kMeans()` "applies the k-means
+algorithm to find the most common colors in an image" (Apple docs: Core
+Image > CIFilter > kMeans(); CIKMeans, with `count` and `perceptual`).
+Accelerate's sample does the same with vImage (Apple docs: Accelerate >
+Calculating the dominant colors in an image). Merging near-duplicates and
+ordering by area is plain Model logic.
+
+**Line.** `line:design`, `line:photo`, each on its own layers and
+selections.
+
+**Waits on.** The shared colour library (row 11); the Shelf (19) for
+extracting from a card.
+
+### 23. Search photos by the text in them (Library)
+
+**What the user does.** Types a word in Library's search field and gets
+the photos that contain it as text: a street sign, a page, a label, a
+whiteboard. The match is highlighted in the viewer. It works offline;
+nothing leaves the Mac.
+
+**Why it matters.** People remember photos by what was written in them
+("the one with the menu") long before they remember a date or a folder.
+
+**Mac capability.** Vision's text recognition runs on device:
+`RecognizeTextRequest` (and the older `VNRecognizeTextRequest`) finds and
+recognizes text in an image, with a recognition level that trades accuracy
+for speed and a list of recognition languages (Apple docs: Vision >
+RecognizeTextRequest; VNRecognizeTextRequest > recognitionLevel,
+recognitionLanguages; Recognizing Text in Images). Recognition runs in the
+background after import, at low priority, and the text goes into the
+catalog's index.
+
+**Line.** `line:library`.
+
+**Waits on.** A search field and text index in Library (library.md has no
+search yet); import that can schedule background work.
+
+### 24. Math in number fields (SuiteUI)
+
+**What the user does.** Types an expression into any number field (size,
+position, opacity, duration, stroke) and presses Return or Tab: "120*2"
+becomes 240, "+16" adds 16 to the current value, "50%" halves it. The field
+shows the result; Undo restores the old value in one step.
+
+**Why it matters.** Doubling a width, nudging by a grid step or taking a
+third of a canvas is arithmetic the user otherwise does elsewhere and
+retypes. It costs one parser and helps every field in all five apps.
+
+**Grammar.**
+
+```
+input    = relative | expr
+relative = ("+" | "*" | "/") expr          (applied to the current value)
+expr     = term   { ("+" | "-") term }
+term     = factor { ("*" | "x" | "×" | "/" | "÷") factor }
+factor   = "-" factor | number [ "%" ] | "(" expr ")"
+number   = digits [ sep digits ] [ unit ]
+```
+
+- `sep` is "." and also the user's locale decimal separator; a unit that
+  matches the field's own unit ("px", "pt", "%", "s", "°") is allowed and
+  dropped. Spaces are ignored.
+- A leading "-" is a negative number, not a subtraction: "-5" sets -5. To
+  subtract from the current value, write "+-5".
+- "%" alone on a whole input means percent of the current value ("50%" is
+  half). Inside an expression it divides by 100 ("200*50%" is 100). A
+  field whose unit is "%" (opacity) reads "50%" as 50.
+- The result is rounded to the field's precision and clamped to its range;
+  a clamped result shows the limit and the field's help says so.
+
+**How an error reads.** Nothing is committed and the old value is kept. The
+field gets the system's error outline and its help text reads, for example,
+`Can't read "12*/3": "/" at position 4.` or `Can't divide by zero.` Escape
+puts the old value back; leaving the field with an error does the same.
+VoiceOver reads the help text.
+
+**Mac capability.** None beyond a text field; the evaluator is pure Swift,
+Linux-safe and tested with Swift Testing.
+
+**Line.** `line:suiteui` (the shared number field, `StudioScrubRow`).
+
+**Waits on.** A Linux-testable home for the evaluator (SuiteUI's tests run
+only on macOS). Nothing else; this is why it is tier 2.
+
+### 25. A scratch shelf that cleans itself (Home)
+
+**What the user does.** Quick captures (19) and scratch documents (made
+with New Scratch, no name, no save dialog) appear in a Scratch row on Home.
+Each expires after a day, a week or a month (a Settings choice, a week by
+default) unless the user pins it. Two days before, the item shows "Expires
+in 2 days"; at expiry it moves to the Trash, so it can still be recovered.
+Pinning or renaming an item, or saving it somewhere else, keeps it.
+
+**Why it matters.** Scratch work piles up because deleting it is a chore
+and keeping it costs nothing at first. Expiry keeps Home clean by default,
+and the Trash keeps the user safe.
+
+**Mac capability.** `FileManager.trashItem(at:resultingItemURL:)` moves the
+file to the Trash instead of deleting it (Apple docs: Foundation >
+FileManager > trashItem(at:resultingItemURL:)). The expiry rule (dates,
+pins, the warning window) is Model logic in `SuiteModel` and is tested on
+Linux with a fake clock.
+
+**Line.** `line:suite` (Home in `AfterGlowApp`, the rule in `SuiteModel`).
+
+**Waits on.** Home (row 2) and the suite store (2.6); Settings (row 13) for
+the period.
 
 ---
 
