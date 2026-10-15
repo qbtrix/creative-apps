@@ -1,7 +1,8 @@
 // Live/LiveDocuments.swift: the live document use cases. PV-1
-// (photo-documents) replaces these NotBuilt stand-ins with the real archive
-// and recovery store. Linux-safe.
+// (photo-documents) fills these: the archive is LiveArchive, the OpenRaster
+// document; the recovery store is still the NotBuilt stand-in until D-4b.
+// Linux-safe.
 enum LiveDocuments {
-    static func archive() -> any DocumentArchiving { NotBuiltArchive() }
+    static func archive() -> any DocumentArchiving { LiveArchive() }
     static func recovery() -> any RecoveryStoring { NotBuiltRecovery() }
 }
