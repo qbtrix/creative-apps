@@ -69,7 +69,7 @@ Layers tab), 7.1 PB-13, PJ-P2, 7.3 PF-8, PF-12.
    below to adjust.". Opacity 0: the canvas equals step 1; Command-Z
    restores it. Select Background: the header reads "Image", "Adjusts the
    whole image". Error: with the adjustment selected, Brush and drag: the
-   status line reads "Pick a pixel layer to paint on." and nothing changes.
+   status line reads "Select an image layer in the Layers tab to paint on." and nothing changes.
 2. **PJ-P2's adjustment series `testAdjustmentLayerScrubLatency`**
    (`+PerfAdjustmentLayers`): on `-PhotoFixture large` add an Exposure
    adjustment layer and drag its bar; at least 60 samples; QB-L2 reported.
@@ -81,7 +81,7 @@ Layers tab), 7.1 PB-13, PJ-P2, 7.3 PF-8, PF-12.
 | Layers tab row | an adjustment at the bottom: info line "Nothing below to adjust." | – | – |
 | Adjust tab | no image: today's empty state; a pixel layer selected: the whole-image sections under "Image" | – | – |
 | Layer > New Adjustment Layer | no image: the four items disabled "Open an image first." | – | – |
-| Canvas | – | a paint tool on an adjustment layer: "Pick a pixel layer to paint on." (photo-seams' `paintTarget()`) | none: an adjustment's tile render stays within PB-13 |
+| Canvas | – | a paint tool on an adjustment layer: "Select an image layer in the Layers tab to paint on." (photo-seams' `paintTarget()`) | none: an adjustment's tile render stays within PB-13 |
 
 ## Contract slice
 

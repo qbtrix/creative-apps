@@ -8,6 +8,16 @@ files (`PhotoWorkspace`, `PhotoIntent`, `PhotoWindow`, `PhotoCommands`,
 **Line:** `line:photo` · **Wave:** 0 (`waves.md`) · **Tier:** p1 by dependency
 · **Lead branch:** `lead/photo-seams`
 
+**Status:** built on `dev` (lead #812). Tasks: S-1 #932, S-2 #948, S-3 #950,
+S-4 #951, S-6a #956, S-6b #959, S-5 #966, S-7a #969, S-7c #972, S-7b #974,
+S-8a #978, S-8b #985, S-9 #986, S-10a #987, S-10b #988, S-11a #989,
+S-11b #991, S-12 #992, S-13 #979 (model budgets) and #997 (latency series).
+Anatomy round 1 (CI run 727): fixes #1010 (refusal names the Layers tab;
+clone and heal stop re-stamping the previous dab), #1011 (Escape-cancels-crop
+and `-PhotoFixture` journeys), #1012 (warning pill, refusals in the error
+style). Needs-ui filed: #952, #953, #954. The paint refusal now reads
+"Select an image layer in the Layers tab to paint on."
+
 **Covers:** no open issue (blueprint 8.1: PV-0 has none). It is the critical
 path: photo-documents, photo-edit and photo-crop (wave 1) and
 photo-adjustment-layers (wave 2) start from its merged result.
@@ -199,7 +209,7 @@ S-7a  drag(from:to:pressure:modifiers:zoom:) and drags([...], zoom:) are the rea
                                     -> tool options color; never a history step
                      else today's paint
 
-S-7c  paintTarget(): .pixels(id); nil + statusMessage "Pick a pixel layer to paint on." on an
+S-7c  paintTarget(): .pixels(id); nil + statusMessage "Select an image layer in the Layers tab to paint on." on an
         adjustment layer; brush, eraser, clone and heal write through it
       every dab (PhotoStroke, PhotoRetouch), Delete and Fill weight each pixel by
         selectionCoverage(x:y:) (1 inside today's rect, 1 everywhere with no selection: no change yet)
@@ -282,7 +292,7 @@ accessory on `LayerList` rows (lists-and-layers' LL-5). #339 and #340 exist.
 | S-6b | `PhotoStepIDTests`: edit, undo, edit gives a `currentStepID` never seen before; 51 edits then 50 undos leave `currentStepID != 0` (the trim moved `baseStepID`); `isDirty` is false right after `newCanvas`, after `open` and with no canvas, true after an edit, false after undoing it; a `.selection` step undoes the selection; `.layers` undo works with a layer that has no pixels entry (an adjustment layer built in the test) | an id repeats, undo-all after a trim reads as the base, a new image reads dirty, or layer-list undo is a no-op with an adjustment layer |
 | S-5 | `PhotoFixturesTests`: `sample` is 800 × 600 with the sun's center pixel yellow and (10, 10) blue; `layered` has 3 layers top first Paint (Multiply, 60 %, masked), Curves 1 (adjustment), Background; `large` is 4000 × 3000 with 3 layers; every fixture runs on `.fake` | a fixture's size, layer order or kinds differ from 4.4 |
 | S-7a | `PhotoToolsTests` (edited): on `.fake` each tool's drag on `sample` changes the workspace; on `.live` each tool either changes the workspace or has a non-empty `toolHelp`. `PhotoDragRoutingTests`: a Shift-drag reaches `selectionDrag` with `.shift`; the wrapper with `sampling: true` equals a drag with `[.option]`; the eyedropper drag adds no history step. Every existing Photo model test passes unchanged | a tool is dead on either services, a modifier is dropped, or an old test needed an edit |
-| S-7c | `PhotoPaintTargetTests`: `refusalIsImmediate` (QB-F2), a brush drag on an adjustment layer leaves pixels unchanged and `statusMessage` reads "Pick a pixel layer to paint on." after that one call; with `selectionCoverage` forced to 0 outside a test rect (a test hook), brush, eraser, clone and heal dabs and Fill change no pixel outside it; with no selection every existing brush, eraser, clone, heal and fill test passes unchanged; Apply Crop calls `layerGeometryChanged` once per layer | a dab ignores the coverage, a refusal is late, or today's paint changes |
+| S-7c | `PhotoPaintTargetTests`: `refusalIsImmediate` (QB-F2), a brush drag on an adjustment layer leaves pixels unchanged and `statusMessage` reads "Select an image layer in the Layers tab to paint on." after that one call; with `selectionCoverage` forced to 0 outside a test rect (a test hook), brush, eraser, clone and heal dabs and Fill change no pixel outside it; with no selection every existing brush, eraser, clone, heal and fill test passes unchanged; Apply Crop calls `layerGeometryChanged` once per layer | a dab ignores the coverage, a refusal is late, or today's paint changes |
 | S-7b | `PhotoLayerCompositeTests`: `PhotoRenderer.render` of `sample` and of a 3-layer stack equals the image from before the change bit for bit (stored as the reference from today's code in the test); `composite` of an adjustment layer returns `below` unchanged; Image Size, Rotate and Straighten call `layerGeometryChanged` once per layer | the render changes by one bit, or a geometry change skips a layer |
 | S-8a | `scripts/ci` app-state rule passes; V1–V12 green on the next macOS run (the window still routes every v1 intent, each area modifier is the identity); `PhotoSelectAllMenuTests` unchanged and passing | an existing journey breaks, or a view assigns model state |
 | S-8b | V5, V6 (open, paint, save, Save As) and the export step of V2 green on the next macOS run; `fileServices` returns its argument | open, save or export behaves differently |
