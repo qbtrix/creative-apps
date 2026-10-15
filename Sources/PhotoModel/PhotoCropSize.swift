@@ -83,7 +83,7 @@ extension PhotoWorkspace {
 
 extension PhotoWorkspace {
     /// The one reason the caption, the fields and Apply give with no crop.
-    private static let startCropReason = "Drag on the image, or pick a shape, to start a crop."
+    private static let startCropReason = "Drag on the image, or pick a ratio below, to start a crop."
 
     /// The number a crop field draws: the pending crop's; with none, the
     /// whole image's rect (X 0, Y 0, W and H the canvas's), the crop that
@@ -117,6 +117,13 @@ extension PhotoWorkspace {
         case .original: return "Original keeps the image's own shape."
         case .ratio(let w, let h): return w == h ? "A square crop is the same both ways." : nil
         }
+    }
+
+    /// Swap's title, which is also its tooltip while it acts: the change it
+    /// makes ("Swap to 2:3" under 3:2), else "Swap Width and Height".
+    public var cropSwapTitle: String {
+        guard cropSwapHelp == nil, case .ratio(let w, let h) = cropAspect else { return "Swap Width and Height" }
+        return "Swap to \(CropAspect.ratio(h, w).title)"
     }
 
     /// Why the four crop fields take no typing, or nil when they do.
@@ -154,8 +161,8 @@ extension PhotoWorkspace {
 
     /// The aspect chips' tooltip: what a lock does and the image's own ratio.
     public var cropAspectGroupHelp: String {
-        guard let ratio = originalRatio else { return "Open an image to choose a crop shape." }
-        return "Lock the crop to a shape, width to height. Original keeps the image's own \(ratio)."
+        guard let ratio = originalRatio else { return "Open an image to choose a crop ratio." }
+        return "Lock the crop to a ratio, width to height. Original keeps the image's own \(ratio)."
     }
 
     /// The tooltip of an enabled crop field: what its number measures.
