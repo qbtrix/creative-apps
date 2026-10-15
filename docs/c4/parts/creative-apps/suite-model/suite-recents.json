@@ -1,0 +1,10 @@
+{
+  "id": "suite-recents",
+  "name": "Recents",
+  "description": "RecentsList: merge, dedupe by file identity, cap 200, filter by app, search; the rules for when an app records.",
+  "technology": "Swift 6, Foundation (FoundationEssentials), Linux and macOS",
+  "paths": [
+    "Sources/SuiteModel/Recents/"
+  ],
+  "order": 60
+}

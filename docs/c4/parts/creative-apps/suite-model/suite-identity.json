@@ -1,0 +1,10 @@
+{
+  "id": "suite-identity",
+  "name": "Identity and type registry",
+  "description": "SuiteApp (the five apps and the launcher), bundle ids under one prefix (SuiteIdentity.prefix), and SuiteTypeRegistry: every document and pasteboard type each app reads and writes and the default app per type. Bundle/Info/*.plist mirror it; a test checks both.",
+  "technology": "Swift 6, Foundation (FoundationEssentials), Linux and macOS",
+  "paths": [
+    "Sources/SuiteModel/Values/"
+  ],
+  "order": 10
+}

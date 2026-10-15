@@ -1,0 +1,10 @@
+{
+  "id": "suite-assets",
+  "name": "Assets",
+  "description": "SuiteAsset, SuiteSwatch, the asset index: add, update with a new revision, remove, search.",
+  "technology": "Swift 6, Foundation (FoundationEssentials), Linux and macOS",
+  "paths": [
+    "Sources/SuiteModel/Assets/"
+  ],
+  "order": 130
+}

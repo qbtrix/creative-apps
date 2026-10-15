@@ -1,0 +1,10 @@
+{
+  "id": "suite-pasteboard",
+  "name": "Pasteboard coding",
+  "description": "SuiteClipItem and its typed representations (suite asset envelope, SVG, PNG, colour, text); best-item choice for a target app.",
+  "technology": "Swift 6, Foundation (FoundationEssentials), Linux and macOS",
+  "paths": [
+    "Sources/SuiteModel/Pasteboard/"
+  ],
+  "order": 110
+}

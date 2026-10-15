@@ -1,0 +1,10 @@
+{
+  "id": "suite-home",
+  "name": "Home state",
+  "description": "Home sections (new tiles and presets, recents grid, running apps strip), search and filter, HomeLayout column math, and HomeModel, the home window's observable view-model.",
+  "technology": "Swift 6, Foundation (FoundationEssentials), Linux and macOS",
+  "paths": [
+    "Sources/SuiteModel/Home/"
+  ],
+  "order": 100
+}

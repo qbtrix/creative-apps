@@ -1,0 +1,10 @@
+{
+  "id": "suite-fakes",
+  "name": "Fakes and fixtures",
+  "description": "A fake per contract with an unavailable reason, and SuiteFixtures: the journeys' store contents, written into the live store by the launcher.",
+  "technology": "Swift 6, Foundation (FoundationEssentials), Linux and macOS",
+  "paths": [
+    "Sources/SuiteModel/Fakes/"
+  ],
+  "order": 40
+}

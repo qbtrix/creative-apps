@@ -1,0 +1,10 @@
+{
+  "id": "suite-handoff",
+  "name": "Hand-offs",
+  "description": "HandOff values (verb, payload, return address), the versioned codec and the lifecycle (pending, accepted, returned, cancelled, expired).",
+  "technology": "Swift 6, Foundation (FoundationEssentials), Linux and macOS",
+  "paths": [
+    "Sources/SuiteModel/HandOff/"
+  ],
+  "order": 80
+}

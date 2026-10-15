@@ -1,0 +1,10 @@
+{
+  "id": "suite-model",
+  "name": "SuiteModel",
+  "description": "Linux-safe values, contracts, fakes and pure logic shared by every app and the launcher. Foundation only; imports no app Model and no engine.",
+  "technology": "Swift 6, Foundation (FoundationEssentials), Linux and macOS",
+  "tags": [
+    "internal"
+  ],
+  "order": 120
+}

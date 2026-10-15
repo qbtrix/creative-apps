@@ -1,0 +1,10 @@
+{
+  "id": "suite-routing",
+  "name": "Routing",
+  "description": "Which app opens a type, the Open In list for a document, and Finder routing decisions for the launcher.",
+  "technology": "Swift 6, Foundation (FoundationEssentials), Linux and macOS",
+  "paths": [
+    "Sources/SuiteModel/Routing/"
+  ],
+  "order": 70
+}

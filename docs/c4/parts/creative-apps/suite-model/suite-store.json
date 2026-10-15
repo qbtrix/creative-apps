@@ -1,0 +1,10 @@
+{
+  "id": "suite-store",
+  "name": "Suite store",
+  "description": "SuiteLocations (the support folder, -SuiteSupportDir override) and FileStore: revisioned JSON files written by atomic replace under an exclusive lock file, merged with the caller's pure merge.",
+  "technology": "Swift 6, Foundation (FoundationEssentials), Linux and macOS",
+  "paths": [
+    "Sources/SuiteModel/Store/"
+  ],
+  "order": 20
+}
