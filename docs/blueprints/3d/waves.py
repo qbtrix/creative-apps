@@ -60,7 +60,7 @@ features = [
             A+"PrismViewportView.swift"]
          + [A+f"PrismWindow+{a}.swift" for a in areas] + [A+f"PrismInspector+{s}.swift" for s in inspector]
          + [T+f"{c}ContractTests.swift" for c in contracts]
-         + [T+"PrismCommandTests.swift", T+"PrismFixturesTests.swift", T+"PrismEditTests.swift", T+"PrismBudget.swift",
+         + [T+"PrismCommandTests.swift", T+"PrismToolsTests.swift", T+"PrismFixturesTests.swift", T+"PrismEditTests.swift", T+"PrismBudget.swift",
             T+"PrismFoundationBudgetTests.swift", SN+"PrismWindowSnapshots.swift", U+"PrismJourneyTests.swift"]),
   dict(wave=1, id="viewport", name="See and navigate the scene; select objects",
        tier="p1", waits_core="none (RealityKit draws; the draw list is Model code)", waits_other="SuiteUI QH-4 #333 (journey files)",
@@ -116,7 +116,7 @@ features = [
        proves="P-J12, P-J13, P-J14; PB-13",
        owns=stubs_of("look") + contract_tests("look")
          + [M+"PrismMaterials.swift", M+"PrismLights.swift", M+"PrismCameras.swift", A+"PrismMaterialList.swift",
-            T+"PrismMaterialsTests.swift", T+"PrismLightsTests.swift", T+"PrismCamerasTests.swift",
+            T+"PrismMaterialsTests.swift", T+"PrismLightsTests.swift", T+"PrismCamerasTests.swift", T+"PrismLookBudgetTests.swift",
             SN+"PrismLookSnapshots.swift", U+"PrismJourneyTests+Look.swift"]),
   dict(wave=2, id="keys", name="Key, ease and play",
        tier="p1", waits_core="none (FlareCore Keyframe, Easing and Timeline.value)",
