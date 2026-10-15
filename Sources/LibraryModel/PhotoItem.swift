@@ -25,12 +25,22 @@ public struct PhotoItem: Identifiable, Sendable, Hashable {
     public internal(set) var rating: Int  // stars, 0...5
     public internal(set) var flag: PhotoFlag
     public internal(set) var label: PhotoLabel?
+    /// The file's absolute path; nil for a generated sample. Equal to `id` for an imported photo.
+    public let path: String?
+    /// After the Exif orientation; samples are 4032 × 3024.
+    public let pixelSize: PixelSize
+    /// Edit instructions; neutral until the person develops the photo.
+    public internal(set) var develop: DevelopSettings
+    /// Whether the file can be read now; set when a decode fails or succeeds.
+    public internal(set) var availability: PhotoAvailability
 
     /// `id` defaults to the name; two photos may share a name but not an id.
     /// `isFlagged` makes it a pick unless `flag` says otherwise.
     public init(
         id: String? = nil, name: String, captureDate: Date, color: Color3, rating: Int = 0,
-        isFlagged: Bool = false, label: PhotoLabel? = nil, flag: PhotoFlag? = nil
+        isFlagged: Bool = false, label: PhotoLabel? = nil, flag: PhotoFlag? = nil, path: String? = nil,
+        pixelSize: PixelSize = PixelSize(width: 4032, height: 3024), develop: DevelopSettings = .neutral,
+        availability: PhotoAvailability = .available
     ) {
         self.id = id ?? name
         self.name = name
@@ -39,6 +49,10 @@ public struct PhotoItem: Identifiable, Sendable, Hashable {
         self.rating = min(max(rating, 0), 5)
         self.flag = flag ?? (isFlagged ? .pick : .none)
         self.label = label
+        self.path = path
+        self.pixelSize = pixelSize
+        self.develop = develop
+        self.availability = availability
     }
 
     /// A pick: Favorites shows these.
@@ -49,10 +63,18 @@ public struct PhotoItem: Identifiable, Sendable, Hashable {
         [color.c0, color.c1, color.c2].map { UInt8(($0 * 255).rounded()) } + [255]
     }
 
+    /// The same photo at another pixel size (fakes use it for a crop's shape).
+    func withSize(_ size: PixelSize) -> PhotoItem {
+        PhotoItem(
+            id: id, name: name, captureDate: captureDate, color: color, rating: rating, label: label, flag: flag,
+            path: path, pixelSize: size, develop: develop, availability: availability)
+    }
+
     /// The same photo under another id.
     func withID(_ newID: String) -> PhotoItem {
         PhotoItem(
-            id: newID, name: name, captureDate: captureDate, color: color, rating: rating, label: label, flag: flag)
+            id: newID, name: name, captureDate: captureDate, color: color, rating: rating, label: label, flag: flag,
+            path: path, pixelSize: pixelSize, develop: develop, availability: availability)
     }
 }
 
@@ -73,3 +95,31 @@ public enum LibrarySort: String, CaseIterable, Sendable, Hashable {
 
 /// What the content area shows: the grid, or one photo in the loupe.
 public enum LibraryMode: Sendable, Hashable { case grid, loupe }
+
+/// Whether a photo's file can be read; `help` is the grid cell's tooltip.
+public enum PhotoAvailability: Hashable, Sendable {
+    case available
+    case missing
+    case unreadable(String)
+
+    /// Nil while available; else what the cell's help says.
+    public var help: String? {
+        switch self {
+        case .available: nil
+        case .missing: "The file is missing."
+        case .unreadable(let reason): "Library can't read this file: \(reason)."
+        }
+    }
+}
+
+extension PhotoItem {
+    /// The loupe photo's and grid cell's accessibility value, e.g.
+    /// "3 stars, Picked, Red"; "No stars" when unrated. Journeys read it.
+    public var cullSummary: String {
+        var parts = [rating == 0 ? "No stars" : rating == 1 ? "1 star" : "\(rating) stars"]
+        if flag == .pick { parts.append("Picked") }
+        if flag == .reject { parts.append("Rejected") }
+        if let label { parts.append(label.rawValue) }
+        return parts.joined(separator: ", ")
+    }
+}
