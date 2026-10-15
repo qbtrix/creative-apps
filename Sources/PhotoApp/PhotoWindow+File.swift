@@ -109,7 +109,8 @@ final class PhotoFileSession {
 
     private nonisolated static let recentKey = "PhotoRecentFiles"
 
-    private nonisolated static func storedRecent() -> [URL] {
+    /// The saved list; Open Recent reads it with no window open.
+    nonisolated static func storedRecent() -> [URL] {
         (UserDefaults.standard.stringArray(forKey: recentKey) ?? []).map { URL(fileURLWithPath: $0) }
     }
 
