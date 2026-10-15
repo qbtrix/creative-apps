@@ -174,6 +174,7 @@ public struct PhotoWorkspace: Sendable {
         history = PhotoHistory()
         // Only an opened file has a name; a new canvas starts unnamed.
         history.baseName = name == nil ? "New Image" : "Open"
+        savedStepID = currentStepID
         selectedLayerID = insertLayer(named: "Background", pixels: background, kind: .pixels, at: 0)
         touch(.all)
     }
