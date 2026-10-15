@@ -1,7 +1,7 @@
 // ShapeFakesTests.swift: the LM-0a2b fake shapes on the `empty` and `bounce` fixtures (docs/blueprints/flare.md, 7.1):
 // a rectangle commit is one "Undo Add Rectangle" entry, Shift gives equal sides, a scale keeps the opposite handle
 // within 1e-9, copy then paste adds "Ball copy" in one "Undo Paste", and garbage paste data throws "Nothing to paste.";
-// and LM-0a2c's path edit, item move and delete.
+// and LM-0a2c's path edit, item move and delete; a move with text refuses as LiveShapes does.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -115,25 +115,50 @@ func garbagePasteDataThrowsNothingToPaste(_ text: String) {
     #expect(engine.document == FlareFixtures.bounce && !engine.canUndo)
 }
 
-// Texts move by position and instances by transform, in the same one "Move" entry as shapes.
-@Test func aMoveTakesTextsAndInstancesToo() throws {
+// A shape and an instance move in one "Move" entry; deleting the shape keeps a layer its instance still holds.
+@Test func aMoveTakesShapesAndInstancesTogether() throws {
+    let doc = withTextAndInstance()
+    var engine = CommandEngine(document: doc)
+    let instance = StageAddress(owner: scene, layerID: "shadow", item: .instance(0))
+    try shapes.translate([item("shadow"), instance], dx: 3, dy: -4, in: &engine)
+    #expect(layers(engine)[1].instances[0].transform == Transform(x: 13, y: 16) && engine.undoActionName == "Undo Move")
+    try shapes.delete([item("shadow")], in: &engine)
+    #expect(layers(engine).count == 3 && layers(engine)[1].shapes.isEmpty)
+    try shapes.delete([textAddress, instance], in: &engine)
+    #expect(layers(engine).map(\.id) == ["background", "ball"])
+    for _ in 0..<3 { try engine.undo() }
+    #expect(engine.document == doc)
+}
+
+// No FlareCore command moves text, so a selection with a text item refuses as a whole, as LiveShapes does.
+@Test func aMoveWithTextThrowsAndChangesNothing() {
+    let doc = withTextAndInstance()
+    var engine = CommandEngine(document: doc)
+    #expect(FakeShapes.textMove == "Text can't be moved yet.")
+    #expect(throws: CommandError.invalidDocument(FakeShapes.textMove)) {
+        try shapes.translate([item("shadow"), textAddress], dx: 3, dy: -4, in: &engine)
+    }
+    #expect(engine.document == doc && !engine.canUndo)
+}
+
+// Fake and live refuse a shape and text move with the same words and leave the same document.
+@Test func fakeAndLiveRefuseATextMoveAlike() {
+    let doc = withTextAndInstance()
+    var fake = CommandEngine(document: doc), live = CommandEngine(document: doc)
+    let picked = [item("shadow"), textAddress]
+    let fakeError = #expect(throws: CommandError.self) { try FakeShapes().translate(picked, dx: 3, dy: -4, in: &fake) }
+    let liveError = #expect(throws: CommandError.self) { try LiveShapes().translate(picked, dx: 3, dy: -4, in: &live) }
+    #expect(fakeError == liveError && liveError == CommandError.invalidDocument(FakeShapes.textMove))
+    #expect(fake.document == live.document && fake.document == doc && !fake.canUndo && !live.canUndo)
+}
+
+private let textAddress = StageAddress(owner: scene, layerID: "shadow", item: .text(0))
+private func withTextAndInstance() -> Document {
     var doc = FlareFixtures.bounce
     doc.scenes[0].layers[1].texts = [TextShape(string: "Hi", fontFamily: "Helvetica", fontSize: 12, position: Point(x: 1, y: 2))]
     doc.symbols = [Symbol(id: "s", name: "S", layers: [])]
     doc.scenes[0].layers[1].instances = [Instance(symbolID: "s", transform: Transform(x: 10, y: 20))]
-    var engine = CommandEngine(document: doc)
-    let text = StageAddress(owner: scene, layerID: "shadow", item: .text(0))
-    let instance = StageAddress(owner: scene, layerID: "shadow", item: .instance(0))
-    try shapes.translate([item("shadow"), text, instance], dx: 3, dy: -4, in: &engine)
-    #expect(layers(engine)[1].texts[0].position == Point(x: 4, y: -2) && engine.undoActionName == "Undo Move")
-    #expect(layers(engine)[1].instances[0].transform == Transform(x: 13, y: 16))
-    // Deleting only the shape keeps the layer, since its text and instance remain.
-    try shapes.delete([item("shadow")], in: &engine)
-    #expect(layers(engine).count == 3 && layers(engine)[1].shapes.isEmpty)
-    try shapes.delete([text, instance], in: &engine)
-    #expect(layers(engine).map(\.id) == ["background", "ball"])
-    for _ in 0..<3 { try engine.undo() }
-    #expect(engine.document == doc)
+    return doc
 }
 
 // Background is locked in `bounce`: each write throws `layerLocked` and leaves the document and undo stack alone.

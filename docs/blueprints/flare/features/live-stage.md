@@ -58,7 +58,7 @@ Model half on the live types, in
 |---|---|---|---|
 | Stage | no scene with that id: a 0 × 0 list with no items (as `FakeStage`); an empty scene: the background only | a missing or cyclic symbol: that instance is skipped, nothing throws; a text item is listed with an empty path and counted in `hiddenTextCount` | none (the list is built per frame, inside QB-L6) |
 | Selection | a click on empty stage or on a locked or hidden layer: `hit` returns nil | – | – |
-| Tool rail | `unavailableHelp(for:)` is nil for every tool (the workspace's `toolHelp` covers "no document") | a draw above a locked layer throws `CommandError.layerLocked(<id>)`, which the workspace turns into "Unlock <layer> to draw on it."; a garbage paste throws "Nothing to paste."; moving a text item throws "Text can't be moved yet." (no FlareCore command moves text) | – |
+| Tool rail | `unavailableHelp(for:)` is nil for every tool (the workspace's `toolHelp` covers "no document") | a draw above a locked layer throws `CommandError.layerLocked(<id>)`, which the workspace turns into "Unlock <layer> to draw on it."; a garbage paste throws "Nothing to paste."; moving a text item throws "Text can't be moved yet." (no FlareCore command moves text), and a selection that includes text refuses as a whole with that message, nothing moved and no undo entry, in `FakeShapes` as in `LiveShapes` | – |
 
 ## Contract slice
 

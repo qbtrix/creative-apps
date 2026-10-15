@@ -3,7 +3,7 @@
 // anchor adds nothing, it closes on 3 anchors that far apart, and one whose extent is under it doesn't commit (#561), at
 // the draft's fit scale (#619); a click within `closeDistance` stage points of its first anchor closes it (#649). Each write
 // is one group named by section 2, of real FlareCore commands or `FixtureEdit` where FlareCore has none (path edit,
-// text and instance move, instance delete).
+// instance move, instance delete); a move with a text item throws `textMove` before anything changes, as LiveShapes.
 // Box gestures follow the not-animated / animated rule; a delete that empties a layer removes the layer. The pasteboard holds `AddLayer` envelopes from
 // `CommandRegistry.builtIn`. With `unavailable` set, reads are empty and every write throws it.
 #if canImport(FoundationEssentials)
@@ -20,6 +20,8 @@ public struct FakeShapes: ShapeBuilding {
 
     /// What `paste` throws for data that holds no layer.
     public static let nothingToPaste = "Nothing to paste."
+    /// What `translate` throws for a selection with a text item, as LiveShapes does; FlareCore has no text move.
+    public static let textMove = "Text can't be moved yet."
     /// Sides of a fake ellipse's polygon.
     public static let ellipseSides = 32
     /// How near the first pen anchor a click closes the path, in stage (view) points: `FlareWorkspace.hitSlop`, so
@@ -150,19 +152,20 @@ public struct FakeShapes: ShapeBuilding {
         }
     }
 
-    /// Shapes move by `TranslateShape`; texts (position) and instances (transform x, y) by `FixtureEdit`, since
-    /// FlareCore has no command for them yet.
+    /// Shapes move by `TranslateShape` and instances (transform x, y) by `FixtureEdit`; a selection with a text
+    /// item throws `textMove` as a whole before anything changes, as LiveShapes does.
     public func translate(_ items: [StageAddress], dx: Double, dy: Double, in engine: inout CommandEngine) throws {
         try available()
+        let picked = Self.unique(items)
+        if picked.contains(where: { if case .text = $0.item { true } else { false } }) {
+            throw CommandError.invalidDocument(Self.textMove)
+        }
         try engine.group("Move") { engine in
-            for a in Self.unique(items) {
+            for a in picked {
                 switch a.item {
                 case .shape(let i):
                     try engine.perform(TranslateShape(owner: a.owner, layerID: a.layerID, index: i, dx: dx, dy: dy))
-                case .text: try Self.editItem("Move", a, in: &engine) { layer, i in
-                    guard layer.texts.indices.contains(i) else { throw CommandError.invalidIndex(i) }
-                    layer.texts[i].position = Point(x: layer.texts[i].position.x + dx, y: layer.texts[i].position.y + dy)
-                }
+                case .text: throw CommandError.invalidDocument(Self.textMove)
                 case .instance: try Self.editItem("Move", a, in: &engine) { layer, i in
                     guard layer.instances.indices.contains(i) else { throw CommandError.invalidIndex(i) }
                     layer.instances[i].transform.x += dx
