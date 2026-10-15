@@ -1,9 +1,11 @@
 // HaloTransport.swift: the status bar's transport (viewer-playback #37,
-// VP-10): six plain SF Symbol buttons sending their HaloCommand, disabled
-// with `unavailableHelp(for:)` as the tooltip while the Model can't act, and
-// drawn in textTertiary then so they look disabled inside the pill. Play
-// shows pause.fill while playing and reads `playLabel` as its value; Loop
-// reads `loopLabel`. It owns the HaloPlaybackDriver: running while
+// VP-10): five plain SF Symbol buttons and a Loop toggle sending their
+// HaloCommand, disabled with `unavailableHelp(for:)` as the tooltip while the
+// Model can't act, and drawn in textTertiary then so they look disabled
+// inside the pill. Play shows pause.fill while playing and reads `playLabel`
+// as its value. Loop is a button-style Toggle that reads `loopLabel` and
+// draws its on state (system highlight, accent ink) so a person can see
+// whether looping is on. It owns the HaloPlaybackDriver: running while
 // `model.playback.playing`, stopped otherwise or once the transport leaves
 // the screen; each refresh sends `.tick(now)` through `perform`.
 import HaloModel
@@ -36,13 +38,14 @@ struct HaloTransport: View {
         HStack(spacing: SuiteSpacing.xs) {
             ForEach(Self.items) { item in
                 let help = model.unavailableHelp(for: item.command)
-                Button(model.title(for: item.command), systemImage: symbol(for: item)) { perform(item.command) }
+                control(for: item)
                     .labelStyle(.iconOnly)
                     .buttonStyle(.borderless)
                     .disabled(help != nil)
                     // Its own ink, so the status bar pill's textSecondary can't
-                    // draw a disabled button as live: tertiary while disabled.
-                    .foregroundStyle(help == nil ? SuiteColor.textSecondary : SuiteColor.textTertiary)
+                    // draw a disabled button as live: tertiary while disabled,
+                    // accent for Loop while it is on.
+                    .foregroundStyle(ink(for: item.command, enabled: help == nil))
                     .help(help ?? model.title(for: item.command))
                     .accessibilityValue(Text(verbatim: value(for: item.command)))
                     .haloControl(id: item.id, enabled: help == nil, help: help)
@@ -50,6 +53,26 @@ struct HaloTransport: View {
         }
         .onChange(of: model.playback.playing, initial: true) { _, playing in follow(playing: playing) }
         .onDisappear { driver?.stop() }
+    }
+
+    /// Loop is a button-style Toggle, so the system draws its on state;
+    /// the rest are plain buttons sending their command.
+    @ViewBuilder private func control(for item: Item) -> some View {
+        if item.command == .toggleLoop {
+            Toggle(isOn: Binding(get: { model.playback.loops }, set: { _ in perform(.toggleLoop) })) {
+                Label(model.title(for: item.command), systemImage: item.symbol)
+            }
+            .toggleStyle(.button)
+            .tint(SuiteColor.accent)
+        } else {
+            Button(model.title(for: item.command), systemImage: symbol(for: item)) { perform(item.command) }
+        }
+    }
+
+    /// Tertiary while disabled, accent for Loop while on, else secondary.
+    private func ink(for command: HaloCommand, enabled: Bool) -> Color {
+        guard enabled else { return SuiteColor.textTertiary }
+        return command == .toggleLoop && model.playback.loops ? SuiteColor.accent : SuiteColor.textSecondary
     }
 
     /// Play's symbol turns to pause while playing; the rest keep theirs.

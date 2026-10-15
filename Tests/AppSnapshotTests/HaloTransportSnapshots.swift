@@ -1,8 +1,10 @@
 // HaloTransportSnapshots.swift: HaloViewer on the three-layers fixture (fake
 // services) at frame 12, so all six transport buttons in the status bar are
 // enabled: paused (play.fill, Play reads "Paused") and playing (pause.fill,
-// Play reads "Playing", Loop "On"). Light and Dark. Writes
-// halo-transport-paused-*.png and halo-transport-playing-*.png (VP-10).
+// Play reads "Playing", Loop "On"), and paused with Loop off (Loop's toggle
+// unhighlighted, reads "Off"). Light and Dark. Writes
+// halo-transport-paused-*.png, halo-transport-playing-*.png and
+// halo-transport-loop-off-*.png (VP-10).
 // macOS only.
 import HaloModel
 import SwiftUI
@@ -35,5 +37,14 @@ import Testing
         #expect(project.unavailableHelp(for: .playPause) == nil)
         try snapshot(HaloViewer(model: project), name: "halo-transport-playing-light", scheme: .light)
         try snapshot(HaloViewer(model: project), name: "halo-transport-playing-dark", scheme: .dark)
+    }
+
+    @Test func loopOff() throws {
+        var project = try project()
+        project.setLoops(false)
+        #expect(project.loopLabel == "Off")
+        #expect(project.unavailableHelp(for: .toggleLoop) == nil)
+        try snapshot(HaloViewer(model: project), name: "halo-transport-loop-off-light", scheme: .light)
+        try snapshot(HaloViewer(model: project), name: "halo-transport-loop-off-dark", scheme: .dark)
     }
 }
