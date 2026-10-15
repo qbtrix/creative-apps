@@ -19,7 +19,11 @@ style). Anatomy round 2 (CI run 38694361192): fixes #1029 (a fixture launch
 stays fitted while the window settles), #1030 (Eyedropper hint, Preview data
 tooltip, refusal in the caption type) and #1031 (fitted-picture, unknown-fixture
 and `.live` Eyedropper journey checks; the clone and heal budget times 20 px
-moves). Needs-ui filed: #952, #953, #954. Gaps filed from the rounds (v1
+moves). Anatomy round 3 (CI runs 38700713285 and 38704216123): fixes #1050
+(the fixture and launch journeys check geometry and the disabled Eyedropper
+instead of the zoom pill's label and a hover tooltip) and #1053 (the QB-F1
+tools tests compare what each tool changes, so a dead stroke tool fails).
+Needs-ui filed: #952, #953, #954, #1049. Gaps filed from the rounds (v1
 behaviour or follow-ups): #1024, #1025, #1026, #1027, #1032. The paint
 refusal now reads "Select an image layer in the Layers tab to paint on."
 
