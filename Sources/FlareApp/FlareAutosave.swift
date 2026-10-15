@@ -1,12 +1,13 @@
 // FlareAutosave.swift: the recovery file and the autosave writer (docs/blueprints/flare/features/mac-platform.md,
 // MP-5). `RecoveryFile` writes atomically (`Data.write(to:options: .atomic)`, the parent folder made first), reads
 // back the bytes with their modification date, and removes itself, ignoring a missing file. `FlareAutosave` keeps
-// the last edit's time; `tick(model:now:)` writes `recoveryData()` off the main actor once per edit when the model
-// says autosave is due (`autosaveDue`), `didSave()` removes the file, and `willQuit(model:)` writes once more while
-// dirty. Times come in as arguments, never from a clock, so tests drive it. On launch (MP-6), `launch()` reads and
+// the last edit's time; `tick(model:now:)` encodes `recoveryData()` and writes it in one detached task, off the main
+// actor, once per edit when the model says autosave is due (`autosaveDue`), `didSave()` removes the file, and
+// `willQuit(model:)` encodes and writes once more, off the main actor, while dirty. Times come in as arguments, never from a clock, so tests drive it. On launch (MP-6), `launch()` reads and
 // decodes the recovery file in a detached task, off the main thread, and returns a `RecoveryOffer` ("Restore the
 // unsaved animation from <time>?"), or nil when there is no file; a damaged file is removed with no offer.
-// `restore(_:into:)` lands the document through `restoreRecovery` and removes the file; `discard()` removes it.
+// `restore(_:into:)` lands the document through `restoreRecovery` and keeps the file, so a second crash before the
+// next edit or save still recovers it; `didSave()` or `discard()` removes it.
 // No SwiftUI: F17c (#393) wires it to the window and shows the offer.
 #if os(macOS)
 import FlareCore
@@ -81,14 +82,13 @@ final class FlareAutosave {
         lastEdit = time
     }
 
-    /// Writes the recovery bytes off the main actor when autosave is due and this edit isn't written yet.
-    func tick(model: FlareWorkspace, now: Double) async {
-        guard let edit = lastEdit, edit != writtenEdit, model.autosaveDue(lastEdit: edit, now: now),
-            let data = model.recoveryData()
-        else { return }
+    /// Encodes and writes the recovery bytes off the main actor when autosave is due and this edit isn't written
+    /// yet. `offMain` runs inside the detached encode and write, for tests.
+    func tick(model: FlareWorkspace, now: Double, offMain: @escaping @Sendable () -> Void = {}) async {
+        guard let edit = lastEdit, edit != writtenEdit, model.autosaveDue(lastEdit: edit, now: now) else { return }
         writtenEdit = edit
         let saved = saves
-        let succeeded = await write(data)
+        let succeeded = await write(model, offMain: offMain)
         if saves != saved {
             recovery.remove()
         } else if !succeeded, writtenEdit == edit {
@@ -106,8 +106,7 @@ final class FlareAutosave {
 
     /// The app is quitting: writes the recovery bytes once more while the document is dirty.
     func willQuit(model: FlareWorkspace) async {
-        guard let data = model.recoveryData() else { return }
-        _ = await write(data)
+        _ = await write(model, offMain: {})
     }
 
     /// Reads and decodes the recovery file off the main thread: the offer, or nil when there is no file. A file
@@ -129,10 +128,10 @@ final class FlareAutosave {
         return RecoveryOffer(document: document, date: date)
     }
 
-    /// Restore: lands the offer's document as unsaved, untitled work and removes the recovery file.
+    /// Restore: lands the offer's document as unsaved, untitled work. The recovery file stays until `didSave()` or
+    /// `discard()`, so a second crash before the next edit or save still recovers it.
     func restore(_ offer: RecoveryOffer, into model: inout FlareWorkspace) {
         model.restoreRecovery(offer.document)
-        recovery.remove()
     }
 
     /// Discard: removes the recovery file.
@@ -140,16 +139,17 @@ final class FlareAutosave {
         recovery.remove()
     }
 
-    /// Writes `data` in a detached task, off the main actor; whether it landed.
-    private func write(_ data: Data) async -> Bool {
+    /// Encodes `model`'s recovery bytes and writes them in one detached task, off the main actor; whether they
+    /// landed. A clean model has no bytes and writes nothing.
+    private func write(_ model: FlareWorkspace, offMain: @escaping @Sendable () -> Void) async -> Bool {
         let recovery = recovery
-        let task = Task.detached(priority: .utility) { try await recovery.write(data) }
-        do {
-            try await task.value
+        let task = Task.detached(priority: .utility) { () async throws -> Bool in
+            offMain()
+            guard let data = model.recoveryData() else { return false }
+            try await recovery.write(data)
             return true
-        } catch {
-            return false
         }
+        return (try? await task.value) ?? false
     }
 }
 #endif
