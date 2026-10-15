@@ -4,7 +4,7 @@ Issue: #812 · Packet: docs/blueprints/photo/features/photo-seams.md
 Run: act-1a13d5e8ca4-huz5 · Session: cloud lead session · Started: 2026-10-15T02:23Z
 Stage: 4 round 3 (waiting on CI)
 Base: c4ec07810683a4bc7d62dcc5205705229f248a71
-Next: wait for the next dev CI run containing 1dcd1a6 that runs the UI journeys (another lead's feature-done or the daily run); then round 3 panel
+Next: run 38704216123 (731, 92db316, contains 1dcd1a6) is in progress; when it finishes with journeys, run the round 3 panel with the same six lenses
 
 ## Tasks
 

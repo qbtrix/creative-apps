@@ -81,3 +81,4 @@ utc	stage	event	ref	note
 2026-10-15T07:42Z	4	pr-merged	#1031	round 2 fixes done
 2026-10-15T07:42Z	4	pr-opened	#1033	feature-done: round 2 status
 2026-10-15T08:00Z	4	ci-run	38700713285	red on SuiteUI FrameProbeTests timing; journeys skipped; noted on #763
+2026-10-15T08:30Z	4	heartbeat	38704216123	round 3 waits on run 731 (contains all round 2 fixes)
