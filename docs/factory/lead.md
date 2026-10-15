@@ -40,11 +40,12 @@ Hand this to every session (the lead and each agent it starts) verbatim.
 - **Shared shell files need macOS proof.** A PR that changes or renames a
   `MAC_GATED` file in `scripts/fast-lane.sh` (`SuiteWindow.swift`,
   `EditorShell.swift`, `ToolbarGroup.swift`, `Tokens.swift` in `Sources/SuiteUI/`)
-  merges only once a completed CI run on its current head has a green
-  `macOS` job (see #962, #975). You can't dispatch it, so the lane does, once
-  per head, comments the run URL, and merges on a later sweep when it is
-  green. A red run waits for your next push, which gets a new run. A
-  `Mac-Check: <run url>` line the supervisor adds for a green run counts too.
+  merges only once a completed CI run on its current head has a `macOS` job
+  that is green or fails only tests that also fail in the latest completed
+  dev run (see #962, #975). You can't dispatch it, so the lane does, once per
+  head, comments the run URL, and merges on a later sweep when it passes. A
+  new failure is refused by test name and waits for your next push. A
+  `Mac-Check: <run url>` line the supervisor adds counts too.
 - **You can read runs.** `gh run list --workflow ci.yml --branch dev`, then
   `gh run download <id> -n ui-screens` (whole-window PNGs, `contact-sheet.html`,
   `audit-*.json`) and `-n snapshots`; or the GitHub MCP `actions_*` and

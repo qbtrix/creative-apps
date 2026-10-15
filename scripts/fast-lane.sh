@@ -22,7 +22,8 @@
 # the head, or the worker's marker in the PR body, a line `Fast-Check: pass`
 # followed by the line `Head: <full head sha>` for the current head. A PR that
 # changes or renames a MAC_GATED shared shell file also needs a completed CI
-# run on its head whose macOS job succeeded (mac_gate): the run a body line
+# run on its head whose macOS job passed or failed only where dev fails
+# (mac_gate): the run a body line
 # `Mac-Check: <run url>` names, or else the latest CI run on the head, which
 # the lane dispatches itself when there is none. A Belt PR
 # (a body line starting `Belt-Run:` or `Belt-Test:`) also needs Belt's
@@ -116,9 +117,10 @@ AUDIT_REASON="loosens the app audit: needs the captain's review"
 # journeys: #962 moved SuiteWindow's inspector, merged on the Linux gate, broke
 # Flare, Library, Halo and Suite on dev (run 38679533707) and was reverted in
 # #975. A PR that changes or renames one merges only with proof from macOS: a
-# completed CI run on its head whose macOS job succeeded. Cloud sessions can't
-# dispatch workflows (403, #1040), so the lane dispatches CI on the PR's head
-# branch itself, once per head, and merges when that run is green. A
+# completed CI run on its head whose macOS job passed, or failed only tests
+# that also fail in the latest completed dev run (mac_judge). Cloud sessions
+# can't dispatch workflows (403, #1040), so the lane dispatches CI on the PR's
+# head branch itself, once per head, and merges when that run passes. A
 # `Mac-Check: <run url>` line a supervisor adds by hand counts too. Not
 # PROTECTED: agents may edit these, with that proof.
 MAC_GATED=(Sources/SuiteUI/SuiteWindow.swift Sources/SuiteUI/EditorShell.swift
@@ -189,29 +191,63 @@ mac_gated() {
   grep -Fx -f <(printf '%s\n' "${MAC_GATED[@]}") "$1" | sort -u | paste -sd, - | sed 's/,/, /g' || true
 }
 
+# failed_tests: the failing test identifiers in a job log on stdin, one per
+# line: XCTest's `-[Module.Class testName]` from its "Test Case '...' failed"
+# lines, and Swift Testing's `Test name()` from its "✘ Test name() failed" lines.
+failed_tests() {
+  sed -e 's/^[0-9T:.-]*Z //' -e $'s/\x1b\\[[0-9;]*m//g' \
+    | sed -n -e "s/.*Test Case '\(-\[[^]]*\]\)' failed.*/\1/p" -e 's/.*✘ \(Test .*\) failed after .*/\1/p' \
+    | sort -u || true
+}
+
 # mac_judge <run.json> <head sha>: nothing when the run (`gh run view --json
 # workflowName,status,headSha,jobs`) is a completed CI run on <head sha> whose
-# macOS job succeeded, else what is wrong with it.
+# macOS job passed, or failed only where dev fails too; else what is wrong.
+# Dev has been red for days at a time from other lines, so a failed macOS job
+# passes when the run's `failedTests` (failed_tests on its log) are all in
+# `.base.failedTests`, the latest completed dev run's, its failed steps are
+# all failed there too, and it has at least one failing test to compare (a
+# build or setup failure has none). evaluate adds both (mac_add_failures).
 mac_judge() {
   local runjson='{}'
   [[ -z "$1" || ! -s "$1" ]] || runjson=$(cat "$1")
   jq -r --arg wf "${CI_WORKFLOWS[0]}" --arg job "$MAC_JOB" --arg head "$2" '
+    def lc: (. // "") | ascii_downcase;
     ([.jobs[]? | select(.name == $job)] | last) as $j
+    | ([$j.steps[]? | select((.conclusion | lc) == "failure") | .name]) as $steps
+    | (.failedTests // []) as $tests
     | if (.workflowName // "") == "" then "its run could not be read"
       elif .workflowName != $wf then "its run is the \(.workflowName) workflow, not \($wf)"
-      elif ((.status // "") | ascii_downcase) != "completed" then "its run has not completed"
+      elif (.status | lc) != "completed" then "its run has not completed"
       elif $j == null then "its run has no \($job) job"
-      elif (($j.conclusion // "") | ascii_downcase) != "success" then "its \($job) job is \($j.conclusion // "unfinished")"
+      elif ($j.conclusion | lc) == "success" then
+        (if (.headSha // "") != $head then "its run is on \(.headSha // "no head"), not the head \($head)" else empty end)
+      elif ($j.conclusion | lc) != "failure" then "its \($job) job is \($j.conclusion // "unfinished")"
+      elif .base == null then "its \($job) job failed, and no completed \($job) run on dev could be read to compare"
+      elif ($tests | length) == 0 then "its \($job) job failed in \($steps | join(", ")) with no failing test to compare with dev"
+      elif ($tests - .base.failedTests | length) > 0 then
+        ($tests - .base.failedTests) as $new
+        | "its \($job) job has \($new | length) failing test(s) that the latest dev run (\(.base.url)) does not: \($new | join(", "))"
+      elif ($steps - .base.failedSteps | length) > 0 then
+        "its \($job) job failed in \($steps - .base.failedSteps | join(", ")), which passed in the latest dev run (\(.base.url))"
       elif (.headSha // "") != $head then "its run is on \(.headSha // "no head"), not the head \($head)"
       else empty end' <<<"$runjson" 2>/dev/null || echo "its run could not be read"
 }
 
+# mac_dev_note <run.json>: when the run's macOS job failed (and mac_judge
+# passed it), a note naming the dev run with the same failures.
+mac_dev_note() {
+  jq -r --arg job "$MAC_JOB" '
+    if ([.jobs[]? | select(.name == $job) | .conclusion // "" | ascii_downcase] | last) == "failure"
+    then " (its failing tests also fail on dev: \(.base.url))" else "" end' "$1" 2>/dev/null || true
+}
+
 # mac_gate <pr.json> <files.txt> <mac-check run.json> <lane run.json>: nothing
 # when the PR touches no MAC_GATED path, else one line:
-#   ok|<proof>                 a green CI run on the head proves it
+#   ok|<proof>                 a CI run on the head passes mac_judge
 #   dispatch|<files>|<branch>  no CI run on the head yet: the lane starts one
 #   wait|<url>                 the CI run on the head is still going
-#   refuse|<what to do>        the CI run on the head failed on macOS
+#   refuse|<what to do>        the CI run on the head failed on macOS beyond dev
 # The Mac-Check line's run counts first (a supervisor can add one by hand);
 # otherwise the latest CI run on the head (<lane run.json>, {} when none).
 mac_gate() {
@@ -222,7 +258,7 @@ mac_gate() {
   branch=$(jq -r '.headRefName // ""' "$pr")
   url=$(mac_check_url "$pr")
   if [[ -n "$url" && -n "$(mac_run_id "$url")" && -z "$(mac_judge "${3:-}" "$head")" ]]; then
-    echo "ok|$MAC_CHECK_LINE $url"; return
+    echo "ok|$MAC_CHECK_LINE $url$(mac_dev_note "$3")"; return
   fi
   [[ -z "${4:-}" || ! -s "$4" ]] || lane=$(cat "$4")
   url=$(jq -r '.url // ""' <<<"$lane" 2>/dev/null || true)
@@ -231,9 +267,59 @@ mac_gate() {
     echo "dispatch|$gated|$branch"; return
   fi
   why=$(mac_judge "$4" "$head")
-  if [[ -z "$why" ]]; then echo "ok|macOS run $url"; return; fi
+  if [[ -z "$why" ]]; then echo "ok|macOS run $url$(mac_dev_note "$4")"; return; fi
   if [[ "$why" == "its run has not completed" ]]; then echo "wait|$url"; return; fi
-  echo "refuse|changes $gated, shared by every app's window, so it needs a green macOS run on its head $head, and the CI run the lane found there failed: $url ($why). Fix it and push; the lane dispatches CI again on the new head. A supervisor can instead add a line \`$MAC_CHECK_LINE <run url>\` naming a green CI run on this head"
+  echo "refuse|changes $gated, shared by every app's window, so it needs a macOS run on its head $head that is green or fails only where dev fails, and the CI run the lane found there doesn't: $url ($why). Fix it and push; the lane dispatches CI again on the new head. A supervisor can instead add a line \`$MAC_CHECK_LINE <run url>\` naming a green CI run on this head"
+}
+
+# mac_job_failures <run.json>: the failing tests in the log of the run's
+# failed macOS job, as a JSON array; nothing when it didn't fail or the log
+# can't be read.
+mac_job_failures() {
+  local jid log
+  jid=$(jq -r --arg job "$MAC_JOB" '[.jobs[]? | select(.name == $job and ((.conclusion // "") | ascii_downcase) == "failure")
+    | .databaseId] | last // ""' "$1" 2>/dev/null || true)
+  [[ -n "$jid" ]] || return 0
+  log=$(gh api "repos/$REPO/actions/jobs/$jid/logs" 2>/dev/null) || return 0
+  failed_tests <<<"$log" | jq -R . | jq -sc .
+}
+
+# mac_base_json: the latest completed CI run on BASE_BRANCH whose macOS job
+# passed or failed, as {url, failedTests, failedSteps}; nothing when none can
+# be read. Read once per lane run (MAC_BASE, MAC_BASE_READ).
+MAC_BASE="" MAC_BASE_READ=0
+mac_base_json() {
+  if (( ! MAC_BASE_READ )); then
+    MAC_BASE_READ=1
+    local id ids f tests
+    f=$(mktemp)
+    ids=$(gh run list -R "$REPO" --workflow "$CI_FILE" --branch "$BASE_BRANCH" --status completed --limit 10 \
+      --json databaseId --jq '.[].databaseId' 2>/dev/null || true)
+    for id in $ids; do
+      gh run view "$id" -R "$REPO" --json jobs,url >"$f" 2>/dev/null || continue
+      case "$(jq -r --arg job "$MAC_JOB" '[.jobs[]? | select(.name == $job) | .conclusion // "" | ascii_downcase] | last // ""' "$f")" in
+        success) tests='[]' ;;
+        failure) tests=$(mac_job_failures "$f"); [[ -n "$tests" ]] || continue ;;
+        *) continue ;;
+      esac
+      MAC_BASE=$(jq -c --arg job "$MAC_JOB" --argjson t "$tests" '{url, failedTests: $t,
+        failedSteps: [.jobs[]? | select(.name == $job) | .steps[]? | select(((.conclusion // "") | ascii_downcase) == "failure") | .name]}' "$f")
+      break
+    done
+    rm -f "$f"
+  fi
+  [[ -z "$MAC_BASE" ]] || echo "$MAC_BASE"
+}
+
+# mac_add_failures <run.json>: when the run's macOS job failed, adds its
+# `failedTests` and the dev run to compare with as `base` (mac_judge).
+mac_add_failures() {
+  local tests base
+  tests=$(mac_job_failures "$1")
+  [[ -n "$tests" ]] || return 0
+  base=$(mac_base_json)
+  jq --argjson t "$tests" --argjson b "${base:-null}" '.failedTests = $t | if $b == null then . else .base = $b end' \
+    "$1" >"$1.x" && mv "$1.x" "$1"
 }
 
 # audit_fetch <sha> <dir> <path>: <path> at <sha> into <dir>/<path>.
@@ -420,13 +506,20 @@ decide() {
     log "belt review: $review"
   fi
 
+  # A gated PR's macOS check is mac_gate's to judge (it may fail only where dev
+  # fails), so it leaves the red and running lists below.
+  local mac macdrop=""
+  mac=$(mac_gate "$pr" "$files" "${6:-}" "${7:-}")
+  [[ -z "$mac" ]] || macdrop="$MAC_JOB"
+
   # Drop our own check, Belt's review and Copilot review checks, then classify the rest.
   local ci_json summary
   ci_json=$(printf '%s\n' "${CI_WORKFLOWS[@]}" "${CI_CHECKS[@]}" | jq -R . | jq -s .)
   summary=$(jq -c --arg self "$SELF_WORKFLOW" --arg selfcheck "$SELF_CHECK" \
-      --arg review "$BELT_REVIEW_CONTEXT" --argjson ci "$ci_json" '
+      --arg review "$BELT_REVIEW_CONTEXT" --argjson ci "$ci_json" --arg macdrop "$macdrop" '
     [ .[]
       | select((.workflowName // "") != $self and (.name // "") != $selfcheck)
+      | select($macdrop == "" or (.name // "") != $macdrop)
       | select((.context // .name // "") != $review)
       | select(((.name // .context // "") + " " + (.workflowName // "")) | test("copilot"; "i") | not)
       | { name: (.name // .context),
@@ -466,8 +559,6 @@ decide() {
     echo "pending|no passing CI check and no $MARKER_LINE marker for head $head"; return
   fi
   if (( belt )) && [[ "$review" != "SUCCESS" ]]; then echo "pending|waiting for review"; return; fi
-  local mac
-  mac=$(mac_gate "$pr" "$files" "${6:-}" "${7:-}")
   log "mac gate: ${mac:-not gated}"
   case "$mac" in
     dispatch\|*) echo "mac-dispatch|${mac#dispatch|}"; return ;;
@@ -549,12 +640,14 @@ evaluate() {
     id=$(mac_run_id "$(mac_check_url "$tmp/pr.json")")
     if [[ -n "$id" ]]; then
       gh run view "$id" -R "$REPO" --json "$fields" >"$tmp/mac.json" 2>/dev/null || echo '{}' >"$tmp/mac.json"
+      mac_add_failures "$tmp/mac.json"
     fi
     if ! id=$(gh run list -R "$REPO" --workflow "$CI_FILE" --commit "$head" --limit 1 --json databaseId --jq '.[0].databaseId // ""'); then
       log "PR #$n: could not list CI runs on the head; the next sweep looks again"; rm -rf "$tmp"; return
     fi
     if [[ -n "$id" ]]; then
       gh run view "$id" -R "$REPO" --json "$fields" >"$tmp/lane.json" 2>/dev/null || echo '{}' >"$tmp/lane.json"
+      mac_add_failures "$tmp/lane.json"
     fi
     (( ${#audit[@]} )) || audit=("" "")
     mac=("$tmp/mac.json" "$tmp/lane.json")
@@ -675,7 +768,7 @@ main() {
   while (( $# )); do
     case "$1" in
       --dry-run) DRY_RUN=1 ;;
-      -h|--help) sed -n '2,55p' "$0"; return 0 ;;
+      -h|--help) sed -n '2,56p' "$0"; return 0 ;;
       *) prs+=("$1") ;;
     esac
     shift

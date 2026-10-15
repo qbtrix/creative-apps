@@ -184,7 +184,7 @@ mac() {
 }
 echo '[]' >"$tmp/empty.json"
 DISPATCH="mac-dispatch|Sources/SuiteUI/SuiteWindow.swift|feat/x"
-REFUSE="mac-gate|changes Sources/SuiteUI/SuiteWindow.swift, shared by every app's window, so it needs a green macOS run on its head $HEAD_SHA, and the CI run the lane found there failed: $LANE_URL"
+REFUSE="mac-gate|changes Sources/SuiteUI/SuiteWindow.swift, shared by every app's window, so it needs a macOS run on its head $HEAD_SHA that is green or fails only where dev fails, and the CI run the lane found there doesn't: $LANE_URL"
 mac "no Mac-Check line and no run on the head: the lane dispatches" "$DISPATCH" "$MARKED" "$GATED" - -
 mac "a Mac-Check run on an older head, none on the head: dispatches" "$DISPATCH" "$MAC_PR" "$GATED" ".headSha = \"$OLD_HEAD\"" -
 mac "an unreadable Mac-Check run, none on the head: dispatches" "$DISPATCH" "$MAC_PR" "$GATED" '{}' -
@@ -195,12 +195,66 @@ mac "the run on the head still going: waits, no second dispatch" "pending|waitin
   "$MARKED" "$GATED" - "$RUNNING"
 mac "the run on the head green: eligible as if Mac-Check were there" "eligible|150|2|Fast-Check marker, macOS run $LANE_URL" \
   "$MARKED" "$GATED" - .
-mac "the run on the head with a failed macOS job is refused" "$REFUSE (its macOS job is failure). Fix it and push; the lane dispatches CI again on the new head" \
+mac "a failed macOS job with no dev run to compare is refused" \
+  "$REFUSE (its macOS job failed, and no completed macOS run on dev could be read to compare). Fix it and push; the lane dispatches CI again on the new head" \
   "$MARKED" "$GATED" - "$FAILED_MAC"
 mac "a skipped macOS job is refused" "$REFUSE (its macOS job is skipped)" \
   "$MARKED" "$GATED" - '(.jobs[] | select(.name == "macOS")).conclusion = "skipped"'
 mac "a run without a macOS job is refused" "$REFUSE (its run has no macOS job)" "$MARKED" "$GATED" - '.jobs |= map(select(.name != "macOS"))'
 mac "another workflow's run is refused" "$REFUSE (its run is the Fast Lane workflow, not CI)" "$MARKED" "$GATED" - '.workflowName = "Fast Lane"'
+# Dev can be red for days from other lines: a failed macOS job passes when its
+# failing tests (evaluate reads them from the job log into failedTests) all
+# fail in the latest completed dev run too (base), matched on the identifier.
+DEV_URL="https://github.com/qbtrix/creative-apps/actions/runs/38711122431"
+T1='-[HaloJourneyTests.HaloJourneyTests testLayoutAtWidths]'
+T2='-[PhotoJourneyTests.PhotoJourneyTests testFixtureLaunch]'
+T3='-[HaloJourneyTests.HaloHistoryJourneyTests testUndoRedoEveryEdit]'
+UI_STEP='[{"name":"Run scripts/ci","conclusion":"success"},{"name":"Run scripts/ui-test","conclusion":"failure"}]'
+fails() {  # fails <run tests json> <dev tests json> [<dev failed steps json>]: a failed macOS run with a dev base
+  printf '%s | (.jobs[] | select(.name == "macOS")).steps = %s | .failedTests = %s | .base = {url: "%s", failedTests: %s, failedSteps: %s}' \
+    "$FAILED_MAC" "$UI_STEP" "$1" "$DEV_URL" "$2" "${3:-[\"Run scripts/ui-test\"]}"
+}
+mac "same failures as dev passes" "eligible|150|2|Fast-Check marker, macOS run $LANE_URL (its failing tests also fail on dev: $DEV_URL)" \
+  "$MARKED" "$GATED" - "$(fails "[\"$T1\", \"$T2\"]" "[\"$T2\", \"$T1\", \"-[Suite.Other x]\"]")"
+mac "one new failure refuses and names it" \
+  "$REFUSE (its macOS job has 1 failing test(s) that the latest dev run ($DEV_URL) does not: $T3). Fix it and push" \
+  "$MARKED" "$GATED" - "$(fails "[\"$T1\", \"$T3\"]" "[\"$T1\", \"$T2\"]")"
+mac "a green dev run makes every failure new" "$REFUSE (its macOS job has 2 failing test(s)" \
+  "$MARKED" "$GATED" - "$(fails "[\"$T1\", \"$T2\"]" '[]' '[]')"
+mac "a failure with no failing test to compare (build or setup) refuses" \
+  "$REFUSE (its macOS job failed in Run scripts/ui-test with no failing test to compare with dev)" \
+  "$MARKED" "$GATED" - "$(fails '[]' "[\"$T1\"]")"
+mac "a failed step that passed on dev refuses, even with known tests" \
+  "$REFUSE (its macOS job failed in Run scripts/ci, which passed in the latest dev run ($DEV_URL))" \
+  "$MARKED" "$GATED" - "$(fails "[\"$T1\"]" "[\"$T1\"]") | (.jobs[] | select(.name == \"macOS\")).steps[0].conclusion = \"failure\""
+mac "a supervisor's Mac-Check run with dev's failures passes" \
+  "eligible|150|2|Fast-Check marker, Mac-Check: $RUN_URL (its failing tests also fail on dev: $DEV_URL)" \
+  "$MAC_PR" "$GATED" "$(fails "[\"$T1\"]" "[\"$T1\"]")" -
+# A gated PR's red macOS check run on the head is the gate's to judge; any
+# other PR's still makes it red.
+RED_MAC='[{"__typename":"CheckRun","name":"Linux","workflowName":"","status":"COMPLETED","conclusion":"SUCCESS"},
+          {"__typename":"CheckRun","name":"macOS","workflowName":"","status":"COMPLETED","conclusion":"FAILURE"}]'
+redmac() {  # redmac <name> <want> <files> <lane run jq>
+  jq "$MARKED" <<<"$BASE_PR" >"$tmp/pr.json"; printf '%s\n' "$3" >"$tmp/files.txt"
+  echo '{}' >"$tmp/run.json"; jq "$4" <<<"$GREEN_RUN" >"$tmp/lane.json"; echo "$RED_MAC" >"$tmp/redmac.json"
+  local got; got=$(decide "$tmp/pr.json" "$tmp/files.txt" "$tmp/redmac.json" "" "" "$tmp/run.json" "$tmp/lane.json" 2>/dev/null)
+  if [[ "$got" == "$2"* ]]; then echo "ok   mac: $1 -> ${got:0:100}"; else echo "FAIL mac: $1: want '$2*', got '$got'"; fail=1; fi
+}
+redmac "a red macOS check with dev's failures doesn't block a gated PR" "eligible|150|2|1 checks green, macOS run $LANE_URL (its failing" \
+  "$GATED" "$(fails "[\"$T1\"]" "[\"$T1\"]")"
+redmac "a red macOS check with a new failure is refused by name, not just red" "$REFUSE (its macOS job has 1 failing test(s)" \
+  "$GATED" "$(fails "[\"$T3\"]" "[\"$T1\"]")"
+redmac "an ungated PR's red macOS check is still red" "red|macOS" "$BASE_FILES" .
+# failed_tests reads XCTest and Swift Testing failures off a timestamped job log.
+got=$(printf '%s\n' \
+  "2026-10-15T09:42:18.8623840Z /x/UITests/PhotoJourneyTests.swift:60: error: -[PhotoJourneyTests.PhotoJourneyTests testFixtureLaunch] : XCTAssertTrue failed" \
+  "2026-10-15T09:42:19.1773830Z Test Case '-[PhotoJourneyTests.PhotoJourneyTests testFixtureLaunch]' failed (12.014 seconds)." \
+  "2026-10-15T09:42:20.0000000Z Test Case '-[PhotoJourneyTests.PhotoJourneyTests testSave]' passed (1.0 seconds)." \
+  "2026-10-15T09:42:21.0000000Z $(printf '\033[1;31m')✘$(printf '\033[0m') Test openKeepsState() failed after 0.2 seconds with 1 issue." \
+  "2026-10-15T09:42:22.0000000Z Test Suite 'All tests' failed at 2026-10-15 09:46:25.386." | failed_tests | paste -sd'|' -)
+if [[ "$got" == "-[PhotoJourneyTests.PhotoJourneyTests testFixtureLaunch]|Test openKeepsState()" ]]; then
+  echo "ok   mac: failed_tests reads the failing test identifiers"
+else echo "FAIL mac: failed_tests: got '$got'"; fail=1; fi
 mac "a supervisor's green Mac-Check run passes, no dispatch" "eligible|150|2|Fast-Check marker, Mac-Check: $RUN_URL" "$MAC_PR" "$GATED" . -
 mac "a green Mac-Check run outranks a failed lane run" "eligible|150|2|Fast-Check marker, Mac-Check: $RUN_URL" "$MAC_PR" "$GATED" . "$FAILED_MAC"
 mac "a Mac-Check run with a failed macOS job falls back to the lane run" "eligible|150|2|Fast-Check marker, macOS run $LANE_URL" \
@@ -397,6 +451,8 @@ gh() {
       if [[ -e "$sw/files.$n.json" ]]; then jq -r "${!#}" "$sw/files.$n.json"
       else jq -rn '[{filename: "Sources/FlareModel/FlareWorkspace.swift", status: "modified"}]' | jq -r "${!#}"; fi ;;
     "run view "*) cat "$sw/run.$3.json" 2>/dev/null || return 1 ;;
+    "run list "*"--status completed"*) jq -r "${!#}" "$sw/devruns.json" 2>/dev/null || true ;;
+    "api "*"/actions/jobs/"*"/logs") u="${2#*/actions/jobs/}"; cat "$sw/log.${u%%/*}" 2>/dev/null || return 1 ;;
     "run list "*"--commit "*)
       u="${a#*--commit }"; u="${u%% *}"
       [[ ! -e "$sw/runlist.fail.$u" ]] || return 1
@@ -533,18 +589,34 @@ jq '.headSha = "h16"' <<<"$GREEN_RUN" >"$sw/run.16.json"
 jq --arg u "https://github.com/qbtrix/creative-apps/actions/runs/20" '.headSha = "h20" | .url = $u | '"$FAILED_MAC" <<<"$GREEN_RUN" >"$sw/run.20.json"
 echo '[{"databaseId": "20", "url": "https://github.com/qbtrix/creative-apps/actions/runs/20"}]' >"$sw/runs.h20.json"
 touch "$sw/runlist.fail.h22"
+# #20's macOS job (id 2020) fails a test dev doesn't. Dev's latest completed CI
+# runs: 701 was cancelled before macOS ran (skipped), 700 failed -[A.B old].
+jq '(.jobs[] | select(.name == "macOS")) |= (.databaseId = 2020 | .steps = [{"name": "Run scripts/ui-test", "conclusion": "failure"}])' \
+  "$sw/run.20.json" >"$sw/x" && mv "$sw/x" "$sw/run.20.json"
+printf "%s\n" "2026-10-15T09:00:00.0Z Test Case '-[A.B old]' failed (1 seconds)." "2026-10-15T09:00:01.0Z Test Case '-[A.B new]' failed (1 seconds)." >"$sw/log.2020"
+echo '[{"databaseId": "701"}, {"databaseId": "700"}]' >"$sw/devruns.json"
+jq '.url = "https://github.com/qbtrix/creative-apps/actions/runs/701" | (.jobs[] | select(.name == "macOS")).conclusion = "skipped"' <<<"$GREEN_RUN" >"$sw/run.701.json"
+jq '.url = "https://github.com/qbtrix/creative-apps/actions/runs/700" | '"$FAILED_MAC"' | (.jobs[] | select(.name == "macOS")) |= (.databaseId = 7000 | .steps = [{"name": "Run scripts/ui-test", "conclusion": "failure"}])' <<<"$GREEN_RUN" >"$sw/run.700.json"
+printf "%s\n" "2026-10-15T08:00:00.0Z Test Case '-[A.B old]' failed (1 seconds)." >"$sw/log.7000"
+# #24's run on its head (id 24) fails only -[A.B old], as dev does: it merges.
+pr_at 24 h24 "$SWF"; jq '.headRefName = "b24"' "$sw/24.json" >"$sw/x" && mv "$sw/x" "$sw/24.json"
+jq '.headSha = "h24" | .url = "https://github.com/qbtrix/creative-apps/actions/runs/24" | '"$FAILED_MAC"' | (.jobs[] | select(.name == "macOS")) |= (.databaseId = 2424 | .steps = [{"name": "Run scripts/ui-test", "conclusion": "failure"}])' <<<"$GREEN_RUN" >"$sw/run.24.json"
+echo '[{"databaseId": "24", "url": "https://github.com/qbtrix/creative-apps/actions/runs/24"}]' >"$sw/runs.h24.json"
+printf "%s\n" "2026-10-15T09:00:00.0Z Test Case '-[A.B old]' failed (1 seconds)." >"$sw/log.2424"
 lane_sweep() { ( FAST_LANE_RUN_LOOKUP_RETRIES=0 main ) >/dev/null 2>&1 || { echo "FAIL sweep: main exited non-zero"; fail=1; }; }
 lane_sweep
 expect "mac: merges the supervisor-proved and the ungated PR, not the one waiting on its run" \
-  "$(grep -oE '^pr merge [0-9]+' "$sw/calls" | paste -sd, -)" "pr merge 16,pr merge 18"
+  "$(grep -oE '^pr merge [0-9]+' "$sw/calls" | paste -sd, -)" "pr merge 16,pr merge 18,pr merge 24"
+expect "mac: the PR failing only where dev fails merges, its comment naming dev's run" \
+  "$(grep -c '^pr comment 24 .*merged into dev.*macOS run https://github.com/qbtrix/creative-apps/actions/runs/24 (its failing tests also fail on dev: https://github.com/qbtrix/creative-apps/actions/runs/700)' "$sw/calls")" 1
 expect "mac: dispatches CI on the gated PR's branch once, re-sweep included" \
   "$(grep -c '^workflow run ci.yml -R qbtrix/creative-apps --ref b14$' "$sw/calls")" 1
 expect "mac: comments the dispatched run's URL once" \
   "$(grep -c '^pr comment 14 .*The lane dispatched CI on b14: https://github.com/qbtrix/creative-apps/actions/runs/914\.' "$sw/calls")" 1
 expect "mac: no dispatch for a supervisor's Mac-Check run" "$(grep -c -- '--ref b16' "$sw/calls")" 0
 expect "mac: a failed macOS run is refused with what to do, no new dispatch" \
-  "$(grep -c '^pr comment 20 .*failed: https://github.com/qbtrix/creative-apps/actions/runs/20 (its macOS job is failure)\. Fix it and push' "$sw/calls")" 1
-expect "mac: a failed run never re-dispatches" "$(grep -c -- '--ref b20' "$sw/calls")" 0
+  "$(grep -c "^pr comment 20 .*doesn't: https://github.com/qbtrix/creative-apps/actions/runs/20 (its macOS job has 1 failing test(s) that the latest dev run (https://github.com/qbtrix/creative-apps/actions/runs/700) does not: -\[A.B new\])\. Fix it and push" "$sw/calls")" 1
+expect "mac: a failed run never re-dispatches" "$(grep -cE -- '--ref b2[04]' "$sw/calls")" 0
 expect "mac: an unreadable run list writes nothing for the PR" "$(grep -cE '^pr [a-z]+ 22 |--ref b22' "$sw/calls")" 0
 expect "mac: refused PRs keep the fast-lane label" "$(grep -c -- '--remove-label fast-lane' "$sw/calls")" 0
 lane_sweep
