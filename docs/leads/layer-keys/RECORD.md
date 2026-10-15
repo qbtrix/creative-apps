@@ -64,5 +64,6 @@ Waves as in the packet. Independent per wave: W1 LK-1; W2 LK-2a; W3 LK-2b; W4 LK
 - LK-8: uses the shared haloP95 helper (quietest p95 of 3x100), not median+p95 of 200 runs.
 
 ## Open
+- dev-red #763: macOS build fails in Sources/LibraryApp/LibraryInspector.swift:14-15 (mutating member on let model), not this feature; it hides any Halo compile error until fixed. Run 38726261412.
 - #207 keeps `needs-human`; the captain decides (packet note). LK-11 says `Closes #207`.
 - #783 (needs-ui): typed text that isn't a number never reaches the Model; H-J6 asserts only that the value is kept.
