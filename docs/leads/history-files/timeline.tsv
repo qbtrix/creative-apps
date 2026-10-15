@@ -38,3 +38,4 @@ utc	stage	event	ref	note
 2026-10-15T10:25Z	4	stage-start	r1-b3	critic majors, feature-done
 2026-10-15T10:34Z	4	pr-merged	#1089	r1-b3 feature-done
 2026-10-15T10:38Z	4	ci-run	38721434364	round 2 run started on c7e5c17
+2026-10-15T10:51Z	4	heartbeat	38721434364	round 2 macOS job running
