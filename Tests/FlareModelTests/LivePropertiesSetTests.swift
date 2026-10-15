@@ -150,7 +150,9 @@ func aNonFiniteValueThrowsAndChangesNothing(value: Double) {
     #expect(engine.document == FlareFixtures.bounce)
 }
 
-@Test func aCoalescedWriteOnSeveralLayersThatThrowsChangesNothing() {
+/// A missing or locked layer is refused before any write, and `SetKeyframe` checks nothing else, so no later layer can
+/// fail inside the loop: what a coalesced write on several layers can throw is a frame before 0, changing nothing.
+@Test func aCoalescedWriteOnSeveralLayersBeforeFrameZeroThrowsAndChangesNothing() {
     var engine = CommandEngine(document: FlareFixtures.bounce)
     #expect(throws: CommandError.invalidFrame(-1)) {
         try LiveProperties().setValue(5, of: "x", owner: scene, layerIDs: ["shadow", "ball"], frame: -1, autoKey: false,

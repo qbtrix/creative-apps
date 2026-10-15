@@ -1,5 +1,5 @@
 // LiveKeyframesEditTests.swift: KY-6's acceptance (docs/blueprints/flare/features/live-keys.md): Ball's 24 -> 28 is one
-// "Undo Move Keyframe"; 24 onto 36 throws and changes nothing, undo state included; past frame 47 throws; 50 coalesced
+// "Undo Move Keyframe"; 24 onto 36 throws and changes nothing, undo state included; past frame 47 throws a key sentence; 50 coalesced
 // one-frame steps are one entry; deleting 12 is one "Undo Delete Keyframe"; a symbol key moves and undoes exactly, and
 // refuses past the symbol's last frame or before frame 0 without naming a scene.
 import FlareCore
@@ -46,9 +46,11 @@ private func frames(_ engine: CommandEngine, _ owner: LayerOwner, _ layerID: Str
 
 @Test func pastTheSceneEndThrows() throws {
     var engine = CommandEngine(document: FlareFixtures.bounce)
-    #expect(throws: CommandError.invalidFrame(48)) {
+    let past = CommandError.invalidDocument("A key can't move past the scene's last frame.")
+    #expect(throws: past) {
         try live.moveKeys([KeyRef(layerID: "ball", property: "y", frame: 47)], by: 1, owner: scene, coalesceKey: nil, in: &engine)
     }
+    #expect(FlareLayerError.command(past).message == "A key can't move past the scene's last frame.")
     #expect(throws: CommandError.invalidFrame(Int.max)) {
         try live.moveKeys([KeyRef(layerID: "ball", property: "y", frame: 12)], by: Int.max, owner: scene, coalesceKey: nil, in: &engine)
     }
