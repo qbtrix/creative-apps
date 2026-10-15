@@ -2,9 +2,9 @@
 
 Issue: #798 · Packet: docs/blueprints/flare/features/live-stage.md
 Run: act-1a13d374bd1-s92z · Session: claude/live-stage-lead-gljfd4 · Started: 2026-10-15T00:40Z
-Stage: 4 round 3
+Stage: 5 finish
 Base: 3033a12d599ff66ce4ebd5536ff9809d12e1d9cf
-Next: read round 3 panel and the local scripts/ci x2 on 3033a12; a clean round 3 ends the loop (2 clean in a row). Then the feature-done PR once dev CI can go green
+Next: wait for #965 (feature-done) to merge and the dev CI run it triggers; green -> Belt-Contact-Sheet comment on #798; red on other lines -> triage on #763 and wait for the next green run
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -27,6 +27,7 @@ Journeys: J3 and J5 model half, steps 1-6 of the packet. Quality: QB-L5 hit <= 1
 |---|---|---|---|---|---|---|---|
 | 1 | 38671960461 (1fdabfd) | red: 6 UI journeys, same as 0a455df before this feature; swift test 1945 green | flare identifier 16 > 15 (Show Sidebar, pre-existing, #938) | clarity, journey, contract, quality, audit | 1 major (fake moves text, live refuses), 3 minor (rotate pivot, QB-F3 coverage, QB-L11 scale); 3 refuted | #945 (r1-b1), #946 (r1-b2) | no |
 | 2 | 38675308731 (1025fcc) | red: Library, Halo, SuiteUI journeys only; all 4 Flare journeys pass; swift test 1966 green | flare at or under baseline (identifier 14 < 15) | same five | 3 minor (copy name double strip, pen refusal wording, p95 per rubric); 0 blocker/major | #957 (r2-b1), #958 (r2-b2), #960 (r2-b3) | yes |
+| 3 | Linux scripts/ci x2 on 3033a12 (PASS); latest UI run 38675308731 (fixes are Model/test only) | flare journeys green on 1025fcc | flare at or under baseline | same five | 1 minor (macOS evidence for 500-instance and p95 lines comes on the next run; no code change) | - | yes |
 
 ## Decisions
 - Depends on: none (issue body); engine issues closed on creative-core main 98be31a.

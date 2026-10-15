@@ -40,3 +40,6 @@ utc	stage	event	ref	note
 2026-10-15T03:56Z	4	pr-opened	#957 #958 #960	round 2 minor fixes
 2026-10-15T03:57Z	4	pr-merged	#957 #958 #960	round 2 fixes merged
 2026-10-15T03:57Z	4	stage-start	#798	round 3 on 3033a12
+2026-10-15T04:05Z	4	round-clean	round 3	2 clean in a row, loop ends
+2026-10-15T04:05Z	4	stage-end	#798	3 rounds
+2026-10-15T04:05Z	5	pr-opened	#965	feature-done packet status
