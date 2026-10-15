@@ -1,0 +1,70 @@
+#!/usr/bin/env python3
+# scripts/jetsam-summary: what a macOS JetsamEvent report says about who held
+# the memory. macOS writes /Library/Logs/DiagnosticReports/JetsamEvent-*.ips
+# when it kills processes because memory ran out. The file is one JSON header
+# line, then a JSON body with `largestProcess`, `memoryStatus.pageSize` and
+# `processes` (each with its resident pages `rpages`, and a `reason` on the
+# ones jetsam killed). This prints the largest process, every killed one, and
+# the top five by resident memory, in MB. ci.yml's Crash reports step runs it
+# on the newest report; Tests/jetsam/test_jetsam_summary.sh is its fixture
+# test. Stdlib Python 3 only.
+#
+# Usage: scripts/jetsam-summary <JetsamEvent.ips>   (exit 2: unreadable report)
+import json
+import sys
+
+DEFAULT_PAGE = 16384
+
+
+def body(text):
+    """The report's body: the JSON after the header line, or the whole file."""
+    head, _, rest = text.partition("\n")
+    for part in (rest, text, head):
+        try:
+            value = json.loads(part)
+        except ValueError:
+            continue
+        if isinstance(value, dict) and "processes" in value:
+            return value
+    return None
+
+
+def megabytes(process, page):
+    pages = process.get("rpages", 0)
+    return pages * page / (1024 * 1024) if isinstance(pages, (int, float)) else 0.0
+
+
+def summary(report):
+    page = (report.get("memoryStatus") or {}).get("pageSize") or DEFAULT_PAGE
+    processes = [p for p in report.get("processes", []) if isinstance(p, dict)]
+    by_size = sorted(processes, key=lambda p: megabytes(p, page), reverse=True)
+    lines = [f"largest process: {report.get('largestProcess', by_size[0]['name'] if by_size else '?')}"]
+    killed = [p for p in by_size if p.get("reason")]
+    lines.append(f"killed: {len(killed)}")
+    for p in killed:
+        lines.append(f"  {p.get('name', '?')} (pid {p.get('pid', '?')}): {megabytes(p, page):.0f} MB, {p['reason']}")
+    lines.append("top 5 by resident memory:")
+    for p in by_size[:5]:
+        lines.append(f"  {p.get('name', '?')} (pid {p.get('pid', '?')}): {megabytes(p, page):.0f} MB")
+    return lines
+
+
+def main(argv):
+    if len(argv) != 2:
+        print("usage: scripts/jetsam-summary <JetsamEvent.ips>", file=sys.stderr)
+        return 2
+    try:
+        with open(argv[1], encoding="utf-8", errors="replace") as file:
+            report = body(file.read())
+    except OSError as error:
+        print(f"jetsam-summary: {error}", file=sys.stderr)
+        return 2
+    if report is None:
+        print(f"jetsam-summary: no processes in {argv[1]}", file=sys.stderr)
+        return 2
+    print("\n".join(summary(report)))
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv))
