@@ -32,3 +32,4 @@ utc	stage	event	ref	note
 2026-10-15T13:23Z	3	pr-merged	#1158	SJ-1b merged; wave 13 SJ-2 starts
 2026-10-15T13:24Z	3	stage-start	wave13	SJ-2 on 2fabc95
 2026-10-15T13:32Z	3	stage-end	wave13	#1162 merged; all 23 tasks merged
+2026-10-15T13:35Z	4	stage-start	round1	run 38742226941: Library snapshots green; macOS red on Halo/Photo only; journeys not executed
