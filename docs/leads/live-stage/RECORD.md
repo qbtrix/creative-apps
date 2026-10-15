@@ -4,7 +4,7 @@ Issue: #798 · Packet: docs/blueprints/flare/features/live-stage.md
 Run: act-1a13d374bd1-s92z · Session: claude/live-stage-lead-gljfd4 · Started: 2026-10-15T00:40Z
 Stage: 5 finish
 Base: 3033a12d599ff66ce4ebd5536ff9809d12e1d9cf
-Next: wait for the first green dev run containing a45f1cb (#965); run 38687993459 on 8f78bad: Flare green, red only on Halo testLayoutAtWidths (timeline track outside the 880 window) and SuiteUI gallery identifier
+Next: wait for the first green dev run containing a45f1cb (#965); run 38694361192 on fdb7c8a: Flare green, red only on Halo (layout 880, Width field label) and SuiteUI (window identifier). If none by 08:30Z, post status on #798 with the blockers
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
