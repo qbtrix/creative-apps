@@ -4,7 +4,7 @@ Issue: #1076 · Packet: docs/blueprints/photo/features/photo-crop.md
 Run: act-1a13f70ddc3-29wr · Session: lead session (claude/photo-crop-feature-lead-e7vpmg) · Started: 2026-10-15T12:03Z
 Stage: 4 round 2 (wave 4 still waits on photo-journey-kit #1073)
 Base: 469520e8def2fe925a065aa8d5febda827851131
-Next: round 2 on the first dev CI run containing ec92393 (#1170), same four lenses; when #1073 closes (UITests/PhotoJourneyTests+Fixtures.swift on dev), build CP-5 and CP-7 together; meanwhile read the first dev CI run containing 469520e (#1151) for round-1 material.
+Next: r2-b1 merges, then round 3 on the next dev CI run, same four lenses; when #1073 closes (UITests/PhotoJourneyTests+Fixtures.swift on dev), build CP-5 and CP-7 together; meanwhile read the first dev CI run containing 469520e (#1151) for round-1 material.
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -23,6 +23,7 @@ Waves: 1 = CP-1 (independent). 2 = CP-2 (waits CP-1). 3 = CP-3, CP-4 (independen
 |---|---|---|---|---|---|---|---|
 | 1 | 38742226941 (head 20d6a1c) | red: our gridAligned (frames[photo.crop.x] nil); Halo keyedFrame6 not ours (#1163) | n/a (journeys did not run) | clarity, design, layout, controls | 5 major + 6 minor (fields read 0 px; two captions; layout shift; Swap dead under 1:1; swapped orientation unreadable; X/Y 0 refused; empty tooltips; Original unexplained; disabled reasons disagree) | r1-b1 #1164 merged (gridAligned via anchor preference), r1-b2 #1170 merged (panel clarity) | no |
 | 1 check | 38746333198 (head e6490aa) | gridAligned passes; Photo green; remaining red is Halo only (keyedFrame6, HaloPlaybackDriverTests), not ours | n/a | – | – | – | – |
+| 2 | 38757068610 (head 111c440) | red only on Halo keyedFrame6 (not ours); Photo green | n/a (journeys did not run) | clarity, design, layout, controls | 2 major (locked field snaps back; Apply on a whole-image crop) + minors (reasons disagree, chip group tooltip empty, caption casing) | r2-b1 | no |
 
 ## Decisions
 - r1-b2: fields follow cropFieldsEnabled, so a locked shape with no pending crop takes typing (model supported it; matches the caption). Kept.
@@ -37,6 +38,7 @@ Waves: 1 = CP-1 (independent). 2 = CP-2 (waits CP-1). 3 = CP-3, CP-4 (independen
 - Wave 1 has one task, so it runs as one worktree subagent, not the build-wave workflow.
 
 ## Open
+- Round 2 minors left alone: overlay has no handles/accent edge (CP-5 / SuiteUI CropShade); status bar 'Selection 220 × 160' lacks px and a prior selection stays drawn under a pending crop (PhotoInspectorContent, not this feature's files). File as gap if still open at finish.
 - #1169 needs-ui: ScrubField placeholder for a nil value.
 - CropOptions.emptyCaption is unused by the view but still asserted by PhotoCropOptionsSnapshots; remove both in a later batch.
 - Issue comments posted from this session get a Generated-by footer re-appended server-side (PATCH can't remove it); the #763 comment carries one. PR bodies can be cleaned.
