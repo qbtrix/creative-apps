@@ -1,7 +1,8 @@
 // CanvasRenderer.swift: keeps the canvas picture up to date without blocking
 // the window. Each change to the workspace asks for the tiles that changed
 // since the picture shown (PhotoRenderer.update), rendered off the main actor;
-// a new image or a new size asks for all of them. While a render runs, newer
+// a new image or a new size asks for all of them; asking again for the
+// revision shown does nothing. While a render runs, newer
 // requests wait and only the latest is drawn, so a fast brush stroke never
 // queues up stale frames. The tiles go straight to the tile layers
 // (CanvasTiles), not through SwiftUI, so no whole-canvas buffer or picture
@@ -38,12 +39,15 @@ final class CanvasRenderer {
             (revision, milliseconds, waiting) = (nil, nil, nil)
             return
         }
+        let sameSize = canvas.width == tiles.width && canvas.height == tiles.height
+        // A drag's revision is shown by the pacer's apply, then asked for again by
+        // the window's revision change: the second ask has nothing to draw.
+        if sameSize, workspace.revision == revision, failure == nil { return }
         guard !isRendering else {
             waiting = workspace
             return
         }
         isRendering = true
-        let sameSize = canvas.width == tiles.width && canvas.height == tiles.height
         let since = sameSize ? revision : nil
         Task {
             do {

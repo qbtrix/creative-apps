@@ -7,7 +7,8 @@
 // it appears. Canvas drags carry the pen's pressure (PointerPressure), the
 // keys held (DragModifiers) and the zoom, and, while they last, AppKit's mouse
 // event coalescing is off so every pointer sample arrives; StrokePacer hands
-// them to the workspace once per display frame. Its workspace runs on
+// them to the workspace as they come, at most twice a display frame, and each
+// apply starts the picture's render at once. Its workspace runs on
 // `fileServices(.live)`, or under `-PhotoFixture` on the fixture's fakes
 // (`launchOptions`, read once from the process; S-12), whose picture it
 // renders and keeps fitted while the window settles, until the user zooms. Open, Save, Save As and their
@@ -173,7 +174,11 @@ struct PhotoWindow: View {
             let move = (
                 Mask.Point(x: from.x, y: from.y), Mask.Point(x: to.x, y: to.y), PointerPressure.current,
                 DragModifiers(flags: NSEvent.modifierFlags))
-            pacer.add(move) { model.drags($0, zoom: zoom) }
+            // The picture starts at once, not after SwiftUI's next pass reaches `.onChange`.
+            pacer.add(move) {
+                model.drags($0, zoom: zoom)
+                renderer.show(model)
+            }
         case .endDrag:
             NSEvent.isMouseCoalescingEnabled = true
             pacer.stop()
