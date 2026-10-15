@@ -13,7 +13,7 @@ Next: wait for ST-5 and ST-9 PRs to merge, then build ST-10 with feature-done
 | ST-2 | 2 | LiveStage nesting, editing, text | Live/LiveStage.swift, LiveStageNestingTests | LiveStageNestingTests | #923 | merged |
 | ST-3 | 1 | LiveHits.hit | Live/LiveHits.swift, LiveHitsTests | LiveHitsTests | #915 | merged |
 | ST-4 | 2 | marquee, bounds, StageHitTesting | Live/LiveHits+Marquee.swift, LiveHitsBoundsTests | LiveHitsBoundsTests | #920 | merged |
-| ST-5 | 3 | LiveConformanceTests | LiveConformanceTests | itself |  | building |
+| ST-5 | 3 | LiveConformanceTests | LiveConformanceTests | itself | #929 | open, waiting on lane |
 | ST-6 | 1 | LiveShapes drafts and commits | Live/LiveShapes.swift, LiveShapesTests | LiveShapesTests | #917 | merged |
 | ST-7 | 1 | BoxGestureMath move | Live/BoxGestureMath.swift, Fakes/FakeShapes.swift, BoxGestureMathTests | BoxGestureMathTests | #918 | merged |
 | ST-8 | 2 | boxResult, commitBox | Live/LiveShapes+Box.swift, LiveShapesBoxTests | LiveShapesBoxTests | #925 | merged |
