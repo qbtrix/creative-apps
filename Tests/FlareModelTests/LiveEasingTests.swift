@@ -1,6 +1,7 @@
 // LiveEasingTests.swift: LM-6's acceptance (docs/blueprints/flare.md, 7.5): the preset table golden, curve endpoints
 // exact, `SetKeyframeEasing` as one undo step (a coalesced drag too), agreement with `FakeEasing` on `bounce`, and the
 // budgets: the curve is FlareCore's `Easing.value(at:)` to the bit, and a coalesced drag step's p95 stays under budget.
+// KY-8 (docs/blueprints/flare/features/live-keys.md): a symbol's layers ease through the same owner path.
 import FlareCore
 import FlareModel
 import Testing
@@ -89,6 +90,8 @@ private func easing(_ engine: CommandEngine, _ property: String, _ frame: Int) -
         (FlareFixtures.bounce, KeyRef(layerID: "ball", property: nil, frame: 13), owner),
         (FlareFixtures.bounce, KeyRef(layerID: "missing", property: "x", frame: 12), owner),
         (FlareFixtures.bounce, KeyRef(layerID: "ball", property: "x", frame: 12), .symbol("symbol-1")),
+        (FlareFixtures.character, KeyRef(layerID: "missing", property: "rotation", frame: 0), .symbol("wave")),
+        (FlareFixtures.character, KeyRef(layerID: "hand", property: "rotation", frame: 0), .symbol("missing")),
         (locked, KeyRef(layerID: "ball", property: nil, frame: 12), owner),
         (locked, KeyRef(layerID: "ball", property: "x", frame: 12), owner),
     ]
@@ -100,6 +103,35 @@ private func easing(_ engine: CommandEngine, _ property: String, _ frame: Int) -
             }
             #expect(engine.document == document && !engine.canUndo)
         }
+    }
+}
+
+private let wave = LayerOwner.symbol("wave")
+
+private func handEasing(_ engine: CommandEngine, _ frame: Int) -> Easing? {
+    engine.document.layers(of: wave)?.first { $0.id == "hand" }?.tracks["rotation"]?.first { $0.frame == frame }?.easing
+}
+
+@Test func symbolLayerEaseOutIsOneUndoStep() throws {
+    for key in [KeyRef(layerID: "hand", property: "rotation", frame: 0), KeyRef(layerID: "hand", property: nil, frame: 0)] {
+        var engine = CommandEngine(document: FlareFixtures.character)
+        try live.setEasing(.easeOut, at: key, owner: wave, coalesceKey: nil, in: &engine)
+        #expect(handEasing(engine, 0) == .easeOut && handEasing(engine, 12) == .linear)
+        #expect(engine.document.scenes == FlareFixtures.character.scenes)
+        #expect(engine.undoActionName == "Undo Set Keyframe Easing")
+        try engine.undo()
+        #expect(engine.document == FlareFixtures.character && !engine.canUndo)
+    }
+}
+
+@Test func missingSymbolLayerThrowsLayerNotFound() {
+    for owner in [wave, owner] {
+        var engine = CommandEngine(document: FlareFixtures.character)
+        #expect(throws: CommandError.layerNotFound("missing")) {
+            try live.setEasing(.ease, at: KeyRef(layerID: "missing", property: nil, frame: 0), owner: owner,
+                               coalesceKey: nil, in: &engine)
+        }
+        #expect(engine.document == FlareFixtures.character && !engine.canUndo)
     }
 }
 
