@@ -14,7 +14,11 @@ to VP-12 merged (#1090, #1072, #1087, #1069, #1098, #1111, #1101, #1085,
 #1099, #1125, #1097, #1102, #1124). The `feature-done` run on #1124's head
 never reached the journeys: AppSnapshotTests didn't compile
 (`HaloPlaybackDriverTests`' untyped `lazy var`, a circular reference), fixed
-by #1136.
+by #1136. Then the macOS test run: the driver runs on an injected link with
+a fake one in tests (#1145); HF-1 renders off the main actor (#1160);
+half-opaque layers mix in linear light on the canvas, as in the render
+(#1163, closes #1161); the driver suite's limit covers main-actor queueing
+(#1171, #1155).
 
 **Covers:** #37, #457. #457 closes with VP-4b; #37 closes with VP-12, the
 `feature-done` PR. The other tasks say "Part of #37" or "Part of the
