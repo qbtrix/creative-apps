@@ -25,7 +25,9 @@
 # run on its head whose macOS job passed or failed only where dev fails
 # (mac_gate): the run a body line
 # `Mac-Check: <run url>` names, or else the latest CI run on the head, which
-# the lane dispatches itself when there is none. A Belt PR
+# the lane dispatches itself when there is none. Any other PR that touches
+# APP_RE (Sources/*App/) needs a passing build-only CI run on its head
+# (build_gate), also dispatched by the lane. A Belt PR
 # (a body line starting `Belt-Run:` or `Belt-Test:`) also needs Belt's
 # `belt/review` commit status at success on its head while REQUIRE_BELT_REVIEW=1.
 # A fast-lane PR based on main is retargeted to BASE_BRANCH. A PR that conflicts
@@ -45,10 +47,12 @@
 # a file-list file (one path per line), a check-rollup JSON file and, when the
 # PR touches the app audit, two audit_snapshot directories (merge base, head),
 # and, when it touches MAC_GATED, the `gh run view` JSON of its Mac-Check run
-# and of the latest CI run on its head.
+# and of the latest CI run on its head, and when it touches APP_RE, its
+# latest build-only run.
 # It logs each rule to stderr and prints one line to stdout:
 #   skip|<why>  retarget|<from base>  not-eligible|<reasons>  red|<checks>
 #   conflict|<head sha>  pending|<why>  mac-dispatch|<gated files>|<head branch>
+#   build-dispatch|<app folders>|<head branch>
 #   mac-gate|<what to do>  eligible|<lines>|<files>|<proof>
 # Tests/fast_lane/test_fast_lane.sh sources this file and feeds `decide` fixtures.
 #
@@ -127,6 +131,14 @@ MAC_GATED=(Sources/SuiteUI/SuiteWindow.swift Sources/SuiteUI/EditorShell.swift
   Sources/SuiteUI/ToolbarGroup.swift Sources/SuiteUI/Tokens.swift)
 MAC_CHECK_LINE="Mac-Check:"
 MAC_JOB="macOS"
+# App code compiles only on macOS. A PR touching Sources/*App/ that isn't
+# MAC_GATED merges only once a build-only CI run (ci.yml's `build_only` input:
+# `swift build`, no tests) compiled its head; the lane dispatches it, once per
+# head. Lesson 114: the Library spine's app PRs merged on the Linux gate, dev
+# stopped compiling on macOS (run 38727890123) and every line's Mac run broke.
+APP_RE='^Sources/[A-Za-z0-9_]+App/'
+BUILD_JOB="macOS build"    # the build-only job's name in ci.yml
+BUILD_TITLE="macOS build"  # ci.yml's run-name for a build-only run
 # After dispatching, look this many times, 5s apart, for the new run's URL to comment.
 RUN_LOOKUP_RETRIES="${FAST_LANE_RUN_LOOKUP_RETRIES:-6}"
 
@@ -322,6 +334,38 @@ mac_add_failures() {
     "$1" >"$1.x" && mv "$1.x" "$1"
 }
 
+# build_apps <files.txt>: the app folders (Sources/<X>App) among <files.txt>, joined by ", ".
+build_apps() {
+  grep -oE "${APP_RE}" "$1" | sed 's:/$::' | sort -u | paste -sd, - | sed 's/,/, /g' || true
+}
+
+# build_gate <pr.json> <files.txt> <mac-check run.json> <build run.json>:
+# nothing when the PR touches no app code, else a line like mac_gate's. A green
+# Mac-Check run on the head (it builds every app) counts; otherwise the latest
+# build-only run on the head ({} when none: dispatch one).
+build_gate() {
+  local pr="$1" apps head branch url run='{}' st
+  apps=$(build_apps "$2")
+  [[ -n "$apps" ]] || return 0
+  head=$(jq -r '.headRefOid' "$pr")
+  branch=$(jq -r '.headRefName // ""' "$pr")
+  url=$(mac_check_url "$pr")
+  if [[ -n "$url" && -n "$(mac_run_id "$url")" && -z "$(mac_judge "${3:-}" "$head")" ]]; then
+    echo "ok|$MAC_CHECK_LINE $url"; return
+  fi
+  [[ -z "${4:-}" || ! -s "$4" ]] || run=$(cat "$4")
+  url=$(jq -r '.url // ""' <<<"$run" 2>/dev/null || true)
+  if [[ -z "$url" || "$(jq -r '.headSha // ""' <<<"$run")" != "$head" ]]; then
+    echo "dispatch|$apps|$branch"; return
+  fi
+  st=$(jq -r '(.status // "" | ascii_downcase) + " " + (.conclusion // "" | ascii_downcase)' <<<"$run")
+  case "$st" in
+    "completed success") echo "ok|$BUILD_JOB $url" ;;
+    completed*) echo "refuse|changes app code ($apps), and its head $head doesn't build on macOS: $url (${st#completed }). Fix it and push; the lane builds the new head on macOS again" ;;
+    *) echo "wait|$url" ;;
+  esac
+}
+
 # audit_fetch <sha> <dir> <path>: <path> at <sha> into <dir>/<path>.
 audit_fetch() {
   gh api -H 'Accept: application/vnd.github.raw+json' "repos/$REPO/contents/$3?ref=$1" >"$2/$3"
@@ -432,7 +476,8 @@ audit_loosens() {
   (( lists <= 1 )) || echo "AppAudit.checks is declared $lists times"
 }
 
-# decide <pr.json> <files.txt> <checks.json> [<audit before dir> <audit after dir> [<mac-check run.json> <lane run.json>]]
+# decide <pr.json> <files.txt> <checks.json> [<audit before dir> <audit after dir>
+#   [<mac-check run.json> <lane run.json> [<build run.json>]]]
 # (pass "" "" for the audit dirs when the PR doesn't touch the audit)
 decide() {
   local pr="$1" files="$2" checks="$3"
@@ -507,10 +552,18 @@ decide() {
   fi
 
   # A gated PR's macOS check is mac_gate's to judge (it may fail only where dev
-  # fails), so it leaves the red and running lists below.
-  local mac macdrop=""
+  # fails), and an app PR's macOS build check is build_gate's, so each leaves
+  # the red and running lists below. A MAC_GATED PR needs only mac_gate: its
+  # full run builds every app too.
+  local mac macdrop="" gate=mac
   mac=$(mac_gate "$pr" "$files" "${6:-}" "${7:-}")
-  [[ -z "$mac" ]] || macdrop="$MAC_JOB"
+  if [[ -n "$mac" ]]; then
+    macdrop="$MAC_JOB"
+  else
+    gate=build
+    mac=$(build_gate "$pr" "$files" "${6:-}" "${8:-}")
+    [[ -z "$mac" ]] || macdrop="$BUILD_JOB"
+  fi
 
   # Drop our own check, Belt's review and Copilot review checks, then classify the rest.
   local ci_json summary
@@ -559,10 +612,13 @@ decide() {
     echo "pending|no passing CI check and no $MARKER_LINE marker for head $head"; return
   fi
   if (( belt )) && [[ "$review" != "SUCCESS" ]]; then echo "pending|waiting for review"; return; fi
-  log "mac gate: ${mac:-not gated}"
+  log "$gate gate: ${mac:-not gated}"
   case "$mac" in
-    dispatch\|*) echo "mac-dispatch|${mac#dispatch|}"; return ;;
-    wait\|*) echo "pending|waiting for the macOS CI run ${mac#wait|} on head $head"; return ;;
+    dispatch\|*) echo "$gate-dispatch|${mac#dispatch|}"; return ;;
+    wait\|*)
+      if [[ "$gate" == mac ]]; then echo "pending|waiting for the macOS CI run ${mac#wait|} on head $head"
+      else echo "pending|waiting for the macOS build ${mac#wait|} on head $head"; fi
+      return ;;
     refuse\|*) echo "mac-gate|${mac#refuse|}"; return ;;
   esac
   local proof="Fast-Check marker"
@@ -642,7 +698,8 @@ evaluate() {
       gh run view "$id" -R "$REPO" --json "$fields" >"$tmp/mac.json" 2>/dev/null || echo '{}' >"$tmp/mac.json"
       mac_add_failures "$tmp/mac.json"
     fi
-    if ! id=$(gh run list -R "$REPO" --workflow "$CI_FILE" --commit "$head" --limit 1 --json databaseId --jq '.[0].databaseId // ""'); then
+    if ! id=$(gh run list -R "$REPO" --workflow "$CI_FILE" --commit "$head" --limit 20 --json databaseId,displayTitle \
+        --jq "[.[] | select(.displayTitle != \"$BUILD_TITLE\")][0].databaseId // \"\""); then
       log "PR #$n: could not list CI runs on the head; the next sweep looks again"; rm -rf "$tmp"; return
     fi
     if [[ -n "$id" ]]; then
@@ -651,6 +708,20 @@ evaluate() {
     fi
     (( ${#audit[@]} )) || audit=("" "")
     mac=("$tmp/mac.json" "$tmp/lane.json")
+  elif [[ -n "$(build_apps "$tmp/files.txt")" ]]; then
+    # App code: the Mac-Check line's run, if any, and the latest build-only run on the head.
+    echo '{}' >"$tmp/mac.json"
+    id=$(mac_run_id "$(mac_check_url "$tmp/pr.json")")
+    if [[ -n "$id" ]]; then
+      gh run view "$id" -R "$REPO" --json "$fields" >"$tmp/mac.json" 2>/dev/null || echo '{}' >"$tmp/mac.json"
+    fi
+    if ! gh run list -R "$REPO" --workflow "$CI_FILE" --commit "$head" --limit 20 \
+        --json databaseId,displayTitle,status,conclusion,url,headSha \
+        --jq "[.[] | select(.displayTitle == \"$BUILD_TITLE\")][0] // {}" >"$tmp/build.json"; then
+      log "PR #$n: could not list CI runs on the head; the next sweep looks again"; rm -rf "$tmp"; return
+    fi
+    (( ${#audit[@]} )) || audit=("" "")
+    mac=("$tmp/mac.json" "$tmp/mac.json" "$tmp/build.json")
   fi
 
   echo "PR #$n:" >&2
@@ -673,21 +744,27 @@ evaluate() {
       # Usually an earlier merge in this sweep. Belt's fixer rebases it; the label stays.
       comment_once "$n" "Fast lane: not merged, this PR conflicts with $BASE_BRANCH at head $rest. Rebase on origin/$BASE_BRANCH, rerun scripts/ci, and update the Fast-Check marker."
       ;;
-    mac-dispatch)
+    mac-dispatch|build-dispatch)
       # Authors can't dispatch (403, #1040), so the lane does, once per head:
       # the next sweep finds this run on the head and waits for it, then merges.
-      local gated branch url="" i
-      IFS='|' read -r gated branch <<<"$rest"
-      if ! write gh workflow run "$CI_FILE" -R "$REPO" --ref "$branch"; then
+      local what branch url="" i flags=() sel="!="
+      IFS='|' read -r what branch <<<"$rest"
+      [[ "$kind" == mac-dispatch ]] || { flags=(-f build_only=true); sel="=="; }
+      if ! write gh workflow run "$CI_FILE" -R "$REPO" "${flags[@]+"${flags[@]}"}" --ref "$branch"; then
         log "could not dispatch CI on $branch; the next sweep tries again"; rm -rf "$tmp"; return
       fi
       for (( i = 0; i <= RUN_LOOKUP_RETRIES; i++ )); do
-        url=$(gh run list -R "$REPO" --workflow "$CI_FILE" --commit "$head" --limit 1 --json url --jq '.[0].url // ""' 2>/dev/null || true)
+        url=$(gh run list -R "$REPO" --workflow "$CI_FILE" --commit "$head" --limit 20 --json url,displayTitle \
+          --jq "[.[] | select(.displayTitle $sel \"$BUILD_TITLE\")][0].url // \"\"" 2>/dev/null || true)
         [[ -z "$url" && $i -lt $RUN_LOOKUP_RETRIES ]] || break
         sleep 5
       done
       [[ -n "$url" ]] || url="https://github.com/$REPO/actions/workflows/$CI_FILE?query=branch%3A$branch"
-      comment_once "$n" "Fast lane: this PR changes $gated, shared by every app's window, so it needs a green macOS run on its head $head. The lane dispatched CI on $branch: $url. A later sweep merges this PR once that run's macOS job passes on this head; a new push gets a new run."
+      if [[ "$kind" == mac-dispatch ]]; then
+        comment_once "$n" "Fast lane: this PR changes $what, shared by every app's window, so it needs a green macOS run on its head $head. The lane dispatched CI on $branch: $url. A later sweep merges this PR once that run's macOS job passes on this head; a new push gets a new run."
+      else
+        comment_once "$n" "Fast lane: this PR changes app code ($what), which compiles only on macOS, so its head $head must build there first. The lane dispatched a macOS build on $branch: $url. A later sweep merges this PR once it compiles; a new push gets a new build."
+      fi
       ;;
     mac-gate)
       # The label stays: a push gets a new run on the new head, and a later sweep merges it once green.
@@ -768,7 +845,7 @@ main() {
   while (( $# )); do
     case "$1" in
       --dry-run) DRY_RUN=1 ;;
-      -h|--help) sed -n '2,56p' "$0"; return 0 ;;
+      -h|--help) sed -n '2,60p' "$0"; return 0 ;;
       *) prs+=("$1") ;;
     esac
     shift

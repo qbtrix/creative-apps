@@ -249,8 +249,12 @@ Crew PRs merge into `dev` at once; `main` moves only when full CI passes on
   later sweep when that run passes. A run with a new failure is refused by
   test name and waits for your next push. A `Mac-Check: <run url>` line a
   supervisor adds counts too.
-- UI code takes the lane on the Linux check alone. A human reviews the
-  snapshots after the next feature CI and files fixes as new issues.
+- Any other PR touching `Sources/*App/` merges only once its head compiles on
+  macOS: the lane dispatches a build-only CI run (`ci.yml` with `build_only`,
+  `swift build`, no tests) once per head, comments its URL, and merges when it
+  succeeds. A failed build waits for your next push.
+- Otherwise UI code takes the lane on the Linux check alone. A human reviews
+  the snapshots after the next feature CI and files fixes as new issues.
 - Each lane run merges every eligible PR, oldest first. A PR that conflicts
   after an earlier merge gets one comment and waits for a rebase. A fast-lane
   PR opened against `main` is retargeted to `dev`.

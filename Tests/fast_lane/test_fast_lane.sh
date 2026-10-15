@@ -66,7 +66,7 @@ check "deny the generated C4 model and waves.md" \
   . $'docs/c4/model.json\ndocs/blueprints/halo/features/waves.md' .
 check "C4 parts, feature data and packets stay eligible" "eligible|150|2|5 checks green" \
   . $'docs/c4/parts/creative-apps/halo-model/halo-model-sources.json\ndocs/blueprints/halo/features/easing.wave.json\ndocs/blueprints/halo/features/easing.md\ndocs/blueprints/halo/waves.in.md\ndocs/blueprints/halo/features/nested/waves.md' .
-check "app shell is eligible (taste review happens after merge, on the snapshots)" "eligible|150|2|5 checks green" \
+check "app code first gets a macOS build (lesson 114; taste review still happens after merge)" "build-dispatch|Sources/FlareApp|feat/x" \
   . $'Sources/FlareApp/FlareApp.swift\nSources/FlareModel/FlareWorkspace.swift' .
 check "SuiteUI outside MAC_GATED is eligible" "eligible|150|2|5 checks green" \
   . $'Sources/SuiteUI/GlassPanel.swift\nTests/SuiteUITests/GlassPanelTests.swift' .
@@ -74,9 +74,9 @@ check "models and tests stay eligible" "eligible|150|2|5 checks green" \
   . $'Sources/PhotoModel/PhotoWorkspace.swift\nTests/AppSnapshotTests/AppSnapshotTests.swift' .
 check "a model named like an app is allowed" "eligible|150|2|5 checks green" \
   . $'Sources/HaloModel/HaloAppState.swift\nTests/HaloModelTests/HaloProjectTests.swift' .
-check "UI with only the worker's marker is eligible" "eligible|150|2|Fast-Check marker" \
+check "SuiteUI with only the worker's marker is eligible" "eligible|150|2|Fast-Check marker" \
   "$(printf '.body = "Closes #1\\n\\nFast-Check: pass\\nHead: %s"' "$HEAD_SHA")" \
-  $'Sources/FlareApp/FlareApp.swift\nSources/SuiteUI/GlassPanel.swift' '[]'
+  $'Sources/SuiteUI/GlassPanel.swift\nTests/SuiteUITests/GlassPanelTests.swift' '[]'
 check "too big (lines)" "not-eligible|too big: 401 lines" '.additions = 401 | .deletions = 0' "$BASE_FILES" .
 check "too big (files)" "not-eligible|too big: 150 lines, 16 files" '.changedFiles = 16' "$BASE_FILES" .
 check "non-allowlisted author" "not-eligible|author someone is not on the fast-lane allowlist" \
@@ -273,6 +273,50 @@ mac "a gated PR still needs the Fast-Check marker" "pending|no passing CI check"
 mac "the gate does not outrank hard rules" "not-eligible|too big" "$MARKED | .additions = 999" "$GATED" - -
 check "a gated PR with no run JSON at all dispatches" "$DISPATCH" "$MARKED" "$GATED" '[]'
 
+# The macOS build gate (lesson 114): a PR touching Sources/*App/ that isn't
+# MAC_GATED merges only once a build-only CI run (ci.yml's build_only input,
+# run title "macOS build") compiled its head; the lane dispatches it.
+# build <name> <want> <pr jq> <files> <build run jq on a green build, or -> [<checks json> [<Mac-Check run jq>]]
+BUILD_URL="https://github.com/qbtrix/creative-apps/actions/runs/38700000003"
+GREEN_BUILD='{"databaseId":"38700000003","displayTitle":"macOS build","status":"completed","conclusion":"success",
+  "url":"'"$BUILD_URL"'","headSha":"'"$HEAD_SHA"'"}'
+APP=$'Sources/LibraryApp/LibraryInspector.swift\nSources/LibraryModel/LibraryCatalog.swift'
+build() {
+  local got
+  jq "$3" <<<"$BASE_PR" >"$tmp/pr.json"; printf '%s\n' "$4" >"$tmp/files.txt"; echo '{}' >"$tmp/run.json"
+  [[ -z "${7:-}" ]] || jq "$7" <<<"$GREEN_RUN" >"$tmp/run.json"
+  if [[ "$5" == - ]]; then echo '{}' >"$tmp/build.json"; else jq "$5" <<<"$GREEN_BUILD" >"$tmp/build.json"; fi
+  printf '%s\n' "${6:-[]}" >"$tmp/bchecks.json"
+  got=$(decide "$tmp/pr.json" "$tmp/files.txt" "$tmp/bchecks.json" "" "" "$tmp/run.json" "$tmp/run.json" "$tmp/build.json" 2>/dev/null)
+  if [[ "$got" == "$2"* ]]; then echo "ok   build: $1 -> ${got:0:110}"; else echo "FAIL build: $1: want '$2*', got '$got'"; fail=1; fi
+}
+BREFUSE="mac-gate|changes app code (Sources/LibraryApp), and its head $HEAD_SHA doesn't build on macOS: $BUILD_URL"
+build "app code with no build on the head: the lane dispatches one" "build-dispatch|Sources/LibraryApp|feat/x" "$MARKED" "$APP" -
+build "a build on an older head counts as none" "build-dispatch|Sources/LibraryApp|feat/x" "$MARKED" "$APP" ".headSha = \"$OLD_HEAD\""
+build "every app folder is named" "build-dispatch|Sources/FlareApp, Sources/LibraryApp|feat/x" "$MARKED" \
+  $'Sources/LibraryApp/A.swift\nSources/FlareApp/B.swift\nSources/LibraryApp/C.swift' -
+build "a rename away from app code is gated" "build-dispatch|Sources/HaloApp|feat/x" "$MARKED" $'Sources/HaloModel/X.swift\nSources/HaloApp/X.swift' -
+build "the build still going: waits, no second dispatch" "pending|waiting for the macOS build $BUILD_URL on head $HEAD_SHA" \
+  "$MARKED" "$APP" '.status = "in_progress" | .conclusion = ""'
+build "the build compiled the head: eligible" "eligible|150|2|Fast-Check marker, macOS build $BUILD_URL" "$MARKED" "$APP" .
+build "the build failed: refused, with what to do" \
+  "$BREFUSE (failure). Fix it and push; the lane builds the new head on macOS again" "$MARKED" "$APP" '.conclusion = "failure"'
+build "a cancelled build is refused too" "$BREFUSE (cancelled)" "$MARKED" "$APP" '.conclusion = "cancelled"'
+build "a red macOS build check is the gate's to name, not just red" "$BREFUSE (failure)" "$MARKED" "$APP" '.conclusion = "failure"' \
+  '[{"__typename":"CheckRun","name":"macOS build","workflowName":"","status":"COMPLETED","conclusion":"FAILURE"},
+    {"__typename":"CheckRun","name":"Linux","workflowName":"","status":"COMPLETED","conclusion":"SKIPPED"},
+    {"__typename":"CheckRun","name":"macOS","workflowName":"","status":"COMPLETED","conclusion":"SKIPPED"}]'
+build "a model-only PR needs no build" "eligible|150|2|Fast-Check marker" "$MARKED" "$BASE_FILES" -
+build "SuiteUI outside MAC_GATED needs no build" "eligible|150|2|Fast-Check marker" "$MARKED" 'Sources/SuiteUI/GlassPanel.swift' -
+build "a model named like an app needs no build" "eligible|150|2|Fast-Check marker" "$MARKED" 'Sources/HaloModel/HaloAppState.swift' -
+build "the build gate does not outrank the marker" "pending|no passing CI check" ".body = \"x\"" "$APP" .
+build "a supervisor's green Mac-Check run covers the build" "eligible|150|2|Fast-Check marker, Mac-Check: $RUN_URL" "$MAC_PR" "$APP" - '[]' .
+# A MAC_GATED PR that also touches app code takes the full Mac run only: it builds every app too.
+jq "$MARKED" <<<"$BASE_PR" >"$tmp/pr.json"; printf '%s\n' 'Sources/SuiteUI/Tokens.swift' 'Sources/FlareApp/FlareApp.swift' >"$tmp/files.txt"
+echo '{}' >"$tmp/run.json"; jq . <<<"$GREEN_BUILD" >"$tmp/build.json"
+got=$(decide "$tmp/pr.json" "$tmp/files.txt" "$tmp/empty.json" "" "" "$tmp/run.json" "$tmp/run.json" "$tmp/build.json" 2>/dev/null)
+if [[ "$got" == "mac-dispatch|Sources/SuiteUI/Tokens.swift|feat/x" ]]; then echo "ok   build: a gated PR with app code takes the full Mac run only -> $got"
+else echo "FAIL build: a gated PR with app code: got '$got'"; fail=1; fi
 # Belt PRs (a body line starting Belt-Run: or Belt-Test:) also need Belt's
 # belt/review commit status at success on the head; other PRs ignore it.
 BELT='.body = "Closes #1\n\nBelt-Run: act-1"'
@@ -460,13 +504,22 @@ gh() {
     "workflow run "*)
       # A dispatch on a PR's head branch starts an in-progress CI run on its head.
       echo "$a" >>"$sw/calls"
+      # With -f build_only=true it is a build-only run (title "macOS build"),
+      # listed ahead of the head's other runs.
       for n in "$sw"/[0-9]*.json; do
         [[ "$(jq -r .headRefName "$n")" == "${!#}" ]] || continue
-        u=$(jq -r .headRefOid "$n"); n="${n##*/}"; n="9${n%.json}"
+        u=$(jq -r .headRefOid "$n"); n="${n##*/}"; n="${n%.json}"
+        if [[ "$a" == *"build_only=true"* ]]; then
+          jq -n --arg id "8$n" --arg h "$u" --arg url "https://github.com/qbtrix/creative-apps/actions/runs/8$n" \
+            '{databaseId: $id, displayTitle: "macOS build", status: "in_progress", conclusion: "", url: $url, headSha: $h}' \
+            | jq -s --slurpfile old <(cat "$sw/runs.$u.json" 2>/dev/null || echo '[]') '. + $old[0]' >"$sw/x" && mv "$sw/x" "$sw/runs.$u.json"
+          continue
+        fi
+        n="9$n"
         jq --arg h "$u" --arg url "https://github.com/qbtrix/creative-apps/actions/runs/$n" \
           ".headSha = \$h | .url = \$url | $RUNNING" <<<"$GREEN_RUN" >"$sw/run.$n.json"
         jq -n --arg id "$n" --arg url "https://github.com/qbtrix/creative-apps/actions/runs/$n" \
-          '[{databaseId: $id, url: $url}]' >"$sw/runs.$u.json"
+          '[{databaseId: $id, displayTitle: " ", url: $url}]' >"$sw/runs.$u.json"
       done ;;
     "run list "*) cat "$sw/ci_head" 2>/dev/null || echo cihead ;;
     "api "*"/compare/cihead...dev"*) cat "$sw/ci_ahead" 2>/dev/null || echo 0 ;;
@@ -631,4 +684,39 @@ expect "mac: once that run is green on the head, a later sweep merges it" "$(gre
 expect "mac: the merge comment names the run" \
   "$(grep -c '^pr comment 14 .*merged into dev.*macOS run https://github.com/qbtrix/creative-apps/actions/runs/914' "$sw/calls")" 1
 expect "mac: still one dispatch for its head" "$(grep -c -- '--ref b14$' "$sw/calls")" 1
+
+# The macOS build gate through sweeps (lesson 114). #30 changes
+# Sources/LibraryApp with no build on its head: the lane dispatches a
+# build-only run on its branch once (-f build_only=true) and comments its URL,
+# waits while it builds, and merges once it compiled. #32's build on its head
+# failed: refused by URL, no dispatch. #34 is MAC_GATED and touches app code:
+# it gets the full run only, never a build-only one.
+rm -rf "$sw"; mkdir -p "$sw"; : >"$sw/calls"
+for n in 30 32 34; do
+  pr_at "$n" "h$n" '[{"filename": "Sources/LibraryApp/LibraryInspector.swift", "status": "modified"}]'
+  jq --arg b "b$n" '.headRefName = $b' "$sw/$n.json" >"$sw/x" && mv "$sw/x" "$sw/$n.json"
+done
+printf '%s\n' '[{"filename": "Sources/SuiteUI/SuiteWindow.swift", "status": "modified"}, {"filename": "Sources/FlareApp/FlareApp.swift", "status": "modified"}]' >"$sw/files.34.json"
+echo '[{"databaseId": "32", "displayTitle": "macOS build", "status": "completed", "conclusion": "failure", "url": "https://github.com/qbtrix/creative-apps/actions/runs/32", "headSha": "h32"}]' >"$sw/runs.h32.json"
+lane_sweep
+expect "build: dispatches one build-only run on the app PR's branch, re-sweep included" \
+  "$(grep -c '^workflow run ci.yml -R qbtrix/creative-apps -f build_only=true --ref b30$' "$sw/calls")" 1
+expect "build: comments the build's URL once" \
+  "$(grep -c '^pr comment 30 .*The lane dispatched a macOS build on b30: https://github.com/qbtrix/creative-apps/actions/runs/830\.' "$sw/calls")" 1
+expect "build: doesn't merge before it compiles" "$(grep -c '^pr merge 30' "$sw/calls")" 0
+expect "build: a failed build is refused by URL" \
+  "$(grep -c "^pr comment 32 .*doesn't build on macOS: https://github.com/qbtrix/creative-apps/actions/runs/32 (failure)\. Fix it and push" "$sw/calls")" 1
+expect "build: a failed build never re-dispatches" "$(grep -c -- '--ref b32' "$sw/calls")" 0
+expect "build: a MAC_GATED PR with app code gets the full run, not a build" \
+  "$(grep -c -- '--ref b34$' "$sw/calls"),$(grep -c -- 'build_only=true --ref b34' "$sw/calls")" "1,0"
+expect "build: refused PRs keep the fast-lane label" "$(grep -c -- '--remove-label fast-lane' "$sw/calls")" 0
+lane_sweep
+expect "build: a later sweep while it builds dispatches and comments nothing more" \
+  "$(grep -c -- '--ref b30$' "$sw/calls"),$(grep -c '^pr comment 30 ' "$sw/calls"),$(grep -c '^pr merge 30' "$sw/calls")" "1,1,0"
+jq 'map(if .displayTitle == "macOS build" then .status = "completed" | .conclusion = "success" else . end)' "$sw/runs.h30.json" >"$sw/x" && mv "$sw/x" "$sw/runs.h30.json"
+lane_sweep
+expect "build: once it compiled the head, a later sweep merges it" "$(grep -c '^pr merge 30' "$sw/calls")" 1
+expect "build: the merge comment names the build" \
+  "$(grep -c '^pr comment 30 .*merged into dev.*macOS build https://github.com/qbtrix/creative-apps/actions/runs/830' "$sw/calls")" 1
+expect "build: still one build for its head" "$(grep -c -- '--ref b30$' "$sw/calls")" 1
 exit "$fail"
