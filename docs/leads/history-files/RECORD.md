@@ -2,9 +2,9 @@
 
 Issue: #1037 · Packet: docs/blueprints/halo/features/history-files.md
 Run: act-1a13e9a2037-pkqb · Session: claude/history-files-lead-j2c6lo · Started: 2026-10-15T08:08Z
-Stage: 4 round 2
+Stage: 4 round 3
 Base: bcf5a099960d2ceb59394cdd38c0b83c7640b7cc
-Next: wait for fix-batch wf_22ed172a-c19 (r2-b2, feature-done) to merge; round 3 on the dev CI run containing #1108 and r2-b2
+Next: wait for a dev CI run whose macOS build passes (Library build break from #1096, tracked on #763) and contains 9caed05; judge round 3 on it (same 5 lenses)
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -26,7 +26,8 @@ Next: wait for fix-batch wf_22ed172a-c19 (r2-b2, feature-done) to merge; round 3
 | round | CI run | CI | audit vs baseline | lenses | confirmed | fixed by | clean |
 |---|---|---|---|---|---|---|---|
 | 1 | 38713326810 | red: H-J8 (menu help tag unreadable), H-J10/H-J11 (halo.file value reads empty, #262); others not ours | at/under baseline (contrast 1, identifier 1, offscreen 4) | clarity, journey, design, layout, controls | 8 (4 major, 4 minor; 1 major + 2 minor filed as #1081, #1082) | #1084, #1083, #1089 | no |
-| 2 | 38721434364 | red: H-J11 passes; H-J8 width check (inspector 192 < 200, SuiteUI), H-J10 sidebar click; others not ours | under baseline (offscreen 0) | same 5 | 7 (2 major, 5 minor) | #1108 (r2-b1), r2-b2 | no |
+| 2 | 38721434364 | red: H-J11 passes; H-J8 width check (inspector 192 < 200, SuiteUI), H-J10 sidebar click; others not ours | under baseline (offscreen 0) | same 5 | 7 (2 major, 5 minor) | #1108 (r2-b1), #1114 (r2-b2) | no |
+| 3 | 38727890123 (9caed05) | red before tests: swift build fails in LibraryApp/LibraryInspector.swift (#1096, #763), not ours | n/a | waiting | - | - | - |
 
 ## Decisions
 - Brief named base 1dcd1a6; origin/dev had moved one commit (92db316, a SuiteUI perf test, #1039) that is a descendant. Used 92db316.
@@ -50,6 +51,7 @@ Next: wait for fix-batch wf_22ed172a-c19 (r2-b2, feature-done) to merge; round 3
 
 ## Open
 - #1081, #1082 gap (W0 files)
+- #1113 gap: .saveAs(then:) continuation for the unsaved alert (W0)
 - #1106 needs-ui: inspector measures 192 pt under its 200 pt min
 - #1065 needs-ui: close guard for unsaved changes on SuiteWindow (no SwiftUI close hook)
 - #1059 needs-ui: .halo exported type declaration (project.yml, bundle-apps)

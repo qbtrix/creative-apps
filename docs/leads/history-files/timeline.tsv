@@ -46,3 +46,4 @@ utc	stage	event	ref	note
 2026-10-15T11:22Z	4	stage-start	r2-b2	damage reason, unsaved Save, readouts
 2026-10-15T11:30Z	4	pr-merged	#1114	r2-b2 feature-done
 2026-10-15T11:30Z	4	ci-run	38726261412	running on 2b98fdb (has #1108, not #1114)
+2026-10-15T11:44Z	4	ci-run	38727890123	red: LibraryApp build break (#1096), journeys did not run
