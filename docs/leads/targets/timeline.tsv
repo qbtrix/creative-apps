@@ -12,3 +12,4 @@ utc	stage	event	ref	note
 2026-10-15T13:45Z	3	pr-merged	#1144	TG-0d, TG-0 complete
 2026-10-15T13:45Z	3	heartbeat	#1143	BU-1b built ahead (f789ca0), waiting on supervisor merge of BU-1a
 2026-10-15T13:15Z	3	heartbeat	#1143	waiting on supervisor merge of #1143 (BU-1a) and #1133 (BU-0); BU-1b ready
+2026-10-15T13:36Z	3	heartbeat	#1143	still waiting on supervisor merge of #1143 and #1133
