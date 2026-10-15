@@ -2,11 +2,13 @@
 // not a copy of the whole picture per layer tile. CoreRaster's composite
 // gives back a fresh copy of its backdrop, so compositing tile by tile onto
 // the whole picture copied it once per tile: Merge Down of two 12 MP layers
-// took about a minute. A one-pixel-tall layer 16 tiles wide over a 64 MB
-// picture now costs about one copy of that picture (the result), where it
-// cost 16. The tiled path Merge Down and Flatten use gives the same pixels
-// as the picture path, blend, opacity and an offset that straddles the
-// picture's tiles included. Runs on Linux and macOS.
+// took about a minute. The cost test compares two composites onto the same
+// 64 MB picture, a one-pixel strip 16 tiles wide and one a single tile wide,
+// so it measures the per-tile copy, not the machine: both pay one picture
+// copy (the result), and the old loop made the wide strip pay 16. The tiled
+// path Merge Down and Flatten use gives the same pixels as the picture path,
+// blend, opacity and an offset that straddles the picture's tiles included.
+// Runs on Linux and macOS.
 import CoreRaster
 @testable import PhotoModel
 import Testing
@@ -14,24 +16,19 @@ import Testing
 @Suite struct PhotoCompositeCostTests {
     @Test func aLayerCostsAboutOnePictureCopyNotOnePerTile() throws {
         let picture = try PixelBuffer(width: 4096, height: 1024, fill: RGBA(r: 0.2, g: 0.3, b: 0.4, a: 1))
-        let strip = try TiledPixels(width: 4096, height: 1, fill: RGBA(r: 0.5, g: 0.1, b: 0.1, a: 0.5))
-        #expect(strip.tiles.count == 16)
-        let content = LayerContent(layer: PhotoLayer(id: "strip", name: "Strip"), pixels: strip)
-        let clock = ContinuousClock()
-        var copies: [Double] = [], composites: [Double] = []
-        for _ in 0..<5 {
-            // One copy of the picture: the copy-on-write a first write makes.
-            var copy = picture
-            copies.append(clock.measure { try? copy.setPixel(x: 0, y: 0, .clear) } / .milliseconds(1))
-            composites.append(clock.measure {
-                _ = try? PhotoLayerComposite.composite(
-                    content, onto: picture, origin: (0, 0),
-                    adjusting: LiveAdjustmentLayers.make(), masking: LiveSelection.masking())
-            } / .milliseconds(1))
-        }
-        let (copy, composite) = (median(copies), median(composites))
-        // A 2 ms floor keeps a fast copy from turning scheduling noise into a ratio.
-        #expect(composite <= 4 * max(copy, 2), "composite \(composite) ms, one picture copy \(copy) ms")
+        let fill = RGBA(r: 0.5, g: 0.1, b: 0.1, a: 0.5)
+        let wide = try TiledPixels(width: 4096, height: 1, fill: fill)
+        let narrow = try TiledPixels(width: PixelBuffer.tileSize, height: 1, fill: fill)
+        #expect(wide.tiles.count == 16)
+        #expect(narrow.tiles.count == 1)
+        let wideCost = try fastest(of: 5) { try composite(wide, onto: picture) }
+        let narrowCost = try fastest(of: 5) { try composite(narrow, onto: picture) }
+        // Both pay one picture copy; the per-tile loop made the wide strip pay
+        // 16 (about 16x). 4x is a quarter of that and far above noise, and the
+        // fastest of five runs drops scheduler stalls. The 1 ms floor guards
+        // a machine so fast the narrow run rounds to nothing.
+        #expect(wideCost <= 4 * max(narrowCost, 1),
+                "16-tile strip \(wideCost) ms, 1-tile strip \(narrowCost) ms")
     }
 
     @Test func theTiledPathMatchesThePicturePath() throws {
@@ -57,7 +54,25 @@ import Testing
     }
 }
 
-private func median(_ values: [Double]) -> Double {
-    let sorted = values.sorted()
-    return sorted.isEmpty ? 0 : sorted[sorted.count / 2]
+/// `strip` (a pixel layer at the canvas origin) composited onto `picture`.
+private func composite(_ strip: TiledPixels, onto picture: PixelBuffer) throws {
+    let content = LayerContent(layer: PhotoLayer(id: "strip", name: "Strip"), pixels: strip)
+    _ = try PhotoLayerComposite.composite(
+        content, onto: picture, origin: (0, 0),
+        adjusting: LiveAdjustmentLayers.make(), masking: LiveSelection.masking())
+}
+
+/// The fastest of `runs` timings of `work`, in milliseconds: noise only adds time.
+private func fastest(of runs: Int, _ work: () throws -> Void) throws -> Double {
+    let clock = ContinuousClock()
+    var best = Double.infinity
+    for _ in 0..<runs {
+        var failure: (any Error)?
+        let time = clock.measure {
+            do { try work() } catch { failure = error }
+        } / .milliseconds(1)
+        if let failure { throw failure }
+        best = min(best, time)
+    }
+    return best
 }
