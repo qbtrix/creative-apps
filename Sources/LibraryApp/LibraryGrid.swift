@@ -8,6 +8,8 @@ import SwiftUI
 
 struct LibraryGrid: View {
     let model: LibraryCatalog
+    /// The window's menu; the thumbnails feature calls `menu.thumbnails` from here.
+    var menu = LibraryMenu()
     var onSelect: @MainActor (Set<String>) -> Void = { _ in }
     var onOpen: @MainActor (String) -> Void = { _ in }
 
