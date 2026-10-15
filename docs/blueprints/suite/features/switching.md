@@ -6,7 +6,11 @@ the launcher and every app; a running app comes forward with its windows
 as left; an app with no window opens one; a cold app launches with the
 suite's arguments; a hand-off file carries "open this", "new from this
 preset" and later verbs to the right app even when it has no window; a
-crash in one app leaves the others running.
+crash in one app leaves the others running. The same switch is one click
+on the app switcher centered at the top of every app window (captain
+decision 2026-10-15, `docs/blueprints/suite.md` section 6). SuiteUI draws
+the switcher (`AppSwitcher`, editor-in-window EW-7 and EW-8), and this
+feature drives it from the same `SwitchMenu` items as Window > Switch To.
 **Line:** `line:suite` · **Wave:** 2 (`waves.md`) · **Lead branch:** `lead/switching`
 **Blueprint:** `docs/blueprints/suite.md` sections 2.3 (shell-apps,
 shell-handoff, shell-store-watch, shell-adoption), 2.6 (processes,
@@ -30,6 +34,21 @@ home's HM-2b #845 (the tiles and cards they click) and on the adoption
 issues below.
 
 **What changed from the blueprint (review of #792 and this packet's critic).**
+
+- **The app switcher (captain decision 2026-10-15), a new task SW-3d.**
+  UC-1's wiring now drives two surfaces from one model: Window > Switch To
+  ▸ (SW-3c) and the visible switcher in every window's toolbar. SuiteUI
+  owns how the switcher looks and puts it in `SuiteWindow` with every item
+  disabled "Not connected yet (switching)."; SW-3d hands SuiteUI the live
+  items through the `suiteSwitcher` environment value. No SuiteUI file is
+  edited here. SW-3d depends on the editor-in-window feature issue
+  (`docs/blueprints/suiteui/features/editor-in-window.md`). Design and Photo
+  show the switcher once their shell-parity features land
+  (`shell-parity-waves.md`); until then their adoption tasks check only the
+  menu.
+- **Flare stays on `SuiteWindow`** (the same day's shell decision). A-FL-1
+  no longer waits on #346 (Flare onto `EditorShell`), which that decision
+  supersedes.
 
 - **SW-3 is split in three** (eleven AppKit files would not fit 400 lines):
   run states and the store watcher; the hand-off transport, the app
@@ -62,11 +81,19 @@ SJ3 `testSwitchKeepsEachAppAsLeft` (`+Switch`) on `weekOfWork`:
 
 1. Open `Bounce.flare` from the home; in Flare go to frame 12, select Ball,
    zoom to 200%.
-2. ⌃⌘2 → Design comes forward (no document: its empty state). The home strip
-   shows "Opening Design…" while it launches cold.
+2. In Flare's toolbar, the app switcher shows Flare's item (`suite.switcher.flare`)
+   selected in the capsule, disabled "You're in Flare.". Click Design's item
+   (`suite.switcher.design`) → Design comes forward (no document: its empty
+   state). The home strip shows "Opening Design…" while it launches cold.
+   Shots `switcher` and, after relaunching Flare with
+   `-AppleInterfaceStyle Dark` at the end of the journey, `switcher-dark`:
+   crops of the row (`shot(_:element:)`) for the contact sheet.
 3. ⌃⌘1 → Flare comes forward: frame 12, Ball selected, 200%, same window.
+   Flare's switcher again marks Flare current.
 4. Window > Switch To > Home (⌃⌘0); in the running strip click Flare → the
-   same state again. The strip lists Flare and Design.
+   same state again. The strip lists Flare and Design. Then the switcher's
+   Home item (`suite.switcher.home`) brings the home forward, and its strip
+   is unchanged.
 5. In Flare ⌘W (the last window), then Window > Switch To > Show Flare
    Window (⌃⌘1, enabled because Flare has no window) → Flare, still the same
    process, opens a window (its empty state, as a reopen).
@@ -103,6 +130,7 @@ SP1, SP2 (`+PerfSwitch`).
 | Window > Switch To ▸ (every process) | the current app's item reads "Show <App> Window": enabled with no window, else disabled "You're in <App>." | a missing app's item disabled with `appMissing`'s sentence | – |
 | Switching to a crashed app | – | the strip drops it within 1 s; the next ⌃⌘<n> launches it cold | the home's "Opening <App>…" after 100 ms |
 | A hand-off the target can't take | – | the target's `refusal` sentence shown by the sender in place (the home's message line); an expired one: "This request expired."; a newer format: "This was sent by a newer AfterGlow. Update AfterGlow to open it." | – |
+| The app switcher (every `SuiteWindow`) | six items, Home then the apps; the current app's item sits in the capsule and is disabled "You're in <App>." while it has a window, so a click on it is never a silent no-op; the others are enabled and switch exactly like their Switch To items | a missing app's item disabled with `appMissing`'s sentence | – |
 | An app that hasn't adopted the suite yet | its Switch To item still launches or activates it; hand-offs to it are refused "<App> can't do that yet." | – | – |
 
 ## Contract slice
@@ -121,6 +149,11 @@ public struct SwitchMenuItem: Equatable, Sendable { app, title, digit, enabled, 
 public enum SwitchMenu { public static func items(current: SuiteApp, states: [SuiteApp: AppRunState]) -> [SwitchMenuItem] }
 public enum LaunchArguments { public static func forward(_ args: [String], to app: SuiteApp) -> [String] }
 
+// Sources/SuiteModel/Switching/SwitcherEntries.swift (SW-3d): the switcher's rows, from the menu's
+public struct SwitcherEntry: Equatable, Sendable { app, title, systemImage, shortcut /* "⌃⌘2" */, reason /* nil: enabled */ }
+public enum SwitcherEntries { public static func entries(current: SuiteApp, states: [SuiteApp: AppRunState]) -> [SwitcherEntry] }
+    // built from SwitchMenu.items, so the two surfaces can't disagree
+
 // Sources/SuiteModel/HandOff/ (SW-2)
 public actor StoreHandOffs: HandOffSending, HandOffReceiving {
     public init(store: FileStore, from: SuiteApp, deliver: @escaping @Sendable (String, SuiteApp) async throws(SuiteError) -> SwitchReceipt)
@@ -136,6 +169,8 @@ open class SuiteAppDelegate: NSObject, NSApplicationDelegate {      // apps adop
     open func application(_ app: NSApplication, open urls: [URL])
 }
 extension Scene { public func suiteApp(_ app: SuiteApp, host: any SuiteDocumentHost) -> some Scene }
+    // SW-3d: also sets `\.suiteSwitcher` (SuiteUI's AppSwitcherState) from SwitcherEntries: current = app,
+    // onSelect = AppLauncher.switchTo, refreshed when StoreWatcher posts the "<app>.windows" notification
 public struct SuiteCommands: Commands { public init(app: SuiteApp = .launcher) }   // the signature BU-1a's stub already has, so the
                                                                                    // frozen AfterGlowApp.swift keeps compiling
 ```
@@ -149,6 +184,11 @@ SwitchMenu.items(current, states):                                  # SW-1
     if states[app] == .missing: disabled(appMissing(app).message)
     elif app == current and states[app] has windows: disabled("You're in \(app.displayName).")
     else enabled ; key ⌃⌘ app.switchDigit
+
+SwitcherEntries.entries(current, states):                           # SW-3d
+  SwitchMenu.items(current, states).map { item in
+    SwitcherEntry(app: item.app, title: item.app.displayName, systemImage: item.app.glyph,
+                  shortcut: "⌃⌘\(item.digit)", reason: item.enabled ? nil : item.reason) }
 
 LaunchArguments.forward(args, to app):                              # SW-1, blueprint 2.6
   keep "-<AppName>*" pairs, -SuiteSupportDir, -SuitePerfProbe, -SuiteFixtureDocuments, -LibrarySample, -LibraryCatalogDir (Library only)
@@ -187,7 +227,8 @@ lands before it; SW-4b and SW-4c are follow-ups outside the done check.
 | SW-3a | #854 | `AppLauncher` (live `AppSwitching`, `-SuiteHideApp`), `StoreWatcher`, the live switching slot, the watcher on the recents slot | `Sources/SuiteShell/AppLauncher.swift`, `StoreWatcher.swift`, `Live/SwitchingSlot.swift`, `Live/RecentsSlot.swift`, `Tests/AppSnapshotTests/SuiteShellSwitchingTests.swift` | SW-1, SC-5b #833 |
 | SW-3b | #855 | `HandOffTransport`, `SuiteAppDelegate`, the live hand-off slot, the launcher's `LauncherRouter` (file routing, no window; verb dispatch to `LauncherRouter+<Area>.swift`) | `Sources/SuiteShell/HandOffTransport.swift`, `SuiteAppDelegate.swift`, `Live/HandOffSlot.swift`, `Sources/AfterGlowApp/LauncherRouter.swift`, `Tests/AppSnapshotTests/SuiteShellHandOffTests.swift` | SW-1, SW-2 |
 | SW-3c | #856 | `SuiteCommands` (Switch To ▸ from `SwitchMenu`; Open In ▸ and Settings… through stubs), `.suiteApp(_:host:)`, the `SettingsRoute` and `OpenInMenu` stubs; the shortcut clash test | `Sources/SuiteShell/SuiteCommands.swift`, `SuiteAppModifier.swift`, `SettingsRoute.swift` (stub), `OpenInMenu.swift` (stub), `Tests/SuiteModelTests/SuiteCommandsTests.swift` | SW-3a, SW-3b |
-| SW-4a | #857 | Journeys SJ3, `testOpenRecentBringsAppForward`, `testCrashIsolation` | `UITests/AfterGlowJourneyTests+Switch.swift` | SW-3c, HM-0 #841, HM-2b #845, A-FL-1 #861, A-DE-1 #862, A-FL-0 #837, A-DE-0 #836 |
+| SW-3d | – (part of #856) | The app switcher's live items: `SwitcherEntries` (Linux), and `.suiteApp` setting `suiteSwitcher` so a click switches like the menu | `Sources/SuiteModel/Switching/SwitcherEntries.swift` (new), `Tests/SuiteModelTests/SwitcherEntriesTests.swift` (new), `Sources/SuiteShell/SuiteAppModifier.swift`, `Sources/SuiteShell/SuiteSwitcherBridge.swift` (new) | SW-3c, the editor-in-window feature issue |
+| SW-4a | #857 | Journeys SJ3, `testOpenRecentBringsAppForward`, `testCrashIsolation` | `UITests/AfterGlowJourneyTests+Switch.swift` | SW-3c, SW-3d, HM-0 #841, HM-2b #845, A-FL-1 #861, A-DE-1 #862, A-FL-0 #837, A-DE-0 #836 |
 | SW-4b | #858 | Journey SJ2 (every tile, the missing-app error) | `UITests/AfterGlowJourneyTests+New.swift` | SW-3c, HM-0 #841, HM-2b #845, A-FL-1 #861, A-DE-1 #862, A-FL-0 #837, A-DE-0 #836, A-PH-1 #863, A-LI-1 #864, A-HA-1 #865 |
 | SW-4c | #859 | SP1, SP2; the switching budget constants (report only) | `UITests/AfterGlowJourneyTests+PerfSwitch.swift`, `UITests/AfterGlowJourneyTests+BudgetsSwitch.swift` | SW-3c, HM-0 #841, HM-2b #845, A-FL-1 #861, A-DE-1 #862, A-FL-0 #837, A-DE-0 #836, #782 |
 | SW-5 | #860 | Every QB-S and QB-SM row of blueprint 7.1 into `docs/review-rubric.md` section 6 as an appended "AfterGlow" subsection, report only, each naming its test and its feature's budget file | `docs/review-rubric.md` | – |
@@ -196,7 +237,7 @@ Adoption issues this feature files (`needs-suite`, each built by its line):
 
 | id | issue | line | what | owned files | depends on |
 |---|---|---|---|---|---|
-| A-FL-1 | #861 | flare | `FlareModel` conforms to `SuiteDocumentHost` (`.open` a `.flare`, `.new` from a preset's width, height and fps); `FlareApp` adds `.suiteApp(.flare, host:)`, `@NSApplicationDelegateAdaptor(SuiteAppDelegate.self)` and `SuiteCommands(app: .flare)`; Flare's menu journey counts updated | `Sources/FlareModel/FlareDocumentHost.swift`, `Tests/FlareModelTests/FlareDocumentHostTests.swift`, `Sources/FlareApp/FlareApp.swift`, `UITests/FlareJourneyTests.swift` | SW-3c #856, #346 (the window on `EditorShell`) |
+| A-FL-1 | #861 | flare | `FlareModel` conforms to `SuiteDocumentHost` (`.open` a `.flare`, `.new` from a preset's width, height and fps); `FlareApp` adds `.suiteApp(.flare, host:)`, `@NSApplicationDelegateAdaptor(SuiteAppDelegate.self)` and `SuiteCommands(app: .flare)`; Flare's menu journey counts updated | `Sources/FlareModel/FlareDocumentHost.swift`, `Tests/FlareModelTests/FlareDocumentHostTests.swift`, `Sources/FlareApp/FlareApp.swift`, `UITests/FlareJourneyTests.swift` | SW-3c #856 (#346 no longer: Flare stays on `SuiteWindow`) |
 | A-DE-1 | #862 | design | Same for Design (`.open` a `.design`, `.new` blank) | `Sources/DesignModel/DesignDocumentHost.swift`, `Tests/DesignModelTests/DesignDocumentHostTests.swift`, `Sources/DesignApp/DesignApp.swift`, `UITests/DesignJourneyTests.swift` | SW-3c |
 | A-PH-1 | #863 | photo | Same for Photo (`.open` an image or `.ora`; `.new` shows the New Image sheet); Photo's PV-1 delegate subclasses `SuiteAppDelegate` when it lands | `Sources/PhotoModel/PhotoDocumentHost.swift`, `Tests/PhotoModelTests/PhotoDocumentHostTests.swift`, `Sources/PhotoApp/PhotoApp.swift`, `UITests/PhotoJourneyTests.swift` | SW-3c |
 | A-LI-1 | #864 | library | Same for Library (`.new` with `library.import` opens Import Folder; `.open` of images is recents-open-in's A-LI-2) | `Sources/LibraryModel/LibraryDocumentHost.swift`, `Tests/LibraryModelTests/LibraryDocumentHostTests.swift`, `Sources/LibraryApp/LibraryApp.swift`, `UITests/LibraryJourneyTests.swift` | SW-3c, A-LI-0 #840 (same `LibraryApp.swift`) |
@@ -210,8 +251,10 @@ cold-launches an app that isn't running, so it passes
 it needs no code. SW-4b and SW-4c don't need SW-4a's journey file; they
 carry its outside waits instead (home's #845, the adoptions, the fixtures)
 and stay follow-ups outside the done check. The adoption issues land on
-their lines after SW-3c. Sizes:
-SW-1 ~300, SW-2 ~280, SW-3a ~350, SW-3b ~380, SW-3c ~330, SW-4a ~330,
+their lines after SW-3c. SW-3d needs SW-3c: it sets the switcher's state inside
+the `.suiteApp` modifier SW-3c adds, and the editor-in-window feature for
+SuiteUI's `AppSwitcherState`. Sizes:
+SW-1 ~300, SW-2 ~280, SW-3a ~350, SW-3b ~380, SW-3c ~330, SW-3d ~220, SW-4a ~330,
 SW-4b ~220, SW-4c ~220, SW-5 ~60.
 
 **Files shared with other features, and why it's safe.** `SuiteCommands.swift`
@@ -235,11 +278,16 @@ targets' TG-0 (see #807) adds, so the feature needs no docs task. `docs/review-r
 - Wave 1: SW-1, SW-2, SW-5. Independent in this wave: all three.
 - Wave 2: SW-3a, SW-3b. Independent in this wave: both.
 - Wave 3: SW-3c. Independent in this wave: SW-3c alone.
-- Wave 4: SW-4a (`feature-done`), SW-4b, SW-4c (follow-ups, each once its
+- Wave 4: SW-3d (also waits on the editor-in-window feature issue).
+  Independent in this wave: SW-3d alone.
+- Wave 5: SW-4a (`feature-done`), SW-4b, SW-4c (follow-ups, each once its
   outside waits clear). Independent in this wave: all three.
 
-Longest chain: SW-1 → SW-3a → SW-3c → SW-4a (4), and SW-2 → SW-3b → SW-3c →
-SW-4a (4).
+Longest chain: SW-1 → SW-3a → SW-3c → SW-3d → SW-4a (5), and SW-2 → SW-3b →
+SW-3c → SW-3d → SW-4a (5).
+Chain of 5: as the chain of 4 below, plus SW-3d, which sets the app
+switcher's state inside the `.suiteApp` modifier SW-3c adds, and SJ3 (SW-4a)
+clicks that switcher (captain decision 2026-10-15).
 Chain of 4: `AppLauncher` (SW-3a) calls `SwitchPlanner` and
 `LaunchArguments` (SW-1), `HandOffTransport` (SW-3b) uses
 `LaunchArguments` (SW-1) and `SuiteAppDelegate` (SW-3b) calls
@@ -256,11 +304,12 @@ the Switch To menu SW-3c adds.
 | SW-3a | `SuiteShellSwitchingTests` (macOS): `AppLauncher` on a bundle without Halo (or with `-SuiteHideApp halo`) reports Halo `missing`; `StoreWatcher.post("recents.json")` reaches an observer within 1 s; a `StoreRecents` behind the recents slot sees another instance's write after the post | a missing app reads as not running, or a cross-process write is never seen |
 | SW-3b | `SuiteShellHandOffTests` (macOS): `SuiteAppDelegate` given a hand-off URL calls `host.accept` with the decoded hand-off and settles it with the host's state; given an expired one never calls the host; `LauncherDelegate` given `Cards.design` opens no launcher window and delivers to Design | a hand-off acts twice, or the launcher opens a window for a routed file |
 | SW-3c | `SuiteCommandsTests` (Linux): `SwitchMenu.items` gives digits 0–5 once each (the shortcuts are built from them in a loop, so the digits are checked on the model, not as text); a text scan of `Sources/*App/*.swift` and `Sources/SuiteShell/*.swift` other than `SuiteCommands.swift` finds no `.keyboardShortcut` whose modifiers hold both `.control` and `.command`; the `SettingsRoute` and `OpenInMenu` stubs carry "Not connected yet (settings)." and "… (recents-open-in)."; `SuiteCommands.swift` declares `init(app: SuiteApp = .launcher)` | a shortcut clashes or doubles, or a stub is enabled with no reason |
+| SW-3d | `SwitcherEntriesTests` (Linux): for every `current` and every mix of run states, the entries equal `SwitchMenu.items` one for one, in app, digit, enablement and reason; the shortcut text is "⌃⌘0" … "⌃⌘5"; a missing app's entry carries `appMissing`'s sentence; the current app with a window reads "You're in <App>.". The macOS build on dev compiles the bridge. | the switcher and the menu disagree, or an item is enabled with nothing behind it |
 | SW-4a | SJ3, `testOpenRecentBringsAppForward`, `testCrashIsolation` on the dev macOS run, asserting the states above; the audit under each app's key and `afterglow` unchanged | state is lost across switches, Show <App> Window is disabled with no window, or a crash takes another app's document |
 | SW-4b | SJ2: each app frontmost with its named window or sheet; the hidden-Halo tile disabled with its sentence | a tile opens the wrong app or nothing |
 | SW-4c | SP1 (30 switches, at least 30 samples) and SP2 (each app 20 cold opens) write p50 and p95 to the run's perf JSON; too few samples fail as invalid | marks are missing or too few |
 | SW-5 | review: every QB-S1…S9, QB-L9 and QB-SM1…SM6 row of blueprint 7.1 appears once in the rubric with its test name and "report only" | a row is missing or a gate is set before ten runs |
-| A-x-1 | each line's `<X>DocumentHostTests` (Linux): the verbs it takes are accepted and others refused "<App> can't do that yet."; `.new` from the app's preset sets the document size it names; the app's journey `testSwitchToMenu` finds Window > Switch To with six items and its own "Show <App> Window"; its menu-count assertions updated in the same PR, its audit counts not raised | a verb is silently ignored, or the app's menus lose an item |
+| A-x-1 | each line's `<X>DocumentHostTests` (Linux): the verbs it takes are accepted and others refused "<App> can't do that yet."; `.new` from the app's preset sets the document size it names; the app's journey `testSwitchToMenu` finds Window > Switch To with six items and its own "Show <App> Window", and, once the app is on `SuiteWindow` (Flare, Halo and Library now; Design and Photo after their shell-parity features), the toolbar's `suite.switcher` with six items, its own selected and disabled "You're in <App>." and the others enabled; its menu-count assertions updated in the same PR, its audit counts not raised | a verb is silently ignored, or the app's menus lose an item |
 
 ## Quality tests
 
@@ -272,6 +321,7 @@ the Switch To menu SW-3c adds.
 | QB-L9 a cold launch shows progress | "Opening <App>…" ≤ 100 ms after the command, by the `switch-cold` mark | SW-4c |
 | 7.6 no work lost when switching; crash isolation | SJ3's state equal after two switches; Design unchanged after Flare's `SIGKILL` | SJ3, `testCrashIsolation` |
 | 6.2 shortcuts | ⌃⌘0–5 bound once, free in every app | `SuiteCommandsTests` |
+| The switcher and the menu agree; no dead control | every switcher item enabled exactly when its Switch To item is, with the same reason | `SwitcherEntriesTests`, SJ3 step 2 |
 
 ## Done check
 
@@ -284,4 +334,5 @@ the Switch To menu SW-3c adds.
   Switch To menu.
 - **Contact sheet:** `Belt-Contact-Sheet: <run link>` on the feature issue,
   one line per journey, Flare's window before and after the two switches
-  side by side.
+  side by side, and the switcher's `switcher` and `switcher-dark` crops (the
+  live switcher, beside editor-in-window's placeholder shots).

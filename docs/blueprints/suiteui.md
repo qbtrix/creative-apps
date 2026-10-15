@@ -1493,6 +1493,30 @@ public struct FakeGoldenComparing: GoldenComparing {
 
 ## 6. Look
 
+**Captain decision 2026-10-15: one shell and one tool box for all five
+apps.** After using the dev build of every app, the captain chose the shell
+Flare and Halo already have: `SuiteWindow`, a `NavigationSplitView` with a
+sidebar, the app's content as the detail and a trailing inspector the user
+can hide, the chrome in system Liquid Glass and the content flat, with a
+title bar and the system appearance. Design and Photo move onto it and keep
+their tools, shortcuts, tool options, canvas with rulers, status line and
+panel contents. For that, SuiteUI gives `SuiteWindow` a sidebar slot for an
+app's own list, a window subtitle for the save state, an editor detail (the
+canvas with its floating palette and the status line under it) and a row of
+icon actions for list footers. Flare's tool box is the standard for every
+app that has tools: `ToolbarGroup`'s `.floating` style, one glass capsule
+over the canvas, as `Sources/FlareApp/FlareApp.swift` draws it. Once no app
+uses them, `EditorShell`, `EditorTopBar` (with `EditorBarItem`,
+`EditorBarMenu`, `EditorBarDivider`) and the `.rail` style are deleted, with
+the tokens only they read. Where this blueprint plans more for `EditorShell`
+or `EditorTopBar` (the timeline slot, `EditorBarItem(.primary)`, the save
+status in the top bar), that work now targets `SuiteWindow`.
+The packets are `docs/blueprints/suiteui/features/editor-in-window.md`,
+`docs/blueprints/design/features/shell-parity.md`,
+`docs/blueprints/photo/features/shell-parity.md` and
+`docs/blueprints/suiteui/features/editor-shell-removal.md`; the waves are in
+`docs/blueprints/suite/features/shell-parity-waves.md`.
+
 ### 6.1 The house reference
 
 Flare's easing editor (`Sources/FlareApp/FlareEasingInspector.swift`) is

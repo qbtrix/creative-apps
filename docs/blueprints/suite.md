@@ -2536,6 +2536,43 @@ shared doc: the `docs/design.md` additions in 6.4 land with the home
 feature's last task (owned there, section 8), after SuiteUI's suite-record
 wave, so the two never touch the file in the same wave.
 
+**Captain decision 2026-10-15: one shell and one tool box for all five
+apps.** After using the dev build of every app, the captain chose the shell
+Flare and Halo already have. Every app opens in `SuiteWindow`: a
+`NavigationSplitView` with the document's structure in the sidebar, the
+app's content as the detail and a trailing inspector the user can hide; the
+chrome (toolbar, sidebar, inspector) is system Liquid Glass, the content
+stays flat, and the window keeps its title bar and follows the system
+appearance. Design and Photo leave `EditorShell` for it. Their tools,
+shortcuts, tool options, canvas with rulers, status line and panel contents
+stay and move inside it: pages and layers in the sidebar, Properties and
+Adjust in the inspector, the top bar's commands (open, save, export, undo,
+redo, zoom) in the window toolbar with the save state as the window's
+subtitle, and the status line under the canvas. A second decision the same
+day: Flare's tool box is the standard for every app that has tools, which
+is `ToolbarGroup`'s `.floating` style, one glass capsule over the canvas, as
+`Sources/FlareApp/FlareApp.swift` draws it; Design and Photo drop the docked
+`.rail`. Once nothing uses them, `EditorShell`, `EditorTopBar` and the
+`.rail` style are deleted. A third decision the same day, from a
+reference picture the captain shared: every app window shows a visible app
+switcher at the top, centered in the window toolbar. It is one row of
+monochrome line icons, about 22 to 24 pt and about 80 pt apart, with no
+labels and no bar or background behind the row: Home, then Flare, Design,
+Photo, Library and Halo. Only the current item sits in a capsule (about
+90 × 48 pt) of dark translucent glass with a hairline light rim and a soft
+top highlight, and its icon is brighter; the others are mid-grey. Each
+item has a tooltip with the app's name and its shortcut (⌃⌘0 to ⌃⌘5, as
+Switch To ▸ in 6.2), an accessibility label and identifier, and is one
+key-view stop. SuiteUI draws it (`AppSwitcher` in a centered slot of
+`SuiteWindow`'s toolbar), every item disabled with its reason until the
+switching feature wires it to the same `SwitchMenu` items as Window >
+Switch To. The packets are
+`docs/blueprints/suiteui/features/editor-in-window.md`,
+`docs/blueprints/design/features/shell-parity.md`,
+`docs/blueprints/photo/features/shell-parity.md` and
+`docs/blueprints/suiteui/features/editor-shell-removal.md`; the waves are in
+`docs/blueprints/suite/features/shell-parity-waves.md`.
+
 ### 6.1 Screens and their components
 
 Component names are SuiteUI unless marked **new** (a `needs-ui` issue on
