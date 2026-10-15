@@ -2,9 +2,9 @@
 
 Issue: #1037 · Packet: docs/blueprints/halo/features/history-files.md
 Run: act-1a13e9a2037-pkqb · Session: claude/history-files-lead-j2c6lo · Started: 2026-10-15T08:08Z
-Stage: 4 round 1
+Stage: 4 round 2
 Base: bcf5a099960d2ceb59394cdd38c0b83c7640b7cc
-Next: find the dev CI run whose head contains 910dafa (#1089 feature-done, r1-b3) and run round 2 on it (same 5 lenses)
+Next: wait for fix-batch wf_949106a3-bad (r2-b1, feature-done) and critic-panel wf_2fae2d07-055; then round 3 on the CI run containing r2-b1
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -26,6 +26,7 @@ Next: find the dev CI run whose head contains 910dafa (#1089 feature-done, r1-b3
 | round | CI run | CI | audit vs baseline | lenses | confirmed | fixed by | clean |
 |---|---|---|---|---|---|---|---|
 | 1 | 38713326810 | red: H-J8 (menu help tag unreadable), H-J10/H-J11 (halo.file value reads empty, #262); others not ours | at/under baseline (contrast 1, identifier 1, offscreen 4) | clarity, journey, design, layout, controls | 8 (4 major, 4 minor; 1 major + 2 minor filed as #1081, #1082) | #1084, #1083, #1089 | no |
+| 2 | 38721434364 | red: H-J11 passes; H-J8 width check (inspector 192 < 200, SuiteUI), H-J10 sidebar click; others not ours | under baseline (offscreen 0) | same 5 | pending | r2-b1 | no |
 
 ## Decisions
 - Brief named base 1dcd1a6; origin/dev had moved one commit (92db316, a SuiteUI perf test, #1039) that is a descendant. Used 92db316.
