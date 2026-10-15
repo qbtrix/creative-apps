@@ -91,6 +91,20 @@ jobs:
           path: .build/app-builds.tar.gz
           retention-days: 7
           if-no-files-found: error
+      # The size baseline (blueprint 7.5): bytes per executable, bundle and
+      # tarball, and SuiteUI symbols per executable, as `size-report` and a
+      # table in the job summary. Report only: it fails on a script error or a
+      # missing bundle, never on a size.
+      - name: Size report
+        run: |
+          bash Tests/size_report/test_size_report.sh
+          scripts/size-report | tee -a "$GITHUB_STEP_SUMMARY"
+      - name: Upload size report
+        uses: actions/upload-artifact@v4
+        with:
+          name: size-report
+          path: .build/size-report.json
+          if-no-files-found: error
       # The human-like UI tests: scripts/ui-test launches the bundles above,
       # clicks through each app (UITests/) and exports a whole-window PNG per
       # step, uploaded as `ui-screens`. A failed journey fails this job.

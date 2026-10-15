@@ -1,0 +1,86 @@
+#!/usr/bin/env bash
+# scripts/size-report: the size baseline of blueprint 7.5 (packet BU-0). Reads
+# the bundles scripts/bundle-apps assembled and writes .build/size-report.json
+# in SuiteModel's SizeReport shape:
+#
+#   { "commit": "<sha>",
+#     "entries": [ { "name": "Flare", "kind": "executable", "bytes": N },
+#                  { "name": "FlareApp.app", "kind": "appBundle", "bytes": N }, ...,
+#                  { "name": "app-builds.tar.gz", "kind": "tarball", "bytes": N } ],
+#     "suiteUISymbols": { "Flare": N, ... } }
+#
+# Per app X: the bytes of .build/apps/<X>App.app/Contents/MacOS/<X>App, the
+# bytes of every file in the bundle, and the SuiteUI symbols the executable
+# defines: `nm -U` names, kept when their mangled module is SuiteUI
+# (`$s7SuiteUI`), demangled with `swift demangle --compact`, minus generic
+# specializations and inlined generic copies (they legitimately land in a
+# client). Then the bytes of the tarball. Prints a markdown table on stdout
+# (CI appends it to the job summary). Report only: it never judges sizes;
+# SizeBudget does that from BU-2 on. Exits 1 when an expected bundle,
+# executable or the tarball is missing. Needs jq; the symbol count needs a
+# Mach-O nm on macOS. Tests/size_report tests it. bash 3.2 compatible.
+#
+#   scripts/size-report
+#   env: APPS     apps to measure        (default "Flare Design Photo Library Halo")
+#        APPS_DIR folder of <X>App.app   (default .build/apps)
+#        TARBALL  the app-builds tarball (default .build/app-builds.tar.gz)
+#        OUT      the JSON written       (default .build/size-report.json)
+#        COMMIT   the commit recorded    (default $GITHUB_SHA, else git HEAD)
+#        NM, SWIFT_DEMANGLE  the commands (default "nm -U", "swift demangle --compact")
+set -euo pipefail
+cd "$(dirname "$0")/.." || exit 1
+
+apps=${APPS:-"Flare Design Photo Library Halo"}
+apps_dir=${APPS_DIR:-.build/apps}
+tarball=${TARBALL:-.build/app-builds.tar.gz}
+out=${OUT:-.build/size-report.json}
+commit=${COMMIT:-${GITHUB_SHA:-$(git rev-parse HEAD 2>/dev/null || echo unknown)}}
+read -r -a nm_cmd <<<"${NM:-nm -U}"
+read -r -a demangle_cmd <<<"${SWIFT_DEMANGLE:-swift demangle --compact}"
+
+die() { echo "size-report: $*" >&2; exit 1; }
+bytes() { wc -c <"$1" | tr -d ' '; }
+tree_bytes() { find "$1" -type f -exec cat {} + | wc -c | tr -d ' '; }
+
+# SuiteUI symbols defined in one executable, as blueprint 7.5 counts them.
+suiteui_symbols() {
+  "${nm_cmd[@]}" "$1" \
+    | awk '$NF ~ /^_?\$s7SuiteUI/ { print $NF }' \
+    | "${demangle_cmd[@]}" \
+    | awk '!/specialization <|inlined generic function </ { n++ } END { print n + 0 }'
+}
+
+for x in $apps; do
+  [[ -d "$apps_dir/${x}App.app" ]] || die "missing bundle $apps_dir/${x}App.app"
+  [[ -f "$apps_dir/${x}App.app/Contents/MacOS/${x}App" ]] \
+    || die "missing executable $apps_dir/${x}App.app/Contents/MacOS/${x}App"
+done
+[[ -f "$tarball" ]] || die "missing tarball $tarball"
+
+rows=""   # one tab-separated line per entry: name kind bytes
+symbols=""  # one tab-separated line per app: name count
+for x in $apps; do
+  app="$apps_dir/${x}App.app"
+  exe="$app/Contents/MacOS/${x}App"
+  rows+="$x	executable	$(bytes "$exe")"$'\n'
+  rows+="${x}App.app	appBundle	$(tree_bytes "$app")"$'\n'
+  symbols+="$x	$(suiteui_symbols "$exe")"$'\n'
+done
+rows+="$(basename "$tarball")	tarball	$(bytes "$tarball")"$'\n'
+
+mkdir -p "$(dirname "$out")"
+jq -n --arg commit "$commit" --arg rows "$rows" --arg symbols "$symbols" '
+  def lines($s): $s | split("\n") | map(select(length > 0) | split("\t"));
+  { commit: $commit,
+    entries: [lines($rows)[] | { name: .[0], kind: .[1], bytes: (.[2] | tonumber) }],
+    suiteUISymbols: (lines($symbols) | map({ key: .[0], value: (.[1] | tonumber) }) | from_entries) }
+' >"$out"
+
+jq -r '
+  "### Size report (\(.commit[0:12]))", "",
+  "| entry | kind | bytes | SuiteUI symbols |", "|---|---|---:|---:|",
+  (.suiteUISymbols as $s | .entries[]
+    | "| \(.name) | \(.kind) | \(.bytes) | \(if .kind == "executable" then $s[.name] else "" end) |"),
+  "", "Sum of the executables: \([.entries[] | select(.kind == "executable") | .bytes] | add // 0) bytes."
+' "$out"
+echo "size-report: wrote $out" >&2
