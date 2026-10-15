@@ -26,3 +26,4 @@ utc	stage	event	ref	note
 2026-10-15T12:47Z	3	stage-start	wave10	SA-5 SA-6 on 6351952; SA-4 #1142 merged
 2026-10-15T12:59Z	3	pr-merged	#1147	SA-6 merged; #1150 held for SJ-1a
 2026-10-15T13:05Z	3	pr-merged	#1152	SJ-1a merged; fast-lane back on #1150
+2026-10-15T13:06Z	3	stage-start	wave11	SA-7 on a6c2135; #1150 merged
