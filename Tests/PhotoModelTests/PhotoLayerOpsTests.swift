@@ -2,7 +2,9 @@
 // Flatten Image (E-4 of photo-edit): the duplicate's own tiles, Merge Down
 // keeping the lower layer's id and name, Flatten resetting the whole-image
 // adjustments, the help texts on `.live` and `.fake`, one named undo step each
-// (QB-F3) and QB-F1. Runs on Linux and macOS.
+// (QB-F3) and QB-F1; the off-main path (beginMerge, merged, commitMerge) with
+// its "Merging…" progress, and Flatten's note on what it baked in or dropped.
+// Runs on Linux and macOS.
 import CoreRaster
 @testable import PhotoModel
 import Testing
@@ -193,5 +195,68 @@ import Testing
             workspace.flattenImage()
             #expect(sameDocument(workspace, flat) && workspace.statusMessage == "The image already has one layer.")
         }
+    }
+
+    @Test(arguments: [LayerMergeJob.mergeDown, .flatten])
+    func theOffMainPathMatchesTheDirectOne(job: LayerMergeJob) throws {
+        var direct = try twoLayers()
+        var stepped = direct
+        job == .mergeDown ? direct.mergeDown() : direct.flattenImage()
+
+        let began = stepped.beginMerge(job)
+        #expect(began && stepped.progress == "Merging…")
+        #expect(stepped.mergeDownHelp == "Wait for the merge to finish.")
+        #expect(stepped.flattenHelp == "Wait for the merge to finish.")
+        let again = stepped.beginMerge(job)
+        #expect(!again && stepped.statusMessage == "Wait for the merge to finish.")
+        stepped.clearStatus()
+        let result = stepped.merged(job)
+        let committed = stepped.commitMerge(result)
+        #expect(committed)
+        #expect(stepped.progress == nil)
+        #expect(stepped.layers == direct.layers && stepped.pixels == direct.pixels)
+        #expect(stepped.historySteps == direct.historySteps && stepped.undoActionName == direct.undoActionName)
+    }
+
+    @Test func aMergeAfterAnotherEditIsDropped() throws {
+        var workspace = try twoLayers()
+        let began = workspace.beginMerge(.mergeDown)
+        let result = workspace.merged(.mergeDown)
+        workspace.adjust(.exposure(0.3))
+        workspace.endAdjust()
+        let before = workspace
+        let committed = workspace.commitMerge(result)
+        #expect(began && !committed)
+        #expect(workspace.progress == nil)
+        #expect(workspace.statusMessage == "The image changed while merging, so nothing was merged.")
+        #expect(sameDocument(workspace, before) && workspace.historySteps == before.historySteps)
+    }
+
+    @Test func aRefusedOffMainMergeClearsTheProgress() throws {
+        var services = PhotoServices.live
+        services.merging = RefusingMerging()
+        var workspace = try twoLayers(services)
+        let before = workspace
+        let began = workspace.beginMerge(.flatten)
+        let committed = workspace.commitMerge(workspace.merged(.flatten))
+        #expect(began && !committed)
+        #expect(workspace.progress == nil && workspace.statusMessage == "No flattening today.")
+        #expect(sameDocument(workspace, before))
+    }
+
+    @Test func flattenSaysWhatItBakedInAndDropped() throws {
+        var workspace = try twoLayers()
+        workspace.adjust(.exposure(1))
+        workspace.endAdjust()
+        let hidden = try #require(workspace.selectedLayerID)
+        workspace.toggleVisibility(hidden)
+        workspace.flattenImage()
+        let note = try #require(workspace.statusMessage)
+        #expect(note.contains("Adjustments applied to the image."))
+        #expect(note.contains("Hidden layers were discarded."))
+
+        var plain = try twoLayers()
+        plain.flattenImage()
+        #expect(plain.layers.count == 1 && plain.statusMessage == nil)
     }
 }
