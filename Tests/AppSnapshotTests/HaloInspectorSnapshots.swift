@@ -6,7 +6,9 @@
 // after typing "abc" into Rotation, with "Rotation needs a number." under the
 // Rotation row. Light and Dark, at the inspector's ideal width. Writes
 // halo-inspector-{light,dark}.png and halo-inspector-refusal-{light,dark}.png.
-// macOS only.
+// Also LAYER on `parented` with Ball following Rig and blending Multiply
+// (halo-inspector-layer-*), and the `keyed` inspector at the minimum width,
+// TRANSFORM and LAYER unclipped (halo-inspector-narrow-*). macOS only.
 import HaloModel
 import SuiteUI
 import SwiftUI
@@ -33,9 +35,31 @@ import Testing
         try snapshots(project, name: "halo-inspector-refusal")
     }
 
-    /// `keyed` with Ball selected and the playhead at frame 12.
-    private func ballAt12() throws -> HaloProject {
-        var project = HaloProject(services: .fake, document: try #require(HaloFixtures.project("keyed")))
+    /// LAYER: Parent reads Rig (None, Rig, Floor offered), Blend Multiply.
+    @Test func layerGroup() throws {
+        var project = try ballAt12("parented")
+        let rig = try #require(project.parentChoices.first { $0.name == "Rig" })
+        #expect(project.parentChoices.map(\.name) == ["Rig", "Floor"])
+        project.setParent(rig.id)
+        project.setSelectedLayerBlendMode(.multiply)
+        #expect(project.selectedLayer?.parentID == rig.id)
+        #expect(project.selectedLayer?.blendMode == .multiply)
+        #expect(project.refusal == nil)
+        #expect(project.unavailableHelp(for: .setParent(rig.id)) == nil)
+        #expect(project.unavailableHelp(for: .setBlendMode(.multiply)) == nil)
+        try snapshots(project, name: "halo-inspector-layer")
+    }
+
+    /// The inspector at its minimum width: TRANSFORM and LAYER, no label clipped.
+    @Test func narrowInspector() throws {
+        let project = try ballAt12()
+        #expect(SuiteSize.inspectorWidth.min == 200)
+        try snapshots(project, name: "halo-inspector-narrow", width: SuiteSize.inspectorWidth.min)
+    }
+
+    /// `fixture` (`keyed` by default) with Ball selected and the playhead at frame 12.
+    private func ballAt12(_ fixture: String = "keyed") throws -> HaloProject {
+        var project = HaloProject(services: .fake, document: try #require(HaloFixtures.project(fixture)))
         let ball = try #require(project.selectedComposition?.layers.first { $0.name == "Ball" })
         project.selectLayer(ball.id)
         project.scrub(to: 12)
@@ -44,11 +68,11 @@ import Testing
     }
 
     /// The inspector in its column on the panel, as `<name>-light.png` and `<name>-dark.png`.
-    private func snapshots(_ model: HaloProject, name: String) throws {
+    private func snapshots(_ model: HaloProject, name: String, width: CGFloat = SuiteSize.inspectorWidth.ideal) throws {
         for scheme in [ColorScheme.light, .dark] {
             try snapshot(
                 HaloLayerInspector(model: model)
-                    .frame(width: SuiteSize.inspectorWidth.ideal, height: 900, alignment: .topLeading)
+                    .frame(width: width, height: 900, alignment: .topLeading)
                     .background(SuiteColor.panel)
                     .padding(SuiteSpacing.xxl),
                 name: "\(name)-\(scheme.name)", scheme: scheme)
