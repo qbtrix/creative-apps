@@ -2,9 +2,9 @@
 
 Issue: #1074 · Packet: docs/blueprints/photo/features/photo-documents.md
 Run: act-1a1404bf04c-bp6m · Session: claude/photo-documents-lead-ezrcev · Started: 2026-10-15T10:40Z
-Stage: 3 wave 8
+Stage: 4 round 1
 Base: 6018826c90376f7b4ea46336d85e8da510c90f4d
-Next: wait for #1233-#1235 and fixes A (ids), B (Open Recent); then fix C (restore decode off main, after A); read the macOS run that contains them
+Next: attribute run 38792928305's Photo journey failures (diagnoser running); then fix batch for ours; wait #1233-#1235 and fixes A, B
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -36,6 +36,7 @@ Waves (packet's Build waves, checked against dev at 00e546a):
 ## Rounds
 | round | CI run | CI | audit vs baseline | lenses | confirmed | fixed by | clean |
 |---|---|---|---|---|---|---|---|
+| 1 | 38792928305 (c93a7f8, D-7..D-9) | macOS timed out at 45 min in ui-test; scripts/ci PASS; 11 Photo journeys red | photo contrast 1 > 0 (_NS:58 on launch) | (diagnosis first) | pending | – | no |
 
 ## Decisions
 - Waves have at most 2 independent tasks, so each wave runs as one worktree subagent per task (lead.md stage 3), not build-wave.js.

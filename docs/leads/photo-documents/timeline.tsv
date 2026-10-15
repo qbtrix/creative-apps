@@ -50,3 +50,5 @@ utc	stage	event	ref	note
 2026-10-15T19:58Z	3	heartbeat	-	waiting
 2026-10-15T20:00Z	3	pr-opened	#1235	D-11 journeys PJ-1, 1b, 2, 4
 2026-10-15T20:00Z	4	stage-start	fixes	A ids, B Open Recent
+2026-10-15T20:09Z	4	ci-run	38792928305	macOS: ci PASS, ui-test 11 Photo red, timeout 45 min
+2026-10-15T20:09Z	4	round-findings	round 1	diagnosing attribution
