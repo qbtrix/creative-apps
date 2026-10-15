@@ -10,7 +10,11 @@
 // shows (HaloRenderedFrameView) and the viewer's gestures (HaloViewerGestures)
 // sit over it. The artboard's value is `viewerSummary` ("Frame 30:
 // Background, Badge, Title: Hello Halo"); its child `halo.viewer.canvas` reads
-// `drawnSummary` ("2 layers drawn"). It reads its model and never acts.
+// `drawnSummary` ("2 layers drawn"). XCUITest reads values empty (#262), so
+// two hidden, hitless leaves carry the same text as labels:
+// `halo.viewer.summary` (viewerSummary) and `halo.viewer.drawn`
+// (drawnSummary, only while a draw list exists). It reads its model and
+// never acts.
 import CoreRaster
 import CoreText
 import HaloModel
@@ -37,10 +41,31 @@ struct HaloViewerCanvas: View {
             }
             .overlay { HaloRenderedFrameView(model: model, perform: perform) }
             .overlay { HaloViewerGestures(model: model, perform: perform) }
+            .overlay {
+                HaloSummaryElement(text: model.viewerSummary, identifier: "halo.viewer.summary")
+                if let list = model.viewerDrawList {
+                    HaloSummaryElement(text: list.drawnSummary, identifier: "halo.viewer.drawn")
+                }
+            }
             .accessibilityElement(children: .contain)
             .accessibilityLabel("Artboard")
             .accessibilityValue(model.viewerSummary)
             .accessibilityIdentifier("halo.viewer")
+    }
+}
+
+/// A hidden, hitless leaf whose label is `text`: what XCUITest can read
+/// where an accessibility value reads empty (#262), as `halo.file` does.
+private struct HaloSummaryElement: View {
+    let text: String
+    let identifier: String
+
+    var body: some View {
+        Color.clear
+            .allowsHitTesting(false)
+            .accessibilityElement()
+            .accessibilityLabel(text)
+            .accessibilityIdentifier(identifier)
     }
 }
 

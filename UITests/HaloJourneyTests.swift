@@ -111,11 +111,12 @@ final class HaloJourneyTests: XCTestCase {
         halo.shot("scrub-out-50")
         step(10, halo)
         let summary = "Frame 60: Background, Title: Hello Halo"
+        // The summary is read by label from `halo.viewer.summary`: values read empty (#262).
         let artboard = halo.app.descendants(matching: .any).matching(
-            NSPredicate(format: "identifier == 'halo.viewer' AND value == %@", summary)).firstMatch
+            NSPredicate(format: "identifier == 'halo.viewer.summary' AND label == %@", summary)).firstMatch
         XCTAssert(
             artboard.waitForExistence(timeout: 5),
-            "the artboard reads \(String(describing: halo.element("halo.viewer").value)), not \(summary)")
+            "the artboard reads \(halo.element("halo.viewer.summary").label), not \(summary)")
         halo.shot("scrub-frame-60")
     }
 

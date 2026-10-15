@@ -4,9 +4,10 @@
 // Background and the Rig null, top first, 24 fps, 72 frames, live services)
 // it clicks Badge's lane, which selects Badge and focuses the timeline so
 // HaloViewer takes Home and → (as H-J3 does), scrubs to 12 and to 30, then
-// adds Layer > New > Solid. The artboard (`halo.viewer`) reads the Model's
-// viewerSummary, bottom layer first, and the canvas inside it
-// (`halo.viewer.canvas`) its draw list's drawnSummary, which proves the
+// adds Layer > New > Solid. The artboard's `halo.viewer.summary` label reads
+// the Model's viewerSummary, bottom layer first, and the canvas's
+// `halo.viewer.drawn` label its draw list's drawnSummary (labels, since
+// XCUITest reads values empty, #262), which proves the
 // live drawing rather than the layer list: 2, 3, then 4 layers drawn (the
 // null draws nothing). A new layer goes on top, so the list's first row is
 // Solid 1. One shot per step, `halo-viewer-<step>`.
@@ -59,23 +60,23 @@ final class HaloViewerJourneyTests: XCTestCase {
         for _ in 0..<count { halo.press(.rightArrow) }
     }
 
-    /// The artboard (`halo.viewer`) reads `summary` within five seconds.
+    /// The artboard's summary (`halo.viewer.summary`) reads `summary` within five seconds.
     @MainActor private func expectArtboard(_ summary: String, _ halo: Journey) {
-        expectValue(summary, of: "halo.viewer", what: "the artboard", halo)
+        expectLabel(summary, of: "halo.viewer.summary", what: "the artboard", halo)
     }
 
-    /// The canvas (`halo.viewer.canvas`) reads `summary` within five seconds.
+    /// The canvas's summary (`halo.viewer.drawn`) reads `summary` within five seconds.
     @MainActor private func expectCanvas(_ summary: String, _ halo: Journey) {
-        expectValue(summary, of: "halo.viewer.canvas", what: "the canvas", halo)
+        expectLabel(summary, of: "halo.viewer.drawn", what: "the canvas", halo)
     }
 
-    /// The element `identifier`'s accessibility value is `value`, within five seconds.
-    @MainActor private func expectValue(_ value: String, of identifier: String, what: String, _ halo: Journey) {
+    /// The element `identifier`'s accessibility label is `label`, within five seconds.
+    @MainActor private func expectLabel(_ label: String, of identifier: String, what: String, _ halo: Journey) {
         let match = halo.app.descendants(matching: .any).matching(
-            NSPredicate(format: "identifier == %@ AND value == %@", identifier, value)).firstMatch
+            NSPredicate(format: "identifier == %@ AND label == %@", identifier, label)).firstMatch
         XCTAssert(
             match.waitForExistence(timeout: 5),
-            "\(what) reads \(String(describing: halo.element(identifier).value)), not \(value)")
+            "\(what) reads \(halo.element(identifier).label), not \(label)")
     }
 
     /// The label (or value) of the layer list's top row; empty with no rows.
