@@ -4,7 +4,7 @@ Issue: #1038 · Packet: docs/blueprints/halo/features/layer-panel.md
 Run: act-1a13e9a2019-lau7 · Session: session_01NGHcmJbQja1RSYvcMZR3TD · Started: 2026-10-15T08:07Z
 Stage: 4 round 1
 Base: e8de2ff5d8ed3515af321c805cc2bebab17050a4
-Next: read CI run 38708263577 (f5bd765: LP-1..3, not LP-4) for compile and W0 journeys; then the first dev run containing e8de2ff (LP-4) for H-J9; critic panel on its screens
+Next: wait for the round 1 fix PR (branch layer-panel/r1-list-inset) to merge, then the first dev run containing it (the journeys only run once scripts/ci passes on macOS); read H-J9 there and run the critic panel on its screens
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -19,6 +19,7 @@ Journeys: H-J9 (8 steps, packet "Journey steps"). Quality bars: QB-F1 no dead co
 ## Rounds
 | round | CI run | CI | audit vs baseline | lenses | confirmed | fixed by | clean |
 |---|---|---|---|---|---|---|---|
+| 1 | 38708263577 (f5bd765) | red: macOS scripts/ci, HaloLayerListTests (4 expectations: List insets rows, icon at 21 pt, tint off both edges); journeys skipped | not run | – (blocker found before the panel) | list inset (LP-3) | layer-panel/r1-list-inset | no |
 
 ## Decisions
 - Identifiers keep W0's shipped `halo.layer.*` prefix (`halo.layer.row.<id>`, `halo.layer.empty`, `halo.layer.new`; W0's journey reads `halo.layer.row.comp-1-layer-2`), so the packet's `halo.layers.list/row/refusal/empty` become `halo.layer.list/row/refusal/empty`.
@@ -33,6 +34,7 @@ Journeys: H-J9 (8 steps, packet "Journey steps"). Quality bars: QB-F1 no dead co
 - The GitHub MCP appends an attribution footer to PR bodies; the lead strips it with update_pull_request after each PR opens.
 - `feature-done` moves from LP-4 to the feature's final PR (an Anatomy fix or the packet status line, which closes #770): LP-2/LP-3's SwiftUI first compiles on the dev macOS run, and any fix must land before the feature-done CI run.
 - LP-3 (#1047): a refused layer rename also shows in W0's viewer caption (`halo.refusal`), since HaloViewer shows any non-inspector refusal; candidate for the critic round.
+- Round 1 fix: drop the List (macOS insets rows even with zero row insets) and reorder with `.draggable`/`.dropDestination` on W0's stack, which passed HaloLayerListTests; dropping on row i moves to index i.
 
 ## Open
 - dev is red before this feature (#763, run 38704216123 on 92db316): Halo `testLayoutAtWidths` (timeline track under the sidebar at 880 pt; fixed by SuiteUI #1040, waiting on a human Mac-Check) and SuiteUI `testGalleryOpensEveryPage` (Hide Sidebar identifier). Neither is in this feature's files; the done check's green dev run needs #1040 merged.
