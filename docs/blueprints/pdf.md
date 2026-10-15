@@ -1374,3 +1374,116 @@ X Text Box, P Pen, R Shape, S Sign, Space-drag Hand.
 | `ThumbnailGrid`: page caption, multi-select (Shift, ⌘), drag reorder with a drop line, keyboard reorder (⌥⌘← →) | sidebar and Page Grid | pages |
 | A pad view for drawing a signature: a flat drawing well with Clear, keyboard alternative "Type instead" | signature sheet | sign; placeholder: a SwiftUI `Canvas` in FolioApp until it lands |
 | `ViewerStatusBar` trailing slot accepting a button pill ("Recognize…") | the no-text pill | ocr; placeholder: a menu item and the inspector row |
+
+---
+
+## 8. Quality bar
+
+Every item names where it is measured and the test that measures it.
+"Gate" means a test fails over the number; "report-only" means the test
+records the number and fails only on too few samples, until ten green CI
+runs set the gate at the measured CI p95 × 1.5, never tighter than the
+device target (`docs/review-rubric.md`, How gates are set). A gate never
+loosens without the captain. The rubric's ids (`QB-…`) are cited where a
+row instantiates one.
+
+### 8.1 Speed budgets per interactive tool
+
+Two halves per tool, as Halo does it. The **Model half** is the work
+between the input and a value the view can draw, measured on Linux and
+macOS by budget tests in `FolioModelTests` (median and p95 over 200 runs on
+the named fixture; debug CI gates carry the rubric's ×10). W0 adds the
+shared timing helper `Tests/FolioModelTests/FolioBudget.swift`; each
+feature writes its rows in its own `Folio<Feature>BudgetTests.swift`. The
+**UI half** is input to the first display refresh that shows it, in frames
+late, read from the frame probe (`FrameProbe`, SuiteUI) in the perf
+journeys P-P1 to P-P6; until the probe's journey helpers are on `dev` these
+are report-only.
+
+| id | Tool | What is timed | Fixture | Device target | CI gate | Test | Feature |
+|---|---|---|---|---|---|---|---|
+| PB-1 | Open | `DocumentOpening.open` + `finishOpen` on the fake; on the live type, first page drawn | `long` (500 pages) | fake ≤ 20 ms; live first page on screen ≤ 300 ms (QB-L9: progress shown ≤ 100 ms) | fake ≤ 200 ms debug; live report-only | `FolioBudgetTests.openLong`; P-P1 | foundation, reader |
+| PB-2 | Layout | `FolioLayout` for every page (continuous, fit width) | `long` | ≤ 2 ms | ≤ 20 ms debug | `FolioBudgetTests.layoutLong` | reader |
+| PB-3 | Scroll | `visiblePages(in:)` per scroll step | `long` | ≤ 0.2 ms | ≤ 2 ms debug | `FolioBudgetTests.visiblePages`; UI half P-P2: p95 frame interval ≤ 1.5 refreshes (QB-L10) | reader |
+| PB-4 | Zoom | one `setZoom` + layout | `long` | ≤ 2 ms | ≤ 20 ms debug | `FolioBudgetTests.zoomStep`; P-P3 ≤ 2 frames late | reader |
+| PB-5 | Find | `TextFinding.find` over all page text | `long` (20,000 lines) | ≤ 50 ms for the whole document; first hit shown ≤ 100 ms | ≤ 500 ms debug | `FolioBudgetTests.findLong` | find |
+| PB-6 | Text select drag | one `select(from:to:)` step | `letter` page 1 and a `long` page | ≤ 0.5 ms | ≤ 5 ms debug | `FolioBudgetTests.selectStep`; P-P4 ≤ 2 frames late (QB-L1) | markup |
+| PB-7 | Highlight | `mark` + workspace `edit` record | `long` with 1,000 marks | ≤ 1 ms | ≤ 10 ms debug | `FolioBudgetTests.markStep` | markup |
+| PB-8 | Move or resize a mark | one drag step | `long` with 1,000 marks | ≤ 1 ms | ≤ 10 ms debug | `FolioBudgetTests.moveMarkStep`; P-P4 | markup |
+| PB-9 | Hit test | `Annotating.hit` per pointer move | 1,000 marks on one page | ≤ 1 ms (QB-L5) | ≤ 10 ms debug | `FolioBudgetTests.hit` | markup |
+| PB-10 | Pen | one ink point appended | a 2,000-point stroke | ≤ 0.2 ms | ≤ 2 ms debug | `FolioBudgetTests.inkPoint`; P-P5 ≤ 2 frames late (QB-L1) | markup |
+| PB-11 | Type in a field | one `FormFilling.set` + record (coalesced) | `form` ×200 fields | ≤ 1 ms | ≤ 10 ms debug | `FolioBudgetTests.fieldKeystroke` | forms |
+| PB-12 | Place a signature | `Signing.place` | `form` | ≤ 1 ms | ≤ 10 ms debug | `FolioBudgetTests.placeSignature` | sign |
+| PB-13 | Page reorder drag | one `move` + thumbnail list rebuild | `long` | ≤ 2 ms | ≤ 20 ms debug | `FolioBudgetTests.reorderLong`; P-P6 ≤ 2 frames late | pages |
+| PB-14 | Undo, Redo | one step | `long` with 1,000 marks | ≤ 2 ms | ≤ 20 ms debug | `FolioBudgetTests.undoStep` | history-files |
+| PB-15 | Save | live `PDFKitWriting.write` | a 50-page, 5 MB sample with 100 marks | ≤ 1 s release, progress ≤ 100 ms (QB-L9) | report-only | `FolioWritingBudgetTests` (macOS) | history-files |
+| PB-16 | Recognize text | live Vision, accurate, per page | 300 ppi scan sample | ≤ 1.5 s per page release; progress per page | report-only | `FolioOCRBudgetTests` (macOS) | ocr |
+| PB-17 | Thumbnail | live `PageImaging.image(maxPixels: 256)` | `long` sample | ≤ 15 ms per page | report-only | `FolioImagingBudgetTests` (macOS) | reader |
+
+Every row above has a fixture that exists in section 6 (`long`, `form`,
+`letter`) or a sample the named feature writes with `FolioSampleWriter`,
+and a named test; none is judged by eye.
+
+### 8.2 App-audit checks
+
+All six checks of `docs/blueprints/app-audit.md` run on every Folio shot:
+`disabled-dim`, `overlap`, `contrast`, `identifier`, `offscreen`,
+`unnamed`. Folio is new, so it enters `UITests/audit-baseline.json` at **0
+for every check** in W0's PR (adding a new app at 0 is not a loosening; a
+count above 0 would need the captain). Every Folio control ships with a
+`folio.<area>.<name>` identifier and a label.
+
+| Check | Target | How Folio holds it | Measured by |
+|---|---|---|---|
+| `identifier`, `unnamed` | 0 | every control in FolioApp has `.accessibilityIdentifier("folio.…")` and a label; form-field views use the field's name and tooltip as label | `audit-folio-*.json`; `FolioControlsTests` (Linux: every `FolioCommand` has a title and identifier) |
+| `offscreen` | 0 | layout spec 8.3 at 1024 × 768 | same, plus PL1 |
+| `overlap` | 0 | the floating palette never covers the status pills or the find bar (PL4) | same |
+| `contrast` | 0 | only tokens; the page is document content and its marks use document colours, but the selection outline, find tint and handles are tokens | same |
+| `disabled-dim` | 0 | every disabled control is a system or SuiteUI control drawn disabled from `unavailableHelp` | same |
+
+### 8.3 Layout spec
+
+Checked at window sizes **minimum** (`SuiteSize.windowMinimum`, about 944 ×
+600 after #973), **1024 × 768** (the CI runner's display), **1280 × 800**,
+**1440 × 900** and **1920 × 1080**, through `-FolioWindowSize`, with the
+`letter` fixture open, page 1 selected and a highlight selected.
+
+| id | Rule | Tolerance | Measured by |
+|---|---|---|---|
+| PL1 | Nothing off the window; no two enabled controls overlap | the audit's own (1 pt slack, 2 pt overlap) | `testLayoutAtWidths` (`FolioJourneyTests.swift`, W0): relaunch at each size, shoot `folio-layout-<w>` |
+| PL2 | Fit Width: the page's width equals the detail width minus 2 × 24 pt margins; Fit Page: the whole page shows | ≤ 1 pt | same journey reads `folio.page.1`'s frame; Linux half `FolioLayoutTests.fitWidth`, `.fitPage` |
+| PL3 | Pages are centered in the detail column, 16 pt apart, never under the floating palette at the default zoom | centers ≤ 1 pt; gap ≤ 0.5 pt | same; Linux half `FolioLayoutTests.column` |
+| PL4 | The floating palette sits 12 pt in from the detail's leading edge, vertically centered, and never overlaps the status pills or the find bar at any width | 0 pt overlap | `testLayoutAtWidths` frames of `suite.tools`, `folio.find`, `suite.status` |
+| PL5 | At minimum width the inspector can be hidden and the page still fits at ≥ 50% zoom; with it shown, Fit Width still shows a page ≥ 320 pt wide | ≥ 320 pt | same, at minimum |
+| PL6 | Thumbnails: one column in the sidebar, each ≤ the sidebar width − 24 pt, captions never truncate below 4 digits ("1234") | ≤ 0.5 pt | `FolioThumbnailLayoutTests` (macOS host) |
+| PL7 | Page Grid: as many columns as fit at 160 pt per thumbnail plus 16 pt gaps, at least 2 | exact column count | `FolioLayoutTests.grid` (Linux) at 600, 900, 1400 pt |
+| PL8 | Form fields drawn over the page stay inside their PDF rect at every zoom from 50% to 400% | ≤ 0.5 pt after scale | `FolioFieldOverlayTests` (macOS host) |
+
+### 8.4 Fidelity tests (output equals a reference)
+
+| id | Output | Reference | Tolerance | Test (where) | Feature |
+|---|---|---|---|---|---|
+| PF-1 | Live `PageImaging` of a sample page (vector text, a filled shape, an image) at 2× | the same page drawn by `PDFPage.draw(with:to:)` into a bitmap context in the test (the reference renderer) | channel ≤ 2/255, ≤ 0.5% of pixels (QB-V2) | `FolioImagingFidelityTests` (macOS) | reader |
+| PF-2 | `PDFKitText.text(of:)` of a sample written by `FolioSampleWriter` with known strings at known points | the strings and their positions the writer used | strings exact; glyph boxes ≤ 1 pt | `FolioTextFidelityTests` (macOS) | reader |
+| PF-3 | Saved file reopened: pages, order, rotation, field values, annotation kinds, rects and colours | the `FolioDocumentState` that was saved | exact for values; rects ≤ 0.01 pt; colours ≤ 1/255 | `FolioRoundTripTests` (macOS, every fixture as a sample) | history-files |
+| PF-4 | A page with Folio's marks drawn on screen vs the same page exported to PNG at the same scale | each other | channel ≤ 2/255, ≤ 0.5% of pixels (QB-V4: what you see is what you export) | `FolioMarksFidelityTests` (macOS) | markup, export-convert |
+| PF-5 | Flatten: a flattened save has no annotation or widget objects, and its pixels equal the unflattened save's | the unflattened save rendered | annotation count 0; pixels as PF-4 | `FolioFlattenTests` (macOS) | history-files |
+| PF-6 | Password save: opening with no password throws `.needsPassword`, with the wrong one `.wrongPassword`, with the right one equals the saved state; owner restrictions read back as set | the options used | exact | `FolioPasswordTests` (macOS) | history-files |
+| PF-7 | Combine `letter` + `form`: page count, order, every field name (a taken name gets " 2"), every value | the two inputs | exact | `PageOrganizingContractTests` (Linux) and `FolioRoundTripTests` (macOS) | pages |
+| PF-8 | OCR on a sample rendered from known lines at 300 ppi | the known lines | character error rate ≤ 1% on the clean sample; found by Find afterwards | `FolioOCRFidelityTests` (macOS) | ocr |
+| PF-9 | Saved OCR text layer: after Save and reopen, `PageTextReading` returns the recognized lines with origin `embedded` and the page's pixels are unchanged | the recognized text; the page before save | strings exact; pixels as PF-1 | `FolioOCRRoundTripTests` (macOS) | ocr |
+| PF-10 | Export PNG at 72, 150, 300 ppi | page size × ppi / 72 | pixel size exact | `FolioExportTests` (macOS) and `PageExportingContractTests` (Linux) | export-convert |
+| PF-11 | Reduce File Size on the image-heavy sample | the original | output ≤ 60% of the input's bytes, every page's text equal, PF-1 pixels within channel ≤ 12/255 at 1× (images resampled) | `FolioReduceSizeTests` (macOS) | export-convert |
+| PF-12 | Signature placed in a field, saved, reopened | the placed rect and the signature's strokes | rect ≤ 0.01 pt; stroke points ≤ 0.1 pt | `FolioSignatureRoundTripTests` (macOS) | sign |
+| PF-13 | (W4) Redaction: text extracted from a redacted region after save, and every content stream's decoded bytes | nothing; the removed strings | no text; no occurrence | `FolioRedactionTests` (macOS) and CP-4's own tests (Linux, creative-core) | content-edit |
+
+### 8.5 Feel (rubric section 6)
+
+| id | How Folio meets it | Measured by |
+|---|---|---|
+| QB-F1 No dead controls | every command's availability is `unavailableHelp(for:)`; every palette tool's `drag` changes the document on `letter` or is disabled with help | `FolioToolsTests`, `FolioCommandTests` (Linux); P-J13 |
+| QB-F2 Immediate feedback | a text drag shows the selection before mouse-up; a pen stroke draws as it goes; a refused edit shows its sentence at the place it was refused | the probe's preview mark (P-P4, P-P5); journey asserts |
+| QB-F3 One gesture, one named step | `edit(_:coalesceKey:_:)` names every step ("Undo Highlight", "Undo Move Page", "Undo Typing"); scroll, zoom and find are never steps | Model tests count undo steps; journeys read the Edit menu |
+| QB-F4 Keyboard parity | every tool has a one-key shortcut; Tab and Shift-Tab walk form fields; arrows move a selected mark 1 pt (Shift 10 pt); ⌥⌘← → move a selected page | P-J5, P-J7 |
+| QB-F5 Reduce Motion, Increase Contrast | page scroll is content; zoom is instant under Reduce Motion; goldens in Increase Contrast | goldens |
+| QB-F6 Geometry holds | only SuiteUI components and tokens in chrome | design lint |
