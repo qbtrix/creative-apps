@@ -4,7 +4,7 @@ Issue: #800 · Packet: docs/blueprints/flare/features/live-scenes.md
 Run: act-1a13ca4f89e-0ft1 · Session: claude/live-scenes-lead-d0sj3t · Started: 2026-10-14
 Stage: 5 finish (built; waiting on other lines for a green dev CI run)
 Base: cba1813739a5be03f353698cc2c61e76bc8c6103
-Next: a resumed lead reads the newest completed dev CI run newer than 38687993459 (38694361192 on fdb7c8a was in progress at 06:56Z); on the first green one, post `Belt-Contact-Sheet: <run link>` on #800 with one line per journey and the audit counts, then mark Stage done. Nothing else is left to build.
+Next: a resumed lead reads the newest completed dev CI run newer than 38694361192 (fdb7c8a, red); on the first green one, post `Belt-Contact-Sheet: <run link>` on #800 with one line per journey and the audit counts, then mark Stage done. Nothing else is left to build.
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
