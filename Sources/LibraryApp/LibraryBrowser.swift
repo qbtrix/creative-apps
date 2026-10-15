@@ -8,8 +8,8 @@ import SuiteUI
 import SwiftUI
 
 /// The notice row over the photo grid, or the empty state whose one button is
-/// Import Folder… (disabled, saying why, until import lands; Load Sample
-/// Photos stays in File); an empty collection in a non-empty catalog gets an empty
+/// Import Folder… (disabled until import lands, its message then saying why and
+/// pointing to File > Load Sample Photos; none for a newer catalog); an empty collection in a non-empty catalog gets an empty
 /// state that says how to fill it, with a button back to All Photos. In loupe
 /// mode it shows the loupe's photo (LibraryLoupe) instead of the grid.
 struct LibraryBrowser: View {
@@ -30,7 +30,8 @@ struct LibraryBrowser: View {
             if let notice = model.notice {
                 LibraryNoticeRow(notice: notice, action: noticeAction(notice))
             }
-            content
+            // Fills the space under the notice, so the empty state stays centred.
+            content.frame(maxWidth: .infinity, maxHeight: .infinity)
         }
     }
 
@@ -57,11 +58,13 @@ struct LibraryBrowser: View {
 
     @ViewBuilder private var content: some View {
         if model.isEmpty {
-            EmptyStateView(
-                "No Photos", systemImage: "photo.stack",
-                message: "Photos you import appear here, sorted by the date they were taken.",
-                action: importAction)
-                .libraryControl(importAction)
+            let empty = model.emptyState(importReason: importAction.unavailableHelp)
+            if empty.offersImport {
+                EmptyStateView(empty.title, systemImage: "photo.stack", message: empty.message, action: importAction)
+                    .libraryControl(importAction)
+            } else {
+                EmptyStateView(empty.title, systemImage: "photo.stack", message: empty.message)
+            }
         } else if model.isSelectedCollectionEmpty, let collection = model.selectedCollection {
             EmptyStateView(
                 "No Photos in \(collection.name)", systemImage: "photo.stack", message: collection.emptyMessage,
