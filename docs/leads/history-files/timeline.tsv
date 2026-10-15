@@ -44,3 +44,5 @@ utc	stage	event	ref	note
 2026-10-15T11:12Z	4	round-findings	round 2	critic: 7 confirmed, 2 major
 2026-10-15T11:22Z	4	pr-merged	#1108	r2-b1
 2026-10-15T11:22Z	4	stage-start	r2-b2	damage reason, unsaved Save, readouts
+2026-10-15T11:30Z	4	pr-merged	#1114	r2-b2 feature-done
+2026-10-15T11:30Z	4	ci-run	38726261412	running on 2b98fdb (has #1108, not #1114)
