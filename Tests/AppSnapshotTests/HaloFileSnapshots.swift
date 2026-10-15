@@ -1,7 +1,10 @@
-// HaloFileSnapshots.swift: opening a project (#209, HF-10). HaloViewer after
-// `finishOpen` of the two-comps fixture as Spot.halo (Intro selected, its
-// three layers), and the same viewer with `halo.file.progress` ("Opening
-// Spot…") over it after `beginOpen`. Light and Dark. Writes
+// HaloFileSnapshots.swift: opening a project (#209, HF-10). The whole
+// HaloWindow, at its launch size as HaloWindowSnapshots draws it, after
+// `finishOpen` of the two-comps fixture as Spot.halo: titled Spot, Intro and
+// Outro in the sidebar, Intro selected with its four layers (Title, Badge,
+// Background, Rig; the test checks the count). Then HaloViewer with
+// `halo.file.progress` ("Opening Spot…") over it after `beginOpen`. Light
+// and Dark. Writes
 // halo-opened-project-light.png, halo-opened-project-dark.png,
 // halo-file-opening-light.png and halo-file-opening-dark.png. macOS only.
 import HaloModel
@@ -20,9 +23,13 @@ import Testing
         #expect(project.windowTitle == "Spot")
         #expect(project.compositions.map(\.name) == ["Intro", "Outro"])
         #expect(!project.file.opening)
+        #expect(project.selectedComposition?.name == "Intro")
+        #expect(project.selectedComposition?.layers.map(\.name) == ["Title", "Badge", "Background", "Rig"])
         for scheme in [ColorScheme.light, .dark] {
             try snapshot(
-                HaloViewer(model: project).overlay { HaloOpenProgress(model: project) },
+                HaloWindow(model: project)
+                    .frame(width: SuiteSize.windowLaunch.width, height: SuiteSize.windowLaunch.height)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading),
                 name: "halo-opened-project-\(scheme == .dark ? "dark" : "light")", scheme: scheme)
         }
     }

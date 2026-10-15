@@ -3,13 +3,14 @@
 // On `-HaloSample two-comps` (live services) with `-HaloSaveTo`, ⌘S writes
 // Spot.halo with no panel; a relaunch with `-HaloOpenFile` brings Intro and
 // Outro back (each composition's `halo.layer.row.<id>` rows, the inspector
-// header and Ball's timeline lane match the
-// fixture, the layer count by its rows) with Edit > Undo disabled. XCUITest reads SwiftUI accessibility
-// values as empty (#262), so everything here is read by label, identifier or
-// existence: `halo.file` carries the save status as its label. Ball's three
-// keys surviving the file are proven by HaloFileValidationTests'
-// everyFixturePassesTheChecks, and Undo's "Nothing to undo." help by
-// HaloHistoryCommandTests (help tags on menu items don't read reliably).
+// header and Ball's timeline lane match the fixture, the layer count by its
+// rows, and Ball's lane reads "3 keyframes": x at 0 and 24, opacity at 0 and
+// 12) with Edit > Undo disabled. XCUITest reads most SwiftUI accessibility
+// values as empty (#262), so `halo.file` carries the save status as its
+// label; the lane's key count is read as H-J6's expectLane reads it, the
+// value of the `halo.timeline.track` labelled Ball. Undo's "Nothing to
+// undo." help is proven by HaloHistoryCommandTests (help tags on menu items
+// don't read reliably).
 // An edit reads "Edited", in `halo.file` and the title bar's subtitle;
 // Open Recent > Spot asks to save, Don't Save reopens the saved file. Then
 // `huge` is saved and reopened: the first shot after that launch has the
@@ -61,6 +62,7 @@ final class HaloFilesJourneyTests: XCTestCase {
         let lane = halo.app.descendants(matching: .any).matching(
             NSPredicate(format: "identifier == 'halo.timeline.track' AND label == 'Ball'")).firstMatch
         XCTAssert(lane.waitForExistence(timeout: 5), "no Ball lane in Outro's timeline")
+        expectLane("Ball", keys: 3, halo)
         expectUndoDisabled(halo)
         halo.element("halo.layer.row.comp-2-layer-2").click()
         let ball = halo.app.descendants(matching: .any).matching(
@@ -174,6 +176,16 @@ final class HaloFilesJourneyTests: XCTestCase {
             .matching(NSPredicate(format: "identifier BEGINSWITH %@", "halo.layer.row."))
         let found = { Set(rows.allElementsBoundByIndex.map(\.identifier)).count }
         XCTAssert(waitFor { found() == count }, "the layer list has \(found()) rows, not \(count)")
+    }
+
+    /// `layer`'s timeline lane reads "`keys` keyframes": the value of the
+    /// `halo.timeline.track` labelled `layer`, as H-J6's expectLane reads it.
+    @MainActor private func expectLane(_ layer: String, keys: Int, _ halo: Journey) {
+        let expected = "\(keys) keyframes"
+        let tracks = halo.app.descendants(matching: .any).matching(
+            NSPredicate(format: "identifier == 'halo.timeline.track' AND label == %@", layer))
+        func values() -> [String] { tracks.allElementsBoundByIndex.compactMap { $0.value as? String } }
+        XCTAssert(waitFor { values().contains(expected) }, "\(layer)'s lane reads \(values()), not \(expected)")
     }
 
     /// The title bar's subtitle reads `status`: a text in the window that
