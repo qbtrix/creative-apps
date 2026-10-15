@@ -141,7 +141,7 @@ public struct FakeKeyframes: KeyframeEditing {
     public func setLabel(_ name: String?, at frame: Int, sceneID: String, in engine: inout CommandEngine) throws {
         try available()
         guard let scene = engine.document.scenes.first(where: { $0.id == sceneID }) else { throw CommandError.sceneNotFound(sceneID) }
-        if let name, name.isEmpty { throw CommandError.invalidDocument("A label needs a name.") }
+        if let name, name.allSatisfy(\.isWhitespace) { throw CommandError.invalidDocument("A label needs a name.") }
         // One label per frame: naming a frame replaces the label already there.
         let here = scene.labels.filter { $0.value == frame && $0.key != name }.keys.sorted()
         try engine.group(name == nil ? "Remove Frame Label" : "Set Frame Label") { engine in

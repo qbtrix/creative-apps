@@ -4,8 +4,9 @@
 // scene with `SetSceneTiming` in the same "Insert Frame" step. A "Remove Frame" drops the keys inside the removed run
 // with `RemoveKeyframe(owner:)` and shifts the rest back. An edit on every layer of a scene moves the scene ruler, so
 // its labels at or after the frame move by the same count and a label inside a removed run goes. A symbol has no scene:
-// its frame edits never grow anything and move no labels. A label names one frame: naming a frame replaces the label
-// already there, and a nil name removes it. Agrees with `FakeKeyframes` on scenes.
+// its frame edits move no labels, and since FlareCore has no command that sets a symbol's length, an insert that would
+// push a key past the symbol's last frame refuses. A label names one frame: naming a frame replaces the label already
+// there, a nil name removes it, and a blank name refuses. Agrees with `FakeKeyframes` on scenes.
 import FlareCore
 
 extension LiveKeyframes: KeyframeEditing {}
@@ -21,6 +22,8 @@ extension LiveKeyframes {
             guard let last = Self.lastKey(of: layer), last >= frame else { continue }
             let (to, overflow) = last.addingReportingOverflow(count)
             guard !overflow, to < Int.max else { throw CommandError.invalidFrame(count) }
+            // FlareCore has no command that grows a symbol, so a key pushed past its last frame refuses.
+            if edit.scene == nil, to >= edit.length { throw CommandError.invalidDocument(Self.pastSymbolEnd) }
             shifts.append(ShiftKeyframes(owner: owner, layerID: layer.id, fromFrame: frame, toFrame: last, delta: count))
             length = max(length, to + 1)
         }
@@ -69,7 +72,7 @@ extension LiveKeyframes {
     public func setLabel(_ name: String?, at frame: Int, sceneID: String, in engine: inout CommandEngine) throws {
         guard let scene = engine.document.scenes.first(where: { $0.id == sceneID }) else { throw CommandError.sceneNotFound(sceneID) }
         guard frame >= 0 else { throw CommandError.invalidFrame(frame) }
-        if name?.isEmpty == true { throw CommandError.invalidDocument("A label needs a name.") }
+        if name?.allSatisfy(\.isWhitespace) == true { throw CommandError.invalidDocument("A label needs a name.") }
         // One label per frame: the label already on this frame goes, unless it is the one being set.
         let replaced = scene.labels.filter { $0.value == frame && $0.key != name }.keys.sorted()
         try engine.group(name == nil ? "Remove Frame Label" : "Set Frame Label") { engine in
@@ -84,17 +87,15 @@ extension LiveKeyframes {
         var layers: [Layer]
         var scene: FlareScene?
         var labels: [String: Int]
+        /// The owner's length in frames.
+        var length: Int
 
-        /// Throws for a frame before 0, a missing scene, or a layer the owner doesn't hold.
+        /// Throws for a frame before 0, a missing scene or symbol, or a layer the owner doesn't hold.
         init(at frame: Int, layerIDs: [String], owner: LayerOwner, in document: Document) throws {
             guard frame >= 0 else { throw CommandError.invalidFrame(frame) }
             scene = nil
-            if case .scene(let sceneID) = owner {
-                guard let found = document.scenes.first(where: { $0.id == sceneID }) else {
-                    throw CommandError.sceneNotFound(sceneID)
-                }
-                scene = found
-            }
+            length = try LiveKeyframes.length(of: owner, in: document)
+            if case .scene(let sceneID) = owner { scene = document.scenes.first { $0.id == sceneID } }
             let all = document.layers(of: owner) ?? []
             let held = Set(all.map(\.id))
             if let missing = layerIDs.first(where: { !held.contains($0) }) { throw CommandError.layerNotFound(missing) }

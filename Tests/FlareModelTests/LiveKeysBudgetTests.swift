@@ -10,7 +10,7 @@ import Testing
 #if DEBUG
 private let budget = Duration.milliseconds(10)
 #else
-private let budget = Duration.milliseconds(2)
+private let budget = Duration.milliseconds(1)
 #endif
 
 private let scene = LayerOwner.scene("scene-1")

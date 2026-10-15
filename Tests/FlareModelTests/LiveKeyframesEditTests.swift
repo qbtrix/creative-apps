@@ -1,6 +1,7 @@
 // LiveKeyframesEditTests.swift: KY-6's acceptance (docs/blueprints/flare/features/live-keys.md): Ball's 24 -> 28 is one
 // "Undo Move Keyframe"; 24 onto 36 throws and changes nothing, undo state included; past frame 47 throws; 50 coalesced
-// one-frame steps are one entry; deleting 12 is one "Undo Delete Keyframe"; a symbol key moves and undoes exactly.
+// one-frame steps are one entry; deleting 12 is one "Undo Delete Keyframe"; a symbol key moves and undoes exactly, and
+// refuses past the symbol's last frame or before frame 0 without naming a scene.
 import FlareCore
 import FlareModel
 import Testing
@@ -89,21 +90,50 @@ private func frames(_ engine: CommandEngine, _ owner: LayerOwner, _ layerID: Str
 
 @Test func symbolKeyMovesAndUndoesExactly() throws {
     var engine = CommandEngine(document: FlareFixtures.character)
-    // A symbol has no scene ruler: only a collision or a frame before 0 refuses.
-    try live.moveKeys([KeyRef(layerID: "hand", property: nil, frame: 23)], by: 7, owner: wave, coalesceKey: nil, in: &engine)
-    #expect(frames(engine, wave, "hand", "rotation") == [0, 12, 30])
+    try live.moveKeys([KeyRef(layerID: "hand", property: nil, frame: 12)], by: 5, owner: wave, coalesceKey: nil, in: &engine)
+    #expect(frames(engine, wave, "hand", "rotation") == [0, 17, 23])
     #expect(engine.undoActionName == "Undo Move Keyframe")
     #expect(throws: (any Error).self) {
-        try live.moveKeys([KeyRef(layerID: "hand", property: "rotation", frame: 12)], by: 18, owner: wave, coalesceKey: nil, in: &engine)
+        try live.moveKeys([KeyRef(layerID: "hand", property: "rotation", frame: 17)], by: 6, owner: wave, coalesceKey: nil, in: &engine)
     }
-    #expect(throws: (any Error).self) {
-        try live.moveKeys([KeyRef(layerID: "hand", property: "rotation", frame: 0)], by: -1, owner: wave, coalesceKey: nil, in: &engine)
-    }
-    #expect(frames(engine, wave, "hand", "rotation") == [0, 12, 30])
+    #expect(frames(engine, wave, "hand", "rotation") == [0, 17, 23])
     try engine.undo()
     #expect(engine.document == FlareFixtures.character && !engine.canUndo)
     try live.removeKeys([KeyRef(layerID: "hand", property: "rotation", frame: 12)], owner: wave, in: &engine)
     #expect(frames(engine, wave, "hand", "rotation") == [0, 23])
     try engine.undo()
     #expect(engine.document == FlareFixtures.character)
+}
+
+/// "wave" is 24 frames (0-23): a key moved past its last frame would never play, so the move refuses.
+@Test func symbolKeyPastTheSymbolEndThrowsAndChangesNothing() throws {
+    var engine = CommandEngine(document: FlareFixtures.character)
+    try live.moveKeys([KeyRef(layerID: "hand", property: "rotation", frame: 12)], by: 5, owner: wave, coalesceKey: nil, in: &engine)
+    let before = engine.document
+    let (canUndo, name) = (engine.canUndo, engine.undoActionName)
+    #expect(throws: CommandError.invalidDocument("A key can't move past the symbol's last frame.")) {
+        try live.moveKeys([KeyRef(layerID: "hand", property: "rotation", frame: 23)], by: 7, owner: wave, coalesceKey: nil, in: &engine)
+    }
+    #expect(engine.document == before && engine.canUndo == canUndo && engine.undoActionName == name)
+    #expect(throws: CommandError.symbolNotFound("nope")) {
+        try live.moveKeys([KeyRef(layerID: "hand", property: "rotation", frame: 23)], by: 1, owner: .symbol("nope"),
+                          coalesceKey: nil, in: &engine)
+    }
+}
+
+/// A key before frame 0 refuses with words that fit a symbol as well as a scene.
+@Test func keyBeforeFrameZeroThrowsWithoutNamingTheScene() throws {
+    for (document, owner, layerID, property) in [(FlareFixtures.character, wave, "hand", "rotation"),
+                                                 (FlareFixtures.bounce, scene, "ball", "x")] {
+        var engine = CommandEngine(document: document)
+        do {
+            try live.moveKeys([KeyRef(layerID: layerID, property: property, frame: 0)], by: -1, owner: owner,
+                              coalesceKey: nil, in: &engine)
+            Issue.record("a move before frame 0 should throw")
+        } catch let error as CommandError {
+            #expect(error == .invalidDocument("A key can't move before frame 0."))
+            if case .invalidDocument(let message) = error { #expect(!message.contains("scene")) }
+        }
+        #expect(engine.document == document && !engine.canUndo)
+    }
 }
