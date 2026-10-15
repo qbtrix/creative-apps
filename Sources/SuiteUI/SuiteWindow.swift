@@ -123,8 +123,12 @@ public struct SuiteWindow<Content: View, Inspector: View>: View {
             content
                 // An explicit ideal so the content's own ideal width can't widen the
                 // detail column past the window and clip the side columns (#579).
+                // Both sit detailInspectorAllowance under the content sizes: the
+                // detail column adds the inspector to them, and at the full sizes
+                // it laid out at 648 pt and ran past the window's edges (#933).
                 .frame(
-                    minWidth: SuiteSize.contentMinimum.width, idealWidth: SuiteSize.contentIdealWidth,
+                    minWidth: SuiteSize.contentMinimum.width - SuiteSize.detailInspectorAllowance,
+                    idealWidth: SuiteSize.contentIdealWidth - SuiteSize.detailInspectorAllowance,
                     maxWidth: .infinity, minHeight: SuiteSize.contentMinimum.height, maxHeight: .infinity)
                 .tint(SuiteColor.accent)
                 .inspector(isPresented: $showsInspector) {

@@ -34,6 +34,20 @@ import Testing
     #expect(ideal <= SuiteSize.windowMinimum.width)
 }
 
+/// #933: the detail column measured its content frame's minimum plus the
+/// inspector's minimum plus an 8 pt divider (648 pt for 440). SuiteWindow's
+/// content frame sits that much under the content sizes, so the column comes
+/// out at contentMinimum and the columns fit the window minimum.
+@Test func contentFrameLeavesTheDetailColumnRoomForTheInspector() {
+    let allowance = SuiteSize.detailInspectorAllowance
+    #expect(allowance == SuiteSize.inspectorWidth.min + 8)
+    #expect(SuiteSize.contentMinimum.width + allowance == 648, "the column width #933 measured with the full minimum")
+    let frameMinimum = SuiteSize.contentMinimum.width - allowance
+    #expect(frameMinimum > 0 && SuiteSize.contentIdealWidth - allowance > frameMinimum)
+    let columns = SuiteSize.sidebarWidth.ideal + (frameMinimum + allowance) + SuiteSize.inspectorWidth.ideal
+    #expect(columns <= SuiteSize.windowMinimum.width)
+}
+
 /// #579: the window opens wide enough for both side columns at their ideals
 /// around the content's ideal width, and that launch size is within the minimum.
 @Test func windowLaunchSizeComesFromTheColumnTokens() {
