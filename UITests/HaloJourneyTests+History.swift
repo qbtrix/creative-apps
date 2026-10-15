@@ -7,8 +7,12 @@
 // item names the step; a timeline scrub in between adds none. The sidebar is
 // read by its row titles top first, the selected composition by the
 // inspector header (`halo.inspector.header`), the layer count by the status
-// bar's readout (`layerSummary`, "1 layer"). A disabled item's reason is its
-// help tag, read by hovering it. One shot per step, `halo-history-<step>`.
+// bar's readout (`layerSummary`, "1 layer"), each matched by label or value
+// (XCUITest can read a SwiftUI value as empty, #262). A disabled menu item is
+// checked as disabled only: XCUITest doesn't read SwiftUI .help on menu items
+// reliably, so its reason ("A project keeps at least one composition.") is
+// proven by HaloModelTests' HaloCommandTests over HaloAvailability+Composition.
+// One shot per step, `halo-history-<step>`.
 import XCTest
 
 final class HaloHistoryJourneyTests: XCTestCase {
@@ -43,7 +47,7 @@ final class HaloHistoryJourneyTests: XCTestCase {
         halo.shot("history-3-scrub")
 
         // 4. Composition > Delete is off with one composition left.
-        expectDisabled(["Composition", "Delete"], help: "A project keeps at least one composition.", halo)
+        expectDisabled(["Composition", "Delete"], halo)
         halo.shot("history-4-delete-disabled")
 
         // 5. Composition > New, Create: Comp 2 below Intro, selected.
@@ -138,14 +142,12 @@ final class HaloHistoryJourneyTests: XCTestCase {
         item.click()
     }
 
-    /// The menu item at `path` is disabled and its help tag reads `help`.
-    @MainActor private func expectDisabled(_ path: [String], help: String, _ halo: Journey) {
+    /// The menu item at `path` is disabled; the menu is closed again. Its
+    /// help text isn't read here (XCUITest doesn't read SwiftUI .help on menu
+    /// items reliably): the Model's availability tests prove it.
+    @MainActor private func expectDisabled(_ path: [String], _ halo: Journey) {
         let item = menuItem(path, halo)
         XCTAssertFalse(item.isEnabled, "\(path.joined(separator: " > ")) is enabled")
-        item.hover()
-        let tag = halo.app.helpTags.matching(
-            NSPredicate(format: "label CONTAINS %@ OR title CONTAINS %@ OR value CONTAINS %@", help, help, help))
-        XCTAssert(tag.firstMatch.waitForExistence(timeout: 5), "\(path.joined(separator: " > ")) doesn't say \(help)")
         halo.press(.escape)
     }
 
