@@ -18,11 +18,16 @@
 // their kind. Each successful open and save is noted in Open Recent.
 // `-PhotoOpenFile <path>` opens a file at launch; `-PhotoRecoveryDir
 // <folder>` keeps autosaves there. PhotoFileSession is the file state the
-// window and PhotoFileArea share; D-8 to D-10 add theirs to it.
+// window and PhotoFileArea share; D-9 and D-10 add theirs to it. PhotoFileArea
+// puts `model.saveStatus` in the environment for the top bar's
+// `photo.bar.saved`, keeps the window's edited dot (`isDocumentEdited`) on
+// `model.isDirty`, and shows "Saving…" (`photo.file.saving`) or "Opening…"
+// (`photo.file.opening`) over the window once `files.working` has run 100 ms.
 import AppKit
 import CoreRaster
 import Observation
 import PhotoModel
+import SuiteUI
 import SwiftUI
 import UniformTypeIdentifiers
 
@@ -39,6 +44,11 @@ enum FileIntent {
 /// Long file work running off the main actor, for the window's notes.
 enum PhotoFileWork: Sendable {
     case saving, opening
+
+    /// The note on the canvas while this runs.
+    var note: String { self == .saving ? "Saving…" : "Opening…" }
+
+    var identifier: String { self == .saving ? "photo.file.saving" : "photo.file.opening" }
 }
 
 /// The file state a window and its PhotoFileArea share.
@@ -274,6 +284,10 @@ struct PhotoFileArea: ViewModifier {
 
     func body(content: Content) -> some View {
         content
+            // D-9 feeds `autosaved` from its autosave.
+            .environment(\.photoSaveStatus, model.saveStatus(autosaved: false, saveFailed: files.saveFailed))
+            .background { PhotoWindowEdited(edited: model.isDirty) }
+            .overlay { PhotoFileWorkNote(work: files.working) }
             .focusedSceneValue(\.photoRecentFiles, files.recentFiles)
             .confirmationDialog(
                 "Keep layers?",
@@ -290,6 +304,59 @@ struct PhotoFileArea: ViewModifier {
             .onChange(of: model.isDirty) {
                 if !model.isDirty { files.saveFailed = false }
             }
+    }
+}
+
+/// `photo.file.saving` / `photo.file.opening`: a spinner and the note over the
+/// window once `work` has run 100 ms (a quick save shows nothing); nothing otherwise.
+struct PhotoFileWorkNote: View {
+    let work: PhotoFileWork?
+    @State private var shown: PhotoFileWork?
+
+    var body: some View {
+        Color.clear
+            .allowsHitTesting(false)
+            .overlay {
+                if let shown {
+                    GlassPanel {
+                        HStack(spacing: SuiteSpacing.s) {
+                            ProgressView().controlSize(.small)
+                            Text(shown.note).font(SuiteFont.body)
+                        }
+                    }
+                    .accessibilityElement(children: .ignore)
+                    .accessibilityLabel(shown.note)
+                    .accessibilityIdentifier(shown.identifier)
+                }
+            }
+            .task(id: work) {
+                shown = nil
+                guard let work else { return }
+                try? await Task.sleep(for: .milliseconds(100))
+                if !Task.isCancelled { shown = work }
+            }
+    }
+}
+
+/// Sets the hosting window's edited dot (`isDocumentEdited`) to `edited`.
+struct PhotoWindowEdited: NSViewRepresentable {
+    let edited: Bool
+
+    func makeNSView(context: Context) -> PhotoWindowEditedView { PhotoWindowEditedView() }
+
+    func updateNSView(_ view: PhotoWindowEditedView, context: Context) { view.edited = edited }
+}
+
+/// An invisible view that keeps its window's edited dot on `edited`, also
+/// once it moves into a window.
+final class PhotoWindowEditedView: NSView {
+    var edited = false {
+        didSet { window?.isDocumentEdited = edited }
+    }
+
+    override func viewDidMoveToWindow() {
+        super.viewDidMoveToWindow()
+        window?.isDocumentEdited = edited
     }
 }
 
