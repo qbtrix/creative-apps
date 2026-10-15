@@ -1,0 +1,4 @@
+utc	stage	event	ref	note
+2026-10-15T12:10Z	0	stage-start	#873	base 7f61259
+2026-10-15T12:20Z	2	stage-end	#873	waves planned: TG-0abc+BU-0, TG-0d+BU-1a, BU-1b
+2026-10-15T12:20Z	3	stage-start	wave 1	TG-0a TG-0b TG-0c BU-0
