@@ -186,7 +186,9 @@ HaloRenderRules.run(...):                                # RO-1
 startRender(s):                                          # RO-3
   guard let comp = selectedComposition, renderJob?.plan == nil || renderJob?.outcome != nil else nil
   do { plan = try services.compositionRendering.plan(comp, settings: s) }
-  catch { renderJob = .init(settings: s, plan: nil, progress: 0, outcome: .failed(frame: 0, message: words)); return nil }
+  catch { renderJob = .init(settings: s, plan: nil, progress: 0,
+            outcome: .failed(frame: 0, message: (error as? HaloEditError)?.message ?? "\(error)")); return nil }
+                                                         # its own wording; never calls HaloRenderRules (RO-1)
   renderJob = .init(settings: s, plan: plan, progress: 0, outcome: nil)   # "Frame 0 of 48" at once
   return (plan, comp)
 renderProgress(n):  only while running and outcome == nil; progress = min(max(progress, n), plan.frames.count)
@@ -216,19 +218,26 @@ pass`, `Head:`. RO-10 also carries `feature-done`. Sizes are estimates.
 |---|---|---|---|---|---|
 | RO-1 | #429 (part) | `HaloRenderRules` (plan: half size even and at least 2, movie sizes even at full size, names sanitized; the frame loop with cancel and sink errors); `LiveCompositionRendering` runs it on `LiveFrameDrawing` and `LiveFrameRendering` with `unavailableHelp == nil`; `FakeCompositionRendering` becomes a thin wrapper over the rules on the fakes; the contract suite runs over `[fake, live]` | `Sources/HaloModel/Live/HaloRenderRules.swift`, `Sources/HaloModel/Live/LiveCompositionRendering.swift`, `Sources/HaloModel/Fakes/FakeCompositionRendering.swift`, `Tests/HaloModelTests/CompositionRenderingContractTests.swift`, `Tests/HaloModelTests/HaloRenderPlanTests.swift` | – | ~330 |
 | RO-2 | #451 (part) | `renderCurrentFrame`, the computed `renderedFrameStale`, `shownRenderedFrame`, `renderedFrameNote`, `renderedFrameSummary` | `Sources/HaloModel/HaloRenderFrame.swift`, `Tests/HaloModelTests/HaloRenderFrameTests.swift` | – | ~220 |
-| RO-3 | #429 (part) | The render job: open and close the sheet, `renderSummary`, `renderOutputName`, `startRender`, `renderProgress`, `cancelRender`, `finishRender`, the progress and outcome texts | `Sources/HaloModel/HaloRenderJob.swift`, `Tests/HaloModelTests/HaloRenderJobTests.swift` | RO-1 | ~330 |
-| RO-4 | #451 (part), #429 (part) | `HaloAvailability+Render.swift` answers state (no composition; a render running) then the services' own help, so both commands turn on; HB-12 and HB-13 report-only | `Sources/HaloModel/Availability/HaloAvailability+Render.swift`, `Tests/HaloModelTests/HaloRenderAvailabilityTests.swift`, `Tests/HaloModelTests/HaloRenderBudgetTests.swift` | RO-2, RO-3 | ~180 |
-| RO-5 | #451 (part) | App: `HaloFrameImage` (CGImage from `rgba8(colorSpace:)`); `HaloRenderedFrameView` replaces the W0 stub (the image fills the artboard, identifier `halo.viewer.rendered` with `renderedFrameSummary` as its value; the note under it as `halo.viewer.renderedNote`); Render Frame's route calls `renderCurrentFrame()`; snapshots | `Sources/HaloApp/HaloFrameImage.swift`, `Sources/HaloApp/HaloRenderedFrameView.swift`, `Sources/HaloApp/HaloWindow+Render.swift`, `Tests/AppSnapshotTests/HaloRenderSnapshots.swift` | RO-4 | ~200 |
-| RO-6 | #429 (part) | `HaloPNGWriter`: `begin` makes the folder (refuses an existing file there), `write` writes one PNG per frame, `finish` keeps written frames; HF-7 | `Sources/HaloApp/HaloPNGWriter.swift`, `Tests/AppSnapshotTests/HaloPNGWriterTests.swift` | RO-5 | ~190 |
+| RO-3 | #429 (part) | The render job: open and close the sheet, `renderSummary`, `renderOutputName`, `startRender`, `renderProgress`, `cancelRender`, `finishRender`, the progress and outcome texts | `Sources/HaloModel/HaloRenderJob.swift`, `Tests/HaloModelTests/HaloRenderJobTests.swift` | – | ~330 |
+| RO-4 | #451 (part), #429 (part) | `HaloAvailability+Render.swift` answers state (no composition; a render running) then the services' own help, so both commands turn on; HB-12 and HB-13 report-only | `Sources/HaloModel/Availability/HaloAvailability+Render.swift`, `Tests/HaloModelTests/HaloRenderAvailabilityTests.swift`, `Tests/HaloModelTests/HaloRenderBudgetTests.swift` | RO-1, RO-3 | ~180 |
+| RO-5 | #451 (part) | App: `HaloFrameImage` (CGImage from `rgba8(colorSpace:)`); `HaloRenderedFrameView` replaces the W0 stub (the image fills the artboard, identifier `halo.viewer.rendered` with `renderedFrameSummary` as its value; the note under it as `halo.viewer.renderedNote`); Render Frame's route calls `renderCurrentFrame()`; snapshots | `Sources/HaloApp/HaloFrameImage.swift`, `Sources/HaloApp/HaloRenderedFrameView.swift`, `Sources/HaloApp/HaloWindow+Render.swift`, `Tests/AppSnapshotTests/HaloRenderSnapshots.swift` | RO-2 | ~200 |
+| RO-6 | #429 (part) | `HaloPNGWriter`: `begin` makes the folder (refuses an existing file there), `write` writes one PNG per frame, `finish` keeps written frames; HF-7 | `Sources/HaloApp/HaloPNGWriter.swift`, `Tests/AppSnapshotTests/HaloPNGWriterTests.swift` | RO-1, RO-5 | ~190 |
 | RO-7 | #429 (part) | `HaloMovieWriter`: H.264 `.mp4` at the plan's size and fps, BT.709 color tagged, frame i at `CMTime(value: i, timescale: fps)`, the session ended at `frames / fps`; transparent areas become black; `finish(cancelled: true)` cancels and removes the file; HF-8 | `Sources/HaloApp/HaloMovieWriter.swift`, `Tests/AppSnapshotTests/HaloMovieWriterTests.swift` | RO-6 | ~300 |
-| RO-8 | #429 (part) | `HaloRenderSheet` (system `Form`, `Picker(.segmented)` for format and size, destination from `-HaloRenderTo` or a folder picker, the summary, Render; progress row with Cancel; result with Reveal in Finder or the failure; Close); Render…'s route opens it; the detached run with a progress sink in `HaloWindow+Render.swift`; the sheet is presented from the `renderScene(_:)` hook while `renderJob != nil`; snapshots | `Sources/HaloApp/HaloRenderSheet.swift`, `Sources/HaloApp/HaloWindow+Render.swift`, `Tests/AppSnapshotTests/HaloRenderSheetSnapshots.swift` | RO-5, RO-6, RO-7 | ~370 |
-| RO-9 | #451 (closes) | Journey H-J20 on `-HaloSample parented` | `UITests/HaloJourneyTests+RenderFrame.swift` | RO-5, #333 | ~120 |
-| RO-10 | #429 (closes), `feature-done` | Journey H-J21: PNG sequence half size on `-HaloSample keyed -HaloRenderTo <tmp>`, then a cancelled movie on a relaunch with `-HaloSample reference` | `UITests/HaloJourneyTests+Render.swift` | RO-8, RO-9, #333 | ~180 |
+| RO-8 | #429 (part) | `HaloRenderSheet` (system `Form`, `Picker(.segmented)` for format and size, destination from `-HaloRenderTo` or a folder picker, the summary, Render; progress row with Cancel; result with Reveal in Finder or the failure; Close); Render…'s route opens it; the detached run with a progress sink in `HaloWindow+Render.swift`; the sheet is presented from the `renderScene(_:)` hook while `renderJob != nil`; snapshots | `Sources/HaloApp/HaloRenderSheet.swift`, `Sources/HaloApp/HaloWindow+Render.swift`, `Tests/AppSnapshotTests/HaloRenderSheetSnapshots.swift` | RO-3, RO-5, RO-6, RO-7 | ~370 |
+| RO-9 | #451 (closes) | Journey H-J20 on `-HaloSample parented` | `UITests/HaloJourneyTests+RenderFrame.swift` | RO-4, RO-5, #333 | ~120 |
+| RO-10 | #429 (closes), `feature-done` | Journey H-J21: PNG sequence half size on `-HaloSample keyed -HaloRenderTo <tmp>`, then a cancelled movie on a relaunch with `-HaloSample reference` | `UITests/HaloJourneyTests+Render.swift` | RO-4, RO-8, #333 | ~180 |
 
-RO-1 and RO-2 share no file and can run in the first build wave. The Model
-chain is (RO-1 → RO-3) ∥ RO-2 → RO-4; the app chain is RO-5 → RO-6 → RO-7 →
-RO-8; RO-9 can run once RO-5 is in, RO-10 last. `HaloWindow+Render.swift` (also RO-5 and RO-8)
-is shared only by tasks that chain.
+RO-1, RO-2 and RO-3 share no file and build together. RO-3 codes against
+W0's `FakeCompositionRendering`, whose plan already gives `keyed` half
+960 × 540, so it doesn't wait for RO-1. RO-3 words a plan error itself
+with `(error as? HaloEditError)?.message ?? "\(error)"` and never calls
+`HaloRenderRules`, which is RO-1's file. RO-4 needs RO-1 (the live help is
+nil) and RO-3 (a render running); RO-5 needs only RO-2's
+`renderCurrentFrame()`. Both journeys need RO-4, since the commands stay
+disabled until then. `HaloWindow+Render.swift` (RO-5 and RO-8) is shared only
+by tasks that chain. No task edits a shared doc (`docs/c4/model.json`,
+`docs/design.md`, the blueprint, `waves.md`), so RO-10, the `feature-done`
+task, stays the final task and adds no docs edit.
 `Tests/HaloModelTests/HaloRenderAvailabilityTests.swift` and
 `HaloRenderJobTests.swift` are new files beyond the blueprint's 8.3 list;
 `Sources/HaloModel/Live/HaloRenderRules.swift` and
@@ -246,6 +255,22 @@ is built from `renderJob != nil` and `closeRenderSheet()`, never from
 the invariant (enabled, or disabled with help) and the shipped commands, so
 RO-4 never edits it; its own `HaloRenderAvailabilityTests` asserts Render
 Frame and Render… turn on.
+
+## Build waves
+
+- Wave 1: RO-1, RO-2, RO-3. Independent in this wave: all three.
+- Wave 2: RO-4, RO-5. Independent in this wave: both.
+- Wave 3: RO-6, RO-9. Independent in this wave: both.
+- Wave 4: RO-7. Independent in this wave: RO-7 alone.
+- Wave 5: RO-8. Independent in this wave: RO-8 alone.
+- Wave 6: RO-10 (final, `feature-done`; also waits on #333). RO-9 merged in
+  wave 3, so the `feature-done` run holds both journeys.
+
+Longest chain: RO-2 → RO-5 → RO-6 → RO-7 → RO-8 → RO-10 (6).
+Chain of 6: RO-5's route calls RO-2's `renderCurrentFrame()`, RO-6's
+`HaloPNGWriter` writes through RO-5's `HaloFrameImage`, RO-7's test compares
+against RO-6's PNG frame 0, RO-8's run builds RO-7's `HaloMovieWriter` and
+edits RO-5's `HaloWindow+Render.swift`, and RO-10's H-J21 drives RO-8's sheet.
 
 ## Acceptance test per task
 

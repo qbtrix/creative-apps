@@ -248,16 +248,19 @@ Each carries the label `fast-lane` and the body lines `Belt-Lead:`,
 | LK-8 | – | Budgets HB-1, HB-3, HB-4 on `reference`, over `.fake` and `.live` | `Tests/HaloModelTests/HaloKeysBudgetTests.swift` | LK-5, LK-7 | ~150 |
 | LK-9 | #38 (part) | `HaloWindow+Keys.swift` routes every keys command to its Model method (`keysScene(_:)` kept). `HaloLayerInspector`'s TRANSFORM group has eight `InspectorSliderRow`s (shown value, range, step, unit, decimals, `keyed:`); `onChange` sends `.setProperty(p, p.stored(fromShown:))` and `onEnd` sends `.endPropertyScrub`. Each row has a `KeyframeButton` (`HaloKeyState` mapped to `KeyState`), `.accessibilityValue(row.text)` and the refusal caption. The EASING and TEXT slots stay as W0 wrote them | `Sources/HaloApp/HaloWindow+Keys.swift`, `Sources/HaloApp/HaloLayerInspector.swift`, `Tests/AppSnapshotTests/HaloInspectorSnapshots.swift` | LK-6, LK-7 | ~360 |
 | LK-10 | #38 (closes) | The LAYER group: Parent (`InspectorPickerRow<String?>`, None then `parentChoices`) and Blend (`blendChoices`) send `.setParent` and `.setBlendMode` (W0's "Change Blend Mode" mutator); snapshots of the group and of the inspector at its minimum width | `Sources/HaloApp/HaloLayerInspector.swift`, `Tests/AppSnapshotTests/HaloInspectorSnapshots.swift` | LK-9 | ~160 |
-| LK-11 | #207 (closes) | `HaloViewerGestures(model:perform:)`: a `DragGesture(minimumDistance: 0)` on the artboard-sized view W0 gives it, mapped through `compositionPoint`, sends begin, move and end; Escape (`onExitCommand`) sends cancel; snapshot of the preview | `Sources/HaloApp/HaloViewerGestures.swift`, `Tests/AppSnapshotTests/HaloKeyByDragSnapshots.swift` | LK-9 | ~180 |
-| LK-12 | – | H-J5 on `-HaloFixture keyed` | `UITests/HaloJourneyTests+Drag.swift` | LK-11, #333 | ~150 |
-| LK-13 | – | H-J6 on `-HaloFixture keyed` | `UITests/HaloJourneyTests+Inspector.swift` | LK-10, #333 | ~170 |
+| LK-11 | #207 (closes) | `HaloViewerGestures(model:perform:)`: a `DragGesture(minimumDistance: 0)` on the artboard-sized view W0 gives it, mapped through `compositionPoint`, sends begin, move and end; Escape (`onExitCommand`) sends cancel; snapshot of the preview | `Sources/HaloApp/HaloViewerGestures.swift`, `Tests/AppSnapshotTests/HaloKeyByDragSnapshots.swift` | LK-7 | ~180 |
+| LK-12 | – | H-J5 on `-HaloFixture keyed` | `UITests/HaloJourneyTests+Drag.swift` | LK-9, LK-11, #333 | ~150 |
+| LK-13 | – | H-J6 on `-HaloFixture keyed` | `UITests/HaloJourneyTests+Inspector.swift` | LK-9, #333 | ~170 |
 | LK-14 | – (`feature-done`) | H-J23 on `-HaloFixture parented` | `UITests/HaloJourneyTests+Parent.swift` | LK-10, LK-12, LK-13, #333 | ~140 |
 
-The Model chain is LK-1 → LK-2a → LK-2b → (LK-3 ∥ LK-4 ∥ LK-5), LK-4 → LK-7, LK-6
-after LK-3, LK-4 and LK-5, and LK-8 after LK-5 and LK-7. The app chain is
-LK-9 → (LK-10 ∥ LK-11) → the journeys. Tasks that share a file chain
-through depends-on. LK-9 writes `HaloWindow+Keys.swift` once with every
-route, so LK-10 and LK-11 can run side by side. The 8.3 list's
+A task depends on another only when it calls what that task adds, its
+test needs that behavior, or it edits that task's file; "Build waves" says
+which tasks run side by side. Tasks that share a file chain through
+depends-on. LK-9 writes `HaloWindow+Keys.swift` once with every route, so
+LK-10 and LK-11 never touch it. LK-11 needs only LK-7's
+`compositionPoint` and drag state: its snapshot sets the drag through the
+Model, so it does not wait for LK-9's routes. The journeys need the routes
+and the inspector, so each waits for LK-9. The 8.3 list's
 `HaloKeyingTests` keeps the rows, scrub and typed value; the toggle and
 availability tests get new files so no task passes 400 lines. LK-2 is split
 in two because moving `FakePropertyKeying`'s ~110 lines of rules into
@@ -271,6 +274,37 @@ math lives once, in `HaloKeyRules`, and neither feature waits on the other. laye
 children on screen through `services.keying.setParent`, which is real after
 LK-3. W0's `HaloCommandTests` checks an invariant (every command enabled,
 or disabled with help), so LK-6 doesn't edit it.
+
+## Build waves
+
+No task edits a shared doc (the `halo-services` description and the
+inspector rows in `docs/design.md` are the supervisor's, as the Halo
+`waves.md` says), so nothing chains through one.
+
+- Wave 1: LK-1. Independent in this wave: LK-1 alone.
+- Wave 2: LK-2a. Independent in this wave: LK-2a alone.
+- Wave 3: LK-2b. Independent in this wave: LK-2b alone.
+- Wave 4: LK-3, LK-4, LK-5. Independent in this wave: all three.
+- Wave 5: LK-6, LK-7. Independent in this wave: both.
+- Wave 6: LK-8, LK-9, LK-11. Independent in this wave: all three.
+- Wave 7: LK-10, LK-12, LK-13. Independent in this wave: all three (LK-12
+  and LK-13 also wait for #333).
+- Wave 8: LK-14 (`feature-done`, final). Independent in this
+  wave: LK-14 alone.
+
+Longest chain: LK-1 → LK-2a → LK-2b → LK-3 → LK-6 → LK-9 → LK-10 → LK-14 (8).
+
+Chain of 8: LK-2a, LK-2b and LK-3 each add to `HaloKeyRules.swift`,
+`LivePropertyKeying.swift` and `FakePropertyKeying.swift`, and each builds
+on the last (rows read LK-1's `value`, LK-2b's write tests read key states
+through LK-2a's rows, `setParent` calls LK-2b's `setValue`); LK-6's
+`setParent` on `.live` needs LK-3's real `LivePropertyKeying.setParent`;
+LK-9's `HaloWindow+Keys.swift` routes call LK-6's `toggleAnimation`,
+`toggleKey` and `setParent`; LK-10 edits LK-9's `HaloLayerInspector.swift`
+and `HaloInspectorSnapshots.swift`; LK-14's H-J23 uses LK-10's Parent and
+Blend pickers. LK-14 also
+waits for LK-12 and LK-13 because its `feature-done` run must hold all three
+journeys.
 
 ## Acceptance test per task
 

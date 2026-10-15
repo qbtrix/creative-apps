@@ -136,6 +136,22 @@ start W0: Q1 (shell), Q2 (edit the `Depends on:` lines of #38, #207, #208,
 Q7 (⌘D follows focus), Q8 (#39 not v1), Q9 (point issue bodies at their
 packets). The packets say "the packet wins over the issue body" meanwhile.
 
+
+## Longest build chain
+
+Each packet was re-cut to `docs/factory/packets.md` (shared docs in one
+final task, a task waits only on merged code it needs, each wave lists its
+independent tasks). Longest depends-on chain in tasks, before and after;
+a chain over 3 has its reason in the packet's Build waves section.
+
+- easing: 7 before, 4 after.
+- history-files: 7 before, 6 after.
+- layer-keys: 9 before, 8 after.
+- layer-panel: 3 before, 3 after.
+- render-out: 8 before, 6 after.
+- text-layers: 5 before, 3 after.
+- viewer-playback: 6 before, 5 after.
+
 ## The lead contract
 
 Every feature lead and every task below codes against this. It is handed
