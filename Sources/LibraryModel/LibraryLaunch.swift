@@ -89,3 +89,14 @@ public struct LibraryLaunch: Sendable, Equatable {
         fixture == "shoot-unimported" ? [] : LibraryFixtures.photos(named: fixture)
     }
 }
+
+extension LibraryCatalog {
+    /// The window's catalog at launch: `services` (from `launch.services`),
+    /// the launch's first photos in the grid, and the test-only values on
+    /// under `-LibraryTestValues`.
+    public init(launch: LibraryLaunch, services: LibraryServices) {
+        self.init(services: services)
+        load(launch.initialPhotos)
+        showsTestValues = launch.testValues
+    }
+}

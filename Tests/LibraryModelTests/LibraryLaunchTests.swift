@@ -104,3 +104,49 @@ import Testing
     #expect(LibraryFixtures.photos(named: "nonsense").isEmpty)
     #expect(LibraryFixtures.photos(named: nil).isEmpty)
 }
+
+// MARK: LibraryCatalog(launch:services:), the window's catalog at launch (SA-2)
+
+private func launchCatalog(_ arguments: [String]) -> LibraryCatalog {
+    let launch = LibraryLaunch(arguments: arguments)
+    return LibraryCatalog(
+        launch: launch,
+        services: launch.services(decoder: FakeDecoder(photos: []), writer: FakeJPEGWriter(), store: FakeCatalogStore()))
+}
+
+@Test func samplesFixtureLaunchesWithSixtyPreviewPhotos() {
+    let catalog = launchCatalog(["/path/LibraryApp", "-LibraryFixture", "samples"])
+    #expect(catalog.items.count == 60)
+    #expect(catalog.items == LibraryFixtures.photos(named: "samples"))
+    #expect(catalog.services.isPreview)
+    #expect(catalog.mode == .grid && catalog.selection.isEmpty)
+    #expect(catalog.sortedItems.count == 60)
+    #expect(!catalog.showsTestValues)
+}
+
+@Test func testValuesFlagSetsShowsTestValues() {
+    #expect(launchCatalog(["-LibraryTestValues"]).showsTestValues)
+    #expect(launchCatalog(["-LibraryFixture", "shoot", "-LibraryTestValues"]).showsTestValues)
+    #expect(!launchCatalog(["-LibraryFixture", "shoot"]).showsTestValues)
+}
+
+@Test func noFixtureLaunchesEmptyOnLiveServicesWithEveryReason() {
+    let catalog = launchCatalog(["/path/LibraryApp"])
+    #expect(catalog.isEmpty)
+    #expect(!catalog.services.isPreview)
+    let reasons: [String: String?] = [
+        "importer": LiveImporter.unavailable, "thumbnails": LiveThumbnails.unavailable,
+        "culling": LiveCulling.unavailable, "coding": LiveCatalogCoding.unavailable,
+        "loupe": LiveLoupeImaging.unavailable, "develop": LiveDevelop.unavailable,
+        "crop": LiveCrop.unavailable, "exporter": LiveExporter.unavailable,
+    ]
+    #expect(catalog.services.unavailable == reasons.compactMapValues { $0 })
+    // Every other stored value is a fresh catalog's.
+    #expect(catalog == LibraryCatalog())
+}
+
+@Test func shootUnimportedLaunchStartsEmptyOnFakes() {
+    let catalog = launchCatalog(["-LibraryFixture", "shoot-unimported"])
+    #expect(catalog.isEmpty)
+    #expect(catalog.services.isPreview)
+}
