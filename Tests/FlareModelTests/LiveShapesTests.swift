@@ -112,3 +112,16 @@ func oneCommitIsOneNamedEntryThatOneUndoReverts(_ tool: FlareTool) throws {
     try engine.undo()
     #expect(engine.document == FlareFixtures.empty && !engine.canUndo)
 }
+
+/// A one-click pen path is refused with the fake's words, which say what to do without using "point" as a distance.
+@Test func aOneClickPenPathIsRefusedInPlainWords() throws {
+    var engine = CommandEngine(document: FlareFixtures.empty)
+    let dot = try #require(draft(.pen, p(40, 40), p(40, 40)))
+    do {
+        _ = try live.commit(dot, owner: scene, aboveLayerID: nil, in: &engine)
+        Issue.record("a one-click pen path committed")
+    } catch let CommandError.invalidDocument(message) {
+        #expect(message == FakeShapes.degeneratePath && !message.contains("a point apart"))
+    }
+    #expect(engine.document == FlareFixtures.empty && !engine.canUndo)
+}
