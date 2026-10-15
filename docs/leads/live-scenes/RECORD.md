@@ -2,9 +2,9 @@
 
 Issue: #800 · Packet: docs/blueprints/flare/features/live-scenes.md
 Run: act-1a13ca4f89e-0ft1 · Session: claude/live-scenes-lead-d0sj3t · Started: 2026-10-14
-Stage: 5 finish
+Stage: 5 finish (built; waiting on other lines for a green dev CI run)
 Base: cba1813739a5be03f353698cc2c61e76bc8c6103
-Next: watch dev CI runs (ci.yml, branch dev) newer than 38687993459; on the first green one, comment Belt-Contact-Sheet on #800 and mark done. Red only on SuiteUI = not ours (dev-red #763).
+Next: a resumed lead reads the newest completed dev CI run newer than 38687993459 (38694361192 on fdb7c8a was in progress at 06:56Z); on the first green one, post `Belt-Contact-Sheet: <run link>` on #800 with one line per journey and the audit counts, then mark Stage done. Nothing else is left to build.
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -36,6 +36,7 @@ Quality bars: QB-F3 one gesture one step, QB-L7 <= 10 ms per moveGuide step (med
 - No Flare screen changes: the live type is not wired until IN-4, so the Anatomy loop judges on CI + audit, not new screens.
 
 ## Open
+- Lead wall clock (8 h) ended 2026-10-15T06:56Z with dev CI still red. Last completed run 38687993459 (8f78bad): Linux green; macOS red only on HaloJourneyTests.testLayoutAtWidths and SuiteJourneyTests.testGalleryOpensEveryPage. Every Flare test and journey passed. Earlier red runs, all outside live-scenes files, are triaged on #763.
 - Feature-done run 38667087530 (c3fd66f) red only on SuiteUI SnapshotHostTests/TokensTests (dev-red #763, triaged twice); waiting on the SuiteUI line for a green dev run. Status comment on #800.
 - Round budget used: 4 rounds (round 4 clean); no gap issues left open.
 - dev-red #763 open before this feature: macOS fails in SuiteUI (SnapshotHost, FrameProbe, ControlInventory, GoldenImage) and Photo (PhotoBrushLatency); no Flare or LiveScenes test in run 38654031210 failed.
