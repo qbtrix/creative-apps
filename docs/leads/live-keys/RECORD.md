@@ -17,7 +17,7 @@ Next: wait for KY-9 (feature-done) to merge, then stage 4 round 1 on the CI run 
 | KY-3 | 3 | `toggleAnimated`, `toggleKey` | Live/LiveProperties+Keys.swift, LivePropertiesKeysTests.swift | LivePropertiesKeysTests | #922 | merged |
 | KY-7 | 3 | `insertFrames`, `removeFrames`, `setLabel` + `KeyframeEditing` | Live/LiveKeyframes+Frames.swift, LiveKeyframesFramesTests.swift | LiveKeyframesFramesTests | #921 | merged |
 | KY-4 | 4 | `setFill`, `setStroke` + `PropertyAnimating` | Live/LiveProperties+Paint.swift, LivePropertiesPaintTests.swift | LivePropertiesPaintTests | #928 | merged |
-| KY-9 | 5 | model journey steps 1–7 + QB-L7 budget (feature-done) | LiveKeysJourneyTests.swift, LiveKeysBudgetTests.swift | both | | building |
+| KY-9 | 5 | model journey steps 1–7 + QB-L7 budget (feature-done) | LiveKeysJourneyTests.swift, LiveKeysBudgetTests.swift | both | #936 | in lane |
 
 ## Rounds
 | round | CI run | CI | audit vs baseline | lenses | confirmed | fixed by | clean |
@@ -37,4 +37,5 @@ Next: wait for KY-9 (feature-done) to merge, then stage 4 round 1 on the CI run 
 - PhotoBrushCopyCostTests.aStrokesFirstEventCopiesOnlyWhatItsDabsTouch is a timing test that failed once under parallel builders' load (median 8.7 vs 3) and passed on rerun of the same head; not this feature's.
 
 ## Open
+- Nit for a round fix: LiveKeyframes+Edit.swift header (line 7) still says the KeyframeEditing conformance "comes in KY-7".
 - none
