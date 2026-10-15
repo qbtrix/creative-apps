@@ -60,7 +60,8 @@ func photoArguments(
 
 final class PhotoJourneyKitTests: XCTestCase {
     /// The arguments are spelled right; a written beach.png opens, titled
-    /// beach.png, with its canvas: the v1 open state.
+    /// beach.png, with its canvas and nothing over the window (no restore
+    /// offer, sheet or dialog): the v1 open state.
     @MainActor func testWrittenPhotoOpens() throws {
         let folder = FileManager.default.temporaryDirectory.appending(path: "photo-kit-\(UUID().uuidString)")
         try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
@@ -80,6 +81,11 @@ final class PhotoJourneyKitTests: XCTestCase {
         let photo = Journey("Photo", self, arguments: photoArguments(open: file))
         XCTAssert(photo.app.windows["beach.png"].waitForExistence(timeout: 30), "beach.png didn't open")
         XCTAssert(photo.element("suite.canvas").waitForExistence(timeout: 5), "no canvas (suite.canvas)")
+        XCTAssertFalse(
+            photo.app.buttons["photo.recovery.restore"].waitForExistence(timeout: 5),
+            "a restore offer covers the opened window: another launch's autosave reached this one")
+        XCTAssertFalse(photo.app.sheets.firstMatch.exists, "a sheet covers the opened window")
+        XCTAssertFalse(photo.app.dialogs.firstMatch.exists, "a dialog covers the opened window")
         photo.shot("kit-opened")
     }
 }
