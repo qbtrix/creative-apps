@@ -3,7 +3,7 @@
 Raw notes behind `docs/blueprints/pdf.md` section 1, gathered 2026-10-15
 from public sources only: usage numbers published by web PDF tool sites,
 keyword-volume pages, help-centre and forum counts, open-source issue
-trackers (reaction and subscriber counts), Hacker News threads, and Apple's
+trackers (reaction and subscriber counts), tech-forum threads, and Apple's
 developer documentation. No PDF app was opened, run, decompiled or scraped
 beyond reading its public pages. A URL may contain a product's name; the
 text describes behaviour only.
@@ -27,14 +27,16 @@ Four kinds of evidence, each a number:
   it under-counts what every viewer already does (read, highlight, search,
   print); those tasks are ranked by the Q&A data instead.
 - **Per-tool vote counts** shown on the tool pages of two web PDF tool sites
-  (site A: pdfcandy.com, site B: pdf2go.com), a stand-in for use. Newer tools
+  (site A and site B; their URLs are in the table), a stand-in for use. Newer tools
   have had less time to collect votes.
-- **Stack Exchange**: the 2,281 top-voted questions tagged pdf (or preview)
-  on the Super User, Ask Ubuntu, Ask Different and Unix sites, 58.8 million
+- **Q&A sites** of one network: the 2,281 top-voted questions tagged pdf (or
+  the built-in viewer's tag) on its general-computing, Linux, Mac and Unix
+  sites (superuser.com, askubuntu.com, apple.stackexchange.com,
+  unix.stackexchange.com), 58.8 million
   views in all, grouped by task from title keywords (approximate), plus
   single-question view counts (api.stackexchange.com).
 - **One web vendor's published usage split** (May 2025, 100M+ files a week:
-  compress 34%, all conversion 28%, e-sign 19%, PDF to word-processor 16%,
+  compress 34%, all conversion 28%, e-sign 19%, PDF to a word-processing format 16%,
   https://smallpdf.com/pdf-statistics), and a vendor-commissioned survey of
   US financial professionals (98% work with PDFs; 61% edit about 20 times a
   month; 64% sign about 15 times a month; seen only in search snippets,
@@ -42,32 +44,32 @@ Four kinds of evidence, each a number:
 
 | # | Task | Signal | Strength | Source |
 |---|---|---|---|---|
-| 1 | Read and view (open, scroll, zoom, layout, default app) | largest Stack Exchange group: 11.8% of 58.8M views; "pdf reader" 33,100/mo, "pdf viewer" 14,800/mo | strong | https://www.seodata.dev/keyword/pdf-reader ; https://api.stackexchange.com/2.3/questions?site=superuser&tagged=pdf&sort=votes |
-| 2 | Convert to a word-processing, spreadsheet or slide format | "pdf to word" 246,000/mo, "pdf to excel" 33,100, "pdf to powerpoint" 22,200; #1 tool on site A (1,613,986 votes) and site B (38,056); 16% of the vendor's activity | strong | https://www.seodata.dev/keyword/pdf-to-word ; https://pdfcandy.com/pdf-to-word.html ; https://www.pdf2go.com/pdf-to-word ; https://smallpdf.com/pdf-statistics |
-| 3 | Merge several PDFs into one | "pdf merger" 201,000, "merge pdf" 135,000, "combine pdf" 135,000; site A 704,085 votes; 8.1% of Stack Exchange views from 76 questions; "How to merge several PDF files?" 785K views | strong | https://www.seodata.dev/keyword/merge-pdf ; https://www.seodata.dev/keyword/combine-pdf ; https://pdfcandy.com/merge-pdf.html ; https://askubuntu.com/questions/2799 |
+| 1 | Read and view (open, scroll, zoom, layout, default app) | largest Q&A group: 11.8% of 58.8M views; "pdf reader" 33,100/mo, "pdf viewer" 14,800/mo | strong | https://www.seodata.dev/keyword/pdf-reader ; https://api.stackexchange.com/2.3/questions?site=superuser&tagged=pdf&sort=votes |
+| 2 | Convert to a word-processing, spreadsheet or slide format | "pdf to <word processor>" 246,000/mo, "pdf to <spreadsheet>" 33,100, "pdf to <slides>" 22,200; #1 tool on site A (1,613,986 votes) and site B (38,056); 16% of the vendor's activity | strong | https://www.seodata.dev/keyword/pdf-to-word ; https://pdfcandy.com/pdf-to-word.html ; https://www.pdf2go.com/pdf-to-word ; https://smallpdf.com/pdf-statistics |
+| 3 | Merge several PDFs into one | "pdf merger" 201,000, "merge pdf" 135,000, "combine pdf" 135,000; site A 704,085 votes; 8.1% of Q&A views from 76 questions; "How to merge several PDF files?" 785K views | strong | https://www.seodata.dev/keyword/merge-pdf ; https://www.seodata.dev/keyword/combine-pdf ; https://pdfcandy.com/merge-pdf.html ; https://askubuntu.com/questions/2799 |
 | 4 | Make a PDF from images or scans | "jpg to pdf" 201,000, "image to pdf" 60,500; site A 450,724 votes; the Mac Q&A site's most-viewed PDF question, combining images into one PDF, 1,502,667 views | strong | https://www.seodata.dev/keyword/jpg-to-pdf ; https://pdfcandy.com/jpg-to-pdf.html ; https://apple.stackexchange.com/questions/11163 |
 | 5 | Reduce file size | 34% of the vendor's activity (its top tool); "compress pdf" 110,000, "reduce pdf size" 33,100; "reduce the file size of a scanned PDF" 1,049,735 views | strong | https://smallpdf.com/pdf-statistics ; https://www.seodata.dev/keyword/compress-pdf ; https://askubuntu.com/questions/113544 |
 | 6 | "Edit a PDF" in general (add text, fill blanks, sign, rearrange) | "pdf editor" 246,000, "edit pdf" 90,500; site A 278,175; site B 36,741; "How to Edit PDFs?" 350K views | strong | https://www.seodata.dev/keyword/pdf-editor ; https://www.seodata.dev/keyword/edit-pdf ; https://pdfcandy.com/edit-pdf.html |
 | 7 | Export pages as images | "pdf to jpg" 165,000, "pdf to png" 74,000; site A 156,024; "convert PDF to image" 466K views | strong | https://www.seodata.dev/keyword/pdf-to-jpg ; https://pdfcandy.com/pdf-to-jpg.html ; https://askubuntu.com/questions/50170 |
-| 8 | Make a PDF from office files, web pages, print to PDF | "word to pdf" 110,000; site A 288,131; 6.1% of Stack Exchange views | strong | https://www.seodata.dev/keyword/word-to-pdf ; https://pdfcandy.com/word-to-pdf.html |
-| 9 | Fill in forms | "fill pdf" 74,000, "pdf filler" 74,000; "software that can fill PDF forms" 248K views; 1.4% of Stack Exchange views | strong | https://www.seodata.dev/keyword/fill-pdf ; https://askubuntu.com/questions/29230 |
-| 10 | Annotate: highlight, notes, comments, drawing | second-largest Stack Exchange group: 8.9% of views, 246 questions; "highlight or annotate PDFs" 307K views; low search volume (3,600) because viewers already do it | strong (Q&A) | https://askubuntu.com/questions/1529 ; https://www.seodata.dev/keyword/annotate-pdf |
+| 8 | Make a PDF from office files, web pages, print to PDF | "<word processor> to pdf" 110,000; site A 288,131; 6.1% of Q&A views | strong | https://www.seodata.dev/keyword/word-to-pdf ; https://pdfcandy.com/word-to-pdf.html |
+| 9 | Fill in forms | "fill pdf" 74,000, "pdf filler" 74,000; "software that can fill PDF forms" 248K views; 1.4% of Q&A views | strong | https://www.seodata.dev/keyword/fill-pdf ; https://askubuntu.com/questions/29230 |
+| 10 | Annotate: highlight, notes, comments, drawing | second-largest Q&A group: 8.9% of views, 246 questions; "highlight or annotate PDFs" 307K views; low search volume (3,600) because viewers already do it | strong (Q&A) | https://askubuntu.com/questions/1529 ; https://www.seodata.dev/keyword/annotate-pdf |
 | 11 | Sign (drawn, typed or picture) | 19% of the vendor's activity (its #2); 64% of surveyed professionals sign ~15 times a month; "sign pdf" 22,200, "pdf signature" 18,100; "add a signature .png to a PDF" 231K views | strong | https://smallpdf.com/pdf-statistics ; https://www.seodata.dev/keyword/sign-pdf ; https://unix.stackexchange.com/questions/85873 |
 | 12 | Split, extract a page range | "split pdf" 40,500, "extract pages from pdf" 8,100; site A 226,452; site B 30,858; "extract a page range" 793K views | strong | https://www.seodata.dev/keyword/split-pdf ; https://pdfcandy.com/split-pdf.html ; https://askubuntu.com/questions/221962 |
 | 13 | Delete, reorder, insert pages | "delete pages from pdf" 33,100, "rearrange pdf pages" 3,600, "add page to pdf" 3,600; site A rearrange 64,169, delete 49,407 | strong | https://www.seodata.dev/keyword/delete-pages-from-pdf ; https://pdfcandy.com/rearrange-pdf.html |
-| 14 | Print (booklet, n-up, poster, scaling) | 4.6% of Stack Exchange views (126 questions); "print one page enlarged to multiple pages" 315K; booklet 96K, 4-up 63K | strong | https://superuser.com/questions/205943 ; https://apple.stackexchange.com/questions/3832 |
+| 14 | Print (booklet, n-up, poster, scaling) | 4.6% of Q&A views (126 questions); "print one page enlarged to multiple pages" 315K; booklet 96K, 4-up 63K | strong | https://superuser.com/questions/205943 ; https://apple.stackexchange.com/questions/3832 |
 | 15 | Copy or extract text | "Can't copy text from a pdf file" 462K views, "copy text without losing formatting" 399K; "pdf to text" 12,100/mo | strong | https://superuser.com/questions/47462 ; https://superuser.com/questions/198392 ; https://www.seodata.dev/keyword/pdf-to-text |
-| 16 | Rotate pages and keep the rotation | Super User's most-viewed PDF question, saving a rotated PDF, 705K; "rotate pdf" 9,900 | strong | https://superuser.com/questions/145696 ; https://www.seodata.dev/keyword/rotate-pdf |
+| 16 | Rotate pages and keep the rotation | the general-computing Q&A site's most-viewed PDF question, saving a rotated PDF, 705K; "rotate pdf" 9,900 | strong | https://superuser.com/questions/145696 ; https://www.seodata.dev/keyword/rotate-pdf |
 | 17 | Remove or add a password | "remove security from a PDF" 582K views; "unlock pdf" 14,800, "password protect pdf" 8,100 | strong | https://superuser.com/questions/179064 ; https://www.seodata.dev/keyword/unlock-pdf ; https://www.seodata.dev/keyword/password-protect-pdf |
 | 18 | Translate, summarize, ask questions of a PDF | "translate pdf" 14,800, "summarize pdf" 2,400, "chat with pdf" 1,600 | strong | https://www.seodata.dev/keyword/translate-pdf |
-| 19 | Crop or change page size | "crop pdf" 9,900; site A 50,461; 1.7% of Stack Exchange views | strong | https://www.seodata.dev/keyword/crop-pdf ; https://pdfcandy.com/crop-pdf.html |
+| 19 | Crop or change page size | "crop pdf" 9,900; site A 50,461; 1.7% of Q&A views | strong | https://www.seodata.dev/keyword/crop-pdf ; https://pdfcandy.com/crop-pdf.html |
 | 20 | Edit existing text in place | "edit pdf text" 8,100 (vs "edit pdf" 90,500); site A's in-place text editor 464 votes vs 278K for its general editor; "change font style in the built-in viewer" 135K views | strong | https://www.seodata.dev/keyword/edit-pdf ; https://apple.stackexchange.com/questions/170840 ; https://pdfcandy.com/edit-pdf-text.html |
 | 21 | Flatten | "flatten pdf" 6,600 | strong | https://www.seodata.dev/keyword/flatten-pdf |
-| 22 | OCR: make scans searchable | "pdf ocr" 5,400 + "ocr pdf" 4,400 + "make pdf searchable" 2,400; site A 38,447; 1.1% of Stack Exchange views; hidden demand inside "can't copy text" (462K) and scan conversions | strong | https://www.seodata.dev/keyword/ocr-pdf ; https://pdfcandy.com/pdf-ocr.html |
+| 22 | OCR: make scans searchable | "pdf ocr" 5,400 + "ocr pdf" 4,400 + "make pdf searchable" 2,400; site A 38,447; 1.1% of Q&A views; hidden demand inside "can't copy text" (462K) and scan conversions | strong | https://www.seodata.dev/keyword/ocr-pdf ; https://pdfcandy.com/pdf-ocr.html |
 | 23 | Redact | "redact pdf" 5,400; the Mac Q&A site's #2 most-viewed PDF question, blacking out or redacting text, 490,831 views; site B 38 votes | strong | https://www.seodata.dev/keyword/redact-pdf ; https://apple.stackexchange.com/questions/22683 |
-| 24 | Compare two versions | "pdf compare" 5,400; Super User's #3 most-viewed PDF question, 485,773 views; 1.3% of Stack Exchange views | strong | https://www.seodata.dev/keyword/pdf-compare ; https://superuser.com/questions/46123 |
+| 24 | Compare two versions | "pdf compare" 5,400; the general-computing Q&A site's #3 most-viewed PDF question, 485,773 views; 1.3% of Q&A views | strong | https://www.seodata.dev/keyword/pdf-compare ; https://superuser.com/questions/46123 |
 | 25 | Read aloud | "read pdf aloud" 4,400, "pdf text to speech" 1,600 | strong | https://www.seodata.dev/keyword/read-pdf-aloud |
-| 26 | Stamps: Bates, page numbers, watermark, header and footer | "bates numbering" 2,900, "add page numbers to pdf" 2,900, "watermark pdf" 1,600; 0.7% of Stack Exchange views | strong | https://www.seodata.dev/keyword/bates-numbering ; https://www.seodata.dev/keyword/add-page-numbers-to-pdf |
+| 26 | Stamps: Bates, page numbers, watermark, header and footer | "bates numbering" 2,900, "add page numbers to pdf" 2,900, "watermark pdf" 1,600; 0.7% of Q&A views | strong | https://www.seodata.dev/keyword/bates-numbering ; https://www.seodata.dev/keyword/add-page-numbers-to-pdf |
 
 Long tail (US monthly searches unless noted): dark or inverted reading 480
 (the Mac Q&A site 133K views; "adjust PDF contrast" 394K); bookmarks and
@@ -82,11 +84,11 @@ mac" 1,600, "compress pdf mac" 1,300, "sign pdf on mac" 880, "ocr pdf mac"
 210, "redact pdf mac" 140.
 
 Other public numbers seen: India volumes on a public SEO site's pages ("pdf
-to word" 4M, "jpg to pdf" 4.8M, "pdf to jpg" 3.4M, "merge pdf" 1.7M,
+to <word processor>" 4M, "jpg to pdf" 4.8M, "pdf to jpg" 3.4M, "merge pdf" 1.7M,
 "compress pdf" 1.6M; https://ahrefstop.com/websites/pdf24.org); one web
-tool site's home page lists Merge, Split, Compress, PDF to Word first (no
-counts). Stack Exchange tag sizes: Super User pdf 3,801, Ask Ubuntu 1,457,
-Ask Different pdf 1,185 and preview 1,094, Unix 733.
+tool site's home page lists Merge, Split, Compress, PDF to a word-processing format first (no
+counts). Q&A tag sizes: general computing pdf 3,801, Linux 1,457, Mac pdf 1,185
+and the built-in viewer's tag 1,094, Unix 733.
 
 ### A.1 Where the built-in macOS viewer falls short (from public Q&A and help pages)
 
@@ -98,7 +100,7 @@ Ask Different pdf 1,185 and preview 1,094, Unix 733.
   edited, only marked up on top
   (https://support.apple.com/guide/preview/annotate-a-pdf-prvw11580/mac);
   135K views on changing a PDF's font.
-- No OCR for scanned PDFs (on-device text recognition works on images only).
+- No OCR for scanned PDFs (the system's on-device text recognition works on images only).
 - Reduce File Size quality is a common complaint ("decrease .pdf size
   without losing quality" 114K views).
 - Splitting one page into several: 306K views.
@@ -108,7 +110,7 @@ Ask Different pdf 1,185 and preview 1,094, Unix 733.
   https://discussions.apple.com/thread/253649204 ,
   https://discussions.apple.com/thread/255716950); ghost note squares that
   can't be removed 156K views; an unexpected password on save 62K.
-- Dynamic XFA forms show only a placeholder.
+- Dynamic XFA forms (a scripted form format) show only a placeholder.
 - Also: setting a document's title (151K), carrying a saved signature to
   another Mac (185K), default view settings such as continuous scroll (64K),
   booklets and pages per sheet (96K, 63K); no compare, Bates or page-number
@@ -123,9 +125,9 @@ share one number.
 
 ## B. Open-source asks
 
-Read through the GitHub issue search (reaction counts), GNOME GitLab
-(upvotes), KDE, The Document Foundation and Ghostscript Bugzilla (no votes:
-CC, the subscriber count, stands in). Units differ across trackers, so
+Read through each project's public issue tracker: reaction counts (👍) on
+one code host, upvotes on another, and on three bug trackers with no votes
+the subscriber count (CC) stands in. Units differ across trackers, so
 ranks across them are approximate.
 
 ### B.1 Projects
@@ -203,8 +205,9 @@ a native build per platform, Apple silicon included.
 
 ## C. What people say is missing
 
-Hacker News (read through the public Algolia API; Reddit could not be
-fetched from this session, so no Reddit counts are claimed):
+A tech news forum, news.ycombinator.com (read through its public search
+API; a large general forum site could not be fetched from this session, so
+no counts from it are claimed):
 
 - "Show HN: free in-browser PDF editor" (791 points,
   https://news.ycombinator.com/item?id=43880962): the top complaint is that
@@ -258,8 +261,7 @@ whole point.** Viewer trackers: 2 CC each
 (https://bugs.kde.org/show_bug.cgi?id=452403,
 https://bugs.kde.org/show_bug.cgi?id=489299); the web toolbox has about 10
 redaction issues, including a 2026 bug where redacted text could still be
-copied (https://github.com/Stirling-Tools/Stirling-PDF/issues/7564). Hacker
-News: "finding bad redactions in PDFs", 709 points
+copied (https://github.com/Stirling-Tools/Stirling-PDF/issues/7564). The tech news forum: "finding bad redactions in PDFs", 709 points
 (https://news.ycombinator.com/item?id=46369923), and two forensics posts on
 a public document release, 409 and 544 points (46886440, 46890335). What
 people want: the text truly gone, small output, no side channel from box
@@ -267,12 +269,12 @@ widths and kerning (46371001).
 
 **Compare: weak.** 4 👍 for better compare
 (https://github.com/Stirling-Tools/Stirling-PDF/issues/1290), 7 👍 for side
-by side (#6140). The neighbour, split view, is strong (41 CC, the top of the
-KDE viewer's wishlist). No Hacker News thread asked for compare.
+by side (#6140). The neighbour, split view, is strong (41 CC, the top of one
+desktop viewer's wishlist). No thread on the tech news forum asked for compare.
 
 **Editing existing text: the loudest editing ask; reflow is not asked.**
 46 👍 (#1141), 12 👍 (#258), 10 👍 (#2305), 8 👍 open (#5257); 24 CC open
-since 2010 (tdf#32249); the first complaint in both Hacker News threads.
+since 2010 (tdf#32249); the first complaint in both tech-forum threads.
 The asks are for in-place edits that keep the font. No one asked for
 multi-line paragraph reflow; commenters call it hard because of fixed
 layout and subset fonts. The nearest is copying wrapped paragraphs without
