@@ -37,3 +37,4 @@ utc	stage	event	ref	note
 2026-10-15T11:50Z	3	pr-merged	#1122	LK-12
 2026-10-15T11:56Z	3	pr-opened	#1126	LK-13
 2026-10-15T11:58Z	3	stage-start	wave8	LK-14 feature-done
+2026-10-15T12:05Z	3	heartbeat	wave8	LK-14 building
