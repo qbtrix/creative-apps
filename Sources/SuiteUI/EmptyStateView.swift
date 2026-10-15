@@ -22,7 +22,8 @@ public struct EmptyStateView: View {
         ContentUnavailableView {
             Label(title, systemImage: systemImage)
         } description: {
-            Text(message)
+            // The system description color measured 3.95:1 on the window background.
+            Text(message).foregroundStyle(SuiteColor.secondaryText)
         } actions: {
             if let action {
                 Button(action.title, action: action.perform)
