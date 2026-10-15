@@ -2,9 +2,9 @@
 
 Issue: #812 · Packet: docs/blueprints/photo/features/photo-seams.md
 Run: act-1a13d5e8ca4-huz5 · Session: cloud lead session · Started: 2026-10-15T02:23Z
-Stage: 3 wave 8
+Stage: 3 wave 9
 Base: c4ec07810683a4bc7d62dcc5205705229f248a71
-Next: wait for the S-7a builder (stacked on S-5, now on dev); read CI run 723/724 (first to include #956) for the macOS compile
+Next: wait for #969; S-7c builder stacks on lead/photo-seams-S-7a; read CI run 723/724 for the macOS compile of #956
 
 ## Tasks
 
@@ -21,7 +21,7 @@ packet chains every task on the one before it (shared files or new types).
 | S-6a | 5 | v2 stored state, layer kinds, .eyedropper, toolHelp, insertLayer, geometry hook decl | M/PhotoWorkspace, PhotoLayer, AdjustmentSettings, PhotoMask, PhotoStroke; A/PhotoIntent, A/PhotoPanel | PhotoV2StateTests | #956 | merged |
 | S-6b | 6 | step ids, isDirty, .selection/.maskTiles steps | M/PhotoHistory.swift | PhotoStepIDTests | #959 | merged |
 | S-5 | 7 | fixtures empty/sample/layered/large | M/PhotoFixtures.swift | PhotoFixturesTests | #966 | merged |
-| S-7a | 8 | drags with modifiers and zoom, routing, eyedropper stub | M/PhotoStroke, PhotoSelectionMask, PhotoCropSize, PhotoTransform, PhotoEyedropper | PhotoToolsTests, PhotoDragRoutingTests | – | todo |
+| S-7a | 8 | drags with modifiers and zoom, routing, eyedropper stub | M/PhotoStroke, PhotoSelectionMask, PhotoCropSize, PhotoTransform, PhotoEyedropper | PhotoToolsTests, PhotoDragRoutingTests | #969 | open |
 | S-7c | 9 | paintTarget, selectionCoverage weighting | M/PhotoStroke, PhotoRetouch, PhotoSelection, PhotoSelectionMask | PhotoPaintTargetTests | – | todo |
 | S-7b | 10 | PhotoLayerComposite hook; geometry hook calls | M/PhotoRender, PhotoLayerComposite, PhotoImageOps, PhotoStraighten | PhotoLayerCompositeTests | – | todo |
 | S-8a | 11 | PhotoIntent sub-enums, nine area files | A/PhotoIntent, PhotoWindow, PhotoWindow+*.swift | app-state rule; V1–V12 | – | todo |
@@ -48,4 +48,5 @@ packet chains every task on the one before it (shared files or new types).
 - Watch: first app-code merge is #956 (ce3e768). Check the first completed macOS CI run on dev at or after ce3e768 for PhotoIntent/PhotoPanel compile errors.
 - S-6b: a coalesced step gets a fresh id; PhotoStack keeps masks but not selectionMask (S-7c may add it).
 - dev CI was red before this feature (runs 717-722 fail in UI journeys of other lines; Linux green). Not ours; the dev-red issue tracks it.
+- docs/c4/model.json PhotoModel description should mention contracts, fakes, services and drag routing; the packet defers it to the supervisor (no c4 edit in this feature).
 - S-6a adds `extension CurvePoint: @retroactive Codable`; it must go if creative-core makes CurvePoint Codable. The "I" key still selects the disabled Eyedropper until S-10a.

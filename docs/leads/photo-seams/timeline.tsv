@@ -29,3 +29,5 @@ utc	stage	event	ref	note
 2026-10-15T04:09Z	3	pr-opened	#966	S-5 fixtures, 206 lines 2 files
 2026-10-15T04:09Z	3	pr-merged	#966	S-5
 2026-10-15T04:09Z	3	stage-start	S-7a	builder stacked on S-5
+2026-10-15T04:17Z	3	pr-opened	#969	S-7a drag routing, 227 lines 7 files
+2026-10-15T04:17Z	3	stage-start	S-7c	builder stacked on S-7a
