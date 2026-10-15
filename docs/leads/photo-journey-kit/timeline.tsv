@@ -27,3 +27,4 @@ utc	stage	event	ref	note
 2026-10-15T21:45Z	4	heartbeat	38807718380	round 3 run still in progress
 2026-10-15T21:56Z	4	ci-run	38807718380	feature journeys 13/13 pass; red elsewhere
 2026-10-15T21:56Z	4	round-clean	38807718380	clean for this feature; CI red outside it
+2026-10-15T22:06Z	4	heartbeat	-	waiting for the round-4 dev CI run
