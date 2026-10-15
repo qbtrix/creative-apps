@@ -2,8 +2,10 @@
 // journeys run before PDFKit and Vision are wired (`-FolioFixture <name>`).
 // The pure use cases' fakes are full reference behaviour: W1 promotes each to
 // its Live/ file and the fake becomes a one-line wrapper (no copies: jscpd).
-// The platform fakes read a "fake PDF": a FolioFixtureFile as JSON, laid out
-// on a fixed grid (FolioFakeLayout) so tests know where every glyph is.
+// The platform fakes read a "fake PDF": the line `%FOLIO-FAKE-PDF-1`, then a
+// FolioFixtureFile as JSON, laid out on a fixed grid (FolioFakeLayout) so
+// tests know where every glyph is. Sources live in FakeDocumentSources,
+// keyed by a hash of the bytes, so a saved file reopens under its own id.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -17,28 +19,60 @@ public struct FolioFixtureFile: Codable, Equatable, Sendable {
         public var size: FolioSize
         public var rotation: FolioRotation
         public var lines: [String]
+        /// Indices of lines that do NOT end a paragraph (joined on copy).
+        public var continued: [Int]
         /// A scan: no text layer until recognized; `lines` is what OCR finds.
         public var scanned: Bool
-        public init(size: FolioSize = .letter, rotation: FolioRotation = .r0, lines: [String], scanned: Bool = false) {
-            self.size = size; self.rotation = rotation; self.lines = lines; self.scanned = scanned
+        /// Text recognized by Folio and saved as an invisible layer.
+        public var recognized: [String]?
+        public var label: String?
+        /// Bytes of picture data on the page (a stand-in for images): written
+        /// as padding, divided by 4 when the writer optimizes images.
+        public var imageBytes: Int
+        public init(size: FolioSize = .letter, rotation: FolioRotation = .r0, lines: [String], continued: [Int] = [],
+                    scanned: Bool = false, recognized: [String]? = nil, label: String? = nil, imageBytes: Int = 0) {
+            self.size = size; self.rotation = rotation; self.lines = lines; self.continued = continued
+            self.scanned = scanned; self.recognized = recognized; self.label = label; self.imageBytes = imageBytes
         }
     }
-    public var magic: String
+    public struct Outline: Codable, Equatable, Sendable {
+        public var title: String
+        public var page: Int
+        public init(title: String, page: Int) { self.title = title; self.page = page }
+    }
     public var title: String
+    public var author: String
     public var password: String?
+    public var ownerPassword: String?
+    public var permissions: FolioPermissions
+    public var scripts: FolioScriptKind
     public var pages: [Page]
+    public var outline: [Outline]
     /// Fields and annotations name pages by index into `pages`.
     public var fields: [FolioFormField]
     public var annotations: [FolioAnnotation]
-    public init(title: String, password: String? = nil, pages: [Page],
-                fields: [FolioFormField] = [], annotations: [FolioAnnotation] = []) {
-        self.magic = Self.magicValue; self.title = title; self.password = password
-        self.pages = pages; self.fields = fields; self.annotations = annotations
+    /// Picture data, one padding string per page with imageBytes > 0.
+    public var pictures: [String]
+    public init(title: String, author: String = "", password: String? = nil, ownerPassword: String? = nil,
+                permissions: FolioPermissions = .all, scripts: FolioScriptKind = .none, pages: [Page],
+                outline: [Outline] = [], fields: [FolioFormField] = [], annotations: [FolioAnnotation] = []) {
+        self.title = title; self.author = author; self.password = password; self.ownerPassword = ownerPassword
+        self.permissions = permissions; self.scripts = scripts; self.pages = pages; self.outline = outline
+        self.fields = fields; self.annotations = annotations
+        self.pictures = pages.filter { $0.imageBytes > 0 }.map { String(repeating: "x", count: $0.imageBytes) }
     }
-    public static let magicValue = "%FOLIO-FAKE-PDF-1"
+    public static let magic = "%FOLIO-FAKE-PDF-1\n"
     public func data() -> Data {
         let enc = JSONEncoder(); enc.outputFormatting = [.sortedKeys]
-        return (try? enc.encode(self)) ?? Data()
+        return Data(Self.magic.utf8) + ((try? enc.encode(self)) ?? Data())
+    }
+    /// nil: not a fake PDF at all; `.failure`: starts like one but is damaged.
+    public static func decode(_ data: Data) -> Result<FolioFixtureFile, FolioOpenError>? {
+        let magic = Data(Self.magic.utf8)
+        guard data.starts(with: magic) else { return nil }
+        do { return .success(try JSONDecoder().decode(FolioFixtureFile.self, from: data.dropFirst(magic.count))) } catch {
+            return .failure(.damaged("its contents end early or are garbled"))
+        }
     }
 }
 
@@ -48,99 +82,139 @@ public enum FolioFakeLayout {
     public static let glyphWidth = 6.0
     public static let glyphHeight = 12.0
     /// Line i of a page `height` tall: 72 pt in, 14 pt per line from the top.
-    public static func line(_ text: String, index: Int, pageHeight: Double) -> FolioTextLine {
+    public static func line(_ text: String, index: Int, pageHeight: Double, endsParagraph: Bool = true) -> FolioTextLine {
         let y = pageHeight - margin - lineHeight * Double(index + 1)
-        let rects = text.indices.enumerated().map { n, _ in
+        let rects = (0..<text.count).map { n in
             FolioRect(x: margin + glyphWidth * Double(n), y: y, width: glyphWidth, height: glyphHeight)
         }
-        return FolioTextLine(text: text, glyphRects: rects)
+        return FolioTextLine(text: text, glyphRects: rects, endsParagraph: endsParagraph)
     }
-    public static func text(_ lines: [String], pageHeight: Double, origin: FolioTextOrigin) -> FolioPageText {
-        FolioPageText(lines: lines.enumerated().map { line($1, index: $0, pageHeight: pageHeight) }, origin: origin)
+    public static func text(_ lines: [String], continued: [Int] = [], pageHeight: Double, origin: FolioTextOrigin) -> FolioPageText {
+        FolioPageText(lines: lines.enumerated().map {
+            line($1, index: $0, pageHeight: pageHeight, endsParagraph: !continued.contains($0))
+        }, origin: origin)
+    }
+    /// FNV-1a over the bytes: the fake's content-derived source id.
+    public static func sourceID(_ data: Data) -> FolioSourceID {
+        var h: UInt64 = 0xcbf2_9ce4_8422_2325
+        for b in data { h = (h ^ UInt64(b)) &* 0x100_0000_01b3 }
+        return FolioSourceID("fake:" + String(h, radix: 16))
     }
 }
 
-/// Every fixture file a fake service can read, by source id.
-public struct FolioFakeLibrary: Sendable {
-    public var files: [FolioSourceID: FolioFixtureFile]
-    public init(_ files: [FolioSourceID: FolioFixtureFile] = [:]) { self.files = files }
-    func page(_ page: FolioPage) -> FolioFixtureFile.Page? {
-        guard case .source(let src, let i) = page.origin, let file = files[src], file.pages.indices.contains(i) else { return nil }
-        return file.pages[i]
+// MARK: Sources
+
+public actor FakeDocumentSources: DocumentSources {
+    private var bytes: [FolioSourceID: Data] = [:]
+    private var names: [FolioSourceID: String] = [:]
+    private var decoded: [FolioSourceID: FolioFixtureFile] = [:]
+    public init() {}
+    public func register(_ id: FolioSourceID, data: Data, name: String) async {
+        bytes[id] = data; names[id] = name
+        if case .success(let f)? = FolioFixtureFile.decode(data) { decoded[id] = f }
+    }
+    public func data(for id: FolioSourceID) async -> Data? { bytes[id] }
+    public func name(for id: FolioSourceID) async -> String? { names[id] }
+    /// The fixture page a FolioPage came from (fakes only).
+    public func fixturePage(_ page: FolioPage) -> FolioFixtureFile.Page? {
+        guard case .source(let src, let i) = page.origin, let f = decoded[src], f.pages.indices.contains(i) else { return nil }
+        return f.pages[i]
     }
 }
 
 // MARK: Platform fakes
 
 public struct FakeDocumentOpening: DocumentOpening {
+    public let sources: FakeDocumentSources
     public var unavailableHelp: String? { nil }
-    public init() {}
+    public init(sources: FakeDocumentSources) { self.sources = sources }
     public static let maxBytes = 2 * 1_073_741_824
 
     public func open(_ data: Data, name: String, password: String?) async throws(FolioOpenError) -> FolioOpened {
         guard data.count <= Self.maxBytes else { throw .tooLarge(bytes: data.count) }
-        guard data.starts(with: Array(#"{"#.utf8)) || data.starts(with: Array("%".utf8)) else { throw .notPDF }
+        guard let result = FolioFixtureFile.decode(data) else { throw .notPDF }
         let file: FolioFixtureFile
-        do { file = try JSONDecoder().decode(FolioFixtureFile.self, from: data) } catch {
-            throw data.starts(with: Array("%PDF".utf8)) ? .damaged("not a fake file") : .notPDF
-        }
-        guard file.magic == FolioFixtureFile.magicValue else { throw .notPDF }
+        switch result { case .success(let f): file = f; case .failure(let e): throw e }
+        var ownerUnlocked = file.ownerPassword == nil
         if let required = file.password {
             guard let given = password else { throw .needsPassword }
-            guard given == required else { throw .wrongPassword }
+            guard given == required || given == file.ownerPassword else { throw .wrongPassword }
         }
-        return Self.opened(file, name: name)
+        if let owner = file.ownerPassword, password == owner { ownerUnlocked = true }
+        let source = FolioFakeLayout.sourceID(data)
+        await sources.register(source, data: data, name: name)
+        var opened = Self.opened(file, source: source, name: name)
+        opened.state.permissions.ownerUnlocked = ownerUnlocked
+        return opened
     }
 
-    public func open(images: [Data], name: String) async throws(FolioOpenError) -> FolioOpened {
-        guard !images.isEmpty else { throw .notPDF }
-        // A fake image's bytes are "IMG <width>x<height>"; anything else is a 600 x 800 picture.
-        let pages = images.map { img -> FolioFixtureFile.Page in
-            let s = String(decoding: img, as: UTF8.self).split(separator: " ").last?.split(separator: "x")
-            let w = s.flatMap { $0.count == 2 ? Double($0[0]) : nil } ?? 600
-            let h = s.flatMap { $0.count == 2 ? Double($0[1]) : nil } ?? 800
-            return .init(size: FolioSize(width: w, height: h), lines: [], scanned: true)
+    public func open(images: [FolioImageInput], name: String, paper: FolioSize) async throws(FolioOpenError) -> FolioOpened {
+        var pages: [FolioFixtureFile.Page] = []
+        var skipped: [FolioSkipped] = []
+        for input in images {
+            guard let px = Self.pngSize(input.data) else {
+                skipped.append(FolioSkipped(name: input.name, reason: "not an image")); continue
+            }
+            let scale = min(paper.width / px.width, paper.height / px.height, 1)
+            pages.append(.init(size: FolioSize(width: px.width * scale, height: px.height * scale), lines: [],
+                               scanned: true, imageBytes: input.data.count))
         }
-        return Self.opened(FolioFixtureFile(title: name, pages: pages), name: name)
+        guard !pages.isEmpty else { throw .notPDF }
+        let file = FolioFixtureFile(title: name, pages: pages)
+        let data = file.data()
+        let source = FolioFakeLayout.sourceID(data)
+        await sources.register(source, data: data, name: name)
+        var opened = Self.opened(file, source: source, name: name)
+        opened.skipped = skipped
+        return opened
     }
 
-    /// The state a fixture opens as; also used by FakeFolioServices to build its library.
-    public static func opened(_ file: FolioFixtureFile, name: String) -> FolioOpened {
-        let source = FolioSourceID("fake:\(file.title)")
+    /// Width and height from a PNG's IHDR chunk (bytes 16 to 23), else nil.
+    static func pngSize(_ d: Data) -> FolioSize? {
+        let sig: [UInt8] = [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A]
+        let b = [UInt8](d.prefix(24))
+        guard b.count == 24, Array(b[0..<8]) == sig else { return nil }
+        func be(_ i: Int) -> Double { Double(UInt32(b[i]) << 24 | UInt32(b[i + 1]) << 16 | UInt32(b[i + 2]) << 8 | UInt32(b[i + 3])) }
+        let w = be(16), h = be(20)
+        return w > 0 && h > 0 ? FolioSize(width: w, height: h) : nil
+    }
+
+    static func opened(_ file: FolioFixtureFile, source: FolioSourceID, name: String) -> FolioOpened {
         let pages = file.pages.enumerated().map { i, p in
-            FolioPage(id: FolioPageID(i), origin: .source(source, index: i), size: p.size, rotation: p.rotation)
+            FolioPage(id: FolioPageID(i), origin: .source(source, index: i), size: p.size, rotation: p.rotation,
+                      label: p.label, recognizedText: p.recognized.map {
+                          FolioFakeLayout.text($0, pageHeight: p.size.height, origin: .recognized) })
         }
-        let fields = file.fields.compactMap { f -> FolioFormField? in
-            guard pages.indices.contains(f.page.raw) else { return nil }
-            return f
-        }
+        let fields = file.fields.filter { pages.indices.contains($0.page.raw) }
         let annotations = file.annotations.map { a -> FolioAnnotation in var a = a; a.fromFile = true; return a }
-        var state = FolioDocumentState(title: name, pages: pages, annotations: annotations, fields: fields)
-        state.outline = []
-        let noText = file.pages.enumerated().filter { $0.element.scanned }.map { FolioPageID($0.offset) }
+        var state = FolioDocumentState(title: name, pages: pages, annotations: annotations, fields: fields,
+                                       outline: file.outline.compactMap { o in
+                                           pages.indices.contains(o.page) ? FolioOutlineItem(title: o.title, page: FolioPageID(o.page)) : nil },
+                                       permissions: file.permissions)
+        state.author = file.author
+        state.scripts = file.scripts
+        let noText = file.pages.enumerated().filter { $0.element.scanned && $0.element.recognized == nil }.map { FolioPageID($0.offset) }
         return FolioOpened(source: source, state: state, pagesWithoutText: noText)
     }
 }
 
 public struct FakePageImaging: PageImaging {
-    public var library: FolioFakeLibrary
+    public let sources: FakeDocumentSources
     public var unavailableHelp: String? { nil }
-    public init(library: FolioFakeLibrary) { self.library = library }
+    public init(sources: FakeDocumentSources) { self.sources = sources }
     /// White page; each text line is a grey band, so a snapshot shows text rows.
     public func image(of page: FolioPage, maxPixels: Int) async -> FolioBitmap? {
-        let blank = page.origin == .blank
-        guard blank || library.page(page) != nil, maxPixels > 0 else { return nil }
+        let fixture = await sources.fixturePage(page)
+        guard page.origin == .blank || fixture != nil, maxPixels > 0 else { return nil }
         let d = page.displaySize
         let longSide = max(d.width, d.height)
         guard longSide > 0 else { return nil }
         let scale = Double(maxPixels) / longSide
         let w = max(1, Int(d.width * scale)), h = max(1, Int(d.height * scale))
         var px = [UInt8](repeating: 255, count: w * h * 4)
-        let lines = blank ? [] : (library.page(page)?.lines ?? [])
-        for (i, _) in lines.enumerated() {
+        for i in (fixture?.lines ?? []).indices {
             let top = Int((FolioFakeLayout.margin + FolioFakeLayout.lineHeight * Double(i)) * scale)
-            let rows = max(1, Int(FolioFakeLayout.glyphHeight * scale))
-            for y in top..<min(h, top + rows) {
+            for y in top..<min(h, top + max(1, Int(FolioFakeLayout.glyphHeight * scale))) {
                 for x in 0..<w { let o = (y * w + x) * 4; px[o] = 160; px[o + 1] = 160; px[o + 2] = 160 }
             }
         }
@@ -149,43 +223,48 @@ public struct FakePageImaging: PageImaging {
 }
 
 public struct FakePageTextReading: PageTextReading {
-    public var library: FolioFakeLibrary
+    public let sources: FakeDocumentSources
     public var unavailableHelp: String? { nil }
-    public init(library: FolioFakeLibrary) { self.library = library }
+    public init(sources: FakeDocumentSources) { self.sources = sources }
     public func text(of page: FolioPage) async -> FolioPageText {
-        guard let p = library.page(page), !p.scanned else { return .empty }
-        return FolioFakeLayout.text(p.lines, pageHeight: page.size.height, origin: .embedded)
+        if let recognized = page.recognizedText { return recognized }
+        guard let p = await sources.fixturePage(page), !p.scanned else { return .empty }
+        return FolioFakeLayout.text(p.lines, continued: p.continued, pageHeight: page.size.height, origin: .embedded)
     }
 }
 
 public struct FakeTextRecognizing: TextRecognizing {
-    public var library: FolioFakeLibrary
+    public let sources: FakeDocumentSources
     public var unavailableHelp: String? { nil }
     public var languages: [String] { ["en-US", "fr-FR", "de-DE"] }
-    public init(library: FolioFakeLibrary) { self.library = library }
+    public init(sources: FakeDocumentSources) { self.sources = sources }
     public func recognize(_ page: FolioPage, languages: [String]) async throws(FolioRecognizeError) -> FolioPageText {
-        guard let p = library.page(page) else { return FolioPageText(lines: [], origin: .recognized) }
+        guard let p = await sources.fixturePage(page) else { return FolioPageText(lines: [], origin: .recognized) }
         return FolioFakeLayout.text(p.lines, pageHeight: page.size.height, origin: .recognized)
     }
 }
 
 public struct FakeDocumentWriting: DocumentWriting {
-    public var library: FolioFakeLibrary
+    public let sources: FakeDocumentSources
     public var unavailableHelp: String? { nil }
-    public init(library: FolioFakeLibrary) { self.library = library }
-    /// Writes a fake file the fake opener reads back: pages in order with their
-    /// lines; Flatten drops fields and annotations and adds "[flattened n]" to
-    /// the first page's lines; passwords become the file's password.
+    public init(sources: FakeDocumentSources) { self.sources = sources }
+    /// Writes a fake file the fake opener reads back: pages in order with
+    /// their lines, recognized text and pictures (a quarter when optimizing);
+    /// Flatten drops fields and annotations and adds "[flattened n]" to the
+    /// first page; passwords and restrictions as asked.
     public func write(_ doc: FolioDocumentState, options: FolioWriteOptions) async throws(FolioWriteError) -> Data {
+        let permissions = options.permissions ?? doc.permissions
+        if permissions.restrictions != doc.permissions.restrictions, !doc.permissions.ownerUnlocked { throw .restricted }
         var pages: [FolioFixtureFile.Page] = []
         for page in doc.pages {
-            var lines: [String] = []
-            var scanned = false
+            var out = FolioFixtureFile.Page(size: page.size, rotation: page.rotation, lines: [], label: page.label)
             if case .source(let src, _) = page.origin {
-                guard let p = library.page(page) else { throw .sourceMissing(src.raw) }
-                lines = p.lines; scanned = p.scanned
+                guard let p = await sources.fixturePage(page) else { throw .sourceMissing(await sources.name(for: src) ?? src.raw) }
+                out.lines = p.lines; out.continued = p.continued; out.scanned = p.scanned
+                out.imageBytes = options.optimizeImages ? p.imageBytes / 4 : p.imageBytes
             }
-            pages.append(.init(size: page.size, rotation: page.rotation, lines: lines, scanned: scanned))
+            if options.keepRecognizedText, let rec = page.recognizedText { out.recognized = rec.lines.map(\.text) }
+            pages.append(out)
         }
         let index = Dictionary(uniqueKeysWithValues: doc.pages.enumerated().map { ($1.id, $0) })
         func reindexed(_ id: FolioPageID) -> FolioPageID { FolioPageID(index[id] ?? 0) }
@@ -197,16 +276,19 @@ public struct FakeDocumentWriting: DocumentWriting {
             pages[0].lines.append("[flattened \(fields.count + annotations.count)]")
             fields = []; annotations = []
         }
-        let file = FolioFixtureFile(title: doc.title, password: options.openPassword, pages: pages,
-                                    fields: fields, annotations: annotations)
+        var restricted = permissions; restricted.ownerUnlocked = true
+        let outline = doc.outline.compactMap { o in o.page.flatMap { index[$0] }.map { FolioFixtureFile.Outline(title: o.title, page: $0) } }
+        let file = FolioFixtureFile(title: doc.title, author: doc.author, password: options.openPassword,
+                                    ownerPassword: options.ownerPassword, permissions: restricted, scripts: doc.scripts,
+                                    pages: pages, outline: outline, fields: fields, annotations: annotations)
         return file.data()
     }
 }
 
 public struct FakePageExporting: PageExporting {
-    public var library: FolioFakeLibrary
+    public let sources: FakeDocumentSources
     public var unavailableHelp: String? { nil }
-    public init(library: FolioFakeLibrary) { self.library = library }
+    public init(sources: FakeDocumentSources) { self.sources = sources }
     /// "<FORMAT> <page id> <w>x<h> <annotation count>" per page; w and h at the asked ppi.
     public func images(of pages: [FolioPage], annotations: [FolioAnnotation], as format: FolioImageExport)
         async throws(FolioWriteError) -> [Data] {
@@ -220,7 +302,12 @@ public struct FakePageExporting: PageExporting {
     /// Plain: the lines, pages split by a form feed. Rich text and
     /// word-processing: the same text after a "{\\rtf1" or "PK" marker.
     public func text(of doc: FolioDocumentState, as format: FolioTextFormat) async throws(FolioWriteError) -> Data {
-        let plain = doc.pages.map { (library.page($0)?.lines ?? []).joined(separator: "\n") }.joined(separator: "\u{0C}")
+        var parts: [String] = []
+        for page in doc.pages {
+            let fixtureLines = await sources.fixturePage(page)?.lines ?? []
+            parts.append((page.recognizedText?.lines.map(\.text) ?? fixtureLines).joined(separator: "\n"))
+        }
+        let plain = parts.joined(separator: "\u{0C}")
         switch format {
         case .plain: return Data(plain.utf8)
         case .rtf: return Data(("{\\rtf1 " + plain + "}").utf8)
@@ -283,6 +370,7 @@ public struct FakeTextFinding: TextFinding {
 
 public struct FakeTextSelecting: TextSelecting {
     public init() {}
+    static let empty = FolioTextSelection(spans: [], quads: [], string: "")
     /// (line, character) nearest a point: the line whose box is closest in y,
     /// then the glyph whose center is closest in x.
     static func position(_ p: FolioPoint, _ text: FolioPageText) -> (Int, Int)? {
@@ -293,10 +381,13 @@ public struct FakeTextSelecting: TextSelecting {
         let ci = rects.indices.min(by: { abs(rects[$0].x + rects[$0].width / 2 - p.x) < abs(rects[$1].x + rects[$1].width / 2 - p.x) })
         return ci.map { (li, $0) }
     }
+    static func span(_ page: FolioPageID, _ text: FolioPageText, _ li: Int, _ s: Int, _ e: Int) -> FolioTextSelection {
+        let chars = Array(text.lines[li].text)
+        return FolioTextSelection(spans: [FolioTextSpan(page: page, line: li, start: s, end: e)],
+                                  quads: [FakeTextFinding.union(text.lines[li].glyphRects, s, e)], string: String(chars[s..<e]))
+    }
     public func select(from: FolioPoint, to: FolioPoint, on page: FolioPageID, text: FolioPageText) -> FolioTextSelection {
-        guard let a = Self.position(from, text), let b = Self.position(to, text) else {
-            return FolioTextSelection(spans: [], quads: [], string: "")
-        }
+        guard let a = Self.position(from, text), let b = Self.position(to, text) else { return Self.empty }
         let (s, e) = a <= b ? (a, b) : (b, a)
         var spans: [FolioTextSpan] = [], quads: [FolioRect] = [], parts: [String] = []
         for li in s.0...e.0 {
@@ -311,17 +402,27 @@ public struct FakeTextSelecting: TextSelecting {
         return FolioTextSelection(spans: spans, quads: quads, string: parts.joined(separator: "\n"))
     }
     public func word(at point: FolioPoint, on page: FolioPageID, text: FolioPageText) -> FolioTextSelection {
-        guard let (li, ci) = Self.position(point, text) else { return FolioTextSelection(spans: [], quads: [], string: "") }
+        guard let (li, ci) = Self.position(point, text) else { return Self.empty }
         let chars = Array(text.lines[li].text)
-        guard chars.indices.contains(ci), chars[ci].isLetter || chars[ci].isNumber else {
-            return FolioTextSelection(spans: [], quads: [], string: "")
-        }
+        guard chars.indices.contains(ci), chars[ci].isLetter || chars[ci].isNumber else { return Self.empty }
         var s = ci, e = ci + 1
         while s > 0, chars[s - 1].isLetter || chars[s - 1].isNumber { s -= 1 }
         while e < chars.count, chars[e].isLetter || chars[e].isNumber { e += 1 }
-        let span = FolioTextSpan(page: page, line: li, start: s, end: e)
-        return FolioTextSelection(spans: [span], quads: [FakeTextFinding.union(text.lines[li].glyphRects, s, e)],
-                                  string: String(chars[s..<e]))
+        return Self.span(page, text, li, s, e)
+    }
+    public func line(at point: FolioPoint, on page: FolioPageID, text: FolioPageText) -> FolioTextSelection {
+        guard let (li, _) = Self.position(point, text), !text.lines[li].text.isEmpty else { return Self.empty }
+        return Self.span(page, text, li, 0, text.lines[li].text.count)
+    }
+    public func copyText(_ selection: FolioTextSelection, text: FolioPageText) -> String {
+        var out = ""
+        for span in selection.spans where text.lines.indices.contains(span.line) {
+            let chars = Array(text.lines[span.line].text)
+            guard span.start < span.end, span.end <= chars.count else { continue }
+            out += String(chars[span.start..<span.end])
+            if span != selection.spans.last { out += text.lines[span.line].endsParagraph ? "\n" : " " }
+        }
+        return out
     }
 }
 
@@ -360,9 +461,7 @@ public struct FakeAnnotating: Annotating {
                     in doc: inout FolioDocumentState) throws(FolioEditError) -> FolioAnnotationID {
         try Self.guardAllowed(doc)
         guard doc.page(page) != nil else { throw .noSuchPage }
-        if case .freeText(let s, _) = body, s.folioTrimmed.isEmpty {
-            throw .invalidValue("Type some text for the text box.")
-        }
+        if case .freeText(let s) = body, s.folioTrimmed.isEmpty { throw .invalidValue("Type some text for the text box.") }
         let id = FolioAnnotationID(doc.nextAnnotationID)
         doc.nextAnnotationID += 1
         doc.annotations.append(FolioAnnotation(id: id, page: page, rect: rect, color: color, body: body))
@@ -375,8 +474,7 @@ public struct FakeAnnotating: Annotating {
         a.rect = a.rect.offsetBy(dx: dx, dy: dy)
         switch a.body {
         case .markup: throw .invalidValue("Highlights stay on their text. Delete it and mark the text again.")
-        case .ink(let strokes, let w):
-            a.body = .ink(strokes.map { $0.map { FolioPoint(x: $0.x + dx, y: $0.y + dy) } }, lineWidth: w)
+        case .ink(let strokes): a.body = .ink(strokes.map { $0.map { FolioPoint(x: $0.x + dx, y: $0.y + dy) } })
         default: break
         }
         doc.annotations[i] = a
@@ -393,16 +491,20 @@ public struct FakeAnnotating: Annotating {
         let i = try Self.index(id, doc)
         doc.annotations[i].color = color
     }
+    public func setStyle(_ id: FolioAnnotationID, to style: FolioMarkStyle, in doc: inout FolioDocumentState) throws(FolioEditError) {
+        try Self.guardAllowed(doc)
+        let i = try Self.index(id, doc)
+        doc.annotations[i].style = FolioMarkStyle(fontSize: style.fontSize, alignment: style.alignment,
+                                                  lineWidth: style.lineWidth, opacity: style.opacity)
+    }
     public func setText(_ id: FolioAnnotationID, to text: String, in doc: inout FolioDocumentState) throws(FolioEditError) {
         try Self.guardAllowed(doc)
         let i = try Self.index(id, doc)
         switch doc.annotations[i].body {
         case .note: doc.annotations[i].body = .note(text)
-        case .freeText(_, let size):
-            guard !text.folioTrimmed.isEmpty else {
-                throw .invalidValue("Type some text for the text box.")
-            }
-            doc.annotations[i].body = .freeText(text, fontSize: size)
+        case .freeText:
+            guard !text.folioTrimmed.isEmpty else { throw .invalidValue("Type some text for the text box.") }
+            doc.annotations[i].body = .freeText(text)
         default: doc.annotations[i].comment = text.isEmpty ? nil : text
         }
     }
@@ -425,7 +527,7 @@ public struct FakeFormFilling: FormFilling {
         guard doc.permissions.canFillForms else { throw .notAllowed("filling in this form") }
         guard let i = doc.fields.firstIndex(where: { $0.id == field }) else { throw .noSuchField }
         let f = doc.fields[i]
-        guard !f.isReadOnly else { throw .readOnlyField(f.id.name) }
+        guard !f.isReadOnly else { throw .readOnlyField(f.label) }
         switch (f.kind, value) {
         case (_, .empty): doc.fields[i].value = .empty
         case (.text(let multiline, let maxLength), .text(let s)):
@@ -445,30 +547,39 @@ public struct FakeFormFilling: FormFilling {
         default: throw .invalidValue("That value doesn't fit this field.")
         }
     }
+    static func group(_ f: FolioFormField) -> String? { if case .radio(let g, _) = f.kind { return g }; return nil }
+    /// Tab stops: fillable, non-signature fields in reading order; a radio
+    /// group appears once, as its checked button or else its first.
     static func order(_ doc: FolioDocumentState) -> [FolioFormField] {
         let pageIndex = Dictionary(uniqueKeysWithValues: doc.pages.enumerated().map { ($1.id, $0) })
-        return doc.fields.filter { !$0.isReadOnly && pageIndex[$0.page] != nil }.sorted { a, b in
+        let sorted = doc.fields.filter { !$0.isReadOnly && $0.kind != .signature && pageIndex[$0.page] != nil }.sorted { a, b in
             let pa = pageIndex[a.page] ?? 0, pb = pageIndex[b.page] ?? 0
             if pa != pb { return pa < pb }
             if abs(a.rect.maxY - b.rect.maxY) > 2 { return a.rect.maxY > b.rect.maxY }
             return a.rect.x < b.rect.x
         }
+        var seen = Set<String>(), out: [FolioFormField] = []
+        for f in sorted {
+            guard let g = group(f) else { out.append(f); continue }
+            guard !seen.contains(g) else { continue }
+            seen.insert(g)
+            out.append(sorted.first { group($0) == g && $0.value == .checked(true) } ?? f)
+        }
+        return out
     }
     public func next(after field: FolioFieldID?, backward: Bool, in doc: FolioDocumentState) -> FolioFieldID? {
         let order = Self.order(doc)
         guard !order.isEmpty else { return nil }
-        guard let field, let i = order.firstIndex(where: { $0.id == field }) else {
-            return (backward ? order.last : order.first)?.id
-        }
+        let current = field.flatMap { id in doc.fields.first { $0.id == id } }
+        guard let current, let i = order.firstIndex(where: { $0.id == current.id || (Self.group($0) != nil && Self.group($0) == Self.group(current)) })
+        else { return (backward ? order.last : order.first)?.id }
         let n = order.count
         return order[(i + (backward ? n - 1 : 1)) % n].id
     }
     public func missingRequired(in doc: FolioDocumentState) -> [FolioFieldID] {
         Self.order(doc).filter { f in
             guard f.isRequired else { return false }
-            if case .radio(let group, _) = f.kind {
-                return !doc.fields.contains { if case .radio(group, _) = $0.kind { return $0.value == .checked(true) }; return false }
-            }
+            if let g = Self.group(f) { return !doc.fields.contains { Self.group($0) == g && $0.value == .checked(true) } }
             switch f.value { case .empty, .text(""), .checked(false): return true; default: return false }
         }.map(\.id)
     }
@@ -546,6 +657,13 @@ public struct FakePageOrganizing: PageOrganizing {
         doc.pages.removeAll { set.contains($0.id) }
         doc.annotations.removeAll { set.contains($0.page) }
         doc.fields.removeAll { set.contains($0.page) }
+    }
+    public func combine(_ files: [FolioOpened], title: String) throws(FolioEditError) -> FolioDocumentState {
+        guard let first = files.first else { throw .pageRange("Pick at least one PDF to combine.") }
+        var doc = first.state
+        doc.title = title
+        for other in files.dropFirst() { _ = try insert(other, at: doc.pages.count, in: &doc) }
+        return doc
     }
     public func insert(_ other: FolioOpened, at index: Int, in doc: inout FolioDocumentState) throws(FolioEditError) -> [FolioPageID] {
         try Self.assemble(doc)

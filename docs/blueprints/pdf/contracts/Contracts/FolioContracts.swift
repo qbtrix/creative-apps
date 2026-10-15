@@ -13,22 +13,38 @@ import FoundationEssentials
 import Foundation
 #endif
 
+/// UC-0 The bytes of every opened file, by source id, for the window's life.
+/// Opening registers; imaging, text, writing, exporting and recognizing read.
+/// The app passes memory-mapped file data, so a file deleted after opening
+/// still saves. Live: `FolioModel/Live/LiveDocumentSources.swift` (an actor).
+public protocol DocumentSources: Sendable {
+    func register(_ id: FolioSourceID, data: Data, name: String) async
+    func data(for id: FolioSourceID) async -> Data?
+    func name(for id: FolioSourceID) async -> String?
+}
+
 /// UC-1 Open a PDF (or make one from images) and read its pages, fields,
-/// annotations and outline into a FolioDocumentState.
-/// Live: `FolioApp/Live/PDFKitOpening.swift` (PDFDocument(data:), unlock(withPassword:)).
+/// annotations, outline and labels into a FolioDocumentState. Registers the
+/// bytes in the DocumentSources the conformance was made with; the source id
+/// is derived from the bytes, so reopening a saved file gets its own id.
+/// Live: `FolioApp/Live/PDFKitOpening.swift` (PDFDocument(data:), unlock(withPassword:)),
+/// `PDFKitImageOpening.swift` (PDFPage(image:options:)).
 public protocol DocumentOpening: Sendable {
     var unavailableHelp: String? { get }
     /// Opens PDF bytes. Throws `.needsPassword` for a locked file opened with
     /// nil, `.wrongPassword` for a bad one, `.notPDF`, `.damaged`, `.tooLarge`.
     func open(_ data: Data, name: String, password: String?) async throws(FolioOpenError) -> FolioOpened
-    /// Makes a document of one page per image (PNG, JPEG or HEIC bytes), each
-    /// page the image's size at 72 ppi capped to fit A4 or Letter.
-    func open(images: [Data], name: String) async throws(FolioOpenError) -> FolioOpened
+    /// One page per image, in order, each fitted inside `paper` (Letter or A4,
+    /// from the locale) keeping its aspect. Inputs that aren't images are left
+    /// out and listed in `skipped`; throws `.notPDF` only when none is an image.
+    func open(images: [FolioImageInput], name: String, paper: FolioSize) async throws(FolioOpenError) -> FolioOpened
 }
 
-/// UC-2 See a page: the page's picture without Folio's own annotations
-/// (the view draws those from the Model, so edits never wait on a render).
-/// Live: `FolioApp/Live/PDFKitImaging.swift` (PDFPage.thumbnail(of:for:)).
+/// UC-2 See a page: the page's own content with no annotations or form
+/// widgets at all (the file's own marks and fields are in the Model and the
+/// view draws them, so a deleted or edited one never lingers in the picture).
+/// Live: `FolioApp/Live/PDFKitImaging.swift`: PDFPage.draw(with:to:) on a copy
+/// of the page whose annotations have shouldDisplay = false.
 public protocol PageImaging: Sendable {
     var unavailableHelp: String? { get }
     /// A picture at most `maxPixels` on its long side, rotation applied.
@@ -57,6 +73,11 @@ public protocol TextSelecting: Sendable {
     func select(from: FolioPoint, to: FolioPoint, on page: FolioPageID, text: FolioPageText) -> FolioTextSelection
     /// The word under the point, or an empty selection.
     func word(at point: FolioPoint, on page: FolioPageID, text: FolioPageText) -> FolioTextSelection
+    /// The whole line under the point (triple-click), or an empty selection.
+    func line(at point: FolioPoint, on page: FolioPageID, text: FolioPageText) -> FolioTextSelection
+    /// The selection as copied text: lines inside a paragraph joined with a
+    /// space, a line break after each paragraph.
+    func copyText(_ selection: FolioTextSelection, text: FolioPageText) -> String
 }
 
 /// UC-6 Mark up: highlight, underline, strike out, notes, text boxes, ink,
@@ -72,6 +93,8 @@ public protocol Annotating: Sendable {
     func move(_ id: FolioAnnotationID, dx: Double, dy: Double, in doc: inout FolioDocumentState) throws(FolioEditError)
     func setRect(_ id: FolioAnnotationID, to rect: FolioRect, in doc: inout FolioDocumentState) throws(FolioEditError)
     func setColor(_ id: FolioAnnotationID, to color: FolioColor, in doc: inout FolioDocumentState) throws(FolioEditError)
+    /// Font size, alignment, line width, opacity (each clamped by FolioMarkStyle).
+    func setStyle(_ id: FolioAnnotationID, to style: FolioMarkStyle, in doc: inout FolioDocumentState) throws(FolioEditError)
     /// The text of a note or text box, or the comment on any other kind.
     func setText(_ id: FolioAnnotationID, to text: String, in doc: inout FolioDocumentState) throws(FolioEditError)
     func delete(_ ids: [FolioAnnotationID], in doc: inout FolioDocumentState) throws(FolioEditError)
@@ -86,7 +109,9 @@ public protocol FormFilling: Sendable {
     /// can't take is refused with `.invalidValue("<sentence>")`.
     func set(_ field: FolioFieldID, to value: FolioFieldValue, in doc: inout FolioDocumentState) throws(FolioEditError)
     /// Tab order: page order, then top to bottom, then left to right; skips
-    /// read-only fields; wraps. nil when the form has no fillable field.
+    /// read-only and signature fields; a radio group is one stop (its first
+    /// button, or the checked one), arrows move inside it; wraps. nil when
+    /// the form has no fillable field.
     func next(after field: FolioFieldID?, backward: Bool, in doc: FolioDocumentState) -> FolioFieldID?
     /// Required fields still empty, in Tab order.
     func missingRequired(in doc: FolioDocumentState) -> [FolioFieldID]
@@ -126,7 +151,9 @@ public protocol PageOrganizing: Sendable {
     func rotate(_ pages: [FolioPageID], clockwise: Bool, in doc: inout FolioDocumentState) throws(FolioEditError)
     /// Deletes pages and their annotations and fields. Refuses all of them (`.lastPage`).
     func delete(_ pages: [FolioPageID], in doc: inout FolioDocumentState) throws(FolioEditError)
-    /// Inserts every page of another opened file at `index` (Combine);
+    /// A new document of every page of `files` in order (File > Combine Files).
+    func combine(_ files: [FolioOpened], title: String) throws(FolioEditError) -> FolioDocumentState
+    /// Inserts every page of another opened file at `index` (Insert from File);
     /// returns the new page ids. Its fields keep their names unless taken,
     /// then get a " 2" suffix.
     func insert(_ other: FolioOpened, at index: Int, in doc: inout FolioDocumentState) throws(FolioEditError) -> [FolioPageID]
@@ -176,6 +203,9 @@ public struct FolioHistory: Equatable, Sendable {
 /// Live: `FolioApp/Live/PDFKitWriting.swift` (PDFDocument.write(to:withOptions:)).
 public protocol DocumentWriting: Sendable {
     var unavailableHelp: String? { get }
+    /// Throws `.restricted` when `options.permissions` differ from the
+    /// document's and its `ownerUnlocked` is false; `.sourceMissing` when a
+    /// page's source isn't in DocumentSources.
     func write(_ doc: FolioDocumentState, options: FolioWriteOptions) async throws(FolioWriteError) -> Data
 }
 
@@ -195,7 +225,8 @@ public protocol PageExporting: Sendable {
 
 /// UC-13 Recognize text on a scanned page (OCR), so it can be found,
 /// selected and highlighted. Live: `FolioApp/Live/VisionRecognizing.swift`
-/// (RecognizeTextRequest, accurate level).
+/// (RecognizeTextRequest, accurate level). The workspace stores the result in
+/// FolioPage.recognizedText through `edit`, so it undoes and saves.
 public protocol TextRecognizing: Sendable {
     var unavailableHelp: String? { get }
     /// Languages offered in the Recognize Text sheet, BCP 47 tags.

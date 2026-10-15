@@ -9,15 +9,23 @@ import Foundation
 #endif
 @testable import FolioModel
 
-private let s = FolioServices.fake()
-
-private func open(_ f: FolioFixtureFile, password: String? = nil) async throws -> FolioOpened {
+private func open(_ s: FolioServices, _ f: FolioFixtureFile, password: String? = nil) async throws -> FolioOpened {
     try await s.opening.open(f.data(), name: f.title, password: password)
 }
 
+private func png(_ w: UInt32, _ h: UInt32) -> Data {
+    var b: [UInt8] = [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 0, 0, 0, 13, 0x49, 0x48, 0x44, 0x52]
+    for v in [w, h] { b += [UInt8(v >> 24 & 255), UInt8(v >> 16 & 255), UInt8(v >> 8 & 255), UInt8(v & 255)] }
+    return Data(b + [8, 6, 0, 0, 0])
+}
+
 @Test func openReadAndFind() async throws {   // P-J1, P-J2
-    let doc = try await open(FolioFixtures.letter)
+    let s = FolioServices.fake()
+    let doc = try await open(s, FolioFixtures.letter)
     #expect(doc.state.pages.count == 3)
+    #expect(doc.state.outline.map(\.title) == ["Agreement", "Deposit and pets", "Signatures"])
+    #expect(doc.state.pages.map(\.label) == ["i", "ii", "iii"])
+    #expect(await s.sources.data(for: doc.source) == FolioFixtures.letter.data())
     var text: [FolioPageID: FolioPageText] = [:]
     for p in doc.state.pages { text[p.id] = await s.text.text(of: p) }
     let hits = s.finding.find(FolioSearchQuery(text: "first day"), pages: doc.state.pages.map(\.id), text: text)
@@ -29,18 +37,24 @@ private func open(_ f: FolioFixtureFile, password: String? = nil) async throws -
 }
 
 @Test func openRefusals() async throws {   // P-J11
-    await #expect(throws: FolioOpenError.needsPassword) { try await open(FolioFixtures.locked) }
-    await #expect(throws: FolioOpenError.wrongPassword) { try await open(FolioFixtures.locked, password: "nope") }
-    #expect(try await open(FolioFixtures.locked, password: "folio").state.pages.count == 1)
+    let s = FolioServices.fake()
+    await #expect(throws: FolioOpenError.needsPassword) { try await open(s, FolioFixtures.locked) }
+    await #expect(throws: FolioOpenError.wrongPassword) { try await open(s, FolioFixtures.locked, password: "nope") }
+    #expect(try await open(s, FolioFixtures.locked, password: "folio").state.pages.count == 1)
     await #expect(throws: FolioOpenError.notPDF) { try await s.opening.open(Data("hello".utf8), name: "x", password: nil) }
-    #expect(FolioOpenError.wrongPassword.message == "That password didn't unlock this PDF. Try again.")
+    let data = FolioFixtures.letter.data()
+    await #expect(throws: FolioOpenError.damaged("its contents end early or are garbled")) {
+        try await s.opening.open(data.prefix(data.count / 2), name: "x", password: nil)
+    }
+    let scripted = try await open(s, FolioFixtures.scripted)
+    #expect(scripted.state.scripts == .javascript)
 }
 
-@Test func highlightAndNote() async throws {   // P-J3, P-J4
-    var doc = try await open(FolioFixtures.letter).state
+@Test func selectMarkAndCopy() async throws {   // P-J3, P-J4
+    let s = FolioServices.fake()
+    var doc = try await open(s, FolioFixtures.letter).state
     let page = doc.pages[0]
     let text = await s.text.text(of: page)
-    // Drag across "RESIDENTIAL LEASE" on line 0: glyph 0 to glyph 16.
     let sel = s.selecting.select(from: FolioPoint(x: 73, y: 712), to: FolioPoint(x: 72 + 6 * 16 + 1, y: 712), on: page.id, text: text)
     #expect(sel.string == "RESIDENTIAL LEASE")
     let ids = try s.annotating.mark(sel, style: .highlight, color: .highlightYellow, in: &doc)
@@ -48,48 +62,64 @@ private func open(_ f: FolioFixtureFile, password: String? = nil) async throws -
     #expect(throws: FolioEditError.emptySelection) {
         try s.annotating.mark(FolioTextSelection(spans: [], quads: [], string: ""), style: .underline, color: .red, in: &doc)
     }
+    let box = try s.annotating.add(.freeText("Initial here"), rect: FolioRect(x: 400, y: 100, width: 120, height: 20),
+                                   color: .black, on: page.id, in: &doc)
+    try s.annotating.setStyle(box, to: FolioMarkStyle(fontSize: 200, alignment: .center), in: &doc)
+    #expect(doc.annotations.last?.style.fontSize == 72 && doc.annotations.last?.style.alignment == .center)
     let note = try s.annotating.add(.note("Ask about parking"), rect: FolioRect(x: 500, y: 700, width: 20, height: 20),
                                     color: .highlightYellow, on: page.id, in: &doc)
     #expect(s.annotating.hit(FolioPoint(x: 510, y: 710), on: page.id, in: doc) == note)
     try s.annotating.move(note, dx: 10, dy: -10, in: &doc)
     #expect(throws: FolioEditError.self) { try s.annotating.move(ids[0], dx: 1, dy: 1, in: &doc) }
     try s.annotating.delete([note], in: &doc)
-    #expect(doc.annotations.count == 1)
+    #expect(doc.annotations.count == 2)
     #expect(s.selecting.word(at: FolioPoint(x: 72 + 6 * 13, y: 712), on: page.id, text: text).string == "LEASE")
+    let line = s.selecting.line(at: FolioPoint(x: 100, y: 698), on: page.id, text: text)
+    #expect(line.string == "This lease is made between the Landlord and the Tenant.")
+    // Two lines of one paragraph copy as one line.
+    let joined = FolioFakeLayout.text(["one two", "three"], continued: [0], pageHeight: 792, origin: .embedded)
+    let both = s.selecting.select(from: FolioPoint(x: 73, y: 712), to: FolioPoint(x: 72 + 6 * 4 + 1, y: 698), on: page.id, text: joined)
+    #expect(s.selecting.copyText(both, text: joined) == "one two three")
 }
 
 @Test func fillFormInTabOrder() async throws {   // P-J5
-    var doc = try await open(FolioFixtures.form).state
-    #expect(s.forms.next(after: nil, backward: false, in: doc) == FolioFieldID("name"))
-    #expect(s.forms.next(after: FolioFieldID("name"), backward: false, in: doc) == FolioFieldID("email"))
+    let s = FolioServices.fake()
+    var doc = try await open(s, FolioFixtures.form).state
+    var order: [FolioFieldID] = []
+    var at: FolioFieldID? = nil
+    for _ in 0..<5 { at = s.forms.next(after: at, backward: false, in: doc); if let at { order.append(at) } }
+    // A radio group is one stop; the signature field is not a stop; wraps.
+    #expect(order == ["name", "email", "plan.basic", "agree", "name"].map { FolioFieldID($0) })
     #expect(s.forms.missingRequired(in: doc) == [FolioFieldID("name"), FolioFieldID("email"), FolioFieldID("agree")])
     try s.forms.set(FolioFieldID("name"), to: .text("Ada Lovelace"), in: &doc)
     try s.forms.set(FolioFieldID("plan.plus"), to: .checked(true), in: &doc)
     #expect(doc.fields.first { $0.id.name == "plan.basic" }?.value == .checked(false))
+    #expect(s.forms.next(after: FolioFieldID("email"), backward: false, in: doc) == FolioFieldID("plan.plus"))
     #expect(throws: FolioEditError.invalidValue("This field takes one line.")) {
         try s.forms.set(FolioFieldID("name"), to: .text("a\nb"), in: &doc)
     }
     #expect(s.forms.missingRequired(in: doc) == [FolioFieldID("email"), FolioFieldID("agree")])
+    #expect(doc.fields.first { $0.id == FolioFieldID("agree") }?.label == "Agree to terms")
 }
 
 @Test func signIntoField() async throws {   // P-J6
-    var doc = try await open(FolioFixtures.form).state
+    let s = FolioServices.fake()
+    var doc = try await open(s, FolioFixtures.form).state
     let sig = try s.signing.make(strokes: [[FolioPoint(x: 10, y: 10), FolioPoint(x: 310, y: 110)]], isInitials: false,
                                  id: FolioSignatureID("sig-1"))
     #expect(sig.aspect == 3)
     try await s.signatures.save([sig])
     #expect(await s.signatures.load() == [sig])
     let id = try s.signing.place(sig, at: FolioPoint(x: 250, y: 560), width: 150, on: FolioPageID(0), in: &doc)
-    let placed = doc.annotations.first { $0.id == id }
-    // Fits the 200 x 40 field: 120 x 40, centered.
-    #expect(placed?.rect == FolioRect(x: 240, y: 540, width: 120, height: 40))
+    #expect(doc.annotations.first { $0.id == id }?.rect == FolioRect(x: 240, y: 540, width: 120, height: 40))
     #expect(throws: FolioEditError.invalidValue("Draw your signature in the box first.")) {
         try s.signing.make(strokes: [[FolioPoint(x: 1, y: 1)]], isInitials: true, id: FolioSignatureID("x"))
     }
 }
 
-@Test func organizeAndCombine() async throws {   // P-J7, P-J8
-    var doc = try await open(FolioFixtures.letter).state
+@Test func organizeCombineSplit() async throws {   // P-J7, P-J8
+    let s = FolioServices.fake()
+    var doc = try await open(s, FolioFixtures.letter).state
     let ids = doc.pages.map(\.id)
     try s.organizing.move([ids[2]], to: 0, in: &doc)
     #expect(doc.pages.map(\.id) == [ids[2], ids[0], ids[1]])
@@ -97,23 +127,26 @@ private func open(_ f: FolioFixtureFile, password: String? = nil) async throws -
     #expect(doc.page(ids[0])?.displaySize == FolioSize(width: 792, height: 612))
     try s.organizing.delete([ids[1]], in: &doc)
     #expect(throws: FolioEditError.lastPage) { try s.organizing.delete(doc.pages.map(\.id), in: &doc) }
-    let other = try await open(FolioFixtures.form)
+    let other = try await open(s, FolioFixtures.form)
     let added = try s.organizing.insert(other, at: doc.pages.count, in: &doc)
     #expect(added.count == 1 && doc.pages.count == 3 && doc.fields.count == 6)
-    #expect(try s.organizing.parseRange("1-2, 3", pageCount: 3) == [1, 2, 3])
-    #expect(try s.organizing.parseRange("2-", pageCount: 3) == [2, 3])
-    #expect(throws: FolioEditError.pageRange("This document has pages 1 to 3.")) { try s.organizing.parseRange("4", pageCount: 3) }
     try s.organizing.crop([doc.pages[0].id], to: FolioRect(x: 36, y: 36, width: 540, height: 720), in: &doc)
-    #expect(doc.pages[0].displaySize == FolioSize(width: 540, height: 720))   // the moved, unrotated page
+    #expect(doc.pages[0].displaySize == FolioSize(width: 540, height: 720))
     #expect(throws: FolioEditError.invalidValue("Keep at least 1 inch of the page on each side.")) {
         try s.organizing.crop([doc.pages[0].id], to: FolioRect(x: 0, y: 0, width: 10, height: 10), in: &doc)
     }
-    let parts = try s.organizing.split(doc, after: [1])
-    #expect(parts.map(\.pages.count) == [1, 2])
+    #expect(try s.organizing.parseRange("1-2, 3", pageCount: 3) == [1, 2, 3])
+    #expect(try s.organizing.parseRange("2-", pageCount: 3) == [2, 3])
+    #expect(throws: FolioEditError.pageRange("This document has pages 1 to 3.")) { try s.organizing.parseRange("4", pageCount: 3) }
+    #expect(try s.organizing.split(doc, after: [1]).map(\.pages.count) == [1, 2])
+    let letter = try await open(s, FolioFixtures.letter)
+    let combined = try s.organizing.combine([letter, other], title: "Combined")
+    #expect(combined.pages.count == 4 && combined.title == "Combined" && combined.fields.count == 6)
 }
 
 @Test func undoRedoCoalesces() async throws {   // P-J9
-    var doc = try await open(FolioFixtures.form).state
+    let s = FolioServices.fake()
+    var doc = try await open(s, FolioFixtures.form).state
     var h = FolioHistory()
     for text in ["A", "Ad", "Ada"] {
         let before = doc
@@ -128,37 +161,80 @@ private func open(_ f: FolioFixtureFile, password: String? = nil) async throws -
     #expect(s.history.redo(undone ?? doc, in: &h)?.fields.first?.value == .text("Ada"))
 }
 
-@Test func saveRoundTripAndFlatten() async throws {   // P-J10
-    var doc = try await open(FolioFixtures.form).state
+@Test func saveRoundTripFlattenPasswordRestrictions() async throws {   // P-J10
+    let s = FolioServices.fake()
+    var doc = try await open(s, FolioFixtures.form).state
     try s.forms.set(FolioFieldID("email"), to: .text("ada@example.com"), in: &doc)
+    doc.title = "Membership"
     let data = try await s.writing.write(doc, options: .plain)
-    let back = try await s.opening.open(data, name: "Application", password: nil)
+    let back = try await s.opening.open(data, name: "Membership", password: nil)
     #expect(back.state.fields.first { $0.id.name == "email" }?.value == .text("ada@example.com"))
+    // The saved file reopens under its own source and saves again.
+    #expect(try await s.writing.write(back.state, options: .plain).count > 0)
     let flat = try await s.writing.write(doc, options: FolioWriteOptions(flatten: true, openPassword: "pw"))
     await #expect(throws: FolioOpenError.needsPassword) { try await s.opening.open(flat, name: "x", password: nil) }
-    let opened = try await s.opening.open(flat, name: "x", password: "pw")
-    #expect(opened.state.fields.isEmpty)
+    #expect(try await s.opening.open(flat, name: "x", password: "pw").state.fields.isEmpty)
+    // Restrictions: kept without the owner password, changed with it.
+    let policy = try await open(s, FolioFixtures.restricted)
+    #expect(policy.state.permissions.ownerUnlocked == false)
+    await #expect(throws: FolioWriteError.restricted) {
+        try await s.writing.write(policy.state, options: FolioWriteOptions(permissions: .all))
+    }
+    #expect(try await s.writing.write(policy.state, options: .plain).count > 0)
+    let unlocked = try await open(s, FolioFixtures.restricted, password: "owner")
+    #expect(try await s.writing.write(unlocked.state, options: FolioWriteOptions(permissions: .all)).count > 0)
+}
+
+@Test func exportTextAndImages() async throws {   // P-J21
+    let s = FolioServices.fake()
+    let doc = try await open(s, FolioFixtures.form).state
     let images = try await s.exporting.images(of: doc.pages, annotations: doc.annotations, as: FolioImageExport(format: .png, ppi: 144))
     #expect(images.first.map { String(decoding: $0, as: UTF8.self) } == "PNG 0 1224x1584 0")
     let docx = try await s.exporting.text(of: doc, as: .docx)
     #expect(String(decoding: docx, as: UTF8.self).hasPrefix("PKMEMBERSHIP APPLICATION"))
 }
 
-@Test func recognizeScannedPages() async throws {   // P-J12
-    let doc = try await open(FolioFixtures.scan)
+@Test func newFromImagesAndReduce() async throws {   // P-J22, P-J23
+    let s = FolioServices.fake()
+    let made = try await s.opening.open(images: [FolioImageInput(name: "a.png", data: png(600, 800)),
+                                                 FolioImageInput(name: "b.png", data: png(800, 600)),
+                                                 FolioImageInput(name: "notes.txt", data: Data("hi".utf8))],
+                                        name: "Scans", paper: .letter)
+    #expect(made.state.pages.count == 2)
+    #expect(made.state.pages[0].size.height > made.state.pages[0].size.width)
+    #expect(made.state.pages[1].size.width > made.state.pages[1].size.height)
+    #expect(made.skipped == [FolioSkipped(name: "notes.txt", reason: "not an image")])
+    #expect(made.pagesWithoutText.count == 2)
+    let saved = try await s.writing.write(made.state, options: .plain)
+    #expect(try await s.opening.open(saved, name: "Scans", password: nil).state.pages.count == 2)
+    let photos = try await open(s, FolioFixtures.photos)
+    let full = try await s.writing.write(photos.state, options: .plain)
+    let small = try await s.writing.write(photos.state, options: FolioWriteOptions(optimizeImages: true))
+    #expect(Double(small.count) <= 0.6 * Double(full.count))
+}
+
+@Test func recognizeKeepAndReopen() async throws {   // P-J20
+    let s = FolioServices.fake()
+    var doc = try await open(s, FolioFixtures.scan)
     #expect(doc.pagesWithoutText == [FolioPageID(0), FolioPageID(1)])
     #expect(await s.text.text(of: doc.state.pages[0]).origin == .none)
     let rec = try await s.recognizing.recognize(doc.state.pages[0], languages: ["en-US"])
     #expect(rec.origin == .recognized && rec.lines.last?.text == "TOTAL 7.70")
-    let hits = s.finding.find(FolioSearchQuery(text: "total"), pages: [doc.state.pages[0].id], text: [doc.state.pages[0].id: rec])
-    #expect(hits.count == 1)
+    doc.state.pages[0].recognizedText = rec   // the workspace does this inside edit("Recognize Text")
+    let page0 = doc.state.pages[0]
+    let found = s.finding.find(FolioSearchQuery(text: "total"), pages: [page0.id], text: [page0.id: await s.text.text(of: page0)])
+    #expect(found.count == 1)
+    let saved = try await s.writing.write(doc.state, options: .plain)
+    let back = try await s.opening.open(saved, name: "Receipt scan", password: nil)
+    #expect(back.pagesWithoutText == [FolioPageID(1)])
+    #expect(await s.text.text(of: back.state.pages[0]).lines.last?.text == "TOTAL 7.70")
 }
 
 @Test func permissionsRefuse() async throws {
-    var doc = try await open(FolioFixtures.letter).state
-    doc.permissions = FolioPermissions(canAnnotate: false, canAssemble: false)
+    let s = FolioServices.fake()
+    var doc = try await open(s, FolioFixtures.restricted).state
     #expect(throws: FolioEditError.notAllowed("adding or changing markup")) {
         try s.annotating.add(.note("x"), rect: FolioRect(x: 0, y: 0, width: 20, height: 20), color: .red, on: FolioPageID(0), in: &doc)
     }
-    #expect(throws: FolioEditError.notAllowed("changing its pages")) { try s.organizing.delete([FolioPageID(0)], in: &doc) }
+    #expect(throws: FolioEditError.notAllowed("changing its pages")) { try s.organizing.insertBlank(size: .letter, at: 0, in: &doc) }
 }

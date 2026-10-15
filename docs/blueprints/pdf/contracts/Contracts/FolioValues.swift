@@ -104,10 +104,14 @@ public struct FolioPage: Identifiable, Hashable, Codable, Sendable {
     public var label: String?
     /// The visible part of the page after Crop, in page space; nil shows it all.
     public var crop: FolioRect?
+    /// Text Folio recognized on this page (OCR), part of the document so it
+    /// undoes, saves as an invisible text layer and reopens; nil when none.
+    public var recognizedText: FolioPageText?
     public init(id: FolioPageID, origin: FolioPageOrigin, size: FolioSize,
-                rotation: FolioRotation = .r0, label: String? = nil, crop: FolioRect? = nil) {
+                rotation: FolioRotation = .r0, label: String? = nil, crop: FolioRect? = nil,
+                recognizedText: FolioPageText? = nil) {
         self.id = id; self.origin = origin; self.size = size; self.rotation = rotation
-        self.label = label; self.crop = crop
+        self.label = label; self.crop = crop; self.recognizedText = recognizedText
     }
     /// The size as shown, after crop and rotation.
     public var displaySize: FolioSize {
@@ -123,7 +127,12 @@ public struct FolioPage: Identifiable, Hashable, Codable, Sendable {
 public struct FolioTextLine: Hashable, Codable, Sendable {
     public var text: String
     public var glyphRects: [FolioRect]
-    public init(text: String, glyphRects: [FolioRect]) { self.text = text; self.glyphRects = glyphRects }
+    /// True when a paragraph ends after this line: Copy keeps a line break
+    /// here and joins other lines with a space.
+    public var endsParagraph: Bool
+    public init(text: String, glyphRects: [FolioRect], endsParagraph: Bool = true) {
+        self.text = text; self.glyphRects = glyphRects; self.endsParagraph = endsParagraph
+    }
     public var bounds: FolioRect? {
         guard let first = glyphRects.first else { return nil }
         return glyphRects.dropFirst().reduce(first) { r, g in
@@ -205,16 +214,36 @@ public enum FolioShape: String, CaseIterable, Codable, Sendable {
     case rectangle, ellipse, line, arrow
 }
 
+public enum FolioTextAlignment: String, CaseIterable, Codable, Sendable { case leading, center, trailing }
+
+/// How a mark draws, beyond its colour: what the inspector edits.
+public struct FolioMarkStyle: Hashable, Codable, Sendable {
+    /// Text boxes: 6...72 pt.
+    public var fontSize: Double
+    public var alignment: FolioTextAlignment
+    /// Pen, shapes, underline and strike-out: 0.5...12 pt.
+    public var lineWidth: Double
+    /// 0.1...1.
+    public var opacity: Double
+    public init(fontSize: Double = 12, alignment: FolioTextAlignment = .leading, lineWidth: Double = 2, opacity: Double = 1) {
+        self.fontSize = Swift.min(72, Swift.max(6, fontSize.isFinite ? fontSize : 12))
+        self.alignment = alignment
+        self.lineWidth = Swift.min(12, Swift.max(0.5, lineWidth.isFinite ? lineWidth : 2))
+        self.opacity = Swift.min(1, Swift.max(0.1, opacity.isFinite ? opacity : 1))
+    }
+    public static let standard = FolioMarkStyle()
+}
+
 public enum FolioAnnotationBody: Hashable, Codable, Sendable {
     /// Text markup over selected text; `quads` from a FolioTextSelection.
     case markup(FolioMarkupStyle, quads: [FolioRect], text: String)
     /// A note: an icon on the page whose text opens in a popover.
     case note(String)
     /// Text drawn on the page (type on a flat form, add a label).
-    case freeText(String, fontSize: Double)
+    case freeText(String)
     /// Freehand pen strokes.
-    case ink([[FolioPoint]], lineWidth: Double)
-    case shape(FolioShape, lineWidth: Double)
+    case ink([[FolioPoint]])
+    case shape(FolioShape)
     /// A placed signature or initials from the library.
     case signature(FolioSignatureID)
     /// A placed image (PNG bytes), for "add an image".
@@ -226,14 +255,16 @@ public struct FolioAnnotation: Identifiable, Hashable, Codable, Sendable {
     public var page: FolioPageID
     public var rect: FolioRect
     public var color: FolioColor
+    public var style: FolioMarkStyle
     public var body: FolioAnnotationBody
     /// The reply or comment typed on a markup; nil when none.
     public var comment: String?
     /// True for annotations the opened file already had.
     public var fromFile: Bool
     public init(id: FolioAnnotationID, page: FolioPageID, rect: FolioRect, color: FolioColor,
-                body: FolioAnnotationBody, comment: String? = nil, fromFile: Bool = false) {
-        self.id = id; self.page = page; self.rect = rect; self.color = color
+                style: FolioMarkStyle = .standard, body: FolioAnnotationBody, comment: String? = nil,
+                fromFile: Bool = false) {
+        self.id = id; self.page = page; self.rect = rect; self.color = color; self.style = style
         self.body = body; self.comment = comment; self.fromFile = fromFile
     }
 }
@@ -265,6 +296,10 @@ public enum FolioFieldValue: Hashable, Codable, Sendable {
 
 public struct FolioFormField: Identifiable, Hashable, Codable, Sendable {
     public var id: FolioFieldID
+    /// What a person calls the field: the form's alternate name (/TU) when it
+    /// has one, else the text line just left of or above the field, else the
+    /// last part of the field name. Used in messages and as the VoiceOver label.
+    public var label: String
     public var page: FolioPageID
     public var rect: FolioRect
     public var kind: FolioFieldKind
@@ -273,10 +308,10 @@ public struct FolioFormField: Identifiable, Hashable, Codable, Sendable {
     public var isRequired: Bool
     /// The tooltip the form author wrote, shown as the field's help.
     public var tooltip: String?
-    public init(id: FolioFieldID, page: FolioPageID, rect: FolioRect, kind: FolioFieldKind,
+    public init(id: FolioFieldID, label: String, page: FolioPageID, rect: FolioRect, kind: FolioFieldKind,
                 value: FolioFieldValue = .empty, isReadOnly: Bool = false, isRequired: Bool = false,
                 tooltip: String? = nil) {
-        self.id = id; self.page = page; self.rect = rect; self.kind = kind; self.value = value
+        self.id = id; self.label = label; self.page = page; self.rect = rect; self.kind = kind; self.value = value
         self.isReadOnly = isReadOnly; self.isRequired = isRequired; self.tooltip = tooltip
     }
 }
@@ -327,11 +362,16 @@ public struct FolioPermissions: Hashable, Codable, Sendable {
     public var canAssemble: Bool
     public var canCopy: Bool
     public var canPrint: Bool
+    /// True when the file has no owner restrictions or was opened with the
+    /// owner password; only then may Save change or drop the restrictions.
+    public var ownerUnlocked: Bool
     public init(canAnnotate: Bool = true, canFillForms: Bool = true, canAssemble: Bool = true,
-                canCopy: Bool = true, canPrint: Bool = true) {
+                canCopy: Bool = true, canPrint: Bool = true, ownerUnlocked: Bool = true) {
         self.canAnnotate = canAnnotate; self.canFillForms = canFillForms
         self.canAssemble = canAssemble; self.canCopy = canCopy; self.canPrint = canPrint
+        self.ownerUnlocked = ownerUnlocked
     }
+    public var restrictions: [Bool] { [canAnnotate, canFillForms, canAssemble, canCopy, canPrint] }
     public static let all = FolioPermissions()
 }
 
@@ -346,6 +386,8 @@ public struct FolioDocumentState: Hashable, Codable, Sendable {
     public var fields: [FolioFormField]
     public var outline: [FolioOutlineItem]
     public var permissions: FolioPermissions
+    /// Form scripts or XFA the file carries; Folio never runs them and says so.
+    public var scripts: FolioScriptKind = .none
     public var nextPageID: Int
     public var nextAnnotationID: Int
     public init(title: String, pages: [FolioPage], annotations: [FolioAnnotation] = [],
@@ -360,14 +402,34 @@ public struct FolioDocumentState: Hashable, Codable, Sendable {
     public func index(of id: FolioPageID) -> Int? { pages.firstIndex { $0.id == id } }
 }
 
-/// What opening a file gives the Model.
+public enum FolioScriptKind: String, Codable, Sendable { case none, javascript, xfa }
+
+/// A file New from Images left out, and why (a sentence).
+public struct FolioSkipped: Hashable, Sendable {
+    public var name: String
+    public var reason: String
+    public init(name: String, reason: String) { self.name = name; self.reason = reason }
+}
+
+/// One picked image for New from Images.
+public struct FolioImageInput: Sendable {
+    public var name: String
+    public var data: Data
+    public init(name: String, data: Data) { self.name = name; self.data = data }
+}
+
+/// What opening a file gives the Model. The opener has already registered
+/// the bytes in `DocumentSources` under `source`.
 public struct FolioOpened: Sendable {
     public var source: FolioSourceID
     public var state: FolioDocumentState
     /// Pages whose text layer is missing: the Recognize Text banner offers OCR.
     public var pagesWithoutText: [FolioPageID]
-    public init(source: FolioSourceID, state: FolioDocumentState, pagesWithoutText: [FolioPageID]) {
-        self.source = source; self.state = state; self.pagesWithoutText = pagesWithoutText
+    /// Inputs New from Images left out.
+    public var skipped: [FolioSkipped]
+    public init(source: FolioSourceID, state: FolioDocumentState, pagesWithoutText: [FolioPageID],
+                skipped: [FolioSkipped] = []) {
+        self.source = source; self.state = state; self.pagesWithoutText = pagesWithoutText; self.skipped = skipped
     }
 }
 
@@ -390,16 +452,17 @@ public struct FolioWriteOptions: Hashable, Sendable {
     /// Open password (nil: none) and owner password (nil: none).
     public var openPassword: String?
     public var ownerPassword: String?
-    /// What the owner password allows when set.
-    public var permissions: FolioPermissions
-    /// Down-sample images above this resolution (pixels per inch); nil keeps them.
-    public var maxImagePPI: Int?
-    /// Keep recognized (OCR) text as an invisible text layer.
+    /// The restrictions to write; nil keeps the document's own.
+    public var permissions: FolioPermissions?
+    /// Reduce File Size: PDFKit's documented image options (optimize images
+    /// for screen, save images as JPEG). No per-ppi control in v1 (section 1.5).
+    public var optimizeImages: Bool
+    /// Write each page's `recognizedText` as an invisible text layer.
     public var keepRecognizedText: Bool
     public init(flatten: Bool = false, openPassword: String? = nil, ownerPassword: String? = nil,
-                permissions: FolioPermissions = .all, maxImagePPI: Int? = nil, keepRecognizedText: Bool = true) {
+                permissions: FolioPermissions? = nil, optimizeImages: Bool = false, keepRecognizedText: Bool = true) {
         self.flatten = flatten; self.openPassword = openPassword; self.ownerPassword = ownerPassword
-        self.permissions = permissions; self.maxImagePPI = maxImagePPI; self.keepRecognizedText = keepRecognizedText
+        self.permissions = permissions; self.optimizeImages = optimizeImages; self.keepRecognizedText = keepRecognizedText
     }
     public static let plain = FolioWriteOptions()
 }
@@ -468,11 +531,14 @@ public enum FolioEditError: Error, Equatable, Sendable {
 
 public enum FolioWriteError: Error, Equatable, Sendable {
     case sourceMissing(String)
+    /// Changing or dropping owner restrictions without the owner password.
+    case restricted
     case diskFull
     case failed(String)
     public var message: String {
         switch self {
-        case .sourceMissing(let name): "\(name) was moved or deleted, so its pages can't be saved. Put it back and try again."
+        case .sourceMissing(let name): "The pages from \(name) are no longer available, so they can't be saved. Open \(name) again and insert its pages."
+        case .restricted: "Changing this PDF's restrictions needs its owner password. Open it with the owner password first."
         case .diskFull: "There isn't enough space on the disk to save. Free some space and try again."
         case .failed(let why): "The PDF couldn't be saved (\(why))."
         }
