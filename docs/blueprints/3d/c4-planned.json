@@ -58,7 +58,7 @@
               {
                 "id": "prism-contracts",
                 "name": "Use-case contracts",
-                "description": "One protocol per use case (25, part 6) and the values they speak; FlareCore's Keyframe and Easing under Prism names from W0.",
+                "description": "One protocol per use case (25, part 6), the values they speak and the row and state values the workspace stores (PrismState); FlareCore's Keyframe and Easing under Prism names from W0.",
                 "paths": [
                   "Sources/PrismModel/Contracts/"
                 ],
@@ -113,7 +113,7 @@
               {
                 "id": "prism-fakes",
                 "name": "Fakes and fixtures",
-                "description": "One fake per contract and PrismFixtures (empty, starter, cube-keyed, modeling, product, crowd, huge), built in code.",
+                "description": "One fake per contract and PrismFixtures (empty, starter, cubeKeyed, modeling, product, crowd, denseCube, denseGrid, huge), built in code.",
                 "paths": [
                   "Sources/PrismModel/Fakes/",
                   "Sources/PrismModel/PrismFixtures.swift"
@@ -389,7 +389,7 @@
           {
             "id": "prism-app",
             "name": "PrismApp",
-            "description": "The Prism app: SwiftUI window from SuiteUI, RealityKit viewport, menus and macOS-only platform pieces. Reads PrismModel and calls its methods.",
+            "description": "The Prism app: SwiftUI window from SuiteUI (hosts compose per-area slots that each feature owns), RealityKit viewport, menus and macOS-only platform pieces. Reads PrismModel and calls its methods.",
             "technology": "Swift 6, SwiftUI, RealityKit, macOS 26",
             "status": "planned",
             "authored": true,
@@ -397,10 +397,11 @@
               {
                 "id": "prism-scene",
                 "name": "App scene and launch",
-                "description": "The App scene and the launch arguments for journeys: -PrismFixture, -PrismSample, -PrismOpenFile, -PrismSaveTo, -PrismImport, -PrismRenderTo, -PrismWindowSize, -PrismPerfProbe, -PrismControlsProbe; assembles .live with the platform pieces.",
+                "description": "The App scene and the launch arguments for journeys: -PrismFixture, -PrismSample, -PrismOpenFile, -PrismSaveTo, -PrismImport, -PrismImportTarget, -PrismRenderTo, -PrismWindowSize, -PrismPerfProbe, -PrismControlsProbe; assembles .live from the per-area PrismLaunch+<Area> files, each returning its feature's platform members (installed in fixture mode too, so real files decode).",
                 "paths": [
                   "Sources/PrismApp/PrismApp.swift",
-                  "Sources/PrismApp/PrismLaunch.swift"
+                  "Sources/PrismApp/PrismLaunch.swift",
+                  "Sources/PrismApp/PrismLaunch+"
                 ],
                 "status": "planned",
                 "authored": true,
@@ -453,6 +454,7 @@
                 "description": "PrismViewportView: RealityView fed from the draw list by PrismRealityBridge (entities, PhysicallyBasedMaterial, lights, camera; LowLevelMesh for edited meshes), the SwiftUI overlay canvas, gestures, the axis widget, the gizmo, the floating palette and the status pills.",
                 "paths": [
                   "Sources/PrismApp/PrismViewportView.swift",
+                  "Sources/PrismApp/PrismViewportView+",
                   "Sources/PrismApp/PrismRealityBridge.swift",
                   "Sources/PrismApp/PrismOverlayCanvas.swift",
                   "Sources/PrismApp/PrismViewportGestures.swift",
@@ -482,6 +484,7 @@
                 "description": "Sidebar (SCENE outliner, MATERIALS), the inspector sections (one file each), the timeline with transport and the display-link playback driver.",
                 "paths": [
                   "Sources/PrismApp/PrismSidebar.swift",
+                  "Sources/PrismApp/PrismSidebar+",
                   "Sources/PrismApp/PrismOutlinerView.swift",
                   "Sources/PrismApp/PrismMaterialList.swift",
                   "Sources/PrismApp/PrismInspector.swift",

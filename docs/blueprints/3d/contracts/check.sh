@@ -6,5 +6,5 @@
 set -euo pipefail
 cd "$(dirname "$0")"
 out="${TMPDIR:-/tmp}/prism-contracts-check"
-swiftc -swift-version 6 -warnings-as-errors Values.swift Rules.swift Contracts.swift Fakes.swift Services.swift main.swift -o "$out"
+swiftc -swift-version 6 -warnings-as-errors Values.swift State.swift Rules.swift Contracts.swift Fakes.swift Services.swift main.swift -o "$out"
 "$out" | tee /dev/stderr | grep -q "contracts: PASS"

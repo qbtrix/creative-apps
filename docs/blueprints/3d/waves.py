@@ -35,11 +35,20 @@ platform = {  # PrismApp macOS-only conformances and writers -> feature
     "PrismMovieWriter.swift": "render", "PrismGlyphOutliner.swift": "shapes", "PrismPasteboard.swift": "shapes",
 }
 
+hosts = {  # W0 seam stubs that pass to a feature: its view slot in a host, its platform members in .live
+    A+"PrismViewportView+Viewport.swift": "viewport", A+"PrismViewportView+Transform.swift": "transform",
+    A+"PrismViewportView+Modeling.swift": "modeling", A+"PrismSidebar+Objects.swift": "objects",
+    A+"PrismSidebar+Look.swift": "look", A+"PrismTimelineView.swift": "keys",
+    A+"PrismLaunch+Import.swift": "import", A+"PrismLaunch+Render.swift": "render", A+"PrismLaunch+Shapes.swift": "shapes",
+    M+"PrismShapes.swift": "shapes",
+}
+
 def stubs_of(feature):
     return ([M + f"Live/Live{c}.swift" for c, f in contracts.items() if f == feature]
             + [AV + a + ".swift" for a, f in areas.items() if f == feature]
             + [A + f"PrismWindow+{a}.swift" for a, f in areas.items() if f == feature]
-            + [A + f"PrismInspector+{s}.swift" for s, f in inspector.items() if f == feature])
+            + [A + f"PrismInspector+{s}.swift" for s, f in inspector.items() if f == feature]
+            + [h for h, f in hosts.items() if f == feature])
 
 def contract_tests(feature):
     return [T + f"{c}ContractTests.swift" for c, f in contracts.items() if f == feature]
@@ -47,9 +56,9 @@ def contract_tests(feature):
 features = [
   dict(wave=0, id="foundation", name="Foundation: targets, contracts, fakes, workspace and the window's seams",
        tier="p1 by dependency", waits_core="none", waits_other="none (alone in its wave)",
-       proves="P-J0, P-J1, P-J21, PL1, PL2, PL6; PB-10",
+       proves="P-J0, P-J1, P-J21, PL1, PL6; PB-10",
        owns=["Package.swift", "project.yml", "UITests/audit-baseline.json", "docs/c4/model.json", "docs/design.md",
-             M+"Contracts/PrismValues.swift", M+"Contracts/PrismContracts.swift", M+"Live/PrismRules.swift",
+             M+"Contracts/PrismValues.swift", M+"Contracts/PrismState.swift", M+"Contracts/PrismContracts.swift", M+"Live/PrismRules.swift",
              M+"PrismServices.swift", M+"PrismWorkspace.swift", M+"PrismCommand.swift", M+"PrismFixtures.swift",
              M+"PrismStatusText.swift"]
          + [M+f"Fakes/Fake{c}.swift" for c in contracts] + [M+"Fakes/CountingSink.swift"]
@@ -57,14 +66,14 @@ features = [
          + [AV + a + ".swift" for a in areas]
          + [A+"PrismApp.swift", A+"PrismLaunch.swift", A+"PrismWindow.swift", A+"PrismControls.swift",
             A+"PrismCommands.swift", A+"PrismInspector.swift", A+"PrismSidebar.swift", A+"PrismPalette.swift",
-            A+"PrismViewportView.swift"]
+            A+"PrismViewportView.swift"] + list(hosts)
          + [A+f"PrismWindow+{a}.swift" for a in areas] + [A+f"PrismInspector+{s}.swift" for s in inspector]
          + [T+f"{c}ContractTests.swift" for c in contracts]
          + [T+"PrismCommandTests.swift", T+"PrismToolsTests.swift", T+"PrismFixturesTests.swift", T+"PrismEditTests.swift", T+"PrismBudget.swift",
             T+"PrismFoundationBudgetTests.swift", SN+"PrismWindowSnapshots.swift", U+"PrismJourneyTests.swift"]),
   dict(wave=1, id="viewport", name="See and navigate the scene; select objects",
        tier="p1", waits_core="none (RealityKit draws; the draw list is Model code)", waits_other="foundation",
-       proves="P-J2, P-J3; PB-1, PB-2, PB-3, PB-4; PF-1, PF-2",
+       proves="P-J2, P-J3; PL2 (palette, axes, status); PB-1, PB-2, PB-3, PB-4; PF-1, PF-2",
        owns=stubs_of("viewport") + contract_tests("viewport")
          + [M+"PrismViewport.swift", M+"PrismOverlay.swift", M+"PrismSelection.swift",
             A+"PrismRealityBridge.swift", A+"PrismOverlayCanvas.swift", A+"PrismViewportGestures.swift", A+"PrismAxisWidget.swift",
@@ -80,11 +89,11 @@ features = [
             SN+"PrismOutlinerSnapshots.swift", U+"PrismJourneyTests+Objects.swift"]),
   dict(wave=1, id="history-files", name="New scene, undo, redo, save and open",
        tier="p1", waits_core="none", waits_other="foundation; the suite's recents and router (suite.md, recents-open-in) for P-J7's Open Recent step (the step skips until then)",
-       proves="P-J5, P-J6, P-J7; PB-8, PB-9; PF-6",
+       proves="P-J5, P-J6, P-J7; PB-8, PB-9, PB-9b; PF-6",
        owns=stubs_of("history-files") + contract_tests("history-files")
          + [M+"PrismHistoryOps.swift", M+"PrismFiles.swift", M+"PrismSceneSettings.swift"]
          + [A+k for k, f in platform.items() if f == "history-files"]
-         + [A+"NewSceneSheet.swift", T+"PrismUndoTests.swift", T+"PrismFileTests.swift", "UITests/Fixtures/prism/bad-not-a-package.prism", "UITests/Fixtures/prism/bad-newer.prism/scene.json", "UITests/Fixtures/prism/bad-damaged.prism/scene.json", T+"PrismFilesBudgetTests.swift",
+         + [A+"NewSceneSheet.swift", T+"PrismUndoTests.swift", T+"PrismFileTests.swift", "UITests/Fixtures/prism/bad-not-a-package.prism", "UITests/Fixtures/prism/bad-newer.prism/scene.json", T+"PrismFilesBudgetTests.swift",
             SN+"PrismFileSnapshots.swift", U+"PrismJourneyTests+History.swift", U+"PrismJourneyTests+Files.swift",
             U+"PrismJourneyTests+FileErrors.swift"]),
   dict(wave=1, id="import", name="Import models and images",
@@ -93,7 +102,7 @@ features = [
        proves="P-J8; PB-12; PF-7",
        owns=stubs_of("import") + contract_tests("import")
          + [M+"PrismImport.swift"] + [A+k for k, f in platform.items() if f == "import"]
-         + [A+"PrismImportProgress.swift", "UITests/Fixtures/prism/Box.glb", "UITests/Fixtures/prism/Box.gltf", "UITests/Fixtures/prism/part.stl", "UITests/Fixtures/prism/chair.usdz", "UITests/Fixtures/prism/empty.obj", "UITests/Fixtures/prism/notes.txt", "UITests/Fixtures/prism/NOTICE.md", T+"PrismImportTests.swift", T+"PrismImportBudgetTests.swift",
+         + [A+"PrismImportProgress.swift", "UITests/Fixtures/prism/Box.glb", "UITests/Fixtures/prism/Box.gltf", "UITests/Fixtures/prism/part.stl", "UITests/Fixtures/prism/chair.usdz", "UITests/Fixtures/prism/empty.obj", "UITests/Fixtures/prism/notes.txt", "UITests/Fixtures/prism/NOTICE.md", T+"Resources/Box.glb", T+"Resources/BoxTextured.glb", T+"Resources/NOTICE.md", T+"PrismImportTests.swift", T+"PrismImportBudgetTests.swift",
             SN+"PrismImportSnapshots.swift", U+"PrismJourneyTests+Import.swift"]),
   dict(wave=2, id="transform", name="Move, rotate and scale with the gizmo and inspector",
        tier="p1", waits_core="none", waits_other="after viewport and objects",
@@ -124,13 +133,13 @@ features = [
        proves="P-J15, P-J16, P-J17; PB-14, PB-15; PF-5",
        owns=stubs_of("keys") + contract_tests("keys")
          + [M+"PrismKeying.swift", M+"PrismKeySelection.swift", M+"PrismPlayback.swift", M+"PrismTimeline.swift",
-            A+"PrismTimelineView.swift", A+"PrismPlaybackDriver.swift",
+            A+"PrismPlaybackDriver.swift",
             T+"PrismKeyingTests.swift", T+"PrismEasingTests.swift", T+"PrismPlaybackTests.swift", T+"PrismKeysBudgetTests.swift",
             SN+"PrismTimelineSnapshots.swift", U+"PrismJourneyTests+Keys.swift", U+"PrismJourneyTests+Playback.swift"]),
   dict(wave=3, id="render", name="Render stills, sequences and movies",
        tier="p1", waits_core="C3D-4 reference renderer (for PF-8 and the Linux live FrameRendering)",
        waits_other="after look and keys",
-       proves="P-J18; PB-16, PB-17; PF-8, PF-9, PF-10",
+       proves="P-J18; PB-16, PB-17; PF-8, PF-9, PF-10, PF-12",
        owns=stubs_of("render") + contract_tests("render")
          + [M+"PrismRenderJob.swift", M+"PrismRenderStill.swift"] + [A+k for k, f in platform.items() if f == "render"]
          + [A+"PrismRenderSheet.swift", A+"PrismRenderPreview.swift",
@@ -141,7 +150,7 @@ features = [
        waits_other="Design's pasteboard SVG (suite clipboard-drag) for P-J20's paste step; after modeling and look",
        proves="P-J19, P-J20; PB-18",
        owns=stubs_of("shapes") + contract_tests("shapes")
-         + [M+"PrismShapes.swift"] + [A+k for k, f in platform.items() if f == "shapes"]
+         + [A+k for k, f in platform.items() if f == "shapes"]
          + ["UITests/Fixtures/prism/logo.svg", "UITests/Fixtures/prism/strokes.svg", T+"PrismShapesTests.swift", T+"PrismShapesBudgetTests.swift", SN+"PrismShapesSnapshots.swift",
             U+"PrismJourneyTests+Shapes.swift"]),
   dict(wave=3, id="modifiers", name="Subdivision Surface and Mirror",
@@ -165,7 +174,7 @@ features = [
          + [M+"PrismHandOff.swift", T+"PrismHandOffTests.swift", U+"PrismJourneyTests+HandOff.swift"]),
   dict(wave=4, id="core-loop", name="The core loop, live, measured",
        tier="p1", waits_core="none", waits_other="every W1 to W3 feature (SuiteFrameProbe is on dev for PB-U1 to PB-U5)",
-       proves="P-J25 live; P-P1 to P-P5; PL3 to PL5",
+       proves="P-J25 live; P-P1 to P-P5; PL2 re-checked with the import row; PL3 to PL5",
        owns=[U+"PrismJourneyTests+CoreLoop.swift", U+"PrismJourneyTests+Perf.swift", SN+"PrismLayoutTests.swift"]),
 ]
 
@@ -178,13 +187,13 @@ components = [
        "PrismWorkspace: the window's one value-type state (document, services, history, playback, viewpoint, edit mode, drags, file, render job, refusal), each stored property written only by its own extension file; edit(_:_:) is the one place an edit records undo.",
        [M+"PrismWorkspace.swift", M+"PrismStatusText.swift", M+"PrismSceneSettings.swift"], [("prism-services", "reads its services"), ("prism-contracts", "stores PrismDocumentState and PrismHistory")]),
   comp("prism-contracts", "Use-case contracts", "prism-model", "planned",
-       "One protocol per use case (25, part 6) and the values they speak; FlareCore's Keyframe and Easing under Prism names from W0.",
+       "One protocol per use case (25, part 6), the values they speak and the row and state values the workspace stores (PrismState); FlareCore's Keyframe and Easing under Prism names from W0.",
        [M+"Contracts/"], [("flarecore", "names Keyframe and Easing")]),
   comp("prism-services", "Services and live conformances", "prism-model", "planned",
        "PrismServices with .fake, .unbuilt and .live; Live/ holds one file per contract (a W0 NotBuilt stub replaced whole by its feature) and PrismRules, the rules fakes and live types share.",
        [M+"PrismServices.swift", M+"Live/"], [("prism-contracts", "conforms to"), ("coremesh", "edits meshes"), ("coremodelio", "reads and writes model files"), ("corerender3d", "renders reference frames"), ("flarecore", "samples keys and eases")]),
   comp("prism-fakes", "Fakes and fixtures", "prism-model", "planned",
-       "One fake per contract and PrismFixtures (empty, starter, cube-keyed, modeling, product, crowd, huge), built in code.",
+       "One fake per contract and PrismFixtures (empty, starter, cubeKeyed, modeling, product, crowd, denseCube, denseGrid, huge), built in code.",
        [M+"Fakes/", M+"PrismFixtures.swift"], [("prism-contracts", "conforms to")]),
   comp("prism-commands", "Commands and availability", "prism-model", "planned",
        "PrismCommand (every menu, palette and key command of v1) and unavailableHelp(for:), dispatched to one Availability/ file per area that its feature replaces.",
@@ -229,19 +238,19 @@ components = [
        [M+"PrismHandOff.swift"], [("prism-contracts", "calls RenderHandingOff"), ("suite-model", "hands the request to HandOffSending")]),
   # PrismApp
   comp("prism-scene", "App scene and launch", "prism-app", "planned",
-       "The App scene and the launch arguments for journeys: -PrismFixture, -PrismSample, -PrismOpenFile, -PrismSaveTo, -PrismImport, -PrismRenderTo, -PrismWindowSize, -PrismPerfProbe, -PrismControlsProbe; assembles .live with the platform pieces.",
-       [A+"PrismApp.swift", A+"PrismLaunch.swift"], [("prism-window", "shows"), ("prism-platform", "installs the macOS conformances")]),
+       "The App scene and the launch arguments for journeys: -PrismFixture, -PrismSample, -PrismOpenFile, -PrismSaveTo, -PrismImport, -PrismImportTarget, -PrismRenderTo, -PrismWindowSize, -PrismPerfProbe, -PrismControlsProbe; assembles .live from the per-area PrismLaunch+<Area> files, each returning its feature's platform members (installed in fixture mode too, so real files decode).",
+       [A+"PrismApp.swift", A+"PrismLaunch.swift", A+"PrismLaunch+"], [("prism-window", "shows"), ("prism-platform", "installs the macOS conformances")]),
   comp("prism-window", "Window and command router", "prism-app", "planned",
        "PrismWindow: SuiteWindow with the switcher row, the one @State workspace, presentation flags, perform(_:) routing each command to its PrismWindow+<Area> file; PrismControls for the every-control journey; the menu bar from PrismCommand.",
        [A+"PrismWindow.swift", A+"PrismControls.swift", A+"PrismCommands.swift", A+"PrismWindow+"], [("prism-workspace", "reads state, calls methods"), ("prism-commands", "asks availability"), ("suiteui", "SuiteWindow shell")]),
   comp("prism-viewport", "Viewport", "prism-app", "planned",
        "PrismViewportView: RealityView fed from the draw list by PrismRealityBridge (entities, PhysicallyBasedMaterial, lights, camera; LowLevelMesh for edited meshes), the SwiftUI overlay canvas, gestures, the axis widget, the gizmo, the floating palette and the status pills.",
-       [A+"PrismViewportView.swift", A+"PrismRealityBridge.swift", A+"PrismOverlayCanvas.swift", A+"PrismViewportGestures.swift",
+       [A+"PrismViewportView.swift", A+"PrismViewportView+", A+"PrismRealityBridge.swift", A+"PrismOverlayCanvas.swift", A+"PrismViewportGestures.swift",
         A+"PrismAxisWidget.swift", A+"PrismGizmoView.swift", A+"PrismPalette.swift", A+"PrismModelingPalette.swift"],
        [("prism-viewport-model", "reads the draw list and overlay, calls navigation"), ("suiteui", "ToolbarGroup floating palette, ViewerStatusBar")]),
   comp("prism-panels", "Sidebar, inspector and timeline", "prism-app", "planned",
        "Sidebar (SCENE outliner, MATERIALS), the inspector sections (one file each), the timeline with transport and the display-link playback driver.",
-       [A+"PrismSidebar.swift", A+"PrismOutlinerView.swift", A+"PrismMaterialList.swift", A+"PrismInspector.swift", A+"PrismInspector+",
+       [A+"PrismSidebar.swift", A+"PrismSidebar+", A+"PrismOutlinerView.swift", A+"PrismMaterialList.swift", A+"PrismInspector.swift", A+"PrismInspector+",
         A+"PrismTimelineView.swift", A+"PrismPlaybackDriver.swift"],
        [("prism-workspace", "reads rows, calls methods"), ("suiteui", "SidebarSection, InspectorSection, StudioScrubRow, KeyframeButton, ChoiceChips, CurveEditor, TimelineStrip")]),
   comp("prism-sheets", "Sheets and previews", "prism-app", "planned",
@@ -262,7 +271,7 @@ components = [
 
 containers = {
   "prism-model": ("PrismModel", "existing" if False else "planned", "Linux-safe state and logic for Prism (3D): workspace, contracts, fakes, live conformances over creative-core.", "Swift 6, Foundation, Linux + macOS"),
-  "prism-app": ("PrismApp", "planned", "The Prism app: SwiftUI window from SuiteUI, RealityKit viewport, menus and macOS-only platform pieces. Reads PrismModel and calls its methods.", "Swift 6, SwiftUI, RealityKit, macOS 26"),
+  "prism-app": ("PrismApp", "planned", "The Prism app: SwiftUI window from SuiteUI (hosts compose per-area slots that each feature owns), RealityKit viewport, menus and macOS-only platform pieces. Reads PrismModel and calls its methods.", "Swift 6, SwiftUI, RealityKit, macOS 26"),
   "prism-tests": ("Prism tests", "planned", "PrismModelTests (Linux), snapshots and goldens, journeys (XCUITest).", "Swift Testing, XCTest"),
 }
 externals = [

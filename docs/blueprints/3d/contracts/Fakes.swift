@@ -16,8 +16,9 @@ import Musl
 import Darwin
 #endif
 
-/// Differs: reads a tiny text stand-in, not real files. "cube" → one cube; "two cubes" → two;
-/// "empty" → .empty; "broken" → .damaged; a gltf names "scene.bin" as its sidecar.
+/// Differs: reads no real file. "two cubes" → two cubes; empty or "empty" → .empty; "broken" → .damaged;
+/// any other bytes of a core format (a real Box.glb included) → one cube named after the file;
+/// a gltf names "scene.bin" as its sidecar. The USD family is the macOS importer's (live only).
 public struct FakeSceneImporting: SceneImporting {
     public init() {}
     public var unavailableHelp: String? { nil }
@@ -33,10 +34,10 @@ public struct FakeSceneImporting: SceneImporting {
         let text = PrismRules.trimmed(String(decoding: data, as: UTF8.self))
         let count: Int
         switch text {
-        case "cube": count = 1
         case "two cubes": count = 2
         case "empty", "": throw .empty
-        default: throw .damaged("the stand-in text \"\(text.prefix(20))\" isn't one the fake reads.")
+        case "broken": throw .damaged("the stand-in says it is broken.")
+        default: count = 1
         }
         let maker = FakePrimitiveMaking()
         var nodes: [PrismNode] = [], meshes: [PrismMesh] = []
@@ -702,6 +703,7 @@ public struct FakeSequenceRendering: SequenceRendering {
                     renderer: any FrameRendering, sink: any RenderSink, progress: @Sendable (Int) -> Void,
                     isCancelled: @Sendable () -> Bool) -> PrismRenderOutcome {
         if let p = problem(with: plan, scene: scene) { return .failed(frame: plan.frames.lowerBound, message: p.message) }
+        guard plan.width > 0, plan.height > 0 else { return .failed(frame: plan.frames.lowerBound, message: PrismRenderError.badSize.message) }
         do throws(PrismRenderError) {
             try sink.begin(plan)
             for (index, frame) in plan.frames.enumerated() {
@@ -781,6 +783,7 @@ public struct FakeMeshEditing: MeshEditing {
     public func apply(_ op: PrismMeshOp, to mesh: PrismMesh, selection: PrismMeshSelection,
                       mode: PrismSelectMode) throws(PrismEditError) -> (mesh: PrismMesh, selection: PrismMeshSelection) {
         if let why = unavailableHelp(for: op.kind) { throw .outOfRange(why) }
+        if let damage = mesh.problem { throw .outOfRange(damage) }
         if case .setSmooth(let on) = op { var m = mesh; m.smooth = on; return (m, selection) }
         guard !selection.isEmpty else { throw .nothingSelected }
         var m = mesh
@@ -818,7 +821,7 @@ public struct FakeMeshEditing: MeshEditing {
         case let .inset(amount):
             guard mode == .face, !selection.faces.isEmpty else { throw .outOfRange("Inset works on selected faces.") }
             guard amount > 0 else { throw .outOfRange("Inset must be more than 0.") }
-            for fi in selection.faces.sorted() where fi < m.faces.count {
+            for fi in selection.faces.sorted() where fi < m.faces.count && m.faces[fi].count >= 3 {
                 let f = m.faces[fi], base = m.positions.count
                 let c = f.reduce(Vec3.zero) { $0 + m.positions[Int($1)] } * (1 / Double(f.count))
                 m.positions += f.map { v -> Vec3 in
@@ -1005,7 +1008,8 @@ public struct FakeVectorArtReading: VectorArtReading {
     }
 }
 
-/// Differs: reads a test format "RGBA <w> <h>\n" then w × h × 4 bytes; anything else is refused.
+/// Differs: reads test formats "RGBA <w> <h>\n" then w × h × 4 bytes, and "RGBAF <w> <h>\n" then
+/// w × h × 4 little-endian Float32 (an HDR stand-in); anything else is .unreadableImage.
 public struct FakeImageDecoding: ImageDecoding {
     public init() {}
     public var unavailableHelp: String? { nil }
@@ -1013,10 +1017,18 @@ public struct FakeImageDecoding: ImageDecoding {
         let bytes = [UInt8](data)
         guard let nl = bytes.firstIndex(of: 10) else { throw .unreadableImage }
         let head = String(decoding: bytes[..<nl], as: UTF8.self).split(separator: " ")
-        guard head.count == 3, head[0] == "RGBA", let w = Int(head[1]), let h = Int(head[2]), w > 0, h > 0 else {
+        guard head.count == 3, head[0] == "RGBA" || head[0] == "RGBAF", let w = Int(head[1]), let h = Int(head[2]),
+              w > 0, h > 0, w <= 16384, h <= 16384 else {
             throw .unreadableImage
         }
         let body = Array(bytes[(nl + 1)...])
+        if head[0] == "RGBAF" {
+            guard body.count == w * h * 16 else { throw .damaged("the image is cut short.") }
+            let floats = stride(from: 0, to: body.count, by: 4).map { i -> Float in
+                Float(bitPattern: UInt32(body[i]) | UInt32(body[i + 1]) << 8 | UInt32(body[i + 2]) << 16 | UInt32(body[i + 3]) << 24)
+            }
+            return PrismTexture(id: id, name: name, width: w, height: h, linearRGBA: floats)
+        }
         guard body.count == w * h * 4 else { throw .damaged("the image is cut short.") }
         return PrismTexture(id: id, name: name, width: w, height: h, rgba8: body)
     }
@@ -1028,6 +1040,7 @@ public struct FakeModifierEvaluating: ModifierEvaluating {
     public init() {}
     public var unavailableHelp: String? { nil }
     public func evaluate(_ mesh: PrismMesh, modifiers: [PrismModifier], forRender: Bool) throws(PrismEditError) -> PrismMesh {
+        if let damage = mesh.problem { throw .outOfRange(damage) }
         var m = mesh
         for mod in modifiers {
             switch mod {
@@ -1047,7 +1060,7 @@ public struct FakeModifierEvaluating: ModifierEvaluating {
                 let count = Swift.max(0, Swift.min(forRender ? 4 : 3, forRender ? renderLevels : levels))
                 for _ in 0..<count {
                     let estimate = m.faces.reduce(0) { $0 + $1.count } * 2
-                    guard estimate <= PrismImportError.maximumTriangles else {
+                    guard estimate <= PrismLimits.maximumTriangles else {
                         throw .outOfRange("That many levels would pass 5,000,000 triangles.")
                     }
                     m = Self.split(m)

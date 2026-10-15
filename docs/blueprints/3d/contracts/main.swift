@@ -256,6 +256,27 @@ do {
     check(subRender.faces.count == 96, "render level 2")
 } catch { check(false, "modifiers threw \(error)") }
 
+// Round 2: unknown core-format bytes import as one cube; HDR keeps values above 1; state values.
+do {
+    let one = try s.importing.importModel(Data([0x67, 0x6C, 0x54, 0x46]), format: .glb, name: "Box", sidecars: [:])
+    check(one.nodes.count == 1 && one.nodes[0].name == "Box", "real-looking glb imports as one cube on the fake")
+    var hdr = Data("RGBAF 1 1\n".utf8)
+    for f: Float in [4.0, 2.0, 1.0, 1.0] { withUnsafeBytes(of: f.bitPattern.littleEndian) { hdr.append(contentsOf: $0) } }
+    let env = try s.images.decode(hdr, name: "studio.hdr", id: PrismID("hdr"))
+    check(env.isHDR && env.isValid && env.linearRGBA.first == 4.0, "HDR keeps 4.0")
+} catch { check(false, "round 2 threw \(error)") }
+check(PrismImportFormat(fileExtension: "SVG")?.isVectorArt == true && PrismImportFormat.svg.isCore == false, "svg is vector art")
+check(PrismMeshOp.setSmooth(false).title == "Shade Flat" && PrismMeshOp.mergeAtCenter.title == "Merge at Center", "op titles")
+check(PrismRenderDraft.cameraNote(for: PrismScene()) == "No camera: rendering the view." && PrismRenderDraft.cameraNote(for: {
+    var sc = doc.scene; sc.activeCameraID = camID; return sc }()) == nil, "camera note")
+check(PrismNewSceneDraft(width: "abc").problems[.width] != nil && PrismNewSceneDraft().problems.isEmpty, "new scene draft")
+check(PrismKeySegment(from: PrismKeyRef(node: cubeID, property: .rotationY, frame: 0), toFrame: 89, easing: .easeInOut,
+                      isSelected: false).title == "Rotation Y 0 → 89", "segment title")
+var broken = cube
+broken.faces.append([0, 1, 99])
+do { _ = try s.meshEditing.apply(.translate(Vec3(1, 0, 0)), to: broken, selection: PrismMeshSelection(vertices: [0]), mode: .vertex)
+     check(false, "damaged mesh edited") } catch { check(error == .outOfRange("Cube points at a vertex it doesn't have."), "damaged mesh refused, no trap") }
+
 // Every unbuilt service says why.
 let unbuilt = PrismServices.unbuilt
 check(unbuilt.importing.unavailableHelp == "Import isn't built yet." && unbuilt.rendering.unavailableHelp != nil, "unbuilt help")

@@ -292,6 +292,14 @@ public enum PrismMeshOp: Sendable, Hashable {
     }
 }
 
+extension PrismMeshOp {
+    /// The Undo menu name of this step ("Undo Shade Flat" for setSmooth(false)).
+    public var title: String {
+        if case .setSmooth(false) = self { return "Shade Flat" }
+        return kind.title
+    }
+}
+
 public enum PrismMeshOpKind: String, Sendable, Hashable, Codable, CaseIterable {
     case translate, rotate, scale, extrude, inset, bevel, loopCut, mergeAtCenter, delete, fill, flipNormals, setSmooth
     /// The Undo menu name of the step.
@@ -304,7 +312,7 @@ public enum PrismMeshOpKind: String, Sendable, Hashable, Codable, CaseIterable {
         case .inset: "Inset"
         case .bevel: "Bevel"
         case .loopCut: "Loop Cut"
-        case .mergeAtCenter: "Merge"
+        case .mergeAtCenter: "Merge at Center"
         case .delete: "Delete"
         case .fill: "Fill"
         case .flipNormals: "Flip Normals"
@@ -313,13 +321,27 @@ public enum PrismMeshOpKind: String, Sendable, Hashable, Codable, CaseIterable {
     }
 }
 
-/// An image a material samples. Pixels are 8-bit RGBA, sRGB-encoded, row-major from the top.
+/// An image a material or the environment samples, row-major from the top. Either 8-bit sRGB RGBA
+/// (`rgba8`, textures) or linear float RGBA (`linearRGBA`, HDR environments, values above 1 kept);
+/// exactly one is non-empty.
 public struct PrismTexture: Sendable, Hashable, Codable, Identifiable {
-    public var id: PrismID, name: String, width: Int, height: Int, rgba8: [UInt8]
+    public var id: PrismID, name: String, width: Int, height: Int, rgba8: [UInt8], linearRGBA: [Float]
     public init(id: PrismID, name: String, width: Int, height: Int, rgba8: [UInt8]) {
-        self.id = id; self.name = name; self.width = width; self.height = height; self.rgba8 = rgba8
+        self.id = id; self.name = name; self.width = width; self.height = height; self.rgba8 = rgba8; self.linearRGBA = []
     }
-    public var isValid: Bool { width > 0 && height > 0 && rgba8.count == width * height * 4 }
+    public init(id: PrismID, name: String, width: Int, height: Int, linearRGBA: [Float]) {
+        self.id = id; self.name = name; self.width = width; self.height = height; self.rgba8 = []; self.linearRGBA = linearRGBA
+    }
+    public var isHDR: Bool { !linearRGBA.isEmpty }
+    public var isValid: Bool {
+        let n = width * height * 4
+        return width > 0 && height > 0 && (rgba8.isEmpty != linearRGBA.isEmpty) && (rgba8.count == n || linearRGBA.count == n)
+    }
+}
+
+/// Limits shared by import, modifiers and files.
+public enum PrismLimits {
+    public static let maximumTriangles = 5_000_000
 }
 
 /// The glTF 2.0 metallic-roughness material, the one material model in v1.
@@ -720,10 +742,12 @@ public enum PrismRenderOutcome: Sendable, Hashable {
 // MARK: Files, import, export, shapes, hand-offs
 
 public enum PrismImportFormat: String, Sendable, Hashable, Codable, CaseIterable {
-    case glb, gltf, obj, stl, ply, usdz, usd, usda, usdc
+    case glb, gltf, obj, stl, ply, usdz, usd, usda, usdc, svg
     public init?(fileExtension: String) { self.init(rawValue: fileExtension.lowercased()) }
-    /// Formats read by pure Swift in creative-core (Linux-tested); the rest by the macOS importer.
+    /// Model formats read by pure Swift in creative-core (Linux-tested); the USD family by the macOS importer.
     public var isCore: Bool { [.glb, .gltf, .obj, .stl, .ply].contains(self) }
+    /// SVG goes to vector art (P-F20) through `VectorArtReading`, not to `SceneImporting`.
+    public var isVectorArt: Bool { self == .svg }
 }
 
 public enum PrismExportFormat: String, Sendable, Hashable, Codable, CaseIterable {
@@ -842,7 +866,7 @@ public enum PrismImportError: Error, Sendable, Hashable {
     case unsupportedFormat(String), damaged(String), missingSidecar(String), tooLarge(Int), empty, unreadableImage
     public var message: String {
         switch self {
-        case let .unsupportedFormat(ext): "Prism can't import .\(ext) files. Try glTF, OBJ, STL, PLY or USDZ."
+        case let .unsupportedFormat(ext): "Prism can't import .\(ext) files. Try glTF, OBJ, STL, PLY, USD or USDZ, or SVG for vector art."
         case let .damaged(reason): "This model is damaged: \(reason)"
         case let .missingSidecar(name): "\(name) is missing. Put it next to the model and import again."
         case let .tooLarge(triangles): "This model has \(triangles) triangles; Prism opens up to 5,000,000."
@@ -850,7 +874,7 @@ public enum PrismImportError: Error, Sendable, Hashable {
         case .unreadableImage: "Prism can't read this image. Use PNG, JPEG, HEIC, HDR or EXR."
         }
     }
-    public static let maximumTriangles = 5_000_000
+    public static let maximumTriangles = PrismLimits.maximumTriangles
 }
 
 public enum PrismFileError: Error, Sendable, Hashable {

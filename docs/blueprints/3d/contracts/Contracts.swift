@@ -58,7 +58,8 @@ public protocol ImageDecoding: PrismService {
 
 /// UC22 Evaluate a mesh's modifiers (subdivision, mirror) for the viewport, render and export.
 public protocol ModifierEvaluating: PrismService {
-    /// The mesh after `modifiers` in order; refuses a result over `PrismImportError.maximumTriangles`.
+    /// The mesh after `modifiers` in order; throws `.outOfRange` with the reason for a result over
+    /// `PrismLimits.maximumTriangles` (the workspace clamps the level before calling, so a person sees the row's reason).
     func evaluate(_ mesh: PrismMesh, modifiers: [PrismModifier], forRender: Bool) throws(PrismEditError) -> PrismMesh
 }
 
