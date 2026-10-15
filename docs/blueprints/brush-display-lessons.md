@@ -56,6 +56,13 @@ p95 517 ms; allocated p50 102 MB per event; 48 MB picture per event; 119 of
 - **Clone's Option press.** #713 added `sampling:` to `drag`. A batched drag
   (`drags`) must carry it per sample, or an Option-press in a batch is lost.
 
+## Tooling on a Mac
+
+- **Release tests need `-Xswiftc -enable-testing`** with Swift 6.4:
+  `swift test -c release -Xswiftc -enable-testing --filter Latency`. Without
+  it the `@testable import` test targets fail to build ("unable to resolve
+  Swift module dependency").
+
 ## Tooling in a cloud session
 
 - No Swift toolchain is preinstalled. The swift.org tarball for
