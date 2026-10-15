@@ -80,3 +80,4 @@ utc	stage	event	ref	note
 2026-10-15T07:39Z	4	gap	#1032	heal headroom against PB-2
 2026-10-15T07:42Z	4	pr-merged	#1031	round 2 fixes done
 2026-10-15T07:42Z	4	pr-opened	#1033	feature-done: round 2 status
+2026-10-15T08:00Z	4	ci-run	38700713285	red on SuiteUI FrameProbeTests timing; journeys skipped; noted on #763
