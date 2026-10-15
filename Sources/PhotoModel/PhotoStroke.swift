@@ -29,7 +29,8 @@
 //                  source yet, the press samples the clone source and the
 //                  drag paints nothing; otherwise clone dabs (PhotoRetouch)
 //                  at the brush's size along the pointer samples on the
-//                  selected layer, one undo step ("Clone").
+//                  selected layer, each dab once (a move skips the one the
+//                  event before ended on), one undo step ("Clone").
 //   heal           the same as clone, but each dab takes its tone from where
 //                  it lands (PhotoRetouch), one undo step ("Heal").
 //   marquee        the rectangle from the press to the pointer is the
@@ -87,11 +88,12 @@ struct PhotoStroke: Sendable, Equatable {
 extension PhotoWorkspace {
     /// Where brush, eraser, clone and heal write: the selected layer's
     /// pixels; nil with no layer selected, or on an adjustment layer, with
-    /// `statusMessage` "Pick a pixel layer to paint on." set in this call.
+    /// `statusMessage` "Select an image layer in the Layers tab to paint on."
+    /// set in this call.
     public mutating func paintTarget() -> PaintTarget? {
         guard let layer = selectedLayer else { return nil }
         if case .adjustment = layer.kind {
-            statusMessage = "Pick a pixel layer to paint on."
+            statusMessage = "Select an image layer in the Layers tab to paint on."
             return nil
         }
         return .pixels(layer.id)
@@ -139,11 +141,12 @@ extension PhotoWorkspace {
             } else {
                 if begun { current.layerID = paintLayerID() }
                 guard let id = current.layerID else { break }
-                let from = current.samples.last?.point ?? start
+                // A move after the press starts on the dab the last event laid, so it skips that one.
+                let last = current.samples.last?.point
                 current.samples = [PhotoStroke.Sample(point: end, pressure: 1)]
                 stamp(
-                    along: [from, end], size: brushOptions.size, layer: id, before: &current.before,
-                    coverage: &current.coverage, healing: current.tool == .heal)
+                    along: [last ?? start, end], size: brushOptions.size, layer: id, before: &current.before,
+                    coverage: &current.coverage, healing: current.tool == .heal, skippingFirst: last != nil)
             }
         case .marquee:
             selectionDrag(&current, to: end, modifiers: modifiers, zoom: zoom, in: canvas)

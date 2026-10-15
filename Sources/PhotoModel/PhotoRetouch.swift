@@ -64,11 +64,13 @@ extension PhotoWorkspace {
     /// on the first stroke. `before` keeps each tile it changed as it was
     /// before the stroke and `coverage` its pixels' coverage, so a stroke
     /// painted over several calls (a drag) reads and blends like one.
-    /// `healing` matches each dab's tone to where it lands. Records no undo
-    /// step.
+    /// `healing` matches each dab's tone to where it lands. `skippingFirst`
+    /// lays no dab at the first point: a drag's later events start where the
+    /// one before laid its last dab, which would change no pixel again.
+    /// Records no undo step.
     mutating func stamp(
         along points: [Mask.Point], size: Double, layer id: PhotoLayer.ID, before: inout [Int: PixelBuffer],
-        coverage: inout [Int: [Float]], healing: Bool = false
+        coverage: inout [Int: [Float]], healing: Bool = false, skippingFirst: Bool = false
     ) {
         guard let source = cloneSource, let first = points.first, size.isFinite,
             points.allSatisfy({ $0.x.isFinite && $0.y.isFinite && abs($0.x) < 1e7 && abs($0.y) < 1e7 }),
@@ -81,7 +83,7 @@ extension PhotoWorkspace {
         let layer = layers[at]
         let weight = coverageWeight(offsetX: layer.offsetX, offsetY: layer.offsetY)
         var touched = PixelRect(x: 0, y: 0, width: 0, height: 0)
-        for center in Self.dabCenters(points, spacing: max(diameter / 4, 1)) {
+        for center in Self.dabCenters(points, spacing: max(diameter / 4, 1)).dropFirst(skippingFirst ? 1 : 0) {
             let dab = Mask.Point(x: center.x - Double(layer.offsetX), y: center.y - Double(layer.offsetY))
             // Every index is inside the layer and every value finite, so a dab can't throw.
             if let area = try? cloneDab(
