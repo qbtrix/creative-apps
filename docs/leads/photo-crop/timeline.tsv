@@ -52,3 +52,4 @@ utc	stage	event	ref	note
 2026-10-15T17:00Z	4	pr-merged	#1202	r4-b1 audit contrast
 2026-10-15T17:01Z	3	stage-start	wave 4	CP-5, CP-7 (journey kit landed; #1202 merged)
 2026-10-15T17:16Z	3	pr-opened	#1216	CP-7 perf journeys (report-only, no FrameProbe in Photo yet)
+2026-10-15T17:17Z	3	pr-opened	#1217	CP-5 aspect pill + PJ-8, feature-done
