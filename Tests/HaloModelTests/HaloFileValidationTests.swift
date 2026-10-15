@@ -193,6 +193,30 @@ private func checkReason(_ change: (inout HaloDocumentState) -> Void) throws -> 
     #expect(reason.contains("name"))
 }
 
+/// The damaged alert's reason reads as words: no brackets, no zero-based
+/// index, no "JSON" (#1037 round 2).
+@Test func aDecodingReasonDescribesThePlaceInWords() throws {
+    let bare = Data(#"{"format":"halo","version":1,"project":{"compositions":[{"id":"a"}]}}"#.utf8)
+    let reason = try #require(damagedReason(bare))
+    #expect(!reason.contains("[") && !reason.contains("JSON"))
+    #expect(reason.contains("first composition"))
+    let text = String(decoding: try twoComps { _ in }, as: UTF8.self)
+    let wrong = text.replacing(/"framesPerSecond":\d+/, with: #""framesPerSecond":"fast""#, maxReplacements: 1)
+    #expect(wrong != text)
+    let kind = try #require(damagedReason(Data(wrong.utf8)))
+    #expect(kind == "the first composition's frames per second has a value of the wrong kind")
+    let garbled = DecodingError.dataCorrupted(.init(codingPath: [], debugDescription: "bad"))
+    #expect(HaloFileFormat.reason(garbled) == "its contents can't be read")
+}
+
+@Test func codingKeysAndOrdinalsReadAsWords() {
+    #expect(HaloFileFormat.words("framesPerSecond") == "frames per second")
+    #expect(HaloFileFormat.words("parentID") == "parent id")
+    #expect(HaloFileFormat.ordinal(3) == "third")
+    #expect(HaloFileFormat.ordinal(12) == "12th")
+    #expect(HaloFileFormat.ordinal(23) == "23rd")
+}
+
 @Test(arguments: HaloFixtures.names.filter { $0 != "huge" })
 func everyFixturePassesTheChecks(name: String) throws {
     let fixture = try #require(HaloFixtures.project(name))

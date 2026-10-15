@@ -6,8 +6,10 @@
 // every exit. A write is atomic and ends in `didSave` or `didFailSave`.
 // Open… sets `request = .open` (the system importer); Open Recent opens its
 // path. With unsaved edits both first set `request = .confirmUnsaved(then:)`:
-// "Save changes to <title>?" with Save (then go on, unless the save needs the
-// panel or fails), Don't Save (go on) and Cancel. An open runs `beginOpen`,
+// "Save changes to <title>?" with Save (then go on, unless the save fails),
+// Don't Save (go on) and Cancel. On an untitled project Save reads "Save As…":
+// it opens the exporter and the held open stops there, since `.saveAs` has
+// no continuation yet. An open runs `beginOpen`,
 // decodes off the main actor and ends in `finishOpen`; meanwhile
 // `halo.file.progress` reads "Opening <name>…". A failed open or save shows
 // the Model's message in one system alert; the project stays as it was.
@@ -64,7 +66,7 @@ extension HaloWindow {
                 "Save changes to \(model.windowTitle)?" as String,
                 isPresented: Binding(get: { pendingCommand != nil }, set: { if !$0, pendingCommand != nil { request = nil } })
             ) {
-                Button("Save") { goOn(saving: true) }
+                Button(alertSaveNeedsPanel ? "Save As…" : "Save") { goOn(saving: true) }
                 Button("Don't Save", role: .destructive) { goOn(saving: false) }
                 Button("Cancel", role: .cancel) { request = nil }
             }
@@ -79,6 +81,13 @@ extension HaloWindow {
     /// The command the unsaved-changes alert holds back.
     private var pendingCommand: HaloCommand? {
         if case .confirmUnsaved(let then) = request { then } else { nil }
+    }
+
+    /// Whether the unsaved-changes alert's save needs the panel (an untitled
+    /// project): its button then reads "Save As…" and the held open doesn't
+    /// run after it, so the button promises only the save.
+    private var alertSaveNeedsPanel: Bool {
+        model.saveTarget(launchPath: HaloLaunch.current.saveTo, saveAs: false) == .ask
     }
 
     /// Writes where `saveTarget` says or asks with the panel; true once written.

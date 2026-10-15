@@ -59,7 +59,7 @@ func aMissingFieldIsDamagedAndNamesWhere(files: any ProjectFiles) throws {
     let text = String(decoding: try files.encode(state), as: UTF8.self)
     let broken = text.replacingOccurrences(of: #""name":"Comp 1","#, with: "")
     #expect(broken != text)
-    #expect(throws: HaloFileError.damaged("it is missing name in compositions[0]")) {
+    #expect(throws: HaloFileError.damaged("the first composition is missing its name")) {
         try files.decode(Data(broken.utf8))
     }
 }
