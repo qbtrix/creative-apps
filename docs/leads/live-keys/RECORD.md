@@ -4,7 +4,7 @@ Issue: #799 · Packet: docs/blueprints/flare/features/live-keys.md
 Run: act-1a13d0020ff-4x51 · Session: cse_01BKSKFkuR1aFXhWhZAhsegU · Started: 2026-10-15T00:00Z
 Stage: 4 round 2
 Base: 1cca8d0b65c9506399533fd640862bac58ffe411
-Next: round 2 panel on 1cca8d0 (same lenses); judge CI on the dev run containing #943
+Next: wait for r2-b1, r2-b2 to merge; round 3 panel (same lenses) on the new dev head
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -23,6 +23,7 @@ Next: round 2 panel on 1cca8d0 (same lenses); judge CI on the dev run containing
 | round | CI run | CI | audit vs baseline | lenses | confirmed | fixed by | clean |
 |---|---|---|---|---|---|---|---|
 | 1 | 38673821944 (3af1c0e: #936, #942) | red, not ours: SuiteUI SidebarRenameGestureTests (#938), on #763; every live-keys suite green on macOS | not run (scripts/ci failed before journeys) | clarity, journey, contract, quality | 12 (2 major: symbol keys past the symbol's end; non-atomic coalesced multi-layer setValue), 1 refuted | #942 (r1-b1), #943 (r1-b2) | no |
+| 2 | (pending: dev run containing 1cca8d0) | pending | pending | clarity, journey, contract, quality | 6 (1 major: no test that a multi-command coalesced drag/scrub stays one entry), 1 refuted | r2-b1, r2-b2 | no |
 
 ## Decisions
 - Base is c111439 (dev one commit past the briefed bcc3197, which is its ancestor: #896, a Flare test pin).
