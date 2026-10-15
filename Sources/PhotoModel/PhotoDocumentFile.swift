@@ -9,7 +9,8 @@
 // every layer, mask, kind and the adjustments, clean and with nothing to undo.
 // A failed open leaves the workspace as it was. `openDocument(_:name:)`
 // takes a snapshot the window decoded off the main actor, and
-// `PhotoServices.recovering(in:)` keeps autosaves in another folder.
+// `PhotoServices.recovering(in:)` keeps autosaves in another folder. Both
+// directions convert tile by tile across the cores (TiledPixelsBytes.swift).
 // Linux-safe.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
@@ -101,7 +102,7 @@ extension PhotoWorkspace {
     public func snapshot() throws -> PhotoDocumentSnapshot {
         guard let canvas else { throw RasterError.invalid("no image is open") }
         func image(_ tiles: TiledPixels) throws -> DecodedImage {
-            DecodedImage(rgba8: try tiles.flattened().rgba8(), width: tiles.width, height: tiles.height)
+            DecodedImage(rgba8: try tiles.rgba8(), width: tiles.width, height: tiles.height)
         }
         return PhotoDocumentSnapshot(
             canvas: canvas, layers: layers, pixels: try pixels.mapValues(image), masks: try masks.mapValues(image),
@@ -188,7 +189,7 @@ extension PhotoWorkspace {
 
     private static func tiles(_ image: DecodedImage, what: String) throws -> TiledPixels {
         do {
-            return TiledPixels(try PixelBuffer(rgba8: image.rgba8, width: image.width, height: image.height))
+            return try TiledPixels(rgba8: image.rgba8, width: image.width, height: image.height)
         } catch {
             throw ArchiveError.damaged("\(what) has bad pixels")
         }

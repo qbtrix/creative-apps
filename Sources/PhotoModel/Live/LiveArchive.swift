@@ -2,12 +2,14 @@
 // an OpenRaster file (https://www.openraster.org/baseline/). Encode writes
 // `mimetype`, one PNG per pixel layer at "data/layer-<i>.png" (i counts the
 // stack from the bottom, 1 first), each mask at "photo/masks/layer-<i>.png",
-// the composite as `mergedimage.png` and at most 256 px long as
-// `Thumbnails/thumbnail.png`, `stack.xml` for other OpenRaster readers, and
-// `photo/document.json` with what OpenRaster has no word for. Decode reads only
+// the composite as `mergedimage.png` and at most 256 px long (a box filter
+// in linear light) as `Thumbnails/thumbnail.png`, `stack.xml` for other
+// OpenRaster readers, and `photo/document.json` with what OpenRaster has no
+// word for. Decode reads only
 // the JSON and the images it names (stack.xml is written, never parsed back:
-// the packet's "Reading" decision) and throws only ArchiveError. The zip is
-// PhotoZip's. Linux-safe.
+// the packet's "Reading" decision) and throws only ArchiveError. Both run
+// the codec on every image at once, across the cores. The zip is PhotoZip's.
+// Linux-safe.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -23,8 +25,8 @@ struct LiveArchive: DocumentArchiving {
     var formatVersion: Int { 1 }
 
     func encode(_ snapshot: PhotoDocumentSnapshot, codec: any PhotoImageCodec) throws -> PhotoPackage {
-        func png(_ image: DecodedImage) throws -> Data { try codec.encode(image, as: .png, quality: 1) }
         var files: [String: Data] = [PhotoZip.mimetype: PhotoZip.mimetypeValue]
+        var images: [(path: String, image: DecodedImage)] = []
         var entries: [LayerEntry] = [], contents: [LayerContent] = []
         for (index, layer) in snapshot.layers.enumerated() {
             let number = snapshot.layers.count - index
@@ -32,12 +34,12 @@ struct LiveArchive: DocumentArchiving {
             if layer.kind == .pixels {
                 guard let image = snapshot.pixels[layer.id] else { throw RasterError.invalid("\(layer.name) has no pixels") }
                 let path = "data/layer-\(number).png"
-                files[path] = try png(image)
+                images.append((path, image))
                 src = path
             }
             if let image = snapshot.masks[layer.id] {
                 let path = "photo/masks/layer-\(number).png"
-                files[path] = try png(image)
+                images.append((path, image))
                 mask = path
             }
             entries.append(LayerEntry(layer, src: src, mask: mask))
@@ -46,10 +48,12 @@ struct LiveArchive: DocumentArchiving {
                 layer: layer, pixels: try snapshot.pixels[layer.id].map(Self.tiles),
                 mask: layer.isMaskEnabled ? try snapshot.masks[layer.id].map(Self.tiles) : nil))
         }
-        let merged = try LiveMerging().flatten(contents, canvas: snapshot.canvas, adjustments: snapshot.adjustments)
-            .flattened()
-        files["mergedimage.png"] = try png(Self.image(merged))
-        files["Thumbnails/thumbnail.png"] = try png(Self.image(Self.thumbnail(merged)))
+        let picture = try LiveMerging().flatten(contents, canvas: snapshot.canvas, adjustments: snapshot.adjustments)
+        let merged = DecodedImage(rgba8: try picture.rgba8(), width: picture.width, height: picture.height)
+        let all = images + [("mergedimage.png", merged), ("Thumbnails/thumbnail.png", try Self.thumbnail(merged))]
+        // Every PNG at once, across the cores.
+        let pngs = try PhotoLayerComposite.inParallel(all.count) { try codec.encode(all[$0].image, as: .png, quality: 1) }
+        for (entry, png) in zip(all, pngs) { files[entry.path] = png }
         files["stack.xml"] = Data(PhotoStackXML.stack(snapshot.canvas, entries).utf8)
         let document = DocumentEntry(
             format: formatVersion, canvas: SizeEntry(width: snapshot.canvas.width, height: snapshot.canvas.height),
@@ -68,17 +72,21 @@ struct LiveArchive: DocumentArchiving {
         guard let document = try? JSONDecoder().decode(DocumentEntry.self, from: json) else { throw unreadable }
         let canvas = CanvasSize(width: document.canvas.width, height: document.canvas.height)
         try Self.checkSize(canvas.width, canvas.height, what: "the canvas")
-        func image(_ path: String) throws -> DecodedImage {
+        @Sendable func image(_ path: String) throws -> DecodedImage {
             guard let data = package.files[path] else { throw ArchiveError.damaged("\(path) is missing") }
             guard let image = try? codec.decode(data, longestSide: nil) else { throw ArchiveError.damaged("\(path) is unreadable") }
             try Self.checkSize(image.width, image.height, what: path)
             return image
         }
+        // Every image at once, across the cores; the first bad one in stack order throws.
+        let paths = document.layers.flatMap { [$0.src, $0.mask].compactMap { $0 } }
+        let decoded = try PhotoLayerComposite.inParallel(paths.count) { try image(paths[$0]) }
+        let byPath = Dictionary(zip(paths, decoded)) { first, _ in first }
         var pixels: [PhotoLayer.ID: DecodedImage] = [:], masks: [PhotoLayer.ID: DecodedImage] = [:]
         var layers: [PhotoLayer] = []
         for entry in document.layers {
-            if let src = entry.src { pixels[entry.id] = try image(src) }
-            if let mask = entry.mask { masks[entry.id] = try image(mask) }
+            if let src = entry.src { pixels[entry.id] = byPath[src] }
+            if let mask = entry.mask { masks[entry.id] = byPath[mask] }
             layers.append(entry.layer)
         }
         return PhotoDocumentSnapshot(
@@ -99,21 +107,18 @@ struct LiveArchive: DocumentArchiving {
     }
 
     private static func tiles(_ image: DecodedImage) throws -> TiledPixels {
-        TiledPixels(try PixelBuffer(rgba8: image.rgba8, width: image.width, height: image.height))
+        try TiledPixels(rgba8: image.rgba8, width: image.width, height: image.height)
     }
 
-    private static func image(_ buffer: PixelBuffer) throws -> DecodedImage {
-        DecodedImage(rgba8: try buffer.rgba8(), width: buffer.width, height: buffer.height)
-    }
-
-    /// `picture` with its longest side at most `thumbnailSide`, the aspect kept.
-    private static func thumbnail(_ picture: PixelBuffer) throws -> PixelBuffer {
+    /// `picture` with its longest side at most `thumbnailSide`, the aspect
+    /// kept: a box filter in linear light, one pass over the merged bytes.
+    private static func thumbnail(_ picture: DecodedImage) throws -> DecodedImage {
         let longest = max(picture.width, picture.height)
         guard longest > thumbnailSide else { return picture }
         let scale = Double(thumbnailSide) / Double(longest)
-        return try picture.resized(
-            width: max(Int((Double(picture.width) * scale).rounded()), 1),
-            height: max(Int((Double(picture.height) * scale).rounded()), 1), filter: .lanczos3)
+        let width = max(Int((Double(picture.width) * scale).rounded()), 1)
+        let height = max(Int((Double(picture.height) * scale).rounded()), 1)
+        return try SRGBBytes.thumbnail(picture, width: width, height: height) ?? picture
     }
 }
 
