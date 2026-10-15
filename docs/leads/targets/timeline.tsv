@@ -7,3 +7,5 @@ utc	stage	event	ref	note
 2026-10-15T13:00Z	3	pr-merged	#1135	TG-0c
 2026-10-15T13:00Z	3	pr-opened	#1133	BU-0 size-report (supervisor)
 2026-10-15T13:05Z	3	stage-start	wave 2	TG-0d BU-1a
+2026-10-15T13:25Z	3	pr-opened	#1143	BU-1a targets (supervisor)
+2026-10-15T13:25Z	3	pr-opened	#1144	TG-0d relationships
