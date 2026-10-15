@@ -73,7 +73,29 @@ jobs:
       # Pin Xcode: the image's default moves. 26.6 ships the macOS 26.5 SDK.
       - run: sudo xcode-select -s /Applications/Xcode_26.6.app
       - run: swift --version
-      - run: scripts/ci
+      # scripts/ci with a memory sample every 20 s into memory.log: the time,
+      # vm_stat's page counts, the system-wide free percentage and the five
+      # largest processes by resident memory. The Crash reports step prints
+      # it on failure, since a step killed for memory leaves no output of its own.
+      - name: scripts/ci (memory sampled)
+        run: |
+          mem="$RUNNER_TEMP/crash-reports/memory.log"
+          mkdir -p "$RUNNER_TEMP/crash-reports"
+          echo "hw.memsize $(sysctl -n hw.memsize), hw.ncpu $(sysctl -n hw.ncpu)" >"$mem"
+          (
+            while true; do
+              {
+                echo "== $(date -u +%H:%M:%S)"
+                vm_stat | head -10
+                memory_pressure | tail -1
+                ps -Ao rss=,pid=,comm= -m | head -5
+              } >>"$mem" 2>&1
+              sleep 20
+            done
+          ) >/dev/null 2>&1 &
+          sampler=$!
+          trap 'kill $sampler 2>/dev/null' EXIT
+          scripts/ci
       - name: Upload snapshots
         if: always()
         uses: actions/upload-artifact@v4
@@ -133,17 +155,38 @@ jobs:
       # process that died (scripts/ci prints TEST PROCESS DIED) leaves an .ips
       # naming the crashed thread. The newest one's head goes in the log; all
       # of them go up as `crash-reports`.
+      # It also prints the last 15 memory samples (all are uploaded), and the
+      # newest JetsamEvent report's summary (scripts/jetsam-summary): macOS
+      # writes one to /Library/Logs/DiagnosticReports when it kills processes
+      # because memory ran out.
       - name: Crash reports
         if: failure()
         run: |
-          mkdir -p "$RUNNER_TEMP/crash-reports"
+          out="$RUNNER_TEMP/crash-reports"
+          mkdir -p "$out"
           shopt -s nullglob
+          if [[ -f "$out/memory.log" ]]; then
+            echo "== memory samples (the last 15 of $(grep -c '^== ' "$out/memory.log"))"
+            awk '/^== /{n++} {line[NR]=$0; at[NR]=n} END{for(i=1;i<=NR;i++) if(at[i]==0 || at[i]>n-15) print line[i]}' "$out/memory.log"
+          else
+            echo "No memory samples"
+          fi
+          jetsam=(/Library/Logs/DiagnosticReports/JetsamEvent*.ips)
+          if (( ${#jetsam[@]} > 0 )); then
+            sudo cp "${jetsam[@]}" "$out/"
+            sudo chown "$(id -u)" "$out"/JetsamEvent*.ips
+            newest=$(ls -t "$out"/JetsamEvent*.ips | head -1)
+            echo "== ${#jetsam[@]} JetsamEvent report(s); the newest, $(basename "$newest"):"
+            scripts/jetsam-summary "$newest" || head -40 "$newest"
+          else
+            echo "No JetsamEvent reports in /Library/Logs/DiagnosticReports"
+          fi
           reports=(~/Library/Logs/DiagnosticReports/*.ips)
           if (( ${#reports[@]} == 0 )); then
             echo "No crash reports in ~/Library/Logs/DiagnosticReports"
             exit 0
           fi
-          cp "${reports[@]}" "$RUNNER_TEMP/crash-reports/"
+          cp "${reports[@]}" "$out/"
           newest=$(ls -t "${reports[@]}" | head -1)
           echo "== ${#reports[@]} crash report(s); the newest, $newest, first 60 lines:"
           head -60 "$newest"

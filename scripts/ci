@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # scripts/ci: the one gate. Runs the no-crash lint, the app-state rule, the
 # design lint, the C4 ownership check, the duplicate-code check, the contact
-# sheet, audit-lower and test-died tests, swift build and swift test, then prints PASS or FAIL and exits with the real status.
+# sheet, audit-lower, test-died and jetsam-summary tests, swift build and swift test, then prints PASS or FAIL and exits with the real status.
 # A swift test that dies without its "Test run with" summary prints TEST PROCESS DIED and the tests it left
 # unfinished (scripts/test-died). CI
 # runs exactly this on Linux and macOS; run it before every PR. On Linux,
@@ -272,6 +272,8 @@ echo "== audit lower (Tests/audit_lower)"
 bash Tests/audit_lower/test_audit_lower.sh || fail "audit lower: scripts/audit-lower broke its decision tests"
 echo "== test died (Tests/test_died)"
 bash Tests/test_died/test_test_died.sh || fail "test died: scripts/test-died broke its fixture test"
+echo "== jetsam summary (Tests/jetsam)"
+bash Tests/jetsam/test_jetsam_summary.sh || fail "jetsam summary: scripts/jetsam-summary broke its fixture test"
 
 flags=()
 if [[ "$(uname)" == Darwin ]]; then
@@ -285,18 +287,40 @@ fi
 echo "== swift build"
 swift build ${flags[@]+"${flags[@]}"} || fail "swift build"
 
-echo "== swift test"
-log="$(mktemp)"
-trap 'rm -f "$log"' EXIT
-swift test ${flags[@]+"${flags[@]}"} 2>&1 | tee "$log"
-status=${PIPESTATUS[0]}
-if (( status != 0 )); then
-  # No "Test run with" summary means the test process died mid-run (a crash,
-  # a kill): name the tests it left running, then fail with that cause.
-  python3 scripts/test-died "$log" || fail "swift test process died (exit $status) with the tests above unfinished"
-  fail "swift test exited $status"
+# run_tests LABEL ARGS...: one `swift test` run, its wall time, and on a
+# failure its cause: a dead test process (no "Test run with" summary) names
+# the tests it left running (scripts/test-died).
+logs=()
+trap 'rm -f ${logs[@]+"${logs[@]}"}' EXIT
+run_tests() {
+  local label=$1 log start status
+  shift
+  log="$(mktemp)"
+  logs+=("$log")
+  echo "== swift test: $label"
+  start=$SECONDS
+  swift test ${flags[@]+"${flags[@]}"} "$@" 2>&1 | tee "$log"
+  status=${PIPESTATUS[0]}
+  echo "== swift test: $label took $((SECONDS - start)) s"
+  if (( status != 0 )); then
+    python3 scripts/test-died "$log" || fail "swift test ($label) process died (exit $status) with the tests above unfinished"
+    fail "swift test ($label) exited $status"
+  fi
+}
+
+if [[ "$(uname)" == Darwin ]]; then
+  # AppSnapshotTests renders images. Run in parallel with every other target,
+  # the whole step was killed mid-run with no output (dev runs 38734211999,
+  # 38746333198, 38759641683), most likely by the runner running out of
+  # memory; ci.yml samples memory to confirm it. So it runs on its own, one
+  # test at a time (--no-parallel serializes Swift Testing), and the rest stay
+  # parallel. Each run prints its wall time.
+  run_tests "all but AppSnapshotTests" --skip '^AppSnapshotTests\.'
+  run_tests "AppSnapshotTests, one at a time" --skip-build --filter '^AppSnapshotTests\.' --no-parallel
+else
+  run_tests "all"
 fi
 
 echo
-grep -E "Test run with [0-9]+ tests?" "$log" | tail -1
+for log in "${logs[@]}"; do grep -E "Test run with [0-9]+ tests?" "$log" | tail -1; done
 echo "CI: PASS"
