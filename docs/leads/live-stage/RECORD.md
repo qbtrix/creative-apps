@@ -4,7 +4,7 @@ Issue: #798 · Packet: docs/blueprints/flare/features/live-stage.md
 Run: act-1a13d374bd1-s92z · Session: claude/live-stage-lead-gljfd4 · Started: 2026-10-15T00:40Z
 Stage: 4 round 2
 Base: 04ae98a764d312627e9705bf4b4e71e075d55271
-Next: wait for r2 fix PRs, then round 3 (same lenses) on the next dev CI run; second clean round ends the loop. Feature-done PR waits for dev CI to go green (other lines red: Library #933, Halo, SuiteUI)
+Next: wait for #957 #958 #960 to merge, then round 3 (same five lenses) on the next dev CI run containing them
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -26,7 +26,7 @@ Journeys: J3 and J5 model half, steps 1-6 of the packet. Quality: QB-L5 hit <= 1
 | round | CI run | CI | audit vs baseline | lenses | confirmed | fixed by | clean |
 |---|---|---|---|---|---|---|---|
 | 1 | 38671960461 (1fdabfd) | red: 6 UI journeys, same as 0a455df before this feature; swift test 1945 green | flare identifier 16 > 15 (Show Sidebar, pre-existing, #938) | clarity, journey, contract, quality, audit | 1 major (fake moves text, live refuses), 3 minor (rotate pivot, QB-F3 coverage, QB-L11 scale); 3 refuted | #945 (r1-b1), #946 (r1-b2) | no |
-| 2 | 38675308731 (1025fcc) | red: Library, Halo, SuiteUI journeys only; all 4 Flare journeys pass; swift test 1966 green | flare at or under baseline (identifier 14 < 15) | same five | 3 minor (copy name double strip, pen refusal wording, p95 per rubric); 0 blocker/major | r2-b1, r2-b2, r2-b3 | yes |
+| 2 | 38675308731 (1025fcc) | red: Library, Halo, SuiteUI journeys only; all 4 Flare journeys pass; swift test 1966 green | flare at or under baseline (identifier 14 < 15) | same five | 3 minor (copy name double strip, pen refusal wording, p95 per rubric); 0 blocker/major | #957 (r2-b1), #958 (r2-b2), #960 (r2-b3) | yes |
 
 ## Decisions
 - Depends on: none (issue body); engine issues closed on creative-core main 98be31a.
@@ -41,6 +41,10 @@ Journeys: J3 and J5 model half, steps 1-6 of the packet. Quality: QB-L5 hit <= 1
 - dev CI was already red before #934 (runs 38667087530, 38669151941 on c3fd66f and 0a455df; SuiteUI increased-contrast snapshots, #907), not this feature.
 
 - Round 1 major: align FakeShapes to the packet (text refuses "Text can't be moved yet."), not the live type to the fake.
+
+- r2-b1: the fixer found the copy-name finding's premise wrong (live already matched the fake); it kept behavior, made the branch clearer, and added a 5-case parity table.
+- r2-b2: one scripts/ci run after rebase printed CI: FAIL with no captured output; two later full runs on the same head passed. Watch for a flaky test in round 3.
+- r2-b3: p95 reported, not gated, per the rubric's rule for new p95 rows.
 
 ## Open
 - none
