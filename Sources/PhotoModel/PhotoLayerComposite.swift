@@ -15,7 +15,9 @@
 // composite is per pixel and layer tiles don't overlap, so the result is the
 // same bits. Picture tiles are independent, so they run across the cores.
 // Merge Down and Flatten keep their picture as TiledPixels (same grid), so
-// they never copy a whole picture at all.
+// they never copy a whole picture at all. A picture of one tile (each region
+// the renderer draws) is its own only tile, so it skips the read and the
+// write back: one copy per layer, not three, on every brush event.
 import CoreRaster
 import Dispatch
 import Synchronization
@@ -30,6 +32,11 @@ public enum PhotoLayerComposite {
                                  adjusting: any AdjustmentLayering,
                                  masking: any LayerMasking) throws -> PixelBuffer {
         let columns = below.tileColumns
+        if columns == 1 && below.tileRows == 1 {
+            let pieces = try pictureTiles(content, width: below.width, height: below.height, columns: 1,
+                                          origin: origin) { _ in below }
+            return pieces.first?.1 ?? below
+        }
         let pieces = try pictureTiles(content, width: below.width, height: below.height, columns: columns,
                                       origin: origin) { try below.tile(column: $0 % columns, row: $0 / columns) }
         guard !pieces.isEmpty else { return below }
