@@ -2,9 +2,9 @@
 
 Issue: #1074 · Packet: docs/blueprints/photo/features/photo-documents.md
 Run: act-1a1404bf04c-bp6m · Session: claude/photo-documents-lead-ezrcev · Started: 2026-10-15T10:40Z
-Stage: 3 wave 7
-Base: 0672506890e811c17e82923b046e316cb553b50c
-Next: wait for D-10 and the perf fix; read the macOS run containing #1230; rerun scripts/ci on lead/photo-documents-d-5-debug; check photo-journey-kit #1073 for wave 8
+Stage: 3 wave 8
+Base: 6018826c90376f7b4ea46336d85e8da510c90f4d
+Next: wait for D-11, D-12 and the perf fix; read the macOS CI run containing #1232 (UI merge); then stage 4 round 1
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -19,9 +19,9 @@ Next: wait for D-10 and the perf fix; read the macOS run containing #1230; rerun
 | D-7 | 4 | Save routing, Keep layers?, open .ora/flat, errors, Not saved, fileServices, Open Recent | A/PhotoWindow+File.swift, A/PhotoCommands+File.swift | V5/V6, app-state rule | #1223 | merged |
 | D-8 | 5 | Save status in top bar, edited dot, Saving…/Opening… notes; snapshots | A/PhotoTopBar.swift, A/PhotoWindow+File.swift, ST/PhotoDocumentsSnapshots.swift | PhotoDocumentsSnapshots | #1228 | merged |
 | D-9 | 6 | PhotoAutosave + wiring | A/PhotoAutosave.swift, A/PhotoWindow+File.swift, ST/PhotoAutosaveTests.swift | PhotoAutosaveTests | #1230 | merged |
-| D-10 | 7 | App delegate: Open Recent/Finder opens, unsaved prompt on close/quit | A/PhotoApp.swift, A/PhotoWindow+File.swift, ST/PhotoUnsavedPromptTests.swift | PhotoUnsavedPromptTests | #1232 | open |
-| D-11 | 8 | Journeys PJ-1, PJ-1b, PJ-2, PJ-4 | UT/PhotoJourneyTests+Documents.swift | macOS run | – | waits D-10 |
-| D-12 | 8 | Journeys PJ-3, PJ-P3 (feature-done if last) | UT/PhotoJourneyTests+Recovery.swift, UT/PhotoJourneyTests+PerfDocuments.swift | macOS run | – | waits D-10 |
+| D-10 | 7 | App delegate: Open Recent/Finder opens, unsaved prompt on close/quit | A/PhotoApp.swift, A/PhotoWindow+File.swift, ST/PhotoUnsavedPromptTests.swift | PhotoUnsavedPromptTests | #1232 | merged |
+| D-11 | 8 | Journeys PJ-1, PJ-1b, PJ-2, PJ-4 | UT/PhotoJourneyTests+Documents.swift | macOS run | – | building |
+| D-12 | 8 | Journeys PJ-3, PJ-P3  | UT/PhotoJourneyTests+Recovery.swift, UT/PhotoJourneyTests+PerfDocuments.swift | macOS run | – | building |
 
 Waves (packet's Build waves, checked against dev at 00e546a):
 - Wave 1: D-1, D-3 — independent of each other.
@@ -65,3 +65,4 @@ Waves (packet's Build waves, checked against dev at 00e546a):
 - design.md says "alerts never at launch" but the packet/PJ-3 require the restore alert; D-9 followed the packet (Decision).
 - D-10 for journeys: unsaved alert "Do you want to save the changes made to the document “beach.png”?" / "Your changes will be lost if you don't save them."; buttons Save (photo.unsaved.save, default), Don't Save (photo.unsaved.dontSave), Cancel (photo.unsaved.cancel); NSAlert sheet. WindowGroup id "photo". Text in PhotoModel/PhotoUnsavedPrompt.swift.
 - Fix-batch item: Open Recent with no window shows an empty submenu (menu reads the focused window's list); fall back to the saved PhotoRecentFiles list and route through D-10's open queue.
+- feature-done goes on a separate final PR (wave.json status built) after the Anatomy loop, not on D-12; D-11/D-12 are plain journey PRs.

@@ -41,3 +41,6 @@ utc	stage	event	ref	note
 2026-10-15T19:21Z	3	heartbeat	belt-nudge	wave 7: D-10 and perf fix building
 2026-10-15T19:34Z	3	pr-opened	#1231	D-5 heavy passes release-only
 2026-10-15T19:37Z	3	pr-opened	#1232	D-10 unsaved prompt
+2026-10-15T19:38Z	3	pr-merged	#1232	D-10
+2026-10-15T19:38Z	3	pr-merged	#1231	D-5 debug guard
+2026-10-15T19:38Z	3	stage-start	wave 8	D-11, D-12 on 6018826
