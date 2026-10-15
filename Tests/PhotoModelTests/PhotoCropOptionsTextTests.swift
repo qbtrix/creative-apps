@@ -2,7 +2,8 @@
 // Anatomy round 1): the one caption in every state, why Swap is off, the
 // fields' numbers with no crop, their tooltips, the chips' tooltips and the
 // disabled reasons, down to a field the lock or the image's edge pins and an
-// Apply that would change nothing (Anatomy round 2). Runs on Linux and macOS.
+// Apply that would change nothing (Anatomy round 2), and journey PJ-8's steps
+// on the model (CP-5). Runs on Linux and macOS.
 import CoreRaster
 import PhotoModel
 import Testing
@@ -162,5 +163,32 @@ import Testing
         #expect(!typed(&workspace, .width, 0))
         #expect(!typed(&workspace, .height, 0))
         #expect(workspace.cropFieldValue(.width) == 600)
+    }
+
+    /// PJ-8's steps on the model, so the journey's numbers hold on Linux: the
+    /// pill reads 1:1, then 2:3 with H > W, then nothing under Free; a typed X
+    /// past the image clamps; a drag back over the crop keeps it; Apply crops.
+    @Test func theTypedCropJourneyReadsAsPJ8Expects() throws {
+        var workspace = try image()
+        workspace.setCropAspect(.ratio(1, 1))
+        #expect(workspace.pendingCrop == PixelRect(x: 100, y: 0, width: 600, height: 600))
+        #expect(workspace.cropAspectBadge == "1:1")
+        #expect(typed(&workspace, .width, 400))
+        #expect(workspace.pendingCrop == PixelRect(x: 100, y: 0, width: 400, height: 400))
+        #expect(workspace.cropAspectBadge == "1:1" && workspace.canvas?.width == 800)
+        workspace.setCropAspect(.ratio(3, 2))
+        workspace.swapCropAspect()
+        let swapped = try #require(workspace.pendingCrop)
+        #expect(workspace.cropAspectBadge == "2:3" && swapped.height > swapped.width)
+        workspace.setCropAspect(.free)
+        #expect(workspace.cropAspectBadge == nil && workspace.pendingCrop == swapped)
+        stroke(&workspace, .crop, from: point(10, 10), to: point(210, 110))
+        #expect(workspace.pendingCrop == PixelRect(x: 10, y: 10, width: 200, height: 100))
+        #expect(typed(&workspace, .x, 700))
+        #expect(workspace.pendingCrop == PixelRect(x: 600, y: 10, width: 200, height: 100))
+        stroke(&workspace, .crop, from: point(600, 10), to: point(805, 110))
+        #expect(workspace.pendingCrop == PixelRect(x: 600, y: 10, width: 200, height: 100))
+        workspace.applyCrop()
+        #expect(workspace.canvas?.width == 200 && workspace.canvas?.height == 100)
     }
 }
