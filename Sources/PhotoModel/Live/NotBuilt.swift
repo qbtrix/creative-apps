@@ -52,17 +52,6 @@ struct NotBuiltMerging: LayerMerging {
     }
 }
 
-struct NotBuiltCrop: CropSizing {
-    let not = NotBuilt(feature: "PV-3")
-    var unavailableHelp: String? { not.help }
-    func setting(_ field: CropField, to value: Int, in crop: PixelRect, aspect: CropAspect, canvas: CanvasSize) -> PixelRect { crop }
-    func dragged(from anchor: Mask.Point, to point: Mask.Point, aspect: CropAspect, canvas: CanvasSize) -> PixelRect {
-        PixelRect(from: anchor, to: point).intersection(canvas.rect) ?? canvas.rect
-    }
-    func applying(_ aspect: CropAspect, to crop: PixelRect?, canvas: CanvasSize) -> PixelRect { crop ?? canvas.rect }
-    func swapped(_ aspect: CropAspect, canvas: CanvasSize) -> CropAspect { aspect }
-}
-
 struct NotBuiltSelection: SelectionShaping {
     let not = NotBuilt(feature: "PV-5")
     var unavailableHelp: String? { not.help }
