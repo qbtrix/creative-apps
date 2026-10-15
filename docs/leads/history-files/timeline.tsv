@@ -10,3 +10,9 @@ utc	stage	event	ref	note
 2026-10-15T08:54Z	3	pr-merged	#1046	HF-6 file state
 2026-10-15T08:54Z	3	pr-merged	#1048	HF-5 validation
 2026-10-15T08:54Z	3	stage-start	wave 3	HF-2 HF-3 HF-7 HF-9 base 064ca8d
+2026-10-15T09:10Z	3	pr-merged	#1056	HF-3
+2026-10-15T09:10Z	3	pr-merged	#1057	HF-2
+2026-10-15T09:10Z	3	pr-merged	#1060	HF-7
+2026-10-15T09:10Z	3	pr-merged	#1061	HF-9
+2026-10-15T09:10Z	3	ci-run	38709336067	red: HaloLayerListTests, not ours (#763)
+2026-10-15T09:10Z	3	stage-start	wave 4	HF-8 HF-10 base 2fc9b59
