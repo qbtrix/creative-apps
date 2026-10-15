@@ -115,6 +115,58 @@ import Testing
         #expect(strokeStart <= Self.dragBudget && strokeEnd <= 16, "\(report)")
         if let budget = Self.totalBudget { #expect(percentile(total, 0.5) <= budget, "\(report)") }
     }
+
+    /// PB-2 (packet photo-seams S-13): a clone or heal drag event to its
+    /// picture on the `large` fixture, timed the way the brush's events are.
+    /// Option at a press sets the source at (1200, 1500); the stroke presses
+    /// 400 px to its right, untimed, then 60 events each move 20 px, more than
+    /// a 64 px dab's 16 px spacing, so every timed event puts down a dab.
+    /// Release p50 within 8 ms; debug reports it. Fewer than 60 samples fails.
+    @MainActor @Test(arguments: [PhotoTool.clone, .heal])
+    func aCloneOrHealDragEventBecomesAFrameWithinBudget(tool: PhotoTool) async throws {
+        let name = tool == .heal ? "heal" : "clone"
+        let clock = ContinuousClock()
+        var open = try PhotoWorkspace.fixture(.large)
+        open.selectTool(tool)
+        open.setToolOption(.size(64))
+        let state = StateBox(open)
+        let source = Mask.Point(x: 1200, y: 1500)
+        state.drag(from: source, to: source, modifiers: [.option])
+        state.endDrag()
+        #expect(state.value.cloneSource?.point == source)
+        let tiles = CanvasTiles()
+        var shown = try await PhotoRenderer.update(state.value, since: nil).revision
+        let path = (0...60).map { Mask.Point(x: 1600 + 20 * Double($0), y: 1500) }
+
+        var total: [Double] = []
+        for (i, to) in path.enumerated() {
+            let t0 = clock.now
+            state.drag(from: i == 0 ? to : path[i - 1], to: to)
+            let next = try await PhotoRenderer.update(state.value, since: shown)
+            tiles.apply(next)
+            let t1 = clock.now
+            #expect(tiles.handedBytes == next.tiles.reduce(0) { $0 + $1.rgba8.count })
+            shown = next.revision
+            guard i > 0 else { continue }
+            #expect(!next.tiles.isEmpty, "\(name) event \(i) put down no dab")
+            total.append(milliseconds(t1 - t0))
+        }
+        state.endDrag()
+        #expect(state.value.undoActionName == (tool == .heal ? "Undo Heal" : "Undo Clone"))
+
+        let report = [
+            "\(name.uppercased())-LATENCY config=\(Self.config) canvas=4000x3000 events=\(total.count) ms per event:",
+            "total p50 \(format(percentile(total, 0.5))) p95 \(format(percentile(total, 0.95))) |",
+            "budget p50 total <= \(Self.totalBudget.map(format) ?? "report only (debug)")",
+        ].joined(separator: " ")
+        print(report)
+        let folder = try packageRoot().appending(path: ".build/snapshots")
+        try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        try Data((report + "\n").utf8).write(to: folder.appending(path: "photo-\(name)-latency.txt"))
+
+        #expect(total.count >= 60, "\(report)")
+        if let budget = Self.totalBudget { #expect(percentile(total, 0.5) <= budget, "\(report)") }
+    }
 }
 
 /// SwiftUI's State storage for the window's workspace: `model.drag(...)` in
@@ -124,9 +176,9 @@ final class StateBox {
 
     init(_ value: PhotoWorkspace) { self.value = value }
 
-    func drag(from a: Mask.Point, to b: Mask.Point) {
+    func drag(from a: Mask.Point, to b: Mask.Point, modifiers: DragModifiers = []) {
         var model = value
-        model.drag(from: a, to: b)
+        model.drag(from: a, to: b, modifiers: modifiers)
         value = model
     }
 
