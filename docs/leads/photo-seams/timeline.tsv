@@ -18,3 +18,4 @@ utc	stage	event	ref	note
 2026-10-15T03:36Z	3	stage-start	S-6a	builder stacked on S-4
 2026-10-15T03:36Z	3	pr-merged	#951	S-4
 2026-10-15T03:36Z	3	needs-ui	#952 #953 #954	blueprint 6.3 lead step
+2026-10-15T03:45Z	-	heartbeat	#812	waiting on builders or the lane
