@@ -23,15 +23,19 @@
 // takes focus on a click, like the timeline, so Delete (⌫) there sends
 // `deleteLayer`. The selected row draws the design.md Selected state: the
 // `stateSelected` tint (SuiteColor.selectedTint) with a 1 pt accent outline at
-// SuiteRadius.row and a semibold name. Names are in primary ink; only the
-// selected row's kind icon takes the accent, the rest use secondary ink
-// (HaloLayerLabelStyle styles SidebarRow's label from outside; SuiteUI is not
-// restyled). A row is the control `halo.layer.row.<layer id>`
-// (HaloControls.swift) and carries its layer id as its tag; its tooltip and
-// VoiceOver value name the kind ("Solid layer", from HaloModel). A refused
+// SuiteRadius.row and a semibold name. Names are in primary ink at the
+// inspector's label size (SuiteFont.inspectorLabel, 11 pt Pro density); only
+// the selected row's kind icon takes accentText (design.md: marks on the
+// stateSelected tint use accentText, not the plain accent), the rest use
+// secondary ink (HaloLayerLabelStyle styles SidebarRow's label from outside;
+// SuiteUI is not restyled). A row is the control `halo.layer.row.<layer id>`
+// (HaloControls.swift) and carries its layer id as its tag; its VoiceOver value
+// names the kind ("Solid layer") and its tooltip adds how to rename and
+// reorder it (HaloLayerKind.rowHelp, from HaloModel). A refused
 // rename shows its message under the row `refusal.control` names, in W0's
 // HaloRefusalCaption (`halo.layer.refusal`). A composition with no layers
-// shows "No layers yet. Add one from Layer > New." (`halo.layer.empty`).
+// shows "No layers yet. Add one from Layer > New." (`halo.layer.empty`), its
+// icon on the rows' SuiteSpacing.m inset.
 // The list is `halo.layer.list`. Values in, commands out.
 import HaloModel
 import SuiteUI
@@ -48,6 +52,8 @@ struct HaloLayerList: View {
                 Label("No layers yet. Add one from Layer > New.", systemImage: "square.stack.3d.up")
                     .font(SuiteFont.caption)
                     .foregroundStyle(SuiteColor.secondaryText)
+                    .padding(.horizontal, SuiteSpacing.m)
+                    .frame(minHeight: SuiteSize.studioRow, alignment: .leading)
                     .accessibilityIdentifier("halo.layer.empty")
             }
             ForEach(Array(layers.enumerated()), id: \.element.id) { index, layer in
@@ -107,7 +113,7 @@ private struct HaloLayerRow: View {
             .contentShape(Rectangle())
             .simultaneousGesture(TapGesture().onEnded { perform(.selectLayer(layer.id)) })
             .draggable(layer.id)
-            .help(layer.kind.layerTitle)
+            .help(layer.kind.rowHelp)
             .accessibilityElement(children: .contain)
             .accessibilityLabel(layer.name)
             .accessibilityValue(layer.kind.layerTitle)
@@ -124,21 +130,24 @@ private struct HaloLayerRow: View {
     }
 }
 
-/// SidebarRow's label in W0's row look: the name in primary ink, semibold when
-/// selected; the kind icon in accent when selected, else secondary ink.
+/// SidebarRow's label in W0's row look: the name in primary ink at the
+/// inspector's label size, semibold when selected; the kind icon in accentText
+/// on the selected tint (the plain accent measures about 2.5:1 there in Dark),
+/// else secondary ink.
 private struct HaloLayerLabelStyle: LabelStyle {
     let selected: Bool
 
     func makeBody(configuration: Configuration) -> some View {
         Label {
             configuration.title
-                .font(selected ? SuiteFont.headline : SuiteFont.body)
+                .font(SuiteFont.inspectorLabel)
+                .fontWeight(selected ? .semibold : nil)
                 .foregroundStyle(SuiteColor.textPrimary)
                 .lineLimit(1)
                 .truncationMode(.middle)
         } icon: {
             configuration.icon
-                .foregroundStyle(selected ? SuiteColor.accent : SuiteColor.secondaryText)
+                .foregroundStyle(selected ? SuiteColor.accentText : SuiteColor.secondaryText)
         }
         .labelStyle(.titleAndIcon)
     }
