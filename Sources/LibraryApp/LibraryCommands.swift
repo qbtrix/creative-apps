@@ -113,11 +113,18 @@ struct LibraryCommands: Commands {
         LibraryMenuItem(
             title: "Actual Size", action: view.actualSize, reason: loupeZoom, shortcut: KeyboardShortcut("1"))
         Divider()
-        Picker("Sort By", selection: Binding(get: { menu.view.sort }, set: { menu.view.setSort?($0) })) {
-            ForEach(LibrarySort.allCases, id: \.self) { Text($0.rawValue).tag($0) }
+        // A Menu of buttons, not a Picker: a Picker's .disabled didn't reach
+        // the menu bar, while each item here is disabled by its nil action.
+        let noSort = why(nil, "There are no photos to sort.")
+        Menu("Sort By") {
+            ForEach(LibrarySort.allCases, id: \.self) { sort in
+                LibraryMenuItem(
+                    title: sort.rawValue, systemImage: sort == view.sort ? "checkmark" : nil,
+                    action: bind(view.setSort, sort), reason: noSort)
+            }
         }
         .disabled(view.setSort == nil)
-        .help(view.setSort == nil ? "Sort By: \(why(nil, "There are no photos to sort."))" : "Sort By")
+        .help(view.setSort == nil ? "Sort By: \(noSort)" : "Sort By")
         Divider()
     }
 

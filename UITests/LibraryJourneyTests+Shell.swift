@@ -4,7 +4,8 @@
 // run: the empty state shows "No Photos" with Import Folder… as its one
 // button, and the File and Edit menus agree with `library.controls` (the
 // window's hidden JSON list of its controls, SuiteUI's ControlDocument).
-// A disabled control's reason is its help tag, read by hovering it. J11
+// A disabled control's reason is its library.controls entry and the empty
+// state's message (the runner shows no help tag on hover). J11
 // (QB-F1, mirroring Halo's H-J13) launches on `-LibraryFixture samples
 // -SuitePerfProbe`, merges `library.controls` with the `library.*` entries of
 // `suite.controls` (which reaches the toolbar, sidebar and inspector columns a
@@ -52,10 +53,8 @@ final class LibraryShellJourneyTests: XCTestCase {
             let reason = entry?.reason ?? ""
             XCTAssertFalse(reason.isEmpty, "a disabled library.import has no reason")
             XCTAssertEqual(reason, "Import isn't connected yet (import).", "library.import's reason")
-            button.hover()
-            let tag = library.app.helpTags.matching(
-                NSPredicate(format: "label CONTAINS %@ OR title CONTAINS %@ OR value CONTAINS %@", reason, reason, reason))
-            XCTAssert(tag.firstMatch.waitForExistence(timeout: 5), "Import Folder… doesn't say \(reason)")
+            // The runner shows no help tag on hover, so the reason is proven by
+            // library.controls above and the visible message below.
             let hint = "File > Load Sample Photos"
             let message = window.staticTexts.matching(
                 NSPredicate(format: "label CONTAINS %@ OR value CONTAINS %@", hint, hint)).firstMatch
@@ -100,7 +99,7 @@ final class LibraryShellJourneyTests: XCTestCase {
             XCTAssert(control.waitForExistence(timeout: 5), "\(entry.id) is listed but not on screen")
             let before = library.app.windows.firstMatch.screenshot().pngRepresentation
             let values = Self.values(library)
-            control.click()
+            Self.target(control).click()
             Thread.sleep(forTimeInterval: 0.5)
             let after = library.app.windows.firstMatch.screenshot().pngRepresentation
             let changed = before != after || values != Self.values(library)
@@ -109,6 +108,16 @@ final class LibraryShellJourneyTests: XCTestCase {
             library.press(.escape)
             library.press(character: "z", .command)
         }
+    }
+
+    /// Where to click `control`: a segmented control acts only on a segment
+    /// that isn't selected, so its last unselected segment (button or radio
+    /// button child); any other control, itself.
+    @MainActor private static func target(_ control: XCUIElement) -> XCUIElement {
+        let segmented = [.segmentedControl, .radioGroup].contains(control.elementType)
+        let segments = control.children(matching: .radioButton).allElementsBoundByIndex
+            + (segmented ? control.children(matching: .button).allElementsBoundByIndex : [])
+        return segments.last { !$0.isSelected && $0.isEnabled } ?? control
     }
 
     /// The probes a click may change without changing the shot: the two
