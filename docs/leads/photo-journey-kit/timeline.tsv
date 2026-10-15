@@ -25,3 +25,5 @@ utc	stage	event	ref	note
 2026-10-15T21:09Z	4	pr-merged	#1243	cdcfb62
 2026-10-15T21:23Z	4	ci-run	38807718380	round 3 run on cdcfb62 (#1243) in progress
 2026-10-15T21:45Z	4	heartbeat	38807718380	round 3 run still in progress
+2026-10-15T21:56Z	4	ci-run	38807718380	feature journeys 13/13 pass; red elsewhere
+2026-10-15T21:56Z	4	round-clean	38807718380	clean for this feature; CI red outside it
