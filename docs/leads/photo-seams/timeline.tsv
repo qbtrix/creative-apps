@@ -88,3 +88,5 @@ utc	stage	event	ref	note
 2026-10-15T08:50Z	-	heartbeat	#812	waiting on builders or the lane
 2026-10-15T08:51Z	4	pr-merged	#1050	r3-b1
 2026-10-15T08:51Z	4	pr-opened	#1053	r3-b2 PhotoToolsTests
+2026-10-15T08:55Z	4	pr-merged	#1053	r3-b2
+2026-10-15T08:55Z	4	pr-opened	#1055	feature-done: round 3 status
