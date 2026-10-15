@@ -1,7 +1,8 @@
 // HaloTimeline.swift: the selected composition's timeline: the playhead and
 // its timecode, the layers active at a frame, the rows the viewer's timeline
 // strip draws, and setting a layer's in and out points at the playhead (the
-// I and O keys). Linux-safe: no UI imports. The playhead stays in
+// I and O keys, each one undo step or a refusal under the timeline).
+// Linux-safe: no UI imports. The playhead stays in
 // 0..<durationFrames; a layer stays visible for at least one frame.
 
 /// One timeline row: a layer's name and the frames it is visible for.
@@ -64,36 +65,27 @@ extension HaloProject {
         updateSelectedComposition { $0.playheadFrame = min(max(frame, 0), $0.lastFrame) }
     }
 
-    /// I: the selected layer starts at the playhead. Refused (false) with no
-    /// selected layer, or when the playhead is at or after its out point.
+    /// I: the selected layer starts at the playhead. One step, "Set In
+    /// Point". Refused on `halo.timeline` (false) with no selected layer
+    /// (`.noLayerSelected`), or when the playhead is at or after its out point
+    /// (`.inPointAfterOut`).
     @discardableResult
     public mutating func setSelectedLayerInPoint() -> Bool {
-        updateSelectedLayerAtPlayhead { layer, playhead in
-            guard playhead < layer.outFrame else { return false }
-            layer.inFrame = playhead
-            return true
+        editSelectedLayer("Set In Point", control: "halo.timeline") { layer, comp in
+            guard comp.playheadFrame < layer.outFrame else { throw HaloEditError.inPointAfterOut }
+            layer.inFrame = comp.playheadFrame
         }
     }
 
     /// O: the selected layer shows through the playhead's frame and stops after
-    /// it. Refused (false) with no selected layer, or when the playhead is
-    /// before its in point.
+    /// it. One step, "Set Out Point". Refused on `halo.timeline` (false) with
+    /// no selected layer, or when the playhead is before its in point
+    /// (`.outPointBeforeIn`).
     @discardableResult
     public mutating func setSelectedLayerOutPoint() -> Bool {
-        updateSelectedLayerAtPlayhead { layer, playhead in
-            guard playhead >= layer.inFrame else { return false }
-            layer.outFrame = playhead + 1
-            return true
+        editSelectedLayer("Set Out Point", control: "halo.timeline") { layer, comp in
+            guard comp.playheadFrame >= layer.inFrame else { throw HaloEditError.outPointBeforeIn }
+            layer.outFrame = comp.playheadFrame + 1
         }
-    }
-
-    private mutating func updateSelectedLayerAtPlayhead(_ change: (inout HaloLayer, Int) -> Bool) -> Bool {
-        let layerID = selectedLayerID
-        var changed = false
-        updateSelectedComposition { comp in
-            guard let l = comp.layers.firstIndex(where: { $0.id == layerID }) else { return }
-            changed = change(&comp.layers[l], comp.playheadFrame)
-        }
-        return changed
     }
 }

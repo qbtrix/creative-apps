@@ -126,3 +126,40 @@ struct FixedBoxRasterizer: TextRasterizing {
     bare.newLayer(.text)
     #expect(bare.selectedLayer?.text == HaloTextContent())
 }
+
+@Test func inAndOutPointsAreOneStepEach() {
+    var project = editProject()
+    let steps = project.history.undo.count
+    project.scrub(to: 100)
+    project.setSelectedLayerOutPoint()
+    #expect(project.history.undoTitle == "Undo Set Out Point")
+    project.scrub(to: 20)
+    project.setSelectedLayerInPoint()
+    #expect(project.history.undoTitle == "Undo Set In Point")
+    #expect(project.history.undo.count == steps + 2)
+    #expect(project.selectedLayer.map { ($0.inFrame, $0.outFrame) } ?? (0, 0) == (20, 101))
+}
+
+@Test func inAfterOutIsRefusedUnderTheTimeline() {
+    var project = editProject()
+    project.scrub(to: 50)
+    let out = project.setSelectedLayerOutPoint()
+    #expect(out)
+    project.scrub(to: 60)
+    let before = project.document
+    let lateIn = project.setSelectedLayerInPoint()
+    #expect(!lateIn)
+    #expect(project.refusal == HaloRefusal(control: "halo.timeline", message: HaloEditError.inPointAfterOut.message))
+    #expect(project.document == before)
+    project.scrub(to: 10)
+    let goodIn = project.setSelectedLayerInPoint()
+    #expect(goodIn && project.refusal == nil)
+    project.scrub(to: 5)
+    let earlyOut = project.setSelectedLayerOutPoint()
+    #expect(!earlyOut)
+    #expect(project.refusal?.message == HaloEditError.outPointBeforeIn.message)
+    project.selectComposition("comp-1")
+    project.newComposition()
+    let noLayer = project.setSelectedLayerInPoint()
+    #expect(!noLayer && project.refusal == HaloRefusal(control: "halo.timeline", message: "Select a layer first."))
+}
