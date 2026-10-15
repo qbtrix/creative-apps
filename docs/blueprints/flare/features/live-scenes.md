@@ -52,8 +52,8 @@ Model half on `LiveScenes`, in
 1. New from "Vertical 9:16" (30 fps), then 60 fps: the scene is 1080 × 1920
    at 60 fps.
 2. On `bounce`, add a scene: "Scene 2"; rename it "Outro"; set its
-   background; reorder Outro above Scene 1; remove Outro. Each is one named
-   entry and undoes exactly.
+   background; reorder Outro above Scene 1; select Scene 1; remove Outro.
+   Each is one named entry and undoes exactly.
 3. Removing the only scene throws "An animation needs at least one scene."
 4. Add a horizontal guide at y 300; drag it to 320 in 20 coalesced steps:
    one "Undo Move Guide" (one `undo()` puts it back at 300); remove it.
