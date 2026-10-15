@@ -85,6 +85,21 @@ private func row(_ name: String, _ id: String, at frame: Int, in engine: Command
     #expect(engine.canUndo == before)
 }
 
+/// A scrub on several selected layers runs one command per layer each step; all 120 steps stay one entry.
+@Test func aMultiLayerScrubIsOneEntry() throws {
+    let doc = FlareFixtures.bounce
+    var engine = CommandEngine(document: doc)
+    for step in 1...120 {
+        try LiveProperties().setValue(Double(step) * 3, of: "rotation", owner: scene, layerIDs: ["ball", "shadow"],
+                                      frame: 12, autoKey: false, coalesceKey: "scrub-rotation-2", in: &engine)
+    }
+    for id in ["ball", "shadow"] { #expect(layer(id, in: engine)?.tracks["rotation"] == [Keyframe(frame: 0, value: 360)]) }
+    #expect(engine.undoActionName == "Undo Set Keyframe")
+    try engine.undo()
+    #expect(engine.document == doc)
+    #expect(!engine.canUndo)
+}
+
 @Test func severalLayersWithoutAKeyAreOneGroup() throws {
     let doc = FlareFixtures.bounce
     var engine = CommandEngine(document: doc)
