@@ -2,7 +2,7 @@
 // with counts, the grid's sort, cell size and selection, and the browse mode.
 // Linux-safe; LibraryApp changes it only through the Model's methods. Invariants:
 // counts follow `items`; ids in `items` are unique; the selection holds only ids
-// the collection shows.
+// the collection shows, and the loupe only a photo it shows.
 
 /// A sidebar collection: a fixed source of photos.
 public struct LibraryCollection: Identifiable, Sendable, Hashable {
@@ -122,12 +122,17 @@ public struct LibraryCatalog: Sendable, Equatable {
     public var canShowLargerThumbnails: Bool { cellSize < 320 }
     public var canShowSmallerThumbnails: Bool { cellSize > 80 }
 
-    /// Selects a collection by id and clears the selection. An unknown id is ignored.
+    /// Selects a collection by id and clears the selection. If the new collection
+    /// hides the loupe's photo, returns to the grid (#156). An unknown id is ignored.
     public mutating func selectCollection(_ id: String) {
         guard collections.contains(where: { $0.id == id }) else { return }
         selectedCollectionID = id
         selection = []
         rebuildOrder()
+        if mode == .loupe, !(focusedItemID.map(order.contains) ?? false) {
+            mode = .grid
+            focusedItemID = nil
+        }
     }
 
     public mutating func loadSamples(seed: UInt64 = LibrarySample.defaultSeed) {
