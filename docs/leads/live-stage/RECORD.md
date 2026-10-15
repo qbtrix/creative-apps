@@ -4,7 +4,7 @@ Issue: #798 · Packet: docs/blueprints/flare/features/live-stage.md
 Run: act-1a13d374bd1-s92z · Session: claude/live-stage-lead-gljfd4 · Started: 2026-10-15T00:40Z
 Stage: 5 finish
 Base: 3033a12d599ff66ce4ebd5536ff9809d12e1d9cf
-Next: wait for #965 (feature-done) to merge and the dev CI run it triggers; green -> Belt-Contact-Sheet comment on #798; red on other lines -> triage on #763 and wait for the next green run
+Next: #965 (feature-done) merged as a45f1cb; its run 38681586835 on f0f31c7 is red on other lines (Flare toolbar after SuiteUI #962, Library #933, Halo, SuiteUI); wait for the first green dev run containing a45f1cb, then post Belt-Contact-Sheet on #798
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -48,4 +48,6 @@ Journeys: J3 and J5 model half, steps 1-6 of the packet. Quality: QB-L5 hit <= 1
 - r2-b3: p95 reported, not gated, per the rubric's rule for new p95 rows.
 
 ## Open
+- dev red on other lines (triage on #763, comment 6184735247): Flare testEditEasingOfAKeyframeSegment 'no button titled New Sample Animation in the toolbar' since SuiteUI #962; Library #933; Halo; SuiteUI hit size and gallery.
+- macOS evidence for the round 3 minor is in: nestedDrawList at 500 instances median 4.5 ms, p95 6.6 ms; hit and drawList p95 printed.
 - none
