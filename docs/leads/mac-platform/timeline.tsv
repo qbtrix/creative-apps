@@ -36,3 +36,4 @@ utc	stage	event	ref	note
 2026-10-14T23:50Z	5	stopped	-	lead done
 2026-10-15T00:15Z	5	stage-start	-	Belt relaunch nudge; re-check only
 2026-10-15T00:15Z	5	ci-run	38657968912	red outside: SnapshotHostTests only (suite-harness); feature tests green; #888 merged (Photo budgets)
+2026-10-15T00:31Z	5	ci-run	38658150595	red outside: SnapshotHostTests only; feature tests green; next run 38660293042 has #888 and #891
