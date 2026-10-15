@@ -90,8 +90,15 @@ struct LiveRecovery: RecoveryStoring {
 
     /// The names of the folder's .ora files; none when the folder is missing.
     private func recoveryFiles() throws -> [String] {
+        // macOS Foundation takes an ObjCBool here and Linux Foundation a Bool (Linux has no ObjCBool).
+        #if canImport(Darwin)
         var isFolder: ObjCBool = false
-        guard FileManager.default.fileExists(atPath: directory.path, isDirectory: &isFolder), isFolder.boolValue else { return [] }
+        let found = FileManager.default.fileExists(atPath: directory.path, isDirectory: &isFolder) && isFolder.boolValue
+        #else
+        var isFolder = false
+        let found = FileManager.default.fileExists(atPath: directory.path, isDirectory: &isFolder) && isFolder
+        #endif
+        guard found else { return [] }
         return try FileManager.default.contentsOfDirectory(atPath: directory.path)
             .filter { $0.hasSuffix(".\(Self.fileExtension)") }
     }
