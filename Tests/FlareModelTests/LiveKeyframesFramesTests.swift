@@ -1,7 +1,8 @@
 // LiveKeyframesFramesTests.swift: KY-7's acceptance (docs/blueprints/flare/features/live-keys.md): on bounce after
 // Ball's 24 -> 28, two frames inserted at 10 on every layer move 28 to 30 and grow the scene in the same entry; one frame
 // removed moves it to 29; a label moves with a whole-scene edit; setLabel replaces and removes; each step is one entry;
-// LiveKeyframes is a KeyframeEditing; an insert inside symbol "wave" shifts the hand's keys and undoes exactly.
+// LiveKeyframes is a KeyframeEditing; frame edits inside symbol "wave" shift the hand's keys and undo exactly, and an
+// insert past its last frame refuses; a blank label name refuses.
 import FlareCore
 import FlareModel
 import Testing
@@ -126,12 +127,40 @@ private func moved() throws -> CommandEngine {
 
 @Test func insertInsideASymbolShiftsTheHandAndUndoesExactly() throws {
     var engine = CommandEngine(document: FlareFixtures.character)
-    try live.insertFrames(3, at: 5, layerIDs: ["hand"], owner: wave, in: &engine)
-    #expect(live.rows(engine.document, owner: wave).first?.keyFrames == [0, 15, 26])
-    #expect(engine.undoActionName == "Undo Insert Frame")
     try live.removeFrames(3, at: 5, layerIDs: ["hand"], owner: wave, in: &engine)
+    #expect(live.rows(engine.document, owner: wave).first?.keyFrames == [0, 9, 20])
+    #expect(engine.undoActionName == "Undo Remove Frame")
+    try live.insertFrames(3, at: 5, layerIDs: ["hand"], owner: wave, in: &engine)
     #expect(live.rows(engine.document, owner: wave).first?.keyFrames == [0, 12, 23])
+    #expect(engine.undoActionName == "Undo Insert Frame")
+    #expect(engine.document.symbols == FlareFixtures.character.symbols)
     try engine.undo()
     try engine.undo()
     #expect(engine.document == FlareFixtures.character && !engine.canUndo)
+}
+
+/// "wave" is 24 frames (0-23) and FlareCore has no command that grows a symbol, so an insert that would push a key
+/// past its last frame refuses and changes nothing.
+@Test func insertPastASymbolEndThrowsAndChangesNothing() throws {
+    var engine = CommandEngine(document: FlareFixtures.character)
+    #expect(throws: CommandError.invalidDocument("A key can't move past the symbol's last frame.")) {
+        try live.insertFrames(3, at: 5, layerIDs: ["hand"], owner: wave, in: &engine)
+    }
+    #expect(throws: CommandError.symbolNotFound("nope")) {
+        try live.insertFrames(1, at: 0, layerIDs: [], owner: .symbol("nope"), in: &engine)
+    }
+    #expect(engine.document == FlareFixtures.character && !engine.canUndo)
+}
+
+@Test func aBlankLabelThrowsAndChangesNothing() throws {
+    var engine = CommandEngine(document: FlareFixtures.bounce)
+    var fake = CommandEngine(document: FlareFixtures.bounce)
+    #expect(throws: CommandError.invalidDocument("A label needs a name.")) {
+        try live.setLabel("  ", at: 3, sceneID: "scene-1", in: &engine)
+    }
+    #expect(throws: CommandError.invalidDocument("A label needs a name.")) {
+        try FakeKeyframes().setLabel("  ", at: 3, sceneID: "scene-1", in: &fake)
+    }
+    #expect(engine.document == FlareFixtures.bounce && !engine.canUndo)
+    #expect(fake.document == FlareFixtures.bounce && !fake.canUndo)
 }

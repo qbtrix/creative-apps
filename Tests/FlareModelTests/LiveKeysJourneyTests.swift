@@ -127,9 +127,9 @@ struct LiveKeysJourneyTests {
         var engine = CommandEngine(document: FlareFixtures.character)
         func hand() -> [Keyframe] { layer("hand", of: wave, in: engine)?.tracks["rotation"] ?? [] }
         #expect(hand().map(\.frame) == [0, 12, 23])
-        try keys.moveKeys([KeyRef(layerID: "hand", property: "rotation", frame: 23)], by: 7, owner: wave,
+        try keys.moveKeys([KeyRef(layerID: "hand", property: "rotation", frame: 12)], by: 5, owner: wave,
                           coalesceKey: nil, in: &engine)
-        #expect(hand().map(\.frame) == [0, 12, 30])
+        #expect(hand().map(\.frame) == [0, 17, 23])
         #expect(engine.document.scenes == FlareFixtures.character.scenes)
         #expect(engine.undoActionName == "Undo Move Keyframe")
         try engine.undo()

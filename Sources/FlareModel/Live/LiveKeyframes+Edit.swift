@@ -1,15 +1,18 @@
 // LiveKeyframes+Edit.swift: the live key moves and removes (docs/blueprints/flare/features/live-keys.md, task KY-6).
 // A summary key (no property) stands for every track keyed at its frame. A move is FlareCore's `MoveKeyframe(owner:)`
 // per key, leading-edge keys first, tried on a copy of the engine so one that lands a key on another throws and changes
-// nothing. In a scene a key never moves past the scene's last frame; a symbol has no ruler of its own, so there only
-// collisions and frames before 0 refuse. Several keys move as one "Move Keyframe" step, or merge into the drag's entry
-// under `coalesceKey`. A remove is `RemoveKeyframe(owner:)` per key, grouped as one "Delete Keyframe". Agrees with
-// `FakeKeyframes` on scenes; the `KeyframeEditing` conformance comes in KY-7.
+// nothing. No key moves before frame 0, or past the last frame of its scene or symbol, where it would never play (a
+// symbol edited in place has its own length, flare.md LM-0c1). Several keys move as one "Move Keyframe" step, or merge
+// into the drag's entry under `coalesceKey`: a coalesced drag of several keys is one undo entry but holds one command
+// per key per step, since FlareCore merges only into the entry's last command. A remove is `RemoveKeyframe(owner:)` per
+// key, grouped as one "Delete Keyframe". Agrees with `FakeKeyframes` on scenes; the `KeyframeEditing` conformance is
+// in LiveKeyframes+Frames.swift.
 import FlareCore
 
 extension LiveKeyframes {
     public func moveKeys(_ keys: Set<KeyRef>, by delta: Int, owner: LayerOwner,
                          coalesceKey: String?, in engine: inout CommandEngine) throws {
+        let length = try Self.length(of: owner, in: engine.document)
         let moving = try Self.trackKeys(keys, owner: owner, in: engine.document)
         guard delta != 0, !moving.isEmpty else { return }
         var targets: [Int] = []
@@ -18,12 +21,11 @@ extension LiveKeyframes {
             guard !overflow else { throw CommandError.invalidFrame(delta) }
             targets.append(to)
         }
-        if case .scene(let sceneID) = owner {
-            guard let scene = engine.document.scenes.first(where: { $0.id == sceneID }) else {
-                throw CommandError.sceneNotFound(sceneID)
-            }
-            // A key past the scene's last frame would never play (#636).
-            if delta > 0, let past = targets.filter({ $0 >= scene.durationFrames }).max() { throw CommandError.invalidFrame(past) }
+        if targets.contains(where: { $0 < 0 }) { throw CommandError.invalidDocument(Self.beforeFrameZero) }
+        // A key past the owner's last frame would never play (#636).
+        if delta > 0, let past = targets.filter({ $0 >= length }).max() {
+            if case .symbol = owner { throw CommandError.invalidDocument(Self.pastSymbolEnd) }
+            throw CommandError.invalidFrame(past)
         }
         // The leading edge moves first, so no key passes over one that has not moved yet.
         let ordered = moving.sorted { delta > 0 ? $0.frame > $1.frame : $0.frame < $1.frame }
@@ -48,6 +50,21 @@ extension LiveKeyframes {
             for key in removing {
                 try engine.perform(RemoveKeyframe(owner: owner, layerID: key.layerID, property: key.property, frame: key.frame))
             }
+        }
+    }
+
+    static let beforeFrameZero = "A key can't move before frame 0."
+    static let pastSymbolEnd = "A key can't move past the symbol's last frame."
+
+    /// The owner's length in frames, its scene's or its symbol's; a missing owner throws.
+    static func length(of owner: LayerOwner, in document: Document) throws -> Int {
+        switch owner {
+        case .scene(let id):
+            guard let scene = document.scenes.first(where: { $0.id == id }) else { throw CommandError.sceneNotFound(id) }
+            return scene.durationFrames
+        case .symbol(let id):
+            guard let symbol = document.symbols.first(where: { $0.id == id }) else { throw CommandError.symbolNotFound(id) }
+            return symbol.durationFrames
         }
     }
 
