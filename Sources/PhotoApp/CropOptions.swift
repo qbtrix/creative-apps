@@ -16,16 +16,18 @@ struct CropOptions: View {
     let model: PhotoWorkspace
     let perform: PhotoPerform
 
+    /// The packet's empty-state wording, still asserted by PhotoCropOptionsSnapshots;
+    /// the panel now draws `model.cropCaption`. Drop this once that test reads the model.
     static let emptyCaption = "Drag on the image, or type a size"
 
     var body: some View {
         VStack(alignment: .leading, spacing: SuiteSpacing.s) {
-            if model.pendingCrop == nil {
-                Text(Self.emptyCaption)
-                    .font(SuiteFont.inspectorMeta)
-                    .foregroundStyle(SuiteColor.textSecondary)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
+            // The one instruction line, always present so nothing moves when a crop appears.
+            Text(model.cropCaption)
+                .font(SuiteFont.inspectorMeta)
+                .foregroundStyle(SuiteColor.textSecondary)
+                .fixedSize(horizontal: false, vertical: true)
+                .accessibilityIdentifier("photo.crop.caption")
             Grid(horizontalSpacing: SuiteSpacing.xs, verticalSpacing: SuiteSpacing.xs) {
                 GridRow {
                     field(.x)
@@ -44,10 +46,11 @@ struct CropOptions: View {
                 .disabled(model.canvas == nil)
                 .help(model.canvas == nil ? "Open an image to choose a crop shape." : "")
             InspectorAction(ToolbarAction(
-                "Swap", systemImage: "arrow.left.arrow.right", unavailableHelp: swapHelp, identifier: "photo.crop.swap"
+                "Swap", systemImage: "arrow.left.arrow.right", unavailableHelp: model.cropSwapHelp,
+                identifier: "photo.crop.swap"
             ) { perform(.crop(.swap)) })
             HStack(spacing: SuiteSpacing.xs) {
-                let why = model.canApplyCrop ? nil : "Drag over the image to choose a crop first."
+                let why = model.cropApplyHelp
                 InspectorAction(ToolbarAction(
                     "Apply Crop", systemImage: "crop", unavailableHelp: why, identifier: "photo.crop.apply"
                 ) { perform(.applyCrop) })
@@ -65,20 +68,12 @@ struct CropOptions: View {
         return .ratio(h, w)
     }
 
-    /// Swap turns a ratio's sides; Free and Original have none to turn.
-    private var swapHelp: String? {
-        switch model.cropAspect {
-        case .ratio: model.canvas == nil ? "Open an image to crop first." : nil
-        case .free, .original: "Pick a ratio such as 3:2 to swap its sides."
-        }
-    }
-
     /// One of X, Y, W, H: whole canvas pixels, X and Y from 0, W and H from 1,
-    /// up to the canvas's size. Shows 0 and stays disabled while nothing is
-    /// pending.
+    /// up to the canvas's size. With nothing pending it shows the whole
+    /// image's rect (until ScrubField takes a placeholder), and takes typing
+    /// once a shape is locked.
     private func field(_ field: CropField) -> some View {
-        let value = model.cropFieldValue(field)
-        let enabled = model.cropFieldsEnabled && value != nil
+        let enabled = model.cropFieldsEnabled
         let (label, name, id): (String, String, String) =
             switch field {
             case .x: ("X", "X", "photo.crop.x")
@@ -88,11 +83,11 @@ struct CropOptions: View {
             }
         let side = field == .x || field == .width ? model.canvas?.width : model.canvas?.height
         let low: Double = field == .x || field == .y ? 0 : 1
-        let reason = enabled ? nil : "Drag on the image or pick an aspect to start a crop."
+        let reason = model.cropFieldsUnavailableHelp
         return InspectorRow(label) {
             ScrubField(
-                name, value: Double(value ?? 0), in: low...max(low, Double(side ?? 1)), step: 1, unit: "px",
-                decimals: 0
+                name, value: Double(model.cropFieldDisplay(field)), in: low...max(low, Double(side ?? 1)), step: 1,
+                unit: "px", decimals: 0
             ) { number in
                 guard number.isFinite else { return }
                 perform(.crop(.field(field, Int(number.rounded()))))
@@ -101,7 +96,7 @@ struct CropOptions: View {
             .anchorPreference(key: CropFieldBoundsKey.self, value: .bounds) { [id: $0] }
         }
         .disabled(!enabled)
-        .help(reason ?? "")
+        .help(reason ?? model.cropFieldHelp(field))
     }
 }
 

@@ -29,14 +29,18 @@ import Testing
         return abs(Double(crop.height) - Double(crop.width) * Double(h) / Double(w)) <= 1
     }
 
-    @Test func aValueUnderOneChangesNothing() throws {
+    /// W and H refuse 0; X and Y refuse only a negative (0 is the image's edge).
+    @Test func aValueUnderTheFieldsLowestChangesNothing() throws {
         var workspace = try image()
         workspace.setCropAspect(.ratio(1, 1))
         let before = workspace
         #expect(!typed(&workspace, .width, 0))
         #expect(!typed(&workspace, .height, -5))
         #expect(!typed(&workspace, .x, Int.min))
+        #expect(!typed(&workspace, .y, -1))
         #expect(workspace == before)
+        #expect(typed(&workspace, .x, 0))
+        #expect(workspace.pendingCrop == PixelRect(x: 0, y: 0, width: 600, height: 600))
     }
 
     @Test func noCanvasTakesNothing() {
