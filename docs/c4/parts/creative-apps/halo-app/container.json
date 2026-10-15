@@ -20,6 +20,18 @@
       "target": "halo-model",
       "description": "reads state and calls its methods",
       "style": "sync"
+    },
+    {
+      "source": "halo-app",
+      "target": "suite-shell",
+      "description": "adds .suiteApp(_:) and the shared menus; records recents",
+      "style": "sync"
+    },
+    {
+      "source": "halo-app",
+      "target": "afterglow-app",
+      "description": "receives hand-offs and routed documents; sends settings and switch requests (hand-off files, distributed notifications)",
+      "style": "async"
     }
   ]
 }

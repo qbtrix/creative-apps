@@ -19,6 +19,12 @@
       "target": "coreraster",
       "description": "uses CoreRaster from creative-core",
       "style": "sync"
+    },
+    {
+      "source": "halo-model",
+      "target": "suite-model",
+      "description": "declares document kinds and pasteboard representations; reads preferences",
+      "style": "sync"
     }
   ]
 }

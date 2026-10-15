@@ -7,5 +7,19 @@
     "internal",
     "macos-only"
   ],
-  "order": 130
+  "order": 130,
+  "relationships": [
+    {
+      "source": "suite-shell",
+      "target": "suite-model",
+      "description": "implements the live conformances of SuiteModel's contracts",
+      "style": "sync"
+    },
+    {
+      "source": "suite-shell",
+      "target": "suiteui",
+      "description": "builds the Switch To and Open In menus and small views from SuiteUI parts",
+      "style": "sync"
+    }
+  ]
 }
