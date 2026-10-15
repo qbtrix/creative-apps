@@ -2,8 +2,8 @@
 
 Issue: #1044 · Packet: docs/blueprints/library/features/spine.md
 Run: act-1a13f18aaa0-lfw5 · Session: session_01DtSRhNqsphGfKkvV5eLsWW · Started: 2026-10-15T10:25Z
-Stage: 4 round 1
-Base: 541ca81f0a4795b0a01d4df371832c645a0956cf
+Stage: 4 round 2
+Base: 111c44093b7959930d078ce21656fa174613a1b0
 Next: round 2 on the CI run containing #1175
 
 ## Tasks
