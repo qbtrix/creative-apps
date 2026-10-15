@@ -31,3 +31,6 @@ utc	stage	event	ref	note
 2026-10-15T04:09Z	3	stage-start	S-7a	builder stacked on S-5
 2026-10-15T04:17Z	3	pr-opened	#969	S-7a drag routing, 227 lines 7 files
 2026-10-15T04:17Z	3	stage-start	S-7c	builder stacked on S-7a
+2026-10-15T04:26Z	3	pr-merged	#969	S-7a
+2026-10-15T04:26Z	3	pr-opened	#972	S-7c paint target, 300 lines 5 files
+2026-10-15T04:26Z	3	stage-start	S-7b	builder stacked on S-7c
