@@ -3,7 +3,7 @@
 // disabled with the workspace's reason as its help when it can't run;
 // Rename…, Show/Hide, Bring Forward, Send Backward, Select Layer Above and
 // Below. The items are a view, PhotoLayerMenu, so the snapshot tests can draw
-// them; the three new items' shortcuts are a table the tests read.
+// them; the three new items' shortcuts and symbols are tables the tests read.
 import AppKit
 import PhotoModel
 import SwiftUI
@@ -27,9 +27,9 @@ struct PhotoLayerMenu: View {
         Button("Delete Layer", systemImage: "trash") { menu.perform(.deleteLayer) }
             .disabled(!menu.canDeleteLayer)
         Divider()
-        item("Duplicate Layer", .duplicateLayer, systemImage: "plus.square.on.square")
-        item("Merge Down", .mergeDown, systemImage: "square.and.arrow.down.on.square")
-        item("Flatten Image", .flattenImage, systemImage: "square.stack.3d.down.right")
+        item("Duplicate Layer", .duplicateLayer)
+        item("Merge Down", .mergeDown)
+        item("Flatten Image", .flattenImage)
         Divider()
         Button("Rename Layer…", systemImage: "pencil") { menu.perform(.renameLayer) }
             .disabled(!menu.canEditLayer)
@@ -61,10 +61,23 @@ struct PhotoLayerMenu: View {
         }
     }
 
+    /// The three layer commands' symbols. Merge Down's reads as two layers
+    /// becoming one, not as a save (the square.and.arrow family).
+    static func systemImage(_ intent: EditIntent) -> String {
+        switch intent {
+        case .duplicateLayer: "plus.square.on.square"
+        case .mergeDown: "rectangle.compress.vertical"
+        case .flattenImage: "square.stack.3d.down.right"
+        case .cut: PhotoEditItem.cut.systemImage
+        case .copy: PhotoEditItem.copy.systemImage
+        case .paste: PhotoEditItem.paste.systemImage
+        }
+    }
+
     /// A layer command, disabled with its reason as its help when it can't run.
-    private func item(_ title: String, _ intent: EditIntent, systemImage: String) -> some View {
+    private func item(_ title: String, _ intent: EditIntent) -> some View {
         let help = menu.editHelp(intent, pasteboard: PhotoPasteboardState())
-        return Button(title, systemImage: systemImage) { menu.perform(.edit(intent)) }
+        return Button(title, systemImage: Self.systemImage(intent)) { menu.perform(.edit(intent)) }
             .keyboardShortcut(Self.shortcut(intent))
             .disabled(help != nil)
             .help(help.map { "\(title): \($0)" } ?? title)
