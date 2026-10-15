@@ -29,3 +29,5 @@ utc	stage	event	ref	note
 2026-10-15T01:37Z	4	round-clean	round4	1 minor, 0 refuted
 2026-10-15T01:37Z	4	stage-end	round4	4 rounds used
 2026-10-15T01:37Z	5	stage-start	finish	feature-done PR building
+2026-10-15T01:42Z	5	pr-merged	#914	feature-done: refusal test isolation, packet and waves status
+2026-10-15T01:42Z	5	ci-run	38667087530	queued on c3fd66f

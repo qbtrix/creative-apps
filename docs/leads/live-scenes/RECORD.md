@@ -4,7 +4,7 @@ Issue: #800 · Packet: docs/blueprints/flare/features/live-scenes.md
 Run: act-1a13ca4f89e-0ft1 · Session: claude/live-scenes-lead-d0sj3t · Started: 2026-10-14
 Stage: 5 finish
 Base: cba1813739a5be03f353698cc2c61e76bc8c6103
-Next: wait for the feature-done PR (r4-done) to merge and its dev CI run; green -> Belt-Contact-Sheet comment on #800
+Next: read dev CI run 38667087530 (c3fd66f, from feature-done #914); green -> Belt-Contact-Sheet comment on #800
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -24,7 +24,7 @@ Quality bars: QB-F3 one gesture one step, QB-L7 <= 10 ms per moveGuide step (med
 | 1 | 38657968912 | red (SuiteUI SnapshotHostTests only, #763) | not run (journeys skipped after scripts/ci failed) | clarity, journey, quality, contract, tests | 1 major (QB-F2 refusals from LiveScenes show case names), 3 minor (setCanvas group breaks drag coalescing on refusal, empty-name divergence unpinned, drag budget prints no p50/p95) | #890 #889 #896 #892 (all merged) | no |
 | 2 | 38660293042 + Linux gate c111439 | red (SuiteUI SnapshotHostTests only, #763); Linux PASS | not run | clarity, journey, quality, contract, tests | 1 major (#890 catch-all hides NotBuilt reasons), 3 minor (specific engine causes and fake sentences hidden; J16 select step missing) | #905 #908 (merged) | no |
 | 3 | Linux gate a7429dc | Linux PASS; latest macOS 38662225263 predates fixes | not run | clarity, journey, quality, contract, tests | 1 major (#905 NotBuilt test passes without the fix), 1 minor (NaN background guard untested) | #911 #910 (merged) | no |
-| 4 | Linux gate cba1813 | Linux PASS | not run | clarity, journey, quality, contract, tests | 1 minor (refusalsArePlainText reuses a stale layerError) | r4-done (feature-done PR) | yes |
+| 4 | Linux gate cba1813 | Linux PASS | not run | clarity, journey, quality, contract, tests | 1 minor (refusalsArePlainText reuses a stale layerError) | #914 (feature-done, merged) | yes |
 
 ## Decisions
 - Base moved from the brief's aa166cb to bfd0328 (one SuiteUI snapshot test on top; aa166cb is an ancestor).
