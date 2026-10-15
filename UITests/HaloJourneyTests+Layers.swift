@@ -10,7 +10,7 @@
 // each step reads the Edit menu's first item title and never presses ⌘Z.
 // A disabled menu item's reason is its help tag, read by hovering it. One
 // shot per step, `halo-layers-<step>`, plus the rename prompt
-// (`halo-layers-4-prompt`).
+// (`halo-layers-4-prompt`), each taken once every menu it opened has gone.
 import XCTest
 
 final class HaloLayersJourneyTests: XCTestCase {
@@ -152,6 +152,7 @@ final class HaloLayersJourneyTests: XCTestCase {
         XCTAssert(entry.waitForExistence(timeout: 3), "the \(menu) menu has no \(item)")
         XCTAssert(entry.isEnabled, "\(menu) > \(item) is disabled")
         entry.click()
+        expectClosed(menu, halo)
     }
 
     /// `menu`'s item `item` is disabled and its help tag reads `help`.
@@ -164,6 +165,7 @@ final class HaloLayersJourneyTests: XCTestCase {
             NSPredicate(format: "label CONTAINS %@ OR title CONTAINS %@ OR value CONTAINS %@", help, help, help))
         XCTAssert(tag.firstMatch.waitForExistence(timeout: 5), "\(menu) > \(item) doesn't say \(help)")
         halo.press(.escape)
+        expectClosed(menu, halo)
     }
 
     /// The Edit menu's first item reads `title`; the menu is closed again.
@@ -172,6 +174,12 @@ final class HaloLayersJourneyTests: XCTestCase {
         XCTAssert(first.waitForExistence(timeout: 3), "the Edit menu shows no items")
         XCTAssertEqual(first.title, title, "the Edit menu's first item")
         halo.press(.escape)
+        expectClosed("Edit", halo)
+    }
+
+    /// The open menu has faded out, so the next shot shows the window alone.
+    @MainActor private func expectClosed(_ menu: String, _ halo: Journey) {
+        XCTAssert(halo.app.menus.firstMatch.waitForNonExistence(timeout: 2), "the \(menu) menu stayed open")
     }
 
     /// Clicks the menu bar's `menu` open and returns it.
