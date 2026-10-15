@@ -4,7 +4,7 @@ Issue: #1044 · Packet: docs/blueprints/library/features/spine.md
 Run: act-1a13f18aaa0-lfw5 · Session: session_01DtSRhNqsphGfKkvV5eLsWW · Started: 2026-10-15T10:25Z
 Stage: 5 finish
 Base: 111c44093b7959930d078ce21656fa174613a1b0
-Next: wait for a green dev CI run containing 66360c4 (#1187); then post Belt-Contact-Sheet on #1044 with journeys and audit; a Library journey failure is round 4 work
+Next: r4-b1 merges; its CI run is the done check; no further rounds (budget 4)
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -52,6 +52,7 @@ Taken from the packet's Build waves; checked against dev bcf5a09.
 | 2 | 38748468768 (3d42e80) | red: macOS build broke in LibraryWindow+Cull/+Loupe (closure ternaries from #1168) | – | (panel not run: no build) | 1 blocker | fixer lead/spine-fix-ternary | no |
 | 3 (round 2 rerun after the compile fix) | 38757068610 (111c440) | red only on HaloViewerFidelityTests (other line); every Library suite green; journeys not executed | not measured (journeys didn't run) | clarity, journey, design, layout, controls (same panel) | 7 minor, 0 major | r2-b1 (feature-done); #1183, #1184 needs-ui | panel clean; CI not green (other line) |
 | 4 (finish run) | 38761014883 (86fe18c, has #1187) | red only on HaloViewerFidelityTests.keyedFrame6 (Halo); Library suites green; journeys not executed | not measured | – | – | – | waiting on another line |
+| 5 (round 4) | 38767265986 (d95c756) | red: Halo audit + 4 Library journeys (loupe Right, Sort By disabled, J11 tabs, J0 hover tag) | library contrast 0/2, identifier 12/16, offscreen 0/16, unnamed 1/1: at or under | (journey failures, no panel) | 4 | r4-b1 (feature-done) | no |
 
 ## Decisions
 - Builder branches are `lead/spine-<id>`, not `lead/spine/<id>`: git can't hold `lead/spine` and `lead/spine/<x>` refs together.

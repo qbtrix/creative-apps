@@ -48,3 +48,4 @@ utc	stage	event	ref	note
 2026-10-15T16:01Z	5	ci-run	38762922782	red only on Halo keyedFrame6; crash-reports artifact is an old runner jetsam
 2026-10-15T16:19Z	5	heartbeat	-	waiting for a green dev CI run with 66360c4
 2026-10-15T16:37Z	5	heartbeat	-	waiting for a green dev CI run with 66360c4
+2026-10-15T16:52Z	4	round-findings	round4	journeys ran: 4 Library failures; final fix batch
