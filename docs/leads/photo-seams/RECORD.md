@@ -2,9 +2,9 @@
 
 Issue: #812 · Packet: docs/blueprints/photo/features/photo-seams.md
 Run: act-1a13d5e8ca4-huz5 · Session: cloud lead session · Started: 2026-10-15T02:23Z
-Stage: 3 wave 16 (S-11a)
+Stage: 3 wave 17 (S-11b)
 Base: c4ec07810683a4bc7d62dcc5205705229f248a71
-Next: wait for #988; S-11a stacks on lead/photo-seams-S-10b; run 726 (e8e5b52, has S-7b) macOS scripts/ci green; #978+ awaits the next run
+Next: wait for #989 to merge; S-11b stacks on lead/photo-seams-S-11a; then S-12, then S-13b (feature-done). Watch the first CI run containing ed953ba (#978)
 
 ## Tasks
 
@@ -28,8 +28,8 @@ packet chains every task on the one before it (shared files or new types).
 | S-8b | 12 | open/save/export into area files; fileServices | A/PhotoWindow{,+File,+Export}.swift | V2, V5, V6 | #985 | merged |
 | S-9 | 13 | menu bar split per menu | A/PhotoCommands{,+File,+Edit,+Select,+Image,+Layer,+View}.swift | V4; PhotoSelectAllMenuTests | #986 | merged |
 | S-10a | 14 | top bar, status line, PhotoRailTool | A/PhotoEditor, PhotoTopBar, PhotoStatusLine, PhotoRailTool; ST/PhotoEditorSnapshots | photo-status-message-dark.png | #987 | merged |
-| S-10b | 15 | overlays, hover, Return/Escape, StrokePacer modifiers | A/PhotoEditor, PhotoWindow, *Overlay.swift, StrokePacer; ST/PhotoStrokePacerTests | PhotoStrokePacerTests; V7, V9 | #988 | open |
-| S-11a | 16 | panel split 1: Adjust tab, tool options | A/PhotoPanel, PhotoAdjustTab, PhotoToolOptions, *Options.swift | snapshots unchanged | – | todo |
+| S-10b | 15 | overlays, hover, Return/Escape, StrokePacer modifiers | A/PhotoEditor, PhotoWindow, *Overlay.swift, StrokePacer; ST/PhotoStrokePacerTests | PhotoStrokePacerTests; V7, V9 | #988 | merged |
+| S-11a | 16 | panel split 1: Adjust tab, tool options | A/PhotoPanel, PhotoAdjustTab, PhotoToolOptions, *Options.swift | snapshots unchanged | #989 | open |
 | S-11b | 17 | panel split 2: Layers tab, History stub | A/PhotoPanel, PhotoLayersTab, PhotoHistoryTab | PhotoLayerRowSnapshots | – | todo |
 | S-12 | 18 | -PhotoFixture, -PhotoWindowWidth, Preview data pill | M/PhotoFixtures, A/PhotoApp, PhotoWindow, PhotoStatusLine | PhotoLaunchOptionsTests; photo-preview-pill-dark.png | – | todo |
 | S-13a | 11 | PB-2 clone/heal and PB-9 move budgets (model half) | MT/PhotoBudgetTests | PhotoBudgetTests | #979 | merged |

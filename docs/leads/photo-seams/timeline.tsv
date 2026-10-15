@@ -56,3 +56,5 @@ utc	stage	event	ref	note
 2026-10-15T05:15Z	3	pr-merged	#987	S-10a
 2026-10-15T05:15Z	3	pr-opened	#988	S-10b overlays, hover, Return/Escape, per-event modifiers, 264 lines 9 files
 2026-10-15T05:15Z	3	stage-start	S-11a	builder stacked on S-10b
+2026-10-15T05:21Z	3	pr-opened	#989	S-11a panel split 1, 267 lines 7 files
+2026-10-15T05:21Z	3	stage-start	S-11b	builder stacked on S-11a
