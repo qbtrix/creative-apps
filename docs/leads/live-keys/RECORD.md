@@ -4,7 +4,7 @@ Issue: #799 · Packet: docs/blueprints/flare/features/live-keys.md
 Run: act-1a13d0020ff-4x51 · Session: cse_01BKSKFkuR1aFXhWhZAhsegU · Started: 2026-10-15T00:00Z
 Stage: 4 round 1
 Base: 899d4243f4b53b42088452afee969d1856a5c7f0
-Next: wait for fix PRs r1-b1, r1-b2 to merge; then round 2 on the dev CI run containing them (lenses fixed: clarity, journey, contract, quality)
+Next: wait for #943 to merge; then round 2 on the dev CI run containing them (lenses fixed: clarity, journey, contract, quality)
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -22,7 +22,7 @@ Next: wait for fix PRs r1-b1, r1-b2 to merge; then round 2 on the dev CI run con
 ## Rounds
 | round | CI run | CI | audit vs baseline | lenses | confirmed | fixed by | clean |
 |---|---|---|---|---|---|---|---|
-| 1 | 38673821944 (3af1c0e: #936, #942) | red, not ours: SuiteUI SidebarRenameGestureTests (#938), on #763; every live-keys suite green on macOS | not run (scripts/ci failed before journeys) | clarity, journey, contract, quality | 12 (2 major: symbol keys past the symbol's end; non-atomic coalesced multi-layer setValue), 1 refuted | r1-b1, r1-b2 | no |
+| 1 | 38673821944 (3af1c0e: #936, #942) | red, not ours: SuiteUI SidebarRenameGestureTests (#938), on #763; every live-keys suite green on macOS | not run (scripts/ci failed before journeys) | clarity, journey, contract, quality | 12 (2 major: symbol keys past the symbol's end; non-atomic coalesced multi-layer setValue), 1 refuted | #942 (r1-b1), #943 (r1-b2) | no |
 
 ## Decisions
 - Base is c111439 (dev one commit past the briefed bcc3197, which is its ancestor: #896, a Flare test pin).
@@ -41,5 +41,6 @@ Next: wait for fix PRs r1-b1, r1-b2 to merge; then round 2 on the dev CI run con
 - Fix PRs carry feature-done too, since they land after KY-9 (#936) and the lane dispatches CI for them.
 
 ## Open
+- needs-core (for the supervisor to file on qbtrix/creative-core; this session's GitHub scope is creative-apps only): a command that sets a symbol's durationFrames, so insertFrames inside a symbol can grow it in the same step. Until then LiveKeyframes refuses a shift past the symbol's end (#943).
 - dev-red #763: macOS fails on SuiteUI SidebarRenameGestureTests (from #938); triage comment posted. live-keys done needs a green dev run after that is fixed.
 - none
