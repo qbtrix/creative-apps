@@ -21,9 +21,12 @@ Waves: 1 = CP-1 (independent). 2 = CP-2 (waits CP-1). 3 = CP-3, CP-4 (independen
 ## Rounds
 | round | CI run | CI | audit vs baseline | lenses | confirmed | fixed by | clean |
 |---|---|---|---|---|---|---|---|
-| 1 | 38742226941 (head 20d6a1c) | red: our gridAligned (frames[photo.crop.x] nil); Halo keyedFrame6 not ours (#1163) | n/a (journeys did not run) | clarity, design, layout, controls | pending | r1-b1 (gridAligned) | no |
+| 1 | 38742226941 (head 20d6a1c) | red: our gridAligned (frames[photo.crop.x] nil); Halo keyedFrame6 not ours (#1163) | n/a (journeys did not run) | clarity, design, layout, controls | 5 major + 6 minor (fields read 0 px; two captions; layout shift; Swap dead under 1:1; swapped orientation unreadable; X/Y 0 refused; empty tooltips; Original unexplained; disabled reasons disagree) | r1-b1 (gridAligned), r1-b2 (panel clarity) | no |
 
 ## Decisions
+- Round 1: X/Y accept 0 (the packet's 'under 1 is refused' meant sizes; an X/Y range starting at 0 that refuses 0 is a dead value).
+- Round 1: until ScrubField has a placeholder (needs-ui), the empty fields show the whole image's rect, read with the caption.
+- Round 1: light/dark crop snapshots are byte-identical because the editor shell is dark in both; outside this feature, not fixed.
 - CP-4 also removed Cancel's .cancelAction (would steal Escape from a typing field); Escape on the canvas still cancels via .dismiss.
 - CP-4 changed one line in UITests/PhotoJourneyTests.swift (Apply's identifier is now photo.crop.apply).
 - CP-7 moved from wave 1 to wave 4: the packet's wave 1 places it there, but it waits on photo-journey-kit (#1073), still open at start; it builds once #1073 closes.
