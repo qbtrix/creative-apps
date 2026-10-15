@@ -2,7 +2,7 @@
   "title": "The suite's targets exist, today's size is measured",
   "wave": 0,
   "order": 10,
-  "status": "building",
+  "status": "built",
   "feature_issue": "#873",
   "covers": "#807, #808, #809, #810, #811",
   "waits_on": "nothing"
