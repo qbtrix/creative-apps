@@ -48,3 +48,4 @@ utc	stage	event	ref	note
 2026-10-15T04:55Z	5	pr-merged	#965	feature-done a45f1cb
 2026-10-15T04:55Z	5	ci-run	38681586835	red on other lines; triage on #763
 2026-10-15T05:15Z	5	heartbeat	#798	waiting on a green dev run with a45f1cb
+2026-10-15T05:17Z	5	ci-run	38682385432	flare green after #975 revert; red on Library, Halo, SuiteUI only

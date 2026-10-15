@@ -4,7 +4,7 @@ Issue: #798 · Packet: docs/blueprints/flare/features/live-stage.md
 Run: act-1a13d374bd1-s92z · Session: claude/live-stage-lead-gljfd4 · Started: 2026-10-15T00:40Z
 Stage: 5 finish
 Base: 3033a12d599ff66ce4ebd5536ff9809d12e1d9cf
-Next: #965 (feature-done) merged as a45f1cb; its run 38681586835 on f0f31c7 is red on other lines (Flare toolbar after SuiteUI #962, Library #933, Halo, SuiteUI); wait for the first green dev run containing a45f1cb, then post Belt-Contact-Sheet on #798
+Next: wait for the first green dev run containing a45f1cb (#965); run 38682385432 on e8e5b52: Flare journeys all green after revert #975, red only on Library, Halo, SuiteUI
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
