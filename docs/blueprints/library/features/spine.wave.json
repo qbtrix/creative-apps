@@ -2,8 +2,8 @@
   "title": "Contracts, fakes, catalog state, undo, launch arguments, the app split",
   "wave": 1,
   "order": 10,
-  "status": "planned",
-  "feature_issue": "filed after this PR merges",
+  "status": "building",
+  "feature_issue": "#1044",
   "covers": "#235 (and the fix for #156, see below)",
   "waits_on": "nothing",
   "issues": [

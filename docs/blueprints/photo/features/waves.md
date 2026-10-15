@@ -9,14 +9,20 @@ the end and get packets once wave 2 has landed. A wave starts when
 everything it waits on has merged. Two features in the same wave never own
 the same file. Each packet lists its tasks, owned files and acceptance tests.
 
+Rows whose wave reads `SP1` to `SP3` belong to the shell-parity track, a
+cross-app plan whose order and shared files are in
+`docs/blueprints/suite/features/shell-parity-waves.md`; they follow that
+file's waves, not this one's.
+
 | wave | feature | PV | packet | covers | tier | waits on (this repo) | waits on (creative-core) | feature issue | status |
 |---|---|---|---|---|---|---|---|---|---|
 | 0 | The seams: contracts, fakes, services, state, routing, file splits | PV-0 | `photo-seams.md` | – | p1 (by dependency) | nothing | nothing | #812 | built |
-| 0 | Shared journey helpers | PV-0 (journey part) | `photo-journey-kit.md` | – | p1 (by dependency) | #333 (QH-4; suite-harness #778 closes it with task SH-7) | nothing | file when ready | planned |
-| 1 | Save and reopen with layers, Open Recent, unsaved state, recovery | PV-1 | `photo-documents.md` | – | p1 | photo-seams (journey tasks only: photo-journey-kit) | nothing | file when ready | planned |
-| 1 | Cut, Copy, Paste, Duplicate, Merge Down, Flatten | PV-2 | `photo-edit.md` | – | p1 | photo-seams (journey tasks only: photo-journey-kit) | nothing | file when ready | planned |
-| 1 | Typed crop size and aspect lock; the perf journeys | PV-3 | `photo-crop.md` | #544 | p1 | photo-seams (journey tasks only: photo-journey-kit) | nothing | file when ready | planned |
+| 0 | Shared journey helpers | PV-0 (journey part) | `photo-journey-kit.md` | – | p1 (by dependency) | #333 (QH-4; suite-harness #778 closes it with task SH-7) | nothing | #1073 | building |
+| 1 | Save and reopen with layers, Open Recent, unsaved state, recovery | PV-1 | `photo-documents.md` | – | p1 | photo-seams (journey tasks only: photo-journey-kit) | nothing | #1074 | building |
+| 1 | Cut, Copy, Paste, Duplicate, Merge Down, Flatten | PV-2 | `photo-edit.md` | – | p1 | photo-seams (journey tasks only: photo-journey-kit) | nothing | #1075 | building |
+| 1 | Typed crop size and aspect lock; the perf journeys | PV-3 | `photo-crop.md` | #544 | p1 | photo-seams (journey tasks only: photo-journey-kit) | nothing | #1076 | building |
 | 2 | Adjustment layers | PV-6 | `photo-adjustment-layers.md` | #580 | p1 | photo-edit (hands over `PhotoCommands+Layer.swift`) | nothing (CR-5 optional) | file when ready | planned |
+| SP2 | Photo opens in `SuiteWindow` with the floating tool box | – | `shell-parity.md` | the 2026-10-15 captain decisions (one shell, one tool box, the app switcher), Photo half | p1 | editor-in-window (SuiteUI, #1079); photo-seams #812 | nothing | file when ready | planned |
 
 The blueprint's PV-0 is two features here: its journey part (moving
 `writeTestPhoto` into a second journey file) is the only part that waits on

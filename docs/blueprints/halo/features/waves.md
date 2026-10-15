@@ -12,10 +12,10 @@ its tasks, owned files, acceptance tests, quality tests and done check.
 | wave | feature | packet | covers | waits on (features) | waits on (SuiteUI, creative-core) | feature issue | status |
 |---|---|---|---|---|---|---|---|
 | W0 | Foundation: contracts, fakes, state and the window's seams | `foundation.md` | #286, #290, #149 | nothing | none | #777 | built |
-| W1 | See and play the composition | `viewer-playback.md` | #37, #457 | foundation #777 | #333 (journey files); #340 not blocking (plain buttons meanwhile) | file when ready | planned |
-| W1 | Key layers: inspector, drag and parent | `layer-keys.md` | #38, #207 | foundation #777 | #333 | file when ready | planned |
-| W1 | Undo, redo, save and open | `history-files.md` | #208, #209 | foundation #777 | #333 | file when ready | planned |
-| W1 | Layer housekeeping | `layer-panel.md` | #770 | foundation #777 | #333 | file when ready | planned |
+| W1 | See and play the composition | `viewer-playback.md` | #37, #457 | foundation #777 | #333 (journey files); #340 not blocking (plain buttons meanwhile) | #1035 | building |
+| W1 | Key layers: inspector, drag and parent | `layer-keys.md` | #38, #207 | foundation #777 | #333 | #1036 | building |
+| W1 | Undo, redo, save and open | `history-files.md` | #208, #209 | foundation #777 | #333 | #1037 | built |
+| W1 | Layer housekeeping | `layer-panel.md` | #770 | foundation #777 | #333 | #1038 | building |
 | W2 | Ease keys | `easing.md` | #428 | layer-keys, history-files | #333; #771 and #63 not blocking (plain diamonds; keys picked from the EASING rows) | file when ready | planned |
 | W2 | Render a frame and render to files | `render-out.md` | #451, #429 | viewer-playback | #333 | file when ready | planned |
 | W2 | Text layers | `text-layers.md` | #430 | layer-keys, viewer-playback, history-files | #333 | file when ready | planned |

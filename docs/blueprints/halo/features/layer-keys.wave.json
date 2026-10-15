@@ -2,8 +2,8 @@
   "title": "Key layers: inspector, drag and parent",
   "wave": "W1",
   "order": 20,
-  "status": "planned",
-  "feature_issue": "file when ready",
+  "status": "building",
+  "feature_issue": "#1036",
   "covers": "#38, #207",
   "waits_on": "foundation #777; #333",
   "cells": {

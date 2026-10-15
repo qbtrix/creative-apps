@@ -1,0 +1,17 @@
+{
+  "title": "Photo opens in `SuiteWindow` with the floating tool box",
+  "wave": "SP2",
+  "order": 10,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "covers": "the 2026-10-15 captain decisions (one shell, one tool box, the app switcher), Photo half",
+  "waits_on": "editor-in-window (SuiteUI, #1079); photo-seams #812",
+  "cells": {
+    "PV": "–",
+    "tier": "p1",
+    "waits on (this repo)": "editor-in-window (SuiteUI, #1079); photo-seams #812",
+    "waits on (creative-core)": "nothing"
+  },
+  "track": "shell parity: docs/blueprints/suite/features/shell-parity-waves.md, wave 2",
+  "longest_chain": "3 (PS-1 → PS-3 → PS-4)"
+}

@@ -13,6 +13,11 @@ blueprint. Its code is about 954 lines before tests in the Model alone
 Model half does not, so it ships as two features in a chain: wave 0a
 (Model) and wave 0b (window).
 
+Rows whose wave reads `SP1` to `SP3` belong to the shell-parity track, a
+cross-app plan whose order and shared files are in
+`docs/blueprints/suite/features/shell-parity-waves.md`; they follow that
+file's waves, not this one's.
+
 <!-- waves-table: wave | feature | packet | covers | waits on | feature issue | status -->
 
 No Design feature issue is filed yet: every feature waits on an open

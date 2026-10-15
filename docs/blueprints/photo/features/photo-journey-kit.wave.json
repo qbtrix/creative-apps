@@ -2,8 +2,8 @@
   "title": "Shared journey helpers",
   "wave": 0,
   "order": 20,
-  "status": "planned",
-  "feature_issue": "file when ready",
+  "status": "building",
+  "feature_issue": "#1073",
   "covers": "–",
   "waits_on": "#333 (QH-4; suite-harness #778 closes it with task SH-7); nothing",
   "cells": {

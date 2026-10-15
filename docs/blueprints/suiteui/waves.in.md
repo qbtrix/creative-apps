@@ -9,6 +9,11 @@ packet lists its tasks, owned files and acceptance tests.
 
 SuiteUI knows no engine, so **no SuiteUI feature waits on creative-core**.
 
+Rows whose wave reads `SP1` to `SP3` belong to the shell-parity track, a
+cross-app plan whose order and shared files are in
+`docs/blueprints/suite/features/shell-parity-waves.md`; they follow that
+file's waves, not this one's.
+
 <!-- waves-table: wave | feature | packet | covers | waits on | feature issue | status -->
 
 ## File when ready

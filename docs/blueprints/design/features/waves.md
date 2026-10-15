@@ -15,6 +15,11 @@ blueprint. Its code is about 954 lines before tests in the Model alone
 Model half does not, so it ships as two features in a chain: wave 0a
 (Model) and wave 0b (window).
 
+Rows whose wave reads `SP1` to `SP3` belong to the shell-parity track, a
+cross-app plan whose order and shared files are in
+`docs/blueprints/suite/features/shell-parity-waves.md`; they follow that
+file's waves, not this one's.
+
 | wave | feature | packet | covers | waits on | feature issue | status |
 |---|---|---|---|---|---|---|
 | 0a | The Model seam: schema, contracts, services, fakes, live stubs, actions, routes, fixtures | `design-seams.md` | the `DesignPage` init gap (filed by the lead) | PR #753 (corner radius) merged | file when ready | planned |
@@ -25,6 +30,7 @@ Model half does not, so it ships as two features in a chain: wave 0a
 | 1 | The Layers panel | `layers-panel.md` | #613, #589 (Design half); gap: rename, reorder, nest, Arrange | design-window | file when ready | planned |
 | 1 | Files and history | `files-history.md` | #275, #270; gap: open bad files journey | design-window | file when ready | planned |
 | 2 | The tier-2 seam | `design-seams-2.md` | – | all five wave-1 features | file when ready | planned |
+| SP2 | Design opens in `SuiteWindow` with the floating tool box | `shell-parity.md` | the 2026-10-15 captain decisions (one shell, one tool box, the app switcher), Design half | editor-in-window (SuiteUI, #1079) | file when ready | planned |
 
 No Design feature issue is filed yet: every feature waits on an open
 dependency (below). #288 closes when Design's `identifier` count reaches 0:

@@ -1,0 +1,11 @@
+{
+  "title": "Delete `EditorShell`, `EditorTopBar`, `.rail` and their tokens; rewrite `docs/design.md`'s Editor shell section",
+  "wave": "SP3",
+  "order": 10,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "covers": "the 2026-10-15 captain decisions (one shell, one tool box, the app switcher), the deletion half",
+  "waits_on": "Design shell-parity, Photo shell-parity",
+  "track": "shell parity: docs/blueprints/suite/features/shell-parity-waves.md, wave 3",
+  "longest_chain": "2 (ER-1 → ER-2)"
+}

@@ -11,6 +11,11 @@ packet lists its tasks, owned files and acceptance tests.
 
 SuiteUI knows no engine, so **no SuiteUI feature waits on creative-core**.
 
+Rows whose wave reads `SP1` to `SP3` belong to the shell-parity track, a
+cross-app plan whose order and shared files are in
+`docs/blueprints/suite/features/shell-parity-waves.md`; they follow that
+file's waves, not this one's.
+
 | wave | feature | packet | covers | waits on | feature issue | status |
 |---|---|---|---|---|---|---|
 | 1 | The test harness: goldens, gallery, inventory, probe, contracts, tokens | `suite-harness.md` | #773, #774, #283, #330, #775, #776, #333, #331, #332 | nothing | #778 | built |
@@ -18,6 +23,8 @@ SuiteUI knows no engine, so **no SuiteUI feature waits on creative-core**.
 | 2 | Inspector controls end once and work from the keyboard | `inspector-controls.md` | #718, #591, #88, #622, #285, #262, #343 | #778 (suite-harness) | file when ready | planned |
 | 2 | Sidebar and layer rows | `lists-and-layers.md` | #146, #577, #108, #73, #589, #111, #249, #284, #308, #311, #312 | #778 (suite-harness) | file when ready | planned |
 | 2 | Marks over the canvas, zoom and pan, the surface | `canvas-marks.md` | #273, #706, #737, #530, #264 | #778 (suite-harness) | file when ready | planned |
+| SP1 | `SuiteWindow` can hold a canvas editor: sidebar slot, subtitle, document actions, inspector width, `-SuiteWindowSize`, `EditorDetail`, `SidebarActionRow`, the app switcher, the journeys' window and geometry checks, the parity journey | `editor-in-window.md` | the 2026-10-15 captain decisions (one shell, one tool box, the app switcher), SuiteUI half | nothing (#933 for the geometric test EW-5b) | #1079 | building |
+| SP3 | Delete `EditorShell`, `EditorTopBar`, `.rail` and their tokens; rewrite `docs/design.md`'s Editor shell section | `editor-shell-removal.md` | the 2026-10-15 captain decisions (one shell, one tool box, the app switcher), the deletion half | Design shell-parity, Photo shell-parity | file when ready | planned |
 
 ## File when ready
 

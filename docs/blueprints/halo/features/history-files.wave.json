@@ -2,8 +2,8 @@
   "title": "Undo, redo, save and open",
   "wave": "W1",
   "order": 30,
-  "status": "planned",
-  "feature_issue": "file when ready",
+  "status": "built",
+  "feature_issue": "#1037",
   "covers": "#208, #209",
   "waits_on": "foundation #777; #333",
   "cells": {

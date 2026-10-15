@@ -7,6 +7,11 @@ the end and get packets once wave 2 has landed. A wave starts when
 everything it waits on has merged. Two features in the same wave never own
 the same file. Each packet lists its tasks, owned files and acceptance tests.
 
+Rows whose wave reads `SP1` to `SP3` belong to the shell-parity track, a
+cross-app plan whose order and shared files are in
+`docs/blueprints/suite/features/shell-parity-waves.md`; they follow that
+file's waves, not this one's.
+
 <!-- waves-table: wave | feature | PV | packet | covers | tier | waits on (this repo) | waits on (creative-core) | feature issue | status -->
 
 The blueprint's PV-0 is two features here: its journey part (moving

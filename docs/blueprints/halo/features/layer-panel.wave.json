@@ -2,8 +2,8 @@
   "title": "Layer housekeeping",
   "wave": "W1",
   "order": 40,
-  "status": "planned",
-  "feature_issue": "file when ready",
+  "status": "building",
+  "feature_issue": "#1038",
   "covers": "#770",
   "waits_on": "foundation #777; #333",
   "cells": {
