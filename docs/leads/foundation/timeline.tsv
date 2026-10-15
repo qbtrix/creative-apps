@@ -99,3 +99,4 @@ utc	stage	event	ref	note
 2026-10-15T06:06Z	4	ci-run	38687993459	halo audit at/under baseline (offscreen 0); only testLayoutAtWidths red (track 4 pt left of window)
 2026-10-15T06:10Z	4	round-findings	round 3	panel 10 confirmed (4 major); batches track+1,5 / E / F
 2026-10-15T06:13Z	4	pr-opened	#1007	round 3: track safe-area bleed, ruler help, diamond click
+2026-10-15T06:19Z	4	pr-opened	#1008	round 3 batch E layers list
