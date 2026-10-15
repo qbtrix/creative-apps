@@ -12,3 +12,5 @@ utc	stage	event	ref	note
 2026-10-15T11:50Z	3	pr-opened	#1200	D-4a recovery logic
 2026-10-15T12:05Z	3	pr-merged	#1200	D-4a
 2026-10-15T12:05Z	3	pr-opened	#1201	D-2 LiveArchive
+2026-10-15T12:25Z	3	pr-merged	#1201	D-2
+2026-10-15T12:26Z	3	stage-start	wave 3	D-4b, D-6 on ea9a729

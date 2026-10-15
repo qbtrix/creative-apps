@@ -2,19 +2,19 @@
 
 Issue: #1074 · Packet: docs/blueprints/photo/features/photo-documents.md
 Run: act-1a1404bf04c-bp6m · Session: claude/photo-documents-lead-ezrcev · Started: 2026-10-15T10:40Z
-Stage: 3 wave 2
-Base: 9f28a9f7dcb6e9d584a7c80847e8ef0108fa5e17
-Next: wait for wave 2 PRs (D-2, D-4a) to merge, then start wave 3 (D-4b, D-6)
+Stage: 3 wave 3
+Base: ea9a72970ab95dc604d1a43a94962a48341ef72a
+Next: wait for wave 3 PRs (D-4b, D-6) to merge, then start wave 4 (D-5, D-7)
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
 |---|---|---|---|---|---|---|
 | D-1 | 1 | Stored-entry zip writer/reader with CRC-32 | M/Live/PhotoZip.swift, MT/PhotoContainerTests.swift | PhotoContainerTests | #1196 | merged |
 | D-3 | 1 | Workspace side: snapshot, documentPackage, openDocument, openImage, didSave, saveAction, fileKind(forName:), needsDocument, saveStatus | M/PhotoDocumentFile.swift, MT/PhotoDocumentFileTests.swift | PhotoDocumentFileTests | #1197 | merged |
-| D-2 | 2 | LiveArchive encode/decode; LiveDocuments.archive() | M/Live/LiveArchive.swift, M/Live/LiveDocuments.swift, MT/PhotoDocumentRoundTripTests.swift | PhotoDocumentRoundTripTests | #1201 | open |
+| D-2 | 2 | LiveArchive encode/decode; LiveDocuments.archive() | M/Live/LiveArchive.swift, M/Live/LiveDocuments.swift, MT/PhotoDocumentRoundTripTests.swift | PhotoDocumentRoundTripTests | #1201 | merged |
 | D-4a | 2 | autosaveDue, recoveryEntry, restore, RecoveryOffer | M/PhotoRecovery.swift, MT/PhotoRecoveryTests.swift | PhotoRecoveryTests | #1200 | merged |
-| D-4b | 3 | LiveRecovery folder I/O; LiveDocuments.recovery(directory:) | M/Live/LiveRecovery.swift, M/Live/LiveDocuments.swift, MT/LiveRecoveryTests.swift | LiveRecoveryTests | – | waits D-1, D-2 |
-| D-6 | 3 | PhotoPackageIO off-main read/write; PF-1 through ImageIO | A/PhotoPackageIO.swift, ST/PhotoPackageIOTests.swift | PhotoPackageIOTests (macOS) | – | waits D-2, D-3 |
+| D-4b | 3 | LiveRecovery folder I/O; LiveDocuments.recovery(directory:) | M/Live/LiveRecovery.swift, M/Live/LiveDocuments.swift, MT/LiveRecoveryTests.swift | LiveRecoveryTests | – | building |
+| D-6 | 3 | PhotoPackageIO off-main read/write; PF-1 through ImageIO | A/PhotoPackageIO.swift, ST/PhotoPackageIOTests.swift | PhotoPackageIOTests (macOS) | – | building |
 | D-5 | 4 | Budgets PB-18/19/20 | MT/PhotoDocumentsBudgetTests.swift | PhotoDocumentsBudgetTests | – | waits D-4a, D-4b |
 | D-7 | 4 | Save routing, Keep layers?, open .ora/flat, errors, Not saved, fileServices, Open Recent | A/PhotoWindow+File.swift, A/PhotoCommands+File.swift | V5/V6, app-state rule | – | waits D-6, D-4b |
 | D-8 | 5 | Save status in top bar, edited dot, Saving…/Opening… notes; snapshots | A/PhotoTopBar.swift, A/PhotoWindow+File.swift, ST/PhotoDocumentsSnapshots.swift | PhotoDocumentsSnapshots | – | waits D-7 |
