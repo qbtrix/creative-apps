@@ -246,27 +246,63 @@ in photo-seams (`M/`, `A/`, `MT/`, `ST/`, `UT/` = `UITests/`).
 |---|---|---|---|---|---|
 | D-1 | – | The stored-entry zip writer and reader with CRC-32 | `M/Live/PhotoZip.swift`, `MT/PhotoContainerTests.swift` | – | ~300, 2 |
 | D-2 | – | `LiveArchive`: encode and decode the document; `LiveDocuments.archive()` returns it | `M/Live/LiveArchive.swift`, `M/Live/LiveDocuments.swift`, `MT/PhotoDocumentRoundTripTests.swift` | D-1 | ~390, 3 |
-| D-3 | – | Workspace side: `snapshot`, `documentPackage`, `openDocument` (moving the layer-id counter past the loaded ids with `reserveLayerIDs`), `openImage`, `didSave`, `saveAction`, `fileKind(forName:)`, `needsDocument`, `saveStatus` | `M/PhotoDocumentFile.swift`, `MT/PhotoDocumentFileTests.swift` | D-2 | ~330, 2 |
+| D-3 | – | Workspace side: `snapshot`, `documentPackage`, `openDocument` (moving the layer-id counter past the loaded ids with `reserveLayerIDs`), `openImage`, `didSave`, `saveAction`, `fileKind(forName:)`, `needsDocument`, `saveStatus` | `M/PhotoDocumentFile.swift`, `MT/PhotoDocumentFileTests.swift` | – | ~330, 2 |
 | D-4a | – | `autosaveDue`, `recoveryEntry`, `restore`, `RecoveryOffer` text | `M/PhotoRecovery.swift`, `MT/PhotoRecoveryTests.swift` | D-3 | ~220, 2 |
-| D-4b | – | `LiveRecovery` (folder I/O, atomic, damaged files dropped); `LiveDocuments.recovery(directory:)` | `M/Live/LiveRecovery.swift`, `M/Live/LiveDocuments.swift`, `MT/LiveRecoveryTests.swift` | D-4a | ~250, 3 |
-| D-5 | – | Budgets PB-18, PB-19, PB-20 on `large` | `MT/PhotoDocumentsBudgetTests.swift` | D-4b | ~150, 1 |
-| D-6 | – | `PhotoPackageIO`: read and write a document's bytes off the main actor; PF-1 through ImageIO | `A/PhotoPackageIO.swift`, `ST/PhotoPackageIOTests.swift` | D-3 | ~220, 2 |
+| D-4b | – | `LiveRecovery` (folder I/O, atomic, damaged files dropped); `LiveDocuments.recovery(directory:)` | `M/Live/LiveRecovery.swift`, `M/Live/LiveDocuments.swift`, `MT/LiveRecoveryTests.swift` | D-1, D-2 | ~250, 3 |
+| D-5 | – | Budgets PB-18, PB-19, PB-20 on `large` | `MT/PhotoDocumentsBudgetTests.swift` | D-4a, D-4b | ~150, 1 |
+| D-6 | – | `PhotoPackageIO`: read and write a document's bytes off the main actor; PF-1 through ImageIO | `A/PhotoPackageIO.swift`, `ST/PhotoPackageIOTests.swift` | D-2, D-3 | ~220, 2 |
 | D-7 | – | Save routing, Keep layers?, open `.ora` and flat files through `openImage`, open errors, "Not saved", `fileServices` with the recovery folder; Open Recent noted after each open and save; all of it inside `PhotoFileArea` | `A/PhotoWindow+File.swift`, `A/PhotoCommands+File.swift` | D-6, D-4b | ~340, 2 |
 | D-8 | – | Save status in the top bar (plain until EC-4), the window's edited dot (from `PhotoFileArea`), the "Saving…" and "Opening…" notes; snapshots | `A/PhotoTopBar.swift`, `A/PhotoWindow+File.swift`, `ST/PhotoDocumentsSnapshots.swift` | D-7 | ~220, 3 |
-| D-9 | – | `PhotoAutosave` (Flare's shape) and its wiring: tick every second, restore offer at launch, discard on a clean close | `A/PhotoAutosave.swift`, `A/PhotoWindow+File.swift`, `ST/PhotoAutosaveTests.swift` | D-8 | ~360, 3 |
+| D-9 | – | `PhotoAutosave` (Flare's shape) and its wiring: tick every second, restore offer at launch, discard on a clean close | `A/PhotoAutosave.swift`, `A/PhotoWindow+File.swift`, `ST/PhotoAutosaveTests.swift` | D-4a, D-4b, D-8 | ~360, 3 |
 | D-10 | – | App delegate adaptor: Open Recent and Finder opens with no window, the unsaved prompt on close and on Quit | `A/PhotoApp.swift`, `A/PhotoWindow+File.swift`, `ST/PhotoUnsavedPromptTests.swift` | D-9 | ~260, 3 |
 | D-11 | – | Journeys PJ-1, PJ-1b, PJ-2, PJ-4 | `UT/PhotoJourneyTests+Documents.swift` | D-10, photo-journey-kit | ~330, 1 |
 | D-12 | – | Journeys PJ-3 and PJ-P3 | `UT/PhotoJourneyTests+Recovery.swift`, `UT/PhotoJourneyTests+PerfDocuments.swift` | D-10, photo-journey-kit | ~220, 2 |
 
-Chains: D-1 → D-2 → D-3 → D-4a → D-4b → D-5 (Model types in turn; D-2 and
-D-4b share `LiveDocuments.swift`); D-6 after D-3, parallel to D-4a; D-7 →
-D-8 → D-9 → D-10 share the window and file code. D-11 and D-12 run side by
-side after D-10. D-12 carries `feature-done` (or whichever merges last).
+Links: D-3 codes against `DocumentArchiving` and runs its tests on
+`PhotoServices.fake`'s `FakeArchive`, so it doesn't wait for `LiveArchive`.
+D-2 and D-4b call `PhotoZip` (D-1); D-4b also edits `LiveDocuments.swift`,
+which D-2 owns. D-4a calls D-3's `openDocument` and `documentPackage`. D-6
+runs PF-1 through `LiveArchive` and calls D-3's `snapshot()`. D-7 to D-10 each
+add state to `PhotoFileArea` in `PhotoWindow+File.swift` and use the one
+before. D-11 and D-12 run side by side after D-10. D-12 carries
+`feature-done` (or whichever merges last). No task edits a shared doc
+(`docs/c4/model.json`, `docs/design.md`, the blueprint, `waves.md`): every new
+file sits in a target folder its C4 component already covers.
 
 **PJ-P3's large document.** `-PhotoFixture large` runs on `.fake`, whose
 archive writes no real file. D-12 instead makes the large photo with
 `writeTestPhoto(to:width:height:)` at 4000 × 3000, adds two layers in the UI
 and saves as a document; the perf numbers come from reopening that file.
+
+## Build waves
+
+- Wave 1: D-1, D-3. Independent in this wave: both.
+- Wave 2: D-2, D-4a. Independent in this wave: both.
+- Wave 3: D-4b, D-6. Independent in this wave: both.
+- Wave 4: D-5, D-7. Independent in this wave: both.
+- Wave 5: D-8. Independent in this wave: none (one task).
+- Wave 6: D-9. Independent in this wave: none (one task).
+- Wave 7: D-10. Independent in this wave: none (one task).
+- Wave 8: D-11, D-12 (`feature-done`, whichever merges last). Independent in
+  this wave: both.
+
+Longest chain: D-1 → D-2 → D-6 → D-7 → D-8 → D-9 → D-10 → D-11 (8).
+Chain of 8: `LiveArchive` (D-2) wraps `PhotoZip` (D-1); `PhotoPackageIO`
+(D-6) round-trips through `LiveArchive`; D-7 saves and opens through
+`PhotoPackageIO`; D-8 snapshots D-7's Keep layers? dialog and shows its
+failed-save flag; D-9 feeds `autosaved` into D-8's status; D-10's Don't Save
+on Quit discards through D-9's `PhotoAutosave`; PJ-2 (D-11) needs D-10's
+prompt. D-7 to D-10 also all edit `PhotoFileArea`'s `@State` in
+`PhotoWindow+File.swift`, which can't move to extension files.
+
+Chain of 6: D-1 → D-2 → D-4b → D-9 → D-10 → D-11, and chain of 5: D-3 →
+D-4a → D-9 → D-10 → D-11. D-9's `PhotoAutosave` calls D-4a's `autosaveDue`,
+`recoveryEntry` and `RecoveryOffer`, and its tests write through D-4b's
+`LiveRecovery`. D-7 waits on D-4b because `fileServices` hands it the recovery
+folder.
+
+Chain of 4: D-1 → D-2 → D-4b → D-5. D-5's PB-20 times D-4a's
+`recoveryEntry` plus the `LiveRecovery` write.
 
 ## Acceptance test per task
 

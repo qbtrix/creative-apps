@@ -213,6 +213,20 @@ covered once; `CanvasViewport.onPointer`, `statusPill(.warning)`,
 history and zip arithmetic holds; Command-J and Command-E are free; no
 product names.
 
+
+## Longest build chain
+
+Each packet was re-cut to `docs/factory/packets.md` (shared docs in one
+final task, a task waits only on merged code it needs, each wave lists its
+independent tasks). Longest depends-on chain in tasks, before and after;
+a chain over 3 has its reason in the packet's Build waves section.
+
+- photo-adjustment-layers: 7 before, 4 after.
+- photo-crop: 5 before, 4 after.
+- photo-documents: 10 before, 8 after.
+- photo-edit: 5 before, 5 after.
+- photo-journey-kit: 1 before, 1 after.
+
 ## The lead contract
 
 Every feature lead and every task below codes against this. It is handed
