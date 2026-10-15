@@ -4,7 +4,7 @@ Issue: #800 · Packet: docs/blueprints/flare/features/live-scenes.md
 Run: act-1a13ca4f89e-0ft1 · Session: claude/live-scenes-lead-d0sj3t · Started: 2026-10-14
 Stage: 4 round 1
 Base: 62395be0c94c10861eaa7518dc7a7fa0d6143447
-Next: read the dev CI run triggered by #886 (feature-done, 62395be); judge round 1 on it
+Next: wait for round 1 critic panel (wf_4fc30372-1d2); round 1 CI 38657968912 red only on SuiteUI SnapshotHostTests (dev-red #763, triaged)
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |

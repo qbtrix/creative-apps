@@ -13,3 +13,5 @@ utc	stage	event	ref	note
 2026-10-15T00:05Z	3	pr-merged	#886	SN-5 SceneEditing conformance and model journeys (feature-done)
 2026-10-15T00:05Z	3	stage-end	wave3	all five tasks merged
 2026-10-15T00:05Z	4	stage-start	round1	waiting on dev CI for 62395be
+2026-10-15T00:13Z	4	ci-run	38657968912	Linux green; macOS red only on SuiteUI SnapshotHostTests.appearances; all LiveScenes tests pass; journeys not run
+2026-10-15T00:13Z	4	heartbeat	round1	critic panel running; triage posted on #763
