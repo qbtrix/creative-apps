@@ -1682,7 +1682,7 @@ agents), so it is a supervisor-merged PR, not a fast-lane one:
 - `project.yml`: the `FolioJourneyTests` bundle globbing
   `UITests/FolioJourneyTests*.swift` in the `Journeys` scheme.
 - `scripts/bundle-apps`: Folio's bundle and Info.plist (PDF as an
-  Editor of rank Alternate, `com.adobe.pdf`, Apple docs: UTType.pdf),
+  Editor of rank Alternate, `UTType.pdf`, Apple docs: UTType.pdf),
   or, once the suite's packaging lands, Folio as the sixth embedded app.
 - `UITests/audit-baseline.json`: `folio` at 0 for every check (a new app at
   0 is not a loosening; section 8.2).
