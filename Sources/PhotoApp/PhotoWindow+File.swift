@@ -169,7 +169,7 @@ extension PhotoWindow {
                 documentURL = nil
             } catch {
                 autosave.discardLeftBehind()  // it holds nothing to keep (packet note 3)
-                problem = (error as? ArchiveError)?.message ?? "The image can't be restored. \(Self.reason(error))"
+                problem = PhotoProblem("The image can't be restored.", (error as? ArchiveError)?.message ?? Self.reason(error))
             }
             files.working = nil
         }
@@ -201,7 +201,7 @@ extension PhotoWindow {
             files.noteRecent(url)
             note = side.map { "Opened at \($0) px on the longest side" }
         } catch {
-            problem = "\(url.lastPathComponent) can't be opened. \(Self.reason(error))"
+            problem = PhotoProblem("\(url.lastPathComponent) can't be opened.", Self.reason(error))
         }
     }
 
@@ -221,9 +221,9 @@ extension PhotoWindow {
                 files.noteRecent(url)
                 note = nil
             } catch let error as ArchiveError {
-                problem = error.message
+                problem = PhotoProblem("\(name) can't be opened.", error.message)
             } catch {
-                problem = "\(name) can't be opened. \(Self.reason(error))"
+                problem = PhotoProblem("\(name) can't be opened.", Self.reason(error))
             }
             files.working = nil
         }
@@ -300,7 +300,7 @@ extension PhotoWindow {
             } catch {
                 if saving { return didFailSave(error) }
                 note = nil
-                problem = "\(url.lastPathComponent) couldn't be written. \(Self.reason(error))"
+                problem = PhotoProblem("\(url.lastPathComponent) couldn't be written.", Self.reason(error))
             }
         }
     }
@@ -324,7 +324,7 @@ extension PhotoWindow {
         note = nil
         files.working = nil
         files.saveFailed = true
-        problem = "The image couldn't be saved: \(reason.hasSuffix(".") ? String(reason.dropLast()) : reason)."
+        problem = PhotoProblem("Not saved", "The image couldn't be saved: \(reason.hasSuffix(".") ? String(reason.dropLast()) : reason).")
     }
 
     static func reason(_ error: Error) -> String {
