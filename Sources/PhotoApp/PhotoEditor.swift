@@ -61,11 +61,11 @@ struct PhotoImageMenu: View {
     }
 }
 
-/// The canvas: the rendered picture (TileCanvas) on the checkerboard with the selection and
-/// a pending crop over it, or the empty state. Drags go to the active tool;
+/// The canvas: the rendered picture (TileCanvas) on the checkerboard with PhotoCanvasOverlay's
+/// marks over it (fed the pointer's document point), or the empty state. Drags go to the active tool;
 /// with the canvas focused, V M B E S J C I pick enabled tools, Delete clears the selection
-/// (Shift-Delete fills it), Return applies a crop and Escape cancels it or
-/// deselects. Dropping an image file opens it. While the Straighten sheet is
+/// (Shift-Delete fills it), Return sends `confirm` (apply a crop) and Escape `dismiss` (cancel it
+/// or deselect). Dropping an image file opens it. While the Straighten sheet is
 /// open the picture turns by its angle under StraightenMarks.
 struct PhotoCanvas: View {
     let model: PhotoWorkspace
@@ -75,6 +75,8 @@ struct PhotoCanvas: View {
     var onZoom: @MainActor (Double) -> Void = { _ in }
     var perform: PhotoPerform = { _ in }
     var straighten: StraightenDraft?
+    /// The document point under the pointer, for the brush cursor; nil once it leaves.
+    @State private var hover: CGPoint?
 
     var body: some View {
         Group {
@@ -82,12 +84,12 @@ struct PhotoCanvas: View {
                 let size = CGSize(width: canvas.width, height: canvas.height)
                 CanvasViewport(
                     documentSize: size, zoom: zoom, pointer: model.tool.pointer, onSize: onViewport, onZoom: onZoom,
-                    onDrag: { perform(.drag($0, $1)) }, onDragEnd: { perform(.endDrag) }, onKey: key
+                    onDrag: { perform(.drag($0, $1)) }, onDragEnd: { perform(.endDrag) }, onKey: key,
+                    onPointer: { hover = $0 }
                 ) {
                     if let tiles { TileCanvas(tiles: tiles, zoom: zoom, degrees: straighten?.degrees ?? 0) }
                 } overlay: {
-                    if let selection = model.selection { SelectionOutline(rect: selection.cgRect, zoom: zoom) }
-                    if let crop = model.pendingCrop { CropShade(rect: crop.cgRect, documentSize: size, zoom: zoom) }
+                    PhotoCanvasOverlay(model: model, zoom: zoom, hover: hover)
                     if let straighten,
                         let frame = model.straightenFrame(degrees: straighten.degrees, cropToFit: straighten.cropToFit)
                     {
@@ -114,9 +116,9 @@ struct PhotoCanvas: View {
         case .delete, .deleteForward:
             perform(press.modifiers.contains(.shift) ? .fillSelection : .deleteSelection)
         case .return:
-            perform(.applyCrop)
+            perform(.confirm)
         case .escape:
-            perform(model.pendingCrop != nil ? .cancelCrop : .deselect)
+            perform(.dismiss)
         default:
             // A disabled tool's key does nothing, as its rail button does.
             guard
