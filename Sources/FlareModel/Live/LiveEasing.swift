@@ -2,6 +2,8 @@
 // six `EasingPreset`s; the curve is `EasingCurve.samples`, FlareCore's `Easing.value(at:)` as FlareWorkspace's editor
 // draws it; a change is FlareCore's `SetKeyframeEasing`, one undo step, or one step per drag under `coalesceKey`.
 // A summary key (no property) sets every track keyed at its frame together. Agrees with `FakeEasing` on the fixtures.
+// The owner is a scene or a symbol (KY-8): a symbol's layers ease through the same `SetKeyframeEasing(owner:)`, and a
+// layer missing from the owner, or an owner that doesn't exist, throws `layerNotFound`.
 import FlareCore
 
 public struct LiveEasing: KeyframeEasing {
@@ -19,7 +21,6 @@ public struct LiveEasing: KeyframeEasing {
 
     public func setEasing(_ easing: Easing, at key: KeyRef, owner: LayerOwner,
                           coalesceKey: String?, in engine: inout CommandEngine) throws {
-        guard case .scene = owner else { throw CommandError.invalidDocument(FakeProperties.symbolKeys) }
         guard let layer = engine.document.layers(of: owner)?.first(where: { $0.id == key.layerID }) else {
             throw CommandError.layerNotFound(key.layerID)
         }
