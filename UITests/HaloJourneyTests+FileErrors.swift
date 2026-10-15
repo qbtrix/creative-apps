@@ -47,7 +47,8 @@ final class HaloFileErrorsJourneyTests: XCTestCase {
             alert.buttons["OK"].click()
             XCTAssert(
                 emptyState(in: halo).waitForExistence(timeout: 5), "No Composition didn't stay after \(item.file)")
-            XCTAssertEqual(halo.element("halo.file").value as? String, "Untitled", "a failed open changed the file")
+            // halo.file's label, not its value: XCUITest reads SwiftUI values as empty (#262).
+            XCTAssertEqual(halo.element("halo.file").label, "Untitled", "a failed open changed the file")
             halo.shot("\(step)-ok")
             halo.app.terminate()
         }
