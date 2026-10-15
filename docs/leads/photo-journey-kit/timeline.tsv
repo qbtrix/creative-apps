@@ -21,3 +21,5 @@ utc	stage	event	ref	note
 2026-10-15T20:34Z	4	heartbeat	38799320916	run on 3dc283e in progress; #1241 changed photoArguments (recovery isolation); round 2 waits for a run with b555f56
 2026-10-15T21:02Z	4	ci-run	38799320916	ui-test ran: smoke passes but its shot shows a stale restore offer (modal)
 2026-10-15T21:02Z	4	round-findings	F2-1	smoke journey false green with a modal; fixer started
+2026-10-15T21:09Z	4	pr-opened	#1243	F2-1 fix, fast-lane + feature-done
+2026-10-15T21:09Z	4	pr-merged	#1243	cdcfb62

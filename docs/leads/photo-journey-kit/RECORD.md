@@ -4,7 +4,7 @@ Issue: #1073 · Packet: docs/blueprints/photo/features/photo-journey-kit.md
 Run: act-1a1406baff9-fu36 · Session: cloud lead session · Started: 2026-10-15T16:36Z
 Stage: 4 round 2
 Base: 9f28a9f7dcb6e9d584a7c80847e8ef0108fa5e17
-Next: wait for the round-2 fixer PR (F2-1, labels fast-lane + feature-done) to merge; round 3 on the dev CI run that contains it (and b555f56)
+Next: round 3 on the dev CI run triggered by #1243 (cdcfb62, feature-done): smoke passes with no offer, V1-V12, Photo audit, photo-kit-opened.png; green = done check, contact sheet on #1073
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -15,7 +15,7 @@ Next: wait for the round-2 fixer PR (F2-1, labels fast-lane + feature-done) to m
 | round | CI run | CI | audit vs baseline | lenses | confirmed | fixed by | clean |
 |---|---|---|---|---|---|---|---|
 | 1 | 38792928305 (c93a7f8; earlier 763-767 never reached ui-test) | red, cancelled mid ui-test: 11/21 Photo journeys fail on app UI (Layers tab, sheets, fields) from photo window changes, not #1199's files | Photo contrast 1 vs 0 on photo-launch (_NS:58, not this feature) | none run: no ui-screens uploaded | PhotoJourneyKitTests.testWrittenPhotoOpens PASSED; photoArguments open/saveTo/fixture journeys pass | reported on #763 (6201226875) | no |
-| 2 | 38799320916 (3dc283e, before #1241) | red: 21 Photo journeys fail; shot photo-kit-opened shows a stale 'Restore beach.png' offer over the window (modal true), the cause #1241 fixes | Photo contrast 1 vs 0 (_NS:58, also on photo-launch: not this feature) | first-use clarity, journey correctness (lead's read of photo-kit-opened.png + audit; one screen, so no full panel) | F2-1: testWrittenPhotoOpens passes and shoots 'the v1 open state' with a modal over the window (false green) | fixer PR (pending) | no |
+| 2 | 38799320916 (3dc283e, before #1241) | red: 21 Photo journeys fail; shot photo-kit-opened shows a stale 'Restore beach.png' offer over the window (modal true), the cause #1241 fixes | Photo contrast 1 vs 0 (_NS:58, also on photo-launch: not this feature) | first-use clarity, journey correctness (lead's read of photo-kit-opened.png + audit; one screen, so no full panel) | F2-1: testWrittenPhotoOpens passes and shoots 'the v1 open state' with a modal over the window (false green) | #1243 (merged, cdcfb62) | no |
 
 ## Decisions
 - Round 2 panel ran as the lead's own read: the feature adds one screen (photo-kit-opened), so the clarity and correctness lenses fit in one pass; the other failures are outside this feature's files and are already on #763 / fixed by #1238-#1242.
