@@ -4,7 +4,7 @@ Issue: #1036 · Packet: docs/blueprints/halo/features/layer-keys.md
 Run: act-1a13eb691a3-wg4n · Session: e0e565d9-6109-5c52-89fd-c254398040f9 · Started: 2026-10-15T08:39Z
 Stage: 4 round 1
 Base: 9af4454347be12947f59fd882c706d833ae6a245
-Next: wait for a dev macOS run where AppSnapshotTests compiles (blocked by viewer-playback's HaloPlaybackDriverTests circular reference, #763); then download ui-screens + snapshots and run the critic panel. Runs on 9af4454: 38732179619 (red), 38732320210 (dispatched).
+Next: run 38734211999 on 35a875b carries the playback test fix (#1136) and every layer-keys PR; when it finishes, read failures in our files, download ui-screens + snapshots, run the critic panel.
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
