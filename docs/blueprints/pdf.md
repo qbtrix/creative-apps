@@ -490,7 +490,7 @@ selected pages or a range; the crop is saved as the page's crop box, so
 nothing is lost and Crop can be removed. *Errors:* "Keep at least 1 inch of
 the page on each side."
 
-**P-T19 Open Recent** (tier 2, KDE-style "reopen previous documents" 27 CC;
+**P-T19 Open Recent** (tier 2, "reopen previous documents" 27 CC on a desktop viewer's wishlist;
 *inferred*; `reader`). File > Open Recent lists 10 files; with the suite's
 recents feature it reads the one AfterGlow list filtered to Folio. A missing
 file is shown dimmed with "Moved or deleted." *Hand-offs:* the AfterGlow
@@ -607,3 +607,158 @@ Later, in the order they would come, each with its evidence:
 | P-T29 Redact (content-edit) | 2 | conditional | P-J26 |
 | P-T30 No dead controls (foundation) | 1 | yes | P-J12 |
 | P-T31 to P-T42 | 2-3 | Later | – |
+
+---
+
+## 4. Pseudo-C4 (drawn before code)
+
+Every element here is **planned**: nothing of Folio is on `origin/dev`.
+Three layers as `docs/engineering.md` sets them: creative-core engines,
+`FolioModel` (Linux-safe state and logic), `FolioApp` (SwiftUI, macOS).
+SuiteUI sits beside the app and knows no Model. The same model as data is
+`docs/blueprints/pdf/c4-planned.json` (the shape of `docs/c4/model.json`,
+one level finer, every element `"status": "planned"` and `"authored":
+true`). It is not read by `scripts/ci`; W0's last task adds the
+`folio-model` and `folio-app` containers to `docs/c4/model.json` when the
+targets exist.
+
+**The one architectural call.** PDFKit is macOS only, so it can never be
+the Model. Folio's Model holds the document as a value
+(`FolioDocumentState`: pages in order with their origin and rotation,
+annotations, form field values, outline, permissions) and treats the bytes
+it opened as read-only **sources**. PDFKit does exactly four jobs, each
+behind a contract with a fake: read a source into that value
+(`DocumentOpening`), draw a source page's picture (`PageImaging`), give a
+page's text with character boxes (`PageTextReading`), and write sources
+plus the value into new bytes (`DocumentWriting`, `PageExporting`). Vision
+does one (`TextRecognizing`). Everything a person does between open and
+save (select, find, mark up, fill, sign, reorder, undo) is pure Swift over
+the value, tested on Linux, and fast because it never round-trips through
+PDFKit. The view shows the page picture from `PageImaging` with Folio's own
+marks drawn over it from the Model, so an edit is on screen in the same
+frame; PDFKit's own annotation drawing is used only at save and export.
+
+Why not drive `PDFView` and its live annotation objects directly: undo,
+tests and journeys would all have to go through AppKit objects that don't
+exist on Linux, a page reorder in `PDFThumbnailView` has no undo (Apple
+docs: PDFThumbnailView, docs silent on undo), and every tool would be a
+view-layer feature the app-state rule forbids. What `PDFView` does well,
+sharp vector drawing at any zoom, Folio keeps: the live `PageImaging`
+draws a visible page with `PDFPage.draw(with:to:)` at the view's current
+scale (Apple docs: PDFPage), and only pages in or near the visible rect are
+drawn (`FolioLayout.visiblePages`, budget PB-3). Q4 in section 10 asks the
+captain to confirm this split.
+
+### 4.1 L1 and L2: containers
+
+```
+ Person with a PDF (reader, form filler, signer, organizer)
+       │ opens, reads, marks up, fills, signs, reorders, saves, exports
+       ▼
+┌──────────────────────────── creative-apps ─────────────────────────────┐      ┌──── creative-core ─────┐
+│                                                                        │      │                        │
+│  FolioApp (macOS) ──reads, calls──▶ FolioModel (Linux + macOS) ────────┼────▶ │ CorePDF (planned):     │
+│    │ scene, SuiteWindow, menus,        document value, workspace,      │      │  object reader,        │
+│    │ page view, thumbnails, sheets,    tools, history, contracts,      │      │  incremental writer,   │
+│    │ live PDFKit + Vision services     fakes, pure live services       │      │  content streams,      │
+│    ├──builds from──▶ SuiteUI (macOS)                                   │      │  redaction, text edit, │
+│    └──joins──▶ SuiteShell / SuiteModel (suite blueprint, planned)      │      │  signature byte ranges │
+│                                                                        │      │ CoreRaster (existing): │
+│  Folio tests: FolioModelTests (Linux), Folio snapshots and goldens,    │      │  pixels for redaction  │
+│  Folio journeys (XCUITest), contracts/check.sh                         │      └────────────────────────┘
+└────────────────────────────────────────────────────────────────────────┘
+   Apple frameworks only in FolioApp: SwiftUI, PDFKit, Vision, CoreGraphics,
+   ImageIO, UniformTypeIdentifiers, AppKit (print, Continuity Camera), Security (later: CMS)
+```
+
+| Container | Status | Responsibility | Owned paths | Line |
+|---|---|---|---|---|
+| `FolioModel` | planned | All state and logic: the document value, the workspace (selection, tool, zoom, find, history, file state), one contract per use case with its fake and its Linux live type; no Apple framework, no engine in v1 | `Sources/FolioModel/` | `line:folio` |
+| `FolioApp` | planned | The SwiftUI app: `SuiteWindow` with thumbnails and outline in the sidebar, the page view as detail with the floating tool palette, the inspector, sheets, menus; the macOS live services (PDFKit, Vision, CoreGraphics) | `Sources/FolioApp/` | `line:folio` |
+| Folio tests | planned | Model tests and budgets (Linux), snapshots and fidelity goldens (macOS), journeys (XCUITest) | `Tests/FolioModelTests/`, `Tests/AppSnapshotTests/Folio*`, `UITests/FolioJourneyTests*.swift` | `line:folio` |
+| SuiteUI | existing (other line) | Window shell, palette, inspector rows, status pills, switcher; gaps go to `needs-ui` (section 7.3) | `Sources/SuiteUI/` | `line:suiteui` |
+| SuiteModel, SuiteShell | planned by the suite blueprint (other line) | The app's identity in the suite, switching, recents, hand-offs, Open In | `Sources/SuiteModel/`, `Sources/SuiteShell/` | `line:suite` |
+| creative-core `CorePDF` | planned (needs new core issues, 4.4) | Pure-Swift PDF object model for what PDFKit can't do: true redaction, editing existing text, certificate signature byte ranges, incremental save | qbtrix/creative-core | `needs-core` |
+| creative-core `CoreRaster` | existing | Fills image regions for redaction (later); nothing in v1 | qbtrix/creative-core | – |
+
+`Package.swift` gains `model("Folio", [])` and `"Folio"` in `apps` (W0,
+protected path: supervisor merges, section 9). `FolioModel` depends on no
+engine in v1; the `content-edit` feature adds `CorePDF` when its core
+issues land.
+
+### 4.2 L3: components
+
+A file belongs to exactly one component (`waves.py` checks it against
+`c4-planned.json`). Paths are relative to the container's folder.
+
+#### FolioModel (planned)
+
+| Component | Responsibility | Paths | Relationships |
+|---|---|---|---|
+| folio-values | The value types every contract speaks (section 6.1): geometry, pages, page text, selections, annotations, fields, signatures, outline, permissions, the document value, write and export options, typed errors with their sentences | `Contracts/FolioValues.swift` | used by every component |
+| folio-contracts | One protocol per use case (section 6.2) and `FolioHistory` | `Contracts/FolioContracts.swift` | implemented by fakes, `Live/` and FolioApp's live types |
+| folio-fakes | A fake per contract; the fake file format and layout | `Fakes/*.swift` (one file per contract, plus `FolioFakeFile.swift`) | snapshots, journeys on `-FolioFixture`, contract suites |
+| folio-fixtures | Named fixtures (`letter`, `form`, `scan`, `locked`, `marked`, `long`, then each feature's own) | `Fixtures/*.swift` | fakes; FolioApp's `-FolioSample` writer |
+| folio-services | `FolioServices` with `.fake`; the live slots are filled in FolioApp | `FolioServices.swift` | workspace |
+| folio-workspace | `FolioWorkspace`: the window's one value-type state (document, source map, history, selection, tool, zoom and page, find state, file state, open progress, refusal), `edit(_:coalesceKey:_:)` (the one place undo is recorded) and one extension file per area, each owned by its feature | `FolioWorkspace.swift`, `Workspace/FolioWorkspace+<Area>.swift`, `FolioPageSummary.swift` (the per-page accessibility value journeys read) | services; read and called by FolioApp |
+| folio-commands | `FolioCommand` (every menu item and toolbar action), `unavailableHelp(for:)` and `title(for:)`, one availability file per area | `FolioCommand.swift`, `Availability/FolioAvailability+<Area>.swift` | workspace; FolioApp menus and toolbar |
+| folio-tools | `FolioTool` (the palette: Select, Text Select, Highlight, Underline, Strike Out, Note, Text Box, Pen, Shape, Sign, Hand), its one-key shortcuts and `drag(from:to:)` routing per tool | `FolioTool.swift`, `Tools/FolioTool+<Kind>.swift` | annotating, selecting, signing; `FolioToolsTests` |
+| folio-layout | Page layout math: the continuous column, two-up, page gaps, fit width and fit page scale, which pages are visible, page ↔ view points | `FolioLayout.swift` | reader view; budgets PB-2, PB-3 |
+| folio-live | The Linux live types of the pure use cases: finding, selecting, annotating, form filling, signing, page organizing, history, the signature store (JSON in a folder the app names) | `Live/Live<Contract>.swift` | contract suites |
+| folio-launch | Launch arguments (`-FolioFixture`, `-FolioSample`, `-FolioOpenFile`, `-FolioSaveTo`, `-FolioExportTo`, `-FolioPickFile(s)`, `-FolioSignaturesDir`, `-FolioWindowSize`, `-FolioControlsProbe`) parsed into `FolioLaunch` | `FolioLaunch.swift` | FolioApp's window root |
+
+#### FolioApp (planned)
+
+| Component | Responsibility | Paths | Relationships |
+|---|---|---|---|
+| folio-scene | `@main FolioApp`: a `DocumentGroup`-free `WindowGroup` (one window per open PDF, Halo's pattern), the `.suiteApp(.folio, host:)` modifier once the suite lands, menus as one `Commands` type per area | `FolioApp.swift`, `FolioCommands+<Area>.swift` | SuiteShell; folio-commands |
+| folio-window | `FolioWindow`: `SuiteWindow` with the sidebar (Pages, Outline, Marks), the detail (page view, palette, status pills), the inspector; one `FolioWindow+<Area>.swift` per area (intents to the workspace, sheets) | `FolioWindow.swift`, `FolioWindow+<Area>.swift`, `FolioPrinting.swift` | workspace; SuiteUI |
+| folio-pageview | The page view: page pictures from `PageImaging` in `FolioLayout`'s column, Folio's marks and form fields drawn over them, gestures routed to the active tool's `drag`, text selection, find bar and highlights; the Page Grid | `PageView/*.swift`, `PageGrid/*.swift` | layout, tools |
+| folio-sidebar | Thumbnails (also the organize grid), outline, the marks list | `Sidebar/*.swift` | organizing |
+| folio-inspector | Document info; the selected mark's colour, width, text, comment; the selected field; the selected page's size and rotation | `Inspector/*.swift` | annotating, forms |
+| folio-sheets | Password, Insert, Combine, Extract and Split, Crop, Save Options, Signature, Export, Reduce Size, Recognize Text, Apply Redactions | `Sheets/*.swift` | the feature that owns each |
+| folio-live-macos | The macOS live services: `PDFKitOpening`, `PDFKitImageOpening` (New from Images), `PDFKitImaging`, `PDFKitText`, `PDFKitFields` (widgets ↔ `FolioFormField`), `PDFKitAnnotations` (PDF annotations ↔ `FolioAnnotation`), `PDFKitWriting`, `PDFKitExporting`, `VisionRecognizing`, `FolioSampleWriter` (fixtures as real PDFs for `-FolioSample`), `FolioSignatureMark` (draws a signature body), `FolioServices+Live` | `Live/*.swift` | contracts; PDFKit, Vision, CoreGraphics |
+| folio-controls | `folio.controls` probe JSON (every control with enabled and help) for the every-control journey | `FolioControls.swift` | journeys |
+
+#### Folio tests (planned)
+
+| Component | Paths |
+|---|---|
+| Model tests, contract suites, budgets | `Tests/FolioModelTests/*.swift` (one file per contract suite, one budget file per feature) |
+| Snapshots and fidelity | `Tests/AppSnapshotTests/Folio*.swift` |
+| Journeys | `UITests/FolioJourneyTests.swift` (W0) and `UITests/FolioJourneyTests+<Area>.swift` (one per feature) |
+
+### 4.3 Relationships
+
+| From | To | What |
+|---|---|---|
+| FolioApp | FolioModel | holds one `FolioWorkspace` in `@State` at the window root; reads it; calls its methods; runs the async service calls between a workspace's `begin…` and `finish…` methods (Halo's open pattern) |
+| FolioApp | SuiteUI | `SuiteWindow`, `ToolbarGroup(.floating)`, inspector rows, `ViewerStatusBar`, `EmptyStateView`, `AppSwitcher` (section 7) |
+| FolioApp | SuiteShell | `.suiteApp(.folio, host:)`, `SuiteAppDelegate`, Switch To and Open In menus, recents (once the suite's switching and recents features land; until then Folio keeps a 10-item recents list like Halo's) |
+| FolioModel | SuiteModel | conforms to `SuiteDocumentHost` (open a file, make a PDF from images handed off by Photo or Library) |
+| FolioApp live types | PDFKit, Vision, CoreGraphics | the four reading and writing jobs, OCR |
+| FolioModel | creative-core CorePDF | none in v1; the `content-edit` feature (conditional, W4) |
+
+### 4.4 creative-core work
+
+PDFKit and Vision cover v1's reading, markup, forms, drawn signatures,
+page organizing, save with passwords and OCR (section 1.5). They cannot do
+the three things the research ranks next after those: edit existing text,
+true redaction and certificate signatures (Apple docs: PDFMarkupType.redact
+has no apply step; CGPDFScanner parses but cannot write a stream;
+PDFAnnotationWidgetSubtype.signature has no signing API). Those need a
+pure-Swift PDF engine. It belongs in creative-core because it is engine
+work every platform can test, and because a future Linux or iPad build of
+any suite app that touches PDF (Design's PDF export, #418) would share it.
+
+| # | Spec (one line each) | Needed by | Tier | Status |
+|---|---|---|---|---|
+| CP-1 | `CorePDF` module: read any PDF 1.7 / 2.0 file into an object graph (lexer, cross-reference tables and streams, object streams, Flate and the predictor filters), lazily, read-only, with typed errors; acceptance: every file in a public conformance corpus opens or throws a typed error, none crashes | content-edit (W4), cert-sign (later) | 2 | needs a new core issue |
+| CP-2 | `CorePDF` incremental writer: append changed and new objects and a new cross-reference section after the original bytes, so earlier bytes (and any signature over them) are untouched; acceptance: a file written with one changed object re-reads equal and its first N bytes are the original's | content-edit, cert-sign | 2 | needs a new core issue |
+| CP-3 | `CorePDF` content streams: tokenize and serialize a page's content (operators and operands), and a text-run view (each show-text run with its font, size, matrix and glyph boxes); acceptance: tokenize then serialize is byte-identical modulo whitespace, run boxes match a reference within 0.5 pt | content-edit | 2 | needs a new core issue |
+| CP-4 | `CorePDF` redaction: given page regions, remove every glyph whose box intersects them, cut intersecting image pixels (through CoreRaster) and vector paths, drop annotations and form fields there, and strip document metadata on request; acceptance: re-extracting text from the region yields nothing and the redacted file's bytes don't contain the removed strings in any stream | content-edit | 2 | needs a new core issue |
+| CP-5 | `CorePDF` text replace: replace a text run's string, reusing its font when every new glyph exists in the embedded subset and otherwise reporting the missing characters; acceptance: the replaced line renders with the old font and the same baseline | content-edit | 2 | needs a new core issue |
+| CP-6 | `CorePDF` signature placeholder: write a signature field with a fixed-size `/Contents` hole and `/ByteRange`, return the bytes to hash, and fill the hole with a CMS blob the app makes (the app signs with the macOS Security framework's CMS encoder); acceptance: a signed fixture validates with an independent open-source verifier | cert-sign (later) | 2 | needs a new core issue |
+
+None blocks v1. `content-edit` is the conditional W4 feature (section 2.4);
+certificate signing is Later.
