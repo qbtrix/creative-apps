@@ -10,6 +10,15 @@
 // for X in Flare (2D animation), Design (vector and UI design), Photo (raster
 // editing), Library (photo catalog) and Halo (motion graphics).
 //
+//   SuiteModel  the suite's shared Linux-safe values (identity, the app list;
+//             docs/blueprints/suite.md), Foundation only, linked by every
+//             <X>Model. With SuiteModelTests, on Linux and macOS.
+//   SuiteShell  macOS glue every app process links: the shared menu commands
+//             (Window > Switch To) and, later, the live suite services.
+//             macOS only.
+//   AfterGlowApp  the launcher: the home window that opens the five apps.
+//             macOS only.
+//
 //   AppAuditTests  the app audit's pure code (pixel math, engine, checks) and
 //             its tests, Foundation only, on Linux and macOS. project.yml
 //             also compiles its non-test files into every UI journey bundle
@@ -17,7 +26,8 @@
 //
 // The macOS-only targets are appended under `#if os(macOS)`. The manifest is
 // evaluated on the host, so on Linux they do not exist at all: `swift build`
-// and `swift test` there cover exactly the Model targets and their tests.
+// and `swift test` there cover exactly the Model targets (SuiteModel among
+// them) and their tests.
 import PackageDescription
 
 // The engines. Tracks creative-core's main branch for now; this moves to a
@@ -27,7 +37,10 @@ let core = "creative-core"
 
 func model(_ name: String, _ engines: [String]) -> [Target] {
     [
-        .target(name: "\(name)Model", dependencies: engines.map { .product(name: $0, package: core) }),
+        .target(
+            name: "\(name)Model",
+            dependencies: ["SuiteModel"] + engines.map { .product(name: $0, package: core) }
+        ),
         .testTarget(name: "\(name)ModelTests", dependencies: [.target(name: "\(name)Model")]),
     ]
 }
@@ -41,19 +54,28 @@ var targets: [Target] =
     + model("Photo", ["CoreRaster", "CoreColor"])
     + model("Library", ["CoreRaster", "CoreColor"])
     + model("Halo", ["FlareCore", "CoreRaster"])
-    + [.testTarget(name: "AppAuditTests")]
+    + [
+        .target(name: "SuiteModel"),
+        .testTarget(name: "SuiteModelTests", dependencies: ["SuiteModel"]),
+        .testTarget(name: "AppAuditTests"),
+    ]
 
 #if os(macOS)
-products += apps.map { .executable(name: "\($0)App", targets: ["\($0)App"]) }
+products += (apps + ["AfterGlow"]).map { .executable(name: "\($0)App", targets: ["\($0)App"]) }
 targets += [
     .target(name: "SuiteUI"),
+    .target(name: "SuiteShell", dependencies: ["SuiteUI", "SuiteModel"]),
+    .executableTarget(name: "AfterGlowApp", dependencies: ["SuiteUI", "SuiteShell", "SuiteModel"]),
     .testTarget(name: "SuiteUITests", dependencies: ["SuiteUI"]),
     .testTarget(
         name: "AppSnapshotTests",
-        dependencies: ["SuiteUI"] + apps.flatMap { [.target(name: "\($0)App"), .target(name: "\($0)Model")] }
+        dependencies: ["SuiteUI", "AfterGlowApp", "SuiteShell", "SuiteModel"]
+            + apps.flatMap { [.target(name: "\($0)App"), .target(name: "\($0)Model")] }
     ),
 ]
-targets += apps.map { .executableTarget(name: "\($0)App", dependencies: ["SuiteUI", .target(name: "\($0)Model")]) }
+targets += apps.map {
+    .executableTarget(name: "\($0)App", dependencies: ["SuiteUI", "SuiteShell", .target(name: "\($0)Model")])
+}
 #endif
 
 let package = Package(
