@@ -2,9 +2,9 @@
 
 Issue: #777 · Packet: docs/blueprints/halo/features/foundation.md (on branch `docs/halo-feature-packets` until its PR merges)
 Run: act-1a13b78bcdb-qu60 · Session: session_01Dc9GDxc9HxLtv9XMcFgSWh · Started: 2026-10-14T17:33Z
-Stage: 3 wave 14
+Stage: 4 round 1 (waiting on #941 and its dev CI run)
 Base: 52928d1dbbdd72b849f7fdb6363991f35b1adbeb
-Next: chain builder does FD-17 (stacked on FD-15 #937) then FD-18 (fast-lane + feature-done); then find the dev CI run the lane dispatches and start round 1 of the Anatomy loop
+Next: once #941 merges, find the CI run on dev it dispatched; read jobs, audit-halo-*.json, ui-screens/snapshots; run the critic panel (clarity lens included). Risks flagged by the FD-17/18 builder: TimelineStrip track ids (needs-ui if missing), halo.controls reach (merged with suite.controls), -HaloWindowSize vs restored frames, L2 0.5% at 880x560, menu submenu hover reads
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -27,8 +27,8 @@ Next: chain builder does FD-17 (stacked on FD-15 #937) then FD-18 (fast-lane + f
 | FD-14 | 12 | perform(_:) routes by area to nine HaloWindow+Area files | Sources/HaloApp x10 | macOS build, H-J13 | #930 | merged |
 | FD-15 | 13 | Stub views, inspector LAYERS + layer header, key diamonds, refusal caption | Sources/HaloApp x11 + 3 snapshots | halo-inspector-layer-selected-*, halo-timeline-keys-*, halo-refusal-* |  | building |
 | FD-16 | 13 | Menus on HaloCommand | Sources/HaloApp x5 | testEveryMenuOpens |  | building |
-| FD-17 | 14 | Accessibility labels and halo.* identifiers (#286, #290) | Sources/HaloApp x5 + 2 snapshots | H-J1, audit unnamed 0 | | building |
-| FD-18 | 15 | Journeys H-J0, H-J1, H-J13, layout (feature-done) | UITests/HaloJourneyTests.swift | the journeys | | building |
+| FD-17 | 14 | Accessibility labels and halo.* identifiers (#286, #290) | Sources/HaloApp x5 + 2 snapshots | H-J1, audit unnamed 0 | #940 | merged |
+| FD-18 | 15 | Journeys H-J0, H-J1, H-J13, layout (feature-done) | UITests/HaloJourneyTests.swift | the journeys | #941 | open, lane (feature-done) |
 
 ## Rounds
 | round | CI run | CI | audit vs baseline | lenses | confirmed | fixed by | clean |
@@ -58,6 +58,8 @@ Next: chain builder does FD-17 (stacked on FD-15 #937) then FD-18 (fast-lane + f
 - The halo.controls probe is a hidden element whose accessibility label is SuiteUI's ControlDocument JSON (same as suite.controls); FD-18 checks inspector controls reach it.
 
 - FD-15 changed HaloCompositionInspectorSnapshots.swift (FD-17's file) only so it compiles with the new init; halo-open/-layers/-timeline snapshots change because the status bar now has the transport.
+
+- FD-17's .haloControl also registers through SuiteUI's .suiteControl so controls in the toolbar, columns and inspector reach the probe; H-J13 merges halo.* entries of suite.controls with halo.controls. Expected audit: unnamed 5→0, identifier 10→3.
 
 ## Open
 - docs/c4/model.json "HaloApp sources" description still names only the Layer and Composition menus; the supervisor folds C4 descriptions in (packet: no shared docs).

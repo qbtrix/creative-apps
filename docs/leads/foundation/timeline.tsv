@@ -55,3 +55,7 @@ utc	stage	event	ref	note
 2026-10-15T02:40Z	3	pr-opened	#937	FD-15
 2026-10-15T02:40Z	3	stage-start	wave 14	FD-17→FD-18
 2026-10-15T02:46Z	-	heartbeat	-	waiting on builders
+2026-10-15T02:53Z	3	pr-merged	#937	FD-15
+2026-10-15T02:53Z	3	pr-merged	#940	FD-17 closes #286 #290
+2026-10-15T02:53Z	3	pr-opened	#941	FD-18 feature-done
+2026-10-15T02:53Z	3	stage-end	wave 14	all task PRs open or merged
