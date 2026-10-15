@@ -97,8 +97,12 @@ private func callNames(in text: some StringProtocol) -> (modifiers: Set<String>,
         #expect(!body.contains(word), "body uses \(word): the row or a toggle could start a rename (#54)")
     }
     let names = callNames(in: body)
+    // `accessibilityIdentifier` and the `identifier(in:)` that builds its
+    // string (#938, the app audit's #262) only name a toggle for accessibility:
+    // neither attaches a gesture or changes a hit area.
     let modifiers: Set = [
-        "toggleStyle", "buttonStyle", "labelStyle", "foregroundStyle", "disabled", "help", "accessibilityLabel", "badge",
+        "toggleStyle", "buttonStyle", "labelStyle", "foregroundStyle", "disabled", "help", "accessibilityLabel",
+        "accessibilityIdentifier", "identifier", "badge",
     ]
     let calls: Set = ["View", "HStack", "Spacer", "ForEach", "Toggle", "Binding", "Label", "Text", "SidebarToggleIcon"]
     #expect(names.modifiers.subtracting(modifiers).isEmpty, "new modifier in body: can it rename from a toggle? (#54)")
