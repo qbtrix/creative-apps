@@ -13,7 +13,9 @@
 // PhotoJourneyTests does; a disabled menu item's reason is its help tag, read
 // by hovering it, as HaloLayersJourneyTests does. The list rows carry no
 // identifier, so the copy's selection is read from its row: the blend and
-// opacity just set show beside "Background copy". Shots: `photo-layerops-*`.
+// opacity just set show beside "Background copy". Merge Down and Flatten
+// Image each report how soon "Merging…" showed (PB-16, report-only).
+// Shots: `photo-layerops-*`.
 import CoreGraphics
 import ImageIO
 import XCTest
@@ -59,6 +61,7 @@ final class PhotoLayerOpsJourneyTests: XCTestCase {
         // 3. Command-E: one layer, Background; the picture is the same as before the merge.
         let before = steadyCanvas(photo)
         photo.press(character: "e", .command)
+        reportMerging("merge-down", photo, until: photo.app.buttons["Undo Merge Down"])
         expect("Undo Merge Down", photo, "Command-E made no Merge Down step")
         XCTAssert(copy.waitForNonExistence(timeout: 5), "Merge Down left Background copy in the list")
         XCTAssert(background.exists, "Merge Down didn't keep Background")
@@ -84,6 +87,7 @@ final class PhotoLayerOpsJourneyTests: XCTestCase {
         expectHeader("2 layers", photo, "the header doesn't count two layers before Flatten Image")
         photo.shot("layerops-painted")
         choose("Flatten Image", from: "Layer", photo)
+        reportMerging("flatten", photo, until: photo.app.buttons["Undo Flatten Image"])
         expect("Undo Flatten Image", photo, "Layer > Flatten Image made no Flatten Image step")
         XCTAssert(layer1.waitForNonExistence(timeout: 5), "Flatten Image left Layer 1 in the list")
         XCTAssert(background.exists, "Flatten Image didn't leave one Background layer")
@@ -114,6 +118,32 @@ final class PhotoLayerOpsJourneyTests: XCTestCase {
     }
 
     // MARK: - Steps
+
+    /// PB-16, report-only: polls from the merge key until `done` shows,
+    /// counting the polls that find "Merging…" (`photo.edit.merging`, shown
+    /// once a merge has run 100 ms) and when it first showed. Attached as
+    /// "perf-report-<series>"; a quick merge never shows it, which isn't a failure.
+    @MainActor private func reportMerging(_ series: String, _ photo: Journey, until done: XCUIElement) {
+        let note = photo.element("photo.edit.merging")
+        let pressed = Date()
+        var (polls, seen, firstSeen) = (0, 0, Double?.none)
+        while !done.exists, Date().timeIntervalSince(pressed) < 60 {
+            polls += 1
+            if note.exists {
+                seen += 1
+                firstSeen = firstSeen ?? Date().timeIntervalSince(pressed) * 1000
+            }
+        }
+        let ms = String(format: "%.0f", Date().timeIntervalSince(pressed) * 1000)
+        let line = "PB-16 PJ-7 \(series): samples=\(seen) of \(polls) polls, first-seen-ms="
+            + "\(firstSeen.map { String(format: "%.0f", $0) } ?? "n/a") merge-ms=\(ms) report-only "
+            + "(counted from the key press; no FrameProbe mark, Photo's window doesn't publish one)"
+        print(line)
+        let attachment = XCTAttachment(string: line)
+        attachment.name = "perf-report-\(series)"
+        attachment.lifetime = .keepAlways
+        add(attachment)
+    }
 
     /// Waits for the button titled `title`, such as the top bar's "Undo Merge Down".
     @MainActor private func expect(_ title: String, _ photo: Journey, _ message: String) {

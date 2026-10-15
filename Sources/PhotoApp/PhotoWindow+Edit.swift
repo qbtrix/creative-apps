@@ -4,14 +4,17 @@
 // on the general pasteboard (PhotoPasteboard); Paste reads the first image
 // there into the workspace, centered on the canvas when it has no place of
 // its own. An edit the workspace refuses shows its reason in the window's
-// alert. Duplicate Layer, Merge Down and Flatten Image go straight to the
-// workspace, which refuses with its reason in the status line (the Layer menu
-// disables them with that reason first). PhotoEditArea watches the general
-// pasteboard's change count and publishes what it holds (`photoPasteboard`)
-// for the Edit menu.
+// alert. Duplicate Layer goes straight to the workspace; Merge Down and
+// Flatten Image work their pixels out off the main actor and commit on return,
+// showing the workspace's "Merging…" over the canvas once they run 100 ms
+// (PhotoMergeNote). The workspace refuses with its reason in the status line
+// (the Layer menu disables them with that reason first). PhotoEditArea
+// watches the general pasteboard's change count and publishes what it holds
+// (`photoPasteboard`) for the Edit menu.
 import AppKit
 import CoreRaster
 import PhotoModel
+import SuiteUI
 import SwiftUI
 
 /// What the edit area can be asked to do (photo-edit adds the cases).
@@ -38,8 +41,20 @@ extension PhotoWindow {
             }
         case .paste: pasteFromPasteboard()
         case .duplicateLayer: model.duplicateSelectedLayer()
-        case .mergeDown: model.mergeDown()
-        case .flattenImage: model.flattenImage()
+        case .mergeDown: merge(.mergeDown)
+        case .flattenImage: merge(.flatten)
+        }
+    }
+
+    /// Merge Down or Flatten Image: "Merging…" at once, the pixels off the
+    /// main actor (seconds on a big photo), then one step unless the image
+    /// changed meanwhile, as Straighten does.
+    private func merge(_ job: LayerMergeJob) {
+        guard model.beginMerge(job) else { return }
+        let workspace = model
+        Task {
+            let result = await Task.detached(priority: .userInitiated) { workspace.merged(job) }.value
+            model.commitMerge(result)
         }
     }
 
@@ -61,6 +76,34 @@ extension PhotoWindow {
     private var pasteCenter: Mask.Point {
         guard let canvas = model.canvas else { return Mask.Point(x: 0, y: 0) }
         return Mask.Point(x: Double(canvas.width) / 2, y: Double(canvas.height) / 2)
+    }
+}
+
+/// `photo.edit.merging`: the workspace's "Merging…" with a spinner over the
+/// canvas once a merge has run 100 ms (a quick one shows nothing).
+private struct PhotoMergeNote: View {
+    let progress: String?
+    @State private var shown: String?
+
+    var body: some View {
+        Color.clear
+            .allowsHitTesting(false)
+            .overlay {
+                if let shown {
+                    GlassPanel {
+                        Label { Text(shown).font(SuiteFont.body) } icon: { ProgressView().controlSize(.small) }
+                    }
+                    .accessibilityElement(children: .ignore)
+                    .accessibilityLabel(shown)
+                    .accessibilityIdentifier("photo.edit.merging")
+                }
+            }
+            .task(id: progress) {
+                shown = nil
+                guard let progress else { return }
+                try? await Task.sleep(for: .milliseconds(100))
+                if !Task.isCancelled { shown = progress }
+            }
     }
 }
 
@@ -95,6 +138,7 @@ struct PhotoEditArea: ViewModifier {
 
     func body(content: Content) -> some View {
         content
+            .overlay { PhotoMergeNote(progress: model.progress) }
             .focusedSceneValue(\.photoPasteboard, pasteboard)
             // Another app can change the pasteboard at any time and says
             // nothing, so its change count is checked four times a second.

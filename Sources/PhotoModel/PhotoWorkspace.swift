@@ -111,6 +111,8 @@ public struct PhotoWorkspace: Sendable {
     /// A one-line refusal or note for the status line ("Nothing to paste.");
     /// `clearStatus()` drops it (the window calls it 4 s later).
     public internal(set) var statusMessage: String?
+    /// "Merging…" while Merge Down or Flatten Image works off the main actor (PhotoLayerOps.swift).
+    public internal(set) var progress: String?
     /// Test hook: how many times `layerGeometryChanged` ran, and its last call
     /// (PhotoMask.swift). Not part of `==`.
     var geometryChangeCount = 0
@@ -381,7 +383,7 @@ extension PhotoWorkspace: Equatable {
             && lhs.cropAspect == rhs.cropAspect && lhs.transformDraft == rhs.transformDraft
             && lhs.sampleSize == rhs.sampleSize && lhs.exportOptions == rhs.exportOptions
             && lhs.fileKind == rhs.fileKind && lhs.savedStepID == rhs.savedStepID
-            && lhs.statusMessage == rhs.statusMessage && lhs.masks == rhs.masks && lhs.pixels == rhs.pixels
+            && lhs.statusMessage == rhs.statusMessage && lhs.progress == rhs.progress && lhs.masks == rhs.masks && lhs.pixels == rhs.pixels
     }
 }
 
