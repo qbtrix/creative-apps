@@ -4,7 +4,7 @@ Issue: #778 · Packet: docs/blueprints/suiteui/features/suite-harness.md (on bra
 Run: act-1a13b7e0908-fybz · Session: claude/suite-harness-lead-wwxtgn · Started: 2026-10-14T18:00Z
 Stage: 4 round 1
 Base: 640d08d83c35cbb12bd71f59b24583857b2863b4 (round 1)
-Next: when #885 merges, open the feature-done PR from lead/suite-harness-status (packet status line, gated) so the lane dispatches round 2's CI
+Next: wait for the lane to merge #887 (feature-done, packet status); then round 2 on the CI run it dispatches
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
