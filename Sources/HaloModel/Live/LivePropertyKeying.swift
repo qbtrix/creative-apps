@@ -1,11 +1,14 @@
-// Live/LivePropertyKeying.swift: the W0 stub of PropertyKeying. Every write
-// throws `.notBuilt` and changes nothing; the layer inspector feature (#38)
-// replaces this file whole with the live type. Linux-safe.
+// Live/LivePropertyKeying.swift: the live PropertyKeying (#38), being built.
+// Its rows are real, read from HaloKeyRules (values sampled by FlareCore,
+// section 2's key states); every write still throws `.notBuilt` and changes
+// nothing until the write half lands. Linux-safe.
 
 public struct LivePropertyKeying: PropertyKeying {
     public init() {}
     public var unavailableHelp: String? { "Keys arrive with the layer inspector (#38)." }
-    public func rows(for layerID: String, in composition: HaloComposition, at frame: Int) -> [HaloPropertyRow] { [] }
+    public func rows(for layerID: String, in composition: HaloComposition, at frame: Int) -> [HaloPropertyRow] {
+        HaloKeyRules.rows(for: layerID, in: composition, at: frame)
+    }
     public func setValue(
         _ value: Double, for property: HaloProperty, of layerID: String, at frame: Int,
         in composition: inout HaloComposition

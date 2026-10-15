@@ -51,6 +51,24 @@ enum HaloKeyRules {
         return false
     }
 
+    /// Section 2's not-animated rule, read side: fewer than two keys is not
+    /// animated; otherwise a key at `f` is keyed here, else animated.
+    static func keyState(_ track: [HaloKeyframe], at f: Int) -> HaloKeyState {
+        if track.count < 2 { return .notAnimated }
+        return track.contains { $0.frame == f } ? .keyedHere : .animated
+    }
+
+    /// The TRANSFORM rows of layer `id` at `f`, in `HaloProperty.allCases`
+    /// order; [] for an unknown id.
+    static func rows(for id: String, in c: HaloComposition, at f: Int) -> [HaloPropertyRow] {
+        guard let layer = layer(id, in: c) else { return [] }
+        return HaloProperty.allCases.map { p in
+            let v = value(p, of: layer, in: c, at: f)
+            return HaloPropertyRow(
+                property: p, value: v, text: p.text(v), keyState: keyState(layer.tracks[p.rawValue] ?? [], at: f))
+        }
+    }
+
     /// Every other layer except those that already follow `id`, in timeline order.
     static func parentCandidates(for id: String, in c: HaloComposition) -> [String] {
         c.layers.map(\.id).filter { $0 != id && !follows($0, id, in: c) }
