@@ -112,6 +112,15 @@ private func png(_ w: UInt32, _ h: UInt32) -> Data {
     #expect(await s.signatures.load() == [sig])
     let id = try s.signing.place(sig, at: FolioPoint(x: 250, y: 560), width: 150, on: FolioPageID(0), in: &doc)
     #expect(doc.annotations.first { $0.id == id }?.rect == FolioRect(x: 240, y: 540, width: 120, height: 40))
+    // A picture: white background dropped, trimmed to the ink (a 4 x 2 dark bar in a 10 x 6 white picture).
+    var rgba = [UInt8](repeating: 255, count: 10 * 6 * 4)
+    for y in 2..<4 { for x in 3..<7 { let o = (y * 10 + x) * 4; rgba[o] = 20; rgba[o + 1] = 20; rgba[o + 2] = 60 } }
+    let pic = try s.signing.make(picture: FolioBitmap(width: 10, height: 6, rgba: rgba), isInitials: false, id: FolioSignatureID("p"))
+    #expect(pic.aspect == 2)
+    if case .picture(let b) = pic.kind { #expect(b.width == 4 && b.height == 2 && b.rgba[3] == 255) } else { Issue.record("not a picture") }
+    #expect(throws: FolioEditError.self) {
+        try s.signing.make(picture: FolioBitmap(width: 2, height: 2, rgba: [UInt8](repeating: 255, count: 16)), isInitials: false, id: FolioSignatureID("q"))
+    }
     #expect(throws: FolioEditError.invalidValue("Draw your signature in the box first.")) {
         try s.signing.make(strokes: [[FolioPoint(x: 1, y: 1)]], isInitials: true, id: FolioSignatureID("x"))
     }
@@ -166,9 +175,11 @@ private func png(_ w: UInt32, _ h: UInt32) -> Data {
     var doc = try await open(s, FolioFixtures.form).state
     try s.forms.set(FolioFieldID("email"), to: .text("ada@example.com"), in: &doc)
     doc.title = "Membership"
+    try s.organizing.crop([doc.pages[0].id], to: FolioRect(x: 36, y: 36, width: 540, height: 720), in: &doc)
     let data = try await s.writing.write(doc, options: .plain)
     let back = try await s.opening.open(data, name: "Membership", password: nil)
     #expect(back.state.fields.first { $0.id.name == "email" }?.value == .text("ada@example.com"))
+    #expect(back.state.pages[0].crop == FolioRect(x: 36, y: 36, width: 540, height: 720))
     // The saved file reopens under its own source and saves again.
     #expect(try await s.writing.write(back.state, options: .plain).count > 0)
     let flat = try await s.writing.write(doc, options: FolioWriteOptions(flatten: true, openPassword: "pw"))
@@ -211,6 +222,10 @@ private func png(_ w: UInt32, _ h: UInt32) -> Data {
     let full = try await s.writing.write(photos.state, options: .plain)
     let small = try await s.writing.write(photos.state, options: FolioWriteOptions(optimizeImages: true))
     #expect(Double(small.count) <= 0.6 * Double(full.count))
+    // Reducing the reduced file gains nothing, so the workspace writes nothing.
+    let reduced = try await s.opening.open(small, name: "Photos (reduced)", password: nil)
+    let again = try await s.writing.write(reduced.state, options: FolioWriteOptions(optimizeImages: true))
+    #expect(again.count >= small.count - 64)
 }
 
 @Test func recognizeKeepAndReopen() async throws {   // P-J20

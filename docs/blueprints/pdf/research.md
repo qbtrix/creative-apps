@@ -209,7 +209,7 @@ A tech news forum, https://news.ycombinator.com (read through its public search
 API; a large general forum site could not be fetched from this session, so
 no counts from it are claimed):
 
-- "Show HN: free in-browser PDF editor" (791 points,
+- A launch post for a free in-browser PDF editor (791 points,
   https://news.ycombinator.com/item?id=43880962): the top complaint is that
   it "doesn't edit PDF text, just adds more" (comment 43881500); subset fonts
   stop typing new glyphs (43883065); people want text boxes that resize and

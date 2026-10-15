@@ -27,12 +27,17 @@ public struct FolioFixtureFile: Codable, Equatable, Sendable {
         public var recognized: [String]?
         public var label: String?
         /// Bytes of picture data on the page (a stand-in for images): written
-        /// as padding, divided by 4 when the writer optimizes images.
+        /// as padding, divided by 4 the first time the writer optimizes images.
         public var imageBytes: Int
+        /// True once optimized: a second optimize leaves the pictures alone.
+        public var optimized: Bool
+        public var crop: FolioRect?
         public init(size: FolioSize = .letter, rotation: FolioRotation = .r0, lines: [String], continued: [Int] = [],
-                    scanned: Bool = false, recognized: [String]? = nil, label: String? = nil, imageBytes: Int = 0) {
+                    scanned: Bool = false, recognized: [String]? = nil, label: String? = nil, imageBytes: Int = 0,
+                    optimized: Bool = false, crop: FolioRect? = nil) {
             self.size = size; self.rotation = rotation; self.lines = lines; self.continued = continued
             self.scanned = scanned; self.recognized = recognized; self.label = label; self.imageBytes = imageBytes
+            self.optimized = optimized; self.crop = crop
         }
     }
     public struct Outline: Codable, Equatable, Sendable {
@@ -182,7 +187,7 @@ public struct FakeDocumentOpening: DocumentOpening {
     static func opened(_ file: FolioFixtureFile, source: FolioSourceID, name: String) -> FolioOpened {
         let pages = file.pages.enumerated().map { i, p in
             FolioPage(id: FolioPageID(i), origin: .source(source, index: i), size: p.size, rotation: p.rotation,
-                      label: p.label, recognizedText: p.recognized.map {
+                      label: p.label, crop: p.crop, recognizedText: p.recognized.map {
                           FolioFakeLayout.text($0, pageHeight: p.size.height, origin: .recognized) })
         }
         let fields = file.fields.filter { pages.indices.contains($0.page.raw) }
@@ -257,11 +262,13 @@ public struct FakeDocumentWriting: DocumentWriting {
         if permissions.restrictions != doc.permissions.restrictions, !doc.permissions.ownerUnlocked { throw .restricted }
         var pages: [FolioFixtureFile.Page] = []
         for page in doc.pages {
-            var out = FolioFixtureFile.Page(size: page.size, rotation: page.rotation, lines: [], label: page.label)
+            var out = FolioFixtureFile.Page(size: page.size, rotation: page.rotation, lines: [], label: page.label, crop: page.crop)
             if case .source(let src, _) = page.origin {
                 guard let p = await sources.fixturePage(page) else { throw .sourceMissing(await sources.name(for: src) ?? src.raw) }
                 out.lines = p.lines; out.continued = p.continued; out.scanned = p.scanned
-                out.imageBytes = options.optimizeImages ? p.imageBytes / 4 : p.imageBytes
+                let shrink = options.optimizeImages && !p.optimized
+                out.imageBytes = shrink ? p.imageBytes / 4 : p.imageBytes
+                out.optimized = p.optimized || options.optimizeImages
             }
             if options.keepRecognizedText, let rec = page.recognizedText { out.recognized = rec.lines.map(\.text) }
             pages.append(out)
@@ -605,6 +612,32 @@ public struct FakeSigning: Signing {
         let trimmed = name.folioTrimmed
         guard !trimmed.isEmpty else { throw .invalidValue("Type your name first.") }
         return FolioSignature(id: id, kind: .typed(trimmed), isInitials: isInitials, aspect: max(1.5, Double(trimmed.count) * 0.55))
+    }
+    public func make(picture: FolioBitmap, isInitials: Bool, id: FolioSignatureID) throws(FolioEditError) -> FolioSignature {
+        let w = picture.width, h = picture.height
+        guard w > 0, h > 0, picture.rgba.count == w * h * 4 else { throw .invalidValue("That picture couldn't be read.") }
+        var px = picture.rgba
+        var minX = w, minY = h, maxX = -1, maxY = -1
+        for y in 0..<h {
+            for x in 0..<w {
+                let o = (y * w + x) * 4
+                let lum = (0.2126 * Double(px[o]) + 0.7152 * Double(px[o + 1]) + 0.0722 * Double(px[o + 2])) / 255
+                if lum >= 0.85 || px[o + 3] == 0 { px[o + 3] = 0 } else {
+                    minX = min(minX, x); maxX = max(maxX, x); minY = min(minY, y); maxY = max(maxY, y)
+                }
+            }
+        }
+        guard maxX >= minX, maxY >= minY else { throw .invalidValue("That picture has no signature in it. Pick one with dark ink on a light background.") }
+        let cw = maxX - minX + 1, ch = maxY - minY + 1
+        var out = [UInt8](repeating: 0, count: cw * ch * 4)
+        for y in 0..<ch {
+            for x in 0..<cw {
+                let s = ((y + minY) * w + (x + minX)) * 4, d = (y * cw + x) * 4
+                out[d] = px[s]; out[d + 1] = px[s + 1]; out[d + 2] = px[s + 2]; out[d + 3] = px[s + 3]
+            }
+        }
+        return FolioSignature(id: id, kind: .picture(FolioBitmap(width: cw, height: ch, rgba: out)), isInitials: isInitials,
+                              aspect: Double(cw) / Double(ch))
     }
     public func place(_ signature: FolioSignature, at point: FolioPoint, width: Double, on page: FolioPageID,
                       in doc: inout FolioDocumentState) throws(FolioEditError) -> FolioAnnotationID {

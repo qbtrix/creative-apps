@@ -126,6 +126,10 @@ public protocol Signing: Sendable {
     /// unit box, keeps the aspect. Refuses fewer than 2 points of ink.
     func make(strokes: [[FolioPoint]], isInitials: Bool, id: FolioSignatureID) throws(FolioEditError) -> FolioSignature
     func make(typed name: String, isInitials: Bool, id: FolioSignatureID) throws(FolioEditError) -> FolioSignature
+    /// From a picture the app decoded (ImageIO) to RGBA: pixels with
+    /// luminance at or above 0.85 become transparent, the rest is trimmed to
+    /// its ink box and kept as PNG-ready RGBA. Refuses a picture with no ink.
+    func make(picture: FolioBitmap, isInitials: Bool, id: FolioSignatureID) throws(FolioEditError) -> FolioSignature
     /// Places a signature centered on `point`, `width` points wide. Inside an
     /// empty signature field it fits that field instead.
     func place(_ signature: FolioSignature, at point: FolioPoint, width: Double, on page: FolioPageID,

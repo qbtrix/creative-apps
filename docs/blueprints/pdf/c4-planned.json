@@ -65,7 +65,7 @@
               {
                 "id": "folio-fixtures",
                 "name": "Fixtures",
-                "description": "Named fixtures (letter, form, scan, locked, marked, long, then each feature's own) for journeys, snapshots and budgets.",
+                "description": "Named fixtures in W0 (letter, form, filled, scripted, scan, locked, restricted, marked, photos, long) and one file per feature for its own (page1000marks and long1000marks: markup; form200: forms; big50: files; scan300: ocr).",
                 "paths": [
                   "Sources/FolioModel/Fixtures/*.swift"
                 ],
@@ -85,12 +85,11 @@
               {
                 "id": "folio-workspace",
                 "name": "Workspace",
-                "description": "FolioWorkspace: the window's one value-type state (document, sources, history, selection, tool, zoom and page, page text, find, file state, open progress, refusal), edit(_:coalesceKey:_:) as the one place undo is recorded, one extension file per area, and the per-page accessibility summary journeys read. Undo and redo live here (W0). pageSummary is assembled from one facet file per area.",
+                "description": "FolioWorkspace: the window's one value-type state (document, sources, history, selection, tool, zoom and page, page text, find, file state, open progress, refusal), edit(_:coalesceKey:_:) as the one place undo is recorded, one extension file per area, and the per-page accessibility summary journeys read. Undo and redo live here (W0). pageSummary and statusPills are whole in W0, pure reads of the document value.",
                 "paths": [
                   "Sources/FolioModel/FolioWorkspace.swift",
                   "Sources/FolioModel/Workspace/*.swift",
-                  "Sources/FolioModel/FolioPageSummary.swift",
-                  "Sources/FolioModel/FolioPageSummary+*.swift"
+                  "Sources/FolioModel/FolioPageSummary.swift"
                 ],
                 "status": "planned",
                 "authored": true
@@ -141,7 +140,7 @@
               {
                 "id": "folio-launch",
                 "name": "Launch",
-                "description": "Launch arguments (-FolioFixture, -FolioSample, -FolioOpenFile, -FolioSaveTo, -FolioExportTo, -FolioPickFile(s), -FolioSignaturesDir, -FolioWindowSize, -FolioControlsProbe) parsed into FolioLaunch. Also -FolioWriteSample <name> <path> (write a fixture as a real PDF and quit) and -SuiteControlsProbe (SuiteUI's shared control inventory).",
+                "description": "Launch arguments (-FolioFixture, -FolioSample, -FolioOpenFile, -FolioSaveTo, -FolioExportTo, -FolioPickFile(s), -FolioSignaturesDir, -FolioWindowSize, ) parsed into FolioLaunch. Also -FolioWriteSample <name> <path> (write a fixture as a real PDF and quit) and -FolioFake (fake services with -FolioOpenFile). The control inventory comes from SuiteUI under -SuitePerfProbe.",
                 "paths": [
                   "Sources/FolioModel/FolioLaunch.swift"
                 ],
@@ -195,7 +194,7 @@
               {
                 "id": "folio-sidebar",
                 "name": "Sidebar",
-                "description": "Thumbnails, outline, find results and the marks list.",
+                "description": "FolioNavigator (not '...Sidebar': the design lint) lists the sidebar sections, each a file W0 stubs and a feature owns: thumbnails, outline, find results, marks list.",
                 "paths": [
                   "Sources/FolioApp/Sidebar/*.swift"
                 ],
@@ -205,7 +204,7 @@
               {
                 "id": "folio-inspector",
                 "name": "Inspector",
-                "description": "Document properties; the selected mark, field or page.",
+                "description": "FolioInspector lists the inspector sections, each a file W0 stubs and a feature owns: document properties, selected mark, field, page.",
                 "paths": [
                   "Sources/FolioApp/Inspector/*.swift"
                 ],
@@ -225,7 +224,7 @@
               {
                 "id": "folio-live-macos",
                 "name": "Live (macOS)",
-                "description": "PDFKit, Vision and CoreGraphics conformances: opening (and from images), page pictures, page text, fields and annotations both ways, writing, exporting, text recognition, the sample writer, signature drawing; FolioServices+Live.",
+                "description": "PDFKit, Vision and CoreGraphics conformances: opening (and from images), page pictures, page text, fields and annotations both ways, writing, exporting, text recognition, the sample writer, signature drawing; FolioServices+Live. The sample writer and the writer's OCR text layer are split into per-area files (FolioSampleWriter+Marks/Fields/Scan/Photos, PDFKitWriting+TextLayer), each owned by its feature.",
                 "paths": [
                   "Sources/FolioApp/Live/*.swift"
                 ],
@@ -325,7 +324,7 @@
       {
         "id": "core-pdf",
         "name": "creative-core CorePDF",
-        "description": "Planned engine: object reader, incremental writer, content streams, redaction, text replace, signature placeholder (needs new core issues CP-1 to CP-6).",
+        "description": "Planned engine: object reader, incremental writer, content streams, redaction, text replace, signature placeholder, image re-encoding (needs new core issues CP-1 to CP-7).",
         "status": "planned",
         "authored": true
       },

@@ -328,8 +328,8 @@ public enum FolioSignatureKind: Hashable, Codable, Sendable {
     case drawn([[FolioPoint]])
     /// A typed name, drawn later in a script face.
     case typed(String)
-    /// A picture of a signature (PNG), background already removed.
-    case image(Data)
+    /// A picture of a signature: RGBA with the background made transparent.
+    case picture(FolioBitmap)
 }
 
 public struct FolioSignature: Identifiable, Hashable, Codable, Sendable {
@@ -434,7 +434,7 @@ public struct FolioOpened: Sendable {
 }
 
 /// A page picture: 8-bit RGBA, premultiplied, row-major, top row first.
-public struct FolioBitmap: Hashable, Sendable {
+public struct FolioBitmap: Hashable, Codable, Sendable {
     public var width: Int
     public var height: Int
     public var rgba: [UInt8]
