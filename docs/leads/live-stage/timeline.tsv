@@ -6,3 +6,5 @@ utc	stage	event	ref	note
 2026-10-15T01:05Z	2	stage-end	#798	4 waves planned
 2026-10-15T01:06Z	3	stage-start	#798	wave 1 ST-1 ST-3 ST-6 ST-7
 2026-10-15T02:02Z	3	heartbeat	#798	wave 1 building
+2026-10-15T02:05Z	3	pr-merged	#915 #916 #917 #918	wave 1 merged
+2026-10-15T02:05Z	3	stage-start	#798	wave 2 ST-2 ST-4 ST-8 base 0a455df

@@ -2,20 +2,20 @@
 
 Issue: #798 · Packet: docs/blueprints/flare/features/live-stage.md
 Run: act-1a13d374bd1-s92z · Session: claude/live-stage-lead-gljfd4 · Started: 2026-10-15T00:40Z
-Stage: 3 wave 1
-Base: 667245a43e0d09ad4262f0f68bce1a587e1f9f9c
-Next: wait for wave 1 PRs (ST-1, ST-3, ST-6, ST-7) to merge, then wave 2 (ST-2, ST-4, ST-8)
+Stage: 3 wave 2
+Base: 0a455dfca4ea3b97b7220f01342d7a564535e0ce
+Next: wait for wave 2 PRs (ST-2, ST-4, ST-8) to merge, then wave 3 (ST-5, ST-9)
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
 |---|---|---|---|---|---|---|
-| ST-1 | 1 | LiveStage on the render list | Live/LiveStage.swift, LiveStageTests | LiveStageTests | | todo |
+| ST-1 | 1 | LiveStage on the render list | Live/LiveStage.swift, LiveStageTests | LiveStageTests | #916 | merged |
 | ST-2 | 2 | LiveStage nesting, editing, text | Live/LiveStage.swift, LiveStageNestingTests | LiveStageNestingTests | | todo |
-| ST-3 | 1 | LiveHits.hit | Live/LiveHits.swift, LiveHitsTests | LiveHitsTests | | todo |
+| ST-3 | 1 | LiveHits.hit | Live/LiveHits.swift, LiveHitsTests | LiveHitsTests | #915 | merged |
 | ST-4 | 2 | marquee, bounds, StageHitTesting | Live/LiveHits+Marquee.swift, LiveHitsBoundsTests | LiveHitsBoundsTests | | todo |
 | ST-5 | 3 | LiveConformanceTests | LiveConformanceTests | itself | | todo |
-| ST-6 | 1 | LiveShapes drafts and commits | Live/LiveShapes.swift, LiveShapesTests | LiveShapesTests | | todo |
-| ST-7 | 1 | BoxGestureMath move | Live/BoxGestureMath.swift, Fakes/FakeShapes.swift, BoxGestureMathTests | BoxGestureMathTests | | todo |
+| ST-6 | 1 | LiveShapes drafts and commits | Live/LiveShapes.swift, LiveShapesTests | LiveShapesTests | #917 | merged |
+| ST-7 | 1 | BoxGestureMath move | Live/BoxGestureMath.swift, Fakes/FakeShapes.swift, BoxGestureMathTests | BoxGestureMathTests | #918 | merged |
 | ST-8 | 2 | boxResult, commitBox | Live/LiveShapes+Box.swift, LiveShapesBoxTests | LiveShapesBoxTests | | todo |
 | ST-9 | 3 | edits + ShapeBuilding | Live/LiveShapes+Edit.swift, LiveShapesEditTests | LiveShapesEditTests | | todo |
 | ST-10 | 4 | model journey + budgets (feature-done) | LiveStageJourneyTests, LiveStageBudgetTests | itself | | todo |
