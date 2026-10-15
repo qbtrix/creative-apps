@@ -1,0 +1,6 @@
+utc	stage	event	ref	note
+2026-10-15T08:39Z	0	stage-start	#1036	base 62a8577
+2026-10-15T08:50Z	0	stage-end	#1036	deps #777 #333 closed; swift 6.3.3 installed; base gate pass
+2026-10-15T08:52Z	1	stage-end	#1036	packet read
+2026-10-15T08:52Z	2	stage-end	#1036	waves as packet, 8 waves
+2026-10-15T08:52Z	3	stage-start	wave1	LK-1
