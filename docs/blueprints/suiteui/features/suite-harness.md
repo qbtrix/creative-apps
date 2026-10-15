@@ -7,6 +7,7 @@ template that picks up a second journey file, the component gallery behind
 (`suite.perf`), the shared contracts with `EditRun`, and the one token sheet
 for waves 2 to 4.
 **Line:** `line:suiteui` · **Wave:** 1 (`waves.md`) · **Lead branch:** `lead/suite-harness`
+**Status:** built on `dev`: SH-1 to SH-10 merged (#786, #787, #850, #867, #866, #869, #871, #874, #875, #877, #878); Anatomy round 1 fixes merged (#881, #883, #884, #885). Review rounds continue in `docs/leads/suite-harness/RECORD.md` on `lead/suite-harness`.
 
 **Covers:** #773 (contracts, SH-1), #774 (token sheet, SH-2), #283
 (secondary text contrast, SH-3), #330 (QH-1 `FrameProbe`, SH-4), #775
