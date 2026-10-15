@@ -4,7 +4,7 @@ Issue: #1044 · Packet: docs/blueprints/library/features/spine.md
 Run: act-1a13f18aaa0-lfw5 · Session: session_01DtSRhNqsphGfKkvV5eLsWW · Started: 2026-10-15T10:25Z
 Stage: 5 finish
 Base: 111c44093b7959930d078ce21656fa174613a1b0
-Next: r4-b1 merges; its CI run is the done check; no further rounds (budget 4)
+Next: wait for the dev CI run triggered by #1208 (feature-done); green -> Belt-Contact-Sheet on #1044
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -31,7 +31,7 @@ Next: r4-b1 merges; its CI run is the done check; no further rounds (budget 4)
 | SA-6 | 10 | Inspector tabs/header, Develop/Crop stubs, crop overlay, loupe value | Inspector, DevelopInspector, CropInspector, CropOverlay, Loupe | LibraryShellSnapshots, loupe journey | #1147 | merged |
 | SA-7 | 11 | library.controls, identifiers, spine snapshots | LibraryControls, Window, LibraryShellSnapshots | snapshots | #1154 | merged |
 | SJ-1 | 12 | Four journeys on samples, J0, J10 | UITests/LibraryJourneyTests.swift | macOS journeys | #1152 + #1158 | merged |
-| SJ-2 | 13 | J11, LibraryFiles helpers (feature-done) | UITests/LibraryJourneyTests+Shell/+Files | J11 | #1162 | merged |
+| SJ-2 | 13 | J11, LibraryFiles helpers (feature-done) | UITests/LibraryJourneyTests+Shell/+Files | J11 | #1162 (+#1208 fixes) | merged |
 
 ## Waves
 Taken from the packet's Build waves; checked against dev bcf5a09.
