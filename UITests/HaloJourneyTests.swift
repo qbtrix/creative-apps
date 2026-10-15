@@ -159,9 +159,12 @@ final class HaloJourneyTests: XCTestCase {
                 NSPredicate(format: "identifier == 'halo.inspector.header' AND label CONTAINS %@", "Frames 0–47")).firstMatch
             XCTAssert(ball.waitForExistence(timeout: 5), "clicking the Ball row selected no layer at \(width)")
             halo.shot("layout-\(width)")
-            let outside = haloControls(in: halo).filter { !window.frame.contains($0.frame) }
+            let outside = haloControls(in: halo).compactMap { control -> String? in
+                guard let shown = visibleFrame(of: control, in: window) else { return nil }
+                return window.frame.insetBy(dx: -1, dy: -1).contains(shown) ? nil : "\(control.identifier) \(shown)"
+            }
             XCTAssert(outside.isEmpty, "halo controls outside the \(width) window \(window.frame): "
-                + outside.map { "\($0.identifier) \($0.frame)" }.joined(separator: ", "))
+                + outside.joined(separator: ", "))
             viewerWidths[width] = halo.element("halo.viewer").frame.width
             let timeline = halo.element("halo.timeline").frame
             XCTAssertLessThanOrEqual(timeline.maxY, window.frame.maxY, "the timeline runs off the window at \(width)")
@@ -170,6 +173,7 @@ final class HaloJourneyTests: XCTestCase {
                 XCTAssertGreaterThanOrEqual(track.frame.minX, timeline.minX - 1,
                     "a timeline track \(track.frame) starts left of the timeline \(timeline) at \(width): it runs under the sidebar")
             }
+            assertLanesFit(halo, timeline: timeline, width: width)
             guard let artboard = artboardFrame(in: halo.element("halo.viewer")) else {
                 XCTFail("no artboard found in the viewer at \(width)")
                 continue
@@ -255,6 +259,46 @@ final class HaloJourneyTests: XCTestCase {
             halo.app.windows.firstMatch.descendants(matching: type)
                 .matching(NSPredicate(format: "identifier BEGINSWITH 'halo.'")).allElementsBoundByIndex
         }
+    }
+
+    /// #1019: the lanes fit the width that shows. The ruler spans every frame
+    /// plus the trailing room, so it ends at its lanes' scroll view's edge (no
+    /// frame clipped past it, none short of it) and within the trailing room
+    /// of the timeline's own trailing edge.
+    @MainActor private func assertLanesFit(_ halo: Journey, timeline: CGRect, width: Int) {
+        let container = halo.element("halo.timeline")
+        let named = NSPredicate(format: "label == 'Frame Ruler'")
+        let ruler = container.descendants(matching: .any).matching(named).firstMatch
+        XCTAssert(ruler.waitForExistence(timeout: 5), "no Frame Ruler in the timeline at \(width)")
+        let lanes = container.descendants(matching: .scrollView).containing(named).allElementsBoundByIndex
+            .map(\.frame).min { $0.width < $1.width }
+        guard let lanes else { return XCTFail("the Frame Ruler is in no scroll view at \(width)") }
+        let end = ruler.frame.maxX
+        XCTAssertLessThanOrEqual(
+            end, lanes.maxX + 1, "the lanes run \(end - lanes.maxX) pt past their edge at \(width): the last frames are cut off")
+        XCTAssertGreaterThanOrEqual(end, lanes.maxX - 2, "the lanes stop \(lanes.maxX - end) pt short of their edge at \(width)")
+        // SuiteSpacing.xl, the layout's trailing room, and 2 pt of rounding.
+        XCTAssertGreaterThanOrEqual(
+            end, timeline.maxX - 24 - 2, "the ruler ends at \(end), short of the timeline \(timeline) at \(width)")
+    }
+
+    /// The part of `control` that shows: its frame cut by every scroll view
+    /// around it, nil when it is scrolled out of view. The packet's L1
+    /// (docs/blueprints/halo/features/foundation.md, Layout step) defines
+    /// "nothing off the window" as the app audit on each halo-layout-<w>
+    /// shot, and the audit's offscreen check
+    /// (Tests/AppAuditTests/Checks/Offscreen.swift, with AuditCore's
+    /// flatten) judges this visible frame against the window with 1 pt of
+    /// slack. So a timeline track whose raw frame starts under the sidebar,
+    /// in a scroll view that clips it to the window, passes, and a control
+    /// pushed off the window still fails.
+    @MainActor private func visibleFrame(of control: XCUIElement, in window: XCUIElement) -> CGRect? {
+        let frame = control.frame
+        guard !window.frame.insetBy(dx: -1, dy: -1).contains(frame) else { return frame }
+        let scrolls = window.descendants(matching: .scrollView)
+            .containing(control.elementType, identifier: control.identifier).allElementsBoundByIndex
+        let shown = scrolls.reduce(frame) { $0.intersection($1.frame) }
+        return shown.isNull || shown.isEmpty ? nil : shown
     }
 
     /// Clicks the sheet's field labelled `label`, selects its text and types `text`.

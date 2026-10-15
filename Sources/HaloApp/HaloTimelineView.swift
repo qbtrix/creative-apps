@@ -6,10 +6,12 @@
 // in the lane under the ruler.
 // The strip's track buttons come from SuiteUI with no identifier of their
 // own, so the strip passes `halo.timeline.track` down to each of them (#290).
-// The strip sits in the column's safe area and has none of its own, so the
-// selected track's background stays out from under the sidebar (#777).
-// HaloTimelineLayout sizes it: the lanes fit the width less the name column,
-// the divider and the trailing room, so the strip never scrolls sideways and
+// The strip sits in the column's safe area. HaloTimelineLayout fits its lanes
+// to the width the strip is laid out at, measured with onGeometryChange (the
+// GeometryReader's width only until then, and in snapshots), less the name
+// column, the divider and the trailing room: a container width can count room
+// under the inspector, and lanes fitted to it lost their last frames (#1019).
+// So every frame and key shows, the strip never scrolls sideways and
 // no scroller covers the ruler; the height is the lanes, at least the slot
 // minimum, at most 40% of the window's column, and past that the lanes
 // scroll vertically so the canvas keeps its room.
@@ -21,6 +23,8 @@ struct HaloTimelineView: View {
     let model: HaloProject
     var perform: @MainActor (HaloCommand) -> Void = { _ in }
     @FocusState private var hasFocus: Bool
+    /// The strip's laid-out width, once measured.
+    @State private var stripWidth: Double?
     @Environment(\.suiteSnapshotRendering) private var snapshot
 
     /// SuiteUI's timeline tokens; the 1 pt is the strip's Divider.
@@ -63,7 +67,7 @@ struct HaloTimelineView: View {
         let height = SuiteSize.timelineRuler + SuiteSize.timelineLane * CGFloat(rows.count)
         return VStack(alignment: .leading, spacing: 0) {
             GeometryReader { geometry in
-                let lanes = Self.layout.laneFitWidth(width: Double(geometry.size.width))
+                let lanes = Self.layout.laneFitWidth(strip: stripWidth, container: Double(geometry.size.width))
                 TimelineStrip(
                     tracks: tracks, duration: model.selectedComposition?.durationFrames ?? 0,
                     frameWidth: CGFloat(model.selectedComposition?.frameWidth(toFit: lanes) ?? 1),
@@ -81,14 +85,7 @@ struct HaloTimelineView: View {
                         perform(.selectLayer(id))
                     })
                     .accessibilityIdentifier("halo.timeline.track")
-                    // The strip's selected-track background ignores the safe
-                    // area, so beside the floating sidebar it ran under it
-                    // and past the window's edge. Padding by the insets and
-                    // ignoring them keeps the strip where it was with no safe
-                    // area left to bleed into.
-                    .padding(.leading, geometry.safeAreaInsets.leading)
-                    .padding(.trailing, geometry.safeAreaInsets.trailing)
-                    .ignoresSafeArea(.all, edges: .horizontal)
+                    .onGeometryChange(for: Double.self) { Double($0.size.width) } action: { stripWidth = $0 }
             }
             .frame(height: height)
             if rows.isEmpty {

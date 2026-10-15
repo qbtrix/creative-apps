@@ -25,6 +25,24 @@ func lanesFitTheStripWidth(width: Double) throws {
     }
 }
 
+/// #1019: the lanes fit the width the strip shows at, not its container's,
+/// which counted 168 pt under the inspector at 880: lanes plus the name
+/// column, divider and trailing room add up to exactly the visible width.
+@Test(arguments: [(463.0, 295.0), (556.0, 499.0), (643.0, 643.0)])
+func lanesFitTheVisibleStripWidth(container: Double, visible: Double) {
+    let lanes = layout.laneFitWidth(strip: visible, container: container)
+    #expect(lanes + layout.labelColumn + layout.divider + layout.trailingRoom == visible)
+    #expect(lanes <= layout.laneFitWidth(width: container))
+}
+
+/// Before the strip is measured (or when the measure is nonsense) the
+/// container's width is all there is.
+@Test func anUnmeasuredStripFitsTheContainer() {
+    for strip in [nil, 0, -20, .nan, .infinity] as [Double?] {
+        #expect(layout.laneFitWidth(strip: strip, container: 880) == layout.laneFitWidth(width: 880))
+    }
+}
+
 @Test func laneWidthIsNeverNegative() {
     #expect(layout.laneFitWidth(width: 0) == 0)
     #expect(layout.laneFitWidth(width: 100) == 0)
