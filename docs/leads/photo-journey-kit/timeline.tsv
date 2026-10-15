@@ -3,3 +3,8 @@ utc	stage	event	ref	note
 2026-10-15T16:36Z	1	stage-end	-	packet read: one task KT-1
 2026-10-15T16:36Z	2	stage-end	-	one wave: KT-1
 2026-10-15T16:36Z	3	stage-start	-	wave 1 KT-1 builder
+2026-10-15T17:22Z	3	pr-opened	#1199	KT-1 builder PR
+2026-10-15T17:22Z	3	pr-merged	#1199	lane merged 16:50Z
+2026-10-15T17:22Z	3	stage-end	-	wave 1 merged
+2026-10-15T17:22Z	4	stage-start	-	round 1; resumed after container restart
+2026-10-15T17:22Z	4	ci-run	38772608478	run 763 contains #1199: failure, reading
