@@ -244,17 +244,28 @@ estimates; split any task that comes out bigger.
 | VP-4b | #457 (closes) | `LiveFrameRendering` for solids and shapes at their matrix with blend and opacity over VP-4a's masks; `FrameRenderer.swift` moves onto it; nulls never count; the note names only text | `Sources/HaloModel/Live/LiveFrameRendering.swift`, `Sources/HaloModel/FrameRenderer.swift`, `Tests/HaloModelTests/FrameRenderingContractTests.swift`, `Tests/HaloModelTests/LiveFrameRenderingTests.swift`, `Tests/HaloModelTests/HaloRenderTests.swift`, `Tests/HaloModelTests/HaloRenderEdgeTests.swift` | VP-1, VP-4a | ~260 |
 | VP-5 | #37 (part) | Text pixels: `TextRasterizing` output resized, rotated and composited at the item's world center, its top-left at the item's `bounds.origin` with the baseline at `height − descent` (the pinned baseline rule); no rasterizer, a mirror or a refused size counts as skipped | `Sources/HaloModel/Live/HaloTextPlacement.swift`, `Sources/HaloModel/Live/LiveFrameRendering.swift`, `Tests/HaloModelTests/LiveFrameRenderingTextTests.swift` | VP-4b | ~240 |
 | VP-6 | – | Budgets HB-2, HB-5, HB-11 on `reference` with W0's `HaloBudget.swift` | `Tests/HaloModelTests/HaloViewerBudgetTests.swift` | VP-1, VP-3 | ~130 |
-| VP-7 | #37 (part) | `HaloAvailability+Playback` turns on Play/Pause, Loop, Next Frame, Previous Frame, Go to Start, Go to End (In and Out keep W0's state-only answers) | `Sources/HaloModel/Availability/HaloAvailability+Playback.swift`, `Tests/HaloModelTests/HaloPlaybackAvailabilityTests.swift` | VP-3 | ~160 |
+| VP-7 | #37 (part) | `HaloAvailability+Playback` turns on Play/Pause, Loop, Next Frame, Previous Frame, Go to Start, Go to End (In and Out keep W0's state-only answers) | `Sources/HaloModel/Availability/HaloAvailability+Playback.swift`, `Tests/HaloModelTests/HaloPlaybackAvailabilityTests.swift` | VP-2 | ~160 |
 | VP-8 | #37 (part) | `HaloViewerCanvas` replaced whole in W0's slot, `init(model:perform:)` (linear light, the blend switch, text as resolved `Text` on the pinned baseline rule, `SelectionOutline` on the selected layer, `halo.viewer.canvas` with `drawnSummary`); it reads `model.viewerDrawList` and `model.selectedLayerID` itself, and W0's call site in `HaloViewer.swift` is untouched; the viewer area file keeps only its routes; #37's preview snapshots | `Sources/HaloApp/HaloViewerCanvas.swift`, `Sources/HaloApp/HaloWindow+Viewer.swift`, `Tests/AppSnapshotTests/HaloPreviewSnapshots.swift` | VP-1 | ~280 |
 | VP-9 | #37 (part) | HF-1: the canvas equals the render, text included (pins the baseline rule) | `Tests/AppSnapshotTests/HaloViewerFidelityTests.swift` | VP-4b, VP-5, VP-8 | ~220 |
 | VP-10 | #37 (part) | Transport (six SF Symbol buttons with `halo.transport.*` ids through `.haloControl`, play value, loop value), `HaloPlaybackDriver` on the display link calling `tick(now:)`, the playback area routes (Space, ←, →, Home, End and the Animation items, `now` from `CACurrentMediaTime()`) | `Sources/HaloApp/HaloTransport.swift`, `Sources/HaloApp/HaloPlaybackDriver.swift`, `Sources/HaloApp/HaloWindow+Playback.swift`, `Tests/AppSnapshotTests/HaloPlaybackDriverTests.swift`, `Tests/AppSnapshotTests/HaloTransportSnapshots.swift` | VP-3, VP-7 | ~350 |
-| VP-11 | – | H-J3: `testScrubTheTimeline` extended, on `-HaloSample three-layers` | `UITests/HaloJourneyTests.swift` | VP-8, VP-10 | ~90 |
-| VP-12 | #37 (closes) (`feature-done`) | H-J2 and H-J4 on `-HaloSample three-layers` | `UITests/HaloJourneyTests+Viewer.swift`, `UITests/HaloJourneyTests+Playback.swift` | VP-5, VP-6, VP-9, VP-11, #333 | ~220 |
+| VP-11 | – | H-J3: `testScrubTheTimeline` extended, on `-HaloSample three-layers` | `UITests/HaloJourneyTests.swift` | VP-10 | ~90 |
+| VP-12 | #37 (closes) (`feature-done`) | H-J2 and H-J4 on `-HaloSample three-layers` | `UITests/HaloJourneyTests+Viewer.swift`, `UITests/HaloJourneyTests+Playback.swift` | VP-6, VP-8, VP-9, VP-10, VP-11, #333 | ~220 |
 
-Chains: VP-4a → VP-4b; VP-1 → VP-4b → VP-5; VP-2 → VP-3 → (VP-6 ∥ VP-7);
-VP-1 → VP-8; (VP-5, VP-8) → VP-9; (VP-3, VP-7) → VP-10; (VP-8, VP-10) → VP-11 → VP-12. VP-1 and VP-2
-start together, with VP-4a. The live types land first, so every journey is written on
-`-HaloSample` from its first PR; none flips later. Until layer-keys lands
+A task depends on another only when it calls what that task adds, its test
+needs that behavior, or it edits that task's file; "Build waves" says which
+tasks run side by side. VP-3's and VP-7's `.live` runs need VP-2's
+`LivePlaybackClock` (W0's stub has help and ends every tick); VP-7 reads
+only state W0 ships and the clock's help, so it doesn't wait for VP-3.
+VP-4b's `FrameRenderer.swift` wrappers sit on VP-1's `LiveFrameDrawing` and
+VP-4a's outlines; VP-5 edits VP-4b's `LiveFrameRendering.swift`. VP-8 reads
+VP-1's `drawnSummary` and `worldBox(of:)`. VP-10's routes call VP-3's
+methods and its playing snapshot needs VP-7's enabled commands. VP-11's H-J3
+presses Home and →, which VP-10 routes; its artboard value is W0's
+`viewerSummary`, so it doesn't wait for VP-8. VP-12's journeys drive VP-8's
+canvas value and VP-10's transport, and as the `feature-done` PR it also
+waits for VP-6, VP-9 and VP-11. VP-1, VP-2 and VP-4a start together. The
+live types land first, so every journey is written on `-HaloSample` from
+its first PR; none flips later. Until layer-keys lands
 `LiveLayerPlacing`, `LiveFrameDrawing()` draws every layer at its static
 place (the stub's nil falls back to identity, which the W0 defaults make
 exact for unkeyed layers); `three-layers` has no keys, so the journeys hold,
@@ -263,6 +274,41 @@ every existing assertion in `HaloRenderTests` and `HaloRenderEdgeTests`
 except `otherLayerKindsAreSkippedWithANote`, which flips (below); the
 axis-aligned `Mask.rectangle` path keeps their exact bytes. The outline
 helper is split out up front (VP-4a) so VP-4b stays well under 400 lines.
+
+## Build waves
+
+No task edits a shared doc (`docs/c4/model.json`, `docs/design.md`, the
+blueprint or `waves.md`; see the shared-file rule above), so there is no
+docs task and VP-12 stays the final task.
+
+- Wave 1: VP-1, VP-2, VP-4a. Independent in this wave: all three.
+- Wave 2: VP-3, VP-4b, VP-7, VP-8. Independent in this wave: all four.
+- Wave 3: VP-5, VP-6, VP-10. Independent in this wave: all three.
+- Wave 4: VP-9, VP-11. Independent in this wave: both.
+- Wave 5: VP-12 (`feature-done`, final; also waits for #333). Independent
+  in this wave: VP-12 alone.
+
+Longest chain: VP-1 → VP-4b → VP-5 → VP-9 → VP-12 (5); VP-4a → VP-4b →
+VP-5 → VP-9 → VP-12, VP-2 → VP-3 → VP-10 → VP-11 → VP-12 and VP-2 →
+VP-7 → VP-10 → VP-11 → VP-12 are the same length.
+
+Chain of 5: VP-4b's `FrameRenderer.swift` wrappers call VP-1's
+`LiveFrameDrawing` and its masks come from VP-4a's `HaloOutlines.swift`;
+VP-5 adds text to VP-4b's `LiveFrameRendering.swift`; VP-9 compares VP-8's
+canvas with VP-5's text pixels; VP-12 is `feature-done` and closes #37.
+Chain of 5: VP-3's `.live` tests need VP-2's `LivePlaybackClock`; VP-10's
+`HaloWindow+Playback.swift` routes call VP-3's `play`, `tick(now:)` and
+`stepFrame(by:)`; VP-11's H-J3 presses Home and →, which VP-10 routes;
+VP-12's H-J4 drives VP-10's transport, and its run must hold H-J3.
+Chain of 5: VP-7's `.live` test needs VP-2's `LivePlaybackClock` help;
+VP-10's playing snapshot needs VP-7's enabled commands; then VP-11 and
+VP-12 as above.
+Chain of 4: VP-8's canvas reads VP-1's `drawnSummary` and `worldBox(of:)`;
+VP-9 compares VP-8's canvas with the render; VP-12's H-J2 drives VP-8's
+canvas value.
+Chain of 4: VP-3's `.live` tests need VP-2's clock; VP-6 times VP-3's
+`tick(now:)` as `playbackTick`; VP-12 is `feature-done` and waits for
+VP-6's budgets.
 
 ## Acceptance test per task
 

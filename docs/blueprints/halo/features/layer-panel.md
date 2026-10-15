@@ -212,6 +212,20 @@ body. It does not edit `HaloCommand.swift`,
 stays on `-HaloFixture`: no live service changes what it reads, and core-loop
 (W3) flips it and adds ⌘Z.
 
+No task edits a shared doc (`docs/c4/model.json`, `docs/design.md`, the
+blueprint or `waves.md`): every new file sits in a target folder its C4
+component already covers, so there is no docs task.
+
+## Build waves
+
+- Wave 1: LP-1. Independent in this wave: LP-1 alone.
+- Wave 2: LP-2, LP-3. Independent in this wave: both (disjoint files; each
+  calls LP-1's `HaloLayerEdits.swift` methods).
+- Wave 3: LP-4 (`feature-done`, final). Its journey needs LP-2's routes and
+  LP-3's list.
+
+Longest chain: LP-1 → LP-2 → LP-4 (3).
+
 ## Acceptance test per task
 
 | id | test | fails when |

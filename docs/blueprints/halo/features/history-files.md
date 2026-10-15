@@ -252,24 +252,47 @@ Every task is one PR to `dev`: at most 400 changed lines and 15 files, label
 | id | issue | what | owned files | depends on | size |
 |---|---|---|---|---|---|
 | HF-1 | #208 (part) | Live history: `HaloHistoryRules` (record, coalescing, step), `LiveProjectHistory` (limit 100, `ponytail:`), `FakeProjectHistory` becomes a thin wrapper; the suite runs on `[fake, live]` | `Sources/HaloModel/Live/HaloHistoryRules.swift`, `Sources/HaloModel/Live/LiveProjectHistory.swift`, `Sources/HaloModel/Fakes/FakeProjectHistory.swift`, `Tests/HaloModelTests/ProjectHistoryContractTests.swift` | – | ~200 |
-| HF-2 | #208 (part) | `undo()`, `redo()`, `undoTitle`, `redoTitle`; undo and redo set `file.unsaved`; HB-8 | `Sources/HaloModel/HaloHistory.swift`, `Tests/HaloModelTests/HaloUndoTests.swift`, `Tests/HaloModelTests/HaloHistoryBudgetTests.swift` | HF-1 | ~300 |
-| HF-3 | – | `+History` turns Undo and Redo on: the service's help, "A project is opening.", "Nothing to undo." / "Nothing to redo." | `Sources/HaloModel/Availability/HaloAvailability+History.swift`, `Tests/HaloModelTests/HaloHistoryCommandTests.swift` | HF-2 | ~110 |
+| HF-2 | #208 (part) | `undo()`, `redo()`, `undoTitle`, `redoTitle`; undo and redo set `file.unsaved`; HB-8 | `Sources/HaloModel/HaloHistory.swift`, `Tests/HaloModelTests/HaloUndoTests.swift`, `Tests/HaloModelTests/HaloHistoryBudgetTests.swift` | HF-1, HF-6 | ~300 |
+| HF-3 | – | `+History` turns Undo and Redo on: the service's help, "A project is opening.", "Nothing to undo." / "Nothing to redo." | `Sources/HaloModel/Availability/HaloAvailability+History.swift`, `Tests/HaloModelTests/HaloHistoryCommandTests.swift` | HF-1, HF-6 | ~110 |
 | HF-4 | #209 (part) | The envelope: `HaloFileEnvelope` and `HaloFileFormat` move to `Live/`; `LiveProjectFiles` encodes and unwraps through them; `FakeProjectFiles` becomes a thin wrapper that skips content checks; the suite runs on `[fake, live]`; HF-6 | `Sources/HaloModel/Live/HaloFileEnvelope.swift`, `Sources/HaloModel/Live/LiveProjectFiles.swift`, `Sources/HaloModel/Fakes/FakeProjectFiles.swift`, `Tests/HaloModelTests/ProjectFilesContractTests.swift` | – | ~260 |
 | HF-5 | #209 (part) | Content validation and counter raising in `LiveProjectFiles.decode` | `Sources/HaloModel/Live/HaloFileValidation.swift`, `Sources/HaloModel/Live/LiveProjectFiles.swift`, `Tests/HaloModelTests/HaloFileValidationTests.swift` | HF-4 | ~320 |
-| HF-6 | #209 (part) | `HaloFiles.swift`: `fileData`, `beginOpen`, `finishOpen` (clears history), `didSave`, `didFailSave`, `recent`, `setRecent`, `windowTitle`, `saveStatus` | `Sources/HaloModel/HaloFiles.swift`, `Tests/HaloModelTests/HaloFileTests.swift` | HF-2, HF-5 | ~340 |
+| HF-6 | #209 (part) | `HaloFiles.swift`: `fileData`, `beginOpen`, `finishOpen` (clears history), `didSave`, `didFailSave`, `recent`, `setRecent`, `windowTitle`, `saveStatus` | `Sources/HaloModel/HaloFiles.swift`, `Tests/HaloModelTests/HaloFileTests.swift` | HF-1, HF-4 | ~340 |
 | HF-7 | – | `+Files` turns Open…, Open Recent, Save and Save As… on; HB-10 on `crowd`; `huge` encodes within 48 MiB (size only) | `Sources/HaloModel/Availability/HaloAvailability+Files.swift`, `Tests/HaloModelTests/HaloFilesCommandTests.swift`, `Tests/HaloModelTests/HaloFilesBudgetTests.swift` | HF-6 | ~230 |
-| HF-8 | #208 (closes) | App: `HaloWindow+Edit.swift` routes `.undo` and `.redo` to `undo()` and `redo()`; the Edit menu snapshot | `Sources/HaloApp/HaloWindow+Edit.swift`, `Tests/AppSnapshotTests/HaloEditMenuSnapshots.swift` | HF-3 | ~120 |
-| HF-9 | – | Model: `saveTarget(launchPath:saveAs:)` and `fileName(fromPath:)`. App: `HaloDocumentType.swift` (the `.halo` type and `HaloProjectDocument: FileDocument` for the exporter); Save and Save As… through `saveTarget` (`-HaloSaveTo` skips the panel; `.ask` sets W0's `request = .saveAs`, which `fileScene` presents as the exporter and clears); the window title from `windowTitle`; `halo.file` carries `saveStatus`; the failed-save alert | `Sources/HaloModel/HaloFiles.swift`, `Tests/HaloModelTests/HaloSaveTargetTests.swift`, `Sources/HaloApp/HaloDocumentType.swift`, `Sources/HaloApp/HaloWindow+File.swift` | HF-7 | ~300 |
+| HF-8 | #208 (closes) | App: `HaloWindow+Edit.swift` routes `.undo` and `.redo` to `undo()` and `redo()`; the Edit menu snapshot | `Sources/HaloApp/HaloWindow+Edit.swift`, `Tests/AppSnapshotTests/HaloEditMenuSnapshots.swift` | HF-2, HF-3 | ~120 |
+| HF-9 | – | Model: `saveTarget(launchPath:saveAs:)` and `fileName(fromPath:)`. App: `HaloDocumentType.swift` (the `.halo` type and `HaloProjectDocument: FileDocument` for the exporter); Save and Save As… through `saveTarget` (`-HaloSaveTo` skips the panel; `.ask` sets W0's `request = .saveAs`, which `fileScene` presents as the exporter and clears); the window title from `windowTitle`; `halo.file` carries `saveStatus`; the failed-save alert | `Sources/HaloModel/HaloFiles.swift`, `Tests/HaloModelTests/HaloSaveTargetTests.swift`, `Sources/HaloApp/HaloDocumentType.swift`, `Sources/HaloApp/HaloWindow+File.swift` | HF-6 | ~300 |
 | HF-10 | #209 (closes) | App: Open… (`request = .open`, presented by `fileScene` as the `fileImporter`), Open Recent, `-HaloOpenFile`, the detached decode between `beginOpen` and `finishOpen`, the progress row, the open-error alert, the unsaved-changes alert (`request = .confirmUnsaved(then:)`; Save, Don't Save, Cancel each clear it), the recent list in `UserDefaults`; snapshots | `Sources/HaloApp/HaloWindow+File.swift`, `Tests/AppSnapshotTests/HaloFileSnapshots.swift` | HF-9 | ~300 |
 | HF-11 | – | Journey H-J8 on `-HaloSample empty` | `UITests/HaloJourneyTests+History.swift` | HF-8, #333 | ~150 |
-| HF-12 | – (`feature-done`) | Journeys H-J10 and H-J11 on live services | `UITests/HaloJourneyTests+Files.swift`, `UITests/HaloJourneyTests+FileErrors.swift` | HF-10, HF-11, #333 | ~280 |
+| HF-12 | – (`feature-done`) | Journeys H-J10 and H-J11 on live services | `UITests/HaloJourneyTests+Files.swift`, `UITests/HaloJourneyTests+FileErrors.swift` | HF-5, HF-7, HF-10, HF-11, #333 | ~280 |
 
-The Model chains are HF-1 → HF-2 → HF-3 and HF-4 → HF-5, joining at HF-6 →
-HF-7; HF-1 and HF-4 start together. The app chain is HF-8 (after HF-3) and
-HF-9 → HF-10 (after HF-7). Both live types land in HF-1 and HF-4, before
-any journey, so every journey is written on `-HaloSample` from its first PR.
+HF-1 and HF-4 start together. HF-6 needs HF-4's live encode and decode
+(its tests run on `.live`) and HF-1's live history (opening must clear real
+steps). HF-2 and HF-3 wait for HF-6, not for each other: `HaloUndoTests`
+calls `didSave` and `HaloHistoryCommandTests` calls `beginOpen`, and Undo's
+title comes from W0's `title(for:)` over `history.undoTitle`, so HF-3 needs
+no HF-2 code. HF-7 and HF-9 need only HF-6 (HF-9 also edits
+`HaloFiles.swift`). HF-8 routes to HF-2's `undo()` and draws HF-3's enabled
+Undo; HF-10 shares `HaloWindow+File.swift` and `HaloDocumentType.swift` with
+HF-9. HF-12 carries `feature-done`, so it waits for every other leaf. Both
+live types land in HF-1 and HF-4, before any journey, so every journey is
+written on `-HaloSample` from its first PR.
 `edit`, `endCoalescing` and the step names are W0's (FD-10); this feature
 never adds a mutator.
+
+This packet edits no shared doc (`docs/c4/model.json`, `docs/design.md`, a
+blueprint or a `waves.md`), so it has no docs task; HF-12 stays the final
+task.
+
+## Build waves
+
+- Wave 1: HF-1, HF-4. Independent in this wave: both.
+- Wave 2: HF-5, HF-6. Independent in this wave: both.
+- Wave 3: HF-2, HF-3, HF-7, HF-9. Independent in this wave: all four.
+- Wave 4: HF-8, HF-10. Independent in this wave: both.
+- Wave 5: HF-11. Independent in this wave: HF-11 alone.
+- Wave 6: HF-12 (`feature-done`, final). Independent in this wave: HF-12 alone.
+
+Longest chain: HF-1 → HF-6 → HF-2 → HF-8 → HF-11 → HF-12 (6).
+Chain of 6: `HaloFileTests` (HF-6) needs `LiveProjectHistory` (HF-1) to record; `HaloUndoTests` (HF-2) calls HF-6's `didSave`; `HaloWindow+Edit.swift` (HF-8) calls HF-2's `undo()`; H-J8 (HF-11) presses ⌘Z through HF-8's route; HF-12's `feature-done` run must include H-J8.
 
 ## Acceptance test per task
 

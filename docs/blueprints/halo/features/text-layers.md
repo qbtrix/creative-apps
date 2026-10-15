@@ -55,7 +55,9 @@ rows. It never edits `Sources/SuiteUI/**`, `project.yml`,
 `UITests/Journey*.swift`, `UITests/Journey+Input.swift`,
 `Tests/AppSnapshotTests/AppSnapshotTests.swift` (it calls the shared
 `snapshot(_:name:scheme:)` helper as it is), `docs/c4/model.json` or
-`docs/design.md`. It does not own `HaloLayerInspector.swift` (layer-keys made
+`docs/design.md`. Its only shared-doc edits are TX-7's two lines in the
+Halo plan (`docs/blueprints/halo/c4-planned.json`,
+`docs/blueprints/halo/waves.py`). It does not own `HaloLayerInspector.swift` (layer-keys made
 the TEXT slot and keeps it), `HaloViewerCanvas.swift`,
 `Live/LiveFrameRendering.swift`, `HaloProject.swift`, `HaloLayer.swift`,
 `HaloLaunch.swift` or any menu file. Its W2 siblings are easing and
@@ -98,7 +100,7 @@ menu after each commit instead. The Model half runs on Linux first:
 feature adds:
 
 ```swift
-// HaloTextEdits.swift (TX-1, TX-2)
+// HaloTextEdits.swift (TX-1); the color members in HaloTextEdits+Color.swift (TX-2)
 extension HaloTextContent {
     public static let fontSizeRange: ClosedRange<Double> = 1...1000   // composition px; writes clamp
     public var sizeText: String { get }                                // "96 px": the size row's value
@@ -178,19 +180,37 @@ pass`, `Head:`. TX-7 also carries `feature-done` and `Closes #430`.
 | id | issue | what | owned files | depends on | size |
 |---|---|---|---|---|---|
 | TX-1 | #430 (part) | `setText`, `setFontSize`, `endTextSizeScrub`, `selectedText`, `fontSizeRange`, `sizeText`; both edits store the measured box from `services.text.measure` (the estimate when nil); one named step per commit, scrubs coalesced | `Sources/HaloModel/HaloTextEdits.swift`, `Tests/HaloModelTests/HaloTextLayerTests.swift` | – | ~260 |
-| TX-2 | #430 (part) | `setLayerColor` ("Change Color") for text, solid and shape; `selectedLayerColor`; `HaloLayerColor(bytes:)` and `bytes` | `Sources/HaloModel/HaloTextEdits.swift`, `Tests/HaloModelTests/HaloTextColorTests.swift` | TX-1 | ~140 |
-| TX-3 | #430 (part) | `HaloAvailability+Text.swift` replaced whole: the text area's commands answer state only ("Create a composition first.", "Select a text layer first.") | `Sources/HaloModel/Availability/HaloAvailability+Text.swift`, `Tests/HaloModelTests/HaloTextAvailabilityTests.swift` | TX-2 | ~110 |
+| TX-2 | #430 (part) | `setLayerColor` ("Change Color") for text, solid and shape; `selectedLayerColor`; `HaloLayerColor(bytes:)` and `bytes` | `Sources/HaloModel/HaloTextEdits+Color.swift`, `Tests/HaloModelTests/HaloTextColorTests.swift` | – | ~140 |
+| TX-3 | #430 (part) | `HaloAvailability+Text.swift` replaced whole: the text area's commands answer state only ("Create a composition first.", "Select a text layer first.") | `Sources/HaloModel/Availability/HaloAvailability+Text.swift`, `Tests/HaloModelTests/HaloTextAvailabilityTests.swift` | – | ~110 |
 | TX-4 | #430 (part) | `HaloTextRasterizer` on CoreText replaces W0's stub: `measure` (typographic line box) and `rasterize` (linear light, premultiplied, box-sized) | `Sources/HaloApp/HaloTextRasterizer.swift`, `Tests/AppSnapshotTests/HaloTextRasterizerTests.swift` | – | ~260 |
 | TX-5 | #430 (part) | HF-10 macOS half with CoreText: the ink lies inside the stored box, and the viewer's drawing of a text layer matches `render` of it as HF-1 compares solids (the baseline rule itself is pinned and tested by viewer-playback's VP-9) | `Tests/AppSnapshotTests/HaloTextFidelityTests.swift` | TX-1, TX-4 | ~200 |
-| TX-6 | #430 (part) | App: `HaloTextInspector` (TEXT header; system `TextField` with a view-local draft committed on Return and focus loss; `InspectorSliderRow` for size with `sizeText` as its accessibility value; `InspectorColorRow(_:hex:onChange:)`; the refusal caption), W0's slot `init(model:perform:)` replaced whole, acting only through `perform` with FD-11's `.setText(String)`, `.setFontSize(Double)`, `.endTextSizeScrub` and `.setLayerColor(HaloLayerColor)`; `HaloWindow+Text` routes those cases to the Model methods; snapshots | `Sources/HaloApp/HaloTextInspector.swift`, `Sources/HaloApp/HaloWindow+Text.swift`, `Tests/AppSnapshotTests/HaloTextLayerSnapshots.swift` | TX-3, TX-4 | ~300 |
-| TX-7 | #430 (closes, `feature-done`) | Journey H-J22 on `-HaloSample empty` | `UITests/HaloJourneyTests+Text.swift` | TX-5, TX-6, #333 | ~150 |
+| TX-6 | #430 (part) | App: `HaloTextInspector` (TEXT header; system `TextField` with a view-local draft committed on Return and focus loss; `InspectorSliderRow` for size with `sizeText` as its accessibility value; `InspectorColorRow(_:hex:onChange:)`; the refusal caption), W0's slot `init(model:perform:)` replaced whole, acting only through `perform` with FD-11's `.setText(String)`, `.setFontSize(Double)`, `.endTextSizeScrub` and `.setLayerColor(HaloLayerColor)`; `HaloWindow+Text` routes those cases to the Model methods; snapshots | `Sources/HaloApp/HaloTextInspector.swift`, `Sources/HaloApp/HaloWindow+Text.swift`, `Tests/AppSnapshotTests/HaloTextLayerSnapshots.swift` | TX-1, TX-2, TX-3, TX-4 | ~300 |
+| TX-7 | #430 (closes, `feature-done`) | Journey H-J22 on `-HaloSample empty`; the feature's shared-doc edits: `Sources/HaloModel/HaloTextEdits+Color.swift` added to `halo-text`'s paths in the planned C4 model, with "and the layer color" in its description, and `M+"HaloTextEdits+Color.swift"` added to text-layers' owns in `waves.py` | `UITests/HaloJourneyTests+Text.swift`, `docs/blueprints/halo/c4-planned.json`, `docs/blueprints/halo/waves.py` | TX-5, TX-6, #333 | ~155 |
 
-TX-1 and TX-4 share no file and can start in the first build wave. The Model
-chain is TX-1 → TX-2 → TX-3 (one file, `HaloTextEdits.swift`, shared by TX-1
-and TX-2); the app chain is TX-4 → (TX-5 ∥ TX-6) → TX-7. TX-3 and TX-6 each
-replace a W0 stub whole (`HaloAvailability+Text.swift`;
-`HaloTextInspector.swift` and `HaloWindow+Text.swift`), keeping the function
-and init spellings W0's router and layer-keys' TEXT slot call.
+TX-1 to TX-4 share no file and start together. TX-2 keeps its color edit in
+its own `HaloTextEdits+Color.swift`, so it no longer waits on TX-1's
+`HaloTextEdits.swift`: it reuses only W0's `edit` and Layer > New > Text.
+TX-3 reads only the composition and the selected layer's kind, which W0
+has. TX-5 calls TX-1's `setText` and `setFontSize` with TX-4's rasterizer.
+TX-6 calls TX-1's and TX-2's methods (`sizeText`, `selectedText`,
+`selectedLayerColor`, `bytes`), needs TX-3's help to enable its controls and
+TX-4's `measure` for the box its snapshot shows. TX-7 is the `feature-done`
+task, so it goes last, after TX-5 and TX-6, and it carries the feature's
+only shared-doc edits. TX-3 and TX-6 each replace a W0
+stub whole (`HaloAvailability+Text.swift`; `HaloTextInspector.swift` and
+`HaloWindow+Text.swift`), keeping the function and init spellings W0's
+router and layer-keys' TEXT slot call.
+
+## Build waves
+
+- Wave 1: TX-1, TX-2, TX-3, TX-4. Independent in this wave: all four.
+- Wave 2: TX-5, TX-6. Independent in this wave: both.
+- Wave 3: TX-7 (final, `feature-done`, shared docs; also waits on #333).
+
+Longest chain: TX-1 → TX-6 → TX-7 (3); TX-2, TX-3 or TX-4 → TX-6 → TX-7 is
+the same length. TX-7, the final task, owns the shared-doc edits (the
+planned C4 path and description, and the `waves.py` owns line; see Review
+notes), so no build task chains through a shared file.
 
 ## Acceptance test per task
 
@@ -202,7 +222,7 @@ and init spellings W0's router and layer-keys' TEXT slot call.
 | TX-4 | `HaloTextRasterizerTests` (macOS): `measure` of "Hello" at 96 has x 0, y 0, whole-number width and height, height ≥ 96 and < 160; width grows from "Hello" to "Hello Halo"; `rasterize` returns a buffer exactly the box's size; "Hello" in white has ink (alpha > 0.5) in both its left and right quarters; a covered pixel of sRGB (1, 0.5, 0) reads linear (1, 0.214, 0, 1) within 1/255, and a half-covered edge pixel's color channels are no greater than its alpha (premultiplied); "Wj", "Ågy" and "—" at 12, 96 and 400: `CTLineGetImageBounds` lies inside `measure`'s box within 1 px | the box is fractional or off-origin, the buffer is mis-sized, the text is clipped or offset, or pixels come out gamma-encoded or unpremultiplied |
 | TX-5 | `HaloTextFidelityTests` (macOS) on `empty` plus a black solid, a white text layer "Hello" at 96 via `setText` and `setFontSize` with `HaloTextRasterizer`: the rendered frame's ink bounding box lies inside the stored box at full size within 1 px (QB-V4); the viewer's canvas (the shared snapshot host, linear light) against `services.rendering.render(_:width:height:text:)` at 1920 × 1080: channel ≤ 2/255 on all but ≤ 0.5% of pixels, upright and with Rotation keyed to 30. Both sides follow viewer-playback's pinned baseline rule (line box top-left at `bounds.origin`, first baseline at `bounds.y + ascent`, the rasterizer's baseline at `height − descent`), so a correct CoreText rasterizer passes; if the viewer-vs-render half fails, the lead files a `line:halo` bug on viewer-playback's `HaloViewerCanvas.swift` and does not fix it here | ink lands outside the box the viewer and hit test use, or the viewer and the render disagree |
 | TX-6 | Snapshots in `HaloTextLayerSnapshots`: `halo-text-layer-light/dark.png` (the viewer showing "Hello" at 96 and the TEXT section: field, "96 px" bar, color row); `halo-text-refused-light/dark.png` (the caption "Enter some text." under the field holding "Hello"). The macOS build on `dev` compiles both files | the TEXT section is missing, shows for a non-text layer, or has no refusal caption |
-| TX-7 | H-J22 above on the `dev` CI run | any step's assert |
+| TX-7 | H-J22 above on the `dev` CI run; `python3 docs/blueprints/halo/waves.py check docs/blueprints/halo/c4-planned.json` passes with `HaloTextEdits+Color.swift` owned once | any step's assert, or the color file has no planned C4 owner |
 
 ## Quality tests
 
@@ -278,6 +298,11 @@ this feature:
 - **The TEXT slot acts through `perform`.** `HaloTextInspector` has W0's
   one initializer `init(model:perform:)`; it sends FD-11's text cases and
   takes no closures.
-- **C4.** The `halo-text` description ("string and size") doesn't mention
-  color; the supervisor folds "and the layer color" in. No new `Sources/`
-  file is added, so the C4 lint passes as is.
+- **C4.** TX-2's new `HaloTextEdits+Color.swift` is covered today by
+  `docs/c4/model.json`'s `Sources/HaloModel/` folder path, so the C4 lint
+  passes as is. The Halo plan lists HaloModel files one by one, and its
+  `halo-text` component names only `HaloTextEdits.swift` ("string and
+  size"). TX-7 adds the color file to `halo-text`'s paths in
+  `c4-planned.json`, folds "and the layer color" into its description, and
+  adds the file to text-layers' owns in `waves.py`, so `waves.py check`
+  finds one owner.
