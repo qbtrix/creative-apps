@@ -2,7 +2,7 @@
 
 Issue: #777 · Packet: docs/blueprints/halo/features/foundation.md (on branch `docs/halo-feature-packets` until its PR merges)
 Run: act-1a13b78bcdb-qu60 · Session: session_01Dc9GDxc9HxLtv9XMcFgSWh · Started: 2026-10-14T17:33Z
-Stage: 4 round 1 (waiting on the dev CI run that contains #941, 837fc5f)
+Stage: 4 round 1 (CI run 38673821944 on 3af1c0e, contains #941, in progress)
 Base: 52928d1dbbdd72b849f7fdb6363991f35b1adbeb
 Next: once #941 merges, find the CI run on dev it dispatched; read jobs, audit-halo-*.json, ui-screens/snapshots; run the critic panel (clarity lens included). Risks flagged by the FD-17/18 builder: TimelineStrip track ids (needs-ui if missing), halo.controls reach (merged with suite.controls), -HaloWindowSize vs restored frames, L2 0.5% at 880x560, menu submenu hover reads
 

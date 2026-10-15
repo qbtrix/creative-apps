@@ -62,3 +62,4 @@ utc	stage	event	ref	note
 2026-10-15T02:53Z	3	pr-merged	#941	FD-18 feature-done
 2026-10-15T02:53Z	3	stage-end	build	all 21 task PRs merged
 2026-10-15T02:53Z	4	stage-start	round 1	waiting on CI for 837fc5f
+2026-10-15T03:00Z	4	ci-run	38673821944	dev 3af1c0e contains #941; in progress
