@@ -2,9 +2,9 @@
 
 Issue: #1037 · Packet: docs/blueprints/halo/features/history-files.md
 Run: act-1a13e9a2037-pkqb · Session: claude/history-files-lead-j2c6lo · Started: 2026-10-15T08:08Z
-Stage: 3 wave 6
-Base: 2fc9b5990fa49dc829a12f989e5407a7376ae402
-Next: wait for #1068 to merge, then stage 4 round 1 on the dev CI run that contains it
+Stage: 4 round 1
+Base: 3e475173ee796f7e37c5108d93db7557a91da177
+Next: read CI run 38713326810 (dev 3e47517, contains every PR): H-J8, H-J10, H-J11, audit-halo, ui-screens; then the critic panel
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -20,7 +20,7 @@ Next: wait for #1068 to merge, then stage 4 round 1 on the dev CI run that conta
 | HF-8 | 4 | app routes .undo/.redo; Edit menu snapshot | HaloWindow+Edit, HaloEditMenuSnapshots | snapshot halo-edit-menu-* | #1063 | merged |
 | HF-10 | 4 | app Open/Open Recent/-HaloOpenFile, progress, alerts, recent in UserDefaults | HaloWindow+File, HaloFileSnapshots | snapshots halo-opened-project-*, halo-file-opening-* | #1066 | merged |
 | HF-11 | 5 | journey H-J8 | UITests/HaloJourneyTests+History | H-J8 on dev CI | #1067 | merged |
-| HF-12 | 6 | journeys H-J10, H-J11 (feature-done) | UITests/HaloJourneyTests+Files, +FileErrors | H-J10, H-J11 on dev CI | #1068 | open (feature-done) |
+| HF-12 | 6 | journeys H-J10, H-J11 (feature-done) | UITests/HaloJourneyTests+Files, +FileErrors | H-J10, H-J11 on dev CI | #1068 | merged (feature-done) |
 
 ## Rounds
 | round | CI run | CI | audit vs baseline | lenses | confirmed | fixed by | clean |
@@ -40,6 +40,7 @@ Next: wait for #1068 to merge, then stage 4 round 1 on the dev CI run that conta
 - HF-10: unsaved-changes Save continues the open only when the save writes directly; the panel path drops the open (no window flag allowed by the packet).
 - HF-12 builder started early too; it opens its feature-done PR only after #1066 and HF-11 merge.
 - HF-12: saveStatus reads "Not saved" only with unsaved edits, so H-J10's read-only step makes an edit before ⌘S (critic round to judge).
+- Run 38711122431 (2fc9b59, has HF-9 app code): swift build+test CI: PASS on macOS; journey failures there are other lines (Photo fixture launch, Halo testLayoutAtWidths, H-J9 rename, SuiteUI gallery audit), #763.
 
 ## Open
 - #1065 needs-ui: close guard for unsaved changes on SuiteWindow (no SwiftUI close hook)
