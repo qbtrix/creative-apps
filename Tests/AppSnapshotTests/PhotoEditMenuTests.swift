@@ -5,7 +5,8 @@
 // the image; with no text focused Copy acts on the image. Every Edit item has
 // the system's symbol, Select All follows Paste, Merge Down's symbol is not a
 // save glyph, and with no window or no image on the pasteboard the items are
-// off with a reason unless text has focus. A spy text view
+// off with a reason unless text has focus; `photo.menu.reasons` lists every
+// item's help as the menus show it. A spy text view
 // stands in for the field editor, so the general pasteboard is never touched.
 // macOS only.
 import AppKit
@@ -47,6 +48,19 @@ private final class TextSpy: NSTextView {
         let image = PhotoPasteboardState(hasImage: true, isEmpty: false)
         #expect(!menu.isEditDisabled(.paste, pasteboard: image))
         #expect(!menu.isEditDisabled(.copy, pasteboard: image))
+    }
+
+    /// `photo.menu.reasons` holds each item's help as its menu item does, one line each.
+    @Test func menuReasonsListEachItemsHelp() throws {
+        var model = PhotoWorkspace()
+        try model.newCanvas(width: 800, height: 600)
+        let menu = PhotoMenu(model: model, perform: { _ in })
+        let lines = menu.editHelpLines(pasteboard: empty).split(separator: "\n").map(String.init)
+        #expect(lines.count == 6)
+        #expect(lines.contains("Paste: Nothing to paste."))
+        #expect(lines.contains("Merge Down: \(try #require(model.mergeDownHelp))"))
+        #expect(lines.contains(menu.editHelpText("Flatten Image", .flattenImage, pasteboard: empty)))
+        #expect(lines.contains("Copy"), "an item that can act shows its title alone")
     }
 
     @Test func commandCInTheImageSizeSheetsFieldCopiesText() throws {
