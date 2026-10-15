@@ -97,7 +97,7 @@ struct PhotoCommands: Commands {
             Button("Save") { menu.perform(.save) }.keyboardShortcut("s").disabled(!menu.hasImage)
             Button("Save As…") { menu.perform(.saveAs) }.keyboardShortcut("s", modifiers: [.command, .shift])
                 .disabled(!menu.hasImage)
-            Button("Export…") { menu.perform(.export) }.keyboardShortcut("e", modifiers: [.command, .shift])
+            Button("Export…") { menu.perform(.export(.openSheet)) }.keyboardShortcut("e", modifiers: [.command, .shift])
                 .disabled(!menu.hasImage)
         }
         CommandGroup(replacing: .undoRedo) {

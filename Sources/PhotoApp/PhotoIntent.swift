@@ -1,15 +1,18 @@
 // PhotoIntent.swift: everything a person can ask Photo's window to do, as one
 // value: every control in the top bar, rail, canvas, panel and menus sends one
 // of these to PhotoWindow.perform, which calls the matching PhotoWorkspace
-// method or opens a panel or sheet. PhotoTool's rail look (title, symbol,
-// one-key shortcut) lives here too.
+// method or opens a panel or sheet. Each v2 area has one case holding its own
+// enum, declared in its PhotoWindow+<Area>.swift and routed to that file's
+// perform, so a feature adds intents without editing this file; the v1 cases
+// stay flat. `confirm` (Return) and `dismiss` (Escape) route by mode.
+// PhotoTool's rail look (title, symbol, one-key shortcut) lives here too.
 import CoreRaster
 import PhotoModel
 import SuiteUI
 import SwiftUI
 
 enum PhotoIntent {
-    case newImage, open, save, saveAs, export, imageSize
+    case newImage, open, save, saveAs, imageSize
     case openFile(URL)
     case rotate(QuarterTurn)
     /// Opens the Straighten sheet; `applyStraighten` turns the image by its choices.
@@ -31,6 +34,13 @@ enum PhotoIntent {
     case moveLayers(IndexSet, Int)
     case addLayer, deleteLayer, renameLayer, bringForward, sendBackward, selectLayerAbove, selectLayerBelow
     case zoomIn, zoomOut, actualSize, fit
+    // One case per v2 area; each area's enum lives in its PhotoWindow+<Area>.swift.
+    case file(FileIntent), edit(EditIntent), crop(CropIntent), history(HistoryIntent), select(SelectIntent)
+    case adjustmentLayer(AdjustmentLayerIntent), transform(TransformIntent), export(ExportIntent), sample(SampleIntent)
+    /// Return: commits a free transform, else applies a pending crop.
+    case confirm
+    /// Escape: cancels a free transform, else cancels a pending crop or deselects.
+    case dismiss
 }
 
 /// Where a view sends its intents.
