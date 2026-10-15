@@ -165,6 +165,11 @@ final class HaloJourneyTests: XCTestCase {
             viewerWidths[width] = halo.element("halo.viewer").frame.width
             let timeline = halo.element("halo.timeline").frame
             XCTAssertLessThanOrEqual(timeline.maxY, window.frame.maxY, "the timeline runs off the window at \(width)")
+            let tracks = halo.app.windows.firstMatch.buttons.matching(identifier: "halo.timeline.track").allElementsBoundByIndex
+            for track in tracks {
+                XCTAssertGreaterThanOrEqual(track.frame.minX, timeline.minX - 1,
+                    "a timeline track \(track.frame) starts left of the timeline \(timeline) at \(width): it runs under the sidebar")
+            }
             guard let artboard = artboardFrame(in: halo.element("halo.viewer")) else {
                 XCTFail("no artboard found in the viewer at \(width)")
                 continue
