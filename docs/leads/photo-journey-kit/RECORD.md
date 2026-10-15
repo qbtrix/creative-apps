@@ -4,7 +4,7 @@ Issue: #1073 · Packet: docs/blueprints/photo/features/photo-journey-kit.md
 Run: act-1a1406baff9-fu36 · Session: cloud lead session · Started: 2026-10-15T16:36Z
 Stage: 4 round 2
 Base: 9f28a9f7dcb6e9d584a7c80847e8ef0108fa5e17
-Next: round 3 on the dev CI run triggered by #1243 (cdcfb62, feature-done): smoke passes with no offer, V1-V12, Photo audit, photo-kit-opened.png; green = done check, contact sheet on #1073
+Next: round 3 on dev CI run 38807718380 (cdcfb62 = #1243's merge, feature-done): smoke passes with no offer, V1-V12, Photo audit, photo-kit-opened.png; green = done check, contact sheet on #1073
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
