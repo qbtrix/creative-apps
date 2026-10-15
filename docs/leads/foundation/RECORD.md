@@ -20,7 +20,7 @@ Next: FD-11, FD-12 and the FD-13b→FD-14 chain are building; then FD-15 ∥ FD-
 | FD-8 | 7 | HaloProject holds document + every v1 stored property; == skips services | HaloProject.swift + 2 tests | HaloProjectTests | | #898 | merged |
 | FD-9 | 8 | HaloFixtures (eight, huge ≤ 48 MiB) | HaloFixtures.swift + test | HaloFixturesTests | | #899 | merged |
 | FD-10 | 9 | edit / endCoalescing / dismissRefusal / takeLayerID; mutators under edit; HB-9 | HaloProject, HaloTimeline + tests | HaloEditTests, HaloFoundationBudgetTests | | #903, #904 (split a/b) | merged |
-| FD-11 | 10 | HaloCommand, unavailableHelp, title, nine Availability files | HaloCommand.swift, Availability/ x9 + test | HaloCommandTests | | | building |
+| FD-11 | 10 | HaloCommand, unavailableHelp, title, nine Availability files | HaloCommand.swift, Availability/ x9 + test | HaloCommandTests | | #924 | open, lane |
 | FD-12 | 10 | viewerDrawList, viewerSummary, row key frames, status suffix; HB-6 | HaloViewerState, HaloTimeline, HaloStatusText + tests | HaloViewerStateTests, HaloTimelineCostTests | | | building |
 | FD-13a | 2 | App: HaloWindow and HaloViewer move to own files (pure move) | HaloApp.swift, HaloWindow.swift, HaloViewer.swift | snapshots unchanged | #893 | merged |
 | FD-13b | 11 | HaloLaunch, HaloControls, stub rasterizer | Sources/HaloApp | macOS build, H-J13 | | | building |
