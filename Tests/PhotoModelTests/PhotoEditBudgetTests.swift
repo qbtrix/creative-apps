@@ -4,7 +4,9 @@
 // "Noise" layer and its Paste in place, timed together, within 120 ms; the
 // paste fits `maxOpenPixels`, so no resize runs. PB-16: Merge Down of "Noise"
 // onto "Gradient" (two 12 MP layers) and Flatten Image of all three, each
-// within 400 ms. Each timed call is undone, untimed, before the next, so
+// within 400 ms. In debug, Copy and Paste of one layer also costs no more
+// than Merge Down of two. All three run in one test, one after another, on
+// one workspace. Each timed call is undone, untimed, before the next, so
 // every round starts from the same stack. All three touch every pixel, so as
 // in PhotoBudgetTests the median is gated in a release build
 // (`swift test -c release -Xswiftc -enable-testing --filter
@@ -17,7 +19,8 @@ import CoreRaster
 import Testing
 
 #if DEBUG
-/// Debug reports the medians; it gates only the sample count.
+/// Debug reports the medians; it gates only the sample count and the order
+/// of copy and paste against merge down.
 private let gated = false
 /// Timed calls per series. Debug's per-pixel loops make one round cost
 /// minutes (Merge Down about 65 s, Flatten about 97 s on a Linux worker), so
@@ -31,9 +34,23 @@ private let rounds = 5
 #endif
 
 @Suite struct PhotoEditBudgetTests {
-    @Test func copyPaste() throws {
+    /// One test, so the series share a workspace and never time each other.
+    @Test func editBudgets() throws {
         var workspace = try PhotoWorkspace.fixture(.large)
         workspace.services.clipboard = PhotoServices.live.clipboard
+        workspace.services.merging = PhotoServices.live.merging
+        let copyPaste = copyPaste(&workspace)
+        let (merge, flatten) = mergeFlatten(&workspace)
+        check(copyPaste, within: .milliseconds(120))
+        check(merge, within: .milliseconds(400))
+        check(flatten, within: .milliseconds(400))
+        // Debug's gate: the lighter edit never costs more than the heavier one.
+        if !gated {
+            #expect(copyPaste.p50 <= merge.p50, "copy and paste \(copyPaste.p50) over merge down \(merge.p50)")
+        }
+    }
+
+    private func copyPaste(_ workspace: inout PhotoWorkspace) -> Series {
         let names = workspace.layers.map(\.name)
         #expect(workspace.selectedLayer?.name == "Noise")
         let clock = ContinuousClock()
@@ -53,12 +70,10 @@ private let rounds = 5
             workspace.undo()
             #expect(workspace.layers.map(\.name) == names)
         }
-        check(Series(name: "PB-15 copy and paste", costs: costs), within: .milliseconds(120))
+        return Series(name: "PB-15 copy and paste", costs: costs)
     }
 
-    @Test func mergeFlatten() throws {
-        var workspace = try PhotoWorkspace.fixture(.large)
-        workspace.services.merging = PhotoServices.live.merging
+    private func mergeFlatten(_ workspace: inout PhotoWorkspace) -> (merge: Series, flatten: Series) {
         let names = workspace.layers.map(\.name)
         #expect(names == ["Noise", "Gradient", "Background"])
         let clock = ContinuousClock()
@@ -79,8 +94,7 @@ private let rounds = 5
             #expect(workspace.layers.map(\.name) == names)
             #expect(workspace.selectedLayer?.name == "Noise", "undo selects Noise again for the next Merge Down")
         }
-        check(Series(name: "PB-16 merge down", costs: merges), within: .milliseconds(400))
-        check(Series(name: "PB-16 flatten", costs: flattens), within: .milliseconds(400))
+        return (Series(name: "PB-16 merge down", costs: merges), Series(name: "PB-16 flatten", costs: flattens))
     }
 
     private func check(_ series: Series, within budget: Duration) {
