@@ -3,7 +3,8 @@
 // seconds have passed since the last edit, and that edit isn't autosaved
 // yet), the entry an autosave writes (`recoveryEntry`: the document package
 // with the image's name and the time), restoring one (`restore`: the image
-// comes back dirty and unsaved, so Save asks where) and the launch offer's
+// comes back dirty and unsaved, so Save asks where; `restore(_:decoded:)`
+// takes a package the window decoded off the main actor) and the launch offer's
 // text (`RecoveryOffer`). Times are seconds passed in by the caller, so none
 // of this reads a clock. Linux-safe.
 #if canImport(FoundationEssentials)
@@ -71,7 +72,14 @@ extension PhotoWorkspace {
     public mutating func restore(
         _ entry: RecoveryEntry, archive: any DocumentArchiving, codec: any PhotoImageCodec
     ) throws {
-        try openDocument(entry.package, name: entry.documentName ?? "Untitled", archive: archive, codec: codec)
+        try restore(entry, decoded: archive.decode(entry.package, codec: codec))
+    }
+
+    /// Restores `entry` from `snapshot`, its package already decoded (the
+    /// window decodes it off the main actor), as `restore(_:archive:codec:)`
+    /// does. Throws `ArchiveError.damaged`; the workspace is unchanged.
+    public mutating func restore(_ entry: RecoveryEntry, decoded snapshot: PhotoDocumentSnapshot) throws {
+        try openDocument(snapshot, name: entry.documentName ?? "Untitled")
         documentName = entry.documentName
         fileKind = nil
         // Every step has an id, so nil matches none: the image never reads saved.

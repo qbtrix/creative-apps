@@ -1,6 +1,7 @@
 // PhotoAutosaveTests.swift: PhotoAutosave (photo-documents D-9, PJ-3), Flare's
-// MP-5 and MP-6 cases for Photo, each in its own temp folder behind the live
-// recovery store (`PhotoServices.recovering(in:)`), times passed in. macOS only.
+// MP-5 and MP-6 cases for Photo and a restore that decodes off the main actor
+// (QB-L12), each in its own temp folder behind the live recovery store
+// (`PhotoServices.recovering(in:)`), times passed in. macOS only.
 #if os(macOS)
 import CoreRaster
 import Foundation
@@ -35,6 +36,21 @@ private final class ProbeStore: RecoveryStoring {
 
     func discard(window: String) throws { try inner.discard(window: window) }
     func discardAll() throws { try inner.discardAll() }
+}
+
+/// ImageIOCodec that records, from inside each call, whether it ran on the main thread.
+private final class MainProbeCodec: PhotoImageCodec {
+    let onMain = Mutex<[Bool]>([])
+
+    func decode(_ data: Data, longestSide: Int?) throws -> DecodedImage {
+        let main = Thread.isMainThread
+        onMain.withLock { $0.append(main) }
+        return try ImageIOCodec().decode(data, longestSide: longestSide)
+    }
+
+    func encode(_ image: DecodedImage, as format: ImageFormat, quality: Double) throws -> Data {
+        try ImageIOCodec().encode(image, as: format, quality: quality)
+    }
 }
 
 /// Blocks the calling thread until `semaphore` is signalled (sync, so it can run in a detached task).
@@ -180,7 +196,8 @@ private func block(on semaphore: DispatchSemaphore) {
         let launched = await relaunch.launch(model: PhotoWorkspace(services: .live))
         let offer = try #require(launched)
         var model = PhotoWorkspace(services: PhotoServices.live.recovering(in: folder))
-        try relaunch.restore(offer, into: &model, codec: ImageIOCodec())
+        let snapshot = try await PhotoAutosave.decode(offer, archive: model.services.archive, codec: ImageIOCodec())
+        try relaunch.restore(offer, decoded: snapshot, into: &model)
         #expect(model.layers.count == 2)
         #expect(model.documentName == "beach.png")
         #expect(model.isDirty)
@@ -196,6 +213,23 @@ private func block(on semaphore: DispatchSemaphore) {
         writer.discard()
         #expect(names().isEmpty)
         #expect(writer.lastEdit == nil)
+    }
+
+    @Test func restoreDecodesOffMain() async throws {
+        _ = try await written()
+        let relaunch = makeAutosave(window: "w2")
+        let launched = await relaunch.launch(model: PhotoWorkspace(services: .live))
+        let offer = try #require(launched)
+        let codec = MainProbeCodec()
+        let snapshot = try await PhotoAutosave.decode(offer, archive: PhotoServices.live.archive, codec: codec)
+        let calls = codec.onMain.withLock { $0 }
+        #expect(!calls.isEmpty)
+        #expect(!calls.contains(true))
+        var model = PhotoWorkspace(services: PhotoServices.live.recovering(in: folder))
+        try relaunch.restore(offer, decoded: snapshot, into: &model)
+        #expect(model.layers.count == 2)
+        #expect(model.isDirty)
+        #expect(names().isEmpty)
     }
 
     @Test func offerTextForBeach() throws {

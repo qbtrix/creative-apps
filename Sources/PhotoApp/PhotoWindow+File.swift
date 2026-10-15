@@ -148,17 +148,28 @@ extension PhotoWindow {
         case .clearRecent: files.clearRecent()
         case .restore(let offer):
             files.recoveryOffer = nil
-            let autosave = files.startAutosave(model.services.recovery)
+            restore(offer)
+        case .discardRecovery:
+            files.recoveryOffer = nil
+            files.startAutosave(model.services.recovery).discardLeftBehind()
+        }
+    }
+
+    /// Restore: decodes the offer's PNGs off the main actor, then opens the
+    /// image; a failure keeps the window as it was and drops the bad file.
+    private func restore(_ offer: RecoveryOffer) {
+        let (autosave, archive) = (files.startAutosave(model.services.recovery), model.services.archive)
+        files.working = .opening
+        Task {
             do {
-                try autosave.restore(offer, into: &model, codec: ImageIOCodec())
+                let snapshot = try await PhotoAutosave.decode(offer, archive: archive, codec: ImageIOCodec())
+                try autosave.restore(offer, decoded: snapshot, into: &model)
                 documentURL = nil
             } catch {
                 autosave.discardLeftBehind()  // it holds nothing to keep (packet note 3)
                 problem = (error as? ArchiveError)?.message ?? "The image can't be restored. \(Self.reason(error))"
             }
-        case .discardRecovery:
-            files.recoveryOffer = nil
-            files.startAutosave(model.services.recovery).discardLeftBehind()
+            files.working = nil
         }
     }
 
