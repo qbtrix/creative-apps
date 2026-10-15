@@ -2,7 +2,7 @@
 
 Issue: #1076 · Packet: docs/blueprints/photo/features/photo-crop.md
 Run: act-1a13f70ddc3-29wr · Session: lead session (claude/photo-crop-feature-lead-e7vpmg) · Started: 2026-10-15T12:03Z
-Stage: 4 round 2 (wave 4 still waits on photo-journey-kit #1073)
+Stage: 4 round 3 (wave 4 still waits on photo-journey-kit #1073)
 Base: 469520e8def2fe925a065aa8d5febda827851131
 Next: r2-b1 merges, then round 3 on the next dev CI run, same four lenses; when #1073 closes (UITests/PhotoJourneyTests+Fixtures.swift on dev), build CP-5 and CP-7 together; meanwhile read the first dev CI run containing 469520e (#1151) for round-1 material.
 
