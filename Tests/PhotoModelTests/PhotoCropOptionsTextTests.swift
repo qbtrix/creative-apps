@@ -1,7 +1,8 @@
 // PhotoCropOptionsTextTests.swift: what the crop options say (photo-crop,
 // Anatomy round 1): the one caption in every state, why Swap is off, the
 // fields' numbers with no crop, their tooltips, the chips' tooltips and the
-// disabled reasons. Runs on Linux and macOS.
+// disabled reasons, down to a field the lock or the image's edge pins and an
+// Apply that would change nothing (Anatomy round 2). Runs on Linux and macOS.
 import CoreRaster
 import PhotoModel
 import Testing
@@ -24,16 +25,16 @@ import Testing
     @Test func captionSaysWhatToDoThenWhatTheCropIs() throws {
         #expect(PhotoWorkspace(services: .live).cropCaption == "Open an image to crop it.")
         var workspace = try image()
-        #expect(workspace.cropCaption == "Drag on the image, or pick a shape to type a size.")
+        #expect(workspace.cropCaption == "Drag on the image, or pick a shape, to start a crop.")
         workspace.setCropAspect(.ratio(1, 1))
         #expect(workspace.cropCaption == "Crop 600 × 600 px, 1:1")
         workspace.cancelCrop()
         #expect(workspace.cropCaption == "Drag on the image, or type a size.")
         workspace.setCropAspect(.original)
-        #expect(workspace.cropCaption == "Crop 800 × 600 px, original")
+        #expect(workspace.cropCaption == "Crop 800 × 600 px, Original")
         workspace.setCropAspect(.free)
         stroke(&workspace, .crop, from: point(10, 10), to: point(210, 110))
-        #expect(workspace.cropCaption == "Crop 200 × 100 px, free")
+        #expect(workspace.cropCaption == "Crop 200 × 100 px, Free")
     }
 
     @Test func captionReadsASwappedRatio() throws {
@@ -91,10 +92,46 @@ import Testing
         #expect(empty.cropFieldsUnavailableHelp == "Open an image to crop first.")
         #expect(empty.cropApplyHelp == "Open an image to crop first.")
         var workspace = try image()
-        #expect(workspace.cropFieldsUnavailableHelp == "Drag on the image, or pick a shape, to start a crop.")
-        #expect(workspace.cropApplyHelp == "Drag over the image to choose a crop first.")
+        let start = "Drag on the image, or pick a shape, to start a crop."
+        #expect(workspace.cropFieldsUnavailableHelp == start && workspace.cropApplyHelp == start)
+        #expect(workspace.cropCaption == start && workspace.cropApplyHelp?.contains("pick a shape") == true)
+        #expect(CropField.allCases.allSatisfy { workspace.cropFieldUnavailableHelp($0) == start })
+        #expect(workspace.cropCancelHelp == "No crop to cancel.")
+        #expect(empty.cropCancelHelp == "Open an image to crop first.")
         workspace.setCropAspect(.ratio(3, 2))
         #expect(workspace.cropFieldsUnavailableHelp == nil && workspace.cropApplyHelp == nil)
+        #expect(workspace.cropCancelHelp == nil)
+    }
+
+    @Test func aFieldTheLockPinsSaysWhy() throws {
+        var workspace = try image()
+        workspace.setCropAspect(.ratio(1, 1))
+        #expect(workspace.cropFieldUnavailableHelp(.y) == "The crop already spans the image's full height.")
+        #expect(workspace.cropFieldUnavailableHelp(.x) == nil)
+        #expect(workspace.cropFieldUnavailableHelp(.width) == nil && workspace.cropFieldUnavailableHelp(.height) == nil)
+        workspace.cancelCrop()
+        #expect(workspace.cropFieldUnavailableHelp(.y) == "The crop already spans the image's full height.")
+        #expect(workspace.cropFieldUnavailableHelp(.x) == nil)
+    }
+
+    @Test func aWholeImageCropPinsXAndYAndCannotApply() throws {
+        var workspace = try image()
+        workspace.setCropAspect(.original)
+        #expect(workspace.pendingCrop == PixelRect(x: 0, y: 0, width: 800, height: 600))
+        #expect(workspace.cropFieldUnavailableHelp(.x) == "The crop already spans the image's full width.")
+        #expect(workspace.cropFieldUnavailableHelp(.y) == "The crop already spans the image's full height.")
+        #expect(workspace.cropFieldUnavailableHelp(.width) == nil)
+        #expect(!workspace.canApplyCrop)
+        #expect(workspace.cropApplyHelp == "The crop covers the whole image.")
+        #expect(workspace.cropCancelHelp == nil)
+    }
+
+    @Test func theChipGroupSaysWhatItLocks() throws {
+        #expect(PhotoWorkspace(services: .live).cropAspectGroupHelp == "Open an image to choose a crop shape.")
+        let workspace = try image()
+        #expect(
+            workspace.cropAspectGroupHelp
+                == "Lock the crop to a shape, width to height. Original keeps the image's own 4:3.")
     }
 
     @Test func xAndYTakeZeroWidthAndHeightDoNot() throws {
