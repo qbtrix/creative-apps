@@ -17,3 +17,6 @@ utc	stage	event	ref	note
 2026-10-15T16:58Z	3	heartbeat	-	waiting
 2026-10-15T12:45Z	3	pr-opened	#1210	D-4b LiveRecovery
 2026-10-15T12:50Z	3	pr-opened	#1212	D-6 PhotoPackageIO
+2026-10-15T13:10Z	3	pr-merged	#1210	D-4b
+2026-10-15T13:10Z	3	pr-merged	#1212	D-6
+2026-10-15T13:11Z	3	stage-start	wave 4	D-5, D-7 on 66d2f04
