@@ -2,9 +2,9 @@
 
 Issue: #777 · Packet: docs/blueprints/halo/features/foundation.md (on branch `docs/halo-feature-packets` until its PR merges)
 Run: act-1a13b78bcdb-qu60 · Session: session_01Dc9GDxc9HxLtv9XMcFgSWh · Started: 2026-10-14T17:33Z
-Stage: 4 round 1 (fix batch r1 building)
+Stage: 4 round 1 (fix batch #961 on the lane)
 Base: 52928d1dbbdd72b849f7fdb6363991f35b1adbeb
-Next: wait for fixer PR lead/foundation-r1-fix (layer row select, H-J0 query, H-J1 problem line, -HaloWindowSize); then round 2 on the CI run that contains it. offscreen waits on SuiteUI #933
+Next: once #961 merges (it touches Sources/HaloApp and UITests, so the lane dispatches CI), run round 2 on the dev CI run that contains it: journeys, audit-halo-*, screens, critic panel incl. clarity lens. offscreen waits on SuiteUI #933
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -33,7 +33,7 @@ Next: wait for fixer PR lead/foundation-r1-fix (layer row select, H-J0 query, H-
 ## Rounds
 | round | CI run | CI | audit vs baseline | lenses | confirmed | fixed by | clean |
 |---|---|---|---|---|---|---|---|
-| 1 | 38675308731 (1025fcc) | red: Halo journeys H-J0, H-J1, H-J13, testLayoutAtWidths, testScrubTheTimeline fail; testEveryMenuOpens passes | halo offscreen 14 > 8 (SuiteUI #933 split-view overflow: sidebar rows x -28/-8, inspector to x 1036 in a 12–1012 window); identifier 1 (system Hide Sidebar) < 10; unnamed 0 < 5 | CI + audit + screens (panel not run: blockers already confirmed by the journeys) | 5: layer row click doesn't select (major); H-J0 query misses EmptyStateView title; H-J1 no problem line for abc; -HaloWindowSize ignored (1000 not 880); offscreen over baseline (blocker, SuiteUI #933) | r1 fixer (4); #933 (offscreen) | no |
+| 1 | 38675308731 (1025fcc) | red: Halo journeys H-J0, H-J1, H-J13, testLayoutAtWidths, testScrubTheTimeline fail; testEveryMenuOpens passes | halo offscreen 14 > 8 (SuiteUI #933 split-view overflow: sidebar rows x -28/-8, inspector to x 1036 in a 12–1012 window); identifier 1 (system Hide Sidebar) < 10; unnamed 0 < 5 | CI + audit + screens (panel not run: blockers already confirmed by the journeys) | 5: layer row click doesn't select (major); H-J0 query misses EmptyStateView title; H-J1 no problem line for abc; -HaloWindowSize ignored (1000 not 880); offscreen over baseline (blocker, SuiteUI #933) | #961 (4); #933 (offscreen) | no |
 | 1a | 38673821944 (3af1c0e) | red: macOS `swift test` failed on SuiteUITests.rowBodyAndItsTogglesCarryNoDoubleClickGesture (not foundation: #938's ids, fixed by #944); UI journeys skipped | not measured | – | – | – | no |
 
 ## Decisions

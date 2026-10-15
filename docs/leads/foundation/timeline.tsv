@@ -69,3 +69,4 @@ utc	stage	event	ref	note
 2026-10-15T03:40Z	-	heartbeat	-	waiting on builders
 2026-10-15T03:47Z	4	ci-run	38675308731	red: Halo journeys; offscreen 14>8 (#933)
 2026-10-15T03:47Z	4	round-findings	round 1	4 Halo fixes + #933
+2026-10-15T03:57Z	4	pr-opened	#961	round 1 fixes: layer row select, journey text query, window sizer
