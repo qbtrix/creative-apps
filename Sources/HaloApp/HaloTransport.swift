@@ -1,6 +1,7 @@
 // HaloTransport.swift: the status bar's transport: plain SF Symbol buttons
 // sending their HaloCommand, disabled with `unavailableHelp(for:)` as the
-// tooltip while the Model can't act. viewer-playback (#37) replaces it.
+// tooltip while the Model can't act, and drawn in textTertiary then so it
+// looks disabled inside the pill. viewer-playback (#37) replaces it.
 import HaloModel
 import SuiteUI
 import SwiftUI
@@ -33,6 +34,9 @@ struct HaloTransport: View {
                     .labelStyle(.iconOnly)
                     .buttonStyle(.borderless)
                     .disabled(help != nil)
+                    // Its own ink, so the status bar pill's textSecondary can't
+                    // draw a disabled button as live: tertiary while disabled.
+                    .foregroundStyle(help == nil ? SuiteColor.textSecondary : SuiteColor.textTertiary)
                     .help(help ?? model.title(for: item.command))
                     .haloControl(id: item.id, enabled: help == nil, help: help)
             }

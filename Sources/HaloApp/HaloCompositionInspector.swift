@@ -2,7 +2,8 @@
 // composition, in the Pro density pattern of docs/design.md. With a layer
 // selected it hosts HaloLayerInspector (the layer's header and slots);
 // otherwise it shows an InspectorHeader (name, size, rate and length) and a
-// Composition section of read-only rows. Either way the layer list follows
+// Composition section of read-only rows, their values in
+// SuiteFont.inspectorValue (semibold, tabular digits). Either way the layer list follows
 // under a Layers section. All text comes from HaloModel; views only read it.
 // The read-only values carry `halo.inspector.composition.*` identifiers so a
 // journey reads them; they aren't controls, so they stay out of halo.controls.
@@ -22,14 +23,15 @@ struct HaloCompositionInspector: View {
                 InspectorHeader(comp.name, details: comp.headerDetails)
                 InspectorSection("Composition") {
                     InspectorRow("Size") {
-                        Text(comp.sizeText).monospacedDigit().accessibilityIdentifier("halo.inspector.composition.size")
+                        Text(comp.sizeText).font(SuiteFont.inspectorValue)
+                            .accessibilityIdentifier("halo.inspector.composition.size")
                     }
                     InspectorRow("Frame Rate") {
-                        Text(comp.frameRateText).monospacedDigit()
+                        Text(comp.frameRateText).font(SuiteFont.inspectorValue)
                             .accessibilityIdentifier("halo.inspector.composition.frameRate")
                     }
                     InspectorRow("Duration") {
-                        Text(comp.durationText).monospacedDigit()
+                        Text(comp.durationText).font(SuiteFont.inspectorValue)
                             .accessibilityIdentifier("halo.inspector.composition.duration")
                     }
                 }
