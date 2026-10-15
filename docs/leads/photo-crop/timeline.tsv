@@ -1,0 +1,6 @@
+utc	stage	event	ref	note
+2026-10-15T12:03Z	0	stage-start	#1076	base 7f61259
+2026-10-15T12:03Z	0	stage-end	#1076	photo-seams #812 closed; photo-journey-kit #1073 open
+2026-10-15T12:03Z	1	stage-end	packet	tasks copied
+2026-10-15T12:03Z	2	stage-end	plan	CP-7 moved to wave 4 (waits #1073)
+2026-10-15T12:03Z	3	stage-start	wave 1	CP-1
