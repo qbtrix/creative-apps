@@ -92,6 +92,21 @@ import Testing
         #expect(workspace.cropFieldDisplay(.width) == 600 && workspace.cropFieldDisplay(.height) == 600)
     }
 
+    /// PJ-8 reads each combined field row's number before "pixel" in its value.
+    @Test func fieldRowsSpeakTheirNumberInPixels() throws {
+        #expect(PhotoWorkspace(services: .live).cropFieldAccessibilityValue(.width) == "0 pixels")
+        var workspace = try image()
+        #expect(workspace.cropFieldAccessibilityValue(.width) == "800 pixels")
+        workspace.setCropAspect(.ratio(1, 1))
+        #expect(workspace.cropFieldAccessibilityValue(.width) == "600 pixels")
+        #expect(workspace.cropFieldAccessibilityValue(.x) == "100 pixels")
+        #expect(typed(&workspace, .width, 1))
+        #expect(workspace.cropFieldAccessibilityValue(.height) == "1 pixel")
+        #expect(CropField.allCases.allSatisfy {
+            workspace.cropFieldAccessibilityValue($0).hasPrefix("\(workspace.cropFieldDisplay($0)) pixel")
+        })
+    }
+
     @Test func everyFieldSaysWhatItMeasures() {
         let workspace = PhotoWorkspace(services: .live)
         let helps = CropField.allCases.map { workspace.cropFieldHelp($0) }

@@ -98,6 +98,14 @@ extension PhotoWorkspace {
         }
     }
 
+    /// What VoiceOver and XCUI read as a crop field row's value: the number
+    /// it draws, spoken with its unit ("600 pixels", "1 pixel"), as ScrubField
+    /// speaks it, since the combined row carries no value of its own.
+    public func cropFieldAccessibilityValue(_ field: CropField) -> String {
+        let number = cropFieldDisplay(field)
+        return "\(number) \(number == 1 ? "pixel" : "pixels")"
+    }
+
     /// The crop options' one instruction line, always shown so nothing moves
     /// when a crop appears: what to do with no crop, else the crop's size and
     /// shape ("Crop 400 × 600 px, 2:3"), so a swapped ratio reads as such.
