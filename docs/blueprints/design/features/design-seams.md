@@ -175,30 +175,63 @@ the marquee is a gesture, not a control).
 Every task is one PR to `dev`: at most 400 changed lines and 15 files,
 label `fast-lane`, body lines `Belt-Lead:`, `Feature: design-seams`,
 `Fast-Check: pass`, `Head:`. The last task (D0-4b) also carries
-`feature-done`. Tasks run in the order of the table; a task that shares a
-file with an earlier one is rebased on it (the depends-on column).
+`feature-done`. A task waits only for the tasks in its depends-on column
+(merged code it needs, or a file it shares); the Build waves below say which
+tasks run together.
 
 | id | issue | what | owned files | depends on | size |
 |---|---|---|---|---|---|
-| D0-1 | gap "public `DesignPage` init" (closes) | Style schema with version-1 files still opening; `init(id:copying:)`; public `DesignPage` init; `marquee`; every selection change ends the edit run | `DesignNode.swift`, `DesignWorkspace.swift`, `DesignSelection.swift`, `DesignFile.swift`; tests `DesignStyleSchemaTests.swift`, `DesignSelectionRunTests.swift` | #753 | ~250, 6 |
-| D0-2.1 | – | `DesignEdit`, `DesignRefusal`, `DesignIDMint`; the style and tier-2 value types | `Contracts/EditContracts.swift`, `Contracts/StyleTypes.swift`; tests `DesignIDMintTests.swift`, `DesignRefusalHelpTests.swift` | D0-1 | ~360, 4 |
+| D0-1 | gap "public `DesignPage` init" (closes) | Style schema with version-1 files still opening; `init(id:copying:)`; public `DesignPage` init; `marquee`; every selection change ends the edit run | `DesignNode.swift`, `DesignWorkspace.swift`, `DesignSelection.swift`, `DesignFile.swift`; tests `DesignStyleSchemaTests.swift`, `DesignSelectionRunTests.swift` | D0-2.1, #753 | ~250, 6 |
+| D0-2.1 | – | `DesignEdit`, `DesignRefusal`, `DesignIDMint`; the style and tier-2 value types | `Contracts/EditContracts.swift`, `Contracts/StyleTypes.swift`; tests `DesignIDMintTests.swift`, `DesignRefusalHelpTests.swift` | – | ~360, 4 |
 | D0-2.2 | – | The use-case protocols and `DesignDocument` | `Contracts/UseCases.swift`; tests `DesignDocumentTests.swift` | D0-2.1 | ~240, 2 |
-| D0-2.3 | – | `NotBuilt` and its conformances; `DesignServices` with `.live`; `services` and `useServices` on the workspace | `NotBuilt.swift`, `DesignServices.swift`, `DesignWorkspace.swift`; tests `DesignNotBuiltTests.swift` | D0-2.2 | ~260, 4 |
-| D0-2.4 | – | Fake helpers; the select-area fakes | `Fakes/FakeSupport.swift`, `Fakes/DesignSelectFakes.swift`; tests `DesignSelectFakesTests.swift` | D0-2.3 | ~330, 3 |
-| D0-2.5 | – | The arrange-area fakes; `.fake` | `Fakes/DesignArrangeFakes.swift`, `DesignServices.swift`; tests `DesignArrangeFakesTests.swift` | D0-2.4 | ~300, 3 |
+| D0-2.3 | – | `NotBuilt` and its conformances; `DesignServices` with `.live`; `services` and `useServices` on the workspace | `NotBuilt.swift`, `DesignServices.swift`, `DesignWorkspace.swift`; tests `DesignNotBuiltTests.swift` | D0-1, D0-2.2 | ~260, 4 |
+| D0-2.4 | – | Fake helpers; the select-area fakes | `Fakes/FakeSupport.swift`, `Fakes/DesignSelectFakes.swift`; tests `DesignSelectFakesTests.swift` | D0-2.2 | ~330, 3 |
+| D0-2.5 | – | The arrange-area fakes; `.fake` | `Fakes/DesignArrangeFakes.swift`, `DesignServices.swift`; tests `DesignArrangeFakesTests.swift` | D0-1, D0-2.3, D0-2.4 | ~300, 3 |
 | D0-2.6 | – | The contract law over every tier-1 conformance | tests `DesignContractLawTests.swift` | D0-2.5 | ~200, 1 |
-| D0-2b | – | One stub per tier-1 live type; `.live` names them; `LiveFiling` wraps today's codec | `Live/LiveMarquee.swift`, `Live/LiveTransforming.swift`, `Live/LiveAligning.swift`, `Live/LiveFraming.swift`, `Live/LiveDuplicating.swift`, `Live/LiveGrouping.swift`, `Live/LiveClipboard.swift`, `Live/LiveOrdering.swift`, `Live/LiveStyling.swift`, `Live/LiveFiling.swift`, `DesignServices.swift`; tests `DesignLiveStubTests.swift` | D0-2.6 | ~300, 12 |
-| D0-3a | – | `DesignCommand`, `help`, `run`, `apply`, `mint`, Zoom to Selection, Select All; one-layer delete, nudge and align keep today's methods | `DesignActions.swift`; tests `DesignActionsTests.swift` | D0-2b | ~330, 2 |
+| D0-2b | – | One stub per tier-1 live type; `.live` names them; `LiveFiling` wraps today's codec | `Live/LiveMarquee.swift`, `Live/LiveTransforming.swift`, `Live/LiveAligning.swift`, `Live/LiveFraming.swift`, `Live/LiveDuplicating.swift`, `Live/LiveGrouping.swift`, `Live/LiveClipboard.swift`, `Live/LiveOrdering.swift`, `Live/LiveStyling.swift`, `Live/LiveFiling.swift`, `DesignServices.swift`; tests `DesignLiveStubTests.swift` | D0-2.3, D0-2.5, D0-2.6 | ~300, 12 |
+| D0-3a | – | `DesignCommand`, `help`, `run`, `apply`, `mint`, Zoom to Selection, Select All; one-layer delete, nudge and align keep today's methods | `DesignActions.swift`; tests `DesignActionsTests.swift` | D0-2.5 | ~330, 2 |
 | D0-3b | – | Copy, cut, paste, `moveLayer`, `styleHelp`, `setStyle`; one-layer frame, fill and radius keep today's methods | `DesignActions+Edit.swift`; tests `DesignActionsEditTests.swift` | D0-3a | ~300, 2 |
-| D0-3c | – | Gesture routes: the marquee rule, several-layer move and resize, Option-drag as one "Duplicate" step; `endDrag` clears the marquee and ends the run | `DesignCanvasEditing.swift`; tests `DesignGestureRouteTests.swift`, `DesignOptionDragTests.swift` | D0-3b | ~380, 3 |
-| D0-4a | – | Fixtures and the seams journey test | `DesignFixtures.swift`; tests `DesignFixturesTests.swift`, `DesignSeamsJourneyTests.swift` | D0-3c | ~330, 3 |
-| D0-4b | – | The budget helper and QD-S8, QD-S9, QD-S11 | tests `DesignBudget.swift`, `DesignBudgetTests.swift` | D0-4a | ~180, 2; `feature-done` |
+| D0-3c | – | Gesture routes: the marquee rule, several-layer move and resize, Option-drag as one "Duplicate" step; `endDrag` clears the marquee and ends the run | `DesignCanvasEditing.swift`; tests `DesignGestureRouteTests.swift`, `DesignOptionDragTests.swift` | D0-1, D0-3a | ~380, 3 |
+| D0-4a | – | Fixtures and the seams journey test | `DesignFixtures.swift`; tests `DesignFixturesTests.swift`, `DesignSeamsJourneyTests.swift` | D0-3b, D0-3c | ~330, 3 |
+| D0-4b | – | The budget helper and QD-S8, QD-S9, QD-S11 | tests `DesignBudget.swift`, `DesignBudgetTests.swift` | D0-3a, D0-4a | ~180, 2; `feature-done` |
 
 Paths drop `Sources/DesignModel/`; tests are `Tests/DesignModelTests/`.
 `DesignWorkspace.swift` passes D0-1 → D0-2.3 and `DesignServices.swift`
-D0-2.3 → D0-2.5 → D0-2b, all in the chain. Sizes are estimates from the
+D0-2.3 → D0-2.5 → D0-2b, each a depends-on link. D0-1 waits on D0-2.1
+because its new `stroke` and `textStyle` fields are `DesignStroke` and
+`DesignTextStyle` from `Contracts/StyleTypes.swift`; D0-2.1 needs nothing
+from D0-1. D0-2b waits on D0-2.6 because its test reruns the contract law
+on the Live stubs. D0-2.3's test compares `.live` with a `DesignServices`
+built in the test, not `.fake`, because `.fake` lands in D0-2.5, which
+already depends on D0-2.3; don't add a link from D0-2.3 to D0-2.5, it would
+make a cycle. D0-3b and D0-3c both call D0-3a's `apply` and `mint` but
+nothing of each other, so they build side by side. The fakes and the tests before D0-4a build their `cards`-shaped
+trees in the test (DesignPage's memberwise init under `@testable`), so they
+don't wait on the fixtures. This packet edits no shared doc (no
+`docs/c4/model.json`, `docs/design.md`, blueprint or `waves.md` change), so
+it has no docs task. Sizes are estimates from the
 blueprint's compiled code; a task that measures over 400 lines splits by
 file before it opens (the fakes by struct, the tests by area).
+
+## Build waves
+
+- Wave 1: D0-2.1. Independent in this wave: D0-2.1 alone.
+- Wave 2: D0-1, D0-2.2. Independent in this wave: both.
+- Wave 3: D0-2.3, D0-2.4. Independent in this wave: both.
+- Wave 4: D0-2.5. Independent in this wave: D0-2.5 alone.
+- Wave 5: D0-2.6, D0-3a. Independent in this wave: both.
+- Wave 6: D0-2b, D0-3b, D0-3c. Independent in this wave: all three.
+- Wave 7: D0-4a. Independent in this wave: D0-4a alone.
+- Wave 8: D0-4b (`feature-done`, final). Independent in this wave: D0-4b alone.
+
+Longest chain: D0-2.1 → D0-2.2 → D0-2.3 → D0-2.5 → D0-3a → D0-3b → D0-4a → D0-4b (8).
+
+Chain of 8: `UseCases.swift` uses `DesignEdit` and the style types from
+D0-2.1; `NotBuilt` conforms to D0-2.2's protocols; `.fake` goes in D0-2.3's
+`DesignServices.swift` and fills its tier-2 slots with `NotBuilt`;
+`DesignActionsTests` run on `.fake`; `DesignActions+Edit.swift` calls D0-3a's
+`apply` and `mint`; journey step 4 pastes through D0-3b's `paste`;
+`DesignBudgetTests` run on D0-4a's `crowd`.
 
 ## Acceptance test per task
 
@@ -207,7 +240,7 @@ file before it opens (the fakes by struct, the tests by area).
 | D0-1 | `DesignStyleSchemaTests`: a version-1 JSON string written before the fields existed decodes with `opacity == 1`, `stroke == nil`, `textStyle == .default`, `cornerRadius == 0`; a node with every field set round-trips; `DesignNode(id: "node-99", copying: n)` equals `n` in every field but `id`; `DesignPage(id:name:frameWidth:frameHeight:nodes:)` builds from another module (`import DesignModel` without `@testable`). `DesignSelectionRunTests`: nudge A, select B, nudge B gives two undo steps; nudge A twice gives one | an old file fails or changes, a copy drops a field, the init is not public, or two selections' nudges merge |
 | D0-2.1 | `DesignIDMintTests`: a mint over `{node-1, node-3}` after 0 hands out node-2, node-4, node-5 and records them in `minted`; a negative counter starts at 0; 1,000 calls never repeat or hit `taken`. `DesignRefusalHelpTests`: every case's `help` equals the blueprint's sentence, `tooFew(needed: 2)` reads "Select two or more layers.", `runKey("move", ["node-4", "node-3"]) == "move-node-3,node-4"` | an id repeats, a help's words drift, or the key depends on order |
 | D0-2.2 | `DesignDocumentTests`: `DesignDocument(pages:)` has empty components and variables; equality covers all three; each protocol is satisfiable by a test-local type (a compile check that the signatures are exactly 5.4's) | a signature differs from 5.4 or a default is missing |
-| D0-2.3 | `DesignNotBuiltTests`: for every slot of `.live`, the help on `cards` with A selected is "<feature> isn't built yet." with the slot's 5.6 name, and the write throws `.notBuilt(name)`; `NotBuilt.decode` throws `.unreadable`; `useServices(.live)` keeps the document; a workspace on `.live` differs from the same workspace on `.fake` and equals itself | a slot names the wrong feature, a NotBuilt write succeeds, or services break workspace equality |
+| D0-2.3 | `DesignNotBuiltTests`: for every slot of `.live`, the help on `cards` with A selected is "<feature> isn't built yet." with the slot's 5.6 name, and the write throws `.notBuilt(name)`; `NotBuilt.decode` throws `.unreadable`; `useServices(.live)` keeps the document; a workspace on `.live` differs from the same workspace on a `DesignServices` built in the test (all `NotBuilt`, named other than "live") and equals itself | a slot names the wrong feature, a NotBuilt write succeeds, or services break workspace equality |
 | D0-2.4 | `DesignSelectFakesTests` on a `cards`-shaped tree built in the test: marquee (80, 80)–(520, 240) in Desktop picks A and B (Title ends at y 72, C starts at x 700), and (380, 580)–(720, 720) picks nothing; move by (40, 0) moves A with its subtree; resize, nudge (1 and 10), delete name their steps "Resize", "Nudge", "Delete"; Align Top on A, B, C sets y 100 on all three; distribute widths 20, 40, 20 across 0…300 gives equal gaps within 1e-9 (QD-V6); two layers: `.tooFewToDistribute`; `rectToShow` of C is C's frame | a fake acts only at the top level, picks a locked or hidden layer, or a number is off |
 | D0-2.5 | `DesignArrangeFakesTests`: duplicate A sits right above A, offset (10, 10), unlocked, fresh ids (QD-V5); group A and B keeps every leaf frame (QD-V4) and names "Group"; A with E1 throws `.notSameParent`; ungroup Pair gives E1, E2 selected; copy Pair, paste lands in Desktop at +10, +10 with two children; `pasteHelp` of `"hello"` bytes is "The pasteboard holds no Design layers."; move Title into Pair; send B to back; set X 300 on A and B sets both | a copy keeps an id, a group moves a leaf, or paste lands in the wrong parent |
 | D0-2.6 | `DesignContractLawTests`: for every protocol, every command and every selection in {none, A, A+B, A+B+C, Locked, Hidden, Pair} on `cards`, on `.fake` and `.live`: help nil ⇒ the write throws nothing but `.unchanged`; help non-nil ⇒ it throws; a deliberately broken conformance defined in the test (help nil, write throws `.locked`) is caught, so the law test can fail | any conformance breaks the law |

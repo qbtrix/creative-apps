@@ -147,7 +147,7 @@ carries `feature-done`. Paths drop `Sources/DesignModel/` and
 | S-3 | #714 (Model part) | `LiveAligning`: align to the union with locked layers fixed; distribute | `Live/LiveAligning.swift`, `DesignAlign.swift` (the one-layer help reused, no behaviour change); tests `DesignDistributeTests.swift` | – | ~260, 3 |
 | S-4 | gap "Zoom to Selection" (part) | `LiveFraming` | `Live/LiveFraming.swift`; tests `DesignFramingTests.swift` | – | ~90, 2 |
 | S-5 | #542, #607 (closes both) | No edit or step while a gesture is live; no nudge of a hidden-in-tree layer | `DesignCanvasEditing.swift`, `DesignActions.swift`, `DesignActions+Edit.swift`; tests `DesignMidDragEditTests.swift`, `DesignHiddenNudgeTests.swift`, `DesignHeldIDsFuzzTests.swift` (existing: gains the `history.undo` check) | – | ~220, 6 |
-| S-6 | gaps "marquee select", "several layers" (close); #714 (closes); #288 (part) | Views: the several-layer box's handles drive `resize` through the canvas gesture; the Align row's Distribute buttons; the marquee drawn from the Model; snapshots | `DesignCanvas.swift`, `DesignSelectionMarks.swift`, `DesignAlignBar.swift`; snapshots `DesignMarqueeSnapshots.swift`, `DesignAlignSnapshots.swift`, `DesignMultiSelectSnapshots.swift` | S-1, S-2, S-3, S-5 | ~260, 6 |
+| S-6 | gaps "marquee select", "several layers" (close); #714 (closes); #288 (part) | Views: the several-layer box's handles drive `resize` through the canvas gesture; the Align row's Distribute buttons; the marquee drawn from the Model; snapshots | `DesignCanvas.swift`, `DesignSelectionMarks.swift`, `DesignAlignBar.swift`; snapshots `DesignMarqueeSnapshots.swift`, `DesignAlignSnapshots.swift`, `DesignMultiSelectSnapshots.swift` | S-1, S-2, S-3 | ~260, 6 |
 | S-7 | gap "Zoom to Selection" (closes) | J4, J5, J6 | `UITests/DesignJourneyTests+Select.swift` | S-4, S-6 | ~280, 1 |
 | S-8 | – | QD-S1 to QD-S4 model budgets; P1 | tests `DesignSelectBudgetTests.swift`; `UITests/DesignJourneyTests+PerfCanvas.swift` | S-7 | ~220, 2; `feature-done` |
 
@@ -156,6 +156,27 @@ If the `CanvasViewport` show-rect input lands in SuiteUI during this
 feature, S-7 also passes `show` on from `DesignCanvas.swift` (S-6's file,
 merged by then) and drops J4's skip; otherwise a follow-up `line:design`
 issue does, filed by the lead.
+
+S-6 needs S-1, S-2 and S-3 for its live snapshots: the marquee on `.live`
+picks through `LiveMarquee`, the box shows its handles only when
+`LiveTransforming.transformHelp` is nil, and the aligned row comes from
+`LiveAligning`. It does not need S-5: its files and snapshots don't touch
+the mid-gesture guard. No task edits a shared doc (`docs/c4/model.json`,
+`docs/design.md`, the blueprint or `waves.md`): the new `Live/` files sit in
+the `DesignModel` component already.
+
+## Build waves
+
+- Wave 1: S-1, S-2, S-3, S-4, S-5. Independent in this wave: all five.
+- Wave 2: S-6. Independent in this wave: S-6 alone.
+- Wave 3: S-7. Independent in this wave: S-7 alone.
+- Wave 4: S-8 (`feature-done`, final). Independent in this wave: S-8 alone.
+
+Longest chain: S-1 → S-6 → S-7 → S-8 (4).
+Chain of 4: S-6 draws the marquee from `LiveMarquee` (S-1); J5 in S-7
+drives S-6's box handles in `DesignSelectionMarks.swift`; S-8 carries
+`feature-done`, whose macOS run must include S-7's J4 to J6, and P1's resize
+drag uses S-6's handles.
 
 ## Acceptance test per task
 

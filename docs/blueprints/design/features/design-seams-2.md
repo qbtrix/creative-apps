@@ -150,15 +150,48 @@ carries `feature-done`. Paths drop `Sources/DesignModel/` and
 | D2-1a | – | `case path` with every switch over the kind (a placeholder in the artwork); `path` on the node | `DesignNode.swift`, `DesignInspectorContent.swift`, `DesignCorners.swift`, `DesignCanvasMarks.swift`; tests `DesignPathKindTests.swift` | – | ~150, 5 |
 | D2-1b | – | `componentID`, `fillVariableID`; file `components` and `variables`; version 2 with version 1 still opening; snapshots carry the library | `DesignNode.swift`, `DesignFile.swift`, `Live/LiveFiling.swift`, `DesignHistory.swift`, `DesignWorkspace.swift`; tests `DesignTierTwoSchemaTests.swift`, and the existing version-1 byte checks it moves to version 2: `DesignFilingTests.swift`, `DesignFileTests.swift`, `DesignFixturesTests.swift` | D2-1a | ~360, 9 |
 | D2-2 | – | Tier-2 fakes and live stubs; `.fake` and `.live` name them; the law over them | `Fakes/DesignTierTwoFakes.swift`, `Live/LiveExport.swift`, `Live/LivePen.swift`, `Live/LiveComponents.swift`, `Live/LiveVariables.swift`, `DesignServices.swift`; tests `DesignContractLawTierTwoTests.swift` | D2-1b | ~380, 7 |
-| D2-3a | – | Export, component and variable actions, `previewMode`, `displayFill`, `resolvedChildren` | `DesignActions+TierTwo.swift`; tests `DesignActionsTierTwoTests.swift` | D2-2 | ~360, 2 |
-| D2-3b | – | Pen press, drag, finish and cancel routes; the Linux model walk | `DesignCanvasEditing.swift`, `DesignActions+TierTwo.swift`; tests `DesignPenRouteTests.swift`, `DesignSeams2JourneyTests.swift` | D2-3a | ~300, 4 |
+| D2-3a | – | Export, component and variable actions, `previewMode`, `displayFill`, `resolvedChildren` | `DesignActions+TierTwo.swift`, `DesignWorkspace.swift` (the stored `previewMode`); tests `DesignActionsTierTwoTests.swift` | D2-2 | ~360, 3 |
+| D2-3b | – | Pen press, drag, finish and cancel routes; the Linux model walk | `DesignCanvasEditing.swift`, `DesignActions+TierTwo.swift`, `DesignWorkspace.swift` (the stored `penDraft`); tests `DesignPenRouteTests.swift`, `DesignSeams2JourneyTests.swift` | D2-3a | ~300, 5 |
 | D2-4a | – | The canvas draws paths, resolved instances and bound fills; the pen draft overlay slot | `DesignCanvasMarks.swift`, `DesignCanvas.swift`; snapshots `DesignTierTwoCanvasSnapshots.swift` | D2-3b | ~250, 3 |
-| D2-4b | #288 (part) | Export…, Create Component, Variables… and Light / Dark in the menus and top bar; the window presents the two placeholder sheets and keeps the visible canvas center for Insert; J1's tier-2 items | `DesignIntent.swift`, `DesignWindow.swift`, `DesignCommands.swift`, `DesignObjectMenu.swift`, `DesignEditor.swift`, `DesignExportSheet.swift`, `DesignVariablesSheet.swift`; snapshots `DesignTierTwoMenuSnapshots.swift`; `UITests/DesignJourneyTests.swift` | D2-3b, D2-4a | ~330, 9; `feature-done` |
+| D2-4b | #288 (part) | Export…, Create Component, Variables… and Light / Dark in the menus and top bar; the window presents the two placeholder sheets and keeps the visible canvas center for Insert; J1's tier-2 items | `DesignIntent.swift`, `DesignWindow.swift`, `DesignCommands.swift`, `DesignObjectMenu.swift`, `DesignEditor.swift`, `DesignExportSheet.swift`, `DesignVariablesSheet.swift`; snapshots `DesignTierTwoMenuSnapshots.swift`; `UITests/DesignJourneyTests.swift` | D2-3a | ~330, 9; `feature-done` |
 
-The tasks run in order. D2-4b waits for D2-4a so the `feature-done` PR is
-the last to merge. `DesignNode.swift` passes D2-1a →
-D2-1b, `DesignCanvasMarks.swift` D2-1a → D2-4a, `DesignActions+TierTwo.swift`
-D2-3a → D2-3b.
+Each link is merged code the task needs. `DesignNode.swift` passes D2-1a →
+D2-1b (both add stored fields and coding keys to `DesignNode`, which an
+extension file can't hold). D2-2's fakes build `.path` nodes and set
+`componentID` and `fillVariableID`. D2-3a calls the tier-2 service slots
+D2-2 adds. Every stored property of `DesignWorkspace` sits in the struct
+body in `DesignWorkspace.swift`, so D2-3a adds `previewMode` there and
+D2-3b adds `penDraft`; that file passes D2-1b → D2-3a → D2-3b, the same
+order the code links give. `DesignActions+TierTwo.swift` passes D2-3a → D2-3b, whose
+journey walk also uses D2-3a's actions. D2-4a reads `displayFill`,
+`resolvedChildren` (D2-3a) and the pen draft overlay draws the `penDraft`
+path that D2-3b's `penPress` builds, and it reopens
+`DesignCanvasMarks.swift` after D2-1a. D2-4b calls only D2-3a's helps and
+actions: Return and Escape for the pen are F7's, so it needs nothing from
+D2-3b or D2-4a and shares no file with them. D2-4b carries
+`feature-done`, so it is held to the last wave next to D2-4a; that is
+the only reason, not a code link. No task edits a shared
+doc (`docs/c4/model.json`, `docs/design.md`, the blueprint, `waves.md`):
+the supervisor folds the wave-3 file names into `docs/c4/model.json`, and
+every new file sits in a folder its C4 component already covers.
+
+## Build waves
+
+- Wave 1: D2-1a. Independent in this wave: one task.
+- Wave 2: D2-1b. Independent in this wave: one task.
+- Wave 3: D2-2. Independent in this wave: one task.
+- Wave 4: D2-3a. Independent in this wave: one task.
+- Wave 5: D2-3b. Independent in this wave: one task.
+- Wave 6: D2-4a, D2-4b (`feature-done`, final). Independent in this wave: both.
+  D2-4b needs only D2-3a; it waits for wave 6 because it carries
+  `feature-done`, whose merge starts the CI run the Done check reads.
+
+Longest chain: D2-1a → D2-1b → D2-2 → D2-3a → D2-3b → D2-4a (6).
+Chain of 6: `DesignNode`'s stored fields (D2-1a → D2-1b), the fakes need
+`path`, `componentID` and `fillVariableID` (→ D2-2), the actions call
+D2-2's `DesignServices` slots (→ D2-3a), the pen routes extend
+`DesignActions+TierTwo.swift` (→ D2-3b), and the canvas overlay reads
+`penDraft` (→ D2-4a).
 
 ## Acceptance test per task
 

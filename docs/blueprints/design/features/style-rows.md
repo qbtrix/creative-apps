@@ -125,13 +125,37 @@ carries `feature-done`. Paths drop `Sources/DesignModel/` and
 | ST-4 | #752, #267, #276 (view part) | Style rows: Layer (Opacity), Corner radius, Stroke (add, color, width, remove), Text (family `Picker`, size, weight and alignment `ChoiceChips`); the hint in the value column; one `onEnd` per run | `DesignInspector.swift`, `DesignInspectorStyle.swift`; snapshots `DesignInspectorSnapshots.swift`, `DesignStyleSnapshots.swift` | ST-1, ST-2 | ~380, 4 |
 | ST-5 | #268 (closes), #266 (closes) | Artwork draws radius, stroke and opacity; the editor at canvas scale; frame names in `DesignFrameLabels` | `DesignCanvasMarks.swift`, `DesignFrameLabels.swift`, `DesignTextEditor.swift`; snapshots `DesignTextSnapshots.swift`, `Tests/AppSnapshotTests/DesignArtworkPathTests.swift`, `Tests/AppSnapshotTests/DesignTextScaleTests.swift` | ST-3 | ~330, 6 |
 | ST-6 | #752, #267, #276 (close all three) | J10, J11 | `UITests/DesignJourneyTests+Style.swift` | ST-4, ST-5 | ~250, 1 |
-| ST-7 | – | QD-S6, QD-S7 model budgets | tests `DesignStyleBudgetTests.swift` | ST-1, ST-3 | ~120, 1 |
+| ST-7 | – | QD-S6, QD-S7 model budgets | tests `DesignStyleBudgetTests.swift` | ST-1 | ~120, 1 |
 | ST-8 | – | P2 | `UITests/DesignJourneyTests+PerfScrub.swift` | ST-6, ST-7 | ~120, 1; `feature-done` |
 
-ST-1, ST-2 and ST-3 run side by side; ST-4 and ST-5 touch disjoint files
-and can too. If ST-4 measures over 400 lines it splits into ST-4a (Layer,
-Corner radius, Stroke) and ST-4b (Text), both owning
-`DesignInspectorStyle.swift` in that order.
+ST-1, ST-2 and ST-3 run side by side; ST-4, ST-5 and ST-7 touch disjoint
+files and can too. If ST-4 measures over 400 lines it splits into ST-4a
+(Layer, Corner radius, Stroke) and ST-4b (Text), both owning
+`DesignInspectorStyle.swift` in that order, so ST-4b depends on ST-4a.
+
+ST-4 needs ST-1 because its snapshots set opacity, radius and stroke on
+`.live`, where `LiveStyling` is design-seams' stub that throws
+`.notBuilt` until ST-1 fills it; it needs ST-2 for `sharedValue` and the
+hint text. ST-5 needs ST-3's `textEditScale` for the editor and for
+`DesignTextScaleTests`. ST-7's `scrubStep` times `LiveStyling` (ST-1);
+`textDraftStep` times `setTextDraft`, which exists today, so ST-7 does not
+wait for ST-3. No task edits a shared doc (`docs/c4/model.json`,
+`docs/design.md`, the blueprint or `waves.md`): the new files sit in the
+`DesignModel`, `DesignApp` and test components already.
+
+## Build waves
+
+- Wave 1: ST-1, ST-2, ST-3. Independent in this wave: all three.
+- Wave 2: ST-4, ST-5, ST-7. Independent in this wave: all three.
+- Wave 3: ST-6. Independent in this wave: ST-6 alone.
+- Wave 4: ST-8 (`feature-done`, final). Independent in this wave: ST-8 alone.
+
+Longest chain: ST-1 → ST-4 → ST-6 → ST-8 (4).
+Chain of 4: ST-4's live snapshots need `LiveStyling` (ST-1); J10 and J11 in
+ST-6 drive ST-4's rows in `DesignInspectorStyle.swift`; ST-8 carries
+`feature-done`, whose macOS run must include ST-6's J10 and J11, and P2
+drags ST-4's Opacity bar. If ST-4 splits, the chain is ST-1 → ST-4a →
+ST-4b → ST-6 → ST-8 (5): ST-4b edits ST-4a's `DesignInspectorStyle.swift`.
 
 ## Acceptance test per task
 

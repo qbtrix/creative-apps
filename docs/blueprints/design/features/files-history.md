@@ -41,7 +41,8 @@ In `UITests/DesignJourneyTests+Files.swift`, class
    names the file ("Untitled" for an unsaved fixture); Cancel keeps the
    window; ⌘W; Don't Save closes it. A clean window closes on ⌘W with no
    alert.
-3. **J16** `testOpenBadFiles`: the test writes the four bad files into its
+3. **J16** `testOpenBadFiles` (`+BadFiles`, class
+   `DesignBadFilesJourneyTests`): the test writes the four bad files into its
    temp folder and launches with `-DesignOpenFile` on each: the alert reads
    "It is not a Design file.", "It was made by a newer version of Design
    (file version 99).", "It has no pages.", "It uses the id node-2 more
@@ -129,19 +130,38 @@ carries `feature-done`. Paths drop `Sources/DesignModel/` and
 
 | id | issue | what | owned files | depends on | size |
 |---|---|---|---|---|---|
-| FH-1 | – | The codec moves into `LiveFiling`; `DesignFile.swift` calls `services.filing`; same bytes | `Live/LiveFiling.swift`, `DesignFile.swift`; tests `DesignFilingTests.swift` | – | ~260, 3 |
-| FH-2 | #270 (Model part), #275 (Model part) | Step serials and the saved marker, `isDirty`, `saveStateText`, `didSave` marking the save, `closePrompt`, `undoTarget` | `DesignHistory.swift`, `DesignFile.swift` (`didSave` only); tests `DesignDirtyTests.swift`, `DesignUndoTargetTests.swift` | FH-1 | ~240, 4 |
-| FH-3 | #275 (view part) | Edit > Undo and Redo act on a focused text field (`DesignCommands.swift`); the window's close prompt (`DesignWindow.swift`), routed through the Model's `undoTarget` | `DesignCommands.swift`, `DesignWindow.swift`; snapshots `DesignFileMenuSnapshots.swift` | FH-1, FH-2 | ~280, 3 |
+| FH-1 | – | The codec moves into `LiveFiling`; `DesignFile.swift` calls `services.filing`; same bytes | `Live/LiveFiling.swift`, `DesignFile.swift`; tests `DesignFilingTests.swift` | FH-2 | ~260, 3 |
+| FH-2 | #270 (Model part), #275 (Model part) | Step serials and the saved marker, `isDirty`, `saveStateText`, `didSave` marking the save, `closePrompt`, `undoTarget` | `DesignHistory.swift`, `DesignFile.swift` (`didSave` only); tests `DesignDirtyTests.swift`, `DesignUndoTargetTests.swift` | – | ~240, 4 |
+| FH-3 | #275 (view part) | Edit > Undo and Redo act on a focused text field (`DesignCommands.swift`); the window's close prompt (`DesignWindow.swift`), routed through the Model's `undoTarget` | `DesignCommands.swift`, `DesignWindow.swift`; snapshots `DesignFileMenuSnapshots.swift` | FH-2 | ~280, 3 |
 | FH-4 | #270 (view part); #288 (part) | The save state and unsaved dot as plain text in the status line (`design.status.save`) until EC-4; ids on the top bar's New, Open and Save items (`DesignEditor.swift`; the menu bar is FH-3's) | `DesignEditor.swift`; snapshots `DesignFileSnapshots.swift` | FH-2 | ~140, 2 |
 | FH-5 | #275, #270 (close both) | J13, J14 | `UITests/DesignJourneyTests+Files.swift` | FH-3, FH-4 | ~250, 1 |
-| FH-6 | gap "open bad files journey" (closes) | J16 | `UITests/DesignJourneyTests+Files.swift` | FH-5 | ~120, 1 |
-| FH-7 | – | P4 | `UITests/DesignJourneyTests+PerfFiles.swift` | FH-6 | ~100, 1; `feature-done` |
+| FH-6 | gap "open bad files journey" (closes) | J16 | `UITests/DesignJourneyTests+BadFiles.swift` | FH-1 | ~120, 1 |
+| FH-7 | – | P4; the shared-doc rows for `+BadFiles`: the J16 row of blueprint section 4 reads `+BadFiles`, and files-history's wave-1 owned list in `waves.md` adds `+BadFiles` | `UITests/DesignJourneyTests+PerfFiles.swift`; `docs/blueprints/design.md` (J16 row only), `docs/blueprints/design/features/waves.md` (files-history's owned list only) | FH-1 | ~104, 3; `feature-done` |
 
-FH-2 follows FH-1 (both touch `DesignFile.swift`); FH-3 and FH-4 touch
-disjoint files and run side by side.
-`DesignJourneyTests+Files.swift` passes FH-5 → FH-6. QD-S11's model half
-is design-seams' `DesignBudgetTests.fileRoundTrip`, which FH-1 keeps
-passing through `LiveFiling`.
+FH-1 follows FH-2 because both edit `DesignFile.swift`: FH-2 changes only
+`didSave`, so it goes first and FH-1 moves the codec around it. FH-3 and
+FH-4 call FH-2's `undoTarget`, `closePrompt`, `isDirty` and
+`saveStateText`. FH-5's J13 and J14 need FH-3's menu and close prompt and
+FH-4's status text. J16 has its own file (`+BadFiles`) so it does not wait
+on J13 and J14; it and P4 open and save through FH-1's `LiveFiling`.
+QD-S11's model half is design-seams' `DesignBudgetTests.fileRoundTrip`,
+which FH-1 keeps passing through `LiveFiling`.
+
+## Build waves
+
+FH-7, the final task, owns the only shared-doc edits: J16 moved from
+`+Files` to `+BadFiles`, so the blueprint's J16 row and files-history's
+owned list in `waves.md` name the new file. No build task edits
+`docs/c4/model.json`, `docs/design.md`, the blueprint or `waves.md`.
+`+BadFiles` is new and only FH-6 owns it, so no wave-1 feature overlaps it.
+
+- Wave 1: FH-2. Independent in this wave: FH-2 alone.
+- Wave 2: FH-1, FH-3, FH-4. Independent in this wave: all three.
+- Wave 3: FH-5, FH-6, FH-7 (`feature-done`, merged last). Independent in
+  this wave: all three.
+
+Longest chain: FH-2 → FH-3 → FH-5 (3); FH-2 → FH-1 → FH-6 and
+FH-2 → FH-1 → FH-7 are the same length.
 
 ## Acceptance test per task
 
@@ -153,7 +173,7 @@ passing through `LiveFiling`.
 | FH-4 | `DesignFileSnapshots` adds `design-file-edited` (the dot and "Edited") and `design-file-saved` ("Saved") | the dot shows on a clean file or hides on a dirty one |
 | FH-5 | J13 and J14 pass on the macOS run; J13 fails if ⌘Z in the X field changes the document's undo name; J14 fails if Cancel closes the window or a clean window prompts | a step's state differs |
 | FH-6 | J16 passes; it fails if any alert's words differ or the window holds a document after a refused open | a reason differs |
-| FH-7 | P4 writes `perf-design-files.json` with the progress mark and the longest main-thread stall (report-only) | no progress mark is recorded |
+| FH-7 | P4 writes `perf-design-files.json` with the progress mark and the longest main-thread stall (report-only); `git grep -n 'testOpenBadFiles' docs/blueprints/design.md` shows `+BadFiles` | no progress mark is recorded, or a shared doc still names `+Files` for J16 |
 
 ## Quality tests
 

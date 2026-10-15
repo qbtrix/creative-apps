@@ -176,12 +176,12 @@ carries `feature-done`. Paths drop `Sources/DesignApp/`; snapshots are in
 | id | issue | what | owned files | depends on | size |
 |---|---|---|---|---|---|
 | D0-5a | #288 (part) | `DesignWindowOptions` and `openFixture`; every new intent and `perform` for it; the three launch arguments; Zoom to Selection sets the zoom and keeps the rect in the window's state; the status line's selection count | `Sources/DesignModel/DesignWindowOptions.swift`, `DesignIntent.swift`, `DesignWindow.swift`, `DesignEditor.swift`; `Tests/DesignModelTests/DesignWindowOptionsTests.swift`; snapshot `DesignStatusSnapshots.swift` | – | ~360, 6 |
-| D0-5b | #288 (part) | Canvas: the marquee mark; selection marks in their own file with `design.canvas.selection`; the empty `DesignFrameLabels` overlay slot; the `show` parameter | `DesignCanvas.swift`, `DesignCanvasMarks.swift`, `DesignSelectionMarks.swift`, `DesignFrameLabels.swift`; snapshot `DesignCanvasSeamSnapshots.swift` | D0-5a | ~300, 5 |
+| D0-5b | #288 (part) | Canvas: the marquee mark; selection marks in their own file with `design.canvas.selection`; the empty `DesignFrameLabels` overlay slot; the `show` parameter | `DesignCanvas.swift`, `DesignCanvasMarks.swift`, `DesignSelectionMarks.swift`, `DesignFrameLabels.swift`; snapshot `DesignCanvasSeamSnapshots.swift` | – | ~300, 5 |
 | D0-5c | #288 (part); files the `ScrubField` mixed `needs-ui` issue | The several-layer inspector shell: "<n> Layers", the Align row with Distribute, rows reading "Mixed", each control's help from the actions | `DesignInspector.swift`, `DesignAlignBar.swift`; snapshot `DesignSeveralInspectorSnapshots.swift` | D0-5a | ~280, 3 |
 | D0-5d | #288 (part) | `DesignPasteboardBridge` (read and write under `pasteboardType`); copy, cut and paste hooks on the canvas and Layers; rename presentation state in Layers (row in rename, draft, refusal text) | `DesignPasteboardBridge.swift`, `DesignWindow.swift` (the `.copy`, `.cut` and `.paste` cases of `perform`), `DesignCanvas.swift`, `DesignLayersPanel.swift`; `Tests/AppSnapshotTests/DesignPasteboardBridgeTests.swift` | D0-5a, D0-5b | ~280, 5 |
 | D0-6 | #288 (part) | Menus: Edit adds Duplicate after the stock pasteboard group (which stays); Page adds Rename Page…; Object adds Group, Ungroup, Arrange ▸, Distribute; View adds Zoom to Selection; every Design item disabled with its help; J1's item list | `DesignCommands.swift`, `DesignEditMenu.swift`, `DesignObjectMenu.swift`; snapshots `DesignEditMenuSnapshots.swift`, `DesignPageMenuSnapshots.swift`; `UITests/DesignJourneyTests.swift` | D0-5a | ~330, 6 |
-| D0-7a | #288 (part) | `.suiteProbes()` at the window root; every Design-owned control gets its `DesignControlID` id and `.suiteControl` registration (rail and top bar through `ToolbarAction.identifier`) | `DesignWindow.swift`, `DesignEditor.swift`, `DesignPanel.swift`, `DesignInspector.swift`, `DesignAlignBar.swift`, `DesignLayersPanel.swift`, `DesignCanvas.swift`, `Sources/DesignModel/DesignWindowOptions.swift`; `Tests/DesignModelTests/DesignControlIDTests.swift` | D0-5c, D0-5d, D0-6; #778 (SH-5) | ~250, 9 |
-| D0-7b | – | The every-control sweep J15 and the layout journey | `UITests/DesignJourneyTests+EveryControl.swift`, `UITests/DesignJourneyTests+Layout.swift` | D0-7a; #778 (SH-7) | ~300, 2; `feature-done` |
+| D0-7a | #288 (part) | `.suiteProbes()` at the window root; every Design-owned control gets its `DesignControlID` id and `.suiteControl` registration (rail and top bar through `ToolbarAction.identifier`) | `DesignWindow.swift`, `DesignEditor.swift`, `DesignPanel.swift`, `DesignInspector.swift`, `DesignAlignBar.swift`, `DesignLayersPanel.swift`, `DesignCanvas.swift`, `Sources/DesignModel/DesignWindowOptions.swift`; `Tests/DesignModelTests/DesignControlIDTests.swift` | D0-5a, D0-5b, D0-5c, D0-5d; #778 (SH-5) | ~250, 9 |
+| D0-7b | – | The every-control sweep J15 and the layout journey | `UITests/DesignJourneyTests+EveryControl.swift`, `UITests/DesignJourneyTests+Layout.swift` | D0-6, D0-7a; #778 (SH-7) | ~300, 2; `feature-done` |
 
 `DesignWindow.swift` passes D0-5a → D0-5d → D0-7a (D0-5a declares the
 `.copy`, `.cut` and `.paste` intents and leaves their `perform` cases empty
@@ -189,8 +189,29 @@ with a note; D0-5d fills them with the bridge); `DesignEditor.swift` D0-5a →
 D0-7a;
 `DesignCanvas.swift` D0-5b → D0-5d → D0-7a; `DesignInspector.swift` and
 `DesignAlignBar.swift` D0-5c → D0-7a; `DesignLayersPanel.swift` D0-5d →
-D0-7a; `DesignWindowOptions.swift` D0-5a → D0-7a. D0-5b, D0-5c and D0-6
-touch disjoint files and may run side by side after D0-5a.
+D0-7a; `DesignWindowOptions.swift` D0-5a → D0-7a. D0-5b needs no task of
+this packet: it reads `marquee`, `transformHelp` and the `cards` fixture
+from design-seams, and its `show` parameter has a nil default, so
+`DesignEditor.swift`'s call still compiles. D0-5c and D0-6 need D0-5a's
+intents (`.setStyle`; `.zoomToSelection`, `.renamePage` and the commands).
+D0-7a needs no D0-6 code: it edits no menu file. D0-7b waits on D0-6 because
+it carries `feature-done`, and that CI run must hold D0-6's extended J1.
+
+## Build waves
+
+- Wave 1: D0-5a, D0-5b. Independent in this wave: both.
+- Wave 2: D0-5c, D0-5d, D0-6. Independent in this wave: all three.
+- Wave 3: D0-7a. Independent in this wave: D0-7a alone.
+- Wave 4: D0-7b (`feature-done`, final). Independent in this wave: D0-7b alone.
+
+No task edits a shared doc (rule (a)), so no docs task is added.
+
+Longest chain: D0-5a → D0-5d → D0-7a → D0-7b (4).
+Chain of 4: D0-5d fills the `.copy`, `.cut` and `.paste` cases D0-5a adds
+to `DesignIntent.swift` and `DesignWindow.swift`; D0-7a registers ids in
+`DesignWindow.swift`, `DesignCanvas.swift` and `DesignLayersPanel.swift`
+after D0-5d's edits there; D0-7b's J15 reads the `suite.controls` D0-7a
+publishes.
 
 ## Acceptance test per task
 

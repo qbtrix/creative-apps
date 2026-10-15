@@ -205,6 +205,23 @@ path is edited; the five wave-1 features own disjoint files; the fixture
 numbers (J5's marquee, "Mixed" fields, clamps, the `crowd` count) hold; no
 product names.
 
+
+## Longest build chain
+
+Each packet was re-cut to `docs/factory/packets.md` (shared docs in one
+final task, a task waits only on merged code it needs, each wave lists its
+independent tasks). Longest depends-on chain in tasks, before and after;
+a chain over 3 has its reason in the packet's Build waves section.
+
+- copy-group: 4 before, 3 after.
+- design-seams: 13 before, 8 after.
+- design-seams-2: 7 before, 6 after.
+- design-window: 5 before, 4 after.
+- files-history: 6 before, 3 after.
+- layers-panel: 6 before, 5 after.
+- select-several: 4 before, 4 after.
+- style-rows: 4 before, 4 after.
+
 ## The lead contract
 
 Every feature lead and every task below codes against this. It is handed
