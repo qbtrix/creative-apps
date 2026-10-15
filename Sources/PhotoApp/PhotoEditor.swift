@@ -64,7 +64,7 @@ struct PhotoTopBar: View {
             Divider()
             Button("Save") { perform(.save) }.disabled(noImage != nil)
             Button("Save As…") { perform(.saveAs) }.disabled(noImage != nil).accessibilityIdentifier("photo.bar.save-as")
-            Button("Export…") { perform(.export) }.disabled(noImage != nil)
+            Button("Export…") { perform(.export(.openSheet)) }.disabled(noImage != nil)
         } content: {
             EditorBarItem(ToolbarAction("Open", systemImage: "folder") { perform(.open) })
                 .accessibilityIdentifier("photo.bar.open")
@@ -73,7 +73,7 @@ struct PhotoTopBar: View {
             })
             .accessibilityIdentifier("photo.bar.save")
             EditorBarItem(ToolbarAction("Export", systemImage: "square.and.arrow.up", unavailableHelp: noImage) {
-                perform(.export)
+                perform(.export(.openSheet))
             })
             .accessibilityIdentifier("photo.bar.export")
             EditorBarMenu("Image", systemImage: "photo", unavailableHelp: noImage) {

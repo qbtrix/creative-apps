@@ -1,8 +1,8 @@
 // PhotoWindow.swift: the root of a Photo window. It holds the one
 // PhotoWorkspace (`model`) and the window's presentation state (zoom, the
 // panel tab, the open file's URL, sheets and alerts, the Straighten draft the
-// canvas previews), turns every PhotoIntent into a workspace method or a
-// panel, and keeps the picture rendered (CanvasRenderer) whenever the
+// canvas previews, and the v2 presentation flags), turns every PhotoIntent
+// into a workspace method or a panel, and keeps the picture rendered (CanvasRenderer) whenever the
 // workspace's revision moves. Canvas drags carry
 // the pen's pressure (PointerPressure) and, while they last, AppKit's mouse
 // event coalescing is off so every pointer sample arrives; StrokePacer hands
@@ -15,6 +15,14 @@
 // a file at launch, `-PhotoExportTo <folder>` makes Export write there
 // directly, and `-PhotoSaveTo <folder>` makes Save As write
 // `<folder>/<name>.png`.
+//
+// Each v2 area's intents go to its PhotoWindow+<Area>.swift (file, edit,
+// crop, history, select, adjustment layer, transform, export, sample), and
+// each area's identity modifier (Photo<Area>Area) is applied here, so a
+// feature keeps its own state, alerts, dialogs and timers in its area file.
+// The window's state is internal so those files can reach it. Return
+// (`confirm`) and Escape (`dismiss`) ask the transform area first, then fall
+// back to the crop and the selection.
 import AppKit
 import CoreRaster
 import PhotoModel
@@ -23,31 +31,40 @@ import SwiftUI
 import UniformTypeIdentifiers
 
 struct PhotoWindow: View {
-    @State private var model = PhotoWorkspace()
-    @State private var renderer = CanvasRenderer()
-    @State private var pacer = StrokePacer()
-    @State private var zoom = 1.0
-    @State private var viewport = CGSize.zero
+    @State var model = PhotoWorkspace()
+    @State var renderer = CanvasRenderer()
+    @State var pacer = StrokePacer()
+    @State var zoom = 1.0
+    @State var viewport = CGSize.zero
     /// A new image waits to be fitted until the canvas has a size.
-    @State private var fitPending = false
-    @State private var tab = PhotoPanelTab.adjust
-    @State private var documentURL: URL?
-    @State private var note: String?
-    @State private var problem: String?
-    @State private var isExporting = false
-    @State private var exportFormat = ImageFormat.png
-    @State private var exportQuality = 0.9
-    @State private var isResizing = false
+    @State var fitPending = false
+    @State var tab = PhotoPanelTab.adjust
+    @State var documentURL: URL?
+    @State var note: String?
+    @State var problem: String?
+    @State var isExporting = false
+    @State var exportFormat = ImageFormat.png
+    @State var exportQuality = 0.9
+    @State var isResizing = false
     /// The Straighten sheet's choices; nil while it is closed.
-    @State private var straightenDraft: StraightenDraft?
-    @State private var isRenaming = false
-    @State private var renameText = ""
+    @State var straightenDraft: StraightenDraft?
+    @State var isRenaming = false
+    @State var renameText = ""
+    // v2 presentation flags (PV-0); each belongs to the area file named.
+    /// A recovered document waiting for Restore or Discard (PhotoWindow+File.swift, PV-1).
+    @State var recoveryOffer: RecoveryEntry?
+    /// Why Paste refused, for its alert (PhotoWindow+Edit.swift, PV-2).
+    @State var pasteRefusal: String?
+    /// Free Transform's box and its Apply and Cancel are up (PhotoWindow+Transform.swift, PV-7).
+    @State var isTransforming = false
+    /// The Export sheet's choices while it is open (PhotoWindow+Export.swift, PV-8).
+    @State var exportDraft: ExportOptions?
 
     /// A sheet or the rename alert is up, so Select > All never selects the canvas.
-    private var isPresenting: Bool { isExporting || isResizing || straightenDraft != nil || isRenaming }
+    var isPresenting: Bool { isExporting || isResizing || straightenDraft != nil || isRenaming }
 
     /// The launch file opens in the first window only.
-    @MainActor private static var launchFileOpened = false
+    @MainActor static var launchFileOpened = false
 
     var body: some View {
         PhotoEditor(
@@ -92,9 +109,18 @@ struct PhotoWindow: View {
                 PointerPressure.watch()
                 openLaunchFile()
             }
+            .modifier(PhotoFileArea(model: model, perform: perform))
+            .modifier(PhotoEditArea(model: model, perform: perform))
+            .modifier(PhotoCropArea(model: model, perform: perform))
+            .modifier(PhotoHistoryArea(model: model, perform: perform))
+            .modifier(PhotoSelectArea(model: model, perform: perform))
+            .modifier(PhotoAdjustmentLayerArea(model: model, perform: perform))
+            .modifier(PhotoTransformArea(model: model, perform: perform))
+            .modifier(PhotoExportArea(model: model, perform: perform))
+            .modifier(PhotoSampleArea(model: model, perform: perform))
     }
 
-    private func perform(_ intent: PhotoIntent) {
+    func perform(_ intent: PhotoIntent) {
         // Drag samples still waiting for the display frame land first.
         if case .drag = intent {} else { pacer.flush() }
         switch intent {
@@ -106,7 +132,6 @@ struct PhotoWindow: View {
         case .openFile(let url): open(url)
         case .save: save()
         case .saveAs: saveAs()
-        case .export: isExporting = model.canvas != nil
         case .imageSize: isResizing = model.canvas != nil
         case .rotate(let turn): model.rotateImage(turn)
         case .straighten: straightenDraft = model.canvas == nil ? nil : StraightenDraft()
@@ -150,6 +175,18 @@ struct PhotoWindow: View {
         case .zoomOut: setZoom(ViewerZoom.zoomedOut(from: zoom))
         case .actualSize: setZoom(1)
         case .fit: fit()
+        case .file(let intent): performFile(intent)
+        case .edit(let intent): performEdit(intent)
+        case .crop(let intent): performCrop(intent)
+        case .history(let intent): performHistory(intent)
+        case .select(let intent): performSelect(intent)
+        case .adjustmentLayer(let intent): performAdjustmentLayer(intent)
+        case .transform(let intent): performTransform(intent)
+        case .export(let intent): performExport(intent)
+        case .sample(let intent): performSample(intent)
+        case .confirm: if confirmTransform() {} else { model.applyCrop() }
+        case .dismiss:
+            if dismissTransform() {} else if model.pendingCrop != nil { model.cancelCrop() } else { model.deselect() }
         }
     }
 
