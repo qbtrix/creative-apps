@@ -2,3 +2,6 @@ utc	stage	event	ref	note
 2026-10-15T00:00Z	0	stage-start	c111439	lead/live-keys from origin/dev
 2026-10-15T00:05Z	0	stage-end	#799	Depends on: none; identity set; Swift 6.3.3 installed
 2026-10-15T00:05Z	1	stage-start	live-keys.md	reading the packet
+2026-10-15T00:42Z	1	stage-end	live-keys.md	packet read; engine APIs present on core 98be31a
+2026-10-15T00:42Z	2	stage-end	RECORD	5 waves planned
+2026-10-15T00:42Z	3	stage-start	wave 1	KY-1 KY-5 KY-8 from c111439
