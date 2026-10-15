@@ -4,7 +4,7 @@ Issue: #1038 · Packet: docs/blueprints/halo/features/layer-panel.md
 Run: act-1a13e9a2019-lau7 · Session: session_01NGHcmJbQja1RSYvcMZR3TD · Started: 2026-10-15T08:07Z
 Stage: 4 round 2
 Base: e8de2ff5d8ed3515af321c805cc2bebab17050a4
-Next: wait for the r2-menu-wait PR (feature-done) to merge and its dispatched dev run; read H-J9 steps 3-8 and run the same five-lens panel on its screens (round 3)
+Next: wait for the next dev CI run after 38726261412 (the Library build break must be fixed first); it is round 3: H-J9 steps 3-8, audit, five-lens panel
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -22,6 +22,7 @@ Journeys: H-J9 (8 steps, packet "Journey steps"). Quality bars: QB-F1 no dead co
 | 1 | 38708263577 (f5bd765) | red: macOS scripts/ci, HaloLayerListTests (4 expectations: List insets rows, icon at 21 pt, tint off both edges); journeys skipped | not run | – (blocker found before the panel) | list inset (LP-3) | #1058 | no |
 | 1b | 38711122431 (2fc9b59) | red: H-J9 step 3, double-click opens no rename field (row is a Button); W0 Halo journeys pass but testLayoutAtWidths (#1040); SuiteUI gallery (#763) | halo identifier 1 (10), contrast 0 (2), offscreen 0 (8), unnamed 0 (5): under | clarity, journey, design, layout, controls | row rename (LP-3); panel 11 confirmed (4 major): selected icon 2.5:1 in Dark, journey shots under a fading Edit menu, row help, null help, row font, empty inset (ours, batch 3); (#38) caption, inspector scroll (not ours); back to List (rejected) | #1070 (merged 3894890), batch 3 #1078 (merged 09:49) | no |
 | 2 | 38721434364 (c7e5c17) | red: macOS scripts/ci green (HaloLayerListTests pass with the round 1 look); H-J9 stops at step 2: #1078's expectClosed asserts app.menus gone after a menu choice and it never is. Other Halo reds not ours: Files testSaveAndReopen, History testUndoRedoEveryEdit (inspector 192 pt), testEveryControlActsOrSaysWhy (transport.end), testLayoutAtWidths (#1040); SuiteUI gallery (#763) | not read (no new feature screens) | panel deferred to the run with H-J9 screens | menu wait (#1078) | #1104 (feature-done, merged 11:08) | no |
+| (3) | 38726261412 (2b98fdb) | red, not judged: macOS swift build fails in Sources/LibraryApp/LibraryInspector.swift (Library line, #763); no tests ran | – | – | – | – | not counted |
 
 ## Decisions
 - Identifiers keep W0's shipped `halo.layer.*` prefix (`halo.layer.row.<id>`, `halo.layer.empty`, `halo.layer.new`; W0's journey reads `halo.layer.row.comp-1-layer-2`), so the packet's `halo.layers.list/row/refusal/empty` become `halo.layer.list/row/refusal/empty`.
@@ -40,6 +41,7 @@ Journeys: H-J9 (8 steps, packet "Journey steps"). Quality bars: QB-F1 no dead co
 - Rejected round 1 panel finding "go back to a system List(selection:)": the macOS run proved List insets rows (38708263577); W0's stack is what passes HaloLayerListTests.
 - Skipped minor: re-hosting the halo-layer-list snapshots inside an InspectorSection (W0's snapshot shape; HaloLayerListTests draws the list alone too).
 - The lane runs main's scripts/fast-lane.sh (ee57a15), which dispatches CI only after a feature-done merge (the UI and 10-merge rules are dev-only, and main is held while dev is red). So each round's PR carries feature-done to get its CI run; #1092 (packet status line, merged 10:39) is the first.
+- A run that fails to build in another line's code (Library, 38726261412) can't judge this feature, so it doesn't count against the 4-round budget.
 
 ## Open
 - Panel finding, not this feature's files: the selected layer's inspector shows "Properties arrive with the layer inspector (#38)." (HaloLayerInspector.swift, W0's placeholder that layer-keys #38 replaces whole). File as gap at finish if still on dev.
