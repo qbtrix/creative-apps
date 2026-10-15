@@ -14,3 +14,4 @@ utc	stage	event	ref	note
 2026-10-15T12:46Z	3	pr-merged	#1141	CP-2
 2026-10-15T12:46Z	3	stage-end	wave 2	dev 61d9c13
 2026-10-15T12:46Z	3	stage-start	wave 3	CP-3, CP-4
+2026-10-15T12:48Z	-	heartbeat	-	waiting on lane/CI
