@@ -168,4 +168,14 @@ extension HaloPropertyRow {
 extension HaloProperty {
     /// The stored value for a value the bar shows: `shown ÷ displayFactor`.
     public func stored(fromShown shown: Double) -> Double { shown / displayFactor }
+
+    /// The widest text the row shows for a typical value (shown values within
+    /// ±9999.9, kept in range): "-9999.9 px", "-10000%", "100%". The
+    /// inspector sizes TRANSFORM rows from it, so a row's layout doesn't flip
+    /// while its value changes.
+    public var widestTypicalText: String {
+        let limit = 9999.9 / displayFactor
+        let ends = [max(range.lowerBound, -limit), min(range.upperBound, limit)].map(text)
+        return ends.max { $0.count < $1.count } ?? text(0)
+    }
 }

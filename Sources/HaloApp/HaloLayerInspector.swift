@@ -2,7 +2,9 @@
 // header (`selectedLayerHeader`), the TRANSFORM group, a refusal's caption,
 // the LAYER group, then the EASING and TEXT slots. TRANSFORM has one InspectorSliderRow per
 // `propertyRows` row (shown value, range, step, unit, decimals; keyed while
-// a key sits at the playhead) with a KeyframeButton beside it: the
+// a key sits at the playhead) with a KeyframeButton beside it, or under it
+// when the full titles and widest typical values (`widestTypicalText`) don't
+// fit beside it, as at the inspector's minimum width: the
 // stopwatch sends .toggleAnimation, the diamond .toggleKey. A scrub sends
 // .setProperty with the stored value and .endPropertyScrub once it ends.
 // Each row is `halo.inspector.row.<raw>` and reads its value as text
@@ -31,9 +33,11 @@ struct HaloLayerInspector: View {
                 InspectorHeader(header.name, details: [header.kind, header.frames, header.parent.map { "Parent: \($0)" } ?? ""])
                     .accessibilityIdentifier("halo.inspector.header")
                 InspectorSection("Transform") {
-                    ForEach(model.propertyRows) { row in
-                        HaloPropertyRowView(
-                            row: row, model: model, refusal: rowRefusal(row.property), perform: perform)
+                    // Bars beside their keyframe buttons while every full
+                    // title and value fits; else each button under its bar.
+                    ViewThatFits(in: .horizontal) {
+                        transformRows(stacked: false)
+                        transformRows(stacked: true)
                     }
                 }
                 if let refusal = model.refusal, refusal.control.hasPrefix("halo.inspector"),
@@ -51,6 +55,16 @@ struct HaloLayerInspector: View {
         }
     }
 
+    /// TRANSFORM's rows, each button beside its bar or `stacked` under it.
+    private func transformRows(stacked: Bool) -> some View {
+        VStack(alignment: .leading, spacing: SuiteSpacing.xs) {
+            ForEach(model.propertyRows) { row in
+                HaloPropertyRowView(
+                    row: row, model: model, refusal: rowRefusal(row.property), stacked: stacked, perform: perform)
+            }
+        }
+    }
+
     /// The refusal that names `p`'s row or its keyframe button, if any.
     private func rowRefusal(_ p: HaloProperty) -> HaloRefusal? {
         guard let refusal = model.refusal else { return nil }
@@ -59,39 +73,87 @@ struct HaloLayerInspector: View {
     }
 }
 
-/// One TRANSFORM row: the bar, its keyframe button and its refusal's caption.
+/// One TRANSFORM row: the bar, its keyframe button (beside it, or under it
+/// when `stacked`) and its refusal's caption. Beside, the bar's ideal width
+/// is what its full title and widest typical value need with the value clear
+/// of the bar's middle, so ViewThatFits stacks rather than truncate a title
+/// or draw the marker over the value.
 private struct HaloPropertyRowView: View {
     let row: HaloPropertyRow
     let model: HaloProject
     let refusal: HaloRefusal?
+    let stacked: Bool
     let perform: @MainActor (HaloCommand) -> Void
 
     var body: some View {
-        let p = row.property
-        let rowHelp = model.unavailableHelp(for: .setProperty(p, row.value))
-        let keyHelp = model.unavailableHelp(for: .toggleAnimation(p))
         VStack(alignment: .leading, spacing: 0) {
-            HStack(spacing: SuiteSpacing.xs) {
-                InspectorSliderRow(
-                    p.title, value: row.shown, in: row.shownRange, step: row.shownStep, unit: p.unit,
-                    decimals: p.decimals, keyed: row.keyState == .keyedHere,
-                    onChange: { perform(.setProperty(p, p.stored(fromShown: $0))) },
-                    onEnd: { perform(.endPropertyScrub) })
-                    .disabled(rowHelp != nil)
-                    .help(rowHelp ?? p.title)
-                    .accessibilityValue(Text(verbatim: row.text))
-                    .haloControl(id: "halo.inspector.row.\(p.rawValue)", enabled: rowHelp == nil, help: rowHelp)
-                KeyframeButton(
-                    p.title, state: Self.keyState(row.keyState),
-                    onToggle: { perform(.toggleAnimation(p)) },
-                    onKey: { perform(.toggleKey(p)) })
-                    .disabled(keyHelp != nil)
-                    .haloControl(id: "halo.inspector.key.\(p.rawValue)", enabled: keyHelp == nil, help: keyHelp)
+            if stacked {
+                VStack(alignment: .trailing, spacing: SuiteSpacing.xs) {
+                    bar
+                    key
+                }
+            } else {
+                HStack(spacing: SuiteSpacing.xs) {
+                    ZStack {
+                        fit.hidden().accessibilityHidden(true)
+                        bar
+                    }
+                    key
+                }
             }
             if let refusal {
                 HaloRefusalCaption(refusal: refusal)
             }
         }
+    }
+
+    /// The property's bar slider.
+    private var bar: some View {
+        let p = row.property
+        let rowHelp = model.unavailableHelp(for: .setProperty(p, row.value))
+        return InspectorSliderRow(
+            p.title, value: row.shown, in: row.shownRange, step: row.shownStep, unit: p.unit,
+            decimals: p.decimals, keyed: row.keyState == .keyedHere,
+            onChange: { perform(.setProperty(p, p.stored(fromShown: $0))) },
+            onEnd: { perform(.endPropertyScrub) })
+            .disabled(rowHelp != nil)
+            .help(rowHelp ?? p.title)
+            .accessibilityValue(Text(verbatim: row.text))
+            .haloControl(id: "halo.inspector.row.\(p.rawValue)", enabled: rowHelp == nil, help: rowHelp)
+    }
+
+    /// The property's stopwatch and key diamond.
+    private var key: some View {
+        let p = row.property
+        let keyHelp = model.unavailableHelp(for: .toggleAnimation(p))
+        return KeyframeButton(
+            p.title, state: Self.keyState(row.keyState),
+            onToggle: { perform(.toggleAnimation(p)) },
+            onKey: { perform(.toggleKey(p)) })
+            .disabled(keyHelp != nil)
+            .haloControl(id: "halo.inspector.key.\(p.rawValue)", enabled: keyHelp == nil, help: keyHelp)
+    }
+
+    /// The bar's room, never drawn (the bar itself has no ideal width): the
+    /// full title, a gap and the widest typical value; and the value twice,
+    /// so the value starts past the bar's middle, where the marker sits for
+    /// a value mid-range.
+    private var fit: some View {
+        let p = row.property
+        let value = Text(verbatim: p.widestTypicalText).font(SuiteFont.inspectorValue)
+        return ZStack {
+            HStack(spacing: SuiteSpacing.s) {
+                Text(verbatim: p.title).font(SuiteFont.inspectorLabel)
+                value
+            }
+            HStack(spacing: 0) {
+                value
+                value
+            }
+        }
+        .lineLimit(1)
+        .fixedSize()
+        .padding(.horizontal, SuiteSpacing.m)
     }
 
     /// HaloModel's key state as SuiteUI's, one to one.
