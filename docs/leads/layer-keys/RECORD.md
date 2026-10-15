@@ -4,7 +4,7 @@ Issue: #1036 · Packet: docs/blueprints/halo/features/layer-keys.md
 Run: act-1a13eb691a3-wg4n · Session: e0e565d9-6109-5c52-89fd-c254398040f9 · Started: 2026-10-15T08:39Z
 Stage: 4 round 1
 Base: 35a875b
-Next: round 1: a fixer root-causes HaloViewerFidelityTests.keyedFrame6 (branch layer-keys/r1-fidelity); the critic panel wf_5fe6ad8b-ef3 reviews the snapshots (no ui-screens: journeys did not run). Then a fix batch.
+Next: wait for #1153 to merge and for viewer-playback's canvas opacity fix (keyedFrame6, #763); then round 2 on the first dev run that passes swift test (same lenses).
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -30,7 +30,7 @@ Waves as in the packet. Independent per wave: W1 LK-1; W2 LK-2a; W3 LK-2b; W4 LK
 ## Rounds
 | round | CI run | CI | audit vs baseline | lenses | confirmed | fixed by | clean |
 |---|---|---|---|---|---|---|---|
-| 1 | 38734211999 (35a875b) | red: swift test fails only HaloViewerFidelityTests.keyedFrame6 (keyed frame 6, 40000 px differ; HF-1 from #1125); journeys did not run. All our snapshots rendered. (Earlier 38732179619: playback test compile, fixed by #1136) | – (no ui-screens) | clarity, journey, design, layout, controls | 3 major (one finding: narrow TRANSFORM labels clip), 6 minor | r1-narrow fixer (narrow + layer snapshot at frame 0); SuiteUI slider ticks/marker → #1146 | no |
+| 1 | 38734211999 (35a875b) | red: swift test fails only HaloViewerFidelityTests.keyedFrame6 (keyed frame 6, 40000 px differ; HF-1 from #1125); journeys did not run. All our snapshots rendered. (Earlier 38732179619: playback test compile, fixed by #1136) | – (no ui-screens) | clarity, journey, design, layout, controls | 3 major (one finding: narrow TRANSFORM labels clip), 6 minor | #1153 (TRANSFORM stacks key buttons under bars via ViewThatFits at narrow widths; layer snapshot at frame 0); SuiteUI slider ticks/marker → #1146 | no |
 
 ## Decisions
 - Depends on #777 and #333: both closed, so the lead runs.
