@@ -4,7 +4,7 @@ Issue: #1073 · Packet: docs/blueprints/photo/features/photo-journey-kit.md
 Run: act-1a1406baff9-fu36 · Session: cloud lead session · Started: 2026-10-15T16:36Z
 Stage: 4 round 1
 Base: 9f28a9f7dcb6e9d584a7c80847e8ef0108fa5e17
-Next: read dev CI run 38792928305 (c93a7f8, has both Photo timing fixes #1227 #1229): macOS ui-test, PhotoJourneyKitTests.testWrittenPhotoOpens, V1-V12, Photo audit
+Next: when run 38792928305 (c93a7f8) finishes ui-test: read PhotoJourneyKitTests.testWrittenPhotoOpens, V1-V12, Photo audit; download ui-screens; judge round 1
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
