@@ -85,11 +85,12 @@
               {
                 "id": "folio-workspace",
                 "name": "Workspace",
-                "description": "FolioWorkspace: the window's one value-type state (document, sources, history, selection, tool, zoom and page, page text, find, file state, open progress, refusal), edit(_:coalesceKey:_:) as the one place undo is recorded, one extension file per area, and the per-page accessibility summary journeys read.",
+                "description": "FolioWorkspace: the window's one value-type state (document, sources, history, selection, tool, zoom and page, page text, find, file state, open progress, refusal), edit(_:coalesceKey:_:) as the one place undo is recorded, one extension file per area, and the per-page accessibility summary journeys read. Undo and redo live here (W0). pageSummary is assembled from one facet file per area.",
                 "paths": [
                   "Sources/FolioModel/FolioWorkspace.swift",
                   "Sources/FolioModel/Workspace/*.swift",
-                  "Sources/FolioModel/FolioPageSummary.swift"
+                  "Sources/FolioModel/FolioPageSummary.swift",
+                  "Sources/FolioModel/FolioPageSummary+*.swift"
                 ],
                 "status": "planned",
                 "authored": true
@@ -121,7 +122,8 @@
                 "name": "Layout",
                 "description": "Page layout math: continuous column, single page, two-up, page grid, fit width and page, visible pages, page and view point conversion.",
                 "paths": [
-                  "Sources/FolioModel/FolioLayout.swift"
+                  "Sources/FolioModel/FolioLayout.swift",
+                  "Sources/FolioModel/FolioGridLayout.swift"
                 ],
                 "status": "planned",
                 "authored": true
@@ -129,7 +131,7 @@
               {
                 "id": "folio-live",
                 "name": "Live (Linux)",
-                "description": "The Linux live types of the pure use cases: find, select, annotate, fill forms, sign, the signature store, organize pages, history; and the conditional text replace and redaction over CorePDF.",
+                "description": "The Linux live types: the source store (DocumentSources), find, select, annotate, fill forms, sign, the signature store, organize pages, history; and the conditional text replace and redaction over CorePDF.",
                 "paths": [
                   "Sources/FolioModel/Live/*.swift"
                 ],
@@ -139,7 +141,7 @@
               {
                 "id": "folio-launch",
                 "name": "Launch",
-                "description": "Launch arguments (-FolioFixture, -FolioSample, -FolioOpenFile, -FolioSaveTo, -FolioExportTo, -FolioPickFile(s), -FolioSignaturesDir, -FolioWindowSize, -FolioControlsProbe) parsed into FolioLaunch.",
+                "description": "Launch arguments (-FolioFixture, -FolioSample, -FolioOpenFile, -FolioSaveTo, -FolioExportTo, -FolioPickFile(s), -FolioSignaturesDir, -FolioWindowSize, -FolioControlsProbe) parsed into FolioLaunch. Also -FolioWriteSample <name> <path> (write a fixture as a real PDF and quit) and -SuiteControlsProbe (SuiteUI's shared control inventory).",
                 "paths": [
                   "Sources/FolioModel/FolioLaunch.swift"
                 ],
@@ -182,7 +184,7 @@
               {
                 "id": "folio-pageview",
                 "name": "Page view and grid",
-                "description": "The page column drawn from page pictures with Folio's marks, selection, find hits and form fields over them, gestures routed to the active tool; the find bar; the page grid.",
+                "description": "The page column drawn from page pictures, with the overlays FolioPageOverlays lists (marks, fields, selection, find hits, redaction marks), each its own file; gestures routed to the active tool; the find bar; the page grid.",
                 "paths": [
                   "Sources/FolioApp/PageView/*.swift",
                   "Sources/FolioApp/PageGrid/*.swift"
@@ -226,16 +228,6 @@
                 "description": "PDFKit, Vision and CoreGraphics conformances: opening (and from images), page pictures, page text, fields and annotations both ways, writing, exporting, text recognition, the sample writer, signature drawing; FolioServices+Live.",
                 "paths": [
                   "Sources/FolioApp/Live/*.swift"
-                ],
-                "status": "planned",
-                "authored": true
-              },
-              {
-                "id": "folio-controls",
-                "name": "Controls probe",
-                "description": "The folio.controls JSON every-control journey reads.",
-                "paths": [
-                  "Sources/FolioApp/FolioControls.swift"
                 ],
                 "status": "planned",
                 "authored": true
@@ -318,6 +310,13 @@
             "description": "content-edit only (conditional, W4): CP-1 to CP-5",
             "status": "planned",
             "authored": true
+          },
+          {
+            "from": "folio-app",
+            "to": "pdfkit",
+            "description": "live services only",
+            "status": "planned",
+            "authored": true
           }
         ]
       }
@@ -335,6 +334,27 @@
         "name": "PDFKit, Vision, CoreGraphics",
         "description": "Apple frameworks used only by FolioApp's live types.",
         "status": "existing",
+        "authored": true
+      },
+      {
+        "id": "suiteui",
+        "name": "SuiteUI",
+        "description": "The shared design system (existing, line:suiteui).",
+        "status": "existing",
+        "authored": true
+      },
+      {
+        "id": "suite-shell",
+        "name": "SuiteShell",
+        "description": "Suite glue each app links (planned by the suite blueprint).",
+        "status": "planned",
+        "authored": true
+      },
+      {
+        "id": "suite-model",
+        "name": "SuiteModel",
+        "description": "Suite values and contracts (planned by the suite blueprint); FolioModel gains it as a dependency when it lands (supervisor-merged Package.swift change).",
+        "status": "planned",
         "authored": true
       }
     ]

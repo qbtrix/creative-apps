@@ -80,16 +80,17 @@ does (read, highlight, find, print); those rows lean on the Q&A numbers.
 ### 1.1 Ranked tasks
 
 Rank is by the strongest signal in the row, then by agreement between
-signals. "Q&A" is one network of public question sites (general computing,
+signals; row 15 (find) has no number of its own and is placed by inference. "Q&A" is one network of public question sites (general computing,
 Linux, Mac, Unix): the 2,281 top-voted PDF questions, 58.8M views in all.
-"Site A" and "site B" are web PDF tool sites that show a use counter on each
-tool page. "The vendor" is a web PDF service that published its own usage
+"Site A" and "site B" are web PDF tool sites that show a vote count on each
+tool page, a stand-in for use (newer tools have had less time to collect
+votes). "The vendor" is a web PDF service that published its own usage
 split (May 2025). Search numbers are US monthly volumes.
 
 | # | Task | Usage signal | Source |
 |---|---|---|---|
 | 1 | Read: open, scroll, zoom, page layout | largest Q&A group, 11.8% of 58.8M views; "pdf reader" 33,100/mo | https://www.seodata.dev/keyword/pdf-reader ; https://api.stackexchange.com/2.3/questions?site=superuser&tagged=pdf&sort=votes |
-| 2 | Convert to a word-processing, spreadsheet or slide format | 246,000/mo for the word-processing variant; site A's #1 tool, 1,613,986 uses; 16% of the vendor's activity | https://www.seodata.dev/keyword/pdf-to-word ; https://pdfcandy.com/pdf-to-word.html ; https://smallpdf.com/pdf-statistics |
+| 2 | Convert to a word-processing, spreadsheet or slide format | 246,000/mo for the word-processing variant; site A's #1 tool, 1,613,986 votes; 16% of the vendor's activity | https://www.seodata.dev/keyword/pdf-to-word ; https://pdfcandy.com/pdf-to-word.html ; https://smallpdf.com/pdf-statistics |
 | 3 | Merge several PDFs into one | "pdf merger" 201,000, "merge pdf" 135,000, "combine pdf" 135,000; site A 704,085; one Q&A question 785K views | https://www.seodata.dev/keyword/merge-pdf ; https://pdfcandy.com/merge-pdf.html ; https://askubuntu.com/questions/2799 |
 | 4 | Make a PDF from images or scans | "jpg to pdf" 201,000; site A 450,724; the Mac Q&A site's most-viewed PDF question, 1,502,667 views | https://www.seodata.dev/keyword/jpg-to-pdf ; https://apple.stackexchange.com/questions/11163 |
 | 5 | Reduce file size | the vendor's top tool, 34% of activity; "compress pdf" 110,000; one Q&A question 1,049,735 views | https://smallpdf.com/pdf-statistics ; https://www.seodata.dev/keyword/compress-pdf ; https://askubuntu.com/questions/113544 |
@@ -102,15 +103,15 @@ split (May 2025). Search numbers are US monthly volumes.
 | 12 | Add text, fill blanks ("edit a PDF" in general) | "pdf editor" 246,000, "edit pdf" 90,500; site A 278,175 for its general editor against 464 for its in-place text editor | https://www.seodata.dev/keyword/edit-pdf ; https://pdfcandy.com/edit-pdf.html ; https://pdfcandy.com/edit-pdf-text.html |
 | 13 | Copy or extract text | Q&A questions on copying text: 462K and 399K views; "pdf to text" 12,100 | https://superuser.com/questions/47462 ; https://superuser.com/questions/198392 |
 | 14 | Export pages as images | "pdf to jpg" 165,000; site A 156,024; one Q&A question 466K | https://www.seodata.dev/keyword/pdf-to-jpg ; https://askubuntu.com/questions/50170 |
-| 15 | Find text in a document | 1.3% of Q&A views; "highlight every match" 34 CC on a desktop viewer's tracker | https://bugs.kde.org/show_bug.cgi?id=377487 |
+| 15 | Find text in a document | no search or Q&A number of its own (every viewer has it); "highlight every match" 34 CC and "keyboard text selection" 19 👍 on viewers' trackers; placed here by inference, as a reading staple | https://bugs.kde.org/show_bug.cgi?id=377487 ; https://github.com/pwmt/zathura/issues/748 |
 | 16 | Remove or add a password | one Q&A question on removing protection 582K; "unlock pdf" 14,800, "password protect pdf" 8,100 | https://superuser.com/questions/179064 ; https://www.seodata.dev/keyword/unlock-pdf |
 | 17 | Print (scaling, booklet, pages per sheet) | 4.6% of Q&A views; booklet 96K, four-up 63K on the Mac Q&A site | https://superuser.com/questions/205943 ; https://apple.stackexchange.com/questions/3832 |
 | 18 | Make a PDF from office files or print to PDF | 110,000/mo; site A 288,131 | https://www.seodata.dev/keyword/word-to-pdf |
 | 19 | Crop or change page size | "crop pdf" 9,900; site A 50,461 | https://www.seodata.dev/keyword/crop-pdf |
 | 20 | Make scans searchable (OCR) | about 12,200/mo across variants; site A 38,447; 1.1% of Q&A views; hidden inside "can't copy text" (462K) | https://www.seodata.dev/keyword/ocr-pdf ; https://pdfcandy.com/pdf-ocr.html |
-| 21 | Certificate (digital) signatures, and checking them | 142 👍 and 26 👍 in a browser viewer's tracker; 22 upvotes in a desktop viewer's | https://github.com/mozilla/pdf.js/issues/1076 ; https://github.com/mozilla/pdf.js/issues/13351 |
+| 21 | Certificate (digital) signatures, and checking them | 142 👍 and 26 👍 in a browser viewer's tracker; 22 upvotes in a desktop viewer's | https://github.com/mozilla/pdf.js/issues/1076 ; https://github.com/mozilla/pdf.js/issues/13351 ; https://gitlab.gnome.org/GNOME/evince/-/work_items/143 |
 | 22 | Redact | "redact pdf" 5,400; the Mac Q&A site's #2 most-viewed PDF question, 490,831 views; a forum thread on bad redactions, 709 points | https://www.seodata.dev/keyword/redact-pdf ; https://apple.stackexchange.com/questions/22683 ; https://news.ycombinator.com/item?id=46369923 |
-| 23 | Edit existing text in place | "edit pdf text" 8,100; 46 👍 in a web toolbox's tracker; the first complaint in two forum threads | https://github.com/Stirling-Tools/Stirling-PDF/issues/1141 ; https://news.ycombinator.com/item?id=43880962 |
+| 23 | Edit existing text in place | "edit pdf text" 8,100; 46 👍 in a web toolbox's tracker; the first complaint in two forum threads | https://www.seodata.dev/keyword/edit-pdf ; https://github.com/Stirling-Tools/Stirling-PDF/issues/1141 ; https://news.ycombinator.com/item?id=43880962 |
 | 24 | Flatten | "flatten pdf" 6,600 | https://www.seodata.dev/keyword/flatten-pdf |
 | 25 | Compare two versions | "pdf compare" 5,400; one Q&A question 485,773; 4 👍 in a web toolbox's tracker | https://superuser.com/questions/46123 ; https://github.com/Stirling-Tools/Stirling-PDF/issues/1290 |
 | 26 | Translate, summarize, ask questions | "translate pdf" 14,800, "summarize pdf" 2,400 | https://www.seodata.dev/keyword/translate-pdf |
@@ -162,7 +163,7 @@ a signature to another Mac (185K), setting the title (151K).
 
 | Capability | Evidence | Platform cost | Call |
 |---|---|---|---|
-| OCR | Moderate direct demand (12,200/mo, site A 38,447), large hidden demand (copying text from scans, converting scans), a named Mac gap, a 35k-star CLI people praise | Low: Vision recognizes text on device and PDFKit has a save option for an OCR text layer (Apple docs: RecognizeTextRequest; PDFDocumentWriteOption.saveTextFromOCROption) | **v1, tier 2** (wave 2) |
+| OCR | Moderate direct demand (12,200/mo, site A 38,447), large hidden demand (copying text from scans, converting scans), a named Mac gap, a 35k-star CLI people praise | Low: Vision recognizes text on device (Apple docs: RecognizeTextRequest); Folio writes the result as an invisible text layer itself (Apple docs: CGTextDrawingMode.invisible), not through the docs-silent `saveTextFromOCROption` | **v1, tier 2** (wave 2) |
 | Redaction | Low search (5,400) but the Mac Q&A site's #2 PDF question (491K) and loud forum demand; the harm of a fake redaction is high | High: PDFKit has a redact markup style but nothing that removes content (Apple docs: PDFMarkupType.redact) | **v1 only if creative-core CP-1 to CP-4 land** (wave 4, conditional); never a draw-a-box stand-in |
 | Compare two versions | Low search (5,400), one 486K-view question, 4 👍; the neighbour (split view) is wanted | Medium: a text diff over page text (pure Swift) plus a two-pane view | **Later (tier 3)** |
 | Full text reflow | Not asked: no request found for paragraph reflow; people ask for in-place edits that keep the font, and the 464-vote in-place editor next to a 278K-vote general editor says most "edit" means add text, fill, sign, rearrange | Very high: fixed glyph positions and subset fonts | **Not planned.** In-place editing of one line is **v1 only if CP-1 to CP-3 and CP-5 land** (wave 4, conditional) |
@@ -173,7 +174,11 @@ PDFKit and Vision cover the tier-1 loop (research.md E): display, page
 pictures, page text with character boxes, the standard annotation kinds,
 form widgets, page insert, remove and exchange, rotation, outline, find,
 unlocking and saving with passwords and permissions, flatten
-(`burnInAnnotationsOption`), image down-sampling options, printing, and OCR.
+(`burnInAnnotationsOption`), two boolean image options (optimize images for
+screen, save images as JPEG), printing, and OCR. There is no documented way
+to down-sample a PDF's images to a chosen resolution, so v1's Reduce File
+Size is one level built on those two options and measured (PF-11); levels
+by resolution need CorePDF image re-encoding (CP-7, section 4.4).
 Gaps Folio builds itself: undo for every page and markup edit (PDFKit's
 thumbnail reordering has no documented undo), its own find bar (the system
 find interaction isn't on macOS), its own ink canvas (the system drawing
@@ -244,10 +249,10 @@ and saves files every other reader opens.
 | Forms | Fill text, checkbox, radio, choice fields; Tab order; required-field check; Clear Form; scripts detected and named | Authoring form fields; calculated fields |
 | Sign | Draw, type or pick a picture; initials; a library kept between launches; place anywhere or fit into a signature field | Certificate signatures and checking them (CP-6) |
 | Pages | Page grid; reorder by drag; rotate; delete; insert blank; insert from file (combine); combine several files at once; extract a range; split; crop | Page labels; pages per sheet; replace page |
-| Edit | Add text boxes and images; **conditional:** edit one line of existing text in place and true redaction, in v1 only if creative-core CP-1 to CP-5 land in time (W4), otherwise v1.1 | Paragraph reflow (not planned); find-and-redact patterns |
+| Edit | Undo (⌘Z), Redo (⇧⌘Z), Cut, Copy (⌘C copies selected text or mark), Paste, Delete (shown without a key equivalent; Delete is handled by the page view and thumbnails), Select All (⌘A: all text on the page), Find ▸ Find… (⌘F), Find Next (⌘G), Find Previous (⇧⌘G) | foundation (undo), markup, find |
 | Undo | every edit one named step, 100 steps; typing in a field and a drag each coalesce into one | History panel |
 | Save | Save, Save As; flatten; add or remove an open password and owner restrictions; atomic writes; the original is never changed until Save | Version browser; autosave and recovery (the suite's policy, adopted on Folio's line when the suite schedules it) |
-| Export | Pages as PNG or JPEG at 72, 150, 300 ppi; text as plain text, rich text or a word-processing document (text and paragraphs, not layout); Reduce File Size with three levels and the measured result; Print | Spreadsheet and slide formats; PDF/A; tagged PDF |
+| Export | Pages as PNG or JPEG at 72, 150, 300 ppi; text as plain text, rich text or a word-processing document (text and paragraphs, not layout); Reduce File Size (the platform's image optimization, one level) with the measured result before writing; Print | Spreadsheet and slide formats; PDF/A; tagged PDF |
 | OCR | Recognize text on scanned pages (languages from the system), kept as an invisible text layer on Save | Deskew and clean-up of scans; document structure export |
 | Suite | One of the apps in AfterGlow: switcher item, Switch To, recents, Open In; hand-offs from Library and Photo (images to a PDF), to Photo (a page as an image) | Linked placement of PDF pages in Design |
 
@@ -276,8 +281,11 @@ Checklist:
 ## 3. Feature catalog
 
 Tiers follow `docs/priorities.md`: **tier 1** (`p1`) is used in nearly
-every session or is one of the top usage rows of 1.1, or something a tier-1
-feature needs; **tier 2** (`p2`) is weekly or once per deliverable;
+every session, or is one of the top usage rows of 1.1 whose result stays a
+PDF (open, make, merge, shrink, mark up, sign, fill, rearrange), or
+something a tier-1 feature needs. Converting out of PDF (rows 2 and 14) is
+tier 2 however high its demand, the rule `docs/priorities.md` applies to
+export in every suite app ("once per deliverable"); **tier 2** (`p2`) is weekly or once per deliverable;
 **tier 3** (`p3`) is specialist or occasional. "Row n" cites section 1.1.
 *Inferred* marks a tier with no direct number, first to move if data turns
 up. Each feature names its wave feature (section 9) and its journey
@@ -304,16 +312,18 @@ locked. Enter its password to open it."), a wrong password shakes the
 field and says "That password didn't unlock this PDF. Try again.", Cancel
 leaves the window empty. A file with form scripts or XFA opens with a
 banner naming what Folio won't run. *Hand-offs in:* Finder (Folio declares
-PDF as Editor, rank Alternate, so it never steals the system default
-without the person choosing it); Open In ▸ Folio from any suite app that
+PDF as Editor with handler rank Alternate, so it never becomes the default
+without the person choosing it: Apple docs, LSHandlerRank); Open In ▸ Folio from any suite app that
 writes PDF (Design's PDF export, #418); a PDF dropped on the AfterGlow home.
 *Out:* recents in the suite's one list.
 
 **P-T2 Read, zoom and page layout** (tier 1, row 1; `reader`, P-J1).
-Continuous scroll (⌘2) by default, Single Page (⌘1), Two Pages (⌘3);
-Actual Size (⌘0), Zoom In and Out (⌘+, ⌘−, pinch), Fit Width (⌘9), Fit
-Page. The zoom pill under the page shows the percent or "Fit Width"; the
-page pill shows "Page n of m" for the page nearest the top. *Empty:* none
+Continuous scroll (⌥⌘2) by default, Single Page (⌥⌘1), Two Pages (⌥⌘3);
+Actual Size (⌘1), Fit Page (⌘0), Fit Width (⌘9), Zoom In and Out (⌘+, ⌘−,
+pinch) along the steps 50, 75, 100, 125, 150, 200, 300, 400% (from a fit
+zoom, the next step above or below it), the suite's ⌘1 and ⌘0 meanings. The zoom pill under the page shows the percent (`ViewerStatusBar`
+formats it); the trailing pill shows "Page n of m" for the page nearest the
+top. *Empty:* none
 (a document has at least one page). *Loading:* as P-T1 for pages scrolled
 into view. *Errors:* a page that fails to draw shows "This page couldn't be
 drawn." in its sheet; the rest of the document reads normally.
@@ -335,14 +345,15 @@ with no text layer, the tool's help reads "This page has no text to select.
 Recognize text first." with Recognize… (P-T27). *Hand-offs out:* plain text
 on the general pasteboard for any app.
 
-**P-T6 Find** (tier 1, row 15, *inferred* from the reading staples and the
-tracker asks; `find`, P-J2). ⌘F opens the find bar over the top of the page
+**P-T6 Find** (tier 1, row 15, *inferred*: no number of its own, a reading
+staple every viewer has; `find`, P-J2). ⌘F opens the find bar over the top of the page
 view; typing finds as you type (after 2 characters); every match is tinted
 and the current one outlined; Return and ⌘G go to the next, ⇧Return and
 ⇧⌘G to the previous; the sidebar shows RESULTS with each hit's page and
 context. Match Case and Whole Words toggles. *Empty:* "No results" and the
-field's help "No matches for <text>." *Loading:* "Searching… page n of m"
-while results stream in page order. *Errors:* pages with no text layer are
+field's help "No matches for <text>." *Loading:* find runs on page text the
+window loads in the background; pages whose text isn't loaded yet are
+counted ("Loading text… 120 of 500") and searched when it arrives. *Errors:* pages with no text layer are
 counted: "2 pages have no text. Recognize text to search them." with
 Recognize….
 
@@ -373,9 +384,12 @@ this is how people fill them. *Errors:* an empty text box is not created
 
 **P-T11 Fill forms** (tier 1, row 8; `forms`, P-J5). Fields are drawn as
 real controls over the page: text fields, checkboxes, radio buttons, pop-up
-choices. Click or Tab into a field; ⇥ and ⇧⇥ move in reading order (page,
-then top to bottom, then left to right), skipping read-only fields; Space
-toggles a checkbox or picks a radio. The field's tooltip from the form
+choices. Click or Tab into a field; Tab and Shift-Tab move in reading order (page,
+then top to bottom, then left to right), skipping read-only and signature
+fields; a radio group is one stop and the arrow keys pick within it; Space
+toggles a checkbox. Tab, Shift-Tab and Delete are handled by the focused
+field and page view, never as menu key equivalents, so typing in a field
+or sheet never triggers a command. The field's tooltip from the form
 author is its help. *Errors:* a read-only field says "<name> is read-only
 in this form."; a too-long value or a line break in a one-line field shows
 its sentence under the field and keeps the old value. *Empty:* a PDF with no
@@ -383,9 +397,9 @@ fields: the Form menu is disabled with "This PDF has no form fields. Use
 Text Box to type on it."
 
 **P-T13 Rotate, delete, reorder, insert pages** (tier 1, rows 10 and 11;
-`pages`, P-J7). In the sidebar thumbnails or the Page Grid (⌘4): select
+`pages`, P-J7). In the sidebar thumbnails or the Page Grid (⌥⌘4): select
 pages (click, Shift-click, ⌘-click), Rotate Right (⌘R) and Left (⌘L),
-Delete Page (⌘⌫), drag to reorder (a drop line shows where), ⌥⌘← and ⌥⌘→
+Delete Page (⌘⌫; plain Delete too while the thumbnails have focus), drag to reorder (a drop line shows where), ⌥⌘← and ⌥⌘→
 move the selection by keyboard, Insert Blank Page (⇧⌘B, the size of the
 selected page). Rotation is saved as the page's rotation, so every reader
 shows it. *Errors:* deleting every page: "A PDF needs at least one page.
@@ -413,14 +427,15 @@ next to the original with " (part k)". *Errors:* a range outside the
 document: "This document has pages 1 to n."; text that isn't a range:
 "\"x\" isn't a page or a range. Type pages like 1-3, 5."
 
-**P-T17 Undo and redo** (tier 1, *inferred* as for every suite app; `history-files`,
-P-J9). Every edit is one named step (Undo Highlight, Undo Move Page, Undo
+**P-T17 Undo and redo** (tier 1, *inferred* as for every suite app;
+`foundation`, proven in every feature's journey and across features by
+P-J9 in core-loop). Every edit is one named step (Undo Highlight, Undo Move Page, Undo
 Typing); typing in one field or one text box and one drag each coalesce;
 scroll, zoom, find and selection are never steps; 100 steps. *Empty:* Undo
 and Redo disabled with "Nothing to undo." / "Nothing to redo."
 
 **P-T18 Save and Save As** (tier 1, row 10's "save the rotated file" is the
-general-computing Q&A site's most-viewed PDF question; `history-files`,
+general-computing Q&A site's most-viewed PDF question; `files`,
 P-J10). ⌘S writes the document through a temporary file and replaces the
 original only when the write succeeded; ⇧⌘S saves a copy elsewhere. The
 window's subtitle reads "Edited" with unsaved changes, "Saved" after, "Not
@@ -433,7 +448,8 @@ title and in an alert; the file the pages came from moved away
 popover: the saved signatures and initials, and New Signature…. The sheet
 has three ways: Draw (a pad: drag with the trackpad or mouse, Clear),
 Type (the name in a script face) and Image (pick a picture of a signature;
-its light background is made transparent). "Save as initials" marks
+pixels near white become transparent by a luminance threshold in
+FolioModel, pure Swift tested on Linux). "Save as initials" marks
 initials. Clicking a page places the chosen signature there at a natural
 size, or fitted inside an empty signature field. Placed signatures move and
 resize like any mark, keeping their aspect. The library lives in Folio's
@@ -455,11 +471,15 @@ selection and Photo's document arrive as images through the suite's
 hand-off and open here.
 
 **P-T22 Reduce File Size** (tier 1, row 5: the web vendor's most-used tool;
-`export-convert`, P-J23). File > Reduce File Size… offers three levels
-(Small: images at 96 ppi; Medium: 150 ppi; Large: 220 ppi; JPEG for photos)
-and shows the result before writing: "From 8.4 MB to 2.9 MB". It writes
+`export-convert`, P-J23). File > Reduce File Size… writes a copy with the
+platform's image optimization (images optimized for screen and saved as
+JPEG: Apple docs, PDFDocumentWriteOption.optimizeImagesForScreenOption and
+saveImagesAsJPEGOption) and shows the measured result before keeping it:
+"From 8.4 MB to 2.9 MB". Choosing a resolution (Small, Medium, Large) is
+Later, with CorePDF's image re-encoding (CP-7, Q9). It writes
 "<name> (reduced).pdf" next to the original and never overwrites it. Text
-and vector content are untouched (PF-11). *Loading:* progress in the sheet
+and vector content are untouched (PF-11); if the platform options prove not
+to shrink real files, the feature ships off and Q9 decides. *Loading:* progress in the sheet
 with Cancel. *Errors:* when the result isn't smaller: "This PDF is already
 as small as Folio can make it." and nothing is written.
 
@@ -471,8 +491,8 @@ yet." until its feature lands.
 
 ### 3.2 Tier 2 (all in v1 unless marked)
 
-**P-T10 Pen and shapes** (tier 2, rows 6 and 30-34 of research.md B: shapes
-18 👍 twice; `markup`, P-J4). Pen (P) draws freehand ink as the pointer
+**P-T10 Pen and shapes** (tier 2, row 6 and research.md B.2 rows 34 and 35:
+shapes 18 👍 and 18 upvotes; `markup`, P-J4). Pen (P) draws freehand ink as the pointer
 moves; Shape (R) draws a rectangle by default, with ellipse, line and arrow
 in the tool's menu (Shift constrains). The inspector sets colour, line width
 (0.5–12 pt, a bar slider) and opacity. Marks move with arrows (1 pt, Shift
@@ -496,17 +516,20 @@ recents feature it reads the one AfterGlow list filtered to Folio. A missing
 file is shown dimmed with "Moved or deleted." *Hand-offs:* the AfterGlow
 home lists Folio documents with thumbnails.
 
-**P-T20 Flatten and passwords** (tier 2, rows 16 and 24; `history-files`,
+**P-T20 Flatten and passwords** (tier 2, rows 16 and 24; `files`,
 P-J10). Save As… and Export… offer Flatten (marks and field values drawn
 into the pages, no longer editable), an open password, and owner
-restrictions (printing, copying, changing). Removing a password: open the
-file with it, then Save As without one. *Errors:* a non-ASCII owner
+restrictions (printing, copying, changing). Removing an open password: open the
+file with it, then Save As without one. Changing or removing owner
+restrictions needs the file opened with its owner password (or a file that
+has none); otherwise Save As keeps them and says "Changing this PDF's
+restrictions needs its owner password." (`FolioWriteError.restricted`, PF-6). *Errors:* a non-ASCII owner
 password is refused with "Use letters, numbers and symbols from a standard
 keyboard." (the system's encryption takes ASCII only: Apple docs:
 kCGPDFContextOwnerPassword).
 
-**P-T23 Export text and a word-processing document** (tier 2 by frequency,
-row 2 by demand; `export-convert`, P-J21). File > Export… > Text, Rich
+**P-T23 Export text and a word-processing document** (tier 2 by the
+conversion rule above, though row 2 by demand; `export-convert`, P-J21). File > Export… > Text, Rich
 Text or Word-Processing Document writes the text in reading order with
 paragraphs, bold, italic and sizes where the text layer has them; never the
 layout. A scanned page without text adds nothing and the sheet says how
@@ -551,7 +574,7 @@ new file; then reopens it and checks that no removed text can be found
 ### 3.3 Tier 3
 
 **P-T26 Document properties** (tier 3, row 29; cheap, so in v1;
-`history-files`). The inspector's DOCUMENT section shows title, author,
+`files`). The inspector's DOCUMENT section shows title, author,
 page count, page size, PDF version and permissions; title and author are
 editable fields, each change one undo step, saved in the file's info.
 
@@ -592,21 +615,27 @@ Later, in the order they would come, each with its evidence:
 | P-T14 Combine (pages) | 1 | yes | P-J8 |
 | P-T15 Extract and split (pages) | 1 | yes | P-J8 |
 | P-T16 Crop (pages) | 2 | yes | P-J7 (extended by the crop task) |
-| P-T17 Undo (history-files) | 1 | yes | P-J9 |
-| P-T18 Save (history-files) | 1 | yes | P-J10 |
+| P-T17 Undo (foundation) | 1 | yes | P-J9 (core-loop) and every journey's Edit-menu asserts |
+| P-T18 Save (files) | 1 | yes | P-J10 |
 | P-T19 Open Recent (reader) | 2 | yes | P-J1 (last step) |
-| P-T20 Flatten and passwords (history-files) | 2 | yes | P-J10 |
+| P-T20 Flatten and passwords (files) | 2 | yes | P-J10 |
 | P-T21 Sign (sign) | 1 | yes | P-J6 |
 | P-T22 Reduce File Size (export-convert) | 1 | yes | P-J23 |
 | P-T23 Export text (export-convert) | 2 | yes | P-J21 |
 | P-T24 Export images (export-convert) | 2 | yes | P-J21 |
 | P-T25 Print (export-convert) | 2 | yes | P-J24 |
-| P-T26 Document properties (history-files) | 3 | yes | P-J10 (properties step) |
+| P-T26 Document properties (files) | 3 | yes | P-J10 (properties step) |
 | P-T27 OCR (ocr) | 2 | yes | P-J20 |
 | P-T28 Edit text in place (content-edit) | 2 | conditional | P-J25 |
 | P-T29 Redact (content-edit) | 2 | conditional | P-J26 |
 | P-T30 No dead controls (foundation) | 1 | yes | P-J12 |
 | P-T31 to P-T42 | 2-3 | Later | – |
+
+Checklist:
+
+- [x] Every feature has a tier that cites a row of 1.1 or is marked *inferred*.
+- [x] Every tier-1 feature has a tier-1 journey (3.4).
+- [x] Each feature says what the person does and sees, its empty, error and loading states, its shortcuts, and its hand-offs where it has any.
 
 ---
 
@@ -618,15 +647,20 @@ Three layers as `docs/engineering.md` sets them: creative-core engines,
 SuiteUI sits beside the app and knows no Model. The same model as data is
 `docs/blueprints/pdf/c4-planned.json` (the shape of `docs/c4/model.json`,
 one level finer, every element `"status": "planned"` and `"authored":
-true`). It is not read by `scripts/ci`; W0's last task adds the
-`folio-model` and `folio-app` containers to `docs/c4/model.json` when the
-targets exist.
+true`). It is not read by `scripts/ci`. W0's first PR (the supervisor-merged
+one that adds the targets to `Package.swift`) also adds the `folio-model` and
+`folio-app` containers, one component per target folder, to
+`docs/c4/model.json`, so every later Folio PR passes the C4 ownership gate;
+W0's last PR refines their descriptions.
 
 **The one architectural call.** PDFKit is macOS only, so it can never be
 the Model. Folio's Model holds the document as a value
 (`FolioDocumentState`: pages in order with their origin and rotation,
 annotations, form field values, outline, permissions) and treats the bytes
-it opened as read-only **sources**. PDFKit does exactly four jobs, each
+it opened as read-only **sources**, held for the window's life in one
+`DocumentSources` store (bytes by source id, registered by the opener, read
+by every platform service; the app hands it memory-mapped file data, so a
+file deleted after opening still saves). PDFKit does exactly four jobs, each
 behind a contract with a fake: read a source into that value
 (`DocumentOpening`), draw a source page's picture (`PageImaging`), give a
 page's text with character boxes (`PageTextReading`), and write sources
@@ -698,14 +732,14 @@ A file belongs to exactly one component (`waves.py` checks it against
 | folio-values | The value types every contract speaks (section 6.1): geometry, pages, page text, selections, annotations, fields, signatures, outline, permissions, the document value, write and export options, typed errors with their sentences | `Contracts/FolioValues.swift` | used by every component |
 | folio-contracts | One protocol per use case (section 6.2) and `FolioHistory` | `Contracts/FolioContracts.swift` | implemented by fakes, `Live/` and FolioApp's live types |
 | folio-fakes | A fake per contract; the fake file format and layout | `Fakes/*.swift` (one file per contract, plus `FolioFakeFile.swift`) | snapshots, journeys on `-FolioFixture`, contract suites |
-| folio-fixtures | Named fixtures (`letter`, `form`, `scan`, `locked`, `marked`, `long`, then each feature's own) | `Fixtures/*.swift` | fakes; FolioApp's `-FolioSample` writer |
+| folio-fixtures | Named fixtures (`letter`, `form`, `filled`, `scripted`, `scan`, `locked`, `restricted`, `marked`, `photos`, `long` in W0; each feature adds its own in `Fixtures/FolioFixtures+<Area>.swift`, a file W0 stubs empty: `long1000marks` (markup), `big50` (files), `scan300` (ocr)) | `Fixtures/*.swift` | fakes; FolioApp's sample writer |
 | folio-services | `FolioServices` with `.fake`; the live slots are filled in FolioApp | `FolioServices.swift` | workspace |
-| folio-workspace | `FolioWorkspace`: the window's one value-type state (document, source map, history, selection, tool, zoom and page, find state, file state, open progress, refusal), `edit(_:coalesceKey:_:)` (the one place undo is recorded) and one extension file per area, each owned by its feature | `FolioWorkspace.swift`, `Workspace/FolioWorkspace+<Area>.swift`, `FolioPageSummary.swift` (the per-page accessibility value journeys read) | services; read and called by FolioApp |
+| folio-workspace | `FolioWorkspace`: the window's one value-type state (document, history, selection, tool, zoom and page, page text, find state, file state, open progress, refusal), `edit(_:coalesceKey:_:)` (the one place undo is recorded), undo and redo, and one extension file per area, each owned by its feature; `pageSummary(n)`, the per-page accessibility value journeys read, assembled in `FolioPageSummary.swift` (W0: "Page n of m, <size>") from one facet file per area (`FolioPageSummary+<Area>.swift`, each owned by its feature, W0 stubs return nothing) | `FolioWorkspace.swift`, `Workspace/*.swift`, `FolioPageSummary.swift`, `FolioPageSummary+*.swift` | services; read and called by FolioApp |
 | folio-commands | `FolioCommand` (every menu item and toolbar action), `unavailableHelp(for:)` and `title(for:)`, one availability file per area | `FolioCommand.swift`, `Availability/FolioAvailability+<Area>.swift` | workspace; FolioApp menus and toolbar |
 | folio-tools | `FolioTool` (the palette: Select, Text Select, Highlight, Underline, Strike Out, Note, Text Box, Pen, Shape, Sign, Hand), its one-key shortcuts and `drag(from:to:)` routing per tool | `FolioTool.swift`, `Tools/FolioTool+<Kind>.swift` | annotating, selecting, signing; `FolioToolsTests` |
-| folio-layout | Page layout math: the continuous column, two-up, page gaps, fit width and fit page scale, which pages are visible, page ↔ view points | `FolioLayout.swift` | reader view; budgets PB-2, PB-3 |
-| folio-live | The Linux live types of the pure use cases: finding, selecting, annotating, form filling, signing, page organizing, history, the signature store (JSON in a folder the app names) | `Live/Live<Contract>.swift` | contract suites |
-| folio-launch | Launch arguments (`-FolioFixture`, `-FolioSample`, `-FolioOpenFile`, `-FolioSaveTo`, `-FolioExportTo`, `-FolioPickFile(s)`, `-FolioSignaturesDir`, `-FolioWindowSize`, `-FolioControlsProbe`) parsed into `FolioLaunch` | `FolioLaunch.swift` | FolioApp's window root |
+| folio-layout | Page layout math: the continuous column, two-up, page gaps, fit width and fit page scale (the page column starts after the floating palette's band, PL2), the zoom steps, which pages are visible, page ↔ view points (`FolioLayout.swift`, reader); the Page Grid's columns (`FolioGridLayout.swift`, pages) | `FolioLayout.swift`, `FolioGridLayout.swift` | reader view, pages grid; budgets PB-2, PB-3 |
+| folio-live | The Linux live types: the source store, finding, selecting, annotating, form filling, signing, page organizing, history, the signature store (JSON in a folder the app names) | `Live/Live<Contract>.swift` | contract suites |
+| folio-launch | Launch arguments (`-FolioFixture`, `-FolioSample`, `-FolioOpenFile`, `-FolioSaveTo`, `-FolioExportTo`, `-FolioPickFile(s)`, `-FolioSignaturesDir`, `-FolioWindowSize`, `-SuiteControlsProbe`, and `-FolioWriteSample <name> <path>`, which writes one fixture as a real PDF and quits, so a journey can make the files it opens) parsed into `FolioLaunch` | `FolioLaunch.swift` | FolioApp's window root |
 
 #### FolioApp (planned)
 
@@ -713,12 +747,12 @@ A file belongs to exactly one component (`waves.py` checks it against
 |---|---|---|---|
 | folio-scene | `@main FolioApp`: a `DocumentGroup`-free `WindowGroup` (one window per open PDF, Halo's pattern), the `.suiteApp(.folio, host:)` modifier once the suite lands, menus as one `Commands` type per area | `FolioApp.swift`, `FolioCommands+<Area>.swift` | SuiteShell; folio-commands |
 | folio-window | `FolioWindow`: `SuiteWindow` with the sidebar (Pages, Outline, Marks), the detail (page view, palette, status pills), the inspector; one `FolioWindow+<Area>.swift` per area (intents to the workspace, sheets) | `FolioWindow.swift`, `FolioWindow+<Area>.swift`, `FolioPrinting.swift` | workspace; SuiteUI |
-| folio-pageview | The page view: page pictures from `PageImaging` in `FolioLayout`'s column, Folio's marks and form fields drawn over them, gestures routed to the active tool's `drag`, text selection, find bar and highlights; the Page Grid | `PageView/*.swift`, `PageGrid/*.swift` | layout, tools |
+| folio-pageview | The page view (`FolioPageView.swift`, reader): page pictures from `PageImaging` in `FolioLayout`'s column, and over each page the overlays listed in `FolioPageOverlays.swift` (W0, the one seam, so no feature edits the page view to add a layer): marks (markup), form fields (forms), text selection (markup), find hits (find), signatures (sign), redaction marks (W4), each its own file W0 stubs empty; gestures routed to the active tool's `drag`; the find bar; the Page Grid | `PageView/*.swift`, `PageGrid/*.swift` | layout, tools |
 | folio-sidebar | Thumbnails (also the organize grid), outline, the marks list | `Sidebar/*.swift` | organizing |
 | folio-inspector | Document info; the selected mark's colour, width, text, comment; the selected field; the selected page's size and rotation | `Inspector/*.swift` | annotating, forms |
 | folio-sheets | Password, Insert, Combine, Extract and Split, Crop, Save Options, Signature, Export, Reduce Size, Recognize Text, Apply Redactions | `Sheets/*.swift` | the feature that owns each |
 | folio-live-macos | The macOS live services: `PDFKitOpening`, `PDFKitImageOpening` (New from Images), `PDFKitImaging`, `PDFKitText`, `PDFKitFields` (widgets ↔ `FolioFormField`), `PDFKitAnnotations` (PDF annotations ↔ `FolioAnnotation`), `PDFKitWriting`, `PDFKitExporting`, `VisionRecognizing`, `FolioSampleWriter` (fixtures as real PDFs for `-FolioSample`), `FolioSignatureMark` (draws a signature body), `FolioServices+Live` | `Live/*.swift` | contracts; PDFKit, Vision, CoreGraphics |
-| folio-controls | `folio.controls` probe JSON (every control with enabled and help) for the every-control journey | `FolioControls.swift` | journeys |
+| (no own probe) | Every Folio control registers with SuiteUI's shared control inventory (`.suiteControl(id:enabled:reason:)`, read by journeys as `suite.controls` with `-SuiteControlsProbe`), so Folio adds no probe of its own | – | SuiteUI `ControlInventory.swift` |
 
 #### Folio tests (planned)
 
@@ -760,8 +794,16 @@ any suite app that touches PDF (Design's PDF export, #418) would share it.
 | CP-5 | `CorePDF` text replace: replace a text run's string, reusing its font when every new glyph exists in the embedded subset and otherwise reporting the missing characters; acceptance: the replaced line renders with the old font and the same baseline | content-edit | 2 | needs a new core issue |
 | CP-6 | `CorePDF` signature placeholder: write a signature field with a fixed-size `/Contents` hole and `/ByteRange`, return the bytes to hash, and fill the hole with a CMS blob the app makes (the app signs with the macOS Security framework's CMS encoder); acceptance: a signed fixture validates with an independent open-source verifier | cert-sign (later) | 2 | needs a new core issue |
 
+| CP-7 | `CorePDF` image re-encoding: rewrite each image XObject at a target resolution and JPEG quality (pixels through CoreRaster) without touching text or vector content; acceptance: on a fixture of 300 ppi photos, 150 ppi output is ≤ 40% of the bytes and every page's extracted text is unchanged | Reduce File Size levels (Later, Q9) | 1 (the level control) | needs a new core issue |
+
 None blocks v1. `content-edit` is the conditional W4 feature (section 2.4);
 certificate signing is Later.
+
+Checklist:
+
+- [x] Every `Sources/` path planned here sits in exactly one component (`waves.py` checks it against `c4-planned.json`).
+- [x] Every engine need says "needs a new core issue" with a one-line spec and an acceptance line (CP-1 to CP-7).
+- [x] `c4-planned.json` mirrors this section, every element planned and authored.
 
 ---
 
@@ -773,7 +815,10 @@ every step (`docs/engineering.md`, Human-like UI tests). The app audit runs
 on every shot.
 
 **Files.** W0 creates `UITests/FolioJourneyTests.swift` (launch, menus,
-every control, layout). Each feature owns `UITests/FolioJourneyTests+<Area>.swift`
+every control, layout). Its every-control and every-menu journey (P-J12)
+is data-driven: it reads `suite.controls` and the menu list from
+`FolioCommand` (Linux-tested), so a feature adds controls and menu items
+without editing the journey file. Each feature owns `UITests/FolioJourneyTests+<Area>.swift`
 with its own `XCTestCase` class, so no two features edit one journey file;
 `project.yml`'s journey bundle globs `UITests/FolioJourneyTests*.swift`
 (W0's supervisor-merged task adds the Folio bundle).
@@ -781,16 +826,23 @@ with its own `XCTestCase` class, so no two features edit one journey file;
 **Modes.** A journey first runs on `-FolioFixture <name>` (fake services,
 section 6) and is flipped to `-FolioSample <name>` (live PDFKit and Vision,
 the same fixture written as a real PDF by `FolioSampleWriter` into the
-test's temp folder) by the task that lands the live type. P-J14 runs live
-from its first PR.
+test's temp folder with `-FolioWriteSample`) by the task that lands the live
+type. P-J14 runs live from its first PR. A journey uses only controls its
+own feature or an earlier wave owns; W0's working pieces (thumbnails that go
+to a page, undo and redo with named steps, the page column on fakes) are
+in every later journey, and a feature that replaces a W0 file keeps them
+working.
 
 **Finding things.** By the title a person reads where there is one, else by
 identifier: `folio.page.<n>` (1-based) for each page view,
 `folio.thumb.<n>`, `folio.mark.<id>`, `folio.field.<name>`, `folio.find`,
 `folio.tool.<tool>`. The page view's pixels can't be read through XCUITest,
 so `folio.page.<n>` carries the Model's `pageSummary(n)` as its
-accessibility value, built and tested in FolioModel: "Page 2 of 3, Letter,
-rotated 90°, 2 highlights, 1 note, fields: name=Ada Lovelace; agree=on".
+accessibility value, built and tested in FolioModel. Its grammar is fixed in
+W0 and each facet comes from its feature's facet file, in this order,
+facets with nothing to say left out: "Page 2 of 3, Letter; rotated 90°;
+cropped 540 × 720; marks: highlight, underline, note; fields: name=Ada
+Lovelace, agree=on; text: embedded" (text: embedded, recognized or none).
 Drags use page points mapped through `folio.page.<n>`'s frame and the zoom
 (`FolioLayout` math, tested on Linux).
 
@@ -803,21 +855,21 @@ Drags use page points mapped through `folio.page.<n>`'s frame and the zoom
 | # | Test (file, feature) | Launch | Steps (each one shot, `folio-<step>`) | Asserts |
 |---|---|---|---|---|
 | P-J0 | `testLaunchShowsWindowShell` (`FolioJourneyTests.swift`, foundation) | none | launch | `expectWindowShell()`; the empty state "No PDF Open" with Open… and Create from Images…; the inspector "No Selection"; the switcher row's Folio item current and disabled "You're in Folio." once the suite wires it (until then every switcher item is disabled with its reason); every audit count 0 |
-| P-J1 | `testOpenAndRead` (`+Read`, reader) | `-FolioOpenFile <tmp>/Lease.pdf` (sample `letter`) | open; ⌘2 Continuous; scroll to the end; ⌥⌘G, type 2, Return; ⌘9 Fit Width; ⌘+ twice; ⌘0; click thumbnail 3; ⌘3 Two Pages; open the Outline section; quit, relaunch with no file, File > Open Recent > Lease | title "Lease"; `folio.page.1` value starts "Page 1 of 3"; the status pill reads "Page 3 of 3" at the end, "Page 2 of 3" after Go to Page; zoom pill "Fit Width" then "125%"…"100%"; thumbnail 3 selected and page 3 at the top; two pages side by side (frames of page 1 and 2 share a top); the Outline section shows "No outline in this PDF." for `letter`; Open Recent lists "Lease" first and reopens it |
+| P-J1 | `testOpenAndRead` (`+Read`, reader) | `-FolioWriteSample letter <tmp>/Lease.pdf`, then `-FolioOpenFile <tmp>/Lease.pdf` | open; ⌥⌘2 Continuous; scroll to the end; ⌥⌘G, type 2, Return; ⌥⌘G, type ii, Return; ⌘1 Actual Size; ⌘+ twice; ⌘9 Fit Width; click thumbnail 3; ⌥⌘3 Two Pages; open the Outline section, click "Signatures"; ⌘[ Back; quit, relaunch with no file, File > Open Recent > Lease | title "Lease"; `folio.page.1` value starts "Page 1 of 3, Letter"; the page pill reads "Page 3 of 3" at the end, "Page 2 of 3" after Go to Page 2 and after Go to "ii"; zoom pill "100%", then "150%"; after Fit Width the page's frame matches PL2; page 3 at the top after the thumbnail click (W0's thumbnails); two pages side by side (frames of page 1 and 2 share a top); the outline lists Agreement, Deposit and pets, Signatures and clicking Signatures puts page 3 at the top; Back returns to the page before; Open Recent lists "Lease" first and reopens it |
 | P-J2 | `testFindText` (`+Find`, find) | `letter` | ⌘F; type "first day"; Return; Return; ⌘G; Match Case on, type "FIRST"; Escape | "1 of 2" then "2 of 2" then wraps "1 of 2"; the sidebar RESULTS list has 2 rows with "p. 1" and their context; with Match Case "No results" and the field's help "No matches for FIRST."; Escape closes the bar and keeps the page where the last hit was |
-| P-J3 | `testHighlightUnderlineStrike` (`+Markup`, markup) | `letter` | press T; drag across "RESIDENTIAL LEASE" on page 1; Markup > Highlight; drag across line 2; press U (Underline tool) and drag line 3; press K and drag line 4; click the highlight; set colour Green in the inspector; type a comment "Check name"; ⌫ on the strike-out | page 1 value "3 marks" then "highlight, underline, strike-out"; Edit menu "Undo Highlight", "Undo Underline", "Undo Strike Out", "Undo Change Color", "Undo Comment", "Undo Delete"; inspector header "Highlight · Page 1" with the comment row; after ⌫ "2 marks" |
-| P-J4 | `testNotesTextBoxPenShape` (`+Annotate`, markup) | `letter` | N, click page 1 at the margin, type "Ask about parking", Escape; X, click, type "Initial here", Escape; P, draw a stroke; R, drag a rectangle; V, drag the note 40 pt down; ⌘Z | page value lists "note, text box, ink, rectangle"; the note's popover holds the text; the text box shows "Initial here"; after the drag the note's frame moved by 40 pt × zoom; ⌘Z puts it back ("Undo Move Note"); an empty text box (X, click, Escape) is not created and the palette's help reads "Type some text for the text box." |
-| P-J5 | `testFillForm` (`+Forms`, forms) | `form` | click Name; type "Ada Lovelace"; ⇥; type "ada@example.com"; ⇥ (to Plan); Space on Plus; ⇥; Space (Agree); Form > Check Form; Form > Clear Form; ⌘Z | after typing, `folio.field.name` value "Ada Lovelace"; ⇥ order Name → Email → Plan → Agree; Plus on and Basic off; Check Form before Agree reads "1 required field is empty: Agree to terms" with a warning outline on Agree, after Agree "All required fields are filled."; Clear empties all, Edit menu "Undo Clear Form" restores them; typing in Name is one step "Undo Typing" |
+| P-J3 | `testSelectCopyAndMark` (`+Markup`, markup) | `letter` | press T; drag across "RESIDENTIAL LEASE" on page 1; ⌘C; double-click "LEASE"; triple-click line 2; ⌘A; click away; drag across "RESIDENTIAL LEASE", Markup > Highlight; press U and drag line 3; press K and drag line 4; click the highlight; set colour Green in the inspector; type a comment "Check name"; select the strike-out, Delete | the general pasteboard (read by the test) holds "RESIDENTIAL LEASE"; the selection reads "LEASE", then line 2's text, then all four lines (the `folio.selection` value); page 1's value gains "marks: highlight", then "marks: highlight, underline, strike-out", then "marks: highlight, underline"; Edit menu "Undo Highlight", "Undo Underline", "Undo Strike Out", "Undo Change Color", "Undo Comment", "Undo Delete" (W0's undo) |
+| P-J4 | `testNotesTextBoxPenShape` (`+Annotate`, markup) | `letter` | N, click page 1 at the margin, type "Ask about parking", Escape; X, click, type "Initial here", Escape; set its font size to 18 in the inspector; P, draw a stroke; R, drag a rectangle; set line width 4; V, drag the note 40 pt down; ⌘Z; X, click, Escape | page value "marks: note, text box, ink, rectangle"; the note's popover holds the text; the text box shows "Initial here" at 18 pt (inspector row); after the drag the note's frame moved by 40 pt × zoom; ⌘Z puts it back ("Undo Move Note"); the empty text box is not created and the help reads "Type some text for the text box." |
+| P-J5 | `testFillForm` (`+Forms`, forms) | `form` | click Name; type "Ada Lovelace"; Tab; type "ada@example.com"; Tab (to the Plan group); → (Plus); Tab (to Agree to terms); Form > Check Form; Space; Form > Check Form; Form > Clear Form; ⌘Z | after typing, `folio.field.name` value "Ada Lovelace"; Tab order Name → Email → Plan → Agree to terms (the signature field is never a Tab stop); → picks Plus and clears Basic; the first Check Form reads "1 required field is empty: Agree to terms" with a warning outline and triangle on it, the second "All required fields are filled."; Clear empties all; Edit menu "Undo Clear Form" restores them; typing in Name was one step "Undo Typing"; `scripted` (second launch) shows the banner "This form has scripts Folio doesn't run. Check calculated fields before sending." |
 | P-J6 | `testSignDocument` (`+Sign`, sign) | `form` with `-FolioSignaturesDir <tmp>` | press S; New Signature…; Draw; drag two strokes on the pad; Done; click inside the Signature field; drag the signature's corner handle; press S, New Signature…, Type, "A.L.", Save as initials on, Done; click near the bottom margin | the library lists the drawn signature; placed inside the field, fitted and centered (its frame inside `folio.field.signature`'s); resize keeps the aspect within 1%; initials placed where clicked at 72 pt wide; quit and relaunch: the library still has both (stored in the folder); an empty pad's Done is disabled with help "Draw your signature in the box first." |
-| P-J7 | `testOrganizePages` (`+Pages`, pages) | `letter` | ⌘4 Page Grid; click page 3; ⌘R; drag page 3 before page 1; select page 2, Shift-click page 3; Page > Delete Page; ⇧⌘B; Page > Crop Pages… with 36 pt margins on page 1, Crop; ⌘Z four times | rotated: page 3 value "rotated 90°"; order (by `folio.thumb.n` captions' content) 3, 1, 2; after delete 1 page left, and selecting all then ⌘⌫ shows "A PDF needs at least one page…" and changes nothing; a blank Letter page appended; page 1's value reads "cropped 540 × 720"; each ⌘Z names "Undo Crop", "Undo Insert Page", "Undo Delete Pages", "Undo Move Page" |
-| P-J8 | `testCombineAndExtract` (`+Combine`, pages) | `letter`, with `form` written to `<tmp>/Application.pdf` | Page > Insert from File…, pick Application.pdf (`-FolioPickFile` skips the panel), at End; Page > Extract Pages…, type "2-3", Extract; in the new window ⌘S with `-FolioSaveTo` | 4 pages; page 4's fields fillable (`folio.field.name` exists on page 4); the Extract sheet refuses "5" with "This document has pages 1 to 4." under the field; a new window "Lease (pages 2–3)" with 2 pages; the original is unchanged |
-| P-J9 | `testUndoRedoEveryEdit` (`+History`, history-files) | `form` | type in Name; highlight a line; rotate page 1; ⌘Z ×3; ⇧⌘Z ×3; scroll and zoom between | Edit menu names each step in order and back; scroll and zoom add no step; with nothing left Undo is disabled with "Nothing to undo." |
-| P-J10 | `testSaveAndReopen` (`+Files`, history-files) | `form` sample, `-FolioSaveTo <tmp>/Filled.pdf` | fill Name; highlight; in the inspector's DOCUMENT section set Title to "Membership"; ⌘S; quit; relaunch `-FolioOpenFile <tmp>/Filled.pdf`; File > Save As… with Flatten on and a password (`-FolioSaveTo <tmp>/Flat.pdf`); open Flat.pdf | subtitle "Edited" then "Saved"; reopened: the value "Ada Lovelace", 1 highlight, the inspector title "Membership", Undo disabled; Flat.pdf asks for its password (the sheet), a wrong one reads "That password didn't unlock this PDF. Try again.", the right one opens with no fields (`folio.field.*` absent) and the name drawn into the page (page value "fields: none") |
+| P-J7 | `testOrganizePages` (`+Pages`, pages) | `letter` | ⌥⌘4 Page Grid; click page 3; ⌘R; drag page 3 before page 1; select page 1, ⌥⌘→ (moves it right); select page 2, Shift-click page 3; Page > Delete Page; ⇧⌘B; Page > Crop Pages… with 36 pt margins on page 1, Crop; ⌘Z four times | rotated: page 3 value "rotated 90°"; order (by the `folio.thumb.n` values) 3, 1, 2 after the drag, then 1, 3, 2 after ⌥⌘→; after delete 1 page left, and selecting every page then ⌘⌫ shows "A PDF needs at least one page…" and changes nothing; a blank Letter page appended; page 1's value reads "cropped 540 × 720"; each ⌘Z names "Undo Crop", "Undo Insert Page", "Undo Delete Pages", "Undo Move Page" |
+| P-J8 | `testCombineExtractSplit` (`+Combine`, pages) | `-FolioWriteSample letter <tmp>/Lease.pdf`, `-FolioWriteSample form <tmp>/Application.pdf`, then `-FolioOpenFile <tmp>/Lease.pdf` with `-FolioPickFile <tmp>/Application.pdf` | Page > Insert from File…, at End; Page > Extract Pages…, type "5", then "2-3", Extract; File > Combine Files… (`-FolioPickFiles` both files), Combine; in the combined window Page > Split…, after page 3, Split | 4 pages; page 4's fields fillable (`folio.field.name` exists on page 4); the Extract sheet refuses "5" with "This document has pages 1 to 4." under the field; a new window "Lease (pages 2–3)" with 2 pages; the original unchanged; a new window "Combined" with 4 pages (Lease then Application); Split writes `Combined (part 1).pdf` (3 pages) and `Combined (part 2).pdf` (1 page) next to the save folder |
+| P-J9 | `testUndoRedoEveryEdit` (`+History`, core-loop) | `form` | type in Name; highlight a line; rotate page 1; ⌘Z ×3; ⇧⌘Z ×3; scroll and zoom between | Edit menu names each step in order and back; scroll and zoom add no step; with nothing left Undo is disabled with "Nothing to undo." (undo itself is W0's, proven step by step in every feature's journey; this journey crosses three features, so it runs after them) |
+| P-J10 | `testSaveAndReopen` (`+Files`, files) | `filled` (a filled form with a highlight from the file), `-FolioSaveTo <tmp>/Filled.pdf` | in the inspector's DOCUMENT section set Title to "Membership"; ⌘S; quit; relaunch `-FolioOpenFile <tmp>/Filled.pdf`; File > Save As… with Flatten on and a password (`-FolioSaveTo <tmp>/Flat.pdf`); open Flat.pdf; then `restricted`: Save As… with "Allow changes" on | subtitle "Edited" then "Saved"; reopened: page 1's value has "fields: name=Ada Lovelace, agree=on" and "marks: highlight", the inspector title "Membership", Undo disabled; Flat.pdf asks for its password, a wrong one reads "That password didn't unlock this PDF. Try again.", the right one opens with no fields (no "fields:" facet); the restricted save refuses with "Changing this PDF's restrictions needs its owner password…" and writes nothing. Runs on fakes; the live round trip of fields and marks is P-J14 (core-loop), after forms and markup land their PDFKit mappings |
 | P-J11 | `testOpenProblems` (`+OpenErrors`, reader) | none, then `-FolioOpenFile` per file | write `not a pdf` text, a truncated PDF (sample cut at half), `locked` sample; open each; on the locked one Cancel, then open again and type the password | each message is `FolioOpenError.message` for its case (not a PDF; damaged with the reason; locked); Cancel leaves the empty state; the right password opens "Payslip"; the window never shows a half-open document |
-| P-J12 | `testEveryControlActsOrSaysWhy` and `testEveryMenuOpens` (`FolioJourneyTests.swift`, foundation; extended by each feature) | `letter` with `-FolioControlsProbe` | open each menu; read the `folio.controls` JSON; click each enabled control, Escape, ⌘Z | every enabled control changed the shot or a value; every disabled one has help (QB-F1); each menu holds section 7.6's items for the features built so far |
-| P-J13 | `testLayoutAtWidths` (`FolioJourneyTests.swift`, foundation) | `letter`, `-FolioWindowSize` ×5 | relaunch at each size of 8.3 | PL1–PL5 |
-| P-J22 | `testCreateFromImages` (`+Images`, export-convert) | none, `-FolioPickFiles` a 600 × 800 PNG, a 800 × 600 JPEG and a text file, `-FolioSaveTo <tmp>/Scans.pdf` | File > New from Images…; ⌘S | 2 pages, the first portrait and the second landscape, each the image's aspect; "Skipped notes.txt: not an image."; the no-text pill offers Recognize…; title "Scans" after save |
-| P-J23 | `testReduceSize` (`+Reduce`, export-convert) | `-FolioSample photos` (6 pages of 300 ppi photos, written by `FolioSampleWriter`), `-FolioExportTo <tmp>` | File > Reduce File Size…, Medium, Reduce; then Reduce again on the reduced file | the sheet reads "From <a> MB to <b> MB" with b ≤ 0.6 a (PF-11); `Photos (reduced).pdf` exists and the original's bytes are unchanged; the second run says "This PDF is already as small as Folio can make it." and writes nothing |
+| P-J12 | `testEveryControlActsOrSaysWhy` and `testEveryMenuOpens` (`FolioJourneyTests.swift`, foundation; data-driven, never edited by a feature) | `letter` with `-SuiteControlsProbe` | open each menu; read the `suite.controls` JSON; click each enabled control, Escape, ⌘Z | every enabled control changed the shot or a value; every disabled one has help (QB-F1); each menu holds exactly the items `FolioCommand.menu(_:)` lists for the features built so far (the same list section 7.6 shows) |
+| P-J13 | `testLayoutAtWidths` (`FolioJourneyTests.swift`, foundation; core-loop adds the PL1 and PL4 checks once the find bar and marks exist) | `letter`, `-FolioWindowSize` ×5 | relaunch at each size of 8.3 | PL2, PL3, PL5 (foundation); PL1, PL4 (core-loop) |
+| P-J22 | `testCreateFromImages` (`+Images`, export-convert) | none, `-FolioPickFiles` a 600 × 800 PNG, an 800 × 600 PNG and a text file, `-FolioSaveTo <tmp>/Scans.pdf` | File > New from Images…; ⌘S | 2 pages, the first portrait and the second landscape, each the image's aspect fitted to the locale's paper; "Skipped notes.txt: not an image."; each page's value ends "text: none"; title "Scans" after save |
+| P-J23 | `testReduceSize` (`+Reduce`, export-convert) | `photos` (fake: picture bytes divide by 4 when optimized; live: `-FolioWriteSample photos`, 300 ppi photos), `-FolioExportTo <tmp>` | File > Reduce File Size…, Reduce; then Reduce again on the reduced file | the sheet reads "From <a> MB to <b> MB" with b ≤ 0.6 a (PF-11); `Photos (reduced).pdf` exists and the original's bytes are unchanged; the second run says "This PDF is already as small as Folio can make it." and writes nothing |
 | P-J14 | `testReadMarkFillSignSave` (`FolioJourneyTests+Loop.swift`, core-loop) | live, `-FolioSample form`, `-FolioSaveTo` | the whole loop on live services: open; find "Name"; highlight it; fill Name and Agree; sign in the field; rotate page 1 and back; ⌘Z, ⇧⌘Z; ⌘S; relaunch on the file | each step on PDFKit; the reopened file has the value, the highlight, the signature (PF-12) and no extra page |
 
 ### 5.2 States each journey passes through
@@ -839,7 +891,7 @@ Drags use page points mapped through `folio.page.<n>`'s frame and the zoom
 
 | # | Test (file, feature) | Launch | Steps | Asserts |
 |---|---|---|---|---|
-| P-J20 | `testRecognizeScan` (`+OCR`, ocr) | `scan` | open; the warning pill "No text: Recognize…"; Tools > Recognize Text…, English, Recognize; ⌘F "total" | progress "Page n of 2"; afterwards the pill reads "Text recognized"; Find gets 1 hit on page 1; T selects "TOTAL 7.70"; after ⌘S and reopen the text is still there (PF-9) |
+| P-J20 | `testRecognizeScan` (`+OCR`, ocr) | `scan` | open; the warning pill "No text: Recognize…"; Tools > Recognize Text…, English, Recognize; ⌘F "total"; T, double-click "TOTAL"; ⌘Z; ⇧⌘Z; ⌘S and reopen | progress "Page n of 2"; afterwards the pill reads "Text recognized" and page 1's value ends "text: recognized"; Find gets 1 hit on page 1; the selection reads "TOTAL"; ⌘Z names "Undo Recognize Text" and page 1 reads "text: none" again, ⇧⌘Z brings it back; after save and reopen the text is still there (PF-9) |
 | P-J21 | `testExportPagesAndText` (`+Export`, export-convert) | `letter` with `-FolioExportTo <tmp>` | File > Export…, PNG, 150 ppi, Pages 1-2, Export; again as Text; again as a word-processing document | 2 files `Lease-1.png`, `Lease-2.png` of 1275 × 1650; `Lease.txt` with every line; `Lease.docx` exists and is non-empty; success line with Reveal in Finder |
 | P-J24 | `testPrint` (`+Print`, export-convert) | `letter` | ⌘P; Cancel | the system print panel appears with 3 pages; Cancel returns with no change |
 | P-J25 | `testEditLineInPlace` (`+ContentEdit`, content-edit; conditional) | `-FolioSample letter` | E; click "2. Rent."'s line; change "first" to "fifth"; Escape; ⌘S; reopen | the line reads "…due on the fifth day." in the same font (the page value names the font); Find "first day" finds 1 (page 1 line 3 only); a character missing from the font names itself in the help |
@@ -859,6 +911,12 @@ reads the probe's JSON, never an XCUI timing.
 | P-P5 | `testPenLatency` | `letter` sample | a 2,000-point pen stroke at 300 pt/s | PB-10: p95 ≤ 2 frames late |
 | P-P6 | `testReorderLatency` | `-FolioSample long`, Page Grid | drag page 3 across 40 thumbnails | PB-13: p95 ≤ 2 frames late |
 
+Checklist:
+
+- [x] Every tier-1 feature has a journey with the XCUITest that proves it.
+- [x] Every journey lists its empty, error and loading states (5.2).
+- [x] Every journey uses only controls its own feature or an earlier wave owns.
+
 ---
 
 ## 6. Contracts
@@ -872,15 +930,22 @@ language mode, typed throws.
 
 **Proof.** The files are in `docs/blueprints/pdf/contracts/`
 (`Contracts/FolioValues.swift`, `Contracts/FolioContracts.swift`,
-`Fakes/FolioFakes.swift`, `FolioServices.swift`) with ten proof tests in
-`Tests/FolioContractTests.swift`, one per tier-1 journey group (open and
-find, open refusals, highlight and note, fill in Tab order, sign into a
-field, organize and combine and crop and split, undo coalescing, save round
-trip with flatten and password and export, recognize a scan, permissions).
+`Fakes/FolioFakes.swift`, `FolioServices.swift`) with twelve proof tests in
+`Tests/FolioContractTests.swift`: open, outline and labels, source
+registration and find (P-J1, P-J2); open refusals, a damaged file and the
+script flag (P-J11, P-J5); select, word, line, copy with paragraphs, mark,
+text-box style, note, move, delete (P-J3, P-J4); Tab order with a radio
+group as one stop and labels (P-J5); sign into a field and keep the library
+(P-J6); reorder, rotate, delete, insert, crop, ranges, split and combine
+(P-J7, P-J8); undo coalescing (P-J9); save, reopen under a new source,
+flatten, passwords and owner restrictions (P-J10); export images and text
+(P-J21); new from images with a skipped file and Reduce (P-J22, P-J23);
+recognize, find, save and reopen the recognized text (P-J20); permissions
+refusing edits.
 `docs/blueprints/pdf/contracts/check.sh` builds them as a `FolioModel`
 target plus a test target in a throwaway package and runs the tests. Run on
-2026-10-15 with Swift 6.1.2 on Ubuntu 24.04: `CONTRACTS: PASS`, no errors,
-no warnings, 10 of 10 tests. W0 copies the files into `Sources/FolioModel/`
+2026-10-15 with Swift 6.1.2 on Ubuntu 24.04 after critic round 1:
+`CONTRACTS: PASS`, no errors, no warnings, 12 of 12 tests. W0 copies the files into `Sources/FolioModel/`
 (the fakes one file per contract).
 
 **Rules every conformance keeps.**
@@ -914,6 +979,7 @@ no warnings, 10 of 10 tests. W0 copies the files into `Sources/FolioModel/`
 
 | Use case | Protocol | Fake | Live (feature) | Journeys |
 |---|---|---|---|---|
+| UC-0 Keep the opened bytes | `DocumentSources` | `FakeDocumentSources` (an actor; also decodes fake files for the other fakes) | `FolioModel/Live/LiveDocumentSources.swift` (foundation) | every journey |
 | UC-1 Open a PDF or images | `DocumentOpening` | `FakeDocumentOpening` (reads the fake file; passwords, not-PDF, too large) | `FolioApp/Live/PDFKitOpening.swift` (reader), `PDFKitImageOpening.swift` (export-convert) | P-J1, P-J11, P-J22 |
 | UC-2 See a page | `PageImaging` | `FakePageImaging` (white page, grey band per line) | `FolioApp/Live/PDFKitImaging.swift` (reader) | P-J1 and every shot |
 | UC-3 Page text | `PageTextReading` | `FakePageTextReading` (fixed grid: 72 pt in, 14 pt lines, 6 pt glyphs) | `FolioApp/Live/PDFKitText.swift` (reader) | P-J2, P-J3 |
@@ -924,13 +990,14 @@ no warnings, 10 of 10 tests. W0 copies the files into `Sources/FolioModel/`
 | UC-8 Make and place a signature | `Signing` | `FakeSigning` (reference) | `FolioModel/Live/LiveSigning.swift` (sign) | P-J6 |
 | UC-8b Keep signatures | `SignatureStoring` | `FakeSignatureStore` (an actor in memory; can fail on save) | `FolioModel/Live/LiveSignatureStore.swift` (sign; JSON in the folder the app names) | P-J6 |
 | UC-9 Organize pages | `PageOrganizing` | `FakePageOrganizing` (reference) | `FolioModel/Live/LivePageOrganizing.swift` (pages) | P-J7, P-J8 |
-| UC-10 Undo and redo | `DocumentHistory` | `FakeDocumentHistory` (reference) | `FolioModel/Live/LiveDocumentHistory.swift` (history-files) | P-J9 and every Edit-menu assert |
-| UC-11 Save | `DocumentWriting` | `FakeDocumentWriting` (writes the fake file; flatten and password) | `FolioApp/Live/PDFKitWriting.swift` (history-files) | P-J10, P-J14 |
+| UC-10 Undo and redo | `DocumentHistory` | `FakeDocumentHistory` (reference) | `FolioModel/Live/LiveDocumentHistory.swift` (foundation) | P-J9 and every Edit-menu assert |
+| UC-11 Save | `DocumentWriting` | `FakeDocumentWriting` (writes the fake file; flatten and password) | `FolioApp/Live/PDFKitWriting.swift` (files) | P-J10, P-J14 |
 | UC-12 Export | `PageExporting` | `FakePageExporting` (describes each image; text with format markers) | `FolioApp/Live/PDFKitExporting.swift` (export-convert) | P-J21, P-J23 |
 | UC-13 Recognize text | `TextRecognizing` | `FakeTextRecognizing` (returns a scan page's known lines) | `FolioApp/Live/VisionRecognizing.swift` (ocr) | P-J20 |
 | (W4) Replace a line, redact | `TextReplacing`, `Redacting` in `Contracts/FolioContentEditContracts.swift` | written by content-edit with its fakes | `FolioModel/Live/LiveTextReplacing.swift`, `LiveRedacting.swift` over CorePDF | P-J25, P-J26 |
 
-Reduce File Size is `DocumentWriting.write` with `maxImagePPI` set; Print
+Reduce File Size is `DocumentWriting.write` with `optimizeImages` set; Combine
+Files is `PageOrganizing.combine`; Print
 is the system print operation on the saved bytes; document properties and
 zoom, page and view mode are workspace methods (pure value edits, tested on
 `FolioWorkspace`).
@@ -943,18 +1010,18 @@ a `struct` the window keeps in `@State` (Halo's `HaloProject` pattern).
 
 | File (feature) | Methods |
 |---|---|
-| `FolioWorkspace.swift` (foundation) | `init(services:launch:)`, `edit(_ name: String, coalesceKey: String?, _ change: (inout FolioDocumentState) throws(FolioEditError) -> Void)` (internal), `endCoalescing()`, `var refusal: FolioRefusal?`, `dismissRefusal()`, `pageText(_:) -> FolioPageText?`, `didLoadText(_:for:)`, `var tool: FolioTool`, `selectTool(_:)` |
-| `FolioPageSummary.swift` (foundation) | `pageSummary(_ number: Int) -> String` (the accessibility value of `folio.page.<n>`) |
-| `Workspace/FolioWorkspace+Read.swift` (reader) | `beginOpen(name:)`, `finishOpen(_: Result<FolioOpened, FolioOpenError>)`, `var needsPassword: Bool`, `setZoom(_: FolioZoom)`, `zoomIn()`, `zoomOut()`, `setViewMode(_: FolioViewMode)`, `go(toPage:)`, `go(toLabel:) throws(FolioEditError)`, `back()`, `forward()`, `didScroll(toPage:)`, `var statusPills: [String]`, `var recent: [FolioRecentFile]`, `setRecent(_:)` |
-| `Workspace/FolioWorkspace+Find.swift` (find) | `setFindText(_:)`, `setMatchCase(_:)`, `setWholeWords(_:)`, `findNext()`, `findPrevious()`, `closeFind()`, `var findHits: [FolioSearchHit]`, `var findCurrent: Int?`, `var findStatus: String` |
-| `Workspace/FolioWorkspace+Markup.swift` (markup) | `beginTextDrag(at:on:)`, `moveTextDrag(to:)`, `endTextDrag()`, `selectWord(at:on:)`, `selectAllText(on:)`, `var textSelection: FolioTextSelection`, `copyText() -> String`, `mark(_: FolioMarkupStyle)`, `addNote(at:on:)`, `addTextBox(at:on:)`, `setMarkText(_:)`, `beginInk(at:on:)`, `addInkPoint(_:)`, `endInk()`, `beginShape(_:at:on:)`, `moveShape(to:)`, `endShape()`, `selectMark(_:)`, `moveSelectedMark(dx:dy:)`, `resizeSelectedMark(to:)`, `setMarkColor(_:)`, `setLineWidth(_:)`, `deleteSelectedMarks()`, `var marks: [FolioMarkRow]` |
+| `FolioWorkspace.swift` (foundation) | `init(services:launch:)`, `init(document:services:)` (a window for an extracted, combined or split document; its sources are already in the shared `services.sources`), `edit(_ name: String, coalesceKey: String?, _ change: (inout FolioDocumentState) throws(FolioEditError) -> Void)` (internal), `endCoalescing()`, `var refusal: FolioRefusal?`, `dismissRefusal()`, `pageText(_:) -> FolioPageText?` (a page's `recognizedText` first), `didLoadText(_:for:)`, `var textLoading: (loaded: Int, total: Int)`, `var tool: FolioTool`, `selectTool(_:)` |
+| `Workspace/FolioWorkspace+History.swift` (foundation) | `undo()`, `redo()`, `var undoTitle: String?`, `var redoTitle: String?` |
+| `FolioPageSummary.swift` (foundation) and `FolioPageSummary+<Area>.swift` (each feature) | `pageSummary(_ number: Int) -> String` (the accessibility value of `folio.page.<n>`, grammar in section 5); each facet file adds `func <area>Facet(_ page: FolioPage) -> String?` |
+| `Workspace/FolioWorkspace+Read.swift` (reader) | `beginOpen(name:)`, `finishOpen(_: Result<FolioOpened, FolioOpenError>)`, `var needsPassword: Bool`, `setZoom(_: FolioZoom)`, `zoomIn()`, `zoomOut()` (the steps 50 to 400% of P-T2), `setViewMode(_: FolioViewMode)`, `go(toPage:)`, `go(toLabel:) throws(FolioEditError)`, `back()`, `forward()`, `didScroll(toPage:)`, `var statusPills: [String]`, `var recent: [FolioRecentFile]`, `setRecent(_:)` |
+| `Workspace/FolioWorkspace+Find.swift` (find) | (synchronous over loaded page text, PB-5) `setFindText(_:)`, `setMatchCase(_:)`, `setWholeWords(_:)`, `findNext()`, `findPrevious()`, `closeFind()`, `var findHits: [FolioSearchHit]`, `var findCurrent: Int?`, `var findStatus: String` |
+| `Workspace/FolioWorkspace+Markup.swift` (markup) | `beginTextDrag(at:on:)`, `moveTextDrag(to:)`, `endTextDrag()`, `selectWord(at:on:)`, `selectLine(at:on:)`, `selectAllText(on:)`, `var textSelection: FolioTextSelection`, `copyText() -> String` (through `TextSelecting.copyText`), `mark(_: FolioMarkupStyle)`, `addNote(at:on:)`, `addTextBox(at:on:)`, `setMarkText(_:)`, `beginInk(at:on:)`, `addInkPoint(_:)`, `endInk()`, `beginShape(_:at:on:)`, `moveShape(to:)`, `endShape()`, `selectMark(_:)`, `moveSelectedMark(dx:dy:)`, `resizeSelectedMark(to:)`, `setMarkColor(_:)`, `setMarkStyle(_: FolioMarkStyle)` (font size, alignment, line width, opacity, through `Annotating.setStyle`), `deleteSelectedMarks()`, `var marks: [FolioMarkRow]` |
 | `Workspace/FolioWorkspace+Forms.swift` (forms) | `focusField(_:)`, `focusNextField(backward:)`, `setField(_:to:)` (coalesced per field), `checkForm() -> [FolioFieldID]`, `clearForm()`, `var focusedField: FolioFieldID?`, `var formBanner: String?` |
 | `Workspace/FolioWorkspace+Sign.swift` (sign) | `beginSignatures()`, `finishSignatures(_: [FolioSignature])`, `addSignature(strokes:isInitials:) throws(FolioEditError)`, `addSignature(typed:isInitials:) throws(FolioEditError)`, `addSignature(image:aspect:isInitials:)`, `removeSignature(_:)`, `chooseSignature(_:)`, `placeSignature(at:on:)`, `var signatures: [FolioSignature]`, `var signaturesToSave: [FolioSignature]?` |
-| `Workspace/FolioWorkspace+Pages.swift` (pages) | `selectPages(_:extending:)`, `rotateSelectedPages(clockwise:)`, `deleteSelectedPages()`, `moveSelectedPages(to:)`, `nudgeSelectedPages(by:)`, `insertBlankPage()`, `beginInsert(at:)`, `finishInsert(_: Result<FolioOpened, FolioOpenError>)`, `extract(range:) throws(FolioEditError) -> FolioDocumentState`, `split(after:) throws(FolioEditError) -> [FolioDocumentState]`, `cropSelectedPages(to:)`, `var selectedPages: [FolioPageID]` |
-| `Workspace/FolioWorkspace+History.swift` (history-files) | `undo()`, `redo()`, `var undoTitle: String?`, `var redoTitle: String?` |
-| `Workspace/FolioWorkspace+Files.swift` (history-files) | `beginSave(options:)`, `finishSave(_: Result<Data, FolioWriteError>, name:path:)`, `var saveState: FolioSaveState` (`edited`, `saved`, `failed(String)`), `setTitle(_:)`, `setAuthor(_:)` |
-| `Workspace/FolioWorkspace+Export.swift` (export-convert) | `beginExport(_: FolioExportRequest)`, `exportProgress(page:)`, `finishExport(_:)`, `cancelExport()`, `beginReduce(level:)`, `finishReduce(original:reduced:)` |
-| `Workspace/FolioWorkspace+OCR.swift` (ocr) | `var pagesWithoutText: [FolioPageID]`, `beginRecognize(pages:languages:)`, `didRecognize(_: FolioPageText, for:)`, `finishRecognize(_: FolioRecognizeError?)` |
+| `Workspace/FolioWorkspace+Pages.swift` (pages) | `selectPages(_:extending:)`, `rotateSelectedPages(clockwise:)`, `deleteSelectedPages()`, `moveSelectedPages(to:)`, `nudgeSelectedPages(by:)`, `insertBlankPage()`, `beginInsert(at:)`, `finishInsert(_: Result<FolioOpened, FolioOpenError>)`, `extract(range:) throws(FolioEditError) -> FolioDocumentState`, `split(after:) throws(FolioEditError) -> [FolioDocumentState]`, `beginCombine()`, `finishCombine(_: [Result<FolioOpened, FolioOpenError>]) -> FolioDocumentState?` (skipped files go to the refusal sentence), `cropSelectedPages(to:)`, `var selectedPages: [FolioPageID]` |
+| `Workspace/FolioWorkspace+Files.swift` (files) | `beginSave(options:)`, `finishSave(_: Result<Data, FolioWriteError>, name:path:)`, `var saveState: FolioSaveState` (`edited`, `saved`, `failed(String)`), `setTitle(_:)`, `setAuthor(_:)` |
+| `Workspace/FolioWorkspace+Export.swift` (export-convert) | `beginNewFromImages()`, `finishNewFromImages(_: Result<FolioOpened, FolioOpenError>)` (`skipped` names go to the sheet), `beginExport(_: FolioExportRequest)`, `exportProgress(page:)`, `finishExport(_:)`, `cancelExport()`, `beginReduce()`, `finishReduce(original: Int, reduced: Int)` (byte counts; not smaller → nothing written) |
+| `Workspace/FolioWorkspace+OCR.swift` (ocr) | `var pagesWithoutText: [FolioPageID]`, `beginRecognize(pages:languages:)`, `didRecognize(_: FolioPageText, for:)` (stores it in `FolioPage.recognizedText` through `edit("Recognize Text", coalesceKey: "ocr")`, so one run is one undo step), `finishRecognize(_: FolioRecognizeError?)` |
 
 The state types these read (`FolioZoom`, `FolioViewMode`, `FolioRefusal`,
 `FolioRecentFile`, `FolioMarkRow`, `FolioSaveState`, `FolioExportRequest`)
@@ -979,22 +1046,38 @@ import FoundationEssentials
 import Foundation
 #endif
 
+/// UC-0 The bytes of every opened file, by source id, for the window's life.
+/// Opening registers; imaging, text, writing, exporting and recognizing read.
+/// The app passes memory-mapped file data, so a file deleted after opening
+/// still saves. Live: `FolioModel/Live/LiveDocumentSources.swift` (an actor).
+public protocol DocumentSources: Sendable {
+    func register(_ id: FolioSourceID, data: Data, name: String) async
+    func data(for id: FolioSourceID) async -> Data?
+    func name(for id: FolioSourceID) async -> String?
+}
+
 /// UC-1 Open a PDF (or make one from images) and read its pages, fields,
-/// annotations and outline into a FolioDocumentState.
-/// Live: `FolioApp/Live/PDFKitOpening.swift` (PDFDocument(data:), unlock(withPassword:)).
+/// annotations, outline and labels into a FolioDocumentState. Registers the
+/// bytes in the DocumentSources the conformance was made with; the source id
+/// is derived from the bytes, so reopening a saved file gets its own id.
+/// Live: `FolioApp/Live/PDFKitOpening.swift` (PDFDocument(data:), unlock(withPassword:)),
+/// `PDFKitImageOpening.swift` (PDFPage(image:options:)).
 public protocol DocumentOpening: Sendable {
     var unavailableHelp: String? { get }
     /// Opens PDF bytes. Throws `.needsPassword` for a locked file opened with
     /// nil, `.wrongPassword` for a bad one, `.notPDF`, `.damaged`, `.tooLarge`.
     func open(_ data: Data, name: String, password: String?) async throws(FolioOpenError) -> FolioOpened
-    /// Makes a document of one page per image (PNG, JPEG or HEIC bytes), each
-    /// page the image's size at 72 ppi capped to fit A4 or Letter.
-    func open(images: [Data], name: String) async throws(FolioOpenError) -> FolioOpened
+    /// One page per image, in order, each fitted inside `paper` (Letter or A4,
+    /// from the locale) keeping its aspect. Inputs that aren't images are left
+    /// out and listed in `skipped`; throws `.notPDF` only when none is an image.
+    func open(images: [FolioImageInput], name: String, paper: FolioSize) async throws(FolioOpenError) -> FolioOpened
 }
 
-/// UC-2 See a page: the page's picture without Folio's own annotations
-/// (the view draws those from the Model, so edits never wait on a render).
-/// Live: `FolioApp/Live/PDFKitImaging.swift` (PDFPage.thumbnail(of:for:)).
+/// UC-2 See a page: the page's own content with no annotations or form
+/// widgets at all (the file's own marks and fields are in the Model and the
+/// view draws them, so a deleted or edited one never lingers in the picture).
+/// Live: `FolioApp/Live/PDFKitImaging.swift`: PDFPage.draw(with:to:) on a copy
+/// of the page whose annotations have shouldDisplay = false.
 public protocol PageImaging: Sendable {
     var unavailableHelp: String? { get }
     /// A picture at most `maxPixels` on its long side, rotation applied.
@@ -1023,6 +1106,11 @@ public protocol TextSelecting: Sendable {
     func select(from: FolioPoint, to: FolioPoint, on page: FolioPageID, text: FolioPageText) -> FolioTextSelection
     /// The word under the point, or an empty selection.
     func word(at point: FolioPoint, on page: FolioPageID, text: FolioPageText) -> FolioTextSelection
+    /// The whole line under the point (triple-click), or an empty selection.
+    func line(at point: FolioPoint, on page: FolioPageID, text: FolioPageText) -> FolioTextSelection
+    /// The selection as copied text: lines inside a paragraph joined with a
+    /// space, a line break after each paragraph.
+    func copyText(_ selection: FolioTextSelection, text: FolioPageText) -> String
 }
 
 /// UC-6 Mark up: highlight, underline, strike out, notes, text boxes, ink,
@@ -1038,6 +1126,8 @@ public protocol Annotating: Sendable {
     func move(_ id: FolioAnnotationID, dx: Double, dy: Double, in doc: inout FolioDocumentState) throws(FolioEditError)
     func setRect(_ id: FolioAnnotationID, to rect: FolioRect, in doc: inout FolioDocumentState) throws(FolioEditError)
     func setColor(_ id: FolioAnnotationID, to color: FolioColor, in doc: inout FolioDocumentState) throws(FolioEditError)
+    /// Font size, alignment, line width, opacity (each clamped by FolioMarkStyle).
+    func setStyle(_ id: FolioAnnotationID, to style: FolioMarkStyle, in doc: inout FolioDocumentState) throws(FolioEditError)
     /// The text of a note or text box, or the comment on any other kind.
     func setText(_ id: FolioAnnotationID, to text: String, in doc: inout FolioDocumentState) throws(FolioEditError)
     func delete(_ ids: [FolioAnnotationID], in doc: inout FolioDocumentState) throws(FolioEditError)
@@ -1052,7 +1142,9 @@ public protocol FormFilling: Sendable {
     /// can't take is refused with `.invalidValue("<sentence>")`.
     func set(_ field: FolioFieldID, to value: FolioFieldValue, in doc: inout FolioDocumentState) throws(FolioEditError)
     /// Tab order: page order, then top to bottom, then left to right; skips
-    /// read-only fields; wraps. nil when the form has no fillable field.
+    /// read-only and signature fields; a radio group is one stop (its first
+    /// button, or the checked one), arrows move inside it; wraps. nil when
+    /// the form has no fillable field.
     func next(after field: FolioFieldID?, backward: Bool, in doc: FolioDocumentState) -> FolioFieldID?
     /// Required fields still empty, in Tab order.
     func missingRequired(in doc: FolioDocumentState) -> [FolioFieldID]
@@ -1092,7 +1184,9 @@ public protocol PageOrganizing: Sendable {
     func rotate(_ pages: [FolioPageID], clockwise: Bool, in doc: inout FolioDocumentState) throws(FolioEditError)
     /// Deletes pages and their annotations and fields. Refuses all of them (`.lastPage`).
     func delete(_ pages: [FolioPageID], in doc: inout FolioDocumentState) throws(FolioEditError)
-    /// Inserts every page of another opened file at `index` (Combine);
+    /// A new document of every page of `files` in order (File > Combine Files).
+    func combine(_ files: [FolioOpened], title: String) throws(FolioEditError) -> FolioDocumentState
+    /// Inserts every page of another opened file at `index` (Insert from File);
     /// returns the new page ids. Its fields keep their names unless taken,
     /// then get a " 2" suffix.
     func insert(_ other: FolioOpened, at index: Int, in doc: inout FolioDocumentState) throws(FolioEditError) -> [FolioPageID]
@@ -1142,6 +1236,9 @@ public struct FolioHistory: Equatable, Sendable {
 /// Live: `FolioApp/Live/PDFKitWriting.swift` (PDFDocument.write(to:withOptions:)).
 public protocol DocumentWriting: Sendable {
     var unavailableHelp: String? { get }
+    /// Throws `.restricted` when `options.permissions` differ from the
+    /// document's and its `ownerUnlocked` is false; `.sourceMissing` when a
+    /// page's source isn't in DocumentSources.
     func write(_ doc: FolioDocumentState, options: FolioWriteOptions) async throws(FolioWriteError) -> Data
 }
 
@@ -1161,7 +1258,8 @@ public protocol PageExporting: Sendable {
 
 /// UC-13 Recognize text on a scanned page (OCR), so it can be found,
 /// selected and highlighted. Live: `FolioApp/Live/VisionRecognizing.swift`
-/// (RecognizeTextRequest, accurate level).
+/// (RecognizeTextRequest, accurate level). The workspace stores the result in
+/// FolioPage.recognizedText through `edit`, so it undoes and saves.
 public protocol TextRecognizing: Sendable {
     var unavailableHelp: String? { get }
     /// Languages offered in the Recognize Text sheet, BCP 47 tags.
@@ -1177,50 +1275,64 @@ public protocol TextRecognizing: Sendable {
 `FolioPoint`, `FolioSize` (`.letter`, `.a4`), `FolioRect`, `FolioRotation`,
 `FolioColor` (clamped sRGB), `FolioSourceID`, `FolioPageID`,
 `FolioPageOrigin` (`.source(id, index:)`, `.blank`), `FolioPage` (size,
-rotation, label, crop, `displaySize`), `FolioTextLine` (text plus one
-rect per Character), `FolioTextOrigin` (`embedded`, `recognized`, `none`),
+rotation, label, crop, `recognizedText`, `displaySize`), `FolioTextLine`
+(text, one rect per Character, `endsParagraph`), `FolioTextOrigin` (`embedded`, `recognized`, `none`),
 `FolioPageText`, `FolioTextSpan`, `FolioTextSelection`, `FolioSearchQuery`,
 `FolioSearchHit`, `FolioAnnotationID`, `FolioMarkupStyle`, `FolioShape`,
-`FolioAnnotationBody` (`markup`, `note`, `freeText`, `ink`, `shape`,
-`signature`, `image`), `FolioAnnotation`, `FolioFieldID`, `FolioFieldKind`
+`FolioTextAlignment`, `FolioMarkStyle` (font size, alignment, line width,
+opacity, clamped), `FolioAnnotationBody` (`markup`, `note`, `freeText`,
+`ink`, `shape`, `signature`, `image`), `FolioAnnotation` (with `style`),
+`FolioFieldID`, `FolioFieldKind`
 (`text(multiline:maxLength:)`, `checkbox`, `radio(group:option:)`,
 `choice(options:editable:)`, `signature`), `FolioFieldValue`,
-`FolioFormField`, `FolioSignatureID`, `FolioSignatureKind` (`drawn`,
-`typed`, `image`), `FolioSignature`, `FolioOutlineItem`, `FolioPermissions`,
-`FolioDocumentState`, `FolioOpened`, `FolioBitmap`, `FolioWriteOptions`
-(flatten, passwords, permissions, `maxImagePPI`, keep OCR text),
+`FolioFormField` (with `label`), `FolioSignatureID`, `FolioSignatureKind` (`drawn`,
+`typed`, `image`), `FolioSignature`, `FolioOutlineItem`, `FolioPermissions` (with `ownerUnlocked`),
+`FolioScriptKind`, `FolioDocumentState` (with `author`, `scripts`),
+`FolioSkipped`, `FolioImageInput`, `FolioOpened` (with `skipped`),
+`FolioBitmap`, `FolioWriteOptions` (flatten, passwords, permissions or nil
+to keep, `optimizeImages`, keep OCR text),
 `FolioImageFormat`, `FolioTextFormat` (`plain`, `rtf`, `docx`),
 `FolioImageExport`, and the typed errors `FolioOpenError`,
-`FolioEditError`, `FolioWriteError`, `FolioRecognizeError`, each with the
+`FolioEditError`, `FolioWriteError` (with `restricted`), `FolioRecognizeError`, each with the
 `message` sentence the person reads. `String.folioTrimmed` stands in for
 `trimmingCharacters`, which FoundationEssentials lacks.
 
-`Fakes/FolioFakes.swift` holds the fake file format (`FolioFixtureFile`,
-JSON starting `%FOLIO-FAKE-PDF-1` so the fake opener can tell it from a
-real PDF), the fixed glyph layout (`FolioFakeLayout`), the
-`FolioFakeLibrary` the platform fakes read, and one fake per contract.
-`FolioServices.swift` holds `FolioServices` and the named fixtures
-(`FolioFixtures.letter`, `.form`, `.scan`, `.locked`, `.marked`, `.long`).
+`Fakes/FolioFakes.swift` holds the fake file format (`FolioFixtureFile`:
+the line `%FOLIO-FAKE-PDF-1`, then JSON, so a cut file reads as damaged and
+anything else as not a PDF; pages with lines, paragraph joins, scan flag,
+recognized text, labels and picture bytes; outline; fields; marks;
+passwords; restrictions; scripts), the fixed glyph layout
+(`FolioFakeLayout`), `FakeDocumentSources` (an actor keyed by a hash of the
+bytes, so a saved file reopens under its own id and saves again), and one
+fake per contract. `FolioServices.swift` holds `FolioServices` and the
+named fixtures (`letter`, `form`, `filled`, `scripted`, `scan`, `locked`,
+`restricted`, `marked`, `photos`, `long`).
 
 ### 6.5 Can every tier-1 journey be built from these?
 
 | Journey | Contract calls (in order) | Proof test |
 |---|---|---|
-| P-J1 Open and read | `DocumentOpening.open`, `PageImaging.image` per visible page, `PageTextReading.text`; zoom and pages are `FolioLayout` | `openReadAndFind` |
+| P-J1 Open and read | `DocumentOpening.open` (registers in `DocumentSources`), `PageImaging.image` per visible page, `PageTextReading.text`; outline and labels from the document value; zoom and pages are `FolioLayout` | `openReadAndFind` |
 | P-J2 Find | `PageTextReading.text` per page, `TextFinding.find` | `openReadAndFind` |
-| P-J3 Highlight | `TextSelecting.select`, `Annotating.mark`, `setColor`, `setText`, `delete`; `word(at:)` | `highlightAndNote` |
-| P-J4 Notes, text box, pen, shape | `Annotating.add` (`.note`, `.freeText`, `.ink`, `.shape`), `hit`, `move`, `DocumentHistory.undo` | `highlightAndNote`, `undoRedoCoalesces` |
-| P-J5 Fill | `FormFilling.next`, `set`, `missingRequired`, `clear` | `fillFormInTabOrder` |
+| P-J3 Select, copy, mark | `TextSelecting.select`, `word(at:)`, `line(at:)`, `copyText`; `Annotating.mark`, `setColor`, `setText`, `delete` | `selectMarkAndCopy` |
+| P-J4 Notes, text box, pen, shape | `Annotating.add` (`.note`, `.freeText`, `.ink`, `.shape`), `setStyle`, `hit`, `move`, `DocumentHistory.undo` | `selectMarkAndCopy`, `undoRedoCoalesces` |
+| P-J5 Fill | `FormFilling.next` (radio group one stop), `set`, `missingRequired` (labels), `clear`; `scripts` from opening | `fillFormInTabOrder`, `openRefusals` |
 | P-J6 Sign | `Signing.make(strokes:)`, `make(typed:)`, `SignatureStoring.save`, `load`, `Signing.place` | `signIntoField` |
-| P-J7 Organize | `PageOrganizing.move`, `rotate`, `delete`, `insertBlank`, `crop` | `organizeAndCombine` |
-| P-J8 Combine, extract | `DocumentOpening.open`, `PageOrganizing.insert`, `parseRange`, `extract`, `split` | `organizeAndCombine` |
+| P-J7 Organize | `PageOrganizing.move`, `rotate`, `delete`, `insertBlank`, `crop` | `organizeCombineSplit` |
+| P-J8 Combine, extract, split | `DocumentOpening.open`, `PageOrganizing.insert`, `parseRange`, `extract`, `combine`, `split` | `organizeCombineSplit` |
 | P-J9 Undo | `DocumentHistory.record`, `endCoalescing`, `undo`, `redo` | `undoRedoCoalesces` |
-| P-J10 Save, reopen, flatten, password | `DocumentWriting.write`, `DocumentOpening.open` with and without the password | `saveRoundTripAndFlatten` |
+| P-J10 Save, reopen, flatten, password, restrictions | `DocumentWriting.write` (throws `.restricted`), `DocumentOpening.open` with and without the password | `saveRoundTripFlattenPasswordRestrictions` |
 | P-J11 Open problems | `DocumentOpening.open` throwing each `FolioOpenError` | `openRefusals` |
-| P-J22 New from Images | `DocumentOpening.open(images:)` | (W0's `DocumentOpeningContractTests`; the fake reads "IMG w x h" bytes) |
-| P-J23 Reduce size | `DocumentWriting.write` with `maxImagePPI`; byte counts compared in the workspace | `saveRoundTripAndFlatten` (write path); PF-11 for the size |
-| P-J20 (tier 2) Recognize | `TextRecognizing.recognize`, then `TextFinding.find` on the result | `recognizeScannedPages` |
-| P-J12 Every control | `FolioCommand.unavailableHelp(for:)` over every service's `unavailableHelp` | W0's `FolioCommandTests` |
+| P-J22 New from Images | `DocumentOpening.open(images:name:paper:)` with `skipped` | `newFromImagesAndReduce` (the fake reads PNG headers) |
+| P-J23 Reduce size | `DocumentWriting.write` with `optimizeImages`; byte counts compared in the workspace | `newFromImagesAndReduce`; PF-11 for real files |
+| P-J20 (tier 2) Recognize | `TextRecognizing.recognize`, stored in `FolioPage.recognizedText` by `edit`, then `TextFinding.find`; saved and reopened by `DocumentWriting` and `DocumentOpening` | `recognizeKeepAndReopen` |
+| P-J12 Every control | `FolioCommand.unavailableHelp(for:)` over every service's `unavailableHelp`; `FolioCommand.menu(_:)` | W0's `FolioCommandTests` |
+
+Checklist:
+
+- [x] One protocol per use case, each with a fake, Linux-safe, Swift 6.
+- [x] `check.sh` passes (12 of 12 tests, no warnings).
+- [x] Every tier-1 journey maps to contract calls and a proof test (6.5).
 
 ---
 
@@ -1240,41 +1352,46 @@ is always drawn as the PDF says (white paper stays white), on the
 
 Content vs. control (design.md, Layers): **content** is the pages, the
 thumbnails grid and the find results list; **control** is the toolbar,
-sidebar, inspector, the floating palette, the find bar (a `GlassPanel`
-over the top of the page view, the one other glass surface) and sheets.
+sidebar, inspector, the floating palette, the find bar and sheets. Custom
+glass over the content is exactly two surfaces: the one floating palette
+(`ToolbarGroup(.floating)`, at the detail's leading edge, vertically
+centered; in the Page Grid it swaps its tools for the page commands, so it
+stays one capsule) and the find bar (`GlassPanel` along the top edge, shown
+only while finding).
 
 ### 7.1 The main window (reading, 1440 × 900)
 
 ```
 ┌──────────────────────────────────────────────────────────────────────────────────────────┐
-│ ● ● ●  ▤ │ ◁ ▷ │ Lease.pdf — Edited        ⌂   ✦   ▱   ◐   ▦   ◎  [▣]   │ ⌕  ⬆ Share  ⓘ │ ← toolbar (glass)
+│ ● ● ●  ▤ │ ◁ ▷ │ Lease — Edited      ⌂  ✦  ▱  ◐  ▦  ◎  [▣]       │ ⌕  ⬆ Share  ⓘ │ ← toolbar (glass); the
 ├───────────────┬──────────────────────────────────────────────────────────┬───────────────┤   switcher row centered:
-│ PAGES ▾       │   ┌─────────────────────────────┐                         │ DOCUMENT      │   Home, Flare, Design, Photo,
-│ ┌─────┐       │   │ RESIDENTIAL LEASE AGREEMENT │                         │ ┌───────────┐ │   Library, Halo, Folio (current,
-│ │ ▓▓▓ │ 1     │   │ ███████ This lease is made  │      ╭──────────────╮   │ │Pages     3│ │   in the capsule)
-│ │ ▓▓  │       │   │ between the Landlord and... │      │ ↖ ⌶ ▮ U̲ S̶ ✎ │   │ │Size Letter│ │
-│ └─────┘       │   │ 1. Term. The term begins... │      │ ☐ T ✍ ✋     │   │ │Text  Yes  │ │ ← inspector:
-│ ┌─────┐       │   │ 2. Rent. Rent is due on...  │      ╰──────────────╯   │ └───────────┘ │   InspectorHeader + info card
-│ │ ▓▓  │ 2     │   │                    [note ▣] │  ↑ floating palette      │ MARKS         │   with nothing selected;
-│ └─────┘       │   └─────────────────────────────┘    (ToolbarGroup        │ Highlight  1  │   the selected mark's rows
-│ ┌─────┐       │   ┌─────────────────────────────┐     .floating, glass)   │ Notes      1  │   when one is
-│ │ ▓   │ 3     │   │ 3. Deposit. The deposit...  │                         │               │
-│ └─────┘       │                                                            │               │
-│ OUTLINE ▸     │                                                            │               │
-│ MARKS ▸       │  (Page 1 of 3)  (110%)  (Letter 8.5 × 11 in)      ViewerStatusBar pills       │
+│ PAGES ▾       │ ╭───╮                                                      │ DOCUMENT      │   Home, Flare, Design,
+│ ┌─────┐       │ │ ↖ │    ┌─────────────────────────────┐                   │ ┌───────────┐ │   Photo, Library, Halo,
+│ │ ▓▓▓ │ i     │ │ ⌶ │    │ RESIDENTIAL LEASE AGREEMENT │                   │ │Pages     3│ │   Folio (current, in
+│ │ ▓▓  │       │ │ ▮ │    │ ███████ This lease is made  │                   │ │Size Letter│ │   the capsule)
+│ └─────┘       │ │ U̲ │    │ between the Landlord and... │                   │ │Text  Yes  │ │
+│ ┌─────┐       │ │ S̶ │    │ 1. Term. The term begins... │                   │ └───────────┘ │ ← inspector:
+│ │ ▓▓  │ ii    │ │ ✎ │    │ 2. Rent. Rent is due on...  │                   │ MARKS         │   InspectorHeader + info
+│ └─────┘       │ │ ☐ │    │                    [note ▣] │                   │ Highlight  1  │   card with nothing
+│ ┌─────┐       │ │ T │    └─────────────────────────────┘                   │ Notes      1  │   selected; the selected
+│ │ ▓   │ iii   │ │ ✍ │    ┌─────────────────────────────┐                   │               │   mark's rows when one is
+│ └─────┘       │ │ ✋ │    │ 3. Deposit. The deposit...  │                   │               │
+│ OUTLINE ▸     │ ╰───╯ ↑ floating palette (ToolbarGroup .floating, one glass capsule,          │
+│ MARKS ▸       │         leading edge, vertically centered); pages start after its band     │
+│               │                                    (100%)  (Letter 8.5 × 11 in)  (Page 1 of 3) ← ViewerStatusBar pills
 └───────────────┴──────────────────────────────────────────────────────────┴───────────────┘
 ```
 
 | Region | Component | Status |
 |---|---|---|
-| Window | `SuiteWindow` (sidebar, detail, inspector), the `-SuiteWindowSize` argument | existing; the sidebar slot, window subtitle and `EditorDetail` arrive with editor-in-window (#973) |
+| Window | `SuiteWindow` (sidebar, detail, inspector); Folio's own `-FolioWindowSize` argument | existing; the sidebar slot, window subtitle and `EditorDetail` arrive with editor-in-window (#973) |
 | App switcher | `AppSwitcher` in `SuiteWindow`'s toolbar | planned by #973; **needs a seventh item** (`suite.switcher.folio`, ⌃⌘6): a `needs-ui` issue plus the suite's `SuiteApp.folio` (section 9.5) |
 | Save state | window subtitle ("Edited", "Saved", "Not saved ⚠") | planned by #973 |
 | Toolbar items | `ToolbarAction`: sidebar toggle, back and forward (page history), zoom menu, Find (⌘F), Share, inspector toggle; one prominent action at most: none while reading | existing |
-| Sidebar | `SidebarSection` + `SidebarRow` for Outline and Marks; thumbnails are a `ThumbnailGrid` (one column in the sidebar) | existing; ThumbnailGrid **needs** a page-number caption, a drop-insertion indicator and multi-select with Shift and ⌘ (`needs-ui`, section 9.5) |
+| Sidebar | `SidebarSection` + `SidebarRow` for Outline and Marks; thumbnails are a `ThumbnailGrid` (one column in the sidebar) with its caption (the page label) and its Shift and ⌘ selection | existing; ThumbnailGrid **needs** a drop-insertion line, drag reorder and keyboard reorder (`needs-ui`, section 9.5) |
 | Page view | content: Folio's own view (`PageView/`), pages on `SuiteColor.canvasSurround`, centered, a 16 pt gap between pages | Folio-owned content view, no look-alike control in it |
 | Tool palette | `ToolbarGroup(style: .floating)` | existing (Flare) |
-| Status | `ViewerStatusBar` pills: page n of m, zoom, page size; the trailing slot shows "Text recognized" or "No text: Recognize…" as a warning pill | existing |
+| Status | `ViewerStatusBar` pills as it draws them: zoom percent, page size, then the trailing slot: "Page n of m", and "Text recognized" or the warning pill "No text: Recognize…" | existing |
 | Inspector | `InspectorHeader` (document name, info card: pages, size, text layer, permissions), `InspectorSection`, `InspectorColorRow`, `InspectorSliderRow` (line width, opacity), `InspectorPickerRow` (font size, shape), `InspectorAction` | existing |
 | Empty state | `EmptyStateView`: "No PDF Open" · "Open a PDF or drop one here." · Open… (prominent), Create from Images… | existing |
 
@@ -1298,7 +1415,7 @@ in the sidebar (system), `Toggle` buttons for Match Case and Whole Words
 (system, `.toggleStyle(.button)`). Hits use `stateSelected` tint; the
 current hit adds a 2 pt `accent` outline (colour plus shape).
 
-### 7.3 Organize pages (View > Page Grid, ⌘4)
+### 7.3 Organize pages (View > Page Grid, ⌥⌘4)
 
 ```
 ┌───────────────┬───────────────────────────────────────────────────────────┬──────────────┐
@@ -1308,15 +1425,15 @@ current hit adds a 2 pt `accent` outline (colour plus shape).
 │  the grid)    │  └─────┘  └─────┘  │╚═══╝│  └─────┘  └─────┘                │ │Rotation 0│ │
 │               │     1        2     └─────┘     4    ▏   5  ← drop line      │ └──────────┘ │
 │               │                       3 (selected: accent outline)         │ ↻ Rotate     │
-│               │  ╭─────────────────────────────────────╮                    │ ⊕ Insert…    │
-│               │  │ ↻  ↺  ⊕ Blank  ⊕ File…  ⇪ Extract  🗑 │ ← floating group │ 🗑 Delete     │
-│               │  ╰─────────────────────────────────────╯                    │              │
+│               │  (the floating palette at the leading edge swaps its tools for  │ ⊕ Insert…    │
+│               │   ↻ ↺ ⊕Blank ⊕File… ⇪Extract ✂Crop 🗑 while the grid shows)   │ 🗑 Delete     │
+│               │                                                              │              │
 └───────────────┴───────────────────────────────────────────────────────────┴──────────────┘
 ```
 
-`ThumbnailGrid` in the detail (existing; the caption, drop indicator and
-multi-select are the `needs-ui` above), the floating `ToolbarGroup` for page
-commands (existing), `InspectorAction` rows for the selected page
+`ThumbnailGrid` in the detail (existing; its drop line and drag reorder are
+the `needs-ui` above), the same floating palette with the page commands in
+place of the tools (existing), `InspectorAction` rows for the selected page
 (existing).
 
 ### 7.4 Fill and sign
@@ -1350,7 +1467,7 @@ drawn on paper is document content), but each one is a real `TextField`,
 `Toggle(.checkbox)`, radio `Picker(.radioGroup)` or `Picker(.menu)` placed
 at the field's rect, so keyboard, focus ring and VoiceOver are the
 system's (no look-alike). The signature pad is a SwiftUI `Canvas` (content),
-the sheet a system sheet with `Picker`, `Toggle(.checkbox)`, `Button`.
+the sheet a system sheet with `Picker`, `Toggle(.checkbox)`, `Button`. (Apple docs: RadioGroupPickerStyle, CheckboxToggleStyle.)
 
 ### 7.5 Export, Reduce Size, Recognize Text
 
@@ -1367,27 +1484,35 @@ checkmark or `stateError` with an exclamation and the error's sentence.
 
 | Menu | Items (shortcut) | Owner feature |
 |---|---|---|
-| File | New from Images… (⇧⌘N), Open… (⌘O), Open Recent ▸, Close (⌘W), Save (⌘S), Save As… (⇧⌘S), Export… (⌥⌘E), Reduce File Size…, Print… (⌘P) | reader, history-files, export-convert |
-| Edit | Undo (⌘Z), Redo (⇧⌘Z), Cut, Copy (⌘C copies selected text or mark), Paste, Delete (⌫), Select All (⌘A: all text on the page), Find ▸ Find… (⌘F), Find Next (⌘G), Find Previous (⇧⌘G) | history-files, markup, find |
-| View | Single Page, Continuous (⌘1, ⌘2), Two Pages (⌘3), Page Grid (⌘4), Actual Size (⌘0), Zoom In (⌘+), Zoom Out (⌘−), Fit Width (⌘9), Fit Page, Show Sidebar (⌃⌘S), Show Inspector (⌥⌘I), Go to Page… (⌥⌘G) | reader, pages |
-| Markup | Highlight (⌃⌘H), Underline (⌃⌘U), Strike Out (⌃⌘K), Add Note (⌃⌘N), Add Text Box (⌃⌘T), Pen, Shape ▸, Sign ▸ | markup, sign |
-| Form | Next Field (⇥), Previous Field (⇧⇥), Check Form, Clear Form | forms |
-| Page | Rotate Right (⌘R), Rotate Left (⌘L), Insert Blank Page (⇧⌘B), Insert from File… (⇧⌘I), Delete Page (⌘⌫), Extract Pages…, Split… | pages |
-| Tools | Recognize Text… | ocr |
+| File | New from Images… (⇧⌘N), Import from iPhone ▸ Scan Documents (Continuity Camera), Open… (⌘O), Open Recent ▸, Combine Files…, Close (⌘W), Save (⌘S), Save As… (⇧⌘S), Export… (⌥⌘E), Reduce File Size…, Print… (⌘P) | reader, files, pages, export-convert |
+| Edit | Undo (⌘Z), Redo (⇧⌘Z), Cut, Copy (⌘C copies selected text or mark), Paste, Delete (⌫), Select All (⌘A: all text on the page), Find ▸ Find… (⌘F), Find Next (⌘G), Find Previous (⇧⌘G) | files, markup, find |
+| View | Single Page (⌥⌘1), Continuous (⌥⌘2), Two Pages (⌥⌘3), Page Grid (⌥⌘4), Actual Size (⌘1), Fit Page (⌘0), Fit Width (⌘9), Zoom In (⌘+), Zoom Out (⌘−), Back (⌘[), Forward (⌘]), Go to Page… (⌥⌘G), Show Sidebar (⌃⌘S), Show Inspector (⌥⌘I) | reader, pages |
+| Markup | Highlight (⌃⌘H), Underline (⌃⌘U), Strike Out (⌃⌘K), Add Note (⌃⌘N), Add Text Box (⌃⌘T), Pen, Shape ▸, Sign ▸; conditional W4: Edit Text, Redact | markup, sign, content-edit |
+| Form | Next Field and Previous Field (shown with Tab and Shift-Tab in their help, no key equivalent; the focused field handles the keys), Check Form, Clear Form | forms |
+| Page | Rotate Right (⌘R), Rotate Left (⌘L), Move Left (⌥⌘←), Move Right (⌥⌘→), Insert Blank Page (⇧⌘B), Insert from File… (⇧⌘I), Delete Page (⌘⌫), Crop Pages…, Extract Pages…, Split… | pages |
+| Tools | Recognize Text…; conditional W4: Apply Redactions… | ocr, content-edit |
 | Window | Switch To ▸ (suite), the system's items | suite |
 
 Tool shortcuts while the page view has focus (design.md, Canvas apps):
 V Select, T Text Select, H Highlight, U Underline, K Strike Out, N Note,
-X Text Box, P Pen, R Shape, S Sign, Space-drag Hand.
+X Text Box, P Pen, R Shape, S Sign, Space-drag Hand; conditional W4: E Edit
+Text, D Redact. Every item above is listed by `FolioCommand.menu(_:)`,
+which P-J12 compares with the real menus.
 
 ### 7.7 SuiteUI Folio needs (filed as `needs-ui` by the named feature)
 
 | Need | For | Filed by |
 |---|---|---|
 | `AppSwitcher` seventh item and ⌃⌘6, once `SuiteApp` gains `.folio` | the switcher row | foundation (with the suite line's `SuiteApp.folio` task) |
-| `ThumbnailGrid`: page caption, multi-select (Shift, ⌘), drag reorder with a drop line, keyboard reorder (⌥⌘← →) | sidebar and Page Grid | pages |
+| `ThumbnailGrid`: a drop-insertion line, drag reorder, keyboard reorder (⌥⌘← →); it already has captions and Shift and ⌘ selection | sidebar and Page Grid | pages |
 | A pad view for drawing a signature: a flat drawing well with Clear, keyboard alternative "Type instead" | signature sheet | sign; placeholder: a SwiftUI `Canvas` in FolioApp until it lands |
 | `ViewerStatusBar` trailing slot accepting a button pill ("Recognize…") | the no-text pill | ocr; placeholder: a menu item and the inspector row |
+
+Checklist:
+
+- [x] `SuiteWindow`, Flare's floating palette and the switcher row, per the 2026-10-15 decisions.
+- [x] Each screen lists the SuiteUI and system components it uses.
+- [x] Each missing component has a `needs-ui` owner and a placeholder (7.7, 9.5).
 
 ---
 
@@ -1410,33 +1535,40 @@ the named fixture; debug CI gates carry the rubric's ×10). W0 adds the
 shared timing helper `Tests/FolioModelTests/FolioBudget.swift`; each
 feature writes its rows in its own `Folio<Feature>BudgetTests.swift`. The
 **UI half** is input to the first display refresh that shows it, in frames
-late, read from the frame probe (`FrameProbe`, SuiteUI) in the perf
-journeys P-P1 to P-P6; until the probe's journey helpers are on `dev` these
-are report-only.
+late, read from the frame probe (`FrameProbe`, SuiteUI, with the journey
+helpers in `UITests/Journey+Input.swift`) in the perf journeys P-P1 to P-P6.
+Every new row ships report-only, as the rubric sets it, until ten green
+runs set its gate in `UITests/Journey+Budgets.swift`.
 
 | id | Tool | What is timed | Fixture | Device target | CI gate | Test | Feature |
 |---|---|---|---|---|---|---|---|
-| PB-1 | Open | `DocumentOpening.open` + `finishOpen` on the fake; on the live type, first page drawn | `long` (500 pages) | fake ≤ 20 ms; live first page on screen ≤ 300 ms (QB-L9: progress shown ≤ 100 ms) | fake ≤ 200 ms debug; live report-only | `FolioBudgetTests.openLong`; P-P1 | foundation, reader |
-| PB-2 | Layout | `FolioLayout` for every page (continuous, fit width) | `long` | ≤ 2 ms | ≤ 20 ms debug | `FolioBudgetTests.layoutLong` | reader |
-| PB-3 | Scroll | `visiblePages(in:)` per scroll step | `long` | ≤ 0.2 ms | ≤ 2 ms debug | `FolioBudgetTests.visiblePages`; UI half P-P2: p95 frame interval ≤ 1.5 refreshes (QB-L10) | reader |
-| PB-4 | Zoom | one `setZoom` + layout | `long` | ≤ 2 ms | ≤ 20 ms debug | `FolioBudgetTests.zoomStep`; P-P3 ≤ 2 frames late | reader |
-| PB-5 | Find | `TextFinding.find` over all page text | `long` (20,000 lines) | ≤ 50 ms for the whole document; first hit shown ≤ 100 ms | ≤ 500 ms debug | `FolioBudgetTests.findLong` | find |
-| PB-6 | Text select drag | one `select(from:to:)` step | `letter` page 1 and a `long` page | ≤ 0.5 ms | ≤ 5 ms debug | `FolioBudgetTests.selectStep`; P-P4 ≤ 2 frames late (QB-L1) | markup |
-| PB-7 | Highlight | `mark` + workspace `edit` record | `long` with 1,000 marks | ≤ 1 ms | ≤ 10 ms debug | `FolioBudgetTests.markStep` | markup |
-| PB-8 | Move or resize a mark | one drag step | `long` with 1,000 marks | ≤ 1 ms | ≤ 10 ms debug | `FolioBudgetTests.moveMarkStep`; P-P4 | markup |
-| PB-9 | Hit test | `Annotating.hit` per pointer move | 1,000 marks on one page | ≤ 1 ms (QB-L5) | ≤ 10 ms debug | `FolioBudgetTests.hit` | markup |
-| PB-10 | Pen | one ink point appended | a 2,000-point stroke | ≤ 0.2 ms | ≤ 2 ms debug | `FolioBudgetTests.inkPoint`; P-P5 ≤ 2 frames late (QB-L1) | markup |
-| PB-11 | Type in a field | one `FormFilling.set` + record (coalesced) | `form` ×200 fields | ≤ 1 ms | ≤ 10 ms debug | `FolioBudgetTests.fieldKeystroke` | forms |
-| PB-12 | Place a signature | `Signing.place` | `form` | ≤ 1 ms | ≤ 10 ms debug | `FolioBudgetTests.placeSignature` | sign |
-| PB-13 | Page reorder drag | one `move` + thumbnail list rebuild | `long` | ≤ 2 ms | ≤ 20 ms debug | `FolioBudgetTests.reorderLong`; P-P6 ≤ 2 frames late | pages |
-| PB-14 | Undo, Redo | one step | `long` with 1,000 marks | ≤ 2 ms | ≤ 20 ms debug | `FolioBudgetTests.undoStep` | history-files |
-| PB-15 | Save | live `PDFKitWriting.write` | a 50-page, 5 MB sample with 100 marks | ≤ 1 s release, progress ≤ 100 ms (QB-L9) | report-only | `FolioWritingBudgetTests` (macOS) | history-files |
-| PB-16 | Recognize text | live Vision, accurate, per page | 300 ppi scan sample | ≤ 1.5 s per page release; progress per page | report-only | `FolioOCRBudgetTests` (macOS) | ocr |
+| PB-1 | Open | `DocumentOpening.open` + `finishOpen` on the fake; on the live type, first page drawn | `long` (500 pages) | fake ≤ 20 ms; live first page on screen ≤ 300 ms (QB-L9: progress shown ≤ 100 ms) | fake ≤ 200 ms debug; live report-only | `FolioFoundationBudgetTests.openLong`; P-P1 | foundation, reader |
+| PB-2 | Layout | `FolioLayout` for every page (continuous, fit width) | `long` | ≤ 2 ms | ≤ 20 ms debug | `FolioReaderBudgetTests.layoutLong` | reader |
+| PB-3 | Scroll | `visiblePages(in:)` per scroll step | `long` | ≤ 0.2 ms | ≤ 2 ms debug | `FolioReaderBudgetTests.visiblePages`; UI half P-P2: p95 frame interval ≤ 1.5 refreshes (QB-L10) | reader |
+| PB-4 | Zoom | one `setZoom` + layout | `long` | ≤ 2 ms | ≤ 20 ms debug | `FolioReaderBudgetTests.zoomStep`; P-P3 ≤ 2 frames late | reader |
+| PB-5 | Find | `TextFinding.find` over all page text | `long` (20,000 lines) | ≤ 50 ms for the whole document (synchronous, so the first hit shows in the same refresh) | ≤ 500 ms debug | `FolioFindBudgetTests.findLong` | find |
+| PB-6 | Text select drag | one `select(from:to:)` step | `letter` page 1 and a `long` page | ≤ 0.5 ms | ≤ 5 ms debug | `FolioMarkupBudgetTests.selectStep`; P-P4 ≤ 2 frames late (QB-L1) | markup |
+| PB-7 | Highlight | `mark` + workspace `edit` record | `long1000marks` (markup's fixture) | ≤ 1 ms | ≤ 10 ms debug | `FolioMarkupBudgetTests.markStep` | markup |
+| PB-8 | Move or resize a mark | one drag step | `long1000marks` | ≤ 1 ms | ≤ 10 ms debug | `FolioMarkupBudgetTests.moveMarkStep`; P-P4 | markup |
+| PB-9 | Hit test | `Annotating.hit` per pointer move | 1,000 marks on one page | ≤ 1 ms (QB-L5) | ≤ 10 ms debug | `FolioMarkupBudgetTests.hit` | markup |
+| PB-10 | Pen | one ink point appended | a 2,000-point stroke | ≤ 0.2 ms | ≤ 2 ms debug | `FolioMarkupBudgetTests.inkPoint`; P-P5 ≤ 2 frames late (QB-L1) | markup |
+| PB-11 | Type in a field | one `FormFilling.set` + record (coalesced) | `form` ×200 fields | ≤ 1 ms | ≤ 10 ms debug | `FolioFormsBudgetTests.fieldKeystroke` | forms |
+| PB-12 | Place a signature | `Signing.place` | `form` | ≤ 1 ms | ≤ 10 ms debug | `FolioSignBudgetTests.placeSignature` | sign |
+| PB-13 | Page reorder drag | one `move` + thumbnail list rebuild | `long` | ≤ 2 ms | ≤ 20 ms debug | `FolioPagesBudgetTests.reorderLong`; P-P6 ≤ 2 frames late | pages |
+| PB-14 | Undo, Redo | one step | `long` after 1,000 note edits made in the test | ≤ 2 ms | ≤ 20 ms debug | `FolioFoundationBudgetTests.undoStep` | foundation |
+| PB-15 | Save | live `PDFKitWriting.write` | `big50` (files' fixture: 50 pages, about 5 MB of pictures, 100 marks) written as a sample | ≤ 1 s release, progress ≤ 100 ms (QB-L9) | report-only | `FolioWritingBudgetTests` (macOS) | files |
+| PB-16 | Recognize text | live Vision, accurate, per page | `scan300` (ocr's fixture: scanned pages the sample writer renders at 300 ppi) | ≤ 1.5 s per page release; progress per page | report-only | `FolioOCRBudgetTests` (macOS) | ocr |
 | PB-17 | Thumbnail | live `PageImaging.image(maxPixels: 256)` | `long` sample | ≤ 15 ms per page | report-only | `FolioImagingBudgetTests` (macOS) | reader |
+| PB-18 | New from Images | fake `open(images:)` of 20 PNG headers + `finishNewFromImages`; live: 20 photos to pages | generated in the test | fake ≤ 5 ms; live ≤ 2 s release, progress ≤ 100 ms | fake ≤ 50 ms debug; live report-only | `FolioExportBudgetTests.newFromImages` (Linux); `FolioExportTests` (macOS) | export-convert |
+| PB-19 | Reduce File Size | live write with `optimizeImages` | `photos` sample | ≤ 3 s release, progress ≤ 100 ms (QB-L9) | report-only | `FolioReduceSizeTests` (macOS) | export-convert |
+| PB-20 | Export pages as images | live 3 pages at 300 ppi | `letter` sample | < 1 s release (QB-L8's PNG row) | report-only | `FolioExportTests` (macOS) | export-convert |
+| PB-21 | Combine | `PageOrganizing.combine` of `long` with `long` | `long` | ≤ 5 ms | ≤ 50 ms debug | `FolioPagesBudgetTests.combineLong` | pages |
 
-Every row above has a fixture that exists in section 6 (`long`, `form`,
-`letter`) or a sample the named feature writes with `FolioSampleWriter`,
-and a named test; none is judged by eye.
+Every row above names a fixture from section 6 (`long`, `form`, `letter`,
+`photos`) or one its feature adds in its own fixtures file (`long1000marks`,
+`big50`, `scan300`), written as a real PDF by `FolioSampleWriter`
+(`-FolioWriteSample`), and a test in a file its feature owns (section 9);
+none is judged by eye.
 
 ### 8.2 App-audit checks
 
@@ -1457,18 +1589,18 @@ count above 0 would need the captain). Every Folio control ships with a
 
 ### 8.3 Layout spec
 
-Checked at window sizes **minimum** (`SuiteSize.windowMinimum`, about 944 ×
-600 after #973), **1024 × 768** (the CI runner's display), **1280 × 800**,
+Checked at window sizes **minimum** (`SuiteSize.windowMinimum`, 944 × 560
+with the editor inspector after #973), **1024 × 768** (the CI runner's display), **1280 × 800**,
 **1440 × 900** and **1920 × 1080**, through `-FolioWindowSize`, with the
 `letter` fixture open, page 1 selected and a highlight selected.
 
 | id | Rule | Tolerance | Measured by |
 |---|---|---|---|
 | PL1 | Nothing off the window; no two enabled controls overlap | the audit's own (1 pt slack, 2 pt overlap) | `testLayoutAtWidths` (`FolioJourneyTests.swift`, W0): relaunch at each size, shoot `folio-layout-<w>` |
-| PL2 | Fit Width: the page's width equals the detail width minus 2 × 24 pt margins; Fit Page: the whole page shows | ≤ 1 pt | same journey reads `folio.page.1`'s frame; Linux half `FolioLayoutTests.fitWidth`, `.fitPage` |
-| PL3 | Pages are centered in the detail column, 16 pt apart, never under the floating palette at the default zoom | centers ≤ 1 pt; gap ≤ 0.5 pt | same; Linux half `FolioLayoutTests.column` |
+| PL2 | The page column starts after the palette's band (the palette's leading inset 12 pt + its width + 12 pt) and ends 24 pt before the detail's trailing edge; Fit Width makes the page exactly that column's width; Fit Page shows the whole page inside it | ≤ 1 pt | same journey reads `folio.page.1`'s frame; Linux half `FolioLayoutTests.fitWidth`, `.fitPage` |
+| PL3 | Pages are centered in the page column (PL2), 16 pt apart, so at Fit Width and any smaller zoom no page lies under the palette | centers ≤ 1 pt; gap ≤ 0.5 pt | same; Linux half `FolioLayoutTests.column` |
 | PL4 | The floating palette sits 12 pt in from the detail's leading edge, vertically centered, and never overlaps the status pills or the find bar at any width | 0 pt overlap | `testLayoutAtWidths` frames of `suite.tools`, `folio.find`, `suite.status` |
-| PL5 | At minimum width the inspector can be hidden and the page still fits at ≥ 50% zoom; with it shown, Fit Width still shows a page ≥ 320 pt wide | ≥ 320 pt | same, at minimum |
+| PL5 | At the minimum window with the sidebar collapsed and the inspector shown, Fit Width shows a page ≥ 320 pt wide (944 − 304 inspector − 68 palette band − 24 = 548 pt of column); with the sidebar shown too, ≥ 320 pt or the inspector hides on ⌥⌘I and the page widens | ≥ 320 pt | same, at minimum |
 | PL6 | Thumbnails: one column in the sidebar, each ≤ the sidebar width − 24 pt, captions never truncate below 4 digits ("1234") | ≤ 0.5 pt | `FolioThumbnailLayoutTests` (macOS host) |
 | PL7 | Page Grid: as many columns as fit at 160 pt per thumbnail plus 16 pt gaps, at least 2 | exact column count | `FolioLayoutTests.grid` (Linux) at 600, 900, 1400 pt |
 | PL8 | Form fields drawn over the page stay inside their PDF rect at every zoom from 50% to 400% | ≤ 0.5 pt after scale | `FolioFieldOverlayTests` (macOS host) |
@@ -1477,17 +1609,17 @@ Checked at window sizes **minimum** (`SuiteSize.windowMinimum`, about 944 ×
 
 | id | Output | Reference | Tolerance | Test (where) | Feature |
 |---|---|---|---|---|---|
-| PF-1 | Live `PageImaging` of a sample page (vector text, a filled shape, an image) at 2× | the same page drawn by `PDFPage.draw(with:to:)` into a bitmap context in the test (the reference renderer) | channel ≤ 2/255, ≤ 0.5% of pixels (QB-V2) | `FolioImagingFidelityTests` (macOS) | reader |
+| PF-1 | Live `PageImaging` of a sample page `FolioSampleWriter` draws with known content: a filled square of a known colour at a known rect, a text line, and a file highlight and a filled text field over a blank area | the known pixels (the square's colour inside its rect, white outside); the blank area under the file's highlight and field stays white (annotations and widgets hidden, Apple docs: PDFAnnotation.shouldDisplay) | square channel ≤ 2/255; blank area exactly white | `FolioImagingFidelityTests` (macOS) | reader |
 | PF-2 | `PDFKitText.text(of:)` of a sample written by `FolioSampleWriter` with known strings at known points | the strings and their positions the writer used | strings exact; glyph boxes ≤ 1 pt | `FolioTextFidelityTests` (macOS) | reader |
-| PF-3 | Saved file reopened: pages, order, rotation, field values, annotation kinds, rects and colours | the `FolioDocumentState` that was saved | exact for values; rects ≤ 0.01 pt; colours ≤ 1/255 | `FolioRoundTripTests` (macOS, every fixture as a sample) | history-files |
+| PF-3 | Saved file reopened: pages, order, rotation, field values, annotation kinds, rects and colours | the `FolioDocumentState` that was saved | exact for values; rects ≤ 0.01 pt; colours ≤ 1/255 | `FolioRoundTripTests` (macOS, every fixture as a sample) | files |
 | PF-4 | A page with Folio's marks drawn on screen vs the same page exported to PNG at the same scale | each other | channel ≤ 2/255, ≤ 0.5% of pixels (QB-V4: what you see is what you export) | `FolioMarksFidelityTests` (macOS) | markup, export-convert |
-| PF-5 | Flatten: a flattened save has no annotation or widget objects, and its pixels equal the unflattened save's | the unflattened save rendered | annotation count 0; pixels as PF-4 | `FolioFlattenTests` (macOS) | history-files |
-| PF-6 | Password save: opening with no password throws `.needsPassword`, with the wrong one `.wrongPassword`, with the right one equals the saved state; owner restrictions read back as set | the options used | exact | `FolioPasswordTests` (macOS) | history-files |
-| PF-7 | Combine `letter` + `form`: page count, order, every field name (a taken name gets " 2"), every value | the two inputs | exact | `PageOrganizingContractTests` (Linux) and `FolioRoundTripTests` (macOS) | pages |
+| PF-5 | Flatten: a flattened save has no annotation or widget objects, and its pixels equal the unflattened save's | the unflattened save rendered | annotation count 0; pixels as PF-4 | `FolioFlattenTests` (macOS) | files |
+| PF-6 | Password save: opening with no password throws `.needsPassword`, with the wrong one `.wrongPassword`, with the right one equals the saved state; owner restrictions read back as set; a restricted file opened without its owner password refuses to save changed restrictions (`.restricted`) | the options used | exact | `FolioPasswordTests` (macOS) | files |
+| PF-7 | Combine `letter` + `form`: page count, order, every field name (a taken name gets " 2"), every value | the two inputs | exact | `PageOrganizingContractTests` (Linux) and `FolioCombineRoundTripTests` (macOS) | pages |
 | PF-8 | OCR on a sample rendered from known lines at 300 ppi | the known lines | character error rate ≤ 1% on the clean sample; found by Find afterwards | `FolioOCRFidelityTests` (macOS) | ocr |
-| PF-9 | Saved OCR text layer: after Save and reopen, `PageTextReading` returns the recognized lines with origin `embedded` and the page's pixels are unchanged | the recognized text; the page before save | strings exact; pixels as PF-1 | `FolioOCRRoundTripTests` (macOS) | ocr |
+| PF-9 | Saved OCR text layer: the live writer draws each page's `recognizedText` as invisible text (Apple docs: CGTextDrawingMode.invisible) at its glyph boxes; after Save and reopen, `PageTextReading` returns the recognized lines with origin `embedded` and the page's pixels are unchanged | the recognized text; the page before save | strings exact; pixels as PF-1 | `FolioOCRRoundTripTests` (macOS) | ocr |
 | PF-10 | Export PNG at 72, 150, 300 ppi | page size × ppi / 72 | pixel size exact | `FolioExportTests` (macOS) and `PageExportingContractTests` (Linux) | export-convert |
-| PF-11 | Reduce File Size on the image-heavy sample | the original | output ≤ 60% of the input's bytes, every page's text equal, PF-1 pixels within channel ≤ 12/255 at 1× (images resampled) | `FolioReduceSizeTests` (macOS) | export-convert |
+| PF-11 | Reduce File Size on the `photos` sample (300 ppi photos) | the original | output ≤ 60% of the input's bytes, every page's text equal, pixels within channel ≤ 12/255 at 1× (images re-encoded); if the platform options can't reach 60% on this sample, the test records the ratio and Q9 decides | `FolioReduceSizeTests` (macOS) | export-convert |
 | PF-12 | Signature placed in a field, saved, reopened | the placed rect and the signature's strokes | rect ≤ 0.01 pt; stroke points ≤ 0.1 pt | `FolioSignatureRoundTripTests` (macOS) | sign |
 | PF-13 | (W4) Redaction: text extracted from a redacted region after save, and every content stream's decoded bytes | nothing; the removed strings | no text; no occurrence | `FolioRedactionTests` (macOS) and CP-4's own tests (Linux, creative-core) | content-edit |
 
@@ -1495,12 +1627,18 @@ Checked at window sizes **minimum** (`SuiteSize.windowMinimum`, about 944 ×
 
 | id | How Folio meets it | Measured by |
 |---|---|---|
-| QB-F1 No dead controls | every command's availability is `unavailableHelp(for:)`; every palette tool's `drag` changes the document on `letter` or is disabled with help | `FolioToolsTests`, `FolioCommandTests` (Linux); P-J13 |
+| QB-F1 No dead controls | every command's availability is `unavailableHelp(for:)`; every enabled palette tool's `drag` on `letter` changes the workspace (document, selection or viewport: Hand pans, Text Select selects) or the tool is disabled with help | `FolioToolsTests`, `FolioCommandTests` (Linux); P-J12 |
 | QB-F2 Immediate feedback | a text drag shows the selection before mouse-up; a pen stroke draws as it goes; a refused edit shows its sentence at the place it was refused | the probe's preview mark (P-P4, P-P5); journey asserts |
 | QB-F3 One gesture, one named step | `edit(_:coalesceKey:_:)` names every step ("Undo Highlight", "Undo Move Page", "Undo Typing"); scroll, zoom and find are never steps | Model tests count undo steps; journeys read the Edit menu |
-| QB-F4 Keyboard parity | every tool has a one-key shortcut; Tab and Shift-Tab walk form fields; arrows move a selected mark 1 pt (Shift 10 pt); ⌥⌘← → move a selected page | P-J5, P-J7 |
+| QB-F4 Keyboard parity | every tool has a one-key shortcut; Tab and Shift-Tab walk form fields and the arrows pick inside a radio group; arrows move a selected mark 1 pt (Shift 10 pt); ⌥⌘← → move a selected page | P-J5 (Tab, →), P-J7 (⌥⌘→), P-J4 (arrows on the note, added by the markup feature) |
 | QB-F5 Reduce Motion, Increase Contrast | page scroll is content; zoom is instant under Reduce Motion; goldens in Increase Contrast | goldens |
 | QB-F6 Geometry holds | only SuiteUI components and tokens in chrome | design lint |
+
+Checklist:
+
+- [x] Every budget names a fixture that exists, a number, and a test in a file its feature owns.
+- [x] The audit enters at 0 for every check.
+- [x] Every layout rule has a tolerance and a test; every fidelity test has an independent reference.
 
 ---
 
@@ -1517,22 +1655,22 @@ waves a later feature may own an earlier one's file only after that one is
 done, which the filing rule below guarantees. `docs/blueprints/pdf/waves.py`
 holds the table below as data and checks it: no file owned twice in a wave,
 every owned `Sources/` file in exactly one component of `c4-planned.json`,
-and every wait on an earlier wave. Run on 2026-10-15: `WAVES: PASS (12
-features, 143 agent-hours)`.
+and every wait on an earlier wave. Run on 2026-10-15 after critic round 1:
+`WAVES: PASS (12 features, 143 agent-hours)`.
 
 ```
-W0  foundation ─────────────────────────────────────────────── waits on nothing
-        │                                                        (+ supervisor: Package.swift, project.yml, bundle-apps)
+W0  foundation (P-T17, P-T30) ───────────────────────────────── waits on nothing
+        │                                                        (+ supervisor: Package.swift, bundle-apps, CLAUDE.md, AGENTS.md)
         ├──▶ W1  reader          (P-T1, P-T2, P-T3, P-T19)
         ├──▶ W1  find            (P-T6)
         ├──▶ W1  markup          (P-T5, P-T7–P-T10)            six leads side by side,
         ├──▶ W1  forms           (P-T11, P-T12)                 no shared file
         ├──▶ W1  pages           (P-T3 thumbnails, P-T13–P-T16)
-        └──▶ W1  history-files   (P-T17, P-T18, P-T20, P-T26)
+        └──▶ W1  files           (P-T18, P-T20, P-T26)
                  │
                  ├──▶ W2  sign            after markup, forms
-                 ├──▶ W2  export-convert  after history-files, markup   (P-T4, P-T22–P-T25)
-                 └──▶ W2  ocr             after reader, find, history-files
+                 ├──▶ W2  export-convert  after files, markup   (P-T4, P-T22–P-T25)
+                 └──▶ W2  ocr             after reader, find, markup, files
                           │
                           └──▶ W3  core-loop   after every W1 and W2 feature
                                    │
@@ -1546,20 +1684,20 @@ issue is filed with the one dependency in its row.
 
 | Wave | Feature | Feature issue `Depends on:` | Tasks (about) | Agent-hours (about) |
 |---|---|---|---|---|
-| W0 | `foundation` | nothing (its supervisor task needs the captain's merge) | 14 PRs: values; protocols; fakes (two PRs); fixtures and services; workspace state and `edit`; commands and availability; tools; layout and page summary; launch arguments; window shell, sidebar and inspector stubs, area stubs; live stubs; contract suites; the every-control and layout journeys; audit entry and C4 | 22 |
+| W0 | `foundation` | nothing (its first PR is supervisor-merged) | 15 PRs: targets, C4 containers and the CLAUDE.md line (supervisor); values; protocols; fakes (two PRs); source store, fixtures and services; workspace state, `edit`, undo and redo; commands and availability; tools; layout and page summary with its facet stubs; launch arguments and the sample-writer seam; window shell, thumbnails, overlay seam, sidebar and inspector stubs, area stubs; live stubs; contract suites; the every-control and layout journeys; audit entry | 24 |
 | W1 | `reader` | foundation | 8 | 13 |
 | W1 | `find` | foundation | 4 | 6 |
 | W1 | `markup` | foundation | 9 | 15 |
 | W1 | `forms` | foundation | 6 | 10 |
 | W1 | `pages` | foundation | 8 | 13 |
-| W1 | `history-files` | foundation | 7 | 12 |
+| W1 | `files` | foundation | 6 | 10 |
 | W2 | `sign` | filed once markup and forms are done; the later of the two | 6 | 10 |
-| W2 | `export-convert` | the later of history-files and markup | 7 | 12 |
-| W2 | `ocr` | the last of reader, find, history-files | 5 | 8 |
+| W2 | `export-convert` | the later of files and markup | 7 | 12 |
+| W2 | `ocr` | the last of reader, find, markup, files | 5 | 8 |
 | W3 | `core-loop` | the last W1 or W2 feature to finish | 4 | 6 |
 | W4 | `content-edit` | core-loop, and creative-core CP-1 to CP-5 closed | 8 | 16 |
 
-Totals: W0 22 agent-hours; W1 69 (about 12 wall-clock hours with six leads
+Totals: W0 24 agent-hours; W1 67 (about 12 wall-clock hours with six leads
 in parallel); W2 30; W3 6; W4 16 (plus the creative-core work, estimated
 there). 143 agent-hours for Folio's own work; v1 without W4 is 127.
 
@@ -1569,11 +1707,11 @@ Generated by `python3 docs/blueprints/pdf/waves.py --markdown`.
 
 #### W0 · `foundation`: Foundation: targets, contracts, fakes, workspace, the window's seams
 
-- **Covers:** P-T30 (no dead controls); open and show pages on fakes for every W1 feature; the targets and the audit entry
+- **Covers:** P-T17 (undo and redo), P-T30 (no dead controls); open and show pages on fakes, thumbnails that go to a page, the overlay seam, the source store; the targets, C4 and the audit entry
 - **Waits on:** nothing
-- **Proves:** P-J0, P-J12, P-J13; PB-1 (fake half); PL1-PL5
-- **Estimate:** about 14 PRs, 22 agent-hours
-- **Owned files (128):** `Sources/FolioModel/Contracts/FolioValues.swift`, `Sources/FolioModel/Contracts/FolioContracts.swift`, `Sources/FolioModel/Fakes/FolioFakeFile.swift`, `Sources/FolioModel/Fakes/FakeDocumentOpening.swift`, `Sources/FolioModel/Fakes/FakePageImaging.swift`, `Sources/FolioModel/Fakes/FakePageTextReading.swift`, `Sources/FolioModel/Fakes/FakeTextFinding.swift`, `Sources/FolioModel/Fakes/FakeTextSelecting.swift`, `Sources/FolioModel/Fakes/FakeAnnotating.swift`, `Sources/FolioModel/Fakes/FakeFormFilling.swift`, `Sources/FolioModel/Fakes/FakeSigning.swift`, `Sources/FolioModel/Fakes/FakeSignatureStore.swift`, `Sources/FolioModel/Fakes/FakePageOrganizing.swift`, `Sources/FolioModel/Fakes/FakeDocumentHistory.swift`, `Sources/FolioModel/Fakes/FakeDocumentWriting.swift`, `Sources/FolioModel/Fakes/FakePageExporting.swift`, `Sources/FolioModel/Fakes/FakeTextRecognizing.swift`, `Sources/FolioModel/Fixtures/FolioFixtures.swift`, `Sources/FolioModel/FolioServices.swift`, `Sources/FolioModel/FolioWorkspace.swift`, `Sources/FolioModel/FolioCommand.swift`, `Sources/FolioModel/FolioTool.swift`, `Sources/FolioModel/FolioLaunch.swift`, `Sources/FolioModel/FolioLayout.swift`, `Sources/FolioModel/FolioPageSummary.swift`, `Sources/FolioModel/Workspace/FolioWorkspace+Read.swift`, `Sources/FolioModel/Workspace/FolioWorkspace+Find.swift`, `Sources/FolioModel/Workspace/FolioWorkspace+Markup.swift`, `Sources/FolioModel/Workspace/FolioWorkspace+Forms.swift`, `Sources/FolioModel/Workspace/FolioWorkspace+Sign.swift`, `Sources/FolioModel/Workspace/FolioWorkspace+Pages.swift`, `Sources/FolioModel/Workspace/FolioWorkspace+History.swift`, `Sources/FolioModel/Workspace/FolioWorkspace+Files.swift`, `Sources/FolioModel/Workspace/FolioWorkspace+Export.swift`, `Sources/FolioModel/Workspace/FolioWorkspace+OCR.swift`, `Sources/FolioModel/Availability/FolioAvailability+Read.swift`, `Sources/FolioModel/Availability/FolioAvailability+Find.swift`, `Sources/FolioModel/Availability/FolioAvailability+Markup.swift`, `Sources/FolioModel/Availability/FolioAvailability+Forms.swift`, `Sources/FolioModel/Availability/FolioAvailability+Sign.swift`, `Sources/FolioModel/Availability/FolioAvailability+Pages.swift`, `Sources/FolioModel/Availability/FolioAvailability+History.swift`, `Sources/FolioModel/Availability/FolioAvailability+Files.swift`, `Sources/FolioModel/Availability/FolioAvailability+Export.swift`, `Sources/FolioModel/Availability/FolioAvailability+OCR.swift`, `Sources/FolioModel/Tools/FolioTool+Select.swift`, `Sources/FolioModel/Tools/FolioTool+TextMarkup.swift`, `Sources/FolioModel/Tools/FolioTool+Annotate.swift`, `Sources/FolioModel/Tools/FolioTool+Sign.swift`, `Sources/FolioModel/Live/LiveTextFinding.swift`, `Sources/FolioModel/Live/LiveTextSelecting.swift`, `Sources/FolioModel/Live/LiveAnnotating.swift`, `Sources/FolioModel/Live/LiveFormFilling.swift`, `Sources/FolioModel/Live/LiveSigning.swift`, `Sources/FolioModel/Live/LiveSignatureStore.swift`, `Sources/FolioModel/Live/LivePageOrganizing.swift`, `Sources/FolioModel/Live/LiveDocumentHistory.swift`, `Sources/FolioApp/FolioApp.swift`, `Sources/FolioApp/FolioWindow.swift`, `Sources/FolioApp/FolioControls.swift`, `Sources/FolioApp/PageView/FolioPageView.swift`, `Sources/FolioApp/PageView/FolioPageGestures.swift`, `Sources/FolioApp/PageView/FolioMarksLayer.swift`, `Sources/FolioApp/PageView/FolioFieldLayer.swift`, `Sources/FolioApp/Sidebar/FolioSidebar.swift`, `Sources/FolioApp/Sidebar/FolioThumbnails.swift`, `Sources/FolioApp/Inspector/FolioInspector.swift`, `Sources/FolioApp/Live/FolioServices+Live.swift`, `Sources/FolioApp/FolioWindow+Read.swift`, `Sources/FolioApp/FolioWindow+Find.swift`, `Sources/FolioApp/FolioWindow+Markup.swift`, `Sources/FolioApp/FolioWindow+Forms.swift`, `Sources/FolioApp/FolioWindow+Sign.swift`, `Sources/FolioApp/FolioWindow+Pages.swift`, `Sources/FolioApp/FolioWindow+History.swift`, `Sources/FolioApp/FolioWindow+Files.swift`, `Sources/FolioApp/FolioWindow+Export.swift`, `Sources/FolioApp/FolioWindow+OCR.swift`, `Sources/FolioApp/FolioCommands+Read.swift`, `Sources/FolioApp/FolioCommands+Find.swift`, `Sources/FolioApp/FolioCommands+Markup.swift`, `Sources/FolioApp/FolioCommands+Forms.swift`, `Sources/FolioApp/FolioCommands+Sign.swift`, `Sources/FolioApp/FolioCommands+Pages.swift`, `Sources/FolioApp/FolioCommands+History.swift`, `Sources/FolioApp/FolioCommands+Files.swift`, `Sources/FolioApp/FolioCommands+Export.swift`, `Sources/FolioApp/FolioCommands+OCR.swift`, `Sources/FolioApp/Live/PDFKitOpening.swift`, `Sources/FolioApp/Live/PDFKitImageOpening.swift`, `Sources/FolioApp/Live/PDFKitImaging.swift`, `Sources/FolioApp/Live/PDFKitText.swift`, `Sources/FolioApp/Live/PDFKitFields.swift`, `Sources/FolioApp/Live/PDFKitAnnotations.swift`, `Sources/FolioApp/Live/PDFKitWriting.swift`, `Sources/FolioApp/Live/PDFKitExporting.swift`, `Sources/FolioApp/Live/VisionRecognizing.swift`, `Sources/FolioApp/Live/FolioSampleWriter.swift`, `Sources/FolioApp/Live/FolioSignatureMark.swift`, `Tests/FolioModelTests/DocumentOpeningContractTests.swift`, `Tests/FolioModelTests/PageImagingContractTests.swift`, `Tests/FolioModelTests/PageTextReadingContractTests.swift`, `Tests/FolioModelTests/TextFindingContractTests.swift`, `Tests/FolioModelTests/TextSelectingContractTests.swift`, `Tests/FolioModelTests/AnnotatingContractTests.swift`, `Tests/FolioModelTests/FormFillingContractTests.swift`, `Tests/FolioModelTests/SigningContractTests.swift`, `Tests/FolioModelTests/SignatureStoringContractTests.swift`, `Tests/FolioModelTests/PageOrganizingContractTests.swift`, `Tests/FolioModelTests/DocumentHistoryContractTests.swift`, `Tests/FolioModelTests/DocumentWritingContractTests.swift`, `Tests/FolioModelTests/PageExportingContractTests.swift`, `Tests/FolioModelTests/TextRecognizingContractTests.swift`, `Tests/FolioModelTests/FolioCommandTests.swift`, `Tests/FolioModelTests/FolioToolsTests.swift`, `Tests/FolioModelTests/FolioWorkspaceTests.swift`, `Tests/FolioModelTests/FolioLayoutTests.swift`, `Tests/FolioModelTests/FolioFixturesTests.swift`, `Tests/FolioModelTests/FolioPageSummaryTests.swift`, `Tests/FolioModelTests/FolioBudget.swift`, `Tests/FolioModelTests/FolioFoundationBudgetTests.swift`, `Tests/AppSnapshotTests/FolioWindowSnapshots.swift`, `UITests/FolioJourneyTests.swift`, `UITests/audit-baseline.json`, `docs/c4/model.json`, `Package.swift`, `project.yml`, `scripts/bundle-apps`
+- **Proves:** P-J0, P-J12, P-J13 (PL2, PL3, PL5); PB-1 (fake half), PB-14
+- **Estimate:** about 15 PRs, 24 agent-hours
+- **Owned files (144):** `Sources/FolioModel/Contracts/FolioValues.swift`, `Sources/FolioModel/Contracts/FolioContracts.swift`, `Sources/FolioModel/Fakes/FolioFakeFile.swift`, `Sources/FolioModel/Fakes/FakeDocumentOpening.swift`, `Sources/FolioModel/Fakes/FakePageImaging.swift`, `Sources/FolioModel/Fakes/FakePageTextReading.swift`, `Sources/FolioModel/Fakes/FakeTextFinding.swift`, `Sources/FolioModel/Fakes/FakeTextSelecting.swift`, `Sources/FolioModel/Fakes/FakeAnnotating.swift`, `Sources/FolioModel/Fakes/FakeFormFilling.swift`, `Sources/FolioModel/Fakes/FakeSigning.swift`, `Sources/FolioModel/Fakes/FakeSignatureStore.swift`, `Sources/FolioModel/Fakes/FakePageOrganizing.swift`, `Sources/FolioModel/Fakes/FakeDocumentHistory.swift`, `Sources/FolioModel/Fakes/FakeDocumentWriting.swift`, `Sources/FolioModel/Fakes/FakePageExporting.swift`, `Sources/FolioModel/Fakes/FakeTextRecognizing.swift`, `Sources/FolioModel/Fakes/FakeDocumentSources.swift`, `Sources/FolioModel/Fixtures/FolioFixtures.swift`, `Sources/FolioModel/FolioServices.swift`, `Sources/FolioModel/FolioWorkspace.swift`, `Sources/FolioModel/FolioCommand.swift`, `Sources/FolioModel/FolioTool.swift`, `Sources/FolioModel/FolioLaunch.swift`, `Sources/FolioModel/FolioLayout.swift`, `Sources/FolioModel/FolioPageSummary.swift`, `Sources/FolioModel/FolioPageSummary+Markup.swift`, `Sources/FolioModel/FolioPageSummary+Forms.swift`, `Sources/FolioModel/FolioPageSummary+Pages.swift`, `Sources/FolioModel/FolioPageSummary+OCR.swift`, `Sources/FolioModel/FolioPageSummary+ContentEdit.swift`, `Sources/FolioModel/Fixtures/FolioFixtures+Markup.swift`, `Sources/FolioModel/Fixtures/FolioFixtures+Files.swift`, `Sources/FolioModel/Fixtures/FolioFixtures+OCR.swift`, `Sources/FolioModel/Workspace/FolioWorkspace+Read.swift`, `Sources/FolioModel/Workspace/FolioWorkspace+Find.swift`, `Sources/FolioModel/Workspace/FolioWorkspace+Markup.swift`, `Sources/FolioModel/Workspace/FolioWorkspace+Forms.swift`, `Sources/FolioModel/Workspace/FolioWorkspace+Sign.swift`, `Sources/FolioModel/Workspace/FolioWorkspace+Pages.swift`, `Sources/FolioModel/Workspace/FolioWorkspace+History.swift`, `Sources/FolioModel/Workspace/FolioWorkspace+Files.swift`, `Sources/FolioModel/Workspace/FolioWorkspace+Export.swift`, `Sources/FolioModel/Workspace/FolioWorkspace+OCR.swift`, `Sources/FolioModel/Availability/FolioAvailability+Read.swift`, `Sources/FolioModel/Availability/FolioAvailability+Find.swift`, `Sources/FolioModel/Availability/FolioAvailability+Markup.swift`, `Sources/FolioModel/Availability/FolioAvailability+Forms.swift`, `Sources/FolioModel/Availability/FolioAvailability+Sign.swift`, `Sources/FolioModel/Availability/FolioAvailability+Pages.swift`, `Sources/FolioModel/Availability/FolioAvailability+History.swift`, `Sources/FolioModel/Availability/FolioAvailability+Files.swift`, `Sources/FolioModel/Availability/FolioAvailability+Export.swift`, `Sources/FolioModel/Availability/FolioAvailability+OCR.swift`, `Sources/FolioModel/Tools/FolioTool+Select.swift`, `Sources/FolioModel/Tools/FolioTool+TextMarkup.swift`, `Sources/FolioModel/Tools/FolioTool+Annotate.swift`, `Sources/FolioModel/Tools/FolioTool+Sign.swift`, `Sources/FolioModel/Live/LiveTextFinding.swift`, `Sources/FolioModel/Live/LiveTextSelecting.swift`, `Sources/FolioModel/Live/LiveAnnotating.swift`, `Sources/FolioModel/Live/LiveFormFilling.swift`, `Sources/FolioModel/Live/LiveSigning.swift`, `Sources/FolioModel/Live/LiveSignatureStore.swift`, `Sources/FolioModel/Live/LivePageOrganizing.swift`, `Sources/FolioModel/Live/LiveDocumentHistory.swift`, `Sources/FolioModel/Live/LiveDocumentSources.swift`, `Sources/FolioApp/FolioApp.swift`, `Sources/FolioApp/FolioWindow.swift`, `Sources/FolioApp/PageView/FolioPageView.swift`, `Sources/FolioApp/PageView/FolioPageGestures.swift`, `Sources/FolioApp/PageView/FolioPageOverlays.swift`, `Sources/FolioApp/PageView/FolioMarksLayer.swift`, `Sources/FolioApp/PageView/FolioFieldLayer.swift`, `Sources/FolioApp/PageView/FolioSelectionLayer.swift`, `Sources/FolioApp/PageView/FolioFindHitsLayer.swift`, `Sources/FolioApp/PageView/FolioRedactionLayer.swift`, `Sources/FolioApp/Sidebar/FolioSidebar.swift`, `Sources/FolioApp/Sidebar/FolioThumbnails.swift`, `Sources/FolioApp/Inspector/FolioInspector.swift`, `Sources/FolioApp/Live/FolioServices+Live.swift`, `Sources/FolioApp/FolioWindow+Read.swift`, `Sources/FolioApp/FolioWindow+Find.swift`, `Sources/FolioApp/FolioWindow+Markup.swift`, `Sources/FolioApp/FolioWindow+Forms.swift`, `Sources/FolioApp/FolioWindow+Sign.swift`, `Sources/FolioApp/FolioWindow+Pages.swift`, `Sources/FolioApp/FolioWindow+History.swift`, `Sources/FolioApp/FolioWindow+Files.swift`, `Sources/FolioApp/FolioWindow+Export.swift`, `Sources/FolioApp/FolioWindow+OCR.swift`, `Sources/FolioApp/FolioCommands+Read.swift`, `Sources/FolioApp/FolioCommands+Find.swift`, `Sources/FolioApp/FolioCommands+Markup.swift`, `Sources/FolioApp/FolioCommands+Forms.swift`, `Sources/FolioApp/FolioCommands+Sign.swift`, `Sources/FolioApp/FolioCommands+Pages.swift`, `Sources/FolioApp/FolioCommands+History.swift`, `Sources/FolioApp/FolioCommands+Files.swift`, `Sources/FolioApp/FolioCommands+Export.swift`, `Sources/FolioApp/FolioCommands+OCR.swift`, `Sources/FolioApp/Live/PDFKitOpening.swift`, `Sources/FolioApp/Live/PDFKitImageOpening.swift`, `Sources/FolioApp/Live/PDFKitImaging.swift`, `Sources/FolioApp/Live/PDFKitText.swift`, `Sources/FolioApp/Live/PDFKitFields.swift`, `Sources/FolioApp/Live/PDFKitAnnotations.swift`, `Sources/FolioApp/Live/PDFKitWriting.swift`, `Sources/FolioApp/Live/PDFKitExporting.swift`, `Sources/FolioApp/Live/VisionRecognizing.swift`, `Sources/FolioApp/Live/FolioSampleWriter.swift`, `Sources/FolioApp/Live/FolioSignatureMark.swift`, `Tests/FolioModelTests/DocumentOpeningContractTests.swift`, `Tests/FolioModelTests/PageImagingContractTests.swift`, `Tests/FolioModelTests/PageTextReadingContractTests.swift`, `Tests/FolioModelTests/TextFindingContractTests.swift`, `Tests/FolioModelTests/TextSelectingContractTests.swift`, `Tests/FolioModelTests/AnnotatingContractTests.swift`, `Tests/FolioModelTests/FormFillingContractTests.swift`, `Tests/FolioModelTests/SigningContractTests.swift`, `Tests/FolioModelTests/SignatureStoringContractTests.swift`, `Tests/FolioModelTests/PageOrganizingContractTests.swift`, `Tests/FolioModelTests/DocumentHistoryContractTests.swift`, `Tests/FolioModelTests/DocumentWritingContractTests.swift`, `Tests/FolioModelTests/PageExportingContractTests.swift`, `Tests/FolioModelTests/TextRecognizingContractTests.swift`, `Tests/FolioModelTests/FolioCommandTests.swift`, `Tests/FolioModelTests/FolioToolsTests.swift`, `Tests/FolioModelTests/FolioWorkspaceTests.swift`, `Tests/FolioModelTests/FolioLayoutTests.swift`, `Tests/FolioModelTests/FolioFixturesTests.swift`, `Tests/FolioModelTests/FolioPageSummaryTests.swift`, `Tests/FolioModelTests/FolioHistoryTests.swift`, `Tests/FolioModelTests/FolioBudget.swift`, `Tests/FolioModelTests/FolioFoundationBudgetTests.swift`, `Tests/AppSnapshotTests/FolioWindowSnapshots.swift`, `UITests/FolioJourneyTests.swift`, `UITests/audit-baseline.json`, `docs/c4/model.json`, `Package.swift`, `project.yml`, `scripts/bundle-apps`, `CLAUDE.md`, `AGENTS.md`
 
 #### W1 · `reader`: Open and read: live PDFKit, zoom and view modes, go to page, outline, passwords, open errors
 
@@ -1589,7 +1727,7 @@ Generated by `python3 docs/blueprints/pdf/waves.py --markdown`.
 - **Waits on:** foundation
 - **Proves:** P-J2; PB-5
 - **Estimate:** about 4 PRs, 6 agent-hours
-- **Owned files (13):** `Sources/FolioModel/Live/LiveTextFinding.swift`, `Sources/FolioModel/Fakes/FakeTextFinding.swift`, `Sources/FolioModel/Workspace/FolioWorkspace+Find.swift`, `Sources/FolioModel/Availability/FolioAvailability+Find.swift`, `Sources/FolioApp/FolioWindow+Find.swift`, `Sources/FolioApp/FolioCommands+Find.swift`, `Sources/FolioApp/PageView/FolioFindBar.swift`, `Sources/FolioApp/Sidebar/FolioFindResults.swift`, `Tests/FolioModelTests/TextFindingContractTests.swift`, `Tests/FolioModelTests/FolioFindTests.swift`, `Tests/FolioModelTests/FolioFindBudgetTests.swift`, `Tests/AppSnapshotTests/FolioFindSnapshots.swift`, `UITests/FolioJourneyTests+Find.swift`
+- **Owned files (14):** `Sources/FolioModel/Live/LiveTextFinding.swift`, `Sources/FolioModel/Fakes/FakeTextFinding.swift`, `Sources/FolioModel/Workspace/FolioWorkspace+Find.swift`, `Sources/FolioModel/Availability/FolioAvailability+Find.swift`, `Sources/FolioApp/FolioWindow+Find.swift`, `Sources/FolioApp/FolioCommands+Find.swift`, `Sources/FolioApp/PageView/FolioFindBar.swift`, `Sources/FolioApp/PageView/FolioFindHitsLayer.swift`, `Sources/FolioApp/Sidebar/FolioFindResults.swift`, `Tests/FolioModelTests/TextFindingContractTests.swift`, `Tests/FolioModelTests/FolioFindTests.swift`, `Tests/FolioModelTests/FolioFindBudgetTests.swift`, `Tests/AppSnapshotTests/FolioFindSnapshots.swift`, `UITests/FolioJourneyTests+Find.swift`
 
 #### W1 · `markup`: Mark up: select text, highlight, underline, strike out, notes, text boxes, pen, shapes
 
@@ -1597,7 +1735,7 @@ Generated by `python3 docs/blueprints/pdf/waves.py --markdown`.
 - **Waits on:** foundation
 - **Proves:** P-J3, P-J4; PB-6, PB-7, PB-8, PB-9, PB-10
 - **Estimate:** about 9 PRs, 15 agent-hours
-- **Owned files (25):** `Sources/FolioModel/Live/LiveTextSelecting.swift`, `Sources/FolioModel/Live/LiveAnnotating.swift`, `Sources/FolioModel/Fakes/FakeTextSelecting.swift`, `Sources/FolioModel/Fakes/FakeAnnotating.swift`, `Sources/FolioModel/Workspace/FolioWorkspace+Markup.swift`, `Sources/FolioModel/Availability/FolioAvailability+Markup.swift`, `Sources/FolioModel/Tools/FolioTool+Select.swift`, `Sources/FolioModel/Tools/FolioTool+TextMarkup.swift`, `Sources/FolioModel/Tools/FolioTool+Annotate.swift`, `Sources/FolioApp/FolioWindow+Markup.swift`, `Sources/FolioApp/FolioCommands+Markup.swift`, `Sources/FolioApp/PageView/FolioMarksLayer.swift`, `Sources/FolioApp/PageView/FolioSelectionLayer.swift`, `Sources/FolioApp/PageView/FolioPageGestures.swift`, `Sources/FolioApp/Inspector/FolioMarkInspector.swift`, `Sources/FolioApp/Sidebar/FolioMarksList.swift`, `Sources/FolioApp/Live/PDFKitAnnotations.swift`, `Tests/FolioModelTests/TextSelectingContractTests.swift`, `Tests/FolioModelTests/AnnotatingContractTests.swift`, `Tests/FolioModelTests/FolioMarkupTests.swift`, `Tests/FolioModelTests/FolioToolsTests.swift`, `Tests/FolioModelTests/FolioMarkupBudgetTests.swift`, `Tests/AppSnapshotTests/FolioMarkupSnapshots.swift`, `UITests/FolioJourneyTests+Markup.swift`, `UITests/FolioJourneyTests+Annotate.swift`
+- **Owned files (27):** `Sources/FolioModel/Live/LiveTextSelecting.swift`, `Sources/FolioModel/Live/LiveAnnotating.swift`, `Sources/FolioModel/Fakes/FakeTextSelecting.swift`, `Sources/FolioModel/Fakes/FakeAnnotating.swift`, `Sources/FolioModel/Workspace/FolioWorkspace+Markup.swift`, `Sources/FolioModel/Availability/FolioAvailability+Markup.swift`, `Sources/FolioModel/Tools/FolioTool+Select.swift`, `Sources/FolioModel/Tools/FolioTool+TextMarkup.swift`, `Sources/FolioModel/Tools/FolioTool+Annotate.swift`, `Sources/FolioApp/FolioWindow+Markup.swift`, `Sources/FolioApp/FolioCommands+Markup.swift`, `Sources/FolioApp/PageView/FolioMarksLayer.swift`, `Sources/FolioApp/PageView/FolioSelectionLayer.swift`, `Sources/FolioApp/PageView/FolioPageGestures.swift`, `Sources/FolioApp/Inspector/FolioMarkInspector.swift`, `Sources/FolioApp/Sidebar/FolioMarksList.swift`, `Sources/FolioApp/Live/PDFKitAnnotations.swift`, `Sources/FolioModel/FolioPageSummary+Markup.swift`, `Sources/FolioModel/Fixtures/FolioFixtures+Markup.swift`, `Tests/FolioModelTests/TextSelectingContractTests.swift`, `Tests/FolioModelTests/AnnotatingContractTests.swift`, `Tests/FolioModelTests/FolioMarkupTests.swift`, `Tests/FolioModelTests/FolioToolsTests.swift`, `Tests/FolioModelTests/FolioMarkupBudgetTests.swift`, `Tests/AppSnapshotTests/FolioMarkupSnapshots.swift`, `UITests/FolioJourneyTests+Markup.swift`, `UITests/FolioJourneyTests+Annotate.swift`
 
 #### W1 · `forms`: Fill forms: fields over the page, Tab order, required fields, clear
 
@@ -1605,23 +1743,23 @@ Generated by `python3 docs/blueprints/pdf/waves.py --markdown`.
 - **Waits on:** foundation
 - **Proves:** P-J5; PB-11; PL8
 - **Estimate:** about 6 PRs, 10 agent-hours
-- **Owned files (15):** `Sources/FolioModel/Live/LiveFormFilling.swift`, `Sources/FolioModel/Fakes/FakeFormFilling.swift`, `Sources/FolioModel/Workspace/FolioWorkspace+Forms.swift`, `Sources/FolioModel/Availability/FolioAvailability+Forms.swift`, `Sources/FolioApp/FolioWindow+Forms.swift`, `Sources/FolioApp/FolioCommands+Forms.swift`, `Sources/FolioApp/PageView/FolioFieldLayer.swift`, `Sources/FolioApp/Inspector/FolioFieldInspector.swift`, `Sources/FolioApp/Live/PDFKitFields.swift`, `Tests/FolioModelTests/FormFillingContractTests.swift`, `Tests/FolioModelTests/FolioFormsTests.swift`, `Tests/FolioModelTests/FolioFormsBudgetTests.swift`, `Tests/AppSnapshotTests/FolioFormsSnapshots.swift`, `Tests/AppSnapshotTests/FolioFieldOverlayTests.swift`, `UITests/FolioJourneyTests+Forms.swift`
+- **Owned files (16):** `Sources/FolioModel/Live/LiveFormFilling.swift`, `Sources/FolioModel/Fakes/FakeFormFilling.swift`, `Sources/FolioModel/Workspace/FolioWorkspace+Forms.swift`, `Sources/FolioModel/Availability/FolioAvailability+Forms.swift`, `Sources/FolioApp/FolioWindow+Forms.swift`, `Sources/FolioApp/FolioCommands+Forms.swift`, `Sources/FolioApp/PageView/FolioFieldLayer.swift`, `Sources/FolioApp/Inspector/FolioFieldInspector.swift`, `Sources/FolioApp/Live/PDFKitFields.swift`, `Sources/FolioModel/FolioPageSummary+Forms.swift`, `Tests/FolioModelTests/FormFillingContractTests.swift`, `Tests/FolioModelTests/FolioFormsTests.swift`, `Tests/FolioModelTests/FolioFormsBudgetTests.swift`, `Tests/AppSnapshotTests/FolioFormsSnapshots.swift`, `Tests/AppSnapshotTests/FolioFieldOverlayTests.swift`, `UITests/FolioJourneyTests+Forms.swift`
 
 #### W1 · `pages`: Organize pages: thumbnails, grid, reorder, rotate, delete, insert, combine, extract, split
 
 - **Covers:** P-T3 (thumbnails), P-T13, P-T14, P-T15, P-T16
 - **Waits on:** foundation
-- **Proves:** P-J7, P-J8; PB-13; PL6, PL7; PF-7
+- **Proves:** P-J7, P-J8; PB-13, PB-21; PL6, PL7; PF-7
 - **Estimate:** about 8 PRs, 13 agent-hours
-- **Owned files (19):** `Sources/FolioModel/Live/LivePageOrganizing.swift`, `Sources/FolioModel/Fakes/FakePageOrganizing.swift`, `Sources/FolioModel/Workspace/FolioWorkspace+Pages.swift`, `Sources/FolioModel/Availability/FolioAvailability+Pages.swift`, `Sources/FolioApp/FolioWindow+Pages.swift`, `Sources/FolioApp/FolioCommands+Pages.swift`, `Sources/FolioApp/Sidebar/FolioThumbnails.swift`, `Sources/FolioApp/PageGrid/FolioPageGrid.swift`, `Sources/FolioApp/Sheets/FolioExtractSheet.swift`, `Sources/FolioApp/Sheets/FolioInsertSheet.swift`, `Sources/FolioApp/Sheets/FolioCombineSheet.swift`, `Sources/FolioApp/Sheets/FolioCropSheet.swift`, `Tests/FolioModelTests/PageOrganizingContractTests.swift`, `Tests/FolioModelTests/FolioPagesTests.swift`, `Tests/FolioModelTests/FolioPagesBudgetTests.swift`, `Tests/AppSnapshotTests/FolioPagesSnapshots.swift`, `Tests/AppSnapshotTests/FolioThumbnailLayoutTests.swift`, `UITests/FolioJourneyTests+Pages.swift`, `UITests/FolioJourneyTests+Combine.swift`
+- **Owned files (23):** `Sources/FolioModel/Live/LivePageOrganizing.swift`, `Sources/FolioModel/Fakes/FakePageOrganizing.swift`, `Sources/FolioModel/Workspace/FolioWorkspace+Pages.swift`, `Sources/FolioModel/Availability/FolioAvailability+Pages.swift`, `Sources/FolioApp/FolioWindow+Pages.swift`, `Sources/FolioApp/FolioCommands+Pages.swift`, `Sources/FolioApp/Sidebar/FolioThumbnails.swift`, `Sources/FolioApp/PageGrid/FolioPageGrid.swift`, `Sources/FolioApp/Sheets/FolioExtractSheet.swift`, `Sources/FolioApp/Sheets/FolioInsertSheet.swift`, `Sources/FolioApp/Sheets/FolioCombineSheet.swift`, `Sources/FolioApp/Sheets/FolioCropSheet.swift`, `Sources/FolioModel/FolioGridLayout.swift`, `Sources/FolioModel/FolioPageSummary+Pages.swift`, `Tests/FolioModelTests/PageOrganizingContractTests.swift`, `Tests/FolioModelTests/FolioPagesTests.swift`, `Tests/FolioModelTests/FolioGridLayoutTests.swift`, `Tests/AppSnapshotTests/FolioCombineRoundTripTests.swift`, `Tests/FolioModelTests/FolioPagesBudgetTests.swift`, `Tests/AppSnapshotTests/FolioPagesSnapshots.swift`, `Tests/AppSnapshotTests/FolioThumbnailLayoutTests.swift`, `UITests/FolioJourneyTests+Pages.swift`, `UITests/FolioJourneyTests+Combine.swift`
 
-#### W1 · `history-files`: Undo, redo, save, save as, flatten, passwords
+#### W1 · `files`: Save, save as, flatten, passwords and restrictions, document properties
 
-- **Covers:** P-T17, P-T18, P-T20, P-T26
+- **Covers:** P-T18, P-T20, P-T26
 - **Waits on:** foundation
-- **Proves:** P-J9, P-J10; PB-14, PB-15; PF-3, PF-5, PF-6
-- **Estimate:** about 7 PRs, 12 agent-hours
-- **Owned files (24):** `Sources/FolioModel/Live/LiveDocumentHistory.swift`, `Sources/FolioModel/Fakes/FakeDocumentHistory.swift`, `Sources/FolioApp/Live/PDFKitWriting.swift`, `Sources/FolioModel/Workspace/FolioWorkspace+History.swift`, `Sources/FolioModel/Workspace/FolioWorkspace+Files.swift`, `Sources/FolioModel/Availability/FolioAvailability+History.swift`, `Sources/FolioModel/Availability/FolioAvailability+Files.swift`, `Sources/FolioApp/FolioWindow+History.swift`, `Sources/FolioApp/FolioWindow+Files.swift`, `Sources/FolioApp/FolioCommands+History.swift`, `Sources/FolioApp/FolioCommands+Files.swift`, `Sources/FolioApp/Sheets/FolioSaveOptionsSheet.swift`, `Sources/FolioApp/Inspector/FolioDocumentInspector.swift`, `Tests/FolioModelTests/DocumentHistoryContractTests.swift`, `Tests/FolioModelTests/DocumentWritingContractTests.swift`, `Tests/FolioModelTests/FolioHistoryTests.swift`, `Tests/FolioModelTests/FolioFilesTests.swift`, `Tests/FolioModelTests/FolioFilesBudgetTests.swift`, `Tests/AppSnapshotTests/FolioRoundTripTests.swift`, `Tests/AppSnapshotTests/FolioFlattenTests.swift`, `Tests/AppSnapshotTests/FolioPasswordTests.swift`, `Tests/AppSnapshotTests/FolioWritingBudgetTests.swift`, `UITests/FolioJourneyTests+History.swift`, `UITests/FolioJourneyTests+Files.swift`
+- **Proves:** P-J10; PB-15; PF-3, PF-5, PF-6
+- **Estimate:** about 6 PRs, 10 agent-hours
+- **Owned files (16):** `Sources/FolioApp/Live/PDFKitWriting.swift`, `Sources/FolioModel/Workspace/FolioWorkspace+Files.swift`, `Sources/FolioModel/Availability/FolioAvailability+Files.swift`, `Sources/FolioApp/FolioWindow+Files.swift`, `Sources/FolioApp/FolioCommands+Files.swift`, `Sources/FolioApp/Sheets/FolioSaveOptionsSheet.swift`, `Sources/FolioApp/Inspector/FolioDocumentInspector.swift`, `Sources/FolioModel/Fixtures/FolioFixtures+Files.swift`, `Tests/FolioModelTests/DocumentWritingContractTests.swift`, `Tests/FolioModelTests/FolioFilesTests.swift`, `Tests/FolioModelTests/FolioFilesBudgetTests.swift`, `Tests/AppSnapshotTests/FolioRoundTripTests.swift`, `Tests/AppSnapshotTests/FolioFlattenTests.swift`, `Tests/AppSnapshotTests/FolioPasswordTests.swift`, `Tests/AppSnapshotTests/FolioWritingBudgetTests.swift`, `UITests/FolioJourneyTests+Files.swift`
 
 #### W2 · `sign`: Sign: draw, type or pick a signature and initials; keep them; place them
 
@@ -1634,26 +1772,26 @@ Generated by `python3 docs/blueprints/pdf/waves.py --markdown`.
 #### W2 · `export-convert`: Export pages and text, new from images, reduce size, print
 
 - **Covers:** P-T4, P-T22, P-T23, P-T24, P-T25
-- **Waits on:** history-files, markup
-- **Proves:** P-J21, P-J22, P-J23, P-J24; PF-4, PF-10, PF-11
+- **Waits on:** files, markup
+- **Proves:** P-J21, P-J22, P-J23, P-J24; PB-18, PB-19, PB-20; PF-4, PF-10, PF-11
 - **Estimate:** about 7 PRs, 12 agent-hours
-- **Owned files (18):** `Sources/FolioApp/Live/PDFKitExporting.swift`, `Sources/FolioApp/Live/PDFKitImageOpening.swift`, `Sources/FolioModel/Workspace/FolioWorkspace+Export.swift`, `Sources/FolioModel/Availability/FolioAvailability+Export.swift`, `Sources/FolioApp/FolioWindow+Export.swift`, `Sources/FolioApp/FolioCommands+Export.swift`, `Sources/FolioApp/Sheets/FolioExportSheet.swift`, `Sources/FolioApp/Sheets/FolioReduceSheet.swift`, `Sources/FolioApp/FolioPrinting.swift`, `Tests/FolioModelTests/PageExportingContractTests.swift`, `Tests/FolioModelTests/FolioExportTests.swift`, `Tests/AppSnapshotTests/FolioExportTests.swift`, `Tests/AppSnapshotTests/FolioReduceSizeTests.swift`, `Tests/AppSnapshotTests/FolioMarksFidelityTests.swift`, `UITests/FolioJourneyTests+Export.swift`, `UITests/FolioJourneyTests+Images.swift`, `UITests/FolioJourneyTests+Reduce.swift`, `UITests/FolioJourneyTests+Print.swift`
+- **Owned files (19):** `Sources/FolioApp/Live/PDFKitExporting.swift`, `Sources/FolioApp/Live/PDFKitImageOpening.swift`, `Sources/FolioModel/Workspace/FolioWorkspace+Export.swift`, `Sources/FolioModel/Availability/FolioAvailability+Export.swift`, `Sources/FolioApp/FolioWindow+Export.swift`, `Sources/FolioApp/FolioCommands+Export.swift`, `Sources/FolioApp/Sheets/FolioExportSheet.swift`, `Sources/FolioApp/Sheets/FolioReduceSheet.swift`, `Sources/FolioApp/FolioPrinting.swift`, `Tests/FolioModelTests/PageExportingContractTests.swift`, `Tests/FolioModelTests/FolioExportBudgetTests.swift`, `Tests/FolioModelTests/FolioExportTests.swift`, `Tests/AppSnapshotTests/FolioExportTests.swift`, `Tests/AppSnapshotTests/FolioReduceSizeTests.swift`, `Tests/AppSnapshotTests/FolioMarksFidelityTests.swift`, `UITests/FolioJourneyTests+Export.swift`, `UITests/FolioJourneyTests+Images.swift`, `UITests/FolioJourneyTests+Reduce.swift`, `UITests/FolioJourneyTests+Print.swift`
 
 #### W2 · `ocr`: Recognize text on scans and keep it as a text layer
 
 - **Covers:** P-T27
-- **Waits on:** reader, find, history-files
+- **Waits on:** reader, find, markup, files
 - **Proves:** P-J20; PB-16; PF-8, PF-9
 - **Estimate:** about 5 PRs, 8 agent-hours
-- **Owned files (12):** `Sources/FolioApp/Live/VisionRecognizing.swift`, `Sources/FolioModel/Workspace/FolioWorkspace+OCR.swift`, `Sources/FolioModel/Availability/FolioAvailability+OCR.swift`, `Sources/FolioApp/FolioWindow+OCR.swift`, `Sources/FolioApp/FolioCommands+OCR.swift`, `Sources/FolioApp/Sheets/FolioRecognizeSheet.swift`, `Tests/FolioModelTests/TextRecognizingContractTests.swift`, `Tests/FolioModelTests/FolioOCRTests.swift`, `Tests/AppSnapshotTests/FolioOCRFidelityTests.swift`, `Tests/AppSnapshotTests/FolioOCRRoundTripTests.swift`, `Tests/AppSnapshotTests/FolioOCRBudgetTests.swift`, `UITests/FolioJourneyTests+OCR.swift`
+- **Owned files (14):** `Sources/FolioApp/Live/VisionRecognizing.swift`, `Sources/FolioModel/Workspace/FolioWorkspace+OCR.swift`, `Sources/FolioModel/Availability/FolioAvailability+OCR.swift`, `Sources/FolioApp/FolioWindow+OCR.swift`, `Sources/FolioApp/FolioCommands+OCR.swift`, `Sources/FolioApp/Sheets/FolioRecognizeSheet.swift`, `Sources/FolioModel/FolioPageSummary+OCR.swift`, `Sources/FolioModel/Fixtures/FolioFixtures+OCR.swift`, `Tests/FolioModelTests/TextRecognizingContractTests.swift`, `Tests/FolioModelTests/FolioOCRTests.swift`, `Tests/AppSnapshotTests/FolioOCRFidelityTests.swift`, `Tests/AppSnapshotTests/FolioOCRRoundTripTests.swift`, `Tests/AppSnapshotTests/FolioOCRBudgetTests.swift`, `UITests/FolioJourneyTests+OCR.swift`
 
 #### W3 · `core-loop`: The core loop, live, measured
 
 - **Covers:** every tier-1 row on live services
-- **Waits on:** reader, find, markup, forms, pages, history-files, sign, export-convert, ocr
-- **Proves:** P-J14, P-J12 (final), P-J13 (final), P-P1-P-P6
+- **Waits on:** reader, find, markup, forms, pages, files, sign, export-convert, ocr
+- **Proves:** P-J9, P-J14, P-J13 (PL1, PL4), P-P1-P-P6
 - **Estimate:** about 4 PRs, 6 agent-hours
-- **Owned files (5):** `UITests/FolioJourneyTests+Loop.swift`, `UITests/FolioJourneyTests+Perf.swift`, `UITests/FolioJourneyTests.swift`, `Tests/FolioModelTests/FolioLoopTests.swift`, `docs/blueprints/pdf.md`
+- **Owned files (6):** `UITests/FolioJourneyTests+Loop.swift`, `UITests/FolioJourneyTests+Perf.swift`, `UITests/FolioJourneyTests.swift`, `UITests/FolioJourneyTests+History.swift`, `Tests/FolioModelTests/FolioLoopTests.swift`, `docs/blueprints/pdf.md`
 
 #### W4 · `content-edit`: Conditional: edit existing text in place, and true redaction (needs CorePDF CP-1 to CP-5)
 
@@ -1661,20 +1799,24 @@ Generated by `python3 docs/blueprints/pdf/waves.py --markdown`.
 - **Waits on:** core-loop
 - **Proves:** P-J25, P-J26; PF-13
 - **Estimate:** about 8 PRs, 16 agent-hours
-- **Owned files (17):** `Sources/FolioModel/Contracts/FolioContentEditContracts.swift`, `Sources/FolioModel/Fakes/FakeTextReplacing.swift`, `Sources/FolioModel/Fakes/FakeRedacting.swift`, `Sources/FolioModel/Live/LiveTextReplacing.swift`, `Sources/FolioModel/Live/LiveRedacting.swift`, `Sources/FolioModel/Workspace/FolioWorkspace+ContentEdit.swift`, `Sources/FolioModel/Availability/FolioAvailability+ContentEdit.swift`, `Sources/FolioModel/Tools/FolioTool+ContentEdit.swift`, `Sources/FolioApp/FolioWindow+ContentEdit.swift`, `Sources/FolioApp/FolioCommands+ContentEdit.swift`, `Sources/FolioApp/PageView/FolioRedactionLayer.swift`, `Sources/FolioApp/Sheets/FolioApplyRedactionSheet.swift`, `Tests/FolioModelTests/TextReplacingContractTests.swift`, `Tests/FolioModelTests/RedactingContractTests.swift`, `Tests/AppSnapshotTests/FolioRedactionTests.swift`, `UITests/FolioJourneyTests+ContentEdit.swift`, `Package.swift`
+- **Owned files (23):** `Sources/FolioModel/Contracts/FolioContentEditContracts.swift`, `Sources/FolioModel/Fakes/FakeTextReplacing.swift`, `Sources/FolioModel/Fakes/FakeRedacting.swift`, `Sources/FolioModel/Live/LiveTextReplacing.swift`, `Sources/FolioModel/Live/LiveRedacting.swift`, `Sources/FolioModel/Workspace/FolioWorkspace+ContentEdit.swift`, `Sources/FolioModel/Availability/FolioAvailability+ContentEdit.swift`, `Sources/FolioModel/Tools/FolioTool+ContentEdit.swift`, `Sources/FolioApp/FolioWindow+ContentEdit.swift`, `Sources/FolioApp/FolioCommands+ContentEdit.swift`, `Sources/FolioApp/PageView/FolioRedactionLayer.swift`, `Sources/FolioApp/Sheets/FolioApplyRedactionSheet.swift`, `Tests/FolioModelTests/TextReplacingContractTests.swift`, `Tests/FolioModelTests/RedactingContractTests.swift`, `Tests/AppSnapshotTests/FolioRedactionTests.swift`, `UITests/FolioJourneyTests+ContentEdit.swift`, `Sources/FolioModel/FolioPageSummary+ContentEdit.swift`, `Sources/FolioModel/FolioTool.swift`, `Sources/FolioModel/FolioCommand.swift`, `Sources/FolioModel/FolioServices.swift`, `Sources/FolioApp/Live/FolioServices+Live.swift`, `Sources/FolioModel/Contracts/FolioValues.swift`, `Package.swift`
+
 
 ### 9.3 creative-core work
 
-The six `CorePDF` items of section 4.4. None blocks v1's W0 to W3. CP-1 to
-CP-5 gate the conditional W4 feature; CP-6 is for certificate signing
-(Later). Each is "needs a new core issue": one issue per item on
+The seven `CorePDF` items of section 4.4. None blocks v1's W0 to W3. CP-1
+to CP-5 gate the conditional W4 feature; CP-6 is for certificate signing
+and CP-7 for Reduce File Size levels (both Later). Each is "needs a new core issue": one issue per item on
 qbtrix/creative-core, labelled `needs-core`, filed after the captain
 approves, with the acceptance line from 4.4.
 
 ### 9.4 Protected paths (supervisor merges)
 
 W0's first task touches files the fast lane refuses (CLAUDE.md, Parallel
-agents), so it is a supervisor-merged PR, not a fast-lane one:
+agents: `Package.swift`, `scripts/`, `CLAUDE.md`, `AGENTS.md`), so it is a
+supervisor-merged PR, not a fast-lane one. It also carries three
+unprotected files that must land with the targets (`project.yml`,
+`UITests/audit-baseline.json`, `docs/c4/model.json`):
 
 - `Package.swift`: `"Folio"` added to `apps` and `model("Folio", [])`
   (FolioModel with no engine; `AppSnapshotTests` gains FolioApp and
@@ -1686,8 +1828,16 @@ agents), so it is a supervisor-merged PR, not a fast-lane one:
   or, once the suite's packaging lands, Folio as the sixth embedded app.
 - `UITests/audit-baseline.json`: `folio` at 0 for every check (a new app at
   0 is not a loosening; section 8.2).
+- `docs/c4/model.json`: the `folio-model` and `folio-app` containers, one
+  component per target folder, so the C4 gate passes from the first Folio
+  file (section 4).
+- `CLAUDE.md` and `AGENTS.md`: Folio added to the list of apps and lines
+  ("X is Flare, Design, Photo, Library, Halo or Folio"; `line:folio`).
 
-W4 also edits `Package.swift` (FolioModel gains the `CorePDF` product).
+W4 also edits `Package.swift` (FolioModel gains the `CorePDF` product), and
+when the suite's `SuiteModel` target lands, a supervisor-merged change adds
+it to FolioModel's dependencies for the `SuiteDocumentHost` conformance
+(section 4.3).
 
 ### 9.5 What Folio needs from other lines
 
@@ -1701,6 +1851,12 @@ W4 also edits `Package.swift` (FolioModel gains the `CorePDF` product).
 | `line:suiteui` | `ViewerStatusBar` trailing button pill | ocr (`needs-ui`) | the menu item and the inspector row |
 | `line:suiteui` | editor-in-window (#973): sidebar slot, window subtitle, `EditorDetail`, `AppSwitcher` | – (in flight) | `SuiteWindow` as on `dev`; the subtitle shows as the title's suffix |
 
+Checklist:
+
+- [x] `waves.py` passes: no file owned twice in a wave, every `Sources/` file in one component, every wait on an earlier wave.
+- [x] Each feature names its waits, owned files and estimate.
+- [x] Protected paths and other lines' work are named, with who files what.
+
 ---
 
 ## 10. Decisions and questions for the captain
@@ -1712,9 +1868,10 @@ W4 also edits `Package.swift` (FolioModel gains the `CorePDF` product).
    tests and journeys run on Linux; PDFKit reads and writes at the edges.
 3. **Folio follows the system appearance** like Library: it is a reading app,
    and pages are white paper.
-4. **Tier 1 includes New from Images and Reduce File Size** because the
-   numbers put them in the top five (1.1 rows 4 and 5), although they are
-   one-off actions.
+4. **Tier 1 includes New from Images and Reduce File Size** (rows 4 and 5),
+   whose result stays a PDF, while converting out of PDF (rows 2 and 14) is
+   tier 2 as export is in every suite app. Overrule this and P-T23 becomes
+   tier 1 with P-J21 as its journey.
 5. **Word-processing export is text only** (no layout), named so in the
    sheet; spreadsheet and slide exports are Later.
 6. **OCR is in v1** (Vision is on device and cheap); **compare is Later**;
@@ -1731,9 +1888,9 @@ W4 also edits `Package.swift` (FolioModel gains the `CorePDF` product).
 
 - **Q1 Name.** Folio, Page or Quill? Whichever is picked needs a trademark
   check before the first public build.
-- **Q2 Line.** Approve a new line `line:folio` (labels `line:folio`,
-  `gap`), and the W0 supervisor task on `Package.swift`, `project.yml`,
-  `scripts/bundle-apps` and the audit baseline?
+- **Q2 Line.** Approve a new line `line:folio`, and the W0 supervisor task
+  on `Package.swift`, `scripts/bundle-apps`, `CLAUDE.md` and `AGENTS.md`
+  (with `project.yml`, the audit baseline and `docs/c4/model.json`)?
 - **Q3 Default app.** Should Folio ever offer to become the default PDF app
   (a one-time prompt in onboarding), or only declare itself an Alternate
   and leave the choice to Finder's Get Info?
@@ -1748,5 +1905,71 @@ W4 also edits `Package.swift` (FolioModel gains the `CorePDF` product).
 - **Q7 Scripted forms.** Folio detects and names scripts and XFA but never
   runs them. Acceptable, or should the scripted-form banner also refuse to
   save such forms?
+- **Q9 Reduce File Size.** v1 has one level built on PDFKit's two
+  documented image options, whose effect the docs don't describe; PF-11
+  measures it. If it can't shrink a 300 ppi photo PDF by 40%, ship the
+  feature off, or wait for CorePDF's image re-encoding (CP-7), which also
+  brings Small, Medium and Large levels?
 - **Q8 Suite slot.** Folio becomes the sixth app in AfterGlow (⌃⌘6, after
   Halo). Confirm the order and the glyph.
+
+Checklist:
+
+- [x] Every call can be overruled on its own.
+- [x] Every question can be answered with a choice.
+
+---
+
+## 11. Critic rounds
+
+One critic agent (a Workflow run) read this document and its folder and
+tried to refute it: a tier with no research, a journey with no component,
+a contract a journey can't be built from, a budget that can't be measured,
+overlapping owned files, a product name, internal contradictions.
+
+### Round 1: 41 findings (2 blocking, 24 major, 15 minor), on fc26f9c
+
+| # | Severity | Finding | Fixed by |
+|---|---|---|---|
+| F1 | blocking | Reduce File Size promised three ppi levels; PDFKit documents only two boolean image options | One level on those options, measured by PF-11; levels moved to CP-7 (Later); Q9 |
+| F2 | blocking | Live services had no way to reach the opened bytes | `DocumentSources` contract, fake actor and live type (UC-0); openers register; source ids from the bytes |
+| F3 | major | Recognized text lived only in a cache; save couldn't write it | `FolioPage.recognizedText`, recognition is an undo step, the writer and the fake carry it; PF-9 cites the invisible text mode |
+| F4 | major | Journeys depended on features in the same wave | Undo moved into foundation; P-J9 to core-loop; P-J10 uses the `filled` fixture; ocr waits on markup; P-J22 no longer asserts the OCR pill |
+| F5 | major | Fit Width page ran under the palette | PL2 to PL5 measure from the palette's band; PL5 arithmetic at 944 pt |
+| F6 | major | C4 containers came last, failing the gate | C4 containers in W0's first PR |
+| F7 | major | pages proved rules in reader's and files' files | `FolioGridLayout.swift` and its tests, `FolioCombineRoundTripTests.swift` owned by pages |
+| F8 | major | Page summary owned by W0 alone; grammar inconsistent | Fixed grammar; one facet file per area, owned by each feature |
+| F9 | major | Every-control journey edited by every feature | Data-driven from `suite.controls` and `FolioCommand.menu` |
+| F10 | major | Find hits and other overlays had no layer file | `FolioPageOverlays.swift` seam with stub layers; find owns its hits layer |
+| F11 | major | Journeys and budgets named samples nobody makes | `-FolioWriteSample`; per-area fixture files; `long1000marks`, `big50`, `scan300`, `photos` |
+| F12 | major | Budget tests named a suite no feature owns; no export budgets | Each PB row names its feature's suite; PB-18 to PB-21 |
+| F13 | major | Tab order put both radio buttons and the signature field in the order; no field label | Radio group one stop, signature fields skipped; `FolioFormField.label`; P-J5 uses → |
+| F14 | major | No value carried form scripts | `FolioDocumentState.scripts`, a `scripted` fixture and a test |
+| F15 | major | New from Images couldn't report skipped files; fake made pages from anything | `FolioImageInput`, `paper:`, `FolioOpened.skipped`; the fake reads PNG headers |
+| F16 | major | Fake library fixed at launch; truncated fake file read as not-a-PDF | Fake source store keyed by content hash; the magic line comes first |
+| F17 | major | Combine Files had no method, menu item or journey; Split untested | `PageOrganizing.combine`, workspace begin/finish, `init(document:services:)`, menu item, P-J8 steps |
+| F18 | major | Menus in 7.6 missed items features use | 7.6 completed; P-J12 compares with `FolioCommand.menu` |
+| F19 | major | ⌘0 and ⌘1 opposite to the suite; bare Tab and Delete as key equivalents | Actual Size ⌘1, Fit Page ⌘0, view modes ⌥⌘1–4; Tab and Delete handled by focus, not menus |
+| F20 | major | Tier rule applied unevenly to conversions | Rule stated: results that stay PDF can be tier 1, conversions out are tier 2; Q-call 10.1 item 4 |
+| F21 | major | Find's 1.3% was compare's number | Row 15 re-sourced and marked inferred |
+| F22 | major | Vote counts called use counts | Called votes, with the caveat |
+| F23 | major | Copy, word, line, ⌘A untested; no paragraph data | `line(at:)`, `copyText`, `endsParagraph`; P-J3 copies and reads the pasteboard |
+| F24 | major | Outline and labels unexercisable | Fixture outline and labels; P-J1 clicks the outline and goes to "ii" |
+| F25 | major | No contract for font size, alignment, width, opacity | `FolioMarkStyle` and `Annotating.setStyle` |
+| F26 | major | Page pictures could double-draw file marks; PF-1 compared PDFKit with itself | Imaging hides annotations (`shouldDisplay`); PF-1 checks known pixels |
+| F27 | minor | Wrong journey ids; no ⌥⌘→ step; untested tier-1 journeys | Ids fixed; P-J7 step; proof test for P-J22 and P-J23 |
+| F28 | minor | Rows without URLs; wrong research rows | URLs added; rows corrected |
+| F29 | minor | Names outside URLs | Trackers and sites described; names kept only in URLs. Kept as is: Finder and Dock, which are the platform's own UI named in Apple's HIG, not a competing product |
+| F30 | minor | Asked SuiteUI for what exists; pill order; wrong argument; 600 | Needs trimmed; pills as drawn; `-FolioWindowSize`; 944 × 560 |
+| F31 | minor | Glass surfaces and palette position contradicted | Two named surfaces; the palette at the leading edge in every sketch |
+| F32 | minor | Protected list wrong; CLAUDE.md update missing | 9.4 corrected; CLAUDE.md and AGENTS.md in W0's supervisor PR; Q2 |
+| F33 | minor | W4 couldn't add its enum cases and slots | W4 owns those files (after every other wave) |
+| F34 | minor | No section 11; no checklists after section 2 | This section; checklists in 3 to 10 |
+| F35 | minor | Dangling C4 ids; SuiteModel dependency unplanned | Externals added; 9.4 names the later supervisor change |
+| F36 | minor | Platform claims without citations | LSHandlerRank, shouldDisplay, invisible text mode, picker and toggle styles cited; background removal made a pure threshold |
+| F37 | minor | Saving could drop owner restrictions | `ownerUnlocked`, `FolioWriteError.restricted`, PF-6 case, test |
+| F38 | minor | A Folio control probe duplicated SuiteUI's | SuiteUI's `.suiteControl` and `suite.controls` |
+| F39 | minor | Stale probe reason; streaming find with no API | Report-only per the rubric, gates in `Journey+Budgets.swift`; find is synchronous over loaded text |
+| F40 | minor | Text Select and Hand can't change the document | QB-F1 reads "changes the workspace" |
+| F41 | minor | W0 claimed layout rules it can't show; zoom ladder undefined | W0 proves PL2, PL3, PL5; core-loop PL1, PL4; zoom steps in P-T2 |
+

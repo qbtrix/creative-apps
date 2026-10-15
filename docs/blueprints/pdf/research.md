@@ -31,8 +31,8 @@ Four kinds of evidence, each a number:
   have had less time to collect votes.
 - **Q&A sites** of one network: the 2,281 top-voted questions tagged pdf (or
   the built-in viewer's tag) on its general-computing, Linux, Mac and Unix
-  sites (superuser.com, askubuntu.com, apple.stackexchange.com,
-  unix.stackexchange.com), 58.8 million
+  sites (https://superuser.com, https://askubuntu.com,
+  https://apple.stackexchange.com, https://unix.stackexchange.com), 58.8 million
   views in all, grouped by task from title keywords (approximate), plus
   single-question view counts (api.stackexchange.com).
 - **One web vendor's published usage split** (May 2025, 100M+ files a week:
@@ -144,11 +144,11 @@ ranks across them are approximate.
 | Structural PDF transformer (CLI) | 5,482 | 143 | no label | https://github.com/qpdf/qpdf |
 | Desktop merge and split tool | 4,619 | 115 | 2 | https://github.com/torakiki/pdfsam |
 | Minimal keyboard viewer | 3,352 | 160 | no label | https://github.com/pwmt/zathura |
-| Rendering library and viewer | 2,999 (mirror) | – | 60 open enhancements on its Bugzilla | https://bugs.ghostscript.com |
-| KDE document viewer | 1,541 (mirror) | – | 560 open wishlist items | https://bugs.kde.org |
-| GNOME document viewer (new) | 78 | 255 | 51 `1. Feature` | https://gitlab.gnome.org/GNOME/papers |
-| GNOME document viewer (classic) | 74 | 825 | 65 `1. Feature` | https://gitlab.gnome.org/GNOME/evince |
-| Office suite's PDF import and drawing | – | – | 113 open enhancements with "pdf" in the title; 54 open bugs titled "pdf import" | https://bugs.documentfoundation.org |
+| Rendering library and viewer | 2,999 (mirror) | – | 60 open enhancements on its bug tracker | https://bugs.ghostscript.com |
+| A desktop environment's document viewer (1) | 1,541 (mirror) | – | 560 open wishlist items | https://bugs.kde.org |
+| Another desktop environment's document viewer (new) | 78 | 255 | 51 `1. Feature` | https://gitlab.gnome.org/GNOME/papers |
+| The same environment's document viewer (classic) | 74 | 825 | 65 `1. Feature` | https://gitlab.gnome.org/GNOME/evince |
+| An open-source office suite's PDF import and drawing | – | – | 113 open enhancements with "pdf" in the title; 54 open bugs titled "pdf import" | https://bugs.documentfoundation.org |
 | Native macOS reader and note taker | – | – | 17 open feature requests | https://sourceforge.net/p/skim-app/feature-requests/ |
 
 ### B.2 Most-requested features (top of every tracker, merged)
@@ -205,7 +205,7 @@ a native build per platform, Apple silicon included.
 
 ## C. What people say is missing
 
-A tech news forum, news.ycombinator.com (read through its public search
+A tech news forum, https://news.ycombinator.com (read through its public search
 API; a large general forum site could not be fetched from this session, so
 no counts from it are claimed):
 
@@ -314,7 +314,7 @@ means the page gives only the symbol and its availability.
 | Scan from iPhone | Continuity Camera: `NSMenuItem.importFromDeviceIdentifier`, `validRequestor(forSendType:returnType:)`, `readSelection(from:)` returns images | Images to pages | https://developer.apple.com/documentation/appkit/supporting-continuity-camera-in-your-mac-app |
 | Drawing input | `PKCanvasView` is not on native macOS; `PKDrawing` is | Folio's own ink canvas | https://developer.apple.com/documentation/pencilkit/pkcanvasview |
 | Writing PDFs | `CGContext(consumer:mediaBox:_:)` with owner and user password keys; the owner password must be ASCII | Fallback writer | https://developer.apple.com/documentation/coregraphics/cgcontext/init(consumer:mediabox:_:) , https://developer.apple.com/documentation/coregraphics/auxiliary-dictionary-keys |
-| Document type | `UTType.pdf` is `com.adobe.pdf` | Declared as Editor, Alternate | https://developer.apple.com/documentation/uniformtypeidentifiers/uttype-swift.struct/pdf |
+| Document type | `UTType.pdf` is the system PDF type | Declared as Editor, Alternate | https://developer.apple.com/documentation/uniformtypeidentifiers/uttype-swift.struct/pdf |
 | Read aloud | `AVSpeechSynthesizer` | Word highlighting | https://developer.apple.com/documentation/avfaudio/avspeechsynthesizer |
 | Translate | `TranslationSession` (15+), on device | Later | https://developer.apple.com/documentation/translation/translationsession |
 | On-device model | `SystemLanguageModel` (26+): availability, context size | Later: summarize; no dedicated API | https://developer.apple.com/documentation/foundationmodels/systemlanguagemodel |

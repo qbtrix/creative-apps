@@ -26,7 +26,9 @@ CONTRACTS = ["DocumentOpening", "PageImaging", "PageTextReading", "TextFinding",
              "Annotating", "FormFilling", "Signing", "SignatureStoring", "PageOrganizing",
              "DocumentHistory", "DocumentWriting", "PageExporting", "TextRecognizing"]
 PURE = ["TextFinding", "TextSelecting", "Annotating", "FormFilling", "Signing", "SignatureStore",
-        "PageOrganizing", "DocumentHistory"]
+        "PageOrganizing", "DocumentHistory", "DocumentSources"]
+FACETS = ["Markup", "Forms", "Pages", "OCR", "ContentEdit"]
+FIXTURES = ["Markup", "Files", "OCR"]
 AREAS = ["Read", "Find", "Markup", "Forms", "Sign", "Pages", "History", "Files", "Export", "OCR"]
 PLATFORM_LIVE = ["PDFKitOpening", "PDFKitImageOpening", "PDFKitImaging", "PDFKitText", "PDFKitFields",
                  "PDFKitAnnotations", "PDFKitWriting", "PDFKitExporting", "VisionRecognizing",
@@ -46,22 +48,26 @@ FEATURES = [
     {
         "id": "foundation", "wave": 0, "waits": [],
         "title": "Foundation: targets, contracts, fakes, workspace, the window's seams",
-        "covers": "P-T30 (no dead controls); open and show pages on fakes for every W1 feature; the targets and the audit entry",
-        "proves": "P-J0, P-J12, P-J13; PB-1 (fake half); PL1-PL5",
-        "prs": 14, "hours": 22,
+        "covers": "P-T17 (undo and redo), P-T30 (no dead controls); open and show pages on fakes, thumbnails that go to a page, the overlay seam, the source store; the targets, C4 and the audit entry",
+        "proves": "P-J0, P-J12, P-J13 (PL2, PL3, PL5); PB-1 (fake half), PB-14",
+        "prs": 15, "hours": 24,
         "files": (
             [M + "Contracts/FolioValues.swift", M + "Contracts/FolioContracts.swift", M + "Fakes/FolioFakeFile.swift"]
-            + [fake(c) for c in CONTRACTS]
+            + [fake(c) for c in CONTRACTS] + [M + "Fakes/FakeDocumentSources.swift"]
             + [M + "Fixtures/FolioFixtures.swift", M + "FolioServices.swift", M + "FolioWorkspace.swift",
                M + "FolioCommand.swift", M + "FolioTool.swift", M + "FolioLaunch.swift", M + "FolioLayout.swift",
                M + "FolioPageSummary.swift"]
+            + [M + "FolioPageSummary+" + f + ".swift" for f in FACETS]
+            + [M + "Fixtures/FolioFixtures+" + f + ".swift" for f in FIXTURES]
             + [M + "Workspace/FolioWorkspace+" + a + ".swift" for a in AREAS]
             + [M + "Availability/FolioAvailability+" + a + ".swift" for a in AREAS]
             + [M + "Tools/FolioTool+" + k + ".swift" for k in ["Select", "TextMarkup", "Annotate", "Sign"]]
             + [live_pure(p) for p in PURE]
-            + [A + "FolioApp.swift", A + "FolioWindow.swift", A + "FolioControls.swift",
+            + [A + "FolioApp.swift", A + "FolioWindow.swift",
                A + "PageView/FolioPageView.swift", A + "PageView/FolioPageGestures.swift",
-               A + "PageView/FolioMarksLayer.swift", A + "PageView/FolioFieldLayer.swift",
+               A + "PageView/FolioPageOverlays.swift", A + "PageView/FolioMarksLayer.swift",
+               A + "PageView/FolioFieldLayer.swift", A + "PageView/FolioSelectionLayer.swift",
+               A + "PageView/FolioFindHitsLayer.swift", A + "PageView/FolioRedactionLayer.swift",
                A + "Sidebar/FolioSidebar.swift", A + "Sidebar/FolioThumbnails.swift",
                A + "Inspector/FolioInspector.swift", A + "Live/FolioServices+Live.swift"]
             + [A + "FolioWindow+" + a + ".swift" for a in AREAS]
@@ -69,11 +75,11 @@ FEATURES = [
             + [A + "Live/" + n + ".swift" for n in PLATFORM_LIVE]
             + [T + c + "ContractTests.swift" for c in CONTRACTS]
             + [T + n + ".swift" for n in ["FolioCommandTests", "FolioToolsTests", "FolioWorkspaceTests",
-                                           "FolioLayoutTests", "FolioFixturesTests", "FolioPageSummaryTests",
+                                           "FolioLayoutTests", "FolioFixturesTests", "FolioPageSummaryTests", "FolioHistoryTests",
                                            "FolioBudget", "FolioFoundationBudgetTests"]]
             + [S + "FolioWindowSnapshots.swift", U + "FolioJourneyTests.swift",
                "UITests/audit-baseline.json", "docs/c4/model.json",
-               "Package.swift", "project.yml", "scripts/bundle-apps"]
+               "Package.swift", "project.yml", "scripts/bundle-apps", "CLAUDE.md", "AGENTS.md"]
         ),
     },
     {
@@ -102,7 +108,7 @@ FEATURES = [
         "prs": 4, "hours": 6,
         "files": [live_pure("TextFinding"), fake("TextFinding"), M + "Workspace/FolioWorkspace+Find.swift",
                   M + "Availability/FolioAvailability+Find.swift", A + "FolioWindow+Find.swift",
-                  A + "FolioCommands+Find.swift", A + "PageView/FolioFindBar.swift", A + "Sidebar/FolioFindResults.swift",
+                  A + "FolioCommands+Find.swift", A + "PageView/FolioFindBar.swift", A + "PageView/FolioFindHitsLayer.swift", A + "Sidebar/FolioFindResults.swift",
                   T + "TextFindingContractTests.swift", T + "FolioFindTests.swift", T + "FolioFindBudgetTests.swift",
                   S + "FolioFindSnapshots.swift", U + "FolioJourneyTests+Find.swift"],
     },
@@ -118,6 +124,7 @@ FEATURES = [
                   A + "FolioWindow+Markup.swift", A + "FolioCommands+Markup.swift", A + "PageView/FolioMarksLayer.swift",
                   A + "PageView/FolioSelectionLayer.swift", A + "PageView/FolioPageGestures.swift",
                   A + "Inspector/FolioMarkInspector.swift", A + "Sidebar/FolioMarksList.swift", A + "Live/PDFKitAnnotations.swift",
+                  M + "FolioPageSummary+Markup.swift", M + "Fixtures/FolioFixtures+Markup.swift",
                   T + "TextSelectingContractTests.swift", T + "AnnotatingContractTests.swift", T + "FolioMarkupTests.swift",
                   T + "FolioToolsTests.swift", T + "FolioMarkupBudgetTests.swift", S + "FolioMarkupSnapshots.swift",
                   U + "FolioJourneyTests+Markup.swift", U + "FolioJourneyTests+Annotate.swift"],
@@ -131,6 +138,7 @@ FEATURES = [
         "files": [live_pure("FormFilling"), fake("FormFilling"), M + "Workspace/FolioWorkspace+Forms.swift",
                   M + "Availability/FolioAvailability+Forms.swift", A + "FolioWindow+Forms.swift", A + "FolioCommands+Forms.swift",
                   A + "PageView/FolioFieldLayer.swift", A + "Inspector/FolioFieldInspector.swift", A + "Live/PDFKitFields.swift",
+                  M + "FolioPageSummary+Forms.swift",
                   T + "FormFillingContractTests.swift", T + "FolioFormsTests.swift", T + "FolioFormsBudgetTests.swift",
                   S + "FolioFormsSnapshots.swift", S + "FolioFieldOverlayTests.swift", U + "FolioJourneyTests+Forms.swift"],
     },
@@ -138,31 +146,31 @@ FEATURES = [
         "id": "pages", "wave": 1, "waits": ["foundation"],
         "title": "Organize pages: thumbnails, grid, reorder, rotate, delete, insert, combine, extract, split",
         "covers": "P-T3 (thumbnails), P-T13, P-T14, P-T15, P-T16",
-        "proves": "P-J7, P-J8; PB-13; PL6, PL7; PF-7",
+        "proves": "P-J7, P-J8; PB-13, PB-21; PL6, PL7; PF-7",
         "prs": 8, "hours": 13,
         "files": [live_pure("PageOrganizing"), fake("PageOrganizing"), M + "Workspace/FolioWorkspace+Pages.swift",
                   M + "Availability/FolioAvailability+Pages.swift", A + "FolioWindow+Pages.swift", A + "FolioCommands+Pages.swift",
                   A + "Sidebar/FolioThumbnails.swift", A + "PageGrid/FolioPageGrid.swift", A + "Sheets/FolioExtractSheet.swift",
                   A + "Sheets/FolioInsertSheet.swift", A + "Sheets/FolioCombineSheet.swift", A + "Sheets/FolioCropSheet.swift",
-                  T + "PageOrganizingContractTests.swift", T + "FolioPagesTests.swift",
+                  M + "FolioGridLayout.swift", M + "FolioPageSummary+Pages.swift",
+                  T + "PageOrganizingContractTests.swift", T + "FolioPagesTests.swift", T + "FolioGridLayoutTests.swift",
+                  S + "FolioCombineRoundTripTests.swift",
                   T + "FolioPagesBudgetTests.swift", S + "FolioPagesSnapshots.swift", S + "FolioThumbnailLayoutTests.swift",
                   U + "FolioJourneyTests+Pages.swift", U + "FolioJourneyTests+Combine.swift"],
     },
     {
-        "id": "history-files", "wave": 1, "waits": ["foundation"],
-        "title": "Undo, redo, save, save as, flatten, passwords",
-        "covers": "P-T17, P-T18, P-T20, P-T26",
-        "proves": "P-J9, P-J10; PB-14, PB-15; PF-3, PF-5, PF-6",
-        "prs": 7, "hours": 12,
-        "files": [live_pure("DocumentHistory"), fake("DocumentHistory"), A + "Live/PDFKitWriting.swift",
-                  M + "Workspace/FolioWorkspace+History.swift", M + "Workspace/FolioWorkspace+Files.swift",
-                  M + "Availability/FolioAvailability+History.swift", M + "Availability/FolioAvailability+Files.swift",
-                  A + "FolioWindow+History.swift", A + "FolioWindow+Files.swift", A + "FolioCommands+History.swift",
+        "id": "files", "wave": 1, "waits": ["foundation"],
+        "title": "Save, save as, flatten, passwords and restrictions, document properties",
+        "covers": "P-T18, P-T20, P-T26",
+        "proves": "P-J10; PB-15; PF-3, PF-5, PF-6",
+        "prs": 6, "hours": 10,
+        "files": [A + "Live/PDFKitWriting.swift", M + "Workspace/FolioWorkspace+Files.swift",
+                  M + "Availability/FolioAvailability+Files.swift", A + "FolioWindow+Files.swift",
                   A + "FolioCommands+Files.swift", A + "Sheets/FolioSaveOptionsSheet.swift", A + "Inspector/FolioDocumentInspector.swift",
-                  T + "DocumentHistoryContractTests.swift", T + "DocumentWritingContractTests.swift", T + "FolioHistoryTests.swift",
-                  T + "FolioFilesTests.swift", T + "FolioFilesBudgetTests.swift", S + "FolioRoundTripTests.swift",
-                  S + "FolioFlattenTests.swift", S + "FolioPasswordTests.swift", S + "FolioWritingBudgetTests.swift",
-                  U + "FolioJourneyTests+History.swift", U + "FolioJourneyTests+Files.swift"],
+                  M + "Fixtures/FolioFixtures+Files.swift",
+                  T + "DocumentWritingContractTests.swift", T + "FolioFilesTests.swift", T + "FolioFilesBudgetTests.swift",
+                  S + "FolioRoundTripTests.swift", S + "FolioFlattenTests.swift", S + "FolioPasswordTests.swift",
+                  S + "FolioWritingBudgetTests.swift", U + "FolioJourneyTests+Files.swift"],
     },
     {
         "id": "sign", "wave": 2, "waits": ["markup", "forms"],
@@ -179,39 +187,41 @@ FEATURES = [
                   S + "FolioSignSnapshots.swift", S + "FolioSignatureRoundTripTests.swift", U + "FolioJourneyTests+Sign.swift"],
     },
     {
-        "id": "export-convert", "wave": 2, "waits": ["history-files", "markup"],
+        "id": "export-convert", "wave": 2, "waits": ["files", "markup"],
         "title": "Export pages and text, new from images, reduce size, print",
         "covers": "P-T4, P-T22, P-T23, P-T24, P-T25",
-        "proves": "P-J21, P-J22, P-J23, P-J24; PF-4, PF-10, PF-11",
+        "proves": "P-J21, P-J22, P-J23, P-J24; PB-18, PB-19, PB-20; PF-4, PF-10, PF-11",
         "prs": 7, "hours": 12,
         "files": [A + "Live/PDFKitExporting.swift", A + "Live/PDFKitImageOpening.swift",
                   M + "Workspace/FolioWorkspace+Export.swift", M + "Availability/FolioAvailability+Export.swift",
                   A + "FolioWindow+Export.swift", A + "FolioCommands+Export.swift", A + "Sheets/FolioExportSheet.swift",
-                  A + "Sheets/FolioReduceSheet.swift", A + "FolioPrinting.swift", T + "PageExportingContractTests.swift",
+                  A + "Sheets/FolioReduceSheet.swift", A + "FolioPrinting.swift", T + "PageExportingContractTests.swift", T + "FolioExportBudgetTests.swift",
                   T + "FolioExportTests.swift", S + "FolioExportTests.swift", S + "FolioReduceSizeTests.swift",
                   S + "FolioMarksFidelityTests.swift", U + "FolioJourneyTests+Export.swift", U + "FolioJourneyTests+Images.swift",
                   U + "FolioJourneyTests+Reduce.swift", U + "FolioJourneyTests+Print.swift"],
     },
     {
-        "id": "ocr", "wave": 2, "waits": ["reader", "find", "history-files"],
+        "id": "ocr", "wave": 2, "waits": ["reader", "find", "markup", "files"],
         "title": "Recognize text on scans and keep it as a text layer",
         "covers": "P-T27",
         "proves": "P-J20; PB-16; PF-8, PF-9",
         "prs": 5, "hours": 8,
         "files": [A + "Live/VisionRecognizing.swift", M + "Workspace/FolioWorkspace+OCR.swift",
                   M + "Availability/FolioAvailability+OCR.swift", A + "FolioWindow+OCR.swift", A + "FolioCommands+OCR.swift",
-                  A + "Sheets/FolioRecognizeSheet.swift", T + "TextRecognizingContractTests.swift", T + "FolioOCRTests.swift",
+                  A + "Sheets/FolioRecognizeSheet.swift", M + "FolioPageSummary+OCR.swift", M + "Fixtures/FolioFixtures+OCR.swift",
+                  T + "TextRecognizingContractTests.swift", T + "FolioOCRTests.swift",
                   S + "FolioOCRFidelityTests.swift", S + "FolioOCRRoundTripTests.swift", S + "FolioOCRBudgetTests.swift",
                   U + "FolioJourneyTests+OCR.swift"],
     },
     {
-        "id": "core-loop", "wave": 3, "waits": ["reader", "find", "markup", "forms", "pages", "history-files",
+        "id": "core-loop", "wave": 3, "waits": ["reader", "find", "markup", "forms", "pages", "files",
                                                "sign", "export-convert", "ocr"],
         "title": "The core loop, live, measured",
         "covers": "every tier-1 row on live services",
-        "proves": "P-J14, P-J12 (final), P-J13 (final), P-P1-P-P6",
+        "proves": "P-J9, P-J14, P-J13 (PL1, PL4), P-P1-P-P6",
         "prs": 4, "hours": 6,
         "files": [U + "FolioJourneyTests+Loop.swift", U + "FolioJourneyTests+Perf.swift", U + "FolioJourneyTests.swift",
+                  U + "FolioJourneyTests+History.swift",
                   T + "FolioLoopTests.swift", "docs/blueprints/pdf.md"],
     },
     {
@@ -226,7 +236,9 @@ FEATURES = [
                   M + "Tools/FolioTool+ContentEdit.swift", A + "FolioWindow+ContentEdit.swift", A + "FolioCommands+ContentEdit.swift",
                   A + "PageView/FolioRedactionLayer.swift", A + "Sheets/FolioApplyRedactionSheet.swift",
                   T + "TextReplacingContractTests.swift", T + "RedactingContractTests.swift", S + "FolioRedactionTests.swift",
-                  U + "FolioJourneyTests+ContentEdit.swift", "Package.swift"],
+                  U + "FolioJourneyTests+ContentEdit.swift", M + "FolioPageSummary+ContentEdit.swift",
+                  M + "FolioTool.swift", M + "FolioCommand.swift", M + "FolioServices.swift", A + "Live/FolioServices+Live.swift",
+                  M + "Contracts/FolioValues.swift", "Package.swift"],
     },
 ]
 
