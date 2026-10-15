@@ -2,9 +2,9 @@
 
 Issue: #1044 · Packet: docs/blueprints/library/features/spine.md
 Run: act-1a13f18aaa0-lfw5 · Session: session_01DtSRhNqsphGfKkvV5eLsWW · Started: 2026-10-15T10:25Z
-Stage: 3 wave 2
+Stage: 3 wave 3
 Base: 98e4db1 (wave 2)
-Next: wait for SP-2's PR to merge; then wave 3 (SP-3)
+Next: wait for SP-3's PR to merge; then wave 4 (SP-4, SP-5)
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
