@@ -2,9 +2,9 @@
 
 Issue: #798 · Packet: docs/blueprints/flare/features/live-stage.md
 Run: act-1a13d374bd1-s92z · Session: claude/live-stage-lead-gljfd4 · Started: 2026-10-15T00:40Z
-Stage: 3 wave 3
-Base: db83d3dc259d3613acf68c62734a6c0a2b707824
-Next: wait for ST-5 and ST-9 PRs to merge, then build ST-10 with feature-done
+Stage: 3 wave 4
+Base: a3b21bfdf6b3984b976326c209d6d0bda3053663
+Next: wait for the ST-10 feature-done PR to merge, then find the dev CI run it triggers (stage 4 round 1)
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -13,12 +13,12 @@ Next: wait for ST-5 and ST-9 PRs to merge, then build ST-10 with feature-done
 | ST-2 | 2 | LiveStage nesting, editing, text | Live/LiveStage.swift, LiveStageNestingTests | LiveStageNestingTests | #923 | merged |
 | ST-3 | 1 | LiveHits.hit | Live/LiveHits.swift, LiveHitsTests | LiveHitsTests | #915 | merged |
 | ST-4 | 2 | marquee, bounds, StageHitTesting | Live/LiveHits+Marquee.swift, LiveHitsBoundsTests | LiveHitsBoundsTests | #920 | merged |
-| ST-5 | 3 | LiveConformanceTests | LiveConformanceTests | itself | #929 | open, waiting on lane |
+| ST-5 | 3 | LiveConformanceTests | LiveConformanceTests | itself | #929 | merged |
 | ST-6 | 1 | LiveShapes drafts and commits | Live/LiveShapes.swift, LiveShapesTests | LiveShapesTests | #917 | merged |
 | ST-7 | 1 | BoxGestureMath move | Live/BoxGestureMath.swift, Fakes/FakeShapes.swift, BoxGestureMathTests | BoxGestureMathTests | #918 | merged |
 | ST-8 | 2 | boxResult, commitBox | Live/LiveShapes+Box.swift, LiveShapesBoxTests | LiveShapesBoxTests | #925 | merged |
-| ST-9 | 3 | edits + ShapeBuilding | Live/LiveShapes+Edit.swift, LiveShapesEditTests | LiveShapesEditTests | #931 | open, waiting on lane |
-| ST-10 | 4 | model journey + budgets (feature-done) | LiveStageJourneyTests, LiveStageBudgetTests | itself | | todo |
+| ST-9 | 3 | edits + ShapeBuilding | Live/LiveShapes+Edit.swift, LiveShapesEditTests | LiveShapesEditTests | #931 | merged |
+| ST-10 | 4 | model journey + budgets (feature-done) | LiveStageJourneyTests, LiveStageBudgetTests | itself | | building |
 
 Journeys: J3 and J5 model half, steps 1-6 of the packet. Quality: QB-L5 hit <= 10 ms, QB-L6 draw list <= 20 ms, QB-L11 nested <= 40 ms, QB-V1 cubics kept, QB-F3 one gesture one step.
 

@@ -16,3 +16,5 @@ utc	stage	event	ref	note
 2026-10-15T02:21Z	3	stage-start	#798	ST-9 building on db83d3d
 2026-10-15T02:27Z	3	pr-opened	#929	ST-5 closes #357
 2026-10-15T02:29Z	3	pr-opened	#931	ST-9 closes #740
+2026-10-15T02:30Z	3	pr-merged	#929 #931	ST-5 ST-9; #357 #740 closed
+2026-10-15T02:30Z	3	stage-start	#798	wave 4 ST-10 feature-done on a3b21bf
