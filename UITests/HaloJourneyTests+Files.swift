@@ -3,18 +3,21 @@
 // On `-HaloSample two-comps` (live services) with `-HaloSaveTo`, ⌘S writes
 // Spot.halo with no panel; a relaunch with `-HaloOpenFile` brings Intro and
 // Outro back (each composition's `halo.layer.row.<id>` rows, the inspector
-// header, the status bar's layer readout and Ball's timeline lane match the
-// fixture) with Edit > Undo disabled. XCUITest reads SwiftUI accessibility
+// header and Ball's timeline lane match the
+// fixture, the layer count by its rows) with Edit > Undo disabled. XCUITest reads SwiftUI accessibility
 // values as empty (#262), so everything here is read by label, identifier or
 // existence: `halo.file` carries the save status as its label. Ball's three
 // keys surviving the file are proven by HaloFileValidationTests'
 // everyFixturePassesTheChecks, and Undo's "Nothing to undo." help by
 // HaloHistoryCommandTests (help tags on menu items don't read reliably).
-// An edit reads "Edited"; Open Recent > Spot asks to save, Don't Save
-// reopens the saved file. Then `huge` is saved and reopened: the first shot
-// after that launch has the `halo.file.progress` row (HB-U5), then the
-// readout reads "2000 layers". Last, a save into a folder the test made
-// read-only shows the save alert and `halo.file` reads "Not saved". Every
+// An edit reads "Edited", in `halo.file` and the title bar's subtitle;
+// Open Recent > Spot asks to save, Don't Save reopens the saved file. Then
+// `huge` is saved and reopened: the first shot after that launch has the
+// `halo.file.progress` row (HB-U5), then the list holds Solid 2000 down to
+// Solid 1. Last, a save with no edit into a folder the test made read-only
+// shows the save alert, and `halo.file` and the subtitle read "Not saved".
+// The window is 1000 by 640 so it fits CI's 1024 by 768 display (at that
+// width the status bar drops its layer readout, so rows are counted). Every
 // file lives in this test's own temp folder, passed by absolute path. One
 // shot per step, `halo-files-<step>`.
 import XCTest
@@ -48,13 +51,13 @@ final class HaloFilesJourneyTests: XCTestCase {
         expectHeader("Intro", halo)
         // Title, Badge, Background and Rig, by the fixture's ids.
         expectLayerRows(["comp-1-layer-4", "comp-1-layer-3", "comp-1-layer-2", "comp-1-layer-1"], halo)
-        expectReadout("4 layers", halo)
+        expectRowCount(4, halo)
         sidebarRow("Outro", halo).click()
         expectHeader("Outro", halo)
         XCTAssert(waitFor { !halo.element("halo.layer.row.comp-1-layer-4").exists }, "Intro's rows stayed in Outro")
         // Ball and Floor.
         expectLayerRows(["comp-2-layer-2", "comp-2-layer-1"], halo)
-        expectReadout("2 layers", halo)
+        expectRowCount(2, halo)
         let lane = halo.app.descendants(matching: .any).matching(
             NSPredicate(format: "identifier == 'halo.timeline.track' AND label == 'Ball'")).firstMatch
         XCTAssert(lane.waitForExistence(timeout: 5), "no Ball lane in Outro's timeline")
@@ -70,6 +73,7 @@ final class HaloFilesJourneyTests: XCTestCase {
         halo.element("halo.composition.new").click()
         halo.click("Create", in: .sheet)
         expectStatus("Edited", halo)
+        expectSubtitle("Edited", halo)
         halo.shot("files-3-edited")
 
         // 4. File > Open Recent > Spot asks first; Don't Save reopens the file.
@@ -86,7 +90,7 @@ final class HaloFilesJourneyTests: XCTestCase {
         halo.shot("files-4-reopened")
         quit(halo)
 
-        // 5. Save huge, quit, reopen: the progress row in the first shot, then 2000 layers.
+        // 5. Save huge, quit, reopen: the progress row in the first shot, then Solid 2000 to Solid 1.
         let huge = folder.appending(path: "Huge.halo").path
         halo = launch(["-HaloSample", "huge", "-HaloSaveTo", huge])
         halo.press(character: "s", .command)
@@ -98,18 +102,17 @@ final class HaloFilesJourneyTests: XCTestCase {
         let opening = progress.label
         halo.shot("files-5-opening")
         XCTAssertEqual(opening, "Opening Huge…", "the progress row's label")
-        expectReadout("2000 layers", halo, timeout: 120)
+        XCTAssert(
+            halo.element("halo.layer.row.comp-1-layer-2000").waitForExistence(timeout: 120), "Huge opened no Solid 2000")
+        expectLayerRows(["comp-1-layer-1"], halo)
         XCTAssertFalse(progress.exists, "the progress row outlived the open")
         halo.shot("files-5-huge")
         quit(halo)
 
-        // 6. Save into a read-only folder: the alert, then Not saved.
+        // 6. Save with no edit into a read-only folder: the alert, then Not saved.
         try FileManager.default.createDirectory(at: locked, withIntermediateDirectories: true)
         try FileManager.default.setAttributes([.posixPermissions: 0o555], ofItemAtPath: locked.path)
         halo = launch(["-HaloSample", "two-comps", "-HaloSaveTo", locked.appending(path: "Spot.halo").path])
-        halo.element("halo.composition.new").click()
-        halo.click("Create", in: .sheet)
-        expectStatus("Edited", halo)
         halo.press(character: "s", .command)
         let failed = alert(halo)
         XCTAssert(
@@ -117,15 +120,16 @@ final class HaloFilesJourneyTests: XCTestCase {
         halo.shot("files-6-save-alert")
         failed.buttons["OK"].click()
         expectStatus("Not saved", halo)
+        expectSubtitle("Not saved", halo)
         halo.shot("files-6-not-saved")
     }
 
     // MARK: - Helpers
 
-    /// Launches Halo at 1280 by 800 (narrower drops the status bar's layer
-    /// readout) and waits for its window.
+    /// Launches Halo at 1000 by 640, inside CI's 1024 by 768 display, and
+    /// waits for its window.
     @MainActor private func launch(_ arguments: [String]) -> Journey {
-        let halo = Journey("Halo", self, arguments: arguments + ["-HaloWindowSize", "1280x800"])
+        let halo = Journey("Halo", self, arguments: arguments + ["-HaloWindowSize", "1000x640"])
         XCTAssert(halo.app.windows.firstMatch.waitForExistence(timeout: 30), "no window opened")
         return halo
     }
@@ -162,10 +166,20 @@ final class HaloFilesJourneyTests: XCTestCase {
         }
     }
 
-    /// The status bar's layer readout reads `readout`.
-    @MainActor private func expectReadout(_ readout: String, _ halo: Journey, timeout: Int = 30) {
-        let found = text(readout, in: halo.app.windows.firstMatch, exactly: true)
-        XCTAssert(found.waitForExistence(timeout: TimeInterval(timeout)), "no \(readout) readout in the viewer")
+    /// The layer list holds exactly `count` distinct `halo.layer.row.*` rows.
+    @MainActor private func expectRowCount(_ count: Int, _ halo: Journey) {
+        let rows = halo.element("halo.layer.list").descendants(matching: .any)
+            .matching(NSPredicate(format: "identifier BEGINSWITH %@", "halo.layer.row."))
+        let found = { Set(rows.allElementsBoundByIndex.map(\.identifier)).count }
+        XCTAssert(waitFor { found() == count }, "the layer list has \(found()) rows, not \(count)")
+    }
+
+    /// The title bar's subtitle reads `status`: a text in the window that
+    /// isn't the hidden `halo.file` element.
+    @MainActor private func expectSubtitle(_ status: String, _ halo: Journey) {
+        let subtitle = halo.app.windows.firstMatch.staticTexts.matching(NSPredicate(
+            format: "(label == %@ OR value == %@) AND identifier != %@", status, status, "halo.file")).firstMatch
+        XCTAssert(subtitle.waitForExistence(timeout: 5), "the title bar shows no \(status) subtitle")
     }
 
     /// Edit > Undo is disabled. Its "Nothing to undo." help is proven by
@@ -176,6 +190,7 @@ final class HaloFilesJourneyTests: XCTestCase {
         XCTAssert(undo.waitForExistence(timeout: 3), "the Edit menu has no plain Undo after an open")
         XCTAssertFalse(undo.isEnabled, "Edit > Undo is enabled after an open")
         halo.press(.escape)
+        XCTAssert(halo.app.menus.firstMatch.waitForNonExistence(timeout: 2), "the Edit menu stayed open")
     }
 
     /// File > Open Recent ▸, checks `name` is the first entry and clicks it.

@@ -2,7 +2,7 @@
 // an open from `beginOpen` to `finishOpen` (which replaces the document and
 // clears history, or leaves the project as it was), what a save or a failed
 // save leaves, the recent list (newest first, 10 at most, no repeated path),
-// the window title and save status, and where Save writes (`saveTarget`,
+// the window title, subtitle and save status, and where Save writes (`saveTarget`,
 // HF-9). The only writer of `file`, besides
 // `edit` marking it unsaved.
 // W0's `HaloFileState.opening` is a Bool, so the file being opened rides at
@@ -68,9 +68,11 @@ extension HaloProject {
         pushRecent(HaloRecentFile(name: name, path: path))
     }
 
-    /// The save failed with `message`; the edits stay unsaved.
+    /// The save failed with `message`: the project reads "Not saved" until a
+    /// save succeeds or a file opens, even with no edit since the last save.
     public mutating func didFailSave(_ message: String) {
         file.error = message
+        file.unsaved = true
     }
 
     /// File > Open Recent: newest first, 10 at most.
@@ -96,6 +98,12 @@ extension HaloProject {
     public var saveStatus: String {
         if file.unsaved { return file.error != nil ? "Not saved" : "Edited" }
         return file.path == nil ? "Untitled" : "Saved"
+    }
+
+    /// The title bar's subtitle: "Edited" or "Not saved" while the work
+    /// isn't on disk; nil when there is nothing to warn about.
+    public var windowSubtitle: String? {
+        file.unsaved ? saveStatus : nil
     }
 
     /// A launch path (`-HaloSaveTo`) always wins; Save As… asks; Save writes

@@ -5,7 +5,8 @@
 // an id, and 64 MiB + 1 byte of spaces) and launches Halo once per file with
 // `-HaloOpenFile <absolute path>`. Each open ends in one system alert whose
 // title is the Model's message; after OK the "No Composition" empty state
-// stays. One shot per file with its alert up, `halo-file-errors-<n>`, and
+// stays. The window is 1000 by 640, inside CI's 1024 by 768 display.
+// One shot per file with its alert up, `halo-file-errors-<n>`, and
 // one after OK, `halo-file-errors-<n>-ok`.
 import XCTest
 
@@ -27,7 +28,7 @@ final class HaloFileErrorsJourneyTests: XCTestCase {
         for (index, item) in cases.enumerated() {
             let path = folder.appending(path: item.file).path
             try item.data.write(to: URL(fileURLWithPath: path))
-            let halo = Journey("Halo", self, arguments: ["-HaloOpenFile", path, "-HaloWindowSize", "1280x800"])
+            let halo = Journey("Halo", self, arguments: ["-HaloOpenFile", path, "-HaloWindowSize", "1000x640"])
             XCTAssert(halo.app.windows.firstMatch.waitForExistence(timeout: 30), "no window opened for \(item.file)")
             let step = "file-errors-\(index + 1)"
 

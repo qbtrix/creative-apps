@@ -1,7 +1,7 @@
 // HaloFileTests.swift: the project's file state (HaloFiles.swift) on the
 // live services: opening replaces the document and clears history, a failed
 // open changes nothing, saves keep a recent list of 10 with no repeated path,
-// and the window title and save status read what the window shows.
+// and the window title, subtitle and save status read what the window shows.
 // Runs on Linux and macOS.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
@@ -69,6 +69,29 @@ private func opened(_ name: String = "two-comps") throws -> (HaloProject, HaloDo
     #expect(project.saveStatus == "Not saved")
     #expect(project.file.unsaved && project.file.error == "The disk is full.")
     #expect(project.windowTitle == "Spot")
+}
+
+@Test func windowSubtitleShowsOnlyUnsavedWork() throws {
+    var project = HaloProject(services: .live, document: try #require(HaloFixtures.project("empty")))
+    #expect(project.windowSubtitle == nil)
+    project.newLayer(.solid)
+    #expect(project.windowSubtitle == "Edited")
+    project.didSave(name: "Spot", path: "/t/Spot.halo")
+    #expect(project.windowSubtitle == nil)
+    project.newLayer(.solid)
+    project.didFailSave("The disk is full.")
+    #expect(project.windowSubtitle == "Not saved")
+    project.didSave(name: "Spot", path: "/t/Spot.halo")
+    #expect(project.windowSubtitle == nil)
+    #expect(project.windowTitle == "Spot")
+}
+
+@Test func aFailedOpenAddsNoSubtitle() throws {
+    var (project, _) = try opened()
+    project.beginOpen(name: "Next", path: "/t/Next.halo")
+    project.finishOpen(.failure(.notAHaloFile))
+    #expect(project.windowSubtitle == nil)
+    #expect(project.saveStatus == "Saved")
 }
 
 @Test func recentKeepsTenNewestFirstWithNoRepeat() throws {

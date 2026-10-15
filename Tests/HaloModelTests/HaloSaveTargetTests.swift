@@ -2,7 +2,8 @@
 // launch path always writes without asking; Save writes the file the project
 // was saved to or asks; Save As… always asks. The file name is the path's
 // last component without ".halo", and after a save the title and status read
-// what the window shows. Runs on Linux and macOS.
+// what the window shows; a failed save reads Not saved with or without an
+// edit, a failed open keeps the status it had. Runs on Linux and macOS.
 import HaloModel
 import Testing
 
@@ -39,9 +40,26 @@ private func empty() throws -> HaloProject {
     project.didSave(name: HaloProject.fileName(fromPath: "/t/Spot.halo"), path: "/t/Spot.halo")
     #expect(project.windowTitle == "Spot")
     #expect(project.saveStatus == "Saved")
-    project.newLayer(.solid)
     project.didFailSave("Spot.halo can't be saved. The folder is read-only.")
     #expect(project.saveStatus == "Not saved")
+    #expect(project.windowSubtitle == "Not saved")
     #expect(project.windowTitle == "Spot")
     #expect(project.saveTarget(launchPath: nil, saveAs: false) == .write(path: "/t/Spot.halo"))
+}
+
+@Test func aFailedSaveWithNoEditReadsNotSaved() throws {
+    var project = try empty()
+    #expect(project.saveStatus == "Untitled")
+    project.didFailSave("Untitled Project.halo can't be saved. The folder is read-only.")
+    #expect(project.saveStatus == "Not saved")
+    #expect(project.file.unsaved)
+}
+
+@Test func aFailedOpenKeepsItsStatus() throws {
+    var project = try empty()
+    project.beginOpen(name: "Bad", path: "/t/Bad.halo")
+    project.finishOpen(.failure(.notAHaloFile))
+    #expect(project.saveStatus == "Untitled")
+    #expect(!project.file.unsaved)
+    #expect(project.windowSubtitle == nil)
 }
