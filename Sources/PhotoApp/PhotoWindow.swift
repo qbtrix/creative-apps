@@ -10,7 +10,7 @@
 // them to the workspace once per display frame. Its workspace runs on
 // `fileServices(.live)`, or under `-PhotoFixture` on the fixture's fakes
 // (`launchOptions`, read once from the process; S-12), whose picture it
-// renders and fits as the window appears. Open, Save, Save As and their
+// renders and keeps fitted while the window settles, until the user zooms. Open, Save, Save As and their
 // launch arguments live in PhotoWindow+File.swift, Export's write in
 // PhotoWindow+Export.swift.
 //
@@ -35,6 +35,10 @@ struct PhotoWindow: View {
     @State var viewport = CGSize.zero
     /// A new image waits to be fitted until the canvas has a size.
     @State var fitPending = false
+    /// A launch fixture's picture refits as the window settles, until the user zooms.
+    @State var fitFollowsViewport = false
+    /// The zoom the last fit chose; a zoom that differs means the user zoomed.
+    @State var fittedZoom: Double?
     @State var tab = PhotoPanelTab.adjust
     @State var documentURL: URL?
     @State var note: String?
@@ -80,6 +84,7 @@ struct PhotoWindow: View {
             .focusedSceneValue(\.photoMenu, PhotoMenu(model: model, isPresenting: isPresenting, perform: perform))
             .onChange(of: model.revision) { renderer.show(model) }
             .onChange(of: model.canvas) {
+                fitFollowsViewport = false
                 fitPending = true
                 fit()
             }
@@ -204,10 +209,12 @@ struct PhotoWindow: View {
 
     // MARK: Zoom
 
-    /// A fixture's picture is there before any change, so render and fit it once.
+    /// A fixture's picture is there before any change, so render and fit it,
+    /// and keep it fitted while the window settles until the user zooms.
     private func showLaunchImage() {
         guard model.canvas != nil else { return }
         renderer.show(model)
+        fitFollowsViewport = true
         fitPending = true
         fit()
     }
@@ -223,11 +230,16 @@ struct PhotoWindow: View {
         let fitted = ViewerZoom.fitScale(
             artboard: CGSize(width: canvas.width, height: canvas.height), in: viewport, inset: SuiteSpacing.xxl)
         setZoom(fitted > 0 ? fitted : 1)
+        fittedZoom = zoom
     }
 
     private func viewportChanged(_ size: CGSize) {
         viewport = size
-        if fitPending { fit() }
+        if fitPending || (fitFollowsViewport && zoom == fittedZoom) {
+            fit()
+        } else {
+            fitFollowsViewport = false
+        }
     }
 
     // MARK: Image
