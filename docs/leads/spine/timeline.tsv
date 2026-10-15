@@ -22,3 +22,4 @@ utc	stage	event	ref	note
 2026-10-15T12:11Z	3	stage-start	wave8	SP-9 SP-14 SA-3 on cc37444; wave 7 #1127 #1128 #1130 merged
 2026-10-15T12:20Z	3	heartbeat	-	waiting on builders or the lane
 2026-10-15T12:37Z	3	stage-start	wave9	SA-4 on 265b1fe; wave 8 #1138 #1139 #1140 merged
+2026-10-15T12:38Z	3	ci-run	38734211999	SA-2 compiles on macOS; red is Halo only

@@ -68,3 +68,4 @@ Taken from the packet's Build waves; checked against dev bcf5a09.
 ## Open
 - PR #217 (fix for #156) is open at stage 0; SP-9 lands only if it is still unmerged when wave 8 starts.
 - Run 38731305776 (7f61259): LibraryApp compiles after #1120; macOS still red on Halo's HaloPlaybackDriverTests.swift:18 circular reference (#1097), reported on #763, not this feature's.
+- Run 38734211999 (35a875b, has SA-2): Library compiles, no Library test failures; macOS red only on HaloViewerFidelityTests.keyedFrame6 (Halo line).
