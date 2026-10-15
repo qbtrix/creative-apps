@@ -2,9 +2,9 @@
 
 Issue: #1044 · Packet: docs/blueprints/library/features/spine.md
 Run: act-1a13f18aaa0-lfw5 · Session: session_01DtSRhNqsphGfKkvV5eLsWW · Started: 2026-10-15T10:25Z
-Stage: 5 finish
+Stage: done (finished without contact sheet: dev CI red in other lines)
 Base: 111c44093b7959930d078ce21656fa174613a1b0
-Next: wait for the dev CI run triggered by #1208 (feature-done); green -> Belt-Contact-Sheet on #1044
+Next: nothing; if relaunched, check for a green dev run containing 43c26c3 and, if green, post Belt-Contact-Sheet on #1044
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -53,6 +53,7 @@ Taken from the packet's Build waves; checked against dev bcf5a09.
 | 3 (round 2 rerun after the compile fix) | 38757068610 (111c440) | red only on HaloViewerFidelityTests (other line); every Library suite green; journeys not executed | not measured (journeys didn't run) | clarity, journey, design, layout, controls (same panel) | 7 minor, 0 major | r2-b1 (feature-done); #1183, #1184 needs-ui | panel clean; CI not green (other line) |
 | 4 (finish run) | 38761014883 (86fe18c, has #1187) | red only on HaloViewerFidelityTests.keyedFrame6 (Halo); Library suites green; journeys not executed | not measured | – | – | – | waiting on another line |
 | 5 (round 4) | 38767265986 (d95c756) | red: Halo audit + 4 Library journeys (loupe Right, Sort By disabled, J11 tabs, J0 hover tag) | library contrast 0/2, identifier 12/16, offscreen 0/16, unnamed 1/1: at or under | (journey failures, no panel) | 4 | r4-b1 (feature-done) | no |
+| 6 (finish) | 38773966980 (43c26c3, has #1208) | red: PhotoBrushDisplayTests (Photo); Library suites green; journeys not executed | – | – | – | – | budget spent |
 
 ## Decisions
 - Builder branches are `lead/spine-<id>`, not `lead/spine/<id>`: git can't hold `lead/spine` and `lead/spine/<x>` refs together.
@@ -82,3 +83,4 @@ Taken from the packet's Build waves; checked against dev bcf5a09.
 - Run 38734211999 (35a875b, has SA-2): Library compiles, no Library test failures; macOS red only on HaloViewerFidelityTests.keyedFrame6 (Halo line).
 - Run 38737961079 (79bd068, has SA-3/SA-4): Library compiles, no Library snapshot/test failures; red only on Halo tests (HaloPlaybackDriverTests, HaloViewerFidelityTests); UI journeys did not execute in that job, so Library journeys are unproven until the Halo red clears.
 - needs-ui #1183 (ThumbnailGrid help + reject badge), #1184 (ViewerStatusBar band, optional zoom) from round 2.
+- gap #1214 (contract/packet texts), #1215 (status bar zoom, Show Inspector shortcut, confirm journeys after #1208).
