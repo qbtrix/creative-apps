@@ -71,3 +71,5 @@ utc	stage	event	ref	note
 2026-10-15T06:06Z	4	ci-run	38687993459	photo green, audit at baseline; red from suiteui+halo (#763)
 2026-10-15T06:06Z	4	stage-start	round 1	critic panel
 2026-10-15T06:15Z	4	round-findings	round 1	6 confirmed (2 major), 3 refuted; fix batches r1-b1, r1-b2, r1-b3 started
+2026-10-15T06:44Z	4	pr-merged	#1010 #1011 #1012	round 1 fixes
+2026-10-15T06:44Z	4	pr-opened	#1013	feature-done: packet status, refusal text in docs
