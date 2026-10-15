@@ -55,8 +55,13 @@ private final class HaloPlayer {
     var link: FakeLink? { links.last }
 }
 
+// The limit bounds a real hang, not the work: these tests share the main
+// actor with every @MainActor snapshot suite in this process, so on CI they
+// can queue for minutes before running (dev run 38743186679: 185 s queued,
+// as Flare's PlaybackDriverTests waited 314 s in run 38738075349). The bodies
+// fire a FakeLink by hand and never wait (#1155).
 @MainActor
-@Suite(.timeLimit(.minutes(1))) struct HaloPlaybackDriverTests {
+@Suite(.timeLimit(.minutes(10))) struct HaloPlaybackDriverTests {
     /// 3 s of 60 Hz targets, far from zero like the link's media clock.
     private let targets = (1...180).map { 5000 + Double($0) / 60 }
 
