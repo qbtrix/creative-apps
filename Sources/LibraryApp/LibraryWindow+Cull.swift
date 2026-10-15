@@ -13,8 +13,8 @@ extension LibraryWindow {
         let canEdit = !model.selection.isEmpty
         return LibraryMenu.Cull(
             key: nil,
-            setRating: canEdit ? { model.setRating($0) } : nil,
-            setFlag: canEdit ? { model.setFlag($0) } : nil,
-            setLabel: canEdit ? { model.setLabel($0) } : nil)
+            setRating: enabled(canEdit) { (stars: Int) in model.setRating(stars) },
+            setFlag: enabled(canEdit) { (flag: PhotoFlag) in model.setFlag(flag) },
+            setLabel: enabled(canEdit) { (label: PhotoLabel?) in model.setLabel(label) })
     }
 }

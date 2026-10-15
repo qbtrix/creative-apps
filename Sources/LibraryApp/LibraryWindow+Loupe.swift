@@ -15,7 +15,7 @@ extension LibraryWindow {
             loupe: enabled(inGrid && !model.isSelectedCollectionEmpty) { model.showLoupe() },
             zoomIn: enabled(inGrid && model.canShowLargerThumbnails) { model.stepCellSize(by: 1) },
             zoomOut: enabled(inGrid && model.canShowSmallerThumbnails) { model.stepCellSize(by: -1) },
-            setSort: model.order.isEmpty ? nil : { model.setSort($0) }, sort: model.sort,
+            setSort: enabled(!model.order.isEmpty) { (sort: LibrarySort) in model.setSort(sort) }, sort: model.sort,
             zoomInTitle: inGrid ? "Larger Thumbnails" : "Zoom In",
             zoomOutTitle: inGrid ? "Smaller Thumbnails" : "Zoom Out")
     }
