@@ -23,7 +23,7 @@ Waves: 1 = CP-1 (independent). 2 = CP-2 (waits CP-1). 3 = CP-3, CP-4 (independen
 |---|---|---|---|---|---|---|---|
 | 1 | 38742226941 (head 20d6a1c) | red: our gridAligned (frames[photo.crop.x] nil); Halo keyedFrame6 not ours (#1163) | n/a (journeys did not run) | clarity, design, layout, controls | 5 major + 6 minor (fields read 0 px; two captions; layout shift; Swap dead under 1:1; swapped orientation unreadable; X/Y 0 refused; empty tooltips; Original unexplained; disabled reasons disagree) | r1-b1 #1164 merged (gridAligned via anchor preference), r1-b2 #1170 merged (panel clarity) | no |
 | 1 check | 38746333198 (head e6490aa) | gridAligned passes; Photo green; remaining red is Halo only (keyedFrame6, HaloPlaybackDriverTests), not ours | n/a | – | – | – | – |
-| 2 | 38757068610 (head 111c440) | red only on Halo keyedFrame6 (not ours); Photo green | n/a (journeys did not run) | clarity, design, layout, controls | 2 major (locked field snaps back; Apply on a whole-image crop) + minors (reasons disagree, chip group tooltip empty, caption casing) | r2-b1 #1186 | no |
+| 2 | 38757068610 (head 111c440) | red only on Halo keyedFrame6 (not ours); Photo green | n/a (journeys did not run) | clarity, design, layout, controls | 2 major (locked field snaps back; Apply on a whole-image crop) + minors (reasons disagree, chip group tooltip empty, caption casing) | r2-b1 #1186 merged | no |
 
 ## Decisions
 - r1-b2: fields follow cropFieldsEnabled, so a locked shape with no pending crop takes typing (model supported it; matches the caption). Kept.
