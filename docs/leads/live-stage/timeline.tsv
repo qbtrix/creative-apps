@@ -1,0 +1,4 @@
+utc	stage	event	ref	note
+2026-10-15T00:40Z	0	stage-start	#798	base 667245a
+2026-10-15T00:45Z	0	stage-end	#798	depends on none
+2026-10-15T00:45Z	1	stage-start	#798	packet
