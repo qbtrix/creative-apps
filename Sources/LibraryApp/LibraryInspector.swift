@@ -25,6 +25,7 @@ struct LibraryInspector: View {
                 "Inspector",
                 tabs: [InspectorOption(id: .info, title: "Info"), InspectorOption(id: .develop, title: "Develop")],
                 selection: tab, onChange: { tab = $0 })
+                .libraryControl(id: "library.inspector.tabs", enabled: true, help: nil)
             if tab == .develop {
                 DevelopInspector(cropDraft: model.cropDraft)
             } else if let metadata = model.selectedMetadata {

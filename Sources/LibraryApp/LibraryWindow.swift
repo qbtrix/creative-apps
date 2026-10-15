@@ -2,7 +2,8 @@
 // collections in the sidebar, LibraryBrowser as content (with LibraryStatusBar
 // under it on preview data), LibraryInspector in the inspector, and
 // LibraryExportSheet while an export is under way. It owns the LibraryCatalog, hands its values and methods
-// to the views, and publishes the menu bar's LibraryMenu as a focused value.
+// to the views, publishes the menu bar's LibraryMenu as a focused value, and
+// publishes the `library.controls` JSON (LibraryControls.swift).
 // The catalog starts from the launch arguments: a fixture's fakes and photos,
 // or the live services over the Platform adapters.
 //
@@ -66,6 +67,7 @@ struct LibraryWindow: View {
                 onLabel: { model.setLabel($0) })
         }
         .focusedSceneValue(\.libraryMenu, menu)
+        .libraryControlsProbe()
         // The export area moves `exportState` off `.idle`; nothing does in wave 1.
         .sheet(isPresented: Binding(get: { model.exportState != .idle }, set: { _ in })) {
             LibraryExportSheet()

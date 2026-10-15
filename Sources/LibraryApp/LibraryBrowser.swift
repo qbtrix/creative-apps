@@ -46,13 +46,13 @@ struct LibraryBrowser: View {
         }
     }
 
-    /// Import Folder…, disabled with its reason while the import area's action is nil.
+    /// Import Folder… (`library.import`), disabled with its reason while the import area's action is nil.
     private var importAction: ToolbarAction {
         let action = menu.file.importFolder
         let reason = menu.file.importHelp ?? model.help(for: "importer") ?? Self.importFallbackHelp
         return ToolbarAction(
             "Import Folder…", systemImage: "folder.badge.plus", unavailableHelp: action == nil ? reason : nil,
-            perform: action ?? {})
+            identifier: "library.import", perform: action ?? {})
     }
 
     @ViewBuilder private var content: some View {
@@ -61,6 +61,7 @@ struct LibraryBrowser: View {
                 "No Photos", systemImage: "photo.stack",
                 message: "Photos you import appear here, sorted by the date they were taken.",
                 action: importAction)
+                .libraryControl(importAction)
         } else if model.isSelectedCollectionEmpty, let collection = model.selectedCollection {
             EmptyStateView(
                 "No Photos in \(collection.name)", systemImage: "photo.stack", message: collection.emptyMessage,
@@ -92,6 +93,7 @@ struct LibraryNoticeRow: View {
             if let action {
                 Button(action.title, action: action.perform)
                     .help(action.help)
+                    .libraryControl(id: "library.notice.action", enabled: true, help: nil)
             }
         }
         .padding(.horizontal, SuiteSpacing.m)
