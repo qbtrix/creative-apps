@@ -40,3 +40,4 @@ utc	stage	event	ref	note
 2026-10-15T03:31Z	4	pr-merged	#947	r2-b2
 2026-10-15T03:31Z	4	stage-start	round 3	panel on e2a8a15
 2026-10-15T03:35Z	4	round-findings	round 3	panel clean (2 minor), fix batch r3-b1
+2026-10-15T03:39Z	4	pr-opened	#955	r3-b1

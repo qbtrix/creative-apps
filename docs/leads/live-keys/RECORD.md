@@ -24,7 +24,7 @@ Next: wait for r3-b1 and the dev CI run containing #947, #949; a round is clean 
 |---|---|---|---|---|---|---|---|
 | 1 | 38673821944 (3af1c0e: #936, #942) | red, not ours: SuiteUI SidebarRenameGestureTests (#938), on #763; every live-keys suite green on macOS | not run (scripts/ci failed before journeys) | clarity, journey, contract, quality | 12 (2 major: symbol keys past the symbol's end; non-atomic coalesced multi-layer setValue), 1 refuted | #942 (r1-b1), #943 (r1-b2) | no |
 | 2 | 38674789740 (1cca8d0) | red, not ours: same SuiteUI SidebarRenameGestureTests (#763); live-keys suites green | not run | clarity, journey, contract, quality | 6 (1 major: no test that a multi-command coalesced drag/scrub stays one entry), 1 refuted | #949 (r2-b1), #947 (r2-b2) | no |
-| 3 | (pending: dev run containing #947, #949) | pending | pending | clarity, journey, contract, quality | 2 minor (no-op Set Frame Label entry; no live-vs-fake write test), 2 refuted; panel clean | r3-b1 | panel yes, CI pending |
+| 3 | (pending: dev run containing #947, #949) | pending | pending | clarity, journey, contract, quality | 2 minor (no-op Set Frame Label entry; no live-vs-fake write test), 2 refuted; panel clean | #955 (r3-b1) | panel yes, CI pending |
 
 ## Decisions
 - Base is c111439 (dev one commit past the briefed bcc3197, which is its ancestor: #896, a Flare test pin).
