@@ -54,6 +54,8 @@ struct PhotoWindow: View {
     // v2 presentation flags (PV-0); each belongs to the area file named.
     /// A recovered document waiting for Restore or Discard (PhotoWindow+File.swift, PV-1).
     @State var recoveryOffer: RecoveryEntry?
+    /// The file state Save and Open share with PhotoFileArea (PhotoWindow+File.swift, PV-1).
+    @State var files = PhotoFileSession()
     /// Why Paste refused, for its alert (PhotoWindow+Edit.swift, PV-2).
     @State var pasteRefusal: String?
     /// Free Transform's box and its Apply and Cancel are up (PhotoWindow+Transform.swift, PV-7).
@@ -126,7 +128,7 @@ struct PhotoWindow: View {
                 showLaunchImage()
                 openLaunchFile()
             }
-            .modifier(PhotoFileArea(model: model, perform: perform))
+            .modifier(PhotoFileArea(model: model, files: files, perform: perform))
             .modifier(PhotoEditArea(model: model, perform: perform))
             .modifier(PhotoCropArea(model: model, perform: perform))
             .modifier(PhotoHistoryArea(model: model, perform: perform))

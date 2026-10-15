@@ -143,6 +143,45 @@ import Testing
         #expect(workspace == before)
     }
 
+    @Test func openingADecodedSnapshotMatchesOpeningItsPackage() throws {
+        let source = try PhotoWorkspace.fixture(.layered)
+        let archive = FakeArchive()
+        let snapshot = try archive.decode(source.documentPackage(archive: archive, codec: RawCodec()), codec: RawCodec())
+        var workspace = try openedImage()
+        try workspace.openDocument(snapshot, name: "b.ora")
+        let viaPackage = try reopened(source)
+        #expect(workspace.layers == source.layers && workspace.layers == viaPackage.layers)
+        #expect(workspace.pixels == viaPackage.pixels && workspace.masks == viaPackage.masks)
+        #expect(workspace.selectedLayerID == viaPackage.selectedLayerID)
+        #expect(workspace.documentName == "b.ora")
+        #expect(workspace.fileKind == .document)
+        #expect(!workspace.isDirty && !workspace.canUndo)
+        let before = workspace
+        let empty = PhotoDocumentSnapshot(canvas: CanvasSize(width: 2, height: 2), layers: [], pixels: [:])
+        #expect(throws: ArchiveError.damaged("the document has no layers")) {
+            try workspace.openDocument(empty, name: "c.ora")
+        }
+        #expect(workspace == before)
+    }
+
+    @Test func documentFileNameSwapsTheExtension() throws {
+        #expect(try openedImage("beach.png").documentFileName == "beach.ora")
+        #expect(try openedImage("a.b.jpeg").documentFileName == "a.b.ora")
+        #expect(try whiteImage().documentFileName == "Untitled.ora")
+    }
+
+    @Test func recoveringKeepsAutosavesInTheFolder() throws {
+        let folder = FileManager.default.temporaryDirectory
+            .appendingPathComponent("PhotoDocumentFileTests-\(UUID().uuidString)", isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: folder) }
+        let services = PhotoServices.live.recovering(in: folder)
+        let entry = RecoveryEntry(documentName: "beach.png", savedAt: 100, package: PhotoPackage(files: ["mimetype": Data("image/openraster".utf8)]))
+        try services.recovery.write(entry, window: "w1")
+        #expect(try FileManager.default.contentsOfDirectory(atPath: folder.path).count == 1)
+        #expect(try services.recovery.leftBehind().map(\.documentName) == ["beach.png"])
+        #expect(services.recovery.unavailableHelp == nil)
+    }
+
     @Test func compositeSurvives() throws {
         var source = try PhotoWorkspace.fixture(.layered)
         source.adjust(.exposure(0.25))

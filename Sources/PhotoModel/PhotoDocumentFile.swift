@@ -7,7 +7,10 @@
 // sRGB like an opened file, `documentPackage` encodes it through a
 // DocumentArchiving, `openDocument` decodes one and starts the image with
 // every layer, mask, kind and the adjustments, clean and with nothing to undo.
-// A failed open leaves the workspace as it was. Linux-safe.
+// A failed open leaves the workspace as it was. `openDocument(_:name:)`
+// takes a snapshot the window decoded off the main actor, and
+// `PhotoServices.recovering(in:)` keeps autosaves in another folder.
+// Linux-safe.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -74,6 +77,13 @@ extension PhotoWorkspace {
         fileKind = Self.fileKind(forName: name)
     }
 
+    /// The name Save as Photo Document offers: the document's name with
+    /// ".ora" ("beach.png" is "beach.ora"); "Untitled.ora" for a new image.
+    public var documentFileName: String {
+        // fileName(for: .png) always ends in ".png".
+        String(fileName(for: .png).dropLast(4)) + ".ora"
+    }
+
     /// The file was written as `name`, of `kind`: the image is clean at this
     /// step and Save writes that kind from now on. Not an undo step; ignored
     /// with no image open.
@@ -121,7 +131,14 @@ extension PhotoWorkspace {
     public mutating func openDocument(
         _ package: PhotoPackage, name: String, archive: any DocumentArchiving, codec: any PhotoImageCodec
     ) throws {
-        let document = try archive.decode(package, codec: codec)
+        try openDocument(archive.decode(package, codec: codec), name: name)
+    }
+
+    /// Opens an already decoded document, named `name`, as
+    /// `openDocument(_:name:archive:codec:)` does, so the window can decode
+    /// its PNGs off the main actor first. Throws `ArchiveError.damaged`; the
+    /// workspace is unchanged.
+    public mutating func openDocument(_ document: PhotoDocumentSnapshot, name: String) throws {
         let stack = try Self.stack(of: document)
         let base = try stack.pixels.values.first
             ?? Self.tiles(width: document.canvas.width, height: document.canvas.height, what: "the canvas")
@@ -183,5 +200,15 @@ extension PhotoWorkspace {
         } catch {
             throw ArchiveError.damaged("\(what) has a bad size")
         }
+    }
+}
+
+extension PhotoServices {
+    /// These services with autosaves kept in `directory` (the window's
+    /// `-PhotoRecoveryDir`) instead of the default recovery folder.
+    public func recovering(in directory: URL) -> PhotoServices {
+        var services = self
+        services.recovery = LiveDocuments.recovery(directory: directory)
+        return services
     }
 }
