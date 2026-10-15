@@ -126,10 +126,14 @@ private func isPlainSentence(_ text: String?) -> Bool {
         ("That item is no longer there.", { $0.moveGuide(at: 5, to: 310, dragStart: 300) }),
         ("This scene is no longer in the document.", { $0.renameScene("scene-9", to: "Outro") }),
     ]
+    // Each refusal runs on its own copy, so one cannot pass on the error an earlier one left behind.
     for (message, refuse) in refusals {
-        refuse(&w)
-        #expect(w.layerError?.message == message)
-        #expect(isPlainSentence(w.layerError?.message) && w.document == guided && w.undoActionName == undoName)
+        var attempt = w
+        #expect(attempt.layerError == nil)
+        refuse(&attempt)
+        #expect(attempt.layerError?.message == message)
+        #expect(isPlainSentence(attempt.layerError?.message))
+        #expect(attempt.document == guided && attempt.undoActionName == undoName)
     }
     // The checker itself catches a case name.
     #expect(!isPlainSentence("The layer could not be changed (invalidIndex(5))."))
