@@ -7,6 +7,15 @@ on; the inspector's layer list renames on the row, reorders by drag and
 deletes with ⌫.
 **Line:** `line:halo` · **Wave:** W1 (`waves.md`) · **Lead branch:** `lead/layer-panel`
 
+**Status (2026-10-15):** built on `dev`, in the lead's Anatomy loop. LP-1 to
+LP-4 merged as #1041, #1045, #1047 and #1052; round 1 fixes #1058 (the rows
+sit in a stack again: a macOS `List` insets them), #1070 (double-click
+renames on the row) and #1078 (selected icon contrast, inspector-sized names,
+rename and drag hints). Identifiers use the shipped singular `halo.layer.*`
+prefix (`halo.layer.list`, `.row.<id>`, `.refusal`, `.empty`), not
+`halo.layers.*`. The lead's record is `docs/leads/layer-panel/RECORD.md` on
+`lead/layer-panel`.
+
 **Covers:** #770 (L-1 in the blueprint). It closes through LP-4, the
 `feature-done` PR; LP-1 to LP-3 say "Part of #770".
 
