@@ -9,3 +9,5 @@ utc	stage	event	ref	note
 2026-10-15T13:05Z	3	stage-start	wave 2	TG-0d BU-1a
 2026-10-15T13:25Z	3	pr-opened	#1143	BU-1a targets (supervisor)
 2026-10-15T13:25Z	3	pr-opened	#1144	TG-0d relationships
+2026-10-15T13:45Z	3	pr-merged	#1144	TG-0d, TG-0 complete
+2026-10-15T13:45Z	3	heartbeat	#1143	BU-1b built ahead (f789ca0), waiting on supervisor merge of BU-1a
