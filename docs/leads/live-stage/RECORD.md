@@ -2,9 +2,9 @@
 
 Issue: #798 · Packet: docs/blueprints/flare/features/live-stage.md
 Run: act-1a13d374bd1-s92z · Session: claude/live-stage-lead-gljfd4 · Started: 2026-10-15T00:40Z
-Stage: 5 finish
+Stage: 5 finish (waiting on a green dev run; other lines red)
 Base: 3033a12d599ff66ce4ebd5536ff9809d12e1d9cf
-Next: wait for the first green dev run containing a45f1cb (#965); run 38694361192 on fdb7c8a: Flare green, red only on Halo (layout 880, Width field label) and SuiteUI (window identifier). If none by 08:30Z, post status on #798 with the blockers
+Next: when a dev CI run containing a45f1cb (#965) is green, comment on #798 with 'Belt-Contact-Sheet: <run link>', one line per Flare journey and the flare audit counts. No more live-stage code is needed. Status comment: #798 issuecomment-6187265834
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -48,6 +48,7 @@ Journeys: J3 and J5 model half, steps 1-6 of the packet. Quality: QB-L5 hit <= 1
 - r2-b3: p95 reported, not gated, per the rubric's rule for new p95 rows.
 
 ## Open
+- Latest run 38698770785 on c0c7116: red only on Halo testLayoutAtWidths (timeline track under the sidebar at 880) and SuiteUI testGalleryOpensEveryPage (1 identifier on the window page). Flare green, audit at or under baseline.
 - dev red on other lines (triage on #763, comment 6184735247): Flare testEditEasingOfAKeyframeSegment 'no button titled New Sample Animation in the toolbar' since SuiteUI #962; Library #933; Halo; SuiteUI hit size and gallery.
 - macOS evidence for the round 3 minor is in: nestedDrawList at 500 instances median 4.5 ms, p95 6.6 ms; hit and drawList p95 printed.
 - none
