@@ -148,11 +148,13 @@ final class HaloLayersJourneyTests: XCTestCase {
         XCTAssert(waitFor { artboard.label == summary }, "the artboard reads \(artboard.label), not \(summary)")
     }
 
-    /// Scrolls the inspector down until `element` lies whole inside the window.
+    /// Scrolls the inspector down until `element` lies whole inside the
+    /// window. `suite.inspector` is the inspector's scroll view itself
+    /// (HaloCompositionInspector's ScrollView carries SuiteWindow's id).
     @MainActor private func scrollInspector(toShow element: XCUIElement, _ halo: Journey) {
         let window = halo.app.windows.firstMatch.frame
-        let inspector = halo.element("suite.inspector").scrollViews.firstMatch
-        XCTAssert(inspector.waitForExistence(timeout: 5), "the inspector doesn't scroll")
+        let inspector = halo.element("suite.inspector")
+        XCTAssert(inspector.waitForExistence(timeout: 5), "no inspector (suite.inspector)")
         for _ in 0..<10 where !window.contains(element.frame) {
             inspector.scroll(byDeltaX: 0, deltaY: -40)
         }
