@@ -43,3 +43,5 @@ utc	stage	event	ref	note
 2026-10-15T15:02Z	4	heartbeat	-	waiting for a dev run that reaches the UI journeys (blocked on #763: HaloViewerFidelityTests #1125, HaloPlaybackDriverTests timeouts #1097)
 2026-10-15T15:17Z	5	heartbeat	38757068610	latest dev run also skipped the journeys; finishing at the 8 h limit
 2026-10-15T15:39Z	5	heartbeat	-	no dev run has reached the journeys; finish comment at ~16:05
+2026-10-15T16:03Z	5	stage-end	#1038	finish comment posted (red, not done); gap issues #1177 #1178 #1179
+2026-10-15T16:03Z	5	stopped	-	8 h limit; dev CI never reached the journeys after round 2

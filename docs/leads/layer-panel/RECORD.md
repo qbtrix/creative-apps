@@ -2,9 +2,9 @@
 
 Issue: #1038 · Packet: docs/blueprints/halo/features/layer-panel.md
 Run: act-1a13e9a2019-lau7 · Session: session_01NGHcmJbQja1RSYvcMZR3TD · Started: 2026-10-15T08:07Z
-Stage: 5 finish (dev CI never reached the journeys after round 2)
+Stage: done (stopped at the 8 h limit; not proven on macOS)
 Base: e8de2ff5d8ed3515af321c805cc2bebab17050a4
-Next: finish (stage 5) at the 8 h limit (~16:07Z) unless a dev run reaches scripts/ui-test first: then read H-J9 and run the panel. Gap issues filed: #1177, #1178, #1179. Post the status comment on #1038.
+Next: nothing for this lead. #1177 carries H-J9 steps 3-8 on macOS once dev reaches scripts/ui-test; #770 stays open until then. Finish comment: https://github.com/qbtrix/creative-apps/issues/1038#issuecomment-6196491794
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -12,7 +12,7 @@ Next: finish (stage 5) at the 8 h limit (~16:07Z) unless a dev run reaches scrip
 | LP-1 | 1 | delete, rename, move (+ forward/backward, `moveTarget`), duplicate: each one named `edit` step; delete un-parents through `keying.setParent(nil, …)` with the `.notBuilt` fallback | `Sources/HaloModel/HaloLayerEdits.swift`, `Tests/HaloModelTests/HaloLayerEditsTests.swift` | `HaloLayerEditsTests` | #1041 | merged (a2313a5) |
 | LP-2 | 2 | Layer commands' availability and routes; Rename Layer prompt from `request`; edit budgets | `Sources/HaloModel/Availability/HaloAvailability+Layers.swift`, `Sources/HaloApp/HaloWindow+Layers.swift`, `Tests/HaloModelTests/HaloLayerAvailabilityTests.swift`, `Tests/HaloModelTests/HaloLayerEditsBudgetTests.swift` | `HaloLayerAvailabilityTests`, `HaloLayerEditsBudgetTests` | #1045 | merged |
 | LP-3 | 2 | `HaloLayerList` as a `List` of `SidebarRow`s: select, rename, `.onMove`, `.onDeleteCommand`, refusal caption, empty text; snapshots | `Sources/HaloApp/HaloLayerList.swift`, `Tests/AppSnapshotTests/HaloLayersSnapshots.swift` | snapshots `halo-layer-list{,-refused,-empty}-{light,dark}.png` | #1047 | merged |
-| LP-4 | 3 | H-J9 `testLayerHousekeeping`, eight steps; `feature-done` | `UITests/HaloJourneyTests+Layers.swift` | H-J9 on the dev CI run | #1052 | merged (e8de2ff) |
+| LP-4 | 3 | H-J9 `testLayerHousekeeping`, eight steps; `feature-done` | `UITests/HaloJourneyTests+Layers.swift` | H-J9 on the dev CI run | #1052 | merged (e8de2ff); steps 1-2 pass on macOS, 3-8 unrun (#1177) |
 
 Journeys: H-J9 (8 steps, packet "Journey steps"). Quality bars: QB-F1 no dead controls, QB-F3 one named step, QB-F4 keyboard parity, HB-9 edit budget (≤ 20 ms debug CI), audit zero new.
 
