@@ -2,17 +2,17 @@
 
 Issue: #1074 · Packet: docs/blueprints/photo/features/photo-documents.md
 Run: act-1a1404bf04c-bp6m · Session: claude/photo-documents-lead-ezrcev · Started: 2026-10-15T10:40Z
-Stage: 3 wave 1
-Base: 00e546a1ae55cc28c1855c7433cff7540df25065
-Next: wait for the wave 1 PRs (D-1, D-3) to merge, then start wave 2 (D-2, D-4a) on the new origin/dev
+Stage: 3 wave 2
+Base: 9f28a9f7dcb6e9d584a7c80847e8ef0108fa5e17
+Next: wait for wave 2 PRs (D-2, D-4a) to merge, then start wave 3 (D-4b, D-6)
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
 |---|---|---|---|---|---|---|
-| D-1 | 1 | Stored-entry zip writer/reader with CRC-32 | M/Live/PhotoZip.swift, MT/PhotoContainerTests.swift | PhotoContainerTests | – | building |
-| D-3 | 1 | Workspace side: snapshot, documentPackage, openDocument, openImage, didSave, saveAction, fileKind(forName:), needsDocument, saveStatus | M/PhotoDocumentFile.swift, MT/PhotoDocumentFileTests.swift | PhotoDocumentFileTests | – | building |
-| D-2 | 2 | LiveArchive encode/decode; LiveDocuments.archive() | M/Live/LiveArchive.swift, M/Live/LiveDocuments.swift, MT/PhotoDocumentRoundTripTests.swift | PhotoDocumentRoundTripTests | – | waits D-1 |
-| D-4a | 2 | autosaveDue, recoveryEntry, restore, RecoveryOffer | M/PhotoRecovery.swift, MT/PhotoRecoveryTests.swift | PhotoRecoveryTests | – | waits D-3 |
+| D-1 | 1 | Stored-entry zip writer/reader with CRC-32 | M/Live/PhotoZip.swift, MT/PhotoContainerTests.swift | PhotoContainerTests | #1196 | merged |
+| D-3 | 1 | Workspace side: snapshot, documentPackage, openDocument, openImage, didSave, saveAction, fileKind(forName:), needsDocument, saveStatus | M/PhotoDocumentFile.swift, MT/PhotoDocumentFileTests.swift | PhotoDocumentFileTests | #1197 | merged |
+| D-2 | 2 | LiveArchive encode/decode; LiveDocuments.archive() | M/Live/LiveArchive.swift, M/Live/LiveDocuments.swift, MT/PhotoDocumentRoundTripTests.swift | PhotoDocumentRoundTripTests | – | building |
+| D-4a | 2 | autosaveDue, recoveryEntry, restore, RecoveryOffer | M/PhotoRecovery.swift, MT/PhotoRecoveryTests.swift | PhotoRecoveryTests | – | building |
 | D-4b | 3 | LiveRecovery folder I/O; LiveDocuments.recovery(directory:) | M/Live/LiveRecovery.swift, M/Live/LiveDocuments.swift, MT/LiveRecoveryTests.swift | LiveRecoveryTests | – | waits D-1, D-2 |
 | D-6 | 3 | PhotoPackageIO off-main read/write; PF-1 through ImageIO | A/PhotoPackageIO.swift, ST/PhotoPackageIOTests.swift | PhotoPackageIOTests (macOS) | – | waits D-2, D-3 |
 | D-5 | 4 | Budgets PB-18/19/20 | MT/PhotoDocumentsBudgetTests.swift | PhotoDocumentsBudgetTests | – | waits D-4a, D-4b |
@@ -41,6 +41,7 @@ Waves (packet's Build waves, checked against dev at 00e546a):
 - Waves have at most 2 independent tasks, so each wave runs as one worktree subagent per task (lead.md stage 3), not build-wave.js.
 - gh CLI has no valid token in this container; agents open PRs and add the fast-lane label through the GitHub MCP tools.
 - Swift was missing from the container; installed with scripts/cloud-setup.sh (6.3.3) before wave 1.
+- Agent branches are flat (lead/photo-documents-<id>): git refuses lead/photo-documents/<id> next to the lead branch.
 - Kept the packet's waves unchanged: every listed wait is a real code dependency (packet "Links").
 
 ## Open
