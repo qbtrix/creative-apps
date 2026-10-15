@@ -32,6 +32,15 @@ final class LibraryJourneyTests: XCTestCase {
         library.shot("loupe-next")
         library.app.typeKey(.escape, modifierFlags: [])
         library.shot("loupe-back-to-grid")
+        // The loupe's photo stays selected, so its metadata inspector shows:
+        // the side columns and the inspector's controls lie inside the window (#933).
+        let window = library.app.windows.firstMatch.frame.insetBy(dx: -1, dy: -1)
+        for id in ["suite.sidebar", "suite.inspector", "suite.inspector.section.metadata",
+                   "library.metadata.star.5", "library.metadata.flag", "library.metadata.label.purple"] {
+            let element = library.element(id)
+            XCTAssert(element.waitForExistence(timeout: 5), "no \(id) after returning to the grid")
+            XCTAssert(window.contains(element.frame), "\(id) at \(element.frame) runs outside the window \(window) (#933)")
+        }
     }
 
     /// Selecting a photo swaps the collection card for its metadata inspector;
