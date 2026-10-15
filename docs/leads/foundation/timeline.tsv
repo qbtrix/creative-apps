@@ -102,3 +102,7 @@ utc	stage	event	ref	note
 2026-10-15T06:19Z	4	pr-opened	#1008	round 3 batch E layers list
 2026-10-15T06:19Z	4	pr-opened	#1009	round 3 batch F menu and sheet
 2026-10-15T06:21Z	-	heartbeat	-	waiting on builders
+2026-10-15T06:21Z	4	pr-merged	#1007	round 3
+2026-10-15T06:21Z	4	pr-merged	#1008	round 3
+2026-10-15T06:21Z	4	pr-merged	#1009	round 3
+2026-10-15T06:21Z	4	stage-start	round 4	waiting on CI for 4c405d0
