@@ -1,12 +1,12 @@
 // FrameRenderingContractTests.swift: what every FrameRendering promises
 // (#451, #430), run over each conforming type in `frameRenderings`; the live
-// type joins by adding itself there. Also checks FakeTextRasterizer, the text
-// these suites draw with. Runs on Linux and macOS.
+// type is in the list. Also checks FakeTextRasterizer, the text these suites
+// draw with. Runs on Linux and macOS.
 import CoreRaster
 import HaloModel
 import Testing
 
-let frameRenderings: [any FrameRendering] = [FakeFrameRendering()]
+let frameRenderings: [any FrameRendering] = [FakeFrameRendering(), LiveFrameRendering()]
 
 /// `keyedPair()`'s frame 0 as drawn by the fake: the red solid at (0, 0).
 func keyedPairList() -> HaloDrawList { FakeFrameDrawing().drawList(keyedPair(), at: 0) }
@@ -34,9 +34,27 @@ func renderCountsSkippedTextButNeverNulls(rendering: any FrameRendering) throws 
     }
     let list = HaloDrawList(width: 400, height: 200, frame: 0, items: [item(.null), solid, item(.text)])
     #expect(try rendering.render(list, width: 400, height: 200, text: nil).skippedLayerCount == 1)
-    #expect(try rendering.render(list, width: 400, height: 200, text: FakeTextRasterizer()).skippedLayerCount == 0)
+    if rendering is FakeFrameRendering {  // live text pixels arrive with VP-5
+        #expect(try rendering.render(list, width: 400, height: 200, text: FakeTextRasterizer()).skippedLayerCount == 0)
+    }
     let nullOnly = HaloDrawList(width: 400, height: 200, frame: 0, items: [item(.null)])
     #expect(try rendering.render(nullOnly, width: 400, height: 200, text: nil).skippedLayerCount == 0)
+}
+
+@Test(arguments: frameRenderings)
+func anOpaqueSolidFillsItsBox(rendering: any FrameRendering) throws {
+    let red = HaloLayerColor(red: 1, green: 0, blue: 0)
+    let solid = HaloDrawItem(
+        layerID: "s", kind: .solid, bounds: HaloLayerRect(x: 10, y: 5, width: 20, height: 10), matrix: .identity,
+        opacity: 1, color: red, blendMode: .normal)
+    let frame = try rendering.render(
+        HaloDrawList(width: 40, height: 20, frame: 0, items: [solid]), width: 40, height: 20, text: nil)
+    for y in 0..<20 {
+        for x in 0..<40 {
+            let inside = (10..<30).contains(x) && (5..<15).contains(y)
+            #expect(try frame.pixels.pixel(x: x, y: y) == (inside ? RGBA(r: 1, g: 0, b: 0, a: 1) : RGBA(r: 0, g: 0, b: 0, a: 0)))
+        }
+    }
 }
 
 @Test func fakeTextRasterizerMeasuresTheEstimateAndFillsIt() throws {
