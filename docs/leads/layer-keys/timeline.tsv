@@ -27,3 +27,7 @@ utc	stage	event	ref	note
 2026-10-15T11:22Z	3	stage-start	wave6	LK-9 (LK-8, LK-11 already building)
 2026-10-15T11:33Z	3	heartbeat	wave6	LK-8 LK-9 LK-11 building
 2026-10-15T11:33Z	3	pr-merged	#1115	LK-11 (Closes #207)
+2026-10-15T11:37Z	3	pr-merged	#1117	LK-9
+2026-10-15T11:38Z	3	pr-merged	#1118	LK-8
+2026-10-15T11:42Z	3	stage-end	wave6	dev fb4c57d
+2026-10-15T11:42Z	3	stage-start	wave7	LK-10 LK-12 LK-13

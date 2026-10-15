@@ -2,9 +2,9 @@
 
 Issue: #1036 · Packet: docs/blueprints/halo/features/layer-keys.md
 Run: act-1a13eb691a3-wg4n · Session: e0e565d9-6109-5c52-89fd-c254398040f9 · Started: 2026-10-15T08:39Z
-Stage: 3 wave 6
-Base: 1dcd22169847a05c50024fdbccc66a670404d79d
-Next: LK-8 + LK-11 (wf_3d8e0165-ff3) and LK-9 (wf_cdd9dfba-e9a) run; on resume check PRs on layer-keys/lk-8, lk-9, lk-11; then wave 7 (LK-10, LK-12, LK-13).
+Stage: 3 wave 7
+Base: fb4c57d7bfef08eb31d07172734371db57d83719
+Next: wave 7 (LK-10, LK-12, LK-13) runs in wf_c116973e-86f; on resume check PRs on layer-keys/lk-10, lk-12, lk-13 and relaunch missing ones; then LK-14 (feature-done).
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -17,12 +17,12 @@ Next: LK-8 + LK-11 (wf_3d8e0165-ff3) and LK-9 (wf_cdd9dfba-e9a) run; on resume c
 | LK-5 | 4 | propertyRows, setProperty to/text, endPropertyScrub, shown helpers | HaloKeying.swift, HaloKeyingTests | HaloKeyingTests | #1091 | merged |
 | LK-6 | 5 | toggles, setParent, choices; keys availability | HaloKeying.swift, Availability/HaloAvailability+Keys, HaloKeyToggleTests, HaloKeysAvailabilityTests | both suites | #1109 | merged |
 | LK-7 | 5 | compositionPoint and viewer drag begin/move/end/cancel | HaloViewerDrag.swift, HaloKeyByDragTests | HaloKeyByDragTests | #1105 | merged |
-| LK-8 | 6 | budgets HB-1, HB-3, HB-4 | HaloKeysBudgetTests | HaloKeysBudgetTests | – | finishing (gate flaky under load) |
-| LK-9 | 6 | keys routes; TRANSFORM rows, key buttons, refusal caption | HaloApp/HaloWindow+Keys, HaloApp/HaloLayerInspector, HaloInspectorSnapshots | halo-inspector(-refusal) snapshots | – | building |
+| LK-8 | 6 | budgets HB-1, HB-3, HB-4 | HaloKeysBudgetTests | HaloKeysBudgetTests | #1118 | merged |
+| LK-9 | 6 | keys routes; TRANSFORM rows, key buttons, refusal caption | HaloApp/HaloWindow+Keys, HaloApp/HaloLayerInspector, HaloInspectorSnapshots | halo-inspector(-refusal) snapshots | #1117 | merged |
 | LK-11 | 6 | HaloViewerGestures drag and Escape | HaloApp/HaloViewerGestures, HaloKeyByDragSnapshots | halo-key-by-drag snapshots | #1115 | merged |
-| LK-10 | 7 | LAYER group Parent and Blend; narrow snapshot | HaloApp/HaloLayerInspector, HaloInspectorSnapshots | halo-inspector-layer, -narrow snapshots | – | waits LK-9 |
-| LK-12 | 7 | H-J5 drag journey | UITests/HaloJourneyTests+Drag | H-J5 | – | waits LK-9,11 |
-| LK-13 | 7 | H-J6 inspector journey | UITests/HaloJourneyTests+Inspector | H-J6 | – | waits LK-9 |
+| LK-10 | 7 | LAYER group Parent and Blend; narrow snapshot | HaloApp/HaloLayerInspector, HaloInspectorSnapshots | halo-inspector-layer, -narrow snapshots | – | building |
+| LK-12 | 7 | H-J5 drag journey | UITests/HaloJourneyTests+Drag | H-J5 | – | building |
+| LK-13 | 7 | H-J6 inspector journey | UITests/HaloJourneyTests+Inspector | H-J6 | – | building |
 | LK-14 | 8 | H-J23 parent journey, feature-done | UITests/HaloJourneyTests+Parent | H-J23 | – | waits LK-10,12,13 |
 
 Waves as in the packet. Independent per wave: W1 LK-1; W2 LK-2a; W3 LK-2b; W4 LK-3, LK-4, LK-5; W5 LK-6, LK-7; W6 LK-8, LK-9, LK-11; W7 LK-10, LK-12, LK-13; W8 LK-14.
@@ -59,6 +59,9 @@ Waves as in the packet. Independent per wave: W1 LK-1; W2 LK-2a; W3 LK-2b; W4 LK
 
 - LK-11: no `halo.viewer.artboard` control id added (H-J13 would click empty artboard); the overlay is accessibility-hidden and laid out like HaloDrawnLayers so it covers only the artboard. Escape needs focus: overlay is focusable with no focus effect.
 - LK-8: the gate failed after rebase only on other lines' timing tests (Flare easing drag, Library metadata) at load 16 on 4 cores; a finisher reruns it.
+
+- LK-9: the key button id halo.inspector.key.<raw> covers both stopwatch and diamond; journeys find them by label. The packet's "Select a layer to see its properties." empty text does not exist in code; empty state unchanged. Blend refusals use halo.inspector.row.blend (W0).
+- LK-8: uses the shared haloP95 helper (quietest p95 of 3x100), not median+p95 of 200 runs.
 
 ## Open
 - #207 keeps `needs-human`; the captain decides (packet note). LK-11 says `Closes #207`.
