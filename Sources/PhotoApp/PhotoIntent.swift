@@ -46,6 +46,7 @@ extension PhotoTool: PaletteTool {
         case .clone: "Clone"
         case .heal: "Heal"
         case .crop: "Crop"
+        case .eyedropper: "Eyedropper"
         }
     }
 
@@ -58,6 +59,7 @@ extension PhotoTool: PaletteTool {
         case .clone: "square.on.square"
         case .heal: "bandage"
         case .crop: "crop"
+        case .eyedropper: "eyedropper"
         }
     }
 
@@ -70,6 +72,7 @@ extension PhotoTool: PaletteTool {
         case .clone: "s"
         case .heal: "j"
         case .crop: "c"
+        case .eyedropper: "i"
         }
     }
 
