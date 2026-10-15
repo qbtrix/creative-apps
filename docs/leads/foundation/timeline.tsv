@@ -78,3 +78,4 @@ utc	stage	event	ref	note
 2026-10-15T04:32Z	4	ci-run	38679533707	red: 3 Halo journeys + offscreen (#933)
 2026-10-15T04:32Z	4	round-findings	round 2	fixer + critic panel started
 2026-10-15T04:32Z	4	round-findings	round 2	2 findings are SuiteUI #962 (revert pending); re-judge on next run
+2026-10-15T04:33Z	4	round-findings	round 2	toolbar id miss is the overflow chevron from SuiteWindow; no Halo PR
