@@ -11,6 +11,10 @@ struct LibraryLoupe: View {
     let position: String
     /// The window's menu; the loupe-viewport feature calls `menu.view` from here.
     var menu = LibraryMenu()
+    /// The model's `loupeValue`, which the UI journeys read as the photo's value.
+    var value: String? = nil
+    /// While set, LibraryCropOverlay draws over the photo.
+    var cropDraft: CropSettings? = nil
     var onStep: @MainActor (Int) -> Void = { _ in }
     var onGrid: @MainActor () -> Void = {}
     @FocusState private var isFocused: Bool
@@ -27,8 +31,12 @@ struct LibraryLoupe: View {
                         .interpolation(.none)
                         .aspectRatio(artboard, contentMode: .fit)
                         .frame(maxWidth: artboard.width, maxHeight: artboard.height)
+                        .overlay {
+                            if let cropDraft { LibraryCropOverlay(cropDraft: cropDraft) }
+                        }
                         .padding(SuiteSize.canvasInset)
                         .accessibilityLabel(photo.name)
+                        .accessibilityValue(value ?? "")
                         .accessibilityIdentifier("library.loupe.photo")
                 }
             }
