@@ -212,6 +212,23 @@ import Testing
         }
     }
 
+    /// Increase Contrast reaches the palette: each system appearance reads its own
+    /// column, high contrast included, and vibrant dark reads Dark.
+    @Test func valueFollowsTheAppearance() {
+        let hex = SuiteHex(0x000001, 0x000002, 0x000003, 0x000004)
+        let expected: [(NSAppearance.Name, UInt32)] = [
+            (.aqua, hex.light), (.darkAqua, hex.dark),
+            (.accessibilityHighContrastAqua, hex.lightContrast),
+            (.accessibilityHighContrastDarkAqua, hex.darkContrast),
+            (.vibrantDark, hex.dark),
+        ]
+        for (name, value) in expected {
+            let appearance = NSAppearance(named: name)
+            #expect(appearance != nil, "\(name.rawValue) exists")
+            if let appearance { #expect(hex.value(for: appearance) == value, "\(name.rawValue)") }
+        }
+    }
+
     /// A system color's sRGB hex (0xRRGGBB) under the named appearance, nil if it has no sRGB form.
     static func resolved(_ color: NSColor, in name: NSAppearance.Name) -> UInt32? {
         guard let appearance = NSAppearance(named: name) else { return nil }
