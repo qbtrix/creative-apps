@@ -56,6 +56,9 @@ extension PhotoMenu {
         case .cut: cutHelp
         case .copy: copyHelp
         case .paste: pasteboard.hasImage ? pasteHelpWithImage : pasteHelpWithoutImage
+        case .duplicateLayer: duplicateLayerHelp
+        case .mergeDown: mergeDownHelp
+        case .flattenImage: flattenHelp
         }
     }
 
@@ -67,6 +70,7 @@ extension PhotoMenu {
         switch intent {
         case .cut, .copy: return !hasImage
         case .paste: return pasteboard.isEmpty
+        case .duplicateLayer, .mergeDown, .flattenImage: return editHelp(intent, pasteboard: pasteboard) != nil
         }
     }
 
@@ -94,6 +98,10 @@ extension PhotoMenu {
         case .cut: #selector(NSText.cut(_:))
         case .copy: #selector(NSText.copy(_:))
         case .paste: #selector(NSText.paste(_:))
+        // Layer commands have no text counterpart; the Layer menu sends them straight to the window.
+        case .duplicateLayer: #selector(PhotoLayerActions.duplicateLayer(_:))
+        case .mergeDown: #selector(PhotoLayerActions.mergeDown(_:))
+        case .flattenImage: #selector(PhotoLayerActions.flattenImage(_:))
         }
     }
 }
