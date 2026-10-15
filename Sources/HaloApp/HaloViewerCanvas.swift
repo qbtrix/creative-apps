@@ -1,8 +1,9 @@
 // HaloViewerCanvas.swift: the artboard in Halo's viewer (#37). CanvasSurface
 // sized to the selected composition, with the Model's `viewerDrawList` drawn
 // over the artboard's fitted frame in one SwiftUI Canvas, bottom layer first,
-// in linear light: each item at its matrix times the fit, at its opacity and
-// blend mode; a solid fills its box, a shape the ellipse in it, a text layer
+// in linear light as LiveFrameRendering composites (the Canvas's colorMode
+// and its drawing group both .linear): each item at its matrix times the fit,
+// at its opacity and blend mode; a solid fills its box, a shape the ellipse in it, a text layer
 // is a resolved Text on the pinned baseline rule (its line box's top-left at
 // bounds.origin, its first baseline at bounds.y + ascent). The selected
 // layer's world box gets SuiteUI's SelectionOutline. The frame Render Frame
@@ -51,7 +52,10 @@ private struct HaloDrawnLayers: View {
 
     var body: some View {
         let list = list
-        Canvas { context, size in
+        // The Canvas's own working space must be linear: its default
+        // (.nonLinear) mixes each item's opacity in sRGB inside the Canvas,
+        // before the linear drawing group ever sees it (HF-1 keyed-6, #1161).
+        Canvas(opaque: false, colorMode: .linear, rendersAsynchronously: false) { context, size in
             let fit = HaloCanvasFit.transform(list: list, size: size)
             for item in list.items {
                 drawItem(item, in: context, fit: fit)
