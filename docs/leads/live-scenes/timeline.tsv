@@ -47,3 +47,4 @@ utc	stage	event	ref	note
 2026-10-15T04:19Z	5	heartbeat	finish	waiting for a green dev CI run newer than 38677546546
 2026-10-15T04:32Z	5	ci-run	38679533707	red: Flare journey toolbar button (app shell, not live-scenes), Halo, Library, Suite journeys
 2026-10-15T04:40Z	5	heartbeat	finish	waiting for a green dev CI run newer than 38679533707
+2026-10-15T04:55Z	5	ci-run	38681586835	same red; Flare toolbar journey likely from #962 (SuiteUI), noted on #763
