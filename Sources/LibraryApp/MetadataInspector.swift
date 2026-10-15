@@ -2,7 +2,8 @@
 // suite's inspector pattern (docs/design.md, Pro density): an InspectorHeader
 // with the selection's name, then Metadata: rating stars, flag and color
 // label dots. A field the photos differ in shows "Mixed". Values in, closures
-// out; LibraryCatalog applies each edit to every selected photo.
+// out; LibraryCatalog applies each edit to every selected photo. Each control
+// carries its MetadataInspectorID.
 import LibraryModel
 import SuiteUI
 import SwiftUI
@@ -21,6 +22,7 @@ struct MetadataInspector: View {
                 InspectorPickerRow("Flag", options: flagOptions, selection: metadata.flag.shared) {
                     if let flag = $0 { onFlag(flag) }
                 }
+                .accessibilityIdentifier(MetadataInspectorID.flag)
                 InspectorRow("Label") { labelDots }
             }
         }
@@ -38,6 +40,7 @@ struct MetadataInspector: View {
                 .buttonStyle(.plain)
                 .help("Rate \(title); click the current rating to clear it")
                 .accessibilityLabel(title)
+                .accessibilityIdentifier(MetadataInspectorID.star(star))
             }
         }
     }
@@ -58,6 +61,7 @@ struct MetadataInspector: View {
                 .buttonStyle(.plain)
                 .help(label.map { "Label \($0.rawValue)" } ?? "No Label")
                 .accessibilityLabel(label?.rawValue ?? "No Label")
+                .accessibilityIdentifier(MetadataInspectorID.label(label))
                 .accessibilityAddTraits(isOn ? .isSelected : [])
             }
         }
