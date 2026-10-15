@@ -18,7 +18,7 @@ Next: wait for D-9 and the perf fix; rerun scripts/ci on lead/photo-documents-d-
 | D-5 | 4 | Budgets PB-18/19/20 | MT/PhotoDocumentsBudgetTests.swift | PhotoDocumentsBudgetTests | #1225 | merged |
 | D-7 | 4 | Save routing, Keep layers?, open .ora/flat, errors, Not saved, fileServices, Open Recent | A/PhotoWindow+File.swift, A/PhotoCommands+File.swift | V5/V6, app-state rule | #1223 | merged |
 | D-8 | 5 | Save status in top bar, edited dot, Saving…/Opening… notes; snapshots | A/PhotoTopBar.swift, A/PhotoWindow+File.swift, ST/PhotoDocumentsSnapshots.swift | PhotoDocumentsSnapshots | #1228 | merged |
-| D-9 | 6 | PhotoAutosave + wiring | A/PhotoAutosave.swift, A/PhotoWindow+File.swift, ST/PhotoAutosaveTests.swift | PhotoAutosaveTests | – | building |
+| D-9 | 6 | PhotoAutosave + wiring | A/PhotoAutosave.swift, A/PhotoWindow+File.swift, ST/PhotoAutosaveTests.swift | PhotoAutosaveTests | #1230 | open |
 | D-10 | 7 | App delegate: Open Recent/Finder opens, unsaved prompt on close/quit | A/PhotoApp.swift, A/PhotoWindow+File.swift, ST/PhotoUnsavedPromptTests.swift | PhotoUnsavedPromptTests | – | waits D-9 |
 | D-11 | 8 | Journeys PJ-1, PJ-1b, PJ-2, PJ-4 | UT/PhotoJourneyTests+Documents.swift | macOS run | – | waits D-10, photo-journey-kit (#1073) |
 | D-12 | 8 | Journeys PJ-3, PJ-P3 (feature-done if last) | UT/PhotoJourneyTests+Recovery.swift, UT/PhotoJourneyTests+PerfDocuments.swift | macOS run | – | waits D-10, photo-journey-kit (#1073) |
@@ -60,3 +60,6 @@ Waves (packet's Build waves, checked against dev at 00e546a):
 - CI run 38782884668 (f9846c9): macOS compiles D-6/D-7 app code; red only on PhotoCompositeCostTests timing ratio (not ours; noted on dev-red #763). No snapshots/journeys ran, so no screens yet.
 - D-8 state for D-9: EnvironmentValues.photoSaveStatus set in PhotoFileArea.body from model.saveStatus(autosaved: false, saveFailed: files.saveFailed); D-9 swaps `false` for its autosave flag. PhotoWindowEdited(edited:) sets isDocumentEdited. Keep layers? (system confirmationDialog) can't be snapshotted; photo-not-saved-*.png instead.
 - Attribution footers removed by hand from #1226's body and from comments on #763 and #1074 (the comment tool appends them too).
+- D-9 for D-10: files.autosave: PhotoAutosave? (startAutosave), files.recoveryOffer; FileIntent .restore(RecoveryOffer), .discardRecovery. Clean close discards on onDisappear; didSave hook removes the file. Quit: willQuit per dirty window before asking; Don't Save -> discard(); Save -> save().
+- Fix-batch item: PhotoAutosave.restore decodes on main (QB-L12); add Model restore(from snapshot) using openDocument(_ snapshot:name:) and decode off main in PhotoAutosave.
+- design.md says "alerts never at launch" but the packet/PJ-3 require the restore alert; D-9 followed the packet (Decision).
