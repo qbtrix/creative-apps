@@ -26,6 +26,7 @@ Journeys: H-J9 (8 steps, packet "Journey steps"). Quality bars: QB-F1 no dead co
 | (3) | 38727890123 (9caed05) | red, not judged: same Library build break (since #1096); reported on #763 | – | – | – | – | not counted |
 | (3) | 38731305776 (7f61259) | red, not judged: Library builds now; swift test fails to compile Tests/AppSnapshotTests/HaloPlaybackDriverTests.swift:18 (circular reference, viewer-playback's); journeys skipped | – | – | – | – | not counted |
 | (3) | 38732179619 (9af4454) | red, not judged: same playback test compile error (#1097); reported on #763 with the likely fix | – | – | – | – | not counted |
+| (3) | 38734211999 (35a875b) | red, not judged: #1136 fixed the playback test; HaloViewerFidelityTests.keyedFrame6 (#1125, HF-1) differs by 40000 px, so scripts/ci fails and journeys skip; reported on #763 | – | – | – | – | not counted |
 
 ## Decisions
 - Identifiers keep W0's shipped `halo.layer.*` prefix (`halo.layer.row.<id>`, `halo.layer.empty`, `halo.layer.new`; W0's journey reads `halo.layer.row.comp-1-layer-2`), so the packet's `halo.layers.list/row/refusal/empty` become `halo.layer.list/row/refusal/empty`.
