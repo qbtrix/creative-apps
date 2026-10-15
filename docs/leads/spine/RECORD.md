@@ -66,6 +66,7 @@ Taken from the packet's Build waves; checked against dev bcf5a09.
 - Commented once on #217 that #1138 supersedes it.
 - SA-4 kept LibraryLoupe(photo:position:menu:...) rather than (model:menu:), so SA-6 owns the one loupe call line in LibraryBrowser.swift (passing the loupe value and crop draft); SA-5 leaves that line alone. They run in parallel; a lane conflict gets a rebase.
 - SJ-1 split: SJ-1a (the four existing journeys on -LibraryFixture samples/empty + File > Load Sample Photos) runs now, ahead of SA-5, because SA-5 removes the content's Load Sample Photos button those journeys click; #1150's fast-lane label is off until SJ-1a merges. SJ-1b (J0, J10) stays in wave 12.
+- SJ-2 ships without feature-done: the Anatomy loop needs a CI run first, and its fixes (or, if clean, a packet status-line PR) form the feature's last PR, which carries feature-done.
 
 ## Open
 - PR #217 (fix for #156) is open at stage 0; SP-9 lands only if it is still unmerged when wave 8 starts.
