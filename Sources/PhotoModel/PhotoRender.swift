@@ -1,6 +1,7 @@
 // PhotoRender.swift: how Photo turns its layers into the picture. A region of
-// the canvas renders by compositing the visible layers bottom-up at their
-// offsets with their blend mode and opacity (CoreRaster's composite), then
+// the canvas renders by compositing the visible layers bottom-up, each through
+// PhotoLayerComposite (a pixel layer at its offset with its blend mode and
+// opacity, CoreRaster's composite; an adjustment layer passes through), then
 // running the enabled adjustments in order: exposure, levels, curves,
 // hue/saturation, blur. Levels and curves work on display (sRGB-encoded)
 // values, as photo editors' tone tools do (CoreRaster's ToneEncoding.sRGB),
@@ -133,20 +134,17 @@ extension PhotoWorkspace {
             x: inner.x - outer.x, y: inner.y - outer.y, width: inner.width, height: inner.height)
     }
 
-    /// The visible layers over transparency, bottom first, in `rect`. Each
-    /// layer tile under `rect` composites in place (composite clips it), so
-    /// every pixel blends exactly as it would from the whole layer.
+    /// The visible layers over transparency, bottom first, in `rect`, each
+    /// through `PhotoLayerComposite` (only its tiles under `rect`, clipped
+    /// there), so every pixel blends exactly as it would from the whole layer.
     func composited(_ rect: PixelRect) throws -> PixelBuffer {
         var result = try PixelBuffer(width: rect.width, height: rect.height)
         for layer in layers.reversed() where layer.isVisible && layer.opacity > 0 {
-            guard let tiled = pixels[layer.id] else { continue }
-            for i in tiled.tileIndices(in: rect.offsetBy(-layer.offsetX, -layer.offsetY))
-            where tiled.tiles.indices.contains(i) {
-                let tile = tiled.tileRect(i).offsetBy(layer.offsetX - rect.x, layer.offsetY - rect.y)
-                result = try CoreRaster.composite(
-                    tiled.tiles[i], onto: result, x: tile.x, y: tile.y, mode: layer.blendMode,
-                    opacity: Float(layer.opacity))
-            }
+            let content = LayerContent(
+                layer: layer, pixels: pixels[layer.id], mask: layer.isMaskEnabled ? masks[layer.id] : nil)
+            result = try PhotoLayerComposite.composite(
+                content, onto: result, origin: (x: rect.x, y: rect.y),
+                adjusting: services.adjustmentLayers, masking: services.masking)
         }
         return result
     }

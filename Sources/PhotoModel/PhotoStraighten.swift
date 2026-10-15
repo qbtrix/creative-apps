@@ -5,7 +5,8 @@
 // the canvas becomes CoreRaster's straightenCrop rectangle (no transparent
 // corners); without it the canvas grows to the turned bounds. Like Rotate and
 // Image Size, it keeps every layer pixel, including those now off the canvas.
-// One undo step keeping the whole stack; it drops the selection and a pending
+// One undo step keeping the whole stack that tells every layer's extras
+// (layerGeometryChanged, PV-5's masks) once; it drops the selection and a pending
 // crop. Angle 0, a non-finite angle or one out of range changes nothing. The
 // turn is slow on a big photo (seconds with lanczos3), so `straightened` works
 // it out without changing anything, off the main actor, and
@@ -48,6 +49,9 @@ public struct StraightenResult: Sendable {
     /// The workspace's revision and layer list it was worked out from.
     let revision: Int
     let layers: [PhotoLayer]
+    /// The angle and the turned canvas's crop, for `layerGeometryChanged`.
+    let degrees: Double
+    let crop: PixelRect
     /// The turned image.
     let stack: PhotoStack
 }
@@ -101,7 +105,7 @@ extension PhotoWorkspace {
         }
         turned.canvas = frame.size
         turned.selection = nil
-        return StraightenResult(revision: revision, layers: layers, stack: turned)
+        return StraightenResult(revision: revision, layers: layers, degrees: degrees, crop: frame.crop, stack: turned)
     }
 
     /// Makes `result` the image, as one "Straighten" undo step, and returns
@@ -115,6 +119,7 @@ extension PhotoWorkspace {
         stack.selectedLayerID = selectedLayerID
         record(.stack(stackState), named: "Straighten")
         restore(stack)
+        for layer in layers { layerGeometryChanged(layer.id, .straightened(degrees: result.degrees, crop: result.crop)) }
         touch(.all)
         return true
     }

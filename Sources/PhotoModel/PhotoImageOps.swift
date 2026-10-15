@@ -3,7 +3,8 @@
 // and scales its offset; Rotate turns every layer a quarter or half turn
 // (CoreRaster's rotated) and moves its offset with it, so layers keep their
 // places on the turned canvas. Each drops the selection and a pending crop and
-// is one undo step keeping the whole stack. A size CoreRaster rejects throws
+// is one undo step keeping the whole stack, and tells every layer's extras
+// (layerGeometryChanged, PV-5's masks) once. A size CoreRaster rejects throws
 // and changes nothing. Linux-safe.
 import CoreRaster
 
@@ -34,6 +35,7 @@ extension PhotoWorkspace {
         resized.selection = nil
         record(.stack(stackState), named: "Image Size")
         restore(resized)
+        for layer in layers { layerGeometryChanged(layer.id, .resized(scaleX: sx, scaleY: sy)) }
         touch(.all)
     }
 
@@ -55,6 +57,7 @@ extension PhotoWorkspace {
             layers[at].offsetX = offset.0
             layers[at].offsetY = offset.1
         }
+        for layer in layers { layerGeometryChanged(layer.id, .rotated(turn)) }
         if turn != .degrees180 { self.canvas = CanvasSize(width: h, height: w) }
         selection = nil
         pendingCrop = nil
