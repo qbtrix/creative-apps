@@ -29,3 +29,6 @@ utc	stage	event	ref	note
 2026-10-15T21:56Z	4	round-clean	38807718380	clean for this feature; CI red outside it
 2026-10-15T22:06Z	4	heartbeat	-	waiting for the round-4 dev CI run
 2026-10-15T22:27Z	4	heartbeat	38808325928	round 4 run in ui-test
+2026-10-15T22:47Z	4	ci-run	38808325928	round 4: feature 14/14 pass; red elsewhere
+2026-10-15T22:47Z	5	stage-end	#1073	Belt-Contact-Sheet comment posted (6203872377): feature journeys pass, dev red elsewhere
+2026-10-15T22:47Z	5	stopped	-	round budget 4/4 used; done check waits on a green dev run
