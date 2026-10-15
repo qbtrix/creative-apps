@@ -110,8 +110,9 @@ lock(id) while editingTextID is id or inside id: commitTextEdit(); then lock    
 
 Every task is one PR to `dev`: at most 400 changed lines and 15 files,
 label `fast-lane`, body lines `Belt-Lead:`, `Feature: layers-panel`,
-`Fast-Check: pass`, `Head:`, and the snapshot PNGs it changes. L-7 also
-carries `feature-done`. Paths drop `Sources/DesignModel/` and
+`Fast-Check: pass`, `Head:`, and the snapshot PNGs it changes. The
+feature's last PR carries `feature-done`: L-6 when LL-9 has merged by the
+time L-5 lands, otherwise L-5. Paths drop `Sources/DesignModel/` and
 `Sources/DesignApp/`; Model tests are `Tests/DesignModelTests/`.
 
 | id | issue | what | owned files | depends on | size |
@@ -119,18 +120,43 @@ carries `feature-done`. Paths drop `Sources/DesignModel/` and
 | L-1 | gap "rename, reorder, nest, Arrange" (Model part) | `LiveOrdering`: move with its refusals; arrange | `Live/LiveOrdering.swift`; tests `DesignOrderingTests.swift` | – | ~300, 2 |
 | L-2 | gap (Model part) | `layerDrop` and `DesignDropPosition` | `DesignLayerToggles.swift`; tests `DesignLayerDropTests.swift` | L-1 | ~150, 2 |
 | L-3 | #613 (closes) | A lock commits an open text edit first; rename trims the name (blank names are already refused) | `DesignWorkspace.swift`; tests `DesignLockTextEditTests.swift`, `DesignRenameTests.swift` | – | ~180, 3 |
-| L-4 | gap (view part); #288 (part) | Layers rows: rename on double-click through `SidebarRow`'s rename, drag to reorder and nest through `layerDrop` and `moveLayer`, the empty page state, row ids `design.layer.<id>` | `DesignLayersPanel.swift`; snapshots `DesignLayersSnapshots.swift` | L-1, L-2, L-3 | ~300, 2 |
-| L-5 | gap (closes) | J12 | `UITests/DesignJourneyTests+Layers.swift` | L-4 | ~250, 1 |
-| L-6 | #589 (Design half), or LL-9's follow-up | J12's group-row eye step without the skip, once lists-and-layers LL-9 has merged; until then this task waits and the lead records it as blocked in RECORD.md | `UITests/DesignJourneyTests+Layers.swift` | L-5; lists-and-layers LL-9 | ~30, 1 |
-| L-7 | – | QD-S10 model budget; P3 | tests `DesignLayersBudgetTests.swift`; `UITests/DesignJourneyTests+PerfLayers.swift` | L-5 | ~150, 2; `feature-done` |
+| L-4 | gap (view part); #288 (part) | Layers rows: rename on double-click through `SidebarRow`'s rename, drag to reorder and nest through `layerDrop` and `moveLayer`, the empty page state, row ids `design.layer.<id>` | `DesignLayersPanel.swift`; snapshots `DesignLayersSnapshots.swift` | L-1, L-2 | ~300, 2 |
+| L-5 | gap (closes) | J12 | `UITests/DesignJourneyTests+Layers.swift` | L-4 | ~250, 1; `feature-done` unless L-6 ships |
+| L-6 | #589 (Design half), or LL-9's follow-up | J12's group-row eye step without the skip, once lists-and-layers LL-9 has merged; until then this task waits and the lead records it as blocked in RECORD.md | `UITests/DesignJourneyTests+Layers.swift` | L-5; lists-and-layers LL-9 | ~30, 1; `feature-done` when it ships |
+| L-7 | – | QD-S10 model budget; P3 | tests `DesignLayersBudgetTests.swift`; `UITests/DesignJourneyTests+PerfLayers.swift` | – | ~150, 2 |
 
-L-1 and L-3 run side by side; L-2 follows L-1 (its test reads
-`LiveOrdering`'s refusals). L-6 is the only task that waits on another
-line. When LL-9 has merged by the time L-5 lands, L-7 depends on L-6 so the
-`feature-done` PR is the last; if LL-9 has not merged when L-7 is ready,
-L-7 ships with `feature-done` and L-6 becomes a `line:design` issue the lead files
-("Design: J12 hides a group from its row's eye", `Depends on:` the
-lists-and-layers feature issue), so the feature does not stall on SuiteUI.
+L-1, L-3 and L-7 run side by side. L-2 follows L-1 (its test reads
+`LiveOrdering`'s refusals). L-4 calls L-2's `layerDrop` and drives L-1's
+moves; it does not need L-3 (`renameNode` already refuses a blank name on
+`dev`). L-5 drives L-4's rows. L-7 needs no task's code: `layerRows`, the
+`crowd` fixture and the row ids already exist, so it builds and merges in
+wave 1 without `feature-done`. L-6 is the only task that waits on another
+line. When LL-9 has merged by the time L-5 lands, L-6 carries
+`feature-done`. If it has not, L-5 carries `feature-done` and L-6 becomes a
+`line:design` issue the lead files ("Design: J12 hides a group from its
+row's eye", `Depends on:` the lists-and-layers feature issue), so the
+feature does not stall on SuiteUI.
+
+No task edits a shared doc (`docs/c4/model.json`, `docs/design.md`, the
+blueprint or `waves.md`): the new files sit in folders their C4 components
+already cover, so there is no docs task.
+
+## Build waves
+
+- Wave 1: L-1, L-3, L-7. Independent in this wave: all three.
+- Wave 2: L-2. Independent in this wave: L-2 alone.
+- Wave 3: L-4. Independent in this wave: L-4 alone.
+- Wave 4: L-5 (`feature-done` when LL-9 has not merged). Independent in
+  this wave: L-5 alone.
+- Wave 5: L-6 (also waits on lists-and-layers LL-9; `feature-done` when it
+  ships). Independent in this wave: L-6 alone.
+
+Longest chain: L-1 → L-2 → L-4 → L-5 → L-6 (5; before the re-cut it was
+6, with L-7 after L-6).
+Chain of 5: L-2's test calls L-1's `LiveOrdering`; L-4's
+`DesignLayersPanel.swift` calls L-2's `layerDrop`; L-5's J12 drives L-4's
+rows; L-6 edits L-5's `UITests/DesignJourneyTests+Layers.swift` to drop
+its skip.
 
 ## Acceptance test per task
 

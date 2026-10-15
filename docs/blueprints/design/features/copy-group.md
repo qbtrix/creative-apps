@@ -128,10 +128,23 @@ carries `feature-done`.
 | C-2 | #416 (Model part) | `LiveGrouping` | `Sources/DesignModel/Live/LiveGrouping.swift`; `Tests/DesignModelTests/DesignGroupTests.swift` | – | ~260, 2 |
 | C-3 | #415 (Model part) | `LiveClipboard` and its payload | `Sources/DesignModel/Live/LiveClipboard.swift`; `Tests/DesignModelTests/DesignPasteboardTests.swift` | C-1 (reuses `copySubtree`) | ~280, 2 |
 | C-4 | – | The three snapshots the issues name | `Tests/AppSnapshotTests/DesignDuplicateSnapshots.swift`, `Tests/AppSnapshotTests/DesignGroupSnapshots.swift`, `Tests/AppSnapshotTests/DesignPasteboardSnapshots.swift` | C-1, C-2, C-3 | ~180, 3 |
-| C-5 | #414, #415, #416 (close all three) | J7, J8, J9 | `UITests/DesignJourneyTests+Arrange.swift` | C-4 | ~300, 1; `feature-done` |
+| C-5 | #414, #415, #416 (close all three) | J7, J8, J9 | `UITests/DesignJourneyTests+Arrange.swift` | C-1, C-2, C-3 | ~300, 1; `feature-done` |
 
-C-1 and C-2 run side by side; C-3 follows C-1. No task edits a view: every
-control these issues need is wave 0's.
+C-1 and C-2 run side by side; C-3 follows C-1. C-4 and C-5 each need the
+live behavior of all three Model tasks, not each other; C-5 carries
+`feature-done`, so the lead merges it after C-4. No task edits a view: every
+control these issues need is wave 0's. No task edits a shared doc
+(`docs/c4/model.json`, `docs/design.md`, the blueprint, `waves.md`): the new
+`Live/` files sit in the DesignModel folder, which its C4 component already
+covers.
+
+## Build waves
+
+- Wave 1: C-1, C-2. Independent in this wave: both.
+- Wave 2: C-3.
+- Wave 3: C-4, C-5 (`feature-done`, final). Independent in this wave: both.
+
+Longest chain: C-1 → C-3 → C-4 (3).
 
 ## Acceptance test per task
 
