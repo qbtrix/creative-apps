@@ -2,9 +2,9 @@
 
 Issue: #812 · Packet: docs/blueprints/photo/features/photo-seams.md
 Run: act-1a13d5e8ca4-huz5 · Session: cloud lead session · Started: 2026-10-15T02:23Z
-Stage: 3 wave 19 (S-13b)
+Stage: 3 done when #997 merges; 4 round 1 next
 Base: c4ec07810683a4bc7d62dcc5205705229f248a71
-Next: wait for #992 and S-13b; then stage 4 round 1 on the first CI run that contains every merge
+Next: wait for #997 (feature-done) to merge and the CI run it dispatches; then round 1: audit, screens, critic panel (clarity, journey, design, layout, controls, quality)
 
 ## Tasks
 
@@ -33,7 +33,7 @@ packet chains every task on the one before it (shared files or new types).
 | S-11b | 17 | panel split 2: Layers tab, History stub | A/PhotoPanel, PhotoLayersTab, PhotoHistoryTab | PhotoLayerRowSnapshots | #991 | merged |
 | S-12 | 18 | -PhotoFixture, -PhotoWindowWidth, Preview data pill | M/PhotoFixtures, A/PhotoApp, PhotoWindow, PhotoStatusLine | PhotoLaunchOptionsTests; photo-preview-pill-dark.png | #992 | merged |
 | S-13a | 11 | PB-2 clone/heal and PB-9 move budgets (model half) | MT/PhotoBudgetTests | PhotoBudgetTests | #979 | merged |
-| S-13b | 19 | PB-2 event-to-picture latency series (feature-done) | ST/PhotoBrushLatencyTests | PhotoBrushLatencyTests | – | todo |
+| S-13b | 19 | PB-2 event-to-picture latency series (feature-done) | ST/PhotoBrushLatencyTests | PhotoBrushLatencyTests | #997 | open |
 
 ## Rounds
 | round | CI run | CI | audit vs baseline | lenses | confirmed | fixed by | clean |
