@@ -1,6 +1,7 @@
 // SuiteWindow.swift: the one window shell every app uses. A NavigationSplitView
 // with a sidebar list of SidebarSections, the app's content as the detail, and a
-// trailing inspector the user can hide (toolbar button, Option-Command-I).
+// full-height trailing inspector outside the split view that the user can hide
+// (toolbar button, Option-Command-I).
 // The window chrome (toolbar, sidebar, inspector) is system Liquid Glass; the
 // content stays flat. Apps pass state in and get selection out through
 // `onSelect`, `onToggle`, `onMove` and `onRename`; a nil closure turns that
@@ -127,17 +128,6 @@ public struct SuiteWindow<Content: View, Inspector: View>: View {
                     minWidth: SuiteSize.contentMinimum.width, idealWidth: SuiteSize.contentIdealWidth,
                     maxWidth: .infinity, minHeight: SuiteSize.contentMinimum.height, maxHeight: .infinity)
                 .tint(SuiteColor.accent)
-                .inspector(isPresented: $showsInspector) {
-                    inspector
-                        .padding(SuiteSpacing.m)
-                        .frame(maxHeight: .infinity, alignment: .top)
-                        .accessibilityElement(children: .contain)
-                        .accessibilityIdentifier("suite.inspector")
-                        .tint(SuiteColor.accent)
-                        .inspectorColumnWidth(
-                            min: SuiteSize.inspectorWidth.min, ideal: SuiteSize.inspectorWidth.ideal,
-                            max: SuiteSize.inspectorWidth.max)
-                }
         }
         .navigationTitle(title)
         .toolbar {
@@ -161,6 +151,22 @@ public struct SuiteWindow<Content: View, Inspector: View>: View {
                 .help(showsInspector ? "Hide Inspector" : "Show Inspector")
                 .suiteControl(id: "suite.inspectorToggle", enabled: true, reason: nil)
             }
+        }
+        // Outside the split view, not in its detail column: there the detail
+        // column's minimum counted the inspector's width as well, so the
+        // content column came out at the content minimum plus the inspector
+        // (648 pt) in every window, and the split view ran past the window's
+        // edges (#933). Out here the inspector is its own full-height column.
+        .inspector(isPresented: $showsInspector) {
+            inspector
+                .padding(SuiteSpacing.m)
+                .frame(maxHeight: .infinity, alignment: .top)
+                .accessibilityElement(children: .contain)
+                .accessibilityIdentifier("suite.inspector")
+                .tint(SuiteColor.accent)
+                .inspectorColumnWidth(
+                    min: SuiteSize.inspectorWidth.min, ideal: SuiteSize.inspectorWidth.ideal,
+                    max: SuiteSize.inspectorWidth.max)
         }
     }
 
