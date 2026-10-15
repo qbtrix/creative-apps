@@ -4,7 +4,7 @@ Issue: #793 (resumes #754) · Packet: docs/blueprints/flare/features/mac-platfor
 Run: act-1a13c789856-0qa9 (first run act-1a13b14336c-tqna) · Session: claude/mac-platform-lead-lxlcta (first: claude/mac-platform-lead-7jx22z) · Started: 2026-10-14T15:43Z, resumed 2026-10-14T22:15Z
 Stage: done, re-checking (round budget spent; waiting for a green dev CI run containing 190e45d)
 Base: 1098ff2d6c135020391cef770f4de11dfde9465a
-Next: watch the next dev CI run after 38669151941. swift test is green there; red is UI journey audits across Flare/Design/Library/Halo/SuiteUI (identifier fault #262; Flare's is the window's 'Show Sidebar' toggle on flare-easing-segment, not a mac-platform file). Green -> edit the Belt-Contact-Sheet comment on #793 (id 6180953518), mark done.
+Next: watch dev CI run 38672867000 (c0198ea, has #938 SuiteUI identifiers incl. Show Sidebar and #939 Library). Green -> edit the Belt-Contact-Sheet comment on #793 (id 6180953518), mark done. No Flare change pending.
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
