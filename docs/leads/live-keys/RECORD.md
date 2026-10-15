@@ -12,10 +12,10 @@ Next: wait for wave 3 PRs (KY-3, KY-7) to merge, then start wave 4 (KY-4) on the
 | KY-1 | 1 | `LiveProperties` struct + `properties` reads (values, key states, Mixed, any owner) | Live/LiveProperties.swift, LivePropertiesTests.swift | LivePropertiesTests | #900 | merged |
 | KY-5 | 1 | `LiveKeyframes` struct + `rows`, `labels` | Live/LiveKeyframes.swift, LiveKeyframesTests.swift | LiveKeyframesTests | #902 | merged |
 | KY-8 | 1 | `LiveEasing` owner path for symbol layers | Live/LiveEasing.swift, LiveEasingTests.swift | LiveEasingTests | #906 | merged |
-| KY-2 | 2 | `setValue` (section 2 rule, NaN refused, merged scrub) | Live/LiveProperties.swift, LivePropertiesSetTests.swift | #913 | merged |
-| KY-6 | 2 | `moveKeys`, `removeKeys` | Live/LiveKeyframes+Edit.swift, LiveKeyframesEditTests.swift | #912 | merged |
-| KY-3 | 3 | `toggleAnimated`, `toggleKey` | Live/LiveProperties+Keys.swift, LivePropertiesKeysTests.swift |  | building |
-| KY-7 | 3 | `insertFrames`, `removeFrames`, `setLabel` + `KeyframeEditing` | Live/LiveKeyframes+Frames.swift, LiveKeyframesFramesTests.swift |  | building |
+| KY-2 | 2 | `setValue` (section 2 rule, NaN refused, merged scrub) | Live/LiveProperties.swift, LivePropertiesSetTests.swift | LivePropertiesSetTests | #913 | merged |
+| KY-6 | 2 | `moveKeys`, `removeKeys` | Live/LiveKeyframes+Edit.swift, LiveKeyframesEditTests.swift | LiveKeyframesEditTests | #912 | merged |
+| KY-3 | 3 | `toggleAnimated`, `toggleKey` | Live/LiveProperties+Keys.swift, LivePropertiesKeysTests.swift | LivePropertiesKeysTests | | building |
+| KY-7 | 3 | `insertFrames`, `removeFrames`, `setLabel` + `KeyframeEditing` | Live/LiveKeyframes+Frames.swift, LiveKeyframesFramesTests.swift | LiveKeyframesFramesTests | | building |
 | KY-4 | 4 | `setFill`, `setStroke` + `PropertyAnimating` | Live/LiveProperties+Paint.swift, LivePropertiesPaintTests.swift | LivePropertiesPaintTests | | waiting KY-3 |
 | KY-9 | 5 | model journey steps 1–7 + QB-L7 budget (feature-done) | LiveKeysJourneyTests.swift, LiveKeysBudgetTests.swift | both | | waiting KY-4, KY-7, KY-8 |
 
