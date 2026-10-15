@@ -9,6 +9,13 @@ sits in the status row. It replaces the W0 stubs for drawing, the clock and
 the renderer, and turns on the playback commands.
 **Line:** `line:halo` · **Wave:** W1 (`waves.md`) · **Lead branch:** `lead/viewer-playback`
 
+**Status (2026-10-15):** built on `dev`, in the lead's Anatomy loop. VP-1
+to VP-12 merged (#1090, #1072, #1087, #1069, #1098, #1111, #1101, #1085,
+#1099, #1125, #1097, #1102, #1124). The `feature-done` run on #1124's head
+never reached the journeys: AppSnapshotTests didn't compile
+(`HaloPlaybackDriverTests`' untyped `lazy var`, a circular reference), fixed
+by #1136.
+
 **Covers:** #37, #457. #457 closes with VP-4b; #37 closes with VP-12, the
 `feature-done` PR. The other tasks say "Part of #37" or "Part of the
 viewer-playback feature".
