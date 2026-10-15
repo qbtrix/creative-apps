@@ -18,7 +18,7 @@ Next: wait for the ST-10 feature-done PR to merge, then find the dev CI run it t
 | ST-7 | 1 | BoxGestureMath move | Live/BoxGestureMath.swift, Fakes/FakeShapes.swift, BoxGestureMathTests | BoxGestureMathTests | #918 | merged |
 | ST-8 | 2 | boxResult, commitBox | Live/LiveShapes+Box.swift, LiveShapesBoxTests | LiveShapesBoxTests | #925 | merged |
 | ST-9 | 3 | edits + ShapeBuilding | Live/LiveShapes+Edit.swift, LiveShapesEditTests | LiveShapesEditTests | #931 | merged |
-| ST-10 | 4 | model journey + budgets (feature-done) | LiveStageJourneyTests, LiveStageBudgetTests | itself | | building |
+| ST-10 | 4 | model journey + budgets (feature-done) | LiveStageJourneyTests, LiveStageBudgetTests | itself | #934 | open, waiting on lane |
 
 Journeys: J3 and J5 model half, steps 1-6 of the packet. Quality: QB-L5 hit <= 10 ms, QB-L6 draw list <= 20 ms, QB-L11 nested <= 40 ms, QB-V1 cubics kept, QB-F3 one gesture one step.
 
