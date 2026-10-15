@@ -5,7 +5,9 @@
 // the field; Return on the canvas applies through `.confirm`. Cancel carries
 // no Escape shortcut either, which would close a field being typed in before
 // its own Escape; Escape on the canvas cancels through `.dismiss`.
-// Values in, intents out.
+// Each field reports its bounds through CropFieldBoundsKey as an anchor, so
+// a test measures the 2 x 2 grid without an assistive client; nothing in the
+// app reads it. Values in, intents out.
 import PhotoModel
 import SuiteUI
 import SwiftUI
@@ -96,8 +98,18 @@ struct CropOptions: View {
                 perform(.crop(.field(field, Int(number.rounded()))))
             }
             .suiteControl(id: id, enabled: enabled, reason: reason)
+            .anchorPreference(key: CropFieldBoundsKey.self, value: .bounds) { [id: $0] }
         }
         .disabled(!enabled)
         .help(reason ?? "")
+    }
+}
+
+/// Each crop field's bounds by accessibility identifier, for the grid test.
+struct CropFieldBoundsKey: PreferenceKey {
+    static var defaultValue: [String: Anchor<CGRect>] { [:] }
+
+    static func reduce(value: inout [String: Anchor<CGRect>], nextValue: () -> [String: Anchor<CGRect>]) {
+        value.merge(nextValue()) { _, next in next }
     }
 }
