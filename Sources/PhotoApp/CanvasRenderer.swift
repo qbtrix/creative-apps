@@ -28,6 +28,8 @@ final class CanvasRenderer {
     private static let timing = Duration.milliseconds(250)
     private var isRendering = false
     private var waiting: PhotoWorkspace?
+    /// Called with each picture's revision as its tiles reach the view (the brush ink test times this).
+    @ObservationIgnored var onPicture: ((Int) -> Void)?
 
     /// Draws `workspace` once the render in flight, if any, is done.
     func show(_ workspace: PhotoWorkspace) {
@@ -47,6 +49,7 @@ final class CanvasRenderer {
             do {
                 let update = try await PhotoRenderer.update(workspace, since: since)
                 tiles.apply(update)
+                onPicture?(update.revision)
                 lastMilliseconds = update.milliseconds
                 if ContinuousClock.now - timed >= Self.timing {
                     (milliseconds, timed) = (update.milliseconds, .now)

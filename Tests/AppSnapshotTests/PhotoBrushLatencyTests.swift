@@ -182,6 +182,13 @@ final class StateBox {
         value = model
     }
 
+    /// A display frame's moves at once, as StrokePacer hands them to the window.
+    func drags(_ moves: [StrokePacer.Move]) {
+        var model = value
+        model.drags(moves)
+        value = model
+    }
+
     func endDrag() {
         var model = value
         model.endDrag()
