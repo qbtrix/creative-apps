@@ -9,6 +9,8 @@ import SwiftUI
 struct LibraryLoupe: View {
     let photo: PhotoItem
     let position: String
+    /// The window's menu; the loupe-viewport feature calls `menu.view` from here.
+    var menu = LibraryMenu()
     var onStep: @MainActor (Int) -> Void = { _ in }
     var onGrid: @MainActor () -> Void = {}
     @FocusState private var isFocused: Bool

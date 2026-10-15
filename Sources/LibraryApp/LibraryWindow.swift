@@ -4,13 +4,34 @@
 // to the views, and publishes the menu bar's LibraryMenu as a focused value.
 // The catalog starts from the launch arguments: a fixture's fakes and photos,
 // or the live services over the Platform adapters.
+//
+// The area hooks: each area (edit, import, thumbnails, cull, persist, loupe,
+// develop, crop, export) fills its own `LibraryWindow+<Area>.swift` with the
+// LibraryMenu sub-struct it owns, its `<Area>AreaState` in `areas`, and the
+// lifecycle hooks this body calls. The window's single keys go to the area
+// that owns them through the menu; a nil action ignores the key.
+import AppKit
 import Foundation
 import LibraryModel
 import SuiteUI
 import SwiftUI
 
+/// One state object per area; each area adds its own properties to its class.
+final class LibraryAreas {
+    let edit = EditAreaState()
+    let imports = ImportAreaState()
+    let thumbnails = ThumbnailsAreaState()
+    let cull = CullAreaState()
+    let persist = PersistAreaState()
+    let loupe = LoupeAreaState()
+    let develop = DevelopAreaState()
+    let crop = CropAreaState()
+    let export = ExportAreaState()
+}
+
 struct LibraryWindow: View {
-    @State private var model: LibraryCatalog
+    @State var model: LibraryCatalog
+    @State var areas = LibraryAreas()
 
     init() {
         let launch = LibraryLaunch(arguments: ProcessInfo.processInfo.arguments)
@@ -29,41 +50,78 @@ struct LibraryWindow: View {
             onSelect: { model.selectCollection($0) }
         ) {
             LibraryBrowser(
-                model: model, onLoadSamples: { model.loadSamples() }, onSelect: { model.select($0) },
+                model: model, menu: menu, onLoadSamples: { model.loadSamples() }, onSelect: { model.select($0) },
                 onOpen: { model.open($0) }, onStep: { model.stepLoupe(by: $0) }, onGrid: { model.showGrid() })
+                // On the content, so it hears keys only while the grid or the loupe has focus.
+                .onKeyPress(phases: .down) { press in route(press) }
         } inspector: {
             LibraryInspector(
                 model: model, onStar: { model.clickStar($0) }, onFlag: { model.setFlag($0) },
                 onLabel: { model.setLabel($0) })
         }
         .focusedSceneValue(\.libraryMenu, menu)
+        .task {
+            importAreaLaunch()
+            persistAreaLaunch()
+        }
+        .onChange(of: model.saveRevision) { _, _ in persistAreaChanged() }
+        .onChange(of: model.focusedItemID) { _, _ in loupeAreaFocusChanged() }
+        .onChange(of: model.catalogState) { _, _ in importAreaCatalogReady() }
+        .onReceive(NotificationCenter.default.publisher(for: NSApplication.willTerminateNotification)) { _ in
+            persistAreaFlush()
+        }
     }
 
-    private var menu: LibraryMenu {
-        let inGrid = model.mode == .grid
+    /// The menu bar's items, each sub-struct from its area's file.
+    var menu: LibraryMenu {
+        var photo = developMenu
+        let crop = cropMenu
+        photo.toggleCrop = crop.toggleCrop
+        photo.cropTitle = crop.cropTitle
+        photo.applyCrop = crop.applyCrop
+        photo.resetCrop = crop.resetCrop
         return LibraryMenu(
-            edit: LibraryMenu.Edit(loadSamples: { model.loadSamples() }),
-            cull: LibraryMenu.Cull(
-                setRating: { model.setRating($0) }, setFlag: { model.setFlag($0) }, setLabel: { model.setLabel($0) }),
-            view: LibraryMenu.Viewing(
-                grid: enabled(model.mode == .loupe) { model.showGrid() },
-                loupe: enabled(inGrid && !model.isSelectedCollectionEmpty) { model.showLoupe() },
-                zoomIn: stepCellSize(1, allowed: inGrid && model.canShowLargerThumbnails),
-                zoomOut: stepCellSize(-1, allowed: inGrid && model.canShowSmallerThumbnails),
-                setSort: { model.setSort($0) }, sort: model.sort,
-                zoomInTitle: inGrid ? "Larger Thumbnails" : "Zoom In",
-                zoomOutTitle: inGrid ? "Smaller Thumbnails" : "Zoom Out"),
-            reasons: model.services.unavailable)
+            edit: editMenu, file: fileMenu, thumbnails: thumbnailsMenu, cull: cullMenu, persist: persistMenu,
+            view: viewMenu, photo: photo, export: exportMenu, reasons: model.services.unavailable)
     }
 
-    /// A thumbnail size step for the View menu, nil at the size limit.
-    private func stepCellSize(_ steps: Int, allowed: Bool) -> (@MainActor () -> Void)? {
-        guard allowed else { return nil }
-        return { model.stepCellSize(by: steps) }
+    /// A single key to the area that owns it; ignored (so the grid or the
+    /// loupe can act) when it has a command modifier or its action is nil.
+    private func route(_ press: KeyPress) -> KeyPress.Result {
+        guard press.modifiers.isDisjoint(with: [.command, .control, .option]),
+              let key = Self.libraryKey(press) else { return .ignored }
+        let current = self.menu
+        let action: LibraryMenu.Action?
+        switch key {
+        case .rating, .pick, .reject, .unflag:
+            guard let cull = current.cull.key else { return .ignored }
+            cull(key)
+            return .handled
+        case .first: action = current.view.first
+        case .last: action = current.view.last
+        case .crop: action = current.photo.toggleCrop
+        case .confirm: action = current.photo.applyCrop
+        case .grid: action = current.view.grid
+        }
+        guard let action else { return .ignored }
+        action()
+        return .handled
+    }
+
+    /// Return, Home and End by their key; anything else by its one character.
+    private static func libraryKey(_ press: KeyPress) -> LibraryKey? {
+        switch press.key {
+        case .return: return LibraryKey(special: .returnKey)
+        case .home: return LibraryKey(special: .home)
+        case .end: return LibraryKey(special: .end)
+        default:
+            guard press.characters.count == 1, let character = press.characters.first else { return nil }
+            return LibraryKey(character: character)
+        }
     }
 
     /// A menu action, nil (so the item disables) when it can't run.
-    private func enabled(_ allowed: Bool, _ perform: @escaping @MainActor () -> Void) -> (@MainActor () -> Void)? {
+    func enabled(_ allowed: Bool, _ perform: @escaping @MainActor () -> Void) -> (@MainActor () -> Void)? {
         allowed ? perform : nil
     }
 

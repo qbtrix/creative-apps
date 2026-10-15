@@ -11,6 +11,8 @@ import SwiftUI
 /// mode it shows the loupe's photo (LibraryLoupe) instead of the grid.
 struct LibraryBrowser: View {
     let model: LibraryCatalog
+    /// The window's menu (LibraryMenu.disabled outside one), passed to the grid and the loupe.
+    var menu = LibraryMenu()
     var onLoadSamples: @MainActor () -> Void = {}
     var onSelect: @MainActor (Set<String>) -> Void = { _ in }
     var onOpen: @MainActor (String) -> Void = { _ in }
@@ -31,9 +33,9 @@ struct LibraryBrowser: View {
                     ToolbarAction($0, systemImage: "photo.on.rectangle.angled", perform: onShowAll)
                 })
         } else if let photo = model.loupeItem, let position = model.loupePosition {
-            LibraryLoupe(photo: photo, position: position, onStep: onStep, onGrid: onGrid)
+            LibraryLoupe(photo: photo, position: position, menu: menu, onStep: onStep, onGrid: onGrid)
         } else {
-            LibraryGrid(model: model, onSelect: onSelect, onOpen: onOpen)
+            LibraryGrid(model: model, menu: menu, onSelect: onSelect, onOpen: onOpen)
         }
     }
 }
