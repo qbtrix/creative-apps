@@ -44,3 +44,4 @@ utc	stage	event	ref	note
 2026-10-15T02:14Z	5	ci-run	38667485578	red (same head c3fd66f as 709, SuiteUI); 38669151941 running with #919
 2026-10-15T02:31Z	5	ci-run	38669151941	swift test green; UI journey audits red in five apps (not feature files); noted on #763
 2026-10-15T02:54Z	5	heartbeat	38672867000	pending; #938 (SuiteUI identifiers, covers Flare Show Sidebar) and #939 merged; 712-714 cancelled
+2026-10-15T03:20Z	5	ci-run	38674789740	red outside: SuiteUI SidebarRenameGestureTests only; feature tests green; 715-717 superseded; 38675308731 running
