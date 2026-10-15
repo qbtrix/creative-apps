@@ -3,7 +3,8 @@
 // sheet; Duplicate, Delete, select and rename call the Model, which refuses
 // what it can't do. Composition > Delete while a text field has focus (renaming in
 // the sidebar) edits the text instead (HaloProject.compositionDeleteCommand).
-// `viewerScene(_:)` adds nothing yet; viewer-playback (#37) fills it.
+// `viewerScene(_:)` is a pass-through: HaloViewerCanvas reads the draw list
+// and the selection from the Model itself (#37), so this file keeps only routes.
 import HaloModel
 import SwiftUI
 
