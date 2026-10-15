@@ -113,8 +113,33 @@ private func isPlainSentence(_ text: String?) -> Bool {
 
     w.removeScene("scene-1")
     #expect(isPlainSentence(w.layerError?.message) && w.document == start && !w.canUndo)
+
+    // Refusals `LiveScenes` itself throws reach the person as sentences too, and change nothing.
+    w.addGuide(.horizontal, at: 300)
+    let guided = w.document, undoName = w.undoActionName
+    let refusals: [(String, (inout FlareWorkspace) -> Void)] = [
+        ("That item is no longer there.", { $0.removeGuide(at: 5) }),
+        ("That item is no longer there.", { $0.moveGuide(at: 5, to: 310, dragStart: 300) }),
+        ("This scene is no longer in the document.", { $0.renameScene("scene-9", to: "Outro") }),
+    ]
+    for (message, refuse) in refusals {
+        refuse(&w)
+        #expect(w.layerError?.message == message)
+        #expect(isPlainSentence(w.layerError?.message) && w.document == guided && w.undoActionName == undoName)
+    }
     // The checker itself catches a case name.
-    #expect(!isPlainSentence(FlareLayerError.command(.invalidIndex(3)).message))
+    #expect(!isPlainSentence("The layer could not be changed (invalidIndex(5))."))
+}
+
+/// Every engine refusal reads as a sentence with no case name or engine text in it (QB-F2).
+@Test func commandRefusalsArePlainText() {
+    let errors: [CommandError] = [
+        .invalidIndex(5), .sceneNotFound("scene-9"), .emptyName, .invalidDocument(FakeScenes.lastSceneMessage),
+        .invalidDocument("scene scene-1: canvas size must be finite and > 0"), .layerNotFound("layer-9"),
+        .notExecuted, .malformedCommand("bad"),
+    ]
+    for error in errors { #expect(isPlainSentence(FlareLayerError.command(error).message), "\(error)") }
+    #expect(FlareLayerError.command(.invalidDocument(FakeScenes.lastSceneMessage)).message == FakeScenes.lastSceneMessage)
 }
 
 @Test func liveEqualsFake() throws {

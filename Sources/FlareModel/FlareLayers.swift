@@ -23,7 +23,14 @@ public enum FlareLayerError: Error, Equatable, Sendable {
         case .command(.invalidDuration): "Length can't be negative."
         case .command(.invalidGuidePosition): "A guide needs a position on the canvas."
         case .command(.layerLocked): "The layer is locked. Unlock it to change it."
-        case .command(let error): "The layer could not be changed (\(error))."
+        // An index the engine refuses is a layer, scene, instance, guide or swatch position that has gone (#800).
+        case .command(.invalidIndex): "That item is no longer there."
+        case .command(.sceneNotFound): "This scene is no longer in the document."
+        case .command(.layerNotFound): "This layer is no longer in the document."
+        case .command(.emptyName): "Type a name first."
+        // Only the workspace's own sentences pass through; engine text never reaches the person.
+        case .command(.invalidDocument(let reason)) where reason == FakeScenes.lastSceneMessage: reason
+        case .command: "That change could not be made."
         }
     }
 }
