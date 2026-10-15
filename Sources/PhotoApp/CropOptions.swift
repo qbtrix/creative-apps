@@ -98,7 +98,9 @@ struct CropOptions: View {
         // The row is one element: the drawn letter joins the field's name, value
         // and adjust actions, so a disabled field's dimmed letter is part of a
         // disabled control, not stray text; the identifier goes on that element.
+        // Combining drops the field's own value, so the row states it again.
         .accessibilityElement(children: .combine)
+        .accessibilityValue(model.cropFieldAccessibilityValue(field))
         .suiteControl(id: id, enabled: enabled, reason: reason)
         .disabled(!enabled)
         .help(reason ?? model.cropFieldHelp(field))
