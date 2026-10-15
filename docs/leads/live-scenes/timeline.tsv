@@ -16,3 +16,6 @@ utc	stage	event	ref	note
 2026-10-15T00:13Z	4	ci-run	38657968912	Linux green; macOS red only on SuiteUI SnapshotHostTests.appearances; all LiveScenes tests pass; journeys not run
 2026-10-15T00:13Z	4	heartbeat	round1	critic panel running; triage posted on #763
 2026-10-15T00:16Z	4	round-findings	round1	1 major 3 minor confirmed, 0 refuted; 4 fix batches launched
+2026-10-15T00:43Z	4	pr-merged	#889 #890 #892 #896	round 1 fixes
+2026-10-15T00:43Z	4	ci-run	38660293042	macOS red only SuiteUI SnapshotHostTests; Linux scripts/ci on c111439 CI: PASS
+2026-10-15T00:43Z	4	stage-start	round2	same five lenses
