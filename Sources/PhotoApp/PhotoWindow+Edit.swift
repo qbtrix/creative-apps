@@ -4,8 +4,11 @@
 // on the general pasteboard (PhotoPasteboard); Paste reads the first image
 // there into the workspace, centered on the canvas when it has no place of
 // its own. An edit the workspace refuses shows its reason in the window's
-// alert. PhotoEditArea watches the general pasteboard's change count and
-// publishes what it holds (`photoPasteboard`) for the Edit menu.
+// alert. Duplicate Layer, Merge Down and Flatten Image go straight to the
+// workspace, which refuses with its reason in the status line (the Layer menu
+// disables them with that reason first). PhotoEditArea watches the general
+// pasteboard's change count and publishes what it holds (`photoPasteboard`)
+// for the Edit menu.
 import AppKit
 import CoreRaster
 import PhotoModel
@@ -14,6 +17,7 @@ import SwiftUI
 /// What the edit area can be asked to do (photo-edit adds the cases).
 enum EditIntent {
     case cut, copy, paste
+    case duplicateLayer, mergeDown, flattenImage
 }
 
 extension PhotoWindow {
@@ -33,6 +37,9 @@ extension PhotoWindow {
                 PhotoPasteboard.write(image)
             }
         case .paste: pasteFromPasteboard()
+        case .duplicateLayer: model.duplicateSelectedLayer()
+        case .mergeDown: model.mergeDown()
+        case .flattenImage: model.flattenImage()
         }
     }
 
