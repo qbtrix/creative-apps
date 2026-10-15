@@ -80,6 +80,12 @@ private func position(_ index: Int, _ engine: CommandEngine) -> Double? {
         }
         times.append(time)
     }
-    let median = times.sorted()[times.count / 2]
-    #expect(median <= .milliseconds(10) && position(index, engine) == 350)
+    times.sort()
+    let budget = Duration.milliseconds(10)
+    let median = times[times.count / 2]
+    let p95 = times[times.count * 95 / 100]
+    let max = times[times.count - 1]
+    print("LiveScenesGuideDrag p50 \(median) p95 \(p95) max \(max) budget \(budget)")
+    #expect(median <= budget)
+    #expect(position(index, engine) == 350)
 }
