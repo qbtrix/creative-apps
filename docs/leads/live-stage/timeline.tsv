@@ -34,3 +34,4 @@ utc	stage	event	ref	note
 2026-10-15T03:16Z	4	stage-start	#798	round 2 waiting on run 38675308731
 2026-10-15T03:32Z	4	heartbeat	#798	waiting on dev CI or round work
 2026-10-15T03:32Z	3	heartbeat	#798	wave 1 building
+2026-10-15T03:42Z	4	ci-run	38675308731	red on other lines only; flare journeys green, audit at baseline
