@@ -2,9 +2,9 @@
 
 Issue: #793 (resumes #754) · Packet: docs/blueprints/flare/features/mac-platform.md
 Run: act-1a13c789856-0qa9 (first run act-1a13b14336c-tqna) · Session: claude/mac-platform-lead-lxlcta (first: claude/mac-platform-lead-7jx22z) · Started: 2026-10-14T15:43Z, resumed 2026-10-14T22:15Z
-Stage: done, re-checking (round budget spent; waiting for a green dev CI run containing 190e45d)
+Stage: 4 round 3
 Base: 1098ff2d6c135020391cef770f4de11dfde9465a
-Next: read dev CI run 38704216123 (731, 92db316, has #1039 FrameProbe fix) when it completes. Green -> edit the Belt-Contact-Sheet comment on #793 (id 6180953518), mark done. 730 red only on SuiteUI FrameProbeTests.summaryWithinBudget (24.4 vs 20 ms); 729 only Halo layout + SuiteUI identifier. Flare and mac-platform green.
+Next: read run 38704216123 (dev 92db316, contains 4594082 and SuiteUI fix #1039). Green: contact sheet on #754. Red outside Flare mac-platform files: note on #763 and wait for the next dev run (round 4 is the last).
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -51,6 +51,7 @@ Next: read dev CI run 38704216123 (731, 92db316, has #1039 FrameProbe fix) when 
 - gh CLI has no valid token in this session; builders open PRs and set labels through the GitHub MCP tools.
 
 ## Open
+- 2026-10-15: dev runs 38682385432..38700713285 all red, every failure outside this feature (SuiteUI FrameProbeTests timing, SuiteWindow #962 toolbar/columns breaking Flare testEditEasingOfAKeyframeSegment, Library loupe, Halo layout); all mac-platform tests pass in each. Tracked on #763 by the other leads.
 - #851 (gap, p1, line:photo): Photo brush timing budgets fail dev CI on shared runners; blocks a green dev run for every feature.
 - creative-core main moved under dev (Package.swift tracks branch main, Package.resolved is gitignored): fixed by #801. No one else had an issue or PR for it.
 - Feature-done PR #806 (packet Status line, waves.md issue #793) opened 22:25Z on head e3c132f.

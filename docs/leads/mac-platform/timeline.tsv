@@ -58,3 +58,5 @@ utc	stage	event	ref	note
 2026-10-15T07:53Z	5	ci-run	38698770785	red outside: Halo testLayoutAtWidths + SuiteUI gallery identifier; Flare green
 2026-10-15T08:20Z	5	ci-run	38700713285	red outside: SuiteUI FrameProbeTests timing only; Flare green
 2026-10-15T08:35Z	5	heartbeat	38704216123	relaunch (act-1a13b14336c-tqna); 731 running with #1039 (FrameProbe fix)
+2026-10-15T08:21Z	4	heartbeat	#763	session resumed after idle; dev red outside feature in runs to 38700713285; waiting on 38704216123
+2026-10-15T08:21Z	4	stage-start	round3	run 38704216123 on 92db316
