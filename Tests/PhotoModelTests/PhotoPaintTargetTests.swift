@@ -65,7 +65,9 @@ import Testing
         workspace.selectTool(.brush)
         let pixels = workspace.pixels, steps = workspace.historySteps.count
         workspace.drag(from: point(100, 100), to: point(100, 100))
-        #expect(workspace.statusMessage == "Pick a pixel layer to paint on.")
+        #expect(workspace.statusMessage == "Select an image layer in the Layers tab to paint on.")
+        // It says where to go: the Layers tab.
+        #expect(workspace.statusMessage?.contains("Layers") == true)
         workspace.drag(from: point(100, 100), to: point(300, 200))
         workspace.endDrag()
         #expect(workspace.pixels == pixels)
