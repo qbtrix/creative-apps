@@ -129,6 +129,32 @@ jobs:
           name: ui-tests-xcresult
           path: .build/ui-tests.xcresult
           retention-days: 7
+      # On any failure, the crash reports macOS wrote for this job: a test
+      # process that died (scripts/ci prints TEST PROCESS DIED) leaves an .ips
+      # naming the crashed thread. The newest one's head goes in the log; all
+      # of them go up as `crash-reports`.
+      - name: Crash reports
+        if: failure()
+        run: |
+          mkdir -p "$RUNNER_TEMP/crash-reports"
+          shopt -s nullglob
+          reports=(~/Library/Logs/DiagnosticReports/*.ips)
+          if (( ${#reports[@]} == 0 )); then
+            echo "No crash reports in ~/Library/Logs/DiagnosticReports"
+            exit 0
+          fi
+          cp "${reports[@]}" "$RUNNER_TEMP/crash-reports/"
+          newest=$(ls -t "${reports[@]}" | head -1)
+          echo "== ${#reports[@]} crash report(s); the newest, $newest, first 60 lines:"
+          head -60 "$newest"
+      - name: Upload crash reports
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: crash-reports
+          path: ${{ runner.temp }}/crash-reports
+          if-no-files-found: ignore
+          retention-days: 7
 
   # Fast-forward main to this dev SHA once every job above passed. The only
   # job besides audit-lower (which pushes one baseline commit to dev) that

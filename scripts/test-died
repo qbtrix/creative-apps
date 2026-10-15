@@ -1,0 +1,71 @@
+#!/usr/bin/env python3
+# scripts/test-died: names what a dead `swift test` left behind. Given the
+# log of a `swift test` that exited non-zero, it checks for Swift Testing's
+# "Test run with N tests" summary. With the summary, the run ended normally
+# (a test failed), so it prints nothing and exits 0. Without it, the test
+# process died (a crash, a kill, a hang cut off), so it prints
+# "TEST PROCESS DIED" and every test that started and never finished, and
+# exits 1. scripts/ci calls it; Tests/test_died/test_test_died.sh is its
+# fixture test. Stdlib Python 3 only.
+#
+# Swift Testing prints "◇ Test name(args:) started." when a test starts, and
+# "✔ Test name(...) passed after …", "✘ … failed after …" or "… skipped"
+# (with "with N test cases" for a parameterized test) when it ends. A
+# parameterized test's "◇ Test case … to name(...) started." lines are its
+# arguments, not tests, and "✘ Test name() recorded an issue at …" comes while
+# the test still runs, so neither counts. XCTest's "Test Case '-[C t]'
+# started." / "passed" / "failed" lines count the same way. Names are counted,
+# so two suites' tests with one name both show when both are unfinished.
+#
+# Usage: scripts/test-died <swift-test-log>
+import re
+import sys
+from collections import Counter
+
+SUMMARY = re.compile(r"Test run with \d+ tests?\b")
+STARTED = re.compile(r"^\S+ Test (\S+?\([^)]*\)) started\.")
+ENDED = re.compile(r"^\S+ Test (\S+?\([^)]*\))(?: with \d+ test cases?)? (?:passed|failed|skipped)\b")
+XC_STARTED = re.compile(r"Test Case '(-\[[^\]]+\])' started\.")
+XC_ENDED = re.compile(r"Test Case '(-\[[^\]]+\])' (?:passed|failed|skipped)")
+ANSI = re.compile(r"\x1b\[[0-9;]*m")
+
+
+def unfinished(lines):
+    """The tests that started and never ended, in the order they started."""
+    started, ended, order = Counter(), Counter(), []
+    for line in lines:
+        line = ANSI.sub("", line.rstrip("\n"))
+        for start, end in ((STARTED, ENDED), (XC_STARTED, XC_ENDED)):
+            if m := start.search(line):
+                started[m.group(1)] += 1
+                order.append(m.group(1))
+            elif m := end.search(line):
+                ended[m.group(1)] += 1
+    left = started - ended
+    names = []
+    for name in order:
+        if left[name] > 0:
+            names.append(name)
+            left[name] -= 1
+    return names
+
+
+def main(argv):
+    if len(argv) != 2:
+        print("usage: scripts/test-died <swift-test-log>", file=sys.stderr)
+        return 2
+    with open(argv[1], encoding="utf-8", errors="replace") as log:
+        lines = log.readlines()
+    if any(SUMMARY.search(line) for line in lines):
+        return 0
+    names = unfinished(lines)
+    print()
+    print(f"TEST PROCESS DIED: swift test printed no 'Test run with' summary; "
+          f"{len(names)} test(s) started and never finished:")
+    for name in names:
+        print(f"  {name}")
+    return 1
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv))

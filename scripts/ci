@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 # scripts/ci: the one gate. Runs the no-crash lint, the app-state rule, the
 # design lint, the C4 ownership check, the duplicate-code check, the contact
-# sheet and audit-lower tests, swift build and swift test, then prints PASS or FAIL and exits with the real status. CI
+# sheet, audit-lower and test-died tests, swift build and swift test, then prints PASS or FAIL and exits with the real status.
+# A swift test that dies without its "Test run with" summary prints TEST PROCESS DIED and the tests it left
+# unfinished (scripts/test-died). CI
 # runs exactly this on Linux and macOS; run it before every PR. On Linux,
 # Package.swift declares only the Model targets, so build and test cover those;
 # on macOS they cover everything.
@@ -268,6 +270,8 @@ echo "== contact sheet (Tests/contact_sheet)"
 bash Tests/contact_sheet/test_contact_sheet.sh || fail "contact sheet: scripts/contact-sheet broke its fixture test"
 echo "== audit lower (Tests/audit_lower)"
 bash Tests/audit_lower/test_audit_lower.sh || fail "audit lower: scripts/audit-lower broke its decision tests"
+echo "== test died (Tests/test_died)"
+bash Tests/test_died/test_test_died.sh || fail "test died: scripts/test-died broke its fixture test"
 
 flags=()
 if [[ "$(uname)" == Darwin ]]; then
@@ -286,7 +290,12 @@ log="$(mktemp)"
 trap 'rm -f "$log"' EXIT
 swift test ${flags[@]+"${flags[@]}"} 2>&1 | tee "$log"
 status=${PIPESTATUS[0]}
-(( status == 0 )) || fail "swift test exited $status"
+if (( status != 0 )); then
+  # No "Test run with" summary means the test process died mid-run (a crash,
+  # a kill): name the tests it left running, then fail with that cause.
+  python3 scripts/test-died "$log" || fail "swift test process died (exit $status) with the tests above unfinished"
+  fail "swift test exited $status"
+fi
 
 echo
 grep -E "Test run with [0-9]+ tests?" "$log" | tail -1
