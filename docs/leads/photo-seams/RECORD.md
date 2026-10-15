@@ -2,9 +2,9 @@
 
 Issue: #812 · Packet: docs/blueprints/photo/features/photo-seams.md
 Run: act-1a13d5e8ca4-huz5 · Session: cloud lead session · Started: 2026-10-15T02:23Z
-Stage: 3 wave 18 (S-12)
+Stage: 3 wave 19 (S-13b)
 Base: c4ec07810683a4bc7d62dcc5205705229f248a71
-Next: wait for #991; S-12 stacks on lead/photo-seams-S-11b; then S-13b with feature-done
+Next: wait for #992 and S-13b; then stage 4 round 1 on the first CI run that contains every merge
 
 ## Tasks
 
@@ -30,8 +30,8 @@ packet chains every task on the one before it (shared files or new types).
 | S-10a | 14 | top bar, status line, PhotoRailTool | A/PhotoEditor, PhotoTopBar, PhotoStatusLine, PhotoRailTool; ST/PhotoEditorSnapshots | photo-status-message-dark.png | #987 | merged |
 | S-10b | 15 | overlays, hover, Return/Escape, StrokePacer modifiers | A/PhotoEditor, PhotoWindow, *Overlay.swift, StrokePacer; ST/PhotoStrokePacerTests | PhotoStrokePacerTests; V7, V9 | #988 | merged |
 | S-11a | 16 | panel split 1: Adjust tab, tool options | A/PhotoPanel, PhotoAdjustTab, PhotoToolOptions, *Options.swift | snapshots unchanged | #989 | merged |
-| S-11b | 17 | panel split 2: Layers tab, History stub | A/PhotoPanel, PhotoLayersTab, PhotoHistoryTab | PhotoLayerRowSnapshots | #991 | open |
-| S-12 | 18 | -PhotoFixture, -PhotoWindowWidth, Preview data pill | M/PhotoFixtures, A/PhotoApp, PhotoWindow, PhotoStatusLine | PhotoLaunchOptionsTests; photo-preview-pill-dark.png | – | todo |
+| S-11b | 17 | panel split 2: Layers tab, History stub | A/PhotoPanel, PhotoLayersTab, PhotoHistoryTab | PhotoLayerRowSnapshots | #991 | merged |
+| S-12 | 18 | -PhotoFixture, -PhotoWindowWidth, Preview data pill | M/PhotoFixtures, A/PhotoApp, PhotoWindow, PhotoStatusLine | PhotoLaunchOptionsTests; photo-preview-pill-dark.png | #992 | merged |
 | S-13a | 11 | PB-2 clone/heal and PB-9 move budgets (model half) | MT/PhotoBudgetTests | PhotoBudgetTests | #979 | merged |
 | S-13b | 19 | PB-2 event-to-picture latency series | ST/PhotoBrushLatencyTests | PhotoBrushLatencyTests | – | todo |
 
@@ -45,6 +45,7 @@ packet chains every task on the one before it (shared files or new types).
 - S-13 split in two: its model half (PhotoBudgetTests) ran beside the app chain as the packet allows. S-13b (latency series) does not carry feature-done: the Anatomy rounds need a CI run first, so feature-done goes on a final packet status-line PR after the rounds (lead.md stage 5).
 - S-8a: flat .export became .export(.openSheet) (a case name clash); area modifiers take PhotoPerform (@MainActor); confirmTransform/dismissTransform are app stubs returning false until PV-7.
 - S-10a: existing editor snapshots should not change (they already ran on .live with the Eyedropper disabled); the 4 s clearStatus task lives in PhotoWindow; status message id photo.status.message.
+- S-12: PhotoLaunchOptions, PhotoWorkspace.launch(_:), isPreviewData (services.archive is FakeArchive); -PhotoWindowWidth only sets defaultSize, so a saved frame still wins (Halo used a window sizer).
 - S-7b reference digests were recorded on Linux; if a macOS model test disagrees, check PhotoLayerCompositeTests first.
 - Builder branches are lead/photo-seams-<id> (a dash: lead/photo-seams already exists). The next builder stacks on the previous branch and opens its PR after rebasing onto dev once the previous PR merged.
 - Lead step after S-4 merges: file the four needs-ui issues of blueprint 6.3 (SelectionPathOutline, SelectionHandles with rotation, BrushCursorMark, LayerList row symbol and accessory).
