@@ -161,7 +161,7 @@ final class PhotoDocumentsJourneyTests: XCTestCase {
         photo.shot("documents-2-closed", screen: true)
         XCTAssertEqual(try Data(contentsOf: beach), original, "Don't Save wrote beach.png")
         quit(photo)
-        photo = launch([], window: nil)
+        photo = launch(photoArguments(), window: nil)
         openRecent("beach.png", photo)
         XCTAssert(photo.app.windows["beach.png"].waitForExistence(timeout: 30), "Open Recent didn't reopen beach.png")
         expectStatus("Saved", photo)

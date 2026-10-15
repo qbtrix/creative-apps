@@ -3,7 +3,11 @@
 // writeTestPhoto writes the test photo a journey opens, and photoArguments
 // builds the launch arguments that skip the system panels (-PhotoOpenFile,
 // -PhotoSaveTo, -PhotoExportTo, -PhotoRecoveryDir) or pick a fixture or a
-// window width. PhotoJourneyKitTests.testWrittenPhotoOpens proves both: the
+// window width. Every launch autosaves into its own recovery folder: a new
+// temp folder unless the journey passes `recoveryDir:` (PJ-3 does, to relaunch
+// on its autosave), so one journey's autosave never reaches the shared
+// Application Support/Photo/Recovery and offers a restore to every later
+// launch. PhotoJourneyKitTests.testWrittenPhotoOpens proves both: the
 // arguments are spelled right, and a written beach.png opens to the v1 open
 // state, shot as "kit-opened".
 import CoreGraphics
@@ -35,7 +39,9 @@ func writeTestPhoto(to url: URL, width: Int = 800, height: Int = 600) throws {
     guard CGImageDestinationFinalize(destination) else { throw CocoaError(.fileWriteUnknown) }
 }
 
-/// Launch arguments for a Photo journey; nil arguments are left out.
+/// Launch arguments for a Photo journey; nil arguments are left out, except
+/// `recoveryDir`: nil means a new temp folder, so `-PhotoRecoveryDir` is
+/// always passed exactly once and the journey's own folder is the only one.
 func photoArguments(
     open file: URL? = nil, saveTo: URL? = nil, exportTo: URL? = nil,
     fixture: String? = nil, recoveryDir: URL? = nil, windowWidth: Int? = nil
@@ -45,7 +51,9 @@ func photoArguments(
     if let saveTo { arguments += ["-PhotoSaveTo", saveTo.path] }
     if let exportTo { arguments += ["-PhotoExportTo", exportTo.path] }
     if let fixture { arguments += ["-PhotoFixture", fixture] }
-    if let recoveryDir { arguments += ["-PhotoRecoveryDir", recoveryDir.path] }
+    let recovery = recoveryDir
+        ?? FileManager.default.temporaryDirectory.appending(path: "photo-journey-recovery-\(UUID().uuidString)")
+    arguments += ["-PhotoRecoveryDir", recovery.path]
     if let windowWidth { arguments += ["-PhotoWindowWidth", "\(windowWidth)"] }
     return arguments
 }
@@ -58,10 +66,15 @@ final class PhotoJourneyKitTests: XCTestCase {
         try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
         addTeardownBlock { try? FileManager.default.removeItem(at: folder) }
         let file = folder.appending(path: "beach.png")
-        XCTAssertEqual(photoArguments(), [], "photoArguments() with no arguments isn't empty")
+        let fresh = photoArguments()
+        XCTAssertEqual(fresh.count, 2, "photoArguments() isn't just its own -PhotoRecoveryDir: \(fresh)")
+        XCTAssertEqual(fresh.first, "-PhotoRecoveryDir", "photoArguments() passes no recovery folder")
+        XCTAssertNotEqual(fresh.last, photoArguments().last, "two photoArguments() calls share a recovery folder")
+        let recovery = folder.appending(path: "recovery")
         XCTAssertEqual(
-            photoArguments(open: file, fixture: "sample"), ["-PhotoOpenFile", file.path, "-PhotoFixture", "sample"],
-            "photoArguments(open:fixture:)")
+            photoArguments(open: file, fixture: "sample", recoveryDir: recovery),
+            ["-PhotoOpenFile", file.path, "-PhotoFixture", "sample", "-PhotoRecoveryDir", recovery.path],
+            "photoArguments(open:fixture:recoveryDir:)")
 
         try writeTestPhoto(to: file)
         let photo = Journey("Photo", self, arguments: photoArguments(open: file))
