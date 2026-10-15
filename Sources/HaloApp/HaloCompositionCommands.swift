@@ -1,26 +1,13 @@
 // HaloCompositionCommands.swift: Halo's Composition menu in the menu bar: New
-// Composition… (opens the sheet), Duplicate and Delete for the focused
-// window's selected composition. The window publishes its actions as a
-// focused scene value; a nil action disables its item rather than hiding it.
-// Command-Delete while a text field has focus (renaming a composition in the
-// sidebar) edits the text, as it does in any field, and never deletes the
-// composition: HaloProject.compositionDeleteCommand decides.
+// ⌥⌘N (opens the New Composition sheet), Duplicate ⌘D and Delete ⌘⌫ for the
+// focused window's selected composition, each sent through `haloPerform` and
+// disabled with the Model's reason as help (HaloMenuItem). Command-Delete
+// while a text field has focus (renaming a composition in the sidebar) edits
+// the text, as it does in any field, and never deletes the composition: the
+// window's route asks HaloProject.compositionDeleteCommand with HaloTextFocus.
 import AppKit
+import HaloModel
 import SwiftUI
-
-extension FocusedValues {
-    /// The focused window's composition actions; nil with no Halo window.
-    @Entry var haloCompositionActions: HaloCompositionActions?
-}
-
-/// What the Composition menu calls. `duplicate` is nil with no composition
-/// selected; `delete` is nil then too, and when only one composition is left.
-/// `delete` gets whether a text field has keyboard focus.
-struct HaloCompositionActions {
-    var new: @MainActor () -> Void
-    var duplicate: (@MainActor () -> Void)?
-    var delete: (@MainActor (_ editingText: Bool) -> Void)?
-}
 
 /// The key window's text focus, read when a menu command fires.
 enum HaloTextFocus {
@@ -37,19 +24,21 @@ enum HaloTextFocus {
 }
 
 struct HaloCompositionCommands: Commands {
-    @FocusedValue(\.haloCompositionActions) private var actions
+    @FocusedValue(\.haloProject) private var model
+    @FocusedValue(\.haloPerform) private var perform
+
+    private var target: HaloMenuTarget { HaloMenuTarget(model: model, perform: perform) }
 
     var body: some Commands {
         CommandMenu("Composition") {
-            Button("New Composition…", systemImage: "plus") { actions?.new() }
-                .keyboardShortcut("n", modifiers: [.command, .option])
-                .disabled(actions == nil)
-            Button("Duplicate", systemImage: "plus.square.on.square") { actions?.duplicate?() }
-                .keyboardShortcut("d")
-                .disabled(actions?.duplicate == nil)
-            Button("Delete", systemImage: "trash") { actions?.delete?(HaloTextFocus.isEditing) }
-                .keyboardShortcut(.delete)
-                .disabled(actions?.delete == nil)
+            HaloMenuItem(
+                command: .newComposition, target: target, title: "New", systemImage: "plus",
+                shortcut: KeyboardShortcut("n", modifiers: [.command, .option]))
+            HaloMenuItem(
+                command: .duplicateComposition, target: target, systemImage: "plus.square.on.square",
+                shortcut: KeyboardShortcut("d"))
+            HaloMenuItem(
+                command: .deleteComposition, target: target, systemImage: "trash", shortcut: KeyboardShortcut(.delete))
         }
     }
 }

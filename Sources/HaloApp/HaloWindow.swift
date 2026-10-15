@@ -11,8 +11,8 @@
 // presents it and sets it back to nil. New Composition opens
 // NewCompositionSheet; a refused rename opens RenameRefusalAlert with the
 // typed name kept. The window publishes `perform` as the `haloPerform`
-// focused value (and, until the menus move to it, the Composition menu's
-// actions and Layer > New's action), opens on HaloLaunch's project and, under
+// focused value and its project as `haloProject` (the menus read titles and
+// availability from it), opens on HaloLaunch's project and, under
 // `-HaloControlsProbe`, publishes the `halo.controls` JSON
 // (HaloControls.swift). Views only read HaloProject and call its methods; all
 // state lives in HaloModel (scripts/ci checks this).
@@ -67,8 +67,7 @@ struct HaloWindow: View {
                 onRename: { perform(.renameComposition($0.id, $1)) },
                 onDismiss: { model.dismissRefusedRename() })))
         .focusedSceneValue(\.haloPerform, perform)
-        .focusedSceneValue(\.haloCompositionActions, compositionActions)
-        .focusedSceneValue(\.haloNewLayer, newLayer)
+        .focusedSceneValue(\.haloProject, model)
         .haloControlsProbe(HaloLaunch.current.controlsProbe)
     }
 
@@ -92,21 +91,5 @@ struct HaloWindow: View {
     /// Every area's hook over `content`, in a fixed order.
     private func scenes(_ content: some View) -> some View {
         textScene(renderScene(easingScene(fileScene(editScene(layersScene(keysScene(playbackScene(viewerScene(content)))))))))
-    }
-
-    /// The Composition menu's actions, through `perform`.
-    private var compositionActions: HaloCompositionActions {
-        var actions = HaloCompositionActions(new: { perform(.newComposition) })
-        if model.selectedCompositionID != nil {
-            actions.duplicate = { perform(.duplicateComposition) }
-            if model.canDeleteComposition { actions.delete = { _ in perform(.deleteComposition) } }
-        }
-        return actions
-    }
-
-    /// Layer > New's action through `perform`, nil when no composition is selected.
-    private var newLayer: (@MainActor (HaloLayerKind) -> Void)? {
-        guard model.canAddLayer else { return nil }
-        return { perform(.newLayer($0)) }
     }
 }
