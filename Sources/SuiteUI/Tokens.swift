@@ -7,7 +7,10 @@
 // Colors: the graphite ladder (panels, rows, fills, lines), the text colors
 // and the state colors are literal sRGB hex per appearance in SuitePalette
 // (Dark, Light, Dark + Increase Contrast, Light + Increase Contrast), resolved
-// at draw time through NSColor(name:dynamicProvider:). The steps are written
+// at draw time through NSColor(name:dynamicProvider:), with the contrast
+// column picked by a high-contrast appearance or SuiteHex.increasedContrast
+// (AppKit hands out a high-contrast appearance only when the system setting
+// is on, so a renderer drawing a chosen contrast binds it). The steps are written
 // out, never mixed at run time, so TokensTests.contrast can check every pair
 // the design table promises. Editors (EditorShell) force Dark, so they
 // resolve the Dark columns in both system appearances. A few roles stay
@@ -244,11 +247,21 @@ public struct SuiteHex: Hashable, Sendable {
     /// The four values in table order.
     public var values: [UInt32] { [dark, light, darkContrast, lightContrast] }
 
+    /// Increase Contrast for the tokens resolved inside
+    /// `SuiteHex.$increasedContrast.withValue(_:operation:)`; nil (the
+    /// default) follows the appearance. AppKit only hands out a high-contrast
+    /// appearance when the system setting is on: `NSAppearance(named:)` with
+    /// a high-contrast name returns plain Aqua or Dark Aqua (CI run
+    /// 38667087530), so a renderer that draws a chosen contrast, like the
+    /// snapshot host, says so here.
+    @TaskLocal public static var increasedContrast: Bool?
+
     /// The value for `appearance`: the closest of the four, so a vibrant dark
-    /// appearance reads Dark, a high-contrast one reads its Increase Contrast
-    /// column, and anything unknown reads Light.
+    /// appearance reads Dark, a high-contrast one (or any appearance while
+    /// `increasedContrast` is true) reads its Increase Contrast column, and
+    /// anything unknown reads Light.
     public func value(for appearance: NSAppearance) -> UInt32 {
-        switch Self.match(appearance) {
+        switch Self.column(appearance) {
         case .darkAqua: dark
         case .accessibilityHighContrastDarkAqua: darkContrast
         case .accessibilityHighContrastAqua: lightContrast
@@ -256,20 +269,32 @@ public struct SuiteHex: Hashable, Sendable {
         }
     }
 
-    /// The appearance as one of the four table columns. A high-contrast
-    /// name or a vibrant one maps straight to its column. A plain `.aqua` or
-    /// `.darkAqua` name is not enough: AppKit applies Increase Contrast to the
-    /// light or dark appearance a view is given, so such an appearance can
-    /// carry the base name. Those, and any other appearance, ask `bestMatch`
-    /// with the high-contrast names first, then split light from dark.
+    /// The table column for `appearance`: its light or dark side from the
+    /// appearance, its contrast from `increasedContrast` when that is bound,
+    /// otherwise from the appearance.
+    private static func column(_ appearance: NSAppearance) -> NSAppearance.Name {
+        let found = match(appearance)
+        let isDark = found == .darkAqua || found == .accessibilityHighContrastDarkAqua
+        let contrast = increasedContrast
+            ?? (found == .accessibilityHighContrastAqua || found == .accessibilityHighContrastDarkAqua)
+        switch (isDark, contrast) {
+        case (true, true): return .accessibilityHighContrastDarkAqua
+        case (true, false): return .darkAqua
+        case (false, true): return .accessibilityHighContrastAqua
+        case (false, false): return .aqua
+        }
+    }
+
+    /// The appearance as one of the four table columns. A system name maps
+    /// directly (vibrant to its non-vibrant column); any other appearance
+    /// tries the high-contrast names first, then splits light from dark.
     private static func match(_ appearance: NSAppearance) -> NSAppearance.Name? {
-        let name = appearance.name
-        if name != .aqua, name != .darkAqua, let column = columns[name] { return column }
+        if let column = columns[appearance.name] { return column }
         let contrast: [NSAppearance.Name] = [.accessibilityHighContrastAqua, .accessibilityHighContrastDarkAqua]
         if let found = appearance.bestMatch(from: contrast + [.aqua, .darkAqua]), contrast.contains(found) {
             return found
         }
-        return columns[name] ?? appearance.bestMatch(from: [.aqua, .darkAqua])
+        return appearance.bestMatch(from: [.aqua, .darkAqua])
     }
 
     private static let columns: [NSAppearance.Name: NSAppearance.Name] = [
@@ -285,8 +310,8 @@ public struct SuiteHex: Hashable, Sendable {
     func color(alpha: CGFloat = 1, darkAlpha: CGFloat? = nil) -> Color {
         Color(nsColor: NSColor(name: nil) { appearance in
             let hex = value(for: appearance)
-            let match = Self.match(appearance)
-            let isDark = match == .darkAqua || match == .accessibilityHighContrastDarkAqua
+            let column = Self.column(appearance)
+            let isDark = column == .darkAqua || column == .accessibilityHighContrastDarkAqua
             return NSColor(
                 srgbRed: CGFloat(hex >> 16 & 0xFF) / 255, green: CGFloat(hex >> 8 & 0xFF) / 255,
                 blue: CGFloat(hex & 0xFF) / 255, alpha: isDark ? darkAlpha ?? alpha : alpha)

@@ -35,7 +35,7 @@ enum SnapshotAppearance: String, CaseIterable, Sendable {
     /// `colorSchemeContrast` views read from the system setting, not the
     /// window's appearance, so the host sets it in the environment (the
     /// underscored setter; the public one is read-only). It always agrees with
-    /// `appearanceName`, which alone decides how NSColor tokens resolve.
+    /// `appearanceName`; SnapshotHost binds `SuiteHex.increasedContrast` from it.
     var contrast: ColorSchemeContrast { self == .lightContrast || self == .darkContrast ? .increased : .standard }
 
     /// The token value SuiteHex documents for this appearance.
@@ -63,8 +63,16 @@ struct SnapshotHost {
     let appearance: SnapshotAppearance
 
     /// `view` at `size` points over the window background, as a 2× bitmap; nil
-    /// when the size is empty or AppKit has no such appearance.
+    /// when the size is empty or AppKit has no such appearance. AppKit gives
+    /// plain Aqua or Dark Aqua for a high-contrast name unless the system
+    /// setting is on, so the Increase Contrast hosts bind
+    /// `SuiteHex.increasedContrast` around the whole layout and draw, and the
+    /// tokens resolve their contrast columns.
     func render(_ view: some View, size: CGSize) -> NSBitmapImageRep? {
+        SuiteHex.$increasedContrast.withValue(appearance.contrast == .increased) { draw(view, size: size) }
+    }
+
+    private func draw(_ view: some View, size: CGSize) -> NSBitmapImageRep? {
         let pixelsWide = Int((size.width * Self.scale).rounded())
         let pixelsHigh = Int((size.height * Self.scale).rounded())
         guard pixelsWide > 0, pixelsHigh > 0, let named = NSAppearance(named: appearance.appearanceName) else {
