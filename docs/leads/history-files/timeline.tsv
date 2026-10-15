@@ -16,3 +16,5 @@ utc	stage	event	ref	note
 2026-10-15T09:10Z	3	pr-merged	#1061	HF-9
 2026-10-15T09:10Z	3	ci-run	38709336067	red: HaloLayerListTests, not ours (#763)
 2026-10-15T09:10Z	3	stage-start	wave 4	HF-8 HF-10 base 2fc9b59
+2026-10-15T09:16Z	3	pr-opened	#1063	HF-8 Edit routes
+2026-10-15T09:16Z	3	stage-start	wave 5	HF-11 built early, PR gated on #1063
