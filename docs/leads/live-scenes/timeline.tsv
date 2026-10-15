@@ -38,3 +38,4 @@ utc	stage	event	ref	note
 2026-10-15T02:32Z	5	heartbeat	finish	waiting for a green dev CI run newer than 38669151941
 2026-10-15T02:54Z	5	heartbeat	finish	waiting on dev CI runs 38671960461 / 38672480053
 2026-10-15T03:02Z	5	ci-run	38671960461	scripts/ci green; same 6 UI journeys red on audit counts across apps (not live-scenes files)
+2026-10-15T03:07Z	5	ci-run	38673821944	macOS red only SuiteUI SidebarRenameGestureTests (identifier modifiers); all else green
