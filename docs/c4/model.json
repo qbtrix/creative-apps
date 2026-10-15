@@ -192,7 +192,7 @@
               {
                 "id": "library-model-sources",
                 "name": "LibraryModel sources",
-                "description": "Linux-safe state and logic behind Library's window: LibraryCatalog (photos, collections with counts, the selected collection, sort order, the loupe's photo, stepping and position), PhotoItem with its sort orders, metadata edits on the selected photos with mixed values (PhotoMetadata, PhotoFlag), and 60 seeded sample photos.",
+                "description": "Linux-safe state and logic behind Library's window: LibraryCatalog (photos, collections with counts, the selected collection, sort order, the loupe's photo, stepping and position), PhotoItem with its sort orders, metadata edits on the selected photos with mixed values (PhotoMetadata, PhotoFlag) and the metadata inspector's accessibility identifiers (MetadataInspectorID), and 60 seeded sample photos.",
                 "technology": "Swift 6, Foundation",
                 "paths": [
                   "Sources/LibraryModel/"
