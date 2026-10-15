@@ -97,11 +97,13 @@ and four new test files. `FakeLayerPlacing` stays layer-keys'.
 3. **H-J4** `testPlayPauseLoopAndStep` (`+Playback`, new) on `-HaloSample
    three-layers`: Space; wait 1 s; Space; ← twice; Animation > Go to End;
    click Loop; Animation > Go to Start; Space; wait 4 s. `halo.transport.play`
-   reads "Playing" then "Paused"; the paused frame f is in 2…71 (the
-   journey fails with a message if not); after ← ← the timecode is f − 2
-   (stepping back never hits the clamp, whatever f the 1 s wait gives); at
-   the end "00:00:02:23"; Loop reads "Off"; after
+   reads "Playing" then "Paused"; the paused frame f is any frame in 0…71
+   (XCUITest's idle waits stretch the 1 s to about 3 s, so the loop may
+   wrap); after ← ← the timecode is max(f − 2, 0), since stepping back
+   clamps at 0; at the end "00:00:02:23"; Loop reads "Off"; after Go to
+   Start the timecode is "00:00:00:00" (shot `halo-playback-start`); after
    4 s playback has stopped on "00:00:02:23" and the button reads "Paused".
+   Each of the six `halo.transport.*` buttons is at least 20 by 20 pt.
    (VP-12)
 
 The Model half runs on Linux first: `FrameDrawingContractTests` (H-J2's
@@ -432,7 +434,8 @@ From the review of the blueprint PR (#767) and the packet brief:
 - **H-J3's header.** "Frames 20–50" is W0's `selectedLayerHeader` (FD-12):
   outFrame is exclusive, so O at 50 stores 51 and the header shows in…out−1.
 - **H-J4 steps back.** `→ →` from a paused f ≥ 70 would clamp at 71, so the
-  journey steps back twice (f in 2…71, timecode f − 2) instead.
+  journey steps back twice instead; the pause can land on any f in 0…71, so
+  it expects timecode max(f − 2, 0), which holds wherever the wait ends.
 - **VP-4 split.** The outline helper is VP-4a, ahead of `LiveFrameRendering`
   and the `FrameRenderer` move (VP-4b, which closes #457), so neither PR
   nears 400 lines.
