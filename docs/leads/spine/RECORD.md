@@ -2,9 +2,9 @@
 
 Issue: #1044 · Packet: docs/blueprints/library/features/spine.md
 Run: act-1a13f18aaa0-lfw5 · Session: session_01DtSRhNqsphGfKkvV5eLsWW · Started: 2026-10-15T10:25Z
-Stage: 3 wave 6
-Base: 328e6b6e2bec7b88d4e454620770619ccabfd4bc
-Next: wait for SP-7 and SP-12 to merge; then wave 7 (SP-8, SP-13, SA-2)
+Stage: 3 wave 7
+Base: 5c008acdfbd123e1beb832fb8a031d38760f908a
+Next: wait for SP-8, SP-13, SA-2 to merge; then wave 8 (SP-9, SP-14, SA-3)
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -18,11 +18,11 @@ Next: wait for SP-7 and SP-12 to merge; then wave 7 (SP-8, SP-13, SA-2)
 | SP-4 | 4 | Fakes: support, platform, use cases (progress first) | Fakes/FakeSupport, FakePlatform, FakeUseCases | LibraryFakesTests | #1110 | merged |
 | SP-5 | 4 | Fakes: loupe, develop, crop, exporter | Fakes/FakeRendering.swift | LibraryFakeRenderingTests | #1112 | merged |
 | SP-6 | 5 | Eight live stubs, LibraryServices | Live/*, LibraryServices.swift | LibraryServicesTests | #1116 | merged |
-| SP-7 | 6 | Stored properties, state enums, init(services:), hand-written == | LibraryCatalog.swift | LibraryCatalogTests |  | building |
-| SP-12 | 6 | Launch arguments and fixtures | LibraryLaunch, LibraryFixtures, LibrarySample | LibraryLaunchTests |  | building |
-| SP-8 | 7 | Cached `order`, Budget.swift | LibraryOrder.swift, LibraryCatalog.swift | LibraryOrderTests | | planned |
-| SP-13 | 7 | Readouts, keys, controls JSON | LibraryReadouts.swift, LibraryKeys.swift | LibraryReadoutsTests, LibraryKeysTests | | planned |
-| SA-2 | 7 | One Window scene, services from launch args, platform stubs | LibraryApp.swift, LibraryWindow.swift, Platform/* | macOS testLaunchShowsWindowShell | | planned |
+| SP-7 | 6 | Stored properties, state enums, init(services:), hand-written == | LibraryCatalog.swift | LibraryCatalogTests | #1123 | merged |
+| SP-12 | 6 | Launch arguments and fixtures | LibraryLaunch, LibraryFixtures, LibrarySample | LibraryLaunchTests | #1121 | merged |
+| SP-8 | 7 | Cached `order`, Budget.swift | LibraryOrder.swift, LibraryCatalog.swift | LibraryOrderTests |  | building |
+| SP-13 | 7 | Readouts, keys, controls JSON | LibraryReadouts.swift, LibraryKeys.swift | LibraryReadoutsTests, LibraryKeysTests |  | building |
+| SA-2 | 7 | One Window scene, services from launch args, platform stubs | LibraryApp.swift, LibraryWindow.swift, Platform/* | macOS testLaunchShowsWindowShell |  | building |
 | SP-9 | 8 | Leave the loupe when the collection hides its photo (only if #217 unmerged) | LibraryCatalog.swift | LibraryCollectionSwitchTests | | planned |
 | SP-14 | 8 | recordEdit, undo, redo, titles, endCoalescing | CatalogHistory.swift | LibraryHistoryTests | | planned |
 | SA-3 | 8 | LibraryMenu per area, every v1 menu item with help | LibraryMenus, LibraryCommands, LibraryWindow | J10 | | planned |
@@ -59,6 +59,8 @@ Taken from the packet's Build waves; checked against dev bcf5a09.
 - `gh` GraphQL is blocked in cloud sessions: builders open PRs with `gh api` REST (POST pulls, then POST issues/<n>/labels).
 - W4 is split into W4a SP-4 then W4b SP-5: FakeRendering's fakes call FakeBehavior (FakeSupport.swift, SP-4's file), so SP-5 needs SP-4 merged; the packet marked them independent.
 - Lesson for app builders: a split-out view with `let model: LibraryCatalog` must take mutations as closures (the catalog is a struct); SA-1 broke the macOS build this way. Every later SA prompt says so.
+- #1120 (fix for SA-1's let-model break) merged 11:48; the next macOS run on dev proves it.
+- SA-2 also adds DisplayImage+Image.swift (moved from SA-1) and a Model init that applies LibraryLaunch (showsTestValues is internal(set), so the app can't set it).
 
 ## Open
 - PR #217 (fix for #156) is open at stage 0; SP-9 lands only if it is still unmerged when wave 8 starts.
