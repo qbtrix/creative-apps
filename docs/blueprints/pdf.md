@@ -762,3 +762,84 @@ any suite app that touches PDF (Design's PDF export, #418) would share it.
 
 None blocks v1. `content-edit` is the conditional W4 feature (section 2.4);
 certificate signing is Later.
+
+---
+
+## 5. Journeys
+
+Every tier-1 feature has a journey: an XCUITest that launches the bundle,
+works the window the way a person would, and shoots the whole window after
+every step (`docs/engineering.md`, Human-like UI tests). The app audit runs
+on every shot.
+
+**Files.** W0 creates `UITests/FolioJourneyTests.swift` (launch, menus,
+every control, layout). Each feature owns `UITests/FolioJourneyTests+<Area>.swift`
+with its own `XCTestCase` class, so no two features edit one journey file;
+`project.yml`'s journey bundle globs `UITests/FolioJourneyTests*.swift`
+(W0's supervisor-merged task adds the Folio bundle).
+
+**Modes.** A journey first runs on `-FolioFixture <name>` (fake services,
+section 6) and is flipped to `-FolioSample <name>` (live PDFKit and Vision,
+the same fixture written as a real PDF by `FolioSampleWriter` into the
+test's temp folder) by the task that lands the live type. P-J14 runs live
+from its first PR.
+
+**Finding things.** By the title a person reads where there is one, else by
+identifier: `folio.page.<n>` (1-based) for each page view,
+`folio.thumb.<n>`, `folio.mark.<id>`, `folio.field.<name>`, `folio.find`,
+`folio.tool.<tool>`. The page view's pixels can't be read through XCUITest,
+so `folio.page.<n>` carries the Model's `pageSummary(n)` as its
+accessibility value, built and tested in FolioModel: "Page 2 of 3, Letter,
+rotated 90°, 2 highlights, 1 note, fields: name=Ada Lovelace; agree=on".
+Drags use page points mapped through `folio.page.<n>`'s frame and the zoom
+(`FolioLayout` math, tested on Linux).
+
+**Waiting.** No timing through XCUI queries. State changes are awaited with
+`waitForExistence` or a value predicate (2 s); timing comes from the probe
+(section 8).
+
+### 5.1 Tier-1 journeys
+
+| # | Test (file, feature) | Launch | Steps (each one shot, `folio-<step>`) | Asserts |
+|---|---|---|---|---|
+| P-J0 | `testLaunchShowsWindowShell` (`FolioJourneyTests.swift`, foundation) | none | launch | `expectWindowShell()`; the empty state "No PDF Open" with Open… and Create from Images…; the inspector "No Selection"; the switcher row's Folio item current and disabled "You're in Folio." once the suite wires it (until then every switcher item is disabled with its reason); every audit count 0 |
+| P-J1 | `testOpenAndRead` (`+Read`, reader) | `-FolioOpenFile <tmp>/Lease.pdf` (sample `letter`) | open; ⌘2 Continuous; scroll to the end; ⌥⌘G, type 2, Return; ⌘9 Fit Width; ⌘+ twice; ⌘0; click thumbnail 3; ⌘3 Two Pages; open the Outline section; quit, relaunch with no file, File > Open Recent > Lease | title "Lease"; `folio.page.1` value starts "Page 1 of 3"; the status pill reads "Page 3 of 3" at the end, "Page 2 of 3" after Go to Page; zoom pill "Fit Width" then "125%"…"100%"; thumbnail 3 selected and page 3 at the top; two pages side by side (frames of page 1 and 2 share a top); the Outline section shows "No outline in this PDF." for `letter`; Open Recent lists "Lease" first and reopens it |
+| P-J2 | `testFindText` (`+Find`, find) | `letter` | ⌘F; type "first day"; Return; Return; ⌘G; Match Case on, type "FIRST"; Escape | "1 of 2" then "2 of 2" then wraps "1 of 2"; the sidebar RESULTS list has 2 rows with "p. 1" and their context; with Match Case "No results" and the field's help "No matches for FIRST."; Escape closes the bar and keeps the page where the last hit was |
+| P-J3 | `testHighlightUnderlineStrike` (`+Markup`, markup) | `letter` | press T; drag across "RESIDENTIAL LEASE" on page 1; Markup > Highlight; drag across line 2; press U (Underline tool) and drag line 3; press K and drag line 4; click the highlight; set colour Green in the inspector; type a comment "Check name"; ⌫ on the strike-out | page 1 value "3 marks" then "highlight, underline, strike-out"; Edit menu "Undo Highlight", "Undo Underline", "Undo Strike Out", "Undo Change Color", "Undo Comment", "Undo Delete"; inspector header "Highlight · Page 1" with the comment row; after ⌫ "2 marks" |
+| P-J4 | `testNotesTextBoxPenShape` (`+Annotate`, markup) | `letter` | N, click page 1 at the margin, type "Ask about parking", Escape; X, click, type "Initial here", Escape; P, draw a stroke; R, drag a rectangle; V, drag the note 40 pt down; ⌘Z | page value lists "note, text box, ink, rectangle"; the note's popover holds the text; the text box shows "Initial here"; after the drag the note's frame moved by 40 pt × zoom; ⌘Z puts it back ("Undo Move Note"); an empty text box (X, click, Escape) is not created and the palette's help reads "Type some text for the text box." |
+| P-J5 | `testFillForm` (`+Forms`, forms) | `form` | click Name; type "Ada Lovelace"; ⇥; type "ada@example.com"; ⇥ (to Plan); Space on Plus; ⇥; Space (Agree); Form > Check Form; Form > Clear Form; ⌘Z | after typing, `folio.field.name` value "Ada Lovelace"; ⇥ order Name → Email → Plan → Agree; Plus on and Basic off; Check Form before Agree reads "1 required field is empty: Agree to terms" with a warning outline on Agree, after Agree "All required fields are filled."; Clear empties all, Edit menu "Undo Clear Form" restores them; typing in Name is one step "Undo Typing" |
+| P-J6 | `testSignDocument` (`+Sign`, sign) | `form` with `-FolioSignaturesDir <tmp>` | press S; New Signature…; Draw; drag two strokes on the pad; Done; click inside the Signature field; drag the signature's corner handle; press S, New Signature…, Type, "A.L.", Save as initials on, Done; click near the bottom margin | the library lists the drawn signature; placed inside the field, fitted and centered (its frame inside `folio.field.signature`'s); resize keeps the aspect within 1%; initials placed where clicked at 72 pt wide; quit and relaunch: the library still has both (stored in the folder); an empty pad's Done is disabled with help "Draw your signature in the box first." |
+| P-J7 | `testOrganizePages` (`+Pages`, pages) | `letter` | ⌘4 Page Grid; click page 3; ⌘R; drag page 3 before page 1; select page 2, Shift-click page 3; Page > Delete Page; ⇧⌘B; Page > Crop Pages… with 36 pt margins on page 1, Crop; ⌘Z four times | rotated: page 3 value "rotated 90°"; order (by `folio.thumb.n` captions' content) 3, 1, 2; after delete 1 page left, and selecting all then ⌘⌫ shows "A PDF needs at least one page…" and changes nothing; a blank Letter page appended; page 1's value reads "cropped 540 × 720"; each ⌘Z names "Undo Crop", "Undo Insert Page", "Undo Delete Pages", "Undo Move Page" |
+| P-J8 | `testCombineAndExtract` (`+Combine`, pages) | `letter`, with `form` written to `<tmp>/Application.pdf` | Page > Insert from File…, pick Application.pdf (`-FolioPickFile` skips the panel), at End; Page > Extract Pages…, type "2-3", Extract; in the new window ⌘S with `-FolioSaveTo` | 4 pages; page 4's fields fillable (`folio.field.name` exists on page 4); the Extract sheet refuses "5" with "This document has pages 1 to 4." under the field; a new window "Lease (pages 2–3)" with 2 pages; the original is unchanged |
+| P-J9 | `testUndoRedoEveryEdit` (`+History`, history-files) | `form` | type in Name; highlight a line; rotate page 1; ⌘Z ×3; ⇧⌘Z ×3; scroll and zoom between | Edit menu names each step in order and back; scroll and zoom add no step; with nothing left Undo is disabled with "Nothing to undo." |
+| P-J10 | `testSaveAndReopen` (`+Files`, history-files) | `form` sample, `-FolioSaveTo <tmp>/Filled.pdf` | fill Name; highlight; in the inspector's DOCUMENT section set Title to "Membership"; ⌘S; quit; relaunch `-FolioOpenFile <tmp>/Filled.pdf`; File > Save As… with Flatten on and a password (`-FolioSaveTo <tmp>/Flat.pdf`); open Flat.pdf | subtitle "Edited" then "Saved"; reopened: the value "Ada Lovelace", 1 highlight, the inspector title "Membership", Undo disabled; Flat.pdf asks for its password (the sheet), a wrong one reads "That password didn't unlock this PDF. Try again.", the right one opens with no fields (`folio.field.*` absent) and the name drawn into the page (page value "fields: none") |
+| P-J11 | `testOpenProblems` (`+OpenErrors`, reader) | none, then `-FolioOpenFile` per file | write `not a pdf` text, a truncated PDF (sample cut at half), `locked` sample; open each; on the locked one Cancel, then open again and type the password | each message is `FolioOpenError.message` for its case (not a PDF; damaged with the reason; locked); Cancel leaves the empty state; the right password opens "Payslip"; the window never shows a half-open document |
+| P-J12 | `testEveryControlActsOrSaysWhy` and `testEveryMenuOpens` (`FolioJourneyTests.swift`, foundation; extended by each feature) | `letter` with `-FolioControlsProbe` | open each menu; read the `folio.controls` JSON; click each enabled control, Escape, ⌘Z | every enabled control changed the shot or a value; every disabled one has help (QB-F1); each menu holds section 7.6's items for the features built so far |
+| P-J13 | `testLayoutAtWidths` (`FolioJourneyTests.swift`, foundation) | `letter`, `-FolioWindowSize` ×5 | relaunch at each size of 8.3 | PL1–PL5 |
+| P-J22 | `testCreateFromImages` (`+Images`, export-convert) | none, `-FolioPickFiles` a 600 × 800 PNG, a 800 × 600 JPEG and a text file, `-FolioSaveTo <tmp>/Scans.pdf` | File > New from Images…; ⌘S | 2 pages, the first portrait and the second landscape, each the image's aspect; "Skipped notes.txt: not an image."; the no-text pill offers Recognize…; title "Scans" after save |
+| P-J23 | `testReduceSize` (`+Reduce`, export-convert) | `-FolioSample photos` (6 pages of 300 ppi photos, written by `FolioSampleWriter`), `-FolioExportTo <tmp>` | File > Reduce File Size…, Medium, Reduce; then Reduce again on the reduced file | the sheet reads "From <a> MB to <b> MB" with b ≤ 0.6 a (PF-11); `Photos (reduced).pdf` exists and the original's bytes are unchanged; the second run says "This PDF is already as small as Folio can make it." and writes nothing |
+| P-J14 | `testReadMarkFillSignSave` (`FolioJourneyTests+Loop.swift`, core-loop) | live, `-FolioSample form`, `-FolioSaveTo` | the whole loop on live services: open; find "Name"; highlight it; fill Name and Agree; sign in the field; rotate page 1 and back; ⌘Z, ⇧⌘Z; ⌘S; relaunch on the file | each step on PDFKit; the reopened file has the value, the highlight, the signature (PF-12) and no extra page |
+
+### 5.2 States each journey passes through
+
+| Journey | Empty | Error | Loading |
+|---|---|---|---|
+| P-J0, P-J1 | no document: "No PDF Open" with Open… (prominent) and Create from Images…; a document with no outline: "No outline in this PDF."; no marks: "No markup yet. Pick a tool and drag over text." | – | open shows a progress row in the page view at once (`beginOpen`, QB-L9) and the thumbnails fill in as `PageImaging` returns; a page whose picture isn't ready shows a blank sheet of its size with a spinner, never a gap |
+| P-J2 | no query: the bar's placeholder "Find in document"; no hits: "No results" and the field's help sentence | a page with no text layer is skipped and the bar says "2 pages have no text. Recognize text to search them." with Recognize… | search runs off the main thread; results stream in page order with "Searching… page n of m" |
+| P-J3, P-J4 | Text Select on a page with no text: the help "This page has no text to select. Recognize text first."; markup on nothing: "Select some text first." | a file whose owner forbids markup: every markup tool disabled with "The owner of this PDF doesn't allow adding or changing markup."; moving a highlight: "Highlights stay on their text…" | – |
+| P-J5 | a PDF without fields: the Form menu items disabled with "This PDF has no form fields. Use Text Box to type on it."; a scripted form: the banner "This form has scripts Folio doesn't run. Check calculated fields before sending." | read-only field: "<name> is read-only in this form."; a value too long or two lines in a one-line field: its sentence under the field | – |
+| P-J6 | no signatures yet: the popover shows only "New Signature…" | an empty pad: Done disabled with its help; the library folder unwritable: "Signatures couldn't be saved…" and the signature still places for this document | – |
+| P-J7, P-J8 | – | deleting every page: `lastPage`; a range outside the document: its sentence; a file the owner locked against assembly: page commands disabled with "The owner of this PDF doesn't allow changing its pages." | inserting a large file: the progress row as in open |
+| P-J9 | nothing to undo or redo: disabled with "Nothing to undo." / "Nothing to redo." | – | – |
+| P-J10, P-J11 | a new document from images is "Untitled" until saved | save to a read-only folder: subtitle "Not saved ⚠" and the sentence; the source file moved away: `sourceMissing`; open errors per `FolioOpenError` | save shows progress after 100 ms; the window stays usable and the save is atomic (temp file, then replace) |
+| P-J14 | – | – | every live step's progress as above |
+
+### 5.3 Tier-2 journeys (v1, after the core loop)
+
+| # | Test (file, feature) | Launch | Steps | Asserts |
+|---|---|---|---|---|
+| P-J20 | `testRecognizeScan` (`+OCR`, ocr) | `scan` | open; the warning pill "No text: Recognize…"; Tools > Recognize Text…, English, Recognize; ⌘F "total" | progress "Page n of 2"; afterwards the pill reads "Text recognized"; Find gets 1 hit on page 1; T selects "TOTAL 7.70"; after ⌘S and reopen the text is still there (PF-9) |
+| P-J21 | `testExportPagesAndText` (`+Export`, export-convert) | `letter` with `-FolioExportTo <tmp>` | File > Export…, PNG, 150 ppi, Pages 1-2, Export; again as Text; again as a word-processing document | 2 files `Lease-1.png`, `Lease-2.png` of 1275 × 1650; `Lease.txt` with every line; `Lease.docx` exists and is non-empty; success line with Reveal in Finder |
+| P-J24 | `testPrint` (`+Print`, export-convert) | `letter` | ⌘P; Cancel | the system print panel appears with 3 pages; Cancel returns with no change |
+| P-J25 | `testEditLineInPlace` (`+ContentEdit`, content-edit; conditional) | `-FolioSample letter` | E; click "2. Rent."'s line; change "first" to "fifth"; Escape; ⌘S; reopen | the line reads "…due on the fifth day." in the same font (the page value names the font); Find "first day" finds 1 (page 1 line 3 only); a character missing from the font names itself in the help |
+| P-J26 | `testRedactAndVerify` (`+ContentEdit`, content-edit; conditional) | `-FolioSample letter`, `-FolioSaveTo <tmp>/Redacted.pdf` | D; drag over "Landlord" on page 1; Tools > Apply Redactions…, Apply; open Redacted.pdf; ⌘F "Landlord" | the sheet lists "1 area on page 1"; the new file has no hit for "Landlord" on page 1 (page 3 still has its own); copying the area yields no text (PF-13) |
