@@ -33,7 +33,7 @@ Next: collect fixer PRs A (clarity: viewer notice, ruler/timecode/pill help), B 
 ## Rounds
 | round | CI run | CI | audit vs baseline | lenses | confirmed | fixed by | clean |
 |---|---|---|---|---|---|---|---|
-| 2 | 38679533707 (54e16aa) | red: H-J0, testScrubTheTimeline, testEveryMenuOpens pass; H-J1 (halo.inspector not found after Create), H-J13 (toolbar halo.composition.new not found), testLayoutAtWidths (no layer selected at 880) fail; -HaloWindowSize now sticks | halo offscreen 14 > 8 (#933); contrast 1 ≤ 2; identifier 2 ≤ 10; unnamed 0 ≤ 5 | clarity, layout, controls, design | 3 journey (all SuiteWindow / #962) + 14 panel (6 major, 8 minor) | journey: none (SuiteWindow, #962 revert); panel: batches A (2,3,4), B (6,7,13), C (5,8,10,11,12); #976 (8, 9 SuiteUI roots); 1, 14 kept by packet | no |
+| 2 | 38679533707 (54e16aa) | red: H-J0, testScrubTheTimeline, testEveryMenuOpens pass; H-J1 (halo.inspector not found after Create), H-J13 (toolbar halo.composition.new not found), testLayoutAtWidths (no layer selected at 880) fail; -HaloWindowSize now sticks | halo offscreen 14 > 8 (#933); contrast 1 ≤ 2; identifier 2 ≤ 10; unnamed 0 ≤ 5 | clarity, layout, controls, design | 3 journey (all SuiteWindow / #962) + 14 panel (6 major, 8 minor) | journey: none (SuiteWindow, #962 revert); panel: batches A (2,3,4), B #982 (6,7,13), C (5,8,10,11,12); #976 (8, 9 SuiteUI roots); 1, 14 kept by packet | no |
 | 1 | 38675308731 (1025fcc) | red: Halo journeys H-J0, H-J1, H-J13, testLayoutAtWidths, testScrubTheTimeline fail; testEveryMenuOpens passes | halo offscreen 14 > 8 (SuiteUI #933 split-view overflow: sidebar rows x -28/-8, inspector to x 1036 in a 12–1012 window); identifier 1 (system Hide Sidebar) < 10; unnamed 0 < 5 | CI + audit + screens (panel not run: blockers already confirmed by the journeys) | 5: layer row click doesn't select (major); H-J0 query misses EmptyStateView title; H-J1 no problem line for abc; -HaloWindowSize ignored (1000 not 880); offscreen over baseline (blocker, SuiteUI #933) | #961 (4); #933 (offscreen) | no |
 | 1a | 38673821944 (3af1c0e) | red: macOS `swift test` failed on SuiteUITests.rowBodyAndItsTogglesCarryNoDoubleClickGesture (not foundation: #938's ids, fixed by #944); UI journeys skipped | not measured | – | – | – | no |
 
@@ -75,5 +75,6 @@ Next: collect fixer PRs A (clarity: viewer notice, ruler/timecode/pill help), B 
 
 ## Open
 - #976 (needs-ui): ViewerStatusBar pills override disabled dimming; sidebar section add button looks disabled.
+- To file (needs-ui): TimelineStrip should reserve or hide its horizontal scroller; a compact EmptyStateView for short panes (from #982).
 - SuiteUI #933: split view wider than the window; blocks halo offscreen ≤ 8 and so H-J13 / testScrubTheTimeline.
 - docs/c4/model.json "HaloApp sources" description still names only the Layer and Composition menus; the supervisor folds C4 descriptions in (packet: no shared docs).
