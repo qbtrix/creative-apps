@@ -1,8 +1,9 @@
 // SnapshotHost.swift: the golden host (QH-2b, #332). Hosts a SwiftUI view in
 // an NSHostingView inside an offscreen borderless window with one of the four
 // appearances (Light, Dark, Light + Increase Contrast, Dark + Increase
-// Contrast), with the matching colorScheme and contrast in the environment, and draws it at backing scale 2, so a 100 × 50 pt view is a
-// 200 × 100 px image and a 1 pt hairline is 2 device pixels (QB-V3). The
+// Contrast), set on both the window and the hosting view so AppKit's
+// appearance decides how dynamic colors resolve, and draws it at backing
+// scale 2, so a 100 × 50 pt view is a 200 × 100 px image and a 1 pt hairline is 2 device pixels (QB-V3). The
 // bitmap is tagged sRGB, so a token's hex comes back as written. Glass draws
 // as SuiteUI's flat stand-in (`suiteSnapshotRendering`). Its images feed
 // GoldenImage (SH-9) through `assertGolden(_:size:name:area:appearance:)`.
@@ -31,10 +32,10 @@ enum SnapshotAppearance: String, CaseIterable, Sendable {
     var scheme: ColorScheme { self == .dark || self == .darkContrast ? .dark : .light }
 
     /// Increased for the two Increase Contrast appearances. SwiftUI takes the
-    /// contrast from the system setting, not the window's appearance, so the
-    /// host sets it in the environment (the underscored setter; the public
-    /// `colorSchemeContrast` is read-only) for dynamic tokens to resolve
-    /// their Increase Contrast values.
+    /// `colorSchemeContrast` views read from the system setting, not the
+    /// window's appearance, so the host sets it in the environment (the
+    /// underscored setter; the public one is read-only). It always agrees with
+    /// `appearanceName`, which alone decides how NSColor tokens resolve.
     var contrast: ColorSchemeContrast { self == .lightContrast || self == .darkContrast ? .increased : .standard }
 
     /// The token value SuiteHex documents for this appearance.
@@ -73,8 +74,13 @@ struct SnapshotHost {
             .frame(width: size.width, height: size.height)
             .background(SuiteColor.windowBackground)
             .environment(\.suiteSnapshotRendering, true)
-            .environment(\.colorScheme, appearance.scheme)
             .environment(\._colorSchemeContrast, appearance.contrast))
+        // No colorScheme override: SwiftUI derives the scheme from the
+        // effective NSAppearance, and forcing it made SwiftUI resolve NSColor
+        // tokens against a plain aqua/darkAqua appearance, dropping the
+        // Increase Contrast name. The appearance goes on the view as well as
+        // the window so it holds before the view joins the window.
+        host.appearance = named
         host.frame = CGRect(origin: .zero, size: size)
         let window = ScaledSnapshotWindow(
             contentRect: host.frame, styleMask: [.borderless], backing: .buffered, defer: false)
