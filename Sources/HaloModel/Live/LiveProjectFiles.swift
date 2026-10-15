@@ -1,6 +1,7 @@
-// Live/LiveProjectFiles.swift: the W0 stub of ProjectFiles. Encoding and
-// decoding throw `.notBuilt`; the files feature (#209) replaces this file
-// whole with the live type. Linux-safe.
+// Live/LiveProjectFiles.swift: the live ProjectFiles (#209). Encodes and
+// unwraps through `HaloFileFormat`, the one copy of the envelope. Content
+// validation (unique ids and names, spans, keys, parents, counters) joins
+// `decode` in HF-5. Linux-safe.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -9,7 +10,10 @@ import Foundation
 
 public struct LiveProjectFiles: ProjectFiles {
     public init() {}
-    public var unavailableHelp: String? { "Saving and opening projects arrive with #209." }
-    public func encode(_ state: HaloDocumentState) throws -> Data { throw HaloEditError.notBuilt("Saving") }
-    public func decode(_ data: Data) throws -> HaloDocumentState { throw HaloEditError.notBuilt("Opening") }
+    public func encode(_ state: HaloDocumentState) throws -> Data { try HaloFileFormat.encode(state) }
+    public func decode(_ data: Data) throws -> HaloDocumentState {
+        let state = try HaloFileFormat.unwrap(data)
+        // HF-5 seam: check the contents and raise the counters here.
+        return state
+    }
 }
