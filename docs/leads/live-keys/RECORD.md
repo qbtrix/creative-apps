@@ -23,7 +23,7 @@ Next: wait for r2-b1, r2-b2 to merge; round 3 panel (same lenses) on the new dev
 | round | CI run | CI | audit vs baseline | lenses | confirmed | fixed by | clean |
 |---|---|---|---|---|---|---|---|
 | 1 | 38673821944 (3af1c0e: #936, #942) | red, not ours: SuiteUI SidebarRenameGestureTests (#938), on #763; every live-keys suite green on macOS | not run (scripts/ci failed before journeys) | clarity, journey, contract, quality | 12 (2 major: symbol keys past the symbol's end; non-atomic coalesced multi-layer setValue), 1 refuted | #942 (r1-b1), #943 (r1-b2) | no |
-| 2 | (pending: dev run containing 1cca8d0) | pending | pending | clarity, journey, contract, quality | 6 (1 major: no test that a multi-command coalesced drag/scrub stays one entry), 1 refuted | r2-b1, r2-b2 | no |
+| 2 | 38674789740 (1cca8d0) | red, not ours: same SuiteUI SidebarRenameGestureTests (#763); live-keys suites green | not run | clarity, journey, contract, quality | 6 (1 major: no test that a multi-command coalesced drag/scrub stays one entry), 1 refuted | r2-b1, r2-b2 | no |
 
 ## Decisions
 - Base is c111439 (dev one commit past the briefed bcc3197, which is its ancestor: #896, a Flare test pin).
