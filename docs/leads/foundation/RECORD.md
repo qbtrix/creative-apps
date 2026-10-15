@@ -2,7 +2,7 @@
 
 Issue: #777 · Packet: docs/blueprints/halo/features/foundation.md (on branch `docs/halo-feature-packets` until its PR merges)
 Run: act-1a13b78bcdb-qu60 · Session: session_01Dc9GDxc9HxLtv9XMcFgSWh · Started: 2026-10-14T17:33Z
-Stage: 4 round 3 (fix #996 on the lane)
+Stage: 4 round 3 (waiting on the dev CI run containing 216cd7e, #996)
 Base: 52928d1dbbdd72b849f7fdb6363991f35b1adbeb
 Next: collect the r3 fixer PR(s) (window-size leak between journeys, rigid 672 pt content column, LAYERS row click-select, halo.inspector anchor); then judge round 3 on the first dev CI run containing them and round 2's #982–#984; same four lenses
 

@@ -94,3 +94,4 @@ utc	stage	event	ref	note
 2026-10-15T05:27Z	4	round-findings	round 3	r3 fixer started
 2026-10-15T05:33Z	-	heartbeat	-	waiting on builders
 2026-10-15T05:38Z	4	pr-opened	#996	round 3: window leak, compressible status bar, row buttons, inspector header id
+2026-10-15T05:38Z	4	pr-merged	#996	round 3 fixes
