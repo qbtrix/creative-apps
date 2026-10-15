@@ -20,3 +20,5 @@ utc	stage	event	ref	note
 2026-10-15T09:16Z	3	stage-start	wave 5	HF-11 built early, PR gated on #1063
 2026-10-15T09:16Z	3	pr-merged	#1063	HF-8
 2026-10-15T09:16Z	3	heartbeat	-	HF-10, HF-11 building
+2026-10-15T09:20Z	3	pr-opened	#1066	HF-10 open and alerts
+2026-10-15T09:20Z	3	stage-start	wave 6	HF-12 built early, PR gated on #1066 and HF-11

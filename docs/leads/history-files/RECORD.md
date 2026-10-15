@@ -4,7 +4,7 @@ Issue: #1037 · Packet: docs/blueprints/halo/features/history-files.md
 Run: act-1a13e9a2037-pkqb · Session: claude/history-files-lead-j2c6lo · Started: 2026-10-15T08:08Z
 Stage: 3 wave 4
 Base: 2fc9b5990fa49dc829a12f989e5407a7376ae402
-Next: wait for HF-8 and HF-10 PRs to merge, then wave 5 (HF-11)
+Next: wait for #1066 (HF-10), the HF-11 PR and the HF-12 PR (feature-done) to merge; then stage 4 on the CI run they trigger
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -18,9 +18,9 @@ Next: wait for HF-8 and HF-10 PRs to merge, then wave 5 (HF-11)
 | HF-7 | 3 | +Files availability, HB-10 | Availability/+Files, HaloFilesCommandTests, HaloFilesBudgetTests | HaloFilesCommandTests, budgets | #1060 | merged |
 | HF-9 | 3 | saveTarget/fileName + app Save/Save As, title, halo.file | HaloFiles.swift, HaloSaveTargetTests, HaloDocumentType, HaloWindow+File | HaloSaveTargetTests | #1061 | merged |
 | HF-8 | 4 | app routes .undo/.redo; Edit menu snapshot | HaloWindow+Edit, HaloEditMenuSnapshots | snapshot halo-edit-menu-* | #1063 | merged |
-| HF-10 | 4 | app Open/Open Recent/-HaloOpenFile, progress, alerts, recent in UserDefaults | HaloWindow+File, HaloFileSnapshots | snapshots halo-opened-project-*, halo-file-opening-* | | building |
+| HF-10 | 4 | app Open/Open Recent/-HaloOpenFile, progress, alerts, recent in UserDefaults | HaloWindow+File, HaloFileSnapshots | snapshots halo-opened-project-*, halo-file-opening-* | #1066 | open |
 | HF-11 | 5 | journey H-J8 | UITests/HaloJourneyTests+History | H-J8 on dev CI | | building |
-| HF-12 | 6 | journeys H-J10, H-J11 (feature-done) | UITests/HaloJourneyTests+Files, +FileErrors | H-J10, H-J11 on dev CI | | waits all |
+| HF-12 | 6 | journeys H-J10, H-J11 (feature-done) | UITests/HaloJourneyTests+Files, +FileErrors | H-J10, H-J11 on dev CI | | building |
 
 ## Rounds
 | round | CI run | CI | audit vs baseline | lenses | confirmed | fixed by | clean |
@@ -37,7 +37,10 @@ Next: wait for HF-8 and HF-10 PRs to merge, then wave 5 (HF-11)
 - HF-9: exporter success calls didSave without a second write; save alert shows on a changed message only (HF-10 folds open errors into the same alert path).
 - dev CI red since before this feature (#763): latest run 38709336067 fails macOS on HaloLayerListTests (layer-panel), not this feature's files; left to #763.
 - HF-11 builder started while #1063 (HF-8) waits for the lane: the journey file needs no HF-8 code to compile; the builder opens its PR only after #1063 merges, so no CI run carries H-J8 without the route.
+- HF-10: unsaved-changes Save continues the open only when the save writes directly; the panel path drops the open (no window flag allowed by the packet).
+- HF-12 builder started early too; it opens its feature-done PR only after #1066 and HF-11 merge.
 
 ## Open
+- #1065 needs-ui: close guard for unsaved changes on SuiteWindow (no SwiftUI close hook)
 - #1059 needs-ui: .halo exported type declaration (project.yml, bundle-apps)
 - none
