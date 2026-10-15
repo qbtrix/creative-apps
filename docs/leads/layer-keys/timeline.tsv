@@ -32,3 +32,4 @@ utc	stage	event	ref	note
 2026-10-15T11:42Z	3	stage-end	wave6	dev fb4c57d
 2026-10-15T11:42Z	3	stage-start	wave7	LK-10 LK-12 LK-13
 2026-10-15T11:45Z	3	ci-run	38726261412	macOS red: LibraryInspector build error (not ours, #763)
+2026-10-15T11:51Z	3	heartbeat	wave7	LK-10 LK-12 LK-13 building
