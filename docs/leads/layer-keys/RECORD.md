@@ -4,7 +4,7 @@ Issue: #1036 · Packet: docs/blueprints/halo/features/layer-keys.md
 Run: act-1a13eb691a3-wg4n · Session: e0e565d9-6109-5c52-89fd-c254398040f9 · Started: 2026-10-15T08:39Z
 Stage: 4 round 1
 Base: 35a875b
-Next: #1153 merged; wait for viewer-playback's canvas opacity fix (keyedFrame6, #763); then round 2 on the first dev run that passes swift test (same lenses).
+Next: dev red on others' code (viewer-playback keyedFrame6 + driver timeouts; Photo crop; now LibraryWindow+Cull/Loupe build at 3d42e80). Round 2 on the first dev run past swift test. Wall clock ends 16:39Z: if still blocked by ~16:15, comment the state on #1036 and stop.
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
