@@ -58,4 +58,4 @@ Next: FD-15 and FD-16 builders run stacked on FD-14 (#930); then FD-17 (#286, #2
 - The halo.controls probe is a hidden element whose accessibility label is SuiteUI's ControlDocument JSON (same as suite.controls); FD-18 checks inspector controls reach it.
 
 ## Open
-- none
+- docs/c4/model.json "HaloApp sources" description still names only the Layer and Composition menus; the supervisor folds C4 descriptions in (packet: no shared docs).
