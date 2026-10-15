@@ -4,7 +4,7 @@ Issue: #799 · Packet: docs/blueprints/flare/features/live-keys.md
 Run: act-1a13d0020ff-4x51 · Session: cse_01BKSKFkuR1aFXhWhZAhsegU · Started: 2026-10-15T00:00Z
 Stage: 4 round 1
 Base: 899d4243f4b53b42088452afee969d1856a5c7f0
-Next: find the dev CI run whose head contains 899d424 (#936), judge round 1 on it
+Next: wait for CI run 38672480053 (dev 24ef33c, contains #936) and judge round 1 on it
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
