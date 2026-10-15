@@ -4,7 +4,7 @@ Issue: #800 · Packet: docs/blueprints/flare/features/live-scenes.md
 Run: act-1a13ca4f89e-0ft1 · Session: claude/live-scenes-lead-d0sj3t · Started: 2026-10-14
 Stage: 5 finish
 Base: cba1813739a5be03f353698cc2c61e76bc8c6103
-Next: watch dev CI runs (ci.yml, branch dev) newer than 38677546546; on the first green one, comment Belt-Contact-Sheet on #800 and mark done. Red only on SuiteUI = not ours (dev-red #763).
+Next: watch dev CI runs (ci.yml, branch dev) newer than 38679533707; on the first green one, comment Belt-Contact-Sheet on #800 and mark done. Red only on SuiteUI = not ours (dev-red #763).
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
