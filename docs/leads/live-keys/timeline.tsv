@@ -42,3 +42,4 @@ utc	stage	event	ref	note
 2026-10-15T03:35Z	4	round-findings	round 3	panel clean (2 minor), fix batch r3-b1
 2026-10-15T03:39Z	4	pr-opened	#955	r3-b1
 2026-10-15T03:48Z	4	heartbeat	ci	waiting on dev CI containing #947 #949
+2026-10-15T04:08Z	4	ci-run	38677546546	scripts/ci PASS on macOS; Flare journeys pass, audit at or under baseline; red on Library/Halo journeys
