@@ -60,7 +60,7 @@ private final class HaloPlayer {
     /// 3 s of 60 Hz targets, far from zero like the link's media clock.
     private let targets = (1...180).map { 5000 + Double($0) / 60 }
 
-    @Test(.disabled("Hangs on the headless macOS runner (#1155)")) func theDriverAgreesWithTickOnTheSameTargets() throws {
+    @Test func theDriverAgreesWithTickOnTheSameTargets() throws {
         let player = try HaloPlayer()
         var direct = player.model
         player.model.play(at: 5000)
@@ -77,7 +77,7 @@ private final class HaloPlayer {
         player.driver.stop()
     }
 
-    @Test(.disabled("Hangs on the headless macOS runner (#1155)")) func framesFollowTheTargetsNotWallTime() throws {
+    @Test func framesFollowTheTargetsNotWallTime() throws {
         let player = try HaloPlayer()
         player.model.play(at: 5000)
         player.driver.start()
@@ -88,7 +88,7 @@ private final class HaloPlayer {
         player.driver.stop()
     }
 
-    @Test(.disabled("Hangs on the headless macOS runner (#1155)")) func aPausedModelStopsTheLink() throws {
+    @Test func aPausedModelStopsTheLink() throws {
         let player = try HaloPlayer()
         player.model.play(at: 5000)
         player.driver.start()
@@ -106,7 +106,7 @@ private final class HaloPlayer {
         #expect(player.model.selectedComposition?.playheadFrame == frame)
     }
 
-    @Test(.disabled("Hangs on the headless macOS runner (#1155)")) func startIsOnceAndStopIsSafe() throws {
+    @Test func startIsOnceAndStopIsSafe() throws {
         let player = try HaloPlayer()
         player.driver.stop()
         #expect(!player.driver.isRunning)
@@ -120,7 +120,7 @@ private final class HaloPlayer {
         player.driver.stop()
     }
 
-    @Test(.disabled("Hangs on the headless macOS runner (#1155)")) func nothingToRefreshOnLeavesTheDriverStopped() {
+    @Test func nothingToRefreshOnLeavesTheDriverStopped() {
         let driver = HaloPlaybackDriver(onTick: { _ in }, makeLink: { _ in nil })
         driver.start()
         #expect(!driver.isRunning)
