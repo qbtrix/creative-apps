@@ -4,7 +4,7 @@ Issue: #800 · Packet: docs/blueprints/flare/features/live-scenes.md
 Run: act-1a13ca4f89e-0ft1 · Session: claude/live-scenes-lead-d0sj3t · Started: 2026-10-14
 Stage: 4 round 1
 Base: 62395be0c94c10861eaa7518dc7a7fa0d6143447
-Next: wait for round 1 critic panel (wf_4fc30372-1d2); round 1 CI 38657968912 red only on SuiteUI SnapshotHostTests (dev-red #763, triaged)
+Next: wait for round 1 fix PRs (wf_bfa122be-057) to merge, then round 2 on the CI run that contains them, same five lenses
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -21,11 +21,14 @@ Quality bars: QB-F3 one gesture one step, QB-L7 <= 10 ms per moveGuide step (med
 ## Rounds
 | round | CI run | CI | audit vs baseline | lenses | confirmed | fixed by | clean |
 |---|---|---|---|---|---|---|---|
+| 1 | 38657968912 | red (SuiteUI SnapshotHostTests only, #763) | not run (journeys skipped after scripts/ci failed) | clarity, journey, quality, contract, tests | 1 major (QB-F2 refusals from LiveScenes show case names), 3 minor (setCanvas group breaks drag coalescing on refusal, empty-name divergence unpinned, drag budget prints no p50/p95) | r1-b1..b4 (wf_bfa122be-057) | no |
 
 ## Decisions
 - Base moved from the brief's aa166cb to bfd0328 (one SuiteUI snapshot test on top; aa166cb is an ancestor).
 - Issue says Depends on: none (LC-8, LC-10 on creative-core main 98be31a); Package.swift tracks creative-core main.
 - Waves follow the packet: SN-1 alone, then SN-2/3/4 in parallel (separate extension files), then SN-5 with feature-done.
+- Round critics review code, not PNGs: no Flare screen changes, and the panel prompt says so (critic-code.js, a copy of critic-panel.js).
+- Empty-name divergence: documented and pinned, not changed (packet: the workspace refuses it first).
 - No Flare screen changes: the live type is not wired until IN-4, so the Anatomy loop judges on CI + audit, not new screens.
 
 ## Open
