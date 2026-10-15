@@ -31,3 +31,6 @@ utc	stage	event	ref	note
 2026-10-15T13:49Z	4	pr-opened	#1164	r1-b1 gridAligned (last red test on dev)
 2026-10-15T13:55Z	4	pr-merged	#1164	r1-b1
 2026-10-15T13:55Z	4	pr-opened	#1170	r1-b2 panel clarity
+2026-10-15T14:01Z	4	pr-merged	#1170	r1-b2
+2026-10-15T14:01Z	4	ci-run	38746333198	gridAligned green; red is Halo only
+2026-10-15T14:01Z	4	stage-start	round 2	waiting on a run containing #1170
