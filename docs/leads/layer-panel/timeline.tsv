@@ -8,3 +8,6 @@ utc	stage	event	ref	note
 2026-10-15T08:41Z	3	stage-start	a5182b4	wave 3: LP-4 building
 2026-10-15T08:42Z	3	heartbeat	#763	dev red before this feature: Halo testLayoutAtWidths (fix #1040 pending), SuiteUI gallery audit
 2026-10-15T08:48Z	3	pr-opened	#1052	LP-4 H-J9 journey; risky steps: drag (5), disabled-item help (6, 8), rename double-click (3), alert lookup (4)
+2026-10-15T08:49Z	3	pr-merged	#1052	LP-4 H-J9 journey
+2026-10-15T08:49Z	3	stage-end	e8de2ff	all four tasks merged
+2026-10-15T08:49Z	4	ci-run	38708263577	f5bd765, LP-1..3, running
