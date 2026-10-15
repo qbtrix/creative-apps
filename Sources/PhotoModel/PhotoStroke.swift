@@ -90,6 +90,8 @@ extension PhotoWorkspace {
         case .move:
             if begun { current.layersBefore = layers }
             moveSelectedLayer(current, to: end)
+        case .eyedropper:
+            break
         }
         stroke = current
     }
@@ -116,7 +118,7 @@ extension PhotoWorkspace {
         case .clone, .heal:
             guard let id = done.layerID, !done.before.isEmpty else { return }
             record(.tiles(layer: id, done.before), named: done.tool == .heal ? "Heal" : "Clone")
-        case .marquee, .crop:
+        case .marquee, .crop, .eyedropper:
             break
         case .move:
             if done.layersBefore != layers, !done.layersBefore.isEmpty {

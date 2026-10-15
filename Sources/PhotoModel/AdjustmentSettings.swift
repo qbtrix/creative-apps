@@ -13,11 +13,12 @@
 // coordinates are display (sRGB-encoded) values, so 0.5 is the grey a screen
 // shows halfway between black and white. PhotoRender applies the enabled
 // sections to the canvas (exposure, levels, curves, hue/saturation, then
-// blur). Linux-safe.
+// blur). Settings are Hashable, so an adjustment layer can hold them, and
+// Codable, so a document can store them. Linux-safe.
 import CoreRaster
 
 /// One adjustment section in the inspector.
-public enum AdjustmentKind: String, CaseIterable, Sendable {
+public enum AdjustmentKind: String, CaseIterable, Sendable, Codable {
     case exposure, levels, curves, blur, hueSaturation
 }
 
@@ -42,7 +43,7 @@ public enum AdjustmentEdit: Sendable, Equatable {
     case reset(AdjustmentKind)
 }
 
-public struct AdjustmentSettings: Sendable, Equatable {
+public struct AdjustmentSettings: Sendable, Hashable, Codable {
     public static let exposureRange: ClosedRange<Float> = -5...5
     public static let levelsRange: ClosedRange<Float> = 0...1
     /// Black and white snap to thousandths: fine next to 8-bit's 1/255.
@@ -170,5 +171,21 @@ public struct AdjustmentSettings: Sendable, Equatable {
     /// `value` inside `range`, or nil for NaN.
     private static func clamp<Value: BinaryFloatingPoint>(_ value: Value, to range: ClosedRange<Value>) -> Value? {
         value.isNaN ? nil : min(max(value, range.lowerBound), range.upperBound)
+    }
+}
+
+/// CoreRaster's curve point as `{"x": …, "y": …}`, for a stored document.
+extension CurvePoint: @retroactive Codable {
+    private enum CodingKeys: String, CodingKey { case x, y }
+
+    public init(from decoder: any Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        self.init(x: try container.decode(Float.self, forKey: .x), y: try container.decode(Float.self, forKey: .y))
+    }
+
+    public func encode(to encoder: any Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(x, forKey: .x)
+        try container.encode(y, forKey: .y)
     }
 }

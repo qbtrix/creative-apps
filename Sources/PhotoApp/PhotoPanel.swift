@@ -99,6 +99,8 @@ struct ToolOptionsSection: View {
                 }
             case .move:
                 hint("Drag over the image to move the selected layer.")
+            case .eyedropper:
+                EmptyView()
             }
         }
     }

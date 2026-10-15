@@ -6,10 +6,14 @@
 // the undo history.
 // Linux-safe: no UI imports. PhotoApp changes it only through the methods here
 // and in the extensions beside it (PhotoStroke, PhotoSelection, PhotoHistory,
-// PhotoImageFile, PhotoImageOps, PhotoStraighten, PhotoRetouch).
+// PhotoImageFile, PhotoImageOps, PhotoStraighten, PhotoRetouch, PhotoMask).
+// It also holds the v2 state (PV-0): the use cases (`services`), the selection
+// mask, layer masks, the crop aspect, a free transform draft, the eyedropper's
+// sample size, the export choices, the open file's kind and a status message.
 //
 // Invariants: with an image open there is at least one layer, the selection
-// names one of them, and `pixels` holds exactly one buffer per layer id.
+// names one of them, and `pixels` holds exactly one buffer per *pixel* layer
+// (an adjustment layer has none).
 // `revision` goes up with every change to what the canvas shows, and
 // `damage(since:)` says which part of the canvas changed since an older
 // revision, so the renderer redraws only that. Every change to the document is
@@ -20,11 +24,13 @@ import CoreRaster
 
 /// The tools on Photo's tool rail.
 public enum PhotoTool: String, CaseIterable, Sendable {
-    case move, marquee, brush, eraser, clone, heal, crop
+    case move, marquee, brush, eraser, clone, heal, crop, eyedropper
 
     /// Why the rail shows this tool disabled, as its tooltip; nil once the
-    /// tool works. Every tool works: the canvas sends its drags to `drag`.
-    public var unavailableHelp: String? { nil }
+    /// tool works. Every other tool works: the canvas sends its drags to
+    /// `drag`. The eyedropper's text is the fallback; the workspace's
+    /// `toolHelp` asks its sampling service instead.
+    public var unavailableHelp: String? { self == .eyedropper ? "Not built yet (PV-9)." : nil }
 
     public var isEnabled: Bool { unavailableHelp == nil }
 }
@@ -74,12 +80,61 @@ public struct PhotoWorkspace: Sendable {
     /// Recent damage, oldest first, for `damage(since:)`.
     private var damageLog: [(revision: Int, damage: PhotoDamage)] = []
     /// The number in the next layer's id; ids are never reused.
-    private var nextLayerNumber = 1
+    var nextLayerNumber = 1
+
+    // v2 state (PV-0). Each belongs to the extension file named; besides it,
+    // start() resets them all, PhotoHistory restores masks and the selection on
+    // undo, and PhotoStroke paints into a mask through paintTarget().
+    /// The use cases (PhotoServices); `.live` in the app, `.fake` under -PhotoFixture.
+    public internal(set) var services: PhotoServices = .live
+    /// The selection's coverage when it isn't an exact rectangle (PhotoSelectionMask.swift).
+    public internal(set) var selectionMask: Mask?
+    /// The Marquee tool's shape and feather (PhotoSelectionMask.swift).
+    public internal(set) var selectionOptions = SelectionOptions()
+    /// Each masked layer's mask, its own size, coverage as gray, alpha 1 (PhotoMask.swift).
+    public internal(set) var masks: [PhotoLayer.ID: TiledPixels] = [:]
+    /// Brush and eraser paint on the selected layer's mask (PhotoMask.swift).
+    public internal(set) var editsMask = false
+    /// The crop's aspect lock (PhotoCropSize.swift).
+    public internal(set) var cropAspect = CropAspect.free
+    /// Free Transform in progress (PhotoTransform.swift).
+    public internal(set) var transformDraft: TransformDraft?
+    /// The eyedropper's sample size (PhotoEyedropper.swift).
+    public internal(set) var sampleSize = SampleSize.point
+    /// The Export sheet's last choices (PhotoExportOptions.swift).
+    public internal(set) var exportOptions = ExportOptions()
+    /// What the open file is, for Save (PhotoDocumentFile.swift).
+    public internal(set) var fileKind: PhotoFileKind?
+    /// The history step last saved, opened or created (`currentStepID`), so a
+    /// new blank image and a just-opened file are clean; nil with no image.
+    public internal(set) var savedStepID: Int?
+    /// A one-line refusal or note for the status line ("Nothing to paste.");
+    /// `clearStatus()` drops it (the window calls it 4 s later).
+    public internal(set) var statusMessage: String?
+    /// Test hook: how many times `layerGeometryChanged` ran, and its last call
+    /// (PhotoMask.swift). Not part of `==`.
+    var geometryChangeCount = 0
+    var lastGeometryChange: (id: PhotoLayer.ID, change: LayerGeometryChange)?
 
     /// The most damage entries kept; a renderer further behind redraws everything.
     static let damageLogLimit = 64
 
     public init() {}
+
+    /// A workspace on `services`: `.fake` under -PhotoFixture and in tests.
+    public init(services: PhotoServices) {
+        self.init()
+        self.services = services
+    }
+
+    /// Why the rail shows `tool` disabled, as its tooltip; nil once it works.
+    /// The eyedropper asks the sampling service, so `.fake` enables it.
+    public func toolHelp(_ tool: PhotoTool) -> String? {
+        tool == .eyedropper ? services.sampling.unavailableHelp : tool.unavailableHelp
+    }
+
+    /// Drops the status line's message.
+    public mutating func clearStatus() { statusMessage = nil }
 
     public var selectedLayer: PhotoLayer? {
         layers.first { $0.id == selectedLayerID }
@@ -110,10 +165,16 @@ public struct PhotoWorkspace: Sendable {
         pendingCrop = nil
         cloneSource = nil
         stroke = nil
+        selectionMask = nil
+        masks = [:]
+        editsMask = false
+        transformDraft = nil
+        statusMessage = nil
+        fileKind = nil
         history = PhotoHistory()
         // Only an opened file has a name; a new canvas starts unnamed.
         history.baseName = name == nil ? "New Image" : "Open"
-        selectedLayerID = insertLayer(named: "Background", pixels: background, at: 0)
+        selectedLayerID = insertLayer(named: "Background", pixels: background, kind: .pixels, at: 0)
         touch(.all)
     }
 
@@ -173,7 +234,7 @@ public struct PhotoWorkspace: Sendable {
         while layers.contains(where: { $0.name == "Layer \(number)" }) { number += 1 }
         record(.stack(stackState), named: "New Layer")
         let above = selectedLayerID.flatMap(index(of:)) ?? 0
-        selectedLayerID = insertLayer(named: "Layer \(number)", pixels: clear, at: above)
+        selectedLayerID = insertLayer(named: "Layer \(number)", pixels: clear, kind: .pixels, at: above)
         touch(.none)
     }
 
@@ -185,6 +246,7 @@ public struct PhotoWorkspace: Sendable {
         record(.stack(stackState), named: "Delete Layer")
         layers.remove(at: at)
         pixels[id] = nil
+        layerGeometryChanged(id, .removed)
         if selectedLayerID == id { selectedLayerID = layers[min(at, layers.count - 1)].id }
         touch(.all)
         return true
@@ -281,13 +343,23 @@ public struct PhotoWorkspace: Sendable {
         pixels[layer.id].map { PixelRect(x: layer.offsetX, y: layer.offsetY, width: $0.width, height: $0.height) }
     }
 
-    /// Inserts a new default layer holding `pixels` at `position` and returns its id.
-    private mutating func insertLayer(named name: String, pixels buffer: TiledPixels, at position: Int) -> PhotoLayer.ID {
-        let layer = PhotoLayer(id: "layer-\(nextLayerNumber)", name: name)
+    /// Inserts a new default layer of `kind` at `position` and returns its id.
+    /// A pixel layer keeps `buffer` in `pixels`; an adjustment layer has none.
+    mutating func insertLayer(
+        named name: String, pixels buffer: TiledPixels?, kind: PhotoLayerKind, at position: Int
+    ) -> PhotoLayer.ID {
+        var layer = PhotoLayer(id: "layer-\(nextLayerNumber)", name: name)
+        layer.kind = kind
         nextLayerNumber += 1
         layers.insert(layer, at: min(max(position, 0), layers.count))
-        pixels[layer.id] = buffer
+        if let buffer { pixels[layer.id] = buffer }
         return layer.id
+    }
+
+    /// Makes sure no id up to "layer-\(maxID)" is handed out again, so a
+    /// loaded document's ids never repeat.
+    mutating func reserveLayerIDs(after maxID: Int) {
+        if maxID >= nextLayerNumber { nextLayerNumber = maxID + 1 }
     }
 }
 
@@ -295,6 +367,7 @@ extension PhotoWorkspace: Equatable {
     /// Equal when they show the same thing in the same state. Two workspaces at
     /// different revisions are never equal, which keeps the comparison from
     /// walking whole pixel buffers when SwiftUI diffs a changed window.
+    /// `services` isn't compared: it isn't Equatable and isn't what shows.
     public static func == (lhs: PhotoWorkspace, rhs: PhotoWorkspace) -> Bool {
         lhs.revision == rhs.revision && lhs.canvas == rhs.canvas && lhs.documentName == rhs.documentName
             && lhs.layers == rhs.layers && lhs.selectedLayerID == rhs.selectedLayerID && lhs.tool == rhs.tool
@@ -302,7 +375,12 @@ extension PhotoWorkspace: Equatable {
             && lhs.eraserOptions == rhs.eraserOptions && lhs.adjustments == rhs.adjustments
             && lhs.selection == rhs.selection && lhs.pendingCrop == rhs.pendingCrop
             && lhs.cloneSource == rhs.cloneSource && lhs.stroke == rhs.stroke
-            && lhs.history == rhs.history && lhs.pixels == rhs.pixels
+            && lhs.history == rhs.history && lhs.selectionMask == rhs.selectionMask
+            && lhs.selectionOptions == rhs.selectionOptions && lhs.editsMask == rhs.editsMask
+            && lhs.cropAspect == rhs.cropAspect && lhs.transformDraft == rhs.transformDraft
+            && lhs.sampleSize == rhs.sampleSize && lhs.exportOptions == rhs.exportOptions
+            && lhs.fileKind == rhs.fileKind && lhs.savedStepID == rhs.savedStepID
+            && lhs.statusMessage == rhs.statusMessage && lhs.masks == rhs.masks && lhs.pixels == rhs.pixels
     }
 }
 
