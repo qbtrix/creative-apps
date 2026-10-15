@@ -107,6 +107,33 @@ enum HaloKeyRules {
         }
     }
 
+    /// The parent picker: layer `id` follows `pid` (nil clears it) and keeps
+    /// its anchor's place on screen at `f`, its x and y rewritten in the new
+    /// parent's space through `setValue` (keyed when animated). The layer
+    /// itself, or a layer that already follows it, throws
+    /// `.parentCycle(<its name>)`; an unknown id throws `.unknownLayer`. A
+    /// refusal changes nothing. Under a parent that can't be inverted (a
+    /// scale of 0 squashes every point to one) x and y stay as they are.
+    static func setParent(_ pid: String?, of id: String, at f: Int, in c: inout HaloComposition) throws {
+        guard let child = layer(id, in: c), let world = worldMatrix(of: id, in: c, at: f) else {
+            throw HaloEditError.unknownLayer(id)
+        }
+        if let pid {
+            guard layer(pid, in: c) != nil else { throw HaloEditError.unknownLayer(pid) }
+            if pid == id || follows(pid, id, in: c) { throw HaloEditError.parentCycle(child.name) }
+        }
+        let anchor = HaloPoint(x: value(.anchorX, of: child, in: c, at: f), y: value(.anchorY, of: child, in: c, at: f))
+        let screen = world.apply(anchor)
+        var copy = c
+        try change(id, in: &copy) { $0.parentID = pid }
+        let parentWorld = pid.flatMap { worldMatrix(of: $0, in: copy, at: f) } ?? .identity
+        if let local = try? parentWorld.inverted().apply(screen) {
+            try setValue(local.x, for: .x, of: id, at: f, in: &copy)
+            try setValue(local.y, for: .y, of: id, at: f, in: &copy)
+        }
+        c = copy
+    }
+
     /// The not-animated home of a value: `opacity` on the layer with no
     /// track, every other property a one-key track at frame 0.
     private static func setStatic(_ v: Double, _ p: HaloProperty, of layer: inout HaloLayer) {

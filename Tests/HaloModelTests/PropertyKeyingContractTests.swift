@@ -1,14 +1,12 @@
 // PropertyKeyingContractTests.swift: what every PropertyKeying promises
-// (#38). Rows and writes run over the fake and the live type
-// (`propertyKeyings`), which share HaloKeyRules; parenting runs over
-// `parentKeyings`, which the live type joins once it is built. Positions are
-// measured with FakeLayerPlacing, which the live keying must agree with.
-// Runs on Linux and macOS.
+// (#38). Rows, writes and parenting run over the fake and the live type
+// (`propertyKeyings`), which share HaloKeyRules. Positions are measured with
+// FakeLayerPlacing, which the live keying must agree with. Runs on Linux and
+// macOS.
 import HaloModel
 import Testing
 
 let propertyKeyings: [any PropertyKeying] = [FakePropertyKeying(), LivePropertyKeying()]
-let parentKeyings: [any PropertyKeying] = [FakePropertyKeying()]
 
 @Test(arguments: propertyKeyings)
 func rowsFollowPropertyOrderAndKeyState(keying: any PropertyKeying) {
@@ -63,16 +61,70 @@ func keyedBallRowsShowTextAndKeyState(keying: any PropertyKeying) throws {
     }
 }
 
-@Test func liveParentingStillRefusesUntilBuilt() {
-    var comp = keyedPair()
-    let before = comp
-    #expect(throws: HaloEditError.notBuilt("Parenting")) {
-        try LivePropertyKeying().setParent("n", of: "s", at: 0, in: &comp)
-    }
-    #expect(comp == before && LivePropertyKeying().unavailableHelp == nil)
+/// The first composition of fixture `parented`: `keyed` with Rig (a null,
+/// x keyed 960 at 0 and 1160 at 47) on top.
+private func parentedFixture() throws -> HaloComposition {
+    try #require(HaloFixtures.project("parented")?.compositions.first)
 }
 
-@Test(arguments: parentKeyings)
+/// Where the anchor of the layer `id` lands in the composition at `f`.
+private func anchorOnScreen(_ id: String, in comp: HaloComposition, at f: Int) throws -> HaloPoint {
+    let placing = FakeLayerPlacing()
+    let world = try #require(placing.worldMatrix(of: id, in: comp, at: f))
+    let ax = try #require(placing.value(.anchorX, of: id, in: comp, at: f))
+    let ay = try #require(placing.value(.anchorY, of: id, in: comp, at: f))
+    return world.apply(HaloPoint(x: ax, y: ay))
+}
+
+@Test func liveKeyingParentsWithNoHelp() throws {
+    #expect(LivePropertyKeying().unavailableHelp == nil)
+    var comp = try parentedFixture()
+    let ball = try layer("Ball", in: comp), rig = try layer("Rig", in: comp)
+    try LivePropertyKeying().setParent(rig.id, of: ball.id, at: 0, in: &comp)
+    #expect(comp.layers[ball.index].parentID == rig.id)
+}
+
+@Test(arguments: propertyKeyings, [0, 30])
+func parentingKeepsTheChildOnScreen(keying: any PropertyKeying, frame: Int) throws {
+    var comp = try parentedFixture()
+    let ball = try layer("Ball", in: comp), rig = try layer("Rig", in: comp)
+    let before = try anchorOnScreen(ball.id, in: comp, at: frame)
+    try keying.setParent(rig.id, of: ball.id, at: frame, in: &comp)
+    let after = try anchorOnScreen(ball.id, in: comp, at: frame)
+    #expect(comp.layers[ball.index].parentID == rig.id)
+    #expect(abs(after.x - before.x) < 1e-6 && abs(after.y - before.y) < 1e-6)
+}
+
+@Test(arguments: propertyKeyings)
+func aChildFollowsItsParentAndStaysPutWhenFreed(keying: any PropertyKeying) throws {
+    var comp = try parentedFixture()
+    let ball = try layer("Ball", in: comp), rig = try layer("Rig", in: comp)
+    try keying.setParent(rig.id, of: ball.id, at: 0, in: &comp)
+    try keying.setValue(1060, for: .x, of: rig.id, at: 0, in: &comp)
+    #expect(abs(try anchorOnScreen(ball.id, in: comp, at: 0).x - 260) < 1e-6)
+    #expect(try row(.x, of: "Ball", in: comp, at: 0, keying: keying).value == 160)
+    try keying.setParent(nil, of: ball.id, at: 0, in: &comp)
+    #expect(comp.layers[ball.index].parentID == nil)
+    let x0 = try row(.x, of: "Ball", in: comp, at: 0, keying: keying).value
+    #expect(abs(x0 - 260) < 1e-6)
+    #expect(abs(try anchorOnScreen(ball.id, in: comp, at: 0).x - 260) < 1e-6)
+}
+
+@Test(arguments: propertyKeyings)
+func parentingRefusesCyclesAndUnknownLayersAndChangesNothing(keying: any PropertyKeying) throws {
+    var comp = try parentedFixture()
+    let ball = try layer("Ball", in: comp), rig = try layer("Rig", in: comp)
+    try keying.setParent(rig.id, of: ball.id, at: 0, in: &comp)
+    let before = comp
+    #expect(throws: HaloEditError.parentCycle("Rig")) { try keying.setParent(ball.id, of: rig.id, at: 0, in: &comp) }
+    #expect(HaloEditError.parentCycle("Rig").message == "Rig can't follow a layer that follows it.")
+    #expect(throws: HaloEditError.parentCycle("Ball")) { try keying.setParent(ball.id, of: ball.id, at: 0, in: &comp) }
+    #expect(throws: HaloEditError.unknownLayer("gone")) { try keying.setParent(rig.id, of: "gone", at: 0, in: &comp) }
+    #expect(throws: HaloEditError.unknownLayer("gone")) { try keying.setParent("gone", of: ball.id, at: 0, in: &comp) }
+    #expect(comp == before)
+}
+
+@Test(arguments: propertyKeyings)
 func parentingFollowsAndRefusesCycles(keying: any PropertyKeying) throws {
     var comp = keyedPair()
     let placing = FakeLayerPlacing()

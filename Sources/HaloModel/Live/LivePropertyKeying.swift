@@ -1,7 +1,7 @@
 // Live/LivePropertyKeying.swift: the live PropertyKeying (#38). Its rows,
-// typed values, stopwatch and key diamond are real, all from HaloKeyRules
-// (values sampled by FlareCore, section 2's not-animated rule). Parenting
-// still throws `.notBuilt` and changes nothing until it lands. Linux-safe.
+// typed values, stopwatch, key diamond and parent picker are real, all from
+// HaloKeyRules (values sampled by FlareCore, section 2's not-animated rule,
+// a new parent keeping the child on screen). Linux-safe.
 
 public struct LivePropertyKeying: PropertyKeying {
     public init() {}
@@ -28,6 +28,6 @@ public struct LivePropertyKeying: PropertyKeying {
     public func setParent(
         _ parentID: String?, of layerID: String, at frame: Int, in composition: inout HaloComposition
     ) throws {
-        throw HaloEditError.notBuilt("Parenting")
+        try HaloKeyRules.setParent(parentID, of: layerID, at: frame, in: &composition)
     }
 }
