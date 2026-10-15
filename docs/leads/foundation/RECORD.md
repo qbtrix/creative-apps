@@ -2,7 +2,7 @@
 
 Issue: #777 · Packet: docs/blueprints/halo/features/foundation.md (on branch `docs/halo-feature-packets` until its PR merges)
 Run: act-1a13b78bcdb-qu60 · Session: session_01Dc9GDxc9HxLtv9XMcFgSWh · Started: 2026-10-14T17:33Z
-Stage: 4 round 1 (waiting on #941 and its dev CI run)
+Stage: 4 round 1 (waiting on the dev CI run that contains #941, 837fc5f)
 Base: 52928d1dbbdd72b849f7fdb6363991f35b1adbeb
 Next: once #941 merges, find the CI run on dev it dispatched; read jobs, audit-halo-*.json, ui-screens/snapshots; run the critic panel (clarity lens included). Risks flagged by the FD-17/18 builder: TimelineStrip track ids (needs-ui if missing), halo.controls reach (merged with suite.controls), -HaloWindowSize vs restored frames, L2 0.5% at 880x560, menu submenu hover reads
 
@@ -28,7 +28,7 @@ Next: once #941 merges, find the CI run on dev it dispatched; read jobs, audit-h
 | FD-15 | 13 | Stub views, inspector LAYERS + layer header, key diamonds, refusal caption | Sources/HaloApp x11 + 3 snapshots | halo-inspector-layer-selected-*, halo-timeline-keys-*, halo-refusal-* |  | building |
 | FD-16 | 13 | Menus on HaloCommand | Sources/HaloApp x5 | testEveryMenuOpens |  | building |
 | FD-17 | 14 | Accessibility labels and halo.* identifiers (#286, #290) | Sources/HaloApp x5 + 2 snapshots | H-J1, audit unnamed 0 | #940 | merged |
-| FD-18 | 15 | Journeys H-J0, H-J1, H-J13, layout (feature-done) | UITests/HaloJourneyTests.swift | the journeys | #941 | open, lane (feature-done) |
+| FD-18 | 15 | Journeys H-J0, H-J1, H-J13, layout (feature-done) | UITests/HaloJourneyTests.swift | the journeys | #941 | merged |
 
 ## Rounds
 | round | CI run | CI | audit vs baseline | lenses | confirmed | fixed by | clean |

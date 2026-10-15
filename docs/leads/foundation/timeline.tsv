@@ -59,3 +59,6 @@ utc	stage	event	ref	note
 2026-10-15T02:53Z	3	pr-merged	#940	FD-17 closes #286 #290
 2026-10-15T02:53Z	3	pr-opened	#941	FD-18 feature-done
 2026-10-15T02:53Z	3	stage-end	wave 14	all task PRs open or merged
+2026-10-15T02:53Z	3	pr-merged	#941	FD-18 feature-done
+2026-10-15T02:53Z	3	stage-end	build	all 21 task PRs merged
+2026-10-15T02:53Z	4	stage-start	round 1	waiting on CI for 837fc5f
