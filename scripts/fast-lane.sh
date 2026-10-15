@@ -21,9 +21,10 @@
 # head, and proof the head passed the gate: a passing check from CI_WORKFLOWS on
 # the head, or the worker's marker in the PR body, a line `Fast-Check: pass`
 # followed by the line `Head: <full head sha>` for the current head. A PR that
-# changes or renames a MAC_GATED shared shell file also needs a body line
-# `Mac-Check: <CI run url>` naming a completed CI run on its head whose macOS
-# job succeeded (mac_gate). A Belt PR
+# changes or renames a MAC_GATED shared shell file also needs a completed CI
+# run on its head whose macOS job succeeded (mac_gate): the run a body line
+# `Mac-Check: <run url>` names, or else the latest CI run on the head, which
+# the lane dispatches itself when there is none. A Belt PR
 # (a body line starting `Belt-Run:` or `Belt-Test:`) also needs Belt's
 # `belt/review` commit status at success on its head while REQUIRE_BELT_REVIEW=1.
 # A fast-lane PR based on main is retargeted to BASE_BRANCH. A PR that conflicts
@@ -42,10 +43,12 @@
 # `decide` is the pure decision function (no network). It reads a PR JSON file,
 # a file-list file (one path per line), a check-rollup JSON file and, when the
 # PR touches the app audit, two audit_snapshot directories (merge base, head),
-# and, when it touches MAC_GATED, the `gh run view` JSON of its Mac-Check run.
+# and, when it touches MAC_GATED, the `gh run view` JSON of its Mac-Check run
+# and of the latest CI run on its head.
 # It logs each rule to stderr and prints one line to stdout:
 #   skip|<why>  retarget|<from base>  not-eligible|<reasons>  red|<checks>
-#   conflict|<head sha>  pending|<why>  mac-gate|<what to do>  eligible|<lines>|<files>|<proof>
+#   conflict|<head sha>  pending|<why>  mac-dispatch|<gated files>|<head branch>
+#   mac-gate|<what to do>  eligible|<lines>|<files>|<proof>
 # Tests/fast_lane/test_fast_lane.sh sources this file and feeds `decide` fixtures.
 #
 # Usage: scripts/fast-lane.sh [--dry-run] [PR ...]   (no PR: every open fast-lane PR)
@@ -113,12 +116,17 @@ AUDIT_REASON="loosens the app audit: needs the captain's review"
 # journeys: #962 moved SuiteWindow's inspector, merged on the Linux gate, broke
 # Flare, Library, Halo and Suite on dev (run 38679533707) and was reverted in
 # #975. A PR that changes or renames one merges only with proof from macOS: a
-# body line `Mac-Check: <run url>` for a completed CI run on its head whose
-# macOS job succeeded. Not PROTECTED: agents may edit these, with that proof.
+# completed CI run on its head whose macOS job succeeded. Cloud sessions can't
+# dispatch workflows (403, #1040), so the lane dispatches CI on the PR's head
+# branch itself, once per head, and merges when that run is green. A
+# `Mac-Check: <run url>` line a supervisor adds by hand counts too. Not
+# PROTECTED: agents may edit these, with that proof.
 MAC_GATED=(Sources/SuiteUI/SuiteWindow.swift Sources/SuiteUI/EditorShell.swift
   Sources/SuiteUI/ToolbarGroup.swift Sources/SuiteUI/Tokens.swift)
 MAC_CHECK_LINE="Mac-Check:"
 MAC_JOB="macOS"
+# After dispatching, look this many times, 5s apart, for the new run's URL to comment.
+RUN_LOOKUP_RETRIES="${FAST_LANE_RUN_LOOKUP_RETRIES:-6}"
 
 # The worker's proof that scripts/ci passed on the head: this line, then `Head: <sha>`.
 MARKER_LINE="Fast-Check: pass"
@@ -176,36 +184,56 @@ mac_run_id() {
   [[ -z "$id" ]] || echo "$id"
 }
 
-# mac_gate <pr.json> <files.txt> <run.json>: nothing when the PR touches no
-# MAC_GATED path or its Mac-Check run proves the head on macOS; otherwise what
-# is wrong and what to do. <run.json> is `gh run view <id> --json
-# workflowName,status,headSha,jobs` for the Mac-Check run ({} when unread).
+# mac_gated <files.txt>: the MAC_GATED paths among <files.txt>, joined by ", ".
+mac_gated() {
+  grep -Fx -f <(printf '%s\n' "${MAC_GATED[@]}") "$1" | sort -u | paste -sd, - | sed 's/,/, /g' || true
+}
+
+# mac_judge <run.json> <head sha>: nothing when the run (`gh run view --json
+# workflowName,status,headSha,jobs`) is a completed CI run on <head sha> whose
+# macOS job succeeded, else what is wrong with it.
+mac_judge() {
+  local runjson='{}'
+  [[ -z "$1" || ! -s "$1" ]] || runjson=$(cat "$1")
+  jq -r --arg wf "${CI_WORKFLOWS[0]}" --arg job "$MAC_JOB" --arg head "$2" '
+    ([.jobs[]? | select(.name == $job)] | last) as $j
+    | if (.workflowName // "") == "" then "its run could not be read"
+      elif .workflowName != $wf then "its run is the \(.workflowName) workflow, not \($wf)"
+      elif ((.status // "") | ascii_downcase) != "completed" then "its run has not completed"
+      elif $j == null then "its run has no \($job) job"
+      elif (($j.conclusion // "") | ascii_downcase) != "success" then "its \($job) job is \($j.conclusion // "unfinished")"
+      elif (.headSha // "") != $head then "its run is on \(.headSha // "no head"), not the head \($head)"
+      else empty end' <<<"$runjson" 2>/dev/null || echo "its run could not be read"
+}
+
+# mac_gate <pr.json> <files.txt> <mac-check run.json> <lane run.json>: nothing
+# when the PR touches no MAC_GATED path, else one line:
+#   ok|<proof>                 a green CI run on the head proves it
+#   dispatch|<files>|<branch>  no CI run on the head yet: the lane starts one
+#   wait|<url>                 the CI run on the head is still going
+#   refuse|<what to do>        the CI run on the head failed on macOS
+# The Mac-Check line's run counts first (a supervisor can add one by hand);
+# otherwise the latest CI run on the head (<lane run.json>, {} when none).
 mac_gate() {
-  local pr="$1" files="$2" run="${3:-}" gated head branch url why=""
-  gated=$(grep -Fx -f <(printf '%s\n' "${MAC_GATED[@]}") "$files" | sort -u | paste -sd, - || true)
+  local pr="$1" files="$2" gated head branch url lane='{}' why
+  gated=$(mac_gated "$files")
   [[ -n "$gated" ]] || return 0
   head=$(jq -r '.headRefOid' "$pr")
-  branch=$(jq -r '.headRefName // "<head branch>"' "$pr")
+  branch=$(jq -r '.headRefName // ""' "$pr")
   url=$(mac_check_url "$pr")
-  local runjson='{}'
-  [[ -z "$run" || ! -s "$run" ]] || runjson=$(cat "$run")
-  if [[ -z "$url" ]]; then
-    why="no $MAC_CHECK_LINE line"
-  elif [[ -z "$(mac_run_id "$url")" ]]; then
-    why="$MAC_CHECK_LINE $url is not a workflow run URL of $REPO"
-  else
-    why=$(jq -r --arg wf "${CI_WORKFLOWS[0]}" --arg job "$MAC_JOB" --arg head "$head" '
-      ([.jobs[]? | select(.name == $job)] | last) as $j
-      | if (.workflowName // "") == "" then "its run could not be read"
-        elif .workflowName != $wf then "its run is the \(.workflowName) workflow, not \($wf)"
-        elif ((.status // "") | ascii_downcase) != "completed" then "its run has not completed"
-        elif $j == null then "its run has no \($job) job"
-        elif (($j.conclusion // "") | ascii_downcase) != "success" then "its \($job) job is \($j.conclusion // "unfinished")"
-        elif (.headSha // "") != $head then "its run is on \(.headSha // "no head"), not the head \($head)"
-        else empty end' <<<"$runjson" 2>/dev/null || echo "its run could not be read")
+  if [[ -n "$url" && -n "$(mac_run_id "$url")" && -z "$(mac_judge "${3:-}" "$head")" ]]; then
+    echo "ok|$MAC_CHECK_LINE $url"; return
   fi
-  [[ -n "$why" ]] || return 0
-  echo "changes ${gated//,/, }, shared by every app's window, so it needs a green macOS run on its head $head: $why. Push, run \`gh workflow run ci.yml -R $REPO --ref $branch\`, wait for it to finish, then add the line \`$MAC_CHECK_LINE <run url>\` with that run's URL to the PR body"
+  [[ -z "${4:-}" || ! -s "$4" ]] || lane=$(cat "$4")
+  url=$(jq -r '.url // ""' <<<"$lane" 2>/dev/null || true)
+  # No run on the head (a run on an older head doesn't count): dispatch one.
+  if [[ -z "$url" || "$(jq -r '.headSha // ""' <<<"$lane")" != "$head" ]]; then
+    echo "dispatch|$gated|$branch"; return
+  fi
+  why=$(mac_judge "$4" "$head")
+  if [[ -z "$why" ]]; then echo "ok|macOS run $url"; return; fi
+  if [[ "$why" == "its run has not completed" ]]; then echo "wait|$url"; return; fi
+  echo "refuse|changes $gated, shared by every app's window, so it needs a green macOS run on its head $head, and the CI run the lane found there failed: $url ($why). Fix it and push; the lane dispatches CI again on the new head. A supervisor can instead add a line \`$MAC_CHECK_LINE <run url>\` naming a green CI run on this head"
 }
 
 # audit_fetch <sha> <dir> <path>: <path> at <sha> into <dir>/<path>.
@@ -318,7 +346,7 @@ audit_loosens() {
   (( lists <= 1 )) || echo "AppAudit.checks is declared $lists times"
 }
 
-# decide <pr.json> <files.txt> <checks.json> [<audit before dir> <audit after dir> [<mac run.json>]]
+# decide <pr.json> <files.txt> <checks.json> [<audit before dir> <audit after dir> [<mac-check run.json> <lane run.json>]]
 # (pass "" "" for the audit dirs when the PR doesn't touch the audit)
 decide() {
   local pr="$1" files="$2" checks="$3"
@@ -439,11 +467,16 @@ decide() {
   fi
   if (( belt )) && [[ "$review" != "SUCCESS" ]]; then echo "pending|waiting for review"; return; fi
   local mac
-  mac=$(mac_gate "$pr" "$files" "${6:-}")
-  log "mac gate: ${mac:-ok}"
-  if [[ -n "$mac" ]]; then echo "mac-gate|$mac"; return; fi
+  mac=$(mac_gate "$pr" "$files" "${6:-}" "${7:-}")
+  log "mac gate: ${mac:-not gated}"
+  case "$mac" in
+    dispatch\|*) echo "mac-dispatch|${mac#dispatch|}"; return ;;
+    wait\|*) echo "pending|waiting for the macOS CI run ${mac#wait|} on head $head"; return ;;
+    refuse\|*) echo "mac-gate|${mac#refuse|}"; return ;;
+  esac
   local proof="Fast-Check marker"
   (( nci == 0 )) || proof="$ngreen checks green"
+  [[ "$mac" != ok\|* ]] || proof+=", ${mac#ok|}"
   echo "eligible|$lines|$nfiles|$proof"
 }
 
@@ -507,18 +540,24 @@ evaluate() {
     fi
     audit=("$tmp/before" "$tmp/after")
   fi
-  # A MAC_GATED change brings the run its Mac-Check line names (mac_gate judges it).
-  local mac=() id
-  if grep -qFx -f <(printf '%s\n' "${MAC_GATED[@]}") "$tmp/files.txt"; then
+  # A MAC_GATED change brings the run its Mac-Check line names and the latest
+  # CI run on the head (mac_gate judges them). A failed run list skips the PR
+  # this sweep, so an API hiccup never dispatches a second run for one head.
+  local mac=() id fields=workflowName,status,conclusion,headSha,jobs,url
+  if [[ -n "$(mac_gated "$tmp/files.txt")" ]]; then
+    echo '{}' >"$tmp/mac.json"; echo '{}' >"$tmp/lane.json"
     id=$(mac_run_id "$(mac_check_url "$tmp/pr.json")")
     if [[ -n "$id" ]]; then
-      gh run view "$id" -R "$REPO" --json workflowName,status,conclusion,headSha,jobs >"$tmp/mac.json" 2>/dev/null \
-        || echo '{}' >"$tmp/mac.json"
-    else
-      echo '{}' >"$tmp/mac.json"
+      gh run view "$id" -R "$REPO" --json "$fields" >"$tmp/mac.json" 2>/dev/null || echo '{}' >"$tmp/mac.json"
+    fi
+    if ! id=$(gh run list -R "$REPO" --workflow "$CI_FILE" --commit "$head" --limit 1 --json databaseId --jq '.[0].databaseId // ""'); then
+      log "PR #$n: could not list CI runs on the head; the next sweep looks again"; rm -rf "$tmp"; return
+    fi
+    if [[ -n "$id" ]]; then
+      gh run view "$id" -R "$REPO" --json "$fields" >"$tmp/lane.json" 2>/dev/null || echo '{}' >"$tmp/lane.json"
     fi
     (( ${#audit[@]} )) || audit=("" "")
-    mac=("$tmp/mac.json")
+    mac=("$tmp/mac.json" "$tmp/lane.json")
   fi
 
   echo "PR #$n:" >&2
@@ -541,8 +580,24 @@ evaluate() {
       # Usually an earlier merge in this sweep. Belt's fixer rebases it; the label stays.
       comment_once "$n" "Fast lane: not merged, this PR conflicts with $BASE_BRANCH at head $rest. Rebase on origin/$BASE_BRANCH, rerun scripts/ci, and update the Fast-Check marker."
       ;;
+    mac-dispatch)
+      # Authors can't dispatch (403, #1040), so the lane does, once per head:
+      # the next sweep finds this run on the head and waits for it, then merges.
+      local gated branch url="" i
+      IFS='|' read -r gated branch <<<"$rest"
+      if ! write gh workflow run "$CI_FILE" -R "$REPO" --ref "$branch"; then
+        log "could not dispatch CI on $branch; the next sweep tries again"; rm -rf "$tmp"; return
+      fi
+      for (( i = 0; i <= RUN_LOOKUP_RETRIES; i++ )); do
+        url=$(gh run list -R "$REPO" --workflow "$CI_FILE" --commit "$head" --limit 1 --json url --jq '.[0].url // ""' 2>/dev/null || true)
+        [[ -z "$url" && $i -lt $RUN_LOOKUP_RETRIES ]] || break
+        sleep 5
+      done
+      [[ -n "$url" ]] || url="https://github.com/$REPO/actions/workflows/$CI_FILE?query=branch%3A$branch"
+      comment_once "$n" "Fast lane: this PR changes $gated, shared by every app's window, so it needs a green macOS run on its head $head. The lane dispatched CI on $branch: $url. A later sweep merges this PR once that run's macOS job passes on this head; a new push gets a new run."
+      ;;
     mac-gate)
-      # The label stays: once the Mac-Check line names a green run on the head, a later sweep merges it.
+      # The label stays: a push gets a new run on the new head, and a later sweep merges it once green.
       comment_once "$n" "Fast lane: waiting for macOS proof. This PR $rest."
       ;;
     not-eligible)
@@ -620,7 +675,7 @@ main() {
   while (( $# )); do
     case "$1" in
       --dry-run) DRY_RUN=1 ;;
-      -h|--help) sed -n '2,52p' "$0"; return 0 ;;
+      -h|--help) sed -n '2,55p' "$0"; return 0 ;;
       *) prs+=("$1") ;;
     esac
     shift

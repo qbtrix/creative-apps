@@ -40,11 +40,11 @@ Hand this to every session (the lead and each agent it starts) verbatim.
 - **Shared shell files need macOS proof.** A PR that changes or renames a
   `MAC_GATED` file in `scripts/fast-lane.sh` (`SuiteWindow.swift`,
   `EditorShell.swift`, `ToolbarGroup.swift`, `Tokens.swift` in `Sources/SuiteUI/`)
-  merges only with a body line `Mac-Check: <run url>` for a completed CI run
-  on its current head whose `macOS` job succeeded (see #962, #975). Push, run
-  `gh workflow run ci.yml -R qbtrix/creative-apps --ref <head branch>` (or ask
-  the supervisor, since you get a 403), wait for it, add the line; push again
-  and you need a new run.
+  merges only once a completed CI run on its current head has a green
+  `macOS` job (see #962, #975). You can't dispatch it, so the lane does, once
+  per head, comments the run URL, and merges on a later sweep when it is
+  green. A red run waits for your next push, which gets a new run. A
+  `Mac-Check: <run url>` line the supervisor adds for a green run counts too.
 - **You can read runs.** `gh run list --workflow ci.yml --branch dev`, then
   `gh run download <id> -n ui-screens` (whole-window PNGs, `contact-sheet.html`,
   `audit-*.json`) and `-n snapshots`; or the GitHub MCP `actions_*` and

@@ -156,61 +156,68 @@ check "marker does not outrank a conflict" "conflict|$HEAD_SHA" \
 check "marker on a draft is skipped" "skip|PR is a draft" "$MARKED | .isDraft = true" "$BASE_FILES" '[]'
 
 # The macOS gate: a PR changing or renaming a MAC_GATED shared shell file needs
-# a `Mac-Check: <run url>` line for a completed CI run on its head whose macOS
-# job succeeded. mac <name> <want> <pr jq> <files> <run jq on a green run>
-# runs decide with that `gh run view` JSON as its 6th argument.
+# a completed CI run on its head whose macOS job succeeded: the run a
+# `Mac-Check: <run url>` line names (a supervisor's), else the latest CI run on
+# the head, which the lane dispatches itself when there is none (authors get a
+# 403 dispatching, #1040). mac <name> <want> <pr jq> <files> <mac-check run>
+# <lane run> runs decide with both `gh run view` JSONs; each run is a jq
+# filter on a green run on the head, or - for none.
 RUN_URL="https://github.com/qbtrix/creative-apps/actions/runs/38700000001"
+LANE_URL="https://github.com/qbtrix/creative-apps/actions/runs/38700000002"
 GREEN_RUN='{"workflowName":"CI","status":"completed","conclusion":"success","headSha":"'"$HEAD_SHA"'",
+  "url":"'"$LANE_URL"'",
   "jobs":[{"name":"Linux","status":"completed","conclusion":"success"},
           {"name":"macOS","status":"completed","conclusion":"success"}]}'
 MAC_PR="$MARKED | .body += \"\\nMac-Check: $RUN_URL\""
 GATED=$'Sources/SuiteUI/SuiteWindow.swift\nTests/SuiteUITests/SuiteWindowTests.swift'
+OLD_HEAD="ffffffffffffffffffffffffffffffffffffffff"
+FAILED_MAC='.conclusion = "failure" | (.jobs[] | select(.name == "macOS")).conclusion = "failure"'
+RUNNING='.status = "in_progress" | .conclusion = "" | (.jobs[] | select(.name == "macOS")) |= (.status = "in_progress" | .conclusion = "")'
 mac() {
   local name="$1" want="$2" got
   jq "$3" <<<"$BASE_PR" >"$tmp/pr.json"
   printf '%s\n' "$4" >"$tmp/files.txt"
-  jq "$5" <<<"$GREEN_RUN" >"$tmp/run.json"
-  got=$(decide "$tmp/pr.json" "$tmp/files.txt" "$tmp/empty.json" "" "" "$tmp/run.json" 2>/dev/null)
+  if [[ "$5" == - ]]; then echo '{}' >"$tmp/run.json"; else jq "$5" <<<"$GREEN_RUN" >"$tmp/run.json"; fi
+  if [[ "$6" == - ]]; then echo '{}' >"$tmp/lane.json"; else jq "$6" <<<"$GREEN_RUN" >"$tmp/lane.json"; fi
+  got=$(decide "$tmp/pr.json" "$tmp/files.txt" "$tmp/empty.json" "" "" "$tmp/run.json" "$tmp/lane.json" 2>/dev/null)
   if [[ "$got" == "$want"* ]]; then echo "ok   mac: $name -> ${got:0:120}"; else echo "FAIL mac: $name: want '$want*', got '$got'"; fail=1; fi
 }
 echo '[]' >"$tmp/empty.json"
-TODO="Push, run \`gh workflow run ci.yml -R qbtrix/creative-apps --ref feat/x\`, wait for it to finish, then add the line \`Mac-Check: <run url>\`"
-WHY="mac-gate|changes Sources/SuiteUI/SuiteWindow.swift, shared by every app's window, so it needs a green macOS run on its head $HEAD_SHA"
-mac "no Mac-Check line is refused" "$WHY: no Mac-Check: line. $TODO" "$MARKED" "$GATED" .
-mac "a run on an older head is refused" \
-  "$WHY: its run is on ffffffffffffffffffffffffffffffffffffffff, not the head $HEAD_SHA. $TODO" \
-  "$MAC_PR" "$GATED" '.headSha = "ffffffffffffffffffffffffffffffffffffffff"'
-mac "a failed macOS job is refused" "$WHY: its macOS job is failure. $TODO" \
-  "$MAC_PR" "$GATED" '.conclusion = "failure" | (.jobs[] | select(.name == "macOS")).conclusion = "failure"'
-mac "a run still in progress is refused" "$WHY: its run has not completed" \
-  "$MAC_PR" "$GATED" '.status = "in_progress" | (.jobs[] | select(.name == "macOS")) |= (.status = "in_progress" | .conclusion = "")'
-mac "a skipped macOS job is refused" "$WHY: its macOS job is skipped" \
-  "$MAC_PR" "$GATED" '(.jobs[] | select(.name == "macOS")).conclusion = "skipped"'
-mac "a run without a macOS job is refused" "$WHY: its run has no macOS job" \
-  "$MAC_PR" "$GATED" '.jobs |= map(select(.name != "macOS"))'
-mac "another workflow's run is refused" "$WHY: its run is the Fast Lane workflow, not CI" \
-  "$MAC_PR" "$GATED" '.workflowName = "Fast Lane"'
-mac "an unreadable run is refused" "$WHY: its run could not be read" "$MAC_PR" "$GATED" '{}'
-mac "a run of another repo is refused" \
-  "$WHY: Mac-Check: https://github.com/someone/creative-apps/actions/runs/1 is not a workflow run URL of qbtrix/creative-apps" \
-  "$MARKED | .body += \"\\nMac-Check: https://github.com/someone/creative-apps/actions/runs/1\"" "$GATED" .
-mac "a matching green run passes" "eligible|150|2|Fast-Check marker" "$MAC_PR" "$GATED" .
-mac "a job URL of that run passes" "eligible|150|2|Fast-Check marker" \
-  "$MARKED | .body += \"\\n  Mac-Check:   $RUN_URL/job/123  \"" "$GATED" .
-mac "an upper-case repo URL passes" "eligible|150|2|Fast-Check marker" \
-  "$MARKED | .body += \"\\nMac-Check: https://github.com/QBTRIX/Creative-Apps/actions/runs/38700000001\"" "$GATED" .
+DISPATCH="mac-dispatch|Sources/SuiteUI/SuiteWindow.swift|feat/x"
+REFUSE="mac-gate|changes Sources/SuiteUI/SuiteWindow.swift, shared by every app's window, so it needs a green macOS run on its head $HEAD_SHA, and the CI run the lane found there failed: $LANE_URL"
+mac "no Mac-Check line and no run on the head: the lane dispatches" "$DISPATCH" "$MARKED" "$GATED" - -
+mac "a Mac-Check run on an older head, none on the head: dispatches" "$DISPATCH" "$MAC_PR" "$GATED" ".headSha = \"$OLD_HEAD\"" -
+mac "an unreadable Mac-Check run, none on the head: dispatches" "$DISPATCH" "$MAC_PR" "$GATED" '{}' -
+mac "a Mac-Check URL of another repo, none on the head: dispatches" "$DISPATCH" \
+  "$MARKED | .body += \"\\nMac-Check: https://github.com/someone/creative-apps/actions/runs/1\"" "$GATED" . -
+mac "a lane run on an older head counts as none: dispatches" "$DISPATCH" "$MARKED" "$GATED" - ".headSha = \"$OLD_HEAD\""
+mac "the run on the head still going: waits, no second dispatch" "pending|waiting for the macOS CI run $LANE_URL on head $HEAD_SHA" \
+  "$MARKED" "$GATED" - "$RUNNING"
+mac "the run on the head green: eligible as if Mac-Check were there" "eligible|150|2|Fast-Check marker, macOS run $LANE_URL" \
+  "$MARKED" "$GATED" - .
+mac "the run on the head with a failed macOS job is refused" "$REFUSE (its macOS job is failure). Fix it and push; the lane dispatches CI again on the new head" \
+  "$MARKED" "$GATED" - "$FAILED_MAC"
+mac "a skipped macOS job is refused" "$REFUSE (its macOS job is skipped)" \
+  "$MARKED" "$GATED" - '(.jobs[] | select(.name == "macOS")).conclusion = "skipped"'
+mac "a run without a macOS job is refused" "$REFUSE (its run has no macOS job)" "$MARKED" "$GATED" - '.jobs |= map(select(.name != "macOS"))'
+mac "another workflow's run is refused" "$REFUSE (its run is the Fast Lane workflow, not CI)" "$MARKED" "$GATED" - '.workflowName = "Fast Lane"'
+mac "a supervisor's green Mac-Check run passes, no dispatch" "eligible|150|2|Fast-Check marker, Mac-Check: $RUN_URL" "$MAC_PR" "$GATED" . -
+mac "a green Mac-Check run outranks a failed lane run" "eligible|150|2|Fast-Check marker, Mac-Check: $RUN_URL" "$MAC_PR" "$GATED" . "$FAILED_MAC"
+mac "a Mac-Check run with a failed macOS job falls back to the lane run" "eligible|150|2|Fast-Check marker, macOS run $LANE_URL" \
+  "$MAC_PR" "$GATED" "$FAILED_MAC" .
+mac "a job URL of a green run passes" "eligible|150|2|Fast-Check marker, Mac-Check:" \
+  "$MARKED | .body += \"\\n  Mac-Check:   $RUN_URL/job/123  \"" "$GATED" . -
+mac "an upper-case repo URL passes" "eligible|150|2|Fast-Check marker, Mac-Check:" \
+  "$MARKED | .body += \"\\nMac-Check: https://github.com/QBTRIX/Creative-Apps/actions/runs/38700000001\"" "$GATED" . -
 if shopt -q nocasematch; then echo "FAIL mac: mac_run_id leaves nocasematch on"; fail=1; else echo "ok   mac: mac_run_id restores nocasematch"; fi
 mac "every gated file is named" \
-  "mac-gate|changes Sources/SuiteUI/EditorShell.swift, Sources/SuiteUI/Tokens.swift, Sources/SuiteUI/ToolbarGroup.swift, shared" \
-  "$MARKED" $'Sources/SuiteUI/Tokens.swift\nSources/SuiteUI/ToolbarGroup.swift\nSources/SuiteUI/EditorShell.swift' .
-mac "a rename away from a gated file is gated" "mac-gate|changes Sources/SuiteUI/SuiteWindow.swift" \
-  "$MARKED" $'Sources/SuiteUI/Window.swift\nSources/SuiteUI/SuiteWindow.swift' .
-mac "a PR touching no gated path is unaffected" "eligible|150|2|Fast-Check marker" "$MARKED" "$BASE_FILES" '{}'
-mac "a gated PR still needs the Fast-Check marker" "pending|no passing CI check" \
-  ".body = \"Mac-Check: $RUN_URL\"" "$GATED" .
-mac "the gate does not outrank hard rules" "not-eligible|too big" "$MARKED | .additions = 999" "$GATED" .
-check "a gated PR with no run JSON at all is refused" "mac-gate|changes Sources/SuiteUI/SuiteWindow.swift" \
-  "$MAC_PR" "$GATED" '[]'
+  "mac-dispatch|Sources/SuiteUI/EditorShell.swift, Sources/SuiteUI/Tokens.swift, Sources/SuiteUI/ToolbarGroup.swift|feat/x" \
+  "$MARKED" $'Sources/SuiteUI/Tokens.swift\nSources/SuiteUI/ToolbarGroup.swift\nSources/SuiteUI/EditorShell.swift' - -
+mac "a rename away from a gated file is gated" "$DISPATCH" "$MARKED" $'Sources/SuiteUI/Window.swift\nSources/SuiteUI/SuiteWindow.swift' - -
+mac "a PR touching no gated path is unaffected" "eligible|150|2|Fast-Check marker" "$MARKED" "$BASE_FILES" - -
+mac "a gated PR still needs the Fast-Check marker" "pending|no passing CI check" ".body = \"Mac-Check: $RUN_URL\"" "$GATED" . .
+mac "the gate does not outrank hard rules" "not-eligible|too big" "$MARKED | .additions = 999" "$GATED" - -
+check "a gated PR with no run JSON at all dispatches" "$DISPATCH" "$MARKED" "$GATED" '[]'
 
 # Belt PRs (a body line starting Belt-Run: or Belt-Test:) also need Belt's
 # belt/review commit status at success on the head; other PRs ignore it.
@@ -390,6 +397,21 @@ gh() {
       if [[ -e "$sw/files.$n.json" ]]; then jq -r "${!#}" "$sw/files.$n.json"
       else jq -rn '[{filename: "Sources/FlareModel/FlareWorkspace.swift", status: "modified"}]' | jq -r "${!#}"; fi ;;
     "run view "*) cat "$sw/run.$3.json" 2>/dev/null || return 1 ;;
+    "run list "*"--commit "*)
+      u="${a#*--commit }"; u="${u%% *}"
+      [[ ! -e "$sw/runlist.fail.$u" ]] || return 1
+      jq -r "${!#}" "$sw/runs.$u.json" 2>/dev/null || jq -rn '[]' | jq -r "${!#}" ;;
+    "workflow run "*)
+      # A dispatch on a PR's head branch starts an in-progress CI run on its head.
+      echo "$a" >>"$sw/calls"
+      for n in "$sw"/[0-9]*.json; do
+        [[ "$(jq -r .headRefName "$n")" == "${!#}" ]] || continue
+        u=$(jq -r .headRefOid "$n"); n="${n##*/}"; n="9${n%.json}"
+        jq --arg h "$u" --arg url "https://github.com/qbtrix/creative-apps/actions/runs/$n" \
+          ".headSha = \$h | .url = \$url | $RUNNING" <<<"$GREEN_RUN" >"$sw/run.$n.json"
+        jq -n --arg id "$n" --arg url "https://github.com/qbtrix/creative-apps/actions/runs/$n" \
+          '[{databaseId: $id, url: $url}]' >"$sw/runs.$u.json"
+      done ;;
     "run list "*) cat "$sw/ci_head" 2>/dev/null || echo cihead ;;
     "api "*"/compare/cihead...dev"*) cat "$sw/ci_ahead" 2>/dev/null || echo 0 ;;
     "api "*"/compare/"*) [[ "$2" != *bad ]] || return 1; echo mb ;;
@@ -493,24 +515,48 @@ expect "a rename away from a protected path is refused" \
 expect "audit: an unreadable merge base skips the PR, no writes" "$(grep -c '^pr [a-z]* 11 ' "$sw/calls")" 0
 expect "audit: a stray AuditCore.swift can't hide a dropped entry" \
   "$(grep -c "^pr comment 12 .*loosens the app audit: needs the captain's review (drops Overlap from AppAudit.checks)" "$sw/calls")" 1
-# The macOS gate through a sweep: #14 changes SuiteWindow.swift with no
-# Mac-Check line, #15 names a run on an older head, #16 a green run on its
-# head, #17 a run the API can't read. Only #16 merges; #14 and #15 keep the
-# label and get the instructions once.
+# The macOS gate through sweeps. #14 changes SuiteWindow.swift with no
+# Mac-Check line and no CI run on its head: the lane dispatches CI on its
+# branch once and comments the run URL, and a later sweep merges it when that
+# run is green on the head. #16 carries a supervisor's green Mac-Check run and
+# merges at once. #18 touches no gated path. #20's run on the head failed on
+# macOS. #22's run list fails, so nothing is written for it.
 rm -rf "$sw"; mkdir -p "$sw"; : >"$sw/calls"
 SWF='[{"filename": "Sources/SuiteUI/SuiteWindow.swift", "status": "modified"}]'
-pr_at 14 h14 "$SWF"
-pr_at 15 h15 "$SWF"; jq '.body += "\nMac-Check: https://github.com/qbtrix/creative-apps/actions/runs/15"' "$sw/15.json" >"$sw/x" && mv "$sw/x" "$sw/15.json"
-jq '.headSha = "old"' <<<"$GREEN_RUN" >"$sw/run.15.json"
-pr_at 16 h16 "$SWF"; jq '.body += "\nMac-Check: https://github.com/qbtrix/creative-apps/actions/runs/16"' "$sw/16.json" >"$sw/x" && mv "$sw/x" "$sw/16.json"
+for n in 14 16 18 20 22; do
+  pr_at "$n" "h$n" "$SWF"
+  jq --arg b "b$n" '.headRefName = $b' "$sw/$n.json" >"$sw/x" && mv "$sw/x" "$sw/$n.json"
+done
+printf '%s\n' '[{"filename": "Sources/FlareModel/FlareWorkspace.swift", "status": "modified"}]' >"$sw/files.18.json"
+jq '.body += "\nMac-Check: https://github.com/qbtrix/creative-apps/actions/runs/16"' "$sw/16.json" >"$sw/x" && mv "$sw/x" "$sw/16.json"
 jq '.headSha = "h16"' <<<"$GREEN_RUN" >"$sw/run.16.json"
-pr_at 17 h17 "$SWF"; jq '.body += "\nMac-Check: https://github.com/qbtrix/creative-apps/actions/runs/17"' "$sw/17.json" >"$sw/x" && mv "$sw/x" "$sw/17.json"
-( main ) >/dev/null 2>&1 || { echo "FAIL sweep: main exited non-zero"; fail=1; }
-expect "mac: merges only the PR whose Mac-Check run is green on its head" \
-  "$(grep -oE '^pr merge [0-9]+' "$sw/calls" | paste -sd, -)" "pr merge 16"
-expect "mac: no line gets the instructions once" \
-  "$(grep -c '^pr comment 14 .*waiting for macOS proof.*no Mac-Check: line\. Push, run `gh workflow run ci.yml -R qbtrix/creative-apps --ref feat/x`' "$sw/calls")" 1
-expect "mac: an older head is named" "$(grep -c '^pr comment 15 .*its run is on old, not the head h15' "$sw/calls")" 1
-expect "mac: an unreadable run is refused" "$(grep -c '^pr comment 17 .*its run could not be read' "$sw/calls")" 1
+jq --arg u "https://github.com/qbtrix/creative-apps/actions/runs/20" '.headSha = "h20" | .url = $u | '"$FAILED_MAC" <<<"$GREEN_RUN" >"$sw/run.20.json"
+echo '[{"databaseId": "20", "url": "https://github.com/qbtrix/creative-apps/actions/runs/20"}]' >"$sw/runs.h20.json"
+touch "$sw/runlist.fail.h22"
+lane_sweep() { ( FAST_LANE_RUN_LOOKUP_RETRIES=0 main ) >/dev/null 2>&1 || { echo "FAIL sweep: main exited non-zero"; fail=1; }; }
+lane_sweep
+expect "mac: merges the supervisor-proved and the ungated PR, not the one waiting on its run" \
+  "$(grep -oE '^pr merge [0-9]+' "$sw/calls" | paste -sd, -)" "pr merge 16,pr merge 18"
+expect "mac: dispatches CI on the gated PR's branch once, re-sweep included" \
+  "$(grep -c '^workflow run ci.yml -R qbtrix/creative-apps --ref b14$' "$sw/calls")" 1
+expect "mac: comments the dispatched run's URL once" \
+  "$(grep -c '^pr comment 14 .*The lane dispatched CI on b14: https://github.com/qbtrix/creative-apps/actions/runs/914\.' "$sw/calls")" 1
+expect "mac: no dispatch for a supervisor's Mac-Check run" "$(grep -c -- '--ref b16' "$sw/calls")" 0
+expect "mac: a failed macOS run is refused with what to do, no new dispatch" \
+  "$(grep -c '^pr comment 20 .*failed: https://github.com/qbtrix/creative-apps/actions/runs/20 (its macOS job is failure)\. Fix it and push' "$sw/calls")" 1
+expect "mac: a failed run never re-dispatches" "$(grep -c -- '--ref b20' "$sw/calls")" 0
+expect "mac: an unreadable run list writes nothing for the PR" "$(grep -cE '^pr [a-z]+ 22 |--ref b22' "$sw/calls")" 0
 expect "mac: refused PRs keep the fast-lane label" "$(grep -c -- '--remove-label fast-lane' "$sw/calls")" 0
+lane_sweep
+expect "mac: a later sweep while the run is going dispatches nothing more" \
+  "$(grep -c -- '--ref b14$' "$sw/calls")" 1
+expect "mac: and comments nothing more" "$(grep -c '^pr comment 14 ' "$sw/calls")" 1
+expect "mac: and doesn't merge it" "$(grep -c '^pr merge 14' "$sw/calls")" 0
+jq '.status = "completed" | .conclusion = "success" | .jobs[].status = "completed" | .jobs[].conclusion = "success"' \
+  "$sw/run.914.json" >"$sw/x" && mv "$sw/x" "$sw/run.914.json"
+lane_sweep
+expect "mac: once that run is green on the head, a later sweep merges it" "$(grep -c '^pr merge 14' "$sw/calls")" 1
+expect "mac: the merge comment names the run" \
+  "$(grep -c '^pr comment 14 .*merged into dev.*macOS run https://github.com/qbtrix/creative-apps/actions/runs/914' "$sw/calls")" 1
+expect "mac: still one dispatch for its head" "$(grep -c -- '--ref b14$' "$sw/calls")" 1
 exit "$fail"
