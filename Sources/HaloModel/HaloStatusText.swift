@@ -38,4 +38,10 @@ extension HaloComposition {
 
     /// The viewer status bar's tooltip over its zoom and size pills.
     public static let viewerPillsHelp = "Viewer zoom, then the composition size in pixels."
+
+    /// The inspector Size row's tooltip: what the size counts.
+    public static let sizeHelp = "Width × height in pixels."
+
+    /// The unit the New Composition sheet shows after its Width and Height fields.
+    public static let sizeUnit = "px"
 }

@@ -3,7 +3,8 @@
 // selected it hosts HaloLayerInspector (the layer's header and slots);
 // otherwise it shows an InspectorHeader (name, size, rate and length) and a
 // Composition section of read-only rows, their values in
-// SuiteFont.inspectorValue (semibold, tabular digits). Either way the layer list follows
+// SuiteFont.inspectorValue (semibold, tabular digits); the Size row's
+// tooltip says it is in pixels (HaloComposition.sizeHelp). Either way the layer list follows
 // under a Layers section. All text comes from HaloModel; views only read it.
 // The read-only values carry `halo.inspector.composition.*` identifiers so a
 // journey reads them; they aren't controls, so they stay out of halo.controls.
@@ -31,6 +32,7 @@ struct HaloCompositionInspector: View {
                         Text(comp.sizeText).font(SuiteFont.inspectorValue)
                             .accessibilityIdentifier("halo.inspector.composition.size")
                     }
+                    .help(HaloComposition.sizeHelp)
                     InspectorRow("Frame Rate") {
                         Text(comp.frameRateText).font(SuiteFont.inspectorValue)
                             .accessibilityIdentifier("halo.inspector.composition.frameRate")
