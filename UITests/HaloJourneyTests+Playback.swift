@@ -6,7 +6,11 @@
 // Space; 1 s; Space; ← twice; Animation > Go to End; click Loop; Animation >
 // Go to Start; Space; 4 s. `halo.transport.play` reads the Model's playLabel
 // ("Playing" or "Paused") and `halo.transport.loop` its loopLabel, which
-// starts "On" (HaloPlaybackState's `loops` defaults to true). The paused
+// starts "On" (HaloPlaybackState's `loops` defaults to true), each read as
+// `value as? String`; their labels are fixed, so a value XCUITest reads empty
+// (#262) falls back to the playhead moving or holding (expectPlay). The window
+// is 1000 by 640, as every Halo journey but the layout one uses, so it fits
+// CI's 1024 by 768 display. The paused
 // frame f is read from the artboard's value ("Frame f: …") and must lie in
 // 2…71, so two steps back never meet the clamp; the status timecode (matched
 // by prefix) then reads f − 2. With Loop off a play from 0 runs 3 s and stops
@@ -28,16 +32,16 @@ final class HaloPlaybackJourneyTests: XCTestCase {
         XCTAssert(
             halo.element("halo.transport.play").waitForExistence(timeout: 10),
             "no Play button (halo.transport.play) in the status bar")
-        expectValue("Paused", of: "halo.transport.play", halo)
-        expectValue("On", of: "halo.transport.loop", halo)
+        expectPlay(false, halo)
+        expectLoop("On", halo)
         focusTimeline(halo)
 
         // 1. Space plays; 1 s later Space pauses.
         halo.press(.space)
-        expectValue("Playing", of: "halo.transport.play", halo)
+        expectPlay(true, halo)
         Thread.sleep(forTimeInterval: 1)
         halo.press(.space)
-        expectValue("Paused", of: "halo.transport.play", halo)
+        expectPlay(false, halo)
         guard let paused = artboardFrame(halo) else {
             return XCTFail("the artboard names no frame: \(String(describing: halo.element("halo.viewer").value))")
         }
@@ -50,7 +54,7 @@ final class HaloPlaybackJourneyTests: XCTestCase {
         halo.press(.leftArrow)
         halo.press(.leftArrow)
         expectTimecode(Self.timecode(paused - 2), halo)
-        expectValue("Paused", of: "halo.transport.play", halo)
+        expectPlay(false, halo)
         halo.shot("playback-stepped-back")
 
         // 3. Animation > Go to End: the last frame.
@@ -62,7 +66,7 @@ final class HaloPlaybackJourneyTests: XCTestCase {
         let loop = halo.element("halo.transport.loop")
         XCTAssert(loop.waitForExistence(timeout: 5), "no Loop button (halo.transport.loop)")
         loop.click()
-        expectValue("Off", of: "halo.transport.loop", halo)
+        expectLoop("Off", halo)
         halo.shot("playback-loop-off")
 
         // 5. Animation > Go to Start, then Space: one pass, stopped on the last frame.
@@ -70,14 +74,14 @@ final class HaloPlaybackJourneyTests: XCTestCase {
         expectTimecode("00:00:00:00", halo)
         focusTimeline(halo)
         halo.press(.space)
-        expectValue("Playing", of: "halo.transport.play", halo)
+        expectPlay(true, halo)
         // Shot here, not in the 1 s pass: a shot's audit takes time, and a
         // looping pass could wrap past the last frame before the pause.
         halo.shot("playback-playing")
         Thread.sleep(forTimeInterval: 4)
         expectTimecode("00:00:02:23", halo)
-        expectValue("Paused", of: "halo.transport.play", halo)
-        expectValue("Off", of: "halo.transport.loop", halo)
+        expectPlay(false, halo)
+        expectLoop("Off", halo)
         halo.shot("playback-stopped")
     }
 
@@ -105,13 +109,54 @@ final class HaloPlaybackJourneyTests: XCTestCase {
         return Int(value.dropFirst("Frame ".count).prefix { $0.isNumber })
     }
 
-    /// The element `identifier`'s accessibility value is `value`, within five seconds.
-    @MainActor private func expectValue(_ value: String, of identifier: String, _ halo: Journey) {
-        let match = halo.app.descendants(matching: .any).matching(
-            NSPredicate(format: "identifier == %@ AND value == %@", identifier, value)).firstMatch
-        XCTAssert(
-            match.waitForExistence(timeout: 5),
-            "\(identifier) reads \(String(describing: halo.element(identifier).value)), not \(value)")
+    /// `halo.transport.play` reads "Playing" (or "Paused"), read as
+    /// `value as? String`. Its label is the fixed "Play/Pause", so when
+    /// XCUITest reads the value empty (#262) for 0.6 s the playhead stands in:
+    /// the artboard's frame moves over 0.3 s while playing and holds while
+    /// paused. A value that reads the other state still fails after 5 s.
+    @MainActor private func expectPlay(_ playing: Bool, _ halo: Journey) {
+        let want = playing ? "Playing" : "Paused"
+        let button = halo.element("halo.transport.play")
+        XCTAssert(button.waitForExistence(timeout: 5), "no Play button (halo.transport.play)")
+        guard case .empty = poll(want, of: button) else { return }
+        let before = artboardFrame(halo)
+        Thread.sleep(forTimeInterval: 0.3)
+        let after = artboardFrame(halo)
+        XCTAssertNotNil(before, "halo.transport.play's value reads empty and the artboard names no frame")
+        XCTAssertEqual(
+            before != after, playing,
+            "halo.transport.play's value reads empty and the playhead went \(String(describing: before)) → "
+                + "\(String(describing: after)), which isn't \(want)")
+    }
+
+    /// `halo.transport.loop` reads `want` ("On" or "Off"), read as `value as?
+    /// String`. Its label is the fixed "Loop", so a value XCUITest reads empty
+    /// (#262) is noted, and the play-once stop on 00:00:02:23 at the end of the
+    /// journey proves Off. A value that reads the other state fails after 5 s.
+    @MainActor private func expectLoop(_ want: String, _ halo: Journey) {
+        let button = halo.element("halo.transport.loop")
+        XCTAssert(button.waitForExistence(timeout: 5), "no Loop button (halo.transport.loop)")
+        if case .empty = poll(want, of: button) {
+            XCTContext.runActivity(named: "halo.transport.loop's value reads empty; the playback stop proves Loop") { _ in }
+        }
+    }
+
+    /// How a control's value compared with what a step wanted.
+    private enum Reading { case matched, empty, mismatched }
+
+    /// Polls `element`'s value for `want`: matched as soon as it reads it,
+    /// empty once it has read nothing for 0.6 s, and a failed assert after
+    /// 5 s of reading something else.
+    @MainActor private func poll(_ want: String, of element: XCUIElement) -> Reading {
+        for attempt in 0..<25 {
+            let read = (element.value as? String) ?? ""
+            if read == want { return .matched }
+            if read.isEmpty, attempt >= 3 { return .empty }
+            Thread.sleep(forTimeInterval: 0.2)
+        }
+        let read = (element.value as? String) ?? ""
+        XCTFail("\(element.identifier) reads \(read), not \(want)")
+        return .mismatched
     }
 
     /// The status row's timecode pill (statusTimecode: the playhead's
