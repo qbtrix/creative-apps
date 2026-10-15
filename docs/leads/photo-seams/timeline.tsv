@@ -46,3 +46,5 @@ utc	stage	event	ref	note
 2026-10-15T04:51Z	3	pr-merged	#978	S-8a
 2026-10-15T04:51Z	3	pr-opened	#985	S-8b file and export areas, 235 lines 3 files
 2026-10-15T04:51Z	3	stage-start	S-9	builder stacked on S-8b
+2026-10-15T04:51Z	3	pr-merged	#979	S-13a
+2026-10-15T04:51Z	3	pr-merged	#985	S-8b

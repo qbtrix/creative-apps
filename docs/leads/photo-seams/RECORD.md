@@ -25,14 +25,14 @@ packet chains every task on the one before it (shared files or new types).
 | S-7c | 9 | paintTarget, selectionCoverage weighting | M/PhotoStroke, PhotoRetouch, PhotoSelection, PhotoSelectionMask | PhotoPaintTargetTests | #972 | merged |
 | S-7b | 10 | PhotoLayerComposite hook; geometry hook calls | M/PhotoRender, PhotoLayerComposite, PhotoImageOps, PhotoStraighten | PhotoLayerCompositeTests | #974 | merged |
 | S-8a | 11 | PhotoIntent sub-enums, nine area files | A/PhotoIntent, PhotoWindow, PhotoWindow+*.swift | app-state rule; V1–V12 | #978 | merged |
-| S-8b | 12 | open/save/export into area files; fileServices | A/PhotoWindow{,+File,+Export}.swift | V2, V5, V6 | #985 | open |
+| S-8b | 12 | open/save/export into area files; fileServices | A/PhotoWindow{,+File,+Export}.swift | V2, V5, V6 | #985 | merged |
 | S-9 | 13 | menu bar split per menu | A/PhotoCommands{,+File,+Edit,+Select,+Image,+Layer,+View}.swift | V4; PhotoSelectAllMenuTests | – | todo |
 | S-10a | 14 | top bar, status line, PhotoRailTool | A/PhotoEditor, PhotoTopBar, PhotoStatusLine, PhotoRailTool; ST/PhotoEditorSnapshots | photo-status-message-dark.png | – | todo |
 | S-10b | 15 | overlays, hover, Return/Escape, StrokePacer modifiers | A/PhotoEditor, PhotoWindow, *Overlay.swift, StrokePacer; ST/PhotoStrokePacerTests | PhotoStrokePacerTests; V7, V9 | – | todo |
 | S-11a | 16 | panel split 1: Adjust tab, tool options | A/PhotoPanel, PhotoAdjustTab, PhotoToolOptions, *Options.swift | snapshots unchanged | – | todo |
 | S-11b | 17 | panel split 2: Layers tab, History stub | A/PhotoPanel, PhotoLayersTab, PhotoHistoryTab | PhotoLayerRowSnapshots | – | todo |
 | S-12 | 18 | -PhotoFixture, -PhotoWindowWidth, Preview data pill | M/PhotoFixtures, A/PhotoApp, PhotoWindow, PhotoStatusLine | PhotoLaunchOptionsTests; photo-preview-pill-dark.png | – | todo |
-| S-13a | 11 | PB-2 clone/heal and PB-9 move budgets (model half) | MT/PhotoBudgetTests | PhotoBudgetTests | #979 | open |
+| S-13a | 11 | PB-2 clone/heal and PB-9 move budgets (model half) | MT/PhotoBudgetTests | PhotoBudgetTests | #979 | merged |
 | S-13b | 19 | PB-2 event-to-picture latency series (feature-done) | ST/PhotoBrushLatencyTests | PhotoBrushLatencyTests | – | todo |
 
 ## Rounds
