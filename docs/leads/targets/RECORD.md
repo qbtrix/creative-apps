@@ -4,7 +4,7 @@ Issue: #873 · Packet: docs/blueprints/suite/features/targets.md
 Run: act-1a13f70dda7-kche · Session: claude/feature-lead-targets-w8ietz · Started: 2026-10-15T12:10Z
 Stage: 4 round 1
 Base: 8fce5e2 (dev with BU-1b #1263)
-Next: read dev CI run 38823367271 (head f3b8987: #1143+#1133, not #1263) for the macOS build of SuiteShell/AfterGlowApp; then find the run whose head contains 8fce5e2 (#1263) and judge round 1 on it.
+Next: judge round 1 on dev CI run 38823898596 (#787, head 8fce5e2, the feature-done run; queued behind 785). Then audit, screens and the critic panel.
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -32,6 +32,7 @@ Next: read dev CI run 38823367271 (head f3b8987: #1143+#1133, not #1263) for the
 - BU-S needs a Mac: not run by this lead (packet).
 
 ## Open
+- Run 785 (f3b8987, has #1143+#1133): macOS scripts/ci, bundle-apps and Size report passed. Linux failed only on PhotoEditBudgetTests.editBudgets (copy/paste p50 7.2 s vs merge 3.8 s): Photo line, a timing budget, not this feature's files; belongs to the dev-red issue.
 - 2026-10-15T19:41Z: lead hit its 8 h budget waiting ~7 h on the supervisor to merge #1143 (BU-1a) and #1133 (BU-0); both merge clean on dev 6018826. BU-1b is ready on lead/targets-bu-1b (f789ca0, one commit over BU-1a 38e2c99).
 - BU-1b: shared-assets must handle ⌘X/C/V/A in text fields (the stub replaces .pasteboard with disabled items); fine today, no text fields.
 - Branches are lead/targets-<task>: git can't hold lead/targets/<task> next to lead/targets.
