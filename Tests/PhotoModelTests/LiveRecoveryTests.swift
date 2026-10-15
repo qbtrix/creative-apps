@@ -124,6 +124,17 @@ import Testing
         }
     }
 
+    @Test func aMissingFolderGivesAnEmptyList() throws {
+        try inTemporaryFolder { root in
+            let folder = root.appendingPathComponent("Recovery", isDirectory: true)
+            let store = LiveRecovery(directory: folder)
+            #expect(try store.leftBehind().isEmpty)
+            try store.discardAll()
+            try store.discard(window: "w")
+            #expect(!FileManager.default.fileExists(atPath: folder.path))
+        }
+    }
+
     @Test func theDefaultFolderIsApplicationSupportPhotoRecovery() {
         let path = LiveRecovery.defaultDirectory.path
         #expect(path.hasSuffix("Photo/Recovery"))
