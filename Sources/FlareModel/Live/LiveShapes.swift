@@ -15,7 +15,7 @@ public struct LiveShapes: Sendable {
     /// How near two pen anchors are the same anchor, and the smallest pen extent that commits, in stage points.
     static let anchorTolerance = 1.0
     /// What `commit` throws for a pen path whose extent is under `anchorTolerance`.
-    static let degeneratePath = "A path needs two points at least a point apart."
+    static let degeneratePath = "Click at least two separate places to draw a path."
 
     /// Every tool draws; the workspace's `toolHelp` covers "no document".
     public func unavailableHelp(for tool: FlareTool) -> String? { nil }

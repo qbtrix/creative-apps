@@ -48,7 +48,7 @@ public struct FakeShapes: ShapeBuilding {
         return tolerance.isFinite ? tolerance : .infinity
     }
     /// What `commit` throws for a pen path whose extent is under `anchorTolerance`.
-    public static let degeneratePath = "A path needs two points at least a point apart."
+    public static let degeneratePath = "Click at least two separate places to draw a path."
 
     private func available() throws { if let unavailable { throw NotBuilt(reason: unavailable) } }
     public func unavailableHelp(for tool: FlareTool) -> String? { unavailable }
