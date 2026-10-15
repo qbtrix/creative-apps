@@ -51,3 +51,4 @@ utc	stage	event	ref	note
 2026-10-15T16:52Z	4	round-findings	round4	journeys ran: 4 Library failures; final fix batch
 2026-10-15T17:01Z	5	pr-merged	#1208	round-4 fixes merged (feature-done)
 2026-10-15T17:15Z	5	stopped	#1044	4 rounds spent; final status on #1044; gaps #1214 #1215
+2026-10-15T17:46Z	5	stage-start	resume	relaunched; dev red on Photo compile (LiveRecovery.swift:94); waiting

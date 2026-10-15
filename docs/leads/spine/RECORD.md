@@ -2,9 +2,9 @@
 
 Issue: #1044 · Packet: docs/blueprints/library/features/spine.md
 Run: act-1a13f18aaa0-lfw5 · Session: session_01DtSRhNqsphGfKkvV5eLsWW · Started: 2026-10-15T10:25Z
-Stage: done (finished without contact sheet: dev CI red in other lines)
+Stage: 5 finish (resumed: waiting for a dev run that executes the journeys)
 Base: 111c44093b7959930d078ce21656fa174613a1b0
-Next: nothing; if relaunched, check for a green dev run containing 43c26c3 and, if green, post Belt-Contact-Sheet on #1044
+Next: wait for a dev CI run containing 43c26c3 where the macOS job reaches the journeys; green -> Belt-Contact-Sheet on #1044; Library journey failure -> gap issue (round budget spent)
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -84,3 +84,4 @@ Taken from the packet's Build waves; checked against dev bcf5a09.
 - Run 38737961079 (79bd068, has SA-3/SA-4): Library compiles, no Library snapshot/test failures; red only on Halo tests (HaloPlaybackDriverTests, HaloViewerFidelityTests); UI journeys did not execute in that job, so Library journeys are unproven until the Halo red clears.
 - needs-ui #1183 (ThumbnailGrid help + reject badge), #1184 (ViewerStatusBar band, optional zoom) from round 2.
 - gap #1214 (contract/packet texts), #1215 (status bar zoom, Show Inspector shortcut, confirm journeys after #1208).
+- Resume 17:5xZ: dev runs 38774988270, 38776323445, 38777072611 fail to compile Sources/PhotoModel/Live/LiveRecovery.swift:94 (Photo line, ObjCBool); Library not reached.
