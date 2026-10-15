@@ -2,10 +2,11 @@
 // display frame. While drawing, AppKit's mouse coalescing is off, so samples
 // arrive faster than the screen refreshes (a tablet sends 200 or more a
 // second), and each workspace write re-runs the window's views and moves the
-// revision. The pacer keeps each sample with the pen pressure and Option key it arrived with,
-// and a display link on the key window's screen applies everything that
-// arrived during a frame as one `drags` call. `flush()` applies what is
-// waiting now; the window calls it before every other intent, so nothing
+// revision. The pacer keeps each sample with the pen pressure and the
+// modifier keys (DragModifiers) it arrived with, never merged across
+// samples, and a display link on the key window's screen applies everything
+// that arrived during a frame as one `drags` call, each sample with its own
+// keys. `flush()` applies what is waiting now; the window calls it before every other intent, so nothing
 // lands out of order, and `stop()` flushes and drops the link at the drag's
 // end. Without a screen there is no display link, and each sample applies at
 // once. Presentation state only.
@@ -14,7 +15,7 @@ import CoreRaster
 import PhotoModel
 
 @MainActor final class StrokePacer: NSObject {
-    typealias Move = (from: Mask.Point, to: Mask.Point, pressure: Double, sampling: Bool)
+    typealias Move = (from: Mask.Point, to: Mask.Point, pressure: Double, modifiers: DragModifiers)
     private var waiting: [Move] = []
     private var apply: ([Move]) -> Void = { _ in }
     private var link: CADisplayLink?
@@ -47,4 +48,13 @@ import PhotoModel
     }
 
     @objc private func frame(_ link: CADisplayLink) { flush() }
+}
+
+extension DragModifiers {
+    /// The keys among `flags` a canvas drag reads: Shift and Option.
+    init(flags: NSEvent.ModifierFlags) {
+        self.init()
+        if flags.contains(.shift) { insert(.shift) }
+        if flags.contains(.option) { insert(.option) }
+    }
 }
