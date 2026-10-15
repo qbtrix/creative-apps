@@ -27,4 +27,15 @@ extension HaloComposition {
     /// The viewer status bar's trailing text: the playhead's timecode
     /// (HaloTimeline), then the length and rate ("00:00:00:00 / 10 s at 30 fps").
     public var statusTimecode: String { "\(playheadTimecode) / \(durationText) at \(frameRateText)" }
+
+    /// The timecode pill's tooltip: what its four parts count and the frame
+    /// the playhead is on ("Hours:minutes:seconds:frames at the playhead
+    /// (frame 45 of 0–299), then the length and frame rate.").
+    public var statusTimecodeHelp: String {
+        "Hours:minutes:seconds:frames at the playhead (frame \(playheadFrame) of 0–\(lastFrame)), "
+            + "then the length and frame rate."
+    }
+
+    /// The viewer status bar's tooltip over its zoom and size pills.
+    public static let viewerPillsHelp = "Viewer zoom, then the composition size in pixels."
 }

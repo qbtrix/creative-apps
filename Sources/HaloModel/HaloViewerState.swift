@@ -1,9 +1,11 @@
 // HaloViewerState.swift: what the viewer and the selected layer's header
 // show, as Model values: the draw list at the playhead (with a viewer drag's
 // preview offset), the artboard's text value ("Frame 30: Background, Badge,
-// Title: Hello Halo") and the layer header (name, kind, frames, parent).
+// Title: Hello Halo"), the layer header (name, kind, frames, parent) and the
+// notice the viewer captions while it can't draw the layers it has.
 // Linux-safe: no UI imports. Drawing never fails; on `.live` the W0 stub draws
-// nothing and the summary still lists the layers.
+// nothing, the summary still lists the layers and `viewerNotice` says why the
+// artboard is blank.
 
 /// The selected layer's header in the inspector.
 public struct HaloLayerHeader: Sendable, Hashable {
@@ -42,6 +44,15 @@ extension HaloProject {
             .filter { $0.kind != .null && $0.isVisible(at: frame) }
             .map { $0.kind == .text ? "\($0.name): \($0.text?.string ?? "Text")" : $0.name }
         return "Frame \(frame): " + (names.isEmpty ? "no layers" : names.joined(separator: ", "))
+    }
+
+    /// The viewer's caption over the artboard: why it is blank while the
+    /// selected composition has layers and frame drawing isn't available yet;
+    /// nil when it draws, or when there is nothing to draw.
+    public var viewerNotice: String? {
+        guard let comp = selectedComposition, !comp.layers.isEmpty, services.drawing.unavailableHelp != nil
+        else { return nil }
+        return "Layers aren't drawn in the viewer yet."
     }
 
     /// The selected layer's header; nil with no layer selected.
