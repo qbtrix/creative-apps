@@ -131,7 +131,7 @@
               {
                 "id": "photo-app-sources",
                 "name": "PhotoApp sources",
-                "description": "The Photo app (raster editing): the SwiftUI App scene and views in Sources/PhotoApp, built from SuiteUI's EditorShell: the window and its intents, the top bar, tool rail and canvas, the Adjust | Layers panel (tool options, adjustment sections with the Levels gamma ScrubField and the Curves tone curve over its histogram, the layer list), the export, image size and straighten sheets (the straighten preview turns the canvas picture on the GPU under a grid), the File, Edit, Select, Image, Layer and View menus, the coalescing canvas renderer, the stroke pacer that applies a display frame's drag samples at once, the pen pressure and the Option key read from AppKit for canvas drags, and the ImageIO codec behind PhotoModel's PhotoImageCodec.",
+                "description": "The Photo app (raster editing): the SwiftUI App scene and views in Sources/PhotoApp, built from SuiteUI's EditorShell: the window and its intents, the top bar, tool rail and canvas, the Adjust | Layers panel (tool options, adjustment sections with the Levels gamma ScrubField and the Curves tone curve over its histogram, the layer list), the export, image size and straighten sheets (the straighten preview turns the canvas picture on the GPU under a grid), the File, Edit (Undo, Redo, and Cut, Copy and Paste on the image unless a text field has focus or a sheet is up), Select, Image, Layer and View menus, the general pasteboard read and written as PNG and TIFF (PhotoPasteboard) and watched for the Edit menu, the coalescing canvas renderer, the stroke pacer that applies a display frame's drag samples at once, the pen pressure and the Option key read from AppKit for canvas drags, and the ImageIO codec behind PhotoModel's PhotoImageCodec.",
                 "technology": "Swift 6, SwiftUI, macOS 26",
                 "paths": [
                   "Sources/PhotoApp/"
@@ -151,7 +151,7 @@
               {
                 "id": "photo-model-sources",
                 "name": "PhotoModel sources",
-                "description": "Linux-safe state and logic behind Photo's window: PhotoWorkspace (the open image's size and name, the layer stack with each layer's offset and its pixels as copy-on-write CoreRaster tiles (TiledPixels), so an edit copies only the tiles it touches, the selected layer, tool, and the brush's and eraser's own tool options with the brush cursor diameter, the marquee selection and pending crop), the tools' drags (brush and eraser dabs, marquee, crop, move, and the Clone and Heal tools' Option-click to sample and drag to clone or heal), the clone stamp (a sampled source and a stroke that copies from it at a fixed offset onto the selected layer, and heal, the same stroke with each dab shifted to the tone where it lands), selection edits and crop, Image Size, Rotate and Straighten (worked out off the main actor, committed unless the image changed), the undo history (the tiles an edit changed, layer lists and whole stacks, read as a list of named steps from \"New Image\" or \"Open\" with a jump to any step), the tile-parallel renderer with damage tracking (a full frame as the reference, or the live canvas's update: only the damaged tiles, premultiplied) and the adjustments it applies (exposure, levels, curves, hue/saturation, blur) with the curve editor's samples and histogram, opening and exporting through the PhotoImageCodec protocol, the adjustment settings and logarithmic gamma track (with the Gamma field's commit, a no-op for the value it shows), what the inspector shows (with the panel header lines and the viewer status size text), and when each Layer menu item can run (with Bring Forward and Send Backward, one place up or down the stack, and Select Layer Above and Below).",
+                "description": "Linux-safe state and logic behind Photo's window: PhotoWorkspace (the open image's size and name, the layer stack with each layer's offset and its pixels as copy-on-write CoreRaster tiles (TiledPixels), so an edit copies only the tiles it touches, the selected layer, tool, and the brush's and eraser's own tool options with the brush cursor diameter, the marquee selection and pending crop), the tools' drags (brush and eraser dabs, marquee, crop, move, and the Clone and Heal tools' Option-click to sample and drag to clone or heal), the clone stamp (a sampled source and a stroke that copies from it at a fixed offset onto the selected layer, and heal, the same stroke with each dab shifted to the tone where it lands), selection edits and crop, Image Size, Rotate and Straighten (worked out off the main actor, committed unless the image changed), the undo history (the tiles an edit changed, layer lists and whole stacks, read as a list of named steps from \"New Image\" or \"Open\" with a jump to any step), the tile-parallel renderer with damage tracking (a full frame as the reference, or the live canvas's update: only the damaged tiles, premultiplied) and the adjustments it applies (exposure, levels, curves, hue/saturation, blur) with the curve editor's samples and histogram, opening and exporting through the PhotoImageCodec protocol, the adjustment settings and logarithmic gamma track (with the Gamma field's commit, a no-op for the value it shows), what the inspector shows (with the panel header lines and the viewer status size text), and when each Layer menu item can run (with Bring Forward and Send Backward, one place up or down the stack, and Select Layer Above and Below), and the live edit services (the clipboard and layer merging, through the renderer's per-layer composite) behind Cut, Copy and Paste of pixels (a pasted layer, or a new image with none open) and Duplicate Layer, Merge Down and Flatten Image, each one named undo step with its reason when it can't run.",
                 "technology": "Swift 6, Foundation",
                 "paths": [
                   "Sources/PhotoModel/"
@@ -240,6 +240,402 @@
                 ]
               }
             ]
+          },
+          {
+            "id": "suite-model",
+            "name": "SuiteModel",
+            "description": "Linux-safe values, contracts, fakes and pure logic shared by every app and the launcher. Foundation only; imports no app Model and no engine.",
+            "technology": "Swift 6, Foundation (FoundationEssentials), Linux and macOS",
+            "tags": [
+              "internal"
+            ],
+            "components": [
+              {
+                "id": "suite-identity",
+                "name": "Identity and type registry",
+                "description": "SuiteApp (the five apps and the launcher), bundle ids under one prefix (SuiteIdentity.prefix), and SuiteTypeRegistry: every document and pasteboard type each app reads and writes and the default app per type. Bundle/Info/*.plist mirror it; a test checks both.",
+                "technology": "Swift 6, Foundation (FoundationEssentials), Linux and macOS",
+                "paths": [
+                  "Sources/SuiteModel/Values/"
+                ]
+              },
+              {
+                "id": "suite-store",
+                "name": "Suite store",
+                "description": "SuiteLocations (the support folder, -SuiteSupportDir override) and FileStore: revisioned JSON files written by atomic replace under an exclusive lock file, merged with the caller's pure merge.",
+                "technology": "Swift 6, Foundation (FoundationEssentials), Linux and macOS",
+                "paths": [
+                  "Sources/SuiteModel/Store/"
+                ]
+              },
+              {
+                "id": "suite-contracts",
+                "name": "Contracts",
+                "description": "One protocol per suite use case (blueprint section 5): switching, recents, new documents, routing, hand-offs, round trip, pasteboard, assets, links, animation import, preferences, settings route, onboarding, updates, thumbnails, home, and SuiteDocumentHost, which each app Model conforms to so it can act on hand-offs.",
+                "technology": "Swift 6, Foundation (FoundationEssentials), Linux and macOS",
+                "paths": [
+                  "Sources/SuiteModel/Contracts/"
+                ]
+              },
+              {
+                "id": "suite-fakes",
+                "name": "Fakes and fixtures",
+                "description": "A fake per contract with an unavailable reason, and SuiteFixtures: the journeys' store contents, written into the live store by the launcher.",
+                "technology": "Swift 6, Foundation (FoundationEssentials), Linux and macOS",
+                "paths": [
+                  "Sources/SuiteModel/Fakes/"
+                ]
+              },
+              {
+                "id": "suite-services",
+                "name": "Services",
+                "description": "SuiteServices: one member per contract, .fake and the slots SuiteShell fills for .live.",
+                "technology": "Swift 6, Foundation (FoundationEssentials), Linux and macOS",
+                "paths": [
+                  "Sources/SuiteModel/SuiteServices.swift"
+                ]
+              },
+              {
+                "id": "suite-recents",
+                "name": "Recents",
+                "description": "RecentsList: merge, dedupe by file identity, cap 200, filter by app, search; the rules for when an app records.",
+                "technology": "Swift 6, Foundation (FoundationEssentials), Linux and macOS",
+                "paths": [
+                  "Sources/SuiteModel/Recents/"
+                ]
+              },
+              {
+                "id": "suite-routing",
+                "name": "Routing",
+                "description": "Which app opens a type, the Open In list for a document, and Finder routing decisions for the launcher.",
+                "technology": "Swift 6, Foundation (FoundationEssentials), Linux and macOS",
+                "paths": [
+                  "Sources/SuiteModel/Routing/"
+                ]
+              },
+              {
+                "id": "suite-handoff",
+                "name": "Hand-offs",
+                "description": "HandOff values (verb, payload, return address), the versioned codec and the lifecycle (pending, accepted, returned, cancelled, expired).",
+                "technology": "Swift 6, Foundation (FoundationEssentials), Linux and macOS",
+                "paths": [
+                  "Sources/SuiteModel/HandOff/"
+                ]
+              },
+              {
+                "id": "suite-switching",
+                "name": "Switching",
+                "description": "Switch requests and receipts, run states, the Switch To menu model.",
+                "technology": "Swift 6, Foundation (FoundationEssentials), Linux and macOS",
+                "paths": [
+                  "Sources/SuiteModel/Switching/"
+                ]
+              },
+              {
+                "id": "suite-home",
+                "name": "Home state",
+                "description": "Home sections (new tiles and presets, recents grid, running apps strip), search and filter, HomeLayout column math, and HomeModel, the home window's observable view-model.",
+                "technology": "Swift 6, Foundation (FoundationEssentials), Linux and macOS",
+                "paths": [
+                  "Sources/SuiteModel/Home/"
+                ]
+              },
+              {
+                "id": "suite-pasteboard",
+                "name": "Pasteboard coding",
+                "description": "SuiteClipItem and its typed representations (suite asset envelope, SVG, PNG, colour, text); best-item choice for a target app.",
+                "technology": "Swift 6, Foundation (FoundationEssentials), Linux and macOS",
+                "paths": [
+                  "Sources/SuiteModel/Pasteboard/"
+                ]
+              },
+              {
+                "id": "suite-roundtrip",
+                "name": "Round trip",
+                "description": "Library to Photo to Library edit sessions and their states.",
+                "technology": "Swift 6, Foundation (FoundationEssentials), Linux and macOS",
+                "paths": [
+                  "Sources/SuiteModel/RoundTrip/"
+                ]
+              },
+              {
+                "id": "suite-assets",
+                "name": "Assets",
+                "description": "SuiteAsset, SuiteSwatch, the asset index: add, update with a new revision, remove, search.",
+                "technology": "Swift 6, Foundation (FoundationEssentials), Linux and macOS",
+                "paths": [
+                  "Sources/SuiteModel/Assets/"
+                ]
+              },
+              {
+                "id": "suite-links",
+                "name": "Links",
+                "description": "AssetLink and its status (current, update available, missing) for placed assets.",
+                "technology": "Swift 6, Foundation (FoundationEssentials), Linux and macOS",
+                "paths": [
+                  "Sources/SuiteModel/Links/"
+                ]
+              },
+              {
+                "id": "suite-animation",
+                "name": "Animation import",
+                "description": "AnimationSummary of a .flare file (size, rate, length, scenes) for Halo's Open In.",
+                "technology": "Swift 6, Foundation (FoundationEssentials), Linux and macOS",
+                "paths": [
+                  "Sources/SuiteModel/Animation/"
+                ]
+              },
+              {
+                "id": "suite-preferences",
+                "name": "Preferences",
+                "description": "SuitePreferences (General and a pane per app), defaults, change records.",
+                "technology": "Swift 6, Foundation (FoundationEssentials), Linux and macOS",
+                "paths": [
+                  "Sources/SuiteModel/Preferences/"
+                ]
+              },
+              {
+                "id": "suite-onboarding",
+                "name": "Onboarding",
+                "description": "Onboarding pages, the person's choices, and when to show them.",
+                "technology": "Swift 6, Foundation (FoundationEssentials), Linux and macOS",
+                "paths": [
+                  "Sources/SuiteModel/Onboarding/"
+                ]
+              },
+              {
+                "id": "suite-update",
+                "name": "Updates",
+                "description": "Update feed parsing, version comparison, the offer and the install plan.",
+                "technology": "Swift 6, Foundation (FoundationEssentials), Linux and macOS",
+                "paths": [
+                  "Sources/SuiteModel/Update/"
+                ]
+              },
+              {
+                "id": "suite-packaging",
+                "name": "Packaging",
+                "description": "BundleLayout (where each executable and framework sits, run paths), SizeReport and SizeBudget with evaluate.",
+                "technology": "Swift 6, Foundation (FoundationEssentials), Linux and macOS",
+                "paths": [
+                  "Sources/SuiteModel/Packaging/"
+                ]
+              }
+            ]
+          },
+          {
+            "id": "suite-shell",
+            "name": "SuiteShell",
+            "description": "macOS glue every app process links: live conformances needing AppKit or Launch Services, shared menu commands, the adoption modifier.",
+            "technology": "Swift 6, SwiftUI and AppKit, macOS 26",
+            "tags": [
+              "internal",
+              "macos-only"
+            ],
+            "components": [
+              {
+                "id": "shell-live",
+                "name": "Live services",
+                "description": "SuiteServices.live and one slot file per member; each feature swaps only its own slot.",
+                "technology": "Swift 6, SwiftUI and AppKit, macOS 26",
+                "paths": [
+                  "Sources/SuiteShell/SuiteServices+Live.swift",
+                  "Sources/SuiteShell/Live/"
+                ]
+              },
+              {
+                "id": "shell-apps",
+                "name": "App launching and Switch To",
+                "description": "Open or activate an embedded app (NSWorkspace.openApplication, NSRunningApplication.activate), run states, the Switch To commands.",
+                "technology": "Swift 6, SwiftUI and AppKit, macOS 26",
+                "paths": [
+                  "Sources/SuiteShell/AppLauncher.swift",
+                  "Sources/SuiteShell/SuiteCommands.swift"
+                ]
+              },
+              {
+                "id": "shell-handoff",
+                "name": "Hand-off transport",
+                "description": "Writes a hand-off file and opens it with the target app; receives one through onOpenURL.",
+                "technology": "Swift 6, SwiftUI and AppKit, macOS 26",
+                "paths": [
+                  "Sources/SuiteShell/HandOffTransport.swift"
+                ]
+              },
+              {
+                "id": "shell-store-watch",
+                "name": "Store watcher",
+                "description": "Posts and observes the org.creativesuite.suite.changed distributed notification.",
+                "technology": "Swift 6, SwiftUI and AppKit, macOS 26",
+                "paths": [
+                  "Sources/SuiteShell/StoreWatcher.swift"
+                ]
+              },
+              {
+                "id": "shell-pasteboard",
+                "name": "Pasteboard and drag bridges",
+                "description": "Maps SuiteClipItem to NSPasteboard items and drag item providers and back.",
+                "technology": "Swift 6, SwiftUI and AppKit, macOS 26",
+                "paths": [
+                  "Sources/SuiteShell/PasteboardBridge.swift",
+                  "Sources/SuiteShell/DragBridge.swift"
+                ]
+              },
+              {
+                "id": "shell-documents",
+                "name": "Documents bridge",
+                "description": "Records opens and saves in recents, writes thumbnails, builds the Open In submenu.",
+                "technology": "Swift 6, SwiftUI and AppKit, macOS 26",
+                "paths": [
+                  "Sources/SuiteShell/SuiteDocumentsBridge.swift",
+                  "Sources/SuiteShell/ThumbnailWriter.swift",
+                  "Sources/SuiteShell/OpenInMenu.swift"
+                ]
+              },
+              {
+                "id": "shell-adoption",
+                "name": "Adoption modifier",
+                "description": "The .suiteApp(_:host:) modifier each app adds to its scene, SuiteAppDelegate (receives hand-off files through application(_:open:) and passes them to the app's SuiteDocumentHost), and the settings route to the launcher.",
+                "technology": "Swift 6, SwiftUI and AppKit, macOS 26",
+                "paths": [
+                  "Sources/SuiteShell/SuiteAppModifier.swift",
+                  "Sources/SuiteShell/SuiteAppDelegate.swift",
+                  "Sources/SuiteShell/SettingsRoute.swift"
+                ]
+              }
+            ]
+          },
+          {
+            "id": "afterglow-app",
+            "name": "AfterGlowApp",
+            "description": "The launcher executable inside AfterGlow.app: home, assets page, settings, onboarding, updater, file router.",
+            "technology": "Swift 6, SwiftUI and AppKit, macOS 26",
+            "tags": [
+              "internal",
+              "macos-only"
+            ],
+            "components": [
+              {
+                "id": "launcher-scene",
+                "name": "Launcher scene and router",
+                "description": "@main AfterGlowApp: the home Window, the Settings scene, the onboarding window, and the router that forwards opened documents to the embedded app. Hand-off verbs the launcher acts on (open settings, routed files) are LauncherRouter+<Area>.swift extensions, one per feature.",
+                "technology": "Swift 6, SwiftUI and AppKit, macOS 26",
+                "paths": [
+                  "Sources/AfterGlowApp/AfterGlowApp.swift",
+                  "Sources/AfterGlowApp/LauncherRouter.swift",
+                  "Sources/AfterGlowApp/LauncherCommands*.swift",
+                  "Sources/AfterGlowApp/LauncherRouter+*.swift"
+                ]
+              },
+              {
+                "id": "home",
+                "name": "Home window",
+                "description": "New tiles and presets, recents grid with search and app filter, running apps strip.",
+                "technology": "Swift 6, SwiftUI and AppKit, macOS 26",
+                "paths": [
+                  "Sources/AfterGlowApp/Home*.swift"
+                ]
+              },
+              {
+                "id": "assets-page",
+                "name": "Assets page",
+                "description": "The shared asset and colour library in the home sidebar.",
+                "technology": "Swift 6, SwiftUI and AppKit, macOS 26",
+                "paths": [
+                  "Sources/AfterGlowApp/Assets*.swift"
+                ]
+              },
+              {
+                "id": "settings",
+                "name": "Settings",
+                "description": "One Settings window: General and one pane per app.",
+                "technology": "Swift 6, SwiftUI and AppKit, macOS 26",
+                "paths": [
+                  "Sources/AfterGlowApp/Settings*.swift"
+                ]
+              },
+              {
+                "id": "onboarding",
+                "name": "Onboarding",
+                "description": "Three first-launch pages.",
+                "technology": "Swift 6, SwiftUI and AppKit, macOS 26",
+                "paths": [
+                  "Sources/AfterGlowApp/Onboarding*.swift"
+                ]
+              },
+              {
+                "id": "updater",
+                "name": "Updater",
+                "description": "Check, offer sheet, progress, install and relaunch.",
+                "technology": "Swift 6, SwiftUI and AppKit, macOS 26",
+                "paths": [
+                  "Sources/AfterGlowApp/Update*.swift"
+                ]
+              }
+            ]
+          },
+          {
+            "id": "afterglow-bundle",
+            "name": "AfterGlow bundle",
+            "description": "The packaged artifact's inputs: Info.plists with document and exported types, icons, the engine re-export file, the release graph in project.yml, scripts/bundle-apps and scripts/size-report (protected: supervisor merges).",
+            "technology": "plist, XcodeGen, bash",
+            "tags": [
+              "internal",
+              "macos-only"
+            ],
+            "components": [
+              {
+                "id": "bundle-inputs",
+                "name": "Bundle inputs",
+                "description": "Info.plists per bundle, icons, entitlements, and Bundle/Engines/CreativeEngines.swift (re-exports FlareCore, CoreRaster, CoreColor for the one shared engine framework).",
+                "technology": "plist, Swift",
+                "paths": [
+                  "Bundle/"
+                ]
+              }
+            ]
+          },
+          {
+            "id": "suite-model-tests",
+            "name": "SuiteModelTests",
+            "description": "Model tests, contract conformance suites, model budgets, BuildGraphTests (Package.swift vs project.yml) and the registry-vs-plist check.",
+            "technology": "Swift 6, Foundation (FoundationEssentials), Linux and macOS",
+            "tags": [
+              "internal",
+              "test"
+            ],
+            "components": [
+              {
+                "id": "suite-model-tests-sources",
+                "name": "SuiteModelTests sources",
+                "description": "as the container",
+                "technology": "Swift 6, Foundation (FoundationEssentials), Linux and macOS",
+                "paths": [
+                  "Tests/SuiteModelTests/"
+                ]
+              }
+            ]
+          },
+          {
+            "id": "afterglow-journeys",
+            "name": "AfterGlow journeys",
+            "description": "XCUITest bundle AfterGlowJourneyTests: drives the launcher and the apps through it; every shot audited.",
+            "technology": "Swift 6, XCTest, macOS 26",
+            "tags": [
+              "internal",
+              "test"
+            ],
+            "components": [
+              {
+                "id": "afterglow-journeys-sources",
+                "name": "AfterGlow journey files",
+                "description": "as the container",
+                "technology": "Swift 6, XCTest, macOS 26",
+                "paths": [
+                  "UITests/AfterGlowJourneyTests*.swift"
+                ]
+              }
+            ]
           }
         ]
       },
@@ -298,9 +694,27 @@
         "style": "sync"
       },
       {
+        "source": "flare-app",
+        "target": "suite-shell",
+        "description": "adds .suiteApp(_:) and the shared menus; records recents",
+        "style": "sync"
+      },
+      {
+        "source": "flare-app",
+        "target": "afterglow-app",
+        "description": "receives hand-offs and routed documents; sends settings and switch requests (hand-off files, distributed notifications)",
+        "style": "async"
+      },
+      {
         "source": "flare-model",
         "target": "flarecore",
         "description": "uses FlareCore from creative-core",
+        "style": "sync"
+      },
+      {
+        "source": "flare-model",
+        "target": "suite-model",
+        "description": "declares document kinds and pasteboard representations; reads preferences",
         "style": "sync"
       },
       {
@@ -316,9 +730,27 @@
         "style": "sync"
       },
       {
+        "source": "design-app",
+        "target": "suite-shell",
+        "description": "adds .suiteApp(_:) and the shared menus; records recents",
+        "style": "sync"
+      },
+      {
+        "source": "design-app",
+        "target": "afterglow-app",
+        "description": "receives hand-offs and routed documents; sends settings and switch requests (hand-off files, distributed notifications)",
+        "style": "async"
+      },
+      {
         "source": "design-model",
         "target": "corecolor",
         "description": "uses CoreColor from creative-core",
+        "style": "sync"
+      },
+      {
+        "source": "design-model",
+        "target": "suite-model",
+        "description": "declares document kinds and pasteboard representations; reads preferences",
         "style": "sync"
       },
       {
@@ -334,6 +766,18 @@
         "style": "sync"
       },
       {
+        "source": "photo-app",
+        "target": "suite-shell",
+        "description": "adds .suiteApp(_:) and the shared menus; records recents",
+        "style": "sync"
+      },
+      {
+        "source": "photo-app",
+        "target": "afterglow-app",
+        "description": "receives hand-offs and routed documents; sends settings and switch requests (hand-off files, distributed notifications)",
+        "style": "async"
+      },
+      {
         "source": "photo-model",
         "target": "coreraster",
         "description": "uses CoreRaster from creative-core",
@@ -343,6 +787,12 @@
         "source": "photo-model",
         "target": "corecolor",
         "description": "uses CoreColor from creative-core",
+        "style": "sync"
+      },
+      {
+        "source": "photo-model",
+        "target": "suite-model",
+        "description": "declares document kinds and pasteboard representations; reads preferences",
         "style": "sync"
       },
       {
@@ -358,6 +808,18 @@
         "style": "sync"
       },
       {
+        "source": "library-app",
+        "target": "suite-shell",
+        "description": "adds .suiteApp(_:) and the shared menus; records recents",
+        "style": "sync"
+      },
+      {
+        "source": "library-app",
+        "target": "afterglow-app",
+        "description": "receives hand-offs and routed documents; sends settings and switch requests (hand-off files, distributed notifications)",
+        "style": "async"
+      },
+      {
         "source": "library-model",
         "target": "coreraster",
         "description": "uses CoreRaster from creative-core",
@@ -367,6 +829,12 @@
         "source": "library-model",
         "target": "corecolor",
         "description": "uses CoreColor from creative-core",
+        "style": "sync"
+      },
+      {
+        "source": "library-model",
+        "target": "suite-model",
+        "description": "declares document kinds and pasteboard representations; reads preferences",
         "style": "sync"
       },
       {
@@ -382,6 +850,18 @@
         "style": "sync"
       },
       {
+        "source": "halo-app",
+        "target": "suite-shell",
+        "description": "adds .suiteApp(_:) and the shared menus; records recents",
+        "style": "sync"
+      },
+      {
+        "source": "halo-app",
+        "target": "afterglow-app",
+        "description": "receives hand-offs and routed documents; sends settings and switch requests (hand-off files, distributed notifications)",
+        "style": "async"
+      },
+      {
         "source": "halo-model",
         "target": "flarecore",
         "description": "uses FlareCore from creative-core",
@@ -392,6 +872,60 @@
         "target": "coreraster",
         "description": "uses CoreRaster from creative-core",
         "style": "sync"
+      },
+      {
+        "source": "halo-model",
+        "target": "suite-model",
+        "description": "declares document kinds and pasteboard representations; reads preferences",
+        "style": "sync"
+      },
+      {
+        "source": "suite-shell",
+        "target": "suite-model",
+        "description": "implements the live conformances of SuiteModel's contracts",
+        "style": "sync"
+      },
+      {
+        "source": "suite-shell",
+        "target": "suiteui",
+        "description": "builds the Switch To and Open In menus and small views from SuiteUI parts",
+        "style": "sync"
+      },
+      {
+        "source": "afterglow-app",
+        "target": "suite-shell",
+        "description": "uses the launcher, hand-off, store and routing services",
+        "style": "sync"
+      },
+      {
+        "source": "afterglow-app",
+        "target": "suite-model",
+        "description": "reads home state, preferences, assets, onboarding and update logic",
+        "style": "sync"
+      },
+      {
+        "source": "afterglow-app",
+        "target": "suiteui",
+        "description": "builds its windows from SuiteUI",
+        "style": "sync"
+      },
+      {
+        "source": "afterglow-bundle",
+        "target": "afterglow-app",
+        "description": "packages the launcher, the five apps and four shared frameworks",
+        "style": "build"
+      },
+      {
+        "source": "suite-model-tests",
+        "target": "suite-model",
+        "description": "tests",
+        "style": "test"
+      },
+      {
+        "source": "afterglow-journeys",
+        "target": "afterglow-app",
+        "description": "launches and drives",
+        "style": "test"
       }
     ]
   }
