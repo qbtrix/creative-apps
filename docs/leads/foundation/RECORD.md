@@ -2,9 +2,9 @@
 
 Issue: #777 · Packet: docs/blueprints/halo/features/foundation.md (on branch `docs/halo-feature-packets` until its PR merges)
 Run: act-1a13b78bcdb-qu60 · Session: session_01Dc9GDxc9HxLtv9XMcFgSWh · Started: 2026-10-14T17:33Z
-Stage: 3 wave 10
+Stage: 3 wave 13
 Base: 52928d1dbbdd72b849f7fdb6363991f35b1adbeb
-Next: FD-11, FD-12 and the FD-13b→FD-14 chain are building; then FD-15 ∥ FD-16, FD-17, FD-18 (feature-done). Handoff notes: FD-10's builder named control ids halo.composition.new, halo.sidebar, halo.layer.new, halo.inspector.row.opacity, halo.inspector.row.blend, halo.timeline
+Next: FD-15 and FD-16 builders run stacked on FD-14 (#930); then FD-17 (#286, #290), then FD-18 with feature-done. Handoff notes for every app API are kept in the lead scratchpad (handoff-fd10.md); key ones are in Decisions.
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -20,13 +20,13 @@ Next: FD-11, FD-12 and the FD-13b→FD-14 chain are building; then FD-15 ∥ FD-
 | FD-8 | 7 | HaloProject holds document + every v1 stored property; == skips services | HaloProject.swift + 2 tests | HaloProjectTests | | #898 | merged |
 | FD-9 | 8 | HaloFixtures (eight, huge ≤ 48 MiB) | HaloFixtures.swift + test | HaloFixturesTests | | #899 | merged |
 | FD-10 | 9 | edit / endCoalescing / dismissRefusal / takeLayerID; mutators under edit; HB-9 | HaloProject, HaloTimeline + tests | HaloEditTests, HaloFoundationBudgetTests | | #903, #904 (split a/b) | merged |
-| FD-11 | 10 | HaloCommand, unavailableHelp, title, nine Availability files | HaloCommand.swift, Availability/ x9 + test | HaloCommandTests | | #924 | open, lane |
-| FD-12 | 10 | viewerDrawList, viewerSummary, row key frames, status suffix; HB-6 | HaloViewerState, HaloTimeline, HaloStatusText + tests | HaloViewerStateTests, HaloTimelineCostTests | | #926 | open, lane |
+| FD-11 | 10 | HaloCommand, unavailableHelp, title, nine Availability files | HaloCommand.swift, Availability/ x9 + test | HaloCommandTests | | #924 | merged |
+| FD-12 | 10 | viewerDrawList, viewerSummary, row key frames, status suffix; HB-6 | HaloViewerState, HaloTimeline, HaloStatusText + tests | HaloViewerStateTests, HaloTimelineCostTests | | #926 | merged |
 | FD-13a | 2 | App: HaloWindow and HaloViewer move to own files (pure move) | HaloApp.swift, HaloWindow.swift, HaloViewer.swift | snapshots unchanged | #893 | merged |
-| FD-13b | 11 | HaloLaunch, HaloControls, stub rasterizer | Sources/HaloApp | macOS build, H-J13 | | | building |
-| FD-14 | 12 | perform(_:) routes by area to nine HaloWindow+Area files | Sources/HaloApp x10 | macOS build, H-J13 | | |
-| FD-15 | 13 | Stub views, inspector LAYERS + layer header, key diamonds, refusal caption | Sources/HaloApp x11 + 3 snapshots | halo-inspector-layer-selected-*, halo-timeline-keys-*, halo-refusal-* | | |
-| FD-16 | 13 | Menus on HaloCommand | Sources/HaloApp x5 | testEveryMenuOpens | | |
+| FD-13b | 11 | HaloLaunch, HaloControls, stub rasterizer | Sources/HaloApp | macOS build, H-J13 | | #927 | merged |
+| FD-14 | 12 | perform(_:) routes by area to nine HaloWindow+Area files | Sources/HaloApp x10 | macOS build, H-J13 | #930 | open, lane |
+| FD-15 | 13 | Stub views, inspector LAYERS + layer header, key diamonds, refusal caption | Sources/HaloApp x11 + 3 snapshots | halo-inspector-layer-selected-*, halo-timeline-keys-*, halo-refusal-* |  | building |
+| FD-16 | 13 | Menus on HaloCommand | Sources/HaloApp x5 | testEveryMenuOpens |  | building |
 | FD-17 | 14 | Accessibility labels and halo.* identifiers (#286, #290) | Sources/HaloApp x5 + 2 snapshots | H-J1, audit unnamed 0 | | |
 | FD-18 | 15 | Journeys H-J0, H-J1, H-J13, layout (feature-done) | UITests/HaloJourneyTests.swift | the journeys | | |
 
@@ -52,6 +52,10 @@ Next: FD-11, FD-12 and the FD-13b→FD-14 chain are building; then FD-15 ∥ FD-
 
 - FD-10 came to 507 lines, so it shipped as #903 (edit, restore, mutators) and #904 (I/O refusals, HB-9).
 - FD-7's 'every live stub is unbuilt' check sits in HaloServicesTests (FD-4..6 own the contract suites), written to stay true when a live type lands.
+
+- FD-13b added `HaloProject(services:document:)` (new file HaloProjectLaunch.swift) so the app can open fixtures; `restore` stays internal.
+- FD-14: `perform` is `@MainActor (HaloCommand) -> Void`; it does not gate on unavailableHelp so Model refusals (I/O with no layer) still show; window title kept as today's so H-J0 and the launch snapshot don't move.
+- The halo.controls probe is a hidden element whose accessibility label is SuiteUI's ControlDocument JSON (same as suite.controls); FD-18 checks inspector controls reach it.
 
 ## Open
 - none
