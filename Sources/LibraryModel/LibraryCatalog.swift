@@ -137,11 +137,18 @@ public struct LibraryCatalog: Sendable, Equatable {
         }
     }
 
-    /// The photos with every id unique; the first photo with an id keeps it.
+    /// The photos with every id unique; the first photo with an id keeps it,
+    /// and a later duplicate never takes an id another photo already owns.
     private static func uniquingIDs(_ photos: [PhotoItem]) -> [PhotoItem] {
         var taken = Set<String>()
+        var keepsOwnID = [Bool]()
+        keepsOwnID.reserveCapacity(photos.count)
+        for photo in photos {
+            keepsOwnID.append(taken.insert(photo.id).inserted)
+        }
         var nextSuffix: [String: Int] = [:]
-        return photos.map { photo in
+        return zip(photos, keepsOwnID).map { photo, keeps in
+            if keeps { return photo }
             var id = photo.id
             var suffix = nextSuffix[photo.id] ?? 2
             while taken.contains(id) {
