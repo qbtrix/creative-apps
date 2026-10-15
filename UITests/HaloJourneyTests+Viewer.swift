@@ -100,7 +100,7 @@ final class HaloViewerJourneyTests: XCTestCase {
         }
         XCTAssert(item.isEnabled, "\(path.joined(separator: " > ")) is disabled")
         item.click()
-        _ = halo.app.menus.firstMatch.waitForNonExistence(timeout: 2)
+        halo.menusClosed()
     }
 
     /// Whether `condition` holds within three seconds.

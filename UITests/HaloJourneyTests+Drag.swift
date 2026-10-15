@@ -191,6 +191,6 @@ extension HaloJourneyTests {
         let item = edit.menus.firstMatch.menuItems.matching(NSPredicate(format: "title == %@", title)).firstMatch
         XCTAssert(item.waitForExistence(timeout: 3), "the Edit menu has no \(title)")
         halo.press(.escape)
-        _ = halo.app.menus.firstMatch.waitForNonExistence(timeout: 2)
+        halo.menusClosed()
     }
 }

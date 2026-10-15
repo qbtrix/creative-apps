@@ -48,7 +48,7 @@ extension HaloJourneyTests {
         XCTAssertFalse(rigChoices.contains("Ball"), "Rig's Parent menu lists Ball, its child: \(rigChoices)")
         halo.shot("parent-rig-menu", screen: true)
         halo.press(.escape)
-        _ = halo.app.menus.firstMatch.waitForNonExistence(timeout: 2)
+        halo.menusClosed()
 
         // 4. Type 1060 into Rig's Position X.
         parentExpectX("960.0 px", halo)
@@ -120,7 +120,7 @@ extension HaloJourneyTests {
             .matching(NSPredicate(format: "title == %@", title)).firstMatch
         XCTAssert(item.waitForExistence(timeout: 3), "the open menu has no \(title)")
         item.click()
-        _ = halo.app.menus.firstMatch.waitForNonExistence(timeout: 2)
+        halo.menusClosed()
     }
 
     /// The picker `id` (or its menu button) reads `value` within three seconds.
@@ -162,7 +162,7 @@ extension HaloJourneyTests {
         let item = edit.menus.firstMatch.menuItems.matching(NSPredicate(format: "title == %@", title)).firstMatch
         XCTAssert(item.waitForExistence(timeout: 3), "the Edit menu has no \(title)")
         halo.press(.escape)
-        _ = halo.app.menus.firstMatch.waitForNonExistence(timeout: 2)
+        halo.menusClosed()
     }
 
     /// Whether `condition` holds within three seconds.
