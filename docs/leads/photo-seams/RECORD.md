@@ -4,7 +4,7 @@ Issue: #812 · Packet: docs/blueprints/photo/features/photo-seams.md
 Run: act-1a13d5e8ca4-huz5 · Session: cloud lead session · Started: 2026-10-15T02:23Z
 Stage: 4 round 1
 Base: c4ec07810683a4bc7d62dcc5205705229f248a71
-Next: round 1 critic panel on run 38687993459 (727, 8f78bad, contains every task); then fix batch
+Next: wait for the r1 fix PRs (r1-b1, r1-b2, r1-b3) to merge; then a feature-done docs PR (packet status line) to dispatch round 2's CI run
 
 ## Tasks
 
@@ -38,11 +38,13 @@ packet chains every task on the one before it (shared files or new types).
 ## Rounds
 | round | CI run | CI | audit vs baseline | lenses | confirmed | fixed by | clean |
 |---|---|---|---|---|---|---|---|
-| 1 | 38687993459 (727, 8f78bad) | photo green (12 journeys pass; macOS scripts/ci green); run red from SuiteUI testGalleryOpensEveryPage and Halo testLayoutAtWidths (#763) | photo all at or under (identifier 16 vs 23) | clarity, journey, design, layout, controls, quality | pending | – | – |
+| 1 | 38687993459 (727, 8f78bad) | photo green (12 journeys pass; macOS scripts/ci green); run red from SuiteUI testGalleryOpensEveryPage and Halo testLayoutAtWidths (#763) | photo all at or under (identifier 16 vs 23) | clarity, journey, design, layout, controls, quality | 6 (2 major: preview pill not a warning pill; no Escape-cancels-crop journey. 4 minor: refusal names no place; refusal in warning not error style; no -PhotoFixture launch journey; clone/heal re-stamp the previous dab). 3 refuted (NotBuilt wording by design; Help menu and SuiteUI slider marker outside feature) | r1-b1 status line, r1-b2 model, r1-b3 journeys | no |
 
 ## Decisions
 - Waves of one task each, in the packet's chain order; the next builder starts once the previous PR has merged into dev.
 - S-7c clips brush, eraser, clone and heal to an existing selection rect (coverage 0 outside). Kept: the packet says coverage is 1 inside the rect; no v1 journey paints with a selection active (checked UITests/PhotoJourneyTests.swift). Crop undo does not restore selectionMask: left to PV-5 (add selectionMask to PhotoStack).
+- Each round's CI comes from a final feature-done PR (the packet status line, kept current) because the lane on main dispatches only after a feature-done merge.
+- Round 1 lead (b) refuted: the hover @State re-runs PhotoCanvas's body but TileCanvas returns early when nothing changed; no picture redraw.
 - S-13 split in two: its model half (PhotoBudgetTests) ran beside the app chain as the packet allows. S-13b carries feature-done: the lane script on main (ee57a15, stuck while dev is red) dispatches CI only after a feature-done merge, so that merge starts round 1's run. Each later round's last fix PR carries feature-done again to get its run.
 - S-8a: flat .export became .export(.openSheet) (a case name clash); area modifiers take PhotoPerform (@MainActor); confirmTransform/dismissTransform are app stubs returning false until PV-7.
 - S-10a: existing editor snapshots should not change (they already ran on .live with the Eyedropper disabled); the 4 s clearStatus task lives in PhotoWindow; status message id photo.status.message.
