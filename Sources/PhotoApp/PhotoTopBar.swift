@@ -24,12 +24,13 @@ struct PhotoTopBar: View {
     var body: some View {
         let noImage = model.canvas == nil ? "Open or create an image first." : nil
         EditorTopBar(app: "Photo", document: model.canvas == nil ? nil : model.documentName ?? "Untitled") {
-            Button("New Image") { perform(.newImage) }
-            Button("Open…") { perform(.open) }
+            Button("New Image") { perform(.newImage) }.accessibilityIdentifier("photo.bar.document.new")
+            Button("Open…") { perform(.open) }.accessibilityIdentifier("photo.bar.document.open")
             Divider()
-            Button("Save") { perform(.save) }.disabled(noImage != nil)
+            Button("Save") { perform(.save) }.disabled(noImage != nil).accessibilityIdentifier("photo.bar.document.save")
             Button("Save As…") { perform(.saveAs) }.disabled(noImage != nil).accessibilityIdentifier("photo.bar.save-as")
             Button("Export…") { perform(.export(.openSheet)) }.disabled(noImage != nil)
+                .accessibilityIdentifier("photo.bar.document.export")
         } content: {
             if let saveStatus {
                 PhotoSaveStatusLabel(status: saveStatus)

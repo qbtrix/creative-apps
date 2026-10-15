@@ -342,9 +342,13 @@ struct PhotoFileArea: ViewModifier {
                 isPresented: Binding(get: { files.keepLayers != nil }, set: { if !$0 { files.keepLayers = nil } }),
                 titleVisibility: .visible, presenting: files.keepLayers
             ) { format in
-                Button("Save as Photo Document") { perform(.file(.saveDocument)) }.keyboardShortcut(.defaultAction)
+                Button("Save as Photo Document") { perform(.file(.saveDocument)) }
+                    .keyboardShortcut(.defaultAction)
+                    .accessibilityIdentifier("photo.file.keep-layers.document")
                 Button("Flatten into \(format.title)") { perform(.file(.flatten(format))) }
+                    .accessibilityIdentifier("photo.file.keep-layers.flatten")
                 Button("Cancel", role: .cancel) {}
+                    .accessibilityIdentifier("photo.file.keep-layers.cancel")
             } message: { format in
                 Text("A \(format.title) file keeps one flat layer. A Photo Document keeps every layer, mask and adjustment.")
             }
