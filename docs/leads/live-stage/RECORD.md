@@ -4,7 +4,7 @@ Issue: #798 · Packet: docs/blueprints/flare/features/live-stage.md
 Run: act-1a13d374bd1-s92z · Session: claude/live-stage-lead-gljfd4 · Started: 2026-10-15T00:40Z
 Stage: 4 round 2
 Base: 04ae98a764d312627e9705bf4b4e71e075d55271
-Next: read the round 2 critic panel result
+Next: wait for r2 fix PRs, then round 3 (same lenses) on the next dev CI run; second clean round ends the loop. Feature-done PR waits for dev CI to go green (other lines red: Library #933, Halo, SuiteUI)
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -26,7 +26,7 @@ Journeys: J3 and J5 model half, steps 1-6 of the packet. Quality: QB-L5 hit <= 1
 | round | CI run | CI | audit vs baseline | lenses | confirmed | fixed by | clean |
 |---|---|---|---|---|---|---|---|
 | 1 | 38671960461 (1fdabfd) | red: 6 UI journeys, same as 0a455df before this feature; swift test 1945 green | flare identifier 16 > 15 (Show Sidebar, pre-existing, #938) | clarity, journey, contract, quality, audit | 1 major (fake moves text, live refuses), 3 minor (rotate pivot, QB-F3 coverage, QB-L11 scale); 3 refuted | #945 (r1-b1), #946 (r1-b2) | no |
-| 2 | 38675308731 (1025fcc) | red: Library, Halo, SuiteUI journeys only; all 4 Flare journeys pass; swift test 1966 green | flare at or under baseline (identifier 14 < 15) | same five | pending | | pending |
+| 2 | 38675308731 (1025fcc) | red: Library, Halo, SuiteUI journeys only; all 4 Flare journeys pass; swift test 1966 green | flare at or under baseline (identifier 14 < 15) | same five | 3 minor (copy name double strip, pen refusal wording, p95 per rubric); 0 blocker/major | r2-b1, r2-b2, r2-b3 | yes |
 
 ## Decisions
 - Depends on: none (issue body); engine issues closed on creative-core main 98be31a.
