@@ -12,7 +12,7 @@ Next: wait for LP-4's PR (branch layer-panel/lp-4) to merge and for the dev CI r
 | LP-1 | 1 | delete, rename, move (+ forward/backward, `moveTarget`), duplicate: each one named `edit` step; delete un-parents through `keying.setParent(nil, …)` with the `.notBuilt` fallback | `Sources/HaloModel/HaloLayerEdits.swift`, `Tests/HaloModelTests/HaloLayerEditsTests.swift` | `HaloLayerEditsTests` | #1041 | merged (a2313a5) |
 | LP-2 | 2 | Layer commands' availability and routes; Rename Layer prompt from `request`; edit budgets | `Sources/HaloModel/Availability/HaloAvailability+Layers.swift`, `Sources/HaloApp/HaloWindow+Layers.swift`, `Tests/HaloModelTests/HaloLayerAvailabilityTests.swift`, `Tests/HaloModelTests/HaloLayerEditsBudgetTests.swift` | `HaloLayerAvailabilityTests`, `HaloLayerEditsBudgetTests` | #1045 | merged |
 | LP-3 | 2 | `HaloLayerList` as a `List` of `SidebarRow`s: select, rename, `.onMove`, `.onDeleteCommand`, refusal caption, empty text; snapshots | `Sources/HaloApp/HaloLayerList.swift`, `Tests/AppSnapshotTests/HaloLayersSnapshots.swift` | snapshots `halo-layer-list{,-refused,-empty}-{light,dark}.png` | #1047 | merged |
-| LP-4 | 3 | H-J9 `testLayerHousekeeping`, eight steps; `feature-done` | `UITests/HaloJourneyTests+Layers.swift` | H-J9 on the dev CI run | – | building (fast-lane only, no feature-done) |
+| LP-4 | 3 | H-J9 `testLayerHousekeeping`, eight steps; `feature-done` | `UITests/HaloJourneyTests+Layers.swift` | H-J9 on the dev CI run | #1052 | opened (fast-lane only, no feature-done) |
 
 Journeys: H-J9 (8 steps, packet "Journey steps"). Quality bars: QB-F1 no dead controls, QB-F3 one named step, QB-F4 keyboard parity, HB-9 edit budget (≤ 20 ms debug CI), audit zero new.
 
