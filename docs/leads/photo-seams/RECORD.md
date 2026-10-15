@@ -2,9 +2,9 @@
 
 Issue: #812 · Packet: docs/blueprints/photo/features/photo-seams.md
 Run: act-1a13d5e8ca4-huz5 · Session: cloud lead session · Started: 2026-10-15T02:23Z
-Stage: 3 wave 15 (S-10b)
+Stage: 3 wave 16 (S-11a)
 Base: c4ec07810683a4bc7d62dcc5205705229f248a71
-Next: wait for #987; S-10b stacks on lead/photo-seams-S-10a; no macOS run yet contains #978 (726 started before it)
+Next: wait for #988; S-11a stacks on lead/photo-seams-S-10b; run 726 (e8e5b52, has S-7b) macOS scripts/ci green; #978+ awaits the next run
 
 ## Tasks
 
@@ -27,8 +27,8 @@ packet chains every task on the one before it (shared files or new types).
 | S-8a | 11 | PhotoIntent sub-enums, nine area files | A/PhotoIntent, PhotoWindow, PhotoWindow+*.swift | app-state rule; V1–V12 | #978 | merged |
 | S-8b | 12 | open/save/export into area files; fileServices | A/PhotoWindow{,+File,+Export}.swift | V2, V5, V6 | #985 | merged |
 | S-9 | 13 | menu bar split per menu | A/PhotoCommands{,+File,+Edit,+Select,+Image,+Layer,+View}.swift | V4; PhotoSelectAllMenuTests | #986 | merged |
-| S-10a | 14 | top bar, status line, PhotoRailTool | A/PhotoEditor, PhotoTopBar, PhotoStatusLine, PhotoRailTool; ST/PhotoEditorSnapshots | photo-status-message-dark.png | #987 | open |
-| S-10b | 15 | overlays, hover, Return/Escape, StrokePacer modifiers | A/PhotoEditor, PhotoWindow, *Overlay.swift, StrokePacer; ST/PhotoStrokePacerTests | PhotoStrokePacerTests; V7, V9 | – | todo |
+| S-10a | 14 | top bar, status line, PhotoRailTool | A/PhotoEditor, PhotoTopBar, PhotoStatusLine, PhotoRailTool; ST/PhotoEditorSnapshots | photo-status-message-dark.png | #987 | merged |
+| S-10b | 15 | overlays, hover, Return/Escape, StrokePacer modifiers | A/PhotoEditor, PhotoWindow, *Overlay.swift, StrokePacer; ST/PhotoStrokePacerTests | PhotoStrokePacerTests; V7, V9 | #988 | open |
 | S-11a | 16 | panel split 1: Adjust tab, tool options | A/PhotoPanel, PhotoAdjustTab, PhotoToolOptions, *Options.swift | snapshots unchanged | – | todo |
 | S-11b | 17 | panel split 2: Layers tab, History stub | A/PhotoPanel, PhotoLayersTab, PhotoHistoryTab | PhotoLayerRowSnapshots | – | todo |
 | S-12 | 18 | -PhotoFixture, -PhotoWindowWidth, Preview data pill | M/PhotoFixtures, A/PhotoApp, PhotoWindow, PhotoStatusLine | PhotoLaunchOptionsTests; photo-preview-pill-dark.png | – | todo |
@@ -52,6 +52,7 @@ packet chains every task on the one before it (shared files or new types).
 ## Open
 - needs-ui filed: #952 SelectionPathOutline, #953 BrushCursorMark, #954 LayerList symbol and accessory. SelectionHandles with rotation is SuiteUI canvas-marks CM-4 (#273), no new issue.
 - Quality finding for round 1 (quality lens): S-13a times 6 px steps with a 64 px brush, so many events put down no dab; heal release p50 0.56 ms but p95 4.6 ms, likely the real per-dab cost (> PB-2 1 ms). Round 1 fix: time events that each dab (step >= dab spacing); if heal misses PB-2 per dab, file a line:photo gap for heal speed.
+- Quality watch for round 1: S-10b stores CanvasViewport hover in @State, so every pointer move redraws PhotoCanvas; check PB-1 brush latency and the hitch journey (testBrushStrokeHitchesOnALargePhoto).
 - #956 app code verified: run 38679533707 (723, 54e16aa) macOS scripts/ci green (compile + snapshots); all 12 Photo journeys ran; photo audit at or under baseline (identifier 16 vs 23). Run red from halo (identifier 14>8) and library (identifier 21>16), not this feature; dev-red #763.
 - S-6b: a coalesced step gets a fresh id; PhotoStack keeps masks but not selectionMask (S-7c may add it).
 - dev CI was red before this feature (runs 717-722 fail in UI journeys of other lines; Linux green). Not ours; the dev-red issue tracks it.
