@@ -24,9 +24,11 @@
 // `model.isDirty`, and shows "Saving…" (`photo.file.saving`) or "Opening…"
 // (`photo.file.opening`) over the window once `files.working` has run 100 ms.
 // It runs the window's PhotoAutosave (D-9): a tick every second, discarded on
-// a clean close; the first window offers what a crash left behind, and
-// Restore and Discard are FileIntents. D-10: PhotoWindowEditedView is the
-// window's hook for Quit and Finder opens (PhotoApp.swift); its close guard
+// a clean close; the first window offers what a crash left behind in an
+// NSAlert sheet (SwiftUI drops alert buttons' identifiers, and journeys find
+// `photo.recovery.restore` by its own), and Restore and Discard are
+// FileIntents. D-10: PhotoWindowEditedView is the window's hook for Quit and
+// Finder opens (PhotoApp.swift); its close guard
 // asks PhotoUnsavedPrompt's alert before a dirty window closes.
 import AppKit
 import CoreRaster
@@ -377,21 +379,14 @@ struct PhotoFileArea: ViewModifier {
                     await autosave.tick(model: model, now: Date.now.timeIntervalSince1970, codec: ImageIOCodec())
                 }
             }
-            .task { await files.offerRecovery(model) }
+            .task {
+                await files.offerRecovery(model)
+                guard let offer = files.recoveryOffer, let hook = await PhotoWindowEditedView.hook(for: files) else { return }
+                if let choice = await hook.askToRestore(offer) { perform(.file(choice)) } else { files.recoveryOffer = nil }
+            }
             .task { if let url = PhotoOpenQueue.shared.windowAppeared(openWindow) { perform(.openFile(url)) } }
             // A clean close leaves nothing to recover; a dirty one asked first (Don't Save discards).
             .onDisappear { if !model.isDirty { files.autosave?.discard() } }
-            .alert(
-                files.recoveryOffer?.message ?? "",
-                isPresented: Binding(get: { files.recoveryOffer != nil }, set: { if !$0 { files.recoveryOffer = nil } }),
-                presenting: files.recoveryOffer
-            ) { offer in
-                Button("Restore") { perform(.file(.restore(offer))) }
-                    .keyboardShortcut(.defaultAction)
-                    .accessibilityIdentifier("photo.recovery.restore")
-                Button("Discard", role: .destructive) { perform(.file(.discardRecovery)) }
-                    .accessibilityIdentifier("photo.recovery.discard")
-            }
     }
 }
 
@@ -439,7 +434,7 @@ struct PhotoWindowEdited: NSViewRepresentable {
 
 /// An invisible view that keeps its window's edited dot on the image's dirty
 /// state, puts its close guard in front of the window's delegate, and answers
-/// the unsaved-changes prompt for its window.
+/// the unsaved-changes prompt and the restore offer for its window.
 final class PhotoWindowEditedView: NSView, PhotoUnsavedWindow {
     /// The visible Photo windows' hooks, front to back.
     static var shown: [PhotoWindowEditedView] {
@@ -482,6 +477,35 @@ final class PhotoWindowEditedView: NSView, PhotoUnsavedWindow {
     func prepareToQuit() async {
         guard let workspace, let autosave = files?.autosave else { return }
         await autosave.willQuit(model: workspace, codec: ImageIOCodec())
+    }
+
+    /// The window's hook for `files`, once it is in a window; nil after 2 s without one.
+    static func hook(for files: PhotoFileSession) async -> PhotoWindowEditedView? {
+        for _ in 0..<40 {
+            if let hook = all.allObjects.first(where: { $0.files === files && $0.window != nil }) { return hook }
+            try? await Task.sleep(for: .milliseconds(50))
+        }
+        return nil
+    }
+
+    /// The launch's restore offer as a sheet: Restore (Return), Discard, or nil
+    /// for Cancel (Escape), which leaves the autosave for the next launch. An
+    /// NSAlert, since SwiftUI drops the identifiers of an alert's buttons.
+    func askToRestore(_ offer: RecoveryOffer) async -> FileIntent? {
+        guard let window else { return nil }
+        let alert = NSAlert()
+        alert.messageText = offer.message
+        alert.informativeText = RecoveryOffer.informativeText
+        alert.addButton(withTitle: "Restore").setAccessibilityIdentifier("photo.recovery.restore")
+        let discard = alert.addButton(withTitle: "Discard")
+        discard.setAccessibilityIdentifier("photo.recovery.discard")
+        discard.hasDestructiveAction = true
+        alert.addButton(withTitle: "Cancel").setAccessibilityIdentifier("photo.recovery.cancel")
+        switch await alert.beginSheetModal(for: window) {
+        case .alertFirstButtonReturn: return .restore(offer)
+        case .alertSecondButtonReturn: return .discardRecovery
+        default: return nil
+        }
     }
 
     func ask() async -> PhotoUnsavedPrompt.Answer {

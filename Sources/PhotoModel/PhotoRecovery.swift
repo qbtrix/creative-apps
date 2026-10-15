@@ -19,6 +19,8 @@ public struct RecoveryOffer: Sendable, Equatable {
     /// "Restore beach.png from 9:41 AM?", or "Restore the unsaved image from
     /// 9:41 AM?" for an image that never had a name.
     public let message: String
+    /// The line under the message, so the alert has no empty text.
+    public static let informativeText = "Photo closed before these changes were saved. Discard deletes them."
 
     /// `time` formats the entry's `savedAt` ("9:41 AM").
     public init(entry: RecoveryEntry, time: (Double) -> String) {
