@@ -53,3 +53,5 @@ utc	stage	event	ref	note
 2026-10-15T13:16Z	4	ci-run	38738075349	red in swift test (viewer-playback fidelity + driver tests); journeys skipped; round 3 critic panel on code+snapshots running
 2026-10-15T13:20Z	4	round-clean	round 3	panel: 0 blocker/major, 5 minor; r3-b1 + gap #1156
 2026-10-15T13:26Z	4	pr-opened	#1159	r3-b1 feature-done (Ball keys, opened snapshot via window)
+2026-10-15T13:38Z	4	pr-merged	#1159	r3-b1
+2026-10-15T13:38Z	4	ci-run	38743186679	running on 8e83ac0
