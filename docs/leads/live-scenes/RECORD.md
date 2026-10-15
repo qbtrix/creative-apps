@@ -4,7 +4,7 @@ Issue: #800 · Packet: docs/blueprints/flare/features/live-scenes.md
 Run: act-1a13ca4f89e-0ft1 · Session: claude/live-scenes-lead-d0sj3t · Started: 2026-10-14
 Stage: 4 round 3
 Base: a7429dc9891274f2c02be3e6d7c2e3545be8cf32
-Next: wait for round 3 critic panel (wf_b5d33f04-b20); Linux gate on a7429dc CI: PASS
+Next: wait for round 3 fix PRs (wf_a51fcc0f-368) to merge, then round 4 (the last by budget), then a feature-done PR to trigger CI
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -23,6 +23,7 @@ Quality bars: QB-F3 one gesture one step, QB-L7 <= 10 ms per moveGuide step (med
 |---|---|---|---|---|---|---|---|
 | 1 | 38657968912 | red (SuiteUI SnapshotHostTests only, #763) | not run (journeys skipped after scripts/ci failed) | clarity, journey, quality, contract, tests | 1 major (QB-F2 refusals from LiveScenes show case names), 3 minor (setCanvas group breaks drag coalescing on refusal, empty-name divergence unpinned, drag budget prints no p50/p95) | #890 #889 #896 #892 (all merged) | no |
 | 2 | 38660293042 + Linux gate c111439 | red (SuiteUI SnapshotHostTests only, #763); Linux PASS | not run | clarity, journey, quality, contract, tests | 1 major (#890 catch-all hides NotBuilt reasons), 3 minor (specific engine causes and fake sentences hidden; J16 select step missing) | #905 #908 (merged) | no |
+| 3 | Linux gate a7429dc | Linux PASS; latest macOS 38662225263 predates fixes | not run | clarity, journey, quality, contract, tests | 1 major (#905 NotBuilt test passes without the fix), 1 minor (NaN background guard untested) | r3-b1, r3-b2 (wf_a51fcc0f-368) | no |
 
 ## Decisions
 - Base moved from the brief's aa166cb to bfd0328 (one SuiteUI snapshot test on top; aa166cb is an ancestor).

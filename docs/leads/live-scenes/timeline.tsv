@@ -22,3 +22,4 @@ utc	stage	event	ref	note
 2026-10-15T00:48Z	4	round-findings	round2	1 major 3 minor (two from #890 over-reach); 2 fix batches
 2026-10-15T01:06Z	4	pr-merged	#905 #908	round 2 fixes
 2026-10-15T01:06Z	4	stage-start	round3	Linux gate a7429dc PASS; same five lenses
+2026-10-15T01:10Z	4	round-findings	round3	1 major 1 minor, test-only; 2 fix batches
