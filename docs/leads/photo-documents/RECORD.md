@@ -2,9 +2,9 @@
 
 Issue: #1074 · Packet: docs/blueprints/photo/features/photo-documents.md
 Run: act-1a1404bf04c-bp6m · Session: claude/photo-documents-lead-ezrcev · Started: 2026-10-15T10:40Z
-Stage: 4 round 1
+Stage: 4 round 2
 Base: b555f566067a4e692fe3416920af9a77f844a882
-Next: round 2 on the first CI run whose head contains b555f56 (fixes C, D); run 38799320916 on 3dc283e predates them
+Next: critic panel (wf_ff699d6f-bbf) results; then fix F (alerts: message text + restore identifiers) batched with panel findings on PhotoWindow*.swift; wait E, G
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -37,6 +37,7 @@ Waves (packet's Build waves, checked against dev at 00e546a):
 | round | CI run | CI | audit vs baseline | lenses | confirmed | fixed by | clean |
 |---|---|---|---|---|---|---|---|
 | 1 | 38792928305 (c93a7f8, D-7..D-9) | red: ui-test timeout 45 min; 11 Photo journeys red | photo contrast 1 > 0 (_NS:58 = restore alert text) | attribution diagnoser | 9 ours: restore alert from shared recovery dir (#1230) blocks later journeys; 2 not ours (crop #1202, edit #1218 -> #763) | fix D recovery dir; A ids; B Open Recent | no |
+| 2 | 38807718380 (cdcfb62) | red: ui-test; 5 photo-documents journeys red (PJ-1, PJ-2 no Close ⌘W; PJ-1b alert contrast; PJ-3 restore button id; PJ-P3 query), PJ-4 green; 9 restore-alert failures gone | photo contrast 1 > 0 (_NS:58 = empty alert message); identifier 22 <= 23 | clarity, journey, design, layout, controls, quality (running) | E close, F alerts, G PJ-P3 query (+panel) | E, G in flight | no |
 
 ## Decisions
 - Waves have at most 2 independent tasks, so each wave runs as one worktree subagent per task (lead.md stage 3), not build-wave.js.
