@@ -4,7 +4,7 @@ Issue: #812 · Packet: docs/blueprints/photo/features/photo-seams.md
 Run: act-1a13d5e8ca4-huz5 · Session: cloud lead session · Started: 2026-10-15T02:23Z
 Stage: 4 round 3
 Base: c4ec07810683a4bc7d62dcc5205705229f248a71
-Next: r3-b1 fixer (journey lookups) and round 3 panel running; fold confirmed in-scope findings into one more batch if time allows; then a feature-done PR for round 4 (last round)
+Next: r3-b1 and r3-b2 fixers running; when both merge, a feature-done docs PR (round 3 status) dispatches round 4 (the last)
 
 ## Tasks
 
@@ -41,7 +41,7 @@ packet chains every task on the one before it (shared files or new types).
 | 1 | 38687993459 (727, 8f78bad) | photo green (12 journeys pass; macOS scripts/ci green); run red from SuiteUI testGalleryOpensEveryPage and Halo testLayoutAtWidths (#763) | photo all at or under (identifier 16 vs 23) | clarity, journey, design, layout, controls, quality | 6 (2 major: preview pill not a warning pill; no Escape-cancels-crop journey. 4 minor: refusal names no place; refusal in warning not error style; no -PhotoFixture launch journey; clone/heal re-stamp the previous dab). 3 refuted (NotBuilt wording by design; Help menu and SuiteUI slider marker outside feature) | #1012 (r1-b1 status line), #1010 (r1-b2 model; heal release p50 0.60 -> 0.31 ms), #1011 (r1-b3 journeys) | no |
 | 2 | 38694361192 (fdb7c8a) | photo green (13 journeys incl. testFixtureLaunch and crop-cancelled; macOS scripts/ci green); run red from SuiteUI testGalleryOpensEveryPage, Halo testLayoutAtWidths and testNewComposition (#763) | photo all at or under (identifier 16 vs 23, 93 steps) | same six | 14 kept; in scope: 1 major (fixture launch not fitted) + 8 minor (eyedropper hint x3, pill tooltip, refusal type role, step-5 journey gaps x2, budget step); out of scope v1 -> gap issues #1024 tile-edge lines (p1), #1025 clone source, #1026 selection unit, #1027 render pill | #1029 (r2-b1 fit), #1030 (r2-b2 hint, tooltip, caption type), #1031 (r2-b3 journeys + 20 px budget) | no |
 | 3 | 38700713285 (1dcd1a6) | macOS scripts/ci red on SuiteUI FrameProbeTests.summaryWithinBudget (24.4 ms vs 20 ms timing, not this feature; noted on #763); every Photo test passed; UI journeys skipped, so no screens | – | – | – | – | wait for a run with journeys |
-| 3b | 38704216123 (731, 92db316) | red in this feature's file: testFixtureLaunch (zoom pill not found by label) and testLaunchShowsWindowShell (help tag not shown on hover), both #1031 test lookups; other failures SuiteUI/Halo (#763) | photo all at or under (identifier 16 vs 23, 92 steps) | same six | panel running | r3-b1 (journey lookups) | no |
+| 3b | 38704216123 (731, 92db316) | red in this feature's file: testFixtureLaunch (zoom pill not found by label) and testLaunchShowsWindowShell (help tag not shown on hover), both #1031 test lookups; other failures SuiteUI/Halo (#763) | photo all at or under (identifier 16 vs 23, 92 steps) | same six | 2 kept (major: PhotoToolsTests QB-F1 check vacuous for stroke tools; minor: rail disabled tool dimmed twice in SuiteUI -> needs-ui #1049), 2 refuted | r3-b1 (journey lookups), r3-b2 (PhotoToolsTests) | no |
 
 ## Decisions
 - Waves of one task each, in the packet's chain order; the next builder starts once the previous PR has merged into dev.
@@ -57,6 +57,7 @@ packet chains every task on the one before it (shared files or new types).
 - Lead step after S-4 merges: file the four needs-ui issues of blueprint 6.3 (SelectionPathOutline, SelectionHandles with rotation, BrushCursorMark, LayerList row symbol and accessory).
 
 ## Open
+- needs-ui #1049: ToolbarGroup dims a disabled rail tool twice (about 15% vs 40%).
 - #1032 heal dab barely meets PB-2 (release median 0.75-0.97 ms vs 1 ms).
 - gap issues from round 2 (v1 behaviour, outside photo-seams): #1024 (tile-edge lines at fractional zoom, p1), #1025, #1026, #1027.
 - needs-ui filed: #952 SelectionPathOutline, #953 BrushCursorMark, #954 LayerList symbol and accessory. SelectionHandles with rotation is SuiteUI canvas-marks CM-4 (#273), no new issue.
