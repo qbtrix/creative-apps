@@ -5,7 +5,8 @@
 // in the environment, drawn plain until SuiteUI's EditorSaveStatus (EC-4,
 // #339) lands: "Saved" in textSecondary, an accent dot and "Edited" while
 // unsaved, a triangle and "Not saved" in stateError after a failed save, and
-// nothing with no image. A command that
+// nothing with no image; its tooltip (PhotoSaveStatus.help) says what each
+// means and what to do next. A command that
 // can't act now is disabled with a tooltip saying why; each carries a
 // `photo.bar.*` accessibility identifier for the UI journeys and the app
 // audit, and Undo and Redo keep theirs whatever edit they name.
@@ -33,7 +34,7 @@ struct PhotoTopBar: View {
                 .accessibilityIdentifier("photo.bar.document.export")
         } content: {
             if let saveStatus {
-                PhotoSaveStatusLabel(status: saveStatus)
+                PhotoSaveStatusLabel(status: saveStatus, fileName: model.documentName)
                 EditorBarDivider()
             }
             EditorBarItem(ToolbarAction("Open", systemImage: "folder") { perform(.open) })
@@ -85,9 +86,13 @@ struct PhotoTopBar: View {
 
 /// `photo.bar.saved`: the save status as plain text with its cue, a stand-in
 /// for SuiteUI's EditorSaveStatus (EC-4). Its label and value are the title
-/// (journeys read the label).
+/// (journeys read the label); its tooltip and hint say what the status means
+/// for `fileName` and what to do next. Inset like a bar button, so it sits
+/// centered between its dividers.
 struct PhotoSaveStatusLabel: View {
     let status: PhotoSaveStatus
+    /// The document's file name; nil for an image never saved.
+    let fileName: String?
 
     var body: some View {
         HStack(spacing: SuiteSpacing.xs) {
@@ -103,10 +108,13 @@ struct PhotoSaveStatusLabel: View {
             Text(status.title)
         }
         .foregroundStyle(status == .notSaved ? SuiteColor.stateError : SuiteColor.textSecondary)
+        .padding(SuiteInset.barButton)
         .fixedSize()
+        .help(status.help(fileName: fileName))
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(status.title)
         .accessibilityValue(status.title)
+        .accessibilityHint(status.help(fileName: fileName))
         .accessibilityIdentifier("photo.bar.saved")
     }
 }
