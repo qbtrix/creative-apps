@@ -71,3 +71,4 @@ utc	stage	event	ref	note
 2026-10-15T21:40Z	5	ci-run	38807718380	PJ-8 still red after #1238; fixer r5-b2
 2026-10-15T21:47Z	5	pr-opened	#1251	r5-b2 crop field rows expose their number to XCUI
 2026-10-15T22:16Z	5	pr-merged	#1251	r5-b2
+2026-10-15T22:45Z	5	heartbeat	-	waiting for a dev CI run containing 9364bed (#1251)
