@@ -29,3 +29,4 @@ utc	stage	event	ref	note
 2026-10-15T09:38Z	6	pr-merged	#1068	HF-12 feature-done
 2026-10-15T09:38Z	6	stage-end	build	all 12 tasks merged
 2026-10-15T09:38Z	4	stage-start	round 1	CI 38713326810 running
+2026-10-15T09:59Z	4	heartbeat	38713326810	macOS job still running
