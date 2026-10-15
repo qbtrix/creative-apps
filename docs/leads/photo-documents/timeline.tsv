@@ -4,3 +4,4 @@ utc	stage	event	ref	note
 2026-10-15T10:46Z	1	stage-end	packet	tasks D-1..D-12 copied
 2026-10-15T10:47Z	2	stage-end	waves	8 waves as in packet
 2026-10-15T10:48Z	3	stage-start	wave 1	D-1, D-3
+2026-10-15T16:22Z	3	heartbeat	-	waiting
