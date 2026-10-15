@@ -2,9 +2,9 @@
 
 Issue: #799 · Packet: docs/blueprints/flare/features/live-keys.md
 Run: act-1a13d0020ff-4x51 · Session: cse_01BKSKFkuR1aFXhWhZAhsegU · Started: 2026-10-15T00:00Z
-Stage: 3 wave 4
-Base: 1e5d4c2428a32ed0d348e2e3dc29cca04ef5442a
-Next: wait for wave 4 PR (KY-4) to merge, then start wave 5 (KY-9, feature-done) on the new origin/dev
+Stage: 3 wave 5
+Base: 87daea24ca43f2d8ba9b49d9ac5cff9c7cd9304a
+Next: wait for KY-9 (feature-done) to merge, then stage 4 round 1 on the CI run it dispatches
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -16,8 +16,8 @@ Next: wait for wave 4 PR (KY-4) to merge, then start wave 5 (KY-9, feature-done)
 | KY-6 | 2 | `moveKeys`, `removeKeys` | Live/LiveKeyframes+Edit.swift, LiveKeyframesEditTests.swift | LiveKeyframesEditTests | #912 | merged |
 | KY-3 | 3 | `toggleAnimated`, `toggleKey` | Live/LiveProperties+Keys.swift, LivePropertiesKeysTests.swift | LivePropertiesKeysTests | #922 | merged |
 | KY-7 | 3 | `insertFrames`, `removeFrames`, `setLabel` + `KeyframeEditing` | Live/LiveKeyframes+Frames.swift, LiveKeyframesFramesTests.swift | LiveKeyframesFramesTests | #921 | merged |
-| KY-4 | 4 | `setFill`, `setStroke` + `PropertyAnimating` | Live/LiveProperties+Paint.swift, LivePropertiesPaintTests.swift | LivePropertiesPaintTests | #928 | in lane |
-| KY-9 | 5 | model journey steps 1–7 + QB-L7 budget (feature-done) | LiveKeysJourneyTests.swift, LiveKeysBudgetTests.swift | both | | waiting KY-4, KY-7, KY-8 |
+| KY-4 | 4 | `setFill`, `setStroke` + `PropertyAnimating` | Live/LiveProperties+Paint.swift, LivePropertiesPaintTests.swift | LivePropertiesPaintTests | #928 | merged |
+| KY-9 | 5 | model journey steps 1–7 + QB-L7 budget (feature-done) | LiveKeysJourneyTests.swift, LiveKeysBudgetTests.swift | both | | building |
 
 ## Rounds
 | round | CI run | CI | audit vs baseline | lenses | confirmed | fixed by | clean |
