@@ -16,7 +16,7 @@ Next: wait for wave 4 PR (KY-4) to merge, then start wave 5 (KY-9, feature-done)
 | KY-6 | 2 | `moveKeys`, `removeKeys` | Live/LiveKeyframes+Edit.swift, LiveKeyframesEditTests.swift | LiveKeyframesEditTests | #912 | merged |
 | KY-3 | 3 | `toggleAnimated`, `toggleKey` | Live/LiveProperties+Keys.swift, LivePropertiesKeysTests.swift | LivePropertiesKeysTests | #922 | merged |
 | KY-7 | 3 | `insertFrames`, `removeFrames`, `setLabel` + `KeyframeEditing` | Live/LiveKeyframes+Frames.swift, LiveKeyframesFramesTests.swift | LiveKeyframesFramesTests | #921 | merged |
-| KY-4 | 4 | `setFill`, `setStroke` + `PropertyAnimating` | Live/LiveProperties+Paint.swift, LivePropertiesPaintTests.swift | LivePropertiesPaintTests | | building |
+| KY-4 | 4 | `setFill`, `setStroke` + `PropertyAnimating` | Live/LiveProperties+Paint.swift, LivePropertiesPaintTests.swift | LivePropertiesPaintTests | #928 | in lane |
 | KY-9 | 5 | model journey steps 1–7 + QB-L7 budget (feature-done) | LiveKeysJourneyTests.swift, LiveKeysBudgetTests.swift | both | | waiting KY-4, KY-7, KY-8 |
 
 ## Rounds
