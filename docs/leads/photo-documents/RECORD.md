@@ -4,7 +4,7 @@ Issue: #1074 · Packet: docs/blueprints/photo/features/photo-documents.md
 Run: act-1a1404bf04c-bp6m · Session: claude/photo-documents-lead-ezrcev · Started: 2026-10-15T10:40Z
 Stage: 4 round 2
 Base: b555f566067a4e692fe3416920af9a77f844a882
-Next: critic panel (wf_ff699d6f-bbf) results; then fix F (alerts: message text + restore identifiers) batched with panel findings on PhotoWindow*.swift; wait E, G
+Next: wait for E, G, F1, F2, F4 PRs; start F3 (plain-word ArchiveError messages + PJ-4 assertions) after F1 merges; round 3 on the CI run containing them
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -37,7 +37,7 @@ Waves (packet's Build waves, checked against dev at 00e546a):
 | round | CI run | CI | audit vs baseline | lenses | confirmed | fixed by | clean |
 |---|---|---|---|---|---|---|---|
 | 1 | 38792928305 (c93a7f8, D-7..D-9) | red: ui-test timeout 45 min; 11 Photo journeys red | photo contrast 1 > 0 (_NS:58 = restore alert text) | attribution diagnoser | 9 ours: restore alert from shared recovery dir (#1230) blocks later journeys; 2 not ours (crop #1202, edit #1218 -> #763) | fix D recovery dir; A ids; B Open Recent | no |
-| 2 | 38807718380 (cdcfb62) | red: ui-test; 5 photo-documents journeys red (PJ-1, PJ-2 no Close ⌘W; PJ-1b alert contrast; PJ-3 restore button id; PJ-P3 query), PJ-4 green; 9 restore-alert failures gone | photo contrast 1 > 0 (_NS:58 = empty alert message); identifier 22 <= 23 | clarity, journey, design, layout, controls, quality (running) | E close, F alerts, G PJ-P3 query (+panel) | E, G in flight | no |
+| 2 | 38807718380 (cdcfb62) | red: ui-test; PJ-1, PJ-1b, PJ-2, PJ-3, PJ-P3 red, PJ-4 green; round-1 failures gone | photo contrast 1 > 0 (_NS:58 empty alert message); identifier 22 <= 23 | clarity, journey, design, layout, controls, quality | 13 of 14 (3 blocker, 6 major, 4 minor) | E close ⌘W; F1 alerts (restore NSAlert ids, title+message, keep-layers text, drop Saved note); F2 status help + inset; F3 plain open errors (after F1); F4 debug budgets; G PJ-P3 query + Saving… sampling; needs-ui #1252 scrub marker | no |
 
 ## Decisions
 - Waves have at most 2 independent tasks, so each wave runs as one worktree subagent per task (lead.md stage 3), not build-wave.js.
@@ -74,3 +74,5 @@ Waves (packet's Build waves, checked against dev at 00e546a):
 - D-11 journeys quit + relaunch to use Open Recent (no-window menu was empty); fix B makes the packet's path work.
 - Lesson: journeys must isolate every persistent folder the app writes (recovery dir); an alert left by one journey blocks clicks and sheets for every later launch.
 - Merged in round 1: #1233 perf, #1234 D-12, #1235 D-11, #1239 fix B, #1240 fix A. #1236 (another session) raised the macOS job to 90 min.
+- Decision: the restore offer stays an alert at launch (packet PJ-3) despite design.md "alerts never at launch"; recorded exception, critic finding #9 (minor) not fixed.
+- Filed needs-ui #1252 (ScrubField marker over its label) for line:suiteui.
