@@ -28,15 +28,21 @@ public struct CompositionSettings: Sendable, Hashable {
 
     /// Why the settings can't make a composition, one line per problem, in
     /// form order; empty when they can.
-    public var problems: [String] {
-        var problems: [String] = []
-        if name.trimmed.isEmpty { problems.append("Enter a name.") }
+    public var problems: [String] { fieldProblems.map(\.text) }
+
+    /// Each problem with the sheet field it's about, in form order, so the
+    /// sheet shows it next to that field.
+    public var fieldProblems: [CompositionProblem] {
+        var problems: [CompositionProblem] = []
+        if name.trimmed.isEmpty { problems.append(.init(.name, "Enter a name.")) }
         let sizes = "\(Self.sizeRange.lowerBound) to \(Self.sizeRange.upperBound)"
-        if !Self.sizeRange.contains(width) { problems.append("Width must be \(sizes) pixels.") }
-        if !Self.sizeRange.contains(height) { problems.append("Height must be \(sizes) pixels.") }
-        if !Self.frameRates.contains(framesPerSecond) { problems.append("Frame rate must be 24, 25, 30 or 60 fps.") }
+        if !Self.sizeRange.contains(width) { problems.append(.init(.width, "Width must be \(sizes) pixels.")) }
+        if !Self.sizeRange.contains(height) { problems.append(.init(.height, "Height must be \(sizes) pixels.")) }
+        if !Self.frameRates.contains(framesPerSecond) {
+            problems.append(.init(.frameRate, "Frame rate must be 24, 25, 30 or 60 fps."))
+        }
         if !(durationSeconds > 0 && durationSeconds <= Self.maxDurationSeconds) {
-            problems.append("Duration must be more than 0 seconds and at most 24 hours.")
+            problems.append(.init(.duration, "Duration must be more than 0 seconds and at most 24 hours."))
         }
         return problems
     }
@@ -48,6 +54,22 @@ public struct CompositionSettings: Sendable, Hashable {
     public var durationFrames: Int? {
         guard isValid else { return nil }
         return max(1, Int((durationSeconds * Double(framesPerSecond)).rounded()))
+    }
+}
+
+/// A field of the New Composition sheet.
+public enum CompositionField: Sendable, Hashable, CaseIterable {
+    case name, width, height, frameRate, duration
+}
+
+/// One reason the settings can't make a composition, and the field it's about.
+public struct CompositionProblem: Sendable, Hashable {
+    public var field: CompositionField
+    public var text: String
+
+    public init(_ field: CompositionField, _ text: String) {
+        self.field = field
+        self.text = text
     }
 }
 

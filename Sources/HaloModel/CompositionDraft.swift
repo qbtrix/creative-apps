@@ -33,19 +33,26 @@ public struct CompositionDraft: Sendable, Hashable {
 
     /// Why Create can't make a composition from the draft; empty when it can.
     /// A field whose text isn't a number says so instead of giving the range.
-    public var problems: [String] {
-        settings.problems.map { line in
-            if line.hasPrefix("Width "), Self.wholeNumber(widthText) == nil {
-                return "Width must be a whole number of pixels."
+    public var problems: [String] { fieldProblems.map(\.text) }
+
+    /// The problems with the field each is about, in form order.
+    public var fieldProblems: [CompositionProblem] {
+        settings.fieldProblems.map { problem in
+            switch problem.field {
+            case .width where Self.wholeNumber(widthText) == nil:
+                CompositionProblem(.width, "Width must be a whole number of pixels.")
+            case .height where Self.wholeNumber(heightText) == nil:
+                CompositionProblem(.height, "Height must be a whole number of pixels.")
+            case .duration where Self.seconds(durationText) == nil:
+                CompositionProblem(.duration, "Duration must be a number of seconds.")
+            default: problem
             }
-            if line.hasPrefix("Height "), Self.wholeNumber(heightText) == nil {
-                return "Height must be a whole number of pixels."
-            }
-            if line.hasPrefix("Duration "), Self.seconds(durationText) == nil {
-                return "Duration must be a number of seconds."
-            }
-            return line
         }
+    }
+
+    /// The problems the sheet shows right under `field`; empty when it's fine.
+    public func problems(for field: CompositionField) -> [String] {
+        fieldProblems.filter { $0.field == field }.map(\.text)
     }
 
     /// Whether Create can make a composition from the draft.
