@@ -2,9 +2,9 @@
 
 Issue: #777 · Packet: docs/blueprints/halo/features/foundation.md (on branch `docs/halo-feature-packets` until its PR merges)
 Run: act-1a13b78bcdb-qu60 · Session: session_01Dc9GDxc9HxLtv9XMcFgSWh · Started: 2026-10-14T17:33Z
-Stage: 4 round 3 (waiting on the dev CI run containing 216cd7e, #996)
+Stage: 4 round 3 (judged on 38687993459; panel + track fixer running)
 Base: 52928d1dbbdd72b849f7fdb6363991f35b1adbeb
-Next: collect the r3 fixer PR(s) (window-size leak between journeys, rigid 672 pt content column, LAYERS row click-select, halo.inspector anchor); then judge round 3 on the first dev CI run containing them and round 2's #982–#984; same four lenses
+Next: collect the round 3 panel and the 880 track fixer PR; round 4 (the last by budget) runs on the CI run containing them
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -33,7 +33,8 @@ Next: collect the r3 fixer PR(s) (window-size leak between journeys, rigid 672 p
 ## Rounds
 | round | CI run | CI | audit vs baseline | lenses | confirmed | fixed by | clean |
 |---|---|---|---|---|---|---|---|
-| 3 | 38682385432 (e8e5b52, after #962 revert; before #982–#984) | red: H-J1 (halo.inspector not found after Create), H-J13 (layer row click selects nothing), testLayoutAtWidths (no layer selected at 880); H-J0, scrub, menus pass | halo offscreen 16 > 8: the 880 window from testLayoutAtWidths leaks into later journeys (sidebar -68, inspector to 956); Halo's content column is a rigid 672 pt at both 1000 and 880; contrast 0, identifier 2 | journeys + audit (panel waits for the run with round 2 fixes) | 4 Halo-owned | #996 | no |
+| 3 | 38687993459 (8f78bad, has #982–#984 and #996) | red only on testLayoutAtWidths: halo.timeline.track (8, 568) starts 4 pt left of the 880 window (the selected track row runs under the floating sidebar); H-J0, H-J1, H-J13, menus, scrub pass | halo offscreen 0 (≤ 8), contrast 0, identifier 1, unnamed 0: at or under baseline | clarity, layout, controls, design | track edge + panel pending | track fixer | no |
+| 3a | 38682385432 (e8e5b52, after #962 revert; before #982–#984) | red: H-J1 (halo.inspector not found after Create), H-J13 (layer row click selects nothing), testLayoutAtWidths (no layer selected at 880); H-J0, scrub, menus pass | halo offscreen 16 > 8: the 880 window from testLayoutAtWidths leaks into later journeys (sidebar -68, inspector to 956); Halo's content column is a rigid 672 pt at both 1000 and 880; contrast 0, identifier 2 | journeys + audit (panel waits for the run with round 2 fixes) | 4 Halo-owned | #996 | no |
 | 2 | 38679533707 (54e16aa) | red: H-J0, testScrubTheTimeline, testEveryMenuOpens pass; H-J1 (halo.inspector not found after Create), H-J13 (toolbar halo.composition.new not found), testLayoutAtWidths (no layer selected at 880) fail; -HaloWindowSize now sticks | halo offscreen 14 > 8 (#933); contrast 1 ≤ 2; identifier 2 ≤ 10; unnamed 0 ≤ 5 | clarity, layout, controls, design | 3 journey (all SuiteWindow / #962) + 14 panel (6 major, 8 minor) | journey: none (SuiteWindow, #962 revert); panel: batches A #984 (2,3,4), B #982 (6,7,13), C #983 (5,8,10,11,12); #976 (8, 9 SuiteUI roots); 1, 14 kept by packet | no |
 | 1 | 38675308731 (1025fcc) | red: Halo journeys H-J0, H-J1, H-J13, testLayoutAtWidths, testScrubTheTimeline fail; testEveryMenuOpens passes | halo offscreen 14 > 8 (SuiteUI #933 split-view overflow: sidebar rows x -28/-8, inspector to x 1036 in a 12–1012 window); identifier 1 (system Hide Sidebar) < 10; unnamed 0 < 5 | CI + audit + screens (panel not run: blockers already confirmed by the journeys) | 5: layer row click doesn't select (major); H-J0 query misses EmptyStateView title; H-J1 no problem line for abc; -HaloWindowSize ignored (1000 not 880); offscreen over baseline (blocker, SuiteUI #933) | #961 (4); #933 (offscreen) | no |
 | 1a | 38673821944 (3af1c0e) | red: macOS `swift test` failed on SuiteUITests.rowBodyAndItsTogglesCarryNoDoubleClickGesture (not foundation: #938's ids, fixed by #944); UI journeys skipped | not measured | – | – | – | no |
