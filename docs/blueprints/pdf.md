@@ -845,6 +845,20 @@ Drags use page points mapped through `folio.page.<n>`'s frame and the zoom
 | P-J25 | `testEditLineInPlace` (`+ContentEdit`, content-edit; conditional) | `-FolioSample letter` | E; click "2. Rent."'s line; change "first" to "fifth"; Escape; ⌘S; reopen | the line reads "…due on the fifth day." in the same font (the page value names the font); Find "first day" finds 1 (page 1 line 3 only); a character missing from the font names itself in the help |
 | P-J26 | `testRedactAndVerify` (`+ContentEdit`, content-edit; conditional) | `-FolioSample letter`, `-FolioSaveTo <tmp>/Redacted.pdf` | D; drag over "Landlord" on page 1; Tools > Apply Redactions…, Apply; open Redacted.pdf; ⌘F "Landlord" | the sheet lists "1 area on page 1"; the new file has no hit for "Landlord" on page 1 (page 3 still has its own); copying the area yields no text (PF-13) |
 
+### 5.4 Perf journeys (`+Perf`, core-loop)
+
+Report-only until the frame probe's journey helpers are on `dev`; each
+reads the probe's JSON, never an XCUI timing.
+
+| # | Test | Launch | Steps | Budget (section 8) |
+|---|---|---|---|---|
+| P-P1 | `testOpenLongDocument` | `-FolioSample long` | open from the empty window | PB-1: progress mark ≤ 100 ms, first page drawn ≤ 300 ms |
+| P-P2 | `testScrollLongDocument` | `-FolioSample long` | scroll from page 1 to 500 at 3,000 pt/s | PB-3: p95 frame interval ≤ 1.5 refreshes |
+| P-P3 | `testZoomSteps` | `-FolioSample long` | ⌘+ ×6, ⌘− ×6, pinch | PB-4: p95 ≤ 2 frames late |
+| P-P4 | `testDragLatency` | `-FolioSample long` with 1,000 marks | drag-select a line; drag a note 300 pt at 300 pt/s | PB-6, PB-8: p95 ≤ 2 frames late, preview before mouse-up |
+| P-P5 | `testPenLatency` | `letter` sample | a 2,000-point pen stroke at 300 pt/s | PB-10: p95 ≤ 2 frames late |
+| P-P6 | `testReorderLatency` | `-FolioSample long`, Page Grid | drag page 3 across 40 thumbnails | PB-13: p95 ≤ 2 frames late |
+
 ---
 
 ## 6. Contracts
@@ -1487,3 +1501,252 @@ Checked at window sizes **minimum** (`SuiteSize.windowMinimum`, about 944 ×
 | QB-F4 Keyboard parity | every tool has a one-key shortcut; Tab and Shift-Tab walk form fields; arrows move a selected mark 1 pt (Shift 10 pt); ⌥⌘← → move a selected page | P-J5, P-J7 |
 | QB-F5 Reduce Motion, Increase Contrast | page scroll is content; zoom is instant under Reduce Motion; goldens in Increase Contrast | goldens |
 | QB-F6 Geometry holds | only SuiteUI components and tokens in chrome | design lint |
+
+---
+
+## 9. Waves
+
+### 9.1 How the work is split
+
+A **feature** is one lead's packet (`docs/blueprints/pdf/features/<feature>.md`,
+written after approval) and one `feature-lead` issue labelled `line:folio`.
+A **wave** is a set of features that own disjoint files and wait on nothing
+in the same wave, so their leads run side by side. Files W0 creates as
+stubs pass to the feature named on them, which replaces them whole; across
+waves a later feature may own an earlier one's file only after that one is
+done, which the filing rule below guarantees. `docs/blueprints/pdf/waves.py`
+holds the table below as data and checks it: no file owned twice in a wave,
+every owned `Sources/` file in exactly one component of `c4-planned.json`,
+and every wait on an earlier wave. Run on 2026-10-15: `WAVES: PASS (12
+features, 143 agent-hours)`.
+
+```
+W0  foundation ─────────────────────────────────────────────── waits on nothing
+        │                                                        (+ supervisor: Package.swift, project.yml, bundle-apps)
+        ├──▶ W1  reader          (P-T1, P-T2, P-T3, P-T19)
+        ├──▶ W1  find            (P-T6)
+        ├──▶ W1  markup          (P-T5, P-T7–P-T10)            six leads side by side,
+        ├──▶ W1  forms           (P-T11, P-T12)                 no shared file
+        ├──▶ W1  pages           (P-T3 thumbnails, P-T13–P-T16)
+        └──▶ W1  history-files   (P-T17, P-T18, P-T20, P-T26)
+                 │
+                 ├──▶ W2  sign            after markup, forms
+                 ├──▶ W2  export-convert  after history-files, markup   (P-T4, P-T22–P-T25)
+                 └──▶ W2  ocr             after reader, find, history-files
+                          │
+                          └──▶ W3  core-loop   after every W1 and W2 feature
+                                   │
+                                   └──▶ W4  content-edit (conditional)   after core-loop and creative-core CP-1–CP-5
+```
+
+A W2 feature starts as soon as its own W1 dependencies merge. Journey tasks
+need the Folio journey bundle in `project.yml` (W0). The lead playbook's
+stage 0 stops a lead whose `Depends on:` issue is open, so each feature
+issue is filed with the one dependency in its row.
+
+| Wave | Feature | Feature issue `Depends on:` | Tasks (about) | Agent-hours (about) |
+|---|---|---|---|---|
+| W0 | `foundation` | nothing (its supervisor task needs the captain's merge) | 14 PRs: values; protocols; fakes (two PRs); fixtures and services; workspace state and `edit`; commands and availability; tools; layout and page summary; launch arguments; window shell, sidebar and inspector stubs, area stubs; live stubs; contract suites; the every-control and layout journeys; audit entry and C4 | 22 |
+| W1 | `reader` | foundation | 8 | 13 |
+| W1 | `find` | foundation | 4 | 6 |
+| W1 | `markup` | foundation | 9 | 15 |
+| W1 | `forms` | foundation | 6 | 10 |
+| W1 | `pages` | foundation | 8 | 13 |
+| W1 | `history-files` | foundation | 7 | 12 |
+| W2 | `sign` | filed once markup and forms are done; the later of the two | 6 | 10 |
+| W2 | `export-convert` | the later of history-files and markup | 7 | 12 |
+| W2 | `ocr` | the last of reader, find, history-files | 5 | 8 |
+| W3 | `core-loop` | the last W1 or W2 feature to finish | 4 | 6 |
+| W4 | `content-edit` | core-loop, and creative-core CP-1 to CP-5 closed | 8 | 16 |
+
+Totals: W0 22 agent-hours; W1 69 (about 12 wall-clock hours with six leads
+in parallel); W2 30; W3 6; W4 16 (plus the creative-core work, estimated
+there). 143 agent-hours for Folio's own work; v1 without W4 is 127.
+
+### 9.2 Features and their owned files
+
+Generated by `python3 docs/blueprints/pdf/waves.py --markdown`.
+
+#### W0 · `foundation`: Foundation: targets, contracts, fakes, workspace, the window's seams
+
+- **Covers:** P-T30 (no dead controls); open and show pages on fakes for every W1 feature; the targets and the audit entry
+- **Waits on:** nothing
+- **Proves:** P-J0, P-J12, P-J13; PB-1 (fake half); PL1-PL5
+- **Estimate:** about 14 PRs, 22 agent-hours
+- **Owned files (128):** `Sources/FolioModel/Contracts/FolioValues.swift`, `Sources/FolioModel/Contracts/FolioContracts.swift`, `Sources/FolioModel/Fakes/FolioFakeFile.swift`, `Sources/FolioModel/Fakes/FakeDocumentOpening.swift`, `Sources/FolioModel/Fakes/FakePageImaging.swift`, `Sources/FolioModel/Fakes/FakePageTextReading.swift`, `Sources/FolioModel/Fakes/FakeTextFinding.swift`, `Sources/FolioModel/Fakes/FakeTextSelecting.swift`, `Sources/FolioModel/Fakes/FakeAnnotating.swift`, `Sources/FolioModel/Fakes/FakeFormFilling.swift`, `Sources/FolioModel/Fakes/FakeSigning.swift`, `Sources/FolioModel/Fakes/FakeSignatureStore.swift`, `Sources/FolioModel/Fakes/FakePageOrganizing.swift`, `Sources/FolioModel/Fakes/FakeDocumentHistory.swift`, `Sources/FolioModel/Fakes/FakeDocumentWriting.swift`, `Sources/FolioModel/Fakes/FakePageExporting.swift`, `Sources/FolioModel/Fakes/FakeTextRecognizing.swift`, `Sources/FolioModel/Fixtures/FolioFixtures.swift`, `Sources/FolioModel/FolioServices.swift`, `Sources/FolioModel/FolioWorkspace.swift`, `Sources/FolioModel/FolioCommand.swift`, `Sources/FolioModel/FolioTool.swift`, `Sources/FolioModel/FolioLaunch.swift`, `Sources/FolioModel/FolioLayout.swift`, `Sources/FolioModel/FolioPageSummary.swift`, `Sources/FolioModel/Workspace/FolioWorkspace+Read.swift`, `Sources/FolioModel/Workspace/FolioWorkspace+Find.swift`, `Sources/FolioModel/Workspace/FolioWorkspace+Markup.swift`, `Sources/FolioModel/Workspace/FolioWorkspace+Forms.swift`, `Sources/FolioModel/Workspace/FolioWorkspace+Sign.swift`, `Sources/FolioModel/Workspace/FolioWorkspace+Pages.swift`, `Sources/FolioModel/Workspace/FolioWorkspace+History.swift`, `Sources/FolioModel/Workspace/FolioWorkspace+Files.swift`, `Sources/FolioModel/Workspace/FolioWorkspace+Export.swift`, `Sources/FolioModel/Workspace/FolioWorkspace+OCR.swift`, `Sources/FolioModel/Availability/FolioAvailability+Read.swift`, `Sources/FolioModel/Availability/FolioAvailability+Find.swift`, `Sources/FolioModel/Availability/FolioAvailability+Markup.swift`, `Sources/FolioModel/Availability/FolioAvailability+Forms.swift`, `Sources/FolioModel/Availability/FolioAvailability+Sign.swift`, `Sources/FolioModel/Availability/FolioAvailability+Pages.swift`, `Sources/FolioModel/Availability/FolioAvailability+History.swift`, `Sources/FolioModel/Availability/FolioAvailability+Files.swift`, `Sources/FolioModel/Availability/FolioAvailability+Export.swift`, `Sources/FolioModel/Availability/FolioAvailability+OCR.swift`, `Sources/FolioModel/Tools/FolioTool+Select.swift`, `Sources/FolioModel/Tools/FolioTool+TextMarkup.swift`, `Sources/FolioModel/Tools/FolioTool+Annotate.swift`, `Sources/FolioModel/Tools/FolioTool+Sign.swift`, `Sources/FolioModel/Live/LiveTextFinding.swift`, `Sources/FolioModel/Live/LiveTextSelecting.swift`, `Sources/FolioModel/Live/LiveAnnotating.swift`, `Sources/FolioModel/Live/LiveFormFilling.swift`, `Sources/FolioModel/Live/LiveSigning.swift`, `Sources/FolioModel/Live/LiveSignatureStore.swift`, `Sources/FolioModel/Live/LivePageOrganizing.swift`, `Sources/FolioModel/Live/LiveDocumentHistory.swift`, `Sources/FolioApp/FolioApp.swift`, `Sources/FolioApp/FolioWindow.swift`, `Sources/FolioApp/FolioControls.swift`, `Sources/FolioApp/PageView/FolioPageView.swift`, `Sources/FolioApp/PageView/FolioPageGestures.swift`, `Sources/FolioApp/PageView/FolioMarksLayer.swift`, `Sources/FolioApp/PageView/FolioFieldLayer.swift`, `Sources/FolioApp/Sidebar/FolioSidebar.swift`, `Sources/FolioApp/Sidebar/FolioThumbnails.swift`, `Sources/FolioApp/Inspector/FolioInspector.swift`, `Sources/FolioApp/Live/FolioServices+Live.swift`, `Sources/FolioApp/FolioWindow+Read.swift`, `Sources/FolioApp/FolioWindow+Find.swift`, `Sources/FolioApp/FolioWindow+Markup.swift`, `Sources/FolioApp/FolioWindow+Forms.swift`, `Sources/FolioApp/FolioWindow+Sign.swift`, `Sources/FolioApp/FolioWindow+Pages.swift`, `Sources/FolioApp/FolioWindow+History.swift`, `Sources/FolioApp/FolioWindow+Files.swift`, `Sources/FolioApp/FolioWindow+Export.swift`, `Sources/FolioApp/FolioWindow+OCR.swift`, `Sources/FolioApp/FolioCommands+Read.swift`, `Sources/FolioApp/FolioCommands+Find.swift`, `Sources/FolioApp/FolioCommands+Markup.swift`, `Sources/FolioApp/FolioCommands+Forms.swift`, `Sources/FolioApp/FolioCommands+Sign.swift`, `Sources/FolioApp/FolioCommands+Pages.swift`, `Sources/FolioApp/FolioCommands+History.swift`, `Sources/FolioApp/FolioCommands+Files.swift`, `Sources/FolioApp/FolioCommands+Export.swift`, `Sources/FolioApp/FolioCommands+OCR.swift`, `Sources/FolioApp/Live/PDFKitOpening.swift`, `Sources/FolioApp/Live/PDFKitImageOpening.swift`, `Sources/FolioApp/Live/PDFKitImaging.swift`, `Sources/FolioApp/Live/PDFKitText.swift`, `Sources/FolioApp/Live/PDFKitFields.swift`, `Sources/FolioApp/Live/PDFKitAnnotations.swift`, `Sources/FolioApp/Live/PDFKitWriting.swift`, `Sources/FolioApp/Live/PDFKitExporting.swift`, `Sources/FolioApp/Live/VisionRecognizing.swift`, `Sources/FolioApp/Live/FolioSampleWriter.swift`, `Sources/FolioApp/Live/FolioSignatureMark.swift`, `Tests/FolioModelTests/DocumentOpeningContractTests.swift`, `Tests/FolioModelTests/PageImagingContractTests.swift`, `Tests/FolioModelTests/PageTextReadingContractTests.swift`, `Tests/FolioModelTests/TextFindingContractTests.swift`, `Tests/FolioModelTests/TextSelectingContractTests.swift`, `Tests/FolioModelTests/AnnotatingContractTests.swift`, `Tests/FolioModelTests/FormFillingContractTests.swift`, `Tests/FolioModelTests/SigningContractTests.swift`, `Tests/FolioModelTests/SignatureStoringContractTests.swift`, `Tests/FolioModelTests/PageOrganizingContractTests.swift`, `Tests/FolioModelTests/DocumentHistoryContractTests.swift`, `Tests/FolioModelTests/DocumentWritingContractTests.swift`, `Tests/FolioModelTests/PageExportingContractTests.swift`, `Tests/FolioModelTests/TextRecognizingContractTests.swift`, `Tests/FolioModelTests/FolioCommandTests.swift`, `Tests/FolioModelTests/FolioToolsTests.swift`, `Tests/FolioModelTests/FolioWorkspaceTests.swift`, `Tests/FolioModelTests/FolioLayoutTests.swift`, `Tests/FolioModelTests/FolioFixturesTests.swift`, `Tests/FolioModelTests/FolioPageSummaryTests.swift`, `Tests/FolioModelTests/FolioBudget.swift`, `Tests/FolioModelTests/FolioFoundationBudgetTests.swift`, `Tests/AppSnapshotTests/FolioWindowSnapshots.swift`, `UITests/FolioJourneyTests.swift`, `UITests/audit-baseline.json`, `docs/c4/model.json`, `Package.swift`, `project.yml`, `scripts/bundle-apps`
+
+#### W1 · `reader`: Open and read: live PDFKit, zoom and view modes, go to page, outline, passwords, open errors
+
+- **Covers:** P-T1, P-T2, P-T3 (go to page, outline), P-T19
+- **Waits on:** foundation
+- **Proves:** P-J1, P-J11; PB-1 (live), PB-2, PB-3, PB-4, PB-17; PF-1, PF-2
+- **Estimate:** about 8 PRs, 13 agent-hours
+- **Owned files (24):** `Sources/FolioApp/Live/PDFKitOpening.swift`, `Sources/FolioApp/Live/PDFKitImaging.swift`, `Sources/FolioApp/Live/PDFKitText.swift`, `Sources/FolioApp/Live/FolioSampleWriter.swift`, `Sources/FolioModel/FolioLayout.swift`, `Sources/FolioModel/Workspace/FolioWorkspace+Read.swift`, `Sources/FolioModel/Availability/FolioAvailability+Read.swift`, `Sources/FolioApp/FolioWindow+Read.swift`, `Sources/FolioApp/FolioCommands+Read.swift`, `Sources/FolioApp/PageView/FolioPageView.swift`, `Sources/FolioApp/Sidebar/FolioOutline.swift`, `Sources/FolioApp/Sheets/FolioPasswordSheet.swift`, `Tests/FolioModelTests/DocumentOpeningContractTests.swift`, `Tests/FolioModelTests/PageImagingContractTests.swift`, `Tests/FolioModelTests/PageTextReadingContractTests.swift`, `Tests/FolioModelTests/FolioLayoutTests.swift`, `Tests/FolioModelTests/FolioReadTests.swift`, `Tests/FolioModelTests/FolioReaderBudgetTests.swift`, `Tests/AppSnapshotTests/FolioReaderSnapshots.swift`, `Tests/AppSnapshotTests/FolioImagingFidelityTests.swift`, `Tests/AppSnapshotTests/FolioTextFidelityTests.swift`, `Tests/AppSnapshotTests/FolioImagingBudgetTests.swift`, `UITests/FolioJourneyTests+Read.swift`, `UITests/FolioJourneyTests+OpenErrors.swift`
+
+#### W1 · `find`: Find text: the find bar, every hit, results list
+
+- **Covers:** P-T6
+- **Waits on:** foundation
+- **Proves:** P-J2; PB-5
+- **Estimate:** about 4 PRs, 6 agent-hours
+- **Owned files (13):** `Sources/FolioModel/Live/LiveTextFinding.swift`, `Sources/FolioModel/Fakes/FakeTextFinding.swift`, `Sources/FolioModel/Workspace/FolioWorkspace+Find.swift`, `Sources/FolioModel/Availability/FolioAvailability+Find.swift`, `Sources/FolioApp/FolioWindow+Find.swift`, `Sources/FolioApp/FolioCommands+Find.swift`, `Sources/FolioApp/PageView/FolioFindBar.swift`, `Sources/FolioApp/Sidebar/FolioFindResults.swift`, `Tests/FolioModelTests/TextFindingContractTests.swift`, `Tests/FolioModelTests/FolioFindTests.swift`, `Tests/FolioModelTests/FolioFindBudgetTests.swift`, `Tests/AppSnapshotTests/FolioFindSnapshots.swift`, `UITests/FolioJourneyTests+Find.swift`
+
+#### W1 · `markup`: Mark up: select text, highlight, underline, strike out, notes, text boxes, pen, shapes
+
+- **Covers:** P-T5, P-T7, P-T8, P-T9, P-T10
+- **Waits on:** foundation
+- **Proves:** P-J3, P-J4; PB-6, PB-7, PB-8, PB-9, PB-10
+- **Estimate:** about 9 PRs, 15 agent-hours
+- **Owned files (25):** `Sources/FolioModel/Live/LiveTextSelecting.swift`, `Sources/FolioModel/Live/LiveAnnotating.swift`, `Sources/FolioModel/Fakes/FakeTextSelecting.swift`, `Sources/FolioModel/Fakes/FakeAnnotating.swift`, `Sources/FolioModel/Workspace/FolioWorkspace+Markup.swift`, `Sources/FolioModel/Availability/FolioAvailability+Markup.swift`, `Sources/FolioModel/Tools/FolioTool+Select.swift`, `Sources/FolioModel/Tools/FolioTool+TextMarkup.swift`, `Sources/FolioModel/Tools/FolioTool+Annotate.swift`, `Sources/FolioApp/FolioWindow+Markup.swift`, `Sources/FolioApp/FolioCommands+Markup.swift`, `Sources/FolioApp/PageView/FolioMarksLayer.swift`, `Sources/FolioApp/PageView/FolioSelectionLayer.swift`, `Sources/FolioApp/PageView/FolioPageGestures.swift`, `Sources/FolioApp/Inspector/FolioMarkInspector.swift`, `Sources/FolioApp/Sidebar/FolioMarksList.swift`, `Sources/FolioApp/Live/PDFKitAnnotations.swift`, `Tests/FolioModelTests/TextSelectingContractTests.swift`, `Tests/FolioModelTests/AnnotatingContractTests.swift`, `Tests/FolioModelTests/FolioMarkupTests.swift`, `Tests/FolioModelTests/FolioToolsTests.swift`, `Tests/FolioModelTests/FolioMarkupBudgetTests.swift`, `Tests/AppSnapshotTests/FolioMarkupSnapshots.swift`, `UITests/FolioJourneyTests+Markup.swift`, `UITests/FolioJourneyTests+Annotate.swift`
+
+#### W1 · `forms`: Fill forms: fields over the page, Tab order, required fields, clear
+
+- **Covers:** P-T11, P-T12
+- **Waits on:** foundation
+- **Proves:** P-J5; PB-11; PL8
+- **Estimate:** about 6 PRs, 10 agent-hours
+- **Owned files (15):** `Sources/FolioModel/Live/LiveFormFilling.swift`, `Sources/FolioModel/Fakes/FakeFormFilling.swift`, `Sources/FolioModel/Workspace/FolioWorkspace+Forms.swift`, `Sources/FolioModel/Availability/FolioAvailability+Forms.swift`, `Sources/FolioApp/FolioWindow+Forms.swift`, `Sources/FolioApp/FolioCommands+Forms.swift`, `Sources/FolioApp/PageView/FolioFieldLayer.swift`, `Sources/FolioApp/Inspector/FolioFieldInspector.swift`, `Sources/FolioApp/Live/PDFKitFields.swift`, `Tests/FolioModelTests/FormFillingContractTests.swift`, `Tests/FolioModelTests/FolioFormsTests.swift`, `Tests/FolioModelTests/FolioFormsBudgetTests.swift`, `Tests/AppSnapshotTests/FolioFormsSnapshots.swift`, `Tests/AppSnapshotTests/FolioFieldOverlayTests.swift`, `UITests/FolioJourneyTests+Forms.swift`
+
+#### W1 · `pages`: Organize pages: thumbnails, grid, reorder, rotate, delete, insert, combine, extract, split
+
+- **Covers:** P-T3 (thumbnails), P-T13, P-T14, P-T15, P-T16
+- **Waits on:** foundation
+- **Proves:** P-J7, P-J8; PB-13; PL6, PL7; PF-7
+- **Estimate:** about 8 PRs, 13 agent-hours
+- **Owned files (19):** `Sources/FolioModel/Live/LivePageOrganizing.swift`, `Sources/FolioModel/Fakes/FakePageOrganizing.swift`, `Sources/FolioModel/Workspace/FolioWorkspace+Pages.swift`, `Sources/FolioModel/Availability/FolioAvailability+Pages.swift`, `Sources/FolioApp/FolioWindow+Pages.swift`, `Sources/FolioApp/FolioCommands+Pages.swift`, `Sources/FolioApp/Sidebar/FolioThumbnails.swift`, `Sources/FolioApp/PageGrid/FolioPageGrid.swift`, `Sources/FolioApp/Sheets/FolioExtractSheet.swift`, `Sources/FolioApp/Sheets/FolioInsertSheet.swift`, `Sources/FolioApp/Sheets/FolioCombineSheet.swift`, `Sources/FolioApp/Sheets/FolioCropSheet.swift`, `Tests/FolioModelTests/PageOrganizingContractTests.swift`, `Tests/FolioModelTests/FolioPagesTests.swift`, `Tests/FolioModelTests/FolioPagesBudgetTests.swift`, `Tests/AppSnapshotTests/FolioPagesSnapshots.swift`, `Tests/AppSnapshotTests/FolioThumbnailLayoutTests.swift`, `UITests/FolioJourneyTests+Pages.swift`, `UITests/FolioJourneyTests+Combine.swift`
+
+#### W1 · `history-files`: Undo, redo, save, save as, flatten, passwords
+
+- **Covers:** P-T17, P-T18, P-T20, P-T26
+- **Waits on:** foundation
+- **Proves:** P-J9, P-J10; PB-14, PB-15; PF-3, PF-5, PF-6
+- **Estimate:** about 7 PRs, 12 agent-hours
+- **Owned files (24):** `Sources/FolioModel/Live/LiveDocumentHistory.swift`, `Sources/FolioModel/Fakes/FakeDocumentHistory.swift`, `Sources/FolioApp/Live/PDFKitWriting.swift`, `Sources/FolioModel/Workspace/FolioWorkspace+History.swift`, `Sources/FolioModel/Workspace/FolioWorkspace+Files.swift`, `Sources/FolioModel/Availability/FolioAvailability+History.swift`, `Sources/FolioModel/Availability/FolioAvailability+Files.swift`, `Sources/FolioApp/FolioWindow+History.swift`, `Sources/FolioApp/FolioWindow+Files.swift`, `Sources/FolioApp/FolioCommands+History.swift`, `Sources/FolioApp/FolioCommands+Files.swift`, `Sources/FolioApp/Sheets/FolioSaveOptionsSheet.swift`, `Sources/FolioApp/Inspector/FolioDocumentInspector.swift`, `Tests/FolioModelTests/DocumentHistoryContractTests.swift`, `Tests/FolioModelTests/DocumentWritingContractTests.swift`, `Tests/FolioModelTests/FolioHistoryTests.swift`, `Tests/FolioModelTests/FolioFilesTests.swift`, `Tests/FolioModelTests/FolioFilesBudgetTests.swift`, `Tests/AppSnapshotTests/FolioRoundTripTests.swift`, `Tests/AppSnapshotTests/FolioFlattenTests.swift`, `Tests/AppSnapshotTests/FolioPasswordTests.swift`, `Tests/AppSnapshotTests/FolioWritingBudgetTests.swift`, `UITests/FolioJourneyTests+History.swift`, `UITests/FolioJourneyTests+Files.swift`
+
+#### W2 · `sign`: Sign: draw, type or pick a signature and initials; keep them; place them
+
+- **Covers:** P-T21
+- **Waits on:** markup, forms
+- **Proves:** P-J6; PB-12; PF-12
+- **Estimate:** about 6 PRs, 10 agent-hours
+- **Owned files (20):** `Sources/FolioModel/Live/LiveSigning.swift`, `Sources/FolioModel/Live/LiveSignatureStore.swift`, `Sources/FolioModel/Fakes/FakeSigning.swift`, `Sources/FolioModel/Fakes/FakeSignatureStore.swift`, `Sources/FolioModel/Workspace/FolioWorkspace+Sign.swift`, `Sources/FolioModel/Availability/FolioAvailability+Sign.swift`, `Sources/FolioModel/Tools/FolioTool+Sign.swift`, `Sources/FolioApp/FolioWindow+Sign.swift`, `Sources/FolioApp/FolioCommands+Sign.swift`, `Sources/FolioApp/Sheets/FolioSignatureSheet.swift`, `Sources/FolioApp/PageView/FolioSignaturePopover.swift`, `Sources/FolioApp/Live/FolioSignatureMark.swift`, `Tests/FolioModelTests/SigningContractTests.swift`, `Tests/FolioModelTests/SignatureStoringContractTests.swift`, `Tests/FolioModelTests/FolioSignTests.swift`, `Tests/FolioModelTests/FolioToolsTests.swift`, `Tests/FolioModelTests/FolioSignBudgetTests.swift`, `Tests/AppSnapshotTests/FolioSignSnapshots.swift`, `Tests/AppSnapshotTests/FolioSignatureRoundTripTests.swift`, `UITests/FolioJourneyTests+Sign.swift`
+
+#### W2 · `export-convert`: Export pages and text, new from images, reduce size, print
+
+- **Covers:** P-T4, P-T22, P-T23, P-T24, P-T25
+- **Waits on:** history-files, markup
+- **Proves:** P-J21, P-J22, P-J23, P-J24; PF-4, PF-10, PF-11
+- **Estimate:** about 7 PRs, 12 agent-hours
+- **Owned files (18):** `Sources/FolioApp/Live/PDFKitExporting.swift`, `Sources/FolioApp/Live/PDFKitImageOpening.swift`, `Sources/FolioModel/Workspace/FolioWorkspace+Export.swift`, `Sources/FolioModel/Availability/FolioAvailability+Export.swift`, `Sources/FolioApp/FolioWindow+Export.swift`, `Sources/FolioApp/FolioCommands+Export.swift`, `Sources/FolioApp/Sheets/FolioExportSheet.swift`, `Sources/FolioApp/Sheets/FolioReduceSheet.swift`, `Sources/FolioApp/FolioPrinting.swift`, `Tests/FolioModelTests/PageExportingContractTests.swift`, `Tests/FolioModelTests/FolioExportTests.swift`, `Tests/AppSnapshotTests/FolioExportTests.swift`, `Tests/AppSnapshotTests/FolioReduceSizeTests.swift`, `Tests/AppSnapshotTests/FolioMarksFidelityTests.swift`, `UITests/FolioJourneyTests+Export.swift`, `UITests/FolioJourneyTests+Images.swift`, `UITests/FolioJourneyTests+Reduce.swift`, `UITests/FolioJourneyTests+Print.swift`
+
+#### W2 · `ocr`: Recognize text on scans and keep it as a text layer
+
+- **Covers:** P-T27
+- **Waits on:** reader, find, history-files
+- **Proves:** P-J20; PB-16; PF-8, PF-9
+- **Estimate:** about 5 PRs, 8 agent-hours
+- **Owned files (12):** `Sources/FolioApp/Live/VisionRecognizing.swift`, `Sources/FolioModel/Workspace/FolioWorkspace+OCR.swift`, `Sources/FolioModel/Availability/FolioAvailability+OCR.swift`, `Sources/FolioApp/FolioWindow+OCR.swift`, `Sources/FolioApp/FolioCommands+OCR.swift`, `Sources/FolioApp/Sheets/FolioRecognizeSheet.swift`, `Tests/FolioModelTests/TextRecognizingContractTests.swift`, `Tests/FolioModelTests/FolioOCRTests.swift`, `Tests/AppSnapshotTests/FolioOCRFidelityTests.swift`, `Tests/AppSnapshotTests/FolioOCRRoundTripTests.swift`, `Tests/AppSnapshotTests/FolioOCRBudgetTests.swift`, `UITests/FolioJourneyTests+OCR.swift`
+
+#### W3 · `core-loop`: The core loop, live, measured
+
+- **Covers:** every tier-1 row on live services
+- **Waits on:** reader, find, markup, forms, pages, history-files, sign, export-convert, ocr
+- **Proves:** P-J14, P-J12 (final), P-J13 (final), P-P1-P-P6
+- **Estimate:** about 4 PRs, 6 agent-hours
+- **Owned files (5):** `UITests/FolioJourneyTests+Loop.swift`, `UITests/FolioJourneyTests+Perf.swift`, `UITests/FolioJourneyTests.swift`, `Tests/FolioModelTests/FolioLoopTests.swift`, `docs/blueprints/pdf.md`
+
+#### W4 · `content-edit`: Conditional: edit existing text in place, and true redaction (needs CorePDF CP-1 to CP-5)
+
+- **Covers:** P-T28, P-T29
+- **Waits on:** core-loop
+- **Proves:** P-J25, P-J26; PF-13
+- **Estimate:** about 8 PRs, 16 agent-hours
+- **Owned files (17):** `Sources/FolioModel/Contracts/FolioContentEditContracts.swift`, `Sources/FolioModel/Fakes/FakeTextReplacing.swift`, `Sources/FolioModel/Fakes/FakeRedacting.swift`, `Sources/FolioModel/Live/LiveTextReplacing.swift`, `Sources/FolioModel/Live/LiveRedacting.swift`, `Sources/FolioModel/Workspace/FolioWorkspace+ContentEdit.swift`, `Sources/FolioModel/Availability/FolioAvailability+ContentEdit.swift`, `Sources/FolioModel/Tools/FolioTool+ContentEdit.swift`, `Sources/FolioApp/FolioWindow+ContentEdit.swift`, `Sources/FolioApp/FolioCommands+ContentEdit.swift`, `Sources/FolioApp/PageView/FolioRedactionLayer.swift`, `Sources/FolioApp/Sheets/FolioApplyRedactionSheet.swift`, `Tests/FolioModelTests/TextReplacingContractTests.swift`, `Tests/FolioModelTests/RedactingContractTests.swift`, `Tests/AppSnapshotTests/FolioRedactionTests.swift`, `UITests/FolioJourneyTests+ContentEdit.swift`, `Package.swift`
+
+### 9.3 creative-core work
+
+The six `CorePDF` items of section 4.4. None blocks v1's W0 to W3. CP-1 to
+CP-5 gate the conditional W4 feature; CP-6 is for certificate signing
+(Later). Each is "needs a new core issue": one issue per item on
+qbtrix/creative-core, labelled `needs-core`, filed after the captain
+approves, with the acceptance line from 4.4.
+
+### 9.4 Protected paths (supervisor merges)
+
+W0's first task touches files the fast lane refuses (CLAUDE.md, Parallel
+agents), so it is a supervisor-merged PR, not a fast-lane one:
+
+- `Package.swift`: `"Folio"` added to `apps` and `model("Folio", [])`
+  (FolioModel with no engine; `AppSnapshotTests` gains FolioApp and
+  FolioModel through the existing `apps` map).
+- `project.yml`: the `FolioJourneyTests` bundle globbing
+  `UITests/FolioJourneyTests*.swift` in the `Journeys` scheme.
+- `scripts/bundle-apps`: Folio's bundle and Info.plist (PDF as an
+  Editor of rank Alternate, `com.adobe.pdf`, Apple docs: UTType.pdf),
+  or, once the suite's packaging lands, Folio as the sixth embedded app.
+- `UITests/audit-baseline.json`: `folio` at 0 for every check (a new app at
+  0 is not a loosening; section 8.2).
+
+W4 also edits `Package.swift` (FolioModel gains the `CorePDF` product).
+
+### 9.5 What Folio needs from other lines
+
+| Line | Need | Filed by | Until it lands |
+|---|---|---|---|
+| `line:suite` | `SuiteApp.folio` in `SuiteModel` (identity, bundle id, glyph `doc.richtext`, ⌃⌘6), PDF in `SuiteTypeRegistry` (Folio: Editor, Alternate), `SwitchMenu` and `SwitcherEntries` with seven items | foundation (an issue on the suite line) | Folio runs standalone; its switcher row shows the suite's six items disabled with their reason, plus nothing for Folio |
+| `line:suite` | Hand-offs: Library "Make PDF from Selection" and Photo "Open In ▸ Folio" (images in), Folio "Open In ▸ Photo" (a page out at 300 ppi), Design's PDF export "Open In ▸ Folio" | export-convert (issues on the suite, Library, Photo and Design lines) | File > New from Images and Export cover the same work by hand |
+| `line:suiteui` | `AppSwitcher` seventh item | foundation (`needs-ui`) | the six-item row |
+| `line:suiteui` | `ThumbnailGrid`: page caption, multi-select, drag reorder with a drop line, keyboard reorder | pages (`needs-ui`) | a plain `LazyVGrid` placeholder in `FolioPageGrid.swift` with the same identifiers |
+| `line:suiteui` | A signature pad (flat drawing well with Clear) | sign (`needs-ui`) | a SwiftUI `Canvas` placeholder in `FolioSignatureSheet.swift` |
+| `line:suiteui` | `ViewerStatusBar` trailing button pill | ocr (`needs-ui`) | the menu item and the inspector row |
+| `line:suiteui` | editor-in-window (#973): sidebar slot, window subtitle, `EditorDetail`, `AppSwitcher` | – (in flight) | `SuiteWindow` as on `dev`; the subtitle shows as the title's suffix |
+
+---
+
+## 10. Decisions and questions for the captain
+
+### 10.1 Calls this blueprint makes (overrule any of them)
+
+1. **Name: Folio** (section 0), with Page and Quill as the alternatives.
+2. **The document is a value; PDFKit is a service** (section 4). Undo,
+   tests and journeys run on Linux; PDFKit reads and writes at the edges.
+3. **Folio follows the system appearance** like Library: it is a reading app,
+   and pages are white paper.
+4. **Tier 1 includes New from Images and Reduce File Size** because the
+   numbers put them in the top five (1.1 rows 4 and 5), although they are
+   one-off actions.
+5. **Word-processing export is text only** (no layout), named so in the
+   sheet; spreadsheet and slide exports are Later.
+6. **OCR is in v1** (Vision is on device and cheap); **compare is Later**;
+   **reflow is not planned**.
+7. **Redaction and in-place text editing are conditional (W4) and never
+   faked**: no black box over live text ships under the name "Redact".
+8. **Drawn and typed signatures are v1; certificate signatures are Later**
+   (CP-6 plus the Security framework).
+9. **Saving never touches the original until the write succeeds**, and
+   Reduce File Size and Extract always write new files.
+10. **One window per document** (`WindowGroup`, like Halo), no tabs in v1.
+
+### 10.2 Questions
+
+- **Q1 Name.** Folio, Page or Quill? Whichever is picked needs a trademark
+  check before the first public build.
+- **Q2 Line.** Approve a new line `line:folio` (labels `line:folio`,
+  `gap`), and the W0 supervisor task on `Package.swift`, `project.yml`,
+  `scripts/bundle-apps` and the audit baseline?
+- **Q3 Default app.** Should Folio ever offer to become the default PDF app
+  (a one-time prompt in onboarding), or only declare itself an Alternate
+  and leave the choice to Finder's Get Info?
+- **Q4 Architecture.** Confirm the value-document design (section 4) over
+  driving `PDFView` and its annotation objects directly.
+- **Q5 Engine.** Approve filing CP-1 to CP-6 on creative-core now (none
+  blocks v1), and whether W4 content-edit holds the v1 release or ships as
+  v1.1 if CorePDF isn't ready when W3 ends.
+- **Q6 Word-processing export.** Ship it in v1 as text-and-paragraphs only,
+  or hold it until layout-aware export (Vision's document structure,
+  macOS 26) can keep tables?
+- **Q7 Scripted forms.** Folio detects and names scripts and XFA but never
+  runs them. Acceptable, or should the scripted-form banner also refuse to
+  save such forms?
+- **Q8 Suite slot.** Folio becomes the sixth app in AfterGlow (⌃⌘6, after
+  Halo). Confirm the order and the glyph.
