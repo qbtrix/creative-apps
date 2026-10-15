@@ -3,8 +3,8 @@
 Issue: #798 · Packet: docs/blueprints/flare/features/live-stage.md
 Run: act-1a13d374bd1-s92z · Session: claude/live-stage-lead-gljfd4 · Started: 2026-10-15T00:40Z
 Stage: 3 wave 3
-Base: 9832551fbf0c32268687638475a764c3b8fd700f
-Next: when #925 (ST-8) merges, build ST-9 on the new dev; ST-5 is building
+Base: db83d3dc259d3613acf68c62734a6c0a2b707824
+Next: wait for ST-5 and ST-9 PRs to merge, then build ST-10 with feature-done
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -16,8 +16,8 @@ Next: when #925 (ST-8) merges, build ST-9 on the new dev; ST-5 is building
 | ST-5 | 3 | LiveConformanceTests | LiveConformanceTests | itself |  | building |
 | ST-6 | 1 | LiveShapes drafts and commits | Live/LiveShapes.swift, LiveShapesTests | LiveShapesTests | #917 | merged |
 | ST-7 | 1 | BoxGestureMath move | Live/BoxGestureMath.swift, Fakes/FakeShapes.swift, BoxGestureMathTests | BoxGestureMathTests | #918 | merged |
-| ST-8 | 2 | boxResult, commitBox | Live/LiveShapes+Box.swift, LiveShapesBoxTests | LiveShapesBoxTests | #925 | open, waiting on lane |
-| ST-9 | 3 | edits + ShapeBuilding | Live/LiveShapes+Edit.swift, LiveShapesEditTests | LiveShapesEditTests | | todo |
+| ST-8 | 2 | boxResult, commitBox | Live/LiveShapes+Box.swift, LiveShapesBoxTests | LiveShapesBoxTests | #925 | merged |
+| ST-9 | 3 | edits + ShapeBuilding | Live/LiveShapes+Edit.swift, LiveShapesEditTests | LiveShapesEditTests |  | building |
 | ST-10 | 4 | model journey + budgets (feature-done) | LiveStageJourneyTests, LiveStageBudgetTests | itself | | todo |
 
 Journeys: J3 and J5 model half, steps 1-6 of the packet. Quality: QB-L5 hit <= 10 ms, QB-L6 draw list <= 20 ms, QB-L11 nested <= 40 ms, QB-V1 cubics kept, QB-F3 one gesture one step.
