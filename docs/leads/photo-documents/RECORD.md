@@ -2,9 +2,9 @@
 
 Issue: #1074 · Packet: docs/blueprints/photo/features/photo-documents.md
 Run: act-1a1404bf04c-bp6m · Session: claude/photo-documents-lead-ezrcev · Started: 2026-10-15T10:40Z
-Stage: 3 wave 6
-Base: 215e3994358888fed5687507e82e23f6ac38904f
-Next: wait for D-9 and the perf fix; rerun scripts/ci on lead/photo-documents-d-5-debug and open its PR; then wave 7 (D-10)
+Stage: 3 wave 7
+Base: 0672506890e811c17e82923b046e316cb553b50c
+Next: wait for D-10 and the perf fix; read the macOS run containing #1230; rerun scripts/ci on lead/photo-documents-d-5-debug; check photo-journey-kit #1073 for wave 8
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -18,8 +18,8 @@ Next: wait for D-9 and the perf fix; rerun scripts/ci on lead/photo-documents-d-
 | D-5 | 4 | Budgets PB-18/19/20 | MT/PhotoDocumentsBudgetTests.swift | PhotoDocumentsBudgetTests | #1225 | merged |
 | D-7 | 4 | Save routing, Keep layers?, open .ora/flat, errors, Not saved, fileServices, Open Recent | A/PhotoWindow+File.swift, A/PhotoCommands+File.swift | V5/V6, app-state rule | #1223 | merged |
 | D-8 | 5 | Save status in top bar, edited dot, Saving…/Opening… notes; snapshots | A/PhotoTopBar.swift, A/PhotoWindow+File.swift, ST/PhotoDocumentsSnapshots.swift | PhotoDocumentsSnapshots | #1228 | merged |
-| D-9 | 6 | PhotoAutosave + wiring | A/PhotoAutosave.swift, A/PhotoWindow+File.swift, ST/PhotoAutosaveTests.swift | PhotoAutosaveTests | #1230 | open |
-| D-10 | 7 | App delegate: Open Recent/Finder opens, unsaved prompt on close/quit | A/PhotoApp.swift, A/PhotoWindow+File.swift, ST/PhotoUnsavedPromptTests.swift | PhotoUnsavedPromptTests | – | waits D-9 |
+| D-9 | 6 | PhotoAutosave + wiring | A/PhotoAutosave.swift, A/PhotoWindow+File.swift, ST/PhotoAutosaveTests.swift | PhotoAutosaveTests | #1230 | merged |
+| D-10 | 7 | App delegate: Open Recent/Finder opens, unsaved prompt on close/quit | A/PhotoApp.swift, A/PhotoWindow+File.swift, ST/PhotoUnsavedPromptTests.swift | PhotoUnsavedPromptTests | – | building |
 | D-11 | 8 | Journeys PJ-1, PJ-1b, PJ-2, PJ-4 | UT/PhotoJourneyTests+Documents.swift | macOS run | – | waits D-10, photo-journey-kit (#1073) |
 | D-12 | 8 | Journeys PJ-3, PJ-P3 (feature-done if last) | UT/PhotoJourneyTests+Recovery.swift, UT/PhotoJourneyTests+PerfDocuments.swift | macOS run | – | waits D-10, photo-journey-kit (#1073) |
 
