@@ -6,7 +6,8 @@ public protocol SceneEditing: Sendable {
     func newDocument(_ preset: CanvasPreset) -> Document
     /// Single. Returns the new scene's id.
     func addScene(_ preset: CanvasPreset, in engine: inout CommandEngine) throws -> String
-    /// Single.
+    /// Single. Callers refuse an empty name first (the workspace says "Type a name for the scene."); an
+    /// implementation may throw for one, and the live one throws `CommandError.emptyName` and changes nothing.
     func renameScene(_ id: String, to name: String, in engine: inout CommandEngine) throws
     /// Single. Throws when it is the last scene.
     func removeScene(_ id: String, in engine: inout CommandEngine) throws
