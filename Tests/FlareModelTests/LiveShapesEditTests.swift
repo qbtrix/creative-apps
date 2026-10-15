@@ -26,7 +26,7 @@ private func layers(_ engine: CommandEngine) -> [Layer] { engine.document.layers
     let edited = layers(engine)[1].shapes[0]
     #expect(edited.path == line && edited.points.count == 3 && engine.undoActionName == "Undo Edit Path")
     try engine.undo()
-    #expect(engine.document == FlareFixtures.bounce)
+    #expect(engine.document == FlareFixtures.bounce && !engine.canUndo)
 }
 
 @Test func liveTranslateMovesTheShapeNotTheLayer() throws {
@@ -36,7 +36,7 @@ private func layers(_ engine: CommandEngine) -> [Layer] { engine.document.layers
     #expect(after.tracks == before.tracks && engine.undoActionName == "Undo Move")
     #expect(after.shapes[0].points == before.shapes[0].points.map { Point(x: $0.x + 5, y: $0.y - 3) })
     try engine.undo()
-    #expect(engine.document == FlareFixtures.bounce)
+    #expect(engine.document == FlareFixtures.bounce && !engine.canUndo)
 }
 
 @Test func liveTranslateMovesAnInstanceByItsTransform() throws {

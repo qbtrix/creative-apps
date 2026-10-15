@@ -1,7 +1,7 @@
 // LiveStageBudgetTests.swift: ST-10 of live-stage (#798), the stage's quality budgets on the live types, as debug-build
 // CI gates: the median of 50 runs, timed with `ContinuousClock`. QB-L5: one `LiveHits.hit` per pointer move within
 // 10 ms on `bounce`; QB-L6: one frame's `LiveStage` draw list within 20 ms on `bounce`; QB-L11 (model half): one
-// frame's list of a scene with instances nested two deep within 40 ms.
+// frame's list of a scene with 500 instances nested two deep within 40 ms.
 import FlareCore
 import FlareModel
 import Testing
@@ -61,9 +61,11 @@ private func nestedDocument(count: Int) -> Document {
 }
 
 @Test func nestedDrawListWithinBudget() {
-    let doc = nestedDocument(count: 20), stage = LiveStage()
+    // QB-L11's scale: 125 outer instances, each holding three leaves, is 500 nested instances.
+    let doc = nestedDocument(count: 125), stage = LiveStage()
     // Per outer instance: its square, then two squares under each of its three leaf instances.
-    let want = 1 + 20 * (1 + 3 * 2)
+    let want = 1 + 125 * (1 + 3 * 2)
+    #expect(want == 876)
     let first = stage.drawList(doc, sceneID: "scene-1", frame: 12, editing: nil)
     #expect(first.items.count == want)
     #expect(first.items.contains { $0.address.instancePath.count == 1 })
