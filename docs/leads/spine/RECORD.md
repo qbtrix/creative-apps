@@ -13,8 +13,8 @@ Next: wait for SP-3's PR to merge; then wave 4 (SP-4, SP-5)
 | SP-10 | 1 | `uniquingIDs` in two passes (closes #235) | LibraryCatalog.swift | LibraryPhotoIDTests | #1093 | merged |
 | SP-11 | 1 | `CatalogHistory` value type | CatalogHistory.swift | LibraryHistoryTests | #1095 | merged |
 | SA-1 | 1 | Pure split of the app into scene, window, browser, grid, inspector, DisplayImage+Image | LibraryApp/* (6 files) | next macOS run, PNGs unchanged | #1096 | merged |
-| SP-2 | 2 | Develop values; PhotoItem grows path, pixelSize, develop, availability | Contracts/DevelopValues.swift, PhotoItem.swift | LibraryPhotoItemTests | | planned |
-| SP-3 | 3 | Protocols (+ `initial` comment fix), SampleImage | Contracts/LibraryContracts.swift, SampleImage.swift | LibraryContractsTests | | planned |
+| SP-2 | 2 | Develop values; PhotoItem grows path, pixelSize, develop, availability | Contracts/DevelopValues.swift, PhotoItem.swift | LibraryPhotoItemTests | #1103 | merged |
+| SP-3 | 3 | Protocols (+ `initial` comment fix), SampleImage | Contracts/LibraryContracts.swift, SampleImage.swift | LibraryContractsTests |  | building |
 | SP-4 | 4 | Fakes: support, platform, use cases (progress first) | Fakes/FakeSupport, FakePlatform, FakeUseCases | LibraryFakesTests | | planned |
 | SP-5 | 4 | Fakes: loupe, develop, crop, exporter | Fakes/FakeRendering.swift | LibraryFakeRenderingTests | | planned |
 | SP-6 | 5 | Eight live stubs, LibraryServices | Live/*, LibraryServices.swift | LibraryServicesTests | | planned |
