@@ -24,3 +24,5 @@ utc	stage	event	ref	note
 2026-10-15T13:03Z	-	heartbeat	-	waiting on lane/CI
 2026-10-15T13:18Z	-	heartbeat	-	waiting on lane/CI
 2026-10-15T13:33Z	-	heartbeat	-	waiting on lane/CI
+2026-10-15T13:43Z	4	ci-run	38742226941	red: PhotoCropOptionsSnapshots.gridAligned
+2026-10-15T13:43Z	4	stage-start	round 1	fixer r1-b1 + critic panel
