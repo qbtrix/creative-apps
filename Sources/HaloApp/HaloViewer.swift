@@ -1,6 +1,7 @@
 // HaloViewer.swift: Halo's main content, the composition viewer with its
 // status bar and timeline strip (HaloTimelineView), which scrubs the playhead
-// and sets in and out points. Views only read HaloProject and call its
+// and sets in and out points. HaloWindow builds it as `init(model:perform:)`,
+// so every action is a HaloCommand. Views only read HaloProject and call its
 // methods; all state lives in HaloModel (scripts/ci checks this).
 import HaloModel
 import SuiteUI
@@ -40,5 +41,15 @@ struct HaloViewer: View {
                 message: "Create a composition to layer and animate footage, shapes and text.",
                 action: ToolbarAction("New Composition…", systemImage: "plus", perform: onNew))
         }
+    }
+}
+
+extension HaloViewer {
+    /// The slot form HaloWindow builds: every action is a command sent to `perform`.
+    init(model: HaloProject, perform: @escaping @MainActor (HaloCommand) -> Void) {
+        self.init(
+            model: model, onNew: { perform(.newComposition) }, onScrub: { perform(.scrub($0)) },
+            onSelectLayer: { perform(.selectLayer($0)) }, onSetInPoint: { perform(.setInPoint) },
+            onSetOutPoint: { perform(.setOutPoint) })
     }
 }
