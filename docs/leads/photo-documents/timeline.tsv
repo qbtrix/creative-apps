@@ -54,3 +54,4 @@ utc	stage	event	ref	note
 2026-10-15T20:09Z	4	round-findings	round 1	diagnosing attribution
 2026-10-15T20:12Z	4	round-findings	round 1	9 ours (restore alert via shared recovery dir), fix D started
 2026-10-15T20:14Z	4	pr-opened	#1239	fix B Open Recent with no window
+2026-10-15T20:15Z	4	pr-opened	#1240	fix A identifiers
