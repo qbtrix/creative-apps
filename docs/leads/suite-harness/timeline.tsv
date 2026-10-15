@@ -46,3 +46,6 @@ utc	stage	event	ref	note
 2026-10-15T00:23Z	4	ci-run	38658150595	round 2 CI on 1854d6c
 2026-10-15T00:23Z	4	round-findings	38658150595	round 2: only SnapshotHost IC appearances red; r2-b1 fixer
 2026-10-15T00:28Z	4	pr-opened	#891	r2-b1 IC hosts, feature-done
+2026-10-15T00:43Z	4	pr-merged	#891	r2-b1 IC hosts
+2026-10-15T00:43Z	4	ci-run	38660293042	round 3 CI on 4b65610
+2026-10-15T00:43Z	4	round-findings	38660293042	round 3: Tokens bestMatch drops high contrast; r3-b1 fixer
