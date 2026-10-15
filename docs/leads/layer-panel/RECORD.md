@@ -38,7 +38,7 @@ Journeys: H-J9 (8 steps, packet "Journey steps"). Quality bars: QB-F1 no dead co
 - Round 1 fix: drop the List (macOS insets rows even with zero row insets) and reorder with `.draggable`/`.dropDestination` on W0's stack, which passed HaloLayerListTests; dropping on row i moves to index i.
 - Rejected round 1 panel finding "go back to a system List(selection:)": the macOS run proved List insets rows (38708263577); W0's stack is what passes HaloLayerListTests.
 - Skipped minor: re-hosting the halo-layer-list snapshots inside an InspectorSection (W0's snapshot shape; HaloLayerListTests draws the list alone too).
-- The lane runs main's scripts/fast-lane.sh (ee57a15), which dispatches CI only after a feature-done merge (the UI and 10-merge rules are dev-only, and main is held while dev is red). So each round's PR carries feature-done to get its CI run; #1092 (packet status line) is the first.
+- The lane runs main's scripts/fast-lane.sh (ee57a15), which dispatches CI only after a feature-done merge (the UI and 10-merge rules are dev-only, and main is held while dev is red). So each round's PR carries feature-done to get its CI run; #1092 (packet status line, merged 10:39) is the first.
 
 ## Open
 - Panel finding, not this feature's files: the selected layer's inspector shows "Properties arrive with the layer inspector (#38)." (HaloLayerInspector.swift, W0's placeholder that layer-keys #38 replaces whole). File as gap at finish if still on dev.
