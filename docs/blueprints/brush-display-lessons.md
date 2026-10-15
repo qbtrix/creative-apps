@@ -43,8 +43,16 @@ p95 517 ms; allocated p50 102 MB per event; 48 MB picture per event; 119 of
   turns its own container layer instead.
 - **Mouse input stays in CanvasViewport.** Taking clicks in the tile view would
   bypass SuiteUI's focus and Space-pan handling, and SuiteUI is another
-  line's target. The view's `hitTest` returns nil. StrokePacer already
-  applies input once per display frame.
+  line's target. The view's `hitTest` returns nil. StrokePacer applies a
+  sample as it arrives, at most twice a display frame.
+- **Waiting for the display link costs a frame.** Holding every sample for
+  the next display link, then starting the render from SwiftUI's
+  `.onChange`, put input to ink at p50 10.8 ms, p95 18.9 ms in release
+  with a 2.4 ms render. Applying at once and starting the render in the
+  same apply gives p50 5.7, p95 12.5 (PhotoBrushInkLatencyTests, BRUSH-INK).
+- **A locked screen stops the display link.** With the display asleep a
+  CADisplayLink never fires, so a link-paced queue never drains; the ink
+  test skips its time budget then, and a UI journey can't launch the app.
 - **Clone's Option press.** #713 added `sampling:` to `drag`. A batched drag
   (`drags`) must carry it per sample, or an Option-press in a batch is lost.
 
