@@ -26,7 +26,7 @@ Next: wait for r3-b1's PR (feature-done) to merge; round 4 (last) on the CI run 
 |---|---|---|---|---|---|---|---|
 | 1 | 38654031210 @640d08d | red: macOS scripts/ci, 5 feature tests (FrameProbe budget, ControlInventory nested probes, SnapshotHost IC + glass, GoldenImage p95); Linux green | n/a: journeys didn't run | none (no ui-screens; CI-failure round) | 5 test failures | #881 #883 #884 #885 | no |
 | 2 | 38658150595 @1854d6c | red: macOS SnapshotHostTests.appearances (light-ic, dark-ic) only; Photo latency passed; Linux green | n/a: journeys didn't run | none (no ui-screens) | 1 (IC hosts resolve plain tokens) | #891 (r2-b1, feature-done) | no |
-| 3 | 38660293042 @4b65610 | red: macOS SnapshotHostTests (appearances, lightContrastSwatch, tokenValueForEachAppearance); Linux green | n/a: journeys didn't run | none (no ui-screens) | 1 root cause: SuiteHex.value(for:) bestMatch maps high-contrast appearances to aqua/darkAqua (product bug: IC tokens never apply) | r3-b1 (Tokens.swift), feature-done | no |
+| 3 | 38660293042 @4b65610 | red: macOS SnapshotHostTests (appearances, lightContrastSwatch, tokenValueForEachAppearance); Linux green | n/a: journeys didn't run | none (no ui-screens) | 1 root cause: SuiteHex.value(for:) bestMatch maps high-contrast appearances to aqua/darkAqua (product bug: IC tokens never apply) | #901 (r3-b1, Tokens.swift, feature-done) | no |
 
 ## Decisions
 - Round 1: macOS scripts/ci failed before the UI journeys, so no ui-screens/audit exist; the round's findings are the feature's 5 failing tests, fixed in 4 disjoint batches. Critic panel runs once a run has screens.
