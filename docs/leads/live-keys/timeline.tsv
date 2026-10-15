@@ -12,3 +12,5 @@ utc	stage	event	ref	note
 2026-10-15T02:09Z	3	pr-merged	#913	KY-2
 2026-10-15T02:09Z	3	pr-merged	#912	KY-6
 2026-10-15T02:09Z	3	stage-start	wave 3	KY-3 KY-7 from 0a455df
+2026-10-15T02:16Z	3	pr-opened	#922	KY-3
+2026-10-15T02:16Z	3	pr-opened	#921	KY-7
