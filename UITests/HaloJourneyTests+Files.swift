@@ -2,8 +2,14 @@
 // HF-12; docs/blueprints/halo/features/history-files.md, Journey steps 2).
 // On `-HaloSample two-comps` (live services) with `-HaloSaveTo`, ⌘S writes
 // Spot.halo with no panel; a relaunch with `-HaloOpenFile` brings Intro and
-// Outro back (the artboard's `halo.viewer` value, the status bar's layer
-// readout and Ball's timeline lane match the fixture) with nothing to undo.
+// Outro back (each composition's `halo.layer.row.<id>` rows, the inspector
+// header, the status bar's layer readout and Ball's timeline lane match the
+// fixture) with Edit > Undo disabled. XCUITest reads SwiftUI accessibility
+// values as empty (#262), so everything here is read by label, identifier or
+// existence: `halo.file` carries the save status as its label. Ball's three
+// keys surviving the file are proven by HaloFileValidationTests'
+// everyFixturePassesTheChecks, and Undo's "Nothing to undo." help by
+// HaloHistoryCommandTests (help tags on menu items don't read reliably).
 // An edit reads "Edited"; Open Recent > Spot asks to save, Don't Save
 // reopens the saved file. Then `huge` is saved and reopened: the first shot
 // after that launch has the `halo.file.progress` row (HB-U5), then the
@@ -39,16 +45,25 @@ final class HaloFilesJourneyTests: XCTestCase {
         expectTitle("Spot", halo)
         expectStatus("Saved", halo)
         XCTAssert(sidebarRow("Intro", halo).exists && sidebarRow("Outro", halo).exists, "Intro and Outro aren't back")
-        expectArtboard("Frame 0: Background, Badge", halo)
+        expectHeader("Intro", halo)
+        // Title, Badge, Background and Rig, by the fixture's ids.
+        expectLayerRows(["comp-1-layer-4", "comp-1-layer-3", "comp-1-layer-2", "comp-1-layer-1"], halo)
         expectReadout("4 layers", halo)
         sidebarRow("Outro", halo).click()
-        expectArtboard("Frame 0: Floor, Ball", halo)
+        expectHeader("Outro", halo)
+        XCTAssert(waitFor { !halo.element("halo.layer.row.comp-1-layer-4").exists }, "Intro's rows stayed in Outro")
+        // Ball and Floor.
+        expectLayerRows(["comp-2-layer-2", "comp-2-layer-1"], halo)
         expectReadout("2 layers", halo)
-        let ball = halo.app.descendants(matching: .any).matching(
+        let lane = halo.app.descendants(matching: .any).matching(
             NSPredicate(format: "identifier == 'halo.timeline.track' AND label == 'Ball'")).firstMatch
-        XCTAssert(ball.waitForExistence(timeout: 5), "no Ball lane in Outro's timeline")
-        XCTAssertEqual(ball.value as? String, "3 keyframes", "Ball's keys didn't come back")
+        XCTAssert(lane.waitForExistence(timeout: 5), "no Ball lane in Outro's timeline")
         expectUndoDisabled(halo)
+        halo.element("halo.layer.row.comp-2-layer-2").click()
+        let ball = halo.app.descendants(matching: .any).matching(
+            NSPredicate(format: "identifier == 'halo.inspector.header' AND label CONTAINS %@", "Frames 0–47")).firstMatch
+        XCTAssert(ball.waitForExistence(timeout: 5), "Ball didn't come back with its frames 0–47")
+        XCTAssert(ball.label.hasPrefix("Ball"), "the inspector header reads \(ball.label), not Ball")
         halo.shot("files-2-reopened")
 
         // 3. New Composition…, Create: Edited.
@@ -127,20 +142,24 @@ final class HaloFilesJourneyTests: XCTestCase {
         XCTAssert(waitFor { window.title == title }, "the window is titled \(window.title), not \(title)")
     }
 
-    /// `halo.file` reads `status`.
+    /// `halo.file`'s label reads `status` (its value reads empty, #262).
     @MainActor private func expectStatus(_ status: String, _ halo: Journey, timeout: Int = 5) {
         let file = halo.element("halo.file")
-        XCTAssert(
-            waitFor(seconds: timeout) { (file.value as? String) == status },
-            "halo.file reads \(String(describing: file.value)), not \(status)")
+        XCTAssert(waitFor(seconds: timeout) { file.label == status }, "halo.file reads \(file.label), not \(status)")
     }
 
-    /// The artboard (`halo.viewer`) reads `summary`.
-    @MainActor private func expectArtboard(_ summary: String, _ halo: Journey) {
-        let viewer = halo.element("halo.viewer")
+    /// The inspector header names composition `name`: it is the selected one.
+    @MainActor private func expectHeader(_ name: String, _ halo: Journey) {
+        let header = halo.element("halo.inspector.header")
         XCTAssert(
-            waitFor(seconds: 30) { (viewer.value as? String) == summary },
-            "the artboard reads \(String(describing: viewer.value)), not \(summary)")
+            waitFor(seconds: 30) { header.label.hasPrefix(name) }, "the inspector header reads \(header.label), not \(name)")
+    }
+
+    /// The layer list has a `halo.layer.row.<id>` row for each of `ids`.
+    @MainActor private func expectLayerRows(_ ids: [String], _ halo: Journey) {
+        for id in ids {
+            XCTAssert(halo.element("halo.layer.row.\(id)").waitForExistence(timeout: 5), "no layer row \(id)")
+        }
     }
 
     /// The status bar's layer readout reads `readout`.
@@ -149,16 +168,13 @@ final class HaloFilesJourneyTests: XCTestCase {
         XCTAssert(found.waitForExistence(timeout: TimeInterval(timeout)), "no \(readout) readout in the viewer")
     }
 
-    /// Edit > Undo is disabled and its help tag reads "Nothing to undo.".
+    /// Edit > Undo is disabled. Its "Nothing to undo." help is proven by
+    /// HaloHistoryCommandTests: XCUITest doesn't read SwiftUI .help on menu
+    /// items reliably.
     @MainActor private func expectUndoDisabled(_ halo: Journey) {
         let undo = menu("Edit", halo).menuItems["Undo"]
         XCTAssert(undo.waitForExistence(timeout: 3), "the Edit menu has no plain Undo after an open")
         XCTAssertFalse(undo.isEnabled, "Edit > Undo is enabled after an open")
-        undo.hover()
-        let help = "Nothing to undo."
-        let tag = halo.app.helpTags.matching(
-            NSPredicate(format: "label CONTAINS %@ OR title CONTAINS %@ OR value CONTAINS %@", help, help, help))
-        XCTAssert(tag.firstMatch.waitForExistence(timeout: 5), "Edit > Undo doesn't say \(help)")
         halo.press(.escape)
     }
 

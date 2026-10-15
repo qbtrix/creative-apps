@@ -13,8 +13,9 @@
 // the Model's message in one system alert; the project stays as it was.
 // At launch the window restores Open Recent from the "HaloRecentFiles"
 // default (and writes it back on every change) and opens `-HaloOpenFile`
-// once. The hidden `halo.file` element's value is `model.saveStatus`; the
-// title is `model.windowTitle`. SwiftUI offers no hook to confirm a window
+// once. The hidden `halo.file` element's label and value are
+// `model.saveStatus` (journeys read the label: XCUITest reads SwiftUI values
+// as empty, #262); the title is `model.windowTitle`. SwiftUI offers no hook to confirm a window
 // close, so closing is not guarded yet (#1065 asks SuiteWindow for one).
 import HaloModel
 import SuiteUI
@@ -200,7 +201,8 @@ struct HaloOpenProgress: View {
     }
 }
 
-/// The hidden `halo.file` element: no hits, its value the save status.
+/// The hidden `halo.file` element: no hits, its label and value the save
+/// status. The label is what XCUITest can read (values read empty, #262).
 private struct HaloFileElement: View {
     let status: String
 
@@ -208,7 +210,7 @@ private struct HaloFileElement: View {
         Color.clear
             .allowsHitTesting(false)
             .accessibilityElement()
-            .accessibilityLabel("File")
+            .accessibilityLabel(status)
             .accessibilityValue(status)
             .accessibilityIdentifier("halo.file")
     }
