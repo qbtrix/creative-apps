@@ -10,3 +10,4 @@ utc	stage	event	ref	note
 2026-10-15T11:08Z	3	heartbeat	-	waiting on builders or the lane
 2026-10-15T11:12Z	3	pr-merged	#1107	SP-3; wave 4a SP-4 starts
 2026-10-15T11:19Z	3	pr-merged	#1110	SP-4; wave 4b SP-5 starts
+2026-10-15T11:26Z	3	heartbeat	-	waiting on builders or the lane
