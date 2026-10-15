@@ -2,9 +2,9 @@
 
 Issue: #778 · Packet: docs/blueprints/suiteui/features/suite-harness.md (on branch `docs/suiteui-feature-packets` until the packet PR merges)
 Run: act-1a13b7e0908-fybz · Session: claude/suite-harness-lead-wwxtgn · Started: 2026-10-14T18:00Z
-Stage: 4 round 3
-Base: 4b65610184807ca65f951bc2f714bc6e644c350e (round 3)
-Next: wait for r3-b1's PR (feature-done) to merge; round 4 (last) on the CI run it dispatches; after round 4, file any open finding as a gap issue and finish
+Stage: done (round budget spent; built, not green)
+Base: 1502416 (final CI run 38662225263)
+Next: nothing for this lead. #907 (Increase Contrast tokens) is the open gap; the next dev CI after it lands runs SJ0, SJ25 and the smoke journey for the first time.
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -27,6 +27,7 @@ Next: wait for r3-b1's PR (feature-done) to merge; round 4 (last) on the CI run 
 | 1 | 38654031210 @640d08d | red: macOS scripts/ci, 5 feature tests (FrameProbe budget, ControlInventory nested probes, SnapshotHost IC + glass, GoldenImage p95); Linux green | n/a: journeys didn't run | none (no ui-screens; CI-failure round) | 5 test failures | #881 #883 #884 #885 | no |
 | 2 | 38658150595 @1854d6c | red: macOS SnapshotHostTests.appearances (light-ic, dark-ic) only; Photo latency passed; Linux green | n/a: journeys didn't run | none (no ui-screens) | 1 (IC hosts resolve plain tokens) | #891 (r2-b1, feature-done) | no |
 | 3 | 38660293042 @4b65610 | red: macOS SnapshotHostTests (appearances, lightContrastSwatch, tokenValueForEachAppearance); Linux green | n/a: journeys didn't run | none (no ui-screens) | 1 root cause: SuiteHex.value(for:) bestMatch maps high-contrast appearances to aqua/darkAqua (product bug: IC tokens never apply) | #901 (r3-b1, Tokens.swift, feature-done) | no |
+| 4 | 38662225263 @1502416 | red: macOS TokensTests.valueFollowsTheAppearance + 3 SnapshotHostTests (IC tokens; system names the appearance NSAppearanceNameAccessibility*Aqua); Linux green | n/a: journeys didn't run | none (no ui-screens) | 1 open | filed gap #907 (p1) | no |
 
 ## Decisions
 - Round 1: macOS scripts/ci failed before the UI journeys, so no ui-screens/audit exist; the round's findings are the feature's 5 failing tests, fixed in 4 disjoint batches. Critic panel runs once a run has screens.
@@ -43,6 +44,9 @@ Next: wait for r3-b1's PR (feature-done) to merge; round 4 (last) on the CI run 
 - Captain questions Q1/Q2/Q3/Q9 built as the packet assumes (its table).
 
 ## Open
+- #907 gap/p1 line:suiteui: Increase Contrast tokens resolve to Light/Dark; keeps the macOS job red. Reported on dev-red #763.
+- SJ0, SJ25, smoke journey and the critic panel never ran: every macOS run stopped at scripts/ci before the UI journeys.
+- Contact sheet posted on #778 (issuecomment-6181972331) with run 38662225263.
 - RESOLVED by #801: scripts/ci fails on dev 1098ff2 (Linux swift build): creative-core main changed keyframe commands to `owner: LayerOwner`; FlareModel fakes still pass `sceneID:`. line:flare, not ours. Reported on #763 (issuecomment-6179761284); builders commented on #283, #330, #331.
 - Wave 2's first run (wf_6a181509-6c9) died in the 18:00Z usage pause with no branch or PR; relaunched as wf_c36a8d40-129 from base 1098ff2.
 - Builder branches are `lead/suite-harness-<id>` (a `lead/suite-harness/<id>` ref can't coexist with the lead branch).
