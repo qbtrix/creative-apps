@@ -52,7 +52,7 @@ final class HaloFilesJourneyTests: XCTestCase {
         // Title, Badge, Background and Rig, by the fixture's ids.
         expectLayerRows(["comp-1-layer-4", "comp-1-layer-3", "comp-1-layer-2", "comp-1-layer-1"], halo)
         expectRowCount(4, halo)
-        sidebarRow("Outro", halo).click()
+        clickBlank(of: "Outro", halo)
         expectHeader("Outro", halo)
         XCTAssert(waitFor { !halo.element("halo.layer.row.comp-1-layer-4").exists }, "Intro's rows stayed in Outro")
         // Ball and Floor.
@@ -215,6 +215,22 @@ final class HaloFilesJourneyTests: XCTestCase {
     /// The sidebar's row titled `title`.
     @MainActor private func sidebarRow(_ title: String, _ halo: Journey) -> XCUIElement {
         text(title, in: halo.element("suite.sidebar"), exactly: true)
+    }
+
+    /// Selects sidebar row `title` with a click on its blank space past the
+    /// title. A click on the title (its label holds SidebarRow's double-click
+    /// rename) didn't select Outro on run 38721434364; SidebarRow's blank
+    /// space only selects. The point is checked inside the sidebar first.
+    @MainActor private func clickBlank(of title: String, _ halo: Journey) {
+        let sidebar = halo.element("suite.sidebar")
+        let name = sidebarRow(title, halo)
+        XCTAssert(name.waitForExistence(timeout: 5), "no sidebar row \(title)")
+        let point = CGPoint(x: sidebar.frame.maxX - 24, y: name.frame.midY)
+        XCTAssert(
+            point.x > name.frame.maxX && sidebar.frame.contains(point),
+            "\(point) isn't blank space of \(title) (\(name.frame)) in the sidebar \(sidebar.frame)")
+        let origin = sidebar.coordinate(withNormalizedOffset: .zero)
+        origin.withOffset(CGVector(dx: point.x - sidebar.frame.minX, dy: point.y - sidebar.frame.minY)).click()
     }
 
     /// A system alert: the window's sheet, or a dialog.
