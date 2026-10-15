@@ -64,7 +64,7 @@ public struct LibraryCatalog: Sendable, Equatable {
 
     public internal(set) var services: LibraryServices  // left out of ==
     public internal(set) var history = CatalogHistory()
-    public internal(set) var order: [String] = []  // the shown ids in sort order; SP-8 fills it
+    public internal(set) var order: [String] = []  // the shown ids in sort order (LibraryOrder.swift)
     public internal(set) var importState = ImportState.idle
     public internal(set) var importNotice: ImportNotice?
     public internal(set) var thumbnails: [String: DisplayImage] = [:]
@@ -87,6 +87,7 @@ public struct LibraryCatalog: Sendable, Equatable {
 
     public init(services: LibraryServices = .fake()) {
         self.services = services
+        rebuildOrder()
     }
 
     /// Every stored property but `services`, whose members are existentials.
@@ -118,11 +119,6 @@ public struct LibraryCatalog: Sendable, Equatable {
     /// True when the selected collection shows no photos, even if the catalog has some.
     public var isSelectedCollectionEmpty: Bool { shownItems.isEmpty }
 
-    /// The selected collection's photos in the current sort order.
-    public var sortedItems: [PhotoItem] {
-        shownItems.sorted { sort.orders($0, before: $1) }
-    }
-
     public var canShowLargerThumbnails: Bool { cellSize < 320 }
     public var canShowSmallerThumbnails: Bool { cellSize > 80 }
 
@@ -131,6 +127,7 @@ public struct LibraryCatalog: Sendable, Equatable {
         guard collections.contains(where: { $0.id == id }) else { return }
         selectedCollectionID = id
         selection = []
+        rebuildOrder()
     }
 
     public mutating func loadSamples(seed: UInt64 = LibrarySample.defaultSeed) {
@@ -145,9 +142,13 @@ public struct LibraryCatalog: Sendable, Equatable {
         mode = .grid
         focusedItemID = nil
         recount()
+        rebuildOrder()
     }
 
-    public mutating func setSort(_ newSort: LibrarySort) { sort = newSort }
+    public mutating func setSort(_ newSort: LibrarySort) {
+        sort = newSort
+        rebuildOrder()
+    }
 
     /// One step larger (positive) or smaller (negative), clamped to 80...320.
     /// The step count is clamped first so a huge count cannot overflow `Int`.
@@ -155,44 +156,6 @@ public struct LibraryCatalog: Sendable, Equatable {
         let span = (320 - 80) / Self.cellSizeStep
         let clampedSteps = min(max(steps, -span), span)
         cellSize = min(max(cellSize + clampedSteps * Self.cellSizeStep, 80), 320)
-    }
-
-    /// Sets the grid selection; ids not shown in the selected collection are dropped.
-    public mutating func select(_ ids: Set<String>) {
-        selection = ids.intersection(sortedItems.map(\.id))
-    }
-
-    /// Opens a shown photo in the loupe. An unknown id is ignored.
-    public mutating func open(_ id: String) {
-        guard sortedItems.contains(where: { $0.id == id }) else { return }
-        focusedItemID = id
-        mode = .loupe
-    }
-
-    /// View > Loupe: opens the first selected photo in the sort, else the
-    /// loupe's last photo, else the first shown. No photos: nothing changes.
-    public mutating func showLoupe() {
-        let order = sortedItems.map(\.id)
-        let last = focusedItemID.flatMap { order.contains($0) ? $0 : nil }
-        guard let id = order.first(where: selection.contains) ?? last ?? order.first else { return }
-        open(id)
-    }
-
-    /// Moves the loupe `steps` photos along the sort; it stops at the ends.
-    public mutating func stepLoupe(by steps: Int) {
-        let order = sortedItems.map(\.id)
-        guard mode == .loupe, let id = focusedItemID, let index = order.firstIndex(of: id) else { return }
-        let last = order.count - 1
-        // Clamp the step first so a huge count cannot overflow `Int`.
-        focusedItemID = order[min(max(index + min(max(steps, -last), last), 0), last)]
-    }
-
-    /// Escape, G or View > Grid: back to the grid with the loupe's photo selected.
-    public mutating func showGrid() {
-        if mode == .loupe, let id = focusedItemID, sortedItems.contains(where: { $0.id == id }) {
-            selection = [id]
-        }
-        mode = .grid
     }
 
     /// Applies `edit` to every selected photo, then keeps the counts and the
@@ -203,6 +166,7 @@ public struct LibraryCatalog: Sendable, Equatable {
             edit(&items[index])
         }
         recount()
+        if editCanReorder { rebuildOrder() }
         select(selection)
     }
 
@@ -238,7 +202,7 @@ public struct LibraryCatalog: Sendable, Equatable {
     }
 
     /// The selected collection's photos, unsorted.
-    private var shownItems: [PhotoItem] {
+    var shownItems: [PhotoItem] {
         switch selectedCollectionID {
         case "favorites": items.filter(\.isFlagged)
         case "recent": recentItems
