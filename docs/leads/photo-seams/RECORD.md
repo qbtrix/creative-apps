@@ -2,9 +2,9 @@
 
 Issue: #812 · Packet: docs/blueprints/photo/features/photo-seams.md
 Run: act-1a13d5e8ca4-huz5 · Session: cloud lead session · Started: 2026-10-15T02:23Z
-Stage: 2 plan
+Stage: 3 wave 1-2
 Base: c4ec07810683a4bc7d62dcc5205705229f248a71
-Next: install Swift (scripts/cloud-setup.sh), then build S-1 from origin/dev
+Next: wait for #932 to merge; S-2 builder stacks on lead/photo-seams-S-1
 
 ## Tasks
 
@@ -14,7 +14,7 @@ packet chains every task on the one before it (shared files or new types).
 
 | id | wave | behavior | files | test | PR | state |
 |---|---|---|---|---|---|---|
-| S-1 | 1 | shared, document, edit and crop contracts (5.1) | M/Contracts/{PhotoContractTypes,DocumentContracts,EditContracts,CropContracts}.swift | PhotoContractsTests | – | todo |
+| S-1 | 1 | shared, document, edit and crop contracts (5.1) | M/Contracts/{PhotoContractTypes,DocumentContracts,EditContracts,CropContracts}.swift | PhotoContractsTests | #932 | open |
 | S-2 | 2 | selection, layer and output contracts (5.1) | M/Contracts/{Selection,Layer,Output}Contracts.swift | PhotoContractsLayerTests | – | todo |
 | S-3 | 3 | fakes (5.2) | M/Fakes/Fake{Documents,Edit,Geometry,Output}.swift | PhotoFakesTests | – | todo |
 | S-4 | 4 | PhotoServices, NotBuilt, Live/ stubs | M/PhotoServices.swift, M/Live/*.swift | LiveServicesTests | – | todo |
@@ -40,6 +40,7 @@ packet chains every task on the one before it (shared files or new types).
 
 ## Decisions
 - Waves of one task each, in the packet's chain order; the next builder starts once the previous PR has merged into dev.
+- Builder branches are lead/photo-seams-<id> (a dash: lead/photo-seams already exists). The next builder stacks on the previous branch and opens its PR after rebasing onto dev once the previous PR merged.
 - Lead step after S-4 merges: file the four needs-ui issues of blueprint 6.3 (SelectionPathOutline, SelectionHandles with rotation, BrushCursorMark, LayerList row symbol and accessory).
 
 ## Open

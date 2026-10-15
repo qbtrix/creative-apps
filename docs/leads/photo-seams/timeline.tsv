@@ -4,3 +4,5 @@ utc	stage	event	ref	note
 2026-10-15T02:30Z	2	stage-end	#812	one task per wave, packet chain order
 2026-10-15T02:44Z	-	heartbeat	#812	waiting on builders or the lane
 2026-10-15T03:04Z	-	heartbeat	#812	waiting on builders or the lane
+2026-10-15T03:18Z	3	pr-opened	#932	S-1 contracts, 311 lines 5 files
+2026-10-15T03:18Z	3	stage-start	S-2	builder stacked on S-1
