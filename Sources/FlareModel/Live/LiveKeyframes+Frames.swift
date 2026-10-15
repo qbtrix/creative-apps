@@ -6,7 +6,7 @@
 // its labels at or after the frame move by the same count and a label inside a removed run goes. A symbol has no scene:
 // its frame edits move no labels, and since FlareCore has no command that sets a symbol's length, an insert that would
 // push a key past the symbol's last frame refuses. A label names one frame: naming a frame replaces the label already
-// there, a nil name removes it, and a blank name refuses. Agrees with `FakeKeyframes` on scenes.
+// there, a nil name removes it, a blank name refuses, and a label that changes nothing adds no undo entry. Agrees with `FakeKeyframes` on scenes.
 import FlareCore
 
 extension LiveKeyframes: KeyframeEditing {}
@@ -73,6 +73,9 @@ extension LiveKeyframes {
         guard let scene = engine.document.scenes.first(where: { $0.id == sceneID }) else { throw CommandError.sceneNotFound(sceneID) }
         guard frame >= 0 else { throw CommandError.invalidFrame(frame) }
         if name?.allSatisfy(\.isWhitespace) == true { throw CommandError.invalidDocument("A label needs a name.") }
+        // A label already on this frame, or a remove on a frame with none, changes nothing and adds no undo entry.
+        if let name, scene.labels[name] == frame { return }
+        if name == nil, !scene.labels.values.contains(frame) { return }
         // One label per frame: the label already on this frame goes, unless it is the one being set.
         let replaced = scene.labels.filter { $0.value == frame && $0.key != name }.keys.sorted()
         try engine.group(name == nil ? "Remove Frame Label" : "Set Frame Label") { engine in
