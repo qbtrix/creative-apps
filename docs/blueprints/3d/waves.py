@@ -63,7 +63,7 @@ features = [
          + [T+"PrismCommandTests.swift", T+"PrismToolsTests.swift", T+"PrismFixturesTests.swift", T+"PrismEditTests.swift", T+"PrismBudget.swift",
             T+"PrismFoundationBudgetTests.swift", SN+"PrismWindowSnapshots.swift", U+"PrismJourneyTests.swift"]),
   dict(wave=1, id="viewport", name="See and navigate the scene; select objects",
-       tier="p1", waits_core="none (RealityKit draws; the draw list is Model code)", waits_other="SuiteUI QH-4 #333 (journey files)",
+       tier="p1", waits_core="none (RealityKit draws; the draw list is Model code)", waits_other="foundation",
        proves="P-J2, P-J3; PB-1, PB-2, PB-3, PB-4; PF-1, PF-2",
        owns=stubs_of("viewport") + contract_tests("viewport")
          + [M+"PrismViewport.swift", M+"PrismOverlay.swift", M+"PrismSelection.swift",
@@ -72,31 +72,31 @@ features = [
             SN+"PrismViewportSnapshots.swift", SN+"PrismViewportFidelityTests.swift",
             U+"PrismJourneyTests+Viewport.swift", U+"PrismJourneyTests+Selection.swift"]),
   dict(wave=1, id="objects", name="Add, organize and delete objects",
-       tier="p1", waits_core="none", waits_other="#333",
+       tier="p1", waits_core="none", waits_other="foundation",
        proves="P-J4; PB-11",
        owns=stubs_of("objects") + contract_tests("objects")
          + [M+"PrismSceneEdits.swift", M+"PrismOutliner.swift", A+"PrismOutlinerView.swift",
             T+"PrismSceneEditsTests.swift", T+"PrismOutlinerTests.swift", T+"PrismObjectsBudgetTests.swift",
             SN+"PrismOutlinerSnapshots.swift", U+"PrismJourneyTests+Objects.swift"]),
   dict(wave=1, id="history-files", name="New scene, undo, redo, save and open",
-       tier="p1", waits_core="none", waits_other="#333; the suite's recents and router (suite.md, recents-open-in) for P-J7's Open Recent step (the step skips until then)",
+       tier="p1", waits_core="none", waits_other="foundation; the suite's recents and router (suite.md, recents-open-in) for P-J7's Open Recent step (the step skips until then)",
        proves="P-J5, P-J6, P-J7; PB-8, PB-9; PF-6",
        owns=stubs_of("history-files") + contract_tests("history-files")
          + [M+"PrismHistoryOps.swift", M+"PrismFiles.swift", M+"PrismSceneSettings.swift"]
          + [A+k for k, f in platform.items() if f == "history-files"]
-         + [A+"NewSceneSheet.swift", T+"PrismUndoTests.swift", T+"PrismFileTests.swift", T+"PrismFilesBudgetTests.swift",
+         + [A+"NewSceneSheet.swift", T+"PrismUndoTests.swift", T+"PrismFileTests.swift", "UITests/Fixtures/prism/bad-not-a-package.prism", "UITests/Fixtures/prism/bad-newer.prism/scene.json", "UITests/Fixtures/prism/bad-damaged.prism/scene.json", T+"PrismFilesBudgetTests.swift",
             SN+"PrismFileSnapshots.swift", U+"PrismJourneyTests+History.swift", U+"PrismJourneyTests+Files.swift",
             U+"PrismJourneyTests+FileErrors.swift"]),
   dict(wave=1, id="import", name="Import models and images",
        tier="p1", waits_core="C3D-2 model readers (glTF/GLB, OBJ+MTL, STL, PLY). Until it lands, LiveSceneImporting reads only the USD family through the macOS importer and the core formats stay disabled with their reason; the fake carries P-J8",
-       waits_other="#333",
+       waits_other="foundation",
        proves="P-J8; PB-12; PF-7",
        owns=stubs_of("import") + contract_tests("import")
          + [M+"PrismImport.swift"] + [A+k for k, f in platform.items() if f == "import"]
-         + [A+"PrismImportProgress.swift", T+"PrismImportTests.swift", T+"PrismImportBudgetTests.swift",
+         + [A+"PrismImportProgress.swift", "UITests/Fixtures/prism/Box.glb", "UITests/Fixtures/prism/Box.gltf", "UITests/Fixtures/prism/part.stl", "UITests/Fixtures/prism/chair.usdz", "UITests/Fixtures/prism/empty.obj", "UITests/Fixtures/prism/notes.txt", "UITests/Fixtures/prism/NOTICE.md", T+"PrismImportTests.swift", T+"PrismImportBudgetTests.swift",
             SN+"PrismImportSnapshots.swift", U+"PrismJourneyTests+Import.swift"]),
   dict(wave=2, id="transform", name="Move, rotate and scale with the gizmo and inspector",
-       tier="p1", waits_core="none", waits_other="#333; after viewport and objects",
+       tier="p1", waits_core="none", waits_other="after viewport and objects",
        proves="P-J9; PB-5; PF-3",
        owns=stubs_of("transform") + contract_tests("transform")
          + [M+"PrismTransformDrag.swift", M+"PrismTransformRows.swift", A+"PrismGizmoView.swift",
@@ -104,7 +104,7 @@ features = [
             U+"PrismJourneyTests+Transform.swift"]),
   dict(wave=2, id="modeling", name="Edit mode and the modeling tools",
        tier="p1", waits_core="C3D-1 mesh kernel (half-edge mesh, ear clipping, extrude, inset, bevel, loop cut, merge, fill, BVH pick); bevel stays disabled with its reason until C3D-1's bevel lands",
-       waits_other="#333; after viewport and history-files",
+       waits_other="after viewport and history-files",
        proves="P-J10, P-J11; PB-6; PF-4",
        owns=stubs_of("modeling") + contract_tests("modeling")
          + [M+"PrismEditMode.swift", M+"PrismModelingTools.swift", A+"PrismModelingPalette.swift",
@@ -112,15 +112,15 @@ features = [
             SN+"PrismModelingSnapshots.swift", U+"PrismJourneyTests+Modeling.swift"]),
   dict(wave=2, id="look", name="Materials, lights, environment and cameras",
        tier="p1", waits_core="none (RealityKit's PhysicallyBasedMaterial and lights draw them)",
-       waits_other="#333; after viewport and objects",
+       waits_other="after viewport and objects",
        proves="P-J12, P-J13, P-J14; PB-13",
        owns=stubs_of("look") + contract_tests("look")
          + [M+"PrismMaterials.swift", M+"PrismLights.swift", M+"PrismCameras.swift", A+"PrismMaterialList.swift",
-            T+"PrismMaterialsTests.swift", T+"PrismLightsTests.swift", T+"PrismCamerasTests.swift", T+"PrismLookBudgetTests.swift",
+            T+"PrismMaterialsTests.swift", T+"PrismLightsTests.swift", T+"PrismCamerasTests.swift", T+"PrismLookBudgetTests.swift", "UITests/Fixtures/prism/check.png", "UITests/Fixtures/prism/studio.hdr",
             SN+"PrismLookSnapshots.swift", U+"PrismJourneyTests+Look.swift"]),
   dict(wave=2, id="keys", name="Key, ease and play",
        tier="p1", waits_core="none (FlareCore Keyframe, Easing and Timeline.value)",
-       waits_other="#333; SuiteUI TransportCapsule #340 (placeholder buttons meanwhile); after objects and history-files",
+       waits_other="SuiteUI TransportCapsule #340 (placeholder buttons meanwhile); after objects and history-files",
        proves="P-J15, P-J16, P-J17; PB-14, PB-15; PF-5",
        owns=stubs_of("keys") + contract_tests("keys")
          + [M+"PrismKeying.swift", M+"PrismKeySelection.swift", M+"PrismPlayback.swift", M+"PrismTimeline.swift",
@@ -129,34 +129,34 @@ features = [
             SN+"PrismTimelineSnapshots.swift", U+"PrismJourneyTests+Keys.swift", U+"PrismJourneyTests+Playback.swift"]),
   dict(wave=3, id="render", name="Render stills, sequences and movies",
        tier="p1", waits_core="C3D-4 reference renderer (for PF-8 and the Linux live FrameRendering)",
-       waits_other="#333; after look and keys",
+       waits_other="after look and keys",
        proves="P-J18; PB-16, PB-17; PF-8, PF-9, PF-10",
        owns=stubs_of("render") + contract_tests("render")
          + [M+"PrismRenderJob.swift", M+"PrismRenderStill.swift"] + [A+k for k, f in platform.items() if f == "render"]
          + [A+"PrismRenderSheet.swift", A+"PrismRenderPreview.swift",
-            T+"PrismRenderPlanTests.swift", T+"PrismRenderBudgetTests.swift", SN+"PrismRenderSnapshots.swift",
+            T+"PrismRenderPlanTests.swift", SN+"PrismRenderBudgetTests.swift", SN+"PrismRenderSnapshots.swift",
             SN+"PrismRenderFidelityTests.swift", SN+"PrismWriterTests.swift", U+"PrismJourneyTests+Render.swift"]),
   dict(wave=3, id="shapes", name="Extrude text and vector art",
        tier="p2", waits_core="C3D-3 outline extrusion with holes and bevel; C3D-5 SVG reading (paths, basic shapes, fills)",
-       waits_other="#333; Design's pasteboard SVG (suite clipboard-drag) for P-J20's paste step; after modeling and look",
+       waits_other="Design's pasteboard SVG (suite clipboard-drag) for P-J20's paste step; after modeling and look",
        proves="P-J19, P-J20; PB-18",
        owns=stubs_of("shapes") + contract_tests("shapes")
          + [M+"PrismShapes.swift"] + [A+k for k, f in platform.items() if f == "shapes"]
-         + [T+"PrismShapesTests.swift", T+"PrismShapesBudgetTests.swift", SN+"PrismShapesSnapshots.swift",
+         + ["UITests/Fixtures/prism/logo.svg", "UITests/Fixtures/prism/strokes.svg", T+"PrismShapesTests.swift", T+"PrismShapesBudgetTests.swift", SN+"PrismShapesSnapshots.swift",
             U+"PrismJourneyTests+Shapes.swift"]),
   dict(wave=3, id="modifiers", name="Subdivision Surface and Mirror",
        tier="p2", waits_core="C3D-1 Catmull-Clark subdivision and mirror",
-       waits_other="#333; after modeling",
+       waits_other="after modeling",
        proves="P-J22; PB-7",
        owns=stubs_of("modifiers") + contract_tests("modifiers")
          + [M+"PrismModifiers.swift", T+"PrismModifiersTests.swift", T+"PrismModifiersBudgetTests.swift",
             SN+"PrismModifiersSnapshots.swift", U+"PrismJourneyTests+Modifiers.swift"]),
   dict(wave=3, id="export", name="Export GLB, USDZ, OBJ and STL",
        tier="p2", waits_core="C3D-2 writers (GLB, OBJ, STL, USDZ as USDA in a zip)",
-       waits_other="#333; after import",
+       waits_other="after import",
        proves="P-J23; PF-11",
        owns=stubs_of("export") + contract_tests("export")
-         + [M+"PrismExport.swift", T+"PrismExportTests.swift", U+"PrismJourneyTests+Export.swift"]),
+         + [M+"PrismExport.swift", T+"PrismExportTests.swift", SN+"PrismExportReadTests.swift", U+"PrismJourneyTests+Export.swift"]),
   dict(wave=4, id="handoff", name="Send renders to Halo, Flare and Design",
        tier="p2", waits_core="none",
        waits_other="the suite hand-off transport (suite.md, switching) and image or footage placement in Halo, Flare and Design (part 9.5)",
@@ -164,10 +164,9 @@ features = [
        owns=stubs_of("handoff") + contract_tests("handoff")
          + [M+"PrismHandOff.swift", T+"PrismHandOffTests.swift", U+"PrismJourneyTests+HandOff.swift"]),
   dict(wave=4, id="core-loop", name="The core loop, live, measured",
-       tier="p1", waits_core="none", waits_other="every W1 to W3 feature; SuiteUI frame probe #330 for PB-U1 to PB-U4",
+       tier="p1", waits_core="none", waits_other="every W1 to W3 feature (SuiteFrameProbe is on dev for PB-U1 to PB-U5)",
        proves="P-J25 live; P-P1 to P-P5; PL3 to PL5",
-       owns=[U+"PrismJourneyTests+CoreLoop.swift", U+"PrismJourneyTests+Perf.swift", SN+"PrismLatencyTests.swift",
-             SN+"PrismLayoutTests.swift"]),
+       owns=[U+"PrismJourneyTests+CoreLoop.swift", U+"PrismJourneyTests+Perf.swift", SN+"PrismLayoutTests.swift"]),
 ]
 
 # Components (part 4 L3). Paths ending in "/" own a folder; a file belongs to the longest matching path.
@@ -258,7 +257,7 @@ components = [
   comp("prism-snapshots", "Prism snapshots and goldens", "prism-tests", "planned",
        "Prism*Snapshots PNGs in Light and Dark, fidelity tests (viewport equals render), writer tests, latency and layout tests.", [SN+"Prism"], [("prism-app", "renders views of")]),
   comp("prism-journeys", "Prism journeys", "prism-tests", "planned",
-       "UITests/PrismJourneyTests.swift and one +<Area> file per feature: P-J0 to P-J25 and the perf journeys P-P1 to P-P5.", [U+"PrismJourneyTests"], [("prism-app", "drives the release bundle of")]),
+       "UITests/PrismJourneyTests.swift and one +<Area> file per feature: P-J0 to P-J25 and the perf journeys P-P1 to P-P5; the fixture files in UITests/Fixtures/prism/ (each with its license in NOTICE.md).", [U+"PrismJourneyTests", "UITests/Fixtures/prism/"], [("prism-app", "drives the release bundle of")]),
 ]
 
 containers = {
@@ -325,7 +324,7 @@ def check():
                 if p in seen:
                     problems.append(f"W{w}: {p} owned by {seen[p]} and {f['id']}")
                 seen[p] = f["id"]
-    all_sources = sorted({p for f in features for p in f["owns"] if p.startswith("Sources/") or p.startswith("Tests/") or p.startswith("UITests/Prism")})
+    all_sources = sorted({p for f in features for p in f["owns"] if p.startswith("Sources/") or p.startswith("Tests/") or p.startswith("UITests/Prism") or p.startswith("UITests/Fixtures/prism/")})
     for p in all_sources:
         o = owner(p)
         if len(o) != 1:

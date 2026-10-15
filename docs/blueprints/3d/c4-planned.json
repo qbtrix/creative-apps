@@ -601,9 +601,10 @@
               {
                 "id": "prism-journeys",
                 "name": "Prism journeys",
-                "description": "UITests/PrismJourneyTests.swift and one +<Area> file per feature: P-J0 to P-J25 and the perf journeys P-P1 to P-P5.",
+                "description": "UITests/PrismJourneyTests.swift and one +<Area> file per feature: P-J0 to P-J25 and the perf journeys P-P1 to P-P5; the fixture files in UITests/Fixtures/prism/ (each with its license in NOTICE.md).",
                 "paths": [
-                  "UITests/PrismJourneyTests"
+                  "UITests/PrismJourneyTests",
+                  "UITests/Fixtures/prism/"
                 ],
                 "status": "planned",
                 "authored": true,

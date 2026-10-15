@@ -34,7 +34,7 @@ public protocol SceneImporting: PrismService {
 public protocol PrimitiveMaking: PrismService {
     /// A mesh of about `detail` segments around (spheres, cylinders, cones, tori); 1 unit across.
     func mesh(for primitive: PrismPrimitive, id: PrismID, detail: Int) -> PrismMesh
-    /// The default light of a kind, placed 4 units up and aimed at the origin.
+    /// The default light of a kind (`PrismLightKind.v1`), placed 4 units up and aimed at the origin.
     func light(_ kind: PrismLightKind) -> (PrismLight, PrismTransform)
 }
 
@@ -50,7 +50,8 @@ public protocol VectorArtReading: PrismService {
     func shapes(fromSVG data: Data) throws(PrismImportError) -> (shapes: [PrismVectorShape], warnings: [String])
 }
 
-/// UC3c Decode an image (PNG, JPEG, HEIC) for a texture or the environment; the macOS live type uses ImageIO.
+/// UC3c Decode an image (PNG, JPEG, HEIC; Radiance HDR and OpenEXR for environments) for a texture or the
+/// environment; the macOS live type uses ImageIO. Anything it can't read throws `.unreadableImage`.
 public protocol ImageDecoding: PrismService {
     func decode(_ data: Data, name: String, id: PrismID) throws(PrismImportError) -> PrismTexture
 }
@@ -79,7 +80,8 @@ public protocol MeshEditing: PrismService {
     /// `.nothingSelected` on an empty selection, or `.outOfRange` with the reason.
     func apply(_ op: PrismMeshOp, to mesh: PrismMesh, selection: PrismMeshSelection,
                mode: PrismSelectMode) throws(PrismEditError) -> (mesh: PrismMesh, selection: PrismMeshSelection)
-    /// The edge loop through an edge (Option-click selects it); the edge alone at a pole or boundary.
+    /// The edge loop through an edge (Option-click selects it), walked both ways across valence-4
+    /// vertices; it stops at a pole (valence ≠ 4) or a boundary, so on a cube it is the edge alone.
     func loop(through edge: PrismEdge, in mesh: PrismMesh) -> [PrismEdge]
 }
 

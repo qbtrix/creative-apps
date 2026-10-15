@@ -252,7 +252,7 @@ public struct PrismMeshSelection: Sendable, Hashable, Codable {
 
 public enum PrismMeshElement: Sendable, Hashable { case vertex(Int), edge(PrismEdge), face(Int) }
 
-/// The tier-1 modeling operations (part 3, P-F8). Amounts are in the mesh's own units.
+/// The tier-1 modeling operations (part 3, P-F11). Amounts are in the mesh's own units.
 public enum PrismMeshOp: Sendable, Hashable {
     case translate(Vec3)
     case rotate(axis: Vec3, degrees: Double)
@@ -338,7 +338,14 @@ public struct PrismMaterial: Sendable, Hashable, Codable, Identifiable {
     }
 }
 
-public enum PrismLightKind: String, Sendable, Hashable, Codable, CaseIterable { case directional, point, spot, area }
+/// v1 offers directional, point and spot; `area` is later (RealityKit has no area light, part 4.1)
+/// and is kept so files stay readable when it lands.
+public enum PrismLightKind: String, Sendable, Hashable, Codable, CaseIterable {
+    case directional, point, spot, area
+    public static let v1: [PrismLightKind] = [.directional, .point, .spot]
+    /// Nil when this kind can cast shadows in v1; else the reason the Shadows toggle shows.
+    public var shadowHelp: String? { self == .point ? "Point lights don't cast shadows yet." : self == .area ? "Area lights arrive later." : nil }
+}
 
 /// Intensity is in the glTF punctual-light units: lux for directional, candela for point and spot;
 /// an area light is a one-sided rectangle `width` × `height` in nits.
@@ -412,6 +419,27 @@ public struct PrismSceneSettings: Sendable, Hashable, Codable {
     public static let rates = [24, 25, 30, 60]
     public var lastFrame: Int { Swift.max(0, durationFrames - 1) }
     public var aspect: Double { height > 0 ? Double(width) / Double(height) : 1 }
+}
+
+public enum PrismSceneField: String, Sendable, Hashable, CaseIterable { case width, height, length }
+
+extension PrismSceneSettings {
+    /// The New Scene sheet's typed text checked field by field: each problem is the sentence
+    /// shown under its field; empty means Create is enabled and `parsed` holds the settings.
+    public static func problems(width: String, height: String, lengthSeconds: String,
+                                framesPerSecond: Int) -> (problems: [PrismSceneField: String], parsed: PrismSceneSettings?) {
+        var out: [PrismSceneField: String] = [:]
+        let w = Int(PrismRules.trimmed(width)), h = Int(PrismRules.trimmed(height))
+        let len = Double(PrismRules.trimmed(lengthSeconds))
+        if !(w.map { (16...8192).contains($0) } ?? false) { out[.width] = "Width must be a whole number from 16 to 8192." }
+        if !(h.map { (16...8192).contains($0) } ?? false) { out[.height] = "Height must be a whole number from 16 to 8192." }
+        let frames = len.map { Int(($0 * Double(framesPerSecond)).rounded()) } ?? 0
+        if !(len.map { $0.isFinite && $0 > 0 && $0 <= 3600 } ?? false) || frames < 1 {
+            out[.length] = "Length must be more than 0 and at most 3,600 seconds."
+        }
+        guard out.isEmpty, let w, let h, PrismSceneSettings.rates.contains(framesPerSecond) else { return (out, nil) }
+        return (out, PrismSceneSettings(width: w, height: h, framesPerSecond: framesPerSecond, durationFrames: frames))
+    }
 }
 
 /// The document. `nodes` is in outliner order (parents before their children).
@@ -793,7 +821,7 @@ public struct PrismHandOffRequest: Sendable, Hashable, Codable {
 
 public enum PrismEditError: Error, Sendable, Hashable {
     case noSuchNode(PrismID), noSuchMaterial(PrismID), notAnimatable(PrismProperty, PrismNodeKind)
-    case parentCycle, notANumber(PrismProperty), outOfRange(String), emptyName, emptyOutline, nothingSelected
+    case parentCycle, notANumber(PrismProperty), outOfRange(String), emptyName, emptyOutline, nothingSelected, emptyText
     public var message: String {
         switch self {
         case .noSuchNode: "That object is no longer in the scene."
@@ -805,12 +833,13 @@ public enum PrismEditError: Error, Sendable, Hashable {
         case .emptyName: "Enter a name."
         case .emptyOutline: "There's no closed shape to extrude."
         case .nothingSelected: "Select an object first."
+        case .emptyText: "Enter some text."
         }
     }
 }
 
 public enum PrismImportError: Error, Sendable, Hashable {
-    case unsupportedFormat(String), damaged(String), missingSidecar(String), tooLarge(Int), empty
+    case unsupportedFormat(String), damaged(String), missingSidecar(String), tooLarge(Int), empty, unreadableImage
     public var message: String {
         switch self {
         case let .unsupportedFormat(ext): "Prism can't import .\(ext) files. Try glTF, OBJ, STL, PLY or USDZ."
@@ -818,6 +847,7 @@ public enum PrismImportError: Error, Sendable, Hashable {
         case let .missingSidecar(name): "\(name) is missing. Put it next to the model and import again."
         case let .tooLarge(triangles): "This model has \(triangles) triangles; Prism opens up to 5,000,000."
         case .empty: "This file has no meshes in it."
+        case .unreadableImage: "Prism can't read this image. Use PNG, JPEG, HEIC, HDR or EXR."
         }
     }
     public static let maximumTriangles = 5_000_000

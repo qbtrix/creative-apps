@@ -90,7 +90,8 @@ do {
     check(near(m1.bounds.max.y, 1.5), "extruded 1 up")
     check(sel1.faces == [top], "extruded face stays selected")
     let (m2, sel2) = try s.meshEditing.apply(.loopCut(cuts: 1), to: cube, selection: PrismMeshSelection(edges: [PrismEdge(0, 1)]), mode: .edge)
-    check(m2.faces.count == 10 && m2.problem == nil && sel2.edges.count == 4, "loop cut around the cube: 4 faces split, 4 new edges")
+    check(m2.faces.count == 10 && m2.positions.count == 12 && m2.edges.count == 20 && m2.problem == nil && sel2.edges.count == 4,
+          "loop cut around the cube: 10 faces, 12 vertices, 20 edges, the new 4-edge loop selected")
     let (m3, _) = try s.meshEditing.apply(.inset(amount: 0.1), to: cube, selection: PrismMeshSelection(faces: [top]), mode: .face)
     check(m3.faces.count == 10 && m3.problem == nil, "inset adds a ring of 4")
     let (m4, _) = try s.meshEditing.apply(.delete, to: cube, selection: PrismMeshSelection(faces: [top]), mode: .face)
@@ -101,7 +102,14 @@ do {
 check(s.meshEditing.unavailableHelp(for: .bevel) != nil, "fake leaves bevel to live")
 let r = PrismRay(origin: Vec3(0, 5, 0), direction: Vec3(0, -1, 0))
 check(s.meshEditing.pick(r, mesh: cube, world: .identity, mode: .face) == .face(top), "pick the top face from above")
-check(s.meshEditing.loop(through: PrismEdge(0, 1), in: cube).count >= 1, "loop has the edge")
+check(s.meshEditing.loop(through: PrismEdge(0, 1), in: cube) == [PrismEdge(0, 1)], "a cube's loop stops at its valence-3 corners")
+// A 4 × 4 grid of quads (5 × 5 vertices, index = row * 5 + column): the loop through an interior
+// vertical edge runs the full height, 4 edges.
+let grid = PrismMesh(id: PrismID("grid"), name: "Grid",
+                     positions: (0..<25).map { Vec3(Double($0 % 5), 0, Double($0 / 5)) },
+                     faces: (0..<16).map { q -> [UInt32] in let r = q / 4, c = q % 4, a = UInt32(r * 5 + c); return [a, a + 5, a + 6, a + 1] })
+check(Set(s.meshEditing.loop(through: PrismEdge(7, 12), in: grid)) == [PrismEdge(2, 7), PrismEdge(7, 12), PrismEdge(12, 17), PrismEdge(17, 22)],
+      "grid loop is the full column of 4 edges")
 
 // UC3 extrusion: "AB" with the fake glyphs gives two boxes, 6 faces each.
 let outline = s.glyphs.outline(of: "A B", fontName: "Helvetica", size: 1)
@@ -225,6 +233,16 @@ do {
     _ = try s.images.decode(Data("RGBA 2 2\n".utf8) + Data([1, 2, 3]), name: "Bad", id: PrismID("t2"))
     check(false, "short image accepted")
 } catch { check(error == .damaged("the image is cut short."), "short image refused") }
+do { _ = try s.images.decode(Data("GIF89a".utf8), name: "x", id: PrismID("t3")); check(false, "gif accepted") }
+catch { check(error == .unreadableImage && error.message.hasPrefix("Prism can't read this image."), "unreadable image message") }
+
+// New Scene sheet: per-field problems; valid text gives the settings.
+let bad = PrismSceneSettings.problems(width: "abc", height: "1920", lengthSeconds: "0", framesPerSecond: 24)
+check(bad.problems[.width] == "Width must be a whole number from 16 to 8192." && bad.problems[.length] != nil && bad.parsed == nil, "scene problems")
+check(PrismSceneSettings.problems(width: "1080", height: "1920", lengthSeconds: "2", framesPerSecond: 24).parsed
+      == PrismSceneSettings(width: 1080, height: 1920, framesPerSecond: 24, durationFrames: 48), "scene parsed 48 frames")
+check(PrismEditError.emptyText.message == "Enter some text.", "empty text message")
+check(PrismLightKind.point.shadowHelp != nil && PrismLightKind.spot.shadowHelp == nil && !PrismLightKind.v1.contains(.area), "v1 lights")
 
 // UC22 modifiers: mirror doubles an off-axis cube; one subdivision level makes 24 quads of a cube.
 do {

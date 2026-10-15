@@ -96,6 +96,7 @@ public struct FakePrimitiveMaking: PrimitiveMaking {
     }
     public func light(_ kind: PrismLightKind) -> (PrismLight, PrismTransform) {
         let intensity: Double = switch kind { case .directional: 3; case .point, .spot: 800; case .area: 20 }
+        // .area is not offered in v1 (PrismLightKind.v1); the value is kept for files.
         return (PrismLight(kind: kind, intensity: intensity),
                 PrismTransform(position: Vec3(0, 4, 0), rotation: Vec3(-90, 0, 0)))
     }
@@ -419,8 +420,8 @@ public struct FakeLightEditing: LightEditing {
             return [spot("Key", 1000, Vec3(1, 1, 1), Vec3(-35, 45, 0)), spot("Fill", 300, Vec3(-1, 0.5, 1), Vec3(-20, -45, 0)),
                     spot("Rim", 600, Vec3(0, 1, -1), Vec3(-45, 180, 0))]
         case "Studio Soft":
-            return [("Softbox", PrismLight(kind: .area, intensity: 30, width: r, height: r),
-                     PrismTransform(position: c + Vec3(0, 1.5, 1) * r, rotation: Vec3(-55, 0, 0)))]
+            // Two wide, soft spots stand in for a softbox until area lights land.
+            return [spot("Soft Left", 500, Vec3(-0.7, 1.5, 1), Vec3(-50, -25, 0)), spot("Soft Right", 500, Vec3(0.7, 1.5, 1), Vec3(-50, 25, 0))]
         case "Rim":
             return [spot("Rim Left", 800, Vec3(-1, 0.5, -1), Vec3(-20, -135, 0)), spot("Rim Right", 800, Vec3(1, 0.5, -1), Vec3(-20, 135, 0))]
         default:
@@ -868,17 +869,21 @@ public struct FakeMeshEditing: MeshEditing {
         }
     }
     public func loop(through edge: PrismEdge, in mesh: PrismMesh) -> [PrismEdge] {
-        // A loop runs across quads through the opposite... the fake returns the ring's cut edges' neighbours:
-        // for a quad mesh, walk edges that share no face with the previous edge and meet at valence-4 vertices.
-        var out = [edge], current = edge, previousFaces = facesWith(current, in: mesh)
-        for _ in 0..<mesh.faces.count {
-            guard let next = nextInLoop(after: current, avoiding: previousFaces, in: mesh), next != edge,
-                  !out.contains(next) else { break }
-            out.append(next); previousFaces = facesWith(next, in: mesh); current = next
+        var out = [edge]
+        for start in [edge.b, edge.a] {
+            var current = edge, at = start
+            for _ in 0..<mesh.faces.count {
+                guard valence(at, in: mesh) == 4,
+                      let next = nextInLoop(after: current, at: at, in: mesh), !out.contains(next) else { break }
+                out.append(next)
+                at = next.a == at ? next.b : next.a
+                current = next
+            }
         }
         return out
     }
 
+    private func valence(_ v: Int, in m: PrismMesh) -> Int { m.edges.filter { $0.a == v || $0.b == v }.count }
     private func faceNormal(_ m: PrismMesh, _ fi: Int) -> Vec3 {
         guard fi < m.faces.count, m.faces[fi].count >= 3 else { return .zero }
         let f = m.faces[fi].map { m.positions[Int($0)] }
@@ -890,9 +895,10 @@ public struct FakeMeshEditing: MeshEditing {
             return f.indices.contains { PrismEdge(Int(f[$0]), Int(f[($0 + 1) % f.count])) == e }
         })
     }
-    private func nextInLoop(after e: PrismEdge, avoiding faces: Set<Int>, in m: PrismMesh) -> PrismEdge? {
-        let candidates = m.edges.filter { $0 != e && ($0.a == e.b || $0.b == e.b) }
-        return candidates.first { facesWith($0, in: m).isDisjoint(with: faces) }
+    /// At a valence-4 vertex, the one other edge that shares no face with `e`.
+    private func nextInLoop(after e: PrismEdge, at v: Int, in m: PrismMesh) -> PrismEdge? {
+        let faces = facesWith(e, in: m)
+        return m.edges.first { $0 != e && ($0.a == v || $0.b == v) && facesWith($0, in: m).isDisjoint(with: faces) }
     }
     /// Walks the ring of quads across `start` and splits each into `cuts + 1` strips.
     private func loopCut(_ mesh: PrismMesh, through start: PrismEdge, cuts: Int) -> (mesh: PrismMesh, selection: PrismMeshSelection) {
@@ -1005,10 +1011,10 @@ public struct FakeImageDecoding: ImageDecoding {
     public var unavailableHelp: String? { nil }
     public func decode(_ data: Data, name: String, id: PrismID) throws(PrismImportError) -> PrismTexture {
         let bytes = [UInt8](data)
-        guard let nl = bytes.firstIndex(of: 10) else { throw .unsupportedFormat("image") }
+        guard let nl = bytes.firstIndex(of: 10) else { throw .unreadableImage }
         let head = String(decoding: bytes[..<nl], as: UTF8.self).split(separator: " ")
         guard head.count == 3, head[0] == "RGBA", let w = Int(head[1]), let h = Int(head[2]), w > 0, h > 0 else {
-            throw .unsupportedFormat("image")
+            throw .unreadableImage
         }
         let body = Array(bytes[(nl + 1)...])
         guard body.count == w * h * 4 else { throw .damaged("the image is cut short.") }
