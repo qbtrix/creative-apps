@@ -36,3 +36,6 @@ utc	stage	event	ref	note
 2026-10-15T03:15Z	4	ci-run	38674789740	red on SuiteUI SidebarRenameGestureTests only (#763)
 2026-10-15T03:30Z	4	pr-opened	#949	r2-b1
 2026-10-15T03:30Z	4	pr-opened	#947	r2-b2
+2026-10-15T03:31Z	4	pr-merged	#949	r2-b1
+2026-10-15T03:31Z	4	pr-merged	#947	r2-b2
+2026-10-15T03:31Z	4	stage-start	round 3	panel on e2a8a15

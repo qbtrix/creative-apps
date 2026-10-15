@@ -2,9 +2,9 @@
 
 Issue: #799 · Packet: docs/blueprints/flare/features/live-keys.md
 Run: act-1a13d0020ff-4x51 · Session: cse_01BKSKFkuR1aFXhWhZAhsegU · Started: 2026-10-15T00:00Z
-Stage: 4 round 2
-Base: 1cca8d0b65c9506399533fd640862bac58ffe411
-Next: wait for r2-b1, r2-b2 to merge; round 3 panel (same lenses) on the new dev head
+Stage: 4 round 3
+Base: e2a8a15e55743e0f1c9d09c2d1c6daf0b2ed3d15
+Next: round 3 panel on e2a8a15 (same lenses); judge CI on the dev run containing #947 and #949
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
