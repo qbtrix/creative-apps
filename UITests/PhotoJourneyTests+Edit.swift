@@ -4,18 +4,23 @@
 // (the whole layer); with the general pasteboard cleared by the runner Paste
 // is off with "Nothing to paste."; a marquee around the sun, Command-C and
 // Command-V give "Pasted Layer" above Background, selected, one "Paste" step,
-// with the selection on the info line unchanged; Command-X on Background
+// with the selection on the info line unchanged and, with Background hidden
+// for a moment, the pasted pixels filling exactly the marquee's rect with the
+// sun in its old place; Command-X on Background
 // clears the sun ("Undo Cut", seen once Pasted Layer is hidden); Command-Z
 // restores both. Last, a marquee on a new transparent layer and Command-C say
 // "Nothing to copy." in the status line. PJ-6 pastes another app's image: the
 // runner writes a magenta 200 x 100 PNG to the general pasteboard; Edit >
-// Paste on beach.png gives a 2:1 layer centered on the image (one "Paste"
-// step); with no image open it opens a clean 200 x 100 "Untitled" image; a
-// 6000 x 4000 PNG opens as 5016 x 3344 with "Pasted at 84%.".
+// Paste on beach.png gives a 200 x 100 layer at (300, 250), centered on the
+// 800 x 600 image (one "Paste" step); with no image open it opens a clean
+// 200 x 100 "Untitled" image; a 6000 x 4000 PNG opens as 5016 x 3344 with
+// "Pasted at 84%.".
 // The sun is found by its yellow in the canvas pixels, so the marquee and the
-// checks don't depend on where the fitted image sits. Layer bounds aren't on
-// any label (no accessibility identifier gives them), so the pasted layer's
-// size and place are read from the canvas pixels. One shot per step, "edit-".
+// checks don't depend on where the fitted image sits. `suite.canvas` is the
+// artboard, so a fraction of the canvas is that fraction of the image. Layer
+// bounds aren't on any label (no accessibility identifier gives them), so the
+// pasted layer's size and place are read from the canvas pixels. One shot per
+// step, "edit-".
 import AppKit
 import CoreGraphics
 import ImageIO
@@ -38,9 +43,12 @@ final class PhotoEditJourneyTests: XCTestCase {
 
         // Marquee the sun, Command-C: the image goes on the pasteboard and Paste turns on.
         photo.element("suite.tools").buttons["Marquee"].click()
+        let sunBox = try XCTUnwrap(box(of: Self.yellow, photo), "no yellow sun on the canvas")
+        let (left, top) = (clamp(sun.dx - 0.16), clamp(sun.dy - 0.21))
+        let marquee = CGRect(x: left, y: top, width: clamp(sun.dx + 0.16) - left, height: clamp(sun.dy + 0.21) - top)
         photo.drag(
-            on: "suite.canvas", from: CGVector(dx: clamp(sun.dx - 0.16), dy: clamp(sun.dy - 0.21)),
-            to: CGVector(dx: clamp(sun.dx + 0.16), dy: clamp(sun.dy + 0.21)), step: "edit-sun-selected")
+            on: "suite.canvas", from: CGVector(dx: marquee.minX, dy: marquee.minY),
+            to: CGVector(dx: marquee.maxX, dy: marquee.maxY), step: "edit-sun-selected")
         // XCUITest reads a SwiftUI Text's words as its label or its value.
         let selection = photo.app.staticTexts.matching(
             NSPredicate(format: "label CONTAINS 'Selection ' OR value CONTAINS 'Selection '")).firstMatch
@@ -65,6 +73,22 @@ final class PhotoEditJourneyTests: XCTestCase {
         expectSelectedRow("Pasted Layer", photo)
         XCTAssertEqual(infoLine(), selected, "the paste changed the selection on the info line")
         photo.shot("edit-pasted")
+
+        // Background hidden: Pasted Layer's pixels fill the marquee's rect, the sun where it was.
+        photo.click("Hide Background", in: .window)
+        expect("Undo Hide Layer", photo, "Background's eye didn't hide it")
+        var layerBox: CGRect?
+        XCTAssert(
+            waitFor { layerBox = self.box(of: Self.colored, photo); return layerBox != nil },
+            "Pasted Layer shows no pixels with Background hidden")
+        if let layerBox { expectBox(layerBox, near: marquee, within: 0.012, "Pasted Layer's pixels") }
+        let pastedSun = box(of: Self.yellow, photo)
+        XCTAssertNotNil(pastedSun, "Pasted Layer holds no sun")
+        if let pastedSun { expectBox(pastedSun, near: sunBox, within: 0.01, "Pasted Layer's sun") }
+        photo.shot("edit-pasted-alone")
+        photo.press(character: "z", .command)
+        expect("Undo Paste", photo, "Command-Z didn't undo hiding Background")
+        expectSelectedRow("Pasted Layer", photo)
 
         // Select Background (Select Layer Below), Command-X: one Cut step; with Pasted Layer
         // hidden the sun's place shows no yellow.
@@ -115,11 +139,9 @@ final class PhotoEditJourneyTests: XCTestCase {
         expectHeader("2 layers", photo, "the header doesn't count two layers after the paste")
         var box: CGRect?
         XCTAssert(waitFor { box = self.magentaBox(photo); return box != nil }, "the pasted image isn't on the canvas")
-        if let box {
-            let ratio = box.width / max(box.height, 1)
-            XCTAssert(abs(ratio - 2) < 0.2, "the pasted layer is \(box.size) on screen, not 2:1 like 200 x 100")
-            XCTAssert(abs(box.midX - 0.5) < 0.06 && abs(box.midY - 0.5) < 0.06, "the pasted layer \(box) isn't centered")
-        }
+        // 200 x 100 at (300, 250) on the 800 x 600 image, within 4 image pixels.
+        let placed = CGRect(x: 300.0 / 800, y: 250.0 / 600, width: 200.0 / 800, height: 100.0 / 600)
+        if let box { expectBox(box, near: placed, within: 4.0 / 800, "the pasted 200 x 100 layer") }
         photo.shot("edit-pasted-from-app")
         photo.app.terminate()
 
@@ -303,6 +325,22 @@ final class PhotoEditJourneyTests: XCTestCase {
     /// The pasted image's magenta (255, 0, 255).
     private static func magenta(_ pixel: (Int, Int, Int)) -> Bool {
         pixel.0 > 180 && pixel.1 < 90 && pixel.2 > 180
+    }
+
+    /// Any picture pixel: the checkerboard and the marching ants are gray, the sky and sun
+    /// aren't (the sky's grayest row still spreads its channels by about 22).
+    private static func colored(_ pixel: (Int, Int, Int)) -> Bool {
+        max(pixel.0, pixel.1, pixel.2) - min(pixel.0, pixel.1, pixel.2) > 12
+    }
+
+    /// `box` matches `expected` (both fractions of the canvas) edge by edge within `tolerance`.
+    private func expectBox(_ box: CGRect, near expected: CGRect, within tolerance: CGFloat, _ what: String) {
+        let edges = [
+            (box.minX, expected.minX), (box.minY, expected.minY), (box.maxX, expected.maxX), (box.maxY, expected.maxY),
+        ]
+        XCTAssert(
+            edges.allSatisfy { abs($0.0 - $0.1) <= tolerance },
+            "\(what) cover \(box) of the canvas, not \(expected) (within \(tolerance))")
     }
 
     /// Where the yellow sun's middle is, as a fraction of the canvas.
