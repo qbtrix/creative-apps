@@ -61,7 +61,7 @@ involved" lists are superseded by the owned files below; each packet says so.
 """)
 for f in F:
     o.append(f"| `{f['id']}` | {f['wave']} | {f['title']} | {', '.join('#' + str(i) for i in f['issues'])} | "
-             f"{', '.join(f['journeys']) or '–'} | {f.get('quality', '–')} | {', '.join('`' + x + '`' for x in f['depends']) or '–'} |\n")
+             f"{', '.join(f.get('journey_ids', [])) or '–'} | {f.get('quality', '–')} | {', '.join('`' + x + '`' for x in f['depends']) or '–'} |\n")
 o.append("""
 ### 8.3 Waves, owned files and what each waits on
 
