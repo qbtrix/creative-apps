@@ -44,6 +44,9 @@ import Testing
         var applied: [Int?] = []
         var pending: [Int] = []
         var pictures: [(revision: Int, at: ContinuousClock.Instant)] = []
+        /// How late the main actor took each sample, and how long each apply ran on it.
+        var late: [Double] = []
+        var applying: [Double] = []
     }
 
     @Test(.timeLimit(.minutes(2))) func brushInkLandsWithinAFrameAtFullRate() async throws {
@@ -61,6 +64,8 @@ import Testing
         renderer.onPicture = { record.pictures.append(($0, record.clock.now)) }
         let pacer = StrokePacer()
         let apply: ([StrokePacer.Move]) -> Void = { moves in
+            let began = record.clock.now
+            defer { record.applying.append(milliseconds(record.clock.now - began)) }
             state.drags(moves)
             for i in record.pending { record.applied[i] = state.value.revision }
             record.pending = []
@@ -70,8 +75,11 @@ import Testing
         // main run loop, so the pacer's display link and the renders run between.
         let started = record.clock.now
         for (i, to) in Self.path.enumerated() {
-            try await Task.sleep(until: started + .microseconds(8_333 * i), clock: record.clock)
-            record.input.append(record.clock.now)
+            // A sample's time is when it arrived, so a busy main actor that takes it late counts.
+            let arrived = started + .microseconds(8_333 * i)
+            try await Task.sleep(until: arrived, clock: record.clock)
+            record.late.append(milliseconds(record.clock.now - arrived))
+            record.input.append(arrived)
             record.applied.append(nil)
             record.pending.append(i)
             pacer.add((from: i == 0 ? to : Self.path[i - 1], to: to, pressure: 1, modifiers: []), apply: apply)
@@ -91,6 +99,8 @@ import Testing
         let times = record.pictures.map(\.at)
         let gaps = zip(times.dropFirst(), times).map { milliseconds($0 - $1) }
         let longest = gaps.max() ?? 0
+        let gapEnd = gaps.firstIndex(of: longest).map { times[$0] }
+        let longestAfter = gapEnd.map { end in record.input.lastIndex { $0 <= end } ?? -1 } ?? -1
         let report = [
             "BRUSH-INK config=\(Self.config) display=\(NSScreen.main?.maximumFramesPerSecond ?? 0)Hz canvas=4000x3000",
             "brush=64px input=120Hz samples=\(latency.count)",
@@ -98,9 +108,11 @@ import Testing
             "p95 \(format(percentile(latency, 0.95))) max \(format(latency.max() ?? 0)) ms",
             "| picture gap p95 \(format(percentile(gaps, 0.95))) max \(format(longest)) ms,",
             "\(gaps.filter { $0 > 2 * Self.frame }.count) over 2 frames | render p50",
-            "\(format(renderer.lastMilliseconds ?? 0)) ms | budget p95 <=",
+            "\(format(renderer.lastMilliseconds ?? 0)) ms | main actor: samples taken late max",
+            "\(format(record.late.max() ?? 0)) ms, apply max \(format(record.applying.max() ?? 0)) ms,",
+            "longest gap after sample \(longestAfter) | budget p95 <=",
             Self.latencyBudget.map { "\(format($0)) ms, gaps <= \(format(2 * Self.frame)) ms" }
-                ?? "report only (debug)",
+                ?? "report only (debug, or the display asleep)",
         ].joined(separator: " ")
         print(report)
         let folder = try packageRoot().appending(path: ".build/snapshots")
