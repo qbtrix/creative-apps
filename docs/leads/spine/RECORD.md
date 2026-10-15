@@ -2,9 +2,9 @@
 
 Issue: #1044 · Packet: docs/blueprints/library/features/spine.md
 Run: act-1a13f18aaa0-lfw5 · Session: session_01DtSRhNqsphGfKkvV5eLsWW · Started: 2026-10-15T10:25Z
-Stage: 3 wave 3
-Base: 98e4db1 (wave 2)
-Next: wait for SP-3's PR to merge; then wave 4 (SP-4, SP-5)
+Stage: 3 wave 4a
+Base: 328e6b6e2bec7b88d4e454620770619ccabfd4bc
+Next: wait for SP-4 to merge; then wave 4b (SP-5)
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -14,8 +14,8 @@ Next: wait for SP-3's PR to merge; then wave 4 (SP-4, SP-5)
 | SP-11 | 1 | `CatalogHistory` value type | CatalogHistory.swift | LibraryHistoryTests | #1095 | merged |
 | SA-1 | 1 | Pure split of the app into scene, window, browser, grid, inspector, DisplayImage+Image | LibraryApp/* (6 files) | next macOS run, PNGs unchanged | #1096 | merged |
 | SP-2 | 2 | Develop values; PhotoItem grows path, pixelSize, develop, availability | Contracts/DevelopValues.swift, PhotoItem.swift | LibraryPhotoItemTests | #1103 | merged |
-| SP-3 | 3 | Protocols (+ `initial` comment fix), SampleImage | Contracts/LibraryContracts.swift, SampleImage.swift | LibraryContractsTests |  | building |
-| SP-4 | 4 | Fakes: support, platform, use cases (progress first) | Fakes/FakeSupport, FakePlatform, FakeUseCases | LibraryFakesTests | | planned |
+| SP-3 | 3 | Protocols (+ `initial` comment fix), SampleImage | Contracts/LibraryContracts.swift, SampleImage.swift | LibraryContractsTests | #1107 | merged |
+| SP-4 | 4 | Fakes: support, platform, use cases (progress first) | Fakes/FakeSupport, FakePlatform, FakeUseCases | LibraryFakesTests |  | building |
 | SP-5 | 4 | Fakes: loupe, develop, crop, exporter | Fakes/FakeRendering.swift | LibraryFakeRenderingTests | | planned |
 | SP-6 | 5 | Eight live stubs, LibraryServices | Live/*, LibraryServices.swift | LibraryServicesTests | | planned |
 | SP-7 | 6 | Stored properties, state enums, init(services:), hand-written == | LibraryCatalog.swift | LibraryCatalogTests | | planned |
