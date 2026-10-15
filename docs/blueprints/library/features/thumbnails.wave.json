@@ -1,0 +1,37 @@
+{
+  "title": "Real grid thumbnails",
+  "wave": 2,
+  "order": 20,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "covers": "#33",
+  "waits_on": "spine, #779 (S-L2), #333",
+  "issues": [
+    33
+  ],
+  "owned": [
+    "Sources/LibraryModel/LibraryThumbnails.swift",
+    "Sources/LibraryModel/Live/LiveThumbnails.swift",
+    "Sources/LibraryApp/LibraryGrid.swift",
+    "Sources/LibraryApp/DisplayImage+Image.swift",
+    "Sources/LibraryApp/LibraryWindow+Thumbnails.swift",
+    "Tests/LibraryModelTests/LibraryThumbnailTests.swift",
+    "Tests/AppSnapshotTests/LibraryThumbnailSnapshots.swift",
+    "Tests/AppSnapshotTests/LibraryGridSnapshots.swift",
+    "UITests/LibraryJourneyTests+Grid.swift",
+    "UITests/LibraryJourneyTests+PerfGrid.swift",
+    "Tests/LibraryModelTests/LibraryGridBudgetTests.swift"
+  ],
+  "core": "none (resized and rgba8 landed: creative-core #132, #143)",
+  "suiteui": "S-L2 ThumbnailGrid additions; #330, #333",
+  "depends": [
+    "spine"
+  ],
+  "journeys": [
+    "J2",
+    "P1"
+  ],
+  "notes": "Live thumbnails read files through services.decoder, which is FakeDecoder in tests and the live ImageIODecoder once import lands. Its (L) steps wait for import to merge. Cell values need S-L2.",
+  "quality": "QB-LIB-3, QB-LIB-8, QB-LIB-V5",
+  "library_title": "Real grid thumbnails: buckets, visible requests, LRU, placeholders"
+}

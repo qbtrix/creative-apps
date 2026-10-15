@@ -1,0 +1,9 @@
+{
+  "title": "The window seam: intents, launch arguments, menus, canvas slots, inspector shell, control ids, J15 and layout",
+  "wave": "0b",
+  "order": 10,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "covers": "#288 (part)",
+  "waits_on": "design-seams; #778 suite-harness"
+}

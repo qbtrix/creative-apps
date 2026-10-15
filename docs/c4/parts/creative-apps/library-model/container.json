@@ -1,0 +1,24 @@
+{
+  "id": "library-model",
+  "name": "LibraryModel",
+  "description": "Linux-safe state and logic behind Library's window: the catalog's photos, sidebar collections with counts, the selected collection and sort order, and seeded sample photos. Foundation only, value types.",
+  "technology": "Swift 6, Foundation",
+  "tags": [
+    "internal"
+  ],
+  "order": 90,
+  "relationships": [
+    {
+      "source": "library-model",
+      "target": "coreraster",
+      "description": "uses CoreRaster from creative-core",
+      "style": "sync"
+    },
+    {
+      "source": "library-model",
+      "target": "corecolor",
+      "description": "uses CoreColor from creative-core",
+      "style": "sync"
+    }
+  ]
+}

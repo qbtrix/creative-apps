@@ -1,0 +1,24 @@
+{
+  "id": "photo-model",
+  "name": "PhotoModel",
+  "description": "Linux-safe state and logic behind Photo's window: the canvas as a CoreRaster PixelBuffer, its layer stack, selected layer and tool, adjustment settings, and inspector and Layer menu state. Foundation only, value types.",
+  "technology": "Swift 6, Foundation",
+  "tags": [
+    "internal"
+  ],
+  "order": 70,
+  "relationships": [
+    {
+      "source": "photo-model",
+      "target": "coreraster",
+      "description": "uses CoreRaster from creative-core",
+      "style": "sync"
+    },
+    {
+      "source": "photo-model",
+      "target": "corecolor",
+      "description": "uses CoreColor from creative-core",
+      "style": "sync"
+    }
+  ]
+}

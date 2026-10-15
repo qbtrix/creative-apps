@@ -1,0 +1,9 @@
+{
+  "title": "One AfterGlow.app with shared frameworks and document types",
+  "wave": 1,
+  "order": 10,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "covers": "#813, #814, #815, #816, #817, #818 (and #819, after ten runs)",
+  "waits_on": "targets; #333 for BU-3"
+}

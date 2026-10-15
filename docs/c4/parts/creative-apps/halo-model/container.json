@@ -1,0 +1,24 @@
+{
+  "id": "halo-model",
+  "name": "HaloModel",
+  "description": "Linux-safe state and logic behind Halo's window: the project's compositions and their layers, the selected composition, New Composition settings, and refused renames. Foundation only, value types.",
+  "technology": "Swift 6, Foundation",
+  "tags": [
+    "internal"
+  ],
+  "order": 110,
+  "relationships": [
+    {
+      "source": "halo-model",
+      "target": "flarecore",
+      "description": "uses FlareCore from creative-core",
+      "style": "sync"
+    },
+    {
+      "source": "halo-model",
+      "target": "coreraster",
+      "description": "uses CoreRaster from creative-core",
+      "style": "sync"
+    }
+  ]
+}

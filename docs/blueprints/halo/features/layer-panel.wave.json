@@ -1,0 +1,30 @@
+{
+  "title": "Layer housekeeping",
+  "wave": "W1",
+  "order": 40,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "covers": "#770",
+  "waits_on": "foundation #777; #333",
+  "cells": {
+    "waits on (features)": "foundation #777",
+    "waits on (SuiteUI, creative-core)": "#333"
+  },
+  "depends": [
+    "foundation"
+  ],
+  "owned": [
+    "Sources/HaloModel/HaloLayerEdits.swift",
+    "Sources/HaloModel/Availability/HaloAvailability+Layers.swift",
+    "Sources/HaloApp/HaloLayerList.swift",
+    "Sources/HaloApp/HaloWindow+Layers.swift",
+    "Tests/HaloModelTests/HaloLayerEditsTests.swift",
+    "Tests/AppSnapshotTests/HaloLayersSnapshots.swift",
+    "UITests/HaloJourneyTests+Layers.swift"
+  ],
+  "core": "none",
+  "waits_ui": [
+    "#333 (journey files)"
+  ],
+  "note": "H-J9."
+}

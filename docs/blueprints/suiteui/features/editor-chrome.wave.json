@@ -1,0 +1,9 @@
+{
+  "title": "The editor window's chrome",
+  "wave": 2,
+  "order": 10,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "covers": "#342, #339, #340, #341",
+  "waits_on": "#778 (suite-harness)"
+}

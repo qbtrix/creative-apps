@@ -1,0 +1,25 @@
+{
+  "id": "photo-app",
+  "name": "PhotoApp",
+  "description": "The Photo app (raster editing): the SwiftUI App scene and views in Sources/PhotoApp, built from SuiteUI. Reads PhotoModel and calls its methods; never writes its state (scripts/ci app-state rule).",
+  "technology": "Swift 6, SwiftUI, macOS 26",
+  "tags": [
+    "internal",
+    "macos-only"
+  ],
+  "order": 60,
+  "relationships": [
+    {
+      "source": "photo-app",
+      "target": "suiteui",
+      "description": "builds its window from SuiteUI components",
+      "style": "sync"
+    },
+    {
+      "source": "photo-app",
+      "target": "photo-model",
+      "description": "reads state and calls its methods",
+      "style": "sync"
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "id": "coreraster",
+  "name": "CoreRaster library",
+  "description": "Pixel buffers, compositing and image operations.",
+  "technology": "Swift 6, SwiftPM",
+  "tags": [
+    "external"
+  ],
+  "order": 30
+}

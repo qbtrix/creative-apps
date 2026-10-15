@@ -1,0 +1,9 @@
+{
+  "title": "Marks over the canvas, zoom and pan, the surface",
+  "wave": 2,
+  "order": 40,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "covers": "#273, #706, #737, #530, #264",
+  "waits_on": "#778 (suite-harness)"
+}

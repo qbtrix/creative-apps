@@ -1,0 +1,43 @@
+{
+  "title": "Render a frame and render to files",
+  "wave": "W2",
+  "order": 20,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "covers": "#451, #429",
+  "waits_on": "viewer-playback; #333",
+  "cells": {
+    "waits on (features)": "viewer-playback",
+    "waits on (SuiteUI, creative-core)": "#333"
+  },
+  "depends": [
+    "viewer-playback"
+  ],
+  "owned": [
+    "Sources/HaloModel/Live/LiveCompositionRendering.swift",
+    "Sources/HaloModel/HaloRenderFrame.swift",
+    "Sources/HaloModel/HaloRenderJob.swift",
+    "Sources/HaloModel/Availability/HaloAvailability+Render.swift",
+    "Sources/HaloApp/HaloRenderSheet.swift",
+    "Sources/HaloApp/HaloRenderedFrameView.swift",
+    "Sources/HaloApp/HaloFrameImage.swift",
+    "Sources/HaloApp/HaloPNGWriter.swift",
+    "Sources/HaloApp/HaloMovieWriter.swift",
+    "Sources/HaloApp/HaloWindow+Render.swift",
+    "Tests/HaloModelTests/CompositionRenderingContractTests.swift",
+    "Tests/HaloModelTests/HaloRenderPlanTests.swift",
+    "Tests/HaloModelTests/HaloRenderFrameTests.swift",
+    "Tests/HaloModelTests/HaloRenderBudgetTests.swift",
+    "Tests/AppSnapshotTests/HaloRenderSheetSnapshots.swift",
+    "Tests/AppSnapshotTests/HaloRenderSnapshots.swift",
+    "Tests/AppSnapshotTests/HaloPNGWriterTests.swift",
+    "Tests/AppSnapshotTests/HaloMovieWriterTests.swift",
+    "UITests/HaloJourneyTests+RenderFrame.swift",
+    "UITests/HaloJourneyTests+Render.swift"
+  ],
+  "core": "none (the PNG and movie writers are app-side: ImageIO and AVFoundation)",
+  "waits_ui": [
+    "#333"
+  ],
+  "note": "H-J20, H-J21; HB-12, HB-13; HF-7, HF-8. Waits on viewer-playback (the live renderer)."
+}

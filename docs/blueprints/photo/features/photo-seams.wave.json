@@ -1,0 +1,15 @@
+{
+  "title": "The seams: contracts, fakes, services, state, routing, file splits",
+  "wave": 0,
+  "order": 10,
+  "status": "built",
+  "feature_issue": "#812",
+  "covers": "–",
+  "waits_on": "nothing; nothing",
+  "cells": {
+    "PV": "PV-0",
+    "tier": "p1 (by dependency)",
+    "waits on (this repo)": "nothing",
+    "waits on (creative-core)": "nothing"
+  }
+}

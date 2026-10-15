@@ -1,0 +1,9 @@
+{
+  "title": "Never lose work, and draw at full quality on the Mac",
+  "wave": 1,
+  "order": 10,
+  "status": "built",
+  "feature_issue": "#793",
+  "covers": "#739, #373, #370",
+  "waits_on": "nothing"
+}

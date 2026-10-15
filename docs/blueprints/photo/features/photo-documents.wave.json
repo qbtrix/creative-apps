@@ -1,0 +1,15 @@
+{
+  "title": "Save and reopen with layers, Open Recent, unsaved state, recovery",
+  "wave": 1,
+  "order": 10,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "covers": "–",
+  "waits_on": "photo-seams (journey tasks only: photo-journey-kit); nothing",
+  "cells": {
+    "PV": "PV-1",
+    "tier": "p1",
+    "waits on (this repo)": "photo-seams (journey tasks only: photo-journey-kit)",
+    "waits on (creative-core)": "nothing"
+  }
+}

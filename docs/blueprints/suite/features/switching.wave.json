@@ -1,0 +1,9 @@
+{
+  "title": "Switch between apps, hand-offs",
+  "wave": 2,
+  "order": 20,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "covers": "#852–#857, #860; app lines #861–#865 (follow-ups #858, #859)",
+  "waits_on": "suite-contracts, bundle, #778; #845 (home HM-2b) for SW-4a; #782 for SW-4c"
+}

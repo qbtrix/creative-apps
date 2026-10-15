@@ -1,0 +1,37 @@
+{
+  "title": "Crop and straighten in the loupe, applied in render, thumbnail and export",
+  "wave": 4,
+  "order": 10,
+  "status": "planned",
+  "feature_issue": "later (packet after wave 2 lands)",
+  "covers": "#425",
+  "waits_on": "develop",
+  "issues": [
+    425
+  ],
+  "owned": [
+    "Sources/LibraryModel/LibraryCrop.swift",
+    "Sources/LibraryModel/Live/LiveCrop.swift",
+    "Sources/LibraryModel/Live/LiveDevelop.swift",
+    "Sources/LibraryApp/LibraryCropOverlay.swift",
+    "Sources/LibraryApp/LibraryWindow+Crop.swift",
+    "Tests/LibraryModelTests/LibraryCropTests.swift",
+    "Tests/AppSnapshotTests/LibraryCropSnapshots.swift",
+    "UITests/LibraryJourneyTests+Crop.swift",
+    "UITests/LibraryJourneyTests+PerfCrop.swift",
+    "Tests/LibraryModelTests/LibraryCropBudgetTests.swift",
+    "Sources/LibraryApp/CropInspector.swift"
+  ],
+  "core": "none (creative-core#230 closed by #251)",
+  "suiteui": "S-L3 CropHandles; #330, #333",
+  "depends": [
+    "develop"
+  ],
+  "journeys": [
+    "J6",
+    "P5"
+  ],
+  "notes": "Edits LiveDevelop.swift (crop after tone), which develop owned in wave 3.",
+  "quality": "QB-L1, QB-LIB-V4, QB-F3, QB-F4",
+  "library_title": "Crop and straighten in the loupe, applied in render, thumbnail and export"
+}

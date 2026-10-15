@@ -1,0 +1,48 @@
+{
+  "title": "See and play the composition",
+  "wave": "W1",
+  "order": 10,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "covers": "#37, #457",
+  "waits_on": "foundation #777; #333 (journey files); #340 not blocking (plain buttons meanwhile)",
+  "cells": {
+    "waits on (features)": "foundation #777",
+    "waits on (SuiteUI, creative-core)": "#333 (journey files); #340 not blocking (plain buttons meanwhile)"
+  },
+  "depends": [
+    "foundation"
+  ],
+  "owned": [
+    "Sources/HaloModel/Live/LiveFrameDrawing.swift",
+    "Sources/HaloModel/Live/LivePlaybackClock.swift",
+    "Sources/HaloModel/Live/LiveFrameRendering.swift",
+    "Sources/HaloModel/FrameRenderer.swift",
+    "Sources/HaloModel/HaloPlayback.swift",
+    "Sources/HaloModel/Availability/HaloAvailability+Playback.swift",
+    "Sources/HaloApp/HaloViewerCanvas.swift",
+    "Sources/HaloApp/HaloTransport.swift",
+    "Sources/HaloApp/HaloPlaybackDriver.swift",
+    "Sources/HaloApp/HaloWindow+Viewer.swift",
+    "Sources/HaloApp/HaloWindow+Playback.swift",
+    "Tests/HaloModelTests/FrameDrawingContractTests.swift",
+    "Tests/HaloModelTests/PlaybackClockContractTests.swift",
+    "Tests/HaloModelTests/FrameRenderingContractTests.swift",
+    "Tests/HaloModelTests/HaloPlaybackTests.swift",
+    "Tests/HaloModelTests/LiveFrameRenderingTests.swift",
+    "Tests/HaloModelTests/HaloRenderTests.swift",
+    "Tests/HaloModelTests/HaloRenderEdgeTests.swift",
+    "Tests/HaloModelTests/HaloViewerBudgetTests.swift",
+    "Tests/AppSnapshotTests/HaloPreviewSnapshots.swift",
+    "Tests/AppSnapshotTests/HaloViewerFidelityTests.swift",
+    "UITests/HaloJourneyTests+Viewer.swift",
+    "UITests/HaloJourneyTests+Playback.swift",
+    "UITests/HaloJourneyTests.swift"
+  ],
+  "core": "none. Shape layers render through an ellipse built from four cubic `PathElement`s (the stopgap Flare uses) until creative-core#182's path builder lands",
+  "waits_ui": [
+    "#333 (journey files)",
+    "#340 TransportCapsule (placeholder meanwhile)"
+  ],
+  "note": "H-J2, H-J3 (extends the shipped scrub journey), H-J4; HB-2, HB-5, HB-11; HF-1, HF-2."
+}

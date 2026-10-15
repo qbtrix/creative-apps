@@ -1,0 +1,10 @@
+{
+  "id": "flare-app-sources",
+  "name": "FlareApp sources",
+  "description": "The Flare app (2D animation): the SwiftUI App scene, its menu bar (FlareCommands) and views in Sources/FlareApp, including the easing inspector on the live FlareWorkspace, built from SuiteUI, and PlaybackDriver, which feeds NSScreen display-link target timestamps into the workspace's play clock, and StagePath, which turns FlareCore paths and colors into CGPath (one addCurve per cubic) and sRGB CGColor for the stage, and FlareAutosave, which writes the dirty document's RecoveryFile atomically off the main actor once autosave is due and removes it after a save, and on launch reads and decodes it off the main thread into a RecoveryOffer to restore or discard.",
+  "technology": "Swift 6, SwiftUI, macOS 26",
+  "paths": [
+    "Sources/FlareApp/"
+  ],
+  "order": 10
+}

@@ -1,0 +1,9 @@
+{
+  "title": "The tier-2 seam",
+  "wave": 2,
+  "order": 10,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "covers": "–",
+  "waits_on": "all five wave-1 features"
+}

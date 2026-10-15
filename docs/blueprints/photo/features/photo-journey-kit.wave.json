@@ -1,0 +1,15 @@
+{
+  "title": "Shared journey helpers",
+  "wave": 0,
+  "order": 20,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "covers": "–",
+  "waits_on": "#333 (QH-4; suite-harness #778 closes it with task SH-7); nothing",
+  "cells": {
+    "PV": "PV-0 (journey part)",
+    "tier": "p1 (by dependency)",
+    "waits on (this repo)": "#333 (QH-4; suite-harness #778 closes it with task SH-7)",
+    "waits on (creative-core)": "nothing"
+  }
+}

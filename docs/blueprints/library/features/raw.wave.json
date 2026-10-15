@@ -1,0 +1,29 @@
+{
+  "title": "Camera raw files through the system decoder (not v1)",
+  "wave": 5,
+  "order": 30,
+  "status": "planned",
+  "feature_issue": "later (packet after wave 2 lands)",
+  "covers": "#427",
+  "waits_on": "import, thumbnails",
+  "issues": [
+    427
+  ],
+  "owned": [
+    "Sources/LibraryModel/RawFileTypes.swift",
+    "Sources/LibraryApp/Platform/RawDecoding.swift",
+    "Tests/LibraryModelTests/LibraryRawImportTests.swift",
+    "Tests/AppSnapshotTests/LibraryRawSnapshots.swift",
+    "UITests/LibraryJourneyTests+Raw.swift"
+  ],
+  "core": "none",
+  "suiteui": "S-L2 (RAW badge)",
+  "depends": [
+    "import",
+    "thumbnails"
+  ],
+  "journeys": [],
+  "notes": "Not v1, pending evidence (docs/priorities.md).",
+  "quality": "later",
+  "library_title": "Camera raw files through the system decoder (not v1)"
+}

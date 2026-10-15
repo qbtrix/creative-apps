@@ -1,0 +1,31 @@
+{
+  "title": "Filter by flag and rating, collections you make, smart rules (not v1)",
+  "wave": 5,
+  "order": 10,
+  "status": "planned",
+  "feature_issue": "later (packet after wave 2 lands)",
+  "covers": "#31",
+  "waits_on": "cull",
+  "issues": [
+    31
+  ],
+  "owned": [
+    "Sources/LibraryModel/LibraryCollections.swift",
+    "Sources/LibraryModel/LibraryFilter.swift",
+    "Sources/LibraryApp/LibraryWindow.swift",
+    "Sources/LibraryApp/LibraryWindow+Filters.swift",
+    "Tests/LibraryModelTests/LibraryCollectionsTests.swift",
+    "Tests/AppSnapshotTests/LibraryCollectionsSnapshots.swift",
+    "UITests/LibraryJourneyTests+Filters.swift",
+    "Sources/LibraryApp/LibraryCommands.swift"
+  ],
+  "core": "none",
+  "suiteui": "none",
+  "depends": [
+    "cull"
+  ],
+  "journeys": [],
+  "notes": "Not v1. Needs one menu item added to LibraryCommands.swift; it takes that file for this wave.",
+  "quality": "later",
+  "library_title": "Filter by flag and rating, collections you make, smart rules (not v1)"
+}

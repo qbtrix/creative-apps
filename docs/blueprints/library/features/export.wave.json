@@ -1,0 +1,39 @@
+{
+  "title": "Export JPEG at a set long edge and quality, never overwriting",
+  "wave": 4,
+  "order": 20,
+  "status": "planned",
+  "feature_issue": "later (packet after wave 2 lands)",
+  "covers": "#424",
+  "waits_on": "develop, import",
+  "issues": [
+    424
+  ],
+  "owned": [
+    "Sources/LibraryModel/LibraryExport.swift",
+    "Sources/LibraryModel/Live/LiveExporter.swift",
+    "Sources/LibraryApp/Platform/JPEGWriter.swift",
+    "Sources/LibraryApp/LibraryExportSheet.swift",
+    "Sources/LibraryApp/LibraryWindow+Export.swift",
+    "Tests/LibraryModelTests/LibraryExportPlanTests.swift",
+    "Tests/AppSnapshotTests/LibraryExportSnapshots.swift",
+    "Tests/AppSnapshotTests/LibraryExportFidelityTests.swift",
+    "UITests/LibraryJourneyTests+Export.swift",
+    "UITests/LibraryJourneyTests.swift",
+    "Tests/LibraryModelTests/LibraryExportBudgetTests.swift",
+    "UITests/LibraryJourneyTests+PerfExport.swift"
+  ],
+  "core": "none",
+  "suiteui": "S-L5 ProgressRow; #330, #333",
+  "depends": [
+    "develop",
+    "import"
+  ],
+  "journeys": [
+    "J7",
+    "P8"
+  ],
+  "notes": "Its last task (the QB-V4 test with a cropped photo) waits for crop to merge. Owns LibraryJourneyTests.swift in its wave, for its journey steps if #333 has not merged.",
+  "quality": "QB-L9, QB-LIB-7, QB-V4, QB-F2",
+  "library_title": "Export JPEG at a set long edge and quality, never overwriting"
+}

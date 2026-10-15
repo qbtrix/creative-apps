@@ -1,0 +1,38 @@
+{
+  "title": "Import a folder",
+  "wave": 2,
+  "order": 10,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "covers": "#210",
+  "waits_on": "spine",
+  "issues": [
+    210
+  ],
+  "owned": [
+    "Sources/LibraryModel/LibraryImport.swift",
+    "Sources/LibraryModel/Live/LiveImporter.swift",
+    "Sources/LibraryApp/Platform/ImageIODecoder.swift",
+    "Sources/LibraryApp/LibraryWindow+Import.swift",
+    "Sources/LibraryApp/LibraryBrowser.swift",
+    "Tests/LibraryModelTests/LibraryImportTests.swift",
+    "Tests/AppSnapshotTests/LibraryImportSnapshots.swift",
+    "Tests/AppSnapshotTests/LibraryDecodeTests.swift",
+    "UITests/LibraryJourneyTests+Import.swift",
+    "UITests/LibraryJourneyTests+PerfImport.swift",
+    "UITests/LibraryJourneyTests.swift",
+    "Tests/LibraryModelTests/LibraryImportBudgetTests.swift"
+  ],
+  "core": "none (decode is ImageIO in LibraryApp)",
+  "suiteui": "S-L4 InlineNotice, S-L5 ProgressRow (placeholders until then); #330, #333",
+  "depends": [
+    "spine"
+  ],
+  "journeys": [
+    "J1",
+    "P6"
+  ],
+  "notes": "Owns LibraryJourneyTests.swift in its wave, for its journey steps if #333 has not merged. Deletes the skipped testImportRateAndRelaunch (J8 replaces it).",
+  "quality": "QB-L9, QB-LIB-1, QB-LIB-V6, QB-F2",
+  "library_title": "Import a folder: scan, metadata, path ids, skip known, progress, failures"
+}

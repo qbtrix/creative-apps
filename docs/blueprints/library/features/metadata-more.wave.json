@@ -1,0 +1,27 @@
+{
+  "title": "Keywords and camera details (not v1)",
+  "wave": 5,
+  "order": 20,
+  "status": "planned",
+  "feature_issue": "later (packet after wave 2 lands)",
+  "covers": "#744",
+  "waits_on": "import",
+  "issues": [
+    744
+  ],
+  "owned": [
+    "Sources/LibraryModel/LibraryKeywords.swift",
+    "Tests/LibraryModelTests/LibraryKeywordTests.swift",
+    "Sources/LibraryApp/MetadataInspector.swift",
+    "Tests/AppSnapshotTests/LibraryMetadataSnapshots.swift"
+  ],
+  "core": "none",
+  "suiteui": "none",
+  "depends": [
+    "import"
+  ],
+  "journeys": [],
+  "notes": "Not v1. Camera details come from the Exif the import scan already reads.",
+  "quality": "later",
+  "library_title": "Keywords and camera details (not v1)"
+}

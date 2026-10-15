@@ -1,0 +1,9 @@
+{
+  "title": "Files and history",
+  "wave": 1,
+  "order": 50,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "covers": "#275, #270; gap: open bad files journey",
+  "waits_on": "design-window"
+}

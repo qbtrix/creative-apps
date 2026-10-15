@@ -1,0 +1,42 @@
+{
+  "title": "Undo, redo, save and open",
+  "wave": "W1",
+  "order": 30,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "covers": "#208, #209",
+  "waits_on": "foundation #777; #333",
+  "cells": {
+    "waits on (features)": "foundation #777",
+    "waits on (SuiteUI, creative-core)": "#333"
+  },
+  "depends": [
+    "foundation"
+  ],
+  "owned": [
+    "Sources/HaloModel/Live/LiveProjectHistory.swift",
+    "Sources/HaloModel/Live/LiveProjectFiles.swift",
+    "Sources/HaloModel/HaloHistory.swift",
+    "Sources/HaloModel/HaloFiles.swift",
+    "Sources/HaloModel/Availability/HaloAvailability+History.swift",
+    "Sources/HaloModel/Availability/HaloAvailability+Files.swift",
+    "Sources/HaloApp/HaloWindow+Edit.swift",
+    "Sources/HaloApp/HaloWindow+File.swift",
+    "Sources/HaloApp/HaloDocumentType.swift",
+    "Tests/HaloModelTests/ProjectHistoryContractTests.swift",
+    "Tests/HaloModelTests/ProjectFilesContractTests.swift",
+    "Tests/HaloModelTests/HaloUndoTests.swift",
+    "Tests/HaloModelTests/HaloFileTests.swift",
+    "Tests/HaloModelTests/HaloFilesBudgetTests.swift",
+    "Tests/AppSnapshotTests/HaloEditMenuSnapshots.swift",
+    "Tests/AppSnapshotTests/HaloFileSnapshots.swift",
+    "UITests/HaloJourneyTests+History.swift",
+    "UITests/HaloJourneyTests+Files.swift",
+    "UITests/HaloJourneyTests+FileErrors.swift"
+  ],
+  "core": "none",
+  "waits_ui": [
+    "#333 (journey files)"
+  ],
+  "note": "H-J8, H-J10, H-J11; HB-8, HB-10; HF-6. Closes the gap #127 left (undo of Delete Composition)."
+}

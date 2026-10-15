@@ -1,0 +1,41 @@
+{
+  "title": "Develop sliders, histogram, render to pixels in loupe and grid, copy and paste settings",
+  "wave": 3,
+  "order": 10,
+  "status": "planned",
+  "feature_issue": "later (packet after wave 2 lands)",
+  "covers": "#32, #423",
+  "waits_on": "spine, loupe-viewport, thumbnails",
+  "issues": [
+    32,
+    423
+  ],
+  "owned": [
+    "Sources/LibraryModel/LibraryDevelop.swift",
+    "Sources/LibraryModel/Live/LiveDevelop.swift",
+    "Sources/LibraryApp/DevelopInspector.swift",
+    "Sources/LibraryApp/LibraryWindow+Develop.swift",
+    "Tests/LibraryModelTests/LibraryDevelopTests.swift",
+    "Tests/LibraryModelTests/LibraryDevelopRenderTests.swift",
+    "Tests/AppSnapshotTests/LibraryDevelopSnapshots.swift",
+    "Tests/AppSnapshotTests/LibraryDevelopRenderSnapshots.swift",
+    "UITests/LibraryJourneyTests+Develop.swift",
+    "UITests/LibraryJourneyTests+PerfDevelop.swift",
+    "UITests/LibraryJourneyTests.swift",
+    "Tests/LibraryModelTests/LibraryDevelopBudgetTests.swift"
+  ],
+  "core": "none (creative-core#231 closed by #246); a new core issue only if QB-LIB-6's model half misses: PixelBuffer.developed(temperature:tint:exposure:contrast:highlights:shadows:), one pass over storage, equal to the chained calls within 1e-6",
+  "suiteui": "S-L1 HistogramView; #330, #333",
+  "depends": [
+    "spine",
+    "loupe-viewport",
+    "thumbnails"
+  ],
+  "journeys": [
+    "J5",
+    "P3"
+  ],
+  "notes": "Owns LibraryJourneyTests.swift in its wave, for its journey steps if #333 has not merged.",
+  "quality": "QB-L2, QB-LIB-6, QB-LIB-V1, QB-LIB-V2, QB-LIB-V3, QB-F3",
+  "library_title": "Develop sliders, histogram, render to pixels in loupe and grid, copy and paste settings"
+}

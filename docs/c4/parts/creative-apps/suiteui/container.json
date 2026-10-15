@@ -1,0 +1,11 @@
+{
+  "id": "suiteui",
+  "name": "SuiteUI",
+  "description": "The shared design system (Sources/SuiteUI): tokens, Liquid Glass primitives, the SuiteWindow shell, toolbar palette, sidebar rows and sections, content-layer surfaces, pro inspector rows and scrub fields, a thumbnail grid and a timeline strip. macOS only; knows no Model or engine.",
+  "technology": "Swift 6, SwiftUI, macOS 26",
+  "tags": [
+    "internal",
+    "macos-only"
+  ],
+  "order": 10
+}
