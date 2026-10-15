@@ -30,3 +30,4 @@ utc	stage	event	ref	note
 2026-10-15T17:56Z	3	stage-start	wave 5	D-8 + perf fix on f9846c9
 2026-10-15T17:52Z	3	heartbeat	-	waiting
 2026-10-15T18:04Z	3	heartbeat	-	wave 5 building
+2026-10-15T18:07Z	4	ci-run	38782884668	macOS on f9846c9 in progress (first compile of D-6/D-7)
