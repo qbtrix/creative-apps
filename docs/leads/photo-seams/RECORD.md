@@ -37,8 +37,8 @@ packet chains every task on the one before it (shared files or new types).
 
 ## Rounds
 | round | CI run | CI | audit vs baseline | lenses | confirmed | fixed by | clean |
-| 1 | 38687993459 (727, 8f78bad) | photo green (12 journeys pass; macOS scripts/ci green); run red from SuiteUI testGalleryOpensEveryPage and Halo testLayoutAtWidths (#763) | photo all at or under (identifier 16 vs 23) | clarity, journey, design, layout, controls, quality | pending | – | – |
 |---|---|---|---|---|---|---|---|
+| 1 | 38687993459 (727, 8f78bad) | photo green (12 journeys pass; macOS scripts/ci green); run red from SuiteUI testGalleryOpensEveryPage and Halo testLayoutAtWidths (#763) | photo all at or under (identifier 16 vs 23) | clarity, journey, design, layout, controls, quality | pending | – | – |
 
 ## Decisions
 - Waves of one task each, in the packet's chain order; the next builder starts once the previous PR has merged into dev.
