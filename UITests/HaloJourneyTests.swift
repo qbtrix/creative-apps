@@ -329,24 +329,23 @@ final class HaloJourneyTests: XCTestCase {
     }
 
     /// #1019: the lanes fit the width that shows. The ruler spans every frame
-    /// plus the trailing room, so it ends at its lanes' scroll view's edge (no
-    /// frame clipped past it, none short of it) and within the trailing room
-    /// of the timeline's own trailing edge.
+    /// plus the trailing room, so it ends at the timeline's visible trailing
+    /// edge (no frame clipped past it, none short of it). That edge is the
+    /// timeline's own frame, which XCUITest reads clipped to the column the
+    /// inspector leaves. The lanes' horizontal scroll view can't stand in:
+    /// SwiftUI runs a scroll view into the safe area along its axis, so it
+    /// reaches under the inspector with its content inset by the inspector's
+    /// width, and its accessibility frame takes that inset off the part
+    /// already clipped at the inspector, reading 240 pt narrower than the
+    /// lanes that show (run 38799320916: 151 pt for 391 pt of lanes).
     @MainActor private func assertLanesFit(_ halo: Journey, timeline: CGRect, width: Int) {
         let container = halo.element("halo.timeline")
-        let named = NSPredicate(format: "label == 'Frame Ruler'")
-        let ruler = container.descendants(matching: .any).matching(named).firstMatch
+        let ruler = container.descendants(matching: .any).matching(NSPredicate(format: "label == 'Frame Ruler'")).firstMatch
         XCTAssert(ruler.waitForExistence(timeout: 5), "no Frame Ruler in the timeline at \(width)")
-        let lanes = container.descendants(matching: .scrollView).containing(named).allElementsBoundByIndex
-            .map(\.frame).min { $0.width < $1.width }
-        guard let lanes else { return XCTFail("the Frame Ruler is in no scroll view at \(width)") }
         let end = ruler.frame.maxX
         XCTAssertLessThanOrEqual(
-            end, lanes.maxX + 1, "the lanes run \(end - lanes.maxX) pt past their edge at \(width): the last frames are cut off")
-        XCTAssertGreaterThanOrEqual(end, lanes.maxX - 2, "the lanes stop \(lanes.maxX - end) pt short of their edge at \(width)")
-        // SuiteSpacing.xl, the layout's trailing room, and 2 pt of rounding.
-        XCTAssertGreaterThanOrEqual(
-            end, timeline.maxX - 24 - 2, "the ruler ends at \(end), short of the timeline \(timeline) at \(width)")
+            end, timeline.maxX + 1, "the lanes run \(end - timeline.maxX) pt past the timeline \(timeline) at \(width): the last frames are cut off")
+        XCTAssertGreaterThanOrEqual(end, timeline.maxX - 2, "the lanes stop \(timeline.maxX - end) pt short of the timeline \(timeline) at \(width)")
     }
 
     /// The part of `control` that shows: its frame cut by every scroll view
