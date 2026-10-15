@@ -19,7 +19,12 @@
 //   so their pixels inside the line box can't agree. Outside the box the two
 //   are compared as above; inside it the canvas's ink must sit in the
 //   rasterizer's box with its baseline on the pinned rule (bounds.y + ascent,
-//   the rasterizer's height - descent). macOS only.
+//   the rasterizer's height - descent).
+//
+// The suite is not main-actor bound: only the ImageRenderer step runs on the
+// main actor (`canvasImage`). The CoreRaster render, the compare and the pixel
+// loops run off it, so these 1920 x 1080 cases don't hold the main actor for
+// minutes and starve other @MainActor suites (#1155). macOS only.
 import CoreRaster
 import HaloModel
 import SuiteUI
@@ -28,20 +33,19 @@ import Testing
 
 @testable import HaloApp
 
-@MainActor
 @Suite struct HaloViewerFidelityTests {
     private static let width = 1920, height = 1080
     private static let backdropColor = HaloLayerColor(red: 0.12, green: 0.14, blue: 0.18)
 
-    @Test func keyedFrame6() throws {
-        try expectCanvasEqualsRender(try keyedProject(at: 6), name: "keyed-6")
+    @Test func keyedFrame6() async throws {
+        try await expectCanvasEqualsRender(try keyedProject(at: 6), name: "keyed-6")
     }
 
-    @Test func keyedFrame12() throws {
-        try expectCanvasEqualsRender(try keyedProject(at: 12), name: "keyed-12")
+    @Test func keyedFrame12() async throws {
+        try await expectCanvasEqualsRender(try keyedProject(at: 12), name: "keyed-12")
     }
 
-    @Test func multiplySolidOverSolid() throws {
+    @Test func multiplySolidOverSolid() async throws {
         let top = HaloLayer(
             id: "comp-1-layer-2", name: "Multiply", kind: .solid, inFrame: 0, outFrame: 24,
             color: HaloLayerColor(red: 0.3, green: 0.6, blue: 0.9), blendMode: .multiply,
@@ -51,10 +55,10 @@ import Testing
             color: HaloLayerColor(red: 0.9, green: 0.8, blue: 0.3))
         let project = try project(layers: [top, under])
         #expect(project.viewerDrawList?.items.last?.blendMode == .multiply)
-        try expectCanvasEqualsRender(project, name: "multiply")
+        try await expectCanvasEqualsRender(project, name: "multiply")
     }
 
-    @Test func textItemSitsOnTheBaselineRule() throws {
+    @Test func textItemSitsOnTheBaselineRule() async throws {
         let rasterizer = BoxTextRasterizer()
         // The size whose system-font ascent is the rasterizer's 40, so both
         // put the baseline 40 pixels under the line box's top.
@@ -71,7 +75,7 @@ import Testing
         let item = try #require(list.items.last)
         #expect(item.kind == .text)
         let b = item.bounds
-        let (canvas, render) = try images(project, list: list, rasterizer: rasterizer)
+        let (canvas, render) = try await images(project, list: list, rasterizer: rasterizer)
 
         // The render: exactly the rasterizer's box at bounds.origin.
         let inBox = { (x: Int, y: Int) in
@@ -135,18 +139,30 @@ import Testing
 
     // MARK: Drawing and comparing
 
-    private func expectCanvasEqualsRender(_ project: HaloProject, name: String) throws {
+    private func expectCanvasEqualsRender(_ project: HaloProject, name: String) async throws {
         let list = try #require(project.viewerDrawList)
         #expect(!list.items.isEmpty)
-        let (canvas, render) = try images(project, list: list, rasterizer: BoxTextRasterizer())
+        let (canvas, render) = try await images(project, list: list, rasterizer: BoxTextRasterizer())
         Self.expectMatch(canvas, render, name: name)
     }
 
     /// The canvas through ImageRenderer, cropped to the artboard, and the
-    /// render of `list`, both 1920 x 1080 8-bit sRGB.
+    /// render of `list`, both 1920 x 1080 8-bit sRGB. Only the canvas step
+    /// takes the main actor.
     private func images(
         _ project: HaloProject, list: HaloDrawList, rasterizer: BoxTextRasterizer
-    ) throws -> (canvas: RGBAImage, render: RGBAImage) {
+    ) async throws -> (canvas: RGBAImage, render: RGBAImage) {
+        let canvas = try await Self.canvasImage(project)
+        let frame = try LiveFrameRendering().render(list, width: Self.width, height: Self.height, text: rasterizer)
+        #expect(frame.skippedLayerCount == 0)
+        let render = RGBAImage(width: Self.width, height: Self.height, bytes: try frame.pixels.rgba8(colorSpace: .sRGB))
+        return (canvas, render)
+    }
+
+    /// HaloViewerCanvas through ImageRenderer, cropped to the 1920 x 1080
+    /// artboard, as 8-bit sRGB: the one step that needs the main actor.
+    @MainActor
+    private static func canvasImage(_ project: HaloProject) throws -> RGBAImage {
         let inset = SuiteSize.canvasInset
         let view = HaloViewerCanvas(model: project, perform: { _ in })
             .frame(width: CGFloat(Self.width) + 2 * inset, height: CGFloat(Self.height) + 2 * inset)
@@ -158,11 +174,7 @@ import Testing
             to: CGRect(x: inset, y: inset, width: CGFloat(Self.width), height: CGFloat(Self.height))))
         let canvas = try #require(RGBAImage(cgImage: artboard))
         #expect(canvas.width == Self.width && canvas.height == Self.height)
-
-        let frame = try LiveFrameRendering().render(list, width: Self.width, height: Self.height, text: rasterizer)
-        #expect(frame.skippedLayerCount == 0)
-        let render = RGBAImage(width: Self.width, height: Self.height, bytes: try frame.pixels.rgba8(colorSpace: .sRGB))
-        return (canvas, render)
+        return canvas
     }
 
     private static func expectMatch(
