@@ -61,6 +61,11 @@ check "every script is protected (#292 changed scripts/ui-test)" "not-eligible|t
 check "deny .claude, Package.resolved and a nested CLAUDE.md" \
   "not-eligible|touches protected paths: .claude/settings.json, Package.resolved, Sources/FlareApp/CLAUDE.md" \
   . $'.claude/settings.json\nPackage.resolved\nSources/FlareApp/CLAUDE.md' .
+check "deny the generated C4 model and waves.md" \
+  "not-eligible|touches protected paths: docs/c4/model.json, docs/blueprints/halo/features/waves.md" \
+  . $'docs/c4/model.json\ndocs/blueprints/halo/features/waves.md' .
+check "C4 parts, feature data and packets stay eligible" "eligible|150|2|5 checks green" \
+  . $'docs/c4/parts/creative-apps/halo-model/halo-model-sources.json\ndocs/blueprints/halo/features/easing.wave.json\ndocs/blueprints/halo/features/easing.md\ndocs/blueprints/halo/waves.in.md\ndocs/blueprints/halo/features/nested/waves.md' .
 check "app shell is eligible (taste review happens after merge, on the snapshots)" "eligible|150|2|5 checks green" \
   . $'Sources/FlareApp/FlareApp.swift\nSources/FlareModel/FlareWorkspace.swift' .
 check "SuiteUI is eligible" "eligible|150|2|5 checks green" \

@@ -1,0 +1,202 @@
+#!/usr/bin/env python3
+# scripts/c4-assemble: builds docs/c4/model.json from its parts in docs/c4/parts/.
+# Stdlib Python 3 only (macOS ships it; on Ubuntu: apt-get install -y python3).
+#
+# Why: every task that adds a file used to edit the one shared model.json, so
+# parallel tasks conflicted. Now each writer edits only its own part, and
+# model.json is generated: a workflow on dev (.github/workflows/generated.yml)
+# runs this and commits the result. PRs never edit model.json (the lane's
+# PROTECTED list); they add or edit parts.
+#
+# Layout (the parent of each part is its folder; ids are the file and folder names):
+#   docs/c4/parts/model.json                          top-level fields and model.people
+#   docs/c4/parts/<system>/system.json                a system without its containers
+#   docs/c4/parts/<system>/<container>/container.json a container without its components
+#   docs/c4/parts/<system>/<container>/<component>.json  one component
+# Every system, container and component part has an integer "order"; siblings
+# are sorted by (order, id) and "order" is dropped from the output. A part may
+# carry "relationships": the arrows whose source it is. They are emitted in the
+# same walk (system, then each container, then its components), so model.json's
+# relationships list stays grouped by source. A new component is one new file.
+#
+# Output format: 2-space indent, UTF-8 unescaped, keys in part order, trailing
+# newline (what `jq .` prints).
+#
+#   scripts/c4-assemble                 write docs/c4/model.json
+#   scripts/c4-assemble --out FILE      write FILE instead (scripts/ci checks this copy)
+#   scripts/c4-assemble --check         exit 1 if docs/c4/model.json differs from the parts
+#   scripts/c4-assemble --split         (one-time) write parts from docs/c4/model.json
+#   --root DIR                          the repo root (default: this script's parent)
+# Problems (bad JSON, a missing or non-integer order, a duplicate id, a
+# relationship whose end is unknown, an id that differs from its file name)
+# print one line each and exit 1.
+import json, os, sys
+
+def dump(obj):
+    return json.dumps(obj, indent=2, ensure_ascii=False) + "\n"
+
+def load(path, problems):
+    try:
+        with open(path, encoding="utf-8") as f:
+            obj = json.load(f)
+    except (OSError, ValueError) as e:
+        problems.append(f"{path}: not valid JSON ({e})")
+        return None
+    if not isinstance(obj, dict):
+        problems.append(f"{path}: not a JSON object")
+        return None
+    return obj
+
+def ordered(items, problems):
+    """Sorts (path, part) pairs by (order, id), noting any part without an integer order."""
+    def key(item):
+        order = item[1].get("order")
+        if not isinstance(order, int) or isinstance(order, bool):
+            problems.append(f"{item[0]}: needs an integer \"order\"")
+            order = 0
+        return (order, str(item[1].get("id", "")))
+    return sorted(items, key=key)
+
+def named(path, obj, want, problems):
+    if obj.get("id") != want:
+        problems.append(f"{path}: id {obj.get('id')!r} must match its name {want!r}")
+
+def strip(obj, *keys):
+    return {k: v for k, v in obj.items() if k not in keys}
+
+def subdirs(path):
+    return sorted(d for d in os.listdir(path) if os.path.isdir(os.path.join(path, d)))
+
+def read_container(folder, problems):
+    """(path, container, [(path, component)]) for one container folder, or None."""
+    cp = os.path.join(folder, "container.json")
+    c = load(cp, problems)
+    if c is None:
+        return None
+    named(cp, c, os.path.basename(folder), problems)
+    comps = []
+    for fn in sorted(os.listdir(folder)):
+        fp = os.path.join(folder, fn)
+        if fn == "container.json":
+            continue
+        if not fn.endswith(".json") or not os.path.isfile(fp):
+            problems.append(f"{fp}: not a part (a component part is <id>.json)")
+            continue
+        k = load(fp, problems)
+        if k is not None:
+            named(fp, k, fn[:-5], problems)
+            comps.append((fp, k))
+    return cp, c, comps
+
+def assemble(parts):
+    problems, rels, systems = [], [], []
+    top = load(os.path.join(parts, "model.json"), problems) or {}
+    sys_items = []
+    for sd in subdirs(parts) if os.path.isdir(parts) else []:
+        sp = os.path.join(parts, sd, "system.json")
+        s = load(sp, problems)
+        if s is not None:
+            named(sp, s, sd, problems)
+            sys_items.append((sp, s))
+    for sp, s in ordered(sys_items, problems):
+        folder = os.path.dirname(sp)
+        rels += s.get("relationships", [])
+        con_items = {}
+        for cd in subdirs(folder):
+            got = read_container(os.path.join(folder, cd), problems)
+            if got:
+                con_items[got[0]] = got
+        out_c = []
+        for cp, c in ordered([(cp, got[1]) for cp, got in con_items.items()], problems):
+            rels += c.get("relationships", [])
+            comps = [k for _, k in ordered(con_items[cp][2], problems)]
+            for k in comps:
+                rels += k.get("relationships", [])
+            out_c.append({**strip(c, "order", "relationships"),
+                          "components": [strip(k, "order", "relationships") for k in comps]})
+        systems.append({**strip(s, "order", "relationships"), "containers": out_c})
+    inner = top.get("model", {}) if isinstance(top.get("model"), dict) else {}
+    model = {**strip(top, "model"), "model": {"people": inner.get("people", []),
+             **strip(inner, "people", "systems", "relationships"), "systems": systems, "relationships": rels}}
+    seen = set()
+    for i in [p.get("id") for p in model["model"]["people"]] + [x for s in systems for x in
+              [s.get("id")] + [y for c in s["containers"] for y in [c.get("id")] + [k.get("id") for k in c["components"]]]]:
+        if i in seen:
+            problems.append(f"id {i!r} is used twice")
+        seen.add(i)
+    for r in rels:
+        for end in ("source", "target"):
+            if r.get(end) not in seen:
+                problems.append(f"relationship {r.get('source')} -> {r.get('target')}: unknown {end} {r.get(end)!r}")
+    return model, problems
+
+def split(model_path, parts):
+    m = json.load(open(model_path, encoding="utf-8"))
+    rels = m["model"].get("relationships", [])
+    by_source = {}
+    for r in rels:
+        by_source.setdefault(r["source"], []).append(r)
+    def put(path, obj):
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        with open(path, "w", encoding="utf-8") as f:
+            f.write(dump(obj))
+    def with_rels(obj, order):
+        out = {**obj, "order": order}
+        if obj["id"] in by_source:
+            out["relationships"] = by_source.pop(obj["id"])
+        return out
+    put(os.path.join(parts, "model.json"), {**strip(m, "model"), "model": strip(m["model"], "systems", "relationships")})
+    for si, s in enumerate(m["model"]["systems"]):
+        put(os.path.join(parts, s["id"], "system.json"), with_rels(strip(s, "containers"), (si + 1) * 10))
+        for ci, c in enumerate(s["containers"]):
+            put(os.path.join(parts, s["id"], c["id"], "container.json"), with_rels(strip(c, "components"), (ci + 1) * 10))
+            for ki, k in enumerate(c["components"]):
+                put(os.path.join(parts, s["id"], c["id"], k["id"] + ".json"), with_rels(k, (ki + 1) * 10))
+    if by_source:
+        sys.exit(f"split: relationships from unknown sources {sorted(by_source)}")
+
+def main(argv):
+    root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    out, mode = None, "write"
+    i = 0
+    while i < len(argv):
+        a = argv[i]
+        if a in ("--out", "--root") and i + 1 < len(argv):
+            if a == "--out":
+                out = argv[i + 1]
+            else:
+                root = argv[i + 1]
+            i += 2
+            continue
+        if a in ("--check", "--split"):
+            mode = a[2:]
+        else:
+            sys.exit(f"usage: scripts/c4-assemble [--check | --split | --out FILE] [--root DIR] (unknown {a!r})")
+        i += 1
+    parts = os.path.join(root, "docs", "c4", "parts")
+    target = os.path.join(root, "docs", "c4", "model.json")
+    if mode == "split":
+        split(target, parts)
+        return 0
+    model, problems = assemble(parts)
+    if problems:
+        print("\n".join(problems))
+        print("c4-assemble: FAIL (fix the parts above in docs/c4/parts/)")
+        return 1
+    text = dump(model)
+    if mode == "check":
+        try:
+            have = open(target, encoding="utf-8").read()
+        except OSError:
+            have = None
+        if have != text:
+            print("c4-assemble: docs/c4/model.json differs from docs/c4/parts/ (run scripts/c4-assemble; on dev the generated workflow does)")
+            return 1
+        print("c4-assemble: docs/c4/model.json matches its parts")
+        return 0
+    with open(out or target, "w", encoding="utf-8") as f:
+        f.write(text)
+    return 0
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))

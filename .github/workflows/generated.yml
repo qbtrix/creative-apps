@@ -1,0 +1,70 @@
+# Generated files: the one writer of docs/c4/model.json (scripts/c4-assemble,
+# from docs/c4/parts/) and docs/blueprints/*/features/waves.md (scripts/waves,
+# from each app's waves.in.md and features/*.wave.json). Writers edit only
+# their own part or feature file, so parallel PRs never conflict on a shared
+# file; PRs never edit the generated ones (the lane's PROTECTED list).
+#
+# When dev's parts and the generated files differ, this commits the generated
+# files to dev as github-actions[bot], the way ci.yml's `audit-lower` pushes
+# lowered baselines: on a refused push (dev moved) it fetches dev and
+# regenerates on top, up to 3 retries. GITHUB_TOKEN pushes start no workflow.
+#
+# Triggers: a push to dev that touches a source of these files. The lane
+# squash-merges with GITHUB_TOKEN, which fires no push event, so a schedule
+# sweeps too (a no-op run when nothing changed; free on a public repo).
+name: Generated
+
+on:
+  push:
+    branches: [dev]
+    paths:
+      - docs/c4/**
+      - docs/blueprints/**
+      - scripts/c4-assemble
+      - scripts/waves
+  schedule:
+    - cron: '7-59/10 * * * *'  # every 10 minutes; schedule runs on the default branch (dev)
+  workflow_dispatch:
+
+permissions:
+  contents: write  # push the generated files to dev
+
+concurrency:
+  group: generated
+  cancel-in-progress: false
+
+jobs:
+  generate:
+    name: Generate
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: dev
+      - name: Assemble and commit the generated files
+        run: |
+          title="chore(generated): assemble docs/c4/model.json and waves.md from their parts"
+          run_url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          for attempt in 1 2 3 4; do
+            python3 scripts/c4-assemble || exit 1
+            python3 scripts/waves render || exit 1
+            git add docs/c4/model.json 'docs/blueprints/*/features/waves.md'
+            if git diff --cached --quiet; then
+              echo "Generated: nothing to commit; dev's generated files match their parts." >>"$GITHUB_STEP_SUMMARY"
+              exit 0
+            fi
+            files=$(git diff --cached --name-only)
+            git commit -q -m "$title" -m "Written by $run_url from the parts on dev $(git rev-parse --short HEAD)." -m "$files"
+            if git push origin HEAD:refs/heads/dev; then
+              printf 'Generated: pushed %s to dev.\n\n%s\n' "$(git rev-parse --short HEAD)" "$files" >>"$GITHUB_STEP_SUMMARY"
+              exit 0
+            fi
+            echo "Push $attempt refused (dev moved); generating again on top of the new dev."
+            git fetch -q origin dev
+            git checkout -q --detach FETCH_HEAD
+          done
+          echo "::error::Could not push the generated files to dev after 3 retries."
+          exit 1

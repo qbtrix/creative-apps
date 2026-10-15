@@ -145,7 +145,9 @@ something. One that can't act yet is disabled and says why:
   `Sources/` is not in exactly one component's `paths` in `docs/c4/model.json`.
   Each target's folder is a component, so a new file in a target is covered;
   if it adds something that component's description doesn't mention, update
-  the description in the same PR.
+  the description in the same PR. The model is assembled from one file per
+  component in `docs/c4/parts/` (`scripts/c4-assemble`): edit that part, or
+  add a part for a new component, never the generated model.json.
 - **Views are dumb.** Files under `Sources/*App/` read their Model and call its
   methods; they never assign its state, bind to it, or mutate its collections.
   `scripts/ci` fails on that (the app-state rule). Model state is
@@ -208,7 +210,11 @@ something. One that can't act yet is disabled and says why:
   (look for the open `dev-red` issue), do not fix it in your PR. Comment on
   your issue with the failing test name and stop.
 - **Never edit** `Package.swift`, `Package.resolved`, `.github/`, `.claude/`,
-  `scripts/`, `CLAUDE.md`, `AGENTS.md` or `LICENSE` unless your issue says to.
+  `scripts/`, `CLAUDE.md`, `AGENTS.md` or `LICENSE` unless your issue says to,
+  and never the generated `docs/c4/model.json` or
+  `docs/blueprints/*/features/waves.md` at all: edit your component's part in
+  docs/c4/parts/ or your feature's .wave.json, and the generated workflow
+  rewrites them on dev.
   `scripts/` means all of it, the gate included. Every target already exists.
   If you think one of these must change, say so in an issue. The fast lane
   refuses exactly this list (PROTECTED in scripts/fast-lane.sh; its tests
