@@ -5,8 +5,10 @@
 // Layer > Rename…, drags a row to the bottom, brings it forward, deletes it,
 // then deletes every layer with ⌫ from the timeline. Rows are found by their
 // `halo.layer.row.<layer id>` identifiers (the fixture's ids; the copy takes
-// the next unused number, 5), the artboard by its `halo.viewer` value (the
-// Model's viewerSummary). Undo stays disabled until history-files lands, so
+// the next unused number, 5), the artboard by its `halo.viewer.summary`
+// label (the Model's viewerSummary; values read empty, #262). Rig's row is
+// below the inspector's fold at 640 pt, so the inspector is scrolled to it
+// before the row drag. Undo stays disabled until history-files lands, so
 // each step reads the Edit menu's first item title and never presses ⌘Z.
 // A disabled menu item's reason is its help tag, read by hovering it. One
 // shot per step, `halo-layers-<step>`, plus the rename prompt
@@ -73,8 +75,10 @@ final class HaloLayersJourneyTests: XCTestCase {
         expectUndo("Undo Rename Layer", halo)
         halo.shot("layers-4")
 
-        // 5. Drag Badge 2 below Rig.
+        // 5. Drag Badge 2 below Rig. Rig's row sits below the inspector's
+        // fold at 640 pt, so scroll to it first, as a person would.
         let rigRow = row(Self.rig, in: halo)
+        scrollInspector(toShow: rigRow, halo)
         row(Self.badgeCopy, in: halo).coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
             .press(forDuration: 0.6, thenDragTo: rigRow.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.9)))
         expectRows([Self.titleLayer, Self.badge, Self.background, Self.rig, Self.badgeCopy], in: halo)
@@ -138,12 +142,21 @@ final class HaloLayersJourneyTests: XCTestCase {
         XCTAssert(waitFor { self.rowIDs(halo) == ids }, "the rows are \(rowIDs(halo)), not \(ids)")
     }
 
-    /// The artboard (`halo.viewer`) reads `summary`.
+    /// The artboard's `halo.viewer.summary` label reads `summary` (values read empty, #262).
     @MainActor private func expectArtboard(_ summary: String, _ halo: Journey) {
-        let artboard = halo.element("halo.viewer")
-        XCTAssert(
-            waitFor { (artboard.value as? String) == summary },
-            "the artboard reads \(String(describing: artboard.value)), not \(summary)")
+        let artboard = halo.element("halo.viewer.summary")
+        XCTAssert(waitFor { artboard.label == summary }, "the artboard reads \(artboard.label), not \(summary)")
+    }
+
+    /// Scrolls the inspector down until `element` lies whole inside the window.
+    @MainActor private func scrollInspector(toShow element: XCUIElement, _ halo: Journey) {
+        let window = halo.app.windows.firstMatch.frame
+        let inspector = halo.element("suite.inspector").scrollViews.firstMatch
+        XCTAssert(inspector.waitForExistence(timeout: 5), "the inspector doesn't scroll")
+        for _ in 0..<10 where !window.contains(element.frame) {
+            inspector.scroll(byDeltaX: 0, deltaY: -40)
+        }
+        XCTAssert(window.contains(element.frame), "scrolling the inspector didn't bring \(element.frame) into \(window)")
     }
 
     /// Opens `menu` and clicks its enabled item `item`.
