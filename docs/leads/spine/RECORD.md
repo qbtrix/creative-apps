@@ -4,7 +4,7 @@ Issue: #1044 · Packet: docs/blueprints/library/features/spine.md
 Run: act-1a13f18aaa0-lfw5 · Session: session_01DtSRhNqsphGfKkvV5eLsWW · Started: 2026-10-15T10:25Z
 Stage: 4 round 1
 Base: 541ca81f0a4795b0a01d4df371832c645a0956cf
-Next: round 1 critic panel running on run 38742226941 snapshots
+Next: wait for r1-b1 and r1-b2 PRs to merge; then round 2 on the CI run that contains them
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -48,6 +48,7 @@ Taken from the packet's Build waves; checked against dev bcf5a09.
 | round | CI run | CI | audit vs baseline | lenses | confirmed | fixed by | clean |
 |---|---|---|---|---|---|---|---|
 | 0 (pre-loop) | 38726261412 (2b98fdb) | red: macOS build | – | – | SA-1 #1096: LibraryInspector calls mutating methods on a let model | fixer lead/spine-fix-inspector | no |
+| 1 | 38742226941 (20d6a1c) | red (Halo, Photo tests; not spine) | no audit (journeys didn't run) | clarity, journey, design, layout, controls | 18 (7 major) | r1-b1, r1-b2 (fixing) | no |
 
 ## Decisions
 - Builder branches are `lead/spine-<id>`, not `lead/spine/<id>`: git can't hold `lead/spine` and `lead/spine/<x>` refs together.
@@ -67,6 +68,7 @@ Taken from the packet's Build waves; checked against dev bcf5a09.
 - SA-4 kept LibraryLoupe(photo:position:menu:...) rather than (model:menu:), so SA-6 owns the one loupe call line in LibraryBrowser.swift (passing the loupe value and crop draft); SA-5 leaves that line alone. They run in parallel; a lane conflict gets a rebase.
 - SJ-1 split: SJ-1a (the four existing journeys on -LibraryFixture samples/empty + File > Load Sample Photos) runs now, ahead of SA-5, because SA-5 removes the content's Load Sample Photos button those journeys click; #1150's fast-lane label is off until SJ-1a merges. SJ-1b (J0, J10) stays in wave 12.
 - SJ-2 ships without feature-done: the Anatomy loop needs a CI run first, and its fixes (or, if clean, a packet status-line PR) form the feature's last PR, which carries feature-done.
+- Round 1 skipped minors that change contract or packet text: the '(import)' area id in reasons, catalog.json.bad's folder, the newer notice's version number, and an always-on status bar; they become gap issues if still open at finish.
 
 ## Open
 - PR #217 (fix for #156) is open at stage 0; SP-9 lands only if it is still unmerged when wave 8 starts.
