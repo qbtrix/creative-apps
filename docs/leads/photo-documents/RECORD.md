@@ -4,7 +4,7 @@ Issue: #1074 · Packet: docs/blueprints/photo/features/photo-documents.md
 Run: act-1a1404bf04c-bp6m · Session: claude/photo-documents-lead-ezrcev · Started: 2026-10-15T10:40Z
 Stage: 3 wave 8
 Base: 6018826c90376f7b4ea46336d85e8da510c90f4d
-Next: wait for D-11, D-12 and the perf fix; read the macOS CI run containing #1232 (UI merge); then stage 4 round 1
+Next: wait for #1233-#1235 and fixes A (ids), B (Open Recent); then fix C (restore decode off main, after A); read the macOS run that contains them
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -20,7 +20,7 @@ Next: wait for D-11, D-12 and the perf fix; read the macOS CI run containing #12
 | D-8 | 5 | Save status in top bar, edited dot, Saving…/Opening… notes; snapshots | A/PhotoTopBar.swift, A/PhotoWindow+File.swift, ST/PhotoDocumentsSnapshots.swift | PhotoDocumentsSnapshots | #1228 | merged |
 | D-9 | 6 | PhotoAutosave + wiring | A/PhotoAutosave.swift, A/PhotoWindow+File.swift, ST/PhotoAutosaveTests.swift | PhotoAutosaveTests | #1230 | merged |
 | D-10 | 7 | App delegate: Open Recent/Finder opens, unsaved prompt on close/quit | A/PhotoApp.swift, A/PhotoWindow+File.swift, ST/PhotoUnsavedPromptTests.swift | PhotoUnsavedPromptTests | #1232 | merged |
-| D-11 | 8 | Journeys PJ-1, PJ-1b, PJ-2, PJ-4 | UT/PhotoJourneyTests+Documents.swift | macOS run | – | building |
+| D-11 | 8 | Journeys PJ-1, PJ-1b, PJ-2, PJ-4 | UT/PhotoJourneyTests+Documents.swift | macOS run | #1235 | open |
 | D-12 | 8 | Journeys PJ-3, PJ-P3  | UT/PhotoJourneyTests+Recovery.swift, UT/PhotoJourneyTests+PerfDocuments.swift | macOS run | #1234 | open |
 
 Waves (packet's Build waves, checked against dev at 00e546a):
@@ -68,3 +68,5 @@ Waves (packet's Build waves, checked against dev at 00e546a):
 - feature-done goes on a separate final PR (wave.json status built) after the Anatomy loop, not on D-12; D-11/D-12 are plain journey PRs.
 - Perf fix #1233 (f160f36): release save 13.8 s -> 1.6 s, open 4.2 s -> 0.6 s, autosave 16 s -> 3.3 s (alone, quiet). PB-20 still over: disk write of the ~190 MB raw-codec test file + LiveMerging.flatten ~0.5 s. Candidate gap issue if not closed by round 4.
 - Fix-batch item (audit): Keep layers? buttons (Save as Photo Document / Flatten into PNG / Cancel) and the top bar's document menu have no accessibility identifiers; add photo.file.keep-layers.* ids.
+- Early fix batch started from builders' findings (before round 1 CI): A ids on Keep layers?/document menu (lead/photo-documents-fix-ids), B Open Recent with no window (lead/photo-documents-fix-recent). C restore off main waits on A (both touch PhotoWindow+File.swift).
+- D-11 journeys quit + relaunch to use Open Recent (no-window menu was empty); fix B makes the packet's path work.
