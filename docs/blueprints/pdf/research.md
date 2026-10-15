@@ -74,7 +74,7 @@ Four kinds of evidence, each a number:
 Long tail (US monthly searches unless noted): dark or inverted reading 480
 (the Mac Q&A site 133K views; "adjust PDF contrast" 394K); bookmarks and
 outline 720 + 320; accessibility 720; PDF/A 480; change a PDF's title
-151K views on the Mac Q&A site; repair a damaged PDF 236K views; which
+151,099 views on the Mac Q&A site (https://apple.stackexchange.com/questions/274703); repair a damaged PDF 236K views; which
 fonts a PDF uses 447K views.
 
 Mac-specific US searches (2026-10-15): "how to modify a pdf on mac" 9,900,

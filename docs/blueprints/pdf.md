@@ -116,7 +116,7 @@ split (May 2025). Search numbers are US monthly volumes.
 | 26 | Translate, summarize, ask questions | "translate pdf" 14,800, "summarize pdf" 2,400 | https://www.seodata.dev/keyword/translate-pdf |
 | 27 | Read aloud | "read pdf aloud" 4,400 | https://www.seodata.dev/keyword/read-pdf-aloud |
 | 28 | Stamps: page numbers, Bates numbers, watermark | 2,900, 2,900, 1,600; 0.7% of Q&A views | https://www.seodata.dev/keyword/add-page-numbers-to-pdf |
-| 29 | Change the document's title and author | 151K views on the Mac Q&A site | research.md A (long tail) |
+| 29 | Change the document's title and author | 151,099 views on the Mac Q&A site | https://apple.stackexchange.com/questions/274703 |
 | 30 | Outline (bookmarks): read, then edit | "add bookmarks to pdf" 720; 9 👍 for outline editing in a CLI's tracker | https://github.com/qpdf/qpdf/issues/343 |
 | 31 | Dark or inverted reading | 480/mo; 133K and 394K views; 37 👍 in a browser viewer's tracker | https://github.com/mozilla/pdf.js/issues/2071 |
 | 32 | Tabs and split view | 41 CC and 29 CC on a desktop viewer's wishlist (its top items) | https://bugs.kde.org/show_bug.cgi?id=169847 |
