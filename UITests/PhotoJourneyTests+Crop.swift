@@ -8,9 +8,11 @@
 // 600 x 600 crop at X 100; W 400 and Return give H 400 with X and Y kept and
 // the crop still pending (the image still 800 x 600); the overlay's pill
 // (`photo.canvas.crop.aspect`) reads 1:1. 3:2 then Swap reads 2:3 with H > W;
-// Free drops the pill. A drag from image pixel (10, 10) to (210, 110), aimed
-// from `suite.canvas`'s frame at the zoom it shows (frame width / 800), gives
-// W 200, H 100 within a pixel at Fit (a point's worth when a point is more);
+// Free drops the pill. A drag from image pixel (10, 10) to (210, 110) gives
+// W 200, H 100 within a pixel at Fit (a point's worth when a point is more).
+// It is aimed from the pending crop's mark (`photo.canvas.crop`), whose frame
+// over the crop the fields show gives the image's place and zoom on screen:
+// `suite.canvas` is the scroll area around the image, not the image (#566).
 // X 700 and Return reads X 800 - W (600) clamped. Return on the canvas then
 // applies it: the image becomes W x H and Edit shows Undo Crop. A click on
 // the canvas would start a new crop (a click is a drag that doesn't move), so
@@ -98,10 +100,9 @@ final class PhotoCropJourneyTests: XCTestCase {
         photo.shot("crop-typed-free")
 
         // 6. A drag from image pixel (10, 10) to (210, 110) gives W 200, H 100.
-        let scale = canvas.frame.width / 800
-        XCTAssertEqual(canvas.frame.height / 600, scale, accuracy: 0.01, "the canvas \(canvas.frame) isn't 800 × 600 at one zoom")
-        let slack = max(1, Int((1 / max(scale, 0.01)).rounded(.up)))
-        drag(from: CGPoint(x: 10, y: 10), to: CGPoint(x: 210, y: 110), scale: scale, photo)
+        let image = imageOnScreen(photo)
+        let slack = max(1, Int((1 / max(image.scale, 0.01)).rounded(.up)))
+        drag(from: CGPoint(x: 10, y: 10), to: CGPoint(x: 210, y: 110), on: image, photo)
         expectCropPending(photo, "the drag")
         expectField("photo.crop.width", around: 200, within: slack, photo)
         expectField("photo.crop.height", around: 100, within: slack, photo)
@@ -118,7 +119,7 @@ final class PhotoCropJourneyTests: XCTestCase {
         // 8. Keys back to the canvas by a drag over the same crop, then Return applies it.
         let x = number(in: "photo.crop.x", photo), y = number(in: "photo.crop.y", photo)
         let h = number(in: "photo.crop.height", photo)
-        drag(from: CGPoint(x: x, y: y), to: CGPoint(x: 805, y: y + h), scale: scale, photo)
+        drag(from: CGPoint(x: x, y: y), to: CGPoint(x: 805, y: y + h), on: image, photo)
         expectCropPending(photo, "the drag back to the canvas")
         expectField("photo.crop.x", around: x, within: slack, photo)
         let finalW = number(in: "photo.crop.width", photo), finalH = number(in: "photo.crop.height", photo)
@@ -216,11 +217,29 @@ final class PhotoCropJourneyTests: XCTestCase {
         XCTAssert(typing.waitForNonExistence(timeout: 5), "Return didn't close \(id)'s typing field")
     }
 
-    /// Drags on the canvas between two image pixels at `scale` points per pixel.
-    @MainActor private func drag(from start: CGPoint, to end: CGPoint, scale: CGFloat, _ photo: Journey) {
+    /// Drags on the canvas between two image pixels, the image placed as `image` says.
+    @MainActor private func drag(
+        from start: CGPoint, to end: CGPoint, on image: (origin: CGPoint, scale: CGFloat), _ photo: Journey
+    ) {
         let canvas = photo.element("suite.canvas")
-        let origin = canvas.coordinate(withNormalizedOffset: CGVector(dx: 0, dy: 0))
-        origin.withOffset(CGVector(dx: start.x * scale, dy: start.y * scale))
-            .press(forDuration: 0.1, thenDragTo: origin.withOffset(CGVector(dx: end.x * scale, dy: end.y * scale)))
+        let corner = canvas.coordinate(withNormalizedOffset: CGVector(dx: 0, dy: 0)), frame = canvas.frame
+        let at = { (pixel: CGPoint) in
+            corner.withOffset(CGVector(
+                dx: image.origin.x - frame.minX + pixel.x * image.scale,
+                dy: image.origin.y - frame.minY + pixel.y * image.scale))
+        }
+        at(start).press(forDuration: 0.1, thenDragTo: at(end))
+    }
+
+    /// Where image pixel (0, 0) sits on screen and the points per pixel, read
+    /// from the pending crop's mark, whose frame covers the crop the fields show.
+    @MainActor private func imageOnScreen(_ photo: Journey) -> (origin: CGPoint, scale: CGFloat) {
+        let mark = photo.element("photo.canvas.crop").frame
+        let (x, y) = (number(in: "photo.crop.x", photo), number(in: "photo.crop.y", photo))
+        let (w, h) = (number(in: "photo.crop.width", photo), number(in: "photo.crop.height", photo))
+        let scale = mark.width / CGFloat(max(w, 1))
+        XCTAssertEqual(
+            mark.height / CGFloat(max(h, 1)), scale, accuracy: 0.01, "the crop mark \(mark) isn't \(w) × \(h) at one zoom")
+        return (CGPoint(x: mark.minX - CGFloat(x) * scale, y: mark.minY - CGFloat(y) * scale), scale)
     }
 }
