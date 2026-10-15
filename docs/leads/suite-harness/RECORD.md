@@ -4,7 +4,7 @@ Issue: #778 · Packet: docs/blueprints/suiteui/features/suite-harness.md (on bra
 Run: act-1a13b7e0908-fybz · Session: claude/suite-harness-lead-wwxtgn · Started: 2026-10-14T18:00Z
 Stage: 4 round 2
 Base: 1854d6c0e4d082dc5564e5ad57e17b21909a6836 (round 2)
-Next: wait for r2-b1's PR (feature-done) to merge; round 3 on the CI run it dispatches
+Next: wait for the lane to merge #891 (feature-done); round 3 on the CI run it dispatches. If lightContrastSwatch fails while tokenValueForEachAppearance passes, resolve tokens at the SwiftUI level
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -25,7 +25,7 @@ Next: wait for r2-b1's PR (feature-done) to merge; round 3 on the CI run it disp
 | round | CI run | CI | audit vs baseline | lenses | confirmed | fixed by | clean |
 |---|---|---|---|---|---|---|---|
 | 1 | 38654031210 @640d08d | red: macOS scripts/ci, 5 feature tests (FrameProbe budget, ControlInventory nested probes, SnapshotHost IC + glass, GoldenImage p95); Linux green | n/a: journeys didn't run | none (no ui-screens; CI-failure round) | 5 test failures | #881 #883 #884 #885 | no |
-| 2 | 38658150595 @1854d6c | red: macOS SnapshotHostTests.appearances (light-ic, dark-ic) only; Photo latency passed; Linux green | n/a: journeys didn't run | none (no ui-screens) | 1 (IC hosts resolve plain tokens) | r2-b1 (wf pending), feature-done | no |
+| 2 | 38658150595 @1854d6c | red: macOS SnapshotHostTests.appearances (light-ic, dark-ic) only; Photo latency passed; Linux green | n/a: journeys didn't run | none (no ui-screens) | 1 (IC hosts resolve plain tokens) | #891 (r2-b1, feature-done) | no |
 
 ## Decisions
 - Round 1: macOS scripts/ci failed before the UI journeys, so no ui-screens/audit exist; the round's findings are the feature's 5 failing tests, fixed in 4 disjoint batches. Critic panel runs once a run has screens.

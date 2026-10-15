@@ -45,3 +45,4 @@ utc	stage	event	ref	note
 2026-10-15T00:23Z	4	pr-merged	#887	feature-done packet status
 2026-10-15T00:23Z	4	ci-run	38658150595	round 2 CI on 1854d6c
 2026-10-15T00:23Z	4	round-findings	38658150595	round 2: only SnapshotHost IC appearances red; r2-b1 fixer
+2026-10-15T00:28Z	4	pr-opened	#891	r2-b1 IC hosts, feature-done
