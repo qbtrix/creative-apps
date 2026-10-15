@@ -36,3 +36,4 @@ utc	stage	event	ref	note
 2026-10-15T14:01Z	4	stage-start	round 2	waiting on a run containing #1170
 2026-10-15T14:21Z	4	ci-run	38748468768	swift build red in LibraryApp (not ours); PhotoApp incl. #1170 compiled; no tests ran; round 2 waits for the next run
 2026-10-15T14:47Z	4	heartbeat	-	no new dev CI run; #1073 still open
+2026-10-15T15:13Z	4	ci-run	38757068610	red only on Halo keyedFrame6 (not ours); Photo green; round 2 panel running
