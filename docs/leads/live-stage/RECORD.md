@@ -2,9 +2,9 @@
 
 Issue: #798 · Packet: docs/blueprints/flare/features/live-stage.md
 Run: act-1a13d374bd1-s92z · Session: claude/live-stage-lead-gljfd4 · Started: 2026-10-15T00:40Z
-Stage: 5 finish (waiting on a green dev run; other lines red)
+Stage: 5 finish (built; contact sheet blocked on dev-red #763)
 Base: 3033a12d599ff66ce4ebd5536ff9809d12e1d9cf
-Next: when a dev CI run containing a45f1cb (#965) is green, comment on #798 with 'Belt-Contact-Sheet: <run link>', one line per Flare journey and the flare audit counts. No live-stage code is needed. Resumed 09:09Z after the second nudge; runs 38708263577, 38708650547, 38709336067 red on other lines (latest: macOS swift test HaloLayerListTests.selectedRowSpansTheColumnInTheSelectedTint)
+Next: no lead work left. When a dev CI run containing a45f1cb (#965) is green, the supervisor (or a relaunched lead) comments on #798 with 'Belt-Contact-Sheet: <run link>', one line per Flare journey and the flare audit counts. Stopped 13:07Z: every dev run since #965 red on other lines (Halo, SuiteUI, Photo; open dev-red #763); latest 38737961079 on 79bd068
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |

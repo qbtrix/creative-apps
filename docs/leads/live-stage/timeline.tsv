@@ -77,3 +77,4 @@ utc	stage	event	ref	note
 2026-10-15T12:21Z	5	heartbeat	#798	waiting on a green dev run with a45f1cb
 2026-10-15T12:40Z	5	heartbeat	#798	waiting on a green dev run with a45f1cb
 2026-10-15T12:58Z	5	heartbeat	#798	waiting on a green dev run with a45f1cb
+2026-10-15T13:07Z	5	stopped	#798	past wall clock; no green dev run since #965; contact sheet left to supervisor
