@@ -42,3 +42,5 @@ utc	stage	event	ref	note
 2026-10-15T11:09Z	4	ci-run	38721434364	round 2: H-J11 green, H-J8 + H-J10 red
 2026-10-15T11:09Z	4	round-findings	round 2	r2-b1 + critic panel running
 2026-10-15T11:12Z	4	round-findings	round 2	critic: 7 confirmed, 2 major
+2026-10-15T11:22Z	4	pr-merged	#1108	r2-b1
+2026-10-15T11:22Z	4	stage-start	r2-b2	damage reason, unsaved Save, readouts
