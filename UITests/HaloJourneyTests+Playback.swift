@@ -188,6 +188,6 @@ final class HaloPlaybackJourneyTests: XCTestCase {
         }
         XCTAssert(item.isEnabled, "\(path.joined(separator: " > ")) is disabled")
         item.click()
-        _ = halo.app.menus.firstMatch.waitForNonExistence(timeout: 2)
+        halo.menusClosed()
     }
 }

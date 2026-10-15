@@ -203,7 +203,7 @@ final class HaloFilesJourneyTests: XCTestCase {
         XCTAssert(undo.waitForExistence(timeout: 3), "the Edit menu has no plain Undo after an open")
         XCTAssertFalse(undo.isEnabled, "Edit > Undo is enabled after an open")
         halo.press(.escape)
-        XCTAssert(halo.app.menus.firstMatch.waitForNonExistence(timeout: 2), "the Edit menu stayed open")
+        XCTAssert(halo.menusClosed(), "the Edit menu stayed open")
     }
 
     /// File > Open Recent ▸, checks `name` is the first entry and clicks it.

@@ -176,7 +176,7 @@ extension HaloJourneyTests {
         let item = edit.menus.firstMatch.children(matching: .menuItem)[title]
         XCTAssert(item.waitForExistence(timeout: 3), "the Edit menu has no \(title)")
         halo.press(.escape)
-        XCTAssert(halo.app.menus.firstMatch.waitForNonExistence(timeout: 2), "a menu stayed open after Escape")
+        XCTAssert(halo.menusClosed(), "a menu stayed open after Escape")
     }
 
     /// Whether `condition` holds within three seconds.
