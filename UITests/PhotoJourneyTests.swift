@@ -383,7 +383,7 @@ final class PhotoJourneyTests: XCTestCase {
         // A click focuses the canvas (a Move click moves nothing), then C picks Crop.
         photo.element("suite.canvas").click()
         photo.app.typeKey("c", modifierFlags: [])
-        let apply = photo.app.buttons["photo.tool.apply-crop"]
+        let apply = photo.app.buttons["photo.crop.apply"]
         XCTAssert(apply.waitForExistence(timeout: 5), "the C key didn't pick the crop tool (no Apply Crop)")
         XCTAssert(photo.element("suite.tools").buttons["Crop"].isSelected, "the rail doesn't show Crop picked after C")
         photo.shot("crop-tool-key")
