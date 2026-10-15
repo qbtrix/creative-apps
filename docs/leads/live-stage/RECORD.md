@@ -4,7 +4,7 @@ Issue: #798 · Packet: docs/blueprints/flare/features/live-stage.md
 Run: act-1a13d374bd1-s92z · Session: claude/live-stage-lead-gljfd4 · Started: 2026-10-15T00:40Z
 Stage: 4 round 1
 Base: 1fdabfde31be793e42b372c608206cff58c4b8e1
-Next: wait for the dev CI run containing 1fdabfd (#934), then audit, screens, critic panel
+Next: read the round 1 critic panel result; fix batch if confirmed blockers or majors
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -25,6 +25,7 @@ Journeys: J3 and J5 model half, steps 1-6 of the packet. Quality: QB-L5 hit <= 1
 ## Rounds
 | round | CI run | CI | audit vs baseline | lenses | confirmed | fixed by | clean |
 |---|---|---|---|---|---|---|---|
+| 1 | 38671960461 (1fdabfd) | red: 6 UI journeys, same as 0a455df before this feature; swift test 1945 green | flare identifier 16 > 15 (Show Sidebar, pre-existing, #938) | clarity, journey, contract, quality, audit | pending | | pending |
 
 ## Decisions
 - Depends on: none (issue body); engine issues closed on creative-core main 98be31a.
