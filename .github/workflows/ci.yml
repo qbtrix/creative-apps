@@ -67,7 +67,9 @@ jobs:
   macos:
     name: macOS
     runs-on: macos-26
-    timeout-minutes: 45
+    # scripts/ci alone takes about 20 min under load and the five apps' UI
+    # journeys about 30 more; 45 cut ui-test off mid-run (dev run 38792928305).
+    timeout-minutes: 90
     steps:
       - uses: actions/checkout@v4
       # Pin Xcode: the image's default moves. 26.6 ships the macOS 26.5 SDK.
