@@ -39,8 +39,10 @@ final class LibraryJourneyTests: XCTestCase {
     @MainActor func testRateASelectedPhoto() {
         let library = Journey("Library", self)
         library.click("Load Sample Photos")
-        let photo = library.app.splitGroups.descendants(matching: .any)
-            .matching(NSPredicate(format: "label BEGINSWITH %@", "IMG_")).firstMatch
+        // A cell's label leads with its badges ("2 stars, Purple, IMG_0034"), so
+        // match the file name anywhere in a grid button's label.
+        let photo = library.app.splitGroups.descendants(matching: .button)
+            .matching(NSPredicate(format: "label CONTAINS %@", "IMG_")).firstMatch
         XCTAssert(photo.waitForExistence(timeout: 10), "no sample photo in the grid")
         photo.click()
         library.shot("photo-inspector")
