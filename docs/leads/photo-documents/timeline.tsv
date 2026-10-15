@@ -63,3 +63,4 @@ utc	stage	event	ref	note
 2026-10-15T20:31Z	4	pr-opened	#1242	fix C restore decode off main
 2026-10-15T20:31Z	4	pr-merged	#1241 #1242	fixes D, C
 2026-10-15T20:34Z	4	heartbeat	-	waiting
+2026-10-15T20:52Z	4	heartbeat	-	waiting
