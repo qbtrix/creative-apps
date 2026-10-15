@@ -66,13 +66,16 @@ import Testing
         }
     }
 
-    /// SuiteHex picks each named AppKit appearance's own value, with no
-    /// SwiftUI in between.
+    /// SuiteHex picks each host appearance's own value, with no SwiftUI in
+    /// between: the host's NSAppearance for light or dark, and its contrast
+    /// bound the way SnapshotHost binds it.
     @Test func tokenValueForEachAppearance() throws {
         let token = SuitePalette.hairline
         for appearance in SnapshotAppearance.allCases {
             let named = try #require(NSAppearance(named: appearance.appearanceName))
-            let value = token.value(for: named)
+            let value = SuiteHex.$increasedContrast.withValue(appearance.contrast == .increased) {
+                token.value(for: named)
+            }
             #expect(value == appearance.value(of: token),
                     "\(appearance.appearanceName.rawValue) read \(String(value, radix: 16))")
         }

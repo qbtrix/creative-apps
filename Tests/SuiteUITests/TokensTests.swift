@@ -213,25 +213,24 @@ import Testing
     }
 
     /// Increase Contrast reaches the palette: each system appearance reads its own
-    /// column, high contrast included, and vibrant dark reads Dark.
+    /// column, and vibrant dark reads Dark. AppKit returns plain Aqua or Dark Aqua
+    /// for `NSAppearance(named:)` with a high-contrast name unless the system
+    /// setting is on (CI run 38667087530), so the contrast columns are reached the
+    /// way a renderer asks for them, through `SuiteHex.increasedContrast`.
     @Test func valueFollowsTheAppearance() {
         let hex = SuiteHex(0x000001, 0x000002, 0x000003, 0x000004)
-        let expected: [(NSAppearance.Name, UInt32)] = [
-            (.aqua, hex.light), (.darkAqua, hex.dark),
-            (.accessibilityHighContrastAqua, hex.lightContrast),
-            (.accessibilityHighContrastDarkAqua, hex.darkContrast),
-            (.vibrantDark, hex.dark),
+        let expected: [(NSAppearance.Name, Bool?, UInt32)] = [
+            (.aqua, nil, hex.light), (.darkAqua, nil, hex.dark), (.vibrantDark, nil, hex.dark),
+            (.aqua, true, hex.lightContrast), (.darkAqua, true, hex.darkContrast),
+            (.vibrantDark, true, hex.darkContrast), (.aqua, false, hex.light), (.darkAqua, false, hex.dark),
         ]
-        for (name, value) in expected {
-            let appearance = NSAppearance(named: name)
-            // What AppKit hands back for each name, so a CI log shows why a column was picked.
-            let candidates: [NSAppearance.Name] = [
-                .accessibilityHighContrastAqua, .accessibilityHighContrastDarkAqua, .aqua, .darkAqua,
-            ]
-            let best = appearance?.bestMatch(from: candidates)?.rawValue ?? "nil"
-            print("APPEARANCE \(name.rawValue): name \(appearance?.name.rawValue ?? "nil"), best match \(best)")
-            #expect(appearance != nil, "\(name.rawValue) exists")
-            if let appearance { #expect(hex.value(for: appearance) == value, "\(name.rawValue)") }
+        for (name, contrast, value) in expected {
+            guard let appearance = NSAppearance(named: name) else {
+                Issue.record("\(name.rawValue) does not exist")
+                continue
+            }
+            let read = SuiteHex.$increasedContrast.withValue(contrast) { hex.value(for: appearance) }
+            #expect(read == value, "\(name.rawValue), increased contrast \(String(describing: contrast))")
         }
     }
 
