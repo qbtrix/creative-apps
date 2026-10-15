@@ -1,14 +1,16 @@
 // PropertyKeyingContractTests.swift: what every PropertyKeying promises
-// (#38), run over each conforming type in `propertyKeyings`; the live type
-// joins by adding itself there. Positions are measured with
+// (#38). The rows run over the fake and the live type (`rowKeyings`), which
+// share HaloKeyRules; the writes run over `propertyKeyings`, which the live
+// type joins once its writes are built. Positions are measured with
 // FakeLayerPlacing, which the live keying must agree with. Runs on Linux and
 // macOS.
 import HaloModel
 import Testing
 
 let propertyKeyings: [any PropertyKeying] = [FakePropertyKeying()]
+let rowKeyings: [any PropertyKeying] = [FakePropertyKeying(), LivePropertyKeying()]
 
-@Test(arguments: propertyKeyings)
+@Test(arguments: rowKeyings)
 func rowsFollowPropertyOrderAndKeyState(keying: any PropertyKeying) {
     let comp = keyedPair()
     let rows = keying.rows(for: "s", in: comp, at: 30)
@@ -17,6 +19,51 @@ func rowsFollowPropertyOrderAndKeyState(keying: any PropertyKeying) {
     #expect(keying.rows(for: "s", in: comp, at: 15).first?.keyState == .animated)
     #expect(rows.last?.keyState == .notAnimated)
     #expect(keying.rows(for: "gone", in: comp, at: 0).isEmpty)
+}
+
+/// The first composition of fixture `keyed`: Ball's x keyed at 0 and 24,
+/// its opacity at 12.
+private func keyedFixture() throws -> HaloComposition {
+    try #require(HaloFixtures.project("keyed")?.compositions.first)
+}
+
+/// The row for `p` of the layer called `name` at frame `f`.
+private func row(
+    _ p: HaloProperty, of name: String, in comp: HaloComposition, at f: Int, keying: any PropertyKeying
+) throws -> HaloPropertyRow {
+    let id = try #require(comp.layers.first { $0.name == name }).id
+    return try #require(keying.rows(for: id, in: comp, at: f).first { $0.property == p })
+}
+
+@Test(arguments: rowKeyings)
+func keyedBallRowsShowTextAndKeyState(keying: any PropertyKeying) throws {
+    let comp = try keyedFixture()
+    let x12 = try row(.x, of: "Ball", in: comp, at: 12, keying: keying)
+    #expect(x12.text == "560.0 px" && x12.keyState == .animated)
+    #expect(try row(.opacity, of: "Ball", in: comp, at: 12, keying: keying).keyState == .keyedHere)
+    #expect(try row(.x, of: "Ball", in: comp, at: 6, keying: keying).keyState == .animated)
+    #expect(try row(.opacity, of: "Ball", in: comp, at: 6, keying: keying).text == "50%")
+    #expect(try row(.rotation, of: "Floor", in: comp, at: 12, keying: keying).keyState == .notAnimated)
+    #expect(keying.rows(for: "gone", in: comp, at: 12).isEmpty)
+}
+
+@Test func liveRowsEqualTheFakesOnEveryFrame() throws {
+    let comp = try keyedFixture()
+    let live = LivePropertyKeying(), fake = FakePropertyKeying()
+    for layer in comp.layers {
+        for f in 0..<comp.durationFrames {
+            #expect(live.rows(for: layer.id, in: comp, at: f) == fake.rows(for: layer.id, in: comp, at: f))
+        }
+    }
+}
+
+@Test func liveWritesStillRefuseUntilBuilt() {
+    var comp = keyedPair()
+    let before = comp
+    #expect(throws: HaloEditError.notBuilt("Keying")) {
+        try LivePropertyKeying().setValue(10, for: .x, of: "s", at: 0, in: &comp)
+    }
+    #expect(comp == before && LivePropertyKeying().unavailableHelp != nil)
 }
 
 @Test(arguments: propertyKeyings)

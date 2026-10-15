@@ -1,22 +1,16 @@
 // Fakes/FakePropertyKeying.swift: a small, predictable PropertyKeying (#38):
 // the TRANSFORM rows, typed values, the stopwatch, the key diamond and the
-// parent picker, keeping each protocol doc comment's rules. Opacity's static
-// value lives on the layer, every other property's in a one-key track.
-// Linux-safe; never used by `.live`.
+// parent picker, keeping each protocol doc comment's rules. Its rows come
+// from LivePropertyKeying (HaloKeyRules), so fake and live can't drift.
+// Opacity's static value lives on the layer, every other property's in a
+// one-key track. Linux-safe; never used by `.live`.
 import FlareCore
 
 public struct FakePropertyKeying: PropertyKeying {
+    private let live = LivePropertyKeying()
     public init() {}
     public func rows(for layerID: String, in composition: HaloComposition, at frame: Int) -> [HaloPropertyRow] {
-        guard let layer = composition.layers.first(where: { $0.id == layerID }) else { return [] }
-        let placing = FakeLayerPlacing()
-        return HaloProperty.allCases.map { p in
-            let value = placing.value(p, of: layerID, in: composition, at: frame) ?? 0
-            let track = layer.tracks[p.rawValue] ?? []
-            let state: HaloKeyState =
-                track.count < 2 ? .notAnimated : track.contains { $0.frame == frame } ? .keyedHere : .animated
-            return HaloPropertyRow(property: p, value: value, text: p.text(value), keyState: state)
-        }
+        live.rows(for: layerID, in: composition, at: frame)
     }
     public func setValue(
         _ value: Double, for property: HaloProperty, of layerID: String, at frame: Int,
@@ -70,7 +64,7 @@ public struct FakePropertyKeying: PropertyKeying {
         }
         if let parentID {
             guard composition.layers.contains(where: { $0.id == parentID }) else { throw HaloEditError.unknownLayer(parentID) }
-            if parentID == layerID || FakeLayerPlacing.follows(parentID, layerID, in: composition) {
+            if parentID == layerID || HaloKeyRules.follows(parentID, layerID, in: composition) {
                 throw HaloEditError.parentCycle(layer.name)
             }
         }
