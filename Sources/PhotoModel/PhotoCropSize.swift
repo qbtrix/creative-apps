@@ -106,6 +106,21 @@ extension PhotoWorkspace {
         return "\(number) \(number == 1 ? "pixel" : "pixels")"
     }
 
+    /// What XCUI and VoiceOver read as a crop field row's label: the field's
+    /// name, then its number in pixels ("Width, 600 pixels"). macOS exposes
+    /// the combined row's label but no value of its own, so the number rides
+    /// in the label.
+    public func cropFieldAccessibilityLabel(_ field: CropField) -> String {
+        let name =
+            switch field {
+            case .x: "X"
+            case .y: "Y"
+            case .width: "Width"
+            case .height: "Height"
+            }
+        return "\(name), \(cropFieldAccessibilityValue(field))"
+    }
+
     /// The crop options' one instruction line, always shown so nothing moves
     /// when a crop appears: what to do with no crop, else the crop's size and
     /// shape ("Crop 400 × 600 px, 2:3"), so a swapped ratio reads as such.

@@ -7,7 +7,8 @@
 // no Escape shortcut either, which would close a field being typed in before
 // its own Escape; Escape on the canvas cancels through `.dismiss`.
 // Each field row is one accessibility element (the letter, the field's name
-// and value combined) carrying the field's identifier.
+// and value combined) carrying the field's identifier, labelled with its name
+// and number ("Width, 600 pixels") so XCUI reads the number.
 // Each field reports its bounds through CropFieldBoundsKey as an anchor, so
 // a test measures the 2 x 2 grid without an assistive client; nothing in the
 // app reads it. Values in, intents out.
@@ -98,8 +99,11 @@ struct CropOptions: View {
         // The row is one element: the drawn letter joins the field's name, value
         // and adjust actions, so a disabled field's dimmed letter is part of a
         // disabled control, not stray text; the identifier goes on that element.
-        // Combining drops the field's own value, so the row states it again.
+        // Combining drops the field's own value, and macOS exposes no value set
+        // on the combined row, so its label carries the number ("Width, 600
+        // pixels"); the value states it again for clients that read one.
         .accessibilityElement(children: .combine)
+        .accessibilityLabel(model.cropFieldAccessibilityLabel(field))
         .accessibilityValue(model.cropFieldAccessibilityValue(field))
         .suiteControl(id: id, enabled: enabled, reason: reason)
         .disabled(!enabled)
