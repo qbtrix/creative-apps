@@ -4,9 +4,10 @@
 // point on the canvas. The first clone stroke after that fixes the offset from
 // where it starts to the source, in whole pixels, and later strokes keep it
 // until the source is sampled again. A stroke lays round dabs of the given
-// size along its points, spaced a quarter of the size apart, on the selected
-// layer, each pixel taking the source pixel at the offset; the brush's
-// hardness gives the soft edge and its opacity how much shows, and each pixel
+// size along its points, spaced a quarter of the size apart, on the paint
+// target (`paintTarget()`, PhotoStroke), each pixel taking the source pixel at
+// the offset; the brush's hardness gives the soft edge, its opacity how much
+// shows and the selection's coverage scales both, and each pixel
 // keeps the most coverage the stroke gave it. Dabs read the layer as it was
 // before the stroke, so a stroke never re-clones its own paint; a source
 // pixel off the layer leaves the pixel alone. One stroke is one undo step
@@ -52,7 +53,7 @@ extension PhotoWorkspace {
     /// a size that isn't finite; the size clamps to the brush's range. Records
     /// nothing when no pixel changed.
     public mutating func clone(along points: [Mask.Point], size: Double) {
-        guard let id = selectedLayerID else { return }
+        guard let id = paintLayerID() else { return }
         var before: [Int: PixelBuffer] = [:], coverage: [Int: [Float]] = [:]
         stamp(along: points, size: size, layer: id, before: &before, coverage: &coverage)
         guard !before.isEmpty else { return }
@@ -78,13 +79,14 @@ extension PhotoWorkspace {
         cloneSource = CloneSource(point: source.point, offset: offset)
         let diameter = min(max(size, ToolOptions.sizeRange.lowerBound), ToolOptions.sizeRange.upperBound)
         let layer = layers[at]
+        let weight = coverageWeight(offsetX: layer.offsetX, offsetY: layer.offsetY)
         var touched = PixelRect(x: 0, y: 0, width: 0, height: 0)
         for center in Self.dabCenters(points, spacing: max(diameter / 4, 1)) {
             let dab = Mask.Point(x: center.x - Double(layer.offsetX), y: center.y - Double(layer.offsetY))
             // Every index is inside the layer and every value finite, so a dab can't throw.
             if let area = try? cloneDab(
-                at: dab, radius: diameter / 2, offset: offset, healing: healing, on: &tiled, before: &before,
-                coverage: &coverage)
+                at: dab, radius: diameter / 2, offset: offset, healing: healing, weight: weight, on: &tiled,
+                before: &before, coverage: &coverage)
             {
                 touched = touched.union(area.offsetBy(layer.offsetX, layer.offsetY))
             }
@@ -110,11 +112,13 @@ extension PhotoWorkspace {
     }
 
     /// One round dab at `center` (layer pixels) copying from `offset` away,
-    /// shifted to this spot's tone when `healing`. Returns the layer region it
-    /// changed, or nil when it changed nothing.
+    /// shifted to this spot's tone when `healing`, each pixel's coverage
+    /// scaled by `weight` (layer pixels; nil is 1). Returns the layer region
+    /// it changed, or nil when it changed nothing.
     private func cloneDab(
-        at center: Mask.Point, radius: Double, offset: (x: Int, y: Int), healing: Bool, on tiled: inout TiledPixels,
-        before: inout [Int: PixelBuffer], coverage: inout [Int: [Float]]
+        at center: Mask.Point, radius: Double, offset: (x: Int, y: Int), healing: Bool,
+        weight: ((Int, Int) -> Float)?, on tiled: inout TiledPixels, before: inout [Int: PixelBuffer],
+        coverage: inout [Int: [Float]]
     ) throws -> PixelRect? {
         let box = PixelRect(
             from: Mask.Point(x: center.x - radius, y: center.y - radius),
@@ -140,7 +144,8 @@ extension PhotoWorkspace {
                 for x in part.x..<part.maxX {
                     let px = Double(x) + 0.5 - center.x, py = Double(y) + 0.5 - center.y
                     let t = min(max((radius - (px * px + py * py).squareRoot()) / softness, 0), 1)
-                    let c = Float(t * t * (3 - 2 * t))
+                    var c = Float(t * t * (3 - 2 * t))
+                    if let weight { c *= weight(x, y) }
                     let j = (y - rect.y) * rect.width + (x - rect.x)
                     guard c > cover[j],
                         let raw = try sourcePixel(x: x + offset.x, y: y + offset.y, in: tiled, before: before)

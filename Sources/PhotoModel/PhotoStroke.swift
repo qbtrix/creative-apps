@@ -41,11 +41,25 @@
 //   move           shifts the selected layer by the drag, in whole pixels
 //                  ("Move Layer").
 //
+// Brush, eraser, clone and heal write through `paintTarget()`: the selected
+// layer's pixels, or on an adjustment layer nothing, with the refusal in
+// `statusMessage` from the press that tried. Every dab is weighted by the
+// selection's coverage (PhotoSelectionMask.swift); with no selection the
+// weight is skipped, so paint costs what it did.
+//
 // ponytail: capsules write through PixelBuffer.pixel/setPixel one pixel at a
 // time, with source-over and the eraser's scaling inline, and visit each
 // piece's whole box, so very large brushes on tight curves cost more; a
 // CoreRaster stamp op is the upgrade once brushes get textures. Linux-safe.
 import CoreRaster
+
+/// Where a paint stroke writes. A mask's coverage is its gray (red
+/// channel), alpha always 1, so the brush paints black to hide and white to
+/// reveal; PV-5 makes `paintTarget()` give `.mask`.
+public enum PaintTarget: Hashable, Sendable {
+    case pixels(PhotoLayer.ID)
+    case mask(PhotoLayer.ID)
+}
 
 /// A drag in progress, from its first `drag` to `endDrag`.
 struct PhotoStroke: Sendable, Equatable {
@@ -71,6 +85,24 @@ struct PhotoStroke: Sendable, Equatable {
 }
 
 extension PhotoWorkspace {
+    /// Where brush, eraser, clone and heal write: the selected layer's
+    /// pixels; nil with no layer selected, or on an adjustment layer, with
+    /// `statusMessage` "Pick a pixel layer to paint on." set in this call.
+    public mutating func paintTarget() -> PaintTarget? {
+        guard let layer = selectedLayer else { return nil }
+        if case .adjustment = layer.kind {
+            statusMessage = "Pick a pixel layer to paint on."
+            return nil
+        }
+        return .pixels(layer.id)
+    }
+
+    /// The pixel layer `paintTarget()` gives, if any.
+    mutating func paintLayerID() -> PhotoLayer.ID? {
+        guard case .pixels(let id)? = paintTarget() else { return nil }
+        return id
+    }
+
     /// `drag(from:to:pressure:modifiers:zoom:)` with Option for `sampling`, at zoom 1.
     public mutating func drag(
         from start: Mask.Point, to end: Mask.Point, pressure: Double = 1, sampling: Bool = false
@@ -95,13 +127,18 @@ extension PhotoWorkspace {
         stroke = nil
         switch current.tool {
         case .brush, .eraser:
-            if begun { paint(&current, adding: start, pressure: pressure) }
+            if begun {
+                current.layerID = paintLayerID()
+                paint(&current, adding: start, pressure: pressure)
+            }
             paint(&current, adding: end, pressure: pressure)
         case .clone, .heal:
             if begun, modifiers.contains(.option) || cloneSource == nil {
                 setCloneSource(at: start)
                 current.layerID = nil
-            } else if let id = current.layerID {
+            } else {
+                if begun { current.layerID = paintLayerID() }
+                guard let id = current.layerID else { break }
                 let from = current.samples.last?.point ?? start
                 current.samples = [PhotoStroke.Sample(point: end, pressure: 1)]
                 stamp(
@@ -287,6 +324,7 @@ extension PhotoWorkspace {
         let opacity = Float(options.opacityPercent / 100)
         let paint = options.linearColor
         let erasing = stroke.tool == .eraser
+        let weight = coverageWeight(offsetX: layer.offsetX, offsetY: layer.offsetY)
         for i in tiled.tileIndices(in: area) where tiled.tiles.indices.contains(i) {
             let rect = tiled.tileRect(i)
             guard let part = area.intersection(rect) else { continue }
@@ -305,7 +343,8 @@ extension PhotoWorkspace {
                     // of the radius, and never less than a pixel, so hard edges antialias.
                     let softness = max((1 - hardness) * radius, min(1, radius))
                     let t = min(max((radius - (ex * ex + ey * ey).squareRoot()) / softness, 0), 1)
-                    let cover = Float(t * t * (3 - 2 * t))
+                    var cover = Float(t * t * (3 - 2 * t))
+                    if let weight { cover *= weight(x, y) }
                     let (tx, ty) = (x - rect.x, y - rect.y)
                     let j = ty * rect.width + tx
                     guard cover > coverage[j] else { continue }
