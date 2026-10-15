@@ -77,7 +77,11 @@ public protocol TextSelecting: Sendable {
     func line(at point: FolioPoint, on page: FolioPageID, text: FolioPageText) -> FolioTextSelection
     /// The selection as copied text: lines inside a paragraph joined with a
     /// space, a line break after each paragraph, typographic ligatures
-    /// (U+FB00 to U+FB06) spelled out as letters, soft hyphens dropped.
+    /// (U+FB00 to U+FB06) spelled out as letters. A line that ends in a soft
+    /// hyphen joins the next with neither hyphen nor space ("re-|view" →
+    /// "review"); one that ends in a hard hyphen before a lowercase letter
+    /// keeps the hyphen and adds no space ("e-|mail" → "e-mail"); soft
+    /// hyphens elsewhere are dropped.
     func copyText(_ selection: FolioTextSelection, text: FolioPageText) -> String
 }
 
@@ -131,6 +135,11 @@ public protocol Signing: Sendable {
     /// luminance at or above 0.85 become transparent, the rest is trimmed to
     /// its ink box and kept as PNG-ready RGBA. Refuses a picture with no ink.
     func make(picture: FolioBitmap, isInitials: Bool, id: FolioSignatureID) throws(FolioEditError) -> FolioSignature
+    /// The library as one file (Signatures > Export…).
+    func exportLibrary(_ signatures: [FolioSignature]) -> Data
+    /// Reads an exported library and merges it into `existing` by id (the
+    /// imported one wins). Refuses anything else with `.invalidValue`.
+    func importLibrary(_ data: Data, into existing: [FolioSignature]) throws(FolioEditError) -> [FolioSignature]
     /// Places a signature centered on `point`, `width` points wide. Inside an
     /// empty signature field it fits that field instead.
     func place(_ signature: FolioSignature, at point: FolioPoint, width: Double, on page: FolioPageID,

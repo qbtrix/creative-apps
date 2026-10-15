@@ -418,6 +418,15 @@ public struct FolioImageInput: Sendable {
     public init(name: String, data: Data) { self.name = name; self.data = data }
 }
 
+/// The passwords a file was opened with, held by the workspace (never in the
+/// shared document value) so Save can keep them.
+public struct FolioPasswords: Hashable, Sendable {
+    public var open: String?
+    public var owner: String?
+    public init(open: String? = nil, owner: String? = nil) { self.open = open; self.owner = owner }
+    public static let none = FolioPasswords()
+}
+
 /// What opening a file gives the Model. The opener has already registered
 /// the bytes in `DocumentSources` under `source`.
 public struct FolioOpened: Sendable {
@@ -427,9 +436,12 @@ public struct FolioOpened: Sendable {
     public var pagesWithoutText: [FolioPageID]
     /// Inputs New from Images left out.
     public var skipped: [FolioSkipped]
+    /// The passwords that opened it (the open one, and the owner one when given).
+    public var passwords: FolioPasswords
     public init(source: FolioSourceID, state: FolioDocumentState, pagesWithoutText: [FolioPageID],
-                skipped: [FolioSkipped] = []) {
+                skipped: [FolioSkipped] = [], passwords: FolioPasswords = .none) {
         self.source = source; self.state = state; self.pagesWithoutText = pagesWithoutText; self.skipped = skipped
+        self.passwords = passwords
     }
 }
 
@@ -464,7 +476,14 @@ public struct FolioWriteOptions: Hashable, Sendable {
         self.flatten = flatten; self.openPassword = openPassword; self.ownerPassword = ownerPassword
         self.permissions = permissions; self.optimizeImages = optimizeImages; self.keepRecognizedText = keepRecognizedText
     }
+    /// No passwords at all (a new document, or Save As without a password).
     public static let plain = FolioWriteOptions()
+    /// What Save uses: the passwords the file was opened with, kept. A file
+    /// with owner restrictions opened without its owner password keeps the
+    /// restrictions; the writer protects them with a fresh owner password.
+    public static func keeping(_ passwords: FolioPasswords) -> FolioWriteOptions {
+        FolioWriteOptions(openPassword: passwords.open, ownerPassword: passwords.owner)
+    }
 }
 
 public enum FolioImageFormat: String, CaseIterable, Codable, Sendable { case png, jpeg }

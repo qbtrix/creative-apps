@@ -150,6 +150,8 @@ public struct FakeDocumentOpening: DocumentOpening {
         await sources.register(source, data: data, name: name)
         var opened = Self.opened(file, source: source, name: name)
         opened.state.permissions.ownerUnlocked = ownerUnlocked
+        opened.passwords = FolioPasswords(open: file.password == nil ? nil : file.password,
+                                          owner: ownerUnlocked && file.ownerPassword != nil ? file.ownerPassword : nil)
         return opened
     }
 
@@ -284,9 +286,11 @@ public struct FakeDocumentWriting: DocumentWriting {
             fields = []; annotations = []
         }
         var restricted = permissions; restricted.ownerUnlocked = true
+        // Restrictions without a known owner password keep a fresh one, so they stay in force.
+        let owner = options.ownerPassword ?? (permissions.restrictions.contains(false) ? "fresh-owner-password" : nil)
         let outline = doc.outline.compactMap { o in o.page.flatMap { index[$0] }.map { FolioFixtureFile.Outline(title: o.title, page: $0) } }
         let file = FolioFixtureFile(title: doc.title, author: doc.author, password: options.openPassword,
-                                    ownerPassword: options.ownerPassword, permissions: restricted, scripts: doc.scripts,
+                                    ownerPassword: owner, permissions: restricted, scripts: doc.scripts,
                                     pages: pages, outline: outline, fields: fields, annotations: annotations)
         return file.data()
     }
@@ -436,8 +440,15 @@ public struct FakeTextSelecting: TextSelecting {
         for span in selection.spans where text.lines.indices.contains(span.line) {
             let chars = Array(text.lines[span.line].text)
             guard span.start < span.end, span.end <= chars.count else { continue }
-            out += String(chars[span.start..<span.end])
-            if span != selection.spans.last { out += text.lines[span.line].endsParagraph ? "\n" : " " }
+            var piece = String(chars[span.start..<span.end])
+            guard span != selection.spans.last else { out += piece; continue }
+            if text.lines[span.line].endsParagraph { out += piece + "\n"; continue }
+            let next = selection.spans.firstIndex(of: span).flatMap { i in
+                selection.spans.indices.contains(i + 1) ? selection.spans[i + 1] : nil }
+            let nextFirst = next.flatMap { n in text.lines.indices.contains(n.line) ? Array(text.lines[n.line].text).dropFirst(n.start).first : nil }
+            if piece.hasSuffix("\u{00AD}") { piece.removeLast(); out += piece }
+            else if piece.hasSuffix("-"), let c = nextFirst, c.isLowercase { out += piece }
+            else { out += piece + " " }
         }
         return out
     }
@@ -648,6 +659,18 @@ public struct FakeSigning: Signing {
         }
         return FolioSignature(id: id, kind: .picture(FolioBitmap(width: cw, height: ch, rgba: out)), isInitials: isInitials,
                               aspect: Double(cw) / Double(ch))
+    }
+    struct Library: Codable { var folioSignatureLibrary: Int; var signatures: [FolioSignature] }
+    public func exportLibrary(_ signatures: [FolioSignature]) -> Data {
+        let enc = JSONEncoder(); enc.outputFormatting = [.sortedKeys]
+        return (try? enc.encode(Library(folioSignatureLibrary: 1, signatures: signatures))) ?? Data()
+    }
+    public func importLibrary(_ data: Data, into existing: [FolioSignature]) throws(FolioEditError) -> [FolioSignature] {
+        guard let lib = try? JSONDecoder().decode(Library.self, from: data), lib.folioSignatureLibrary == 1 else {
+            throw .invalidValue("That file isn't a Folio signature library.")
+        }
+        let incoming = Set(lib.signatures.map(\.id))
+        return existing.filter { !incoming.contains($0.id) } + lib.signatures
     }
     public func place(_ signature: FolioSignature, at point: FolioPoint, width: Double, on page: FolioPageID,
                       in doc: inout FolioDocumentState) throws(FolioEditError) -> FolioAnnotationID {

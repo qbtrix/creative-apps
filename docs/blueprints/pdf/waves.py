@@ -81,7 +81,7 @@ FEATURES = [
             + [A + "Live/" + n + ".swift" for n in PLATFORM_LIVE]
             + [T + c + "ContractTests.swift" for c in CONTRACTS]
             + [T + n + ".swift" for n in ["FolioCommandTests", "FolioToolsTests", "FolioWorkspaceTests",
-                                           "FolioLayoutTests", "FolioFixturesTests", "FolioPageSummaryTests", "FolioHistoryTests",
+                                           "FolioLayoutTests", "FolioFixturesTests", "FolioPageSummaryTests", "FolioHistoryTests", "FolioNoNetworkTests",
                                            "FolioBudget", "FolioFoundationBudgetTests"]]
             + [S + "FolioWindowSnapshots.swift", U + "FolioJourneyTests.swift",
                "UITests/audit-baseline.json", "docs/c4/model.json",
@@ -91,7 +91,7 @@ FEATURES = [
     {
         "id": "reader", "wave": 1, "waits": ["foundation"],
         "title": "Open and read: live PDFKit, zoom and view modes, go to page, outline, passwords, open errors",
-        "covers": "P-T1, P-T2, P-T3 (go to page, outline), P-T19",
+        "covers": "P-T1, P-T2, P-T3 (go to page, outline), P-T19, P-T32",
         "proves": "P-J1, P-J11; PB-1 (live), PB-2, PB-3, PB-4, PB-17; PF-1, PF-2",
         "prs": 8, "hours": 13,
         "files": [A + "Live/PDFKitOpening.swift", A + "Live/PDFKitImaging.swift", A + "Live/PDFKitText.swift",
@@ -122,7 +122,7 @@ FEATURES = [
         "id": "markup", "wave": 1, "waits": ["foundation"],
         "title": "Mark up: select text, highlight, underline, strike out, notes, text boxes, pen, shapes",
         "covers": "P-T5, P-T7, P-T8, P-T9, P-T10",
-        "proves": "P-J3, P-J4; PB-6, PB-7, PB-8, PB-9, PB-10; PF-15",
+        "proves": "P-J3, P-J4; PB-6, PB-7, PB-8, PB-9, PB-10",
         "prs": 9, "hours": 15,
         "files": [live_pure("TextSelecting"), live_pure("Annotating"), fake("TextSelecting"), fake("Annotating"),
                   M + "Workspace/FolioWorkspace+Markup.swift", M + "Availability/FolioAvailability+Markup.swift",
@@ -132,7 +132,7 @@ FEATURES = [
                   A + "Inspector/FolioMarkInspector.swift", A + "Sidebar/FolioMarksList.swift", A + "Live/PDFKitAnnotations.swift",
                   M + "Fixtures/FolioFixtures+Markup.swift", A + "Live/FolioSampleWriter+Marks.swift",
                   T + "TextSelectingContractTests.swift", T + "AnnotatingContractTests.swift", T + "FolioMarkupTests.swift",
-                  T + "FolioToolsTests.swift", T + "FolioMarkupBudgetTests.swift", S + "FolioMarkupSnapshots.swift", S + "FolioAnnotationInteropTests.swift",
+                  T + "FolioToolsTests.swift", T + "FolioMarkupBudgetTests.swift", S + "FolioMarkupSnapshots.swift",
                   U + "FolioJourneyTests+Markup.swift", U + "FolioJourneyTests+Annotate.swift"],
     },
     {
@@ -168,14 +168,14 @@ FEATURES = [
         "id": "files", "wave": 1, "waits": ["foundation"],
         "title": "Save, save as, flatten, passwords and restrictions, document properties",
         "covers": "P-T18, P-T20, P-T26",
-        "proves": "P-J10; PB-15; PF-3 (page level: order, rotation, crop, labels kept, title), PF-6, PF-16",
+        "proves": "P-J10; PB-15; PF-3 (page level: order, rotation, crop, labels kept, title), PF-6",
         "prs": 6, "hours": 10,
         "files": [A + "Live/PDFKitWriting.swift", M + "Workspace/FolioWorkspace+Files.swift",
                   M + "Availability/FolioAvailability+Files.swift", A + "FolioWindow+Files.swift",
                   A + "FolioCommands+Files.swift", A + "Sheets/FolioSaveOptionsSheet.swift", A + "Inspector/FolioDocumentInspector.swift",
                   M + "Fixtures/FolioFixtures+Files.swift",
                   T + "DocumentWritingContractTests.swift", T + "FolioFilesTests.swift", T + "FolioFilesBudgetTests.swift",
-                  S + "FolioRoundTripTests.swift", S + "FolioPasswordTests.swift", S + "FolioSaveIntegrityTests.swift",
+                  S + "FolioRoundTripTests.swift", S + "FolioPasswordTests.swift",
                   S + "FolioWritingBudgetTests.swift", U + "FolioJourneyTests+Files.swift"],
     },
     {
@@ -225,10 +225,10 @@ FEATURES = [
                                                "sign", "export-convert", "ocr"],
         "title": "The core loop, live, measured",
         "covers": "every tier-1 row on live services",
-        "proves": "P-J9, P-J14 (with PF-3 for fields and marks, PF-5, PF-14), PL1 and PL4 (in +Loop), P-P1-P-P6",
+        "proves": "P-J9, P-J14 (with PF-3 for fields and marks, PF-5, PF-14, PF-15, PF-16), PL1 and PL4 (in +Loop), P-P1-P-P6",
         "prs": 4, "hours": 6,
         "files": [U + "FolioJourneyTests+Loop.swift", U + "FolioJourneyTests+Perf.swift", S + "FolioLoopFidelityTests.swift",
-                  U + "FolioJourneyTests+History.swift",
+                  U + "FolioJourneyTests+History.swift", S + "FolioAnnotationInteropTests.swift", S + "FolioSaveIntegrityTests.swift",
                   T + "FolioLoopTests.swift", "docs/blueprints/pdf.md"],
     },
     {

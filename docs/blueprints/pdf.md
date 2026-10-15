@@ -221,36 +221,37 @@ where it goes.
 | # | Pain point | How often, how loud | Source | What fixes it | v1? |
 |---|---|---|---|---|---|
 | 1 | Subscription lock-in: early-cancellation fees, "free" tools that charge at download, a cheap trial that turns into a yearly charge | a leading vendor's review page: 7,534 reviews, 91% one-star, cancellation fees in 5 of 24 visible reviews; a forum thread on it: 817 points, 587 comments; a converter site with 40 billing complaints in 3 years | https://www.trustpilot.com/review/www.adobe.com ; https://news.ycombinator.com/item?id=26786563 ; https://www.bbb.org/us/nd/fargo/profile/tech-support/files-editor-0704-1000077989/complaints | Folio is free and open source, inside AfterGlow: no account, no subscription, no per-file charge, no feature behind a paywall (2.1; 10.1 call 11) | Fixed in v1 |
-| 2 | Marks disappear after a save, or are invisible or wrong in another reader | the platform forum: 366 "me too" on one thread; "annotations filled in appear blank to other users": 41,232 views; the most-reacted issue of an open-source reader asks for annotations other readers can see | https://discussions.apple.com/thread/253093013 ; https://apple.stackexchange.com/questions/68446 | Folio writes only the standard annotation kinds and widget values (P-T7 to P-T10, P-T11) and gives every mark an appearance stream so any reader draws it (Apple docs: PDFAnnotation.hasAppearanceStream); PF-3 round-trips every mark; PF-15 checks the appearance streams | Fixed in v1 |
-| 3 | The built-in viewer damages files on save: adds a password nobody asked for, breaks the text layer so copy and search turn to gibberish, grows the file | password on save: 191 and 46 "me too" on two threads, 62,045 views on Q&A; garbled text after save: 39 "me too"; "file size increases when saving": 29,941 views | https://discussions.apple.com/thread/253601818 ; https://apple.stackexchange.com/questions/436596 ; https://apple.stackexchange.com/questions/76474 | A password is written only when the person sets one (`FolioWriteOptions`); the original isn't touched until a save succeeds (P-T18); PF-16 saves every fixture with no edits and checks no password appears, every page's text is unchanged and the file grows by at most 10%; incremental save (CP-2) later keeps the original bytes entirely | Fixed in v1 (incremental save Later) |
-| 4 | Can't change the existing text; edits swap in the wrong font | a vendor forum thread on "font not available for editing": 237,142 views; "free software to edit PDF on Mac": 56,108 views; the second most-reacted issue of a web toolbox | https://community.adobe.com/questions-9/font-not-available-or-can-t-be-used-in-editing-1245210/index1.html ; https://apple.stackexchange.com/questions/16226 | Editing one line in place that keeps its font, saying which characters the embedded font lacks (P-T28, CP-1 to CP-3, CP-5) | v1 does not, unless W4 lands (conditional); v1 adds text boxes (P-T9) |
+| 2 | Marks disappear after a save, or are invisible or wrong in another reader | the platform forum: 366 "me too" on one thread; "annotations filled in appear blank to other users": 41,232 views; an open-source reader's most-reacted issue asks for annotations other readers can see (30 👍, https://github.com/ahrm/sioyek/issues/160) | https://discussions.apple.com/thread/253093013 ; https://apple.stackexchange.com/questions/68446 | Folio writes only the standard annotation kinds and widget values (P-T7 to P-T11, P-T21) through PDFKit's writer, and PF-15 checks that every saved mark and filled field carries an appearance stream other readers draw (Apple docs: PDFAnnotation.hasAppearanceStream, a getter only: no documented call creates one, so PF-15 measures what PDFKit writes); if it doesn't, Folio draws the appearance itself (CP-8, Q11); PF-3 round-trips every mark | Aimed at in v1; PF-15 (core-loop) decides, Q11 if it fails |
+| 3 | The built-in viewer damages files on save: adds a password nobody asked for, breaks the text layer so copy and search turn to gibberish, grows the file | password on save: 191 and 46 "me too" on two threads, 62,045 views on Q&A; garbled text after save: 39 "me too"; "file size increases when saving": 29,941 views | https://discussions.apple.com/thread/253601818 ; https://apple.stackexchange.com/questions/436596 ; https://apple.stackexchange.com/questions/76474 | Save keeps exactly the passwords the file was opened with (`FolioWriteOptions.keeping`), adds none, and keeps owner restrictions in force; the original isn't touched until a save succeeds (P-T18); PF-16 (core-loop) saves every sample unedited and checks passwords and restrictions unchanged, every page's text unchanged and growth at most 10% | Partly: proven on Folio-written samples only; files from other producers (subset fonts, object streams) aren't in the samples, and full byte preservation waits for incremental save (CP-2) |
+| 4 | Can't change the existing text; edits swap in the wrong font | a vendor forum thread on "font not available for editing": 237,142 views; "free software to edit PDF on Mac": 56,108 views; a web toolbox's "edit text directly" request, 46 👍 (https://github.com/Stirling-Tools/Stirling-PDF/issues/1141) | https://community.adobe.com/questions-9/font-not-available-or-can-t-be-used-in-editing-1245210/index1.html ; https://apple.stackexchange.com/questions/16226 | Editing one line in place that keeps its font, saying which characters the embedded font lacks (P-T28, CP-1 to CP-3, CP-5) | v1 does not, unless W4 lands (conditional); v1 adds text boxes (P-T9) |
 | 5 | Fake redaction: black boxes over text that can still be copied | forum threads: 1,029 points / 780 comments, 709 / 122, 529 / 716; the Mac Q&A site's question on redaction: 490,832 views | https://news.ycombinator.com/item?id=46368946 ; https://apple.stackexchange.com/questions/22683 | True removal with a verification pass after saving (P-T29, CP-4, PF-13); Folio never ships a box drawn over live text called "Redact" (10.1 call 7) | v1 does not, unless W4 lands; never faked |
-| 6 | Slow, bloated, hangs on big files | forum threads: 193 / 172 ("intrusive, slow"), 190 / 137 (installer size); "scrolls so slowly": 86,295 views; "Mac unresponsive opening complex PDF": 9,955 views | https://news.ycombinator.com/item?id=45598776 ; https://superuser.com/questions/257881 | A native app on the platform's own PDF engine; only visible pages draw; budgets with tests: progress within 100 ms and first page within 300 ms on 500 pages, scrolling at display rate (PB-1 to PB-4, PB-17, P-P1, P-P2) | Fixed in v1 |
-| 7 | Forms won't fill or save, filled fields show blank elsewhere, scripted forms stuck on "Please wait…" | a vendor forum thread on "Please wait…": 44,297 views; the platform forum: 39 and 24 "me too"; "doesn't save form data": 12,295 views; a web toolbox's most-reacted issue is form filling | https://apple.stackexchange.com/questions/87528 ; https://discussions.apple.com/thread/3255797 | Standard form fields filled with Tab order and required checks, values written so other readers show them (P-T11, P-T12, PF-3); scripted and XFA forms detected and named, never run (P-T1) | Partly: standard forms fixed; XFA forms v1 does not (none planned, Q7) |
-| 8 | Having to upload private documents to web tools | forum threads on local-only PDF tools: 791 / 182, 522 / 185 ("office networks block the upload sites"), 507 / 231; a tracking-pixel complaint in an open-source toolbox | https://news.ycombinator.com/item?id=43880962 ; https://news.ycombinator.com/item?id=37110628 | Everything happens on the Mac: no network calls in Folio, OCR on device (P-T27), future AI on device only (F1) | Fixed in v1 |
-| 9 | Copied text comes out garbled: broken lines, ligatures, hyphens, columns | "Can't copy text from a PDF": 461,920 views; "copy without losing formatting": 398,921; "garbled text when copy-pasting": 234,023; forum threads on why text extraction is hard: 733 / 342 | https://superuser.com/questions/47462 ; https://superuser.com/questions/137824 | Copy joins lines inside a paragraph, spells ligatures out and drops soft hyphens (`TextSelecting.copyText`, proof test; P-T5); scans get text from OCR (P-T27) | Partly: multi-column reading order v1 does not (F2's structure later) |
-| 10 | No dark or night reading mode; eye strain | a vendor forum thread on night mode: 279,436 views; "adjust PDF contrast": 394,273; the Mac Q&A site: 132,875 | https://superuser.com/questions/117521 ; https://apple.stackexchange.com/questions/317845 | Dark and inverted reading (P-T32) | v1 does not (Later, tier 3) |
-| 11 | Interface overhauls, AI pop-ups and upgrade nags that can't be turned off | a vendor forum thread on reverting the new interface: 164,081 views; "turn off the AI assistant box": 17,336 views; "disable the upgrade prompt" is an open-source toolbox's third most-reacted issue | https://community.adobe.com/questions-9/acrobat-2023-how-to-revert-to-classic-gui-user-interface-1285215 ; https://community.adobe.com/questions-12/how-to-turn-off-ask-ai-assistant-box-at-bottom-of-window-1505991/index1.html | No upsell anywhere; no assistant panel; future AI features (F1) appear only when the person invokes them from a menu; the window follows the suite's one shell, which changes only with the captain (10.1 call 11) | Fixed in v1 |
-| 12 | Signatures don't move between Macs, can't be imported or exported, look pixelated; no certificate signing | "export my signature to another Mac": 185,125 views; "extract an image of my signature": 51,569; "import signature from image": 18,590; certificate signatures: a browser viewer's most-reacted issue | https://apple.stackexchange.com/questions/74950 ; https://apple.stackexchange.com/questions/348011 ; https://github.com/mozilla/pdf.js/issues/1076 | Drawn signatures kept as vector strokes, typed ones as text, pictures trimmed (P-T21, `Signing.make(picture:)`); Signatures > Export… and Import… write and read the library as one file (P-T21); certificate signatures (P-T31, CP-6) | Partly: portable library fixed; certificate signing Later |
+| 6 | Slow, bloated, hangs on big files | forum threads: 193 / 172 ("intrusive, slow"), 190 / 137 (installer size); "scrolls so slowly": 86,295 views; "Mac unresponsive opening complex PDF": 9,955 views | https://news.ycombinator.com/item?id=45598776 ; https://superuser.com/questions/257881 | A native app on the platform's own PDF engine; only visible pages draw; budgets with tests: progress within 100 ms and first page within 300 ms on 500 pages, scrolling at display rate (PB-1 to PB-4, PB-17, P-P1, P-P2) | Aimed at in v1 and measured: the Model halves gate now, the live halves gate after ten green runs; very complex pages aren't in the fixtures yet |
+| 7 | Forms won't fill or save, filled fields show blank elsewhere, scripted forms stuck on "Please wait…" | a vendor forum thread on "Please wait…": 44,297 views; the platform forum: 39 and 24 "me too"; "doesn't save form data": 12,295 views; form filling is a web toolbox's most-reacted request, 57 👍 (https://github.com/Stirling-Tools/Stirling-PDF/issues/320) | https://apple.stackexchange.com/questions/87528 ; https://discussions.apple.com/thread/3255797 | Standard form fields filled with Tab order and required checks (P-T11, P-T12); filled values written with their appearance, checked by PF-15; scripted and XFA forms detected and named, never run (P-T1) | Partly: standard forms in v1, other readers' display proven only by PF-15's appearance check; XFA forms v1 does not (none planned, Q7) |
+| 8 | Having to upload private documents to web tools | forum threads on local-only PDF tools: 791 / 182, 522 / 185 ("office networks block the upload sites"), 507 / 231; a tracking-pixel complaint in an open-source toolbox | https://news.ycombinator.com/item?id=43880962 ; https://news.ycombinator.com/item?id=37110628 | Everything happens on the Mac: v1 makes no network call, enforced by a test that fails on any network API in Folio's sources (`FolioNoNetworkTests`, W0); OCR on device (P-T27); future features that use the local network (F5) ask first | Fixed in v1 |
+| 9 | Copied text comes out garbled: broken lines, ligatures, hyphens, columns | "Can't copy text from a PDF": 461,920 views; "copy without losing formatting": 398,921; "garbled text when copy-pasting": 234,023; forum threads on why text extraction is hard: 733 / 342 | https://superuser.com/questions/47462 ; https://superuser.com/questions/137824 | Copy joins lines inside a paragraph, spells ligatures out, joins a word split by a soft hyphen at a line end, keeps a hard hyphen before a lowercase continuation (`TextSelecting.copyText`, proof test; P-T5); scans get text from OCR (P-T27) | Partly: multi-column reading order v1 does not (F2's structure later); a hard hyphen that should vanish ("exam-|ple") stays |
+| 10 | No dark or night reading mode; eye strain | a vendor forum thread on night mode: 279,436 views; "adjust PDF contrast": 394,273; the Mac Q&A site: 132,875 | https://superuser.com/questions/117521 ; https://apple.stackexchange.com/questions/317845 | View > Page Colors > Dark shows each page with its lightness inverted and hues kept, the file unchanged (P-T32, reader) | Fixed in v1 |
+| 11 | Interface overhauls, AI pop-ups and upgrade nags that can't be turned off | a vendor forum thread on reverting the new interface: 164,081 views; "turn off the AI assistant box": 17,336 views; "disable the upgrade prompt", 32 👍 in an open-source toolbox (https://github.com/Stirling-Tools/Stirling-PDF/issues/2974) | https://community.adobe.com/questions-9/acrobat-2023-how-to-revert-to-classic-gui-user-interface-1285215 ; https://community.adobe.com/questions-12/how-to-turn-off-ask-ai-assistant-box-at-bottom-of-window-1505991/index1.html | No upsell anywhere; no assistant panel; future AI features (F1) appear only when the person invokes them from a menu; the window follows the suite's one shell, which changes only with the captain (10.1 call 11) | Fixed in v1 |
+| 12 | Signatures don't move between Macs, can't be imported or exported, look pixelated; no certificate signing | "export my signature to another Mac": 185,125 views; "extract an image of my signature": 51,569; "import signature from image": 18,590; certificate signatures: a browser viewer's most-reacted issue | https://apple.stackexchange.com/questions/74950 ; https://apple.stackexchange.com/questions/348011 ; https://github.com/mozilla/pdf.js/issues/1076 | Drawn signatures kept as vector strokes, typed ones as text, pictures trimmed (P-T21, `Signing.make(picture:)`); Markup > Sign ▸ Export Signatures… and Import Signatures… write and read the library as one file and merge by id (`Signing.exportLibrary`, `importLibrary`, proof test, P-J6); certificate signatures (P-T31, CP-6) | Partly: portable library fixed; certificate signing Later |
 | 13 | Password and permission confusion: an owner password blocks marking up, a known password can't be removed | "remove a usage restriction": 219,318 views; "removing the password": 61,340; "without the owner password you do not have permission to annotate": 32,986 | https://superuser.com/questions/616844 ; https://apple.stackexchange.com/questions/441130 | Messages that name which password is needed and why ("The owner of this PDF doesn't allow…"; "Changing this PDF's restrictions needs its owner password…"); removing an open password you know is one Save As (P-T20, PF-6) | Partly: lifting owner restrictions without the owner password v1 does not, by design |
 | 14 | Compression doesn't shrink the file, or makes it worse or blurry | "decrease PDF size without losing quality": 113,529 views; "compress with adjustable ratio": 34,248; vendor forum threads on files that grew after compressing | https://apple.stackexchange.com/questions/297417 ; https://apple.stackexchange.com/questions/33702 | Reduce File Size shows the measured result before keeping it, never writes a larger file, never overwrites the original (P-T22, PF-11) | Partly: a quality slider needs CP-7 (Later, Q9) |
-| 15 | No OCR: scans can't be searched or copied | "extract text with OCR": 72,911 views; "make an existing PDF searchable": 54,397; "batch OCR": 40,320 | https://superuser.com/questions/28426 ; https://apple.stackexchange.com/questions/76471 | Recognize Text on device, kept as an invisible text layer, findable and copyable (P-T27, PF-8, PF-9) | Fixed in v1 (one document at a time; batch Later) |
+| 15 | No OCR: scans can't be searched or copied | "extract text with OCR": 72,911 views; "make an existing PDF searchable": 54,397; "batch OCR": 40,320 | https://superuser.com/questions/28426 ; https://apple.stackexchange.com/questions/76471 | Recognize Text on device, kept as an invisible text layer, findable and copyable (P-T27, PF-8, PF-9) | Partly: one document at a time in v1; batch OCR across files Later |
 
 Just below the top 15 (research.md F): search that misses text or stops
 working (45,628 views; fixed by Find over Folio's own page text and OCR,
-P-T6, P-T27); printing at the wrong scale (55,962 views; the print sheet
-offers Actual Size, Fit and Shrink to Fit, Apple docs: PDFPrintScalingMode,
-P-T25); not reopening at the last page, no tabs (69,268 and 42,223 views;
-Later, P-T32, P-T33); autosave overwriting the original (the platform forum;
+P-T6, P-T27); printing at the wrong scale (55,962 views; an
+accessory in the print panel offers Actual Size, Fit and Shrink to Fit,
+P-T25); not reopening at the last page (42,223 views; Later, P-T43) and no
+tabs (21,726 views; Later, P-T33); autosave overwriting the original (the platform forum;
 fixed: Folio saves only on Save, P-T18); free web tools capped by size or
 count (fixed: no caps beyond the 2 GB file limit).
 
-**What the list changed in this blueprint:** PF-15 (every mark written with
-an appearance stream) and PF-16 (an unedited save keeps the text, adds no
-password and grows at most 10%) in section 8; ligature and soft-hyphen
-cleanup in `TextSelecting.copyText` with its test; Signatures > Export… and
-Import… in P-T21; call 11 in section 10.1 (no upsell, no account, no
-network, no unasked AI).
+**What the list changed in this blueprint:** PF-15 (every mark and filled
+field saved with an appearance stream) and PF-16 (an unedited save keeps
+passwords, restrictions and text and grows at most 10%) in section 8, both
+in core-loop; Save keeping the passwords a file was opened with
+(`FolioWriteOptions.keeping`); copy cleanup in `TextSelecting.copyText` with
+its test; signature library export and import (P-T21, P-J6); dark pages in
+v1 (P-T32); `FolioNoNetworkTests`; call 11 in section 10.1.
 
 Checklist:
 
@@ -300,7 +301,7 @@ reason; its context is small, so long PDFs are answered from retrieved
 passages; answers must always cite their lines (a quote that isn't on the
 page is refused). Prompt regression tests per OS release.
 
-### F2 Accessible by default: tagged PDFs on save (tier 2 when its law bites, Later)
+### F2 Accessible by default: tagged PDFs on save (tier 2, first after v1)
 
 **What the person does.** Saves or exports and gets a tagged PDF (headings,
 reading order, alt text, table headers) that a screen reader can follow,
@@ -310,7 +311,11 @@ image's alt text, a heading level).
 **Why soon.** The European Accessibility Act applies from 2025-06-28; the
 US rule for state and local governments (WCAG 2.1 AA, PDFs and online forms
 named in scope) now applies from 2027-04-26 and 2028-04-26 after its
-2026-04-20 extension; the PDF/UA-2 standard (ISO 14289-2:2024) was published
+2026-04-20 extension. The first is in force: it covers the documents and
+services of banking, e-commerce and e-books rather than a desktop PDF tool
+as such, but the people who make those documents use tools like this one
+today, so F2 is tier 2 now, and the first future feature to schedule after
+v1; the PDF/UA-2 standard (ISO 14289-2:2024) was published
 2024-03-13. More than one in four US adults has a disability.
 
 **Possible now.** CoreGraphics writes tagged PDFs (Apple docs:
@@ -369,10 +374,13 @@ signer for the signature and its timestamp (Apple docs: CMSEncoder,
 CMSEncoderSetHasDetachedContent, CMSEncoderCopySignerTimestamp); long-term
 validation by document timestamps (PAdES B-LTA).
 
-**Waits on.** CP-2 and CP-6 (incremental save, signature placeholder) plus
+**Waits on.** Whether the CMS signer can request a trusted timestamp is
+unconfirmed (it can read one), so long-term validity may need its own
+timestamp client; CP-2 and CP-6 (incremental save, signature placeholder) plus
 new CorePDF items for the validation dictionary and document timestamp; a
-signing certificate on the C2PA trust list, which has a cost and an
-enrolment (Q10).
+signing certificate trusted by content-credential checkers; the interim
+trust list was frozen on 2026-01-01 and its successor's enrolment rules
+are not settled (Q10).
 
 ### F5 Review together on the same network, no account (tier 3, Later)
 
@@ -381,8 +389,10 @@ same network (or nearby, with peer-to-peer Wi-Fi) joins after accepting a
 pairing code; both see each other's marks and cursors live; working offline
 and reconnecting merges the marks without conflicts. No server, no sign-up.
 
-**Why soon.** Local-first software (fast, offline, private, owned by the
-person) has a published research agenda since 2019 that names conflict-free
+**Why soon.** No dated shift of its own: it rests on F1's privacy driver
+(2024: organizations limiting what data leaves them). Local-first software
+(fast, offline, private, owned by the person) has a published research
+agenda since 2019 that names conflict-free
 replicated data types as the way to merge edits; the same privacy pressure
 as F1 applies. Demand evidence is weak (research.md G); this is the most
 speculative item.
@@ -391,7 +401,9 @@ speculative item.
 and connection with Bonjour and QUIC with mutual TLS (Apple docs:
 NetworkListener, NetworkBrowser, NetworkConnection, macOS 26; TN3213 says to
 use these rather than Multipeer Connectivity, which Xcode 27 deprecates);
-Wi-Fi Aware for paired devices. Folio's marks are already values in the
+(Wi-Fi Aware, the framework for paired peer-to-peer Wi-Fi, is iOS and
+iPadOS only, so the Mac path is Bonjour over the Network framework).
+Folio's marks are already values in the
 Model (section 4), which is what a merge needs.
 
 **Waits on.** A conflict-free merge for marks and field values (FolioModel
@@ -412,8 +424,8 @@ platform now lets apps expose their content to the system assistant.
 **Possible now.** On-device speech to text (Apple docs: SpeechAnalyzer,
 SpeechTranscriber, macOS 26), mapping a sentence to typed field values
 (Generable), exposing documents and fields to the system assistant and
-Shortcuts (Apple docs: App Intents, IndexedEntity), speech output
-(AVSpeechSynthesizer, section 1.5).
+Shortcuts (Apple docs: App Intents, IndexedEntity), speech output (Apple
+docs: AVSpeechSynthesizer).
 
 **Waits on.** A reliable reading order, which F2's tags give.
 
@@ -423,10 +435,10 @@ Shortcuts (Apple docs: App Intents, IndexedEntity), speech output
 their language, each paragraph in its own place and size, and switches
 back; copies the translated text.
 
-**Why soon.** Three in four consumers prefer information in their own
-language (a 2020 survey of 8,709 people in 29 countries); documents now
-cross languages daily, and uploading them to translate them is the same
-privacy problem as F1.
+**Why soon.** It rests mainly on F1's privacy driver (2024): uploading a
+document to translate it is the same problem. Behind it, three in four
+consumers prefer information in their own language (a 2020 survey of 8,709
+people in 29 countries).
 
 **Possible now.** On-device translation with batches and styled text
 (Apple docs: TranslationSession, init(installedSource:target:),
@@ -461,12 +473,12 @@ signature, never instead; F4's CorePDF work.
 | # | Feature | Tier | Driver (date) | Possible now through | Waits on |
 |---|---|---|---|---|---|
 | F1 | Ask the document, on the Mac | 3 | workplace AI use vs. data bans (2024 surveys) | SystemLanguageModel, Generable, RecognizeDocumentsRequest | model availability; cited answers |
-| F2 | Accessible by default (tagged PDFs) | 2 when due, else 3 | EAA 2025-06-28; US rule 2027-04-26; PDF/UA-2 2024 | CGPDFContextBeginTag; Vision structure | CorePDF tag writer and checker |
+| F2 | Accessible by default (tagged PDFs) | 2 (first after v1) | EAA 2025-06-28; US rule 2027-04-26; PDF/UA-2 2024 | CGPDFContextBeginTag; Vision structure | CorePDF tag writer and checker |
 | F3 | E-invoices you can read and make | 3 (2 for EU business) | Germany 2025/2027/2028; France 2026-09-01; ViDA 2030 | kCGPDFContextCreatePDFA; Vision | CorePDF embedded files; schema licences |
 | F4 | Provenance you can check | 3 | EU AI Act Art. 50 2026-08-02; C2PA 2.2 | C2PA PDF embedding; CMSEncoder; PAdES B-LTA | CP-2, CP-6, timestamps; a trust-listed certificate |
-| F5 | Review together, no account | 3 | local-first agenda (2019); privacy | NetworkListener, NetworkBrowser, NetworkConnection, Wi-Fi Aware | merge of marks; pairing |
-| F6 | Fill and read by voice | 3 | accessibility law; 12% mobility disability | SpeechAnalyzer, App Intents, AVSpeechSynthesizer | F2's reading order |
-| F7 | Translate in place | 3 | own-language preference (2020 survey) | TranslationSession | text fitting; RTL |
+| F5 | Review together, no account | 3 | rests on F1's privacy driver (2024); local-first agenda (2019) | NetworkListener, NetworkBrowser, NetworkConnection (macOS 26) | merge of marks; pairing |
+| F6 | Fill and read by voice | 3 | EAA 2025-06-28; 12.2% of US adults with a mobility disability (CDC, 2024-07-15) | SpeechAnalyzer, App Intents, AVSpeechSynthesizer | F2's reading order |
+| F7 | Translate in place | 3 | rests on F1's privacy driver (2024); own-language preference (2020 survey) | TranslationSession | text fitting; RTL |
 | F8 | Signatures that outlive today's cryptography | 3 | NIST IR 8547 draft 2030/2035; VC 2.0 2025 | CryptoKit ML-DSA | a PDF profile for post-quantum signatures |
 
 How these shape v1 without being in it: the document is already a value
@@ -526,12 +538,12 @@ and saves files every other reader opens.
 
 | Area | In v1 | Out of v1 (later, in order) |
 |---|---|---|
-| Open and read | Open from Finder, File > Open, drop, Open Recent; locked files ask for the password; damaged and non-PDF files refused with a sentence; continuous, single page, two pages; zoom in, out, actual size, fit width, fit page; thumbnails, go to page, back and forward; read-only outline navigation; document info | Tabs; split view; remembering the last position per file; dark or inverted reading; read aloud |
+| Open and read | Open from Finder, File > Open, drop, Open Recent; locked files ask for the password; damaged and non-PDF files refused with a sentence; continuous, single page, two pages; zoom in, out, actual size, fit width, fit page; thumbnails, go to page, back and forward; read-only outline navigation; document info; dark pages | Tabs; split view; remembering the last position per file; read aloud |
 | Make | New from Images (and scans from an iPhone through Continuity Camera) | New blank document with templates |
 | Find and copy | Find with every match highlighted, a results list, Match Case, Whole Words; select text by drag, double-click a word, copy | Find and replace (needs text editing) |
 | Mark up | Highlight, underline, strike out, notes, comments on any mark, text boxes, pen, rectangle, ellipse, line, arrow; colour, line width, opacity; move, resize, delete; a marks list | Stamps, measurements, comment replies and authors, import and export of comments |
 | Forms | Fill text, checkbox, radio, choice fields; Tab order; required-field check; Clear Form; scripts detected and named | Authoring form fields; calculated fields |
-| Sign | Draw, type or pick a picture; initials; a library kept between launches; place anywhere or fit into a signature field | Certificate signatures and checking them (CP-6) |
+| Sign | Draw, type or pick a picture; initials; a library kept between launches, exported and imported as one file; place anywhere or fit into a signature field | Certificate signatures and checking them (CP-6) |
 | Pages | Page grid; reorder by drag; rotate; delete; insert blank; insert from file (combine); combine several files at once; extract a range; split; crop | Page labels; pages per sheet; replace page |
 | Edit | Add text boxes and images; **conditional:** edit one line of existing text in place and true redaction, in v1 only if creative-core CP-1 to CP-5 land in time (W4), otherwise v1.1 | Paragraph reflow (not planned); find-and-redact patterns |
 | Undo | every edit one named step, 100 steps; typing in a field and a drag each coalesce into one | History panel |
@@ -632,7 +644,8 @@ n." under the Go to Page field for a number out of range.
 **P-T5 Select and copy text** (tier 1, row 13; `markup`, P-J3). Text
 Select (T) or the default Select tool over text: drag to select, double-click
 a word, triple-click a line, ⌘A selects all text on the page, ⌘C copies it
-as plain text with line breaks joined inside paragraphs. *Empty:* on a page
+as plain text with line breaks joined inside paragraphs, ligatures spelled
+out and words split by a hyphen at a line end joined (`TextSelecting.copyText`). *Empty:* on a page
 with no text layer, the tool's help reads "This page has no text to select.
 Recognize text first." with Recognize… (P-T27). *Hand-offs out:* plain text
 on the general pasteboard for any app.
@@ -842,7 +855,9 @@ image in Photo (suite hand-off; the page is rendered at 300 ppi).
 system print panel with Folio's page range, scaling (fit, actual size) and
 auto-rotate (Apple docs: PDFDocument.printOperation); the scaling is the
 person's choice of Actual Size, Fit or Shrink to Fit (Apple docs:
-PDFPrintScalingMode), shown in the panel, defaulting to Actual Size. Booklets and pages
+PDFPrintScalingMode), shown as an accessory in the print panel that
+`FolioPrinting.swift` adds (Apple docs: NSPrintPanel
+addAccessoryController(_:)), defaulting to Actual Size. Booklets and pages
 per sheet are Later.
 
 **P-T27 Recognize text (OCR)** (tier 2, row 20 and 1.4; `ocr`, P-J20). On
@@ -869,6 +884,13 @@ drops marks and fields there, optionally strips metadata, and saves to a
 new file; then reopens it and checks that no removed text can be found
 (PF-13). Never a black box over live text. Needs CP-1 to CP-4.
 
+**P-T32 Dark pages** (tier 2: 1A pain point 10, with 279,436 and 394,273
+views, above several tier-1 rows' Q&A numbers; `reader`, P-J1). View > Page
+Colors > Normal or Dark: Dark shows each page with its lightness inverted
+and its hues kept, drawn by the page view (the file and exports unchanged);
+the choice is the window's and Folio remembers it. Page pictures are never
+cached inverted, so switching is instant. *Empty, error, loading:* as P-T2.
+
 ### 3.3 Tier 3
 
 **P-T26 Document properties** (tier 3, row 29; cheap, so in v1;
@@ -881,7 +903,7 @@ Later, in the order they would come, each with its evidence:
 | # | Feature | Tier | Evidence | Needs |
 |---|---|---|---|---|
 | P-T31 | Certificate signatures and checking them | 2 | row 21 (142 👍) | CP-2, CP-6, the macOS Security framework's CMS encoder and decoder |
-| P-T32 | Dark and inverted reading; remember the last position; default zoom | 3 | rows 31; research.md B (15 👍, 34 CC) | – |
+| P-T43 | Remember the last position per file; default zoom | 3 | research.md B (15 👍, 34 CC); 1A just below the top 15 (42,223 views) | the suite's recents (last page stored with each recent) |
 | P-T33 | Tabs and side-by-side documents | 3 | row 32 | SuiteUI |
 | P-T34 | Compare two versions (text differences, side by side) | 3 | row 25 | a text diff in FolioModel |
 | P-T35 | Stamps: page numbers, Bates numbers, watermark, header and footer | 3 | row 28 | – |
@@ -927,7 +949,8 @@ Later, in the order they would come, each with its evidence:
 | P-T28 Edit text in place (content-edit) | 2 | conditional | P-J25 |
 | P-T29 Redact (content-edit) | 2 | conditional | P-J26 |
 | P-T30 No dead controls (foundation) | 1 | yes | P-J12 |
-| P-T31 to P-T42 | 2-3 | Later | – |
+| P-T32 Dark pages (reader) | 2 | yes | P-J1 (Page Colors step) |
+| P-T31, P-T33 to P-T43 | 2-3 | Later | – |
 
 Checklist:
 
@@ -1163,13 +1186,13 @@ Drags use page points mapped through `folio.page.<n>`'s frame and the zoom
 | # | Test (file, feature) | Launch | Steps (each one shot, `folio-<step>`) | Asserts |
 |---|---|---|---|---|
 | P-J0 | `testLaunchShowsWindowShell` (`FolioJourneyTests.swift`, foundation) | none | launch | `expectWindowShell()`; the empty state "No PDF Open" with Open… and Create from Images…; the inspector "No Selection"; the switcher row's Folio item current and disabled "You're in Folio." once the suite wires it (until then every switcher item is disabled with its reason); every audit count 0 |
-| P-J1 | `testOpenAndRead` (`+Read`, reader) | `-FolioWriteSample letter <tmp>/Lease.pdf`, then `-FolioOpenFile <tmp>/Lease.pdf` | open; ⌥⌘2 Continuous; scroll to the end; ⌥⌘G, type 2, Return; ⌘1 Actual Size; ⌘+ twice; ⌘9 Fit Width; click thumbnail 3; ⌥⌘3 Two Pages; open the Outline section, click "Signatures"; ⌘[ Back; quit, relaunch with no file, File > Open Recent > Lease | title "Lease"; `folio.page.1` value starts "Page 1 of 3, Letter"; the page pill reads "Page 3 of 3" at the end, "Page 2 of 3" after Go to Page 2; zoom pill "100%", then "150%"; after Fit Width the page's frame matches PL2; page 3 at the top after the thumbnail click (W0's thumbnails); two pages side by side (frames of page 1 and 2 share a top); the outline lists Agreement, Deposit and pets, Signatures and clicking Signatures puts page 3 at the top; Back returns to the page before; Open Recent lists "Lease" first and reopens it |
+| P-J1 | `testOpenAndRead` (`+Read`, reader) | `-FolioWriteSample letter <tmp>/Lease.pdf`, then `-FolioOpenFile <tmp>/Lease.pdf` | open; ⌥⌘2 Continuous; scroll to the end; ⌥⌘G, type 2, Return; ⌘1 Actual Size; ⌘+ twice; ⌘9 Fit Width; click thumbnail 3; ⌥⌘3 Two Pages; open the Outline section, click "Signatures"; ⌘[ Back; View > Page Colors > Dark, then Normal; quit, relaunch with no file, File > Open Recent > Lease | title "Lease"; `folio.page.1` value starts "Page 1 of 3, Letter"; the page pill reads "Page 3 of 3" at the end, "Page 2 of 3" after Go to Page 2; zoom pill "100%", then "150%"; after Fit Width the page's frame matches PL2; page 3 at the top after the thumbnail click (W0's thumbnails); two pages side by side (frames of page 1 and 2 share a top); the outline lists Agreement, Deposit and pets, Signatures and clicking Signatures puts page 3 at the top; Back returns to the page before; Page Colors sets the `folio.pageview` value to "Dark" and back to "Normal"; Open Recent lists "Lease" first and reopens it |
 | P-J1b | `testGoToPageLabel` (`+Read`, reader) | `letter` (fake: pages labelled i, ii, iii) | ⌥⌘G, type ii, Return; ⌥⌘G, type x, Return | page 2 at the top; "x" refused with "No page is labelled x." under the field. Fixture mode only: PDFKit reads page labels but can't write them (Apple docs: PDFPage.label is get-only), so the sample writer can't make a labelled live file; live label reading is checked when CorePDF can write a fixture (CP-2) |
 | P-J2 | `testFindText` (`+Find`, find) | `letter` | ⌘F; type "first day"; Return; Return; ⌘G; Match Case on, type "FIRST"; Escape | "1 of 2" then "2 of 2" then wraps "1 of 2"; the sidebar RESULTS list has 2 rows with "p. 1" and their context; with Match Case "No results" and the field's help "No matches for FIRST."; Escape closes the bar and keeps the page where the last hit was |
 | P-J3 | `testSelectCopyAndMark` (`+Markup`, markup) | `letter` | press T; drag across "RESIDENTIAL LEASE" on page 1; ⌘C; double-click "LEASE"; triple-click line 2; ⌘A; click away; drag across "RESIDENTIAL LEASE", Markup > Highlight; press U and drag line 3; press K and drag line 4; click the highlight; set colour Green in the inspector; type a comment "Check name"; select the strike-out, Delete | the general pasteboard (read by the test) holds "RESIDENTIAL LEASE"; the selection reads "LEASE", then line 2's text, then all four lines (the `folio.selection` value); page 1's value gains "marks: highlight", then "marks: highlight, underline, strike-out", then "marks: highlight, underline"; Edit menu "Undo Highlight", "Undo Underline", "Undo Strike Out", "Undo Change Color", "Undo Comment", "Undo Delete" (W0's undo) |
 | P-J4 | `testNotesTextBoxPenShape` (`+Annotate`, markup) | `letter` | N, click page 1 at the margin, type "Ask about parking", Escape; X, click, type "Initial here", Escape; set its font size to 18 in the inspector; P, draw a stroke; R, drag a rectangle; set line width 4; V, drag the note 40 pt down; ⌘Z; with the note selected press → twice and Shift-↓; X, click, Escape | page value "marks: note, text box, ink, rectangle"; the note's popover holds the text; the text box shows "Initial here" at 18 pt (inspector row); after the drag the note's frame moved by 40 pt × zoom; ⌘Z puts it back ("Undo Move Note"); the arrows move it 2 pt right and 10 pt down; the empty text box is not created and the help reads "Type some text for the text box." |
 | P-J5 | `testFillForm` (`+Forms`, forms) | `form` | click Name; type "Ada Lovelace"; Tab; type "ada@example.com"; Tab (to the Plan group); → (Plus); Tab (to Agree to terms); Form > Check Form; Space; Form > Check Form; Form > Clear Form; ⌘Z | after typing, `folio.field.name` value "Ada Lovelace"; Tab order Name → Email → Plan → Agree to terms (the signature field is never a Tab stop); → picks Plus and clears Basic; the first Check Form reads "1 required field is empty: Agree to terms" with a warning outline and triangle on it, the second "All required fields are filled."; Clear empties all; Edit menu "Undo Clear Form" restores them; typing in Name was one step "Undo Typing"; `scripted` (second launch) shows the banner "This form has scripts Folio doesn't run. Check calculated fields before sending." |
-| P-J6 | `testSignDocument` (`+Sign`, sign) | `form` with `-FolioSignaturesDir <tmp>` and `-FolioPickFile` a PNG of dark ink on white | press S; New Signature…; Done (pad empty); Draw two strokes on the pad; Done; click inside the Signature field; drag the signature's corner handle; press S, New Signature…, Type, "A.L.", Save as initials on, Done; click near the bottom margin; press S, New Signature…, Image, pick, Done; quit; relaunch with the same `-FolioSignaturesDir`; press S | the empty pad's Done is disabled with help "Draw your signature in the box first."; placed inside the field, fitted and centered (its frame inside `folio.field.signature`'s); resize keeps the aspect within 1%; initials placed where clicked at 72 pt wide; the picture signature appears in the library trimmed to its ink; after relaunch the library still lists all three |
+| P-J6 | `testSignDocument` (`+Sign`, sign) | `form` with `-FolioSignaturesDir <tmp>` and `-FolioPickFile` a PNG of dark ink on white | press S; New Signature…; Done (pad empty); Draw two strokes on the pad; Done; click inside the Signature field; drag the signature's corner handle; press S, New Signature…, Type, "A.L.", Save as initials on, Done; click near the bottom margin; press S, New Signature…, Image, pick, Done; Markup > Sign ▸ Export Signatures… (`-FolioExportTo <tmp>/sigs`); quit; relaunch with the same `-FolioSignaturesDir`; press S; quit; relaunch with an empty `-FolioSignaturesDir` and `-FolioPickFile <tmp>/sigs/Signatures.foliosig`; Markup > Sign ▸ Import Signatures…; press S | the empty pad's Done is disabled with help "Draw your signature in the box first."; placed inside the field, fitted and centered (its frame inside `folio.field.signature`'s); resize keeps the aspect within 1%; initials placed where clicked at 72 pt wide; the picture signature appears in the library trimmed to its ink; after relaunch the library still lists all three; the export wrote one file; on the empty library, Import brings back the three (merged by id); importing a text file instead says "That file isn't a Folio signature library." |
 | P-J7 | `testOrganizePages` (`+Pages`, pages) | `letter` | ⌥⌘4 Page Grid; click page 3; ⌘R; drag page 3 before page 1; select page 1, ⌥⌘→ (moves it right); select page 2, Shift-click page 3; Page > Delete Page; ⇧⌘B; Page > Crop Pages… with 36 pt margins on page 1, Crop; ⌘Z four times | rotated: page 3 value "rotated 90°"; order (by the `folio.thumb.n` values) 3, 1, 2 after the drag, then 1, 3, 2 after ⌥⌘→; after delete 1 page left, and selecting every page then ⌘⌫ shows "A PDF needs at least one page…" and changes nothing; a blank Letter page appended; page 1's value reads "cropped 540 × 720"; each ⌘Z names "Undo Crop", "Undo Insert Page", "Undo Delete Pages", "Undo Move Page" |
 | P-J8 | `testCombineExtractSplit` (`+Combine`, pages) | `-FolioWriteSample letter <tmp>/Lease.pdf`, `-FolioWriteSample form <tmp>/Application.pdf`, then `-FolioOpenFile <tmp>/Lease.pdf` with `-FolioPickFile <tmp>/Application.pdf`, `-FolioPickFiles <tmp>/Lease.pdf,<tmp>/Application.pdf` and `-FolioExportTo <tmp>/out` | Page > Insert from File…, at End; Page > Extract Pages…, type "5", then "2-3", Extract; File > Combine Files… (`-FolioPickFiles` both files), Combine; in the combined window Page > Split…, after page 3, Split | 4 pages; page 4's value lists its fields ("fields: name=, email=, …"); the Extract sheet refuses "5" with "This document has pages 1 to 4." under the field; a new window "Lease (pages 2–3)" with 2 pages; the original unchanged; a new window "Combined" with 4 pages (Lease then Application); Split writes `Combined (part 1).pdf` (3 pages) and `Combined (part 2).pdf` (1 page) into `<tmp>/out` |
 | P-J9 | `testUndoRedoEveryEdit` (`+History`, core-loop) | `form` | type in Name; highlight a line; rotate page 1; ⌘Z ×3; ⇧⌘Z ×3; scroll and zoom between | Edit menu names each step in order and back; scroll and zoom add no step; with nothing left Undo is disabled with "Nothing to undo." (undo itself is W0's, proven step by step in every feature's journey; this journey crosses three features, so it runs after them) |
@@ -1202,7 +1225,7 @@ Drags use page points mapped through `folio.page.<n>`'s frame and the zoom
 |---|---|---|---|---|
 | P-J20 | `testRecognizeScan` (`+OCR`, ocr) | `scan` | open; the warning pill "No text: Recognize…"; Tools > Recognize Text…, English, Recognize; ⌘F "total"; T, double-click "TOTAL"; ⌘Z; ⇧⌘Z; ⌘S and reopen | progress "Page n of 2"; afterwards the pill reads "Text recognized" and page 1's value ends "text: recognized"; Find gets 1 hit on page 1; the selection reads "TOTAL"; ⌘Z names "Undo Recognize Text" and page 1 reads "text: none" again, ⇧⌘Z brings it back; after save and reopen the text is still there (PF-9) |
 | P-J21 | `testExportPagesAndText` (`+Export`, export-convert) | `letter` with `-FolioExportTo <tmp>` | File > Export…, PNG, 150 ppi, Pages 1-2, Export; again as Text; again as a word-processing document | 2 files `Lease-1.png`, `Lease-2.png` of 1275 × 1650; `Lease.txt` with every line; `Lease.docx` exists and is non-empty; success line with Reveal in Finder |
-| P-J24 | `testPrint` (`+Print`, export-convert) | `letter` | ⌘P; Cancel | the system print panel appears with 3 pages; Cancel returns with no change |
+| P-J24 | `testPrint` (`+Print`, export-convert) | `letter` | ⌘P; Cancel | the system print panel appears with 3 pages and Folio's Scaling accessory reading "Actual Size"; Cancel returns with no change |
 | P-J25 | `testEditLineInPlace` (`+ContentEdit`, content-edit; conditional) | `-FolioSample letter` | E; click "2. Rent."'s line; change "first" to "fifth"; Escape; ⌘S; reopen | the line reads "…due on the fifth day." in the same font (the page value names the font); Find "first day" finds 1 (page 1 line 3 only); a character missing from the font names itself in the help |
 | P-J26 | `testRedactAndVerify` (`+ContentEdit`, content-edit; conditional) | `-FolioSample letter`, `-FolioSaveTo <tmp>/Redacted.pdf` | D; drag over "Landlord" on page 1; Tools > Apply Redactions…, Apply; open Redacted.pdf; ⌘F "Landlord" | the sheet lists "1 area on page 1"; the new file has no hit for "Landlord" on page 1 (page 3 still has its own); copying the area yields no text (PF-13) |
 
@@ -1328,7 +1351,7 @@ a `struct` the window keeps in `@State` (Halo's `HaloProject` pattern).
 | `Workspace/FolioWorkspace+Forms.swift` (forms) | `focusField(_:)`, `focusNextField(backward:)`, `setField(_:to:)` (coalesced per field), `checkForm() -> [FolioFieldID]`, `clearForm()`, `var focusedField: FolioFieldID?`, `var formBanner: String?` |
 | `Workspace/FolioWorkspace+Sign.swift` (sign) | `beginSignatures()`, `finishSignatures(_: [FolioSignature])`, `addSignature(strokes:isInitials:) throws(FolioEditError)`, `addSignature(typed:isInitials:) throws(FolioEditError)`, `addSignature(picture: FolioBitmap, isInitials:) throws(FolioEditError)`, `removeSignature(_:)`, `exportSignatures() -> Data` (the library as JSON), `importSignatures(_: Data) throws(FolioEditError)` (merges by id; a file that isn't a library is refused with "That file isn't a Folio signature library."), `chooseSignature(_:)`, `placeSignature(at:on:)`, `var signatures: [FolioSignature]`, `var signaturesToSave: [FolioSignature]?` |
 | `Workspace/FolioWorkspace+Pages.swift` (pages) | `selectPages(_:extending:)`, `rotateSelectedPages(clockwise:)`, `deleteSelectedPages()`, `moveSelectedPages(to:)`, `nudgeSelectedPages(by:)`, `insertBlankPage()`, `beginInsert(at:)`, `finishInsert(_: Result<FolioOpened, FolioOpenError>)`, `extract(range:) throws(FolioEditError) -> FolioDocumentState`, `split(after:) throws(FolioEditError) -> [FolioDocumentState]`, `beginCombine()`, `finishCombine(_: [Result<FolioOpened, FolioOpenError>]) -> FolioDocumentState?` (skipped files go to the refusal sentence), `cropSelectedPages(to:)`, `var selectedPages: [FolioPageID]` |
-| `Workspace/FolioWorkspace+Files.swift` (files) | `beginSave(options:)`, `finishSave(_: Result<Data, FolioWriteError>, name:path:)`, `var saveState: FolioSaveState` (`edited`, `saved`, `failed(String)`), `setTitle(_:)`, `setAuthor(_:)` |
+| `Workspace/FolioWorkspace+Files.swift` (files) | `var passwords: FolioPasswords` (from opening, kept here, never in the document value; Save writes with `.keeping(passwords)`, Save As with what the sheet sets), `beginSave(options:)`, `finishSave(_: Result<Data, FolioWriteError>, name:path:)`, `var saveState: FolioSaveState` (`edited`, `saved`, `failed(String)`), `setTitle(_:)`, `setAuthor(_:)` |
 | `Workspace/FolioWorkspace+Export.swift` (export-convert) | `beginNewFromImages()`, `finishNewFromImages(_: Result<FolioOpened, FolioOpenError>)` (`skipped` names go to the sheet), `beginExport(_: FolioExportRequest)`, `exportProgress(page:)`, `finishExport(_:)`, `cancelExport()`, `beginReduce()`, `finishReduce(original: Int, reduced: Int)` (byte counts; not smaller → nothing written) |
 | `Workspace/FolioWorkspace+OCR.swift` (ocr) | `var pagesWithoutText: [FolioPageID]`, `beginRecognize(pages:languages:)`, `didRecognize(_: FolioPageText, for:)` (stores it in `FolioPage.recognizedText` through `edit("Recognize Text", coalesceKey: "ocr")`, so one run is one undo step), `finishRecognize(_: FolioRecognizeError?)` |
 
@@ -1418,7 +1441,12 @@ public protocol TextSelecting: Sendable {
     /// The whole line under the point (triple-click), or an empty selection.
     func line(at point: FolioPoint, on page: FolioPageID, text: FolioPageText) -> FolioTextSelection
     /// The selection as copied text: lines inside a paragraph joined with a
-    /// space, a line break after each paragraph.
+    /// space, a line break after each paragraph, typographic ligatures
+    /// (U+FB00 to U+FB06) spelled out as letters. A line that ends in a soft
+    /// hyphen joins the next with neither hyphen nor space ("re-|view" →
+    /// "review"); one that ends in a hard hyphen before a lowercase letter
+    /// keeps the hyphen and adds no space ("e-|mail" → "e-mail"); soft
+    /// hyphens elsewhere are dropped.
     func copyText(_ selection: FolioTextSelection, text: FolioPageText) -> String
 }
 
@@ -1472,6 +1500,11 @@ public protocol Signing: Sendable {
     /// luminance at or above 0.85 become transparent, the rest is trimmed to
     /// its ink box and kept as PNG-ready RGBA. Refuses a picture with no ink.
     func make(picture: FolioBitmap, isInitials: Bool, id: FolioSignatureID) throws(FolioEditError) -> FolioSignature
+    /// The library as one file (Signatures > Export…).
+    func exportLibrary(_ signatures: [FolioSignature]) -> Data
+    /// Reads an exported library and merges it into `existing` by id (the
+    /// imported one wins). Refuses anything else with `.invalidValue`.
+    func importLibrary(_ data: Data, into existing: [FolioSignature]) throws(FolioEditError) -> [FolioSignature]
     /// Places a signature centered on `point`, `width` points wide. Inside an
     /// empty signature field it fits that field instead.
     func place(_ signature: FolioSignature, at point: FolioPoint, width: Double, on page: FolioPageID,
@@ -1598,8 +1631,7 @@ opacity, clamped), `FolioAnnotationBody` (`markup`, `note`, `freeText`,
 `FolioFieldID`, `FolioFieldKind`
 (`text(multiline:maxLength:)`, `checkbox`, `radio(group:option:)`,
 `choice(options:editable:)`, `signature`), `FolioFieldValue`,
-`FolioFormField` (with `label`), `FolioSignatureID`, `FolioSignatureKind` (`drawn`,
-`typed`, `image`), `FolioSignature`, `FolioOutlineItem`, `FolioPermissions` (with `ownerUnlocked`),
+`FolioFormField` (with `label`), `FolioSignatureID`, `FolioSignature`, `FolioOutlineItem`, `FolioPermissions` (with `ownerUnlocked`),
 `FolioScriptKind`, `FolioDocumentState` (with `author`, `scripts`),
 `FolioSkipped`, `FolioImageInput`, `FolioOpened` (with `skipped`),
 `FolioBitmap`, `FolioWriteOptions` (flatten, passwords, permissions or nil
@@ -1801,8 +1833,8 @@ checkmark or `stateError` with an exclamation and the error's sentence.
 |---|---|---|
 | File | New from Images… (⇧⌘N), Import from iPhone ▸ Scan Documents (Continuity Camera), Open… (⌘O), Open Recent ▸, Combine Files…, Close (⌘W), Save (⌘S), Save As… (⇧⌘S), Export… (⌥⌘E), Reduce File Size…, Print… (⌘P) | reader, files, pages, export-convert |
 | Edit | Undo (⌘Z), Redo (⇧⌘Z), Cut (⌘X: copies the selected marks and deletes them), Copy (⌘C: selected text as plain text, or selected marks), Paste (⌘V: marks copied from Folio land on the current page; plain text becomes a text box; an image becomes an image mark), Delete (no key equivalent; Delete is handled by the focused page view or thumbnails), Select All (⌘A: all text on the page), Find ▸ Find… (⌘F), Find Next (⌘G), Find Previous (⇧⌘G) | foundation (undo), markup (cut, copy, paste, select), find |
-| View | Single Page (⌥⌘1), Continuous (⌥⌘2), Two Pages (⌥⌘3), Page Grid (⌥⌘4), Actual Size (⌘1), Fit Page (⌘0), Fit Width (⌘9), Zoom In (⌘+), Zoom Out (⌘−), Back (⌘[), Forward (⌘]), Go to Page… (⌥⌘G), Show Sidebar (⌃⌘S), Show Inspector (⌥⌘I) | reader, pages |
-| Markup | Highlight (⌃⌘H), Underline (⌃⌘U), Strike Out (⌃⌘K), Add Note (⌃⌘N), Add Text Box (⌃⌘T), Pen, Shape ▸, Sign ▸; conditional W4: Edit Text, Redact | markup, sign, content-edit |
+| View | Single Page (⌥⌘1), Continuous (⌥⌘2), Two Pages (⌥⌘3), Page Grid (⌥⌘4), Actual Size (⌘1), Fit Page (⌘0), Fit Width (⌘9), Zoom In (⌘+), Zoom Out (⌘−), Back (⌘[), Forward (⌘]), Go to Page… (⌥⌘G), Page Colors ▸ Normal, Dark, Show Sidebar (⌃⌘S), Show Inspector (⌥⌘I) | reader, pages |
+| Markup | Highlight (⌃⌘H), Underline (⌃⌘U), Strike Out (⌃⌘K), Add Note (⌃⌘N), Add Text Box (⌃⌘T), Pen, Shape ▸, Sign ▸ (the saved signatures, New Signature…, Export Signatures…, Import Signatures…); conditional W4: Edit Text, Redact | markup, sign, content-edit |
 | Form | Next Field and Previous Field (shown with Tab and Shift-Tab in their help, no key equivalent; the focused field handles the keys), Check Form, Clear Form | forms |
 | Page | Rotate Right (⌘R), Rotate Left (⌘L), Move Left (⌥⌘←), Move Right (⌥⌘→), Insert Blank Page (⇧⌘B), Insert from File… (⇧⌘I), Delete Page (⌘⌫), Crop Pages…, Extract Pages…, Split… | pages |
 | Tools | Recognize Text…; conditional W4: Apply Redactions… | ocr, content-edit |
@@ -1929,8 +1961,8 @@ sizes with a highlight selected and the find bar open (PL1, PL4).
 |---|---|---|---|---|---|
 | PF-1 | Live `PageImaging` of a sample page `FolioSampleWriter` draws with known content: a filled square of a known colour at a known rect and a text line | the known pixels (the square's colour inside its rect, white outside) | channel ≤ 2/255 | `FolioImagingFidelityTests` (macOS) | reader |
 | PF-14 | Live `PageImaging` of a sample with a file highlight and a filled text field (written by `FolioSampleWriter+Marks` and `+Fields`) over a blank area | the blank area stays white: annotations and widgets hidden (Apple docs: PDFAnnotation.shouldDisplay), drawn only by Folio from the Model | exactly white | `FolioLoopFidelityTests` (macOS) | core-loop |
-| PF-15 | Every mark Folio saves has an appearance stream, so other readers draw it (1A, pain point 2) | the saved file reopened: each annotation's `hasAppearanceStream` (Apple docs: PDFAnnotation) | all true, for every annotation kind of P-T7 to P-T10 | `FolioAnnotationInteropTests` (macOS) | markup |
-| PF-16 | Saving an opened file with no edits (1A, pain point 3) | the original | no password added; every page's text equal (`PageTextReading`); page count equal; size within +10% | `FolioSaveIntegrityTests` (macOS, every fixture as a sample) | files |
+| PF-15 | Every mark and filled field Folio saves has an appearance stream, so other readers draw it (1A, pain points 2 and 7) | the saved file reopened: each annotation's and widget's `hasAppearanceStream` (Apple docs: PDFAnnotation) | all true, for every kind of P-T7 to P-T11 and P-T21 (signatures, pictures); a false fails and Q11 decides | `FolioAnnotationInteropTests` (macOS) | core-loop |
+| PF-16 | Saving an opened file with no edits through Save (1A, pain point 3) | the original | the same open password (`locked` still asks for "folio"), the same restrictions (`restricted` still locked), none added elsewhere; every page's text equal (`PageTextReading`); page count equal; size within +10% | `FolioSaveIntegrityTests` (macOS, every sample) | core-loop |
 | PF-2 | `PDFKitText.text(of:)` of a sample written by `FolioSampleWriter` with known strings at known points | the strings and their positions the writer used | strings exact; glyph boxes ≤ 1 pt | `FolioTextFidelityTests` (macOS) | reader |
 | PF-3 | Saved file reopened: pages, order, rotation, crop, title (files, W1, `FolioRoundTripTests`); field values, annotation kinds, rects and colours (core-loop, `FolioLoopFidelityTests`, once forms and markup map them) | the `FolioDocumentState` that was saved | exact for values; rects ≤ 0.01 pt; colours ≤ 1/255 | both (macOS, every fixture as a sample) | files, core-loop |
 | PF-4 | A page with Folio's marks drawn on screen vs the same page exported to PNG at the same scale | each other | channel ≤ 2/255, ≤ 0.5% of pixels (QB-V4: what you see is what you export) | `FolioMarksFidelityTests` (macOS) | markup, export-convert |
@@ -2032,11 +2064,11 @@ Generated by `python3 docs/blueprints/pdf/waves.py --markdown`.
 - **Waits on:** nothing
 - **Proves:** P-J0, P-J12, P-J13 (PL2, PL3, PL5); PB-1 (fake half), PB-14
 - **Estimate:** about 15 PRs, 24 agent-hours
-- **Owned files (152):** `Sources/FolioModel/Contracts/FolioValues.swift`, `Sources/FolioModel/Contracts/FolioContracts.swift`, `Sources/FolioModel/Fakes/FolioFakeFile.swift`, `Sources/FolioModel/Fakes/FakeDocumentOpening.swift`, `Sources/FolioModel/Fakes/FakePageImaging.swift`, `Sources/FolioModel/Fakes/FakePageTextReading.swift`, `Sources/FolioModel/Fakes/FakeTextFinding.swift`, `Sources/FolioModel/Fakes/FakeTextSelecting.swift`, `Sources/FolioModel/Fakes/FakeAnnotating.swift`, `Sources/FolioModel/Fakes/FakeFormFilling.swift`, `Sources/FolioModel/Fakes/FakeSigning.swift`, `Sources/FolioModel/Fakes/FakeSignatureStore.swift`, `Sources/FolioModel/Fakes/FakePageOrganizing.swift`, `Sources/FolioModel/Fakes/FakeDocumentHistory.swift`, `Sources/FolioModel/Fakes/FakeDocumentWriting.swift`, `Sources/FolioModel/Fakes/FakePageExporting.swift`, `Sources/FolioModel/Fakes/FakeTextRecognizing.swift`, `Sources/FolioModel/Fakes/FakeDocumentSources.swift`, `Sources/FolioModel/Fixtures/FolioFixtures.swift`, `Sources/FolioModel/FolioServices.swift`, `Sources/FolioModel/FolioWorkspace.swift`, `Sources/FolioModel/FolioCommand.swift`, `Sources/FolioModel/FolioTool.swift`, `Sources/FolioModel/FolioLaunch.swift`, `Sources/FolioModel/FolioLayout.swift`, `Sources/FolioModel/FolioPageSummary.swift`, `Sources/FolioModel/Fixtures/FolioFixtures+Markup.swift`, `Sources/FolioModel/Fixtures/FolioFixtures+Forms.swift`, `Sources/FolioModel/Fixtures/FolioFixtures+Files.swift`, `Sources/FolioModel/Fixtures/FolioFixtures+OCR.swift`, `Sources/FolioModel/Workspace/FolioWorkspace+Read.swift`, `Sources/FolioModel/Workspace/FolioWorkspace+Find.swift`, `Sources/FolioModel/Workspace/FolioWorkspace+Markup.swift`, `Sources/FolioModel/Workspace/FolioWorkspace+Forms.swift`, `Sources/FolioModel/Workspace/FolioWorkspace+Sign.swift`, `Sources/FolioModel/Workspace/FolioWorkspace+Pages.swift`, `Sources/FolioModel/Workspace/FolioWorkspace+History.swift`, `Sources/FolioModel/Workspace/FolioWorkspace+Files.swift`, `Sources/FolioModel/Workspace/FolioWorkspace+Export.swift`, `Sources/FolioModel/Workspace/FolioWorkspace+OCR.swift`, `Sources/FolioModel/Availability/FolioAvailability+Read.swift`, `Sources/FolioModel/Availability/FolioAvailability+Find.swift`, `Sources/FolioModel/Availability/FolioAvailability+Markup.swift`, `Sources/FolioModel/Availability/FolioAvailability+Forms.swift`, `Sources/FolioModel/Availability/FolioAvailability+Sign.swift`, `Sources/FolioModel/Availability/FolioAvailability+Pages.swift`, `Sources/FolioModel/Availability/FolioAvailability+History.swift`, `Sources/FolioModel/Availability/FolioAvailability+Files.swift`, `Sources/FolioModel/Availability/FolioAvailability+Export.swift`, `Sources/FolioModel/Availability/FolioAvailability+OCR.swift`, `Sources/FolioModel/Tools/FolioTool+Select.swift`, `Sources/FolioModel/Tools/FolioTool+TextMarkup.swift`, `Sources/FolioModel/Tools/FolioTool+Annotate.swift`, `Sources/FolioModel/Tools/FolioTool+Sign.swift`, `Sources/FolioModel/Live/LiveTextFinding.swift`, `Sources/FolioModel/Live/LiveTextSelecting.swift`, `Sources/FolioModel/Live/LiveAnnotating.swift`, `Sources/FolioModel/Live/LiveFormFilling.swift`, `Sources/FolioModel/Live/LiveSigning.swift`, `Sources/FolioModel/Live/LiveSignatureStore.swift`, `Sources/FolioModel/Live/LivePageOrganizing.swift`, `Sources/FolioModel/Live/LiveDocumentHistory.swift`, `Sources/FolioModel/Live/LiveDocumentSources.swift`, `Sources/FolioApp/FolioApp.swift`, `Sources/FolioApp/FolioWindow.swift`, `Sources/FolioApp/PageView/FolioPageView.swift`, `Sources/FolioApp/PageView/FolioPageGestures.swift`, `Sources/FolioApp/PageView/FolioPageOverlays.swift`, `Sources/FolioApp/PageView/FolioMarksLayer.swift`, `Sources/FolioApp/PageView/FolioFieldLayer.swift`, `Sources/FolioApp/PageView/FolioSelectionLayer.swift`, `Sources/FolioApp/PageView/FolioFindHitsLayer.swift`, `Sources/FolioApp/PageView/FolioRedactionLayer.swift`, `Sources/FolioApp/Sidebar/FolioNavigator.swift`, `Sources/FolioApp/Sidebar/FolioThumbnails.swift`, `Sources/FolioApp/Inspector/FolioInspector.swift`, `Sources/FolioApp/Live/FolioServices+Live.swift`, `Sources/FolioApp/Sidebar/FolioOutline.swift`, `Sources/FolioApp/Sidebar/FolioFindResults.swift`, `Sources/FolioApp/Sidebar/FolioMarksList.swift`, `Sources/FolioApp/Inspector/FolioMarkInspector.swift`, `Sources/FolioApp/Inspector/FolioFieldInspector.swift`, `Sources/FolioApp/Inspector/FolioDocumentInspector.swift`, `Sources/FolioApp/Inspector/FolioPageInspector.swift`, `Sources/FolioApp/Live/FolioSampleWriter+Marks.swift`, `Sources/FolioApp/Live/FolioSampleWriter+Fields.swift`, `Sources/FolioApp/Live/FolioSampleWriter+Scan.swift`, `Sources/FolioApp/Live/FolioSampleWriter+Photos.swift`, `Sources/FolioApp/Live/PDFKitWriting+TextLayer.swift`, `Sources/FolioApp/FolioWindow+Read.swift`, `Sources/FolioApp/FolioWindow+Find.swift`, `Sources/FolioApp/FolioWindow+Markup.swift`, `Sources/FolioApp/FolioWindow+Forms.swift`, `Sources/FolioApp/FolioWindow+Sign.swift`, `Sources/FolioApp/FolioWindow+Pages.swift`, `Sources/FolioApp/FolioWindow+History.swift`, `Sources/FolioApp/FolioWindow+Files.swift`, `Sources/FolioApp/FolioWindow+Export.swift`, `Sources/FolioApp/FolioWindow+OCR.swift`, `Sources/FolioApp/FolioCommands+Read.swift`, `Sources/FolioApp/FolioCommands+Find.swift`, `Sources/FolioApp/FolioCommands+Markup.swift`, `Sources/FolioApp/FolioCommands+Forms.swift`, `Sources/FolioApp/FolioCommands+Sign.swift`, `Sources/FolioApp/FolioCommands+Pages.swift`, `Sources/FolioApp/FolioCommands+History.swift`, `Sources/FolioApp/FolioCommands+Files.swift`, `Sources/FolioApp/FolioCommands+Export.swift`, `Sources/FolioApp/FolioCommands+OCR.swift`, `Sources/FolioApp/Live/PDFKitOpening.swift`, `Sources/FolioApp/Live/PDFKitImageOpening.swift`, `Sources/FolioApp/Live/PDFKitImaging.swift`, `Sources/FolioApp/Live/PDFKitText.swift`, `Sources/FolioApp/Live/PDFKitFields.swift`, `Sources/FolioApp/Live/PDFKitAnnotations.swift`, `Sources/FolioApp/Live/PDFKitWriting.swift`, `Sources/FolioApp/Live/PDFKitExporting.swift`, `Sources/FolioApp/Live/VisionRecognizing.swift`, `Sources/FolioApp/Live/FolioSampleWriter.swift`, `Sources/FolioApp/Live/FolioSignatureMark.swift`, `Tests/FolioModelTests/DocumentOpeningContractTests.swift`, `Tests/FolioModelTests/PageImagingContractTests.swift`, `Tests/FolioModelTests/PageTextReadingContractTests.swift`, `Tests/FolioModelTests/TextFindingContractTests.swift`, `Tests/FolioModelTests/TextSelectingContractTests.swift`, `Tests/FolioModelTests/AnnotatingContractTests.swift`, `Tests/FolioModelTests/FormFillingContractTests.swift`, `Tests/FolioModelTests/SigningContractTests.swift`, `Tests/FolioModelTests/SignatureStoringContractTests.swift`, `Tests/FolioModelTests/PageOrganizingContractTests.swift`, `Tests/FolioModelTests/DocumentHistoryContractTests.swift`, `Tests/FolioModelTests/DocumentWritingContractTests.swift`, `Tests/FolioModelTests/PageExportingContractTests.swift`, `Tests/FolioModelTests/TextRecognizingContractTests.swift`, `Tests/FolioModelTests/FolioCommandTests.swift`, `Tests/FolioModelTests/FolioToolsTests.swift`, `Tests/FolioModelTests/FolioWorkspaceTests.swift`, `Tests/FolioModelTests/FolioLayoutTests.swift`, `Tests/FolioModelTests/FolioFixturesTests.swift`, `Tests/FolioModelTests/FolioPageSummaryTests.swift`, `Tests/FolioModelTests/FolioHistoryTests.swift`, `Tests/FolioModelTests/FolioBudget.swift`, `Tests/FolioModelTests/FolioFoundationBudgetTests.swift`, `Tests/AppSnapshotTests/FolioWindowSnapshots.swift`, `UITests/FolioJourneyTests.swift`, `UITests/audit-baseline.json`, `docs/c4/model.json`, `Package.swift`, `project.yml`, `scripts/bundle-apps`, `CLAUDE.md`, `AGENTS.md`
+- **Owned files (153):** `Sources/FolioModel/Contracts/FolioValues.swift`, `Sources/FolioModel/Contracts/FolioContracts.swift`, `Sources/FolioModel/Fakes/FolioFakeFile.swift`, `Sources/FolioModel/Fakes/FakeDocumentOpening.swift`, `Sources/FolioModel/Fakes/FakePageImaging.swift`, `Sources/FolioModel/Fakes/FakePageTextReading.swift`, `Sources/FolioModel/Fakes/FakeTextFinding.swift`, `Sources/FolioModel/Fakes/FakeTextSelecting.swift`, `Sources/FolioModel/Fakes/FakeAnnotating.swift`, `Sources/FolioModel/Fakes/FakeFormFilling.swift`, `Sources/FolioModel/Fakes/FakeSigning.swift`, `Sources/FolioModel/Fakes/FakeSignatureStore.swift`, `Sources/FolioModel/Fakes/FakePageOrganizing.swift`, `Sources/FolioModel/Fakes/FakeDocumentHistory.swift`, `Sources/FolioModel/Fakes/FakeDocumentWriting.swift`, `Sources/FolioModel/Fakes/FakePageExporting.swift`, `Sources/FolioModel/Fakes/FakeTextRecognizing.swift`, `Sources/FolioModel/Fakes/FakeDocumentSources.swift`, `Sources/FolioModel/Fixtures/FolioFixtures.swift`, `Sources/FolioModel/FolioServices.swift`, `Sources/FolioModel/FolioWorkspace.swift`, `Sources/FolioModel/FolioCommand.swift`, `Sources/FolioModel/FolioTool.swift`, `Sources/FolioModel/FolioLaunch.swift`, `Sources/FolioModel/FolioLayout.swift`, `Sources/FolioModel/FolioPageSummary.swift`, `Sources/FolioModel/Fixtures/FolioFixtures+Markup.swift`, `Sources/FolioModel/Fixtures/FolioFixtures+Forms.swift`, `Sources/FolioModel/Fixtures/FolioFixtures+Files.swift`, `Sources/FolioModel/Fixtures/FolioFixtures+OCR.swift`, `Sources/FolioModel/Workspace/FolioWorkspace+Read.swift`, `Sources/FolioModel/Workspace/FolioWorkspace+Find.swift`, `Sources/FolioModel/Workspace/FolioWorkspace+Markup.swift`, `Sources/FolioModel/Workspace/FolioWorkspace+Forms.swift`, `Sources/FolioModel/Workspace/FolioWorkspace+Sign.swift`, `Sources/FolioModel/Workspace/FolioWorkspace+Pages.swift`, `Sources/FolioModel/Workspace/FolioWorkspace+History.swift`, `Sources/FolioModel/Workspace/FolioWorkspace+Files.swift`, `Sources/FolioModel/Workspace/FolioWorkspace+Export.swift`, `Sources/FolioModel/Workspace/FolioWorkspace+OCR.swift`, `Sources/FolioModel/Availability/FolioAvailability+Read.swift`, `Sources/FolioModel/Availability/FolioAvailability+Find.swift`, `Sources/FolioModel/Availability/FolioAvailability+Markup.swift`, `Sources/FolioModel/Availability/FolioAvailability+Forms.swift`, `Sources/FolioModel/Availability/FolioAvailability+Sign.swift`, `Sources/FolioModel/Availability/FolioAvailability+Pages.swift`, `Sources/FolioModel/Availability/FolioAvailability+History.swift`, `Sources/FolioModel/Availability/FolioAvailability+Files.swift`, `Sources/FolioModel/Availability/FolioAvailability+Export.swift`, `Sources/FolioModel/Availability/FolioAvailability+OCR.swift`, `Sources/FolioModel/Tools/FolioTool+Select.swift`, `Sources/FolioModel/Tools/FolioTool+TextMarkup.swift`, `Sources/FolioModel/Tools/FolioTool+Annotate.swift`, `Sources/FolioModel/Tools/FolioTool+Sign.swift`, `Sources/FolioModel/Live/LiveTextFinding.swift`, `Sources/FolioModel/Live/LiveTextSelecting.swift`, `Sources/FolioModel/Live/LiveAnnotating.swift`, `Sources/FolioModel/Live/LiveFormFilling.swift`, `Sources/FolioModel/Live/LiveSigning.swift`, `Sources/FolioModel/Live/LiveSignatureStore.swift`, `Sources/FolioModel/Live/LivePageOrganizing.swift`, `Sources/FolioModel/Live/LiveDocumentHistory.swift`, `Sources/FolioModel/Live/LiveDocumentSources.swift`, `Sources/FolioApp/FolioApp.swift`, `Sources/FolioApp/FolioWindow.swift`, `Sources/FolioApp/PageView/FolioPageView.swift`, `Sources/FolioApp/PageView/FolioPageGestures.swift`, `Sources/FolioApp/PageView/FolioPageOverlays.swift`, `Sources/FolioApp/PageView/FolioMarksLayer.swift`, `Sources/FolioApp/PageView/FolioFieldLayer.swift`, `Sources/FolioApp/PageView/FolioSelectionLayer.swift`, `Sources/FolioApp/PageView/FolioFindHitsLayer.swift`, `Sources/FolioApp/PageView/FolioRedactionLayer.swift`, `Sources/FolioApp/Sidebar/FolioNavigator.swift`, `Sources/FolioApp/Sidebar/FolioThumbnails.swift`, `Sources/FolioApp/Inspector/FolioInspector.swift`, `Sources/FolioApp/Live/FolioServices+Live.swift`, `Sources/FolioApp/Sidebar/FolioOutline.swift`, `Sources/FolioApp/Sidebar/FolioFindResults.swift`, `Sources/FolioApp/Sidebar/FolioMarksList.swift`, `Sources/FolioApp/Inspector/FolioMarkInspector.swift`, `Sources/FolioApp/Inspector/FolioFieldInspector.swift`, `Sources/FolioApp/Inspector/FolioDocumentInspector.swift`, `Sources/FolioApp/Inspector/FolioPageInspector.swift`, `Sources/FolioApp/Live/FolioSampleWriter+Marks.swift`, `Sources/FolioApp/Live/FolioSampleWriter+Fields.swift`, `Sources/FolioApp/Live/FolioSampleWriter+Scan.swift`, `Sources/FolioApp/Live/FolioSampleWriter+Photos.swift`, `Sources/FolioApp/Live/PDFKitWriting+TextLayer.swift`, `Sources/FolioApp/FolioWindow+Read.swift`, `Sources/FolioApp/FolioWindow+Find.swift`, `Sources/FolioApp/FolioWindow+Markup.swift`, `Sources/FolioApp/FolioWindow+Forms.swift`, `Sources/FolioApp/FolioWindow+Sign.swift`, `Sources/FolioApp/FolioWindow+Pages.swift`, `Sources/FolioApp/FolioWindow+History.swift`, `Sources/FolioApp/FolioWindow+Files.swift`, `Sources/FolioApp/FolioWindow+Export.swift`, `Sources/FolioApp/FolioWindow+OCR.swift`, `Sources/FolioApp/FolioCommands+Read.swift`, `Sources/FolioApp/FolioCommands+Find.swift`, `Sources/FolioApp/FolioCommands+Markup.swift`, `Sources/FolioApp/FolioCommands+Forms.swift`, `Sources/FolioApp/FolioCommands+Sign.swift`, `Sources/FolioApp/FolioCommands+Pages.swift`, `Sources/FolioApp/FolioCommands+History.swift`, `Sources/FolioApp/FolioCommands+Files.swift`, `Sources/FolioApp/FolioCommands+Export.swift`, `Sources/FolioApp/FolioCommands+OCR.swift`, `Sources/FolioApp/Live/PDFKitOpening.swift`, `Sources/FolioApp/Live/PDFKitImageOpening.swift`, `Sources/FolioApp/Live/PDFKitImaging.swift`, `Sources/FolioApp/Live/PDFKitText.swift`, `Sources/FolioApp/Live/PDFKitFields.swift`, `Sources/FolioApp/Live/PDFKitAnnotations.swift`, `Sources/FolioApp/Live/PDFKitWriting.swift`, `Sources/FolioApp/Live/PDFKitExporting.swift`, `Sources/FolioApp/Live/VisionRecognizing.swift`, `Sources/FolioApp/Live/FolioSampleWriter.swift`, `Sources/FolioApp/Live/FolioSignatureMark.swift`, `Tests/FolioModelTests/DocumentOpeningContractTests.swift`, `Tests/FolioModelTests/PageImagingContractTests.swift`, `Tests/FolioModelTests/PageTextReadingContractTests.swift`, `Tests/FolioModelTests/TextFindingContractTests.swift`, `Tests/FolioModelTests/TextSelectingContractTests.swift`, `Tests/FolioModelTests/AnnotatingContractTests.swift`, `Tests/FolioModelTests/FormFillingContractTests.swift`, `Tests/FolioModelTests/SigningContractTests.swift`, `Tests/FolioModelTests/SignatureStoringContractTests.swift`, `Tests/FolioModelTests/PageOrganizingContractTests.swift`, `Tests/FolioModelTests/DocumentHistoryContractTests.swift`, `Tests/FolioModelTests/DocumentWritingContractTests.swift`, `Tests/FolioModelTests/PageExportingContractTests.swift`, `Tests/FolioModelTests/TextRecognizingContractTests.swift`, `Tests/FolioModelTests/FolioCommandTests.swift`, `Tests/FolioModelTests/FolioToolsTests.swift`, `Tests/FolioModelTests/FolioWorkspaceTests.swift`, `Tests/FolioModelTests/FolioLayoutTests.swift`, `Tests/FolioModelTests/FolioFixturesTests.swift`, `Tests/FolioModelTests/FolioPageSummaryTests.swift`, `Tests/FolioModelTests/FolioHistoryTests.swift`, `Tests/FolioModelTests/FolioNoNetworkTests.swift`, `Tests/FolioModelTests/FolioBudget.swift`, `Tests/FolioModelTests/FolioFoundationBudgetTests.swift`, `Tests/AppSnapshotTests/FolioWindowSnapshots.swift`, `UITests/FolioJourneyTests.swift`, `UITests/audit-baseline.json`, `docs/c4/model.json`, `Package.swift`, `project.yml`, `scripts/bundle-apps`, `CLAUDE.md`, `AGENTS.md`
 
 #### W1 · `reader`: Open and read: live PDFKit, zoom and view modes, go to page, outline, passwords, open errors
 
-- **Covers:** P-T1, P-T2, P-T3 (go to page, outline), P-T19
+- **Covers:** P-T1, P-T2, P-T3 (go to page, outline), P-T19, P-T32
 - **Waits on:** foundation
 - **Proves:** P-J1, P-J11; PB-1 (live), PB-2, PB-3, PB-4, PB-17; PF-1, PF-2
 - **Estimate:** about 8 PRs, 13 agent-hours
@@ -2054,9 +2086,9 @@ Generated by `python3 docs/blueprints/pdf/waves.py --markdown`.
 
 - **Covers:** P-T5, P-T7, P-T8, P-T9, P-T10
 - **Waits on:** foundation
-- **Proves:** P-J3, P-J4; PB-6, PB-7, PB-8, PB-9, PB-10; PF-15
+- **Proves:** P-J3, P-J4; PB-6, PB-7, PB-8, PB-9, PB-10
 - **Estimate:** about 9 PRs, 15 agent-hours
-- **Owned files (28):** `Sources/FolioModel/Live/LiveTextSelecting.swift`, `Sources/FolioModel/Live/LiveAnnotating.swift`, `Sources/FolioModel/Fakes/FakeTextSelecting.swift`, `Sources/FolioModel/Fakes/FakeAnnotating.swift`, `Sources/FolioModel/Workspace/FolioWorkspace+Markup.swift`, `Sources/FolioModel/Availability/FolioAvailability+Markup.swift`, `Sources/FolioModel/Tools/FolioTool+Select.swift`, `Sources/FolioModel/Tools/FolioTool+TextMarkup.swift`, `Sources/FolioModel/Tools/FolioTool+Annotate.swift`, `Sources/FolioApp/FolioWindow+Markup.swift`, `Sources/FolioApp/FolioCommands+Markup.swift`, `Sources/FolioApp/PageView/FolioMarksLayer.swift`, `Sources/FolioApp/PageView/FolioSelectionLayer.swift`, `Sources/FolioApp/PageView/FolioPageGestures.swift`, `Sources/FolioApp/Inspector/FolioMarkInspector.swift`, `Sources/FolioApp/Sidebar/FolioMarksList.swift`, `Sources/FolioApp/Live/PDFKitAnnotations.swift`, `Sources/FolioModel/Fixtures/FolioFixtures+Markup.swift`, `Sources/FolioApp/Live/FolioSampleWriter+Marks.swift`, `Tests/FolioModelTests/TextSelectingContractTests.swift`, `Tests/FolioModelTests/AnnotatingContractTests.swift`, `Tests/FolioModelTests/FolioMarkupTests.swift`, `Tests/FolioModelTests/FolioToolsTests.swift`, `Tests/FolioModelTests/FolioMarkupBudgetTests.swift`, `Tests/AppSnapshotTests/FolioMarkupSnapshots.swift`, `Tests/AppSnapshotTests/FolioAnnotationInteropTests.swift`, `UITests/FolioJourneyTests+Markup.swift`, `UITests/FolioJourneyTests+Annotate.swift`
+- **Owned files (27):** `Sources/FolioModel/Live/LiveTextSelecting.swift`, `Sources/FolioModel/Live/LiveAnnotating.swift`, `Sources/FolioModel/Fakes/FakeTextSelecting.swift`, `Sources/FolioModel/Fakes/FakeAnnotating.swift`, `Sources/FolioModel/Workspace/FolioWorkspace+Markup.swift`, `Sources/FolioModel/Availability/FolioAvailability+Markup.swift`, `Sources/FolioModel/Tools/FolioTool+Select.swift`, `Sources/FolioModel/Tools/FolioTool+TextMarkup.swift`, `Sources/FolioModel/Tools/FolioTool+Annotate.swift`, `Sources/FolioApp/FolioWindow+Markup.swift`, `Sources/FolioApp/FolioCommands+Markup.swift`, `Sources/FolioApp/PageView/FolioMarksLayer.swift`, `Sources/FolioApp/PageView/FolioSelectionLayer.swift`, `Sources/FolioApp/PageView/FolioPageGestures.swift`, `Sources/FolioApp/Inspector/FolioMarkInspector.swift`, `Sources/FolioApp/Sidebar/FolioMarksList.swift`, `Sources/FolioApp/Live/PDFKitAnnotations.swift`, `Sources/FolioModel/Fixtures/FolioFixtures+Markup.swift`, `Sources/FolioApp/Live/FolioSampleWriter+Marks.swift`, `Tests/FolioModelTests/TextSelectingContractTests.swift`, `Tests/FolioModelTests/AnnotatingContractTests.swift`, `Tests/FolioModelTests/FolioMarkupTests.swift`, `Tests/FolioModelTests/FolioToolsTests.swift`, `Tests/FolioModelTests/FolioMarkupBudgetTests.swift`, `Tests/AppSnapshotTests/FolioMarkupSnapshots.swift`, `UITests/FolioJourneyTests+Markup.swift`, `UITests/FolioJourneyTests+Annotate.swift`
 
 #### W1 · `forms`: Fill forms: fields over the page, Tab order, required fields, clear
 
@@ -2078,9 +2110,9 @@ Generated by `python3 docs/blueprints/pdf/waves.py --markdown`.
 
 - **Covers:** P-T18, P-T20, P-T26
 - **Waits on:** foundation
-- **Proves:** P-J10; PB-15; PF-3 (page level: order, rotation, crop, labels kept, title), PF-6, PF-16
+- **Proves:** P-J10; PB-15; PF-3 (page level: order, rotation, crop, labels kept, title), PF-6
 - **Estimate:** about 6 PRs, 10 agent-hours
-- **Owned files (16):** `Sources/FolioApp/Live/PDFKitWriting.swift`, `Sources/FolioModel/Workspace/FolioWorkspace+Files.swift`, `Sources/FolioModel/Availability/FolioAvailability+Files.swift`, `Sources/FolioApp/FolioWindow+Files.swift`, `Sources/FolioApp/FolioCommands+Files.swift`, `Sources/FolioApp/Sheets/FolioSaveOptionsSheet.swift`, `Sources/FolioApp/Inspector/FolioDocumentInspector.swift`, `Sources/FolioModel/Fixtures/FolioFixtures+Files.swift`, `Tests/FolioModelTests/DocumentWritingContractTests.swift`, `Tests/FolioModelTests/FolioFilesTests.swift`, `Tests/FolioModelTests/FolioFilesBudgetTests.swift`, `Tests/AppSnapshotTests/FolioRoundTripTests.swift`, `Tests/AppSnapshotTests/FolioPasswordTests.swift`, `Tests/AppSnapshotTests/FolioSaveIntegrityTests.swift`, `Tests/AppSnapshotTests/FolioWritingBudgetTests.swift`, `UITests/FolioJourneyTests+Files.swift`
+- **Owned files (15):** `Sources/FolioApp/Live/PDFKitWriting.swift`, `Sources/FolioModel/Workspace/FolioWorkspace+Files.swift`, `Sources/FolioModel/Availability/FolioAvailability+Files.swift`, `Sources/FolioApp/FolioWindow+Files.swift`, `Sources/FolioApp/FolioCommands+Files.swift`, `Sources/FolioApp/Sheets/FolioSaveOptionsSheet.swift`, `Sources/FolioApp/Inspector/FolioDocumentInspector.swift`, `Sources/FolioModel/Fixtures/FolioFixtures+Files.swift`, `Tests/FolioModelTests/DocumentWritingContractTests.swift`, `Tests/FolioModelTests/FolioFilesTests.swift`, `Tests/FolioModelTests/FolioFilesBudgetTests.swift`, `Tests/AppSnapshotTests/FolioRoundTripTests.swift`, `Tests/AppSnapshotTests/FolioPasswordTests.swift`, `Tests/AppSnapshotTests/FolioWritingBudgetTests.swift`, `UITests/FolioJourneyTests+Files.swift`
 
 #### W2 · `sign`: Sign: draw, type or pick a signature and initials; keep them; place them
 
@@ -2110,9 +2142,9 @@ Generated by `python3 docs/blueprints/pdf/waves.py --markdown`.
 
 - **Covers:** every tier-1 row on live services
 - **Waits on:** reader, find, markup, forms, pages, files, sign, export-convert, ocr
-- **Proves:** P-J9, P-J14 (with PF-3 for fields and marks, PF-5, PF-14), PL1 and PL4 (in +Loop), P-P1-P-P6
+- **Proves:** P-J9, P-J14 (with PF-3 for fields and marks, PF-5, PF-14, PF-15, PF-16), PL1 and PL4 (in +Loop), P-P1-P-P6
 - **Estimate:** about 4 PRs, 6 agent-hours
-- **Owned files (6):** `UITests/FolioJourneyTests+Loop.swift`, `UITests/FolioJourneyTests+Perf.swift`, `Tests/AppSnapshotTests/FolioLoopFidelityTests.swift`, `UITests/FolioJourneyTests+History.swift`, `Tests/FolioModelTests/FolioLoopTests.swift`, `docs/blueprints/pdf.md`
+- **Owned files (8):** `UITests/FolioJourneyTests+Loop.swift`, `UITests/FolioJourneyTests+Perf.swift`, `Tests/AppSnapshotTests/FolioLoopFidelityTests.swift`, `UITests/FolioJourneyTests+History.swift`, `Tests/AppSnapshotTests/FolioAnnotationInteropTests.swift`, `Tests/AppSnapshotTests/FolioSaveIntegrityTests.swift`, `Tests/FolioModelTests/FolioLoopTests.swift`, `docs/blueprints/pdf.md`
 
 #### W4 · `content-edit`: Conditional: edit existing text in place, and true redaction (needs CorePDF CP-1 to CP-5)
 
@@ -2209,9 +2241,11 @@ Checklist:
    Reduce File Size and Extract always write new files.
 10. **One window per document** (`WindowGroup`, like Halo), no tabs in v1.
 11. **No upsell, no account, no network, no unasked AI** (1A, pain points 1,
-    8 and 11): Folio makes no network call, shows no upgrade or sign-in
-    prompt, and any future AI feature (F1) runs on the Mac and appears only
-    when the person invokes it.
+    8 and 11): v1 makes no network call (`FolioNoNetworkTests`, W0, fails on
+    any network API in `Sources/FolioModel` or `Sources/FolioApp`), shows no
+    upgrade or sign-in prompt, and any future AI feature (F1) runs on the
+    Mac and appears only when the person invokes it; future features that
+    use the local network (F5) or download languages (F7) ask first.
 
 ### 10.2 Questions
 
@@ -2234,10 +2268,6 @@ Checklist:
 - **Q7 Scripted forms.** Folio detects and names scripts and XFA but never
   runs them. Acceptable, or should the scripted-form banner also refuse to
   save such forms?
-- **Q10 Provenance.** Folio's own provenance records (F4) need a signing
-  certificate on the content-credentials trust list, which costs money and
-  an enrolment. Pursue it when F4 is scheduled, or leave Folio able to
-  check provenance but not to add its own?
 - **Q8 Suite slot.** Folio becomes the sixth app in AfterGlow (⌃⌘6, after
   Halo). Confirm the order and the glyph.
 - **Q9 Reduce File Size.** v1 has one level built on PDFKit's two
@@ -2245,6 +2275,15 @@ Checklist:
   measures it. If it can't shrink a 300 ppi photo PDF by 40%, ship the
   feature off, or wait for CorePDF's image re-encoding (CP-7), which also
   brings Small, Medium and Large levels?
+- **Q10 Provenance.** Folio's own provenance records (F4) need a signing
+  certificate on the content-credentials trust list, which costs money and
+  an enrolment. Pursue it when F4 is scheduled, or leave Folio able to
+  check provenance but not to add its own?
+- **Q11 Appearance streams.** If PF-15 shows PDFKit saves marks or filled
+  fields without appearance streams, should Folio draw the appearances
+  itself (CP-8, CorePDF: write an appearance stream per annotation, so v1
+  waits on it), or ship v1 and say in the save sheet that some readers may
+  not show the marks?
 
 Checklist:
 
@@ -2356,7 +2395,39 @@ F18 replaced the brief's Edit row (2.4) instead of 7.6's.
 | R2-40 | minor | Fixtures placed in two files | W0 moves `FolioFixtures` to `Fixtures/FolioFixtures.swift` |
 
 After round 2: `check.sh` `CONTRACTS: PASS` (12 of 12, no warnings) and
-`waves.py` `WAVES: PASS`. No third round was run: round 2's single blocking
-item was a same-wave dependency, now removed by making the shared reads
-whole in W0, and every other item was a local fix.
+`waves.py` `WAVES: PASS`.
+
+### Round 3: 22 findings (0 blocking, 10 major, 12 minor), on 5fd704f
+
+Run after the captain added sections 1A and 1B (and research.md F and G),
+aimed hardest at them and at their knock-on edits.
+
+| # | Severity | Finding | Fixed by |
+|---|---|---|---|
+| R3-1 | major | A plain Save stripped a file's open password and owner password | `FolioPasswords` from opening, `FolioWriteOptions.keeping`; restrictions without the owner password stay in force under a fresh owner password; proof test; PF-16 checks it |
+| R3-2 | major | PF-16 needed samples and text reading from features in the same wave | PF-16 moved to core-loop |
+| R3-3 | major | PF-15 in the same wave as the writer; the cited API only reads; no fallback | PF-15 moved to core-loop; the mechanism (PDFKit's writer, measured) and the fallback (CP-8) stated; pain point 2 "aimed at, PF-15 decides"; Q11 |
+| R3-4 | major | Signature export and import had no menu, test or journey | Markup > Sign ▸ Export and Import Signatures; `Signing.exportLibrary`, `importLibrary`; proof test; P-J6 steps |
+| R3-5 | major | Line-end hyphens weren't handled | Soft hyphen joins, hard hyphen before lowercase kept without a space; proof test; the remaining case named |
+| R3-6 | major | Form values in other readers unproven | PF-15 covers widgets, signatures and pictures; pain point 7 "Partly" |
+| R3-7 | major | PF-16 and the speed rows overclaimed | Pain point 3 "Partly (Folio-written samples)"; pain point 6 "aimed at, measured" |
+| R3-8 | major | Wi-Fi Aware isn't on macOS | Dropped from F5; the Network framework path kept |
+| R3-9 | major | F2's trigger already in force | F2 tier 2, first after v1, with the reason |
+| R3-10 | major | Dark reading tier contradicted 1A | Dark pages in v1 (P-T32, tier 2, reader); last position stays Later (P-T43) |
+| R3-11 | minor | View counts attached to the wrong complaints | Corrected |
+| R3-12 | minor | Rows with leftovers marked fixed | Pain points 3 and 15 "Partly" |
+| R3-13 | minor | "No network call" unenforced | `FolioNoNetworkTests` (W0); call 11 reworded |
+| R3-14 | minor | F4's timestamp caveat and the frozen trust list | Carried into F4 and Q10 |
+| R3-15 | minor | Read-aloud citation | Apple docs: AVSpeechSynthesizer, URL in research.md G |
+| R3-16 | minor | Undated or weak drivers for F5, F6, F7 | F6 dated; F5 and F7 say they rest on F1's driver |
+| R3-17 | minor | 6.3 copy of the contracts stale; P-T5 silent on cleanup | 6.3 re-embedded; P-T5 updated |
+| R3-18 | minor | `FolioSignatureKind` listed twice | One entry |
+| R3-19 | minor | Questions out of order | Q8, Q9, Q10, Q11 |
+| R3-20 | minor | Rank claims without numbers or issue URLs | Counts and URLs added; research.md F intro corrected |
+| R3-21 | minor | 2.4 and section 11 missed this round | 2.4 Sign row; this table |
+| R3-22 | minor | The print scaling choice had no owner | An accessory in `FolioPrinting.swift`, cited; P-J24 asserts it |
+
+After round 3: `check.sh` `CONTRACTS: PASS` (12 of 12, no warnings) and
+`waves.py` `WAVES: PASS`. The round had no blocking item, so no fourth
+round was run.
 

@@ -84,6 +84,10 @@ private func png(_ w: UInt32, _ h: UInt32) -> Data {
     let lig = FolioFakeLayout.text(["\u{FB01}nal re\u{00AD}view"], pageHeight: 792, origin: .embedded)
     let all = s.selecting.line(at: FolioPoint(x: 80, y: 712), on: page.id, text: lig)
     #expect(s.selecting.copyText(all, text: lig) == "final review")
+    // A soft hyphen at a line end joins with no space; a hard one before lowercase keeps the hyphen.
+    let hy = FolioFakeLayout.text(["the re\u{00AD}", "view of e-", "mail"], continued: [0, 1], pageHeight: 792, origin: .embedded)
+    let hyAll = s.selecting.select(from: FolioPoint(x: 73, y: 712), to: FolioPoint(x: 72 + 6 * 3 + 1, y: 684), on: page.id, text: hy)
+    #expect(s.selecting.copyText(hyAll, text: hy) == "the review of e-mail")
 }
 
 @Test func fillFormInTabOrder() async throws {   // P-J5
@@ -124,6 +128,13 @@ private func png(_ w: UInt32, _ h: UInt32) -> Data {
     if case .picture(let b) = pic.kind { #expect(b.width == 4 && b.height == 2 && b.rgba[3] == 255) } else { Issue.record("not a picture") }
     #expect(throws: FolioEditError.self) {
         try s.signing.make(picture: FolioBitmap(width: 2, height: 2, rgba: [UInt8](repeating: 255, count: 16)), isInitials: false, id: FolioSignatureID("q"))
+    }
+    // Export, import, merge by id, refuse anything else.
+    let lib = s.signing.exportLibrary([sig, pic])
+    let merged = try s.signing.importLibrary(lib, into: [pic])
+    #expect(merged.map(\.id) == [FolioSignatureID("sig-1"), FolioSignatureID("p")])
+    #expect(throws: FolioEditError.invalidValue("That file isn't a Folio signature library.")) {
+        try s.signing.importLibrary(Data("{}".utf8), into: [])
     }
     #expect(throws: FolioEditError.invalidValue("Draw your signature in the box first.")) {
         try s.signing.make(strokes: [[FolioPoint(x: 1, y: 1)]], isInitials: true, id: FolioSignatureID("x"))
@@ -198,6 +209,14 @@ private func png(_ w: UInt32, _ h: UInt32) -> Data {
     #expect(try await s.writing.write(policy.state, options: .plain).count > 0)
     let unlocked = try await open(s, FolioFixtures.restricted, password: "owner")
     #expect(try await s.writing.write(unlocked.state, options: FolioWriteOptions(permissions: .all)).count > 0)
+    // Save keeps the passwords a file was opened with; restrictions stay in force without the owner password.
+    let payslip = try await open(s, FolioFixtures.locked, password: "folio")
+    let kept = try await s.writing.write(payslip.state, options: .keeping(payslip.passwords))
+    await #expect(throws: FolioOpenError.needsPassword) { try await s.opening.open(kept, name: "Payslip", password: nil) }
+    let policySaved = try await s.writing.write(policy.state, options: .keeping(policy.passwords))
+    let policyBack = try await s.opening.open(policySaved, name: "Policy", password: nil)
+    #expect(policyBack.state.permissions.restrictions == policy.state.permissions.restrictions)
+    #expect(policyBack.state.permissions.ownerUnlocked == false)
 }
 
 @Test func exportTextAndImages() async throws {   // P-J21
