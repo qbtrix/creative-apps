@@ -52,9 +52,11 @@ private func track(_ property: String, _ id: String, of owner: LayerOwner = scen
     try live.toggleKey("x", owner: scene, layerID: "ball", frame: 20, in: &engine)
     #expect(track("x", "ball", in: engine)?.map(\.frame) == [0, 12, 20, 24, 36, 47])
     #expect(track("x", "ball", in: engine)?.first { $0.frame == 20 }?.value == sampled)
+    #expect(engine.undoActionName == "Undo Set Keyframe")
     let added = engine.document
     try live.toggleKey("x", owner: scene, layerID: "ball", frame: 20, in: &engine)
     #expect(engine.document == doc)
+    #expect(engine.undoActionName == "Undo Delete Keyframe")
     try engine.undo()
     #expect(engine.document == added)
     try engine.undo()

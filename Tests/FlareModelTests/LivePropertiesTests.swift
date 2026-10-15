@@ -22,6 +22,12 @@ func liveRowsEqualTheFakeOnBounce(layerIDs: [String], frame: Int) {
     let scaleX = rows.first { $0.name == "scaleX" }
     #expect(scaleX != nil)
     #expect(scaleX?.value == nil && scaleX?.keyState == .notAnimated)
+    // Each alone reads 1, so Mixed comes from the key states differing, not the values.
+    let alone = { (id: String) in
+        LiveProperties().properties(FlareFixtures.bounce, owner: scene, layerIDs: [id], frame: 0).first { $0.name == "scaleX" }
+    }
+    #expect(alone("ball")?.value == 1 && alone("ball")?.keyState == .keyedHere)
+    #expect(alone("shadow")?.value == 1 && alone("shadow")?.keyState == .notAnimated)
 }
 
 @Test(arguments: [0, 6, 12, 23])

@@ -1,5 +1,7 @@
 # Feature packet: live-keys
 
+**Status:** built on dev by KY-1..KY-9 and the Anatomy fix PRs; feature issue #799.
+
 **Feature:** key, retime and ease on real documents. The inspector's
 TRANSFORM rows with section 2's not-animated rule, the stopwatch and the
 keyframe button, fill and stroke, and the timeline's rows, key moves,
@@ -75,7 +77,7 @@ feature proves their Model half on the live types, in
 
 | Screen | Empty | Error | Loading |
 |---|---|---|---|
-| Properties TRANSFORM rows | no layer selected: `properties` returns `[]` and the inspector shows SCENE | a write on a locked layer throws `CommandError.layerLocked(<id>)` (the workspace shows "Unlock <layer> to draw on it."); a non-finite value throws "<Title> needs a number." and changes nothing, as `FakeProperties` does | none |
+| Properties TRANSFORM rows | no layer selected: `properties` returns `[]` and the inspector shows SCENE | a write on a locked layer throws `CommandError.layerLocked(<id>)` (the workspace shows "The layer is locked. Unlock it to change it."); a non-finite value throws "<Title> needs a number." and changes nothing, as `FakeProperties` does | none |
 | Keyframe button | `.notAnimated` (idle), `.animated`, `.keyedHere` per section 2 | – | – |
 | FILL and STROKE | no shape on the selection: the fill write is a no-op that adds no undo entry | negative stroke width throws (LC-7's validation) | – |
 | Timeline rows | a scene with no layers: `rows` is `[]` ("No layers yet." empty text, F7a) | a key move onto another key or past the last frame throws, nothing changes | – |

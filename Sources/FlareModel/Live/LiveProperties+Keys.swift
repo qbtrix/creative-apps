@@ -2,7 +2,7 @@
 // Section 2's rule, as in FakeProperties: a track with fewer than two keys is not animated, so the stopwatch keys the
 // playhead (and the last frame, or 0, when that leaves one key); an animated track's stopwatch keeps one key at 0 holding
 // the value at the playhead. Keys are FlareCore's `SetKeyframe` and `RemoveKeyframe` with the owner, so a symbol's own
-// layers work like scene layers. The `PropertyAnimating` conformance comes in KY-4.
+// layers work like scene layers. The `PropertyAnimating` conformance lives in LiveProperties+Paint.swift.
 import FlareCore
 
 extension LiveProperties {
