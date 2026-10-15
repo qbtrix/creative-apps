@@ -60,3 +60,5 @@ utc	stage	event	ref	note
 2026-10-15T05:21Z	3	stage-start	S-11b	builder stacked on S-11a
 2026-10-15T05:21Z	3	pr-merged	#988 #989	S-10b, S-11a
 2026-10-15T05:25Z	3	heartbeat	-	no dev CI run since 726; app chain since #978 unverified on macOS
+2026-10-15T05:26Z	3	pr-opened	#991	S-11b layers tab, history stub, 206 lines 3 files (open)
+2026-10-15T05:26Z	3	stage-start	S-12	builder stacked on S-11b
