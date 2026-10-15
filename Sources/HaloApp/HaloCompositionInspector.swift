@@ -4,6 +4,8 @@
 // otherwise it shows an InspectorHeader (name, size, rate and length) and a
 // Composition section of read-only rows. Either way the layer list follows
 // under a Layers section. All text comes from HaloModel; views only read it.
+// The read-only values carry `halo.inspector.composition.*` identifiers so a
+// journey reads them; they aren't controls, so they stay out of halo.controls.
 import HaloModel
 import SuiteUI
 import SwiftUI
@@ -19,9 +21,17 @@ struct HaloCompositionInspector: View {
             } else if let comp = model.selectedComposition {
                 InspectorHeader(comp.name, details: comp.headerDetails)
                 InspectorSection("Composition") {
-                    InspectorRow("Size") { Text(comp.sizeText).monospacedDigit() }
-                    InspectorRow("Frame Rate") { Text(comp.frameRateText).monospacedDigit() }
-                    InspectorRow("Duration") { Text(comp.durationText).monospacedDigit() }
+                    InspectorRow("Size") {
+                        Text(comp.sizeText).monospacedDigit().accessibilityIdentifier("halo.inspector.composition.size")
+                    }
+                    InspectorRow("Frame Rate") {
+                        Text(comp.frameRateText).monospacedDigit()
+                            .accessibilityIdentifier("halo.inspector.composition.frameRate")
+                    }
+                    InspectorRow("Duration") {
+                        Text(comp.durationText).monospacedDigit()
+                            .accessibilityIdentifier("halo.inspector.composition.duration")
+                    }
                 }
             }
             InspectorSection("Layers") {

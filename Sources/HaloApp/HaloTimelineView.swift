@@ -2,6 +2,8 @@
 // its span bar from in to out point and a diamond on each key frame. The
 // ruler scrubs, a track selects its layer, a diamond its lane's keys; a click
 // gives it focus so HaloViewer's keys reach it. No layers: how to add one.
+// The strip's track buttons come from SuiteUI with no identifier of their
+// own, so the strip passes `halo.timeline.track` down to each of them (#290).
 import HaloModel
 import SuiteUI
 import SwiftUI
@@ -36,6 +38,7 @@ struct HaloTimelineView: View {
                         hasFocus = true
                         perform(.selectLayer(id))
                     })
+                    .accessibilityIdentifier("halo.timeline.track")
             }
             .frame(height: SuiteSize.timelineRuler + SuiteSize.timelineLane * CGFloat(rows.count))
             if rows.isEmpty {
