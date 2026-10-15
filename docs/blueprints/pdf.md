@@ -270,3 +270,340 @@ Checklist:
 - [x] Every "In v1" row traces to a row of 1.1 or a platform fact in 1.5.
 - [x] Every non-goal names a behaviour, not another company's product.
 - [x] Every "out" item says where it goes.
+
+---
+
+## 3. Feature catalog
+
+Tiers follow `docs/priorities.md`: **tier 1** (`p1`) is used in nearly
+every session or is one of the top usage rows of 1.1, or something a tier-1
+feature needs; **tier 2** (`p2`) is weekly or once per deliverable;
+**tier 3** (`p3`) is specialist or occasional. "Row n" cites section 1.1.
+*Inferred* marks a tier with no direct number, first to move if data turns
+up. Each feature names its wave feature (section 9) and its journey
+(section 5).
+
+Shortcuts are the menu's (section 7.6); tool keys work while the page view
+has focus. "Hand-offs" are the suite connections of `docs/blueprints/suite.md`
+(Open In, typed pasteboard, hand-off files); each needs the suite's
+`SuiteApp.folio` (section 9.5).
+
+### 3.1 Tier 1
+
+**P-T1 Open a PDF** (tier 1, row 1; `reader`, P-J1, P-J11). The person
+double-clicks a PDF in Finder, chooses File > Open… (⌘O), drops a file on
+the window or the Dock icon, or picks one from File > Open Recent. Folio
+opens one window per document, titled with the file's name, and shows page
+1 fitted to the width. *Empty:* with no document the window shows "No PDF
+Open · Open a PDF or drop one here." with Open… (prominent) and Create from
+Images…. *Loading:* a progress row appears in the page view at once and
+thumbnails fill in as pages draw; a page not drawn yet is a blank sheet of
+its size, never a gap. *Errors:* not a PDF, damaged (with the reason), too
+large, and locked: a locked file opens a password sheet ("This PDF is
+locked. Enter its password to open it."), a wrong password shakes the
+field and says "That password didn't unlock this PDF. Try again.", Cancel
+leaves the window empty. A file with form scripts or XFA opens with a
+banner naming what Folio won't run. *Hand-offs in:* Finder (Folio declares
+PDF as Editor, rank Alternate, so it never steals the system default
+without the person choosing it); Open In ▸ Folio from any suite app that
+writes PDF (Design's PDF export, #418); a PDF dropped on the AfterGlow home.
+*Out:* recents in the suite's one list.
+
+**P-T2 Read, zoom and page layout** (tier 1, row 1; `reader`, P-J1).
+Continuous scroll (⌘2) by default, Single Page (⌘1), Two Pages (⌘3);
+Actual Size (⌘0), Zoom In and Out (⌘+, ⌘−, pinch), Fit Width (⌘9), Fit
+Page. The zoom pill under the page shows the percent or "Fit Width"; the
+page pill shows "Page n of m" for the page nearest the top. *Empty:* none
+(a document has at least one page). *Loading:* as P-T1 for pages scrolled
+into view. *Errors:* a page that fails to draw shows "This page couldn't be
+drawn." in its sheet; the rest of the document reads normally.
+
+**P-T3 Navigate: thumbnails, go to page, outline** (tier 1, row 1;
+`reader` for go to page and outline, `pages` for the thumbnails, P-J1). The
+sidebar's PAGES section shows a thumbnail per page with its number (or
+printed label); clicking one scrolls to it. View > Go to Page… (⌥⌘G) takes
+a number or a label; back and forward (⌘[ and ⌘]) step through jumps. The
+OUTLINE section shows the file's bookmarks as a tree; clicking one jumps.
+*Empty:* "No outline in this PDF." *Errors:* "This document has pages 1 to
+n." under the Go to Page field for a number out of range.
+
+**P-T5 Select and copy text** (tier 1, row 13; `markup`, P-J3). Text
+Select (T) or the default Select tool over text: drag to select, double-click
+a word, triple-click a line, ⌘A selects all text on the page, ⌘C copies it
+as plain text with line breaks joined inside paragraphs. *Empty:* on a page
+with no text layer, the tool's help reads "This page has no text to select.
+Recognize text first." with Recognize… (P-T27). *Hand-offs out:* plain text
+on the general pasteboard for any app.
+
+**P-T6 Find** (tier 1, row 15, *inferred* from the reading staples and the
+tracker asks; `find`, P-J2). ⌘F opens the find bar over the top of the page
+view; typing finds as you type (after 2 characters); every match is tinted
+and the current one outlined; Return and ⌘G go to the next, ⇧Return and
+⇧⌘G to the previous; the sidebar shows RESULTS with each hit's page and
+context. Match Case and Whole Words toggles. *Empty:* "No results" and the
+field's help "No matches for <text>." *Loading:* "Searching… page n of m"
+while results stream in page order. *Errors:* pages with no text layer are
+counted: "2 pages have no text. Recognize text to search them." with
+Recognize….
+
+**P-T7 Highlight, underline, strike out** (tier 1, row 6; `markup`, P-J3).
+With text selected, Markup > Highlight (⌃⌘H), Underline (⌃⌘U) or Strike Out
+(⌃⌘K); or pick the tool (H, U, K) and drag across text, which marks as you
+release. The inspector shows the mark: colour (the five markup colours plus
+the system colour panel), opacity, the comment field. A mark sits on its
+text; it can be recoloured, commented or deleted, not moved. *Errors:* a
+file whose owner forbids markup disables every markup tool with "The owner
+of this PDF doesn't allow adding or changing markup."; marking with no
+selection says "Select some text first."
+
+**P-T8 Notes and comments** (tier 1, row 6; `markup`, P-J4). Note (N):
+click to place a note icon, type in its popover, Escape closes it. Any mark
+takes a comment in the inspector. The sidebar's MARKS section lists every
+mark by page with its text or comment; clicking one selects it and scrolls
+to it. *Empty:* "No markup yet. Pick a tool and drag over text." *Hand-offs:*
+none in v1.
+
+**P-T9 Add text (text box)** (tier 1, row 12: most "edit a PDF" means adding
+text and filling blanks; `markup`, P-J4). Text Box (X): click to place, type,
+Escape or click away to finish; double-click to edit again; drag to move,
+handles to resize; the inspector sets font size, colour and alignment (the
+system font, so it reads as typed). For flat forms that have no fields,
+this is how people fill them. *Errors:* an empty text box is not created
+("Type some text for the text box.").
+
+**P-T11 Fill forms** (tier 1, row 8; `forms`, P-J5). Fields are drawn as
+real controls over the page: text fields, checkboxes, radio buttons, pop-up
+choices. Click or Tab into a field; ⇥ and ⇧⇥ move in reading order (page,
+then top to bottom, then left to right), skipping read-only fields; Space
+toggles a checkbox or picks a radio. The field's tooltip from the form
+author is its help. *Errors:* a read-only field says "<name> is read-only
+in this form."; a too-long value or a line break in a one-line field shows
+its sentence under the field and keeps the old value. *Empty:* a PDF with no
+fields: the Form menu is disabled with "This PDF has no form fields. Use
+Text Box to type on it."
+
+**P-T13 Rotate, delete, reorder, insert pages** (tier 1, rows 10 and 11;
+`pages`, P-J7). In the sidebar thumbnails or the Page Grid (⌘4): select
+pages (click, Shift-click, ⌘-click), Rotate Right (⌘R) and Left (⌘L),
+Delete Page (⌘⌫), drag to reorder (a drop line shows where), ⌥⌘← and ⌥⌘→
+move the selection by keyboard, Insert Blank Page (⇧⌘B, the size of the
+selected page). Rotation is saved as the page's rotation, so every reader
+shows it. *Errors:* deleting every page: "A PDF needs at least one page.
+Add a page before deleting this one."; a file locked against changes:
+page commands disabled with "The owner of this PDF doesn't allow changing
+its pages."
+
+**P-T14 Combine files** (tier 1, row 3; `pages`, P-J8). Page > Insert from
+File… (⇧⌘I) inserts every page of another PDF after the selected page (or
+at the start or end); dropping PDFs onto the thumbnails inserts them where
+dropped; File > Combine Files… picks several files in one panel and makes
+one new document in the order shown, which the sheet lets the person
+reorder before Combine. Inserted forms keep their fields; a field name
+already taken gets " 2". *Loading:* the open progress row. *Errors:* a
+locked file in the set asks for its password in turn; a damaged one is
+named and skipped with "Skipped Notes.pdf: this PDF is damaged…".
+*Hand-offs in:* Library's "Make PDF from Selection" and Photo's export land
+here as a new document (P-T4).
+
+**P-T15 Extract and split** (tier 1, row 9; `pages`, P-J8). Page > Extract
+Pages… takes a range ("1-3, 5, 8-") and opens a new window with those pages
+(title "<name> (pages 1–3)"), leaving the original alone. Page > Split…
+splits after every n pages or at typed page numbers and writes each part
+next to the original with " (part k)". *Errors:* a range outside the
+document: "This document has pages 1 to n."; text that isn't a range:
+"\"x\" isn't a page or a range. Type pages like 1-3, 5."
+
+**P-T17 Undo and redo** (tier 1, *inferred* as for every suite app; `history-files`,
+P-J9). Every edit is one named step (Undo Highlight, Undo Move Page, Undo
+Typing); typing in one field or one text box and one drag each coalesce;
+scroll, zoom, find and selection are never steps; 100 steps. *Empty:* Undo
+and Redo disabled with "Nothing to undo." / "Nothing to redo."
+
+**P-T18 Save and Save As** (tier 1, row 10's "save the rotated file" is the
+general-computing Q&A site's most-viewed PDF question; `history-files`,
+P-J10). ⌘S writes the document through a temporary file and replaces the
+original only when the write succeeded; ⇧⌘S saves a copy elsewhere. The
+window's subtitle reads "Edited" with unsaved changes, "Saved" after, "Not
+saved ⚠" after a failure. Closing with changes asks Save, Don't Save,
+Cancel. *Errors:* a read-only folder or full disk: the sentence near the
+title and in an alert; the file the pages came from moved away
+(`sourceMissing`). *Loading:* progress after 100 ms; the window stays usable.
+
+**P-T21 Sign** (tier 1, row 7; `sign`, P-J6). Sign (S) opens the signature
+popover: the saved signatures and initials, and New Signature…. The sheet
+has three ways: Draw (a pad: drag with the trackpad or mouse, Clear),
+Type (the name in a script face) and Image (pick a picture of a signature;
+its light background is made transparent). "Save as initials" marks
+initials. Clicking a page places the chosen signature there at a natural
+size, or fitted inside an empty signature field. Placed signatures move and
+resize like any mark, keeping their aspect. The library lives in Folio's
+folder and survives relaunch. *Empty:* only New Signature…. *Errors:* Done
+is disabled on an empty pad with "Draw your signature in the box first.";
+an unwritable folder: "Signatures couldn't be saved…" and the signature
+still places in this document. Certificate signatures are Later (P-T31).
+
+**P-T4 New from Images** (tier 1, row 4; the Mac Q&A site's most-viewed PDF
+question; `export-convert`, P-J22). File > New from Images… (⇧⌘N) picks
+PNG, JPEG or HEIC files (or drop them on the empty window) and makes one
+page per image in the order picked, each page the image's aspect, fitted
+to Letter or A4 by the locale. File > Import from iPhone > Scan Documents
+(Continuity Camera) adds scanned pages the same way (Apple docs: Supporting
+Continuity Camera in your Mac app). The new document is "Untitled" until
+saved, and its no-text banner offers Recognize Text (P-T27). *Errors:* a
+file that isn't an image is named and skipped. *Hand-offs in:* Library's
+selection and Photo's document arrive as images through the suite's
+hand-off and open here.
+
+**P-T22 Reduce File Size** (tier 1, row 5: the web vendor's most-used tool;
+`export-convert`, P-J23). File > Reduce File Size… offers three levels
+(Small: images at 96 ppi; Medium: 150 ppi; Large: 220 ppi; JPEG for photos)
+and shows the result before writing: "From 8.4 MB to 2.9 MB". It writes
+"<name> (reduced).pdf" next to the original and never overwrites it. Text
+and vector content are untouched (PF-11). *Loading:* progress in the sheet
+with Cancel. *Errors:* when the result isn't smaller: "This PDF is already
+as small as Folio can make it." and nothing is written.
+
+**P-T30 No dead controls** (tier 1 by dependency: CLAUDE.md, review rubric
+QB-F1; `foundation`, P-J12). Every menu item, toolbar button and palette
+tool acts or is disabled with the sentence saying why, from
+`unavailableHelp(for:)` in the Model; each feature's controls read "Not built
+yet." until its feature lands.
+
+### 3.2 Tier 2 (all in v1 unless marked)
+
+**P-T10 Pen and shapes** (tier 2, rows 6 and 30-34 of research.md B: shapes
+18 👍 twice; `markup`, P-J4). Pen (P) draws freehand ink as the pointer
+moves; Shape (R) draws a rectangle by default, with ellipse, line and arrow
+in the tool's menu (Shift constrains). The inspector sets colour, line width
+(0.5–12 pt, a bar slider) and opacity. Marks move with arrows (1 pt, Shift
+10 pt). *Errors:* as P-T7 for locked files.
+
+**P-T12 Check and clear a form** (tier 2, *inferred* from the form filler's
+need to send a complete form; `forms`, P-J5). Form > Check Form lists empty
+required fields ("1 required field is empty: Agree to terms") and outlines
+each in the warning colour with its triangle; Form > Clear Form empties
+every field in one undoable step.
+
+**P-T16 Crop pages** (tier 2, row 19; `pages`). Page > Crop Pages… sets
+margins (or drag a crop box on the page in the sheet's preview) for the
+selected pages or a range; the crop is saved as the page's crop box, so
+nothing is lost and Crop can be removed. *Errors:* "Keep at least 1 inch of
+the page on each side."
+
+**P-T19 Open Recent** (tier 2, KDE-style "reopen previous documents" 27 CC;
+*inferred*; `reader`). File > Open Recent lists 10 files; with the suite's
+recents feature it reads the one AfterGlow list filtered to Folio. A missing
+file is shown dimmed with "Moved or deleted." *Hand-offs:* the AfterGlow
+home lists Folio documents with thumbnails.
+
+**P-T20 Flatten and passwords** (tier 2, rows 16 and 24; `history-files`,
+P-J10). Save As… and Export… offer Flatten (marks and field values drawn
+into the pages, no longer editable), an open password, and owner
+restrictions (printing, copying, changing). Removing a password: open the
+file with it, then Save As without one. *Errors:* a non-ASCII owner
+password is refused with "Use letters, numbers and symbols from a standard
+keyboard." (the system's encryption takes ASCII only: Apple docs:
+kCGPDFContextOwnerPassword).
+
+**P-T23 Export text and a word-processing document** (tier 2 by frequency,
+row 2 by demand; `export-convert`, P-J21). File > Export… > Text, Rich
+Text or Word-Processing Document writes the text in reading order with
+paragraphs, bold, italic and sizes where the text layer has them; never the
+layout. A scanned page without text adds nothing and the sheet says how
+many pages had no text. *Hand-offs out:* the file opens in the system's
+default app for its type.
+
+**P-T24 Export pages as images** (tier 2, row 14; `export-convert`,
+P-J21). File > Export… > PNG or JPEG, 72, 150 or 300 ppi, JPEG quality,
+pages All, Current or a range; one file per page, "<name>-<n>.png", with the
+marks drawn. *Hand-offs out:* Open In ▸ Photo opens the current page as an
+image in Photo (suite hand-off; the page is rendered at 300 ppi).
+
+**P-T25 Print** (tier 2, row 17; `export-convert`, P-J24). ⌘P opens the
+system print panel with Folio's page range, scaling (fit, actual size) and
+auto-rotate (Apple docs: PDFDocument.printOperation). Booklets and pages
+per sheet are Later.
+
+**P-T27 Recognize text (OCR)** (tier 2, row 20 and 1.4; `ocr`, P-J20). On
+opening a document whose pages have no text, a warning pill reads "No text:
+Recognize…"; Tools > Recognize Text… picks languages (the system's list,
+the person's preferred first) and pages, then recognizes page by page
+with progress and Cancel. Recognized text is selectable, findable and
+highlightable at once and is saved as an invisible text layer. *Errors:*
+Cancel keeps pages already done; a page with no text found says so in the
+summary.
+
+**P-T28 Edit text in place** (tier 2, row 23; `content-edit`, conditional
+W4). Edit Text (E): click a line of existing text to edit it in place;
+Folio keeps the line's font, size and colour when every typed character
+exists in the embedded font, and otherwise says which characters are
+missing and offers the nearest system font. One line at a time, no reflow.
+Needs CP-1, CP-2, CP-3, CP-5.
+
+**P-T29 Redact** (tier 2, row 22; `content-edit`, conditional W4). Redact
+(D): drag over text or an area to mark it (a hatched outline, not yet
+applied); Tools > Apply Redactions… lists what will be removed and, on
+confirm, removes the text, image pixels and vector paths under each mark,
+drops marks and fields there, optionally strips metadata, and saves to a
+new file; then reopens it and checks that no removed text can be found
+(PF-13). Never a black box over live text. Needs CP-1 to CP-4.
+
+### 3.3 Tier 3
+
+**P-T26 Document properties** (tier 3, row 29; cheap, so in v1;
+`history-files`). The inspector's DOCUMENT section shows title, author,
+page count, page size, PDF version and permissions; title and author are
+editable fields, each change one undo step, saved in the file's info.
+
+Later, in the order they would come, each with its evidence:
+
+| # | Feature | Tier | Evidence | Needs |
+|---|---|---|---|---|
+| P-T31 | Certificate signatures and checking them | 2 | row 21 (142 👍) | CP-2, CP-6, the macOS Security framework's CMS encoder and decoder |
+| P-T32 | Dark and inverted reading; remember the last position; default zoom | 3 | rows 31; research.md B (15 👍, 34 CC) | – |
+| P-T33 | Tabs and side-by-side documents | 3 | row 32 | SuiteUI |
+| P-T34 | Compare two versions (text differences, side by side) | 3 | row 25 | a text diff in FolioModel |
+| P-T35 | Stamps: page numbers, Bates numbers, watermark, header and footer | 3 | row 28 | – |
+| P-T36 | Edit the outline | 3 | row 30 | – |
+| P-T37 | Author form fields | 3 | row 33 | – |
+| P-T38 | Read aloud with word highlighting | 3 | row 27 | AVSpeechSynthesizer (Apple docs) |
+| P-T39 | Translate, summarize (on device) | 3 | row 26 | Translation, Foundation Models (Apple docs) |
+| P-T40 | Booklet and pages-per-sheet printing | 3 | row 17 | – |
+| P-T41 | PDF/A and tagged PDF output | 3 | research.md B (33 👍), long tail | CorePDF |
+| P-T42 | Export to spreadsheet and slide formats | 3 | row 2 | Vision document structure (Apple docs: RecognizeDocumentsRequest) |
+
+### 3.4 Coverage
+
+| Feature (wave feature) | Tier | v1 | Journey |
+|---|---|---|---|
+| P-T1 Open (reader) | 1 | yes | P-J1, P-J11 |
+| P-T2 Read and zoom (reader) | 1 | yes | P-J1 |
+| P-T3 Navigate (reader, pages) | 1 | yes | P-J1 |
+| P-T4 New from Images (export-convert) | 1 | yes | P-J22 |
+| P-T5 Select and copy text (markup) | 1 | yes | P-J3 |
+| P-T6 Find (find) | 1 | yes | P-J2 |
+| P-T7 Highlight, underline, strike out (markup) | 1 | yes | P-J3 |
+| P-T8 Notes and comments (markup) | 1 | yes | P-J4 |
+| P-T9 Text box (markup) | 1 | yes | P-J4 |
+| P-T10 Pen and shapes (markup) | 2 | yes | P-J4 |
+| P-T11 Fill forms (forms) | 1 | yes | P-J5 |
+| P-T12 Check and clear (forms) | 2 | yes | P-J5 |
+| P-T13 Page operations (pages) | 1 | yes | P-J7 |
+| P-T14 Combine (pages) | 1 | yes | P-J8 |
+| P-T15 Extract and split (pages) | 1 | yes | P-J8 |
+| P-T16 Crop (pages) | 2 | yes | P-J7 (extended by the crop task) |
+| P-T17 Undo (history-files) | 1 | yes | P-J9 |
+| P-T18 Save (history-files) | 1 | yes | P-J10 |
+| P-T19 Open Recent (reader) | 2 | yes | P-J1 (last step) |
+| P-T20 Flatten and passwords (history-files) | 2 | yes | P-J10 |
+| P-T21 Sign (sign) | 1 | yes | P-J6 |
+| P-T22 Reduce File Size (export-convert) | 1 | yes | P-J23 |
+| P-T23 Export text (export-convert) | 2 | yes | P-J21 |
+| P-T24 Export images (export-convert) | 2 | yes | P-J21 |
+| P-T25 Print (export-convert) | 2 | yes | P-J24 |
+| P-T26 Document properties (history-files) | 3 | yes | P-J10 (properties step) |
+| P-T27 OCR (ocr) | 2 | yes | P-J20 |
+| P-T28 Edit text in place (content-edit) | 2 | conditional | P-J25 |
+| P-T29 Redact (content-edit) | 2 | conditional | P-J26 |
+| P-T30 No dead controls (foundation) | 1 | yes | P-J12 |
+| P-T31 to P-T42 | 2-3 | Later | – |
