@@ -107,6 +107,10 @@ the GPL, and pays only if it wants Enterprise (or Team, or AI).
   `docs/blueprints/suite/editions.md`) and their free defaults. They live in
   this repo, so anyone can read exactly what a paid module can and cannot
   reach.
+- The **additional terms** in `ADDITIONAL-TERMS.md`, made under GPL-3.0
+  section 7: keep the copyright and author notices, don't misrepresent the
+  origin and mark modified versions as different, and no trademark rights
+  in the names and icons. `LICENSE` itself is the unchanged GPL-3.0 text.
 - The public build you make from these repos. You may run it, study it,
   change it, and share it, changed or not, under the GPL's terms (above all:
   pass on the source and the same freedoms).
@@ -120,8 +124,9 @@ the GPL, and pays only if it wants Enterprise (or Team, or AI).
   you receive, not a service you use over the network.
 - **The names and marks** "AfterGlow", "Flare", "Design", "Photo", "Library",
   "Halo" and "Paw OS", and the official icons. The GPL licenses code, not
-  trademarks. A fork must use its own name and icons. **Legal review:** a
-  written trademark policy.
+  trademarks. A fork must use its own name and icons and may say "based on
+  AfterGlow"; `docs/trademark-policy.md` says what is allowed and what needs
+  written permission (draft, legal review).
 - **Your documents.** Files you make with the apps are yours; the GPL does
   not reach them.
 
@@ -149,7 +154,7 @@ the GPL, and pays only if it wants Enterprise (or Team, or AI).
    that loads into the GPL core is not the copyright owner, so the GPL's
    terms apply to that combination. Modules built by others for their own
    copy should be GPL-compatible. **Legal review:** state this precisely in
-   the trademark and module terms.
+   the module terms.
 
 ## Contributing: the CLA
 
