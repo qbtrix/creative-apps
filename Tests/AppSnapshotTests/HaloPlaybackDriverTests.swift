@@ -1,8 +1,10 @@
-// HaloPlaybackDriverTests.swift: VP-10's display-link driver (viewer-playback
-// #37). The same target timestamps sent through HaloPlaybackDriver and
-// straight into HaloProject.tick(now:) land on the same frames; the frames
-// follow the targets, not wall time; and a paused model stops the link, the
-// way HaloTransport follows `playback.playing`. macOS only.
+// HaloPlaybackDriverTests.swift: VP-10's playback driver (viewer-playback
+// #37). The same target timestamps fired through HaloPlaybackDriver's link
+// and sent straight into HaloProject.tick(now:) land on the same frames; the
+// frames follow the targets, not wall time; and a paused model stops the
+// link, the way HaloTransport follows `playback.playing`. Every test runs on
+// a FakeLink fired by hand: none starts a real display link, which the
+// headless CI runner can't serve. macOS only.
 #if canImport(AppKit)
 import AppKit
 import HaloModel
@@ -10,25 +12,51 @@ import Testing
 
 @testable import HaloApp
 
+/// A link the test fires by hand; after `invalidate()` it fires nothing.
+@MainActor
+private final class FakeLink: HaloRefreshLink {
+    private let receive: @MainActor (Double) -> Void
+    private(set) var invalidated = false
+
+    init(_ receive: @escaping @MainActor (Double) -> Void) { self.receive = receive }
+
+    func invalidate() { invalidated = true }
+
+    func fire(_ target: Double) {
+        if !invalidated { receive(target) }
+    }
+}
+
 /// Holds the project the driver plays, as the window's state does, and stops
-/// the driver once the Model stops playing, as the transport does.
+/// the driver once the Model stops playing, as the transport does. Every link
+/// the driver asks for is a FakeLink, kept in `links`.
 @MainActor
 private final class HaloPlayer {
     var model: HaloProject
-    // Typed, so the closure's own `driver` doesn't make its inference circular.
-    lazy var driver: HaloPlaybackDriver = HaloPlaybackDriver { [weak self] now in
-        guard let self else { return }
-        self.model.tick(now: now)
-        if !self.model.playback.playing { self.driver.stop() }
-    }
+    private(set) var links: [FakeLink] = []
+    // Typed, so the closures' own `driver` doesn't make its inference circular.
+    lazy var driver: HaloPlaybackDriver = HaloPlaybackDriver(
+        onTick: { [weak self] now in
+            guard let self else { return }
+            self.model.tick(now: now)
+            if !self.model.playback.playing { self.driver.stop() }
+        },
+        makeLink: { [weak self] receive in
+            let link = FakeLink(receive)
+            self?.links.append(link)
+            return link
+        })
 
     init() throws {
         model = HaloProject(services: .fake, document: try #require(HaloFixtures.project("three-layers")))
     }
+
+    /// The link the driver is running on, if it started one.
+    var link: FakeLink? { links.last }
 }
 
 @MainActor
-@Suite struct HaloPlaybackDriverTests {
+@Suite(.timeLimit(.minutes(1))) struct HaloPlaybackDriverTests {
     /// 3 s of 60 Hz targets, far from zero like the link's media clock.
     private let targets = (1...180).map { 5000 + Double($0) / 60 }
 
@@ -37,37 +65,65 @@ private final class HaloPlayer {
         var direct = player.model
         player.model.play(at: 5000)
         direct.play(at: 5000)
+        player.driver.start()
+        let link = try #require(player.link)
         #expect(player.model.playback.playing)
         for target in targets {
-            player.driver.receive(target: target)
+            link.fire(target)
             direct.tick(now: target)
             #expect(player.model.selectedComposition?.playheadFrame == direct.selectedComposition?.playheadFrame)
         }
         #expect(player.model.playback == direct.playback)
+        player.driver.stop()
     }
 
     @Test func framesFollowTheTargetsNotWallTime() throws {
         let player = try HaloPlayer()
         player.model.play(at: 5000)
-        // One second apart on the link's clock, delivered back to back.
-        player.driver.receive(target: 5001)
+        player.driver.start()
+        // One second apart on the link's clock, fired back to back.
+        try #require(player.link).fire(5001)
         let fps = try #require(player.model.selectedComposition).framesPerSecond
         #expect(player.model.selectedComposition?.playheadFrame == fps)
+        player.driver.stop()
     }
 
     @Test func aPausedModelStopsTheLink() throws {
         let player = try HaloPlayer()
         player.model.play(at: 5000)
         player.driver.start()
-        // A headless runner has no screen and so no link.
-        #expect(player.driver.isRunning == (NSScreen.main != nil))
-        player.driver.receive(target: 5000.5)
+        let link = try #require(player.link)
+        #expect(player.driver.isRunning)
+        link.fire(5000.5)
         player.model.pause()
         let frame = player.model.selectedComposition?.playheadFrame
-        player.driver.receive(target: 5002)
+        link.fire(5002)
         #expect(!player.driver.isRunning)
+        #expect(link.invalidated)
         #expect(player.model.selectedComposition?.playheadFrame == frame)
+        // An invalidated link fires nothing more.
+        link.fire(5003)
+        #expect(player.model.selectedComposition?.playheadFrame == frame)
+    }
+
+    @Test func startIsOnceAndStopIsSafe() throws {
+        let player = try HaloPlayer()
         player.driver.stop()
+        #expect(!player.driver.isRunning)
+        player.driver.start()
+        player.driver.start()
+        #expect(player.links.count == 1)
+        player.driver.stop()
+        #expect(!player.driver.isRunning)
+        player.driver.start()
+        #expect(player.links.count == 2)
+        player.driver.stop()
+    }
+
+    @Test func nothingToRefreshOnLeavesTheDriverStopped() {
+        let driver = HaloPlaybackDriver(onTick: { _ in }, makeLink: { _ in nil })
+        driver.start()
+        #expect(!driver.isRunning)
     }
 }
 #endif
