@@ -1,19 +1,19 @@
 // HaloLayerList.swift: the selected composition's layers, top first, flush
 // under the inspector's Layers section (which draws the title, so the list has
-// none), as an editable list (layer-panel, #770). It is a system List, since
-// drag to reorder (`.onMove`) needs one, with its chrome taken off so the rows
-// look as W0's plain stack did: the plain style, no row insets, separators or
-// row backgrounds, no content background, and no List selection (a sidebar
-// List added its own selection inset and grey highlight). Each row spans the
-// section's full width, the same edges as the Composition rows, with its icon
-// and name SuiteSpacing.m inside, and SuiteSpacing.xs under it. The List
-// doesn't scroll inside the inspector's scroll view: its height is its rows'
-// (SuiteSize.studioRow + SuiteSpacing.xs each, one studioRow more while a
-// refusal shows). Each row is a plain Button around SuiteUI's SidebarRow: a
-// click sends `selectLayer`, a double-click on the name renames it on the row
-// (SidebarRow trims the name and drops an empty one, then the row sends
-// `renameLayer(id, name)`). A drag sends `moveLayer(id, to:)`, the index from
-// HaloProject.moveTarget, so the view does no offset math; Delete (⌫) sends
+// none), as an editable list (layer-panel, #770). The rows are a plain stack,
+// not a List: a macOS List insets its rows horizontally even with zero row
+// insets, hidden separators and clear row backgrounds, so the selected row
+// stopped spanning the column and the icons moved in (HaloLayerListTests).
+// Each row spans the section's full width, the same edges as the Composition
+// rows, with its icon and name SuiteSpacing.m inside, and SuiteSpacing.xs
+// between rows; the stack sizes itself, so it never scrolls inside the
+// inspector's scroll view. Each row is a plain Button around SuiteUI's
+// SidebarRow: a click sends `selectLayer`, a double-click on the name renames
+// it on the row (SidebarRow trims the name and drops an empty one, then the
+// row sends `renameLayer(id, name)`). Each row drags its layer id, and a layer
+// id dropped on row i sends `moveLayer(id, to: i)`, so dropping on the bottom
+// row puts the layer at the bottom; the view does no offset math. The stack
+// takes focus on a click, like the timeline, so Delete (⌫) there sends
 // `deleteLayer`. The selected row draws the design.md Selected state: the
 // `stateSelected` tint (SuiteColor.selectedTint) with a 1 pt accent outline at
 // SuiteRadius.row and a semibold name. Names are in primary ink; only the
@@ -36,33 +36,28 @@ struct HaloLayerList: View {
 
     var body: some View {
         let layers = model.selectedComposition?.layers ?? []
-        if layers.isEmpty {
-            Label("No layers yet. Add one from Layer > New.", systemImage: "square.stack.3d.up")
-                .font(SuiteFont.caption)
-                .foregroundStyle(SuiteColor.secondaryText)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .accessibilityIdentifier("halo.layer.empty")
-        } else {
-            List {
-                ForEach(layers) { layer in
-                    HaloLayerRow(
-                        layer: layer, selected: layer.id == model.selectedLayerID,
-                        refusal: refusal(for: layer), perform: perform)
-                    .listRowInsets(EdgeInsets())
-                    .listRowSeparator(.hidden)
-                    .listRowBackground(Color.clear)
-                }
-                .onMove { source, offset in move(source, to: offset, in: layers) }
+        VStack(alignment: .leading, spacing: SuiteSpacing.xs) {
+            if layers.isEmpty {
+                Label("No layers yet. Add one from Layer > New.", systemImage: "square.stack.3d.up")
+                    .font(SuiteFont.caption)
+                    .foregroundStyle(SuiteColor.secondaryText)
+                    .accessibilityIdentifier("halo.layer.empty")
             }
-            .listStyle(.plain)
-            .scrollContentBackground(.hidden)
-            .scrollDisabled(true)
-            .environment(\.defaultMinListRowHeight, SuiteSize.studioRow)
-            .frame(maxWidth: .infinity)
-            .frame(height: height(rows: layers.count, refused: layers.contains { refusal(for: $0) != nil }))
-            .onDeleteCommand { perform(.deleteLayer) }
-            .accessibilityIdentifier("halo.layer.list")
+            ForEach(Array(layers.enumerated()), id: \.element.id) { index, layer in
+                HaloLayerRow(
+                    layer: layer, selected: layer.id == model.selectedLayerID,
+                    refusal: refusal(for: layer), perform: perform)
+                .dropDestination(for: String.self) { ids, _ in
+                    drop(ids, at: index, in: layers)
+                }
+            }
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .focusable()
+        .focusEffectDisabled()
+        .onDeleteCommand { perform(.deleteLayer) }
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier("halo.layer.list")
     }
 
     /// The refusal to show under `layer`'s row: one whose control is that row.
@@ -71,22 +66,17 @@ struct HaloLayerList: View {
         return refusal
     }
 
-    /// Every row's height, plus room for one refusal caption.
-    private func height(rows: Int, refused: Bool) -> CGFloat {
-        (SuiteSize.studioRow + SuiteSpacing.xs) * CGFloat(rows) + (refused ? SuiteSize.studioRow : 0)
-    }
-
-    /// Sends the dragged row's move; the target index comes from the Model.
-    private func move(_ source: IndexSet, to offset: Int, in layers: [HaloLayer]) {
-        guard let from = source.first, layers.indices.contains(from),
-              let target = HaloProject.moveTarget(from: from, toOffset: offset, count: layers.count)
-        else { return }
-        perform(.moveLayer(layers[from].id, to: target))
+    /// Moves a layer id dropped on the row at `index` to that index. Ids that
+    /// aren't this composition's layers, or a row dropped on itself, do nothing.
+    private func drop(_ ids: [String], at index: Int, in layers: [HaloLayer]) -> Bool {
+        guard let id = ids.first, let from = layers.firstIndex(where: { $0.id == id }) else { return false }
+        if from != index { perform(.moveLayer(id, to: index)) }
+        return true
     }
 }
 
 /// One layer row: the select button around SidebarRow (rename on the name),
-/// then its refusal caption, if any.
+/// dragging its layer id, then its refusal caption, if any.
 private struct HaloLayerRow: View {
     let layer: HaloLayer
     let selected: Bool
@@ -111,6 +101,7 @@ private struct HaloLayerRow: View {
                 .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
+            .draggable(layer.id)
             .help(layer.kind.layerTitle)
             .accessibilityValue(layer.kind.layerTitle)
             .accessibilityAddTraits(selected ? .isSelected : [])
@@ -122,7 +113,6 @@ private struct HaloLayerRow: View {
                     .accessibilityIdentifier("halo.layer.refusal")
             }
         }
-        .padding(.bottom, SuiteSpacing.xs)
     }
 }
 
