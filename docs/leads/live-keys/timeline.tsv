@@ -45,3 +45,4 @@ utc	stage	event	ref	note
 2026-10-15T04:08Z	4	ci-run	38677546546	scripts/ci PASS on macOS; Flare journeys pass, audit at or under baseline; red on Library/Halo journeys
 2026-10-15T04:08Z	4	pr-merged	#955	r3-b1 (21db0dd, in run 38677546546)
 2026-10-15T04:08Z	4	stage-start	round 4	panel on a45f1cb
+2026-10-15T04:12Z	4	round-findings	round 4	6 confirmed (2 major); r4-b1 fix batch; gap #967 #968
