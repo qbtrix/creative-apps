@@ -29,13 +29,13 @@ extension PhotoWindow {
         // Nothing taken leaves its reason ("Nothing to copy.") in the status line.
         case .cut:
             if let help = model.cutHelp {
-                problem = help
+                problem = PhotoProblem("Can't cut", help)
             } else if let image = model.cutSelection() {
                 PhotoPasteboard.write(image)
             }
         case .copy:
             if let help = model.copyHelp {
-                problem = help
+                problem = PhotoProblem("Can't copy", help)
             } else if let image = model.copySelection() {
                 PhotoPasteboard.write(image)
             }
@@ -61,11 +61,11 @@ extension PhotoWindow {
     /// Paste: the pasteboard's image as a new layer, or a new image with none open.
     private func pasteFromPasteboard() {
         guard let image = PhotoPasteboard.read() else {
-            problem = model.pasteHelp(false)
+            problem = model.pasteHelp(false).map { PhotoProblem("Can't paste", $0) }
             return
         }
         if let help = model.pasteHelp(true) {
-            problem = help
+            problem = PhotoProblem("Can't paste", help)
             return
         }
         model.paste(image, viewCenter: pasteCenter)
