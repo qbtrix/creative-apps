@@ -1,8 +1,9 @@
 // LiveScenesOrderTests.swift: SN-2's acceptance (docs/blueprints/flare/features/live-scenes.md): `renameScene`
 // and `reorderScene` are one named undo step each that undoes exactly, the index clamps like the fake's, an
-// unknown id throws and changes nothing, and every write leaves the document the fake leaves.
+// unknown id throws and changes nothing, an empty name is refused before and by the service, and every write
+// leaves the document the fake leaves.
 import FlareCore
-import FlareModel
+@testable import FlareModel
 import Testing
 
 private let live = LiveScenes()
@@ -65,4 +66,20 @@ func outOfRangeIndexClampsLikeTheFake(index: Int, landsAt: Int) throws {
         try live.renameScene("missing", to: "Outro", in: &engine)
     }
     #expect(engine.document == start && engine.undoActionName == "Undo Add Scene")
+}
+
+@Test func emptyNameIsRefusedAndChangesNothing() throws {
+    var (engine, _, id) = try twoScenes()
+    let start = engine.document, couldUndo = engine.canUndo
+    #expect(throws: CommandError.emptyName) { try live.renameScene(id, to: "", in: &engine) }
+    #expect(engine.document == start && engine.canUndo == couldUndo && engine.undoActionName == "Undo Add Scene")
+
+    var services = FlareServices.fake()
+    services.scenes = LiveScenes()
+    var w = FlareWorkspace(services: services)
+    w.load(FlareFixtures.bounce)
+    let before = w.document
+    w.renameScene("scene-1", to: "")
+    #expect(w.layerError?.message == "Type a name for the scene.")
+    #expect(w.document == before && !w.canUndo)
 }
