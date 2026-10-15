@@ -29,7 +29,7 @@ packet chains every task on the one before it (shared files or new types).
 | S-9 | 13 | menu bar split per menu | A/PhotoCommands{,+File,+Edit,+Select,+Image,+Layer,+View}.swift | V4; PhotoSelectAllMenuTests | #986 | merged |
 | S-10a | 14 | top bar, status line, PhotoRailTool | A/PhotoEditor, PhotoTopBar, PhotoStatusLine, PhotoRailTool; ST/PhotoEditorSnapshots | photo-status-message-dark.png | #987 | merged |
 | S-10b | 15 | overlays, hover, Return/Escape, StrokePacer modifiers | A/PhotoEditor, PhotoWindow, *Overlay.swift, StrokePacer; ST/PhotoStrokePacerTests | PhotoStrokePacerTests; V7, V9 | #988 | merged |
-| S-11a | 16 | panel split 1: Adjust tab, tool options | A/PhotoPanel, PhotoAdjustTab, PhotoToolOptions, *Options.swift | snapshots unchanged | #989 | open |
+| S-11a | 16 | panel split 1: Adjust tab, tool options | A/PhotoPanel, PhotoAdjustTab, PhotoToolOptions, *Options.swift | snapshots unchanged | #989 | merged |
 | S-11b | 17 | panel split 2: Layers tab, History stub | A/PhotoPanel, PhotoLayersTab, PhotoHistoryTab | PhotoLayerRowSnapshots | – | todo |
 | S-12 | 18 | -PhotoFixture, -PhotoWindowWidth, Preview data pill | M/PhotoFixtures, A/PhotoApp, PhotoWindow, PhotoStatusLine | PhotoLaunchOptionsTests; photo-preview-pill-dark.png | – | todo |
 | S-13a | 11 | PB-2 clone/heal and PB-9 move budgets (model half) | MT/PhotoBudgetTests | PhotoBudgetTests | #979 | merged |

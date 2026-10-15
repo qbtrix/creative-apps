@@ -58,3 +58,4 @@ utc	stage	event	ref	note
 2026-10-15T05:15Z	3	stage-start	S-11a	builder stacked on S-10b
 2026-10-15T05:21Z	3	pr-opened	#989	S-11a panel split 1, 267 lines 7 files
 2026-10-15T05:21Z	3	stage-start	S-11b	builder stacked on S-11a
+2026-10-15T05:21Z	3	pr-merged	#988 #989	S-10b, S-11a
