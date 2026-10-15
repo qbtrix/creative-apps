@@ -2,9 +2,9 @@
 
 Issue: #873 · Packet: docs/blueprints/suite/features/targets.md
 Run: act-1a13f70dda7-kche · Session: claude/feature-lead-targets-w8ietz · Started: 2026-10-15T12:10Z
-Stage: 3 wave 3
-Base: b073dac (dev after TG-0c)
-Next: wait for the lane to merge #1263 (BU-1b, feature-done), then find the dev CI run it dispatches (stage 4: CI, audit, screens, critic panel incl. clarity lens).
+Stage: 4 round 1
+Base: 8fce5e2 (dev with BU-1b #1263)
+Next: read dev CI run 38823367271 (head f3b8987: #1143+#1133, not #1263) for the macOS build of SuiteShell/AfterGlowApp; then find the run whose head contains 8fce5e2 (#1263) and judge round 1 on it.
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -15,7 +15,7 @@ Next: wait for the lane to merge #1263 (BU-1b, feature-done), then find the dev 
 | BU-0 | 1 | scripts/size-report, its fixture test, macos step + artifact (supervisor merges) | scripts/size-report, Tests/size_report/, .github/workflows/ci.yml | Tests/size_report/test_size_report.sh (macos) | #1133 | merged 8e6d8ff |
 | TG-0d | 2 | C4: the 23 planned relationships on new and existing container parts | 15 container.json parts | c4-assemble resolves every end | #1144 | merged |
 | BU-1a | 2 | Package.swift: SuiteModel(+Tests), SuiteShell, AfterGlowApp, one file each (supervisor merges) | Package.swift + 4 files | SuiteIdentityTests | #1143 | merged ea892e2 |
-| BU-1b | 3 | launcher scenes, placeholders, disabled menu stubs (lane, feature-done) | 11 under Sources/AfterGlowApp/ + LauncherMenuStubTests | LauncherMenuStubTests | #1263 | open, lane (feature-done), head 8e2b60c, CI: PASS |
+| BU-1b | 3 | launcher scenes, placeholders, disabled menu stubs (lane, feature-done) | 11 under Sources/AfterGlowApp/ + LauncherMenuStubTests | LauncherMenuStubTests | #1263 | merged 8fce5e2 |
 | BU-S | – | packaging spike on a Mac | docs/blueprints/suite/spike.md | supervisor review | – | supervisor/captain; not in done check |
 
 ## Rounds
