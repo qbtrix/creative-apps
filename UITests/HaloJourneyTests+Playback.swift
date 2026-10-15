@@ -11,7 +11,8 @@
 // (#262) falls back to the playhead moving or holding (expectPlay). The window
 // is 1000 by 640, as every Halo journey but the layout one uses, so it fits
 // CI's 1024 by 768 display. The paused
-// frame f is read from the artboard's value ("Frame f: …") and must lie in
+// frame f is read from the label of the artboard's `halo.viewer.summary`
+// ("Frame f: …"; a label, since values read empty, #262) and must lie in
 // 2…71, so two steps back never meet the clamp; the status timecode (matched
 // by prefix) then reads f − 2. With Loop off a play from 0 runs 3 s and stops
 // on the last frame, so after 4 s the button reads Paused at 00:00:02:23.
@@ -43,7 +44,7 @@ final class HaloPlaybackJourneyTests: XCTestCase {
         halo.press(.space)
         expectPlay(false, halo)
         guard let paused = artboardFrame(halo) else {
-            return XCTFail("the artboard names no frame: \(String(describing: halo.element("halo.viewer").value))")
+            return XCTFail("the artboard names no frame: \(halo.element("halo.viewer.summary").label)")
         }
         XCTAssert(
             (2...Self.lastFrame).contains(paused),
@@ -103,10 +104,13 @@ final class HaloPlaybackJourneyTests: XCTestCase {
         lane.click()
     }
 
-    /// The frame the artboard's value names ("Frame 30: …"); nil when it names none.
+    /// The frame the artboard's summary label names ("Frame 30: …"); nil when it names none.
     @MainActor private func artboardFrame(_ halo: Journey) -> Int? {
-        guard let value = halo.element("halo.viewer").value as? String, value.hasPrefix("Frame ") else { return nil }
-        return Int(value.dropFirst("Frame ".count).prefix { $0.isNumber })
+        let summary = halo.element("halo.viewer.summary")
+        guard summary.waitForExistence(timeout: 5) else { return nil }
+        let label = summary.label
+        guard label.hasPrefix("Frame ") else { return nil }
+        return Int(label.dropFirst("Frame ".count).prefix { $0.isNumber })
     }
 
     /// `halo.transport.play` reads "Playing" (or "Paused"), read as
