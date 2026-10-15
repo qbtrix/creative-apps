@@ -39,3 +39,5 @@ utc	stage	event	ref	note
 2026-10-15T04:35Z	3	pr-opened	#974	S-7b composite hook, 218 lines 5 files
 2026-10-15T04:35Z	3	stage-start	S-8a	builder stacked on S-7b
 2026-10-15T04:35Z	3	stage-start	S-13a	builder stacked on S-7b, beside the app chain
+2026-10-15T04:45Z	3	pr-merged	#974	S-7b, model chain done
+2026-10-15T04:45Z	3	pr-opened	#979	S-13a budgets, 89 lines 1 file; heal p95 4.6 ms noted
