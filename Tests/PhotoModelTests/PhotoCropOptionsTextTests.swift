@@ -25,7 +25,7 @@ import Testing
     @Test func captionSaysWhatToDoThenWhatTheCropIs() throws {
         #expect(PhotoWorkspace(services: .live).cropCaption == "Open an image to crop it.")
         var workspace = try image()
-        #expect(workspace.cropCaption == "Drag on the image, or pick a shape, to start a crop.")
+        #expect(workspace.cropCaption == "Drag on the image, or pick a ratio below, to start a crop.")
         workspace.setCropAspect(.ratio(1, 1))
         #expect(workspace.cropCaption == "Crop 600 × 600 px, 1:1")
         workspace.cancelCrop()
@@ -61,6 +61,25 @@ import Testing
         #expect(workspace.cropSwapHelp == nil)
     }
 
+    @Test func swapNamesTheChangeItMakes() throws {
+        #expect(PhotoWorkspace(services: .live).cropSwapTitle == "Swap Width and Height")
+        var workspace = try image()
+        #expect(workspace.cropSwapTitle == "Swap Width and Height")
+        workspace.setCropAspect(.ratio(1, 1))
+        #expect(workspace.cropSwapTitle == "Swap Width and Height")
+        workspace.setCropAspect(.ratio(3, 2))
+        #expect(workspace.cropSwapTitle == "Swap to 2:3")
+        workspace.swapCropAspect()
+        #expect(workspace.cropSwapTitle == "Swap to 3:2")
+    }
+
+    @Test func theTextSaysRatioNotShape() throws {
+        let workspace = try image()
+        #expect(workspace.cropCaption.contains("ratio") && !workspace.cropCaption.contains("shape"))
+        #expect(workspace.cropAspectGroupHelp.contains("ratio") && !workspace.cropAspectGroupHelp.contains("shape"))
+        #expect(!PhotoWorkspace(services: .live).cropAspectGroupHelp.contains("shape"))
+    }
+
     @Test func fieldsShowTheWholeImageUntilACropIsPending() throws {
         #expect(CropField.allCases.allSatisfy { PhotoWorkspace(services: .live).cropFieldDisplay($0) == 0 })
         var workspace = try image()
@@ -92,9 +111,9 @@ import Testing
         #expect(empty.cropFieldsUnavailableHelp == "Open an image to crop first.")
         #expect(empty.cropApplyHelp == "Open an image to crop first.")
         var workspace = try image()
-        let start = "Drag on the image, or pick a shape, to start a crop."
+        let start = "Drag on the image, or pick a ratio below, to start a crop."
         #expect(workspace.cropFieldsUnavailableHelp == start && workspace.cropApplyHelp == start)
-        #expect(workspace.cropCaption == start && workspace.cropApplyHelp?.contains("pick a shape") == true)
+        #expect(workspace.cropCaption == start && workspace.cropApplyHelp?.contains("pick a ratio") == true)
         #expect(CropField.allCases.allSatisfy { workspace.cropFieldUnavailableHelp($0) == start })
         #expect(workspace.cropCancelHelp == "No crop to cancel.")
         #expect(empty.cropCancelHelp == "Open an image to crop first.")
@@ -127,11 +146,11 @@ import Testing
     }
 
     @Test func theChipGroupSaysWhatItLocks() throws {
-        #expect(PhotoWorkspace(services: .live).cropAspectGroupHelp == "Open an image to choose a crop shape.")
+        #expect(PhotoWorkspace(services: .live).cropAspectGroupHelp == "Open an image to choose a crop ratio.")
         let workspace = try image()
         #expect(
             workspace.cropAspectGroupHelp
-                == "Lock the crop to a shape, width to height. Original keeps the image's own 4:3.")
+                == "Lock the crop to a ratio, width to height. Original keeps the image's own 4:3.")
     }
 
     @Test func xAndYTakeZeroWidthAndHeightDoNot() throws {

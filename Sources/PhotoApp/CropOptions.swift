@@ -1,8 +1,9 @@
 // CropOptions.swift: the crop tool's options in the Adjust tab (PV-3): the
 // pending crop's X, Y, W and H as ScrubFields two per row in a Grid (X over
 // W, Y over H, equal columns), the six aspect chips, Swap, then Apply Crop
-// and Cancel. Apply carries no Return shortcut, so Return in a field commits
-// the field; Return on the canvas applies through `.confirm`. Cancel carries
+// over Cancel, each action full width and every row SuiteSpacing.xs apart.
+// Apply carries no Return shortcut, so Return in a field commits the field;
+// Return on the canvas applies through `.confirm`. Cancel carries
 // no Escape shortcut either, which would close a field being typed in before
 // its own Escape; Escape on the canvas cancels through `.dismiss`.
 // Each field reports its bounds through CropFieldBoundsKey as an anchor, so
@@ -17,7 +18,8 @@ struct CropOptions: View {
     let perform: PhotoPerform
 
     var body: some View {
-        VStack(alignment: .leading, spacing: SuiteSpacing.s) {
+        // One row gap throughout, InspectorSection's own (SuiteSpacing.xs).
+        VStack(alignment: .leading, spacing: SuiteSpacing.xs) {
             // The one instruction line, always present so nothing moves when a crop appears.
             Text(model.cropCaption)
                 .font(SuiteFont.inspectorMeta)
@@ -41,20 +43,19 @@ struct CropOptions: View {
             ) { perform(.crop(.aspect($0))) }
                 .disabled(model.canvas == nil)
                 .help(model.cropAspectGroupHelp)
+            // The title names the change ("Swap to 2:3"), so its tooltip does too.
             InspectorAction(ToolbarAction(
-                "Swap", systemImage: "arrow.left.arrow.right", unavailableHelp: model.cropSwapHelp,
+                model.cropSwapTitle, systemImage: "arrow.left.arrow.right", unavailableHelp: model.cropSwapHelp,
                 identifier: "photo.crop.swap"
             ) { perform(.crop(.swap)) })
-            HStack(spacing: SuiteSpacing.xs) {
-                InspectorAction(ToolbarAction(
-                    "Apply Crop", systemImage: "crop", unavailableHelp: model.cropApplyHelp,
-                    identifier: "photo.crop.apply"
-                ) { perform(.applyCrop) })
-                InspectorAction(ToolbarAction(
-                    "Cancel", systemImage: "xmark", unavailableHelp: model.cropCancelHelp,
-                    identifier: "photo.crop.cancel"
-                ) { perform(.cancelCrop) })
-            }
+            InspectorAction(ToolbarAction(
+                "Apply Crop", systemImage: "crop", unavailableHelp: model.cropApplyHelp,
+                identifier: "photo.crop.apply"
+            ) { perform(.applyCrop) })
+            InspectorAction(ToolbarAction(
+                "Cancel", systemImage: "xmark", unavailableHelp: model.cropCancelHelp,
+                identifier: "photo.crop.cancel"
+            ) { perform(.cancelCrop) })
         }
     }
 
@@ -68,7 +69,7 @@ struct CropOptions: View {
     /// One of X, Y, W, H: whole canvas pixels, X and Y from 0, W and H from 1,
     /// up to the canvas's size. With nothing pending it shows the whole
     /// image's rect (until ScrubField takes a placeholder), and takes typing
-    /// once a shape is locked, unless the crop already spans that side.
+    /// once a ratio is locked, unless the crop already spans that side.
     private func field(_ field: CropField) -> some View {
         // Each field on its own: one the lock or the image's edge pins says why.
         let reason = model.cropFieldUnavailableHelp(field)

@@ -1,7 +1,7 @@
 // PhotoCropOptionsSnapshots.swift: the crop tool's options (photo-crop CP-4,
 // PV-3) on an 800 x 600 image. Writes photo-crop-options-light/dark.png (the
 // empty state: Crop picked, no crop, Free, the fields disabled under "Drag on
-// the image, or pick a shape, to start a crop.") and
+// the image, or pick a ratio below, to start a crop.") and
 // photo-crop-ratio-light/dark.png (1:1 locked, a centered 600 x 600 pending
 // crop, Y disabled since the crop spans the full height). `gridAligned` checks blueprint 7.4 rule
 // 5: the four fields' frames (CropFieldBoundsKey) form a 2 x 2 grid, X over W and Y
@@ -39,7 +39,7 @@ import Testing
         let model = try opened()
         #expect(model.tool == .crop && model.pendingCrop == nil && model.cropAspect == .free)
         #expect(!model.cropFieldsEnabled)
-        #expect(model.cropCaption == "Drag on the image, or pick a shape, to start a crop.")
+        #expect(model.cropCaption == "Drag on the image, or pick a ratio below, to start a crop.")
         let tiles = try photoTiles(model)
         for scheme in [ColorScheme.light, .dark] {
             try snapshot(
