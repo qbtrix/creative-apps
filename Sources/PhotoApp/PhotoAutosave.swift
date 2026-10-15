@@ -6,7 +6,8 @@
 // (the main actor only copies the workspace value). A write that lands after
 // a save or a discard is removed again. `launch` reads `leftBehind()` off the
 // main actor (a damaged file is already dropped) and offers the newest;
-// Restore and Discard remove what the crash left. Times come in as arguments.
+// Restore decodes the offer off the main actor (`decode`), then installs it,
+// and Restore and Discard remove what the crash left. Times come in as arguments.
 import Foundation
 import Observation
 import PhotoModel
@@ -73,10 +74,19 @@ final class PhotoAutosave {
         return RecoveryOffer(entry: newest, time: Self.time)
     }
 
-    /// Restore: opens the offer's image, dirty and unsaved, then removes what
-    /// the crash left behind (the next edit autosaves it under this window).
-    func restore(_ offer: RecoveryOffer, into model: inout PhotoWorkspace, codec: any PhotoImageCodec) throws {
-        try model.restore(offer.entry, codec: codec)
+    /// Restore, first half: decodes the offer's PNGs through `archive` in a
+    /// detached task, off the main actor.
+    nonisolated static func decode(
+        _ offer: RecoveryOffer, archive: any DocumentArchiving, codec: any PhotoImageCodec
+    ) async throws -> PhotoDocumentSnapshot {
+        let package = offer.entry.package
+        return try await Task.detached(priority: .userInitiated) { try archive.decode(package, codec: codec) }.value
+    }
+
+    /// Restore, second half: opens the decoded image, dirty and unsaved, then
+    /// removes what the crash left behind (the next edit autosaves it under this window).
+    func restore(_ offer: RecoveryOffer, decoded snapshot: PhotoDocumentSnapshot, into model: inout PhotoWorkspace) throws {
+        try model.restore(offer.entry, decoded: snapshot)
         discardLeftBehind()
     }
 

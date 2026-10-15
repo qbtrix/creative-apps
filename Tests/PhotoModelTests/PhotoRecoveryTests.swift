@@ -102,6 +102,33 @@ import Testing
         #expect(restored.isDirty)
     }
 
+    @Test func decodedRestoreMatchesThePackageRestore() throws {
+        let archive = FakeArchive()
+        let entry = try #require(try editedImage().recoveryEntry(now: 1, archive: archive, codec: RawCodec()))
+        var fromPackage = PhotoWorkspace(services: .fake)
+        try fromPackage.restore(entry, archive: archive, codec: RawCodec())
+        var fromSnapshot = PhotoWorkspace(services: .fake)
+        try fromSnapshot.restore(entry, decoded: try archive.decode(entry.package, codec: RawCodec()))
+        #expect(fromSnapshot.layers.count == 2)
+        #expect(fromSnapshot.isDirty)
+        #expect(fromSnapshot.fileKind == nil)
+        #expect(fromSnapshot.documentName == "beach.png")
+        #expect(fromSnapshot.saveAction == .saveAs)
+        #expect(fromSnapshot.layers == fromPackage.layers)
+        #expect(try fromSnapshot.snapshot() == (try fromPackage.snapshot()))
+    }
+
+    @Test func aDamagedDecodedRestoreLeavesTheWorkspaceAsItWas() throws {
+        let before = try openedImage("other.png")
+        var workspace = before
+        let entry = RecoveryEntry(documentName: "beach.png", savedAt: 1, package: PhotoPackage(files: [:]))
+        let empty = PhotoDocumentSnapshot(
+            canvas: try #require(before.canvas), layers: [], pixels: [:], masks: [:],
+            adjustments: before.adjustments, selectedLayerID: nil)
+        #expect(throws: ArchiveError.self) { try workspace.restore(entry, decoded: empty) }
+        #expect(workspace == before)
+    }
+
     @Test func restoreWithoutANameStaysUntitled() throws {
         let archive = FakeArchive()
         let edited = try editedImage()
