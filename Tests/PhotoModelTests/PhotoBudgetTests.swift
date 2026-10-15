@@ -2,7 +2,9 @@
 // 7.1, packet S-13) on the `large` fixture (4000 x 3000, three layers, on
 // `.fake`): the wall time of the `drag` call one pointer move makes, over 60
 // moves of one stroke after its press. PB-2: a clone and a heal move with a
-// 64 px dab, median within 1 ms; PB-9: a move-tool move, median within
+// 64 px dab, median within 1 ms; each move goes 20 px, past the 16 px dab
+// spacing, so every timed move lays at least one fresh dab (as
+// PhotoBrushLatencyTests does) rather than re-touching painted pixels; PB-9: a move-tool move, median within
 // 0.1 ms. Both touch pixels or ride on a stroke that does, so per the
 // blueprint the median is gated in a release build
 // (`swift test -c release --filter PhotoBudgetTests`) and only reported in
@@ -35,7 +37,7 @@ private let events = 60
         #expect(workspace.cloneSource?.point == point(1200, 1500))
         let id = try #require(workspace.selectedLayerID)
         let before = workspace.pixels[id]
-        let costs = timedMoves(&workspace, from: point(1600, 1500), step: 6)
+        let costs = timedMoves(&workspace, from: point(1600, 1500), step: 20)
         workspace.endDrag()
         #expect(workspace.pixels[id] != before, "the \(tool) stroke painted")
         #expect(workspace.undoActionName == (tool == .heal ? "Undo Heal" : "Undo Clone"))
