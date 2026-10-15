@@ -1,3 +1,5 @@
 utc	stage	event	ref	note
 2026-10-15T08:08Z	0	stage-start	1dcd1a6	base verified; deps #777 and #333 closed
 2026-10-15T08:08Z	2	stage-end	-	three waves: LP-1 | LP-2, LP-3 | LP-4
+2026-10-15T08:31Z	3	pr-merged	#1041	LP-1 layer edits
+2026-10-15T08:31Z	3	stage-start	62a8577	wave 2: LP-2, LP-3 building
