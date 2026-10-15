@@ -10,3 +10,7 @@ utc	stage	event	ref	note
 2026-10-15T12:38Z	3	pr-merged	#1132	CP-1
 2026-10-15T12:38Z	3	stage-end	wave 1	dev 265b1fe
 2026-10-15T12:38Z	3	stage-start	wave 2	CP-2
+2026-10-15T12:46Z	3	pr-opened	#1141	CP-2 workspace crop API
+2026-10-15T12:46Z	3	pr-merged	#1141	CP-2
+2026-10-15T12:46Z	3	stage-end	wave 2	dev 61d9c13
+2026-10-15T12:46Z	3	stage-start	wave 3	CP-3, CP-4
