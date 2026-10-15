@@ -14,17 +14,12 @@ struct LibraryStatusBar: View {
     static let previewHelp = "This window shows built-in sample data, not photos on disk."
 
     var body: some View {
-        ViewerStatusBar(zoom: 1, size: Self.countText(model.items.count)) {
+        ViewerStatusBar(zoom: 1, size: LibraryCatalog.photoCountText(model.items.count)) {
             if model.services.isPreview {
                 Text("Preview data").accessibilityIdentifier("library.status.preview").statusPill(.warning)
                     .help(Self.previewHelp)
                     .accessibilityHint(Self.previewHelp)
             }
         }
-    }
-
-    /// "1 photo", "26 photos".
-    static func countText(_ count: Int) -> String {
-        count == 1 ? "1 photo" : "\(count) photos"
     }
 }

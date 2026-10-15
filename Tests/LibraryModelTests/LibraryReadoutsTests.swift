@@ -100,11 +100,52 @@ private func image(_ width: Int, _ height: Int) -> DisplayImage? {
     #expect(catalog.notice?.message == "Imported 2 photos. 1 file couldn't be imported.")
     catalog.catalogState = .damaged
     #expect(catalog.notice?.source == .catalog)
-    #expect(catalog.notice?.isError == true)
+    #expect(catalog.notice?.isError == false)
     #expect(catalog.notice?.action == .showCatalogInFinder)
     #expect(catalog.notice?.message == CatalogFileState.damaged.message)
     catalog.catalogState = .newer(version: 2)
     #expect(catalog.notice?.source == .catalog && catalog.notice?.action == nil)
+    #expect(catalog.notice?.isError == true)
+}
+
+@Test func damagedCatalogNoticeIsAWarningAndNewerIsAnError() {
+    var catalog = LibraryCatalog()
+    catalog.catalogState = .damaged
+    #expect(catalog.notice?.isError == false)
+    catalog.catalogState = .newer(version: 9)
+    #expect(catalog.notice?.isError == true)
+}
+
+@Test func emptyStateSaysWhyImportCantActAndPointsToSamples() {
+    let catalog = LibraryCatalog()
+    let live = catalog.emptyState(importReason: nil)
+    #expect(live == LibraryEmptyState(
+        title: "No Photos", message: "Photos you import appear here, sorted by the date they were taken.",
+        offersImport: true))
+    let off = catalog.emptyState(importReason: "Import isn't connected yet (import).")
+    #expect(off.title == "No Photos" && off.offersImport)
+    #expect(off.message.contains("Import isn't connected yet (import)."))
+    #expect(off.message.contains("File > Load Sample Photos"))
+    #expect(catalog.emptyState(importReason: "No importer").message.hasPrefix("No importer. Choose"))
+}
+
+@Test func emptyStateAgreesWithTheCatalogNotice() {
+    var catalog = LibraryCatalog()
+    catalog.catalogState = .newer(version: 9)
+    let newer = catalog.emptyState(importReason: "Import isn't connected yet (import).")
+    #expect(newer.title != "No Photos" && !newer.offersImport)
+    #expect(!newer.message.contains("import") && newer.message.contains("Update Library"))
+    catalog.catalogState = .damaged
+    let damaged = catalog.emptyState(importReason: nil)
+    #expect(damaged.title != "No Photos" && damaged.offersImport)
+    #expect(damaged.message.contains("catalog.json.bad"))
+    #expect(catalog.emptyState(importReason: "Off.").message.contains("File > Load Sample Photos"))
+}
+
+@Test func photoCountTextHandlesTheSingular() {
+    #expect(LibraryCatalog.photoCountText(0) == "0 photos")
+    #expect(LibraryCatalog.photoCountText(1) == "1 photo")
+    #expect(LibraryCatalog.photoCountText(60) == "60 photos")
 }
 
 @Test func helpForAMemberIsItsUnavailableReason() {

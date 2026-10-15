@@ -18,6 +18,16 @@ public struct LibraryNoticeContent: Hashable, Sendable {
     }
 }
 
+/// The empty catalog's title and message, and whether it offers Import Folder….
+public struct LibraryEmptyState: Hashable, Sendable {
+    public var title: String
+    public var message: String
+    public var offersImport: Bool
+    public init(title: String, message: String, offersImport: Bool) {
+        self.title = title; self.message = message; self.offersImport = offersImport
+    }
+}
+
 extension LibraryCatalog {
     /// A grid cell's value: `unreadable`, `ready W×H` or `loading`, then the
     /// photo's `cullSummary` ("ready 256×171 3 stars, Picked, Red"). Empty for an unknown id.
@@ -94,7 +104,10 @@ extension LibraryCatalog {
     public var notice: LibraryNoticeContent? {
         if let message = catalogState.message {
             let action: LibraryNoticeContent.Action? = catalogState == .damaged ? .showCatalogInFinder : nil
-            return LibraryNoticeContent(message: message, isError: true, action: action, source: .catalog)
+            // A damaged file was set aside and Library carries on (a warning);
+            // a newer one is refused (an error).
+            return LibraryNoticeContent(
+                message: message, isError: catalogState != .damaged, action: action, source: .catalog)
         }
         if let importNotice {
             return LibraryNoticeContent(
@@ -105,6 +118,37 @@ extension LibraryCatalog {
             return LibraryNoticeContent(message: cullError, isError: true, action: nil, source: .cull)
         }
         return nil
+    }
+
+    /// What the empty catalog's content says, agreeing with the catalog
+    /// notice above it. `importReason` is why Import Folder… can't act (nil
+    /// when it can); the message then says so and points to File > Load
+    /// Sample Photos. A newer catalog offers no import: nothing is saved over it.
+    public func emptyState(importReason: String?) -> LibraryEmptyState {
+        let hint = importReason.map { reason in
+            (reason.hasSuffix(".") ? reason : reason + ".") + " Choose File > Load Sample Photos to try Library."
+        }
+        switch catalogState {
+        case .newer:
+            return LibraryEmptyState(
+                title: "Catalog Not Opened",
+                message: "Your photos are safe in the newer catalog. Update Library to see them.",
+                offersImport: false)
+        case .damaged:
+            let kept = "The old catalog is kept as catalog.json.bad, and this new one starts empty."
+            return LibraryEmptyState(
+                title: "New Catalog Started", message: hint.map { kept + " " + $0 } ?? kept, offersImport: true)
+        case .loading, .ready:
+            return LibraryEmptyState(
+                title: "No Photos",
+                message: hint ?? "Photos you import appear here, sorted by the date they were taken.",
+                offersImport: true)
+        }
+    }
+
+    /// "1 photo", "26 photos": the status bar's count.
+    public static func photoCountText(_ count: Int) -> String {
+        count == 1 ? "1 photo" : "\(count) photos"
     }
 
     /// Why the services member `member` ("importer", "loupe", ...) can't act

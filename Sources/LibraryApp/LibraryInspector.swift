@@ -31,7 +31,7 @@ struct LibraryInspector: View {
             } else if let metadata = model.selectedMetadata {
                 MetadataInspector(metadata: metadata, onStar: onStar, onFlag: onFlag, onLabel: onLabel)
             } else if let collection = model.selectedCollection {
-                InspectorHeader(collection.name, details: ["\(collection.count) photos"])
+                InspectorHeader(collection.name, facts: [InspectorFact("Photos", "\(collection.count)")])
             }
         }
     }

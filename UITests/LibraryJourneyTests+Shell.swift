@@ -56,6 +56,10 @@ final class LibraryShellJourneyTests: XCTestCase {
             let tag = library.app.helpTags.matching(
                 NSPredicate(format: "label CONTAINS %@ OR title CONTAINS %@ OR value CONTAINS %@", reason, reason, reason))
             XCTAssert(tag.firstMatch.waitForExistence(timeout: 5), "Import Folder… doesn't say \(reason)")
+            let hint = "File > Load Sample Photos"
+            let message = window.staticTexts.matching(
+                NSPredicate(format: "label CONTAINS %@ OR value CONTAINS %@", hint, hint)).firstMatch
+            XCTAssert(message.exists, "the empty state doesn't say why import is off or point to \(hint)")
         }
 
         // Step 3: nothing to undo or redo on launch.
@@ -72,6 +76,10 @@ final class LibraryShellJourneyTests: XCTestCase {
     @MainActor func testEveryControlActsOrSaysWhy() {
         let library = Journey("Library", self, arguments: ["-LibraryFixture", "samples", "-SuitePerfProbe"])
         XCTAssert(library.app.windows.firstMatch.waitForExistence(timeout: 30), "no window opened")
+        let pill = library.element("library.status.preview")
+        XCTAssert(pill.waitForExistence(timeout: 10), "no Preview data pill on the fakes")
+        let frame = library.app.windows.firstMatch.frame
+        XCTAssert(frame.contains(pill.frame), "the Preview data pill \(pill.frame) is outside the window \(frame)")
         library.shot("controls")
         let listed = Self.decode(library.element("library.controls"))
         XCTAssertNotNil(listed, "no library.controls JSON")

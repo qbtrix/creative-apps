@@ -58,7 +58,8 @@ struct LibraryWindow: View {
                     // On the content, so it hears keys only while the grid or the loupe has focus.
                     .onKeyPress(phases: .down) { press in route(press) }
                 if model.services.isPreview {
-                    LibraryStatusBar(model: model)
+                    // Keeps its height; the content above shrinks to fit.
+                    LibraryStatusBar(model: model).fixedSize(horizontal: false, vertical: true)
                 }
             }
         } inspector: {
