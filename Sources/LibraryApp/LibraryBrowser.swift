@@ -33,7 +33,7 @@ struct LibraryBrowser: View {
                     ToolbarAction($0, systemImage: "photo.on.rectangle.angled", perform: onShowAll)
                 })
         } else if let photo = model.loupeItem, let position = model.loupePosition {
-            LibraryLoupe(photo: photo, position: position, menu: menu, onStep: onStep, onGrid: onGrid)
+            LibraryLoupe(photo: photo, position: position, menu: menu, value: model.loupeValue, cropDraft: model.cropDraft, onStep: onStep, onGrid: onGrid)
         } else {
             LibraryGrid(model: model, menu: menu, onSelect: onSelect, onOpen: onOpen)
         }
