@@ -6,13 +6,16 @@ import FlareCore
 import Testing
 
 @Test func notBuiltReasonReachesThePerson() {
-    let reason = "Scenes aren't available yet."
+    // Parentheses like FlareServices.live's real reasons, so the generic engine path would hide it.
+    let reason = "Not connected yet (IN-4)."
     var services = FlareServices.fake()
     services.scenes = FakeScenes(unavailable: reason)
     var w = FlareWorkspace(services: services)
     w.load(FlareFixtures.bounce)
     w.addScene()
+    #expect(w.layerError == .refused(reason))
     #expect(w.layerError?.message == reason)
+    #expect(!w.canUndo)
     #expect(w.document == FlareFixtures.bounce)
 }
 
