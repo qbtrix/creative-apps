@@ -2,3 +2,4 @@ utc	stage	event	ref	note
 2026-10-15T02:23Z	0	stage-start	#812	base c4ec078, fresh lead branch
 2026-10-15T02:30Z	1	stage-end	#812	packet read, 19 tasks copied
 2026-10-15T02:30Z	2	stage-end	#812	one task per wave, packet chain order
+2026-10-15T02:44Z	-	heartbeat	#812	waiting on builders or the lane
