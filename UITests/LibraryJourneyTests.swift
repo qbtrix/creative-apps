@@ -9,20 +9,24 @@ final class LibraryJourneyTests: XCTestCase {
         Journey("Library", self).expectWindowShell()
     }
 
+    /// File > Load Sample Photos fills an empty catalog's grid.
     @MainActor func testLoadSamplePhotos() {
-        let library = Journey("Library", self)
-        library.click("Load Sample Photos", step: "sample-photos")
+        let library = Journey("Library", self, arguments: ["-LibraryFixture", "empty"])
+        XCTAssert(library.app.windows.firstMatch.waitForExistence(timeout: 30), "no window opened")
+        let file = library.app.menuBars.firstMatch.menuBarItems["File"]
+        file.click()
+        file.menuItems["Load Sample Photos"].click()
+        XCTAssert(samplePhoto(in: library).waitForExistence(timeout: 10), "no sample photo in the grid")
+        library.shot("sample-photos")
     }
 
     @MainActor func testEveryMenuOpens() {
-        let library = Journey("Library", self)
-        library.click("Load Sample Photos")
+        let library = Journey("Library", self, arguments: ["-LibraryFixture", "samples"])
         library.openEachMenu()
     }
 
     @MainActor func testLoupeStepsAndReturnsToTheGrid() {
-        let library = Journey("Library", self)
-        library.click("Load Sample Photos")
+        let library = Journey("Library", self, arguments: ["-LibraryFixture", "samples"])
         let view = library.app.menuBars.firstMatch.menuBarItems["View"]
         view.click()
         view.menuItems["Loupe"].click()
@@ -37,12 +41,8 @@ final class LibraryJourneyTests: XCTestCase {
     /// Selecting a photo swaps the collection card for its metadata inspector;
     /// a star rates it.
     @MainActor func testRateASelectedPhoto() {
-        let library = Journey("Library", self)
-        library.click("Load Sample Photos")
-        // A cell's label leads with its badges ("2 stars, Purple, IMG_0034"), so
-        // match the file name anywhere in a grid button's label.
-        let photo = library.app.splitGroups.descendants(matching: .button)
-            .matching(NSPredicate(format: "label CONTAINS %@", "IMG_")).firstMatch
+        let library = Journey("Library", self, arguments: ["-LibraryFixture", "samples"])
+        let photo = samplePhoto(in: library)
         XCTAssert(photo.waitForExistence(timeout: 10), "no sample photo in the grid")
         photo.click()
         library.shot("photo-inspector")
@@ -51,5 +51,13 @@ final class LibraryJourneyTests: XCTestCase {
 
     @MainActor func testImportRateAndRelaunch() throws {
         throw XCTSkip("journey arrives with #210 (import), #211 (rate) and #212 (relaunch)")
+    }
+
+    /// The grid's first sample photo. A cell's label leads with its badges
+    /// ("2 stars, Purple, IMG_0034"), so match the file name anywhere in a
+    /// grid button's label.
+    @MainActor private func samplePhoto(in library: Journey) -> XCUIElement {
+        library.app.splitGroups.descendants(matching: .button)
+            .matching(NSPredicate(format: "label CONTAINS %@", "IMG_")).firstMatch
     }
 }
