@@ -177,9 +177,11 @@ final class HaloLayersJourneyTests: XCTestCase {
         expectClosed("Edit", halo)
     }
 
-    /// The open menu has faded out, so the next shot shows the window alone.
+    /// Gives the open `menu` up to 2 s to fade out, so the next shot shows the window alone.
+    /// Best-effort: on macOS `app.menus` still matches the menu bar items' menus after an item
+    /// is chosen, so the wait can't be asserted (as PhotoJourneyTests' Reset wait does).
     @MainActor private func expectClosed(_ menu: String, _ halo: Journey) {
-        XCTAssert(halo.app.menus.firstMatch.waitForNonExistence(timeout: 2), "the \(menu) menu stayed open")
+        _ = halo.app.menus.firstMatch.waitForNonExistence(timeout: 2)
     }
 
     /// Clicks the menu bar's `menu` open and returns it.
