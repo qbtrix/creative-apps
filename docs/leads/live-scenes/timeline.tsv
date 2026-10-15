@@ -32,3 +32,4 @@ utc	stage	event	ref	note
 2026-10-15T01:42Z	5	pr-merged	#914	feature-done: refusal test isolation, packet and waves status
 2026-10-15T01:42Z	5	ci-run	38667087530	queued on c3fd66f
 2026-10-15T01:50Z	5	ci-run	38667087530	Linux green; macOS red only SuiteUI SnapshotHost+Tokens; all Flare green; waiting for a green dev run
+2026-10-15T01:56Z	5	ci-run	38667485578	re-dispatch on c3fd66f: same SuiteUI-only red; watching for the next run
