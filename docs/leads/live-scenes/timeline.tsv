@@ -26,3 +26,6 @@ utc	stage	event	ref	note
 2026-10-15T01:16Z	4	heartbeat	round3	container restarted; round 3 fixers relaunched on 207c54c
 2026-10-15T01:34Z	4	pr-merged	#910 #911	round 3 fixes
 2026-10-15T01:34Z	4	stage-start	round4	Linux gate cba1813 PASS; same five lenses; last round
+2026-10-15T01:37Z	4	round-clean	round4	1 minor, 0 refuted
+2026-10-15T01:37Z	4	stage-end	round4	4 rounds used
+2026-10-15T01:37Z	5	stage-start	finish	feature-done PR building
