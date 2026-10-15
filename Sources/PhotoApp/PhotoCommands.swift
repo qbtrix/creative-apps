@@ -1,6 +1,6 @@
 // PhotoCommands.swift: Photo's menu bar, composed in order from one file per
 // menu (PhotoCommands+File, +Edit, +Select, +Image, +Layer, +View). File: New
-// Image, Open…, Save, Save As…, Export…; Edit: Undo and Redo named for the
+// Image, Open…, Open Recent, Save, Save As…, Export…; Edit: Undo and Redo named for the
 // edit, Cut, Copy, Paste, Delete Selection, Fill Selection; Select: All, Deselect; Image: Image
 // Size…, Rotate, Straighten…; Layer: New, Delete, Duplicate, Merge Down,
 // Flatten Image, Rename…, Show/Hide, Bring Forward, Send Backward, Select
@@ -107,6 +107,8 @@ private struct PhotoMenuKey: FocusedValueKey {
 /// Composes the menus; each menu's items live in PhotoCommands+<Menu>.swift.
 struct PhotoCommands: Commands {
     @FocusedValue(\.photoMenu) var focused
+    /// The focused window's Open Recent files (PhotoWindow+File.swift).
+    @FocusedValue(\.photoRecentFiles) var recentFiles
 
     var menu: PhotoMenu { focused ?? PhotoMenu() }
 
