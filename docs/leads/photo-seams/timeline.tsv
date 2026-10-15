@@ -22,3 +22,5 @@ utc	stage	event	ref	note
 2026-10-15T03:47Z	3	pr-opened	#956	S-6a v2 state, 311 lines 8 files
 2026-10-15T03:47Z	3	stage-start	S-6b	builder stacked on S-6a
 2026-10-15T03:47Z	3	pr-merged	#956	S-6a, ce3e768, first PhotoApp edit
+2026-10-15T03:53Z	3	pr-opened	#959	S-6b step ids, 213 lines 3 files
+2026-10-15T03:53Z	3	stage-start	S-5	builder stacked on S-6b
