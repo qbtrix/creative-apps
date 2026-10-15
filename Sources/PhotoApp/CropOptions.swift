@@ -6,6 +6,8 @@
 // Return on the canvas applies through `.confirm`. Cancel carries
 // no Escape shortcut either, which would close a field being typed in before
 // its own Escape; Escape on the canvas cancels through `.dismiss`.
+// Each field row is one accessibility element (the letter, the field's name
+// and value combined) carrying the field's identifier.
 // Each field reports its bounds through CropFieldBoundsKey as an anchor, so
 // a test measures the 2 x 2 grid without an assistive client; nothing in the
 // app reads it. Values in, intents out.
@@ -91,9 +93,13 @@ struct CropOptions: View {
                 guard number.isFinite else { return }
                 perform(.crop(.field(field, Int(number.rounded()))))
             }
-            .suiteControl(id: id, enabled: enabled, reason: reason)
             .anchorPreference(key: CropFieldBoundsKey.self, value: .bounds) { [id: $0] }
         }
+        // The row is one element: the drawn letter joins the field's name, value
+        // and adjust actions, so a disabled field's dimmed letter is part of a
+        // disabled control, not stray text; the identifier goes on that element.
+        .accessibilityElement(children: .combine)
+        .suiteControl(id: id, enabled: enabled, reason: reason)
         .disabled(!enabled)
         .help(reason ?? model.cropFieldHelp(field))
     }
