@@ -3,3 +3,4 @@ utc	stage	event	ref	note
 2026-10-15T08:08Z	2	stage-end	-	three waves: LP-1 | LP-2, LP-3 | LP-4
 2026-10-15T08:31Z	3	pr-merged	#1041	LP-1 layer edits
 2026-10-15T08:31Z	3	stage-start	62a8577	wave 2: LP-2, LP-3 building
+2026-10-15T08:39Z	3	pr-merged	#1045	LP-2 Layer commands, availability, rename prompt

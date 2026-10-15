@@ -10,7 +10,7 @@ Next: wait for LP-2's and LP-3's PRs (branches layer-panel/lp-2, layer-panel/lp-
 | id | wave | behavior | files | test | PR | state |
 |---|---|---|---|---|---|---|
 | LP-1 | 1 | delete, rename, move (+ forward/backward, `moveTarget`), duplicate: each one named `edit` step; delete un-parents through `keying.setParent(nil, …)` with the `.notBuilt` fallback | `Sources/HaloModel/HaloLayerEdits.swift`, `Tests/HaloModelTests/HaloLayerEditsTests.swift` | `HaloLayerEditsTests` | #1041 | merged (a2313a5) |
-| LP-2 | 2 | Layer commands' availability and routes; Rename Layer prompt from `request`; edit budgets | `Sources/HaloModel/Availability/HaloAvailability+Layers.swift`, `Sources/HaloApp/HaloWindow+Layers.swift`, `Tests/HaloModelTests/HaloLayerAvailabilityTests.swift`, `Tests/HaloModelTests/HaloLayerEditsBudgetTests.swift` | `HaloLayerAvailabilityTests`, `HaloLayerEditsBudgetTests` | – | building |
+| LP-2 | 2 | Layer commands' availability and routes; Rename Layer prompt from `request`; edit budgets | `Sources/HaloModel/Availability/HaloAvailability+Layers.swift`, `Sources/HaloApp/HaloWindow+Layers.swift`, `Tests/HaloModelTests/HaloLayerAvailabilityTests.swift`, `Tests/HaloModelTests/HaloLayerEditsBudgetTests.swift` | `HaloLayerAvailabilityTests`, `HaloLayerEditsBudgetTests` | #1045 | merged |
 | LP-3 | 2 | `HaloLayerList` as a `List` of `SidebarRow`s: select, rename, `.onMove`, `.onDeleteCommand`, refusal caption, empty text; snapshots | `Sources/HaloApp/HaloLayerList.swift`, `Tests/AppSnapshotTests/HaloLayersSnapshots.swift` | snapshots `halo-layer-list{,-refused,-empty}-{light,dark}.png` | – | building |
 | LP-4 | 3 | H-J9 `testLayerHousekeeping`, eight steps; `feature-done` | `UITests/HaloJourneyTests+Layers.swift` | H-J9 on the dev CI run | – | waits on LP-2, LP-3 |
 
@@ -26,10 +26,11 @@ Journeys: H-J9 (8 steps, packet "Journey steps"). Quality bars: QB-F1 no dead co
 - Waves as the packet has them: LP-2 and LP-3 each call LP-1's methods (need its merged code); LP-4's journey needs LP-2's routes and LP-3's list. #777 and #333 are both closed.
 - Wave 1 has one task, so one worktree subagent rather than the build-wave workflow.
 - The container had no Swift; ran the repo's `scripts/cloud-setup.sh` to install the pinned 6.3.3 toolchain for the gate.
-
 - LP-1 (#1041): Position X 560.0 at 12 not asserted: Ball's parent is set directly, so un-parenting keeps its world place (x = 560 + Rig's offset); the test asserts the world anchor point within 1e-6, which is the contract.
 - LP-3 keeps W0's row look (HaloLayerListTests pixel checks) with a chrome-less plain `List`, since `.onMove` needs a List.
 - Wave 2 has 2 independent tasks: two worktree subagents started together, not the build-wave workflow.
+- LP-2 (#1045): `.selectLayer(nil)` stays off with "A layer stays selected until you pick another." (no Model method clears the selection); Rename is the alert's default button (Return renames).
+- The GitHub MCP appends an attribution footer to PR bodies; the lead strips it with update_pull_request after each PR opens.
 
 ## Open
 - none
