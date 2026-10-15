@@ -4,7 +4,7 @@ Issue: #1073 · Packet: docs/blueprints/photo/features/photo-journey-kit.md
 Run: act-1a1406baff9-fu36 · Session: cloud lead session · Started: 2026-10-15T16:36Z
 Stage: 4 round 1
 Base: 9f28a9f7dcb6e9d584a7c80847e8ef0108fa5e17
-Next: wait for a dev CI run past PhotoCompositeCostTests (photo-edit timing bound, reported on #763 by others); read its ui-test: PhotoJourneyKitTests.testWrittenPhotoOpens, V1-V12, Photo audit
+Next: read the first dev CI run on or after 0672506 (includes the composite bound fix #1229): macOS ui-test, PhotoJourneyKitTests.testWrittenPhotoOpens, V1-V12, Photo audit
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |

@@ -13,3 +13,4 @@ utc	stage	event	ref	note
 2026-10-15T17:45Z	4	heartbeat	38777072611	still red on LiveRecovery compile; fix #1224 open; waiting
 2026-10-15T18:06Z	4	ci-run	38782884668	queued on f9846c9 after LiveRecovery fix #1226
 2026-10-15T18:32Z	4	ci-run	38782884668	red: PhotoCompositeCostTests timing (photo-edit), ui-test skipped; already reported on #763
+2026-10-15T18:58Z	4	heartbeat	0672506	composite bound fix #1229 on dev; no CI run since 38782884668 yet
