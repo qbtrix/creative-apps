@@ -56,3 +56,6 @@ utc	stage	event	ref	note
 2026-10-15T20:14Z	4	pr-opened	#1239	fix B Open Recent with no window
 2026-10-15T20:15Z	4	pr-opened	#1240	fix A identifiers
 2026-10-15T20:16Z	4	heartbeat	-	waiting
+2026-10-15T20:16Z	4	pr-merged	#1240	fix A
+2026-10-15T20:16Z	4	pr-merged	#1239	fix B
+2026-10-15T20:16Z	4	pr-merged	#1233 #1234 #1235	perf, D-12, D-11

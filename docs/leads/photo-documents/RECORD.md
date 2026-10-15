@@ -4,7 +4,7 @@ Issue: #1074 · Packet: docs/blueprints/photo/features/photo-documents.md
 Run: act-1a1404bf04c-bp6m · Session: claude/photo-documents-lead-ezrcev · Started: 2026-10-15T10:40Z
 Stage: 4 round 1
 Base: 6018826c90376f7b4ea46336d85e8da510c90f4d
-Next: wait for fixes A, B, D and #1233-#1235 to merge; then fix C (restore decode off main); round 2 on the CI run containing them
+Next: wait for fix D (recovery dir) and fix C (restore off main) to merge; round 2 on the CI run that contains them
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -20,8 +20,8 @@ Next: wait for fixes A, B, D and #1233-#1235 to merge; then fix C (restore decod
 | D-8 | 5 | Save status in top bar, edited dot, Saving…/Opening… notes; snapshots | A/PhotoTopBar.swift, A/PhotoWindow+File.swift, ST/PhotoDocumentsSnapshots.swift | PhotoDocumentsSnapshots | #1228 | merged |
 | D-9 | 6 | PhotoAutosave + wiring | A/PhotoAutosave.swift, A/PhotoWindow+File.swift, ST/PhotoAutosaveTests.swift | PhotoAutosaveTests | #1230 | merged |
 | D-10 | 7 | App delegate: Open Recent/Finder opens, unsaved prompt on close/quit | A/PhotoApp.swift, A/PhotoWindow+File.swift, ST/PhotoUnsavedPromptTests.swift | PhotoUnsavedPromptTests | #1232 | merged |
-| D-11 | 8 | Journeys PJ-1, PJ-1b, PJ-2, PJ-4 | UT/PhotoJourneyTests+Documents.swift | macOS run | #1235 | open |
-| D-12 | 8 | Journeys PJ-3, PJ-P3  | UT/PhotoJourneyTests+Recovery.swift, UT/PhotoJourneyTests+PerfDocuments.swift | macOS run | #1234 | open |
+| D-11 | 8 | Journeys PJ-1, PJ-1b, PJ-2, PJ-4 | UT/PhotoJourneyTests+Documents.swift | macOS run | #1235 | merged |
+| D-12 | 8 | Journeys PJ-3, PJ-P3  | UT/PhotoJourneyTests+Recovery.swift, UT/PhotoJourneyTests+PerfDocuments.swift | macOS run | #1234 | merged |
 
 Waves (packet's Build waves, checked against dev at 00e546a):
 - Wave 1: D-1, D-3 — independent of each other.
@@ -72,3 +72,4 @@ Waves (packet's Build waves, checked against dev at 00e546a):
 - Early fix batch started from builders' findings (before round 1 CI): A ids on Keep layers?/document menu (lead/photo-documents-fix-ids), B Open Recent with no window (lead/photo-documents-fix-recent). C restore off main waits on A (both touch PhotoWindow+File.swift).
 - D-11 journeys quit + relaunch to use Open Recent (no-window menu was empty); fix B makes the packet's path work.
 - Lesson: journeys must isolate every persistent folder the app writes (recovery dir); an alert left by one journey blocks clicks and sheets for every later launch.
+- Merged in round 1: #1233 perf, #1234 D-12, #1235 D-11, #1239 fix B, #1240 fix A. #1236 (another session) raised the macOS job to 90 min.
