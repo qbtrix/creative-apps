@@ -165,9 +165,15 @@ mac_check_url() {
 }
 
 # mac_run_id <url>: the run id when <url> is a workflow run of REPO, else nothing.
+# Case-insensitive through nocasematch, restored after: ${x,,} needs bash 4,
+# and the supervisor runs these tests with macOS's bash 3.2.
 mac_run_id() {
-  local re="^https://github\.com/${REPO//./\\.}/actions/runs/([0-9]+)(/.*)?\$"
-  if [[ "${1,,}" =~ ${re,,} ]]; then echo "${BASH_REMATCH[1]}"; fi
+  local re="^https://github\.com/${REPO//./\\.}/actions/runs/([0-9]+)(/.*)?\$" id="" was=0
+  shopt -q nocasematch && was=1
+  shopt -s nocasematch
+  if [[ "$1" =~ $re ]]; then id="${BASH_REMATCH[1]}"; fi
+  (( was )) || shopt -u nocasematch
+  [[ -z "$id" ]] || echo "$id"
 }
 
 # mac_gate <pr.json> <files.txt> <run.json>: nothing when the PR touches no

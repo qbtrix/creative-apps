@@ -197,6 +197,9 @@ mac "a run of another repo is refused" \
 mac "a matching green run passes" "eligible|150|2|Fast-Check marker" "$MAC_PR" "$GATED" .
 mac "a job URL of that run passes" "eligible|150|2|Fast-Check marker" \
   "$MARKED | .body += \"\\n  Mac-Check:   $RUN_URL/job/123  \"" "$GATED" .
+mac "an upper-case repo URL passes" "eligible|150|2|Fast-Check marker" \
+  "$MARKED | .body += \"\\nMac-Check: https://github.com/QBTRIX/Creative-Apps/actions/runs/38700000001\"" "$GATED" .
+if shopt -q nocasematch; then echo "FAIL mac: mac_run_id leaves nocasematch on"; fail=1; else echo "ok   mac: mac_run_id restores nocasematch"; fi
 mac "every gated file is named" \
   "mac-gate|changes Sources/SuiteUI/EditorShell.swift, Sources/SuiteUI/Tokens.swift, Sources/SuiteUI/ToolbarGroup.swift, shared" \
   "$MARKED" $'Sources/SuiteUI/Tokens.swift\nSources/SuiteUI/ToolbarGroup.swift\nSources/SuiteUI/EditorShell.swift' .
