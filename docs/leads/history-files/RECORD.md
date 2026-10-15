@@ -3,8 +3,8 @@
 Issue: #1037 · Packet: docs/blueprints/halo/features/history-files.md
 Run: act-1a13e9a2037-pkqb · Session: claude/history-files-lead-j2c6lo · Started: 2026-10-15T08:08Z
 Stage: 4 round 1
-Base: 3e475173ee796f7e37c5108d93db7557a91da177
-Next: wait for fix-batch wf_c714e674-222 (r1-b1, r1-b2) PRs and critic-panel wf_dd6cb011-757; fold confirmed critic findings into a round-1 follow-up batch; then round 2 on the CI run containing the fixes
+Base: bcf5a099960d2ceb59394cdd38c0b83c7640b7cc
+Next: wait for fix-batch wf_e5588495-b46 (r1-b3, feature-done) to merge; round 2 on the dev CI run containing #1083, #1084 and r1-b3
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -44,6 +44,7 @@ Next: wait for fix-batch wf_c714e674-222 (r1-b1, r1-b2) PRs and critic-panel wf_
 - Run 38711122431 (2fc9b59, has HF-9 app code): swift build+test CI: PASS on macOS; journey failures there are other lines (Photo fixture launch, Halo testLayoutAtWidths, H-J9 rename, SuiteUI gallery audit), #763.
 - Round 1 critic: in-scope majors (unsaved state not visible; failed save should read "Not saved" without an edit; journeys launch 1280 wide on a 1024 display) + minor (menu fade in shots) go to batch r1-b3 after r1-b1/b2 merge (same files). Packet contradiction on "Not saved": took the Screens table and HF-9 proof (error first) over the pseudocode.
 - Out-of-scope W0-file findings filed as gap issues: #1081 (File menu drops New Window), #1082 (open-error wording, menu symbols).
+- r1-b3: didFailSave also sets unsaved, so a failed save reads "Not saved" with no edit while a failed open keeps its status; it carries feature-done again because #1068's run was red.
 
 ## Open
 - #1081, #1082 gap (W0 files)
