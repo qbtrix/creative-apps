@@ -46,6 +46,14 @@ Product, site and survey names are replaced by the ids in the source key below. 
 | S-WEB3D | A browser-based 3D design tool aimed at designers. | https://community.spline.design/ , https://docs.spline.design/llms.txt , https://docs.spline.design/basics/faq.md , https://hunted.space/product/spline/launches/spline-alpha |
 | S-CAD-MAC | A Mac/iPad direct-modeling CAD tool. Its user forum. | https://discourse.shapr3d.com/top.json , https://discourse.shapr3d.com/t/9546 |
 | S-APPLE | Apple developer documentation, WWDC sessions and developer forums. | (per row in section F) |
+| S-REVIEWS-A | A software review site. Returned 403 to direct fetch; figures are search snippets. | https://www.g2.com/products/blender/reviews , https://www.g2.com/compare/camtasia-vs-maya-vs-blender , https://www.g2.com/compare/adobe-after-effects-vs-greensock-animation-platform-vs-cinema-4d , https://www.g2.com/products/3ds-max/reviews?qs=pros-and-cons |
+| S-REVIEWS-B | A second software review site. Returned 403 to direct fetch; figures are search snippets. | https://www.capterra.com/p/167519/Blender/reviews/ , https://www.capterra.com/p/146825/Maya/reviews/ |
+| S-REVIEWS-AGG | A vendor-rating aggregator that quotes several review sites. Read via search snippet. | https://www.rfp.wiki/vendors/spline |
+| S-APPSTORE | The Mac App Store listing for S-CAD-MAC. | https://apps.apple.com/us/app/shapr3d-cad-modeling/id1091675654 |
+| S-PRICING | A CG industry news site's pricing coverage (the same site as S-ARCHVIZ-RENDER), plus a second CG news site's petition post. | https://www.cgchannel.com/2017/03/autodesk-to-raise-price-of-its-software-maintenance-plans/ , https://www.cgchannel.com/2020/02/autodesk-to-end-maintenance-plans-and-multi-user-subs , https://cgpress.org/archives/petition-to-keep-perpetual-licensing-at-autodesk.html |
+| S-VENDOR-IDEAS | V-A's public ideas forum. Returned 403 to direct fetch. | https://forums.autodesk.com/t5/3ds-max-ideas/3ds-max-for-mac/idi-p/7048579 |
+| S-SCULPT-FORUM | P-SCULPT's user forum. | https://www.zbrushcentral.com/t/thread-regarding-maxon-transition/418100?page=3 |
+| S-C2PA-NOTES | A secondary site that writes explainers about C2PA. | https://c2paviewer.com/articles/apple-reference-image-vs-c2pa |
 
 ### Products and features named inside the sources
 
@@ -72,6 +80,14 @@ Product, site and survey names are replaced by the ids in the source key below. 
 | P-VIDEO-GRADE | a commercial video editor with color grading |
 | P-VIDEO | a commercial video editor |
 | P-RENDER-A, P-RENDER-B | two commercial render engines |
+| P-PRO3D-A | a commercial 3D animation suite, sold by V-A |
+| P-PRO3D-B | a second commercial 3D modeling and animation suite from V-A, Windows only |
+| V-A | the vendor of P-PRO3D-A and P-PRO3D-B |
+| V-B | the vendor of P-MOTION3D, which also bought P-SCULPT |
+| P-BUNDLE-B | V-B's all-apps subscription bundle |
+| P-CRDT-A | an MIT-licensed CRDT library for Swift (with a companion networking repo) |
+| P-CRDT-B | an MIT-licensed CRDT library for JavaScript |
+| P-CRDT-B-SWIFT | MIT-licensed Swift bindings to P-CRDT-B's Rust port |
 
 ## A. What people do
 
@@ -846,3 +862,224 @@ Verified 2026-10-15 against developer.apple.com (docs MCP mirror and the DocC JS
 - S-NEWS comment-search counts were unreliable and are not used. S-SOCIAL was read through a mirror.
 - The S-OSS-SURVEY-2025 motion-graphics share (25.5%) is the best motion-design 3D signal found, but it covers that suite's users only.
 - Apple items marked 27.0+ are not on macOS 26. "Not found" in F means absence of evidence in the docs, not a confirmed absence.
+
+## I. Pain points: public complaints about today's 3D tools
+
+Collected 2026-10-15 from public sources only.
+
+**Ranking method.** Themes are ranked first by how many independent kinds of source report them (review sites, user forums, the Q&A site, the issue tracker, news and pricing coverage, app store reviews, social threads, vendor forums), then by the size of the strongest single number behind them. Views, posts, issue counts and review shares are different units, so the second step is a judgment call; the strongest number is stated on each row.
+
+**What could not be fetched.**
+
+- Review sites (S-REVIEWS-A, S-REVIEWS-B and two more) and V-A's forums returned 403 to direct fetch. Their figures come from search-engine snippets and are marked "(search snippet)". S-REVIEWS-A per-tag counts were not visible.
+- S-SOCIAL (the main site and its mirrors) was blocked this time, so there are no social-site vote counts.
+- The code host's search API was blocked for this session, so there are no issue-reaction counts.
+- S-IDEAS has no vote ranking available (the board is retired; no snapshot found).
+- Exact sources: S-QA through its public API; S-DEVTALK and S-FORUM through their forum JSON; S-TRACKER through its tracker API. Tracker counts are full-text matches that include the issue template, so they are upper bounds. macOS/Metal tracker counts are inflated by the system-info template and are not used.
+
+### I1. Ranking
+
+| Rank | Theme | Source kinds | Strongest number |
+|---|---|---|---|
+| 1 | Cost, subscriptions and licensing | 5: review sites, app store, CG news, social, vendor forum | maintenance price hikes up to 20% (2017-19); V-B bundle ~$1,199-1,265/yr (search snippet) |
+| 2 | Performance: viewport, undo, render time | 4: review sites, forums, Q&A, tracker | 239,546 views ("Enable GPU rendering"); 620 open "performance" issues |
+| 3 | Crashes, instability and data loss | 4: review sites, forums, Q&A, tracker | 654 open "crash" issues; 72% negative of 74 reviews (search snippet) |
+| 4 | Mac, Apple silicon and iPad support | 3: forums, Q&A, vendor forum | 988,635 views (S-FORUM Mac thread, Part 1) |
+| 5 | Learning curve, interface and navigation | 3: review sites, forums, Q&A | 705,494 views ("focus on selected object"); origin/pivot ~1.5M views across 3 questions |
+| 6 | File interchange (import/export) | 3: Q&A, forums, tracker | 381,292 views (how to import a closed commercial scene file, .max) |
+| 7 | Modeling-tool reliability (booleans, precision) | 3: Q&A, forums, tracker | 200,196 views ("Boolean modifier not working"); 259 open "boolean" issues |
+| 8 | Add-on breakage across versions | 1: forums | 210 posts, 33,585 views |
+
+Cost ranks first on breadth, but nearly all of its numbers are search snippets; the forum, Q&A and tracker numbers in rows 2-7 are exact.
+
+**How this maps to part 1A of the blueprint.** I1 groups complaints into 8 themes. Part 1A of `docs/blueprints/3d.md` ranks the 15 single pain points inside them, by the same two steps applied per item. The per-item order differs from the theme order because single items with exact, very large numbers (navigation questions at 705,494 views) outrank items whose numbers are snippets. The 15 by theme:
+
+- theme 1 (cost): PP-5
+- theme 2 (performance): PP-8, PP-11, PP-12
+- theme 3 (crashes and data loss): PP-3, PP-14
+- theme 4 (Mac support): PP-4
+- theme 5 (learning curve and interface): PP-1, PP-2, PP-6, PP-9
+- theme 6 (file interchange): PP-7, PP-10
+- theme 7 (modeling reliability): PP-13
+- theme 8 (add-on breakage): PP-15
+
+### I2. Cost, subscriptions and licensing
+
+- P-PRO3D-A on S-REVIEWS-B: "subscription plans are too expensive" (search snippet). https://www.capterra.com/p/146825/Maya/reviews/
+- P-PRO3D-B on S-REVIEWS-A (323 reviews): an AI summary says the subscription cost is high for freelancers and small studios (search snippet). https://www.g2.com/products/3ds-max/reviews?qs=pros-and-cons
+- P-COMPOSITE on S-REVIEWS-A: Expensive (12) (search snippet). https://www.g2.com/compare/adobe-after-effects-vs-greensock-animation-platform-vs-cinema-4d
+- S-WEB3D: 2.8 (2 reviews) on S-REVIEWS-A, 3.0 (2) on S-REVIEWS-B and 2.9 (2) on a consumer review site, per S-REVIEWS-AGG. Complaints: billing and cancellation, performance on polygon-heavy scenes, paid exports (search snippet, tiny sample). https://www.rfp.wiki/vendors/spline
+- S-APPSTORE: S-CAD-MAC rates 4.7 from 34K ratings; visible reviews complain about price ("$239/annual", "absolutely ridiculous"). Fetched 2026-10-15. https://apps.apple.com/us/app/shapr3d-cad-modeling/id1091675654
+- S-PRICING: V-A raised maintenance prices 5%/10%/20% (2017-19) and ended perpetual-license maintenance in May 2021; users started a petition thread (search snippet). https://www.cgchannel.com/2017/03/autodesk-to-raise-price-of-its-software-maintenance-plans/ , https://cgpress.org/archives/petition-to-keep-perpetual-licensing-at-autodesk.html , https://www.cgchannel.com/2020/02/autodesk-to-end-maintenance-plans-and-multi-user-subs
+- A "Bring back perpetual licensing" thread in V-A's subforum on S-SOCIAL's host site, Feb 2025 (no vote count; seen via a mirror link in a snippet).
+- P-MOTION3D ~$719-840/yr, P-BUNDLE-B ~$1,199-1,265/yr; an argument about it in S-SOCIAL, Mar 2025 (search snippet).
+- S-SCULPT-FORUM: complaints about P-SCULPT's move to V-B. https://www.zbrushcentral.com/t/thread-regarding-maxon-transition/418100?page=3
+
+### I3. Performance: viewport, undo, render time
+
+- Review sites: P-PRO3D-B is slow with complex scenes and heavy files (S-REVIEWS-A AI summary, search snippet). P-MOTION3D: Performance Issues (2) (S-REVIEWS-A, search snippet).
+- Undo (forums):
+  - 129 posts, 24,732 views: "Undo Performance Feedback". https://devtalk.blender.org/t/2554
+  - 143 posts, 28,752 views: "Will something be done about [S-OSS]'s slow undo system?" https://blenderartists.org/t/1161768
+  - 72 posts, 7,810 views: "Undo Performance Must Be Addressed". https://devtalk.blender.org/t/8838
+  - Users reported 3-8 s, 17 s and 45 s per undo on big scenes (search snippet).
+- Viewport: 31 posts, 21,338 views: "Why is [S-OSS]'s viewport performance so slow/even slower?", 2020. https://blenderartists.org/t/1232100 . With hundreds of objects or 30-40M polygons, selection takes seconds (search snippet quote).
+- Renderers: R-RT next-generation feedback, 1,288 posts, 154,342 views; R-PT feedback, 1,124 posts, 102,638 views. Render quality and speed regressions are mixed with praise. https://devtalk.blender.org/t/31813 , https://devtalk.blender.org/t/18598
+- S-QA (score / views):
+  - 98 / 239,546: Enable GPU rendering. https://blender.stackexchange.com/questions/7485
+  - 24 / 148,167: Reduce noise in R-PT. https://blender.stackexchange.com/questions/18304
+  - 88 / 122,742: How to avoid noisy renders. https://blender.stackexchange.com/questions/4980
+  - 5 / 38,708: Why is the render taking so long. https://blender.stackexchange.com/questions/31973
+  - 44 / 122,504: Undo steps. https://blender.stackexchange.com/questions/3026
+  - 7 / 45,700: Undo not working. https://blender.stackexchange.com/questions/78085
+- S-TRACKER (open, full-text, upper bounds): "slow" 539; "performance" 620; "undo" 385; "regression" 409.
+
+### I4. Crashes, instability and data loss
+
+- Review sites (search snippets):
+  - S-REVIEWS-B, S-OSS: "Crashes/glitches" theme 72% negative of 74 reviews mentioning it. S-OSS has 950 reviews there, rated 4.7. https://www.capterra.com/p/167519/Blender/reviews/
+  - S-REVIEWS-A comparison pages: "software crashes and instability (3 mentions)".
+  - P-PRO3D-A on S-REVIEWS-A (267 reviews, 4.3): top cons Crashes (1), Software Bugs (1). https://www.g2.com/compare/camtasia-vs-maya-vs-blender . On S-REVIEWS-B: "crashes can be frequent". https://www.capterra.com/p/146825/Maya/reviews/
+- Data loss on save (orphan data): 107 posts, 14,632 views, 207 likes: "[S-OSS] Deleted My Un-assigned Materials - How is That A Feature? - Fake User", 2022. https://devtalk.blender.org/t/22715 . The same complaint appears in the S-FORUM thread in I6 ("trashing your data in ... save", 13 likes).
+- S-QA: 18 / 25,742: Recover overwritten files. https://blender.stackexchange.com/questions/14101
+- S-TRACKER (open, full-text, upper bounds): 6,877 open issues in total; "crash" 654; "freeze" 166; "data loss" 54; "autosave" 36.
+
+### I5. Mac, Apple silicon and iPad support
+
+- 9,990 posts, 988,635 views, 12,065 likes: S-FORUM "Mac: M3 - Hardware accelerated RT (Part 1)", 2020-11-10 to 2023-06-07. https://blenderartists.org/t/1264658
+- 4,906 posts, 412,948 views, still active 2026-10-11: Part 2, "The [S-OSS] macOS and general Apple thread". https://blenderartists.org/t/1467856
+- 387 posts, 75,833 views, 1,270 likes: "Is there interest in supporting a Metal version of [R-PT] for MacOS?", 2018-12-15. https://devtalk.blender.org/t/4475
+- 440 posts, 90,508 views: "[R-PT] Apple Metal device feedback", 2021-12-13. https://devtalk.blender.org/t/21868
+- 56 posts, 166,909 views: "[S-OSS] for iPad Pro, please!" https://devtalk.blender.org/t/17429
+- S-QA, Mac input: pan on a Mac 7 / 16,784; a one-button Mac mouse 7,463 views; no numpad period key 6,683 views.
+- P-PRO3D-B has no macOS build and V-A says it has "no plans"; several S-VENDOR-IDEAS posts ask for one (vote counts not visible). https://forums.autodesk.com/t5/3ds-max-ideas/3ds-max-for-mac/idi-p/7048579
+
+### I6. Learning curve, interface and navigation
+
+- Review sites (search snippets):
+  - S-REVIEWS-B, S-OSS: "Steep learning curve" theme 57% negative of 60 reviews mentioning it; "Interface" theme 51% negative of 104. https://www.capterra.com/p/167519/Blender/reviews/
+  - S-REVIEWS-A AI summary for S-OSS (319 reviews per the page title): "many note a steep learning curve due to its complex interface". https://www.g2.com/products/blender/reviews
+  - S-REVIEWS-A: P-MOTION3D (137 reviews, 4.6) cons Difficult Learning (2); P-COMPOSITE on the same page, Learning Curve (13). https://www.g2.com/compare/adobe-after-effects-vs-greensock-animation-platform-vs-cinema-4d
+- Forums (exact):
+  - 4,020 posts, 211,282 views, 10,568 likes, 496 participants: "[S-OSS] UI paper cuts", 2018-10-31 to 2020-07-01. https://devtalk.blender.org/t/blender-ui-paper-cuts/2596 . Most-liked posts: remember the File Browser display mode (59); outliner shift-select (41); unclear status bar info (34); bevel profile values (30); outliner selection that works like P-PRO3D-A's (30); no save prompt on File > New (24); hard to tell proportional editing is on (23).
+  - 2,385 posts, 184,827 views, 4,100 likes: "What is the most bat-guano-insane thing in [S-OSS] that you can't believe they haven't fixed yet?", 2021-04-23. https://blenderartists.org/t/1300129 . Most-liked posts: can't select backfaces without X-ray (41); UV unwrap tools 10-15 years old (28); console window flash on Windows (23); Alt needed to edit all selected (21); parent/unparent in the Outliner loses the transform (15); "[S-OSS] trashing your data in ... save" orphan data (13); export takes the entire scene by default for FBX/OBJ/STL (12).
+  - 1,409 posts, 127,344 views: "[S-OSS] user interface design", 2018-05-30. https://devtalk.blender.org/t/505
+  - 410 posts, 38,425 views: "[S-OSS] is moving in the wrong direction", 2018-12-02. https://devtalk.blender.org/t/3853
+  - 409 posts, 33,681 views: "Left click select keymap". https://devtalk.blender.org/t/3168
+- S-QA (score / views), basic navigation and object handling:
+  - 133 / 705,494: Focus on the selected object. https://blender.stackexchange.com/questions/6735
+  - 299 / 693,322: Transparent PNG background. https://blender.stackexchange.com/questions/1303
+  - Origin/pivot, ~1.5M views across 3 questions: change pivot/origin 214 / 665,586 (https://blender.stackexchange.com/questions/1291); recenter origin 148 / 448,035 (/14294); setting the pivot point 55 / 391,629 (/5519).
+  - 249 / 592,679: Zoom stops at a point (/644).
+  - 172 / 525,135: Separate mesh parts (/6184). 233 / 506,376: Merge areas (/5631).
+  - 57 / 475,627: Join objects into one (/2632). 31 / 445,941: Merge meshes (/76700). 21 / 143,410: Group objects (/33743). 11 / 64,125: "group so they move together (2.8)" (/134627).
+  - 68 / 391,612: Image texture on a material in R-PT (/8697). 41 / 292,339: Show textures in the viewport (/5283).
+  - 25 / 241,224: Updating to the latest version (/41123).
+  - Render vs viewport looking different: only small questions (3.5k-3.9k views), so a weak signal.
+
+### I7. File interchange (import/export)
+
+- S-QA (score / views):
+  - 39 / 381,292: how to import a closed commercial scene file (.max) (/14808).
+  - 43 / 338,461: Import .mtl (/5110).
+  - 67 / 317,674: FBX export has no materials/textures (/57531).
+  - 33 / 312,395: STEP (/126324).
+  - 43 / 155,218: Pink textures (/5368).
+  - 27 / 124,302: Open glTF (/93415).
+  - 41 / 120,498: Export a single object from a scene (/55913).
+- Forums: export takes the whole scene by default for FBX/OBJ/STL (12 likes, I6). 52 posts, 12,855 views: "[S-ENGINE] interop". https://devtalk.blender.org/t/38559
+- S-TRACKER (open, full-text, upper bounds): FBX 95; glTF 70; USD 119.
+
+### I8. Modeling-tool reliability (booleans, precision)
+
+- S-QA (score / views): Boolean modifier not working 24 / 200,196 (/34781); Why doesn't boolean work 17 / 84,875 (/7480); cut a shape out 86 / 296,189 (/7928); non-manifold 110 / 201,366 (/7910).
+- Forums: 280 posts, 24,580 views: "Snapping & precision modeling improvements". https://devtalk.blender.org/t/28435 . UV unwrap tools 10-15 years old (28 likes, I6).
+- S-TRACKER (open, full-text, upper bound): "boolean" 259.
+
+### I9. Add-on breakage across versions
+
+- 210 posts, 33,585 views: "Changes to Add-on and Themes Bundling (4.2 onwards)". https://devtalk.blender.org/t/34593
+
+### I10. Caveats for this section
+
+- Forum view counts here were read at a different moment from E5, so the same thread can differ by a few dozen views (for example 211,282 here, 211,239 in E5).
+- Q&A view counts measure how many people needed help, not how many complained. They show where people get stuck, not how angry they are.
+- Review-site AI summaries and theme shares are the sites' own aggregation, read from snippets.
+
+## J. Features from the future: what makes them possible on a Mac
+
+Checked 2026-10-15. Apple docs were read live through the apple-docs MCP (a mirror of developer.apple.com, timestamped 2026-10-15); standards through web fetch and search. Items not confirmed on the cited page are marked *unverified*.
+
+**Context.** macOS 27 is the current release. The Apple Intelligence support page says "macOS 27", M1 or later, and up to 8 to 14 GB of storage. https://support.apple.com/en-us/121115 . Several items below are **macOS 27 only**. If the deployment target stays macOS 26, they need `if #available(macOS 27, *)`.
+
+### J1. On-device AI over the scene graph
+
+| macOS | API | Notes | URL |
+|---|---|---|---|
+| 26.0+ | Foundation Models `SystemLanguageModel` | The on-device model behind Apple Intelligence. Check availability first (`.deviceNotEligible`, `.modelNotReady`). Three model versions so far: 26.0-26.3, 26.4 and 27.0. | https://developer.apple.com/documentation/foundationmodels/systemlanguagemodel |
+| 26.0+ | `@Generable` / `@Guide` guided generation | The framework turns the type into a JSON schema, which uses context. | https://developer.apple.com/documentation/foundationmodels/generable |
+| 26.0+ | `Tool` protocol (tool calling) | Arguments are `@Generable`. The model can chain tool calls back to back; tool definitions take up context. | https://developer.apple.com/documentation/foundationmodels/tool |
+| back-deployed to before 26.4 | `contextSize` | Reports the token limit. The page gives no number. | https://developer.apple.com/documentation/foundationmodels/systemlanguagemodel/contextsize |
+| probably 27, *unverified* | `LanguageModelSession.DynamicProfile`, `reasoningLevel`, `onToolCall` | Listed in the framework index; exact OS versions not checked. | https://developer.apple.com/documentation/foundationmodels |
+
+- Fit for this app: expose scene-graph queries and edits as `Tool`s, and have the model return `@Generable` edit plans. The model never sees raw USD, only the tool output.
+- MLX Swift: MIT license, Apple silicon, Metal backend. Building from source needs Xcode because SwiftPM can't build the Metal shaders. LLM and VLM models live in the separate mlx-swift-lm repo. https://github.com/ml-explore/mlx-swift
+- Core ML: not fetched this session (details *unverified*).
+- Text-to-3D or image-to-3D: **no Apple API found**; the apple-docs search returned nothing. The WWDC26 Reality Composer Pro 3 session mentions "AI-assisted features" inside the editor, which is a tool, not an API (scope *unverified*). https://developer.apple.com/videos/play/wwdc2026/280
+- Photos to 3D: see Object Capture (J6).
+
+### J2. Live collaboration without a cloud account
+
+| macOS | API | Notes | URL |
+|---|---|---|---|
+| 26.0+ | Network framework `NetworkListener`, `NetworkBrowser`, `NetworkConnection` (Swift concurrency) | Bonjour advertising through `.bonjour(type:)`. | https://developer.apple.com/documentation/network/networklistener |
+| 10.15+ | `NWBrowser` / `NWListener` | Needs `NSBonjourServices` and `NSLocalNetworkUsageDescription`. | https://developer.apple.com/documentation/network/nwbrowser |
+| deprecated in Xcode 27 | Multipeer Connectivity | TN3213: "Xcode 27 deprecates the entire Multipeer Connectivity framework." Migrate to Network framework, which has opt-in Apple peer-to-peer Wi-Fi, recommends QUIC with mutual TLS, and also supports Wi-Fi Aware. TLS-PSK doesn't work with QUIC or TLS 1.3. The MCSession API is still documented; avoid it in new code. | https://developer.apple.com/documentation/technotes/tn3213-moving-from-multipeer-connectivity-to-network-framework , https://developer.apple.com/documentation/multipeerconnectivity |
+| 12.0+ | SharePlay `GroupSessionMessenger` | Rides the FaceTime channel, so it needs FaceTime and an Apple ID rather than an account of the app's own. Reliable or unreliable delivery. `GroupSessionJournal` handles file attachments. There is a `createTogether` activity type. Needs the `com.apple.developer.group-session` entitlement. | https://developer.apple.com/documentation/groupactivities/groupsessionmessenger , https://developer.apple.com/documentation/groupactivities |
+
+- CRDT libraries:
+  - P-CRDT-A: MIT, version 0.5.2 in its quickstart. Networking comes from a companion repo. https://github.com/automerge/automerge-swift
+  - P-CRDT-B: MIT. https://github.com/yjs/yjs
+  - P-CRDT-B-SWIFT: MIT, bindings over an XCFramework, but its README marks it "WIP". https://github.com/y-crdt/yswift
+
+### J3. Spatial and Vision Pro
+
+| macOS | API | Notes | URL |
+|---|---|---|---|
+| **26.0+** | SwiftUI `RemoteImmersiveSpace` | A Mac app renders Metal through `CompositorLayer` into an immersive space on a chosen Vision Pro. `\.remoteDeviceIdentifier` drives `ARKitSession` for the remote device. Check `\.supportsRemoteScenes`. Only one immersive space can be open at a time. | https://developer.apple.com/documentation/swiftui/remoteimmersivespace , WWDC25 https://developer.apple.com/videos/play/wwdc2025/294 |
+| **27.0+** | Spatial Preview framework (`USDPreviewSession`) | Streams a USDKit `USDStage` live to a visionOS device. Changes made on visionOS sync back to the Mac stage, and undo/redo counts are shared. Also `DocumentPreviewSession` and `SpatialPreviewDevicePicker`. | https://developer.apple.com/documentation/spatialpreview , https://developer.apple.com/documentation/spatialpreview/usdpreviewsession , WWDC26 https://developer.apple.com/videos/play/wwdc2026/282 |
+| 27.0+ | USDKit (`USDStage`, `USDPrim`, `USDLayer`) | A native Swift USD scene graph: composition, edit targets, change observers and USDZ export (see F6). | https://developer.apple.com/documentation/usdkit/usdstage |
+
+- Mac Virtual Display: not researched (*unverified*).
+
+### J4. Voice
+
+| macOS | API | Notes | URL |
+|---|---|---|---|
+| 26.0+ | Speech `SpeechAnalyzer` + `SpeechTranscriber` | On-device. Locale assets download through `AssetInventory`. Check `SpeechTranscriber.isAvailable` and fall back to `DictationTranscriber`. The system caps simultaneous analyses. | https://developer.apple.com/documentation/speech/speechanalyzer , https://developer.apple.com/documentation/speech/speechtranscriber |
+| 13.0+ | App Intents `AppIntent` | Exposes actions to Siri, Shortcuts and Apple Intelligence. `UndoableIntent` exists. | https://developer.apple.com/documentation/appintents/appintent |
+
+### J5. Provenance (C2PA)
+
+- The C2PA spec is at **2.4 (April 2026)**; version 2.2 is from May 2025. https://spec.c2pa.org/specifications/specifications/2.4/specs/C2PA_Specification.html
+- The C2PA project's Rust SDK is dual MIT / Apache-2.0 and has a C API. Some dependent crates may carry other licenses. Its README names no official Swift bindings. https://github.com/contentauth/c2pa-rs
+- CryptoKit `SecureEnclave`, macOS 10.15+: P-256 signing, plus ML-DSA-65/87 and ML-KEM. https://developer.apple.com/documentation/cryptokit/secureenclave
+  - That C2PA's allowed algorithms include ES256 (P-256) comes from memory of the spec: *unverified*.
+- Apple and C2PA: **no Apple C2PA membership or API found**. Secondary sources (Sept-Oct 2026, including S-C2PA-NOTES) describe an "Apple Reference Image" camera feature in iOS 27 that signs at the sensor and is separate from C2PA. Not confirmed on an Apple page: *unverified*. https://c2paviewer.com/articles/apple-reference-image-vs-c2pa
+
+### J6. Object Capture (photos to USDZ)
+
+- RealityKit `PhotogrammetrySession`, macOS 12.0+. Takes a folder of images or a sequence of samples and produces USDZ at a chosen detail level. It can also return poses and a point cloud. https://developer.apple.com/documentation/realitykit/photogrammetrysession
+- Requirements: a GPU with at least 4 GB of RAM and ray-tracing support. Gate on `PhotogrammetrySession.isSupported`. It may downsample automatically when resources are tight. https://developer.apple.com/documentation/realitykit/creating-3d-objects-from-photographs
+
+### J7. Gaussian splats
+
+- KHR_gaussian_splatting: "Complete, Ratified by the Khronos Group" (2026). Stores position, rotation, scale, opacity and spherical harmonics as glTF point primitives. Falls back to a point cloud through COLOR_0. https://github.com/KhronosGroup/glTF/tree/main/extensions/2.0/Khronos/KHR_gaussian_splatting
+- RealityKit `GaussianSplatComponent`, **macOS 27.0+**. Needs the Apple7 GPU family. Unaffected by scene lighting. No file loader: you fill `LowLevelBuffer`s yourself from PLY, USD or other sources. An internal splat-count cap makes the initializer throw when exceeded. https://developer.apple.com/documentation/realitykit/gaussiansplatcomponent
+- On macOS 26 this needs a custom Metal renderer (sort, then alpha-blend the ellipsoids). That is standard 3D Gaussian splatting technique, not an Apple API.
+
+### J8. OpenUSD and AOUSD
+
+- AOUSD Core Specification 1.0 is ratified (AOUSD blog dated Dec 17, 2025). It covers grammar and data types, the data model, composition, value resolution, USDA/USDC/USDZ, and compliance. Domain schemas (Materials, Geometry, Physics) are separate and slated for 1.1. https://aousd.org/blog , https://aousd.org/uncategorized/foundations-of-open-3d-development-introducing-aousd-core-specification-1-0/ , https://www.linuxfoundation.org/press/aousd_prmarch2026
+- Apple is an AOUSD founding member, with four other companies (an animation studio, two creative-software vendors and a GPU maker). https://aousd.org/
+- USD is a scene format, not a collaboration protocol. Live co-editing still needs a sync layer: a CRDT or an op log over layers, with session layers or edit targets in USDKit. This is an architectural inference, not a documented Apple pattern.
