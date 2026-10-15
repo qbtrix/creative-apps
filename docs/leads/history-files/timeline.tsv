@@ -57,3 +57,4 @@ utc	stage	event	ref	note
 2026-10-15T13:38Z	4	ci-run	38743186679	running on 8e83ac0
 2026-10-15T13:49Z	4	ci-run	38743186679	round 4: swift test red (viewer-playback fidelity/driver, gridAligned); our snapshot suites pass; journeys skipped
 2026-10-15T14:05Z	4	heartbeat	38746333198	still red on viewer-playback tests; journeys skipped
+2026-10-15T14:17Z	4	heartbeat	38748468768	running on 3d42e80
