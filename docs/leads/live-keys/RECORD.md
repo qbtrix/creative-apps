@@ -2,7 +2,7 @@
 
 Issue: #799 · Packet: docs/blueprints/flare/features/live-keys.md
 Run: act-1a13d0020ff-4x51 · Session: cse_01BKSKFkuR1aFXhWhZAhsegU · Started: 2026-10-15T00:00Z
-Stage: 5 finish (blocked: dev CI red outside Flare)
+Stage: 5 finish (resumed after stall nudge; waiting on a green dev run)
 Base: a45f1cbe6a5c49a11296e40bac32b48bb4b264fd
 Next: when a dev CI run containing #970 (db2f53a) is green, comment on #799 "Belt-Contact-Sheet: <run link>" with the journey lines and Flare audit counts, then mark done. Nothing else is left for live-keys. Last checked run 38698770785 (c0c7116): Flare journeys pass, Flare audit under baseline; red only on HaloJourneyTests.testLayoutAtWidths and SuiteJourneyTests.testGalleryOpensEveryPage (#763).
 
