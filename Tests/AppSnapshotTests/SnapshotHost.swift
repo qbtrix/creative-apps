@@ -1,7 +1,7 @@
 // SnapshotHost.swift: the golden host (QH-2b, #332). Hosts a SwiftUI view in
 // an NSHostingView inside an offscreen borderless window with one of the four
 // appearances (Light, Dark, Light + Increase Contrast, Dark + Increase
-// Contrast) and draws it at backing scale 2, so a 100 × 50 pt view is a
+// Contrast), with the matching colorScheme and contrast in the environment, and draws it at backing scale 2, so a 100 × 50 pt view is a
 // 200 × 100 px image and a 1 pt hairline is 2 device pixels (QB-V3). The
 // bitmap is tagged sRGB, so a token's hex comes back as written. Glass draws
 // as SuiteUI's flat stand-in (`suiteSnapshotRendering`). Its images feed
@@ -29,6 +29,13 @@ enum SnapshotAppearance: String, CaseIterable, Sendable {
     }
 
     var scheme: ColorScheme { self == .dark || self == .darkContrast ? .dark : .light }
+
+    /// Increased for the two Increase Contrast appearances. SwiftUI takes the
+    /// contrast from the system setting, not the window's appearance, so the
+    /// host sets it in the environment (the underscored setter; the public
+    /// `colorSchemeContrast` is read-only) for dynamic tokens to resolve
+    /// their Increase Contrast values.
+    var contrast: ColorSchemeContrast { self == .lightContrast || self == .darkContrast ? .increased : .standard }
 
     /// The token value SuiteHex documents for this appearance.
     func value(of hex: SuiteHex) -> UInt32 {
@@ -65,7 +72,9 @@ struct SnapshotHost {
         let host = NSHostingView(rootView: view
             .frame(width: size.width, height: size.height)
             .background(SuiteColor.windowBackground)
-            .environment(\.suiteSnapshotRendering, true))
+            .environment(\.suiteSnapshotRendering, true)
+            .environment(\.colorScheme, appearance.scheme)
+            .environment(\._colorSchemeContrast, appearance.contrast))
         host.frame = CGRect(origin: .zero, size: size)
         let window = ScaledSnapshotWindow(
             contentRect: host.frame, styleMask: [.borderless], backing: .buffered, defer: false)

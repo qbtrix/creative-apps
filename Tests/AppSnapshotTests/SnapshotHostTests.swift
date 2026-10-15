@@ -66,6 +66,20 @@ import Testing
         }
     }
 
+    /// The contrast and scheme views read match the host's appearance, so a
+    /// view that branches on Increase Contrast draws its increased branch.
+    @Test func contrastEnvironment() throws {
+        for appearance in SnapshotAppearance.allCases {
+            let probe = ContrastProbe()
+            let image = try #require(SnapshotHost(appearance: appearance).image(probe, size: CGSize(width: 10, height: 10)))
+            let increased = appearance.contrast == .increased
+            #expect(!Self.differs(Self.pixel(image, 10, 10), increased ? [0, 0, 0, 255] : [255, 255, 255, 255]),
+                    "\(appearance.rawValue) read the wrong contrast")
+        }
+        #expect(SnapshotAppearance.lightContrast.contrast == .increased)
+        #expect(SnapshotAppearance.dark.contrast == .standard)
+    }
+
     /// The glass stand-in draws inside the host at scale 2: its fill differs
     /// from the background around it and its 1 pt border is 2 px.
     @Test func glassStandIn() throws {
@@ -89,5 +103,14 @@ import Testing
         #expect(SnapshotAppearance.allCases.map(\.rawValue) == ["light", "dark", "light-ic", "dark-ic"])
         #expect(SnapshotAppearance.lightContrast.scheme == .light && SnapshotAppearance.darkContrast.scheme == .dark)
         #expect(SnapshotAppearance.darkContrast.appearanceName == .accessibilityHighContrastDarkAqua)
+    }
+}
+
+/// Black under Increase Contrast, white otherwise.
+private struct ContrastProbe: View {
+    @Environment(\.colorSchemeContrast) private var contrast
+
+    var body: some View {
+        Rectangle().fill(contrast == .increased ? Color.black : Color.white)
     }
 }
