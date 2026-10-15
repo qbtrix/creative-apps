@@ -16,7 +16,7 @@ Next: wait for wave 4 PRs (D-5, D-7) to merge, then start wave 5 (D-8)
 | D-4b | 3 | LiveRecovery folder I/O; LiveDocuments.recovery(directory:) | M/Live/LiveRecovery.swift, M/Live/LiveDocuments.swift, MT/LiveRecoveryTests.swift | LiveRecoveryTests | #1210 | merged |
 | D-6 | 3 | PhotoPackageIO off-main read/write; PF-1 through ImageIO | A/PhotoPackageIO.swift, ST/PhotoPackageIOTests.swift | PhotoPackageIOTests (macOS) | #1212 | merged |
 | D-5 | 4 | Budgets PB-18/19/20 | MT/PhotoDocumentsBudgetTests.swift | PhotoDocumentsBudgetTests | – | building |
-| D-7 | 4 | Save routing, Keep layers?, open .ora/flat, errors, Not saved, fileServices, Open Recent | A/PhotoWindow+File.swift, A/PhotoCommands+File.swift | V5/V6, app-state rule | #1223 | open |
+| D-7 | 4 | Save routing, Keep layers?, open .ora/flat, errors, Not saved, fileServices, Open Recent | A/PhotoWindow+File.swift, A/PhotoCommands+File.swift | V5/V6, app-state rule | #1223 | merged |
 | D-8 | 5 | Save status in top bar, edited dot, Saving…/Opening… notes; snapshots | A/PhotoTopBar.swift, A/PhotoWindow+File.swift, ST/PhotoDocumentsSnapshots.swift | PhotoDocumentsSnapshots | – | waits D-7 |
 | D-9 | 6 | PhotoAutosave + wiring | A/PhotoAutosave.swift, A/PhotoWindow+File.swift, ST/PhotoAutosaveTests.swift | PhotoAutosaveTests | – | waits D-4a, D-4b, D-8 |
 | D-10 | 7 | App delegate: Open Recent/Finder opens, unsaved prompt on close/quit | A/PhotoApp.swift, A/PhotoWindow+File.swift, ST/PhotoUnsavedPromptTests.swift | PhotoUnsavedPromptTests | – | waits D-9 |
@@ -52,3 +52,4 @@ Waves (packet's Build waves, checked against dev at 00e546a):
 - D-7 state for D-8..D-10: window holds `@State var files = PhotoFileSession()` (@MainActor @Observable) passed to PhotoFileArea(model:files:perform:); fields keepLayers: ImageFormat?, saveFailed: Bool, working: PhotoFileWork? (.saving/.opening), recentFiles + noteRecent/clearRecent; FileIntent .saveDocument/.flatten/.clearRecent; FocusedValues.photoRecentFiles. PhotoWindow.swift edited (2 lines) to hold the session.
 - Open Recent reads Photo's own UserDefaults list `PhotoRecentFiles` (bundle declares no document types; the bundle script is protected).
 - QB-L12 gap closed by D-7: openDocument(_ snapshot:name:) added; window decodes off main.
+- dev macOS red since #1210 (runs 38774988270, 38776323445, 38777072611): LiveRecovery.swift:94 passes &Bool to fileExists(atPath:isDirectory:) (ObjCBool on Darwin). Ours; fixer PR in flight. Until it lands, no macOS signal for D-6/D-7 app code (build stops in PhotoModel). Tracked on dev-red #763.
