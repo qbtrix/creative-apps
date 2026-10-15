@@ -50,6 +50,7 @@ Taken from the packet's Build waves; checked against dev bcf5a09.
 | 0 (pre-loop) | 38726261412 (2b98fdb) | red: macOS build | – | – | SA-1 #1096: LibraryInspector calls mutating methods on a let model | fixer lead/spine-fix-inspector | no |
 | 1 | 38742226941 (20d6a1c) | red (Halo, Photo tests; not spine) | no audit (journeys didn't run) | clarity, journey, design, layout, controls | 18 (7 major) | r1-b1, r1-b2 (fixing) | no |
 | 2 | 38748468768 (3d42e80) | red: macOS build broke in LibraryWindow+Cull/+Loupe (closure ternaries from #1168) | – | (panel not run: no build) | 1 blocker | fixer lead/spine-fix-ternary | no |
+| 3 (round 2 rerun after the compile fix) | 38757068610 (111c440) | red only on HaloViewerFidelityTests (other line); every Library suite green; journeys not executed | not measured (journeys didn't run) | clarity, journey, design, layout, controls (same panel) | 7 minor, 0 major | r2-b1 (feature-done); #1183, #1184 needs-ui | panel clean; CI not green (other line) |
 
 ## Decisions
 - Builder branches are `lead/spine-<id>`, not `lead/spine/<id>`: git can't hold `lead/spine` and `lead/spine/<x>` refs together.
@@ -78,3 +79,4 @@ Taken from the packet's Build waves; checked against dev bcf5a09.
 - Run 38731305776 (7f61259): LibraryApp compiles after #1120; macOS still red on Halo's HaloPlaybackDriverTests.swift:18 circular reference (#1097), reported on #763, not this feature's.
 - Run 38734211999 (35a875b, has SA-2): Library compiles, no Library test failures; macOS red only on HaloViewerFidelityTests.keyedFrame6 (Halo line).
 - Run 38737961079 (79bd068, has SA-3/SA-4): Library compiles, no Library snapshot/test failures; red only on Halo tests (HaloPlaybackDriverTests, HaloViewerFidelityTests); UI journeys did not execute in that job, so Library journeys are unproven until the Halo red clears.
+- needs-ui #1183 (ThumbnailGrid help + reject badge), #1184 (ViewerStatusBar band, optional zoom) from round 2.
