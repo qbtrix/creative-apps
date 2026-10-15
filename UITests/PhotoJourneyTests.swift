@@ -60,42 +60,39 @@ final class PhotoJourneyTests: XCTestCase {
         XCTAssert(labelled("No Image Open", unknown).exists, "-PhotoFixture nope doesn't show the No Image Open empty state")
     }
 
-    /// On `.live` the Eyedropper is disabled and its tooltip says why.
+    /// On `.live` the Eyedropper is disabled.
     @MainActor func testLaunchShowsWindowShell() {
         let photo = Journey("Photo", self)
         photo.expectEditorShell()
         let eyedropper = photo.element("suite.tools").buttons["Eyedropper"]
         XCTAssert(eyedropper.waitForExistence(timeout: 5), "the rail has no Eyedropper")
         XCTAssertFalse(eyedropper.isEnabled, "the Eyedropper is enabled on .live, where sampling isn't built")
-        // .help is the button's help tag (tooltip), shown on hover; XCUITest has no help attribute.
-        eyedropper.hover()
-        let help = "Not built yet (PV-9)."
-        let tag = photo.app.helpTags.matching(
-            NSPredicate(format: "label CONTAINS %@ OR title CONTAINS %@ OR value CONTAINS %@", help, help, help)).firstMatch
-        XCTAssert(tag.waitForExistence(timeout: 5), "hovering the Eyedropper shows no \(help) help tag")
+        // Its help text is proven by AppSnapshotTests' PhotoEditorSnapshots.railEyedropperHelp (PhotoRailTool
+        // reports "Not built yet (PV-9)." on .live), since XCUITest doesn't read SwiftUI .help reliably.
     }
 
-    /// The sample opened fitted: the zoom pill reads under 100%, and the picture
-    /// (suite.canvas) lies inside the canvas viewport and the window, clear of
-    /// the inspector and above the status bar (the zoom and Preview data pills).
+    /// The sample opened fitted: the picture (suite.canvas) is no larger than
+    /// the canvas viewport (at 100% the 800 x 600 sample would overflow the
+    /// journey window's viewport) and lies inside it and the window, clear of
+    /// the inspector and above the status bar (the Preview data pill). It
+    /// doesn't read the zoom pill: XCUITest doesn't expose that SwiftUI label
+    /// as a static text (#262).
     @MainActor private func expectFitted(_ photo: Journey) {
-        let pill = photo.app.staticTexts.matching(NSPredicate(format: "label BEGINSWITH 'Zoom '")).firstMatch
-        XCTAssert(pill.waitForExistence(timeout: 5), "the status bar shows no zoom pill")
-        let percent = Int(pill.label.dropFirst("Zoom ".count).filter(\.isNumber)) ?? 0
-        XCTAssert(percent > 0 && percent < 100, "the sample opened at \(pill.label), not fitted under 100%")
         let picture = photo.element("suite.canvas").frame
         let viewport = photo.app.scrollViews.containing(.any, identifier: "suite.canvas").firstMatch
         XCTAssert(viewport.exists, "no scroll view holds the canvas (suite.canvas)")
+        let room = viewport.frame
+        XCTAssertLessThanOrEqual(picture.width, room.width + 1, "the picture \(picture) is wider than the viewport \(room): not fitted")
+        XCTAssertLessThanOrEqual(picture.height, room.height + 1, "the picture \(picture) is taller than the viewport \(room): not fitted")
         let slack = { (frame: CGRect) in frame.insetBy(dx: -1, dy: -1) }
         XCTAssert(slack(viewport.frame).contains(picture), "the picture \(picture) runs outside the canvas viewport \(viewport.frame)")
         let window = photo.app.windows.firstMatch.frame
         XCTAssert(slack(window).contains(picture), "the picture \(picture) runs outside the window \(window)")
         let inspector = photo.element("suite.inspector").frame
         XCTAssertFalse(picture.insetBy(dx: 1, dy: 1).intersects(inspector), "the picture \(picture) runs under the inspector \(inspector)")
-        for bar in [pill.frame, photo.element("photo.status.preview").frame] {
-            XCTAssertFalse(picture.insetBy(dx: 1, dy: 1).intersects(bar), "the picture \(picture) runs under the status bar \(bar)")
-            XCTAssertLessThanOrEqual(picture.maxY, bar.minY + 1, "the picture \(picture) reaches below the status bar's top \(bar)")
-        }
+        let bar = photo.element("photo.status.preview").frame
+        XCTAssertFalse(picture.insetBy(dx: 1, dy: 1).intersects(bar), "the picture \(picture) runs under the status bar \(bar)")
+        XCTAssertLessThanOrEqual(picture.maxY, bar.minY + 1, "the picture \(picture) reaches below the status bar's top \(bar)")
     }
 
     @MainActor func testNewImageAndEveryTool() {
