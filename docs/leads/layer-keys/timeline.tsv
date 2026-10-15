@@ -20,3 +20,4 @@ utc	stage	event	ref	note
 2026-10-15T10:58Z	3	stage-start	wave5	LK-6 LK-7
 2026-10-15T11:10Z	3	pr-merged	#1105	LK-7
 2026-10-15T11:16Z	3	heartbeat	wave5	LK-6 building
+2026-10-15T11:18Z	3	stage-start	wave6	LK-8 LK-11 early (deps merged)

@@ -4,7 +4,7 @@ Issue: #1036 · Packet: docs/blueprints/halo/features/layer-keys.md
 Run: act-1a13eb691a3-wg4n · Session: e0e565d9-6109-5c52-89fd-c254398040f9 · Started: 2026-10-15T08:39Z
 Stage: 3 wave 5
 Base: 98e4db15a3ebfb5d0f68dd8a464088bf56679f71
-Next: wave 5 (LK-6, LK-7) runs in a Workflow; on resume check PRs on layer-keys/lk-6, lk-7 and relaunch only the missing ones; then wave 6 (LK-8, LK-9, LK-11).
+Next: LK-6 (wf_1ebfb340-bd6) and LK-8 + LK-11 (wf_3d8e0165-ff3) run; on resume check PRs on layer-keys/lk-6, lk-8, lk-11 and relaunch missing ones; when LK-6 merges start LK-9.
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -17,9 +17,9 @@ Next: wave 5 (LK-6, LK-7) runs in a Workflow; on resume check PRs on layer-keys/
 | LK-5 | 4 | propertyRows, setProperty to/text, endPropertyScrub, shown helpers | HaloKeying.swift, HaloKeyingTests | HaloKeyingTests | #1091 | merged |
 | LK-6 | 5 | toggles, setParent, choices; keys availability | HaloKeying.swift, Availability/HaloAvailability+Keys, HaloKeyToggleTests, HaloKeysAvailabilityTests | both suites | – | building |
 | LK-7 | 5 | compositionPoint and viewer drag begin/move/end/cancel | HaloViewerDrag.swift, HaloKeyByDragTests | HaloKeyByDragTests | #1105 | merged |
-| LK-8 | 6 | budgets HB-1, HB-3, HB-4 | HaloKeysBudgetTests | HaloKeysBudgetTests | – | waits LK-5,7 |
+| LK-8 | 6 | budgets HB-1, HB-3, HB-4 | HaloKeysBudgetTests | HaloKeysBudgetTests | – | building |
 | LK-9 | 6 | keys routes; TRANSFORM rows, key buttons, refusal caption | HaloApp/HaloWindow+Keys, HaloApp/HaloLayerInspector, HaloInspectorSnapshots | halo-inspector(-refusal) snapshots | – | waits LK-6,7 |
-| LK-11 | 6 | HaloViewerGestures drag and Escape | HaloApp/HaloViewerGestures, HaloKeyByDragSnapshots | halo-key-by-drag snapshots | – | waits LK-7 |
+| LK-11 | 6 | HaloViewerGestures drag and Escape | HaloApp/HaloViewerGestures, HaloKeyByDragSnapshots | halo-key-by-drag snapshots | – | building |
 | LK-10 | 7 | LAYER group Parent and Blend; narrow snapshot | HaloApp/HaloLayerInspector, HaloInspectorSnapshots | halo-inspector-layer, -narrow snapshots | – | waits LK-9 |
 | LK-12 | 7 | H-J5 drag journey | UITests/HaloJourneyTests+Drag | H-J5 | – | waits LK-9,11 |
 | LK-13 | 7 | H-J6 inspector journey | UITests/HaloJourneyTests+Inspector | H-J6 | – | waits LK-9 |
@@ -51,6 +51,8 @@ Waves as in the packet. Independent per wave: W1 LK-1; W2 LK-2a; W3 LK-2b; W4 LK
 - LK-5: setProperty with no selected layer is a no-op (no refusal); HaloProject.propertyRowControl(_:) builds row ids.
 - LK-5 PR body briefly carried a tool-appended attribution footer; it is gone now; builders re-read and strip it after opening.
 - Flake seen: FlareEasingDragCostTests.handleDragP95UnderBudget (5.04 ms vs 5 ms under load), not ours.
+
+- LK-8 and LK-11 start before LK-6 merges: they need only LK-5 and LK-7 (merged), per packets.md rule (b). LK-9 still waits on LK-6.
 
 ## Open
 - #207 keeps `needs-human`; the captain decides (packet note). LK-11 says `Closes #207`.
