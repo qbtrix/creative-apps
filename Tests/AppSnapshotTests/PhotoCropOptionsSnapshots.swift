@@ -3,7 +3,7 @@
 // empty state: Crop picked, no crop, Free, the fields disabled under "Drag on
 // the image, or type a size") and photo-crop-ratio-light/dark.png (1:1 locked,
 // a centered 600 x 600 pending crop). `gridAligned` checks blueprint 7.4 rule
-// 5: the four fields' accessibility frames form a 2 x 2 grid, X over W and Y
+// 5: the four fields' frames (CropFieldBoundsKey) form a 2 x 2 grid, X over W and Y
 // over H, equal widths within 1 pt. macOS only.
 import AppKit
 import PhotoModel
@@ -68,19 +68,21 @@ import Testing
         #expect(CropOptions.preset(for: .original) == .original)
     }
 
-    /// Blueprint 7.4 rule 5, measured from the fields' accessibility frames in
-    /// a panel-wide host (the same frames XCUI reads).
+    /// Blueprint 7.4 rule 5, measured from the bounds each field reports
+    /// through CropFieldBoundsKey in a panel-wide host. SwiftUI builds a
+    /// hosting view's accessibility tree only when an assistive client asks,
+    /// so a headless runner has no accessibility frames to read.
     @Test func gridAligned() throws {
         var model = try opened()
         model.setCropAspect(.ratio(1, 1))
-        let ids = ["photo.crop.x", "photo.crop.y", "photo.crop.width", "photo.crop.height"]
-        let frames = accessibilityFrames(
-            of: Set(ids), in: CropOptions(model: model, perform: { _ in }).padding(SuiteSpacing.m),
+        let frames = fieldFrames(
+            in: CropOptions(model: model, perform: { _ in }).padding(SuiteSpacing.m),
             size: CGSize(width: SuiteSize.editorPanelWidth, height: 480))
         let x = try #require(frames["photo.crop.x"], "no photo.crop.x among \(frames.keys.sorted())")
         let y = try #require(frames["photo.crop.y"])
         let w = try #require(frames["photo.crop.width"])
         let h = try #require(frames["photo.crop.height"])
+        #expect(x.width > 0 && x.height > 0, "photo.crop.x has no size: \(x)")
         for frame in [y, w, h] { #expect(abs(frame.width - x.width) <= 1, "field widths differ: \(frames)") }
         #expect(abs(x.minX - w.minX) <= 1, "X is not over W: \(x) \(w)")
         #expect(abs(y.minX - h.minX) <= 1, "Y is not over H: \(y) \(h)")
@@ -89,27 +91,41 @@ import Testing
         #expect(x.midY != w.midY, "the two rows share a line: \(frames)")
     }
 
-    /// The accessibility frames of the elements carrying `ids`, with `view`
-    /// hosted in an offscreen window. Test host only; the app measures nothing.
-    private func accessibilityFrames(of ids: Set<String>, in view: some View, size: CGSize) -> [String: CGRect] {
-        let host = NSHostingView(rootView: view.frame(width: size.width, height: size.height, alignment: .top))
+    /// Each crop field's frame in `view`'s space, resolved from its
+    /// CropFieldBoundsKey anchor once `view` is hosted in a window and laid
+    /// out (the way `render` and ControlInventoryTests host a view).
+    private func fieldFrames(in view: some View, size: CGSize) -> [String: CGRect] {
+        let seen = MeasuredFields()
+        let measured = view
+            .frame(width: size.width, height: size.height, alignment: .top)
+            .overlayPreferenceValue(CropFieldBoundsKey.self) { anchors in
+                GeometryReader { proxy in
+                    Color.clear.preference(key: ResolvedFieldFramesKey.self, value: anchors.mapValues { proxy[$0] })
+                }
+            }
+            .onPreferenceChange(ResolvedFieldFramesKey.self) { frames in
+                MainActor.assumeIsolated { seen.frames = frames }
+            }
+        let host = NSHostingView(rootView: measured)
         host.frame = CGRect(origin: .zero, size: size)
         let window = NSWindow(contentRect: host.frame, styleMask: [.borderless], backing: .buffered, defer: false)
         window.contentView = host
-        window.orderFrontRegardless()
-        defer { window.orderOut(nil) }
         host.layoutSubtreeIfNeeded()
         RunLoop.main.run(until: Date().addingTimeInterval(0.2))
         host.layoutSubtreeIfNeeded()
-        var found: [String: CGRect] = [:]
-        var queue: [any NSAccessibilityProtocol] = [host]
-        var visited = 0
-        while !queue.isEmpty, visited < 5000 {
-            let element = queue.removeFirst()
-            visited += 1
-            if let id = element.accessibilityIdentifier(), ids.contains(id) { found[id] = element.accessibilityFrame() }
-            queue += (element.accessibilityChildren() ?? []).compactMap { $0 as? any NSAccessibilityProtocol }
-        }
-        return found
+        return seen.frames
+    }
+}
+
+@MainActor private final class MeasuredFields {
+    var frames: [String: CGRect] = [:]
+}
+
+/// The crop fields' frames once resolved in the measuring host's space.
+private struct ResolvedFieldFramesKey: PreferenceKey {
+    static var defaultValue: [String: CGRect] { [:] }
+
+    static func reduce(value: inout [String: CGRect], nextValue: () -> [String: CGRect]) {
+        value.merge(nextValue()) { _, next in next }
     }
 }
