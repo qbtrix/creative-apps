@@ -2,12 +2,21 @@
 // collections in the sidebar, LibraryBrowser as content and LibraryInspector
 // in the inspector. It owns the LibraryCatalog, hands its values and methods
 // to the views, and publishes the menu bar's LibraryMenu as a focused value.
+// The catalog starts from the launch arguments: a fixture's fakes and photos,
+// or the live services over the Platform adapters.
+import Foundation
 import LibraryModel
 import SuiteUI
 import SwiftUI
 
 struct LibraryWindow: View {
-    @State private var model = LibraryCatalog()
+    @State private var model: LibraryCatalog
+
+    init() {
+        let launch = LibraryLaunch(arguments: ProcessInfo.processInfo.arguments)
+        let services = launch.services(decoder: ImageIODecoder(), writer: JPEGWriter(), store: CatalogStore())
+        _model = State(initialValue: LibraryCatalog(launch: launch, services: services))
+    }
 
     var body: some View {
         SuiteWindow(
