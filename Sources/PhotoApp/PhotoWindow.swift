@@ -6,15 +6,9 @@
 // workspace's revision moves. Canvas drags carry
 // the pen's pressure (PointerPressure) and, while they last, AppKit's mouse
 // event coalescing is off so every pointer sample arrives; StrokePacer hands
-// them to the workspace once per display frame. Files go through
-// ImageIOCodec; the open and save panels are AppKit's. Save writes over the
-// open file in its own format; a new image or a HEIC goes to Save As, which
-// asks where (PNG or JPEG by the name's extension) and makes that file the
-// document. Export never changes which file the window holds. Three launch
-// arguments let the UI journeys skip the panels: `-PhotoOpenFile <path>` opens
-// a file at launch, `-PhotoExportTo <folder>` makes Export write there
-// directly, and `-PhotoSaveTo <folder>` makes Save As write
-// `<folder>/<name>.png`.
+// them to the workspace once per display frame. Its workspace runs on
+// `fileServices(.live)`. Open, Save, Save As and their launch arguments live in
+// PhotoWindow+File.swift, Export's write in PhotoWindow+Export.swift.
 //
 // Each v2 area's intents go to its PhotoWindow+<Area>.swift (file, edit,
 // crop, history, select, adjustment layer, transform, export, sample), and
@@ -28,10 +22,9 @@ import CoreRaster
 import PhotoModel
 import SuiteUI
 import SwiftUI
-import UniformTypeIdentifiers
 
 struct PhotoWindow: View {
-    @State var model = PhotoWorkspace()
+    @State var model = PhotoWorkspace(services: PhotoWindow.fileServices(.live))
     @State var renderer = CanvasRenderer()
     @State var pacer = StrokePacer()
     @State var zoom = 1.0
@@ -210,92 +203,7 @@ struct PhotoWindow: View {
         if fitPending { fit() }
     }
 
-    // MARK: Files
-
-    private func openLaunchFile() {
-        guard !Self.launchFileOpened, let path = UserDefaults.standard.string(forKey: "PhotoOpenFile") else { return }
-        Self.launchFileOpened = true
-        open(URL(fileURLWithPath: path))
-    }
-
-    private func chooseFile() {
-        let panel = NSOpenPanel()
-        panel.allowedContentTypes = [.png, .jpeg, .heic]
-        panel.allowsMultipleSelection = false
-        guard panel.runModal() == .OK, let url = panel.url else { return }
-        open(url)
-    }
-
-    private func open(_ url: URL) {
-        do {
-            let data = try Data(contentsOf: url)
-            let side = ImageIOCodec.pixelSize(of: data).flatMap {
-                PhotoWorkspace.decodeLongestSide(width: $0.width, height: $0.height)
-            }
-            try model.open(data, name: url.lastPathComponent, codec: ImageIOCodec(), longestSide: side)
-            documentURL = url
-            note = side.map { "Opened at \($0) px on the longest side" }
-        } catch {
-            problem = "\(url.lastPathComponent) can't be opened. \(Self.reason(error))"
-        }
-    }
-
-    /// Writes over the open file in its own format; a new image, or a file in
-    /// a format Photo doesn't write, is Save As.
-    private func save() {
-        guard model.canvas != nil else { return }
-        guard let url = documentURL, let format = ImageFormat(fileName: url.lastPathComponent) else { return saveAs() }
-        write(to: url, as: format, quality: exportQuality, saving: true)
-    }
-
-    /// Asks where to save, PNG or JPEG by the name's extension; `-PhotoSaveTo` writes a PNG there without asking.
-    private func saveAs() {
-        guard model.canvas != nil else { return }
-        if let folder = UserDefaults.standard.string(forKey: "PhotoSaveTo") {
-            let url = URL(fileURLWithPath: folder).appending(path: model.fileName(for: .png))
-            return write(to: url, as: .png, quality: exportQuality, saving: true)
-        }
-        let panel = NSSavePanel()
-        panel.allowedContentTypes = [.png, .jpeg]
-        panel.nameFieldStringValue = model.fileName(for: ImageFormat(fileName: model.documentName ?? "") ?? .png)
-        guard panel.runModal() == .OK, let url = panel.url else { return }
-        write(to: url, as: ImageFormat(fileName: url.lastPathComponent) ?? .png, quality: exportQuality, saving: true)
-    }
-
-    private func exportChosen() {
-        isExporting = false
-        let name = model.fileName(for: exportFormat)
-        if let folder = UserDefaults.standard.string(forKey: "PhotoExportTo") {
-            write(to: URL(fileURLWithPath: folder).appending(path: name), as: exportFormat, quality: exportQuality, saving: false)
-            return
-        }
-        let panel = NSSavePanel()
-        panel.allowedContentTypes = [exportFormat == .png ? .png : .jpeg]
-        panel.nameFieldStringValue = name
-        guard panel.runModal() == .OK, let url = panel.url else { return }
-        write(to: url, as: exportFormat, quality: exportQuality, saving: false)
-    }
-
-    /// Saving (Save, Save As) makes `url` the window's file; exporting doesn't.
-    private func write(to url: URL, as format: ImageFormat, quality: Double, saving: Bool) {
-        let (workspace, opened) = (model, documentURL)
-        note = saving ? "Saving…" : "Exporting…"
-        Task {
-            do {
-                let data = try await workspace.export(as: format, quality: quality, codec: ImageIOCodec())
-                try data.write(to: url, options: .atomic)
-                // A file opened meanwhile keeps its own name and URL.
-                if saving, documentURL == opened {
-                    documentURL = url
-                    model.didSave(as: url.lastPathComponent)
-                }
-                note = "\(saving ? "Saved" : "Exported") \(url.lastPathComponent)"
-            } catch {
-                note = nil
-                problem = "\(url.lastPathComponent) couldn't be written. \(Self.reason(error))"
-            }
-        }
-    }
+    // MARK: Image
 
     private func resize(width: Int, height: Int) {
         isResizing = false
@@ -325,14 +233,6 @@ struct PhotoWindow: View {
                 note = nil
                 problem = "The image can't be straightened by \(degrees)°. \(Self.reason(error))"
             }
-        }
-    }
-
-    private static func reason(_ error: Error) -> String {
-        switch error {
-        case let failure as ImageIOCodec.Failure: failure.description
-        case RasterError.invalid(let message): "The image is not valid: \(message)."
-        default: error.localizedDescription
         }
     }
 
