@@ -66,3 +66,7 @@ utc	stage	event	ref	note
 2026-10-15T05:33Z	3	stage-start	S-13b	builder stacked on S-12
 2026-10-15T05:33Z	3	pr-merged	#991 #992	S-11b, S-12
 2026-10-15T05:39Z	3	pr-opened	#997	S-13b clone/heal latency series, feature-done, 56 lines 1 file
+2026-10-15T06:06Z	3	pr-merged	#997	S-13b, feature-done
+2026-10-15T06:06Z	3	stage-end	-	all 19 tasks merged
+2026-10-15T06:06Z	4	ci-run	38687993459	photo green, audit at baseline; red from suiteui+halo (#763)
+2026-10-15T06:06Z	4	stage-start	round 1	critic panel
