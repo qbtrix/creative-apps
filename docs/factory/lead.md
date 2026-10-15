@@ -63,7 +63,8 @@ so Belt never reads a quiet lead as a stall.
 
 ### 1. Read the packet
 
-Read the packet `docs/blueprints/<app>/features/<feature>.md`, the app's
+Read the packet `docs/blueprints/<app>/features/<feature>.md` (its shape and
+rules are in `docs/factory/packets.md`), the app's
 blueprint, `docs/engineering.md`, `docs/design.md`, `docs/review-rubric.md` and
 the code the tasks touch. Copy the packet's tasks, journeys and quality bars
 into RECORD.md. A task that needs another line's code becomes a `needs-ui` or
@@ -71,19 +72,32 @@ into RECORD.md. A task that needs another line's code becomes a `needs-ui` or
 
 ### 2. Plan waves
 
-Group the tasks into waves. A wave is a set of tasks that touch disjoint files
-and don't depend on each other's unmerged code. Usually two: Models and their
-tests first, then the views and journeys that read them. Each task gets: an
-id, one behavior, the files it may touch, the test that proves it, the
-snapshot or journey step it adds when it changes what the user sees, and a
-size estimate under 400 lines and 15 files. Split anything bigger.
+Take the waves from the packet's Build waves section (`packets.md`, rule
+(c)) and check them against the code as it is now. A wave is a set of tasks
+that touch disjoint files and don't depend on each other's unmerged code.
+Each task gets: an id, one behavior, the files it may touch, the test that
+proves it, the snapshot or journey step it adds when it changes what the
+user sees, and a size estimate under 400 lines and 15 files. Split anything
+bigger.
+
+A task waits on another only when it needs that task's merged code
+(`packets.md`, rule (b)). Shared docs (`docs/c4/model.json`,
+`docs/design.md`, the blueprint, `waves.md`) go in the one final task
+(rule (a)). If the packet chains tasks that don't need each other, unchain
+them and record it under Decisions. For every wave, RECORD.md lists which
+tasks are independent and, for each task that waits on another, which one
+and why.
 
 ### 3. Build waves
 
-For each wave run `docs/factory/workflows/build-wave.js` with the Workflow
-tool (or one subagent per task with `isolation: "worktree"` if Workflow is
-unavailable). One builder per task, in its own worktree, one PR per task
-under contract rule 4. Then:
+When a wave has **3 or more independent tasks**, run them in one go with
+`docs/factory/workflows/build-wave.js` and the Workflow tool: one builder
+per task, each in its own worktree, one PR per task under contract rule 4.
+With 1 or 2 independent tasks, the template or one subagent per task with
+`isolation: "worktree"` (also the fallback if Workflow is unavailable),
+started together. Run subagents one after another only for tasks that truly
+depend on each other; RECORD.md says which ones and why, one line each
+under Decisions. Then:
 
 1. Wait for the lane to merge every PR of the wave. A PR the lane comments on
    (conflict, red, not eligible) goes back to its builder or a fixer: rebase
