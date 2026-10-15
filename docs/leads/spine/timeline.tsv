@@ -34,3 +34,4 @@ utc	stage	event	ref	note
 2026-10-15T13:32Z	3	stage-end	wave13	#1162 merged; all 23 tasks merged
 2026-10-15T13:35Z	4	stage-start	round1	run 38742226941: Library snapshots green; macOS red on Halo/Photo only; journeys not executed
 2026-10-15T13:42Z	4	round-findings	round1	18 confirmed, 7 major; fix batches r1-b1 r1-b2 started
+2026-10-15T13:56Z	4	pr-merged	#1165 #1168	round 1 fixes merged

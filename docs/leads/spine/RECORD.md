@@ -4,7 +4,7 @@ Issue: #1044 · Packet: docs/blueprints/library/features/spine.md
 Run: act-1a13f18aaa0-lfw5 · Session: session_01DtSRhNqsphGfKkvV5eLsWW · Started: 2026-10-15T10:25Z
 Stage: 4 round 1
 Base: 541ca81f0a4795b0a01d4df371832c645a0956cf
-Next: wait for r1-b1 and r1-b2 PRs to merge; then round 2 on the CI run that contains them
+Next: round 2: wait for the dev CI run containing #1165 and #1168
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -69,6 +69,7 @@ Taken from the packet's Build waves; checked against dev bcf5a09.
 - SJ-1 split: SJ-1a (the four existing journeys on -LibraryFixture samples/empty + File > Load Sample Photos) runs now, ahead of SA-5, because SA-5 removes the content's Load Sample Photos button those journeys click; #1150's fast-lane label is off until SJ-1a merges. SJ-1b (J0, J10) stays in wave 12.
 - SJ-2 ships without feature-done: the Anatomy loop needs a CI run first, and its fixes (or, if clean, a packet status-line PR) form the feature's last PR, which carries feature-done.
 - Round 1 skipped minors that change contract or packet text: the '(import)' area id in reasons, catalog.json.bad's folder, the newer notice's version number, and an always-on status bar; they become gap issues if still open at finish.
+- r1-b2 adds InspectorCommands (⌃⌘I, Apple's built-in) for View > Show Inspector; SuiteWindow's toolbar keeps ⌥⌘I. Blueprint 6.2 says ⌥⌘I: noted for the gap list.
 
 ## Open
 - PR #217 (fix for #156) is open at stage 0; SP-9 lands only if it is still unmerged when wave 8 starts.
