@@ -53,3 +53,4 @@ utc	stage	event	ref	note
 2026-10-15T13:06Z	4	pr-merged	#1153	round1 fix
 2026-10-15T13:20Z	4	heartbeat	round1	dev still red on viewer-playback (keyedFrame6, driver timeouts)
 2026-10-15T13:41Z	4	heartbeat	round1	waiting dev run 38743186679 (8e83ac0)
+2026-10-15T14:12Z	4	heartbeat	round1	waiting dev runs 38746333198, 38748468768
