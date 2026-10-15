@@ -82,3 +82,4 @@ utc	stage	event	ref	note
 2026-10-15T04:38Z	4	round-findings	round 2	panel 14 confirmed (6 major); batches A B C; #976 filed
 2026-10-15T04:39Z	-	heartbeat	-	waiting on builders
 2026-10-15T04:47Z	4	pr-opened	#982	round 2 batch B timeline geometry
+2026-10-15T04:48Z	4	pr-opened	#983	round 2 batch C inspector
