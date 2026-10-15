@@ -2,9 +2,9 @@
 
 Issue: #1044 · Packet: docs/blueprints/library/features/spine.md
 Run: act-1a13f18aaa0-lfw5 · Session: session_01DtSRhNqsphGfKkvV5eLsWW · Started: 2026-10-15T10:25Z
-Stage: 3 wave 5
+Stage: 3 wave 6
 Base: 328e6b6e2bec7b88d4e454620770619ccabfd4bc
-Next: wait for SP-6 to merge; then wave 6 (SP-7, SP-12)
+Next: wait for SP-7 and SP-12 to merge; then wave 7 (SP-8, SP-13, SA-2)
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -17,9 +17,9 @@ Next: wait for SP-6 to merge; then wave 6 (SP-7, SP-12)
 | SP-3 | 3 | Protocols (+ `initial` comment fix), SampleImage | Contracts/LibraryContracts.swift, SampleImage.swift | LibraryContractsTests | #1107 | merged |
 | SP-4 | 4 | Fakes: support, platform, use cases (progress first) | Fakes/FakeSupport, FakePlatform, FakeUseCases | LibraryFakesTests | #1110 | merged |
 | SP-5 | 4 | Fakes: loupe, develop, crop, exporter | Fakes/FakeRendering.swift | LibraryFakeRenderingTests | #1112 | merged |
-| SP-6 | 5 | Eight live stubs, LibraryServices | Live/*, LibraryServices.swift | LibraryServicesTests |  | building |
-| SP-7 | 6 | Stored properties, state enums, init(services:), hand-written == | LibraryCatalog.swift | LibraryCatalogTests | | planned |
-| SP-12 | 6 | Launch arguments and fixtures | LibraryLaunch, LibraryFixtures, LibrarySample | LibraryLaunchTests | | planned |
+| SP-6 | 5 | Eight live stubs, LibraryServices | Live/*, LibraryServices.swift | LibraryServicesTests | #1116 | merged |
+| SP-7 | 6 | Stored properties, state enums, init(services:), hand-written == | LibraryCatalog.swift | LibraryCatalogTests |  | building |
+| SP-12 | 6 | Launch arguments and fixtures | LibraryLaunch, LibraryFixtures, LibrarySample | LibraryLaunchTests |  | building |
 | SP-8 | 7 | Cached `order`, Budget.swift | LibraryOrder.swift, LibraryCatalog.swift | LibraryOrderTests | | planned |
 | SP-13 | 7 | Readouts, keys, controls JSON | LibraryReadouts.swift, LibraryKeys.swift | LibraryReadoutsTests, LibraryKeysTests | | planned |
 | SA-2 | 7 | One Window scene, services from launch args, platform stubs | LibraryApp.swift, LibraryWindow.swift, Platform/* | macOS testLaunchShowsWindowShell | | planned |
