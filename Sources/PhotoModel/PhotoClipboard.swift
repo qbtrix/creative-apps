@@ -2,7 +2,8 @@
 // `services.clipboard` the selected layer's pixels inside the selection (the
 // whole layer with none) and the selection mask, and returns what it took for
 // the window to put on the pasteboard; a fully transparent area gives
-// "Nothing to copy." in the status line in that same call. Cut copies, then
+// "Nothing to copy." and the selected layer's name in the status line in
+// that same call. Cut copies, then
 // clears that area weighted by the selection's coverage, as one "Cut" step.
 // Paste puts an image in a new "Pasted Layer" above the selected layer, where
 // `services.clipboard.placement` says, and selects it: one "Paste" step. With
@@ -31,8 +32,8 @@ extension PhotoWorkspace {
     }
 
     /// The selected layer's pixels inside the selection, for the pasteboard.
-    /// Nil when Copy can't run, or with "Nothing to copy." in `statusMessage`
-    /// when every pixel there is transparent.
+    /// Nil when Copy can't run, or with "Nothing to copy." and the layer's
+    /// name in `statusMessage` when every pixel there is transparent.
     public mutating func copySelection() -> ClipboardImage? {
         guard copyHelp == nil, let layer = selectedLayer, let tiled = pixels[layer.id] else { return nil }
         let content = PlacedPixels(pixels: tiled, x: layer.offsetX, y: layer.offsetY)
@@ -40,13 +41,22 @@ extension PhotoWorkspace {
             if let image = try services.clipboard.copy(content, selection: selection, mask: selectionMask) {
                 return image
             }
-            statusMessage = "Nothing to copy."
+            statusMessage = nothingToCopy(layer)
         } catch let refusal as PhotoRefusal {
             statusMessage = refusal.message
         } catch {
-            statusMessage = "Nothing to copy."
+            statusMessage = nothingToCopy(layer)
         }
         return nil
+    }
+
+    /// Why Copy took nothing: it reads only the selected layer, so the
+    /// message names it, e.g. "Nothing to copy. The selected area of
+    /// “Layer 1” is empty." (without a selection, "“Layer 1” is empty.").
+    func nothingToCopy(_ layer: PhotoLayer) -> String {
+        selection == nil
+            ? "Nothing to copy. “\(layer.name)” is empty."
+            : "Nothing to copy. The selected area of “\(layer.name)” is empty."
     }
 
     /// Copies, then clears what was copied from the selected layer, weighted
