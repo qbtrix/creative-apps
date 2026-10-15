@@ -166,3 +166,14 @@ private func moved() throws -> CommandEngine {
     #expect(engine.document == FlareFixtures.bounce && !engine.canUndo)
     #expect(fake.document == FlareFixtures.bounce && !fake.canUndo)
 }
+
+/// Setting the label a frame already has, or removing a label from a frame with none, changes nothing and adds no entry.
+@Test func aLabelThatChangesNothingAddsNoEntry() throws {
+    var engine = try moved()
+    try live.setLabel("hit", at: 29, sceneID: "scene-1", in: &engine)
+    try live.setLabel("hit", at: 29, sceneID: "scene-1", in: &engine)
+    try live.setLabel(nil, at: 12, sceneID: "scene-1", in: &engine)
+    #expect(labels(engine) == ["hit": 29])
+    try engine.undo()
+    #expect(labels(engine).isEmpty && !engine.canUndo)
+}

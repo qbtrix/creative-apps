@@ -1,6 +1,7 @@
 // LivePropertiesSetTests.swift: KY-2, the live inspector write (docs/blueprints/flare/features/live-keys.md). setValue
 // follows section 2's rule, refuses a non-finite value without changing anything, makes a scrub one undo entry, and works
-// on a symbol's own layer as well as a scene layer.
+// on a symbol's own layer as well as a scene layer. Each write on bounce's scene layers leaves the same document and
+// undo name as FakeProperties.
 import FlareCore
 @testable import FlareModel
 import Testing
@@ -157,4 +158,39 @@ func aNonFiniteValueThrowsAndChangesNothing(value: Double) {
     }
     #expect(engine.document == FlareFixtures.bounce)
     #expect(!engine.canUndo)
+}
+
+/// One write on bounce's scene layers, run the same way on the live type and on the fake.
+enum BounceWrite: String, CaseIterable, Sendable {
+    case xOnShadow, xOnShadowAutoKey, rotationOnBallAndShadow, animateShadowX, keyBallX, fillBall
+
+    func run(_ properties: any PropertyAnimating, in engine: inout CommandEngine) throws {
+        switch self {
+        case .xOnShadow, .xOnShadowAutoKey:
+            try properties.setValue(200, of: "x", owner: scene, layerIDs: ["shadow"], frame: 30,
+                                    autoKey: self == .xOnShadowAutoKey, coalesceKey: nil, in: &engine)
+        case .rotationOnBallAndShadow:
+            try properties.setValue(45, of: "rotation", owner: scene, layerIDs: ["ball", "shadow"], frame: 12,
+                                    autoKey: false, coalesceKey: nil, in: &engine)
+        case .animateShadowX:
+            try properties.toggleAnimated("x", owner: scene, layerID: "shadow", frame: 0, lastFrame: 47, in: &engine)
+        case .keyBallX:
+            try properties.toggleKey("x", owner: scene, layerID: "ball", frame: 20, in: &engine)
+        case .fillBall:
+            let count = layer("ball", in: engine)?.shapes.count ?? 0
+            let items = (0..<count).map { StageAddress(owner: scene, layerID: "ball", item: .shape($0)) }
+            try properties.setFill(.solid(FlareColor(r: 1, g: 59.0 / 255, b: 48.0 / 255)), of: items, in: &engine)
+        }
+    }
+}
+
+@Test(arguments: BounceWrite.allCases)
+func liveWritesMatchTheFakeOnBounce(write: BounceWrite) throws {
+    var live = CommandEngine(document: FlareFixtures.bounce)
+    var fake = CommandEngine(document: FlareFixtures.bounce)
+    try write.run(LiveProperties(), in: &live)
+    try write.run(FakeProperties(), in: &fake)
+    #expect(live.document != FlareFixtures.bounce)
+    #expect(live.document == fake.document)
+    #expect(live.undoActionName == fake.undoActionName)
 }
