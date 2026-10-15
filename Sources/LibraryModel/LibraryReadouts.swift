@@ -146,6 +146,13 @@ extension LibraryCatalog {
         }
     }
 
+    /// Whether File > Load Sample Photos can act: not over a newer catalog,
+    /// whose "Catalog Not Opened" state must stay until Library is updated.
+    public var canLoadSamples: Bool {
+        if case .newer = catalogState { return false }
+        return true
+    }
+
     /// "1 photo", "26 photos": the status bar's count.
     public static func photoCountText(_ count: Int) -> String {
         count == 1 ? "1 photo" : "\(count) photos"
