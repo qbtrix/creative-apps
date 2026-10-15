@@ -209,10 +209,39 @@ let req = s.handOff.request(for: .halo, plan: plan, outcome: outcome, settings: 
 check(req?.files.count == 48 && req?.hasAlpha == true && req?.framesPerSecond == 24, "halo hand-off")
 check(s.handOff.refusal(for: .design, plan: plan) == "Design can't take this kind of render. Pick Still.", "design refuses a sequence")
 
+// UC3b vector art: two rects become two shapes with their fills; a circle is skipped with a warning.
+do {
+    let svg = ##"<svg><rect x="0" y="0" width="10" height="5" fill="#ff0000"/><circle r="3"/><rect x="20" y="0" width="5" height="5"/></svg>"##
+    let (shapes, warnings) = try s.vectors.shapes(fromSVG: Data(svg.utf8))
+    check(shapes.count == 2 && shapes[0].fill == PrismColor(1, 0, 0) && warnings.count == 1, "svg rects and a warning")
+    let solid = try s.extruding.extrude(shapes[0].outline, PrismExtrusion(depth: 1), id: PrismID("v"), name: "Logo")
+    check(near(solid.bounds.size.x, 10) && near(solid.bounds.size.y, 5), "extruded svg keeps its size")
+} catch { check(false, "svg threw \(error)") }
+
+// UC3c images: a 2 × 1 test image decodes; a short one is damaged.
+do {
+    let tex = try s.images.decode(Data("RGBA 2 1\n".utf8) + Data([255, 0, 0, 255, 0, 0, 255, 255]), name: "Swatch", id: PrismID("t"))
+    check(tex.isValid && tex.width == 2, "decode test image")
+    _ = try s.images.decode(Data("RGBA 2 2\n".utf8) + Data([1, 2, 3]), name: "Bad", id: PrismID("t2"))
+    check(false, "short image accepted")
+} catch { check(error == .damaged("the image is cut short."), "short image refused") }
+
+// UC22 modifiers: mirror doubles an off-axis cube; one subdivision level makes 24 quads of a cube.
+do {
+    var offset = cube
+    offset.positions = offset.positions.map { $0 + Vec3(2, 0, 0) }
+    let mirrored = try s.modifiers.evaluate(offset, modifiers: [.mirror(axis: .x, merge: true)], forRender: false)
+    check(mirrored.positions.count == 16 && mirrored.faces.count == 12 && near(mirrored.bounds.min.x, -2.5), "mirror")
+    let sub = try s.modifiers.evaluate(cube, modifiers: [.subdivision(levels: 1, renderLevels: 2)], forRender: false)
+    check(sub.faces.count == 24 && sub.positions.count == 26 && sub.problem == nil, "subdivide once")
+    let subRender = try s.modifiers.evaluate(cube, modifiers: [.subdivision(levels: 1, renderLevels: 2)], forRender: true)
+    check(subRender.faces.count == 96, "render level 2")
+} catch { check(false, "modifiers threw \(error)") }
+
 // Every unbuilt service says why.
 let unbuilt = PrismServices.unbuilt
 check(unbuilt.importing.unavailableHelp == "Import isn't built yet." && unbuilt.rendering.unavailableHelp != nil, "unbuilt help")
 check([s.importing.unavailableHelp, s.meshEditing.unavailableHelp, s.handOff.unavailableHelp].allSatisfy { $0 == nil }, "fakes work")
 
-if failures.isEmpty { print("contracts: PASS (\(PrismPrimitive.allCases.count) primitives, 22 services)") }
+if failures.isEmpty { print("contracts: PASS (\(PrismPrimitive.allCases.count) primitives, 25 services)") }
 else { print(failures.joined(separator: "\n")); print("contracts: FAIL") }

@@ -964,3 +964,109 @@ public final class CountingSink: RenderSink, @unchecked Sendable {
     }
     public func cancel(_ plan: PrismRenderPlan) { cancelled = true }
 }
+
+/// Differs: reads only `<rect x= y= width= height= fill="#rrggbb"/>` elements; anything else is a warning.
+public struct FakeVectorArtReading: VectorArtReading {
+    public init() {}
+    public var unavailableHelp: String? { nil }
+    public func shapes(fromSVG data: Data) throws(PrismImportError) -> (shapes: [PrismVectorShape], warnings: [String]) {
+        let text = String(decoding: data, as: UTF8.self)
+        guard text.contains("<svg") else { throw .damaged("it isn't SVG.") }
+        var shapes: [PrismVectorShape] = [], warnings: [String] = []
+        for element in text.split(separator: "<").dropFirst() {
+            let tag = element.prefix { $0 != " " && $0 != ">" && $0 != "/" }
+            guard tag != "svg", !tag.isEmpty else { continue }
+            guard tag == "rect" else { warnings.append("Skipped a <\(tag)>: the fake reads rectangles only."); continue }
+            func attr(_ n: String) -> Double? {
+                guard let rest = PrismRules.after(n + "=\"", in: element) else { return nil }
+                return Double(rest.prefix { $0 != "\"" })
+            }
+            guard let x = attr("x"), let y = attr("y"), let w = attr("width"), let h = attr("height"), w > 0, h > 0 else {
+                warnings.append("Skipped a rectangle with no size."); continue
+            }
+            var fill = PrismColor.black
+            if let rest = PrismRules.after("fill=\"#", in: element) {
+                let hex = rest.prefix(6)
+                if hex.count == 6, let v = Int(hex, radix: 16) {
+                    fill = PrismColor(Double((v >> 16) & 255) / 255, Double((v >> 8) & 255) / 255, Double(v & 255) / 255)
+                }
+            }
+            shapes.append(PrismVectorShape(name: "Shape \(shapes.count + 1)",
+                                           outline: PrismOutline(contours: [[Vec2(x, -y - h), Vec2(x + w, -y - h), Vec2(x + w, -y), Vec2(x, -y)]]),
+                                           fill: fill))
+        }
+        return (shapes, warnings)
+    }
+}
+
+/// Differs: reads a test format "RGBA <w> <h>\n" then w × h × 4 bytes; anything else is refused.
+public struct FakeImageDecoding: ImageDecoding {
+    public init() {}
+    public var unavailableHelp: String? { nil }
+    public func decode(_ data: Data, name: String, id: PrismID) throws(PrismImportError) -> PrismTexture {
+        let bytes = [UInt8](data)
+        guard let nl = bytes.firstIndex(of: 10) else { throw .unsupportedFormat("image") }
+        let head = String(decoding: bytes[..<nl], as: UTF8.self).split(separator: " ")
+        guard head.count == 3, head[0] == "RGBA", let w = Int(head[1]), let h = Int(head[2]), w > 0, h > 0 else {
+            throw .unsupportedFormat("image")
+        }
+        let body = Array(bytes[(nl + 1)...])
+        guard body.count == w * h * 4 else { throw .damaged("the image is cut short.") }
+        return PrismTexture(id: id, name: name, width: w, height: h, rgba8: body)
+    }
+}
+
+/// Differs: subdivision splits each face at its center and edge midpoints without smoothing
+/// (the counts match Catmull-Clark, the positions don't); mirror matches live.
+public struct FakeModifierEvaluating: ModifierEvaluating {
+    public init() {}
+    public var unavailableHelp: String? { nil }
+    public func evaluate(_ mesh: PrismMesh, modifiers: [PrismModifier], forRender: Bool) throws(PrismEditError) -> PrismMesh {
+        var m = mesh
+        for mod in modifiers {
+            switch mod {
+            case let .mirror(axis, merge):
+                let n = m.positions.count
+                func flip(_ p: Vec3) -> Vec3 { axis == .x ? Vec3(-p.x, p.y, p.z) : axis == .y ? Vec3(p.x, -p.y, p.z) : Vec3(p.x, p.y, -p.z) }
+                func onPlane(_ p: Vec3) -> Bool { abs(axis == .x ? p.x : axis == .y ? p.y : p.z) < 0.001 }
+                var map = [UInt32](repeating: 0, count: n)
+                var added: [Vec3] = []
+                for (i, p) in m.positions.enumerated() {
+                    if merge && onPlane(p) { map[i] = UInt32(i) } else { map[i] = UInt32(n + added.count); added.append(flip(p)) }
+                }
+                m.positions += added
+                m.faces += mesh.faces.map { f in f.reversed().map { Int($0) < n ? map[Int($0)] : $0 } }
+                m.normals = []; m.uvs = []
+            case let .subdivision(levels, renderLevels):
+                let count = Swift.max(0, Swift.min(forRender ? 4 : 3, forRender ? renderLevels : levels))
+                for _ in 0..<count {
+                    let estimate = m.faces.reduce(0) { $0 + $1.count } * 2
+                    guard estimate <= PrismImportError.maximumTriangles else {
+                        throw .outOfRange("That many levels would pass 5,000,000 triangles.")
+                    }
+                    m = Self.split(m)
+                }
+            }
+        }
+        return m
+    }
+    static func split(_ mesh: PrismMesh) -> PrismMesh {
+        var p = mesh.positions, faces: [[UInt32]] = [], mids: [PrismEdge: UInt32] = [:]
+        func mid(_ a: Int, _ b: Int) -> UInt32 {
+            let e = PrismEdge(a, b)
+            if let i = mids[e] { return i }
+            p.append((p[a] + p[b]) * 0.5); mids[e] = UInt32(p.count - 1)
+            return UInt32(p.count - 1)
+        }
+        for f in mesh.faces where f.count >= 3 {
+            let c = f.reduce(Vec3.zero) { $0 + p[Int($1)] } * (1 / Double(f.count))
+            p.append(c)
+            let ci = UInt32(p.count - 1)
+            for i in f.indices {
+                let prev = Int(f[(i + f.count - 1) % f.count]), cur = Int(f[i]), next = Int(f[(i + 1) % f.count])
+                faces.append([UInt32(cur), mid(cur, next), ci, mid(prev, cur)])
+            }
+        }
+        return PrismMesh(id: mesh.id, name: mesh.name, positions: p, faces: faces, smooth: true)
+    }
+}

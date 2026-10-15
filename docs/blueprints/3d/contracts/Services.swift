@@ -17,7 +17,8 @@ public struct PrismServices: Sendable {
     public var keying: any PropertyKeying, easing: any KeyEasing, clock: any PlaybackClock
     public var history: any SceneHistory, files: any SceneFiles, exporting: any SceneExporting
     public var drawing: any FrameDrawing, rendering: any FrameRendering, sequences: any SequenceRendering
-    public var handOff: any RenderHandingOff
+    public var handOff: any RenderHandingOff, vectors: any VectorArtReading, images: any ImageDecoding
+    public var modifiers: any ModifierEvaluating
 
     public static let fake = PrismServices(
         importing: FakeSceneImporting(), primitives: FakePrimitiveMaking(), extruding: FakeShapeExtruding(),
@@ -27,7 +28,8 @@ public struct PrismServices: Sendable {
         keying: FakePropertyKeying(), easing: FakeKeyEasing(), clock: FakePlaybackClock(),
         history: FakeSceneHistory(), files: FakeSceneFiles(), exporting: FakeSceneExporting(),
         drawing: FakeFrameDrawing(), rendering: FakeFrameRendering(), sequences: FakeSequenceRendering(),
-        handOff: FakeRenderHandingOff())
+        handOff: FakeRenderHandingOff(), vectors: FakeVectorArtReading(), images: FakeImageDecoding(),
+        modifiers: FakeModifierEvaluating())
 
     /// What W0 ships as `.live` before any feature lands: every member a NotBuilt stub.
     public static let unbuilt = PrismServices(
@@ -38,7 +40,8 @@ public struct PrismServices: Sendable {
         keying: NotBuilt("Keys"), easing: NotBuilt("Easing"), clock: NotBuilt("Playback"),
         history: NotBuilt("Undo"), files: NotBuilt("Save and Open"), exporting: NotBuilt("Export"),
         drawing: NotBuilt("Viewport"), rendering: NotBuilt("Render"), sequences: NotBuilt("Render"),
-        handOff: NotBuilt("Send To"))
+        handOff: NotBuilt("Send To"), vectors: NotBuilt("Vector art"), images: NotBuilt("Images"),
+        modifiers: NotBuilt("Modifiers"))
 }
 
 /// The W0 live stub: conforms to every contract, does nothing, and says why.
@@ -185,4 +188,20 @@ extension NotBuilt: RenderHandingOff {
     public func refusal(for target: PrismHandOffTarget, plan: PrismRenderPlan) -> String? { unavailableHelp }
     public func request(for target: PrismHandOffTarget, plan: PrismRenderPlan, outcome: PrismRenderOutcome,
                         settings: PrismSceneSettings, sourceDocument: String?) -> PrismHandOffRequest? { nil }
+}
+extension NotBuilt: VectorArtReading {
+    public func shapes(fromSVG data: Data) throws(PrismImportError) -> (shapes: [PrismVectorShape], warnings: [String]) {
+        throw .unsupportedFormat("svg")
+    }
+}
+extension NotBuilt: ImageDecoding {
+    public func decode(_ data: Data, name: String, id: PrismID) throws(PrismImportError) -> PrismTexture {
+        throw .unsupportedFormat("image")
+    }
+}
+extension NotBuilt: ModifierEvaluating {
+    public func evaluate(_ mesh: PrismMesh, modifiers: [PrismModifier], forRender: Bool) throws(PrismEditError) -> PrismMesh {
+        guard modifiers.isEmpty else { throw .outOfRange(unavailableHelp ?? "") }
+        return mesh
+    }
 }

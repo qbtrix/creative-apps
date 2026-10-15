@@ -17,6 +17,18 @@ import Darwin
 #endif
 
 public enum PrismRules {
+    /// What follows the first `needle` in `hay`, or nil (FoundationEssentials has no range(of:)).
+    public static func after(_ needle: String, in hay: Substring) -> Substring? {
+        let n = Array(needle)
+        guard !n.isEmpty else { return hay }
+        var i = hay.startIndex
+        while i < hay.endIndex {
+            if hay[i...].starts(with: n) { return hay[hay.index(i, offsetBy: n.count)...] }
+            i = hay.index(after: i)
+        }
+        return nil
+    }
+
     /// Text without leading and trailing white space (FoundationEssentials has no trimming).
     public static func trimmed(_ s: String) -> String {
         String(String(s.drop(while: \.isWhitespace).reversed()).drop(while: \.isWhitespace).reversed())

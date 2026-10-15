@@ -44,6 +44,23 @@ public protocol ShapeExtruding: PrismService {
                  name: String) throws(PrismEditError) -> PrismMesh
 }
 
+/// UC3b Read vector art (SVG 1.1 paths, basic shapes and solid fills; Design's pasteboard SVG) as shapes.
+public protocol VectorArtReading: PrismService {
+    /// Filled closed shapes in document order, y up, in SVG user units; skipped features as warnings.
+    func shapes(fromSVG data: Data) throws(PrismImportError) -> (shapes: [PrismVectorShape], warnings: [String])
+}
+
+/// UC3c Decode an image (PNG, JPEG, HEIC) for a texture or the environment; the macOS live type uses ImageIO.
+public protocol ImageDecoding: PrismService {
+    func decode(_ data: Data, name: String, id: PrismID) throws(PrismImportError) -> PrismTexture
+}
+
+/// UC22 Evaluate a mesh's modifiers (subdivision, mirror) for the viewport, render and export.
+public protocol ModifierEvaluating: PrismService {
+    /// The mesh after `modifiers` in order; refuses a result over `PrismImportError.maximumTriangles`.
+    func evaluate(_ mesh: PrismMesh, modifiers: [PrismModifier], forRender: Bool) throws(PrismEditError) -> PrismMesh
+}
+
 /// UC3 (platform half) Glyph outlines for a string; the macOS live type uses Core Text.
 public protocol GlyphOutlining: PrismService {
     /// The string's outline at `size` units per em, baseline at y = 0, left edge at x = 0.

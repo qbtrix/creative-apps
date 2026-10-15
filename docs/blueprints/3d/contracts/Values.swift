@@ -377,12 +377,17 @@ public struct PrismNode: Sendable, Hashable, Codable, Identifiable {
     public var meshID: PrismID?, materialID: PrismID?, light: PrismLight?, camera: PrismCamera?
     /// Keyframe tracks by `PrismProperty.rawValue`, each sorted by frame with one key per frame.
     public var tracks: [String: [PrismKey]]
+    /// Applied in order to the mesh before drawing, rendering and export (P-F21).
+    public var modifiers: [PrismModifier]
+    /// Text or vector art the mesh is rebuilt from (P-F19, P-F20); nil once converted to a mesh.
+    public var shapeSource: PrismShapeSource?
     public init(id: PrismID, name: String, kind: PrismNodeKind, transform: PrismTransform = .identity,
                 parentID: PrismID? = nil, isVisible: Bool = true, meshID: PrismID? = nil, materialID: PrismID? = nil,
-                light: PrismLight? = nil, camera: PrismCamera? = nil, tracks: [String: [PrismKey]] = [:]) {
+                light: PrismLight? = nil, camera: PrismCamera? = nil, tracks: [String: [PrismKey]] = [:],
+                modifiers: [PrismModifier] = [], shapeSource: PrismShapeSource? = nil) {
         self.id = id; self.name = name; self.kind = kind; self.transform = transform; self.parentID = parentID
         self.isVisible = isVisible; self.meshID = meshID; self.materialID = materialID; self.light = light
-        self.camera = camera; self.tracks = tracks
+        self.camera = camera; self.tracks = tracks; self.modifiers = modifiers; self.shapeSource = shapeSource
     }
 }
 
@@ -735,6 +740,30 @@ public struct PrismExtrusion: Sendable, Hashable, Codable {
     public init(depth: Double = 0.2, bevel: Double = 0.02, bevelSegments: Int = 2) {
         self.depth = depth; self.bevel = bevel; self.bevelSegments = bevelSegments
     }
+}
+
+public enum PrismModifier: Sendable, Hashable, Codable {
+    /// Catmull-Clark subdivision: `levels` in the viewport (0...3), `renderLevels` in renders and export (0...4).
+    case subdivision(levels: Int, renderLevels: Int)
+    /// Mirror across the object's own axis; `merge` welds vertices within 0.001 of the plane.
+    case mirror(axis: PrismAxis, merge: Bool)
+    public var title: String {
+        switch self {
+        case .subdivision: "Subdivision Surface"
+        case .mirror: "Mirror"
+        }
+    }
+}
+
+public enum PrismShapeSource: Sendable, Hashable, Codable {
+    case text(string: String, fontName: String, size: Double, extrusion: PrismExtrusion)
+    case vector(outline: PrismOutline, extrusion: PrismExtrusion)
+}
+
+/// One filled shape read from vector art, ready to extrude.
+public struct PrismVectorShape: Sendable, Hashable, Codable {
+    public var name: String, outline: PrismOutline, fill: PrismColor
+    public init(name: String, outline: PrismOutline, fill: PrismColor) { self.name = name; self.outline = outline; self.fill = fill }
 }
 
 /// Where a render goes after it is written.
