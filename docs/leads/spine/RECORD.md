@@ -2,9 +2,9 @@
 
 Issue: #1044 · Packet: docs/blueprints/library/features/spine.md
 Run: act-1a13f18aaa0-lfw5 · Session: session_01DtSRhNqsphGfKkvV5eLsWW · Started: 2026-10-15T10:25Z
-Stage: 3 wave 8
-Base: cc37444c336095b91b1ee2b69a2f11686b8c1f05
-Next: wait for SP-9, SP-14, SA-3 to merge; comment once on #217; then wave 9 (SA-4)
+Stage: 3 wave 9
+Base: 265b1fe07f0eae0aefb7cad8f0276c7c7c97f7a6
+Next: wait for SA-4 to merge; then wave 10 (SA-5, SA-6)
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -23,10 +23,10 @@ Next: wait for SP-9, SP-14, SA-3 to merge; comment once on #217; then wave 9 (SA
 | SP-8 | 7 | Cached `order`, Budget.swift | LibraryOrder.swift, LibraryCatalog.swift | LibraryOrderTests | #1127 | merged |
 | SP-13 | 7 | Readouts, keys, controls JSON | LibraryReadouts.swift, LibraryKeys.swift | LibraryReadoutsTests, LibraryKeysTests | #1128 | merged |
 | SA-2 | 7 | One Window scene, services from launch args, platform stubs | LibraryApp.swift, LibraryWindow.swift, Platform/* | macOS testLaunchShowsWindowShell | #1130 | merged |
-| SP-9 | 8 | Leave the loupe when the collection hides its photo (only if #217 unmerged) | LibraryCatalog.swift | LibraryCollectionSwitchTests |  | building |
-| SP-14 | 8 | recordEdit, undo, redo, titles, endCoalescing | CatalogHistory.swift | LibraryHistoryTests |  | building |
-| SA-3 | 8 | LibraryMenu per area, every v1 menu item with help | LibraryMenus, LibraryCommands, LibraryWindow | J10 |  | building |
-| SA-4 | 9 | Nine area files, hooks, menu: params, key routing | LibraryWindow*, Browser, Grid, Loupe | J0 step 3, existing journeys | | planned |
+| SP-9 | 8 | Leave the loupe when the collection hides its photo (only if #217 unmerged) | LibraryCatalog.swift | LibraryCollectionSwitchTests | #1138 | merged |
+| SP-14 | 8 | recordEdit, undo, redo, titles, endCoalescing | CatalogHistory.swift | LibraryHistoryTests | #1139 | merged |
+| SA-3 | 8 | LibraryMenu per area, every v1 menu item with help | LibraryMenus, LibraryCommands, LibraryWindow | J10 | #1140 | merged |
+| SA-4 | 9 | Nine area files, hooks, menu: params, key routing | LibraryWindow*, Browser, Grid, Loupe | J0 step 3, existing journeys |  | building |
 | SA-5 | 10 | Import Folder… empty state, notice slot, Preview pill, export sheet | Browser, StatusBar, ExportSheet, Window | LibraryShellSnapshots | | planned |
 | SA-6 | 10 | Inspector tabs/header, Develop/Crop stubs, crop overlay, loupe value | Inspector, DevelopInspector, CropInspector, CropOverlay, Loupe | LibraryShellSnapshots, loupe journey | | planned |
 | SA-7 | 11 | library.controls, identifiers, spine snapshots | LibraryControls, Window, LibraryShellSnapshots | snapshots | | planned |
@@ -62,6 +62,8 @@ Taken from the packet's Build waves; checked against dev bcf5a09.
 - #1120 (fix for SA-1's let-model break) merged 11:48; the next macOS run on dev proves it.
 - SA-2 also adds DisplayImage+Image.swift (moved from SA-1) and a Model init that applies LibraryLaunch (showsTestValues is internal(set), so the app can't set it).
 - SP-9 runs: #217 still open at wave 8 start (12:12Z).
+- SP-14 leaves setRating/setFlag/setLabel/clickStar outside the undo history (their files weren't in SP-14's list); the cull feature routes them through cull/recordEdit in wave 2, as blueprint 5.7 says.
+- Commented once on #217 that #1138 supersedes it.
 
 ## Open
 - PR #217 (fix for #156) is open at stage 0; SP-9 lands only if it is still unmerged when wave 8 starts.
