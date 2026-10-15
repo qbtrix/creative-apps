@@ -8,9 +8,10 @@
 // (PhotoRenderer.update) and makes their images (CanvasTiles.apply). The events are 120 steps of one
 // steady stroke, each rendered before the next, the case where the renderer
 // keeps up. The test prints p50 and p95 of each part as one BRUSH-LATENCY
-// line and writes it to .build/snapshots/photo-brush-latency.txt, with the
-// stroke's first event and its mouse-up. Not timed: SwiftUI's diff and draw,
-// and Core Animation taking each new tile image. macOS only.
+// line and writes it to .build/snapshots/photo-brush-latency.txt, with a
+// stroke's first event and its mouse-up, each the median of seven strokes.
+// Not timed: SwiftUI's diff and draw, and Core Animation taking each new tile
+// image. macOS only.
 //
 // Budgets, p50 per event. A 60 Hz frame is 16 ms; half of it is left for
 // what this test can't time, so in a release build the timed parts get 8 ms.
@@ -53,7 +54,7 @@ import Testing
         let path = (0...120).map { Mask.Point(x: 400 + 14 * Double($0), y: 1500 + 250 * sin(Double($0) / 12)) }
 
         var drag: [Double] = [], render: [Double] = [], image: [Double] = [], total: [Double] = []
-        var strokeStart = 0.0
+        var strokeStarts: [Double] = []
         for (i, to) in path.enumerated() {
             let t0 = clock.now
             state.drag(from: i == 0 ? to : path[i - 1], to: to)
@@ -65,7 +66,7 @@ import Testing
             #expect(tiles.handedBytes == next.tiles.reduce(0) { $0 + $1.rgba8.count })
             shown = next.revision
             guard i > 0 else {
-                strokeStart = milliseconds(t1 - t0)
+                strokeStarts.append(milliseconds(t1 - t0))
                 continue
             }
             drag.append(milliseconds(t1 - t0))
@@ -75,7 +76,23 @@ import Testing
         }
         started = clock.now
         state.endDrag()
-        let strokeEnd = milliseconds(clock.now - started)
+        var strokeEnds = [milliseconds(clock.now - started)]
+        // A stroke has one first event and one mouse-up, so each is a single
+        // sample, and a load spike on a shared runner can land on it (8.4 ms
+        // once, against 1.0 ms on the run before). Six more short strokes
+        // make both ends medians of seven; a whole-layer copy or walk would
+        // still slow every one of them.
+        for stroke in 1...6 {
+            let y = 300 + 400 * Double(stroke)
+            let t0 = clock.now
+            state.drag(from: Mask.Point(x: 400, y: y), to: Mask.Point(x: 400, y: y))
+            strokeStarts.append(milliseconds(clock.now - t0))
+            state.drag(from: Mask.Point(x: 400, y: y), to: Mask.Point(x: 414, y: y))
+            let t1 = clock.now
+            state.endDrag()
+            strokeEnds.append(milliseconds(clock.now - t1))
+        }
+        let strokeStart = percentile(strokeStarts, 0.5), strokeEnd = percentile(strokeEnds, 0.5)
 
         func split(_ name: String, _ values: [Double]) -> String {
             "\(name) p50 \(format(percentile(values, 0.5))) p95 \(format(percentile(values, 0.95)))"
@@ -83,7 +100,8 @@ import Testing
         let report = [
             "BRUSH-LATENCY config=\(Self.config) canvas=4000x3000 events=\(total.count) ms per event:",
             split("drag", drag) + ",", split("render", render) + ",", split("tiles", image) + ",",
-            split("total", total), "| stroke first drag \(format(strokeStart)), mouse-up \(format(strokeEnd)),",
+            split("total", total), "| \(strokeStarts.count) strokes: first drag p50 \(format(strokeStart)),",
+            "mouse-up p50 \(format(strokeEnd)),",
             "first frame \(format(firstFrame)) | budget p50 drag <= \(format(Self.dragBudget)),",
             "total <= \(Self.totalBudget.map(format) ?? "report only (debug)")",
         ].joined(separator: " ")
