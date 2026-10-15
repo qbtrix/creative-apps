@@ -120,22 +120,66 @@ import Testing
         }
     }
 
-    // QB-S16: summary over 10,000 samples, median and p95 of 100 runs ≤ 20 ms (the debug gate; target 2 ms).
+    // QB-S16: summary over 10,000 samples. After 10 warm-up runs, 100 runs are each timed in this thread's
+    // CPU time, so time the scheduler gives other tests (they run in parallel) isn't counted: their median and
+    // p95 stay within 20 ms (the debug gate; target 2 ms). The work takes about 1.3 ms in a debug build, so the
+    // 20 ms gate alone can't see a 2x slowdown; each run is also paired with `framesLateReference`, timed right
+    // after it, and the summary's median and p95 stay within 2.5x the reference's. Measured on Linux, debug:
+    // 1.6 to 1.7x idle and with four copies running at once; doing the summary twice per run gives 3.1 to 3.4x.
     @Test func summaryWithinBudget() {
         var probe = SuiteFrameProbe()
+        var samples: [ProbeSample] = []
         for i in 0..<10_000 {
             let event = Double(i) / 120
-            probe.record(ProbeSample(series: "canvas-drag", eventTime: event, shownAt: event + Double(i % 7) / 60))
+            let sample = ProbeSample(series: "canvas-drag", eventTime: event, shownAt: event + Double(i % 7) / 60)
+            probe.record(sample)
+            samples.append(sample)
         }
-        let clock = ContinuousClock()
-        var runs: [Duration] = []
+        let r = 1.0 / 60
         var last = ProbeSummary(count: 0, p50FramesLate: 0, p95FramesLate: 0, valid: false)
-        for _ in 0..<100 {
-            runs.append(clock.measure { last = probe.summary(of: "canvas-drag", refreshInterval: 1.0 / 60) })
+        var runs: [Double] = []
+        var references: [Double] = []
+        for run in 0..<110 {
+            let start = Self.threadCPUSeconds()
+            last = probe.summary(of: "canvas-drag", refreshInterval: r)
+            let middle = Self.threadCPUSeconds()
+            let lates = Self.framesLateReference(samples, series: "canvas-drag", refreshInterval: r)
+            let end = Self.threadCPUSeconds()
+            #expect(lates == 10_000)
+            if run >= 10 {
+                runs.append(middle - start)
+                references.append(end - middle)
+            }
         }
         runs.sort()
+        references.sort()
+        let (median, p95) = (runs[49], runs[94])
+        let (refMedian, refP95) = (max(references[49], 1e-6), max(references[94], 1e-6))
+        print("QB-S16 summary cpu median \(median * 1000) ms, p95 \(p95 * 1000) ms; reference median "
+              + "\(refMedian * 1000) ms, p95 \(refP95 * 1000) ms; ratio \(median / refMedian), \(p95 / refP95)")
         #expect(last.count == 10_000 && last.valid)
-        #expect(runs[49] <= .milliseconds(20), "median \(runs[49])")
-        #expect(runs[94] <= .milliseconds(20), "p95 \(runs[94])")
+        #expect(median <= 0.020, "median \(median * 1000) ms")
+        #expect(p95 <= 0.020, "p95 \(p95 * 1000) ms")
+        #expect(median / refMedian <= 2.5, "median \(median / refMedian)x the reference")
+        #expect(p95 / refP95 <= 2.5, "p95 \(p95 / refP95)x the reference")
+    }
+
+    /// The summary's first pass without the probe: frames late for every sample of `series`, by the same
+    /// formula, into an array. No percentiles. Returns how many it kept.
+    static func framesLateReference(_ samples: [ProbeSample], series: String, refreshInterval r: Double) -> Int {
+        var lates: [Int] = []
+        lates.reserveCapacity(samples.count)
+        for sample in samples where sample.series == series {
+            let refreshes = ((sample.shownAt - sample.eventTime) / r).rounded(.up)
+            lates.append(refreshes > 1 ? Int(refreshes) - 1 : 0)
+        }
+        return lates.count
+    }
+
+    /// This thread's CPU time in seconds.
+    static func threadCPUSeconds() -> Double {
+        var now = timespec()
+        clock_gettime(CLOCK_THREAD_CPUTIME_ID, &now)
+        return Double(now.tv_sec) + Double(now.tv_nsec) / 1_000_000_000
     }
 }
