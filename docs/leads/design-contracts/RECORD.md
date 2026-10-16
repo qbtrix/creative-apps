@@ -4,7 +4,7 @@ Issue: #1324 · Packet: docs/blueprints/design/features/design-contracts.md
 Run: act-1a14478b14e-i8ep · Session: session_01DKQiisBimhgRgEM46b1U5E · Started: 2026-10-16T11:29Z
 Stage: 3 wave 5
 Base: fb72b7e52405a824fabe34c6c408fcc00d242da2
-Next: wait on the lane for #1400 (D0-3b) and #1401 (D0-2b.2), both waiting on macOS builds; then rebase lead/design-contracts-FD (committed locally in the lead's scratchpad; redo from dev if lost: wave.json status built, feature_issue #1324), run scripts/ci, open it with feature-done; CT-b waits for scoped run 38917492060
+Next: wait for #1401 to merge, then open FD (feature-done); wait for a green scoped CI run app=design (blocked by #1391's journey breaks, reported on dev-red #1393) to post CT-b, CT-c, CT-d done
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | rounds | state | run |
@@ -30,7 +30,7 @@ Next: wait on the lane for #1400 (D0-3b) and #1401 (D0-2b.2), both waiting on ma
 | D0-3a | CT-d | 4 | DesignCommand, help, run, apply, mint | DesignActions.swift, DesignActionsTests.swift | DesignActionsTests | #1395 | merged (Mutate 6/6) |
 | D0-2b.1 | CT-c | 3 | six new Live stubs (Duplicating, Grouping, Clipboard, Ordering, Styling, Filing) | Live/Live{Duplicating,Grouping,Clipboard,Ordering,Styling,Filing}.swift, DesignLiveStubTests.swift | DesignLiveStubTests | #1383 | merged |
 | D0-2b.2 | CT-c | 5 | .live names every Live type; law on .live; MJ3 | DesignServices.swift, DesignLiveStubTests.swift | DesignLiveStubTests | #1401 | open (Mutate 10/10) |
-| D0-3b | CT-d | 5 | clipboard, moveLayer, setStyle; MJ4 | DesignActions+Edit.swift, DesignActionsEditTests.swift | DesignActionsEditTests | #1400 | open (Mutate 5/5) |
+| D0-3b | CT-d | 5 | clipboard, moveLayer, setStyle; MJ4 | DesignActions+Edit.swift, DesignActionsEditTests.swift | DesignActionsEditTests | #1400 | merged (Mutate 5/5) |
 | FD | CT-d | 6 | feature-done: design-contracts.wave.json status built, feature issue #1324 | docs/blueprints/design/features/design-contracts.wave.json | scripts/ci (waves render) | | waits D0-2b.2, D0-3b |
 
 Waves: 1 = D0-0, D0-4a, F-1314 (all independent). 2 = D0-1 (waits D0-0: same DesignNode/DesignFile). 3 = D0-2.3 (waits D0-1: DesignWorkspace.swift). 4 = D0-2.5 (waits D0-2.3: DesignServices.swift). 5 = D0-2.6, D0-3a (both wait D0-2.5's .fake; independent of each other). 6 = D0-2b (waits D0-2.6, D0-4a), D0-3b (waits D0-3a); later of the two carries feature-done.
@@ -56,5 +56,6 @@ Waves: 1 = D0-0, D0-4a, F-1314 (all independent). 2 = D0-1 (waits D0-0: same Des
 - Filed gap #1326 (public DesignPage init); D0-1 closes it.
 
 ## Open
+- Scoped design run 38917492060 (contains #1388) red: testDrawShapesAddTextAndSave, testShellLight, testShellDark; Model tests green. Culprit #1391 (shell-parity), reported on #1393. CT-b..CT-d need a green Design run.
 - Full CI run 38915938965 (head fb72b7e) red on Linux LibraryImportBudgetTests.beginImportWithinBudget (Library line, not this feature) and macOS; CT-b is judged on the scoped design run.
 - gap #1326: closes with D0-1.

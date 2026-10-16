@@ -25,3 +25,5 @@ utc	stage	event	ref	note
 2026-10-16T15:00Z	3	pr-opened	#1400	D0-3b (Mutate 5/5)
 2026-10-16T15:00Z	3	ci-run	38915938965	full CI red: Library budget test, not ours
 2026-10-16T15:25Z	3	pr-opened	#1401	D0-2b.2 .live runs the Live types; MJ3 (Mutate 10/10)
+2026-10-16T15:00Z	3	pr-merged	#1400	D0-3b
+2026-10-16T15:00Z	3	ci-run	38917492060	scoped design red on 3 journeys from #1391; reported #1393
