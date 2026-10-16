@@ -25,3 +25,5 @@ utc	stage	event	ref	note
 2026-10-16T14:15Z	3	pr-merged	#1389	EZ-8 feature-done
 2026-10-16T14:15Z	3	stage-end	waves	all 8 tasks merged
 2026-10-16T14:24Z	4	ci-run	38914550143	full dev run containing #1389, pending
+2026-10-16T14:51Z	4	ci-run	38915938965	full dev run red: Library only (dev-red #1393); journeys not reached
+2026-10-16T14:51Z	4	ci-run	38917497685	scoped halo, contains #1389, in progress

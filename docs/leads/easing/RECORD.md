@@ -4,7 +4,7 @@ Issue: #1333 · Packet: docs/blueprints/halo/features/easing.md
 Run: act-1a1448a5fbe-p22s · Session: session_01Fpq7bUwf2TjhThXdtGKn4r · Started: 2026-10-16T11:48Z
 Stage: 4 round 1
 Base: e464ecab9b0e11b9cfc27851181beafdb8fee424
-Next: wait for full dev CI run 38914550143 (head e0abe75529, contains #1389); then Anatomy round 1: ui-screens + snapshots + audit, critic-panel.js with issue 1333
+Next: wait for scoped halo run 38917497685 (head fb72b7e, contains #1389); then Anatomy round 1 on it (full runs 38914550143 cancelled, 38915938965 red on Library only, dev-red #1393)
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -38,4 +38,5 @@ Wave 4: EZ-8 waits on EZ-6 and EZ-7 (drives what they put on screen); #333 close
 
 ## Open
 - Ask the supervisor to add HaloModelTests.HaloEasingBudgetTests to Tests/perf-suites.txt (#1363 body).
+- Full run 38915938965 red only on LibraryImportBudgetTests (Linux) and LibraryImportSnapshots.progressRowShowsAfterItsDelay (macOS): not easing, tracked by dev-red #1393. Its macOS job stopped before journeys.
 - #771 (key shapes, selected-keys set) not blocking: plain diamonds.
