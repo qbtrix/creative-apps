@@ -1,0 +1,30 @@
+[
+  {
+    "label": "a slot names the wrong feature",
+    "file": "Sources/DesignModel/DesignServices.swift",
+    "find": "framing: NotBuilt(\"Zoom to Selection\")",
+    "replace": "framing: NotBuilt(\"Zoom\")",
+    "tests": "DesignNotBuiltTests"
+  },
+  {
+    "label": "the filing slot names the wrong feature",
+    "file": "Sources/DesignModel/DesignServices.swift",
+    "find": "filing: NotBuilt(\"Saving\")",
+    "replace": "filing: NotBuilt(\"Save\")",
+    "tests": "DesignNotBuiltTests"
+  },
+  {
+    "label": "services never break equality",
+    "file": "Sources/DesignModel/DesignServices.swift",
+    "find": "-> Bool { a.name == b.name }",
+    "replace": "-> Bool { true }",
+    "tests": "DesignNotBuiltTests"
+  },
+  {
+    "label": "useServices drops the swap",
+    "file": "Sources/DesignModel/DesignWorkspace.swift",
+    "find": "        self.services = services\n",
+    "replace": "",
+    "tests": "DesignNotBuiltTests"
+  }
+]

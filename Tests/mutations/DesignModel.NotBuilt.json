@@ -1,0 +1,30 @@
+[
+  {
+    "label": "a NotBuilt write returns instead of throwing",
+    "file": "Sources/DesignModel/NotBuilt.swift",
+    "find": "public func ungroup(_ ids: [String], on page: DesignPage) throws(DesignRefusal) -> DesignEdit { throw refusal }",
+    "replace": "public func ungroup(_ ids: [String], on page: DesignPage) throws(DesignRefusal) -> DesignEdit { DesignEdit(name: \"Ungroup\", nodes: page.nodes, selection: ids) }",
+    "tests": "DesignNotBuiltTests"
+  },
+  {
+    "label": "a help answers nil, so the control looks enabled",
+    "file": "Sources/DesignModel/NotBuilt.swift",
+    "find": "public func styleHelp(_ property: DesignStyleProperty, _ ids: [String], on page: DesignPage) -> String? { help }",
+    "replace": "public func styleHelp(_ property: DesignStyleProperty, _ ids: [String], on page: DesignPage) -> String? { nil }",
+    "tests": "DesignNotBuiltTests"
+  },
+  {
+    "label": "decode refuses with the wrong reason",
+    "file": "Sources/DesignModel/NotBuilt.swift",
+    "find": "throws(DesignFileError) -> DesignDocument { throw .unreadable }",
+    "replace": "throws(DesignFileError) -> DesignDocument { throw .noPages }",
+    "tests": "DesignNotBuiltTests"
+  },
+  {
+    "label": "the refusal is not notBuilt",
+    "file": "Sources/DesignModel/NotBuilt.swift",
+    "find": "var refusal: DesignRefusal { .notBuilt(feature) }",
+    "replace": "var refusal: DesignRefusal { .unchanged }",
+    "tests": "DesignNotBuiltTests"
+  }
+]
