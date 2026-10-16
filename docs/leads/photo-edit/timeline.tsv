@@ -100,3 +100,4 @@ utc	stage	event	ref	note
 2026-10-16T14:33Z	5	heartbeat	-	no scoped photo run, PJ-5/6/7 still quarantined, no supervisor reply
 2026-10-16T14:55Z	5	heartbeat	-	no scoped photo run, PJ-5/6/7 still quarantined, no supervisor reply
 2026-10-16T15:19Z	5	ci-run	38919557811	dev red #1393, not ours: LibraryImportSnapshots.progressRowShowsAfterItsDelay; still no scoped photo run, PJ-5/6/7 quarantined
+2026-10-16T15:41Z	5	heartbeat	-	no scoped photo run, PJ-5/6/7 still quarantined, no supervisor reply
