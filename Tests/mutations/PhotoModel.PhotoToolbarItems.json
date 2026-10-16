@@ -1,0 +1,6 @@
+[
+{"label":"a clean never-saved image reads Saved","file":"Sources/PhotoModel/PhotoToolbarItems.swift","find":"if status == .saved, workspace.documentName == nil { return nil }","replace":"","tests":"PhotoToolbarItemsTests"},
+{"label":"Open says why it can't run","file":"Sources/PhotoModel/PhotoToolbarItems.swift","find":"if self == .open { return nil }","replace":"","tests":"PhotoToolbarItemsTests"},
+{"label":"Undo ignores the history","file":"Sources/PhotoModel/PhotoToolbarItems.swift","find":"case .undo: return workspace.canUndo ? nil : \"Nothing to undo.\"","replace":"case .undo: return nil","tests":"PhotoToolbarItemsTests"},
+{"label":"Undo shows a fixed title","file":"Sources/PhotoModel/PhotoToolbarItems.swift","find":"case .undo: workspace.undoActionName","replace":"case .undo: \"Undo\"","tests":"PhotoToolbarItemsTests"}
+]
