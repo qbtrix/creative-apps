@@ -63,3 +63,4 @@ utc	stage	event	ref	note
 2026-10-16T06:22Z	4	heartbeat	dev-ci	waiting on a green full or scoped:suite dev run: 38860005273 scoped: halo completed failure 0375364; 38860001517 CI completed failure 0375364; 38859997997 scoped: library completed failure 0375364
 2026-10-16T06:42Z	4	heartbeat	dev-ci	waiting on a green full or scoped:suite dev run; last full 38860001517 red (Flare build)
 2026-10-16T07:00Z	4	heartbeat	38863614580	full run on c39a9d5 running
+2026-10-16T07:30Z	4	heartbeat	38867245345	863614580 cancelled; full run on a56bbe3 running
