@@ -54,6 +54,10 @@ for them by name.
    feature's `.wave.json` under `slices`, with each slice's owned files;
    `scripts/waves check` fails when two slices that can run at once own one
    file. A feature's first slice publishes what other features plug into.
+   A task that needs another feature's real code, not its fake, waits on
+   the slice that builds it, not on that feature's first slice. A packet
+   with this table runs the v3 lead loop (`lead.md`, Which loop); one
+   without it runs the v2 loop unchanged.
 3. **Journey steps.** The numbered steps a user takes, each naming the task
    and the journey test (`<X>-J<n>`) that proves it.
 4. **Screens and states.** Each screen state the feature adds and the
@@ -87,7 +91,10 @@ for them by name.
 10. **Quality tests.** `| quality row | budget | test |`: budgets, no dead
    controls, one gesture one step, keyboard parity, the audit.
 11. **Done check.** Journeys green on the `feature-done` CI run, audit zero
-    new, the contact sheet comment.
+    new, the contact sheet comment. With Slices, per slice instead: its
+    journeys green on a scoped run (`ci.yml` with `app=<app>`) that contains
+    its last merged PR, every app built, no open `finding` issue, then the
+    contact sheet once every slice is done (`lead.md`, contract rule 6).
 12. **Review notes folded in** (optional). What a review changed.
 
 ## The three rules
