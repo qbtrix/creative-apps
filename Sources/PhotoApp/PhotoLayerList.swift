@@ -54,7 +54,9 @@ struct PhotoLayerList: View {
 /// One Layers row: the show/hide eye, the kind symbol, the name with the
 /// Model's info line under it (`layerInfo`), and the blend mode and opacity
 /// when either is not the default. The eye and the kind symbol carry
-/// `photo.layer.<id>.eye` and `photo.layer.<id>.kind`, each with a label. Hierarchical styles, so on the focused
+/// `photo.layer.<id>.eye` and `photo.layer.<id>.kind`, each with a label. Both
+/// symbols sit in a fixed `symbolColumn`, so every row's name starts at the
+/// same x whatever its kind or visibility (#1633). Hierarchical styles, so on the focused
 /// selection's fill the row turns white with the system's own selected text;
 /// a selected row draws everything primary, since secondary is too faint there.
 struct PhotoLayerRow: View {
@@ -73,6 +75,10 @@ struct PhotoLayerRow: View {
         return "Image layer"
     }
 
+    /// The width of the eye's and the kind symbol's column: eye and
+    /// eye.slash, photo and slider.horizontal.3 draw at different widths.
+    static let symbolColumn: CGFloat = SuiteSize.iconButtonHit
+
     static func eyeIdentifier(_ id: PhotoLayer.ID) -> String { "photo.layer.\(id).eye" }
     static func kindIdentifier(_ id: PhotoLayer.ID) -> String { "photo.layer.\(id).kind" }
 
@@ -82,6 +88,7 @@ struct PhotoLayerRow: View {
                 perform(.toggleVisibility(layer.id))
             } label: {
                 Image(systemName: layer.isVisible ? "eye" : "eye.slash")
+                    .frame(width: Self.symbolColumn)
                     .foregroundStyle(isSelected || layer.isVisible ? HierarchicalShapeStyle.primary : .secondary)
             }
             .buttonStyle(.borderless)
@@ -89,6 +96,7 @@ struct PhotoLayerRow: View {
             .accessibilityLabel("\(layer.isVisible ? "Hide" : "Show") \(layer.name)")
             .accessibilityIdentifier(Self.eyeIdentifier(layer.id))
             Image(systemName: Self.kindSymbol(layer.kind))
+                .frame(width: Self.symbolColumn)
                 .foregroundStyle(isSelected ? HierarchicalShapeStyle.primary : .secondary)
                 .help(Self.kindLabel(layer.kind))
                 .accessibilityLabel(Self.kindLabel(layer.kind))
