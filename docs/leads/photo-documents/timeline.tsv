@@ -84,3 +84,4 @@ utc	stage	event	ref	note
 2026-10-16T00:33Z	4	stage-start	round 3	CI 38829075229 on a42b3cf pending; F1b, F3, G2 started
 2026-10-16T00:50Z	4	heartbeat	-	gate queue E, G, F1
 2026-10-16T00:55Z	4	pr-opened	#1265	F1b Keep layers? NSAlert + text, drop Saved note
+2026-10-16T00:55Z	4	pr-opened	#1266	F3 plain-word open errors
