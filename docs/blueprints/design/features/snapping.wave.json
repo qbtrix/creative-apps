@@ -41,14 +41,13 @@
   "slices": [
     {
       "id": "SN-a",
-      "behavior": "Given the layers a drag can line up with, the snap engine finds the offset that puts an edge or centre on another layer's, the frame's or the page's, or makes a gap equal its neighbour's, and names the guides, distances and spacing hints that result.",
+      "behavior": "The guide types, the ⌘ and setting modifier, the layers a drag can line up with and the engine's shape are declared, with stubs for everything the screen calls (a fixed guide set while a drag runs, none otherwise), so the screen and the snap logic build in parallel.",
       "tasks": [
         "SN-1",
-        "SN-2",
-        "SN-3"
+        "SN-9"
       ],
       "journeys": [
-        "MJ10"
+        "MJ12"
       ],
       "owned": [
         "Sources/DesignModel/DesignSnapping.swift",
@@ -56,11 +55,7 @@
         "Sources/DesignModel/DesignSnapGaps.swift",
         "Tests/DesignModelTests/DesignSnapCandidateTests.swift",
         "Tests/DesignModelTests/DesignSnapEngineTests.swift",
-        "Tests/mutations/DesignModel.DesignSnapping.json",
-        "Tests/DesignModelTests/DesignSnapLineTests.swift",
-        "Tests/mutations/DesignModel.DesignSnapLines.json",
-        "Tests/DesignModelTests/DesignSnapGapTests.swift",
-        "Tests/mutations/DesignModel.DesignSnapGaps.json"
+        "Tests/mutations/DesignModel.DesignSnapping.json"
       ],
       "waits": {},
       "ui": false
@@ -89,6 +84,9 @@
         "SN-a": [
           "SN-4"
         ],
+        "SN-e": [
+          "SN-4"
+        ],
         "design-seams": [
           "SN-4"
         ],
@@ -103,7 +101,7 @@
     },
     {
       "id": "SN-c",
-      "behavior": "The canvas draws the smart guides, distance labels and spacing hints while a drag snaps, and View > Snap to Layers turns snapping off and on, remembered across relaunches.",
+      "behavior": "The canvas draws the smart guides, distance labels and spacing hints while a drag snaps (the stubbed guides first, the live ones once the routes land), and View > Snap to Layers turns snapping off and on, remembered across relaunches.",
       "tasks": [
         "SN-6",
         "SN-7",
@@ -123,8 +121,9 @@
         "Tests/AppSnapshotTests/DesignSnapSettingTests.swift"
       ],
       "waits": {
-        "SN-b": [
-          "SN-7"
+        "SN-a": [
+          "SN-7",
+          "SN-8"
         ],
         "design-window:DW-d": [
           "SN-7"
@@ -140,6 +139,63 @@
         ]
       },
       "ui": true
+    },
+    {
+      "id": "SN-e",
+      "behavior": "Given the layers a drag can line up with, the snap engine finds the offset that puts an edge or centre on another layer's, the frame's or the page's, or makes a gap equal its neighbour's, and names the guides, distances and spacing hints that result.",
+      "tasks": [
+        "SN-2",
+        "SN-3"
+      ],
+      "journeys": [
+        "MJ10"
+      ],
+      "owned": [
+        "Sources/DesignModel/DesignSnapLines.swift",
+        "Sources/DesignModel/DesignSnapGaps.swift",
+        "Tests/DesignModelTests/DesignSnapEngineTests.swift",
+        "Tests/DesignModelTests/DesignSnapLineTests.swift",
+        "Tests/mutations/DesignModel.DesignSnapLines.json",
+        "Tests/DesignModelTests/DesignSnapGapTests.swift",
+        "Tests/mutations/DesignModel.DesignSnapGaps.json"
+      ],
+      "waits": {
+        "SN-a": [
+          "SN-2",
+          "SN-3"
+        ]
+      },
+      "ui": false
+    },
+    {
+      "id": "SN-f",
+      "behavior": "Moving, resizing and drawing on the real canvas show the live smart guides, and the journey's snapped drags, guide reads and budgets pass on the live services.",
+      "tasks": [
+        "SN-10",
+        "SN-11"
+      ],
+      "journeys": [
+        "testSnapAndSmartGuides"
+      ],
+      "owned": [
+        "UITests/DesignJourneyTests+Snap.swift",
+        "Tests/AppSnapshotTests/RenderBudgetDesignSnapTests.swift"
+      ],
+      "waits": {
+        "SN-b": [
+          "SN-10",
+          "SN-11"
+        ],
+        "SN-e": [
+          "SN-10",
+          "SN-11"
+        ],
+        "SN-c": [
+          "SN-10",
+          "SN-11"
+        ]
+      },
+      "ui": false
     }
   ]
 }
