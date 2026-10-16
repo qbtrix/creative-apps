@@ -22,3 +22,5 @@ utc	stage	event	ref	note
 2026-10-16T14:15Z	4	heartbeat	#1382	macOS build failed (LibraryImportSnapshots: Color3 import, && line); sent back to fixer
 2026-10-16T14:26Z	4	pr-merged	#1382	round 1 fixes
 2026-10-16T14:38Z	4	fix-round	fix2	#1375 #1376
+2026-10-16T14:52Z	4	pr-merged	#1398	#1375 #1376
+2026-10-16T15:05Z	4	ci-run	38915938965	dev red #1393: two import tests; fix3 started

@@ -2,9 +2,9 @@
 
 Issue: #1334 · Packet: docs/blueprints/library/features/import.md
 Run: act-1a1448a5fa3-a8rg · Session: claude/library-import-feature-c0rl9g · Started: 2026-10-16T11:49Z
-Stage: 4 round 1
+Stage: 4 round 2
 Base: 8243ce4435006760f7ec9a87147fef094f6be4ed
-Next: fixer PR lead/import-fix2 (#1375 #1376); then round 2 review on the first scoped library run that contains #1382 and that PR
+Next: fix3 PR (dev-red #1393: beginImport budget 11.7/10 ms on Linux; progressRowShowsAfterItsDelay on macOS); then the round 2 review on the first scoped library run that contains #1398 and fix3
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -42,6 +42,7 @@ Wave 1: IM-1, IM-2, IM-4 independent. Wave 2: IM-3 (waits IM-1, IM-2: benchmarks
 
 - J1's audit violations come from SuiteUI ThumbnailGrid (cell identifiers #779, scroller #1368, filed needs-ui); import can't edit SuiteUI or LibraryGrid, so round 1 skips J1 to stop it reddening the other Library journeys, rather than loosening the audit.
 - #1372 #1373 #1374 #1377 are in files other features own (spine, thumbnails, status-and-layout): relabelled gap p2 for those features, not fixed here.
+- #1384 merged ThumbnailGrid cell ids (#779 item 2), but LibraryGrid must pass the prefix (owned by thumbnails) and the scroller needs #1368, so J1 stays skipped.
 
 ## Open
 - #1367 waits on #779 and #1368 (SuiteUI); J1 skipped until then.
