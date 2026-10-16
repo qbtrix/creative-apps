@@ -4,7 +4,7 @@ Issue: #1324 · Packet: docs/blueprints/design/features/design-contracts.md
 Run: act-1a14478b14e-i8ep · Session: session_01DKQiisBimhgRgEM46b1U5E · Started: 2026-10-16T11:29Z
 Stage: 3 wave 5
 Base: fb72b7e52405a824fabe34c6c408fcc00d242da2
-Next: wait on the lane for #1394 (D0-2.6) and #1395 (D0-3a); D0-2b.2 and D0-3b build stacked on them; then a docs-only feature-done PR (wave.json status built); CT-b waits for the scoped CI run app=design that contains #1388
+Next: D0-2b.2 builder opens its PR; #1400 (D0-3b) waits on the lane; then FD (feature-done); CT-b waits for scoped run 38917492060 (app=design, contains #1388)
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | rounds | state | run |
@@ -26,11 +26,11 @@ Next: wait on the lane for #1394 (D0-2.6) and #1395 (D0-3a); D0-2b.2 and D0-3b b
 | D0-1 | CT-a | 2 | style schema, public DesignPage init, marquee, selection ends run; MJ1 | DesignNode.swift, DesignWorkspace.swift, DesignSelection.swift, DesignFile.swift, DesignStyleSchemaTests.swift, DesignSelectionRunTests.swift | DesignStyleSchemaTests, DesignSelectionRunTests | #1356 | merged |
 | D0-2.3 | CT-b | 3 | NotBuilt, DesignServices .live, services/useServices | NotBuilt.swift, DesignServices.swift, DesignWorkspace.swift, DesignNotBuiltTests.swift | DesignNotBuiltTests | #1354 | merged |
 | D0-2.5 | CT-b | 4 | arrange fakes, .fake; MJ2 | Fakes/DesignArrangeFakes.swift, DesignServices.swift, DesignArrangeFakesTests.swift | DesignArrangeFakesTests | #1388 | merged |
-| D0-2.6 | CT-c | 4 | contract law | DesignContractLawTests.swift | DesignContractLawTests | #1394 | open |
-| D0-3a | CT-d | 4 | DesignCommand, help, run, apply, mint | DesignActions.swift, DesignActionsTests.swift | DesignActionsTests | #1395 | open (Mutate 6/6) |
+| D0-2.6 | CT-c | 4 | contract law | DesignContractLawTests.swift | DesignContractLawTests | #1394 | merged |
+| D0-3a | CT-d | 4 | DesignCommand, help, run, apply, mint | DesignActions.swift, DesignActionsTests.swift | DesignActionsTests | #1395 | merged (Mutate 6/6) |
 | D0-2b.1 | CT-c | 3 | six new Live stubs (Duplicating, Grouping, Clipboard, Ordering, Styling, Filing) | Live/Live{Duplicating,Grouping,Clipboard,Ordering,Styling,Filing}.swift, DesignLiveStubTests.swift | DesignLiveStubTests | #1383 | merged |
 | D0-2b.2 | CT-c | 5 | .live names every Live type; law on .live; MJ3 | DesignServices.swift, DesignLiveStubTests.swift | DesignLiveStubTests | | building (wave 5, stacked on #1394) |
-| D0-3b | CT-d | 5 | clipboard, moveLayer, setStyle; MJ4 | DesignActions+Edit.swift, DesignActionsEditTests.swift | DesignActionsEditTests | | building (wave 5, stacked on #1395) |
+| D0-3b | CT-d | 5 | clipboard, moveLayer, setStyle; MJ4 | DesignActions+Edit.swift, DesignActionsEditTests.swift | DesignActionsEditTests | #1400 | open (Mutate 5/5) |
 | FD | CT-d | 6 | feature-done: design-contracts.wave.json status built, feature issue #1324 | docs/blueprints/design/features/design-contracts.wave.json | scripts/ci (waves render) | | waits D0-2b.2, D0-3b |
 
 Waves: 1 = D0-0, D0-4a, F-1314 (all independent). 2 = D0-1 (waits D0-0: same DesignNode/DesignFile). 3 = D0-2.3 (waits D0-1: DesignWorkspace.swift). 4 = D0-2.5 (waits D0-2.3: DesignServices.swift). 5 = D0-2.6, D0-3a (both wait D0-2.5's .fake; independent of each other). 6 = D0-2b (waits D0-2.6, D0-4a), D0-3b (waits D0-3a); later of the two carries feature-done.
@@ -56,4 +56,5 @@ Waves: 1 = D0-0, D0-4a, F-1314 (all independent). 2 = D0-1 (waits D0-0: same Des
 - Filed gap #1326 (public DesignPage init); D0-1 closes it.
 
 ## Open
+- Full CI run 38915938965 (head fb72b7e) red on Linux LibraryImportBudgetTests.beginImportWithinBudget (Library line, not this feature) and macOS; CT-b is judged on the scoped design run.
 - gap #1326: closes with D0-1.
