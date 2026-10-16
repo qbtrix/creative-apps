@@ -95,7 +95,8 @@
         "loupe-viewport": [
           "SL-4"
         ]
-      }
+      },
+      "ui": true
     },
     {
       "id": "SL-c",
@@ -129,7 +130,8 @@
           "SL-6",
           "SL-8"
         ]
-      }
+      },
+      "ui": true
     }
   ]
 }

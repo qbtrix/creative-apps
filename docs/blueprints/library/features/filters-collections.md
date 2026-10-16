@@ -94,6 +94,12 @@ and tests only, except FC-10's drag and FC-15's file I/O.
 | FC-d | New Smart Collection from Filter saves the filter as a collection whose count follows every rating, and while it is selected the filter bar edits its rules as one undo step each. | FC-11, FC-12 | J15 | FC-a (FC-11, FC-12); FC-b (FC-12) |
 | FC-e | Your collections, their rules, the filter and the selected collection survive a relaunch, and a damaged collections file is set aside with a notice, never overwritten. | FC-13, FC-14, FC-15, FC-16 | J16 | FC-a (FC-13, FC-15); FC-c (FC-14, FC-16); FC-b, FC-d (FC-16) |
 
+Screen early: FC-a already is the early screen. It mounts the filter bar, the
+sidebar's Collections section and every menu item on the contract, each
+control disabled with its reason, so FC-a, FC-c (the sidebar drag) and FC-e
+(`CollectionsStore` and its notice) are UI slices (`"ui": true`), and the
+logic slices FC-b to FC-e light the controls up. Nothing was split.
+
 ## Journey steps
 
 Ids continue the blueprint's J0 to J12. Each journey is its own

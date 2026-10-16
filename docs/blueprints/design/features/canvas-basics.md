@@ -69,6 +69,13 @@ the Design-scoped macOS run (CB-a's MJ9 also on the Linux gate).
 | CB-b | A clicked text box grows and shrinks with its text, a dragged one keeps its width, wraps and grows down, and a size change refits the box, so no text is cut off. | CB-4, CB-5, CB-6 | `testTextBoxFitsItsText` | CB-a, style-rows SR-m (CB-5); style-rows SR-t, design-window (CB-6) |
 | CB-c | Layers past the page's edge show dimmed instead of vanishing, and the page's width and height are editable in the inspector, one undo step each. | CB-7, CB-8, CB-9 | `testPageSizeAndPastThePage` | design-window, CB-b (CB-9) |
 
+CB-b and CB-c are the UI slices (`"ui": true` in the `.wave.json`: the feel
+gate, rule 15, and the Mac finish, rule 17); CB-a is Model only. Their view
+tasks (CB-6, CB-9) call Model code their own slice adds
+(`commitTextEdit(extent:)`, `setPageSize`), which design-contracts doesn't
+declare, so they keep their waits; CB-9, the `feature-done` task, is the
+integrate step that runs the journeys on `.live`.
+
 CB-a is first and Model only (rule 12): CB-3's Text click-drag route is
 what DW-d's preview and journey plug into.
 

@@ -110,7 +110,8 @@
         "Tests/mutations/SuiteUI.TimelineTrack.json",
         "Sources/SuiteUI/Gallery/GalleryTimeline.swift"
       ],
-      "waits": {}
+      "waits": {},
+      "ui": true
     },
     {
       "id": "TL-b",
@@ -154,7 +155,8 @@
           "TL-5",
           "TL-7"
         ]
-      }
+      },
+      "ui": true
     },
     {
       "id": "TL-c",
@@ -188,7 +190,8 @@
         "TL-b": [
           "TL-11"
         ]
-      }
+      },
+      "ui": true
     },
     {
       "id": "TL-d",
@@ -221,7 +224,8 @@
           "TL-13",
           "TL-14"
         ]
-      }
+      },
+      "ui": true
     },
     {
       "id": "TL-e",
@@ -267,7 +271,8 @@
         "TL-d": [
           "TL-19"
         ]
-      }
+      },
+      "ui": true
     }
   ]
 }

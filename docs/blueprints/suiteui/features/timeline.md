@@ -71,6 +71,21 @@ files TL-b restyles (`TimelineLaneInput.swift`, `TimelineRuler.swift`,
 `TimelineStrip+Keys.swift`), so TL-c's keyboard and VoiceOver work owns files
 no other slice touches.
 
+All five slices own `Sources/SuiteUI/` files, so each is a UI slice
+(`"ui": true`, packets.md rule 12) and takes the feel gate and a Mac
+finisher pass (lead.md rules 15, 17).
+
+**Screen early (v3 shape, 2026-10-16).** The contract slice already puts the
+screen up on fakes: TL-4 (wave 3) shows the strip on both gallery pages,
+which SJ0 opens, and builds with `-SuiteGalleryFakes`.
+The rule tasks (TL-10, TL-13, TL-16) wait only on TL-1, never on a UI task,
+and run in waves 2 and 3 beside the UI chain. Each UI task that calls a rule
+(TL-11 on TL-10, TL-14 on TL-13, TL-17 on TL-16) also waits on a file-chain
+task that lands later (TL-6 wave 4, TL-11 wave 5, TL-7 wave 3), so building
+those on fakes would start nothing sooner; the slices stay as they are. The
+journeys run on live as each slice's enabling task lands (TL-8, TL-12,
+TL-15), and TL-19 is the integrate step: SJ19d on live and `feature-done`.
+
 ### Who uses each part
 
 H: Halo (`HaloTimelineView`, today's only caller). F: Flare (`FlareTimeline`,

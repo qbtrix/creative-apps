@@ -174,5 +174,7 @@
         ]
       }
     }
-  ]
+  ],
+  "ui_slice": "none",
+  "ui_slice_reason": "Contracts, fakes, live stubs and actions in DesignModel only; its controls are design-window DW-a's."
 }

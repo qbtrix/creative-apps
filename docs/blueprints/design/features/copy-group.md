@@ -40,6 +40,10 @@ the Design-scoped macOS run.
 |---|---|---|---|---|
 | CG-a | Duplicate and Option-drag a layer, group and ungroup several, and cut, copy and paste layers, also between files, each one step. | C-1, C-2, C-3, C-4, C-5 | J7, J8, J9 | design-contracts (C-1 to C-3); design-seams (C-1, C-5); design-window DW-a (C-4, C-5) and DW-b (C-4) |
 
+No UI slice (`"ui_slice": "none"` in the `.wave.json`): no task edits a
+view, since every control is design-window DW-a's. C-1 to C-3 are the logic;
+C-4 and C-5 are the integrate step on `.live`.
+
 One slice: the three use cases share the journey file and the menus, and
 five tasks fit. An Option-drag goes through design-window's live drag box,
 so the editor body doesn't run per sample; C-4 checks it.

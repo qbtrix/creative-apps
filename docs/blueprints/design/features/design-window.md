@@ -123,6 +123,11 @@ the Design-scoped macOS run.
 | DW-d | The canvas shows what a click will pick, a W × H badge under the selection (X, Y while moving) that stays live mid-drag, a resize, move or copy pointer over handles and layers, and the Text tool's box before a click, which a click-drag sizes. | D0-9a, D0-9b, D0-9c, D0-9d | `testCanvasFeedback` | DW-a (D0-9c); DW-b (D0-9d); canvas-basics CB-a (D0-9d) |
 | DW-c | Every enabled Design control acts and every disabled one says why, and the window keeps its layout at every width. | D0-7a, D0-7b | J15, `testLayoutAtWidths` | DW-b (D0-7a); DW-a, DW-d (D0-7b) |
 
+Every slice here is a UI slice (`"ui": true` in the `.wave.json`: the feel
+gate, rule 15, and the Mac finish, rule 17). DW-a is also the slot and
+intent contract the wave-1 views plug into; D0-7b, the `feature-done` task,
+is the integrate step that sweeps every control on the finished window.
+
 The wave-1 features' view tasks wait on DW-a; the ones that check a drag or
 a scrub also wait on DW-b, whose box and `bodyRuns` counter they use. DW-d
 runs beside the wave-1 features and blocks none of them; DW-c's J15 waits

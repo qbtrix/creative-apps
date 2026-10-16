@@ -128,7 +128,7 @@
     },
     {
       "id": "DV-d",
-      "behavior": "In the app, the Develop tab's rows, curve, levels, histogram, Show Original, resets, Copy, Paste and Sync work on the fakes, with the loupe following each drag.",
+      "behavior": "In the app, the Develop tab's rows, curve, levels, histogram, Show Original, resets, Copy, Paste and Sync are on screen over the contract's stubs on the fakes, reachable from the inspector's Develop tab, with the loupe following each render.",
       "tasks": [
         "DV-7",
         "DV-8",
@@ -150,11 +150,9 @@
         "DV-a": [
           "DV-8",
           "DV-9"
-        ],
-        "DV-b": [
-          "DV-10"
         ]
-      }
+      },
+      "ui": true
     },
     {
       "id": "DV-e",
@@ -181,7 +179,7 @@
     },
     {
       "id": "DV-f",
-      "behavior": "On real files the developed picture survives a relaunch, the slider stays within its frame budget, and the blueprint says what shipped.",
+      "behavior": "Every edit, reset, copy, paste and sync from the panel acts on the photos, the developed picture survives a relaunch on real files, the slider stays within its frame budget, and the blueprint says what shipped.",
       "tasks": [
         "DV-13",
         "DV-14",
@@ -208,6 +206,9 @@
         ],
         "DV-e": [
           "DV-15"
+        ],
+        "DV-b": [
+          "DV-13"
         ]
       }
     }

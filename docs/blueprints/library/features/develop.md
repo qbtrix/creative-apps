@@ -10,7 +10,7 @@ one undo step however many photos they touch. Show Original compares before
 and after, and each slider, section and the whole panel resets.
 **Line:** `line:library` · **Wave:** 3 (`waves.md`) · **Lead branch:** `lead/develop`
 
-**Covers:** #32 (closes with DV-10), #423 (closes with DV-13: render to
+**Covers:** #32 and #423 (both close with DV-13, the integrate task: #423 is render to
 pixels in loupe and grid; its catalog-file half was persist's PE-2).
 
 **Depends on:** the spine, persist, thumbnails and loupe-viewport feature
@@ -104,21 +104,27 @@ DV-e are Linux-only and prove themselves with a Model walk (MJ1 to MJ4, one
 test method each); DV-d and DV-f are proved by J5 and P3 on a scoped macOS
 run (`app=library`).
 
+Screen early (UI and logic in parallel): DV-a is the contract; DV-d is the
+UI slice (`"ui": true`), the Develop tab drawn over DV-2's stub bodies on
+the fakes, and it waits only on DV-a, so it builds beside DV-b, DV-c and
+DV-e. DV-f is the integrate slice: DV-13 swaps the stubs for DV-b's edits
+and DV-c's live renderer and turns on J5's behaviour steps.
+
 | slice | behavior (one sentence) | tasks | journeys | waits on |
 |---|---|---|---|---|
 | DV-a | A catalog written before the new controls opens with them neutral, and every new field survives a save, changes the thumbnail token and moves the fake loupe's picture. | DV-1, DV-2 | MJ1 | nothing in this feature (spine, persist, thumbnails merged) |
 | DV-b | Every slider, curve and levels edit, reset, copy, paste and sync acts on the right photos as one named undo step, and a drag drops the grid's stale thumbnails once, on release. | DV-3, DV-4 | MJ2 | DV-a (DV-3) |
 | DV-c | The live renderer runs only the passes the settings need, in a fixed order, matches CoreRaster run by hand bit for bit, and draws the histogram of what it rendered. | DV-5, DV-6 | MJ3 | DV-a (DV-5, DV-6) |
-| DV-d | In the app, the Develop tab's rows, curve, levels, histogram, Show Original, resets, Copy, Paste and Sync work on the fakes, with the loupe following each drag. | DV-7, DV-8, DV-9, DV-10 | J5 | DV-a (DV-8, DV-9); DV-b (DV-10); spine follow-up (DV-9) |
+| DV-d | In the app, the Develop tab's rows, curve, levels, histogram, Show Original, resets, Copy, Paste and Sync are on screen over the contract's stubs on the fakes, reachable from the inspector's Develop tab, with the loupe following each render. | DV-7, DV-8, DV-9, DV-10 | J5 | DV-a (DV-8, DV-9); spine follow-up (DV-9) |
 | DV-e | Vibrance and Saturation render through CoreRaster on the live services, and a grey stays grey. | DV-11, DV-12 | MJ4 | DV-c (DV-11, DV-12); creative-core issue and its bump (DV-12) |
-| DV-f | On real files the developed picture survives a relaunch, the slider stays within its frame budget, and the blueprint says what shipped. | DV-13, DV-14, DV-15 | J5, P3 | DV-d (DV-13, DV-14); DV-c (DV-13, DV-14); DV-e (DV-15) |
+| DV-f | Every edit, reset, copy, paste and sync from the panel acts on the photos, the developed picture survives a relaunch on real files, the slider stays within its frame budget, and the blueprint says what shipped. | DV-13, DV-14, DV-15 | J5, P3 | DV-d (DV-13, DV-14); DV-c (DV-13, DV-14); DV-b (DV-13); DV-e (DV-15) |
 
 ## Journey steps
 
 **J5 · `LibraryDevelopJourneyTests.testDevelopSlidersAndHistogram`**
 (`UITests/LibraryJourneyTests+Develop.swift`, its own `XCTestCase` class,
-like `+Shell.swift`; DV-7 writes it skipped, DV-10 enables the (F) steps,
-DV-13 adds the (L) steps)
+like `+Shell.swift`; DV-7 writes it skipped, DV-10 enables (F) steps 1 and
+11 on the stubs, DV-13 enables (F) steps 2–9 and adds the (L) steps)
 
 1. (F) Launch on `-LibraryFixture shoot`. (L) Live on `writeShoot` with
    `-LibraryImportOnLaunch`. Both with `-LibraryTestValues`. View > Sort By
@@ -132,31 +138,31 @@ DV-13 adds the (L) steps)
 2. (F, L) Drag Exposure right. Shot `develop-exposure`. Expect the row's
    value above 0, the loupe checksum changed and the histogram's mean up.
    Edit's Undo reads "Undo Exposure"; one Undo puts Exposure back to 0 (a
-   drag is one step); Redo. (DV-10)
+   drag is one step); Redo. (DV-13)
 3. (F, L) Focus Contrast; press Right three times, then Shift-Right. Expect
-   3, then 13. (DV-10)
-4. (F, L) Undo reads "Undo Contrast"; undo once; Contrast reads 3. (DV-10)
+   3, then 13. (DV-13)
+4. (F, L) Undo reads "Undo Contrast"; undo once; Contrast reads 3. (DV-13)
 5. (F, L) Click **Show Original** (`library.develop.original`; or press
    `\` while the tab shows). Shot `develop-original`. Expect the loupe
    checksum equal to step 1's and Undo still "Undo Contrast". Click it
-   again: the developed checksum is back. (DV-10)
+   again: the developed checksum is back. (DV-13)
 6. (F, L) In the curve, click at the middle and drag up 40 pt. Shot
    `develop-curve`. Expect three points, the checksum changed, Undo "Undo
-   Curve". Set LEVELS' Midtones to 1.20: Undo "Undo Levels". (DV-10)
+   Curve". Set LEVELS' Midtones to 1.20: Undo "Undo Levels". (DV-13)
 7. (F, L) Click the photo (focus leaves the curve); Photo > Copy Settings
    (Shift-Command-C); Escape to the grid; click `IMG_0002`, Shift-click
    `IMG_0004`; Photo > Paste Settings (Shift-Command-V). Shot
    `develop-pasted`. Expect Undo "Undo Paste Settings"; open `IMG_0003`:
    its Exposure equals `IMG_0001`'s; Escape; one Undo; open `IMG_0003`
-   again: Exposure 0 (all three came back in one step). (DV-10)
+   again: Exposure 0 (all three came back in one step). (DV-13)
 8. (F, L) Escape; click `IMG_0001`, Shift-click `IMG_0006`. Expect
    **Sync from IMG_0001** (`library.develop.sync`); click it. Shot
    `develop-synced`. Expect the inspector's rows no longer "Mixed" and Undo
-   "Undo Sync Settings". (DV-10)
+   "Undo Sync Settings". (DV-13)
 9. (F, L) Open `IMG_0001`; right-click the Exposure row, choose **Reset
    Exposure**: Undo "Undo Reset Exposure". Click TONE's Reset: its six rows
    at 0, Undo "Undo Reset Tone". (A reset button inside the row waits on
-   S-L6.) (DV-10)
+   S-L6.) (DV-13)
 10. (L) Set Exposure to +1 on `IMG_0001`; note the checksum; wait for
     `library.catalog` = `saved`; terminate and relaunch on the same
     `-LibraryCatalogDir`; open `IMG_0001`. Expect Exposure +1 and the same
@@ -543,13 +549,13 @@ A task that measures over 400 lines splits by file before it opens.
 | DV-4 | #32 (part) | Copy, paste and sync as one step, `copiedSummary`, the histogram helpers; MJ2 enabled | `Sources/LibraryModel/LibraryDevelop.swift`, `Tests/LibraryModelTests/LibraryDevelopTests.swift`, `Tests/mutations/LibraryModel.LibraryDevelop.json` | DV-3 | ~180, 3 |
 | DV-5 | – | The render and budget checks, disabled until DV-6: QB-LIB-V1 to V3, the pass list, MJ3, QB-L2 and QB-LIB-6's Model half | `Tests/LibraryModelTests/LibraryDevelopRenderTests.swift`, `Tests/LibraryModelTests/LibraryDevelopBudgetTests.swift` | DV-1 | ~300, 2 |
 | DV-6 | #423 (part) | `LiveDevelop`: the pass list, the CoreRaster calls, neutral untouched, the histogram, `waiting`; `unavailable = nil`; enables DV-5's tests | `Sources/LibraryModel/Live/LiveDevelop.swift`, `Tests/LibraryModelTests/LibraryDevelopRenderTests.swift`, `Tests/LibraryModelTests/LibraryDevelopBudgetTests.swift`, `Tests/mutations/LibraryModel.LiveDevelop.json` | DV-5 | ~200, 4 |
-| DV-7 | – | J5 written from this packet, `throw XCTSkip("waits on DV-10")` (and "waits on DV-13" on step 10) | `UITests/LibraryJourneyTests+Develop.swift` | – | ~260, 1 |
+| DV-7 | – | J5 written from this packet, `throw XCTSkip("waits on DV-10")` on steps 1 and 11 and "waits on DV-13" on steps 2–10 | `UITests/LibraryJourneyTests+Develop.swift` | – | ~260, 1 |
 | DV-8 | – | `LibraryMenu.Develop`; the develop area: menu closures, preview and full loupe renders through LV-8's queue, Show Original, thumbnails redrawn on release (`refreshThumbnails` in the thumbnails area) | `Sources/LibraryApp/LibraryMenus.swift`, `Sources/LibraryApp/LibraryWindow+Develop.swift`, `Sources/LibraryApp/LibraryWindow+Thumbnails.swift` (`visible` and `refreshThumbnails` only) | DV-2, loupe-viewport LV-8, thumbnails TH-6 | ~240, 3 |
 | DV-9 | #32 (part) | The Develop tab: histogram readout, TONE and COLOR rows with Mixed, section and row resets, Show Original, Sync, Paste help, error, empty; four snapshots | `Sources/LibraryApp/DevelopInspector.swift`, `Tests/AppSnapshotTests/LibraryDevelopSnapshots.swift` | DV-8, spine follow-up (inspector pass-through) | ~320, 2 |
-| DV-10 | #32 (closes) | CURVE (`ToneCurveEditor`) and LEVELS sections; `library-develop-curve`; J5's (F) steps enabled | `Sources/LibraryApp/DevelopInspector.swift`, `Tests/AppSnapshotTests/LibraryDevelopSnapshots.swift`, `UITests/LibraryJourneyTests+Develop.swift` | DV-4, DV-7, DV-9 | ~240, 3 |
+| DV-10 | #32 (part) | CURVE (`ToneCurveEditor`) and LEVELS sections over DV-2's stubs; `library-develop-curve`; J5's (F) steps 1 and 11 enabled | `Sources/LibraryApp/DevelopInspector.swift`, `Tests/AppSnapshotTests/LibraryDevelopSnapshots.swift`, `UITests/LibraryJourneyTests+Develop.swift` | DV-7, DV-9 | ~240, 3 |
 | DV-11 | – | Vibrance and Saturation checks and MJ4, disabled until DV-12 | `Tests/LibraryModelTests/LibraryDevelopColorTests.swift` | DV-6 | ~140, 1 |
 | DV-12 | – | The `.color` pass over CoreRaster's `vibrance` and `saturation`; `waiting` emptied; MJ4 enabled; DV-6's "Vibrance throws" check becomes "every control set" | `Sources/LibraryModel/Live/LiveDevelop.swift`, `Tests/LibraryModelTests/LibraryDevelopColorTests.swift`, `Tests/LibraryModelTests/LibraryDevelopRenderTests.swift`, `Tests/mutations/LibraryModel.LiveDevelop.json` | DV-11, the creative-core issue and its bump on `dev` | ~120, 4 |
-| DV-13 | #423 (closes) | J5's (L) steps (relaunch, grid redraw); `library-develop-render` over a live render | `UITests/LibraryJourneyTests+Develop.swift`, `Tests/AppSnapshotTests/LibraryDevelopRenderSnapshots.swift` | DV-6, DV-10, import IM-6 | ~160, 2 |
+| DV-13 | #32, #423 (closes) | Integrate: J5's (F) steps 2–9 enabled on DV-3 and DV-4's edits, and its (L) steps (relaunch, grid redraw); `library-develop-render` over a live render | `UITests/LibraryJourneyTests+Develop.swift`, `Tests/AppSnapshotTests/LibraryDevelopRenderSnapshots.swift` | DV-4, DV-6, DV-10, import IM-6 | ~200, 2 |
 | DV-14 | – | P3 `testDevelopSliderLatency` (perf, report-only) | `UITests/LibraryJourneyTests+PerfDevelop.swift` | DV-6, DV-9, #782, import IM-6 | ~130, 1 |
 | DV-15 | – | Blueprint prose: 5's note that `Sources/LibraryModel/Contracts/DevelopValues.swift` supersedes `docs/blueprints/library/contracts/`' copy, 5.7's J5 row, J5's steps, 6.2's Develop rows, 6.3, 6.4's S-L1 and S-L6 numbers, 7.1's pass list, 7.4's order, 8.2's depends cell (`persist`); `status: built` (`feature-done`) | `docs/blueprints/library.md` | DV-12, DV-13, DV-14 | ~120, 1 |
 
@@ -562,10 +568,11 @@ set the new fields; DV-6 enables DV-5's tests; DV-11 reads DV-6's
 fills DV-2's signatures, not their behaviour, so it builds beside DV-3 and
 DV-4 on the stub bodies. DV-9 is the view over DV-8's closures and needs
 the spine follow-up to receive them; it doesn't need DV-3 or DV-4 (its
-snapshots build photos with settings already set). DV-10 enables J5, whose
-steps need DV-4's paste and sync and DV-9's panel; it shares two files with
-DV-9 and the journey file with DV-7. DV-13 extends the journey file and
-needs the live renderer. The perf journey drags DV-9's Exposure row, through
+snapshots build photos with settings already set). DV-10 enables J5's
+steps 1 and 11, which need only DV-9's panel on the stubs; it shares two
+files with DV-9 and the journey file with DV-7. DV-13 extends the journey
+file, turns on the steps that need DV-4's edits, paste and sync, and needs
+the live renderer. The perf journey drags DV-9's Exposure row, through
 DV-8's area, on DV-6's renderer.
 
 ## Build waves
@@ -578,13 +585,14 @@ DV-8's area, on DV-6's renderer.
 - Wave 6: DV-13. Independent in this wave: DV-13 alone.
 - Wave 7: DV-15 (final, `feature-done`). Independent in this wave: DV-15 alone.
 
-Longest chain: DV-1 → DV-2 → DV-3 → DV-4 → DV-10 → DV-13 → DV-15 (7), and
-DV-1 → DV-2 → DV-8 → DV-9 → DV-10 → DV-13 → DV-15 (7).
+Longest chain: DV-1 → DV-2 → DV-8 → DV-9 → DV-10 → DV-13 → DV-15 (7), and
+DV-1 → DV-2 → DV-3 → DV-4 → DV-13 → DV-15 (6).
 Chain of 7: DV-2 to DV-4 stack on the one `LibraryDevelop.swift` the C4
-plan allows; DV-10 enables J5, which needs DV-4's paste and DV-9's panel;
-DV-13 adds the live steps to DV-10's journey file; DV-15 is the
+plan allows; DV-13 turns on J5's behaviour steps, which need DV-4's paste
+and DV-10's panel, and adds the live steps to DV-10's journey file; DV-15 is the
 `feature-done` docs task and goes last by rule (a). The other branch is the
-UI track: DV-8's closures, DV-9's view over them, DV-10 in the same view.
+UI track (DV-d, on the stubs, beside DV-3 and DV-4): DV-8's closures, DV-9's
+view over them, DV-10 in the same view.
 
 ## Acceptance test per task
 
@@ -604,12 +612,12 @@ change nothing, and its two mutations cover the token and the fake.
 | DV-5 | the checks below, disabled "waits on DV-6"; the LibraryModel suite stays green | a check is missing | – (no behaviour) |
 | DV-6 | `LibraryDevelopRenderTests` (enabled): `passes(for: .neutral)` is empty and `render` returns the input equal (QB-LIB-V1); each slider alone gives exactly its pass; every control set gives the order white balance, exposure, contrast, highlights and shadows, whites and blacks, curve, levels; that render equals the CoreRaster calls run by hand in the same order, bit for bit (QB-LIB-V2); Exposure +1 doubles a linear 0.18 grey within 1e-4; Temperature +50 makes red above blue on grey and keeps its Rec. 709 luminance within 1e-3; Whites +50 brightens a 0.9 sRGB grey and Blacks −50 darkens a 0.1 one; Vibrance ≠ 0 throws `.renderFailed` with `waiting`'s text; `histogram(of:)` equals `Histogram(of:bins:256,encoding:.sRGB)` of the rendered buffer and each channel sums to the pixel count (QB-LIB-V3); `LiveDevelop.unavailable == nil`; MJ3. `LibraryDevelopBudgetTests` rows below | the order or math drifts from CoreRaster, neutral touches pixels, or the histogram is of the wrong buffer | drop the neutral `if … != 0` guards (`LibraryDevelopRenderTests`); contrast pass before exposure (`LibraryDevelopRenderTests`); `histogram(of:)` over the input (`LibraryDevelopRenderTests`); `whites > 0 ? 1 - …` → `1 + …` (`LibraryDevelopRenderTests`) |
 | DV-7 | J5 compiles and every step skips with its reason | the file doesn't build in the journey bundle | – |
-| DV-8 | J5 steps 2 to 7 once DV-10 enables them (the closures are only reachable through the panel); the macOS build of `LibraryApp` | a closure is nil while its action can run, or a drag doesn't re-render | – (app code) |
+| DV-8 | J5 steps 2 to 7 once DV-13 enables them (the closures are only reachable through the panel); the macOS build of `LibraryApp` | a closure is nil while its action can run, or a drag doesn't re-render | – (app code) |
 | DV-9 | `LibraryDevelopSnapshots`: `library-develop`, `-mixed`, `-error`, `-empty`, Light and Dark, each control with its `library.develop.*` identifier | a row, the readout or a state is missing | – (app code) |
-| DV-10 | `library-develop-curve`; J5 (F) steps 1–9 and 11 green on the scoped run | any (F) expectation fails | – (app code) |
+| DV-10 | `library-develop-curve`; J5 (F) steps 1 and 11 green on the scoped run | the tab, a section or the error state is missing | – (app code) |
 | DV-11 | `LibraryDevelopColorTests`, disabled "waits on DV-12" | – | – (no behaviour) |
 | DV-12 | `LibraryDevelopColorTests` (enabled): grey unchanged at Vibrance and Saturation ±100; Saturation −100 turns a red patch into a grey of its luminance within 1e-4; Vibrance +50 lifts a muted color's chroma more than a strong one's; the `.color` pass sits after whites and blacks and before the curve; `waiting` is empty; MJ4 | a grey shifts, the pass is dropped or misplaced, or a row stays disabled | drop the `.color` pass (`LibraryDevelopColorTests`); pass `saturation` as vibrance and back (`LibraryDevelopColorTests`); leave `.vibrance` in `waiting` (`LibraryDevelopColorTests`) |
-| DV-13 | J5 (L) steps 1–10 green on the scoped run; `library-develop-render` | develop doesn't survive a relaunch, or the grid keeps the old picture | – (journey) |
+| DV-13 | J5 (F) steps 2–9 and (L) steps 1–10 green on the scoped run; `library-develop-render` | an edit, paste or sync from the panel isn't one step on the right photos, develop doesn't survive a relaunch, or the grid keeps the old picture | – (journey) |
 | DV-14 | P3 attaches ≥ 60 samples per series and a `render-full` per release | fewer samples (invalid) | – (journey) |
 | DV-15 | `scripts/ci` (the docs lints and the waves check) passes | the prose drifts from the shipped behaviour | – (docs) |
 
@@ -636,7 +644,8 @@ and every mutation in its plans caught:
 - **DV-a, DV-b, DV-c, DV-e:** their tasks merged and MJ1, MJ2, MJ3, MJ4
   green among the LibraryModel tests of a scoped run (`app=library`) that
   contains the slice's last PR.
-- **DV-d:** J5's (F) steps green on a scoped run containing DV-10, every app
+- **DV-d:** J5's (F) steps 1 and 11 green on a scoped run containing DV-10, the
+  feel gate and its `Mac-Finish:` line (`"ui": true`), every app
   built, `library` audit counts not above `UITests/audit-baseline.json`.
 - **DV-f:** J5 (F and L) and P3 (≥ 60 samples) on a scoped run containing
   DV-13 and DV-14; DV-15 merged with `feature-done`; then
