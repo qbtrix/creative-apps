@@ -4,7 +4,7 @@ Issue: #1334 · Packet: docs/blueprints/library/features/import.md
 Run: act-1a1448a5fa3-a8rg · Session: claude/library-import-feature-c0rl9g · Started: 2026-10-16T11:49Z
 Stage: 4 round 1
 Base: 8243ce4435006760f7ec9a87147fef094f6be4ed
-Next: when #1382 (round 1 fixes: #1366 #1378 #1379 #1380 #1381, J1 skip for #1367) merges, run the second fixer for #1375 and #1376 (same files, so after #1382); then round 2 on the run that contains them
+Next: fixer PR lead/import-fix2 (#1375 #1376); then round 2 review on the first scoped library run that contains #1382 and that PR
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -23,7 +23,7 @@ Wave 1: IM-1, IM-2, IM-4 independent. Wave 2: IM-3 (waits IM-1, IM-2: benchmarks
 ## Rounds
 | round | CI run | CI | audit vs baseline | lenses | confirmed | fixed by | clean |
 |---|---|---|---|---|---|---|---|
-| 1 | 38905496250 (scoped: library, 3cf8a9e4) | red: J1 failed (progress read empty; audit identifier 34/12, unnamed 4/1 from ThumbnailGrid cells and scroller); testLoadSamplePhotos, testRateASelectedPhoto failed only from J1's tally | over | clarity, journey, design, states | #1366 #1367 #1372-#1381 (12 confirmed, 1 refuted) | #1382 (+ #1375 #1376 next) | no |
+| 1 | 38905496250 (scoped: library, 3cf8a9e4) | red: J1 failed (progress read empty; audit identifier 34/12, unnamed 4/1 from ThumbnailGrid cells and scroller); testLoadSamplePhotos, testRateASelectedPhoto failed only from J1's tally | over | clarity, journey, design, states | #1366 #1367 #1372-#1381 (12 confirmed, 1 refuted) | #1382 (merged 14:26) + lead/import-fix2 (#1375 #1376) | no |
 
 ## Decisions
 - No `## Slices` table in the packet: v2 loop; work started after #1302 merged (04:20Z), so findings queue and a 2-round cap apply.
