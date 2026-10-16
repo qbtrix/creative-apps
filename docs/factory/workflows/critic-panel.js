@@ -23,6 +23,8 @@ export const meta = {
 //   commit: '<the run\'s full head sha>',
 //   open: [{ number: 901, title: '...' }],  // the feature's open finding issues, so nothing is filed twice
 //   slice: 'S2', journeys: ['H-J3'],        // v3 only: the slice and its journeys; judge only their screens
+//   ui: true,                               // v3 UI slice ("ui": true in .wave.json): adds the mouse and taste lenses
+//                                           // (lead.md rule 15, the feel gate); pass it from the slice's first review
 // }
 // Without issue (v2 work started before): returns { clean, confirmed: [finding], refuted: n } as it always did.
 // With issue: returns { clean, filed: [issue numbers], confirmed: n, refuted: n }.
@@ -31,7 +33,14 @@ export const meta = {
 const LENSES = {
   clarity: 'First-use clarity: what does each number and label mean to someone new? Flag any value without a unit or context, any jargon, any icon without a label or tooltip, and any state a first-time user cannot read.',
   journey: `The ${args.slice ? 'slice' : 'packet'}'s journeys: walk each one through the screens in order. Flag a step that is missing, out of order, or ends somewhere the packet does not say.`,
-  design: 'docs/design.md: spacing, alignment, type, color tokens, glass, component order, light and dark. Flag anything that breaks a rule, naming the rule.',
+  design: 'docs/design.md: spacing, alignment, type, color tokens, glass, component order, light and dark. Flag anything that breaks a rule, naming the rule. ' +
+    'Also flag an app-local view that copies a SuiteUI component or a pattern another app already has (SuiteUI first, lead.md rule 16); the fix moves it to SuiteUI.',
+  mouse: 'Mouse-only first-time user (the feel gate, lead.md rule 15): you know no shortcuts and only click what you see. Flag every new screen or mode you cannot enter or leave ' +
+    'with a visible control (a blocker), any control with no hover or pressed state, and anything reachable only by a key or a menu shortcut. ' +
+    'Check the journey steps too: a mode change proven only by a key press is a finding.',
+  taste: 'Taste (the feel gate, lead.md rule 15): compare the slice\'s snapshots and screens with the taste board, docs/design/taste in paw-workspace, if this session can read it ' +
+    '(judge against weight-3 references first). Otherwise compare with the suite\'s reference look: Flare\'s easing panel, StudioScrubRow and ChoiceChips. ' +
+    'Flag what looks dated or basic next to it (flat controls with no feedback, cramped or uneven rows, missing live values), naming the reference.',
   layout: 'Geometry: clipped or overlapping content, controls off-window or under the toolbar, panels too narrow to read, text truncation. Propose a geometric test (frames inside the window, no overlap, minimum sizes) for each.',
   controls: 'No dead controls (CLAUDE.md): every visible button, tool and menu item acts or is disabled with help text that says why.',
   audit: 'The app audit: every count over baseline, and the screen and element behind it.',
@@ -43,6 +52,7 @@ const LENSES = {
 }
 const lenses = (args.lenses && args.lenses.length ? args.lenses
   : ['clarity', 'journey', 'design', 'layout', 'controls', ...(args.slice ? ['oracle'] : [])])
+if (args.ui) for (const l of ['mouse', 'taste']) if (!lenses.includes(l)) lenses.push(l)
 if (!lenses.includes('clarity')) lenses.unshift('clarity')
 
 const FINDINGS = {

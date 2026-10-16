@@ -72,6 +72,7 @@ Test that proves it: ${t.test}
 ${t.visible ? `What the user sees: ${t.visible}. Add or extend the snapshot in AppSnapshotTests or the step in UITests/<X>JourneyTests.swift that shows it.` : ''}
 
 Read the packet section for this task and the code it touches. Write the Swift Testing test first.
+${(t.files || []).some(f => /^Sources\/(\w*App|SuiteUI)\//.test(f)) ? 'This task changes SwiftUI: read docs/engineering/swiftui-rules.md first and keep to it. On Linux, list each new or unfamiliar macOS 27 / Swift 6.4 API call under "Unverified API:" in the PR body.' : ''}
 Keep to line:${a.app}. Run scripts/ci --changed (every lint and build, your touched targets' tests) until it prints CI: PASS. Then
 git fetch origin && git rebase origin/dev, rerun scripts/ci --changed (CI: PASS again), push, and open ONE PR.
 
