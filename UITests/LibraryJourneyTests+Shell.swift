@@ -9,9 +9,10 @@
 // (QB-F1, mirroring Halo's H-J13) launches on `-LibraryFixture samples
 // -SuitePerfProbe`, merges `library.controls` with the `library.*` entries of
 // `suite.controls` (which reaches the toolbar, sidebar and inspector columns a
-// preference may not leave), clicks every enabled control (then Escape and
-// Command-Z) and checks it changed the window or a value, and that every
-// disabled one says why.
+// preference may not leave), expects every identified control on screen but
+// the grid's photo cells to be listed, clicks every enabled control (then
+// Escape and Command-Z) and checks it changed the window or a value, and that
+// every disabled one says why.
 import XCTest
 
 final class LibraryShellJourneyTests: XCTestCase {
@@ -130,14 +131,20 @@ final class LibraryShellJourneyTests: XCTestCase {
     }
 
     /// The `library.*` identifiers of the window's buttons, pop-ups, fields,
-    /// checkboxes, sliders and rows.
+    /// checkboxes, sliders and rows, but the grid's photo cells
+    /// (`library.grid.cell.<id>`): SuiteUI's ThumbnailGrid cells, one per
+    /// photo, which act through the grid's selection, as Halo leaves out its
+    /// timeline's track names.
     @MainActor private static func onScreenControlIDs(_ library: Journey) -> Set<String> {
         let window = library.app.windows.firstMatch
         let types: [XCUIElement.ElementType] = [.button, .popUpButton, .textField, .checkBox, .slider, .cell]
         var ids = Set<String>()
         for type in types {
             let query = window.descendants(matching: type).matching(NSPredicate(format: "identifier BEGINSWITH 'library.'"))
-            for element in query.allElementsBoundByIndex { ids.insert(element.identifier) }
+            for element in query.allElementsBoundByIndex {
+                let id = element.identifier
+                if !id.hasPrefix("library.grid.cell.") { ids.insert(id) }
+            }
         }
         return ids
     }
