@@ -20,6 +20,7 @@
     "Tests/AppSnapshotTests/DesignStyleSnapshots.swift",
     "Tests/AppSnapshotTests/DesignStyleScrubTests.swift",
     "UITests/DesignJourneyTests+Style.swift",
+    "Tests/DesignModelTests/DesignStyleBudgetTests.swift",
     "Sources/DesignModel/DesignText.swift",
     "Tests/DesignModelTests/DesignTextScaleModelTests.swift",
     "Tests/DesignModelTests/DesignCompactSelectionTests.swift",
@@ -30,7 +31,6 @@
     "Tests/AppSnapshotTests/DesignTextSnapshots.swift",
     "Tests/AppSnapshotTests/DesignArtworkPathTests.swift",
     "Tests/AppSnapshotTests/DesignTextScaleTests.swift",
-    "Tests/DesignModelTests/DesignStyleBudgetTests.swift",
     "UITests/DesignJourneyTests+PerfScrub.swift"
   ],
   "journeys": [
@@ -41,12 +41,13 @@
   "slices": [
     {
       "id": "SR-a",
-      "behavior": "Layer opacity, corner radius and stroke rows set one or several layers in one step per scrub, read \"Mixed\" when the layers differ, and show the locked hint in the value column.",
+      "behavior": "Layer opacity, corner radius and stroke rows set one or several layers in one step per scrub, read \"Mixed\" when the layers differ, show the locked hint in the value column, and keep each scrub step inside its budget.",
       "tasks": [
         "ST-1",
         "ST-2",
         "ST-4",
-        "ST-6"
+        "ST-6",
+        "ST-7"
       ],
       "journeys": [
         "J10"
@@ -61,7 +62,8 @@
         "Tests/AppSnapshotTests/DesignInspectorSnapshots.swift",
         "Tests/AppSnapshotTests/DesignStyleSnapshots.swift",
         "Tests/AppSnapshotTests/DesignStyleScrubTests.swift",
-        "UITests/DesignJourneyTests+Style.swift"
+        "UITests/DesignJourneyTests+Style.swift",
+        "Tests/DesignModelTests/DesignStyleBudgetTests.swift"
       ],
       "waits": {
         "design-window:DW-a": [
@@ -75,15 +77,17 @@
     },
     {
       "id": "SR-b",
-      "behavior": "Text family, size, weight and alignment rows work, committed text doesn't jump at any zoom, and the canvas draws radius, stroke, opacity and frame names above their frames.",
+      "behavior": "Text family, size, weight and alignment rows work, committed text doesn't jump at any zoom, the canvas draws radius, stroke, opacity and frame names above their frames, and scrubs and typing keep up on 2,000 layers.",
       "tasks": [
         "ST-3",
         "ST-4b",
         "ST-5",
-        "ST-6b"
+        "ST-6b",
+        "ST-8"
       ],
       "journeys": [
-        "J11"
+        "J11",
+        "P2"
       ],
       "owned": [
         "Sources/DesignModel/DesignText.swift",
@@ -97,40 +101,19 @@
         "Tests/AppSnapshotTests/DesignTextSnapshots.swift",
         "Tests/AppSnapshotTests/DesignArtworkPathTests.swift",
         "Tests/AppSnapshotTests/DesignTextScaleTests.swift",
-        "UITests/DesignJourneyTests+Style.swift"
+        "UITests/DesignJourneyTests+Style.swift",
+        "UITests/DesignJourneyTests+PerfScrub.swift"
       ],
       "waits": {
         "design-window:DW-a": [
           "ST-4b",
           "ST-5",
-          "ST-6b"
+          "ST-6b",
+          "ST-8"
         ],
         "SR-a": [
           "ST-4b",
-          "ST-6b"
-        ]
-      }
-    },
-    {
-      "id": "SR-c",
-      "behavior": "Scrubbing a style row and typing into a text layer keep up on 2,000 layers.",
-      "tasks": [
-        "ST-7",
-        "ST-8"
-      ],
-      "journeys": [
-        "P2"
-      ],
-      "owned": [
-        "Tests/DesignModelTests/DesignStyleBudgetTests.swift",
-        "UITests/DesignJourneyTests+PerfScrub.swift"
-      ],
-      "waits": {
-        "SR-a": [
-          "ST-7",
-          "ST-8"
-        ],
-        "SR-b": [
+          "ST-6b",
           "ST-8"
         ]
       }
