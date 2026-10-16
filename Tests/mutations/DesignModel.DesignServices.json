@@ -26,5 +26,26 @@
     "find": "        self.services = services\n",
     "replace": "",
     "tests": "DesignNotBuiltTests"
+  },
+  {
+    "label": "the fake duplicating slot stays NotBuilt",
+    "file": "Sources/DesignModel/DesignServices.swift",
+    "find": "duplicating: FakeDuplicating(),",
+    "replace": "duplicating: NotBuilt(\"Duplicate\"),",
+    "tests": "DesignArrangeFakesTests"
+  },
+  {
+    "label": "the fake clipboard slot stays NotBuilt",
+    "file": "Sources/DesignModel/DesignServices.swift",
+    "find": "clipboard: FakeClipboard(),",
+    "replace": "clipboard: NotBuilt(\"Copy and paste\"),",
+    "tests": "DesignArrangeFakesTests"
+  },
+  {
+    "label": "the fake set takes the live name",
+    "file": "Sources/DesignModel/DesignServices.swift",
+    "find": "name: \"fake\", marquee",
+    "replace": "name: \"live\", marquee",
+    "tests": "DesignArrangeFakesTests"
   }
 ]
