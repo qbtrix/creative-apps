@@ -3,7 +3,7 @@
 Issue: #1344 · Packet: docs/blueprints/suiteui/features/editor-chrome.md
 Run: act-1a145e74bc5-jgg4 · Session: claude/editor-chrome-lead-9soj7i · Started: 2026-10-16T18:10Z
 Stage: 0 setup (stopped: packet superseded, needs rescope)
-Base: 446018204b0f0b237f757c3f1b171a290ccb56c3
+Base: 583bb69be5a6e75d8e9c6d373806f1162c131057
 Next: when editor-chrome.wave.json on dev gains a Slices rescope off EditorShell/EditorTopBar/.rail (supervisor note 2026-10-16: "wave data is being re-sliced"), restart at stage 1 on the v3 loop; until then nothing in the packet can start as written
 
 ## Tasks
@@ -34,6 +34,7 @@ Next: when editor-chrome.wave.json on dev gains a Slices rescope off EditorShell
 - PRs would target dev, not main (CLAUDE.md: never target main); the brief's "base main" predates the dev flow.
 
 ## Open
+- Second stall nudge (2026-10-16T19:15Z): dev at 583bb69b; #1536 re-sliced timeline only, editor-chrome packet and wave.json unchanged (no Slices, still on EditorShell/EditorTopBar/.rail). No supervisor reply on #1344; needs-human stays. Still stopped.
 - Resumed after a Belt stall nudge (2026-10-16T18:44Z): the packet and wave.json on dev are unchanged and editor-shell-removal is unfiled. The supervisor note of 2026-10-16 18:13Z (build UI and logic in parallel; wave data being re-sliced) does not lift the rescope, so the lead stays stopped.
 - Packet rescope by the supervisor (comment on #1344).
 - Optional: EC-5 (transport), EC-6 (status pills) and the non-shell half of EC-1/EC-8 are valid as written and could run as a separate small feature if the supervisor splits them out.

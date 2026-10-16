@@ -2,3 +2,4 @@ utc	stage	event	ref	note
 2026-10-16T18:10Z	0	stage-start	#1344	base 132d910484b48c7d79bc92a43c2de55cc12c1dc1
 2026-10-16T18:10Z	0	stopped	#1344	packet superseded by 2026-10-15 one-shell decision; needs rescope after editor-shell-removal
 2026-10-16T18:44Z	0	heartbeat	#1344	resumed on stall nudge; packet still superseded; waiting for re-sliced wave.json
+2026-10-16T19:15Z	0	heartbeat	#1344	second stall nudge; #1536 re-sliced timeline only; editor-chrome still unrescoped
