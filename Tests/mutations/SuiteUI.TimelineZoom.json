@@ -1,0 +1,4 @@
+[
+{"label":"the lower clamp dropped: the strip zooms below fit","file":"Sources/SuiteUI/TimelineZoom.swift","find":"        return min(max(zoom, r.lowerBound), r.upperBound)\n","replace":"        return min(zoom, r.upperBound)\n","tests":"TimelineNavTests"},
+{"label":"the anchor ignores the pointer: the frame under it drifts","file":"Sources/SuiteUI/TimelineZoom.swift","find":"        return (offset + anchorX) * new / old - anchorX\n","replace":"        return offset * new / old\n","tests":"TimelineNavTests"}
+]

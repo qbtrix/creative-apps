@@ -1,0 +1,4 @@
+[
+{"label":"the frames field is frame % 60, not frame % fps","file":"Sources/SuiteUI/TimelineTime.swift","find":"let ff = f % rate","replace":"let ff = f % 60","tests":"TimelineNavTests"},
+{"label":"the fps guard dropped: fps 0 divides by zero","file":"Sources/SuiteUI/TimelineTime.swift","find":"        guard unit == .timecode, fps > 0 else { return \"\\(frame)\" }\n","replace":"        guard unit == .timecode else { return \"\\(frame)\" }\n","tests":"TimelineNavTests"}
+]
