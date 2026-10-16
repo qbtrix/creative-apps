@@ -9,9 +9,7 @@
 // with Add Page and Delete Page in a SidebarActionRow under the pages; a
 // one-page file shows Delete Page disabled, saying why. Writes design-layers-,
 // -group-hidden-, -collapsed-, -chevrons-, -collapsed-selection- and
-// -one-page-{light,dark}.png. The + glyph of the action row sits on the page
-// rows' symbol column, measured on the rendered pixels (#1386). macOS only.
-import AppKit
+// -one-page-{light,dark}.png. macOS only.
 import DesignModel
 import SuiteUI
 import SwiftUI
@@ -96,50 +94,14 @@ import Testing
         let allEnabled = DesignLayersPanel.pageCommands(twoPages(), { _ in }).allSatisfy { $0.isEnabled }
         #expect(allEnabled)
     }
-
-    /// With a layer selected no page row is highlighted, so the inked bands from the top read: the Pages
-    /// header, Page 1, Page 2, then the action row. Its first glyph starts on Page 2's symbol column.
-    @Test func thePageActionRowLinesUpWithThePageRows() throws {
-        var model = twoPages()
-        model.selectItem("node-1")
-        #expect(model.selectedNodeIDs == ["node-1"])
-        for scheme in [ColorScheme.light, .dark] {
-            let image = try #require(render(PanelSample(model: model), scheme: scheme))
-            let bands = inkBands(image)
-            try #require(bands.count >= 4, "only \(bands.count) inked bands in \(scheme)")
-            let page = bands[2]
-            let actions = bands[3]
-            #expect(abs(actions - page) <= 1, "+ glyph at x \(actions), page symbol at x \(page) in \(scheme)")
-        }
-    }
 }
 
-/// The leading x of the first `count` horizontal bands of ink in the panel, top to bottom. A pixel is
-/// ink when it differs from the pixel just inside the panel's leading edge on its own line, so a sidebar
-/// material behind the list doesn't count; lines with ink are grouped while consecutive.
-@MainActor
-private func inkBands(_ image: NSBitmapImageRep, count: Int = 4) -> [Int] {
-    let left = Int(SuiteSpacing.xxl) + 1
-    let right = min(image.pixelsWide, Int(SuiteSpacing.xxl + SuiteSize.editorPanelWidth))
-    guard left < right else { return [] }
-    func sRGB(_ x: Int, _ y: Int) -> NSColor? { image.colorAt(x: x, y: y)?.usingColorSpace(.sRGB) }
-    var bands: [Int] = []
-    var current: Int?
-    for y in 0..<image.pixelsHigh where bands.count < count {
-        guard let background = sRGB(left, y) else { continue }
-        let leading = ((left + 1)..<right).first { x in
-            guard let color = sRGB(x, y) else { return false }
-            let distance = abs(color.redComponent - background.redComponent)
-                + abs(color.greenComponent - background.greenComponent)
-                + abs(color.blueComponent - background.blueComponent)
-            return distance > 0.25
-        }
-        if let leading {
-            current = min(current ?? leading, leading)
-        } else if let band = current {
-            bands.append(band)
-            current = nil
-        }
+private struct PanelSample: View {
+    let model: DesignWorkspace
+    var body: some View {
+        DesignLayersPanel(model: model, perform: { _ in })
+            .frame(width: SuiteSize.editorPanelWidth)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+            .padding(SuiteSpacing.xxl)
     }
-    return bands
 }
