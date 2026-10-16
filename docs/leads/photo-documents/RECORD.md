@@ -4,7 +4,7 @@ Issue: #1074 · Packet: docs/blueprints/photo/features/photo-documents.md
 Run: act-1a1404bf04c-bp6m · Session: claude/photo-documents-lead-ezrcev · Started: 2026-10-15T10:40Z
 Stage: 4 round 3
 Base: a42b3cff7c7cd9f4f14aa8166e9b30451ebbf0b4
-Next: round 3 on CI run 38829075229 (a42b3cf: #1253, F2 #1254, F4 #1255); F1b (Keep layers? NSAlert + text), F3 (plain open errors), G2 (Saving… sample) building
+Next: read round 3 run 38829075229 when done (critic panel, same lenses); F1b #1265, F3 #1266, G2 #1267 go into round 4's run
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
