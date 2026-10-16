@@ -1,0 +1,361 @@
+{
+  "version": "1.0",
+  "scope": "creative-apps/folio (planned)",
+  "generated_at": "2026-10-15T00:00:00Z",
+  "source_path": ".",
+  "authored": true,
+  "note": "Folio blueprint, section 4. Same shape as docs/c4/model.json, one level finer: L3 components inside FolioModel and FolioApp with the files each owns. Every element is planned (nothing of Folio is on origin/dev f7d30fd). Not read by scripts/ci; docs/c4/model.json stays the gate. waves.py checks that every owned Sources/ file has exactly one component here.",
+  "model": {
+    "people": [
+      {
+        "id": "pdf-person",
+        "name": "Person with a PDF",
+        "description": "Reads, marks up, fills, signs, organizes, saves and exports PDF documents.",
+        "status": "planned",
+        "authored": true
+      }
+    ],
+    "systems": [
+      {
+        "id": "creative-apps",
+        "name": "creative-apps",
+        "status": "existing",
+        "authored": true,
+        "description": "Folio's part of the AfterGlow app shells.",
+        "containers": [
+          {
+            "id": "folio-model",
+            "name": "FolioModel",
+            "description": "Linux-safe state and logic behind Folio's window: the document as a value, the workspace, one contract per use case with its fake and its Linux live type. Foundation only; no engine in v1; CorePDF for the conditional content-edit feature.",
+            "technology": "Swift 6, Foundation (FoundationEssentials), Linux and macOS",
+            "status": "planned",
+            "authored": true,
+            "components": [
+              {
+                "id": "folio-values",
+                "name": "Values",
+                "description": "The value types every contract speaks: geometry, pages (origin, size, rotation, crop), page text with character boxes, selections, search hits, annotations, form fields, signatures, outline, permissions, the document value, write and export options, typed errors with their sentences.",
+                "paths": [
+                  "Sources/FolioModel/Contracts/FolioValues.swift"
+                ],
+                "status": "planned",
+                "authored": true
+              },
+              {
+                "id": "folio-contracts",
+                "name": "Contracts",
+                "description": "One protocol per use case (open, page pictures, page text, find, select, annotate, fill forms, sign, keep signatures, organize pages, history, write, export, recognize text) and FolioHistory; the conditional content-edit contracts.",
+                "paths": [
+                  "Sources/FolioModel/Contracts/FolioContracts.swift",
+                  "Sources/FolioModel/Contracts/FolioContentEditContracts.swift"
+                ],
+                "status": "planned",
+                "authored": true
+              },
+              {
+                "id": "folio-fakes",
+                "name": "Fakes",
+                "description": "A fake per contract and the fake file format (a fixture as JSON laid out on a fixed glyph grid), so views and journeys run before PDFKit and Vision are wired.",
+                "paths": [
+                  "Sources/FolioModel/Fakes/*.swift"
+                ],
+                "status": "planned",
+                "authored": true
+              },
+              {
+                "id": "folio-fixtures",
+                "name": "Fixtures",
+                "description": "Named fixtures in W0 (letter, form, filled, scripted, scan, locked, restricted, marked, photos, long) and one file per feature for its own (page1000marks and long1000marks: markup; form200: forms; big50: files; scan300: ocr).",
+                "paths": [
+                  "Sources/FolioModel/Fixtures/*.swift"
+                ],
+                "status": "planned",
+                "authored": true
+              },
+              {
+                "id": "folio-services",
+                "name": "Services",
+                "description": "FolioServices with every contract slot and .fake; the live slots are filled in FolioApp.",
+                "paths": [
+                  "Sources/FolioModel/FolioServices.swift"
+                ],
+                "status": "planned",
+                "authored": true
+              },
+              {
+                "id": "folio-workspace",
+                "name": "Workspace",
+                "description": "FolioWorkspace: the window's one value-type state (document, sources, history, selection, tool, zoom and page, page text, find, file state, open progress, refusal), edit(_:coalesceKey:_:) as the one place undo is recorded, one extension file per area, and the per-page accessibility summary journeys read. Undo and redo live here (W0). pageSummary and statusPills are whole in W0, pure reads of the document value.",
+                "paths": [
+                  "Sources/FolioModel/FolioWorkspace.swift",
+                  "Sources/FolioModel/Workspace/*.swift",
+                  "Sources/FolioModel/FolioPageSummary.swift"
+                ],
+                "status": "planned",
+                "authored": true
+              },
+              {
+                "id": "folio-commands",
+                "name": "Commands",
+                "description": "FolioCommand (every menu item and toolbar action), unavailableHelp(for:) and title(for:), one availability file per area.",
+                "paths": [
+                  "Sources/FolioModel/FolioCommand.swift",
+                  "Sources/FolioModel/Availability/*.swift"
+                ],
+                "status": "planned",
+                "authored": true
+              },
+              {
+                "id": "folio-tools",
+                "name": "Tools",
+                "description": "FolioTool (the palette), one-key shortcuts, and drag(from:to:) routing per tool kind.",
+                "paths": [
+                  "Sources/FolioModel/FolioTool.swift",
+                  "Sources/FolioModel/Tools/*.swift"
+                ],
+                "status": "planned",
+                "authored": true
+              },
+              {
+                "id": "folio-layout",
+                "name": "Layout",
+                "description": "Page layout math: continuous column, single page, two-up, page grid, fit width and page, visible pages, page and view point conversion.",
+                "paths": [
+                  "Sources/FolioModel/FolioLayout.swift",
+                  "Sources/FolioModel/FolioGridLayout.swift"
+                ],
+                "status": "planned",
+                "authored": true
+              },
+              {
+                "id": "folio-live",
+                "name": "Live (Linux)",
+                "description": "The Linux live types: the source store (DocumentSources), find, select, annotate, fill forms, sign, the signature store, organize pages, history; and the conditional text replace and redaction over CorePDF.",
+                "paths": [
+                  "Sources/FolioModel/Live/*.swift"
+                ],
+                "status": "planned",
+                "authored": true
+              },
+              {
+                "id": "folio-launch",
+                "name": "Launch",
+                "description": "Launch arguments (-FolioFixture, -FolioSample, -FolioOpenFile, -FolioSaveTo, -FolioExportTo, -FolioPickFile(s), -FolioSignaturesDir, -FolioWindowSize, ) parsed into FolioLaunch. Also -FolioWriteSample <name> <path> (write a fixture as a real PDF and quit) and -FolioFake (fake services with -FolioOpenFile). The control inventory comes from SuiteUI under -SuitePerfProbe.",
+                "paths": [
+                  "Sources/FolioModel/FolioLaunch.swift"
+                ],
+                "status": "planned",
+                "authored": true
+              }
+            ]
+          },
+          {
+            "id": "folio-app",
+            "name": "FolioApp",
+            "description": "The SwiftUI app: SuiteWindow with thumbnails, outline and marks in the sidebar, the page view with the floating palette, the inspector, sheets, menus; the macOS live services over PDFKit, Vision and CoreGraphics.",
+            "technology": "Swift 6, SwiftUI, PDFKit, Vision, macOS 26",
+            "status": "planned",
+            "authored": true,
+            "components": [
+              {
+                "id": "folio-scene",
+                "name": "Scene and menus",
+                "description": "@main FolioApp, one WindowGroup window per document, the suite modifier once it lands, and one Commands type per area.",
+                "paths": [
+                  "Sources/FolioApp/FolioApp.swift",
+                  "Sources/FolioApp/FolioCommands+*.swift"
+                ],
+                "status": "planned",
+                "authored": true
+              },
+              {
+                "id": "folio-window",
+                "name": "Window",
+                "description": "FolioWindow: SuiteWindow with the sidebar, the page view and palette, the inspector; one FolioWindow+<Area> file per area that turns intents into workspace calls and runs async service calls between begin and finish; printing.",
+                "paths": [
+                  "Sources/FolioApp/FolioWindow.swift",
+                  "Sources/FolioApp/FolioWindow+*.swift",
+                  "Sources/FolioApp/FolioPrinting.swift"
+                ],
+                "status": "planned",
+                "authored": true
+              },
+              {
+                "id": "folio-pageview",
+                "name": "Page view and grid",
+                "description": "The page column drawn from page pictures, with the overlays FolioPageOverlays lists (marks, fields, selection, find hits, redaction marks), each its own file; gestures routed to the active tool; the find bar; the page grid.",
+                "paths": [
+                  "Sources/FolioApp/PageView/*.swift",
+                  "Sources/FolioApp/PageGrid/*.swift"
+                ],
+                "status": "planned",
+                "authored": true
+              },
+              {
+                "id": "folio-sidebar",
+                "name": "Sidebar",
+                "description": "FolioNavigator (not '...Sidebar': the design lint) lists the sidebar sections, each a file W0 stubs and a feature owns: thumbnails, outline, find results, marks list.",
+                "paths": [
+                  "Sources/FolioApp/Sidebar/*.swift"
+                ],
+                "status": "planned",
+                "authored": true
+              },
+              {
+                "id": "folio-inspector",
+                "name": "Inspector",
+                "description": "FolioInspector lists the inspector sections, each a file W0 stubs and a feature owns: document properties, selected mark, field, page.",
+                "paths": [
+                  "Sources/FolioApp/Inspector/*.swift"
+                ],
+                "status": "planned",
+                "authored": true
+              },
+              {
+                "id": "folio-sheets",
+                "name": "Sheets",
+                "description": "Password, insert, combine, extract and split, crop, save options, signature, export, reduce size, recognize text, apply redactions.",
+                "paths": [
+                  "Sources/FolioApp/Sheets/*.swift"
+                ],
+                "status": "planned",
+                "authored": true
+              },
+              {
+                "id": "folio-live-macos",
+                "name": "Live (macOS)",
+                "description": "PDFKit, Vision and CoreGraphics conformances: opening (and from images), page pictures, page text, fields and annotations both ways, writing, exporting, text recognition, the sample writer, signature drawing; FolioServices+Live. The sample writer and the writer's OCR text layer are split into per-area files (FolioSampleWriter+Marks/Fields/Scan/Photos, PDFKitWriting+TextLayer), each owned by its feature.",
+                "paths": [
+                  "Sources/FolioApp/Live/*.swift"
+                ],
+                "status": "planned",
+                "authored": true
+              }
+            ]
+          },
+          {
+            "id": "folio-tests",
+            "name": "Folio tests",
+            "description": "Model tests and budgets (Linux), snapshots and fidelity (macOS), journeys (XCUITest).",
+            "technology": "Swift Testing, XCTest, XCUITest",
+            "status": "planned",
+            "authored": true,
+            "components": [
+              {
+                "id": "folio-model-tests",
+                "name": "Model tests",
+                "description": "Contract suites (fake and live), area tests, budgets.",
+                "paths": [
+                  "Tests/FolioModelTests/*.swift"
+                ],
+                "status": "planned",
+                "authored": true
+              },
+              {
+                "id": "folio-snapshots",
+                "name": "Snapshots and fidelity",
+                "description": "Snapshots, fidelity goldens and macOS budget tests.",
+                "paths": [
+                  "Tests/AppSnapshotTests/Folio*.swift"
+                ],
+                "status": "planned",
+                "authored": true
+              },
+              {
+                "id": "folio-journeys",
+                "name": "Journeys",
+                "description": "XCUITest journeys, one file per feature.",
+                "paths": [
+                  "UITests/FolioJourneyTests*.swift"
+                ],
+                "status": "planned",
+                "authored": true
+              }
+            ]
+          }
+        ],
+        "relationships": [
+          {
+            "from": "folio-app",
+            "to": "folio-model",
+            "description": "holds one FolioWorkspace in @State, reads it, calls its methods",
+            "status": "planned",
+            "authored": true
+          },
+          {
+            "from": "folio-app",
+            "to": "suiteui",
+            "description": "SuiteWindow, ToolbarGroup(.floating), inspector rows, ViewerStatusBar, EmptyStateView, ThumbnailGrid, AppSwitcher",
+            "status": "planned",
+            "authored": true
+          },
+          {
+            "from": "folio-app",
+            "to": "suite-shell",
+            "description": ".suiteApp(.folio, host:), Switch To, Open In, recents (suite blueprint)",
+            "status": "planned",
+            "authored": true
+          },
+          {
+            "from": "folio-model",
+            "to": "suite-model",
+            "description": "SuiteDocumentHost: open a PDF, make a PDF from images handed off",
+            "status": "planned",
+            "authored": true
+          },
+          {
+            "from": "folio-model",
+            "to": "core-pdf",
+            "description": "content-edit only (conditional, W4): CP-1 to CP-5",
+            "status": "planned",
+            "authored": true
+          },
+          {
+            "from": "folio-app",
+            "to": "pdfkit",
+            "description": "live services only",
+            "status": "planned",
+            "authored": true
+          }
+        ]
+      }
+    ],
+    "external": [
+      {
+        "id": "core-pdf",
+        "name": "creative-core CorePDF",
+        "description": "Planned engine: object reader, incremental writer, content streams, redaction, text replace, signature placeholder, image re-encoding (needs new core issues CP-1 to CP-7).",
+        "status": "planned",
+        "authored": true
+      },
+      {
+        "id": "pdfkit",
+        "name": "PDFKit, Vision, CoreGraphics",
+        "description": "Apple frameworks used only by FolioApp's live types.",
+        "status": "existing",
+        "authored": true
+      },
+      {
+        "id": "suiteui",
+        "name": "SuiteUI",
+        "description": "The shared design system (existing, line:suiteui).",
+        "status": "existing",
+        "authored": true
+      },
+      {
+        "id": "suite-shell",
+        "name": "SuiteShell",
+        "description": "Suite glue each app links (planned by the suite blueprint).",
+        "status": "planned",
+        "authored": true
+      },
+      {
+        "id": "suite-model",
+        "name": "SuiteModel",
+        "description": "Suite values and contracts (planned by the suite blueprint); FolioModel gains it as a dependency when it lands (supervisor-merged Package.swift change).",
+        "status": "planned",
+        "authored": true
+      }
+    ]
+  }
+}
