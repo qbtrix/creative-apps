@@ -10,3 +10,4 @@ utc	stage	event	ref	note
 2026-10-16T13:10Z	3	pr-merged	#1354	D0-2.3 NotBuilt + DesignServices
 2026-10-16T13:10Z	3	pr-merged	#1356	D0-1 style schema; closes #1326; CT-a merged
 2026-10-16T13:10Z	3	stage-start	wave 3	D0-2.5, D0-2b.1
+2026-10-16T13:30Z	3	slice-done	CT-a	run 38905490687 (scoped: design, success)

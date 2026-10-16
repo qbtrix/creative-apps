@@ -9,7 +9,7 @@ Next: wait for wave 3 PRs (D0-2.5, D0-2b.1) to merge, then wave 4 (D0-2.6, D0-3a
 ## Slices
 | slice | behavior | tasks | journeys | waits on | rounds | state | run |
 |---|---|---|---|---|---|---|---|
-| CT-a | old files open with defaults; corner radius saves and reopens | D0-0, D0-2.1 (#1304), D0-1 | MJ1 | nothing | 0 | merged | |
+| CT-a | old files open with defaults; corner radius saves and reopens | D0-0, D0-2.1 (#1304), D0-1 | MJ1 | nothing | 0 | done | 38905490687 |
 | CT-b | fakes act; live says "isn't built yet." | D0-2.2 (#1307), D0-2.3, D0-2.4 (#1312), D0-2.5 | MJ2 | CT-a | 0 | building | |
 | CT-c | help law on every fake and stub; four fixtures | D0-2.6, D0-2b, D0-4a | MJ3 | CT-b; CT-a | 0 | building | |
 | CT-d | each command one named step; one-layer edits keep today's methods | D0-3a, D0-3b | MJ4 | CT-b | 0 | building | |
