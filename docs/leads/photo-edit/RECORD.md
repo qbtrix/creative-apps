@@ -4,7 +4,7 @@ Issue: #1075 · Packet: docs/blueprints/photo/features/photo-edit.md
 Run: act-1a144817472-xzgv (was act-1a1429c8810-2gls, act-1a13fcb7db6-e1sg) · Session: session_01NRtuLXL2My6shBUxxvDYQE (relaunch; first lead session_016oJAmpWVjb6Qzg26PPT8aW) · Started: 2026-10-15T13:38Z
 Stage: 5 finish (round 3 = the feature-done CI run)
 Base: 9e3c5f8e23708b834bded120d35d9db5acf4a7f3
-Next: wait for a scoped: photo CI run (asked the supervisor on #1075); PJ-5/6/7 are quarantined for full runs (owner #1075, expires 2026-10-18). Green -> Belt-Contact-Sheet; red -> round 4 fix
+Next: wait for the scoped CI run app=photo (or a full run after the #1075 quarantine entries are lifted) that contains #1317; asked the supervisor on #1075 (3rd ask 14:10Z). Green -> Belt-Contact-Sheet; a PJ-5/6/7 failure -> round 4 fix
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
