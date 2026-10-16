@@ -16,8 +16,9 @@
 // selected (blueprint 7.3): L1 is the audit on each `halo-layout-<w>` shot, L2
 // takes the artboard as the drawn layers' frame (`halo.viewer.canvas`) and
 // checks it is centered within 1 pt (across: the surround on its two sides,
-// measured in the window's pixels to where each panel starts, as a person
-// sees it) with its 16:9 aspect within 0.5%, L6 that it is
+// measured in the screen's pixels to where each panel starts, as a person
+// sees it, or the viewer's frame when a panel is off the screen) with its
+// 16:9 aspect within 0.5%, L6 that it is
 // at least 160 pt wide at the minimum size; it also checks every halo.*
 // control lies inside the window and the viewer is narrower at 880 than at
 // 1024 (the content column follows the window). Every other journey launches
@@ -256,11 +257,13 @@ final class HaloJourneyTests: XCTestCase {
                 XCTFail("no drawn artboard (halo.viewer.canvas) in the viewer at \(width)")
                 continue
             }
-            if let side = sideMargins(of: board, viewer: viewer, in: halo) {
+            if let side = sideMargins(of: board, viewer: viewer) {
                 XCTAssertEqual(side.left, side.right, accuracy: 2,
                     "L2: the artboard isn't centered across at \(width): \(side.left) pt of surround left, \(side.right) pt right")
             } else {
-                XCTFail("L2: no surround found beside the artboard at \(width)")
+                // A panel's edge is off the screen (the window is wider than
+                // the runner's display): judge against the viewer's frame.
+                XCTAssertEqual(board.midX, viewer.midX, accuracy: 1, "L2: the artboard isn't centered across at \(width)")
             }
             XCTAssertEqual(board.midY, viewer.midY, accuracy: 1, "L2: the artboard isn't centered down at \(width)")
             let aspect = board.width / board.height
@@ -426,26 +429,29 @@ final class HaloJourneyTests: XCTestCase {
     }
 
     /// The surround's width left and right of `artboard` (screen points),
-    /// along the window's row through its middle: from the artboard to the
-    /// sharpest step in the window's pixels between it and `viewer`'s edge
+    /// along the screen's row through its middle: from the artboard to the
+    /// sharpest step in the screen's pixels between it and `viewer`'s edge
     /// (within 8 pt), where a panel starts; 12 pt nearest the artboard are
     /// its shadow and left out. This is the centering a person sees, between
     /// the panels, rather than against XCUITest's frame for the viewer, which
-    /// is its split view column clipped to the window.
-    @MainActor private func sideMargins(of artboard: CGRect, viewer: CGRect, in halo: Journey) -> (left: Double, right: Double)? {
-        let window = halo.app.windows.firstMatch
-        guard let shot = ShotPixels(window), window.frame.width > 0 else { return nil }
-        let scale = Double(shot.width) / Double(window.frame.width)
-        let y = Int(((artboard.midY - window.frame.minY) * scale).rounded())
+    /// is its split view column clipped to the window. Nil when either range
+    /// runs off the screen. The screen, not the window: a window wider than
+    /// the display shoots only its visible part (1012 of 1024 pt in run
+    /// 38843147593), which no scale from its frame maps back.
+    @MainActor private func sideMargins(of artboard: CGRect, viewer: CGRect) -> (left: Double, right: Double)? {
+        let display = NSScreen.screens.first?.frame.size ?? .zero
+        guard display.width > 0, let shot = ShotPixels(XCUIScreen.main.screenshot()) else { return nil }
+        let scale = Double(shot.width) / Double(display.width)
+        let y = Int((Double(artboard.midY) * scale).rounded())
         guard (0..<shot.height).contains(y) else { return nil }
-        func px(_ x: CGFloat) -> Int { Int(((x - window.frame.minX) * scale).rounded()) }
+        func px(_ x: CGFloat) -> Int { Int((Double(x) * scale).rounded()) }
         /// The point just past the sharpest step between `from` and `to`.
         func step(_ from: CGFloat, _ to: CGFloat) -> Double? {
-            let (a, b) = (max(px(from), 0), min(px(to), shot.width - 1))
-            guard a < b else { return nil }
+            let (a, b) = (px(from), px(to))
+            guard a >= 0, b < shot.width - 1, a < b else { return nil }
             let jump = { (x: Int) in abs(shot.gray(x + 1, y) - shot.gray(x, y)) }
             guard let i = (a..<b).max(by: { jump($0) < jump($1) }) else { return nil }
-            return Double(i + 1) / scale + Double(window.frame.minX)
+            return Double(i + 1) / scale
         }
         guard let left = step(viewer.minX - 8, artboard.minX - 12), let right = step(artboard.maxX + 12, viewer.maxX + 8)
         else { return nil }
@@ -463,14 +469,14 @@ final class HaloJourneyTests: XCTestCase {
     }
 }
 
-/// An element's screenshot as sRGB, read as gray levels, top row first.
+/// A screenshot as sRGB, read as gray levels, top row first.
 private struct ShotPixels {
     let width: Int
     let height: Int
     private let rgba: [UInt8]
 
-    @MainActor init?(_ element: XCUIElement) {
-        guard let image = NSBitmapImageRep(data: element.screenshot().pngRepresentation)?.cgImage,
+    @MainActor init?(_ screenshot: XCUIScreenshot) {
+        guard let image = NSBitmapImageRep(data: screenshot.pngRepresentation)?.cgImage,
             let srgb = CGColorSpace(name: CGColorSpace.sRGB)
         else { return nil }
         (width, height) = (image.width, image.height)
