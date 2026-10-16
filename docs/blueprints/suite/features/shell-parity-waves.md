@@ -122,6 +122,11 @@ edits the shared `Tests/AppSnapshotTests/AppSnapshotTests.swift`.
 Within a wave, no path is in two features. Within a feature, every shared
 path is a chain in its packet.
 
+Design's later features take specific `Sources/DesignApp/` and
+`UITests/DesignJourneyTests.swift` files after Design shell-parity (its
+`.wave.json` lists DS-1 to DS-4's exact files); the order is in the owners
+table of `docs/blueprints/design/waves.in.md`.
+
 ## Collisions with features not running yet
 
 None of these has a feature issue today. The supervisor files them only

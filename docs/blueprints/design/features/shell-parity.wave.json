@@ -25,8 +25,8 @@
   ],
   "journeys": [
     "DesignJourneyTests.testLaunchShowsWindowShell",
-    "DesignJourneyTests.testDrawShapesAddTextAndSave",
-    "DesignShellJourneyTests.testShellWindow"
+    "DesignJourneyTests.testNewFileAndEveryTool",
+    "DesignJourneyTests.testDrawShapesAddTextAndSave"
   ],
   "slices": [
     {

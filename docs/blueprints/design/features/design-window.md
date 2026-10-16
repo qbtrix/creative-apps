@@ -115,7 +115,7 @@ a scrub also wait on DW-b, whose box and `bodyRuns` counter they use.
 2. **Fake mode** (D0-5a): `-DesignServices fake -DesignFixture cards`
    opens `cards` as an unsaved file on the fixture fakes; selecting A and B
    shows "2 Layers" in the inspector header and the status line.
-3. **J15** `testEveryControlActsOrSaysWhy` (`+EveryControl`, D0-7b) on
+3. **J15** `testEveryControlActsOrSaysWhy` (`+EveryControl`, class `DesignEveryControlJourneyTests`, D0-7b) on
    `cards`, live services: read `suite.controls`, click each enabled
    `design.*` control, Escape, ⌘Z; every enabled one changed the shot or a
    value; every disabled one has a reason (the "isn't built yet." ones
@@ -123,7 +123,7 @@ a scrub also wait on DW-b, whose box and `bodyRuns` counter they use.
 4. **J3** `testDrawShapesAddTextAndSave` (exists) keeps passing with its
    frame, rectangle and ellipse drags, moves and resizes going through the
    live drag box (DW-b); D0-8b checks the box's cost.
-5. **Layout** `testLayoutAtWidths` (`+Layout`, D0-7b) on `cards` with A
+5. **Layout** `testLayoutAtWidths` (`+Layout`, class `DesignLayoutJourneyTests`, D0-7b) on `cards` with A
    selected at 880 × 560 and 1024 × 720 (CI), and 1280 × 800, 1440 × 900,
    1920 × 1080 locally (skipped on a smaller display): blueprint 7.3's six
    asserts, to 0.5 pt.
