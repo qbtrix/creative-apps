@@ -62,14 +62,19 @@ struct HomeContent: View {
     let images: [String: Image]
 
     var body: some View {
-        VStack(alignment: .leading, spacing: SuiteSpacing.l) {
-            HomeNewRow(model: model)
-            HomeGrid(model: model, images: images, isPreview: Self.showsPreview(services),
-                     open: Self.open(services, identifier: "afterglow.home.empty.open"))
-                .homeLayoutAnchor("recents")
-            HomeRunningStrip(model: model)
+        // Scrolls when the recents are taller than the window; without it the
+        // flexible VStack centres its overflow and pushes the New row off the top.
+        ScrollView(.vertical) {
+            VStack(alignment: .leading, spacing: SuiteSpacing.l) {
+                HomeNewRow(model: model)
+                HomeGrid(model: model, images: images, isPreview: Self.showsPreview(services),
+                         open: Self.open(services, identifier: "afterglow.home.empty.open"))
+                    .homeLayoutAnchor("recents")
+                HomeRunningStrip(model: model)
+            }
+            .padding(SuiteSpacing.xl)
+            .frame(maxWidth: .infinity, alignment: .topLeading)
         }
-        .padding(SuiteSpacing.xl)
     }
 
     /// The "Preview data" pill shows only on the fakes, never on a live store.
