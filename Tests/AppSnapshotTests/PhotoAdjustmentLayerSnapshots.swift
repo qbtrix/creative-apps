@@ -6,7 +6,7 @@
 // adjustment at the bottom gets the info line "Nothing below to adjust.".
 // Writes photo-adjustment-layer-light.png, photo-adjustment-layer-dark.png
 // and, with Curves 1 moved to the bottom, photo-adjustment-layer-bottom-light.png
-// and photo-adjustment-layer-bottom-dark.png. The panel with its padding fits
+// and photo-adjustment-layer-bottom-dark.png, Curves 1 selected there. The panel with its padding fits
 // the 900 pt canvas (#1634), and every row's name starts at the same x
 // whatever its kind or visibility (#1633).
 // macOS only.
@@ -35,10 +35,12 @@ import Testing
             .padding(SuiteSpacing.xxl)
     }
 
-    /// The `layered` fixture with Curves 1 moved to the bottom.
+    /// The `layered` fixture with Curves 1 moved to the bottom and selected,
+    /// the state PJ-9's step 5 ends on (#1713).
     static func bottomCurves() throws -> PhotoWorkspace {
         var model = try PhotoWorkspace.fixture(.layered)
         model.moveLayers(fromOffsets: [1], toOffset: 3)
+        if let curves = model.layers.first(where: { $0.name == "Curves 1" }) { model.selectLayer(curves.id) }
         return model
     }
 
@@ -76,10 +78,15 @@ import Testing
     }
 
     /// An adjustment row at the bottom shows its info line under the name.
+    /// It is the selection, so its row is highlighted and Send Backward is
+    /// disabled (#1713).
     @Test func bottomAdjustmentInfoLine() throws {
         let model = try Self.bottomCurves()
         let curves = try #require(model.layers.first { $0.name == "Curves 1" })
         #expect(model.layers.last?.id == curves.id)
+        #expect(model.selectedLayer?.name == "Curves 1")
+        #expect(model.canSendSelectedLayerBackward == false)
+        #expect(model.canBringSelectedLayerForward)
         #expect(model.layerInfo(curves.id) == "Nothing below to adjust.")
         for scheme in [ColorScheme.light, .dark] {
             try snapshot(
