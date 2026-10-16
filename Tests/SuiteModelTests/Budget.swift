@@ -3,11 +3,12 @@
 // in debug (the gate), and the median of a set of measured costs.
 
 /// A budget: `device` milliseconds in release, ten times that in debug.
-func suiteBudget(device milliseconds: Int) -> Duration {
+/// Fractional budgets (QB-SM1's 0.2 ms) keep microsecond precision.
+func suiteBudget(device milliseconds: Double) -> Duration {
     #if DEBUG
-    .milliseconds(milliseconds * 10)
+    .microseconds(Int((milliseconds * 10_000).rounded()))
     #else
-    .milliseconds(milliseconds)
+    .microseconds(Int((milliseconds * 1_000).rounded()))
     #endif
 }
 
