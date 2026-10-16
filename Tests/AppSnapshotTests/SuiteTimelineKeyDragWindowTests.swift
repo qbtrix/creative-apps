@@ -4,7 +4,7 @@
 // playhead in @State. Keys at 120 are picked on lanes 5 and 6; lane 5's takes
 // 120 dragged events over 600 pt. Spec: lanes run at most 2 x (frame steps +
 // 2) bodies (the counter sums every lane), one move call per step summing to
-// 150, one onEndKeyDrag. TL-13 writes it disabled; TL-14 enables it. Nested
+// 150, one onEndKeyDrag. TL-13 wrote it disabled; TL-14 enabled it. Nested
 // in BodyCountSuites: it reads global body counters. macOS only.
 import AppKit
 import SwiftUI
@@ -14,7 +14,7 @@ import Testing
 
 extension BodyCountSuites {
     @MainActor @Suite struct SuiteTimelineKeyDragWindowTests {
-        @Test(.disabled("waits on TL-14"), .timeLimit(.minutes(2))) func aKeyDragRedrawsOnlyItsLanes() async throws {
+        @Test(.timeLimit(.minutes(2))) func aKeyDragRedrawsOnlyItsLanes() async throws {
             let sent = KeyDragSent()
             let size = CGSize(width: 1280, height: 400)
             let w = RenderBudgetWindow(KeyDragHost(sent: sent).frame(width: size.width, height: size.height, alignment: .top), size: size)
