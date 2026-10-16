@@ -407,6 +407,9 @@ final class PhotoJourneyTests: XCTestCase {
         XCTAssert(tab.waitForExistence(timeout: 5), "no Layers tab")
         tab.click()
         XCTAssert(photo.app.staticTexts["Background"].waitForExistence(timeout: 5), "the Layers tab doesn't list Background")
+        for identifier in ["photo.layer.new", "photo.layer.delete", "photo.layer.rename"] {
+            XCTAssert(photo.element(identifier).waitForExistence(timeout: 5), "the layer list has no \(identifier)")
+        }
         photo.shot("layers-tab")
 
         photo.click("New Layer", in: .window)
