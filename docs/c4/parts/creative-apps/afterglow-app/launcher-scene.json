@@ -1,7 +1,7 @@
 {
   "id": "launcher-scene",
   "name": "Launcher scene and router",
-  "description": "@main AfterGlowApp: the home Window, the Settings scene, the onboarding window, and the router that forwards opened documents to the embedded app. Hand-off verbs the launcher acts on (open settings, routed files) are LauncherRouter+<Area>.swift extensions, one per feature.",
+  "description": "@main AfterGlowApp: the home Window, the Settings scene, the onboarding window, and the router that forwards opened documents to the embedded app. Hand-off verbs the launcher acts on (open settings, routed files) are LauncherRouter+<Area>.swift extensions, one per feature; LauncherRouter+Services.swift builds LauncherServices.shared, the live services over the support folder, seeding a -SuiteFixture first.",
   "technology": "Swift 6, SwiftUI and AppKit, macOS 26",
   "paths": [
     "Sources/AfterGlowApp/AfterGlowApp.swift",

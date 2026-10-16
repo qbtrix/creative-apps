@@ -1,7 +1,7 @@
 {
   "id": "updater",
   "name": "Updater",
-  "description": "Check, offer sheet, progress, install and relaunch.",
+  "description": "Check, offer sheet, progress, install and relaunch. UpdateService.checker() supplies the launcher's UpdateChecking to the live services (nil until the updater builds it).",
   "technology": "Swift 6, SwiftUI and AppKit, macOS 26",
   "paths": [
     "Sources/AfterGlowApp/Update*.swift"

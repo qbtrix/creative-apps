@@ -1,7 +1,7 @@
 {
   "id": "home",
   "name": "Home window",
-  "description": "New tiles and presets, recents grid with search and app filter, running apps strip.",
+  "description": "SuiteWindow over a HomeModel: sidebar (Home, Assets, the five apps), Open… and search in the toolbar, the recents grid with app filter chips, the \"Preview data\" pill on the fakes, empty, no-match and missing-file states in place, the running apps strip; the New row's slot and inspector (HM-2b). Publishes the model as the homeModel focused value.",
   "technology": "Swift 6, SwiftUI and AppKit, macOS 26",
   "paths": [
     "Sources/AfterGlowApp/Home*.swift"
