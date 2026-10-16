@@ -89,3 +89,4 @@ utc	stage	event	ref	note
 2026-10-16T10:56Z	5	heartbeat	-	waiting supervisor: scoped photo run or lift PJ-5/6/7 quarantine
 2026-10-16T11:23Z	5	heartbeat	38887139934	full CI green again (9e3c5f8); PJ-5/6/7 still quarantined; waiting supervisor
 2026-10-16T11:40Z	5	heartbeat	-	relaunch act-1a144817472-xzgv; lead branch rebuilt on main 9e3c5f8; waiting scoped photo run
+2026-10-16T11:49Z	5	heartbeat	-	waiting scoped photo run or PJ-5/6/7 quarantine lift
