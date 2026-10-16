@@ -2,8 +2,8 @@
   "title": "Draw a rectangle, key it, play it and save it",
   "wave": 3,
   "order": 10,
-  "status": "planned",
-  "feature_issue": "file when ready",
+  "status": "built",
+  "feature_issue": "#1365",
   "covers": "#346, #347, #12, #203, #15, #11, #205; part of #204, #376, #391",
   "waits_on": "#793 (closed); task DK-3 only on #798, #799, #800",
   "owned": [
