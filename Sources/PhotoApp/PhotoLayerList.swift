@@ -1,5 +1,6 @@
 // PhotoLayerList.swift: Photo's layer list: the stack, top first, each row
-// with its show/hide eye (PhotoLayerRow), drag to reorder, and under it a
+// with its show/hide eye, kind symbol (photo for pixels, slider.horizontal.3
+// for an adjustment layer) and info line (PhotoLayerRow), drag to reorder, and under it a
 // SuiteUI SidebarActionRow of New Layer, Delete Layer and Rename Layer…
 // (`photo.layer.new`, `.delete`, `.rename`). Delete is disabled on the last
 // layer and says why. Values in, intents out.
@@ -17,7 +18,11 @@ struct PhotoLayerList: View {
         VStack(alignment: .leading, spacing: 0) {
             List(selection: Binding(get: { model.selectedLayerID }, set: { if let id = $0 { perform(.selectLayer(id)) } })) {
                 ForEach(model.layers) { layer in
-                    PhotoLayerRow(layer: layer, isSelected: layer.id == model.selectedLayerID, perform: perform).tag(layer.id)
+                    PhotoLayerRow(
+                        layer: layer, isSelected: layer.id == model.selectedLayerID, info: model.layerInfo(layer.id),
+                        perform: perform
+                    )
+                    .tag(layer.id)
                 }
                 .onMove { perform(.moveLayers($0, $1)) }
             }
@@ -46,14 +51,30 @@ struct PhotoLayerList: View {
     }
 }
 
-/// One Layers row: the show/hide eye, the name, and the blend mode and opacity
-/// when either is not the default. Hierarchical styles, so on the focused
+/// One Layers row: the show/hide eye, the kind symbol, the name with the
+/// Model's info line under it (`layerInfo`), and the blend mode and opacity
+/// when either is not the default. The eye and the kind symbol carry
+/// `photo.layer.<id>.eye` and `photo.layer.<id>.kind`, each with a label. Hierarchical styles, so on the focused
 /// selection's fill the row turns white with the system's own selected text;
 /// a selected row draws everything primary, since secondary is too faint there.
 struct PhotoLayerRow: View {
     let layer: PhotoLayer
     let isSelected: Bool
+    var info: String? = nil
     let perform: PhotoPerform
+
+    static func kindSymbol(_ kind: PhotoLayerKind) -> String {
+        if case .adjustment = kind { return "slider.horizontal.3" }
+        return "photo"
+    }
+
+    static func kindLabel(_ kind: PhotoLayerKind) -> String {
+        if case .adjustment = kind { return "Adjustment layer" }
+        return "Image layer"
+    }
+
+    static func eyeIdentifier(_ id: PhotoLayer.ID) -> String { "photo.layer.\(id).eye" }
+    static func kindIdentifier(_ id: PhotoLayer.ID) -> String { "photo.layer.\(id).kind" }
 
     var body: some View {
         HStack(spacing: SuiteSpacing.s) {
@@ -66,8 +87,21 @@ struct PhotoLayerRow: View {
             .buttonStyle(.borderless)
             .help(layer.isVisible ? "Hide Layer" : "Show Layer")
             .accessibilityLabel("\(layer.isVisible ? "Hide" : "Show") \(layer.name)")
-            .accessibilityIdentifier("photo.layer.visibility.\(layer.id)")
-            Text(layer.name).lineLimit(1).truncationMode(.middle)
+            .accessibilityIdentifier(Self.eyeIdentifier(layer.id))
+            Image(systemName: Self.kindSymbol(layer.kind))
+                .foregroundStyle(isSelected ? HierarchicalShapeStyle.primary : .secondary)
+                .help(Self.kindLabel(layer.kind))
+                .accessibilityLabel(Self.kindLabel(layer.kind))
+                .accessibilityIdentifier(Self.kindIdentifier(layer.id))
+            VStack(alignment: .leading, spacing: 0) {
+                Text(layer.name).lineLimit(1).truncationMode(.middle)
+                if let info {
+                    Text(info)
+                        .font(SuiteFont.inspectorMeta)
+                        .lineLimit(1)
+                        .foregroundStyle(isSelected ? HierarchicalShapeStyle.primary : .secondary)
+                }
+            }
             Spacer(minLength: 0)
             if layer.blendMode != .normal || layer.opacity < 1 {
                 Text("\(layer.blendMode.title) \(Int(layer.opacityPercent.rounded()))%")
