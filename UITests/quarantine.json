@@ -4,5 +4,47 @@
     "owner": "#1262",
     "reason": "H-J10 step 5 opens the 2,000-layer fixture: the UI query times out (HaloJourneyTests+Files.swift:107) because every layer row is in the accessibility tree, and in run 38835566584 the opening screen adds 2 contrast hits. #1262 says it stays red until the layer list and timeline rows go lazy. Steps 1 to 4 pass.",
     "expires": "2026-10-23"
+  },
+  {
+    "test": "HaloJourneyTests/HaloJourneyTests/testDragLayerToKeyPosition",
+    "owner": "#1283",
+    "reason": "H-J5: a 100 px drag on Ball in the viewer leaves Position X at 560, not 660 (HaloJourneyTests+Drag.swift:49, scoped run 38857364213 on the tree dev holds now). The press doesn't reach HaloViewerGestures under XCUITest; #1283 is open on it.",
+    "expires": "2026-10-18",
+    "scope": "full"
+  },
+  {
+    "test": "HaloJourneyTests/HaloJourneyTests/testEveryControlActsOrSaysWhy",
+    "owner": "#1035",
+    "reason": "H-J13: halo.transport.play is enabled but clicking it changes nothing (HaloJourneyTests.swift:205), the viewer-playback lead's transport. It also fails the overlap audit on the keyed stopwatch (#1282). Both in scoped run 38857364213 on the tree dev holds now.",
+    "expires": "2026-10-18",
+    "scope": "full"
+  },
+  {
+    "test": "HaloJourneyTests/HaloJourneyTests/testInspectorKeysTransform",
+    "owner": "#1282",
+    "reason": "H-J6: the overlap audit fails, 2 violations over a baseline of 0: a keyed stopwatch reads 56 pt wide and covers the diamond (KeyframeButton, #1282). Scoped run 38857364213 on the tree dev holds now.",
+    "expires": "2026-10-18",
+    "scope": "full"
+  },
+  {
+    "test": "PhotoJourneyTests/PhotoEditJourneyTests/testCopyPasteAsNewLayer",
+    "owner": "#1075",
+    "reason": "PJ-5: Edit > Paste's reason read failed in full run 38841439320, the last that reached the journeys. #1281 changed the read after that run and no run has reached Photo's journeys since (the brush test stops them), so it is unproven; the scoped photo run decides.",
+    "expires": "2026-10-18",
+    "scope": "full"
+  },
+  {
+    "test": "PhotoJourneyTests/PhotoEditJourneyTests/testPasteFromAnotherApp",
+    "owner": "#1075",
+    "reason": "PJ-6: the pasted 200 x 100 layer's place read failed in full run 38841439320, the last that reached the journeys. #1281 changed the read after that run and no run has reached Photo's journeys since, so it is unproven; the scoped photo run decides.",
+    "expires": "2026-10-18",
+    "scope": "full"
+  },
+  {
+    "test": "PhotoJourneyTests/PhotoLayerOpsJourneyTests/testDuplicateMergeAndFlatten",
+    "owner": "#1075",
+    "reason": "PJ-7: Layer > Merge Down's reason read failed in full run 38841439320, the last that reached the journeys. #1284 changed the read after that run and no run has reached Photo's journeys since, so it is unproven; the scoped photo run decides.",
+    "expires": "2026-10-18",
+    "scope": "full"
   }
 ]
