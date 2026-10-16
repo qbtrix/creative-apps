@@ -7,8 +7,29 @@
 // selected adjustment layer's own section under its name, or the whole-image
 // sections under "Image". An edit to a layer is clamped and refused exactly as
 // the whole-image one (AdjustmentSettings), damages the whole canvas at once,
-// and one gesture is one undo step (`endAdjustLayer`). Linux-safe.
+// and one gesture is one undo step (`endAdjustLayer`). A row's kind label
+// names the adjustment whatever the layer is called (`PhotoLayerKind.label`,
+// #1710), and its blend summary's tooltip says which value is the blend mode
+// and which the opacity (`layerBlendSummary`, #1709). Linux-safe.
 import CoreRaster
+
+/// A Layers row's trailing summary, "Multiply 60%", and its tooltip and
+/// accessibility label, "Blend mode Multiply, opacity 60%" (#1709).
+public struct PhotoBlendSummary: Hashable, Sendable {
+    public let text: String
+    public let help: String
+}
+
+extension PhotoLayerKind {
+    /// The kind symbol's tooltip and label: "Image layer", or the adjustment
+    /// the layer holds, "Curves adjustment layer", read from its settings so
+    /// a renamed layer still says what it does (#1710).
+    public var label: String {
+        guard case .adjustment(let settings) = self else { return "Image layer" }
+        let kinds = AdjustmentKind.allCases.filter { settings.isEnabled($0) }.map(\.title)
+        return kinds.isEmpty ? "Adjustment layer" : "\(kinds.joined(separator: ", ")) adjustment layer"
+    }
+}
 
 /// Where the inspector's adjustment edits go (PV-6).
 public enum AdjustTarget: Hashable, Sendable {
@@ -91,5 +112,14 @@ extension PhotoWorkspace {
     public func layerInfo(_ id: PhotoLayer.ID) -> String? {
         guard let at = index(of: id), case .adjustment = layers[at].kind, at == layers.count - 1 else { return nil }
         return "Nothing below to adjust."
+    }
+
+    /// The blend mode and opacity at the end of layer `id`'s row, with the
+    /// tooltip that names both; nil for a Normal layer at 100% or an unknown id.
+    public func layerBlendSummary(_ id: PhotoLayer.ID) -> PhotoBlendSummary? {
+        guard let at = index(of: id), layers[at].blendMode != .normal || layers[at].opacity < 1 else { return nil }
+        let mode = layers[at].blendMode.title
+        let percent = "\(Int(layers[at].opacityPercent.rounded()))%"
+        return PhotoBlendSummary(text: "\(mode) \(percent)", help: "Blend mode \(mode), opacity \(percent)")
     }
 }

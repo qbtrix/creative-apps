@@ -55,16 +55,18 @@ import Testing
     }
 
     /// Each row's symbol, kind label and identifiers: the adjustment reads
-    /// "Adjustment layer" with slider.horizontal.3, pixel layers "Image layer"
-    /// with photo; no two rows share an identifier.
+    /// "Curves adjustment layer" with slider.horizontal.3 (#1710), pixel layers
+    /// "Image layer" with photo; Paint's "Multiply 60%" names its blend mode
+    /// and opacity in its tooltip (#1709); no two rows share an identifier.
     @Test func rowsCarryKindAndIdentifiers() throws {
         let model = try PhotoWorkspace.fixture(.layered)
         let curves = try #require(model.layers.first { $0.name == "Curves 1" })
         let paint = try #require(model.layers.first { $0.name == "Paint" })
         #expect(PhotoLayerRow.kindSymbol(curves.kind) == "slider.horizontal.3")
-        #expect(PhotoLayerRow.kindLabel(curves.kind) == "Adjustment layer")
+        #expect(PhotoLayerRow.kindLabel(curves.kind) == "Curves adjustment layer")
         #expect(PhotoLayerRow.kindSymbol(paint.kind) == "photo")
         #expect(PhotoLayerRow.kindLabel(paint.kind) == "Image layer")
+        #expect(model.layerBlendSummary(paint.id) == PhotoBlendSummary(text: "Multiply 60%", help: "Blend mode Multiply, opacity 60%"))
         var identifiers = Set<String>()
         for layer in model.layers {
             #expect(PhotoLayerRow.eyeIdentifier(layer.id) == "photo.layer.\(layer.id).eye")

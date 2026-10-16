@@ -20,7 +20,7 @@ struct PhotoLayerList: View {
                 ForEach(model.layers) { layer in
                     PhotoLayerRow(
                         layer: layer, isSelected: layer.id == model.selectedLayerID, info: model.layerInfo(layer.id),
-                        perform: perform
+                        blend: model.layerBlendSummary(layer.id), perform: perform
                     )
                     .tag(layer.id)
                 }
@@ -53,7 +53,8 @@ struct PhotoLayerList: View {
 
 /// One Layers row: the show/hide eye, the kind symbol, the name with the
 /// Model's info line under it (`layerInfo`), and the blend mode and opacity
-/// when either is not the default. The eye and the kind symbol carry
+/// when either is not the default (`layerBlendSummary`, whose tooltip names
+/// both). The kind symbol's label names the adjustment (`PhotoLayerKind.label`). The eye and the kind symbol carry
 /// `photo.layer.<id>.eye` and `photo.layer.<id>.kind`, each with a label. Both
 /// symbols sit in a fixed `symbolColumn`, so every row's name starts at the
 /// same x whatever its kind or visibility (#1633). Hierarchical styles, so on the focused
@@ -63,6 +64,7 @@ struct PhotoLayerRow: View {
     let layer: PhotoLayer
     let isSelected: Bool
     var info: String? = nil
+    var blend: PhotoBlendSummary? = nil
     let perform: PhotoPerform
 
     static func kindSymbol(_ kind: PhotoLayerKind) -> String {
@@ -70,10 +72,7 @@ struct PhotoLayerRow: View {
         return "photo"
     }
 
-    static func kindLabel(_ kind: PhotoLayerKind) -> String {
-        if case .adjustment = kind { return "Adjustment layer" }
-        return "Image layer"
-    }
+    static func kindLabel(_ kind: PhotoLayerKind) -> String { kind.label }
 
     /// The width of the eye's and the kind symbol's column: eye and
     /// eye.slash, photo and slider.horizontal.3 draw at different widths.
@@ -111,9 +110,11 @@ struct PhotoLayerRow: View {
                 }
             }
             Spacer(minLength: 0)
-            if layer.blendMode != .normal || layer.opacity < 1 {
-                Text("\(layer.blendMode.title) \(Int(layer.opacityPercent.rounded()))%")
+            if let blend {
+                Text(blend.text)
                     .font(SuiteFont.inspectorMeta)
+                    .help(blend.help)
+                    .accessibilityLabel(blend.help)
                     // The secondary grey reads 3:1 on the selection highlight; WCAG wants 4.5:1.
                     .foregroundStyle(isSelected ? HierarchicalShapeStyle.primary : .secondary)
             }
