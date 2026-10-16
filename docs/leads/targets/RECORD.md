@@ -1,7 +1,7 @@
 # targets lead record
 
 Issue: #873 · Packet: docs/blueprints/suite/features/targets.md
-Run: act-1a13f70dda7-kche · Session: claude/feature-lead-targets-w8ietz · Started: 2026-10-15T12:10Z
+Run: act-1a1429c87d2-exzi (resumed; first act-1a13f70dda7-kche) · Session: claude/feature-lead-targets-r13t2d · Started: 2026-10-15T12:10Z, resumed 2026-10-16T02:50Z
 Stage: 4 round 1
 Base: 8fce5e2 (dev with BU-1b #1263)
 Next: watch ci.yml runs on dev; on the first green run whose head contains 8fce5e2, comment `Belt-Contact-Sheet: <run link>` on #873 with the size table and 'launcher has no journey shots until home'. Nothing of this feature's is red; no fix batch.
@@ -44,6 +44,7 @@ Executables total 31,308,416 bytes; app-builds.tar.gz 8,064,887 bytes. SuiteUI i
 - BU-S needs a Mac: not run by this lead (packet).
 
 ## Open
+- 2026-10-16T02:50Z: dev still red for others: run 791 (e99643c) Linux red on PhotoEditBudgetTests.editBudgets (Photo timing budget, #763); 792 (9230d80) queued. Waiting for a green dev run containing 8fce5e2.
 - Run 785 (f3b8987, has #1143+#1133): macOS scripts/ci, bundle-apps and Size report passed. Linux failed only on PhotoEditBudgetTests.editBudgets (copy/paste p50 7.2 s vs merge 3.8 s): Photo line, a timing budget, not this feature's files; belongs to the dev-red issue.
 - 2026-10-15T19:41Z: lead hit its 8 h budget waiting ~7 h on the supervisor to merge #1143 (BU-1a) and #1133 (BU-0); both merge clean on dev 6018826. BU-1b is ready on lead/targets-bu-1b (f789ca0, one commit over BU-1a 38e2c99).
 - BU-1b: shared-assets must handle ⌘X/C/V/A in text fields (the stub replaces .pasteboard with disabled items); fine today, no text fields.
