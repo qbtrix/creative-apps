@@ -1,12 +1,15 @@
 // PhotoCommands+File.swift: Photo's File menu items: New Image, Open…, Open
-// Recent ▸, Save, Save As…, Export…. Save, Save As and Export are off with no
-// image. Open Recent lists the focused window's recent files, newest first;
+// Recent ▸, Close, Save, Save As…, Export…. Save, Save As and Export are off
+// with no image. Close (Command-W) is the system's, which replacing
+// `.saveItem` drops: it sends performClose: to the key window, so an unsaved
+// window asks first (PhotoWindowCloseGuard). Open Recent lists the focused window's recent files, newest first;
 // one opens in that window (a file that is gone shows the open error), and
 // Clear Menu, disabled with none, empties the list. With no window open it
 // lists the saved list (PhotoSavedRecent) and a pick opens in a new window
 // through PhotoOpenQueue (PhotoRecentMenu chooses). Replacing `.newItem`
 // drops nothing the system would show: a WindowGroup app has no Open Recent
 // of its own.
+import AppKit
 import PhotoModel
 import SwiftUI
 
@@ -25,6 +28,9 @@ extension PhotoCommands {
             }
         }
         CommandGroup(replacing: .saveItem) {
+            // `.saveItem` holds the system's Close, so replacing it brings Close back here.
+            Button("Close") { NSApp.sendAction(#selector(NSWindow.performClose(_:)), to: nil, from: nil) }
+                .keyboardShortcut("w")
             Button("Save") { menu.perform(.save) }.keyboardShortcut("s").disabled(!menu.hasImage)
             Button("Save As…") { menu.perform(.saveAs) }.keyboardShortcut("s", modifiers: [.command, .shift])
                 .disabled(!menu.hasImage)

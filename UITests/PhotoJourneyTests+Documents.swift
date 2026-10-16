@@ -152,7 +152,8 @@ final class PhotoDocumentsJourneyTests: XCTestCase {
         cancel.click()
         XCTAssert(cancel.waitForNonExistence(timeout: 5), "Cancel left the unsaved alert up")
         XCTAssert(photo.app.windows["beach.png"].exists, "Cancel closed the window")
-        expectStatus("Edited", photo)
+        // The autosave, 5 s after the stroke, has usually run by now: "Edited, autosaved" is still edited.
+        expectStatus("Edited", photo, prefix: true)
         photo.shot("documents-2-cancelled")
 
         // 3. Command-W, Don't Save closes; Open Recent's first entry reopens beach.png as it was on disk.
@@ -193,12 +194,14 @@ final class PhotoDocumentsJourneyTests: XCTestCase {
         if !photo.app.wait(for: .notRunning, timeout: 15) { photo.app.terminate() }
     }
 
-    /// `photo.bar.saved`'s label reads `status` (SwiftUI values can read empty).
-    @MainActor private func expectStatus(_ status: String, _ photo: Journey) {
+    /// `photo.bar.saved`'s label reads `status`, or starts with it when
+    /// `prefix` (SwiftUI values can read empty).
+    @MainActor private func expectStatus(_ status: String, _ photo: Journey, prefix: Bool = false) {
         let saved = photo.element("photo.bar.saved")
         XCTAssert(saved.waitForExistence(timeout: 10), "no save status (photo.bar.saved)")
-        for _ in 0..<25 where saved.label != status { Thread.sleep(forTimeInterval: 0.2) }
-        XCTAssertEqual(saved.label, status, "photo.bar.saved's label")
+        let reads = { prefix ? saved.label.hasPrefix(status) : saved.label == status }
+        for _ in 0..<25 where !reads() { Thread.sleep(forTimeInterval: 0.2) }
+        XCTAssert(reads(), "photo.bar.saved's label reads \(saved.label), not \(status)\(prefix ? "…" : "")")
     }
 
     /// Layer > New Layer by its key (Shift-Command-N): one "New Layer" step.
