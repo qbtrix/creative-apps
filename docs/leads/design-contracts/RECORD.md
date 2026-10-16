@@ -4,7 +4,7 @@ Issue: #1324 · Packet: docs/blueprints/design/features/design-contracts.md
 Run: act-1a14478b14e-i8ep · Session: session_01DKQiisBimhgRgEM46b1U5E · Started: 2026-10-16T11:29Z
 Stage: 3 polling
 Base: fb72b7e52405a824fabe34c6c408fcc00d242da2
-Next: wait for the lane to merge #1410 (feature-done), then for a green scoped CI run app=design (or full run) that contains it; post Belt-Slice-Done for CT-b, CT-c, CT-d and the contact sheet. Current Design runs are red from #1391's journeys (dev-red #1393)
+Next: wait for a green scoped CI run app=design (or full run) containing #1410 (165933fc); runs 38923051520 and earlier are red on the same three #1391 journeys (dev-red #1393); Model tests green
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | rounds | state | run |
@@ -31,7 +31,7 @@ Next: wait for the lane to merge #1410 (feature-done), then for a green scoped C
 | D0-2b.1 | CT-c | 3 | six new Live stubs (Duplicating, Grouping, Clipboard, Ordering, Styling, Filing) | Live/Live{Duplicating,Grouping,Clipboard,Ordering,Styling,Filing}.swift, DesignLiveStubTests.swift | DesignLiveStubTests | #1383 | merged |
 | D0-2b.2 | CT-c | 5 | .live names every Live type; law on .live; MJ3 | DesignServices.swift, DesignLiveStubTests.swift | DesignLiveStubTests | #1401 | merged (Mutate 10/10) |
 | D0-3b | CT-d | 5 | clipboard, moveLayer, setStyle; MJ4 | DesignActions+Edit.swift, DesignActionsEditTests.swift | DesignActionsEditTests | #1400 | merged (Mutate 5/5) |
-| FD | CT-d | 6 | feature-done: design-contracts.wave.json status built, feature issue #1324 | docs/blueprints/design/features/design-contracts.wave.json | scripts/ci (waves render) | #1410 | open, feature-done |
+| FD | CT-d | 6 | feature-done: design-contracts.wave.json status built, feature issue #1324 | docs/blueprints/design/features/design-contracts.wave.json | scripts/ci (waves render) | #1410 | merged, feature-done |
 
 Waves: 1 = D0-0, D0-4a, F-1314 (all independent). 2 = D0-1 (waits D0-0: same DesignNode/DesignFile). 3 = D0-2.3 (waits D0-1: DesignWorkspace.swift). 4 = D0-2.5 (waits D0-2.3: DesignServices.swift). 5 = D0-2.6, D0-3a (both wait D0-2.5's .fake; independent of each other). 6 = D0-2b (waits D0-2.6, D0-4a), D0-3b (waits D0-3a); later of the two carries feature-done.
 
