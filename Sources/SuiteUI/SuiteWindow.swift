@@ -29,6 +29,9 @@
 // (an editor's panel) is the inspector's minimum and ideal, and takes the
 // inspector ideal's place in the window's minimum and launch widths. With
 // `-SuiteWindowSize WxH` a SuiteWindowSizer sizes the window (SuiteWindowSizer.swift).
+// The toolbar's centered (`.principal`) slot holds the app switcher
+// (AppSwitcher.swift) with no shared toolbar glass behind it: the environment's
+// `suiteSwitcher`, or AppSwitcherState.placeholder for this process's name.
 import SwiftUI
 
 public struct SuiteWindow<Sidebar: View, Content: View, Inspector: View>: View {
@@ -46,6 +49,8 @@ public struct SuiteWindow<Sidebar: View, Content: View, Inspector: View>: View {
     private let launchSize: CGSize?
     @State private var showsInspector = true
     @State private var columns: NavigationSplitViewVisibility = .all
+    /// The app switcher to show; nil shows the placeholder.
+    @Environment(\.suiteSwitcher) private var switcher
 }
 
 extension SuiteWindow where Sidebar == SuiteSidebarList {
@@ -210,6 +215,12 @@ extension SuiteWindow {
                     ForEach(documentActions) { actionButton($0) }
                 }
             }
+            ToolbarItem(placement: .principal) {
+                let state = switcher ?? AppSwitcherState.placeholder(processName: ProcessInfo.processInfo.processName)
+                AppSwitcher(items: state.items, current: state.current, onSelect: state.onSelect)
+            }
+            // The switcher row draws its own capsule; no toolbar glass sits behind it.
+            .sharedBackgroundVisibility(.hidden)
             ToolbarItemGroup(placement: .primaryAction) {
                 ForEach(actions) { actionButton($0) }
             }
