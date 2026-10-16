@@ -3,14 +3,14 @@
 Issue: #1324 · Packet: docs/blueprints/design/features/design-contracts.md
 Run: act-1a14478b14e-i8ep · Session: session_01DKQiisBimhgRgEM46b1U5E · Started: 2026-10-16T11:29Z
 Stage: 3 wave 4
-Base: 70b2920f7ae0d1f15131da69a1b8b89aa5e3f724
-Next: wave 3 PRs #1383 (D0-2b.1, macOS build green) and #1388 (D0-2.5, macOS build queued) wait on the lane; wave 4 (D0-2.6, D0-3a) builds stacked on #1388's branch and opens after it merges
+Base: fb72b7e52405a824fabe34c6c408fcc00d242da2
+Next: D0-2.6 and D0-3a rebase onto dev and open PRs; then wave 5 (D0-2b.2, D0-3b); CT-b waits for the scoped CI run app=design that contains #1388
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | rounds | state | run |
 |---|---|---|---|---|---|---|---|
 | CT-a | old files open with defaults; corner radius saves and reopens | D0-0, D0-2.1 (#1304), D0-1 | MJ1 | nothing | 0 | done | 38905490687 |
-| CT-b | fakes act; live says "isn't built yet." | D0-2.2 (#1307), D0-2.3, D0-2.4 (#1312), D0-2.5 | MJ2 | CT-a | 0 | building | |
+| CT-b | fakes act; live says "isn't built yet." | D0-2.2 (#1307), D0-2.3, D0-2.4 (#1312), D0-2.5 | MJ2 | CT-a | 0 | merged | |
 | CT-c | help law on every fake and stub; four fixtures | D0-2.6, D0-2b, D0-4a | MJ3 | CT-b; CT-a | 0 | building | |
 | CT-d | each command one named step; one-layer edits keep today's methods | D0-3a, D0-3b | MJ4 | CT-b | 0 | building | |
 
@@ -25,10 +25,10 @@ Next: wave 3 PRs #1383 (D0-2b.1, macOS build green) and #1388 (D0-2.5, macOS bui
 | F-1314 | CT-b | 1 | DesignDocumentTests header fix (#1314) | Tests/DesignModelTests/DesignDocumentTests.swift | DesignDocumentTests | #1328 | merged |
 | D0-1 | CT-a | 2 | style schema, public DesignPage init, marquee, selection ends run; MJ1 | DesignNode.swift, DesignWorkspace.swift, DesignSelection.swift, DesignFile.swift, DesignStyleSchemaTests.swift, DesignSelectionRunTests.swift | DesignStyleSchemaTests, DesignSelectionRunTests | #1356 | merged |
 | D0-2.3 | CT-b | 3 | NotBuilt, DesignServices .live, services/useServices | NotBuilt.swift, DesignServices.swift, DesignWorkspace.swift, DesignNotBuiltTests.swift | DesignNotBuiltTests | #1354 | merged |
-| D0-2.5 | CT-b | 4 | arrange fakes, .fake; MJ2 | Fakes/DesignArrangeFakes.swift, DesignServices.swift, DesignArrangeFakesTests.swift | DesignArrangeFakesTests | #1388 | open, lane macOS build |
+| D0-2.5 | CT-b | 4 | arrange fakes, .fake; MJ2 | Fakes/DesignArrangeFakes.swift, DesignServices.swift, DesignArrangeFakesTests.swift | DesignArrangeFakesTests | #1388 | merged |
 | D0-2.6 | CT-c | 4 | contract law | DesignContractLawTests.swift | DesignContractLawTests | | building (wave 4, stacked on #1388) |
 | D0-3a | CT-d | 4 | DesignCommand, help, run, apply, mint | DesignActions.swift, DesignActionsTests.swift | DesignActionsTests | | building (wave 4, stacked on #1388) |
-| D0-2b.1 | CT-c | 3 | six new Live stubs (Duplicating, Grouping, Clipboard, Ordering, Styling, Filing) | Live/Live{Duplicating,Grouping,Clipboard,Ordering,Styling,Filing}.swift, DesignLiveStubTests.swift | DesignLiveStubTests | #1383 | open, macOS build green |
+| D0-2b.1 | CT-c | 3 | six new Live stubs (Duplicating, Grouping, Clipboard, Ordering, Styling, Filing) | Live/Live{Duplicating,Grouping,Clipboard,Ordering,Styling,Filing}.swift, DesignLiveStubTests.swift | DesignLiveStubTests | #1383 | merged |
 | D0-2b.2 | CT-c | 5 | .live names every Live type; law on .live; MJ3 | DesignServices.swift, DesignLiveStubTests.swift | DesignLiveStubTests | | waits D0-2.5, D0-2.6, D0-2b.1 |
 | D0-3b | CT-d | 5 | clipboard, moveLayer, setStyle; MJ4 | DesignActions+Edit.swift, DesignActionsEditTests.swift | DesignActionsEditTests | | waits D0-3a |
 
