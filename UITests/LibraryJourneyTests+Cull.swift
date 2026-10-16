@@ -44,9 +44,10 @@ extension LibraryJourneyTests {
 
     /// J4 steps 1-7 on `library`, each shot's name ending `suffix`.
     @MainActor private func cullSteps(_ library: Journey, suffix: String) {
-        // Step 1: name order, IMG_0001 in the loupe, Auto Advance on.
+        // Step 1: name order, IMG_0001 in the loupe, Auto Advance there. XCUITest
+        // can't read a menu Toggle's check mark (#1654): step 2 proves it's on.
         openInLoupe("IMG_0001", library)
-        XCTAssert(autoAdvanceItem(library).checked, "Metadata > Auto Advance isn't checked on launch")
+        _ = autoAdvanceItem(library)
         library.press(.escape)
 
         // Step 2: 3 rates IMG_0001 and moves on to IMG_0002.
@@ -75,10 +76,9 @@ extension LibraryJourneyTests {
         expectPosition("IMG_0003", "3 of 24", library)
         XCTAssertFalse(cullValue(library).contains("Rejected"), "IMG_0003 is still rejected after the undo")
 
-        // Step 5: with Auto Advance off, 5 rates and stays.
-        autoAdvanceItem(library).item.click()
-        XCTAssertFalse(autoAdvanceItem(library).checked, "Metadata > Auto Advance stayed checked")
-        library.press(.escape)
+        // Step 5: with Auto Advance off, 5 rates and stays. Choosing the item
+        // closes the menu, so no Escape here: it would leave the loupe (#1666).
+        autoAdvanceItem(library).click()
         focusLoupe(library)
         library.press(character: "5")
         expectValue(endingWith: "5 stars", library)
@@ -100,7 +100,9 @@ extension LibraryJourneyTests {
 
         // Step 7: P picks both, U clears them; Undo names Clear Flag.
         library.press(character: "p")
-        XCTAssert(cullCell("IMG_0006", library, marked: "Flagged").waitForExistence(timeout: 5), "P didn't pick IMG_0006")
+        for name in ["IMG_0005", "IMG_0006"] {
+            XCTAssert(cullCell(name, library, marked: "Flagged").waitForExistence(timeout: 5), "P didn't pick \(name)")
+        }
         library.press(character: "u")
         let edit = library.app.menuBars.firstMatch.menuBarItems["Edit"]
         edit.click()
@@ -191,16 +193,14 @@ extension LibraryJourneyTests {
         XCTAssert(badge.waitForExistence(timeout: timeout), "\(title) doesn't count \(count)")
     }
 
-    /// Opens Metadata and returns Auto Advance with whether it shows its
-    /// checkmark (selected, or a non-empty, non-zero mark value). Leaves the menu open.
-    @MainActor private func autoAdvanceItem(_ library: Journey) -> (item: XCUIElement, checked: Bool) {
+    /// Opens Metadata and returns its enabled Auto Advance. Leaves the menu open.
+    @MainActor private func autoAdvanceItem(_ library: Journey) -> XCUIElement {
         let metadata = library.app.menuBars.firstMatch.menuBarItems["Metadata"]
         metadata.click()
         let item = metadata.menuItems["Auto Advance"]
         XCTAssert(item.waitForExistence(timeout: 3), "the Metadata menu has no Auto Advance")
         XCTAssert(item.isEnabled, "Metadata > Auto Advance is disabled")
-        let mark = item.value.map { "\($0)" } ?? ""
-        return (item, item.isSelected || !(mark.isEmpty || mark == "0"))
+        return item
     }
 
     /// Edit's top-level Undo item, whatever step it names.
