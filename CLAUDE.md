@@ -177,7 +177,10 @@ something. One that can't act yet is disabled and says why:
   `#if canImport(FoundationEssentials) import FoundationEssentials #else import Foundation #endif`.
   Swift 6 language mode. Value types, `Sendable`.
 - **Every change gets a test.** Swift Testing (`import Testing`, `@Test`,
-  `#expect`).
+  `#expect`). In a v3 slice, a mutation that breaks the change must also
+  fail that test: add 2 or more to the plan of the file you change in
+  `Tests/mutations/` and run `scripts/mutate --plan <plan>` until each is
+  caught (docs/factory/lead.md, contract rule 14).
 - **No new dependencies** without an issue that approves them.
 - **PR title** in Conventional Commits (`feat(flare): onion skin toggle`). The
   body says what changed, why, and which test or snapshot proves it.
@@ -336,7 +339,9 @@ Crew PRs merge into `dev` at once; `main` moves only when full CI passes on
 ## Commands
 
 ```bash
-scripts/ci                                   # lint + app-state rule + design lint + C4 ownership + jscpd + build + test: the gate
+scripts/ci                                   # lint + app-state rule + design lint + C4 ownership + jscpd + mutation anchors + build + test: the gate
+scripts/mutate --plan DesignModel.LiveMarquee # plant each bug in that plan (Tests/mutations/) and require a test to fail; prints the score
+scripts/mutate --validate                    # every plan's `find` occurs exactly once (no build; scripts/ci runs it)
 swift test --filter FlareModelTests          # one suite while iterating
 bash Tests/fast_lane/test_fast_lane.sh       # fast-lane decision tests (needs jq)
 bash Tests/audit_lower/test_audit_lower.sh   # decision tests for scripts/audit-lower, CI's baseline lowering (needs jq)

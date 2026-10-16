@@ -1,0 +1,37 @@
+[
+  {
+    "label": "picks a hidden layer",
+    "file": "Sources/DesignModel/Live/LiveMarquee.swift",
+    "find": "!node.isHidden && !node.isLocked\n",
+    "replace": "!node.isLocked\n",
+    "tests": "DesignMarqueeTests"
+  },
+  {
+    "label": "picks a locked layer",
+    "file": "Sources/DesignModel/Live/LiveMarquee.swift",
+    "find": "!node.isHidden && !node.isLocked\n",
+    "replace": "!node.isHidden\n",
+    "tests": "DesignMarqueeTests"
+  },
+  {
+    "label": "opens a hidden or locked parent",
+    "file": "Sources/DesignModel/Live/LiveMarquee.swift",
+    "find": "for node in nodes where !node.isHidden && !node.isLocked {",
+    "replace": "for node in nodes {",
+    "tests": "DesignMarqueeTests"
+  },
+  {
+    "label": "a zero-size rect on a right edge misses",
+    "file": "Sources/DesignModel/Live/LiveMarquee.swift",
+    "find": "rect.x <= node.frame.maxX",
+    "replace": "rect.x < node.frame.maxX",
+    "tests": "DesignMarqueeTests"
+  },
+  {
+    "label": "a zero-size rect on a left edge misses",
+    "file": "Sources/DesignModel/Live/LiveMarquee.swift",
+    "find": "node.frame.x <= rect.maxX",
+    "replace": "node.frame.x < rect.maxX",
+    "tests": "DesignMarqueeTests"
+  }
+]

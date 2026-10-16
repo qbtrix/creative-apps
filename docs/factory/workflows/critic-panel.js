@@ -16,7 +16,7 @@ export const meta = {
 //   screens: '<scratchpad>/ui-screens',     // downloaded ui-screens artifact (PNGs, contact-sheet.html, audit-*.json)
 //   snapshots: '<scratchpad>/snapshots',    // downloaded snapshots artifact
 //   audit: 'halo: overlap 0 (=), contrast 1 (↓)',  // the contact sheet's audit row for the app
-//   lenses: ['clarity', 'journey', ...],    // optional; keep the same list after a clean review
+//   lenses: ['clarity', 'journey', ...],    // optional; keep the same list after a clean review. v3 default adds 'oracle'
 //   round: 2,                               // v2: the Anatomy round
 //   // The findings queue (work started after lead.md's v3 contract landed):
 //   issue: 812,                             // the feature issue; with it, confirmed findings are filed as issues
@@ -36,8 +36,13 @@ const LENSES = {
   controls: 'No dead controls (CLAUDE.md): every visible button, tool and menu item acts or is disabled with help text that says why.',
   audit: 'The app audit: every count over baseline, and the screen and element behind it.',
   quality: 'The packet\'s quality bars and docs/review-rubric.md section 6 budgets: any perf report line over budget.',
+  oracle: 'Test the oracle (docs/factory/lead.md, contract rule 14): would a planted bug in this code fail a test? This lens reads code, not PNGs: ' +
+    `the Model source the ${args.slice ? 'slice' : 'feature'}'s merged PRs changed (their Slice: and Feature: lines), the tests that cover it, and its plans in Tests/mutations/. ` +
+    'Name one mutation that would escape: the file, the exact line, the change (a dropped guard, <= for <, a skipped filter), and why no test fails. ' +
+    'Use "-" for the screen. The fix is the test that catches it plus that mutation in the file\'s plan.',
 }
-const lenses = (args.lenses && args.lenses.length ? args.lenses : ['clarity', 'journey', 'design', 'layout', 'controls'])
+const lenses = (args.lenses && args.lenses.length ? args.lenses
+  : ['clarity', 'journey', 'design', 'layout', 'controls', ...(args.slice ? ['oracle'] : [])])
 if (!lenses.includes('clarity')) lenses.unshift('clarity')
 
 const FINDINGS = {
@@ -92,7 +97,9 @@ const verified = await pipeline(
     { label: `critic:${lens}`, phase: 'Critique', schema: FINDINGS }),
   (r, lens) => parallel((r ? r.findings : []).map(f => () =>
     agent(`${ctx}\n\nA ${lens} critic reports (${f.severity}) on ${f.screen}: ${f.what}\nWhy: ${f.why}\n` +
-      'Try to refute it: check the screen and the code. refuted=true if it is not visible, not a problem, ' +
+      (lens === 'oracle'
+        ? 'Try to refute it: read the tests, or run it with scripts/mutate as a one-entry plan. refuted=true if a test fails with that change, the change cannot alter behaviour, '
+        : 'Try to refute it: check the screen and the code. refuted=true if it is not visible, not a problem, ') +
       (queue ? `already fixed on dev, outside this ${scope}, or already covered by one of these open findings:\n${open}\n`
         : 'already fixed on dev, or outside this feature. ') +
       'Keep it only if you can see it.',

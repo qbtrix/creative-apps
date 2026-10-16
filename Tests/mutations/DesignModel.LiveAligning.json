@@ -1,0 +1,37 @@
+[
+  {
+    "label": "align moves a locked layer",
+    "file": "Sources/DesignModel/Live/LiveAligning.swift",
+    "find": "let movable = selected.filter { !isLocked($0.id, on: page) }",
+    "replace": "let movable = selected",
+    "tests": "DesignDistributeTests"
+  },
+  {
+    "label": "a layer inside a locked group counts as unlocked",
+    "file": "Sources/DesignModel/Live/LiveAligning.swift",
+    "find": "((page.nodes.ancestors(of: id) ?? []) + [id]).contains { page.nodes.node($0)?.isLocked == true }",
+    "replace": "page.nodes.node(id)?.isLocked == true",
+    "tests": "DesignDistributeTests"
+  },
+  {
+    "label": "distribute takes two layers",
+    "file": "Sources/DesignModel/Live/LiveAligning.swift",
+    "find": "guard sorted.count >= 3,",
+    "replace": "guard sorted.count >= 2,",
+    "tests": "DesignDistributeTests"
+  },
+  {
+    "label": "distribute moves a locked inner layer",
+    "file": "Sources/DesignModel/Live/LiveAligning.swift",
+    "find": "if let locked = inner.first(where: { isLocked($0.id, on: page) }) { throw .locked(locked.name) }",
+    "replace": "",
+    "tests": "DesignDistributeTests"
+  },
+  {
+    "label": "distribute splits the space into one gap too few",
+    "file": "Sources/DesignModel/Live/LiveAligning.swift",
+    "find": "/ Double(inner.count + 1)",
+    "replace": "/ Double(inner.count)",
+    "tests": "DesignDistributeTests"
+  }
+]

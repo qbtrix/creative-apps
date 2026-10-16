@@ -1,9 +1,10 @@
 // DesignSeveralTransformTests.swift: LiveTransforming, the live Move, Resize,
 // Nudge and Delete for a selection, on blueprint 4's `cards` (the fixture
 // DesignMarqueeTests builds). Several layers move with their subtrees as one
-// coalescing step, resize scales each one inside the selection's box (a box of
-// no width never divides by zero), and a locked or hidden-in-tree layer refuses
-// every write by the selected layer's name. Runs on Linux and macOS.
+// coalescing step, each once (a repeated id too), resize scales each one inside
+// the selection's box (a box of no width never divides by zero), and a layer
+// locked or hidden, itself or by a layer around it, refuses every write by the
+// selected layer's name. Runs on Linux and macOS.
 @testable import DesignModel
 import Testing
 
@@ -108,6 +109,16 @@ import Testing
     @Test func aLockedLayerRefusesTheSelection() {
         expectRefused(["A", "Locked"], .locked("Locked"), on: cards)
         #expect(live.transformHelp(["A", "Locked"], on: cards) == "Unlock Locked to change it.")
+    }
+
+    @Test func aLockedAncestorRefusesByTheSelectedLayersName() {
+        let locked = DesignMarqueeTests.cards { _ = $0.update("Pair") { $0.isLocked = true } }
+        expectRefused(["E1"], .locked("E1"), on: locked)
+    }
+
+    @Test func aRepeatedIDMovesOnce() throws {
+        let edit = try live.move(["A", "A"], by: pt(40, 0), on: cards)
+        #expect(frame("A", edit) == rc(140, 100, 100, 80))
     }
 
     @Test func aHiddenAncestorRefusesByTheSelectedLayersName() {

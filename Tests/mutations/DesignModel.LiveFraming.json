@@ -1,0 +1,30 @@
+[
+  {
+    "label": "frames a hidden layer",
+    "file": "Sources/DesignModel/Live/LiveFraming.swift",
+    "find": "nodes.filter { !$0.isHidden }.flatMap",
+    "replace": "nodes.flatMap",
+    "tests": "DesignFramingTests"
+  },
+  {
+    "label": "frames a layer inside a hidden frame",
+    "file": "Sources/DesignModel/Live/LiveFraming.swift",
+    "find": "nodes.filter { !$0.isHidden }.flatMap { node in\n            (ids.contains(node.id) ? [node.frame] : [])",
+    "replace": "nodes.flatMap { node in\n            (ids.contains(node.id) && !node.isHidden ? [node.frame] : [])",
+    "tests": "DesignFramingTests"
+  },
+  {
+    "label": "the union keeps the last layer's left edge",
+    "file": "Sources/DesignModel/Live/LiveFraming.swift",
+    "find": "Swift.min(box.x, frame.x)",
+    "replace": "frame.x",
+    "tests": "DesignFramingTests"
+  },
+  {
+    "label": "help shows while there is a rect",
+    "file": "Sources/DesignModel/Live/LiveFraming.swift",
+    "find": "rectToShow(ids, on: page) == nil ?",
+    "replace": "rectToShow(ids, on: page) != nil ?",
+    "tests": "DesignFramingTests"
+  }
+]

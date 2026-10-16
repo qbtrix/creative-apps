@@ -1,8 +1,8 @@
 // DesignFramingTests.swift: View > Zoom to Selection on the live services
 // (LiveFraming) against the `cards` frames (blueprint 4): one layer frames
-// itself, two frame their union, a hidden layer frames nothing and the help
-// says why, and the help is nil exactly when there is a rect. Runs on Linux
-// and macOS.
+// itself, two frame their union, a hidden layer (or one inside a hidden
+// frame) frames nothing and the help says why, and the help is nil exactly
+// when there is a rect. Runs on Linux and macOS.
 @testable import DesignModel
 import Testing
 
@@ -34,6 +34,13 @@ import Testing
     @Test func aHiddenLayerFramesNothingAndSaysWhy() {
         #expect(framing.rectToShow(["Hidden"], on: page) == nil)
         #expect(framing.framingHelp(["Hidden"], on: page) == "Select a layer first.")
+    }
+
+    @Test func aLayerInsideAHiddenFrameFramesNothing() {
+        var hidden = page
+        _ = hidden.nodes.update("Desktop") { $0.isHidden = true }
+        #expect(framing.rectToShow(["A"], on: hidden) == nil)
+        #expect(framing.framingHelp(["A"], on: hidden) == "Select a layer first.")
     }
 
     @Test func nothingSelectedFramesNothing() {

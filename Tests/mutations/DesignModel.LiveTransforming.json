@@ -1,0 +1,37 @@
+[
+  {
+    "label": "a box of no width divides by zero",
+    "file": "Sources/DesignModel/Live/LiveTransforming.swift",
+    "find": "length > 0 ? newStart + (value - start) * newLength / length : newStart",
+    "replace": "newStart + (value - start) * newLength / length",
+    "tests": "DesignSeveralTransformTests"
+  },
+  {
+    "label": "a locked layer does not refuse",
+    "file": "Sources/DesignModel/Live/LiveTransforming.swift",
+    "find": "if let node = nodes.first(where: { inTree($0.id, on: page) { $0.isLocked } }) { throw .locked(node.name) }",
+    "replace": "",
+    "tests": "DesignSeveralTransformTests"
+  },
+  {
+    "label": "a layer inside a locked group does not refuse",
+    "file": "Sources/DesignModel/Live/LiveTransforming.swift",
+    "find": "inTree($0.id, on: page) { $0.isLocked }",
+    "replace": "$0.isLocked",
+    "tests": "DesignSeveralTransformTests"
+  },
+  {
+    "label": "a selected child moves twice",
+    "file": "Sources/DesignModel/Live/LiveTransforming.swift",
+    "find": "seen.insert(node.id).inserted && !(page.nodes.ancestors(of: node.id) ?? []).contains(where: selected.contains)",
+    "replace": "seen.insert(node.id).inserted",
+    "tests": "DesignSeveralTransformTests"
+  },
+  {
+    "label": "a repeated id moves twice",
+    "file": "Sources/DesignModel/Live/LiveTransforming.swift",
+    "find": "seen.insert(node.id).inserted && !(page.nodes.ancestors(of: node.id) ?? []).contains(where: selected.contains)",
+    "replace": "!(page.nodes.ancestors(of: node.id) ?? []).contains(where: selected.contains)",
+    "tests": "DesignSeveralTransformTests"
+  }
+]
