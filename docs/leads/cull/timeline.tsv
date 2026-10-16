@@ -15,3 +15,4 @@ utc	stage	event	ref	note
 2026-10-16T19:52Z	3	heartbeat	-	wait for the lane to merge #1588 (CU-3) and #1579 (CU-4); CU-5 builder running; 
 2026-10-16T19:45Z	3	pr-opened	#1598	CU-5 cull area keys, Auto Advance, notice close
 2026-10-16T19:55Z	3	pr-opened	#1604	CU-7 J4 (unlabelled until wave 3 merges)
+2026-10-16T20:12Z	3	heartbeat	-	macOS builds for #1588 #1579 #1598 queued (12 in queue)
