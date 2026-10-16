@@ -34,6 +34,7 @@ Wave 3: BU-4 waits on BU-3 (the release graph it builds) and BU-5a/b/c (the plis
 - BU-3 (project.yml) and BU-4 (scripts/) open without the fast-lane label: the packet says the supervisor merges them.
 - No mutation plans (contract rule 14 is v3 only).
 - BU-4 built while BU-3 #1358 waits on the supervisor: its files (scripts/) are disjoint from BU-3's and the supervisor merges both, BU-3 first; the builder reads BU-3's project.yml from its branch for names.
+- Supervisor note 2026-10-16T18:13Z (UI and logic in parallel, re-sliced wave data) read: bundle has no UI slice and dev's bundle.wave.json is not re-sliced yet, so the v2 plan stands.
 - BU-5c opens without feature-done: BU-4 (supervisor) can't merge before it. The last lane PR, after BU-4 merges, sets bundle.wave.json status built and carries feature-done.
 - Wave 2's first launch was given a PR head as base (squash merges make that SHA absent from dev); stopped and relaunched on dev e464eca.
 
