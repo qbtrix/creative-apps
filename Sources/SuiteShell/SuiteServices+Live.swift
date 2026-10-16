@@ -1,7 +1,7 @@
 // SuiteServices+Live.swift: the services a real suite process uses
 // (suite-contracts packet, correction 8). `live` builds one SlotContext and
 // asks each member's slot in Live/ for its conformance; a slot that isn't
-// live yet holds its fake, which throws "Not connected yet (<feature>)."
+// live yet holds its fake, which throws "<What> isn't available yet."
 // (pure members hold the reference fake), and `pending` lists every such
 // member so views disable its controls with that reason. `animations` and
 // `updates` have no slot: they stay fakes until a process swaps them with

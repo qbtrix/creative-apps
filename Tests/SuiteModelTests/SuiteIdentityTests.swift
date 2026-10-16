@@ -9,8 +9,10 @@ import Testing
         #expect(SuiteIdentity.launcherBundleID == "org.creativesuite.afterglow")
     }
 
-    @Test func notConnectedNamesTheFeature() {
-        #expect(SuiteIdentity.notConnected("home") == "Not connected yet (home).")
+    @Test func notConnectedSaysWhatIsMissingInPlainWords() {
+        #expect(SuiteIdentity.notConnected("home") == "The Home window isn't available yet.")
+        #expect(SuiteIdentity.notConnected("switching") == "Switching between apps isn't available yet.")
+        #expect(SuiteIdentity.notConnected("no-such-feature") == "This isn't available yet.")
     }
 
     @Test func appsInSwitchOrder() {
