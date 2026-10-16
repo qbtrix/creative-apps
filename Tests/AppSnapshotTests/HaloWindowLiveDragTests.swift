@@ -18,101 +18,103 @@ import Testing
 
 @testable import HaloApp
 
-@MainActor @Suite struct HaloWindowLiveDragTests {
-    /// Floor spans the artboard's bottom band, so a press there hits it.
-    static let floor = "comp-1-layer-1"
+extension BodyCountSuites {
+    @MainActor @Suite struct HaloWindowLiveDragTests {
+        /// Floor spans the artboard's bottom band, so a press there hits it.
+        static let floor = "comp-1-layer-1"
 
-    @Test(.timeLimit(.minutes(3))) func aViewerDragRunsTheWindowAtMostThreeTimes() async throws {
-        let project = HaloLaunch(arguments: ["Halo", "-HaloSample", "keyed"]).project()
-        let hosted = try await HostedHaloWindow(project)
-        defer { hosted.close() }
-        let canvas = try #require(hosted.frame(of: "halo.viewer.canvas"), "no halo.viewer.canvas")
-        // Composition (960, 980): the middle of Floor's band, under nothing else at frame 0.
-        let start = CGPoint(x: canvas.midX, y: canvas.minY + canvas.height * (100.0 / 1080.0))
-        let end = CGPoint(x: start.x + 120, y: start.y + 30)
+        @Test(.timeLimit(.minutes(3))) func aViewerDragRunsTheWindowAtMostThreeTimes() async throws {
+            let project = HaloLaunch(arguments: ["Halo", "-HaloSample", "keyed"]).project()
+            let hosted = try await HostedHaloWindow(project)
+            defer { hosted.close() }
+            let canvas = try #require(hosted.frame(of: "halo.viewer.canvas"), "no halo.viewer.canvas")
+            // Composition (960, 980): the middle of Floor's band, under nothing else at frame 0.
+            let start = CGPoint(x: canvas.midX, y: canvas.minY + canvas.height * (100.0 / 1080.0))
+            let end = CGPoint(x: start.x + 120, y: start.y + 30)
 
-        let drawn = Self.layerBodies()
-        let (runs, after) = try await hosted.drag(from: start, to: end)
-        let redrawn = Self.layerBodies().map { $0 - (drawn ?? 0) }
+            let drawn = Self.layerBodies()
+            let (runs, after) = try await hosted.drag(from: start, to: end)
+            let redrawn = Self.layerBodies().map { $0 - (drawn ?? 0) }
 
-        var expected = project
-        let artboard = (w: Double(canvas.width), h: Double(canvas.height))
-        let from = try #require(expected.compositionPoint(
-            x: start.x - canvas.minX, y: canvas.maxY - start.y, artboardWidth: artboard.w, artboardHeight: artboard.h))
-        let to = try #require(expected.compositionPoint(
-            x: end.x - canvas.minX, y: canvas.maxY - end.y, artboardWidth: artboard.w, artboardHeight: artboard.h))
-        expected.beginViewerDrag(at: from)
-        expected.moveViewerDrag(to: to)
-        expected.endViewerDrag()
-        let want = try #require(expected.viewerDrawList?.worldBox(of: Self.floor))
-        let got = try #require(after.viewerDrawList?.worldBox(of: Self.floor))
-        let report = "VIEWER-DRAG samples=120@120Hz | window bodies \(runs.map(String.init) ?? "n/a"), drawn layers \(redrawn.map(String.init) ?? "n/a"), undo \(after.undoTitle ?? "nil") selected \(after.selectedLayerID ?? "nil"), Floor at \(got.x),\(got.y) (want \(want.x),\(want.y))"
-        print(report)
+            var expected = project
+            let artboard = (w: Double(canvas.width), h: Double(canvas.height))
+            let from = try #require(expected.compositionPoint(
+                x: start.x - canvas.minX, y: canvas.maxY - start.y, artboardWidth: artboard.w, artboardHeight: artboard.h))
+            let to = try #require(expected.compositionPoint(
+                x: end.x - canvas.minX, y: canvas.maxY - end.y, artboardWidth: artboard.w, artboardHeight: artboard.h))
+            expected.beginViewerDrag(at: from)
+            expected.moveViewerDrag(to: to)
+            expected.endViewerDrag()
+            let want = try #require(expected.viewerDrawList?.worldBox(of: Self.floor))
+            let got = try #require(after.viewerDrawList?.worldBox(of: Self.floor))
+            let report = "VIEWER-DRAG samples=120@120Hz | window bodies \(runs.map(String.init) ?? "n/a"), drawn layers \(redrawn.map(String.init) ?? "n/a"), undo \(after.undoTitle ?? "nil") selected \(after.selectedLayerID ?? "nil"), Floor at \(got.x),\(got.y) (want \(want.x),\(want.y))"
+            print(report)
 
-        if let runs { #expect(runs <= 3, "the window ran per drag sample: \(report)") }
-        if let redrawn { #expect(redrawn >= 30, "the viewer didn't draw the drag as it went: \(report)") }
-        #expect(after.history.undo.count == project.history.undo.count + 1, "the drag isn't one step: \(report)")
-        #expect(after.undoTitle == "Undo Move", "\(report)")
-        #expect(abs(got.x - want.x) < 0.5 && abs(got.y - want.y) < 0.5, "the drag landed elsewhere: \(report)")
-        #expect(after.viewerDrag == nil, "\(report)")
-    }
-
-    @Test(.timeLimit(.minutes(3))) func anInspectorScrubMovesNothingElseInTheWindow() async throws {
-        var project = HaloLaunch(arguments: ["Halo", "-HaloSample", "keyed"]).project()
-        // Ball's X is keyed at 0 and 24, so scrubbing it at frame 6 adds a key.
-        project.selectLayer("comp-1-layer-2")
-        project.scrub(to: 6)
-        let hosted = try await HostedHaloWindow(project)
-        defer { hosted.close() }
-        let before = hosted.frames(under: "halo.")
-        let row = try #require(before["halo.inspector.row.x"], "no halo.inspector.row.x")
-        let start = CGPoint(x: row.midX, y: row.midY)
-        var moved: Set<String> = []
-        let (_, after) = try await hosted.drag(from: start, to: CGPoint(x: start.x + 120, y: start.y), every: 20) {
-            let now = hosted.frames(under: "halo.")
-            // The dragged bar draws its focus ring; everything else holds still.
-            for id in Set(before.keys).union(now.keys) where id != "halo.inspector.row.x" && now[id] != before[id] {
-                moved.insert("\(id) \(before[id].map { "\($0)" } ?? "new") -> \(now[id].map { "\($0)" } ?? "gone")")
-            }
+            if let runs { #expect(runs <= 3, "the window ran per drag sample: \(report)") }
+            if let redrawn { #expect(redrawn >= 30, "the viewer didn't draw the drag as it went: \(report)") }
+            #expect(after.history.undo.count == project.history.undo.count + 1, "the drag isn't one step: \(report)")
+            #expect(after.undoTitle == "Undo Move", "\(report)")
+            #expect(abs(got.x - want.x) < 0.5 && abs(got.y - want.y) < 0.5, "the drag landed elsewhere: \(report)")
+            #expect(after.viewerDrag == nil, "\(report)")
         }
-        let report = "WINDOW-LAYOUT \(before.count) elements | moved or came and went during the scrub: \(moved.isEmpty ? "none" : moved.sorted().joined(separator: "; "))"
-        print(report)
-        #expect(before.count >= 16, "the window's elements weren't found: \(before.keys.sorted())")
-        #expect(moved.isEmpty, "the window's layout changed during a scrub: \(report)")
-        #expect(after.undoTitle == "Undo Change Position X", "\(report)")
-    }
 
-    /// HaloLiveLayers' body runs so far; nil in release, which has no counter.
-    static func layerBodies() -> Int? {
-        #if DEBUG
-        return HaloLiveLayers.bodyRuns
-        #else
-        return nil
-        #endif
-    }
+        @Test(.timeLimit(.minutes(3))) func anInspectorScrubMovesNothingElseInTheWindow() async throws {
+            var project = HaloLaunch(arguments: ["Halo", "-HaloSample", "keyed"]).project()
+            // Ball's X is keyed at 0 and 24, so scrubbing it at frame 6 adds a key.
+            project.selectLayer("comp-1-layer-2")
+            project.scrub(to: 6)
+            let hosted = try await HostedHaloWindow(project)
+            defer { hosted.close() }
+            let before = hosted.frames(under: "halo.")
+            let row = try #require(before["halo.inspector.row.x"], "no halo.inspector.row.x")
+            let start = CGPoint(x: row.midX, y: row.midY)
+            var moved: Set<String> = []
+            let (_, after) = try await hosted.drag(from: start, to: CGPoint(x: start.x + 120, y: start.y), every: 20) {
+                let now = hosted.frames(under: "halo.")
+                // The dragged bar draws its focus ring; everything else holds still.
+                for id in Set(before.keys).union(now.keys) where id != "halo.inspector.row.x" && now[id] != before[id] {
+                    moved.insert("\(id) \(before[id].map { "\($0)" } ?? "new") -> \(now[id].map { "\($0)" } ?? "gone")")
+                }
+            }
+            let report = "WINDOW-LAYOUT \(before.count) elements | moved or came and went during the scrub: \(moved.isEmpty ? "none" : moved.sorted().joined(separator: "; "))"
+            print(report)
+            #expect(before.count >= 16, "the window's elements weren't found: \(before.keys.sorted())")
+            #expect(moved.isEmpty, "the window's layout changed during a scrub: \(report)")
+            #expect(after.undoTitle == "Undo Change Position X", "\(report)")
+        }
 
-    @Test(.timeLimit(.minutes(3))) func anInspectorScrubRunsTheWindowAtMostThreeTimes() async throws {
-        var project = HaloLaunch(arguments: ["Halo", "-HaloSample", "keyed"]).project()
-        project.selectLayer(Self.floor)
-        let x = try #require(project.propertyRows.first { $0.property == .x }?.value)
-        let hosted = try await HostedHaloWindow(project)
-        defer { hosted.close() }
-        let row = try #require(hosted.frame(of: "halo.inspector.row.x"), "no halo.inspector.row.x")
-        let start = CGPoint(x: row.midX, y: row.midY)
+        /// HaloLiveLayers' body runs so far; nil in release, which has no counter.
+        static func layerBodies() -> Int? {
+            #if DEBUG
+            return HaloLiveLayers.bodyRuns
+            #else
+            return nil
+            #endif
+        }
 
-        let drawn = Self.layerBodies()
-        let (runs, after) = try await hosted.drag(from: start, to: CGPoint(x: start.x + 120, y: start.y))
-        let redrawn = Self.layerBodies().map { $0 - (drawn ?? 0) }
+        @Test(.timeLimit(.minutes(3))) func anInspectorScrubRunsTheWindowAtMostThreeTimes() async throws {
+            var project = HaloLaunch(arguments: ["Halo", "-HaloSample", "keyed"]).project()
+            project.selectLayer(Self.floor)
+            let x = try #require(project.propertyRows.first { $0.property == .x }?.value)
+            let hosted = try await HostedHaloWindow(project)
+            defer { hosted.close() }
+            let row = try #require(hosted.frame(of: "halo.inspector.row.x"), "no halo.inspector.row.x")
+            let start = CGPoint(x: row.midX, y: row.midY)
 
-        let moved = after.propertyRows.first { $0.property == .x }?.value
-        let report = "INSPECTOR-SCRUB samples=120@120Hz | window bodies \(runs.map(String.init) ?? "n/a"), drawn layers \(redrawn.map(String.init) ?? "n/a"), undo \(after.undoTitle ?? "nil"), X \(x) -> \(moved.map { "\($0)" } ?? "nil")"
-        print(report)
+            let drawn = Self.layerBodies()
+            let (runs, after) = try await hosted.drag(from: start, to: CGPoint(x: start.x + 120, y: start.y))
+            let redrawn = Self.layerBodies().map { $0 - (drawn ?? 0) }
 
-        if let runs { #expect(runs <= 3, "the window ran per scrub sample: \(report)") }
-        if let redrawn { #expect(redrawn >= 30, "the viewer didn't draw the scrub as it went: \(report)") }
-        #expect(after.history.undo.count == project.history.undo.count + 1, "the scrub isn't one step: \(report)")
-        #expect(after.undoTitle == "Undo Change Position X", "\(report)")
-        #expect(moved != nil && moved != x, "the scrub didn't change X: \(report)")
+            let moved = after.propertyRows.first { $0.property == .x }?.value
+            let report = "INSPECTOR-SCRUB samples=120@120Hz | window bodies \(runs.map(String.init) ?? "n/a"), drawn layers \(redrawn.map(String.init) ?? "n/a"), undo \(after.undoTitle ?? "nil"), X \(x) -> \(moved.map { "\($0)" } ?? "nil")"
+            print(report)
+
+            if let runs { #expect(runs <= 3, "the window ran per scrub sample: \(report)") }
+            if let redrawn { #expect(redrawn >= 30, "the viewer didn't draw the scrub as it went: \(report)") }
+            #expect(after.history.undo.count == project.history.undo.count + 1, "the scrub isn't one step: \(report)")
+            #expect(after.undoTitle == "Undo Change Position X", "\(report)")
+            #expect(moved != nil && moved != x, "the scrub didn't change X: \(report)")
+        }
     }
 }
 
