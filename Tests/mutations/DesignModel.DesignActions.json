@@ -1,0 +1,44 @@
+[
+  {
+    "label": "run drops the one-layer fast path",
+    "file": "Sources/DesignModel/DesignActions.swift",
+    "find": "if ids.count == 1, command.hasOneLayerMethod { return try runOneLayer(command) }",
+    "replace": "",
+    "tests": "DesignActionsTests"
+  },
+  {
+    "label": "help drops the one-layer fast path",
+    "file": "Sources/DesignModel/DesignActions.swift",
+    "find": "if ids.count == 1, command.hasOneLayerMethod { return oneLayerHelp(command) }",
+    "replace": "",
+    "tests": "DesignActionsTests"
+  },
+  {
+    "label": "a one-layer refusal runs today's method instead of throwing",
+    "file": "Sources/DesignModel/DesignActions.swift",
+    "find": "if oneLayerHelp(command) != nil, let node = selectedNode {",
+    "replace": "if false, let node = selectedNode {",
+    "tests": "DesignActionsTests"
+  },
+  {
+    "label": "the mint ignores the ids the file holds",
+    "file": "Sources/DesignModel/DesignActions.swift",
+    "find": "DesignIDMint(taken: held.ids, after: nodeCount)",
+    "replace": "DesignIDMint(taken: [], after: nodeCount)",
+    "tests": "DesignActionsTests"
+  },
+  {
+    "label": "apply never takes the mint's counter",
+    "file": "Sources/DesignModel/DesignActions.swift",
+    "find": "if let mint { nodeCount = Swift.max(nodeCount, mint.counter) }",
+    "replace": "",
+    "tests": "DesignActionsTests"
+  },
+  {
+    "label": "apply drops the coalescing key",
+    "file": "Sources/DesignModel/DesignActions.swift",
+    "find": "coalescing: edit.coalescingKey)",
+    "replace": "coalescing: nil)",
+    "tests": "DesignActionsTests"
+  }
+]
