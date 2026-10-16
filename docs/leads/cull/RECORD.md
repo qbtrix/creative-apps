@@ -4,7 +4,7 @@ Issue: #1345 · Packet: docs/blueprints/library/features/cull.md
 Run: act-1a145e74beb-obp4 · Session: cse_01BkDrX316MPq32KYU5agHQr · Started: 2026-10-16T18:10Z
 Stage: 4 round 1
 Base: 7ab292cdb1022222c00314a2b52c44c087811c46
-Next: wait for the full CI run on dev that contains #1604 (a5c680a); then round 1: download ui-screens and snapshots, run the critic panel
+Next: wait for the full CI run 38964480632 on dev (7acb6e8, contains #1604); then round 1: download ui-screens and snapshots, run the critic panel
 
 Loop: v2 (no `## Slices` table in the packet), with the findings queue and
 the 2-round cap (started after #1302 merged at 2026-10-16T04:20Z).
