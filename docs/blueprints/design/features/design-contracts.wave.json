@@ -2,8 +2,8 @@
   "title": "The contracts: style schema, use cases, services with NotBuilt, fakes, live stubs, actions, fixtures",
   "wave": "0a",
   "order": 10,
-  "status": "planned",
-  "feature_issue": "file when ready",
+  "status": "built",
+  "feature_issue": "#1324",
   "covers": "the `DesignPage` init gap (filed by the lead); #532 (Model part, from PR #753)",
   "waits_on": "nothing (PR #753's Model half is its task D0-0)",
   "owned": [
