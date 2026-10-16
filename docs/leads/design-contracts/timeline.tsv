@@ -33,3 +33,4 @@ utc	stage	event	ref	note
 2026-10-16T15:46Z	4	pr-merged	#1410	feature-done
 2026-10-16T15:46Z	3	heartbeat	38923051520	design run red: same 3 #1391 journeys; waiting
 2026-10-16T16:14Z	3	heartbeat	38925966750	design run with #1410 red on the 3 #1391 journeys; told shell-parity #1325
+2026-10-16T16:41Z	3	heartbeat	38931490731	design run still red; waiting on #1391 fix
