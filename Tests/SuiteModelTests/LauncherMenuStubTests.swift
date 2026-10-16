@@ -1,11 +1,13 @@
 // LauncherMenuStubTests.swift: the launcher's menus (blueprint suite.md 6.2)
 // read as text, since SwiftUI doesn't build on Linux. Every item that is not
 // the system's appears exactly once, in the stub of the feature that will
-// build it, disabled with "Not connected yet (<feature>)." and with its 6.2
-// shortcut; AfterGlowApp.swift declares the three scenes and the command
-// groups. Settings… ⌘, is the Settings scene's own item (it opens the
+// build it, disabled with its not-connected reason and with its 6.2
+// shortcut, except the home's, which LauncherCommandsHome renders from
+// HomeMenu (HM-2c); AfterGlowApp.swift declares the three scenes and the
+// command groups. Settings… ⌘, is the Settings scene's own item (it opens the
 // placeholder), like About, Hide and Quit, so no stub declares it.
 import Foundation
+import SuiteModel
 import Testing
 
 private let commandFiles = [
@@ -25,10 +27,6 @@ private struct Item {
     var shortcut: String?
 }
 
-private func home(_ title: String, _ shortcut: String? = nil) -> Item {
-    Item(title: title, file: "LauncherCommands+Home.swift", feature: "home", shortcut: shortcut)
-}
-
 private func assets(_ title: String, _ shortcut: String? = nil) -> Item {
     Item(title: title, file: "LauncherCommands+Assets.swift", feature: "shared-assets", shortcut: shortcut)
 }
@@ -40,17 +38,21 @@ private func switching(_ title: String, _ digit: Int) -> Item {
 }
 
 private let items: [Item] = [
-    home("New Animation"), home("New Design"), home("New Image"), home("Import Photos…"),
-    home("New Composition"), home("Open…", ".keyboardShortcut(\"o\")"), home("Clear Menu"),
-    home("Remove from Recents"), home("Show Sidebar"),
-    home("Show Inspector", ".keyboardShortcut(\"i\", modifiers: [.option, .command])"),
-    home("Larger Thumbnails", ".keyboardShortcut(\"+\")"), home("Smaller Thumbnails", ".keyboardShortcut(\"-\")"),
     assets("Cut", ".keyboardShortcut(\"x\")"), assets("Copy", ".keyboardShortcut(\"c\")"),
     assets("Add from Clipboard", ".keyboardShortcut(\"v\")"), assets("Select All", ".keyboardShortcut(\"a\")"),
     assets("Assets", ".keyboardShortcut(\"a\", modifiers: [.option, .command])"),
     Item(title: "Check for Updates…", file: "LauncherCommands+Update.swift", feature: "updater"),
     switching("Home", 0), switching("Flare", 1), switching("Design", 2), switching("Photo", 3),
     switching("Library", 4), switching("Halo", 5),
+]
+
+private let homeFile = "Sources/AfterGlowApp/LauncherCommands+Home.swift"
+
+/// Each HomeMenu item LauncherCommandsHome renders, and the 6.2 shortcut that must follow it.
+private let homeFields: [(String, String?)] = [
+    ("open", ".keyboardShortcut(\"o\")"), ("clearMenu", nil), ("undo", nil), ("delete", nil), ("showSidebar", nil),
+    ("showInspector", ".keyboardShortcut(\"i\", modifiers: [.option, .command])"),
+    ("larger", ".keyboardShortcut(\"+\")"), ("smaller", ".keyboardShortcut(\"-\")"),
 ]
 
 /// The submenus, each declared once in its file.
@@ -108,8 +110,31 @@ private func occurrences(of needle: String, in text: String) -> Int {
         }
     }
 
+    @Test func homeItemsComeFromHomeMenu() throws {
+        let text = try source(homeFile)
+        #expect(text.contains("@FocusedValue(\\.homeModel)") && text.contains("HomeMenu.make("))
+        #expect(!text.contains("notConnected(") && !text.contains(".disabled(true)"))
+        // Each item renders once, with its 6.2 shortcut.
+        let statements = text.components(separatedBy: "HomeMenuItem(item: menu.").dropFirst()
+        for (field, shortcut) in homeFields {
+            let found = statements.filter { $0.hasPrefix(field + ")") }
+            #expect(found.count == 1, "menu.\(field) renders \(found.count) times")
+            if let shortcut { #expect(found.first?.contains(shortcut) == true, "menu.\(field) lacks \(shortcut)") }
+        }
+        #expect(text.contains("ForEach(menu.new,") && text.contains("ForEach(menu.recents,"))
+        // The one Button: disabled, with its reason as help, whenever it can't act.
+        let button = try #require(buttons(text).first)
+        #expect(buttons(text).count == 1 && button.contains(".disabled(!item.isEnabled).help(item.reason"))
+        let menu = HomeMenu.make(recents: RecentsList(), selection: nil, thumbnailStep: 1, page: .home, hasWindow: true)
+        let titles = menu.new.map(\.item.title) + [menu.open, menu.clearMenu, menu.delete, menu.showSidebar,
+                                                  menu.showInspector, menu.larger, menu.smaller].map(\.title)
+        #expect(titles == ["New Animation", "New Design", "New Image", "Import Photos…", "New Composition", "Open…",
+                           "Clear Menu", "Remove from Recents", "Show Sidebar", "Show Inspector",
+                           "Larger Thumbnails", "Smaller Thumbnails"])
+    }
+
     @Test func noItemEnabledWithoutAReason() throws {
-        for file in commandFiles {
+        for file in commandFiles where file != homeFile {
             for statement in try buttons(source(file)) {
                 #expect(statement.contains(".disabled(true)") && statement.contains("notConnected(\""), "\(file): \(statement)")
             }
