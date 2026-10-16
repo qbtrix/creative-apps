@@ -4,7 +4,9 @@
 // 10 pt glyphs they were about 15 × 16 pt each (Anatomy round 3,
 // halo-transport-playing-light.png); design.md wants hit targets of at
 // least 28 pt and never under 20. Laid out unconstrained, the row must be
-// at least pillHit tall and six pillHit squares plus their gaps wide.
+// at least pillHit tall and six pillHit squares wide, and no wider: the
+// squares sit edge to edge (#1264) so the status bar still fits the content
+// column with the timecode and layer count at the 1000 pt window.
 // The journeys check each halo.transport.* frame in the live window.
 // macOS only.
 import AppKit
@@ -33,9 +35,10 @@ import Testing
 
     @Test func eachControlTakesAPillHitSquare() throws {
         let taken = size(try project())
-        let minWidth = Self.controls * SuiteSize.pillHit + (Self.controls - 1) * SuiteSpacing.xs
+        let squares = Self.controls * SuiteSize.pillHit
         #expect(taken.height >= SuiteSize.pillHit - 0.5, "the transport row is \(taken.height) pt tall")
-        #expect(taken.width >= minWidth - 0.5, "the transport row is \(taken.width) pt wide, under \(minWidth)")
+        #expect(taken.width >= squares - 0.5, "the transport row is \(taken.width) pt wide, under \(squares)")
+        #expect(taken.width <= squares + 0.5, "the transport row is \(taken.width) pt wide, over \(squares): gaps crept back")
     }
 
     @Test func playingKeepsThePillHitSquares() throws {
