@@ -32,8 +32,8 @@
     "UITests/PhotoJourneyTests+LayerOps.swift"
   ],
   "journeys": [
-    "PhotoJourneyTests.testCopyPasteAsNewLayer",
-    "PhotoJourneyTests.testDuplicateMergeAndFlatten",
-    "PhotoJourneyTests.testPasteFromAnotherApp"
+    "PhotoEditJourneyTests.testCopyPasteAsNewLayer",
+    "PhotoLayerOpsJourneyTests.testDuplicateMergeAndFlatten",
+    "PhotoEditJourneyTests.testPasteFromAnotherApp"
   ]
 }

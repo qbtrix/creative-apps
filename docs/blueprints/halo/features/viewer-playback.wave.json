@@ -47,9 +47,9 @@
   "note": "H-J2, H-J3 (extends the shipped scrub journey), H-J4; HB-2, HB-5, HB-11; HF-1, HF-2.",
   "journeys": [
     "HaloJourneyTests.testEveryMenuOpens",
-    "HaloJourneyTests.testLayersDrawAtThePlayhead",
+    "HaloViewerJourneyTests.testLayersDrawAtThePlayhead",
     "HaloJourneyTests.testLayoutAtWidths",
-    "HaloJourneyTests.testPlayPauseLoopAndStep",
+    "HaloPlaybackJourneyTests.testPlayPauseLoopAndStep",
     "HaloJourneyTests.testScrubTheTimeline"
   ]
 }

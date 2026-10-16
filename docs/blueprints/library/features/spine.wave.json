@@ -64,9 +64,9 @@
   "suiteui": "none for its own work; the cell values it declares are shown once S-L2 lands (a hard wait for journey steps that read them); #333 for its own journey file (until then it edits LibraryJourneyTests.swift)",
   "depends": [],
   "journeys": [
-    "LibraryJourneyTests.testEveryControlActsOrSaysWhy",
+    "LibraryShellJourneyTests.testEveryControlActsOrSaysWhy",
     "LibraryJourneyTests.testEveryMenuOpens",
-    "LibraryJourneyTests.testLaunchShowsEmptyCatalog",
+    "LibraryShellJourneyTests.testLaunchShowsEmptyCatalog",
     "LibraryJourneyTests.testLaunchShowsWindowShell",
     "LibraryJourneyTests.testLoadSamplePhotos",
     "LibraryJourneyTests.testLoupeStepsAndReturnsToTheGrid",

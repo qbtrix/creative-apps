@@ -40,11 +40,11 @@
     "UITests/PhotoJourneyTests+PerfDocuments.swift"
   ],
   "journeys": [
-    "PhotoJourneyTests.testFailedSaveSaysNotSaved",
-    "PhotoJourneyTests.testOpenBadDocuments",
-    "PhotoJourneyTests.testOpenLargeDocument",
-    "PhotoJourneyTests.testRestoreAfterCrash",
-    "PhotoJourneyTests.testSaveLayeredDocumentAndReopen",
-    "PhotoJourneyTests.testUnsavedPromptAndOpenRecent"
+    "PhotoDocumentsJourneyTests.testFailedSaveSaysNotSaved",
+    "PhotoDocumentsJourneyTests.testOpenBadDocuments",
+    "PhotoPerfDocumentsJourneyTests.testOpenLargeDocument",
+    "PhotoRecoveryJourneyTests.testRestoreAfterCrash",
+    "PhotoDocumentsJourneyTests.testSaveLayeredDocumentAndReopen",
+    "PhotoDocumentsJourneyTests.testUnsavedPromptAndOpenRecent"
   ]
 }

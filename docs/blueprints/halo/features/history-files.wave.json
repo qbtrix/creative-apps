@@ -41,8 +41,8 @@
   "note": "H-J8, H-J10, H-J11; HB-8, HB-10; HF-6. Closes the gap #127 left (undo of Delete Composition).",
   "journeys": [
     "HaloJourneyTests.testEveryMenuOpens",
-    "HaloJourneyTests.testOpenBadFiles",
-    "HaloJourneyTests.testSaveAndReopen",
-    "HaloJourneyTests.testUndoRedoEveryEdit"
+    "HaloFileErrorsJourneyTests.testOpenBadFiles",
+    "HaloFilesJourneyTests.testSaveAndReopen",
+    "HaloHistoryJourneyTests.testUndoRedoEveryEdit"
   ]
 }

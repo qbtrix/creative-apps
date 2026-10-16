@@ -29,7 +29,7 @@
   "note": "H-J9.",
   "journeys": [
     "HaloJourneyTests.testEveryMenuOpens",
-    "HaloJourneyTests.testLayerHousekeeping",
+    "HaloLayersJourneyTests.testLayerHousekeeping",
     "HaloJourneyTests.testLayoutAtWidths"
   ]
 }

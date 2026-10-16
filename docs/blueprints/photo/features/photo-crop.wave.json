@@ -26,8 +26,8 @@
     "UITests/PhotoJourneyTests+Perf.swift"
   ],
   "journeys": [
-    "PhotoJourneyTests.testCanvasDragLatency",
-    "PhotoJourneyTests.testSliderScrubLatency",
-    "PhotoJourneyTests.testTypedCropSizeAndAspect"
+    "PhotoPerfJourneyTests.testCanvasDragLatency",
+    "PhotoPerfJourneyTests.testSliderScrubLatency",
+    "PhotoCropJourneyTests.testTypedCropSizeAndAspect"
   ]
 }

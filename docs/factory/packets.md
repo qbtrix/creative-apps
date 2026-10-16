@@ -39,16 +39,21 @@ chain or conflict through them:
     generated file: own the C4 part or the `.wave.json` instead.
   - `journeys` lists each XCUITest that proves the feature as
     `<Class>.<testMethod>` (`HaloJourneyTests.testRenderFrame`), the names
-    the packet's Journey steps give. A feature with no XCUITest (Model
-    only, no packet yet) leaves it empty and says why in `journeys_none`.
+    the packet's Journey steps give. `<Class>` is the class that declares
+    the test: a `UITests/<App>JourneyTests+<Area>.swift` file has its own
+    (`HaloFilesJourneyTests.testSaveAndReopen`). A feature with no XCUITest
+    (Model only, no packet yet) leaves it empty and says why in
+    `journeys_none`. A slice's `journeys` are the packet's journey ids
+    (`J12`, `MJ5`), not class names.
   - A task that adds or renames an owned file or a journey updates the
     `.wave.json` in the same PR, like its C4 part.
 
 No task ever edits `docs/c4/model.json` or a `waves.md`: the lane refuses
 them, and on `dev` the Generated workflow rewrites both from their parts.
 `scripts/ci` fails when the parts don't assemble or a feature's data breaks
-the wave checks (no `owned` or `journeys`, two features of one wave owning a
-file, a dependency in the same or a later wave, an owned generated file).
+the wave checks (no `owned` or `journeys`, two features of one wave or two
+slices that can run at once owning a file, a dependency in the same or a
+later wave, an owned generated file).
 
 ## The shape
 
