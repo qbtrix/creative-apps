@@ -2,9 +2,9 @@
 
 Issue: #1332 · Packet: docs/blueprints/suite/features/suite-contracts.md
 Run: act-1a1448a5fd9-0he1 · Session: claude/suite-contracts-lead-rv72k4 · Started: 2026-10-16T11:49Z
-Stage: 3 wave 6
-Base: e0abe75529c37eacd56015d799d17b0bcc8fdb2f
-Next: wait for the lane to merge #1396 (SC-3b), #1397 (SC-3c), #1399 (SC-5a), then start wave 7 (SC-4b, SC-4c)
+Stage: 3 wave 7
+Base: 77c504c8d4c3f13068da5120fc76dace6831210c
+Next: wave 7 builders running (SC-4b, SC-4c); wait for their PRs to merge, then start wave 8 (SC-5b)
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -17,11 +17,11 @@ Next: wait for the lane to merge #1396 (SC-3b), #1397 (SC-3c), #1399 (SC-5a), th
 | SC-2a | 4 | nine tier-1 contracts (#824) | Contracts/{AppSwitching,RecentWork,DocumentCreating,DocumentRouting,HandOffSending,HandOffReceiving,ThumbnailPublishing,HomeBuilding,SuiteDocumentHost}.swift, ContractShapeTests | ContractShapeTests | #1371 | merged |
 | SC-2b | 4 | other nine contracts (#825) | Contracts/{RoundTripEditing,PasteboardCoding,AssetLibrary,AssetLinking,AnimationSourceReading,PreferencesStoring,SettingsRouting,OnboardingFlowing,UpdateChecking}.swift, ContractShapeMoreTests | ContractShapeMoreTests | #1370 | merged |
 | SC-3a | 5 | `ChangeFeed` and tier-1 fakes (#826) | Fakes/{ChangeFeed,FakeSwitching,FakeRecents,FakeCreating,FakeRouting,FakeHandOffs,FakeThumbnails,FakeHome,FakeDocumentHost}.swift, FakesTier1Tests | FakesTier1Tests | #1390 | merged |
-| SC-3b | 6 | round-trip, pasteboard, asset, link fakes (#827) | Fakes/{FakeRoundTrips,FakePasteboard,FakeAssets,FakeLinking}.swift, FakesExchangeTests | FakesExchangeTests | #1396 | open |
-| SC-3c | 6 | animation, prefs, settings, onboarding, update fakes; `SuiteFixtures` (#828) | Fakes/{FakeAnimationSource,FakePreferences,FakeSettingsRoute,FakeOnboarding,FakeUpdates,SuiteFixtures}.swift, FakesSettingsTests, SuiteFixturesTests | FakesSettingsTests, SuiteFixturesTests | #1397 | open |
-| SC-5a | 6 | `StoreRecents` (#832) | Recents/StoreRecents.swift, StoreRecentsTests | StoreRecentsTests | #1399 | open |
-| SC-4b | 7 | `SuiteServices`, budget helper, QB-SM6, QB-SV8, Model journey (#830) | SuiteServices.swift, SuiteServicesTests, Budget, Budget+Store, StoreRoundTripTests, SuiteContractsJourneyTests | those | | planned |
-| SC-4c | 7 | `FixtureSeeder` (#831) | Store/FixtureSeeder.swift, FixtureSeederTests | FixtureSeederTests | | planned |
+| SC-3b | 6 | round-trip, pasteboard, asset, link fakes (#827) | Fakes/{FakeRoundTrips,FakePasteboard,FakeAssets,FakeLinking}.swift, FakesExchangeTests | FakesExchangeTests | #1396 | merged |
+| SC-3c | 6 | animation, prefs, settings, onboarding, update fakes; `SuiteFixtures` (#828) | Fakes/{FakeAnimationSource,FakePreferences,FakeSettingsRoute,FakeOnboarding,FakeUpdates,SuiteFixtures}.swift, FakesSettingsTests, SuiteFixturesTests | FakesSettingsTests, SuiteFixturesTests | #1397 | merged |
+| SC-5a | 6 | `StoreRecents` (#832) | Recents/StoreRecents.swift, StoreRecentsTests | StoreRecentsTests | #1399 | merged |
+| SC-4b | 7 | `SuiteServices`, budget helper, QB-SM6, QB-SV8, Model journey (#830) | SuiteServices.swift, SuiteServicesTests, Budget, Budget+Store, StoreRoundTripTests, SuiteContractsJourneyTests | those | | building |
+| SC-4c | 7 | `FixtureSeeder` (#831) | Store/FixtureSeeder.swift, FixtureSeederTests | FixtureSeederTests | | building |
 | SC-5b | 8 | `SlotContext`, `SuiteServices.live`, first seven slots (#833) | Sources/SuiteShell/SuiteServices+Live.swift, Live/{Switching,Recents,Creating,Routing,HandOff,Thumbnails,Home}Slot.swift, Tests/AppSnapshotTests/SuiteLiveServicesTests.swift | SuiteLiveServicesTests (macOS) | | planned |
 | SC-5c | 9 | other seven slots; `feature-done` (#834) | SuiteServices+Live.swift, Live/{RoundTrip,Pasteboard,Assets,Linking,Preferences,Settings,Onboarding}Slot.swift, SuiteLiveServicesTests | SuiteLiveServicesTests (macOS) | | planned |
 

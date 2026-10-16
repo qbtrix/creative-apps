@@ -26,3 +26,5 @@ utc	stage	event	ref	note
 2026-10-16T14:21Z	3	stage-start	wave 6	SC-3b SC-3c SC-5a on e0abe75
 2026-10-16T14:41Z	3	heartbeat	wave 6	#1396 SC-3b, #1397 SC-3c open; SC-5a building
 2026-10-16T14:45Z	3	pr-opened	#1396 #1397 #1399	SC-3b SC-3c SC-5a
+2026-10-16T15:00Z	3	pr-merged	#1396 #1397 #1399	wave 6 merged
+2026-10-16T15:02Z	3	stage-start	wave 7	SC-4b SC-4c on 77c504c
