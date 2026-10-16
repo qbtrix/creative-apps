@@ -50,7 +50,7 @@ const FIXED = {
   properties: {
     pr: { type: 'integer', description: 'PR number, 0 if none was opened' },
     head: { type: 'string' },
-    ciPass: { type: 'boolean', description: 'scripts/ci printed CI: PASS on that head' },
+    ciPass: { type: 'boolean', description: 'scripts/ci --changed printed CI: PASS on that head' },
     fixed: { type: 'array', items: { type: 'string' }, description: 'each finding fixed: its "what", or #<n> for a finding issue' },
     notes: { type: 'string', description: 'findings not fixed and why' },
   },
@@ -83,8 +83,8 @@ For each finding: write the test that fails before the fix, then the smallest fi
 geometric test (frames inside the window, no overlap, minimum sizes). A visible fix extends the snapshot or
 the UITests/<X>JourneyTests.swift step that shows it. Keep to line:${args.app} and the files above.
 
-Full harness before you hand back: scripts/ci until CI: PASS, then git fetch origin && git rebase origin/dev,
-scripts/ci again until CI: PASS, then push and open ONE PR: base dev, label fast-lane${args.featureDone ? ' and feature-done' : ''},
+Full harness before you hand back: scripts/ci --changed until CI: PASS, then git fetch origin && git rebase origin/dev,
+scripts/ci --changed again until CI: PASS, then push and open ONE PR: base dev, label fast-lane${args.featureDone ? ' and feature-done' : ''},
 at most 400 lines and 15 files, Conventional Commits title, body saying what each fix is and which test proves it,
 ${closes}listing the snapshot PNGs it changes, and ending with:
 Belt-Lead: ${args.runId}

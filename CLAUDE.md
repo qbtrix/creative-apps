@@ -85,11 +85,20 @@ X is Flare, Design, Photo, Library or Halo. Each app is one **line** (label
 3. **Implement with tests.** Model behavior gets a Swift Testing test first. A
    view change gets its state into a snapshot in `AppSnapshotTests` if no
    existing snapshot shows it.
-4. **Gate.** Run `scripts/ci`. It must print `CI: PASS`. On Linux it covers
-   the Model targets and the lints; the macOS job on `dev` catches the rest.
+4. **Gate.** Run `scripts/ci --changed`. It must print `CI: PASS`. It runs
+   every lint and builds every target (a shared change can break any app),
+   then runs only the tests of the targets your branch touched since
+   `origin/dev`: `Sources/<X>Model` runs `<X>ModelTests`, `Sources/<X>App`
+   that app's `AppSnapshotTests` suites, `SuiteUI` `SuiteUITests`,
+   `SuiteModel` every Model's tests, and `Package.swift` all of them
+   (`scripts/test-scope` holds the table). Plain `scripts/ci` is the full
+   gate CI runs. Neither runs the perf and timing tests in
+   `Tests/perf-suites.txt`: the `macOS` job's Perf step reports those and
+   never fails. On Linux it covers the Model targets and the lints; the
+   macOS job on `dev` catches the rest.
    It is your whole check: no CI runs on your PR, and you never start CI
    yourself for routine work (no `gh workflow run`).
-5. **Ship.** `git fetch origin && git rebase origin/dev`, rerun `scripts/ci`
+5. **Ship.** `git fetch origin && git rebase origin/dev`, rerun `scripts/ci --changed`
    (it must print `CI: PASS` again), push, then open ONE small PR to `dev`
    with `Closes #<n>`, the `fast-lane` label, the snapshot PNGs your change
    touches, and these two lines at the end of the body for the head you
@@ -98,12 +107,12 @@ X is Flare, Design, Photo, Library or Halo. Each app is one **line** (label
    Fast-Check: pass
    Head: <full sha from git rev-parse HEAD>
    ```
-   After every later push, rerun `scripts/ci` and update the `Head:` line to
+   After every later push, rerun `scripts/ci --changed` and update the `Head:` line to
    the new head; the lane ignores a marker for an older head. Then stop.
    ```bash
    # body.md: what and why, Closes #<n>, the PNGs, then the two lines for $(git rev-parse HEAD)
    gh pr create --base dev --label fast-lane --title "<type(scope): what>" --body-file body.md
-   # after a later push, once scripts/ci passed on it: move the marker to the new head
+   # after a later push, once scripts/ci --changed passed on it: move the marker to the new head
    gh pr view <n> --json body --jq .body | sed "s/^Head: .*/Head: $(git rev-parse HEAD)/" >body.md
    gh pr edit <n> --body-file body.md
    ```
@@ -218,7 +227,7 @@ something. One that can't act yet is disabled and says why:
 
 - Keep to your line and your issue's files. Prefer a new file over appending to
   a shared one.
-- Rebase on `origin/dev` before opening the PR, and rerun `scripts/ci` after.
+- Rebase on `origin/dev` before opening the PR, and rerun `scripts/ci --changed` after.
 - If `scripts/ci` fails on `origin/dev` itself because of someone else's merge
   (look for the open `dev-red` issue), do not fix it in your PR. Comment on
   your issue with the failing test name and stop.
@@ -228,7 +237,8 @@ something. One that can't act yet is disabled and says why:
   `docs/blueprints/*/features/waves.md` at all: edit your component's part in
   docs/c4/parts/ or your feature's .wave.json, and the generated workflow
   rewrites them on dev. Only the supervisor edits the journey quarantine,
-  `UITests/quarantine.json`.
+  `UITests/quarantine.json`, and the perf list the gate skips,
+  `Tests/perf-suites.txt`.
   `scripts/` means all of it, the gate included. Every target already exists.
   If you think one of these must change, say so in an issue. The fast lane
   refuses exactly this list (PROTECTED in scripts/fast-lane.sh; its tests
@@ -342,6 +352,8 @@ Crew PRs merge into `dev` at once; `main` moves only when full CI passes on
 scripts/ci                                   # lint + app-state rule + design lint + C4 ownership + jscpd + mutation anchors + build + test: the gate
 scripts/mutate --plan DesignModel.LiveMarquee # plant each bug in that plan (Tests/mutations/) and require a test to fail; prints the score
 scripts/mutate --validate                    # every plan's `find` occurs exactly once (no build; scripts/ci runs it)
+scripts/ci --changed [base]                  # the same lints and build, then only the touched targets' tests (base: origin/dev)
+swift test --filter "$(scripts/test-scope perf photo)" --no-parallel   # Photo's perf and timing tests, which the gate skips
 swift test --filter FlareModelTests          # one suite while iterating
 bash Tests/fast_lane/test_fast_lane.sh       # fast-lane decision tests (needs jq)
 bash Tests/audit_lower/test_audit_lower.sh   # decision tests for scripts/audit-lower, CI's baseline lowering (needs jq)

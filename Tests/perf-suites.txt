@@ -1,0 +1,51 @@
+# Tests/perf-suites.txt: the perf and timing tests, kept out of the merge gate.
+# A test belongs here when it asserts a wall-clock or allocation budget, so a
+# busy machine can fail it while the code is fine. scripts/ci (Linux and
+# macOS, full and --changed) and CI's scoped runs skip exactly these; the
+# macOS job's Perf step runs exactly these, one at a time, on every full run
+# (a scoped run: its app's), and reports what they measured. That step never
+# fails the run: a test that missed a bound by more than 3x gets a warning
+# (FLAG in scripts/test-scope).
+#
+# One test per line: <app> <id>. app is the scope that measures it (flare,
+# design, photo, library, halo, suite, suiteui). id is Target.Suite (every
+# test in it), Target.Suite/test (one test, when the rest of the suite times
+# nothing) or Target.freeTest. Tests/test_scope checks each id exists. Only
+# the supervisor edits this file.
+
+photo PhotoModelTests.PhotoBudgetTests
+photo PhotoModelTests.PhotoBrushCopyCostTests
+photo PhotoModelTests.PhotoCompositeCostTests/aLayerCostsAboutOnePictureCopyNotOnePerTile
+photo PhotoModelTests.PhotoCropBudgetTests
+photo PhotoModelTests.PhotoDocumentsBudgetTests
+photo PhotoModelTests.PhotoEditBudgetTests
+photo AppSnapshotTests.PhotoBrushDisplayTests
+photo AppSnapshotTests.PhotoBrushInkLatencyTests
+photo AppSnapshotTests.PhotoBrushLatencyTests
+photo AppSnapshotTests.PhotoStrokePacerTests/theFirstSampleAppliesAtOnceAndQuickOnesWaitTogetherInOrder
+
+halo HaloModelTests.HaloFilesBudgetTests/openCrowd
+halo HaloModelTests.HaloFilesBudgetTests/saveCrowd
+halo HaloModelTests.HaloFoundationBudgetTests
+halo HaloModelTests.HaloHistoryBudgetTests
+halo HaloModelTests.HaloKeysBudgetTests
+halo HaloModelTests.HaloLayerEditsBudgetTests
+halo HaloModelTests.HaloTimelineCostTests
+halo HaloModelTests.HaloViewerBudgetTests
+
+flare FlareModelTests.FlareEasingDragCostTests
+flare FlareModelTests.LiveKeysBudgetTests
+flare FlareModelTests.aDirectSelectMoveStaysWithinTheEditBudget
+flare FlareModelTests.coalescedDragStepP95UnderBudget
+flare FlareModelTests.dragStepWithinBudget
+flare FlareModelTests.drawListWithinBudget
+flare FlareModelTests.editsAndPreviewStepsStayWithinTheirModelBudgets
+flare FlareModelTests.hitWithinBudget
+flare FlareModelTests.machineEditsAndPreviewTicksStayWithinTheirModelBudgets
+flare FlareModelTests.nestedDrawListWithinBudget
+
+library LibraryModelTests.oneEditOnSixtyPhotosStaysInBudget
+library LibraryModelTests.orderRebuildWithinBudget
+
+suiteui SuiteUITests.FrameProbeTests/summaryWithinBudget
+suiteui AppSnapshotTests.GoldenImageTests/compareWithinBudget
