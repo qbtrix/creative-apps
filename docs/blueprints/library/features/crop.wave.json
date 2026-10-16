@@ -3,37 +3,180 @@
   "wave": 4,
   "order": 10,
   "status": "planned",
-  "feature_issue": "later (packet after wave 2 lands)",
+  "feature_issue": "file when ready",
   "covers": "#425",
-  "waits_on": "develop",
+  "waits_on": "develop; slice CR-a first (contract); CR-5 and CR-6 wait on the spine follow-up (LibraryMenu.Photo.crop merged by the window) and develop's inspector follow-up; P5 (CR-8) waits on #782; CR-10 waits on a creative-core issue to file (horizon angle) and its bump",
   "issues": [
     425
   ],
   "owned": [
     "Sources/LibraryModel/LibraryCrop.swift",
+    "Sources/LibraryModel/LibraryLoupeImage.swift",
+    "Tests/LibraryModelTests/LibraryCropTests.swift",
+    "Tests/mutations/LibraryModel.LibraryCrop.json",
+    "Tests/mutations/LibraryModel.LibraryLoupeImage.json",
+    "Sources/LibraryModel/Contracts/CropLeveling.swift",
+    "Sources/LibraryModel/Fakes/FakeCropLeveling.swift",
+    "Tests/LibraryModelTests/LibraryCropLevelingTests.swift",
+    "Tests/mutations/LibraryModel.FakeCropLeveling.json",
+    "Tests/LibraryModelTests/LibraryLiveCropTests.swift",
+    "Tests/LibraryModelTests/LibraryCropRenderTests.swift",
+    "Tests/LibraryModelTests/LibraryCropBudgetTests.swift",
     "Sources/LibraryModel/Live/LiveCrop.swift",
     "Sources/LibraryModel/Live/LiveDevelop.swift",
-    "Sources/LibraryApp/LibraryCropOverlay.swift",
+    "Tests/mutations/LibraryModel.LiveCrop.json",
+    "Tests/mutations/LibraryModel.LiveDevelop.json",
     "Sources/LibraryApp/LibraryWindow+Crop.swift",
-    "Tests/LibraryModelTests/LibraryCropTests.swift",
-    "Tests/AppSnapshotTests/LibraryCropSnapshots.swift",
+    "Sources/LibraryApp/DevelopInspector.swift",
     "UITests/LibraryJourneyTests+Crop.swift",
+    "Sources/LibraryApp/LibraryCropOverlay.swift",
+    "Sources/LibraryApp/CropInspector.swift",
+    "Sources/LibraryApp/LibraryLoupe.swift",
+    "Tests/AppSnapshotTests/LibraryCropSnapshots.swift",
     "UITests/LibraryJourneyTests+PerfCrop.swift",
-    "Tests/LibraryModelTests/LibraryCropBudgetTests.swift",
-    "Sources/LibraryApp/CropInspector.swift"
+    "Tests/LibraryModelTests/LibraryCropLevelTests.swift"
   ],
-  "core": "none (creative-core#230 closed by #251)",
-  "suiteui": "S-L3 CropHandles; #330, #333",
+  "core": "new, to file: CoreRaster PixelBuffer.horizonAngle(maxDegrees:) for Auto (CR-10 only); conditional: rotated(degrees:filter:) split across tasks if the cropped render misses its release budget (creative-core#230 closed by #251 gives rotate and straightenCrop)",
+  "suiteui": "S-L3 CropHandles (unfiled: the lead files it; plain handles until it lands); #782 for P5; #330, #333 closed",
   "depends": [
     "develop"
   ],
-  "journeys": [],
-  "notes": "Edits LiveDevelop.swift (crop after tone), which develop owned in wave 3.",
+  "journeys": [
+    "LibraryJourneyTests.testCropAndStraighten",
+    "LibraryJourneyTests.testCropDragLatency"
+  ],
+  "notes": "Takes LiveDevelop.swift and one line of DevelopInspector.swift from develop (crop after tone; CropInspector gets menu.photo.crop), two lines of loupe-viewport's LibraryLoupeImage.swift (the loupe renders the whole straightened photo while cropping; a focus change closes the draft) and the overlay and artboard lines of LibraryLoupe.swift. The Auto slot is its own protocol (Contracts/CropLeveling.swift, Fakes/FakeCropLeveling.swift) because LibraryContracts.swift is also raw's. The window's one merge line is a spine follow-up, since LibraryWindow.swift is also filters-collections' and metadata-more's. Export's QB-V4 task waits on crop:CR-b. CR-e may close with gaps if core's detector hasn't shipped.",
   "quality": "QB-L1, QB-LIB-V4, QB-F3, QB-F4",
   "library_title": "Crop and straighten in the loupe, applied in render, thumbnail and export",
   "journey_ids": [
     "J6",
     "P5"
   ],
-  "journeys_none": "no packet yet: the blueprint names its journeys by id (J6, P5) but no XCUITest method"
+  "slices": [
+    {
+      "id": "CR-a",
+      "behavior": "On the fakes, R opens a crop draft on the loupe photo, chips, drags and a typed angle reshape it, Return stores it as one \"Crop\" step, and Cancel, drags and leaving the photo record nothing.",
+      "tasks": [
+        "CR-1",
+        "CR-2"
+      ],
+      "journeys": [
+        "MJ6"
+      ],
+      "owned": [
+        "Sources/LibraryModel/LibraryCrop.swift",
+        "Sources/LibraryModel/LibraryLoupeImage.swift",
+        "Tests/LibraryModelTests/LibraryCropTests.swift",
+        "Tests/mutations/LibraryModel.LibraryCrop.json",
+        "Tests/mutations/LibraryModel.LibraryLoupeImage.json",
+        "Sources/LibraryModel/Contracts/CropLeveling.swift",
+        "Sources/LibraryModel/Fakes/FakeCropLeveling.swift",
+        "Tests/LibraryModelTests/LibraryCropLevelingTests.swift",
+        "Tests/mutations/LibraryModel.FakeCropLeveling.json"
+      ],
+      "waits": {}
+    },
+    {
+      "id": "CR-b",
+      "behavior": "On real pixels the frame stays inside the straightened photo, and the loupe, thumbnails and export get the turned and cropped picture.",
+      "tasks": [
+        "CR-3",
+        "CR-4"
+      ],
+      "journeys": [
+        "MJ6L"
+      ],
+      "owned": [
+        "Tests/LibraryModelTests/LibraryLiveCropTests.swift",
+        "Tests/LibraryModelTests/LibraryCropRenderTests.swift",
+        "Tests/LibraryModelTests/LibraryCropBudgetTests.swift",
+        "Sources/LibraryModel/Live/LiveCrop.swift",
+        "Sources/LibraryModel/Live/LiveDevelop.swift",
+        "Tests/mutations/LibraryModel.LiveCrop.json",
+        "Tests/mutations/LibraryModel.LiveDevelop.json"
+      ],
+      "waits": {
+        "CR-a": [
+          "CR-3",
+          "CR-4"
+        ]
+      }
+    },
+    {
+      "id": "CR-c",
+      "behavior": "In the loupe, Photo > Crop shows the frame with handles, the aspect chips, Straighten, Auto, Apply and Cancel, all reachable from the keyboard.",
+      "tasks": [
+        "CR-5",
+        "CR-6"
+      ],
+      "journeys": [
+        "J6"
+      ],
+      "owned": [
+        "Sources/LibraryApp/LibraryWindow+Crop.swift",
+        "Sources/LibraryApp/DevelopInspector.swift",
+        "UITests/LibraryJourneyTests+Crop.swift",
+        "Sources/LibraryApp/LibraryCropOverlay.swift",
+        "Sources/LibraryApp/CropInspector.swift",
+        "Sources/LibraryApp/LibraryLoupe.swift",
+        "Tests/AppSnapshotTests/LibraryCropSnapshots.swift"
+      ],
+      "waits": {
+        "CR-a": [
+          "CR-5",
+          "CR-6"
+        ]
+      }
+    },
+    {
+      "id": "CR-d",
+      "behavior": "On real files the 1:1 frame straightened 5 degrees is 3545 px and survives a relaunch, and a corner drag stays within its frame budget.",
+      "tasks": [
+        "CR-7",
+        "CR-8"
+      ],
+      "journeys": [
+        "J6",
+        "P5"
+      ],
+      "owned": [
+        "UITests/LibraryJourneyTests+Crop.swift",
+        "UITests/LibraryJourneyTests+PerfCrop.swift"
+      ],
+      "waits": {
+        "CR-b": [
+          "CR-7"
+        ],
+        "CR-c": [
+          "CR-7",
+          "CR-8"
+        ]
+      }
+    },
+    {
+      "id": "CR-e",
+      "behavior": "Auto levels a tilted horizon on a real photo.",
+      "tasks": [
+        "CR-9",
+        "CR-10"
+      ],
+      "journeys": [
+        "MJ6A"
+      ],
+      "owned": [
+        "Tests/LibraryModelTests/LibraryCropLevelTests.swift",
+        "Sources/LibraryModel/Live/LiveCrop.swift",
+        "Tests/mutations/LibraryModel.LiveCrop.json"
+      ],
+      "waits": {
+        "CR-a": [
+          "CR-9",
+          "CR-10"
+        ],
+        "CR-b": [
+          "CR-10"
+        ]
+      }
+    }
+  ]
 }

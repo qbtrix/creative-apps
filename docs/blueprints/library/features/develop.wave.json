@@ -3,41 +3,213 @@
   "wave": 3,
   "order": 10,
   "status": "planned",
-  "feature_issue": "later (packet after wave 2 lands)",
+  "feature_issue": "file when ready",
   "covers": "#32, #423",
-  "waits_on": "spine, loupe-viewport, thumbnails",
+  "waits_on": "spine, persist, thumbnails, loupe-viewport; the spine follow-up (inspector pass-through) for DV-9; a creative-core issue (vibrance, saturation) and its bump for DV-12; #782 for P3",
   "issues": [
     32,
     423
   ],
   "owned": [
+    "Sources/LibraryModel/Contracts/DevelopValues.swift",
+    "Sources/LibraryModel/LibraryThumbnails.swift",
+    "Sources/LibraryModel/Fakes/FakeRendering.swift",
+    "Tests/LibraryModelTests/LibraryDevelopValuesTests.swift",
+    "Tests/mutations/LibraryModel.DevelopValues.json",
+    "Tests/mutations/LibraryModel.LibraryThumbnails.json",
+    "Tests/mutations/LibraryModel.FakeRendering.json",
     "Sources/LibraryModel/LibraryDevelop.swift",
-    "Sources/LibraryModel/Live/LiveDevelop.swift",
-    "Sources/LibraryApp/DevelopInspector.swift",
-    "Sources/LibraryApp/LibraryWindow+Develop.swift",
     "Tests/LibraryModelTests/LibraryDevelopTests.swift",
+    "Tests/mutations/LibraryModel.LibraryDevelop.json",
+    "Sources/LibraryModel/Live/LiveDevelop.swift",
     "Tests/LibraryModelTests/LibraryDevelopRenderTests.swift",
-    "Tests/AppSnapshotTests/LibraryDevelopSnapshots.swift",
-    "Tests/AppSnapshotTests/LibraryDevelopRenderSnapshots.swift",
+    "Tests/LibraryModelTests/LibraryDevelopBudgetTests.swift",
+    "Tests/mutations/LibraryModel.LiveDevelop.json",
     "UITests/LibraryJourneyTests+Develop.swift",
+    "Sources/LibraryApp/LibraryMenus.swift",
+    "Sources/LibraryApp/LibraryWindow+Develop.swift",
+    "Sources/LibraryApp/LibraryWindow+Thumbnails.swift",
+    "Sources/LibraryApp/DevelopInspector.swift",
+    "Tests/AppSnapshotTests/LibraryDevelopSnapshots.swift",
+    "Tests/LibraryModelTests/LibraryDevelopColorTests.swift",
+    "Tests/AppSnapshotTests/LibraryDevelopRenderSnapshots.swift",
     "UITests/LibraryJourneyTests+PerfDevelop.swift",
-    "UITests/LibraryJourneyTests.swift",
-    "Tests/LibraryModelTests/LibraryDevelopBudgetTests.swift"
+    "docs/blueprints/library.md"
   ],
-  "core": "none (creative-core#231 closed by #246); a new core issue only if QB-LIB-6's model half misses: PixelBuffer.developed(temperature:tint:exposure:contrast:highlights:shadows:), one pass over storage, equal to the chained calls within 1e-6",
-  "suiteui": "S-L1 HistogramView; #330, #333",
+  "core": "to file: CoreRaster PixelBuffer.saturation(_:) and vibrance(_:) (DV-12 waits on it and its bump; packet header has the spec). Only if QB-LIB-6's Model half misses: the fused develop pass, now over every slider, the curve and levels. Whites, Blacks, Curve and Levels use the existing levels(...) and curves(...)",
+  "suiteui": "to file: S-L1 HistogramView, S-L6 InspectorSliderRow row reset (interim: a text readout and a row context menu); reuses ToneCurveEditor; #782 for P3",
   "depends": [
     "spine",
-    "loupe-viewport",
-    "thumbnails"
+    "persist",
+    "thumbnails",
+    "loupe-viewport"
   ],
-  "journeys": [],
-  "notes": "Owns LibraryJourneyTests.swift in its wave, for its journey steps if #333 has not merged.",
-  "quality": "QB-L2, QB-LIB-6, QB-LIB-V1, QB-LIB-V2, QB-LIB-V3, QB-F3",
+  "journeys": [
+    "LibraryDevelopJourneyTests.testDevelopSlidersAndHistogram",
+    "LibraryPerfDevelopJourneyTests.testDevelopSliderLatency"
+  ],
+  "notes": "v3 packet (Slices). Owns Contracts/DevelopValues.swift, Fakes/FakeRendering.swift and LibraryMenus.swift (spine's) the token line of LibraryThumbnails.swift and a refreshThumbnails() in LibraryWindow+Thumbnails.swift (thumbnails'), all reached through depends. Adds Whites, Blacks, Vibrance, Saturation, a tone curve and levels; Sync, Show Original and per-slider reset live in the Develop tab, so it adds no menu item or key. Needs a spine follow-up so DevelopInspector gets the catalog and LibraryMenu (DV-9). Persist's golden stays byte-equal: new fields are written only when off their default. #333 has merged, so it no longer owns LibraryJourneyTests.swift.",
+  "quality": "QB-L2, QB-LIB-6, QB-LIB-V1, QB-LIB-V2, QB-LIB-V3, QB-F1, QB-F3, QB-F4, QB-V5",
   "library_title": "Develop sliders, histogram, render to pixels in loupe and grid, copy and paste settings",
   "journey_ids": [
     "J5",
-    "P3"
+    "P3",
+    "MJ1",
+    "MJ2",
+    "MJ3",
+    "MJ4"
   ],
-  "journeys_none": "no packet yet: the blueprint names its journeys by id (J5, P3) but no XCUITest method"
+  "slices": [
+    {
+      "id": "DV-a",
+      "behavior": "A catalog written before the new controls opens with them neutral, and every new field survives a save, changes the thumbnail token and moves the fake loupe's picture.",
+      "tasks": [
+        "DV-1",
+        "DV-2"
+      ],
+      "journeys": [
+        "MJ1"
+      ],
+      "owned": [
+        "Sources/LibraryModel/Contracts/DevelopValues.swift",
+        "Sources/LibraryModel/LibraryThumbnails.swift",
+        "Sources/LibraryModel/Fakes/FakeRendering.swift",
+        "Tests/LibraryModelTests/LibraryDevelopValuesTests.swift",
+        "Tests/mutations/LibraryModel.DevelopValues.json",
+        "Tests/mutations/LibraryModel.LibraryThumbnails.json",
+        "Tests/mutations/LibraryModel.FakeRendering.json",
+        "Sources/LibraryModel/LibraryDevelop.swift",
+        "Tests/LibraryModelTests/LibraryDevelopTests.swift"
+      ]
+    },
+    {
+      "id": "DV-b",
+      "behavior": "Every slider, curve and levels edit, reset, copy, paste and sync acts on the right photos as one named undo step, and a drag drops the grid's stale thumbnails once, on release.",
+      "tasks": [
+        "DV-3",
+        "DV-4"
+      ],
+      "journeys": [
+        "MJ2"
+      ],
+      "owned": [
+        "Sources/LibraryModel/LibraryDevelop.swift",
+        "Tests/LibraryModelTests/LibraryDevelopTests.swift",
+        "Tests/mutations/LibraryModel.LibraryDevelop.json"
+      ],
+      "waits": {
+        "DV-a": [
+          "DV-3"
+        ]
+      }
+    },
+    {
+      "id": "DV-c",
+      "behavior": "The live renderer runs only the passes the settings need, in a fixed order, matches CoreRaster run by hand bit for bit, and draws the histogram of what it rendered.",
+      "tasks": [
+        "DV-5",
+        "DV-6"
+      ],
+      "journeys": [
+        "MJ3"
+      ],
+      "owned": [
+        "Sources/LibraryModel/Live/LiveDevelop.swift",
+        "Tests/LibraryModelTests/LibraryDevelopRenderTests.swift",
+        "Tests/LibraryModelTests/LibraryDevelopBudgetTests.swift",
+        "Tests/mutations/LibraryModel.LiveDevelop.json"
+      ],
+      "waits": {
+        "DV-a": [
+          "DV-5",
+          "DV-6"
+        ]
+      }
+    },
+    {
+      "id": "DV-d",
+      "behavior": "In the app, the Develop tab's rows, curve, levels, histogram, Show Original, resets, Copy, Paste and Sync work on the fakes, with the loupe following each drag.",
+      "tasks": [
+        "DV-7",
+        "DV-8",
+        "DV-9",
+        "DV-10"
+      ],
+      "journeys": [
+        "J5"
+      ],
+      "owned": [
+        "UITests/LibraryJourneyTests+Develop.swift",
+        "Sources/LibraryApp/LibraryMenus.swift",
+        "Sources/LibraryApp/LibraryWindow+Develop.swift",
+        "Sources/LibraryApp/LibraryWindow+Thumbnails.swift",
+        "Sources/LibraryApp/DevelopInspector.swift",
+        "Tests/AppSnapshotTests/LibraryDevelopSnapshots.swift"
+      ],
+      "waits": {
+        "DV-a": [
+          "DV-8",
+          "DV-9"
+        ],
+        "DV-b": [
+          "DV-10"
+        ]
+      }
+    },
+    {
+      "id": "DV-e",
+      "behavior": "Vibrance and Saturation render through CoreRaster on the live services, and a grey stays grey.",
+      "tasks": [
+        "DV-11",
+        "DV-12"
+      ],
+      "journeys": [
+        "MJ4"
+      ],
+      "owned": [
+        "Tests/LibraryModelTests/LibraryDevelopColorTests.swift",
+        "Sources/LibraryModel/Live/LiveDevelop.swift",
+        "Tests/LibraryModelTests/LibraryDevelopRenderTests.swift",
+        "Tests/mutations/LibraryModel.LiveDevelop.json"
+      ],
+      "waits": {
+        "DV-c": [
+          "DV-11",
+          "DV-12"
+        ]
+      }
+    },
+    {
+      "id": "DV-f",
+      "behavior": "On real files the developed picture survives a relaunch, the slider stays within its frame budget, and the blueprint says what shipped.",
+      "tasks": [
+        "DV-13",
+        "DV-14",
+        "DV-15"
+      ],
+      "journeys": [
+        "J5",
+        "P3"
+      ],
+      "owned": [
+        "UITests/LibraryJourneyTests+Develop.swift",
+        "Tests/AppSnapshotTests/LibraryDevelopRenderSnapshots.swift",
+        "UITests/LibraryJourneyTests+PerfDevelop.swift",
+        "docs/blueprints/library.md"
+      ],
+      "waits": {
+        "DV-d": [
+          "DV-13",
+          "DV-14"
+        ],
+        "DV-c": [
+          "DV-13",
+          "DV-14"
+        ],
+        "DV-e": [
+          "DV-15"
+        ]
+      }
+    }
+  ]
 }
