@@ -63,6 +63,9 @@ scoped macOS run that contains its last PR. Slices run most-used first.
 | TL-c | Keys are picked by click, Shift-click, Command-click and right-click, cleared by a click on the bed, stepped with ← and →, and read and picked by VoiceOver. | TL-10, TL-11, TL-12 | SJ19b | TL-a (TL-10); TL-b (TL-11) |
 | TL-d | Picked keys drag as one group with snapping to frames and the playhead, and a clip's ends trim by drag, each drag one step for the host. | TL-13, TL-14, TL-15 | SJ19c, SP8 | TL-a (TL-13); TL-c (TL-13, TL-14) |
 | TL-e | The strip zooms (⌘+, ⌘−, ⌘0, pinch, a zoom bar), scrolls sideways, switches frames and timecode, and shows a draggable work area on the ruler. | TL-16, TL-17, TL-18, TL-19 | SJ19d | TL-a (TL-16); TL-b (TL-17, TL-18, TL-19); TL-c, TL-d (TL-19) |
+| TL-f | Lane beds, clips, keys, tweens and the playhead band draw in one AppKit view with a `CALayer` per lane, and pick, key drag and trim run on that view, so a 120-sample drag runs 0 window bodies while SwiftUI keeps the toolbar, ruler layout, focus and VoiceOver tree. | TL-20, TL-21, TL-22, TL-23 | SJ19e | TL-b (TL-20, TL-21); TL-c (TL-23); TL-d (TL-22) |
+
+**Amendment 2026-10-17 (dual renderer, `paw-workspace/docs/design/drafts/2026-10-17-dual-renderer.md`, section 4).** TL-f is new; every earlier slice id and task id is unchanged. TL-b already has five tasks, so the AppKit lanes are their own slice that waits on TL-b (look rules, `TimelineLane.swift`) and TL-d (the last owner of `TimelineLaneInput.swift`). `feature-done` moves from TL-19 to TL-23, which also sets the feature's `status`; TL-19 keeps its other duties. A lead already running adds TL-f to its RECORD at the next check and never re-cuts TL-a to TL-e.
 
 TL-c to TL-e wait on TL-b because their lanes, ruler and strip edits land in
 files TL-b restyles (`TimelineLaneInput.swift`, `TimelineRuler.swift`,
@@ -372,6 +375,10 @@ this packet has no docs task. Paths drop `Sources/SuiteUI/`.
 | TL-17 | – | Zoom and sideways scroll: ⌘+ ⌘− ⌘0, pinch, the toolbar row with the zoom bar and Fit, follow during playback | `TimelineStrip.swift`, `TimelineToolbar.swift`, `Tests/SuiteUITests/TimelineToolbarTests.swift`, `Tests/mutations/SuiteUI.TimelineStrip.json`, `Tests/mutations/SuiteUI.TimelineToolbar.json` | TL-16, TL-7 | ~340, 5 |
 | TL-18 | – | Units and work area: the Frames/Timecode chips, ruler and pill text in the unit, the Work Area chip, the bar and its handles | `TimelineToolbar.swift`, `TimelineRuler.swift`, `Tests/SuiteUITests/TimelineRulerUnitTests.swift`, `Tests/mutations/SuiteUI.TimelineToolbar.json`, `Tests/mutations/SuiteUI.TimelineRuler.json` | TL-17, TL-8 | ~320, 5 |
 | TL-19 | – | Enables SJ19d; baselines `suiteui-timeline-toolbar` in the four appearances; the feature's `.wave.json` status; `feature-done` | `UITests/SuiteJourneyTests+TimelineNav.swift`, `Tests/AppSnapshotTests/Golden/timeline/` (4 PNGs) | TL-18, TL-15, TL-12, TL-9 | ~60, 6 |
+| TL-20 | – | Checks first, then the lane-layer rules: `TimelineLaneLayers` (which lanes redraw from an Equatable diff, layer frames per lane, a press routed to the existing classification); SJ19e skipped; the real-window lanes budget disabled | `TimelineLaneLayers.swift`, `Tests/SuiteUITests/TimelineLaneLayersTests.swift`, `Tests/mutations/SuiteUI.TimelineLaneLayers.json`, `UITests/SuiteJourneyTests+TimelineLanes.swift`, `Tests/AppSnapshotTests/SuiteTimelineLanesWindowTests.swift` | TL-6 | ~320, 5 |
+| TL-21 | – | `TimelineLanesView` (NSView, a `CALayer` per lane drawn with `TimelineLook` through CoreGraphics, redraw only changed lanes) and `TimelineLanes` (representable); `TimelineLane` becomes its host, same inputs | `TimelineLanesView.swift`, `TimelineLane.swift`, `Tests/SuiteUITests/TimelineLanesViewTests.swift`, `Tests/AppSnapshotTests/SuiteTimelineSnapshots.swift`, `Tests/mutations/SuiteUI.TimelineLane.json` | TL-20 | ~360, 5 |
+| TL-22 | #1458 (strip half) | Pointer input on the view: mouse down, drag and up route to `TimelineLaneInput`'s classification (key, clip end, playhead band, bed), so pick, key drag and trim run 0 bodies; enables the lanes budget | `TimelineLaneInput.swift`, `TimelineLanesView.swift`, `Tests/SuiteUITests/TimelineLanesInputTests.swift`, `Tests/mutations/SuiteUI.TimelineLaneInput.json`, `Tests/AppSnapshotTests/SuiteTimelineLanesWindowTests.swift` | TL-21, TL-15 | ~300, 5 |
+| TL-23 | – | Each key an accessibility child of the view, mirroring `TimelineLaneAccess`; enables SJ19e; lane baselines; `status: built`; `feature-done` | `TimelineLanesView+Access.swift`, `Tests/SuiteUITests/TimelineLanesAccessTests.swift`, `UITests/SuiteJourneyTests+TimelineLanes.swift`, `Tests/AppSnapshotTests/Golden/timeline-lanes/`, `timeline.wave.json` | TL-22, TL-12, TL-19 | ~220, 4 + PNGs |
 
 Inside the feature: `TimelineStrip.swift` passes TL-2 → TL-3 → TL-7 →
 TL-17, `TimelineLaneInput.swift` TL-2 → TL-6 → TL-11 → TL-14 → TL-15,
@@ -390,15 +397,19 @@ at once. TL-9 and TL-19 never hold the same PNG.
 - Wave 5: TL-8, TL-11. Independent in this wave: both.
 - Wave 6: TL-9, TL-12, TL-14, TL-18. Independent in this wave: all four.
 - Wave 7: TL-15. Independent in this wave: TL-15 alone.
-- Wave 8: TL-19 (`feature-done`, final). Independent in this wave: TL-19 alone.
+- Wave 8: TL-19, TL-20. Independent in this wave: both.
+- Wave 9: TL-21. Independent in this wave: TL-21 alone.
+- Wave 10: TL-22. Independent in this wave: TL-22 alone.
+- Wave 11: TL-23 (`feature-done`, final). Independent in this wave: TL-23 alone.
 
-Longest chain: TL-1 → TL-3 → TL-5 → TL-6 → TL-11 → TL-14 → TL-15 → TL-19 (8).
+Longest chain: TL-1 → TL-3 → TL-5 → TL-6 → TL-11 → TL-14 → TL-15 → TL-22 → TL-23 (9).
 Chain of 8: TL-3 adds the key types TL-5's look rules read; TL-6 draws with
 TL-5's rules; then one pointer handler per lane (`TimelineLaneInput.swift`)
 takes, in turn, the 16 pt hit (TL-6), picking (TL-11), key drag (TL-14) and
-trim (TL-15), because a press is classified once (key, clip end, playhead
-band, bed) and each step adds one branch to the same gesture; TL-19 carries
-`feature-done`, whose run must show every journey green. Splitting that
+trim (TL-15) and then moves onto the AppKit lanes view (TL-22), because a press is classified once (key, clip end, playhead
+band, bed) and each step adds one branch to the same gesture; TL-23 carries
+`feature-done` (moved from TL-19 by the 2026-10-17 amendment), whose run must
+show every journey green. Splitting that
 gesture across files would let two handlers claim one press.
 
 ## Acceptance test per task
@@ -429,6 +440,10 @@ and that task enables it. Mutation filters are `swift test --filter` regexes.
 | TL-17 | `TimelineToolbarTests`: the zoom bar's range is 1…the clamp's max and Fit sets 1; ⌘+ from fit goes to the next stop; the toolbar's controls register with reasons equal to their help, each ≥ 20 pt (chips 28) | the bar can't zoom, Fit misses, or a control is dead | `SuiteUI.TimelineToolbar`: the bar's upper bound 1 → `TimelineToolbarTests`; `SuiteUI.TimelineStrip`: ⌘0 keeps the zoom → `TimelineToolbarTests` |
 | TL-18 | `TimelineRulerUnitTests`: in timecode the ruler labels read `00:01:00` style at whole seconds and never overlap at widths 320, 640, 1,280 (QB-S21); the Work Area chip sends `0...duration` then `nil`; a handle drag sends one `onWorkArea` on release, clamped by `trimmed` | a label ignores the unit, labels overlap, or the work area inverts | `SuiteUI.TimelineRuler`: labels ignore the unit → `TimelineRulerUnitTests`; `SuiteUI.TimelineToolbar`: the chip sends the range when turning off → `TimelineRulerUnitTests` |
 | TL-19 | SJ19d passes; the golden checks pass with no known issue left for `timeline` | an assert in SJ19d fails or a baseline differs | none |
+| TL-20 | `TimelineLaneLayersTests`: lanes 2 and 5 of 8 changed give exactly {2, 5} to redraw; frames tile the strip's height with no gap; a press at a key's 16 pt token routes `.key`, at a clip end `.clipEnd`, on the bed `.bed` | a clean lane redraws, or a press lands in the wrong branch | `SuiteUI.TimelineLaneLayers`: every lane marked dirty → `TimelineLaneLayersTests`; `<=` for `<` on the token edge → `TimelineLaneLayersTests` |
+| TL-21 | `TimelineLanesViewTests`: 8 lanes make 8 layers; an update of lanes {2, 5} calls `draw` twice; the pixels at a key match `TimelineLook`'s fill in four appearances; `SuiteTimelineSnapshots` passes unchanged | a lane is redrawn for nothing, or the look drifts | `SuiteUI.TimelineLane`: host skips the Equatable check → `TimelineLanesViewTests`; a layer per key instead of per lane → `TimelineLanesViewTests` |
+| TL-22 | `TimelineLanesInputTests`: a 120-sample key drag calls `onMoveKeyframes` once and `bodyRuns` stays 0 for lanes; a trim calls `onTrim` once; Escape cancels; `SuiteTimelineLanesWindowTests` passes | a sample reaches the window, or a drag ends twice | `SuiteUI.TimelineLaneInput`: `endDrag` fires per sample → `TimelineLanesInputTests`; Escape keeps the move → `TimelineLanesInputTests` |
+| TL-23 | `TimelineLanesAccessTests`: each key is an accessibility child with the lane's spoken value and its default action picks it; SJ19b and SJ19e pass | VoiceOver loses a key | none: parity with TL-12, which its tests guard |
 
 **The real-window budgets** (factory lesson 153), each hosting the strip
 itself, not a model, in a 1280 × 400 borderless window ordered in far off
@@ -469,6 +484,7 @@ test, as in contract rule 14, and the slice isn't done while one escapes.
 | QB-S5 ruler scrub and key drag | p95 ≤ 2 frames late (placeholder 3) | SP3 `timeline-scrub`, SP8 `key-drag` (TL-8 adds `timeline-scrub` to QB-S5's series) |
 | Real-window render budget, scrub | 0 lane and ruler bodies over 120 samples | `SuiteTimelineScrubWindowTests` |
 | Real-window render budget, key drag | 0 bodies on lanes without a picked key | `SuiteTimelineKeyDragWindowTests` |
+| render: lanes in AppKit (TL-f) | 120-sample key drag or trim ≤ 0 lane bodies and ≤ 1 window body; lane redraw p95 ≤ 4 ms for 8 lanes, reported | `SuiteTimelineLanesWindowTests`, SP8 `key-drag` on the view |
 | QB-S11 ruler marks | 4,096 pt of a 100,000-frame timeline ≤ 0.2 ms (gate 2 ms) | `TimelineBudgetTests` |
 | QB-S20 hit sizes | keys 16 pt; toolbar controls ≥ 20 pt, chips 28 | `TimelineLaneTests`, `TimelineToolbarTests`, SJ25 |
 | QB-S21 labels inside and never overlapping | lane widths 320, 640, 1,280; frames and timecode | `FrameMapping` label tests (exist), `TimelineRulerUnitTests` |
@@ -485,7 +501,8 @@ Per slice (contract rule 6): its journeys green on a scoped macOS run that
 contains its last merged PR, every app built, no open `finding` issue for the
 slice, and every plan of its PRs scored with no escape (on the Mac, as above).
 TL-a: SJ0. TL-b: SJ19a and SP3 plus the scrub budget. TL-c: SJ19b. TL-d:
-SJ19c and SP8 plus the key-drag budget. TL-e: SJ19d. Then:
+SJ19c and SP8 plus the key-drag budget. TL-e: SJ19d. TL-f: SJ19e plus the lanes
+budget and its `Mac-Finish:` line. Then:
 
 - **Audit zero new:** `suiteui` stays 0 for every check; Halo's counts don't
   rise (`HaloTimelineView` keeps calling the strip as today, so read Halo's

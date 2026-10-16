@@ -1,0 +1,180 @@
+{
+  "title": "An AppKit canvas host (CALayer tiles or a CAMetalLayer) with live input, and the Settings > Rendering choice",
+  "wave": 3,
+  "order": 10,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "covers": "dual-renderer design (2026-10-17) sections 2 and 3; #1458 (SuiteUI half)",
+  "waits_on": "canvas-marks (owns CanvasViewport.swift in wave 2; CH-9 adds an extension file, never edits it); no creative-core issue",
+  "depends": [
+    "canvas-marks"
+  ],
+  "longest_chain": "6 (CH-1 → CH-2 → CH-3 → CH-5 → CH-9 → CH-11)",
+  "owned": [
+    "Sources/SuiteUI/Contracts/CanvasHosting.swift",
+    "Tests/SuiteUITests/CanvasHostFakeTests.swift",
+    "Sources/SuiteUI/RenderingPreference.swift",
+    "Tests/SuiteUITests/RenderingPreferenceTests.swift",
+    "Tests/mutations/SuiteUI.RenderingPreference.json",
+    "Sources/SuiteUI/Gallery/GalleryCanvasHost.swift",
+    "Sources/SuiteUI/Gallery/GalleryRenderingPane.swift",
+    "UITests/SuiteJourneyTests+CanvasHost.swift",
+    "Tests/AppSnapshotTests/RenderBudgetCanvasHostTests.swift",
+    "Sources/SuiteUI/CanvasHostView.swift",
+    "Sources/SuiteUI/CanvasHost.swift",
+    "Tests/SuiteUITests/CanvasHostTests.swift",
+    "Tests/AppSnapshotTests/SuiteCanvasHostSnapshots.swift",
+    "Sources/SuiteUI/RenderingSettingsPane.swift",
+    "Tests/SuiteUITests/RenderingSettingsPaneTests.swift",
+    "Tests/AppSnapshotTests/SuiteRenderingPaneSnapshots.swift",
+    "Tests/AppSnapshotTests/Golden/canvas-host/",
+    "Sources/SuiteUI/CanvasHitMap.swift",
+    "Tests/SuiteUITests/CanvasHitMapTests.swift",
+    "Tests/mutations/SuiteUI.CanvasHitMap.json",
+    "Tests/SuiteUITests/RenderingPreferenceLiveTests.swift",
+    "Sources/SuiteUI/CanvasTileSet.swift",
+    "Tests/SuiteUITests/CanvasTileSetTests.swift",
+    "Tests/mutations/SuiteUI.CanvasTileSet.json",
+    "Sources/SuiteUI/CanvasViewport+Host.swift",
+    "Tests/SuiteUITests/CanvasHostIntegrationTests.swift",
+    "Sources/SuiteUI/CanvasHostView+Metal.swift",
+    "Tests/SuiteUITests/CanvasHostMetalTests.swift",
+    "Tests/mutations/SuiteUI.CanvasHostView+Metal.json",
+    "docs/blueprints/suiteui.md",
+    "docs/blueprints/suiteui/features/canvas-host.wave.json"
+  ],
+  "journeys": [
+    "SuiteJourneyTests.testGalleryOpensEveryPage",
+    "SuiteJourneyTests.testCanvasHostDragsWithoutBodies",
+    "SuiteJourneyTests.testRenderingPaneSwitchesBackend",
+    "SuiteJourneyTests.testCanvasHostDragLatency"
+  ],
+  "slices": [
+    {
+      "id": "CH-a",
+      "behavior": "Hosts and tests can code against CanvasHosting (content tiles, the input delegate, the hit map), the RenderingPreference type and its stubbed store, with fakes and the two gallery pages declared as placeholders.",
+      "tasks": [
+        "CH-1",
+        "CH-2"
+      ],
+      "journeys": [
+        "SJ0"
+      ],
+      "owned": [
+        "Sources/SuiteUI/Contracts/CanvasHosting.swift",
+        "Tests/SuiteUITests/CanvasHostFakeTests.swift",
+        "Sources/SuiteUI/RenderingPreference.swift",
+        "Tests/SuiteUITests/RenderingPreferenceTests.swift",
+        "Tests/mutations/SuiteUI.RenderingPreference.json",
+        "Sources/SuiteUI/Gallery/GalleryCanvasHost.swift",
+        "Sources/SuiteUI/Gallery/GalleryRenderingPane.swift",
+        "UITests/SuiteJourneyTests+CanvasHost.swift",
+        "Tests/AppSnapshotTests/RenderBudgetCanvasHostTests.swift"
+      ],
+      "waits": {},
+      "ui": true
+    },
+    {
+      "id": "CH-b",
+      "behavior": "The gallery's canvas-host page shows a document on the AppKit host, drags draw on the overlay and reach the fake delegate with 0 window bodies per sample, and the settings-rendering page switches Automatic, GPU and CPU on the fake preference with the status note.",
+      "tasks": [
+        "CH-3",
+        "CH-4",
+        "CH-5"
+      ],
+      "journeys": [
+        "SJ27",
+        "SJ28",
+        "SP11"
+      ],
+      "owned": [
+        "Sources/SuiteUI/CanvasHostView.swift",
+        "Sources/SuiteUI/CanvasHost.swift",
+        "Sources/SuiteUI/Gallery/GalleryCanvasHost.swift",
+        "Tests/SuiteUITests/CanvasHostTests.swift",
+        "Tests/AppSnapshotTests/SuiteCanvasHostSnapshots.swift",
+        "Sources/SuiteUI/RenderingSettingsPane.swift",
+        "Sources/SuiteUI/Gallery/GalleryRenderingPane.swift",
+        "Tests/SuiteUITests/RenderingSettingsPaneTests.swift",
+        "Tests/AppSnapshotTests/SuiteRenderingPaneSnapshots.swift",
+        "UITests/SuiteJourneyTests+CanvasHost.swift",
+        "Tests/AppSnapshotTests/RenderBudgetCanvasHostTests.swift",
+        "Tests/AppSnapshotTests/Golden/canvas-host/"
+      ],
+      "waits": {
+        "CH-a": [
+          "CH-3",
+          "CH-4"
+        ]
+      },
+      "ui": true
+    },
+    {
+      "id": "CH-c",
+      "behavior": "The hit map, the tile set (premultiplied sRGB tiles, dirty-tile replace) and the live preference store (shared suite defaults, observed across the suite's processes) behave as the fakes promised.",
+      "tasks": [
+        "CH-6",
+        "CH-7",
+        "CH-8"
+      ],
+      "journeys": [
+        "SJ27"
+      ],
+      "owned": [
+        "Sources/SuiteUI/CanvasHitMap.swift",
+        "Tests/SuiteUITests/CanvasHitMapTests.swift",
+        "Tests/mutations/SuiteUI.CanvasHitMap.json",
+        "Sources/SuiteUI/RenderingPreference.swift",
+        "Tests/SuiteUITests/RenderingPreferenceLiveTests.swift",
+        "Tests/mutations/SuiteUI.RenderingPreference.json",
+        "Sources/SuiteUI/CanvasTileSet.swift",
+        "Tests/SuiteUITests/CanvasTileSetTests.swift",
+        "Tests/mutations/SuiteUI.CanvasTileSet.json"
+      ],
+      "waits": {
+        "CH-a": [
+          "CH-6",
+          "CH-7",
+          "CH-8"
+        ]
+      },
+      "ui": true
+    },
+    {
+      "id": "CH-d",
+      "behavior": "The pages run on the live store and tiles, CanvasViewport hosts its content on the host, the Metal layer path exists behind the preference, and the journeys pass on live.",
+      "tasks": [
+        "CH-9",
+        "CH-10",
+        "CH-11"
+      ],
+      "journeys": [
+        "SJ27",
+        "SJ28",
+        "SP11"
+      ],
+      "owned": [
+        "Sources/SuiteUI/CanvasViewport+Host.swift",
+        "Sources/SuiteUI/Gallery/GalleryCanvasHost.swift",
+        "Sources/SuiteUI/Gallery/GalleryRenderingPane.swift",
+        "Tests/SuiteUITests/CanvasHostIntegrationTests.swift",
+        "Tests/AppSnapshotTests/SuiteCanvasHostSnapshots.swift",
+        "Sources/SuiteUI/CanvasHostView+Metal.swift",
+        "Tests/SuiteUITests/CanvasHostMetalTests.swift",
+        "Tests/mutations/SuiteUI.CanvasHostView+Metal.json",
+        "docs/blueprints/suiteui.md",
+        "docs/blueprints/suiteui/features/canvas-host.wave.json"
+      ],
+      "waits": {
+        "CH-b": [
+          "CH-9",
+          "CH-10"
+        ],
+        "CH-c": [
+          "CH-9"
+        ]
+      },
+      "ui": true
+    }
+  ]
+}
