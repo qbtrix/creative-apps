@@ -19,7 +19,9 @@
 // shows the group's state in its toggles. Each row carries the identifier
 // `design.layer.<id>`: a leaf row is a container with its toggles inside, and a
 // group's row, its disclosure's label, reads as one checkbox, so the identifier
-// is what names it. The section headers use SuiteColor.textSecondary; the
+// is what names it. A page row is a container identified `design.page.row.<id>`
+// with its checkmark inside: a page name's words sit in its text's value, not
+// its label, so journeys count pages by identifier (#1451). The section headers use SuiteColor.textSecondary; the
 // sidebar style's own header gray is under 4.5:1. Values in, intents out.
 import DesignModel
 import SuiteUI
@@ -122,6 +124,8 @@ private struct DesignPageLabel: View {
                     .accessibilityIdentifier("design.current-page")
             }
         }
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier("design.page.row.\(page.id)")
     }
 }
 
