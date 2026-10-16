@@ -29,7 +29,7 @@ final class FlareDrawJourneys: XCTestCase {
         choose("e", "Ellipse", flare)
         let side = stage.frame.height * 0.2
         let start = point(0.5, 0.1, on: stage)
-        stage.perform(withKeyModifiers: .shift) {
+        XCUIElement.perform(withKeyModifiers: .shift) {
             start.press(forDuration: 0.1, thenDragTo: start.withOffset(CGVector(dx: side, dy: side)))
         }
         expectLayers(["Rectangle 1", "Ellipse 1"], flare)
