@@ -86,3 +86,4 @@ utc	stage	event	ref	note
 2026-10-16T00:55Z	4	pr-opened	#1265	F1b Keep layers? NSAlert + text, drop Saved note
 2026-10-16T00:55Z	4	pr-opened	#1266	F3 plain-word open errors
 2026-10-16T00:59Z	4	pr-opened	#1267	G2 Saving… sample (lead ran the gate idle: CI PASS)
+2026-10-16T01:08Z	4	heartbeat	-	gate queue E, G, F1
