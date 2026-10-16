@@ -2,9 +2,9 @@
 
 Issue: #1074 · Packet: docs/blueprints/photo/features/photo-documents.md
 Run: act-1a1404bf04c-bp6m · Session: claude/photo-documents-lead-ezrcev · Started: 2026-10-15T10:40Z
-Stage: 4 round 3
+Stage: 4 round 4
 Base: a42b3cff7c7cd9f4f14aa8166e9b30451ebbf0b4
-Next: read round 3 run 38829075229 when done (critic panel, same lenses); F1b #1265, F3 #1266, G2 #1267 go into round 4's run
+Next: round 4 (last) on the first CI run containing #1265, #1266, #1267; same six lenses; then finish (feature-done PR + contact sheet) or gap issues
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -38,6 +38,7 @@ Waves (packet's Build waves, checked against dev at 00e546a):
 |---|---|---|---|---|---|---|---|
 | 1 | 38792928305 (c93a7f8, D-7..D-9) | red: ui-test timeout 45 min; 11 Photo journeys red | photo contrast 1 > 0 (_NS:58 = restore alert text) | attribution diagnoser | 9 ours: restore alert from shared recovery dir (#1230) blocks later journeys; 2 not ours (crop #1202, edit #1218 -> #763) | fix D recovery dir; A ids; B Open Recent | no |
 | 2 | 38807718380 (cdcfb62) | red: ui-test; PJ-1, PJ-1b, PJ-2, PJ-3, PJ-P3 red, PJ-4 green; round-1 failures gone | photo contrast 1 > 0 (_NS:58 empty alert message); identifier 22 <= 23 | clarity, journey, design, layout, controls, quality | 13 of 14 (3 blocker, 6 major, 4 minor) | E close ⌘W; F1 alerts (restore NSAlert ids, title+message, keep-layers text, drop Saved note); F2 status help + inset; F3 plain open errors (after F1); F4 debug budgets; G PJ-P3 query + Saving… sampling; needs-ui #1252 scrub marker | no |
+| 3 | 38829075229 (a42b3cf: #1253, F2, F4) | red, not ours: HaloTransportFitTests (#1258 vs #1264) in scripts/ci, no journeys ran | no data | panel not run (no screens) | – | F1b #1265, F3 #1266, G2 #1267 pending merge | no |
 
 ## Decisions
 - Waves have at most 2 independent tasks, so each wave runs as one worktree subagent per task (lead.md stage 3), not build-wave.js.
