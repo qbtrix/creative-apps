@@ -38,9 +38,11 @@ final class PhotoDocumentsJourneyTests: XCTestCase {
         let keep = alert(photo)
         XCTAssert(text("Keep layers?", in: keep).waitForExistence(timeout: 5), "Save asked no Keep layers?")
         let choices = ["document": "Save as Photo Document", "flatten": "Flatten into PNG", "cancel": "Cancel"]
+        // An NSAlert's NSButton reads its text as `title` to XCUITest on macOS; `label` can be empty.
         for (id, title) in choices {
             let button = keep.buttons["photo.file.keep-layers.\(id)"].firstMatch
-            XCTAssert(button.exists && button.label == title, "Keep layers? has no \(title) (photo.file.keep-layers.\(id))")
+            XCTAssert(button.exists && (button.title == title || button.label == title),
+                      "Keep layers? has no \(title) (photo.file.keep-layers.\(id)); it reads title \(button.title), label \(button.label)")
         }
         let says = "beach.png can keep only one flat layer. Save as Photo Document writes beach.ora next to it"
         XCTAssert(keep.staticTexts.matching(NSPredicate(format: "label BEGINSWITH %@ OR value BEGINSWITH %@", says, says))
