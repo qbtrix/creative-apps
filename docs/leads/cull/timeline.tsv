@@ -33,3 +33,4 @@ utc	stage	event	ref	note
 2026-10-16T21:28Z	4	finding-filed	#1654	J4 reads unreadable menu check mark
 2026-10-16T21:35Z	4	review	round1	panel: 12 confirmed, 11 filed #1661-#1671; 3 rerouted
 2026-10-16T21:35Z	4	fix-round	round1	fix batch for 9 findings
+2026-10-16T22:05Z	4	pr-opened	round1	#1677 #1678 #1683 #1684 #1687 #1688 #1692
