@@ -60,6 +60,19 @@ struct Journey {
         if !screen { audit(step) }
     }
 
+    /// Attaches one element's picture as "<app>-<step>" (a palette, the
+    /// switcher row) and audits the window as that step; `audit: false` skips
+    /// the audit, for a shot of another app's element that mustn't count
+    /// under this app.
+    func shot(_ step: String, element: XCUIElement, audit: Bool = true) {
+        XCTAssert(element.waitForExistence(timeout: 10), "nothing to shoot for \(name)-\(step)")
+        let attachment = XCTAttachment(screenshot: element.screenshot())
+        attachment.name = "\(name)-\(step)"
+        attachment.lifetime = .keepAlways
+        test.add(attachment)
+        if audit { self.audit(step) }
+    }
+
     /// The window is up with its sidebar, inspector and toolbar; shoots "launch".
     func expectWindowShell() {
         XCTAssert(app.windows.firstMatch.waitForExistence(timeout: 30), "no window opened")
