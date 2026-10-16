@@ -3,7 +3,9 @@
 // items (docs/blueprints/flare.md): Object and Animate hold exactly theirs;
 // File, Edit, View and Window are system menus AppKit adds to, so each holds
 // its 3.4 items in order and every one of them once. Open Sample lists
-// Bounce, Character, Button and Keyed Ball. testKeys presses the menu keys
+// Bounce, Character, Button and Keyed Ball, and each one opens: Character
+// shows Body in LAYERS, Bounce Ball, Shadow and Background, Button drops
+// Ball. testKeys presses the menu keys
 // on bounce: End reads 47, Home 0, → steps one, Space plays and pauses, and
 // ⌘Z undoes the sidebar's New Layer. One shot per step.
 import XCTest
@@ -46,6 +48,20 @@ final class FlareMenuJourneys: XCTestCase {
             flare.menuTitles("Animate", submenu: "Easing"),
             ["Linear", "Ease", "Ease In", "Ease Out", "Ease In-Out", "Hold"], "Animate > Easing isn't the presets")
         XCTAssert(flare.menuTitles("File", submenu: "Open Recent").contains("Clear Menu"), "Open Recent has no Clear Menu")
+
+        let sidebar = flare.element("suite.sidebar")
+        flare.openSample("Character")
+        XCTAssert(sidebar.staticTexts["Body"].waitForExistence(timeout: 10), "Open Sample > Character didn't open it")
+        XCTAssert(sidebar.staticTexts["Ball"].waitForNonExistence(timeout: 5), "Character kept bounce's Ball")
+        flare.shot("open-sample-character")
+        flare.openSample("Bounce")
+        for layer in ["Ball", "Shadow", "Background"] {
+            XCTAssert(sidebar.staticTexts[layer].waitForExistence(timeout: 10), "Open Sample > Bounce shows no \(layer)")
+        }
+        flare.shot("open-sample-bounce")
+        flare.openSample("Button")
+        XCTAssert(sidebar.staticTexts["Ball"].waitForNonExistence(timeout: 10), "Open Sample > Button didn't open it")
+        flare.shot("open-sample-button")
     }
 
     /// The keys live on the menu items: Home, End, →, Space and ⌘Z act from the keyboard.
