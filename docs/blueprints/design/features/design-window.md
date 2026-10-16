@@ -168,8 +168,9 @@ public enum DesignControlID { public static let all: [String]; public static let
 ```
 
 App slot files (D0-5a, D0-5d), each a pass-through until files-history
-fills it: `DesignSaveStatus.subtitle(model) -> String?` (nil; the window
-subtitle shell-parity leaves empty) and `DesignClosePrompt`, a view
+fills it: `DesignSaveStatus` (`subtitle(model) -> String?`, nil: the window subtitle
+shell-parity leaves empty; and an empty `design.status.save` label in the
+status line) and `DesignClosePrompt`, a view
 modifier on the window root that lets every close through.
 
 `DesignLiveDrag` (D0-8a, `Sources/DesignApp/DesignLiveDrag.swift`): an
