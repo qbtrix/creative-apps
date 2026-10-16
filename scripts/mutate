@@ -184,6 +184,7 @@ def ran_tests(out: str) -> bool:
 
 
 def first_error(out: str) -> str:
+    out = re.sub(r"\x1b\[[0-9;]*m", "", out)  # swift colours its diagnostics
     m = re.search(r"^(\S+?):(\d+):\d+: error: (.*)$", out, re.M)
     return f"{Path(m.group(1)).name}:{m.group(2)}: {m.group(3)}" if m else ""
 
