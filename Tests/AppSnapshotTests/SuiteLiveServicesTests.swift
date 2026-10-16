@@ -1,7 +1,7 @@
 // SuiteLiveServicesTests.swift: SuiteServices.live over a temp support
 // folder (suite-contracts SC-5b, SC-5c). It is not a preview; recents is
-// live and writes recents.json there; each of the other 14 slotted members
-// (14 slot files) is pending with its "<What> isn't available yet."
+// live and writes recents.json there, creating and home are live (HM-2a); each of
+// the other 12 slotted members is pending with its "<What> isn't available yet."
 // sentence, and each throwing one throws notAvailable with that sentence.
 // `animations` and `updates` are the fakes until `with(animations:updates:)`
 // swaps them. macOS only (SuiteShell).
@@ -48,12 +48,13 @@ import Testing
     @Test func everyOtherSlottedMemberIsPendingWithItsFeature() {
         let pending = makeLive().services.pending
         var expected = SuiteServices.slotFeatures.mapValues(SuiteIdentity.notConnected)
-        expected["recents"] = nil
+        for live in ["recents", "creating", "home"] { expected[live] = nil }
         #expect(pending == expected)
-        #expect(pending.count == 14)
+        #expect(pending.count == 12)
         #expect(pending["sending"] == "Switching between apps isn't available yet.")
         #expect(pending["thumbnails"] == "Opening recent work isn't available yet.")
-        #expect(pending["home"] == "The Home window isn't available yet.")
+        #expect(pending["home"] == nil)
+        #expect(pending["creating"] == nil)
         #expect(pending["onboarding"] == "The welcome tour isn't available yet.")
         #expect(pending["roundTrips"] == "Editing in Photo and back isn't available yet.")
         #expect(pending["pasteboard"] == "Copy and paste between apps isn't available yet.")
@@ -69,7 +70,7 @@ import Testing
                                     "roundTrips", "pasteboard", "assets", "linking", "preferences", "settings",
                                     "onboarding", "thumbnails", "home"]
         #expect(Set(SuiteServices.slotFeatures.keys) == members)
-        #expect(Set(pending.keys).union(["recents"]) == members)
+        #expect(Set(pending.keys).union(["recents", "creating", "home"]) == members)
     }
 
     @Test func throwingMembersNotLiveThrowTheirReason() async throws {
