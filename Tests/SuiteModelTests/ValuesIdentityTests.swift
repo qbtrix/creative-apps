@@ -87,18 +87,19 @@ import Testing
             (.nothingToPaste, "Nothing to paste."),
             (.cannotPaste(app: .halo, kind: "images"), "Halo can't paste images yet."),
             (.staleRevision, "Another app changed this at the same time. Try again."),
-            (.damaged("hand-off id"), "This file is damaged: hand-off id."),
+            (.damaged("the message from another app"), "This file is damaged: the message from another app."),
             (.notAvailable("Not connected yet (home)."), "Not connected yet (home)."),
             (.cancelled, "Cancelled."),
             (.timedOut, "This took too long. Try again."),
             (.updateNotVerified, "This update couldn't be verified, so it wasn't installed."),
             (.ioFailed("disk full"), "Couldn't save: disk full."),
+            (.readFailed("your recent work list"), "Couldn't read your recent work list."),
             (.noOtherReader(typeName: "Halo Project"), "No other app opens Halo Project files."),
             (.originalMissing(name: "IMG_0002"), "The original of IMG_0002 is missing. Locate it in Library first."),
-            (.linkMissing, "Linked asset is missing; using the last copy."),
+            (.linkMissing(name: "Logo"), "Logo can't be found, so this document uses the copy saved with it."),
             (.updatePostponed(.design), "Update postponed: Design has unsaved changes."),
         ]
-        #expect(cases.count == 16)
+        #expect(cases.count == 17)
         for (error, sentence) in cases { #expect(error.message == sentence) }
     }
 

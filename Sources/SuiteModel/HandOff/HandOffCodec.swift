@@ -17,15 +17,18 @@ public enum HandOffCodec {
 
     public static func decode(_ data: Data) throws(SuiteError) -> HandOff {
         struct Head: Decodable { var format: Int }
-        guard let head = try? JSONDecoder().decode(Head.self, from: data) else { throw .damaged("not a hand-off") }
+        guard let head = try? JSONDecoder().decode(Head.self, from: data) else { throw .damaged(subject) }
         guard head.format <= HandOff.formatVersion else {
             throw .notAvailable("This was sent by a newer AfterGlow. Update AfterGlow to open it.")
         }
         let h: HandOff
-        do { h = try JSONDecoder().decode(HandOff.self, from: data) } catch { throw .damaged("hand-off fields") }
-        guard isSafeID(h.id) else { throw .damaged("hand-off id") }
+        do { h = try JSONDecoder().decode(HandOff.self, from: data) } catch { throw .damaged(subject) }
+        guard isSafeID(h.id) else { throw .damaged(subject) }
         return h
     }
+
+    /// What a damaged hand-off is called in the message the user sees.
+    static let subject = "the message from another app"
 
     /// An id names `handoffs/<id>.aghandoff`, so it holds only a-z, 0-9 and -.
     static func isSafeID(_ id: String) -> Bool {

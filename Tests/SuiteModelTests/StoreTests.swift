@@ -109,7 +109,7 @@ import Testing
     @Test func damagedFileThrowsDamaged() throws {
         let store = makeStore()
         try store.writeData("recents.json", Data("not json".utf8))
-        #expect(throws: SuiteError.damaged("recents.json")) {
+        #expect(throws: SuiteError.damaged("your recent work list")) {
             try store.read("recents.json", as: [String].self)
         }
     }

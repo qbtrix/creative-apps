@@ -16,9 +16,10 @@ public enum SuiteError: Error, Equatable, Sendable {
     case timedOut
     case updateNotVerified
     case ioFailed(String)
+    case readFailed(String)
     case noOtherReader(typeName: String)
     case originalMissing(name: String)
-    case linkMissing
+    case linkMissing(name: String)
     case updatePostponed(SuiteApp)
 
     public var message: String {
@@ -35,9 +36,10 @@ public enum SuiteError: Error, Equatable, Sendable {
         case .timedOut: "This took too long. Try again."
         case .updateNotVerified: "This update couldn't be verified, so it wasn't installed."
         case .ioFailed(let d): "Couldn't save: \(d)."
+        case .readFailed(let d): "Couldn't read \(d)."
         case .noOtherReader(let t): "No other app opens \(t) files."
         case .originalMissing(let n): "The original of \(n) is missing. Locate it in Library first."
-        case .linkMissing: "Linked asset is missing; using the last copy."
+        case .linkMissing(let n): "\(n) can't be found, so this document uses the copy saved with it."
         case .updatePostponed(let a): "Update postponed: \(a.displayName) has unsaved changes."
         }
     }
