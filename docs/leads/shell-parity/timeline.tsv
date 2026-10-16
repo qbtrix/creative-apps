@@ -54,3 +54,7 @@ utc	stage	event	ref	note
 2026-10-16T21:35Z	4	pr-opened	#1655	Fixes gap #1561: switcher between title and trailing buttons
 2026-10-16T22:02Z	4	pr-merged	#1655	Fixes gap #1561
 2026-10-16T22:03Z	4	heartbeat	#1325	no scoped design run with #1610; asked supervisor to dispatch app=design
+2026-10-16T22:35Z	4	ci-run	38971702274	scoped design successful, contains #1610 #1655; DesignJourneyTests green; shell journeys red only on #1456 (5 lines)
+2026-10-16T22:36Z	4	slice-done	DP-b	38971702274 gaps #1452 #1572 #1573 #1617 #1618
+2026-10-16T22:37Z	4	stage-end	#1325	Belt-Contact-Sheet posted
+2026-10-16T22:37Z	done	stopped	#1325	feature done

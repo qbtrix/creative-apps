@@ -2,15 +2,15 @@
 
 Issue: #1325 · Packet: docs/blueprints/design/features/shell-parity.md
 Run: act-1a14478b134-5to5 · Session: claude/design-shell-parity-2jr7z3 · Started: 2026-10-16T12:00Z
-Stage: 4 finish
+Stage: done
 Base: c9e46560366b0c3464a5e822d11c4a865e4dc53e
-Next: wait for a scoped ci.yml run app=design on dev containing #1610 (c97f2782) and #1655 (e16a3edd) (asked the supervisor on #1325 to dispatch one; full runs skip the journeys because their macOS scripts/ci step fails). Then post 'Belt-Slice-Done: DP-b <run> gaps: #1452 #1572 #1573' and 'Belt-Contact-Sheet: <run>' on #1325; Stage: done
+Next: nothing. Feature done: DP-a done (38956034097), DP-b done with gaps #1452 #1572 #1573 #1617 #1618 (38971702274), Belt-Contact-Sheet posted on #1325. The gaps close when SuiteUI #1456 lands.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | rounds | state | run |
 |---|---|---|---|---|---|---|---|
 | DP-a | The toolbar's eight commands each act or say why, and Add Page and Delete Page sit in a row under the pages. | DS-1, DS-2 | J3 | editor-in-window APIs (on dev) | 2 | done | 38956034097 |
-| DP-b | Design opens in the suite window with pages and layers in the sidebar, Properties in the inspector and the floating tool box over the canvas, in light and dark. | DS-3, DS-4 | J0, DS-J1..DS-J5 | DP-a (DS-3) | 2 | merged; closing with gaps #1452 #1572 #1573 (SuiteUI #1456) after DS-5 | 38956034097 (shell journeys red) |
+| DP-b | Design opens in the suite window with pages and layers in the sidebar, Properties in the inspector and the floating tool box over the canvas, in light and dark. | DS-3, DS-4 | J0, DS-J1..DS-J5 | DP-a (DS-3) | 2 | done-with-gaps (#1452 #1572 #1573 #1617 #1618) | 38971702274 |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
