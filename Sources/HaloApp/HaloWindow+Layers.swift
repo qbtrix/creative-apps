@@ -1,6 +1,7 @@
 // HaloWindow+Layers.swift: the layers area's routes and hook. Every Layer
 // command calls its HaloModel method (HaloLayerEdits.swift), which refuses
-// what it can't do; ⌫ from the viewer and timeline arrives as .deleteLayer.
+// what it can't do; ⌫ from the viewer and timeline arrives as .deleteLayer
+// while no key is picked.
 // Rename… asks for the Rename Layer prompt through `request`
 // (.renameLayer(id)); `layersScene(_:)` shows it as a system alert with a
 // field holding the layer's name, sends Rename's draft as .renameLayer(id,

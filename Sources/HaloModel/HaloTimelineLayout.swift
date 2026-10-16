@@ -3,8 +3,8 @@
 // name column, the divider and the strip's trailing room come off the
 // width), and the timeline's height: its ruler and lanes, at least the slot
 // minimum, at most a share of the height it sits in so the canvas keeps room
-// (past that the lanes scroll). The view passes SuiteUI's tokens in; the
-// Model can't see them. Linux-safe: no UI imports. Never negative.
+// (past that the lanes scroll), and which lane a click lands in. The view
+// passes SuiteUI's tokens in; the Model can't see them. Linux-safe: no UI imports. Never negative.
 
 /// The timeline strip's sizes, from the design tokens.
 public struct HaloTimelineLayout: Sendable, Hashable {
@@ -52,6 +52,15 @@ public struct HaloTimelineLayout: Sendable, Hashable {
     public func laneFitWidth(strip: Double?, container: Double) -> Double {
         guard let strip, strip.isFinite, strip > 0 else { return laneFitWidth(width: container) }
         return laneFitWidth(width: strip)
+    }
+
+    /// The lane, top first, of a click at (`x`, `y`) in a strip of `rows`
+    /// lanes; nil on the ruler, the name column or the divider, or below the
+    /// last lane.
+    public func row(atX x: Double, y: Double, rows: Int) -> Int? {
+        guard x.isFinite, y.isFinite, x > labelColumn + divider, y >= ruler, y < ruler + lane * Double(max(rows, 0))
+        else { return nil }
+        return Int((y - ruler) / lane)
     }
 
     /// The ruler and one lane per row; an empty timeline keeps one lane's

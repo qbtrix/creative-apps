@@ -21,8 +21,8 @@
 // 640 pt, so the inspector is scrolled to each control before it is used,
 // and each shot shows its step's end state whole (#1418).
 // A disabled menu item is checked as disabled only: XCUITest doesn't read
-// SwiftUI .help on menu items reliably, so its reason ("Pick a span in the
-// EASING list first.") is proven by HaloModelTests'
+// SwiftUI .help on menu items reliably, so its reason ("Click a key on the
+// timeline or pick a span in the EASING list first.") is proven by HaloModelTests'
 // HaloEasingAvailabilityTests. The Model half of every step is
 // HaloEasingTests.testEaseKeysJourney. One shot per step, `halo-easing-<step>`.
 import XCTest

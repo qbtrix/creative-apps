@@ -1,8 +1,12 @@
 // HaloTimelineView.swift: Halo's timeline: a TimelineStrip track per layer,
-// its span bar from in to out point and a diamond on each key frame. The
-// ruler scrubs, a track selects its layer, a diamond its lane's keys (its
-// layer while key picking can't act), Shift extending the picked keys
-// (selectLaneKeys); a click gives it focus so HaloViewer's keys reach it.
+// its span bar from the in point to the last frame shown and a diamond on each
+// key frame. The strip's `duration` is the last frame (`lastFrame`), so the
+// ruler ends on it. The ruler scrubs, a name or a click anywhere on a lane
+// selects its layer (the strip reports only name and key clicks, so a
+// simultaneous tap finds the lane through HaloTimelineLayout.row), a diamond
+// picks its lane's keys (its layer while key picking can't act), Shift
+// extending the pick (selectLaneKeys); a click gives it focus so HaloViewer's
+// keys reach it.
 // The strip's context menu holds the five easing presets for the picked keys,
 // each disabled with the Model's unavailableHelp as its help while it can't
 // act. Plain diamonds until key shapes land (#771). The tooltip is the
@@ -69,14 +73,14 @@ struct HaloTimelineView: View {
 
     private func content(_ rows: [HaloTimelineRow]) -> some View {
         let tracks = rows.map {
-            TimelineTrack(id: $0.id, name: $0.name, keyframes: $0.keyFrames, spans: [$0.span], isSelected: $0.isSelected)
+            TimelineTrack(id: $0.id, name: $0.name, keyframes: $0.keyFrames, spans: [$0.bar], isSelected: $0.isSelected)
         }
         let height = SuiteSize.timelineRuler + SuiteSize.timelineLane * CGFloat(rows.count)
         return VStack(alignment: .leading, spacing: 0) {
             GeometryReader { geometry in
                 let lanes = Self.layout.laneFitWidth(strip: stripWidth, container: Double(geometry.size.width))
                 TimelineStrip(
-                    tracks: tracks, duration: model.selectedComposition?.durationFrames ?? 0,
+                    tracks: tracks, duration: model.selectedComposition?.lastFrame ?? 0,
                     frameWidth: CGFloat(model.selectedComposition?.frameWidth(toFit: lanes) ?? 1),
                     playhead: model.selectedComposition?.playheadFrame ?? 0,
                     onScrub: { frame in
@@ -92,6 +96,12 @@ struct HaloTimelineView: View {
                         perform(.selectLayer(id))
                     })
                     .accessibilityIdentifier("halo.timeline.track")
+                    .simultaneousGesture(SpatialTapGesture().onEnded { tap in
+                        let hit = Self.layout.row(atX: Double(tap.location.x), y: Double(tap.location.y), rows: rows.count)
+                        guard let hit, rows.indices.contains(hit) else { return }
+                        hasFocus = true
+                        perform(.selectLayer(rows[hit].id))
+                    })
                     .contextMenu { easingItems }
                     .onGeometryChange(for: Double.self) { Double($0.size.width) } action: { stripWidth = $0 }
             }

@@ -106,9 +106,12 @@ private func project(fps: Int = 24) -> HaloProject {
     #expect(results == [false, false])
 }
 
+/// B3: the strip's frames run 0...lastFrame, so 47 frame steps fill the
+/// width of a 48-frame composition and its last frame lands on the edge.
 @Test func theStripFitsTheWholeComposition() throws {
     let comp = try #require(project().selectedComposition)
-    #expect(comp.frameWidth(toFit: 480) == 10)
+    #expect(comp.lastFrame == 47)
+    #expect(comp.frameWidth(toFit: 470) == 10)
     #expect(comp.frameWidth(toFit: 0) == 0)
     #expect(comp.frameWidth(toFit: .nan) == 0)
 }
@@ -124,6 +127,26 @@ private func project(fps: Int = 24) -> HaloProject {
     #expect(rows.map(\.name) == ["Shape 1", "Solid 1"])
     #expect(rows.map(\.span) == [5...48, 0...48])
     #expect(rows.map(\.isSelected) == [false, true])
+}
+
+/// B3: a bar runs from the tick of its first shown frame to the tick of its
+/// last (the out point is the first frame it no longer shows), so a layer
+/// that runs to the end stops on the ruler's last frame.
+@Test func eachBarEndsOnItsLastShownFrame() throws {
+    var project = project()
+    project.scrub(to: 5)
+    project.setSelectedLayerInPoint()
+    project.scrub(to: 20)
+    project.setSelectedLayerOutPoint()
+    project.newLayer(.shape)
+    project.scrub(to: 9)
+    project.setSelectedLayerInPoint()
+    project.setSelectedLayerOutPoint()
+    let rows = project.timelineRows
+    #expect(rows.map(\.span) == [9...10, 5...21])
+    #expect(rows.map(\.bar) == [9...9, 5...20])
+    project.newLayer(.text)
+    #expect(project.timelineRows.first?.bar == 0...47)
 }
 
 /// `name` loaded on the fake services, first composition selected.

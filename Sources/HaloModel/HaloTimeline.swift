@@ -11,6 +11,9 @@ public struct HaloTimelineRow: Identifiable, Sendable, Hashable {
     public let name: String
     /// From the layer's in point to its out point, the frame it stops showing.
     public let span: ClosedRange<Int>
+    /// The frames the timeline's bar covers: from the in point to the last
+    /// frame shown, the frame before the out point.
+    public var bar: ClosedRange<Int> { span.lowerBound...max(span.lowerBound, span.upperBound - 1) }
     public let isSelected: Bool
     /// Every frame any of the layer's tracks has a key on, ascending, once each.
     public let keyFrames: [Int]
@@ -34,10 +37,11 @@ extension HaloComposition {
     /// The playhead's timecode, as the viewer's readout shows it.
     public var playheadTimecode: String { timecode(playheadFrame) }
 
-    /// Points per frame that fit every frame into `width` points, so the strip
-    /// shows the whole composition; 0 for a width that is not positive.
+    /// Points per frame that fit frames 0 through `lastFrame` into `width`
+    /// points, so the strip shows the whole composition and its last frame
+    /// sits on the lanes' edge; 0 for a width that is not positive.
     public func frameWidth(toFit width: Double) -> Double {
-        width > 0 ? width / Double(max(1, durationFrames)) : 0
+        width > 0 ? width / Double(max(1, lastFrame)) : 0
     }
 
     /// The layers visible at `frame`, top first.

@@ -20,8 +20,8 @@
 // Each row drags its layer id, and a layer
 // id dropped on row i sends `moveLayer(id, to: i)`, so dropping on the bottom
 // row puts the layer at the bottom; the view does no offset math. The stack
-// takes focus on a click, like the timeline, so Delete (⌫) there sends
-// `deleteLayer`. The selected row draws the design.md Selected state: the
+// takes focus on a click, so Delete (⌫) there sends `deleteLayer` (in the
+// viewer and timeline ⌫ deletes the picked keys first, HaloViewer). The selected row draws the design.md Selected state: the
 // `stateSelected` tint (SuiteColor.selectedTint) with a 1 pt accent outline at
 // SuiteRadius.row and a semibold name. Names are in primary ink at the
 // inspector's label size (SuiteFont.inspectorLabel, 11 pt Pro density); only
