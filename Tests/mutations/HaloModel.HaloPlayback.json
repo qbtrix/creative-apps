@@ -1,0 +1,4 @@
+[
+{"label":"tickChanges always says a tick writes","file":"Sources/HaloModel/HaloPlayback.swift","find":"        return next != self\n","replace":"        return true\n","tests":"HaloPlaybackWritesTests"},
+{"label":"tickChanges compares only the shown frame, losing the re-anchor after a scrub","file":"Sources/HaloModel/HaloPlayback.swift","find":"        return next != self\n","replace":"        return next.selectedComposition?.playheadFrame != selectedComposition?.playheadFrame\n","tests":"HaloPlaybackWritesTests"}
+]

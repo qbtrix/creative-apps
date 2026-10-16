@@ -74,6 +74,13 @@ extension HaloProject {
         updateSelectedComposition { $0.playheadFrame = min(max(frame, 0), $0.lastFrame) }
     }
 
+    /// Whether `scrub(to:)` would move the playhead: false for a drag
+    /// sample on the frame already shown, or with no composition.
+    public func scrubChanges(to frame: Int) -> Bool {
+        guard let comp = selectedComposition else { return false }
+        return min(max(frame, 0), comp.lastFrame) != comp.playheadFrame
+    }
+
     /// I: the selected layer starts at the playhead. One step, "Set In
     /// Point". Refused on `halo.timeline` (false) with no selected layer
     /// (`.noLayerSelected`), or when the playhead is at or after its out point
