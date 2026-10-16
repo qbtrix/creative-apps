@@ -6,7 +6,11 @@
 // a delete is one "Curves" undo step. A click that would add a point past
 // curvePointCount is refused by the model, so nothing changes. Identifiers:
 // photo.curves, photo.curves.point1, ...
-// AdjustmentsPanel is the Adjust tab's sections for a workspace. It keeps the
+// AdjustmentsPanel is the Adjust tab's sections for its target
+// (adjustTarget): the whole image's sections and intents, or, for a selected
+// adjustment layer, that layer's settings (so Curves reads and writes the
+// layer's curve), only its sections (adjustSections), no enable switch, and
+// the .adjustmentLayer intents. It keeps the
 // histogram as presentation state and counts it off the main actor only when
 // curvesHistogramKey changes (pixels, layers, exposure, levels), never during
 // a curve drag, and not during a canvas drag either: a brush stroke changes
@@ -40,15 +44,32 @@ struct AdjustmentsPanel: View {
     @State private var histogram: [Double] = []
 
     var body: some View {
-        AdjustmentsInspector(
-            settings: model.adjustments, onEdit: { perform(.adjust($0)) }, histogram: histogram,
-            onEditEnd: { perform(.endAdjust) })
+        inspector
         // Nil while dragging, so a brush stroke never recounts; its end does, once.
         .task(id: model.isDragging ? nil : model.curvesHistogramKey) {
             guard !model.isDragging else { return }
             let workspace = model
             let counted = await Task.detached(priority: .userInitiated) { workspace.curvesHistogram() }.value
             if !Task.isCancelled { histogram = counted }
+        }
+    }
+
+    /// An adjustment layer's sections have no enable switch: its row's eye turns it off.
+    static func showsEnable(for target: AdjustTarget) -> Bool {
+        if case .layer = target { false } else { true }
+    }
+
+    @ViewBuilder private var inspector: some View {
+        switch model.adjustTarget {
+        case .image:
+            AdjustmentsInspector(
+                settings: model.adjustments, onEdit: { perform(.adjust($0)) }, histogram: histogram,
+                onEditEnd: { perform(.endAdjust) })
+        case .layer(let id, let settings):
+            AdjustmentsInspector(
+                settings: settings, onEdit: { perform(.adjustmentLayer(.adjust(id, $0))) }, histogram: histogram,
+                onEditEnd: { perform(.adjustmentLayer(.endAdjust)) }, sections: model.adjustSections,
+                showsEnable: Self.showsEnable(for: model.adjustTarget))
         }
     }
 }
