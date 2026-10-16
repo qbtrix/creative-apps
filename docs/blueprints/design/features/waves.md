@@ -24,7 +24,7 @@ file's waves, not this one's.
 
 | wave | feature | packet | covers | waits on | feature issue | status |
 |---|---|---|---|---|---|---|
-| 0a | The contracts: style schema, use cases, services with NotBuilt, fakes, live stubs, actions, fixtures | `design-contracts.md` | the `DesignPage` init gap (filed by the lead); #532 (Model part, from PR #753) | nothing (PR #753's Model half is its task D0-0) | file when ready | planned |
+| 0a | The contracts: style schema, use cases, services with NotBuilt, fakes, live stubs, actions, fixtures | `design-contracts.md` | the `DesignPage` init gap (filed by the lead); #532 (Model part, from PR #753) | nothing (PR #753's Model half is its task D0-0) | #1324 | built |
 | 0b | The gesture routes: the marquee rule, several-layer drags, Option-drag as one step; the shared Model budgets | `design-seams.md` | – | design-contracts | file when ready | planned |
 | 0b | The window seam: intents, launch arguments, menus, canvas slots, inspector shell, control ids, J15 and layout | `design-window.md` | #288 (part) | design-contracts; its first slice DW-a also waits on Design shell-parity, which edits the same window files | file when ready | planned |
 | 1 | Select and edit several layers | `select-several.md` | #714, #542, #607; gaps: marquee, several layers, Zoom to Selection | design-contracts; design-seams for S-5, S-7, S-8; view tasks: design-window DW-a (DW-b for the drag check) | file when ready | planned |
