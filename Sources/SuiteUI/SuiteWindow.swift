@@ -35,7 +35,8 @@
 // The window measures its width (onGeometryChange) and gives the row
 // AppSwitcher.toolbarSpacing for it, so the row leaves the sidebar toggle,
 // document actions, title, actions and inspector toggle their room and none
-// of them goes into the toolbar's overflow.
+// of them goes into the toolbar's overflow; in a crowded toolbar (Design's
+// eight commands) the row narrows to its compact step instead.
 import SwiftUI
 
 public struct SuiteWindow<Sidebar: View, Content: View, Inspector: View>: View {
@@ -224,7 +225,8 @@ extension SuiteWindow {
             }
             ToolbarItem(placement: .principal) {
                 let state = switcher ?? AppSwitcherState.placeholder(processName: ProcessInfo.processInfo.processName)
-                // The sidebar toggle leads; the inspector toggle trails.
+                // The sidebar toggle leads; the inspector toggle trails. Below every step
+                // the row takes AppSwitcher.compactSpacing rather than crowd the actions out.
                 let spacing = AppSwitcher.toolbarSpacing(
                     windowWidth: windowWidth, itemCount: state.items.count,
                     leadingButtons: 1 + documentActions.count, trailingButtons: actions.count + 1)

@@ -5,12 +5,15 @@
 // row's one glass shape) with its icon in textPrimary; the others are
 // textSecondary. Item centers sit `spacing` apart, one of `spacingSteps`
 // (80, 64, 48, 40: from `switcherSpacing` down by SuiteSpacing.l to
-// `switcherSpacingMinimum`). A toolbar item is never offered less than its
+// `switcherSpacingMinimum`), or the last step, `compactSpacing` (toolButton,
+// 32), when none of them fits. A toolbar item is never offered less than its
 // ideal width, so ViewThatFits there would always keep 80 and push the
 // window's actions into the overflow (run 38897404951); SuiteWindow instead
 // passes `toolbarSpacing(windowWidth:…)`, the widest step whose row leaves the
-// toolbar's leading and trailing buttons their room. The capsule narrows with
-// the step (`capsuleWidth(spacing:)`) so it never reaches a neighbour's icon. An item
+// toolbar's leading and trailing buttons their room, so in a crowded toolbar
+// (Design's eight commands) the switcher gives way, not the actions. The
+// capsule narrows with the step (`capsuleWidth(spacing:)`, and at the compact
+// step `capsuleHeight(spacing:)` too) so it never reaches a neighbour's icon. An item
 // that can't switch yet is disabled and its tooltip says why after the app's
 // name and shortcut ("Design (⌃⌘2)", then the reason on a new line). The row is
 // the container `suite.switcher`; each item is `suite.switcher.<id>` and lists
@@ -73,38 +76,77 @@ public struct AppSwitcher: View {
         Array(stride(from: SuiteSize.switcherSpacing, to: SuiteSize.switcherSpacingMinimum, by: -SuiteSpacing.l))
         + [SuiteSize.switcherSpacingMinimum]
 
-    /// The toolbar width one button takes: its glass (the overflow button
-    /// measured 38 pt in run 38897404951) and the gap to the next.
-    nonisolated public static let toolbarButtonRoom: CGFloat = SuiteSize.toolButton + SuiteSpacing.m
-    /// The width kept for the window title beside the leading buttons
-    /// ("Flare", "Halo", "Library" take about 40 to 60 pt).
-    nonisolated public static let titleRoom: CGFloat = 2 * toolbarButtonRoom
+    /// The last step, below `switcherSpacingMinimum`: a tool button's width,
+    /// so each item stays a full-size click target. The row takes it when no
+    /// step of `spacingSteps` fits (Design's eight commands at 1000 to 1024 pt);
+    /// it is the narrowest the row gets.
+    nonisolated public static let compactSpacing: CGFloat = SuiteSize.toolButton
 
-    /// The widest of `spacingSteps` whose row of `itemCount` items, centered in
-    /// a window `windowWidth` wide, keeps clear of both toolbar ends: the
-    /// leading end is the sidebar column, `leadingButtons` and the title; the
-    /// trailing end is `trailingButtons`. Centered on the window, the row's
-    /// half must fit beside the wider end, so its width is at most
-    /// windowWidth − 2 × max(leading, trailing); centered between the two ends
-    /// instead it needs less. Below every step (or before the window is
-    /// measured) it is `switcherSpacingMinimum`.
+    /// The toolbar width one button takes: its share of its glass group
+    /// (measured 36 to 37.5 pt in runs 38897404951 and 38938835086).
+    nonisolated public static let toolbarButtonRoom: CGFloat = SuiteSize.toolButton + SuiteSpacing.xs
+    /// From the leading buttons' end to where the row starts: the window title's
+    /// slot, which the toolbar keeps about 155 pt wide whatever the title
+    /// ("Flare", "Untitled Project", "journey.design"), and its gaps. Measured,
+    /// the row starts at 423 to 424 pt after one leading button and at 538 pt
+    /// after Design's four; this model says 432 and 540.
+    nonisolated public static let titleRoom: CGFloat = 5 * toolbarButtonRoom + SuiteSpacing.l
+    /// Past the trailing buttons: the window edge's margin (about 10 pt) and the
+    /// least gap the toolbar keeps before its trailing group. A row 12 pt
+    /// (Halo, 1000 pt at 80) or about 16 pt (Design, 1024 pt at 40) from that
+    /// group pushed buttons into the overflow; 36 pt (Halo, 1024 pt at 80) kept them.
+    nonisolated public static let trailingClearance: CGFloat = 2 * SuiteSpacing.xl
+
+    /// Where the row's leading edge can be at the earliest: the sidebar column,
+    /// `leadingButtons` and the title's slot.
+    nonisolated public static func toolbarLeading(leadingButtons: Int) -> CGFloat {
+        SuiteSize.sidebarWidth.ideal + CGFloat(max(leadingButtons, 0)) * toolbarButtonRoom + titleRoom
+    }
+
+    /// The room `trailingButtons` take at the window's trailing end, with their clearance.
+    nonisolated public static func toolbarTrailing(trailingButtons: Int) -> CGFloat {
+        CGFloat(max(trailingButtons, 0)) * toolbarButtonRoom + trailingClearance
+    }
+
+    /// Where the row of `itemCount` items at `spacing` ends in a window
+    /// `windowWidth` wide: the toolbar centers it in the window unless that
+    /// would overlap the leading end, and then starts it at the leading end
+    /// (every journey shot so far shows the second).
+    nonisolated public static func rowEnd(
+        windowWidth: CGFloat, spacing: CGFloat, itemCount: Int, leadingButtons: Int
+    ) -> CGFloat {
+        let row = spacing * CGFloat(max(itemCount, 0))
+        return max(windowWidth / 2 - row / 2, toolbarLeading(leadingButtons: leadingButtons)) + row
+    }
+
+    /// The widest of `spacingSteps` whose row of `itemCount` items ends
+    /// before the trailing buttons' room (`rowEnd` ≤ windowWidth −
+    /// `toolbarTrailing`), else `compactSpacing`: the switcher gives way
+    /// before any toolbar action goes into the overflow. Before the window is
+    /// measured (width 0) nothing fits, so it is `compactSpacing` too.
     nonisolated public static func toolbarSpacing(
         windowWidth: CGFloat, itemCount: Int, leadingButtons: Int, trailingButtons: Int
     ) -> CGFloat {
-        let leading = SuiteSize.sidebarWidth.ideal + CGFloat(max(leadingButtons, 0)) * toolbarButtonRoom + titleRoom
-        let trailing = CGFloat(max(trailingButtons, 0)) * toolbarButtonRoom
-        let room = windowWidth - 2 * max(leading, trailing)
-        let count = CGFloat(max(itemCount, 0))
-        return spacingSteps.first { $0 * count <= room } ?? SuiteSize.switcherSpacingMinimum
+        let limit = windowWidth - toolbarTrailing(trailingButtons: trailingButtons)
+        return spacingSteps.first {
+            rowEnd(windowWidth: windowWidth, spacing: $0, itemCount: itemCount, leadingButtons: leadingButtons)
+                <= limit
+        } ?? compactSpacing
+    }
+
+    /// The current item's capsule height at `spacing`: `switcherCapsule.height`,
+    /// or a tool button's height at the compact step, where the item is that wide.
+    nonisolated public static func capsuleHeight(spacing: CGFloat) -> CGFloat {
+        spacing < SuiteSize.switcherSpacingMinimum ? SuiteSize.toolButton : SuiteSize.switcherCapsule.height
     }
 
     /// The current item's capsule width at `spacing`: `switcherCapsule.width`,
     /// narrowed so each end stays SuiteSpacing.xs clear of a neighbour's icon
-    /// (90 at 80 and 64, 66 at 48, 50 at 40), and never under the capsule's
-    /// height, so it stays a capsule.
+    /// (90 at 80 and 64, 66 at 48, 50 at 40, 34 at 32), and never under the
+    /// capsule's height, so it stays a capsule.
     nonisolated public static func capsuleWidth(spacing: CGFloat) -> CGFloat {
         let clear = 2 * (spacing - SuiteSize.switcherIcon / 2 - SuiteSpacing.xs)
-        return max(SuiteSize.switcherCapsule.height, min(SuiteSize.switcherCapsule.width, clear))
+        return max(capsuleHeight(spacing: spacing), min(SuiteSize.switcherCapsule.width, clear))
     }
 
     public var body: some View {
@@ -117,14 +159,15 @@ public struct AppSwitcher: View {
                     Image(systemName: item.systemImage)
                         .font(.system(size: SuiteSize.switcherIcon))
                         .foregroundStyle(isCurrent ? SuiteColor.textPrimary : SuiteColor.textSecondary)
-                        .frame(width: spacing, height: SuiteSize.switcherCapsule.height)
+                        .frame(width: spacing, height: Self.capsuleHeight(spacing: spacing))
                         .contentShape(.rect)
                 }
                 .buttonStyle(.plain)
                 .background {
                     if isCurrent {
                         Color.clear
-                            .frame(width: Self.capsuleWidth(spacing: spacing), height: SuiteSize.switcherCapsule.height)
+                            .frame(
+                                width: Self.capsuleWidth(spacing: spacing), height: Self.capsuleHeight(spacing: spacing))
                             .suiteGlass(in: Capsule())
                     }
                 }
