@@ -62,6 +62,14 @@ extension BodyCountSuites {
             let before = try #require(edited.workspace)
 
             let box = canvas.convert(canvas.bounds, to: nil)
+            // One warm-up stroke, always. The window's first stroke creates the
+            // live stroke's overlay, a canvas-sized layer drawn once when it
+            // appears; that one-time display is not per-sample work, so it
+            // must not land inside the measured stroke.
+            let warm = CGPoint(x: box.minX + box.width * 0.25, y: box.minY + 40)
+            try await w.drag(from: warm, release: false, path: wave(from: warm))
+            w.send(.leftMouseUp, at: CGPoint(x: warm.x + 360, y: warm.y))
+            try await Task.sleep(for: .milliseconds(500))
             let seconds = Double(ProcessInfo.processInfo.environment["PHOTO_WINDOW_STROKE_SECONDS"] ?? "") ?? 0
             let clock = ContinuousClock()
             let until = clock.now + .seconds(seconds)
