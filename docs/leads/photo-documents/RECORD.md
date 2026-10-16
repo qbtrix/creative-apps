@@ -2,9 +2,9 @@
 
 Issue: #1074 · Packet: docs/blueprints/photo/features/photo-documents.md
 Run: act-1a1404bf04c-bp6m · Session: claude/photo-documents-lead-ezrcev · Started: 2026-10-15T10:40Z
-Stage: 4 round 2
-Base: b555f566067a4e692fe3416920af9a77f844a882
-Next: lead runs the gate serially at low load for fixes E (agent-a54bdc1e...), G (agent-a930a085...), F1 (agent-a86f5ccb...) in their worktrees, then pushes and opens their PRs; F2, F4 still building; F3 after F1 merges
+Stage: 4 round 3
+Base: a42b3cff7c7cd9f4f14aa8166e9b30451ebbf0b4
+Next: round 3 on CI run 38829075229 (a42b3cf: #1253, F2 #1254, F4 #1255); F1b (Keep layers? NSAlert + text), F3 (plain open errors), G2 (Saving… sample) building
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -79,3 +79,6 @@ Waves (packet's Build waves, checked against dev at 00e546a):
 - Container load (~40 on 4 cores, five parallel gates) fails timing budgets in other lines (Flare p95, Library, Halo, Stage). Decision: the lead reruns finished fixers' gates one at a time once load < 6, instead of more parallel reruns.
 - F1 texts: save "Couldn't Save beach.ora" / "<reason>. Choose another folder with File > Save As…"; open "Couldn't Open <file>" / ArchiveError.message; recovery offer NSAlert sheet with informative text; Keep layers? names beach.ora and beach.png. Packet line 107 still quotes the old save text (packet edit belongs to the finish PR).
 - F4 #1255: debug runs PB-18/19/20 on 400x300, report-only (debug ~22 us/px/pass, 2-13x over the 10x scaled bound); +3.4 s debug wall time.
+- #1253 (another session, same identity) landed Close ⌘W, the restore offer as NSAlert with ids, title+message alerts (PhotoProblem), PJ-P3 Touch Bar query and PJ-2's autosave label check. Fixes E, F1, G as written were dropped (local only, never pushed); remaining items re-briefed as F1b, F3, G2 on fresh dev.
+- The gate queue never ran: a defunct swift-frontend zombie kept `pgrep` true for 2 h. Lesson: check load only, or ignore zombie processes.
+- Merged in round 2: #1254 (F2 status help + inset), #1255 (F4 debug budgets report-only).
