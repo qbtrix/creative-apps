@@ -2,9 +2,9 @@
 
 Issue: #1333 · Packet: docs/blueprints/halo/features/easing.md
 Run: act-1a1448a5fbe-p22s · Session: session_01Fpq7bUwf2TjhThXdtGKn4r · Started: 2026-10-16T11:48Z
-Stage: 3 wave 4
+Stage: 4 round 1
 Base: e464ecab9b0e11b9cfc27851181beafdb8fee424
-Next: wait for the lane to merge #1389 (EZ-8, feature-done); then stage 4 Anatomy round 1 on the full dev CI run it triggers
+Next: wait for full dev CI run 38914550143 (head e0abe75529, contains #1389); then Anatomy round 1: ui-screens + snapshots + audit, critic-panel.js with issue 1333
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -16,7 +16,7 @@ Next: wait for the lane to merge #1389 (EZ-8, feature-done); then stage 4 Anatom
 | EZ-5 | 2 | `HaloAvailability+Easing.swift` turns the five Keyframe Easing commands on when a key is picked | Sources/HaloModel/Availability/HaloAvailability+Easing.swift, Tests/HaloModelTests/HaloEasingAvailabilityTests.swift | HaloEasingAvailabilityTests | #1352 | merged |
 | EZ-4 | 3 | HB-7 budget | Tests/HaloModelTests/HaloEasingBudgetTests.swift | HaloEasingBudgetTests.easingStep | #1363 | merged |
 | EZ-6 | 3 | `HaloEasingInspector` EASING group + `HaloWindow+Easing` routes | Sources/HaloApp/HaloEasingInspector.swift, Sources/HaloApp/HaloWindow+Easing.swift, Tests/AppSnapshotTests/HaloEasingSnapshots.swift | HaloEasingSnapshots (6 PNGs) | #1364 | merged |
-| EZ-8 | 4 | H-J7 `testEaseKeys` steps 1 to 8 on `-HaloSample keyed`; `feature-done` | UITests/HaloJourneyTests+Easing.swift | H-J7 on dev CI | #1389 | open, macOS build 38911489559 running |
+| EZ-8 | 4 | H-J7 `testEaseKeys` steps 1 to 8 on `-HaloSample keyed`; `feature-done` | UITests/HaloJourneyTests+Easing.swift | H-J7 on dev CI | #1389 | merged |
 
 Wave 1: EZ-1, EZ-2, EZ-7 independent (disjoint files; EZ-2 reads tracks and W0's `selectedKeys` directly; EZ-7 only sends FD-11 commands).
 Wave 2: EZ-3 waits on EZ-1 (`.live` runs need `LiveKeyEasing`) and EZ-2 (`pickedKeys`, `pickedSegment`, same file). EZ-5 waits on EZ-1 (`unavailableHelp == nil`) and EZ-2 (`pickedKeys`). EZ-3 and EZ-5 independent of each other.
