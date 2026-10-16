@@ -6,3 +6,6 @@ utc	stage	event	ref	note
 2026-10-16T12:03Z	3	pr-opened	#1340	SC-1a values
 2026-10-16T12:11Z	3	pr-merged	#1340	SC-1a
 2026-10-16T12:25Z	3	stage-start	wave 2	SC-1b SC-1c SC-4a on 8ecd8b9
+2026-10-16T12:34Z	3	pr-opened	#1349	SC-1c
+2026-10-16T12:34Z	3	pr-opened	#1350	SC-1b
+2026-10-16T12:41Z	3	pr-opened	#1353	SC-4a
