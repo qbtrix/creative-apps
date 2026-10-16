@@ -18,6 +18,13 @@ Each app has three layers. Each depends only on the ones below it.
 1. **creative-core** (another repo): the engines. FlareCore (animation
    document, commands, timeline, export), CoreColor (color spaces), CoreRaster
    (pixel buffers, compositing, image operations). Pure Swift, Linux-safe.
+   Pinned to one commit (`revision:` in `Package.swift`, recorded in the
+   committed `Package.resolved`), so a core merge can't reach the apps
+   unchecked: `scripts/bump-core` moves the pin through a PR that names the
+   core range and its PRs, after every Model test target and the brush perf
+   suites pass on it, and the supervisor merges it once the macOS job is
+   green. Gate: `scripts/ci` builds only from the committed `Package.resolved`
+   and fails when it disagrees with `Package.swift`.
 2. **`<X>Model`**: the app's state and logic: what is open, what is selected,
    which tool is active, and every operation a view can ask for. It calls
    creative-core to do the real work. Linux-safe, so it is where tests live.
@@ -39,7 +46,8 @@ SuiteUI sits beside the apps: it knows nothing about any Model or engine.
   tests cover it. Arithmetic that can fail (division, indexing) never lives in
   a view. Review-only.
 - **Models call creative-core; they don't copy it.** If the engine lacks
-  something, file `needs-core` on creative-core (CLAUDE.md) and keep going.
+  something, file `needs-core` on creative-core (CLAUDE.md) and keep going;
+  the merged core feature arrives with the next bump PR.
   Document edits go through the engine's commands (FlareCore's `Command` and
   `CommandEngine`), so undo works. Review-only.
 - **Models are Linux-safe.** Foundation only, through the FoundationEssentials

@@ -1,8 +1,11 @@
 #!/usr/bin/env bash
 # scripts/ci: the one gate. Runs the no-crash lint, the app-state rule, the
 # design lint, the C4 ownership check, the duplicate-code check, the contact
-# sheet, audit-lower, test-died and jetsam-summary tests, the journey
+# sheet, audit-lower, test-died, jetsam-summary and bump-core tests, the journey
 # quarantine check, swift build and swift test, then prints PASS or FAIL and exits with the real status.
+# swift build takes its dependencies only from the committed Package.resolved
+# (--force-resolved-versions): a Package.swift whose creative-core revision
+# doesn't match it fails here instead of re-resolving (scripts/bump-core moves both).
 # A swift test that dies without its "Test run with" summary prints TEST PROCESS DIED and the tests it left
 # unfinished (scripts/test-died). CI
 # runs exactly this on Linux and macOS; run it before every PR. On Linux,
@@ -284,6 +287,8 @@ bash Tests/jetsam/test_jetsam_summary.sh || fail "jetsam summary: scripts/jetsam
 echo "== journey quarantine (UITests/quarantine.json)"
 bash Tests/quarantine/test_quarantine.sh || fail "journey quarantine: scripts/quarantine broke its fixture test"
 scripts/quarantine check || fail "journey quarantine: fix, renew or remove the entries above (the supervisor edits UITests/quarantine.json)"
+echo "== bump core (Tests/bump_core)"
+bash Tests/bump_core/test_bump_core.sh || fail "bump core: scripts/bump-core broke its tests"
 
 flags=()
 if [[ "$(uname)" == Darwin ]]; then
@@ -295,7 +300,8 @@ if [[ "$(uname)" == Darwin ]]; then
 fi
 
 echo "== swift build"
-swift build ${flags[@]+"${flags[@]}"} || fail "swift build"
+swift build --force-resolved-versions ${flags[@]+"${flags[@]}"} \
+  || fail "swift build (an out-of-date Package.resolved means the creative-core pin moved by hand: use scripts/bump-core)"
 
 # run_tests LABEL ARGS...: one `swift test` run, its wall time, and on a
 # failure its cause: a dead test process (no "Test run with" summary) names
