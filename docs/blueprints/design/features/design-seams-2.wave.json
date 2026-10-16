@@ -5,7 +5,7 @@
   "status": "planned",
   "feature_issue": "file when ready",
   "covers": "–",
-  "waits_on": "design-contracts; the wave-1 slices whose files it reopens (style-rows SR-a, SR-b; files-history FH-a, FH-b; layers-panel LP-b; select-several SS-b); design-seams; all of design-window",
+  "waits_on": "design-contracts; the wave-1 slices whose files it reopens (style-rows SR-m, SR-b; files-history FH-a, FH-b; layers-panel LP-b; select-several SS-b); design-seams; all of design-window; canvas-basics (D2-3b, D2-4a, D2-4b)",
   "depends": [
     "design-contracts"
   ],
@@ -88,9 +88,6 @@
         "Tests/DesignModelTests/DesignContractLawTierTwoTests.swift"
       ],
       "waits": {
-        "style-rows:SR-a": [
-          "D2-1a"
-        ],
         "style-rows:SR-b": [
           "D2-1a"
         ],
@@ -99,6 +96,9 @@
         ],
         "layers-panel:LP-b": [
           "D2-1b"
+        ],
+        "style-rows:SR-m": [
+          "D2-1a"
         ]
       }
     },
@@ -159,6 +159,11 @@
           "D2-4a"
         ],
         "files-history:FH-b": [
+          "D2-4b"
+        ],
+        "canvas-basics": [
+          "D2-3b",
+          "D2-4a",
           "D2-4b"
         ]
       }

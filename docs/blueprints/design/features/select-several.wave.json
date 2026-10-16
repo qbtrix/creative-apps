@@ -5,7 +5,7 @@
   "status": "planned",
   "feature_issue": "file when ready",
   "covers": "#714, #542, #607; gaps: marquee, several layers, Zoom to Selection",
-  "waits_on": "design-contracts; design-seams for S-5, S-7, S-8; view tasks: design-window DW-a (DW-b for the drag check)",
+  "waits_on": "design-contracts; design-seams for S-5, S-7, S-8; view tasks: design-window DW-a (DW-b for the drag check); S-5 also waits on canvas-basics CB-a (DesignCanvasEditing.swift)",
   "depends": [
     "design-contracts"
   ],
@@ -123,6 +123,9 @@
         "SS-a": [
           "S-7b",
           "S-8"
+        ],
+        "canvas-basics:CB-a": [
+          "S-5"
         ]
       }
     }
