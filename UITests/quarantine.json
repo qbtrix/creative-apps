@@ -15,14 +15,7 @@
   {
     "test": "HaloJourneyTests/HaloJourneyTests/testEveryControlActsOrSaysWhy",
     "owner": "#1035",
-    "reason": "H-J13: halo.transport.play is enabled but clicking it changes nothing (HaloJourneyTests.swift:205), the viewer-playback lead's transport. It also fails the overlap audit on the keyed stopwatch (#1282). Both in scoped run 38857364213 on the tree dev holds now.",
-    "expires": "2026-10-18",
-    "scope": "full"
-  },
-  {
-    "test": "HaloJourneyTests/HaloJourneyTests/testInspectorKeysTransform",
-    "owner": "#1282",
-    "reason": "H-J6: the overlap audit fails, 2 violations over a baseline of 0: a keyed stopwatch reads 56 pt wide and covers the diamond (KeyframeButton, #1282). Scoped run 38857364213 on the tree dev holds now.",
+    "reason": "H-J13: halo.transport.play is enabled but clicking it changes nothing (HaloJourneyTests.swift:205), the viewer-playback lead's transport. Scoped run 38857364213 showed it; its overlap failure (#1282) is fixed by #1322 (scoped run 38874911359).",
     "expires": "2026-10-18",
     "scope": "full"
   },
