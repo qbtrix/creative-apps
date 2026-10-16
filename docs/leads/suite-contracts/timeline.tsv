@@ -56,3 +56,4 @@ utc	stage	event	ref	note
 2026-10-16T17:47Z	4	fix-round	round 2	fix batch on 6 minors
 2026-10-16T17:58Z	4	ci-run	38940652547	scoped: suite on 3fbd10f green (all round-1 fixes)
 2026-10-16T18:20Z	4	pr-opened	#1492 #1504 #1518 #1519	round 2 fixes; #1492 merged
+2026-10-16T18:19Z	4	pr-merged	#1504	round 2 fix; full run 38938209193 in progress
