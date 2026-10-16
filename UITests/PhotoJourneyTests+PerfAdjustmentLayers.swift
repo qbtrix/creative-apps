@@ -10,7 +10,8 @@
 // for the contact sheet and attaches it as
 // "perf-report-adjustment-layer-scrub". The samples are the `suite.perf`
 // `bar-slider` samples the scrub added once the window publishes the frame
-// probe (#330), else event samples (the drag's seconds at 60 Hz), as there.
+// probe (SuiteWindow does), else event samples (the drag's seconds at 60 Hz), as there.
+// The inspector has no tabs: the new layer's Exposure slider shows at once.
 import AppKit
 import CoreGraphics
 import XCTest
@@ -18,7 +19,7 @@ import XCTest
 extension PhotoJourneyTests {
     /// PJ-P2's adjustment series: an Exposure adjustment layer's bar scrubbed on `large`; QB-L2, report-only.
     @MainActor func testAdjustmentLayerScrubLatency() throws {
-        let photo = Journey("Photo", self, arguments: photoArguments(fixture: "large", windowWidth: 1800) + ["-SuitePerfProbe"])
+        let photo = Journey("Photo", self, arguments: photoArguments(fixture: "large", windowSize: "1800x820") + ["-SuitePerfProbe"])
         XCTAssert(photo.element("suite.tools").waitForExistence(timeout: 60), "no tool rail (suite.tools)")
         let header = photo.app.descendants(matching: .any)
             .matching(NSPredicate(format: "label CONTAINS %@", "4000 × 3000 px")).firstMatch
@@ -26,9 +27,6 @@ extension PhotoJourneyTests {
 
         adjChooseAdjustmentLayer("Exposure", photo)
         adjExpect("Undo New Adjustment Layer", photo, "New Adjustment Layer > Exposure made no undo step")
-        let adjust = photo.app.radioButtons["Adjust"]
-        XCTAssert(adjust.waitForExistence(timeout: 5), "no Adjust tab")
-        adjust.click()
         let slider = photo.app.sliders["Exposure"]
         XCTAssert(slider.waitForExistence(timeout: 10), "the Exposure adjustment layer shows no Exposure slider")
         photo.shot("perf-adjustment-layer-added")

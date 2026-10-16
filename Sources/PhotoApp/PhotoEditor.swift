@@ -5,7 +5,7 @@
 // Redo and the zoom commands trailing), the layer list in the sidebar
 // (PhotoLayerList), the canvas with its rulers in EditorDetail with the
 // floating tool palette over its leading edge while an image is open (each
-// tool a PhotoRailTool carrying the workspace's `toolHelp`) and the status
+// tool a PhotoPaletteTool carrying the workspace's `toolHelp`) and the status
 // line under it (PhotoStatusLine, with the save status `photo.bar.saved`
 // beside it), and PhotoPanel in the inspector. Values in, intents out: it
 // reads the workspace and sends every action to `perform`, so the same view
@@ -62,9 +62,9 @@ struct PhotoEditor: View {
                     .scrollIndicators(.never)
             } palette: {
                 if model.canvas != nil {
-                    ToolbarGroup(tools: PhotoRailTool.rail(model), selected: PhotoRailTool(model.tool, in: model)) {
-                        perform(.tool($0.tool))
-                    }
+                    ToolbarGroup(
+                        tools: PhotoPaletteTool.palette(model), selected: PhotoPaletteTool(model.tool, in: model)
+                    ) { perform(.tool($0.tool)) }
                 }
             } status: {
                 HStack(spacing: 0) {
@@ -96,20 +96,6 @@ struct PhotoEditor: View {
             item.title(in: model), systemImage: item.systemImage, unavailableHelp: item.unavailableHelp(in: model),
             identifier: item.identifier
         ) { perform(intent) }
-    }
-}
-
-/// The Image menu's items, in the menu bar.
-struct PhotoImageMenu: View {
-    let perform: PhotoPerform
-
-    var body: some View {
-        Button("Image Size…") { perform(.imageSize) }
-        Divider()
-        Button("Rotate 90° Clockwise") { perform(.rotate(.degrees90)) }
-        Button("Rotate 90° Counterclockwise") { perform(.rotate(.degrees270)) }
-        Button("Rotate 180°") { perform(.rotate(.degrees180)) }
-        Button("Straighten…") { perform(.straighten) }
     }
 }
 
@@ -172,7 +158,7 @@ struct PhotoCanvas: View {
         case .escape:
             perform(.dismiss)
         default:
-            // A disabled tool's key does nothing, as its rail button does.
+            // A disabled tool's key does nothing, as its palette button does.
             guard
                 let tool = PhotoTool.allCases.first(where: { $0.shortcut.map(String.init) == press.characters.lowercased() }),
                 model.toolHelp(tool) == nil

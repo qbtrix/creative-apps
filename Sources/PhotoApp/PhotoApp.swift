@@ -5,8 +5,8 @@
 // in the window toolbar). The window keeps its title bar and follows the
 // system appearance, and View > Hide Sidebar (SidebarCommands) makes room on a
 // small screen. PhotoWindow holds the state; the menus in PhotoCommands reach
-// it through a focused scene value. A window opens `-PhotoWindowWidth` points
-// wide when given (880...4096), else 1280.
+// it through a focused scene value. A window opens 1000 x 700, or at
+// `-SuiteWindowSize WxH` when given (SuiteWindow reads it).
 //
 // PhotoAppDelegate (photo-documents D-10) sends files Finder hands the app
 // to an empty window or a new one (PhotoOpenQueue), and on Quit asks each
@@ -22,7 +22,7 @@ struct PhotoApp: App {
 
     var body: some Scene {
         WindowGroup(id: PhotoOpenQueue.windowID) { PhotoWindow() }
-            .defaultSize(width: CGFloat(PhotoWindow.launchOptions.windowWidth ?? 1280), height: 820)
+            .defaultSize(width: 1000, height: 700)
             .commands {
                 SidebarCommands()
                 PhotoCommands()
