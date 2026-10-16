@@ -58,7 +58,7 @@ struct HomeInspector: View {
         ]
         if card.isMissing {
             list.append(ToolbarAction("Locate…", systemImage: "magnifyingglass", identifier: "afterglow.home.inspector.locate") {
-                locate(ref)
+                Self.locate(ref, model: model)
             })
         }
         list.append(ToolbarAction("Remove from Recents", systemImage: "minus.circle",
@@ -68,8 +68,9 @@ struct HomeInspector: View {
         return list
     }
 
-    /// Locate…: the person picks where the file went; the card re-points to it.
-    private func locate(_ ref: SuiteDocumentRef) {
+    /// Locate…: the person picks where the file went; the card re-points to
+    /// it. The inspector and the missing-file notice both call it.
+    static func locate(_ ref: SuiteDocumentRef, model: HomeModel) {
         let panel = NSOpenPanel()
         panel.canChooseFiles = true
         panel.canChooseDirectories = false
