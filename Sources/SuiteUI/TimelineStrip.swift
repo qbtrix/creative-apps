@@ -276,7 +276,7 @@ public struct TimelineStrip<ID: Hashable & Sendable>: View {
                 // The strip owns the tap so no closure sits in what `.equatable()` compares.
                 TimelineLane(track: track, mapping: mapping).equatable()
                     .contentShape(Rectangle())
-                    .modifier(TimelineLaneInput(track: track, mapping: mapping, onSelectKeyframe: onSelectKeyframe))
+                    .modifier(TimelineLaneInput(track: track, mapping: mapping, actions: TimelineLaneActions(onSelectKeyframe: onSelectKeyframe, onSelectTrack: onSelectTrack, onPickKeyframe: onPickKeyframe)))
             }
         }
         .frame(width: width, alignment: .leading)
