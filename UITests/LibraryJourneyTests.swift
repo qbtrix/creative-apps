@@ -73,6 +73,7 @@ final class LibraryJourneyTests: XCTestCase {
         XCTAssert(position.waitForExistence(timeout: 5), "no loupe position (library.loupe.position)")
         let start = Self.text(of: position)
         XCTAssert(start.contains(" of "), "the loupe position reads \(start), not \"<name>  ·  n of m\"")
+        XCTAssert(start.contains("star"), "the loupe readout \(start) doesn't show the photo's rating (#1661)")
         library.shot("loupe")
         // The loupe's keys act while it has focus; a menu click may leave focus
         // elsewhere, so click the photo first, as a person would.

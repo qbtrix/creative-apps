@@ -1,8 +1,9 @@
 // LibraryRatingSnapshots.swift: the cull feature's result (cull CU-5): the
-// loupe on a sample photo culled to 3 stars, picked and red, beside the
-// MetadataInspector for that photo and for a second, rejected photo, with
-// the loupe's value written under them. Built only through the catalog's
-// public cull methods, in Light and Dark. Writes library-rated-{light,dark}.png.
+// loupe on a sample photo culled to 3 stars, picked and red, with nothing
+// selected in the grid: its glass readout ends with that cull state and the
+// window's own LibraryInspector shows the loupe photo (#1661), beside the
+// MetadataInspector for a second, rejected photo. Built only through the
+// catalog's public cull methods, in Light and Dark. Writes library-rated-{light,dark}.png.
 // macOS only.
 import LibraryModel
 import SuiteUI
@@ -27,7 +28,7 @@ import Testing
         #expect(catalog.cullError == nil)
 
         var rated = catalog
-        rated.select([order[0]])
+        rated.select([])
         rated.open(order[0])
         var rejected = catalog
         rejected.select([order[1]])
@@ -35,32 +36,32 @@ import Testing
         let rejectedMetadata = try #require(rejected.selectedMetadata)
         let value = try #require(rated.loupeValue)
         #expect(value.hasSuffix("3 stars, Picked, Red"), "the loupe's value reads \(value)")
+        let readout = try #require(rated.loupeReadout)
+        #expect(readout.hasSuffix("  ·  3 stars, Picked, Red"), "the loupe's readout reads \(readout)")
+        #expect(ratedMetadata.title == rated.loupeItem?.name)
         #expect(ratedMetadata.rating == .value(3) && ratedMetadata.flag == .value(.pick))
         #expect(ratedMetadata.label == .value(.red))
         #expect(rejectedMetadata.flag == .value(.reject))
 
         for scheme in [ColorScheme.light, .dark] {
             try snapshot(
-                page(rated, value: value, inspectors: [ratedMetadata, rejectedMetadata]),
+                page(rated, other: rejectedMetadata),
                 name: "library-rated-\(scheme == .dark ? "dark" : "light")", scheme: scheme)
         }
     }
 
-    /// The loupe on the left; the two inspectors and the loupe's value on the right.
-    private func page(_ model: LibraryCatalog, value: String, inspectors: [PhotoMetadata]) -> some View {
+    /// The loupe on the left; the window's inspector for it and the other photo's on the right.
+    private func page(_ model: LibraryCatalog, other: PhotoMetadata) -> some View {
         HStack(alignment: .top, spacing: 0) {
             LibraryBrowser(model: model)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             VStack(alignment: .leading, spacing: SuiteSpacing.m) {
-                ForEach(inspectors, id: \.title) { metadata in
-                    MetadataInspector(metadata: metadata)
-                        .frame(width: SuiteSize.inspectorWidth.ideal, height: 360, alignment: .topLeading)
-                        .background(SuiteColor.panel)
-                }
-                Text(value)
-                    .font(SuiteFont.caption)
-                    .foregroundStyle(SuiteColor.textSecondary)
-                    .frame(width: SuiteSize.inspectorWidth.ideal, alignment: .leading)
+                LibraryInspector(model: model)
+                    .frame(width: SuiteSize.inspectorWidth.ideal, height: 400, alignment: .topLeading)
+                    .background(SuiteColor.panel)
+                MetadataInspector(metadata: other)
+                    .frame(width: SuiteSize.inspectorWidth.ideal, height: 360, alignment: .topLeading)
+                    .background(SuiteColor.panel)
             }
             .padding(SuiteSpacing.l)
         }
