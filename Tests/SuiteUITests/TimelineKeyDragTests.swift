@@ -76,8 +76,10 @@ import Testing
         _ = drag.move(dx: 50, actions: log.actions)
         drag.cancel(actions: log.actions)
         #expect(log.calls == ["move 3", "move 2", "move -5", "end"])
-        #expect(!drag.move(dx: 80, actions: log.actions), "a cancelled drag sends nothing more")
-        #expect(!drag.release(actions: log.actions))
+        let movedAfterCancel = drag.move(dx: 80, actions: log.actions)
+        #expect(!movedAfterCancel, "a cancelled drag sends nothing more")
+        let releasedAfterCancel = drag.release(actions: log.actions)
+        #expect(!releasedAfterCancel)
         #expect(log.calls == ["move 3", "move 2", "move -5", "end"])
     }
 
@@ -86,8 +88,10 @@ import Testing
         var drag = try #require(begin(40, log: log))
         _ = drag.move(dx: 30, actions: log.actions)
         _ = drag.move(dx: 0, actions: log.actions)
-        #expect(!drag.release(actions: log.actions))
-        #expect(!drag.release(actions: log.actions))
+        let firstRelease = drag.release(actions: log.actions)
+        #expect(!firstRelease)
+        let secondRelease = drag.release(actions: log.actions)
+        #expect(!secondRelease)
         drag.cancel(actions: log.actions)
         #expect(log.calls == ["move 3", "move -3", "end"])
     }
@@ -95,9 +99,11 @@ import Testing
     @Test func aClickOnAPickedKeyPicksItOnRelease() throws {
         let log = Log()
         var drag = try #require(begin(40, log: log))
-        #expect(drag.release(actions: log.actions), "a picked key's waiting pick runs on a still release")
+        let pickedClick = drag.release(actions: log.actions)
+        #expect(pickedClick, "a picked key's waiting pick runs on a still release")
         var fresh = try #require(begin(10, log: log))
-        #expect(!fresh.release(actions: log.actions), "an unpicked key was picked at the press, not twice")
+        let freshClick = fresh.release(actions: log.actions)
+        #expect(!freshClick, "an unpicked key was picked at the press, not twice")
         #expect(!log.calls.contains("end"))
     }
 

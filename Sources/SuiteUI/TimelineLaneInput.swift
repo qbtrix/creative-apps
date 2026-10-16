@@ -76,7 +76,7 @@ struct TimelineLaneInput<ID: Hashable & Sendable>: ViewModifier {
                 .foregroundStyle(SuiteColor.overlayPaper)
                 .padding(SuiteInset.pill)
                 .frame(height: SuiteSize.pill)
-                .background(SuiteColor.accentFill, in: Capsule())
+                .background { Capsule().fill(SuiteColor.accentFill) }
                 .fixedSize()
                 .position(x: tickX(mapping, pillFrame), y: -SuiteSize.pill / 2)
                 .allowsHitTesting(false)
