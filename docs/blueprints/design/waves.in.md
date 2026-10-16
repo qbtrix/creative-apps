@@ -3,15 +3,17 @@
 The Design blueprint (`docs/blueprints/design.md`, merged in #766) grouped
 into features, one feature-lead session each. This file covers the
 blueprint's waves 0, 1 and 2, which have packets; wave 3 (tier 2) gets its
-packets once wave 2 has landed. A wave starts when everything it waits on
-has merged. Two features in the same wave never own the same file. Each
-packet lists its tasks, owned files and acceptance tests.
+packets once wave 2 has landed. Each packet lists its slices, tasks, owned
+files and acceptance tests.
 
-Blueprint wave 0 (`design-seams`, D0-1 to D0-7) is one feature in the
-blueprint. Its code is about 954 lines before tests in the Model alone
-(review of #766), and its window half waits on SuiteUI's harness while its
-Model half does not, so it ships as two features in a chain: wave 0a
-(Model) and wave 0b (window).
+Design is the pilot of factory v3 (2026-10-16): packets are cut into
+**slices** and features wait on **contracts**, not on whole features.
+Blueprint wave 0 ships as three features: `design-contracts` (wave 0a,
+everything the others compile against, Model only, done on Linux in
+hours), then `design-seams` (the gesture routes and shared budgets) and
+`design-window` (the window seam) side by side in wave 0b. The five wave-1
+features start the moment design-contracts closes; their view tasks wait on
+design-window's first slice, DW-a, not on all of it.
 
 Rows whose wave reads `SP1` to `SP3` belong to the shell-parity track, a
 cross-app plan whose order and shared files are in
@@ -20,132 +22,189 @@ file's waves, not this one's.
 
 <!-- waves-table: wave | feature | packet | covers | waits on | feature issue | status -->
 
-No Design feature issue is filed yet: every feature waits on an open
-dependency (below). #288 closes when Design's `identifier` count reaches 0:
-each wave-1 lead reads the count on its `feature-done` run, and the one
-whose run reaches 0 carries `Closes #288` in its last PR (or files the
-remainder as a `gap` issue if wave 1 ends above 0).
+No Design feature issue is filed yet. #288 closes when Design's
+`identifier` count reaches 0: each wave-1 lead reads the count on its
+`feature-done` run, and the one whose run reaches 0 carries `Closes #288` in
+its last PR (or files the remainder as a `gap` issue if wave 1 ends above 0).
+
+## Slices and contract-first waits
+
+```
+ editor-in-window (#1079, SuiteUI) ──> shell-parity (SP2) ──────────────┐
+                                                                        v
+ design-contracts (0a, Linux) ──┬──> design-window  DW-a ──> DW-b ──> DW-c
+   CT-a..CT-d, hours            │      (slots,      (drag    (ids, J15,
+                                │       intents,     box)     layout)
+                                │       menus)
+                                ├──> design-seams   SE-a (gesture routes, budgets)
+                                ├──> select-several ┐
+                                ├──> copy-group     │ Model tasks start here;
+                                ├──> style-rows     │ view tasks wait on DW-a,
+                                ├──> layers-panel   │ drag and scrub checks on DW-b,
+                                └──> files-history  ┘ gesture tasks on design-seams
+ design-seams-2 (2): design-contracts + SR-a, SR-b, FH-a, FH-b, LP-b, SS-b,
+                     design-seams, all of design-window
+```
+
+- **A slice is the unit of done.** Each packet's `## Slices` table gives
+  the slice id, its user-visible behavior in one sentence, its 2 to 5
+  tasks, its journeys and what it waits on. A slice is done when its tasks
+  have merged and its journeys pass: on the Design-scoped macOS run, or on
+  the Linux gate for a Model-only slice, whose journey is a Model walk
+  (MJ1 to MJ7, named in its packet). A feature is done when all its slices
+  are.
+- **Waits name the contract, not the feature.** A feature's `depends`
+  (design-contracts, for every Design feature but shell-parity) is when its
+  lead may start. Each slice's `waits` in the feature's `.wave.json` maps
+  what it waits on (a feature, or `<feature>:<slice>`) to the tasks that
+  wait; the packet's task table says the same in its depends-on column.
+  Belt reads the slice data; this file's table shows the summary.
+- **A file has one owner at a time.** Two slices that can run at once never
+  own the same file. A file changes hands only across a wait: the slot
+  files design-window's DW-a creates pass to the wave-1 feature that fills
+  them, the live stubs pass from design-contracts to the feature that fills
+  each, and design-seams-2 takes back what it reopens only after the slices
+  that own it. `scripts/waves check` proves the order from the data.
+- **The editor body never runs per sample.** Every slice with a drag or a
+  scrub checks that the editor body runs at most 3 times over a 120-sample
+  gesture, with design-window D0-8b's counter and helper.
 
 ## File when ready
 
 The lead playbook (`docs/factory/lead.md`, stage 0) stops a lead whose
 `Depends on:` issue is still open, and Belt launches a lead the moment a
-feature issue exists, so each issue is filed once its dependency has
-merged or closed: labels `feature-lead`, `line:design` and `p1`, a link to
-its packet, the issues it covers, one `Depends on:` line, and the lead
-contract below.
+feature issue exists, so each issue is filed once its first slice can start:
+labels `feature-lead`, `line:design` and `p1`, a link to its packet, the
+issues it covers, one `Depends on:` line, and the lead contract below. Its
+body lists the slice waits from its packet, so the lead holds a task until
+the slice it waits on has merged.
 
-| feature | title | tier | waits on | `Depends on:` line once filed |
+| feature | title | tier | file when | `Depends on:` line once filed |
 |---|---|---|---|---|
-| design-seams | Feature: design-seams | p1 | PR #753 merged (rebased first: it was CONFLICTING against `dev` at review) | `Depends on: #753 (merged)` |
-| design-window | Feature: design-window | p1 | the design-seams feature issue closed, and #778 suite-harness closed | `Depends on: <design-seams issue> (closed)`; the body also names #778 |
-| select-several | Feature: select-several | p1 | the design-window feature issue closed | `Depends on: <design-window issue> (closed)` |
-| copy-group | Feature: copy-group | p1 | the design-window feature issue closed | same |
-| style-rows | Feature: style-rows | p1 | the design-window feature issue closed | same |
-| layers-panel | Feature: layers-panel | p1 | the design-window feature issue closed | same |
-| files-history | Feature: files-history | p1 | the design-window feature issue closed | same |
-| design-seams-2 | Feature: design-seams-2 | p2 (tier 2) | all five wave-1 feature issues closed | `Depends on: <files-history issue> (closed)`; the body lists the other four |
+| design-contracts | Feature: design-contracts | p1 | now (PR #753's Model half is its D0-0) | `Depends on: none` |
+| design-seams | Feature: design-seams | p1 | design-contracts closed | `Depends on: <design-contracts issue> (closed)` |
+| design-window | Feature: design-window | p1 | design-contracts and Design shell-parity closed (DW-a edits shell-parity's window files, so filing earlier leaves the lead idle) | `Depends on: <shell-parity issue> (closed)`; the body also names design-contracts |
+| select-several | Feature: select-several | p1 | design-contracts closed | `Depends on: <design-contracts issue> (closed)`; the body names design-window DW-a, DW-b and design-seams for its later tasks |
+| copy-group | Feature: copy-group | p1 | design-contracts closed | same |
+| style-rows | Feature: style-rows | p1 | design-contracts closed | same, without design-seams |
+| layers-panel | Feature: layers-panel | p1 | design-contracts closed | same, without design-seams |
+| files-history | Feature: files-history | p1 | design-contracts closed | same, DW-a only |
+| design-seams-2 | Feature: design-seams-2 | p2 (tier 2) | the slices S2-a waits on are done (style-rows SR-a, SR-b; files-history FH-a; layers-panel LP-b) | `Depends on: <style-rows issue>`; the body lists every slice wait in its packet |
 
-Housekeeping before wave 0a (review of #766, blueprint Q6): close PR #719,
-whose fix shipped as #749, and rebase #753, dropping its `docs/c4/model.json`
-edit on the rebase (the supervisor folds it in with the rest), or keeping it
-as a captain-approved exception.
+The pilot runs at most 6 Design leads at once; when more can start, the
+features whose next slice unblocks the most others go first
+(design-contracts, then design-window, then the wave-1 features).
+
+Housekeeping (review of #766, blueprint Q6): close PR #719, whose fix
+shipped as #749. PR #753 (corner radius, CONFLICTING against `dev`) no
+longer blocks anything: design-contracts D0-0 rebuilds its Model half
+without its `docs/c4/model.json` edit, and style-rows ST-4, ST-5 and ST-6
+build its inspector row, canvas drawing and journey step; ST-6 closes #532,
+which #753 named.
 
 ## Why this order
 
-- **Wave 0a takes every shared Model file once** (`DesignNode.swift`,
-  `DesignWorkspace.swift`, `DesignServices.swift`, the contracts, the
-  actions, the gesture routes) and backs each new slot with `NotBuilt`,
-  so nothing that works today goes off and no later feature has to add a
-  case, slot or stored field. Wave 1 still edits some of these files for
-  its own behavior, as a deliberate change from the blueprint's 8.2 table:
-  select-several takes `DesignActions.swift`, `DesignActions+Edit.swift`
-  and `DesignCanvasEditing.swift` (the #542 guard on the public entry
-  points), and layers-panel takes `DesignWorkspace.swift` (#613); no two
-  wave-1 features share one. It needs no SuiteUI and no engine, so it can start as soon as
-  #753 merges.
-- **Wave 0b takes every shared window file once** (`DesignIntent.swift`,
-  `DesignWindow.swift`, `DesignCommands.swift`, the menus) and puts every
-  tier-1 control on screen, disabled with "<Feature> isn't built yet.". It
-  waits on SuiteUI's harness (#778) for three things it cannot make
-  itself: the journey template that compiles `UITests/DesignJourneyTests*.swift`
-  (SH-7, #333), `suite.controls` through `.suiteControl` and `.suiteProbes()`
-  (SH-5, #775, the one publisher), and `suite.perf` (SH-4, #330).
-- **Wave 1 is the everyday loop** in five features with disjoint files,
-  any order. None waits on creative-core. Each SuiteUI part it would like
-  (a `CanvasViewport` show-rect input, `ScrubField` mixed, `EditorSaveStatus`,
+- **design-contracts goes first, alone, and fast.** It holds the schema,
+  the protocols, `DesignServices` with `NotBuilt`, the fakes, one live stub
+  per tier-1 slot, the actions every view calls, and the fixtures. Its
+  longest chain is 6 tasks of Model code that the Linux gate proves, so it
+  closes in hours, and every later Model task codes against it.
+- **design-seams and design-window run beside wave 1.** design-seams adds
+  the gesture routes three features drive (select-several, copy-group and
+  design-seams-2). design-window publishes its slot and intent contract
+  first (DW-a), then the canvas drag box (DW-b), then ids and the sweeps
+  (DW-c). Each wave-1 feature takes over the slot files it fills when DW-a
+  merges.
+- **design-window waits on Design shell-parity**, which moves the window
+  onto `SuiteWindow` in the same files; the cross-app track
+  (`shell-parity-waves.md`) puts that move first, and it waits on
+  editor-in-window (#1079). The Model slices don't wait on it.
+- **Wave 1 is the everyday loop** in five features with disjoint files. None
+  waits on creative-core. Each SuiteUI part it would like (a
+  `CanvasViewport` show-rect input, `ScrubField` mixed, `EditorSaveStatus`,
   the sidebar rename and group-row toggles) has a placeholder or an
   `XCTSkip` naming the issue, so no wave-1 feature waits on another line.
-- **Wave 2 repeats the seam for tier 2** once wave 1 has let go of the
-  shared files, so wave 3's four features (export, pen, components,
+- **Wave 2 repeats the seam for tier 2** once the slices that own its files
+  have merged, so wave 3's four features (export, pen, components,
   variables) run side by side.
 
 ## What each feature waits on in other lines (none blocks its start)
 
 | feature | SuiteUI | creative-core |
 |---|---|---|
+| design-contracts | – | – |
 | design-seams | – | – |
-| design-window | #778 suite-harness (SH-4 #330, SH-5 #775, SH-7 #333); files a new `needs-ui` issue: `ScrubField` mixed state | – |
-| select-several | files a new `needs-ui` issue: `CanvasViewport` shows a document rect (J4's centering assert skips on it); #330, #333 for P1; #273 is not waited on (Q7: canvas-marks CM-4 files Design's adoption task) | – |
+| design-window | #778 suite-harness has merged (SH-4 `suite.perf`, SH-5 `.suiteControl` and `.suiteProbes()`, SH-7's journey template); files a new `needs-ui` issue: `ScrubField` mixed state; through shell-parity, editor-in-window #1079 | – |
+| select-several | files a new `needs-ui` issue: `CanvasViewport` shows a document rect (J4's centering assert skips on it); #273 is not waited on (Q7: canvas-marks CM-4 files Design's adoption task) | – |
 | copy-group | – | – |
-| style-rows | #718 (inspector-controls IC-3: `onEnd` on the color rows; Design's local end works meanwhile); #330, #333 for P2 | – |
-| layers-panel | lists-and-layers: #577, #108 (rename keys), #73 (context menus), #589 (LL-9, group-row toggles: J12's eye step skips on it); #330, #333 for P3 | – |
-| files-history | editor-chrome EC-4 #339 (`EditorSaveStatus`; plain status text meanwhile); #330, #333 for P4 | – |
+| style-rows | #718 (inspector-controls IC-3: `onEnd` on the color rows; Design's local end works meanwhile; `ScrubField`'s `onEnd` is on `dev`) | – |
+| layers-panel | lists-and-layers: #577, #108 (rename keys), #73 (context menus), #589 (LL-9, group-row toggles: J12's eye step skips on it) | – |
+| files-history | editor-chrome EC-4 #339 (`EditorSaveStatus`; plain text meanwhile) | – |
 | design-seams-2 | editor-chrome EC-4 #339 (Export's primary style; plain item meanwhile) | – |
+| shell-parity | editor-in-window #1079 (its `feature-done` waits on #933's fix) | – |
 
-Screen-side budgets (blueprint 7.1, the review's "weak" note): until
-#330 and #333 land, P1 to P4 cannot run even report-only; each lead
-records them as blocked in RECORD.md with the issue numbers, and the model
-half gates alone (Q3). QD-V2, QD-V4's golden half, QD-V9 and the QB-F5
-goldens wait on #331 and #332 (suite-harness SH-9, SH-10).
+**SuiteUI owner lane.** `Sources/SuiteUI/CanvasViewport.swift`'s
+`checkerTile` (line 309 on `dev`) is a computed `static var` that rebuilds
+on every body run of the canvas, Design's and Photo's. It is SuiteUI's file,
+so it is a SuiteUI issue, not a Design task; until it lands each canvas
+re-run still pays for the tile. DW-b's checks count the editor body, so
+they don't wait on it.
 
-## Files across the waves
+Screen-side budgets: `suite.perf` and the journey template are on `dev`, so
+P1 to P4 run report-only until ten green runs set their gates. QD-V2,
+QD-V4's golden half, QD-V9 and the QB-F5 goldens wait on #331 and #332
+(suite-harness SH-9, SH-10).
 
-- **Wave 0a, design-seams** owns, in `Sources/DesignModel/`:
-  `DesignNode.swift`, `DesignWorkspace.swift`, `DesignSelection.swift`,
-  `DesignFile.swift`, `Contracts/` (three files), `NotBuilt.swift`,
-  `DesignServices.swift`, `Fakes/` (three files), `Live/` (ten files),
-  `DesignActions.swift`, `DesignActions+Edit.swift`,
-  `DesignCanvasEditing.swift`, `DesignFixtures.swift`, and its tests.
-- **Wave 0b, design-window** owns `Sources/DesignModel/DesignWindowOptions.swift`
-  and, in `Sources/DesignApp/`: `DesignIntent.swift`, `DesignWindow.swift`,
-  `DesignEditor.swift`, `DesignCanvas.swift`, `DesignCanvasMarks.swift`,
-  `DesignSelectionMarks.swift`, `DesignFrameLabels.swift`,
-  `DesignInspector.swift`, `DesignAlignBar.swift`,
-  `DesignPasteboardBridge.swift`, `DesignLayersPanel.swift`,
-  `DesignPanel.swift`, `DesignCommands.swift`, `DesignEditMenu.swift`,
-  `DesignObjectMenu.swift`; `UITests/DesignJourneyTests.swift`,
-  `+EveryControl`, `+Layout`; its snapshots and tests.
-- **Wave 1** (disjoint, checked by the critic):
-  - select-several: `Live/LiveMarquee`, `LiveTransforming`, `LiveAligning`,
-    `LiveFraming`; `DesignAlign.swift`, `DesignCanvasEditing.swift`,
-    `DesignActions.swift`, `DesignActions+Edit.swift` (the #542 guard);
-    `DesignCanvas.swift`, `DesignSelectionMarks.swift`, `DesignAlignBar.swift`;
-    `+Select`, `+PerfCanvas`.
-  - copy-group: `Live/LiveDuplicating`, `LiveGrouping`, `LiveClipboard`;
-    three new snapshot files; `+Arrange`. No view.
-  - style-rows: `Live/LiveStyling`; `DesignCorners.swift`,
-    `DesignInspectorContent.swift`, `DesignText.swift`;
-    `DesignInspector.swift`, `DesignInspectorStyle.swift`,
-    `DesignCanvasMarks.swift`, `DesignFrameLabels.swift`,
-    `DesignTextEditor.swift`; `+Style`, `+PerfScrub`.
-  - layers-panel: `Live/LiveOrdering`; `DesignLayerToggles.swift`,
-    `DesignWorkspace.swift`; `DesignLayersPanel.swift`; `+Layers`,
-    `+PerfLayers`.
-  - files-history: `Live/LiveFiling`; `DesignFile.swift`,
-    `DesignHistory.swift`; `DesignCommands.swift`, `DesignWindow.swift`,
-    `DesignEditor.swift`; `+Files`, `+PerfFiles`.
-- **Wave 2, design-seams-2** takes back what it needs from wave 1 (listed
-  in its packet) plus `Fakes/DesignTierTwoFakes.swift`, four `Live/`
-  stubs, `DesignActions+TierTwo.swift`, `DesignExportSheet.swift` and
-  `DesignVariablesSheet.swift`.
-- **Nobody** in waves 0 to 2 edits `Sources/SuiteUI/**`, `project.yml`,
-  `UITests/Journey*.swift`, `Tests/AppSnapshotTests/AppSnapshotTests.swift`,
-  `docs/c4/model.json`, `docs/design.md` or `Package.swift`. The
-  `design-model-sources` and `design-app-sources` components already own
-  every new file by path; the supervisor folds the planned descriptions
-  (`docs/blueprints/design/c4-planned.json`) and blueprint section 6's
-  Design rules into those shared docs.
+## Files and their owners
+
+Each feature's `.wave.json` lists its files per slice; `scripts/waves check`
+fails when two slices that can run at once own one. The files that change
+hands, in order:
+
+| file (`Sources/DesignModel/`, `Sources/DesignApp/`) | owners, in order |
+|---|---|
+| `DesignNode.swift`, `DesignCorners.swift` | design-contracts → design-seams-2 S2-a |
+| `DesignFile.swift` | design-contracts → files-history FH-a → design-seams-2 S2-a |
+| `DesignWorkspace.swift` | design-contracts → layers-panel LP-b → design-seams-2 S2-a, S2-b |
+| `DesignServices.swift` | design-contracts → design-seams-2 S2-a |
+| `DesignActions.swift`, `DesignActions+Edit.swift` | design-contracts → select-several SS-b (the #542 guard) |
+| `DesignCanvasEditing.swift` | design-seams → select-several SS-b → design-seams-2 S2-b |
+| `Live/Live<Slot>.swift` | design-contracts (stubs) → the wave-1 feature that fills each (`LiveFiling`: files-history FH-a → design-seams-2 S2-a) |
+| `DesignInspectorContent.swift` | style-rows SR-a → design-seams-2 S2-a |
+| `DesignHistory.swift` | files-history FH-a → design-seams-2 S2-a |
+| `DesignWindowOptions.swift` (with `DesignControlID`) | design-window → design-seams-2 S2-b |
+| `DesignIntent.swift`, `DesignWindow.swift`, `DesignEditor.swift` | shell-parity → design-window → design-seams-2 S2-b |
+| `DesignCanvas.swift` | design-window → design-seams-2 S2-b |
+| `DesignLayersPanel.swift` | shell-parity DP-a → design-window DW-a → layers-panel LP-a |
+| `DesignSelectionMarks.swift`, `DesignAlignBar.swift` | design-window DW-a → select-several SS-a |
+| `DesignInspector.swift` | design-window DW-a → style-rows SR-a |
+| `DesignCanvasMarks.swift` | design-window DW-a → style-rows SR-b → design-seams-2 S2-a, S2-b |
+| `DesignFrameLabels.swift` | design-window DW-a → style-rows SR-b |
+| `DesignCommands.swift` | design-window DW-a → files-history FH-b → design-seams-2 S2-b |
+| `DesignSaveStatus.swift`, `DesignClosePrompt.swift` (slots) | design-window DW-a → files-history FH-b |
+| `DesignObjectMenu.swift` | design-window DW-a → design-seams-2 S2-b |
+| `UITests/DesignJourneyTests.swift` | shell-parity → design-window DW-a → design-seams-2 S2-b |
+| `Tests/AppSnapshotTests/DesignAlignSnapshots.swift`, `DesignInspectorSnapshots.swift`, `DesignLayersSnapshots.swift` | shell-parity → select-several SS-a, style-rows SR-a, layers-panel LP-a |
+
+Every other file has one owner. Journey files are per feature
+(`UITests/DesignJourneyTests+<Area>.swift`); two slices of one feature that
+share one are ordered by a wait.
+
+**Shared files go through their owner lane; no Design task edits them:**
+
+| shared file | owner lane |
+|---|---|
+| `Sources/SuiteUI/**`, `UITests/Journey*.swift` | SuiteUI (`line:suiteui`): a Design need is a `needs-ui` issue |
+| `Package.swift` | targets (#873), protected |
+| `project.yml` | SuiteUI's journey template (SH-7, merged) |
+| `Tests/AppSnapshotTests/AppSnapshotTests.swift` | shared; shell-parity keeps `DesignEditor`'s init, so nobody edits it |
+| `docs/c4/model.json`, `docs/design.md` | the supervisor (`docs/c4/model.json` is generated from `docs/c4/parts/`) |
+| `docs/blueprints/design.md` | files-history FH-7 (its J16 row), the only Design task that edits it |
+
+The `design-model-sources` and `design-app-sources` C4 components own every
+new file by path; the supervisor folds the planned descriptions
+(`docs/blueprints/design/c4-planned.json`) and blueprint section 6's
+Design rules into the shared docs.
 
 ## Folded in from the review of #766
 
@@ -204,19 +263,21 @@ product names.
 
 ## Longest build chain
 
-Each packet was re-cut to `docs/factory/packets.md` (shared docs in one
-final task, a task waits only on merged code it needs, each wave lists its
-independent tasks). Longest depends-on chain in tasks, before and after;
+Each packet follows `docs/factory/packets.md` (shared docs in one final
+task, a task waits only on merged code it needs, each wave lists its
+independent tasks). Longest depends-on chain in tasks, after the v3 re-cut;
 a chain over 3 has its reason in the packet's Build waves section.
 
-- copy-group: 4 before, 3 after.
-- design-seams: 13 before, 8 after.
-- design-seams-2: 7 before, 6 after.
-- design-window: 5 before, 4 after.
-- files-history: 6 before, 3 after.
-- layers-panel: 6 before, 5 after.
-- select-several: 4 before, 4 after.
-- style-rows: 4 before, 4 after.
+- design-contracts: 6 (D0-2.1 → D0-2.2 → D0-2.3 → D0-2.5 → D0-2.6 → D0-2b).
+- design-seams: 1 (was 8 before the contracts moved out).
+- design-window: 6 (was 4; the canvas drag box D0-8a and D0-8b sit in it).
+- select-several: 5 (was 4; J4 moved to S-7b).
+- copy-group: 3.
+- style-rows: 5 (ST-4 split into ST-4 and ST-4b, J11 into ST-6b).
+- layers-panel: 5.
+- files-history: 3.
+- design-seams-2: 6.
+- shell-parity: 3.
 
 ## The lead contract
 
