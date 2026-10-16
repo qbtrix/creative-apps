@@ -2,15 +2,15 @@
 
 Issue: #1325 · Packet: docs/blueprints/design/features/shell-parity.md
 Run: act-1a14478b134-5to5 · Session: claude/design-shell-parity-2jr7z3 · Started: 2026-10-16T12:00Z
-Stage: 3 wave 5
+Stage: 3 polling
 Base: c9e46560366b0c3464a5e822d11c4a865e4dc53e
-Next: wave 5 = fix round 2 (last) for DP-a (#1451, sp/r2-1451) and DP-b (#1452, sp/r2-1452); then the scoped run app=design containing them; findings still open after it become gap issues (rule 11); DP-b's switcher checks wait on #1337
+Next: wait for the lane to merge #1467 and #1469, then the scoped CI run app=design that contains them; DP-a done if J3 green and no finding open; DP-b's shell journeys wait on SuiteUI #1456 (geometry) and #1337 (switcher): after round 2, relabel open DP-b findings gap and say on #1325 that DP-b's journeys are red on SuiteUI
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | rounds | state | run |
 |---|---|---|---|---|---|---|---|
 | DP-a | The toolbar's eight commands each act or say why, and Add Page and Delete Page sit in a row under the pages. | DS-1, DS-2 | J3 | editor-in-window APIs (on dev) | 2 | merged (round 1: #1403 #1404 #1408 merged; round 2: #1451 -> PR #1467) | 38906785154 green, contains #1329 |
-| DP-b | Design opens in the suite window with pages and layers in the sidebar, Properties in the inspector and the floating tool box over the canvas, in light and dark. | DS-3, DS-4 | J0, DS-J1..DS-J5 | DP-a (DS-3) | 2 | merged (round 1: #1446 #1447 merged; round 2: #1452) | 38917492060 red: J3 #1443, shell journeys #1444 (switcher waits on #1337) |
+| DP-b | Design opens in the suite window with pages and layers in the sidebar, Properties in the inspector and the floating tool box over the canvas, in light and dark. | DS-3, DS-4 | J0, DS-J1..DS-J5 | DP-a (DS-3) | 2 | merged (round 1: #1446 #1447 merged; round 2: #1452 -> PR #1469, zoom query; geometry is SuiteUI's #1456) | 38917492060 red: J3 #1443, shell journeys #1444 (switcher waits on #1337) |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
@@ -39,6 +39,7 @@ Next: wave 5 = fix round 2 (last) for DP-a (#1451, sp/r2-1451) and DP-b (#1452, 
 - DS-4 carries feature-done and sets the wave.json status to built.
 
 ## Open
+- needs-ui #1456 (filed by the #1452 fixer): EditorDetail regions bleed under the floating sidebar/inspector, suite.inspector lands inside SuiteWindow's padding (280 vs 304), -SuiteWindowSize gives a 677 pt window (3 pt past the visible frame). DP-b's geometry assertions stay until it lands.
 - dev-red #1393: full run 38915938965 red on Library tests only (LibraryImportBudgetTests timing, LibraryImportSnapshots.progressRowShowsAfterItsDelay from #1382); not Design's.
 - Findings #1443, #1444 (DP-b, from scoped run 38917492060), fix round 1 in wave 4: #1444 -> PR #1447 (switcher checks moved last; status-line text read as label or value); #1443 -> PR #1446 (root cause: design.properties sat on the scroll view that SuiteWindow turns into suite.inspector). DP-b's shell journeys also wait on #1337 (EW-8, the app switcher in SuiteWindow).
 - DS-3 note: the shell journey asserts suite.switcher, which SuiteWindow shows only after editor-in-window EW-8 (#1079 open); DP-b's journeys may stay red until EW-8 lands.
