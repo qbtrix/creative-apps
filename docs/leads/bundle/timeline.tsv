@@ -15,3 +15,4 @@ utc	stage	event	ref	note
 2026-10-16T15:25Z	3	heartbeat	#1358	BU-3 still waits on the supervisor; BU-4 not started
 2026-10-16T15:48Z	3	stage-start	wave 3	BU-4 on dev f52ec33, merges after #1358
 2026-10-16T15:57Z	3	pr-opened	#1445	BU-4 bundle-apps and size-report, supervisor merges after #1358
+2026-10-16T16:11Z	3	heartbeat	#1358	BU-3 #1358 and BU-4 #1445 wait on the supervisor
