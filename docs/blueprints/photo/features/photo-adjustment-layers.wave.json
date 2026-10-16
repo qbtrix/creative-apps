@@ -2,8 +2,8 @@
   "title": "Adjustment layers",
   "wave": 2,
   "order": 10,
-  "status": "planned",
-  "feature_issue": "file when ready",
+  "status": "built",
+  "feature_issue": "#1501",
   "covers": "#580",
   "waits_on": "photo-edit (hands over `PhotoCommands+Layer.swift`); nothing (CR-5 optional)",
   "cells": {
