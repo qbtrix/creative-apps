@@ -14,3 +14,6 @@ utc	stage	event	ref	note
 2026-10-16T12:50Z	3	pr-merged	#1351	EZ-3
 2026-10-16T12:51Z	3	pr-merged	#1352	EZ-5
 2026-10-16T13:06Z	3	stage-start	wave 3	EZ-4 EZ-6 on 47ea502
+2026-10-16T13:20Z	3	pr-opened	#1363	EZ-4 HB-7 budget
+2026-10-16T13:20Z	3	pr-opened	#1364	EZ-6 EASING inspector + routes, 6 new PNGs, halo-inspector-* change
+2026-10-16T13:29Z	3	heartbeat	#1364	macOS build running

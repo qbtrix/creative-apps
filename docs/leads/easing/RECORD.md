@@ -4,7 +4,7 @@ Issue: #1333 · Packet: docs/blueprints/halo/features/easing.md
 Run: act-1a1448a5fbe-p22s · Session: session_01Fpq7bUwf2TjhThXdtGKn4r · Started: 2026-10-16T11:48Z
 Stage: 3 wave 3
 Base: 47ea502c7a188da1fc3b012743f147ab19b6d4e5
-Next: read the wave 3 PRs (EZ-4, EZ-6) and wait for the lane to merge them; then wave 4 (EZ-8, feature-done)
+Next: wait for #1364 macOS build (run 38906640970) and merges of #1363, #1364; then wave 4 EZ-8 from scratchpad wave4-tasks.json
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -14,8 +14,8 @@ Next: read the wave 3 PRs (EZ-4, EZ-6) and wait for the lane to merge them; then
 | EZ-7 | 1 | `HaloTimelineView` slot: diamond click sends `.selectLaneKeys`, context menu of the five presets for the picked keys, disabled with help | Sources/HaloApp/HaloTimelineView.swift | macOS build; H-J7 step 7 (EZ-8) | #1343 | merged |
 | EZ-3 | 2 | `setEasing` one "Keyframe Easing" step; `setCustomEasing`, `moveEasingHandle`, `easingHandles`, `easingCurve`; HF-4; Model journey | Sources/HaloModel/HaloKeySelection.swift, Tests/HaloModelTests/HaloEasingTests.swift | HaloEasingTests | #1351 | merged |
 | EZ-5 | 2 | `HaloAvailability+Easing.swift` turns the five Keyframe Easing commands on when a key is picked | Sources/HaloModel/Availability/HaloAvailability+Easing.swift, Tests/HaloModelTests/HaloEasingAvailabilityTests.swift | HaloEasingAvailabilityTests | #1352 | merged |
-| EZ-4 | 3 | HB-7 budget | Tests/HaloModelTests/HaloEasingBudgetTests.swift | HaloEasingBudgetTests.easingStep | | building |
-| EZ-6 | 3 | `HaloEasingInspector` EASING group + `HaloWindow+Easing` routes | Sources/HaloApp/HaloEasingInspector.swift, Sources/HaloApp/HaloWindow+Easing.swift, Tests/AppSnapshotTests/HaloEasingSnapshots.swift | HaloEasingSnapshots (6 PNGs) | | building |
+| EZ-4 | 3 | HB-7 budget | Tests/HaloModelTests/HaloEasingBudgetTests.swift | HaloEasingBudgetTests.easingStep | #1363 | open, macOS build green |
+| EZ-6 | 3 | `HaloEasingInspector` EASING group + `HaloWindow+Easing` routes | Sources/HaloApp/HaloEasingInspector.swift, Sources/HaloApp/HaloWindow+Easing.swift, Tests/AppSnapshotTests/HaloEasingSnapshots.swift | HaloEasingSnapshots (6 PNGs) | #1364 | open, macOS build running |
 | EZ-8 | 4 | H-J7 `testEaseKeys` steps 1 to 8 on `-HaloSample keyed`; `feature-done` | UITests/HaloJourneyTests+Easing.swift | H-J7 on dev CI | | planned |
 
 Wave 1: EZ-1, EZ-2, EZ-7 independent (disjoint files; EZ-2 reads tracks and W0's `selectedKeys` directly; EZ-7 only sends FD-11 commands).
@@ -37,4 +37,5 @@ Wave 4: EZ-8 waits on EZ-6 and EZ-7 (drives what they put on screen); #333 close
 - Rules 13 and 14 (check first, mutations) don't apply: v2 packet.
 
 ## Open
+- Ask the supervisor to add HaloModelTests.HaloEasingBudgetTests to Tests/perf-suites.txt (#1363 body).
 - #771 (key shapes, selected-keys set) not blocking: plain diamonds.
