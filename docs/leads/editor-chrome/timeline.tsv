@@ -5,3 +5,4 @@ utc	stage	event	ref	note
 2026-10-16T19:15Z	0	heartbeat	#1344	second stall nudge; #1536 re-sliced timeline only; editor-chrome still unrescoped
 2026-10-16T19:46Z	0	stopped	#1344	third stall nudge; no rescope on dev; needs-human per contract rule 7
 2026-10-16T20:17Z	0	stopped	#1344	fourth nudge after the rule-7 stop; dev 1d68b228 (#1585 canvas-host and timeline only); editor-chrome still unrescoped, no reply on #1344
+2026-10-16T20:48Z	0	stopped	#1344	fifth nudge; dev 7acb6e81; editor-chrome packet, shell-parity-waves and editor-shell-removal unchanged; no reply on #1344
