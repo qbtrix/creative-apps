@@ -27,3 +27,4 @@ utc	stage	event	ref	note
 2026-10-16T21:15Z	4	heartbeat	-	scoped library 38967059607 and full CI 38965923292 in progress
 2026-10-16T21:16Z	4	ci-run	38965923292	full CI success but macOS job red in SuiteUI unit tests; no journeys ran
 2026-10-16T21:16Z	4	round-findings	#1587	cull budget 12.97ms > 10ms; fixer r1-b1 started
+2026-10-16T21:23Z	4	pr-opened	#1645	r1-b1 recorded edit no longer rescans; cull 0.7-1 ms
