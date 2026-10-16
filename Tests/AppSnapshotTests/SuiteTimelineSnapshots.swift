@@ -9,7 +9,10 @@
 // tweens, picked keys on a selected track), suiteui-timeline-clips (clip
 // blocks with keys over them) and suiteui-timeline-hover (the hovered lane's
 // rowHover bed and the accent ring round the key under the pointer). The
-// baselines come from the CI artifact (TL-9). macOS only.
+// baselines come from the CI artifact (TL-9). `toolbarGolden()` checks
+// suiteui-timeline-toolbar (TL-19): the strip's own toolbar row over the
+// lanes, time in timecode at 24 fps and the work area on the ruler; its
+// baselines come from the next CI artifact (TL-19b). macOS only.
 @testable import SuiteUI
 import SwiftUI
 import Testing
@@ -35,6 +38,15 @@ import Testing
                          name: "suiteui-timeline-clips", area: "timeline", appearance: appearance)
             assertGolden(HoveredLanes(), size: size,
                          name: "suiteui-timeline-hover", area: "timeline", appearance: appearance)
+        }
+    }
+
+    @Test func toolbarGolden() {
+        let size = CGSize(width: 720, height: 240)
+        let strip = TimelineSample(
+            tracks: TimelineSample.shaped, unit: .timecode, fps: 24, workArea: 12...84, toolbar: true)
+        for appearance in SnapshotAppearance.allCases {
+            assertGolden(strip, size: size, name: "suiteui-timeline-toolbar", area: "timeline", appearance: appearance)
         }
     }
 }
@@ -74,9 +86,15 @@ private struct TimelineSample: View {
     let tracks: [TimelineTrack<String>]
     var duration = 120
     var frameWidth: CGFloat = 10
+    var unit: TimeUnit = .frames
+    var fps = 0
+    var workArea: ClosedRange<Int>?
+    var toolbar = false
 
     var body: some View {
-        TimelineStrip(tracks: tracks, duration: duration, frameWidth: frameWidth, playhead: 30)
+        TimelineStrip(
+            tracks: tracks, duration: duration, frameWidth: frameWidth, playhead: 30, unit: unit, fps: fps,
+            workArea: workArea, toolbar: toolbar)
             .background(SuiteColor.surface, in: RoundedRectangle(cornerRadius: SuiteRadius.medium))
             .clipShape(RoundedRectangle(cornerRadius: SuiteRadius.medium))
             .padding(SuiteSpacing.xxl)
