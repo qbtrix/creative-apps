@@ -1,6 +1,6 @@
 // HandOffCodec.swift: the `.aghandoff` file format. Sorted-key JSON; a
-// newer format is refused by name, and an id that could name a nested path
-// is damaged. Foundation only for JSON, Linux-safe.
+// newer format is refused by name, an id that could name a nested path is
+// damaged, and a failed encode is a failed save. Foundation only for JSON, Linux-safe.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -12,7 +12,7 @@ public enum HandOffCodec {
     public static func encode(_ h: HandOff) throws(SuiteError) -> Data {
         let e = JSONEncoder()
         e.outputFormatting = [.sortedKeys]
-        do { return try e.encode(h) } catch { throw .damaged("hand-off could not be written") }
+        do { return try e.encode(h) } catch { throw encodeFailure }
     }
 
     public static func decode(_ data: Data) throws(SuiteError) -> HandOff {
@@ -26,6 +26,9 @@ public enum HandOffCodec {
         guard isSafeID(h.id) else { throw .damaged(subject) }
         return h
     }
+
+    /// What `encode` throws when it can't write: a failed save, never a damaged file.
+    public static let encodeFailure = SuiteError.ioFailed(subject)
 
     /// What a damaged hand-off is called in the message the user sees.
     static let subject = "the message from another app"

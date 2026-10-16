@@ -57,6 +57,15 @@ import Testing
         }
     }
 
+    /// #1486: a failed encode is a failed write in plain words, not a damaged
+    /// file, and no message the codec builds says "hand-off".
+    @Test func anEncodeFailureIsAFailedWriteInPlainWords() {
+        #expect(HandOffCodec.encodeFailure == .ioFailed("the message from another app"))
+        #expect(HandOffCodec.encodeFailure.message == "Couldn't save: the message from another app.")
+        #expect(!HandOffCodec.encodeFailure.message.lowercased().contains("hand-off"))
+        #expect(!HandOffCodec.encodeFailure.message.contains("damaged"))
+    }
+
     @Test func newIDIsALowercaseUUIDAndUnique() throws {
         let a = HandOff.newID()
         let b = HandOff.newID()
