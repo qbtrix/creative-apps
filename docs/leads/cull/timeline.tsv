@@ -31,3 +31,5 @@ utc	stage	event	ref	note
 2026-10-16T21:25Z	4	ci-run	38967787160	full CI success, macOS unit tests red in SuiteUI again; reported on #1480
 2026-10-16T21:28Z	4	ci-run	38967059607	scoped library: J4 red step 1 (#1654), other library journeys green, audit under baseline
 2026-10-16T21:28Z	4	finding-filed	#1654	J4 reads unreadable menu check mark
+2026-10-16T21:35Z	4	review	round1	panel: 12 confirmed, 11 filed #1661-#1671; 3 rerouted
+2026-10-16T21:35Z	4	fix-round	round1	fix batch for 9 findings
