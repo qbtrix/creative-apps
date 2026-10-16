@@ -64,7 +64,7 @@ struct LibraryBrowser: View {
     }
 
     /// Import Folder… (`library.import`), disabled with its reason while the import area's action is nil.
-    private var importAction: ToolbarAction {
+    var importAction: ToolbarAction {
         let action = menu.file.importFolder
         let reason = menu.file.importHelp ?? model.help(for: "importer") ?? Self.importFallbackHelp
         return ToolbarAction(
@@ -90,7 +90,9 @@ struct LibraryBrowser: View {
         } else if let photo = model.loupeItem, let position = model.loupePosition {
             LibraryLoupe(photo: photo, position: position, menu: menu, value: model.loupeValue, cropDraft: model.cropDraft, onStep: onStep, onGrid: onGrid)
         } else {
+            // Top-aligned, so a short grid (an import's first batch) starts under the rows above.
             LibraryGrid(model: model, menu: menu, onSelect: onSelect, onOpen: onOpen)
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         }
     }
 }
@@ -124,7 +126,8 @@ struct LibraryNoticeRow: View {
 }
 
 /// The import's progress row: "Importing 3 of 27" over a determinate bar,
-/// `library.import.progress` with the text as its value. It appears `delay`
+/// `library.import.progress` with the text as its label and value (XCUITest
+/// reads a SwiftUI value as "", so journeys read the label). It appears `delay`
 /// after the import starts, so a quick import never flashes it.
 struct LibraryImportProgressRow: View {
     static let identifier = "library.import.progress"
@@ -141,14 +144,20 @@ struct LibraryImportProgressRow: View {
     /// The row's text and its accessibility value.
     var value: String { progress.text }
 
+    /// The row's accessibility label: the same text, which journeys read.
+    var label: String { value }
+
     /// The bar's value and total: done of total, never past it, total at least 1.
     var fraction: (value: Double, total: Double) {
         let total = max(progress.total, 1)
         return (Double(min(max(progress.done, 0), total)), Double(total))
     }
 
+    /// A ZStack, not a Group: its zero-height placeholder always exists, so
+    /// the delay's `.task` runs even while the row is hidden (#1379).
     var body: some View {
-        Group {
+        ZStack(alignment: .topLeading) {
+            Color.clear.frame(height: CGFloat.zero)
             if shown {
                 VStack(alignment: .leading, spacing: SuiteSpacing.xs) {
                     Text(value)
@@ -162,7 +171,7 @@ struct LibraryImportProgressRow: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .background(SuiteColor.panel)
                 .accessibilityElement(children: .ignore)
-                .accessibilityLabel("Import progress")
+                .accessibilityLabel(label)
                 .accessibilityValue(value)
                 .accessibilityIdentifier(Self.identifier)
             }
@@ -198,14 +207,19 @@ struct LibraryImportNoticeRow: View {
         notice.failures.map { "\($0.path.split(separator: "/").last.map(String.init) ?? $0.path): \($0.reason)" }
     }
 
-    private var tint: Color {
+    /// Error red, warning orange when some files failed, success green when
+    /// photos came in, and secondary text when nothing new did.
+    var tint: Color {
         if notice.isError { return SuiteColor.stateError }
-        return notice.failures.isEmpty ? SuiteColor.textPrimary : SuiteColor.stateWarning
+        if !notice.failures.isEmpty { return SuiteColor.stateWarning }
+        return notice.added > 0 ? SuiteColor.stateSuccess : SuiteColor.textSecondary
     }
 
-    private var symbol: String {
+    /// The state's shape cue, matching `tint`.
+    var symbol: String {
         if notice.isError { return "exclamationmark.octagon" }
-        return notice.failures.isEmpty ? "checkmark.circle" : "exclamationmark.triangle"
+        if !notice.failures.isEmpty { return "exclamationmark.triangle" }
+        return notice.added > 0 ? "checkmark.circle" : "info.circle"
     }
 
     var body: some View {

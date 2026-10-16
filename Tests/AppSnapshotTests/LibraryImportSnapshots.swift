@@ -1,12 +1,15 @@
 // LibraryImportSnapshots.swift: the import feature's five content states
 // (import IM-7) in Light and Dark, each built through the catalog's public
 // import methods: an import running with its progress row ("Importing 3 of
-// 27"), the notice after a clean import, after one with failures (listed),
-// after one that found nothing new, and the error notice for an unreadable
-// folder. Writes library-importing, library-imported,
+// 27") over its first batch of grey cells, the notice after a clean import,
+// after one with failures (listed), after one that found nothing new, and the
+// error notice for an unreadable folder, all with the window's import actions
+// enabled. Writes library-importing, library-imported,
 // library-import-failures, library-import-nothing-new and
 // library-import-denied, each -{light,dark}.png. macOS only.
+import AppKit
 import LibraryModel
+import SuiteUI
 import SwiftUI
 import Testing
 
@@ -21,6 +24,18 @@ import Testing
         return samples.items
     }
 
+    /// An import's first batch, built as LiveImporter builds it: id == path,
+    /// neutral grey, no rating, flag or label.
+    private var firstBatch: [PhotoItem] {
+        let start = Date(timeIntervalSince1970: 1_750_000_000)
+        return (1...3).map { n in
+            let path = "/Shoot/jpeg-000\(n).jpg"
+            return PhotoItem(
+                id: path, name: "jpeg-000\(n)", captureDate: start.addingTimeInterval(Double(n) * 60),
+                color: .init(0.5, 0.5, 0.5), path: path)  // LiveImporter's neutral grey
+        }
+    }
+
     @Test func importStates() throws {
         let photos = samplePhotos
         #expect(photos.count >= 4)
@@ -28,8 +43,13 @@ import Testing
         var importing = LibraryCatalog()
         #expect(importing.beginImport() != nil)
         importing.showImportProgress(ImportProgress(done: 2, total: 27))
-        importing.appendImported(Array(photos.prefix(3)))
+        importing.appendImported(firstBatch)
         #expect(importing.importState == .running(ImportProgress(done: 2, total: 27)))
+        #expect(importing.items.count == 3)
+        let neutral = importing.items.allSatisfy { photo in
+            photo.rating == 0 && photo.label == nil && photo.flag == PhotoFlag.none && photo.id == photo.path
+        }
+        #expect(neutral, "an imported photo arrived with a rating, label or flag, or an id other than its path")
 
         var imported = LibraryCatalog()
         _ = imported.beginImport()
@@ -68,14 +88,54 @@ import Testing
         }
     }
 
-    /// The progress row is `library.import.progress`, its value the progress text.
+    /// The progress row is `library.import.progress`, its label and value the
+    /// progress text (journeys read the label).
     @Test func progressRowIsIdentifiedWithItsText() {
         let row = LibraryImportProgressRow(progress: ImportProgress(done: 2, total: 27))
         #expect(LibraryImportProgressRow.identifier == "library.import.progress")
         #expect(row.value == "Importing 3 of 27")
+        #expect(row.label == "Importing 3 of 27")
         #expect(row.fraction.value == 2 && row.fraction.total == 27)
         let empty = LibraryImportProgressRow(progress: ImportProgress(done: 0, total: 0))
         #expect(empty.fraction.value == 0 && empty.fraction.total == 1)
+    }
+
+    /// With a delay above zero the row starts hidden and shows once the delay
+    /// passes (#1379: the delay's task hung on an empty Group never ran).
+    @Test func progressRowShowsAfterItsDelay() {
+        let row = LibraryImportProgressRow(progress: ImportProgress(done: 0, total: 24), delay: .milliseconds(10))
+        let host = NSHostingView(rootView: row.frame(width: 600))
+        host.frame = CGRect(x: 0, y: 0, width: 600, height: 200)
+        let window = NSWindow(contentRect: host.frame, styleMask: [.borderless], backing: .buffered, defer: false)
+        window.contentView = host
+        host.layoutSubtreeIfNeeded()
+        #expect(host.fittingSize.height < 1, "the row showed before its delay")
+        RunLoop.main.run(until: Date().addingTimeInterval(0.2))
+        host.layoutSubtreeIfNeeded()
+        #expect(host.fittingSize.height > 0, "the row never showed after its 10 ms delay")
+    }
+
+    /// A clean import's notice is success green with the checkmark; a
+    /// nothing-new notice is secondary text with the info symbol (#1378).
+    @Test func noticeUsesItsStateColor() {
+        let clean = LibraryImportNoticeRow(notice: ImportNotice(folder: "Shoot", added: 26), onClose: nil)
+        #expect(clean.symbol == "checkmark.circle")
+        #expect(clean.tint == SuiteColor.stateSuccess)
+        let nothingNew = LibraryImportNoticeRow(notice: ImportNotice(folder: "Shoot", alreadyKnown: 26), onClose: nil)
+        #expect(nothingNew.symbol == "info.circle")
+        #expect(nothingNew.tint == SuiteColor.textSecondary)
+    }
+
+    /// With the window's import actions, the denied empty state offers an
+    /// enabled Import Folder… and no "isn't connected" hint (#1380).
+    @Test func deniedOffersAnEnabledImport() {
+        var denied = LibraryCatalog()
+        _ = denied.beginImport()
+        denied.failImport(.unreadableFolder("Shoot"), folder: "Shoot")
+        let reason = LibraryBrowser(model: denied, menu: Self.importMenu).importAction.unavailableHelp
+        #expect(reason == nil)
+        let message = denied.emptyState(importReason: reason).message
+        #expect(!message.contains("isn't connected"), "the denied empty state reads \(message)")
     }
 
     /// The notice lists each failure as `name: reason`.
@@ -87,10 +147,14 @@ import Testing
         #expect(LibraryImportNoticeRow.identifier == "library.import.notice")
     }
 
-    /// The browser with the progress row at once (no 100 ms wait) and the
-    /// rows pinned to the top, as in the window.
+    /// The window's File actions: Import Folder… and the notice's close enabled.
+    private static let importMenu = LibraryMenu(file: LibraryMenu.File(importFolder: {}, dismissImportNotice: {}))
+
+    /// The browser with the window's import actions, the progress row at once
+    /// (no 100 ms wait) and the rows pinned to the top, as in the window.
     private func browser(_ model: LibraryCatalog, expanded: Bool = false) -> some View {
-        LibraryBrowser(model: model, importProgressDelay: .zero, importFailuresExpanded: expanded)
+        LibraryBrowser(
+            model: model, menu: Self.importMenu, importProgressDelay: .zero, importFailuresExpanded: expanded)
             .frame(width: 1440, height: 900, alignment: .top)
     }
 }
