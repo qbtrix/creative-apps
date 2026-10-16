@@ -119,7 +119,7 @@ func photoTiles(_ model: PhotoWorkspace) throws -> CanvasTiles? {
         let curves = try #require(model.layers.first { $0.name == "Curves 1" })
         model.selectLayer(curves.id)
         drag(&model, .brush, (200, 200), (300, 260))
-        #expect(model.statusMessage == "Select an image layer in the Layers tab to paint on.")
+        #expect(model.statusMessage == "Select an image layer in the sidebar to paint on.")
         #expect(PhotoStatusLine.messageFont == SuiteFont.caption)
         #expect(PhotoStatusLine.messageFont != SuiteFont.pill)
         try snapshot(

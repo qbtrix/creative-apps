@@ -111,7 +111,7 @@ final class PhotoPerfJourneyTests: XCTestCase {
         return photo
     }
 
-    /// Waits for the rail to show `tool` picked.
+    /// Waits for the tool palette to show `tool` picked.
     @MainActor private func expectPicked(_ tool: String, _ photo: Journey) {
         let picked = photo.element("suite.tools").buttons
             .matching(NSPredicate(format: "label == %@ AND selected == true", tool)).firstMatch
@@ -124,7 +124,7 @@ final class PhotoPerfJourneyTests: XCTestCase {
     @MainActor private func canvasDrag(_ name: String, _ photo: Journey, step: String) -> Series {
         let frame = photo.element("suite.canvas").frame
         var area = frame.intersection(photo.app.windows.firstMatch.frame)
-        // Zoomed in, the canvas runs under the tool rail and the inspector: keep between them.
+        // Zoomed in, the canvas runs under the floating tool palette and the inspector: keep between them.
         let rail = photo.element("suite.tools").frame, inspector = photo.element("suite.inspector").frame
         if rail.maxX > area.minX, rail.maxX < area.maxX {
             area = area.divided(atDistance: rail.maxX - area.minX, from: .minXEdge).remainder

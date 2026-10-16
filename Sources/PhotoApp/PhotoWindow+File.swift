@@ -14,7 +14,7 @@
 // `-PhotoSaveTo <folder>` writes `<name>.ora` there when the image needs a
 // document, else `<name>.png`). A failed save shows "The image couldn't be
 // saved: <reason>." and sets `files.saveFailed` until the image is clean.
-// A save leaves no note (the top bar says "Saved"); an export notes "Exported <name>".
+// A save leaves no note (the save status says "Saved"); an export notes "Exported <name>".
 // Open reads an `.ora` and decodes its PNGs off the main actor, then opens
 // the snapshot; a bad document shows its ArchiveError message and the window
 // keeps what it had. Flat files open through `openImage`, so Save knows
@@ -22,8 +22,8 @@
 // `-PhotoOpenFile <path>` opens a file at launch; `-PhotoRecoveryDir
 // <folder>` keeps autosaves there. PhotoFileSession is the file state the
 // window and PhotoFileArea share. PhotoFileArea
-// puts `model.saveStatus` in the environment for the top bar's
-// `photo.bar.saved`, keeps the window's edited dot (`isDocumentEdited`) on
+// puts `model.saveStatus` in the environment for the window's
+// subtitle and `photo.bar.saved`, keeps the window's edited dot (`isDocumentEdited`) on
 // `model.isDirty`, and shows "Saving…" (`photo.file.saving`) or "Opening…"
 // (`photo.file.opening`) over the window once `files.working` has run 100 ms.
 // It runs the window's PhotoAutosave (D-9): a tick every second, discarded on
@@ -319,7 +319,7 @@ extension PhotoWindow {
         files.saveFailed = false
         files.working = nil
         files.noteRecent(url)
-        note = nil  // the top bar's `photo.bar.saved` says "Saved"
+        note = nil  // the save status `photo.bar.saved` says "Saved"
     }
 
     private func didFailSave(_ error: Error) {
