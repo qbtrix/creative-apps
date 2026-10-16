@@ -1,4 +1,6 @@
 [
 {"label":"ideal height drops the ruler","file":"Sources/SuiteUI/TimelineStrip.swift","find":"    var idealHeight: CGFloat { toolbarHeight + SuiteSize.timelineRuler + lanesHeight }\n","replace":"    var idealHeight: CGFloat { toolbarHeight + lanesHeight }\n","tests":"TimelineStripLayoutTests"},
-{"label":"the lanes' stack made eager","file":"Sources/SuiteUI/TimelineStrip.swift","find":"    private func lanes(width: CGFloat) -> some View {\n        LazyVStack(alignment: .leading, spacing: 0) {\n","replace":"    private func lanes(width: CGFloat) -> some View {\n        VStack(alignment: .leading, spacing: 0) {\n","tests":"TimelineStripLayoutTests"}
+{"label":"the lanes' stack made eager","file":"Sources/SuiteUI/TimelineStrip.swift","find":"    private func lanes(width: CGFloat) -> some View {\n        LazyVStack(alignment: .leading, spacing: 0) {\n","replace":"    private func lanes(width: CGFloat) -> some View {\n        VStack(alignment: .leading, spacing: 0) {\n","tests":"TimelineStripLayoutTests"},
+{"label":"Command-0 keeps the zoom","file":"Sources/SuiteUI/TimelineStrip.swift","find":"        case .fit: return TimelineToolbarControls.fitZoom\n","replace":"        case .fit: return zoom\n","tests":"TimelineToolbarTests"},
+{"label":"Command-plus zooms out","file":"Sources/SuiteUI/TimelineStrip.swift","find":"        case \"=\", \"+\": self = .zoomIn\n","replace":"        case \"=\", \"+\": self = .zoomOut\n","tests":"TimelineToolbarTests"}
 ]

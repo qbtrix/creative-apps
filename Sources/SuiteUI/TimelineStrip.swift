@@ -19,12 +19,18 @@
 // strip's width (#219). Moving keyframes by drag is not here yet. The track
 // data is in TimelineTrack.swift. The unit, fps, work area and the pick, move,
 // trim, unit and work-area closures are taken and stored; later timeline
-// slices act on them.
+// slices act on them. The strip owns its zoom (TL-17), a factor over the
+// host's frameWidth kept in TimelineZoom's range (1 = fit): Command-plus,
+// Command-minus and Command-0 while it has focus (anchored on the playhead),
+// a pinch on the lanes (anchored under the pointer) and the toolbar row
+// (TimelineToolbar). The lanes scroll sideways by wheel and trackpad, and a
+// playhead that leaves the view moves it a page (TimelineZoom.followed).
 import SwiftUI
 
 public struct TimelineStrip<ID: Hashable & Sendable>: View {
     private let tracks: [TimelineTrack<ID>]
-    private let mapping: FrameMapping
+    /// The host's mapping: zoom 1.
+    private let fitMapping: FrameMapping
     private let playhead: Int
     private let onScrub: @MainActor (Int) -> Void
     private let onSelectKeyframe: @MainActor (ID, Int) -> Void
@@ -44,6 +50,13 @@ public struct TimelineStrip<ID: Hashable & Sendable>: View {
     /// The stretch of the lanes the scroll view shows, in mapping x; nil until
     /// it first reports.
     @State private var visibleX: ClosedRange<Double>?
+    /// The zoom over the host's frameWidth; 1 is fit.
+    @State private var zoom: Double = 1
+    /// A pinch under way: the zoom it began at and the view x it anchors.
+    @State private var pinch: (zoom: Double, anchorX: Double)?
+    @State private var position = ScrollPosition()
+    /// The content x a zoom scrolls to once the lanes take their new width.
+    @State private var pendingScrollX: Double?
 
     #if DEBUG
     /// How many times a strip's body ran, over every ID type; the real-window
@@ -74,7 +87,7 @@ public struct TimelineStrip<ID: Hashable & Sendable>: View {
         onWorkArea: @escaping @MainActor (ClosedRange<Int>?) -> Void = { _ in }
     ) {
         self.tracks = tracks
-        self.mapping = FrameMapping(duration: duration, frameWidth: Double(frameWidth))
+        self.fitMapping = FrameMapping(duration: duration, frameWidth: Double(frameWidth))
         self.playhead = playhead
         self.onScrub = onScrub
         self.onSelectKeyframe = onSelectKeyframe
@@ -98,8 +111,11 @@ public struct TimelineStrip<ID: Hashable & Sendable>: View {
         #endif
         let layout = TimelineStripLayout(trackCount: tracks.count, toolbar: toolbar)
         VStack(alignment: .leading, spacing: 0) {
-            // The toolbar row's room; TL-17 puts the toolbar in it.
-            if toolbar { Color.clear.frame(height: layout.toolbarHeight) }
+            if toolbar {
+                TimelineToolbar(zoom: zoom, controls: TimelineToolbarControls(frameWidth: fitMapping.frameWidth)) {
+                    setZoom($0, anchorX: nil)
+                }
+            }
             HStack(spacing: 0) {
                 Color.clear.frame(width: SuiteSize.timelineLabelColumn, height: SuiteSize.timelineRuler)
                 Divider()
@@ -135,6 +151,13 @@ public struct TimelineStrip<ID: Hashable & Sendable>: View {
                         } action: { _, visible in
                             visibleX = visible
                         }
+                        .scrollPosition($position)
+                        // A zoom's scroll waits for the lanes' new width, or it would be clamped to the old one.
+                        .onScrollGeometryChange(for: Double.self) { Double($0.contentSize.width) } action: { _, _ in
+                            guard let x = pendingScrollX else { return }
+                            pendingScrollX = nil
+                            position.scrollTo(x: x)
+                        }
                     }
                 }
             }
@@ -144,6 +167,68 @@ public struct TimelineStrip<ID: Hashable & Sendable>: View {
             minHeight: layout.toolbarHeight + SuiteSize.timelineRuler, idealHeight: layout.idealHeight,
             maxHeight: layout.idealHeight, alignment: .top
         )
+        .focusable(!snapshot, interactions: .edit)
+        .onKeyPress(phases: [.down, .repeat]) { press in zoomKey(press) }
+        .onChange(of: playhead) { _, frame in follow(frame) }
+    }
+
+    /// The host's mapping at the strip's zoom.
+    private var mapping: FrameMapping {
+        FrameMapping(duration: fitMapping.duration, frameWidth: fitMapping.frameWidth * zoom)
+    }
+
+    /// The scrolled offset in TimelineZoom's terms (content x less the inset)
+    /// and the view's width; nil until the scroll view first reports.
+    private var scroll: (offset: Double, width: Double)? {
+        guard let visibleX else { return nil }
+        let offset = pendingScrollX.map { $0 - Double(timelineInset) } ?? visibleX.lowerBound
+        return (offset, visibleX.upperBound - visibleX.lowerBound)
+    }
+
+    /// Command-plus (or Command-equals), Command-minus and Command-0, anchored on the playhead.
+    private func zoomKey(_ press: KeyPress) -> KeyPress.Result {
+        guard press.modifiers.contains(.command), press.modifiers.isDisjoint(with: [.option, .control]),
+            let key = TimelineZoomKey(press.key.character)
+        else { return .ignored }
+        setZoom(key.zoom(from: zoom, frameWidth: fitMapping.frameWidth), anchorX: nil)
+        return .handled
+    }
+
+    /// Sets the zoom inside TimelineZoom's range and scrolls so what sits at
+    /// the view x `anchorX` (the playhead when nil) stays there.
+    private func setZoom(_ value: Double, anchorX: Double?) {
+        let new = TimelineZoom.clamped(value, frameWidth: fitMapping.frameWidth)
+        guard new != zoom else { return }
+        let old = zoom
+        zoom = new
+        // With no frames past 0 the lanes keep their width, so there is nothing to scroll.
+        guard let scroll, fitMapping.duration > 0 else { return }
+        let anchor = anchorX
+            ?? TimelineZoom.x(ofFrame: playhead, frameWidth: fitMapping.frameWidth, zoom: old, offset: scroll.offset)
+        let offset = TimelineZoom.anchoredOffset(scroll.offset, anchorX: anchor, from: old, to: new)
+        let lanes = Double(fitMapping.duration) * fitMapping.frameWidth * new + Double(SuiteSpacing.xl)
+        pendingScrollX = min(max(offset + Double(timelineInset), 0), max(lanes - scroll.width, 0))
+    }
+
+    /// The follow rule: a playhead that leaves the view moves it a page.
+    private func follow(_ frame: Int) {
+        guard let scroll, pendingScrollX == nil else { return }
+        let offset = TimelineZoom.followed(
+            scroll.offset, playhead: frame, frameWidth: fitMapping.frameWidth, zoom: zoom, viewport: scroll.width)
+        if offset != scroll.offset { position.scrollTo(x: max(offset + Double(timelineInset), 0)) }
+    }
+
+    /// A pinch on the lanes: continuous, clamped, anchored under the pointer
+    /// where it began.
+    private var pinchGesture: some Gesture {
+        MagnifyGesture()
+            .onChanged { value in
+                let anchorX = Double(value.startLocation.x - timelineInset) - (scroll?.offset ?? 0)
+                let start = pinch ?? (zoom: zoom, anchorX: anchorX)
+                pinch = start
+                setZoom(start.zoom * Double(value.magnification), anchorX: start.anchorX)
+            }
+            .onEnded { _ in pinch = nil }
     }
 
     /// The ruler, outside both scroll views: drawn at the lanes' width and
@@ -196,6 +281,31 @@ public struct TimelineStrip<ID: Hashable & Sendable>: View {
         }
         .frame(width: width, alignment: .leading)
         .overlay { TimelinePlayhead(mapping: mapping, playhead: playhead).allowsHitTesting(false) }
+        .simultaneousGesture(pinchGesture, isEnabled: !snapshot)
+    }
+}
+
+/// The strip's zoom keys with Command held: plus (or equals) zooms in a stop,
+/// minus out a stop, 0 back to fit (TL-17; TimelineToolbarTests).
+enum TimelineZoomKey: Equatable, Sendable {
+    case zoomIn, zoomOut, fit
+
+    init?(_ character: Character) {
+        switch character {
+        case "=", "+": self = .zoomIn
+        case "-": self = .zoomOut
+        case "0": self = .fit
+        default: return nil
+        }
+    }
+
+    /// The zoom this key asks for from `zoom`, within range.
+    func zoom(from zoom: Double, frameWidth: Double) -> Double {
+        switch self {
+        case .zoomIn: return TimelineZoom.zoomedIn(from: zoom, frameWidth: frameWidth)
+        case .zoomOut: return TimelineZoom.zoomedOut(from: zoom, frameWidth: frameWidth)
+        case .fit: return TimelineToolbarControls.fitZoom
+        }
     }
 }
 
