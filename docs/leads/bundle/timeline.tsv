@@ -11,3 +11,4 @@ utc	stage	event	ref	note
 2026-10-16T14:19Z	3	heartbeat	#1392	BU-5c waits on lane macOS build run 38912960821; BU-3 #1358 waits on supervisor
 2026-10-16T14:41Z	3	pr-merged	#1392	BU-5c
 2026-10-16T14:41Z	3	stage-start	wave 3	BU-4 waits on supervisor merge of BU-3 #1358
+2026-10-16T15:03Z	3	heartbeat	#1358	BU-3 still waits on the supervisor; BU-4 not started
