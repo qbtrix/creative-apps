@@ -42,3 +42,4 @@ utc	stage	event	ref	note
 2026-10-16T00:50Z	4	heartbeat	38823898596	run 787: size-report uploaded (5 bundles, tarball 8.06 MB); ui-test running
 2026-10-16T01:25Z	4	ci-run	38823898596	787: Linux+macOS build green; UI red 19, none ours (17 pre-existing, 2 Halo #1258/#1260); triage on #763
 2026-10-16T01:25Z	4	round-clean	round 1	no findings for targets; waiting on a green dev run for the contact sheet
+2026-10-16T02:10Z	4	heartbeat	38835566584	no green dev run yet: 788 red on HaloTransportFitTests (Halo, fixed by #1268); 791 running
