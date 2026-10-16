@@ -140,7 +140,10 @@ final class HaloLayersJourneyTests: XCTestCase {
 
     /// The list shows exactly `ids`, top first, within three seconds.
     @MainActor private func expectRows(_ ids: [String], in halo: Journey) {
-        XCTAssert(waitFor { self.rowIDs(halo) == ids }, "the rows are \(rowIDs(halo)), not \(ids)")
+        let shown = waitFor { self.rowIDs(halo) == ids }
+        // Which element held the keys, when a key didn't reach the list.
+        if !shown { halo.attachTree(as: "layers-rows-tree") }
+        XCTAssert(shown, "the rows are \(rowIDs(halo)), not \(ids)")
     }
 
     /// The artboard's `halo.viewer.summary` label reads `summary` (values read empty, #262).

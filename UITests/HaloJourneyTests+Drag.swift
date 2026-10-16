@@ -113,14 +113,22 @@ extension HaloJourneyTests {
         let from = corner.withOffset(
             CGVector(dx: origin.x + CGFloat(start.0) * scale, dy: origin.y + CGFloat(start.1) * scale))
         let to = from.withOffset(CGVector(dx: CGFloat(delta.0) * scale, dy: CGFloat(delta.1) * scale))
-        from.press(forDuration: 0.1, thenDragTo: to)
+        Self.personDrag(from, to)
+    }
+
+    /// Presses, then drags at a hand's pace (100 pt a second) and holds
+    /// before letting go, so the drag arrives as many small moves. The default
+    /// press-and-drag crossed Ball's 22 pt in 44 ms and Ball didn't move (run
+    /// 38823293728's synthesized event).
+    private static func personDrag(_ from: XCUICoordinate, _ to: XCUICoordinate) {
+        from.click(forDuration: 0.1, thenDragTo: to, withVelocity: 100, thenHoldForDuration: 0.1)
     }
 
     /// Drags down the surround left of the artboard, half an inset from the viewer's edge.
     func dragInSurround() {
         let half = Self.inset / 2
         let from = viewer.coordinate(withNormalizedOffset: .zero).withOffset(CGVector(dx: half, dy: half))
-        from.press(forDuration: 0.1, thenDragTo: from.withOffset(CGVector(dx: 0, dy: half)))
+        Self.personDrag(from, from.withOffset(CGVector(dx: 0, dy: half)))
     }
 
     /// Clicks layer `name`'s timeline lane: selects it and focuses the
