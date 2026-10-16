@@ -21,7 +21,7 @@ file's waves, not this one's.
 | 1 | Save and reopen with layers, Open Recent, unsaved state, recovery | PV-1 | `photo-documents.md` | – | p1 | photo-seams (journey tasks only: photo-journey-kit) | nothing | #1074 | built |
 | 1 | Cut, Copy, Paste, Duplicate, Merge Down, Flatten | PV-2 | `photo-edit.md` | – | p1 | photo-seams (journey tasks only: photo-journey-kit) | nothing | #1075 | built |
 | 1 | Typed crop size and aspect lock; the perf journeys | PV-3 | `photo-crop.md` | #544 | p1 | photo-seams (journey tasks only: photo-journey-kit) | nothing | #1076 | built |
-| 2 | Adjustment layers | PV-6 | `photo-adjustment-layers.md` | #580 | p1 | photo-edit (hands over `PhotoCommands+Layer.swift`) | nothing (CR-5 optional) | file when ready | planned |
+| 2 | Adjustment layers | PV-6 | `photo-adjustment-layers.md` | #580 | p1 | photo-edit (hands over `PhotoCommands+Layer.swift`) | nothing (CR-5 optional) | #1501 | built |
 | SP2 | Photo opens in `SuiteWindow` with the floating tool box | – | `shell-parity.md` | the 2026-10-15 captain decisions (one shell, one tool box, the app switcher), Photo half | p1 | editor-in-window (SuiteUI, #1079); photo-seams #812 | nothing | file when ready | planned |
 
 The blueprint's PV-0 is two features here: its journey part (moving
