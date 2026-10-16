@@ -1,8 +1,11 @@
-// LibraryBrowser.swift: the Library window's content: the notice slot on top
-// (the catalog file's problem, the last import's result or a refused cull
-// change: `LibraryCatalog.notice`), then the photo grid (LibraryGrid), the
-// loupe (LibraryLoupe), or an empty state. Values in, closures out;
-// LibraryCatalog holds the state.
+// LibraryBrowser.swift: the Library window's content: the import progress
+// row while an import runs (shown 100 ms after it starts), the notice slot
+// (the catalog file's problem, the last import's result with its failures
+// and close button, or a refused cull change: `LibraryCatalog.notice`), then
+// the photo grid (LibraryGrid), the loupe (LibraryLoupe), or an empty state.
+// Values in, closures out; LibraryCatalog holds the state. The progress row
+// and the import notice are plain SwiftUI placeholders until SuiteUI's
+// ProgressRow (#781) and InlineNotice (#780) land.
 import LibraryModel
 import SuiteUI
 import SwiftUI
@@ -21,14 +24,27 @@ struct LibraryBrowser: View {
     var onShowAll: @MainActor () -> Void = {}
     var onStep: @MainActor (Int) -> Void = { _ in }
     var onGrid: @MainActor () -> Void = {}
+    /// How long an import runs before its progress row shows (zero in snapshots).
+    var importProgressDelay: Duration = .milliseconds(100)
+    /// Whether the import notice opens with its failures listed (snapshots).
+    var importFailuresExpanded = false
 
     /// Why Import Folder… can't act when neither the menu nor the services say.
     static let importFallbackHelp = "Import isn't connected yet."
 
     var body: some View {
         VStack(spacing: 0) {
+            if case .running(let progress) = model.importState {
+                LibraryImportProgressRow(progress: progress, delay: importProgressDelay)
+            }
             if let notice = model.notice {
-                LibraryNoticeRow(notice: notice, action: noticeAction(notice))
+                if notice.source == .import, let importNotice = model.importNotice {
+                    LibraryImportNoticeRow(
+                        notice: importNotice, onClose: menu.file.dismissImportNotice,
+                        expanded: importFailuresExpanded)
+                } else {
+                    LibraryNoticeRow(notice: notice, action: noticeAction(notice))
+                }
             }
             // Fills the space under the notice, so the empty state stays centred.
             content.frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -104,5 +120,128 @@ struct LibraryNoticeRow: View {
         .background(SuiteColor.panel)
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("library.notice")
+    }
+}
+
+/// The import's progress row: "Importing 3 of 27" over a determinate bar,
+/// `library.import.progress` with the text as its value. It appears `delay`
+/// after the import starts, so a quick import never flashes it.
+struct LibraryImportProgressRow: View {
+    static let identifier = "library.import.progress"
+    let progress: ImportProgress
+    let delay: Duration
+    @State private var shown: Bool
+
+    init(progress: ImportProgress, delay: Duration = .milliseconds(100)) {
+        self.progress = progress
+        self.delay = delay
+        _shown = State(initialValue: delay <= .zero)
+    }
+
+    /// The row's text and its accessibility value.
+    var value: String { progress.text }
+
+    /// The bar's value and total: done of total, never past it, total at least 1.
+    var fraction: (value: Double, total: Double) {
+        let total = max(progress.total, 1)
+        return (Double(min(max(progress.done, 0), total)), Double(total))
+    }
+
+    var body: some View {
+        Group {
+            if shown {
+                VStack(alignment: .leading, spacing: SuiteSpacing.xs) {
+                    Text(value)
+                        .font(SuiteFont.caption)
+                        .foregroundStyle(SuiteColor.textSecondary)
+                    ProgressView(value: fraction.value, total: fraction.total)
+                        .progressViewStyle(.linear)
+                }
+                .padding(.horizontal, SuiteSpacing.m)
+                .padding(.vertical, SuiteSpacing.s)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(SuiteColor.panel)
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel("Import progress")
+                .accessibilityValue(value)
+                .accessibilityIdentifier(Self.identifier)
+            }
+        }
+        .task {
+            guard !shown else { return }
+            try? await Task.sleep(for: delay)
+            if !Task.isCancelled { shown = true }
+        }
+    }
+}
+
+/// The last import's notice (`library.import.notice`): its message, in the
+/// error style when `isError` and the warning style when some files failed;
+/// Show, which lists each `name: reason` failure; and Close, which calls the
+/// import area's `onClose` (`dismissImportNotice()`), disabled with its
+/// reason until the area passes one.
+struct LibraryImportNoticeRow: View {
+    static let identifier = "library.import.notice"
+    static let closeUnavailable = "Closing the import notice isn't connected yet."
+    let notice: ImportNotice
+    let onClose: (@MainActor () -> Void)?
+    @State private var expanded: Bool
+
+    init(notice: ImportNotice, onClose: (@MainActor () -> Void)?, expanded: Bool = false) {
+        self.notice = notice
+        self.onClose = onClose
+        _expanded = State(initialValue: expanded)
+    }
+
+    /// Each failure as `name: reason`, the name the file's last path component.
+    var failureLines: [String] {
+        notice.failures.map { "\($0.path.split(separator: "/").last.map(String.init) ?? $0.path): \($0.reason)" }
+    }
+
+    private var tint: Color {
+        if notice.isError { return SuiteColor.stateError }
+        return notice.failures.isEmpty ? SuiteColor.textPrimary : SuiteColor.stateWarning
+    }
+
+    private var symbol: String {
+        if notice.isError { return "exclamationmark.octagon" }
+        return notice.failures.isEmpty ? "checkmark.circle" : "exclamationmark.triangle"
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: SuiteSpacing.xs) {
+            HStack(spacing: SuiteSpacing.s) {
+                Label(notice.message, systemImage: symbol)
+                    .font(SuiteFont.caption)
+                    .foregroundStyle(tint)
+                    .lineLimit(2)
+                Spacer(minLength: SuiteSpacing.s)
+                if !notice.failures.isEmpty {
+                    Button(expanded ? "Hide" : "Show") { expanded.toggle() }
+                        .help(expanded ? "Hide the files that couldn't be imported." : "List the files that couldn't be imported.")
+                        .libraryControl(id: "library.import.notice.show", enabled: true, help: nil)
+                }
+                Button("Close", systemImage: "xmark") { onClose?() }
+                    .labelStyle(.iconOnly)
+                    .help(onClose == nil ? Self.closeUnavailable : "Close the import notice.")
+                    .disabled(onClose == nil)
+                    .libraryControl(
+                        id: "library.import.notice.close", enabled: onClose != nil, help: Self.closeUnavailable)
+            }
+            if expanded {
+                ForEach(Array(failureLines.enumerated()), id: \.offset) { _, line in
+                    Text(line)
+                        .font(SuiteFont.caption)
+                        .foregroundStyle(SuiteColor.textSecondary)
+                        .lineLimit(1)
+                }
+            }
+        }
+        .padding(.horizontal, SuiteSpacing.m)
+        .padding(.vertical, SuiteSpacing.s)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(SuiteColor.panel)
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier(Self.identifier)
     }
 }
