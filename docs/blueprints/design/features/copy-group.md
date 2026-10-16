@@ -18,16 +18,29 @@ not `UITests/DesignJourneyTests.swift`, so no two wave-1 features share a
 journey file. #415's "rename a layer, then ⌘C and ⌘V in the field" step uses
 the inspector's X field instead (rename is layers-panel's), as J8 says.
 
-**Depends on:** the design-window feature issue (it waits on design-seams
-and #778). No SuiteUI and no creative-core issue. The pieces of these issues
-that live in shared files landed in wave 0: the Option-drag route as one
-"Duplicate" step (design-seams D0-3c), Edit > Duplicate and Object > Group
-and Ungroup (design-window D0-6), the copy cursor while Option is held over
-a selected layer (design-window D0-5b), the pasteboard bridge and the copy,
-cut and paste focus hooks with the stock pasteboard group kept (D0-5d,
-D0-6), and the new group's row expanding after Group (design-seams D0-3a).
-The lead checks each is on `dev` at stage 1; a missing one becomes a
-`line:design` issue, not a task here.
+**Depends on:** the design-contracts feature issue: C-1 to C-3 fill its
+live stubs against its fakes and start when it closes. C-1 and C-5 also
+wait on design-seams (the Option-drag route as one "Duplicate" step,
+D0-3c); C-4 and C-5 wait on design-window's contract slice DW-a (Edit >
+Duplicate and Object > Group and Ungroup, D0-6; the copy cursor, D0-5b; the
+pasteboard bridge and the copy, cut and paste hooks, D0-5d), and C-4's drag
+check on DW-b. The new group's row expanding after Group is
+design-contracts D0-3a. No SuiteUI and no creative-core issue. The lead
+checks each piece is on `dev` before the task that needs it; a missing one
+becomes a `line:design` issue, not a task here.
+
+## Slices
+
+A slice is the unit of done: its tasks have merged and its journeys pass on
+the Design-scoped macOS run.
+
+| slice | behavior (one sentence) | tasks | journeys | waits on |
+|---|---|---|---|---|
+| CG-a | Duplicate and Option-drag a layer, group and ungroup several, and cut, copy and paste layers, also between files, each one step. | C-1, C-2, C-3, C-4, C-5 | J7, J8, J9 | design-contracts (C-1 to C-3); design-seams (C-1, C-5); design-window DW-a (C-4, C-5) and DW-b (C-4) |
+
+One slice: the three use cases share the journey file and the menus, and
+five tasks fit. An Option-drag goes through design-window's live drag box,
+so the editor body doesn't run per sample; C-4 checks it.
 
 Blueprint sections: 4 (J7, J8, J9), 5.4 (`LayerDuplicating`,
 `LayerGrouping`, `LayerClipboard`), 7.4 (QD-V4, QD-V5), 8.2 (F2).
@@ -124,13 +137,15 @@ carries `feature-done`.
 
 | id | issue | what | owned files | depends on | size |
 |---|---|---|---|---|---|
-| C-1 | #414 (Model part) | `LiveDuplicating` | `Sources/DesignModel/Live/LiveDuplicating.swift`; `Tests/DesignModelTests/DesignDuplicateTests.swift` | – | ~200, 2 |
+| C-1 | #414 (Model part) | `LiveDuplicating` | `Sources/DesignModel/Live/LiveDuplicating.swift`; `Tests/DesignModelTests/DesignDuplicateTests.swift` | design-seams | ~200, 2 |
 | C-2 | #416 (Model part) | `LiveGrouping` | `Sources/DesignModel/Live/LiveGrouping.swift`; `Tests/DesignModelTests/DesignGroupTests.swift` | – | ~260, 2 |
 | C-3 | #415 (Model part) | `LiveClipboard` and its payload | `Sources/DesignModel/Live/LiveClipboard.swift`; `Tests/DesignModelTests/DesignPasteboardTests.swift` | C-1 (reuses `copySubtree`) | ~280, 2 |
-| C-4 | – | The three snapshots the issues name | `Tests/AppSnapshotTests/DesignDuplicateSnapshots.swift`, `Tests/AppSnapshotTests/DesignGroupSnapshots.swift`, `Tests/AppSnapshotTests/DesignPasteboardSnapshots.swift` | C-1, C-2, C-3 | ~180, 3 |
-| C-5 | #414, #415, #416 (close all three) | J7, J8, J9 | `UITests/DesignJourneyTests+Arrange.swift` | C-1, C-2, C-3 | ~300, 1; `feature-done` |
+| C-4 | – | The three snapshots the issues name; the Option-drag check | `Tests/AppSnapshotTests/DesignDuplicateSnapshots.swift`, `Tests/AppSnapshotTests/DesignGroupSnapshots.swift`, `Tests/AppSnapshotTests/DesignPasteboardSnapshots.swift`, `Tests/AppSnapshotTests/DesignArrangeDragTests.swift` | C-1, C-2, C-3; design-window DW-a, DW-b | ~240, 4 |
+| C-5 | #414, #415, #416 (close all three) | J7, J8, J9 | `UITests/DesignJourneyTests+Arrange.swift` | C-1, C-2, C-3; design-seams; design-window DW-a | ~300, 1; `feature-done` |
 
-C-1 and C-2 run side by side; C-3 follows C-1. C-4 and C-5 each need the
+C-1 and C-2 run side by side (C-2 once design-contracts closes, C-1 once
+design-seams has too, since its Option-drag test runs through the route);
+C-3 follows C-1. C-4 and C-5 each need the
 live behavior of all three Model tasks, not each other; C-5 carries
 `feature-done`, so the lead merges it after C-4. No task edits a view: every
 control these issues need is wave 0's. No task edits a shared doc
@@ -153,7 +168,7 @@ Longest chain: C-1 → C-3 → C-4 (3).
 | C-1 | `DesignDuplicateTests` (#414 (a), through the workspace on `.live`): duplicating a frame with two children gives three new ids, none equal to an existing one, at +10, +10, directly above the original; Undo removes all three and restores the selection; an Option-drag by (40, 0) leaves the original in place and the copy at +40, one step; Duplicate with nothing selected changes nothing and records no step; duplicating Locked gives an unlocked copy; a file saved after duplicating opens again with no repeated id; the copy equals the original except ids, offset and lock (QD-V5) | an id repeats, a copy lands in the wrong parent or place, keeps the lock, or two steps are recorded |
 | C-2 | `DesignGroupTests` (#416 (a)): grouping two of three rectangles gives a group whose frame is their union, at the topmost one's index, named "Group 1", children unmoved (every leaf frame equal, QD-V4); a second group is "Group 2"; ungroup puts them back at the same indexes and positions; A with E1 is refused with "Select layers that share a parent." and changes nothing; moving the group by (5, 5) moves both children by (5, 5); Undo after Group restores the tree and selection; a saved file with a group opens again; Ungroup on A throws `.notAGroup("A")` | a leaf moves, the order changes, a cross-parent group is made, or a name repeats |
 | C-3 | `DesignPasteboardTests` (#415 (a)): copy then paste a frame with children gives new ids and the same names, fills and relative positions; paste into a selected frame nests the copies there; pasting over the original offsets by (10, 10), and pasting where nothing matches does not; cut removes and Undo restores with the selection; bytes from `copySelection()` paste into a second `DesignWorkspace` (another file, built in the test with no node whose id is the source parent's) into its top level; garbage bytes, a payload with `version: 2` and an empty payload throw `.unreadable` and change nothing; `pasteHelp` of plain-text bytes is "The pasteboard holds no Design layers." | a pasted id collides, the destination rule is wrong, or bad bytes change anything |
-| C-4 | `DesignDuplicateSnapshots`: `design-duplicate-light.png`, `design-duplicate-dark.png` (original and copy); `DesignGroupSnapshots`: `design-group-light.png`, `design-group-dark.png` (a group of two selected, canvas and Layers rows); `DesignPasteboardSnapshots`: `design-paste-light.png`, `design-paste-dark.png` (a frame with two children pasted beside the original) | a PNG is missing or shows the wrong tree |
+| C-4 | `DesignDuplicateSnapshots`: `design-duplicate-light.png`, `design-duplicate-dark.png` (original and copy); `DesignGroupSnapshots`: `design-group-light.png`, `design-group-dark.png` (a group of two selected, canvas and Layers rows); `DesignPasteboardSnapshots`: `design-paste-light.png`, `design-paste-dark.png` (a frame with two children pasted beside the original). `DesignArrangeDragTests` (design-window D0-8b's `dragSamples`): a 120-sample Option-drag of A on `cards` runs `DesignEditor`'s body 3 times or fewer and ends with one "Duplicate" step | a PNG is missing or shows the wrong tree, or the editor body runs per sample |
 | C-5 | J7, J8, J9 pass on the macOS run; J7 fails if an Option-drag records two steps; J8 fails if ⌘V in the X field adds a layer; J9 fails if the cross-parent Group is enabled | any undo name, count or disabled reason differs |
 
 ## Quality tests
@@ -165,9 +180,13 @@ Longest chain: C-1 → C-3 → C-4 (3).
 | QD-S9 any document edit | ≤ 1 ms / ≤ 10 ms (design-seams' `DesignBudgetTests.applyStep` covers duplicate, group and paste on `crowd`) | `DesignBudgetTests.applyStep` |
 | QB-F1 no dead controls | Duplicate, Group, Ungroup, Cut, Copy, Paste act or say why | J7, J8, J9; J15 |
 | QB-F3 one gesture, one step | ⌘D, Option-drag, ⌘G, ⇧⌘G, ⌘X, ⌘V one step each | J7, J8, J9 |
+| the editor body doesn't run per sample | ≤ 3 `DesignEditor` body runs over a 120-sample Option-drag | `DesignArrangeDragTests` (C-4) |
 | text fields keep system Cut, Copy, Paste | the X field's ⌘C and ⌘V act on text | J8 |
 
 ## Done check
+
+CG-a, the only slice, is done when J7, J8 and J9 pass on the Design-scoped
+run after C-5; that is also the feature's done:
 
 - **Journeys green:** the macOS run on `dev` after the `feature-done` PR is
   green: J7, J8, J9 new; J1 and J15 still pass (J15 now finds Duplicate,
