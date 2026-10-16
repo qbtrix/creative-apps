@@ -29,7 +29,7 @@ import SuiteUI
 import SwiftUI
 
 struct PhotoWindow: View {
-    @State var model = PhotoWindow.launchWorkspace()
+    @State var model: PhotoWorkspace
     @State var renderer = CanvasRenderer()
     @State var pacer = StrokePacer()
     @State var zoom = 1.0
@@ -77,6 +77,11 @@ struct PhotoWindow: View {
     /// The fixture on the fakes under `-PhotoFixture`, else a workspace on `fileServices(.live)`.
     nonisolated static func launchWorkspace() -> PhotoWorkspace {
         PhotoWorkspace.launch(launchOptions) ?? PhotoWorkspace(services: fileServices(.live))
+    }
+
+    /// A window on `model`: the launch workspace in the app, a test's own in tests.
+    init(model: PhotoWorkspace = PhotoWindow.launchWorkspace()) {
+        _model = State(initialValue: model)
     }
 
     var body: some View {

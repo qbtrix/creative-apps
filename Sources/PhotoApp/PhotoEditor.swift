@@ -27,7 +27,15 @@ struct PhotoEditor: View {
     /// The Straighten sheet's choices while it is open, previewed on the canvas.
     var straighten: StraightenDraft?
 
+    #if DEBUG
+    /// How many times an editor's body ran; PhotoWindowStrokeTests counts a stroke's.
+    static var bodyRuns = 0
+    #endif
+
     var body: some View {
+        #if DEBUG
+        let _ = Self.bodyRuns += 1
+        #endif
         EditorShell {
             PhotoTopBar(model: model, perform: perform)
         } rail: {
