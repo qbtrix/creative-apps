@@ -4,7 +4,7 @@ Issue: #873 · Packet: docs/blueprints/suite/features/targets.md
 Run: act-1a1429c87d2-exzi (resumed; first act-1a13f70dda7-kche) · Session: claude/feature-lead-targets-r13t2d · Started: 2026-10-15T12:10Z, resumed 2026-10-16T02:50Z
 Stage: 4 round 1
 Base: 8fce5e2 (dev with BU-1b #1263)
-Next: watch ci.yml runs on dev; on the first green run whose head contains 8fce5e2, comment `Belt-Contact-Sheet: <run link>` on #873 with the size table and 'launcher has no journey shots until home'. Nothing of this feature's is red; no fix batch.
+Next: wait on dev CI (run 791 on e99643c macOS running, 792 on 9230d80 pending); on the first green ci.yml run on dev whose head contains 8fce5e2, comment `Belt-Contact-Sheet: <run link>` on #873 with the size table and 'launcher has no journey shots until home'. Nothing of this feature's is red; no fix batch.
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
