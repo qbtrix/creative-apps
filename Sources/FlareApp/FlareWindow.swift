@@ -12,6 +12,9 @@
 // tasks without touching their call sites here. The
 // window owns presentation state only: zoom, rulers, guides, the inspector
 // tab and what is presented (FlarePresentation, in FlareNewSheet.swift).
+// It publishes the menu bar's FlareMenu (FlareCommands.swift): `perform` and
+// `help` for every section 3.4 item, the Undo and Redo step names, the recent
+// files and Loop.
 import FlareModel
 import SuiteUI
 import SwiftUI
@@ -66,8 +69,21 @@ struct FlareWindow: View {
         .focusedSceneValue(
             \.flareMenu,
             FlareMenu(
-                model: model, newSample: { model.newSampleAnimation() }, undo: { perform(.edit(.undo)) },
-                redo: { perform(.edit(.redo)) }))
+                perform: { menuPerform($0) }, help: { menuHelp($0) },
+                undoTitle: model.undoActionName ?? "Undo", redoTitle: model.redoActionName ?? "Redo",
+                recent: model.recent, loops: model.loops))
+    }
+
+    /// The menu bar's door: File > Open Sample > Keyed Ball opens the keyed
+    /// sample (the easing journey's route); every other item goes through
+    /// `perform`, the file area's samples included.
+    private func menuPerform(_ intent: FlareIntent) {
+        if intent == .file(.openSample(name: "keyed")) { model.newSampleAnimation() } else { perform(intent) }
+    }
+
+    /// Why a menu item can't act now: nil for Keyed Ball, else `help(for:)`.
+    private func menuHelp(_ intent: FlareIntent) -> String? {
+        intent == .file(.openSample(name: "keyed")) ? nil : help(for: intent)
     }
 
     /// The toolbar, in the captain's order: each action takes its intent's
