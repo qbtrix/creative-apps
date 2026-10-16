@@ -3,9 +3,9 @@
 // asks each member's slot in Live/ for its conformance; a slot that isn't
 // live yet holds its fake, which throws "Not connected yet (<feature>)."
 // (pure members hold the reference fake), and `pending` lists every such
-// member so views disable its controls with that reason. The seven members
-// below without a slot file yet are inline fakes until SC-5c. `animations`
-// and `updates` stay fakes; a process swaps them with `with(...)`.
+// member so views disable its controls with that reason. `animations` and
+// `updates` have no slot: they stay fakes until a process swaps them with
+// `with(animations:updates:)`.
 import SuiteModel
 
 /// What every slot may need to build its member.
@@ -28,11 +28,9 @@ extension SuiteServices {
         var s = SuiteServices(
             switching: switchingSlot(c), recents: recentsSlot(c), creating: creatingSlot(c), routing: routingSlot(c),
             sending: handOffs, receiving: handOffs,
-            roundTrips: FakeRoundTrips(unavailable: notConnected("roundTrips")), pasteboard: FakePasteboard(),
-            assets: FakeAssets(unavailable: notConnected("assets")), linking: FakeLinking(),
-            animations: FakeAnimationSource(), preferences: FakePreferences(unavailable: notConnected("preferences")),
-            settings: FakeSettingsRoute(unavailable: notConnected("settings")), onboarding: FakeOnboarding(),
-            updates: FakeUpdates(), thumbnails: thumbnailsSlot(c), home: homeSlot(c), isPreview: false)
+            roundTrips: roundTripsSlot(c), pasteboard: pasteboardSlot(c), assets: assetsSlot(c), linking: linkingSlot(c),
+            animations: FakeAnimationSource(), preferences: preferencesSlot(c), settings: settingsSlot(c),
+            onboarding: onboardingSlot(c), updates: FakeUpdates(), thumbnails: thumbnailsSlot(c), home: homeSlot(c), isPreview: false)
         s.pending = pendingReasons(liveness: slotLiveness)
         return s
     }
@@ -42,8 +40,9 @@ extension SuiteServices {
         "switching": switchingIsLive, "recents": recentsIsLive, "creating": creatingIsLive,
         "routing": routingIsLive, "sending": handOffIsLive, "receiving": handOffIsLive,
         "thumbnails": thumbnailsIsLive, "home": homeIsLive,
-        "roundTrips": false, "pasteboard": false, "assets": false, "linking": false,
-        "preferences": false, "settings": false, "onboarding": false,
+        "roundTrips": roundTripsIsLive, "pasteboard": pasteboardIsLive, "assets": assetsIsLive,
+        "linking": linkingIsLive, "preferences": preferencesIsLive, "settings": settingsIsLive,
+        "onboarding": onboardingIsLive,
     ]
 
     /// Every slotted member whose slot isn't live, with its not-connected reason.
