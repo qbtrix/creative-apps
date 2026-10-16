@@ -88,9 +88,11 @@ import Testing
             ControlEntry(id: "design.page.add", enabled: true),
             ControlEntry(id: "design.page.delete", enabled: false, reason: "A file keeps at least one page."),
         ])
-        #expect(DesignLayersPanel.pageCommands(model, { _ in }).map(\.title) == ["Add Page", "Delete Page"])
+        let titles = DesignLayersPanel.pageCommands(model, { _ in }).map { $0.title }
+        #expect(titles == ["Add Page", "Delete Page"])
         try shoot("-one-page", model)
-        #expect(DesignLayersPanel.pageCommands(twoPages(), { _ in }).allSatisfy(\.isEnabled))
+        let allEnabled = DesignLayersPanel.pageCommands(twoPages(), { _ in }).allSatisfy { $0.isEnabled }
+        #expect(allEnabled)
     }
 }
 
