@@ -4,7 +4,7 @@ Issue: #1332 · Packet: docs/blueprints/suite/features/suite-contracts.md
 Run: act-1a1448a5fd9-0he1 · Session: claude/suite-contracts-lead-rv72k4 · Started: 2026-10-16T11:49Z
 Stage: 4 round 1
 Base: c9e46560366b0c3464a5e822d11c4a865e4dc53e
-Next: wait for the dev CI run 38933216466 (https://github.com/qbtrix/creative-apps/actions/runs/38933216466, head c9e4656 = SC-5c merge) to complete, then run the round-1 critic panel
+Next: round 1 critic panel running (workflow wf_fbe78885-98f, lenses clarity/oracle/quality/packet-conformance/robustness, code at c9e4656); dev CI run 38933216466 queued. Then fix batch for confirmed findings (round 1 of max 2).
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -51,6 +51,7 @@ Waves (packet's Build waves, checked against dev at ebc68bf):
 - The GitHub MCP server appends a Claude Code footer to PR bodies; the lead strips it with update_pull_request (done on #1349, #1350, #1353), and the builder brief now tells builders to.
 - SC-4b QB-SM6: two real processes on Linux (test binary relaunched with SUITE_STORE_WRITER); two tasks on macOS. RecentsList caps at 200, so "1,000 items" is checked as store revision == 1,000 plus the list being exactly the 200 newest; with flock disabled it failed at revision 543. Measured median write ~15 ms (debug gate 50 ms). Supervisor may add `suite SuiteModelTests.StoreBudgetTests` to Tests/perf-suites.txt.
 - SC-4b slotFeatures: switching/sending/receiving -> switching; recents/routing/thumbnails -> recents-open-in; creating/home -> home; preferences/settings -> settings; pasteboard -> clipboard-drag; roundTrips -> photo-round-trip; assets -> shared-assets; onboarding -> onboarding; linking -> linked-assets.
+- Round 1 panel runs on the code without waiting for CI: no screens in this feature, so the critics read code; CI is judged separately when run 38933216466 ends.
 - Waves 1 and 3, 5, 8, 9 have one task: one worktree subagent each instead of the build-wave workflow.
 - Corrections in the packet are listed 1-6, 8-10, 7 (no correction is missing); builders apply the ones naming their task.
 
