@@ -1,7 +1,8 @@
 // LibraryBrowser.swift: the Library window's content: the import progress
 // row while an import runs (shown 100 ms after it starts), the notice slot
 // (the catalog file's problem, the last import's result with its failures
-// and close button, or a refused cull change: `LibraryCatalog.notice`), then
+// and close button, or a refused cull change with its close button:
+// `LibraryCatalog.notice`), then
 // the photo grid (LibraryGrid), the loupe (LibraryLoupe), or an empty state.
 // Values in, closures out; LibraryCatalog holds the state. The progress row
 // and the import notice are plain SwiftUI placeholders until SuiteUI's
@@ -43,7 +44,9 @@ struct LibraryBrowser: View {
                         notice: importNotice, onClose: menu.file.dismissImportNotice,
                         expanded: importFailuresExpanded)
                 } else {
-                    LibraryNoticeRow(notice: notice, action: noticeAction(notice))
+                    LibraryNoticeRow(
+                        notice: notice, action: noticeAction(notice),
+                        onClose: notice.source == .cull ? menu.cull.dismissCullError : nil)
                 }
             }
             // Fills the space under the notice, so the empty state stays centred.
@@ -98,11 +101,14 @@ struct LibraryBrowser: View {
 }
 
 /// The notice slot's row: the message with an error or warning symbol, and
-/// the source's action as a button when it has one. A plain placeholder until
+/// the source's action as a button when it has one, and Close when the
+/// source passes `onClose` (a refused cull change). A plain placeholder until
 /// the import feature restyles it.
 struct LibraryNoticeRow: View {
+    static let closeHelp = "Close the notice."
     let notice: LibraryNoticeContent
     var action: ToolbarAction?
+    var onClose: (@MainActor () -> Void)?
 
     var body: some View {
         HStack(spacing: SuiteSpacing.s) {
@@ -115,6 +121,12 @@ struct LibraryNoticeRow: View {
                 Button(action.title, action: action.perform)
                     .help(action.help)
                     .libraryControl(id: "library.notice.action", enabled: true, help: nil)
+            }
+            if let onClose {
+                Button("Close", systemImage: "xmark") { onClose() }
+                    .labelStyle(.iconOnly)
+                    .help(Self.closeHelp)
+                    .libraryControl(id: "library.notice.close", enabled: true, help: nil)
             }
         }
         .padding(.horizontal, SuiteSpacing.m)
