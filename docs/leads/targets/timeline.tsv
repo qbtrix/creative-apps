@@ -38,3 +38,4 @@ utc	stage	event	ref	note
 2026-10-15T23:35Z	4	stage-start	round 1	waiting on dev CI: run 38823367271 on f3b8987 in progress; need a run containing 8fce5e2
 2026-10-15T23:57Z	4	ci-run	38823367271	785 on f3b8987: macOS build+bundle+size-report ok; Linux red on PhotoEditBudgetTests (not ours)
 2026-10-15T23:57Z	4	heartbeat	38823898596	feature-done run 787 on 8fce5e2 queued
+2026-10-16T00:22Z	4	heartbeat	38823898596	run 787: Linux green; macOS scripts/ci passed (AfterGlowApp compiles); bundle-apps + ui-test pending
