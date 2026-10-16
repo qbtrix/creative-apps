@@ -51,6 +51,7 @@ Next: wait for the scoped CI run app=photo (or a full run after the #1075 quaran
 - The perf fixer may edit `PhotoLayerComposite.swift` (photo-seams file, next owner photo-adjustment-layers, not started): output bit for bit unchanged, no API change; the speed-up is this feature's budget.
 
 ## Open
+- 15:18Z: dev red #1393 (runs 38918886542, 38919557811) on Library LibraryImportSnapshots.progressRowShowsAfterItsDelay, not ours.
 - 11:40Z relaunch (run act-1a144817472-xzgv): lead/photo-edit rebuilt on origin/main 9e3c5f8 (it carried only docs/leads/photo-edit; the 690 old commits were squash-merged history), pushed with --force-with-lease. Full runs 38878109062 and 38887139934 green; still waiting a scoped photo run or the quarantine lift.
 - PJ-5/6/7 quarantined (scope full, owner #1075, expires 2026-10-18; UITests/quarantine.json is protected). Asked the supervisor on #1075 for a scoped photo run.
 - Blocked: creative-core#334 (needs-core). CoreRaster composite allocates per row since core #320; creative-apps CI builds core main, so dev is red on PhotoBrushDisplayTests and no Photo journey runs. Corrected on #763.
