@@ -149,7 +149,7 @@ func easingSurvivesSaveAndOpen(_ services: HaloServices) throws {
 func testEaseKeysJourney(_ services: HaloServices) throws {
     // 1. Select Ball: two segments, none picked.
     var (project, ball) = try ballProject(services)
-    #expect(project.keySegments.map(\.title) == ["Position X 0 → 24", "Opacity 0 → 12"])
+    #expect(project.keySegments.map(\.title) == ["Position X, frames 0–24", "Opacity, frames 0–12"])
     #expect(project.pickedSegment == nil)
     // 2. Nothing picked (the menu's availability is EZ-5's).
     #expect(project.pickedKeys.isEmpty)
