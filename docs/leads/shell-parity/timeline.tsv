@@ -2,3 +2,4 @@ utc	stage	event	ref	note
 2026-10-16T12:00Z	0	stage-start	#1325	base 9e3c5f8
 2026-10-16T12:05Z	2	stage-end	#1325	waves: DS-1+DS-2, DS-3, DS-4
 2026-10-16T12:05Z	3	stage-start	wave 1	DS-1, DS-2
+2026-10-16T12:10Z	3	stage-start	wave 1	DS-4 journey-first added to wave 1 (rule 13)
