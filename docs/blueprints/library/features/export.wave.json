@@ -29,11 +29,13 @@
     "develop",
     "import"
   ],
-  "journeys": [
+  "journeys": [],
+  "notes": "Its last task (the QB-V4 test with a cropped photo) waits for crop to merge. Owns LibraryJourneyTests.swift in its wave, for its journey steps if #333 has not merged.",
+  "quality": "QB-L9, QB-LIB-7, QB-V4, QB-F2",
+  "library_title": "Export JPEG at a set long edge and quality, never overwriting",
+  "journey_ids": [
     "J7",
     "P8"
   ],
-  "notes": "Its last task (the QB-V4 test with a cropped photo) waits for crop to merge. Owns LibraryJourneyTests.swift in its wave, for its journey steps if #333 has not merged.",
-  "quality": "QB-L9, QB-LIB-7, QB-V4, QB-F2",
-  "library_title": "Export JPEG at a set long edge and quality, never overwriting"
+  "journeys_none": "no packet yet: the blueprint names its journeys by id (J7, P8) but no XCUITest method"
 }

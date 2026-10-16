@@ -11,5 +11,29 @@
     "tier": "p1",
     "waits on (this repo)": "photo-edit (hands over `PhotoCommands+Layer.swift`)",
     "waits on (creative-core)": "nothing (CR-5 optional)"
-  }
+  },
+  "owned": [
+    "Sources/PhotoModel/Live/LiveAdjustmentLayers.swift",
+    "Tests/PhotoModelTests/LiveAdjustmentLayeringTests.swift",
+    "Sources/PhotoModel/PhotoLayerComposite.swift",
+    "Tests/PhotoModelTests/PhotoAdjustmentLayerTileTests.swift",
+    "Sources/PhotoModel/PhotoAdjustmentLayer.swift",
+    "Tests/PhotoModelTests/PhotoAdjustmentLayerTests.swift",
+    "Tests/PhotoModelTests/PhotoAdjustmentLayerBudgetTests.swift",
+    "Tests/AppSnapshotTests/PhotoAdjustmentLayerLatencyTests.swift",
+    "Sources/PhotoApp/PhotoCommands+Layer.swift",
+    "Sources/PhotoApp/PhotoWindow+AdjustmentLayer.swift",
+    "Sources/PhotoApp/PhotoLayersTab.swift",
+    "Tests/AppSnapshotTests/PhotoAdjustmentLayerSnapshots.swift",
+    "Sources/PhotoApp/PhotoAdjustTab.swift",
+    "Sources/PhotoApp/AdjustmentsInspector.swift",
+    "Sources/PhotoApp/CurvesSection.swift",
+    "Tests/AppSnapshotTests/PhotoAdjustTargetSnapshots.swift",
+    "UITests/PhotoJourneyTests+AdjustmentLayers.swift",
+    "UITests/PhotoJourneyTests+PerfAdjustmentLayers.swift"
+  ],
+  "journeys": [
+    "PhotoJourneyTests.testAdjustmentLayer",
+    "PhotoJourneyTests.testAdjustmentLayerScrubLatency"
+  ]
 }

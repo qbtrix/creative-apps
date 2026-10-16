@@ -7,5 +7,34 @@
   "covers": "the 2026-10-15 captain decisions (one shell, one tool box, the app switcher), SuiteUI half",
   "waits_on": "nothing (#933 for the geometric test EW-5b)",
   "track": "shell parity: docs/blueprints/suite/features/shell-parity-waves.md, wave 1",
-  "longest_chain": "4 (EW-1 → EW-8 → EW-5 → EW-5b)"
+  "longest_chain": "4 (EW-1 → EW-8 → EW-5 → EW-5b)",
+  "owned": [
+    "Sources/SuiteUI/SuiteWindow.swift",
+    "Sources/SuiteUI/SuiteSidebarList.swift",
+    "Sources/SuiteUI/SuiteWindowSizer.swift",
+    "Tests/SuiteUITests/SuiteWindowSizeTests.swift",
+    "Tests/AppSnapshotTests/SuiteWindowSlotSnapshots.swift",
+    "Sources/SuiteUI/EditorDetail.swift",
+    "Sources/SuiteUI/CanvasViewport.swift",
+    "Tests/SuiteUITests/EditorDetailLayoutTests.swift",
+    "Tests/AppSnapshotTests/SuiteEditorDetailSnapshots.swift",
+    "Sources/SuiteUI/SidebarActionRow.swift",
+    "Tests/AppSnapshotTests/SuiteSidebarActionRowSnapshots.swift",
+    "UITests/Journey.swift",
+    "UITests/Journey+Geometry.swift",
+    "Tests/AppAuditTests/ShellGeometry.swift",
+    "Tests/AppAuditTests/ShellGeometryTests.swift",
+    "Sources/SuiteUI/AppSwitcher.swift",
+    "Sources/SuiteUI/Tokens.swift",
+    "Tests/SuiteUITests/AppSwitcherTests.swift",
+    "Tests/AppSnapshotTests/SuiteAppSwitcherSnapshots.swift",
+    "Sources/SuiteUI/Gallery/GalleryEditorWindow.swift",
+    "Sources/SuiteUI/SuiteGallery.swift",
+    "UITests/SuiteJourneyTests+EditorWindow.swift",
+    "UITests/SuiteJourneyTests+Parity.swift"
+  ],
+  "journeys": [
+    "SuiteJourneyTests.testAppsSideBySide",
+    "SuiteJourneyTests.testEveryControlMeetsHitSize"
+  ]
 }

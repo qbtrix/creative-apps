@@ -29,10 +29,15 @@
     "spine"
   ],
   "journeys": [
-    "J1",
-    "P6"
+    "LibraryJourneyTests.testImportAFolder",
+    "LibraryJourneyTests.testImportProgressAndThroughput",
+    "LibraryJourneyTests.testImportRateAndRelaunch"
   ],
   "notes": "Owns LibraryJourneyTests.swift in its wave, for its journey steps if #333 has not merged. Deletes the skipped testImportRateAndRelaunch (J8 replaces it).",
   "quality": "QB-L9, QB-LIB-1, QB-LIB-V6, QB-F2",
-  "library_title": "Import a folder: scan, metadata, path ids, skip known, progress, failures"
+  "library_title": "Import a folder: scan, metadata, path ids, skip known, progress, failures",
+  "journey_ids": [
+    "J1",
+    "P6"
+  ]
 }

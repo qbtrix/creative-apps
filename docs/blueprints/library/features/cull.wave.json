@@ -33,10 +33,16 @@
     "spine"
   ],
   "journeys": [
-    "J4",
-    "P2"
+    "LibraryJourneyTests.testCullKeyLatency",
+    "LibraryJourneyTests.testCullWithKeysAndAutoAdvance",
+    "LibraryJourneyTests.testLoupeStepsAndReturnsToTheGrid",
+    "LibraryJourneyTests.testRateASelectedPhoto"
   ],
   "notes": "#724's keys only; its zoom and photo size go to loupe-viewport. The grid's reject mark (dimmed cell, xmark badge) is drawn by thumbnails, which owns the cell builder; cull changes only Model state. Owns MetadataInspector.swift in wave 2: it routes the stars, flag and label through cull(_:) and gives every control an identifier (most of #291's list); metadata-more takes the file in wave 5. Its (L) steps wait for import to merge. Its PR that lands the loupe keys says 'Part of #724'; whichever of cull and loupe-viewport merges its #724 part last says 'Closes #724'.",
   "quality": "QB-LIB-4, QB-LIB-5, QB-F3, QB-F4",
-  "library_title": "Cull from the keyboard with undo and Auto Advance, in grid and loupe"
+  "library_title": "Cull from the keyboard with undo and Auto Advance, in grid and loupe",
+  "journey_ids": [
+    "J4",
+    "P2"
+  ]
 }

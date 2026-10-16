@@ -27,5 +27,6 @@
   "journeys": [],
   "notes": "Not v1. Needs one menu item added to LibraryCommands.swift; it takes that file for this wave.",
   "quality": "later",
-  "library_title": "Filter by flag and rating, collections you make, smart rules (not v1)"
+  "library_title": "Filter by flag and rating, collections you make, smart rules (not v1)",
+  "journeys_none": "no packet yet, not v1: the blueprint names no journey"
 }

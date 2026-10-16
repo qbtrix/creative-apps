@@ -17,12 +17,23 @@
 #   feature_issue  "#777", or "file when ready" until it is filed
 #   covers, waits_on   the table cells, as text
 #   depends        optional feature ids it waits on: each must be in an earlier wave
-#   owned          optional paths it owns; a path ending in / or + covers every
-#                  path under or starting with it. Two features in one wave
-#                  never own the same path. An owned Sources/ file needs exactly
-#                  one owner in docs/blueprints/<app>/c4-planned.json when that exists;
-#                  with "every_source_file_owned": true at its top, every planned
-#                  Sources/ file also needs a feature that owns it (Library).
+#   owned          required, never empty: the files and globs its packet's task
+#                  table owns (a feature without a packet: what its blueprint's
+#                  waves section owns). A path ending in / or + covers every path
+#                  under or starting with it. Two features in one wave never own
+#                  the same path (with slices, the slice rule below). Never a generated file (docs/c4/model.json, a
+#                  waves.md): own the C4 part or the .wave.json instead.
+#   journeys       required: the XCUITest journeys that prove it, each
+#                  "<Class>.<testMethod>" (HaloJourneyTests.testRenderFrame), as
+#                  its packet names them. Empty only with "journeys_none": the
+#                  reason (Model-only, no packet yet, ...). Belt's blueprint view
+#                  joins features to C4 components and journeys through these two.
+#   C4             with "owned_files_planned": true (Halo) or
+#                  "every_source_file_owned": true (Library) at the top of
+#                  docs/blueprints/<app>/c4-planned.json, every owned Sources/ file
+#                  has exactly one owner there (a file, a folder or a glob, as
+#                  scripts/ci matches them); with the second, every planned
+#                  Sources/ file also needs a feature that owns it.
 #   slices         optional (contract-first packets, Design first): the feature's
 #                  units of done, each {"id", "behavior" (one sentence), "tasks"
 #                  (2 to 5 task ids, each in one slice), "journeys" (journey ids,
@@ -38,7 +49,7 @@
 #                  waits have no cycle. Features without slices keep the
 #                  same-wave rule.
 #   cells          optional {"column header": "text"} for an app's extra columns
-#   anything else (notes, journeys, quality, ...) is kept for the blueprint's own
+#   anything else (notes, quality, ...) is kept for the blueprint's own
 #   generators (library's gen_section8.py reads them) and ignored here.
 #
 # Prose: docs/blueprints/<app>/waves.in.md, hand-written blueprint prose with
@@ -62,7 +73,7 @@
 #                                         while PRs that edit waves.md can still merge)
 #   --root DIR                            the repo root (default: this script's parent)
 # With no APP, every docs/blueprints/<app>/ that has a waves.in.md.
-import json, os, re, sys
+import fnmatch, json, os, re, sys
 
 KNOWN = {"wave": "wave", "feature": "title", "covers": "covers", "waits on": "waits_on",
          "feature issue": "feature_issue", "status": "status"}
@@ -98,6 +109,11 @@ def load_features(app_dir, problems):
         f["_packet"] = os.path.isfile(os.path.join(folder, f["id"] + ".md"))
         out.append(f)
     return sorted(out, key=lambda f: (wave_key(f.get("wave")), f.get("order", 0) if isinstance(f.get("order"), int) else 0, f["id"]))
+
+def owns(p, f):
+    """A C4 paths entry owns a file as scripts/ci matches it: the file itself, a
+    folder prefix (with or without a trailing /) or a glob."""
+    return f == p or f.startswith(p.rstrip("/") + "/") or fnmatch.fnmatchcase(f, p)
 
 def covers(a, b):
     return a == b or (a.endswith(("/", "+")) and b.startswith(a))
@@ -196,13 +212,27 @@ def check(app_dir, features):
         for k in ("title", "covers", "waits_on", "feature_issue"):
             if not isinstance(f.get(k), str) or not f[k]:
                 problems.append(f"{p}: needs a text \"{k}\"")
+        root = os.path.dirname(os.path.dirname(os.path.dirname(app_dir)))
+        rel = os.path.relpath(f["_path"], root)
+        source = (f"its packet {rel[:-len('.wave.json')]}.md" if f["_packet"]
+                  else "its blueprint's waves section (no packet yet)")
+        if not isinstance(f.get("owned"), list) or not f["owned"]:
+            problems.append(f"{f['id']}: needs \"owned\", the files and globs {source} owns ({rel})")
+        for o in (f["owned"] if isinstance(f.get("owned"), list) else []):
+            if o == "docs/c4/model.json" or re.fullmatch(r"docs/blueprints/[^/]+/features/waves\.md", str(o)):
+                problems.append(f"{f['id']}: owns the generated {o}; own its source instead (a part in docs/c4/parts/, or this .wave.json) ({rel})")
+        j = f.get("journeys")
+        if not isinstance(j, list) or not all(isinstance(x, str) and re.fullmatch(r"[A-Z]\w*\.test\w+", x) for x in j):
+            problems.append(f"{f['id']}: needs \"journeys\", a list of \"<Class>.<testMethod>\" XCUITests from {source} ({rel})")
+        elif not j and not (isinstance(f.get("journeys_none"), str) and f["journeys_none"]):
+            problems.append(f"{f['id']}: \"journeys\" is empty; name the XCUITests {source} names, or say why there are none in \"journeys_none\" ({rel})")
         if not isinstance(f.get("wave"), (int, str)) or isinstance(f.get("wave"), bool):
             problems.append(f"{p}: needs a \"wave\" (a number or a label like \"0a\")")
         if f.get("status") not in STATUSES:
             problems.append(f"{p}: \"status\" must be one of {', '.join(STATUSES)}")
         if "order" in f and (not isinstance(f["order"], int) or isinstance(f["order"], bool)):
             problems.append(f"{p}: \"order\" must be an integer")
-        for k in ("depends", "owned"):
+        for k in ("depends", "owned", "journeys"):
             if k in f and not (isinstance(f[k], list) and all(isinstance(x, str) for x in f[k])):
                 problems.append(f"{p}: \"{k}\" must be a list of text")
         if "cells" in f and not (isinstance(f["cells"], dict) and all(isinstance(v, str) for v in f["cells"].values())):
@@ -225,18 +255,18 @@ def check(app_dir, features):
                     if covers(a, b) or covers(b, a):
                         problems.append(f"wave {f['wave']}: {f['id']} and {g['id']} both own {a}" + ("" if a == b else f" / {b}"))
     c4path = os.path.join(app_dir, "c4-planned.json")
-    if os.path.isfile(c4path):
-        c4 = json.load(open(c4path, encoding="utf-8"))
+    c4 = json.load(open(c4path, encoding="utf-8")) if os.path.isfile(c4path) else {}
+    if c4.get("owned_files_planned") or c4.get("every_source_file_owned"):
         paths = [p for s in c4["model"]["systems"] for c in s["containers"] for k in c.get("components", []) for p in k.get("paths", [])]
         for f in features:
             for o in f.get("owned", []):
                 if not o.startswith("Sources/"):
                     continue
                 if o.endswith(("/", "+")):
-                    if not any(p.startswith(o) or (p.endswith("/") and o.startswith(p)) for p in paths):
+                    if not any(p.startswith(o) or owns(p, o) for p in paths):
                         problems.append(f"{f['id']}: {o} has no owner in {c4path}")
                     continue
-                owners = [p for p in paths if p == o or (p.endswith("/") and o.startswith(p))]
+                owners = [p for p in paths if owns(p, o)]
                 if len(owners) != 1:
                     problems.append(f"{f['id']}: {o} has {len(owners)} owners in {c4path} {owners}")
         # Opt-in (a top-level "every_source_file_owned": true in c4-planned.json):

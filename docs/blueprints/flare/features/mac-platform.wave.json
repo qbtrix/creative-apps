@@ -5,5 +5,19 @@
   "status": "built",
   "feature_issue": "#793",
   "covers": "#739, #373, #370",
-  "waits_on": "nothing"
+  "waits_on": "nothing",
+  "owned": [
+    "Sources/FlareModel/FlareFiles.swift",
+    "Tests/FlareModelTests/FlareRecentTests.swift",
+    "Tests/FlareModelTests/FlareAutosaveDueTests.swift",
+    "Tests/FlareModelTests/FlareRecoveryRestoreTests.swift",
+    "Tests/FlareModelTests/MacPlatformJourneyTests.swift",
+    "Sources/FlareApp/StagePath.swift",
+    "Tests/AppSnapshotTests/StagePathTests.swift",
+    "Sources/FlareApp/FlareAutosave.swift",
+    "Tests/AppSnapshotTests/AutosaveTests.swift",
+    "Tests/AppSnapshotTests/AutosaveRecoveryTests.swift"
+  ],
+  "journeys": [],
+  "journeys_none": "Model only: its packet names no XCUITest; the journey is a Linux Model journey, Tests/FlareModelTests/MacPlatformJourneyTests.swift"
 }

@@ -32,10 +32,15 @@
     "spine"
   ],
   "journeys": [
-    "J3",
-    "P4"
+    "LibraryJourneyTests.testLoupeStepLatency",
+    "LibraryJourneyTests.testLoupeStepsAndReturnsToTheGrid",
+    "LibraryJourneyTests.testLoupeStepsZoomsAndReturns"
   ],
   "notes": "#724's zoom, photo on the artboard and real size. Adds Home and End (first and last photo) and scroll pan. Its (L) steps wait for import to merge. Its #724 PR says 'Part of #724' unless it merges after cull's, then 'Closes #724'.",
   "quality": "QB-LIB-5, QB-L1 (pan), QB-LIB-8",
-  "library_title": "Loupe on CanvasViewport: zoom, pan, real photo size, latest-wins render, prefetch"
+  "library_title": "Loupe on CanvasViewport: zoom, pan, real photo size, latest-wins render, prefetch",
+  "journey_ids": [
+    "J3",
+    "P4"
+  ]
 }

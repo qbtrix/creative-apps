@@ -23,5 +23,6 @@
   "journeys": [],
   "notes": "Not v1. Camera details come from the Exif the import scan already reads.",
   "quality": "later",
-  "library_title": "Keywords and camera details (not v1)"
+  "library_title": "Keywords and camera details (not v1)",
+  "journeys_none": "no packet yet, not v1: the blueprint names no journey"
 }

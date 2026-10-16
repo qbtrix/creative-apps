@@ -27,11 +27,13 @@
   "depends": [
     "develop"
   ],
-  "journeys": [
+  "journeys": [],
+  "notes": "Edits LiveDevelop.swift (crop after tone), which develop owned in wave 3.",
+  "quality": "QB-L1, QB-LIB-V4, QB-F3, QB-F4",
+  "library_title": "Crop and straighten in the loupe, applied in render, thumbnail and export",
+  "journey_ids": [
     "J6",
     "P5"
   ],
-  "notes": "Edits LiveDevelop.swift (crop after tone), which develop owned in wave 3.",
-  "quality": "QB-L1, QB-LIB-V4, QB-F3, QB-F4",
-  "library_title": "Crop and straighten in the loupe, applied in render, thumbnail and export"
+  "journeys_none": "no packet yet: the blueprint names its journeys by id (J6, P5) but no XCUITest method"
 }

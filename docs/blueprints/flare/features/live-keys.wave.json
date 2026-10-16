@@ -5,5 +5,26 @@
   "status": "built",
   "feature_issue": "#799",
   "covers": "#13, #358",
-  "waits_on": "creative-core #171, #216, #219"
+  "waits_on": "creative-core #171, #216, #219",
+  "owned": [
+    "Sources/FlareModel/Live/LiveProperties.swift",
+    "Tests/FlareModelTests/LivePropertiesTests.swift",
+    "Tests/FlareModelTests/LivePropertiesSetTests.swift",
+    "Sources/FlareModel/Live/LiveProperties+Keys.swift",
+    "Tests/FlareModelTests/LivePropertiesKeysTests.swift",
+    "Sources/FlareModel/Live/LiveProperties+Paint.swift",
+    "Tests/FlareModelTests/LivePropertiesPaintTests.swift",
+    "Sources/FlareModel/Live/LiveKeyframes.swift",
+    "Tests/FlareModelTests/LiveKeyframesTests.swift",
+    "Sources/FlareModel/Live/LiveKeyframes+Edit.swift",
+    "Tests/FlareModelTests/LiveKeyframesEditTests.swift",
+    "Sources/FlareModel/Live/LiveKeyframes+Frames.swift",
+    "Tests/FlareModelTests/LiveKeyframesFramesTests.swift",
+    "Sources/FlareModel/Live/LiveEasing.swift",
+    "Tests/FlareModelTests/LiveEasingTests.swift",
+    "Tests/FlareModelTests/LiveKeysJourneyTests.swift",
+    "Tests/FlareModelTests/LiveKeysBudgetTests.swift"
+  ],
+  "journeys": [],
+  "journeys_none": "Model only: its packet names no XCUITest; the journey is a Linux Model journey, Tests/FlareModelTests/LiveKeysJourneyTests.swift"
 }

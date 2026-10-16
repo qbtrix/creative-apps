@@ -39,5 +39,9 @@
   "waits_ui": [
     "#333"
   ],
-  "note": "H-J20, H-J21; HB-12, HB-13; HF-7, HF-8. Waits on viewer-playback (the live renderer)."
+  "note": "H-J20, H-J21; HB-12, HB-13; HF-7, HF-8. Waits on viewer-playback (the live renderer).",
+  "journeys": [
+    "HaloJourneyTests.testRenderFrame",
+    "HaloJourneyTests.testRenderPNGSequence"
+  ]
 }

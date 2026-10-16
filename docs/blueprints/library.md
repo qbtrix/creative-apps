@@ -2459,7 +2459,7 @@ wave 5   filters-collections · metadata-more · raw                      ┘
   in each wave exactly one feature may add journey steps, to that file: the
   spine in wave 1, import in wave 2, develop in wave 3, export in wave 4.
   The others ship Model tests and snapshots and add their `+<Area>` file as
-  soon as #333 lands. `check_waves.py` treats the `+<Area>` files as owned
+  soon as #333 lands. `scripts/waves check library` treats the `+<Area>` files as owned
   already.
 - **No engine waits for v1.** Every CoreRaster call v1 needs is on
   creative-core `main` (section 0.2). The one possible core issue is the
@@ -2477,9 +2477,9 @@ wave 5   filters-collections · metadata-more · raw                      ┘
 Checklist:
 
 - [x] Every open `line:library` issue maps to a feature or says "not v1"
-      (`check_waves.py`).
+      (`scripts/waves check library`).
 - [x] Every feature has owned files, and no two features in a wave share
-      one (`check_waves.py`).
+      one (`scripts/waves check library`).
 - [x] Every feature names the creative-core work it waits on: an existing
       issue (closed ones named), "none", or a one-line spec for a new one.
 

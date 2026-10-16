@@ -11,5 +11,12 @@
     "tier": "p1 (by dependency)",
     "waits on (this repo)": "#333 (QH-4; suite-harness #778 closes it with task SH-7)",
     "waits on (creative-core)": "nothing"
-  }
+  },
+  "owned": [
+    "UITests/PhotoJourneyTests.swift",
+    "UITests/PhotoJourneyTests+Fixtures.swift"
+  ],
+  "journeys": [
+    "PhotoJourneyKitTests.testWrittenPhotoOpens"
+  ]
 }

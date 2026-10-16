@@ -107,7 +107,6 @@
     "Tests/AppSnapshotTests/HaloLayersSnapshots.swift",
     "Tests/AppSnapshotTests/HaloTimelineSnapshots.swift",
     "UITests/HaloJourneyTests.swift",
-    "docs/c4/model.json",
     "docs/design.md",
     "Tests/HaloModelTests/HaloCompositionDeleteCommandTests.swift",
     "Tests/HaloModelTests/HaloCompositionDraftEdgeTests.swift",
@@ -133,5 +132,12 @@
   "waits_ui": [
     "none: alone in its wave, so its journeys (H-J0, H-J1, H-J13, layout L1 and L6) stay in HaloJourneyTests.swift"
   ],
-  "note": "H-J0, H-J1, H-J13, layout L1, L2 and L6; HB-6, HB-9. Moves HaloWindow and HaloViewer out of HaloApp.swift, keeping `HaloProject()` and `HaloViewer(model:)` as AppSnapshotTests calls them; leaves CompositionSettings, CompositionDraft, RefusedRename, CompositionDeleteCommand and RenameRefusalAlert unchanged. The stub HaloLayerInspector already shows the selected layer's header (name, kind, frames) that H-J3 reads. Also: timeline rows carry each layer's key frames and the strip draws them as diamonds (`HaloTimeline.swift`, `HaloTimelineView.swift`); the inspector always shows the layer list. Copies section 5's files into Sources (fakes and live stubs one file per contract); every W1 and W2 file below that W0 creates as a stub passes to its feature, which replaces it whole."
+  "note": "H-J0, H-J1, H-J13, layout L1, L2 and L6; HB-6, HB-9. Moves HaloWindow and HaloViewer out of HaloApp.swift, keeping `HaloProject()` and `HaloViewer(model:)` as AppSnapshotTests calls them; leaves CompositionSettings, CompositionDraft, RefusedRename, CompositionDeleteCommand and RenameRefusalAlert unchanged. The stub HaloLayerInspector already shows the selected layer's header (name, kind, frames) that H-J3 reads. Also: timeline rows carry each layer's key frames and the strip draws them as diamonds (`HaloTimeline.swift`, `HaloTimelineView.swift`); the inspector always shows the layer list. Copies section 5's files into Sources (fakes and live stubs one file per contract); every W1 and W2 file below that W0 creates as a stub passes to its feature, which replaces it whole.",
+  "journeys": [
+    "HaloJourneyTests.testEveryControlActsOrSaysWhy",
+    "HaloJourneyTests.testEveryMenuOpens",
+    "HaloJourneyTests.testLaunchShowsWindowShell",
+    "HaloJourneyTests.testLayoutAtWidths",
+    "HaloJourneyTests.testNewComposition"
+  ]
 }

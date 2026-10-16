@@ -28,10 +28,14 @@
     "spine"
   ],
   "journeys": [
-    "J2",
-    "P1"
+    "LibraryJourneyTests.testGridScrollLarge",
+    "LibraryJourneyTests.testGridShowsThumbnailsAndSorts"
   ],
   "notes": "Live thumbnails read files through services.decoder, which is FakeDecoder in tests and the live ImageIODecoder once import lands. Its (L) steps wait for import to merge. Cell values need S-L2.",
   "quality": "QB-LIB-3, QB-LIB-8, QB-LIB-V5",
-  "library_title": "Real grid thumbnails: buckets, visible requests, LRU, placeholders"
+  "library_title": "Real grid thumbnails: buckets, visible requests, LRU, placeholders",
+  "journey_ids": [
+    "J2",
+    "P1"
+  ]
 }

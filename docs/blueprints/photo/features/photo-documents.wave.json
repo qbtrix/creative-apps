@@ -11,5 +11,40 @@
     "tier": "p1",
     "waits on (this repo)": "photo-seams (journey tasks only: photo-journey-kit)",
     "waits on (creative-core)": "nothing"
-  }
+  },
+  "owned": [
+    "Sources/PhotoModel/Live/PhotoZip.swift",
+    "Tests/PhotoModelTests/PhotoContainerTests.swift",
+    "Sources/PhotoModel/Live/LiveArchive.swift",
+    "Sources/PhotoModel/Live/LiveDocuments.swift",
+    "Tests/PhotoModelTests/PhotoDocumentRoundTripTests.swift",
+    "Sources/PhotoModel/PhotoDocumentFile.swift",
+    "Tests/PhotoModelTests/PhotoDocumentFileTests.swift",
+    "Sources/PhotoModel/PhotoRecovery.swift",
+    "Tests/PhotoModelTests/PhotoRecoveryTests.swift",
+    "Sources/PhotoModel/Live/LiveRecovery.swift",
+    "Tests/PhotoModelTests/LiveRecoveryTests.swift",
+    "Tests/PhotoModelTests/PhotoDocumentsBudgetTests.swift",
+    "Sources/PhotoApp/PhotoPackageIO.swift",
+    "Tests/AppSnapshotTests/PhotoPackageIOTests.swift",
+    "Sources/PhotoApp/PhotoWindow+File.swift",
+    "Sources/PhotoApp/PhotoCommands+File.swift",
+    "Sources/PhotoApp/PhotoTopBar.swift",
+    "Tests/AppSnapshotTests/PhotoDocumentsSnapshots.swift",
+    "Sources/PhotoApp/PhotoAutosave.swift",
+    "Tests/AppSnapshotTests/PhotoAutosaveTests.swift",
+    "Sources/PhotoApp/PhotoApp.swift",
+    "Tests/AppSnapshotTests/PhotoUnsavedPromptTests.swift",
+    "UITests/PhotoJourneyTests+Documents.swift",
+    "UITests/PhotoJourneyTests+Recovery.swift",
+    "UITests/PhotoJourneyTests+PerfDocuments.swift"
+  ],
+  "journeys": [
+    "PhotoDocumentsJourneyTests.testFailedSaveSaysNotSaved",
+    "PhotoDocumentsJourneyTests.testOpenBadDocuments",
+    "PhotoPerfDocumentsJourneyTests.testOpenLargeDocument",
+    "PhotoRecoveryJourneyTests.testRestoreAfterCrash",
+    "PhotoDocumentsJourneyTests.testSaveLayeredDocumentAndReopen",
+    "PhotoDocumentsJourneyTests.testUnsavedPromptAndOpenRecent"
+  ]
 }

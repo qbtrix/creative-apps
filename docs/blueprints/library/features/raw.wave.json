@@ -25,5 +25,6 @@
   "journeys": [],
   "notes": "Not v1, pending evidence (docs/priorities.md).",
   "quality": "later",
-  "library_title": "Camera raw files through the system decoder (not v1)"
+  "library_title": "Camera raw files through the system decoder (not v1)",
+  "journeys_none": "no packet yet, not v1: the blueprint names no journey"
 }
