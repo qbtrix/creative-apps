@@ -98,3 +98,4 @@ utc	stage	event	ref	note
 2026-10-16T13:39Z	5	heartbeat	-	poller hit 2 h limit; still no scoped photo run, PJ-5/6/7 still quarantined; full CI dee94cc0 queued
 2026-10-16T14:11Z	5	heartbeat	#1075	no scoped photo run yet; re-asked supervisor for app=photo run or quarantine lift
 2026-10-16T14:33Z	5	heartbeat	-	no scoped photo run, PJ-5/6/7 still quarantined, no supervisor reply
+2026-10-16T14:55Z	5	heartbeat	-	no scoped photo run, PJ-5/6/7 still quarantined, no supervisor reply
