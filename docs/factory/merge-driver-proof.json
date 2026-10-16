@@ -1,0 +1,4 @@
+{
+  "about": "Record of the fast lane's own integration proofs (rung 2a of the agentic VCS layer). Each key below was added by a separate PR to the same spot of this file, so the second one conflicted with dev and the lane merged it in with the JSON merge driver instead of asking an agent to rebase.",
+  "proof-a": { "what": "created this file", "on": "2026-10-16" }
+}
