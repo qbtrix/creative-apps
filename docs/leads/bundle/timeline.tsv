@@ -7,3 +7,4 @@ utc	stage	event	ref	note
 2026-10-16T13:56Z	3	pr-merged	#1361	BU-5b
 2026-10-16T13:56Z	3	pr-opened	#1358	BU-3 supervisor merges
 2026-10-16T13:56Z	3	stage-start	wave 2	BU-5c on dev e464eca
+2026-10-16T14:04Z	3	pr-opened	#1392	BU-5c placeholder icons, no feature-done

@@ -4,7 +4,7 @@ Issue: #1331 · Packet: docs/blueprints/suite/features/bundle.md
 Run: act-1a144bb7df0-dpn3 · Session: claude/bundle-feature-lead-3ldknj · Started: 2026-10-16T12:43Z
 Stage: 3 wave 2
 Base: e464ecab9b0e11b9cfc27851181beafdb8fee424
-Next: wait for wave-2 BU-5c's PR (workflow wfcd21y2o) and for the supervisor to merge BU-3 #1358; then build BU-4
+Next: wait for the lane to merge BU-5c #1392 and the supervisor to merge BU-3 #1358; then build BU-4 (supervisor merges)
 
 Loop: v2 (the packet has no Slices table), with the findings queue and the 2-round cap (started after #1302 merged, 2026-10-16T04:20Z).
 Depends on: none open (#809 BU-0, #810 BU-1a, #333 SH-7 all closed).
@@ -16,7 +16,7 @@ Depends on: none open (#809 BU-0, #810 BU-1a, #333 SH-7 all closed).
 | BU-3 | 1 | Release graph in project.yml (R1), CreativeEngines re-export, journey bundle sources (#814; supervisor merges) | project.yml, Bundle/Engines/CreativeEngines.swift, Tests/SuiteModelTests/BuildGraphTests.swift | BuildGraphTests | #1358 | open, supervisor merges |
 | BU-5a | 1 | AfterGlow.plist with every suite document and exported type (#815) | Bundle/Info/AfterGlow.plist, Tests/SuiteModelTests/PlistShapeTests.swift | PlistShapeTests | #1360 | merged |
 | BU-5b | 1 | Info.plists for the five embedded apps (#816) | Bundle/Info/{Flare,Design,Photo,Library,Halo}.plist, Tests/SuiteModelTests/PlistShapeAppsTests.swift | PlistShapeAppsTests | #1361 | merged |
-| BU-5c | 2 | Placeholder icons (#817; feature-done, held until BU-4 merges) | Bundle/Icons/*.png, Bundle/Icons/README.md, Tests/SuiteModelTests/IconFilesTests.swift | IconFilesTests | | building (wave 2) |
+| BU-5c | 2 | Placeholder icons (#817; feature-done, held until BU-4 merges) | Bundle/Icons/*.png, Bundle/Icons/README.md, Tests/SuiteModelTests/IconFilesTests.swift | IconFilesTests | #1392 | open, lane |
 | BU-4 | 3 | scripts/bundle-apps assembles and signs AfterGlow.app; size-report rows (#818; supervisor merges) | scripts/bundle-apps, scripts/size-report | dev macOS run | | waits BU-3, BU-5a, BU-5b, BU-5c |
 | BU-6 | 4 | Size gate on after ten green dev runs (#819; supervisor, later; not in the done check) | .github/workflows/ci.yml, Bundle/size-budget.json | SizeGateTests | | later |
 
