@@ -7,3 +7,4 @@ utc	stage	event	ref	note
 2026-10-16T20:17Z	0	stopped	#1344	fourth nudge after the rule-7 stop; dev 1d68b228 (#1585 canvas-host and timeline only); editor-chrome still unrescoped, no reply on #1344
 2026-10-16T20:48Z	0	stopped	#1344	fifth nudge; dev 7acb6e81; editor-chrome packet, shell-parity-waves and editor-shell-removal unchanged; no reply on #1344
 2026-10-16T21:19Z	0	stopped	#1344	sixth nudge; dev fb6f9837; packet, shell-parity-waves, editor-shell-removal unchanged; no reply on #1344
+2026-10-16T21:50Z	0	stopped	#1344	seventh nudge; dev 1cbf2d7b; packet, shell-parity-waves, editor-shell-removal unchanged; no reply on #1344
