@@ -26,9 +26,17 @@ struct FlareApp: App {
 }
 
 struct FlareWindow: View {
-    @State private var model = FlareWorkspace()
+    @State var model = FlareWorkspace()
+
+    #if DEBUG
+    /// How many times a window's body ran; RenderBudgetFlareTests counts an interaction's.
+    static var bodyRuns = 0
+    #endif
 
     var body: some View {
+        #if DEBUG
+        let _ = Self.bodyRuns += 1
+        #endif
         SuiteWindow(
             title: model.document == nil ? "Flare" : "Untitled Animation",
             sections: SidebarSection.flare(model, onAddLayer: { model.addLayer() }),

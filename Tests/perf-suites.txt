@@ -23,6 +23,7 @@ photo AppSnapshotTests.PhotoBrushDisplayTests
 photo AppSnapshotTests.PhotoBrushInkLatencyTests
 photo AppSnapshotTests.PhotoBrushLatencyTests
 photo AppSnapshotTests.PhotoStrokePacerTests/theFirstSampleAppliesAtOnceAndQuickOnesWaitTogetherInOrder
+photo AppSnapshotTests.RenderBudgetPhotoTests
 
 halo HaloModelTests.HaloFilesBudgetTests/openCrowd
 halo HaloModelTests.HaloFilesBudgetTests/saveCrowd
@@ -32,6 +33,7 @@ halo HaloModelTests.HaloKeysBudgetTests
 halo HaloModelTests.HaloLayerEditsBudgetTests
 halo HaloModelTests.HaloTimelineCostTests
 halo HaloModelTests.HaloViewerBudgetTests
+halo AppSnapshotTests.RenderBudgetHaloTests/timing
 
 flare FlareModelTests.FlareEasingDragCostTests
 flare FlareModelTests.LiveKeysBudgetTests
@@ -43,9 +45,13 @@ flare FlareModelTests.editsAndPreviewStepsStayWithinTheirModelBudgets
 flare FlareModelTests.hitWithinBudget
 flare FlareModelTests.machineEditsAndPreviewTicksStayWithinTheirModelBudgets
 flare FlareModelTests.nestedDrawListWithinBudget
+flare AppSnapshotTests.RenderBudgetFlareTests/timing
 
 library LibraryModelTests.oneEditOnSixtyPhotosStaysInBudget
 library LibraryModelTests.orderRebuildWithinBudget
+library AppSnapshotTests.RenderBudgetLibraryTests/timing
+
+design AppSnapshotTests.RenderBudgetDesignTests/timing
 
 suiteui SuiteUITests.FrameProbeTests/summaryWithinBudget
 suiteui AppSnapshotTests.GoldenImageTests/compareWithinBudget

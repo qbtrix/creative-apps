@@ -28,8 +28,8 @@ changed() {
   printf '%s\n' "$@" | python3 "$ts" changed ${flag[@]+"${flag[@]}"} | paste -sd';' -
 }
 
-design_snaps='^AppSnapshotTests\.(Design[A-Za-z]*/|AppSnapshotTests/design\()'
-photo_snaps='^AppSnapshotTests\.(Photo[A-Za-z]*/|AppSnapshotTests/photo\()'
+design_snaps='^AppSnapshotTests\.((RenderBudget)?Design[A-Za-z]*/|AppSnapshotTests/design\()'
+photo_snaps='^AppSnapshotTests\.((RenderBudget)?Photo[A-Za-z]*/|AppSnapshotTests/photo\()'
 suiteui_snaps='^AppSnapshotTests\.((Suite[A-Za-z]*|GoldenImageTests|SnapshotHostTests)/|(suite[A-Za-z]*|snapshotsDrawRealSlidersNotPlaceholders|theCapsuleDrawsOnlyBehindTheCurrentItem|aDisabledBarCommandDrawsDimmerThanAnEnabledOne)\(|AppSnapshotTests/suiteGallery\()'
 
 # Changed paths to tests.
@@ -49,6 +49,8 @@ check "AfterGlow and SuiteShell run the suite scope" \
 check "a Model test file runs its target" '^(HaloModelTests)\.;' "$(changed Tests/HaloModelTests/HaloEditTests.swift)"
 check "an app's snapshot file runs that app's snapshot suites" \
   ";$photo_snaps" "$(changed Tests/AppSnapshotTests/PhotoBrushSnapshots.swift)"
+check "an app's render budget file runs that app's snapshot suites" \
+  ";$photo_snaps" "$(changed Tests/AppSnapshotTests/RenderBudgetPhotoTests.swift)"
 check "a shared snapshot file runs every snapshot" \
   ';^AppSnapshotTests\.' "$(changed Tests/AppSnapshotTests/GoldenImage.swift)"
 check "docs, scripts, journeys, CI and the perf list run no tests" ';' \
@@ -99,7 +101,7 @@ check "leaves another target's suite of the same name" no "$(takes 'DesignModelT
 photo=$(python3 "$ts" perf photo)
 check "perf photo takes Photo's" yes "$(grep -qE "$photo" <<<'AppSnapshotTests.PhotoBrushLatencyTests/x()' && echo yes || echo no)"
 check "perf photo leaves Halo's" no "$(grep -qE "$photo" <<<'HaloModelTests.HaloViewerBudgetTests/x()' && echo yes || echo no)"
-check "perf for an app with none is empty, never a match-all regex" "" "$(python3 "$ts" perf design)"
+check "perf for an app with none is empty, never a match-all regex" "" "$(python3 "$ts" perf suite)"
 printf '%s\n' '# nothing yet' >"$tmp/empty.txt"
 check "an empty list gives no regex" "" "$(PERF_SUITES="$tmp/empty.txt" python3 "$ts" perf)"
 printf '%s\n' 'photo PhotoModelTests' >"$tmp/bad.txt"
