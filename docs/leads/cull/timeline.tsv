@@ -8,3 +8,4 @@ utc	stage	event	ref	note
 2026-10-16T19:00Z	3	pr-merged	#1533	CU-2 LiveCulling Auto Advance rule
 2026-10-16T19:00Z	3	pr-merged	#1541	CU-1 cull on targets, one undo step
 2026-10-16T19:05Z	3	stage-start	wave2	CU-3 CU-4 on base ef9dfc2
+2026-10-16T19:32Z	3	heartbeat	-	wave 2 (CU-3, CU-4) builders running; check their PRs and the lane, then start w
