@@ -1,7 +1,9 @@
 // LibraryAutoAdvanceTests.swift: the live Auto Advance rule (CU-2, #426).
 // `LiveCulling.advance` picks the photo to focus after a change: the next
 // one, itself when it was last, the photo that took its place when a filter
-// hid it, and nil when nothing is shown.
+// hid it, and nil when nothing is shown. The catalog half (CU-3): `cull`
+// moves the loupe on after a rating or a flag with Auto Advance on, never on
+// a label, in the grid or on undo.
 import Testing
 @testable import LibraryModel
 
@@ -89,5 +91,129 @@ private let order = ["IMG_0001", "IMG_0002", "IMG_0003", "IMG_0004"]
         #expect(throws: LibraryError.invalid("A rating is 0 to 5 stars.")) {
             try LiveCulling().apply(.rating(stars), to: ids, in: photos)
         }
+    }
+}
+
+// MARK: - The catalog's Auto Advance (CU-3)
+
+/// The shoot fixture's photo `IMG_<n>` (ids are paths).
+private func shot(_ n: Int) -> String { "/fixture/shoot/IMG_" + LibraryFixtures.padded(n, to: 4) + ".jpg" }
+
+/// The shoot sorted by name, in the loupe on IMG_0001, on `culling`.
+private func shootInLoupe(culling: any PhotoCulling = FakeCulling()) -> LibraryCatalog {
+    var services = LibraryServices.fake()
+    services.culling = culling
+    var catalog = LibraryCatalog(services: services)
+    catalog.load(LibraryFixtures.photos(named: "shoot"))
+    catalog.setSort(.name)
+    catalog.open(shot(1))
+    return catalog
+}
+
+private func rating(_ catalog: LibraryCatalog, _ id: String) -> Int? {
+    catalog.items.first { $0.id == id }?.rating
+}
+
+@Test func aRatingInTheLoupeAdvancesToTheNextPhoto() {
+    for culling: any PhotoCulling in [FakeCulling(), LiveCulling()] {
+        var catalog = shootInLoupe(culling: culling)
+        catalog.cull(.rating(3))
+        #expect(rating(catalog, shot(1)) == 3)
+        #expect(catalog.mode == .loupe)
+        #expect(catalog.focusedItemID == shot(2))
+        catalog.cull(.flag(.pick))
+        #expect(catalog.items.first { $0.id == shot(2) }?.flag == .pick)
+        #expect(catalog.focusedItemID == shot(3))
+    }
+}
+
+@Test func aLabelDoesNotAdvance() {
+    var catalog = shootInLoupe()
+    catalog.cull(.label(.red))
+    #expect(catalog.items.first { $0.id == shot(1) }?.label == .red)
+    #expect(catalog.focusedItemID == shot(1))
+    #expect(catalog.mode == .loupe)
+}
+
+@Test func autoAdvanceOffMovesNothing() {
+    var catalog = shootInLoupe()
+    catalog.setAutoAdvance(false)
+    #expect(!catalog.autoAdvance)
+    catalog.cull(.rating(3))
+    catalog.cull(.flag(.reject))
+    #expect(rating(catalog, shot(1)) == 3)
+    #expect(catalog.focusedItemID == shot(1))
+    catalog.setAutoAdvance(true)
+    catalog.cull(.rating(4))
+    #expect(catalog.focusedItemID == shot(2))
+}
+
+@Test func aCullWithoutAdvanceDoesNotMove() {
+    var catalog = shootInLoupe()
+    catalog.cull(.rating(3), advance: false)
+    catalog.cull(.flag(.pick), advance: false)
+    #expect(rating(catalog, shot(1)) == 3)
+    #expect(catalog.focusedItemID == shot(1))
+}
+
+@Test func theLastPhotoStaysPutWhenItAdvances() {
+    var catalog = shootInLoupe()
+    catalog.open(shot(24))
+    catalog.cull(.rating(2))
+    #expect(catalog.focusedItemID == shot(24))
+    #expect(catalog.mode == .loupe)
+}
+
+@Test func inTheGridTheSelectionNeverMoves() {
+    var catalog = shootInLoupe()
+    catalog.showGrid()
+    catalog.select([shot(1), shot(5)])
+    let focus = catalog.focusedItemID
+    for change: CullChange in [.rating(3), .flag(.pick), .label(.blue)] {
+        catalog.cull(change)
+        #expect(catalog.selection == [shot(1), shot(5)])
+        #expect(catalog.mode == .grid)
+        #expect(catalog.focusedItemID == focus)
+    }
+}
+
+@Test func undoAfterAnAdvanceRestoresTheRatingAndLeavesTheLoupe() {
+    var catalog = shootInLoupe()
+    catalog.cull(.rating(3))
+    #expect(catalog.focusedItemID == shot(2))
+    catalog.undo()
+    #expect(rating(catalog, shot(1)) == 0)
+    #expect(catalog.mode == .loupe)
+    #expect(catalog.focusedItemID == shot(2))
+    catalog.redo()
+    #expect(rating(catalog, shot(1)) == 3)
+    #expect(catalog.focusedItemID == shot(2))
+}
+
+@Test func unflaggingInFavoritesGoesToThePhotoThatTookItsPlace() {
+    var catalog = shootInLoupe(culling: LiveCulling())
+    catalog.showGrid()
+    catalog.select([shot(1), shot(2)])
+    catalog.cull(.flag(.pick))
+    catalog.selectCollection("favorites")
+    catalog.open(shot(1))
+    catalog.cull(.flag(.none))
+    #expect(catalog.order == [shot(2)])
+    #expect(catalog.mode == .loupe)
+    #expect(catalog.focusedItemID == shot(2))
+}
+
+@Test func aChangeThatEmptiesTheShownOrderReturnsToTheGrid() {
+    for culling: any PhotoCulling in [FakeCulling(), LiveCulling()] {
+        var catalog = shootInLoupe(culling: culling)
+        catalog.cull(.flag(.pick), advance: false)
+        catalog.selectCollection("favorites")
+        catalog.open(shot(1))
+        #expect(catalog.mode == .loupe)
+        catalog.cull(.flag(.none))
+        #expect(catalog.order.isEmpty)
+        #expect(catalog.mode == .grid)
+        #expect(catalog.focusedItemID == nil)
+        #expect(catalog.loupeItem == nil)
     }
 }
