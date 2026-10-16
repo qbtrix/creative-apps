@@ -1,0 +1,7 @@
+[
+{"label":"setStyle drops the one-layer fast path","file":"Sources/DesignModel/DesignActions+Edit.swift","find":"if ids.count == 1, change.property.hasOneLayerMethod, let node = selectedNode {","replace":"if false, let node = selectedNode {","tests":"DesignActionsEditTests"},
+{"label":"styleHelp drops the one-layer fast path","file":"Sources/DesignModel/DesignActions+Edit.swift","find":"if ids.count == 1, property.hasOneLayerMethod { return","replace":"if false { return","tests":"DesignActionsEditTests"},
+{"label":"a several-layer cut keeps the service's step name","file":"Sources/DesignModel/DesignActions+Edit.swift","find":"(edit.name, edit.coalescingKey) = (\"Cut\", nil)","replace":"edit.coalescingKey = nil","tests":"DesignActionsEditTests"},
+{"label":"a one-layer cut of a locked layer says nothing would change","file":"Sources/DesignModel/DesignActions+Edit.swift","find":"if isLockedInTree(node.id) { throw .locked(node.name) }","replace":"","tests":"DesignActionsEditTests"},
+{"label":"paste ignores the selected frame","file":"Sources/DesignModel/DesignActions+Edit.swift","find":"try services.clipboard.paste(data, into: frame, on: page, mint: &mint)","replace":"try services.clipboard.paste(data, into: nil, on: page, mint: &mint)","tests":"DesignActionsEditTests"}
+]
