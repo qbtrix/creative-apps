@@ -77,6 +77,16 @@ for them by name.
    the slice that builds it, not on that feature's first slice. A packet
    with this table runs the v3 lead loop (`lead.md`, Which loop); one
    without it runs the v2 loop unchanged.
+   - **UI slices.** A slice whose tasks change `Sources/*App/` or
+     `Sources/SuiteUI/` declares `"ui": true` on its entry in `slices`
+     (`scripts/waves check` fails on a value that isn't `true` or `false`).
+     It also gets a render budget row in Quality tests for each
+     interaction it adds or changes, for example "120-sample drag ≤ 3
+     window bodies; divider drag p95 ≤ 8 ms", with its
+     `Tests/AppSnapshotTests/RenderBudget*` test. Body counts gate; times
+     are checked by the Mac finisher. A UI slice is done only through the
+     feel gate and a Mac finisher pass (`lead.md`, contract rules 15 and
+     17). Its builders read `docs/engineering/swiftui-rules.md`.
 3. **Journey steps.** The numbered steps a user takes, each naming the task
    and the journey test (`<X>-J<n>`) that proves it.
 4. **Screens and states.** Each screen state the feature adds and the
@@ -119,12 +129,15 @@ for them by name.
      for `<` on the left edge; a locked layer moves), which the builder adds
      to the plan of the file it changes and runs with `scripts/mutate`.
 10. **Quality tests.** `| quality row | budget | test |`: budgets, no dead
-   controls, one gesture one step, keyboard parity, the audit.
+   controls, one gesture one step, keyboard parity, the audit, and a render
+   budget row per UI slice (`render: <interaction>` | `120-sample drag ≤ 3
+   window bodies; p95 ≤ 8 ms` | `RenderBudget<App>Tests.<test>`).
 11. **Done check.** Journeys green on the `feature-done` CI run, audit zero
     new, the contact sheet comment. With Slices, per slice instead: its
     journeys green on a scoped run (`ci.yml` with `app=<app>`) that contains
-    its last merged PR, every app built, no open `finding` issue, then the
-    contact sheet once every slice is done (`lead.md`, contract rule 6).
+    its last merged PR, every app built, no open `finding` issue, for a UI
+    slice the feel gate and its `Mac-Finish:` line, then the contact sheet
+    once every slice is done (`lead.md`, contract rules 6, 15 and 17).
 12. **Review notes folded in** (optional). What a review changed.
 
 ## The three rules
@@ -199,3 +212,6 @@ with the task ids. It refutes; it doesn't rewrite.
 11. **No oracle** (with Slices). A task that adds behaviour with fewer than
     2 mutations in its Acceptance row, or that changes planned source
     without owning that file's plan in `Tests/mutations/`.
+12. **UI slice unmarked** (with Slices). A slice whose tasks own files under
+    `Sources/*App/` or `Sources/SuiteUI/` without `"ui": true`, or a UI
+    slice with no render budget row in Quality tests.

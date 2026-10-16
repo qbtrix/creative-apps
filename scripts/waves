@@ -38,7 +38,10 @@
 #                  units of done, each {"id", "behavior" (one sentence), "tasks"
 #                  (2 to 5 task ids, each in one slice), "journeys" (journey ids,
 #                  at least one), "owned" (its tasks' files; together exactly the
-#                  feature's "owned"), "waits" ({what: [its tasks that wait]})}.
+#                  feature's "owned"), "waits" ({what: [its tasks that wait]}),
+#                  "ui" (optional, true or false: true for a slice that changes
+#                  Sources/*App/ or Sources/SuiteUI/, which then takes the feel
+#                  gate and a Mac finisher pass, docs/factory/lead.md rules 15, 17)}.
 #                  A waits key is a feature id (all its slices), "<feature>:<slice>"
 #                  or a slice of the same feature. Slice waits carry no wave rule:
 #                  they say when a task may start, so a slice can wait on a
@@ -154,6 +157,8 @@ def check_slices(features, byid):
                     problems.append(f"{name}: \"{k}\" must be a non-empty list of text")
             if not isinstance(s.get("waits", {}), dict):
                 problems.append(f"{name}: \"waits\" must map what it waits on to its tasks that wait")
+            if not isinstance(s.get("ui", False), bool):
+                problems.append(f"{name}: \"ui\" must be true or false")
             nodes[(f["id"], sid)] = s.get("owned", []) if texts(s.get("owned")) else []
         union = {o for s in sl if texts(s.get("owned")) for o in s["owned"]}
         if union != set(f.get("owned", [])):
