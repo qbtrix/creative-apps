@@ -4,7 +4,7 @@ Issue: #1331 · Packet: docs/blueprints/suite/features/bundle.md
 Run: act-1a144bb7df0-dpn3 · Session: claude/bundle-feature-lead-3ldknj · Started: 2026-10-16T12:43Z
 Stage: 3 wave 2
 Base: e464ecab9b0e11b9cfc27851181beafdb8fee424
-Next: wait for the lane to merge BU-5c #1392 and the supervisor to merge BU-3 #1358; then build BU-4 (supervisor merges)
+Next: wait for the lane macOS build run 38912960821 on BU-5c #1392 and the supervisor to merge BU-3 #1358; then build BU-4 (supervisor merges)
 
 Loop: v2 (the packet has no Slices table), with the findings queue and the 2-round cap (started after #1302 merged, 2026-10-16T04:20Z).
 Depends on: none open (#809 BU-0, #810 BU-1a, #333 SH-7 all closed).
