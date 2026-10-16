@@ -2,3 +2,6 @@ utc	stage	event	ref	note
 2026-10-16T11:49Z	0	stage-start	#1334	base ebc68bf
 2026-10-16T11:55Z	2	stage-end	#1334	three waves planned; IM-9 blocked on #782
 2026-10-16T11:55Z	3	stage-start	wave 1	IM-1 IM-2 IM-4
+2026-10-16T12:07Z	3	pr-merged	#1338	IM-1
+2026-10-16T12:17Z	3	pr-merged	#1342	IM-4
+2026-10-16T12:25Z	3	stage-start	wave 2	IM-2 retry, IM-6, IM-7
