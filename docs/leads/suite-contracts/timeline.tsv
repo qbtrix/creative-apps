@@ -62,3 +62,4 @@ utc	stage	event	ref	note
 2026-10-16T18:33Z	4	ci-run	38945792388	scoped: suite on b01e722 green; full 38938209193 (7d7256c) in progress
 2026-10-16T18:40Z	4	round-findings	round 3	5 confirmed (3 major) #1556-#1560
 2026-10-16T18:41Z	5	stage-start	finish	round cap reached; 6 findings relabelled gap
+2026-10-16T18:55Z	5	ci-run	38938209193	red on design shell + halo easing journeys (not suite-contracts); suite tests and SuiteJourneyTests green

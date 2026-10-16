@@ -4,7 +4,7 @@ Issue: #1332 · Packet: docs/blueprints/suite/features/suite-contracts.md
 Run: act-1a1448a5fd9-0he1 · Session: claude/suite-contracts-lead-rv72k4 · Started: 2026-10-16T11:49Z
 Stage: 5 finish
 Base: 68cabe667bf2de7df53327a947705078d3b08f2b
-Next: wait for a green full dev CI run whose head contains 26689bbc (last suite-contracts PR, #1519); then comment Belt-Contact-Sheet on #1332 with the run link, round summary, gaps #1556 #1558 #1560 (p1) #1557 #1559 #1463 (p2), and the Linux SuiteModelTests count and QB-SM6 median
+Next: wait for full dev run 38949843618 (#1030, head 4460182, contains every suite-contracts PR incl. #1519); if green, post Belt-Contact-Sheet on #1332; if red only on other features, record it and wait for the next full run
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -41,7 +41,7 @@ Waves (packet's Build waves, checked against dev at ebc68bf):
 |---|---|---|---|---|---|---|---|
 | 1 | 38933216466 | red, not this feature: Linux green; macOS failed only HaloEasingSnapshots.segmentTitlesFitOneLine (halo, #1450); SuiteLiveServicesTests, all SuiteModelTests (2740 Model tests) and StoreBudgetTests passed; QB-SM6 median 5.5/5.7 ms (debug gate 50); journeys skipped after the test failure, so no audit | no screens touched | clarity, oracle, quality, packet conformance, robustness | 10 (4 major, 6 minor): #1457 #1459 #1460 #1461 #1462 #1463 #1464 #1465 #1466 #1468 | #1472 #1473 #1474 #1476 merged | no |
 | 2 | scoped: suite 38940652547 on 3fbd10f (all round-1 fixes) | scoped green; full 38938209193 still queued | no screens touched | same five lenses | 6 minor, 0 blocker/major (panel clean): #1485 #1486 #1487 #1488 #1489 #1490 | #1492 #1504 #1518 #1519 merged | panel clean |
-| 3 (final) | scoped: suite 38945792388 on b01e722 green; full run pending | pending | no screens touched | same five lenses | 5 (3 major): #1556 #1558 #1560 major, #1557 #1559 minor | none: round cap (rule 11) reached; relabelled gap with #1463 | no |
+| 3 (final) | full 38938209193 on 7d7256c | red, not this feature: Design shell geometry (testShellDark/Light, shell-parity #1452) and Halo easing/playback journeys + audit (easing); SuiteLiveServicesTests, StoreBudgetTests and SuiteJourneyTests (4/4) passed | no screens touched | same five lenses | 5 (3 major): #1556 #1558 #1560 major, #1557 #1559 minor | none: round cap (rule 11) reached; relabelled gap with #1463 | no |
 
 Runs after round 1: scoped: suite 38938043443 on 91f1ba6 (has SC-5c and #1472) green; full run 38938209193 on 7d7256c pending; scoped: suite 38940652547 on 3fbd10f (all round-1 fixes) in progress.
 
