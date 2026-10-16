@@ -1,0 +1,3 @@
+utc	stage	event	ref	note
+2026-10-16T21:27Z	2	stage-start		plan written from packet and origin/dev
+2026-10-16T21:27Z	2	stage-end		waiting on Swift toolchain for scripts/ci
