@@ -14,7 +14,7 @@ acceptance tests.
 
 | wave | feature | packet | covers | waits on | feature issue | status |
 |---|---|---|---|---|---|---|
-| 0 | The suite's targets exist, today's size is measured | `targets.md` | #807, #808, #809, #810, #811 | nothing | #873 | building |
+| 0 | The suite's targets exist, today's size is measured | `targets.md` | #807, #808, #809, #810, #811 | nothing | #873 | built |
 | 1 | One AfterGlow.app with shared frameworks and document types | `bundle.md` | #813, #814, #815, #816, #817, #818 (and #819, after ten runs) | targets; #333 for BU-3 | file when ready | planned |
 | 1 | Shared values, contracts, fakes, store and live slots | `suite-contracts.md` | #820–#834 | targets | file when ready | planned |
 | 2 | The AfterGlow home | `home.md` | #841–#848, #870; app lines #836–#840 (follow-up #849) | suite-contracts, bundle, #778; #782 for the follow-up | file when ready | planned |
