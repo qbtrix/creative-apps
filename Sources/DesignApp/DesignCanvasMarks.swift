@@ -101,17 +101,23 @@ struct DesignArtwork: View {
     }
 }
 
-/// Draws a frame's name above its top-left corner, or just inside it when the frame touches the
-/// top of the page and the artboard would clip a name above it.
+/// Draws a frame's name above its top-left corner, or just inside it when the artboard has no room
+/// for the name above the frame (DesignFrameLabel decides). The Canvas is laid out on the artboard,
+/// so the artboard's top is 0 here, and the name's own measured height sets the room it needs.
 private func drawName(of item: DesignPainted, in context: GraphicsContext, scaledBy fit: CGAffineTransform) {
     let box = item.node.frame.cgRect.applying(fit)
-    let inside = box.minY < SuiteSpacing.l
-    let color = labelColor(over: inside ? item.node.fill : item.backdrop)
-    let name = context.resolve(Text(item.node.name).font(SuiteFont.caption).foregroundStyle(color))
-    if inside {
-        context.draw(name, at: CGPoint(x: box.minX + SuiteSpacing.xs, y: box.minY + SuiteSpacing.xs), anchor: .topLeading)
-    } else {
-        context.draw(name, at: CGPoint(x: box.minX, y: box.minY - SuiteSpacing.xxs), anchor: .bottomLeading)
+    let text = Text(item.node.name).font(SuiteFont.caption)
+    let height = context.resolve(text).measure(in: CGSize(width: CGFloat.infinity, height: .infinity)).height
+    let label = DesignFrameLabel.place(
+        frameTop: Double(box.minY), artboardTop: 0, labelHeight: Double(height),
+        gap: Double(SuiteSpacing.xxs), inset: Double(SuiteSpacing.xs))
+    let color = labelColor(over: label.isInside ? item.node.fill : item.backdrop)
+    let name = context.resolve(text.foregroundStyle(color))
+    switch label {
+    case .inside(let top):
+        context.draw(name, at: CGPoint(x: box.minX + SuiteSpacing.xs, y: top), anchor: .topLeading)
+    case .above(let bottom):
+        context.draw(name, at: CGPoint(x: box.minX, y: bottom), anchor: .bottomLeading)
     }
 }
 

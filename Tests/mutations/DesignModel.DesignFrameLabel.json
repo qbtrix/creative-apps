@@ -1,0 +1,6 @@
+[
+{"label":"room ignores the artboard's offset","file":"Sources/DesignModel/DesignFrameLabel.swift","find":"let room = frameTop - artboardTop","replace":"let room = frameTop","tests":"DesignFrameLabelTests.swift"},
+{"label":"room counts the name but not the gap","file":"Sources/DesignModel/DesignFrameLabel.swift","find":"room >= labelHeight + gap {","replace":"room >= labelHeight {","tests":"DesignFrameLabelTests.swift"},
+{"label":"the boundary is strict","file":"Sources/DesignModel/DesignFrameLabel.swift","find":"room >= labelHeight + gap {","replace":"room > labelHeight + gap {","tests":"DesignFrameLabelTests.swift"},
+{"label":"an inside name follows a frame above the artboard","file":"Sources/DesignModel/DesignFrameLabel.swift","find":"return .inside(top: Swift.max(frameTop, artboardTop) + inset)","replace":"return .inside(top: frameTop + inset)","tests":"DesignFrameLabelTests.swift"}
+]
