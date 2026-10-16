@@ -36,10 +36,11 @@
 # title "macOS build", and ignores "macOS" and "macOS (<app>)", so keep them
 # stable.
 name: CI
-# A build-only run (the fast lane's compile check for code PRs) and a scoped
-# run ("scoped: <app>", how verify-dispatch.sh finds them) get their own
-# titles; " " keeps the default title.
-run-name: "${{ inputs.build_only && 'macOS build' || inputs.app && format('scoped: {0}', inputs.app) || ' ' }}"
+# A build-only run (the fast lane's compile check for code PRs), a Linux-only
+# run (the lane's check on a head it integrated) and a scoped run ("scoped:
+# <app>", how verify-dispatch.sh finds them) get their own titles; " " keeps
+# the default title.
+run-name: "${{ inputs.build_only && 'macOS build' || inputs.linux_only && 'Linux check' || inputs.app && format('scoped: {0}', inputs.app) || ' ' }}"
 
 on:
   pull_request:
@@ -48,6 +49,10 @@ on:
     inputs:
       build_only:
         description: Only build every target on macOS (the fast lane's compile check for code PRs)
+        type: boolean
+        default: false
+      linux_only:
+        description: Only the Linux job (the fast lane's check on a PR head it integrated itself; no macOS job, so no findings get filed for a branch)
         type: boolean
         default: false
       app:
@@ -66,7 +71,7 @@ permissions:
 # from a branch named dev can't cancel a dev run. Each scoped app gets its own
 # group, so a Design run never displaces a pending Photo or full run.
 concurrency:
-  group: ci-${{ github.event.pull_request.number || github.ref_name }}${{ inputs.build_only && '-build' || '' }}${{ inputs.app && format('-{0}', inputs.app) || '' }}
+  group: ci-${{ github.event.pull_request.number || github.ref_name }}${{ inputs.build_only && '-build' || '' }}${{ inputs.linux_only && '-linux' || '' }}${{ inputs.app && format('-{0}', inputs.app) || '' }}
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' && github.ref != 'refs/heads/dev' }}
 
 jobs:
@@ -113,7 +118,7 @@ jobs:
 
   macos:
     name: ${{ inputs.app && format('macOS ({0})', inputs.app) || 'macOS' }}
-    if: ${{ !inputs.build_only }}
+    if: ${{ !inputs.build_only && !inputs.linux_only }}
     runs-on: macos-26
     # scripts/ci alone takes about 20 min under load and the five apps' UI
     # journeys about 30 more; 45 cut ui-test off mid-run (dev run 38792928305).

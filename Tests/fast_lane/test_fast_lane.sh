@@ -2,7 +2,9 @@
 # Tests/fast_lane/test_fast_lane.sh: fixture tests for the pure `decide`
 # function in scripts/fast-lane.sh, its PROTECTED list against CLAUDE.md's
 # "Never edit" bullet, the app audit guard (audit_loosens on before/after
-# trees) and whole sweeps against a stub `gh`. No network, needs bash and jq.
+# trees), whole sweeps against a stub `gh`, and the lane's integration of a
+# conflicting PR (integrate) against a local bare repo. No network, needs bash,
+# git and jq.
 #
 # checks-green.json is a check rollup shaped like a green flare-core PR: the CI
 # workflow's Linux and macOS jobs plus one SKIPPED CI job, a non-CI workflow
@@ -22,6 +24,7 @@ source "$here/../../scripts/fast-lane.sh"
 tmp=$(mktemp -d)
 trap 'rm -rf "$tmp"' EXIT
 fail=0
+REMOTE="$tmp/no-such-remote"  # integrate's clone target; the integrate cases point it at a bare repo
 
 HEAD_SHA="0123456789abcdef0123456789abcdef01234567"
 BASE_PR='{"number":1,"state":"OPEN","isDraft":false,"baseRefName":"dev","headRefName":"feat/x",
@@ -525,8 +528,9 @@ gh() {
     "pr view "*"--json title "*) echo "title $2" ;;
     "pr view "*"--json body "*) jq -r .body "$sw/$3.json" ;;
     "pr view "*"--json closingIssuesReferences "*) cat "$sw/$3.closes" 2>/dev/null || true ;;
-    "pr view "*) cat "$sw/$3.json" ;;
-    "api "*"/check-runs"*|"api "*"/status "*) echo '[]' ;;
+    "pr view "*) live_pr "$3" ;;
+    "api "*"/check-runs"*) u="${2#*/commits/}"; u="${u%%/*}"; cat "$sw/checks.$u.json" 2>/dev/null || echo '[]' ;;
+    "api "*"/status "*) echo '[]' ;;
     "api "*"/pulls/"*"/files "*)
       n="${2#*/pulls/}"; n="${n%%/*}"
       if [[ -e "$sw/files.$n.json" ]]; then jq -r "${!#}" "$sw/files.$n.json"
@@ -577,6 +581,17 @@ gh() {
     *) echo "$a" >>"$sw/calls" ;;
   esac
 }
+# live_pr <n>: the PR's fixture, with the head moved to the bare remote's
+# branch tip when the lane pushed one there (GitHub would show the new head,
+# mergeable again, and the lane's merge as the last commit).
+live_pr() {
+  local f="$sw/$1.json" br tip
+  br=$(jq -r .headRefName "$f"); tip=$(git -C "$sw/origin.git" rev-parse "refs/heads/$br" 2>/dev/null || true)
+  if [[ -n "$tip" && "$tip" != "$(jq -r .headRefOid "$f")" ]]; then
+    jq --arg t "$tip" --arg s "$(git -C "$sw/origin.git" log -1 --format=%s "$tip")" \
+      '.headRefOid = $t | .mergeable = "MERGEABLE" | .mergeStateStatus = "CLEAN" | .commits = [{oid: $t, messageHeadline: $s}]' "$f"
+  else cat "$f"; fi
+}
 sweep() {
   rm -rf "$sw"; mkdir -p "$sw"; : >"$sw/calls"
   local n
@@ -598,11 +613,70 @@ sweep
 expect "merges every eligible PR, oldest first, and the retargeted one on the re-sweep" \
   "$(grep -oE '^pr merge [0-9]+' "$sw/calls" | paste -sd, -)" "pr merge 4,pr merge 7,pr merge 5"
 expect "retargets the main-based PR once" "$(grep -c '^pr edit 5 .*--base dev' "$sw/calls")" 1
-expect "one conflict comment" "$(grep -c '^pr comment 6 .*conflicts with dev' "$sw/calls")" 1
+expect "a conflicting PR the lane can't reach (no remote) gets no comment yet" "$(grep -c '^pr comment 6 ' "$sw/calls")" 0
 expect "never merges the conflicting PR" "$(grep -c '^pr merge 6' "$sw/calls")" 0
+
 expect "routine merges start no CI" "$(grep -c '^workflow run' "$sw/calls")" 0
 sweep 4 7
 expect "feature-done merges dispatch CI on dev once" "$(grep -c '^workflow run ci.yml .*--ref dev' "$sw/calls")" 1
+
+# The lane integrates a conflicting PR (rung 2 of the agentic VCS layer): a
+# bare "origin" with dev, feat/json (a key the JSON driver merges with dev's)
+# and feat/text (the same Markdown line changed both ways). Both PRs are
+# CONFLICTING for GitHub. lane_sweep runs main() with no run-lookup retries.
+lane_sweep() { ( FAST_LANE_RUN_LOOKUP_RETRIES=0 main ) >/dev/null 2>&1 || { echo "FAIL sweep: main exited non-zero"; fail=1; }; }
+w="$tmp/remote-work"
+rm -rf "$sw"; mkdir -p "$sw"; : >"$sw/calls"
+git init -q --bare "$sw/origin.git"; git -C "$sw/origin.git" config uploadpack.allowFilter true
+git init -q -b dev "$w"; git -C "$w" config user.name t; git -C "$w" config user.email t@t; git -C "$w" config commit.gpgsign false
+cp "$here/../../.gitattributes" "$w/"
+printf '{"a": 1}\n' >"$w/a.json"; printf 'one\ntwo\nthree\n' >"$w/t.md"; git -C "$w" add -A; git -C "$w" commit -qm base
+git -C "$w" switch -qc feat/json; printf '{"a": 1, "b": 2}\n' >"$w/a.json"; git -C "$w" commit -qam "feat: b"
+git -C "$w" switch -qc feat/text dev; printf 'one\nTWO ours\nthree\n' >"$w/t.md"; git -C "$w" commit -qam "docs: two"
+git -C "$w" switch -q dev; printf '{"a": 1, "c": 3}\n' >"$w/a.json"; printf 'one\nTWO theirs\nthree\n' >"$w/t.md"; git -C "$w" commit -qam "dev moves"
+git -C "$w" push -q "$sw/origin.git" dev feat/json feat/text
+JSON_HEAD=$(git -C "$w" rev-parse feat/json); TEXT_HEAD=$(git -C "$w" rev-parse feat/text); DEV_TIP=$(git -C "$w" rev-parse dev)
+for spec in "6 feat/json $JSON_HEAD" "8 feat/text $TEXT_HEAD"; do
+  read -r n br h <<<"$spec"
+  jq --argjson n "$n" --arg br "$br" --arg h "$h" '.number = $n | .headRefName = $br | .headRefOid = $h
+    | .mergeable = "CONFLICTING" | .mergeStateStatus = "DIRTY" | .commits = [{oid: $h, messageHeadline: "a change"}]' <<<"$BASE_PR" \
+    | jq "$(mark "Fast-Check: pass" "Head: $h")" >"$sw/$n.json"
+  printf '%s\n' '[{"filename": "docs/x.md", "status": "modified"}]' >"$sw/files.$n.json"
+done
+REMOTE="$sw/origin.git" lane_sweep
+MERGE_TIP=$(git -C "$sw/origin.git" rev-parse feat/json)
+expect "integrate: feat/json now ends in the lane's merge commit" "$(git -C "$sw/origin.git" log -1 --format=%s feat/json)" "$LANE_MERGE_SUBJECT"
+expect "integrate: its parents are the old head and dev" "$(git -C "$sw/origin.git" rev-parse feat/json^1 feat/json^2 | paste -sd' ' -)" "$JSON_HEAD $DEV_TIP"
+expect "integrate: the JSON driver merged both keys" "$(git -C "$sw/origin.git" show feat/json:a.json | jq -c .)" '{"a":1,"b":2,"c":3}'
+expect "integrate: one comment says the lane merged dev in" "$(grep -c "^pr comment 6 .*merged origin/dev into feat/json itself ($MERGE_TIP)" "$sw/calls")" 1
+expect "integrate: the re-sweep starts a Linux-only check on the new head" "$(grep -c '^workflow run ci.yml .*-f linux_only=true --ref feat/json' "$sw/calls")" 1
+expect "integrate: and says so once" "$(grep -c "^pr comment 6 .*head $MERGE_TIP is the lane's merge of dev into feat/json" "$sw/calls")" 1
+expect "integrate: not merged before the check" "$(grep -c '^pr merge 6' "$sw/calls")" 0
+expect "integrate: a real conflict leaves the branch alone" "$(git -C "$sw/origin.git" rev-parse feat/text)" "$TEXT_HEAD"
+expect "integrate: and labels it needs-rebase" "$(grep -c '^label create needs-rebase' "$sw/calls"),$(grep -c '^pr edit 8 .*--add-label needs-rebase' "$sw/calls")" "1,1"
+expect "integrate: with one comment naming the files and the head" "$(grep -c "^pr comment 8 .*conflicts with dev in t.md, and the lane could not integrate it at head $TEXT_HEAD" "$sw/calls")" 1
+# Later sweeps: the Linux check runs, then passes; the fixer's PR is left alone.
+jq -n '[{name: "Linux", status: "in_progress", conclusion: null, started_at: "2026-01-01T00:00:00Z"}]' >"$sw/checks.$MERGE_TIP.json"
+REMOTE="$sw/origin.git" lane_sweep
+expect "integrate: while the check runs nothing more is dispatched or said" \
+  "$(grep -c '^workflow run' "$sw/calls"),$(grep -c '^pr comment 6 ' "$sw/calls"),$(grep -c '^pr comment 8 ' "$sw/calls"),$(grep -c '^pr edit 8 ' "$sw/calls")" "1,2,1,1"
+jq -n '[{name: "Linux", status: "completed", conclusion: "success", started_at: "2026-01-01T00:00:00Z"}]' >"$sw/checks.$MERGE_TIP.json"
+REMOTE="$sw/origin.git" lane_sweep
+expect "integrate: a green Linux check on the lane's head merges the PR" "$(grep -c "^pr merge 6 .*--match-head-commit $MERGE_TIP" "$sw/calls")" 1
+expect "integrate: with the check as its proof" "$(grep -c '^pr comment 6 .*merged into dev (.*1 checks green)' "$sw/calls")" 1
+expect "integrate: the fixer's PR is still not merged" "$(grep -c '^pr merge 8' "$sw/calls")" 0
+
+# decide on the lane's own merge commit as the head.
+LANE_HEAD_PR='.commits = [{oid: "'"$HEAD_SHA"'", messageHeadline: "'"$LANE_MERGE_SUBJECT"'"}]'
+check "lane head with no check: dispatch the Linux check" "linux-dispatch|feat/x" "$LANE_HEAD_PR" "$BASE_FILES" '[]'
+check "lane head with a running Linux check waits" "pending|1 checks still running" "$LANE_HEAD_PR" "$BASE_FILES" \
+  '[{"__typename":"CheckRun","name":"Linux","workflowName":"","status":"IN_PROGRESS","conclusion":""}]'
+check "lane head with a green Linux check is eligible" "eligible|150|2|1 checks green" "$LANE_HEAD_PR" "$BASE_FILES" \
+  '[{"__typename":"CheckRun","name":"Linux","workflowName":"","status":"COMPLETED","conclusion":"SUCCESS"}]'
+check "lane head with a red Linux check is red" "red|Linux" "$LANE_HEAD_PR" "$BASE_FILES" \
+  '[{"__typename":"CheckRun","name":"Linux","workflowName":"","status":"COMPLETED","conclusion":"FAILURE"}]'
+check "the lane's subject on an older commit is no lane head" "pending|no passing CI check" \
+  '.commits = [{oid: "'"$OLD_HEAD"'", messageHeadline: "'"$LANE_MERGE_SUBJECT"'"}, {oid: "'"$HEAD_SHA"'", messageHeadline: "feat"}]' "$BASE_FILES" '[]'
 
 # dispatch_reason: feature-done, then a UI change, then the 10-merge count.
 reason() {  # reason <name> <want> <feature> <ui> <since>

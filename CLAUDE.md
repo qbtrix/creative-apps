@@ -98,8 +98,7 @@ X is Flare, Design, Photo, Library or Halo. Each app is one **line** (label
    macOS job on `dev` catches the rest.
    It is your whole check: no CI runs on your PR, and you never start CI
    yourself for routine work (no `gh workflow run`).
-5. **Ship.** `git fetch origin && git rebase origin/dev`, rerun `scripts/ci --changed`
-   (it must print `CI: PASS` again), push, then open ONE small PR to `dev`
+5. **Ship.** Push, then open ONE small PR to `dev`
    with `Closes #<n>`, the `fast-lane` label, the snapshot PNGs your change
    touches, and these two lines at the end of the body for the head you
    pushed:
@@ -231,12 +230,18 @@ something. One that can't act yet is disabled and says why:
   rebase then merges `.json` files key by key (`.gitattributes`), so two PRs
   adding different keys to one C4 part, `.wave.json` or mutation plan no
   longer conflict.
-- Rebase on `origin/dev` before opening the PR, and rerun `scripts/ci --changed` after.
+- Don't rebase on `origin/dev` for drift. A PR that is behind merges as it is,
+  and one that conflicts is integrated by the fast lane (it merges dev into
+  your branch with the merge drivers and checks the result). Only a PR
+  labelled `needs-rebase` comes back to you: merge `origin/dev` into your
+  branch, resolve the files the lane named, rerun `scripts/ci --changed`,
+  push, and move the `Head:` line. After the lane has pushed to your branch,
+  fetch before you push again.
 - If `scripts/ci` fails on `origin/dev` itself because of someone else's merge
   (look for the open `dev-red` issue), do not fix it in your PR. Comment on
   your issue with the failing test name and stop.
 - **Never edit** `Package.swift`, `Package.resolved`, `.github/`, `.claude/`,
-  `scripts/`, `CLAUDE.md`, `AGENTS.md` or `LICENSE` unless your issue says to,
+  `scripts/`, `.gitattributes`, `CLAUDE.md`, `AGENTS.md` or `LICENSE` unless your issue says to,
   and never the generated `docs/c4/model.json` or
   `docs/blueprints/*/features/waves.md` at all: edit your component's part in
   docs/c4/parts/ or your feature's .wave.json, and the generated workflow
@@ -311,9 +316,18 @@ Crew PRs merge into `dev` at once; `main` moves only when full CI passes on
   (docs, data, packets) takes the lane on the Linux check alone.
 - Outside `MAC_GATED`, no test runs on macOS before a merge. A human reviews
   the snapshots after the next feature CI and files fixes as new issues.
-- Each lane run merges every eligible PR, oldest first. A PR that conflicts
-  after an earlier merge gets one comment and waits for a rebase. A fast-lane
-  PR opened against `main` is retargeted to `dev`.
+- Each lane run merges every eligible PR, oldest first. A PR that is behind
+  `dev` merges as it is. A PR that conflicts is integrated by the lane: in a
+  scratch clone it merges `origin/dev` into the PR branch with the repo's
+  merge drivers (`.gitattributes`, from main, which is why that file is
+  protected), pushes the merge commit to the branch, starts a Linux-only CI
+  run (`ci.yml` with `linux_only`) on it, and merges on a later sweep when
+  that run passes. The old `Head:` marker no longer matches, by design: the
+  Linux run is the proof for the integrated head, and a code PR gets its
+  macOS build on that head too. A conflict the drivers can't resolve gets one
+  comment naming the files and the `needs-rebase` label; a fixer merges dev,
+  resolves, pushes, and the lane drops the label. A fast-lane PR opened
+  against `main` is retargeted to `dev`.
 - A Belt PR (its body has a `Belt-Run:` or `Belt-Test:` line) also waits for
   Belt's `belt/review` commit status to be success on its head;
   `REQUIRE_BELT_REVIEW` in `scripts/fast-lane.sh` turns that off.

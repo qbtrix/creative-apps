@@ -4,9 +4,11 @@
 # merging a `feature-done` PR), and ci.yml's `promote` job moves main to a dev
 # SHA only when that run is green.
 #
-# Safety: this workflow never checks out or runs PR code. It checks out only
-# scripts/fast-lane.sh from main (green, promoted code) and talks to the GitHub
-# API. workflow_run and schedule fire from the copy of this file on the default
+# Safety: this workflow never runs PR code. It checks out only the lane's
+# scripts from main (green, promoted code) and talks to the GitHub API. For a
+# PR that conflicts with dev it clones the repo into a scratch folder, merges
+# dev into the PR head with git and main's merge drivers, and pushes the result
+# to the PR branch (contents: write); nothing from that tree is executed. workflow_run and schedule fire from the copy of this file on the default
 # branch, so those triggers follow whatever branch is the default (dev).
 name: Fast Lane
 
@@ -58,7 +60,12 @@ jobs:
         with:
           ref: main
           persist-credentials: false
-          sparse-checkout: scripts/fast-lane.sh
+          # The lane's own code plus the merge drivers it installs in the scratch
+          # clone that integrates a conflicting PR: all from main, never the PR.
+          sparse-checkout: |
+            scripts/fast-lane.sh
+            scripts/install-merge-drivers
+            scripts/merge-json
           sparse-checkout-cone-mode: false
       - name: Sweep
         env:
