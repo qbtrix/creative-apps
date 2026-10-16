@@ -2,8 +2,8 @@
 // whole-window screenshot after every step (see Journey.swift). Each test is
 // one journey; grow them as Flare's features land, and replace the skipped
 // test with the real journey when its issue is built. The easing journey
-// (docs/blueprints/flare-easing-editor.md) starts from File > New Sample
-// Animation and checks every step by the active preset chip and by where the
+// (docs/blueprints/flare-easing-editor.md) starts from File > Open Sample >
+// Keyed Ball (FlareJourneyTests+Menus.swift, with J1) and checks every step by the active preset chip and by where the
 // curve well draws handle 1.
 import XCTest
 
@@ -48,8 +48,7 @@ final class FlareJourneyTests: XCTestCase {
 
         // The sidebar goes through `.layers` intents: Scene 1 drops the layer
         // selection (the easing editor hides), and Ball brings it back.
-        flare.app.menuBars.menuBarItems["File"].click()
-        flare.app.menuBars.menuItems["New Sample Animation"].click()
+        flare.openSample("Keyed Ball")
         let hint = flare.app.staticTexts["Pick a keyframe above."]
         XCTAssert(hint.waitForExistence(timeout: 10), "the sample didn't open with Ball selected")
         let sidebar = flare.element("suite.sidebar")
@@ -75,22 +74,13 @@ final class FlareJourneyTests: XCTestCase {
         flare.clickEachTool()
     }
 
-    @MainActor func testEveryMenuOpens() {
-        let flare = Journey("Flare", self)
-        flare.click("New Animation")
-        flare.openEachMenu()
-    }
-
     @MainActor func testDrawKeyAndSave() throws {
         throw XCTSkip("journey arrives with #203 (draw), #204 (key) and #205 (save)")
     }
 
     @MainActor func testEditEasingOfAKeyframeSegment() {
         let flare = Journey("Flare", self)
-        flare.app.menuBars.menuBarItems["File"].click()
-        let sample = flare.app.menuBars.menuItems["New Sample Animation"]
-        XCTAssert(sample.waitForExistence(timeout: 5), "File has no New Sample Animation")
-        sample.click()
+        flare.openSample("Keyed Ball")
         flare.shot("easing-sample")
         for row in ["x 0 → 24", "x 24 → 48", "y 0 → 24"] {
             XCTAssert(flare.app.buttons[row].waitForExistence(timeout: 10), "KEYFRAMES doesn't list \(row)")
