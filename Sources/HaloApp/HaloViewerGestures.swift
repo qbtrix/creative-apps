@@ -72,6 +72,8 @@ struct HaloViewerGestures: View {
                 guard let start, let now = point(value.location) else { return }
                 guard let live else { return perform(.moveViewerDrag(x: now.x, y: now.y)) }
                 last = now
+                // A press over empty space started no drag; there is nothing to preview.
+                guard model.viewerDrag != nil || live.project == nil else { return }
                 live.show { shown in
                     // The window may not have drawn the begin yet; the copy takes it too.
                     if shown.viewerDrag == nil { shown.beginViewerDrag(at: start) }

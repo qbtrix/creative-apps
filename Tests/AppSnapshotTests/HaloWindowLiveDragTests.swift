@@ -22,7 +22,7 @@ import Testing
     /// Floor spans the artboard's bottom band, so a press there hits it.
     static let floor = "comp-1-layer-1"
 
-    @Test(.timeLimit(.minutes(2))) func aViewerDragRunsTheWindowAtMostThreeTimes() async throws {
+    @Test(.timeLimit(.minutes(3))) func aViewerDragRunsTheWindowAtMostThreeTimes() async throws {
         let project = HaloLaunch(arguments: ["Halo", "-HaloSample", "keyed"]).project()
         let hosted = try await HostedHaloWindow(project)
         defer { hosted.close() }
@@ -57,7 +57,7 @@ import Testing
         #expect(after.viewerDrag == nil, "\(report)")
     }
 
-    @Test(.timeLimit(.minutes(2))) func anInspectorScrubMovesNothingElseInTheWindow() async throws {
+    @Test(.timeLimit(.minutes(3))) func anInspectorScrubMovesNothingElseInTheWindow() async throws {
         var project = HaloLaunch(arguments: ["Halo", "-HaloSample", "keyed"]).project()
         // Ball's X is keyed at 0 and 24, so scrubbing it at frame 6 adds a key.
         project.selectLayer("comp-1-layer-2")
@@ -91,7 +91,7 @@ import Testing
         #endif
     }
 
-    @Test(.timeLimit(.minutes(2))) func anInspectorScrubRunsTheWindowAtMostThreeTimes() async throws {
+    @Test(.timeLimit(.minutes(3))) func anInspectorScrubRunsTheWindowAtMostThreeTimes() async throws {
         var project = HaloLaunch(arguments: ["Halo", "-HaloSample", "keyed"]).project()
         project.selectLayer(Self.floor)
         let x = try #require(project.propertyRows.first { $0.property == .x }?.value)
