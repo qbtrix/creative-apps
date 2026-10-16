@@ -89,3 +89,4 @@ utc	stage	event	ref	note
 2026-10-16T01:08Z	4	heartbeat	-	gate queue E, G, F1
 2026-10-16T01:11Z	4	ci-run	38829075229	red not ours (Halo transport fit); noted on #763
 2026-10-16T01:11Z	4	stage-start	round 4	waiting for run with #1265-#1267
+2026-10-16T01:26Z	4	heartbeat	-	gate queue E, G, F1
