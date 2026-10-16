@@ -15,7 +15,7 @@
 #      <X>ModelTests target (their Budget tests included), and on macOS the perf
 #      suites in PERF. The repo keeps no perf list; these are the ones core's
 #      raster code moves (creative-core #321 tripled PhotoBrushDisplayTests'
-#      bytes per event);
+#      bytes per event). A filter that matches no test fails the bump;
 #   4. commits, pushes and opens "chore(core): bump creative-core to <short sha>"
 #      on dev, its body holding the core compare link and a link to each core
 #      PR in the range.
@@ -64,21 +64,31 @@ if [[ "$(uname)" == Darwin ]]; then
            -Xlinker -rpath -Xlinker "$clt/Frameworks" -Xlinker -rpath -Xlinker "$clt/usr/lib")
   fi
 fi
+tmp=$(mktemp -d)
+trap 'rm -rf "$tmp"' EXIT
+# run_tests LABEL ARGS...: one swift test run. Fails on a red run, and on a
+# filter that matched no test, which swift test passes (as ci.yml's scoped run).
+run_tests() {
+  local label=$1 status
+  shift
+  swift test --skip-build ${flags[@]+"${flags[@]}"} "$@" 2>&1 | tee "$tmp/test.log"
+  status=${PIPESTATUS[0]}
+  (( status == 0 )) || die "$label failed at $short"
+  grep -qE 'Test run with [1-9][0-9]* tests?' "$tmp/test.log" || die "$label: the filter matched no tests"
+}
 models=$(cd Tests && printf '%s\n' *ModelTests | paste -sd'|' -)
 checked="swift build --build-tests, the Model tests ($models)"
 swift build --build-tests ${flags[@]+"${flags[@]}"} || die "swift build failed at $short"
-swift test --skip-build ${flags[@]+"${flags[@]}"} --filter "^($models)\." || die "Model tests failed at $short"
+run_tests "Model tests" --filter "^($models)\."
 if [[ "$(uname)" == Darwin ]]; then
-  swift test --skip-build ${flags[@]+"${flags[@]}"} --filter "^AppSnapshotTests\.($PERF)/" --no-parallel \
-    || die "perf suites failed at $short"
+  run_tests "perf suites" --filter "^AppSnapshotTests\.($PERF)/" --no-parallel
   checked="$checked and the perf suites ($PERF)"
 else
   checked="$checked; the perf suites are macOS only and did not run"
 fi
 
 title="chore(core): bump creative-core to $short"
-body=$(mktemp)
-trap 'rm -f "$body"' EXIT
+body="$tmp/body.md"
 {
   echo "Moves the creative-core pin from ${old:0:7} to $short."
   echo

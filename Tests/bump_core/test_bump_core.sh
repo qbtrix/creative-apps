@@ -5,8 +5,8 @@
 # `gh pr create`, and a fake `swift` that logs its calls and rewrites
 # Package.resolved on `package resolve`. Covers the bump PR (title, pins,
 # range, one link per core PR, the checks it ran), the already-pinned exit,
-# a commit behind the pin, a failing check and a dirty tree. No network;
-# needs bash 3.2+, git and jq.
+# a commit behind the pin, a failing check, a filter that matched no test
+# and a dirty tree. No network; needs bash 3.2+, git and jq.
 #
 # Run: bash Tests/bump_core/test_bump_core.sh   (exit 0 = all pass)
 set -uo pipefail
@@ -49,7 +49,7 @@ case "$1" in
   package)
     rev=$(sed -n 's/.*revision: "\([0-9a-f]*\)".*/\1/p' Package.swift)
     printf '{\n  "pins" : [\n    {\n      "identity" : "creative-core",\n      "state" : {\n        "revision" : "%s"\n      }\n    }\n  ]\n}\n' "$rev" >Package.resolved ;;
-  test) exit "${FAKE_TEST_STATUS:-0}" ;;
+  test) echo "${FAKE_TEST_SUMMARY-Test run with 2 tests in 1 suite passed after 0.1 seconds.}"; exit "${FAKE_TEST_STATUS:-0}" ;;
 esac
 EOF
 chmod +x "$tmp/bin/gh" "$tmp/bin/swift"
@@ -136,6 +136,10 @@ FAKE_TEST_STATUS=1 bump
 expect "failing Model tests: stops before the commit and the PR" \
   "$status,$(git -C "$work" rev-list --count origin/dev..HEAD),$(calls '^gh pr create')" "1,0,0"
 expect "failing Model tests: says so" "$(grep -c 'Model tests failed at 2222222' <<<"$out")" 1
+
+FAKE_TEST_SUMMARY="Test run with 0 tests in 0 suites passed after 0.0 seconds." bump
+expect "a filter that matches no test: stops before the commit and the PR" \
+  "$status,$(git -C "$work" rev-list --count origin/dev..HEAD),$(calls '^gh pr create'),$(grep -c 'Model tests: the filter matched no tests' <<<"$out")" "1,0,0,1"
 
 DIRTY=1 bump
 expect "dirty tree: refused" "$status,$(calls '^gh '),$(grep -c 'tracked changes' <<<"$out")" "1,0,1"
