@@ -18,7 +18,7 @@ import XCTest
 extension PhotoJourneyTests {
     /// PJ-P2's adjustment series: an Exposure adjustment layer's bar scrubbed on `large`; QB-L2, report-only.
     @MainActor func testAdjustmentLayerScrubLatency() throws {
-        let photo = Journey("Photo", self, arguments: photoArguments(fixture: "large", windowWidth: 1800) + ["-SuitePerfProbe"])
+        let photo = Journey("Photo", self, arguments: photoArguments(fixture: "large", windowSize: "1800x820") + ["-SuitePerfProbe"])
         XCTAssert(photo.element("suite.tools").waitForExistence(timeout: 60), "no tool rail (suite.tools)")
         let header = photo.app.descendants(matching: .any)
             .matching(NSPredicate(format: "label CONTAINS %@", "4000 × 3000 px")).firstMatch
