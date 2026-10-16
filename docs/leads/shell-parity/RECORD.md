@@ -4,12 +4,12 @@ Issue: #1325 · Packet: docs/blueprints/design/features/shell-parity.md
 Run: act-1a14478b134-5to5 · Session: claude/design-shell-parity-2jr7z3 · Started: 2026-10-16T12:00Z
 Stage: 3 wave 2
 Base: 7773dc3175d53ffff7e379c14f0db1427beff8c4
-Next: DS-3 builder opens its PR (sp/ds-3); between waves check for the scoped CI run app=design that contains #1329 (DP-a done) and for findings
+Next: read DP-a's critic panel (wf_5bbf65c1-1e6); clean -> post Belt-Slice-Done DP-a 38906785154; DS-3 builder opens its PR
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | rounds | state | run |
 |---|---|---|---|---|---|---|---|
-| DP-a | The toolbar's eight commands each act or say why, and Add Page and Delete Page sit in a row under the pages. | DS-1, DS-2 | J3 | editor-in-window APIs (on dev) | 0 | merged | wait scoped run app=design containing #1329 |
+| DP-a | The toolbar's eight commands each act or say why, and Add Page and Delete Page sit in a row under the pages. | DS-1, DS-2 | J3 | editor-in-window APIs (on dev) | 0 | merged (in review) | 38906785154 green, contains #1329 |
 | DP-b | Design opens in the suite window with pages and layers in the sidebar, Properties in the inspector and the floating tool box over the canvas, in light and dark. | DS-3, DS-4 | J0, DS-J1..DS-J5 | DP-a (DS-3) | 0 | building | – |
 
 ## Tasks
@@ -24,6 +24,7 @@ Next: DS-3 builder opens its PR (sp/ds-3); between waves check for the scoped CI
 ## Reviews
 | slice | run | commit | lenses | filed | after round |
 |---|---|---|---|---|---|
+| DP-a | 38906785154 | b2e5453c | clarity, journey, design, layout, controls, oracle | running (wf_5bbf65c1-1e6) | 0 |
 
 ## Decisions
 - Wave 1: DS-1 and DS-2 independent (disjoint files). Wave 2: DS-3 waits on DS-1 (uses DesignToolbarItem) and DS-2 (same UITests/DesignJourneyTests.swift and DesignLayersSnapshots.swift). DS-4 moved to wave 1 under contract rule 13 (acceptance journey before code): it merges with `throw XCTSkip("waits on DS-3")` and DS-3 removes the skips (DS-3 also owns UITests/DesignJourneyTests+Shell.swift for that). The feature-done label moves to a small DS-5 (wave.json status) after DS-3.

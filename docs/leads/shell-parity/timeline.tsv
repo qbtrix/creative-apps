@@ -8,3 +8,5 @@ utc	stage	event	ref	note
 2026-10-16T13:20Z	3	fix-round	#1329	DS-2 macOS build fix (not a finding round)
 2026-10-16T13:13Z	3	pr-merged	#1329	DS-2 sidebar action row; DP-a merged
 2026-10-16T13:40Z	3	stage-start	wave 2	DS-3 base 7773dc3
+2026-10-16T13:50Z	3	ci-run	38906785154	scoped design green, contains #1329 (DP-a); audit design identifier 16 = baseline
+2026-10-16T13:52Z	3	review	DP-a	critic panel started
