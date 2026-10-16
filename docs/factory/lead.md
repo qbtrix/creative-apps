@@ -25,8 +25,9 @@ Look for a `## Slices` table in the packet.
   on its own app's scoped run, and the feature ends with the contact sheet
   once every slice is done. This page's Stages (v3) and RECORD.md (v3).
 - **Without one (v2).** The loop in "Packets without slices (v2)" at the end
-  of this page, unchanged: build waves, then Anatomy rounds on dev CI, then
-  the contact sheet.
+  of this page, unchanged except that its first two waves follow contract
+  rule 18 (stub the UI's Model calls, then the UI on the stubs beside the
+  logic): build waves, then Anatomy rounds on dev CI, then the contact sheet.
 
 The findings queue (contract rule 10) and the round cap (rule 11) apply to
 both loops, but only to work started after this contract landed: a lead
@@ -344,6 +345,11 @@ this contract landed (see Which loop), rules 10 and 11 change two things:
 - **Round cap.** At most 2 fix rounds for the feature, in place of "2 clean
   rounds or 4 rounds in total". After the review that follows the second
   round, relabel the feature's open findings `gap` and finish.
+
+Contract rule 18 holds for v2 too, for work started after it landed: in
+Plan waves below, the first wave is one small task that declares, as stubs,
+every Model signature the UI calls, and the second wave builds the UI on
+those stubs beside the logic tasks, which never wait on the UI.
 
 A lead whose work started before keeps every line below as written, and
 calls the templates with the args it always used.
