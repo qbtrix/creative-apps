@@ -3,8 +3,8 @@
 Issue: #1331 · Packet: docs/blueprints/suite/features/bundle.md
 Run: act-1a144bb7df0-dpn3 · Session: claude/bundle-feature-lead-3ldknj · Started: 2026-10-16T12:43Z
 Stage: 3 wave 3
-Base: e464ecab9b0e11b9cfc27851181beafdb8fee424
-Next: wait for the supervisor to merge BU-3 #1358 (project.yml); then build BU-4 on that dev SHA (supervisor merges, no fast-lane)
+Base: f52ec33e25bc15716063bca270ec3b760ad6d723
+Next: read BU-4's PR from workflow wap384phx; supervisor merges BU-3 #1358 then BU-4; then the final feature-done PR (bundle.wave.json built)
 
 Loop: v2 (the packet has no Slices table), with the findings queue and the 2-round cap (started after #1302 merged, 2026-10-16T04:20Z).
 Depends on: none open (#809 BU-0, #810 BU-1a, #333 SH-7 all closed).
@@ -17,7 +17,7 @@ Depends on: none open (#809 BU-0, #810 BU-1a, #333 SH-7 all closed).
 | BU-5a | 1 | AfterGlow.plist with every suite document and exported type (#815) | Bundle/Info/AfterGlow.plist, Tests/SuiteModelTests/PlistShapeTests.swift | PlistShapeTests | #1360 | merged |
 | BU-5b | 1 | Info.plists for the five embedded apps (#816) | Bundle/Info/{Flare,Design,Photo,Library,Halo}.plist, Tests/SuiteModelTests/PlistShapeAppsTests.swift | PlistShapeAppsTests | #1361 | merged |
 | BU-5c | 2 | Placeholder icons (#817; feature-done, held until BU-4 merges) | Bundle/Icons/*.png, Bundle/Icons/README.md, Tests/SuiteModelTests/IconFilesTests.swift | IconFilesTests | #1392 | merged |
-| BU-4 | 3 | scripts/bundle-apps assembles and signs AfterGlow.app; size-report rows (#818; supervisor merges) | scripts/bundle-apps, scripts/size-report | dev macOS run | | waits BU-3, BU-5a, BU-5b, BU-5c |
+| BU-4 | 3 | scripts/bundle-apps assembles and signs AfterGlow.app; size-report rows (#818; supervisor merges) | scripts/bundle-apps, scripts/size-report | dev macOS run | | building (wave 3), merges after #1358 |
 | BU-6 | 4 | Size gate on after ten green dev runs (#819; supervisor, later; not in the done check) | .github/workflows/ci.yml, Bundle/size-budget.json | SizeGateTests | | later |
 
 Wave 1: BU-2, BU-3, BU-5a, BU-5b, all independent (disjoint files; BU-5b's test reads only the app plists).
@@ -33,6 +33,7 @@ Wave 3: BU-4 waits on BU-3 (the release graph it builds) and BU-5a/b/c (the plis
 - Builder branches are lead/bundle-<id> (a lead/bundle/<id> ref can't coexist with lead/bundle).
 - BU-3 (project.yml) and BU-4 (scripts/) open without the fast-lane label: the packet says the supervisor merges them.
 - No mutation plans (contract rule 14 is v3 only).
+- BU-4 built while BU-3 #1358 waits on the supervisor: its files (scripts/) are disjoint from BU-3's and the supervisor merges both, BU-3 first; the builder reads BU-3's project.yml from its branch for names.
 - BU-5c opens without feature-done: BU-4 (supervisor) can't merge before it. The last lane PR, after BU-4 merges, sets bundle.wave.json status built and carries feature-done.
 - Wave 2's first launch was given a PR head as base (squash merges make that SHA absent from dev); stopped and relaunched on dev e464eca.
 
