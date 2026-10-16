@@ -27,3 +27,6 @@ utc	stage	event	ref	note
 2026-10-16T15:18Z	4	pr-merged	#1405	dev-red fixes
 2026-10-16T15:23Z	4	ci-run	38923057966	scoped library on 7662a828 queued
 2026-10-16T15:47Z	4	ci-run	38923057966	scoped library green on 7662a828
+2026-10-16T16:00Z	4	round-findings	panel 2	#1431-#1442 filed
+2026-10-16T16:02Z	5	stage-end	#1334	round cap: findings relabelled gap; contact sheet posted
+2026-10-16T16:02Z	5	stopped	#1334	done with gaps

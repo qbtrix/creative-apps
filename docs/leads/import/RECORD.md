@@ -2,9 +2,9 @@
 
 Issue: #1334 · Packet: docs/blueprints/library/features/import.md
 Run: act-1a1448a5fa3-a8rg · Session: claude/library-import-feature-c0rl9g · Started: 2026-10-16T11:49Z
-Stage: 4 round 2
+Stage: done
 Base: 8243ce4435006760f7ec9a87147fef094f6be4ed
-Next: round 2 critic panel on run 38923057966 (green, 7662a828); after it, findings past round 2 become gaps; then the contact sheet on #1334
+Next: nothing; feature finished with gaps (contact sheet posted on #1334). A relaunch only re-checks that the gap issues are open.
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -45,6 +45,8 @@ Wave 1: IM-1, IM-2, IM-4 independent. Wave 2: IM-3 (waits IM-1, IM-2: benchmarks
 - #1384 merged ThumbnailGrid cell ids (#779 item 2), but LibraryGrid must pass the prefix (owned by thumbnails) and the scroller needs #1368, so J1 stays skipped.
 
 ## Open
+- Gaps p1: #1367 #1380 #1435 #1440. p2: #1431-#1434 #1436-#1439 #1441 #1442; other features: #1372 #1373 #1374 #1377.
+- Full dev CI hasn't been green since #1355 (cancelled or red on Design, #1393); the contact sheet uses the green scoped library run 38923057966.
 - #1367 waits on #779 and #1368 (SuiteUI); J1 skipped until then.
 - IM-9 blocked on #782 (S-L8 FrameProbe marks).
 - Swap-in of InlineNotice/ProgressRow once #780/#781 merge.
