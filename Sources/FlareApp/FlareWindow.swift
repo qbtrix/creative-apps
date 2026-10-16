@@ -53,7 +53,7 @@ struct FlareWindow: View {
         ) {
             FlareCanvas(
                 model: model, zoom: zoom, showsRulers: showsRulers, showsGuides: showsGuides, perform: perform,
-                help: { help(for: $0) }, tick: { model.tick(target: $0, ticker: &$1) })
+                help: { help(for: $0) }, tick: { model.tick(target: $0, ticker: &$1) }, onKey: toolKey)
         } inspector: {
             FlareInspector(
                 model: model, tab: inspectorTab, perform: perform,
@@ -116,13 +116,15 @@ struct FlareCanvas: View {
     var perform: @MainActor (FlareIntent) -> Void = { _ in }
     var help: @MainActor (FlareIntent) -> String? = { _ in nil }
     var tick: @MainActor (Double, inout PlaybackTicker) -> Bool = { _, _ in false }
+    /// The stage's keys it doesn't take itself (Return, Escape): the window's `toolKey`.
+    var onKey: @MainActor (KeyPress) -> KeyPress.Result = { _ in .ignored }
 
     var body: some View {
         if model.document != nil {
             VStack(spacing: 0) {
                 FlareStage(
                     model: model, zoom: zoom, showsRulers: showsRulers, showsGuides: showsGuides, perform: perform,
-                    help: help)
+                    help: help, onKey: onKey)
                 FlareTimeline(model: model, zoom: zoom, perform: perform, tick: tick)
             }
             .overlay { FlareRecording(model: model) }
