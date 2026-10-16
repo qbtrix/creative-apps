@@ -2,3 +2,4 @@ utc	stage	event	ref	note
 2026-10-16T18:10Z	0	stage-start	#1345	lead set up on base 132d910
 2026-10-16T18:20Z	2	stage-end	#1345	waves planned: W1 CU-1 CU-2 CU-6; W2 CU-3 CU-4; W3 CU-5; W4 CU-7
 2026-10-16T18:35Z	3	stage-start	wave1	CU-1 CU-2 on base 132d910
+2026-10-16T18:32Z	3	heartbeat	-	wave 1 (CU-1, CU-2) builders running; check their PRs and the lane, then start w
