@@ -2,14 +2,14 @@
 
 Issue: #1324 · Packet: docs/blueprints/design/features/design-contracts.md
 Run: act-1a14478b14e-i8ep · Session: session_01DKQiisBimhgRgEM46b1U5E · Started: 2026-10-16T11:29Z
-Stage: 3 wave 2
-Base: 8ecd8b9b7f6bed18afe784640d467d369194c0d6
-Next: wait for wave 2 PRs (D0-1, D0-2.3) to merge, then start wave 3 (D0-2.5)
+Stage: 3 wave 3
+Base: 70b2920f7ae0d1f15131da69a1b8b89aa5e3f724
+Next: wait for wave 3 PRs (D0-2.5, D0-2b.1) to merge, then wave 4 (D0-2.6, D0-3a); check the scoped app=design run that contains #1356 for CT-a
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | rounds | state | run |
 |---|---|---|---|---|---|---|---|
-| CT-a | old files open with defaults; corner radius saves and reopens | D0-0, D0-2.1 (#1304), D0-1 | MJ1 | nothing | 0 | building | |
+| CT-a | old files open with defaults; corner radius saves and reopens | D0-0, D0-2.1 (#1304), D0-1 | MJ1 | nothing | 0 | merged | |
 | CT-b | fakes act; live says "isn't built yet." | D0-2.2 (#1307), D0-2.3, D0-2.4 (#1312), D0-2.5 | MJ2 | CT-a | 0 | building | |
 | CT-c | help law on every fake and stub; four fixtures | D0-2.6, D0-2b, D0-4a | MJ3 | CT-b; CT-a | 0 | building | |
 | CT-d | each command one named step; one-layer edits keep today's methods | D0-3a, D0-3b | MJ4 | CT-b | 0 | building | |
@@ -23,13 +23,14 @@ Next: wait for wave 2 PRs (D0-1, D0-2.3) to merge, then start wave 3 (D0-2.5)
 | D0-0 | CT-a | 1 | corner radius (Model half of #753) | DesignNode.swift, DesignCorners.swift, DesignFile.swift, DesignCornerRadiusTests.swift | DesignCornerRadiusTests | #1336 | merged |
 | D0-4a | CT-c | 1 | four fixtures, budget helper | DesignFixtures.swift, DesignFixturesTests.swift, DesignBudget.swift, DesignBudgetHelperTests.swift | DesignFixturesTests, DesignBudgetHelperTests | #1327 | merged |
 | F-1314 | CT-b | 1 | DesignDocumentTests header fix (#1314) | Tests/DesignModelTests/DesignDocumentTests.swift | DesignDocumentTests | #1328 | merged |
-| D0-1 | CT-a | 2 | style schema, public DesignPage init, marquee, selection ends run; MJ1 | DesignNode.swift, DesignWorkspace.swift, DesignSelection.swift, DesignFile.swift, DesignStyleSchemaTests.swift, DesignSelectionRunTests.swift | DesignStyleSchemaTests, DesignSelectionRunTests | | building (wave 2) |
-| D0-2.3 | CT-b | 3 | NotBuilt, DesignServices .live, services/useServices | NotBuilt.swift, DesignServices.swift, DesignWorkspace.swift, DesignNotBuiltTests.swift | DesignNotBuiltTests | | building (wave 2) |
-| D0-2.5 | CT-b | 4 | arrange fakes, .fake; MJ2 | Fakes/DesignArrangeFakes.swift, DesignServices.swift, DesignArrangeFakesTests.swift | DesignArrangeFakesTests | | waits D0-2.3 |
-| D0-2.6 | CT-c | 5 | contract law | DesignContractLawTests.swift | DesignContractLawTests | | waits D0-2.5 |
-| D0-3a | CT-d | 5 | DesignCommand, help, run, apply, mint | DesignActions.swift, DesignActionsTests.swift | DesignActionsTests | | waits D0-2.5 |
-| D0-2b | CT-c | 6 | Live stubs, .live names them, LiveFiling; MJ3 | Live/*.swift, DesignServices.swift, DesignLiveStubTests.swift | DesignLiveStubTests | | waits D0-2.6, D0-4a |
-| D0-3b | CT-d | 6 | clipboard, moveLayer, setStyle; MJ4 | DesignActions+Edit.swift, DesignActionsEditTests.swift | DesignActionsEditTests | | waits D0-3a |
+| D0-1 | CT-a | 2 | style schema, public DesignPage init, marquee, selection ends run; MJ1 | DesignNode.swift, DesignWorkspace.swift, DesignSelection.swift, DesignFile.swift, DesignStyleSchemaTests.swift, DesignSelectionRunTests.swift | DesignStyleSchemaTests, DesignSelectionRunTests | #1356 | merged |
+| D0-2.3 | CT-b | 3 | NotBuilt, DesignServices .live, services/useServices | NotBuilt.swift, DesignServices.swift, DesignWorkspace.swift, DesignNotBuiltTests.swift | DesignNotBuiltTests | #1354 | merged |
+| D0-2.5 | CT-b | 4 | arrange fakes, .fake; MJ2 | Fakes/DesignArrangeFakes.swift, DesignServices.swift, DesignArrangeFakesTests.swift | DesignArrangeFakesTests | | building (wave 3) |
+| D0-2.6 | CT-c | 4 | contract law | DesignContractLawTests.swift | DesignContractLawTests | | waits D0-2.5 |
+| D0-3a | CT-d | 4 | DesignCommand, help, run, apply, mint | DesignActions.swift, DesignActionsTests.swift | DesignActionsTests | | waits D0-2.5 |
+| D0-2b.1 | CT-c | 3 | six new Live stubs (Duplicating, Grouping, Clipboard, Ordering, Styling, Filing) | Live/Live{Duplicating,Grouping,Clipboard,Ordering,Styling,Filing}.swift, DesignLiveStubTests.swift | DesignLiveStubTests | | building (wave 3) |
+| D0-2b.2 | CT-c | 5 | .live names every Live type; law on .live; MJ3 | DesignServices.swift, DesignLiveStubTests.swift | DesignLiveStubTests | | waits D0-2.5, D0-2.6, D0-2b.1 |
+| D0-3b | CT-d | 5 | clipboard, moveLayer, setStyle; MJ4 | DesignActions+Edit.swift, DesignActionsEditTests.swift | DesignActionsEditTests | | waits D0-3a |
 
 Waves: 1 = D0-0, D0-4a, F-1314 (all independent). 2 = D0-1 (waits D0-0: same DesignNode/DesignFile). 3 = D0-2.3 (waits D0-1: DesignWorkspace.swift). 4 = D0-2.5 (waits D0-2.3: DesignServices.swift). 5 = D0-2.6, D0-3a (both wait D0-2.5's .fake; independent of each other). 6 = D0-2b (waits D0-2.6, D0-4a), D0-3b (waits D0-3a); later of the two carries feature-done.
 
@@ -45,6 +46,7 @@ Waves: 1 = D0-0, D0-4a, F-1314 (all independent). 2 = D0-1 (waits D0-0: same Des
 - #1314 (a design-seams finding on DesignDocumentTests, a file this packet now owns) is fixed in wave 1 as F-1314.
 - D0-2.3 runs in wave 2 beside D0-1: they share only DesignWorkspace.swift, and D0-2.3 adds just `services`/`useServices` there; whichever merges second rebases. Saves a wave.
 - The PR-create tool appends a 'Generated by' footer server-side; the lane strips it from the squash commit (CLAUDE.md), so builders' PRs merged with it (#1327, #1328, #1336).
+- D0-2b split: D0-2b.1 (the six new stub files, tests on the stubs alone) runs in wave 3 beside D0-2.5; D0-2b.2 (wiring `.live`, the law on `.live`, MJ3) waits on D0-2.5, D0-2.6 and D0-2b.1. LiveMarquee/Transforming/Aligning/Framing already exist (S-1..S-4), so D0-2b only registers them. Waves now: 3 = D0-2.5, D0-2b.1; 4 = D0-2.6, D0-3a; 5 = D0-2b.2, D0-3b.
 - Filed gap #1326 (public DesignPage init); D0-1 closes it.
 
 ## Open

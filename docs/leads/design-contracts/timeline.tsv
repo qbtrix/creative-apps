@@ -7,3 +7,6 @@ utc	stage	event	ref	note
 2026-10-16T12:20Z	3	pr-merged	#1328	F-1314 fixes #1314
 2026-10-16T12:20Z	3	pr-merged	#1336	D0-0 corner radius (Mutate 5/5)
 2026-10-16T12:20Z	3	stage-start	wave 2	D0-1, D0-2.3
+2026-10-16T13:10Z	3	pr-merged	#1354	D0-2.3 NotBuilt + DesignServices
+2026-10-16T13:10Z	3	pr-merged	#1356	D0-1 style schema; closes #1326; CT-a merged
+2026-10-16T13:10Z	3	stage-start	wave 3	D0-2.5, D0-2b.1
