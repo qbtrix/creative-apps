@@ -22,3 +22,5 @@ utc	stage	event	ref	note
 2026-10-16T16:00Z	3	fix-round	DP-b	round 1: #1443 #1444; #1404 build fix
 2026-10-16T16:20Z	3	pr-opened	#1446	fix #1443 design.properties inside suite.inspector
 2026-10-16T16:30Z	3	pr-opened	#1447	fix #1444 switcher checks last
+2026-10-16T16:45Z	3	pr-opened	#1404	new head c8360c7, build fix
+2026-10-16T16:45Z	3	heartbeat	-	polling: lane merges of #1404 #1446 #1447, then scoped run app=design
