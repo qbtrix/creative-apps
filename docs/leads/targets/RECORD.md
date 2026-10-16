@@ -4,7 +4,7 @@ Issue: #873 · Packet: docs/blueprints/suite/features/targets.md
 Run: act-1a1429c87d2-exzi (resumed; first act-1a13f70dda7-kche) · Session: claude/feature-lead-targets-r13t2d · Started: 2026-10-15T12:10Z, resumed 2026-10-16T02:50Z
 Stage: 4 round 1
 Base: 8fce5e2 (dev with BU-1b #1263)
-Next: watch full run 38855142429 on 1c309d9; else wait for a green full ci.yml run on dev containing 8fce5e2, or a green `scoped: suite` run (asked the supervisor on #873 at 04:40Z; leads get 403 on dispatch). Then comment `Belt-Contact-Sheet: <run link>` on #873 with the size table and 'launcher has no journey shots until home'. Scoped runs for other apps (e.g. 38849414997 scoped: design) do not count.
+Next: wait for a green full ci.yml run on dev containing 8fce5e2, or a green `scoped: suite` run (asked the supervisor on #873 at 04:40Z; leads get 403 on dispatch). Then comment `Belt-Contact-Sheet: <run link>` on #873 with the size table and 'launcher has no journey shots until home'. Scoped runs for other apps (e.g. 38849414997 scoped: design) do not count.
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -45,6 +45,7 @@ Executables total 31,308,416 bytes; app-builds.tar.gz 8,064,887 bytes. SuiteUI i
 - BU-S needs a Mac: not run by this lead (packet).
 
 ## Open
+- 2026-10-16T05:50Z: full run 38855142429 (1c309d9) red: Linux green; macOS scripts/ci failed in AppSnapshotTests on PhotoBrushDisplayTests (Photo brush timing budget, 119 over). Not ours. No supervisor reply yet on the scoped suite request.
 - 2026-10-16T04:05Z: run 792 (9230d80) red: Linux green; macOS scripts/ci PASS; UI journeys red only in Halo (7), Library loupe, Photo paste/merge (3). PJ-1 keep-layers now passes. None ours; #763.
 - 2026-10-16T03:40Z: run 791 (e99643c) red: Linux PhotoEditBudgetTests; macOS scripts/ci PASS, UI journeys red only in Halo (overlap, unnamed, transport, layout, parent menu), Photo (paste, merge, keep-layers) and Library (loupe). None in AfterGlowApp/SuiteShell/SuiteModel; all on #763.
 - 2026-10-16T02:50Z: dev still red for others: run 791 (e99643c) Linux red on PhotoEditBudgetTests.editBudgets (Photo timing budget, #763); 792 (9230d80) queued. Waiting for a green dev run containing 8fce5e2.
