@@ -123,11 +123,11 @@ final class PhotoDocumentsJourneyTests: XCTestCase {
             })
         }
         let cases: [(file: String, data: Data, message: String)] = [
-            ("NotZip.ora", Data("not a zip".utf8), "This file isn't a Photo document."),
-            ("Newer.ora", edited(#""format":1,"#, #""format":2,"#), "This document was made by a newer Photo (format 2). Update Photo to open it."),
-            ("Missing.ora", Self.storedZip(entries.filter { $0.name != "data/layer-2.png" }), "This document is damaged: data/layer-2.png is missing."),
+            ("NotZip.ora", Data("not a zip".utf8), "It isn't a Photo Document or an image Photo can open."),
+            ("Newer.ora", edited(#""format":1,"#, #""format":2,"#), "It was saved by a newer version of Photo. Update Photo to open it."),
+            ("Missing.ora", Self.storedZip(entries.filter { $0.name != "data/layer-2.png" }), "It is damaged and can't be read."),
             ("Large.ora", edited(#""canvas":{"height":600,"width":800}"#, #""canvas":{"height":4000,"width":5000}"#),
-             "This document is larger than Photo can open."),
+             "It is larger than Photo can open: up to 16 megapixels."),
         ]
         for (index, item) in cases.enumerated() {
             let url = folder.appending(path: item.file)
