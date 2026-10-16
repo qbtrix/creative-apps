@@ -16,7 +16,7 @@ Next: wait for the lane to merge #1389 (EZ-8, feature-done); then stage 4 Anatom
 | EZ-5 | 2 | `HaloAvailability+Easing.swift` turns the five Keyframe Easing commands on when a key is picked | Sources/HaloModel/Availability/HaloAvailability+Easing.swift, Tests/HaloModelTests/HaloEasingAvailabilityTests.swift | HaloEasingAvailabilityTests | #1352 | merged |
 | EZ-4 | 3 | HB-7 budget | Tests/HaloModelTests/HaloEasingBudgetTests.swift | HaloEasingBudgetTests.easingStep | #1363 | merged |
 | EZ-6 | 3 | `HaloEasingInspector` EASING group + `HaloWindow+Easing` routes | Sources/HaloApp/HaloEasingInspector.swift, Sources/HaloApp/HaloWindow+Easing.swift, Tests/AppSnapshotTests/HaloEasingSnapshots.swift | HaloEasingSnapshots (6 PNGs) | #1364 | merged |
-| EZ-8 | 4 | H-J7 `testEaseKeys` steps 1 to 8 on `-HaloSample keyed`; `feature-done` | UITests/HaloJourneyTests+Easing.swift | H-J7 on dev CI | #1389 | open, waiting on lane macOS build |
+| EZ-8 | 4 | H-J7 `testEaseKeys` steps 1 to 8 on `-HaloSample keyed`; `feature-done` | UITests/HaloJourneyTests+Easing.swift | H-J7 on dev CI | #1389 | open, macOS build 38911489559 running |
 
 Wave 1: EZ-1, EZ-2, EZ-7 independent (disjoint files; EZ-2 reads tracks and W0's `selectedKeys` directly; EZ-7 only sends FD-11 commands).
 Wave 2: EZ-3 waits on EZ-1 (`.live` runs need `LiveKeyEasing`) and EZ-2 (`pickedKeys`, `pickedSegment`, same file). EZ-5 waits on EZ-1 (`unavailableHelp == nil`) and EZ-2 (`pickedKeys`). EZ-3 and EZ-5 independent of each other.

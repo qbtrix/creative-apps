@@ -21,3 +21,4 @@ utc	stage	event	ref	note
 2026-10-16T13:34Z	3	pr-merged	#1364	EZ-6
 2026-10-16T13:46Z	3	stage-start	wave 4	EZ-8 on e464eca
 2026-10-16T13:55Z	3	pr-opened	#1389	EZ-8 H-J7 journey, feature-done, wave.json built
+2026-10-16T14:08Z	3	heartbeat	#1389	lane macOS build run 38911489559 in progress
