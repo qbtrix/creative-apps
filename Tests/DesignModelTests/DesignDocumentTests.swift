@@ -3,8 +3,9 @@
 // conforms to all 14 protocols, and `everyUseCaseIsSatisfiableAsWritten` binds every requirement
 // through `any P` to a function value typed as 5.4 writes it, so a requirement that is removed,
 // renamed, retyped, or loosened from a typed `throws(...)` to plain `throws` stops this file
-// compiling. Function conversion still lets a narrowing through (a write that stops throwing, a
-// `String?` help that becomes `String`). Runs on Linux and macOS.
+// compiling. A narrowed requirement (a write that stops throwing, a `String?` help that becomes
+// `String`) is caught by `Stub`'s conformance, whose witnesses no longer match; the existential
+// pins catch loosening and removal. Runs on Linux and macOS.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
