@@ -19,8 +19,8 @@
 #
 # A run refuses to start while a target file differs from HEAD, so a run that
 # was killed mid-mutation is noticed rather than adopted as the original. It
-# builds and runs the selected tests unmutated first (a red baseline would make
-# every mutation look caught). Then per entry: write the bug; `swift build`
+# builds and runs each selected `tests` filter unmutated first (a red baseline
+# would make every mutation look caught; a filter matching nothing, escaped). Then per entry: write the bug; `swift build`
 # (the sources; a compile error there is BROKEN, the entry plants nothing
 # testable); `swift test --filter <tests>`, which builds the test targets too,
 # so a test that stops compiling counts as caught (the signature pins in
@@ -227,12 +227,12 @@ def mutate(args) -> int:
     if code != 0:
         print(f"{tail(out)}\nBaseline build failed; fix the build first.")
         return 2
-    union = "|".join(sorted({e["tests"] for e in entries}))
-    code, out = run(test + [union])
-    if code != 0 or no_tests_ran(out) or not ran_tests(out):
-        print(f"{tail(out)}\nBaseline: the selected tests fail or match nothing WITHOUT any mutation,"
-              " so no result would mean anything.")
-        return 2
+    for tests in sorted({e["tests"] for e in entries}):
+        code, out = run(test + [tests])
+        if code != 0 or no_tests_ran(out) or not ran_tests(out):
+            print(f"{tail(out)}\nBaseline: --filter {tests!r} fails or matches nothing WITHOUT any mutation,"
+                  " so no result would mean anything.")
+            return 2
     print(f"baseline build and tests green in {time.monotonic() - start:.0f}s\n")
 
     originals = {f: (ROOT / f).read_bytes() for f in files}
