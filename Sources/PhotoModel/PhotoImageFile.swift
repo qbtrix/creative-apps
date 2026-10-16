@@ -104,8 +104,8 @@ extension PhotoWorkspace {
         return (base.isEmpty ? name : base) + "." + format.fileExtension
     }
 
-    /// Save As wrote the image to a file named `name`: the window, top bar and
-    /// panel header name it from now on. Not an undo step; ignored with no image open.
+    /// Save As wrote the image to a file named `name`: the window title and
+    /// the inspector's image header name it from now on. Not an undo step; ignored with no image open.
     public mutating func didSave(as name: String) {
         guard canvas != nil else { return }
         documentName = name

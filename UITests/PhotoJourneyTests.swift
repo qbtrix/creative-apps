@@ -6,7 +6,7 @@
 // testTier1CropResize (Escape cancels a pending crop, Return applies one),
 // testTier1Tone,
 // testTier1UndoRedoZoomPan and testTier1Layers. Edits are checked by their
-// undo names, sizes and layer counts by the panel header, values XCUITest
+// undo names, sizes and layer counts by the inspector's image header, values XCUITest
 // can't read by the canvas pixels; tier-1 files are named tools.png, a name
 // the audit knows. Another journey edits with every other tool,
 // one straightens the image by 3 degrees from the Image menu (typed after
@@ -33,11 +33,11 @@ final class PhotoJourneyTests: XCTestCase {
     /// sampling service, disabled on `.live`) is on. An unknown name says so.
     @MainActor func testFixtureLaunch() {
         let photo = Journey("Photo", self, arguments: photoArguments(fixture: "sample"))
-        XCTAssert(photo.element("suite.tools").waitForExistence(timeout: 30), "no tool rail (suite.tools)")
+        XCTAssert(photo.element("suite.tools").waitForExistence(timeout: 30), "no tool palette (suite.tools)")
         XCTAssert(photo.element("photo.status.preview").waitForExistence(timeout: 10), "-PhotoFixture sample shows no Preview data pill")
         expectHeader("800 × 600 px", photo, "-PhotoFixture sample didn't open the 800 × 600 px sample")
         let eyedropper = photo.element("suite.tools").buttons["Eyedropper"]
-        XCTAssert(eyedropper.waitForExistence(timeout: 5), "the rail has no Eyedropper")
+        XCTAssert(eyedropper.waitForExistence(timeout: 5), "the tool palette has no Eyedropper")
         XCTAssert(eyedropper.isEnabled, "the Eyedropper is disabled under -PhotoFixture (the window is on .live?)")
         expectFitted(photo)
         photo.shot("fixture-sample")
@@ -254,13 +254,13 @@ final class PhotoJourneyTests: XCTestCase {
         let photo = Journey("Photo", self, arguments: photoArguments(open: file, saveTo: saves))
         XCTAssert(photo.app.windows["tools.PNG"].waitForExistence(timeout: 30), "tools.PNG didn't open")
 
-        // Shift-Command-S writes a PNG copy, and the window and panel header now name it.
+        // Shift-Command-S writes a PNG copy, and the window and the image header now name it.
         photo.app.typeKey("s", modifierFlags: [.command, .shift])
         let copy = saves.appending(path: "tools.png")
         XCTAssert(Self.waitForFile(copy), "Save As wrote no tools.png")
         XCTAssertEqual(try Data(contentsOf: copy).prefix(4), Data([0x89, 0x50, 0x4E, 0x47]), "the Save As copy isn't a PNG")
         XCTAssert(photo.app.windows["tools.png"].waitForExistence(timeout: 5), "the window isn't titled tools.png")
-        expectHeader("tools.png, ", photo, "the panel header doesn't name tools.png")
+        expectHeader("tools.png, ", photo, "the image header doesn't name tools.png")
         photo.shot("saved-as")
 
         // From now on Save writes the copy, never the opened file.
@@ -387,7 +387,7 @@ final class PhotoJourneyTests: XCTestCase {
         photo.app.typeKey("c", modifierFlags: [])
         let apply = photo.app.buttons["photo.crop.apply"]
         XCTAssert(apply.waitForExistence(timeout: 5), "the C key didn't pick the crop tool (no Apply Crop)")
-        XCTAssert(photo.element("suite.tools").buttons["Crop"].isSelected, "the rail doesn't show Crop picked after C")
+        XCTAssert(photo.element("suite.tools").buttons["Crop"].isSelected, "the tool palette doesn't show Crop picked after C")
         photo.shot("crop-tool-key")
         photo.drag(on: "suite.canvas", from: CGVector(dx: 0.25, dy: 0.25), to: CGVector(dx: 0.75, dy: 0.75), step: "crop-chosen")
         XCTAssert(apply.isEnabled, "Apply Crop is still disabled after dragging a crop")
@@ -535,7 +535,7 @@ final class PhotoJourneyTests: XCTestCase {
         photo.shot("history-redo-key")
 
         photo.click("Redo New Layer", in: .window)
-        expect("Undo New Layer", photo, "the top bar's Redo didn't redo New Layer")
+        expect("Undo New Layer", photo, "the window toolbar's Redo didn't redo New Layer")
         expectHeader("2 layers", photo, "redoing New Layer didn't bring the layer back")
         photo.shot("history-redo-button")
 
@@ -550,7 +550,7 @@ final class PhotoJourneyTests: XCTestCase {
         let fit = canvas.frame.size
         zoom({ photo.app.typeKey("=", modifierFlags: .command) }, photo, "Command-= didn't zoom in")
         photo.shot("zoom-in-key")
-        for _ in 0..<2 { zoom({ photo.click("Zoom In", in: .window) }, photo, "the top bar's Zoom In didn't zoom in") }
+        for _ in 0..<2 { zoom({ photo.click("Zoom In", in: .window) }, photo, "the window toolbar's Zoom In didn't zoom in") }
         XCTAssert(canvas.frame.height > fit.height + 100, "zooming in didn't outgrow the viewport (\(canvas.frame.size), fit \(fit))")
         photo.shot("zoom-in")
 
@@ -574,7 +574,7 @@ final class PhotoJourneyTests: XCTestCase {
         photo.shot("panned-by-key")
 
         let zoomedIn = canvas.frame.height
-        zoom({ photo.click("Zoom Out", in: .window) }, photo, "the top bar's Zoom Out didn't zoom out")
+        zoom({ photo.click("Zoom Out", in: .window) }, photo, "the window toolbar's Zoom Out didn't zoom out")
         XCTAssert(Self.waitUntil { canvas.frame.height < zoomedIn - 1 }, "Zoom Out didn't make the image smaller")
         photo.shot("zoom-out")
         photo.app.typeKey("0", modifierFlags: .command)
@@ -603,7 +603,7 @@ final class PhotoJourneyTests: XCTestCase {
         return photo
     }
 
-    /// Waits for the button titled `title`, such as the top bar's "Undo Crop".
+    /// Waits for the button titled `title`, such as the window toolbar's "Undo Crop".
     @MainActor private func expect(_ title: String, _ photo: Journey, _ message: String) {
         XCTAssert(photo.app.buttons[title].waitForExistence(timeout: 5), "\(message) (no \(title) button)")
     }

@@ -11,7 +11,7 @@
 // (a sheet's, the rename alert's, an inspector number) it selects that field's
 // text instead, and it never selects the canvas while a sheet or alert is up
 // (#575). A disabled item would swallow the key, so it is disabled only for a
-// focused window with no image. Every top bar command is here too.
+// focused window with no image. Every window toolbar command is here too.
 import AppKit
 import PhotoModel
 import SwiftUI

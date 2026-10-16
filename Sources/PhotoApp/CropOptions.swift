@@ -1,4 +1,4 @@
-// CropOptions.swift: the crop tool's options in the Adjust tab (PV-3): the
+// CropOptions.swift: the crop tool's options in the inspector (PV-3): the
 // pending crop's X, Y, W and H as ScrubFields two per row in a Grid (X over
 // W, Y over H, equal columns), the six aspect chips, Swap, then Apply Crop
 // over Cancel, each action full width and every row SuiteSpacing.xs apart.

@@ -1,4 +1,4 @@
-// SelectOptions.swift: the selection tools' own options in the Adjust tab.
+// SelectOptions.swift: the selection tools' own options in the inspector.
 // Shows nothing yet; the selection feature fills it.
 import PhotoModel
 import SwiftUI
