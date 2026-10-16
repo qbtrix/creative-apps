@@ -58,3 +58,4 @@ utc	stage	event	ref	note
 2026-10-16T05:22Z	4	heartbeat	dev-ci	waiting on a green full or scoped:suite dev run: 38855142429 CI in_progress  1c309d9; 38854627217 scoped: design completed success 7b288fe; 38854622691 scoped: photo completed failure 7b288fe
 2026-10-16T05:29Z	4	ci-run	38855142429	1c309d9 red: macOS AppSnapshotTests PhotoBrushDisplayTests budget (Photo); none ours
 2026-10-16T05:42Z	4	heartbeat	dev-ci	waiting on a green full or scoped:suite dev run: 38855142429 CI completed failure 1c309d9; 38854627217 scoped: design completed success 7b288fe; 38854622691 scoped: photo completed failure 7b288fe
+2026-10-16T06:02Z	4	heartbeat	dev-ci	waiting on a green full or scoped:suite dev run: 38855142429 CI completed failure 1c309d9; 38854627217 scoped: design completed success 7b288fe; 38854622691 scoped: photo completed failure 7b288fe
