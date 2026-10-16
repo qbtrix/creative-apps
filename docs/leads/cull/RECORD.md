@@ -4,7 +4,7 @@ Issue: #1345 · Packet: docs/blueprints/library/features/cull.md
 Run: act-1a145e74beb-obp4 · Session: cse_01BkDrX316MPq32KYU5agHQr · Started: 2026-10-16T18:10Z
 Stage: 4 round 1
 Base: 7ab292cdb1022222c00314a2b52c44c087811c46
-Next: wait for the newest full CI run on dev that contains #1604 (a5c680a; now 38965297921 on 9a4279d, earlier ones superseded); then round 1: download ui-screens and snapshots, run the critic panel
+Next: wait for scoped: library run 38967059607 (5c1742f, contains #1604) for J4 screens and snapshots; then the round-1 critic panel; fixer r1-b1 (#1587) running
 
 Loop: v2 (no `## Slices` table in the packet), with the findings queue and
 the 2-round cap (started after #1302 merged at 2026-10-16T04:20Z).
@@ -30,6 +30,7 @@ CU-5's keys and menu.
 ## Rounds
 | round | CI run | CI | audit vs baseline | lenses | confirmed | fixed by | clean |
 |---|---|---|---|---|---|---|---|
+| 1 | 38965923292 (full, 1910bff) | macOS job red: SuiteUI TimelineStripLayoutTests (not cull); snapshots and journeys never ran; cullOneWithinBudget 12.97 ms > 10 hidden as known issue (#1587) | not measured | pending (scoped run) | #1587 | r1-b1 | no |
 
 ## Decisions
 - Base and PR target are `dev`, not `main` as the Belt brief says: CLAUDE.md
@@ -62,4 +63,7 @@ CU-5's keys and menu.
   `gh pr create` uses, answers 403 here.
 
 ## Open
+- Full run 38965923292 reports success while its macOS job failed in
+  unit tests (TimelineStripLayoutTests, SuiteUI), so no journey ran there;
+  cull's done check waits on a run whose journeys ran.
 - CU-8 / P2 waits on #782.
