@@ -1,7 +1,10 @@
 // DesignDocumentTests.swift: DesignDocument's defaults and equality, and a compile check that
-// every use-case protocol in Contracts/UseCases.swift has exactly blueprint 5.4's signatures:
-// `Stub` writes each requirement as 5.4 does, so a protocol whose signature drifts no longer
-// accepts it. Runs on Linux and macOS.
+// every use-case protocol in Contracts/UseCases.swift has blueprint 5.4's signatures. `Stub`
+// conforms to all 14 protocols, and `everyUseCaseIsSatisfiableAsWritten` binds every requirement
+// through `any P` to a function value typed as 5.4 writes it, so a requirement that is removed,
+// renamed, retyped, or loosened from a typed `throws(...)` to plain `throws` stops this file
+// compiling. Function conversion still lets a narrowing through (a write that stops throwing, a
+// `String?` help that becomes `String`). Runs on Linux and macOS.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -31,12 +34,106 @@ import DesignModel
 
     @Test func everyUseCaseIsSatisfiableAsWritten() throws {
         let page = try #require(openDesign().pages.first)
+
+        // Tier 1.
+        let marquee: any MarqueeSelecting = Stub()
+        let _: (DesignRect, String?, DesignPage) -> [String] = marquee.layers(touching:in:on:)
+
         let transforming: any SelectionTransforming = Stub()
+        let _: ([String], DesignPage) -> String? = transforming.transformHelp(_:on:)
+        let _: ([String], DesignPoint, DesignPage) throws(DesignRefusal) -> DesignEdit = transforming.move(_:by:on:)
+        let _: ([String], DesignHandle, DesignPoint, DesignModifiers, DesignPage) throws(DesignRefusal) -> DesignEdit
+            = transforming.resize(_:handle:by:modifiers:on:)
+        let _: ([String], DesignDirection, Bool, DesignPage) throws(DesignRefusal) -> DesignEdit = transforming.nudge(_:_:large:on:)
+        let _: ([String], DesignPage) throws(DesignRefusal) -> DesignEdit = transforming.delete(_:on:)
+
+        let aligning: any LayerAligning = Stub()
+        let _: (DesignAlignEdge, [String], DesignPage) -> String? = aligning.alignHelp(_:_:on:)
+        let _: (DesignAlignEdge, [String], DesignPage) throws(DesignRefusal) -> DesignEdit = aligning.align(_:_:on:)
+        let _: (DesignDistributeAxis, [String], DesignPage) -> String? = aligning.distributeHelp(_:_:on:)
+        let _: (DesignDistributeAxis, [String], DesignPage) throws(DesignRefusal) -> DesignEdit = aligning.distribute(_:_:on:)
+
+        let duplicating: any LayerDuplicating = Stub()
+        let _: ([String], DesignPage) -> String? = duplicating.duplicateHelp(_:on:)
+        let _: ([String], DesignPoint, DesignPage, inout DesignIDMint) throws(DesignRefusal) -> DesignEdit
+            = duplicating.duplicate(_:offset:on:mint:)
+        let _: (DesignNode, inout DesignIDMint) -> DesignNode = duplicating.copySubtree(_:mint:)
+
+        let grouping: any LayerGrouping = Stub()
+        let _: ([String], DesignPage) -> String? = grouping.groupHelp(_:on:)
+        let _: ([String], DesignPage, inout DesignIDMint) throws(DesignRefusal) -> DesignEdit = grouping.group(_:on:mint:)
+        let _: ([String], DesignPage) -> String? = grouping.ungroupHelp(_:on:)
+        let _: ([String], DesignPage) throws(DesignRefusal) -> DesignEdit = grouping.ungroup(_:on:)
+
+        let clipboard: any LayerClipboard = Stub()
+        let _: String = clipboard.pasteboardType
+        let _: ([String], DesignPage) -> String? = clipboard.copyHelp(_:on:)
+        let _: ([String], DesignPage) throws(DesignRefusal) -> Data = clipboard.encode(_:on:)
+        let _: (Data?) -> String? = clipboard.pasteHelp(_:)
+        let _: (Data, String?, DesignPage, inout DesignIDMint) throws(DesignRefusal) -> DesignEdit
+            = clipboard.paste(_:into:on:mint:)
+
+        let ordering: any LayerOrdering = Stub()
+        let _: (String, String?, Int, DesignPage) -> String? = ordering.moveHelp(_:into:at:on:)
+        let _: (String, String?, Int, DesignPage) throws(DesignRefusal) -> DesignEdit = ordering.move(_:into:at:on:)
+        let _: (DesignArrangeStep, [String], DesignPage) -> String? = ordering.arrangeHelp(_:_:on:)
+        let _: (DesignArrangeStep, [String], DesignPage) throws(DesignRefusal) -> DesignEdit = ordering.arrange(_:_:on:)
+
+        let styling: any StyleEditing = Stub()
+        let _: (DesignStyleProperty, [String], DesignPage) -> String? = styling.styleHelp(_:_:on:)
+        let _: (DesignFrameField, Double, [String], DesignPage) throws(DesignRefusal) -> DesignEdit = styling.setFrame(_:to:_:on:)
+        let _: (DesignColor, [String], DesignPage) throws(DesignRefusal) -> DesignEdit = styling.setFill(_:_:on:)
+        let _: (Double, [String], DesignPage) throws(DesignRefusal) -> DesignEdit = styling.setCornerRadius(_:_:on:)
+        let _: (Double, [String], DesignPage) throws(DesignRefusal) -> DesignEdit = styling.setOpacity(_:_:on:)
+        let _: (DesignStroke?, [String], DesignPage) throws(DesignRefusal) -> DesignEdit = styling.setStroke(_:_:on:)
+        let _: (DesignTextStyle, [String], DesignPage) throws(DesignRefusal) -> DesignEdit = styling.setTextStyle(_:_:on:)
+
+        let framing: any ViewFraming = Stub()
+        let _: ([String], DesignPage) -> String? = framing.framingHelp(_:on:)
+        let _: ([String], DesignPage) -> DesignRect? = framing.rectToShow(_:on:)
+
+        let filing: any DocumentFiling = Stub()
+        let _: (DesignDocument) throws(DesignFileError) -> Data = filing.encode(_:)
+        let _: (Data) throws(DesignFileError) -> DesignDocument = filing.decode(_:)
+
+        // Tier 2.
+        let exporting: any ExportPlanning = Stub()
+        let _: ([String], DesignPage) -> String? = exporting.exportHelp(_:on:)
+        let _: ([String], DesignPage, DesignExportFormat, Int, Set<String>) throws(DesignRefusal) -> [DesignExportItem]
+            = exporting.plan(_:on:format:scale:existing:)
+        let _: (String, DesignPage) throws(DesignRefusal) -> String = exporting.svg(for:on:)
+
+        let drawing: any PathDrawing = Stub()
+        let _: (DesignPoint, DesignPath?, Double) -> DesignPath = drawing.press(at:draft:tolerance:)
+        let _: (DesignPoint, DesignPath) -> DesignPath = drawing.dragHandle(to:draft:)
+        let _: (DesignPath) -> DesignRect? = drawing.bounds(of:)
+        let _: (DesignPath, String?, DesignPage, inout DesignIDMint) throws(DesignRefusal) -> DesignEdit
+            = drawing.commit(_:into:on:mint:)
+
+        let components: any ComponentLibrary = Stub()
+        let _: ([String], DesignPage) -> String? = components.createHelp(_:on:)
+        let _: (String, DesignPage, [DesignComponent], inout DesignIDMint) throws(DesignRefusal)
+            -> (edit: DesignEdit, library: [DesignComponent]) = components.create(from:on:library:mint:)
+        let _: (String, DesignPoint, DesignPage, [DesignComponent], inout DesignIDMint) throws(DesignRefusal) -> DesignEdit
+            = components.insert(_:centeredOn:on:library:mint:)
+        let _: (DesignNode, [DesignComponent]) -> [DesignNode]? = components.resolve(_:library:)
+
+        let variables: any VariableEditing = Stub()
+        let _: (String, DesignVariableValue, [DesignVariable], String) throws(DesignRefusal) -> [DesignVariable]
+            = variables.add(named:value:to:id:)
+        let _: (String, String, [DesignVariable]) throws(DesignRefusal) -> [DesignVariable] = variables.rename(_:to:in:)
+        let _: (String, [DesignVariable]) throws(DesignRefusal) -> [DesignVariable] = variables.remove(_:from:)
+        let _: (String, DesignMode, DesignVariableValue, [DesignVariable]) throws(DesignRefusal) -> [DesignVariable]
+            = variables.set(_:_:to:in:)
+        let _: (String, DesignMode, [DesignVariable]) -> DesignVariableValue? = variables.resolve(_:in:variables:)
+        let _: (String?, [String], DesignPage, [DesignVariable]) throws(DesignRefusal) -> DesignEdit
+            = variables.bind(_:_:on:variables:)
+
+        // And through the existential at run time.
         #expect(transforming.transformHelp(["node-1"], on: page) == "Stub isn't built yet.")
         #expect(throws: DesignRefusal.notBuilt("Stub")) {
             try transforming.move(["node-1"], by: DesignPoint(x: 1, y: 0), on: page)
         }
-        let filing: any DocumentFiling = Stub()
         #expect(throws: DesignFileError.unreadable) { try filing.decode(Data()) }
     }
 }
