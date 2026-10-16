@@ -79,7 +79,11 @@
                 "paths": [
                   "Sources/DesignModel/DesignCanvasEditing.swift",
                   "Sources/DesignModel/DesignDrawing.swift",
-                  "Sources/DesignModel/DesignText.swift"
+                  "Sources/DesignModel/DesignText.swift",
+                  "Sources/DesignModel/DesignWholePoints.swift",
+                  "Sources/DesignModel/DesignCanvasHints.swift",
+                  "Sources/DesignModel/DesignFrameLabel.swift",
+                  "Sources/DesignModel/DesignPageSize.swift"
                 ],
                 "status": "existing",
                 "authored": true
@@ -201,7 +205,11 @@
                   "Sources/DesignApp/DesignTextEditor.swift",
                   "Sources/DesignApp/DesignSelectionMarks.swift",
                   "Sources/DesignApp/DesignFrameLabels.swift",
-                  "Sources/DesignApp/DesignLiveDrag.swift"
+                  "Sources/DesignApp/DesignLiveDrag.swift",
+                  "Sources/DesignApp/DesignCanvasFeedback.swift",
+                  "Sources/DesignApp/DesignTextArtwork.swift",
+                  "Sources/DesignApp/DesignTextFont.swift",
+                  "Sources/DesignApp/DesignPastEdge.swift"
                 ],
                 "status": "existing",
                 "authored": true
@@ -217,7 +225,9 @@
                   "Sources/DesignApp/DesignAlignBar.swift",
                   "Sources/DesignApp/DesignLayersPanel.swift",
                   "Sources/DesignApp/DesignInspectorStyle.swift",
-                  "Sources/DesignApp/DesignAssetsPanel.swift"
+                  "Sources/DesignApp/DesignAssetsPanel.swift",
+                  "Sources/DesignApp/DesignInspectorText.swift",
+                  "Sources/DesignApp/DesignInspectorPage.swift"
                 ],
                 "status": "existing",
                 "authored": true

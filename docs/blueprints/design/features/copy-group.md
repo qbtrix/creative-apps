@@ -22,9 +22,11 @@ the inspector's X field instead (rename is layers-panel's), as J8 says.
 live stubs against its fakes and start when it closes. C-1 and C-5 also
 wait on design-seams (the Option-drag route as one "Duplicate" step,
 D0-3c); C-4 and C-5 wait on design-window's contract slice DW-a (Edit >
-Duplicate and Object > Group and Ungroup, D0-6; the copy cursor, D0-5b; the
-pasteboard bridge and the copy, cut and paste hooks, D0-5d), and C-4's drag
-check on DW-b. The new group's row expanding after Group is
+Duplicate and Object > Group and Ungroup, D0-6; the pasteboard bridge and
+the copy, cut and paste hooks, D0-5d), and C-4's drag check on DW-b. The
+copy pointer shown while Option is held over a layer is design-window
+DW-d's (D0-9b decides it, D0-9c draws it); J7 doesn't assert it, so no
+task here waits on DW-d. The new group's row expanding after Group is
 design-contracts D0-3a. No SuiteUI and no creative-core issue. The lead
 checks each piece is on `dev` before the task that needs it; a missing one
 becomes a `line:design` issue, not a task here.

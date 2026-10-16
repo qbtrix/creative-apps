@@ -13,9 +13,18 @@ Design is the pilot of factory v3 (2026-10-16): packets are cut into
 Blueprint wave 0 ships as three features: `design-contracts` (wave 0a,
 everything the others compile against, Model only, done on Linux in
 hours), then `design-seams` (the gesture routes and shared budgets) and
-`design-window` (the window seam) side by side in wave 0b. The five wave-1
+`design-window` (the window seam) side by side in wave 0b. The six wave-1
 features start the moment design-contracts closes; their view tasks wait on
 design-window's first slice, DW-a, not on all of it.
+
+The Design app UX review (2026-10-16) re-cut three things. style-rows
+gained a Model contract slice (SR-m) and a text slice (SR-t) that waits
+only on SR-m and DW-a, so a working font size needs design-contracts and
+DW-a and nothing else. design-window gained DW-d, the canvas's tool
+feedback (hover outline, size badge, pointers, the Text tool's box). A
+sixth wave-1 feature, `canvas-basics`, makes drags land on whole points,
+text boxes fit their text, layers past the page stay visible, and the page
+size editable.
 
 Rows whose wave reads `SP1` to `SP3` belong to the shell-parity track, a
 cross-app plan whose order and shared files are in
@@ -26,13 +35,14 @@ file's waves, not this one's.
 |---|---|---|---|---|---|---|
 | 0a | The contracts: style schema, use cases, services with NotBuilt, fakes, live stubs, actions, fixtures | `design-contracts.md` | the `DesignPage` init gap (filed by the lead); #532 (Model part, from PR #753) | nothing (PR #753's Model half is its task D0-0) | #1324 | built |
 | 0b | The gesture routes: the marquee rule, several-layer drags, Option-drag as one step; the shared Model budgets | `design-seams.md` | – | design-contracts | file when ready | planned |
-| 0b | The window seam: intents, launch arguments, menus, canvas slots, inspector shell, control ids, J15 and layout | `design-window.md` | #288 (part) | design-contracts; its first slice DW-a also waits on Design shell-parity, which edits the same window files | file when ready | planned |
-| 1 | Select and edit several layers | `select-several.md` | #714, #542, #607; gaps: marquee, several layers, Zoom to Selection | design-contracts; design-seams for S-5, S-7, S-8; view tasks: design-window DW-a (DW-b for the drag check) | file when ready | planned |
+| 0b | The window seam: intents, launch arguments, menus, canvas slots, inspector shell, control ids, canvas feedback, J15 and layout | `design-window.md` | #288 (part) | design-contracts; its first slice DW-a also waits on Design shell-parity, which edits the same window files; DW-d's last task waits on canvas-basics CB-a (the Text click-drag route) | file when ready | planned |
+| 1 | Select and edit several layers | `select-several.md` | #714, #542, #607; gaps: marquee, several layers, Zoom to Selection | design-contracts; design-seams for S-5, S-7, S-8; view tasks: design-window DW-a (DW-b for the drag check); S-5 also waits on canvas-basics CB-a (DesignCanvasEditing.swift) | file when ready | planned |
 | 1 | Duplicate, group, cut, copy and paste | `copy-group.md` | #414, #416, #415 | design-contracts; design-seams for C-1, C-5; view tasks: design-window DW-a (DW-b for the drag check) | file when ready | planned |
-| 1 | Style rows and drawing them | `style-rows.md` | #752, #267, #268, #276, #266, #532 | design-contracts; view tasks: design-window DW-a (DW-b for the scrub check) | file when ready | planned |
+| 1 | Style rows and drawing them | `style-rows.md` | #752, #267, #268, #276, #266, #532 | design-contracts; SR-t's view tasks: design-window DW-a only; SR-a's: DW-a (DW-b for the scrub check) | file when ready | planned |
 | 1 | The Layers panel | `layers-panel.md` | #613, #589 (Design half); gap: rename, reorder, nest, Arrange | design-contracts; view tasks: design-window DW-a (DW-b for the drag check); L-6 waits on SuiteUI lists-and-layers LL-9 | file when ready | planned |
 | 1 | Files and history | `files-history.md` | #275, #270; gap: open bad files journey | design-contracts; view tasks: design-window DW-a | file when ready | planned |
-| 2 | The tier-2 seam | `design-seams-2.md` | – | design-contracts; the wave-1 slices whose files it reopens (style-rows SR-a, SR-b; files-history FH-a, FH-b; layers-panel LP-b; select-several SS-b); design-seams; all of design-window | file when ready | planned |
+| 1 | Canvas basics: whole points, text boxes that fit, layers past the page, page size | `canvas-basics.md` | UX review 2026-10-16 R6 (top-12 items 5, 9, 10); one gap issue per slice, filed at stage 1 | design-contracts; design-seams for CB-a's Model; style-rows SR-m and SR-t for CB-b; all of design-window for the App tasks of CB-b and CB-c | file when ready | planned |
+| 2 | The tier-2 seam | `design-seams-2.md` | – | design-contracts; the wave-1 slices whose files it reopens (style-rows SR-m, SR-b; files-history FH-a, FH-b; layers-panel LP-b; select-several SS-b); design-seams; all of design-window; canvas-basics (D2-3b, D2-4a, D2-4b) | file when ready | planned |
 | SP2 | Design opens in `SuiteWindow` with the floating tool box | `shell-parity.md` | the 2026-10-15 captain decisions (one shell, one tool box, the app switcher), Design half | editor-in-window (SuiteUI, #1079) | file when ready | planned |
 
 No Design feature issue is filed yet. #288 closes when Design's
@@ -45,18 +55,23 @@ its last PR (or files the remainder as a `gap` issue if wave 1 ends above 0).
 ```
  editor-in-window (#1079, SuiteUI) ──> shell-parity (SP2) ──────────────┐
                                                                         v
- design-contracts (0a, Linux) ──┬──> design-window  DW-a ──> DW-b ──> DW-c
-   CT-a..CT-d, hours            │      (slots,      (drag    (ids, J15,
-                                │       intents,     box)     layout)
-                                │       menus)
+ design-contracts (0a, Linux) ──┬──> design-window  DW-a ──> DW-b ──> DW-d ──> DW-c
+   CT-a..CT-d, hours            │      (slots,      (drag    (hover,   (ids, J15,
+                                │       intents,     box)     badge,    layout)
+                                │       menus)                pointers)
                                 ├──> design-seams   SE-a (gesture routes, budgets)
                                 ├──> select-several ┐
                                 ├──> copy-group     │ Model tasks start here;
                                 ├──> style-rows     │ view tasks wait on DW-a,
                                 ├──> layers-panel   │ drag and scrub checks on DW-b,
-                                └──> files-history  ┘ gesture tasks on design-seams
- design-seams-2 (2): design-contracts + SR-a, SR-b, FH-a, FH-b, LP-b, SS-b,
-                     design-seams, all of design-window
+                                ├──> files-history  │ gesture tasks on design-seams
+                                └──> canvas-basics  ┘
+ style-rows:     SR-m (Model) ──┬──> SR-t (text rows + drawing; + DW-a) ──┐
+                                └──> SR-a (+ DW-a, DW-b) ─────────────────┴──> SR-b
+ canvas-basics:  design-seams ──> CB-a (whole points) ──> select-several SS-b (S-5)
+                                    └──> DW-d's last task; CB-b (+ SR-m, SR-t) ──> CB-c
+ design-seams-2 (2): design-contracts + SR-m, SR-b, FH-a, FH-b, LP-b, SS-b,
+                     design-seams, canvas-basics, all of design-window
 ```
 
 - **A slice is the unit of done.** Each packet's `## Slices` table gives
@@ -99,10 +114,11 @@ the slice it waits on has merged.
 | design-window | Feature: design-window | p1 | design-contracts and Design shell-parity closed (DW-a edits shell-parity's window files, so filing earlier leaves the lead idle) | `Depends on: <shell-parity issue> (closed)`; the body also names design-contracts |
 | select-several | Feature: select-several | p1 | design-contracts closed | `Depends on: <design-contracts issue> (closed)`; the body names design-window DW-a, DW-b and design-seams for its later tasks |
 | copy-group | Feature: copy-group | p1 | design-contracts closed | same |
-| style-rows | Feature: style-rows | p1 | design-contracts closed | same, without design-seams |
+| style-rows | Feature: style-rows | p1 | design-contracts closed | same, without design-seams; the body says SR-t waits only on SR-m and DW-a |
 | layers-panel | Feature: layers-panel | p1 | design-contracts closed | same, without design-seams |
 | files-history | Feature: files-history | p1 | design-contracts closed | same, DW-a only |
-| design-seams-2 | Feature: design-seams-2 | p2 (tier 2) | the slices S2-a waits on are done (style-rows SR-a, SR-b; files-history FH-a; layers-panel LP-b) | `Depends on: <style-rows issue>`; the body lists every slice wait in its packet |
+| canvas-basics | Feature: canvas-basics | p1 | design-contracts closed | `Depends on: <design-contracts issue> (closed)`; the body names design-seams for CB-a's Model, style-rows SR-m and SR-t, and design-window for its App tasks |
+| design-seams-2 | Feature: design-seams-2 | p2 (tier 2) | the slices S2-a waits on are done (style-rows SR-m, SR-b; files-history FH-a; layers-panel LP-b) | `Depends on: <style-rows issue>`; the body lists every slice wait in its packet |
 
 The pilot runs at most 6 Design leads at once; when more can start, the
 features whose next slice unblocks the most others go first
@@ -147,12 +163,13 @@ which #753 named.
 |---|---|---|
 | design-contracts | – | – |
 | design-seams | – | – |
-| design-window | #778 suite-harness has merged (SH-4 `suite.perf`, SH-5 `.suiteControl` and `.suiteProbes()`, SH-7's journey template); files a new `needs-ui` issue: `ScrubField` mixed state; through shell-parity, editor-in-window #1079 | – |
+| design-window | #778 suite-harness has merged (SH-4 `suite.perf`, SH-5 `.suiteControl` and `.suiteProbes()`, SH-7's journey template); files new `needs-ui` issues: `ScrubField` mixed state, and `CanvasViewport` reporting the pointer past the artboard (DW-d's hover; not waited on); through shell-parity, editor-in-window #1079 | – |
 | select-several | files a new `needs-ui` issue: `CanvasViewport` shows a document rect (J4's centering assert skips on it); #273 is not waited on (Q7: canvas-marks CM-4 files Design's adoption task) | – |
 | copy-group | – | – |
 | style-rows | #718 (inspector-controls IC-3: `onEnd` on the color rows; Design's local end works meanwhile; `ScrubField`'s `onEnd` is on `dev`) | – |
 | layers-panel | lists-and-layers: #577, #108 (rename keys), #73 (context menus), #589 (LL-9, group-row toggles: J12's eye step skips on it) | – |
 | files-history | editor-chrome EC-4 #339 (`EditorSaveStatus`; plain text meanwhile) | – |
+| canvas-basics | – (layers past the edge draw in the unclipped overlay; their hover outline waits on DW-d's `needs-ui` issue, not blocking) | – |
 | design-seams-2 | editor-chrome EC-4 #339 (Export's primary style; plain item meanwhile) | – |
 | shell-parity | editor-in-window #1079 (its `feature-done` waits on #933's fix) | – |
 
@@ -181,18 +198,25 @@ hands, in order:
 | `DesignWorkspace.swift` | design-contracts → layers-panel LP-b → design-seams-2 S2-a, S2-b |
 | `DesignServices.swift` | design-contracts → design-seams-2 S2-a |
 | `DesignActions.swift`, `DesignActions+Edit.swift` | design-contracts → select-several SS-b (the #542 guard) |
-| `DesignCanvasEditing.swift` | design-seams → select-several SS-b → design-seams-2 S2-b |
+| `DesignCanvasEditing.swift`, `DesignDrawing.swift` | design-seams → canvas-basics CB-a → select-several SS-b → design-seams-2 S2-b |
+| `Live/LiveStyling.swift`, `DesignText.swift` | design-contracts → style-rows SR-m → canvas-basics CB-b |
+| `Contracts/StyleTypes.swift` | design-contracts → canvas-basics CB-a |
 | `Live/Live<Slot>.swift` | design-contracts (stubs) → the wave-1 feature that fills each (`LiveFiling`: files-history FH-a → design-seams-2 S2-a) |
-| `DesignInspectorContent.swift` | style-rows SR-a → design-seams-2 S2-a |
+| `DesignInspectorContent.swift` | style-rows SR-m → design-seams-2 S2-a |
 | `DesignHistory.swift` | files-history FH-a → design-seams-2 S2-a |
 | `DesignWindowOptions.swift` (with `DesignControlID`) | design-window → design-seams-2 S2-b |
-| `DesignIntent.swift`, `DesignWindow.swift`, `DesignEditor.swift` | shell-parity → design-window → design-seams-2 S2-b |
-| `DesignCanvas.swift` | design-window → design-seams-2 S2-b |
+| `DesignIntent.swift`, `DesignWindow.swift` | shell-parity → design-window → canvas-basics CB-b, CB-c → design-seams-2 S2-b |
+| `DesignEditor.swift` | shell-parity → design-window → design-seams-2 S2-b |
+| `DesignCanvas.swift` | design-window → canvas-basics CB-c → design-seams-2 S2-b |
+| `DesignCanvasFeedback.swift` (slot) | design-window DW-a → DW-d |
+| `DesignTextArtwork.swift` (slot), `DesignTextEditor.swift`, `DesignTextFont.swift` | design-window DW-a (the slot) → style-rows SR-t → canvas-basics CB-b |
+| `DesignInspectorText.swift` (slot) | design-window DW-a → style-rows SR-t |
+| `DesignInspectorPage.swift` (slot) | design-window DW-a → canvas-basics CB-c |
 | `DesignLayersPanel.swift` | shell-parity DP-a → design-window DW-a → layers-panel LP-a |
 | `DesignSelectionMarks.swift`, `DesignAlignBar.swift` | design-window DW-a → select-several SS-a |
 | `DesignInspector.swift` | design-window DW-a → style-rows SR-a |
 | `DesignCanvasMarks.swift` | design-window DW-a → style-rows SR-b → design-seams-2 S2-a, S2-b |
-| `DesignFrameLabels.swift` | design-window DW-a → style-rows SR-b |
+| `DesignFrameLabels.swift`, `DesignFrameLabel.swift` | design-window DW-a (the slot) → style-rows SR-t |
 | `DesignCommands.swift` | design-window DW-a → files-history FH-b → design-seams-2 S2-b |
 | `DesignSaveStatus.swift`, `DesignClosePrompt.swift` (slots) | design-window DW-a → files-history FH-b |
 | `DesignObjectMenu.swift` | design-window DW-a → design-seams-2 S2-b |
