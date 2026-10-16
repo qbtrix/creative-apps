@@ -4,7 +4,7 @@ Issue: #1333 · Packet: docs/blueprints/halo/features/easing.md
 Run: act-1a1448a5fbe-p22s · Session: session_01Fpq7bUwf2TjhThXdtGKn4r · Started: 2026-10-16T11:48Z
 Stage: 4 round 1
 Base: e464ecab9b0e11b9cfc27851181beafdb8fee424
-Next: critic panel round 1 (workflow wf_3a38e3ad-fa3) on run 38917497685; then fix-batch.js with every open easing finding (#1411, #1412 and the panel's)
+Next: fix round 1 (fix-batch wf_fd7513ff-722) on findings #1411 to #1424; when its PRs merge, round 2 review on the next scoped halo run that contains them
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -26,7 +26,7 @@ Wave 4: EZ-8 waits on EZ-6 and EZ-7 (drives what they put on screen); #333 close
 ## Rounds
 | round | CI run | CI | audit vs baseline | lenses | confirmed | fixed by | clean |
 |---|---|---|---|---|---|---|---|
-| 1 | 38917497685 (scoped halo, fb72b7e) | red: H-J7 step 3 (#1411); testLayerHousekeeping contrast 3 > 2 (#1412); testDragLayerToKeyPosition and testEveryControlActsOrSaysWhy are full-run quarantined (#1283, #1035), not easing | contrast 3 vs 2 | clarity, journey, design, layout, controls, audit | #1411, #1412 + panel | | no |
+| 1 | 38917497685 (scoped halo, fb72b7e) | red: H-J7 step 3 (#1411); testLayerHousekeeping contrast 3 > 2 (#1412); testDragLayerToKeyPosition and testEveryControlActsOrSaysWhy are full-run quarantined (#1283, #1035), not easing | contrast 3 vs 2 | clarity, journey, design, layout, controls, audit | #1411 to #1424 (14: 1 blocker, 7 major, 6 minor; 1 refuted) | fix round 1 | no |
 
 ## Decisions
 - Packet has no `## Slices` table: v2 loop. Started after #1302 merged (2026-10-16T04:20Z), so findings queue (rule 10) and round cap of 2 (rule 11) apply.
