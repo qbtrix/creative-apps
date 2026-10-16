@@ -128,8 +128,7 @@ had only Esc, G and View > Grid, until #1449 added a Grid button.
 
 ```swift
 ✗ .onKeyPress(.escape) { model.showGrid() }                  // and nothing on screen
-✓ ToolbarGroup { Button("Grid", systemImage: "square.grid.2x2") { model.showGrid() } }
-  .keyboardShortcut("g", modifiers: [])
+✓ ToolbarAction("Grid", systemImage: "square.grid.2x2", shortcut: "g", identifier: "library.loupe.grid") { model.showGrid() }
 ```
 
 **10. Every interactive element shows hover, pressed and selected.** A
