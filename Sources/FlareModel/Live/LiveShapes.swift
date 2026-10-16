@@ -3,7 +3,9 @@
 // draws from the center); a Pen draft adds an anchor per click, and a drag makes that anchor smooth with mirrored
 // handles (G1), so its segments are cubics; a click near the first anchor closes the path. A commit is one engine
 // group, "Add Rectangle", "Add Ellipse" or "Add Path", of `AddLayer` and `AddShape`, with the layer id and name
-// the fake gives ("rectangle-1", "Rectangle 1"), and throws `CommandError.layerLocked` above a locked layer.
+// the fake gives ("rectangle-1", "Rectangle 1"), and throws `CommandError.layerLocked` above a locked layer. The same
+// group keys the new layer's position (`x` and `y`, at their standard values) once at frame 0, so an auto-key edit at a
+// later frame keeps 0 and the shape animates (#1731).
 // ST-8 and ST-9 add the box gestures and edits in their own files; ST-9 adds the `ShapeBuilding` conformance.
 import FlareCore
 
@@ -16,6 +18,8 @@ public struct LiveShapes: Sendable {
     static let anchorTolerance = 1.0
     /// What `commit` throws for a pen path whose extent is under `anchorTolerance`.
     static let degeneratePath = "Click at least two separate places to draw a path."
+    /// The tracks a new shape keys once at frame 0: its position.
+    static let positionKeys = ["x", "y"]
 
     /// Every tool draws; the workspace's `toolHelp` covers "no document".
     public func unavailableHelp(for tool: FlareTool) -> String? { nil }
@@ -69,6 +73,10 @@ public struct LiveShapes: Sendable {
         try engine.group("Add \(kind)") {
             try $0.perform(AddLayer(owner: owner, layer: layer, index: index))
             try $0.perform(AddShape(owner: owner, layerID: layer.id, shape: draft.shape))
+            for property in Self.positionKeys {
+                let key = Keyframe(frame: 0, value: Layer.standardDefaults[property] ?? 0)
+                try $0.perform(SetKeyframe(owner: owner, layerID: layer.id, property: property, keyframe: key))
+            }
         }
         return layer.id
     }
