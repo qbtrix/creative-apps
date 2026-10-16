@@ -2,7 +2,7 @@
   "title": "Cut, Copy, Paste, Duplicate, Merge Down, Flatten",
   "wave": 1,
   "order": 20,
-  "status": "building",
+  "status": "built",
   "feature_issue": "#1075",
   "covers": "–",
   "waits_on": "photo-seams (journey tasks only: photo-journey-kit); nothing",
