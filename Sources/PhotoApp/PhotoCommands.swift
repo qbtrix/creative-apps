@@ -2,7 +2,7 @@
 // menu (PhotoCommands+File, +Edit, +Select, +Image, +Layer, +View). File: New
 // Image, Open…, Open Recent, Close, Save, Save As…, Export…; Edit: Undo and Redo named for the
 // edit, Cut, Copy, Paste, Delete Selection, Fill Selection; Select: All, Deselect; Image: Image
-// Size…, Rotate, Straighten…; Layer: New, Delete, Duplicate, Merge Down,
+// Size…, Rotate, Straighten…; Layer: New, New Adjustment Layer, Delete, Duplicate, Merge Down,
 // Flatten Image, Rename…, Show/Hide, Bring Forward, Send Backward, Select
 // Layer Above and Below; View: Zoom In, Zoom
 // Out, Actual Size, Fit on Screen. The focused window publishes a PhotoMenu
@@ -47,6 +47,9 @@ struct PhotoMenu {
     var duplicateLayerHelp: String? = "Open an image first."
     var mergeDownHelp: String? = "Open an image first."
     var flattenHelp: String? = "Open an image first."
+    /// The kinds New Adjustment Layer offers, and why they can't run, or nil.
+    var adjustmentLayerKinds: [AdjustmentKind] = []
+    var addAdjustmentLayerHelp: String? = "Open an image first."
 
     /// Select > All acts on the canvas, so not while a sheet is up.
     var canSelectAll: Bool { hasImage && !isPresenting }
@@ -74,6 +77,8 @@ struct PhotoMenu {
         duplicateLayerHelp = model.duplicateLayerHelp
         mergeDownHelp = model.mergeDownHelp
         flattenHelp = model.flattenHelp
+        adjustmentLayerKinds = model.adjustmentLayerKinds
+        addAdjustmentLayerHelp = model.addAdjustmentLayerHelp
         hasImage = model.canvas != nil
         canUndo = model.canUndo
         canRedo = model.canRedo

@@ -2,7 +2,9 @@
 // title as a user moves through no image, a new image, more layers, hiding
 // and deleting, Bring Forward / Send Backward moving the selected layer one
 // place as one undo step, and Select Layer Above / Below moving the selection
-// with no undo step. Runs on Linux and macOS.
+// with no undo step, and New Adjustment Layer's items on the live services:
+// the four kinds, never Blur, disabled with "Open an image first." until an
+// image is open. Runs on Linux and macOS.
 import PhotoModel
 import Testing
 
@@ -115,5 +117,18 @@ import Testing
         empty.selectLayerAbove()
         empty.selectLayerBelow()
         #expect(empty == PhotoWorkspace())
+    }
+
+    @Test func newAdjustmentLayerOffersFourKindsDisabledUntilAnImageIsOpen() throws {
+        let empty = PhotoWorkspace()
+        #expect(empty.adjustmentLayerKinds == [.exposure, .levels, .curves, .hueSaturation])
+        #expect(!empty.adjustmentLayerKinds.contains(.blur))
+        #expect(empty.addAdjustmentLayerHelp == "Open an image first.")
+        var workspace = try whiteImage(4, 4)
+        #expect(workspace.adjustmentLayerKinds.map(\.title) == ["Exposure", "Levels", "Curves", "Hue/Saturation"])
+        #expect(workspace.addAdjustmentLayerHelp == nil)
+        workspace.addAdjustmentLayer(.curves)
+        #expect(workspace.selectedLayer?.name == "Curves 1")
+        #expect(workspace.undoActionName == "Undo New Adjustment Layer")
     }
 }

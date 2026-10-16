@@ -1,16 +1,29 @@
 // PhotoWindow+AdjustmentLayer.swift: the adjustment layer area of a Photo
 // window (photo-adjustment-layers, PV-6): its intents, its route and its hook
-// on the window. PV-0 stub: AdjustmentLayerIntent has no case yet, and
-// PhotoAdjustmentLayerArea is the identity until PV-6 needs it.
+// on the window. Layer > New Adjustment Layer sends `add`; the Adjust tab
+// sends `adjust` for each change to the selected adjustment layer and
+// `endAdjust` when its slider or curve gesture ends, so a gesture is one undo
+// step. PhotoAdjustmentLayerArea is the identity until the area needs it.
 import PhotoModel
 import SwiftUI
 
-/// What the adjustment layer area can be asked to do (PV-6 adds the cases).
-enum AdjustmentLayerIntent {}
+/// What the adjustment layer area can be asked to do.
+enum AdjustmentLayerIntent {
+    /// Adds an adjustment layer of this kind above the selected layer.
+    case add(AdjustmentKind)
+    /// Changes one value of the adjustment layer with this id.
+    case adjust(PhotoLayer.ID, AdjustmentEdit)
+    /// A slider's or the curve's gesture on an adjustment layer ended.
+    case endAdjust
+}
 
 extension PhotoWindow {
     func performAdjustmentLayer(_ intent: AdjustmentLayerIntent) {
-        switch intent {}
+        switch intent {
+        case .add(let kind): model.addAdjustmentLayer(kind)
+        case .adjust(let id, let edit): model.adjustLayer(id, edit)
+        case .endAdjust: model.endAdjustLayer()
+        }
     }
 }
 
