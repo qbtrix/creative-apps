@@ -64,9 +64,10 @@ extension HaloJourneyTests {
         let presses: [(XCUIElement.KeyModifierFlags, Double)] = [([], 1), ([], 2), (.shift, 12)]
         for (modifiers, total) in presses {
             halo.press(.rightArrow, modifiers)
-            XCTAssert(
-                waitUntil { self.rotation(halo) == start + total },
-                "Rotation reads \(String(describing: rotation(halo))), not \(start + total) after the arrows")
+            let stepped = waitUntil { self.rotation(halo) == start + total }
+            // Which element has the keyboard, when the arrow went elsewhere.
+            if !stepped { halo.attachTree(as: "inspector-arrow-keys-tree") }
+            XCTAssert(stepped, "Rotation reads \(String(describing: rotation(halo))), not \(start + total) after the arrows")
         }
         halo.shot("inspector-arrow-keys")
 
