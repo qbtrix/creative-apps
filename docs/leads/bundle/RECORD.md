@@ -2,9 +2,9 @@
 
 Issue: #1331 · Packet: docs/blueprints/suite/features/bundle.md
 Run: act-1a144bb7df0-dpn3 · Session: claude/bundle-feature-lead-3ldknj · Started: 2026-10-16T12:43Z
-Stage: 3 wave 3
+Stage: 3 polling
 Base: f52ec33e25bc15716063bca270ec3b760ad6d723
-Next: wait for the supervisor to merge BU-3 #1358 then BU-4 #1445; then open the final feature-done PR (bundle.wave.json built)
+Next: resume brief: BU-2 #1357, BU-5a #1360, BU-5b #1361, BU-5c #1392 merged. Wait for the supervisor to merge BU-3 #1358 (project.yml) then BU-4 #1445 (scripts/, merge after #1358). If either needs a rebase or fix, send it to a fixer on its branch (lead/bundle-BU-3, lead/bundle-BU-4) and move its Head: line. Once both are on dev: open the final lane PR from origin/dev setting docs/blueprints/suite/features/bundle.wave.json status built and feature_issue #1331, labels fast-lane and feature-done, body Refs #1331 and the Belt-Lead/Feature/Fast-Check/Head lines. Then the Anatomy loop on the dev CI run it triggers (2 rounds max), then Belt-Contact-Sheet on #1331 with the size-report table and one helper's otool -L lines.
 
 Loop: v2 (the packet has no Slices table), with the findings queue and the 2-round cap (started after #1302 merged, 2026-10-16T04:20Z).
 Depends on: none open (#809 BU-0, #810 BU-1a, #333 SH-7 all closed).
