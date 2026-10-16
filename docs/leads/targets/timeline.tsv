@@ -46,3 +46,4 @@ utc	stage	event	ref	note
 2026-10-16T02:50Z	4	heartbeat	38841439320	resumed by act-1a1429c87d2-exzi; 791 Linux red PhotoEditBudgetTests (not ours); 792 on 9230d80 queued
 2026-10-16T03:19Z	4	heartbeat	38841265840	791 macOS still running (Linux red, Photo budget, not ours); 792 pending
 2026-10-16T03:20Z	4	heartbeat	38841265840	Belt nudge received; still waiting on dev CI (791 macOS running, 792 pending)
+2026-10-16T03:40Z	4	ci-run	38841265840	791 on e99643c red: Photo budget + Halo/Photo/Library journeys; none ours
