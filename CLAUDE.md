@@ -302,7 +302,7 @@ Crew PRs merge into `dev` at once; `main` moves only when full CI passes on
   app=<flare|design|photo|library|halo|suite|suiteui>`. It still builds every
   target, app bundle and journey bundle, then runs only that app's Model
   tests, snapshot tests and journeys (titled `scoped: <app>`, job `macOS
-  (<app>)`, about 20 min). It skips the Linux job and never promotes `main`,
+  (<app>)`; about 10 min for Design, longer for apps with more journeys). It skips the Linux job and never promotes `main`,
   opens `dev-red` or lowers the audit baseline. The supervisor's
   verify-dispatch.sh starts one per app after that app's merges.
 - A journey that keeps failing on `dev` for a known reason can be quarantined,
