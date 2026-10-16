@@ -1,9 +1,9 @@
 // PhotoJourneyTests+AdjustmentLayers.swift: PJ-9 testAdjustmentLayer
 // (photo-adjustment-layers AL-8; docs/blueprints/photo/features/
-// photo-adjustment-layers.md, Journey steps 1). On a fresh tools.png, in the
-// Layers tab, Layer > New Adjustment Layer > Curves adds "Curves 1" above
-// Background (its `photo.layer.<id>.kind` reads "Adjustment layer"),
-// selected: the Adjust tab shows only Curves under the header "Curves 1",
+// photo-adjustment-layers.md, Journey steps 1). On a fresh tools.png, with
+// the layer list in the sidebar, Layer > New Adjustment Layer > Curves adds
+// "Curves 1" above Background (its `photo.layer.<id>.kind` reads "Adjustment
+// layer"), selected: the inspector shows only Curves under the header "Curves 1",
 // "Adjusts the layers below", and the step is "Undo New Adjustment Layer".
 // The curve's midpoint dragged up changes the canvas as one "Undo Curves"
 // step; the row's eye hides it and the canvas is the opened one again. A new
@@ -14,8 +14,10 @@
 // (the adjustment already adjusts nothing) and Command-Z undoes it. Background
 // selected reads "Image", "Adjusts the whole image". Last, the error: a brush
 // drag with the adjustment selected says "Select an image layer in the Layers
-// tab to paint on." and changes nothing. Layers are picked by key (Select
-// Layer Above/Below), as testTier1Layers does. Shots: `photo-adjlayer-*`.
+// tab to paint on." (PhotoStroke's wording) and changes nothing. The window
+// has no tabs: the layer list is always in the sidebar and the adjustment
+// sections always in the inspector. Layers are picked by key (Select Layer
+// Above/Below), as testTier1Layers does. Shots: `photo-adjlayer-*`.
 import CoreGraphics
 import ImageIO
 import XCTest
@@ -30,11 +32,10 @@ extension PhotoJourneyTests {
         try writeTestPhoto(to: file)
         let photo = Journey("Photo", self, arguments: photoArguments(open: file))
         XCTAssert(photo.app.windows["tools.png"].waitForExistence(timeout: 30), "tools.png didn't open")
-        let layersTab = photo.app.radioButtons["Layers"], adjustTab = photo.app.radioButtons["Adjust"]
-        XCTAssert(layersTab.waitForExistence(timeout: 5), "no Layers tab")
-        layersTab.click()
+        let layers = photo.element("suite.sidebar").descendants(matching: .any)["photo.layers"]
+        XCTAssert(layers.waitForExistence(timeout: 5), "the sidebar shows no layer list (photo.layers)")
         let background = photo.app.staticTexts["Background"], curves = photo.app.staticTexts["Curves 1"]
-        XCTAssert(background.waitForExistence(timeout: 5), "the Layers tab doesn't list Background")
+        XCTAssert(background.waitForExistence(timeout: 5), "the sidebar doesn't list Background")
         let opened = adjSteadyCanvas(photo)
         photo.shot("adjlayer-opened")
 
@@ -49,11 +50,10 @@ extension PhotoJourneyTests {
         XCTAssert(kind.waitForExistence(timeout: 5), "no photo.layer.<id>.kind reads Adjustment layer")
         XCTAssert(abs(kind.frame.midY - curves.frame.midY) < 12, "the Adjustment layer kind isn't on Curves 1's row")
         photo.shot("adjlayer-added")
-        adjustTab.click()
         adjExpectHeader("Curves 1", "Adjusts the layers below", photo)
-        XCTAssert(photo.element("photo.curves").waitForExistence(timeout: 5), "the Adjust tab shows no Curves")
+        XCTAssert(photo.element("photo.curves").waitForExistence(timeout: 5), "the inspector shows no Curves")
         for other in ["Exposure", "Black", "Hue"] {
-            XCTAssertFalse(photo.app.sliders[other].exists, "the Adjust tab of Curves 1 shows \(other)")
+            XCTAssertFalse(photo.app.sliders[other].exists, "the inspector of Curves 1 shows \(other)")
         }
         photo.shot("adjlayer-adjust-tab")
 
@@ -64,7 +64,6 @@ extension PhotoJourneyTests {
         photo.shot("adjlayer-curved")
 
         // 3. The eye hides it: the canvas is the opened one again.
-        layersTab.click()
         photo.click("Hide Curves 1", in: .window)
         adjExpect("Undo Hide Layer", photo, "Curves 1's eye didn't hide it")
         adjExpectCanvas(like: opened, photo, "hiding Curves 1 didn't give back the opened canvas")
@@ -121,9 +120,8 @@ extension PhotoJourneyTests {
         XCTAssert(photo.app.staticTexts["Normal 0%"].waitForNonExistence(timeout: 5), "Command-Z left Curves 1 at 0%")
         photo.shot("adjlayer-opacity-undone")
 
-        // 7. Background selected: the Adjust tab adjusts the whole image.
+        // 7. Background selected: the inspector adjusts the whole image.
         photo.app.typeKey("]", modifierFlags: [.command, .option])
-        adjustTab.click()
         adjExpectHeader("Image", "Adjusts the whole image", photo)
         photo.shot("adjlayer-image")
 
@@ -159,10 +157,10 @@ extension PhotoJourneyTests {
         item.click()
     }
 
-    /// The Adjust tab's header (`photo.adjust.header`) reads `title` over `info`.
+    /// The inspector's adjustment header (`photo.adjust.header`) reads `title` over `info`.
     @MainActor private func adjExpectHeader(_ title: String, _ info: String, _ photo: Journey) {
         let header = photo.element("photo.adjust.header")
-        XCTAssert(header.waitForExistence(timeout: 5), "the Adjust tab has no header (photo.adjust.header)")
+        XCTAssert(header.waitForExistence(timeout: 5), "the inspector has no adjustment header (photo.adjust.header)")
         var read = ""
         let reads = adjWaitUntil {
             let parts = [header] + header.descendants(matching: .any).allElementsBoundByIndex
