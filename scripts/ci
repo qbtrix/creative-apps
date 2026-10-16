@@ -2,7 +2,7 @@
 # scripts/ci: the one gate. Runs the no-crash lint, the app-state rule, the
 # design lint, the C4 ownership check, the duplicate-code check, the contact
 # sheet, audit-lower, test-died, jetsam-summary and bump-core tests, the journey
-# quarantine check, swift build and swift test, then prints PASS or FAIL and exits with the real status.
+# quarantine check, the mutation anchors, swift build and swift test, then prints PASS or FAIL and exits with the real status.
 # swift build takes its dependencies only from the committed Package.resolved
 # (--force-resolved-versions): a Package.swift whose creative-core revision
 # doesn't match it fails here instead of re-resolving (scripts/bump-core moves both).
@@ -63,6 +63,11 @@
 # UITests/, an owner issue (#<number>, open when gh can tell), a reason, and
 # an expiry no more than 7 days out that hasn't passed. scripts/ui-test skips
 # the live entries. Needs jq.
+#
+# The mutation anchors check runs Tests/mutate, then scripts/mutate --validate:
+# every `find` in Tests/mutations/*.json occurs exactly once in its file, so a
+# refactor can't leave a plan that plants nothing and still reads as covered.
+# It builds nothing; running the mutations (scripts/mutate) is a builder's step.
 #
 # The duplicate check runs jscpd (pinned) over Sources/ and fails when duplicated
 # lines exceed JSCPD_THRESHOLD percent. It starts at creative-core's threshold
@@ -289,6 +294,9 @@ bash Tests/quarantine/test_quarantine.sh || fail "journey quarantine: scripts/qu
 scripts/quarantine check || fail "journey quarantine: fix, renew or remove the entries above (the supervisor edits UITests/quarantine.json)"
 echo "== bump core (Tests/bump_core)"
 bash Tests/bump_core/test_bump_core.sh || fail "bump core: scripts/bump-core broke its tests"
+echo "== mutation anchors (Tests/mutations)"
+bash Tests/mutate/test_mutate.sh || fail "mutation anchors: scripts/mutate broke its fixture test"
+python3 scripts/mutate --validate || fail "mutation anchors: repoint each find above at the code as it is now (scripts/mutate)"
 
 flags=()
 if [[ "$(uname)" == Darwin ]]; then

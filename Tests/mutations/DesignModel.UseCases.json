@@ -1,0 +1,37 @@
+[
+  {
+    "label": "move loosened to plain throws",
+    "file": "Sources/DesignModel/Contracts/UseCases.swift",
+    "find": "func move(_ ids: [String], by delta: DesignPoint, on page: DesignPage) throws(DesignRefusal) -> DesignEdit",
+    "replace": "func move(_ ids: [String], by delta: DesignPoint, on page: DesignPage) throws -> DesignEdit",
+    "tests": "DesignDocumentTests"
+  },
+  {
+    "label": "decode loosened to plain throws",
+    "file": "Sources/DesignModel/Contracts/UseCases.swift",
+    "find": "func decode(_ data: Data) throws(DesignFileError) -> DesignDocument",
+    "replace": "func decode(_ data: Data) throws -> DesignDocument",
+    "tests": "DesignDocumentTests"
+  },
+  {
+    "label": "bounds(of:) removed from PathDrawing",
+    "file": "Sources/DesignModel/Contracts/UseCases.swift",
+    "find": "    func bounds(of path: DesignPath) -> DesignRect?\n",
+    "replace": "",
+    "tests": "DesignDocumentTests"
+  },
+  {
+    "label": "pasteboardType removed from LayerClipboard",
+    "file": "Sources/DesignModel/Contracts/UseCases.swift",
+    "find": "    var pasteboardType: String { get }\n",
+    "replace": "",
+    "tests": "DesignDocumentTests"
+  },
+  {
+    "label": "groupHelp narrowed to a non-optional String",
+    "file": "Sources/DesignModel/Contracts/UseCases.swift",
+    "find": "func groupHelp(_ ids: [String], on page: DesignPage) -> String?",
+    "replace": "func groupHelp(_ ids: [String], on page: DesignPage) -> String",
+    "tests": "DesignDocumentTests"
+  }
+]
