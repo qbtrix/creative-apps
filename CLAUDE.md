@@ -227,7 +227,11 @@ A session started from a `feature-lead` issue is a lead: it follows
 its workflow templates in `docs/factory/workflows/`. Every PR a lead or its
 agents open carries `Belt-Lead: <run id>` and `Feature: <feature>` lines
 above the `Fast-Check:` / `Head:` lines. `Belt-Lead:` PRs don't wait for
-`belt/review`; the lead's critic panel is their review.
+`belt/review`; the lead's critic panel is their review. A PR with a
+`Feature:` line closes no issue: before the squash the fast lane turns each
+closing keyword before an issue reference in its body (close, fixes,
+`Resolved:` and the rest, any case) into `Refs`, and closes nothing for it.
+A feature's issue closes when the feature is done, not with one slice.
 
 ## Fast lane
 

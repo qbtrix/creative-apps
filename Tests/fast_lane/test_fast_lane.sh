@@ -396,6 +396,27 @@ else
   echo "FAIL strip_attribution: got '$got'"; fail=1
 fi
 
+# lead_refs: a lead's PR (a Feature: line) gets Refs for every closing keyword
+# before an issue reference; any other PR keeps its keywords.
+refs() {  # refs <name> <want> <body lines...>
+  local name="$1" want="$2" got; shift 2
+  got=$(printf '%s\n' "$@" | lead_refs | paste -sd'|' -)
+  if [[ "$got" == "$want" ]]; then echo "ok   refs: $name"; else echo "FAIL refs: $name: want '$want', got '$got'"; fail=1; fi
+}
+refs "every keyword form, any case, colon or not" \
+  "Refs #12|Refs #13, Refs #14|Refs #15|Refs qbtrix/creative-core#16|Refs https://github.com/qbtrix/creative-apps/issues/17|Refs #18. Refs #19, Refs #20|Feature: halo-keyframes" \
+  "Closes #12" "fixes: #13, Resolved #14" "CLOSE:#15" "closed qbtrix/creative-core#16" \
+  "Fix https://github.com/qbtrix/creative-apps/issues/17" "FIXED #18. resolve  #19, Resolves: #20" "Feature: halo-keyframes"
+refs "words that only contain a keyword, or no reference, stay" \
+  "prefixes #1, suffixed #2, fixed-width #3; closes the gap; see #4|Refs #5|Feature: x" \
+  "prefixes #1, suffixed #2, fixed-width #3; closes the gap; see #4" "Refs #5" "Feature: x"
+refs "a CRLF body and an indented Feature line" "$(printf 'Refs #7\r|  Feature: x\r')" "$(printf 'Closes #7\r')" "$(printf '  Feature: x\r')"
+refs "a PR without a Feature line keeps its keywords" "Closes #1|Fixes #2|Belt-Lead: r1|Feature flags too" \
+  "Closes #1" "Fixes #2" "Belt-Lead: r1" "Feature flags too"
+lead_body=$'Adds keyframes.\n\nCloses #12, fixes #13\n\nBelt-Lead: r1\nFeature: halo-keyframes\nFast-Check: pass\nHead: h40'
+if [[ "$(lead_refs <<<"$lead_body" | lead_refs)" == "$(lead_refs <<<"$lead_body")" ]]; then echo "ok   refs: idempotent"
+else echo "FAIL refs: a second pass changes the body"; fail=1; fi
+
 # With the gate off, a Belt PR with no review is eligible like any other.
 REQUIRE_BELT_REVIEW=0
 check "gate off: belt PR without review is eligible" "eligible|150|2|5 checks green" '.body = "x\nBelt-Run: act-1"' "$BASE_FILES" .
@@ -536,7 +557,7 @@ gh() {
       done ;;
     "pr view "*"--json title "*) echo "title $2" ;;
     "pr view "*"--json body "*) jq -r .body "$sw/$3.json" ;;
-    "pr view "*"--json closingIssuesReferences "*) ;;
+    "pr view "*"--json closingIssuesReferences "*) cat "$sw/$3.closes" 2>/dev/null || true ;;
     "pr view "*) cat "$sw/$3.json" ;;
     "api "*"/check-runs"*|"api "*"/status "*) echo '[]' ;;
     "api "*"/pulls/"*"/files "*)
@@ -579,7 +600,8 @@ gh() {
     "api "*"/contents/"*) u="${!#}"; u="${u#*/contents/}"; cat "$sw/refs/${u##*\?ref=}/${u%%\?*}" ;;
     "api "*"/issues/"*"/comments "*) n="${2#*/issues/}"; cat "$sw/${n%%/*}.comments" 2>/dev/null || true ;;
     "pr comment "*) echo "$a" >>"$sw/calls"; printf '%s\n' "${!#}" >>"$sw/$3.comments" ;;
-    "pr merge "*) echo "$a" >>"$sw/calls"; touch "$sw/$3.merged" ;;
+    "pr merge "*) echo "$a" >>"$sw/calls"; touch "$sw/$3.merged"; printf '%s\n' "${!#}" >"$sw/$3.squash" ;;
+    "pr edit "*"--body "*) echo "pr edit $3 --body" >>"$sw/calls"; printf '%s\n' "${!#}" >"$sw/$3.edited" ;;
     "pr edit "*"--base "*) echo "$a" >>"$sw/calls"; jq '.baseRefName = "dev"' "$sw/$3.json" >"$sw/x" && mv "$sw/x" "$sw/$3.json" ;;
     "pr edit "*"--remove-label fast-lane"*) echo "$a" >>"$sw/calls"
       jq '.labels |= map(select(.name != "fast-lane"))' "$sw/$3.json" >"$sw/x" && mv "$sw/x" "$sw/$3.json" ;;
@@ -792,4 +814,23 @@ expect "build: a Model-only PR gets one build, not a merge" \
   "$(grep -c -- '-f build_only=true --ref b38$' "$sw/calls"),$(grep -c '^pr merge 38' "$sw/calls")" "1,0"
 expect "build: a docs-only PR merges with no build" \
   "$(grep -c -- '--ref b39' "$sw/calls"),$(grep -c '^pr merge 39' "$sw/calls")" "0,1"
+
+# A lead's PR closes no issue. #40 has a Feature: line and a closing keyword
+# for #12 (GitHub still lists #12 as closing): the lane edits its body to
+# Refs before the squash, squashes with that body, and closes nothing. #41 is
+# no lead's: it keeps its keyword and the lane closes #13.
+rm -rf "$sw"; mkdir -p "$sw"; : >"$sw/calls"
+for n in 40 41; do pr_at "$n" "h$n" '[{"filename": "docs/blueprints/halo/features/keyframes.md", "status": "modified"}]'; done
+jq --arg b "$lead_body" '.body = $b' "$sw/40.json" >"$sw/x" && mv "$sw/x" "$sw/40.json"
+echo 12 >"$sw/40.closes"; echo 13 >"$sw/41.closes"
+jq '.body = "Closes #13\n\nFast-Check: pass\nHead: h41"' "$sw/41.json" >"$sw/x" && mv "$sw/x" "$sw/41.json"
+lane_sweep
+expect "refs: both merge" "$(grep -oE '^pr merge [0-9]+' "$sw/calls" | paste -sd, -)" "pr merge 40,pr merge 41"
+expect "refs: the lead's body is edited to Refs before the squash" \
+  "$(grep -nE '^pr (edit 40 --body|merge 40)' "$sw/calls" | cut -d' ' -f2 | paste -sd, -),$(grep -c '^Refs #12, Refs #13$' "$sw/40.edited")" "edit,merge,1"
+expect "refs: the squash message carries Refs, no keyword" \
+  "$(grep -c '^Refs #12, Refs #13$' "$sw/40.squash"),$(grep -ciE '(close|fix|resolve)' "$sw/40.squash")" "1,0"
+expect "refs: the lane closes no issue for the lead's PR" "$(grep -c '^issue close 12 ' "$sw/calls")" 0
+expect "refs: another PR keeps its keyword and gets its issue closed" \
+  "$(grep -c '^Closes #13$' "$sw/41.squash"),$(grep -c '^issue close 13 ' "$sw/calls")" "1,1"
 exit "$fail"
