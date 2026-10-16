@@ -10,7 +10,8 @@
 // below the inspector's fold at 640 pt, so the inspector is scrolled to it
 // before the row drag. Undo stays disabled until history-files lands, so
 // each step reads the Edit menu's first item title and never presses ⌘Z.
-// A disabled menu item's reason is its help tag, read by hovering it. One
+// A disabled menu item's reason is its help, read from the window's hidden
+// `halo.menu.reasons` readout (XCUITest reads a help tag as no text). One
 // shot per step, `halo-layers-<step>`, plus the rename prompt
 // (`halo-layers-4-prompt`), each taken once every menu it opened has gone.
 import XCTest
@@ -170,17 +171,22 @@ final class HaloLayersJourneyTests: XCTestCase {
         expectClosed(menu, halo)
     }
 
-    /// `menu`'s item `item` is disabled and its help tag reads `help`.
+    /// `menu`'s item `item` is disabled and says `help`. XCUITest reads a
+    /// menu item's help tag as no text (run 38808431710, #1253: a HelpTag with no
+    /// label, title or value), so the reason is read from the window's
+    /// hidden `halo.menu.reasons` readout, "<item>: <help>", which lists the
+    /// Layer menu's items as the menu shows them.
     @MainActor private func expectDisabled(_ item: String, in menu: String, help: String, _ halo: Journey) {
         let entry = openMenu(menu, halo).menuItems[item]
         XCTAssert(entry.waitForExistence(timeout: 3), "the \(menu) menu has no \(item)")
         XCTAssertFalse(entry.isEnabled, "\(menu) > \(item) is enabled")
-        entry.hover()
-        let tag = halo.app.helpTags.matching(
-            NSPredicate(format: "label CONTAINS %@ OR title CONTAINS %@ OR value CONTAINS %@", help, help, help))
-        XCTAssert(tag.firstMatch.waitForExistence(timeout: 5), "\(menu) > \(item) doesn't say \(help)")
         halo.press(.escape)
         expectClosed(menu, halo)
+        let reasons = halo.element("halo.menu.reasons")
+        let line = "\(item): \(help)"
+        XCTAssert(
+            waitFor { reasons.label.split(separator: "\n").contains { $0 == line } },
+            "\(menu) > \(item) doesn't say \(help): halo.menu.reasons reads \(reasons.label)")
     }
 
     /// The Edit menu's first item reads `title`; the menu is closed again.
