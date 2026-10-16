@@ -1,7 +1,7 @@
 // PhotoJourneyTests+Crop.swift: PJ-8, a typed crop size and an aspect lock
 // (photo-crop CP-5, #544; docs/blueprints/photo/features/photo-crop.md,
 // Journey steps; blueprint 4.2). On beach.png (800 x 600), C picks Crop: the
-// Adjust tab shows X, Y, W, H (`photo.crop.x`, `.y`, `.width`, `.height`, each
+// inspector shows X, Y, W, H (`photo.crop.x`, `.y`, `.width`, `.height`, each
 // one combined element whose label and value hold its letter, name and
 // "<n> pixels"), the caption (`photo.crop.caption`) and the six aspect chips,
 // found by title until they carry identifiers (#1148). 1:1 gives a centred
