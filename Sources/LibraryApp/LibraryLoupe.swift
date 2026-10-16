@@ -1,6 +1,6 @@
 // LibraryLoupe.swift: one photo fitted in SuiteUI's CanvasSurface at the
 // photo's size, with its name, "12 of 60" position and cull summary ("3 stars,
-// Picked, Red") in a glass readout.
+// Picked, Red label") in a glass readout.
 // Left and Right step through the sort; Escape, G or the glass Grid button at
 // the top leading corner (`library.loupe.grid`, so nobody needs the keys) go
 // back to the grid. The button and the readout sit outside the focusable

@@ -44,7 +44,7 @@ private extension PhotoItem {
     @Test func anUnflaggedCellSaysItsStarsAndLabel() {
         let photo = PhotoItem(name: "IMG_0042", captureDate: epoch, color: Self.color, rating: 3, label: .red)
         let cell = ThumbnailItem<String>(photo: photo)
-        #expect(cell.help == "IMG_0042: 3 stars, Red")
+        #expect(cell.help == "IMG_0042: 3 stars, Red label")
         #expect(!cell.badges.dimmed && !cell.badges.isFlagged)
     }
 
