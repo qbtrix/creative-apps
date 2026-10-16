@@ -8,18 +8,64 @@
 import XCTest
 
 final class FlareJourneyTests: XCTestCase {
+    /// The toolbar's eight actions: intent identifier, title, and the reason
+    /// its area gives while no document is open (nil: enabled).
+    static let toolbar: [(id: String, title: String, reason: String?)] = [
+        ("flare.file.new", "New", nil), ("flare.file.open", "Open", "Not built yet (F17a)."),
+        ("flare.file.save", "Save", "Not built yet (F17a)."), ("flare.edit.undo", "Undo", "Nothing to undo."),
+        ("flare.edit.redo", "Redo", "Nothing to redo."),
+        ("flare.timeline.toggleAutoKey", "Auto-key", "Open an animation to key it."),
+        ("flare.assist.showPopover", "Animate…", "Not built yet (F16a)."),
+        ("flare.export.showSheet", "Export…", "Not built yet (F15a)."),
+    ]
+
     /// J0: the window is SuiteWindow with the empty state's New Animation and
-    /// the toolbar's eight actions, each found by its title.
+    /// the toolbar's eight actions, each identified by its FlareIntent and,
+    /// while disabled, saying its area's reason in `suite.controls`. Every
+    /// control goes through the router: selecting Ball in the sidebar selects
+    /// it, and Auto-key reads selected after a click.
     @MainActor func testLaunchShowsWindowShell() {
-        let flare = Journey("Flare", self)
+        let flare = Journey("Flare", self, arguments: ["-SuitePerfProbe"])
         flare.expectWindowShell()
         XCTAssert(
             flare.app.splitGroups.buttons["New Animation"].waitForExistence(timeout: 10),
             "the empty state has no New Animation")
         let toolbar = flare.app.toolbars.firstMatch
-        XCTAssert(toolbar.buttons["Open"].exists, "the toolbar has no Open")
-        for title in ["New", "Open", "Save", "Undo", "Redo", "Auto-key", "Animate…", "Export…"] {
-            XCTAssert(toolbar.buttons[title].exists, "the toolbar has no \(title)")
+        for action in Self.toolbar {
+            let button = toolbar.buttons[action.id]
+            XCTAssert(button.exists, "the toolbar has no \(action.title) identified \(action.id)")
+            XCTAssertEqual(button.label, action.title, "\(action.id) isn't titled \(action.title)")
+            XCTAssertEqual(button.isEnabled, action.reason == nil, "\(action.id) is enabled wrongly")
+        }
+        var entries: [String: ControlEntry] = [:]
+        for _ in 0..<10 where Self.toolbar.contains(where: { entries[$0.id] == nil }) {
+            entries = Dictionary((flare.controls()?.controls ?? []).map { ($0.id, $0) }) { first, _ in first }
+            Thread.sleep(forTimeInterval: 0.2)
+        }
+        for action in Self.toolbar {
+            XCTAssertEqual(entries[action.id]?.reason, action.reason, "\(action.id)'s tooltip isn't its area's help")
+        }
+
+        // The sidebar goes through `.layers` intents: Scene 1 drops the layer
+        // selection (the easing editor hides), and Ball brings it back.
+        flare.app.menuBars.menuBarItems["File"].click()
+        flare.app.menuBars.menuItems["New Sample Animation"].click()
+        let hint = flare.app.staticTexts["Pick a keyframe above."]
+        XCTAssert(hint.waitForExistence(timeout: 10), "the sample didn't open with Ball selected")
+        let sidebar = flare.element("suite.sidebar")
+        sidebar.staticTexts["Scene 1"].click()
+        XCTAssert(hint.waitForNonExistence(timeout: 5), "selecting Scene 1 kept Ball selected")
+        sidebar.staticTexts["Ball"].click()
+        XCTAssert(hint.waitForExistence(timeout: 5), "selecting Ball in the sidebar didn't select it")
+        flare.shot("sidebar-ball")
+
+        let autoKey = toolbar.buttons["flare.timeline.toggleAutoKey"]
+        XCTAssert(autoKey.isEnabled, "Auto-key is disabled with the sample open")
+        autoKey.click()
+        flare.shot("auto-key")
+        // SuiteWindow's toolbar draws no selected state yet (needs-ui #1621).
+        XCTExpectFailure("SuiteWindow drops ToolbarAction.isSelected (#1621)", options: .nonStrict()) {
+            XCTAssert(autoKey.isSelected, "Auto-key doesn't read selected after a click")
         }
     }
 
