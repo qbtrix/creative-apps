@@ -2,17 +2,17 @@
 
 Issue: #1332 · Packet: docs/blueprints/suite/features/suite-contracts.md
 Run: act-1a1448a5fd9-0he1 · Session: claude/suite-contracts-lead-rv72k4 · Started: 2026-10-16T11:49Z
-Stage: 3 wave 1
-Base: ebc68bff2c46f99ac266d69fda013cc2625008da
-Next: wait for the SC-1a PR to merge through the lane, then start wave 2 (SC-1b, SC-1c, SC-4a) on the new origin/dev
+Stage: 3 wave 2
+Base: 8ecd8b9b7f6bed18afe784640d467d369194c0d6
+Next: wave 2 builders running (workflow wf_0b87bd0c-b52); wait for their PRs to merge, then start wave 3 (SC-1d) on the new origin/dev
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
 |---|---|---|---|---|---|---|
-| SC-1a | 1 | identity, app, types, document refs (`fileKey`), errors, links; `declaredOnly` (#820) | Sources/SuiteModel/Values/{SuiteIdentity,SuiteApp,SuiteTypes,SuiteDocumentRef,SuiteError,Links}.swift, Tests/SuiteModelTests/ValuesIdentityTests.swift | ValuesIdentityTests | | building |
-| SC-1b | 2 | recents values, `RecentsList`, presets, switching values, `HandOff` (`newID`), `HandOffCodec` (id check) (#821) | Values/{Recents,NewDocumentPreset,Switching,HandOff}.swift, Recents/RecentsList.swift, HandOff/HandOffCodec.swift, ValuesRecentsTests, ValuesHandOffTests | ValuesRecentsTests, ValuesHandOffTests | | planned |
-| SC-1c | 2 | round-trip, colour, asset, clipboard values (#822) | Values/{RoundTrip,SuiteColor,Assets,Clip}.swift, ValuesExchangeTests | ValuesExchangeTests | | planned |
-| SC-4a | 2 | `SuiteLocations`, `FileStore` (#829) | Store/{SuiteLocations,FileStore}.swift, StoreTests | StoreTests | | planned |
+| SC-1a | 1 | identity, app, types, document refs (`fileKey`), errors, links; `declaredOnly` (#820) | Sources/SuiteModel/Values/{SuiteIdentity,SuiteApp,SuiteTypes,SuiteDocumentRef,SuiteError,Links}.swift, Tests/SuiteModelTests/ValuesIdentityTests.swift | ValuesIdentityTests | #1340 | merged |
+| SC-1b | 2 | recents values, `RecentsList`, presets, switching values, `HandOff` (`newID`), `HandOffCodec` (id check) (#821) | Values/{Recents,NewDocumentPreset,Switching,HandOff}.swift, Recents/RecentsList.swift, HandOff/HandOffCodec.swift, ValuesRecentsTests, ValuesHandOffTests | ValuesRecentsTests, ValuesHandOffTests | | building |
+| SC-1c | 2 | round-trip, colour, asset, clipboard values (#822) | Values/{RoundTrip,SuiteColor,Assets,Clip}.swift, ValuesExchangeTests | ValuesExchangeTests | | building |
+| SC-4a | 2 | `SuiteLocations`, `FileStore` (#829) | Store/{SuiteLocations,FileStore}.swift, StoreTests | StoreTests | | building |
 | SC-1d | 3 | preferences, onboarding, update values, `UpdateFeed`, `AnimationSummary`, home values, `HomeLayout` (#823) | Values/{Preferences,Onboarding,Update,AnimationSummary,HomeValues}.swift, Update/UpdateFeed.swift, Home/HomeLayout.swift, ValuesSettingsTests, ValuesHomeLayoutTests | ValuesSettingsTests, ValuesHomeLayoutTests | | planned |
 | SC-2a | 4 | nine tier-1 contracts (#824) | Contracts/{AppSwitching,RecentWork,DocumentCreating,DocumentRouting,HandOffSending,HandOffReceiving,ThumbnailPublishing,HomeBuilding,SuiteDocumentHost}.swift, ContractShapeTests | ContractShapeTests | | planned |
 | SC-2b | 4 | other nine contracts (#825) | Contracts/{RoundTripEditing,PasteboardCoding,AssetLibrary,AssetLinking,AnimationSourceReading,PreferencesStoring,SettingsRouting,OnboardingFlowing,UpdateChecking}.swift, ContractShapeMoreTests | ContractShapeMoreTests | | planned |
@@ -47,6 +47,7 @@ Waves (packet's Build waves, checked against dev at ebc68bf):
 - Builder branches are `lead/suite-contracts-<id>` (git can't hold `lead/suite-contracts/<id>` beside the lead branch).
 - The container had no Swift: installed swift-6.3.3-RELEASE (CI's image version) under /opt/swift, linked into /usr/local/bin; `scripts/ci --changed` passes on dev ebc68bf.
 - `gh` has no valid token in this container: builders open PRs and set labels through the GitHub MCP tools.
+- Wave 2 runs through a copy of build-wave.js with branch `lead/suite-contracts-<id>` and MCP PR opening (the template uses `gh`).
 - Waves 1 and 3, 5, 8, 9 have one task: one worktree subagent each instead of the build-wave workflow.
 - Corrections in the packet are listed 1-6, 8-10, 7 (no correction is missing); builders apply the ones naming their task.
 

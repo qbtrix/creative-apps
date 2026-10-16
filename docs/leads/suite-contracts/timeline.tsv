@@ -3,3 +3,6 @@ utc	stage	event	ref	note
 2026-10-16T11:52Z	2	stage-end	#1332	9 waves, 15 tasks, v2 loop
 2026-10-16T11:52Z	3	stage-start	wave 1	SC-1a
 2026-10-16T12:05Z	3	heartbeat	SC-1a	builder started in worktree
+2026-10-16T12:03Z	3	pr-opened	#1340	SC-1a values
+2026-10-16T12:11Z	3	pr-merged	#1340	SC-1a
+2026-10-16T12:25Z	3	stage-start	wave 2	SC-1b SC-1c SC-4a on 8ecd8b9
