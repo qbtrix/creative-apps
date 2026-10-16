@@ -9,7 +9,7 @@
 // With one layer left, Merge Down and Flatten Image are disabled with their
 // reasons. Last, it relaunches on `-PhotoFixture layered` (Paint, Curves 1,
 // Background, top first) with Paint selected: Merge Down needs a pixel layer
-// below. Undo steps are read from the top bar's Undo button, as
+// below. Undo steps are read from the window toolbar's Undo button, as
 // PhotoJourneyTests does; a disabled menu item's reason is its help tag, shown
 // by hovering it, as HaloLayersJourneyTests does. Photo's help tag reaches
 // accessibility with no text (dev run 38835566584: a HelpTag beside Merge
@@ -147,7 +147,7 @@ final class PhotoLayerOpsJourneyTests: XCTestCase {
         add(attachment)
     }
 
-    /// Waits for the button titled `title`, such as the top bar's "Undo Merge Down".
+    /// Waits for the button titled `title`, such as the window toolbar's "Undo Merge Down".
     @MainActor private func expect(_ title: String, _ photo: Journey, _ message: String) {
         XCTAssert(photo.app.buttons[title].waitForExistence(timeout: 5), "\(message) (no \(title) button)")
     }

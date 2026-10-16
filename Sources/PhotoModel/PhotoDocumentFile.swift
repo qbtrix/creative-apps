@@ -2,7 +2,7 @@
 // open file is (`fileKind(forName:)`: ".ora" is a document, a name
 // ImageFormat maps is a flat image Photo writes, anything else read-only),
 // what File > Save does with it (`saveAction`), whether the image needs a
-// document to keep what it has (`needsDocument`), the top bar's save status,
+// document to keep what it has (`needsDocument`), the window's save status,
 // and the round trip: `snapshot()` turns the image into 8-bit straight-alpha
 // sRGB like an opened file, `documentPackage` encodes it through a
 // DocumentArchiving, `openDocument` decodes one and starts the image with
@@ -19,7 +19,7 @@ import Foundation
 #endif
 import CoreRaster
 
-/// The save status the top bar shows.
+/// The save status the window shows (its subtitle and status slot).
 public enum PhotoSaveStatus: Hashable, Sendable, CaseIterable {
     case saved, edited, editedAutosaved, notSaved
 
@@ -58,7 +58,7 @@ extension PhotoWorkspace {
         }
     }
 
-    /// The top bar's status: nil with no image; "Saved" when clean; once
+    /// The window's save status: nil with no image; "Saved" when clean; once
     /// edited, "Not saved" after a failed save, "Edited, autosaved" after an
     /// autosave of the latest edit, else "Edited". It reads `isDirty`, so it
     /// changes in the same call that edits or saves.

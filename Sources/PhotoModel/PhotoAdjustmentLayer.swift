@@ -3,14 +3,14 @@
 // Curves or Hue/Saturation, as `services.adjustmentLayers` offers them) and
 // changes the layers under it. Its settings have only that kind enabled, so the
 // kind is read from them; the row's eye turns the layer off. Names count per
-// kind ("Curves 1", "Curves 2"). The Adjust tab edits `adjustTarget`: the
+// kind ("Curves 1", "Curves 2"). The inspector edits `adjustTarget`: the
 // selected adjustment layer's own section under its name, or the whole-image
 // sections under "Image". An edit to a layer is clamped and refused exactly as
 // the whole-image one (AdjustmentSettings), damages the whole canvas at once,
 // and one gesture is one undo step (`endAdjustLayer`). Linux-safe.
 import CoreRaster
 
-/// Where the Adjust tab's edits go (PV-6).
+/// Where the inspector's adjustment edits go (PV-6).
 public enum AdjustTarget: Hashable, Sendable {
     case image
     case layer(PhotoLayer.ID, AdjustmentSettings)
@@ -69,7 +69,7 @@ extension PhotoWorkspace {
     /// per gesture, as `endAdjust` does for the whole image.
     public mutating func endAdjustLayer() { endAdjust() }
 
-    /// The sections the Adjust tab shows for the target, in order: the layer's
+    /// The sections the inspector shows for the target, in order: the layer's
     /// own, or all five for the whole image.
     public var adjustSections: [AdjustmentKind] {
         switch adjustTarget {
