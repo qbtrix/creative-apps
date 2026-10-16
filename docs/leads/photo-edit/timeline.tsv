@@ -1,0 +1,91 @@
+utc	stage	event	ref	note
+2026-10-15T13:38Z	0	stage-start	#1075	base 28f1df2, #812 closed
+2026-10-15T13:41Z	0	stage-end	#1075	lead/photo-edit created
+2026-10-15T13:45Z	1	stage-end	photo-edit.md	packet read
+2026-10-15T13:46Z	2	stage-end	-	5 waves as packet
+2026-10-15T13:52Z	3	stage-start	wave 1	E-1, E-6 builders started
+2026-10-15T13:53Z	3	pr-merged	#1166	E-6 PhotoPasteboard
+2026-10-15T13:54Z	3	pr-merged	#1167	E-1 LiveClipboard
+2026-10-15T14:06Z	3	stage-start	wave 2	E-2, E-3 on ec92393
+2026-10-15T13:53Z	3	pr-merged	#1166	E-6 PhotoPasteboard
+2026-10-15T13:54Z	3	pr-merged	#1167	E-1 LiveClipboard
+2026-10-15T14:06Z	3	stage-start	wave 2	E-2, E-3 on ec92393
+2026-10-15T14:15Z	3	pr-merged	#1173	E-2 LiveMerging
+2026-10-15T14:26Z	3	pr-merged	#1174	E-3 workspace clipboard
+2026-10-15T14:58Z	3	stage-start	wave 3	E-4, E-7 on 9dea98e
+2026-10-15T15:00Z	3	ci-run	38748468768	dev red on LibraryApp compile (not ours); #1175 fix on dev
+2026-10-15T15:07Z	3	pr-merged	#1181	E-4 layer ops
+2026-10-15T15:10Z	3	pr-merged	#1182	E-7 Edit menu
+2026-10-15T15:12Z	3	ci-run	38757068610	red on Halo golden only; Photo suites green
+2026-10-15T15:22Z	3	stage-start	wave 4	E-5, E-8 on 575c0fb; E-9 waits #1073
+2026-10-15T15:35Z	3	pr-opened	#1188	E-8 Layer menu
+2026-10-15T15:36Z	3	heartbeat	#1191	gap filed: Merging… note
+2026-10-15T15:48Z	3	heartbeat	-	E-5 measuring; #1073 open
+2026-10-15T15:50Z	3	ci-run	38761014883	86fe18c Photo green, Halo golden red
+2026-10-15T16:30Z	3	pr-opened	#1193	E-5 budgets; held: release gates missed 13-200x
+2026-10-15T16:32Z	4	round-findings	perf	fixer started on PhotoLayerComposite/LiveMerging/LiveClipboard
+2026-10-15T16:11Z	4	heartbeat	-	perf fixer running; #1193 held; #1073 open
+2026-10-15T16:21Z	4	heartbeat	-	perf fixer running
+2026-10-15T15:59Z	3	pr-merged	#1193	E-5 budgets (lane beat the hold)
+2026-10-15T16:45Z	4	pr-opened	#1198	perf fix: merge 171 ms, flatten 247 ms, copy+paste 401 ms; core#309
+2026-10-15T16:42Z	4	heartbeat	-	waiting #1198, run d95c756, #1073
+2026-10-15T16:39Z	4	pr-merged	#1198	perf fix
+2026-10-15T17:05Z	3	stage-start	wave 5	E-9, E-10 on bd1b046 (#1073 closed)
+2026-10-15T17:05Z	4	round-findings	38772608478	flaky PhotoCompositeCostTests; fixer started
+2026-10-15T17:20Z	3	pr-opened	#1213	E-10 PJ-7 journey
+2026-10-15T17:24Z	3	pr-opened	#1218	E-9 PJ-5, PJ-6 journeys
+2026-10-15T17:40Z	4	pr-opened	#1220	cost test robust fix
+2026-10-15T17:15Z	3	pr-merged	#1213	E-10
+2026-10-15T17:18Z	3	pr-merged	#1218	E-9
+2026-10-15T17:41Z	3	stage-end	waves	all tasks merged
+2026-10-15T17:41Z	4	stage-start	round 1	waiting CI with journeys
+2026-10-15T17:23Z	4	heartbeat	38776323445	waiting round-1 CI
+2026-10-15T17:43Z	4	ci-run	38776323445	red: LiveRecovery build (photo-documents, #1224); journeys did not run
+2026-10-15T18:05Z	4	heartbeat	f9846c9	LiveRecovery build fixed by #1226; waiting next CI
+2026-10-15T18:27Z	4	ci-run	38782884668	red on our cost test bound (4.6x>4x); fixer started; noted on #763
+2026-10-15T18:38Z	4	pr-opened	#1229	cost bound 8x
+2026-10-15T18:47Z	4	heartbeat	#1229	waiting merge and CI
+2026-10-15T19:08Z	4	heartbeat	#1229	no CI run since merge yet
+2026-10-15T19:15Z	4	stage-start	round 1	critic panel on d95c756 screens (no newer run: dev quiet, #1229 not yet in a CI run)
+2026-10-15T19:40Z	4	round-findings	round 1	12 confirmed (3 major); 3 fix batches
+2026-10-15T20:42Z	4	heartbeat	-	resumed lead; round-1 findings detail lost with the stalled session, recovering
+2026-10-15T20:55Z	4	ci-run	38799320916	red: restore offer blocks Photo journeys (photo-documents, fixed by #1241); waiting next run
+2026-10-15T20:55Z	4	stage-start	round 1	panel rerun wf_5429bb7a-466 on 38799320916 snapshots + code (journey screens next run)
+2026-10-15T21:01Z	4	round-findings	round 1	13 confirmed (4 major); fix batches r1-b1..b5 started (wf_20971fd5-ef8)
+2026-10-15T21:13Z	4	heartbeat	38807718380	waiting dev CI with #1241
+2026-10-15T21:31Z	4	heartbeat	38807718380	waiting dev CI with #1241
+2026-10-15T21:49Z	4	heartbeat	38807718380	waiting dev CI with #1241
+2026-10-16T01:58Z	4	heartbeat	38835566584	resumed after stall; round 2 waits on run 81f3288; gap #1269 filed
+2026-10-16T02:18Z	4	heartbeat	38835566584	run 81f3288 past unit tests (app-builds up), journeys running
+2026-10-16T02:45Z	4	ci-run	38835566584	red: 4 ours (Linux budget ordering; PJ-5, PJ-6, PJ-7); 3 fixers started
+2026-10-16T02:50Z	4	heartbeat	act-1a1429c8810-2gls	relaunched lead; adopting round-2 fixers of the first session
+2026-10-16T03:00Z	4	pr-opened	#1279	r2-budget: drop copy-vs-merge ordering check (Linux gate)
+2026-10-16T03:10Z	4	pr-opened	#1281	r2-edit: PJ-5 help tag (XCUITest cannot read menu help text), PJ-6 image rect inside viewport
+2026-10-16T03:20Z	4	pr-opened	#1284	r2-layerops: PJ-7 reads tooltip by OCR; gap #1287 filed
+2026-10-16T03:03Z	4	heartbeat	-	round-2 fixes merged; waiting CI
+2026-10-16T03:20Z	4	heartbeat	-	waiting CI with round-2 fixes
+2026-10-16T03:42Z	4	heartbeat	-	waiting CI with round-2 fixes
+2026-10-16T04:04Z	4	heartbeat	-	waiting CI with round-2 fixes
+2026-10-16T04:27Z	4	heartbeat	38849414997	green but scoped to design; waiting a Photo run with round-2 fixes
+2026-10-16T04:48Z	4	heartbeat	-	waiting a Photo CI run with round-2 fixes
+2026-10-16T05:15Z	5	pr-opened	#1317	feature-done: photo-edit.wave.json built; its CI is round 3
+2026-10-16T05:42Z	5	pr-merged	#1317	feature-done merged 05:18Z
+2026-10-16T05:42Z	5	ci-run	38855142429	red, not ours: PhotoBrushDisplayTests (#1291); journeys not run; noted on #763
+2026-10-16T06:03Z	5	heartbeat	-	brush display test still red on dev, no fix PR; diagnosing to propose a patch on #763
+2026-10-16T06:15Z	5	heartbeat	creative-core#334	brush test red from core #320 row copies (not #1291); needs-core filed; #763 corrected
+2026-10-16T06:24Z	5	heartbeat	creative-core#334	blocked on core fix; no new Photo run
+2026-10-16T06:26Z	5	ci-run	38860001517	red, not ours: swift build fails in FlareModel (CommandError switch not exhaustive); still blocked on creative-core#334 for Photo
+2026-10-16T06:45Z	5	heartbeat	creative-core#334	still blocked
+2026-10-16T07:07Z	5	heartbeat	creative-core#334	still blocked
+2026-10-16T07:28Z	5	heartbeat	creative-core#334	run c39a9d5 cancelled; still blocked
+2026-10-16T07:49Z	5	heartbeat	38867245345	run a56bbe3 in progress; core#334 open
+2026-10-16T08:12Z	5	heartbeat	38867245345	run a56bbe3 still running
+2026-10-16T08:40Z	5	ci-run	38867245345	Photo journeys ran (others pass); ours skipped (quarantined full); asked supervisor for scoped photo run
+2026-10-16T08:57Z	5	heartbeat	-	waiting scoped photo run / supervisor reply on #1075
+2026-10-16T09:19Z	5	heartbeat	-	no scoped photo run yet; no supervisor reply; PJ-5/6/7 still quarantined
+2026-10-16T09:41Z	5	heartbeat	-	still waiting scoped photo run / supervisor; PJ-5/6/7 quarantined
+2026-10-16T10:03Z	5	heartbeat	-	still waiting scoped photo run / supervisor; PJ-5/6/7 quarantined
+2026-10-16T10:30Z	5	ci-run	38878109062	full CI green on ab9e264; Photo audit 22<=23; PJ-5/6/7 still quarantined; supervisor re-asked
+2026-10-16T10:56Z	5	heartbeat	-	waiting supervisor: scoped photo run or lift PJ-5/6/7 quarantine
+2026-10-16T11:23Z	5	heartbeat	38887139934	full CI green again (9e3c5f8); PJ-5/6/7 still quarantined; waiting supervisor
+2026-10-16T11:40Z	5	heartbeat	-	relaunch act-1a144817472-xzgv; lead branch rebuilt on main 9e3c5f8; waiting scoped photo run
