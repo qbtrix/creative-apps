@@ -67,3 +67,5 @@ fi
 link_toolchain
 export PATH="$PREFIX/usr/bin:$PATH"
 swift --version
+# The repo's merge drivers (.gitattributes), so a rebase here merges JSON by key.
+bash "$(dirname "$0")/install-merge-drivers" "$(cd "$(dirname "$0")/.." && pwd)" || echo "cloud-setup: merge drivers not installed (git merges by lines)" >&2

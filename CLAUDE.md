@@ -227,6 +227,10 @@ something. One that can't act yet is disabled and says why:
 
 - Keep to your line and your issue's files. Prefer a new file over appending to
   a shared one.
+- Run `scripts/install-merge-drivers` once per clone (cloud-setup.sh does): a
+  rebase then merges `.json` files key by key (`.gitattributes`), so two PRs
+  adding different keys to one C4 part, `.wave.json` or mutation plan no
+  longer conflict.
 - Rebase on `origin/dev` before opening the PR, and rerun `scripts/ci --changed` after.
 - If `scripts/ci` fails on `origin/dev` itself because of someone else's merge
   (look for the open `dev-red` issue), do not fix it in your PR. Comment on
@@ -371,6 +375,8 @@ bash Tests/audit_lower/test_audit_lower.sh   # decision tests for scripts/audit-
 scripts/quarantine check                     # the journey quarantine's entries: owned, reasoned, unexpired (needs jq; gh for owner state)
 scripts/bump-core [<core sha>]               # move the creative-core pin (default: core main's head): checks, then the bump PR
 bash Tests/bump_core/test_bump_core.sh       # scripts/bump-core against a fake gh and swift (needs jq)
+scripts/install-merge-drivers                # once per clone: .gitattributes merge drivers (JSON by key) and rebase.updateRefs; cloud-setup.sh runs it
+bash Tests/merge_drivers/test_merge_drivers.sh # the merge drivers on scratch repos (needs git, jq)
 gh run list --workflow ci.yml --branch dev    # feature CI runs on dev
 gh run download <run-id> -n snapshots        # the PNGs from a macOS CI run
 gh run download <run-id> -n ui-screens       # whole-window PNGs from the UI journeys

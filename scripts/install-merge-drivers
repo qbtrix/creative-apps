@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+# scripts/install-merge-drivers [<repo dir>]: repo-local git config for the
+# merge drivers .gitattributes names, plus rebase.updateRefs=true so a rebase
+# carries the local branches stacked on the rebased commits along. Today one
+# driver: `json` -> scripts/merge-json, by absolute path from this script's
+# own folder, because git runs a driver from the worktree root and the fast
+# lane's scratch clone must run main's copy, never the PR's. Idempotent; the
+# default repo is the one enclosing the current directory. Agents run it once
+# per clone (scripts/cloud-setup.sh does); the lane runs it before it
+# integrates a conflicting PR. Without it every `merge=` attribute is inert:
+# git falls back to its line merge, so nothing breaks for a clone that never
+# ran it.
+set -euo pipefail
+here=$(cd "$(dirname "$0")" && pwd)
+repo=${1:-$(git rev-parse --show-toplevel)}
+git -C "$repo" config --local merge.json.name "three-way merge by JSON key (scripts/merge-json)"
+git -C "$repo" config --local merge.json.driver "'$here/merge-json' %O %A %B %L"
+git -C "$repo" config --local rebase.updateRefs true
+echo "merge drivers: json -> $here/merge-json; rebase.updateRefs=true ($repo)"

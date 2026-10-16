@@ -1,0 +1,17 @@
+# Merge drivers for files many agents edit at once. They act only in a clone
+# that ran scripts/install-merge-drivers (the fast lane's scratch clone does;
+# scripts/cloud-setup.sh does); elsewhere git merges by lines as before.
+# GitHub's own merge ignores this file, so it helps local merges and rebases
+# and the lane's integration of a conflicting PR, not the squash itself.
+#
+# json: three-way merge by object key (scripts/merge-json). C4 parts, .wave.json
+# feature data, mutation plans and the audit baseline are objects whose keys
+# different PRs add or change; two PRs touching different keys no longer
+# conflict. Arrays stay atomic.
+*.json merge=json
+
+# No `merge=union`: it appends both sides' new lines in arbitrary order, so it
+# fits only a shared file that is append-only and order-free. The audit of
+# dev (2026-10-16) found none: docs/leads/*/timeline.tsv has one writer on its
+# own lead/<feature> branch, every numbered table or list is ordered, and
+# there is no changelog. Add one here only for a file that fits.

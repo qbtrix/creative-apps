@@ -312,6 +312,8 @@ bash Tests/quarantine/test_quarantine.sh || fail "journey quarantine: scripts/qu
 scripts/quarantine check || fail "journey quarantine: fix, renew or remove the entries above (the supervisor edits UITests/quarantine.json)"
 echo "== bump core (Tests/bump_core)"
 bash Tests/bump_core/test_bump_core.sh || fail "bump core: scripts/bump-core broke its tests"
+echo "== merge drivers (Tests/merge_drivers)"
+bash Tests/merge_drivers/test_merge_drivers.sh || fail "merge drivers: scripts/merge-json or scripts/install-merge-drivers broke their tests, or .gitattributes names a driver they don't define"
 echo "== mutation anchors (Tests/mutations)"
 bash Tests/mutate/test_mutate.sh || fail "mutation anchors: scripts/mutate broke its fixture test"
 python3 scripts/mutate --validate || fail "mutation anchors: repoint each find above at the code as it is now (scripts/mutate)"
