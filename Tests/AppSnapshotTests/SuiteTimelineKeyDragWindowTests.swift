@@ -4,8 +4,12 @@
 // playhead in @State. Keys at 120 are picked on lanes 5 and 6; lane 5's takes
 // 120 dragged events over 600 pt. Spec: lanes run at most 2 x (frame steps +
 // 2) bodies (the counter sums every lane), one move call per step summing to
-// 150, one onEndKeyDrag. TL-13 wrote it disabled; TL-14 enabled it. Nested
-// in BodyCountSuites: it reads global body counters. macOS only.
+// 150, one onEndKeyDrag. TL-13 wrote it disabled; TL-14 enabled it. The test
+// process is never the active app, so its press is a window-activation click,
+// which a SwiftUI gesture drops unless it opts in (RenderBudgetHarness.swift):
+// the host opts in, as the scrub window test's does (#1746), and the press is
+// placed from the host's frame in window points. Nested in BodyCountSuites: it
+// reads global body counters. macOS only.
 import AppKit
 import SwiftUI
 import Testing
@@ -21,9 +25,11 @@ extension BodyCountSuites {
             defer { w.close() }
             try await w.settle(600)
 
-            // Lane 5's key at 120, from the window's bottom left: names column, divider, inset, then 4 pt a frame.
-            let x = SuiteSize.timelineLabelColumn + 1 + timelineInset + 120 * 4
-            let y = size.height - (SuiteSize.timelineRuler + SuiteSize.timelineLane * 5.5)
+            // Lane 5's key at 120 in window points (y up), from the host's top left: names column, divider,
+            // inset, then 4 pt a frame across; the ruler, then five and a half lanes down.
+            let box = w.host.convert(w.host.bounds, to: nil)
+            let x = box.minX + SuiteSize.timelineLabelColumn + 1 + timelineInset + 120 * 4
+            let y = box.maxY - (SuiteSize.timelineRuler + SuiteSize.timelineLane * 5.5)
             let lanesBefore = laneBodies()
             let step = try await w.measure("timeline key drag, 120 samples", bodies: stripBodies) {
                 try await w.drag(from: CGPoint(x: x, y: y), by: CGVector(dx: 600, dy: 0))
@@ -82,6 +88,8 @@ private struct KeyDragHost: View {
                 tracks = tracks.map { Self.moving($0, by: delta) }
             },
             onEndKeyDrag: { sent.ends += 1 })
+        // Every press here activates the window; a hand's press in the active window needs no opt-in.
+        .allowsWindowActivationEvents()
     }
 
     private static func moving(_ track: TimelineTrack<String>, by delta: Int) -> TimelineTrack<String> {
