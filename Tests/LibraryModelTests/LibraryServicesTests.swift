@@ -1,6 +1,7 @@
 // LibraryServicesTests.swift: `LibraryServices.fake` answers through every
-// member, and `.live` names a reason for each spine stub while the stubs
-// still draw samples and apply the plain culling rules.
+// member, and `.live` names a reason for each spine stub (not the importer,
+// live since IM-2) while the stubs still draw samples and apply the plain
+// culling rules.
 import CoreColor
 import CoreRaster
 import Foundation
@@ -62,14 +63,15 @@ private func liveServices() -> LibraryServices {
 @Test func liveListsAReasonForEveryStub() {
     let services = liveServices()
     #expect(!services.isPreview)
-    let members = ["importer", "thumbnails", "culling", "coding", "loupe", "develop", "crop", "exporter"]
+    let members = ["thumbnails", "culling", "coding", "loupe", "develop", "crop", "exporter"]
     #expect(Set(services.unavailable.keys) == Set(members))
     #expect(services.unavailable.values.allSatisfy { !$0.isEmpty })
     let reasons: [String?] = [
-        LiveImporter.unavailable, LiveThumbnails.unavailable, LiveCulling.unavailable, LiveCatalogCoding.unavailable,
+        LiveThumbnails.unavailable, LiveCulling.unavailable, LiveCatalogCoding.unavailable,
         LiveLoupeImaging.unavailable, LiveDevelop.unavailable, LiveCrop.unavailable, LiveExporter.unavailable,
     ]
     #expect(reasons.allSatisfy { ($0?.isEmpty ?? true) == false })
+    #expect(LiveImporter.unavailable == nil)
 }
 
 @Test func liveStubsDrawSamplesAndRefuseFiles() async throws {
@@ -115,9 +117,10 @@ private func liveServices() -> LibraryServices {
 
 @Test func liveStubsSayWhyUntilBuilt() async throws {
     let services = liveServices()
-    #expect(services.unavailable["importer"] == "Import isn't connected yet (import).")
-    #expect(services.unavailable.count == 8)
-    await #expect(throws: LibraryError.self) {
+    #expect(services.unavailable["importer"] == nil)
+    #expect(services.unavailable.count == 7)
+    // The importer is live: the fake decoder's empty folder has no photos.
+    await #expect(throws: LibraryError.noPhotos("f")) {
         try await services.importer.importFolder("/f", known: [], progress: { _ in }, added: { _ in })
     }
     #expect(try services.develop.histogram(of: PixelBuffer(rgba8: [0, 0, 0, 255], width: 1, height: 1)) == .empty)
