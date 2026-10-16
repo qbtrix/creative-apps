@@ -1,9 +1,12 @@
 // HaloTimelineView.swift: Halo's timeline: a TimelineStrip track per layer,
 // its span bar from in to out point and a diamond on each key frame. The
 // ruler scrubs, a track selects its layer, a diamond its lane's keys (its
-// layer while key picking can't act); a click gives it focus so HaloViewer's
-// keys reach it. The tooltip is the Model's timelineHelp. No layers: how to add one,
-// in the lane under the ruler.
+// layer while key picking can't act), Shift extending the picked keys
+// (selectLaneKeys); a click gives it focus so HaloViewer's keys reach it.
+// The strip's context menu holds the five easing presets for the picked keys,
+// each disabled with the Model's unavailableHelp as its help while it can't
+// act. Plain diamonds until key shapes land (#771). The tooltip is the
+// Model's timelineHelp. No layers: how to add one, in the lane under the ruler.
 // The strip's track buttons come from SuiteUI with no identifier of their
 // own, so the strip passes `halo.timeline.track` down to each of them (#290).
 // A lane speaks its key count as its value, which XCUITest reads empty
@@ -18,6 +21,7 @@
 // no scroller covers the ruler; the height is the lanes, at least the slot
 // minimum, at most 40% of the window's column, and past that the lanes
 // scroll vertically so the canvas keeps its room.
+import AppKit
 import HaloModel
 import SuiteUI
 import SwiftUI
@@ -81,13 +85,14 @@ struct HaloTimelineView: View {
                     },
                     onSelectKeyframe: { id, frame in
                         hasFocus = true
-                        perform(model.keyClickCommand(layerID: id, frame: frame))
+                        perform(keyClick(layerID: id, frame: frame))
                     },
                     onSelectTrack: { id in
                         hasFocus = true
                         perform(.selectLayer(id))
                     })
                     .accessibilityIdentifier("halo.timeline.track")
+                    .contextMenu { easingItems }
                     .onGeometryChange(for: Double.self) { Double($0.size.width) } action: { stripWidth = $0 }
             }
             .frame(height: height)
@@ -100,6 +105,26 @@ struct HaloTimelineView: View {
                     .foregroundStyle(SuiteColor.secondaryText)
                     .frame(maxWidth: .infinity, minHeight: SuiteSize.timelineLane)
             }
+        }
+    }
+
+    /// The command a diamond click sends: the Model's pick of that lane's
+    /// keys, extended while Shift is held, or its fallback (select the layer)
+    /// while key picking can't act.
+    private func keyClick(layerID: String, frame: Int) -> HaloCommand {
+        let command = model.keyClickCommand(layerID: layerID, frame: frame)
+        guard case .selectLaneKeys = command else { return command }
+        let extending = NSEvent.modifierFlags.contains(.shift)
+        return .selectLaneKeys(layerID: layerID, frame: frame, extending: extending)
+    }
+
+    /// The five easing presets for the picked keys, each disabled with why.
+    @ViewBuilder private var easingItems: some View {
+        ForEach(HaloEasingPreset.allCases, id: \.self) { preset in
+            let help = model.unavailableHelp(for: .setEasing(preset))
+            Button(preset.title) { perform(.setEasing(preset)) }
+                .disabled(help != nil)
+                .help(help ?? preset.title)
         }
     }
 }
