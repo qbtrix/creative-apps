@@ -1,0 +1,23 @@
+{
+  "originHash" : "c0f12134917aca053bf81f8f8fdbc30c4a17cea4e5d6331d0e924c6ec9cee3c1",
+  "pins" : [
+    {
+      "identity" : "creative-core",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/qbtrix/creative-core",
+      "state" : {
+        "revision" : "c608d4b72c0c69a1f7b1609642f23059cf8533a7"
+      }
+    },
+    {
+      "identity" : "grdb.swift",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/groue/GRDB.swift.git",
+      "state" : {
+        "revision" : "b83108d10f42680d78f23fe4d4d80fc88dab3212",
+        "version" : "7.11.1"
+      }
+    }
+  ],
+  "version" : 3
+}

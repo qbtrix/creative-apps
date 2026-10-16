@@ -1,0 +1,118 @@
+#!/usr/bin/env bash
+# scripts/bump-core: moves the creative-core pin to one core commit, through a PR.
+#
+#   scripts/bump-core [<core commit>]      default: the head of core's main
+#
+# creative-core is pinned by `revision:` in Package.swift, and the committed
+# Package.resolved records the same commit, so a core merge reaches the apps
+# only through the PR this opens. From a checkout with no tracked changes it:
+#   1. resolves the commit on qbtrix/creative-core and refuses one that is not
+#      on core main or not ahead of the pin on origin/dev;
+#   2. branches chore/bump-core-<short sha> from origin/dev, writes the new
+#      revision into Package.swift and lets `swift package resolve` rewrite
+#      Package.resolved (the other pins stay where they are);
+#   3. runs what a core change can break: swift build --build-tests, every
+#      <X>ModelTests target (their Budget tests included), and on macOS the perf
+#      suites in PERF. The repo keeps no perf list; these are the ones core's
+#      raster code moves (creative-core #321 tripled PhotoBrushDisplayTests'
+#      bytes per event). A filter that matches no test fails the bump;
+#   4. commits, pushes and opens "chore(core): bump creative-core to <short sha>"
+#      on dev, its body holding the core compare link and a link to each core
+#      PR in the range.
+# A failed check stops before the commit, on the bump branch, for a look.
+# Package.swift and Package.resolved are protected, so the PR carries no
+# fast-lane label: the supervisor runs the macOS job on it and merges.
+#
+# Needs git, gh and swift. Tests: Tests/bump_core/test_bump_core.sh (fake gh
+# and swift). bash 3.2 compatible (macOS /bin/bash).
+set -uo pipefail
+cd "$(dirname "$0")/.." || exit 1
+
+CORE=qbtrix/creative-core
+PERF='PhotoBrushDisplayTests|PhotoBrushLatencyTests|PhotoBrushInkLatencyTests'
+
+die() { echo "bump-core: $*" >&2; exit 1; }
+
+[[ -z "$(git status --porcelain --untracked-files=no)" ]] || die "commit or stash your tracked changes first"
+git fetch -q origin dev || die "git fetch origin dev failed"
+manifest=$(git show origin/dev:Package.swift) || die "no Package.swift on origin/dev"
+old=$(sed -n 's|.*/creative-core", revision: "\([0-9a-f]\{40\}\)".*|\1|p' <<<"$manifest")
+[[ -n "$old" ]] || die "Package.swift on origin/dev has no creative-core revision: pin"
+new=$(gh api "repos/$CORE/commits/${1:-main}" --jq .sha) && [[ "$new" =~ ^[0-9a-f]{40}$ ]] \
+  || die "${1:-main} is not a commit on $CORE"
+if [[ "$new" == "$old" ]]; then echo "bump-core: already pinned at $old"; exit 0; fi
+on_main=$(gh api "repos/$CORE/compare/$new...main" --jq .status) || die "can't compare $new with $CORE main"
+[[ "$on_main" == ahead || "$on_main" == identical ]] || die "$new is not on $CORE main ($on_main)"
+range=$(gh api "repos/$CORE/compare/$old...$new" --jq '"\(.status) \(.total_commits)"') || die "can't compare the pin with $new"
+[[ "$range" == ahead\ * ]] || die "$new is not ahead of the pin $old (${range% *})"
+
+short=${new:0:7}
+branch="chore/bump-core-$short"
+git switch -q -c "$branch" origin/dev || die "can't create $branch from origin/dev"
+sed "s|/creative-core\", revision: \"$old\"|/creative-core\", revision: \"$new\"|" Package.swift >Package.swift.new \
+  && mv Package.swift.new Package.swift
+grep -q "revision: \"$new\"" Package.swift || die "could not write the revision into Package.swift"
+swift package resolve || die "swift package resolve failed"
+grep -q "\"revision\" : \"$new\"" Package.resolved || die "Package.resolved does not pin $new after resolve"
+
+# Command Line Tools without Xcode keep Swift Testing where swift doesn't look (as scripts/ci).
+flags=()
+if [[ "$(uname)" == Darwin ]]; then
+  clt=/Library/Developer/CommandLineTools/Library/Developer
+  if [[ "$(xcode-select -p 2>/dev/null)" == /Library/Developer/CommandLineTools* && -d "$clt/Frameworks/Testing.framework" ]]; then
+    flags=(-Xswiftc -F -Xswiftc "$clt/Frameworks" -Xlinker -F -Xlinker "$clt/Frameworks"
+           -Xlinker -rpath -Xlinker "$clt/Frameworks" -Xlinker -rpath -Xlinker "$clt/usr/lib")
+  fi
+fi
+tmp=$(mktemp -d)
+trap 'rm -rf "$tmp"' EXIT
+# run_tests LABEL ARGS...: one swift test run. Fails on a red run, and on a
+# filter that matched no test, which swift test passes (as ci.yml's scoped run).
+run_tests() {
+  local label=$1 status
+  shift
+  swift test --skip-build ${flags[@]+"${flags[@]}"} "$@" 2>&1 | tee "$tmp/test.log"
+  status=${PIPESTATUS[0]}
+  (( status == 0 )) || die "$label failed at $short"
+  grep -qE 'Test run with [1-9][0-9]* tests?' "$tmp/test.log" || die "$label: the filter matched no tests"
+}
+models=$(cd Tests && printf '%s\n' *ModelTests | paste -sd'|' -)
+checked="swift build --build-tests, the Model tests ($models)"
+swift build --build-tests ${flags[@]+"${flags[@]}"} || die "swift build failed at $short"
+run_tests "Model tests" --filter "^($models)\."
+if [[ "$(uname)" == Darwin ]]; then
+  run_tests "perf suites" --filter "^AppSnapshotTests\.($PERF)/" --no-parallel
+  checked="$checked and the perf suites ($PERF)"
+else
+  checked="$checked; the perf suites are macOS only and did not run"
+fi
+
+title="chore(core): bump creative-core to $short"
+body="$tmp/body.md"
+{
+  echo "Moves the creative-core pin from ${old:0:7} to $short."
+  echo
+  echo "Core range (${range#* } commits): https://github.com/$CORE/compare/$old...$new"
+  echo
+  # Core squash merges end their subject with (#N); the link names core's PR,
+  # since a bare #N here would point at this repo.
+  gh api "repos/$CORE/compare/$old...$new" --jq '.commits[] | "\(.sha[0:7])\t\(.commit.message | split("\n")[0])"' \
+    | while IFS=$'\t' read -r sha subject; do
+        n=$(sed -n 's/.*(#\([0-9][0-9]*\))$/\1/p' <<<"$subject")
+        if [[ -n "$n" ]]; then
+          echo "- [creative-core#$n](https://github.com/$CORE/pull/$n) ${subject% (#"$n")}"
+        else
+          echo "- $sha $subject"
+        fi
+      done
+  echo
+  echo "Checked locally on $(uname): $checked."
+  echo
+  echo "Package.swift and Package.resolved are protected, so this skips the fast lane."
+  echo "Supervisor: run the macOS job on this branch and merge when it is green:"
+  echo "gh workflow run ci.yml --ref $branch"
+} >"$body"
+git commit -q -m "$title" -m "Core range: https://github.com/$CORE/compare/$old...$new" Package.swift Package.resolved \
+  || die "git commit failed"
+git push -q -u origin "$branch" || die "git push failed"
+gh pr create --base dev --head "$branch" --title "$title" --body-file "$body" || die "gh pr create failed"

@@ -30,9 +30,11 @@
 // them) and their tests.
 import PackageDescription
 
-// The engines. Tracks creative-core's main branch for now; this moves to a
-// pinned version (`exact:`) once creative-core tags releases. Package.resolved
-// is not committed, so every build resolves the current main.
+// The engines, pinned to one creative-core commit (`revision:` below; core has
+// no tags yet), so a core merge reaches the apps only through a bump PR.
+// Package.resolved is committed and records the same commit. scripts/bump-core
+// moves the pin: it edits the revision, resolves, runs the Model tests and the
+// brush perf suites, and opens "chore(core): bump creative-core to <sha>".
 let core = "creative-core"
 
 func model(_ name: String, _ engines: [String]) -> [Target] {
@@ -85,7 +87,7 @@ let package = Package(
     platforms: [.macOS("26.0")],
     products: products,
     dependencies: [
-        .package(url: "https://github.com/qbtrix/creative-core", branch: "main"),
+        .package(url: "https://github.com/qbtrix/creative-core", revision: "c608d4b72c0c69a1f7b1609642f23059cf8533a7"),
     ],
     targets: targets
 )

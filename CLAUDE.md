@@ -39,6 +39,14 @@ You never start it yourself for routine work. So:
 | `SuiteUITests`, `AppSnapshotTests` | macOS | SuiteUI tests; the snapshot PNGs. |
 | `AppAuditTests` | Linux + macOS | The app audit's checks and their tests (docs/blueprints/app-audit.md). |
 
+creative-core is pinned to one commit: `revision:` in Package.swift, recorded
+in the committed Package.resolved. You build against that commit, not core's
+main. The pin moves only through a bump PR from `scripts/bump-core [<core sha>]`
+("chore(core): bump creative-core to <sha>", the core range and a link to each
+core PR in its body), which runs every Model test target and the brush perf
+suites first. Both files are protected, so the supervisor runs the macOS job on
+the bump and merges it. `scripts/ci` fails when the two files disagree.
+
 X is Flare, Design, Photo, Library or Halo. Each app is one **line** (label
 `line:flare`, ...) and SuiteUI is its own line (`line:suiteui`).
 
@@ -51,7 +59,9 @@ X is Flare, Design, Photo, Library or Halo. Each app is one **line** (label
   app's target.
 - **A missing engine feature:** file an issue on qbtrix/creative-core labelled
   `needs-core` with the API you need and an acceptance test. Keep going with
-  what exists; never copy engine code into a Model.
+  what exists; never copy engine code into a Model. A merged core feature
+  reaches the apps only through a bump PR (`scripts/bump-core`, merged by the
+  supervisor), so start work that uses the new API once that bump is on `dev`.
 
 ## Start here
 
@@ -331,6 +341,8 @@ swift test --filter FlareModelTests          # one suite while iterating
 bash Tests/fast_lane/test_fast_lane.sh       # fast-lane decision tests (needs jq)
 bash Tests/audit_lower/test_audit_lower.sh   # decision tests for scripts/audit-lower, CI's baseline lowering (needs jq)
 scripts/quarantine check                     # the journey quarantine's entries: owned, reasoned, unexpired (needs jq; gh for owner state)
+scripts/bump-core [<core sha>]               # move the creative-core pin (default: core main's head): checks, then the bump PR
+bash Tests/bump_core/test_bump_core.sh       # scripts/bump-core against a fake gh and swift (needs jq)
 gh run list --workflow ci.yml --branch dev    # feature CI runs on dev
 gh run download <run-id> -n snapshots        # the PNGs from a macOS CI run
 gh run download <run-id> -n ui-screens       # whole-window PNGs from the UI journeys
