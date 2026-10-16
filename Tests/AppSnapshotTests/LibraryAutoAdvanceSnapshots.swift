@@ -36,7 +36,7 @@ import Testing
         try #require(!order.isEmpty)
         catalog.select([order[0]])
         catalog.cull(.rating(3))
-        #expect(catalog.cullError == "Rating is unavailable in this preview.")
+        #expect(catalog.cullError == "Couldn't set the rating: this window shows built-in sample data, not photos on disk.")
         let notice = try #require(catalog.notice)
         #expect(notice.source == .cull && notice.isError)
         let row = LibraryNoticeRow(notice: notice, onClose: {})
