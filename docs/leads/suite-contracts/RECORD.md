@@ -45,6 +45,7 @@ Waves (packet's Build waves, checked against dev at ebc68bf):
 - PRs target `dev`, not `main`: CLAUDE.md forbids targeting `main` and the lane retargets fast-lane PRs to `dev`. The brief's main HEAD 9e3c5f8 was verified; dev (ebc68bf) is one commit ahead.
 - `targets` dependency met: its `.wave.json` is `built`, and `Sources/SuiteModel/Values/SuiteIdentity.swift`, `SuiteApp.swift` exist on dev.
 - Builder branches are `lead/suite-contracts-<id>` (git can't hold `lead/suite-contracts/<id>` beside the lead branch).
+- The container had no Swift: installed swift-6.3.3-RELEASE (CI's image version) under /opt/swift, linked into /usr/local/bin; `scripts/ci --changed` passes on dev ebc68bf.
 - `gh` has no valid token in this container: builders open PRs and set labels through the GitHub MCP tools.
 - Waves 1 and 3, 5, 8, 9 have one task: one worktree subagent each instead of the build-wave workflow.
 - Corrections in the packet are listed 1-6, 8-10, 7 (no correction is missing); builders apply the ones naming their task.
