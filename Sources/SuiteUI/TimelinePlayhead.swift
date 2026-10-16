@@ -44,7 +44,8 @@ struct TimelinePlayhead: View {
                     .font(SuiteFont.pill)
                     .foregroundStyle(.white)
                     .frame(width: pill.width, height: pill.height)
-                    .background(SuiteColor.accentFill, in: Capsule())
+                    // A view background, not a color one, so it keeps to the safe area (#1034).
+                    .background(alignment: .center) { Capsule().fill(SuiteColor.accentFill) }
                     .offset(x: pill.minX, y: pill.minY)
             }
             .contentShape(TimelinePlayheadGrab.shape(lineX: lineX, pill: pill, height: proxy.size.height))
