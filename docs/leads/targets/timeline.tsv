@@ -70,3 +70,7 @@ utc	stage	event	ref	note
 2026-10-16T09:14Z	4	ci-run	38873489300	a56bbe3 rerun red on HaloJourneyTests.testParentAndBlend only; next 38878109062 on ab9e264
 2026-10-16T09:20Z	4	heartbeat	38878109062	full run on ab9e264 running
 2026-10-16T09:50Z	4	heartbeat	38878109062	full run on ab9e264 still running
+2026-10-16T10:04Z	4	ci-run	38878109062	ab9e264 green (full CI); contains 8fce5e2
+2026-10-16T10:04Z	4	round-clean	round 2	green dev run, no findings for targets
+2026-10-16T10:04Z	5	stage-end	#873	Belt-Contact-Sheet posted (issuecomment-6213076235)
+2026-10-16T10:04Z	done	stopped	#873	feature done

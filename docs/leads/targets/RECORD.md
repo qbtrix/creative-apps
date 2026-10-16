@@ -2,9 +2,9 @@
 
 Issue: #873 · Packet: docs/blueprints/suite/features/targets.md
 Run: act-1a1429c87d2-exzi (resumed; first act-1a13f70dda7-kche) · Session: claude/feature-lead-targets-r13t2d · Started: 2026-10-15T12:10Z, resumed 2026-10-16T02:50Z
-Stage: 4 round 1
-Base: 8fce5e2 (dev with BU-1b #1263)
-Next: wait for a green full ci.yml run on dev containing 8fce5e2, or a green `scoped: suite` run (asked the supervisor on #873 at 04:40Z; leads get 403 on dispatch). Then comment `Belt-Contact-Sheet: <run link>` on #873 with the size table and 'launcher has no journey shots until home'. Scoped runs for other apps (e.g. 38849414997 scoped: design) do not count.
+Stage: done
+Base: ab9e264 (green full CI run 38878109062)
+Next: nothing; done. Contact sheet on #873 (issuecomment-6213076235). BU-S stays with the supervisor or captain.
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -22,6 +22,7 @@ Next: wait for a green full ci.yml run on dev containing 8fce5e2, or a green `sc
 | round | CI run | CI | audit vs baseline | lenses | confirmed | fixed by | clean |
 |---|---|---|---|---|---|---|---|
 | 1 | 38823898596 (8fce5e2) | Linux green; macOS build/bundle/size green; UI journeys red 19 (Halo/Photo/Library, 17 pre-existing at 75492b1, 2 from Halo #1258/#1260) | no afterglow key yet; over-baseline counts are Halo/Photo, not ours | none run: no launcher screens exist (no journey until home) | 0 for this feature | – | clean for targets; dev not green |
+| 2 | 38878109062 (ab9e264) | green (Linux, macOS, Promote, Audit lower) | no afterglow key; every app at or under baseline (Audit lower passed) | none run: still no launcher screens | 0 | – | clean |
 
 ## Size report (run 38823898596, 8fce5e2)
 | app | executable bytes | bundle bytes | SuiteUI symbols |
@@ -45,6 +46,7 @@ Executables total 31,308,416 bytes; app-builds.tar.gz 8,064,887 bytes. SuiteUI i
 - BU-S needs a Mac: not run by this lead (packet).
 
 ## Open
+- 2026-10-16T10:10Z: DONE. Full run 38878109062 on ab9e264 (contains 8fce5e2) green; Belt-Contact-Sheet posted on #873. Scoped suite request moot.
 - 2026-10-16T09:30Z: rerun 38873489300 (a56bbe3) red again on HaloJourneyTests.testParentAndBlend only; the Halo finisher tracks Halo journeys on #763. Watching full run 38878109062 on ab9e264.
 - 2026-10-16T08:40Z: full run 38867245345 (a56bbe3) red on one test only: HaloJourneyTests.testParentAndBlend (Halo line, failing since 791). Linux, macOS scripts/ci, snapshots and every other journey green. Not ours.
 - 2026-10-16T06:40Z: full run 38860001517 (0375364) red: swift build fails on both jobs at Sources/FlareModel/FlareMachineMessages.swift:29 (switch must be exhaustive; Flare line). Not ours.
