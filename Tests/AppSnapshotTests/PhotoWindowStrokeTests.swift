@@ -19,128 +19,130 @@ import Testing
 
 @testable import PhotoApp
 
-@MainActor @Suite struct PhotoWindowStrokeTests {
-    @Test(.timeLimit(.minutes(2))) func aBrushStrokeRedrawsOnlyTheCanvas() async throws {
-        var open = try PhotoWorkspace.fixture(.large)
-        open.selectTool(.brush)
-        open.setToolOption(.size(64))
-        let host = CountingHostingView(rootView: PhotoWindow(model: open))
-        let frame = CGRect(x: 0, y: 0, width: 1280, height: 820)
-        host.frame = frame
-        let window = NSWindow(contentRect: frame, styleMask: [.borderless], backing: .buffered, defer: false)
-        window.isReleasedWhenClosed = false
-        window.contentView = host
-        window.setFrameOrigin(NSPoint(x: -20_000, y: -20_000))
-        window.orderFrontRegardless()
-        defer { window.close() }
+extension BodyCountSuites {
+    @MainActor @Suite struct PhotoWindowStrokeTests {
+        @Test(.timeLimit(.minutes(2))) func aBrushStrokeRedrawsOnlyTheCanvas() async throws {
+            var open = try PhotoWorkspace.fixture(.large)
+            open.selectTool(.brush)
+            open.setToolOption(.size(64))
+            let host = CountingHostingView(rootView: PhotoWindow(model: open))
+            let frame = CGRect(x: 0, y: 0, width: 1280, height: 820)
+            host.frame = frame
+            let window = NSWindow(contentRect: frame, styleMask: [.borderless], backing: .buffered, defer: false)
+            window.isReleasedWhenClosed = false
+            window.contentView = host
+            window.setFrameOrigin(NSPoint(x: -20_000, y: -20_000))
+            window.orderFrontRegardless()
+            defer { window.close() }
 
-        // The first picture: every tile layer has its image (seconds in debug).
-        let canvas = try #require(await first(TileCanvasView.self, in: host))
-        for _ in 0..<600 where tileImages(canvas).isEmpty { try await Task.sleep(for: .milliseconds(50)) }
-        let shown = tileImages(canvas)
-        try #require(!shown.isEmpty, "the canvas never showed its first picture")
-        try await Task.sleep(for: .milliseconds(300))
-        let edited = try #require(await first(PhotoWindowEditedView.self, in: host))
-        let before = try #require(edited.workspace)
+            // The first picture: every tile layer has its image (seconds in debug).
+            let canvas = try #require(await first(TileCanvasView.self, in: host))
+            for _ in 0..<600 where tileImages(canvas).isEmpty { try await Task.sleep(for: .milliseconds(50)) }
+            let shown = tileImages(canvas)
+            try #require(!shown.isEmpty, "the canvas never showed its first picture")
+            try await Task.sleep(for: .milliseconds(300))
+            let edited = try #require(await first(PhotoWindowEditedView.self, in: host))
+            let before = try #require(edited.workspace)
 
-        let box = canvas.convert(canvas.bounds, to: nil)
-        let seconds = Double(ProcessInfo.processInfo.environment["PHOTO_WINDOW_STROKE_SECONDS"] ?? "") ?? 0
-        let clock = ContinuousClock()
-        let until = clock.now + .seconds(seconds)
-        var row = 0
-        while clock.now < until {
-            row += 1
-            let y = box.minY + 40 + Double(row * 23 % Int(max(box.height - 80, 1)))
-            try await stroke(from: CGPoint(x: box.minX + box.width * 0.25, y: y), in: window)
-            send(.leftMouseUp, at: CGPoint(x: box.minX + box.width * 0.25 + 360, y: y), to: window)
+            let box = canvas.convert(canvas.bounds, to: nil)
+            let seconds = Double(ProcessInfo.processInfo.environment["PHOTO_WINDOW_STROKE_SECONDS"] ?? "") ?? 0
+            let clock = ContinuousClock()
+            let until = clock.now + .seconds(seconds)
+            var row = 0
+            while clock.now < until {
+                row += 1
+                let y = box.minY + 40 + Double(row * 23 % Int(max(box.height - 80, 1)))
+                try await stroke(from: CGPoint(x: box.minX + box.width * 0.25, y: y), in: window)
+                send(.leftMouseUp, at: CGPoint(x: box.minX + box.width * 0.25 + 360, y: y), to: window)
+            }
+            // The last of those strokes lands its panels before the measured one starts.
+            if seconds > 0 { try await Task.sleep(for: .milliseconds(500)) }
+            let start = CGPoint(x: box.minX + box.width * 0.25, y: box.midY)
+            let layouts = host.layouts
+            let layoutTime = host.layoutTime
+            let bodies = editorBodies()
+            LayerDisplays.start(in: host)
+            try await stroke(from: start, in: window)
+            // Let the stroke's last renders land before the mouse comes up.
+            try await Task.sleep(for: .milliseconds(150))
+            let passes = host.layouts - layouts
+            let passTime = host.layoutTime - layoutTime
+            let editorRuns = editorBodies().map { $0 - (bodies ?? 0) }
+            let drawn = LayerDisplays.stop()
+            let inked = Set(tileImages(canvas)).subtracting(shown).count
+            send(.leftMouseUp, at: CGPoint(x: start.x + 360, y: start.y), to: window)
+            for _ in 0..<100 where edited.workspace?.isDirty != true { try await Task.sleep(for: .milliseconds(20)) }
+            let after = try #require(edited.workspace)
+
+            let big = drawn.filter { $0.area >= 256 * 256 }
+            let kinds = Dictionary(grouping: drawn, by: \.name).map { "\($1.count)x \($0)" }.sorted()
+            let report = [
+                "WINDOW-STROKE config=\(PhotoBrushLatencyTests.config) canvas=4000x3000 window=1280x820",
+                "samples=120@120Hz | during the stroke: editor bodies \(editorRuns.map(String.init) ?? "n/a"),",
+                "SwiftUI passes \(passes) (\(String(format: "%.1f", passTime)) ms), CPU layer displays \(drawn.count)",
+                "(\(kinds.joined(separator: ", "))) | tile layers inked \(inked) | after: dirty \(after.isDirty),",
+                "revision \(before.revision) -> \(after.revision)",
+            ].joined(separator: " ")
+            print(report)
+
+            #expect(inked > 0, "the canvas showed nothing while drawing: \(report)")
+            if let editorRuns { #expect(editorRuns <= 1, "the editor ran again during the stroke: \(report)") }
+            #expect(big.isEmpty, "a large layer was drawn on the CPU during the stroke: \(report)")
+            #expect(after.isDirty && after.revision > before.revision, "the window never took the stroke: \(report)")
+            #expect(after.undoActionName == "Undo Paint", "mouse-up left no Paint step: \(report)")
         }
-        // The last of those strokes lands its panels before the measured one starts.
-        if seconds > 0 { try await Task.sleep(for: .milliseconds(500)) }
-        let start = CGPoint(x: box.minX + box.width * 0.25, y: box.midY)
-        let layouts = host.layouts
-        let layoutTime = host.layoutTime
-        let bodies = editorBodies()
-        LayerDisplays.start(in: host)
-        try await stroke(from: start, in: window)
-        // Let the stroke's last renders land before the mouse comes up.
-        try await Task.sleep(for: .milliseconds(150))
-        let passes = host.layouts - layouts
-        let passTime = host.layoutTime - layoutTime
-        let editorRuns = editorBodies().map { $0 - (bodies ?? 0) }
-        let drawn = LayerDisplays.stop()
-        let inked = Set(tileImages(canvas)).subtracting(shown).count
-        send(.leftMouseUp, at: CGPoint(x: start.x + 360, y: start.y), to: window)
-        for _ in 0..<100 where edited.workspace?.isDirty != true { try await Task.sleep(for: .milliseconds(20)) }
-        let after = try #require(edited.workspace)
 
-        let big = drawn.filter { $0.area >= 256 * 256 }
-        let kinds = Dictionary(grouping: drawn, by: \.name).map { "\($1.count)x \($0)" }.sorted()
-        let report = [
-            "WINDOW-STROKE config=\(PhotoBrushLatencyTests.config) canvas=4000x3000 window=1280x820",
-            "samples=120@120Hz | during the stroke: editor bodies \(editorRuns.map(String.init) ?? "n/a"),",
-            "SwiftUI passes \(passes) (\(String(format: "%.1f", passTime)) ms), CPU layer displays \(drawn.count)",
-            "(\(kinds.joined(separator: ", "))) | tile layers inked \(inked) | after: dirty \(after.isDirty),",
-            "revision \(before.revision) -> \(after.revision)",
-        ].joined(separator: " ")
-        print(report)
-
-        #expect(inked > 0, "the canvas showed nothing while drawing: \(report)")
-        if let editorRuns { #expect(editorRuns <= 1, "the editor ran again during the stroke: \(report)") }
-        #expect(big.isEmpty, "a large layer was drawn on the CPU during the stroke: \(report)")
-        #expect(after.isDirty && after.revision > before.revision, "the window never took the stroke: \(report)")
-        #expect(after.undoActionName == "Undo Paint", "mouse-up left no Paint step: \(report)")
-    }
-
-    /// PhotoEditor's body runs so far; nil in release, which has no counter.
-    private func editorBodies() -> Int? {
-        #if DEBUG
-        return PhotoEditor.bodyRuns
-        #else
-        return nil
-        #endif
-    }
-
-    /// A mouse-down at `start`, then 120 dragged events at 120 Hz, 3 px apart on a wave.
-    private func stroke(from start: CGPoint, in window: NSWindow) async throws {
-        send(.leftMouseDown, at: start, to: window)
-        let clock = ContinuousClock()
-        let began = clock.now
-        for i in 1...120 {
-            try await Task.sleep(until: began + .microseconds(8_333 * i), clock: clock)
-            send(.leftMouseDragged, at: CGPoint(x: start.x + 3 * Double(i), y: start.y + 40 * sin(Double(i) / 12)), to: window)
+        /// PhotoEditor's body runs so far; nil in release, which has no counter.
+        private func editorBodies() -> Int? {
+            #if DEBUG
+            return PhotoEditor.bodyRuns
+            #else
+            return nil
+            #endif
         }
-    }
 
-    private func send(_ kind: NSEvent.EventType, at point: CGPoint, to window: NSWindow) {
-        guard let event = NSEvent.mouseEvent(
-            with: kind, location: point, modifierFlags: [], timestamp: ProcessInfo.processInfo.systemUptime,
-            windowNumber: window.windowNumber, context: nil, eventNumber: 0, clickCount: 1, pressure: 1)
-        else {
-            Issue.record("no \(kind) event")
-            return
+        /// A mouse-down at `start`, then 120 dragged events at 120 Hz, 3 px apart on a wave.
+        private func stroke(from start: CGPoint, in window: NSWindow) async throws {
+            send(.leftMouseDown, at: start, to: window)
+            let clock = ContinuousClock()
+            let began = clock.now
+            for i in 1...120 {
+                try await Task.sleep(until: began + .microseconds(8_333 * i), clock: clock)
+                send(.leftMouseDragged, at: CGPoint(x: start.x + 3 * Double(i), y: start.y + 40 * sin(Double(i) / 12)), to: window)
+            }
         }
-        window.sendEvent(event)
-    }
 
-    /// The images the tile layers show now.
-    private func tileImages(_ canvas: TileCanvasView) -> [ObjectIdentifier] {
-        (canvas.layer?.sublayers?.first?.sublayers ?? []).compactMap {
-            ($0.contents as AnyObject?).map(ObjectIdentifier.init)
+        private func send(_ kind: NSEvent.EventType, at point: CGPoint, to window: NSWindow) {
+            guard let event = NSEvent.mouseEvent(
+                with: kind, location: point, modifierFlags: [], timestamp: ProcessInfo.processInfo.systemUptime,
+                windowNumber: window.windowNumber, context: nil, eventNumber: 0, clickCount: 1, pressure: 1)
+            else {
+                Issue.record("no \(kind) event")
+                return
+            }
+            window.sendEvent(event)
         }
-    }
 
-    /// The first `V` in `view`'s tree, waiting up to two seconds for SwiftUI to make it.
-    private func first<V: NSView>(_ type: V.Type, in view: NSView) async -> V? {
-        for _ in 0..<100 {
-            if let found = find(type, in: view) { return found }
-            try? await Task.sleep(for: .milliseconds(20))
+        /// The images the tile layers show now.
+        private func tileImages(_ canvas: TileCanvasView) -> [ObjectIdentifier] {
+            (canvas.layer?.sublayers?.first?.sublayers ?? []).compactMap {
+                ($0.contents as AnyObject?).map(ObjectIdentifier.init)
+            }
         }
-        return nil
-    }
 
-    private func find<V: NSView>(_ type: V.Type, in view: NSView) -> V? {
-        if let match = view as? V { return match }
-        return view.subviews.lazy.compactMap { find(type, in: $0) }.first
+        /// The first `V` in `view`'s tree, waiting up to two seconds for SwiftUI to make it.
+        private func first<V: NSView>(_ type: V.Type, in view: NSView) async -> V? {
+            for _ in 0..<100 {
+                if let found = find(type, in: view) { return found }
+                try? await Task.sleep(for: .milliseconds(20))
+            }
+            return nil
+        }
+
+        private func find<V: NSView>(_ type: V.Type, in view: NSView) -> V? {
+            if let match = view as? V { return match }
+            return view.subviews.lazy.compactMap { find(type, in: $0) }.first
+        }
     }
 }
 
