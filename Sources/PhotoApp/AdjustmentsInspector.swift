@@ -9,6 +9,10 @@
 // Curves (CurvesEditor) sits between Levels and Hue/Saturation, over
 // `histogram`. The end of every gesture, a curve drag or a bar slider's drag,
 // key step or typed value, goes out as onEditEnd, so each is one undo step.
+// `sections` picks which sections show, in the order above (the Adjust tab
+// passes adjustSections), and `showsEnable` false drops the enable checkboxes, for
+// an adjustment layer, whose row's eye turns it off. The defaults are the
+// whole image's inspector, unchanged.
 import PhotoModel
 import SuiteUI
 import SwiftUI
@@ -18,6 +22,8 @@ struct AdjustmentsInspector: View {
     var onEdit: @MainActor (AdjustmentEdit) -> Void = { _ in }
     var histogram: [Double] = []
     var onEditEnd: @MainActor () -> Void = {}
+    var sections: [AdjustmentKind] = AdjustmentKind.allCases
+    var showsEnable = true
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -47,18 +53,23 @@ struct AdjustmentsInspector: View {
         }
     }
 
-    /// One section: its enable checkbox above its rows, and Reset while it
-    /// isn't at its defaults.
+    /// One section, when `sections` holds it: its enable checkbox (while
+    /// `showsEnable`) above its rows, and Reset while it isn't at its defaults.
+    @ViewBuilder
     private func section(_ kind: AdjustmentKind, @ViewBuilder rows: () -> some View) -> some View {
-        InspectorSection(kind.title, onReset: settings.isIdentity(kind) ? nil : reset(kind)) {
-            InspectorRow("") {
-                Toggle(
-                    "Enabled",
-                    isOn: Binding(get: { settings.isEnabled(kind) }, set: { onEdit(.setEnabled(kind, $0)) }))
-                .toggleStyle(.checkbox)
-                .accessibilityLabel("\(kind.title) Enabled")
+        if sections.contains(kind) {
+            InspectorSection(kind.title, onReset: settings.isIdentity(kind) ? nil : reset(kind)) {
+                if showsEnable {
+                    InspectorRow("") {
+                        Toggle(
+                            "Enabled",
+                            isOn: Binding(get: { settings.isEnabled(kind) }, set: { onEdit(.setEnabled(kind, $0)) }))
+                        .toggleStyle(.checkbox)
+                        .accessibilityLabel("\(kind.title) Enabled")
+                    }
+                }
+                rows().disabled(!settings.isEnabled(kind))
             }
-            rows().disabled(!settings.isEnabled(kind))
         }
     }
 
