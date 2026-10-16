@@ -13,7 +13,9 @@
 // The test runner is sandboxed with read-only access to "/": it reads the
 // baseline from the repo, and the reports and counts leave only as
 // attachments, which scripts/ui-test exports into ui-screens. An audit
-// failure doesn't stop the journey, so one run reports every screen.
+// failure doesn't stop the journey, so one run reports every screen; it
+// also attaches the window's element tree as "audit-tree-<app>-<step>" (in
+// the result bundle).
 import AppKit
 import XCTest
 
@@ -42,7 +44,19 @@ extension Journey {
             image: image, scale: image.map { Double($0.width) / width } ?? 1)
 
         attach(report, as: "audit-\(screen)")
-        record(AuditRun.tallies[name]?.add(report) ?? [])
+        let failures = AuditRun.tallies[name]?.add(report) ?? []
+        if !failures.isEmpty { attachTree(as: "audit-tree-\(screen)") }
+        record(failures)
+    }
+
+    /// Attaches the window's element tree (XCUITest's own description, with
+    /// frames, ids, values and which element has the keyboard), so a failed
+    /// check names what it saw next to what it measured.
+    func attachTree(as attachmentName: String) {
+        let attachment = XCTAttachment(string: app.windows.firstMatch.debugDescription)
+        attachment.name = attachmentName
+        attachment.lifetime = .keepAlways
+        test.add(attachment)
     }
 
     /// After the app's last journey: attaches the app's distinct counts per
