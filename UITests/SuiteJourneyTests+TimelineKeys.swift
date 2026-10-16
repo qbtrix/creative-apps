@@ -8,15 +8,14 @@
 // → twice picks 24, ← at the first key changes nothing. Then VoiceOver: the
 // element "Key at frame 36, eased" on Shadow's lane picks it by its default
 // action, and Badge's lane reads "Frames 20–50, 3 keyframes at 20, 30, 50".
-// Written before its code (lead.md, contract rule 13): TL-10 lands it
-// skipped, TL-12 turns it on. A lane is found by its track name as label and
+// Written before its code (lead.md, contract rule 13): TL-10 landed it
+// skipped, TL-12 turned it on. A lane is found by its track name as label and
 // a value that counts keyframes; a key by "Key at frame <n>" inside it.
 import XCTest
 
 extension SuiteJourneyTests {
     /// SJ19b: keys are picked by click, Shift, ⌘, right-click, the bed, ← → and VoiceOver.
     @MainActor func testTimelinePicksKeys() throws {
-        throw XCTSkip("waits on TL-12")
         try walkTimelinePicks()
     }
 

@@ -1,4 +1,4 @@
-// MetadataEditing.swift: the inspector's view of the selected photos and the
+// MetadataEditing.swift: the inspector's view of the cull targets and the
 // edits it and the Metadata menu make: rating, flag and color label. Every
 // edit goes through `cull(_:advance: false)`, so it changes the cull targets
 // (the loupe photo in the loupe, else the selection) as the same named undo
@@ -49,9 +49,12 @@ public struct PhotoMetadata: Sendable, Hashable {
 }
 
 extension LibraryCatalog {
-    /// The selected photos as the inspector shows them; nil with nothing selected.
+    /// The cull targets as the inspector shows them: the loupe photo in the
+    /// loupe, else the selected photos; nil with nothing to cull. One source
+    /// with `cull`, so the inspector shows what a key just changed (#1661).
     public var selectedMetadata: PhotoMetadata? {
-        PhotoMetadata(sortedItems.filter { selection.contains($0.id) })
+        let ids = cullTargets
+        return PhotoMetadata(items.filter { ids.contains($0.id) })
     }
 
     /// Sets the cull targets' rating as one "Set Rating" step; a rating
@@ -64,8 +67,7 @@ extension LibraryCatalog {
     /// A click on star `stars`: sets that rating, or clears it when every
     /// cull target already has it.
     public mutating func clickStar(_ stars: Int) {
-        let ids = cullTargets
-        let current = PhotoMetadata(items.filter { ids.contains($0.id) })?.rating
+        let current = selectedMetadata?.rating
         setRating(current == .value(stars) ? 0 : stars)
     }
 

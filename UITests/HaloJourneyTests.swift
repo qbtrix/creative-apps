@@ -184,8 +184,10 @@ final class HaloJourneyTests: XCTestCase {
             XCTAssertNotNil(entries[id], "\(id) is on screen but in neither halo.controls nor suite.controls")
         }
         for listed in entries.values.sorted(by: { $0.id < $1.id }) {
-            // Earlier clicks move state Undo doesn't restore (End leaves the
-            // playhead on the last frame, so Next turns off and says why), so
+            // End and Loop aren't undo steps, so earlier clicks leave state ⌘Z
+            // doesn't restore. The Start reset after each click puts the
+            // playhead back on frame 0: a play-once pass started on the last
+            // frame ends there again before XCUITest's idle wait returns. Still
             // judge each control as the probe lists it now, not at launch.
             let entry = Self.decode(halo.element("halo.controls"))?.controls.first { $0.id == listed.id } ?? listed
             guard entry.enabled else {
@@ -205,6 +207,8 @@ final class HaloJourneyTests: XCTestCase {
             XCTAssert(changed, "\(entry.id) is enabled but clicking it changed nothing")
             halo.press(.escape)
             halo.press(character: "z", .command)
+            let start = halo.element("halo.transport.start")
+            if start.exists, start.isEnabled { start.click() }
         }
     }
 

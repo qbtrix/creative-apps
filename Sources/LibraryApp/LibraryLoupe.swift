@@ -1,5 +1,6 @@
 // LibraryLoupe.swift: one photo fitted in SuiteUI's CanvasSurface at the
-// photo's size, with its name and "12 of 60" position in a glass readout.
+// photo's size, with its name, "12 of 60" position and cull summary ("3 stars,
+// Picked, Red") in a glass readout.
 // Left and Right step through the sort; Escape, G or the glass Grid button at
 // the top leading corner (`library.loupe.grid`, so nobody needs the keys) go
 // back to the grid. The button and the readout sit outside the focusable
@@ -58,7 +59,7 @@ struct LibraryLoupe: View {
             // After the focus modifiers, so the readout is never the focusable element.
             .overlay(alignment: .bottom) {
                 GlassPanel {
-                    Text("\(photo.name)  ·  \(position)")
+                    Text(LibraryCatalog.loupeReadout(for: photo, position: position))
                         .font(SuiteFont.monospacedDigits)
                         .accessibilityIdentifier("library.loupe.position")
                 }

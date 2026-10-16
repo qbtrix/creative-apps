@@ -71,6 +71,18 @@ extension LibraryCatalog {
         return parts.joined(separator: " ")
     }
 
+    /// The loupe's glass readout: name, place and cull summary, e.g.
+    /// "IMG_0055  ·  1 of 60  ·  3 stars, Picked, Red". Nil outside the loupe.
+    public var loupeReadout: String? {
+        guard let photo = loupeItem, let position = loupePosition else { return nil }
+        return Self.loupeReadout(for: photo, position: position)
+    }
+
+    /// The readout for `photo` at `position` ("1 of 60"), so a key's change shows in the loupe (#1661).
+    public static func loupeReadout(for photo: PhotoItem, position: String) -> String {
+        "\(photo.name)  ·  \(position)  ·  \(photo.cullSummary)"
+    }
+
     /// The loupe render's histogram as `mean 0.4213`; `mean 0.0000` with no render.
     public var histogramValue: String {
         Self.histogramValue(of: loupeRender?.histogram ?? .empty)

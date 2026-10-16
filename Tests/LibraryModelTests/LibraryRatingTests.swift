@@ -96,9 +96,28 @@ private func ratings(_ catalog: LibraryCatalog) -> [String: Int] {
     #expect(catalog.items == items)
     #expect(catalog.history == history)
     #expect(catalog.saveRevision == revision)
-    #expect(catalog.cullError == "Rating is unavailable in this preview.")
+    #expect(catalog.cullError == "Couldn't set the rating: this window shows built-in sample data, not photos on disk.")
     catalog.dismissCullError()
     #expect(catalog.cullError == nil)
+}
+
+@Test func aRefusedCullNamesTheChangeAndSaysWhyInPlainWords() throws {
+    let cases: [(CullChange, String)] = [
+        (.rating(3), "Couldn't set the rating"),
+        (.flag(.pick), "Couldn't set the flag"),
+        (.flag(.reject), "Couldn't set the flag"),
+        (.flag(.none), "Couldn't clear the flag"),
+        (.label(nil), "Couldn't set the label"),
+    ]
+    for (change, opening) in cases {
+        var catalog = fourPhotos(mode: .fail)
+        catalog.select(["P1"])
+        catalog.cull(change)
+        let message = try #require(catalog.cullError)
+        #expect(message.hasPrefix(opening), "\(change): \(message)")
+        #expect(message.contains("sample data"), "\(change): \(message)")
+        #expect(!message.lowercased().contains("preview"), "\(change): \(message)")
+    }
 }
 
 @Test func aSuccessfulCullClearsTheError() {
