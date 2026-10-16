@@ -24,3 +24,5 @@ utc	stage	event	ref	note
 2026-10-16T14:38Z	4	fix-round	fix2	#1375 #1376
 2026-10-16T14:52Z	4	pr-merged	#1398	#1375 #1376
 2026-10-16T15:05Z	4	ci-run	38915938965	dev red #1393: two import tests; fix3 started
+2026-10-16T15:18Z	4	pr-merged	#1405	dev-red fixes
+2026-10-16T15:23Z	4	ci-run	38923057966	scoped library on 7662a828 queued

@@ -4,7 +4,7 @@ Issue: #1334 · Packet: docs/blueprints/library/features/import.md
 Run: act-1a1448a5fa3-a8rg · Session: claude/library-import-feature-c0rl9g · Started: 2026-10-16T11:49Z
 Stage: 4 round 2
 Base: 8243ce4435006760f7ec9a87147fef094f6be4ed
-Next: fix3 PR (dev-red #1393: beginImport budget 11.7/10 ms on Linux; progressRowShowsAfterItsDelay on macOS); then the round 2 review on the first scoped library run that contains #1398 and fix3
+Next: wait for scoped library run 38923057966 on 7662a828 (contains #1405); if green, round 2 critic panel on its screens; then finish (contact sheet, gaps)
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
