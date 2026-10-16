@@ -67,3 +67,4 @@ utc	stage	event	ref	note
 2026-10-16T08:00Z	4	heartbeat	38867245345	full run on a56bbe3 still running
 2026-10-16T08:19Z	4	ci-run	38867245345	a56bbe3 red on HaloJourneyTests.testParentAndBlend only; none ours
 2026-10-16T08:50Z	4	heartbeat	38873489300	full rerun on a56bbe3 running
+2026-10-16T09:14Z	4	ci-run	38873489300	a56bbe3 rerun red on HaloJourneyTests.testParentAndBlend only; next 38878109062 on ab9e264

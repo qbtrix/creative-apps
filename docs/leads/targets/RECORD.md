@@ -45,6 +45,7 @@ Executables total 31,308,416 bytes; app-builds.tar.gz 8,064,887 bytes. SuiteUI i
 - BU-S needs a Mac: not run by this lead (packet).
 
 ## Open
+- 2026-10-16T09:30Z: rerun 38873489300 (a56bbe3) red again on HaloJourneyTests.testParentAndBlend only; the Halo finisher tracks Halo journeys on #763. Watching full run 38878109062 on ab9e264.
 - 2026-10-16T08:40Z: full run 38867245345 (a56bbe3) red on one test only: HaloJourneyTests.testParentAndBlend (Halo line, failing since 791). Linux, macOS scripts/ci, snapshots and every other journey green. Not ours.
 - 2026-10-16T06:40Z: full run 38860001517 (0375364) red: swift build fails on both jobs at Sources/FlareModel/FlareMachineMessages.swift:29 (switch must be exhaustive; Flare line). Not ours.
 - 2026-10-16T05:50Z: full run 38855142429 (1c309d9) red: Linux green; macOS scripts/ci failed in AppSnapshotTests on PhotoBrushDisplayTests (Photo brush timing budget, 119 over). Not ours. No supervisor reply yet on the scoped suite request.
