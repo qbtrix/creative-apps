@@ -4,7 +4,7 @@ Issue: #1333 · Packet: docs/blueprints/halo/features/easing.md
 Run: act-1a1448a5fbe-p22s · Session: session_01Fpq7bUwf2TjhThXdtGKn4r · Started: 2026-10-16T11:48Z
 Stage: 4 final review
 Base: e464ecab9b0e11b9cfc27851181beafdb8fee424
-Next: wait for a scoped halo (or full) run containing #1470 (merge 162b470) that reaches the journeys; final review: H-J7, audit, screens; relabel open findings gap (rule 11); contact sheet on #1333
+Next: final review on scoped halo run 38936726137 (head 162b470, contains #1470), in progress; then relabel open findings gap and post the contact sheet on #1333
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
