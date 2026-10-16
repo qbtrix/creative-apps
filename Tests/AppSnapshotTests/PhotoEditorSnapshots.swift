@@ -1,11 +1,10 @@
 // PhotoEditorSnapshots.swift: the Photo window (PhotoEditor) in each state
 // its core loop reaches: an opened photo, layers composited, a brush and an
 // eraser stroke, a marquee selection, a pending crop, a moved layer, exposure
-// +1, the Layers tab, the export sheet and a refusal in the status line
+// +1, layers in the sidebar, the export sheet and a refusal in the status line
 // (photo-status-message-dark.png only); the rail's tool help is checked here
 // too. Each other state writes
-// photo-<state>-light.png and photo-<state>-dark.png; the editor is dark in
-// both on purpose. The canvas picture is rendered the way the window renders
+// photo-<state>-light.png and photo-<state>-dark.png. The canvas picture is rendered the way the window renders
 // it (the workspace's tiles on their layers).
 import CoreRaster
 import PhotoModel
@@ -49,11 +48,11 @@ func photoTiles(_ model: PhotoWorkspace) throws -> CanvasTiles? {
         model.endDrag()
     }
 
-    private func shoot(_ state: String, _ model: PhotoWorkspace, tab: PhotoPanelTab = .adjust) throws {
+    private func shoot(_ state: String, _ model: PhotoWorkspace) throws {
         let tiles = try photoTiles(model)
         for scheme in [ColorScheme.light, .dark] {
             try snapshot(
-                PhotoEditor(model: model, tiles: tiles, renderMilliseconds: 8, zoom: 1, tab: tab),
+                PhotoEditor(model: model, tiles: tiles, renderMilliseconds: 8, zoom: 1),
                 name: "photo-\(state)-\(scheme == .dark ? "dark" : "light")", scheme: scheme)
         }
     }
@@ -73,7 +72,7 @@ func photoTiles(_ model: PhotoWorkspace) throws -> CanvasTiles? {
         let red = try #require(model.selectedLayerID)
         model.setBlendMode(red, .multiply)
         model.setOpacity(red, percent: 50)
-        try shoot("layer-composite", model, tab: .layers)
+        try shoot("layer-composite", model)
     }
 
     @Test func brushAndEraserStrokes() throws {

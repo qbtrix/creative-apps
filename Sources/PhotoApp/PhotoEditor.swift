@@ -1,14 +1,19 @@
 // PhotoEditor.swift: what a Photo window shows, laid out on SuiteUI's
-// EditorShell: the top bar (PhotoTopBar.swift), the tool rail (each tool a
-// PhotoRailTool carrying the workspace's `toolHelp`), the canvas with its
-// rulers, the Adjust | Layers panel and the status line (PhotoStatusLine.swift:
-// the status message, zoom, image size, the active tool, render time). Values in, intents
-// out: it reads the workspace and sends every action to `perform`, so the
-// same view draws the live window and the snapshots. A control that can't act
-// now is disabled with a tooltip saying why, and a disabled tool's shortcut
-// key does nothing. The canvas shows
-// no scrollers: AppKit's scroller parts are unnamed buttons (the app audit's
-// unnamed check), and a zoomed image still pans by scrolling.
+// SuiteWindow: the title (the file's name, "Untitled" for an image with none,
+// else "Photo") with the save state as its subtitle, the toolbar's eight
+// commands (PhotoToolbarItem: Open, Save and Export beside the title; Undo,
+// Redo and the zoom commands trailing), the layer list in the sidebar
+// (PhotoLayerList), the canvas with its rulers in EditorDetail with the
+// floating tool palette over its leading edge while an image is open (each
+// tool a PhotoRailTool carrying the workspace's `toolHelp`) and the status
+// line under it (PhotoStatusLine, with the save status `photo.bar.saved`
+// beside it), and PhotoPanel in the inspector. Values in, intents out: it
+// reads the workspace and sends every action to `perform`, so the same view
+// draws the live window and the snapshots. A control that can't act now is
+// disabled with a tooltip saying why, and a disabled tool's shortcut key does
+// nothing. The canvas shows no scrollers: AppKit's scroller parts are unnamed
+// buttons (the app audit's unnamed check), and a zoomed image still pans by
+// scrolling.
 import PhotoModel
 import SuiteUI
 import SwiftUI
@@ -19,13 +24,17 @@ struct PhotoEditor: View {
     var renderMilliseconds: Double?
     var note: String?
     var zoom = 1.0
-    var tab = PhotoPanelTab.adjust
-    var onTab: @MainActor (PhotoPanelTab) -> Void = { _ in }
     var onViewport: @MainActor (CGSize) -> Void = { _ in }
     var onZoom: @MainActor (Double) -> Void = { _ in }
     var perform: PhotoPerform = { _ in }
     /// The Straighten sheet's choices while it is open, previewed on the canvas.
     var straighten: StraightenDraft?
+    /// The window's save status from PhotoFileArea; nil with no image or outside a window.
+    @Environment(\.photoSaveStatus) private var saveStatus
+
+    /// The commands beside the title, then the trailing ones, in toolbar order.
+    private static let documentItems: [PhotoToolbarItem] = [.open, .save, .export]
+    private static let trailingItems: [PhotoToolbarItem] = [.undo, .redo, .zoomOut, .fit, .zoomIn]
 
     #if DEBUG
     /// How many times an editor's body ran; PhotoWindowStrokeTests counts a stroke's.
@@ -36,26 +45,61 @@ struct PhotoEditor: View {
         #if DEBUG
         let _ = Self.bodyRuns += 1
         #endif
-        EditorShell {
-            PhotoTopBar(model: model, perform: perform)
-        } rail: {
-            ToolbarGroup(
-                tools: PhotoRailTool.rail(model), selected: PhotoRailTool(model.tool, in: model), style: .rail
-            ) { perform(.tool($0.tool)) }
-        } canvas: {
-            PhotoCanvas(
-                model: model, tiles: tiles, zoom: zoom, onViewport: onViewport, onZoom: onZoom, perform: perform,
-                straighten: straighten)
-                .scrollIndicators(.never)
-        } panel: {
-            PhotoPanel(model: model, tab: tab, onTab: onTab, perform: perform)
-        } status: {
-            PhotoStatusLine(model: model, zoom: zoom, note: note, renderMilliseconds: renderMilliseconds)
+        SuiteWindow(
+            title: model.documentName ?? (model.canvas == nil ? "Photo" : "Untitled"),
+            // Never nil, so the split view keeps its identity when an image opens; "" shows none.
+            subtitle: saveStatus?.title ?? "",
+            documentActions: Self.documentItems.map { action($0) },
+            actions: Self.trailingItems.map { action($0) },
+            inspectorWidth: SuiteSize.editorPanelWidth + 2 * SuiteSpacing.m
+        ) {
+            PhotoLayerList(model: model, perform: perform)
+        } content: {
+            EditorDetail {
+                PhotoCanvas(
+                    model: model, tiles: tiles, zoom: zoom, onViewport: onViewport, onZoom: onZoom, perform: perform,
+                    straighten: straighten)
+                    .scrollIndicators(.never)
+            } palette: {
+                if model.canvas != nil {
+                    ToolbarGroup(tools: PhotoRailTool.rail(model), selected: PhotoRailTool(model.tool, in: model)) {
+                        perform(.tool($0.tool))
+                    }
+                }
+            } status: {
+                HStack(spacing: 0) {
+                    if let saveStatus {
+                        PhotoSaveStatusLabel(status: saveStatus, fileName: model.documentName)
+                    }
+                    PhotoStatusLine(model: model, zoom: zoom, note: note, renderMilliseconds: renderMilliseconds)
+                }
+                .background(SuiteColor.panel)
+            }
+        } inspector: {
+            PhotoPanel(model: model, perform: perform)
         }
+    }
+
+    /// One toolbar command: the Model's title, symbol, reason and identifier, sending its intent.
+    private func action(_ item: PhotoToolbarItem) -> ToolbarAction {
+        let intent: PhotoIntent = switch item {
+        case .open: .open
+        case .save: .save
+        case .export: .export(.openSheet)
+        case .undo: .undo
+        case .redo: .redo
+        case .zoomOut: .zoomOut
+        case .fit: .fit
+        case .zoomIn: .zoomIn
+        }
+        return ToolbarAction(
+            item.title(in: model), systemImage: item.systemImage, unavailableHelp: item.unavailableHelp(in: model),
+            identifier: item.identifier
+        ) { perform(intent) }
     }
 }
 
-/// The Image menu's items, in the top bar and the menu bar.
+/// The Image menu's items, in the menu bar.
 struct PhotoImageMenu: View {
     let perform: PhotoPerform
 

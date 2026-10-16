@@ -1,9 +1,12 @@
 // PhotoApp.swift: Photo, the raster editing app. One window per image, laid
-// out as SuiteUI's EditorShell (top bar, tool rail, canvas with rulers, the
-// Adjust | Layers panel, status line) in a window whose title bar is hidden so
-// the top bar takes its place. PhotoWindow holds the state; the menus in
-// PhotoCommands reach it through a focused scene value. A window opens
-// `-PhotoWindowWidth` points wide when given (880...4096), else 1280.
+// out as SuiteUI's SuiteWindow (the layer list in the sidebar, the canvas with
+// rulers, the floating tool palette and the status line, the image header,
+// tool options, layer settings and adjustments in the inspector, the commands
+// in the window toolbar). The window keeps its title bar and follows the
+// system appearance, and View > Hide Sidebar (SidebarCommands) makes room on a
+// small screen. PhotoWindow holds the state; the menus in PhotoCommands reach
+// it through a focused scene value. A window opens `-PhotoWindowWidth` points
+// wide when given (880...4096), else 1280.
 //
 // PhotoAppDelegate (photo-documents D-10) sends files Finder hands the app
 // to an empty window or a new one (PhotoOpenQueue), and on Quit asks each
@@ -19,9 +22,11 @@ struct PhotoApp: App {
 
     var body: some Scene {
         WindowGroup(id: PhotoOpenQueue.windowID) { PhotoWindow() }
-            .windowStyle(.hiddenTitleBar)
             .defaultSize(width: CGFloat(PhotoWindow.launchOptions.windowWidth ?? 1280), height: 820)
-            .commands { PhotoCommands() }
+            .commands {
+                SidebarCommands()
+                PhotoCommands()
+            }
     }
 }
 

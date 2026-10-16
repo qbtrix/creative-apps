@@ -18,7 +18,7 @@ import Testing
         #expect(model.isPreviewData)
         let tiles = try photoTiles(model)
         try snapshot(
-            PhotoEditor(model: model, tiles: tiles, renderMilliseconds: 8, zoom: 1, tab: .adjust),
+            PhotoEditor(model: model, tiles: tiles, renderMilliseconds: 8, zoom: 1),
             name: "photo-preview-pill-dark", scheme: .dark)
         #expect(PhotoStatusLine.previewHelp == "This window shows built-in sample data, not a file on disk.")
     }
@@ -31,7 +31,7 @@ import Testing
         #expect(model.tool == .eyedropper)
         #expect(ToolOptionsSection.eyedropperHint == "Click the image to pick a color for the brush.")
         try snapshot(
-            PhotoEditor(model: model, tiles: try photoTiles(model), renderMilliseconds: 8, zoom: 1, tab: .adjust),
+            PhotoEditor(model: model, tiles: try photoTiles(model), renderMilliseconds: 8, zoom: 1),
             name: "photo-eyedropper-options-dark", scheme: .dark)
     }
 }
