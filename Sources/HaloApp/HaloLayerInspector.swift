@@ -5,8 +5,13 @@
 // a key sits at the playhead) with a KeyframeButton beside it, or under it
 // when the full titles and widest typical values (`widestTypicalText`) don't
 // fit beside it, as at the inspector's minimum width: the
-// stopwatch sends .toggleAnimation, the diamond .toggleKey. A scrub sends
-// .setProperty with the stored value and .endPropertyScrub once it ends.
+// stopwatch sends .toggleAnimation, the diamond .toggleKey. A scrub shows
+// its value in the bar and puts the window's project with it set
+// (`setProperty` on a copy, HaloLiveEdit.show) in the window's HaloLiveEdit, so only the bar and
+// the viewer's layers re-run per sample; once it ends (a drag, a key, a typed
+// value) the row sends .setProperty with the stored value and
+// .endPropertyScrub, one step. Hosted without a HaloLiveEdit, each value is
+// sent as it comes.
 // Each row is `halo.inspector.row.<raw>` and reads its value as text
 // (XCUITest reads values empty otherwise, #262); its stopwatch is
 // `halo.inspector.key.<raw>`, labelled "Animate <title>" with the key state
@@ -61,7 +66,11 @@ struct HaloLayerInspector: View {
         VStack(alignment: .leading, spacing: SuiteSpacing.xs) {
             ForEach(model.propertyRows) { row in
                 HaloPropertyRowView(
-                    row: row, model: model, refusal: rowRefusal(row.property), stacked: stacked, perform: perform)
+                    row: row, refusal: rowRefusal(row.property), stacked: stacked,
+                    rowHelp: model.unavailableHelp(for: .setProperty(row.property, row.value)),
+                    keyHelp: model.unavailableHelp(for: .toggleAnimation(row.property)), perform: perform
+                )
+                .equatable()
             }
         }
     }
@@ -75,18 +84,39 @@ struct HaloLayerInspector: View {
 }
 
 /// One TRANSFORM row: the bar, its keyframe button (beside it, or under it
-/// when `stacked`) and its refusal's caption. Beside, the bar's ideal width
+/// when `stacked`) and its refusal's caption. Its inputs are values (the
+/// Model's help strings come from the parent; `perform` is the window's,
+/// which always acts on the window's current project, so it is left out of
+/// `==`), so a frame that leaves the row as it was skips its body. Beside, the bar's ideal width
 /// is what its full title and widest typical value need with the value clear
 /// of the bar's middle, so ViewThatFits stacks rather than truncate a title
 /// or draw the marker over the value.
-private struct HaloPropertyRowView: View {
+struct HaloPropertyRowView: View, Equatable {
     let row: HaloPropertyRow
-    let model: HaloProject
     let refusal: HaloRefusal?
     let stacked: Bool
+    /// Why the bar can't act, and why the keyframe button can't; nil while it can.
+    let rowHelp: String?
+    let keyHelp: String?
     let perform: @MainActor (HaloCommand) -> Void
+    /// The bar's shown value while a scrub lasts; nil otherwise.
+    @State private var scrubbed: Double?
+    @Environment(\.haloLiveEdit) private var live
+
+    #if DEBUG
+    /// How many times a row's body ran; HaloWindowPlaybackTests counts playback's.
+    static var bodyRuns = 0
+    #endif
+
+    nonisolated static func == (a: Self, b: Self) -> Bool {
+        a.row == b.row && a.refusal == b.refusal && a.stacked == b.stacked && a.rowHelp == b.rowHelp
+            && a.keyHelp == b.keyHelp
+    }
 
     var body: some View {
+        #if DEBUG
+        let _ = Self.bodyRuns += 1
+        #endif
         VStack(alignment: .leading, spacing: 0) {
             if stacked {
                 VStack(alignment: .trailing, spacing: SuiteSpacing.xs) {
@@ -111,16 +141,29 @@ private struct HaloPropertyRowView: View {
     /// The property's bar slider.
     private var bar: some View {
         let p = row.property
-        let rowHelp = model.unavailableHelp(for: .setProperty(p, row.value))
         return InspectorSliderRow(
-            p.title, value: row.shown, in: row.shownRange, step: row.shownStep, unit: p.unit,
+            p.title, value: scrubbed ?? row.shown, in: row.shownRange, step: row.shownStep, unit: p.unit,
             decimals: p.decimals, keyed: row.keyState == .keyedHere,
-            onChange: { perform(.setProperty(p, p.stored(fromShown: $0))) },
-            onEnd: { perform(.endPropertyScrub) })
+            onChange: { scrub(to: $0) },
+            onEnd: {
+                if live != nil, let scrubbed { perform(.setProperty(p, p.stored(fromShown: scrubbed))) }
+                perform(.endPropertyScrub)
+                scrubbed = nil
+                live?.project = nil
+            })
             .disabled(rowHelp != nil)
             .help(rowHelp ?? p.title)
             .accessibilityValue(Text(verbatim: row.text))
             .haloControl(id: "halo.inspector.row.\(p.rawValue)", enabled: rowHelp == nil, help: rowHelp)
+    }
+
+    /// One scrub value: the bar shows it and the viewer draws the window's
+    /// project with it set; the window gets it at the scrub's end.
+    private func scrub(to shown: Double) {
+        let p = row.property
+        scrubbed = shown
+        guard let live else { return perform(.setProperty(p, p.stored(fromShown: shown))) }
+        live.show { $0.setProperty(p, to: p.stored(fromShown: shown)) }
     }
 
     /// The property's stopwatch and key diamond. KeyframeButton sets both
@@ -128,7 +171,6 @@ private struct HaloPropertyRowView: View {
     private var key: some View {
         let p = row.property
         let id = "halo.inspector.key.\(p.rawValue)"
-        let keyHelp = model.unavailableHelp(for: .toggleAnimation(p))
         let state = Self.keyState(row.keyState)
         return KeyframeButton(
             p.title, id: id, state: state,
