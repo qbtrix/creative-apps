@@ -4,6 +4,9 @@
 // and out points, and a long timeline whose ruler thins its ticks and labels
 // to the width (suiteui-timeline-{light,dark}.png,
 // suiteui-timeline-spans-{light,dark}.png, suiteui-timeline-long-{light,dark}.png).
+// `workAreaAndTimecode()` turns on the toolbar, the timecode ruler and a work
+// area over 20...90, so the Timecode and Work Area chips, the work-area bar and
+// the dimmed lanes outside it are drawn (suiteui-timeline-workarea-{light,dark}.png).
 // `goldens()` checks TL-6's lanes against Golden/timeline/ in the four
 // appearances: suiteui-timeline (beds, linear, eased and hold keys with their
 // tweens, picked keys on a selected track), suiteui-timeline-clips (clip
@@ -23,6 +26,17 @@ import Testing
             try snapshot(TimelineSample(tracks: TimelineSample.spans), name: "suiteui-timeline-spans-\(suffix)", scheme: scheme)
             let long = TimelineSample(tracks: TimelineSample.keyframes, duration: 20_000, frameWidth: 2)
             try snapshot(long, name: "suiteui-timeline-long-\(suffix)", scheme: scheme)
+        }
+    }
+
+    /// The toolbar's Timecode and Work Area chips on, the ruler in timecode, and the work area's dimmed lanes outside 20...90.
+    @Test func workAreaAndTimecode() throws {
+        for scheme in [ColorScheme.light, .dark] {
+            let suffix = scheme == .dark ? "dark" : "light"
+            let sample = TimelineSample(
+                tracks: TimelineSample.keyframes, duration: 120, frameWidth: 10, unit: .timecode, fps: 30,
+                workArea: 20...90, toolbar: true)
+            try snapshot(sample, name: "suiteui-timeline-workarea-\(suffix)", scheme: scheme)
         }
     }
 
@@ -74,9 +88,15 @@ private struct TimelineSample: View {
     let tracks: [TimelineTrack<String>]
     var duration = 120
     var frameWidth: CGFloat = 10
+    var unit: TimeUnit = .frames
+    var fps = 0
+    var workArea: ClosedRange<Int>? = nil
+    var toolbar = false
 
     var body: some View {
-        TimelineStrip(tracks: tracks, duration: duration, frameWidth: frameWidth, playhead: 30)
+        TimelineStrip(
+            tracks: tracks, duration: duration, frameWidth: frameWidth, playhead: 30,
+            unit: unit, fps: fps, workArea: workArea, toolbar: toolbar)
             .background(SuiteColor.surface, in: RoundedRectangle(cornerRadius: SuiteRadius.medium))
             .clipShape(RoundedRectangle(cornerRadius: SuiteRadius.medium))
             .padding(SuiteSpacing.xxl)
