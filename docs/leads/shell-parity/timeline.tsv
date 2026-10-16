@@ -47,3 +47,5 @@ utc	stage	event	ref	note
 2026-10-16T20:21Z	4	slice-done	DP-a	38956034097
 2026-10-16T20:22Z	4	stopped	#1572 #1573	CI findings -> gap (round cap)
 2026-10-16T20:24Z	4	pr-opened	#1610	DS-5 feature-done
+2026-10-16T20:26Z	4	pr-merged	#1610	DS-5 feature-done
+2026-10-16T20:53Z	4	heartbeat	38960992806	scoped design at 58ac7ac9 (has #1337, not #1610): DesignJourneyTests green, shell journeys red only on #1456 geometry; waiting for a successful run containing #1610
