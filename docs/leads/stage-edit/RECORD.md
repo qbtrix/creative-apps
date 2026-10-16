@@ -4,7 +4,7 @@ Issue: #1514 · Packet: docs/blueprints/flare/features/stage-edit.md
 Run: act-1a146828a2d-9sza · Session: claude/feature-lead-flare-line-yzaus7 · Started: 2026-10-16T18:20Z
 Stage: 0 setup (waiting on dependency)
 Base: 1d68b2288cfe9c31e6b7cea460f5eb1ada5ddd18 (origin/main; origin/dev is 1910bff6)
-Next: wait for draw-key-save (#1365) to close, then re-run stage 0 step 4 and continue from stage 1
+Next: supervisor to confirm whether #1365 (open, never closed by the lane) or the built wave.json satisfies Depends on; then re-run stage 0 step 4 and continue from stage 1
 
 ## Slices
 No `## Slices` table: v2 packet, v2 loop applies.
