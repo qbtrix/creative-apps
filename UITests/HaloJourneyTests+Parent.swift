@@ -11,7 +11,8 @@
 // "Undo Set Parent". The Parent and Blend pickers are InspectorPickerRows: a
 // Menu (a menu button labelled "Parent" or "Blend" under `suite.inspector`)
 // whose row carries `halo.inspector.parent` / `.blend` and the current title
-// as its value. Positions come from the TRANSFORM rows
+// as its value; its menu is the one on screen (`shownMenuTitles`), never
+// `app.menus.firstMatch`, which is the closed Apple menu. Positions come from the TRANSFORM rows
 // (`halo.inspector.row.x`, a slider whose value is its position, 160, or
 // the row's text, "160.0 px"). A row's bar opens its typing
 // field on a click, as H-J6 types into Rotation. Undo stays history-files':
@@ -108,17 +109,19 @@ extension HaloJourneyTests {
         XCTAssert(picker.waitForExistence(timeout: 5), "no \(label) menu (\(id))")
         XCTAssert(picker.isEnabled, "the \(label) menu is disabled")
         picker.click()
-        let menu = halo.app.menus.firstMatch
-        XCTAssert(menu.waitForExistence(timeout: 3), "clicking \(label) opened no menu")
-        let items = menu.descendants(matching: .menuItem)
-        XCTAssert(items.firstMatch.waitForExistence(timeout: 3), "the \(label) menu shows no items")
-        return items.allElementsBoundByIndex.map { $0.title }
+        guard let titles = halo.shownMenuTitles() else {
+            XCTFail("clicking \(label) opened no menu")
+            return []
+        }
+        XCTAssertFalse(titles.isEmpty, "the \(label) menu shows no items")
+        return titles
     }
 
     /// Clicks the open menu's item `title`; the menu closes.
     @MainActor private func parentChooseItem(_ title: String, _ halo: Journey) {
-        let item = halo.app.menus.firstMatch.descendants(matching: .menuItem)
-            .matching(NSPredicate(format: "title == %@", title)).firstMatch
+        XCTAssert(halo.shownMenuTitles()?.contains(title) == true, "the open menu has no \(title)")
+        // The menu bar's menus hold no item with a layer's or blend's title.
+        let item = halo.app.menuItems.matching(NSPredicate(format: "title == %@", title)).firstMatch
         XCTAssert(item.waitForExistence(timeout: 3), "the open menu has no \(title)")
         item.click()
         halo.menusClosed()

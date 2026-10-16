@@ -5,10 +5,13 @@
 // Layer > Rename…, drags a row to the bottom, brings it forward, deletes it,
 // then deletes every layer with ⌫ from the timeline. Rows are found by their
 // `halo.layer.row.<layer id>` identifiers (the fixture's ids; the copy takes
-// the next unused number, 5), the artboard by its `halo.viewer` value (the
-// Model's viewerSummary). Undo stays disabled until history-files lands, so
+// the next unused number, 5), the artboard by its `halo.viewer.summary`
+// label (the Model's viewerSummary; values read empty, #262). Rig's row is
+// below the inspector's fold at 640 pt, so the inspector is scrolled to it
+// before the row drag. Undo stays disabled until history-files lands, so
 // each step reads the Edit menu's first item title and never presses ⌘Z.
-// A disabled menu item's reason is its help tag, read by hovering it. One
+// A disabled menu item's reason is its help, read from the window's hidden
+// `halo.menu.reasons` readout (XCUITest reads a help tag as no text). One
 // shot per step, `halo-layers-<step>`, plus the rename prompt
 // (`halo-layers-4-prompt`), each taken once every menu it opened has gone.
 import XCTest
@@ -73,8 +76,10 @@ final class HaloLayersJourneyTests: XCTestCase {
         expectUndo("Undo Rename Layer", halo)
         halo.shot("layers-4")
 
-        // 5. Drag Badge 2 below Rig.
+        // 5. Drag Badge 2 below Rig. Rig's row sits below the inspector's
+        // fold at 640 pt, so scroll to it first, as a person would.
         let rigRow = row(Self.rig, in: halo)
+        scrollInspector(toShow: rigRow, halo)
         row(Self.badgeCopy, in: halo).coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
             .press(forDuration: 0.6, thenDragTo: rigRow.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.9)))
         expectRows([Self.titleLayer, Self.badge, Self.background, Self.rig, Self.badgeCopy], in: halo)
@@ -135,15 +140,29 @@ final class HaloLayersJourneyTests: XCTestCase {
 
     /// The list shows exactly `ids`, top first, within three seconds.
     @MainActor private func expectRows(_ ids: [String], in halo: Journey) {
-        XCTAssert(waitFor { self.rowIDs(halo) == ids }, "the rows are \(rowIDs(halo)), not \(ids)")
+        let shown = waitFor { self.rowIDs(halo) == ids }
+        // Which element held the keys, when a key didn't reach the list.
+        if !shown { halo.attachTree(as: "layers-rows-tree") }
+        XCTAssert(shown, "the rows are \(rowIDs(halo)), not \(ids)")
     }
 
-    /// The artboard (`halo.viewer`) reads `summary`.
+    /// The artboard's `halo.viewer.summary` label reads `summary` (values read empty, #262).
     @MainActor private func expectArtboard(_ summary: String, _ halo: Journey) {
-        let artboard = halo.element("halo.viewer")
-        XCTAssert(
-            waitFor { (artboard.value as? String) == summary },
-            "the artboard reads \(String(describing: artboard.value)), not \(summary)")
+        let artboard = halo.element("halo.viewer.summary")
+        XCTAssert(waitFor { artboard.label == summary }, "the artboard reads \(artboard.label), not \(summary)")
+    }
+
+    /// Scrolls the inspector down until `element` lies whole inside the
+    /// window. `suite.inspector` is the inspector's scroll view itself
+    /// (HaloCompositionInspector's ScrollView carries SuiteWindow's id).
+    @MainActor private func scrollInspector(toShow element: XCUIElement, _ halo: Journey) {
+        let window = halo.app.windows.firstMatch.frame
+        let inspector = halo.element("suite.inspector")
+        XCTAssert(inspector.waitForExistence(timeout: 5), "no inspector (suite.inspector)")
+        for _ in 0..<10 where !window.contains(element.frame) {
+            inspector.scroll(byDeltaX: 0, deltaY: -40)
+        }
+        XCTAssert(window.contains(element.frame), "scrolling the inspector didn't bring \(element.frame) into \(window)")
     }
 
     /// Opens `menu` and clicks its enabled item `item`.
@@ -155,17 +174,22 @@ final class HaloLayersJourneyTests: XCTestCase {
         expectClosed(menu, halo)
     }
 
-    /// `menu`'s item `item` is disabled and its help tag reads `help`.
+    /// `menu`'s item `item` is disabled and says `help`. XCUITest reads a
+    /// menu item's help tag as no text (run 38808431710, #1253: a HelpTag with no
+    /// label, title or value), so the reason is read from the window's
+    /// hidden `halo.menu.reasons` readout, "<item>: <help>", which lists the
+    /// Layer menu's items as the menu shows them.
     @MainActor private func expectDisabled(_ item: String, in menu: String, help: String, _ halo: Journey) {
         let entry = openMenu(menu, halo).menuItems[item]
         XCTAssert(entry.waitForExistence(timeout: 3), "the \(menu) menu has no \(item)")
         XCTAssertFalse(entry.isEnabled, "\(menu) > \(item) is enabled")
-        entry.hover()
-        let tag = halo.app.helpTags.matching(
-            NSPredicate(format: "label CONTAINS %@ OR title CONTAINS %@ OR value CONTAINS %@", help, help, help))
-        XCTAssert(tag.firstMatch.waitForExistence(timeout: 5), "\(menu) > \(item) doesn't say \(help)")
         halo.press(.escape)
         expectClosed(menu, halo)
+        let reasons = halo.element("halo.menu.reasons")
+        let line = "\(item): \(help)"
+        XCTAssert(
+            waitFor { reasons.label.split(separator: "\n").contains { $0 == line } },
+            "\(menu) > \(item) doesn't say \(help): halo.menu.reasons reads \(reasons.label)")
     }
 
     /// The Edit menu's first item reads `title`; the menu is closed again.
