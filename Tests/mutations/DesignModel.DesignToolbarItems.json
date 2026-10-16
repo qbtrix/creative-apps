@@ -1,0 +1,44 @@
+[
+  {
+    "label": "Save is enabled with no file open",
+    "file": "Sources/DesignModel/DesignToolbarItems.swift",
+    "find": "        case .save, .zoomOut, .fit, .zoomIn:\n            return workspace.isOpen ? nil : Self.noFile",
+    "replace": "        case .save:\n            return nil\n        case .zoomOut, .fit, .zoomIn:\n            return workspace.isOpen ? nil : Self.noFile",
+    "tests": "DesignToolbarItemsTests"
+  },
+  {
+    "label": "Undo's help ignores canUndo",
+    "file": "Sources/DesignModel/DesignToolbarItems.swift",
+    "find": "return workspace.canUndo ? nil : \"Nothing to undo.\"",
+    "replace": "return nil",
+    "tests": "DesignToolbarItemsTests"
+  },
+  {
+    "label": "Redo reads canUndo",
+    "file": "Sources/DesignModel/DesignToolbarItems.swift",
+    "find": "return workspace.canRedo ? nil : \"Nothing to redo.\"",
+    "replace": "return workspace.canUndo ? nil : \"Nothing to redo.\"",
+    "tests": "DesignToolbarItemsTests"
+  },
+  {
+    "label": "Undo's identifier drifts from the journeys' design.bar.undo",
+    "file": "Sources/DesignModel/DesignToolbarItems.swift",
+    "find": "case .undo: \"design.bar.undo\"",
+    "replace": "case .undo: \"design.bar.history-undo\"",
+    "tests": "DesignToolbarItemsTests"
+  },
+  {
+    "label": "Undo's title drops the edit's name",
+    "file": "Sources/DesignModel/DesignToolbarItems.swift",
+    "find": "case .undo: workspace.undoActionName",
+    "replace": "case .undo: \"Undo\"",
+    "tests": "DesignToolbarItemsTests"
+  },
+  {
+    "label": "Undo stays on while text is being edited",
+    "file": "Sources/DesignModel/DesignToolbarItems.swift",
+    "find": "            if workspace.editingTextID != nil { return Self.finishEditing }\n            return workspace.canUndo",
+    "replace": "            return workspace.canUndo",
+    "tests": "DesignToolbarItemsTests"
+  }
+]
