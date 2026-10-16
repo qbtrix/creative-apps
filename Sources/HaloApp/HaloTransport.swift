@@ -9,7 +9,8 @@
 // `model.playback.playing`, stopped otherwise or once the transport leaves
 // the screen; each refresh sends `.tick(now)` through `perform`. Each
 // control takes at least a SuiteSize.pillHit square (24 pt) to click, not
-// just its 10 pt glyph, until TransportCapsule (#340) replaces this row.
+// just its 10 pt glyph, the squares edge to edge so the row stays narrow
+// enough for the status bar, until TransportCapsule (#340) replaces it.
 import HaloModel
 import SuiteUI
 import SwiftUI
@@ -37,7 +38,7 @@ struct HaloTransport: View {
     ]
 
     var body: some View {
-        HStack(spacing: SuiteSpacing.xs) {
+        HStack(spacing: 0) {
             ForEach(Self.items) { item in
                 let help = model.unavailableHelp(for: item.command)
                 control(for: item)
