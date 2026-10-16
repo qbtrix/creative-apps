@@ -43,3 +43,7 @@ utc	stage	event	ref	note
 2026-10-16T19:22Z	3	heartbeat	38949684833	design run in progress
 2026-10-16T19:43Z	3	heartbeat	38949684833	design run red: testShellLight/Dark only; next 38956034097 queued
 2026-10-16T20:04Z	3	heartbeat	38956034097	design run still queued
+2026-10-16T20:28Z	3	slice-done	CT-b	run 38956769306
+2026-10-16T20:28Z	3	slice-done	CT-c	run 38956769306
+2026-10-16T20:28Z	3	slice-done	CT-d	run 38956769306
+2026-10-16T20:28Z	4	stage-end	#1324	Belt-Contact-Sheet posted; done

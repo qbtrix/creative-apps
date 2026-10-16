@@ -2,17 +2,17 @@
 
 Issue: #1324 · Packet: docs/blueprints/design/features/design-contracts.md
 Run: act-1a14478b14e-i8ep · Session: session_01DKQiisBimhgRgEM46b1U5E · Started: 2026-10-16T11:29Z
-Stage: 3 polling
+Stage: done
 Base: fb72b7e52405a824fabe34c6c408fcc00d242da2
-Next: wait for the scoped CI run app=design (next after 38936731510, red) or a full CI run containing #1410 (165933fc) to go green; every Design run since #1391 is red on testDrawShapesAddTextAndSave, testShellLight, testShellDark (shell-parity #1325, dev-red #1393); then post Belt-Slice-Done CT-b, CT-c, CT-d and Belt-Contact-Sheet
+Next: nothing; feature done (Belt-Contact-Sheet posted on #1324 for run 38956769306)
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | rounds | state | run |
 |---|---|---|---|---|---|---|---|
 | CT-a | old files open with defaults; corner radius saves and reopens | D0-0, D0-2.1 (#1304), D0-1 | MJ1 | nothing | 0 | done | 38905490687 |
-| CT-b | fakes act; live says "isn't built yet." | D0-2.2 (#1307), D0-2.3, D0-2.4 (#1312), D0-2.5 | MJ2 | CT-a | 0 | merged | |
-| CT-c | help law on every fake and stub; four fixtures | D0-2.6, D0-2b, D0-4a | MJ3 | CT-b; CT-a | 0 | merged | |
-| CT-d | each command one named step; one-layer edits keep today's methods | D0-3a, D0-3b | MJ4 | CT-b | 0 | merged | |
+| CT-b | fakes act; live says "isn't built yet." | D0-2.2 (#1307), D0-2.3, D0-2.4 (#1312), D0-2.5 | MJ2 | CT-a | 0 | done | 38956769306 |
+| CT-c | help law on every fake and stub; four fixtures | D0-2.6, D0-2b, D0-4a | MJ3 | CT-b; CT-a | 0 | done | 38956769306 |
+| CT-d | each command one named step; one-layer edits keep today's methods | D0-3a, D0-3b | MJ4 | CT-b | 0 | done | 38956769306 |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
