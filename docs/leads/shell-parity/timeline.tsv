@@ -6,3 +6,5 @@ utc	stage	event	ref	note
 2026-10-16T11:56Z	3	pr-merged	#1335	DS-1 DesignToolbarItem
 2026-10-16T11:56Z	3	pr-merged	#1330	DS-4 shell journey, skipped
 2026-10-16T13:20Z	3	fix-round	#1329	DS-2 macOS build fix (not a finding round)
+2026-10-16T13:13Z	3	pr-merged	#1329	DS-2 sidebar action row; DP-a merged
+2026-10-16T13:40Z	3	stage-start	wave 2	DS-3 base 7773dc3
