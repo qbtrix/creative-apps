@@ -8,3 +8,6 @@ utc	stage	event	ref	note
 2026-10-16T12:12Z	3	pr-merged	#1341	EZ-2 key selection
 2026-10-16T12:17Z	3	pr-merged	#1343	EZ-7 timeline lane keys + menu
 2026-10-16T12:22Z	3	stage-start	wave 2	EZ-3 EZ-5 on 8ecd8b9
+2026-10-16T12:20Z	3	pr-opened	#1351	EZ-3 setEasing, handles, HF-4, Model journey
+2026-10-16T12:20Z	3	pr-opened	#1352	EZ-5 easing availability
+2026-10-16T12:44Z	3	heartbeat	#1351 #1352	waiting on lane macOS builds
