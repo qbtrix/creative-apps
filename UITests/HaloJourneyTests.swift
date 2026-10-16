@@ -13,9 +13,13 @@
 // `.haloControl` registers too. testEveryMenuOpens checks the Composition,
 // Layer and Animation menus hold exactly their items and File and Edit hold
 // Halo's. testLayoutAtWidths relaunches at five window sizes with a layer
-// selected (blueprint 7.3): L1 is the audit on each `halo-layout-<w>` shot, L2
-// finds the artboard in the viewer's pixels (white on the surround) and checks
-// it is centered within 1 pt with its 16:9 aspect within 0.5%, L6 that it is
+// selected from its timeline lane (blueprint 7.3): L1 is the audit on each
+// `halo-layout-<w>` shot, L2
+// takes the artboard as the drawn layers' frame (`halo.viewer.canvas`) and
+// checks it is centered within 1 pt (across: the surround on its two sides,
+// measured in the screen's pixels to where each panel starts, as a person
+// sees it, or the viewer's frame when a panel is off the screen) with its
+// 16:9 aspect within 0.5%, L6 that it is
 // at least 160 pt wide at the minimum size; it also checks every halo.*
 // control lies inside the window and the viewer is narrower at 880 than at
 // 1024 (the content column follows the window). Every other journey launches
@@ -219,12 +223,17 @@ final class HaloJourneyTests: XCTestCase {
             if size.width <= screen.width {
                 XCTAssertEqual(window.frame.width, size.width, accuracy: 2, "-HaloWindowSize \(width) wasn't the window's width")
             }
-            let row = halo.element("halo.layer.row.comp-1-layer-2")
-            XCTAssert(row.waitForExistence(timeout: 5), "no Ball row in the inspector's layers at \(width)")
-            row.click()
+            // Ball's timeline lane, not its inspector row: from 1280 up the
+            // window is wider than the runner's 1024 pt display and the
+            // inspector is off it, where nothing can be clicked (run
+            // 38848092018: no hit point for suite.inspector at x 1064).
+            let lane = halo.app.descendants(matching: .any).matching(
+                NSPredicate(format: "identifier == 'halo.timeline.track' AND label == 'Ball'")).firstMatch
+            XCTAssert(lane.waitForExistence(timeout: 5), "no Ball lane in the timeline at \(width)")
+            lane.click()
             let ball = halo.app.descendants(matching: .any).matching(
                 NSPredicate(format: "identifier == 'halo.inspector.header' AND label CONTAINS %@", "Frames 0–47")).firstMatch
-            XCTAssert(ball.waitForExistence(timeout: 5), "clicking the Ball row selected no layer at \(width)")
+            XCTAssert(ball.waitForExistence(timeout: 5), "clicking Ball's lane selected no layer at \(width)")
             halo.shot("layout-\(width)")
             let outside = haloControls(in: halo).compactMap { control -> String? in
                 guard let shown = visibleFrame(of: control, in: window) else { return nil }
@@ -241,17 +250,32 @@ final class HaloJourneyTests: XCTestCase {
                     "a timeline track \(track.frame) starts left of the timeline \(timeline) at \(width): it runs under the sidebar")
             }
             assertLanesFit(halo, timeline: timeline, width: width)
-            guard let artboard = artboardFrame(in: halo.element("halo.viewer")) else {
-                XCTFail("no artboard found in the viewer at \(width)")
+            // The artboard is the drawn layers' frame (`halo.viewer.canvas`,
+            // laid out on it exactly as CanvasSurface lays out the artboard).
+            // Its pixels can't stand in: the surround's own shading, the
+            // keyed fixture's red Floor and its antialiased edges each threw
+            // a pixel measure off by 2 to 17 pt in runs 38823293728 to
+            // 38838721076, and at 880 it is 175.5 pt tall, too fine for whole
+            // pixels at 0.5%.
+            let viewer = halo.element("halo.viewer").frame
+            let board = halo.element("halo.viewer.canvas").frame
+            guard board.width > 0, board.height > 0 else {
+                XCTFail("no drawn artboard (halo.viewer.canvas) in the viewer at \(width)")
                 continue
             }
-            let viewer = halo.element("halo.viewer").frame
-            XCTAssertEqual(artboard.midX, viewer.width / 2, accuracy: 1, "L2: the artboard isn't centered across at \(width)")
-            XCTAssertEqual(artboard.midY, viewer.height / 2, accuracy: 1, "L2: the artboard isn't centered down at \(width)")
-            let aspect = artboard.height > 0 ? artboard.width / artboard.height : 0
+            if let side = sideMargins(of: board, viewer: viewer) {
+                XCTAssertEqual(side.left, side.right, accuracy: 2,
+                    "L2: the artboard isn't centered across at \(width): \(side.left) pt of surround left, \(side.right) pt right")
+            } else {
+                // A panel's edge is off the screen (the window is wider than
+                // the runner's display): judge against the viewer's frame.
+                XCTAssertEqual(board.midX, viewer.midX, accuracy: 1, "L2: the artboard isn't centered across at \(width)")
+            }
+            XCTAssertEqual(board.midY, viewer.midY, accuracy: 1, "L2: the artboard isn't centered down at \(width)")
+            let aspect = board.width / board.height
             XCTAssertEqual(aspect / (1920.0 / 1080.0), 1, accuracy: 0.005, "L2: the artboard's aspect is \(aspect) at \(width)")
             if size == sizes.first {
-                XCTAssertGreaterThanOrEqual(artboard.width, 160, "L6: the artboard is under 160 pt wide at the minimum")
+                XCTAssertGreaterThanOrEqual(board.width, 160, "L6: the artboard is under 160 pt wide at the minimum")
             }
         }
         // The content follows the window: nothing in it holds the column at a fixed width.
@@ -329,24 +353,23 @@ final class HaloJourneyTests: XCTestCase {
     }
 
     /// #1019: the lanes fit the width that shows. The ruler spans every frame
-    /// plus the trailing room, so it ends at its lanes' scroll view's edge (no
-    /// frame clipped past it, none short of it) and within the trailing room
-    /// of the timeline's own trailing edge.
+    /// plus the trailing room, so it ends at the timeline's visible trailing
+    /// edge (no frame clipped past it, none short of it). That edge is the
+    /// timeline's own frame, which XCUITest reads clipped to the column the
+    /// inspector leaves. The lanes' horizontal scroll view can't stand in:
+    /// SwiftUI runs a scroll view into the safe area along its axis, so it
+    /// reaches under the inspector with its content inset by the inspector's
+    /// width, and its accessibility frame takes that inset off the part
+    /// already clipped at the inspector, reading 240 pt narrower than the
+    /// lanes that show (run 38799320916: 151 pt for 391 pt of lanes).
     @MainActor private func assertLanesFit(_ halo: Journey, timeline: CGRect, width: Int) {
         let container = halo.element("halo.timeline")
-        let named = NSPredicate(format: "label == 'Frame Ruler'")
-        let ruler = container.descendants(matching: .any).matching(named).firstMatch
+        let ruler = container.descendants(matching: .any).matching(NSPredicate(format: "label == 'Frame Ruler'")).firstMatch
         XCTAssert(ruler.waitForExistence(timeout: 5), "no Frame Ruler in the timeline at \(width)")
-        let lanes = container.descendants(matching: .scrollView).containing(named).allElementsBoundByIndex
-            .map(\.frame).min { $0.width < $1.width }
-        guard let lanes else { return XCTFail("the Frame Ruler is in no scroll view at \(width)") }
         let end = ruler.frame.maxX
         XCTAssertLessThanOrEqual(
-            end, lanes.maxX + 1, "the lanes run \(end - lanes.maxX) pt past their edge at \(width): the last frames are cut off")
-        XCTAssertGreaterThanOrEqual(end, lanes.maxX - 2, "the lanes stop \(lanes.maxX - end) pt short of their edge at \(width)")
-        // SuiteSpacing.xl, the layout's trailing room, and 2 pt of rounding.
-        XCTAssertGreaterThanOrEqual(
-            end, timeline.maxX - 24 - 2, "the ruler ends at \(end), short of the timeline \(timeline) at \(width)")
+            end, timeline.maxX + 1, "the lanes run \(end - timeline.maxX) pt past the timeline \(timeline) at \(width): the last frames are cut off")
+        XCTAssertGreaterThanOrEqual(end, timeline.maxX - 2, "the lanes stop \(timeline.maxX - end) pt short of the timeline \(timeline) at \(width)")
     }
 
     /// The part of `control` that shows: its frame cut by every scroll view
@@ -411,44 +434,34 @@ final class HaloJourneyTests: XCTestCase {
         return ids
     }
 
-    /// The artboard's frame in `viewer`, in points from its top left, found in
-    /// its pixels: each pixel's share of the way from the surround's gray (a
-    /// corner) to the artboard's white (the center), summed along the center
-    /// row and column, so an antialiased edge counts in part. Nil when the
-    /// center doesn't stand out from the corner.
-    @MainActor private func artboardFrame(in viewer: XCUIElement) -> CGRect? {
-        guard viewer.waitForExistence(timeout: 5), viewer.frame.width > 0,
-            let image = NSBitmapImageRep(data: viewer.screenshot().pngRepresentation)?.cgImage,
-            let srgb = CGColorSpace(name: CGColorSpace.sRGB)
+    /// The surround's width left and right of `artboard` (screen points),
+    /// along the screen's row through its middle: from the artboard to the
+    /// sharpest step in the screen's pixels between it and `viewer`'s edge
+    /// (within 8 pt), where a panel starts; 12 pt nearest the artboard are
+    /// its shadow and left out. This is the centering a person sees, between
+    /// the panels, rather than against XCUITest's frame for the viewer, which
+    /// is its split view column clipped to the window. Nil when either range
+    /// runs off the screen. The screen, not the window: a window wider than
+    /// the display shoots only its visible part (1012 of 1024 pt in run
+    /// 38843147593), which no scale from its frame maps back.
+    @MainActor private func sideMargins(of artboard: CGRect, viewer: CGRect) -> (left: Double, right: Double)? {
+        let display = NSScreen.screens.first?.frame.size ?? .zero
+        guard display.width > 0, let shot = ShotPixels(XCUIScreen.main.screenshot()) else { return nil }
+        let scale = Double(shot.width) / Double(display.width)
+        let y = Int((Double(artboard.midY) * scale).rounded())
+        guard (0..<shot.height).contains(y) else { return nil }
+        func px(_ x: CGFloat) -> Int { Int((Double(x) * scale).rounded()) }
+        /// The point just past the sharpest step between `from` and `to`.
+        func step(_ from: CGFloat, _ to: CGFloat) -> Double? {
+            let (a, b) = (px(from), px(to))
+            guard a >= 0, b < shot.width - 1, a < b else { return nil }
+            let jump = { (x: Int) in abs(shot.gray(x + 1, y) - shot.gray(x, y)) }
+            guard let i = (a..<b).max(by: { jump($0) < jump($1) }) else { return nil }
+            return Double(i + 1) / scale
+        }
+        guard let left = step(viewer.minX - 8, artboard.minX - 12), let right = step(artboard.maxX + 12, viewer.maxX + 8)
         else { return nil }
-        let (width, height) = (image.width, image.height)
-        guard width > 2, height > 2 else { return nil }
-        var rgba = [UInt8](repeating: 0, count: width * height * 4)
-        let drawn = rgba.withUnsafeMutableBytes { bytes -> Bool in
-            guard let context = CGContext(
-                data: bytes.baseAddress, width: width, height: height, bitsPerComponent: 8, bytesPerRow: width * 4,
-                space: srgb, bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)
-            else { return false }
-            context.draw(image, in: CGRect(x: 0, y: 0, width: width, height: height))
-            return true
-        }
-        guard drawn else { return nil }
-        func gray(_ x: Int, _ y: Int) -> Double {
-            let i = (y * width + x) * 4
-            return (Double(rgba[i]) + Double(rgba[i + 1]) + Double(rgba[i + 2])) / 3
-        }
-        let surround = gray(1, 1), board = gray(width / 2, height / 2)
-        guard abs(board - surround) > 8 else { return nil }
-        func share(_ x: Int, _ y: Int) -> Double { min(max((gray(x, y) - surround) / (board - surround), 0), 1) }
-        let across = (0..<width).map { share($0, height / 2) }
-        let down = (0..<height).map { share(width / 2, $0) }
-        let (sumX, sumY) = (across.reduce(0, +), down.reduce(0, +))
-        guard sumX > 0, sumY > 0 else { return nil }
-        let midX = zip(across.indices, across).reduce(0) { $0 + (Double($1.0) + 0.5) * $1.1 } / sumX
-        let midY = zip(down.indices, down).reduce(0) { $0 + (Double($1.0) + 0.5) * $1.1 } / sumY
-        let scale = Double(width) / Double(viewer.frame.width)
-        return CGRect(
-            x: (midX - sumX / 2) / scale, y: (midY - sumY / 2) / scale, width: sumX / scale, height: sumY / scale)
+        return (Double(artboard.minX) - left, right - Double(artboard.maxX))
     }
 
     private func attach(_ value: some Encodable, as name: String) {
@@ -459,5 +472,36 @@ final class HaloJourneyTests: XCTestCase {
         attachment.name = name
         attachment.lifetime = .keepAlways
         add(attachment)
+    }
+}
+
+/// A screenshot as sRGB, read as gray levels, top row first.
+private struct ShotPixels {
+    let width: Int
+    let height: Int
+    private let rgba: [UInt8]
+
+    @MainActor init?(_ screenshot: XCUIScreenshot) {
+        guard let image = NSBitmapImageRep(data: screenshot.pngRepresentation)?.cgImage,
+            let srgb = CGColorSpace(name: CGColorSpace.sRGB)
+        else { return nil }
+        (width, height) = (image.width, image.height)
+        var rgba = [UInt8](repeating: 0, count: image.width * image.height * 4)
+        let drawn = rgba.withUnsafeMutableBytes { bytes -> Bool in
+            guard let context = CGContext(
+                data: bytes.baseAddress, width: image.width, height: image.height, bitsPerComponent: 8,
+                bytesPerRow: image.width * 4, space: srgb, bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)
+            else { return false }
+            context.draw(image, in: CGRect(x: 0, y: 0, width: image.width, height: image.height))
+            return true
+        }
+        guard drawn else { return nil }
+        self.rgba = rgba
+    }
+
+    /// The mean of a pixel's red, green and blue.
+    func gray(_ x: Int, _ y: Int) -> Double {
+        let i = (y * width + x) * 4
+        return (Double(rgba[i]) + Double(rgba[i + 1]) + Double(rgba[i + 2])) / 3
     }
 }

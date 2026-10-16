@@ -6,7 +6,10 @@
 // field holding the layer's name, sends Rename's draft as .renameLayer(id,
 // name) and clears `request` on Rename or Cancel. A blank name is the Model's
 // refusal, shown under the layer's row. Clearing the selection has no Model
-// method yet, so it does nothing (its availability says why).
+// method yet, so it does nothing (its availability says why). The hook also
+// publishes the Layer menu's reasons as the hidden `halo.menu.reasons`
+// readout (HaloReadout.swift), since XCUITest reads a menu item's help tag
+// as no text.
 import HaloModel
 import SwiftUI
 
@@ -28,14 +31,18 @@ extension HaloWindow {
     }
 
     func layersScene(_ content: some View) -> some View {
-        content.modifier(RenameLayerPrompt(
-            layerID: renamingLayerID,
-            name: { id in model.selectedComposition?.layers.first(where: { $0.id == id })?.name ?? "" },
-            onRename: { id, name in
-                request = nil
-                perform(.renameLayer(id, name))
-            },
-            onDismiss: { if renamingLayerID != nil { request = nil } }))
+        content
+            .background(alignment: .topLeading) {
+                HaloReadoutElement(identifier: "halo.menu.reasons", text: model.layerMenuReasons)
+            }
+            .modifier(RenameLayerPrompt(
+                layerID: renamingLayerID,
+                name: { id in model.selectedComposition?.layers.first(where: { $0.id == id })?.name ?? "" },
+                onRename: { id, name in
+                    request = nil
+                    perform(.renameLayer(id, name))
+                },
+                onDismiss: { if renamingLayerID != nil { request = nil } }))
     }
 
     /// The layer the Rename Layer prompt is for, while `request` asks for it.

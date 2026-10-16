@@ -4,7 +4,9 @@
 // the two moves are off at the end they would move past (the Model's moves do
 // nothing there). Rename, move and pick act on a layer the composition has.
 // Clearing the selection has no Model method, so it stays off with its
-// reason. Linux-safe.
+// reason. `layerMenuReasons` lists the Layer menu's top items as the menu
+// shows them, for the journeys' hidden `halo.menu.reasons` readout (XCUITest
+// reads a menu item's help tag as no text). Linux-safe.
 
 extension HaloProject {
     /// Nil when `command` can act now; otherwise why not.
@@ -28,5 +30,13 @@ extension HaloProject {
         default:
             return nil
         }
+    }
+
+    /// The Layer menu's top items, one line each: "Send Backward: This layer
+    /// is already at the bottom." while one can't act, its title while it can.
+    public var layerMenuReasons: String {
+        let items: [HaloCommand] = [.duplicateLayer, .beginRenameLayer, .deleteLayer, .bringLayerForward, .sendLayerBackward]
+        return items.map { command in unavailableHelp(for: command).map { "\(command.title): \($0)" } ?? command.title }
+            .joined(separator: "\n")
     }
 }

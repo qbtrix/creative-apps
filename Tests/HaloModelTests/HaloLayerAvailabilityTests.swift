@@ -96,3 +96,13 @@ func noLayerCommandIsAStub(services: HaloServices) throws {
     #expect(project.title(for: .undo) == "Undo Delete Layer")
     #expect(project.selectedComposition?.layers.map(\.name) == ["Title", "Badge", "Background", "Rig"])
 }
+
+@Test func layerMenuReasonsReadAsTheMenuSaysThem() throws {
+    let bottom = try threeLayers(.fake, select: "Rig")
+    #expect(bottom.layerMenuReasons.split(separator: "\n") == [
+        "Duplicate", "Rename…", "Delete", "Bring Forward", "Send Backward: This layer is already at the bottom.",
+    ])
+    let none = try threeLayers(.fake, select: nil)
+    #expect(none.layerMenuReasons.split(separator: "\n").last == "Send Backward: Select a layer first.")
+    #expect(none.layerMenuReasons.contains("Delete: Select a layer first."))
+}

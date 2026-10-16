@@ -8,8 +8,10 @@
 // right (docs/design.md, Studio rows and chips). Both share the rules: drag
 // sideways to change the value (one step per point, Shift ten, Option a
 // tenth; a modifier change re-anchors so nothing jumps), click or press
-// Return to type (Return or a click away commits, Escape cancels), arrows
-// step with the same modifiers, and the bar takes Home and End. Hover shows a dotted underline under the
+// Return to type (Return or a click away commits, Escape cancels; after
+// Return or Escape the field has the keys again), arrows step with the same
+// modifiers, and the bar takes Home and End. A click or drag gives it the
+// keys (focus interactions `.edit`), with or without keyboard navigation. Hover shows a dotted underline under the
 // value; focus draws the 2 pt accent ring 1 pt outside; disabled draws at 40%.
 // A ScrubTrack lets the bar move along a non-linear track (Photo's log gamma).
 // Values go out through `onChange` already clamped and snapped (ScrubValue,
@@ -109,7 +111,10 @@ public struct ScrubField: View {
         .opacity(isEnabled ? 1 : SuiteColor.disabledOpacity)
         .pointerStyle(editing || !isEnabled ? nil : .columnResize)
         .gesture(scrub, isEnabled: !editing && isEnabled)
-        .focusable(!editing && isEnabled, interactions: .activate)
+        // .edit, not .activate: an activate-only view is button-like and
+        // takes focus only with keyboard navigation on system-wide, so the
+        // arrows and Home/End never reached the bar on a default Mac.
+        .focusable(!editing && isEnabled, interactions: .edit)
         .focused($isFocused)
         .focusEffectDisabled()
         .onHover { hovering = $0 }
@@ -181,7 +186,7 @@ public struct ScrubField: View {
                 .onSubmit { commit(refocus: true) }
                 .onExitCommand {
                     draft = nil
-                    isFocused = true
+                    Task { await takeBackKeys() }
                 }
                 .onChange(of: isTyping) { _, typing in if !typing { commit() } }
                 .padding(.horizontal, SuiteSpacing.xs)
@@ -265,6 +270,18 @@ public struct ScrubField: View {
         }
     }
 
+    /// Gives the keys back to the field once its typing field has gone, so the
+    /// arrows step it. The field isn't focusable while it types, so a request
+    /// made in the update that closes the typing field may land before it is
+    /// focusable again; it waits a turn, then asks until it holds.
+    /// ponytail: polls up to a third of a second, as takeFocus does.
+    private func takeBackKeys() async {
+        for _ in 0..<10 where !isFocused && !Task.isCancelled {
+            try? await Task.sleep(for: .milliseconds(30))
+            isFocused = true
+        }
+    }
+
     /// Swaps in the typing field; it takes focus as it appears.
     private func beginTyping() {
         guard isEnabled else { return }
@@ -275,7 +292,7 @@ public struct ScrubField: View {
     private func commit(refocus: Bool = false) {
         guard let text = draft else { return }
         draft = nil
-        if refocus { isFocused = true }
+        if refocus { Task { await takeBackKeys() } }
         let parsed = NumericInput.committed(text, in: range, keeping: value, edited: edited)
         guard parsed != value else { return }
         onChange(parsed)
