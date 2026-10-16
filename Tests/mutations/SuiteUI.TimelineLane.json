@@ -1,0 +1,4 @@
+[
+{"label":"the block ends at upper + 1, so it covers a cell past its last frame","file":"Sources/SuiteUI/TimelineLane.swift","find":"max(tickX(mapping, span.upperBound) - start","replace":"max(tickX(mapping, span.upperBound + 1) - start","tests":"TimelineLaneTests"},
+{"label":"the minimum width is dropped, so a one-frame span draws nothing","file":"Sources/SuiteUI/TimelineLane.swift","find":"tickX(mapping, span.upperBound) - start, SuiteSize.timelineKeyframe)","replace":"tickX(mapping, span.upperBound) - start, 0)","tests":"TimelineLaneTests"}
+]

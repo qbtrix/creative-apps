@@ -1,0 +1,4 @@
+[
+{"label":"the hit is the 10 pt draw size, not half the 16 pt token (B11)","file":"Sources/SuiteUI/TimelineLaneInput.swift","find":"tolerance: Double(SuiteSize.timelineKeyframeHit / 2)","replace":"tolerance: Double(SuiteSize.timelineKeyframe)","tests":"TimelineLaneTests"},
+{"label":"the strip's inset is dropped, so every press lands 8 pt late","file":"Sources/SuiteUI/TimelineLaneInput.swift","find":"Double(x - timelineInset)","replace":"Double(x)","tests":"TimelineLaneTests"}
+]
