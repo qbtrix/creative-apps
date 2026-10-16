@@ -642,7 +642,7 @@
       {
         "id": "creative-core",
         "name": "creative-core",
-        "description": "The pure-Swift engines the Models call (github.com/qbtrix/creative-core), tracked on its main branch until it tags releases.",
+        "description": "The pure-Swift engines the Models call (github.com/qbtrix/creative-core), pinned to one commit (revision: in Package.swift, recorded in the committed Package.resolved) and moved only by a bump PR from scripts/bump-core.",
         "tags": [
           "external"
         ],
