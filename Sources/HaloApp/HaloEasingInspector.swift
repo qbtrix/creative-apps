@@ -1,19 +1,24 @@
 // HaloEasingInspector.swift: the EASING group of Halo's layer inspector
 // (#428, EZ-6), in the house shape of Flare's easing inspector. One row per
-// `model.keySegments` segment (a plain Button: its title, "Position X 0 →
-// 24", and its easing's title as value, selected while picked); a click picks
-// it (`.selectKey`, Shift extends) and Escape picks nothing
-// (`.clearKeySelection`). With a pick: ChoiceChips for the five presets (the
-// on chip is `model.pickedPreset`, none for a custom curve) sending
-// `.setEasing`, SuiteUI's CurveEditor (`halo.easing`, handles
-// `halo.easing.handle1`/`handle2`) sending `.moveEasingHandle`, and X1 Y1 X2
-// Y2 StudioScrubRows sending `.setCustomEasing`; every curve drag, nudge and
-// scrub ends in `.endEasingDrag`, so each is one undo step. Empty: "Key a
-// property to shape its easing." with no segment, "Pick a key above." with
-// none picked. A refusal on `halo.easing` shows under the group. Every
-// control goes through `.haloControl` with a `halo.easing.*` id, disabled
-// with `model.unavailableHelp(for:)` as help. It only reads the model and
-// calls `perform`. Owns presentation state only: the hovered row.
+// `model.keySegments` segment (a plain Button on a filled Studio row: its
+// title, "Position X, frames 0–24", in secondary text left on one line, and
+// its easing's title as value right, which truncates first; selected while
+// picked); a click picks it (`.selectKey`, Shift extends) and Escape picks
+// nothing (`.clearKeySelection`). With a pick: the five presets as
+// PresetGrid chips in `chipRows` (two short ones a row, "Ease In and Out"
+// alone, so no title truncates; the on chip is `model.pickedPreset`, none
+// for a custom curve) sending `.setEasing`, SuiteUI's CurveEditor
+// (`halo.easing`, handles `halo.easing.handle1`/`handle2`) sending
+// `.moveEasingHandle`, and X1 Y1 X2 Y2 StudioScrubRows (`handleHelp` says
+// what each is) sending `.setCustomEasing`, captioned "X is time, Y is
+// progress"; every curve drag, nudge and scrub ends in `.endEasingDrag`, so
+// each is one undo step. With no segment the group starts collapsed (no
+// extra height under the fold, #1412); open, it reads "Key a property to
+// shape its easing.". None picked: "Pick a key above.". A refusal on
+// `halo.easing` shows under the group. Every control goes through
+// `.haloControl` with a `halo.easing.*` id, disabled with
+// `model.unavailableHelp(for:)` as help. It only reads the model and calls
+// `perform`. Owns presentation state only: the hovered row.
 import AppKit
 import HaloModel
 import SuiteUI
@@ -22,15 +27,38 @@ import SwiftUI
 struct HaloEasingInspector: View {
     let model: HaloProject
     var perform: @MainActor (HaloCommand) -> Void = { _ in }
+    /// Whether the group opens with no segment to list; the empty snapshot
+    /// opens it to show its text.
+    var expandsWhenEmpty = false
     @State private var hovered: HaloKeyRef?
+
+    /// The preset chips a row: the short titles two by two, "Ease In and
+    /// Out" alone, so every title fits at the inspector's minimum width.
+    static let chipRows: [[HaloEasingPreset]] = [[.linear, .hold], [.easeIn, .easeOut], [.easeInOut]]
+
+    /// The X1 to Y2 rows' tooltips: which handle, and what its number means.
+    static func handleHelp(_ label: String) -> String {
+        let handle = label.hasSuffix("1") ? "first" : "second"
+        return label.hasPrefix("X")
+            ? "Time of the \(handle) handle, from 0 (this key) to 1 (the next key)."
+            : "Progress at the \(handle) handle, from 0 (this key's value) to 1 (the next key's value)."
+    }
+
+    /// A segment row's fill: the selected well while picked, else the
+    /// Studio row's, lighter under the pointer.
+    static func rowFill(picked: Bool, hovered: Bool) -> Color {
+        picked ? SuiteColor.selectedWell : hovered ? SuiteColor.rowHover : SuiteColor.row
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            InspectorSection("Easing") {
-                let segments = model.keySegments
-                if segments.isEmpty {
+            let segments = model.keySegments
+            if segments.isEmpty {
+                InspectorSection("Easing", isExpanded: expandsWhenEmpty) {
                     note("Key a property to shape its easing.")
-                } else {
+                }
+            } else {
+                InspectorSection("Easing") {
                     ForEach(segments) { segmentRow($0) }
                     if let segment = model.pickedSegment, let handles = model.easingHandles {
                         editor(segment, handles: handles)
@@ -38,8 +66,8 @@ struct HaloEasingInspector: View {
                         note("Pick a key above.")
                     }
                 }
+                .onExitCommand { perform(.clearKeySelection) }
             }
-            .onExitCommand { perform(.clearKeySelection) }
             if let refusal = model.refusal, refusal.control == "halo.easing" {
                 HaloRefusalCaption(refusal: refusal)
             }
@@ -50,6 +78,7 @@ struct HaloEasingInspector: View {
         Text(text)
             .font(SuiteFont.inspectorMeta)
             .foregroundStyle(SuiteColor.secondaryText)
+            .fixedSize(horizontal: false, vertical: true)
             .frame(maxWidth: .infinity, alignment: .leading)
     }
 
@@ -66,23 +95,28 @@ struct HaloEasingInspector: View {
                     .foregroundStyle(SuiteColor.keyframed)
                 Text(segment.title)
                     .font(SuiteFont.inspectorLabel)
-                    .foregroundStyle(segment.isPicked ? SuiteColor.accentText : Color.primary)
+                    .foregroundStyle(segment.isPicked ? SuiteColor.accentText : SuiteColor.textSecondary)
+                    .lineLimit(1)
+                    .fixedSize(horizontal: true, vertical: false)
+                    .layoutPriority(1)
                 Spacer(minLength: SuiteSpacing.s)
                 Text(segment.easingTitle)
-                    .font(SuiteFont.inspectorMeta)
-                    .foregroundStyle(SuiteColor.secondaryText)
+                    .font(SuiteFont.inspectorValue)
+                    .foregroundStyle(SuiteColor.textPrimary)
+                    .lineLimit(1)
+                    .truncationMode(.tail)
             }
-            .padding(.horizontal, SuiteSpacing.s)
+            .padding(.horizontal, SuiteSpacing.m)
             .frame(maxWidth: .infinity, minHeight: SuiteSize.chip, maxHeight: SuiteSize.chip, alignment: .leading)
             .background(
-                segment.isPicked ? SuiteColor.selectedWell : key == hovered ? SuiteColor.panelRaised : Color.clear,
+                Self.rowFill(picked: segment.isPicked, hovered: key == hovered),
                 in: RoundedRectangle(cornerRadius: SuiteRadius.small))
             .contentShape(RoundedRectangle(cornerRadius: SuiteRadius.small))
         }
         .buttonStyle(.plain)
         .onHover { hovered = $0 ? key : (hovered == key ? nil : hovered) }
         .disabled(help != nil)
-        .help(help ?? segment.title)
+        .help(help ?? "\(segment.help) \(segment.easingTitle).")
         .accessibilityLabel(Text(verbatim: segment.title))
         .accessibilityValue(Text(verbatim: segment.easingTitle))
         .accessibilityAddTraits(segment.isPicked ? .isSelected : [])
@@ -94,12 +128,16 @@ struct HaloEasingInspector: View {
         let presetHelp = model.unavailableHelp(for: .setEasing(model.pickedPreset ?? .linear))
         let curveHelp = model.unavailableHelp(for: .moveEasingHandle(index: 0, x: handles.first.x, y: handles.first.y))
         return VStack(spacing: SuiteSpacing.xs) {
-            ChoiceChips(
-                options: HaloEasingPreset.allCases.map { InspectorOption(id: $0, title: $0.title) },
-                selected: model.pickedPreset, onSelect: { perform(.setEasing($0)) })
-                .padding(.vertical, SuiteSpacing.xs)
-                .disabled(presetHelp != nil)
-                .haloControl(id: "halo.easing.presets", enabled: presetHelp == nil, help: presetHelp, identifies: false)
+            VStack(spacing: 0) {
+                ForEach(Self.chipRows, id: \.self) { row in
+                    PresetGrid(
+                        options: row.map { InspectorOption(id: $0, title: $0.title) },
+                        selected: model.pickedPreset, columns: row.count, onSelect: { perform(.setEasing($0)) })
+                }
+            }
+            .padding(.vertical, SuiteSpacing.xs)
+            .disabled(presetHelp != nil)
+            .haloControl(id: "halo.easing.presets", enabled: presetHelp == nil, help: presetHelp, identifies: false)
             CurveEditor(
                 samples: model.easingCurve(count: 129).map { CGPoint(x: $0.x, y: $0.y) },
                 handles: (CGPoint(x: handles.first.x, y: handles.first.y), CGPoint(x: handles.second.x, y: handles.second.y)),
@@ -116,6 +154,7 @@ struct HaloEasingInspector: View {
             scrubRow("Y1", handles, first: true, x: false)
             scrubRow("X2", handles, first: false, x: true)
             scrubRow("Y2", handles, first: false, x: false)
+            note("X is time, Y is progress: 0 at this key, 1 at the next.")
         }
     }
 
@@ -135,7 +174,7 @@ struct HaloEasingInspector: View {
             },
             onEnd: { perform(.endEasingDrag) })
             .disabled(help != nil)
-            .help(help ?? label)
+            .help(help ?? Self.handleHelp(label))
             .haloControl(id: "halo.easing.row.\(label.lowercased())", enabled: help == nil, help: help)
     }
 

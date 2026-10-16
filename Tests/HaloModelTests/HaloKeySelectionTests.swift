@@ -16,7 +16,13 @@ private func keyedSelection() throws -> (project: HaloProject, ball: String, flo
     var (project, ball, floor) = try keyedSelection()
     #expect(project.keySegments.isEmpty)
     project.selectLayer(ball)
-    #expect(project.keySegments.map(\.title) == ["Position X 0 → 24", "Opacity 0 → 12"])
+    #expect(project.keySegments.map(\.title) == ["Position X, frames 0–24", "Opacity, frames 0–12"])
+    #expect(project.keySegments.allSatisfy { $0.title.contains("frames") })
+    #expect(
+        project.keySegments.map(\.help) == [
+            "Eases Position X between its keys at frames 0 and 24.",
+            "Eases Opacity between its keys at frames 0 and 12.",
+        ])
     #expect(project.keySegments.map(\.easingTitle) == ["Linear", "Linear"])
     #expect(project.keySegments.map(\.endFrame) == [24, 12])
     #expect(project.keySegments.allSatisfy { $0.preset == .linear && !$0.isPicked })

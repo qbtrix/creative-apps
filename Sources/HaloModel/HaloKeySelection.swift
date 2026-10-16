@@ -18,8 +18,12 @@ public struct HaloKeySegment: Identifiable, Sendable, Hashable {
     public var easing: HaloEasing
     public var preset: HaloEasingPreset? { HaloEasingPreset(easing) }
     public var isPicked: Bool
-    /// "Position X 0 → 24".
-    public var title: String { "\(key.property.title) \(key.frame) → \(endFrame)" }
+    /// "Position X, frames 0–24": the numbers name frames, not values (#1413).
+    public var title: String { "\(key.property.title), frames \(key.frame)–\(endFrame)" }
+    /// The row's tooltip: "Eases Position X between its keys at frames 0 and 24.".
+    public var help: String {
+        "Eases \(key.property.title) between its keys at frames \(key.frame) and \(endFrame)."
+    }
     /// The preset's name, or "Custom" for a curve matching none.
     public var easingTitle: String { preset?.title ?? "Custom" }
 
