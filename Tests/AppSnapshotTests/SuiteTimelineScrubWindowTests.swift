@@ -5,7 +5,11 @@
 // PhotoWindowStrokeTests hosts Photo's. A ruler press, 120 drags at 120 Hz
 // over 600 pt: no lane or ruler body runs, the playhead and strip at most
 // frames crossed + 2, one onScrub per frame crossed, never a frame twice.
-// TL-5 wrote it disabled; TL-8 turned it on. macOS only.
+// TL-5 wrote it disabled; TL-8 turned it on. The test process is never the
+// active app, so its press is a window-activation click, which a SwiftUI
+// gesture drops unless it opts in (RenderBudgetHarness.swift): the host opts
+// in, as HaloWindowLiveDragTests' does, and the press is placed from the
+// host's frame in window points (#1728). macOS only.
 import AppKit
 import SwiftUI
 import Testing
@@ -27,7 +31,8 @@ extension BodyCountSuites {
             defer { window.close() }
             try await Task.sleep(for: .milliseconds(500))
             // The ruler runs along the top of the strip, right of the names column (window y is up).
-            let start = CGPoint(x: SuiteSize.timelineLabelColumn + 40, y: frame.height - SuiteSize.timelineRuler / 2)
+            let box = host.convert(host.bounds, to: nil)
+            let start = CGPoint(x: box.minX + SuiteSize.timelineLabelColumn + 40, y: box.maxY - SuiteSize.timelineRuler / 2)
             let before = (bodies(), host.layouts)
             send(.leftMouseDown, at: start, to: window)
             var xs = [start.x]
@@ -48,7 +53,7 @@ extension BodyCountSuites {
             let visited = [0] + xs.map { mapping.frame(atX: $0 - origin) }
             let crossed = zip(visited, visited.dropFirst()).filter { $0 != $1 }.count
             let runs = zip(after.0, before.0).map { $0 - $1 }
-            let report = "SCRUB-WINDOW lanes=300 frames=10000 crossed=\(crossed) scrubs=\(scrubs.frames.count) "
+            let report = "SCRUB-WINDOW host=\(box) lanes=300 frames=10000 crossed=\(crossed) scrubs=\(scrubs.frames.count) "
                 + "bodies lane/ruler/playhead/strip=\(runs) layouts=\(after.1 - before.1)"
             print(report)
             #expect(runs[0] == 0, "a lane redrew during the scrub: \(report)")
@@ -102,5 +107,7 @@ private struct ScrubHost: View {
             }
         )
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+        // Every press here activates the window; a hand's press in the active window needs no opt-in.
+        .allowsWindowActivationEvents()
     }
 }
