@@ -42,3 +42,5 @@ utc	stage	event	ref	note
 2026-10-16T16:40Z	3	stage-end	wave 9	build waves done
 2026-10-16T16:40Z	4	ci-run	38933216466	full dev run on c9e4656 pending
 2026-10-16T16:42Z	4	stage-start	round 1	critic panel on c9e4656
+2026-10-16T16:50Z	4	round-findings	round 1	10 confirmed (4 major), filed #1457-#1468
+2026-10-16T16:52Z	4	fix-round	round 1	fix batch on 9 findings; #1463 left to supervisor
