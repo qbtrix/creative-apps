@@ -4,8 +4,8 @@
 // loupe, each within 10 ms debug (1 ms release). Under the name sort a cull
 // never rebuilds `order` (the same buffer before and after); under the rating
 // sort it does, and the photo moves. Each prints a `LIBRARY-BUDGET cull …`
-// line. The spine's shared edit path costs about 9 ms of the 10 on Linux
-// debug (#1587), so a miss there is a known issue until #1587 lands. Runs on
+// line. A recorded edit finds one photo by a plain scan and moves the counts
+// by the changed photo alone (#1587), so the gate is a plain #expect. Runs on
 // Linux and macOS.
 @testable import LibraryModel
 import Testing
@@ -30,13 +30,6 @@ private func sameBuffer(_ order: [String], _ earlier: [String]) -> Bool {
     order.withUnsafeBufferPointer { now in earlier.withUnsafeBufferPointer { now.baseAddress == $0.baseAddress } }
 }
 
-/// Gates `median` at `limit` ms; a miss is #1587's known issue, still reported.
-private func expectWithin(_ median: Double, _ limit: Double) {
-    withKnownIssue("#1587: the spine's recount and recordEdit scan all 10,000 photos per edit", isIntermittent: true) {
-        #expect(median <= limit)
-    }
-}
-
 @Test func cullOneWithinBudget() throws {
     var catalog = largeCatalog(sort: .name)
     let id = try #require(catalog.order.dropFirst(5_000).first)
@@ -51,7 +44,7 @@ private func expectWithin(_ median: Double, _ limit: Double) {
     #expect(catalog.history.undo.count == 20)
     #expect(sameBuffer(catalog.order, order))
     #expect(catalog.selection == [id])
-    expectWithin(cost.median, 10 * scale)
+    #expect(cost.median <= 10 * scale)
 }
 
 @Test func orderFollowsARatingUnderRatingSort() throws {
@@ -81,5 +74,5 @@ private func expectWithin(_ median: Double, _ limit: Double) {
     #expect(catalog.focusedItemID == catalog.order.dropFirst(20).first)
     #expect(catalog.items.first { $0.id == start }?.rating == 1)
     #expect(sameBuffer(catalog.order, order))
-    expectWithin(cost.median, 10 * scale)
+    #expect(cost.median <= 10 * scale)
 }
