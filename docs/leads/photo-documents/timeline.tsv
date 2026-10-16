@@ -106,3 +106,6 @@ utc	stage	event	ref	note
 2026-10-16T03:33Z	5	heartbeat	-	waiting for the feature-done CI run
 2026-10-16T03:52Z	5	heartbeat	-	waiting for the feature-done CI run
 2026-10-16T04:11Z	5	heartbeat	-	waiting for the feature-done CI run
+2026-10-16T04:19Z	5	pr-merged	#1278	feature-done
+2026-10-16T04:19Z	5	ci-run	38841439320	photo-documents journeys all green; red elsewhere (#763)
+2026-10-16T04:19Z	5	stopped	#1074	Belt-Contact-Sheet posted; done

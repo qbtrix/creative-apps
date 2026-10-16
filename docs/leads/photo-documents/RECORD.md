@@ -2,9 +2,9 @@
 
 Issue: #1074 · Packet: docs/blueprints/photo/features/photo-documents.md
 Run: act-1a1404bf04c-bp6m · Session: claude/photo-documents-lead-ezrcev · Started: 2026-10-15T10:40Z
-Stage: 5 finish
-Base: 81f32886
-Next: wait for the feature-done PR (lead/photo-documents-done: PJ-1 title check, wave.json built, packet + blueprint text) to merge; read the CI run it triggers; comment Belt-Contact-Sheet on #1074
+Stage: done
+Base: 9230d80820528101d77dcdb8d0bd2d65b6638eac
+Next: nothing; the feature is built. Follow-ups are the gap and needs-ui issues under Open.
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -86,3 +86,4 @@ Waves (packet's Build waves, checked against dev at 00e546a):
 - Merged in round 2: #1254 (F2 status help + inset), #1255 (F4 debug budgets report-only).
 - Round budget spent (4 rounds). Open findings filed as gap issues on line:photo: #1270 restore offer text + day, #1271 unsaved prompt + recovery copy, #1272 status line pills, #1273 Close with no window + PJ-2 shots, #1274 Layers tab design, #1276 save/autosave/open budgets + main-thread stall. needs-ui: #1252 ScrubField marker, #1275 EditorTopBar outline/primary.
 - Final PR carries the PJ-1 fix (journey compared NSAlert button label, not title) as the playbook's "small last fix".
+- Finish: #1278 (feature-done: PJ-1 title check, wave.json built, packet + blueprint text) merged at 9230d80. CI run 38841439320: Linux green; macOS scripts/ci PASS; all six photo-documents journeys and all 14 PhotoJourneyTests pass; Photo audit identifier 22 <= 23, modal screens offscreen 0 / overlap 0. ui-test step red only on photo-edit, layer-ops, Library and Halo journeys (dev-red #763). Belt-Contact-Sheet posted on #1074.
