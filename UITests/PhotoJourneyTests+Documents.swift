@@ -37,10 +37,16 @@ final class PhotoDocumentsJourneyTests: XCTestCase {
         photo.press(character: "s", .command)
         let keep = alert(photo)
         XCTAssert(text("Keep layers?", in: keep).waitForExistence(timeout: 5), "Save asked no Keep layers?")
-        let choices = ["Save as Photo Document", "Flatten into PNG", "Cancel"]
-        XCTAssert(choices.allSatisfy { keep.buttons[$0].exists }, "Keep layers? doesn't offer \(choices)")
+        let choices = ["document": "Save as Photo Document", "flatten": "Flatten into PNG", "cancel": "Cancel"]
+        for (id, title) in choices {
+            let button = keep.buttons["photo.file.keep-layers.\(id)"].firstMatch
+            XCTAssert(button.exists && button.label == title, "Keep layers? has no \(title) (photo.file.keep-layers.\(id))")
+        }
+        let says = "beach.png can keep only one flat layer. Save as Photo Document writes beach.ora next to it"
+        XCTAssert(keep.staticTexts.matching(NSPredicate(format: "label BEGINSWITH %@ OR value BEGINSWITH %@", says, says))
+            .firstMatch.exists, "Keep layers? doesn't say it writes beach.ora next to beach.png")
         photo.shot("documents-1-keep-layers")
-        keep.buttons["Save as Photo Document"].click()
+        keep.buttons["photo.file.keep-layers.document"].firstMatch.click()
         XCTAssert(photo.app.windows["beach.ora"].waitForExistence(timeout: 30), "the window isn't titled beach.ora")
         expectStatus("Saved", photo)
         let saved = try Data(contentsOf: folder.appending(path: "beach.ora"))
@@ -88,7 +94,7 @@ final class PhotoDocumentsJourneyTests: XCTestCase {
         photo.shot("documents-1b-edited")
 
         photo.press(character: "s", .command)
-        alert(photo).buttons["Save as Photo Document"].click()
+        alert(photo).buttons["photo.file.keep-layers.document"].firstMatch.click()
         let failed = alert(photo), prefix = "The image couldn't be saved: "
         let message = failed.staticTexts.matching(NSPredicate(format: "label BEGINSWITH %@ OR value BEGINSWITH %@", prefix, prefix))
         XCTAssert(message.firstMatch.waitForExistence(timeout: 30), "a save into a locked folder showed no save alert")
