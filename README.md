@@ -36,4 +36,9 @@ swift run FlareApp    # open Flare (or DesignApp, PhotoApp, LibraryApp, HaloApp)
 
 ## License
 
-GPL-3.0. See [LICENSE](LICENSE).
+GPL-3.0. See [LICENSE](LICENSE), with additional terms under its
+section 7 in [ADDITIONAL-TERMS.md](ADDITIONAL-TERMS.md) (notices,
+marking modified versions, no trademark rights). The names and icons are
+covered by [docs/trademark-policy.md](docs/trademark-policy.md); editions
+and contributing: [docs/licensing.md](docs/licensing.md),
+[CONTRIBUTING.md](CONTRIBUTING.md).
