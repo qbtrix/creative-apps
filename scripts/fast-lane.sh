@@ -96,8 +96,10 @@ SELF_CHECK="fast-lane"
 # file in any folder (docs/AGENTS.md too). A * matches one folder name.
 # Matching ignores case. docs/c4/model.json and each app's waves.md are
 # generated on dev (.github/workflows/generated.yml), so PRs never edit them.
+# UITests/quarantine.json skips failing journeys (scripts/quarantine), so only
+# the supervisor quarantines.
 PROTECTED=(Package.swift Package.resolved .github/ .claude/ scripts/ CLAUDE.md AGENTS.md LICENSE
-  docs/c4/model.json 'docs/blueprints/*/features/waves.md')
+  docs/c4/model.json 'docs/blueprints/*/features/waves.md' UITests/quarantine.json)
 deny_re() {
   local p re=""
   for p in "${PROTECTED[@]}"; do

@@ -1,0 +1,8 @@
+[
+  {
+    "test": "HaloJourneyTests/HaloFilesJourneyTests/testSaveAndReopen",
+    "owner": "#1262",
+    "reason": "H-J10 step 5 opens the 2,000-layer fixture: the UI query times out (HaloJourneyTests+Files.swift:107) because every layer row is in the accessibility tree, and in run 38835566584 the opening screen adds 2 contrast hits. #1262 says it stays red until the layer list and timeline rows go lazy. Steps 1 to 4 pass.",
+    "expires": "2026-10-23"
+  }
+]
