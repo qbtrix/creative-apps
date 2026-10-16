@@ -2,8 +2,8 @@
 
 Issue: #1344 · Packet: docs/blueprints/suiteui/features/editor-chrome.md
 Run: act-1a145e74bc5-jgg4 · Session: claude/editor-chrome-lead-9soj7i · Started: 2026-10-16T18:10Z
-Stage: 0 setup (stopped: packet superseded, needs rescope)
-Base: 583bb69be5a6e75d8e9c6d373806f1162c131057
+Stage: 0 setup (stopped: needs-human; packet superseded, needs rescope)
+Base: 7ab292cdb1022222c00314a2b52c44c087811c46
 Next: when editor-chrome.wave.json on dev gains a Slices rescope off EditorShell/EditorTopBar/.rail (supervisor note 2026-10-16: "wave data is being re-sliced"), restart at stage 1 on the v3 loop; until then nothing in the packet can start as written
 
 ## Tasks
@@ -34,6 +34,7 @@ Next: when editor-chrome.wave.json on dev gains a Slices rescope off EditorShell
 - PRs would target dev, not main (CLAUDE.md: never target main); the brief's "base main" predates the dev flow.
 
 ## Open
+- Third stall nudge (2026-10-16T19:46Z): dev at 7ab292cd, no change to the editor-chrome packet or wave.json, no reply on #1344. Contract rule 7: third stall stops the lead with needs-human (already on #1344). A relaunch is useful only after the rescope lands on dev.
 - Second stall nudge (2026-10-16T19:15Z): dev at 583bb69b; #1536 re-sliced timeline only, editor-chrome packet and wave.json unchanged (no Slices, still on EditorShell/EditorTopBar/.rail). No supervisor reply on #1344; needs-human stays. Still stopped.
 - Resumed after a Belt stall nudge (2026-10-16T18:44Z): the packet and wave.json on dev are unchanged and editor-shell-removal is unfiled. The supervisor note of 2026-10-16 18:13Z (build UI and logic in parallel; wave data being re-sliced) does not lift the rescope, so the lead stays stopped.
 - Packet rescope by the supervisor (comment on #1344).
