@@ -2,9 +2,9 @@
 
 Issue: #1075 · Packet: docs/blueprints/photo/features/photo-edit.md
 Run: act-1a144817472-xzgv (was act-1a1429c8810-2gls, act-1a13fcb7db6-e1sg) · Session: session_01NRtuLXL2My6shBUxxvDYQE (relaunch; first lead session_016oJAmpWVjb6Qzg26PPT8aW) · Started: 2026-10-15T13:38Z
-Stage: 5 finish (round 3 = the feature-done CI run)
+Stage: done
 Base: 9e3c5f8e23708b834bded120d35d9db5acf4a7f3
-Next: wait for the scoped CI run app=photo (or a full run after the #1075 quarantine entries are lifted) that contains #1317; asked the supervisor on #1075 (3rd ask 14:10Z). Green -> Belt-Contact-Sheet; a PJ-5/6/7 failure -> round 4 fix
+Next: nothing; Belt-Contact-Sheet posted on #1075 (comment 6221883062). PJ-5/6/7 proof tracked in gap #1520
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -23,6 +23,7 @@ Next: wait for the scoped CI run app=photo (or a full run after the #1075 quaran
 ## Rounds
 | round | CI run | CI | audit vs baseline | lenses | confirmed | fixed by | clean |
 |---|---|---|---|---|---|---|---|
+| done | 38887139934 (9e3c5f8, full, contains #1317) | green; main promoted | photo identifier 22 <= 23 (38878109062) | - | - | - | yes under the 18:13Z rule (journeys report, compile + Model tests block) |
 | 1 | 38776323445 (0dc8dda) | red: macOS build fails in LiveRecovery.swift (photo-documents; fixed on dev by #1226) | – | – | – | – | no |
 | 1 (panel) | 38767265986 (d95c756) screens + current code | – | photo at baseline but crop contrast (not ours) | clarity, journey, design, layout, controls, quality | 12 (3 major), list lost with stalled session | – | – |
 | 1 (panel rerun) | 38799320916 snapshots + code @ b555f56 | red, not ours | photo contrast 1, identifier 16 | same 6 | 13 (4 major: F0 bounds readout, F3 PJ-5 bounds, F10 PB-15, F11 Merging…) see round1-findings.md | r1-b1..b5 | no |
@@ -34,6 +35,7 @@ Next: wait for the scoped CI run app=photo (or a full run after the #1075 quaran
 | 1b | 38782884668 (f9846c9) | red: our PhotoCompositeCostTests 4.6× > 4× bound on macOS (unit step, journeys not run) | – | – | flaky bound | #1229 (8×) | – |
 
 ## Decisions
+- Finished on run 38887139934 without PJ-5/6/7: the supervisor's 18:13Z rule makes journeys report-only. Their proof is gap #1520, not a round 4.
 - Round 1 batches: b1 inspector bounds + copy refusal (Model), b2 PJ-5/PJ-6 bounds checks, b3 Edit/Layer menu (symbols, Select All, no-window, non-image paste), b4 PB-15 copy speed, b5 async merge with Merging… (closes gap #1191) + flatten note. F9's model part and F2's LiveEdit part dropped to keep files disjoint.
 - Waves as the packet's Build waves; checked against dev 28f1df2: `LiveEdit.swift` stub, `EditContracts.swift`, `PhotoWindow+Edit.swift` and `PhotoCommands+Layer.swift` exist as photo-seams left them; no file named in the task table exists yet except those stubs.
 - Each wave has 2 independent tasks (wave 4 has 3 but E-9 waits on #1073), so builders run as worktree subagents started together, not build-wave.js.
@@ -51,6 +53,7 @@ Next: wait for the scoped CI run app=photo (or a full run after the #1075 quaran
 - The perf fixer may edit `PhotoLayerComposite.swift` (photo-seams file, next owner photo-adjustment-layers, not started): output bit for bit unchanged, no API change; the speed-up is this feature's budget.
 
 ## Open
+- 18:13Z supervisor note on #1075: CI blocks only on compile and Model tests; journeys report findings. Done met: Belt-Contact-Sheet posted 18:16Z. PJ-5/6/7 still quarantined (owner #1075): gap #1520 tracks their proof; asked the supervisor to repoint the quarantine owner to #1520 before #1075 closes.
 - 15:18Z: dev red #1393 (runs 38918886542, 38919557811) on Library LibraryImportSnapshots.progressRowShowsAfterItsDelay, not ours.
 - 11:40Z relaunch (run act-1a144817472-xzgv): lead/photo-edit rebuilt on origin/main 9e3c5f8 (it carried only docs/leads/photo-edit; the 690 old commits were squash-merged history), pushed with --force-with-lease. Full runs 38878109062 and 38887139934 green; still waiting a scoped photo run or the quarantine lift.
 - PJ-5/6/7 quarantined (scope full, owner #1075, expires 2026-10-18; UITests/quarantine.json is protected). Asked the supervisor on #1075 for a scoped photo run.

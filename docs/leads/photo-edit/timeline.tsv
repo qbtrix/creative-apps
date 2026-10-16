@@ -107,3 +107,5 @@ utc	stage	event	ref	note
 2026-10-16T17:09Z	5	heartbeat	-	no scoped photo run, PJ-5/6/7 still quarantined, no supervisor reply
 2026-10-16T17:31Z	5	heartbeat	-	no scoped photo run, PJ-5/6/7 still quarantined, no supervisor reply
 2026-10-16T17:52Z	5	heartbeat	-	no scoped photo run, PJ-5/6/7 still quarantined, no supervisor reply
+2026-10-16T18:15Z	5	stage-end	#1075	Belt-Contact-Sheet posted on run 38887139934; gap #1520 for PJ-5/6/7
+2026-10-16T18:15Z	done	stopped	-	feature done
