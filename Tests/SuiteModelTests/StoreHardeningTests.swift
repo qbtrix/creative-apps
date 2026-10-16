@@ -1,5 +1,6 @@
 // StoreHardeningTests.swift: the suite store survives what another process
-// or a person leaves on disk (finding issues #1459, #1465, #1466, #1468):
+// or a person leaves on disk (finding issues #1459, #1465, #1466, #1468,
+// #1487, #1488):
 // errors name what broke in plain words, a damaged file is moved aside
 // instead of blocking every write, a huge revision never overflows, and a
 // name can't leave the support folder. A fresh temp folder per test.
@@ -58,6 +59,19 @@ import Testing
         }
     }
 
+    // #1488: each file kind has its own plain words, and an unknown name
+    // falls back to "a suite file".
+    @Test(arguments: [("handoffs/x.aghandoff", "the message from another app"),
+                      ("assets/index.json", "your shared assets list"),
+                      ("thumbnails/x.png", "a thumbnail"),
+                      ("other.json", "a suite file")])
+    func aStoreErrorNamesEachFileKindInPlainWords(name: String, subject: String) throws {
+        let store = FileStore(folder: makeRoot())
+        // A folder where the file should be: it exists but has no bytes to read.
+        try FileManager.default.createDirectory(atPath: store.folder + "/" + name, withIntermediateDirectories: true)
+        #expect(throws: SuiteError.readFailed(subject)) { try store.readData(name) }
+    }
+
     // MARK: #1465 a damaged file never blocks writes
 
     @Test(arguments: ["", #"{"revision":3,"value":{"revision":3,"items":[{"ref":{"app":"futureApp"}}]}}"#])
@@ -111,10 +125,17 @@ import Testing
     func aNameThatLeavesTheFolderIsDamaged(name: String) throws {
         let root = makeRoot()
         let store = FileStore(folder: root + "/support")
-        #expect(throws: SuiteError.damaged(name)) { try store.writeData(name, Data("x".utf8)) }
-        #expect(throws: SuiteError.damaged(name)) { try store.readData(name) }
-        #expect(throws: SuiteError.damaged(name)) { try store.update(name, empty: [String]()) { $0 } }
+        // #1487: the error names what the file holds, never the raw name.
+        let damaged = SuiteError.damaged("a suite file")
+        #expect(throws: damaged) { try store.writeData(name, Data("x".utf8)) }
+        #expect(throws: damaged) { try store.readData(name) }
+        #expect(throws: damaged) { try store.update(name, empty: [String]()) { $0 } }
         #expect(!FileManager.default.fileExists(atPath: root + "/escape.json"))
         #expect(!FileManager.default.fileExists(atPath: root + "/escape.json.lock"))
+    }
+
+    @Test func anEscapingHandOffNameSaysWhatItHolds() {
+        let store = FileStore(folder: makeRoot())
+        #expect(throws: SuiteError.damaged("the message from another app")) { try store.readData("handoffs/../x") }
     }
 }
