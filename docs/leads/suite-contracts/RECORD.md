@@ -2,9 +2,9 @@
 
 Issue: #1332 · Packet: docs/blueprints/suite/features/suite-contracts.md
 Run: act-1a1448a5fd9-0he1 · Session: claude/suite-contracts-lead-rv72k4 · Started: 2026-10-16T11:49Z
-Stage: 3 wave 8
-Base: f52ec33e25bc15716063bca270ec3b760ad6d723
-Next: wait for the lane's macOS build and merge of #1428 (SC-5b), then start wave 9 (SC-5c, feature-done)
+Stage: 3 wave 9
+Base: 1f75673b528dda050c0166dd7ae598256c85802e
+Next: wave 9 builder running (SC-5c, feature-done); wait for it to merge and for the dev CI run it triggers, then stage 4 (Anatomy round 1: CI, audit, critic panel)
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -22,8 +22,8 @@ Next: wait for the lane's macOS build and merge of #1428 (SC-5b), then start wav
 | SC-5a | 6 | `StoreRecents` (#832) | Recents/StoreRecents.swift, StoreRecentsTests | StoreRecentsTests | #1399 | merged |
 | SC-4b | 7 | `SuiteServices`, budget helper, QB-SM6, QB-SV8, Model journey (#830) | SuiteServices.swift, SuiteServicesTests, Budget, Budget+Store, StoreRoundTripTests, SuiteContractsJourneyTests | those | #1409 | merged |
 | SC-4c | 7 | `FixtureSeeder` (#831) | Store/FixtureSeeder.swift, FixtureSeederTests | FixtureSeederTests | #1407 | merged |
-| SC-5b | 8 | `SlotContext`, `SuiteServices.live`, first seven slots (#833) | Sources/SuiteShell/SuiteServices+Live.swift, Live/{Switching,Recents,Creating,Routing,HandOff,Thumbnails,Home}Slot.swift, Tests/AppSnapshotTests/SuiteLiveServicesTests.swift | SuiteLiveServicesTests (macOS) | #1428 | open |
-| SC-5c | 9 | other seven slots; `feature-done` (#834) | SuiteServices+Live.swift, Live/{RoundTrip,Pasteboard,Assets,Linking,Preferences,Settings,Onboarding}Slot.swift, SuiteLiveServicesTests | SuiteLiveServicesTests (macOS) | | planned |
+| SC-5b | 8 | `SlotContext`, `SuiteServices.live`, first seven slots (#833) | Sources/SuiteShell/SuiteServices+Live.swift, Live/{Switching,Recents,Creating,Routing,HandOff,Thumbnails,Home}Slot.swift, Tests/AppSnapshotTests/SuiteLiveServicesTests.swift | SuiteLiveServicesTests (macOS) | #1428 | merged |
+| SC-5c | 9 | other seven slots; `feature-done` (#834) | SuiteServices+Live.swift, Live/{RoundTrip,Pasteboard,Assets,Linking,Preferences,Settings,Onboarding}Slot.swift, SuiteLiveServicesTests | SuiteLiveServicesTests (macOS) | | building |
 
 Waves (packet's Build waves, checked against dev at ebc68bf):
 - Wave 1: SC-1a alone.
