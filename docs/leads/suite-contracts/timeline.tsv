@@ -33,3 +33,4 @@ utc	stage	event	ref	note
 2026-10-16T15:32Z	3	heartbeat	#1409	SC-4b macOS build pending
 2026-10-16T15:40Z	3	pr-merged	#1409	SC-4b
 2026-10-16T15:42Z	3	stage-start	wave 8	SC-5b on f52ec33
+2026-10-16T15:51Z	3	pr-opened	#1428	SC-5b
