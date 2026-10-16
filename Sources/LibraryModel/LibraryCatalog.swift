@@ -175,11 +175,23 @@ public struct LibraryCatalog: Sendable, Equatable {
         select(selection)
     }
 
+    /// Every count from scratch: for a load or an import, which add photos.
+    /// Recently Added holds the newest `recentLimit`, so its count needs no sort.
     mutating func recount() {
-        let counts = ["all": items.count, "favorites": items.filter(\.isFlagged).count, "recent": recentItems.count]
+        let favorites = items.reduce(0) { $0 + ($1.isFlagged ? 1 : 0) }
+        let counts = ["all": items.count, "favorites": favorites, "recent": min(items.count, Self.recentLimit)]
         for index in collections.indices {
             collections[index].count = counts[collections[index].id] ?? 0
         }
+    }
+
+    /// The counts after a metadata edit, undo or redo that replaced `before`
+    /// with `after` in place: no photo was added or removed and no capture
+    /// date changed, so only Favorites moves, by the flags that changed.
+    mutating func recount(replacing before: [PhotoItem], with after: [PhotoItem]) {
+        let delta = after.reduce(0) { $0 + ($1.isFlagged ? 1 : 0) } - before.reduce(0) { $0 + ($1.isFlagged ? 1 : 0) }
+        guard delta != 0, let index = collections.firstIndex(where: { $0.id == "favorites" }) else { return }
+        collections[index].count += delta
     }
 
     /// The photos with every id unique; the first photo with an id keeps it,

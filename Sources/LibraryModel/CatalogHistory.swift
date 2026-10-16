@@ -90,7 +90,7 @@ extension LibraryCatalog {
     mutating func recordEdit(
         _ name: String, coalesceKey: String? = nil, ids: Set<String>, _ edit: (inout PhotoItem) -> Void
     ) {
-        let indices = items.indices.filter { ids.contains(items[$0].id) }
+        let indices = itemIndices(of: ids)
         let before = indices.map { items[$0] }
         for index in indices {
             edit(&items[index])
@@ -99,7 +99,15 @@ extension LibraryCatalog {
         guard before != after else { return }
         saveRevision += 1
         history.push(CatalogHistory.Step(name: name, before: before, after: after, coalesceKey: coalesceKey))
-        refreshAfterHistoryChange()
+        refreshAfterHistoryChange(replacing: before, with: after)
+    }
+
+    /// The indices in `items` of the photos with `ids`. One id (a single
+    /// selection, the loupe) is found by a plain scan, with no id hashed;
+    /// several through the set.
+    private func itemIndices(of ids: Set<String>) -> [Int] {
+        if ids.count == 1, let id = ids.first { return items.firstIndex { $0.id == id }.map { [$0] } ?? [] }
+        return items.indices.filter { ids.contains(items[$0].id) }
     }
 
     /// Ends the current gesture: the next recorded edit is a new step.
@@ -122,18 +130,26 @@ extension LibraryCatalog {
     /// Replaces each photo by id with its copy in `photos`, then refreshes.
     private mutating func restore(_ photos: [PhotoItem]) {
         let byID = Dictionary(photos.map { ($0.id, $0) }, uniquingKeysWith: { _, last in last })
-        for index in items.indices {
+        let indices = itemIndices(of: Set(byID.keys))
+        let before = indices.map { items[$0] }
+        for index in indices {
             if let photo = byID[items[index].id] { items[index] = photo }
         }
+        let after = indices.map { items[$0] }
         saveRevision += 1
-        refreshAfterHistoryChange()
+        refreshAfterHistoryChange(replacing: before, with: after)
     }
 
     /// Keeps the counts, the order and the selection true after an edit,
-    /// undo or redo. It never touches `mode` or `focusedItemID`.
-    private mutating func refreshAfterHistoryChange() {
-        recount()
-        if editCanReorder { rebuildOrder() }
+    /// undo or redo that replaced `before` with `after` in place. Counts move
+    /// by the changed photos alone; `order` and the selection are rebuilt
+    /// only when the edit can move or hide a photo, since otherwise `order`
+    /// is unchanged and the selection already lies within it. It never
+    /// touches `mode` or `focusedItemID`.
+    private mutating func refreshAfterHistoryChange(replacing before: [PhotoItem], with after: [PhotoItem]) {
+        recount(replacing: before, with: after)
+        guard editCanReorder else { return }
+        rebuildOrder()
         select(selection)
     }
 }
