@@ -104,8 +104,16 @@ public struct DesignWorkspace: Sendable, Equatable {
     var gesture: DesignGesture?
     /// A text node placed by a Text click, until its edit commits or cancels.
     var placedText: DesignPlacedText?
+    /// The use cases this workspace runs on (DesignServices); equal by name, so equality holds.
+    public internal(set) var services: DesignServices = .live
 
     public init() {}
+
+    /// Swaps the services (the window does it once, from `-DesignServices fake`). The document,
+    /// selection and history stay as they are.
+    public mutating func useServices(_ services: DesignServices) {
+        self.services = services
+    }
 
     public var isOpen: Bool { !pages.isEmpty }
 
