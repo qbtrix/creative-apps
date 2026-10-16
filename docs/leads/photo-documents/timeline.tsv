@@ -98,3 +98,5 @@ utc	stage	event	ref	note
 2026-10-16T02:08Z	4	heartbeat	-	waiting for round 4 run 38835566584
 2026-10-16T02:23Z	4	ci-run	38835566584	round 4: Linux ci red, macOS ui-test red; PJ-2, PJ-3, PJ-4, PJ-P3 shots complete, PJ-1 stops after edited; panel + diagnosis running
 2026-10-16T02:26Z	4	round-findings	round 4	5 of 6 photo-documents journeys green; PJ-1 journey label check; audit at baseline
+2026-10-16T02:29Z	4	round-findings	round 4	12 confirmed; gap issues #1270-#1274, #1276; needs-ui #1275
+2026-10-16T02:29Z	5	stage-start	finish	feature-done PR building

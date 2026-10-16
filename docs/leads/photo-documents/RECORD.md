@@ -2,9 +2,9 @@
 
 Issue: #1074 · Packet: docs/blueprints/photo/features/photo-documents.md
 Run: act-1a1404bf04c-bp6m · Session: claude/photo-documents-lead-ezrcev · Started: 2026-10-15T10:40Z
-Stage: 4 round 4
+Stage: 5 finish
 Base: 81f32886
-Next: round 4 (last) on CI run 38835566584 (81f3288: #1265, #1266, #1267, Halo fix #1268); same six lenses; then finish
+Next: wait for the feature-done PR (lead/photo-documents-done: PJ-1 title check, wave.json built, packet + blueprint text) to merge; read the CI run it triggers; comment Belt-Contact-Sheet on #1074
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -39,7 +39,7 @@ Waves (packet's Build waves, checked against dev at 00e546a):
 | 1 | 38792928305 (c93a7f8, D-7..D-9) | red: ui-test timeout 45 min; 11 Photo journeys red | photo contrast 1 > 0 (_NS:58 = restore alert text) | attribution diagnoser | 9 ours: restore alert from shared recovery dir (#1230) blocks later journeys; 2 not ours (crop #1202, edit #1218 -> #763) | fix D recovery dir; A ids; B Open Recent | no |
 | 2 | 38807718380 (cdcfb62) | red: ui-test; PJ-1, PJ-1b, PJ-2, PJ-3, PJ-P3 red, PJ-4 green; round-1 failures gone | photo contrast 1 > 0 (_NS:58 empty alert message); identifier 22 <= 23 | clarity, journey, design, layout, controls, quality | 13 of 14 (3 blocker, 6 major, 4 minor) | E close ⌘W; F1 alerts (restore NSAlert ids, title+message, keep-layers text, drop Saved note); F2 status help + inset; F3 plain open errors (after F1); F4 debug budgets; G PJ-P3 query + Saving… sampling; needs-ui #1252 scrub marker | no |
 | 3 | 38829075229 (a42b3cf: #1253, F2, F4) | red, not ours: HaloTransportFitTests (#1258 vs #1264) in scripts/ci, no journeys ran | no data | panel not run (no screens) | – | F1b #1265, F3 #1266, G2 #1267 pending merge | no |
-| 4 | 38835566584 (81f3288) | Linux red: PhotoEditBudgetTests timing (photo-edit, not ours); macOS: PJ-1b, PJ-2, PJ-3, PJ-4, PJ-P3 green, PJ-1 red (journey checks button label not title, #1265) | photo identifier 22 <= 23, nothing over baseline | same six (panel running) | PJ-1 journey fix (finish PR) | – | pending panel |
+| 4 | 38835566584 (81f3288) | Linux red: PhotoEditBudgetTests timing (photo-edit, not ours); macOS: PJ-1b, PJ-2, PJ-3, PJ-4, PJ-P3 green, PJ-1 red (journey checks button label not title, #1265) | photo identifier 22 <= 23, nothing over baseline | same six (panel running) | PJ-1 journey fix (finish PR) | – | no (12 of 14 confirmed: 1 blocker PJ-1 journey, 4 major, 7 minor) |
 
 ## Decisions
 - Waves have at most 2 independent tasks, so each wave runs as one worktree subagent per task (lead.md stage 3), not build-wave.js.
@@ -84,3 +84,5 @@ Waves (packet's Build waves, checked against dev at 00e546a):
 - #1253 (another session, same identity) landed Close ⌘W, the restore offer as NSAlert with ids, title+message alerts (PhotoProblem), PJ-P3 Touch Bar query and PJ-2's autosave label check. Fixes E, F1, G as written were dropped (local only, never pushed); remaining items re-briefed as F1b, F3, G2 on fresh dev.
 - The gate queue never ran: a defunct swift-frontend zombie kept `pgrep` true for 2 h. Lesson: check load only, or ignore zombie processes.
 - Merged in round 2: #1254 (F2 status help + inset), #1255 (F4 debug budgets report-only).
+- Round budget spent (4 rounds). Open findings filed as gap issues on line:photo: #1270 restore offer text + day, #1271 unsaved prompt + recovery copy, #1272 status line pills, #1273 Close with no window + PJ-2 shots, #1274 Layers tab design, #1276 save/autosave/open budgets + main-thread stall. needs-ui: #1252 ScrubField marker, #1275 EditorTopBar outline/primary.
+- Final PR carries the PJ-1 fix (journey compared NSAlert button label, not title) as the playbook's "small last fix".
