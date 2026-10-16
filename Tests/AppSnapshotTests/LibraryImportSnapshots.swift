@@ -32,7 +32,7 @@ import Testing
             let path = "/Shoot/jpeg-000\(n).jpg"
             return PhotoItem(
                 id: path, name: "jpeg-000\(n)", captureDate: start.addingTimeInterval(Double(n) * 60),
-                color: Color3(0.5, 0.5, 0.5), path: path)
+                color: .init(0.5, 0.5, 0.5), path: path)  // LiveImporter's neutral grey
         }
     }
 
@@ -46,7 +46,10 @@ import Testing
         importing.appendImported(firstBatch)
         #expect(importing.importState == .running(ImportProgress(done: 2, total: 27)))
         #expect(importing.items.count == 3)
-        #expect(importing.items.allSatisfy { $0.rating == 0 && $0.label == nil && $0.flag == PhotoFlag.none &&$0.id == $0.path })
+        let neutral = importing.items.allSatisfy { photo in
+            photo.rating == 0 && photo.label == nil && photo.flag == PhotoFlag.none && photo.id == photo.path
+        }
+        #expect(neutral, "an imported photo arrived with a rating, label or flag, or an id other than its path")
 
         var imported = LibraryCatalog()
         _ = imported.beginImport()
@@ -129,9 +132,10 @@ import Testing
         var denied = LibraryCatalog()
         _ = denied.beginImport()
         denied.failImport(.unreadableFolder("Shoot"), folder: "Shoot")
-        let browser = LibraryBrowser(model: denied, menu: Self.importMenu)
-        #expect(browser.importAction.unavailableHelp == nil)
-        #expect(!denied.emptyState(importReason: browser.importAction.unavailableHelp).message.contains("isn't connected"))
+        let reason = LibraryBrowser(model: denied, menu: Self.importMenu).importAction.unavailableHelp
+        #expect(reason == nil)
+        let message = denied.emptyState(importReason: reason).message
+        #expect(!message.contains("isn't connected"), "the denied empty state reads \(message)")
     }
 
     /// The notice lists each failure as `name: reason`.

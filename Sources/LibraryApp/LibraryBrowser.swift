@@ -157,7 +157,7 @@ struct LibraryImportProgressRow: View {
     /// the delay's `.task` runs even while the row is hidden (#1379).
     var body: some View {
         ZStack(alignment: .topLeading) {
-            Color.clear.frame(height: .zero)
+            Color.clear.frame(height: CGFloat.zero)
             if shown {
                 VStack(alignment: .leading, spacing: SuiteSpacing.xs) {
                     Text(value)
