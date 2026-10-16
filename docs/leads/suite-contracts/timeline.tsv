@@ -69,3 +69,4 @@ utc	stage	event	ref	note
 2026-10-16T19:58Z	5	heartbeat	38949843618	full dev run in progress
 2026-10-16T20:20Z	5	heartbeat	38949843618	full dev run in progress
 2026-10-16T20:42Z	5	heartbeat	38949843618	full dev run in progress
+2026-10-16T20:55Z	5	ci-run	38949843618	cancelled; macOS scripts/ci failed at journey quarantine (owner #1075 closed), not this feature; noted on #1332

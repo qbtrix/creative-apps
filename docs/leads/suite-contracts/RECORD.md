@@ -4,7 +4,7 @@ Issue: #1332 · Packet: docs/blueprints/suite/features/suite-contracts.md
 Run: act-1a1448a5fd9-0he1 · Session: claude/suite-contracts-lead-rv72k4 · Started: 2026-10-16T11:49Z
 Stage: 5 finish
 Base: 68cabe667bf2de7df53327a947705078d3b08f2b
-Next: wait for full dev run 38949843618 (#1030, head 4460182, contains every suite-contracts PR incl. #1519); if green, post Belt-Contact-Sheet on #1332; if red only on other features, record it and wait for the next full run
+Next: blocked on the supervisor: full dev runs fail scripts/ci at the journey quarantine check (owner #1075 closed). Wait for a green full dev run containing 26689bbc (newest: 38965143576 pending), then post Belt-Contact-Sheet on #1332
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -61,6 +61,7 @@ Runs after round 1: scoped: suite 38938043443 on 91f1ba6 (has SC-5c and #1472) g
 - Corrections in the packet are listed 1-6, 8-10, 7 (no correction is missing); builders apply the ones naming their task.
 
 ## Open
+- Full dev runs blocked by UITests/quarantine.json (owner #1075 closed; supervisor-only). Noted on #1332.
 - Gaps after the round cap: #1556 #1558 #1560 (p1), #1557 #1559 #1463 (p2), #1491 (p2); needs-ui #1477.
 - #1491 (gap, p2): home.md, targets.md, switching.md packets still quote the old "Not connected yet (" sentence.
 - #1477 (needs-ui, line:suiteui): AppSwitcher hardcodes the old not-connected sentence that #1473 replaces.
