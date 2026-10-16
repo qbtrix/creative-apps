@@ -8,13 +8,14 @@
 // The curve's midpoint dragged up changes the canvas as one "Undo Curves"
 // step; the row's eye hides it and the canvas is the opened one again. A new
 // layer above takes a brush stroke; showing the adjustment again changes the
-// canvas but not the stroke, so the stroke is unadjusted. Send Backward once
-// makes the adjustment the bottom row, Send Backward is then disabled and the
-// row reads "Nothing below to adjust."; opacity 0 leaves the canvas as it was
-// (the adjustment already adjusts nothing) and Command-Z undoes it. Background
-// selected reads "Image", "Adjusts the whole image". Last, the error: a brush
-// drag with the adjustment selected says "Select an image layer in the Layers
-// tab to paint on." (PhotoStroke's wording) and changes nothing. The window
+// canvas but not the stroke, so the stroke is unadjusted. With the adjustment
+// selected and still adjusting Background, opacity 0 gives back the hidden-eye
+// canvas (the stroke over the unadjusted image) and Command-Z restores the
+// adjusted one. Send Backward once makes the adjustment the bottom row, Send
+// Backward is then disabled and the row reads "Nothing below to adjust.".
+// Background selected reads "Image", "Adjusts the whole image". Last, the
+// error: a brush drag with the adjustment selected says "Select an image layer
+// in the sidebar to paint on." (PhotoStroke's wording) and changes nothing. The window
 // has no tabs: the layer list is always in the sidebar and the adjustment
 // sections always in the inspector. Layers are picked by key (Select Layer
 // Above/Below), as testTier1Layers does. Shots: `photo-adjlayer-*`.
@@ -91,8 +92,21 @@ extension PhotoJourneyTests {
             "Curves 1 below Layer 1 adjusted its stroke (\(strokeBefore) became \(strokeAfter))")
         photo.shot("adjlayer-stroke-unadjusted")
 
-        // 5. Curves 1 selected, Send Backward once: the bottom row, nothing below to adjust.
+        // 5. Curves 1 selected, opacity 0: the hidden-eye canvas; Command-Z restores the adjusted one.
         photo.app.typeKey("[", modifierFlags: [.command, .option])
+        adjExpectHeader("Curves 1", "Adjusts the layers below", photo)
+        adjTypeValue("0", into: "Opacity", photo)
+        adjExpect("Undo Layer Opacity", photo, "typing 0 into Opacity made no Layer Opacity step")
+        XCTAssert(photo.app.staticTexts["Normal 0%"].waitForExistence(timeout: 5), "Curves 1 doesn't read Normal 0%")
+        adjExpectCanvas(like: painted, photo, "opacity 0 on Curves 1 didn't give back the hidden-eye canvas")
+        photo.shot("adjlayer-opacity-0")
+        photo.app.typeKey("z", modifierFlags: .command)
+        adjExpect("Redo Layer Opacity", photo, "Command-Z didn't undo the opacity")
+        XCTAssert(photo.app.staticTexts["Normal 0%"].waitForNonExistence(timeout: 5), "Command-Z left Curves 1 at 0%")
+        adjExpectCanvas(like: shown, photo, "Command-Z didn't restore the adjusted canvas")
+        photo.shot("adjlayer-opacity-undone")
+
+        // 6. Send Backward once: the bottom row, nothing below to adjust.
         adjChoose("Send Backward", from: "Layer", photo)
         adjExpect("Undo Reorder Layers", photo, "Send Backward made no Reorder Layers step")
         XCTAssert(adjWaitUntil { curves.frame.minY > background.frame.minY }, "Curves 1 isn't the bottom row")
@@ -107,18 +121,6 @@ extension PhotoJourneyTests {
         photo.shot("adjlayer-bottom-menu", screen: true)
         photo.press(.escape)
         photo.shot("adjlayer-bottom")
-
-        // 6. Opacity 0: the canvas as it was; Command-Z undoes it.
-        let bottom = adjSteadyCanvas(photo)
-        adjTypeValue("0", into: "Opacity", photo)
-        adjExpect("Undo Layer Opacity", photo, "typing 0 into Opacity made no Layer Opacity step")
-        XCTAssert(photo.app.staticTexts["Normal 0%"].waitForExistence(timeout: 5), "Curves 1 doesn't read Normal 0%")
-        adjExpectCanvas(like: bottom, photo, "opacity 0 changed the canvas")
-        photo.shot("adjlayer-opacity-0")
-        photo.app.typeKey("z", modifierFlags: .command)
-        adjExpect("Redo Layer Opacity", photo, "Command-Z didn't undo the opacity")
-        XCTAssert(photo.app.staticTexts["Normal 0%"].waitForNonExistence(timeout: 5), "Command-Z left Curves 1 at 0%")
-        photo.shot("adjlayer-opacity-undone")
 
         // 7. Background selected: the inspector adjusts the whole image.
         photo.app.typeKey("]", modifierFlags: [.command, .option])
