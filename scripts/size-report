@@ -9,8 +9,15 @@
 #                  { "name": "app-builds.tar.gz", "kind": "tarball", "bytes": N } ],
 #     "suiteUISymbols": { "Flare": N, ... } }
 #
-# Per app X: the bytes of .build/apps/<X>App.app/Contents/MacOS/<X>App, the
-# bytes of every file in the bundle, and the SuiteUI symbols the executable
+# When APPS_DIR holds AfterGlow.app (scripts/bundle-apps, packet BU-4) it
+# measures that bundle, laid out as SuiteModel's BundleLayout: the launcher
+# ("AfterGlow", executable), each framework ("SuiteUI.framework", framework),
+# per app X Contents/Helpers/<X>.app/Contents/MacOS/<X> ("Flare", executable)
+# and the helper ("Flare.app", appBundle), and the whole bundle
+# ("AfterGlow.app", wholeBundle); a missing launcher, framework or helper
+# exits 1. Without it (BU-0's five bundles), per app X the bytes of
+# .build/apps/<X>App.app/Contents/MacOS/<X>App and of every file in the
+# bundle ("FlareApp.app", appBundle). Either way, the SuiteUI symbols the app executable
 # defines: `nm -U` names, kept when their mangled module is SuiteUI
 # (`$s7SuiteUI`), demangled with `swift demangle --compact`, minus generic
 # specializations and inlined generic copies (they legitimately land in a
@@ -24,6 +31,7 @@
 #   env: APPS     apps to measure        (default "Flare Design Photo Library Halo")
 #        APPS_DIR folder of <X>App.app   (default .build/apps)
 #        TARBALL  the app-builds tarball (default .build/app-builds.tar.gz)
+#        FRAMEWORKS  AfterGlow.app's    (default "SuiteUI SuiteModel SuiteShell CreativeEngines")
 #        OUT      the JSON written       (default .build/size-report.json)
 #        COMMIT   the commit recorded    (default $GITHUB_SHA, else git HEAD)
 #        NM, SWIFT_DEMANGLE  the commands (default "nm -U", "swift demangle --compact")
@@ -33,6 +41,8 @@ cd "$(dirname "$0")/.." || exit 1
 apps=${APPS:-"Flare Design Photo Library Halo"}
 apps_dir=${APPS_DIR:-.build/apps}
 tarball=${TARBALL:-.build/app-builds.tar.gz}
+frameworks=${FRAMEWORKS:-"SuiteUI SuiteModel SuiteShell CreativeEngines"}
+suite="$apps_dir/AfterGlow.app"
 out=${OUT:-.build/size-report.json}
 commit=${COMMIT:-${GITHUB_SHA:-$(git rev-parse HEAD 2>/dev/null || echo unknown)}}
 read -r -a nm_cmd <<<"${NM:-nm -U}"
@@ -40,6 +50,8 @@ read -r -a demangle_cmd <<<"${SWIFT_DEMANGLE:-swift demangle --compact}"
 
 die() { echo "size-report: $*" >&2; exit 1; }
 bytes() { wc -c <"$1" | tr -d ' '; }
+# Every file under a folder; inner symlinks (a framework's Versions/Current)
+# are not followed, so nothing counts twice.
 tree_bytes() { find "$1" -type f -exec cat {} + | wc -c | tr -d ' '; }
 
 # SuiteUI symbols defined in one executable, as blueprint 7.5 counts them.
@@ -50,22 +62,37 @@ suiteui_symbols() {
     | awk '!/specialization <|inlined generic function </ { n++ } END { print n + 0 }'
 }
 
+# app_dir X / app_exe X: the bundle and executable measured for app X.
+app_dir() { if [[ -d "$suite" ]]; then echo "$suite/Contents/Helpers/$1.app"; else echo "$apps_dir/${1}App.app"; fi; }
+app_exe() { if [[ -d "$suite" ]]; then echo "$(app_dir "$1")/Contents/MacOS/$1"; else echo "$(app_dir "$1")/Contents/MacOS/${1}App"; fi; }
+
+if [[ -d "$suite" ]]; then
+  [[ -f "$suite/Contents/MacOS/AfterGlow" ]] || die "missing executable $suite/Contents/MacOS/AfterGlow"
+  for f in $frameworks; do
+    [[ -d "$suite/Contents/Frameworks/$f.framework" ]] || die "missing framework $suite/Contents/Frameworks/$f.framework"
+  done
+fi
 for x in $apps; do
-  [[ -d "$apps_dir/${x}App.app" ]] || die "missing bundle $apps_dir/${x}App.app"
-  [[ -f "$apps_dir/${x}App.app/Contents/MacOS/${x}App" ]] \
-    || die "missing executable $apps_dir/${x}App.app/Contents/MacOS/${x}App"
+  [[ -d "$(app_dir "$x")" ]] || die "missing bundle $(app_dir "$x")"
+  [[ -f "$(app_exe "$x")" ]] || die "missing executable $(app_exe "$x")"
 done
 [[ -f "$tarball" ]] || die "missing tarball $tarball"
 
 rows=""   # one tab-separated line per entry: name kind bytes
 symbols=""  # one tab-separated line per app: name count
+if [[ -d "$suite" ]]; then
+  rows+="AfterGlow	executable	$(bytes "$suite/Contents/MacOS/AfterGlow")"$'\n'
+  for f in $frameworks; do
+    rows+="$f.framework	framework	$(tree_bytes "$suite/Contents/Frameworks/$f.framework")"$'\n'
+  done
+fi
 for x in $apps; do
-  app="$apps_dir/${x}App.app"
-  exe="$app/Contents/MacOS/${x}App"
+  exe=$(app_exe "$x")
   rows+="$x	executable	$(bytes "$exe")"$'\n'
-  rows+="${x}App.app	appBundle	$(tree_bytes "$app")"$'\n'
+  rows+="$(basename "$(app_dir "$x")")	appBundle	$(tree_bytes "$(app_dir "$x")")"$'\n'
   symbols+="$x	$(suiteui_symbols "$exe")"$'\n'
 done
+if [[ -d "$suite" ]]; then rows+="AfterGlow.app	wholeBundle	$(tree_bytes "$suite")"$'\n'; fi
 rows+="$(basename "$tarball")	tarball	$(bytes "$tarball")"$'\n'
 
 mkdir -p "$(dirname "$out")"
@@ -80,7 +107,7 @@ jq -r '
   "### Size report (\(.commit[0:12]))", "",
   "| entry | kind | bytes | SuiteUI symbols |", "|---|---|---:|---:|",
   (.suiteUISymbols as $s | .entries[]
-    | "| \(.name) | \(.kind) | \(.bytes) | \(if .kind == "executable" then $s[.name] else "" end) |"),
+    | "| \(.name) | \(.kind) | \(.bytes) | \(if .kind == "executable" then ($s[.name] // "") else "" end) |"),
   "", "Sum of the executables: \([.entries[] | select(.kind == "executable") | .bytes] | add // 0) bytes."
 ' "$out"
 echo "size-report: wrote $out" >&2

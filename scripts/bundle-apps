@@ -1,62 +1,177 @@
 #!/usr/bin/env bash
-# scripts/bundle-apps: builds the five apps in release and wraps each one in a
-# minimal, ad-hoc signed app bundle a reviewer can open on a Mac. macOS only.
-# CI runs it after scripts/ci passes and uploads the tarball as `app-builds`.
+# scripts/bundle-apps: builds the Release graph of project.yml (route R1,
+# docs/blueprints/suite.md 2.5) and assembles the one suite bundle a reviewer
+# can open on a Mac (packet docs/blueprints/suite/features/bundle.md, BU-4).
+# macOS with Xcode only. CI runs it after scripts/ci passes and uploads the
+# tarball as `app-builds`; scripts/ui-test runs it before the journeys.
 #
-#   .build/apps/<X>App.app/Contents/MacOS/<X>App   the release executable
-#   .build/apps/<X>App.app/Contents/Info.plist     id <prefix>.<x>, macOS 26.0
-#   .build/apps/<X>App.app/Contents/Resources/     SwiftPM resource bundles
-#   .build/app-builds.tar.gz                       the five .app folders
+#   .build/apps/AfterGlow.app/Contents/MacOS/AfterGlow           the launcher
+#   .build/apps/AfterGlow.app/Contents/Helpers/<X>.app            each app, its
+#       Info.plist from Bundle/Info/<X>.plist, executable Contents/MacOS/<X>
+#   .build/apps/AfterGlow.app/Contents/Frameworks/<F>.framework   SuiteUI,
+#       SuiteModel, SuiteShell, CreativeEngines (linked once, shared)
+#   .build/apps/AfterGlow.app/Contents/Resources/Samples          Bundle/Samples/, if present
+#   <bundle>/Contents/Resources/<name>.icns                       from Bundle/Icons/<name>.png
+#   .build/apps/<X>App.app -> AfterGlow.app/Contents/Helpers/<X>.app
+#   .build/app-builds.tar.gz                                      all of the above
 #
-# for X in Flare, Design, Photo, Library and Halo. The bundles ship as a
-# tarball because actions/upload-artifact drops file modes: a bundle whose
-# executable lost its +x bit does not launch. To open one after download:
-#   tar xzf app-builds.tar.gz && open FlareApp.app
+# for X in Flare, Design, Photo, Library and Halo (SuiteModel's BundleLayout).
+# The <X>App.app symlinks keep every journey (UITests/Journey.swift launches
+# .build/apps/<X>App.app) and `open FlareApp.app` working. The bundles ship as
+# a tarball because actions/upload-artifact drops file modes. To open after
+# download: tar xzf app-builds.tar.gz && open AfterGlow.app
 #
-# Before tarring, each bundle must pass `plutil -lint` and
-# `codesign --verify --deep --strict`, so a broken bundle fails the job.
-# bash 3.2 compatible (macOS /bin/bash).
-set -euo pipefail
+# Steps: build (xcodegen, xcodebuild -scheme Release), assemble, verify each
+# helper's links (otool -L lists the four frameworks; otool -l has the helper
+# run path), sign inside out ad hoc (frameworks, helpers, outer), verify
+# (plutil -lint every Info.plist, codesign --verify --deep --strict), register
+# (lsregister -f), then tar. A failure exits 1 naming the step and the path;
+# a helper missing a framework fails with "<X> does not link <framework>".
+# xcodegen comes from PATH, else the pinned release ci.yml installs is fetched
+# into .build/tools (sha256 checked), since CI runs this before that step.
+# Release builds only the active arch, as the SwiftPM build before it did, so
+# size-report stays comparable with BU-0's numbers. bash 3.2 compatible.
+set -Eeuo pipefail
 cd "$(dirname "$0")/.." || exit 1
 
-id_prefix="org.creativesuite" # placeholder until the suite has a real one
 apps="Flare Design Photo Library Halo"
+frameworks="SuiteUI SuiteModel SuiteShell CreativeEngines"
 out=.build/apps
+bundle="$out/AfterGlow.app"
+derived=.build/xcode-release
+products="$derived/Build/Products/Release"
+lsregister=/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister
 
-# One release build covers all five executable products and shares their deps.
-swift build -c release
-bin=$(swift build -c release --show-bin-path)
+step=build
+at=project.yml
+trap 'echo "bundle-apps: $step failed at $at" >&2' ERR
+die() { echo "bundle-apps: $step: $*" >&2; trap - ERR; exit 1; }
 
+xcodegen_bin() {
+  if command -v xcodegen >/dev/null; then echo xcodegen; return; fi
+  local dir=.build/tools zip=.build/tools/xcodegen.zip
+  local sum=4d9e34b62172d645eed6457cac13fc222569974098ef4ee9c3368bedf0196806
+  if [[ ! -x "$dir/xcodegen/bin/xcodegen" ]]; then
+    mkdir -p "$dir"
+    curl -fsSL -o "$zip" https://github.com/yonaskolb/XcodeGen/releases/download/2.46.0/xcodegen.zip
+    echo "$sum  $zip" | shasum -a 256 -c - >/dev/null || die "xcodegen.zip checksum mismatch ($zip)"
+    unzip -qo "$zip" -d "$dir"
+  fi
+  echo "$dir/xcodegen/bin/xcodegen"
+}
+
+# PNG -> .icns with every size an iconset holds, into <app>/Contents/Resources.
+make_icns() {
+  local png=$1 dest=$2 set
+  set="$(mktemp -d)/$(basename "$png" .png).iconset"
+  mkdir -p "$set"
+  for s in 16 32 128 256 512; do
+    sips -z "$s" "$s" "$png" --out "$set/icon_${s}x${s}.png" >/dev/null
+    sips -z $((s * 2)) $((s * 2)) "$png" --out "$set/icon_${s}x${s}@2x.png" >/dev/null
+  done
+  iconutil -c icns "$set" -o "$dest"
+  rm -rf "$(dirname "$set")"
+}
+
+# Install a bundle's Info.plist from Bundle/Info/<name>.plist, naming the
+# executable the build produced, and its icon when Bundle/Icons has one.
+dress() {
+  local app=$1 name=$2 exe=$3
+  at="Bundle/Info/$name.plist"
+  [[ -f "$at" ]] || die "missing $at"
+  [[ -f "$app/Contents/MacOS/$exe" ]] || die "missing executable $app/Contents/MacOS/$exe"
+  cp "$at" "$app/Contents/Info.plist"
+  at="$app/Contents/Info.plist"
+  plutil -replace CFBundleExecutable -string "$exe" "$at"
+  mkdir -p "$app/Contents/Resources"
+  local icon
+  icon=$(plutil -extract CFBundleIconFile raw "$at" 2>/dev/null || echo "$name")
+  icon=${icon%.icns}
+  at="Bundle/Icons/$icon.png"
+  if [[ -f "$at" ]]; then make_icns "$at" "$app/Contents/Resources/$icon.icns"; fi
+}
+
+# 1. build
+xcodegen=$(xcodegen_bin)
+"$xcodegen" generate --quiet
+at="$derived (xcodebuild -scheme Release)"
+xcodebuild build -project CreativeApps.xcodeproj -scheme Release -configuration Release \
+  -destination platform=macOS -derivedDataPath "$derived" ONLY_ACTIVE_ARCH=YES -quiet
+
+# 2. assemble
+step=assemble
 rm -rf "$out" .build/app-builds.tar.gz
 mkdir -p "$out"
+at="$products/AfterGlow.app"
+[[ -d "$at" ]] || die "missing $at"
+ditto "$at" "$bundle"
+dress "$bundle" AfterGlow AfterGlow
+mkdir -p "$bundle/Contents/Helpers" "$bundle/Contents/Frameworks"
+for f in $frameworks; do
+  at="$products/$f.framework"
+  [[ -d "$at" ]] || die "missing $at"
+  ditto "$at" "$bundle/Contents/Frameworks/$f.framework"
+done
 for x in $apps; do
-  exe="${x}App"
-  app="$out/$exe.app"
-  lower=$(echo "$x" | tr '[:upper:]' '[:lower:]')
-  mkdir -p "$app/Contents/MacOS" "$app/Contents/Resources"
-  cp "$bin/$exe" "$app/Contents/MacOS/$exe"
-  for b in "$bin"/*.bundle; do
-    if [ -e "$b" ]; then cp -R "$b" "$app/Contents/Resources/"; fi
+  at="$products/$x.app"
+  [[ -d "$at" ]] || die "missing $at"
+  ditto "$at" "$bundle/Contents/Helpers/$x.app"
+  dress "$bundle/Contents/Helpers/$x.app" "$x" "$x"
+done
+if [[ -d Bundle/Samples ]]; then
+  at=Bundle/Samples
+  ditto Bundle/Samples "$bundle/Contents/Resources/Samples"
+fi
+
+# 3. verify the links: each helper loads the four frameworks from the bundle.
+step=verify
+for x in $apps; do
+  at="$bundle/Contents/Helpers/$x.app/Contents/MacOS/$x"
+  links=$(otool -L "$at")
+  for f in $frameworks; do
+    grep -q "/$f.framework/" <<<"$links" || die "$x does not link $f ($at)"
   done
-  cat > "$app/Contents/Info.plist" <<EOF
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-<dict>
-  <key>CFBundleExecutable</key><string>$exe</string>
-  <key>CFBundleIdentifier</key><string>$id_prefix.$lower</string>
-  <key>CFBundleName</key><string>$x</string>
-  <key>CFBundlePackageType</key><string>APPL</string>
-  <key>LSMinimumSystemVersion</key><string>26.0</string>
-  <key>NSPrincipalClass</key><string>NSApplication</string>
-</dict>
-</plist>
-EOF
-  codesign --force --deep -s - "$app"
-  plutil -lint "$app/Contents/Info.plist"
-  codesign --verify --deep --strict "$app"
+  otool -l "$at" | grep -q '@executable_path/../../../../Frameworks' \
+    || die "$x has no run path @executable_path/../../../../Frameworks ($at)"
 done
 
-# COPYFILE_DISABLE keeps macOS tar from adding ._ metadata files.
+# 4. sign inside out, ad hoc until a Developer ID exists.
+step=sign
+for f in $frameworks; do
+  at="$bundle/Contents/Frameworks/$f.framework"
+  codesign --force -s - "$at"
+done
+for x in $apps; do
+  at="$bundle/Contents/Helpers/$x.app"
+  codesign --force -s - "$at"
+done
+at="$bundle"
+codesign --force -s - "$at"
+
+# 5. verify the bundle.
+step=verify
+while IFS= read -r plist; do
+  at="$plist"
+  plutil -lint "$at" >/dev/null
+done < <(find "$bundle" -name Info.plist)
+at="$bundle"
+codesign --verify --deep --strict "$at"
+
+# The old paths, for the journeys; then tell Launch Services the types.
+for x in $apps; do
+  ln -s "AfterGlow.app/Contents/Helpers/$x.app" "$out/${x}App.app"
+done
+step=register
+at="$bundle"
+if [[ -x "$lsregister" ]]; then
+  "$lsregister" -f "$bundle" || echo "bundle-apps: register: lsregister -f $bundle failed; the journeys launch by path, so this only warns" >&2
+else
+  echo "bundle-apps: register: no lsregister at $lsregister; skipped" >&2
+fi
+
+# COPYFILE_DISABLE keeps macOS tar from adding ._ metadata files. The
+# <X>App.app symlinks go in as symlinks.
+step=tar
+at=.build/app-builds.tar.gz
 (cd "$out" && COPYFILE_DISABLE=1 tar -czf ../app-builds.tar.gz ./*.app)
-echo "bundle-apps: wrote" "$out"/*.app .build/app-builds.tar.gz
+echo "bundle-apps: wrote $bundle, the <X>App.app links and .build/app-builds.tar.gz"
