@@ -75,10 +75,10 @@ struct HaloViewer: View {
     ) -> some View {
         ViewerStatusBar(zoom: ViewerZoom.fitScale(artboard: artboard, in: viewport), size: comp.sizeText) {
             if timecode {
-                // One Text, so the readout stays one accessibility label:
-                // the current part primary, the total secondary (docs/design.md).
-                Text("\(Text(comp.statusPlayheadText).foregroundStyle(SuiteColor.textPrimary))\(comp.statusLengthText)")
-                    .font(SuiteFont.timecode)
+                // The current time in primary ink, in the pill type so the
+                // bar fits the content column; the length is in the tooltip.
+                Text(comp.statusTimecode)
+                    .foregroundStyle(SuiteColor.textPrimary)
                     .help(comp.statusTimecodeHelp)
             }
             if layers { Text(comp.layerSummary).help("Layers in this composition.") }
