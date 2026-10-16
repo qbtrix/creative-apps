@@ -25,7 +25,7 @@ import Testing
 @Test func theCapsuleDrawsOnlyBehindTheCurrentItem() throws {
     let items = AppSwitcherState.placeholder(processName: "xctest").items
     let spacing = SuiteSize.switcherSpacing
-    // Exactly the widest row, so ViewThatFits keeps 80 pt and item i spans [80i, 80i + 80].
+    // Exactly the row at the default 80 pt spacing, so item i spans [80i, 80i + 80].
     let size = CGSize(width: spacing * CGFloat(items.count), height: SuiteSize.switcherCapsule.height)
     let index = try #require(items.firstIndex { $0.id == "design" })
     let center = spacing * (CGFloat(index) + 0.5)

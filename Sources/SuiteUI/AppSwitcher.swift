@@ -3,9 +3,14 @@
 // Halo), no labels and no bar behind it (docs/blueprints/suiteui.md section 6).
 // The current app's item sits in a capsule of SuiteUI glass (`suiteGlass`, the
 // row's one glass shape) with its icon in textPrimary; the others are
-// textSecondary. Item centers sit `switcherSpacing` apart and step down by
-// SuiteSpacing.l to `switcherSpacingMinimum` (80, 64, 48, 40) through
-// ViewThatFits, so the row shrinks before any toolbar item overflows. An item
+// textSecondary. Item centers sit `spacing` apart, one of `spacingSteps`
+// (80, 64, 48, 40: from `switcherSpacing` down by SuiteSpacing.l to
+// `switcherSpacingMinimum`). A toolbar item is never offered less than its
+// ideal width, so ViewThatFits there would always keep 80 and push the
+// window's actions into the overflow (run 38897404951); SuiteWindow instead
+// passes `toolbarSpacing(windowWidth:…)`, the widest step whose row leaves the
+// toolbar's leading and trailing buttons their room. The capsule narrows with
+// the step (`capsuleWidth(spacing:)`) so it never reaches a neighbour's icon. An item
 // that can't switch yet is disabled and its tooltip says why after the app's
 // name and shortcut ("Design (⌃⌘2)", then the reason on a new line). The row is
 // the container `suite.switcher`; each item is `suite.switcher.<id>` and lists
@@ -47,32 +52,62 @@ public struct AppSwitcherItem: Identifiable, Sendable {
 public struct AppSwitcher: View {
     private let items: [AppSwitcherItem]
     private let current: AppSwitcherItem.ID?
+    private let spacing: CGFloat
     private let onSelect: @MainActor (AppSwitcherItem.ID) -> Void
 
+    /// `spacing` is the distance between item centers, `switcherSpacing` unless
+    /// the toolbar needs a narrower step (`toolbarSpacing(windowWidth:…)`).
     public init(
-        items: [AppSwitcherItem], current: AppSwitcherItem.ID?,
+        items: [AppSwitcherItem], current: AppSwitcherItem.ID?, spacing: CGFloat = SuiteSize.switcherSpacing,
         onSelect: @escaping @MainActor (AppSwitcherItem.ID) -> Void
     ) {
         self.items = items
         self.current = current
+        self.spacing = spacing
         self.onSelect = onSelect
     }
 
-    /// The distances between item centers ViewThatFits tries, widest first:
+    /// The distances between item centers the row may use, widest first:
     /// from `switcherSpacing` down by SuiteSpacing.l, then `switcherSpacingMinimum`.
     nonisolated public static let spacingSteps: [CGFloat] =
         Array(stride(from: SuiteSize.switcherSpacing, to: SuiteSize.switcherSpacingMinimum, by: -SuiteSpacing.l))
         + [SuiteSize.switcherSpacingMinimum]
 
-    public var body: some View {
-        ViewThatFits(in: .horizontal) {
-            ForEach(Self.spacingSteps, id: \.self) { spacing in
-                row(spacing: spacing)
-            }
-        }
+    /// The toolbar width one button takes: its glass (the overflow button
+    /// measured 38 pt in run 38897404951) and the gap to the next.
+    nonisolated public static let toolbarButtonRoom: CGFloat = SuiteSize.toolButton + SuiteSpacing.m
+    /// The width kept for the window title beside the leading buttons
+    /// ("Flare", "Halo", "Library" take about 40 to 60 pt).
+    nonisolated public static let titleRoom: CGFloat = 2 * toolbarButtonRoom
+
+    /// The widest of `spacingSteps` whose row of `itemCount` items, centered in
+    /// a window `windowWidth` wide, keeps clear of both toolbar ends: the
+    /// leading end is the sidebar column, `leadingButtons` and the title; the
+    /// trailing end is `trailingButtons`. Centered on the window, the row's
+    /// half must fit beside the wider end, so its width is at most
+    /// windowWidth − 2 × max(leading, trailing); centered between the two ends
+    /// instead it needs less. Below every step (or before the window is
+    /// measured) it is `switcherSpacingMinimum`.
+    nonisolated public static func toolbarSpacing(
+        windowWidth: CGFloat, itemCount: Int, leadingButtons: Int, trailingButtons: Int
+    ) -> CGFloat {
+        let leading = SuiteSize.sidebarWidth.ideal + CGFloat(max(leadingButtons, 0)) * toolbarButtonRoom + titleRoom
+        let trailing = CGFloat(max(trailingButtons, 0)) * toolbarButtonRoom
+        let room = windowWidth - 2 * max(leading, trailing)
+        let count = CGFloat(max(itemCount, 0))
+        return spacingSteps.first { $0 * count <= room } ?? SuiteSize.switcherSpacingMinimum
     }
 
-    private func row(spacing: CGFloat) -> some View {
+    /// The current item's capsule width at `spacing`: `switcherCapsule.width`,
+    /// narrowed so each end stays SuiteSpacing.xs clear of a neighbour's icon
+    /// (90 at 80 and 64, 66 at 48, 50 at 40), and never under the capsule's
+    /// height, so it stays a capsule.
+    nonisolated public static func capsuleWidth(spacing: CGFloat) -> CGFloat {
+        let clear = 2 * (spacing - SuiteSize.switcherIcon / 2 - SuiteSpacing.xs)
+        return max(SuiteSize.switcherCapsule.height, min(SuiteSize.switcherCapsule.width, clear))
+    }
+
+    public var body: some View {
         HStack(spacing: 0) {
             ForEach(items) { item in
                 let isCurrent = item.id == current
@@ -89,7 +124,7 @@ public struct AppSwitcher: View {
                 .background {
                     if isCurrent {
                         Color.clear
-                            .frame(width: SuiteSize.switcherCapsule.width, height: SuiteSize.switcherCapsule.height)
+                            .frame(width: Self.capsuleWidth(spacing: spacing), height: SuiteSize.switcherCapsule.height)
                             .suiteGlass(in: Capsule())
                     }
                 }
