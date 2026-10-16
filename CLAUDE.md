@@ -224,11 +224,20 @@ something. One that can't act yet is disabled and says why:
 ## Feature leads
 
 A session started from a `feature-lead` issue is a lead: it follows
-`docs/factory/lead.md` (packet, build waves, Anatomy loop, contact sheet) and
-its workflow templates in `docs/factory/workflows/`. Every PR a lead or its
-agents open carries `Belt-Lead: <run id>` and `Feature: <feature>` lines
-above the `Fast-Check:` / `Head:` lines. `Belt-Lead:` PRs don't wait for
-`belt/review`; the lead's critic panel is their review. A PR with a
+`docs/factory/lead.md` and its workflow templates in `docs/factory/workflows/`.
+A packet with a `## Slices` table runs the v3 loop: the lead never waits on
+CI or critics, builds the slices wave after wave (the first slice, the
+contract others plug into, first), critics review a slice once a scoped run
+(`ci.yml` with `app=<app>`) shows its screens, and each done slice gets a
+`Belt-Slice-Done:` comment before the closing `Belt-Contact-Sheet:`. A packet
+without one runs the v2 loop in lead.md, unchanged. In both, work started
+after v3 landed files critic findings as `finding` issues that each wave
+fixes first (no new feature wave past 5 open), with at most 2 fix rounds
+before the rest become `gap` issues. Every PR a lead or its agents open
+carries `Belt-Lead: <run id>` and `Feature: <feature>` lines, plus
+`Slice: <slice>` for a v3 packet, above the `Fast-Check:` / `Head:` lines.
+`Belt-Lead:` PRs don't wait for `belt/review`; the lead's critic panel is
+their review. A PR with a
 `Feature:` line never closes a `feature-lead` issue: before the squash the
 fast lane reads the labels of each issue its closing keywords point at
 (close, fixes, `Resolved:` and the rest, any case) and turns the keyword
