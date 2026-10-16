@@ -4,7 +4,7 @@ Issue: #1325 · Packet: docs/blueprints/design/features/shell-parity.md
 Run: act-1a14478b134-5to5 · Session: claude/design-shell-parity-2jr7z3 · Started: 2026-10-16T12:00Z
 Stage: 3 polling
 Base: c9e46560366b0c3464a5e822d11c4a865e4dc53e
-Next: wait for SuiteUI #1456 (shell geometry) and #1337 (switcher); on each new scoped run app=design read DesignShellJourneyTests; once a successful scoped run contains #1467 post Belt-Slice-Done DP-a, once DP-b's journeys pass post DP-b (gaps: #1452) and run DS-5 feature-done
+Next: read scoped run app=design 38949684833 (head 44601820, contains #1467, queued 18:44): successful -> Belt-Slice-Done DP-a; DesignShellJourneyTests pass -> DP-b gaps #1452 + DS-5
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | rounds | state | run |
