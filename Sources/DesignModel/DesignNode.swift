@@ -185,15 +185,30 @@ public struct DesignNode: Identifiable, Sendable, Hashable, Codable {
     public var fill: DesignColor
     /// A text node's text; empty for every other kind.
     public var text: String
+    /// How round a rectangle's or frame's corners are, in points; 0 is square. The canvas draws
+    /// at most `maxCornerRadius` (DesignCorners), so a later resize never needs to change it.
+    public var cornerRadius: Double
 
     public init(
         id: String, name: String, kind: DesignNodeKind, frame: DesignRect,
         children: [DesignNode] = [], isHidden: Bool = false, isLocked: Bool = false,
-        fill: DesignColor? = nil, text: String = ""
+        fill: DesignColor? = nil, text: String = "", cornerRadius: Double = 0
     ) {
         (self.id, self.name, self.kind, self.frame) = (id, name, kind, frame)
         (self.children, self.isHidden, self.isLocked) = (children, isHidden, isLocked)
-        (self.fill, self.text) = (fill ?? kind.defaultFill, text)
+        (self.fill, self.text, self.cornerRadius) = (fill ?? kind.defaultFill, text, cornerRadius)
+    }
+
+    /// Decodes a node; a file written before corner radius existed has none, so it is 0.
+    public init(from decoder: any Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        try self.init(
+            id: container.decode(String.self, forKey: .id), name: container.decode(String.self, forKey: .name),
+            kind: container.decode(DesignNodeKind.self, forKey: .kind), frame: container.decode(DesignRect.self, forKey: .frame),
+            children: container.decode([DesignNode].self, forKey: .children),
+            isHidden: container.decode(Bool.self, forKey: .isHidden), isLocked: container.decode(Bool.self, forKey: .isLocked),
+            fill: container.decode(DesignColor.self, forKey: .fill), text: container.decode(String.self, forKey: .text),
+            cornerRadius: container.decodeIfPresent(Double.self, forKey: .cornerRadius) ?? 0)
     }
 
     /// Shifts this node and everything under it by `delta`.
@@ -217,6 +232,8 @@ public enum DesignTreeError: Error, Equatable, Sendable {
     case unknownID(String), notAContainer(String), intoItself(String)
     case emptyName, lastPage, alreadyExists(String)
     case locked(String), notText(String), emptyText
+    /// The node's kind has no corners to round (DesignCorners).
+    case noCorners(String)
 }
 
 /// Modifier keys that change a drag: Shift constrains (square, aspect), Option works from the center.
