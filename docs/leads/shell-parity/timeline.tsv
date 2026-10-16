@@ -43,3 +43,7 @@ utc	stage	event	ref	note
 2026-10-16T19:26Z	3	heartbeat	38949684833	scoped design running: build+Model+snapshot tests green, journeys pending
 2026-10-16T19:48Z	3	ci-run	38949684833	same as 38936731510: DesignJourneyTests green, DesignShellJourneyTests red on #1456 geometry; run failed
 2026-10-16T19:49Z	3	heartbeat	-	lead wall clock near 8 h; RECORD Next written for a resume
+2026-10-16T20:20Z	4	ci-run	38956034097	successful scoped design, contains #1467; DP-a green; shell journeys red (#1456)
+2026-10-16T20:21Z	4	slice-done	DP-a	38956034097
+2026-10-16T20:22Z	4	stopped	#1572 #1573	CI findings -> gap (round cap)
+2026-10-16T20:24Z	4	pr-opened	#1610	DS-5 feature-done
