@@ -4,7 +4,7 @@ Issue: #873 · Packet: docs/blueprints/suite/features/targets.md
 Run: act-1a1429c87d2-exzi (resumed; first act-1a13f70dda7-kche) · Session: claude/feature-lead-targets-r13t2d · Started: 2026-10-15T12:10Z, resumed 2026-10-16T02:50Z
 Stage: 4 round 1
 Base: 8fce5e2 (dev with BU-1b #1263)
-Next: wait on dev CI (791, 792 red, not ours; next run pending); on the first green ci.yml run on dev whose head contains 8fce5e2, comment `Belt-Contact-Sheet: <run link>` on #873 with the size table and 'launcher has no journey shots until home'. Nothing of this feature's is red; no fix batch.
+Next: wait for a green full ci.yml run on dev containing 8fce5e2, or a green `scoped: suite` run (asked the supervisor on #873 at 04:40Z; leads get 403 on dispatch). Then comment `Belt-Contact-Sheet: <run link>` on #873 with the size table and 'launcher has no journey shots until home'. Scoped runs for other apps (e.g. 38849414997 scoped: design) do not count.
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -34,6 +34,7 @@ Next: wait on dev CI (791, 792 red, not ours; next run pending); on the first gr
 Executables total 31,308,416 bytes; app-builds.tar.gz 8,064,887 bytes. SuiteUI is linked into each of the five executables (about 5.8k symbols each).
 
 ## Decisions
+- A `scoped: <other app>` green run does not satisfy done: it skips Linux and runs only that app's tests. A `scoped: suite` run would (ci.yml: runs only that app's Model, snapshot and journey tests), so asked the supervisor for one.
 - Round 1: no critic panel. The feature adds no screen any journey or snapshot captures (packet: no journey until home), so there is nothing for critics to read; the menu stubs are covered by LauncherMenuStubTests.
 - BU-1b: AfterGlow > Settings… is the Settings scene's own working item (packet step 3: ⌘, opens Settings), not a disabled stub; LauncherCommandsSettings is an empty group for the settings feature.
 - TG-0 goes in as C4 parts (docs/c4/parts/), not a model.json edit: model.json is generated now and no PR edits it; parts are lane work, so the lead opens them instead of waiting on the supervisor.
