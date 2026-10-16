@@ -4,7 +4,8 @@
 // says, so a journey that relaunches Halo at another size got the last run's
 // frame back. Under `-HaloWindowSize` HaloApp puts this invisible view behind
 // the window's content; once it is in a window it sets that window's frame to
-// the requested size, top left kept, constrained to the screen, after turning
+// the requested size, top left kept, both held to the screen's visible frame
+// (a size larger than the display shrinks to it), after turning
 // off that window's frame autosave and restoration so the size never leaks
 // into a later launch (a 880 pt layout run once opened every later journey
 // at 880). Without the
@@ -49,7 +50,14 @@ final class HaloWindowSizingView: NSView {
         window.isRestorable = false
         let top = window.frame.maxY
         var frame = NSRect(x: window.frame.minX, y: top - size.height, width: size.width, height: size.height)
-        if let screen = window.screen { frame = window.constrainFrameRect(frame, to: screen) }
+        // constrainFrameRect(_:to:) only keeps the top edge on the screen, so
+        // a 1280 pt window ran 256 pt off the runner's 1024 pt display: the
+        // size is held to the screen's visible frame and the window moved on.
+        if let visible = window.screen?.visibleFrame {
+            frame.size = CGSize(width: min(frame.width, visible.width), height: min(frame.height, visible.height))
+            frame.origin.x = min(max(frame.minX, visible.minX), visible.maxX - frame.width)
+            frame.origin.y = min(max(top - frame.height, visible.minY), visible.maxY - frame.height)
+        }
         window.setFrame(frame, display: true)
     }
 }
