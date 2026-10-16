@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>CFBundleExecutable</key><string>LibraryApp</string>
+  <key>CFBundleIconFile</key><string>Library</string>
+  <key>CFBundleIdentifier</key><string>org.creativesuite.library</string>
+  <key>CFBundleName</key><string>Library</string>
+  <key>CFBundlePackageType</key><string>APPL</string>
+  <key>LSMinimumSystemVersion</key><string>26.0</string>
+  <key>NSPrincipalClass</key><string>NSApplication</string>
+  <key>CFBundleDocumentTypes</key>
+  <array>
+    <dict>
+      <key>CFBundleTypeName</key><string>PNG image</string>
+      <key>CFBundleTypeRole</key><string>Viewer</string>
+      <key>LSHandlerRank</key><string>Alternate</string>
+      <key>LSItemContentTypes</key><array><string>public.png</string></array>
+    </dict>
+    <dict>
+      <key>CFBundleTypeName</key><string>JPEG image</string>
+      <key>CFBundleTypeRole</key><string>Viewer</string>
+      <key>LSHandlerRank</key><string>Alternate</string>
+      <key>LSItemContentTypes</key><array><string>public.jpeg</string></array>
+    </dict>
+    <dict>
+      <key>CFBundleTypeName</key><string>HEIC image</string>
+      <key>CFBundleTypeRole</key><string>Viewer</string>
+      <key>LSHandlerRank</key><string>Alternate</string>
+      <key>LSItemContentTypes</key><array><string>public.heic</string></array>
+    </dict>
+    <dict>
+      <key>CFBundleTypeName</key><string>Suite Hand-Off</string>
+      <key>CFBundleTypeRole</key><string>Viewer</string>
+      <key>LSHandlerRank</key><string>Alternate</string>
+      <key>LSItemContentTypes</key><array><string>org.creativesuite.suite.handoff</string></array>
+    </dict>
+  </array>
+  <key>UTImportedTypeDeclarations</key>
+  <array>
+    <dict>
+      <key>UTTypeIdentifier</key><string>org.creativesuite.suite.handoff</string>
+      <key>UTTypeDescription</key><string>Suite Hand-Off</string>
+      <key>UTTypeConformsTo</key><array><string>public.data</string></array>
+      <key>UTTypeTagSpecification</key><dict><key>public.filename-extension</key><array><string>aghandoff</string></array></dict>
+    </dict>
+  </array>
+</dict>
+</plist>
