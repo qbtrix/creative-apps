@@ -119,7 +119,12 @@ public struct TimelineStrip<ID: Hashable & Sendable>: View {
     private var lanes: some View {
         VStack(alignment: .leading, spacing: 0) {
             TimelineRuler(mapping: mapping, visibleX: visibleX, playhead: playhead, onScrub: onScrub)
-            ForEach(tracks) { TimelineLane(track: $0, mapping: mapping, onSelectKeyframe: onSelectKeyframe) }
+            ForEach(tracks) { track in
+                // The strip owns the tap so no closure sits in what `.equatable()` compares.
+                TimelineLane(track: track, mapping: mapping).equatable()
+                    .contentShape(Rectangle())
+                    .modifier(TimelineLaneInput(track: track, mapping: mapping, onSelectKeyframe: onSelectKeyframe))
+            }
         }
         .frame(width: CGFloat(mapping.contentWidth) + SuiteSpacing.xl, alignment: .leading)
         .overlay { TimelinePlayhead(mapping: mapping, playhead: playhead).allowsHitTesting(false) }

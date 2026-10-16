@@ -82,6 +82,7 @@ struct HaloWindow: View {
                 onRename: { perform(.renameComposition($0.id, $1)) },
                 onDismiss: { model.dismissRefusedRename() })))
         .environment(\.haloLiveEdit, live)
+        .onAppear { live.current = { model } }
         .focusedSceneValue(\.haloPerform, perform)
         .focusedSceneValue(\.haloProject, model)
         .haloControlsProbe(HaloLaunch.current.controlsProbe)

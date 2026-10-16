@@ -1,14 +1,14 @@
 // TimelineLane.swift: one track's lane in TimelineStrip, drawn with Canvas:
 // spans as rounded bars, keyframes as diamonds, a separator rule along the
-// bottom. Equatable over its values (the closure is left out), so SwiftUI can
-// skip a lane whose track and mapping didn't change. Pointer handling is in
-// TimelineLaneInput, accessibility in TimelineLaneAccess.
+// bottom. Equatable over its values and holding no closure, so the strip's
+// `.equatable()` skips a lane whose track and mapping didn't change. The strip
+// attaches pointer handling (TimelineLaneInput) outside the lane; accessibility
+// is in TimelineLaneAccess.
 import SwiftUI
 
 struct TimelineLane<ID: Hashable & Sendable>: View {
     let track: TimelineTrack<ID>
     let mapping: FrameMapping
-    let onSelectKeyframe: @MainActor (ID, Int) -> Void
 
     #if DEBUG
     /// How many times a lane's body ran, over every ID type; the real-window
@@ -52,14 +52,12 @@ struct TimelineLane<ID: Hashable & Sendable>: View {
         }
         .frame(height: SuiteSize.timelineLane)
         .background(track.isSelected ? SuiteColor.accent.opacity(0.08) : Color.clear, ignoresSafeAreaEdges: [])
-        .contentShape(Rectangle())
-        .modifier(TimelineLaneInput(track: track, mapping: mapping, onSelectKeyframe: onSelectKeyframe))
         .modifier(TimelineLaneAccess(track: track))
     }
 }
 
 extension TimelineLane: Equatable {
-    /// Compares the values a lane draws; the closure can't be compared.
+    /// Compares the values a lane draws.
     nonisolated static func == (lhs: Self, rhs: Self) -> Bool {
         lhs.track == rhs.track && lhs.mapping == rhs.mapping
     }
