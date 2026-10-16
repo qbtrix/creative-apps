@@ -3,6 +3,9 @@
 // neighbouring keys on a track, named after the first. Picking a key, from a
 // row or a timeline diamond, writes `selectedKeys`, which only this file
 // writes. A pick is never an edit: no history step, no dirty file.
+// EZ-3: easing the picked keys. A preset is one "Keyframe Easing" step; a
+// handle drag is one step until `endCoalescing()` (coalesced per layer); the
+// curve and handles the inspector draws come from the first picked segment.
 // Linux-safe: no UI imports.
 
 /// One row of the EASING list: a key and the next key on its track.
@@ -90,5 +93,78 @@ extension HaloProject {
     /// Picks nothing.
     public mutating func clearKeySelection() {
         selectedKeys = []
+    }
+
+    // MARK: Easing the picked keys (EZ-3)
+
+    /// Where the picked segment's handles sit; linear and hold read as
+    /// (0, 0) and (1, 1). Nil with nothing picked.
+    public var easingHandles: (first: HaloPoint, second: HaloPoint)? {
+        pickedSegment?.easing.handles
+    }
+
+    /// `count` points along the picked segment's curve, x from 0 to 1, y from
+    /// FlareCore's `Easing.value(at:)`. Empty with nothing picked.
+    public func easingCurve(count: Int) -> [HaloPoint] {
+        guard let easing = pickedSegment?.easing, count > 0 else { return [] }
+        let last = Double(max(count - 1, 1))
+        return (0..<count).map { i in
+            let x = Double(i) / last
+            return HaloPoint(x: x, y: easing.value(at: x))
+        }
+    }
+
+    /// Gives every picked key `preset`, as one "Keyframe Easing" step. The
+    /// same preset again records nothing (the copy equals the document).
+    public mutating func setEasing(_ preset: HaloEasingPreset) {
+        applyEasing(preset.easing, coalesceKey: nil)
+    }
+
+    /// Gives every picked key `easing`; writes with the same `coalesceKey`
+    /// merge into one step until `endCoalescing()`.
+    public mutating func setCustomEasing(_ easing: HaloEasing, coalesceKey: String?) {
+        applyEasing(easing, coalesceKey: coalesceKey)
+    }
+
+    /// Moves one handle of the picked segment's curve to `point` (x clamped to
+    /// 0...1, y kept) and gives every picked key that curve. A drag's moves
+    /// are one step until `endCoalescing()`. Nothing with nothing picked or a
+    /// non-finite point.
+    public mutating func moveEasingHandle(_ handle: HaloEasingHandle, to point: HaloPoint) {
+        guard let segment = pickedSegment, point.x.isFinite, point.y.isFinite else { return }
+        setCustomEasing(segment.easing.movingHandle(handle, to: point), coalesceKey: "\(segment.key.layerID).easing")
+    }
+
+    /// One "Keyframe Easing" edit on the picked keys of the selected
+    /// composition; the keys and service are copied first, as `edit` mutates.
+    private mutating func applyEasing(_ easing: HaloEasing, coalesceKey: String?) {
+        let keys = pickedKeys
+        let service = services.easing
+        edit("Keyframe Easing", control: "halo.easing", coalesceKey: coalesceKey) { doc in
+            guard let c = doc.compositions.firstIndex(where: { $0.id == doc.selectedCompositionID })
+            else { throw HaloEditError.noComposition }
+            try service.setEasing(easing, on: keys, in: &doc.compositions[c])
+        }
+    }
+}
+
+extension HaloEasing {
+    /// The curve's two handles; linear and hold read as (0, 0) and (1, 1).
+    var handles: (first: HaloPoint, second: HaloPoint) {
+        switch self {
+        case let .cubicBezier(x1, y1, x2, y2): (HaloPoint(x: x1, y: y1), HaloPoint(x: x2, y: y2))
+        case .linear, .hold: (HaloPoint(x: 0, y: 0), HaloPoint(x: 1, y: 1))
+        }
+    }
+
+    /// This curve with `handle` at `point`: x clamped to 0...1, y kept.
+    func movingHandle(_ handle: HaloEasingHandle, to point: HaloPoint) -> HaloEasing {
+        var (first, second) = handles
+        let moved = HaloPoint(x: min(max(point.x, 0), 1), y: point.y)
+        switch handle {
+        case .first: first = moved
+        case .second: second = moved
+        }
+        return .cubicBezier(x1: first.x, y1: first.y, x2: second.x, y2: second.y)
     }
 }
