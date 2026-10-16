@@ -46,7 +46,7 @@ func everyCommandActsOrSaysWhy(services: HaloServices) {
 
 @Test func allCasesListsEachCaseOnceInEveryArea() {
     #expect(Set(HaloCommand.allCases).count == HaloCommand.allCases.count)
-    #expect(HaloCommand.allCases.count == 57)
+    #expect(HaloCommand.allCases.count == 58)
     #expect(Set(HaloCommand.allCases.map(\.area)) == Set(HaloCommandArea.allCases))
     #expect(HaloCommand.allCases.allSatisfy { !$0.title.isEmpty })
 }

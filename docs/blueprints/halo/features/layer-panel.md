@@ -4,7 +4,10 @@
 of the selected composition, each one named undo step through `edit`; the
 Layer menu's Duplicate, Rename, Delete, Bring Forward and Send Backward turn
 on; the inspector's layer list renames on the row, reorders by drag and
-deletes with ⌫.
+deletes with ⌫. In the viewer and timeline ⌫ deletes the selected layer only
+while no key is picked: with keys picked from the timeline it deletes those
+keys instead, as one "Delete Keyframes" step (the 2026-10-16 timeline review,
+B1).
 **Line:** `line:halo` · **Wave:** W1 (`waves.md`) · **Lead branch:** `lead/layer-panel`
 
 **Status (2026-10-15):** built on `dev`, in the lead's Anatomy loop. LP-1 to
@@ -57,7 +60,8 @@ never edits `Sources/SuiteUI/**`, `project.yml`, `UITests/Journey*.swift`,
 `Availability/HaloAvailability+History.swift` or `HaloHistory.swift`
 (history-files). The layer menu's key equivalents (⇧⌘D, ⌘], ⌘[) are W0's
 menu file, from section 6; the plain ⌫ is routed by W0's `HaloViewer` to
-`perform(.deleteLayer)`. This feature fills the routes.
+`perform(model.deleteCommand)`: `.deleteKeys` while keys are picked, else
+`.deleteLayer`. This feature fills the routes.
 
 ## Journey steps
 
@@ -250,7 +254,7 @@ Longest chain: LP-1 → LP-2 → LP-4 (3).
 |---|---|---|
 | QB-F1 no dead controls | the five Layer commands enabled exactly when they act, else disabled with help | `HaloLayerAvailabilityTests` (LP-2); H-J9 steps 6 and 8; W0's `HaloCommandTests` and H-J13 stay green |
 | QB-F3 one gesture, one named step | each edit records exactly one step with its name; refused and no-op edits record none | `HaloLayerEditsTests` (LP-1) |
-| QB-F4 keyboard parity | ⌫ in the viewer, timeline and list deletes; ⇧⌘D, ⌘], ⌘[ from W0's menu act | H-J9 step 8 (⌫); LP-2's routes for the menu keys |
+| QB-F4 keyboard parity | ⌫ in the viewer, timeline and list deletes (in the viewer and timeline, the picked keys while any are picked); ⇧⌘D, ⌘], ⌘[ from W0's menu act | H-J9 step 8 (⌫); LP-2's routes for the menu keys |
 | HB-9 any edit (feature rows) | `duplicateSelectedLayer` and `deleteSelectedLayer` on `crowd`, each ≤ 2 ms device, ≤ 20 ms debug CI, median and p95 over 200 runs with W0's `HaloBudget` helper | `HaloLayerEditsBudgetTests.duplicateCrowd`, `.deleteCrowd` (LP-2) |
 | Audit, all six checks | no `halo` count over `UITests/audit-baseline.json`; new controls carry `halo.layers.*` identifiers, so `identifier` and `unnamed` don't rise | `audit-halo-*.json` on the `feature-done` run; LP-3's and LP-4's PR bodies state the counts they expect |
 
