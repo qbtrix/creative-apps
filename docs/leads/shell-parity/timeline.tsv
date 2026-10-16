@@ -20,3 +20,4 @@ utc	stage	event	ref	note
 2026-10-16T15:55Z	3	ci-run	38917492060	scoped design red: 3 journeys from #1391
 2026-10-16T15:58Z	3	finding-filed	#1443 #1444	DP-b
 2026-10-16T16:00Z	3	fix-round	DP-b	round 1: #1443 #1444; #1404 build fix
+2026-10-16T16:20Z	3	pr-opened	#1446	fix #1443 design.properties inside suite.inspector
