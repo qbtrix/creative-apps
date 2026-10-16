@@ -41,3 +41,5 @@ utc	stage	event	ref	note
 2026-10-16T18:33Z	3	heartbeat	-	no scoped design run since 38936731510; #1337 #1456 open; supervisor 18:13: journeys no longer hold CI
 2026-10-16T19:00Z	3	heartbeat	38949684833	scoped design run queued, contains #1467; #1337 #1456 open
 2026-10-16T19:26Z	3	heartbeat	38949684833	scoped design running: build+Model+snapshot tests green, journeys pending
+2026-10-16T19:48Z	3	ci-run	38949684833	same as 38936731510: DesignJourneyTests green, DesignShellJourneyTests red on #1456 geometry; run failed
+2026-10-16T19:49Z	3	heartbeat	-	lead wall clock near 8 h; RECORD Next written for a resume

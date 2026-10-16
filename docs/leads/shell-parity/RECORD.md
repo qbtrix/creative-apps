@@ -2,9 +2,9 @@
 
 Issue: #1325 · Packet: docs/blueprints/design/features/shell-parity.md
 Run: act-1a14478b134-5to5 · Session: claude/design-shell-parity-2jr7z3 · Started: 2026-10-16T12:00Z
-Stage: 3 polling
+Stage: 3 polling (waiting on SuiteUI #1456, #1337)
 Base: c9e46560366b0c3464a5e822d11c4a865e4dc53e
-Next: read scoped run app=design 38949684833 (head 44601820, contains #1467, queued 18:44): successful -> Belt-Slice-Done DP-a; DesignShellJourneyTests pass -> DP-b gaps #1452 + DS-5
+Next: (resume) all tasks DS-1..DS-4 and both fix rounds have merged; nothing is left to build. On each new scoped run app=design: a successful run containing #1467 -> post 'Belt-Slice-Done: DP-a <run>'; once DesignShellJourneyTests pass (needs SuiteUI #1456 geometry and #1337 switcher) or the supervisor quarantines them / accepts gaps -> 'Belt-Slice-Done: DP-b <run> gaps: #1452', then DS-5 (feature-done: shell-parity.wave.json status built, feature_issue #1325), then Belt-Contact-Sheet. Runs 38936731510 and 38949684833: DP-a journeys green, DP-b shell journeys red only on #1456
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | rounds | state | run |
