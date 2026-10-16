@@ -14,12 +14,15 @@ import Testing
     @Test func idealHeightIsRulerPlusLanesWithTheToolbarOff() {
         let layout = TimelineStripLayout(trackCount: 3, toolbar: false)
         #expect(layout.idealHeight == SuiteSize.timelineRuler + 3 * SuiteSize.timelineLane)
-        #expect(layout.idealHeight == 24 + 96)
+        // The packet's numbers: a 24 pt ruler over three 32 pt lanes. Typed as
+        // CGFloat, since #expect type-checks a bare `24 + 96` on its own as Int.
+        let packet: CGFloat = 24 + 3 * 32
+        #expect(layout.idealHeight == packet)
     }
 
     @Test func idealHeightAddsTheToolbarRowWhenOn() {
         let layout = TimelineStripLayout(trackCount: 3, toolbar: true)
-        #expect(layout.idealHeight == SuiteSize.timelineRuler + 36 + 3 * SuiteSize.timelineLane)
+        #expect(layout.idealHeight == SuiteSize.timelineRuler + SuiteSize.timelineSlotToolbar + 3 * SuiteSize.timelineLane)
         #expect(layout.toolbarHeight == 36)
     }
 
