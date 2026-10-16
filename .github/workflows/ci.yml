@@ -268,7 +268,8 @@ jobs:
         run: |
           xcodegen generate --quiet
           xcodebuild build-for-testing -project CreativeApps.xcodeproj -scheme Journeys -destination platform=macOS
-      - id: ui
+      - name: Run scripts/ui-test  # the lane compares failed step names with dev's
+        id: ui
         if: ${{ !inputs.app || steps.scope.outputs.journeys != '' }}
         env:
           JOURNEYS: ${{ steps.scope.outputs.journeys }}
