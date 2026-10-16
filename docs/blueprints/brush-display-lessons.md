@@ -50,6 +50,13 @@ p95 517 ms; allocated p50 102 MB per event; 48 MB picture per event; 119 of
   `.onChange`, put input to ink at p50 10.8 ms, p95 18.9 ms in release
   with a 2.4 ms render. Applying at once and starting the render in the
   same apply gives p50 5.7, p95 12.5 (PhotoBrushInkLatencyTests, BRUSH-INK).
+- **State holding a struct re-runs every view per write.** The window's
+  workspace is a value in `@State`, so each brush sample written to it re-ran
+  and laid out the whole editor and redrew the 874 x 655 pt checkerboard on
+  the CPU (`CanvasViewport.checkerTile` builds a new Image per body run):
+  47% of the main thread in Core Animation's commit, 1.5% idle. A paint
+  stroke now draws on LiveStroke's copy and comes back once at the end: 85%
+  idle (PhotoWindowStrokeTests, WINDOW-STROKE, drives the real window).
 - **A locked screen stops the display link.** With the display asleep a
   CADisplayLink never fires, so a link-paced queue never drains; the ink
   test skips its time budget then, and a UI journey can't launch the app.
