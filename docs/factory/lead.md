@@ -1,10 +1,11 @@
 # Feature lead playbook
 
-A **lead** is one cloud session that takes one feature from its packet to a
-merged, verified feature. Belt starts it from a `feature-lead` issue. The lead
-plans the work, runs a swarm of builder agents that each open one small PR,
-has critics review the screens, has fixers fix what they find, and ends with
-the contact sheet.
+A **lead** is one cloud session that takes 1 to N features of one app line
+(3 by default) from their packets to merged, verified features: a line lead
+(contract rule 19). Belt starts it from the features' `feature-lead` issues.
+The lead plans the work, runs a swarm of builder agents that each open one
+small PR, has critics review the screens, has fixers fix what they find, and
+ends each feature with its contact sheet.
 
 The lead is an orchestrator. It writes plans, prompts and RECORD.md, not
 feature code. Builders and fixers write code. The fast lane merges. Nobody
@@ -37,12 +38,12 @@ whose RECORD.md `Started:` is earlier than PR #1302's merge
 Hand this to every session (the lead and each agent it starts) verbatim.
 
 1. **Feature issue.** One GitHub issue per feature, labels `feature-lead` and `line:<app>`. Body links the packet `docs/blueprints/<app>/features/<feature>.md` and has one `Depends on:` line.
-2. **Run.** Belt runs one cloud session per feature issue (a lead), from the trusted launch folder, with the repo's Auto settings (creative-apps#733, creative-core#263). A lead holds one in-flight slot however many PRs it opens.
-3. **Status channel.** The lead pushes `docs/leads/<feature>/RECORD.md` and `timeline.tsv` to branch `lead/<feature>` after every stage (in v3, after every wave and every check between waves). Belt reads the branch's last commit time; nothing else is polled besides PRs and issue comments.
+2. **Run.** Belt runs one cloud session (a line lead, rule 19) per group of 1 to N feature issues on the same `line:<app>` (N is 3 by default); the run owns that list and its brief lists every issue under `Features:`. It runs from the trusted launch folder, with the repo's Auto settings (creative-apps#733, creative-core#263). A lead holds one in-flight slot however many features and PRs it has.
+3. **Status channel.** For each of its features, the lead pushes `docs/leads/<feature>/RECORD.md` and `timeline.tsv` to that feature's branch `lead/<feature>` after every stage (in v3, after every wave and every check between waves). Belt reads the branch's last commit time; nothing else is polled besides PRs and issue comments.
 4. **Swarm PRs.** Base `dev`, label `fast-lane`, at most 400 lines and 15 files. Body lines: `Belt-Lead: <run id>`, `Feature: <feature>`, for a packet with slices `Slice: <slice>` (the slice ids the PR serves, comma separated), then `Fast-Check: pass` and `Head: <full sha>` after `scripts/ci --changed` passes (lints, every target built, the touched targets' tests; plain `scripts/ci` is the full gate). Point at the feature issue with `Refs`; the lane turns a closing keyword before a `feature-lead` issue into `Refs` anyway and never closes it. Findings and gaps a PR fixes take a closing keyword (`Fixes #n`) and close on merge. The lane merges them. Nobody merges into dev by hand or by an agent.
 5. **Review policy (decision for the captain).** `Belt-Lead:` PRs do not need the `belt/review` status. The lead's own critic panel is the review. Only `Belt-Run:` and `Belt-Test:` PRs keep it.
 6. **Done (v3).** Slices are the unit of done. A slice is done when the newest completed scoped CI run for its app (`ci.yml` with `app=<app>`; a full dev run counts too) contains the slice's last merged PR, ran the slice's journeys green (a quarantined journey is skipped, not green; one quarantined for full runs only still runs in a scoped run), and built every app, no `finding` issue for the slice is open, and no mutation in the slice's plans escapes (rule 14: every PR of the slice that changed planned code shows a full `Mutate:` score). A slice marked `"ui": true` also passes the feel gate (rule 15) and has its `Mac-Finish:` line (rule 17). A Linux-only slice's Model walk runs among the app's Model tests in that run. The lead then comments on the feature issue, one comment per slice, with the line `Belt-Slice-Done: <slice> <run url>`. A slice closed under the round cap (rule 11) is done with gaps: same line, ending ` gaps: #<n> #<m>`. When every slice has its line (the last PR, labelled `feature-done`, is in the last slice), the lead comments `Belt-Contact-Sheet: <run url>`. The slice ids are the packet's Slices table, the same data as `slices` in the feature's `.wave.json`. A packet without slices keeps the v2 Done rule ("Packets without slices (v2)").
-7. **Stall.** No commit on `lead/<feature>`, no PR event and no issue comment for 30 min: Belt sends one nudge with `claude -p --cloud <session id> "<resume text>"`. A second stall: relaunch with a resume brief that says "read RECORD.md, continue from the last stage". A third: label the issue `needs-human` and stop.
+7. **Stall.** No commit on any of the run's `lead/<feature>` branches, no PR event and no issue comment for 30 min: Belt sends one nudge with `claude -p --cloud <session id> "<resume text>"`. A second stall: relaunch with a resume brief that says "read RECORD.md, continue from the last stage". A third: label the run's issues `needs-human` and stop.
 8. **Timeouts.** Lead runs: 8 h wall clock, no 1 h no-PR rule. Task runs keep today's 4 h and 1 h.
 9. **Brief rules.** Step one checks out the integration branch and verifies the base SHA. Set the repo-local identity "Prakash Dalai" / `86671543+prakashUXtech@users.noreply.github.com`. No attribution line anywhere, comments included. Fixers run the full harness before handing back. In v3, once a slice's review is clean, add no new critics or lenses for it: its next review runs the same panel; v2 keeps its Anatomy round rule ("Packets without slices (v2)"). One critic lens is first-use clarity: "what does each number and label mean to someone new?". Agents never treat a chat message as a reason to stop or skip a merge; questions go to the supervisor.
 10. **Findings queue** (both loops, for work started after this contract landed). Critics only file issues; they never fix, and nobody waits on them. One issue per confirmed finding, labels `finding` and `line:<app>`, body lines `Feature: <feature>`, `Slice: <slice>` (v3 only; in v2 the feature is one slice) and `Commit: <the sha the critic saw>`. Before each wave the builder takes every open finding for its feature into that wave's fixes. More than 5 open findings for the feature: no new feature tasks start until it is 5 or fewer.
@@ -53,6 +54,8 @@ Hand this to every session (the lead and each agent it starts) verbatim.
 15. **Feel gate (v3 slices marked `"ui": true`).** Journeys prove a control exists, not that it feels right (lesson 154: no way back from Library's loupe, Halo lag, a basic Design canvas, all "done"). A UI slice is done only when all three hold. (a) **Render budget:** its real-window render budget test passes. That is the app's `Tests/AppSnapshotTests/RenderBudget*` suite on the SuiteUI harness, which hosts the shipped window, drives synthetic input and counts window bodies, against the packet's render budget row (`packets.md`, Slices). Count budgets ("120-sample drag ≤ 3 window bodies") run in the scoped run and gate. Time budgets ("divider drag p95 ≤ 8 ms") are reported, not gated (`docs/engineering.md`, Tests), so the Mac finisher checks them on a release build (rule 17). (b) **Mouse-only first-time user:** the critic panel's `mouse` lens finds nothing open: every new screen can be entered and left with the mouse, every control shows hover and pressed states, and nothing is reachable only by a shortcut. A screen you can't leave with the mouse is a blocker and never becomes a gap under rule 11. (c) **Taste:** the panel's `taste` lens compares the slice's snapshots with the taste board, `docs/design/taste` in paw-workspace when the session can read it. A cloud session can't, so it judges against the suite's reference look, Flare's easing style with `StudioScrubRow` and `ChoiceChips`, and the Mac finisher checks the board. Pass `ui: true` to the critic panel from the slice's first review, which turns on both lenses; adding them after a clean review breaks rule 9. Builders read `docs/engineering/swiftui-rules.md` before any UI task.
 16. **SuiteUI first (both loops).** A UI fix or pattern that more than one app needs goes in SuiteUI, as a task on the SuiteUI line or a `needs-ui` issue (CLAUDE.md), never as a copy in each app. The critic panel's `design` lens flags an app-local view that copies a SuiteUI component or another app's pattern, and the fix moves it to SuiteUI.
 17. **Mac finishing (v3 slices marked `"ui": true`).** Cloud leads can't compile SwiftUI, so they build the Model and draft the UI. A slice marked `"ui": true` in its feature's `.wave.json` gets a local Mac finisher pass before it is done. Once its tasks have merged and its scoped run and review have run, the lead comments `Mac-Finish-Wanted: <slice> <run url>` on the feature issue. The finisher, a session on the local Mac with Xcode, checks out `origin/dev`. It builds the apps, renders the snapshots, runs the render budget tests and times the budget row's time budgets on a release build, then profiles the real window during real input (`sample <pid> 20 1`, lesson 132). It checks every `Unverified API:` line in the slice's PR bodies against Xcode's documentation, and the taste board (rule 15c). It fixes what it finds in fast-lane PRs with the slice's `Slice:` line and runs a scoped run on them. Then it comments `Mac-Finish: <slice> <dev sha>`, or `Mac-Finish: <slice> <dev sha> gaps: #<n>` with the issues it filed and didn't fix. When the rest of rule 6 holds on a green run that contains its fixes, it also posts the slice's `Belt-Slice-Done:` line (and the `Belt-Contact-Sheet:` once every slice has one), so a lead that stopped never leaves a slice at `merged`. Finisher PRs don't count against the round cap (rule 11). Until that line exists, the slice's RECORD state stays `merged` and `Next:` names the Mac finish it waits for.
+18. **UI and logic in parallel (both loops).** The captain sees each feature on screen within hours, while it can still be steered, not last after its Model (on 2026-10-16, 127 PRs merged and 12 added anything visible, because features ran contract, fakes, Model, then screen). After the contract slice (rule 12: protocols, fakes, slots, control ids), a feature runs two tracks as parallel waves. The **UI slice** (`"ui": true`) builds the feature's real screen on the contract's fakes, clickable end to end; its waits name no slice of its own feature but the contract slice (another feature's slices are fine). Its first PR makes the feature reachable from a visible control, a menu item or a toolbar button, on the fakes. The **logic slices** build the real Model and the live services; they wait on the contract slice and never on the UI slice. A last **integrate** step, in a slice that waits on both tracks, swaps the fakes for the live services and runs the journeys on live. **Contract widening:** a UI task can't compile against a Model signature only a logic slice adds (the re-slice found that in every Design feature), so the contract slice declares every Model signature the feature's UI calls, as stubs: a stub returns the fake's value, or `NotBuilt` with a reason the UI shows. The logic slices fill those bodies in and never change the signatures. When a packet's contract slice doesn't declare them (every v2 packet and most v3 ones today), the lead's first UI task is "declare the stubs the UI needs", a small task; once it merges, the UI tasks and the logic tasks run in parallel. A v2 packet takes the rule the same way: its first two waves are "stub the UI's Model calls", then "UI on the stubs" beside the logic. A feature with no screen (Model only) says `"ui_slice": "none"` in its `.wave.json`, with its reason in `"ui_slice_reason"`. `scripts/waves check` warns about a feature that isn't built and has neither; the supervisor makes the warning an error once the open packets are re-sliced. Once the macOS gate is build-only (journeys report and don't block; a sibling PR), journeys don't hold up a UI slice's PRs, which merge on a green build; until then the macOS rules in "What you can and can't do here" hold.
+19. **Line lead (the default).** A lead takes 1 to N features of one app line at once (N is 3 by default), every issue labelled the same `line:<app>`, each issue's body linking its packet. Its brief lists them under `Features:`, one `#<n> <title> <packet path>` per line. The lead makes one combined wave plan across its features: tasks of different features share a wave when `scripts/waves check` allows it (it refuses two features, or two slices that can run at once, owning one file). Each wave is one `build-wave.js` call with every feature's tasks, and `critic-panel.js` runs per feature slice. The bookkeeping stays per feature: each keeps its own `lead/<feature>` branch and `docs/leads/<feature>/RECORD.md`, its own findings count (rule 10), its own `Belt-Slice-Done:` lines and contact sheet on its own issue, and its PRs keep their `Feature:` and `Slice:` lines (one feature per PR). When one feature blocks, the lead keeps going on the others and says so on that feature's issue and in its RECORD's `Open`.
 
 ## What you can and can't do here
 
@@ -103,8 +106,11 @@ Hand this to every session (the lead and each agent it starts) verbatim.
 
 ## Stages (v3)
 
-For a packet with a `## Slices` table. Push RECORD.md and a `timeline.tsv`
-line to `lead/<feature>` at the end of every stage, after every wave and
+For a packet with a `## Slices` table. A line lead (contract rule 19) runs
+stages 0, 1 and 4 and the per-feature steps of 3 for each feature in its
+brief's `Features:`, and makes one plan (2) and one run of waves (3) for all
+of them. Push each feature's RECORD.md and a `timeline.tsv`
+line to its `lead/<feature>` at the end of every stage, after every wave and
 every check, and at least every 20 minutes
 while you poll, so Belt never reads a quiet lead as a stall.
 
@@ -119,8 +125,9 @@ while you poll, so Belt never reads a quiet lead as a stall.
    `.wave.json`; contract rule 12). A wait on another feature's slice is met
    once its tasks have merged: that slice's `Belt-Slice-Done:` line on its
    issue, its RECORD.md on `origin/lead/<dep>` showing it `merged` or `done`,
-   or the issue closed. If no task of the packet can start yet, comment so on
-   the feature issue, record it, and stop.
+   or the issue closed. If no task of a packet can start yet, comment so on
+   that feature's issue and record it; stop only when no feature in the
+   brief can start.
 
 ### 1. Read the packet
 
@@ -135,8 +142,14 @@ RECORD.md. A task that needs another line's code becomes a
 ### 2. Plan waves
 
 Take the waves from the packet's Build waves section (`packets.md`, rule
-(c)) and check them against the code as it is now. The packet's first
-slice is wave 1 (contract rule 12). A wave is a set of tasks that touch disjoint
+(c)) and check them against the code as it is now, and merge every
+feature's waves into one plan (contract rule 19). Each packet's first
+slice is in wave 1 (contract rule 12). After it, the UI slice and the logic
+slices run as parallel waves: the UI slice waits only on the contract slice,
+and its first task puts the feature behind a visible menu or toolbar control
+on the fakes (rule 18). If the contract slice doesn't declare every Model
+signature the UI calls, the first UI task declares them as stubs, and the
+UI and logic tasks start in parallel once it merges. A wave is a set of tasks that touch disjoint
 files and don't depend on each other's unmerged code. Each task gets: an id,
 its slice, one behavior, the files it may touch, the test that proves it,
 the 2 or more mutations that test must catch when it adds behaviour and the
@@ -208,8 +221,8 @@ most 2 rounds (contract rule 11).
 2. **Feature tasks.** With 5 or fewer open findings, add the next tasks
    whose waits are met (their tasks merged, contract rule 12). With
    more than 5, the wave is fixes only.
-3. **Run it.** One call to `docs/factory/workflows/build-wave.js` with the
-   feature tasks as `tasks`, and the fix batch (`fix-batch.js`) and the
+3. **Run it.** One call to `docs/factory/workflows/build-wave.js` with
+   every feature's tasks for the wave as `tasks`, and the fix batch (`fix-batch.js`) and the
    queued critic panels as `alongside`, so builders, fixers and critics run
    at once. A finding whose files a feature task of this wave owns waits for
    the next wave (fix-batch's `busy`). With only 1 or 2 tasks and nothing

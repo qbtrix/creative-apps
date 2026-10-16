@@ -1,6 +1,6 @@
 # Writing a feature packet
 
-A **packet** is the plan one feature lead builds from:
+A **packet** is the plan a lead builds one feature from:
 `docs/blueprints/<app>/features/<feature>.md`. This page is the one
 reference for whoever writes or re-cuts a packet, and for the packet critic
 who checks it. The lead playbook (`lead.md`) says how a lead runs one.
@@ -87,6 +87,22 @@ for them by name.
      are checked by the Mac finisher. A UI slice is done only through the
      feel gate and a Mac finisher pass (`lead.md`, contract rules 15 and
      17). Its builders read `docs/engineering/swiftui-rules.md`.
+   - **Screen early** (`lead.md`, contract rule 18). Every packet has a
+     UI slice that builds the feature's real screen on the contract
+     slice's fakes, clickable end to end. Its waits name no slice of its own
+     feature but the first (contract) slice, so it runs beside the logic
+     slices (real Model, live services), which never wait on it. Its first
+     task makes the feature reachable from a visible menu or toolbar
+     control. The contract slice declares every Model signature the UI
+     calls, as stubs (a stub returns the fake's value, or `NotBuilt` with a
+     reason the UI shows); the logic slices fill in the bodies and never
+     change the signatures. A packet whose contract slice doesn't (every
+     v2 packet, most v3 ones today) gets a small first UI task that
+     declares the stubs, and the UI and logic tasks wait only on it. A last slice waits on both and swaps the fakes for live, with
+     the journeys on live. A feature with no screen (Model only) puts
+     `"ui_slice": "none"` and its reason in `"ui_slice_reason"` in its
+     `.wave.json` instead. `scripts/waves check` warns when a feature that
+     isn't built has neither (an error once the open packets are re-sliced).
 3. **Journey steps.** The numbered steps a user takes, each naming the task
    and the journey test (`<X>-J<n>`) that proves it.
 4. **Screens and states.** Each screen state the feature adds and the
@@ -215,3 +231,12 @@ with the task ids. It refutes; it doesn't rewrite.
 12. **UI slice unmarked** (with Slices). A slice whose tasks own files under
     `Sources/*App/` or `Sources/SuiteUI/` without `"ui": true`, or a UI
     slice with no render budget row in Quality tests.
+13. **Screen last.** A UI task that calls a Model signature no contract
+    task or stub task declares (it can't compile until a logic slice
+    lands); every packet, v2 included. With Slices, also: no `"ui": true`
+    slice whose waits, within its own feature, name only the contract
+    slice (never a logic slice), or a UI slice whose first task doesn't
+    reach the feature from a visible menu or toolbar control on the fakes.
+    A feature with no screen instead declares `"ui_slice": "none"` with a
+    `"ui_slice_reason"`; a reason that doesn't hold (the feature adds a
+    control or a screen) is a miss too.

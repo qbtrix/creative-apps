@@ -51,6 +51,13 @@
 #                  path need a chain of waits or depends between them, and the
 #                  waits have no cycle. Features without slices keep the
 #                  same-wave rule.
+#   ui_slice       optional, with slices: "none" for a feature with no screen
+#                  (Model-only), with its reason in "ui_slice_reason". Without it,
+#                  a feature with slices that isn't built needs a "ui": true slice
+#                  whose waits name no slice of its own feature but the first (the
+#                  contract slice), so its screen runs on the fakes in parallel with
+#                  the logic slices (docs/factory/lead.md rule 18). A miss prints a
+#                  "warning:" line and still exits 0 for now.
 #   cells          optional {"column header": "text"} for an app's extra columns
 #   anything else (notes, quality, ...) is kept for the blueprint's own
 #   generators (library's gen_section8.py reads them) and ignored here.
@@ -209,6 +216,33 @@ def check_slices(features, byid):
                                 + ("" if hit[0] == hit[1] else f" / {hit[1]}") + ": one must wait on the other")
     return problems
 
+def check_ui_slice(app, features):
+    """lead.md rule 18: a sliced feature's UI slice waits only on its own contract slice.
+    Warnings for now; built features are exempt (their packets aren't re-sliced)."""
+    out = []
+    ids = {g["id"] for g in features}
+    for f in features:
+        sl = f.get("slices")
+        if not sl or f.get("status") == "built":
+            continue
+        name = f"warning: {app}/{f['id']}"
+        if "ui_slice" in f:
+            if f["ui_slice"] != "none":
+                out.append(f"{name}: \"ui_slice\" can only be \"none\"")
+            elif not (isinstance(f.get("ui_slice_reason"), str) and f["ui_slice_reason"]):
+                out.append(f"{name}: \"ui_slice\": \"none\" needs its reason in \"ui_slice_reason\"")
+            continue
+        first = sl[0]["id"]
+        def own(key):
+            fid, _, sid = key.rpartition(":")
+            if not fid:
+                fid, sid = (key, None) if key in ids else (f["id"], key)
+            return fid == f["id"] and sid != first
+        if not any(s.get("ui") is True and not any(own(k) for k in s.get("waits", {})) for s in sl):
+            out.append(f"{name}: no \"ui\": true slice that waits only on its contract slice {first}"
+                       f" (or \"ui_slice\": \"none\" with a \"ui_slice_reason\"); lead.md rule 18")
+    return out
+
 def check(app_dir, features):
     problems = []
     byid = {f["id"]: f for f in features}
@@ -353,12 +387,14 @@ def main(argv):
     cmd, rest = argv[0], argv[1:]
     only_check, dry, guard = "--check" in rest, "--dry-run" in rest, "--guard" in rest
     rest = [a for a in rest if a not in ("--check", "--dry-run", "--guard")]
-    problems, stale, edited = [], [], []
+    problems, stale, edited, warnings = [], [], [], []
     for app, app_dir in apps(root, rest):
         found = []
         features = load_features(app_dir, found)
         if not found:
             found += check(app_dir, features)
+        if not found:  # ponytail: a warning until the open packets are re-sliced, then add to found
+            warnings += check_ui_slice(app, features)
         if cmd == "render" and not found:
             text = render(app, app_dir, features, found)
             target = os.path.join(app_dir, "features", "waves.md")
@@ -375,6 +411,8 @@ def main(argv):
                     with open(target, "w", encoding="utf-8") as f:
                         f.write(text)
         problems += found
+    if warnings:
+        print("\n".join(warnings))
     if problems:
         print("\n".join(problems))
         print("waves: FAIL")
