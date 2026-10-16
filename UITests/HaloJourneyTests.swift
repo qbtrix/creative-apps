@@ -13,7 +13,8 @@
 // `.haloControl` registers too. testEveryMenuOpens checks the Composition,
 // Layer and Animation menus hold exactly their items and File and Edit hold
 // Halo's. testLayoutAtWidths relaunches at five window sizes with a layer
-// selected (blueprint 7.3): L1 is the audit on each `halo-layout-<w>` shot, L2
+// selected from its timeline lane (blueprint 7.3): L1 is the audit on each
+// `halo-layout-<w>` shot, L2
 // takes the artboard as the drawn layers' frame (`halo.viewer.canvas`) and
 // checks it is centered within 1 pt (across: the surround on its two sides,
 // measured in the screen's pixels to where each panel starts, as a person
@@ -222,12 +223,17 @@ final class HaloJourneyTests: XCTestCase {
             if size.width <= screen.width {
                 XCTAssertEqual(window.frame.width, size.width, accuracy: 2, "-HaloWindowSize \(width) wasn't the window's width")
             }
-            let row = halo.element("halo.layer.row.comp-1-layer-2")
-            XCTAssert(row.waitForExistence(timeout: 5), "no Ball row in the inspector's layers at \(width)")
-            row.click()
+            // Ball's timeline lane, not its inspector row: from 1280 up the
+            // window is wider than the runner's 1024 pt display and the
+            // inspector is off it, where nothing can be clicked (run
+            // 38848092018: no hit point for suite.inspector at x 1064).
+            let lane = halo.app.descendants(matching: .any).matching(
+                NSPredicate(format: "identifier == 'halo.timeline.track' AND label == 'Ball'")).firstMatch
+            XCTAssert(lane.waitForExistence(timeout: 5), "no Ball lane in the timeline at \(width)")
+            lane.click()
             let ball = halo.app.descendants(matching: .any).matching(
                 NSPredicate(format: "identifier == 'halo.inspector.header' AND label CONTAINS %@", "Frames 0–47")).firstMatch
-            XCTAssert(ball.waitForExistence(timeout: 5), "clicking the Ball row selected no layer at \(width)")
+            XCTAssert(ball.waitForExistence(timeout: 5), "clicking Ball's lane selected no layer at \(width)")
             halo.shot("layout-\(width)")
             let outside = haloControls(in: halo).compactMap { control -> String? in
                 guard let shown = visibleFrame(of: control, in: window) else { return nil }
