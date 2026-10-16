@@ -23,6 +23,20 @@
 #                  one owner in docs/blueprints/<app>/c4-planned.json when that exists;
 #                  with "every_source_file_owned": true at its top, every planned
 #                  Sources/ file also needs a feature that owns it (Library).
+#   slices         optional (contract-first packets, Design first): the feature's
+#                  units of done, each {"id", "behavior" (one sentence), "tasks"
+#                  (2 to 5 task ids, each in one slice), "journeys" (journey ids,
+#                  at least one), "owned" (its tasks' files; together exactly the
+#                  feature's "owned"), "waits" ({what: [its tasks that wait]})}.
+#                  A waits key is a feature id (all its slices), "<feature>:<slice>"
+#                  or a slice of the same feature. Slice waits carry no wave rule:
+#                  they say when a task may start, so a slice can wait on a
+#                  contract slice of a feature in the same wave or another track.
+#                  With slices, a path may be owned twice only when one owner runs
+#                  after the other: two slices (of any features) that own the same
+#                  path need a chain of waits or depends between them, and the
+#                  waits have no cycle. Features without slices keep the
+#                  same-wave rule.
 #   cells          optional {"column header": "text"} for an app's extra columns
 #   anything else (notes, journeys, quality, ...) is kept for the blueprint's own
 #   generators (library's gen_section8.py reads them) and ignored here.
@@ -88,6 +102,92 @@ def load_features(app_dir, problems):
 def covers(a, b):
     return a == b or (a.endswith(("/", "+")) and b.startswith(a))
 
+def check_slices(features, byid):
+    """The slice checks: shape, waits that resolve, no cycle, and no path owned by two
+    slices (or a slice and a feature without slices) that could run at the same time."""
+    problems, nodes, edges = [], {}, {}
+    text = lambda x: isinstance(x, str) and x
+    texts = lambda x: isinstance(x, list) and all(text(y) for y in x)
+    for f in features:
+        sl = f.get("slices")
+        if sl is None:
+            nodes[(f["id"], None)] = f.get("owned", [])
+            continue
+        if not (isinstance(sl, list) and sl and all(isinstance(s, dict) for s in sl)):
+            problems.append(f"{f['id']}: \"slices\" must be a non-empty list of objects")
+            continue
+        seen, tasks = set(), set()
+        for s in sl:
+            sid = s.get("id")
+            name = f"{f['id']}:{sid}"
+            if not text(sid) or sid in seen:
+                problems.append(f"{f['id']}: every slice needs a unique text \"id\" ({sid!r})")
+                continue
+            seen.add(sid)
+            if not text(s.get("behavior")):
+                problems.append(f"{name}: needs a one-sentence \"behavior\"")
+            if not texts(s.get("tasks")) or not 2 <= len(s["tasks"]) <= 5:
+                problems.append(f"{name}: \"tasks\" must list 2 to 5 task ids")
+            if texts(s.get("tasks")):
+                for t in s["tasks"]:
+                    if t in tasks:
+                        problems.append(f"{name}: task {t} is in two slices")
+                    tasks.add(t)
+            for k in ("journeys", "owned"):
+                if not texts(s.get(k)) or not s[k]:
+                    problems.append(f"{name}: \"{k}\" must be a non-empty list of text")
+            if not isinstance(s.get("waits", {}), dict):
+                problems.append(f"{name}: \"waits\" must map what it waits on to its tasks that wait")
+            nodes[(f["id"], sid)] = s.get("owned", []) if texts(s.get("owned")) else []
+        union = {o for s in sl if texts(s.get("owned")) for o in s["owned"]}
+        if union != set(f.get("owned", [])):
+            problems.append(f"{f['id']}: the slices' \"owned\" must together be the feature's \"owned\""
+                            f" (only in slices: {sorted(union - set(f.get('owned', [])))};"
+                            f" only in the feature: {sorted(set(f.get('owned', [])) - union)})")
+    every = lambda fid: [n for n in nodes if n[0] == fid]
+    for f in features:
+        deps = [n for d in f.get("depends", []) if d in byid for n in every(d)]
+        for n in every(f["id"]):
+            edges[n] = list(deps)
+        for s in f.get("slices") or []:
+            if not isinstance(s, dict) or (f["id"], s.get("id")) not in nodes or not isinstance(s.get("waits", {}), dict):
+                continue
+            name = f"{f['id']}:{s['id']}"
+            for key, who in s.get("waits", {}).items():
+                fid, _, sid = key.rpartition(":")
+                if not fid:
+                    fid, sid = (key, None) if key in byid else (f["id"], key)
+                target = every(fid) if sid is None else [(fid, sid)]
+                if fid not in byid or (sid is not None and (fid, sid) not in nodes) or (fid, sid) == (f["id"], s["id"]):
+                    problems.append(f"{name} waits on unknown {key}")
+                    continue
+                if not (texts(who) and who and set(who) <= set(s.get("tasks") or [])):
+                    problems.append(f"{name}: waits[\"{key}\"] must list tasks of this slice")
+                edges[(f["id"], s["id"])] += target
+    reach, state = {}, {}
+    def walk(n):
+        if state.get(n) == 1:
+            problems.append(f"waits go round in a cycle through {n[0]}" + (f":{n[1]}" if n[1] else ""))
+            return set()
+        if n not in reach:
+            state[n] = 1
+            reach[n] = {m for e in edges.get(n, []) for m in ({e} | walk(e))}
+            state[n] = 2
+        return reach[n]
+    for n in nodes:
+        walk(n)
+    label = lambda n: n[0] + (f":{n[1]}" if n[1] else "")
+    keys = list(nodes)
+    for i, a in enumerate(keys):
+        for b in keys[i + 1:]:
+            if (a[1] is None and b[1] is None) or b in reach.get(a, ()) or a in reach.get(b, ()):
+                continue
+            hit = next(((x, y) for x in nodes[a] for y in nodes[b] if covers(x, y) or covers(y, x)), None)
+            if hit:
+                problems.append(f"{label(a)} and {label(b)} can run at once and both own {hit[0]}"
+                                + ("" if hit[0] == hit[1] else f" / {hit[1]}") + ": one must wait on the other")
+    return problems
+
 def check(app_dir, features):
     problems = []
     byid = {f["id"]: f for f in features}
@@ -115,9 +215,10 @@ def check(app_dir, features):
                 problems.append(f"{f['id']} depends on unknown feature {dep}")
             elif wave_key(byid[dep]["wave"]) >= wave_key(f["wave"]):
                 problems.append(f"{f['id']} (wave {f['wave']}) depends on {dep} (wave {byid[dep]['wave']}): it must be in an earlier wave")
+    problems += check_slices(features, byid)
     for i, f in enumerate(features):
         for g in features[i + 1:]:
-            if wave_key(f["wave"]) != wave_key(g["wave"]):
+            if wave_key(f["wave"]) != wave_key(g["wave"]) or "slices" in f or "slices" in g:
                 continue
             for a in f.get("owned", []):
                 for b in g.get("owned", []):
