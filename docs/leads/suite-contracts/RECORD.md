@@ -2,9 +2,9 @@
 
 Issue: #1332 · Packet: docs/blueprints/suite/features/suite-contracts.md
 Run: act-1a1448a5fd9-0he1 · Session: claude/suite-contracts-lead-rv72k4 · Started: 2026-10-16T11:49Z
-Stage: 3 wave 7
-Base: 77c504c8d4c3f13068da5120fc76dace6831210c
-Next: wait for the lane to merge #1409 (SC-4b), #1407 (SC-4c), then start wave 8 (SC-5b)
+Stage: 3 wave 8
+Base: f52ec33e25bc15716063bca270ec3b760ad6d723
+Next: wave 8 builder running (SC-5b); wait for its PR to merge (macOS build-only gate), then start wave 9 (SC-5c, feature-done)
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -20,9 +20,9 @@ Next: wait for the lane to merge #1409 (SC-4b), #1407 (SC-4c), then start wave 8
 | SC-3b | 6 | round-trip, pasteboard, asset, link fakes (#827) | Fakes/{FakeRoundTrips,FakePasteboard,FakeAssets,FakeLinking}.swift, FakesExchangeTests | FakesExchangeTests | #1396 | merged |
 | SC-3c | 6 | animation, prefs, settings, onboarding, update fakes; `SuiteFixtures` (#828) | Fakes/{FakeAnimationSource,FakePreferences,FakeSettingsRoute,FakeOnboarding,FakeUpdates,SuiteFixtures}.swift, FakesSettingsTests, SuiteFixturesTests | FakesSettingsTests, SuiteFixturesTests | #1397 | merged |
 | SC-5a | 6 | `StoreRecents` (#832) | Recents/StoreRecents.swift, StoreRecentsTests | StoreRecentsTests | #1399 | merged |
-| SC-4b | 7 | `SuiteServices`, budget helper, QB-SM6, QB-SV8, Model journey (#830) | SuiteServices.swift, SuiteServicesTests, Budget, Budget+Store, StoreRoundTripTests, SuiteContractsJourneyTests | those | #1409 | open |
+| SC-4b | 7 | `SuiteServices`, budget helper, QB-SM6, QB-SV8, Model journey (#830) | SuiteServices.swift, SuiteServicesTests, Budget, Budget+Store, StoreRoundTripTests, SuiteContractsJourneyTests | those | #1409 | merged |
 | SC-4c | 7 | `FixtureSeeder` (#831) | Store/FixtureSeeder.swift, FixtureSeederTests | FixtureSeederTests | #1407 | merged |
-| SC-5b | 8 | `SlotContext`, `SuiteServices.live`, first seven slots (#833) | Sources/SuiteShell/SuiteServices+Live.swift, Live/{Switching,Recents,Creating,Routing,HandOff,Thumbnails,Home}Slot.swift, Tests/AppSnapshotTests/SuiteLiveServicesTests.swift | SuiteLiveServicesTests (macOS) | | planned |
+| SC-5b | 8 | `SlotContext`, `SuiteServices.live`, first seven slots (#833) | Sources/SuiteShell/SuiteServices+Live.swift, Live/{Switching,Recents,Creating,Routing,HandOff,Thumbnails,Home}Slot.swift, Tests/AppSnapshotTests/SuiteLiveServicesTests.swift | SuiteLiveServicesTests (macOS) | | building |
 | SC-5c | 9 | other seven slots; `feature-done` (#834) | SuiteServices+Live.swift, Live/{RoundTrip,Pasteboard,Assets,Linking,Preferences,Settings,Onboarding}Slot.swift, SuiteLiveServicesTests | SuiteLiveServicesTests (macOS) | | planned |
 
 Waves (packet's Build waves, checked against dev at ebc68bf):
