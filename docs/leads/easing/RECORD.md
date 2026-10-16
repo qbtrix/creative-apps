@@ -41,4 +41,5 @@ Wave 4: EZ-8 waits on EZ-6 and EZ-7 (drives what they put on screen); #333 close
 ## Open
 - Ask the supervisor to add HaloModelTests.HaloEasingBudgetTests to Tests/perf-suites.txt (#1363 body).
 - Full run 38915938965 red only on LibraryImportBudgetTests (Linux) and LibraryImportSnapshots.progressRowShowsAfterItsDelay (macOS): not easing, tracked by dev-red #1393. Its macOS job stopped before journeys.
+- Round 1 fix batch r-b1 takes #1411-#1415, #1418-#1421; the minors #1416, #1417, #1422, #1423, #1424 wait for the next fix wave (round 2).
 - #771 (key shapes, selected-keys set) not blocking: plain diamonds.
