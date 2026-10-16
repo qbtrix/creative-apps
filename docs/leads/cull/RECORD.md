@@ -4,7 +4,7 @@ Issue: #1345 · Packet: docs/blueprints/library/features/cull.md
 Run: act-1a145e74beb-obp4 · Session: cse_01BkDrX316MPq32KYU5agHQr · Started: 2026-10-16T18:10Z
 Stage: 3 wave 4
 Base: 7ab292cdb1022222c00314a2b52c44c087811c46
-Next: wait for the lane to merge #1588 (CU-3), #1579 (CU-4), #1598 (CU-5); then label #1604 (CU-7) fast-lane + feature-done
+Next: wait for the lane to merge #1604 (CU-7, feature-done), then the full CI run on dev it triggers; then round 1 (critic panel on its ui-screens)
 
 Loop: v2 (no `## Slices` table in the packet), with the findings queue and
 the 2-round cap (started after #1302 merged at 2026-10-16T04:20Z).
@@ -15,10 +15,10 @@ the 2-round cap (started after #1302 merged at 2026-10-16T04:20Z).
 | CU-1 | 1 | `cull(_:advance:)` on `cullTargets`, one named undo step, refused change sets `cullError`, `cullHelp`, `cullChange(for:)`, `setAutoAdvance`, `dismissCullError` | Sources/LibraryModel/LibraryCulling.swift, Tests/LibraryModelTests/LibraryRatingTests.swift | LibraryRatingTests | #1541 | merged |
 | CU-2 | 1 | `LiveCulling` full Auto Advance rule; `unavailable = nil` | Sources/LibraryModel/Live/LiveCulling.swift, Tests/LibraryModelTests/LibraryAutoAdvanceTests.swift | LibraryAutoAdvanceTests (live) | #1533 | merged |
 | CU-6 | 1 | `MetadataInspector` stars, flag, label identifiers `library.metadata.*`; snapshots redrawn | Sources/LibraryApp/MetadataInspector.swift, Tests/AppSnapshotTests/LibraryMetadataSnapshots.swift | LibraryMetadataSnapshots | – | done before this lead (#262) |
-| CU-3 | 2 | Auto Advance inside `cull`; undo never moves the loupe; cull budgets | Sources/LibraryModel/LibraryCulling.swift, Tests/LibraryModelTests/LibraryAutoAdvanceTests.swift, Tests/LibraryModelTests/LibraryCullBudgetTests.swift | LibraryAutoAdvanceTests, LibraryCullBudgetTests | #1588 | lane (macOS build) |
-| CU-4 | 2 | inspector and menu edits go through `cull(_:advance: false)` | Sources/LibraryModel/MetadataEditing.swift, Tests/LibraryModelTests/LibraryMetadataTests.swift | LibraryMetadataTests | #1579 | lane (macOS build) |
-| CU-5 | 3 | cull area: single keys, Metadata menu, Auto Advance checkmark, refused-change notice | Sources/LibraryApp/LibraryWindow+Cull.swift, Sources/LibraryApp/LibraryBrowser.swift (cull notice close button), Tests/AppSnapshotTests/LibraryRatingSnapshots.swift, Tests/AppSnapshotTests/LibraryAutoAdvanceSnapshots.swift | snapshots; J4 on macOS | #1598 | lane (macOS build) |
-| CU-7 | 4 | J4 steps 1–8 (F and L); `feature-done`; cull.wave.json `status: built` | UITests/LibraryJourneyTests+Cull.swift, docs/blueprints/library/features/cull.wave.json | J4 | #1604 | open, unlabelled until CU-3/4/5 merge |
+| CU-3 | 2 | Auto Advance inside `cull`; undo never moves the loupe; cull budgets | Sources/LibraryModel/LibraryCulling.swift, Tests/LibraryModelTests/LibraryAutoAdvanceTests.swift, Tests/LibraryModelTests/LibraryCullBudgetTests.swift | LibraryAutoAdvanceTests, LibraryCullBudgetTests | #1588 | merged |
+| CU-4 | 2 | inspector and menu edits go through `cull(_:advance: false)` | Sources/LibraryModel/MetadataEditing.swift, Tests/LibraryModelTests/LibraryMetadataTests.swift | LibraryMetadataTests | #1579 | merged |
+| CU-5 | 3 | cull area: single keys, Metadata menu, Auto Advance checkmark, refused-change notice | Sources/LibraryApp/LibraryWindow+Cull.swift, Sources/LibraryApp/LibraryBrowser.swift (cull notice close button), Tests/AppSnapshotTests/LibraryRatingSnapshots.swift, Tests/AppSnapshotTests/LibraryAutoAdvanceSnapshots.swift | snapshots; J4 on macOS | #1598 | merged |
+| CU-7 | 4 | J4 steps 1–8 (F and L); `feature-done`; cull.wave.json `status: built` | UITests/LibraryJourneyTests+Cull.swift, docs/blueprints/library/features/cull.wave.json | J4 | #1604 | lane (fast-lane, feature-done) |
 | CU-8 | – | P2 `testCullKeyLatency` (report-only) | UITests/LibraryJourneyTests+PerfCull.swift | P2 | | blocked: #782 open |
 
 Wave independence: wave 1 CU-1 and CU-2 independent; wave 2 CU-3 and CU-4

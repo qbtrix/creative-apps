@@ -16,3 +16,7 @@ utc	stage	event	ref	note
 2026-10-16T19:45Z	3	pr-opened	#1598	CU-5 cull area keys, Auto Advance, notice close
 2026-10-16T19:55Z	3	pr-opened	#1604	CU-7 J4 (unlabelled until wave 3 merges)
 2026-10-16T20:12Z	3	heartbeat	-	macOS builds for #1588 #1579 #1598 queued (12 in queue)
+2026-10-16T20:40Z	3	pr-merged	#1588	CU-3
+2026-10-16T20:40Z	3	pr-merged	#1579	CU-4
+2026-10-16T20:45Z	3	pr-merged	#1598	CU-5
+2026-10-16T20:46Z	3	stage-end	wave4	#1604 labelled fast-lane feature-done
