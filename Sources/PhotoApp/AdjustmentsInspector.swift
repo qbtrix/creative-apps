@@ -5,7 +5,8 @@
 // Values in, one closure out: every change goes out as an AdjustmentEdit, and
 // AdjustmentSettings clamps and validates it. A disabled section dims its
 // rows. Numbers show whole degrees and percents, one decimal for EV and px,
-// and levelsDecimals for Black and White, so distinct points read distinct.
+// and Black and White as a percent of the tonal range (PhotoLevelsFormat),
+// at places that keep distinct points reading distinct.
 // Curves (CurvesEditor) sits between Levels and Hue/Saturation, over
 // `histogram`. The end of every gesture, a curve drag or a bar slider's drag,
 // key step or typed value, goes out as onEditEnd, so each is one undo step.
@@ -33,10 +34,8 @@ struct AdjustmentsInspector: View {
                 }
             }
             section(.levels) {
-                slider("Black", Double(settings.blackPoint), Self.doubles(AdjustmentSettings.levelsRange),
-                       decimals: AdjustmentSettings.levelsDecimals) { .blackPoint(Float($0)) }
-                slider("White", Double(settings.whitePoint), Self.doubles(AdjustmentSettings.levelsRange),
-                       decimals: AdjustmentSettings.levelsDecimals) { .whitePoint(Float($0)) }
+                levelsRow("Black", settings.blackPoint) { .blackPoint($0) }
+                levelsRow("White", settings.whitePoint) { .whitePoint($0) }
                 gammaRow
             }
             section(.curves) {
@@ -75,6 +74,15 @@ struct AdjustmentsInspector: View {
 
     private func reset(_ kind: AdjustmentKind) -> @MainActor () -> Void {
         { onEdit(.reset(kind)) }
+    }
+
+    /// A Levels point as a percent of the tonal range (PhotoLevelsFormat):
+    /// 0% pure black, 100% pure white.
+    private func levelsRow(_ label: String, _ point: Float, _ edit: @escaping (Float) -> AdjustmentEdit) -> some View {
+        slider(
+            label, PhotoLevelsFormat.percent(point), PhotoLevelsFormat.range, unit: PhotoLevelsFormat.unit,
+            decimals: PhotoLevelsFormat.decimals
+        ) { edit(PhotoLevelsFormat.point(percent: $0)) }
     }
 
     /// Gamma as a bar slider on a log10 track (GammaTrack), so 1 sits mid-row
