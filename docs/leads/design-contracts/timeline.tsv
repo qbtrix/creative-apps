@@ -35,3 +35,4 @@ utc	stage	event	ref	note
 2026-10-16T16:14Z	3	heartbeat	38925966750	design run with #1410 red on the 3 #1391 journeys; told shell-parity #1325
 2026-10-16T16:41Z	3	heartbeat	38931490731	design run still red; waiting on #1391 fix
 2026-10-16T17:11Z	3	heartbeat	38934137818	design run red, same journeys; 38936731510 in progress
+2026-10-16T17:34Z	3	heartbeat	38936731510	design run red; waiting

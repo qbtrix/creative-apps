@@ -4,7 +4,7 @@ Issue: #1324 · Packet: docs/blueprints/design/features/design-contracts.md
 Run: act-1a14478b14e-i8ep · Session: session_01DKQiisBimhgRgEM46b1U5E · Started: 2026-10-16T11:29Z
 Stage: 3 polling
 Base: fb72b7e52405a824fabe34c6c408fcc00d242da2
-Next: wait for the scoped CI run app=design (38936731510, in progress) or a full CI run containing #1410 (165933fc) to go green; every Design run since #1391 is red on testDrawShapesAddTextAndSave, testShellLight, testShellDark (shell-parity #1325, dev-red #1393); then post Belt-Slice-Done CT-b, CT-c, CT-d and Belt-Contact-Sheet
+Next: wait for the scoped CI run app=design (next after 38936731510, red) or a full CI run containing #1410 (165933fc) to go green; every Design run since #1391 is red on testDrawShapesAddTextAndSave, testShellLight, testShellDark (shell-parity #1325, dev-red #1393); then post Belt-Slice-Done CT-b, CT-c, CT-d and Belt-Contact-Sheet
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | rounds | state | run |
