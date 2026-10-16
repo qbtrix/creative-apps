@@ -91,7 +91,9 @@ for them by name.
 
    - **what:** one behavior.
    - **owned files:** every file the task creates or edits, tests
-     included. Nothing outside this list.
+     included, and with Slices the mutation plan of each source file it
+     changes (`Tests/mutations/<Target>.<File>.json`, `lead.md` contract
+     rule 14). Nothing outside this list.
    - **depends on:** other task ids of this packet (and outside issues
      such as `#333`), under rule (b). `–` when none.
    - **size:** at most 400 changed lines and 15 files. Split anything
@@ -106,7 +108,16 @@ for them by name.
    Longest chain: EZ-1 → EZ-2 → EZ-3 (3).
    ```
 9. **Acceptance test per task.** `| id | test | fails when |`, one row per
-   task. A test that fails before the task and passes after.
+   task. A test that fails before the task and passes after. With Slices
+   (`lead.md`, contract rules 13 and 14):
+   - **Build the check first.** A slice's acceptance tests are owned by its
+     first code task or a task before it, never a later one. A test that
+     merges ahead of its code is disabled until that task
+     (`@Test(.disabled("waits on <task id>"))`), so `dev` stays green.
+   - **Test the oracle.** The table gains a `mutations` column: for each
+     task that adds behaviour, 2 or more bugs that test must catch (`<=`
+     for `<` on the left edge; a locked layer moves), which the builder adds
+     to the plan of the file it changes and runs with `scripts/mutate`.
 10. **Quality tests.** `| quality row | budget | test |`: budgets, no dead
    controls, one gesture one step, keyboard parity, the audit.
 11. **Done check.** Journeys green on the `feature-done` CI run, audit zero
@@ -183,3 +194,8 @@ with the task ids. It refutes; it doesn't rewrite.
 9. **Data out of step.** The packet's `.wave.json` missing a file its task
    table owns or a journey its Journey steps name, or naming one the packet
    doesn't (`owned`, `journeys`).
+10. **Check after code** (with Slices). A slice whose acceptance tests are
+    owned only by a task that comes after its first code task.
+11. **No oracle** (with Slices). A task that adds behaviour with fewer than
+    2 mutations in its Acceptance row, or that changes planned source
+    without owning that file's plan in `Tests/mutations/`.
