@@ -3,7 +3,8 @@
 // the order and selection moves disabled, "Show Layer"), and two layers with
 // the top one selected (all but Bring Forward and Select Layer Above), in
 // Light and Dark. New Adjustment Layer holds the four kinds (never Blur),
-// disabled with "Open an image first." with no image and enabled with one;
+// the submenu and its items disabled with "Open an image first." with no
+// image, and enabled with one;
 // the menu bar doesn't render here, so the items are drawn in
 // columns. Writes photo-layer-menu-light.png and photo-layer-menu-dark.png.
 // macOS only.
@@ -33,6 +34,8 @@ import Testing
         #expect(menus[0].addAdjustmentLayerHelp == "Open an image first.")
         #expect(menus[1].addAdjustmentLayerHelp == nil && menus[2].addAdjustmentLayerHelp == nil)
         #expect(PhotoMenu().addAdjustmentLayerHelp == "Open an image first.")
+        #expect(menus[0].adjustmentMenuDisabled && PhotoMenu().adjustmentMenuDisabled)
+        #expect(!menus[1].adjustmentMenuDisabled && !menus[2].adjustmentMenuDisabled)
         for scheme in [ColorScheme.light, .dark] {
             try snapshot(
                 MenuStates(menus: menus), name: "photo-layer-menu-\(scheme == .dark ? "dark" : "light")", scheme: scheme)
