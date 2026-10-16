@@ -259,11 +259,8 @@ public struct TimelineStrip<ID: Hashable & Sendable>: View {
                         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
                         .contentShape(Rectangle())
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(TimelineNameStyle(selected: track.isSelected))
                 .frame(height: SuiteSize.timelineLane)
-                // `ignoresSafeAreaEdges: []`: a color background ignores every safe-area edge by default,
-                // so under a floating sidebar the selected row reached 208 pt left of the strip (#1034).
-                .background(track.isSelected ? SuiteColor.accent.opacity(0.15) : Color.clear, ignoresSafeAreaEdges: [])
                 .accessibilityAddTraits(track.isSelected ? .isSelected : [])
             }
         }
@@ -353,6 +350,41 @@ struct TimelineStripLayout: Equatable, Sendable {
     /// of thousands of points wide (#219).
     func lanesWidth(contentWidth: Double, offered: CGFloat, snapshot: Bool) -> CGFloat {
         snapshot ? max(offered, 0) : CGFloat(contentWidth) + SuiteSpacing.xl
+    }
+}
+
+/// A track name's button: the row fill from TimelineLook.nameRow, so the name
+/// shows hover and press like the other rows in the suite (lead rule 10).
+struct TimelineNameStyle: ButtonStyle {
+    let selected: Bool
+
+    func makeBody(configuration: Configuration) -> some View {
+        TimelineNameBody(configuration: configuration, selected: selected)
+    }
+
+    private struct TimelineNameBody: View {
+        let configuration: ButtonStyleConfiguration
+        let selected: Bool
+        @State private var hovering = false
+        @Environment(\.isEnabled) private var isEnabled
+
+        var body: some View {
+            let row = TimelineLook.nameRow(selected: selected, hovered: hovering && isEnabled, pressed: configuration.isPressed)
+            configuration.label
+                // `ignoresSafeAreaEdges: []`: a color background ignores every safe-area edge by default,
+                // so under a floating sidebar the selected row reached 208 pt left of the strip (#1034).
+                .background(fill(row), ignoresSafeAreaEdges: [])
+                .onHover { hovering = $0 }
+        }
+
+        private func fill(_ row: TimelineLook.NameRow) -> Color {
+            switch row {
+            case .plain: Color.clear
+            case .hovered: SuiteColor.rowHover
+            case .pressed: SuiteColor.field
+            case .selected: SuiteColor.accent.opacity(0.15)
+            }
+        }
     }
 }
 

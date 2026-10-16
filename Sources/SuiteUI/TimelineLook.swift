@@ -73,6 +73,18 @@ public enum TimelineLook {
         return Segment(kind: .line, curveGlyphX: glyph ? (ax + bx) / 2 : nil)
     }
 
+    /// The row a track name shows: pressed, selected, hovered or plain.
+    public enum NameRow: Hashable, Sendable { case plain, hovered, pressed, selected }
+
+    /// A track name's row: a press shows at once, even on the selected track;
+    /// a selected row keeps its tint under the pointer; hover is only for an
+    /// idle row (every control shows hover, pressed and selected, lead rule 10).
+    public static func nameRow(selected: Bool, hovered: Bool, pressed: Bool) -> NameRow {
+        if pressed { return .pressed }
+        if selected { return .selected }
+        return hovered ? .hovered : .plain
+    }
+
     /// The time pill for a label `labelWidth` wide, `height` tall from y 0:
     /// centred on `playheadX`, clamped inside `visible` less `pillInset` at
     /// either end. A pill wider than the stretch starts at its lower end.
