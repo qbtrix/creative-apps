@@ -1,5 +1,6 @@
 // DesignCanvas.swift: the canvas of Design's editor shell: the selected page on
-// SuiteUI's CanvasViewport (rulers, checkerboard, zoom), with its nodes painted
+// SuiteUI's CanvasViewport (rulers in points, matching the status bar and the
+// inspector; checkerboard; zoom), with its nodes painted
 // by DesignArtwork and the selection's outline and handles over them (with
 // several layers selected, an outline on each, SuiteUI's dashed SelectionOutline
 // around them all, and no handles), or the
@@ -43,7 +44,7 @@ struct DesignCanvas: View {
         let outlined = painted.map(\.node).filter { selectedIDs.contains($0.id) }
         return CanvasViewport(
             documentSize: CGSize(width: page.frameWidth, height: page.frameHeight), zoom: zoom,
-            pointer: model.tool.pointer, onSize: onViewport, onZoom: onZoom,
+            pointer: model.tool.pointer, unit: "pt", onSize: onViewport, onZoom: onZoom,
             onDrag: { perform(.drag($0, $1, .current)) }, onDragEnd: { perform(.endDrag) },
             onKey: model.editingTextID == nil ? { key($0) } : nil
         ) {
