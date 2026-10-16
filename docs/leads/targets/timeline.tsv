@@ -52,3 +52,4 @@ utc	stage	event	ref	note
 2026-10-16T04:05Z	4	ci-run	38841439320	792 on 9230d80: Linux green, macOS build green, UI red 11 (Halo 7, Photo 3, Library 1); none ours
 2026-10-16T04:20Z	4	heartbeat	dev-ci	waiting on a green dev run: 38849414997 in_progress  e27292b; 38841439320 completed failure 9230d80; 38841265840 completed failure e99643c
 2026-10-16T04:40Z	4	ci-run	38849414997	scoped: design green on e27292b; does not count. Asked supervisor on #873 for a scoped suite run
+2026-10-16T04:40Z	4	heartbeat	dev-ci	waiting on a green dev run: 38851162437 in_progress  7ce0c25; 38849414997 completed success e27292b; 38841439320 completed failure 9230d80
