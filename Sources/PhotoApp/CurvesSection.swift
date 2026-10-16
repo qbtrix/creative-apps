@@ -6,7 +6,7 @@
 // a delete is one "Curves" undo step. A click that would add a point past
 // curvePointCount is refused by the model, so nothing changes. Identifiers:
 // photo.curves, photo.curves.point1, ...
-// AdjustmentsPanel is the Adjust tab's sections for its target
+// AdjustmentsPanel is the inspector's adjustment sections for its target
 // (adjustTarget): the whole image's sections and intents, or, for a selected
 // adjustment layer, that layer's settings (so Curves reads and writes the
 // layer's curve), only its sections (adjustSections), no enable switch, and
