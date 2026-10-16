@@ -41,3 +41,5 @@ utc	stage	event	ref	note
 2026-10-16T16:40Z	4	ci-run	38930143233	scoped halo red: segmentTitlesFitOneLine; journeys skipped
 2026-10-16T16:41Z	4	finding-filed	#1450	title overflow at min width
 2026-10-16T16:42Z	4	review	round 2	critic panel on snapshots
+2026-10-16T16:47Z	4	review	round 2	panel: #1453-#1455 filed, 1 refuted
+2026-10-16T16:48Z	4	fix-round	round 2	fix-batch on 9 findings, base c9e4656
