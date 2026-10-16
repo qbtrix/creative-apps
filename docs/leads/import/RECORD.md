@@ -4,17 +4,17 @@ Issue: #1334 · Packet: docs/blueprints/library/features/import.md
 Run: act-1a1448a5fa3-a8rg · Session: claude/library-import-feature-c0rl9g · Started: 2026-10-16T11:49Z
 Stage: 3 wave 2
 Base: 8ecd8b9b7f6bed18afe784640d467d369194c0d6
-Next: wait for IM-2 (re-opened PR), IM-6, IM-7 PRs; when IM-2 merges start IM-3; when IM-2/6/7 merge start IM-8
+Next: wait for the lane's macOS builds on #1346, #1347, #1348; when #1346 merges start IM-3; when all three merge start IM-8
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
 |---|---|---|---|---|---|---|
 | IM-1 | 1 | Catalog import state machine: begin, progress, batches, finish, fail, dismiss, help | Sources/LibraryModel/LibraryImport.swift, Tests/LibraryModelTests/LibraryImportTests.swift | LibraryImportTests | #1338 | merged |
-| IM-2 | 1 | LiveImporter: skip known, capture-date order, path ids, batches, throttled progress, cancel; unavailable = nil | Sources/LibraryModel/Live/LiveImporter.swift, Tests/LibraryModelTests/LibraryLiveImporterTests.swift, Tests/LibraryModelTests/LibraryServicesTests.swift | LibraryLiveImporterTests | – | rebuilding |
+| IM-2 | 1 | LiveImporter: skip known, capture-date order, path ids, batches, throttled progress, cancel; unavailable = nil | Sources/LibraryModel/Live/LiveImporter.swift, Tests/LibraryModelTests/LibraryLiveImporterTests.swift, Tests/LibraryModelTests/LibraryServicesTests.swift | LibraryLiveImporterTests | #1346 | lane: macOS build |
 | IM-4 | 1 | ImageIODecoder: scan with metadata and orientation, decode to sRGB RGBA8 | Sources/LibraryApp/Platform/ImageIODecoder.swift, Tests/AppSnapshotTests/LibraryDecodeTests.swift | LibraryDecodeTests (macOS) | #1342 | merged |
 | IM-3 | 2 | Import model budgets | Tests/LibraryModelTests/LibraryImportBudgetTests.swift | LibraryImportBudgetTests | – | planned |
-| IM-6 | 2 | Import area: File > Import Folder…, open panel or -LibraryImportFolder, off-main task, import on launch | Sources/LibraryApp/LibraryWindow+Import.swift | J1 step 6 (fakes), IM-8 live | – | building |
-| IM-7 | 2 | Progress row and notice (placeholders until #780/#781) and snapshots | Sources/LibraryApp/LibraryBrowser.swift, Tests/AppSnapshotTests/LibraryImportSnapshots.swift | LibraryImportSnapshots | – | building |
+| IM-6 | 2 | Import area: File > Import Folder…, open panel or -LibraryImportFolder, off-main task, import on launch | Sources/LibraryApp/LibraryWindow+Import.swift | J1 step 6 (fakes), IM-8 live | #1347 | lane: macOS build |
+| IM-7 | 2 | Progress row and notice (placeholders until #780/#781) and snapshots | Sources/LibraryApp/LibraryBrowser.swift, Tests/AppSnapshotTests/LibraryImportSnapshots.swift | LibraryImportSnapshots | #1348 | lane: macOS build |
 | IM-8 | 3 | J1 testImportAFolder; delete skipped testImportRateAndRelaunch; feature-done | UITests/LibraryJourneyTests.swift, UITests/LibraryJourneyTests+Import.swift, UITests/LibraryJourneyTests+Files.swift, docs/blueprints/library/features/import.wave.json | J1 | – | planned |
 | IM-9 | 3 | P6 perf journey (report-only) | UITests/LibraryJourneyTests+PerfImport.swift | P6 | – | blocked on #782 |
 
@@ -33,6 +33,8 @@ Wave 1: IM-1, IM-2, IM-4 independent. Wave 2: IM-3 (waits IM-1, IM-2: benchmarks
 
 - IM-2 also edits Tests/LibraryModelTests/LibraryServicesTests.swift: its spine assertions expected the importer stub (gate failed without it).
 - IM-6 and IM-7 started beside IM-2's retry: they need only IM-1 (merged), so wave 2 overlaps wave 1's tail.
+- PR bodies get a session footer appended outside the builders' control; the lane strips attribution from the squash commit.
+- IM-6 adds no Linux test (SwiftUI area only); its proof is J1 in IM-8, per the packet.
 - Builder branches are lead/import-<id>: lead/import/<id> can't coexist with the lead/import branch.
 
 ## Open

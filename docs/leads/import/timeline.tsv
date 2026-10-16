@@ -5,3 +5,6 @@ utc	stage	event	ref	note
 2026-10-16T12:07Z	3	pr-merged	#1338	IM-1
 2026-10-16T12:17Z	3	pr-merged	#1342	IM-4
 2026-10-16T12:25Z	3	stage-start	wave 2	IM-2 retry, IM-6, IM-7
+2026-10-16T12:35Z	3	pr-opened	#1346	IM-2
+2026-10-16T12:35Z	3	pr-opened	#1347	IM-6
+2026-10-16T12:35Z	3	pr-opened	#1348	IM-7
