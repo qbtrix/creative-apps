@@ -18,112 +18,158 @@
 // recurses. The window applies `.suiteProbes()`; its toolbar buttons carry
 // identifiers (`suite.sidebarToggle`, which replaces the system's sidebar toggle,
 // `suite.inspectorToggle`, and each action's `identifier`).
+// The `sidebar:` init takes an app's own list instead of the sections (the
+// sections inits put a SuiteSidebarList there); either way the slot is one
+// container carrying `suite.sidebar`, so the app's list keeps its own
+// identifier inside it. That init skips the -SuiteGallery check too, so a
+// gallery page built on it never recurses. `documentActions` (New, Open,
+// Save) sit beside the title after the sidebar toggle, `actions` trail. A
+// non-nil `subtitle` is the title bar's subtitle (the save state; "" shows
+// none); nil leaves it to the caller (Halo sets its own). `inspectorWidth`
+// (an editor's panel) is the inspector's minimum and ideal, and takes the
+// inspector ideal's place in the window's minimum and launch widths. With
+// `-SuiteWindowSize WxH` a SuiteWindowSizer sizes the window (SuiteWindowSizer.swift).
 import SwiftUI
 
-public struct SuiteWindow<Content: View, Inspector: View>: View {
+public struct SuiteWindow<Sidebar: View, Content: View, Inspector: View>: View {
     private let title: String
-    private let sections: [SidebarSection]
-    private let selection: SidebarItem.ID?
-    private let onSelect: @MainActor (SidebarItem.ID) -> Void
-    private let onToggle: (@MainActor (SidebarItem.ID, SidebarToggle.ID) -> Void)?
-    private let onMove: (@MainActor (SidebarSection.ID, IndexSet, Int) -> Void)?
-    private let onRename: (@MainActor (SidebarItem.ID, String) -> Void)?
+    private let subtitle: String?
+    private let documentActions: [ToolbarAction]
     private let actions: [ToolbarAction]
+    private let inspectorWidth: CGFloat?
+    private let sidebar: Sidebar
     private let content: Content
     private let inspector: Inspector
     /// The gallery this window shows instead of the app; nil shows the app.
     let galleryRequest: GalleryRequest?
+    /// The `-SuiteWindowSize` frame size; nil keeps the window's own size.
+    private let launchSize: CGSize?
     @State private var showsInspector = true
     @State private var columns: NavigationSplitViewVisibility = .all
+}
 
+extension SuiteWindow where Sidebar == SuiteSidebarList {
     /// `title` names the open document (or the app when none is open).
     /// `actions` become the window's trailing toolbar items. `onToggle` gets a
     /// row toggle click, `onMove` a drag reorder within a section's top-level
     /// rows, `onRename` a double-click rename.
     public init(
-        title: String, sections: [SidebarSection], selection: SidebarItem.ID?,
+        title: String, subtitle: String? = nil, sections: [SidebarSection], selection: SidebarItem.ID?,
         onSelect: @escaping @MainActor (SidebarItem.ID) -> Void,
         onToggle: (@MainActor (SidebarItem.ID, SidebarToggle.ID) -> Void)? = nil,
         onMove: (@MainActor (SidebarSection.ID, IndexSet, Int) -> Void)? = nil,
         onRename: (@MainActor (SidebarItem.ID, String) -> Void)? = nil,
-        actions: [ToolbarAction] = [],
+        documentActions: [ToolbarAction] = [], actions: [ToolbarAction] = [],
         @ViewBuilder content: () -> Content, @ViewBuilder inspector: () -> Inspector
     ) {
         self.init(
             galleryPage: SuiteGallery.request(from: ProcessInfo.processInfo.arguments), title: title,
-            sections: sections, selection: selection, onSelect: onSelect, onToggle: onToggle, onMove: onMove,
-            onRename: onRename, actions: actions, content: content, inspector: inspector)
+            subtitle: subtitle, sections: sections, selection: selection, onSelect: onSelect, onToggle: onToggle,
+            onMove: onMove, onRename: onRename, documentActions: documentActions, actions: actions,
+            content: content, inspector: inspector)
     }
 
     /// The window without the launch-argument check: it shows `galleryPage`
     /// when given, else the app. The gallery's `window` page passes nil.
     init(
-        galleryPage: GalleryRequest?, title: String, sections: [SidebarSection], selection: SidebarItem.ID?,
-        onSelect: @escaping @MainActor (SidebarItem.ID) -> Void,
+        galleryPage: GalleryRequest?, title: String, subtitle: String? = nil, sections: [SidebarSection],
+        selection: SidebarItem.ID?, onSelect: @escaping @MainActor (SidebarItem.ID) -> Void,
         onToggle: (@MainActor (SidebarItem.ID, SidebarToggle.ID) -> Void)? = nil,
         onMove: (@MainActor (SidebarSection.ID, IndexSet, Int) -> Void)? = nil,
         onRename: (@MainActor (SidebarItem.ID, String) -> Void)? = nil,
-        actions: [ToolbarAction] = [],
+        documentActions: [ToolbarAction] = [], actions: [ToolbarAction] = [],
         @ViewBuilder content: () -> Content, @ViewBuilder inspector: () -> Inspector
     ) {
-        self.galleryRequest = galleryPage
-        self.title = title
-        self.sections = sections
-        self.selection = selection
-        self.onSelect = onSelect
-        self.onToggle = onToggle
-        self.onMove = onMove
-        self.onRename = onRename
-        self.actions = actions
-        self.content = content()
-        self.inspector = inspector()
+        self.init(
+            gallery: galleryPage, title: title, subtitle: subtitle, documentActions: documentActions,
+            actions: actions, inspectorWidth: nil,
+            sidebar: SuiteSidebarList(
+                sections: sections, selection: selection, onSelect: onSelect, onToggle: onToggle, onMove: onMove,
+                onRename: onRename),
+            content: content(), inspector: inspector())
     }
 
     /// One sidebar section titled `sidebarTitle`.
     public init(
-        title: String, sidebarTitle: String, items: [SidebarItem], selection: SidebarItem.ID?,
-        onSelect: @escaping @MainActor (SidebarItem.ID) -> Void, actions: [ToolbarAction] = [],
+        title: String, subtitle: String? = nil, sidebarTitle: String, items: [SidebarItem],
+        selection: SidebarItem.ID?, onSelect: @escaping @MainActor (SidebarItem.ID) -> Void,
+        documentActions: [ToolbarAction] = [], actions: [ToolbarAction] = [],
         @ViewBuilder content: () -> Content, @ViewBuilder inspector: () -> Inspector
     ) {
         self.init(
-            title: title, sections: [SidebarSection(id: sidebarTitle, title: sidebarTitle, items: items)],
-            selection: selection, onSelect: onSelect, actions: actions, content: content, inspector: inspector)
+            title: title, subtitle: subtitle,
+            sections: [SidebarSection(id: sidebarTitle, title: sidebarTitle, items: items)],
+            selection: selection, onSelect: onSelect, documentActions: documentActions, actions: actions,
+            content: content, inspector: inspector)
+    }
+}
+
+extension SuiteWindow {
+    /// An app's own sidebar list: Design's pages and layer tree, Photo's layers.
+    public init(
+        title: String, subtitle: String? = nil, documentActions: [ToolbarAction] = [],
+        actions: [ToolbarAction] = [], inspectorWidth: CGFloat? = nil,
+        @ViewBuilder sidebar: () -> Sidebar, @ViewBuilder content: () -> Content,
+        @ViewBuilder inspector: () -> Inspector
+    ) {
+        self.init(
+            gallery: nil, title: title, subtitle: subtitle, documentActions: documentActions, actions: actions,
+            inspectorWidth: inspectorWidth, sidebar: sidebar(), content: content(), inspector: inspector())
+    }
+
+    private init(
+        gallery: GalleryRequest?, title: String, subtitle: String?, documentActions: [ToolbarAction],
+        actions: [ToolbarAction], inspectorWidth: CGFloat?, sidebar: Sidebar, content: Content, inspector: Inspector
+    ) {
+        self.galleryRequest = gallery
+        self.title = title
+        self.subtitle = subtitle
+        self.documentActions = documentActions
+        self.actions = actions
+        self.inspectorWidth = inspectorWidth
+        self.sidebar = sidebar
+        self.content = content
+        self.inspector = inspector
+        self.launchSize = SuiteWindowSize.parse(ProcessInfo.processInfo.arguments)
     }
 
     public var body: some View {
         Group {
             if let galleryRequest {
                 SuiteGallery(galleryRequest)
+            } else if let subtitle {
+                splitView.navigationSubtitle(subtitle)
             } else {
                 splitView
             }
         }
         .suiteProbes()
+        .background {
+            if let launchSize { SuiteWindowSizer(size: launchSize) }
+        }
         // The window opens at its ideal size: the launch size the column tokens add up to.
         .frame(
-            minWidth: SuiteSize.windowMinimum.width, idealWidth: SuiteSize.windowLaunch.width,
+            minWidth: SuiteSize.sidebarWidth.ideal + SuiteSize.contentMinimum.width + inspectorColumn.ideal,
+            idealWidth: SuiteSize.sidebarWidth.ideal + SuiteSize.contentIdealWidth + inspectorColumn.ideal,
             minHeight: SuiteSize.windowMinimum.height, idealHeight: SuiteSize.windowLaunch.height)
+    }
+
+    /// The inspector column's widths: `inspectorWidth` as minimum and ideal, else the token.
+    private var inspectorColumn: (min: CGFloat, ideal: CGFloat, max: CGFloat) {
+        guard let width = inspectorWidth, width > 0 else { return SuiteSize.inspectorWidth }
+        return (width, width, max(width, SuiteSize.inspectorWidth.max))
     }
 
     private var splitView: some View {
         NavigationSplitView(columnVisibility: $columns) {
-            List(selection: Binding(get: { selection }, set: { id in if let id { onSelect(id) } })) {
-                ForEach(sections) { section in
-                    Section {
-                        ForEach(section.items) { SidebarNode(item: $0, onToggle: onToggle, onRename: onRename) }
-                            .onMove(perform: moveAction(in: section.id))
-                    } header: {
-                        SidebarSectionHeader(section: section)
-                    }
-                }
-            }
-            .listStyle(.sidebar)
-            .accessibilityIdentifier("suite.sidebar")
-            // The system's sidebar toggle has no accessibility identifier and can't be given one
-            // (the app audit, #262); the toolbar's own `suite.sidebarToggle` replaces it.
-            .toolbar(removing: .sidebarToggle)
-            .navigationSplitViewColumnWidth(
-                min: SuiteSize.sidebarWidth.min, ideal: SuiteSize.sidebarWidth.ideal, max: SuiteSize.sidebarWidth.max)
+            sidebar
+                .accessibilityElement(children: .contain)
+                .accessibilityIdentifier("suite.sidebar")
+                // The system's sidebar toggle has no accessibility identifier and can't be given one
+                // (the app audit, #262); the toolbar's own `suite.sidebarToggle` replaces it.
+                .toolbar(removing: .sidebarToggle)
+                .navigationSplitViewColumnWidth(
+                    min: SuiteSize.sidebarWidth.min, ideal: SuiteSize.sidebarWidth.ideal, max: SuiteSize.sidebarWidth.max)
         } detail: {
             content
                 // An explicit ideal so the content's own ideal width can't widen the
@@ -144,8 +190,7 @@ public struct SuiteWindow<Content: View, Inspector: View>: View {
                         .accessibilityIdentifier("suite.inspector")
                         .tint(SuiteColor.accent)
                         .inspectorColumnWidth(
-                            min: SuiteSize.inspectorWidth.min, ideal: SuiteSize.inspectorWidth.ideal,
-                            max: SuiteSize.inspectorWidth.max)
+                            min: inspectorColumn.min, ideal: inspectorColumn.ideal, max: inspectorColumn.max)
                 }
         }
         .navigationTitle(title)
@@ -160,15 +205,13 @@ public struct SuiteWindow<Content: View, Inspector: View>: View {
                 .help(hidden ? "Show Sidebar" : "Hide Sidebar")
                 .suiteControl(id: "suite.sidebarToggle", enabled: true, reason: nil)
             }
-            ToolbarItemGroup(placement: .primaryAction) {
-                ForEach(actions) { action in
-                    Button(action: action.perform) {
-                        Label(action.title, systemImage: action.systemImage)
-                    }
-                    .disabled(!action.isEnabled)
-                    .help(action.help)
-                    .suiteControl(action)
+            if !documentActions.isEmpty {
+                ToolbarItemGroup(placement: .navigation) {
+                    ForEach(documentActions) { actionButton($0) }
                 }
+            }
+            ToolbarItemGroup(placement: .primaryAction) {
+                ForEach(actions) { actionButton($0) }
             }
             ToolbarItem(placement: .primaryAction) {
                 Button {
@@ -183,9 +226,13 @@ public struct SuiteWindow<Content: View, Inspector: View>: View {
         }
     }
 
-    /// Drag reorder for one section's rows; nil (reorder off) without `onMove`.
-    private func moveAction(in sectionID: SidebarSection.ID) -> ((IndexSet, Int) -> Void)? {
-        guard let onMove else { return nil }
-        return { from, to in onMove(sectionID, from, to) }
+    /// One toolbar action: disabled, with its reason as the tooltip, while it can't act.
+    private func actionButton(_ action: ToolbarAction) -> some View {
+        Button(action: action.perform) {
+            Label(action.title, systemImage: action.systemImage)
+        }
+        .disabled(!action.isEnabled)
+        .help(action.help)
+        .suiteControl(action)
     }
 }
