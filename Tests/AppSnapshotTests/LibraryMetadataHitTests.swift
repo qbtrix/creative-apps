@@ -4,7 +4,8 @@
 // ideal and least widths, for one photo and for a mixed selection, and reads
 // each star's and dot's accessibility frame: at least 20 x 20 pt
 // (docs/design.md's floor), inside the inspector, and no two overlapping.
-// macOS only.
+// A mixed row's "Mixed" text is one line, inside, and clear of every mark
+// (#1719). No Label is not the grid's Rejected xmark (#1721). macOS only.
 import AppKit
 import LibraryModel
 import SuiteUI
@@ -39,6 +40,35 @@ import Testing
                 #expect(overlap.isNull || overlap.width * overlap.height < 1, "\(a.0) overlaps \(b.0)")
             }
         }
+    }
+
+    @Test(arguments: [SuiteSize.inspectorWidth.ideal, SuiteSize.inspectorWidth.min])
+    func mixedTextIsOneLineClearOfTheMarks(width: CGFloat) throws {
+        let metadata = try Self.metadata(mixed: true)
+        #expect(metadata.rating == .mixed && metadata.label == .mixed)
+        let size = CGSize(width: width, height: 400)
+        let window = host(MetadataInspector(metadata: metadata), size: size)
+        defer { window.orderOut(nil) }
+        let bounds = CGRect(origin: .zero, size: size).insetBy(dx: -0.5, dy: -0.5)
+        let marks = try Self.ids.map { try #require(frame(of: $0, in: window), "no \($0)") }
+        let line = NSFont.preferredFont(forTextStyle: .subheadline).boundingRectForFont.height
+        for row in ["rating", "label"] {
+            let id = MetadataInspector.mixedID(row)
+            let text = try #require(frame(of: id, in: window), "no \(id)")
+            #expect(text.height <= line + 1, "\(id) is \(text.height) pt tall: it wraps")
+            #expect(text.width >= 20, "\(id) is \(text.width) pt wide")
+            #expect(bounds.contains(text), "\(id) at \(text) leaves the inspector")
+            for mark in marks {
+                let overlap = text.intersection(mark)
+                #expect(overlap.isNull || overlap.width * overlap.height < 1, "\(id) overlaps a mark at \(mark)")
+            }
+        }
+    }
+
+    @Test func noLabelIsNotTheRejectedMark() {
+        #expect(MetadataInspector.noLabelSymbol != "xmark.circle")
+        #expect(!MetadataInspector.noLabelSymbol.hasPrefix("xmark"))
+        #expect(NSImage(systemSymbolName: MetadataInspector.noLabelSymbol, accessibilityDescription: nil) != nil)
     }
 
     private static func metadata(mixed: Bool) throws -> PhotoMetadata {
