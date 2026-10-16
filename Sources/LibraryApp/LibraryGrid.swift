@@ -1,6 +1,8 @@
 // LibraryGrid.swift: the photo grid, SuiteUI's ThumbnailGrid of the sorted
 // photos at the catalog's cell size, and the ThumbnailItem a photo becomes
-// (its flat color, file name, and rating, flag and label badges). Values in,
+// (its flat color, file name, and rating, flag and label badges). Each cell is
+// identified `library.grid.cell.<photo id>` on the cell itself, never on the
+// grid, so journeys and the app audit can find it. Values in,
 // closures out; LibraryCatalog holds the state.
 import LibraryModel
 import SuiteUI
@@ -13,11 +15,15 @@ struct LibraryGrid: View {
     var onSelect: @MainActor (Set<String>) -> Void = { _ in }
     var onOpen: @MainActor (String) -> Void = { _ in }
 
+    /// Each cell's identifier is this plus the photo's id.
+    static let cellIdentifierPrefix = "library.grid.cell."
+
     var body: some View {
         let side = CGFloat(model.cellSize)
         ThumbnailGrid(
             model.sortedItems.map { ThumbnailItem<String>(photo: $0) }, cellSize: CGSize(width: side, height: side * 3 / 4),
-            selection: model.selection, onSelectionChange: onSelect, onOpen: onOpen)
+            selection: model.selection, onSelectionChange: onSelect, onOpen: onOpen,
+            cellIdentifierPrefix: Self.cellIdentifierPrefix)
     }
 }
 
