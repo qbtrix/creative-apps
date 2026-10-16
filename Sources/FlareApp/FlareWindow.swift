@@ -5,10 +5,11 @@
 // while it can't act. The content is the stage over the timeline (FlareCanvas)
 // while a document is open, else the empty state with New Animation; the
 // inspector is FlareInspector (Properties and Library tabs). Every control
-// goes through one FlareIntent: `perform` and `help` below route the few that
-// act today, until DK-7 moves them into FlareWindow+Router.swift and its area
-// files. The stubs (FlareTimeline, FlareRecording and the four modifiers)
-// are filled by later tasks without touching their call sites here. The
+// goes through one FlareIntent: `perform` and `help(for:)` in
+// FlareWindow+Router.swift hand it to its area's file, and a control's
+// accessibility identifier is its intent's `identifier`. The stubs
+// (FlareTimeline, FlareRecording and the four modifiers) are filled by later
+// tasks without touching their call sites here. The
 // window owns presentation state only: zoom, rulers, guides, the inspector
 // tab and what is presented (FlarePresentation, in FlareNewSheet.swift).
 import FlareModel
@@ -37,17 +38,14 @@ struct FlareWindow: View {
         #endif
         SuiteWindow(
             title: model.document == nil ? "Flare" : model.title,
-            sections: SidebarSection.flare(model, onAddLayer: { model.addLayer() }),
+            sections: SidebarSection.flare(model, onAddLayer: { perform(.layers(.addLayer)) }),
             selection: model.selectedLayerID ?? model.selectedSceneID,
-            onSelect: { model.selectItem($0) },
-            onToggle: { id, toggle in
-                if let flag = FlareLayerFlag(rawValue: toggle) { model.toggleLayerFlag(id, flag) }
-            },
+            onSelect: { perform(.layers(.select(id: $0))) },
+            onToggle: { perform(.layers(.toggle(id: $0, flag: $1))) },
             onMove: { section, rows, destination in
-                // The sidebar selects one row at a time, so a drag moves one layer.
-                if section == "layers", let row = rows.first { model.moveLayer(from: row, to: destination) }
+                if let row = rows.first { perform(.layers(.move(section: section, from: row, to: destination))) }
             },
-            onRename: { id, name in model.renameLayer(id, to: name) },
+            onRename: { perform(.layers(.rename(id: $0, name: $1))) },
             actions: toolbar
         ) {
             FlareCanvas(
@@ -68,52 +66,25 @@ struct FlareWindow: View {
         .focusedSceneValue(
             \.flareMenu,
             FlareMenu(
-                model: model, newSample: { model.newSampleAnimation() }, undo: { model.undo() },
-                redo: { model.redo() }))
+                model: model, newSample: { model.newSampleAnimation() }, undo: { perform(.edit(.undo)) },
+                redo: { perform(.edit(.redo)) }))
     }
 
-    /// The toolbar, in the captain's order.
+    /// The toolbar, in the captain's order: each action takes its intent's
+    /// title, identifier and reason, and acts through `perform`.
     private var toolbar: [ToolbarAction] {
-        let items: [(FlareIntent, String, String)] = [
-            (.file(.new), "New", "doc.badge.plus"), (.file(.open), "Open", "folder"),
-            (.file(.save), "Save", "square.and.arrow.down"), (.edit(.undo), "Undo", "arrow.uturn.backward"),
-            (.edit(.redo), "Redo", "arrow.uturn.forward"), (.timeline(.toggleAutoKey), "Auto-key", "record.circle"),
-            (.assist(.showPopover), "Animate…", "sparkles"), (.export(.showSheet), "Export…", "square.and.arrow.up"),
+        let items: [(FlareIntent, String)] = [
+            (.file(.new), "doc.badge.plus"), (.file(.open), "folder"), (.file(.save), "square.and.arrow.down"),
+            (.edit(.undo), "arrow.uturn.backward"), (.edit(.redo), "arrow.uturn.forward"),
+            (.timeline(.toggleAutoKey), "record.circle"), (.assist(.showPopover), "sparkles"),
+            (.export(.showSheet), "square.and.arrow.up"),
         ]
-        return items.map { intent, title, image in
+        return items.map { intent, image in
             ToolbarAction(
-                title, systemImage: image, isSelected: intent == .timeline(.toggleAutoKey) && model.autoKey,
-                unavailableHelp: help(for: intent)
+                intent.toolbarTitle, systemImage: image,
+                isSelected: intent == .timeline(.toggleAutoKey) && model.autoKey,
+                unavailableHelp: help(for: intent), identifier: intent.identifier
             ) { perform(intent) }
-        }
-    }
-
-    /// Acts on `intent`; DK-7's router replaces this with one function per area.
-    func perform(_ intent: FlareIntent) {
-        switch intent {
-        case .file(.new): model.newDocument()
-        case .edit(.undo): model.undo()
-        case .edit(.redo): model.redo()
-        case .timeline(.toggleAutoKey): model.toggleAutoKey()
-        case .tools(.choose(let tool)): model.selectTool(tool)
-        case .inspector(.showTab(let id)): if let tab = FlareInspectorTab(rawValue: id) { inspectorTab = tab }
-        default: break
-        }
-    }
-
-    /// Why `intent` can't act now; nil when it can.
-    func help(for intent: FlareIntent) -> String? {
-        switch intent {
-        case .file(.new): nil
-        case .file: "Not built yet (F17a)."
-        case .edit(.undo): model.canUndo ? nil : "Nothing to undo."
-        case .edit(.redo): model.canRedo ? nil : "Nothing to redo."
-        case .timeline(.toggleAutoKey): model.document == nil ? "Open an animation to key it." : nil
-        case .tools(.choose(let tool)): model.toolHelp(tool)
-        case .inspector(.showTab): nil
-        case .export: "Not built yet (F15a)."
-        case .assist: "Not built yet (F16a)."
-        default: "Not built yet."
         }
     }
 }
