@@ -38,3 +38,5 @@ utc	stage	event	ref	note
 2026-10-16T22:43Z	4	pr-merged	#1692	last round-1 fix (5dbf4f0)
 2026-10-16T22:54Z	4	ci-run	38977890145	scoped library: snapshot test red, no journeys
 2026-10-16T22:54Z	4	fix-round	round2	r2-b1 snapshot test + panel
+2026-10-16T23:00Z	4	review	round2	panel: 8 confirmed, #1718-#1722 filed; #1718 rerouted
+2026-10-16T23:00Z	4	pr-opened	#1717	r2-b1 auto-advance snapshot test
