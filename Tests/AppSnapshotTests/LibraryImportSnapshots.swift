@@ -68,11 +68,13 @@ import Testing
         }
     }
 
-    /// The progress row is `library.import.progress`, its value the progress text.
+    /// The progress row is `library.import.progress`, its label and value the
+    /// progress text (journeys read the label).
     @Test func progressRowIsIdentifiedWithItsText() {
         let row = LibraryImportProgressRow(progress: ImportProgress(done: 2, total: 27))
         #expect(LibraryImportProgressRow.identifier == "library.import.progress")
         #expect(row.value == "Importing 3 of 27")
+        #expect(row.label == "Importing 3 of 27")
         #expect(row.fraction.value == 2 && row.fraction.total == 27)
         let empty = LibraryImportProgressRow(progress: ImportProgress(done: 0, total: 0))
         #expect(empty.fraction.value == 0 && empty.fraction.total == 1)

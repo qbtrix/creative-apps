@@ -124,7 +124,8 @@ struct LibraryNoticeRow: View {
 }
 
 /// The import's progress row: "Importing 3 of 27" over a determinate bar,
-/// `library.import.progress` with the text as its value. It appears `delay`
+/// `library.import.progress` with the text as its label and value (XCUITest
+/// reads a SwiftUI value as "", so journeys read the label). It appears `delay`
 /// after the import starts, so a quick import never flashes it.
 struct LibraryImportProgressRow: View {
     static let identifier = "library.import.progress"
@@ -140,6 +141,9 @@ struct LibraryImportProgressRow: View {
 
     /// The row's text and its accessibility value.
     var value: String { progress.text }
+
+    /// The row's accessibility label: the same text, which journeys read.
+    var label: String { value }
 
     /// The bar's value and total: done of total, never past it, total at least 1.
     var fraction: (value: Double, total: Double) {
@@ -162,7 +166,7 @@ struct LibraryImportProgressRow: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .background(SuiteColor.panel)
                 .accessibilityElement(children: .ignore)
-                .accessibilityLabel("Import progress")
+                .accessibilityLabel(label)
                 .accessibilityValue(value)
                 .accessibilityIdentifier(Self.identifier)
             }
