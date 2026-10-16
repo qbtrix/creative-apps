@@ -1,6 +1,7 @@
 // PhotoCommands+Layer.swift: Photo's Layer menu: New, New Adjustment Layer
 // (a submenu of the kinds the workspace offers, each disabled with its reason
-// as its help when it can't run; Blur is never one), Delete; Duplicate Layer
+// as its help when it can't run; Blur is never one; the submenu itself is
+// disabled with that reason when no kind can be added), Delete; Duplicate Layer
 // (Command-J), Merge Down (Command-E) and Flatten Image (no shortcut), each
 // disabled with the workspace's reason as its help when it can't run;
 // Rename…, Show/Hide, Bring Forward, Send Backward, Select Layer Above and
@@ -87,7 +88,7 @@ struct PhotoLayerMenu: View {
                     .help(help.map { "\(kind.title): \($0)" } ?? kind.title)
             }
         }
-        .disabled(menu.adjustmentLayerKinds.isEmpty)
+        .disabled(menu.adjustmentMenuDisabled)
         .help(help ?? "New Adjustment Layer")
     }
 
@@ -98,6 +99,14 @@ struct PhotoLayerMenu: View {
             .keyboardShortcut(Self.shortcut(intent))
             .disabled(help != nil)
             .help(help.map { "\(title): \($0)" } ?? title)
+    }
+}
+
+extension PhotoMenu {
+    /// New Adjustment Layer's submenu is itself disabled when none of its
+    /// kinds can be added, so it reads dimmed rather than opening onto dead items.
+    var adjustmentMenuDisabled: Bool {
+        adjustmentLayerKinds.isEmpty || addAdjustmentLayerHelp != nil
     }
 }
 
