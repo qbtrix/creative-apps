@@ -2,13 +2,25 @@
 // whole-window screenshot after every step (see Journey.swift). Each test is
 // one journey; grow them as Flare's features land, and replace the skipped
 // test with the real journey when its issue is built. The easing journey
-// (docs/blueprints/flare-easing-editor.md) checks every step by the active
-// preset chip and by where the curve well draws handle 1.
+// (docs/blueprints/flare-easing-editor.md) starts from File > New Sample
+// Animation and checks every step by the active preset chip and by where the
+// curve well draws handle 1.
 import XCTest
 
 final class FlareJourneyTests: XCTestCase {
+    /// J0: the window is SuiteWindow with the empty state's New Animation and
+    /// the toolbar's eight actions, each found by its title.
     @MainActor func testLaunchShowsWindowShell() {
-        Journey("Flare", self).expectWindowShell()
+        let flare = Journey("Flare", self)
+        flare.expectWindowShell()
+        XCTAssert(
+            flare.app.splitGroups.buttons["New Animation"].waitForExistence(timeout: 10),
+            "the empty state has no New Animation")
+        let toolbar = flare.app.toolbars.firstMatch
+        XCTAssert(toolbar.buttons["Open"].exists, "the toolbar has no Open")
+        for title in ["New", "Open", "Save", "Undo", "Redo", "Auto-key", "Animate…", "Export…"] {
+            XCTAssert(toolbar.buttons[title].exists, "the toolbar has no \(title)")
+        }
     }
 
     @MainActor func testNewAnimationAndEveryTool() {
@@ -29,7 +41,11 @@ final class FlareJourneyTests: XCTestCase {
 
     @MainActor func testEditEasingOfAKeyframeSegment() {
         let flare = Journey("Flare", self)
-        flare.click("New Sample Animation", in: .toolbar, step: "easing-sample")
+        flare.app.menuBars.menuBarItems["File"].click()
+        let sample = flare.app.menuBars.menuItems["New Sample Animation"]
+        XCTAssert(sample.waitForExistence(timeout: 5), "File has no New Sample Animation")
+        sample.click()
+        flare.shot("easing-sample")
         for row in ["x 0 → 24", "x 24 → 48", "y 0 → 24"] {
             XCTAssert(flare.app.buttons[row].waitForExistence(timeout: 10), "KEYFRAMES doesn't list \(row)")
         }
