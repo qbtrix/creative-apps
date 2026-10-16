@@ -9,6 +9,9 @@
 // again. Written before its code (lead.md, contract rule 13); DS-3 put Design on
 // SuiteWindow and turned it on. The palette shows only while a file is open, so
 // the empty window is checked region by region rather than by expectEditorWindow().
+// The app switcher comes with editor-in-window's EW-8 (#1337), so each test checks
+// it last (expectSwitcher), after every other step has run and reported (#1444).
+// A plain Text reads its words as its value on macOS, so texts are read by label or value.
 import XCTest
 
 final class DesignShellJourneyTests: XCTestCase {
@@ -33,7 +36,6 @@ final class DesignShellJourneyTests: XCTestCase {
         for header in ["Pages", "Layers"] {
             XCTAssert(sidebar.staticTexts[header].waitForExistence(timeout: 5), "the sidebar shows no \(header)")
         }
-        XCTAssert(design.element("suite.switcher").exists, "no app switcher (suite.switcher)")
         for identifier in Self.bar {
             let item = design.element(identifier)
             XCTAssert(item.waitForExistence(timeout: 5), "no toolbar item \(identifier)")
@@ -52,9 +54,9 @@ final class DesignShellJourneyTests: XCTestCase {
         let status = design.element("suite.status")
         let zoom = status.descendants(matching: .any).matching(NSPredicate(format: "label BEGINSWITH 'Zoom '")).firstMatch
         XCTAssert(zoom.exists, "the status line shows no zoom")
-        let size = status.staticTexts.matching(NSPredicate(format: "label CONTAINS ' × '")).firstMatch
+        let size = status.staticTexts.matching(NSPredicate(format: "label CONTAINS ' × ' OR value CONTAINS ' × '")).firstMatch
         XCTAssert(size.exists, "the status line shows no page size")
-        XCTAssertEqual(design.element("design.status.tool").label, "Move", "the status line's tool")
+        XCTAssertEqual(text(design.element("design.status.tool")), "Move", "the status line's tool")
 
         // DS-J3: a selected rectangle on the page's left edge, at Fit Page.
         drawOnEdge(design, shot: "shell-handles")
@@ -72,6 +74,7 @@ final class DesignShellJourneyTests: XCTestCase {
         undo.click()
         XCTAssertFalse(rows.firstMatch.waitForExistence(timeout: 2), "Undo left the rectangle in Layers")
         design.shot("shell-undone")
+        expectSwitcher(design)
     }
 
     /// DS-J5: the same window in dark.
@@ -81,6 +84,7 @@ final class DesignShellJourneyTests: XCTestCase {
         openFile(design, shot: "shell-open-dark")
         drawOnEdge(design, shot: "shell-handles-dark")
         expectGeometry(design)
+        expectSwitcher(design)
     }
 
     /// ⌘N: the page, and the palette's six tools in order at the canvas's leading edge.
@@ -106,16 +110,15 @@ final class DesignShellJourneyTests: XCTestCase {
         design.shot(shot)
     }
 
-    /// The shell's rules, the eight toolbar items in the window beside a centred
-    /// switcher, and the palette clear of both rulers and the page grown by its handles.
+    /// The shell's rules, the eight toolbar items in the window, and the palette
+    /// clear of both rulers and the page grown by its handles.
     @MainActor private func expectGeometry(_ design: Journey) {
-        var items: [String: XCUIElement] = ["suite.switcher": design.element("suite.switcher")]
+        var items: [String: XCUIElement] = [:]
         for identifier in Self.bar {
             items[identifier] = design.element(identifier)
             XCTAssert(design.element(identifier).isHittable, "\(identifier) isn't hittable (in the overflow?)")
         }
-        let window = design.app.windows.firstMatch.frame, switcher = design.element("suite.switcher").frame
-        XCTAssertEqual(switcher.midX, window.midX, accuracy: 2, "the switcher isn't centred in the toolbar")
+        let window = design.app.windows.firstMatch.frame
         design.expectShellGeometry(
             minimums: [
                 "suite.viewport": (width: 440, height: 360), "suite.inspector": (width: 304, height: 1),
@@ -136,6 +139,21 @@ final class DesignShellJourneyTests: XCTestCase {
             window: rect(window), regions: regions, minimums: [:], apart: [],
             clear: [("palette", "top ruler"), ("palette", "leading ruler"), ("palette", "page grown by its handles")])
         XCTAssert(found.isEmpty, "the palette covers a ruler or a handle:\n" + found.joined(separator: "\n"))
+    }
+
+    /// The app switcher, centred in the toolbar and inside the window beside the
+    /// toolbar items. Last in each test: it shows once #1337 (EW-8) merges.
+    @MainActor private func expectSwitcher(_ design: Journey) {
+        let switcher = design.element("suite.switcher")
+        XCTAssert(switcher.waitForExistence(timeout: 5), "no app switcher (suite.switcher)")
+        let window = design.app.windows.firstMatch.frame
+        XCTAssertEqual(switcher.frame.midX, window.midX, accuracy: 2, "the switcher isn't centred in the toolbar")
+        design.expectShellGeometry(minimums: ["suite.switcher": (width: 1, height: 1)], regions: ["suite.switcher": switcher])
+    }
+
+    /// What a text reads: its label, or its value where macOS puts a plain Text's words.
+    @MainActor private func text(_ element: XCUIElement) -> String {
+        element.label.isEmpty ? (element.value as? String ?? "") : element.label
     }
 
     private func rect(_ frame: CGRect) -> AppAudit.Rect {
