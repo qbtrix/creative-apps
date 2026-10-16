@@ -103,6 +103,8 @@ extension PhotoWorkspace {
     /// selected.
     private mutating func addFixtureLayers() throws {
         var curves = AdjustmentSettings()
+        // One kind per layer, as addAdjustmentLayer makes it.
+        for other in AdjustmentKind.allCases where other != .curves { curves.apply(.setEnabled(other, false)) }
         curves.apply(.curvePoints([CurvePoint(x: 0, y: 0), CurvePoint(x: 0.25, y: 0.18),
                                    CurvePoint(x: 0.75, y: 0.82), CurvePoint(x: 1, y: 1)]))
         _ = insertLayer(named: "Curves 1", pixels: nil, kind: .adjustment(curves), at: 0)

@@ -185,6 +185,20 @@ import Testing
         #expect(workspace.adjustHeader.title == "Image")
     }
 
+    /// The `layered` fixture's "Curves 1" holds one kind, as a new layer does.
+    @Test func layeredFixtureCurves1HoldsOnlyCurves() throws {
+        var workspace = try PhotoWorkspace.fixture(.layered)
+        let curves = try #require(workspace.layers.first { $0.name == "Curves 1" })
+        workspace.selectLayer(curves.id)
+        #expect(workspace.adjustSections == [.curves])
+        #expect(workspace.adjustHeader.title == "Curves 1")
+        guard case .adjustment(let settings) = curves.kind else {
+            Issue.record("not an adjustment layer")
+            return
+        }
+        #expect(AdjustmentKind.allCases.filter { settings.isEnabled($0) } == [.curves])
+    }
+
     /// Default settings with only `kind` enabled.
     private static func only(_ kind: AdjustmentKind) -> AdjustmentSettings {
         var settings = AdjustmentSettings()
