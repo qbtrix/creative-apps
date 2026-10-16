@@ -1,9 +1,154 @@
 {
   "title": "The window seam: intents, launch arguments, menus, canvas slots, inspector shell, control ids, J15 and layout",
   "wave": "0b",
-  "order": 10,
+  "order": 20,
   "status": "planned",
   "feature_issue": "file when ready",
   "covers": "#288 (part)",
-  "waits_on": "design-seams; #778 suite-harness"
+  "waits_on": "design-contracts; its first slice DW-a also waits on Design shell-parity, which edits the same window files",
+  "depends": [
+    "design-contracts"
+  ],
+  "owned": [
+    "Sources/DesignModel/DesignWindowOptions.swift",
+    "Sources/DesignApp/DesignIntent.swift",
+    "Sources/DesignApp/DesignWindow.swift",
+    "Sources/DesignApp/DesignEditor.swift",
+    "Sources/DesignApp/DesignSaveStatus.swift",
+    "Tests/DesignModelTests/DesignWindowOptionsTests.swift",
+    "Tests/AppSnapshotTests/DesignStatusSnapshots.swift",
+    "Sources/DesignApp/DesignCanvas.swift",
+    "Sources/DesignApp/DesignCanvasMarks.swift",
+    "Sources/DesignApp/DesignSelectionMarks.swift",
+    "Sources/DesignApp/DesignFrameLabels.swift",
+    "Tests/AppSnapshotTests/DesignCanvasSeamSnapshots.swift",
+    "Sources/DesignApp/DesignInspector.swift",
+    "Sources/DesignApp/DesignAlignBar.swift",
+    "Tests/AppSnapshotTests/DesignSeveralInspectorSnapshots.swift",
+    "Sources/DesignApp/DesignPasteboardBridge.swift",
+    "Sources/DesignApp/DesignLayersPanel.swift",
+    "Sources/DesignApp/DesignClosePrompt.swift",
+    "Tests/AppSnapshotTests/DesignPasteboardBridgeTests.swift",
+    "Sources/DesignApp/DesignCommands.swift",
+    "Sources/DesignApp/DesignEditMenu.swift",
+    "Sources/DesignApp/DesignObjectMenu.swift",
+    "Tests/AppSnapshotTests/DesignEditMenuSnapshots.swift",
+    "Tests/AppSnapshotTests/DesignPageMenuSnapshots.swift",
+    "UITests/DesignJourneyTests.swift",
+    "Sources/DesignApp/DesignLiveDrag.swift",
+    "Tests/AppSnapshotTests/DesignLiveDragTests.swift",
+    "Tests/AppSnapshotTests/DesignWindowDragTests.swift",
+    "Tests/DesignModelTests/DesignControlIDTests.swift",
+    "UITests/DesignJourneyTests+EveryControl.swift",
+    "UITests/DesignJourneyTests+Layout.swift"
+  ],
+  "journeys": [
+    "DesignJourneyTests.testEveryMenuOpens",
+    "DesignEveryControlJourneyTests.testEveryControlActsOrSaysWhy",
+    "DesignLayoutJourneyTests.testLayoutAtWidths"
+  ],
+  "slices": [
+    {
+      "id": "DW-a",
+      "behavior": "Every tier-1 command is in the menus, the several-layer inspector and the canvas, wired to the actions, and on the live services each says \"<Feature> isn't built yet.\" (the slot and intent contract the wave-1 views plug into).",
+      "tasks": [
+        "D0-5a",
+        "D0-5b",
+        "D0-5c",
+        "D0-5d",
+        "D0-6"
+      ],
+      "journeys": [
+        "J1"
+      ],
+      "owned": [
+        "Sources/DesignModel/DesignWindowOptions.swift",
+        "Sources/DesignApp/DesignIntent.swift",
+        "Sources/DesignApp/DesignWindow.swift",
+        "Sources/DesignApp/DesignEditor.swift",
+        "Sources/DesignApp/DesignSaveStatus.swift",
+        "Tests/DesignModelTests/DesignWindowOptionsTests.swift",
+        "Tests/AppSnapshotTests/DesignStatusSnapshots.swift",
+        "Sources/DesignApp/DesignCanvas.swift",
+        "Sources/DesignApp/DesignCanvasMarks.swift",
+        "Sources/DesignApp/DesignSelectionMarks.swift",
+        "Sources/DesignApp/DesignFrameLabels.swift",
+        "Tests/AppSnapshotTests/DesignCanvasSeamSnapshots.swift",
+        "Sources/DesignApp/DesignInspector.swift",
+        "Sources/DesignApp/DesignAlignBar.swift",
+        "Tests/AppSnapshotTests/DesignSeveralInspectorSnapshots.swift",
+        "Sources/DesignApp/DesignPasteboardBridge.swift",
+        "Sources/DesignApp/DesignLayersPanel.swift",
+        "Sources/DesignApp/DesignClosePrompt.swift",
+        "Tests/AppSnapshotTests/DesignPasteboardBridgeTests.swift",
+        "Sources/DesignApp/DesignCommands.swift",
+        "Sources/DesignApp/DesignEditMenu.swift",
+        "Sources/DesignApp/DesignObjectMenu.swift",
+        "Tests/AppSnapshotTests/DesignEditMenuSnapshots.swift",
+        "Tests/AppSnapshotTests/DesignPageMenuSnapshots.swift",
+        "UITests/DesignJourneyTests.swift"
+      ],
+      "waits": {
+        "shell-parity": [
+          "D0-5a",
+          "D0-5d",
+          "D0-6"
+        ]
+      }
+    },
+    {
+      "id": "DW-b",
+      "behavior": "A drag on the canvas redraws only the canvas: the editor body runs at most 3 times over a 120-sample drag, and the document ends the same as before.",
+      "tasks": [
+        "D0-8a",
+        "D0-8b"
+      ],
+      "journeys": [
+        "J3"
+      ],
+      "owned": [
+        "Sources/DesignApp/DesignLiveDrag.swift",
+        "Sources/DesignApp/DesignCanvas.swift",
+        "Sources/DesignApp/DesignWindow.swift",
+        "Sources/DesignApp/DesignEditor.swift",
+        "Tests/AppSnapshotTests/DesignLiveDragTests.swift",
+        "Tests/AppSnapshotTests/DesignWindowDragTests.swift"
+      ],
+      "waits": {
+        "DW-a": [
+          "D0-8a",
+          "D0-8b"
+        ]
+      }
+    },
+    {
+      "id": "DW-c",
+      "behavior": "Every enabled Design control acts and every disabled one says why, and the window keeps its layout at every width.",
+      "tasks": [
+        "D0-7a",
+        "D0-7b"
+      ],
+      "journeys": [
+        "J15",
+        "testLayoutAtWidths"
+      ],
+      "owned": [
+        "Sources/DesignApp/DesignWindow.swift",
+        "Sources/DesignApp/DesignEditor.swift",
+        "Sources/DesignApp/DesignCanvas.swift",
+        "Sources/DesignModel/DesignWindowOptions.swift",
+        "Tests/DesignModelTests/DesignControlIDTests.swift",
+        "UITests/DesignJourneyTests+EveryControl.swift",
+        "UITests/DesignJourneyTests+Layout.swift"
+      ],
+      "waits": {
+        "DW-b": [
+          "D0-7a"
+        ],
+        "DW-a": [
+          "D0-7b"
+        ]
+      }
+    }
+  ]
 }

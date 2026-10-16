@@ -7,5 +7,78 @@
   "covers": "the 2026-10-15 captain decisions (one shell, one tool box, the app switcher), Design half",
   "waits_on": "editor-in-window (SuiteUI, #1079)",
   "track": "shell parity: docs/blueprints/suite/features/shell-parity-waves.md, wave 2",
-  "longest_chain": "3 (DS-1 → DS-3 → DS-4)"
+  "longest_chain": "3 (DS-1 → DS-3 → DS-4)",
+  "owned": [
+    "Sources/DesignModel/DesignToolbarItems.swift",
+    "Tests/DesignModelTests/DesignToolbarItemsTests.swift",
+    "Sources/DesignApp/DesignLayersPanel.swift",
+    "Tests/AppSnapshotTests/DesignLayersSnapshots.swift",
+    "UITests/DesignJourneyTests.swift",
+    "Sources/DesignApp/DesignEditor.swift",
+    "Sources/DesignApp/DesignPanel.swift",
+    "Sources/DesignApp/DesignIntent.swift",
+    "Sources/DesignApp/DesignWindow.swift",
+    "Sources/DesignApp/DesignApp.swift",
+    "Tests/AppSnapshotTests/DesignAlignSnapshots.swift",
+    "Tests/AppSnapshotTests/DesignInspectorSnapshots.swift",
+    "UITests/DesignJourneyTests+Shell.swift"
+  ],
+  "journeys": [
+    "DesignJourneyTests.testLaunchShowsWindowShell",
+    "DesignJourneyTests.testNewFileAndEveryTool",
+    "DesignJourneyTests.testDrawShapesAddTextAndSave"
+  ],
+  "slices": [
+    {
+      "id": "DP-a",
+      "behavior": "The toolbar's eight commands each act or say why, and Add Page and Delete Page sit in a row under the pages.",
+      "tasks": [
+        "DS-1",
+        "DS-2"
+      ],
+      "journeys": [
+        "J3"
+      ],
+      "owned": [
+        "Sources/DesignModel/DesignToolbarItems.swift",
+        "Tests/DesignModelTests/DesignToolbarItemsTests.swift",
+        "Sources/DesignApp/DesignLayersPanel.swift",
+        "Tests/AppSnapshotTests/DesignLayersSnapshots.swift",
+        "UITests/DesignJourneyTests.swift"
+      ]
+    },
+    {
+      "id": "DP-b",
+      "behavior": "Design opens in the suite window with pages and layers in the sidebar, Properties in the inspector and the floating tool box over the canvas, in light and dark.",
+      "tasks": [
+        "DS-3",
+        "DS-4"
+      ],
+      "journeys": [
+        "J0",
+        "DS-J1",
+        "DS-J2",
+        "DS-J3",
+        "DS-J4",
+        "DS-J5"
+      ],
+      "owned": [
+        "Sources/DesignApp/DesignEditor.swift",
+        "Sources/DesignApp/DesignPanel.swift",
+        "Sources/DesignApp/DesignIntent.swift",
+        "Sources/DesignApp/DesignWindow.swift",
+        "Sources/DesignApp/DesignApp.swift",
+        "UITests/DesignJourneyTests.swift",
+        "Tests/AppSnapshotTests/DesignAlignSnapshots.swift",
+        "Tests/AppSnapshotTests/DesignInspectorSnapshots.swift",
+        "Tests/AppSnapshotTests/DesignLayersSnapshots.swift",
+        "UITests/DesignJourneyTests+Shell.swift"
+      ],
+      "waits": {
+        "DP-a": [
+          "DS-3"
+        ]
+      }
+    }
+  ]
 }

@@ -1,9 +1,39 @@
 {
-  "title": "The Model seam: schema, contracts, services, fakes, live stubs, actions, routes, fixtures",
-  "wave": "0a",
+  "title": "The gesture routes: the marquee rule, several-layer drags, Option-drag as one step; the shared Model budgets",
+  "wave": "0b",
   "order": 10,
   "status": "planned",
   "feature_issue": "file when ready",
-  "covers": "the `DesignPage` init gap (filed by the lead)",
-  "waits_on": "PR #753 (corner radius) merged"
+  "covers": "–",
+  "waits_on": "design-contracts",
+  "depends": [
+    "design-contracts"
+  ],
+  "owned": [
+    "Sources/DesignModel/DesignCanvasEditing.swift",
+    "Tests/DesignModelTests/DesignGestureRouteTests.swift",
+    "Tests/DesignModelTests/DesignOptionDragTests.swift",
+    "Tests/DesignModelTests/DesignBudgetTests.swift"
+  ],
+  "journeys": [],
+  "journeys_none": "Model only: the Linux walk MJ5 (DesignGestureRouteTests); its XCUITests are select-several's J5 and copy-group's J7",
+  "slices": [
+    {
+      "id": "SE-a",
+      "behavior": "A marquee selects inside the frame under the pointer, a drag moves or resizes several layers as one step, an Option-drag is one Duplicate step, and hit test, edit and save stay inside their budgets on 2,000 layers.",
+      "tasks": [
+        "D0-3c",
+        "D0-4b"
+      ],
+      "journeys": [
+        "MJ5"
+      ],
+      "owned": [
+        "Sources/DesignModel/DesignCanvasEditing.swift",
+        "Tests/DesignModelTests/DesignGestureRouteTests.swift",
+        "Tests/DesignModelTests/DesignOptionDragTests.swift",
+        "Tests/DesignModelTests/DesignBudgetTests.swift"
+      ]
+    }
+  ]
 }

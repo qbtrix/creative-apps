@@ -5,5 +5,126 @@
   "status": "planned",
   "feature_issue": "file when ready",
   "covers": "#714, #542, #607; gaps: marquee, several layers, Zoom to Selection",
-  "waits_on": "design-window"
+  "waits_on": "design-contracts; design-seams for S-5, S-7, S-8; view tasks: design-window DW-a (DW-b for the drag check)",
+  "depends": [
+    "design-contracts"
+  ],
+  "owned": [
+    "Sources/DesignModel/Live/LiveMarquee.swift",
+    "Tests/DesignModelTests/DesignMarqueeTests.swift",
+    "Sources/DesignModel/Live/LiveTransforming.swift",
+    "Tests/DesignModelTests/DesignSeveralTransformTests.swift",
+    "Sources/DesignModel/Live/LiveAligning.swift",
+    "Sources/DesignModel/DesignAlign.swift",
+    "Tests/DesignModelTests/DesignDistributeTests.swift",
+    "Sources/DesignApp/DesignSelectionMarks.swift",
+    "Sources/DesignApp/DesignAlignBar.swift",
+    "Tests/AppSnapshotTests/DesignMarqueeSnapshots.swift",
+    "Tests/AppSnapshotTests/DesignAlignSnapshots.swift",
+    "Tests/AppSnapshotTests/DesignMultiSelectSnapshots.swift",
+    "Tests/AppSnapshotTests/DesignSelectDragTests.swift",
+    "UITests/DesignJourneyTests+Select.swift",
+    "Sources/DesignModel/Live/LiveFraming.swift",
+    "Tests/DesignModelTests/DesignFramingTests.swift",
+    "Sources/DesignModel/DesignCanvasEditing.swift",
+    "Sources/DesignModel/DesignActions.swift",
+    "Sources/DesignModel/DesignActions+Edit.swift",
+    "Tests/DesignModelTests/DesignMidDragEditTests.swift",
+    "Tests/DesignModelTests/DesignHiddenNudgeTests.swift",
+    "Tests/DesignModelTests/DesignHeldIDsFuzzTests.swift",
+    "Tests/DesignModelTests/DesignSelectBudgetTests.swift",
+    "UITests/DesignJourneyTests+PerfCanvas.swift"
+  ],
+  "journeys": [
+    "DesignSelectJourneyTests.testMarqueeMoveResizeSeveral",
+    "DesignSelectJourneyTests.testAlignAndDistributeSeveral",
+    "DesignSelectJourneyTests.testZoomPanFitAndZoomToSelection",
+    "DesignPerfCanvasJourneyTests.testCanvasDragLatency"
+  ],
+  "slices": [
+    {
+      "id": "SS-a",
+      "behavior": "A marquee selects several layers, which then move, resize, nudge, delete, align and distribute as one step each.",
+      "tasks": [
+        "S-1",
+        "S-2",
+        "S-3",
+        "S-6",
+        "S-7"
+      ],
+      "journeys": [
+        "J5",
+        "J6"
+      ],
+      "owned": [
+        "Sources/DesignModel/Live/LiveMarquee.swift",
+        "Tests/DesignModelTests/DesignMarqueeTests.swift",
+        "Sources/DesignModel/Live/LiveTransforming.swift",
+        "Tests/DesignModelTests/DesignSeveralTransformTests.swift",
+        "Sources/DesignModel/Live/LiveAligning.swift",
+        "Sources/DesignModel/DesignAlign.swift",
+        "Tests/DesignModelTests/DesignDistributeTests.swift",
+        "Sources/DesignApp/DesignSelectionMarks.swift",
+        "Sources/DesignApp/DesignAlignBar.swift",
+        "Tests/AppSnapshotTests/DesignMarqueeSnapshots.swift",
+        "Tests/AppSnapshotTests/DesignAlignSnapshots.swift",
+        "Tests/AppSnapshotTests/DesignMultiSelectSnapshots.swift",
+        "Tests/AppSnapshotTests/DesignSelectDragTests.swift",
+        "UITests/DesignJourneyTests+Select.swift"
+      ],
+      "waits": {
+        "design-window:DW-a": [
+          "S-6",
+          "S-7"
+        ],
+        "design-window:DW-b": [
+          "S-6"
+        ],
+        "design-seams": [
+          "S-7"
+        ]
+      }
+    },
+    {
+      "id": "SS-b",
+      "behavior": "View > Zoom to Selection frames the selection, an edit pressed mid-drag waits for the drag to end, and canvas drags keep up on 2,000 layers.",
+      "tasks": [
+        "S-4",
+        "S-5",
+        "S-7b",
+        "S-8"
+      ],
+      "journeys": [
+        "J4",
+        "P1"
+      ],
+      "owned": [
+        "Sources/DesignModel/Live/LiveFraming.swift",
+        "Tests/DesignModelTests/DesignFramingTests.swift",
+        "Sources/DesignModel/DesignCanvasEditing.swift",
+        "Sources/DesignModel/DesignActions.swift",
+        "Sources/DesignModel/DesignActions+Edit.swift",
+        "Tests/DesignModelTests/DesignMidDragEditTests.swift",
+        "Tests/DesignModelTests/DesignHiddenNudgeTests.swift",
+        "Tests/DesignModelTests/DesignHeldIDsFuzzTests.swift",
+        "UITests/DesignJourneyTests+Select.swift",
+        "Tests/DesignModelTests/DesignSelectBudgetTests.swift",
+        "UITests/DesignJourneyTests+PerfCanvas.swift"
+      ],
+      "waits": {
+        "design-seams": [
+          "S-5",
+          "S-8"
+        ],
+        "design-window:DW-a": [
+          "S-7b",
+          "S-8"
+        ],
+        "SS-a": [
+          "S-7b",
+          "S-8"
+        ]
+      }
+    }
+  ]
 }
