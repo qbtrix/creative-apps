@@ -99,7 +99,7 @@ public struct FileStore: Sendable {
     private func path(_ name: String) throws(SuiteError) -> String {
         let parts = name.split(separator: "/", omittingEmptySubsequences: false)
         guard !name.isEmpty, !parts.contains(where: { $0.isEmpty || $0 == "." || $0 == ".." }) else {
-            throw .damaged(name)
+            throw .damaged(Self.subject(name))
         }
         return folder.hasSuffix("/") ? folder + name : folder + "/" + name
     }
