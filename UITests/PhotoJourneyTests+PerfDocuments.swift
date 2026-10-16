@@ -15,7 +15,9 @@
 // main-thread stall; SuiteUI's FrameProbe (#330) isn't published by Photo's
 // window yet, so there is no probe mark. The lines go to
 // .build/ui-screens/photo-perf-open-document.txt and attach as
-// "perf-report-open-document"; the test asserts only that the document opens
+// "perf-report-open-document", after a "Saving…" line (`photo.file.saving`,
+// polled from the Save as Photo Document click until the bar reads Saved,
+// PB-18); the test asserts only that the document opens
 // with its 3 layers, and says why when no "Opening…" sample was seen.
 // Shots are "perf-documents-"; the ones that show the Keep layers? dialog or the
 // beach.ora name are screen shots, which skip the audit.
@@ -51,10 +53,25 @@ final class PhotoPerfDocumentsJourneyTests: XCTestCase {
         XCTAssert(keep.waitForExistence(timeout: 10), "Save on a layered PNG didn't ask Keep layers?")
         photo.shot("perf-documents-keep-layers", screen: true)
         keep.click()
+        let clicked = Date()
         let document = saves.appending(path: "beach.ora")
         let saved = photo.app.descendants(matching: .any).matching(
             NSPredicate(format: "identifier == 'photo.bar.saved' AND label == 'Saved'")).firstMatch
-        XCTAssert(saved.waitForExistence(timeout: 60), "Save as Photo Document never read Saved")
+        // Report-only (PB-18): poll for "Saving…" (`photo.file.saving`, shown once a save has run 100 ms)
+        // until the top bar reads Saved, as the reopen loop below polls "Opening…".
+        let savingNote = photo.element("photo.file.saving")
+        var (savePolls, saveSeen, saveFirstSeen, isSaved) = (0, 0, Double?.none, false)
+        while !isSaved, Date().timeIntervalSince(clicked) < 60 {
+            let started = Date()
+            if savingNote.exists {
+                saveSeen += 1
+                saveFirstSeen = saveFirstSeen ?? started.timeIntervalSince(clicked) * 1000
+            }
+            isSaved = saved.exists
+            savePolls += 1
+        }
+        let saveSeconds = Date().timeIntervalSince(clicked)
+        XCTAssert(isSaved, "Save as Photo Document never read Saved")
         let head = (try? Data(contentsOf: document).prefix(2)).map(Array.init) ?? []
         XCTAssertEqual(head, [0x50, 0x4B], "the saved beach.ora isn't a zip")
         photo.shot("perf-documents-saved", screen: true)
@@ -90,7 +107,15 @@ final class PhotoPerfDocumentsJourneyTests: XCTestCase {
             ? "photo.file.opening seen in \(seen) of \(polls) polls"
             : "photo.file.opening never seen in \(polls) polls: the open finished before a poll found the note, "
                 + "or it ran under 100 ms, so the note never showed"
+        let saveWhy = saveSeen > 0
+            ? "photo.file.saving seen in \(saveSeen) of \(savePolls) polls"
+            : "photo.file.saving never seen in \(savePolls) polls: the save finished before a poll found the note, "
+                + "or it ran under 100 ms, so the note never showed"
         report([
+            "QB-L9 PJ-P3 saving: samples=\(saveSeen) "
+                + "first-seen-ms=\(saveFirstSeen.map { String(format: "%.0f", $0) } ?? "n/a") "
+                + "save-s=\(String(format: "%.2f", saveSeconds)) report-only (\(saveWhy); counted from the "
+                + "Save as Photo Document click, no probe mark until FrameProbe #330 is wired)",
             "QB-L9 PJ-P3 opening: samples=\(seen) first-seen-ms=\(firstSeen.map { String(format: "%.0f", $0) } ?? "n/a") "
                 + "open-s=\(String(format: "%.2f", seconds)) report-only (\(why); counted from launch() returning, "
                 + "no probe mark until FrameProbe #330 is wired)",
