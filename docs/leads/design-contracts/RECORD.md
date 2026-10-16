@@ -2,17 +2,17 @@
 
 Issue: #1324 · Packet: docs/blueprints/design/features/design-contracts.md
 Run: act-1a14478b14e-i8ep · Session: session_01DKQiisBimhgRgEM46b1U5E · Started: 2026-10-16T11:29Z
-Stage: 3 wave 5
+Stage: 3 polling
 Base: fb72b7e52405a824fabe34c6c408fcc00d242da2
-Next: wait for #1401 to merge, then open FD (feature-done); wait for a green scoped CI run app=design (blocked by #1391's journey breaks, reported on dev-red #1393) to post CT-b, CT-c, CT-d done
+Next: wait for the lane to merge #1410 (feature-done), then for a green scoped CI run app=design (or full run) that contains it; post Belt-Slice-Done for CT-b, CT-c, CT-d and the contact sheet. Current Design runs are red from #1391's journeys (dev-red #1393)
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | rounds | state | run |
 |---|---|---|---|---|---|---|---|
 | CT-a | old files open with defaults; corner radius saves and reopens | D0-0, D0-2.1 (#1304), D0-1 | MJ1 | nothing | 0 | done | 38905490687 |
 | CT-b | fakes act; live says "isn't built yet." | D0-2.2 (#1307), D0-2.3, D0-2.4 (#1312), D0-2.5 | MJ2 | CT-a | 0 | merged | |
-| CT-c | help law on every fake and stub; four fixtures | D0-2.6, D0-2b, D0-4a | MJ3 | CT-b; CT-a | 0 | building | |
-| CT-d | each command one named step; one-layer edits keep today's methods | D0-3a, D0-3b | MJ4 | CT-b | 0 | building | |
+| CT-c | help law on every fake and stub; four fixtures | D0-2.6, D0-2b, D0-4a | MJ3 | CT-b; CT-a | 0 | merged | |
+| CT-d | each command one named step; one-layer edits keep today's methods | D0-3a, D0-3b | MJ4 | CT-b | 0 | merged | |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
@@ -29,9 +29,9 @@ Next: wait for #1401 to merge, then open FD (feature-done); wait for a green sco
 | D0-2.6 | CT-c | 4 | contract law | DesignContractLawTests.swift | DesignContractLawTests | #1394 | merged |
 | D0-3a | CT-d | 4 | DesignCommand, help, run, apply, mint | DesignActions.swift, DesignActionsTests.swift | DesignActionsTests | #1395 | merged (Mutate 6/6) |
 | D0-2b.1 | CT-c | 3 | six new Live stubs (Duplicating, Grouping, Clipboard, Ordering, Styling, Filing) | Live/Live{Duplicating,Grouping,Clipboard,Ordering,Styling,Filing}.swift, DesignLiveStubTests.swift | DesignLiveStubTests | #1383 | merged |
-| D0-2b.2 | CT-c | 5 | .live names every Live type; law on .live; MJ3 | DesignServices.swift, DesignLiveStubTests.swift | DesignLiveStubTests | #1401 | open (Mutate 10/10) |
+| D0-2b.2 | CT-c | 5 | .live names every Live type; law on .live; MJ3 | DesignServices.swift, DesignLiveStubTests.swift | DesignLiveStubTests | #1401 | merged (Mutate 10/10) |
 | D0-3b | CT-d | 5 | clipboard, moveLayer, setStyle; MJ4 | DesignActions+Edit.swift, DesignActionsEditTests.swift | DesignActionsEditTests | #1400 | merged (Mutate 5/5) |
-| FD | CT-d | 6 | feature-done: design-contracts.wave.json status built, feature issue #1324 | docs/blueprints/design/features/design-contracts.wave.json | scripts/ci (waves render) | | waits D0-2b.2, D0-3b |
+| FD | CT-d | 6 | feature-done: design-contracts.wave.json status built, feature issue #1324 | docs/blueprints/design/features/design-contracts.wave.json | scripts/ci (waves render) | #1410 | open, feature-done |
 
 Waves: 1 = D0-0, D0-4a, F-1314 (all independent). 2 = D0-1 (waits D0-0: same DesignNode/DesignFile). 3 = D0-2.3 (waits D0-1: DesignWorkspace.swift). 4 = D0-2.5 (waits D0-2.3: DesignServices.swift). 5 = D0-2.6, D0-3a (both wait D0-2.5's .fake; independent of each other). 6 = D0-2b (waits D0-2.6, D0-4a), D0-3b (waits D0-3a); later of the two carries feature-done.
 

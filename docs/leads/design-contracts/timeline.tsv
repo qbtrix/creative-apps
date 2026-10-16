@@ -27,3 +27,6 @@ utc	stage	event	ref	note
 2026-10-16T15:25Z	3	pr-opened	#1401	D0-2b.2 .live runs the Live types; MJ3 (Mutate 10/10)
 2026-10-16T15:00Z	3	pr-merged	#1400	D0-3b
 2026-10-16T15:00Z	3	ci-run	38917492060	scoped design red on 3 journeys from #1391; reported #1393
+2026-10-16T15:25Z	3	pr-merged	#1401	D0-2b.2; CT-c merged
+2026-10-16T15:25Z	4	pr-opened	#1410	feature-done (docs only)
+2026-10-16T15:25Z	3	stage-start	polling	wait for green design run
