@@ -1,0 +1,4 @@
+[
+{"label":"the value drops the span","file":"Sources/SuiteUI/TimelineLaneAccess.swift","find":"return (spans + [keys]).joined(separator: \", \")","replace":"return keys","tests":"TimelineAccessTests"},
+{"label":"the child label reads the index, not the frame","file":"Sources/SuiteUI/TimelineLaneAccess.swift","find":"label: keyLabel(frame: key.frame, shape: key.shape)","replace":"label: keyLabel(frame: track.keys.firstIndex(of: key) ?? 0, shape: key.shape)","tests":"TimelineAccessTests"}
+]
