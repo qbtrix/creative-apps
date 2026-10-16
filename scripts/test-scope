@@ -146,7 +146,7 @@ NOISE = re.compile(r"^(\S+ (Test|Suite) |\[\d+/\d+\]|Building |Build complete|Co
 def perf_report(log):
     with open(log, errors="replace") as f:
         lines = f.read().splitlines()
-    results, ratios, printed, summary = {}, {}, [], None
+    results, ratios, printed, summary = {}, {}, [], []  # one `Test run with` line per test target
     issue, compared = None, None  # the test whose issue the ↳ lines explain; (indent, values) of its comparison
 
     def measured(name, lhs, rhs):
@@ -155,7 +155,7 @@ def perf_report(log):
 
     for line in lines:
         if "Test run with" in line:
-            summary = line.strip()
+            summary.append(line.strip())
         event, detail = EVENT.match(line), DETAIL.match(line)
         if event:
             name, what = event.groups()
@@ -183,7 +183,7 @@ def perf_report(log):
             printed.append(line.strip())
     out = ["### Perf and timing tests (report only)", ""]
     out.append(f"These never fail the run. A test is flagged when it measured over {FLAG}x a bound it asserts.")
-    out += ["", summary or "No `Test run with` line: the run died or timed out (see the step log).", ""]
+    out += [""] + ([s + "  " for s in summary] or ["No `Test run with` line: the run died or timed out (see the step log)."]) + [""]
     if results:
         out += ["| Test | Result |", "|---|---|"]
         for name, result in results.items():

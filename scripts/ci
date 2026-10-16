@@ -393,6 +393,6 @@ else
 fi
 
 echo
-for log in ${logs[@]+"${logs[@]}"}; do grep -E "Test run with [0-9]+ tests?" "$log" | tail -1; done
+for log in ${logs[@]+"${logs[@]}"}; do grep -E "Test run with [0-9]+ tests?" "$log"; done
 (( ! changed_mode )) || echo "Scoped to the changes since $base; plain scripts/ci is the full gate."
 echo "CI: PASS"

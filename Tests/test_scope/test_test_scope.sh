@@ -129,7 +129,8 @@ PhotoBudget move p50 12.0 ms p95 14.0 ms max 20.0 ms (60 events, gated)
 ✘ Test aBrushEventReachesTheCanvasInTimeWithBytesForItsDirtyTiles() recorded an issue at PhotoBrushDisplayTests.swift:128:9: Expectation failed: overBudget.count == 0
 ✘ Test aBrushEventReachesTheCanvasInTimeWithBytesForItsDirtyTiles() failed after 3.0 seconds with 1 issue.
 ✔ Test cloneOrHeal(tool:) with 2 test cases passed after 0.4 seconds.
-✘ Test run with 4 tests in 3 suites failed after 5.0 seconds with 3 issues.
+✘ Test run with 3 tests in 3 suites failed after 5.0 seconds with 3 issues.
+✔ Test run with 1 test in 1 suite passed after 0.4 seconds.
 EOF
 python3 "$ts" perf-report "$tmp/perf.log" >"$tmp/report.md" 2>"$tmp/warnings"
 check "perf-report exits 0 on failed tests" 0 "$?"
@@ -141,8 +142,7 @@ check "a failure with no measured bound is reported" 'failed (no measured bound 
 check "a parameterized pass is listed" passed "$(row 'cloneOrHeal(tool:)')"
 check "one warning, for the flagged test" '::warning title=Perf flag::editBudgets() measured 4.0x its bound (flagged over 3x)' \
   "$(cat "$tmp/warnings")"
-check "the report carries the run's result line" yes \
-  "$(grep -q 'Test run with 4 tests in 3 suites failed' "$tmp/report.md" && echo yes || echo no)"
+check "the report carries every target's result line" 2 "$(grep -c 'Test run with' "$tmp/report.md")"
 check "the report carries what the tests printed" yes \
   "$(grep -qx 'PhotoBudget move p50 12.0 ms p95 14.0 ms max 20.0 ms (60 events, gated)' "$tmp/report.md" && echo yes || echo no)"
 printf '%s\n' '◇ Test editBudgets() started.' >"$tmp/died.log"
