@@ -56,7 +56,7 @@ struct ToolOptionsSection: View {
                 // CropOptions draws the crop's one instruction line itself.
                 CropOptions(model: model, perform: perform)
             case .move:
-                hint("Drag over the image to move the selected layer.")
+                hint(model.moveHint)
                 TransformOptions(model: model, perform: perform)
             case .eyedropper:
                 hint(Self.eyedropperHint)

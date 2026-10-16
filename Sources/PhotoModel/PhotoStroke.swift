@@ -101,6 +101,15 @@ extension PhotoWorkspace {
         return .pixels(layer.id)
     }
 
+    /// The Move tool's instruction line: how to move the selected layer, or
+    /// why an adjustment layer (which has no place on the canvas) can't move.
+    public var moveHint: String {
+        if case .adjustment? = selectedLayer?.kind { return Self.moveRefusal }
+        return "Drag over the image to move the selected layer."
+    }
+
+    static let moveRefusal = "Select an image layer in the Layers tab to move it."
+
     /// The pixel layer `paintTarget()` gives, if any.
     mutating func paintLayerID() -> PhotoLayer.ID? {
         guard case .pixels(let id)? = paintTarget() else { return nil }
@@ -263,6 +272,10 @@ extension PhotoWorkspace {
         guard let id = selectedLayerID, let at = index(of: id),
             let before = current.layersBefore.first(where: { $0.id == id })
         else { return }
+        if case .adjustment = layers[at].kind {
+            statusMessage = Self.moveRefusal
+            return
+        }
         let dx = end.x - current.start.x, dy = end.y - current.start.y
         guard dx.isFinite, dy.isFinite, abs(dx) < 1e7, abs(dy) < 1e7 else { return }
         let x = before.offsetX + Int(dx.rounded()), y = before.offsetY + Int(dy.rounded())
