@@ -5,7 +5,7 @@
 // PhotoWindowStrokeTests hosts Photo's. A ruler press, 120 drags at 120 Hz
 // over 600 pt: no lane or ruler body runs, the playhead and strip at most
 // frames crossed + 2, one onScrub per frame crossed, never a frame twice.
-// TL-5 writes it disabled; TL-8 turns it on. macOS only.
+// TL-5 wrote it disabled; TL-8 turned it on. macOS only.
 import AppKit
 import SwiftUI
 import Testing
@@ -14,7 +14,7 @@ import Testing
 
 extension BodyCountSuites {
     @MainActor @Suite struct SuiteTimelineScrubWindowTests {
-        @Test(.disabled("waits on TL-8"), .timeLimit(.minutes(2))) func aScrubRedrawsOnlyThePlayhead() async throws {
+        @Test(.timeLimit(.minutes(2))) func aScrubRedrawsOnlyThePlayhead() async throws {
             let scrubs = ScrubLog()
             let host = CountingHostingView(rootView: ScrubHost(log: scrubs))
             let frame = CGRect(x: 0, y: 0, width: 1280, height: 400)

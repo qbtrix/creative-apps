@@ -7,7 +7,7 @@
 // toolbar row (when on), the ruler and every lane: a host inside its own
 // vertical ScrollView sees every lane, and one that offers less gets lanes
 // scrolling under the ruler. TimelineStripLayout holds that arithmetic. The
-// playhead line (TimelinePlayhead) sits over the ruler and the lanes. This
+// playhead (TimelinePlayhead) is one layer over the ruler and the lanes. This
 // file is the layout; each part draws in its own file. Lanes show keyframes as
 // diamonds and spans (Halo's in and out points) as rounded bars. Tracks are
 // content, so nothing here is glass. Values in, closures out: dragging on the
@@ -50,6 +50,8 @@ public struct TimelineStrip<ID: Hashable & Sendable>: View {
     /// The stretch of the lanes the scroll view shows, in mapping x; nil until
     /// it first reports.
     @State private var visibleX: ClosedRange<Double>?
+    /// The lanes' visible y range; nil until the vertical scroll view first reports.
+    @State private var visibleY: ClosedRange<Double>?
     /// The zoom over the host's frameWidth; 1 is fit.
     @State private var zoom: Double = 1
     /// A pinch under way: the zoom it began at and the view x it anchors.
@@ -119,7 +121,7 @@ public struct TimelineStrip<ID: Hashable & Sendable>: View {
             HStack(spacing: 0) {
                 Color.clear.frame(width: SuiteSize.timelineLabelColumn, height: SuiteSize.timelineRuler)
                 Divider()
-                pinnedRuler(snapshot: snapshot)
+                TimelineRuler(mapping: mapping, visibleX: visibleX, playhead: playhead, onScrub: onScrub)
             }
             .frame(height: SuiteSize.timelineRuler)
             // ImageRenderer can't draw a ScrollView, so snapshots show the
@@ -160,8 +162,15 @@ public struct TimelineStrip<ID: Hashable & Sendable>: View {
                         }
                     }
                 }
+                .onScrollGeometryChange(for: ClosedRange<Double>.self) { geometry in
+                    let rect = geometry.visibleRect
+                    return Double(rect.minY)...max(Double(rect.minY), Double(rect.maxY))
+                } action: { _, visible in
+                    visibleY = visible
+                }
             }
         }
+        .overlay(alignment: .topLeading) { playheadLayer(layout) }
         // A host inside its own vertical ScrollView proposes no height and gets the ideal one.
         .frame(
             minHeight: layout.toolbarHeight + SuiteSize.timelineRuler, idealHeight: layout.idealHeight,
@@ -231,21 +240,17 @@ public struct TimelineStrip<ID: Hashable & Sendable>: View {
             .onEnded { _ in pinch = nil }
     }
 
-    /// The ruler, outside both scroll views: drawn at the lanes' width and
-    /// shifted by the sideways scroll, so its marks sit at x - visibleX.lower
-    /// over the lanes. In a snapshot it is offered the strip's width (#219).
-    private func pinnedRuler(snapshot: Bool) -> some View {
-        let scrollX = (visibleX?.lowerBound ?? -Double(timelineInset)) + Double(timelineInset)
-        return GeometryReader { proxy in
-            let width = snapshot
-                ? max(proxy.size.width, 0) : CGFloat(mapping.contentWidth) + SuiteSpacing.xl
-            TimelineRuler(mapping: mapping, visibleX: visibleX, playhead: playhead, onScrub: onScrub)
-                .frame(width: width, alignment: .leading)
-                .overlay { TimelinePlayhead(mapping: mapping, playhead: playhead).allowsHitTesting(false) }
-                .offset(x: snapshot ? 0 : -CGFloat(scrollX))
-        }
-        .frame(height: SuiteSize.timelineRuler)
-        .clipped()
+    /// The playhead over the ruler and the lanes, right of the names column and its divider.
+    private func playheadLayer(_ layout: TimelineStripLayout) -> some View {
+        let scrollX = snapshot ? 0 : (visibleX?.lowerBound).map { $0 + Double(timelineInset) } ?? 0
+        let rows = TimelinePlayhead.rows(showing: snapshot ? nil : visibleY, count: tracks.count)
+        return TimelinePlayhead(
+            mapping: mapping, playhead: playhead, unit: unit, fps: fps,
+            scroll: CGPoint(x: scrollX, y: snapshot ? 0 : visibleY?.lowerBound ?? 0),
+            keys: TimelinePlayhead.keys(at: mapping.clamp(playhead), in: tracks, rows: rows), onScrub: onScrub
+        ).equatable()
+            .padding(.top, layout.toolbarHeight)
+            .padding(.leading, SuiteSize.timelineLabelColumn + TimelinePlayheadGrab.divider)
     }
 
     private var names: some View {
@@ -280,7 +285,6 @@ public struct TimelineStrip<ID: Hashable & Sendable>: View {
             }
         }
         .frame(width: width, alignment: .leading)
-        .overlay { TimelinePlayhead(mapping: mapping, playhead: playhead).allowsHitTesting(false) }
         .simultaneousGesture(pinchGesture, isEnabled: !snapshot)
     }
 }
