@@ -4,10 +4,11 @@
 // and masks from one place. Today a pixel layer composites with its blend
 // mode and opacity at its offset (CoreRaster's composite, tile by tile, each
 // clipped to the region, exactly as the renderer always did); an adjustment
-// layer gives back `below` unchanged until photo-adjustment-layers fills that
-// case through `adjusting`; the mask is ignored until PV-5 fills it through
-// `masking`. Whether a layer shows at all (hidden, opacity 0) is the caller's
-// call. Linux-safe.
+// layer (AL-2 of photo-adjustment-layers) turns `below` into
+// `adjusting.applying` its settings with its opacity and blend mode, or gives
+// `below` back when hidden or at opacity 0; the mask is ignored until PV-5
+// fills it through `masking` (and passes it to `applying`). Callers still skip
+// hidden and 0 % layers themselves. Linux-safe.
 //
 // Cost: CoreRaster's composite returns a fresh copy of its backdrop, so each
 // layer tile goes onto one tile of the picture's own grid instead of onto the
@@ -17,7 +18,9 @@
 // Merge Down and Flatten keep their picture as TiledPixels (same grid), so
 // they never copy a whole picture at all. A picture of one tile (each region
 // the renderer draws) is its own only tile, so it skips the read and the
-// write back: one copy per layer, not three, on every brush event.
+// write back: one copy per layer, not three, on every brush event. An
+// adjustment layer is per pixel, so it costs the region it covers: the whole
+// region at once, or tile by tile across the cores on a tiled picture.
 import CoreRaster
 import Dispatch
 import Synchronization
@@ -31,6 +34,12 @@ public enum PhotoLayerComposite {
                                  origin: (x: Int, y: Int),
                                  adjusting: any AdjustmentLayering,
                                  masking: any LayerMasking) throws -> PixelBuffer {
+        if case .adjustment(let settings) = content.layer.kind {
+            let layer = content.layer
+            guard layer.isVisible && layer.opacity > 0 else { return below }
+            return try adjusting.applying(settings, to: below, opacity: layer.opacity,
+                                          blendMode: layer.blendMode, mask: nil)
+        }
         let columns = below.tileColumns
         if columns == 1 && below.tileRows == 1 {
             let pieces = try pictureTiles(content, width: below.width, height: below.height, columns: 1,
@@ -52,6 +61,16 @@ public enum PhotoLayerComposite {
                           origin: (x: Int, y: Int),
                           adjusting: any AdjustmentLayering,
                           masking: any LayerMasking) throws -> TiledPixels {
+        if case .adjustment(let settings) = content.layer.kind {
+            let layer = content.layer, tiles = below.tiles
+            guard layer.isVisible && layer.opacity > 0 else { return below }
+            var picture = below
+            picture.tiles = try inParallel(tiles.count) {
+                try adjusting.applying(settings, to: tiles[$0], opacity: layer.opacity,
+                                       blendMode: layer.blendMode, mask: nil)
+            }
+            return picture
+        }
         let pieces = try pictureTiles(content, width: below.width, height: below.height, columns: below.columns,
                                       origin: origin) { index in
             guard below.tiles.indices.contains(index) else { throw RasterError.invalid("tile \(index) is missing") }
@@ -70,7 +89,7 @@ public enum PhotoLayerComposite {
         read: @Sendable (Int) throws -> PixelBuffer
     ) throws -> [(Int, PixelBuffer)] {
         let layer = content.layer
-        // ponytail: photo-adjustment-layers fills .adjustment with adjusting.applying, PV-5 masks with masking.masked.
+        // ponytail: PV-5 masks with masking.masked. An adjustment layer never gets here.
         guard case .pixels = layer.kind, let tiled = content.pixels else { return [] }
         let region = PixelRect(x: origin.x - layer.offsetX, y: origin.y - layer.offsetY, width: width, height: height)
         // Each layer tile under the region, in picture pixels, filed under

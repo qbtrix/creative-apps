@@ -1,8 +1,8 @@
 // PhotoLayerCompositeTests.swift: the renderer composites each layer through
 // PhotoLayerComposite (S-7b, review note 2 of photo-seams). The reference
 // digests and probe pixels were taken from the renderer before it went through
-// the hook, so the picture is the same bit for bit; an adjustment layer leaves
-// the picture under it alone until photo-adjustment-layers fills that case;
+// the hook, so the picture is the same bit for bit; an adjustment layer puts
+// the picture under it through the adjustment service (AL-2);
 // Image Size, Rotate and Straighten tell every layer's extras (PV-5's masks)
 // about the change once per layer. Runs on Linux and macOS.
 import CoreRaster
@@ -96,15 +96,15 @@ import Testing
         #expect(result == expected)
     }
 
-    @Test func anAdjustmentLayerLeavesThePictureBelowUnchanged() throws {
+    @Test func anAdjustmentLayerGoesThroughTheAdjustmentService() throws {
         let workspace = try PhotoWorkspace.fixture(.layered)
         let curves = try #require(workspace.layers.first { $0.name == "Curves 1" })
         let below = try PixelBuffer(width: 32, height: 16, fill: RGBA(r: 0.2, g: 0.5, b: 0.7, a: 1))
-        // The fake adjustment service brightens by a stop, so a call would show.
+        // The fake adjustment service brightens by a stop, whatever the settings.
         let result = try PhotoLayerComposite.composite(
             LayerContent(layer: curves, pixels: nil), onto: below, origin: (x: 0, y: 0),
             adjusting: workspace.services.adjustmentLayers, masking: workspace.services.masking)
-        #expect(result == below)
+        #expect(result == (try below.exposure(stops: 1)))
     }
 
     @Test func imageSizeTellsEveryLayerOnce() throws {
