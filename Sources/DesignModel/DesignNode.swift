@@ -188,18 +188,36 @@ public struct DesignNode: Identifiable, Sendable, Hashable, Codable {
     /// How round a rectangle's or frame's corners are, in points; 0 is square. The canvas draws
     /// at most `maxCornerRadius` (DesignCorners), so a later resize never needs to change it.
     public var cornerRadius: Double
+    /// How opaque the layer draws, 0...1; 1 is fully opaque.
+    public var opacity: Double
+    /// The outline drawn centered on the shape's edge; nil draws none.
+    public var stroke: DesignStroke?
+    /// How a text node's text is set; every other kind keeps `.default`.
+    public var textStyle: DesignTextStyle
 
     public init(
         id: String, name: String, kind: DesignNodeKind, frame: DesignRect,
         children: [DesignNode] = [], isHidden: Bool = false, isLocked: Bool = false,
-        fill: DesignColor? = nil, text: String = "", cornerRadius: Double = 0
+        fill: DesignColor? = nil, text: String = "", cornerRadius: Double = 0,
+        opacity: Double = 1, stroke: DesignStroke? = nil, textStyle: DesignTextStyle = .default
     ) {
         (self.id, self.name, self.kind, self.frame) = (id, name, kind, frame)
         (self.children, self.isHidden, self.isLocked) = (children, isHidden, isLocked)
         (self.fill, self.text, self.cornerRadius) = (fill ?? kind.defaultFill, text, cornerRadius)
+        (self.opacity, self.stroke, self.textStyle) = (opacity, stroke, textStyle)
     }
 
-    /// Decodes a node; a file written before corner radius existed has none, so it is 0.
+    /// `node` with every field kept and the id replaced (duplicate, paste). A field added to
+    /// DesignNode is copied here too.
+    public init(id: String, copying node: DesignNode) {
+        self.init(
+            id: id, name: node.name, kind: node.kind, frame: node.frame, children: node.children,
+            isHidden: node.isHidden, isLocked: node.isLocked, fill: node.fill, text: node.text,
+            cornerRadius: node.cornerRadius, opacity: node.opacity, stroke: node.stroke, textStyle: node.textStyle)
+    }
+
+    /// Decodes a node; a field a file written before it existed lacks takes its default: square
+    /// corners, fully opaque, no stroke and the default text style.
     public init(from decoder: any Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         try self.init(
@@ -208,7 +226,10 @@ public struct DesignNode: Identifiable, Sendable, Hashable, Codable {
             children: container.decode([DesignNode].self, forKey: .children),
             isHidden: container.decode(Bool.self, forKey: .isHidden), isLocked: container.decode(Bool.self, forKey: .isLocked),
             fill: container.decode(DesignColor.self, forKey: .fill), text: container.decode(String.self, forKey: .text),
-            cornerRadius: container.decodeIfPresent(Double.self, forKey: .cornerRadius) ?? 0)
+            cornerRadius: container.decodeIfPresent(Double.self, forKey: .cornerRadius) ?? 0,
+            opacity: container.decodeIfPresent(Double.self, forKey: .opacity) ?? 1,
+            stroke: container.decodeIfPresent(DesignStroke.self, forKey: .stroke),
+            textStyle: container.decodeIfPresent(DesignTextStyle.self, forKey: .textStyle) ?? .default)
     }
 
     /// Shifts this node and everything under it by `delta`.

@@ -1,0 +1,30 @@
+[
+  {
+    "label": "an old file opens fully transparent",
+    "file": "Sources/DesignModel/DesignNode.swift",
+    "find": "opacity: container.decodeIfPresent(Double.self, forKey: .opacity) ?? 1,",
+    "replace": "opacity: container.decodeIfPresent(Double.self, forKey: .opacity) ?? 0,",
+    "tests": "DesignStyleSchemaTests.swift"
+  },
+  {
+    "label": "a copy drops the stroke",
+    "file": "Sources/DesignModel/DesignNode.swift",
+    "find": "opacity: node.opacity, stroke: node.stroke, textStyle: node.textStyle)",
+    "replace": "opacity: node.opacity, stroke: nil, textStyle: node.textStyle)",
+    "tests": "DesignStyleSchemaTests.swift"
+  },
+  {
+    "label": "the text style is not decoded",
+    "file": "Sources/DesignModel/DesignNode.swift",
+    "find": "textStyle: container.decodeIfPresent(DesignTextStyle.self, forKey: .textStyle) ?? .default)",
+    "replace": "textStyle: .default)",
+    "tests": "DesignStyleSchemaTests.swift"
+  },
+  {
+    "label": "a copy loses its corner radius",
+    "file": "Sources/DesignModel/DesignNode.swift",
+    "find": "cornerRadius: node.cornerRadius, opacity: node.opacity,",
+    "replace": "cornerRadius: 0, opacity: node.opacity,",
+    "tests": "DesignStyleSchemaTests.swift"
+  }
+]
