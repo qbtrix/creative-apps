@@ -4,7 +4,7 @@ Issue: #1332 · Packet: docs/blueprints/suite/features/suite-contracts.md
 Run: act-1a1448a5fd9-0he1 · Session: claude/suite-contracts-lead-rv72k4 · Started: 2026-10-16T11:49Z
 Stage: 4 round 1
 Base: c9e46560366b0c3464a5e822d11c4a865e4dc53e
-Next: round 1 fix batch running (workflow wf_6a118dfd-1d0) on findings #1457 #1459 #1460 #1461 #1462 #1464 #1465 #1466 #1468; wait for its PRs to merge, then the round-2 review on the same panel. Also read dev CI run 38933216466.
+Next: wait for round-1 fix PRs #1472 (#1459 #1460 #1465 #1466 #1468), #1473 (#1457), #1474 (#1461 #1462), #1476 (#1464) to merge and dev CI 38933216466 to finish; then round-2 review on the same panel at the new dev head
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -39,7 +39,7 @@ Waves (packet's Build waves, checked against dev at ebc68bf):
 ## Rounds
 | round | CI run | CI | audit vs baseline | lenses | confirmed | fixed by | clean |
 |---|---|---|---|---|---|---|---|
-| 1 | 38933216466 (pending) | pending | no screens touched | clarity, oracle, quality, packet conformance, robustness | 10 (4 major, 6 minor): #1457 #1459 #1460 #1461 #1462 #1463 #1464 #1465 #1466 #1468 | fix batch wf_6a118dfd-1d0 | no |
+| 1 | 38933216466 (pending) | pending | no screens touched | clarity, oracle, quality, packet conformance, robustness | 10 (4 major, 6 minor): #1457 #1459 #1460 #1461 #1462 #1463 #1464 #1465 #1466 #1468 | #1472 #1473 #1474 #1476 | no |
 
 ## Decisions
 - No `## Slices` table in the packet: v2 loop. Started after #1302, so the findings queue (rule 10) and the 2-round cap (rule 11) apply; rules 13/14 (v3 only) don't.
@@ -57,4 +57,5 @@ Waves (packet's Build waves, checked against dev at ebc68bf):
 - Corrections in the packet are listed 1-6, 8-10, 7 (no correction is missing); builders apply the ones naming their task.
 
 ## Open
+- #1477 (needs-ui, line:suiteui): AppSwitcher hardcodes the old not-connected sentence that #1473 replaces.
 - #1463 (perf-suites.txt) needs the supervisor: protected file; commented on the issue. Becomes a gap after round 2 if still open.
