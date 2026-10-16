@@ -97,9 +97,10 @@ SELF_CHECK="fast-lane"
 # Matching ignores case. docs/c4/model.json and each app's waves.md are
 # generated on dev (.github/workflows/generated.yml), so PRs never edit them.
 # UITests/quarantine.json skips failing journeys (scripts/quarantine), so only
-# the supervisor quarantines.
+# the supervisor quarantines; Tests/perf-suites.txt takes tests out of the
+# gate (scripts/test-scope), so only the supervisor lists them.
 PROTECTED=(Package.swift Package.resolved .github/ .claude/ scripts/ CLAUDE.md AGENTS.md LICENSE
-  docs/c4/model.json 'docs/blueprints/*/features/waves.md' UITests/quarantine.json)
+  docs/c4/model.json 'docs/blueprints/*/features/waves.md' UITests/quarantine.json Tests/perf-suites.txt)
 deny_re() {
   local p re=""
   for p in "${PROTECTED[@]}"; do

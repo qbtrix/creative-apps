@@ -1,0 +1,224 @@
+#!/usr/bin/env python3
+# scripts/test-scope: which swift tests run where, in one place, so the gate
+# (scripts/ci and its --changed mode), CI's scoped runs and CI's Perf step
+# agree on every test. Stdlib Python 3 only.
+#
+#   scripts/test-scope app APP             APP's tests (flare, design, photo, library, halo, suite, suiteui)
+#   scripts/test-scope changed [--linux]   the tests for the changed paths on stdin
+#   scripts/test-scope perf [APP]          the perf and timing tests, all or APP's
+#   scripts/test-scope perf-report LOG     a perf run's swift test log as a markdown report
+#
+# app and changed print two lines: the regex for the tests outside
+# AppSnapshotTests, then the one for AppSnapshotTests (they run one at a
+# time). An empty line means none. changed prints `all` instead when a path
+# can change any test (Package.swift, Package.resolved, a new Sources/ dir).
+# A Model maps to its Model tests, an App to its snapshot suites, SuiteUI to
+# SuiteUITests and its snapshot suites, SuiteModel to every Model's tests;
+# docs, scripts, UITests and the like map to none. --linux drops SuiteUITests
+# and AppSnapshotTests, which Linux doesn't build.
+#
+# perf prints one regex, empty when there is none. Tests/perf-suites.txt lists
+# the perf and timing tests: the gate and scoped runs skip them, and CI's Perf
+# step runs exactly them, so each test runs in one place. perf-report prints
+# what they measured and flags (a ::warning:: on stderr) each failed bound a
+# test missed by more than FLAG times; it never fails on a number.
+#
+# Regexes match swift test's ids, Target.Suite/test() or Target.freeTest().
+# Never pass an empty one to --filter or --skip: it matches every test.
+# Tested by Tests/test_scope.
+import os
+import re
+import sys
+
+APPS = {"flare": "Flare", "design": "Design", "photo": "Photo", "library": "Library", "halo": "Halo"}
+SCOPES = list(APPS) + ["suite", "suiteui"]
+SNAP = "AppSnapshotTests"
+# AppSnapshotTests suites per scope, by name. Flare and SuiteUI add the
+# suites and free tests whose names don't say so, and each app has its test
+# in the AppSnapshotTests suite. A snapshot test that fits no app runs in
+# full runs only.
+SNAPSHOTS = {
+    "flare": r"(Flare[A-Za-z]*|AutosaveTests|AutosaveRecoveryTests|PlaybackDriverTests|StagePathTests)/|AppSnapshotTests/flare\(",
+    "design": r"Design[A-Za-z]*/|AppSnapshotTests/design\(",
+    "photo": r"Photo[A-Za-z]*/|AppSnapshotTests/photo\(",
+    "library": r"Library[A-Za-z]*/|AppSnapshotTests/library\(",
+    "halo": r"Halo[A-Za-z]*/|AppSnapshotTests/halo\(",
+    "suiteui": r"(Suite[A-Za-z]*|GoldenImageTests|SnapshotHostTests)/|(suite[A-Za-z]*|snapshotsDrawRealSlidersNotPlaceholders"
+    r"|theCapsuleDrawsOnlyBehindTheCurrentItem|aDisabledBarCommandDrawsDimmerThanAnEnabledOne)\(|AppSnapshotTests/suiteGallery\(",
+}
+MAC_ONLY = {"SuiteUITests", SNAP}
+ALL = [("all", None)]
+FLAG = 3  # a perf test is flagged when it measured over FLAG times a bound it asserts
+PERF_LIST = os.environ.get("PERF_SUITES") or os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "Tests", "perf-suites.txt")
+
+
+def app_units(app):
+    """(target, suite regex or None for the whole target) for a scope."""
+    if app in APPS:
+        return [(APPS[app] + "ModelTests", None), (SNAP, SNAPSHOTS[app])]
+    if app == "suite":  # SuiteModel and AfterGlow: no snapshots yet
+        return [("SuiteModelTests", None)]
+    if app == "suiteui":
+        return [("SuiteUITests", None), ("AppAuditTests", None), (SNAP, SNAPSHOTS["suiteui"])]
+    sys.exit(f"test-scope: unknown app {app!r}; one of {', '.join(SCOPES)}")
+
+
+def path_units(path):
+    if path in ("Package.swift", "Package.resolved"):
+        return ALL
+    parts = path.split("/")
+    if len(parts) < 3:
+        return []
+    root, top = parts[0], parts[1]
+    if root == "Sources":
+        if top == "SuiteModel":  # every Model links it
+            return [("SuiteModelTests", None)] + [(x + "ModelTests", None) for x in APPS.values()]
+        if top in ("AfterGlowApp", "SuiteShell"):
+            return app_units("suite")
+        if top == "SuiteUI":
+            return [("SuiteUITests", None), (SNAP, SNAPSHOTS["suiteui"])]
+        for app, x in APPS.items():
+            if top == x + "Model":
+                return [(x + "ModelTests", None)]
+            if top == x + "App":
+                return [(SNAP, SNAPSHOTS[app])]
+        return ALL  # a target this table doesn't know yet
+    if root == "Tests":
+        if top == SNAP:
+            app = next((a for a, x in APPS.items() if parts[2].startswith(x)), None)
+            return [(SNAP, SNAPSHOTS[app] if app else None)]
+        if top.endswith("ModelTests") or top in ("SuiteUITests", "AppAuditTests"):
+            return [(top, None)]
+    return []
+
+
+def regexes(units, linux=False):
+    """The two lines app and changed print."""
+    if ("all", None) in units:
+        return "all"
+    tests = sorted({t for t, _ in units if t != SNAP and not (linux and t in MAC_ONLY)})
+    snaps = [] if linux else [r for t, r in units if t == SNAP]
+    first = "^(%s)\\." % "|".join(tests) if tests else ""
+    if None in snaps:
+        second = r"^AppSnapshotTests\."
+    elif snaps:
+        second = r"^AppSnapshotTests\.(%s)" % "|".join(dict.fromkeys(snaps))
+    else:
+        second = ""
+    return first + "\n" + second
+
+
+def perf_entries():
+    """(app, id) per line of the perf list; # starts a comment."""
+    entries = []
+    with open(PERF_LIST) as f:
+        for n, line in enumerate(f, 1):
+            fields = line.split("#", 1)[0].split()
+            if not fields:
+                continue
+            if len(fields) != 2 or fields[0] not in SCOPES or not re.fullmatch(r"\w+\.\w+(/\w+)?", fields[1]):
+                sys.exit(f"test-scope: {PERF_LIST}:{n}: want '<app> <Target>.<Suite>[/<test>]' or '<app> <Target>.<freeTest>', got {line.strip()!r}")
+            entries.append((fields[0], fields[1]))
+    return entries
+
+
+def perf_regex(app=None):
+    if app is not None and app not in SCOPES:
+        sys.exit(f"test-scope: unknown app {app!r}; one of {', '.join(SCOPES)}")
+    ids = [i.replace(".", r"\.") for a, i in perf_entries() if app in (None, a)]
+    return "^(%s)(/|\\()" % "|".join(ids) if ids else ""
+
+
+NUMBER = r"([-+]?[0-9]*\.?[0-9]+(?:[eE][-+]?[0-9]+)?)"
+VALUE = re.compile("\u2192 " + NUMBER + r"(?: seconds)?$")
+# How Swift Testing shows a failed `#expect(a <= b)`: older releases on the
+# issue line, `(a → 0.012 seconds) <= (b → 0.005 seconds)`; newer ones on
+# the ↳ lines below it, `a <= b → false` with a's and b's values indented
+# two more spaces under it.
+INLINE = re.compile("\u2192 " + NUMBER + r"(?: seconds)?\)\s*<=?\s*\([^\u2192]*\u2192 " + NUMBER + r"(?: seconds)?\)")
+COMPARE = re.compile(r".+ <=? .+ \u2192 false$")
+DETAIL = re.compile(r"^\u21b3( *)(.*)$")
+EVENT = re.compile(r"^\S+ Test (\w[^ ]*\))(?: with \d+ test cases?)? (passed|failed|recorded an issue)")
+NUMBERS = re.compile(r"(?i)p50|p95|median|budget")
+NOISE = re.compile(r"^(\S+ (Test|Suite) |\[\d+/\d+\]|Building |Build complete|Compiling )")  # swift test's own lines
+
+
+def perf_report(log):
+    with open(log, errors="replace") as f:
+        lines = f.read().splitlines()
+    results, ratios, printed, summary = {}, {}, [], []  # one `Test run with` line per test target
+    issue, compared = None, None  # the test whose issue the ↳ lines explain; (indent, values) of its comparison
+
+    def measured(name, lhs, rhs):
+        if rhs > 0:
+            ratios[name] = max(ratios.get(name, 0), lhs / rhs)
+
+    for line in lines:
+        if "Test run with" in line:
+            summary.append(line.strip())
+        event, detail = EVENT.match(line), DETAIL.match(line)
+        if event:
+            name, what = event.groups()
+            issue = compared = None
+            if what == "recorded an issue":
+                results[name], issue = "failed", name
+                for lhs, rhs in INLINE.findall(line):
+                    measured(name, float(lhs), float(rhs))
+            else:
+                results.setdefault(name, what)
+        elif detail and issue:
+            indent, text = len(detail.group(1)), detail.group(2)
+            if COMPARE.match(text):
+                compared = (indent, [])
+            elif compared and indent == compared[0] + 2:
+                value = VALUE.search(text)
+                compared[1].append(float(value.group(1)) if value else None)
+                if len(compared[1]) == 2:
+                    if None not in compared[1]:
+                        measured(issue, *compared[1])
+                    compared = None
+            elif "\u2192" not in text and NUMBERS.search(text):
+                printed.append(text)
+        elif NUMBERS.search(line) and not NOISE.match(line):
+            printed.append(line.strip())
+    out = ["### Perf and timing tests (report only)", ""]
+    out.append(f"These never fail the run. A test is flagged when it measured over {FLAG}x a bound it asserts.")
+    out += [""] + ([s + "  " for s in summary] or ["No `Test run with` line: the run died or timed out (see the step log)."]) + [""]
+    if results:
+        out += ["| Test | Result |", "|---|---|"]
+        for name, result in results.items():
+            ratio = ratios.get(name)
+            if result != "failed":
+                cell = result
+            elif ratio is None:
+                cell = "failed (no measured bound in its issue)"
+            elif ratio > FLAG:
+                cell = f"**flagged: {ratio:.1f}x its bound**"
+                print(f"::warning title=Perf flag::{name} measured {ratio:.1f}x its bound (flagged over {FLAG}x)", file=sys.stderr)
+            else:
+                cell = f"over its bound, {ratio:.1f}x"
+            out.append(f"| `{name}` | {cell} |")
+    if not summary:
+        print("::warning title=Perf::the perf run printed no result line; it died or timed out", file=sys.stderr)
+    if printed:
+        out += ["", "<details><summary>What the tests printed</summary>", "", "```"] + printed + ["```", "</details>"]
+    print("\n".join(out))
+
+
+def main(argv):
+    cmd, args = (argv[0], argv[1:]) if argv else ("", [])
+    if cmd == "app" and len(args) == 1:
+        print(regexes(app_units(args[0])))
+    elif cmd == "changed" and args in ([], ["--linux"]):
+        units = [u for p in sys.stdin.read().splitlines() if p for u in path_units(p)]
+        print(regexes(units, linux=bool(args)))
+    elif cmd == "perf" and len(args) <= 1:
+        print(perf_regex(args[0] if args else None))
+    elif cmd == "perf-report" and len(args) == 1:
+        perf_report(args[0])
+    else:
+        sys.exit("usage: scripts/test-scope app APP | changed [--linux] | perf [APP] | perf-report LOG")
+
+
+if __name__ == "__main__":
+    main(sys.argv[1:])

@@ -166,7 +166,8 @@ every step.
   returned a default value proves nothing. Review-only.
 - **Bug fixes start red.** Write the test that reproduces the bug, see it fail,
   then fix the cause. Review-only.
-- **Proof is the gate.** "It compiles" is not done. Gate: `scripts/ci` prints
+- **Proof is the gate.** "It compiles" is not done. Gate: `scripts/ci --changed`
+  (every lint and build, then the tests of the targets you touched) prints
   `CI: PASS` on your branch rebased on `origin/dev`, and the PR body carries
   the `Fast-Check: pass` / `Head: <sha>` marker for that head. Both CI jobs
   run on `dev` once a feature is built; `main` only takes a green `dev` SHA.
@@ -175,6 +176,12 @@ every step.
   builds, and only that app's Model tests, snapshots and journeys run, so
   another app's red test can't block it. Only a full run moves `main`.
   Gate: the `macOS (<app>)` job.
+- **Timing is reported, not gated.** A test that asserts a wall-clock or
+  allocation budget can fail on a busy machine while the code is fine, so it
+  goes in `Tests/perf-suites.txt` (the supervisor edits it). The gate and
+  scoped runs skip it; the `macOS` job's Perf step runs it alone, reports its
+  numbers in the job summary and warns when a bound is missed by more than
+  3x. Gate: none, by design; read the warnings on `dev` runs.
 
 ## Reading cost
 

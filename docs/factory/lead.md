@@ -39,7 +39,7 @@ Hand this to every session (the lead and each agent it starts) verbatim.
 1. **Feature issue.** One GitHub issue per feature, labels `feature-lead` and `line:<app>`. Body links the packet `docs/blueprints/<app>/features/<feature>.md` and has one `Depends on:` line.
 2. **Run.** Belt runs one cloud session per feature issue (a lead), from the trusted launch folder, with the repo's Auto settings (creative-apps#733, creative-core#263). A lead holds one in-flight slot however many PRs it opens.
 3. **Status channel.** The lead pushes `docs/leads/<feature>/RECORD.md` and `timeline.tsv` to branch `lead/<feature>` after every stage (in v3, after every wave and every check between waves). Belt reads the branch's last commit time; nothing else is polled besides PRs and issue comments.
-4. **Swarm PRs.** Base `dev`, label `fast-lane`, at most 400 lines and 15 files. Body lines: `Belt-Lead: <run id>`, `Feature: <feature>`, for a packet with slices `Slice: <slice>` (the slice ids the PR serves, comma separated), then `Fast-Check: pass` and `Head: <full sha>` after `scripts/ci` passes. Point at the feature issue with `Refs`; the lane turns a closing keyword before a `feature-lead` issue into `Refs` anyway and never closes it. Findings and gaps a PR fixes take a closing keyword (`Fixes #n`) and close on merge. The lane merges them. Nobody merges into dev by hand or by an agent.
+4. **Swarm PRs.** Base `dev`, label `fast-lane`, at most 400 lines and 15 files. Body lines: `Belt-Lead: <run id>`, `Feature: <feature>`, for a packet with slices `Slice: <slice>` (the slice ids the PR serves, comma separated), then `Fast-Check: pass` and `Head: <full sha>` after `scripts/ci --changed` passes (lints, every target built, the touched targets' tests; plain `scripts/ci` is the full gate). Point at the feature issue with `Refs`; the lane turns a closing keyword before a `feature-lead` issue into `Refs` anyway and never closes it. Findings and gaps a PR fixes take a closing keyword (`Fixes #n`) and close on merge. The lane merges them. Nobody merges into dev by hand or by an agent.
 5. **Review policy (decision for the captain).** `Belt-Lead:` PRs do not need the `belt/review` status. The lead's own critic panel is the review. Only `Belt-Run:` and `Belt-Test:` PRs keep it.
 6. **Done (v3).** Slices are the unit of done. A slice is done when the newest completed scoped CI run for its app (`ci.yml` with `app=<app>`; a full dev run counts too) contains the slice's last merged PR, ran the slice's journeys green (a quarantined journey is skipped, not green), and built every app, no `finding` issue for the slice is open, and no mutation in the slice's plans escapes (rule 14: every PR of the slice that changed planned code shows a full `Mutate:` score). A Linux-only slice's Model walk runs among the app's Model tests in that run. The lead then comments on the feature issue, one comment per slice, with the line `Belt-Slice-Done: <slice> <run url>`. A slice closed under the round cap (rule 11) is done with gaps: same line, ending ` gaps: #<n> #<m>`. When every slice has its line (the last PR, labelled `feature-done`, is in the last slice), the lead comments `Belt-Contact-Sheet: <run url>`. The slice ids are the packet's Slices table, the same data as `slices` in the feature's `.wave.json`. A packet without slices keeps the v2 Done rule ("Packets without slices (v2)").
 7. **Stall.** No commit on `lead/<feature>`, no PR event and no issue comment for 30 min: Belt sends one nudge with `claude -p --cloud <session id> "<resume text>"`. A second stall: relaunch with a resume brief that says "read RECORD.md, continue from the last stage". A third: label the issue `needs-human` and stop.
@@ -206,10 +206,10 @@ most 2 rounds (contract rule 11).
    RECORD.md says which ones and why, one line each under Decisions.
 4. **Merge.** A PR the lane comments on (conflict, red, not eligible) goes
    back to its builder or a fixer: rebase on `origin/dev`, rerun
-   `scripts/ci`, move the `Head:` line. Once the wave's PRs have merged, run
+   `scripts/ci --changed`, move the `Head:` line. Once the wave's PRs have merged, run
    the check and start the next wave.
 
-Every fixer runs the full harness before it hands back: `scripts/ci` until
+Every fixer runs the full harness before it hands back: `scripts/ci --changed` until
 `CI: PASS`, plus a test that fails before the fix, and the journey step or
 snapshot that shows it when it is visible. A layout finding gets a geometric
 test (frames inside the window, no overlap, minimum sizes): the pilot's
@@ -381,7 +381,7 @@ under Decisions. Then:
 
 1. Wait for the lane to merge every PR of the wave. A PR the lane comments on
    (conflict, red, not eligible) goes back to its builder or a fixer: rebase
-   on `origin/dev`, rerun `scripts/ci`, move the `Head:` line.
+   on `origin/dev`, rerun `scripts/ci --changed`, move the `Head:` line.
 2. The next wave's base is the new `origin/dev` SHA. Record it.
 
 #### 4. The Anatomy loop
@@ -402,7 +402,7 @@ One round:
    always one. Critics only report; verifiers drop findings they can refute.
 5. **Fix batch.** Group the confirmed findings into batches with disjoint
    files and run `docs/factory/workflows/fix-batch.js`. Every fixer runs the
-   full harness before it hands back: `scripts/ci` until `CI: PASS`, plus a
+   full harness before it hands back: `scripts/ci --changed` until `CI: PASS`, plus a
    test that fails before the fix, and the journey step or snapshot that
    shows it when it is visible. A layout finding gets a geometric test (frames
    inside the window, no overlap, minimum sizes): the pilot's geometric test

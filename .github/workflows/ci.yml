@@ -7,8 +7,8 @@
 # the one page to review per run, inside it).
 #
 # Branch model: crew PRs merge into dev through the fast lane with no CI of
-# their own; the worker's local scripts/ci (Models and lint, since SwiftUI
-# can't compile on Linux) is the per-PR check. This workflow runs on dev once a
+# their own; the worker's local scripts/ci --changed (Models and lint, since
+# SwiftUI can't compile on Linux) is the per-PR check. This workflow runs on dev once a
 # feature is built, not after every merge: on workflow_dispatch (the supervisor
 # or Belt, e.g. after an integrate PR), when the lane merges a PR labelled
 # `feature-done` (it dispatches this once), and daily as a safety net. When
@@ -24,11 +24,16 @@
 # Trade-off: SwiftUI breakage, snapshot and UI journey failures sit on dev
 # until the next feature run, so a dev-red culprit range can span several PRs.
 #
+# Perf and timing tests (Tests/perf-suites.txt) are out of the gate: scripts/ci
+# and the scoped step skip them, and the macOS job's Perf step runs them alone
+# on every run, reports their numbers in the job summary and warns on a bound
+# missed by more than 3x. It never fails the job, so it never blocks promote.
+#
 # Scoped run (workflow_dispatch with `app`: flare, design, photo, library,
 # halo, suite or suiteui): the macOS job still builds every target with its
 # tests, the five app bundles and every journey bundle, but runs only that
 # app's Model tests, snapshot tests and UI journeys, so another app's red test
-# can't hide it. The Linux job (lints and every Model's tests) is skipped, and
+# can't hide it, then that app's perf tests in the Perf step. The Linux job (lints and every Model's tests) is skipped, and
 # a scoped run never promotes main, opens dev-red or lowers the audit
 # baseline. belt-pilot's verify-dispatch.sh dispatches one on dev after an
 # app's merges.
@@ -160,31 +165,28 @@ jobs:
           GH_TOKEN: ${{ github.token }}
       # A scoped run instead: build every target with its tests, then run only
       # APP's Model tests and its snapshot tests (one at a time, as scripts/ci
-      # does). swift test --filter matches <target>.<suite>/<test>() or
-      # <target>.<test>() for a free function. Snapshot suites are named after
-      # their app; the alternations add Flare's and SuiteUI's suites and free
-      # tests that aren't, and each app's test in the AppSnapshotTests suite. A
-      # snapshot test whose name fits no app runs in full runs only. A filter
-      # that matches no test fails the step. The job summary lists what ran.
+      # does). The filters come from scripts/test-scope, the table scripts/ci
+      # --changed maps changed files with; a snapshot test whose name fits no
+      # app runs in full runs only. Perf tests are skipped here and run in the
+      # Perf step. A filter that matches no test fails the step. The job
+      # summary lists what ran.
       - name: Scoped build and tests
         if: inputs.app
         id: scope
         run: |
-          snap_flare='(Flare[A-Za-z]*|AutosaveTests|AutosaveRecoveryTests|PlaybackDriverTests|StagePathTests)/|AppSnapshotTests/flare\('
-          snap_suiteui='(Suite[A-Za-z]*|GoldenImageTests|SnapshotHostTests)/|(suite[A-Za-z]*|snapshotsDrawRealSlidersNotPlaceholders|theCapsuleDrawsOnlyBehindTheCurrentItem|aDisabledBarCommandDrawsDimmerThanAnEnabledOne)\(|AppSnapshotTests/suiteGallery\('
-          journeys=""
           case "$APP" in
-            flare)   model=FlareModelTests;   snap=$snap_flare;                                    journeys=FlareJourneyTests ;;
-            design)  model=DesignModelTests;  snap='Design[A-Za-z]*/|AppSnapshotTests/design\(';   journeys=DesignJourneyTests ;;
-            photo)   model=PhotoModelTests;   snap='Photo[A-Za-z]*/|AppSnapshotTests/photo\(';     journeys=PhotoJourneyTests ;;
-            library) model=LibraryModelTests; snap='Library[A-Za-z]*/|AppSnapshotTests/library\('; journeys=LibraryJourneyTests ;;
-            halo)    model=HaloModelTests;    snap='Halo[A-Za-z]*/|AppSnapshotTests/halo\(';       journeys=HaloJourneyTests ;;
-            suite)   model=SuiteModelTests;   snap="" ;;  # AfterGlow and SuiteModel: no snapshots or journey bundle yet
-            suiteui) model='SuiteUITests|AppAuditTests'; snap=$snap_suiteui;                      journeys=SuiteJourneyTests ;;
+            flare)   journeys=FlareJourneyTests ;;
+            design)  journeys=DesignJourneyTests ;;
+            photo)   journeys=PhotoJourneyTests ;;
+            library) journeys=LibraryJourneyTests ;;
+            halo)    journeys=HaloJourneyTests ;;
+            suite)   journeys="" ;;  # AfterGlow and SuiteModel: no snapshots or journey bundle yet
+            suiteui) journeys=SuiteJourneyTests ;;
             *) echo "::error::app '$APP' is not one of flare, design, photo, library, halo, suite, suiteui"; exit 1 ;;
           esac
-          model="^($model)\."
-          [[ -z "$snap" ]] || snap="^AppSnapshotTests\.($snap)"
+          scope=$(scripts/test-scope app "$APP")
+          model=$(sed -n 1p <<<"$scope") snap=$(sed -n 2p <<<"$scope")
+          perf=$(scripts/test-scope perf)
           echo "journeys=$journeys" >>"$GITHUB_OUTPUT"
           {
             echo "## scoped: $APP"
@@ -194,17 +196,18 @@ jobs:
             echo "- Model tests: \`swift test --filter '$model'\`"
             if [[ -n "$snap" ]]; then echo "- Snapshot tests: \`swift test --filter '$snap' --no-parallel\`"; else echo "- Snapshot tests: none"; fi
             if [[ -n "$journeys" ]]; then echo "- UI journeys: \`scripts/ui-test -only-testing:$journeys\` (quarantined ones still skipped)"; else echo "- UI journeys: none"; fi
+            echo "- Perf and timing tests: skipped above; the Perf step runs $APP's (Tests/perf-suites.txt)"
             echo
             echo "Skipped: the Linux job (lints and every Model's tests), other apps' tests and journeys, and Promote, Dev red and Audit lower (a scoped run never moves main or the audit baseline)."
             echo
           } >>"$GITHUB_STEP_SUMMARY"
           swift build --build-tests
-          # run LABEL ARGS...: one swift test run; its result line goes in the summary.
+          # run LABEL ARGS...: one swift test run without the perf tests; its result line goes in the summary.
           run() {
             local label=$1 log="$RUNNER_TEMP/scoped-$RANDOM.log" status
             shift
             echo "== swift test: $label"
-            swift test --skip-build "$@" 2>&1 | tee "$log"
+            swift test --skip-build "$@" ${perf:+--skip "$perf"} 2>&1 | tee "$log"
             status=${PIPESTATUS[0]}
             echo "- $label: $(grep -E 'Test run with [0-9]+ tests?' "$log" | tail -1 || true)" >>"$GITHUB_STEP_SUMMARY"
             if (( status != 0 )); then
@@ -215,6 +218,28 @@ jobs:
           }
           run "Model tests" --filter "$model"
           [[ -z "$snap" ]] || run "Snapshot tests" --filter "$snap" --no-parallel
+      # The perf and timing tests (Tests/perf-suites.txt; a scoped run: APP's),
+      # alone and one at a time, so other tests' load doesn't skew them. Runs
+      # whether the tests above passed or not, and before Upload snapshots so
+      # the reports they write to .build/snapshots reach the artifact and the
+      # contact sheet. Report only: continue-on-error, and the script never
+      # fails on a number. The job summary gets each test's result and the
+      # numbers it printed; a bound missed by more than 3x (FLAG in
+      # scripts/test-scope) also gets a warning.
+      - name: Perf (report only)
+        if: ${{ !cancelled() }}
+        continue-on-error: true
+        timeout-minutes: 30
+        run: |
+          filter=$(scripts/test-scope perf ${APP:+"$APP"})
+          if [[ -z "$filter" ]]; then
+            echo "### Perf: no perf or timing tests for ${APP:-this run}" >>"$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          log="$RUNNER_TEMP/perf.log"
+          swift test --filter "$filter" --no-parallel 2>&1 | tee "$log" || true
+          python3 scripts/test-died "$log" || true
+          scripts/test-scope perf-report "$log" 2>&1 >>"$GITHUB_STEP_SUMMARY"
       - name: Upload snapshots
         if: always()
         uses: actions/upload-artifact@v4

@@ -30,6 +30,7 @@ You need macOS 26 and Xcode 26 (or Swift 6 on Linux for the Models).
 
 ```bash
 scripts/ci            # lint, build and test: the same gate CI runs
+scripts/ci --changed  # the same lints and build, then only the tests of the targets you touched
 swift run FlareApp    # open Flare (or DesignApp, PhotoApp, LibraryApp, HaloApp)
 ```
 

@@ -1,16 +1,22 @@
 #!/usr/bin/env bash
-# scripts/ci: the one gate. Runs the no-crash lint, the app-state rule, the
-# design lint, the C4 ownership check, the duplicate-code check, the contact
-# sheet, audit-lower, test-died, jetsam-summary and bump-core tests, the journey
-# quarantine check, the mutation anchors, swift build and swift test, then prints PASS or FAIL and exits with the real status.
-# swift build takes its dependencies only from the committed Package.resolved
-# (--force-resolved-versions): a Package.swift whose creative-core revision
-# doesn't match it fails here instead of re-resolving (scripts/bump-core moves both).
-# A swift test that dies without its "Test run with" summary prints TEST PROCESS DIED and the tests it left
-# unfinished (scripts/test-died). CI
-# runs exactly this on Linux and macOS; run it before every PR. On Linux,
-# Package.swift declares only the Model targets, so build and test cover those;
-# on macOS they cover everything.
+# scripts/ci [--changed [BASE]]: the one gate. Runs the no-crash lint, the
+# app-state rule, the design lint, the C4 ownership check, the duplicate-code
+# check, the CI scripts' fixture tests, the journey quarantine check, the
+# mutation anchors, swift build of every target with its tests, and swift
+# test, then prints PASS or FAIL and exits with the real status. swift build takes its dependencies only
+# from the committed Package.resolved (--force-resolved-versions): a
+# Package.swift whose creative-core revision doesn't match it fails here
+# instead of re-resolving (scripts/bump-core moves both). A swift test that
+# dies without its "Test run with" summary prints TEST PROCESS DIED and the
+# tests it left unfinished (scripts/test-died). CI runs plain scripts/ci on
+# Linux and macOS. On Linux, Package.swift declares only the Model targets, so
+# build and test cover those; on macOS they cover everything.
+#
+# --changed is what builders run before a PR: every lint and the same build,
+# then only the tests of the targets the branch touched since its merge base
+# with BASE (default origin/dev), uncommitted and untracked files included
+# (scripts/test-scope changed maps paths to tests). Neither mode runs the
+# perf and timing tests in Tests/perf-suites.txt; CI's Perf step does.
 #
 # The no-crash lint fails on crash-prone constructs in Sources/ (tests exempt):
 #   try!  as!  fatalError(  preconditionFailure(  precondition(  unowned  .first!  .last!
@@ -54,9 +60,8 @@
 # waves.md without writing it (the generated files are written only on dev),
 # and Tests/generated tests scripts/c4-assemble and scripts/waves on fixtures.
 #
-# The contact sheet check runs Tests/contact_sheet, the fixture test for
-# scripts/contact-sheet (the macOS job's review page), and Tests/audit_lower,
-# the decision tests for scripts/audit-lower (CI's baseline lowering). Both need jq.
+# The fixture tests: Tests/contact_sheet, audit_lower, test_died, jetsam,
+# test_scope and bump_core test the scripts of the same names (some need jq).
 #
 # The journey quarantine check runs Tests/quarantine, then scripts/quarantine
 # check on UITests/quarantine.json: every entry names a journey that exists in
@@ -82,6 +87,17 @@ set -uo pipefail
 cd "$(dirname "$0")/.." || exit 1
 
 fail() { echo; echo "CI: FAIL ($1)"; exit 1; }
+
+changed_mode=0
+case "${1:-}" in
+  "") ;;
+  --changed) changed_mode=1 base=${2:-origin/dev} ;;
+  *) echo "usage: scripts/ci [--changed [BASE]]   (BASE defaults to origin/dev)" >&2; exit 2 ;;
+esac
+if (( changed_mode )); then
+  fork=$(git merge-base "$base" HEAD 2>/dev/null) || fail "--changed: $base has no merge base with HEAD (git fetch origin first?)"
+  changed=$( { git diff --name-only "$fork"; git ls-files --others --exclude-standard; } | sort -u)
+fi
 
 echo "== no-crash lint (Sources/)"
 pattern='try!|as!|fatalError\(|preconditionFailure\(|precondition\(|unowned |\.first!|\.last!'
@@ -289,6 +305,8 @@ echo "== test died (Tests/test_died)"
 bash Tests/test_died/test_test_died.sh || fail "test died: scripts/test-died broke its fixture test"
 echo "== jetsam summary (Tests/jetsam)"
 bash Tests/jetsam/test_jetsam_summary.sh || fail "jetsam summary: scripts/jetsam-summary broke its fixture test"
+echo "== test scope (Tests/test_scope)"
+bash Tests/test_scope/test_test_scope.sh || fail "test scope: scripts/test-scope or Tests/perf-suites.txt broke its tests"
 echo "== journey quarantine (UITests/quarantine.json)"
 bash Tests/quarantine/test_quarantine.sh || fail "journey quarantine: scripts/quarantine broke its fixture test"
 scripts/quarantine check || fail "journey quarantine: fix, renew or remove the entries above (the supervisor edits UITests/quarantine.json)"
@@ -307,13 +325,13 @@ if [[ "$(uname)" == Darwin ]]; then
   fi
 fi
 
-echo "== swift build"
-swift build --force-resolved-versions ${flags[@]+"${flags[@]}"} \
+echo "== swift build (every target with its tests)"
+swift build --build-tests --force-resolved-versions ${flags[@]+"${flags[@]}"} \
   || fail "swift build (an out-of-date Package.resolved means the creative-core pin moved by hand: use scripts/bump-core)"
 
-# run_tests LABEL ARGS...: one `swift test` run, its wall time, and on a
-# failure its cause: a dead test process (no "Test run with" summary) names
-# the tests it left running (scripts/test-died).
+# run_tests LABEL ARGS...: one `swift test` run on the build above, its wall
+# time, and on a failure its cause: a dead test process (no "Test run with"
+# summary) names the tests it left running (scripts/test-died).
 logs=()
 trap 'rm -f ${logs[@]+"${logs[@]}"}' EXIT
 run_tests() {
@@ -323,7 +341,7 @@ run_tests() {
   logs+=("$log")
   echo "== swift test: $label"
   start=$SECONDS
-  swift test ${flags[@]+"${flags[@]}"} "$@" 2>&1 | tee "$log"
+  swift test ${flags[@]+"${flags[@]}"} --skip-build "$@" 2>&1 | tee "$log"
   status=${PIPESTATUS[0]}
   echo "== swift test: $label took $((SECONDS - start)) s"
   if (( status != 0 )); then
@@ -332,19 +350,49 @@ run_tests() {
   fi
 }
 
-if [[ "$(uname)" == Darwin ]]; then
-  # AppSnapshotTests renders images. Run in parallel with every other target,
-  # the whole step was killed mid-run with no output (dev runs 38734211999,
-  # 38746333198, 38759641683), most likely by the runner running out of
-  # memory; ci.yml samples memory to confirm it. So it runs on its own, one
-  # test at a time (--no-parallel serializes Swift Testing), and the rest stay
-  # parallel. Each run prints its wall time.
-  run_tests "all but AppSnapshotTests" --skip '^AppSnapshotTests\.'
-  run_tests "AppSnapshotTests, one at a time" --skip-build --filter '^AppSnapshotTests\.' --no-parallel
+# The perf and timing tests run in CI's Perf step, never here. An empty
+# regex would skip every test, so the flag goes in only when there is one.
+perf=$(python3 scripts/test-scope perf) || fail "Tests/perf-suites.txt: fix the line above"
+skip_perf=()
+[[ -z "$perf" ]] || skip_perf=(--skip "$perf")
+
+# run_all: every test but the perf ones.
+run_all() {
+  if [[ "$(uname)" == Darwin ]]; then
+    # AppSnapshotTests renders images. Run in parallel with every other target,
+    # the whole step was killed mid-run with no output (dev runs 38734211999,
+    # 38746333198, 38759641683), most likely by the runner running out of
+    # memory; ci.yml samples memory to confirm it. So it runs on its own, one
+    # test at a time (--no-parallel serializes Swift Testing), and the rest stay
+    # parallel. Each run prints its wall time.
+    run_tests "all but AppSnapshotTests" --skip "^AppSnapshotTests\.${perf:+|$perf}"
+    run_tests "AppSnapshotTests, one at a time" --filter '^AppSnapshotTests\.' ${skip_perf[@]+"${skip_perf[@]}"} --no-parallel
+  else
+    run_tests "all" ${skip_perf[@]+"${skip_perf[@]}"}
+  fi
+}
+
+if (( ! changed_mode )); then
+  run_all
 else
-  run_tests "all"
+  echo "== changed since $base (merge base ${fork:0:12}):"
+  printf '%s\n' "${changed:-(nothing)}" | sed 's/^/  /'
+  scope_args=()
+  [[ "$(uname)" == Darwin ]] || scope_args=(--linux)
+  scope=$(printf '%s\n' "$changed" | python3 scripts/test-scope changed ${scope_args[@]+"${scope_args[@]}"}) \
+    || fail "test-scope: could not map the changed paths"
+  if [[ "$scope" == all ]]; then
+    echo "== a change can reach every test (Package.swift, Package.resolved or a new Sources/ folder): all of them"
+    run_all
+  else
+    tests=$(sed -n 1p <<<"$scope") snaps=$(sed -n 2p <<<"$scope")
+    [[ -z "$tests" ]] || run_tests "changed: $tests" --filter "$tests" ${skip_perf[@]+"${skip_perf[@]}"}
+    [[ -z "$snaps" ]] || run_tests "changed snapshots, one at a time: $snaps" --filter "$snaps" ${skip_perf[@]+"${skip_perf[@]}"} --no-parallel
+    [[ -n "$tests$snaps" ]] || echo "== swift test: no test target covers the changed files; the build above is the check"
+  fi
 fi
 
 echo
-for log in "${logs[@]}"; do grep -E "Test run with [0-9]+ tests?" "$log" | tail -1; done
+for log in ${logs[@]+"${logs[@]}"}; do grep -E "Test run with [0-9]+ tests?" "$log"; done
+(( ! changed_mode )) || echo "Scoped to the changes since $base; plain scripts/ci is the full gate."
 echo "CI: PASS"
