@@ -52,3 +52,5 @@ utc	stage	event	ref	note
 2026-10-16T17:37Z	4	pr-merged	#1476	round 1 fixes all merged
 2026-10-16T17:37Z	4	stage-start	round 2	critic panel on 268ba55
 2026-10-16T17:38Z	4	ci-run	38938043443	scoped: suite on 91f1ba6 green
+2026-10-16T17:46Z	4	round-clean	round 2	panel clean (6 minor, 0 major) #1485-#1490
+2026-10-16T17:47Z	4	fix-round	round 2	fix batch on 6 minors

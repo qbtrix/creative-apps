@@ -4,7 +4,7 @@ Issue: #1332 · Packet: docs/blueprints/suite/features/suite-contracts.md
 Run: act-1a1448a5fd9-0he1 · Session: claude/suite-contracts-lead-rv72k4 · Started: 2026-10-16T11:49Z
 Stage: 4 round 2
 Base: 268ba55b38575566eb01f8600c4af5a8236cb8d2
-Next: round-2 critic panel running on 268ba55 (same five lenses, critics in their own worktrees); then the round-2 fix batch (last round under the cap), then wait for a green full dev run holding every suite-contracts PR and post Belt-Contact-Sheet on #1332
+Next: round-2 fix batch running (wf_3f6cb958-5d3) on #1485-#1490 (last fix round under the cap); then one review after it, relabel anything still open as gap, wait for a green full dev run and post Belt-Contact-Sheet on #1332
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
