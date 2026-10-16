@@ -3,20 +3,25 @@
 # entry skips one UI journey that fails on dev for a known reason while its
 # owner fixes it:
 #   {"test": "Target/Class/testName", "owner": "#<open issue>",
-#    "reason": "why it fails", "expires": "YYYY-MM-DD"}
-# An entry is live while TODAY is before its expires date; from that day on
-# the journey runs again and `check` fails until the entry is renewed or
-# removed. The file is PROTECTED (scripts/fast-lane.sh), so only the
-# supervisor quarantines.
+#    "reason": "why it fails", "expires": "YYYY-MM-DD", "scope": "all"|"full"}
+# scope is optional: `all` (the default) skips the journey in every run;
+# `full` skips it only in full runs, so a scoped run (ci.yml's `app` input)
+# still runs it and its owner keeps the proof while main can promote. An
+# entry is live while TODAY is before its expires date; from that day on the
+# journey runs again and `check` fails until the entry is renewed or removed.
+# The file is PROTECTED (scripts/fast-lane.sh), so only the supervisor
+# quarantines.
 #
 #   check [FILE [TODAY]]  fails on an expired entry, an expiry more than 7
 #                         days after TODAY, an owner that isn't #<number>, an
-#                         empty reason, or a test that isn't in UITests/ (the
-#                         folder FILE sits in). With gh, it also fails when an
-#                         owner issue is closed or missing; without gh, or when
-#                         gh can't reach GitHub, it prints SKIP for that part.
+#                         empty reason, a scope other than all or full, or a
+#                         test that isn't in UITests/ (the folder FILE sits
+#                         in). With gh, it also fails when an owner issue is
+#                         closed or missing; without gh, or when gh can't
+#                         reach GitHub, it prints SKIP for that part.
 #                         scripts/ci runs it.
-#   live [FILE [TODAY]]   prints each live entry as test<TAB>owner<TAB>expires<TAB>reason.
+#   live [FILE [TODAY]]   prints each live entry as
+#                         test<TAB>owner<TAB>expires<TAB>scope<TAB>reason.
 #                         scripts/ui-test skips these with -skip-testing.
 # Defaults: UITests/quarantine.json and today's UTC date. Needs jq. Tested by
 # Tests/quarantine. bash 3.2 compatible.
@@ -30,7 +35,7 @@ REPO="${GH_REPO:-qbtrix/creative-apps}"
 jq -e 'type == "array"' "$file" >/dev/null 2>&1 || { echo "$file: not a JSON array of entries" >&2; exit 1; }
 
 if [[ "$mode" == live ]]; then
-  jq -r --arg today "$today" '.[] | select(.expires > $today) | [.test, .owner, .expires, .reason] | @tsv' "$file"
+  jq -r --arg today "$today" '.[] | select(.expires > $today) | [.test, .owner, .expires, .scope // "all", .reason] | @tsv' "$file"
   exit
 fi
 
@@ -48,7 +53,9 @@ problems=$(jq -r --arg today "$today" --arg max "$max" '.[] | (.test // "(no tes
      "\($t): expires must be YYYY-MM-DD"
    elif .expires <= $today then "\($t): expired on \(.expires): fix it, or renew with a new date and reason"
    elif .expires > $max then "\($t): expires \(.expires), more than 7 days out (latest \($max))"
-   else empty end)' "$file") || exit 1
+   else empty end),
+  (if (.scope // "all") == "all" or .scope == "full" then empty
+   else "\($t): scope must be all or full (full: skipped in full runs only)" end)' "$file") || exit 1
 
 # Each test must exist: UITests/<Target>.swift is the target's main file, and
 # one of its files declares or extends Class and defines func testName(.
@@ -86,4 +93,7 @@ if [[ -n "$problems" ]]; then
   echo "$problems"
   exit 1
 fi
-echo "$(jq length "$file") quarantined, all owned and unexpired"
+full=$(jq '[.[] | select(.scope == "full")] | length' "$file")
+note=""
+(( full == 0 )) || note=", $full skipped in full runs only"
+echo "$(jq length "$file") quarantined, all owned and unexpired$note"

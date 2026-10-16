@@ -9,8 +9,10 @@
 #   scripts/ui-test -only-testing:PhotoJourneyTests
 # Journeys in the quarantine (UITests/quarantine.json, scripts/quarantine) are
 # skipped with -skip-testing, and listed with their owner and expiry here and
-# in the job summary, so a skip is never silent. An unreadable quarantine
-# fails the run before anything builds.
+# in the job summary, so a skip is never silent. An entry with scope `full` is
+# skipped only in a full run: when APP is set (ci.yml's macOS job sets it from
+# its `app` input, so only in a scoped run) it isn't skipped, and is listed
+# as such. An unreadable quarantine fails the run before anything builds.
 #
 #   .build/ui-tests.xcresult   the result bundle (open it in Xcode)
 #   .build/ui-screens/         <app>-<step>.png per journey step, and audit-<app>-<step>.json per
@@ -27,18 +29,25 @@ cd "$(dirname "$0")/.." || exit 1
 
 command -v xcodegen >/dev/null || { echo "ui-test: install xcodegen (see .github/workflows/ci.yml)"; exit 1; }
 live=$(scripts/quarantine live) || { echo "ui-test: UITests/quarantine.json is unreadable (scripts/quarantine check)"; exit 1; }
-skips=()
-if [[ -n "$live" ]]; then
-  echo "ui-test: $(grep -c . <<<"$live") quarantined in UITests/quarantine.json, skipped this run:"
-  summary=$'### Quarantined journeys (skipped)\n\n| test | owner | expires | reason |\n|---|---|---|---|\n'
-  while IFS=$'\t' read -r test owner expires reason; do
+skips=() skipped="" running=""
+while IFS=$'\t' read -r test owner expires scope reason; do
+  [[ -n "$test" ]] || continue
+  where="every run"; [[ "$scope" != full ]] || where="full runs only"
+  row="| \`$test\` | $owner | $expires | $where | ${reason//|/\\|} |"$'\n'
+  if [[ "$scope" == full && -n "${APP:-}" ]]; then
+    running+=$row
+    echo "ui-test: quarantined in full runs only, not skipped in this scoped run: $test  owner $owner  expires $expires"
+  else
     skips+=("-skip-testing:$test")
-    echo "  $test  owner $owner  expires $expires  $reason"
-    summary+="| \`$test\` | $owner | $expires | ${reason//|/\\|} |"$'\n'
-  done <<<"$live"
-  [[ -z "${GITHUB_STEP_SUMMARY:-}" ]] || printf '%s\n' "$summary" >>"$GITHUB_STEP_SUMMARY"
-else
-  echo "ui-test: no journeys quarantined"
+    skipped+=$row
+    echo "ui-test: quarantined, skipped this run: $test  owner $owner  expires $expires  skipped in $where  $reason"
+  fi
+done <<<"$live"
+[[ -n "$live" ]] || echo "ui-test: no journeys quarantined"
+cols=$'| test | owner | expires | skipped in | reason |\n|---|---|---|---|---|\n'
+if [[ -n "${GITHUB_STEP_SUMMARY:-}" ]]; then
+  [[ -z "$skipped" ]] || printf '### Quarantined journeys (skipped)\n\n%s%s\n' "$cols" "$skipped" >>"$GITHUB_STEP_SUMMARY"
+  [[ -z "$running" ]] || printf '### Quarantined in full runs only (not skipped in this scoped run)\n\n%s%s\n' "$cols" "$running" >>"$GITHUB_STEP_SUMMARY"
 fi
 scripts/bundle-apps || exit 1
 xcodegen generate --quiet || exit 1

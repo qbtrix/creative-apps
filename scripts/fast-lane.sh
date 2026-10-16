@@ -15,7 +15,8 @@
 # while dev is red, on purpose: promotion is the guard that keeps main green.
 #
 # Eligibility (all must hold): open, not draft, label `fast-lane`, base
-# BASE_BRANCH, author in FAST_LANE_AUTHORS, size within MAX_LINES/MAX_FILES, no
+# BASE_BRANCH, author in FAST_LANE_AUTHORS, size within MAX_LINES/MAX_FILES
+# (unless every path is under DOCS_RE: the docs tier takes any size), no
 # changed or renamed-away path under PROTECTED (CLAUDE.md's "Never edit" list),
 # no looser app audit (audit_loosens), MERGEABLE, no red or running check on the
 # head, and proof the head passed the gate: a passing check from CI_WORKFLOWS on
@@ -69,6 +70,15 @@ set -euo pipefail
 FAST_LANE_AUTHORS="prakashUXtech"
 MAX_LINES=400
 MAX_FILES=15
+# The docs tier: a PR whose every changed and renamed-away path is under docs/
+# (packets, blueprints with their .wave.json feature data, C4 parts, any .md
+# there) takes the lane at any size; the Design packets waited hours on the
+# 400-line cap. Its proof is every PR's: the Fast-Check marker or a passing CI
+# check, i.e. scripts/ci on its head, which renders the waves (scripts/waves
+# render --dry-run) and assembles the C4 parts with the ownership check.
+# PROTECTED paths under docs/ stay refused, and a file list shorter than the
+# PR's file count (the API's cap) gets no tier.
+DOCS_RE='^docs/'
 # Belt PRs wait for Belt's pre-merge review: the `belt/review` commit status on
 # the head must be success (missing or pending waits, failure is red). Not a
 # ruleset-required check, since merge-queue group commits would never get it.
@@ -568,7 +578,7 @@ decide() {
   head=$(jq -r '.headRefOid' "$pr")
   lines=$((adds + dels))
 
-  local skip="" retarget="" reasons=() pending="" red="" ngreen=0 review=""
+  local skip="" retarget="" reasons=() pending="" red="" ngreen=0 review="" tier=""
 
   log "state=$state draft=$draft base=$base label=$has_label"
   [[ "$state" == "OPEN" ]] || skip="PR is $state"
@@ -585,6 +595,9 @@ decide() {
   fi
   if (( lines <= MAX_LINES && nfiles <= MAX_FILES )); then
     log "size: ok ($lines lines, $nfiles files)"
+  elif grep -qE "$DOCS_RE" "$files" && ! grep -qvE "$DOCS_RE|^\$" "$files" \
+      && (( $(grep -c . "$files") >= nfiles )); then
+    log "size: ok, docs only ($lines lines, $nfiles files)"; tier=", docs only: any size"
   else
     log "size: FAIL ($lines lines, $nfiles files)"
     reasons+=("too big: $lines lines, $nfiles files (max $MAX_LINES lines, $MAX_FILES files)")
@@ -697,7 +710,7 @@ decide() {
   local proof="Fast-Check marker"
   (( nci == 0 )) || proof="$ngreen checks green"
   [[ "$mac" != ok\|* ]] || proof+=", ${mac#ok|}"
-  echo "eligible|$lines|$nfiles|$proof"
+  echo "eligible|$lines|$nfiles|$proof$tier"
 }
 
 write() {  # run a mutating command unless --dry-run

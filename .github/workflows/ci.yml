@@ -195,7 +195,7 @@ jobs:
             echo
             echo "- Model tests: \`swift test --filter '$model'\`"
             if [[ -n "$snap" ]]; then echo "- Snapshot tests: \`swift test --filter '$snap' --no-parallel\`"; else echo "- Snapshot tests: none"; fi
-            if [[ -n "$journeys" ]]; then echo "- UI journeys: \`scripts/ui-test -only-testing:$journeys\` (quarantined ones still skipped)"; else echo "- UI journeys: none"; fi
+            if [[ -n "$journeys" ]]; then echo "- UI journeys: \`scripts/ui-test -only-testing:$journeys\` (quarantine entries of scope all still skipped; scope full ones run)"; else echo "- UI journeys: none"; fi
             echo "- Perf and timing tests: skipped above; the Perf step runs $APP's (Tests/perf-suites.txt)"
             echo
             echo "Skipped: the Linux job (lints and every Model's tests), other apps' tests and journeys, and Promote, Dev red and Audit lower (a scoped run never moves main or the audit baseline)."
@@ -287,7 +287,9 @@ jobs:
       # A scoped run builds every journey bundle first, so a shared change
       # that breaks another app's journeys still fails it, then runs only
       # APP's bundle (suite has none yet). scripts/ui-test passes
-      # -only-testing to xcodebuild and still skips quarantined journeys.
+      # -only-testing to xcodebuild. APP (the job's env) tells it this is a
+      # scoped run: it still skips quarantined journeys of scope `all`, and
+      # runs the `full` ones, which only full runs skip.
       - name: Build every journey bundle
         if: inputs.app
         run: |

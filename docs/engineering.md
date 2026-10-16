@@ -121,8 +121,10 @@ every step.
   the `macOS` job.
 - **Quarantine is owned and expires.** The supervisor can skip a journey that
   keeps failing on `dev` by adding it to `UITests/quarantine.json` with an
-  open owner issue, a reason and an expiry at most 7 days out. `scripts/ui-test`
-  lists every skip in its output and the job summary, and `scripts/ci` fails
+  open owner issue, a reason and an expiry at most 7 days out. An entry with
+  `"scope": "full"` is skipped in full runs only, so a scoped run still runs
+  it and its owner keeps the proof while `main` can promote. `scripts/ui-test`
+  lists every entry in its output and the job summary, and `scripts/ci` fails
   once an entry expires, its owner issue closes, or its test is gone, so the
   list can't grow quietly. Agents never edit the file. Gate: `scripts/ci`.
 - **Every user-facing feature extends its app's journey.** When a PR adds

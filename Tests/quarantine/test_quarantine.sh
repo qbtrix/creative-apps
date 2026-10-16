@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
 # Tests/quarantine/test_quarantine.sh: fixture tests for scripts/quarantine,
-# the journey quarantine's check and its live list for scripts/ui-test. Each
-# case writes a quarantine.json into a scratch UITests/ with a few journey
-# files, fixes TODAY, and runs the script with a stub `gh` that reports the
-# owner issue's state (OPEN, CLOSED, missing, or no access). No network; needs
-# bash and jq. bash 3.2 compatible.
+# the journey quarantine's check (scope included: all, or full for full runs
+# only) and its live list for scripts/ui-test. Each case writes a
+# quarantine.json into a scratch UITests/ with a few journey files, fixes
+# TODAY, and runs the script with a stub `gh` that reports the owner issue's
+# state (OPEN, CLOSED, missing, or no access). No network; needs bash and jq.
+# bash 3.2 compatible.
 #
 # Run: bash Tests/quarantine/test_quarantine.sh   (exit 0 = all pass)
 set -uo pipefail
@@ -108,9 +109,37 @@ run "no gh still fails an expired entry" \
 HaloJourneyTests/HaloJourneyTests/testLayoutAtWidths: expired on 2026-10-01: fix it, or renew with a new date and reason' nogh
 run "an object instead of a list fails" "$GOOD" 1 "$tmp/UITests/quarantine.json: not a JSON array of entries"
 
-run "live lists unexpired entries only, as TSV" \
+# scope: optional, all (the default) or full (skipped in full runs only).
+scoped() { # scoped <scope json value>: an owned entry with that scope
+  jq -c --argjson s "$1" '. + {scope: $s}' <<<"$(entry HaloJourneyTests/HaloJourneyTests/testParentAndBlend '#1035' 'H-J13 play changes nothing' 2026-10-18)"
+}
+FULL=$(scoped '"full"')
+run "a full-scope entry passes and is counted" "[$GOOD, $FULL]" 0 \
+  '2 quarantined, all owned and unexpired, 1 skipped in full runs only'
+run "scope all is the default, spelled out" "[$(scoped '"all"')]" 0 '1 quarantined, all owned and unexpired'
+run "a null scope reads as all" "[$(scoped null)]" 0 '1 quarantined, all owned and unexpired'
+run "an unknown scope fails" "[$(scoped '"scoped"')]" 1 \
+  'HaloJourneyTests/HaloJourneyTests/testParentAndBlend: scope must be all or full (full: skipped in full runs only)'
+run "scope is case-sensitive" "[$(scoped '"Full"')]" 1 \
+  'HaloJourneyTests/HaloJourneyTests/testParentAndBlend: scope must be all or full (full: skipped in full runs only)'
+run "a full-scope entry still needs an unexpired date" \
+  "[$(jq -c '.expires = "2026-10-16"' <<<"$FULL")]" 1 \
+  'HaloJourneyTests/HaloJourneyTests/testParentAndBlend: expired on 2026-10-16: fix it, or renew with a new date and reason'
+run "a full-scope entry still needs at most 7 days" \
+  "[$(jq -c '.expires = "2026-10-24"' <<<"$FULL")]" 1 \
+  'HaloJourneyTests/HaloJourneyTests/testParentAndBlend: expires 2026-10-24, more than 7 days out (latest 2026-10-23)'
+run "a full-scope entry still needs an open owner" "[$FULL]" 1 \
+  'owner #1035 is CLOSED, not open: remove its entries or name an open owner' CLOSED
+run "a full-scope entry passes on Linux without gh" "[$FULL]" 0 'SKIP owner issues not checked: gh not found
+1 quarantined, all owned and unexpired, 1 skipped in full runs only' nogh
+
+run "live lists unexpired entries only, as TSV, scope all by default" \
   "[$GOOD, $(entry HaloJourneyTests/HaloJourneyTests/testLayoutAtWidths '#1019' 'lanes' 2026-10-16)]" 0 \
-  "$(printf 'HaloJourneyTests/HaloLayersJourneyTests/testLayerHousekeeping\t#1177\t2026-10-23\tH-J9 reorders the duplicated row')" \
+  "$(printf 'HaloJourneyTests/HaloLayersJourneyTests/testLayerHousekeeping\t#1177\t2026-10-23\tall\tH-J9 reorders the duplicated row')" \
+  nogh live
+run "live prints each entry's scope" "[$FULL, $(scoped '"all"')]" 0 \
+  "$(printf 'HaloJourneyTests/HaloJourneyTests/testParentAndBlend\t#1035\t2026-10-18\tfull\tH-J13 play changes nothing
+HaloJourneyTests/HaloJourneyTests/testParentAndBlend\t#1035\t2026-10-18\tall\tH-J13 play changes nothing')" \
   nogh live
 run "live on an empty quarantine prints nothing" '[]' 0 '' nogh live
 
