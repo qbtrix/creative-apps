@@ -3,3 +3,6 @@ utc	stage	event	ref	note
 2026-10-16T12:05Z	2	stage-end	#1325	waves: DS-1+DS-2, DS-3, DS-4
 2026-10-16T12:05Z	3	stage-start	wave 1	DS-1, DS-2
 2026-10-16T12:10Z	3	stage-start	wave 1	DS-4 journey-first added to wave 1 (rule 13)
+2026-10-16T11:56Z	3	pr-merged	#1335	DS-1 DesignToolbarItem
+2026-10-16T11:56Z	3	pr-merged	#1330	DS-4 shell journey, skipped
+2026-10-16T13:20Z	3	fix-round	#1329	DS-2 macOS build fix (not a finding round)
