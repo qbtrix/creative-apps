@@ -4,23 +4,24 @@
 // "Noise" layer and its Paste in place, timed together, within 120 ms; the
 // paste fits `maxOpenPixels`, so no resize runs. PB-16: Merge Down of "Noise"
 // onto "Gradient" (two 12 MP layers) and Flatten Image of all three, each
-// within 400 ms. In debug, Copy and Paste of one layer also costs no more
-// than Merge Down of two. All three run in one test, one after another, on
-// one workspace. Each timed call is undone, untimed, before the next, so
+// within 400 ms. All three run in one test, one after another, on one
+// workspace. Each timed call is undone, untimed, before the next, so
 // every round starts from the same stack. All three touch every pixel, so as
 // in PhotoBudgetTests the median is gated in a release build
 // (`swift test -c release -Xswiftc -enable-testing --filter
 // PhotoEditBudgetTests`, which `@testable` needs to swap the services) and
 // only reported in debug, which is what CI runs. Every build prints p50,
-// p95 and max, and a series with fewer than `rounds` samples fails. Runs on
-// Linux and macOS.
+// p95 and max, and a series with fewer than `rounds` samples fails. Debug
+// does not compare copy and paste with Merge Down: Merge Down is fast now
+// (#1198, #1250), and copy and paste is bounded by CoreRaster's per-pixel
+// 8-bit conversion (creative-core#309), so in debug their order is a coin
+// flip, not a property of the code. Runs on Linux and macOS.
 import CoreRaster
 @testable import PhotoModel
 import Testing
 
 #if DEBUG
-/// Debug reports the medians; it gates only the sample count and the order
-/// of copy and paste against merge down.
+/// Debug reports the medians; it gates only the sample count.
 private let gated = false
 /// Timed calls per series. Debug's per-pixel loops make one round cost
 /// minutes (Merge Down about 65 s, Flatten about 97 s on a Linux worker), so
@@ -44,10 +45,6 @@ private let rounds = 5
         check(copyPaste, within: .milliseconds(120))
         check(merge, within: .milliseconds(400))
         check(flatten, within: .milliseconds(400))
-        // Debug's gate: the lighter edit never costs more than the heavier one.
-        if !gated {
-            #expect(copyPaste.p50 <= merge.p50, "copy and paste \(copyPaste.p50) over merge down \(merge.p50)")
-        }
     }
 
     private func copyPaste(_ workspace: inout PhotoWorkspace) -> Series {
