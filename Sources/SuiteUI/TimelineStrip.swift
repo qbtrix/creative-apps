@@ -254,7 +254,8 @@ public struct TimelineStrip<ID: Hashable & Sendable>: View {
         return TimelinePlayhead(
             mapping: mapping, playhead: playhead, unit: unit, fps: fps,
             scroll: CGPoint(x: scrollX, y: snapshot ? 0 : visibleY?.lowerBound ?? 0),
-            keys: TimelinePlayhead.keys(at: mapping.clamp(playhead), in: tracks, rows: rows), onScrub: onScrub
+            keys: TimelinePlayhead.keys(at: mapping.clamp(playhead), in: tracks, rows: rows), workArea: workArea,
+            onScrub: onScrub
         ).equatable()
             .padding(.top, layout.toolbarHeight)
             .padding(.leading, SuiteSize.timelineLabelColumn + TimelinePlayheadGrab.divider)

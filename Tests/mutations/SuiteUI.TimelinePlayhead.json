@@ -1,4 +1,5 @@
 [
 {"label":"the changed-frame guard is dropped, so a scrub repeats a frame (#1297)","file":"Sources/SuiteUI/TimelinePlayhead.swift","find":"guard frame != last else { return }","replace":"_ = last","tests":"TimelinePlayheadTests|SuiteTimelineScrubWindowTests"},
-{"label":"the band is the 2 pt line, so a press beside it misses","file":"Sources/SuiteUI/TimelinePlayhead.swift","find":"static let band: CGFloat = SuiteSize.timelineKeyframeHit","replace":"static let band: CGFloat = 2","tests":"TimelinePlayheadTests"}
+{"label":"the band is the 2 pt line, so a press beside it misses","file":"Sources/SuiteUI/TimelinePlayhead.swift","find":"static let band: CGFloat = SuiteSize.timelineKeyframeHit","replace":"static let band: CGFloat = 2","tests":"TimelinePlayheadTests"},
+{"label":"the upper dim is dropped, so the lanes after the work area stay bright","file":"Sources/SuiteUI/TimelinePlayhead.swift","find":"(tickX(mapping, workArea.upperBound), tickX(mapping, mapping.duration)),","replace":"","tests":"TimelinePlayheadTests"}
 ]
