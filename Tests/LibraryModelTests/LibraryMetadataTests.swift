@@ -148,5 +148,5 @@ private func threeSelected() -> LibraryCatalog {
     catalog.setFlag(.reject)
     #expect(catalog.items == before)
     #expect(catalog.history.undo.isEmpty)
-    #expect(catalog.cullError == "Couldn't set the flag: this window shows built-in sample data, not photos on disk.")
+    #expect(catalog.cullError == "Couldn't set the flag: this window shows built-in sample data, not photos on disk. Import a folder to rate your own photos.")
 }

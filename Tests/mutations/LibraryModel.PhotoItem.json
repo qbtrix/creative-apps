@@ -1,0 +1,16 @@
+[
+  {
+    "label": "the cull summary names the label by color alone",
+    "file": "Sources/LibraryModel/PhotoItem.swift",
+    "find": "if let label { parts.append(\"\\(label.rawValue) label\") }",
+    "replace": "if let label { parts.append(label.rawValue) }",
+    "tests": "LibraryPhotoItemTests.swift"
+  },
+  {
+    "label": "the cull summary drops the label",
+    "file": "Sources/LibraryModel/PhotoItem.swift",
+    "find": "if let label { parts.append(\"\\(label.rawValue) label\") }",
+    "replace": "if label == nil { parts.append(\"No label\") }",
+    "tests": "LibraryPhotoItemTests.swift"
+  }
+]

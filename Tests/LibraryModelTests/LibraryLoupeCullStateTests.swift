@@ -43,5 +43,5 @@ import Testing
     catalog.cull(.flag(.pick))
     catalog.cull(.label(.red))
     let position = try #require(catalog.loupePosition)
-    #expect(catalog.loupeReadout == "\(first.name)  ·  \(position)  ·  3 stars, Picked, Red")
+    #expect(catalog.loupeReadout == "\(first.name)  ·  \(position)  ·  3 stars, Picked, Red label")
 }

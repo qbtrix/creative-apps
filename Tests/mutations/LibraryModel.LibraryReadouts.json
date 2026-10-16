@@ -1,0 +1,16 @@
+[
+  {
+    "label": "a refused cull on sample data offers no import",
+    "file": "Sources/LibraryModel/LibraryReadouts.swift",
+    "find": "cullError.hasSuffix(LibraryNoticeContent.importHint) ? .importFolder : nil",
+    "replace": "nil",
+    "tests": "LibraryRatingTests.swift"
+  },
+  {
+    "label": "every cull error offers import, even one import can't fix",
+    "file": "Sources/LibraryModel/LibraryReadouts.swift",
+    "find": "cullError.hasSuffix(LibraryNoticeContent.importHint) ? .importFolder : nil",
+    "replace": ".importFolder",
+    "tests": "LibraryRatingTests.swift"
+  }
+]
