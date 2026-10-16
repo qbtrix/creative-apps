@@ -1,0 +1,23 @@
+[
+  {
+    "label": "the inspector reads the grid selection, not the loupe photo",
+    "file": "Sources/LibraryModel/MetadataEditing.swift",
+    "find": "        let ids = cullTargets\n        return PhotoMetadata(items.filter { ids.contains($0.id) })",
+    "replace": "        let ids = selection\n        return PhotoMetadata(items.filter { ids.contains($0.id) })",
+    "tests": "LibraryLoupeCullStateTests.swift"
+  },
+  {
+    "label": "the loupe readout drops the cull summary",
+    "file": "Sources/LibraryModel/LibraryReadouts.swift",
+    "find": "\"\\(photo.name)  ·  \\(position)  ·  \\(photo.cullSummary)\"",
+    "replace": "\"\\(photo.name)  ·  \\(position)\"",
+    "tests": "LibraryLoupeCullStateTests.swift"
+  },
+  {
+    "label": "the loupe readout shows outside the loupe",
+    "file": "Sources/LibraryModel/LibraryReadouts.swift",
+    "find": "guard let photo = loupeItem, let position = loupePosition else { return nil }",
+    "replace": "guard let photo = loupeItem ?? items.first, let position = loupePosition ?? Optional(\"\") else { return nil }",
+    "tests": "LibraryLoupeCullStateTests.swift"
+  }
+]
