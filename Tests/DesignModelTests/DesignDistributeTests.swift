@@ -1,8 +1,9 @@
 // DesignDistributeTests.swift: LiveAligning, the live Align and Distribute
 // (QD-V6, exact within 1e-9). Several layers align to the union of their
-// frames, a locked one counting toward it but staying put; Distribute keeps the
-// outer two and makes every gap equal, and refuses fewer than three; one layer
-// lands exactly where today's alignLayer puts it. Runs on Linux and macOS.
+// frames, a locked one (or one inside a locked group) counting toward it but
+// staying put; Distribute keeps the outer two and makes every gap equal, and
+// refuses fewer than three or a locked layer between them; one layer lands
+// exactly where today's alignLayer puts it. Runs on Linux and macOS.
 import DesignModel
 import Testing
 
@@ -43,6 +44,16 @@ private func threeInARow(middleLocked: Bool = false) throws -> DesignPage {
     #expect(frames(top, ["l", "m", "r"]) == [rc(10, 20, 30, 30), rc(50, 20, 30, 30), rc(200, 20, 30, 30)])
 }
 
+@Test func aLayerInsideALockedGroupCountsButStays() throws {
+    // m sits in a locked group, so Align Bottom reaches y 70 through r and leaves m where it is.
+    let group = DesignNode(id: "g", name: "G", kind: .group, frame: rc(50, 20, 30, 30),
+                           children: [rect("m", rc(50, 20, 30, 30))], isLocked: true)
+    let page = try page([rect("l", rc(10, 30, 30, 30)), group, rect("r", rc(200, 40, 30, 30))])
+    let edit = try LiveAligning().align(.bottom, ["l", "m", "r"], on: page)
+    #expect(frames(edit, ["l", "r"]) == [rc(10, 40, 30, 30), rc(200, 40, 30, 30)])
+    #expect(edit.nodes.first { $0.id == "g" }?.children.first?.frame == rc(50, 20, 30, 30))
+}
+
 @Test func onlyLockedLayersRefuse() throws {
     let page = try page([rect("m", rc(50, 20, 30, 30), locked: true), rect("n", rc(90, 20, 30, 30), locked: true)])
     #expect(throws: DesignRefusal.locked("M")) { try LiveAligning().align(.left, ["m", "n"], on: page) }
@@ -67,6 +78,12 @@ private func threeInARow(middleLocked: Bool = false) throws -> DesignPage {
     let page = try page([rect("a", rc(0, 0, 20, 20)), rect("b", rc(100, 0, 20, 20))])
     #expect(throws: DesignRefusal.tooFewToDistribute) { try LiveAligning().distribute(.horizontal, ["a", "b"], on: page) }
     #expect(LiveAligning().distributeHelp(.vertical, ["a", "b"], on: page) == "Select three or more layers to distribute.")
+}
+
+@Test func distributeRefusesALockedInnerLayer() throws {
+    let page = try threeInARow(middleLocked: true)
+    #expect(throws: DesignRefusal.locked("M")) { try LiveAligning().distribute(.horizontal, ["l", "m", "r"], on: page) }
+    #expect(LiveAligning().distributeHelp(.horizontal, ["l", "m", "r"], on: page) == "Unlock M to change it.")
 }
 
 @Test func alignTopOnTheCardsRow() throws {

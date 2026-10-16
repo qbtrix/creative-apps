@@ -1,7 +1,7 @@
 // DesignMarqueeTests.swift: LiveMarquee on a `cards`-shaped tree built here with
 // DesignPage's memberwise init: the marquee picks the touched layers of one level
 // in paint order, never a hidden or locked layer or one inside them, and touching
-// is closed intervals. Runs on Linux and macOS.
+// is closed intervals on every edge. Runs on Linux and macOS.
 @testable import DesignModel
 import Testing
 
@@ -73,6 +73,7 @@ import Testing
     @Test func aZeroSizeRectOnAnEdgeTouches() {
         #expect(pick(pt(200, 140), pt(200, 140), in: "Desktop") == ["A"])
         #expect(pick(pt(500, 220), pt(500, 220), in: "Desktop") == ["B"])
+        #expect(pick(pt(100, 100), pt(100, 100), in: "Desktop") == ["A"])
         #expect(pick(pt(201, 140), pt(201, 140), in: "Desktop") == [])
     }
 
