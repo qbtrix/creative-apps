@@ -8,7 +8,7 @@
 // stroke: the tile layers show it, PhotoEditor's body runs at most once
 // (a debug-only counter) and no large layer is drawn on the CPU (CALayer
 // `display`, swizzled for the process); after it, the window's workspace holds
-// the stroke. NSHostingView's layout passes are reported, not judged: SwiftUI
+// the stroke as one "Undo Paint" step. NSHostingView's layout passes are reported, not judged: SwiftUI
 // runs one per mouse event for the gesture, cheap when no body changed.
 // PHOTO_WINDOW_STROKE_SECONDS=20 first strokes for that long, for `sample`.
 import AppKit
@@ -88,6 +88,7 @@ import Testing
         if let editorRuns { #expect(editorRuns <= 1, "the editor ran again during the stroke: \(report)") }
         #expect(big.isEmpty, "a large layer was drawn on the CPU during the stroke: \(report)")
         #expect(after.isDirty && after.revision > before.revision, "the window never took the stroke: \(report)")
+        #expect(after.undoActionName == "Undo Paint", "mouse-up left no Paint step: \(report)")
     }
 
     /// PhotoEditor's body runs so far; nil in release, which has no counter.
