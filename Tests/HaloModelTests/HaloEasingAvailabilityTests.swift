@@ -46,7 +46,7 @@ func easingEditsWaitForAPickedKey(services: HaloServices) throws {
     var (project, ball) = try keyedBall(services)
     project.selectLayer(ball)
     for command in easingEdits {
-        #expect(project.unavailableHelp(for: command) == "Pick a key in the EASING list first.", "\(command)")
+        #expect(project.unavailableHelp(for: command) == "Pick a span in the EASING list first.", "\(command)")
     }
     for command in picks(ball) {
         #expect(project.unavailableHelp(for: command) == nil, "\(command)")
@@ -56,7 +56,7 @@ func easingEditsWaitForAPickedKey(services: HaloServices) throws {
         #expect(project.unavailableHelp(for: command) == nil, "\(command)")
     }
     project.clearKeySelection()
-    #expect(project.unavailableHelp(for: .setEasing(.easeIn)) == "Pick a key in the EASING list first.")
+    #expect(project.unavailableHelp(for: .setEasing(.easeIn)) == "Pick a span in the EASING list first.")
 }
 
 @Test(arguments: [HaloServices.fake, .live])

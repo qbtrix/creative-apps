@@ -1,20 +1,20 @@
 // HaloEasingInspector.swift: the EASING group of Halo's layer inspector
 // (#428, EZ-6), in the house shape of Flare's easing inspector. One row per
-// `model.keySegments` segment (a plain Button on a filled Studio row: its
-// title, "Position X, frames 0–24", in secondary text left on one line, and
-// its easing's title as value right, which truncates first; selected while
-// picked); a click picks it (`.selectKey`, Shift extends) and Escape picks
+// `model.keySegments` segment (a plain Button on a filled Studio row,
+// `HaloEasingSegmentLabel`: its title, "Position X, frames 0–24", in
+// secondary text left and its easing's title right on one line while both
+// fit whole, else the easing under the title, so neither truncates; while
+// picked, the selected well and a 1 pt accent border); a click picks it (`.selectKey`, Shift extends) and Escape picks
 // nothing (`.clearKeySelection`). With a pick: the five presets as
 // PresetGrid chips in `chipRows` (two short ones a row, "Ease In and Out"
 // alone, so no title truncates; the on chip is `model.pickedPreset`, none
 // for a custom curve) sending `.setEasing`, SuiteUI's CurveEditor
 // (`halo.easing`, handles `halo.easing.handle1`/`handle2`) sending
-// `.moveEasingHandle`, and X1 Y1 X2 Y2 StudioScrubRows (`handleHelp` says
-// what each is) sending `.setCustomEasing`, captioned "X is time, Y is
-// progress"; every curve drag, nudge and scrub ends in `.endEasingDrag`, so
+// `.moveEasingHandle` (tooltip `curveTip`), and X1 Y1 X2 Y2 StudioScrubRows (`handleHelp` says
+// what each is) sending `.setCustomEasing`, captioned `curveNote`; every curve drag, nudge and scrub ends in `.endEasingDrag`, so
 // each is one undo step. With no segment the group starts collapsed (no
-// extra height under the fold, #1412); open, it reads "Key a property to
-// shape its easing.". None picked: "Pick a key above.". A refusal on
+// extra height under the fold, #1412); open, it reads `emptyNote`. None
+// picked: `unpickedNote`. A refusal on
 // `halo.easing` shows under the group. Every control goes through
 // `.haloControl` with a `halo.easing.*` id, disabled with
 // `model.unavailableHelp(for:)` as help. It only reads the model and calls
@@ -31,6 +31,15 @@ struct HaloEasingInspector: View {
     /// opens it to show its text.
     var expandsWhenEmpty = false
     @State private var hovered: HaloKeyRef?
+
+    /// The open group's text with no segment: how to make one (#1417).
+    static let emptyNote = "Click a property's stopwatch, then add a second key to shape the easing between them."
+    /// The text under the rows with none picked: a row is a span (#1454).
+    static let unpickedNote = "Pick a span above to shape its easing."
+    /// The caption under X1 to Y2: what the curve's axes and dashed line are (#1416).
+    static let curveNote = "X is time, Y is progress: 0 at this key, 1 at the next. The dashed line is Linear."
+    /// The curve's tooltip while it can act (#1416).
+    static let curveTip = "Drag a handle to shape the easing between this key and the next."
 
     /// The preset chips a row: the short titles two by two, "Ease In and
     /// Out" alone, so every title fits at the inspector's minimum width.
@@ -50,12 +59,18 @@ struct HaloEasingInspector: View {
         picked ? SuiteColor.selectedWell : hovered ? SuiteColor.rowHover : SuiteColor.row
     }
 
+    /// A segment row's border: accent while picked, so color isn't the
+    /// pick's only cue (#1422); none otherwise.
+    static func rowBorder(picked: Bool) -> Color? {
+        picked ? SuiteColor.accent : nil
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             let segments = model.keySegments
             if segments.isEmpty {
                 InspectorSection("Easing", isExpanded: expandsWhenEmpty) {
-                    note("Key a property to shape its easing.")
+                    note(Self.emptyNote)
                 }
             } else {
                 InspectorSection("Easing") {
@@ -63,7 +78,7 @@ struct HaloEasingInspector: View {
                     if let segment = model.pickedSegment, let handles = model.easingHandles {
                         editor(segment, handles: handles)
                     } else {
-                        note("Pick a key above.")
+                        note(Self.unpickedNote)
                     }
                 }
                 .onExitCommand { perform(.clearKeySelection) }
@@ -88,29 +103,16 @@ struct HaloEasingInspector: View {
         return Button {
             perform(.selectKey(key, extending: NSEvent.modifierFlags.contains(.shift)))
         } label: {
-            HStack(spacing: SuiteSpacing.s) {
-                Image(systemName: "diamond.fill")
-                    .font(SuiteFont.rulerLabel)
-                    .imageScale(.small)
-                    .foregroundStyle(SuiteColor.keyframed)
-                Text(segment.title)
-                    .font(SuiteFont.inspectorLabel)
-                    .foregroundStyle(segment.isPicked ? SuiteColor.accentText : SuiteColor.textSecondary)
-                    .lineLimit(1)
-                    .fixedSize(horizontal: true, vertical: false)
-                    .layoutPriority(1)
-                Spacer(minLength: SuiteSpacing.s)
-                Text(segment.easingTitle)
-                    .font(SuiteFont.inspectorValue)
-                    .foregroundStyle(SuiteColor.textPrimary)
-                    .lineLimit(1)
-                    .truncationMode(.tail)
-            }
-            .padding(.horizontal, SuiteSpacing.m)
-            .frame(maxWidth: .infinity, minHeight: SuiteSize.chip, maxHeight: SuiteSize.chip, alignment: .leading)
-            .background(
-                Self.rowFill(picked: segment.isPicked, hovered: key == hovered),
-                in: RoundedRectangle(cornerRadius: SuiteRadius.small))
+            HaloEasingSegmentLabel(title: segment.title, value: segment.easingTitle, picked: segment.isPicked)
+                .frame(maxWidth: .infinity, minHeight: SuiteSize.chip, alignment: .leading)
+                .background(
+                    Self.rowFill(picked: segment.isPicked, hovered: key == hovered),
+                    in: RoundedRectangle(cornerRadius: SuiteRadius.small))
+                .overlay {
+                    if let border = Self.rowBorder(picked: segment.isPicked) {
+                        RoundedRectangle(cornerRadius: SuiteRadius.small).strokeBorder(border, lineWidth: 1)
+                    }
+                }
             .contentShape(RoundedRectangle(cornerRadius: SuiteRadius.small))
         }
         .buttonStyle(.plain)
@@ -147,6 +149,7 @@ struct HaloEasingInspector: View {
                 },
                 onEnd: { perform(.endEasingDrag) })
                 .disabled(curveHelp != nil)
+                .help(curveHelp ?? Self.curveTip)
                 .haloControl(id: "halo.easing", enabled: curveHelp == nil, help: curveHelp, identifies: false)
                 .haloControl(id: "halo.easing.handle1", enabled: curveHelp == nil, help: curveHelp, identifies: false)
                 .haloControl(id: "halo.easing.handle2", enabled: curveHelp == nil, help: curveHelp, identifies: false)
@@ -154,7 +157,7 @@ struct HaloEasingInspector: View {
             scrubRow("Y1", handles, first: true, x: false)
             scrubRow("X2", handles, first: false, x: true)
             scrubRow("Y2", handles, first: false, x: false)
-            note("X is time, Y is progress: 0 at this key, 1 at the next.")
+            note(Self.curveNote)
         }
     }
 
@@ -181,5 +184,58 @@ struct HaloEasingInspector: View {
     /// The cubic Bézier easing through `handles`.
     private static func curve(_ handles: (first: HaloPoint, second: HaloPoint)) -> HaloEasing {
         .cubicBezier(x1: handles.first.x, y1: handles.first.y, x2: handles.second.x, y2: handles.second.y)
+    }
+}
+
+/// A segment row's text (#1450, #1453): the title left and the easing's
+/// title right on one line while both fit whole, else the easing under the
+/// title. Neither truncates. `oneLine` and `twoLines` are exactly what the
+/// row draws, so HaloEasingSnapshots measures them.
+struct HaloEasingSegmentLabel: View {
+    let title: String
+    let value: String
+    var picked = false
+
+    var body: some View {
+        ViewThatFits(in: .horizontal) {
+            oneLine
+            twoLines
+        }
+    }
+
+    /// Title and value side by side, at least `SuiteSpacing.s` apart.
+    var oneLine: some View {
+        HStack(spacing: 0) {
+            titleText
+            Spacer(minLength: SuiteSpacing.s)
+            valueText
+        }
+        .padding(.horizontal, SuiteSpacing.m)
+    }
+
+    /// The value under the title, each on its own line.
+    var twoLines: some View {
+        VStack(alignment: .leading, spacing: SuiteSpacing.xxs) {
+            titleText
+            valueText
+        }
+        .padding(.horizontal, SuiteSpacing.m)
+        .padding(.vertical, SuiteSpacing.xs)
+    }
+
+    private var titleText: some View {
+        Text(verbatim: title)
+            .font(SuiteFont.inspectorLabel)
+            .foregroundStyle(picked ? SuiteColor.accentText : SuiteColor.textSecondary)
+            .lineLimit(1)
+            .fixedSize()
+    }
+
+    private var valueText: some View {
+        Text(verbatim: value)
+            .font(SuiteFont.inspectorValue)
+            .foregroundStyle(SuiteColor.textPrimary)
+            .lineLimit(1)
+            .fixedSize()
     }
 }
