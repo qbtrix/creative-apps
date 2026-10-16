@@ -59,14 +59,23 @@ for them by name.
    app's `waves.md`) and `**Lead branch:**`; `**Covers:**` (issues);
    `**Depends on:**` (feature issues, SuiteUI and creative-core issues);
    the blueprint sections it builds on.
-2. **Journey steps.** The numbered steps a user takes, each naming the task
+2. **Slices** (contract-first packets, Design first). One table:
+   `| slice | behavior (one sentence) | tasks | journeys | waits on |`. A
+   slice is the unit of done: 2 to 5 tasks, at least one journey that
+   exists or that one of its tasks adds (a Linux Model walk for a
+   Model-only slice), and what its tasks wait on outside the slice (a
+   feature, or another feature's contract slice). The same data goes in the
+   feature's `.wave.json` under `slices`, with each slice's owned files;
+   `scripts/waves check` fails when two slices that can run at once own one
+   file. A feature's first slice publishes what other features plug into.
+3. **Journey steps.** The numbered steps a user takes, each naming the task
    and the journey test (`<X>-J<n>`) that proves it.
-3. **Screens and states.** Each screen state the feature adds and the
+4. **Screens and states.** Each screen state the feature adds and the
    snapshot PNG that shows it.
-4. **Contract slice.** The types, protocols and methods the feature adds or
+5. **Contract slice.** The types, protocols and methods the feature adds or
    fills in, with signatures.
-5. **Pseudocode.** The logic that isn't obvious from the contract.
-6. **Tasks.** One table, one row per task, one PR per task:
+6. **Pseudocode.** The logic that isn't obvious from the contract.
+7. **Tasks.** One table, one row per task, one PR per task:
 
    | id | issue | what | owned files | depends on | size |
    |---|---|---|---|---|---|
@@ -78,7 +87,7 @@ for them by name.
      such as `#333`), under rule (b). `–` when none.
    - **size:** at most 400 changed lines and 15 files. Split anything
      bigger.
-7. **Build waves.** Rule (c): one line per wave, then its independent
+8. **Build waves.** Rule (c): one line per wave, then its independent
    tasks, then the longest chain:
 
    ```
@@ -87,13 +96,13 @@ for them by name.
    - Wave 3: EZ-3, EZ-7, EZ-9 (blueprint prose and design.md, final).
    Longest chain: EZ-1 → EZ-2 → EZ-3 (3).
    ```
-8. **Acceptance test per task.** `| id | test | fails when |`, one row per
+9. **Acceptance test per task.** `| id | test | fails when |`, one row per
    task. A test that fails before the task and passes after.
-9. **Quality tests.** `| quality row | budget | test |`: budgets, no dead
+10. **Quality tests.** `| quality row | budget | test |`: budgets, no dead
    controls, one gesture one step, keyboard parity, the audit.
-10. **Done check.** Journeys green on the `feature-done` CI run, audit zero
+11. **Done check.** Journeys green on the `feature-done` CI run, audit zero
     new, the contact sheet comment.
-11. **Review notes folded in** (optional). What a review changed.
+12. **Review notes folded in** (optional). What a review changed.
 
 ## The three rules
 

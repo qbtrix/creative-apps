@@ -28,6 +28,28 @@ that fix (its EW-5b), so this feature, filed after editor-in-window closes,
 never starts on a shell that still overflows. If #933 has reopened by the
 time DS-4 runs, DS-4 waits on it and records that in RECORD.md.
 
+**In the v3 Design pilot** this feature still waits only on editor-in-window
+(#1079). design-window's contract slice DW-a waits on all of it, because
+DS-2 and DS-3 rewrite the files DW-a edits (`DesignIntent.swift`,
+`DesignWindow.swift`, `DesignEditor.swift`, `DesignLayersPanel.swift`,
+`UITests/DesignJourneyTests.swift`), and every wave-1 view slice waits on
+DW-a. So it sits on the path to the wave-1 views; the Model slices of
+design-contracts, design-seams and wave 1 run beside it.
+
+## Slices
+
+A slice is the unit of done: its tasks have merged and its journeys pass on
+the Design-scoped macOS run.
+
+| slice | behavior (one sentence) | tasks | journeys | waits on |
+|---|---|---|---|---|
+| DP-a | The toolbar's eight commands each act or say why, and Add Page and Delete Page sit in a row under the pages. | DS-1, DS-2 | J3 | editor-in-window (#1079, SuiteUI) |
+| DP-b | Design opens in the suite window with pages and layers in the sidebar, Properties in the inspector and the floating tool box over the canvas, in light and dark. | DS-3, DS-4 | J0, DS-J1 to DS-J5 | DP-a (DS-3) |
+
+No task here changes a drag or a scrub: DS-J3's rectangle drag goes through
+today's canvas route. The rule that the editor body doesn't run per sample
+lands after this feature, in design-window's DW-b.
+
 **Owns only** `Sources/DesignApp/`, `Sources/DesignModel/`,
 `Tests/DesignModelTests/`, `UITests/DesignJourneyTests*.swift` and the
 `Design*` snapshot files in `Tests/AppSnapshotTests/`. It does not edit

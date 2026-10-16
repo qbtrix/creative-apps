@@ -111,6 +111,12 @@ every step.
   bundles are built and uploads the folder as the `ui-screens` artifact
   (`gh run download <id> -n ui-screens`). A failed step fails the job. Gate:
   the `macOS` job.
+- **Quarantine is owned and expires.** The supervisor can skip a journey that
+  keeps failing on `dev` by adding it to `UITests/quarantine.json` with an
+  open owner issue, a reason and an expiry at most 7 days out. `scripts/ui-test`
+  lists every skip in its output and the job summary, and `scripts/ci` fails
+  once an entry expires, its owner issue closes, or its test is gone, so the
+  list can't grow quietly. Agents never edit the file. Gate: `scripts/ci`.
 - **Every user-facing feature extends its app's journey.** When a PR adds
   something a person can see or do, it adds the steps that do it to
   `<X>JourneyTests`: a new `test...` method for a new journey, or more steps in
@@ -156,6 +162,11 @@ every step.
   `CI: PASS` on your branch rebased on `origin/dev`, and the PR body carries
   the `Fast-Check: pass` / `Head: <sha>` marker for that head. Both CI jobs
   run on `dev` once a feature is built; `main` only takes a green `dev` SHA.
+- **Proof is per app.** A slice is verified by a green scoped run on `dev`
+  (`ci.yml` with `app`, titled `scoped: <app>`): every target and bundle
+  builds, and only that app's Model tests, snapshots and journeys run, so
+  another app's red test can't block it. Only a full run moves `main`.
+  Gate: the `macOS (<app>)` job.
 
 ## Reading cost
 

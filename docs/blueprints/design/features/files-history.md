@@ -13,15 +13,33 @@ status ids). The lead files at stage 1 one `gap` issue, "Design: a journey
 for opening bad files" (`gap`, `line:design`, `p1`, `in-progress`;
 blueprint 8.1), which FH-6 closes.
 
-**Depends on:** the design-window feature issue (the window's launch
-arguments `-DesignFixture`, `-DesignSaveTo`, `-DesignOpenFile` and
-`perform`; design-seams' `LiveFiling` stub) and, through it, #778. The top
-bar's save status is editor-chrome EC-4 (#339, `EditorSaveStatus`); until
-that feature merges, FH-4 shows the state as plain text in the status line
-(`design.status.save`) and the lead files a `line:design` follow-up,
-"Design: adopt `EditorSaveStatus` in the top bar", with `Depends on:` the
+**Depends on:** the design-contracts feature issue (the `LiveFiling`
+stub; `DesignFile.swift`, which passes to this feature when it closes):
+FH-2 and FH-1 start then, and FH-6 needs only FH-1 (`-DesignOpenFile`
+exists on `dev`). FH-3, FH-4, FH-5 and FH-7 wait on design-window's
+contract slice DW-a, which hands over `DesignCommands.swift` and two slot
+files it creates empty: `DesignSaveStatus.swift` (the window subtitle,
+the save state's place on `SuiteWindow` after shell-parity, and the
+`design.status.save` label in the status line) and `DesignClosePrompt.swift`
+(the close prompt on the window root). So no task here edits
+`DesignWindow.swift` or `DesignEditor.swift`, which stay design-window's.
+The styled save status is editor-chrome EC-4 (#339, `EditorSaveStatus`);
+until it merges FH-4 shows plain text, and the lead files a `line:design`
+follow-up, "Design: adopt `EditorSaveStatus`", with `Depends on:` the
 editor-chrome feature issue once it is filed (#339 until then). P4 needs
 #330 and #333 (suite-harness). No creative-core issue.
+
+## Slices
+
+A slice is the unit of done: its tasks have merged and its journeys pass on
+the Design-scoped macOS run.
+
+| slice | behavior (one sentence) | tasks | journeys | waits on |
+|---|---|---|---|---|
+| FH-a | Saving and opening go through the live filing with the same bytes, the document knows when it is unsaved, and opening a bad file says exactly what is wrong. | FH-2, FH-1, FH-6 | J16 | design-contracts (the feature) |
+| FH-b | Undo in a text field undoes the typing, the window says when the file is saved, closing with unsaved changes asks first, and a 2,000-layer file opens within budget. | FH-3, FH-4, FH-5, FH-7 | J13, J14, P4 | FH-a (FH-3, FH-4, FH-7); design-window DW-a (FH-3, FH-4, FH-5, FH-7) |
+
+No drag or scrub here.
 
 Blueprint sections: 4 (J3, J13, J14, J16, P4; the bad files), 5.4
 (`DocumentFiling`), 6 (rule 6, the alerts row, File > Close), 7.1 (QD-S11
@@ -132,11 +150,11 @@ carries `feature-done`. Paths drop `Sources/DesignModel/` and
 |---|---|---|---|---|---|
 | FH-1 | – | The codec moves into `LiveFiling`; `DesignFile.swift` calls `services.filing`; same bytes | `Live/LiveFiling.swift`, `DesignFile.swift`; tests `DesignFilingTests.swift` | FH-2 | ~260, 3 |
 | FH-2 | #270 (Model part), #275 (Model part) | Step serials and the saved marker, `isDirty`, `saveStateText`, `didSave` marking the save, `closePrompt`, `undoTarget` | `DesignHistory.swift`, `DesignFile.swift` (`didSave` only); tests `DesignDirtyTests.swift`, `DesignUndoTargetTests.swift` | – | ~240, 4 |
-| FH-3 | #275 (view part) | Edit > Undo and Redo act on a focused text field (`DesignCommands.swift`); the window's close prompt (`DesignWindow.swift`), routed through the Model's `undoTarget` | `DesignCommands.swift`, `DesignWindow.swift`; snapshots `DesignFileMenuSnapshots.swift` | FH-2 | ~280, 3 |
-| FH-4 | #270 (view part); #288 (part) | The save state and unsaved dot as plain text in the status line (`design.status.save`) until EC-4; ids on the top bar's New, Open and Save items (`DesignEditor.swift`; the menu bar is FH-3's) | `DesignEditor.swift`; snapshots `DesignFileSnapshots.swift` | FH-2 | ~140, 2 |
-| FH-5 | #275, #270 (close both) | J13, J14 | `UITests/DesignJourneyTests+Files.swift` | FH-3, FH-4 | ~250, 1 |
+| FH-3 | #275 (view part) | Edit > Undo and Redo act on a focused text field (`DesignCommands.swift`), routed through the Model's `undoTarget`; the close prompt in DW-a's `DesignClosePrompt` slot | `DesignCommands.swift`, `DesignClosePrompt.swift`; snapshots `DesignFileMenuSnapshots.swift` | FH-2; design-window DW-a | ~280, 3 |
+| FH-4 | #270 (view part); #288 (part) | The save state ("Edited", "Saved") in DW-a's `DesignSaveStatus` slot: the window subtitle and the `design.status.save` label, plain text until EC-4 (the toolbar's New, Open and Save ids are shell-parity's) | `DesignSaveStatus.swift`; snapshots `DesignFileSnapshots.swift` | FH-2; design-window DW-a | ~120, 2 |
+| FH-5 | #275, #270 (close both) | J13, J14 | `UITests/DesignJourneyTests+Files.swift` | FH-3, FH-4; design-window DW-a | ~250, 1 |
 | FH-6 | gap "open bad files journey" (closes) | J16 | `UITests/DesignJourneyTests+BadFiles.swift` | FH-1 | ~120, 1 |
-| FH-7 | – | P4; the shared-doc rows for `+BadFiles`: the J16 row of blueprint section 4 reads `+BadFiles`, and files-history's wave-1 owned list in `waves.md` adds `+BadFiles` | `UITests/DesignJourneyTests+PerfFiles.swift`; `docs/blueprints/design.md` (J16 row only), `docs/blueprints/design/features/waves.md` (files-history's owned list only) | FH-1 | ~104, 3; `feature-done` |
+| FH-7 | – | P4; the J16 row of blueprint section 4 reads `+BadFiles` (files-history's `.wave.json` already owns `+BadFiles`; `waves.md` is generated) | `UITests/DesignJourneyTests+PerfFiles.swift`; `docs/blueprints/design.md` (J16 row only) | FH-1; design-window DW-a (P4 launches `-DesignFixture crowd`) | ~100, 2; `feature-done` |
 
 FH-1 follows FH-2 because both edit `DesignFile.swift`: FH-2 changes only
 `didSave`, so it goes first and FH-1 moves the codec around it. FH-3 and
@@ -149,10 +167,10 @@ which FH-1 keeps passing through `LiveFiling`.
 
 ## Build waves
 
-FH-7, the final task, owns the only shared-doc edits: J16 moved from
-`+Files` to `+BadFiles`, so the blueprint's J16 row and files-history's
-owned list in `waves.md` name the new file. No build task edits
-`docs/c4/model.json`, `docs/design.md`, the blueprint or `waves.md`.
+FH-7, the final task, owns the only shared-doc edit: J16 moved from
+`+Files` to `+BadFiles`, so the blueprint's J16 row names the new file. No
+task edits `docs/c4/model.json`, `docs/design.md` or the generated
+`waves.md`; the owned list lives in `files-history.wave.json`.
 `+BadFiles` is new and only FH-6 owns it, so no wave-1 feature overlaps it.
 
 - Wave 1: FH-2. Independent in this wave: FH-2 alone.
@@ -173,7 +191,7 @@ FH-2 → FH-1 → FH-7 are the same length.
 | FH-4 | `DesignFileSnapshots` adds `design-file-edited` (the dot and "Edited") and `design-file-saved` ("Saved") | the dot shows on a clean file or hides on a dirty one |
 | FH-5 | J13 and J14 pass on the macOS run; J13 fails if ⌘Z in the X field changes the document's undo name; J14 fails if Cancel closes the window or a clean window prompts | a step's state differs |
 | FH-6 | J16 passes; it fails if any alert's words differ or the window holds a document after a refused open | a reason differs |
-| FH-7 | P4 writes `perf-design-files.json` with the progress mark and the longest main-thread stall (report-only); `git grep -n 'testOpenBadFiles' docs/blueprints/design.md` shows `+BadFiles` | no progress mark is recorded, or a shared doc still names `+Files` for J16 |
+| FH-7 | P4 writes `perf-design-files.json` with the progress mark and the longest main-thread stall (report-only); `git grep -n 'testOpenBadFiles' docs/blueprints/design.md` shows `+BadFiles` | no progress mark is recorded, or the blueprint still names `+Files` for J16 |
 
 ## Quality tests
 
@@ -189,6 +207,10 @@ Autosave and crash recovery stay out of v1 (blueprint Q4); the close
 prompt covers the common loss.
 
 ## Done check
+
+Per slice: FH-a is done when J16 passes on the Design-scoped run after FH-6
+and J3's save and reopen still pass; FH-b when J13, J14 and P4 do after
+FH-7. The feature is done when both are:
 
 - **Journeys green:** the macOS run on `dev` after the `feature-done` PR is
   green: J13, J14, J16 and P4 new; J3's save and reopen still pass.

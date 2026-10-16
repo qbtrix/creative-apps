@@ -74,7 +74,13 @@ struct HaloViewer: View {
         _ comp: HaloComposition, artboard: CGSize, timecode: Bool, layers: Bool, transport: Bool
     ) -> some View {
         ViewerStatusBar(zoom: ViewerZoom.fitScale(artboard: artboard, in: viewport), size: comp.sizeText) {
-            if timecode { Text(comp.statusTimecode).help(comp.statusTimecodeHelp) }
+            if timecode {
+                // The current time in primary ink, in the pill type so the
+                // bar fits the content column; the length is in the tooltip.
+                Text(comp.statusTimecode)
+                    .foregroundStyle(SuiteColor.textPrimary)
+                    .help(comp.statusTimecodeHelp)
+            }
             if layers { Text(comp.layerSummary).help("Layers in this composition.") }
             if transport { HaloTransport(model: model, perform: perform) }
         }

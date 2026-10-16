@@ -5,24 +5,90 @@
   "status": "planned",
   "feature_issue": "file when ready",
   "covers": "#613, #589 (Design half); gap: rename, reorder, nest, Arrange",
-  "waits_on": "design-window",
+  "waits_on": "design-contracts; view tasks: design-window DW-a (DW-b for the drag check); L-6 waits on SuiteUI lists-and-layers LL-9",
+  "depends": [
+    "design-contracts"
+  ],
   "owned": [
     "Sources/DesignModel/Live/LiveOrdering.swift",
     "Tests/DesignModelTests/DesignOrderingTests.swift",
     "Sources/DesignModel/DesignLayerToggles.swift",
     "Tests/DesignModelTests/DesignLayerDropTests.swift",
+    "Sources/DesignApp/DesignLayersPanel.swift",
+    "Tests/AppSnapshotTests/DesignLayersSnapshots.swift",
+    "Tests/AppSnapshotTests/DesignLayersDragTests.swift",
+    "UITests/DesignJourneyTests+Layers.swift",
     "Sources/DesignModel/DesignWorkspace.swift",
     "Tests/DesignModelTests/DesignLockTextEditTests.swift",
     "Tests/DesignModelTests/DesignRenameTests.swift",
-    "Sources/DesignApp/DesignLayersPanel.swift",
-    "Tests/AppSnapshotTests/DesignLayersSnapshots.swift",
-    "UITests/DesignJourneyTests+Layers.swift",
     "Tests/DesignModelTests/DesignLayersBudgetTests.swift",
     "UITests/DesignJourneyTests+PerfLayers.swift"
   ],
   "journeys": [
-    "DesignJourneyTests.testLayerListScroll",
-    "DesignJourneyTests.testLayersRenameReorderNest",
-    "DesignJourneyTests.testLayoutAtWidths"
+    "DesignLayersJourneyTests.testLayersRenameReorderNest",
+    "DesignPerfLayersJourneyTests.testLayerListScroll"
+  ],
+  "slices": [
+    {
+      "id": "LP-a",
+      "behavior": "Rename, reorder and nest layers from the Layers panel, and Object > Arrange, each one step.",
+      "tasks": [
+        "L-1",
+        "L-2",
+        "L-4",
+        "L-5"
+      ],
+      "journeys": [
+        "J12"
+      ],
+      "owned": [
+        "Sources/DesignModel/Live/LiveOrdering.swift",
+        "Tests/DesignModelTests/DesignOrderingTests.swift",
+        "Sources/DesignModel/DesignLayerToggles.swift",
+        "Tests/DesignModelTests/DesignLayerDropTests.swift",
+        "Sources/DesignApp/DesignLayersPanel.swift",
+        "Tests/AppSnapshotTests/DesignLayersSnapshots.swift",
+        "Tests/AppSnapshotTests/DesignLayersDragTests.swift",
+        "UITests/DesignJourneyTests+Layers.swift"
+      ],
+      "waits": {
+        "design-window:DW-a": [
+          "L-4",
+          "L-5"
+        ],
+        "design-window:DW-b": [
+          "L-4"
+        ]
+      }
+    },
+    {
+      "id": "LP-b",
+      "behavior": "Locking a layer mid text edit keeps the typing, the Layers list scrolls 2,000 expanded rows, and a group row's own eye hides it once SuiteUI's LL-9 lands.",
+      "tasks": [
+        "L-3",
+        "L-6",
+        "L-7"
+      ],
+      "journeys": [
+        "P3",
+        "J12"
+      ],
+      "owned": [
+        "Sources/DesignModel/DesignWorkspace.swift",
+        "Tests/DesignModelTests/DesignLockTextEditTests.swift",
+        "Tests/DesignModelTests/DesignRenameTests.swift",
+        "UITests/DesignJourneyTests+Layers.swift",
+        "Tests/DesignModelTests/DesignLayersBudgetTests.swift",
+        "UITests/DesignJourneyTests+PerfLayers.swift"
+      ],
+      "waits": {
+        "LP-a": [
+          "L-6"
+        ],
+        "design-window:DW-a": [
+          "L-7"
+        ]
+      }
+    }
   ]
 }

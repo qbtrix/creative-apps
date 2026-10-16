@@ -11,14 +11,21 @@
 // (#262) falls back to the playhead moving or holding (expectPlay). The window
 // is 1000 by 640, as every Halo journey but the layout one uses, so it fits
 // CI's 1024 by 768 display. The paused
-// frame f is read from the artboard's value ("Frame f: …") and must lie in
-// 2…71, so two steps back never meet the clamp; the status timecode (matched
-// by prefix) then reads f − 2. With Loop off a play from 0 runs 3 s and stops
+// frame f is read from the label of the artboard's `halo.viewer.summary`
+// ("Frame f: …"; a label, since values read empty, #262) and may be any
+// frame in 0…71: XCUITest's idle waits stretch "1 s" to about 3 s, so the
+// loop can wrap. Stepping back clamps at 0, so after ← ← the status timecode
+// (matched by prefix) reads max(f − 2, 0). Each of the six transport buttons
+// is at least 20 by 20 pt (docs/design.md hit areas). With Loop off a play from 0 runs 3 s and stops
 // on the last frame, so after 4 s the button reads Paused at 00:00:02:23.
 // Before the last Space the lane is clicked again, so a Loop button that took
-// focus can't take the key. One shot per step, `halo-playback-<step>`; the
-// playing shot is taken in the play-once pass, so its audit can't stretch the
-// 1 s wait.
+// focus can't take the key. The play-once pass lasts 3 s, and XCUITest waits
+// for the app to idle after a key (over 3 s while the display link runs), so
+// the pass may be over before the button can be read: from Go to Start, the
+// stop on 00:00:02:23 with Loop still Off proves that Space played it;
+// `halo-playback-start` shows Go to Start's 00:00:00:00 before it. One
+// shot per step, `halo-playback-<step>`; the playing shot is taken in the
+// first, looping, pass.
 import XCTest
 
 final class HaloPlaybackJourneyTests: XCTestCase {
@@ -34,26 +41,28 @@ final class HaloPlaybackJourneyTests: XCTestCase {
             "no Play button (halo.transport.play) in the status bar")
         expectPlay(false, halo)
         expectLoop("On", halo)
+        expectTransportHitTargets(halo)
         focusTimeline(halo)
 
         // 1. Space plays; 1 s later Space pauses.
         halo.press(.space)
         expectPlay(true, halo)
+        halo.shot("playback-playing")
         Thread.sleep(forTimeInterval: 1)
         halo.press(.space)
         expectPlay(false, halo)
         guard let paused = artboardFrame(halo) else {
-            return XCTFail("the artboard names no frame: \(String(describing: halo.element("halo.viewer").value))")
+            return XCTFail("the artboard names no frame: \(halo.element("halo.viewer.summary").label)")
         }
         XCTAssert(
-            (2...Self.lastFrame).contains(paused),
-            "playing 1 s from 0 paused on frame \(paused), outside 2…\(Self.lastFrame)")
+            (0...Self.lastFrame).contains(paused),
+            "playing from 0 paused on frame \(paused), outside 0…\(Self.lastFrame)")
         halo.shot("playback-paused")
 
-        // 2. ← twice: two frames back, still paused.
+        // 2. ← twice: two frames back (clamped at 0), still paused.
         halo.press(.leftArrow)
         halo.press(.leftArrow)
-        expectTimecode(Self.timecode(paused - 2), halo)
+        expectTimecode(Self.timecode(max(paused - 2, 0)), halo)
         expectPlay(false, halo)
         halo.shot("playback-stepped-back")
 
@@ -69,15 +78,15 @@ final class HaloPlaybackJourneyTests: XCTestCase {
         expectLoop("Off", halo)
         halo.shot("playback-loop-off")
 
-        // 5. Animation > Go to Start, then Space: one pass, stopped on the last frame.
+        // 5. Animation > Go to Start, then Space: one pass, stopped on the
+        // last frame. Not read as Playing: the 3 s pass can end before
+        // XCUITest's idle wait after the key does, and the stop on the last
+        // frame, from frame 0, is what proves the pass.
         choose(["Animation", "Go to Start"], halo)
         expectTimecode("00:00:00:00", halo)
+        halo.shot("playback-start")
         focusTimeline(halo)
         halo.press(.space)
-        expectPlay(true, halo)
-        // Shot here, not in the 1 s pass: a shot's audit takes time, and a
-        // looping pass could wrap past the last frame before the pause.
-        halo.shot("playback-playing")
         Thread.sleep(forTimeInterval: 4)
         expectTimecode("00:00:02:23", halo)
         expectPlay(false, halo)
@@ -86,6 +95,22 @@ final class HaloPlaybackJourneyTests: XCTestCase {
     }
 
     // MARK: - Helpers
+
+    /// The six transport buttons' ids, start to loop.
+    private static let transportIDs = ["start", "previous", "play", "next", "end", "loop"].map { "halo.transport.\($0)" }
+
+    /// Each transport button's frame is at least 20 by 20 pt, the smallest
+    /// hit area docs/design.md allows.
+    @MainActor private func expectTransportHitTargets(_ halo: Journey) {
+        for id in Self.transportIDs {
+            let button = halo.element(id)
+            XCTAssert(button.waitForExistence(timeout: 5), "no transport button \(id)")
+            let frame = button.frame
+            XCTAssert(
+                frame.width >= 20 && frame.height >= 20,
+                "\(id)'s hit area is \(frame), under the 20 by 20 pt minimum")
+        }
+    }
 
     /// `frame` as the status bar's timecode, hours:minutes:seconds:frames at 24 fps.
     private static func timecode(_ frame: Int) -> String {
@@ -103,10 +128,13 @@ final class HaloPlaybackJourneyTests: XCTestCase {
         lane.click()
     }
 
-    /// The frame the artboard's value names ("Frame 30: …"); nil when it names none.
+    /// The frame the artboard's summary label names ("Frame 30: …"); nil when it names none.
     @MainActor private func artboardFrame(_ halo: Journey) -> Int? {
-        guard let value = halo.element("halo.viewer").value as? String, value.hasPrefix("Frame ") else { return nil }
-        return Int(value.dropFirst("Frame ".count).prefix { $0.isNumber })
+        let summary = halo.element("halo.viewer.summary")
+        guard summary.waitForExistence(timeout: 5) else { return nil }
+        let label = summary.label
+        guard label.hasPrefix("Frame ") else { return nil }
+        return Int(label.dropFirst("Frame ".count).prefix { $0.isNumber })
     }
 
     /// `halo.transport.play` reads "Playing" (or "Paused"), read as
@@ -184,6 +212,6 @@ final class HaloPlaybackJourneyTests: XCTestCase {
         }
         XCTAssert(item.isEnabled, "\(path.joined(separator: " > ")) is disabled")
         item.click()
-        _ = halo.app.menus.firstMatch.waitForNonExistence(timeout: 2)
+        halo.menusClosed()
     }
 }

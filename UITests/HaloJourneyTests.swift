@@ -99,11 +99,11 @@ final class HaloJourneyTests: XCTestCase {
         XCTAssert(header("Badge", halo).waitForExistence(timeout: 5), "clicking Badge's lane didn't select Badge")
         halo.press(.home)
         step(20, halo)
-        expectTimecode("00:00:00:20", halo)
+        expectTimecode("00:00:00:20 · frame 20", halo)
         halo.shot("scrub-frame-20")
         halo.press(character: "i", step: "scrub-in-20")
         step(30, halo)
-        expectTimecode("00:00:02:02", halo)
+        expectTimecode("00:00:02:02 · frame 50", halo)
         halo.press(character: "o")
         XCTAssert(
             header("Frames 20–50", halo).waitForExistence(timeout: 5),
@@ -111,11 +111,12 @@ final class HaloJourneyTests: XCTestCase {
         halo.shot("scrub-out-50")
         step(10, halo)
         let summary = "Frame 60: Background, Title: Hello Halo"
+        // The summary is read by label from `halo.viewer.summary`: values read empty (#262).
         let artboard = halo.app.descendants(matching: .any).matching(
-            NSPredicate(format: "identifier == 'halo.viewer' AND value == %@", summary)).firstMatch
+            NSPredicate(format: "identifier == 'halo.viewer.summary' AND label == %@", summary)).firstMatch
         XCTAssert(
             artboard.waitForExistence(timeout: 5),
-            "the artboard reads \(String(describing: halo.element("halo.viewer").value)), not \(summary)")
+            "the artboard reads \(halo.element("halo.viewer.summary").label), not \(summary)")
         halo.shot("scrub-frame-60")
     }
 
@@ -178,7 +179,11 @@ final class HaloJourneyTests: XCTestCase {
         for id in onScreenControlIDs(halo) {
             XCTAssertNotNil(entries[id], "\(id) is on screen but in neither halo.controls nor suite.controls")
         }
-        for entry in entries.values.sorted(by: { $0.id < $1.id }) {
+        for listed in entries.values.sorted(by: { $0.id < $1.id }) {
+            // Earlier clicks move state Undo doesn't restore (End leaves the
+            // playhead on the last frame, so Next turns off and says why), so
+            // judge each control as the probe lists it now, not at launch.
+            let entry = Self.decode(halo.element("halo.controls"))?.controls.first { $0.id == listed.id } ?? listed
             guard entry.enabled else {
                 XCTAssertFalse((entry.reason ?? "").isEmpty, "\(entry.id) is disabled and doesn't say why")
                 continue

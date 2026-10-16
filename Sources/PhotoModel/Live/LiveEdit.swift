@@ -20,37 +20,19 @@ struct LiveClipboard: PixelClipboard {
         let pixels = content.pixels
         let bounds = PixelRect(x: content.x, y: content.y, width: pixels.width, height: pixels.height)
         guard let region = (selection ?? bounds).intersection(bounds) else { return nil }
-        var buffer = try PixelBuffer(width: region.width, height: region.height)
-        // The region's pixels with any alpha, in region pixels.
-        var minX = region.width, minY = region.height, maxX = -1, maxY = -1
         let layerArea = region.offsetBy(-content.x, -content.y)
-        for index in pixels.tileIndices(in: layerArea) where pixels.tiles.indices.contains(index) {
-            let tileRect = pixels.tileRect(index)
-            guard let area = tileRect.intersection(layerArea) else { continue }
-            let tile = pixels.tiles[index]
-            for y in area.y..<area.maxY {
-                for x in area.x..<area.maxX {
-                    var pixel = try tile.pixel(x: x - tileRect.x, y: y - tileRect.y)
-                    if let mask {
-                        let c = (try? mask.coverage(x: x + content.x, y: y + content.y)) ?? 0
-                        pixel = RGBA(r: pixel.r * c, g: pixel.g * c, b: pixel.b * c, a: pixel.a * c)
-                    }
-                    guard pixel.a > 0 else { continue }
-                    let rx = x - layerArea.x, ry = y - layerArea.y
-                    try buffer.setPixel(x: rx, y: ry, pixel)
-                    minX = min(minX, rx); minY = min(minY, ry); maxX = max(maxX, rx); maxY = max(maxY, ry)
-                }
-            }
-        }
-        guard maxX >= minX, maxY >= minY else { return nil }
-        let kept = try buffer.cropped(x: minX, y: minY, width: maxX - minX + 1, height: maxY - minY + 1)
-        let bytes = try kept.rgba8()
-        // A faint pixel can round to alpha 0 in 8 bits: cut again on the bytes.
-        guard let trim = Self.opaqueBounds(bytes, width: kept.width, height: kept.height) else { return nil }
-        let image = DecodedImage(
-            rgba8: Self.crop(bytes, width: kept.width, to: trim), width: trim.width, height: trim.height)
-        let source = trim.offsetBy(region.x + minX, region.y + minY)
-        return ClipboardImage(image: image, source: source)
+        // Each layer tile's part of the region, encoded and trimmed across
+        // the cores; the trims' union is the copy, in layer pixels.
+        let indices = pixels.tileIndices(in: layerArea).filter { pixels.tiles.indices.contains($0) }
+        let shift = (x: content.x, y: content.y)
+        let pieces = try PhotoLayerComposite.inParallel(indices.count) { job in
+            try Self.piece(of: pixels, tile: indices[job], in: layerArea, mask: mask, shift: shift)
+        }.compactMap { $0 }.filter { $0.kept != nil }
+        guard let kept = pieces.compactMap(\.kept).reduce(nil, { $0?.union($1) ?? $1 }) else { return nil }
+        var bytes = [UInt8](repeating: 0, count: kept.width * kept.height * 4)
+        for piece in pieces { Self.copyRows(of: piece, into: &bytes, at: kept) }
+        let image = DecodedImage(rgba8: bytes, width: kept.width, height: kept.height)
+        return ClipboardImage(image: image, source: kept.offsetBy(content.x, content.y))
     }
 
     func placement(of image: ClipboardImage, canvas: CanvasSize, center: Mask.Point) -> PixelRect {
@@ -64,29 +46,59 @@ struct LiveClipboard: PixelClipboard {
         return PixelRect(x: Int(x), y: Int(y), width: w, height: h)
     }
 
-    /// The bounds of the bytes' pixels with alpha above 0, or nil when none.
-    static func opaqueBounds(_ bytes: [UInt8], width: Int, height: Int) -> PixelRect? {
-        var minX = width, minY = height, maxX = -1, maxY = -1
-        for y in 0..<height {
-            for x in 0..<width {
-                let a = (y * width + x) * 4 + 3
-                guard bytes.indices.contains(a), bytes[a] > 0 else { continue }
-                minX = min(minX, x); minY = min(minY, y); maxX = max(maxX, x); maxY = max(maxY, y)
-            }
-        }
-        guard maxX >= minX, maxY >= minY else { return nil }
-        return PixelRect(x: minX, y: minY, width: maxX - minX + 1, height: maxY - minY + 1)
+    /// One layer tile's part of a copy: its pixels inside `layerArea`, each
+    /// weighted by `mask` (canvas pixels, layer pixel plus `shift`) when there
+    /// is one, encoded as 8-bit bytes (`SRGBBytes`, bit for bit `rgba8()`)
+    /// with no alpha left as 0, 0, 0, 0, and the bounds of the bytes with
+    /// alpha above 0 (a faint pixel can round to alpha 0 in 8 bits).
+    struct Piece: Sendable {
+        let area: PixelRect, kept: PixelRect?, bytes: [UInt8]
     }
 
-    /// The rows of `rect` from bytes `width` pixels wide.
-    static func crop(_ bytes: [UInt8], width: Int, to rect: PixelRect) -> [UInt8] {
-        var out: [UInt8] = []
-        out.reserveCapacity(rect.width * rect.height * 4)
-        for y in rect.y..<rect.maxY {
-            let start = (y * width + rect.x) * 4, end = start + rect.width * 4
-            guard start >= 0, end <= bytes.count else { continue }
-            out.append(contentsOf: bytes[start..<end])
+    static func piece(of pixels: TiledPixels, tile index: Int, in layerArea: PixelRect, mask: Mask?,
+                      shift: (x: Int, y: Int)) throws -> Piece? {
+        let rect = pixels.tileRect(index)
+        guard pixels.tiles.indices.contains(index), let area = rect.intersection(layerArea) else { return nil }
+        let tile = pixels.tiles[index], least = SRGBBytes.least, start = SRGBBytes.start
+        var bytes = [UInt8](repeating: 0, count: area.width * area.height * 4)
+        var minX = area.maxX, minY = area.maxY, maxX = -1, maxY = -1, at = 0
+        var last = RGBA.clear, encoded: (UInt8, UInt8, UInt8, UInt8) = (0, 0, 0, 0)
+        for y in area.y..<area.maxY {
+            for x in area.x..<area.maxX {
+                var p = try tile.pixel(x: x - rect.x, y: y - rect.y)
+                if let mask {
+                    let c = (try? mask.coverage(x: x + shift.x, y: y + shift.y)) ?? 0
+                    p = RGBA(r: p.r * c, g: p.g * c, b: p.b * c, a: p.a * c)
+                }
+                // Equal pixels give equal bytes; no alpha gives none.
+                if p != last {
+                    last = p
+                    encoded = p.a > 0 ? (
+                        SRGBBytes.byte(p.r / p.a, least: least, start: start),
+                        SRGBBytes.byte(p.g / p.a, least: least, start: start),
+                        SRGBBytes.byte(p.b / p.a, least: least, start: start),
+                        UInt8((min(Double(p.a), 1) * 255).rounded())) : (0, 0, 0, 0)
+                }
+                bytes[at] = encoded.0; bytes[at + 1] = encoded.1
+                bytes[at + 2] = encoded.2; bytes[at + 3] = encoded.3
+                at += 4
+                if encoded.3 > 0 { minX = min(minX, x); minY = min(minY, y); maxX = max(maxX, x); maxY = max(maxY, y) }
+            }
         }
-        return out
+        let kept = maxX >= minX && maxY >= minY
+            ? PixelRect(x: minX, y: minY, width: maxX - minX + 1, height: maxY - minY + 1) : nil
+        return Piece(area: area, kept: kept, bytes: bytes)
+    }
+
+    /// `piece`'s bytes inside `rect` written into `bytes`, which hold `rect`.
+    static func copyRows(of piece: Piece, into bytes: inout [UInt8], at rect: PixelRect) {
+        guard let overlap = piece.area.intersection(rect) else { return }
+        let count = overlap.width * 4
+        for y in overlap.y..<overlap.maxY {
+            let from = ((y - piece.area.y) * piece.area.width + overlap.x - piece.area.x) * 4
+            let to = ((y - rect.y) * rect.width + overlap.x - rect.x) * 4
+            guard from >= 0, from + count <= piece.bytes.count, to >= 0, to + count <= bytes.count else { continue }
+            bytes.replaceSubrange(to..<(to + count), with: piece.bytes[from..<(from + count)])
+        }
     }
 }

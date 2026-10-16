@@ -424,6 +424,8 @@ print setup; specialist controls; gradients and fills; magic wand and refine
 edge; skew, distort, perspective and warp; layer groups and clipping masks;
 camera raw (Library); 16-bit layers (section 9, question 3).
 
+Later, from the suite blueprint (captain, 2026-10-15): drag out to export (20) and palette from a reference (22), in `docs/blueprints/suite.md` section 3a.
+
 ### Priority labels for v2 work
 
 Following `docs/priorities.md`'s rules: PV-1, PV-2, PV-3 and PV-6 are `p1`;
@@ -477,7 +479,9 @@ lists every empty, error and loading state the journey passes through.
    document-edited state is set.
 3. File > Save. Assert a "Keep layers?" choice appears, because the open
    file is a PNG: **Save as Photo Document** (default) or **Flatten into
-   PNG**. Choose Save as Photo Document. Assert the title reads
+   PNG** (an `NSAlert` sheet, `photo.file.keep-layers.*`, whose text says
+   Save as Photo Document writes `beach.ora` next to `beach.png` and leaves
+   `beach.png` as it is). Choose Save as Photo Document. Assert the title reads
    `beach.ora`, "Saved", and the file exists in `<tmp>`, starts with the
    zip signature and its first entry is `mimetype` reading `image/openraster`.
 4. Close the window (Command-W): no prompt. File > Open Recent >
@@ -511,8 +515,13 @@ States: empty (Open Recent with nothing), none loading, error none.
    otherwise).
 2. Terminate the app (`app.terminate()`, no quit path), relaunch with the
    same `-PhotoRecoveryDir` and no file.
-3. Assert the restore offer: "Restore beach.png from <time>?" with Restore
-   and Discard (`photo.recovery.restore`, `photo.recovery.discard`).
+3. Assert the restore offer: "Restore beach.png from <time>?", an
+   `NSAlert` sheet reading "Photo closed before these changes were saved.
+   Discard deletes them.", with Restore, Discard and Cancel
+   (`photo.recovery.restore`, `photo.recovery.discard`,
+   `photo.recovery.cancel`; Cancel keeps the file for the next launch).
+   It is the one alert shown at launch (design.md's "never at launch"
+   exception), since the offer exists only then.
 4. Restore. Assert 2 layers and "Edited" (a restored document is unsaved).
 5. Command-Q, Don't Save; relaunch: no offer (a clean close discards the
    recovery file).
@@ -528,10 +537,11 @@ For each file written by the test: a `.ora` that is not a zip (bytes
 `not a zip`); one whose `photo/document.json` says `"format": 2`; one
 missing `data/layer-2.png`; one with a 20 MP layer, over the limit. Open each with `-PhotoOpenFile`.
 
-Assert the alert text is `ArchiveError.message` for the case ("This file
-isn't a Photo document.", "…made by a newer Photo (format 2)…", "This
-document is damaged: data/layer-2.png is missing.", "This document is
-larger than Photo can open."), and the empty state stays (or the document
+Assert the alert, titled "<file> can't be opened.", reads
+`ArchiveError.message` for the case ("It isn't a Photo Document or an
+image Photo can open.", "It was saved by a newer version of Photo. Update
+Photo to open it.", "It is damaged and can't be read.", "It is larger than
+Photo can open: up to 16 megapixels."), and the empty state stays (or the document
 that was open stays open).
 
 States: error (four), empty (after each alert).
@@ -792,19 +802,22 @@ public struct PhotoDocumentSnapshot: Sendable, Equatable {
     }
 }
 
-/// Why a package didn't open; `message` is the alert's text.
+/// Why a package didn't open; `message` is the alert's text, shown under
+/// "<file> can't be opened.", so it names no entry path or format number.
 public enum ArchiveError: Error, Equatable, Sendable {
     case notADocument
+    /// The format version the file was written with.
     case newerVersion(Int)
+    /// What is wrong inside the file ("data/layer-2.png is missing"), for logs and tests.
     case damaged(String)
     case tooLarge
 
     public var message: String {
         switch self {
-        case .notADocument: "This file isn't a Photo document."
-        case .newerVersion(let v): "This document was made by a newer Photo (format \(v)). Update Photo to open it."
-        case .damaged(let detail): "This document is damaged: \(detail)."
-        case .tooLarge: "This document is larger than Photo can open."
+        case .notADocument: "It isn't a Photo Document or an image Photo can open."
+        case .newerVersion: "It was saved by a newer version of Photo. Update Photo to open it."
+        case .damaged: "It is damaged and can't be read."
+        case .tooLarge: "It is larger than Photo can open: up to \(PhotoWorkspace.maxOpenPixels / (1024 * 1024)) megapixels."
         }
     }
 }
@@ -2049,8 +2062,8 @@ means it doesn't exist yet (section 6.3).
 | History tab | no image open | `EmptyStateView` ("No image open. Its edits will be listed here.") | PV-4 |
 | History tab | image with no edits | one row, "New Image" or "Open", current | PV-4 |
 | Export sheet | – | `Picker` (segmented: PNG, JPEG, TIFF, HEIC), `InspectorSliderRow` (Quality %, Size %), `ScrubField` (Longest side px), a `Picker` for the size kind, the output size line | PV-8 |
-| Keep layers? | Save of a flat file with layers | system `.confirmationDialog`: Save as Photo Document (default), Flatten into PNG, Cancel | PV-1 |
-| Restore offer | launch after a crash | system alert: Restore, Discard | PV-1 |
+| Keep layers? | Save of a flat file with layers | an `NSAlert` sheet: Save as Photo Document (default), Flatten into PNG, Cancel (`photo.file.keep-layers.document`, `.flatten`, `.cancel`); its text names the new `<name>.ora` next to the flat file | PV-1 |
+| Restore offer | launch after a crash | an `NSAlert` sheet: Restore, Discard, Cancel (`photo.recovery.restore`, `.discard`, `.cancel`); the one alert shown at launch | PV-1 |
 | Unsaved changes | close or quit | an `NSAlert` with Save, Don't Save, Cancel, worded like the system's document alert | PV-1 |
 | Open failure | bad package | system alert with `ArchiveError.message` | PV-1 |
 

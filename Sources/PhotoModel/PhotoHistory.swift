@@ -28,6 +28,9 @@ enum PhotoEdit: Sendable, Equatable {
     case selection(PixelRect?, Mask?)
     /// One layer mask's changed tiles as they were, by tile index.
     case maskTiles(layer: PhotoLayer.ID, [Int: PixelBuffer])
+    /// Several edits put back as one step (Flatten Image: the stack and the
+    /// adjustments); applied in order, their inverses in reverse.
+    case group([PhotoEdit])
 }
 
 /// The whole layer stack, for edits that add, remove or resize layers.
@@ -187,6 +190,8 @@ extension PhotoWorkspace {
             adjustments = settings
             touch(.all, adjustmentsOnly: true)
             return inverse
+        case .group(let edits):
+            return .group(edits.map { apply($0) }.reversed())
         }
     }
 

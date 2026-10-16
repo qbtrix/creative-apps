@@ -42,7 +42,8 @@ struct PhotoWindow: View {
     @State var tab = PhotoPanelTab.adjust
     @State var documentURL: URL?
     @State var note: String?
-    @State var problem: String?
+    /// The error or refusal the window's alert shows; nil while it is closed.
+    @State var problem: PhotoProblem?
     @State var isExporting = false
     @State var exportFormat = ImageFormat.png
     @State var exportQuality = 0.9
@@ -54,6 +55,8 @@ struct PhotoWindow: View {
     // v2 presentation flags (PV-0); each belongs to the area file named.
     /// A recovered document waiting for Restore or Discard (PhotoWindow+File.swift, PV-1).
     @State var recoveryOffer: RecoveryEntry?
+    /// The file state Save and Open share with PhotoFileArea (PhotoWindow+File.swift, PV-1).
+    @State var files = PhotoFileSession()
     /// Why Paste refused, for its alert (PhotoWindow+Edit.swift, PV-2).
     @State var pasteRefusal: String?
     /// Free Transform's box and its Apply and Cancel are up (PhotoWindow+Transform.swift, PV-7).
@@ -117,16 +120,24 @@ struct PhotoWindow: View {
                 TextField("Name", text: $renameText).accessibilityIdentifier("photo.layer.name")
                 Button("Rename", action: commitRename)
                 Button("Cancel", role: .cancel) {}
+            } message: {
+                Text("Enter a new name for the layer.")
             }
-            .alert(problem ?? "", isPresented: Binding(get: { problem != nil }, set: { if !$0 { problem = nil } })) {
+            .alert(
+                problem?.title ?? "",
+                isPresented: Binding(get: { problem != nil }, set: { if !$0 { problem = nil } }),
+                presenting: problem
+            ) { _ in
                 Button("OK", role: .cancel) {}
+            } message: { shown in
+                Text(shown.message)
             }
             .task {
                 PointerPressure.watch()
                 showLaunchImage()
                 openLaunchFile()
             }
-            .modifier(PhotoFileArea(model: model, perform: perform))
+            .modifier(PhotoFileArea(model: model, files: files, perform: perform))
             .modifier(PhotoEditArea(model: model, perform: perform))
             .modifier(PhotoCropArea(model: model, perform: perform))
             .modifier(PhotoHistoryArea(model: model, perform: perform))
@@ -249,7 +260,7 @@ struct PhotoWindow: View {
         do {
             try model.resizeImage(width: width, height: height)
         } catch {
-            problem = "The image can't be resized to \(width) × \(height). \(Self.reason(error))"
+            problem = PhotoProblem("The image can't be resized to \(width) × \(height).", Self.reason(error))
         }
     }
 
@@ -270,7 +281,7 @@ struct PhotoWindow: View {
                 }
             } catch {
                 note = nil
-                problem = "The image can't be straightened by \(degrees)°. \(Self.reason(error))"
+                problem = PhotoProblem("The image can't be straightened by \(degrees)°.", Self.reason(error))
             }
         }
     }
@@ -286,5 +297,18 @@ struct PhotoWindow: View {
     private func commitRename() {
         guard let id = model.selectedLayerID else { return }
         model.renameLayer(id, to: renameText)
+    }
+}
+
+/// The window alert's words: a short title and the sentence that says why.
+/// Every alert carries both, since an alert with no message leaves an empty
+/// text field in the sheet that the app audit reads as invisible text.
+struct PhotoProblem {
+    let title: String
+    let message: String
+
+    init(_ title: String, _ message: String) {
+        self.title = title
+        self.message = message
     }
 }

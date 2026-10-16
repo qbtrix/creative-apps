@@ -389,6 +389,8 @@ Within a tier the order is the order a session meets the feature.
 | 3 | Density polish of the inspector and status bar | design rule, not usage | #185 (the status bar is pulled into v1 as a design requirement, section 1.4) |
 | 4 | Identifiers on every control | test plumbing | #291 (pulled into v1: the journeys need it) |
 
+Later, from the suite blueprint (captain, 2026-10-15): search photos by the text in them (23), in `docs/blueprints/suite.md` section 3a.
+
 ### Calls against the tiers
 
 | Row | Call | Why |

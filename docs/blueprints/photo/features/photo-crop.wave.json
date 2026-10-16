@@ -2,7 +2,7 @@
   "title": "Typed crop size and aspect lock; the perf journeys",
   "wave": 1,
   "order": 30,
-  "status": "building",
+  "status": "built",
   "feature_issue": "#1076",
   "covers": "#544",
   "waits_on": "photo-seams (journey tasks only: photo-journey-kit); nothing",

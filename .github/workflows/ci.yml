@@ -24,14 +24,38 @@
 # Trade-off: SwiftUI breakage, snapshot and UI journey failures sit on dev
 # until the next feature run, so a dev-red culprit range can span several PRs.
 #
+# Scoped run (workflow_dispatch with `app`: flare, design, photo, library,
+# halo, suite or suiteui): the macOS job still builds every target with its
+# tests, the five app bundles and every journey bundle, but runs only that
+# app's Model tests, snapshot tests and UI journeys, so another app's red test
+# can't hide it. The Linux job (lints and every Model's tests) is skipped, and
+# a scoped run never promotes main, opens dev-red or lowers the audit
+# baseline. belt-pilot's verify-dispatch.sh dispatches one on dev after an
+# app's merges.
+#
 # The fast lane also counts a passing check from this workflow ("CI") on a PR
-# head and reads the job names "Linux" and "macOS", so keep both names stable.
+# head and reads the job names "Linux", "macOS" and "macOS build" and the
+# run title "macOS build", so keep them stable. A scoped run's macOS job is
+# named "macOS (<app>)" so the lane never takes it as a full macOS result.
 name: CI
+# A build-only run (the fast lane's compile check for code PRs) and a scoped
+# run ("scoped: <app>", how verify-dispatch.sh finds them) get their own
+# titles; " " keeps the default title.
+run-name: "${{ inputs.build_only && 'macOS build' || inputs.app && format('scoped: {0}', inputs.app) || ' ' }}"
 
 on:
   pull_request:
     branches: [main]
   workflow_dispatch:
+    inputs:
+      build_only:
+        description: Only build every target on macOS (the fast lane's compile check for code PRs)
+        type: boolean
+        default: false
+      app:
+        description: 'Scope to one app: flare, design, photo, library, halo, suite or suiteui (empty: the full run)'
+        type: string
+        default: ''
   schedule:
     - cron: '17 4 * * *'  # daily; schedule runs on the default branch (dev)
 
@@ -41,14 +65,16 @@ permissions:
 # Runs on dev and main never cancel: GitHub keeps the running one plus the
 # newest pending one, so dispatches that pile up collapse into one run (macOS
 # runners are a small shared pool). PR runs group by PR number, so a hotfix PR
-# from a branch named dev can't cancel a dev run.
+# from a branch named dev can't cancel a dev run. Each scoped app gets its own
+# group, so a Design run never displaces a pending Photo or full run.
 concurrency:
-  group: ci-${{ github.event.pull_request.number || github.ref_name }}
+  group: ci-${{ github.event.pull_request.number || github.ref_name }}${{ inputs.build_only && '-build' || '' }}${{ inputs.app && format('-{0}', inputs.app) || '' }}
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' && github.ref != 'refs/heads/dev' }}
 
 jobs:
   linux:
     name: Linux
+    if: ${{ !inputs.build_only && !inputs.app }}
     runs-on: ubuntu-latest
     # Official image; 6.3.3-noble is Ubuntu 24.04, the same OS as the cloud agents.
     container: swift:6.3.3-noble
@@ -64,16 +90,131 @@ jobs:
       - run: scripts/ci
       - run: bash Tests/fast_lane/test_fast_lane.sh
 
-  macos:
-    name: macOS
+  # The fast lane's compile check for a PR that changes code (BUILD_RE in
+  # scripts/fast-lane.sh: Swift under Sources/, Tests/ and UITests/,
+  # project.yml, Package.swift). It compiles everything and runs nothing:
+  # every SwiftPM target with its tests, then the journey bundles from
+  # project.yml. Only on workflow_dispatch with build_only.
+  mac-build:
+    name: macOS build
+    if: ${{ inputs.build_only }}
     runs-on: macos-26
-    timeout-minutes: 45
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo xcode-select -s /Applications/Xcode_26.6.app
+      - run: swift build --build-tests
+      - name: Install XcodeGen 2.46.0
+        run: |
+          curl -fsSL -o "$RUNNER_TEMP/xcodegen.zip" https://github.com/yonaskolb/XcodeGen/releases/download/2.46.0/xcodegen.zip
+          echo "4d9e34b62172d645eed6457cac13fc222569974098ef4ee9c3368bedf0196806  $RUNNER_TEMP/xcodegen.zip" | shasum -a 256 -c -
+          unzip -q "$RUNNER_TEMP/xcodegen.zip" -d "$RUNNER_TEMP"
+          echo "$RUNNER_TEMP/xcodegen/bin" >> "$GITHUB_PATH"
+      - run: xcodegen generate --quiet
+      - run: xcodebuild build-for-testing -project CreativeApps.xcodeproj -scheme Journeys -destination platform=macOS
+
+  macos:
+    name: ${{ inputs.app && format('macOS ({0})', inputs.app) || 'macOS' }}
+    if: ${{ !inputs.build_only }}
+    runs-on: macos-26
+    # scripts/ci alone takes about 20 min under load and the five apps' UI
+    # journeys about 30 more; 45 cut ui-test off mid-run (dev run 38792928305).
+    timeout-minutes: 90
+    # issues: read lets scripts/quarantine check that each quarantined
+    # journey's owner issue is still open (the Linux container has no gh).
+    permissions:
+      contents: read
+      issues: read
+    env:
+      APP: ${{ inputs.app }}
     steps:
       - uses: actions/checkout@v4
       # Pin Xcode: the image's default moves. 26.6 ships the macOS 26.5 SDK.
       - run: sudo xcode-select -s /Applications/Xcode_26.6.app
       - run: swift --version
-      - run: scripts/ci
+      # scripts/ci with a memory sample every 20 s into memory.log: the time,
+      # vm_stat's page counts, the system-wide free percentage and the five
+      # largest processes by resident memory. The Crash reports step prints
+      # it on failure, since a step killed for memory leaves no output of its own.
+      - name: scripts/ci (memory sampled)
+        if: ${{ !inputs.app }}
+        run: |
+          mem="$RUNNER_TEMP/crash-reports/memory.log"
+          mkdir -p "$RUNNER_TEMP/crash-reports"
+          echo "hw.memsize $(sysctl -n hw.memsize), hw.ncpu $(sysctl -n hw.ncpu)" >"$mem"
+          (
+            while true; do
+              {
+                echo "== $(date -u +%H:%M:%S)"
+                vm_stat | head -10
+                memory_pressure | tail -1
+                ps -Ao rss=,pid=,comm= -m | head -5
+              } >>"$mem" 2>&1
+              sleep 20
+            done
+          ) >/dev/null 2>&1 &
+          sampler=$!
+          trap 'kill $sampler 2>/dev/null' EXIT
+          scripts/ci
+        env:
+          GH_TOKEN: ${{ github.token }}
+      # A scoped run instead: build every target with its tests, then run only
+      # APP's Model tests and its snapshot tests (one at a time, as scripts/ci
+      # does). swift test --filter matches <target>.<suite>/<test>() or
+      # <target>.<test>() for a free function. Snapshot suites are named after
+      # their app; the alternations add Flare's and SuiteUI's suites and free
+      # tests that aren't, and each app's test in the AppSnapshotTests suite. A
+      # snapshot test whose name fits no app runs in full runs only. A filter
+      # that matches no test fails the step. The job summary lists what ran.
+      - name: Scoped build and tests
+        if: inputs.app
+        id: scope
+        run: |
+          snap_flare='(Flare[A-Za-z]*|AutosaveTests|AutosaveRecoveryTests|PlaybackDriverTests|StagePathTests)/|AppSnapshotTests/flare\('
+          snap_suiteui='(Suite[A-Za-z]*|GoldenImageTests|SnapshotHostTests)/|(suite[A-Za-z]*|snapshotsDrawRealSlidersNotPlaceholders|theCapsuleDrawsOnlyBehindTheCurrentItem|aDisabledBarCommandDrawsDimmerThanAnEnabledOne)\(|AppSnapshotTests/suiteGallery\('
+          journeys=""
+          case "$APP" in
+            flare)   model=FlareModelTests;   snap=$snap_flare;                                    journeys=FlareJourneyTests ;;
+            design)  model=DesignModelTests;  snap='Design[A-Za-z]*/|AppSnapshotTests/design\(';   journeys=DesignJourneyTests ;;
+            photo)   model=PhotoModelTests;   snap='Photo[A-Za-z]*/|AppSnapshotTests/photo\(';     journeys=PhotoJourneyTests ;;
+            library) model=LibraryModelTests; snap='Library[A-Za-z]*/|AppSnapshotTests/library\('; journeys=LibraryJourneyTests ;;
+            halo)    model=HaloModelTests;    snap='Halo[A-Za-z]*/|AppSnapshotTests/halo\(';       journeys=HaloJourneyTests ;;
+            suite)   model=SuiteModelTests;   snap="" ;;  # AfterGlow and SuiteModel: no snapshots or journey bundle yet
+            suiteui) model='SuiteUITests|AppAuditTests'; snap=$snap_suiteui;                      journeys=SuiteJourneyTests ;;
+            *) echo "::error::app '$APP' is not one of flare, design, photo, library, halo, suite, suiteui"; exit 1 ;;
+          esac
+          model="^($model)\."
+          [[ -z "$snap" ]] || snap="^AppSnapshotTests\.($snap)"
+          echo "journeys=$journeys" >>"$GITHUB_OUTPUT"
+          {
+            echo "## scoped: $APP"
+            echo
+            echo "Built every target with its tests, the five app bundles and every journey bundle. Ran only:"
+            echo
+            echo "- Model tests: \`swift test --filter '$model'\`"
+            if [[ -n "$snap" ]]; then echo "- Snapshot tests: \`swift test --filter '$snap' --no-parallel\`"; else echo "- Snapshot tests: none"; fi
+            if [[ -n "$journeys" ]]; then echo "- UI journeys: \`scripts/ui-test -only-testing:$journeys\` (quarantined ones still skipped)"; else echo "- UI journeys: none"; fi
+            echo
+            echo "Skipped: the Linux job (lints and every Model's tests), other apps' tests and journeys, and Promote, Dev red and Audit lower (a scoped run never moves main or the audit baseline)."
+            echo
+          } >>"$GITHUB_STEP_SUMMARY"
+          swift build --build-tests
+          # run LABEL ARGS...: one swift test run; its result line goes in the summary.
+          run() {
+            local label=$1 log="$RUNNER_TEMP/scoped-$RANDOM.log" status
+            shift
+            echo "== swift test: $label"
+            swift test --skip-build "$@" 2>&1 | tee "$log"
+            status=${PIPESTATUS[0]}
+            echo "- $label: $(grep -E 'Test run with [0-9]+ tests?' "$log" | tail -1 || true)" >>"$GITHUB_STEP_SUMMARY"
+            if (( status != 0 )); then
+              python3 scripts/test-died "$log" || echo "::error::$label: the test process died with the tests above unfinished"
+              exit "$status"
+            fi
+            grep -qE 'Test run with [1-9][0-9]* tests?' "$log" || { echo "::error::$label: the filter matched no tests"; exit 1; }
+          }
+          run "Model tests" --filter "$model"
+          [[ -z "$snap" ]] || run "Snapshot tests" --filter "$snap" --no-parallel
       - name: Upload snapshots
         if: always()
         uses: actions/upload-artifact@v4
@@ -91,6 +232,20 @@ jobs:
           path: .build/app-builds.tar.gz
           retention-days: 7
           if-no-files-found: error
+      # The size baseline (blueprint 7.5): bytes per executable, bundle and
+      # tarball, and SuiteUI symbols per executable, as `size-report` and a
+      # table in the job summary. Report only: it fails on a script error or a
+      # missing bundle, never on a size.
+      - name: Size report
+        run: |
+          bash Tests/size_report/test_size_report.sh
+          scripts/size-report | tee -a "$GITHUB_STEP_SUMMARY"
+      - name: Upload size report
+        uses: actions/upload-artifact@v4
+        with:
+          name: size-report
+          path: .build/size-report.json
+          if-no-files-found: error
       # The human-like UI tests: scripts/ui-test launches the bundles above,
       # clicks through each app (UITests/) and exports a whole-window PNG per
       # step, uploaded as `ui-screens`. A failed journey fails this job.
@@ -104,15 +259,35 @@ jobs:
           unzip -q "$RUNNER_TEMP/xcodegen.zip" -d "$RUNNER_TEMP"
           echo "$RUNNER_TEMP/xcodegen/bin" >> "$GITHUB_PATH"
       - run: sudo automationmodetool enable-automationmode-without-authentication
-      - id: ui
-        run: scripts/ui-test
+      # A scoped run builds every journey bundle first, so a shared change
+      # that breaks another app's journeys still fails it, then runs only
+      # APP's bundle (suite has none yet). scripts/ui-test passes
+      # -only-testing to xcodebuild and still skips quarantined journeys.
+      - name: Build every journey bundle
+        if: inputs.app
+        run: |
+          xcodegen generate --quiet
+          xcodebuild build-for-testing -project CreativeApps.xcodeproj -scheme Journeys -destination platform=macOS
+      - name: Run scripts/ui-test  # the lane compares failed step names with dev's
+        id: ui
+        if: ${{ !inputs.app || steps.scope.outputs.journeys != '' }}
+        env:
+          JOURNEYS: ${{ steps.scope.outputs.journeys }}
+        run: scripts/ui-test ${JOURNEYS:+"-only-testing:$JOURNEYS"}
       # The page to review: every journey step with its audit, each app's
       # audit counts against the baseline and the perf reports, written into
       # ui-screens, plus a short table in the job summary. Runs when a journey
       # failed too, since that's when the sheet matters most.
+      # A scoped run's sheet compares only APP against its baseline (the other
+      # apps didn't run), and its branch reads "dev (scoped: APP)" so the sheet
+      # doesn't promise an Audit lower that a scoped run skips.
       - name: Contact sheet
         if: always() && steps.ui.outcome != 'skipped'
-        run: scripts/contact-sheet
+        run: |
+          if [[ -z "$APP" ]]; then scripts/contact-sheet; exit; fi
+          base="$RUNNER_TEMP/audit-baseline.json"
+          jq --arg a "$APP" 'with_entries(select(.key == $a))' UITests/audit-baseline.json >"$base"
+          GITHUB_REF_NAME="$GITHUB_REF_NAME (scoped: $APP)" scripts/contact-sheet .build/ui-screens "$base"
       - name: Upload UI screens
         if: always() && steps.ui.outcome != 'skipped'
         uses: actions/upload-artifact@v4
@@ -129,6 +304,53 @@ jobs:
           name: ui-tests-xcresult
           path: .build/ui-tests.xcresult
           retention-days: 7
+      # On any failure, the crash reports macOS wrote for this job: a test
+      # process that died (scripts/ci prints TEST PROCESS DIED) leaves an .ips
+      # naming the crashed thread. The newest one's head goes in the log; all
+      # of them go up as `crash-reports`.
+      # It also prints the last 15 memory samples (all are uploaded), and the
+      # newest JetsamEvent report's summary (scripts/jetsam-summary): macOS
+      # writes one to /Library/Logs/DiagnosticReports when it kills processes
+      # because memory ran out.
+      - name: Crash reports
+        if: failure()
+        run: |
+          out="$RUNNER_TEMP/crash-reports"
+          mkdir -p "$out"
+          shopt -s nullglob
+          if [[ -f "$out/memory.log" ]]; then
+            echo "== memory samples (the last 15 of $(grep -c '^== ' "$out/memory.log"))"
+            awk '/^== /{n++} {line[NR]=$0; at[NR]=n} END{for(i=1;i<=NR;i++) if(at[i]==0 || at[i]>n-15) print line[i]}' "$out/memory.log"
+          else
+            echo "No memory samples"
+          fi
+          jetsam=(/Library/Logs/DiagnosticReports/JetsamEvent*.ips)
+          if (( ${#jetsam[@]} > 0 )); then
+            sudo cp "${jetsam[@]}" "$out/"
+            sudo chown "$(id -u)" "$out"/JetsamEvent*.ips
+            newest=$(ls -t "$out"/JetsamEvent*.ips | head -1)
+            echo "== ${#jetsam[@]} JetsamEvent report(s); the newest, $(basename "$newest"):"
+            scripts/jetsam-summary "$newest" || head -40 "$newest"
+          else
+            echo "No JetsamEvent reports in /Library/Logs/DiagnosticReports"
+          fi
+          reports=(~/Library/Logs/DiagnosticReports/*.ips)
+          if (( ${#reports[@]} == 0 )); then
+            echo "No crash reports in ~/Library/Logs/DiagnosticReports"
+            exit 0
+          fi
+          cp "${reports[@]}" "$out/"
+          newest=$(ls -t "${reports[@]}" | head -1)
+          echo "== ${#reports[@]} crash report(s); the newest, $newest, first 60 lines:"
+          head -60 "$newest"
+      - name: Upload crash reports
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: crash-reports
+          path: ${{ runner.temp }}/crash-reports
+          if-no-files-found: ignore
+          retention-days: 7
 
   # Fast-forward main to this dev SHA once every job above passed. The only
   # job besides audit-lower (which pushes one baseline commit to dev) that
@@ -136,7 +358,7 @@ jobs:
   promote:
     name: Promote
     needs: [linux, macos]
-    if: github.ref == 'refs/heads/dev'
+    if: github.ref == 'refs/heads/dev' && !inputs.app
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions:
@@ -171,7 +393,7 @@ jobs:
   dev-red:
     name: Dev red
     needs: [linux, macos]
-    if: failure() && github.ref == 'refs/heads/dev'
+    if: failure() && github.ref == 'refs/heads/dev' && !inputs.app
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions:
@@ -225,7 +447,7 @@ jobs:
   audit-lower:
     name: Audit lower
     needs: [macos]
-    if: github.ref == 'refs/heads/dev'
+    if: github.ref == 'refs/heads/dev' && !inputs.app
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions:

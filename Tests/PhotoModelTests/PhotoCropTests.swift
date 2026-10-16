@@ -50,6 +50,18 @@ import Testing
         #expect(workspace.canvas == CanvasSize(width: 32, height: 24))
     }
 
+    @Test func aCropOfTheWholeImageIsNoUndoStep() throws {
+        var workspace = try gradient()
+        stroke(&workspace, .crop, from: point(0, 0), to: point(64, 64))
+        #expect(workspace.pendingCrop == PixelRect(x: 0, y: 0, width: 64, height: 64))
+        #expect(!workspace.canApplyCrop)
+        workspace.applyCrop()
+        #expect(!workspace.canUndo)
+        #expect(workspace.pendingCrop == PixelRect(x: 0, y: 0, width: 64, height: 64))
+        workspace.setCropAspect(.ratio(1, 2))
+        #expect(workspace.canApplyCrop)
+    }
+
     @Test func choosingAnotherToolDropsAPendingCrop() throws {
         var workspace = try gradient()
         stroke(&workspace, .crop, from: point(8, 8), to: point(40, 32))

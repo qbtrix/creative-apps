@@ -5,29 +5,92 @@
   "status": "planned",
   "feature_issue": "file when ready",
   "covers": "#275, #270; gap: open bad files journey",
-  "waits_on": "design-window",
+  "waits_on": "design-contracts; view tasks: design-window DW-a",
+  "depends": [
+    "design-contracts"
+  ],
   "owned": [
-    "Sources/DesignModel/Live/LiveFiling.swift",
-    "Sources/DesignModel/DesignFile.swift",
-    "Tests/DesignModelTests/DesignFilingTests.swift",
     "Sources/DesignModel/DesignHistory.swift",
+    "Sources/DesignModel/DesignFile.swift",
     "Tests/DesignModelTests/DesignDirtyTests.swift",
     "Tests/DesignModelTests/DesignUndoTargetTests.swift",
+    "Sources/DesignModel/Live/LiveFiling.swift",
+    "Tests/DesignModelTests/DesignFilingTests.swift",
+    "UITests/DesignJourneyTests+BadFiles.swift",
     "Sources/DesignApp/DesignCommands.swift",
-    "Sources/DesignApp/DesignWindow.swift",
+    "Sources/DesignApp/DesignClosePrompt.swift",
     "Tests/AppSnapshotTests/DesignFileMenuSnapshots.swift",
-    "Sources/DesignApp/DesignEditor.swift",
+    "Sources/DesignApp/DesignSaveStatus.swift",
     "Tests/AppSnapshotTests/DesignFileSnapshots.swift",
     "UITests/DesignJourneyTests+Files.swift",
-    "UITests/DesignJourneyTests+BadFiles.swift",
     "UITests/DesignJourneyTests+PerfFiles.swift",
     "docs/blueprints/design.md"
   ],
   "journeys": [
-    "DesignJourneyTests.testCloseWithUnsavedChanges",
-    "DesignJourneyTests.testDrawShapesAddTextAndSave",
-    "DesignJourneyTests.testOpenBadFiles",
-    "DesignJourneyTests.testOpenLargeFile",
-    "DesignJourneyTests.testUndoInTextFieldsAndDirtyState"
+    "DesignBadFilesJourneyTests.testOpenBadFiles",
+    "DesignFilesJourneyTests.testUndoInTextFieldsAndDirtyState",
+    "DesignFilesJourneyTests.testCloseWithUnsavedChanges",
+    "DesignPerfFilesJourneyTests.testOpenLargeFile"
+  ],
+  "slices": [
+    {
+      "id": "FH-a",
+      "behavior": "Saving and opening go through the live filing with the same bytes, the document knows when it is unsaved, and opening a bad file says exactly what is wrong.",
+      "tasks": [
+        "FH-2",
+        "FH-1",
+        "FH-6"
+      ],
+      "journeys": [
+        "J16"
+      ],
+      "owned": [
+        "Sources/DesignModel/DesignHistory.swift",
+        "Sources/DesignModel/DesignFile.swift",
+        "Tests/DesignModelTests/DesignDirtyTests.swift",
+        "Tests/DesignModelTests/DesignUndoTargetTests.swift",
+        "Sources/DesignModel/Live/LiveFiling.swift",
+        "Tests/DesignModelTests/DesignFilingTests.swift",
+        "UITests/DesignJourneyTests+BadFiles.swift"
+      ]
+    },
+    {
+      "id": "FH-b",
+      "behavior": "Undo in a text field undoes the typing, the window says when the file is saved, closing with unsaved changes asks first, and a 2,000-layer file opens within budget.",
+      "tasks": [
+        "FH-3",
+        "FH-4",
+        "FH-5",
+        "FH-7"
+      ],
+      "journeys": [
+        "J13",
+        "J14",
+        "P4"
+      ],
+      "owned": [
+        "Sources/DesignApp/DesignCommands.swift",
+        "Sources/DesignApp/DesignClosePrompt.swift",
+        "Tests/AppSnapshotTests/DesignFileMenuSnapshots.swift",
+        "Sources/DesignApp/DesignSaveStatus.swift",
+        "Tests/AppSnapshotTests/DesignFileSnapshots.swift",
+        "UITests/DesignJourneyTests+Files.swift",
+        "UITests/DesignJourneyTests+PerfFiles.swift",
+        "docs/blueprints/design.md"
+      ],
+      "waits": {
+        "FH-a": [
+          "FH-3",
+          "FH-4",
+          "FH-7"
+        ],
+        "design-window:DW-a": [
+          "FH-3",
+          "FH-4",
+          "FH-5",
+          "FH-7"
+        ]
+      }
+    }
   ]
 }

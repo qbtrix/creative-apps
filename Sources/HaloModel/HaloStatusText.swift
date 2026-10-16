@@ -24,16 +24,23 @@ extension HaloComposition {
     /// The inspector header's card: the size, then rate and length.
     public var headerDetails: [String] { [sizeText, "\(frameRateText) · \(durationText)"] }
 
-    /// The viewer status bar's trailing text: the playhead's timecode
-    /// (HaloTimeline), then the length and rate ("00:00:00:00 / 10 s at 30 fps").
-    public var statusTimecode: String { "\(playheadTimecode) / \(durationText) at \(frameRateText)" }
+    /// The viewer status bar's timecode pill: the playhead's timecode
+    /// (HaloTimeline), then its frame, so it matches the ruler
+    /// ("00:00:00:20 · frame 20"). The timecode leads, so journeys can match on
+    /// its prefix. The length and rate live in the tooltip: the status bar
+    /// shares the content column with the layer count and the transport, and
+    /// must fit it at the 1000 pt window.
+    public var statusTimecode: String { "\(playheadTimecode) · frame \(playheadFrame)" }
 
-    /// The timecode pill's tooltip: what its four parts count and the frame
-    /// the playhead is on ("Hours:minutes:seconds:frames at the playhead
-    /// (frame 45 of 0–299), then the length and frame rate.").
+    /// The length and rate the tooltip ends with ("3 s at 24 fps").
+    public var statusLengthText: String { "\(durationText) at \(frameRateText)" }
+
+    /// The timecode pill's tooltip: what its parts count, the frame range and
+    /// the length ("Hours:minutes:seconds:frames, then the frame, at the
+    /// playhead (frame 45 of 0–299). The composition runs 10 s at 30 fps.").
     public var statusTimecodeHelp: String {
-        "Hours:minutes:seconds:frames at the playhead (frame \(playheadFrame) of 0–\(lastFrame)), "
-            + "then the length and frame rate."
+        "Hours:minutes:seconds:frames, then the frame, at the playhead (frame \(playheadFrame) of 0–\(lastFrame)). "
+            + "The composition runs \(statusLengthText)."
     }
 
     /// The viewer status bar's tooltip over its zoom and size pills.

@@ -6,12 +6,27 @@ import Testing
 
 @Suite struct PhotoContractsTests {
     @Test func archiveErrorsGiveTheTextsOfPJ4() {
-        #expect(ArchiveError.notADocument.message == "This file isn't a Photo document.")
+        #expect(ArchiveError.notADocument.message == "It isn't a Photo Document or an image Photo can open.")
         #expect(ArchiveError.newerVersion(2).message
-            == "This document was made by a newer Photo (format 2). Update Photo to open it.")
-        #expect(ArchiveError.damaged("data/layer-2.png is missing").message
-            == "This document is damaged: data/layer-2.png is missing.")
-        #expect(ArchiveError.tooLarge.message == "This document is larger than Photo can open.")
+            == "It was saved by a newer version of Photo. Update Photo to open it.")
+        #expect(ArchiveError.damaged("data/layer-2.png is missing").message == "It is damaged and can't be read.")
+        #expect(ArchiveError.tooLarge.message == "It is larger than Photo can open: up to 16 megapixels.")
+    }
+
+    @Test func archiveErrorsSpeakPlainWords() {
+        let all: [ArchiveError] = [.notADocument, .newerVersion(2), .damaged("data/layer-2.png is missing"),
+                                   .damaged("photo/document.json is missing"), .tooLarge]
+        for error in all {
+            #expect(!error.message.contains("/"), "\(error) names a path: \(error.message)")
+            #expect(!error.message.contains(/format \d/), "\(error) names a format number: \(error.message)")
+        }
+        #expect(ArchiveError.tooLarge.message.contains("megapixels"))
+        #expect(ArchiveError.notADocument.message.contains("Photo Document"))
+    }
+
+    @Test func aDamagedFileKeepsItsDetailOutOfTheAlert() {
+        #expect(ArchiveError.damaged("data/layer-2.png is missing").detail == "data/layer-2.png is missing")
+        #expect(ArchiveError.tooLarge.detail == nil)
     }
 
     @Test func cropAspectPresetsAreInOrder() {

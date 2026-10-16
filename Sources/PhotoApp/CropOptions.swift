@@ -1,10 +1,14 @@
 // CropOptions.swift: the crop tool's options in the Adjust tab (PV-3): the
 // pending crop's X, Y, W and H as ScrubFields two per row in a Grid (X over
 // W, Y over H, equal columns), the six aspect chips, Swap, then Apply Crop
-// and Cancel. Apply carries no Return shortcut, so Return in a field commits
-// the field; Return on the canvas applies through `.confirm`. Cancel carries
+// over Cancel, each action full width and every row SuiteSpacing.xs apart.
+// Apply carries no Return shortcut, so Return in a field commits the field;
+// Return on the canvas applies through `.confirm`. Cancel carries
 // no Escape shortcut either, which would close a field being typed in before
 // its own Escape; Escape on the canvas cancels through `.dismiss`.
+// Each field row is one accessibility element (the letter, the field's name
+// and value combined) carrying the field's identifier, labelled with its name
+// and number ("Width, 600 pixels") so XCUI reads the number.
 // Each field reports its bounds through CropFieldBoundsKey as an anchor, so
 // a test measures the 2 x 2 grid without an assistive client; nothing in the
 // app reads it. Values in, intents out.
@@ -16,12 +20,9 @@ struct CropOptions: View {
     let model: PhotoWorkspace
     let perform: PhotoPerform
 
-    /// The packet's empty-state wording, still asserted by PhotoCropOptionsSnapshots;
-    /// the panel now draws `model.cropCaption`. Drop this once that test reads the model.
-    static let emptyCaption = "Drag on the image, or type a size"
-
     var body: some View {
-        VStack(alignment: .leading, spacing: SuiteSpacing.s) {
+        // One row gap throughout, InspectorSection's own (SuiteSpacing.xs).
+        VStack(alignment: .leading, spacing: SuiteSpacing.xs) {
             // The one instruction line, always present so nothing moves when a crop appears.
             Text(model.cropCaption)
                 .font(SuiteFont.inspectorMeta)
@@ -44,20 +45,20 @@ struct CropOptions: View {
                 selected: Self.preset(for: model.cropAspect)
             ) { perform(.crop(.aspect($0))) }
                 .disabled(model.canvas == nil)
-                .help(model.canvas == nil ? "Open an image to choose a crop shape." : "")
+                .help(model.cropAspectGroupHelp)
+            // The title names the change ("Swap to 2:3"), so its tooltip does too.
             InspectorAction(ToolbarAction(
-                "Swap", systemImage: "arrow.left.arrow.right", unavailableHelp: model.cropSwapHelp,
+                model.cropSwapTitle, systemImage: "arrow.left.arrow.right", unavailableHelp: model.cropSwapHelp,
                 identifier: "photo.crop.swap"
             ) { perform(.crop(.swap)) })
-            HStack(spacing: SuiteSpacing.xs) {
-                let why = model.cropApplyHelp
-                InspectorAction(ToolbarAction(
-                    "Apply Crop", systemImage: "crop", unavailableHelp: why, identifier: "photo.crop.apply"
-                ) { perform(.applyCrop) })
-                InspectorAction(ToolbarAction(
-                    "Cancel", systemImage: "xmark", unavailableHelp: why, identifier: "photo.crop.cancel"
-                ) { perform(.cancelCrop) })
-            }
+            InspectorAction(ToolbarAction(
+                "Apply Crop", systemImage: "crop", unavailableHelp: model.cropApplyHelp,
+                identifier: "photo.crop.apply"
+            ) { perform(.applyCrop) })
+            InspectorAction(ToolbarAction(
+                "Cancel", systemImage: "xmark", unavailableHelp: model.cropCancelHelp,
+                identifier: "photo.crop.cancel"
+            ) { perform(.cancelCrop) })
         }
     }
 
@@ -71,9 +72,11 @@ struct CropOptions: View {
     /// One of X, Y, W, H: whole canvas pixels, X and Y from 0, W and H from 1,
     /// up to the canvas's size. With nothing pending it shows the whole
     /// image's rect (until ScrubField takes a placeholder), and takes typing
-    /// once a shape is locked.
+    /// once a ratio is locked, unless the crop already spans that side.
     private func field(_ field: CropField) -> some View {
-        let enabled = model.cropFieldsEnabled
+        // Each field on its own: one the lock or the image's edge pins says why.
+        let reason = model.cropFieldUnavailableHelp(field)
+        let enabled = reason == nil
         let (label, name, id): (String, String, String) =
             switch field {
             case .x: ("X", "X", "photo.crop.x")
@@ -83,7 +86,6 @@ struct CropOptions: View {
             }
         let side = field == .x || field == .width ? model.canvas?.width : model.canvas?.height
         let low: Double = field == .x || field == .y ? 0 : 1
-        let reason = model.cropFieldsUnavailableHelp
         return InspectorRow(label) {
             ScrubField(
                 name, value: Double(model.cropFieldDisplay(field)), in: low...max(low, Double(side ?? 1)), step: 1,
@@ -92,9 +94,18 @@ struct CropOptions: View {
                 guard number.isFinite else { return }
                 perform(.crop(.field(field, Int(number.rounded()))))
             }
-            .suiteControl(id: id, enabled: enabled, reason: reason)
             .anchorPreference(key: CropFieldBoundsKey.self, value: .bounds) { [id: $0] }
         }
+        // The row is one element: the drawn letter joins the field's name, value
+        // and adjust actions, so a disabled field's dimmed letter is part of a
+        // disabled control, not stray text; the identifier goes on that element.
+        // Combining drops the field's own value, and macOS exposes no value set
+        // on the combined row, so its label carries the number ("Width, 600
+        // pixels"); the value states it again for clients that read one.
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel(model.cropFieldAccessibilityLabel(field))
+        .accessibilityValue(model.cropFieldAccessibilityValue(field))
+        .suiteControl(id: id, enabled: enabled, reason: reason)
         .disabled(!enabled)
         .help(reason ?? model.cropFieldHelp(field))
     }

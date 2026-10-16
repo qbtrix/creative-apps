@@ -12,6 +12,15 @@
 // element reading "name, size, rate · length". The inspector as a whole is
 // SuiteWindow's `suite.inspector`: an id on this root merged into that
 // element and was overwritten, so a journey never found `halo.inspector`.
+// SuiteWindow doesn't scroll its inspector, so this one scrolls itself: a
+// selected layer's TRANSFORM rows stack under their bars at the inspector's
+// width, and unscrolled they stood taller than a 640 pt window, which pushed
+// the sidebar's rows above the window and the status bar, timeline and layer
+// rows below it. Snapshots draw it unscrolled (ImageRenderer can't draw a
+// ScrollView), as HaloTimelineView does. Its indicators are `.never`, as in
+// Photo's inspector tabs: with legacy scrollers the vertical one was an
+// unlabelled button to the app audit's Unnamed check. The column still
+// scrolls by wheel and trackpad.
 import HaloModel
 import SuiteUI
 import SwiftUI
@@ -19,8 +28,18 @@ import SwiftUI
 struct HaloCompositionInspector: View {
     let model: HaloProject
     var perform: @MainActor (HaloCommand) -> Void = { _ in }
+    @Environment(\.suiteSnapshotRendering) private var snapshot
 
     var body: some View {
+        if snapshot {
+            content
+        } else {
+            ScrollView(.vertical) { content }
+                .scrollIndicators(.never)
+        }
+    }
+
+    private var content: some View {
         VStack(alignment: .leading, spacing: 0) {
             if model.selectedLayerHeader != nil {
                 HaloLayerInspector(model: model, perform: perform)
@@ -47,5 +66,6 @@ struct HaloCompositionInspector: View {
                 HaloLayerList(model: model, perform: perform)
             }
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 }

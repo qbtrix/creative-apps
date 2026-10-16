@@ -12,7 +12,8 @@
 // Menu (a menu button labelled "Parent" or "Blend" under `suite.inspector`)
 // whose row carries `halo.inspector.parent` / `.blend` and the current title
 // as its value. Positions come from the TRANSFORM rows
-// (`halo.inspector.row.x`, value "160.0 px"). A row's bar opens its typing
+// (`halo.inspector.row.x`, a slider whose value is its position, 160, or
+// the row's text, "160.0 px"). A row's bar opens its typing
 // field on a click, as H-J6 types into Rotation. Undo stays history-files':
 // the Edit item is only looked up, ⌘Z is never pressed. Shots:
 // `halo-parent-*`, a menu's on the whole screen. The name sorts before
@@ -27,7 +28,7 @@ extension HaloJourneyTests {
 
         // 1. Select Ball: its Parent menu lists None, Floor and Rig, not Ball.
         parentSelect("comp-1-layer-2", named: "Ball", halo)
-        parentExpectX("160.0 px", halo)
+        parentExpectX(160, halo)
         let ballChoices = parentOpenPicker("halo.inspector.parent", label: "Parent", halo)
         for name in ["None", "Floor", "Rig"] {
             XCTAssert(ballChoices.contains(name), "Ball's Parent menu lists \(ballChoices), no \(name)")
@@ -38,7 +39,7 @@ extension HaloJourneyTests {
         // 2. Choose Rig: Ball's Position X still reads 160.0 px.
         parentChooseItem("Rig", halo)
         parentExpectValue("Rig", of: "halo.inspector.parent", label: "Parent", halo)
-        parentExpectX("160.0 px", halo)
+        parentExpectX(160, halo)
         halo.shot("parent-ball-rig")
 
         // 3. Select Rig: its Parent menu has no Ball (Ball follows Rig).
@@ -48,17 +49,17 @@ extension HaloJourneyTests {
         XCTAssertFalse(rigChoices.contains("Ball"), "Rig's Parent menu lists Ball, its child: \(rigChoices)")
         halo.shot("parent-rig-menu", screen: true)
         halo.press(.escape)
-        _ = halo.app.menus.firstMatch.waitForNonExistence(timeout: 2)
+        halo.menusClosed()
 
         // 4. Type 1060 into Rig's Position X.
-        parentExpectX("960.0 px", halo)
+        parentExpectX(960, halo)
         parentType("1060", into: "halo.inspector.row.x", halo)
-        parentExpectX("1060.0 px", halo)
+        parentExpectX(1060, halo)
         halo.shot("parent-rig-x-1060")
 
         // 5. Select Ball: still 160.0 px. Blend → Multiply: the row reads Multiply.
         parentSelect("comp-1-layer-2", named: "Ball", halo)
-        parentExpectX("160.0 px", halo)
+        parentExpectX(160, halo)
         let blends = parentOpenPicker("halo.inspector.blend", label: "Blend", halo)
         XCTAssert(blends.contains("Multiply"), "the Blend menu lists \(blends), no Multiply")
         parentChooseItem("Multiply", halo)
@@ -69,7 +70,7 @@ extension HaloJourneyTests {
         _ = parentOpenPicker("halo.inspector.parent", label: "Parent", halo)
         parentChooseItem("None", halo)
         parentExpectValue("None", of: "halo.inspector.parent", label: "Parent", halo)
-        parentExpectX("260.0 px", halo)
+        parentExpectX(260, halo)
         parentExpectEditItem("Undo Set Parent", halo)
         halo.shot("parent-none-kept")
     }
@@ -120,7 +121,7 @@ extension HaloJourneyTests {
             .matching(NSPredicate(format: "title == %@", title)).firstMatch
         XCTAssert(item.waitForExistence(timeout: 3), "the open menu has no \(title)")
         item.click()
-        _ = halo.app.menus.firstMatch.waitForNonExistence(timeout: 2)
+        halo.menusClosed()
     }
 
     /// The picker `id` (or its menu button) reads `value` within three seconds.
@@ -132,13 +133,22 @@ extension HaloJourneyTests {
             "\(label) reads \(String(describing: halo.element(id).value)), not \(value)")
     }
 
-    /// The Position X row reads `text` ("160.0 px") within three seconds.
-    @MainActor private func parentExpectX(_ text: String, _ halo: Journey) {
+    /// The Position X row reads `x` px within three seconds. The row is a
+    /// slider (InspectorSliderRow's accessibility representation), so
+    /// XCUITest reads its position, a number in px (160), not the row's text
+    /// ("160.0 px", run 38767265986); either one is matched, the number to
+    /// the text's one decimal, as H-J6 reads Rotation.
+    @MainActor private func parentExpectX(_ x: Double, _ halo: Journey) {
         let row = halo.element("halo.inspector.row.x")
         XCTAssert(row.waitForExistence(timeout: 5), "no Position X row (halo.inspector.row.x)")
-        XCTAssert(
-            parentWaitUntil { (row.value as? String) == text },
-            "Position X reads \(String(describing: row.value)), not \(text)")
+        func reads() -> Bool {
+            switch row.value {
+            case let number as NSNumber: abs(number.doubleValue - x) < 0.05
+            case let text as String: text == String(format: "%.1f px", x)
+            default: false
+            }
+        }
+        XCTAssert(parentWaitUntil(reads), "Position X reads \(String(describing: row.value)), not \(x) px")
     }
 
     /// Clicks the bar `id` open, selects its text, types `text` and presses Return.
@@ -162,7 +172,7 @@ extension HaloJourneyTests {
         let item = edit.menus.firstMatch.menuItems.matching(NSPredicate(format: "title == %@", title)).firstMatch
         XCTAssert(item.waitForExistence(timeout: 3), "the Edit menu has no \(title)")
         halo.press(.escape)
-        _ = halo.app.menus.firstMatch.waitForNonExistence(timeout: 2)
+        halo.menusClosed()
     }
 
     /// Whether `condition` holds within three seconds.

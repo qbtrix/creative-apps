@@ -42,7 +42,9 @@
                 "paths": [
                   "Sources/DesignModel/DesignWorkspace.swift",
                   "Sources/DesignModel/DesignSelection.swift",
-                  "Sources/DesignModel/DesignHeldIDs.swift"
+                  "Sources/DesignModel/DesignHeldIDs.swift",
+                  "Sources/DesignModel/DesignWindowOptions.swift",
+                  "Sources/DesignModel/DesignToolbarItems.swift"
                 ],
                 "status": "existing",
                 "authored": true
@@ -126,7 +128,10 @@
                 "technology": "Swift 6, Foundation",
                 "paths": [
                   "Sources/DesignModel/DesignServices.swift",
-                  "Sources/DesignModel/DesignActions.swift"
+                  "Sources/DesignModel/DesignActions.swift",
+                  "Sources/DesignModel/NotBuilt.swift",
+                  "Sources/DesignModel/DesignActions+Edit.swift",
+                  "Sources/DesignModel/DesignActions+TierTwo.swift"
                 ],
                 "status": "planned",
                 "authored": true
@@ -178,7 +183,9 @@
                   "Sources/DesignApp/DesignWindow.swift",
                   "Sources/DesignApp/DesignEditor.swift",
                   "Sources/DesignApp/DesignIntent.swift",
-                  "Sources/DesignApp/DesignControls.swift"
+                  "Sources/DesignApp/DesignControls.swift",
+                  "Sources/DesignApp/DesignSaveStatus.swift",
+                  "Sources/DesignApp/DesignClosePrompt.swift"
                 ],
                 "status": "existing",
                 "authored": true
@@ -193,7 +200,8 @@
                   "Sources/DesignApp/DesignCanvasMarks.swift",
                   "Sources/DesignApp/DesignTextEditor.swift",
                   "Sources/DesignApp/DesignSelectionMarks.swift",
-                  "Sources/DesignApp/DesignFrameLabels.swift"
+                  "Sources/DesignApp/DesignFrameLabels.swift",
+                  "Sources/DesignApp/DesignLiveDrag.swift"
                 ],
                 "status": "existing",
                 "authored": true

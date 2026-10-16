@@ -4,12 +4,15 @@
 // Background and the Rig null, top first, 24 fps, 72 frames, live services)
 // it clicks Badge's lane, which selects Badge and focuses the timeline so
 // HaloViewer takes Home and → (as H-J3 does), scrubs to 12 and to 30, then
-// adds Layer > New > Solid. The artboard (`halo.viewer`) reads the Model's
-// viewerSummary, bottom layer first, and the canvas inside it
-// (`halo.viewer.canvas`) its draw list's drawnSummary, which proves the
+// adds Layer > New > Solid. The artboard's `halo.viewer.summary` label reads
+// the Model's viewerSummary, bottom layer first, and the canvas's
+// `halo.viewer.drawn` label its draw list's drawnSummary (labels, since
+// XCUITest reads values empty, #262), which proves the
 // live drawing rather than the layer list: 2, 3, then 4 layers drawn (the
 // null draws nothing). A new layer goes on top, so the list's first row is
-// Solid 1. One shot per step, `halo-viewer-<step>`.
+// the new solid. HaloProject.newLayer names it by kind and that kind's count
+// plus one, and Background is already a solid, so it is Solid 2. One shot
+// per step, `halo-viewer-<step>`.
 import XCTest
 
 final class HaloViewerJourneyTests: XCTestCase {
@@ -33,13 +36,13 @@ final class HaloViewerJourneyTests: XCTestCase {
         expectCanvas("3 layers drawn", halo)
         halo.shot("viewer-frame-30")
 
-        // 3. Layer > New > Solid: Solid 1 on top, drawn last.
+        // 3. Layer > New > Solid: Solid 2 (Background is the first solid) on top, drawn last.
         choose(["Layer", "New", "Solid"], halo)
-        expectArtboard("Frame 30: Background, Badge, Title: Hello Halo, Solid 1", halo)
+        expectArtboard("Frame 30: Background, Badge, Title: Hello Halo, Solid 2", halo)
         expectCanvas("4 layers drawn", halo)
         XCTAssert(
-            waitFor { self.firstRowLabel(halo).contains("Solid 1") },
-            "the layer list's first row reads \(firstRowLabel(halo)), not Solid 1")
+            waitFor { self.firstRowLabel(halo).contains("Solid 2") },
+            "the layer list's first row reads \(firstRowLabel(halo)), not Solid 2")
         halo.shot("viewer-solid-on-top")
     }
 
@@ -59,23 +62,23 @@ final class HaloViewerJourneyTests: XCTestCase {
         for _ in 0..<count { halo.press(.rightArrow) }
     }
 
-    /// The artboard (`halo.viewer`) reads `summary` within five seconds.
+    /// The artboard's summary (`halo.viewer.summary`) reads `summary` within five seconds.
     @MainActor private func expectArtboard(_ summary: String, _ halo: Journey) {
-        expectValue(summary, of: "halo.viewer", what: "the artboard", halo)
+        expectLabel(summary, of: "halo.viewer.summary", what: "the artboard", halo)
     }
 
-    /// The canvas (`halo.viewer.canvas`) reads `summary` within five seconds.
+    /// The canvas's summary (`halo.viewer.drawn`) reads `summary` within five seconds.
     @MainActor private func expectCanvas(_ summary: String, _ halo: Journey) {
-        expectValue(summary, of: "halo.viewer.canvas", what: "the canvas", halo)
+        expectLabel(summary, of: "halo.viewer.drawn", what: "the canvas", halo)
     }
 
-    /// The element `identifier`'s accessibility value is `value`, within five seconds.
-    @MainActor private func expectValue(_ value: String, of identifier: String, what: String, _ halo: Journey) {
+    /// The element `identifier`'s accessibility label is `label`, within five seconds.
+    @MainActor private func expectLabel(_ label: String, of identifier: String, what: String, _ halo: Journey) {
         let match = halo.app.descendants(matching: .any).matching(
-            NSPredicate(format: "identifier == %@ AND value == %@", identifier, value)).firstMatch
+            NSPredicate(format: "identifier == %@ AND label == %@", identifier, label)).firstMatch
         XCTAssert(
             match.waitForExistence(timeout: 5),
-            "\(what) reads \(String(describing: halo.element(identifier).value)), not \(value)")
+            "\(what) reads \(halo.element(identifier).label), not \(label)")
     }
 
     /// The label (or value) of the layer list's top row; empty with no rows.
@@ -99,7 +102,7 @@ final class HaloViewerJourneyTests: XCTestCase {
         }
         XCTAssert(item.isEnabled, "\(path.joined(separator: " > ")) is disabled")
         item.click()
-        _ = halo.app.menus.firstMatch.waitForNonExistence(timeout: 2)
+        halo.menusClosed()
     }
 
     /// Whether `condition` holds within three seconds.

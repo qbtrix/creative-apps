@@ -62,10 +62,10 @@ struct LibraryCommands: Commands {
                 shortcut: KeyboardShortcut("i", modifiers: [.command, .shift]))
             LibraryMenuItem(
                 title: "Load Sample Photos", systemImage: "photo.badge.plus", action: menu.edit.loadSamples,
-                reason: why(nil, "Samples can't load right now."))
+                reason: why(nil, "This catalog was made by a newer Library. Update Library to open it."))
             LibraryMenuItem(
                 title: "Export…", systemImage: "square.and.arrow.up", action: menu.export.export,
-                reason: menu.export.exportHelp ?? why("exporter", "Select photos to export."),
+                reason: menu.export.exportHelp ?? why("exporter", "Export isn't connected yet."),
                 shortcut: KeyboardShortcut("e", modifiers: [.command, .shift]))
         }
         CommandGroup(replacing: .undoRedo) {
@@ -98,31 +98,40 @@ struct LibraryCommands: Commands {
             title: "Loupe", systemImage: "rectangle", action: view.loupe,
             reason: why(nil, "The loupe is already showing, or there are no photos."))
         Divider()
+        // In the grid Zoom In/Out size the thumbnails (disabled at a limit);
+        // in the loupe they wait on loupe zoom, which isn't wired yet.
+        let inGrid = view.zoomInTitle == "Larger Thumbnails"
+        let loupeZoom = why("loupe", "Zoom in the loupe isn't connected yet.")
         LibraryMenuItem(
             title: view.zoomInTitle, systemImage: "plus.magnifyingglass", action: view.zoomIn,
-            reason: why(nil, "Can't zoom in further."), shortcut: KeyboardShortcut("+"))
+            reason: inGrid ? why(nil, "Can't zoom in further.") : loupeZoom, shortcut: KeyboardShortcut("+"))
         LibraryMenuItem(
             title: view.zoomOutTitle, systemImage: "minus.magnifyingglass", action: view.zoomOut,
-            reason: why(nil, "Can't zoom out further."), shortcut: KeyboardShortcut("-"))
+            reason: inGrid ? why(nil, "Can't zoom out further.") : loupeZoom, shortcut: KeyboardShortcut("-"))
         LibraryMenuItem(
-            title: "Zoom to Fit", action: view.zoomToFit, reason: why("loupe", "Open a photo in the loupe first."),
-            shortcut: KeyboardShortcut("0"))
+            title: "Zoom to Fit", action: view.zoomToFit, reason: loupeZoom, shortcut: KeyboardShortcut("0"))
         LibraryMenuItem(
-            title: "Actual Size", action: view.actualSize, reason: why("loupe", "Open a photo in the loupe first."),
-            shortcut: KeyboardShortcut("1"))
+            title: "Actual Size", action: view.actualSize, reason: loupeZoom, shortcut: KeyboardShortcut("1"))
         Divider()
-        Picker("Sort By", selection: Binding(get: { menu.view.sort }, set: { menu.view.setSort?($0) })) {
-            ForEach(LibrarySort.allCases, id: \.self) { Text($0.rawValue).tag($0) }
+        // A Menu of buttons, not a Picker: a Picker's .disabled didn't reach
+        // the menu bar, while each item here is disabled by its nil action.
+        let noSort = why(nil, "There are no photos to sort.")
+        Menu("Sort By") {
+            ForEach(LibrarySort.allCases, id: \.self) { sort in
+                LibraryMenuItem(
+                    title: sort.rawValue, systemImage: sort == view.sort ? "checkmark" : nil,
+                    action: bind(view.setSort, sort), reason: noSort)
+            }
         }
         .disabled(view.setSort == nil)
-        .help(view.setSort == nil ? "Sort By: \(why(nil, "There are no photos to sort."))" : "Sort By")
+        .help(view.setSort == nil ? "Sort By: \(noSort)" : "Sort By")
         Divider()
     }
 
     @ViewBuilder private var photoItems: some View {
         let photo = menu.photo
-        let develop = why("develop", "Select a photo to develop.")
-        let crop = why("crop", "Select one photo to crop.")
+        let develop = why("develop", "Develop isn't connected yet.")
+        let crop = why("crop", "Crop isn't connected yet.")
         LibraryMenuItem(
             title: "Copy Settings", action: photo.copySettings, reason: develop,
             shortcut: KeyboardShortcut("c", modifiers: [.command, .shift]))

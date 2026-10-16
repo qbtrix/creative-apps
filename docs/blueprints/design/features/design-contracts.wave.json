@@ -1,0 +1,178 @@
+{
+  "title": "The contracts: style schema, use cases, services with NotBuilt, fakes, live stubs, actions, fixtures",
+  "wave": "0a",
+  "order": 10,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "covers": "the `DesignPage` init gap (filed by the lead); #532 (Model part, from PR #753)",
+  "waits_on": "nothing (PR #753's Model half is its task D0-0)",
+  "owned": [
+    "Sources/DesignModel/DesignNode.swift",
+    "Sources/DesignModel/DesignCorners.swift",
+    "Sources/DesignModel/DesignFile.swift",
+    "Tests/DesignModelTests/DesignCornerRadiusTests.swift",
+    "Sources/DesignModel/Contracts/EditContracts.swift",
+    "Sources/DesignModel/Contracts/StyleTypes.swift",
+    "Tests/DesignModelTests/DesignIDMintTests.swift",
+    "Tests/DesignModelTests/DesignRefusalHelpTests.swift",
+    "Sources/DesignModel/DesignWorkspace.swift",
+    "Sources/DesignModel/DesignSelection.swift",
+    "Tests/DesignModelTests/DesignStyleSchemaTests.swift",
+    "Tests/DesignModelTests/DesignSelectionRunTests.swift",
+    "Sources/DesignModel/Contracts/UseCases.swift",
+    "Tests/DesignModelTests/DesignDocumentTests.swift",
+    "Sources/DesignModel/NotBuilt.swift",
+    "Sources/DesignModel/DesignServices.swift",
+    "Tests/DesignModelTests/DesignNotBuiltTests.swift",
+    "Sources/DesignModel/Fakes/FakeSupport.swift",
+    "Sources/DesignModel/Fakes/DesignSelectFakes.swift",
+    "Tests/DesignModelTests/DesignSelectFakesTests.swift",
+    "Sources/DesignModel/Fakes/DesignArrangeFakes.swift",
+    "Tests/DesignModelTests/DesignArrangeFakesTests.swift",
+    "Tests/DesignModelTests/DesignContractLawTests.swift",
+    "Sources/DesignModel/Live/LiveMarquee.swift",
+    "Sources/DesignModel/Live/LiveTransforming.swift",
+    "Sources/DesignModel/Live/LiveAligning.swift",
+    "Sources/DesignModel/Live/LiveFraming.swift",
+    "Sources/DesignModel/Live/LiveDuplicating.swift",
+    "Sources/DesignModel/Live/LiveGrouping.swift",
+    "Sources/DesignModel/Live/LiveClipboard.swift",
+    "Sources/DesignModel/Live/LiveOrdering.swift",
+    "Sources/DesignModel/Live/LiveStyling.swift",
+    "Sources/DesignModel/Live/LiveFiling.swift",
+    "Tests/DesignModelTests/DesignLiveStubTests.swift",
+    "Sources/DesignModel/DesignFixtures.swift",
+    "Tests/DesignModelTests/DesignFixturesTests.swift",
+    "Tests/DesignModelTests/DesignBudget.swift",
+    "Tests/DesignModelTests/DesignBudgetHelperTests.swift",
+    "Sources/DesignModel/DesignActions.swift",
+    "Tests/DesignModelTests/DesignActionsTests.swift",
+    "Sources/DesignModel/DesignActions+Edit.swift",
+    "Tests/DesignModelTests/DesignActionsEditTests.swift"
+  ],
+  "journeys": [],
+  "journeys_none": "Model only: Linux walks MJ1 to MJ4, one per slice, in the slices' own tests (the packet's Journey steps)",
+  "slices": [
+    {
+      "id": "CT-a",
+      "behavior": "A file saved before the new style fields still opens with every field at its default, and a rectangle's corner radius saves and reopens.",
+      "tasks": [
+        "D0-0",
+        "D0-2.1",
+        "D0-1"
+      ],
+      "journeys": [
+        "MJ1"
+      ],
+      "owned": [
+        "Sources/DesignModel/DesignNode.swift",
+        "Sources/DesignModel/DesignCorners.swift",
+        "Sources/DesignModel/DesignFile.swift",
+        "Tests/DesignModelTests/DesignCornerRadiusTests.swift",
+        "Sources/DesignModel/Contracts/EditContracts.swift",
+        "Sources/DesignModel/Contracts/StyleTypes.swift",
+        "Tests/DesignModelTests/DesignIDMintTests.swift",
+        "Tests/DesignModelTests/DesignRefusalHelpTests.swift",
+        "Sources/DesignModel/DesignWorkspace.swift",
+        "Sources/DesignModel/DesignSelection.swift",
+        "Tests/DesignModelTests/DesignStyleSchemaTests.swift",
+        "Tests/DesignModelTests/DesignSelectionRunTests.swift"
+      ]
+    },
+    {
+      "id": "CT-b",
+      "behavior": "On the fake services every tier-1 use case acts, and on the live services each one says \"<Feature> isn't built yet.\" and changes nothing.",
+      "tasks": [
+        "D0-2.2",
+        "D0-2.3",
+        "D0-2.4",
+        "D0-2.5"
+      ],
+      "journeys": [
+        "MJ2"
+      ],
+      "owned": [
+        "Sources/DesignModel/Contracts/UseCases.swift",
+        "Tests/DesignModelTests/DesignDocumentTests.swift",
+        "Sources/DesignModel/NotBuilt.swift",
+        "Sources/DesignModel/DesignServices.swift",
+        "Sources/DesignModel/DesignWorkspace.swift",
+        "Tests/DesignModelTests/DesignNotBuiltTests.swift",
+        "Sources/DesignModel/Fakes/FakeSupport.swift",
+        "Sources/DesignModel/Fakes/DesignSelectFakes.swift",
+        "Tests/DesignModelTests/DesignSelectFakesTests.swift",
+        "Sources/DesignModel/Fakes/DesignArrangeFakes.swift",
+        "Tests/DesignModelTests/DesignArrangeFakesTests.swift"
+      ],
+      "waits": {
+        "CT-a": [
+          "D0-2.2",
+          "D0-2.3",
+          "D0-2.5"
+        ]
+      }
+    },
+    {
+      "id": "CT-c",
+      "behavior": "The help law holds on every fake and every live stub, and the four fixtures open exactly as the blueprint lists them.",
+      "tasks": [
+        "D0-2.6",
+        "D0-2b",
+        "D0-4a"
+      ],
+      "journeys": [
+        "MJ3"
+      ],
+      "owned": [
+        "Tests/DesignModelTests/DesignContractLawTests.swift",
+        "Sources/DesignModel/Live/LiveMarquee.swift",
+        "Sources/DesignModel/Live/LiveTransforming.swift",
+        "Sources/DesignModel/Live/LiveAligning.swift",
+        "Sources/DesignModel/Live/LiveFraming.swift",
+        "Sources/DesignModel/Live/LiveDuplicating.swift",
+        "Sources/DesignModel/Live/LiveGrouping.swift",
+        "Sources/DesignModel/Live/LiveClipboard.swift",
+        "Sources/DesignModel/Live/LiveOrdering.swift",
+        "Sources/DesignModel/Live/LiveStyling.swift",
+        "Sources/DesignModel/Live/LiveFiling.swift",
+        "Sources/DesignModel/DesignServices.swift",
+        "Tests/DesignModelTests/DesignLiveStubTests.swift",
+        "Sources/DesignModel/DesignFixtures.swift",
+        "Tests/DesignModelTests/DesignFixturesTests.swift",
+        "Tests/DesignModelTests/DesignBudget.swift",
+        "Tests/DesignModelTests/DesignBudgetHelperTests.swift"
+      ],
+      "waits": {
+        "CT-b": [
+          "D0-2.6",
+          "D0-2b"
+        ],
+        "CT-a": [
+          "D0-4a"
+        ]
+      }
+    },
+    {
+      "id": "CT-d",
+      "behavior": "Every workspace command records one named step or says why, and one-layer delete, nudge, align, frame, fill and radius edits keep today's methods on the live services.",
+      "tasks": [
+        "D0-3a",
+        "D0-3b"
+      ],
+      "journeys": [
+        "MJ4"
+      ],
+      "owned": [
+        "Sources/DesignModel/DesignActions.swift",
+        "Tests/DesignModelTests/DesignActionsTests.swift",
+        "Sources/DesignModel/DesignActions+Edit.swift",
+        "Tests/DesignModelTests/DesignActionsEditTests.swift"
+      ],
+      "waits": {
+        "CT-b": [
+          "D0-3a"
+        ]
+      }
+    }
+  ]
+}

@@ -214,7 +214,8 @@ something. One that can't act yet is disabled and says why:
   and never the generated `docs/c4/model.json` or
   `docs/blueprints/*/features/waves.md` at all: edit your component's part in
   docs/c4/parts/ or your feature's .wave.json, and the generated workflow
-  rewrites them on dev.
+  rewrites them on dev. Only the supervisor edits the journey quarantine,
+  `UITests/quarantine.json`.
   `scripts/` means all of it, the gate included. Every target already exists.
   If you think one of these must change, say so in an issue. The fast lane
   refuses exactly this list (PROTECTED in scripts/fast-lane.sh; its tests
@@ -227,7 +228,14 @@ A session started from a `feature-lead` issue is a lead: it follows
 its workflow templates in `docs/factory/workflows/`. Every PR a lead or its
 agents open carries `Belt-Lead: <run id>` and `Feature: <feature>` lines
 above the `Fast-Check:` / `Head:` lines. `Belt-Lead:` PRs don't wait for
-`belt/review`; the lead's critic panel is their review.
+`belt/review`; the lead's critic panel is their review. A PR with a
+`Feature:` line never closes a `feature-lead` issue: before the squash the
+fast lane reads the labels of each issue its closing keywords point at
+(close, fixes, `Resolved:` and the rest, any case) and turns the keyword
+before a `feature-lead` issue into `Refs`. Its other closing references,
+such as the critic findings and gaps it fixes, stay and close on merge. An
+issue whose labels the lane can't read keeps its keyword, isn't closed, and
+gets one comment on the PR.
 
 ## Fast lane
 
@@ -240,8 +248,27 @@ Crew PRs merge into `dev` at once; `main` moves only when full CI passes on
   path touched (the files above), mergeable, no red or running check on the
   head, and proof the head passed the gate: the `Fast-Check: pass` /
   `Head: <sha>` lines for the current head, or a passing CI check on it.
-- UI code takes the lane on the Linux check alone. A human reviews the
-  snapshots after the next feature CI and files fixes as new issues.
+- A PR that changes or renames a shared shell file (`MAC_GATED` in
+  scripts/fast-lane.sh: SuiteWindow, EditorShell, ToolbarGroup and Tokens in
+  Sources/SuiteUI) also needs a completed CI run on its current head whose
+  `macOS` job is green, or fails only tests that also fail in the latest
+  completed dev run. You can't dispatch CI (403), so the lane does: once per
+  head it runs `ci.yml` on your branch, comments the run URL, and merges on a
+  later sweep when that run passes. A run with a new failure is refused by
+  test name and waits for your next push. A `Mac-Check: <run url>` line a
+  supervisor adds counts too.
+- Any other PR that changes code (`BUILD_RE` in scripts/fast-lane.sh: a
+  `.swift` file under `Sources/`, `Tests/` or `UITests/`, `project.yml`, or
+  `Package.swift`), a Model included, merges only once its head compiles on
+  macOS. Linux `scripts/ci` never builds the apps, and it misses macOS-only
+  breaks in the targets it does build (#1210: an `ObjCBool` error in
+  PhotoModel). The lane dispatches a build-only CI run (`ci.yml` with
+  `build_only`: every target with its tests, then the journey bundles;
+  nothing runs) once per head, comments its URL, and merges when it
+  succeeds. A failed build waits for your next push. A PR with no code
+  (docs, data, packets) takes the lane on the Linux check alone.
+- Outside `MAC_GATED`, no test runs on macOS before a merge. A human reviews
+  the snapshots after the next feature CI and files fixes as new issues.
 - Each lane run merges every eligible PR, oldest first. A PR that conflicts
   after an earlier merge gets one comment and waits for a rebase. A fast-lane
   PR opened against `main` is retargeted to `dev`.
@@ -271,6 +298,21 @@ Crew PRs merge into `dev` at once; `main` moves only when full CI passes on
   `main..<sha>`. SwiftUI breakage can sit on `dev` until that run, so the range
   can span several PRs. The lane keeps merging while the issue is open; the
   next green run moves `main` and closes it.
+- A scoped run proves one app: `gh workflow run ci.yml --ref dev -f
+  app=<flare|design|photo|library|halo|suite|suiteui>`. It still builds every
+  target, app bundle and journey bundle, then runs only that app's Model
+  tests, snapshot tests and journeys (titled `scoped: <app>`, job `macOS
+  (<app>)`; about 10 min for Design, longer for apps with more journeys). It skips the Linux job and never promotes `main`,
+  opens `dev-red` or lowers the audit baseline. The supervisor's
+  verify-dispatch.sh starts one per app after that app's merges.
+- A journey that keeps failing on `dev` for a known reason can be quarantined,
+  by the supervisor only, in `UITests/quarantine.json`: entries of
+  `{"test": "Target/Class/testName", "owner": "#<open issue>", "reason": ..., "expires": "YYYY-MM-DD"}`,
+  at most 7 days out. `scripts/ui-test` skips each live entry and lists it in
+  its output and the job summary. `scripts/ci` fails on an expired entry, a
+  closed or missing owner issue, an empty reason, or a test that isn't in
+  `UITests/`. When the owner's fix merges, the supervisor removes the entry
+  and the next `dev` run proves it.
 
 ## Commands
 
@@ -279,6 +321,7 @@ scripts/ci                                   # lint + app-state rule + design li
 swift test --filter FlareModelTests          # one suite while iterating
 bash Tests/fast_lane/test_fast_lane.sh       # fast-lane decision tests (needs jq)
 bash Tests/audit_lower/test_audit_lower.sh   # decision tests for scripts/audit-lower, CI's baseline lowering (needs jq)
+scripts/quarantine check                     # the journey quarantine's entries: owned, reasoned, unexpired (needs jq; gh for owner state)
 gh run list --workflow ci.yml --branch dev    # feature CI runs on dev
 gh run download <run-id> -n snapshots        # the PNGs from a macOS CI run
 gh run download <run-id> -n ui-screens       # whole-window PNGs from the UI journeys

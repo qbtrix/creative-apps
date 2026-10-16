@@ -73,6 +73,10 @@ final class LibraryJourneyTests: XCTestCase {
         XCTAssert(position.waitForExistence(timeout: 5), "no loupe position (library.loupe.position)")
         let start = position.label
         library.shot("loupe")
+        // The loupe's keys act while it has focus; a menu click may leave focus
+        // elsewhere, so click the photo first, as a person would.
+        let photo = library.element("library.loupe.photo")
+        if photo.waitForExistence(timeout: 3) { photo.click() } else { loupe.click() }
         library.app.typeKey(.rightArrow, modifierFlags: [])
         let next = library.app.descendants(matching: .any).matching(NSPredicate(
             format: "identifier == 'library.loupe.position' AND label != %@", start)).firstMatch
@@ -160,14 +164,26 @@ final class LibraryJourneyTests: XCTestCase {
         return titles
     }
 
-    /// Opens View and checks Sort By's enabled state; closes it again.
+    /// Opens View > Sort By and checks each sort item's enabled state (a
+    /// submenu's parent item may stay enabled while all its items are off);
+    /// closes the menu again.
     @MainActor private func expectSortBy(enabled: Bool, _ library: Journey) {
         let view = library.app.menuBars.firstMatch.menuBarItems["View"]
         view.click()
         let sort = view.menuItems["Sort By"]
         XCTAssert(sort.waitForExistence(timeout: 3), "the View menu has no Sort By")
-        XCTAssertEqual(sort.isEnabled, enabled, "View > Sort By enabled")
+        if enabled { XCTAssert(sort.isEnabled, "View > Sort By is disabled with photos") }
+        if sort.isEnabled {
+            sort.hover()
+            let items = sort.menus.firstMatch.children(matching: .menuItem)
+            XCTAssert(items.firstMatch.waitForExistence(timeout: 3), "View > Sort By has no items")
+            for item in items.allElementsBoundByIndex where !item.title.isEmpty {
+                XCTAssertEqual(item.isEnabled, enabled, "View > Sort By > \(item.title) enabled")
+            }
+            library.press(.escape)
+        }
         library.press(.escape)
+        _ = library.app.menus.firstMatch.waitForNonExistence(timeout: 2)
     }
 
     /// Opens each of Metadata's Set Rating, Set Flag and Set Label and checks

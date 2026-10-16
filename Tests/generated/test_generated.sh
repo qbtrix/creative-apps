@@ -7,7 +7,11 @@
 # model, the part problems that fail (bad JSON, missing order, id/name mismatch,
 # duplicate id, unknown relationship end); waves rendering, --check, --dry-run,
 # and the checks (same-wave clash, a prefix clash, a dependency in the same
-# wave, a missing field, a bad status). Also: the real repo's parts assemble, and
+# wave, a missing field, a bad status, no owned or journeys, a journey without
+# its class, an owned generated file, the C4 owner opt-in) and the slice checks (a file handed over
+# across a contract-slice wait, two slices that can run at once owning a file,
+# unknown waits, slice size, a task in two slices, journeys, owned in step,
+# cycles). Also: the real repo's parts assemble, and
 # the Generated workflow's guards on a scratch git repo: c4-assemble --absorb keeps
 # a part edit, folds a direct model.json edit into the parts, and refuses a part
 # changed both ways; waves render --guard regenerates after a data edit and leaves
@@ -195,6 +199,42 @@ expect "with owned_files_planned, an owned file needs one planned owner (folder 
 feature draw '{"title": "Draw", "wave": 1, "status": "built", "feature_issue": "#3", "covers": "#12", "waits_on": "seam", "owned": ["Sources/AppModel/Draw.swift"], "journeys": ["AppJourneyTests.testDraw"]}'
 expect "a folder entry without its slash owns the files under it" 0 "waves: OK" python3 "$waves" --root "$w" check
 rm "$w/docs/blueprints/app/c4-planned.json"
+
+# Slices: a contract-first app. "ui" waits on win's contract slice W-a for its view
+# tasks, so it may take over a file W-a created; "model" waits on nothing in win.
+s="$tmp/s"
+mkdir -p "$s/docs/blueprints/app/features"
+cp "$w/docs/blueprints/app/waves.in.md" "$s/docs/blueprints/app/"
+sfeature() { printf '%s\n' "$2" >"$s/docs/blueprints/app/features/$1.wave.json"; }
+base='"status": "planned", "feature_issue": "later", "covers": "-", "waits_on": "-", "journeys": ["AppJourneyTests.testSlot"]'
+sfeature win '{"title": "Window", "wave": "0b", '"$base"', "owned": ["A/Slot.swift", "A/Win.swift"], "slices": [
+  {"id": "W-a", "behavior": "The slot shows.", "tasks": ["W-1", "W-2"], "journeys": ["J1"], "owned": ["A/Slot.swift", "A/Win.swift"]},
+  {"id": "W-b", "behavior": "The window finishes.", "tasks": ["W-3", "W-4"], "journeys": ["J2"], "owned": ["A/Win.swift"], "waits": {"W-a": ["W-3"]}}]}'
+sfeature ui '{"title": "UI", "wave": 1, '"$base"', "owned": ["M/Ui.swift", "A/Slot.swift"], "slices": [
+  {"id": "U-a", "behavior": "The slot fills.", "tasks": ["U-1", "U-2"], "journeys": ["J3"], "owned": ["M/Ui.swift", "A/Slot.swift"], "waits": {"win:W-a": ["U-2"]}}]}'
+expect "slices: a file handed over across a contract-slice wait passes" 0 "waves: OK" python3 "$waves" --root "$s" check
+sfeature ui '{"title": "UI", "wave": 1, '"$base"', "owned": ["M/Ui.swift", "A/Win.swift"], "slices": [
+  {"id": "U-a", "behavior": "The slot fills.", "tasks": ["U-1", "U-2"], "journeys": ["J3"], "owned": ["M/Ui.swift", "A/Win.swift"], "waits": {"win:W-a": ["U-2"]}}]}'
+expect "slices: two slices that can run at once owning a file fail" 1 "win:W-b and ui:U-a can run at once and both own A/Win.swift" python3 "$waves" --root "$s" check
+sfeature ui '{"title": "UI", "wave": 1, '"$base"', "owned": ["M/Ui.swift"], "slices": [
+  {"id": "U-a", "behavior": "The slot fills.", "tasks": ["U-1", "U-2"], "journeys": ["J3"], "owned": ["M/Ui.swift"], "waits": {"win:W-z": ["U-2"]}}]}'
+expect "slices: a wait on an unknown slice fails" 1 "ui:U-a waits on unknown win:W-z" python3 "$waves" --root "$s" check
+sfeature ui '{"title": "UI", "wave": 1, '"$base"', "owned": ["M/Ui.swift"], "slices": [
+  {"id": "U-a", "behavior": "The slot fills.", "tasks": ["U-1", "U-2"], "journeys": ["J3"], "owned": ["M/Ui.swift"], "waits": {"win:W-a": ["U-9"]}}]}'
+expect "slices: a wait naming a task outside the slice fails" 1 'must list tasks of this slice' python3 "$waves" --root "$s" check
+sfeature ui '{"title": "UI", "wave": 1, '"$base"', "owned": ["M/Ui.swift"], "slices": [
+  {"id": "U-a", "behavior": "Too big.", "tasks": ["U-1", "U-2", "U-3", "U-4", "U-5", "U-6"], "journeys": ["J3"], "owned": ["M/Ui.swift"]},
+  {"id": "U-b", "behavior": "Repeats a task.", "tasks": ["U-1", "U-7"], "journeys": ["J4"], "owned": ["M/Ui.swift"], "waits": {"U-a": ["U-7"]}}]}'
+expect "slices: a slice of six tasks fails" 1 '"tasks" must list 2 to 5 task ids' python3 "$waves" --root "$s" check
+expect "slices: a task in two slices fails" 1 'task U-1 is in two slices' python3 "$waves" --root "$s" check
+sfeature ui '{"title": "UI", "wave": 1, '"$base"', "owned": ["M/Ui.swift", "M/Other.swift"], "slices": [
+  {"id": "U-a", "behavior": "The slot fills.", "tasks": ["U-1", "U-2"], "journeys": [], "owned": ["M/Ui.swift"]}]}'
+expect "slices: a slice with no journey fails" 1 '"journeys" must be a non-empty list' python3 "$waves" --root "$s" check
+expect "slices: owned that differs from the slices' owned fails" 1 "only in the feature: ['M/Other.swift']" python3 "$waves" --root "$s" check
+sfeature ui '{"title": "UI", "wave": 1, '"$base"', "owned": ["M/Ui.swift"], "slices": [
+  {"id": "U-a", "behavior": "One.", "tasks": ["U-1", "U-2"], "journeys": ["J3"], "owned": ["M/Ui.swift"], "waits": {"U-b": ["U-1"]}},
+  {"id": "U-b", "behavior": "Two.", "tasks": ["U-3", "U-4"], "journeys": ["J4"], "owned": ["M/Ui.swift"], "waits": {"U-a": ["U-3"]}}]}'
+expect "slices: waits that go round fail" 1 "cycle through ui" python3 "$waves" --root "$s" check
 
 # --- the Generated workflow's guards (git history) ----------------------------
 # A scratch repo with scripts/ copied in; commit <msg> commits everything.

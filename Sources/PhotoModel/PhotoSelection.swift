@@ -21,7 +21,8 @@ extension PhotoWorkspace {
         guard let selection, let layer = selectedLayer, let bounds = bounds(of: layer) else { return false }
         return selection.intersection(bounds) != nil
     }
-    public var canApplyCrop: Bool { pendingCrop != nil }
+    /// A pending crop that covers the whole canvas would change nothing.
+    public var canApplyCrop: Bool { pendingCrop != nil && pendingCrop != canvas?.rect }
 
     public mutating func selectAll() {
         guard let canvas else { return }
@@ -45,7 +46,7 @@ extension PhotoWorkspace {
 
     /// Cuts every layer to the pending crop and makes it the canvas.
     public mutating func applyCrop() {
-        guard let crop = pendingCrop else { return }
+        guard canApplyCrop, let crop = pendingCrop else { return }
         record(.stack(stackState), named: "Crop")
         for (at, layer) in layers.enumerated() {
             layerGeometryChanged(layer.id, .cropped(crop))

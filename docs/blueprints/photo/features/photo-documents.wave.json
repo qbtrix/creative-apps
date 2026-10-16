@@ -2,7 +2,7 @@
   "title": "Save and reopen with layers, Open Recent, unsaved state, recovery",
   "wave": 1,
   "order": 10,
-  "status": "building",
+  "status": "built",
   "feature_issue": "#1074",
   "covers": "–",
   "waits_on": "photo-seams (journey tasks only: photo-journey-kit); nothing",

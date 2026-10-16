@@ -14,7 +14,15 @@ to VP-12 merged (#1090, #1072, #1087, #1069, #1098, #1111, #1101, #1085,
 #1099, #1125, #1097, #1102, #1124). The `feature-done` run on #1124's head
 never reached the journeys: AppSnapshotTests didn't compile
 (`HaloPlaybackDriverTests`' untyped `lazy var`, a circular reference), fixed
-by #1136.
+by #1136. Then the macOS test run: the driver runs on an injected link with
+a fake one in tests (#1145); HF-1 renders off the main actor (#1160);
+half-opaque layers mix in linear light on the canvas, as in the render
+(#1163, closes #1161); the driver suite's limit covers main-actor queueing
+(#1171, #1155). Anatomy rounds 1–3: the canvas render matches in linear
+light (#1194); journeys read the viewer's summaries by label (#1211); H-J2
+and H-J4 match the Model's naming and timing (#1246, #1259); Loop shows its
+state (#1247); the transport has 24 pt hit targets (#1258); the status
+readout names the frame (#1260). SuiteUI asks: #1257, #273, #340.
 
 **Covers:** #37, #457. #457 closes with VP-4b; #37 closes with VP-12, the
 `feature-done` PR. The other tasks say "Part of #37" or "Part of the
@@ -76,7 +84,7 @@ and four new test files. `FakeLayerPlacing` stays layer-keys'.
    three-layers`: scrub to 12; scrub to 30; Layer > New > Solid. The
    artboard value reads "Frame 12: Background, Badge", then "Frame 30:
    Background, Badge, Title: Hello Halo", then "Frame 30: Background, Badge,
-   Title: Hello Halo, Solid 1", and the layer list's first row is "Solid 1".
+   Title: Hello Halo, Solid 2", and the layer list's first row is "Solid 2".
    Because `viewerSummary` reads the layers, not the drawing, the canvas's own
    value proves the live drawing: `halo.viewer.canvas` reads "2 layers
    drawn", "3 layers drawn", then "4 layers drawn". (VP-12)
@@ -93,11 +101,13 @@ and four new test files. `FakeLayerPlacing` stays layer-keys'.
 3. **H-J4** `testPlayPauseLoopAndStep` (`+Playback`, new) on `-HaloSample
    three-layers`: Space; wait 1 s; Space; ← twice; Animation > Go to End;
    click Loop; Animation > Go to Start; Space; wait 4 s. `halo.transport.play`
-   reads "Playing" then "Paused"; the paused frame f is in 2…71 (the
-   journey fails with a message if not); after ← ← the timecode is f − 2
-   (stepping back never hits the clamp, whatever f the 1 s wait gives); at
-   the end "00:00:02:23"; Loop reads "Off"; after
+   reads "Playing" then "Paused"; the paused frame f is any frame in 0…71
+   (XCUITest's idle waits stretch the 1 s to about 3 s, so the loop may
+   wrap); after ← ← the timecode is max(f − 2, 0), since stepping back
+   clamps at 0; at the end "00:00:02:23"; Loop reads "Off"; after Go to
+   Start the timecode is "00:00:00:00" (shot `halo-playback-start`); after
    4 s playback has stopped on "00:00:02:23" and the button reads "Paused".
+   Each of the six `halo.transport.*` buttons is at least 20 by 20 pt.
    (VP-12)
 
 The Model half runs on Linux first: `FrameDrawingContractTests` (H-J2's
@@ -362,7 +372,7 @@ of VP-8, VP-10 and VP-12 state the audit counts they expect (unchanged).
 - **Contact sheet:** the lead comments on the feature issue with
   `Belt-Contact-Sheet: <run link>`, one line per journey and the audit
   counts. Expected new shots: `halo-` steps of H-J2 (layers appear at 12 and
-  30, then Solid 1 on top), H-J3 (Badge's span 20–50), H-J4 (playing,
+  30, then Solid 2 on top), H-J3 (Badge's span 20–50), H-J4 (playing,
   paused, end); the snapshot PNGs listed under VP-8 and VP-10.
 
 ## Review notes folded in
@@ -428,7 +438,8 @@ From the review of the blueprint PR (#767) and the packet brief:
 - **H-J3's header.** "Frames 20–50" is W0's `selectedLayerHeader` (FD-12):
   outFrame is exclusive, so O at 50 stores 51 and the header shows in…out−1.
 - **H-J4 steps back.** `→ →` from a paused f ≥ 70 would clamp at 71, so the
-  journey steps back twice (f in 2…71, timecode f − 2) instead.
+  journey steps back twice instead; the pause can land on any f in 0…71, so
+  it expects timecode max(f − 2, 0), which holds wherever the wait ends.
 - **VP-4 split.** The outline helper is VP-4a, ahead of `LiveFrameRendering`
   and the `FrameRenderer` move (VP-4b, which closes #457), so neither PR
   nears 400 lines.

@@ -42,20 +42,28 @@ public struct PhotoDocumentSnapshot: Sendable, Equatable {
     }
 }
 
-/// Why a package didn't open; `message` is the alert's text.
+/// Why a package didn't open; `message` is the alert's text, shown under
+/// "<file> can't be opened.", so it names no entry path or format number.
 public enum ArchiveError: Error, Equatable, Sendable {
     case notADocument
+    /// The format version the file was written with.
     case newerVersion(Int)
+    /// What is wrong inside the file ("data/layer-2.png is missing"), for logs and tests.
     case damaged(String)
     case tooLarge
 
     public var message: String {
         switch self {
-        case .notADocument: "This file isn't a Photo document."
-        case .newerVersion(let v): "This document was made by a newer Photo (format \(v)). Update Photo to open it."
-        case .damaged(let detail): "This document is damaged: \(detail)."
-        case .tooLarge: "This document is larger than Photo can open."
+        case .notADocument: "It isn't a Photo Document or an image Photo can open."
+        case .newerVersion: "It was saved by a newer version of Photo. Update Photo to open it."
+        case .damaged: "It is damaged and can't be read."
+        case .tooLarge: "It is larger than Photo can open: up to \(PhotoWorkspace.maxOpenPixels / (1024 * 1024)) megapixels."
         }
+    }
+
+    /// The internal reason a damaged file failed, nil for the other cases.
+    public var detail: String? {
+        if case .damaged(let detail) = self { detail } else { nil }
     }
 }
 

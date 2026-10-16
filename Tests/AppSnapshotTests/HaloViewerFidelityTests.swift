@@ -33,7 +33,8 @@ import Testing
 
 @testable import HaloApp
 
-@Suite struct HaloViewerFidelityTests {
+// The limit bounds a real hang; one case takes ~50 s on CI.
+@Suite(.timeLimit(.minutes(10))) struct HaloViewerFidelityTests {
     private static let width = 1920, height = 1080
     private static let backdropColor = HaloLayerColor(red: 0.12, green: 0.14, blue: 0.18)
 
@@ -169,6 +170,12 @@ import Testing
             .environment(\.colorScheme, .light)
         let renderer = ImageRenderer(content: view)
         renderer.scale = 1
+        // The renderer's own working space defaults to non-linear sRGB, which
+        // flattens the canvas's linear drawing group there: a 50% layer came
+        // out [124, 60, 55] against the render's [160, 65, 56] (run
+        // 38762922782, #1161). Extended linear keeps the canvas in linear light,
+        // as on screen, and in float, so opaque dark colors don't band.
+        renderer.colorMode = .extendedLinear
         let full = try #require(renderer.cgImage, "ImageRenderer drew nothing")
         let artboard = try #require(full.cropping(
             to: CGRect(x: inset, y: inset, width: CGFloat(Self.width), height: CGFloat(Self.height))))
@@ -181,7 +188,24 @@ import Testing
         _ canvas: RGBAImage, _ render: RGBAImage, name: String, sourceLocation: SourceLocation = #_sourceLocation
     ) {
         let result = GoldenImage().compare(canvas, to: render, tolerance: .standard)
-        #expect(result.passes, "\(name): \(result.differing) pixels differ (share \(result.share))", sourceLocation: sourceLocation)
+        #expect(
+            result.passes,
+            "\(name): \(result.differing) pixels differ (share \(result.share)); \(firstDifference(canvas, render))",
+            sourceLocation: sourceLocation)
+    }
+
+    /// Where the two first differ by over 2/255 and both RGBA values there,
+    /// so a failing run names which side is off without its images.
+    private static func firstDifference(_ canvas: RGBAImage, _ render: RGBAImage) -> String {
+        guard canvas.width == render.width, canvas.height == render.height,
+            canvas.bytes.count == render.bytes.count
+        else { return "sizes differ" }
+        for i in stride(from: 0, to: canvas.bytes.count - 3, by: 4)
+        where (0..<4).contains(where: { abs(Int(canvas.bytes[i + $0]) - Int(render.bytes[i + $0])) > 2 }) {
+            let x = (i / 4) % canvas.width, y = (i / 4) / canvas.width
+            return "first at (\(x), \(y)): canvas \(Array(canvas.bytes[i..<i + 4])) render \(Array(render.bytes[i..<i + 4]))"
+        }
+        return "no pixel over 2/255"
     }
 
     struct Bounds: Equatable {

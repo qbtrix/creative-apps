@@ -136,6 +136,8 @@ version browser; the shared suite library.
 If the pencil or brush ships later, its quality bar is already written
 (QB-L1 and QB-V1) and it does not ship without it.
 
+Later, from the suite blueprint (captain, 2026-10-15): drag out to export (20), and tracing over a locked Shelf card (19), in `docs/blueprints/suite.md` section 3a.
+
 ### Non-goals
 
 Raster painting (Photo), compositing and effects (Halo), UI layout and

@@ -79,9 +79,12 @@ extension PhotoWorkspace {
     }
 }
 
-// MARK: The crop options' text (photo-crop, Anatomy round 1)
+// MARK: The crop options' text (photo-crop, Anatomy rounds 1 and 2)
 
 extension PhotoWorkspace {
+    /// The one reason the caption, the fields and Apply give with no crop.
+    private static let startCropReason = "Drag on the image, or pick a ratio below, to start a crop."
+
     /// The number a crop field draws: the pending crop's; with none, the
     /// whole image's rect (X 0, Y 0, W and H the canvas's), the crop that
     /// nothing pending means; 0 with no image.
@@ -95,23 +98,38 @@ extension PhotoWorkspace {
         }
     }
 
+    /// What VoiceOver and XCUI read as a crop field row's value: the number
+    /// it draws, spoken with its unit ("600 pixels", "1 pixel"), as ScrubField
+    /// speaks it, since the combined row carries no value of its own.
+    public func cropFieldAccessibilityValue(_ field: CropField) -> String {
+        let number = cropFieldDisplay(field)
+        return "\(number) \(number == 1 ? "pixel" : "pixels")"
+    }
+
+    /// What XCUI and VoiceOver read as a crop field row's label: the field's
+    /// name, then its number in pixels ("Width, 600 pixels"). macOS exposes
+    /// the combined row's label but no value of its own, so the number rides
+    /// in the label.
+    public func cropFieldAccessibilityLabel(_ field: CropField) -> String {
+        let name =
+            switch field {
+            case .x: "X"
+            case .y: "Y"
+            case .width: "Width"
+            case .height: "Height"
+            }
+        return "\(name), \(cropFieldAccessibilityValue(field))"
+    }
+
     /// The crop options' one instruction line, always shown so nothing moves
     /// when a crop appears: what to do with no crop, else the crop's size and
     /// shape ("Crop 400 × 600 px, 2:3"), so a swapped ratio reads as such.
     public var cropCaption: String {
         guard canvas != nil else { return "Open an image to crop it." }
         guard let crop = pendingCrop else {
-            return cropAspect == .free
-                ? "Drag on the image, or pick a shape to type a size."
-                : "Drag on the image, or type a size."
+            return cropAspect == .free ? Self.startCropReason : "Drag on the image, or type a size."
         }
-        let shape =
-            switch cropAspect {
-            case .free: "free"
-            case .original: "original"
-            case .ratio: cropAspect.title
-            }
-        return "Crop \(crop.width) × \(crop.height) px, \(shape)"
+        return "Crop \(crop.width) × \(crop.height) px, \(cropAspect.title)"
     }
 
     /// Why Swap can't act, or nil when it turns the locked ratio's sides.
@@ -124,16 +142,50 @@ extension PhotoWorkspace {
         }
     }
 
+    /// Swap's title, which is also its tooltip while it acts: the change it
+    /// makes ("Swap to 2:3" under 3:2), else "Swap Width and Height".
+    public var cropSwapTitle: String {
+        guard cropSwapHelp == nil, case .ratio(let w, let h) = cropAspect else { return "Swap Width and Height" }
+        return "Swap to \(CropAspect.ratio(h, w).title)"
+    }
+
     /// Why the four crop fields take no typing, or nil when they do.
     public var cropFieldsUnavailableHelp: String? {
         guard canvas != nil else { return "Open an image to crop first." }
-        return cropFieldsEnabled ? nil : "Drag on the image, or pick a shape, to start a crop."
+        return cropFieldsEnabled ? nil : Self.startCropReason
     }
 
-    /// Why Apply Crop and Cancel can't act, or nil while a crop is pending.
+    /// Why one crop field takes no typing, or nil when it does: the fields'
+    /// shared reason, else X (Y) when the crop typing would move already
+    /// spans the image's full width (height), so any value snaps back to 0.
+    public func cropFieldUnavailableHelp(_ field: CropField) -> String? {
+        if let reason = cropFieldsUnavailableHelp { return reason }
+        guard let canvas else { return nil }
+        let crop = pendingCrop ?? services.crop.applying(cropAspect, to: nil, canvas: canvas)
+        switch field {
+        case .x: return crop.width >= canvas.width ? "The crop already spans the image's full width." : nil
+        case .y: return crop.height >= canvas.height ? "The crop already spans the image's full height." : nil
+        case .width, .height: return nil
+        }
+    }
+
+    /// Why Apply Crop can't act, or nil while a crop that changes the image is pending.
     public var cropApplyHelp: String? {
+        guard let canvas else { return "Open an image to crop first." }
+        guard pendingCrop != nil else { return Self.startCropReason }
+        return pendingCrop == canvas.rect ? "The crop covers the whole image." : nil
+    }
+
+    /// Why Cancel can't act, or nil while a crop is pending.
+    public var cropCancelHelp: String? {
         guard canvas != nil else { return "Open an image to crop first." }
-        return canApplyCrop ? nil : "Drag over the image to choose a crop first."
+        return pendingCrop == nil ? "No crop to cancel." : nil
+    }
+
+    /// The aspect chips' tooltip: what a lock does and the image's own ratio.
+    public var cropAspectGroupHelp: String {
+        guard let ratio = originalRatio else { return "Open an image to choose a crop ratio." }
+        return "Lock the crop to a ratio, width to height. Original keeps the image's own \(ratio)."
     }
 
     /// The tooltip of an enabled crop field: what its number measures.
@@ -153,10 +205,16 @@ extension PhotoWorkspace {
         case .free: return "Any shape."
         case .ratio(let w, let h): return "Width to height \(w):\(h)."
         case .original:
-            guard let canvas, canvas.width > 0, canvas.height > 0 else { return "The image's own proportions." }
-            let divisor = Self.greatestCommonDivisor(canvas.width, canvas.height)
-            return "The image's own proportions (\(canvas.width / divisor):\(canvas.height / divisor))."
+            guard let ratio = originalRatio else { return "The image's own proportions." }
+            return "The image's own proportions (\(ratio))."
         }
+    }
+
+    /// The canvas's reduced width to height ("4:3"); nil with no image.
+    private var originalRatio: String? {
+        guard let canvas, canvas.width > 0, canvas.height > 0 else { return nil }
+        let divisor = Self.greatestCommonDivisor(canvas.width, canvas.height)
+        return "\(canvas.width / divisor):\(canvas.height / divisor)"
     }
 
     /// The greatest common divisor of two sides, at least 1 so it divides safely.

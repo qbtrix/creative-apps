@@ -122,6 +122,11 @@ edits the shared `Tests/AppSnapshotTests/AppSnapshotTests.swift`.
 Within a wave, no path is in two features. Within a feature, every shared
 path is a chain in its packet.
 
+Design's later features take specific `Sources/DesignApp/` and
+`UITests/DesignJourneyTests.swift` files after Design shell-parity (its
+`.wave.json` lists DS-1 to DS-4's exact files); the order is in the owners
+table of `docs/blueprints/design/waves.in.md`.
+
 ## Collisions with features not running yet
 
 None of these has a feature issue today. The supervisor files them only
@@ -136,7 +141,7 @@ rescopes them first.
 | SuiteUI editor-chrome | `EditorShell.swift`, `EditorTopBar.swift`, `ToolbarGroup.swift` | rescope before filing: EC-3 (the timeline slot) and EC-4 (`.primary`, save status) target `SuiteWindow` and `EditorDetail` now, and EC-7's rail colors go with `.rail`; file it after editor-shell-removal |
 | Flare F1a #346, F1b #347 ("the window on `EditorShell`") | `Sources/FlareApp/` | they target `SuiteWindow` (flare.md section 3's dated paragraph); see the next section; the supervisor rewords both issues, which no shell-parity task edits |
 | Halo's `-HaloWindowSize` | `Sources/HaloApp/HaloWindowSizer.swift` | not touched here; the editor-in-window lead files a `line:halo` issue to retire it for `-SuiteWindowSize` |
-| Design design-window (wave 0b) and the wave-1 Design features | `Sources/DesignApp/`, `UITests/DesignJourneyTests.swift` | file after Design shell-parity closes; design-seams (wave 0a, Model only) can run beside it because DS-1 adds a new Model file only |
+| Design design-window (wave 0b) and the wave-1 Design features' view slices | `Sources/DesignApp/`, `UITests/DesignJourneyTests.swift` | design-window is filed after Design shell-parity closes, and the wave-1 view slices wait on its first slice (DW-a); design-contracts, design-seams and the wave-1 Model slices run beside shell-parity, since DS-1 adds a new Model file only (Design's v3 pilot, `docs/blueprints/design/waves.in.md`) |
 | Photo photo-journey-kit, photo-documents, photo-edit, photo-crop | `UITests/PhotoJourneyTests.swift`, `Sources/PhotoApp/` (window, panel, commands; PV-1's save status) | file after Photo shell-parity closes; PV-1's save status shows in the window subtitle (`PhotoToolbarItem.saveState`), not in a top bar |
 
 ## Flare's F1a and F1b target SuiteWindow

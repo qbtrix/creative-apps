@@ -178,13 +178,12 @@ final class HaloFilesJourneyTests: XCTestCase {
         XCTAssert(waitFor { found() == count }, "the layer list has \(found()) rows, not \(count)")
     }
 
-    /// `layer`'s timeline lane reads "`keys` keyframes": the value of the
-    /// `halo.timeline.track` labelled `layer`, as H-J6's expectLane reads it.
+    /// `layer`'s timeline lane reads "`keys` keyframes": its
+    /// `halo.timeline.keys` readout (the lane's value reads empty, #262), as
+    /// H-J6's expectLane reads it.
     @MainActor private func expectLane(_ layer: String, keys: Int, _ halo: Journey) {
         let expected = "\(keys) keyframes"
-        let tracks = halo.app.descendants(matching: .any).matching(
-            NSPredicate(format: "identifier == 'halo.timeline.track' AND label == %@", layer))
-        func values() -> [String] { tracks.allElementsBoundByIndex.compactMap { $0.value as? String } }
+        func values() -> [String] { halo.laneKeys(layer) }
         XCTAssert(waitFor { values().contains(expected) }, "\(layer)'s lane reads \(values()), not \(expected)")
     }
 
@@ -204,7 +203,7 @@ final class HaloFilesJourneyTests: XCTestCase {
         XCTAssert(undo.waitForExistence(timeout: 3), "the Edit menu has no plain Undo after an open")
         XCTAssertFalse(undo.isEnabled, "Edit > Undo is enabled after an open")
         halo.press(.escape)
-        XCTAssert(halo.app.menus.firstMatch.waitForNonExistence(timeout: 2), "the Edit menu stayed open")
+        XCTAssert(halo.menusClosed(), "the Edit menu stayed open")
     }
 
     /// File > Open Recent ▸, checks `name` is the first entry and clicks it.

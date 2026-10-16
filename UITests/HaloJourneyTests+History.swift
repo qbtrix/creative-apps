@@ -207,7 +207,7 @@ final class HaloHistoryJourneyTests: XCTestCase {
     /// fading menu over the sidebar.
     @MainActor private func closeMenu(_ halo: Journey) {
         halo.press(.escape)
-        XCTAssert(halo.app.menus.firstMatch.waitForNonExistence(timeout: 2), "a menu stayed open after Escape")
+        XCTAssert(halo.menusClosed(), "a menu stayed open after Escape")
     }
 
     /// The number of distinct `halo.layer.row.*` rows in the layer list.

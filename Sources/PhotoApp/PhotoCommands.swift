@@ -1,9 +1,10 @@
 // PhotoCommands.swift: Photo's menu bar, composed in order from one file per
 // menu (PhotoCommands+File, +Edit, +Select, +Image, +Layer, +View). File: New
-// Image, Open…, Save, Save As…, Export…; Edit: Undo and Redo named for the
-// edit, Delete Selection, Fill Selection; Select: All, Deselect; Image: Image
-// Size…, Rotate, Straighten…; Layer: New, Delete, Rename…, Show/Hide, Bring
-// Forward, Send Backward, Select Layer Above and Below; View: Zoom In, Zoom
+// Image, Open…, Open Recent, Close, Save, Save As…, Export…; Edit: Undo and Redo named for the
+// edit, Cut, Copy, Paste, Delete Selection, Fill Selection; Select: All, Deselect; Image: Image
+// Size…, Rotate, Straighten…; Layer: New, Delete, Duplicate, Merge Down,
+// Flatten Image, Rename…, Show/Hide, Bring Forward, Send Backward, Select
+// Layer Above and Below; View: Zoom In, Zoom
 // Out, Actual Size, Fit on Screen. The focused window publishes a PhotoMenu
 // (what can run now, and where to send it) as a focused scene value; an item
 // that can't run is disabled, never hidden. Select > All owns Command-A, so while a text field is being edited
@@ -35,6 +36,17 @@ struct PhotoMenu {
     var selectedLayer: PhotoLayer.ID?
     /// A sheet or alert covers the canvas; its text fields own Command-A.
     var isPresenting = false
+    /// Built from a window's workspace (false for the no-window default).
+    var hasWindow = false
+    var copyHelp: String? = "Open an image first."
+    var cutHelp: String? = "Open an image first."
+    /// Paste's reason with an image on the pasteboard, and with none.
+    var pasteHelpWithImage: String?
+    var pasteHelpWithoutImage: String? = "Nothing to paste."
+    /// Why Duplicate Layer, Merge Down or Flatten Image can't run, or nil.
+    var duplicateLayerHelp: String? = "Open an image first."
+    var mergeDownHelp: String? = "Open an image first."
+    var flattenHelp: String? = "Open an image first."
 
     /// Select > All acts on the canvas, so not while a sheet is up.
     var canSelectAll: Bool { hasImage && !isPresenting }
@@ -54,6 +66,14 @@ struct PhotoMenu {
     init(model: PhotoWorkspace, isPresenting: Bool = false, perform: @escaping PhotoPerform) {
         self.perform = perform
         self.isPresenting = isPresenting
+        hasWindow = true
+        copyHelp = model.copyHelp
+        cutHelp = model.cutHelp
+        pasteHelpWithImage = model.pasteHelp(true)
+        pasteHelpWithoutImage = model.pasteHelp(false)
+        duplicateLayerHelp = model.duplicateLayerHelp
+        mergeDownHelp = model.mergeDownHelp
+        flattenHelp = model.flattenHelp
         hasImage = model.canvas != nil
         canUndo = model.canUndo
         canRedo = model.canRedo
@@ -87,6 +107,9 @@ private struct PhotoMenuKey: FocusedValueKey {
 /// Composes the menus; each menu's items live in PhotoCommands+<Menu>.swift.
 struct PhotoCommands: Commands {
     @FocusedValue(\.photoMenu) var focused
+    /// The focused window's Open Recent files (PhotoWindow+File.swift);
+    /// nil with no window, when the menu shows the saved list instead.
+    @FocusedValue(\.photoRecentFiles) var recentFiles
 
     var menu: PhotoMenu { focused ?? PhotoMenu() }
 

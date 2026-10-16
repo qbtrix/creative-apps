@@ -1,5 +1,16 @@
 # Feature packet: photo-documents
 
+> **Built.** Status `built` (#1074). PRs: #1196 #1197 #1200 #1201 #1210
+> #1212 #1223 #1225 #1226 #1228 #1230 #1231 #1232 #1233 #1234 #1235 #1239
+> #1240 #1241 #1242 #1253 #1254 #1255 #1265 #1266 #1267 and the
+> `feature-done` PR. Open follow-ups: gap #1270 (restore offer text and
+> day), #1271 (unsaved prompt mentions the recovery copy), #1272 (status
+> line pills), #1273 (Close disabled with no window; PJ-2 shots), #1274
+> (Layers tab design), #1276 (save, autosave and open budgets and the
+> main-thread stall); needs-ui #1252 (ScrubField marker) and #1275
+> (EditorTopBar outline and primary). The text below is updated to what
+> shipped where it differs.
+
 **Feature:** PV-1. Save and reopen with layers kept (an OpenRaster `.ora`
 file), the "Keep layers?" choice for a flat file with layers, Open Recent,
 the unsaved state (top bar and the window's edited dot), the unsaved-changes
@@ -93,8 +104,12 @@ error state per note 3, and one new journey.
 1. **PJ-1 `testSaveLayeredDocumentAndReopen`** (`+Documents`): open
    `beach.png` with `-PhotoSaveTo <tmp>`; "Saved"; New Layer, brush, opacity
    50, Multiply; "Edited" and the window's edited state; File > Save asks
-   **Keep layers?** (Save as Photo Document default, Flatten into PNG,
-   Cancel); Save as Photo Document gives the title `beach.ora`, "Saved", a
+   **Keep layers?**, an `NSAlert` sheet (Save as Photo Document default,
+   Flatten into PNG, Cancel: `photo.file.keep-layers.document`, `.flatten`,
+   `.cancel`) whose text names the new `.ora` next to the flat file:
+   "beach.png can keep only one flat layer. Save as Photo Document writes
+   beach.ora next to it with every layer, mask and adjustment, and leaves
+   beach.png as it is."; Save as Photo Document gives the title `beach.ora`, "Saved", a
    zip whose first entry is `mimetype` = `image/openraster`; Command-W closes
    with no prompt; Open Recent > `beach.ora` gives 2 layers, the top "Layer
    1", opacity 50, Multiply, the canvas equal to step 3's; Command-Z leaves
@@ -104,7 +119,8 @@ error state per note 3, and one new journey.
    and sets it to `0o500`); Layer > New Layer and brush (so Save asks Keep
    layers? and writes a new document into the locked folder rather than
    over `beach.png`); File > Save, Save as Photo Document.
-   Assert the alert "The image couldn't be saved: <reason>." with OK, then
+   Assert the alert titled "Not saved" reading "The image couldn't be
+   saved: <reason>." with OK, then
    `photo.bar.saved` reads "Not saved" and the window stays edited. Restore
    the folder's permissions in `tearDown`.
 3. **PJ-2 `testUnsavedPromptAndOpenRecent`** (`+Documents`): as written
@@ -113,13 +129,22 @@ error state per note 3, and one new journey.
    only Clear Menu, disabled).
 4. **PJ-3 `testRestoreAfterCrash`** (`+Recovery`): as written (autosave 5 s
    after the last edit under `-PhotoRecoveryDir`; "Edited, autosaved";
-   `app.terminate()`; relaunch; "Restore beach.png from <time>?" with
-   `photo.recovery.restore` and `photo.recovery.discard`; Restore gives 2
+   `app.terminate()`; relaunch; "Restore beach.png from <time>?", an
+   `NSAlert` sheet reading "Photo closed before these changes were saved.
+   Discard deletes them." with Restore, Discard and Cancel
+   (`photo.recovery.restore`, `.discard`, `.cancel`; Cancel keeps the file
+   for the next launch). It shows at launch although design.md says alerts
+   never do: this is the one exception, since the offer exists only at
+   launch; Restore gives 2
    layers, "Edited"; Command-Q, Don't Save, relaunch: no offer). Added step:
    the test writes `not a zip` as a recovery file into the folder and
    relaunches: no offer, and the file is gone.
 5. **PJ-4 `testOpenBadDocuments`** (`+Documents`): as written (four files,
-   four `ArchiveError.message` alerts, the empty state stays).
+   four `ArchiveError.message` alerts, the empty state stays). Each alert
+   is titled "<file> can't be opened." and reads "It isn't a Photo Document
+   or an image Photo can open.", "It was saved by a newer version of Photo.
+   Update Photo to open it.", "It is damaged and can't be read." or "It is
+   larger than Photo can open: up to 16 megapixels." (#1266).
 6. **PJ-P3 `testOpenLargeDocument`** (`+PerfDocuments`): write a 4000 × 3000
    photo with `writeTestPhoto(to:width:height:)`, open it, add two layers
    and save as a document (see D-12; `-PhotoFixture large` runs on fakes),
