@@ -9,7 +9,7 @@ Next: wave 5 = fix round 2 (last) for DP-a (#1451, sp/r2-1451) and DP-b (#1452, 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | rounds | state | run |
 |---|---|---|---|---|---|---|---|
-| DP-a | The toolbar's eight commands each act or say why, and Add Page and Delete Page sit in a row under the pages. | DS-1, DS-2 | J3 | editor-in-window APIs (on dev) | 2 | merged (round 1: #1403 #1404 #1408 merged; round 2: #1451) | 38906785154 green, contains #1329 |
+| DP-a | The toolbar's eight commands each act or say why, and Add Page and Delete Page sit in a row under the pages. | DS-1, DS-2 | J3 | editor-in-window APIs (on dev) | 2 | merged (round 1: #1403 #1404 #1408 merged; round 2: #1451 -> PR #1467) | 38906785154 green, contains #1329 |
 | DP-b | Design opens in the suite window with pages and layers in the sidebar, Properties in the inspector and the floating tool box over the canvas, in light and dark. | DS-3, DS-4 | J0, DS-J1..DS-J5 | DP-a (DS-3) | 2 | merged (round 1: #1446 #1447 merged; round 2: #1452) | 38917492060 red: J3 #1443, shell journeys #1444 (switcher waits on #1337) |
 
 ## Tasks
