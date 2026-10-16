@@ -110,10 +110,6 @@ final class LibraryJourneyTests: XCTestCase {
         XCTAssert(rated.waitForExistence(timeout: 5), "no 4 stars on \(name)'s grid cell")
     }
 
-    @MainActor func testImportRateAndRelaunch() throws {
-        throw XCTSkip("journey arrives with #210 (import), #211 (rate) and #212 (relaunch)")
-    }
-
     // MARK: - Menus
 
     /// Library's items in each menu (blueprint 6.2), top level, each by the
