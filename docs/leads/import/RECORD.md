@@ -2,9 +2,9 @@
 
 Issue: #1334 · Packet: docs/blueprints/library/features/import.md
 Run: act-1a1448a5fa3-a8rg · Session: claude/library-import-feature-c0rl9g · Started: 2026-10-16T11:49Z
-Stage: 3 wave 3
+Stage: 4 round 1
 Base: 8243ce4435006760f7ec9a87147fef094f6be4ed
-Next: wait for #1348 (IM-7) to merge and for the IM-3 and IM-8 PRs; then the full dev CI run the feature-done merge triggers, and the Anatomy round on it
+Next: wait for the full CI run 38904662639 on dev 905efdc0 (contains #1355, feature-done), then Anatomy round 1 on it; IM-3 PR still building
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -14,8 +14,8 @@ Next: wait for #1348 (IM-7) to merge and for the IM-3 and IM-8 PRs; then the ful
 | IM-4 | 1 | ImageIODecoder: scan with metadata and orientation, decode to sRGB RGBA8 | Sources/LibraryApp/Platform/ImageIODecoder.swift, Tests/AppSnapshotTests/LibraryDecodeTests.swift | LibraryDecodeTests (macOS) | #1342 | merged |
 | IM-3 | 2 | Import model budgets | Tests/LibraryModelTests/LibraryImportBudgetTests.swift | LibraryImportBudgetTests | – | building |
 | IM-6 | 2 | Import area: File > Import Folder…, open panel or -LibraryImportFolder, off-main task, import on launch | Sources/LibraryApp/LibraryWindow+Import.swift | J1 step 6 (fakes), IM-8 live | #1347 | merged |
-| IM-7 | 2 | Progress row and notice (placeholders until #780/#781) and snapshots | Sources/LibraryApp/LibraryBrowser.swift, Tests/AppSnapshotTests/LibraryImportSnapshots.swift | LibraryImportSnapshots | #1348 | lane: macOS build |
-| IM-8 | 3 | J1 testImportAFolder; delete skipped testImportRateAndRelaunch; feature-done | UITests/LibraryJourneyTests.swift, UITests/LibraryJourneyTests+Import.swift, UITests/LibraryJourneyTests+Files.swift, docs/blueprints/library/features/import.wave.json | J1 | – | building |
+| IM-7 | 2 | Progress row and notice (placeholders until #780/#781) and snapshots | Sources/LibraryApp/LibraryBrowser.swift, Tests/AppSnapshotTests/LibraryImportSnapshots.swift | LibraryImportSnapshots | #1348 | merged |
+| IM-8 | 3 | J1 testImportAFolder; delete skipped testImportRateAndRelaunch; feature-done | UITests/LibraryJourneyTests.swift, UITests/LibraryJourneyTests+Import.swift, UITests/LibraryJourneyTests+Files.swift, docs/blueprints/library/features/import.wave.json | J1 | #1355 | merged (feature-done) |
 | IM-9 | 3 | P6 perf journey (report-only) | UITests/LibraryJourneyTests+PerfImport.swift | P6 | – | blocked on #782 |
 
 Wave 1: IM-1, IM-2, IM-4 independent. Wave 2: IM-3 (waits IM-1, IM-2: benchmarks their code), IM-6 (waits IM-1: calls its catalog methods), IM-7 (waits IM-1: reads its state and calls dismissImportNotice); independent of each other. Wave 3: IM-8 (waits IM-2, IM-4, IM-6, IM-7: runs the live import).

@@ -11,3 +11,6 @@ utc	stage	event	ref	note
 2026-10-16T12:40Z	3	pr-merged	#1346	IM-2
 2026-10-16T12:42Z	3	pr-merged	#1347	IM-6
 2026-10-16T12:44Z	3	stage-start	wave 3	IM-3, IM-8
+2026-10-16T12:43Z	3	pr-merged	#1348	IM-7
+2026-10-16T13:00Z	3	pr-merged	#1355	IM-8 feature-done
+2026-10-16T13:07Z	4	ci-run	38904662639	full CI on 905efdc0 pending
