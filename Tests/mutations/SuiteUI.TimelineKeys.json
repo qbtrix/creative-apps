@@ -1,0 +1,5 @@
+[
+{"label":"each key clamps on its own (the Fake's rule), so a group loses its spacing at an edge","file":"Sources/SuiteUI/TimelineKeys.swift","find":"keys.map { ($0, $0.frame + shift) }","replace":"keys.map { ($0, min(max($0.frame + delta, 0), last)) }","tests":"TimelineKeysTests"},
+{"label":"Shift gives .replace","file":"Sources/SuiteUI/TimelineKeys.swift","find":"if modifiers.contains(.shift) { return .extend }","replace":"if modifiers.contains(.shift) { return .replace }","tests":"TimelineKeysTests"},
+{"label":"a right press on an unpicked key keeps the old pick (B6)","file":"Sources/SuiteUI/TimelineKeys.swift","find":"return picked ? nil : .replace","replace":"return nil","tests":"TimelineKeysTests"}
+]
