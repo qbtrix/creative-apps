@@ -1,0 +1,3 @@
+[
+{"label":"→ and ← swapped","file":"Sources/SuiteUI/TimelineStrip+Keys.swift","find":"if key == .rightArrow { return 1 }","replace":"if key == .rightArrow { return -1 }","tests":"TimelineAccessTests"}
+]

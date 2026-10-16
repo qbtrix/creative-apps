@@ -183,6 +183,7 @@ public struct TimelineStrip<ID: Hashable & Sendable>: View {
             maxHeight: layout.idealHeight, alignment: .top
         )
         .focusable(!snapshot, interactions: .edit)
+        .modifier(TimelineStripKeys(tracks: tracks, mapping: mapping, onPickKeyframe: onPickKeyframe))
         .onKeyPress(phases: [.down, .repeat]) { press in zoomKey(press) }
         .onChange(of: playhead) { _, frame in follow(frame) }
     }
