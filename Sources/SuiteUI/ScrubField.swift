@@ -302,7 +302,9 @@ public struct ScrubField: View {
 
 /// The field is one adjustable element; the bar is a real slider over its
 /// track (so XCUI finds `sliders[label]`), except while typing, when the
-/// text field shows through.
+/// text field shows through. The slider takes no `step:`: a stepped Slider
+/// builds one tick per step on every body pass (200,001 for Halo's X), so it
+/// snaps a set value itself and steps through its adjustable action.
 private struct ScrubAccessibility: ViewModifier {
     let label: String
     let spoken: String
@@ -316,23 +318,27 @@ private struct ScrubAccessibility: ViewModifier {
         if isBar && !editing {
             content.accessibilityRepresentation {
                 Slider(
-                    value: Binding(get: { position }, set: { adjust($0) }), in: track.positions,
-                    step: track.step > 0 && track.step.isFinite ? track.step : 1
+                    value: Binding(get: { position }, set: { adjust(ScrubValue.snapped($0, to: track.step, in: track.positions)) }),
+                    in: track.positions
                 ) {
                     Text(label)
                 }
                 .accessibilityValue(spoken)
+                .accessibilityAdjustableAction(step)
             }
         } else {
             content
                 .accessibilityElement(children: editing ? .contain : .ignore)
                 .accessibilityLabel(label)
                 .accessibilityValue(spoken)
-                .accessibilityAdjustableAction { direction in
-                    let key: ScrubKey = direction == .increment ? .increment : .decrement
-                    guard direction == .increment || direction == .decrement else { return }
-                    adjust(ScrubValue.pressed(key, from: position, step: track.step, in: track.positions))
-                }
+                .accessibilityAdjustableAction(step)
         }
+    }
+
+    /// VoiceOver's increment and decrement: one step along the track.
+    private func step(_ direction: AccessibilityAdjustmentDirection) {
+        guard direction == .increment || direction == .decrement else { return }
+        let key: ScrubKey = direction == .increment ? .increment : .decrement
+        adjust(ScrubValue.pressed(key, from: position, step: track.step, in: track.positions))
     }
 }
