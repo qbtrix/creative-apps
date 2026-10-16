@@ -15,8 +15,10 @@
 // show it) and learns the viewport's size from `onSize` to work out a fit.
 // With `onZoom`, the viewport also zooms itself through it, clamped by
 // ZoomMath to 10% to 3200%: pinch, and Command-plus, Command-minus and
-// Command-0 (fit) while it has focus. `checkerboard: false` puts the document
-// on the plain artboard color instead of the checkerboard. `onPointer`
+// Command-0 (fit) while it has focus; Command-0 asks for the environment's
+// `canvasFitScale` (EditorDetail's palette-clear fit) when one is set.
+// `checkerboard: false` puts the document on the plain artboard color
+// instead of the checkerboard. `onPointer`
 // reports the document point under the pointer, nil once it leaves the artboard.
 // CanvasLayout is the placement and pan math, plain and tested on its own;
 // every pan is clamped to its scrollable area. The content is clipped to the
@@ -118,6 +120,7 @@ public struct CanvasViewport<Content: View, Overlay: View>: View {
     /// The scroll offset where the pan under way began; nil while no pan is.
     @State private var panStart: CGPoint?
     @FocusState private var isFocused: Bool
+    @Environment(\.canvasFitScale) private var fitScale
 
     /// `documentSize` in pixels; `content` and `overlay` are laid out at the
     /// artboard's size (the document at `zoom`), overlay on top. Only the
@@ -250,7 +253,7 @@ public struct CanvasViewport<Content: View, Overlay: View>: View {
         switch press.key {
         case "=", "+": return ZoomMath.zoomedIn(from: zoom)
         case "-": return ZoomMath.zoomedOut(from: zoom)
-        case "0": return ZoomMath.fit(document: documentSize, in: layout.viewport)
+        case "0": return ZoomMath.fit(document: documentSize, in: layout.viewport, using: fitScale)
         default: return nil
         }
     }
