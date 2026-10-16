@@ -14,3 +14,5 @@ utc	stage	event	ref	note
 2026-10-16T12:43Z	3	pr-merged	#1348	IM-7
 2026-10-16T13:00Z	3	pr-merged	#1355	IM-8 feature-done
 2026-10-16T13:07Z	4	ci-run	38904662639	full CI on 905efdc0 pending
+2026-10-16T13:35Z	4	ci-run	38905496250	scoped library red: J1
+2026-10-16T13:40Z	4	round-findings	#1366 #1367	fix round 1 started; needs-ui #1368

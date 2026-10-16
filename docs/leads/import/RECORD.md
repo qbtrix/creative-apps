@@ -4,7 +4,7 @@ Issue: #1334 · Packet: docs/blueprints/library/features/import.md
 Run: act-1a1448a5fa3-a8rg · Session: claude/library-import-feature-c0rl9g · Started: 2026-10-16T11:49Z
 Stage: 4 round 1
 Base: 8243ce4435006760f7ec9a87147fef094f6be4ed
-Next: wait for the full CI run 38904662639 on dev 905efdc0 (contains #1355, feature-done), then Anatomy round 1 on it; IM-3 PR still building
+Next: round 1 fix PR (lead/import-fix1: #1366 label, #1367 J1 skip until #779/#1368) and the critic panel on run 38905496250; then round 2 on the run that contains the fix
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -23,6 +23,7 @@ Wave 1: IM-1, IM-2, IM-4 independent. Wave 2: IM-3 (waits IM-1, IM-2: benchmarks
 ## Rounds
 | round | CI run | CI | audit vs baseline | lenses | confirmed | fixed by | clean |
 |---|---|---|---|---|---|---|---|
+| 1 | 38905496250 (scoped: library, 3cf8a9e4) | red: J1 failed (progress read empty; audit identifier 34/12, unnamed 4/1 from ThumbnailGrid cells and scroller); testLoadSamplePhotos, testRateASelectedPhoto failed only from J1's tally | over | clarity, journey, design, states | #1366, #1367 (+ panel) | lead/import-fix1 | no |
 
 ## Decisions
 - No `## Slices` table in the packet: v2 loop; work started after #1302 merged (04:20Z), so findings queue and a 2-round cap apply.
@@ -39,6 +40,9 @@ Wave 1: IM-1, IM-2, IM-4 independent. Wave 2: IM-3 (waits IM-1, IM-2: benchmarks
 
 - IM-8 started before IM-7 (#1348) merged: it only reads IM-7's identifiers, which are fixed in #1348; the lane merges it after a macOS build either way.
 
+- J1's audit violations come from SuiteUI ThumbnailGrid (cell identifiers #779, scroller #1368, filed needs-ui); import can't edit SuiteUI or LibraryGrid, so round 1 skips J1 to stop it reddening the other Library journeys, rather than loosening the audit.
+
 ## Open
+- #1367 waits on #779 and #1368 (SuiteUI); J1 skipped until then.
 - IM-9 blocked on #782 (S-L8 FrameProbe marks).
 - Swap-in of InlineNotice/ProgressRow once #780/#781 merge.
