@@ -7,7 +7,8 @@
 # checks-green.json is a check rollup shaped like a green flare-core PR: the CI
 # workflow's Linux and macOS jobs plus one SKIPPED CI job, a non-CI workflow
 # check, a commit status, the fast-lane workflow's own in-progress check and a
-# Copilot review check (decide must ignore the last two). Each case mutates a
+# Copilot review check (decide must ignore the last two, and CI's report-only
+# macOS job, so 4 checks count). Each case mutates a
 # base PR / file list / rollup with jq. Most crew PRs have no CI on their head
 # (CI runs on dev), so the worker's Fast-Check marker cases start from `[]`.
 #
@@ -51,7 +52,7 @@ check() {
   fi
 }
 
-check "happy path" "eligible|150|2|5 checks green" . "$BASE_FILES" .
+check "happy path" "eligible|150|2|4 checks green" . "$BASE_FILES" .
 check "claude app bot author is not allowlisted" "not-eligible|author app/claude is not on the fast-lane allowlist" '.author.login = "app/claude"' "$BASE_FILES" .
 check "deny path hit" "not-eligible|touches protected paths: .github/workflows/ci.yml" \
   . $'.github/workflows/ci.yml\nsrc/x.py' .
@@ -61,7 +62,7 @@ check "deny gate scripts" "not-eligible|touches protected paths: scripts/ci, scr
   . $'scripts/ci\nscripts/cloud-setup.sh' .
 check "deny agent rules, any case" "not-eligible|touches protected paths: docs/agents.md" \
   . 'docs/agents.md' .
-check "similar names are allowed" "eligible|150|2|5 checks green" \
+check "similar names are allowed" "eligible|150|2|4 checks green" \
   . $'docs/scripts/ci.md\nSources/DesignModel/PackageSwiftNotes.swift' .
 check "every script is protected (#292 changed scripts/ui-test)" "not-eligible|touches protected paths: scripts/ui-test" \
   . $'scripts/ui-test\nUITests/Audit.swift' .
@@ -71,15 +72,15 @@ check "deny .claude, Package.resolved and a nested CLAUDE.md" \
 check "deny the generated C4 model and waves.md" \
   "not-eligible|touches protected paths: docs/c4/model.json, docs/blueprints/halo/features/waves.md" \
   . $'docs/c4/model.json\ndocs/blueprints/halo/features/waves.md' .
-check "C4 parts, feature data and packets stay eligible" "eligible|150|2|5 checks green" \
+check "C4 parts, feature data and packets stay eligible" "eligible|150|2|4 checks green" \
   . $'docs/c4/parts/creative-apps/halo-model/halo-model-sources.json\ndocs/blueprints/halo/features/easing.wave.json\ndocs/blueprints/halo/features/easing.md\ndocs/blueprints/halo/waves.in.md\ndocs/blueprints/halo/features/nested/waves.md' .
-check "app code that built on macOS is eligible (taste review still happens after merge)" "eligible|150|2|5 checks green, macOS build $BUILD_URL" \
+check "app code that built on macOS is eligible (taste review still happens after merge)" "eligible|150|2|4 checks green, macOS build $BUILD_URL" \
   . $'Sources/FlareApp/FlareApp.swift\nSources/FlareModel/FlareWorkspace.swift' .
-check "SuiteUI outside MAC_GATED needs only the build" "eligible|150|2|5 checks green, macOS build $BUILD_URL" \
+check "SuiteUI needs only the build" "eligible|150|2|4 checks green, macOS build $BUILD_URL" \
   . $'Sources/SuiteUI/GlassPanel.swift\nTests/SuiteUITests/GlassPanelTests.swift' .
-check "models and tests stay eligible" "eligible|150|2|5 checks green" \
+check "models and tests stay eligible" "eligible|150|2|4 checks green" \
   . $'Sources/PhotoModel/PhotoWorkspace.swift\nTests/PhotoModelTests/PhotoWorkspaceTests.swift' .
-check "a model named like an app is allowed" "eligible|150|2|5 checks green" \
+check "a model named like an app is allowed" "eligible|150|2|4 checks green" \
   . $'Sources/HaloModel/HaloAppState.swift\nTests/HaloModelTests/HaloProjectTests.swift' .
 check "a model with only the worker's marker is eligible" "eligible|150|2|Fast-Check marker" \
   "$(printf '.body = "Closes #1\\n\\nFast-Check: pass\\nHead: %s"' "$HEAD_SHA")" \
@@ -92,11 +93,11 @@ check "too big (files)" "not-eligible|too big: 150 lines, 16 files" '.changedFil
 DOCS=$'docs/blueprints/design/packets/v3-select.md\ndocs/blueprints/design/features/select.wave.json\ndocs/c4/parts/creative-apps/design-model/design-model-sources.json'
 BIG='.additions = 1200 | .changedFiles = 3'
 many_docs() { local i; for (( i = 1; i <= $1; i++ )); do echo "docs/blueprints/design/packets/p$i.md"; done; }
-check "docs only: any size on a green check" "eligible|1230|3|5 checks green, docs only: any size" "$BIG" "$DOCS" .
+check "docs only: any size on a green check" "eligible|1230|3|4 checks green, docs only: any size" "$BIG" "$DOCS" .
 check "docs only: 40 files on the worker's marker" "eligible|1230|40|Fast-Check marker, docs only: any size" \
   "$(printf '.body = "Closes #1\\n\\nFast-Check: pass\\nHead: %s" | .additions = 1200 | .changedFiles = 40' "$HEAD_SHA")" \
   "$(many_docs 40)" '[]'
-check "docs only under the cap: no tier note" "eligible|150|3|5 checks green" '.changedFiles = 3' "$DOCS" .
+check "docs only under the cap: no tier note" "eligible|150|3|4 checks green" '.changedFiles = 3' "$DOCS" .
 check "docs only still needs proof" "pending|no passing CI check and no Fast-Check: pass marker" "$BIG" "$DOCS" '[]'
 check "docs only still waits on a red check" "red|Linux" "$BIG" "$DOCS" \
   'map(if .name == "Linux" then .conclusion = "FAILURE" else . end)'
@@ -124,7 +125,7 @@ check "one red check" "red|Linux" . "$BASE_FILES" \
 check "red status context" "red|ci/external" . "$BASE_FILES" \
   'map(if .context == "ci/external" then .state = "FAILURE" else . end)'
 check "pending check" "pending|1 checks still running" . "$BASE_FILES" \
-  'map(if .name == "macOS" then .status = "IN_PROGRESS" | .conclusion = null else . end)'
+  'map(if .name == "Linux" then .status = "IN_PROGRESS" | .conclusion = null else . end)'
 check "draft PR" "skip|PR is a draft" '.isDraft = true' "$BASE_FILES" .
 check "no label" "skip|no fast-lane label" '.labels = []' "$BASE_FILES" .
 check "already merged" "skip|PR is MERGED" '.state = "MERGED"' "$BASE_FILES" .
@@ -136,7 +137,7 @@ check "mergeable unknown" "pending|not mergeable yet (UNKNOWN/UNKNOWN)" \
   '.mergeable = "UNKNOWN" | .mergeStateStatus = "UNKNOWN"' "$BASE_FILES" .
 check "conflicting after an earlier merge" "conflict|$HEAD_SHA" \
   '.mergeable = "CONFLICTING" | .mergeStateStatus = "DIRTY"' "$BASE_FILES" .
-check "behind dev is still eligible (no freshness rule)" "eligible|150|2|5 checks green" \
+check "behind dev is still eligible (no freshness rule)" "eligible|150|2|4 checks green" \
   '.mergeStateStatus = "BEHIND"' "$BASE_FILES" .
 check "red CI outranks a conflict" "red|Linux" \
   '.mergeable = "CONFLICTING" | .mergeStateStatus = "DIRTY"' "$BASE_FILES" \
@@ -181,132 +182,67 @@ check "Head line alone waits" "pending|no passing CI check" \
 check "marker does not outrank a red check" "red|Linux" "$MARKED" "$BASE_FILES" \
   'map(if .name == "Linux" then .conclusion = "FAILURE" else . end)'
 check "marker does not outrank a running check" "pending|1 checks still running" "$MARKED" "$BASE_FILES" \
-  'map(if .name == "macOS" then .status = "IN_PROGRESS" | .conclusion = null else . end)'
+  'map(if .name == "Linux" then .status = "IN_PROGRESS" | .conclusion = null else . end)'
 check "marker does not outrank hard rules" "not-eligible|too big" "$MARKED | .additions = 999" "$BASE_FILES" '[]'
 check "marker does not outrank a conflict" "conflict|$HEAD_SHA" \
   "$MARKED | .mergeable = \"CONFLICTING\" | .mergeStateStatus = \"DIRTY\"" "$BASE_FILES" '[]'
 check "marker on a draft is skipped" "skip|PR is a draft" "$MARKED | .isDraft = true" "$BASE_FILES" '[]'
 
-# The macOS gate: a PR changing or renaming a MAC_GATED shared shell file needs
-# a completed CI run on its head whose macOS job succeeded: the run a
-# `Mac-Check: <run url>` line names (a supervisor's), else the latest CI run on
-# the head, which the lane dispatches itself when there is none (authors get a
-# 403 dispatching, #1040). mac <name> <want> <pr jq> <files> <mac-check run>
-# <lane run> runs decide with both `gh run view` JSONs; each run is a jq
-# filter on a green run on the head, or - for none.
+# CI's macOS jobs are report-only until beta (captain, 2026-10-16): a red or
+# running `macOS` or `macOS (<app>)` check never holds a PR, and a green one
+# is no proof; the proof is Linux-side. Shared shell files such as
+# SuiteWindow.swift need only what any code PR needs: the marker and a build.
+check "a red macOS check doesn't block" "eligible|150|2|4 checks green" . "$BASE_FILES" \
+  'map(if .name == "macOS" then .conclusion = "FAILURE" else . end)'
+check "a running macOS check doesn't block" "eligible|150|2|4 checks green" . "$BASE_FILES" \
+  'map(if .name == "macOS" then .status = "IN_PROGRESS" | .conclusion = null else . end)'
+check "a red scoped macOS check doesn't block" "eligible|150|2|Fast-Check marker" "$MARKED" "$BASE_FILES" \
+  '[{"__typename":"CheckRun","name":"macOS (halo)","workflowName":"","status":"COMPLETED","conclusion":"FAILURE"}]'
+check "a green macOS check alone is no proof" "pending|no passing CI check and no Fast-Check: pass marker" . "$BASE_FILES" \
+  '[{"__typename":"CheckRun","name":"macOS","workflowName":"","status":"COMPLETED","conclusion":"SUCCESS"}]'
+check "a green Linux check alone is proof" "eligible|150|2|1 checks green" . "$BASE_FILES" \
+  '[{"__typename":"CheckRun","name":"Linux","workflowName":"","status":"COMPLETED","conclusion":"SUCCESS"}]'
+check "a check merely named like macOS still counts" "red|macOS lint" . "$BASE_FILES" \
+  '. + [{"__typename":"CheckRun","name":"macOS lint","workflowName":"","status":"COMPLETED","conclusion":"FAILURE"}]'
+GATED=$'Sources/SuiteUI/SuiteWindow.swift\nTests/SuiteUITests/SuiteWindowTests.swift'
+check "SuiteWindow.swift on the marker and a build: eligible, no macOS run (#1337)" \
+  "eligible|150|2|Fast-Check marker, macOS build $BUILD_URL" "$MARKED" "$GATED" '[]'
+
+# A supervisor's `Mac-Check: <run url>` line names a CI run; one whose macOS
+# job passed on the head proves the build (build cases below). mac_judge:
 RUN_URL="https://github.com/qbtrix/creative-apps/actions/runs/38700000001"
-LANE_URL="https://github.com/qbtrix/creative-apps/actions/runs/38700000002"
 GREEN_RUN='{"workflowName":"CI","status":"completed","conclusion":"success","headSha":"'"$HEAD_SHA"'",
-  "url":"'"$LANE_URL"'",
+  "url":"'"$RUN_URL"'",
   "jobs":[{"name":"Linux","status":"completed","conclusion":"success"},
           {"name":"macOS","status":"completed","conclusion":"success"}]}'
 MAC_PR="$MARKED | .body += \"\\nMac-Check: $RUN_URL\""
-GATED=$'Sources/SuiteUI/SuiteWindow.swift\nTests/SuiteUITests/SuiteWindowTests.swift'
 OLD_HEAD="ffffffffffffffffffffffffffffffffffffffff"
 FAILED_MAC='.conclusion = "failure" | (.jobs[] | select(.name == "macOS")).conclusion = "failure"'
 RUNNING='.status = "in_progress" | .conclusion = "" | (.jobs[] | select(.name == "macOS")) |= (.status = "in_progress" | .conclusion = "")'
-mac() {
-  local name="$1" want="$2" got
-  jq "$3" <<<"$BASE_PR" >"$tmp/pr.json"
-  printf '%s\n' "$4" >"$tmp/files.txt"
-  if [[ "$5" == - ]]; then echo '{}' >"$tmp/run.json"; else jq "$5" <<<"$GREEN_RUN" >"$tmp/run.json"; fi
-  if [[ "$6" == - ]]; then echo '{}' >"$tmp/lane.json"; else jq "$6" <<<"$GREEN_RUN" >"$tmp/lane.json"; fi
-  got=$(decide "$tmp/pr.json" "$tmp/files.txt" "$tmp/empty.json" "" "" "$tmp/run.json" "$tmp/lane.json" "$tmp/gbuild.json" 2>/dev/null)
-  if [[ "$got" == "$want"* ]]; then echo "ok   mac: $name -> ${got:0:120}"; else echo "FAIL mac: $name: want '$want*', got '$got'"; fail=1; fi
+judge() {  # judge <name> <want> <run jq>
+  local got; jq "$3" <<<"$GREEN_RUN" >"$tmp/run.json"; got=$(mac_judge "$tmp/run.json" "$HEAD_SHA")
+  if [[ "$got" == "$2" ]]; then echo "ok   judge: $1"; else echo "FAIL judge: $1: want '$2', got '$got'"; fail=1; fi
 }
+judge "a green run on the head passes" "" .
+judge "a failed macOS job" "its macOS job is failure" "$FAILED_MAC"
+judge "a running run" "its run has not completed" "$RUNNING"
+judge "a skipped macOS job" "its macOS job is skipped" '(.jobs[] | select(.name == "macOS")).conclusion = "skipped"'
+judge "no macOS job" "its run has no macOS job" '.jobs |= map(select(.name != "macOS"))'
+judge "another workflow" "its run is the Fast Lane workflow, not CI" '.workflowName = "Fast Lane"'
+judge "an older head" "its run is on $OLD_HEAD, not the head $HEAD_SHA" ".headSha = \"$OLD_HEAD\""
+judge "an unreadable run" "its run could not be read" '{}'
+jq "$MARKED | .body += \"\\n  Mac-Check:   $RUN_URL/job/123  \"" <<<"$BASE_PR" >"$tmp/pr.json"
+got=$(mac_run_id "$(mac_check_url "$tmp/pr.json")")
+if [[ "$got" == 38700000001 ]]; then echo "ok   judge: a job URL with spaces reads its run id"; else echo "FAIL judge: job URL: got '$got'"; fail=1; fi
+got=$(mac_run_id "https://github.com/QBTRIX/Creative-Apps/actions/runs/38700000001")
+if [[ "$got" == 38700000001 ]]; then echo "ok   judge: an upper-case repo URL reads"; else echo "FAIL judge: upper-case URL: got '$got'"; fail=1; fi
+got=$(mac_run_id "https://github.com/someone/creative-apps/actions/runs/1")
+if [[ -z "$got" ]]; then echo "ok   judge: another repo's run is no run"; else echo "FAIL judge: another repo: got '$got'"; fail=1; fi
+if shopt -q nocasematch; then echo "FAIL judge: mac_run_id leaves nocasematch on"; fail=1; else echo "ok   judge: mac_run_id restores nocasematch"; fi
 echo '[]' >"$tmp/empty.json"
-DISPATCH="mac-dispatch|Sources/SuiteUI/SuiteWindow.swift|feat/x"
-REFUSE="mac-gate|changes Sources/SuiteUI/SuiteWindow.swift, shared by every app's window, so it needs a macOS run on its head $HEAD_SHA that is green or fails only where dev fails, and the CI run the lane found there doesn't: $LANE_URL"
-mac "no Mac-Check line and no run on the head: the lane dispatches" "$DISPATCH" "$MARKED" "$GATED" - -
-mac "a Mac-Check run on an older head, none on the head: dispatches" "$DISPATCH" "$MAC_PR" "$GATED" ".headSha = \"$OLD_HEAD\"" -
-mac "an unreadable Mac-Check run, none on the head: dispatches" "$DISPATCH" "$MAC_PR" "$GATED" '{}' -
-mac "a Mac-Check URL of another repo, none on the head: dispatches" "$DISPATCH" \
-  "$MARKED | .body += \"\\nMac-Check: https://github.com/someone/creative-apps/actions/runs/1\"" "$GATED" . -
-mac "a lane run on an older head counts as none: dispatches" "$DISPATCH" "$MARKED" "$GATED" - ".headSha = \"$OLD_HEAD\""
-mac "the run on the head still going: waits, no second dispatch" "pending|waiting for the macOS CI run $LANE_URL on head $HEAD_SHA" \
-  "$MARKED" "$GATED" - "$RUNNING"
-mac "the run on the head green: eligible as if Mac-Check were there" "eligible|150|2|Fast-Check marker, macOS run $LANE_URL" \
-  "$MARKED" "$GATED" - .
-mac "a failed macOS job with no dev run to compare is refused" \
-  "$REFUSE (its macOS job failed, and no completed macOS run on dev could be read to compare). Fix it and push; the lane dispatches CI again on the new head" \
-  "$MARKED" "$GATED" - "$FAILED_MAC"
-mac "a skipped macOS job is refused" "$REFUSE (its macOS job is skipped)" \
-  "$MARKED" "$GATED" - '(.jobs[] | select(.name == "macOS")).conclusion = "skipped"'
-mac "a run without a macOS job is refused" "$REFUSE (its run has no macOS job)" "$MARKED" "$GATED" - '.jobs |= map(select(.name != "macOS"))'
-mac "another workflow's run is refused" "$REFUSE (its run is the Fast Lane workflow, not CI)" "$MARKED" "$GATED" - '.workflowName = "Fast Lane"'
-# Dev can be red for days from other lines: a failed macOS job passes when its
-# failing tests (evaluate reads them from the job log into failedTests) all
-# fail in the latest completed dev run too (base), matched on the identifier.
-DEV_URL="https://github.com/qbtrix/creative-apps/actions/runs/38711122431"
-T1='-[HaloJourneyTests.HaloJourneyTests testLayoutAtWidths]'
-T2='-[PhotoJourneyTests.PhotoJourneyTests testFixtureLaunch]'
-T3='-[HaloJourneyTests.HaloHistoryJourneyTests testUndoRedoEveryEdit]'
-UI_STEP='[{"name":"Run scripts/ci","conclusion":"success"},{"name":"Run scripts/ui-test","conclusion":"failure"}]'
-fails() {  # fails <run tests json> <dev tests json> [<dev failed steps json>]: a failed macOS run with a dev base
-  printf '%s | (.jobs[] | select(.name == "macOS")).steps = %s | .failedTests = %s | .base = {url: "%s", failedTests: %s, failedSteps: %s}' \
-    "$FAILED_MAC" "$UI_STEP" "$1" "$DEV_URL" "$2" "${3:-[\"Run scripts/ui-test\"]}"
-}
-mac "same failures as dev passes" "eligible|150|2|Fast-Check marker, macOS run $LANE_URL (its failing tests also fail on dev: $DEV_URL)" \
-  "$MARKED" "$GATED" - "$(fails "[\"$T1\", \"$T2\"]" "[\"$T2\", \"$T1\", \"-[Suite.Other x]\"]")"
-mac "one new failure refuses and names it" \
-  "$REFUSE (its macOS job has 1 failing test(s) that the latest dev run ($DEV_URL) does not: $T3). Fix it and push" \
-  "$MARKED" "$GATED" - "$(fails "[\"$T1\", \"$T3\"]" "[\"$T1\", \"$T2\"]")"
-mac "a green dev run makes every failure new" "$REFUSE (its macOS job has 2 failing test(s)" \
-  "$MARKED" "$GATED" - "$(fails "[\"$T1\", \"$T2\"]" '[]' '[]')"
-mac "a failure with no failing test to compare (build or setup) refuses" \
-  "$REFUSE (its macOS job failed in Run scripts/ui-test with no failing test to compare with dev)" \
-  "$MARKED" "$GATED" - "$(fails '[]' "[\"$T1\"]")"
-mac "a failed step that passed on dev refuses, even with known tests" \
-  "$REFUSE (its macOS job failed in Run scripts/ci, which passed in the latest dev run ($DEV_URL))" \
-  "$MARKED" "$GATED" - "$(fails "[\"$T1\"]" "[\"$T1\"]") | (.jobs[] | select(.name == \"macOS\")).steps[0].conclusion = \"failure\""
-mac "a supervisor's Mac-Check run with dev's failures passes" \
-  "eligible|150|2|Fast-Check marker, Mac-Check: $RUN_URL (its failing tests also fail on dev: $DEV_URL)" \
-  "$MAC_PR" "$GATED" "$(fails "[\"$T1\"]" "[\"$T1\"]")" -
-# A gated PR's red macOS check run on the head is the gate's to judge; any
-# other PR's still makes it red.
-RED_MAC='[{"__typename":"CheckRun","name":"Linux","workflowName":"","status":"COMPLETED","conclusion":"SUCCESS"},
-          {"__typename":"CheckRun","name":"macOS","workflowName":"","status":"COMPLETED","conclusion":"FAILURE"}]'
-redmac() {  # redmac <name> <want> <files> <lane run jq>
-  jq "$MARKED" <<<"$BASE_PR" >"$tmp/pr.json"; printf '%s\n' "$3" >"$tmp/files.txt"
-  echo '{}' >"$tmp/run.json"; jq "$4" <<<"$GREEN_RUN" >"$tmp/lane.json"; echo "$RED_MAC" >"$tmp/redmac.json"
-  local got; got=$(decide "$tmp/pr.json" "$tmp/files.txt" "$tmp/redmac.json" "" "" "$tmp/run.json" "$tmp/lane.json" 2>/dev/null)
-  if [[ "$got" == "$2"* ]]; then echo "ok   mac: $1 -> ${got:0:100}"; else echo "FAIL mac: $1: want '$2*', got '$got'"; fail=1; fi
-}
-redmac "a red macOS check with dev's failures doesn't block a gated PR" "eligible|150|2|1 checks green, macOS run $LANE_URL (its failing" \
-  "$GATED" "$(fails "[\"$T1\"]" "[\"$T1\"]")"
-redmac "a red macOS check with a new failure is refused by name, not just red" "$REFUSE (its macOS job has 1 failing test(s)" \
-  "$GATED" "$(fails "[\"$T3\"]" "[\"$T1\"]")"
-redmac "an ungated PR's red macOS check is still red" "red|macOS" "$BASE_FILES" .
-# failed_tests reads XCTest and Swift Testing failures off a timestamped job log.
-got=$(printf '%s\n' \
-  "2026-10-15T09:42:18.8623840Z /x/UITests/PhotoJourneyTests.swift:60: error: -[PhotoJourneyTests.PhotoJourneyTests testFixtureLaunch] : XCTAssertTrue failed" \
-  "2026-10-15T09:42:19.1773830Z Test Case '-[PhotoJourneyTests.PhotoJourneyTests testFixtureLaunch]' failed (12.014 seconds)." \
-  "2026-10-15T09:42:20.0000000Z Test Case '-[PhotoJourneyTests.PhotoJourneyTests testSave]' passed (1.0 seconds)." \
-  "2026-10-15T09:42:21.0000000Z $(printf '\033[1;31m')✘$(printf '\033[0m') Test openKeepsState() failed after 0.2 seconds with 1 issue." \
-  "2026-10-15T09:42:22.0000000Z Test Suite 'All tests' failed at 2026-10-15 09:46:25.386." | failed_tests | paste -sd'|' -)
-if [[ "$got" == "-[PhotoJourneyTests.PhotoJourneyTests testFixtureLaunch]|Test openKeepsState()" ]]; then
-  echo "ok   mac: failed_tests reads the failing test identifiers"
-else echo "FAIL mac: failed_tests: got '$got'"; fail=1; fi
-mac "a supervisor's green Mac-Check run passes, no dispatch" "eligible|150|2|Fast-Check marker, Mac-Check: $RUN_URL" "$MAC_PR" "$GATED" . -
-mac "a green Mac-Check run outranks a failed lane run" "eligible|150|2|Fast-Check marker, Mac-Check: $RUN_URL" "$MAC_PR" "$GATED" . "$FAILED_MAC"
-mac "a Mac-Check run with a failed macOS job falls back to the lane run" "eligible|150|2|Fast-Check marker, macOS run $LANE_URL" \
-  "$MAC_PR" "$GATED" "$FAILED_MAC" .
-mac "a job URL of a green run passes" "eligible|150|2|Fast-Check marker, Mac-Check:" \
-  "$MARKED | .body += \"\\n  Mac-Check:   $RUN_URL/job/123  \"" "$GATED" . -
-mac "an upper-case repo URL passes" "eligible|150|2|Fast-Check marker, Mac-Check:" \
-  "$MARKED | .body += \"\\nMac-Check: https://github.com/QBTRIX/Creative-Apps/actions/runs/38700000001\"" "$GATED" . -
-if shopt -q nocasematch; then echo "FAIL mac: mac_run_id leaves nocasematch on"; fail=1; else echo "ok   mac: mac_run_id restores nocasematch"; fi
-mac "every gated file is named" \
-  "mac-dispatch|Sources/SuiteUI/EditorShell.swift, Sources/SuiteUI/Tokens.swift, Sources/SuiteUI/ToolbarGroup.swift|feat/x" \
-  "$MARKED" $'Sources/SuiteUI/Tokens.swift\nSources/SuiteUI/ToolbarGroup.swift\nSources/SuiteUI/EditorShell.swift' - -
-mac "a rename away from a gated file is gated" "$DISPATCH" "$MARKED" $'Sources/SuiteUI/Window.swift\nSources/SuiteUI/SuiteWindow.swift' - -
-mac "a PR touching no gated path is unaffected" "eligible|150|2|Fast-Check marker" "$MARKED" "$BASE_FILES" - -
-mac "a gated PR still needs the Fast-Check marker" "pending|no passing CI check" ".body = \"Mac-Check: $RUN_URL\"" "$GATED" . .
-mac "the gate does not outrank hard rules" "not-eligible|too big" "$MARKED | .additions = 999" "$GATED" - -
-check "a gated PR with no run JSON at all dispatches" "$DISPATCH" "$MARKED" "$GATED" '[]'
 
-# The macOS build gate (lesson 114, #1210): a PR changing code (BUILD_RE) that
-# isn't MAC_GATED merges only once a build-only CI run (ci.yml's build_only
+# The macOS build gate (lesson 114, #1210): a PR changing code (BUILD_RE)
+# merges only once a build-only CI run (ci.yml's build_only
 # input, run title "macOS build") compiled its head; the lane dispatches it.
 # build <name> <want> <pr jq> <files> <build run jq on a green build, or -> [<checks json> [<Mac-Check run jq>]]
 APP=$'Sources/LibraryApp/LibraryInspector.swift\nSources/LibraryModel/LibraryCatalog.swift'
@@ -319,7 +255,7 @@ build() {
   got=$(decide "$tmp/pr.json" "$tmp/files.txt" "$tmp/bchecks.json" "" "" "$tmp/run.json" "$tmp/run.json" "$tmp/build.json" 2>/dev/null)
   if [[ "$got" == "$2"* ]]; then echo "ok   build: $1 -> ${got:0:110}"; else echo "FAIL build: $1: want '$2*', got '$got'"; fail=1; fi
 }
-BREFUSE="mac-gate|changes code (Sources/LibraryApp, Sources/LibraryModel), and its head $HEAD_SHA doesn't build on macOS: $BUILD_URL"
+BREFUSE="build-gate|changes code (Sources/LibraryApp, Sources/LibraryModel), and its head $HEAD_SHA doesn't build on macOS: $BUILD_URL"
 build "app code with no build on the head: the lane dispatches one" "build-dispatch|Sources/LibraryApp, Sources/LibraryModel|feat/x" "$MARKED" "$APP" -
 build "a build on an older head counts as none" "build-dispatch|Sources/LibraryApp, Sources/LibraryModel|feat/x" "$MARKED" "$APP" ".headSha = \"$OLD_HEAD\""
 build "every app folder is named" "build-dispatch|Sources/FlareApp, Sources/LibraryApp|feat/x" "$MARKED" \
@@ -340,14 +276,17 @@ build "a red macOS build check is the gate's to name, not just red" "$BREFUSE (f
 build "a Model-only PR gets the build (#1210)" "build-dispatch|Sources/FlareModel, Tests/FlareModelTests|feat/x" "$MARKED" "$BASE_FILES" -
 build "a Model-only PR whose head built: eligible" "eligible|150|2|Fast-Check marker, macOS build $BUILD_URL" "$MARKED" "$BASE_FILES" .
 build "a Model that doesn't build on macOS is refused" \
-  "mac-gate|changes code (Sources/PhotoModel), and its head $HEAD_SHA doesn't build on macOS: $BUILD_URL (failure)" \
+  "build-gate|changes code (Sources/PhotoModel), and its head $HEAD_SHA doesn't build on macOS: $BUILD_URL (failure)" \
   "$MARKED" 'Sources/PhotoModel/PhotoRecovery.swift' '.conclusion = "failure"'
 # Every target gets the build, each on its own (run 38732179619: a snapshot
 # test broke the macOS build, #1097).
 build "only a snapshot test (#1097): the build" "build-dispatch|Tests/AppSnapshotTests|feat/x" "$MARKED" 'Tests/AppSnapshotTests/HaloPlaybackDriverTests.swift' -
 build "only a UI journey: the build" "build-dispatch|UITests|feat/x" "$MARKED" 'UITests/HaloJourneyTests+Layers.swift' -
 build "only a SuiteUI test: the build" "build-dispatch|Tests/SuiteUITests|feat/x" "$MARKED" 'Tests/SuiteUITests/TokensTests.swift' -
-build "only SuiteUI outside MAC_GATED: the build" "build-dispatch|Sources/SuiteUI|feat/x" "$MARKED" 'Sources/SuiteUI/GlassPanel.swift' -
+build "only SuiteUI: the build" "build-dispatch|Sources/SuiteUI|feat/x" "$MARKED" 'Sources/SuiteUI/GlassPanel.swift' -
+build "a shared shell file: the build, no full macOS run" "build-dispatch|Sources/SuiteUI|feat/x" "$MARKED" 'Sources/SuiteUI/SuiteWindow.swift' -
+build "a Mac-Check run with a failed macOS job falls back to the build" "eligible|150|2|Fast-Check marker, macOS build $BUILD_URL" \
+  "$MAC_PR" "$APP" . '[]' "$FAILED_MAC"
 build "only project.yml: the build" "build-dispatch|project.yml|feat/x" "$MARKED" 'project.yml' -
 build "only an app: the build" "build-dispatch|Sources/PhotoApp|feat/x" "$MARKED" 'Sources/PhotoApp/PhotoApp.swift' -
 build "the audit baseline is data, not code: no build" "eligible|150|2|Fast-Check marker" "$MARKED" 'UITests/audit-baseline.json' -
@@ -362,12 +301,6 @@ if [[ "$got" == "Package.swift, Sources/X.swift, UITests, project.yml" ]]; then 
 else echo "FAIL build: build_paths: got '$got'"; fail=1; fi
 build "the build gate does not outrank the marker" "pending|no passing CI check" ".body = \"x\"" "$APP" .
 build "a supervisor's green Mac-Check run covers the build" "eligible|150|2|Fast-Check marker, Mac-Check: $RUN_URL" "$MAC_PR" "$APP" - '[]' .
-# A MAC_GATED PR that also touches app code takes the full Mac run only: it builds every app too.
-jq "$MARKED" <<<"$BASE_PR" >"$tmp/pr.json"; printf '%s\n' 'Sources/SuiteUI/Tokens.swift' 'Sources/FlareApp/FlareApp.swift' >"$tmp/files.txt"
-echo '{}' >"$tmp/run.json"; jq . <<<"$GREEN_BUILD" >"$tmp/build.json"
-got=$(decide "$tmp/pr.json" "$tmp/files.txt" "$tmp/empty.json" "" "" "$tmp/run.json" "$tmp/run.json" "$tmp/build.json" 2>/dev/null)
-if [[ "$got" == "mac-dispatch|Sources/SuiteUI/Tokens.swift|feat/x" ]]; then echo "ok   build: a gated PR with app code takes the full Mac run only -> $got"
-else echo "FAIL build: a gated PR with app code: got '$got'"; fail=1; fi
 # Every source the manifests compile falls under BUILD_RE: each Package.swift
 # target with its `#if os(macOS)` block switched on (swift package
 # dump-package; a Mac and a Linux runner read it the same way), and each
@@ -399,17 +332,17 @@ review() { printf '. + [{"__typename":"StatusContext","context":"belt/review","s
 REQUIRE_BELT_REVIEW=1
 check "belt PR, review missing: waits" "pending|waiting for review" "$BELT" "$BASE_FILES" .
 check "belt PR, review pending: waits" "pending|waiting for review" "$BELT" "$BASE_FILES" "$(review PENDING)"
-check "belt PR, review success: eligible" "eligible|150|2|5 checks green" "$BELT" "$BASE_FILES" "$(review SUCCESS)"
+check "belt PR, review success: eligible" "eligible|150|2|4 checks green" "$BELT" "$BASE_FILES" "$(review SUCCESS)"
 check "belt PR, review failure: red" "red|review failed" "$BELT" "$BASE_FILES" "$(review FAILURE)"
 check "belt PR, review error: red" "red|review failed" "$BELT" "$BASE_FILES" "$(review ERROR)"
 check "a Belt-Test line makes a belt PR too" "pending|waiting for review" '.body = "Belt-Test: t-9"' "$BASE_FILES" .
 check "red CI outranks the review" "red|Linux" "$BELT" "$BASE_FILES" \
   "$(review SUCCESS) | map(if .name == \"Linux\" then .conclusion = \"FAILURE\" else . end)"
-check "non-belt PR ignores belt/review" "eligible|150|2|5 checks green" . "$BASE_FILES" "$(review FAILURE)"
+check "non-belt PR ignores belt/review" "eligible|150|2|4 checks green" . "$BASE_FILES" "$(review FAILURE)"
 check "belt PR with a marker still waits for review" "pending|waiting for review" \
   "$BELT | .body += \"\\nFast-Check: pass\\nHead: $HEAD_SHA\"" "$BASE_FILES" '[]'
 REQUIRE_BELT_REVIEW=0
-check "gate off: belt PR needs no review" "eligible|150|2|5 checks green" "$BELT" "$BASE_FILES" .
+check "gate off: belt PR needs no review" "eligible|150|2|4 checks green" "$BELT" "$BASE_FILES" .
 REQUIRE_BELT_REVIEW=1
 
 # strip_attribution drops the footer cloud sessions add to PR bodies and keeps the rest.
@@ -453,7 +386,7 @@ else echo "FAIL refs: closing_refs: got '$got'"; fail=1; fi
 
 # With the gate off, a Belt PR with no review is eligible like any other.
 REQUIRE_BELT_REVIEW=0
-check "gate off: belt PR without review is eligible" "eligible|150|2|5 checks green" '.body = "x\nBelt-Run: act-1"' "$BASE_FILES" .
+check "gate off: belt PR without review is eligible" "eligible|150|2|4 checks green" '.body = "x\nBelt-Run: act-1"' "$BASE_FILES" .
 
 # The app audit guard. audit_tree <dir> <baseline> <registry entries> <checks...>
 # writes an audit tree; "-" leaves the baseline or AuditCore.swift out, and a
@@ -564,14 +497,14 @@ same '{ "photo": { "identifier": 55, "overlap": 0 }, "halo": { "contrast": 2 } }
 audit_decide "decide: a looser audit is not eligible" \
   "not-eligible|loosens the app audit: needs the captain's review (photo identifier 54 -> 55)"
 same '{ "photo": { "identifier": 50, "overlap": 0 }, "halo": { "contrast": 2 } }'
-audit_decide "decide: a lowered baseline is eligible" "eligible|150|2|5 checks green"
+audit_decide "decide: a lowered baseline is eligible" "eligible|150|2|4 checks green"
 # Like #292: baselines for checks it adds, plus a scripts/ui-test change. Only
 # the script keeps it off the lane.
 added "$FOCUS_BL" "$REG, Focus()" Focus=focus
 audit_decide "decide: #292-style, new check baselines pass, the script doesn't" \
   "not-eligible|touches protected paths: scripts/ui-test" \
   "$(printf '%s\n' "$AUDIT_BASELINE" "$AD/AuditCore.swift" "$AD/Checks/Focus.swift" scripts/ui-test)"
-audit_decide "decide: the same without the script is eligible" "eligible|150|2|5 checks green, macOS build $BUILD_URL" \
+audit_decide "decide: the same without the script is eligible" "eligible|150|2|4 checks green, macOS build $BUILD_URL" \
   "$(printf '%s\n' "$AUDIT_BASELINE" "$AD/AuditCore.swift" "$AD/Checks/Focus.swift")"
 
 # A whole sweep against a stub `gh` that answers from per-PR fixtures and logs
@@ -599,8 +532,6 @@ gh() {
       if [[ -e "$sw/files.$n.json" ]]; then jq -r "${!#}" "$sw/files.$n.json"
       else jq -rn '[{filename: "Sources/FlareModel/FlareWorkspace.swift", status: "modified"}]' | jq -r "${!#}"; fi ;;
     "run view "*) cat "$sw/run.$3.json" 2>/dev/null || return 1 ;;
-    "run list "*"--status completed"*) jq -r "${!#}" "$sw/devruns.json" 2>/dev/null || true ;;
-    "api "*"/actions/jobs/"*"/logs") u="${2#*/actions/jobs/}"; cat "$sw/log.${u%%/*}" 2>/dev/null || return 1 ;;
     "run list "*"--commit "*)
       u="${a#*--commit }"; u="${u%% *}"
       [[ ! -e "$sw/runlist.fail.$u" ]] || return 1
@@ -736,74 +667,32 @@ expect "a rename away from a protected path is refused" \
 expect "audit: an unreadable merge base skips the PR, no writes" "$(grep -c '^pr [a-z]* 11 ' "$sw/calls")" 0
 expect "audit: a stray AuditCore.swift can't hide a dropped entry" \
   "$(grep -c "^pr comment 12 .*loosens the app audit: needs the captain's review (drops Overlap from AppAudit.checks)" "$sw/calls")" 1
-# The macOS gate through sweeps. #14 changes SuiteWindow.swift with no
-# Mac-Check line and no CI run on its head: the lane dispatches CI on its
-# branch once and comments the run URL, and a later sweep merges it when that
-# run is green on the head. #16 carries a supervisor's green Mac-Check run and
-# merges at once. #18 touches no gated path. #20's run on the head failed on
-# macOS. #22's run list fails, so nothing is written for it.
+# A shared shell file through sweeps (#1337 waited hours on a full macOS
+# run): #14 changes SuiteWindow.swift and gets one build-only run, like any
+# code PR, then merges once it compiled. #22's run list fails, so nothing is
+# written for it.
 rm -rf "$sw"; mkdir -p "$sw"; : >"$sw/calls"
 SWF='[{"filename": "Sources/SuiteUI/SuiteWindow.swift", "status": "modified"}]'
-for n in 14 16 18 20 22; do
+for n in 14 22; do
   pr_at "$n" "h$n" "$SWF"
   jq --arg b "b$n" '.headRefName = $b' "$sw/$n.json" >"$sw/x" && mv "$sw/x" "$sw/$n.json"
 done
-printf '%s\n' '[{"filename": "Sources/FlareModel/FlareWorkspace.swift", "status": "modified"}]' >"$sw/files.18.json"
-jq -c '[.headSha = "h18"]' <<<"$GREEN_BUILD" >"$sw/runs.h18.json"
-jq '.body += "\nMac-Check: https://github.com/qbtrix/creative-apps/actions/runs/16"' "$sw/16.json" >"$sw/x" && mv "$sw/x" "$sw/16.json"
-jq '.headSha = "h16"' <<<"$GREEN_RUN" >"$sw/run.16.json"
-jq --arg u "https://github.com/qbtrix/creative-apps/actions/runs/20" '.headSha = "h20" | .url = $u | '"$FAILED_MAC" <<<"$GREEN_RUN" >"$sw/run.20.json"
-echo '[{"databaseId": "20", "url": "https://github.com/qbtrix/creative-apps/actions/runs/20"}]' >"$sw/runs.h20.json"
 touch "$sw/runlist.fail.h22"
-# #20's macOS job (id 2020) fails a test dev doesn't. Dev's latest completed CI
-# runs: 701 was cancelled before macOS ran (skipped), 700 failed -[A.B old].
-jq '(.jobs[] | select(.name == "macOS")) |= (.databaseId = 2020 | .steps = [{"name": "Run scripts/ui-test", "conclusion": "failure"}])' \
-  "$sw/run.20.json" >"$sw/x" && mv "$sw/x" "$sw/run.20.json"
-printf "%s\n" "2026-10-15T09:00:00.0Z Test Case '-[A.B old]' failed (1 seconds)." "2026-10-15T09:00:01.0Z Test Case '-[A.B new]' failed (1 seconds)." >"$sw/log.2020"
-echo '[{"databaseId": "701"}, {"databaseId": "700"}]' >"$sw/devruns.json"
-jq '.url = "https://github.com/qbtrix/creative-apps/actions/runs/701" | (.jobs[] | select(.name == "macOS")).conclusion = "skipped"' <<<"$GREEN_RUN" >"$sw/run.701.json"
-jq '.url = "https://github.com/qbtrix/creative-apps/actions/runs/700" | '"$FAILED_MAC"' | (.jobs[] | select(.name == "macOS")) |= (.databaseId = 7000 | .steps = [{"name": "Run scripts/ui-test", "conclusion": "failure"}])' <<<"$GREEN_RUN" >"$sw/run.700.json"
-printf "%s\n" "2026-10-15T08:00:00.0Z Test Case '-[A.B old]' failed (1 seconds)." >"$sw/log.7000"
-# #24's run on its head (id 24) fails only -[A.B old], as dev does: it merges.
-pr_at 24 h24 "$SWF"; jq '.headRefName = "b24"' "$sw/24.json" >"$sw/x" && mv "$sw/x" "$sw/24.json"
-jq '.headSha = "h24" | .url = "https://github.com/qbtrix/creative-apps/actions/runs/24" | '"$FAILED_MAC"' | (.jobs[] | select(.name == "macOS")) |= (.databaseId = 2424 | .steps = [{"name": "Run scripts/ui-test", "conclusion": "failure"}])' <<<"$GREEN_RUN" >"$sw/run.24.json"
-echo '[{"databaseId": "24", "url": "https://github.com/qbtrix/creative-apps/actions/runs/24"}]' >"$sw/runs.h24.json"
-printf "%s\n" "2026-10-15T09:00:00.0Z Test Case '-[A.B old]' failed (1 seconds)." >"$sw/log.2424"
 lane_sweep() { ( FAST_LANE_RUN_LOOKUP_RETRIES=0 main ) >/dev/null 2>&1 || { echo "FAIL sweep: main exited non-zero"; fail=1; }; }
 lane_sweep
-expect "mac: merges the supervisor-proved and the ungated PR, not the one waiting on its run" \
-  "$(grep -oE '^pr merge [0-9]+' "$sw/calls" | paste -sd, -)" "pr merge 16,pr merge 18,pr merge 24"
-expect "mac: the PR failing only where dev fails merges, its comment naming dev's run" \
-  "$(grep -c '^pr comment 24 .*merged into dev.*macOS run https://github.com/qbtrix/creative-apps/actions/runs/24 (its failing tests also fail on dev: https://github.com/qbtrix/creative-apps/actions/runs/700)' "$sw/calls")" 1
-expect "mac: dispatches CI on the gated PR's branch once, re-sweep included" \
-  "$(grep -c '^workflow run ci.yml -R qbtrix/creative-apps --ref b14$' "$sw/calls")" 1
-expect "mac: comments the dispatched run's URL once" \
-  "$(grep -c '^pr comment 14 .*The lane dispatched CI on b14: https://github.com/qbtrix/creative-apps/actions/runs/914\.' "$sw/calls")" 1
-expect "mac: no dispatch for a supervisor's Mac-Check run" "$(grep -c -- '--ref b16' "$sw/calls")" 0
-expect "mac: a failed macOS run is refused with what to do, no new dispatch" \
-  "$(grep -c "^pr comment 20 .*doesn't: https://github.com/qbtrix/creative-apps/actions/runs/20 (its macOS job has 1 failing test(s) that the latest dev run (https://github.com/qbtrix/creative-apps/actions/runs/700) does not: -\[A.B new\])\. Fix it and push" "$sw/calls")" 1
-expect "mac: a failed run never re-dispatches" "$(grep -cE -- '--ref b2[04]' "$sw/calls")" 0
-expect "mac: an unreadable run list writes nothing for the PR" "$(grep -cE '^pr [a-z]+ 22 |--ref b22' "$sw/calls")" 0
-expect "mac: refused PRs keep the fast-lane label" "$(grep -c -- '--remove-label fast-lane' "$sw/calls")" 0
+expect "shell: a SuiteWindow PR gets one build-only run, no full run" \
+  "$(grep -c -- '-f build_only=true --ref b14$' "$sw/calls"),$(grep -c '^workflow run ci.yml -R qbtrix/creative-apps --ref b14$' "$sw/calls")" "1,0"
+expect "shell: an unreadable run list writes nothing for the PR" "$(grep -cE '^pr [a-z]+ 22 |--ref b22' "$sw/calls")" 0
+jq 'map(if .displayTitle == "macOS build" then .status = "completed" | .conclusion = "success" else . end)' "$sw/runs.h14.json" >"$sw/x" && mv "$sw/x" "$sw/runs.h14.json"
 lane_sweep
-expect "mac: a later sweep while the run is going dispatches nothing more" \
-  "$(grep -c -- '--ref b14$' "$sw/calls")" 1
-expect "mac: and comments nothing more" "$(grep -c '^pr comment 14 ' "$sw/calls")" 1
-expect "mac: and doesn't merge it" "$(grep -c '^pr merge 14' "$sw/calls")" 0
-jq '.status = "completed" | .conclusion = "success" | .jobs[].status = "completed" | .jobs[].conclusion = "success"' \
-  "$sw/run.914.json" >"$sw/x" && mv "$sw/x" "$sw/run.914.json"
-lane_sweep
-expect "mac: once that run is green on the head, a later sweep merges it" "$(grep -c '^pr merge 14' "$sw/calls")" 1
-expect "mac: the merge comment names the run" \
-  "$(grep -c '^pr comment 14 .*merged into dev.*macOS run https://github.com/qbtrix/creative-apps/actions/runs/914' "$sw/calls")" 1
-expect "mac: still one dispatch for its head" "$(grep -c -- '--ref b14$' "$sw/calls")" 1
+expect "shell: once it compiled, a later sweep merges it" "$(grep -c '^pr merge 14' "$sw/calls")" 1
 
 # The macOS build gate through sweeps (lesson 114). #30 changes
 # Sources/LibraryApp with no build on its head: the lane dispatches a
 # build-only run on its branch once (-f build_only=true) and comments its URL,
 # waits while it builds, and merges once it compiled. #32's build on its head
-# failed: refused by URL, no dispatch. #34 is MAC_GATED and touches app code:
-# it gets the full run only, never a build-only one.
+# failed: refused by URL, no dispatch. #34 touches SuiteWindow.swift and app
+# code: one build-only run, never a full one.
 rm -rf "$sw"; mkdir -p "$sw"; : >"$sw/calls"
 for n in 30 32 34; do
   pr_at "$n" "h$n" '[{"filename": "Sources/LibraryApp/LibraryInspector.swift", "status": "modified"}]'
@@ -820,8 +709,8 @@ expect "build: doesn't merge before it compiles" "$(grep -c '^pr merge 30' "$sw/
 expect "build: a failed build is refused by URL" \
   "$(grep -c "^pr comment 32 .*doesn't build on macOS: https://github.com/qbtrix/creative-apps/actions/runs/32 (failure)\. Fix it and push" "$sw/calls")" 1
 expect "build: a failed build never re-dispatches" "$(grep -c -- '--ref b32' "$sw/calls")" 0
-expect "build: a MAC_GATED PR with app code gets the full run, not a build" \
-  "$(grep -c -- '--ref b34$' "$sw/calls"),$(grep -c -- 'build_only=true --ref b34' "$sw/calls")" "1,0"
+expect "build: a shared shell file with app code gets one build, not a full run" \
+  "$(grep -c -- '--ref b34$' "$sw/calls"),$(grep -c -- 'build_only=true --ref b34' "$sw/calls")" "1,1"
 expect "build: refused PRs keep the fast-lane label" "$(grep -c -- '--remove-label fast-lane' "$sw/calls")" 0
 lane_sweep
 expect "build: a later sweep while it builds dispatches and comments nothing more" \
