@@ -339,12 +339,16 @@ Crew PRs merge into `dev` at once; `main` moves only when full CI passes on
   verify-dispatch.sh starts one per app after that app's merges.
 - A journey that keeps failing on `dev` for a known reason can be quarantined,
   by the supervisor only, in `UITests/quarantine.json`: entries of
-  `{"test": "Target/Class/testName", "owner": "#<open issue>", "reason": ..., "expires": "YYYY-MM-DD"}`,
-  at most 7 days out. `scripts/ui-test` skips each live entry and lists it in
-  its output and the job summary. `scripts/ci` fails on an expired entry, a
-  closed or missing owner issue, an empty reason, or a test that isn't in
-  `UITests/`. When the owner's fix merges, the supervisor removes the entry
-  and the next `dev` run proves it.
+  `{"test": "Target/Class/testName", "owner": "#<open issue>", "reason": ..., "expires": "YYYY-MM-DD", "scope": "all"|"full"}`,
+  at most 7 days out. `scope` is optional: `all` (the default) skips the
+  journey in every run; `full` skips it only in full runs, so a full run can
+  go green and promote `main` while the owner's scoped run (`app=<app>`)
+  still runs it and shows the truth. `scripts/ui-test` skips each live entry
+  that applies and lists every entry, with where it is skipped, in its output
+  and the job summary. `scripts/ci` fails on an expired entry, a closed or
+  missing owner issue, an empty reason, a scope other than `all` or `full`, or
+  a test that isn't in `UITests/`. When the owner's fix merges, the
+  supervisor removes the entry and the next `dev` run proves it.
 
 ## Commands
 
