@@ -38,3 +38,6 @@ utc	stage	event	ref	note
 2026-10-16T16:15Z	3	pr-merged	#1428	SC-5b
 2026-10-16T16:18Z	3	stage-start	wave 9	SC-5c feature-done on 1f75673
 2026-10-16T16:24Z	3	pr-opened	#1448	SC-5c feature-done
+2026-10-16T16:35Z	3	pr-merged	#1448	SC-5c feature-done; all 15 tasks merged
+2026-10-16T16:40Z	3	stage-end	wave 9	build waves done
+2026-10-16T16:40Z	4	ci-run	38933216466	full dev run on c9e4656 pending

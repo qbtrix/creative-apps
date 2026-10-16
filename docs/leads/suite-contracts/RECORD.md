@@ -2,9 +2,9 @@
 
 Issue: #1332 · Packet: docs/blueprints/suite/features/suite-contracts.md
 Run: act-1a1448a5fd9-0he1 · Session: claude/suite-contracts-lead-rv72k4 · Started: 2026-10-16T11:49Z
-Stage: 3 wave 9
-Base: 1f75673b528dda050c0166dd7ae598256c85802e
-Next: wait for #1448 (SC-5c, feature-done) to merge, then find the dev CI run it triggers (gh run list / actions_list ci.yml branch dev) and start Anatomy round 1
+Stage: 4 round 1
+Base: c9e46560366b0c3464a5e822d11c4a865e4dc53e
+Next: wait for the dev CI run 38933216466 (https://github.com/qbtrix/creative-apps/actions/runs/38933216466, head c9e4656 = SC-5c merge) to complete, then run the round-1 critic panel
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -23,7 +23,7 @@ Next: wait for #1448 (SC-5c, feature-done) to merge, then find the dev CI run it
 | SC-4b | 7 | `SuiteServices`, budget helper, QB-SM6, QB-SV8, Model journey (#830) | SuiteServices.swift, SuiteServicesTests, Budget, Budget+Store, StoreRoundTripTests, SuiteContractsJourneyTests | those | #1409 | merged |
 | SC-4c | 7 | `FixtureSeeder` (#831) | Store/FixtureSeeder.swift, FixtureSeederTests | FixtureSeederTests | #1407 | merged |
 | SC-5b | 8 | `SlotContext`, `SuiteServices.live`, first seven slots (#833) | Sources/SuiteShell/SuiteServices+Live.swift, Live/{Switching,Recents,Creating,Routing,HandOff,Thumbnails,Home}Slot.swift, Tests/AppSnapshotTests/SuiteLiveServicesTests.swift | SuiteLiveServicesTests (macOS) | #1428 | merged |
-| SC-5c | 9 | other seven slots; `feature-done` (#834) | SuiteServices+Live.swift, Live/{RoundTrip,Pasteboard,Assets,Linking,Preferences,Settings,Onboarding}Slot.swift, SuiteLiveServicesTests | SuiteLiveServicesTests (macOS) | #1448 | open |
+| SC-5c | 9 | other seven slots; `feature-done` (#834) | SuiteServices+Live.swift, Live/{RoundTrip,Pasteboard,Assets,Linking,Preferences,Settings,Onboarding}Slot.swift, SuiteLiveServicesTests | SuiteLiveServicesTests (macOS) | #1448 | merged |
 
 Waves (packet's Build waves, checked against dev at ebc68bf):
 - Wave 1: SC-1a alone.
