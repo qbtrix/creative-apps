@@ -4,7 +4,7 @@ Issue: #1324 · Packet: docs/blueprints/design/features/design-contracts.md
 Run: act-1a14478b14e-i8ep · Session: session_01DKQiisBimhgRgEM46b1U5E · Started: 2026-10-16T11:29Z
 Stage: 3 wave 5
 Base: fb72b7e52405a824fabe34c6c408fcc00d242da2
-Next: D0-2b.2 builder opens its PR; #1400 (D0-3b) waits on the lane; then FD (feature-done); CT-b waits for scoped run 38917492060 (app=design, contains #1388)
+Next: wait on the lane for #1400 (D0-3b) and #1401 (D0-2b.2), both waiting on macOS builds; then rebase lead/design-contracts-FD (committed locally in the lead's scratchpad; redo from dev if lost: wave.json status built, feature_issue #1324), run scripts/ci, open it with feature-done; CT-b waits for scoped run 38917492060
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | rounds | state | run |
@@ -29,7 +29,7 @@ Next: D0-2b.2 builder opens its PR; #1400 (D0-3b) waits on the lane; then FD (fe
 | D0-2.6 | CT-c | 4 | contract law | DesignContractLawTests.swift | DesignContractLawTests | #1394 | merged |
 | D0-3a | CT-d | 4 | DesignCommand, help, run, apply, mint | DesignActions.swift, DesignActionsTests.swift | DesignActionsTests | #1395 | merged (Mutate 6/6) |
 | D0-2b.1 | CT-c | 3 | six new Live stubs (Duplicating, Grouping, Clipboard, Ordering, Styling, Filing) | Live/Live{Duplicating,Grouping,Clipboard,Ordering,Styling,Filing}.swift, DesignLiveStubTests.swift | DesignLiveStubTests | #1383 | merged |
-| D0-2b.2 | CT-c | 5 | .live names every Live type; law on .live; MJ3 | DesignServices.swift, DesignLiveStubTests.swift | DesignLiveStubTests | | building (wave 5, stacked on #1394) |
+| D0-2b.2 | CT-c | 5 | .live names every Live type; law on .live; MJ3 | DesignServices.swift, DesignLiveStubTests.swift | DesignLiveStubTests | #1401 | open (Mutate 10/10) |
 | D0-3b | CT-d | 5 | clipboard, moveLayer, setStyle; MJ4 | DesignActions+Edit.swift, DesignActionsEditTests.swift | DesignActionsEditTests | #1400 | open (Mutate 5/5) |
 | FD | CT-d | 6 | feature-done: design-contracts.wave.json status built, feature issue #1324 | docs/blueprints/design/features/design-contracts.wave.json | scripts/ci (waves render) | | waits D0-2b.2, D0-3b |
 
