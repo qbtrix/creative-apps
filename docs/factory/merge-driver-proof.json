@@ -1,0 +1,4 @@
+{
+  "about": "A different sentence on purpose: this PR conflicts with proof A on the same key, so the lane can't integrate it and hands it to a fixer with the needs-rebase label.",
+  "proof-c": { "what": "a conflict the drivers can't resolve", "on": "2026-10-16" }
+}
