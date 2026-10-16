@@ -2,6 +2,8 @@
 // beginImport hands the importer the ids to skip and marks the import
 // running; batches arrive through appendImported, which drops ids already
 // in the catalog; finishImport and failImport set the notice and go idle.
+// ImportNotice.alreadyKnownDetail is the nothing-new notice's count of
+// photos the catalog already had.
 // An import is never an undo step (D4), but it does dirty the catalog file.
 // Linux-safe.
 
@@ -57,5 +59,15 @@ extension LibraryCatalog {
     public var importHelp: String? {
         if case .running = importState { return "An import is already running." }
         return LiveImporter.unavailable
+    }
+}
+
+extension ImportNotice {
+    /// The nothing-new notice's second sentence (#1375): how many of the
+    /// folder's photos the catalog already had, so "No new photos" can't be
+    /// read as "found nothing". Empty when it had none.
+    var alreadyKnownDetail: String {
+        guard alreadyKnown > 0 else { return "" }
+        return alreadyKnown == 1 ? " 1 is already in your library." : " All \(alreadyKnown) are already in your library."
     }
 }

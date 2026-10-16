@@ -3,6 +3,7 @@
 // docs/blueprints/library/features/spine.md, SJ-2). Live (L) journeys write
 // real files through ImageIO in the test process and launch on them:
 // `freshCatalogDir()` is every journey's empty `-LibraryCatalogDir`,
+// `freshPhotoFolder()` a folder to write photos into and import from,
 // `writeShoot(in:)` writes the `shoot` fixture's 24 photos as JPEGs with the
 // same names, pixel sizes and Exif capture dates, `write(_:kinds:in:subfolder:)`
 // writes plain files of each kind, `broken(in:)` a `.jpg` that isn't an image,
@@ -44,6 +45,12 @@ enum LibraryFiles {
     /// A new, empty temporary folder: a different one on every call.
     static func freshCatalogDir() throws -> URL {
         try folder("library-catalog")
+    }
+
+    /// A new, empty temporary folder for photos to import: a different one on
+    /// every call, named apart from the catalog's (`library-photos-…`).
+    static func freshPhotoFolder() throws -> URL {
+        try folder("library-photos")
     }
 
     /// The `shoot` fixture's photos: IMG_0001.jpg … IMG_0024.jpg, every third

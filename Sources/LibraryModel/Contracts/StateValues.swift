@@ -20,7 +20,9 @@ public struct ImportNotice: Hashable, Sendable {
         if let error { return error.message }
         let failed = failures.isEmpty ? "" : failures.count == 1
             ? " 1 file couldn't be imported." : " \(failures.count) files couldn't be imported."
-        if added == 0 { return failures.isEmpty ? "No new photos in \(folder)." : String(failed.dropFirst()) }
+        if added == 0 {
+            return failures.isEmpty ? "No new photos in \(folder)." + alreadyKnownDetail : String(failed.dropFirst())
+        }
         return (added == 1 ? "Imported 1 photo." : "Imported \(added) photos.") + failed
     }
     /// The notice's state: error when nothing came in and something failed.

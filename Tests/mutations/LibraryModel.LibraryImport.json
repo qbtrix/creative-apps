@@ -1,0 +1,23 @@
+[
+  {
+    "label": "the nothing-new notice drops the already-known count",
+    "file": "Sources/LibraryModel/LibraryImport.swift",
+    "find": "guard alreadyKnown > 0 else { return \"\" }",
+    "replace": "guard alreadyKnown < 0 else { return \"\" }",
+    "tests": "LibraryImportTests.swift"
+  },
+  {
+    "label": "a count of one reads \"All 1 are\"",
+    "file": "Sources/LibraryModel/LibraryImport.swift",
+    "find": "return alreadyKnown == 1 ? \" 1 is already in your library.\"",
+    "replace": "return alreadyKnown == 0 ? \" 1 is already in your library.\"",
+    "tests": "LibraryImportTests.swift"
+  },
+  {
+    "label": "a fresh folder's nothing-new notice claims photos are already known",
+    "file": "Sources/LibraryModel/LibraryImport.swift",
+    "find": "guard alreadyKnown > 0 else { return \"\" }",
+    "replace": "guard alreadyKnown >= 0 else { return \"\" }",
+    "tests": "LibraryImportTests.swift"
+  }
+]

@@ -70,7 +70,7 @@ import Testing
         var nothingNew = imported
         _ = nothingNew.beginImport()
         nothingNew.finishImport(ImportResult(added: [], alreadyKnown: photos.count, failures: []), folder: "Shoot")
-        #expect(nothingNew.importNotice?.message == "No new photos in Shoot.")
+        #expect(nothingNew.importNotice?.message == "No new photos in Shoot. All \(photos.count) are already in your library.")
 
         var denied = LibraryCatalog()
         _ = denied.beginImport()

@@ -74,7 +74,8 @@ import Testing
 @Test func noticesSayExactlyWhatJourneysRead() {
     #expect(ImportNotice(folder: "/f", added: 26, failures: [FileFailure(path: "/f/b.jpg", reason: "not an image file")]).message
         == "Imported 26 photos. 1 file couldn't be imported.")
-    #expect(ImportNotice(folder: "/f", alreadyKnown: 26).message == "No new photos in /f.")
+    #expect(ImportNotice(folder: "/f", alreadyKnown: 26).message
+        == "No new photos in /f. All 26 are already in your library.")
     #expect(ImportNotice(folder: "/f", error: .unreadableFolder("/f")).message
         == "Library can't read /f. Check that you have access to it.")
     #expect(ExportSummary(total: 2, written: ["a", "b"]).message == "Exported 2 photos.")

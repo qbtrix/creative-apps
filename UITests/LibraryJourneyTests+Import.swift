@@ -19,7 +19,7 @@ extension LibraryJourneyTests {
             )
         }
         // Step 1: 24 JPEGs (4 in day2/), 1 PNG, 1 HEIC, broken.jpg and notes.txt.
-        let folder = try LibraryFiles.freshCatalogDir()
+        let folder = try LibraryFiles.freshPhotoFolder()
         let catalog = try LibraryFiles.freshCatalogDir()
         addTeardownBlock { for url in [folder, catalog] { try? FileManager.default.removeItem(at: url) } }
         try LibraryFiles.write(20, in: folder)
@@ -28,6 +28,7 @@ extension LibraryJourneyTests {
         let broken = try LibraryFiles.broken(in: folder)
         try Data("not a photo".utf8).write(to: folder.appending(path: "notes.txt"))
         let name = folder.lastPathComponent
+        XCTAssertFalse(name.hasPrefix("library-catalog"), "the imported folder is named like a catalog dir")
         var library = Journey("Library", self, arguments: [
             "-LibraryImportFolder", folder.path, "-LibraryCatalogDir", catalog.path,
         ])
@@ -57,10 +58,11 @@ extension LibraryJourneyTests {
         XCTAssertEqual(mentions.count, 0, "the notice mentions notes.txt")
         library.shot("imported")
 
-        // Step 4: without broken.jpg, the same folder again brings nothing new.
+        // Step 4: without broken.jpg, the same folder again brings nothing new
+        // and says its 26 photos are already in the library.
         try FileManager.default.removeItem(at: broken)
         importFromFileMenu(library)
-        expectNotice("No new photos in \(name).", library)
+        expectNotice("No new photos in \(name). All 26 are already in your library.", library)
         library.shot("import-again")
         XCTAssertEqual(gridCells(library).count, 26, "importing again changed the grid's cell count")
         expectAllPhotos(26, library)
