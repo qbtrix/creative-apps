@@ -47,3 +47,5 @@ utc	stage	event	ref	note
 2026-10-16T17:00Z	4	heartbeat	38933216466	dev CI in progress; round 1 fix batch running
 2026-10-16T17:05Z	4	pr-opened	#1472 #1473 #1474 #1476	round 1 fixes
 2026-10-16T17:06Z	4	finding-filed	#1477	needs-ui AppSwitcher sentence
+2026-10-16T17:25Z	4	ci-run	38933216466	red only on HaloEasingSnapshots (#1450, halo); suite tests green on macOS, QB-SM6 5.5 ms
+2026-10-16T17:25Z	4	pr-merged	#1472 #1473 #1474	round 1 fixes

@@ -4,7 +4,7 @@ Issue: #1332 · Packet: docs/blueprints/suite/features/suite-contracts.md
 Run: act-1a1448a5fd9-0he1 · Session: claude/suite-contracts-lead-rv72k4 · Started: 2026-10-16T11:49Z
 Stage: 4 round 1
 Base: c9e46560366b0c3464a5e822d11c4a865e4dc53e
-Next: wait for round-1 fix PRs #1472 (#1459 #1460 #1465 #1466 #1468), #1473 (#1457), #1474 (#1461 #1462), #1476 (#1464) to merge and dev CI 38933216466 to finish; then round-2 review on the same panel at the new dev head
+Next: when #1476 merges, run the round-2 critic panel (same five lenses, in a worktree) on the new dev head; then wait for a green full dev run containing all suite-contracts PRs (run 969 was red only on Halo's HaloEasingSnapshots, finding #1450)
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -39,7 +39,7 @@ Waves (packet's Build waves, checked against dev at ebc68bf):
 ## Rounds
 | round | CI run | CI | audit vs baseline | lenses | confirmed | fixed by | clean |
 |---|---|---|---|---|---|---|---|
-| 1 | 38933216466 (pending) | pending | no screens touched | clarity, oracle, quality, packet conformance, robustness | 10 (4 major, 6 minor): #1457 #1459 #1460 #1461 #1462 #1463 #1464 #1465 #1466 #1468 | #1472 #1473 #1474 #1476 | no |
+| 1 | 38933216466 | red, not this feature: Linux green; macOS failed only HaloEasingSnapshots.segmentTitlesFitOneLine (halo, #1450); SuiteLiveServicesTests, all SuiteModelTests (2740 Model tests) and StoreBudgetTests passed; QB-SM6 median 5.5/5.7 ms (debug gate 50); journeys skipped after the test failure, so no audit | no screens touched | clarity, oracle, quality, packet conformance, robustness | 10 (4 major, 6 minor): #1457 #1459 #1460 #1461 #1462 #1463 #1464 #1465 #1466 #1468 | #1472 #1473 #1474 merged, #1476 macOS build pending | no |
 
 ## Decisions
 - No `## Slices` table in the packet: v2 loop. Started after #1302, so the findings queue (rule 10) and the 2-round cap (rule 11) apply; rules 13/14 (v3 only) don't.
