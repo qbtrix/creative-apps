@@ -21,7 +21,7 @@ stubs, the fixtures): CB-1, CB-4, CB-7 and CB-8 start when it closes.
 - CB-a's Model tasks also wait on **design-seams** (D0-3c owns the gesture
   routes in `DesignCanvasEditing.swift`). select-several's S-5 waits on
   CB-a in turn, so the file passes design-seams → canvas-basics →
-  select-several → design-seams-2.
+  select-several → snapping → design-seams-2.
 - CB-b waits on **style-rows SR-m** (`DesignText.swift`,
   `Live/LiveStyling.swift`) and **SR-t** (`DesignTextFont.swift`,
   `DesignTextArtwork.swift`, `DesignTextEditor.swift`), and its App task

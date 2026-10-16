@@ -1,0 +1,145 @@
+{
+  "title": "Snapping: edges and centres to layers, the frame and the page, smart guides with distances, equal spacing, ⌘ to drag free, View > Snap to Layers",
+  "wave": 1,
+  "order": 70,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "covers": "captain call 2026-10-16, snapping in v1; UX review 2026-10-16 item 11 and R7; one gap issue per slice, filed at stage 1",
+  "waits_on": "design-contracts; design-seams, canvas-basics CB-a and select-several SS-b for SN-b's routes; design-window DW-d for the overlay; design-window DW-a, canvas-basics CB-c and files-history FH-b for the menu and modifiers",
+  "depends": [
+    "design-contracts"
+  ],
+  "owned": [
+    "Sources/DesignModel/DesignSnapping.swift",
+    "Sources/DesignModel/DesignSnapLines.swift",
+    "Sources/DesignModel/DesignSnapGaps.swift",
+    "Tests/DesignModelTests/DesignSnapCandidateTests.swift",
+    "Tests/DesignModelTests/DesignSnapEngineTests.swift",
+    "Tests/mutations/DesignModel.DesignSnapping.json",
+    "Tests/DesignModelTests/DesignSnapLineTests.swift",
+    "Tests/mutations/DesignModel.DesignSnapLines.json",
+    "Tests/DesignModelTests/DesignSnapGapTests.swift",
+    "Tests/mutations/DesignModel.DesignSnapGaps.json",
+    "Sources/DesignModel/DesignCanvasEditing.swift",
+    "Tests/DesignModelTests/DesignSnapMoveTests.swift",
+    "Tests/DesignModelTests/DesignSnapWalkTests.swift",
+    "Tests/DesignModelTests/DesignSnapBudgetTests.swift",
+    "Tests/mutations/DesignModel.DesignCanvasEditing.json",
+    "Tests/DesignModelTests/DesignSnapResizeDrawTests.swift",
+    "UITests/DesignJourneyTests+Snap.swift",
+    "Sources/DesignApp/DesignSnapGuides.swift",
+    "Sources/DesignApp/DesignCanvasFeedback.swift",
+    "Tests/AppSnapshotTests/DesignSnapGuideSnapshots.swift",
+    "Tests/AppSnapshotTests/RenderBudgetDesignSnapTests.swift",
+    "Sources/DesignApp/DesignIntent.swift",
+    "Sources/DesignApp/DesignCommands.swift",
+    "Tests/AppSnapshotTests/DesignSnapSettingTests.swift"
+  ],
+  "journeys": [
+    "DesignSnapJourneyTests.testSnapAndSmartGuides"
+  ],
+  "slices": [
+    {
+      "id": "SN-a",
+      "behavior": "Given the layers a drag can line up with, the snap engine finds the offset that puts an edge or centre on another layer's, the frame's or the page's, or makes a gap equal its neighbour's, and names the guides, distances and spacing hints that result.",
+      "tasks": [
+        "SN-1",
+        "SN-2",
+        "SN-3"
+      ],
+      "journeys": [
+        "MJ10"
+      ],
+      "owned": [
+        "Sources/DesignModel/DesignSnapping.swift",
+        "Sources/DesignModel/DesignSnapLines.swift",
+        "Sources/DesignModel/DesignSnapGaps.swift",
+        "Tests/DesignModelTests/DesignSnapCandidateTests.swift",
+        "Tests/DesignModelTests/DesignSnapEngineTests.swift",
+        "Tests/mutations/DesignModel.DesignSnapping.json",
+        "Tests/DesignModelTests/DesignSnapLineTests.swift",
+        "Tests/mutations/DesignModel.DesignSnapLines.json",
+        "Tests/DesignModelTests/DesignSnapGapTests.swift",
+        "Tests/mutations/DesignModel.DesignSnapGaps.json"
+      ],
+      "waits": {},
+      "ui": false
+    },
+    {
+      "id": "SN-b",
+      "behavior": "Moving, resizing and drawing on the canvas, with one layer or several and with an Option-drag copy, snap to those lines and gaps before whole points, build the engine once per drag, and snap to nothing while ⌘ is held.",
+      "tasks": [
+        "SN-4",
+        "SN-5"
+      ],
+      "journeys": [
+        "MJ11"
+      ],
+      "owned": [
+        "Sources/DesignModel/DesignCanvasEditing.swift",
+        "Sources/DesignModel/DesignSnapping.swift",
+        "Tests/DesignModelTests/DesignSnapMoveTests.swift",
+        "Tests/DesignModelTests/DesignSnapWalkTests.swift",
+        "Tests/DesignModelTests/DesignSnapBudgetTests.swift",
+        "Tests/mutations/DesignModel.DesignCanvasEditing.json",
+        "Tests/mutations/DesignModel.DesignSnapping.json",
+        "Tests/DesignModelTests/DesignSnapResizeDrawTests.swift"
+      ],
+      "waits": {
+        "SN-a": [
+          "SN-4"
+        ],
+        "design-seams": [
+          "SN-4"
+        ],
+        "canvas-basics:CB-a": [
+          "SN-4"
+        ],
+        "select-several:SS-b": [
+          "SN-4"
+        ]
+      },
+      "ui": false
+    },
+    {
+      "id": "SN-c",
+      "behavior": "The canvas draws the smart guides, distance labels and spacing hints while a drag snaps, and View > Snap to Layers turns snapping off and on, remembered across relaunches.",
+      "tasks": [
+        "SN-6",
+        "SN-7",
+        "SN-8"
+      ],
+      "journeys": [
+        "testSnapAndSmartGuides"
+      ],
+      "owned": [
+        "UITests/DesignJourneyTests+Snap.swift",
+        "Sources/DesignApp/DesignSnapGuides.swift",
+        "Sources/DesignApp/DesignCanvasFeedback.swift",
+        "Tests/AppSnapshotTests/DesignSnapGuideSnapshots.swift",
+        "Tests/AppSnapshotTests/RenderBudgetDesignSnapTests.swift",
+        "Sources/DesignApp/DesignIntent.swift",
+        "Sources/DesignApp/DesignCommands.swift",
+        "Tests/AppSnapshotTests/DesignSnapSettingTests.swift"
+      ],
+      "waits": {
+        "SN-b": [
+          "SN-7"
+        ],
+        "design-window:DW-d": [
+          "SN-7"
+        ],
+        "design-window:DW-a": [
+          "SN-8"
+        ],
+        "canvas-basics:CB-c": [
+          "SN-8"
+        ],
+        "files-history:FH-b": [
+          "SN-8"
+        ]
+      },
+      "ui": true
+    }
+  ]
+}

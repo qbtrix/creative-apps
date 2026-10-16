@@ -24,6 +24,14 @@ sixth wave-1 feature, `canvas-basics`, makes drags land on whole points,
 text boxes fit their text, layers past the page stay visible, and the page
 size editable.
 
+The captain moved snapping into v1 the same day ("the canvas feels basic,
+needs better tool feedback"), so a seventh wave-1 feature, `snapping`,
+snaps moves, resizes and draws to other layers, the frame and the page,
+draws smart guides with distances and equal-spacing hints, lets ⌘ drag
+free, and adds View > Snap to Layers. Its engine (SN-a) is Model-only and
+starts when design-contracts closes; its routes wait on the drag files'
+wave-1 owners and its overlay on DW-d.
+
 Rows whose wave reads `SP1` to `SP3` belong to the shell-parity track, a
 cross-app plan whose order and shared files are in
 `docs/blueprints/suite/features/shell-parity-waves.md`; they follow that
@@ -56,8 +64,10 @@ its last PR (or files the remainder as a `gap` issue if wave 1 ends above 0).
                                 └──> SR-a (+ DW-a, DW-b) ─────────────────┴──> SR-b
  canvas-basics:  design-seams ──> CB-a (whole points) ──> select-several SS-b (S-5)
                                     └──> DW-d's last task; CB-b (+ SR-m, SR-t) ──> CB-c
+ snapping:       SN-a (engine, Linux) ──> SN-b (routes; + SS-b) ──> SN-c (guides; + DW-d)
+                 SN-c's menu and ⌘ also wait on DW-a, CB-c and FH-b
  design-seams-2 (2): design-contracts + SR-m, SR-b, FH-a, FH-b, LP-b, SS-b,
-                     design-seams, canvas-basics, all of design-window
+                     design-seams, canvas-basics, snapping SN-b and SN-c, all of design-window
 ```
 
 - **A slice is the unit of done.** Each packet's `## Slices` table gives
@@ -104,6 +114,7 @@ the slice it waits on has merged.
 | layers-panel | Feature: layers-panel | p1 | design-contracts closed | same, without design-seams |
 | files-history | Feature: files-history | p1 | design-contracts closed | same, DW-a only |
 | canvas-basics | Feature: canvas-basics | p1 | design-contracts closed | `Depends on: <design-contracts issue> (closed)`; the body names design-seams for CB-a's Model, style-rows SR-m and SR-t, and design-window for its App tasks |
+| snapping | Feature: snapping | p1 | design-contracts closed | `Depends on: <design-contracts issue> (closed)`; the body names design-seams, canvas-basics CB-a and select-several SS-b for SN-b, and design-window DW-a and DW-d, canvas-basics CB-c and files-history FH-b for SN-c |
 | design-seams-2 | Feature: design-seams-2 | p2 (tier 2) | the slices S2-a waits on are done (style-rows SR-m, SR-b; files-history FH-a; layers-panel LP-b) | `Depends on: <style-rows issue>`; the body lists every slice wait in its packet |
 
 The pilot runs at most 6 Design leads at once; when more can start, the
@@ -156,6 +167,7 @@ which #753 named.
 | layers-panel | lists-and-layers: #577, #108 (rename keys), #73 (context menus), #589 (LL-9, group-row toggles: J12's eye step skips on it) | – |
 | files-history | editor-chrome EC-4 #339 (`EditorSaveStatus`; plain text meanwhile) | – |
 | canvas-basics | – (layers past the edge draw in the unclipped overlay; their hover outline waits on DW-d's `needs-ui` issue, not blocking) | – |
+| snapping | files a new `needs-ui` issue: smart-guide marks with a distance label (canvas-marks CM-5's guide marks span the viewport); plain marks meanwhile, not waited on | – |
 | design-seams-2 | editor-chrome EC-4 #339 (Export's primary style; plain item meanwhile) | – |
 | shell-parity | editor-in-window #1079 (its `feature-done` waits on #933's fix) | – |
 
@@ -184,17 +196,19 @@ hands, in order:
 | `DesignWorkspace.swift` | design-contracts → layers-panel LP-b → design-seams-2 S2-a, S2-b |
 | `DesignServices.swift` | design-contracts → design-seams-2 S2-a |
 | `DesignActions.swift`, `DesignActions+Edit.swift` | design-contracts → select-several SS-b (the #542 guard) |
-| `DesignCanvasEditing.swift`, `DesignDrawing.swift` | design-seams → canvas-basics CB-a → select-several SS-b → design-seams-2 S2-b |
+| `DesignCanvasEditing.swift` | design-seams → canvas-basics CB-a → select-several SS-b → snapping SN-b → design-seams-2 S2-b |
+| `DesignDrawing.swift` | design-seams → canvas-basics CB-a → select-several SS-b → design-seams-2 S2-b |
 | `Live/LiveStyling.swift`, `DesignText.swift` | design-contracts → style-rows SR-m → canvas-basics CB-b |
 | `Contracts/StyleTypes.swift` | design-contracts → canvas-basics CB-a |
 | `Live/Live<Slot>.swift` | design-contracts (stubs) → the wave-1 feature that fills each (`LiveFiling`: files-history FH-a → design-seams-2 S2-a) |
 | `DesignInspectorContent.swift` | style-rows SR-m → design-seams-2 S2-a |
 | `DesignHistory.swift` | files-history FH-a → design-seams-2 S2-a |
 | `DesignWindowOptions.swift` (with `DesignControlID`) | design-window → design-seams-2 S2-b |
-| `DesignIntent.swift`, `DesignWindow.swift` | shell-parity → design-window → canvas-basics CB-b, CB-c → design-seams-2 S2-b |
+| `DesignIntent.swift` | shell-parity → design-window → canvas-basics CB-b, CB-c → snapping SN-c → design-seams-2 S2-b |
+| `DesignWindow.swift` | shell-parity → design-window → canvas-basics CB-b, CB-c → design-seams-2 S2-b |
 | `DesignEditor.swift` | shell-parity → design-window → design-seams-2 S2-b |
 | `DesignCanvas.swift` | design-window → canvas-basics CB-c → design-seams-2 S2-b |
-| `DesignCanvasFeedback.swift` (slot) | design-window DW-a → DW-d |
+| `DesignCanvasFeedback.swift` (slot) | design-window DW-a → DW-d → snapping SN-c |
 | `DesignTextArtwork.swift` (slot), `DesignTextEditor.swift`, `DesignTextFont.swift` | design-window DW-a (the slot) → style-rows SR-t → canvas-basics CB-b |
 | `DesignInspectorText.swift` (slot) | design-window DW-a → style-rows SR-t |
 | `DesignInspectorPage.swift` (slot) | design-window DW-a → canvas-basics CB-c |
@@ -203,7 +217,7 @@ hands, in order:
 | `DesignInspector.swift` | design-window DW-a → style-rows SR-a |
 | `DesignCanvasMarks.swift` | design-window DW-a → style-rows SR-b → design-seams-2 S2-a, S2-b |
 | `DesignFrameLabels.swift`, `DesignFrameLabel.swift` | design-window DW-a (the slot) → style-rows SR-t |
-| `DesignCommands.swift` | design-window DW-a → files-history FH-b → design-seams-2 S2-b |
+| `DesignCommands.swift` | design-window DW-a → files-history FH-b → snapping SN-c → design-seams-2 S2-b |
 | `DesignSaveStatus.swift`, `DesignClosePrompt.swift` (slots) | design-window DW-a → files-history FH-b |
 | `DesignObjectMenu.swift` | design-window DW-a → design-seams-2 S2-b |
 | `UITests/DesignJourneyTests.swift` | shell-parity → design-window DW-a → design-seams-2 S2-b |
