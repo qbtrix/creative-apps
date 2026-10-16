@@ -179,7 +179,11 @@ final class HaloJourneyTests: XCTestCase {
         for id in onScreenControlIDs(halo) {
             XCTAssertNotNil(entries[id], "\(id) is on screen but in neither halo.controls nor suite.controls")
         }
-        for entry in entries.values.sorted(by: { $0.id < $1.id }) {
+        for listed in entries.values.sorted(by: { $0.id < $1.id }) {
+            // Earlier clicks move state Undo doesn't restore (End leaves the
+            // playhead on the last frame, so Next turns off and says why), so
+            // judge each control as the probe lists it now, not at launch.
+            let entry = Self.decode(halo.element("halo.controls"))?.controls.first { $0.id == listed.id } ?? listed
             guard entry.enabled else {
                 XCTAssertFalse((entry.reason ?? "").isEmpty, "\(entry.id) is disabled and doesn't say why")
                 continue
