@@ -1,0 +1,37 @@
+[
+  {
+    "label": "Locked not locked",
+    "file": "Sources/DesignModel/DesignFixtures.swift",
+    "find": "rect(400, 600, 100, 100),\n                           isLocked: true)",
+    "replace": "rect(400, 600, 100, 100),\n                           isLocked: false)",
+    "tests": "DesignFixturesTests"
+  },
+  {
+    "label": "Hidden not hidden",
+    "file": "Sources/DesignModel/DesignFixtures.swift",
+    "find": "rect(600, 600, 100, 100),\n                           isHidden: true)",
+    "replace": "rect(600, 600, 100, 100),\n                           isHidden: false)",
+    "tests": "DesignFixturesTests"
+  },
+  {
+    "label": "B's frame one point off",
+    "file": "Sources/DesignModel/DesignFixtures.swift",
+    "find": "rect(300, 140, 200, 80)",
+    "replace": "rect(300, 141, 200, 80)",
+    "tests": "DesignFixturesTests"
+  },
+  {
+    "label": "crowd one rectangle short per frame",
+    "file": "Sources/DesignModel/DesignFixtures.swift",
+    "find": "for cell in 0..<48",
+    "replace": "for cell in 0..<47",
+    "tests": "DesignFixturesTests"
+  },
+  {
+    "label": "crowd ids restart in each frame",
+    "file": "Sources/DesignModel/DesignFixtures.swift",
+    "find": "            let frameID = nextID()\n",
+    "replace": "            number = index\n            let frameID = nextID()\n",
+    "tests": "DesignFixturesTests"
+  }
+]
