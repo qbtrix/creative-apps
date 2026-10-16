@@ -9,6 +9,9 @@
 // screen so the app can load only those thumbnails. Images aspect-fit inside
 // the cell; a reject is dimmed with a badge and an unreadable file shows a
 // warning mark. Snapshots drop the ScrollView, which ImageRenderer does not draw.
+// Its indicators are `.never`, as in Halo's and Photo's inspectors: a legacy
+// scroller is an unlabelled, unidentified button to the app audit (#1368).
+// The grid still scrolls by wheel, trackpad and arrow keys.
 import AppKit
 import SwiftUI
 
@@ -100,7 +103,9 @@ public struct ThumbnailGrid<ID: Hashable>: View {
             grid
         } else {
             ScrollViewReader { proxy in
-                ScrollView { grid }.onChange(of: anchor) { _, id in if let id { proxy.scrollTo(id) } }
+                ScrollView { grid }
+                    .scrollIndicators(.never)
+                    .onChange(of: anchor) { _, id in if let id { proxy.scrollTo(id) } }
             }
         }
     }
