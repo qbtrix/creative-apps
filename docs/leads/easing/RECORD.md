@@ -4,7 +4,7 @@ Issue: #1333 · Packet: docs/blueprints/halo/features/easing.md
 Run: act-1a1448a5fbe-p22s · Session: session_01Fpq7bUwf2TjhThXdtGKn4r · Started: 2026-10-16T11:48Z
 Stage: 4 round 2
 Base: e464ecab9b0e11b9cfc27851181beafdb8fee424
-Next: wait for full CI run 38929688596 (head 4fb505e, contains #1429) or a newer scoped halo run containing #1429; then review round 2 (critic-panel.js, same 6 lenses) and fix round 2 with #1416 #1417 #1422 #1423 #1424 + round 2 findings
+Next: round 2 critic panel (wf_f8ff4c05-3cc) on run 38930143233 snapshots; then fix round 2 (the last) on #1450, #1416, #1417, #1422, #1423, #1424 + panel findings; then the final review, remaining findings become gap
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -27,6 +27,7 @@ Wave 4: EZ-8 waits on EZ-6 and EZ-7 (drives what they put on screen); #333 close
 | round | CI run | CI | audit vs baseline | lenses | confirmed | fixed by | clean |
 |---|---|---|---|---|---|---|---|
 | 1 | 38917497685 (scoped halo, fb72b7e) | red: H-J7 step 3 (#1411); testLayerHousekeeping contrast 3 > 2 (#1412); testDragLayerToKeyPosition and testEveryControlActsOrSaysWhy are full-run quarantined (#1283, #1035), not easing | contrast 3 vs 2 | clarity, journey, design, layout, controls, audit | #1411 to #1424 (14: 1 blocker, 7 major, 6 minor; 1 refuted) | #1429 (r-b1: #1411-#1415, #1418-#1421) | no |
+| 2 | 38930143233 (scoped halo, 4fb505e) | red: HaloEasingSnapshots.segmentTitlesFitOneLine 126 > 124 pt (#1450); ui-test skipped, so no journey screens | n/a (journeys skipped) | same 6 | #1450 + panel | | no |
 
 ## Decisions
 - Packet has no `## Slices` table: v2 loop. Started after #1302 merged (2026-10-16T04:20Z), so findings queue (rule 10) and round cap of 2 (rule 11) apply.
@@ -36,6 +37,7 @@ Wave 4: EZ-8 waits on EZ-6 and EZ-7 (drives what they put on screen); #333 close
 - The PR API appends a Claude Code footer to bodies; the lane strips it from the squash commit (#1339 to #1343 merged clean), so builders don't fight it.
 - #1352 (EZ-5) also edits Tests/HaloModelTests/HaloTimelineHelpTests.swift: it asserted the W0 easing stub help, which EZ-5 replaces.
 - The issue and PR APIs append a Claude Code footer to every body and re-add it on edit; it can't be removed from here.
+- Round 2 reviews the snapshots only: run 38930143233 skipped the journeys after #1450, and the last fix round should still catch what #1429 changed visibly.
 - Rules 13 and 14 (check first, mutations) don't apply: v2 packet.
 
 ## Open

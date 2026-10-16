@@ -38,3 +38,6 @@ utc	stage	event	ref	note
 2026-10-16T15:55Z	4	pr-opened	#1429	round 1 fixes r-b1 (#1411-#1415, #1418-#1421); needs-ui #1426
 2026-10-16T16:08Z	4	pr-merged	#1429	round 1 fixes; #1411-#1415, #1418-#1421 closed
 2026-10-16T16:13Z	4	ci-run	38929688596	full dev run containing #1429, pending
+2026-10-16T16:40Z	4	ci-run	38930143233	scoped halo red: segmentTitlesFitOneLine; journeys skipped
+2026-10-16T16:41Z	4	finding-filed	#1450	title overflow at min width
+2026-10-16T16:42Z	4	review	round 2	critic panel on snapshots
