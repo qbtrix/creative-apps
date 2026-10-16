@@ -6,8 +6,9 @@
 // the shell geometry with the palette clear of the rulers and of the page grown
 // by half a handle's hit, then selects the rectangle from Layers and undoes it.
 // The dark journey shoots the open and selected states and checks the geometry
-// again. Written before its code (lead.md, contract rule 13): DS-3 removes the
-// skips once Design sits on SuiteWindow.
+// again. Written before its code (lead.md, contract rule 13); DS-3 put Design on
+// SuiteWindow and turned it on. The palette shows only while a file is open, so
+// the empty window is checked region by region rather than by expectEditorWindow().
 import XCTest
 
 final class DesignShellJourneyTests: XCTestCase {
@@ -17,11 +18,16 @@ final class DesignShellJourneyTests: XCTestCase {
 
     /// DS-J1..DS-J4 in light.
     @MainActor func testShellLight() throws {
-        throw XCTSkip("waits on DS-3")
         let design = Journey("Design", self, arguments: Self.size)
-        // DS-J1: the empty window.
-        design.expectEditorWindow()
+        // DS-J1: the empty window, every editor region up but the palette, which waits for a file.
         let window = design.app.windows.firstMatch
+        XCTAssert(window.waitForExistence(timeout: 30), "no window opened")
+        for identifier in Journey.editorRegions where identifier != "suite.tools" {
+            let region = design.element(identifier)
+            XCTAssert(region.waitForExistence(timeout: 5), "no \(identifier)")
+            XCTAssert(region.isHittable, "\(identifier) isn't hittable")
+        }
+        XCTAssert(design.app.toolbars.firstMatch.exists, "no window toolbar")
         XCTAssertEqual(window.title, "Design", "the empty window's title")
         let sidebar = design.element("suite.sidebar")
         for header in ["Pages", "Layers"] {
@@ -70,7 +76,6 @@ final class DesignShellJourneyTests: XCTestCase {
 
     /// DS-J5: the same window in dark.
     @MainActor func testShellDark() throws {
-        throw XCTSkip("waits on DS-3")
         let design = Journey("Design", self, arguments: Self.size + ["-AppleInterfaceStyle", "Dark"])
         XCTAssert(design.app.windows.firstMatch.waitForExistence(timeout: 30), "no window opened")
         openFile(design, shot: "shell-open-dark")

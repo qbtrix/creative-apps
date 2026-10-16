@@ -1,13 +1,15 @@
 // DesignJourneyTests.swift: Design driven like a person would, with a
-// whole-window screenshot after every step (see Journey.swift). Design is an
-// EditorShell window. The core journey draws a frame (crossing the page's top
+// whole-window screenshot after every step (see Journey.swift). Design is a
+// SuiteWindow holding an editor: pages and layers in the sidebar, Properties in
+// the inspector, and the floating tool palette, which shows once a file is
+// open, so the launch check and the tool journey start with New File. The core journey draws a frame (crossing the page's top
 // edge, so its handles show past it), a rectangle and an ellipse, moves and
-// resizes the ellipse, checks the tool rail and the status line's tool are back
+// resizes the ellipse, checks the palette and the status line's tool are back
 // on Move after each draw and after the text placement (#278), so the move and
-// the press on the committed text select and move rather than draw again; checks Layers still marks the current page while the
+// the press on the committed text select and move rather than draw again; checks the sidebar still marks the current page while the
 // ellipse is selected, finds Add Page and Delete Page (`design.page.add`,
 // `design.page.delete`) by the pages with Delete Page disabled on the one
-// page, hides a layer from its row's eye and undoes that,
+// page, hides a layer from its row's eye and undoes that, finds Properties in the inspector,
 // places and types text (shot while typing, when the editor
 // draws at full size, and once committed, with a small box's corner handles
 // outside it), undoes and redoes, saves with -DesignSaveTo (no panel), then
@@ -19,7 +21,10 @@ import XCTest
 
 final class DesignJourneyTests: XCTestCase {
     @MainActor func testLaunchShowsWindowShell() {
-        Journey("Design", self).expectEditorShell()
+        let design = Journey("Design", self)
+        // The floating palette, one of the editor window's regions, shows only while a file is open.
+        design.app.typeKey("n", modifierFlags: .command)
+        design.expectEditorWindow()
     }
 
     @MainActor func testNewFileAndEveryTool() {
@@ -97,25 +102,27 @@ final class DesignJourneyTests: XCTestCase {
         let both = design.app.descendants(matching: .any).matching(NSPredicate(format: "label == %@ OR value == %@", "2 Layers", "2 Layers")).firstMatch
         XCTAssert(both.waitForExistence(timeout: 5), "Shift-click didn't add the rectangle to the selection")
         design.shot("multi-select")
-        // With the ellipse holding the selection, the Layers tab still checks the current page.
-        tab("Layers", in: design)
-        XCTAssert(design.element("design.current-page").waitForExistence(timeout: 5), "Layers lost the current page's mark")
-        let window = design.app.windows.firstMatch
-        XCTAssert(window.buttons["Delete Page"].waitForExistence(timeout: 3), "no Delete Page button by the pages:\n\(window.debugDescription)")
+        // With the ellipse holding the selection, the sidebar still checks the current page.
+        let sidebar = design.element("suite.sidebar")
+        let currentPage = sidebar.descendants(matching: .any)["design.current-page"]
+        XCTAssert(currentPage.waitForExistence(timeout: 5), "the sidebar lost the current page's mark")
+        XCTAssert(sidebar.buttons["Delete Page"].waitForExistence(timeout: 3), "no Delete Page button by the pages:\n\(sidebar.debugDescription)")
         // The page row's commands: Add Page runs; with one page, Delete Page is disabled (its tooltip says why).
-        let addPage = window.buttons["design.page.add"], deletePage = window.buttons["design.page.delete"]
+        let addPage = sidebar.buttons["design.page.add"], deletePage = sidebar.buttons["design.page.delete"]
         XCTAssert(addPage.exists && addPage.label == "Add Page" && addPage.isEnabled, "no enabled Add Page by the pages")
         XCTAssert(deletePage.exists && deletePage.label == "Delete Page", "no Delete Page identified design.page.delete")
         XCTAssertFalse(deletePage.isEnabled, "Delete Page is enabled with one page")
         design.shot("layers")
         // A row's eye hides that layer as one undo step, and Undo shows it again.
-        let eye = window.descendants(matching: .any).matching(NSPredicate(format: "label == %@", "Hide Layer")).firstMatch
-        XCTAssert(eye.waitForExistence(timeout: 3), "no eye toggle on the layer rows:\n\(window.debugDescription)")
+        let eye = sidebar.descendants(matching: .any).matching(NSPredicate(format: "label == %@", "Hide Layer")).firstMatch
+        XCTAssert(eye.waitForExistence(timeout: 3), "no eye toggle on the layer rows:\n\(sidebar.debugDescription)")
         eye.click()
         XCTAssert(design.app.buttons["Undo Hide Layer"].waitForExistence(timeout: 5), "the eye toggle made no undo step")
         design.shot("layer-hidden")
         design.click("Undo Hide Layer", in: .window, step: "layer-shown")
-        tab("Properties", in: design)
+        // Properties sits in the inspector beside the sidebar, with no tab to switch.
+        let properties = design.element("suite.inspector").descendants(matching: .any)["design.properties"]
+        XCTAssert(properties.waitForExistence(timeout: 5), "no Properties in the inspector (design.properties)")
 
         tools["Text"].click()
         design.drag(on: "suite.canvas", from: CGVector(dx: 0.2, dy: 0.75), to: CGVector(dx: 0.2, dy: 0.75), step: "text-placed")
@@ -154,7 +161,7 @@ final class DesignJourneyTests: XCTestCase {
         reopened.shot("reopened")
     }
 
-    /// The tool rail shows Move as the picked tool and the status line names Move, checked for
+    /// The palette shows Move as the picked tool and the status line names Move, checked for
     /// up to three seconds after `action`.
     @MainActor private func expectMove(_ design: Journey, after action: String) {
         let move = design.element("suite.tools").buttons["Move"]
@@ -166,16 +173,8 @@ final class DesignJourneyTests: XCTestCase {
             if picked { break }
             Thread.sleep(forTimeInterval: 0.3)
         }
-        XCTAssert(move.isSelected, "the tool rail doesn't show Move picked after \(action)")
+        XCTAssert(move.isSelected, "the palette doesn't show Move picked after \(action)")
         XCTAssert(picked, "the status line shows \(status.label) \(String(describing: status.value)), not Move, after \(action)")
-    }
-
-    /// Clicks the panel tab titled `title` (a segment, whatever role the system gives it).
-    @MainActor private func tab(_ title: String, in design: Journey) {
-        let segment = design.app.windows.firstMatch.descendants(matching: .any)
-            .matching(NSPredicate(format: "label == %@", title)).firstMatch
-        XCTAssert(segment.waitForExistence(timeout: 5), "no \(title) tab")
-        segment.click()
     }
 
     /// Waits up to 15 seconds for `url` to exist.

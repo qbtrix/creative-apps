@@ -1,9 +1,13 @@
 // DesignApp.swift: Design, the vector and UI design app. One window per file
 // (Open never replaces a window's file; it opens another window),
-// laid out as SuiteUI's EditorShell (top bar, tool rail, canvas with rulers, the
-// Properties | Layers panel, status line) in a window whose title bar is hidden
-// so the top bar takes its place. DesignWindow holds the state; the menus in
-// DesignCommands reach it through a focused scene value. Views only read
+// laid out as SuiteUI's SuiteWindow (pages and layers in the sidebar, the
+// canvas with rulers, the floating tool palette and the status line, Properties
+// in the inspector, the commands in the window toolbar). The window keeps its
+// title bar and follows the system appearance; it opens at 1000 x 700, which
+// fits the 1024 x 768 CI runner with the inspector in full, and View > Hide
+// Sidebar (SidebarCommands) makes room on a small screen. DesignWindow holds
+// the state; the menus in DesignCommands reach it through a focused scene
+// value. Views only read
 // DesignWorkspace and call its methods; all state lives in DesignModel
 // (scripts/ci checks this).
 import SwiftUI
@@ -27,9 +31,11 @@ struct DesignApp: App {
         WindowGroup(id: DesignLaunch.windowID, for: DesignLaunch.self) { launch in
             DesignWindow(launch: launch.wrappedValue)
         }
-        .windowStyle(.hiddenTitleBar)
-        .defaultSize(width: 1280, height: 820)
+        .defaultSize(width: 1000, height: 700)
         .defaultLaunchBehavior(.presented)
-        .commands { DesignCommands() }
+        .commands {
+            SidebarCommands()
+            DesignCommands()
+        }
     }
 }

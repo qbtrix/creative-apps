@@ -1,7 +1,8 @@
 // DesignIntent.swift: everything a person can ask Design's window to do, as one
-// value. Every control in the top bar, rail, canvas, panel and menus sends one
-// of these to DesignWindow.perform, which calls the matching DesignWorkspace
-// method or opens a panel. Also the rail look of DesignTool (title, symbol,
+// value. Every control in the toolbar, palette, canvas, sidebar, inspector and
+// menus sends one of these to DesignWindow.perform, which calls the matching
+// DesignWorkspace method or opens a panel. Also the intent of each toolbar
+// command (DesignToolbarItem), the palette look of DesignTool (title, symbol,
 // one-key shortcut, pointer) and the small bridges between DesignModel's plain
 // types and SwiftUI's. The cases are the contract the view files build on.
 import AppKit
@@ -36,8 +37,21 @@ enum DesignIntent {
 /// Where a view sends its intents.
 typealias DesignPerform = @MainActor (DesignIntent) -> Void
 
-/// The two tabs of the right panel.
-enum DesignPanelTab: Hashable, Sendable { case properties, layers }
+extension DesignToolbarItem {
+    /// What the toolbar command asks the window to do.
+    var intent: DesignIntent {
+        switch self {
+        case .newFile: .newFile
+        case .open: .open
+        case .save: .save
+        case .undo: .undo
+        case .redo: .redo
+        case .zoomOut: .zoomOut
+        case .fit: .fit
+        case .zoomIn: .zoomIn
+        }
+    }
+}
 
 extension DesignTool: PaletteTool {
     public var title: String {

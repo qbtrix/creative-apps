@@ -1,7 +1,7 @@
 // DesignAlignSnapshots.swift: Object > Align for one layer (#417, slice 1). The
-// panel's Properties tab with a rectangle selected inside a frame shows the
-// Align row, Align Left off because the rectangle already sits at the left
-// edge; then the canvas after Align Center, the rectangle centered in its
+// inspector's Properties at the editor's panel width, with a rectangle
+// selected inside a frame, shows the Align row, Align Left off because the
+// rectangle already sits at the left edge; then the canvas after Align Center, the rectangle centered in its
 // frame and still selected. Writes design-align-inspector- and
 // design-align-center-{light,dark}.png. macOS only.
 import DesignModel
@@ -35,7 +35,7 @@ import Testing
 private struct AlignPanelSample: View {
     let model: DesignWorkspace
     var body: some View {
-        DesignPanel(model: model, tab: .properties)
+        DesignInspector(model: model, perform: { _ in })
             .frame(width: SuiteSize.editorPanelWidth)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             .padding(SuiteSpacing.xxl)

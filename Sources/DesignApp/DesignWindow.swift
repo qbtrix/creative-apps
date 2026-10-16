@@ -1,10 +1,12 @@
 // DesignWindow.swift: the root of a Design window. It holds the one
 // DesignWorkspace (`model`) and the window's presentation state (zoom, the
-// viewport, the panel tab, the status note and the alert; the open file's URL
-// lives in the workspace), turns every DesignIntent into a workspace method or a file panel, and
+// viewport, the status note and the alert; the open file's URL lives in the
+// workspace), turns every DesignIntent into a workspace method or a file panel, and
 // publishes a DesignMenu to the menu bar. Only this file calls the workspace's
 // methods. The zoom keeps the handle tolerance a constant size on screen, and
-// the page is fitted whenever the selected page changes or a file opens.
+// the page is fitted whenever the selected page changes or a file opens,
+// through EditorDetailLayout so the fitted page and its handles stay clear of
+// the floating palette. The window's title is SuiteWindow's (DesignEditor).
 //
 // Files: Open and Save As use AppKit's panels. Open fills this window only while
 // it holds no file (DesignWorkspace.takesOpenedFile); otherwise the chosen file
@@ -30,7 +32,6 @@ struct DesignWindow: View {
     @State private var viewport = CGSize.zero
     /// A new page waits to be fitted until the canvas has a size.
     @State private var fitPending = false
-    @State private var tab = DesignPanelTab.properties
     /// The status line's message ("Saved sample.design"); it goes at the next edit.
     @State private var note: String?
     @State private var problem: String?
@@ -46,10 +47,9 @@ struct DesignWindow: View {
 
     var body: some View {
         DesignEditor(
-            model: model, documentName: model.documentURL?.lastPathComponent, note: note, zoom: zoom, tab: tab,
-            onTab: { tab = $0 }, onViewport: viewportChanged, onZoom: setZoom, perform: perform
+            model: model, documentName: model.documentURL?.lastPathComponent, note: note, zoom: zoom,
+            onViewport: viewportChanged, onZoom: setZoom, perform: perform
         )
-        .navigationTitle(model.documentURL?.lastPathComponent ?? (model.isOpen ? "Untitled" : "Design"))
         .focusedSceneValue(\.designMenu, DesignMenu(model: model, perform: perform))
         .onChange(of: model.selectedPageID) {
             fitPending = true
@@ -110,12 +110,14 @@ struct DesignWindow: View {
         model.setHandleTolerance(Double(SuiteSpacing.s) / zoom)
     }
 
-    /// Zooms to show the whole selected page, once the canvas has been laid out.
+    /// Zooms to show the whole selected page clear of the floating palette, once the canvas has been
+    /// laid out. The palette shows every tool while a page is open.
     private func fit() {
         guard let page = model.selectedPage, viewport != .zero else { return }
         fitPending = false
         let size = CGSize(width: page.frameWidth, height: page.frameHeight)
-        let scale = ViewerZoom.fitScale(artboard: size, in: viewport, inset: SuiteSpacing.xxl)
+        let layout = EditorDetailLayout(viewport: viewport, toolCount: DesignTool.allCases.count)
+        let scale = layout.fitScale(artboard: size)
         setZoom(scale > 0 ? scale : 1)
     }
 

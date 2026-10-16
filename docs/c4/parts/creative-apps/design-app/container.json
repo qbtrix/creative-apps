@@ -1,7 +1,7 @@
 {
   "id": "design-app",
   "name": "DesignApp",
-  "description": "The Design app (vector and UI design): the SwiftUI App scene and views in Sources/DesignApp, built from SuiteUI's EditorShell. Reads DesignModel and sends it intents through DesignWindow; never writes its state (scripts/ci app-state rule).",
+  "description": "The Design app (vector and UI design): the SwiftUI App scene and views in Sources/DesignApp, built on SuiteUI's SuiteWindow and EditorDetail. Reads DesignModel and sends it intents through DesignWindow; never writes its state (scripts/ci app-state rule).",
   "technology": "Swift 6, SwiftUI, macOS 26",
   "tags": [
     "internal",
