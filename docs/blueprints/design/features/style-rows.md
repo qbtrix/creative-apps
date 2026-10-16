@@ -162,7 +162,7 @@ ST-4b (Text), both owning `DesignInspectorStyle.swift` in that order. J10
 and J11 likewise land as ST-6 and ST-6b in one journey file.
 
 ST-4 needs ST-1 because its snapshots set opacity, radius and stroke on
-`.live`, where `LiveStyling` is design-seams' stub that throws
+`.live`, where `LiveStyling` is design-contracts' stub (D0-2b) that throws
 `.notBuilt` until ST-1 fills it; it needs ST-2 for `sharedValue` and the
 hint text. ST-5 needs ST-3's `textEditScale` for the editor and for
 `DesignTextScaleTests`. ST-7's `scrubStep` times `LiveStyling` (ST-1);

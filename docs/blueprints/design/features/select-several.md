@@ -98,7 +98,7 @@ The four protocols of blueprint 5.4, filled by the live types:
 
 ```swift
 // Sources/DesignModel/Live/LiveMarquee.swift
-public struct LiveMarquee: MarqueeSelecting      // replaces D0-2b's stub body
+public struct LiveMarquee: MarqueeSelecting      // replaces design-contracts D0-2b's stub body
 // Sources/DesignModel/Live/LiveTransforming.swift
 public struct LiveTransforming: SelectionTransforming
 // Sources/DesignModel/Live/LiveAligning.swift
