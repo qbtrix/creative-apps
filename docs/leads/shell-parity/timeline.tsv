@@ -32,3 +32,5 @@ utc	stage	event	ref	note
 2026-10-16T17:05Z	3	pr-opened	#1467	fix #1451 page rows get design.page.row.<id>
 2026-10-16T17:15Z	3	pr-opened	#1469	Refs #1452: status zoom read; geometry filed as needs-ui #1456
 2026-10-16T17:15Z	3	heartbeat	-	polling: lane merges of #1467 #1469, then scoped run app=design
+2026-10-16T16:56Z	3	pr-merged	#1467 #1469	round 2 fixes
+2026-10-16T17:20Z	3	heartbeat	38936731510	scoped design run in progress, contains round 2

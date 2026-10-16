@@ -4,7 +4,7 @@ Issue: #1325 · Packet: docs/blueprints/design/features/shell-parity.md
 Run: act-1a14478b134-5to5 · Session: claude/design-shell-parity-2jr7z3 · Started: 2026-10-16T12:00Z
 Stage: 3 polling
 Base: c9e46560366b0c3464a5e822d11c4a865e4dc53e
-Next: wait for the lane to merge #1467 and #1469, then the scoped CI run app=design that contains them; DP-a done if J3 green and no finding open; DP-b's shell journeys wait on SuiteUI #1456 (geometry) and #1337 (switcher): after round 2, relabel open DP-b findings gap and say on #1325 that DP-b's journeys are red on SuiteUI
+Next: wait for scoped run app=design 38936731510 (head 162b4700, contains #1467 and #1469, in progress); then DP-a done-check, DP-b gaps (SuiteUI #1456 geometry, #1337 switcher)
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | rounds | state | run |
