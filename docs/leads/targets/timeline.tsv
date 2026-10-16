@@ -39,3 +39,4 @@ utc	stage	event	ref	note
 2026-10-15T23:57Z	4	ci-run	38823367271	785 on f3b8987: macOS build+bundle+size-report ok; Linux red on PhotoEditBudgetTests (not ours)
 2026-10-15T23:57Z	4	heartbeat	38823898596	feature-done run 787 on 8fce5e2 queued
 2026-10-16T00:22Z	4	heartbeat	38823898596	run 787: Linux green; macOS scripts/ci passed (AfterGlowApp compiles); bundle-apps + ui-test pending
+2026-10-16T00:50Z	4	heartbeat	38823898596	run 787: size-report uploaded (5 bundles, tarball 8.06 MB); ui-test running

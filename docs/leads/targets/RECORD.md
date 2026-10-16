@@ -22,6 +22,16 @@ Next: judge round 1 on dev CI run 38823898596 (#787, head 8fce5e2, the feature-d
 | round | CI run | CI | audit vs baseline | lenses | confirmed | fixed by | clean |
 |---|---|---|---|---|---|---|---|
 
+## Size report (run 38823898596, 8fce5e2)
+| app | executable bytes | bundle bytes | SuiteUI symbols |
+|---|---|---|---|
+| Flare | 7,363,200 | 7,365,936 | 5,785 |
+| Design | 4,415,376 | 4,418,115 | 5,831 |
+| Photo | 6,434,704 | 6,437,440 | 5,854 |
+| Library | 4,838,032 | 4,840,774 | 5,812 |
+| Halo | 8,257,104 | 8,259,837 | 5,817 |
+Executables total 31,308,416 bytes; app-builds.tar.gz 8,064,887 bytes. SuiteUI is linked into each of the five executables (about 5.8k symbols each).
+
 ## Decisions
 - BU-1b: AfterGlow > Settings… is the Settings scene's own working item (packet step 3: ⌘, opens Settings), not a disabled stub; LauncherCommandsSettings is an empty group for the settings feature.
 - TG-0 goes in as C4 parts (docs/c4/parts/), not a model.json edit: model.json is generated now and no PR edits it; parts are lane work, so the lead opens them instead of waiting on the supervisor.
