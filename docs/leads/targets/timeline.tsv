@@ -47,3 +47,4 @@ utc	stage	event	ref	note
 2026-10-16T03:19Z	4	heartbeat	38841265840	791 macOS still running (Linux red, Photo budget, not ours); 792 pending
 2026-10-16T03:20Z	4	heartbeat	38841265840	Belt nudge received; still waiting on dev CI (791 macOS running, 792 pending)
 2026-10-16T03:40Z	4	ci-run	38841265840	791 on e99643c red: Photo budget + Halo/Photo/Library journeys; none ours
+2026-10-16T03:40Z	4	heartbeat	dev-ci	waiting on a green dev run: 38841439320 in_progress  9230d80; 38841265840 completed failure e99643c; 38835566584 completed failure 81f3288
