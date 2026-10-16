@@ -229,10 +229,14 @@ most 2 rounds (contract rule 11).
    fallback if Workflow is unavailable), started together. Run subagents
    one after another only for tasks that truly depend on each other;
    RECORD.md says which ones and why, one line each under Decisions.
-4. **Merge.** A PR the lane comments on (conflict, red, not eligible) goes
-   back to its builder or a fixer: rebase on `origin/dev`, rerun
-   `scripts/ci --changed`, move the `Head:` line. Once the wave's PRs have merged, run
-   the check and start the next wave.
+4. **Merge.** Nobody rebases onto `dev` for drift: a PR that is behind
+   merges as it is, and one that conflicts is integrated by the lane (it
+   merges dev into the branch with the merge drivers, runs the Linux check
+   on the result and merges). Only a PR the lane labels `needs-rebase`
+   (comment names the files), or comments red or not eligible, goes back to
+   its builder or a fixer: merge `origin/dev` into the branch, resolve the
+   named files, rerun `scripts/ci --changed`, push, move the `Head:` line.
+   Once the wave's PRs have merged, run the check and start the next wave.
 
 Every fixer runs the full harness before it hands back: `scripts/ci --changed` until
 `CI: PASS`, plus a test that fails before the fix, and the journey step or
@@ -417,9 +421,11 @@ started together. Run subagents one after another only for tasks that truly
 depend on each other; RECORD.md says which ones and why, one line each
 under Decisions. Then:
 
-1. Wait for the lane to merge every PR of the wave. A PR the lane comments on
-   (conflict, red, not eligible) goes back to its builder or a fixer: rebase
-   on `origin/dev`, rerun `scripts/ci --changed`, move the `Head:` line.
+1. Wait for the lane to merge every PR of the wave. The lane integrates a
+   PR that conflicts with `dev` itself; only one it labels `needs-rebase`, or
+   comments red or not eligible, goes back to its builder or a fixer: merge
+   `origin/dev` into the branch, resolve the named files, rerun
+   `scripts/ci --changed`, push, move the `Head:` line.
 2. The next wave's base is the new `origin/dev` SHA. Record it.
 
 #### 4. The Anatomy loop

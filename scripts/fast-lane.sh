@@ -22,7 +22,17 @@
 # (audit_loosens), MERGEABLE, no red or running check on the head, the proof
 # above, and for a Belt PR (`Belt-Run:` or `Belt-Test:` line) Belt's
 # `belt/review` status while REQUIRE_BELT_REVIEW=1. A PR based on main is
-# retargeted; a conflicting PR gets one comment per head and keeps its label.
+# retargeted. A PR that is behind the base merges as it is. One that conflicts
+# is integrated by the lane (integrate): a scratch clone merges the base into
+# the PR head with the repo's merge drivers (scripts/install-merge-drivers and
+# scripts/merge-json from this checkout, i.e. main, never the PR's), pushes the
+# merge commit to the PR branch with a lease on the head it read, and the
+# re-sweep, seeing a head whose last commit is that merge (LANE_MERGE_SUBJECT)
+# with no check on it, dispatches a Linux-only CI run (linux-dispatch; ci.yml's
+# `linux_only`) and merges on its pass like any CI-proven head. A conflict the
+# drivers can't resolve gets one comment naming the files and the
+# NEEDS_REBASE_LABEL label for a fixer; the label goes when a later head
+# integrates or merges.
 #
 # Every run sweeps all open fast-lane PRs, oldest first. A lead's PR (a
 # `Feature:` body line) never closes a `feature-lead` issue (lead_refs). After
@@ -36,6 +46,7 @@
 # the head, logs each rule to stderr and prints one line to stdout:
 #   skip|<why>  retarget|<from base>  not-eligible|<reasons>  red|<checks>
 #   conflict|<head sha>  pending|<why>  build-dispatch|<code paths>|<head branch>
+#   linux-dispatch|<head branch>
 #   build-gate|<what to do>  eligible|<lines>|<files>|<proof>
 # Tests/fast_lane/test_fast_lane.sh sources this file and feeds it fixtures.
 #
@@ -84,12 +95,13 @@ SELF_CHECK="fast-lane"
 # bullet; Tests/fast_lane checks the two match. A path ending in / is that
 # folder at the root, a path with a / is that file, and a bare name is that
 # file in any folder (docs/AGENTS.md too). A * matches one folder name.
-# Matching ignores case. docs/c4/model.json and each app's waves.md are
+# Matching ignores case. .gitattributes names the merge drivers the lane runs
+# when it integrates a PR, so a PR can't turn one on for itself. docs/c4/model.json and each app's waves.md are
 # generated on dev (.github/workflows/generated.yml), so PRs never edit them.
 # UITests/quarantine.json skips failing journeys (scripts/quarantine), so only
 # the supervisor quarantines; Tests/perf-suites.txt takes tests out of the
 # gate (scripts/test-scope), so only the supervisor lists them.
-PROTECTED=(Package.swift Package.resolved .github/ .claude/ scripts/ CLAUDE.md AGENTS.md LICENSE
+PROTECTED=(Package.swift Package.resolved .github/ .claude/ scripts/ .gitattributes CLAUDE.md AGENTS.md LICENSE
   docs/c4/model.json 'docs/blueprints/*/features/waves.md' UITests/quarantine.json Tests/perf-suites.txt)
 deny_re() {
   local p re=""
@@ -131,6 +143,14 @@ MAC_JOB="macOS"
 BUILD_RE='^((Sources|Tests|UITests)/.*\.swift|project\.yml|Package\.swift)$'
 BUILD_JOB="macOS build"    # the build-only job's name in ci.yml
 BUILD_TITLE="macOS build"  # ci.yml's run-name for a build-only run
+LINUX_TITLE="Linux check"  # ci.yml's run-name for a linux_only run (the lane's check on a head it integrated)
+# The lane's own merge commit on a PR head (integrate). Fixed subject, so
+# decide can tell such a head and ask for its Linux check (linux-dispatch).
+LANE_MERGE_SUBJECT="fast lane: merge dev into the PR head"
+NEEDS_REBASE_LABEL="needs-rebase"
+# Where integrate fetches and pushes; tests point it at a local bare repo.
+REMOTE="${FAST_LANE_REMOTE:-https://github.com/${GH_REPO:-qbtrix/creative-apps}.git}"
+HERE=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 # After dispatching, look this many times, 5s apart, for the new run's URL to comment.
 RUN_LOOKUP_RETRIES="${FAST_LANE_RUN_LOOKUP_RETRIES:-6}"
 
@@ -528,9 +548,15 @@ decide() {
   npending=$(jq -r '.pending | length' <<<"$summary")
   nci=$(jq -r '.ci_passed' <<<"$summary")
   if has_marker "$pr" "$head"; then marker=1; fi
+  # The lane's own merge commit as the head (integrate): no marker can name it,
+  # so its proof is a Linux run, which the lane starts when none exists yet.
+  local lane_head=0
+  if [[ "$(jq -r --arg h "$head" '.commits // [] | last // {} | select(.oid == $h) | .messageHeadline // ""' "$pr")" == "$LANE_MERGE_SUBJECT" ]]; then
+    lane_head=1
+  fi
   # ponytail: "CI passed" = at least one *passing* check from CI_WORKFLOWS, so a
   # head where every CI job was skipped still needs the worker's marker.
-  log "checks: green=$ngreen pending=$npending red=[${red}] ci_passed=$nci marker=$marker"
+  log "checks: green=$ngreen pending=$npending red=[${red}] ci_passed=$nci marker=$marker lane_head=$lane_head"
 
   if [[ -n "$skip" ]]; then echo "skip|$skip"; return; fi
   if [[ -n "$retarget" ]]; then echo "retarget|$retarget"; return; fi
@@ -543,6 +569,7 @@ decide() {
   if [[ -n "$pending" ]]; then echo "pending|$pending"; return; fi
   if (( npending )); then echo "pending|$npending checks still running"; return; fi
   if (( nci == 0 && marker == 0 )); then
+    if (( lane_head )); then echo "linux-dispatch|$(jq -r '.headRefName // ""' "$pr")"; return; fi
     echo "pending|no passing CI check and no $MARKER_LINE marker for head $head"; return
   fi
   if (( belt )) && [[ "$review" != "SUCCESS" ]]; then echo "pending|waiting for review"; return; fi
@@ -556,6 +583,45 @@ decide() {
   (( nci == 0 )) || proof="$ngreen checks green"
   [[ "$mac" != ok\|* ]] || proof+=", ${mac#ok|}"
   echo "eligible|$lines|$nfiles|$proof$tier"
+}
+
+# integrate <head sha> <head branch>: in a scratch clone, merges
+# origin/BASE_BRANCH into the PR head with the repo's merge drivers (installed
+# from this checkout: main's scripts, never the PR's) and pushes the merge
+# commit to the head branch with a lease on <head sha>. Runs git and the
+# drivers only; nothing from the PR's tree is executed. Prints one line:
+#   integrated|<new head sha>   conflict|<unmerged files>   failed|<why>
+integrate() {
+  local head="$1" branch="$2" d files new
+  d=$(mktemp -d)
+  if ! git init -q "$d" || ! git -C "$d" remote add origin "$REMOTE" \
+      || ! { git -C "$d" fetch -q --filter=blob:none origin "$BASE_BRANCH" "$branch" 2>/dev/null \
+             || git -C "$d" fetch -q origin "$BASE_BRANCH" "$branch" 2>/dev/null; }; then
+    echo "failed|could not fetch $BASE_BRANCH and $branch from $REMOTE"; rm -rf "$d"; return
+  fi
+  if [[ "$(git -C "$d" rev-parse "origin/$branch" 2>/dev/null)" != "$head" ]]; then
+    echo "failed|$branch no longer points at $head"; rm -rf "$d"; return
+  fi
+  if ! git -C "$d" checkout -q -b work "origin/$branch" 2>/dev/null || ! bash "$HERE/install-merge-drivers" "$d" >/dev/null 2>&1; then
+    echo "failed|could not check out $branch with the merge drivers"; rm -rf "$d"; return
+  fi
+  if ! git -C "$d" -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
+      merge -q --no-edit -m "$LANE_MERGE_SUBJECT" "origin/$BASE_BRANCH" >/dev/null 2>&1; then
+    files=$(git -C "$d" diff --name-only --diff-filter=U | sort -u | paste -sd, - | sed 's/,/, /g')
+    git -C "$d" merge --abort >/dev/null 2>&1 || true
+    echo "conflict|${files:-files git could not name}"; rm -rf "$d"; return
+  fi
+  new=$(git -C "$d" rev-parse HEAD)
+  if ! git -C "$d" push -q --force-with-lease="refs/heads/$branch:$head" origin "HEAD:refs/heads/$branch" 2>/dev/null; then
+    echo "failed|push to $branch refused (it moved past $head)"; rm -rf "$d"; return
+  fi
+  rm -rf "$d"
+  echo "integrated|$new"
+}
+
+# has_comment <pr> <text>: a comment on the PR contains <text>.
+has_comment() {
+  gh api "repos/$REPO/issues/$1/comments" --paginate --jq '.[].body' 2>/dev/null | grep -qF -- "$2"
 }
 
 write() {  # run a mutating command unless --dry-run
@@ -579,7 +645,7 @@ evaluate() {
   tmp=$(mktemp -d)
   local tries=0
   while :; do
-    gh pr view "$n" -R "$REPO" --json number,state,isDraft,baseRefName,labels,author,body,additions,deletions,changedFiles,mergeable,mergeStateStatus,headRefOid,headRefName,statusCheckRollup >"$tmp/pr.json"
+    gh pr view "$n" -R "$REPO" --json number,state,isDraft,baseRefName,labels,author,body,additions,deletions,changedFiles,mergeable,mergeStateStatus,headRefOid,headRefName,statusCheckRollup,commits >"$tmp/pr.json"
     [[ "$(jq -r '.mergeable' "$tmp/pr.json")" == "UNKNOWN" ]] || break
     (( tries++ < UNKNOWN_RETRIES )) || break
     sleep 5
@@ -654,25 +720,58 @@ evaluate() {
       fi
       ;;
     conflict)
-      # Usually an earlier merge in this sweep. Belt's fixer rebases it; the label stays.
-      comment_once "$n" "Fast lane: not merged, this PR conflicts with $BASE_BRANCH at head $rest. Rebase on origin/$BASE_BRANCH, rerun scripts/ci, and update the Fast-Check marker."
+      # The lane integrates: merge the base into the head with the merge
+      # drivers and push. The re-sweep then sees the lane's merge commit as the
+      # head with no check and starts its Linux run (linux-dispatch). A conflict
+      # the drivers can't resolve goes to a fixer once per head, with the files.
+      local branch out why
+      branch=$(jq -r '.headRefName // ""' "$tmp/pr.json")
+      if has_comment "$n" "could not integrate it at head $rest"; then
+        log "conflict at head $rest already handed to a fixer"
+      elif (( DRY_RUN )); then
+        log "dry-run, would integrate $BASE_BRANCH into $branch at $rest"
+      else
+        gh auth setup-git >/dev/null 2>&1 || true
+        out=$(integrate "$rest" "$branch"); why="${out#*|}"
+        case "${out%%|*}" in
+          integrated)
+            MERGED_ANY=1  # re-sweep: the new head gets its Linux check now, not next run
+            if jq -e --arg l "$NEEDS_REBASE_LABEL" '[.labels[]?.name] | index($l) != null' "$tmp/pr.json" >/dev/null; then
+              write gh pr edit "$n" -R "$REPO" --remove-label "$NEEDS_REBASE_LABEL" || log "could not remove $NEEDS_REBASE_LABEL"
+            fi
+            comment_once "$n" "Fast lane: this PR conflicted with $BASE_BRANCH, so the lane merged origin/$BASE_BRANCH into $branch itself ($why) with the repo's merge drivers. Next it starts a Linux check on that head and merges once it passes; nothing to do on your side. If you push again, fetch first."
+            ;;
+          conflict)
+            write gh label create "$NEEDS_REBASE_LABEL" -R "$REPO" --color d93f0b --force \
+              --description "The lane could not merge dev into this PR; a fixer resolves the named files" >/dev/null 2>&1 || true
+            write gh pr edit "$n" -R "$REPO" --add-label "$NEEDS_REBASE_LABEL" || log "could not add $NEEDS_REBASE_LABEL"
+            comment_once "$n" "Fast lane: this PR conflicts with $BASE_BRANCH in $why, and the lane could not integrate it at head $rest (the merge drivers don't resolve these). A fixer takes it: merge origin/$BASE_BRANCH into $branch, resolve those files, rerun scripts/ci --changed, push, and move the Head: line. The lane then drops the $NEEDS_REBASE_LABEL label and merges."
+            ;;
+          *) log "integration failed ($why); the next sweep tries again" ;;
+        esac
+      fi
       ;;
-    build-dispatch)
+    build-dispatch|linux-dispatch)
       # Authors can't dispatch (403, #1040), so the lane does, once per head:
-      # the next sweep finds this build on the head and waits for it, then merges.
-      local what branch url="" i
-      IFS='|' read -r what branch <<<"$rest"
-      if ! write gh workflow run "$CI_FILE" -R "$REPO" -f build_only=true --ref "$branch"; then
+      # the next sweep finds this run on the head and waits for it, then merges.
+      local what="" branch url="" i flags=(-f build_only=true) title="$BUILD_TITLE"
+      if [[ "$kind" == linux-dispatch ]]; then branch="$rest"; flags=(-f linux_only=true); title="$LINUX_TITLE"
+      else IFS='|' read -r what branch <<<"$rest"; fi
+      if ! write gh workflow run "$CI_FILE" -R "$REPO" "${flags[@]}" --ref "$branch"; then
         log "could not dispatch CI on $branch; the next sweep tries again"; rm -rf "$tmp"; return
       fi
       for (( i = 0; i <= RUN_LOOKUP_RETRIES; i++ )); do
         url=$(gh run list -R "$REPO" --workflow "$CI_FILE" --commit "$head" --limit 20 --json url,displayTitle \
-          --jq "[.[] | select(.displayTitle == \"$BUILD_TITLE\")][0].url // \"\"" 2>/dev/null || true)
+          --jq "[.[] | select(.displayTitle == \"$title\")][0].url // \"\"" 2>/dev/null || true)
         [[ -z "$url" && $i -lt $RUN_LOOKUP_RETRIES ]] || break
         sleep 5
       done
       [[ -n "$url" ]] || url="https://github.com/$REPO/actions/workflows/$CI_FILE?query=branch%3A$branch"
-      comment_once "$n" "Fast lane: this PR changes code ($what), so its head $head must build on macOS first. The lane dispatched a macOS build on $branch: $url. A later sweep merges this PR once it compiles; a new push gets a new build."
+      if [[ "$kind" == linux-dispatch ]]; then
+        comment_once "$n" "Fast lane: the head $head is the lane's merge of $BASE_BRANCH into $branch, so its proof is a Linux check, started now: $url. A later sweep merges this PR once it passes (a code PR gets its macOS build on this head first)."
+      else
+        comment_once "$n" "Fast lane: this PR changes code ($what), so its head $head must build on macOS first. The lane dispatched a macOS build on $branch: $url. A later sweep merges this PR once it compiles; a new push gets a new build."
+      fi
       ;;
     build-gate)
       # The label stays: a push gets a new build on the new head, and a later sweep merges it once it compiles.
@@ -731,6 +830,9 @@ evaluate() {
         write gh issue edit "$issue" -R "$REPO" --remove-label in-progress || true
       done
       write gh pr edit "$n" -R "$REPO" --add-label "$MERGED_LABEL" || log "could not add $MERGED_LABEL label"
+      if jq -e --arg l "$NEEDS_REBASE_LABEL" '[.labels[]?.name] | index($l) != null' "$tmp/pr.json" >/dev/null; then
+        write gh pr edit "$n" -R "$REPO" --remove-label "$NEEDS_REBASE_LABEL" || true
+      fi
       comment_once "$n" "Fast lane: merged into $BASE_BRANCH ($lines lines, $files files, $proof)."
       ;;
   esac
@@ -779,8 +881,9 @@ main() {
   local n pass
   for n in "${prs[@]}"; do evaluate "$n"; done
   # A merge changes every other PR's mergeable state, and GitHub reports
-  # UNKNOWN until it recomputes. Sweep again after any merge, until a pass
-  # merges nothing, so a PR that settles late still merges in this run.
+  # UNKNOWN until it recomputes. Sweep again after any merge (or a lane
+  # integration, whose new head needs its Linux check), until a pass changes
+  # nothing, so a PR that settles late still merges in this run.
   for (( pass = 0; MERGED_ANY && pass < 5; pass++ )); do
     MERGED_ANY=0
     while read -r n; do [[ -n "$n" ]] && evaluate "$n"; done < <(open_prs)
