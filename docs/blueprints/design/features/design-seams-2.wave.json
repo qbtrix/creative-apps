@@ -5,5 +5,163 @@
   "status": "planned",
   "feature_issue": "file when ready",
   "covers": "–",
-  "waits_on": "all five wave-1 features"
+  "waits_on": "design-contracts; the wave-1 slices whose files it reopens (style-rows SR-a, SR-b; files-history FH-a, FH-b; layers-panel LP-b; select-several SS-b); design-seams; all of design-window",
+  "depends": [
+    "design-contracts"
+  ],
+  "owned": [
+    "Sources/DesignModel/DesignNode.swift",
+    "Sources/DesignModel/DesignInspectorContent.swift",
+    "Sources/DesignModel/DesignCorners.swift",
+    "Sources/DesignApp/DesignCanvasMarks.swift",
+    "Tests/DesignModelTests/DesignPathKindTests.swift",
+    "Sources/DesignModel/DesignFile.swift",
+    "Sources/DesignModel/Live/LiveFiling.swift",
+    "Sources/DesignModel/DesignHistory.swift",
+    "Sources/DesignModel/DesignWorkspace.swift",
+    "Tests/DesignModelTests/DesignTierTwoSchemaTests.swift",
+    "Tests/DesignModelTests/DesignFilingTests.swift",
+    "Tests/DesignModelTests/DesignFileTests.swift",
+    "Tests/DesignModelTests/DesignFixturesTests.swift",
+    "Sources/DesignModel/Fakes/DesignTierTwoFakes.swift",
+    "Sources/DesignModel/Live/LiveExport.swift",
+    "Sources/DesignModel/Live/LivePen.swift",
+    "Sources/DesignModel/Live/LiveComponents.swift",
+    "Sources/DesignModel/Live/LiveVariables.swift",
+    "Sources/DesignModel/DesignServices.swift",
+    "Tests/DesignModelTests/DesignContractLawTierTwoTests.swift",
+    "Sources/DesignModel/DesignActions+TierTwo.swift",
+    "Tests/DesignModelTests/DesignActionsTierTwoTests.swift",
+    "Sources/DesignModel/DesignCanvasEditing.swift",
+    "Tests/DesignModelTests/DesignPenRouteTests.swift",
+    "Tests/DesignModelTests/DesignSeams2JourneyTests.swift",
+    "Sources/DesignApp/DesignCanvas.swift",
+    "Tests/AppSnapshotTests/DesignTierTwoCanvasSnapshots.swift",
+    "Tests/AppSnapshotTests/DesignPenDragTests.swift",
+    "Sources/DesignApp/DesignIntent.swift",
+    "Sources/DesignApp/DesignWindow.swift",
+    "Sources/DesignApp/DesignCommands.swift",
+    "Sources/DesignApp/DesignObjectMenu.swift",
+    "Sources/DesignApp/DesignEditor.swift",
+    "Sources/DesignApp/DesignExportSheet.swift",
+    "Sources/DesignApp/DesignVariablesSheet.swift",
+    "Sources/DesignModel/DesignWindowOptions.swift",
+    "Tests/AppSnapshotTests/DesignTierTwoMenuSnapshots.swift",
+    "UITests/DesignJourneyTests.swift"
+  ],
+  "journeys": [
+    "DesignJourneyTests.testEveryMenuOpens",
+    "DesignJourneyTests.testNewFileAndEveryTool"
+  ],
+  "slices": [
+    {
+      "id": "S2-a",
+      "behavior": "A file with a path, a component and a bound variable saves as version 2 and reopens, version 1 still opens, a newer version is refused, and undo restores the library.",
+      "tasks": [
+        "D2-1a",
+        "D2-1b",
+        "D2-2"
+      ],
+      "journeys": [
+        "MJ6"
+      ],
+      "owned": [
+        "Sources/DesignModel/DesignNode.swift",
+        "Sources/DesignModel/DesignInspectorContent.swift",
+        "Sources/DesignModel/DesignCorners.swift",
+        "Sources/DesignApp/DesignCanvasMarks.swift",
+        "Tests/DesignModelTests/DesignPathKindTests.swift",
+        "Sources/DesignModel/DesignFile.swift",
+        "Sources/DesignModel/Live/LiveFiling.swift",
+        "Sources/DesignModel/DesignHistory.swift",
+        "Sources/DesignModel/DesignWorkspace.swift",
+        "Tests/DesignModelTests/DesignTierTwoSchemaTests.swift",
+        "Tests/DesignModelTests/DesignFilingTests.swift",
+        "Tests/DesignModelTests/DesignFileTests.swift",
+        "Tests/DesignModelTests/DesignFixturesTests.swift",
+        "Sources/DesignModel/Fakes/DesignTierTwoFakes.swift",
+        "Sources/DesignModel/Live/LiveExport.swift",
+        "Sources/DesignModel/Live/LivePen.swift",
+        "Sources/DesignModel/Live/LiveComponents.swift",
+        "Sources/DesignModel/Live/LiveVariables.swift",
+        "Sources/DesignModel/DesignServices.swift",
+        "Tests/DesignModelTests/DesignContractLawTierTwoTests.swift"
+      ],
+      "waits": {
+        "style-rows:SR-a": [
+          "D2-1a"
+        ],
+        "style-rows:SR-b": [
+          "D2-1a"
+        ],
+        "files-history:FH-a": [
+          "D2-1b"
+        ],
+        "layers-panel:LP-b": [
+          "D2-1b"
+        ]
+      }
+    },
+    {
+      "id": "S2-b",
+      "behavior": "Export, Create Component, Variables and Light or Dark preview sit in the menus, each saying it isn't built yet, while the Model drafts pen paths, components and variables on the fakes.",
+      "tasks": [
+        "D2-3a",
+        "D2-3b",
+        "D2-4a",
+        "D2-4b"
+      ],
+      "journeys": [
+        "J1",
+        "MJ7"
+      ],
+      "owned": [
+        "Sources/DesignModel/DesignActions+TierTwo.swift",
+        "Sources/DesignModel/DesignWorkspace.swift",
+        "Tests/DesignModelTests/DesignActionsTierTwoTests.swift",
+        "Sources/DesignModel/DesignCanvasEditing.swift",
+        "Tests/DesignModelTests/DesignPenRouteTests.swift",
+        "Tests/DesignModelTests/DesignSeams2JourneyTests.swift",
+        "Sources/DesignApp/DesignCanvasMarks.swift",
+        "Sources/DesignApp/DesignCanvas.swift",
+        "Tests/AppSnapshotTests/DesignTierTwoCanvasSnapshots.swift",
+        "Tests/AppSnapshotTests/DesignPenDragTests.swift",
+        "Sources/DesignApp/DesignIntent.swift",
+        "Sources/DesignApp/DesignWindow.swift",
+        "Sources/DesignApp/DesignCommands.swift",
+        "Sources/DesignApp/DesignObjectMenu.swift",
+        "Sources/DesignApp/DesignEditor.swift",
+        "Sources/DesignApp/DesignExportSheet.swift",
+        "Sources/DesignApp/DesignVariablesSheet.swift",
+        "Sources/DesignModel/DesignWindowOptions.swift",
+        "Tests/AppSnapshotTests/DesignTierTwoMenuSnapshots.swift",
+        "UITests/DesignJourneyTests.swift"
+      ],
+      "waits": {
+        "S2-a": [
+          "D2-3a",
+          "D2-4a"
+        ],
+        "layers-panel:LP-b": [
+          "D2-3a"
+        ],
+        "design-seams": [
+          "D2-3b"
+        ],
+        "select-several:SS-b": [
+          "D2-3b"
+        ],
+        "design-window": [
+          "D2-4a",
+          "D2-4b"
+        ],
+        "style-rows:SR-b": [
+          "D2-4a"
+        ],
+        "files-history:FH-b": [
+          "D2-4b"
+        ]
+      }
+    }
+  ]
 }

@@ -5,5 +5,70 @@
   "status": "planned",
   "feature_issue": "file when ready",
   "covers": "#414, #416, #415",
-  "waits_on": "design-window"
+  "waits_on": "design-contracts; design-seams for C-1, C-5; view tasks: design-window DW-a (DW-b for the drag check)",
+  "depends": [
+    "design-contracts"
+  ],
+  "owned": [
+    "Sources/DesignModel/Live/LiveDuplicating.swift",
+    "Tests/DesignModelTests/DesignDuplicateTests.swift",
+    "Sources/DesignModel/Live/LiveGrouping.swift",
+    "Tests/DesignModelTests/DesignGroupTests.swift",
+    "Sources/DesignModel/Live/LiveClipboard.swift",
+    "Tests/DesignModelTests/DesignPasteboardTests.swift",
+    "Tests/AppSnapshotTests/DesignDuplicateSnapshots.swift",
+    "Tests/AppSnapshotTests/DesignGroupSnapshots.swift",
+    "Tests/AppSnapshotTests/DesignPasteboardSnapshots.swift",
+    "Tests/AppSnapshotTests/DesignArrangeDragTests.swift",
+    "UITests/DesignJourneyTests+Arrange.swift"
+  ],
+  "journeys": [
+    "DesignArrangeJourneyTests.testDuplicateAndOptionDrag",
+    "DesignArrangeJourneyTests.testCutCopyPasteAcrossFiles",
+    "DesignArrangeJourneyTests.testGroupAndUngroup"
+  ],
+  "slices": [
+    {
+      "id": "CG-a",
+      "behavior": "Duplicate and Option-drag a layer, group and ungroup several, and cut, copy and paste layers, also between files, each one step.",
+      "tasks": [
+        "C-1",
+        "C-2",
+        "C-3",
+        "C-4",
+        "C-5"
+      ],
+      "journeys": [
+        "J7",
+        "J8",
+        "J9"
+      ],
+      "owned": [
+        "Sources/DesignModel/Live/LiveDuplicating.swift",
+        "Tests/DesignModelTests/DesignDuplicateTests.swift",
+        "Sources/DesignModel/Live/LiveGrouping.swift",
+        "Tests/DesignModelTests/DesignGroupTests.swift",
+        "Sources/DesignModel/Live/LiveClipboard.swift",
+        "Tests/DesignModelTests/DesignPasteboardTests.swift",
+        "Tests/AppSnapshotTests/DesignDuplicateSnapshots.swift",
+        "Tests/AppSnapshotTests/DesignGroupSnapshots.swift",
+        "Tests/AppSnapshotTests/DesignPasteboardSnapshots.swift",
+        "Tests/AppSnapshotTests/DesignArrangeDragTests.swift",
+        "UITests/DesignJourneyTests+Arrange.swift"
+      ],
+      "waits": {
+        "design-seams": [
+          "C-1",
+          "C-5"
+        ],
+        "design-window:DW-a": [
+          "C-4",
+          "C-5"
+        ],
+        "design-window:DW-b": [
+          "C-4"
+        ]
+      }
+    }
+  ]
 }

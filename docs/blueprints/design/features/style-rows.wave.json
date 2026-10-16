@@ -4,6 +4,136 @@
   "order": 30,
   "status": "planned",
   "feature_issue": "file when ready",
-  "covers": "#752, #267, #268, #276, #266",
-  "waits_on": "design-window"
+  "covers": "#752, #267, #268, #276, #266, #532",
+  "waits_on": "design-contracts; view tasks: design-window DW-a (DW-b for the scrub check)",
+  "depends": [
+    "design-contracts"
+  ],
+  "owned": [
+    "Sources/DesignModel/Live/LiveStyling.swift",
+    "Tests/DesignModelTests/DesignStyleTests.swift",
+    "Sources/DesignModel/DesignInspectorContent.swift",
+    "Tests/DesignModelTests/DesignInspectorSharedValueTests.swift",
+    "Sources/DesignApp/DesignInspector.swift",
+    "Sources/DesignApp/DesignInspectorStyle.swift",
+    "Tests/AppSnapshotTests/DesignInspectorSnapshots.swift",
+    "Tests/AppSnapshotTests/DesignStyleSnapshots.swift",
+    "Tests/AppSnapshotTests/DesignStyleScrubTests.swift",
+    "UITests/DesignJourneyTests+Style.swift",
+    "Sources/DesignModel/DesignText.swift",
+    "Tests/DesignModelTests/DesignTextScaleModelTests.swift",
+    "Tests/DesignModelTests/DesignCompactSelectionTests.swift",
+    "Tests/AppSnapshotTests/DesignTextStyleSnapshots.swift",
+    "Sources/DesignApp/DesignCanvasMarks.swift",
+    "Sources/DesignApp/DesignFrameLabels.swift",
+    "Sources/DesignApp/DesignTextEditor.swift",
+    "Tests/AppSnapshotTests/DesignTextSnapshots.swift",
+    "Tests/AppSnapshotTests/DesignArtworkPathTests.swift",
+    "Tests/AppSnapshotTests/DesignTextScaleTests.swift",
+    "Tests/DesignModelTests/DesignStyleBudgetTests.swift",
+    "UITests/DesignJourneyTests+PerfScrub.swift"
+  ],
+  "journeys": [
+    "DesignStyleJourneyTests.testInspectorStyleRows",
+    "DesignStyleJourneyTests.testTextFontAndSize",
+    "DesignPerfScrubJourneyTests.testScrubLatency"
+  ],
+  "slices": [
+    {
+      "id": "SR-a",
+      "behavior": "Layer opacity, corner radius and stroke rows set one or several layers in one step per scrub, read \"Mixed\" when the layers differ, and show the locked hint in the value column.",
+      "tasks": [
+        "ST-1",
+        "ST-2",
+        "ST-4",
+        "ST-6"
+      ],
+      "journeys": [
+        "J10"
+      ],
+      "owned": [
+        "Sources/DesignModel/Live/LiveStyling.swift",
+        "Tests/DesignModelTests/DesignStyleTests.swift",
+        "Sources/DesignModel/DesignInspectorContent.swift",
+        "Tests/DesignModelTests/DesignInspectorSharedValueTests.swift",
+        "Sources/DesignApp/DesignInspector.swift",
+        "Sources/DesignApp/DesignInspectorStyle.swift",
+        "Tests/AppSnapshotTests/DesignInspectorSnapshots.swift",
+        "Tests/AppSnapshotTests/DesignStyleSnapshots.swift",
+        "Tests/AppSnapshotTests/DesignStyleScrubTests.swift",
+        "UITests/DesignJourneyTests+Style.swift"
+      ],
+      "waits": {
+        "design-window:DW-a": [
+          "ST-4",
+          "ST-6"
+        ],
+        "design-window:DW-b": [
+          "ST-4"
+        ]
+      }
+    },
+    {
+      "id": "SR-b",
+      "behavior": "Text family, size, weight and alignment rows work, committed text doesn't jump at any zoom, and the canvas draws radius, stroke, opacity and frame names above their frames.",
+      "tasks": [
+        "ST-3",
+        "ST-4b",
+        "ST-5",
+        "ST-6b"
+      ],
+      "journeys": [
+        "J11"
+      ],
+      "owned": [
+        "Sources/DesignModel/DesignText.swift",
+        "Tests/DesignModelTests/DesignTextScaleModelTests.swift",
+        "Tests/DesignModelTests/DesignCompactSelectionTests.swift",
+        "Sources/DesignApp/DesignInspectorStyle.swift",
+        "Tests/AppSnapshotTests/DesignTextStyleSnapshots.swift",
+        "Sources/DesignApp/DesignCanvasMarks.swift",
+        "Sources/DesignApp/DesignFrameLabels.swift",
+        "Sources/DesignApp/DesignTextEditor.swift",
+        "Tests/AppSnapshotTests/DesignTextSnapshots.swift",
+        "Tests/AppSnapshotTests/DesignArtworkPathTests.swift",
+        "Tests/AppSnapshotTests/DesignTextScaleTests.swift",
+        "UITests/DesignJourneyTests+Style.swift"
+      ],
+      "waits": {
+        "design-window:DW-a": [
+          "ST-4b",
+          "ST-5",
+          "ST-6b"
+        ],
+        "SR-a": [
+          "ST-4b",
+          "ST-6b"
+        ]
+      }
+    },
+    {
+      "id": "SR-c",
+      "behavior": "Scrubbing a style row and typing into a text layer keep up on 2,000 layers.",
+      "tasks": [
+        "ST-7",
+        "ST-8"
+      ],
+      "journeys": [
+        "P2"
+      ],
+      "owned": [
+        "Tests/DesignModelTests/DesignStyleBudgetTests.swift",
+        "UITests/DesignJourneyTests+PerfScrub.swift"
+      ],
+      "waits": {
+        "SR-a": [
+          "ST-7",
+          "ST-8"
+        ],
+        "SR-b": [
+          "ST-8"
+        ]
+      }
+    }
+  ]
 }
