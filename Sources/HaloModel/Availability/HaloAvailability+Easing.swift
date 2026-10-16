@@ -3,8 +3,8 @@
 // composition. A lane click selects the layer it hits, so it needs nothing
 // more; the rest need a selected layer. With those, the easing service may
 // say why not, and then the commands that change easing need a picked key
-// (EZ-2's `pickedKeys`). Picking and clearing act whenever they can reach a
-// layer. Linux-safe.
+// (EZ-2's `pickedKeys`), named for the span its row shows (#1454). Picking
+// and clearing act whenever they can reach a layer. Linux-safe.
 
 extension HaloProject {
     /// Nil when `command` can act now; otherwise why not.
@@ -15,7 +15,7 @@ extension HaloProject {
         if let reason = services.easing.unavailableHelp { return reason }
         switch command {
         case .setEasing, .setCustomEasing, .moveEasingHandle, .endEasingDrag:
-            return pickedKeys.isEmpty ? "Pick a key in the EASING list first." : nil
+            return pickedKeys.isEmpty ? "Pick a span in the EASING list first." : nil
         default:
             return nil
         }

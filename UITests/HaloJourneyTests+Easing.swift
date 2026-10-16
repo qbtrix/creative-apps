@@ -3,7 +3,8 @@
 // `-HaloSample keyed` (Bounce on live services: Ball keyed on x at 0 and 24,
 // 160 to 960 px, and on opacity at 0 and 12, and Floor) it selects Ball in
 // the inspector's LAYERS list, scrolls to that list's end so EASING's rows
-// and "Pick a key above." show whole above it, finds Animation > Keyframe Easing off with nothing picked, picks the
+// and "Pick a span above to shape its easing." show whole above it, finds
+// Animation > Keyframe Easing off with nothing picked, picks the
 // Position X row in EASING, gives it Ease In and Out from the chips, reads
 // Position X at 12 and 6, bends the curve by dragging `halo.easing.handle1`,
 // gives it Hold from `halo.timeline`'s context menu, then ⌘Z three times.
@@ -20,7 +21,7 @@
 // 640 pt, so the inspector is scrolled to each control before it is used,
 // and each shot shows its step's end state whole (#1418).
 // A disabled menu item is checked as disabled only: XCUITest doesn't read
-// SwiftUI .help on menu items reliably, so its reason ("Pick a key in the
+// SwiftUI .help on menu items reliably, so its reason ("Pick a span in the
 // EASING list first.") is proven by HaloModelTests'
 // HaloEasingAvailabilityTests. The Model half of every step is
 // HaloEasingTests.testEaseKeysJourney. One shot per step, `halo-easing-<step>`.
@@ -38,8 +39,9 @@ final class HaloEasingJourneyTests: XCTestCase {
         XCTAssert(halo.app.windows.firstMatch.waitForExistence(timeout: 30), "no window opened")
 
         // 1. Select Ball in the inspector's LAYERS list: two rows, none
-        // picked, "Pick a key above.". The shot sits at LAYERS' end (Floor),
-        // so the note shows whole and nothing is cut at the window's edge.
+        // picked, "Pick a span above to shape its easing.". The shot sits at
+        // LAYERS' end (Floor), so the note shows whole and nothing is cut at
+        // the window's edge.
         let ballRow = halo.element("halo.layer.row.\(Self.ball)")
         XCTAssert(ballRow.waitForExistence(timeout: 10), "no Ball row (halo.layer.row.\(Self.ball))")
         scrollInspector(toShow: ballRow, halo)
@@ -51,9 +53,10 @@ final class HaloEasingJourneyTests: XCTestCase {
         XCTAssertEqual(opacityRow.label, "Opacity, frames 0–12", "the second EASING row's title")
         XCTAssertFalse(xRow.isSelected, "Position X, frames 0–24 is picked before any click")
         XCTAssertFalse(opacityRow.isSelected, "Opacity, frames 0–12 is picked before any click")
-        let inspector = halo.element("suite.inspector"), note = text("Pick a key above.", in: inspector)
-        XCTAssert(note.waitForExistence(timeout: 5), "EASING doesn't read Pick a key above.")
-        XCTAssert(inspector.frame.contains(note.frame), "Pick a key above. at \(note.frame) is cut by \(inspector.frame)")
+        let unpicked = "Pick a span above to shape its easing."
+        let inspector = halo.element("suite.inspector"), note = text(unpicked, in: inspector)
+        XCTAssert(note.waitForExistence(timeout: 5), "EASING doesn't read \(unpicked)")
+        XCTAssert(inspector.frame.contains(note.frame), "\(unpicked) at \(note.frame) is cut by \(inspector.frame)")
         XCTAssert(inspector.frame.contains(xRow.frame), "the Position X row is cut by the inspector")
         halo.shot("easing-1-select-ball")
 
