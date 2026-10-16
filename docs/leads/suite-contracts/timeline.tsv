@@ -29,3 +29,5 @@ utc	stage	event	ref	note
 2026-10-16T15:00Z	3	pr-merged	#1396 #1397 #1399	wave 6 merged
 2026-10-16T15:02Z	3	stage-start	wave 7	SC-4b SC-4c on 77c504c
 2026-10-16T15:18Z	3	pr-opened	#1409 #1407	SC-4b SC-4c
+2026-10-16T15:30Z	3	pr-merged	#1407	SC-4c
+2026-10-16T15:32Z	3	heartbeat	#1409	SC-4b macOS build pending
