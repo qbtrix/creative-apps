@@ -35,13 +35,22 @@ struct LibraryWindow: View {
     @State var model: LibraryCatalog
     @State var areas = LibraryAreas()
 
-    init() {
-        let launch = LibraryLaunch(arguments: ProcessInfo.processInfo.arguments)
+    /// `arguments` are the launch arguments (LibraryLaunch); a test passes a fixture's.
+    init(arguments: [String] = ProcessInfo.processInfo.arguments) {
+        let launch = LibraryLaunch(arguments: arguments)
         let services = launch.services(decoder: ImageIODecoder(), writer: JPEGWriter(), store: CatalogStore())
         _model = State(initialValue: LibraryCatalog(launch: launch, services: services))
     }
 
+    #if DEBUG
+    /// How many times a window's body ran; RenderBudgetLibraryTests counts an interaction's.
+    static var bodyRuns = 0
+    #endif
+
     var body: some View {
+        #if DEBUG
+        let _ = Self.bodyRuns += 1
+        #endif
         SuiteWindow(
             title: "Library",
             sidebarTitle: "Collections",

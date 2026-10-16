@@ -45,7 +45,15 @@ struct DesignWindow: View {
     /// type a real `.design` file gets doesn't conform to that, so the open panel would grey it out.
     private static let fileType = UTType(filenameExtension: "design") ?? .data
 
+    #if DEBUG
+    /// How many times a window's body ran; RenderBudgetDesignTests counts an interaction's.
+    static var bodyRuns = 0
+    #endif
+
     var body: some View {
+        #if DEBUG
+        let _ = Self.bodyRuns += 1
+        #endif
         DesignEditor(
             model: model, documentName: model.documentURL?.lastPathComponent, note: note, zoom: zoom,
             onViewport: viewportChanged, onZoom: setZoom, perform: perform
