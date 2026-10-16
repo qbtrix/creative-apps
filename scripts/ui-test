@@ -7,6 +7,10 @@
 # so a failed journey fails the run; the screenshots are exported either way.
 # Extra arguments go to xcodebuild, so one app's journeys run with
 #   scripts/ui-test -only-testing:PhotoJourneyTests
+# Journeys in the quarantine (UITests/quarantine.json, scripts/quarantine) are
+# skipped with -skip-testing, and listed with their owner and expiry here and
+# in the job summary, so a skip is never silent. An unreadable quarantine
+# fails the run before anything builds.
 #
 #   .build/ui-tests.xcresult   the result bundle (open it in Xcode)
 #   .build/ui-screens/         <app>-<step>.png per journey step, and audit-<app>-<step>.json per
@@ -22,6 +26,20 @@ set -uo pipefail
 cd "$(dirname "$0")/.." || exit 1
 
 command -v xcodegen >/dev/null || { echo "ui-test: install xcodegen (see .github/workflows/ci.yml)"; exit 1; }
+live=$(scripts/quarantine live) || { echo "ui-test: UITests/quarantine.json is unreadable (scripts/quarantine check)"; exit 1; }
+skips=()
+if [[ -n "$live" ]]; then
+  echo "ui-test: $(grep -c . <<<"$live") quarantined in UITests/quarantine.json, skipped this run:"
+  summary=$'### Quarantined journeys (skipped)\n\n| test | owner | expires | reason |\n|---|---|---|---|\n'
+  while IFS=$'\t' read -r test owner expires reason; do
+    skips+=("-skip-testing:$test")
+    echo "  $test  owner $owner  expires $expires  $reason"
+    summary+="| \`$test\` | $owner | $expires | ${reason//|/\\|} |"$'\n'
+  done <<<"$live"
+  [[ -z "${GITHUB_STEP_SUMMARY:-}" ]] || printf '%s\n' "$summary" >>"$GITHUB_STEP_SUMMARY"
+else
+  echo "ui-test: no journeys quarantined"
+fi
 scripts/bundle-apps || exit 1
 xcodegen generate --quiet || exit 1
 
@@ -29,7 +47,7 @@ result=.build/ui-tests.xcresult
 screens=.build/ui-screens
 rm -rf "$result" "$screens"
 xcodebuild test -project CreativeApps.xcodeproj -scheme Journeys -destination platform=macOS \
-  -resultBundlePath "$result" "$@"
+  -resultBundlePath "$result" ${skips[@]+"${skips[@]}"} "$@"
 status=$?
 
 # Each attachment exports under a generated file name; manifest.json maps it to

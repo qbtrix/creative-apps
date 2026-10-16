@@ -1,0 +1,89 @@
+#!/usr/bin/env bash
+# scripts/quarantine: the journey quarantine, UITests/quarantine.json. Each
+# entry skips one UI journey that fails on dev for a known reason while its
+# owner fixes it:
+#   {"test": "Target/Class/testName", "owner": "#<open issue>",
+#    "reason": "why it fails", "expires": "YYYY-MM-DD"}
+# An entry is live while TODAY is before its expires date; from that day on
+# the journey runs again and `check` fails until the entry is renewed or
+# removed. The file is PROTECTED (scripts/fast-lane.sh), so only the
+# supervisor quarantines.
+#
+#   check [FILE [TODAY]]  fails on an expired entry, an expiry more than 7
+#                         days after TODAY, an owner that isn't #<number>, an
+#                         empty reason, or a test that isn't in UITests/ (the
+#                         folder FILE sits in). With gh, it also fails when an
+#                         owner issue is closed or missing; without gh, or when
+#                         gh can't reach GitHub, it prints SKIP for that part.
+#                         scripts/ci runs it.
+#   live [FILE [TODAY]]   prints each live entry as test<TAB>owner<TAB>expires<TAB>reason.
+#                         scripts/ui-test skips these with -skip-testing.
+# Defaults: UITests/quarantine.json and today's UTC date. Needs jq. Tested by
+# Tests/quarantine. bash 3.2 compatible.
+set -uo pipefail
+
+mode=${1:-}
+file=${2:-"$(cd "$(dirname "$0")/.." && pwd)/UITests/quarantine.json"}
+today=${3:-$(date -u +%Y-%m-%d)}
+REPO="${GH_REPO:-qbtrix/creative-apps}"
+[[ "$mode" == check || "$mode" == live ]] || { echo "usage: scripts/quarantine check|live [FILE [TODAY]]" >&2; exit 2; }
+jq -e 'type == "array"' "$file" >/dev/null 2>&1 || { echo "$file: not a JSON array of entries" >&2; exit 1; }
+
+if [[ "$mode" == live ]]; then
+  jq -r --arg today "$today" '.[] | select(.expires > $today) | [.test, .owner, .expires, .reason] | @tsv' "$file"
+  exit
+fi
+
+# Field checks in jq: one "test: why" line per problem. Noon keeps a
+# timezone-buggy mktime from moving the date.
+max=$(jq -rn --arg d "$today" '$d + "T12:00:00Z" | fromdate + 7 * 86400 | strftime("%Y-%m-%d")') || exit 1
+problems=$(jq -r --arg today "$today" --arg max "$max" '.[] | (.test // "(no test)" | tostring) as $t |
+  (if (.test | type) == "string" and (.test | test("^[A-Za-z0-9_]+/[A-Za-z0-9_]+/test[A-Za-z0-9_]+$")) then empty
+   else "\($t): test must be Target/Class/testName" end),
+  (if (.owner | type) == "string" and (.owner | test("^#[0-9]+$")) then empty
+   else "\($t): owner must be an open issue, #<number>" end),
+  (if (.reason | type) == "string" and (.reason | test("[^[:space:]]")) then empty
+   else "\($t): reason is empty: say why it fails" end),
+  (if (.expires | type) != "string" or (.expires | test("^[0-9]{4}-[0-9]{2}-[0-9]{2}$") | not) then
+     "\($t): expires must be YYYY-MM-DD"
+   elif .expires <= $today then "\($t): expired on \(.expires): fix it, or renew with a new date and reason"
+   elif .expires > $max then "\($t): expires \(.expires), more than 7 days out (latest \($max))"
+   else empty end)' "$file") || exit 1
+
+# Each test must exist: UITests/<Target>.swift is the target's main file, and
+# one of its files declares or extends Class and defines func testName(.
+dir=$(dirname "$file")
+while IFS=/ read -r target class name; do
+  [[ -n "$target" && -n "$class" && -n "$name" ]] || continue
+  found=""
+  if [[ -f "$dir/$target.swift" ]]; then
+    for f in "$dir/$target.swift" "$dir/$target+"*.swift; do
+      [[ -f "$f" ]] || continue
+      if grep -qE "(class|extension)[[:space:]]+$class([^A-Za-z0-9_]|\$)" "$f" \
+          && grep -qE "func[[:space:]]+$name[[:space:]]*\(" "$f"; then found=1; break; fi
+    done
+  fi
+  [[ -n "$found" ]] || problems+="${problems:+$'\n'}$target/$class/$name: no such test in $dir"
+done < <(jq -r '.[].test | strings | select(test("^[A-Za-z0-9_]+/[A-Za-z0-9_]+/test[A-Za-z0-9_]+$"))' "$file")
+
+# Each owner issue must be open: needs gh and GitHub.
+owners=$(jq -r '[.[].owner | strings | select(test("^#[0-9]+$"))] | unique | .[]' "$file")
+if [[ -n "$owners" ]]; then
+  if ! command -v gh >/dev/null 2>&1; then
+    echo "SKIP owner issues not checked: gh not found"
+  else
+    for o in $owners; do
+      if ! state=$(gh issue view "${o#\#}" -R "$REPO" --json state -q .state 2>&1); then
+        if [[ "$state" == *"Could not resolve"* ]]; then state=MISSING
+        else echo "SKIP owner issues not checked: gh can't read $o from $REPO"; break; fi
+      fi
+      [[ "$state" == OPEN ]] || problems+="${problems:+$'\n'}owner $o is $state, not open: remove its entries or name an open owner"
+    done
+  fi
+fi
+
+if [[ -n "$problems" ]]; then
+  echo "$problems"
+  exit 1
+fi
+echo "$(jq length "$file") quarantined, all owned and unexpired"

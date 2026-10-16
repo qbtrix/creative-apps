@@ -214,7 +214,8 @@ something. One that can't act yet is disabled and says why:
   and never the generated `docs/c4/model.json` or
   `docs/blueprints/*/features/waves.md` at all: edit your component's part in
   docs/c4/parts/ or your feature's .wave.json, and the generated workflow
-  rewrites them on dev.
+  rewrites them on dev. Only the supervisor edits the journey quarantine,
+  `UITests/quarantine.json`.
   `scripts/` means all of it, the gate included. Every target already exists.
   If you think one of these must change, say so in an issue. The fast lane
   refuses exactly this list (PROTECTED in scripts/fast-lane.sh; its tests
@@ -297,6 +298,14 @@ Crew PRs merge into `dev` at once; `main` moves only when full CI passes on
   `main..<sha>`. SwiftUI breakage can sit on `dev` until that run, so the range
   can span several PRs. The lane keeps merging while the issue is open; the
   next green run moves `main` and closes it.
+- A journey that keeps failing on `dev` for a known reason can be quarantined,
+  by the supervisor only, in `UITests/quarantine.json`: entries of
+  `{"test": "Target/Class/testName", "owner": "#<open issue>", "reason": ..., "expires": "YYYY-MM-DD"}`,
+  at most 7 days out. `scripts/ui-test` skips each live entry and lists it in
+  its output and the job summary. `scripts/ci` fails on an expired entry, a
+  closed or missing owner issue, an empty reason, or a test that isn't in
+  `UITests/`. When the owner's fix merges, the supervisor removes the entry
+  and the next `dev` run proves it.
 
 ## Commands
 
@@ -305,6 +314,7 @@ scripts/ci                                   # lint + app-state rule + design li
 swift test --filter FlareModelTests          # one suite while iterating
 bash Tests/fast_lane/test_fast_lane.sh       # fast-lane decision tests (needs jq)
 bash Tests/audit_lower/test_audit_lower.sh   # decision tests for scripts/audit-lower, CI's baseline lowering (needs jq)
+scripts/quarantine check                     # the journey quarantine's entries: owned, reasoned, unexpired (needs jq; gh for owner state)
 gh run list --workflow ci.yml --branch dev    # feature CI runs on dev
 gh run download <run-id> -n snapshots        # the PNGs from a macOS CI run
 gh run download <run-id> -n ui-screens       # whole-window PNGs from the UI journeys

@@ -104,6 +104,11 @@ jobs:
     # scripts/ci alone takes about 20 min under load and the five apps' UI
     # journeys about 30 more; 45 cut ui-test off mid-run (dev run 38792928305).
     timeout-minutes: 90
+    # issues: read lets scripts/quarantine check that each quarantined
+    # journey's owner issue is still open (the Linux container has no gh).
+    permissions:
+      contents: read
+      issues: read
     steps:
       - uses: actions/checkout@v4
       # Pin Xcode: the image's default moves. 26.6 ships the macOS 26.5 SDK.
@@ -132,6 +137,8 @@ jobs:
           sampler=$!
           trap 'kill $sampler 2>/dev/null' EXIT
           scripts/ci
+        env:
+          GH_TOKEN: ${{ github.token }}
       - name: Upload snapshots
         if: always()
         uses: actions/upload-artifact@v4
