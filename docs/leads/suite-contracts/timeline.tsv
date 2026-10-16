@@ -75,3 +75,4 @@ utc	stage	event	ref	note
 2026-10-16T22:26Z	5	heartbeat	ci	full dev runs still cancelled by newer merges (1160); 1166 queued
 2026-10-16T22:58Z	5	heartbeat	ci	full run 1181 in progress; earlier runs cancelled by merges
 2026-10-16T23:30Z	5	heartbeat	ci	full runs 1199/1202/1205 cancelled by newer merges; waiting
+2026-10-16T23:56Z	5	heartbeat	ci	full run 1215 cancelled by newer merge; waiting
