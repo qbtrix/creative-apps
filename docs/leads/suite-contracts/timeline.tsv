@@ -1,0 +1,4 @@
+utc	stage	event	ref	note
+2026-10-16T11:49Z	0	stage-start	#1332	base ebc68bf (dev); main 9e3c5f8 verified
+2026-10-16T11:52Z	2	stage-end	#1332	9 waves, 15 tasks, v2 loop
+2026-10-16T11:52Z	3	stage-start	wave 1	SC-1a
