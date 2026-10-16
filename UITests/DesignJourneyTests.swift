@@ -5,7 +5,9 @@
 // resizes the ellipse, checks the tool rail and the status line's tool are back
 // on Move after each draw and after the text placement (#278), so the move and
 // the press on the committed text select and move rather than draw again; checks Layers still marks the current page while the
-// ellipse is selected, hides a layer from its row's eye and undoes that,
+// ellipse is selected, finds Add Page and Delete Page (`design.page.add`,
+// `design.page.delete`) by the pages with Delete Page disabled on the one
+// page, hides a layer from its row's eye and undoes that,
 // places and types text (shot while typing, when the editor
 // draws at full size, and once committed, with a small box's corner handles
 // outside it), undoes and redoes, saves with -DesignSaveTo (no panel), then
@@ -100,6 +102,11 @@ final class DesignJourneyTests: XCTestCase {
         XCTAssert(design.element("design.current-page").waitForExistence(timeout: 5), "Layers lost the current page's mark")
         let window = design.app.windows.firstMatch
         XCTAssert(window.buttons["Delete Page"].waitForExistence(timeout: 3), "no Delete Page button by the pages:\n\(window.debugDescription)")
+        // The page row's commands: Add Page runs; with one page, Delete Page is disabled (its tooltip says why).
+        let addPage = window.buttons["design.page.add"], deletePage = window.buttons["design.page.delete"]
+        XCTAssert(addPage.exists && addPage.label == "Add Page" && addPage.isEnabled, "no enabled Add Page by the pages")
+        XCTAssert(deletePage.exists && deletePage.label == "Delete Page", "no Delete Page identified design.page.delete")
+        XCTAssertFalse(deletePage.isEnabled, "Delete Page is enabled with one page")
         design.shot("layers")
         // A row's eye hides that layer as one undo step, and Undo shows it again.
         let eye = window.descendants(matching: .any).matching(NSPredicate(format: "label == %@", "Hide Layer")).firstMatch
