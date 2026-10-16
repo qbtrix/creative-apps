@@ -4,7 +4,7 @@ Issue: #1325 · Packet: docs/blueprints/design/features/shell-parity.md
 Run: act-1a14478b134-5to5 · Session: claude/design-shell-parity-2jr7z3 · Started: 2026-10-16T12:00Z
 Stage: 3 wave 3
 Base: 11b1fd691dcd79cce6c2ea7473ecf9532e10fe92
-Next: wave 3 = DP-a fix round 1 (fixers sp/r1-1385, sp/r1-1386, sp/r1-1387); then DP-b review on the scoped run app=design containing #1391; DS-5 (feature-done) after DP-b's review
+Next: wait for fixers (#1385/#1386/#1387) and the diagnosis of dev-red #1393 (full run 38915938965 red, range includes #1391); then DP-b review on scoped run app=design 38917492060 (head fb72b7e5, contains #1391)
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | rounds | state | run |
@@ -37,5 +37,7 @@ Next: wave 3 = DP-a fix round 1 (fixers sp/r1-1385, sp/r1-1386, sp/r1-1387); the
 - DS-4 carries feature-done and sets the wave.json status to built.
 
 ## Open
+- dev-red #1393: full run 38915938965 red (Linux + macOS) in a range with #1391 and #1329; diagnosing whether any failure is Design's.
+- DS-3 note: the shell journey asserts suite.switcher, which SuiteWindow shows only after editor-in-window EW-8 (#1079 open); DP-b's journeys may stay red until EW-8 lands.
 - Finding issues #1385, #1386, #1387 (DP-a), fix round 1 in wave 3.
 - #1079 editor-in-window still open (needs-human); not blocking code.

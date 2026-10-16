@@ -14,3 +14,4 @@ utc	stage	event	ref	note
 2026-10-16T14:00Z	3	finding-filed	#1385 #1386 #1387	DP-a
 2026-10-16T14:16Z	3	pr-merged	#1391	DS-3 suite window move; DP-b merged
 2026-10-16T14:30Z	3	fix-round	DP-a	round 1: #1385 #1386 #1387
+2026-10-16T14:50Z	3	ci-run	38915938965	full run red (dev-red #1393), diagnosing
