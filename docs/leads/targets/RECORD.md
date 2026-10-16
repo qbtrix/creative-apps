@@ -4,7 +4,7 @@ Issue: #873 · Packet: docs/blueprints/suite/features/targets.md
 Run: act-1a13f70dda7-kche · Session: claude/feature-lead-targets-w8ietz · Started: 2026-10-15T12:10Z
 Stage: 4 round 1
 Base: 8fce5e2 (dev with BU-1b #1263)
-Next: judge round 1 on dev CI run 38823898596 (#787, head 8fce5e2, the feature-done run; queued behind 785). Then audit, screens and the critic panel.
+Next: watch ci.yml runs on dev; on the first green run whose head contains 8fce5e2, comment `Belt-Contact-Sheet: <run link>` on #873 with the size table and 'launcher has no journey shots until home'. Nothing of this feature's is red; no fix batch.
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -21,6 +21,7 @@ Next: judge round 1 on dev CI run 38823898596 (#787, head 8fce5e2, the feature-d
 ## Rounds
 | round | CI run | CI | audit vs baseline | lenses | confirmed | fixed by | clean |
 |---|---|---|---|---|---|---|---|
+| 1 | 38823898596 (8fce5e2) | Linux green; macOS build/bundle/size green; UI journeys red 19 (Halo/Photo/Library, 17 pre-existing at 75492b1, 2 from Halo #1258/#1260) | no afterglow key yet; over-baseline counts are Halo/Photo, not ours | none run: no launcher screens exist (no journey until home) | 0 for this feature | – | clean for targets; dev not green |
 
 ## Size report (run 38823898596, 8fce5e2)
 | app | executable bytes | bundle bytes | SuiteUI symbols |
@@ -33,6 +34,7 @@ Next: judge round 1 on dev CI run 38823898596 (#787, head 8fce5e2, the feature-d
 Executables total 31,308,416 bytes; app-builds.tar.gz 8,064,887 bytes. SuiteUI is linked into each of the five executables (about 5.8k symbols each).
 
 ## Decisions
+- Round 1: no critic panel. The feature adds no screen any journey or snapshot captures (packet: no journey until home), so there is nothing for critics to read; the menu stubs are covered by LauncherMenuStubTests.
 - BU-1b: AfterGlow > Settings… is the Settings scene's own working item (packet step 3: ⌘, opens Settings), not a disabled stub; LauncherCommandsSettings is an empty group for the settings feature.
 - TG-0 goes in as C4 parts (docs/c4/parts/), not a model.json edit: model.json is generated now and no PR edits it; parts are lane work, so the lead opens them instead of waiting on the supervisor.
 - TG-0 split in four (a, b, c, d) to keep each PR at 15 files or fewer; the new parts carry no relationships so a, b, c are independent; d adds all 23 relationships once every end exists.
