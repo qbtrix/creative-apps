@@ -37,3 +37,4 @@ utc	stage	event	ref	note
 2026-10-16T17:11Z	3	heartbeat	38934137818	design run red, same journeys; 38936731510 in progress
 2026-10-16T17:34Z	3	heartbeat	38936731510	design run red; waiting
 2026-10-16T17:55Z	3	heartbeat	38936404407	no new design run; full run in progress
+2026-10-16T18:17Z	3	heartbeat	38936404407	full CI red: DesignShell journeys + Halo easing; Linux green
