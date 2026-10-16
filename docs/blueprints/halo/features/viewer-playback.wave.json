@@ -2,7 +2,7 @@
   "title": "See and play the composition",
   "wave": "W1",
   "order": 10,
-  "status": "building",
+  "status": "built",
   "feature_issue": "#1035",
   "covers": "#37, #457",
   "waits_on": "foundation #777; #333 (journey files); #340 not blocking (plain buttons meanwhile)",

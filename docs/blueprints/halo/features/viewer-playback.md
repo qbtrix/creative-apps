@@ -9,7 +9,7 @@ sits in the status row. It replaces the W0 stubs for drawing, the clock and
 the renderer, and turns on the playback commands.
 **Line:** `line:halo` · **Wave:** W1 (`waves.md`) · **Lead branch:** `lead/viewer-playback`
 
-**Status (2026-10-15):** built on `dev`, in the lead's Anatomy loop. VP-1
+**Status (2026-10-16):** built on `dev`; the lead's Anatomy loop is finished. VP-1
 to VP-12 merged (#1090, #1072, #1087, #1069, #1098, #1111, #1101, #1085,
 #1099, #1125, #1097, #1102, #1124). The `feature-done` run on #1124's head
 never reached the journeys: AppSnapshotTests didn't compile
@@ -22,7 +22,13 @@ half-opaque layers mix in linear light on the canvas, as in the render
 light (#1194); journeys read the viewer's summaries by label (#1211); H-J2
 and H-J4 match the Model's naming and timing (#1246, #1259); Loop shows its
 state (#1247); the transport has 24 pt hit targets (#1258); the status
-readout names the frame (#1260). SuiteUI asks: #1257, #273, #340.
+readout names the frame (#1260). Round 4: the status bar fits the content
+column at 1000 pt again (#1264, #1268); H-J13 judges each control by its
+current state (#1277) and from frame 0, since a play-once pass started on
+the last frame ends there before XCUITest's idle wait returns (#1590); the
+inspector's scroller no longer counts as an unnamed control (#1280).
+Scoped halo run 38952256967 passes H-J2, H-J3, H-J4 and H-J13. SuiteUI asks:
+#1257, #273, #340.
 
 **Covers:** #37, #457. #457 closes with VP-4b; #37 closes with VP-12, the
 `feature-done` PR. The other tasks say "Part of #37" or "Part of the
