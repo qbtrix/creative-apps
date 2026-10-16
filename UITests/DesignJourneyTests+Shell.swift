@@ -10,7 +10,8 @@
 // SuiteWindow and turned it on. The palette shows only while a file is open, so
 // the empty window is checked region by region rather than by expectEditorWindow().
 // The app switcher comes with editor-in-window's EW-8 (#1337), so each test checks
-// it last (expectSwitcher), after every other step has run and reported (#1444).
+// it last (expectSwitcher), after every other step has run and reported (#1444),
+// between the leading and trailing toolbar items rather than centred (#1561).
 // A plain Text reads its words as its value on macOS, so texts are read by label or value.
 import XCTest
 
@@ -142,13 +143,25 @@ final class DesignShellJourneyTests: XCTestCase {
         XCTAssert(found.isEmpty, "the palette covers a ruler or a handle:\n" + found.joined(separator: "\n"))
     }
 
-    /// The app switcher, centred in the toolbar and inside the window beside the
-    /// toolbar items. Last in each test: it shows once #1337 (EW-8) merges.
+    /// The app switcher between the title's leading items (the sidebar toggle,
+    /// New, Open, Save) and the trailing ones (Undo onward), every toolbar item
+    /// hittable so none went into the overflow, inside the window. The system
+    /// doesn't centre a principal item on the window (#1561). Last in each test:
+    /// it shows once #1337 (EW-8) merges.
     @MainActor private func expectSwitcher(_ design: Journey) {
         let switcher = design.element("suite.switcher")
         XCTAssert(switcher.waitForExistence(timeout: 5), "no app switcher (suite.switcher)")
-        let window = design.app.windows.firstMatch.frame
-        XCTAssertEqual(switcher.frame.midX, window.midX, accuracy: 2, "the switcher isn't centred in the toolbar")
+        let window = design.app.windows.firstMatch.frame, frame = switcher.frame
+        let leading = ["suite.sidebarToggle", "design.bar.new", "design.bar.open", "design.bar.save"]
+            .map { design.element($0).frame.maxX }.max() ?? window.minX
+        let trailing = ["design.bar.undo", "design.bar.redo", "design.bar.zoom-out", "design.bar.fit", "design.bar.zoom-in"]
+            .map { design.element($0).frame.minX }.min() ?? window.maxX
+        XCTAssert(frame.minX >= leading, "the switcher starts at \(frame.minX), before Save ends (\(leading))")
+        XCTAssert(frame.maxX <= trailing, "the switcher ends at \(frame.maxX), past Undo's start (\(trailing))")
+        XCTAssert(window.contains(frame), "the switcher \(frame) isn't inside the window \(window)")
+        for identifier in Self.bar {
+            XCTAssert(design.element(identifier).isHittable, "\(identifier) isn't hittable (in the overflow?)")
+        }
         design.expectShellGeometry(minimums: ["suite.switcher": (width: 1, height: 1)], regions: ["suite.switcher": switcher])
     }
 
