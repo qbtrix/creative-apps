@@ -4,13 +4,20 @@
 // `CACurrentMediaTime()` reads; it passes each target to `onTick`, and the
 // transport sends it on as `.tick(now)`, which calls `HaloProject.tick(now:)`.
 // It never reads wall time. The app's link is `HaloScreenLink`, the main
-// screen's `NSScreen.displayLink(target:selector:)` (macOS 14+); tests inject
-// a link they fire by hand, so no unit test ever starts a real display link.
+// screen's `NSScreen.displayLink(target:selector:)` (macOS 14+), read from
+// the `haloRefreshLink` environment value so a test hosting the whole window
+// can swap in a link it fires by hand; no unit test ever starts a real one.
 // The transport stops the driver as soon as the Model stops playing, so a
 // paused composition costs no refreshes.
 #if canImport(AppKit)
 import AppKit
 import QuartzCore
+import SwiftUI
+
+extension EnvironmentValues {
+    /// The link the transport's driver plays on: the main screen's display link.
+    @Entry var haloRefreshLink: HaloPlaybackDriver.LinkMaker = HaloScreenLink.make
+}
 
 /// Something that calls back once per refresh until it is invalidated.
 @MainActor

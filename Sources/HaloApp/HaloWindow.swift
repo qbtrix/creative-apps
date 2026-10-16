@@ -31,7 +31,15 @@ struct HaloWindow: View {
     /// The dialog an area's route asked for; its area's hook shows it and sets it back to nil.
     @State var request: HaloWindowRequest?
 
+    #if DEBUG
+    /// How many times a window's body ran; HaloWindowPlaybackTests counts playback's.
+    static var bodyRuns = 0
+    #endif
+
     var body: some View {
+        #if DEBUG
+        let _ = Self.bodyRuns += 1
+        #endif
         let newComposition = ToolbarAction("New Composition…", systemImage: "plus", identifier: "halo.composition.new") {
             perform(.newComposition)
         }

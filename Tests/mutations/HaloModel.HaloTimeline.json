@@ -1,0 +1,4 @@
+[
+{"label":"scrubChanges drops the clamp","file":"Sources/HaloModel/HaloTimeline.swift","find":"return min(max(frame, 0), comp.lastFrame) != comp.playheadFrame","replace":"return frame != comp.playheadFrame","tests":"HaloPlaybackWritesTests"},
+{"label":"scrubChanges says yes with no composition","file":"Sources/HaloModel/HaloTimeline.swift","find":"guard let comp = selectedComposition else { return false }\n        return min","replace":"guard let comp = selectedComposition else { return true }\n        return min","tests":"HaloPlaybackWritesTests"}
+]
