@@ -1,8 +1,8 @@
 // DesignActionsTests.swift: the workspace actions of DesignActions.swift on
 // DesignFixtures.cards (every layer inside Desktop). On `.fake` each command is
 // one named step and a refusal records none; the help law holds through the
-// workspace; on `.live` one-layer delete, nudge and align keep today's methods
-// while several layers are refused with the slot's "isn't built yet."; minted
+// workspace; on `.live` one-layer delete, nudge and align keep today's methods;
+// on an all-NotBuilt set several layers are refused with the slot's "isn't built yet."; minted
 // ids never repeat; Zoom to Selection and Select All. Runs on Linux and macOS.
 @testable import DesignModel
 import Testing
@@ -148,20 +148,21 @@ private func allIDs(_ nodes: [DesignNode]) -> [String] { nodes.flatMap { [$0.id]
         #expect(refusal(&lined, .align(.left)) == .unchanged && lined.history.undo.count == 1)
     }
 
-    @Test func severalLayersOnLiveAreNotBuilt() {
+    @Test func severalLayersOnNotBuiltAreRefused() {
+        let notBuilt = DesignNotBuiltTests.notBuilt
         let several: [(DesignCommand, String)] =
             [(.delete, "Editing several layers")]
             + DesignDirection.allCases.map { (.nudge($0, large: false), "Editing several layers") }
             + DesignAlignEdge.allCases.map { (.align($0), "Aligning several layers") }
         for (command, feature) in several {
-            var workspace = cards(.live, [a, b])
+            var workspace = cards(notBuilt, [a, b])
             let before = workspace
             #expect(workspace.help(command) == "\(feature) isn't built yet.", "\(command)")
             #expect(refusal(&workspace, command) == .notBuilt(feature), "\(command)")
             #expect(workspace == before && workspace.history.undo.isEmpty, "\(command)")
         }
-        #expect(cards(.live, [a, b]).transformHelp == "Editing several layers isn't built yet.")
-        #expect(cards(.live, [a]).transformHelp == nil)
+        #expect(cards(notBuilt, [a, b]).transformHelp == "Editing several layers isn't built yet.")
+        #expect(cards(notBuilt, [a]).transformHelp == nil)
     }
 
     @Test func mintNeverHandsOutAHeldID() throws {
@@ -202,8 +203,9 @@ private func allIDs(_ nodes: [DesignNode]) -> [String] { nodes.flatMap { [$0.id]
     @Test func zoomToSelectionFollowsTheFraming() {
         let workspace = cards(.fake, [a, b])
         #expect(workspace.zoomToSelectionRect == rc(100, 100, 400, 120) && workspace.zoomToSelectionHelp == nil)
-        #expect(cards(.live, [a]).zoomToSelectionHelp == "Zoom to Selection isn't built yet.")
-        #expect(cards(.live, [a]).zoomToSelectionRect == nil)
+        #expect(cards(DesignNotBuiltTests.notBuilt, [a]).zoomToSelectionHelp == "Zoom to Selection isn't built yet.")
+        #expect(cards(DesignNotBuiltTests.notBuilt, [a]).zoomToSelectionRect == nil)
+        #expect(cards(.live, [a]).zoomToSelectionRect == rc(100, 100, 100, 80))
     }
 
     @Test func selectAllSelectsTheVisibleUnlockedLayersAtTheSelectionsLevel() {
