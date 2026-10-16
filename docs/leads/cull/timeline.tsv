@@ -41,3 +41,4 @@ utc	stage	event	ref	note
 2026-10-16T23:00Z	4	review	round2	panel: 8 confirmed, #1718-#1722 filed; #1718 rerouted
 2026-10-16T23:00Z	4	pr-opened	#1717	r2-b1 auto-advance snapshot test
 2026-10-16T23:10Z	4	pr-opened	round2	#1730 #1732; #1717 merged
+2026-10-16T23:21Z	4	pr-merged	round2	#1730 #1732 merged
