@@ -162,6 +162,11 @@ every step.
   `CI: PASS` on your branch rebased on `origin/dev`, and the PR body carries
   the `Fast-Check: pass` / `Head: <sha>` marker for that head. Both CI jobs
   run on `dev` once a feature is built; `main` only takes a green `dev` SHA.
+- **Proof is per app.** A slice is verified by a green scoped run on `dev`
+  (`ci.yml` with `app`, titled `scoped: <app>`): every target and bundle
+  builds, and only that app's Model tests, snapshots and journeys run, so
+  another app's red test can't block it. Only a full run moves `main`.
+  Gate: the `macOS (<app>)` job.
 
 ## Reading cost
 
