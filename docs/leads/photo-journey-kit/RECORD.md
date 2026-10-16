@@ -2,9 +2,9 @@
 
 Issue: #1073 · Packet: docs/blueprints/photo/features/photo-journey-kit.md
 Run: act-1a1406baff9-fu36 · Session: cloud lead session · Started: 2026-10-15T16:36Z
-Stage: 5 finish (stopped after round 4 of 4)
+Stage: done
 Base: 9f28a9f7dcb6e9d584a7c80847e8ef0108fa5e17
-Next: nothing for the lead. A resumed lead only checks whether a dev CI run containing cdcfb62 went green; if so, reply on #1073 with that run link. Otherwise the supervisor decides.
+Next: nothing; the feature is done (green run 38902728208 contains #1243; contact sheet on #1073, comment 6223315447).
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -20,6 +20,7 @@ Next: nothing for the lead. A resumed lead only checks whether a dev CI run cont
 | 4 | 38808325928 (75492b1, contains #1243) | red outside this feature (9 Photo journeys of other features, 7 Halo, 1 Library); this feature 14/14 pass | photo identifier 22 <= 23; contrast 1 > 0 from photo-documents' save alert; photo-kit-opened modal false, contrast 0 | same as round 3 | none | - | clean for this feature; run red elsewhere |
 
 ## Decisions
+- Done check: #1243's own triggered run was red for other features, so the first full green dev run containing cdcfb62 (38902728208) counts as the done run.
 - Round 3: no finding in this feature's files; the red journeys and the contrast count belong to photo-documents, photo-edit, crop, Halo and Library, which the Dev red job already posted to #763. No new lenses after this round.
 - Round 2 panel ran as the lead's own read: the feature adds one screen (photo-kit-opened), so the clarity and correctness lenses fit in one pass; the other failures are outside this feature's files and are already on #763 / fixed by #1238-#1242.
 - F2-1's fixer PR also carries feature-done: #1199's triggered CI was red for other features' reasons, so the done check needs a later feature-done merge whose run is green.
@@ -31,6 +32,6 @@ Next: nothing for the lead. A resumed lead only checks whether a dev CI run cont
 - KT-1 touches only UITests/, which compiles only on macOS: the Linux gate covers lints only; the macOS run on dev the lane dispatches (UITests path + feature-done) is the real check.
 
 ## Open
-- Done check open: no green dev CI run yet; #1243 (feature-done) triggered 38807718380, red for other features (#763). Contact sheet posted on #1073 (comment 6203872377) saying so.
+- Done check met: run 38902728208 on dev 2e0f7df6 (contains cdcfb62) is green in full, with Linux, macOS UI journeys and Promote passing, and main moved there. This feature's journeys pass 15/15 and the Photo audit is at baseline (identifier 22 of 22). Contact sheet on #1073, comment 6223315447.
 - KT-1 follow-up F2-1 shipped as #1243.
 - dev-red #763: macOS jobs die before ui-test (runs 763-767 all stop in scripts/ci), so the smoke journey has not run yet; LiveRecovery fixed by #1226; run 38782884668 (f9846c9) then failed swift test on PhotoCompositeCostTests' 4x timing ratio (photo-edit, already on #763), ui-test skipped

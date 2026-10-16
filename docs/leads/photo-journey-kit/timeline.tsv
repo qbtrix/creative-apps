@@ -32,3 +32,5 @@ utc	stage	event	ref	note
 2026-10-15T22:47Z	4	ci-run	38808325928	round 4: feature 14/14 pass; red elsewhere
 2026-10-15T22:47Z	5	stage-end	#1073	Belt-Contact-Sheet comment posted (6203872377): feature journeys pass, dev red elsewhere
 2026-10-15T22:47Z	5	stopped	-	round budget 4/4 used; done check waits on a green dev run
+2026-10-16T19:41Z	5	ci-run	38902728208	green full run on 2e0f7df6 (contains #1243); main promoted
+2026-10-16T19:41Z	5	stage-end	#1073	Belt-Contact-Sheet on green run (comment 6223315447); done
