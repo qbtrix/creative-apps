@@ -28,9 +28,11 @@ The captain moved snapping into v1 the same day ("the canvas feels basic,
 needs better tool feedback"), so a seventh wave-1 feature, `snapping`,
 snaps moves, resizes and draws to other layers, the frame and the page,
 draws smart guides with distances and equal-spacing hints, lets ⌘ drag
-free, and adds View > Snap to Layers. Its engine (SN-a) is Model-only and
-starts when design-contracts closes; its routes wait on the drag files'
-wave-1 owners and its overlay on DW-d.
+free, and adds View > Snap to Layers. Its contract (SN-a) is Model-only and
+starts when design-contracts closes; its screen (SN-c) waits only on that
+contract and draws stubbed guides beside the engine (SN-e) and the routes
+(SN-b), which wait on the drag files' wave-1 owners; the overlay also waits
+on DW-d, and SN-f turns the live steps on once the routes have merged.
 
 Rows whose wave reads `SP1` to `SP3` belong to the shell-parity track, a
 cross-app plan whose order and shared files are in
@@ -64,7 +66,9 @@ its last PR (or files the remainder as a `gap` issue if wave 1 ends above 0).
                                 └──> SR-a (+ DW-a, DW-b) ─────────────────┴──> SR-b
  canvas-basics:  design-seams ──> CB-a (whole points) ──> select-several SS-b (S-5)
                                     └──> DW-d's last task; CB-b (+ SR-m, SR-t) ──> CB-c
- snapping:       SN-a (engine, Linux) ──> SN-b (routes; + SS-b) ──> SN-c (guides; + DW-d)
+ snapping:       SN-a (contract, Linux) ──┬──> SN-c (guides on stubs; + DW-d)
+                                          └──> SN-e (engine) ──> SN-b (routes; + SS-b)
+                 SN-c, SN-b, SN-e ──> SN-f (live steps and budgets)
                  SN-c's menu and ⌘ also wait on DW-a, CB-c and FH-b
  design-seams-2 (2): design-contracts + SR-m, SR-b, FH-a, FH-b, LP-b, SS-b,
                      design-seams, canvas-basics, snapping SN-b and SN-c, all of design-window

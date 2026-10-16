@@ -25,26 +25,29 @@ viewport and carry no label. SN-7 draws plain marks in the meantime
 (`docs/engineering/swiftui-rules.md`, rule 11); nothing here waits on it.
 
 **Depends on:** the design-contracts feature issue (the schema, the
-workspace, the fixtures): SN-1 and SN-6 start when it closes, and the rest
-of SN-a needs nothing else.
+workspace, the fixtures): SN-1 and SN-6 start when it closes. Within the
+feature, SN-e (the engine) and SN-c (the screen) wait only on SN-a, the
+contract, so the screen is built on the contract's stubs beside the engine
+and the routes (`lead.md` rule 18).
 - **Snap to pixel is canvas-basics CB-a**, not a task here. CB-2 makes
   every draw, move and resize land on whole points through
   `DesignPoint.wholePoints` and `DesignRect.wholePoints`; this feature snaps
   first and lets CB-2's rounding run after, unchanged.
-- SN-b edits `DesignCanvasEditing.swift`, so it waits on its owners before
-  it: **design-seams** (D0-3c, the several-layer and Option-drag routes),
+- SN-b edits `DesignCanvasEditing.swift` and calls the engine, so it waits
+  on SN-a and SN-e, and on its file's owners before it: **design-seams** (D0-3c, the several-layer and Option-drag routes),
   **canvas-basics CB-a** (CB-2, CB-3: whole points and the Text click-drag
   route) and **select-several SS-b** (S-5, the mid-gesture guard). The file
   passes design-seams → canvas-basics → select-several → snapping →
   design-seams-2, whose D2-3b now waits on SN-b.
-- SN-c's App tasks wait on **design-window**: SN-7 on DW-d
+- SN-c's App tasks wait on SN-a and on **design-window**: SN-7 on DW-d
   (`DesignCanvasFeedback.swift` after D0-9d; DW-b's live drag box and
   D0-8b's `bodyRuns` counter and `dragSamples` helper come before it), SN-8
   on DW-a (`DesignIntent.swift` from D0-5a, `DesignCommands.swift` from
   D0-6). SN-8 also waits on **canvas-basics CB-c** (CB-9 edits
   `DesignIntent.swift`) and **files-history FH-b** (FH-3 edits
   `DesignCommands.swift`). design-seams-2's D2-4b now waits on SN-c for
-  both files.
+  both files. SN-f edits only the journey and render budget files SN-c
+  owns, so it waits on SN-c, SN-b and SN-e.
 - `design.canvas.guides` joins design-window D0-5a's up-front id list
   (`DesignControlID`), as DW-d's and canvas-basics' ids did.
 
@@ -72,19 +75,34 @@ inputs"). These are the ones this feature fixes, as behaviour:
 ## Slices
 
 A slice is the unit of done: its tasks have merged and its journeys pass on
-the Design-scoped macOS run (SN-a's MJ10 and SN-b's MJ11 on the Linux gate).
+the Design-scoped macOS run (SN-a's MJ12, SN-e's MJ10 and SN-b's MJ11 on the
+Linux gate).
 
 | slice | behavior (one sentence) | tasks | journeys | waits on |
 |---|---|---|---|---|
-| SN-a | Given the layers a drag can line up with, the snap engine finds the offset that puts an edge or centre on another layer's, the frame's or the page's, or makes a gap equal its neighbour's, and names the guides, distances and spacing hints that result. | SN-1, SN-2, SN-3 | MJ10 | – (design-contracts, the feature) |
-| SN-b | Moving, resizing and drawing on the canvas, with one layer or several and with an Option-drag copy, snap to those lines and gaps before whole points, build the engine once per drag, and snap to nothing while ⌘ is held. | SN-4, SN-5 | MJ11 | design-seams, canvas-basics CB-a, select-several SS-b (SN-4) |
-| SN-c | The canvas draws the smart guides, distance labels and spacing hints while a drag snaps, and View > Snap to Layers turns snapping off and on, remembered across relaunches. | SN-6, SN-7, SN-8 | `testSnapAndSmartGuides` | design-window DW-d (SN-7); design-window DW-a, canvas-basics CB-c, files-history FH-b (SN-8) |
+| SN-a | The guide types, the ⌘ and setting modifier, the layers a drag can line up with and the engine's shape are declared, with stubs for everything the screen calls (a fixed guide set while a drag runs, none otherwise), so the screen and the snap logic build in parallel. | SN-1, SN-9 | MJ12 | – (design-contracts, the feature) |
+| SN-b | Moving, resizing and drawing on the canvas, with one layer or several and with an Option-drag copy, snap to those lines and gaps before whole points, build the engine once per drag, and snap to nothing while ⌘ is held. | SN-4, SN-5 | MJ11 | SN-a, SN-e, design-seams, canvas-basics CB-a, select-several SS-b (SN-4) |
+| SN-c | The canvas draws the smart guides, distance labels and spacing hints while a drag snaps (the stubbed guides first, the live ones once the routes land), and View > Snap to Layers turns snapping off and on, remembered across relaunches. | SN-6, SN-7, SN-8 | `testSnapAndSmartGuides` | SN-a (SN-7, SN-8); design-window DW-d (SN-7); design-window DW-a, canvas-basics CB-c, files-history FH-b (SN-8) |
+| SN-e | Given the layers a drag can line up with, the snap engine finds the offset that puts an edge or centre on another layer's, the frame's or the page's, or makes a gap equal its neighbour's, and names the guides, distances and spacing hints that result. | SN-2, SN-3 | MJ10 | SN-a |
+| SN-f | Moving, resizing and drawing on the real canvas show the live smart guides, and the journey's snapped drags, guide reads and budgets pass on the live services. | SN-10, SN-11 | `testSnapAndSmartGuides` | SN-b, SN-e, SN-c |
 
-SN-a is the contract and comes first (rule 12): the guide types, the
-`.noSnap` modifier and `snapGuides` that SN-c's overlay reads. It is pure
-Model code with no wait past design-contracts, so it can be done on Linux
-while wave 1 builds the routes it plugs into. SN-c is `"ui": true`: the
-feel gate and a Mac finisher pass (`lead.md`, rules 15 and 17).
+SN-a is the contract and comes first (rule 12), and it declares every Model
+signature the screen calls as a stub (rule 18, contract widening): the
+guide types, the snapping-off flag (`.noSnap`, its init, the defaults key)
+and `snapGuides`, which returns a fixed guide set while a drag runs and
+nothing otherwise. SN-1 declares the types, the modifier, the candidates
+and the engine files' signatures; SN-9 adds the stubs the screen draws
+from. A slice needs two tasks, so the stubs are their own small task. It
+is pure Model code with no wait past design-contracts, so it can be done on
+Linux. Then two tracks run in parallel. SN-c, the screen, is `"ui": true`
+(the feel gate and a Mac finisher pass, `lead.md` rules 15 and 17): it
+waits only on SN-a and draws the stubbed guides, with View > Snap to Layers
+as its visible control. SN-e builds the engine and SN-b the routes, and
+never wait on the screen. SN-f is the integrate step: it waits on SN-b, SN-e
+and SN-c, turns on the journey's live steps and runs the render budget on
+the live guides, and its last task carries `feature-done`. It sits in its
+own slice because a slice that waits on SN-b would stop SN-c counting as
+the screen's slice (`scripts/waves check`).
 
 ## Journey steps
 
@@ -95,11 +113,15 @@ drag, so the canvas publishes the guide set as an accessibility value:
 `design.canvas.guides` reads the summary of the drag under way, and after
 mouse-up the last drag's, until the next press (`"x 300, y 140, gap x 100,
 spacing x 100"`, or `"none"`). Holding ⌘ is a key, so it's proven in MJ11
-and SN-8's hosted check, not here. Live services, `-DesignFixture cards`,
-at the window's fitted zoom (under 100 %).
+and SN-8's hosted check, not here. `-DesignFixture cards`, at the window's
+fitted zoom (under 100 %). The steps that click View and read the menu's
+checkmark run on the stubs; the steps that drag and read X, W, H or the
+guides value need the live routes, so they sit behind
+`DesignSnapJourneyTests.snapIsLive`, false until SN-10 sets it.
 
 1. **SN-c** `testSnapAndSmartGuides` (`+Snap`, class
-   `DesignSnapJourneyTests`; SN-6 writes it, SN-7 turns it on). Screen
+   `DesignSnapJourneyTests`; SN-6 writes it, SN-7 turns on the stub steps,
+   SN-10 the live ones). Screen
    positions come from the `design.canvas.selection` element's frame, so
    each drag stops 2 screen points short of its target, inside the
    window's snap reach of 8 screen points:
@@ -130,11 +152,16 @@ at the window's fitted zoom (under 100 %).
       less than 200. Click Undo.
    9. *On again:* click View > Snap to Layers; repeat step 2's drag: X reads
       200. Click Undo. The journey leaves the setting on.
-2. **MJ10** `walkEngine`, a Linux Model walk in `DesignSnapEngineTests` on
-   `cards` (SN-1 writes it disabled, SN-3 turns it on): A's candidates;
-   A's box at (297.4, 100.4) gets offset (2.6, -0.4) from the lines; C's box
+2. **MJ12** `walkSnapContract`, a Linux Model walk in
+   `DesignSnapCandidateTests` on `cards` (SN-1 writes it, SN-9 extends it;
+   green from SN-9): A's candidates; the modifiers map ⌘ or the setting off
+   to `.noSnap`; `summary` of the empty set and of a full one;
+   `snapGuides` is nil with no drag and `DesignSnapGuides.fake` while one
+   runs; the engines' stubs find no line, no gap and no offset.
+3. **MJ10** `walkEngine`, a Linux Model walk in `DesignSnapEngineTests` on
+   `cards` (SN-1 writes it disabled, SN-3 turns it on): A's box at (297.4, 100.4) gets offset (2.6, -0.4) from the lines; C's box
    at x 603 gets -3 from the spacing; distances and spacing hints for each.
-3. **MJ11** `walkSnapping`, a Linux Model walk in `DesignSnapWalkTests` on
+4. **MJ11** `walkSnapping`, a Linux Model walk in `DesignSnapWalkTests` on
    `cards` (SN-4 writes it disabled, SN-5 turns it on): a move, a several
    move, an Option-drag copy, a resize, a Shift and an Option resize, a
    rectangle draw and a Text click-drag, each snapped, then each again with
@@ -176,10 +203,16 @@ public struct DesignSnapGuides: Sendable, Hashable {
     /// "x 300, y 140, gap x 100, spacing x 100": lines (x, then y, by position), then gaps,
     /// then spacing hints; "none" when empty. The guide mark's accessibility value.
     public var summary: String { get }
+    public init(lines: [DesignSnapLine] = [], gaps: [DesignSnapGap] = [])
+    public static let empty: DesignSnapGuides
+    /// A fixed set for the screen to draw before the routes exist (SN-9): one line at x 300,
+    /// a gap of 100 on x and a spacing hint of 100; its `summary` is "x 300, gap x 100, spacing x 100".
+    public static let fake: DesignSnapGuides
 }
 extension DesignWorkspace {
     /// The guides of the drag under way: nil when no gesture runs, empty when one runs and
-    /// nothing lined up. SN-1 returns nil; SN-4 reads the gesture.
+    /// nothing lined up. A stub until SN-4: nil with no gesture, `.fake` while one runs
+    /// (SN-1 returns nil, SN-9 adds the fake); SN-4 reads the gesture and never changes the signature.
     public var snapGuides: DesignSnapGuides? { get }
 }
 extension DesignModifiers {
@@ -204,7 +237,7 @@ extension DesignWorkspace {
 
 The engine, built once per gesture from the candidates, each in its own
 file so SN-2 and SN-3 share nothing (SN-1 adds both with these signatures
-and empty bodies):
+and stub bodies that return nothing: no line, no gap, no offset):
 
 ```swift
 // DesignSnapLines.swift (SN-2): each candidate's min, centre and max on both axes, bucketed by position.
@@ -281,7 +314,7 @@ routes (SN-4 moves, SN-5 resize and draw), in DesignCanvasEditing:
   snap first, whole points second: a candidate at a fraction (an old file's 820.3) can't be met,
     the rounding wins, and no guide is reported for it
 
-overlay (SN-7), in DesignCanvasFeedback, no model write:
+overlay (SN-7), in DesignCanvasFeedback, no model write; on the stubs it draws .fake, later the live set:
   g = (live.workspace ?? model).snapGuides
   draw g's lines (1 pt accent, end crosses) and gaps (thin line plus caption pill), one size at any zoom
   @State last: String?                              # the a11y value after mouse-up
@@ -309,29 +342,35 @@ meanings. Whole points stay on under ⌘, as canvas-basics says.
 Every task is one PR to `dev`: at most 400 changed lines and 15 files,
 label `fast-lane`, body lines `Belt-Lead:`, `Feature: snapping`,
 `Slice:`, `Fast-Check: pass`, `Head:`, the snapshot PNGs it changes, and
-for a task with mutations its `Mutate:` score line. SN-7 also carries
+for a task with mutations its `Mutate:` score line. SN-11 also carries
 `feature-done`. Paths drop `Sources/DesignModel/` and `Sources/DesignApp/`.
 
 | id | issue | what | owned files | depends on | size |
 |---|---|---|---|---|---|
-| SN-1 | – | The contract: the guide types, `summary`, `.noSnap` and its init, the defaults key, `snapGuides` (nil), `snapCandidates`; `DesignSnapLines` and `DesignSnapGaps` with their signatures and empty bodies; MJ10 written first, disabled | `DesignSnapping.swift`, `DesignSnapLines.swift`, `DesignSnapGaps.swift`; `Tests/DesignModelTests/DesignSnapCandidateTests.swift`, `Tests/DesignModelTests/DesignSnapEngineTests.swift`; `Tests/mutations/DesignModel.DesignSnapping.json` | – | ~300, 6 |
+| SN-1 | – | The contract: the guide types, `summary`, `.noSnap` and its init, the defaults key, `snapGuides` (nil), `snapCandidates`; `DesignSnapLines` and `DesignSnapGaps` with their signatures and stub bodies; MJ10 written first, disabled; MJ12 written | `DesignSnapping.swift`, `DesignSnapLines.swift`, `DesignSnapGaps.swift`; `Tests/DesignModelTests/DesignSnapCandidateTests.swift`, `Tests/DesignModelTests/DesignSnapEngineTests.swift`; `Tests/mutations/DesignModel.DesignSnapping.json` | – | ~300, 6 |
 | SN-2 | – | Edges and centres: the bucketed lines, `offset` and `lines(on:)` | `DesignSnapLines.swift`; `Tests/DesignModelTests/DesignSnapLineTests.swift`; `Tests/mutations/DesignModel.DesignSnapLines.json` | SN-1 | ~250, 3 |
-| SN-3 | SN-a's gap issue (closes) | Distances and equal spacing: the grid, `gaps(around:)` and `spacingOffset`; turns on MJ10 | `DesignSnapGaps.swift`; `Tests/DesignModelTests/DesignSnapGapTests.swift`, `Tests/DesignModelTests/DesignSnapEngineTests.swift`; `Tests/mutations/DesignModel.DesignSnapGaps.json` | SN-1, SN-2 | ~300, 4 |
-| SN-4 | – | The gesture builds the engine once at the press; a move, a several move and an Option-drag copy snap before whole points; `.noSnap` snaps nothing; `snapGuides` reads the gesture; MJ11 written first, disabled | `DesignCanvasEditing.swift`, `DesignSnapping.swift`; `Tests/DesignModelTests/DesignSnapMoveTests.swift`, `Tests/DesignModelTests/DesignSnapWalkTests.swift`, `Tests/DesignModelTests/DesignSnapBudgetTests.swift`; `Tests/mutations/DesignModel.DesignCanvasEditing.json`, `Tests/mutations/DesignModel.DesignSnapping.json` | SN-2, SN-3; design-seams; canvas-basics CB-a; select-several SS-b | ~350, 7 |
+| SN-3 | SN-e's gap issue (closes) | Distances and equal spacing: the grid, `gaps(around:)` and `spacingOffset`; turns on MJ10 | `DesignSnapGaps.swift`; `Tests/DesignModelTests/DesignSnapGapTests.swift`, `Tests/DesignModelTests/DesignSnapEngineTests.swift`; `Tests/mutations/DesignModel.DesignSnapGaps.json` | SN-1, SN-2 | ~300, 4 |
+| SN-4 | – | The gesture builds the engine once at the press; a move, a several move and an Option-drag copy snap before whole points; `.noSnap` snaps nothing; `snapGuides` reads the gesture, replacing SN-9's fake; MJ11 written first, disabled | `DesignCanvasEditing.swift`, `DesignSnapping.swift`; `Tests/DesignModelTests/DesignSnapMoveTests.swift`, `Tests/DesignModelTests/DesignSnapWalkTests.swift`, `Tests/DesignModelTests/DesignSnapBudgetTests.swift`; `Tests/mutations/DesignModel.DesignCanvasEditing.json`, `Tests/mutations/DesignModel.DesignSnapping.json` | SN-2, SN-3, SN-9; design-seams; canvas-basics CB-a; select-several SS-b | ~350, 7 |
 | SN-5 | SN-b's gap issue (closes) | A resize (one or several, Shift, Option) snaps its dragged edges; a draw and a Text click-drag snap their start and end; turns on MJ11 | `DesignCanvasEditing.swift`; `Tests/DesignModelTests/DesignSnapResizeDrawTests.swift`, `Tests/DesignModelTests/DesignSnapWalkTests.swift`, `Tests/DesignModelTests/DesignSnapBudgetTests.swift`; `Tests/mutations/DesignModel.DesignCanvasEditing.json` | SN-4 | ~320, 5 |
-| SN-6 | – | SN-c's journey written first, `XCTSkip("waits on SN-7")` | `UITests/DesignJourneyTests+Snap.swift` | – | ~170, 1 |
-| SN-7 | SN-c's gap issue (closes) | The guide overlay in DW-d's slot: lines, distance labels and spacing hints from the live box, the `design.canvas.guides` value; the render budget test; turns SN-6's journey on | `DesignSnapGuides.swift`, `DesignCanvasFeedback.swift`; `Tests/AppSnapshotTests/DesignSnapGuideSnapshots.swift`, `Tests/AppSnapshotTests/RenderBudgetDesignSnapTests.swift`; `UITests/DesignJourneyTests+Snap.swift` | SN-5, SN-6, SN-8; design-window DW-d | ~330, 5; `feature-done` |
+| SN-6 | – | SN-c's journey written first, `XCTSkip("waits on SN-7")`, its drag and guide steps behind `snapIsLive` | `UITests/DesignJourneyTests+Snap.swift` | – | ~170, 1 |
+| SN-7 | SN-c's gap issue (closes) | The guide overlay in DW-d's slot, drawing `snapGuides` (the fake's set until the routes land): lines, distance labels and spacing hints, the `design.canvas.guides` value; snapshots from fixed guide sets; the render budget test on the fake guides; turns on SN-6's journey except the `snapIsLive` steps | `DesignSnapGuides.swift`, `DesignCanvasFeedback.swift`; `Tests/AppSnapshotTests/DesignSnapGuideSnapshots.swift`, `Tests/AppSnapshotTests/RenderBudgetDesignSnapTests.swift`; `UITests/DesignJourneyTests+Snap.swift` | SN-6, SN-8, SN-9; design-window DW-d | ~300, 5 |
 | SN-8 | – | View > Snap to Layers, stored under `DesignSnapSettings.defaultsKey`; `DesignModifiers.current` adds `.noSnap` for ⌘ or the setting off | `DesignIntent.swift`, `DesignCommands.swift`; `Tests/AppSnapshotTests/DesignSnapSettingTests.swift` | SN-1; design-window DW-a; canvas-basics CB-c; files-history FH-b | ~160, 3 |
+| SN-9 | SN-a's gap issue (closes) | The stubs the screen calls: `DesignSnapGuides.init`, `.empty` and `.fake`, `snapGuides` returning `.fake` while a drag runs and nil otherwise; MJ12 extended and green | `DesignSnapping.swift`; `Tests/DesignModelTests/DesignSnapCandidateTests.swift`; `Tests/mutations/DesignModel.DesignSnapping.json` | SN-1 | ~120, 3 |
+| SN-10 | – | The integrate step: sets `snapIsLive`, so the journey's snapped drags and guide reads run on the live routes (steps 2 to 9); fixes whatever the live guides show the overlay got wrong | `UITests/DesignJourneyTests+Snap.swift` | SN-5, SN-7 | ~60, 1 |
+| SN-11 | SN-f's gap issue (closes) | The render budget on the live guides: a 120-sample move, resize and draw read the live copy's summary; `feature-done` | `Tests/AppSnapshotTests/RenderBudgetDesignSnapTests.swift` | SN-10 | ~120, 1; `feature-done` |
 
 SN-2 and SN-3 each fill the stub file SN-1 adds, so they share no file.
 SN-3 waits on SN-2 only because MJ10, which it turns on, walks the lines
-too. SN-4 calls both engines and edits `DesignSnapping.swift` after SN-1
-(`snapGuides` reads the gesture). SN-5 edits SN-4's
-`DesignCanvasEditing.swift`, walk and budget file. SN-7 draws what the
-routes produce and times a snapped move, resize and draw, so it needs SN-5;
-it turns on the journey, whose steps 7 to 9 need SN-8's toggle. SN-8 needs
-only SN-1's `.noSnap` and its init. Each journey or walk file passes to the
-task that turns it on. Existing Model tests that drag a layer near another
+too. SN-9 edits the `DesignSnapping.swift` SN-1 adds and runs beside SN-2.
+SN-4 calls both engines and edits `DesignSnapping.swift` after SN-9
+(`snapGuides` reads the gesture instead of returning the fake). SN-5 edits
+SN-4's `DesignCanvasEditing.swift`, walk and budget file. SN-7 draws
+`snapGuides` and needs none of SN-2 to SN-5: it runs on SN-9's fake, and it
+turns on the journey's menu steps with SN-8's toggle. SN-10 and SN-11 are
+the integrate step and wait on SN-5 and SN-7 (SN-3 comes with SN-5): the
+journey's drags and the render budget need the routes and the screen both.
+SN-8 needs only SN-1's `.noSnap` and its init. Each journey or walk file
+passes to the task that turns it on. Existing Model tests that drag a layer near another
 and expect the raw position back are updated in SN-4's or SN-5's PR, which
 lists them. No task edits a shared doc (`docs/c4/model.json`,
 `docs/design.md`, the blueprint or `waves.md`): every new file sits in the
@@ -341,22 +380,27 @@ the complaints above move into the blueprint at its next revision.
 ## Build waves
 
 - Wave 1: SN-1, SN-6. Independent in this wave: both.
-- Wave 2: SN-2, SN-8 (design-window DW-a, canvas-basics CB-c and files-history FH-b merged). Independent in this wave: both.
-- Wave 3: SN-3. Independent in this wave: SN-3 alone.
+- Wave 2: SN-2, SN-9, SN-8 (design-window DW-a, canvas-basics CB-c and files-history FH-b merged). Independent in this wave: all three.
+- Wave 3: SN-3, SN-7 (design-window DW-d merged). Independent in this wave: both.
 - Wave 4: SN-4 (design-seams, canvas-basics CB-a and select-several SS-b merged). Independent in this wave: SN-4 alone.
 - Wave 5: SN-5. Independent in this wave: SN-5 alone.
-- Wave 6: SN-7 (design-window DW-d merged; `feature-done`, final). Independent in this wave: SN-7 alone.
+- Wave 6: SN-10. Independent in this wave: SN-10 alone.
+- Wave 7: SN-11 (`feature-done`, final). Independent in this wave: SN-11 alone.
 
-Longest chain: SN-1 → SN-2 → SN-3 → SN-4 → SN-5 → SN-7 (6).
-Chain of 6: SN-2 fills SN-1's line stub; SN-3's MJ10 walks SN-2's lines;
+Longest chain: SN-1 → SN-2 → SN-3 → SN-4 → SN-5 → SN-10 → SN-11 (7).
+Chain of 7: SN-2 fills SN-1's line stub; SN-3's MJ10 walks SN-2's lines;
 SN-4's routes call both engines; SN-5 edits SN-4's `DesignCanvasEditing.swift`;
-SN-7 draws and times what SN-5's routes produce and carries `feature-done`.
-SN-a, the engine, is done after its first three links, on Linux alone.
+SN-10 turns on the live journey steps once the routes and the screen have
+merged; SN-11 times the live guides and carries `feature-done`.
+SN-a, the contract, is done after its first two links (SN-1, SN-9), and the
+screen (SN-6, SN-8, SN-7) is done by wave 3, before the engine and the
+routes, on the stubs.
 
 ## Acceptance test per task
 
-Checks first (rule 13): SN-a's walk MJ10 merges in SN-1, SN-b's MJ11 in
-SN-4, SN-c's journey in SN-6, each disabled by name; the Model tests merge
+Checks first (rule 13): SN-e's walk MJ10 merges in SN-1, SN-b's MJ11 in
+SN-4, SN-c's journey in SN-6, each disabled by name (SN-a's MJ12 merges
+green); the Model tests merge
 with their code. Numbers are on `cards` with the workspace's default
 `handleTolerance` of 6 pt: A (100, 100, 100 × 80), B (300, 140, 200 × 80),
 C (700, 100, 100 × 120), Title (100, 40, 200 × 32), Pair (900, 400,
@@ -366,14 +410,17 @@ files (`scripts/mutate --plan DesignModel.<File>`).
 
 | id | test | fails when | mutations |
 |---|---|---|---|
-| SN-1 | `DesignSnapCandidateTests`: A's candidates are B, C, Title, Pair, Locked, Desktop and the page, never A or Hidden; Pair's leave out E1 and E2; A and B moving together leave out both; a draw into Desktop gets Desktop's visible children, Desktop and the page; `DesignModifiers(shift: false, option: false, command: true, snapToLayers: true)` holds `.noSnap`, so does `snapToLayers: false`, and neither alone with `command: false, snapToLayers: true`; `summary` of an empty set is "none" and of one line at x 300, a gap of 100 on x and a spacing hint of 100 is "x 300, gap x 100, spacing x 100"; `snapGuides` is nil; MJ10 compiles, disabled "waits on SN-3" | a hidden or moving layer is a candidate, a locked one is dropped, or ⌘ or the setting fails to turn snapping off | `snapCandidates`: the hidden check dropped; the moving subtree kept (only the moving ids skipped). `init(shift:option:command:snapToLayers:)`: `||` becomes `&&` |
+| SN-1 | `DesignSnapCandidateTests`: A's candidates are B, C, Title, Pair, Locked, Desktop and the page, never A or Hidden; Pair's leave out E1 and E2; A and B moving together leave out both; a draw into Desktop gets Desktop's visible children, Desktop and the page; `DesignModifiers(shift: false, option: false, command: true, snapToLayers: true)` holds `.noSnap`, so does `snapToLayers: false`, and neither alone with `command: false, snapToLayers: true`; `summary` of an empty set is "none" and of one line at x 300, a gap of 100 on x and a spacing hint of 100 is "x 300, gap x 100, spacing x 100"; `snapGuides` is nil; the engines' stubs return no line, no gap and no offset; MJ12 written; MJ10 compiles, disabled "waits on SN-3" | a hidden or moving layer is a candidate, a locked one is dropped, or ⌘ or the setting fails to turn snapping off | `snapCandidates`: the hidden check dropped; the moving subtree kept (only the moving ids skipped). `init(shift:option:command:snapToLayers:)`: `||` becomes `&&` |
 | SN-2 | `DesignSnapLineTests` on A's candidates: values 297.4, 347.4, 397.4 on x give +2.6 (300, and 400 for the right edge); 294 gives +6 (exactly the tolerance); 293.9 gives nil; on y 100.4, 140.4, 180.4 give -0.4; a value equally far from two lines, 3 below and 3 above, gives -3; `lines(on:)` A at (300, 100) gives x 300 spanning Title and B, x 400, y 100, y 140 and y 180; a box at a fraction gives no line; a line at 129 catches a value at 127, across the 128 bucket edge | a value past the tolerance snaps, the nearest line loses, or a guide is reported off its line | `offset`: `<= tolerance` becomes `< tolerance`; the bucket range reads only floor(v / 64), so a line across a bucket edge is missed. `lines(on:)`: the centre left out |
 | SN-3 | `DesignSnapGapTests`: A's box at its own place has gaps x 100 to B and y 28 to Title and none left or below; C's box at x 603 gets spacing offset -3 on x (B's gap to A is 100), and at 600 the gaps hold "spacing x 100" twice (A to B, B to C); B's box at x 348.6 gets +1.4 (centred, 150 each side); a neighbour that contains the box (Desktop) or overlaps it gives no gap; a neighbour past 2,048 pt gives none; MJ10 passes | a gap is measured to the parent, an overlapping layer or the wrong side, or an equal gap is missed | `neighbour`: the overlap check on the other axis dropped, so Pair counts as A's right neighbour; the equal-gap compare uses the box's own gap twice. `spacingOffset`: the centred case dropped |
 | SN-4 | `DesignSnapMoveTests` on `cards`, `.live`: A moved by (197.4, 0.4) lands at (300, 100) with "Undo Move" and `snapGuides` holding x 300 mid-drag; the same with `.noSnap` lands at (297, 100) with no guides; A by (0.4, 0.4) stays at (100, 100) with gaps x 100 and y 28; A and B moved by (0, 277.6) land at y 380 and 420, keeping their gap, guide y 500; an Option-drag of A and B by the same lands the copies there in one "Duplicate" step, the originals unmoved; C by (-97, 0.4) lands at (600, 100) with "spacing x 100"; a 120-sample move keeps `gesture.snapBuilds` at 1 and ends equal to its last sample alone; after `endDrag` `snapGuides` is nil. `DesignSnapBudgetTests`: QD-S13 and QD-S14 (move) on `crowd` and on a flat page of 2,000 rectangles | a move ignores a line or snaps under `.noSnap`, several layers drift apart, the engine is rebuilt per sample, or a step leaves its gate | `DesignCanvasEditing`: the index built in each step instead of at the press; the `.noSnap` check dropped; the several move snaps A's frame instead of the selection's bounds. `DesignSnapping`: `snapGuides` keeps the last guides after `endDrag` |
 | SN-5 | `DesignSnapResizeDrawTests` on `cards`, `.live`: A's bottom-right handle by (97.6, 0.4) gives W 200, H 80 ("Undo Resize"), and with `.noSnap` W 198; with Shift W 200, H 160; with Option X 0, W 300, Y 100, H 80; with A and B selected, the box's bottom-right handle by (197.6, 0) puts the box's right edge on C's left edge, 700; a Rectangle drag from (497.5, 137.6) to (697.2, 222.3) gives (500, 140, 200, 80), and with `.noSnap` (498, 138, 199, 84); a Text drag from (497.5, 137.6) to (697.2, 160) gives a 200 pt fixed-width box at x 500; a click with Rectangle at (497.5, 137.6) places its default box at (498, 138), unsnapped, where DW-d's preview showed it; MJ11 passes; QD-S14 (resize, draw) | a resize snaps the edge it didn't drag, Shift or Option lose their meaning, a draw's start or end ignores a line, or a step leaves its gate | `DesignCanvasEditing`: the resize snaps every edge of the box, not the handle's; with Shift both axes snap, breaking the aspect; the draw snaps its end but not its start |
 | SN-6 | The journey compiles and skips by name on the macOS run | the skip names another task | – (journey) |
-| SN-7 | `DesignSnapGuideSnapshots`: `design-canvas-snap-guides` (A mid-move onto B's left edge: the line, its end crosses, gaps x and y), `design-canvas-snap-spacing` (C mid-move at the equal gap: two "100" pills), light and dark, at 50 % and 200 % zoom (one size); `RenderBudgetDesignSnapTests.snappedDrag` (the hosted window, D0-8b's `dragSamples`, `crowd`, Snap to Layers on): a 120-sample move, resize and draw each run `DesignEditor`'s body 3 times or fewer, and after 60 samples of a move the overlay's `design.canvas.guides` value reads the live copy's summary while the model's layer is unmoved; after mouse-up the value keeps the last summary and a new press clears it; the journey passes on the macOS run | the guides are missing, scale with zoom, read the model mid-drag, or a sample runs the editor body | – (view code; the Model half is SN-1 to SN-5's) |
+| SN-7 | `DesignSnapGuideSnapshots`: `design-canvas-snap-guides` (a fixed set: a line at x 300 with its end crosses, a gap x 100 and a gap y 28), `design-canvas-snap-spacing` (a fixed spacing set: two "100" pills), light and dark, at 50 % and 200 % zoom (one size); `RenderBudgetDesignSnapTests.snappedDrag` (the hosted window, D0-8b's `dragSamples`, `crowd`, Snap to Layers on, the stub's `.fake` guides): a 120-sample move runs `DesignEditor`'s body 3 times or fewer, and after 60 samples `design.canvas.guides` reads the fake's summary while the model's layer is unmoved; after mouse-up the value keeps the last summary and a new press clears it; the journey's stub steps pass on the macOS run (View checkmark, relaunch, the toggle) | the guides are missing, scale with zoom, read the model mid-drag, or a sample runs the editor body | – (view code; the Model half is SN-1 to SN-5's) |
 | SN-8 | `DesignSnapSettingTests` (macOS, a private `UserDefaults` suite): with no stored value Snap to Layers reads on and `.current`'s mapping has no `.noSnap`; stored false, the mapping has it; toggling the menu item writes the key; the View menu lists Snap to Layers after Fit Page, enabled with no file open | the setting doesn't persist, reads off when missing, or ⌘ and the setting aren't both honoured | – (the mapping's mutations are SN-1's) |
+| SN-9 | `DesignSnapCandidateTests` (MJ12): `snapGuides` is nil with no drag and `DesignSnapGuides.fake` while a drag runs, with `summary` "x 300, gap x 100, spacing x 100"; `.empty.summary` is "none"; the init defaults to no lines and no gaps | the screen gets nothing to draw before the routes exist, or a stale fake outlives the drag | `snapGuides`: the no-gesture nil check dropped, so the fake shows with no drag; the stub returns `.empty` instead of `.fake` |
+| SN-10 | The journey passes on the macOS run with `snapIsLive` set: steps 2 to 9, each drag's Undo title and X, W, H or guides value as listed | a step still passes only on the stubs (step 7's "none" under the fake) or a live drag shows no guides | – (journey) |
+| SN-11 | `RenderBudgetDesignSnapTests.snappedDrag` on `crowd` with live guides: a 120-sample move, resize and draw each run `DesignEditor`'s body 3 times or fewer, and after 60 samples of each `design.canvas.guides` reads the live copy's summary while the model's layer is unmoved | a snapped step runs the editor body, or the overlay reads the model mid-drag | – (view code) |
 
 ## Quality tests
 
@@ -382,7 +429,7 @@ files (`scripts/mutate --plan DesignModel.<File>`).
 | QD-S13 snap engine at the press | lines and grid built from 1,999 siblings (a flat page of 2,000 rectangles) ≤ 2 ms device / ≤ 20 ms Linux debug; on `crowd` (a frame among 40) well under | `DesignSnapBudgetTests.engineBuild` (SN-4) |
 | QD-S14 one snapped step | lines, spacing, whole points and guides for one move, resize or draw step on the flat page ≤ 0.2 ms / ≤ 2 ms; QD-S1 to QD-S3 stay inside their gates with snapping on | `DesignSnapBudgetTests.snapStep` (SN-4 move, SN-5 resize and draw); `DesignSelectBudgetTests` (select-several S-8) |
 | never per sample over all layers | a 120-sample drag builds the engine once (`snapBuilds == 1`) | `DesignSnapMoveTests` (SN-4) |
-| render: snapped drag | 120-sample move, resize and draw on `crowd` with Snap to Layers on: ≤ 3 `DesignEditor` body runs each (the window body, `lead.md` rule 15a; `swiftui-rules.md` rules 1 and 6); guide overlay frame p95 ≤ 8 ms, reported, checked by the Mac finisher | `RenderBudgetDesignSnapTests.snappedDrag` (SN-7) |
+| render: snapped drag | 120-sample move, resize and draw on `crowd` with Snap to Layers on: ≤ 3 `DesignEditor` body runs each (the window body, `lead.md` rule 15a; `swiftui-rules.md` rules 1 and 6); guide overlay frame p95 ≤ 8 ms, reported, checked by the Mac finisher | `RenderBudgetDesignSnapTests.snappedDrag` (SN-7 on the stub's fake guides, SN-11 on the live ones) |
 | QB-F3 one gesture, one step | a snapped move, resize, draw and Option-drag copy are one step each | MJ11, the journey |
 | no dead controls | Snap to Layers acts in every state; the guide mark is a value, not a control | J15 (design-window D0-7b) |
 | audit | zero new `design` counts; `design.canvas.guides` carries its id | the macOS run's audit |
@@ -395,5 +442,5 @@ contains its last merged PR (MJ10 and MJ11 on the Linux gate too), no open
 also the feel gate (rule 15: the render budget row, the `mouse` and `taste`
 lenses) and its `Mac-Finish:` line (rule 17); then `Belt-Slice-Done:
 <slice> <run url>` on the feature issue. The feature is done when SN-a,
-SN-b and SN-c are, with zero new `design` audit counts and the
-`Belt-Contact-Sheet:` comment listing the journey and both walks.
+SN-e, SN-b, SN-c and SN-f are, with zero new `design` audit counts and the
+`Belt-Contact-Sheet:` comment listing the journey and the three walks.
