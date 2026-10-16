@@ -3,7 +3,7 @@
 // on LauncherServices.shared, reloaded then observed in a `.task`, with
 // search, Open… (disabled, saying why, until a chosen file can be routed)
 // and the model published as the `homeModel` focused value for the menus.
-// HM-2b fills the New row's slot and the inspector.
+// HM-2b: the New row (HomeNewRow) and the inspector (HomeInspector).
 import AppKit
 import SuiteModel
 import SuiteUI
@@ -36,8 +36,8 @@ struct HomeWindow: View {
             onSelect: select, actions: [HomeContent.open(services, identifier: "afterglow.home.open")]
         ) {
             if showsAssets { AssetsPage() } else { HomeContent(model: model, services: services, images: images) }
-        } inspector: {  // HM-2b: HomeInspector
-            Text("Select a recent item to see its details.").foregroundStyle(SuiteColor.textSecondary)
+        } inspector: {
+            HomeInspector(model: model, services: services)
         }
         .searchable(text: Binding(get: { model.query }, set: { model.search($0, now: Date()) }))
         .task { await model.reload(now: Date()); await model.observe(now: { Date() }) }
@@ -63,16 +63,14 @@ struct HomeContent: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: SuiteSpacing.l) {
-            newRow
+            HomeNewRow(model: model)
             HomeGrid(model: model, images: images, isPreview: Self.showsPreview(services),
                      open: Self.open(services, identifier: "afterglow.home.empty.open"))
+                .homeLayoutAnchor("recents")
             HomeRunningStrip(model: model)
         }
         .padding(SuiteSpacing.xl)
     }
-
-    /// The New row's slot; HM-2b puts `HomeNewRow` here.
-    @ViewBuilder private var newRow: some View { EmptyView() }
 
     /// The "Preview data" pill shows only on the fakes, never on a live store.
     static func showsPreview(_ services: SuiteServices) -> Bool { services.isPreview }
