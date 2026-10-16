@@ -16,15 +16,11 @@ public enum FlareTool: String, CaseIterable, Sendable {
 
     /// Why the palette shows this tool disabled, as its tooltip; nil once the
     /// stage sends it drags. `FlareWorkspace.toolHelp(_:)` falls back to it.
+    /// Nil for all five: FlareStage sends every tool's drag (DK-8), and each
+    /// acts through `drag` here (FlareToolsTests).
     public var unavailableHelp: String? {
         switch self {
-        case .select: "Selecting on the stage isn't built yet (#12)."
-        case .directSelect: "Direct selection on the stage isn't wired up yet."
-        case .pen: "Drawing paths isn't built yet."
-        case .rectangle: "Drawing rectangles isn't built yet."
-        // The ellipse logic works (`drag`, `dragChanged`), but the stage
-        // doesn't send drags yet; set this to nil when it does.
-        case .ellipse: "Drawing ellipses on the stage isn't wired up yet."
+        case .select, .directSelect, .pen, .rectangle, .ellipse: nil
         }
     }
 
