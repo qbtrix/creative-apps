@@ -1,0 +1,23 @@
+[
+  {
+    "label": "decode skips the codec's check and opens anything",
+    "file": "Sources/DesignModel/Live/LiveFiling.swift",
+    "find": "try workspace.open(data)",
+    "replace": "_ = data",
+    "tests": "DesignLiveStubTests"
+  },
+  {
+    "label": "encode writes an empty workspace",
+    "file": "Sources/DesignModel/Live/LiveFiling.swift",
+    "find": "workspace.load(document.pages)",
+    "replace": "workspace.load([])",
+    "tests": "DesignLiveStubTests"
+  },
+  {
+    "label": "decode drops the file's pages",
+    "file": "Sources/DesignModel/Live/LiveFiling.swift",
+    "find": "return DesignDocument(pages: workspace.pages)",
+    "replace": "return DesignDocument(pages: Array(workspace.pages.prefix(0)))",
+    "tests": "DesignLiveStubTests"
+  }
+]
