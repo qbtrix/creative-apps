@@ -2,9 +2,9 @@
 
 Issue: #1345 · Packet: docs/blueprints/library/features/cull.md
 Run: act-1a145e74beb-obp4 · Session: cse_01BkDrX316MPq32KYU5agHQr · Started: 2026-10-16T18:10Z
-Stage: 3 wave 2
-Base: ef9dfc2e1d197ab775718f6c0197509e0bdf4c11
-Next: wave 2 (CU-3, CU-4) builders running; check their PRs and the lane, then start wave 3 (CU-5)
+Stage: 3 wave 3
+Base: 7ab292cdb1022222c00314a2b52c44c087811c46
+Next: wait for the lane to merge #1588 (CU-3) and #1579 (CU-4); CU-5 builder running; then wave 4 (CU-7)
 
 Loop: v2 (no `## Slices` table in the packet), with the findings queue and
 the 2-round cap (started after #1302 merged at 2026-10-16T04:20Z).
@@ -15,9 +15,9 @@ the 2-round cap (started after #1302 merged at 2026-10-16T04:20Z).
 | CU-1 | 1 | `cull(_:advance:)` on `cullTargets`, one named undo step, refused change sets `cullError`, `cullHelp`, `cullChange(for:)`, `setAutoAdvance`, `dismissCullError` | Sources/LibraryModel/LibraryCulling.swift, Tests/LibraryModelTests/LibraryRatingTests.swift | LibraryRatingTests | #1541 | merged |
 | CU-2 | 1 | `LiveCulling` full Auto Advance rule; `unavailable = nil` | Sources/LibraryModel/Live/LiveCulling.swift, Tests/LibraryModelTests/LibraryAutoAdvanceTests.swift | LibraryAutoAdvanceTests (live) | #1533 | merged |
 | CU-6 | 1 | `MetadataInspector` stars, flag, label identifiers `library.metadata.*`; snapshots redrawn | Sources/LibraryApp/MetadataInspector.swift, Tests/AppSnapshotTests/LibraryMetadataSnapshots.swift | LibraryMetadataSnapshots | – | done before this lead (#262) |
-| CU-3 | 2 | Auto Advance inside `cull`; undo never moves the loupe; cull budgets | Sources/LibraryModel/LibraryCulling.swift, Tests/LibraryModelTests/LibraryAutoAdvanceTests.swift, Tests/LibraryModelTests/LibraryCullBudgetTests.swift | LibraryAutoAdvanceTests, LibraryCullBudgetTests | | building |
-| CU-4 | 2 | inspector and menu edits go through `cull(_:advance: false)` | Sources/LibraryModel/MetadataEditing.swift, Tests/LibraryModelTests/LibraryMetadataTests.swift | LibraryMetadataTests | | building |
-| CU-5 | 3 | cull area: single keys, Metadata menu, Auto Advance checkmark, refused-change notice | Sources/LibraryApp/LibraryWindow+Cull.swift, Tests/AppSnapshotTests/LibraryRatingSnapshots.swift, Tests/AppSnapshotTests/LibraryAutoAdvanceSnapshots.swift | snapshots; J4 on macOS | | waiting CU-3 |
+| CU-3 | 2 | Auto Advance inside `cull`; undo never moves the loupe; cull budgets | Sources/LibraryModel/LibraryCulling.swift, Tests/LibraryModelTests/LibraryAutoAdvanceTests.swift, Tests/LibraryModelTests/LibraryCullBudgetTests.swift | LibraryAutoAdvanceTests, LibraryCullBudgetTests | #1588 | lane (macOS build) |
+| CU-4 | 2 | inspector and menu edits go through `cull(_:advance: false)` | Sources/LibraryModel/MetadataEditing.swift, Tests/LibraryModelTests/LibraryMetadataTests.swift | LibraryMetadataTests | #1579 | lane (macOS build) |
+| CU-5 | 3 | cull area: single keys, Metadata menu, Auto Advance checkmark, refused-change notice | Sources/LibraryApp/LibraryWindow+Cull.swift, Sources/LibraryApp/LibraryBrowser.swift (cull notice close button), Tests/AppSnapshotTests/LibraryRatingSnapshots.swift, Tests/AppSnapshotTests/LibraryAutoAdvanceSnapshots.swift | snapshots; J4 on macOS | | building |
 | CU-7 | 4 | J4 steps 1–8 (F and L); `feature-done`; cull.wave.json `status: built` | UITests/LibraryJourneyTests+Cull.swift, docs/blueprints/library/features/cull.wave.json | J4 | | waiting CU-5 |
 | CU-8 | – | P2 `testCullKeyLatency` (report-only) | UITests/LibraryJourneyTests+PerfCull.swift | P2 | | blocked: #782 open |
 
@@ -49,6 +49,12 @@ CU-5's keys and menu.
   the squash commit (CLAUDE.md).
 - CU-2 also touched LibraryServicesTests.swift (its stub count followed
   `LiveCulling.unavailable = nil`); accepted as the task's test.
+- CU-5 started beside wave 2 (base 7ab292c): it compiles against CU-1's
+  `cull`, `cullHelp` and `setAutoAdvance` alone; only its Auto Advance
+  snapshot needs CU-3, and snapshots run on macOS after both merge.
+- CU-5 may edit LibraryBrowser.swift for the cull notice's close button (the
+  packet's notice is dismissible; LibraryNoticeRow has none). Its owners
+  (spine closed, import built, filters-collections not started) are idle.
 - PRs open through the REST API (`gh api .../pulls`): GraphQL, which
   `gh pr create` uses, answers 403 here.
 
