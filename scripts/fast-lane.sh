@@ -35,8 +35,9 @@
 # with the base gets one comment per head and keeps its label for Belt's fixer.
 #
 # Every run sweeps all open fast-lane PRs, oldest first, and merges each
-# eligible one. A lead's PR (a `Feature:` body line) closes no issue: before
-# the squash the lane turns its closing keywords into `Refs` (lead_refs).
+# eligible one. A lead's PR (a `Feature:` body line) never closes a
+# `feature-lead` issue: before the squash the lane turns the closing keyword
+# before one into `Refs` (lead_refs); its other closing references stay.
 # After its merges the lane dispatches CI on BASE_BRANCH at most once per run
 # (dispatch_reason), when it merged a PR labelled FEATURE_LABEL,
 # merged a PR touching UI_RE (app shells, SuiteUI, snapshot tests, UI journeys),
@@ -174,23 +175,63 @@ strip_attribution() {
   grep -v -i -E '^[[:space:]]*(co-authored-by:.*(claude|anthropic)|claude-session:|_?generated (with|by) \[?claude)' || true
 }
 
-# A lead's PR has this line (CLAUDE.md, "Feature leads"): one slice of a feature.
+# A lead's PR has this line (CLAUDE.md, "Feature leads"): one slice of a
+# feature, whose issue carries FEATURE_ISSUE_LABEL. Merging a slice must never
+# close that issue (three were closed while their leads said not done), but
+# the finding and gap issues the slice fixes still close.
 LEAD_RE='^[[:space:]]*Feature:'
+FEATURE_ISSUE_LABEL="feature-lead"
+# A closing keyword (close, closes, closed, fix, fixes, fixed, resolve,
+# resolves, resolved; any case, a colon or not) and the issue it closes: #n,
+# owner/repo#n or an issue URL. jq (Oniguruma) syntax, matched with "i".
+CLOSE_RE='(?<![A-Za-z0-9_])(?<kw>close[sd]?|fix(?:e[sd])?|resolve[sd]?)(?<sep>:?[ \t]*)(?<ref>#[0-9]+|[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+#[0-9]+|https://github\.com/[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+/issues/[0-9]+)'
+# jq: a reference as owner/repo#n (#n is in REPO).
+# shellcheck disable=SC2016 # jq code, not shell
+REF_KEY_JQ='def key: if startswith("#") then $repo + . elif startswith("https://") then
+  (capture("github\\.com/(?<r>[^/]+/[^/]+)/issues/(?<n>[0-9]+)") | "\(.r)#\(.n)") else . end;'
 
-# lead_refs: the PR body on stdin, unchanged unless it is a lead's. Then each
-# closing keyword (close, closes, closed, fix, fixes, fixed, resolve, resolves,
-# resolved; any case, a colon or not) before an issue reference becomes
-# `Refs`, so merging one slice never closes the feature's issue (three were
-# closed that way while their leads said not done). Idempotent: `Refs` is no
-# keyword.
+# closing_refs: the issues the closing keywords in the body on stdin point
+# at, as owner/repo#n, one per line.
+closing_refs() {
+  jq -Rr --arg re "$CLOSE_RE" --arg repo "$REPO" "$REF_KEY_JQ"'match($re; "gi") | .captures[] | select(.name == "ref") | .string | key' | sort -u
+}
+
+# lead_refs <owner/repo#n lines>: the body on stdin with the closing keyword
+# before each of those issues turned into `Refs`; every other line and
+# keyword unchanged. Idempotent: `Refs` is no keyword.
 lead_refs() {
-  local body
-  body=$(cat)
-  if grep -qE "$LEAD_RE" <<<"$body"; then
-    jq -Rr 'gsub("(?<![A-Za-z0-9_])(close[sd]?|fix(e[sd])?|resolve[sd]?):?[ \t]*(?=#[0-9]|[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+#[0-9]|https://github\\.com/[^ \t]+/issues/[0-9])"; "Refs "; "i")' <<<"$body"
-  else
-    printf '%s\n' "$body"
-  fi
+  jq -Rr --arg re "$CLOSE_RE" --arg repo "$REPO" --arg f "$1" "$REF_KEY_JQ"'($f | split("\n")) as $f
+    | gsub($re; (.ref | key) as $k | if any($f[]; . == $k) then "Refs \(.ref)" else "\(.kw)\(.sep // "")\(.ref)" end; "i")'
+}
+
+# issue_is_feature <owner/repo#n>: sets FEATURE to y when the issue carries
+# FEATURE_ISSUE_LABEL, n when not; returns 1 when its labels can't be read.
+# One gh call per issue per lane run: answers are cached in FEATURE_SEEN
+# (" key=y key=n"; bash 3.2 has no associative arrays). Failures aren't.
+FEATURE_SEEN="" FEATURE=""
+issue_is_feature() {
+  local k="$1" got
+  case "$FEATURE_SEEN" in *" $k="*) got="${FEATURE_SEEN##*" $k="}"; FEATURE="${got%% *}"; return 0 ;; esac
+  got=$(gh api "repos/${k%#*}/issues/${k##*#}" \
+    --jq "if [.labels[]?.name] | index(\"$FEATURE_ISSUE_LABEL\") then \"y\" else \"n\" end" 2>/dev/null) || return 1
+  case "$got" in y|n) ;; *) return 1 ;; esac
+  FEATURE_SEEN+=" $k=$got" FEATURE="$got"
+}
+
+# lead_issues <body>: sorts the issues the body's closing keywords point at
+# into LEAD_FEATURES (feature-lead issues, one per line) and LEAD_UNREAD
+# (labels unreadable, joined by ", "). Runs in the caller's shell, so the
+# cache outlives it.
+LEAD_FEATURES="" LEAD_UNREAD=""
+lead_issues() {
+  local k
+  LEAD_FEATURES="" LEAD_UNREAD=""
+  while IFS= read -r k; do
+    [[ -n "$k" ]] || continue
+    if ! issue_is_feature "$k"; then LEAD_UNREAD+="${LEAD_UNREAD:+, }$k"
+    elif [[ "$FEATURE" == y ]]; then LEAD_FEATURES+="$k"$'\n'
+    fi
+  done < <(closing_refs <<<"$1")
 }
 
 log() { printf '  %s\n' "$*" >&2; }
@@ -816,9 +857,17 @@ evaluate() {
       # Squash message = PR title + body, minus any AI attribution lines.
       local title body
       title=$(gh pr view "$n" -R "$REPO" --json title --jq .title)
-      body=$(gh pr view "$n" -R "$REPO" --json body --jq .body | strip_attribution | lead_refs)
-      # Cloud sessions append a "Generated by Claude Code" footer to the PR body; drop it there
-      # too, and a lead's closing keywords, so neither GitHub nor the squash message closes an issue.
+      body=$(gh pr view "$n" -R "$REPO" --json body --jq .body | strip_attribution)
+      # A lead's closing keyword before a feature-lead issue becomes Refs, in the body and so
+      # in the squash message. An issue whose labels can't be read keeps its keyword.
+      local lead=0
+      if grep -qE "$LEAD_RE" <<<"$body"; then
+        lead=1
+        lead_issues "$body"
+        body=$(lead_refs "$LEAD_FEATURES" <<<"$body")
+        [[ -z "$LEAD_UNREAD" ]] || comment_once "$n" "Fast lane: could not read the labels of $LEAD_UNREAD, so the closing keyword before it stays and the lane closes none of them. A PR must never close a $FEATURE_ISSUE_LABEL issue: if one is, reopen it after the merge."
+      fi
+      # Cloud sessions append a "Generated by Claude Code" footer to the PR body; drop it there too.
       write gh pr edit "$n" -R "$REPO" --body "$body" || log "could not strip attribution from the PR body"
       # A failed merge (head moved, or the base changed under it) is left for the next sweep.
       if ! write gh pr merge "$n" -R "$REPO" --squash --delete-branch=false --match-head-commit "$head" \
@@ -833,15 +882,16 @@ evaluate() {
       fi
       if grep -qE "$UI_RE" "$tmp/files.txt"; then DISPATCH_UI=1; fi
       # GitHub does not auto-close linked issues when GITHUB_TOKEN merges, so close them here.
-      # Not for a lead's: GitHub may still list the keywords lead_refs just rewrote, or an
-      # issue linked by hand, and a feature's issue closes when the feature is done.
+      # For a lead's PR only issues known not to be feature-lead: GitHub may still list one
+      # whose keyword lead_refs just rewrote, or one linked by hand.
       local issue
-      if ! grep -qE "$LEAD_RE" <<<"$body"; then
-        for issue in $(gh pr view "$n" -R "$REPO" --json closingIssuesReferences --jq '.closingIssuesReferences[].number'); do
-          write gh issue close "$issue" -R "$REPO" --reason completed --comment "Done in #$n (fast lane)." || log "could not close #$issue"
-          write gh issue edit "$issue" -R "$REPO" --remove-label in-progress || true
-        done
-      fi
+      for issue in $(gh pr view "$n" -R "$REPO" --json closingIssuesReferences --jq '.closingIssuesReferences[].number'); do
+        if (( lead )) && ! { issue_is_feature "$REPO#$issue" && [[ "$FEATURE" == n ]]; }; then
+          log "not closing #$issue: a $FEATURE_ISSUE_LABEL issue, or its labels can't be read"; continue
+        fi
+        write gh issue close "$issue" -R "$REPO" --reason completed --comment "Done in #$n (fast lane)." || log "could not close #$issue"
+        write gh issue edit "$issue" -R "$REPO" --remove-label in-progress || true
+      done
       write gh pr edit "$n" -R "$REPO" --add-label "$MERGED_LABEL" || log "could not add $MERGED_LABEL label"
       comment_once "$n" "Fast lane: merged into $BASE_BRANCH ($lines lines, $files files, $proof)."
       ;;

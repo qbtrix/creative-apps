@@ -228,10 +228,13 @@ its workflow templates in `docs/factory/workflows/`. Every PR a lead or its
 agents open carries `Belt-Lead: <run id>` and `Feature: <feature>` lines
 above the `Fast-Check:` / `Head:` lines. `Belt-Lead:` PRs don't wait for
 `belt/review`; the lead's critic panel is their review. A PR with a
-`Feature:` line closes no issue: before the squash the fast lane turns each
-closing keyword before an issue reference in its body (close, fixes,
-`Resolved:` and the rest, any case) into `Refs`, and closes nothing for it.
-A feature's issue closes when the feature is done, not with one slice.
+`Feature:` line never closes a `feature-lead` issue: before the squash the
+fast lane reads the labels of each issue its closing keywords point at
+(close, fixes, `Resolved:` and the rest, any case) and turns the keyword
+before a `feature-lead` issue into `Refs`. Its other closing references,
+such as the critic findings and gaps it fixes, stay and close on merge. An
+issue whose labels the lane can't read keeps its keyword, isn't closed, and
+gets one comment on the PR.
 
 ## Fast lane
 
