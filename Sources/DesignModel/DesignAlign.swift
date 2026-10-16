@@ -1,9 +1,10 @@
-// DesignAlign.swift: Object > Align for the single selected layer (#417, slice 1).
-// Each edge moves the layer, with its subtree, so that edge lines up with the
-// same edge of its align bounds: the nearest enclosing frame, or the page's
-// bounds for a layer in no frame. A group is not a bound; a layer in a group
-// aligns to the frame around the group. Aligning several layers to each other
-// and Distribute wait for multi-selection (#413).
+// DesignAlign.swift: the six align edges and Object > Align for the single
+// selected layer (#417). Each edge moves the layer, with its subtree, so that
+// edge lines up with the same edge of its align bounds: the nearest enclosing
+// frame, or the page's bounds for a layer in no frame. A group is not a bound;
+// a layer in a group aligns to the frame around the group. The bounds and the
+// hidden-ancestor test live on DesignPage, so LiveAligning (several layers,
+// Distribute) reuses the one-layer rule on a page without the workspace.
 //
 // Invariants:
 // - Each command is one undo step named after it ("Align Left"), never merged
@@ -66,15 +67,34 @@ public enum DesignAlignEdge: String, CaseIterable, Sendable {
     }
 }
 
+extension DesignPage {
+    /// What node `id` aligns inside on its own: its nearest enclosing frame, or the page's bounds
+    /// when no frame encloses it. Nil for an id not on this page.
+    func alignBounds(_ id: String) -> DesignRect? {
+        guard let path = nodes.ancestors(of: id) else { return nil }
+        let frame = path.reversed().lazy.compactMap { nodes.node($0) }.first { $0.kind == .frame }
+        return frame?.frame ?? DesignRect(x: 0, y: 0, width: frameWidth, height: frameHeight)
+    }
+
+    /// Where `node`'s origin goes for `edge` aligned on its own; nil when the bounds are unknown or
+    /// the result isn't finite.
+    func alignOrigin(_ edge: DesignAlignEdge, of node: DesignNode) -> DesignPoint? {
+        guard let bounds = alignBounds(node.id) else { return nil }
+        let target = edge.origin(of: node.frame, in: bounds)
+        return target.isFinite ? target : nil
+    }
+
+    /// Whether a node enclosing `id` (not `id` itself) is hidden.
+    func hasHiddenAncestor(_ id: String) -> Bool {
+        nodes.ancestors(of: id)?.contains { nodes.node($0)?.isHidden == true } == true
+    }
+}
+
 extension DesignWorkspace {
     /// What node `id` aligns inside: its nearest enclosing frame, or its page's bounds when no
     /// frame encloses it. Nil for an id on no page.
     public func alignBounds(_ id: String) -> DesignRect? {
-        guard let page = pages.first(where: { $0.nodes.node(id) != nil }),
-            let path = page.nodes.ancestors(of: id)
-        else { return nil }
-        let frame = path.reversed().lazy.compactMap { page.nodes.node($0) }.first { $0.kind == .frame }
-        return frame?.frame ?? DesignRect(x: 0, y: 0, width: page.frameWidth, height: page.frameHeight)
+        page(holding: id)?.alignBounds(id)
     }
 
     /// Why `edge` can't align the selected layer now, or nil when it can.
@@ -83,7 +103,7 @@ extension DesignWorkspace {
         if let multipleSelectionHelp { return multipleSelectionHelp }
         if editingTextID != nil { return "Finish editing the text first." }
         if let lockHelp = lockHelp(node.id) { return lockHelp }
-        if hasHiddenAncestor(node.id) { return "Show the group around this layer to align it." }
+        if page(holding: node.id)?.hasHiddenAncestor(node.id) == true { return "Show the group around this layer to align it." }
         guard let target = alignOrigin(edge, of: node) else { return "The layer can't be aligned." }
         return target == DesignPoint(x: node.frame.x, y: node.frame.y) ? edge.alreadyHelp : nil
     }
@@ -102,16 +122,11 @@ extension DesignWorkspace {
         try? editNode(node.id, named: edge.title) { $0.translate(by: delta) }
     }
 
-    /// Where `node`'s origin goes for `edge`; nil when the bounds are unknown or the result isn't finite.
     private func alignOrigin(_ edge: DesignAlignEdge, of node: DesignNode) -> DesignPoint? {
-        guard let bounds = alignBounds(node.id) else { return nil }
-        let target = edge.origin(of: node.frame, in: bounds)
-        return target.isFinite ? target : nil
+        page(holding: node.id)?.alignOrigin(edge, of: node)
     }
 
-    /// Whether a node enclosing `id` (not `id` itself) is hidden.
-    private func hasHiddenAncestor(_ id: String) -> Bool {
-        guard let page = pages.first(where: { $0.nodes.node(id) != nil }) else { return false }
-        return page.nodes.ancestors(of: id)?.contains { page.nodes.node($0)?.isHidden == true } == true
+    private func page(holding id: String) -> DesignPage? {
+        pages.first { $0.nodes.node(id) != nil }
     }
 }
