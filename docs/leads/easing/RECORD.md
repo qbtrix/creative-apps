@@ -2,9 +2,9 @@
 
 Issue: #1333 · Packet: docs/blueprints/halo/features/easing.md
 Run: act-1a1448a5fbe-p22s · Session: session_01Fpq7bUwf2TjhThXdtGKn4r · Started: 2026-10-16T11:48Z
-Stage: 4 round 2
+Stage: 4 final review
 Base: e464ecab9b0e11b9cfc27851181beafdb8fee424
-Next: wait for the lane to merge #1470 (fix round 2, the last); then the final review on a scoped halo run containing it that reaches the journeys; then relabel #1423, #1424 and anything still open as gap; contact sheet on #1333
+Next: wait for a scoped halo (or full) run containing #1470 (merge 162b470) that reaches the journeys; final review: H-J7, audit, screens; relabel open findings gap (rule 11); contact sheet on #1333
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -27,7 +27,7 @@ Wave 4: EZ-8 waits on EZ-6 and EZ-7 (drives what they put on screen); #333 close
 | round | CI run | CI | audit vs baseline | lenses | confirmed | fixed by | clean |
 |---|---|---|---|---|---|---|---|
 | 1 | 38917497685 (scoped halo, fb72b7e) | red: H-J7 step 3 (#1411); testLayerHousekeeping contrast 3 > 2 (#1412); testDragLayerToKeyPosition and testEveryControlActsOrSaysWhy are full-run quarantined (#1283, #1035), not easing | contrast 3 vs 2 | clarity, journey, design, layout, controls, audit | #1411 to #1424 (14: 1 blocker, 7 major, 6 minor; 1 refuted) | #1429 (r-b1: #1411-#1415, #1418-#1421) | no |
-| 2 | 38930143233 (scoped halo, 4fb505e) | red: HaloEasingSnapshots.segmentTitlesFitOneLine 126 > 124 pt (#1450); ui-test skipped, so no journey screens | n/a (journeys skipped) | same 6 | #1450, #1453-#1455 (4 new: 1 blocker, 1 major, 2 minor; 1 refuted) + #1416 #1417 #1422 #1423 #1424 | #1470 (#1450 #1453 #1454 #1416 #1417 #1422); #1455 already fixed, closed; #1423 #1424 deferred (outside easing files) | no |
+| 2 | 38930143233 (scoped halo, 4fb505e) | red: HaloEasingSnapshots.segmentTitlesFitOneLine 126 > 124 pt (#1450); ui-test skipped, so no journey screens | n/a (journeys skipped) | same 6 | #1450, #1453-#1455 (4 new: 1 blocker, 1 major, 2 minor; 1 refuted) + #1416 #1417 #1422 #1423 #1424 | #1470 merged (#1450 #1453 #1454 #1416 #1417 #1422); #1455 already fixed, closed; #1423 #1424 deferred (outside easing files) | no |
 
 ## Decisions
 - Packet has no `## Slices` table: v2 loop. Started after #1302 merged (2026-10-16T04:20Z), so findings queue (rule 10) and round cap of 2 (rule 11) apply.

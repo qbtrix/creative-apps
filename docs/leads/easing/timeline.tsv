@@ -44,3 +44,4 @@ utc	stage	event	ref	note
 2026-10-16T16:47Z	4	review	round 2	panel: #1453-#1455 filed, 1 refuted
 2026-10-16T16:48Z	4	fix-round	round 2	fix-batch on 9 findings, base c9e4656
 2026-10-16T17:00Z	4	pr-opened	#1470	fix round 2
+2026-10-16T17:00Z	4	pr-merged	#1470	fix round 2 (last)
