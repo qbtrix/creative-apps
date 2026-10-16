@@ -1,0 +1,46 @@
+{
+  "title": "Scenes and layers, new from a preset, files that never fail silently",
+  "wave": 4,
+  "order": 30,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "covers": "#350, #351, #392, #393; IN-4 #398 (files half)",
+  "waits_on": "`draw-key-save`; tasks LF-1 on #146, LF-2 on #73",
+  "depends": [
+    "draw-key-save"
+  ],
+  "owned": [
+    "Sources/FlareModel/FlareSidebarHelp.swift",
+    "Tests/FlareModelTests/FlareSidebarHelpTests.swift",
+    "Sources/FlareApp/FlareLayerItems.swift",
+    "Sources/FlareApp/FlareWindow+Layers.swift",
+    "Tests/AppSnapshotTests/FlareLayersSnapshots.swift",
+    "UITests/FlareJourneyTests+Scenes.swift",
+    "UITests/FlareJourneyTests+SceneMenus.swift",
+    "Sources/FlareModel/FlareNewDocument.swift",
+    "Tests/FlareModelTests/FlareNewDocumentTests.swift",
+    "Sources/FlareApp/FlareNewSheet.swift",
+    "Sources/FlareApp/FlareWindow+File.swift",
+    "Tests/AppSnapshotTests/FlareNewSheetSnapshots.swift",
+    "UITests/FlareJourneyTests+NewSheet.swift",
+    "UITests/FlareJourneyTests+Loop.swift",
+    "Sources/FlareModel/FlareLoadProgress.swift",
+    "Tests/FlareModelTests/FlareLoadProgressTests.swift",
+    "Sources/FlareApp/FlareOpenStatus.swift",
+    "Tests/AppSnapshotTests/FlareOpenStatusSnapshots.swift",
+    "UITests/FlareJourneyTests+OpenErrors.swift",
+    "Sources/FlareModel/FlareSaveStatus.swift",
+    "Tests/FlareModelTests/FlareSaveStatusTests.swift",
+    "Sources/FlareApp/FlareRecovery.swift",
+    "Tests/AppSnapshotTests/FlareRecoverySnapshots.swift",
+    "UITests/FlareJourneyTests+Recovery.swift",
+    "docs/blueprints/flare/features/layers-files.md"
+  ],
+  "journeys": [
+    "FlareScenesJourneys.testScenesAddRenameReorderRemove",
+    "FlareSceneMenuJourneys.testRowContextMenus",
+    "FlareNewSheetJourneys.testNewAnimationFromPreset",
+    "FlareOpenErrorJourneys.testOpenBadFiles",
+    "FlareRecoveryJourneys.testSaveFailureAndRecovery"
+  ]
+}
