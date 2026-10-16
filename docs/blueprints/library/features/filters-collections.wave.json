@@ -3,30 +3,231 @@
   "wave": 5,
   "order": 10,
   "status": "planned",
-  "feature_issue": "later (packet after wave 2 lands)",
+  "feature_issue": "file when ready",
   "covers": "#31",
-  "waits_on": "cull",
+  "waits_on": "cull, persist, thumbnails, import, status-and-layout, export (v1 done); S-L9 (needs-ui, FC-10's drag only)",
   "issues": [
     31
   ],
   "owned": [
-    "Sources/LibraryModel/LibraryCollections.swift",
     "Sources/LibraryModel/LibraryFilter.swift",
-    "Sources/LibraryApp/LibraryWindow.swift",
+    "Tests/LibraryModelTests/LibraryFilterTests.swift",
+    "Tests/mutations/LibraryModel.LibraryFilter.json",
+    "Sources/LibraryModel/LibraryCatalog.swift",
+    "Sources/LibraryModel/LibraryOrder.swift",
+    "Sources/LibraryModel/LibraryCollections.swift",
+    "Sources/LibraryModel/LibraryEmptyCollection.swift",
+    "Tests/LibraryModelTests/LibraryCollectionsSeamTests.swift",
+    "Tests/mutations/LibraryModel.LibraryCatalog.json",
+    "Tests/mutations/LibraryModel.LibraryOrder.json",
+    "Sources/LibraryModel/CatalogHistory.swift",
+    "Tests/LibraryModelTests/LibraryCollectionsHistoryTests.swift",
+    "Tests/mutations/LibraryModel.CatalogHistory.json",
     "Sources/LibraryApp/LibraryWindow+Filters.swift",
-    "Tests/LibraryModelTests/LibraryCollectionsTests.swift",
-    "Tests/AppSnapshotTests/LibraryCollectionsSnapshots.swift",
+    "Sources/LibraryApp/Platform/CollectionsStore.swift",
+    "Sources/LibraryApp/LibraryWindow.swift",
+    "Sources/LibraryApp/LibraryCommands.swift",
+    "Sources/LibraryApp/LibraryBrowser.swift",
+    "Tests/LibraryModelTests/LibraryFilterBarTests.swift",
+    "Tests/LibraryModelTests/LibraryFilterBudgetTests.swift",
+    "Tests/AppSnapshotTests/LibraryFilterSnapshots.swift",
     "UITests/LibraryJourneyTests+Filters.swift",
-    "Sources/LibraryApp/LibraryCommands.swift"
+    "Tests/LibraryModelTests/LibraryCollectionsTests.swift",
+    "Tests/LibraryModelTests/LibraryCollectionsBudgetTests.swift",
+    "Tests/AppSnapshotTests/LibraryCollectionsSnapshots.swift",
+    "UITests/LibraryJourneyTests+Collections.swift",
+    "Tests/mutations/LibraryModel.LibraryCollections.json",
+    "Sources/LibraryApp/LibraryGrid.swift",
+    "Tests/LibraryModelTests/LibrarySmartCollectionTests.swift",
+    "Tests/AppSnapshotTests/LibrarySmartSnapshots.swift",
+    "UITests/LibraryJourneyTests+Smart.swift",
+    "Tests/LibraryModelTests/LibraryCollectionsFileTests.swift",
+    "Tests/AppSnapshotTests/LibraryCollectionsStoreTests.swift",
+    "Tests/AppSnapshotTests/LibraryCollectionsNoticeSnapshots.swift",
+    "UITests/LibraryJourneyTests+CollectionsFile.swift",
+    "docs/blueprints/library.md",
+    "docs/design.md",
+    "docs/c4/parts/creative-apps/library-model/library-model-sources.json",
+    "docs/c4/parts/creative-apps/library-app/library-app-sources.json",
+    "docs/blueprints/library/features/filters-collections.wave.json"
   ],
   "core": "none",
-  "suiteui": "none",
+  "suiteui": "S-L9 (drag the grid selection onto a sidebar row; FC-10 waits on it), S-L10 (rename only some rows; nothing waits); both to file",
   "depends": [
-    "cull"
+    "cull",
+    "persist",
+    "thumbnails",
+    "import",
+    "status-and-layout",
+    "export"
   ],
-  "journeys": [],
-  "notes": "Not v1. Needs one menu item added to LibraryCommands.swift; it takes that file for this wave.",
-  "quality": "later",
+  "journeys": [
+    "LibraryFiltersJourneyTests.testFilterByFlagAndRating",
+    "LibraryCollectionsJourneyTests.testMakeACollection",
+    "LibrarySmartJourneyTests.testSmartCollectionFromFilter",
+    "LibraryCollectionsFileJourneyTests.testCollectionsSurviveRelaunch"
+  ],
+  "notes": "Not v1. Takes spine files LibraryCatalog.swift, LibraryOrder.swift, CatalogHistory.swift, LibraryEmptyCollection.swift, LibraryWindow.swift and LibraryCommands.swift, import's LibraryBrowser.swift and thumbnails' LibraryGrid.swift (FC-10) for wave 5. Collections live in collections.json beside catalog.json, so persist's contract and golden are untouched.",
+  "quality": "QB-LIB-3 and QB-LIB-4 model halves under a filter and with collections; relaunch codec budget; QB-F1, QB-F3, QB-F4; audit zero new",
   "library_title": "Filter by flag and rating, collections you make, smart rules (not v1)",
-  "journeys_none": "no packet yet, not v1: the blueprint names no journey"
+  "slices": [
+    {
+      "id": "FC-a",
+      "behavior": "With no filter and no collection of yours Library behaves exactly as today, while the filter and collection state, the undo of a collection change, every catalog method, the filter bar, the sidebar's Collections section and every new menu item exist, each control disabled with \"... isn't built yet (filters-collections).\"",
+      "tasks": [
+        "FC-1",
+        "FC-2",
+        "FC-3",
+        "FC-4",
+        "FC-5"
+      ],
+      "journeys": [
+        "MJ1"
+      ],
+      "owned": [
+        "Sources/LibraryModel/LibraryFilter.swift",
+        "Tests/LibraryModelTests/LibraryFilterTests.swift",
+        "Tests/mutations/LibraryModel.LibraryFilter.json",
+        "Sources/LibraryModel/LibraryCatalog.swift",
+        "Sources/LibraryModel/LibraryOrder.swift",
+        "Sources/LibraryModel/LibraryCollections.swift",
+        "Sources/LibraryModel/LibraryEmptyCollection.swift",
+        "Tests/LibraryModelTests/LibraryCollectionsSeamTests.swift",
+        "Tests/mutations/LibraryModel.LibraryCatalog.json",
+        "Tests/mutations/LibraryModel.LibraryOrder.json",
+        "Sources/LibraryModel/CatalogHistory.swift",
+        "Tests/LibraryModelTests/LibraryCollectionsHistoryTests.swift",
+        "Tests/mutations/LibraryModel.CatalogHistory.json",
+        "Sources/LibraryApp/LibraryWindow+Filters.swift",
+        "Sources/LibraryApp/Platform/CollectionsStore.swift",
+        "Sources/LibraryApp/LibraryWindow.swift",
+        "Sources/LibraryApp/LibraryCommands.swift",
+        "Sources/LibraryApp/LibraryBrowser.swift"
+      ]
+    },
+    {
+      "id": "FC-b",
+      "behavior": "The filter bar narrows any collection by flag, by rating at least or exactly N, and by hiding rejects, shows \"N of M\", and says so with Clear Filter when nothing matches.",
+      "tasks": [
+        "FC-6",
+        "FC-7"
+      ],
+      "journeys": [
+        "J13"
+      ],
+      "owned": [
+        "Tests/LibraryModelTests/LibraryFilterBarTests.swift",
+        "Tests/LibraryModelTests/LibraryFilterBudgetTests.swift",
+        "Tests/AppSnapshotTests/LibraryFilterSnapshots.swift",
+        "UITests/LibraryJourneyTests+Filters.swift",
+        "Sources/LibraryModel/LibraryFilter.swift",
+        "Tests/mutations/LibraryModel.LibraryFilter.json"
+      ],
+      "waits": {
+        "FC-a": [
+          "FC-6",
+          "FC-7"
+        ]
+      }
+    },
+    {
+      "id": "FC-c",
+      "behavior": "New Collection takes the selection, Photo > Add to Collection, Remove from Collection, rename and delete each record one undo step, and dragging the selection onto a sidebar row adds it.",
+      "tasks": [
+        "FC-8",
+        "FC-9",
+        "FC-10"
+      ],
+      "journeys": [
+        "J14"
+      ],
+      "owned": [
+        "Tests/LibraryModelTests/LibraryCollectionsTests.swift",
+        "Tests/LibraryModelTests/LibraryCollectionsBudgetTests.swift",
+        "Tests/AppSnapshotTests/LibraryCollectionsSnapshots.swift",
+        "UITests/LibraryJourneyTests+Collections.swift",
+        "Sources/LibraryModel/LibraryCollections.swift",
+        "Tests/mutations/LibraryModel.LibraryCollections.json",
+        "Sources/LibraryApp/LibraryGrid.swift",
+        "Sources/LibraryApp/LibraryWindow.swift"
+      ],
+      "waits": {
+        "FC-a": [
+          "FC-8",
+          "FC-9",
+          "FC-10"
+        ]
+      }
+    },
+    {
+      "id": "FC-d",
+      "behavior": "New Smart Collection from Filter saves the filter as a collection whose count follows every rating, and while it is selected the filter bar edits its rules as one undo step each.",
+      "tasks": [
+        "FC-11",
+        "FC-12"
+      ],
+      "journeys": [
+        "J15"
+      ],
+      "owned": [
+        "Tests/LibraryModelTests/LibrarySmartCollectionTests.swift",
+        "Tests/AppSnapshotTests/LibrarySmartSnapshots.swift",
+        "UITests/LibraryJourneyTests+Smart.swift",
+        "Sources/LibraryModel/LibraryFilter.swift",
+        "Tests/mutations/LibraryModel.LibraryFilter.json"
+      ],
+      "waits": {
+        "FC-a": [
+          "FC-11",
+          "FC-12"
+        ],
+        "FC-b": [
+          "FC-12"
+        ]
+      }
+    },
+    {
+      "id": "FC-e",
+      "behavior": "Your collections, their rules, the filter and the selected collection survive a relaunch, and a damaged collections file is set aside with a notice, never overwritten.",
+      "tasks": [
+        "FC-13",
+        "FC-14",
+        "FC-15",
+        "FC-16"
+      ],
+      "journeys": [
+        "J16"
+      ],
+      "owned": [
+        "Tests/LibraryModelTests/LibraryCollectionsFileTests.swift",
+        "Tests/AppSnapshotTests/LibraryCollectionsStoreTests.swift",
+        "Tests/AppSnapshotTests/LibraryCollectionsNoticeSnapshots.swift",
+        "UITests/LibraryJourneyTests+CollectionsFile.swift",
+        "Sources/LibraryModel/LibraryCollections.swift",
+        "Tests/mutations/LibraryModel.LibraryCollections.json",
+        "Sources/LibraryApp/Platform/CollectionsStore.swift",
+        "docs/blueprints/library.md",
+        "docs/design.md",
+        "docs/c4/parts/creative-apps/library-model/library-model-sources.json",
+        "docs/c4/parts/creative-apps/library-app/library-app-sources.json",
+        "docs/blueprints/library/features/filters-collections.wave.json"
+      ],
+      "waits": {
+        "FC-a": [
+          "FC-13",
+          "FC-15"
+        ],
+        "FC-c": [
+          "FC-14",
+          "FC-16"
+        ],
+        "FC-b": [
+          "FC-16"
+        ],
+        "FC-d": [
+          "FC-16"
+        ]
+      }
+    }
+  ]
 }

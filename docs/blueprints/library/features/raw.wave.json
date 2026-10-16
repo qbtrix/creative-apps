@@ -3,28 +3,214 @@
   "wave": 5,
   "order": 30,
   "status": "planned",
-  "feature_issue": "later (packet after wave 2 lands)",
+  "feature_issue": "file when ready",
   "covers": "#427",
-  "waits_on": "import, thumbnails",
+  "waits_on": "import, thumbnails; RW-a also waits on develop:DV-a, crop:CR-a, export:EX-a, metadata-more:MD-a and MD-e, RW-b on metadata-more:MD-b (shared files); RW-c on develop, persist and export, and RW-10 on status-and-layout and filters-collections:FC-e (the two Library C4 parts); the grid's RAW tag on a needs-ui ThumbnailBadges issue (caption until then)",
   "issues": [
     427
   ],
   "owned": [
+    "Sources/LibraryModel/Contracts/RawValues.swift",
+    "Sources/LibraryModel/Contracts/LibraryValues.swift",
+    "Sources/LibraryModel/Contracts/DevelopValues.swift",
+    "Sources/LibraryModel/Contracts/LibraryContracts.swift",
+    "Tests/LibraryModelTests/LibraryRawContractTests.swift",
+    "Tests/LibraryModelTests/LibraryRawFakesTests.swift",
+    "Tests/mutations/LibraryModel.RawValues.json",
+    "Tests/mutations/LibraryModel.LibraryValues.json",
+    "Tests/mutations/LibraryModel.DevelopValues.json",
+    "Tests/mutations/LibraryModel.LibraryContracts.json",
+    "Sources/LibraryModel/Fakes/FakeRaw.swift",
+    "Sources/LibraryModel/Fakes/FakePlatform.swift",
+    "Sources/LibraryModel/LibraryFixtures.swift",
+    "Sources/LibraryModel/LibraryCatalog.swift",
+    "Tests/mutations/LibraryModel.FakeRaw.json",
+    "Tests/mutations/LibraryModel.FakePlatform.json",
+    "Tests/mutations/LibraryModel.LibraryCatalog.json",
     "Sources/LibraryModel/RawFileTypes.swift",
-    "Sources/LibraryApp/Platform/RawDecoding.swift",
     "Tests/LibraryModelTests/LibraryRawImportTests.swift",
+    "Tests/LibraryModelTests/LibraryRawDecodePlanTests.swift",
+    "Tests/LibraryModelTests/LibraryRawBudgetTests.swift",
+    "Tests/AppSnapshotTests/LibraryRawDecodeTests.swift",
     "Tests/AppSnapshotTests/LibraryRawSnapshots.swift",
-    "UITests/LibraryJourneyTests+Raw.swift"
+    "UITests/LibraryJourneyTests+Raw.swift",
+    "Tests/mutations/LibraryModel.RawFileTypes.json",
+    "Sources/LibraryModel/Live/LiveImporter.swift",
+    "Tests/mutations/LibraryModel.LiveImporter.json",
+    "Tests/AppSnapshotTests/LibraryTinyDNG.swift",
+    "Tests/AppSnapshotTests/Fixtures/library-tiny.dng",
+    "Sources/LibraryApp/Platform/RawDecoding.swift",
+    "Sources/LibraryApp/Platform/ImageIODecoder.swift",
+    "Sources/LibraryApp/LibraryGrid.swift",
+    "Tests/LibraryModelTests/LibraryRawDevelopTests.swift",
+    "Tests/LibraryModelTests/LibraryRawRenderTests.swift",
+    "Tests/AppSnapshotTests/LibraryRawDevelopSnapshots.swift",
+    "UITests/LibraryJourneyTests+RawDevelop.swift",
+    "Sources/LibraryModel/Live/LiveThumbnails.swift",
+    "Sources/LibraryModel/Live/LiveLoupeImaging.swift",
+    "Sources/LibraryModel/Live/LiveExporter.swift",
+    "Tests/mutations/LibraryModel.LiveThumbnails.json",
+    "Tests/mutations/LibraryModel.LiveLoupeImaging.json",
+    "Tests/mutations/LibraryModel.LiveExporter.json",
+    "Sources/LibraryApp/DevelopInspector.swift",
+    "Sources/LibraryApp/LibraryWindow+Develop.swift",
+    "Sources/LibraryApp/LibraryMenus.swift",
+    "docs/c4/parts/creative-apps/library-model/library-model-sources.json",
+    "docs/c4/parts/creative-apps/library-app/library-app-sources.json"
   ],
   "core": "none",
-  "suiteui": "S-L2 (RAW badge)",
+  "suiteui": "S-L2 (#779); a needs-ui text tag on ThumbnailBadges (filed by the lead; a caption suffix until it lands)",
   "depends": [
     "import",
     "thumbnails"
   ],
-  "journeys": [],
-  "notes": "Not v1, pending evidence (docs/priorities.md).",
-  "quality": "later",
+  "journeys": [
+    "LibraryRawJourneyTests.testImportRawFilesAndPairs",
+    "LibraryRawDevelopJourneyTests.testRawControlsFollowTheFile"
+  ],
+  "notes": "Not v1, pending evidence (docs/priorities.md). Decodes through Core Image RAW inside ImageIODecoder (LibraryWindow.swift is filters-collections' in wave 5). Embedded preview first for the grid; RAW + JPEG pairs import as one photo; RAW rows in develop's inspector, only where the file's decoder offers them. Adds one stored property (rawInfo) to LibraryCatalog.swift (open question R1).",
+  "quality": "QB-LIB-1 (raw fold budget, preview first), QB-L2 (setRaw), QB-V4 (export decodes with the loupe's RAW settings), QB-LIB-V8 (new: the tiny DNG decodes upright, preview and raw told apart), QB-F1, QB-F3, QB-V5",
   "library_title": "Camera raw files through the system decoder (not v1)",
-  "journeys_none": "no packet yet, not v1: the blueprint names no journey"
+  "slices": [
+    {
+      "id": "RW-a",
+      "behavior": "The raw types, the decoder's raw requirements with defaults, the fake raw files and the raw-shoot fixture exist, and a catalog file without raw settings encodes byte for byte as before.",
+      "tasks": [
+        "RW-1",
+        "RW-2"
+      ],
+      "journeys": [
+        "RJ0"
+      ],
+      "owned": [
+        "Sources/LibraryModel/Contracts/RawValues.swift",
+        "Sources/LibraryModel/Contracts/LibraryValues.swift",
+        "Sources/LibraryModel/Contracts/DevelopValues.swift",
+        "Sources/LibraryModel/Contracts/LibraryContracts.swift",
+        "Tests/LibraryModelTests/LibraryRawContractTests.swift",
+        "Tests/LibraryModelTests/LibraryRawFakesTests.swift",
+        "Tests/mutations/LibraryModel.RawValues.json",
+        "Tests/mutations/LibraryModel.LibraryValues.json",
+        "Tests/mutations/LibraryModel.DevelopValues.json",
+        "Tests/mutations/LibraryModel.LibraryContracts.json",
+        "Sources/LibraryModel/Fakes/FakeRaw.swift",
+        "Sources/LibraryModel/Fakes/FakePlatform.swift",
+        "Sources/LibraryModel/LibraryFixtures.swift",
+        "Sources/LibraryModel/LibraryCatalog.swift",
+        "Tests/mutations/LibraryModel.FakeRaw.json",
+        "Tests/mutations/LibraryModel.FakePlatform.json",
+        "Tests/mutations/LibraryModel.LibraryCatalog.json"
+      ],
+      "waits": {
+        "develop:DV-a": [
+          "RW-1"
+        ],
+        "crop:CR-a": [
+          "RW-1"
+        ],
+        "metadata-more:MD-a": [
+          "RW-1"
+        ],
+        "metadata-more:MD-e": [
+          "RW-2"
+        ],
+        "export:EX-a": [
+          "RW-1"
+        ]
+      }
+    },
+    {
+      "id": "RW-b",
+      "behavior": "Importing a folder of raw files is as fast as JPEGs because the grid draws each camera's embedded preview, a RAW and its JPEG come in as one photo, and the grid marks raw photos.",
+      "tasks": [
+        "RW-3",
+        "RW-4",
+        "RW-5",
+        "RW-6",
+        "RW-7"
+      ],
+      "journeys": [
+        "RJ1"
+      ],
+      "owned": [
+        "Sources/LibraryModel/RawFileTypes.swift",
+        "Tests/LibraryModelTests/LibraryRawImportTests.swift",
+        "Tests/LibraryModelTests/LibraryRawDecodePlanTests.swift",
+        "Tests/LibraryModelTests/LibraryRawBudgetTests.swift",
+        "Tests/AppSnapshotTests/LibraryRawDecodeTests.swift",
+        "Tests/AppSnapshotTests/LibraryRawSnapshots.swift",
+        "UITests/LibraryJourneyTests+Raw.swift",
+        "Tests/mutations/LibraryModel.RawFileTypes.json",
+        "Sources/LibraryModel/Live/LiveImporter.swift",
+        "Tests/mutations/LibraryModel.LiveImporter.json",
+        "Tests/AppSnapshotTests/LibraryTinyDNG.swift",
+        "Tests/AppSnapshotTests/Fixtures/library-tiny.dng",
+        "Sources/LibraryApp/Platform/RawDecoding.swift",
+        "Sources/LibraryApp/Platform/ImageIODecoder.swift",
+        "Sources/LibraryApp/LibraryGrid.swift"
+      ],
+      "waits": {
+        "RW-a": [
+          "RW-3"
+        ],
+        "metadata-more:MD-b": [
+          "RW-6"
+        ]
+      }
+    },
+    {
+      "id": "RW-c",
+      "behavior": "The Develop tab shows the RAW controls this file's decoder offers, each change is one undo step, and the grid, the loupe and export all decode with them.",
+      "tasks": [
+        "RW-8",
+        "RW-9",
+        "RW-10"
+      ],
+      "journeys": [
+        "RJ2"
+      ],
+      "owned": [
+        "Sources/LibraryModel/RawFileTypes.swift",
+        "Tests/LibraryModelTests/LibraryRawDevelopTests.swift",
+        "Tests/LibraryModelTests/LibraryRawRenderTests.swift",
+        "Tests/LibraryModelTests/LibraryRawBudgetTests.swift",
+        "Tests/AppSnapshotTests/LibraryRawDevelopSnapshots.swift",
+        "UITests/LibraryJourneyTests+RawDevelop.swift",
+        "Tests/mutations/LibraryModel.RawFileTypes.json",
+        "Sources/LibraryModel/Live/LiveThumbnails.swift",
+        "Sources/LibraryModel/Live/LiveLoupeImaging.swift",
+        "Sources/LibraryModel/Live/LiveExporter.swift",
+        "Tests/mutations/LibraryModel.LiveThumbnails.json",
+        "Tests/mutations/LibraryModel.LiveLoupeImaging.json",
+        "Tests/mutations/LibraryModel.LiveExporter.json",
+        "Sources/LibraryApp/DevelopInspector.swift",
+        "Sources/LibraryApp/LibraryWindow+Develop.swift",
+        "Sources/LibraryApp/LibraryMenus.swift",
+        "docs/c4/parts/creative-apps/library-model/library-model-sources.json",
+        "docs/c4/parts/creative-apps/library-app/library-app-sources.json"
+      ],
+      "waits": {
+        "RW-b": [
+          "RW-8",
+          "RW-10"
+        ],
+        "develop": [
+          "RW-8",
+          "RW-10"
+        ],
+        "persist": [
+          "RW-8"
+        ],
+        "export": [
+          "RW-9"
+        ],
+        "status-and-layout": [
+          "RW-10"
+        ],
+        "filters-collections:FC-e": [
+          "RW-10"
+        ]
+      }
+    }
+  ]
 }

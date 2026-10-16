@@ -8,7 +8,8 @@ one feature-lead session each. A wave starts when everything it waits on has
 merged. Two features in the same wave never own the same file. Each packet
 lists its tasks, owned files, acceptance tests, quality bars and done check.
 Waves 3 to 5 (develop, status-and-layout, crop, export, and the three not-v1
-features) get their packets once wave 2 has landed.
+features) have v3 packets with slices too: contract slice first, acceptance
+tests written before their code, and mutation plans for Model behaviour.
 
 | wave | feature | packet | covers | waits on | feature issue | status |
 |---|---|---|---|---|---|---|
@@ -18,13 +19,13 @@ features) get their packets once wave 2 has landed.
 | 2 | Cull from the keyboard with undo and Auto Advance | `cull.md` | #211, #426, #724 (keys) | spine, #333 | file when ready | planned |
 | 2 | The catalog file | `persist.md` | #212 | spine, #333 | file when ready | planned |
 | 2 | The loupe on CanvasViewport | `loupe-viewport.md` | #724 (zoom, real size) | spine, #333 | file when ready | planned |
-| 3 | Develop sliders, histogram, render to pixels in loupe and grid, copy and paste settings | no packet yet | #32, #423 | spine, loupe-viewport, thumbnails | later (packet after wave 2 lands) | planned |
-| 3 | Status pills, inspector header (#185), the remaining identifiers (#291), layout tests | no packet yet | #185, #291 | spine, thumbnails, loupe-viewport | later (packet after wave 2 lands) | planned |
-| 4 | Crop and straighten in the loupe, applied in render, thumbnail and export | no packet yet | #425 | develop | later (packet after wave 2 lands) | planned |
-| 4 | Export JPEG at a set long edge and quality, never overwriting | no packet yet | #424 | develop, import | later (packet after wave 2 lands) | planned |
-| 5 | Filter by flag and rating, collections you make, smart rules (not v1) | no packet yet | #31 | cull | later (packet after wave 2 lands) | planned |
-| 5 | Keywords and camera details (not v1) | no packet yet | #744 | import | later (packet after wave 2 lands) | planned |
-| 5 | Camera raw files through the system decoder (not v1) | no packet yet | #427 | import, thumbnails | later (packet after wave 2 lands) | planned |
+| 3 | Develop sliders, histogram, render to pixels in loupe and grid, copy and paste settings | `develop.md` | #32, #423 | spine, persist, thumbnails, loupe-viewport; the spine follow-up (inspector pass-through) for DV-9; a creative-core issue (vibrance, saturation) and its bump for DV-12; #782 for P3 | file when ready | planned |
+| 3 | Status pills, inspector header (#185), the remaining identifiers (#291), layout tests | `status-and-layout.md` | #185, #291 | spine, thumbnails, loupe-viewport; SuiteUI #1184 (S-L7); two gaps filed at stage 1 (the spine's preview-only status bar, MetadataInspector's own header) | file when ready | planned |
+| 4 | Crop and straighten in the loupe, applied in render, thumbnail and export | `crop.md` | #425 | develop; slice CR-a first (contract); CR-5 and CR-6 wait on the spine follow-up (LibraryMenu.Photo.crop merged by the window) and develop's inspector follow-up; P5 (CR-8) waits on #782; CR-10 waits on a creative-core issue to file (horizon angle) and its bump | file when ready | planned |
+| 4 | Export JPEG at a set long edge and quality, never overwriting | `export.md` | #424 (closes with EX-13); gaps the lead files: other formats, presets and name templates, XMP sidecars | develop, import; in wave 4, EX-1 after crop's CR-a and EX-6 after crop's CR-c (shared spine files), EX-14 after crop; P8: #782; the progress row: #781 (soft) | file when ready | planned |
+| 5 | Filter by flag and rating, collections you make, smart rules (not v1) | `filters-collections.md` | #31 | cull, persist, thumbnails, import, status-and-layout, export (v1 done); S-L9 (needs-ui, FC-10's drag only) | file when ready | planned |
+| 5 | Keywords and camera details | `metadata-more.md` | #744 | import; takes over files from cull, persist, status-and-layout, and the window shell crop and export edit in wave 4; its window and search slices wait on filters-collections (same wave) | file when ready | planned |
+| 5 | Camera raw files through the system decoder (not v1) | `raw.md` | #427 | import, thumbnails; RW-a also waits on develop:DV-a, crop:CR-a, export:EX-a, metadata-more:MD-a and MD-e, RW-b on metadata-more:MD-b (shared files); RW-c on develop, persist and export, and RW-10 on status-and-layout and filters-collections:FC-e (the two Library C4 parts); the grid's RAW tag on a needs-ui ThumbnailBadges issue (caption until then) | file when ready | planned |
 
 ## File when ready
 
