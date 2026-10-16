@@ -2,20 +2,20 @@
 
 Issue: #1334 · Packet: docs/blueprints/library/features/import.md
 Run: act-1a1448a5fa3-a8rg · Session: claude/library-import-feature-c0rl9g · Started: 2026-10-16T11:49Z
-Stage: 3 wave 2
-Base: 8ecd8b9b7f6bed18afe784640d467d369194c0d6
-Next: wait for the lane's macOS builds on #1346, #1347, #1348; when #1346 merges start IM-3; when all three merge start IM-8
+Stage: 3 wave 3
+Base: 8243ce4435006760f7ec9a87147fef094f6be4ed
+Next: wait for #1348 (IM-7) to merge and for the IM-3 and IM-8 PRs; then the full dev CI run the feature-done merge triggers, and the Anatomy round on it
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
 |---|---|---|---|---|---|---|
 | IM-1 | 1 | Catalog import state machine: begin, progress, batches, finish, fail, dismiss, help | Sources/LibraryModel/LibraryImport.swift, Tests/LibraryModelTests/LibraryImportTests.swift | LibraryImportTests | #1338 | merged |
-| IM-2 | 1 | LiveImporter: skip known, capture-date order, path ids, batches, throttled progress, cancel; unavailable = nil | Sources/LibraryModel/Live/LiveImporter.swift, Tests/LibraryModelTests/LibraryLiveImporterTests.swift, Tests/LibraryModelTests/LibraryServicesTests.swift | LibraryLiveImporterTests | #1346 | lane: macOS build |
+| IM-2 | 1 | LiveImporter: skip known, capture-date order, path ids, batches, throttled progress, cancel; unavailable = nil | Sources/LibraryModel/Live/LiveImporter.swift, Tests/LibraryModelTests/LibraryLiveImporterTests.swift, Tests/LibraryModelTests/LibraryServicesTests.swift | LibraryLiveImporterTests | #1346 | merged |
 | IM-4 | 1 | ImageIODecoder: scan with metadata and orientation, decode to sRGB RGBA8 | Sources/LibraryApp/Platform/ImageIODecoder.swift, Tests/AppSnapshotTests/LibraryDecodeTests.swift | LibraryDecodeTests (macOS) | #1342 | merged |
-| IM-3 | 2 | Import model budgets | Tests/LibraryModelTests/LibraryImportBudgetTests.swift | LibraryImportBudgetTests | – | planned |
-| IM-6 | 2 | Import area: File > Import Folder…, open panel or -LibraryImportFolder, off-main task, import on launch | Sources/LibraryApp/LibraryWindow+Import.swift | J1 step 6 (fakes), IM-8 live | #1347 | lane: macOS build |
+| IM-3 | 2 | Import model budgets | Tests/LibraryModelTests/LibraryImportBudgetTests.swift | LibraryImportBudgetTests | – | building |
+| IM-6 | 2 | Import area: File > Import Folder…, open panel or -LibraryImportFolder, off-main task, import on launch | Sources/LibraryApp/LibraryWindow+Import.swift | J1 step 6 (fakes), IM-8 live | #1347 | merged |
 | IM-7 | 2 | Progress row and notice (placeholders until #780/#781) and snapshots | Sources/LibraryApp/LibraryBrowser.swift, Tests/AppSnapshotTests/LibraryImportSnapshots.swift | LibraryImportSnapshots | #1348 | lane: macOS build |
-| IM-8 | 3 | J1 testImportAFolder; delete skipped testImportRateAndRelaunch; feature-done | UITests/LibraryJourneyTests.swift, UITests/LibraryJourneyTests+Import.swift, UITests/LibraryJourneyTests+Files.swift, docs/blueprints/library/features/import.wave.json | J1 | – | planned |
+| IM-8 | 3 | J1 testImportAFolder; delete skipped testImportRateAndRelaunch; feature-done | UITests/LibraryJourneyTests.swift, UITests/LibraryJourneyTests+Import.swift, UITests/LibraryJourneyTests+Files.swift, docs/blueprints/library/features/import.wave.json | J1 | – | building |
 | IM-9 | 3 | P6 perf journey (report-only) | UITests/LibraryJourneyTests+PerfImport.swift | P6 | – | blocked on #782 |
 
 Wave 1: IM-1, IM-2, IM-4 independent. Wave 2: IM-3 (waits IM-1, IM-2: benchmarks their code), IM-6 (waits IM-1: calls its catalog methods), IM-7 (waits IM-1: reads its state and calls dismissImportNotice); independent of each other. Wave 3: IM-8 (waits IM-2, IM-4, IM-6, IM-7: runs the live import).
@@ -36,6 +36,8 @@ Wave 1: IM-1, IM-2, IM-4 independent. Wave 2: IM-3 (waits IM-1, IM-2: benchmarks
 - PR bodies get a session footer appended outside the builders' control; the lane strips attribution from the squash commit.
 - IM-6 adds no Linux test (SwiftUI area only); its proof is J1 in IM-8, per the packet.
 - Builder branches are lead/import-<id>: lead/import/<id> can't coexist with the lead/import branch.
+
+- IM-8 started before IM-7 (#1348) merged: it only reads IM-7's identifiers, which are fixed in #1348; the lane merges it after a macOS build either way.
 
 ## Open
 - IM-9 blocked on #782 (S-L8 FrameProbe marks).
