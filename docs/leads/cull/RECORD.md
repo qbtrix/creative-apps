@@ -65,5 +65,6 @@ CU-5's keys and menu.
 ## Open
 - Full run 38965923292 reports success while its macOS job failed in
   unit tests (TimelineStripLayoutTests, SuiteUI), so no journey ran there;
-  cull's done check waits on a run whose journeys ran.
+  cull's done check waits on a run whose journeys ran. Same on 38967787160
+  (8e0a526). Reported on #1480 (timeline lead, SuiteUI).
 - CU-8 / P2 waits on #782.
