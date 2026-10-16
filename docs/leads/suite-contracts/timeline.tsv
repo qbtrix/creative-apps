@@ -18,3 +18,5 @@ utc	stage	event	ref	note
 2026-10-16T13:35Z	3	pr-opened	#1370	SC-2b
 2026-10-16T13:43Z	3	pr-merged	#1370	SC-2b
 2026-10-16T13:43Z	3	heartbeat	#1371	SC-2a macOS build running
+2026-10-16T13:45Z	3	pr-merged	#1371	SC-2a
+2026-10-16T13:46Z	3	stage-start	wave 5	SC-3a on e464eca
