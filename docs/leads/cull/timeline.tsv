@@ -12,3 +12,4 @@ utc	stage	event	ref	note
 2026-10-16T19:30Z	3	pr-opened	#1588	CU-3 Auto Advance in cull, budgets
 2026-10-16T19:30Z	3	pr-opened	#1579	CU-4 metadata edits through cull
 2026-10-16T19:32Z	3	stage-start	wave3	CU-5 on base 7ab292c
+2026-10-16T19:52Z	3	heartbeat	-	wait for the lane to merge #1588 (CU-3) and #1579 (CU-4); CU-5 builder running; 
