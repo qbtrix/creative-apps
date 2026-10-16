@@ -9,7 +9,7 @@
 // the press on the committed text select and move rather than draw again; checks the sidebar still marks the current page while the
 // ellipse is selected, finds Add Page and Delete Page (`design.page.add`,
 // `design.page.delete`) by the pages with Delete Page disabled on the one
-// page, hides a layer from its row's eye and undoes that, finds Properties in the inspector,
+// page, clicks Add Page (two pages, Delete Page enabled) and undoes it, hides a layer from its row's eye and undoes that, finds Properties in the inspector,
 // places and types text (shot while typing, when the editor
 // draws at full size, and once committed, with a small box's corner handles
 // outside it), undoes and redoes, saves with -DesignSaveTo (no panel), then
@@ -113,6 +113,17 @@ final class DesignJourneyTests: XCTestCase {
         XCTAssert(deletePage.exists && deletePage.label == "Delete Page", "no Delete Page identified design.page.delete")
         XCTAssertFalse(deletePage.isEnabled, "Delete Page is enabled with one page")
         design.shot("layers")
+        // The row's Add Page adds a page as one undo step, which turns Delete Page on; Undo takes it back (#1385).
+        addPage.click()
+        XCTAssert(Self.waitForLabel(design.element("design.bar.undo"), "Undo Add Page"), "the row's Add Page made no undo step")
+        let pageRows = sidebar.staticTexts.matching(NSPredicate(format: "label BEGINSWITH %@", "Page "))
+        XCTAssert(sidebar.staticTexts["Page 2"].waitForExistence(timeout: 5), "the row's Add Page added no Page 2:\n\(sidebar.debugDescription)")
+        XCTAssertEqual(pageRows.count, 2, "the Pages list doesn't hold two pages")
+        XCTAssert(deletePage.isEnabled, "Delete Page is disabled with two pages")
+        design.shot("layers-added-page")
+        design.element("design.bar.undo").click()
+        XCTAssert(Self.waitForGone(sidebar.staticTexts["Page 2"]), "Undo left Page 2 in the Pages list")
+        XCTAssertFalse(deletePage.isEnabled, "Delete Page stayed enabled once Add Page was undone")
         // A row's eye hides that layer as one undo step, and Undo shows it again.
         let eye = sidebar.descendants(matching: .any).matching(NSPredicate(format: "label == %@", "Hide Layer")).firstMatch
         XCTAssert(eye.waitForExistence(timeout: 3), "no eye toggle on the layer rows:\n\(sidebar.debugDescription)")
@@ -175,6 +186,25 @@ final class DesignJourneyTests: XCTestCase {
         }
         XCTAssert(move.isSelected, "the palette doesn't show Move picked after \(action)")
         XCTAssert(picked, "the status line shows \(status.label) \(String(describing: status.value)), not Move, after \(action)")
+    }
+
+    /// Whether `element`'s label reads `label` within `timeout` seconds.
+    @MainActor private static func waitForLabel(_ element: XCUIElement, _ label: String, timeout: Double = 5) -> Bool {
+        let deadline = Date().addingTimeInterval(timeout)
+        repeat {
+            if element.exists && element.label == label { return true }
+            Thread.sleep(forTimeInterval: 0.2)
+        } while Date() < deadline
+        return false
+    }
+
+    /// Whether `element` is gone within five seconds.
+    @MainActor private static func waitForGone(_ element: XCUIElement) -> Bool {
+        for _ in 0..<25 {
+            if !element.exists { return true }
+            Thread.sleep(forTimeInterval: 0.2)
+        }
+        return false
     }
 
     /// Waits up to 15 seconds for `url` to exist.
