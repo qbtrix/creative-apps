@@ -337,8 +337,12 @@ if command -v swift >/dev/null 2>&1; then
   root="$here/../.."
   dump() { (cd "$1" && swift package dump-package 2>/dev/null) | jq -r '.targets[]
     | .path // ((if .type == "test" then "Tests/" else "Sources/" end) + .name)'; }
-  mkdir -p "$tmp/allmac"; sed 's/^#if os(macOS)$/#if true/' "$root/Package.swift" >"$tmp/allmac/Package.swift"
-  linux_dirs=$(dump "$root" | sort -u)
+  # Evaluate the manifest both ways explicitly, so the check reads the same on a
+  # Linux runner and on a Mac (where `#if os(macOS)` is true on the host).
+  mkdir -p "$tmp/allmac" "$tmp/linux"
+  sed 's/^#if os(macOS)$/#if true/' "$root/Package.swift" >"$tmp/allmac/Package.swift"
+  sed 's/^#if os(macOS)$/#if false/' "$root/Package.swift" >"$tmp/linux/Package.swift"
+  linux_dirs=$(dump "$tmp/linux" | sort -u)
   all_dirs=$(dump "$tmp/allmac" | sort -u)
   yml_dirs=$(grep -oE '^ *- (path: )?(Sources|Tests|UITests)[^ ,]*' "$root/project.yml" | sed -E 's/^ *- (path: )?//' \
     | while IFS= read -r p; do

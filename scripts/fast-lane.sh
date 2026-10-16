@@ -143,7 +143,7 @@ MAC_JOB="macOS"
 # manifests (`swift package dump-package` with the block switched on) and
 # checks it matches. A `*` stands for part of one name; each entry is a
 # folder or a file. Only Swift files and project.yml count (build_apps).
-MAC_ONLY=(Sources/SuiteUI 'Sources/*App' Tests/SuiteUITests Tests/AppSnapshotTests UITests project.yml)
+MAC_ONLY=(Sources/SuiteUI Sources/SuiteShell 'Sources/*App' Tests/SuiteUITests Tests/AppSnapshotTests UITests project.yml)
 mac_only_re() {
   local p re=""
   for p in "${MAC_ONLY[@]}"; do p="${p//./\\.}"; re+="${re:+|}${p//\*/[A-Za-z0-9_]+}"; done

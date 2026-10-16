@@ -250,7 +250,7 @@ Crew PRs merge into `dev` at once; `main` moves only when full CI passes on
   test name and waits for your next push. A `Mac-Check: <run url>` line a
   supervisor adds counts too.
 - Any other PR changing Swift that Linux `scripts/ci` doesn't compile
-  (`MAC_ONLY` in scripts/fast-lane.sh: `Sources/*App`, `Sources/SuiteUI`,
+  (`MAC_ONLY` in scripts/fast-lane.sh: `Sources/*App`, `Sources/SuiteUI`, `Sources/SuiteShell`,
   `Tests/SuiteUITests`, `Tests/AppSnapshotTests`, `UITests`, and
   `project.yml`; its tests derive the list from the manifests) merges only
   once its head compiles on macOS: the lane dispatches a build-only CI run
