@@ -47,3 +47,4 @@ utc	stage	event	ref	note
 2026-10-16T17:00Z	4	pr-merged	#1470	fix round 2 (last)
 2026-10-16T17:04Z	4	ci-run	38936726137	scoped halo containing #1470, in progress
 2026-10-16T17:19Z	4	heartbeat	38936726137	scoped build and tests green (snapshots incl. segmentTitlesFitOneLine); journeys running
+2026-10-16T17:28Z	4	heartbeat	38936726137	journeys still running
