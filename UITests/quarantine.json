@@ -21,21 +21,21 @@
   },
   {
     "test": "PhotoJourneyTests/PhotoEditJourneyTests/testCopyPasteAsNewLayer",
-    "owner": "#1075",
+    "owner": "#1520",
     "reason": "PJ-5: Edit > Paste's reason read failed in full run 38841439320, the last that reached the journeys. #1281 changed the read after that run and no run has reached Photo's journeys since (the brush test stops them), so it is unproven; the scoped photo run decides.",
     "expires": "2026-10-18",
     "scope": "full"
   },
   {
     "test": "PhotoJourneyTests/PhotoEditJourneyTests/testPasteFromAnotherApp",
-    "owner": "#1075",
+    "owner": "#1520",
     "reason": "PJ-6: the pasted 200 x 100 layer's place read failed in full run 38841439320, the last that reached the journeys. #1281 changed the read after that run and no run has reached Photo's journeys since, so it is unproven; the scoped photo run decides.",
     "expires": "2026-10-18",
     "scope": "full"
   },
   {
     "test": "PhotoJourneyTests/PhotoLayerOpsJourneyTests/testDuplicateMergeAndFlatten",
-    "owner": "#1075",
+    "owner": "#1520",
     "reason": "PJ-7: Layer > Merge Down's reason read failed in full run 38841439320, the last that reached the journeys. #1284 changed the read after that run and no run has reached Photo's journeys since, so it is unproven; the scoped photo run decides.",
     "expires": "2026-10-18",
     "scope": "full"
