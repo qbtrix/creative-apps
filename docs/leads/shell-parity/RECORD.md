@@ -40,7 +40,7 @@ Next: wait for SuiteUI #1456 (shell geometry) and #1337 (switcher); on each new 
 - DS-4 carries feature-done and sets the wave.json status to built.
 
 ## Open
-- gap #1452 (DP-b, round cap): geometry is SuiteUI #1456; switcher waits on #1337. Status posted on #1325 (asked the supervisor whether to close DP-b with gaps or quarantine).
+- gap #1452 (DP-b, round cap): geometry is SuiteUI #1456; switcher waits on #1337. Status posted on #1325; replied to the supervisor's 16:43 note: merge #1337 first, and #1456 is SuiteUI's (offered a supervisor quarantine of the two shell journeys, owner #1456).
 - needs-ui #1456 (filed by the #1452 fixer): EditorDetail regions bleed under the floating sidebar/inspector, suite.inspector lands inside SuiteWindow's padding (280 vs 304), -SuiteWindowSize gives a 677 pt window (3 pt past the visible frame). DP-b's geometry assertions stay until it lands.
 - dev-red #1393: full run 38915938965 red on Library tests only (LibraryImportBudgetTests timing, LibraryImportSnapshots.progressRowShowsAfterItsDelay from #1382); not Design's.
 - Findings #1443, #1444 (DP-b, from scoped run 38917492060), fix round 1 in wave 4: #1444 -> PR #1447 (switcher checks moved last; status-line text read as label or value); #1443 -> PR #1446 (root cause: design.properties sat on the scroll view that SuiteWindow turns into suite.inspector). DP-b's shell journeys also wait on #1337 (EW-8, the app switcher in SuiteWindow).
