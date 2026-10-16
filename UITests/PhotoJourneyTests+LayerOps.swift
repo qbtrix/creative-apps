@@ -10,14 +10,18 @@
 // reasons. Last, it relaunches on `-PhotoFixture layered` (Paint, Curves 1,
 // Background, top first) with Paint selected: Merge Down needs a pixel layer
 // below. Undo steps are read from the top bar's Undo button, as
-// PhotoJourneyTests does; a disabled menu item's reason is its help tag, read
-// by hovering it, as HaloLayersJourneyTests does. The list rows carry no
+// PhotoJourneyTests does; a disabled menu item's reason is its help tag, shown
+// by hovering it, as HaloLayersJourneyTests does. Photo's help tag reaches
+// accessibility with no text (dev run 38835566584: a HelpTag beside Merge
+// Down, no label, title or value), so the tag's text is read from its pixels
+// with Vision when accessibility gives none. The list rows carry no
 // identifier, so the copy's selection is read from its row: the blend and
 // opacity just set show beside "Background copy". Merge Down and Flatten
 // Image each report how soon "Merging…" showed (PB-16, report-only).
 // Shots: `photo-layerops-*`.
 import CoreGraphics
 import ImageIO
+import Vision
 import XCTest
 
 final class PhotoLayerOpsJourneyTests: XCTestCase {
@@ -168,7 +172,9 @@ final class PhotoLayerOpsJourneyTests: XCTestCase {
         entry.click()
     }
 
-    /// `menu`'s item `item` is disabled and its help tag reads `help`; the menu is closed again.
+    /// `menu`'s item `item` is disabled and the help tag hovering it shows
+    /// reads `help`; the menu is closed again. The tag's text comes from
+    /// accessibility when it has any, else from the tag's pixels.
     @MainActor private func expectDisabled(_ item: String, in menu: String, help: String, _ photo: Journey) {
         let bar = photo.app.menuBars.firstMatch.menuBarItems[menu]
         XCTAssert(bar.waitForExistence(timeout: 5), "no \(menu) menu")
@@ -177,11 +183,64 @@ final class PhotoLayerOpsJourneyTests: XCTestCase {
         XCTAssert(entry.waitForExistence(timeout: 3), "the \(menu) menu has no \(item)")
         XCTAssertFalse(entry.isEnabled, "\(menu) > \(item) is enabled")
         entry.hover()
-        let tag = photo.app.helpTags.matching(
-            NSPredicate(format: "label CONTAINS %@ OR title CONTAINS %@ OR value CONTAINS %@", help, help, help))
-        XCTAssert(tag.firstMatch.waitForExistence(timeout: 5), "\(menu) > \(item) doesn't say \(help)")
+        let tags = photo.app.helpTags
+        XCTAssert(tags.firstMatch.waitForExistence(timeout: 5), "hovering \(menu) > \(item) showed no help tag")
+        var read: [String] = []
+        let said = waitUntil {
+            read = tags.allElementsBoundByIndex.map { self.helpText($0) }
+            return read.contains { Self.says($0, help) }
+        }
+        if !said, tags.firstMatch.exists {
+            let attachment = XCTAttachment(screenshot: tags.firstMatch.screenshot())
+            attachment.name = "photo-layerops-help-tag"
+            add(attachment)
+        }
+        XCTAssert(said, "\(menu) > \(item) doesn't say \(help); its help tag reads \(read)")
         photo.press(.escape)
         _ = photo.app.menus.firstMatch.waitForNonExistence(timeout: 2)
+    }
+
+    /// A help tag's text: its label, title and value, or, when they're all
+    /// empty, the words Vision recognizes in a shot of it.
+    @MainActor private func helpText(_ tag: XCUIElement) -> String {
+        guard tag.exists else { return "" }
+        let named = [tag.label, tag.title, (tag.value as? String) ?? ""].filter { !$0.isEmpty }
+        if !named.isEmpty { return named.joined(separator: " ") }
+        return Self.recognizedText(tag.screenshot().pngRepresentation)
+    }
+
+    /// Whether `text` holds `expected`, ignoring case, punctuation and
+    /// spacing, so a recognized "There’s" or "Theres" matches "There's".
+    private static func says(_ text: String, _ expected: String) -> Bool {
+        func letters(_ string: String) -> String {
+            String(string.lowercased().unicodeScalars.filter { CharacterSet.alphanumerics.contains($0) })
+        }
+        let wanted = letters(expected)
+        return !wanted.isEmpty && letters(text).contains(wanted)
+    }
+
+    /// The lines of text Vision finds in a PNG shot, joined by spaces; the
+    /// shot is drawn three times larger first, as a help tag's type is small.
+    private static func recognizedText(_ png: Data) -> String {
+        guard let source = CGImageSourceCreateWithData(png as CFData, nil),
+            let image = CGImageSourceCreateImageAtIndex(source, 0, nil),
+            let space = CGColorSpace(name: CGColorSpace.sRGB),
+            image.width > 0, image.height > 0
+        else { return "" }
+        let width = image.width * 3, height = image.height * 3
+        guard let context = CGContext(
+            data: nil, width: width, height: height, bitsPerComponent: 8, bytesPerRow: 0,
+            space: space, bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)
+        else { return "" }
+        context.interpolationQuality = .high
+        context.draw(image, in: CGRect(x: 0, y: 0, width: width, height: height))
+        guard let large = context.makeImage() else { return "" }
+        let request = VNRecognizeTextRequest()
+        request.recognitionLevel = .accurate
+        request.usesLanguageCorrection = false
+        guard (try? VNImageRequestHandler(cgImage: large, options: [:]).perform([request])) != nil else { return "" }
+        let lines = (request.results ?? []).compactMap { $0.topCandidates(1).first?.string }
+        return lines.joined(separator: " ")
     }
 
     /// Clicks the Layers tab's Blend Mode picker open and returns its menu's item titles.
