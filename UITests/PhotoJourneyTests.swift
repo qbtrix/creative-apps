@@ -649,10 +649,12 @@ final class PhotoJourneyTests: XCTestCase {
         let matches = photo.element("suite.inspector").descendants(matching: .any)
             .matching(NSPredicate(format: "label == %@ OR identifier == %@", label, label))
         XCTAssert(matches.firstMatch.waitForExistence(timeout: 5), "no \(label) in the panel")
-        matches.element(boundBy: matches.count - 1).click()
+        let target = matches.element(boundBy: matches.count - 1)
+        let name = target.label.isEmpty ? label : target.label
+        target.click()
         // The open number's field carries the label (the brush's hex field may sit above it);
         // click it, as it may open without the keyboard.
-        let panel = photo.element("suite.inspector"), named = panel.textFields[label]
+        let panel = photo.element("suite.inspector"), named = panel.textFields[name]
         let field = named.waitForExistence(timeout: 3) ? named : panel.textFields.firstMatch
         XCTAssert(field.waitForExistence(timeout: 5), "clicking \(label)'s number opened no field to type in")
         replaceText(in: field, with: value, photo)

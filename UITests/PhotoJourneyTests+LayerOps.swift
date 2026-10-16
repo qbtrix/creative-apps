@@ -273,8 +273,10 @@ final class PhotoLayerOpsJourneyTests: XCTestCase {
         let matches = panel.descendants(matching: .any)
             .matching(NSPredicate(format: "label == %@ OR identifier == %@", label, label))
         XCTAssert(matches.firstMatch.waitForExistence(timeout: 5), "no \(label) in the panel")
-        matches.element(boundBy: matches.count - 1).click()
-        let named = panel.textFields[label]
+        let target = matches.element(boundBy: matches.count - 1)
+        let name = target.label.isEmpty ? label : target.label
+        target.click()
+        let named = panel.textFields[name]
         let field = named.waitForExistence(timeout: 3) ? named : panel.textFields.firstMatch
         XCTAssert(field.waitForExistence(timeout: 5), "clicking \(label)'s number opened no field to type in")
         // Clear without Command-A (Photo's Select > All has it).
