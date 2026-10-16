@@ -18,9 +18,15 @@
 // Merge Down and Flatten keep their picture as TiledPixels (same grid), so
 // they never copy a whole picture at all. A picture of one tile (each region
 // the renderer draws) is its own only tile, so it skips the read and the
-// write back: one copy per layer, not three, on every brush event. An
-// adjustment layer is per pixel, so it costs the region it covers: the whole
-// region at once, or tile by tile across the cores on a tiled picture.
+// write back: one copy per layer, not three, on every brush event. Two
+// composites give their answer without running (#1636, PB-13): an opaque
+// normal layer tile at opacity 1 covering a picture tile is that tile, and a
+// layer tile composites only over the rectangle it paints, since a clear
+// pixel leaves its backdrop alone. CoreRaster's composite is about 37 ns a
+// pixel, so a 256 px tile under an opaque Background and a partly painted
+// layer drops from about 5 ms to about 3. An adjustment layer is per pixel,
+// so it costs the region it covers: the whole region at once, or tile by
+// tile across the cores on a tiled picture.
 import CoreRaster
 import Dispatch
 import Synchronization
@@ -112,12 +118,76 @@ public enum PhotoLayerComposite {
             let x = index % columns * size, y = index / columns * size
             var piece = try read(index)
             for hit in placed {
+                let tile = tiled.tiles[hit.tile], dx = hit.at.x - x, dy = hit.at.y - y
+                guard (0...1).contains(opacity) else {
+                    // CoreRaster throws for this opacity.
+                    piece = try CoreRaster.composite(tile, onto: piece, x: dx, y: dy, mode: mode, opacity: opacity)
+                    continue
+                }
+                if try replaces(tile, piece, dx: dx, dy: dy, mode: mode, opacity: opacity) {
+                    piece = tile
+                    continue
+                }
+                guard let painted = try paintedRect(of: tile) else { continue }
+                let source = painted.width == tile.width && painted.height == tile.height ? tile
+                    : try tile.cropped(x: painted.x, y: painted.y, width: painted.width, height: painted.height)
                 piece = try CoreRaster.composite(
-                    tiled.tiles[hit.tile], onto: piece, x: hit.at.x - x, y: hit.at.y - y, mode: mode, opacity: opacity)
+                    source, onto: piece, x: dx + painted.x, y: dy + painted.y, mode: mode, opacity: opacity)
             }
             return piece
         }
         return Array(zip(jobs.map(\.key), pieces))
+    }
+
+    /// Whether `tile` at (dx, dy) composited onto `piece` gives `tile` itself:
+    /// normal at opacity 1, covering the whole piece, every pixel opaque.
+    /// Source-over then keeps none of the backdrop (1 - alpha is 0) and the
+    /// straight color times alpha 1 is the color, so the same bits; skipping
+    /// the composite saves a per-pixel pass, such as an opaque Background
+    /// under every rendered tile. The scan stops at the first pixel that isn't
+    /// opaque, so a layer with any transparency costs about one pixel read.
+    static func replaces(_ tile: PixelBuffer, _ piece: PixelBuffer, dx: Int, dy: Int,
+                         mode: BlendMode, opacity: Float) throws -> Bool {
+        guard mode == .normal, opacity == 1, dx == 0, dy == 0,
+            tile.width == piece.width, tile.height == piece.height
+        else { return false }
+        for y in 0..<tile.height {
+            for x in 0..<tile.width {
+                if try tile.pixel(x: x, y: y).a != 1 { return false }
+            }
+        }
+        return true
+    }
+
+    /// The smallest rectangle of `tile` holding every pixel with alpha above
+    /// 0; nil when the whole tile is clear. A clear source pixel leaves its
+    /// backdrop pixel as it was in every blend mode (its straight color is
+    /// clear, its weight 0 and the backdrop's 1), so only this rectangle needs
+    /// compositing: a layer that paints part of a tile costs that part. Rows
+    /// are read from each end until one is painted, then each painted row
+    /// from both ends, so a tile painted to its edges costs a few reads.
+    static func paintedRect(of tile: PixelBuffer) throws -> PixelRect? {
+        func clear(_ x: Int, _ y: Int) throws -> Bool { try tile.pixel(x: x, y: y).a == 0 }
+        func clearRow(_ y: Int) throws -> Bool {
+            for x in 0..<tile.width where try !clear(x, y) { return false }
+            return true
+        }
+        var top = 0
+        while top < tile.height, try clearRow(top) { top += 1 }
+        guard top < tile.height else { return nil }
+        var bottom = tile.height - 1
+        while bottom > top, try clearRow(bottom) { bottom -= 1 }
+        var left = tile.width, right = -1
+        for y in top...bottom {
+            var x = 0
+            while x < left, try clear(x, y) { x += 1 }
+            left = min(left, x)
+            var end = tile.width - 1
+            while end > right, try clear(end, y) { end -= 1 }
+            right = max(right, end)
+        }
+        guard right >= left else { return nil }
+        return PixelRect(x: left, y: top, width: right - left + 1, height: bottom - top + 1)
     }
 
     /// `work(0) ... work(count - 1)` run across the cores, in index order.
