@@ -23,7 +23,7 @@ extension LibraryJourneyTests {
         XCTAssert(before.hasSuffix("No stars"), "IMG_0001 starts as \(before), not unrated")
         focusLoupe(refused)
         refused.press(character: "3", step: "cull-refused")
-        let text = "Couldn't set the rating: this window shows built-in sample data, not photos on disk."
+        let text = "Couldn't set the rating: this window shows built-in sample data, not photos on disk. Import a folder to rate your own photos."
         let message = refused.element("library.notice").descendants(matching: .any)
             .matching(NSPredicate(format: "label == %@ OR value == %@", text, text)).firstMatch
         XCTAssert(message.waitForExistence(timeout: 10), "the cull notice (library.notice) doesn't read \"\(text)\"")

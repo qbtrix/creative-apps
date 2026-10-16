@@ -71,9 +71,10 @@ import Testing
         try #require(!order.isEmpty)
         catalog.select([order[0]])
         catalog.cull(.rating(3))
-        #expect(catalog.cullError == "Couldn't set the rating: this window shows built-in sample data, not photos on disk.")
+        #expect(catalog.cullError == "Couldn't set the rating: this window shows built-in sample data, not photos on disk. Import a folder to rate your own photos.")
         let notice = try #require(catalog.notice)
         #expect(notice.source == .cull && notice.isError)
+        #expect(notice.action == .importFolder)
         let row = LibraryNoticeRow(notice: notice, onClose: {})
         #expect(row.onClose != nil)
         var dismissed = catalog
@@ -87,6 +88,7 @@ import Testing
         }
     }
 
-    /// The window's cull actions: the notice's close enabled.
-    private static let cullMenu = LibraryMenu(cull: LibraryMenu.Cull(dismissCullError: {}))
+    /// The window's cull actions: the notice's close and Import Folder… enabled.
+    private static let cullMenu = LibraryMenu(
+        file: LibraryMenu.File(importFolder: {}), cull: LibraryMenu.Cull(dismissCullError: {}))
 }

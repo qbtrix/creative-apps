@@ -96,7 +96,7 @@ private func ratings(_ catalog: LibraryCatalog) -> [String: Int] {
     #expect(catalog.items == items)
     #expect(catalog.history == history)
     #expect(catalog.saveRevision == revision)
-    #expect(catalog.cullError == "Couldn't set the rating: this window shows built-in sample data, not photos on disk.")
+    #expect(catalog.cullError == "Couldn't set the rating: this window shows built-in sample data, not photos on disk. Import a folder to rate your own photos.")
     catalog.dismissCullError()
     #expect(catalog.cullError == nil)
 }
@@ -117,7 +117,18 @@ private func ratings(_ catalog: LibraryCatalog) -> [String: Int] {
         #expect(message.hasPrefix(opening), "\(change): \(message)")
         #expect(message.contains("sample data"), "\(change): \(message)")
         #expect(!message.lowercased().contains("preview"), "\(change): \(message)")
+        #expect(message.hasSuffix("Import a folder to rate your own photos."), "\(change): \(message)")
+        #expect(catalog.notice?.action == .importFolder, "\(change)")
     }
+}
+
+@Test func aCullErrorWithoutTheImportHintOffersNoImport() {
+    var catalog = fourPhotos()
+    catalog.select(["P1"])
+    catalog.cull(.rating(9))
+    #expect(catalog.cullError == "A rating is 0 to 5 stars.")
+    #expect(catalog.notice?.source == .cull)
+    #expect(catalog.notice?.action == nil)
 }
 
 @Test func aSuccessfulCullClearsTheError() {

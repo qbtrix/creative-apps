@@ -61,6 +61,8 @@ struct LibraryBrowser: View {
             menu.persist.showCatalogInFinder.map { ToolbarAction("Show in Finder", systemImage: "folder", perform: $0) }
         case .showFailures:
             menu.file.showImportFailures.map { ToolbarAction("Show Failures", systemImage: "list.bullet", perform: $0) }
+        case .importFolder:
+            menu.file.importFolder.map { ToolbarAction("Import Folder…", systemImage: "folder.badge.plus", perform: $0) }
         case nil:
             nil
         }
