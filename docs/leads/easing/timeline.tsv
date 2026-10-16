@@ -36,3 +36,5 @@ utc	stage	event	ref	note
 2026-10-16T15:34Z	4	fix-round	round 1	fix-batch on #1411-#1424, base 165933f
 2026-10-16T15:48Z	4	heartbeat	round 1	batch r-b1 (#1411-#1415, #1418-#1421) fixing; deferred #1416 #1417 #1422 #1423 #1424
 2026-10-16T15:55Z	4	pr-opened	#1429	round 1 fixes r-b1 (#1411-#1415, #1418-#1421); needs-ui #1426
+2026-10-16T16:08Z	4	pr-merged	#1429	round 1 fixes; #1411-#1415, #1418-#1421 closed
+2026-10-16T16:13Z	4	ci-run	38929688596	full dev run containing #1429, pending

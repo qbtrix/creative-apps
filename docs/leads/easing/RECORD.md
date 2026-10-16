@@ -2,9 +2,9 @@
 
 Issue: #1333 · Packet: docs/blueprints/halo/features/easing.md
 Run: act-1a1448a5fbe-p22s · Session: session_01Fpq7bUwf2TjhThXdtGKn4r · Started: 2026-10-16T11:48Z
-Stage: 4 round 1
+Stage: 4 round 2
 Base: e464ecab9b0e11b9cfc27851181beafdb8fee424
-Next: wait for the lane to merge fix PR #1429 (round 1); then review round 2 on the next scoped halo run containing it; fix round 2 takes the deferred minors #1416 #1417 #1422 #1423 #1424 plus round 2 findings
+Next: wait for full CI run 38929688596 (head 4fb505e, contains #1429) or a newer scoped halo run containing #1429; then review round 2 (critic-panel.js, same 6 lenses) and fix round 2 with #1416 #1417 #1422 #1423 #1424 + round 2 findings
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
