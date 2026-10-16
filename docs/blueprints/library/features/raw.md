@@ -75,6 +75,13 @@ status-and-layout and on filters-collections' FC-e, which edit them too.
 | RW-b | Importing a folder of raw files is as fast as JPEGs because the grid draws each camera's embedded preview, a RAW and its JPEG come in as one photo, and the grid marks raw photos. | RW-3, RW-4, RW-5, RW-6, RW-7 | RJ1 | RW-a (RW-3); metadata-more:MD-b (RW-6) |
 | RW-c | The Develop tab shows the RAW controls this file's decoder offers, each change is one undo step, and the grid, the loupe and export all decode with them. | RW-8, RW-9, RW-10 | RJ2 | RW-b (RW-8, RW-10); develop (RW-8, RW-10); persist (RW-8); export (RW-9); status-and-layout, filters-collections:FC-e (RW-10) |
 
+Screen early: RW-b (the grid's RAW mark, `RawDecoding`) and RW-c (the
+Develop tab's RAW section) own `Sources/LibraryApp/` files, so both are UI
+slices (`"ui": true`). The views (RW-7, RW-10) still come last in their
+slices. RW-a doesn't publish the slots they draw (RW-8's rows, header and
+`setRaw`, and the raw mark), so a UI slice on the fakes needs those stubs
+moved into RW-a first.
+
 ## Top complaints and features from the future
 
 Usage evidence for raw is thin (blueprint 3, tier 2 row 6: "pending

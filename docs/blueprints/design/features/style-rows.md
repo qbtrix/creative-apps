@@ -62,6 +62,11 @@ the Design-scoped macOS run (SR-m: on the Linux gate).
 | SR-a | Layer opacity, corner radius and stroke rows set one or several layers in one step per scrub, read "Mixed" when the layers differ, show the locked hint in the value column, and keep each scrub step inside its budget. | ST-4, ST-6, ST-7 | J10 | SR-m (ST-4, ST-7); design-window DW-a (ST-4, ST-6) and DW-b (ST-4) |
 | SR-b | The canvas draws radius, stroke and opacity as stored, and scrubs and typing keep up on 2,000 layers. | ST-5, ST-8 | P2 | design-window DW-a (ST-5, ST-8); SR-a, SR-t (ST-8) |
 
+SR-t, SR-a and SR-b are the UI slices (`"ui": true` in the `.wave.json`: the
+feel gate, rule 15, and the Mac finish, rule 17). They wait only on SR-m,
+the contract slice, and on design-window; ST-8, the `feature-done` task, is
+the integrate step on `.live`.
+
 SR-m is the contract slice (rule 12): Model only, Linux, the setters,
 shared values and edit scale both view slices call. SR-t is the front of
 the queue: the captain's "text does not have font size adjustments"

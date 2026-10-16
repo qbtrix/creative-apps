@@ -42,6 +42,11 @@ the Design-scoped macOS run.
 | SS-a | A marquee selects several layers, which then move, resize, nudge, delete, align and distribute as one step each. | S-1, S-2, S-3, S-6, S-7 | J5, J6 | design-contracts (S-1 to S-3); design-window DW-a (S-6, S-7) and DW-b (S-6); design-seams (S-7) |
 | SS-b | View > Zoom to Selection frames the selection, an edit pressed mid-drag waits for the drag to end, and canvas drags keep up on 2,000 layers. | S-4, S-5, S-7b, S-8 | J4, P1 | design-contracts (S-4); design-seams, canvas-basics CB-a (S-5); design-seams (S-8); design-window DW-a (S-7b, S-8); SS-a (S-7b, S-8) |
 
+SS-a is the UI slice (`"ui": true` in the `.wave.json`: the feel gate, rule
+15, and the Mac finish, rule 17); SS-b has no view task. S-1 to S-3 have
+merged, so SS-a's tasks and waits stay as they are; S-8, the `feature-done`
+task, is the integrate step on `.live`.
+
 Every drag here goes through design-window's live drag box, so the editor
 body doesn't run per sample: S-6 checks it for the marquee and the
 several-layer resize.

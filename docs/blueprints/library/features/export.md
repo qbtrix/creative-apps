@@ -88,6 +88,12 @@ build side by side.
 | EX-e | Exporting many photos shows its progress with Cancel, keeps going past a file that fails, lists each failure with Try Again, stops cleanly on Cancel, and a cropped photo exports exactly as the loupe shows it. | EX-12, EX-13, EX-14 | J7B, P8 | EX-a (EX-12, EX-13, EX-14); EX-b (EX-13, EX-14); crop:CR-b (EX-14); #782 (P8 in EX-13) |
 | EX-f | With Write Sidecar on, each exported file gets an XMP file beside it with its rating, label, pick and develop settings, named so neither file overwrites anything. | EX-15, EX-16, EX-17 | J7S | EX-a (EX-15, EX-16); EX-b (EX-16); EX-c, EX-d, EX-e (EX-17, the docs task) |
 
+Screen early: EX-b, EX-c and EX-d own `Sources/LibraryApp/` files, so they
+are UI slices (`"ui": true`). EX-b already waits only on EX-a, the first
+slice; its sheet (EX-6) is reached from File > Export…. EX-a carries the real
+`LiveExporter` and `ExportRunner` (EX-2, EX-3) beside the contract, so here
+"contract" means the first slice, and nothing was split.
+
 ## Journey steps
 
 Each journey has its own class and file (#333 merged). (F) runs on fakes,

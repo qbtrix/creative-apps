@@ -156,7 +156,8 @@
         "metadata-more:MD-b": [
           "RW-6"
         ]
-      }
+      },
+      "ui": true
     },
     {
       "id": "RW-c",
@@ -210,7 +211,8 @@
         "filters-collections:FC-e": [
           "RW-10"
         ]
-      }
+      },
+      "ui": true
     }
   ]
 }

@@ -83,7 +83,8 @@
         "design-seams": [
           "S-7"
         ]
-      }
+      },
+      "ui": true
     },
     {
       "id": "SS-b",

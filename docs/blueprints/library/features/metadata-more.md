@@ -95,6 +95,13 @@ files, line up one after another.
 | MD-d | Each keyword, title, caption, rating or label change on a photo with a file is written to an XMP sidecar beside it, the original never changes, and a sidecar another app wrote is left alone with a reason. | MD-14, MD-15, MD-16, MD-17, MD-18 | MD-J3 | MD-a (MD-14); MD-c (MD-18); cull (MD-18); filters-collections (MD-18) |
 | MD-e | Typing in the window's search field shows only the photos whose keywords, title, caption or camera details match, `field:value` narrows to one field, and a camera value in the Info tab searches for itself. | MD-19, MD-20, MD-21, MD-22 | MD-J4 | MD-a (MD-19); filters-collections (MD-21, MD-22); MD-d (MD-22) |
 
+Screen early: MD-b to MD-e own `Sources/LibraryApp/` files, so they are UI
+slices (`"ui": true`). Their views (MD-8, MD-13, MD-18, MD-22) still close
+each slice and chain through `LibraryInspector.swift`. MD-a already
+publishes the slots they draw, so they can move to one UI slice that waits
+only on MD-a. That move also needs Model walks for the Model-only slices
+and an integrate slice, so it is not made here.
+
 ## Journey steps
 
 Each journey file declares its own `XCTestCase` class (packets.md). (F)

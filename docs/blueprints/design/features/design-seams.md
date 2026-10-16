@@ -32,6 +32,9 @@ the Linux gate.
 |---|---|---|---|---|
 | SE-a | A marquee selects inside the frame under the pointer, a drag moves or resizes several layers as one step, an Option-drag is one Duplicate step, and hit test, edit and save stay inside their budgets on 2,000 layers. | D0-3c, D0-4b | MJ5 | design-contracts (the feature) |
 
+No UI slice (`"ui_slice": "none"` in the `.wave.json`): gesture routes and
+budgets in the Model only; the canvas that drives them is design-window's.
+
 ## Journey steps
 
 1. **MJ5** `DesignGestureRouteTests.testGesturesWalk` (D0-3c), Linux, on

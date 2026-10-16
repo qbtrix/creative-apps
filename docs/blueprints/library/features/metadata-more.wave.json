@@ -165,7 +165,8 @@
         "status-and-layout": [
           "MD-8"
         ]
-      }
+      },
+      "ui": true
     },
     {
       "id": "MD-c",
@@ -222,7 +223,8 @@
         "export": [
           "MD-13"
         ]
-      }
+      },
+      "ui": true
     },
     {
       "id": "MD-d",
@@ -264,7 +266,8 @@
         "filters-collections": [
           "MD-18"
         ]
-      }
+      },
+      "ui": true
     },
     {
       "id": "MD-e",
@@ -304,7 +307,8 @@
         "MD-d": [
           "MD-22"
         ]
-      }
+      },
+      "ui": true
     }
   ]
 }

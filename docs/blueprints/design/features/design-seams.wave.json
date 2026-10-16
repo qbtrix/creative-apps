@@ -35,5 +35,7 @@
         "Tests/DesignModelTests/DesignBudgetTests.swift"
       ]
     }
-  ]
+  ],
+  "ui_slice": "none",
+  "ui_slice_reason": "Gesture routes and budgets in DesignModel only; the canvas that drives them is design-window's."
 }
