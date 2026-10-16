@@ -1,7 +1,7 @@
 // PhotoPanel.swift: the inspector of a Photo window, with no tabs: the image
-// header, the selected layer's blend mode and opacity (PhotoLayerSettings),
-// then PhotoAdjustTab (the active tool's options and the adjustment sections,
-// in one scroll view). The layer list lives in the window's sidebar
+// header, then PhotoAdjustTab in one scroll view (the active tool's options,
+// the selected layer's blend mode and opacity from PhotoLayerSettings, then
+// the adjustment sections). The layer list lives in the window's sidebar
 // (PhotoLayerList), and PhotoHistoryTab is not shown yet. With no image open
 // it says how to start. Values in, intents out. Every control carries a
 // `photo.tool.*` or `photo.layer.*` accessibility identifier for the UI
@@ -18,8 +18,7 @@ struct PhotoPanel: View {
         VStack(alignment: .leading, spacing: 0) {
             if model.canvas != nil {
                 InspectorHeader(model.inspectorHeaderTitle, details: model.inspectorHeaderDetails)
-                PhotoLayerSettings(model: model, perform: perform)
-                PhotoAdjustTab(model: model, perform: perform)
+                PhotoAdjustTab(model: model, perform: perform, showsLayerSettings: true)
             } else {
                 EmptyStateView(
                     PhotoInspectorContent.noImageTitle, systemImage: PhotoInspectorContent.noImageSymbol,

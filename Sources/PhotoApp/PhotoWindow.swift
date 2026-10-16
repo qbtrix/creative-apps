@@ -73,7 +73,7 @@ struct PhotoWindow: View {
     /// The launch file opens in the first window only.
     @MainActor static var launchFileOpened = false
 
-    /// This process's `-PhotoFixture` and `-PhotoWindowWidth`, read once.
+    /// This process's `-PhotoFixture`, read once.
     nonisolated static let launchOptions = PhotoLaunchOptions(arguments: ProcessInfo.processInfo.arguments)
 
     /// The fixture on the fakes under `-PhotoFixture`, else a workspace on `fileServices(.live)`.

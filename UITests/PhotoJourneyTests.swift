@@ -69,7 +69,7 @@ final class PhotoJourneyTests: XCTestCase {
         let eyedropper = photo.element("suite.tools").buttons["Eyedropper"]
         XCTAssert(eyedropper.waitForExistence(timeout: 5), "the palette has no Eyedropper")
         XCTAssertFalse(eyedropper.isEnabled, "the Eyedropper is enabled on .live, where sampling isn't built")
-        // Its help text is proven by AppSnapshotTests' PhotoEditorSnapshots.railEyedropperHelp (PhotoRailTool
+        // Its help text is proven by AppSnapshotTests' PhotoEditorSnapshots.paletteEyedropperHelp (PhotoPaletteTool
         // reports "Not built yet (PV-9)." on .live), since XCUITest doesn't read SwiftUI .help reliably.
     }
 

@@ -1,7 +1,7 @@
 // PhotoLaunchOptionsTests.swift: the launch arguments (S-12). `-PhotoFixture`
-// names a fixture or is kept as an unknown name, `-PhotoWindowWidth` is kept
-// only within 880...4096, and the launch workspace runs on the fakes under a
-// fixture (empty with "No fixture named <name>." for an unknown one) and is
+// names a fixture or is kept as an unknown name, other flags (SuiteUI's
+// `-SuiteWindowSize` among them) are skipped, and the launch workspace runs on
+// the fakes under a fixture (empty with "No fixture named <name>." for an unknown one) and is
 // nil without one, so the window stays on `.live`. Runs on Linux and macOS.
 import PhotoModel
 import Testing
@@ -19,22 +19,17 @@ import Testing
         #expect(options.unknownFixture == "nope")
     }
 
-    @Test(arguments: [("500", nil), ("1200", 1200), ("880", 880), ("4096", 4096), ("4097", nil), ("wide", nil), ("nan", nil)]
-          as [(String, Double?)])
-    func theWindowWidthIsKeptOnlyInRange(_ text: String, _ width: Double?) {
-        #expect(PhotoLaunchOptions(arguments: ["-PhotoWindowWidth", text]).windowWidth == width)
-    }
-
-    @Test func bothFlagsTogether() {
-        let options = PhotoLaunchOptions(arguments: ["-PhotoWindowWidth", "1400", "-PhotoFixture", "sample"])
+    @Test func theWindowSizeFlagIsSkipped() {
+        let options = PhotoLaunchOptions(arguments: ["-SuiteWindowSize", "1400x900", "-PhotoFixture", "sample"])
         #expect(options.fixture == .sample)
-        #expect(options.windowWidth == 1400)
+        #expect(options.unknownFixture == nil)
     }
 
-    @Test(arguments: [[], ["/path/PhotoApp"], ["-PhotoFixture"], ["-PhotoWindowWidth"], ["-Other", "x"]] as [[String]])
+    @Test(arguments: [[], ["/path/PhotoApp"], ["-PhotoFixture"], ["-SuiteWindowSize", "1024x768"], ["-Other", "x"]]
+          as [[String]])
     func noValueGivesNothing(_ arguments: [String]) {
         let options = PhotoLaunchOptions(arguments: arguments)
-        #expect(options.fixture == nil && options.unknownFixture == nil && options.windowWidth == nil)
+        #expect(options.fixture == nil && options.unknownFixture == nil)
     }
 
     @Test func aFixtureLaunchesOnFakes() throws {
@@ -52,7 +47,7 @@ import Testing
     }
 
     @Test func withoutAFixtureTheWindowStaysLive() {
-        #expect(PhotoWorkspace.launch(PhotoLaunchOptions(arguments: ["-PhotoWindowWidth", "1200"])) == nil)
+        #expect(PhotoWorkspace.launch(PhotoLaunchOptions(arguments: ["-SuiteWindowSize", "1200x800"])) == nil)
         #expect(!PhotoWorkspace(services: .live).isPreviewData)
         #expect(!PhotoWorkspace().isPreviewData)
     }

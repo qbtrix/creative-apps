@@ -127,14 +127,14 @@ func photoTiles(_ model: PhotoWorkspace) throws -> CanvasTiles? {
             name: "photo-status-message-dark", scheme: .dark)
     }
 
-    /// The rail's Eyedropper carries the sampling service's help: disabled on
+    /// The palette's Eyedropper carries the sampling service's help: disabled on
     /// `.live`, enabled on `.fake`.
-    @Test func railEyedropperHelp() {
+    @Test func paletteEyedropperHelp() {
         let live = PhotoWorkspace(services: .live)
-        #expect(PhotoRailTool(.eyedropper, in: live).unavailableHelp == live.toolHelp(.eyedropper))
-        #expect(PhotoRailTool(.eyedropper, in: live).unavailableHelp == "Not built yet (PV-9).")
-        #expect(PhotoRailTool(.eyedropper, in: PhotoWorkspace(services: .fake)).unavailableHelp == nil)
-        #expect(PhotoRailTool.rail(live).map(\.tool) == PhotoTool.allCases)
+        #expect(PhotoPaletteTool(.eyedropper, in: live).unavailableHelp == live.toolHelp(.eyedropper))
+        #expect(PhotoPaletteTool(.eyedropper, in: live).unavailableHelp == "Not built yet (PV-9).")
+        #expect(PhotoPaletteTool(.eyedropper, in: PhotoWorkspace(services: .fake)).unavailableHelp == nil)
+        #expect(PhotoPaletteTool.palette(live).map(\.tool) == PhotoTool.allCases)
     }
 
     @Test func exportSheet() throws {
