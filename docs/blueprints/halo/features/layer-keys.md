@@ -178,7 +178,10 @@ extension HaloProject {
 
 **Control ids**, each set through `.haloControl(id:enabled:help:)` so H-J13
 finds it: `halo.inspector.row.<raw>` (a TRANSFORM row),
-`halo.inspector.key.<raw>` (its keyframe button), `halo.inspector.parent`,
+`halo.inspector.key.<raw>` (its stopwatch) and
+`halo.inspector.key.<raw>.diamond` (its key diamond, listed while shown;
+KeyframeButton sets both ids itself, since an id on the pair lands on both
+buttons, #1282), `halo.inspector.parent`,
 `halo.inspector.blend`, and `halo.viewer.artboard` for a drag's refusal.
 Values read empty in XCUITest (#262), so each row also sets
 `.accessibilityValue(row.text)`. The Blend titles are Halo's own `switch`

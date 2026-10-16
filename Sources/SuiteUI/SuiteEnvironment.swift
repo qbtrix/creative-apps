@@ -7,9 +7,12 @@
 // one of each. Each element also reports its identifier through
 // SuiteProbeElementsKey, so a test counts what was placed without an
 // assistive client (SwiftUI builds a hosting view's accessibility tree only
-// when one asks). `.suiteControl(id:enabled:reason:role:)` sets the control's
-// accessibility identifier and keeps it registered in that window's
-// SuiteControlInventory while it is on screen. Plain keys rather than
+// when one asks). `.suiteControl(id:enabled:reason:role:identifies:)` sets the
+// control's accessibility identifier and keeps it registered in that window's
+// SuiteControlInventory while it is on screen; a nil id registers nothing.
+// With `identifies` false it only registers, for a view whose parts carry
+// their own identifiers: an identifier on a view of several elements lands on
+// every one of them (KeyframeButton, #1282). Plain keys rather than
 // `@Entry`, as in Glass.swift.
 import SwiftUI
 
@@ -54,9 +57,14 @@ struct SuiteProbeElementsKey: PreferenceKey {
 
 extension View {
     /// Identifies this control and lists it in the window's `suite.controls`
-    /// while it is on screen. A disabled control must say why in `reason`.
-    public func suiteControl(id: String, enabled: Bool, reason: String?, role: String? = nil) -> some View {
-        modifier(SuiteControlModifier(entry: ControlEntry(id: id, enabled: enabled, reason: reason, role: role)))
+    /// while it is on screen. A disabled control must say why in `reason`. A
+    /// nil `id` lists nothing; with `identifies` false the view is listed but
+    /// keeps the identifiers its parts set themselves.
+    public func suiteControl(
+        id: String?, enabled: Bool, reason: String?, role: String? = nil, identifies: Bool = true
+    ) -> some View {
+        let entry = id.map { ControlEntry(id: $0, enabled: enabled, reason: reason, role: role) }
+        return modifier(SuiteControlModifier(entry: entry, identifies: identifies))
     }
 
     /// Publishes `suite.perf` and `suite.controls` when `arguments` carry
@@ -82,11 +90,12 @@ extension ToolbarAction {
 
 private struct SuiteControlModifier: ViewModifier {
     let entry: ControlEntry?
+    var identifies = true
     @Environment(\.suiteControlStore) private var store
     @State private var owner = UUID()
 
     func body(content: Content) -> some View {
-        if let entry {
+        if let entry, identifies {
             content
                 .accessibilityIdentifier(entry.id)
                 .onAppear { store?.register(entry, owner: owner) }
@@ -95,8 +104,18 @@ private struct SuiteControlModifier: ViewModifier {
                     store?.register(new, owner: owner)
                 }
                 .onDisappear { store?.unregister(entry.id, owner: owner) }
-        } else {
+        } else if identifies {
             content
+        } else {
+            // Registers only. The entry may come and go without the content
+            // changing identity, so every hook takes it as optional.
+            content
+                .onAppear { entry.map { store?.register($0, owner: owner) } }
+                .onChange(of: entry) { old, new in
+                    if let old, old.id != new?.id { store?.unregister(old.id, owner: owner) }
+                    new.map { store?.register($0, owner: owner) }
+                }
+                .onDisappear { entry.map { store?.unregister($0.id, owner: owner) } }
         }
     }
 }

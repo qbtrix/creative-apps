@@ -8,9 +8,9 @@
 // "6 keyframes" (0, 6, 12, 20, 24, 47), then adds an Opacity key with the
 // diamond. The playhead moves from the keys: clicking Ball's name in the
 // timeline focuses it, then Home and →, read on the status timecode. A
-// KeyframeButton's stopwatch and diamond share `halo.inspector.key.<raw>`,
-// so both are found by label ("Animate Rotation", "Add Key, Opacity") and
-// the stopwatch's value is the key state. The Rotation bar is
+// KeyframeButton's stopwatch is `halo.inspector.key.<raw>` and its diamond
+// `halo.inspector.key.<raw>.diamond`; both are found by label ("Animate
+// Rotation", "Add Key, Opacity") and the stopwatch's value is the key state. The Rotation bar is
 // `halo.inspector.row.rotation`, a slider whose value is the row's text
 // ("12°") or its position, both in degrees. A lane is the timeline element
 // labelled with the layer's name; its key count is read from its
