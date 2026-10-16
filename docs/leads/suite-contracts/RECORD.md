@@ -41,6 +41,8 @@ Waves (packet's Build waves, checked against dev at ebc68bf):
 |---|---|---|---|---|---|---|---|
 | 1 | 38933216466 | red, not this feature: Linux green; macOS failed only HaloEasingSnapshots.segmentTitlesFitOneLine (halo, #1450); SuiteLiveServicesTests, all SuiteModelTests (2740 Model tests) and StoreBudgetTests passed; QB-SM6 median 5.5/5.7 ms (debug gate 50); journeys skipped after the test failure, so no audit | no screens touched | clarity, oracle, quality, packet conformance, robustness | 10 (4 major, 6 minor): #1457 #1459 #1460 #1461 #1462 #1463 #1464 #1465 #1466 #1468 | #1472 #1473 #1474 #1476 merged | no |
 
+Runs after round 1: scoped: suite 38938043443 on 91f1ba6 (has SC-5c and #1472) green; full run 38938209193 on 7d7256c pending; scoped: suite 38940652547 on 3fbd10f (all round-1 fixes) in progress.
+
 ## Decisions
 - No `## Slices` table in the packet: v2 loop. Started after #1302, so the findings queue (rule 10) and the 2-round cap (rule 11) apply; rules 13/14 (v3 only) don't.
 - PRs target `dev`, not `main`: CLAUDE.md forbids targeting `main` and the lane retargets fast-lane PRs to `dev`. The brief's main HEAD 9e3c5f8 was verified; dev (ebc68bf) is one commit ahead.
