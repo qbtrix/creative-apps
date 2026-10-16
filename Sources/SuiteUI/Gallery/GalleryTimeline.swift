@@ -12,6 +12,9 @@
 // page switches (No tracks, Nothing picked, Toolbar) are single-chip
 // ChipRows, each its own `suite.gallery.timeline.*` control; the strip
 // carries an easing context menu for the picked keys, as a host adds one.
+// The page offers the strip the height left between the switches and the log,
+// with no vertical ScrollView of its own, so `timeline-long`'s 300 lanes
+// scroll under the strip's pinned ruler.
 import SwiftUI
 
 enum GalleryTimeline {
@@ -118,13 +121,12 @@ private struct GalleryTimelinePage: View {
                 pageSwitch("Nothing picked", id: "nothing-picked", isOn: nothingPicked) { nothingPicked.toggle() }
                 pageSwitch("Toolbar", id: "toolbar", isOn: toolbar) { toolbar.toggle() }
             }
-            // The long page scrolls its lanes in a ScrollView until the strip
-            // pins its ruler over lazy lanes of its own (TL-7).
-            if fixture.order.count > 20 && !noTracks {
-                ScrollView(.vertical) { strip }
-            } else {
-                strip
-            }
+            // No outer ScrollView: the strip is offered the room between the
+            // switches and the log, capped below its ideal height on the long
+            // page, so its lanes scroll lazily under the pinned ruler (TL-7).
+            // The priority hands it that room ahead of the Spacer.
+            strip
+                .layoutPriority(1)
             if noTracks {
                 Text("No tracks yet.")
                     .font(SuiteFont.caption)
