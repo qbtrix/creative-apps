@@ -295,7 +295,9 @@ used by the fake and the live conformance alike:
   sits at the playhead.
 - Auto-key on and the property not animated: an edit writes a key at the
   playhead and keeps any key at another frame, so an edit at a second frame
-  makes the property animated.
+  makes the property animated. A new shape writes its position as one key at
+  frame 0, inside its one "Add <Shape>" undo step, so the first auto-key drag
+  at another frame animates it.
 - The stopwatch on a not-animated property adds a key at the playhead. If
   that still leaves one key (the playhead was on it), it also keys the
   scene's last frame with the same value, so the person sees two diamonds

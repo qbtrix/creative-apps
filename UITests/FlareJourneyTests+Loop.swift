@@ -13,9 +13,6 @@
 // and opening it lands at frame 0 with keys at 0 and 24 on the lane and the
 // title "Untitled", not edited. Lanes, scene points and the ruler are read as
 // FlareAnimateJourneys reads them. One shot per step, `flare-loop-<step>`.
-// Gap #1731: on live services a drawn shape has no key at 0, so the drag keys
-// only 24. Every check of the key at 0 is an expected failure naming it, next
-// to a check of the key at 24 that must hold today.
 import XCTest
 
 final class FlareLoopJourneys: XCTestCase {
@@ -109,19 +106,10 @@ final class FlareLoopJourneys: XCTestCase {
         flare.shot("loop-8-reopened")
     }
 
-    /// The lane's keys are exactly `want`; expected to fail while #1731 leaves no key at 0.
+    /// The lane's keys are exactly `want`.
     @MainActor private func expectKeys(_ want: Set<Int>, _ flare: Journey, _ when: String) {
-        expectGap {
-            XCTAssert(waitFor { keys(Self.lane, flare) == want },
-                      "\(Self.lane)'s lane reads \(keys(Self.lane, flare).sorted()) \(when), not \(want.sorted())")
-        }
-    }
-
-    /// Runs `check` as an expected failure of gap #1731 without stopping the journey.
-    @MainActor private func expectGap(_ check: () -> Void) {
-        continueAfterFailure = true
-        XCTExpectFailure("a drawn shape has no key at 0 on live services (#1731)", options: .nonStrict(), failingBlock: check)
-        continueAfterFailure = false
+        XCTAssert(waitFor { keys(Self.lane, flare) == want },
+                  "\(Self.lane)'s lane reads \(keys(Self.lane, flare).sorted()) \(when), not \(want.sorted())")
     }
 
     /// The window reads "Untitled" with no edited dot (`flare.file` reads "Saved").
