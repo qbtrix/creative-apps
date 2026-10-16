@@ -3,8 +3,8 @@
 Issue: #1074 · Packet: docs/blueprints/photo/features/photo-documents.md
 Run: act-1a1404bf04c-bp6m · Session: claude/photo-documents-lead-ezrcev · Started: 2026-10-15T10:40Z
 Stage: 4 round 4
-Base: a42b3cff7c7cd9f4f14aa8166e9b30451ebbf0b4
-Next: round 4 (last) on the first CI run containing #1265, #1266, #1267; same six lenses; then finish (feature-done PR + contact sheet) or gap issues
+Base: 81f32886
+Next: round 4 (last) on CI run 38835566584 (81f3288: #1265, #1266, #1267, Halo fix #1268); same six lenses; then finish
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
