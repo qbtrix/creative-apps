@@ -29,6 +29,14 @@
 // (an editor's panel) is the inspector's minimum and ideal, and takes the
 // inspector ideal's place in the window's minimum and launch widths. With
 // `-SuiteWindowSize WxH` a SuiteWindowSizer sizes the window (SuiteWindowSizer.swift).
+// The toolbar's centered (`.principal`) slot holds the app switcher
+// (AppSwitcher.swift) with no shared toolbar glass behind it: the environment's
+// `suiteSwitcher`, or AppSwitcherState.placeholder for this process's name.
+// The window measures its width (onGeometryChange) and gives the row
+// AppSwitcher.toolbarSpacing for it, so the row leaves the sidebar toggle,
+// document actions, title, actions and inspector toggle their room and none
+// of them goes into the toolbar's overflow; in a crowded toolbar (Design's
+// eight commands) the row narrows to its compact step instead.
 import SwiftUI
 
 public struct SuiteWindow<Sidebar: View, Content: View, Inspector: View>: View {
@@ -46,6 +54,10 @@ public struct SuiteWindow<Sidebar: View, Content: View, Inspector: View>: View {
     private let launchSize: CGSize?
     @State private var showsInspector = true
     @State private var columns: NavigationSplitViewVisibility = .all
+    /// The window's width, for the switcher's spacing; 0 until measured.
+    @State private var windowWidth: CGFloat = 0
+    /// The app switcher to show; nil shows the placeholder.
+    @Environment(\.suiteSwitcher) private var switcher
 }
 
 extension SuiteWindow where Sidebar == SuiteSidebarList {
@@ -144,6 +156,7 @@ extension SuiteWindow {
             }
         }
         .suiteProbes()
+        .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { windowWidth = $0 }
         .background {
             if let launchSize { SuiteWindowSizer(size: launchSize) }
         }
@@ -210,6 +223,17 @@ extension SuiteWindow {
                     ForEach(documentActions) { actionButton($0) }
                 }
             }
+            ToolbarItem(placement: .principal) {
+                let state = switcher ?? AppSwitcherState.placeholder(processName: ProcessInfo.processInfo.processName)
+                // The sidebar toggle leads; the inspector toggle trails. Below every step
+                // the row takes AppSwitcher.compactSpacing rather than crowd the actions out.
+                let spacing = AppSwitcher.toolbarSpacing(
+                    windowWidth: windowWidth, itemCount: state.items.count,
+                    leadingButtons: 1 + documentActions.count, trailingButtons: actions.count + 1)
+                AppSwitcher(items: state.items, current: state.current, spacing: spacing, onSelect: state.onSelect)
+            }
+            // The switcher row draws its own capsule; no toolbar glass sits behind it.
+            .sharedBackgroundVisibility(.hidden)
             ToolbarItemGroup(placement: .primaryAction) {
                 ForEach(actions) { actionButton($0) }
             }
