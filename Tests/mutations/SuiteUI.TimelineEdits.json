@@ -1,0 +1,5 @@
+[
+{"label":"`<` for `<=` on the radius: a tie no longer goes to the playhead","file":"Sources/SuiteUI/TimelineEdits.swift","find":"return distance <= radius ? playhead : frame","replace":"return distance < radius ? playhead : frame","tests":"TimelineEditsTests"},
+{"label":"the one-frame floor dropped: a start trimmed onto the end collapses the span to one tick","file":"Sources/SuiteUI/TimelineEdits.swift","find":"let start = min(max(min(frame, hi - 1), 0), hi)","replace":"let start = min(max(frame, 0), hi)","tests":"TimelineEditsTests"},
+{"label":"steps sent per sample: a repeated total sends a 0 step","file":"Sources/SuiteUI/TimelineEdits.swift","find":"        guard total != lastSent else { return nil }\n","replace":"","tests":"TimelineEditsTests"}
+]
