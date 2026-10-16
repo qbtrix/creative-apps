@@ -23,3 +23,4 @@ utc	stage	event	ref	note
 2026-10-16T20:44Z	3	pr-merged	#1604	CU-7 J4, feature-done, a5c680a
 2026-10-16T20:44Z	4	stage-start	round1	waiting for dev CI containing a5c680a
 2026-10-16T20:47Z	4	ci-run	38964480632	full CI on 7acb6e8 contains #1604, pending
+2026-10-16T20:51Z	4	ci-run	38965143576	full CI on ef95656 contains #1604 (38964480632 cancelled)
