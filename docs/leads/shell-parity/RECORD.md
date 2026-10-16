@@ -29,6 +29,7 @@ Next: wait for SuiteUI #1456 (shell geometry) and #1337 (switcher); on each new 
 | DP-a, DP-b | 38931490731 (CI: failed journeys) | 82b239c9 | journey, layout (CI) | #1451 (DP-a), #1452 (DP-b) | 1 |
 
 ## Decisions
+- Supervisor note 18:13: CI now blocks only on compile and Model tests; journeys report findings and never hold a slice. Our slices carry no "ui": true, so rules 15/17 (feel gate, Mac finisher) don't apply. DP-a's done line waits for the next successful scoped design run that contains #1467.
 - Wave 1: DS-1 and DS-2 independent (disjoint files). Wave 2: DS-3 waits on DS-1 (uses DesignToolbarItem) and DS-2 (same UITests/DesignJourneyTests.swift and DesignLayersSnapshots.swift). DS-4 moved to wave 1 under contract rule 13 (acceptance journey before code): it merges with `throw XCTSkip("waits on DS-3")` and DS-3 removes the skips (DS-3 also owns UITests/DesignJourneyTests+Shell.swift for that). The feature-done label moves to a small DS-5 (wave.json status) after DS-3.
 - DP-a's wait on editor-in-window (#1079): #1079 is open (needs-human), but every API this feature uses is on dev at the base (SuiteWindow sidebar:/subtitle/documentActions/inspectorWidth, SuiteWindowSizer, EditorDetail(+Layout), SidebarActionRow, AppSwitcher, expectEditorWindow, expectShellGeometry). The issue says "Depends on: none", so the wait is met for code; DS-4's geometry may still hit #933-type overflow, which DS-4 records.
 - Wave 1 has 2 tasks: one worktree subagent each, started together (lead.md stage 3).

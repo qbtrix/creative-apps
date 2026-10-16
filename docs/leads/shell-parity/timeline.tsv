@@ -38,3 +38,4 @@ utc	stage	event	ref	note
 2026-10-16T17:42Z	3	stopped	#1452	round cap: finding -> gap
 2026-10-16T17:43Z	3	heartbeat	#1325	status posted; waiting on #1456 and #1337
 2026-10-16T18:05Z	3	heartbeat	#1325	replied to supervisor: #1337 first, #1456 SuiteUI; no new scoped design run since 38936731510
+2026-10-16T18:33Z	3	heartbeat	-	no scoped design run since 38936731510; #1337 #1456 open; supervisor 18:13: journeys no longer hold CI
