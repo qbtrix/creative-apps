@@ -2,3 +2,8 @@ utc	stage	event	ref	note
 2026-10-16T12:43Z	0	stage-start	#1331	lead set up on dev b102413
 2026-10-16T12:43Z	2	stage-end	#1331	planned 4 waves from the packet
 2026-10-16T12:43Z	3	stage-start	wave 1	BU-2 BU-3 BU-5a BU-5b
+2026-10-16T13:56Z	3	pr-merged	#1357	BU-2
+2026-10-16T13:56Z	3	pr-merged	#1360	BU-5a
+2026-10-16T13:56Z	3	pr-merged	#1361	BU-5b
+2026-10-16T13:56Z	3	pr-opened	#1358	BU-3 supervisor merges
+2026-10-16T13:56Z	3	stage-start	wave 2	BU-5c on dev e464eca
