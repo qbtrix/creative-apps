@@ -23,8 +23,8 @@ extension SuiteJourneyTests {
 
     @MainActor private func walkTimelineNav() throws {
         let gallery = Journey("Library", self, name: "suiteui", arguments: ["-SuiteGallery", "timeline-long"])
-        let ruler = gallery.element("suite.gallery.timeline.ruler")
-        XCTAssert(ruler.waitForExistence(timeout: 30), "timeline-long has no ruler (suite.gallery.timeline.ruler)")
+        let ruler = gallery.element("suite.timeline.ruler")
+        XCTAssert(ruler.waitForExistence(timeout: 30), "timeline-long has no ruler (suite.timeline.ruler)")
         let zoom = gallery.app.descendants(matching: .any)["Zoom"].firstMatch
         XCTAssert(zoom.waitForExistence(timeout: 10), "the toolbar has no Zoom bar")
         let log = gallery.element("suite.gallery.log")

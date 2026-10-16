@@ -3,23 +3,21 @@
 // its name, scrubs from the playhead line inside Badge's lane and from the
 // ruler, then scrolls `timeline-long` under its pinned ruler. SP3 drags the
 // pill 600 pt across `timeline-long`, series `timeline-scrub`, report-only.
-// Written before its code (lead.md, contract rule 13): TL-5 lands both
-// skipped, TL-8 turns them on.
+// TL-5 wrote both skipped; TL-8 turns them on. The ruler is SuiteUI's own
+// `suite.timeline.ruler`.
 import XCTest
 
 extension SuiteJourneyTests {
     /// SJ19a: the strip looks right idle and hovered, scrubs from a lane and the ruler, and keeps the ruler pinned.
     @MainActor func testTimelineLooksAndScrubs() throws {
-        throw XCTSkip("waits on TL-8")
         try walkTimelineLook()
     }
 
     /// SP3: a fast drag of the playhead pill across 600 pt of `timeline-long`; report-only (QB-S5).
     @MainActor func testTimelineScrubLatency() throws {
-        throw XCTSkip("waits on TL-8")
         let gallery = Journey("Library", self, name: "suiteui", arguments: ["-SuiteGallery", "timeline-long", "-SuitePerfProbe"])
-        let ruler = gallery.element("suite.gallery.timeline.ruler")
-        XCTAssert(ruler.waitForExistence(timeout: 30), "timeline-long has no ruler (suite.gallery.timeline.ruler)")
+        let ruler = gallery.element("suite.timeline.ruler")
+        XCTAssert(ruler.waitForExistence(timeout: 30), "timeline-long has no ruler (suite.timeline.ruler)")
         // A click puts the pill under the pointer; then the pill is dragged 600 pt at 300 pt a second.
         let pill = ruler.coordinate(withNormalizedOffset: CGVector(dx: 0, dy: 0.5)).withOffset(CGVector(dx: 40, dy: 0))
         pill.click()
@@ -31,8 +29,8 @@ extension SuiteJourneyTests {
 
     @MainActor private func walkTimelineLook() throws {
         let gallery = Journey("Library", self, name: "suiteui", arguments: ["-SuiteGallery", "timeline"])
-        let ruler = gallery.element("suite.gallery.timeline.ruler")
-        XCTAssert(ruler.waitForExistence(timeout: 30), "timeline has no ruler (suite.gallery.timeline.ruler)")
+        let ruler = gallery.element("suite.timeline.ruler")
+        XCTAssert(ruler.waitForExistence(timeout: 30), "timeline has no ruler (suite.timeline.ruler)")
         let log = gallery.element("suite.gallery.log")
         gallery.shot("timeline-idle")
         // 1. Hover Ball's key at 12: the shot shows the hover ring.
@@ -58,7 +56,7 @@ extension SuiteJourneyTests {
         // 5. timeline-long: the wheel scrolls the lanes 2,000 pt down under a pinned ruler.
         gallery.app.terminate()
         let long = Journey("Library", self, name: "suiteui", arguments: ["-SuiteGallery", "timeline-long"])
-        let longRuler = long.element("suite.gallery.timeline.ruler")
+        let longRuler = long.element("suite.timeline.ruler")
         XCTAssert(longRuler.waitForExistence(timeout: 30), "timeline-long has no ruler")
         let rulerY = longRuler.frame.minY
         longRuler.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 6)).scroll(byDeltaX: 0, deltaY: -2_000)
@@ -67,7 +65,7 @@ extension SuiteJourneyTests {
             NSPredicate(format: "value CONTAINS 'keyframe'")).allElementsBoundByIndex.filter { $0.isHittable }
         XCTAssert(deep.contains { (Int($0.label.filter(\.isNumber)) ?? 0) > 60 }, "no lane past the 60th is hittable")
         long.shot("timeline-long-scrolled")
-        long.drag(on: "suite.gallery.timeline.ruler", from: CGVector(dx: 0.2, dy: 0.5), to: CGVector(dx: 0.4, dy: 0.5))
+        long.drag(on: "suite.timeline.ruler", from: CGVector(dx: 0.2, dy: 0.5), to: CGVector(dx: 0.4, dy: 0.5))
         let longLog = long.element("suite.gallery.log")
         XCTAssert(lookWait { self.lookLastLine(longLog).hasPrefix("scrub ") }, "the ruler drag logged \(lookLastLine(longLog))")
     }

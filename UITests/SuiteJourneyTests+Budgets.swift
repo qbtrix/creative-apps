@@ -19,8 +19,8 @@ extension SuiteJourneyTests: PerfBudgeted {
     static let canvasDrag = PerfBudget(row: "QB-S3", series: ["canvas-drag"], measure: .latency, limit: 3)
     /// QB-S4, SP5: selection handle drag (target p95 ≤ 2).
     static let handleDrag = PerfBudget(row: "QB-S4", series: ["handle-drag"], measure: .latency, limit: 3)
-    /// QB-S5, SP8 (and SP3's ruler scrub, whose series its feature names): key drag (target p95 ≤ 2).
-    static let timelineDrag = PerfBudget(row: "QB-S5", series: ["key-drag"], measure: .latency, limit: 3)
+    /// QB-S5, SP3 and SP8: ruler scrub and key drag (target p95 ≤ 2).
+    static let timelineDrag = PerfBudget(row: "QB-S5", series: ["timeline-scrub", "key-drag"], measure: .latency, limit: 3)
     /// QB-S6, SP7: curve handle and tone point drag (target p95 ≤ 2).
     static let curveDrag = PerfBudget(row: "QB-S6", series: ["curve-drag"], measure: .latency, limit: 3)
     /// QB-S7, SP4: layer list and thumbnail grid scroll, p95 interval in
