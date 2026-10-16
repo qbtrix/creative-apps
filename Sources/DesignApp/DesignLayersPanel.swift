@@ -1,6 +1,7 @@
 // DesignLayersPanel.swift: the Layers tab of Design's panel. One List in the
 // small source-list style: the file's pages, with Add Page and Delete Page in
 // a SidebarActionRow under them (`design.page.add`, `design.page.delete`),
+// its first glyph on the page rows' symbol column,
 // then the current page's layer tree, frontmost layer at the top
 // (`frontToBack`; the document keeps paint order). Selection runs through
 // the List, so arrow keys and type-select move through pages and layers; the
@@ -35,7 +36,10 @@ struct DesignLayersPanel: View {
                     DesignPageLabel(page: page, isCurrent: page.id == model.selectedPageID).tag(page.id)
                 }
                 // A row, not the section header: a sidebar header hides its buttons from accessibility.
+                // The accessory-bar button pads its glyph on top of the row's own inset; pulling the row
+                // back by that padding puts the + glyph on the page rows' symbol column (#1386).
                 SidebarActionRow(Self.pageCommands(model, perform))
+                    .padding(.leading, -SuiteInset.barButton.leading)
             } header: {
                 header("Pages")
             }
