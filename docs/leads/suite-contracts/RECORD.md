@@ -4,7 +4,7 @@ Issue: #1332 · Packet: docs/blueprints/suite/features/suite-contracts.md
 Run: act-1a1448a5fd9-0he1 · Session: claude/suite-contracts-lead-rv72k4 · Started: 2026-10-16T11:49Z
 Stage: 3 wave 3
 Base: fcdb85d6c9dbbd393a655cdf04f5ba2d9bcb39e3
-Next: wave 3 builder running (workflow wf_58fbcde2-259, SC-1d); then strip any PR footer, wait for the lane, start wave 4 (SC-2a, SC-2b)
+Next: wait for the lane to merge #1359 (SC-1d), then start wave 4 (SC-2a, SC-2b) on the new origin/dev
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -13,7 +13,7 @@ Next: wave 3 builder running (workflow wf_58fbcde2-259, SC-1d); then strip any P
 | SC-1b | 2 | recents values, `RecentsList`, presets, switching values, `HandOff` (`newID`), `HandOffCodec` (id check) (#821) | Values/{Recents,NewDocumentPreset,Switching,HandOff}.swift, Recents/RecentsList.swift, HandOff/HandOffCodec.swift, ValuesRecentsTests, ValuesHandOffTests | ValuesRecentsTests, ValuesHandOffTests | #1350 | merged |
 | SC-1c | 2 | round-trip, colour, asset, clipboard values (#822) | Values/{RoundTrip,SuiteColor,Assets,Clip}.swift, ValuesExchangeTests | ValuesExchangeTests | #1349 | merged |
 | SC-4a | 2 | `SuiteLocations`, `FileStore` (#829) | Store/{SuiteLocations,FileStore}.swift, StoreTests | StoreTests | #1353 | merged |
-| SC-1d | 3 | preferences, onboarding, update values, `UpdateFeed`, `AnimationSummary`, home values, `HomeLayout` (#823) | Values/{Preferences,Onboarding,Update,AnimationSummary,HomeValues}.swift, Update/UpdateFeed.swift, Home/HomeLayout.swift, ValuesSettingsTests, ValuesHomeLayoutTests | ValuesSettingsTests, ValuesHomeLayoutTests | | building |
+| SC-1d | 3 | preferences, onboarding, update values, `UpdateFeed`, `AnimationSummary`, home values, `HomeLayout` (#823) | Values/{Preferences,Onboarding,Update,AnimationSummary,HomeValues}.swift, Update/UpdateFeed.swift, Home/HomeLayout.swift, ValuesSettingsTests, ValuesHomeLayoutTests | ValuesSettingsTests, ValuesHomeLayoutTests | #1359 | open |
 | SC-2a | 4 | nine tier-1 contracts (#824) | Contracts/{AppSwitching,RecentWork,DocumentCreating,DocumentRouting,HandOffSending,HandOffReceiving,ThumbnailPublishing,HomeBuilding,SuiteDocumentHost}.swift, ContractShapeTests | ContractShapeTests | | planned |
 | SC-2b | 4 | other nine contracts (#825) | Contracts/{RoundTripEditing,PasteboardCoding,AssetLibrary,AssetLinking,AnimationSourceReading,PreferencesStoring,SettingsRouting,OnboardingFlowing,UpdateChecking}.swift, ContractShapeMoreTests | ContractShapeMoreTests | | planned |
 | SC-3a | 5 | `ChangeFeed` and tier-1 fakes (#826) | Fakes/{ChangeFeed,FakeSwitching,FakeRecents,FakeCreating,FakeRouting,FakeHandOffs,FakeThumbnails,FakeHome,FakeDocumentHost}.swift, FakesTier1Tests | FakesTier1Tests | | planned |

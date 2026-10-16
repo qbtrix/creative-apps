@@ -11,3 +11,4 @@ utc	stage	event	ref	note
 2026-10-16T12:41Z	3	pr-opened	#1353	SC-4a
 2026-10-16T12:50Z	3	pr-merged	#1349 #1350 #1353	wave 2 merged
 2026-10-16T12:57Z	3	stage-start	wave 3	SC-1d on fcdb85d
+2026-10-16T13:06Z	3	pr-opened	#1359	SC-1d
