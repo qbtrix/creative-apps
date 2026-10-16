@@ -1,13 +1,18 @@
-// Live/LiveKeyEasing.swift: the W0 stub of KeyEasing. It lists no keys and
-// setting an easing throws `.notBuilt`; the easing feature (#428) replaces
-// this file whole with the live type. Linux-safe.
+// Live/LiveKeyEasing.swift: the live KeyEasing (#428). Keys are eased with
+// FlareCore's `Easing`, which `Timeline.value(of:at:)` samples; listing and
+// setting go through HaloEasingRules, the rules the fake shares (all or
+// nothing, finite curves only, handle x clamped to 0...1). Linux-safe.
 
 public struct LiveKeyEasing: KeyEasing {
     public init() {}
-    public var unavailableHelp: String? { "Easing arrives with #428." }
-    public func keys(of layerID: String, in composition: HaloComposition) -> [HaloKeyRef] { [] }
-    public func easing(of key: HaloKeyRef, in composition: HaloComposition) -> HaloEasing? { nil }
+    public var unavailableHelp: String? { nil }
+    public func keys(of layerID: String, in composition: HaloComposition) -> [HaloKeyRef] {
+        HaloEasingRules.keys(of: layerID, in: composition)
+    }
+    public func easing(of key: HaloKeyRef, in composition: HaloComposition) -> HaloEasing? {
+        HaloEasingRules.easing(of: key, in: composition)
+    }
     public func setEasing(_ easing: HaloEasing, on keys: Set<HaloKeyRef>, in composition: inout HaloComposition) throws {
-        throw HaloEditError.notBuilt("Easing")
+        try HaloEasingRules.setEasing(easing, on: keys, in: &composition)
     }
 }
