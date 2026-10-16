@@ -13,7 +13,7 @@ features) get their packets once wave 2 has landed.
 | wave | feature | packet | covers | waits on | feature issue | status |
 |---|---|---|---|---|---|---|
 | 1 | Contracts, fakes, catalog state, undo, launch arguments, the app split | `spine.md` | #235 (and the fix for #156, see below) | nothing | #1044 | building |
-| 2 | Import a folder | `import.md` | #210 | spine | file when ready | planned |
+| 2 | Import a folder | `import.md` | #210 | spine | #1334 | built |
 | 2 | Real grid thumbnails | `thumbnails.md` | #33 | spine, #779 (S-L2), #333 | file when ready | planned |
 | 2 | Cull from the keyboard with undo and Auto Advance | `cull.md` | #211, #426, #724 (keys) | spine, #333 | file when ready | planned |
 | 2 | The catalog file | `persist.md` | #212 | spine, #333 | file when ready | planned |
