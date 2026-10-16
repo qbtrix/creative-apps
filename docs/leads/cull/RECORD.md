@@ -4,7 +4,7 @@ Issue: #1345 · Packet: docs/blueprints/library/features/cull.md
 Run: act-1a145e74beb-obp4 · Session: cse_01BkDrX316MPq32KYU5agHQr · Started: 2026-10-16T18:10Z
 Stage: 3 wave 1
 Base: 132d910484b48c7d79bc92a43c2de55cc12c1dc1
-Next: wave 1 (CU-1, CU-2, CU-6) builders running; check their PRs and the lane, then start wave 2
+Next: wave 1 (CU-1, CU-2) builders running; check their PRs and the lane, then start wave 2
 
 Loop: v2 (no `## Slices` table in the packet), with the findings queue and
 the 2-round cap (started after #1302 merged at 2026-10-16T04:20Z).
@@ -14,14 +14,14 @@ the 2-round cap (started after #1302 merged at 2026-10-16T04:20Z).
 |---|---|---|---|---|---|---|
 | CU-1 | 1 | `cull(_:advance:)` on `cullTargets`, one named undo step, refused change sets `cullError`, `cullHelp`, `cullChange(for:)`, `setAutoAdvance`, `dismissCullError` | Sources/LibraryModel/LibraryCulling.swift, Tests/LibraryModelTests/LibraryRatingTests.swift | LibraryRatingTests | | building |
 | CU-2 | 1 | `LiveCulling` full Auto Advance rule; `unavailable = nil` | Sources/LibraryModel/Live/LiveCulling.swift, Tests/LibraryModelTests/LibraryAutoAdvanceTests.swift | LibraryAutoAdvanceTests (live) | | building |
-| CU-6 | 1 | `MetadataInspector` stars, flag, label identifiers `library.metadata.*`; snapshots redrawn | Sources/LibraryApp/MetadataInspector.swift, Tests/AppSnapshotTests/LibraryMetadataSnapshots.swift | LibraryMetadataSnapshots | | building |
+| CU-6 | 1 | `MetadataInspector` stars, flag, label identifiers `library.metadata.*`; snapshots redrawn | Sources/LibraryApp/MetadataInspector.swift, Tests/AppSnapshotTests/LibraryMetadataSnapshots.swift | LibraryMetadataSnapshots | – | done before this lead (#262) |
 | CU-3 | 2 | Auto Advance inside `cull`; undo never moves the loupe; cull budgets | Sources/LibraryModel/LibraryCulling.swift, Tests/LibraryModelTests/LibraryAutoAdvanceTests.swift, Tests/LibraryModelTests/LibraryCullBudgetTests.swift | LibraryAutoAdvanceTests, LibraryCullBudgetTests | | waiting CU-1, CU-2 |
 | CU-4 | 2 | inspector and menu edits go through `cull(_:advance: false)` | Sources/LibraryModel/MetadataEditing.swift, Tests/LibraryModelTests/LibraryMetadataTests.swift | LibraryMetadataTests | | waiting CU-1 |
 | CU-5 | 3 | cull area: single keys, Metadata menu, Auto Advance checkmark, refused-change notice | Sources/LibraryApp/LibraryWindow+Cull.swift, Tests/AppSnapshotTests/LibraryRatingSnapshots.swift, Tests/AppSnapshotTests/LibraryAutoAdvanceSnapshots.swift | snapshots; J4 on macOS | | waiting CU-3 |
 | CU-7 | 4 | J4 steps 1–8 (F and L); `feature-done`; cull.wave.json `status: built` | UITests/LibraryJourneyTests+Cull.swift, docs/blueprints/library/features/cull.wave.json | J4 | | waiting CU-5 |
 | CU-8 | – | P2 `testCullKeyLatency` (report-only) | UITests/LibraryJourneyTests+PerfCull.swift | P2 | | blocked: #782 open |
 
-Wave independence: wave 1 all three independent; wave 2 CU-3 and CU-4
+Wave independence: wave 1 CU-1 and CU-2 independent; wave 2 CU-3 and CU-4
 independent of each other (CU-3 needs CU-1 and CU-2 merged, stacked on
 LibraryCulling.swift and LibraryAutoAdvanceTests.swift; CU-4 needs CU-1's
 `cull`); wave 3 CU-5 needs CU-3's Auto Advance in `cull`; wave 4 CU-7 drives
@@ -41,6 +41,9 @@ CU-5's keys and menu.
 - #779 has merged, so J4 step 6 reads cell values directly.
 - CU-7 also sets cull.wave.json `"status": "built"` and `"feature_issue": 1345`
   (the feature-done PR marks the feature built in its own data, lead.md).
+- CU-6 dropped: MetadataInspector's stars, flag and label already carry
+  `library.metadata.*` ids (MetadataInspectorID, #262) and call the window's
+  closures; CU-4 reroutes those closures' Model methods through `cull`.
 - PRs open through the REST API (`gh api .../pulls`): GraphQL, which
   `gh pr create` uses, answers 403 here.
 
