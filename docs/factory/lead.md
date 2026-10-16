@@ -37,6 +37,21 @@ Hand this to every session (the lead and each agent it starts) verbatim.
   touching `Sources/*App`, `Sources/SuiteUI`, `Tests/App*` or `UITests`, or
   the 10th merged PR since the last CI run. So a wave that touches UI gets
   its CI run without you asking.
+- **Shared shell files need macOS proof.** A PR that changes or renames a
+  `MAC_GATED` file in `scripts/fast-lane.sh` (`SuiteWindow.swift`,
+  `EditorShell.swift`, `ToolbarGroup.swift`, `Tokens.swift` in `Sources/SuiteUI/`)
+  merges only once a completed CI run on its current head has a `macOS` job
+  that is green or fails only tests that also fail in the latest completed
+  dev run (see #962, #975). You can't dispatch it, so the lane does, once per
+  head, comments the run URL, and merges on a later sweep when it passes. A
+  new failure is refused by test name and waits for your next push. A
+  `Mac-Check: <run url>` line the supervisor adds counts too.
+- **macOS-only code must compile on macOS.** A PR changing Swift that Linux
+  never compiles (the apps, SuiteUI, `Tests/SuiteUITests`,
+  `Tests/AppSnapshotTests`, `UITests`, or `project.yml`) merges only once a
+  build-only macOS run compiled its head (lesson 114; #1097). The lane
+  dispatches it, comments the URL, and merges when it builds; a failed build
+  waits for your next push.
 - **You can read runs.** `gh run list --workflow ci.yml --branch dev`, then
   `gh run download <id> -n ui-screens` (whole-window PNGs, `contact-sheet.html`,
   `audit-*.json`) and `-n snapshots`; or the GitHub MCP `actions_*` and

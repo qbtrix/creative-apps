@@ -240,8 +240,25 @@ Crew PRs merge into `dev` at once; `main` moves only when full CI passes on
   path touched (the files above), mergeable, no red or running check on the
   head, and proof the head passed the gate: the `Fast-Check: pass` /
   `Head: <sha>` lines for the current head, or a passing CI check on it.
-- UI code takes the lane on the Linux check alone. A human reviews the
-  snapshots after the next feature CI and files fixes as new issues.
+- A PR that changes or renames a shared shell file (`MAC_GATED` in
+  scripts/fast-lane.sh: SuiteWindow, EditorShell, ToolbarGroup and Tokens in
+  Sources/SuiteUI) also needs a completed CI run on its current head whose
+  `macOS` job is green, or fails only tests that also fail in the latest
+  completed dev run. You can't dispatch CI (403), so the lane does: once per
+  head it runs `ci.yml` on your branch, comments the run URL, and merges on a
+  later sweep when that run passes. A run with a new failure is refused by
+  test name and waits for your next push. A `Mac-Check: <run url>` line a
+  supervisor adds counts too.
+- Any other PR changing Swift that Linux `scripts/ci` doesn't compile
+  (`MAC_ONLY` in scripts/fast-lane.sh: `Sources/*App`, `Sources/SuiteUI`, `Sources/SuiteShell`,
+  `Tests/SuiteUITests`, `Tests/AppSnapshotTests`, `UITests`, and
+  `project.yml`; its tests derive the list from the manifests) merges only
+  once its head compiles on macOS: the lane dispatches a build-only CI run
+  (`ci.yml` with `build_only`: every target with its tests, then the journey
+  bundles; nothing runs) once per head, comments its URL, and merges when it
+  succeeds. A failed build waits for your next push.
+- Otherwise UI code takes the lane on the Linux check alone. A human reviews
+  the snapshots after the next feature CI and files fixes as new issues.
 - Each lane run merges every eligible PR, oldest first. A PR that conflicts
   after an earlier merge gets one comment and waits for a rebase. A fast-lane
   PR opened against `main` is retargeted to `dev`.
