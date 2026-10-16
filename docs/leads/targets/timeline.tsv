@@ -54,3 +54,4 @@ utc	stage	event	ref	note
 2026-10-16T04:40Z	4	ci-run	38849414997	scoped: design green on e27292b; does not count. Asked supervisor on #873 for a scoped suite run
 2026-10-16T04:40Z	4	heartbeat	dev-ci	waiting on a green dev run: 38851162437 in_progress  7ce0c25; 38849414997 completed success e27292b; 38841439320 completed failure 9230d80
 2026-10-16T05:02Z	4	heartbeat	dev-ci	waiting on a green full or scoped:suite dev run: 38852881325 scoped: design in_progress  e9ab5f4; 38852021106 scoped: design completed success 5ebd7b9; 38851162437 scoped: design completed success 7ce0c25
+2026-10-16T05:19Z	4	ci-run	38855142429	full run on 1c309d9 started

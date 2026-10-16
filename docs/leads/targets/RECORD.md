@@ -4,7 +4,7 @@ Issue: #873 · Packet: docs/blueprints/suite/features/targets.md
 Run: act-1a1429c87d2-exzi (resumed; first act-1a13f70dda7-kche) · Session: claude/feature-lead-targets-r13t2d · Started: 2026-10-15T12:10Z, resumed 2026-10-16T02:50Z
 Stage: 4 round 1
 Base: 8fce5e2 (dev with BU-1b #1263)
-Next: wait for a green full ci.yml run on dev containing 8fce5e2, or a green `scoped: suite` run (asked the supervisor on #873 at 04:40Z; leads get 403 on dispatch). Then comment `Belt-Contact-Sheet: <run link>` on #873 with the size table and 'launcher has no journey shots until home'. Scoped runs for other apps (e.g. 38849414997 scoped: design) do not count.
+Next: watch full run 38855142429 on 1c309d9; else wait for a green full ci.yml run on dev containing 8fce5e2, or a green `scoped: suite` run (asked the supervisor on #873 at 04:40Z; leads get 403 on dispatch). Then comment `Belt-Contact-Sheet: <run link>` on #873 with the size table and 'launcher has no journey shots until home'. Scoped runs for other apps (e.g. 38849414997 scoped: design) do not count.
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
