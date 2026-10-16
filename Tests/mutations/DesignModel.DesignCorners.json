@@ -1,0 +1,37 @@
+[
+  {
+    "label": "max radius from the longer side",
+    "file": "Sources/DesignModel/DesignCorners.swift",
+    "find": "let half = Swift.min(frame.width, frame.height) / 2",
+    "replace": "let half = Swift.max(frame.width, frame.height) / 2",
+    "tests": "DesignCornerRadiusTests.swift"
+  },
+  {
+    "label": "drawn radius not clamped after a shrink",
+    "file": "Sources/DesignModel/DesignCorners.swift",
+    "find": "return Swift.min(Swift.max(cornerRadius, 0), maxCornerRadius)",
+    "replace": "return cornerRadius",
+    "tests": "DesignCornerRadiusTests.swift"
+  },
+  {
+    "label": "radius edits no longer coalesce",
+    "file": "Sources/DesignModel/DesignCorners.swift",
+    "find": "coalescing: \"radius-\\(id)\"",
+    "replace": "coalescing: nil",
+    "tests": "DesignCornerRadiusTests.swift"
+  },
+  {
+    "label": "frames lose their corners",
+    "file": "Sources/DesignModel/DesignCorners.swift",
+    "find": "public var hasCorners: Bool { self == .rectangle || self == .frame }",
+    "replace": "public var hasCorners: Bool { self == .rectangle }",
+    "tests": "DesignCornerRadiusTests.swift"
+  },
+  {
+    "label": "a negative radius is stored unclamped",
+    "file": "Sources/DesignModel/DesignCorners.swift",
+    "find": "let clamped = Swift.min(Swift.max(radius, 0), node.maxCornerRadius)",
+    "replace": "let clamped = Swift.min(radius, node.maxCornerRadius)",
+    "tests": "DesignCornerRadiusTests.swift"
+  }
+]
