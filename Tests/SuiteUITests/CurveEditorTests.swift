@@ -1,6 +1,7 @@
 // CurveEditorTests.swift: the math behind SuiteUI's CurveEditor: the curve is
 // one vector path, the plot range widens for overshoot, the preview dot never
-// leaves the samples, and arrow-key nudges step by 0.01 (0.1 with Shift).
+// leaves the samples, arrow-key nudges step by 0.01 (0.1 with Shift), and a
+// handle looks different at rest, under the pointer and pressed or focused.
 // No rendering here. macOS only.
 import CoreGraphics
 import SuiteUI
@@ -60,4 +61,17 @@ import Testing
     for _ in 0..<5 { q = CurveEditor.nudged(q, dx: 1, dy: 0, coarse: false) }
     #expect(q.x == 0.47)
     #expect(CurveEditor.describe(CGPoint(x: 0.42, y: 0)) == "x 0.42, y 0.00")
+}
+
+@Test func handleShowsHoverPressedAndFocus() {
+    let rest = CurveEditor.handleLook(active: false, hovered: false)
+    let hover = CurveEditor.handleLook(active: false, hovered: true)
+    let active = CurveEditor.handleLook(active: true, hovered: false)
+    // Under the pointer the handle's rim turns accent, so it reads as grabbable before the press.
+    #expect(rest.stroke != hover.stroke)
+    #expect(hover.stroke == SuiteColor.accent && hover.fill == rest.fill)
+    // Pressed, dragged or focused: filled accent, ringed; hover adds nothing on top.
+    #expect(active.fill == SuiteColor.accent && active.ring)
+    #expect(CurveEditor.handleLook(active: true, hovered: true) == active)
+    #expect(!rest.ring && !hover.ring)
 }
