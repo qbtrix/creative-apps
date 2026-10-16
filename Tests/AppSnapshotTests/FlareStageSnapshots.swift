@@ -42,6 +42,16 @@ import Testing
         check(model, name: "flare-stage-draft")
     }
 
+    /// Two pen clicks leave an open path, so Finish Path in the palette is on, with no reason.
+    @Test func penDraft() {
+        var model = Self.open("bounce")
+        model.selectTool(.pen)
+        model.drag(from: Point(x: 300, y: 60), to: Point(x: 300, y: 60))
+        model.drag(from: Point(x: 460, y: 180), to: Point(x: 460, y: 180))
+        #expect(model.finishPathHelp == nil, "two pen clicks should leave a path Finish Path can commit")
+        check(model, name: "flare-stage-pen-draft")
+    }
+
     @Test func marquee() {
         var model = Self.open("bounce")
         model.selectTool(.select)

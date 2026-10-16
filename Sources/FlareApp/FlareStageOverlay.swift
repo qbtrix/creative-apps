@@ -10,6 +10,8 @@ import SwiftUI
 
 struct FlareStageOverlay: View {
     let marks: StageMarks
+    /// The marquee under way, read here so its samples redraw this overlay alone (FlareLiveMarquee).
+    var live: FlareLiveMarquee? = nil
     let zoom: Double
 
     var body: some View {
@@ -18,7 +20,7 @@ struct FlareStageOverlay: View {
                 SwiftUI.Path(StagePath.cgPath(draft, transform: .scale(x: zoom, y: zoom)))
                     .stroke(SuiteColor.accent, lineWidth: 1)
             }
-            if let marquee = marks.marquee { SelectionOutline(rect: Self.rect(marquee), zoom: zoom) }
+            if let marquee = live?.marquee ?? marks.marquee { SelectionOutline(rect: Self.rect(marquee), zoom: zoom) }
             if let selection = marks.selection { SelectionOutline(rect: Self.rect(selection), zoom: zoom) }
         }
         .allowsHitTesting(false)

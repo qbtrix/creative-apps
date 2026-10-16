@@ -4,8 +4,8 @@
 // easing segment selected, it steps the easing inspector's X1 scrub row 60
 // times through its slider (the way VoiceOver and XCUI adjust it: the row's
 // drag ignores the test's window-activation clicks), then drags 120 samples
-// across the canvas, which has no gesture yet, so that row bounds the shell
-// alone. `bodies` gates the window-body counts; `timing`
+// across empty canvas with the select tool: a marquee, which draws on the
+// stage overlay and commits once at mouse-up. `bodies` gates the window-body counts; `timing`
 // (Tests/perf-suites.txt, report-only) judges the step times. Nested in
 // BodyCountSuites, as every suite that reads a body counter is. macOS only.
 #if canImport(AppKit)
@@ -22,8 +22,11 @@ extension BodyCountSuites {
             let (scrub, canvas) = try await Self.run()
             // Each step is one easing edit: one body. Target: 60.
             expectBodies(scrub, atMost: 60, target: 60)  // dev: 60
-            // A canvas drag with no tool gesture changes nothing. Target: 0.
-            expectBodies(canvas, atMost: 0, target: 0)  // dev: 0
+            // The canvas drag is a marquee on empty stage (select tool). Its 120 samples draw on the
+            // overlay alone (FlareLiveMarquee): the press writes the model once, mouse-up commits once, so the
+            // count is 2 whatever the sample count. Budget 0 predates PR #1649, which routed the stage's drags
+            // to the Model and made every sample a window body.
+            expectBodies(canvas, atMost: 2, target: 2)  // dev: 122 per sample (#1649); fixed: 2 per drag
         }
 
         @Test(.timeLimit(.minutes(2))) func timing() async throws {

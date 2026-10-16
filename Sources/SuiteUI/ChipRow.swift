@@ -60,6 +60,10 @@ public struct ChipRow<ID: Hashable & Sendable>: View {
 struct SuiteChipStyle: ButtonStyle {
     enum Kind { case preset, chip }
 
+    /// Side padding inside a preset, 4 pt so the widest preset ("Ease In-Out") fits its column of PresetGrid at the
+    /// inspector's ideal width; the chips keep SuiteSpacing.s. PresetLabelFitTests holds the fit.
+    static let presetPadding: CGFloat = SuiteSpacing.xs
+
     let kind: Kind
     let isOn: Bool
 
@@ -82,7 +86,7 @@ struct SuiteChipStyle: ButtonStyle {
                 .font(SuiteFont.caption.weight(.semibold))
                 .lineLimit(1)
                 .foregroundStyle(lit ? Color.primary : SuiteColor.secondaryText)
-                .padding(.horizontal, SuiteSpacing.s)
+                .padding(.horizontal, kind == .preset ? SuiteChipStyle.presetPadding : SuiteSpacing.s)
                 .frame(maxWidth: kind == .preset ? .infinity : nil)
                 .frame(height: kind == .preset ? SuiteSize.preset : SuiteSize.chip)
                 .background(fill, in: shape)

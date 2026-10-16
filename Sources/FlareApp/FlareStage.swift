@@ -3,8 +3,8 @@
 // only when the list changes; FlareStageOverlay draws the marks (draft, marquee, selection outline) over it. A drag
 // sends `.stage(.dragChanged)` with the gesture's start, Shift and Option and the zoom, then `.stage(.endDrag)`. A
 // tool letter (V A R E P) chooses its tool; every other key goes to `onKey` (the window's `toolKey`). The floating
-// glass palette lists FlareTool.allCases, each with `model.toolHelp` as its reason when it can't act. It only reads
-// `model`; every change goes through `perform`.
+// glass palette lists FlareTool.allCases, each with `model.toolHelp` as its reason when it can't act, then Finish
+// Path with `model.finishPathHelp`. It only reads `model`; every change goes through `perform`.
 import AppKit
 import FlareCore
 import FlareModel
@@ -20,6 +20,8 @@ struct FlareStage: View {
     let help: @MainActor (FlareIntent) -> String?
     /// A key the stage doesn't take itself; the window passes `toolKey` (Escape, Return).
     var onKey: @MainActor (KeyPress) -> KeyPress.Result = { _ in .ignored }
+    /// The marquee under way, drawn from outside `model` (FlareLiveMarquee); nil in previews and snapshots.
+    var live: FlareLiveMarquee? = nil
     /// The gesture under way's first point, in scene points; nil between drags.
     @State private var dragStart: CGPoint?
     /// The viewport's size, for the fit while `zoom` is nil.
@@ -36,7 +38,7 @@ struct FlareStage: View {
             ) {
                 if let list = model.stageList { FlareStageArt(list: list, zoom: scale).drawingGroup() }
             } overlay: {
-                FlareStageOverlay(marks: model.stageMarks, zoom: scale)
+                FlareStageOverlay(marks: model.stageMarks, live: live, zoom: scale)
                 FlareStageSelection(model: model, zoom: scale, perform: perform)
                 FlareStageGuides(model: model, zoom: scale, perform: perform)
             }
@@ -67,15 +69,23 @@ struct FlareStage: View {
         return .handled
     }
 
-    /// The palette: V A R E P, each with its reason when it can't act.
+    /// The palette: V A R E P, each with its reason when it can't act, then Finish Path. Return finishes a pen
+    /// path too, but a mouse-only user needs a control on screen (lead.md rule 8, 9).
     private var palette: [ToolbarAction] {
-        FlareTool.allCases.map { tool in
+        let tools = FlareTool.allCases.map { tool in
             let intent = FlareIntent.tools(.choose(tool))
             return ToolbarAction(
                 tool.title, systemImage: tool.systemImage, isSelected: tool == model.tool,
                 unavailableHelp: model.toolHelp(tool), shortcut: tool.shortcut, identifier: intent.identifier
             ) { perform(intent) }
         }
+        let finish = FlareIntent.tools(.finishPath)
+        return tools + [
+            ToolbarAction(
+                "Finish Path", systemImage: "checkmark.circle", isSelected: false,
+                unavailableHelp: model.finishPathHelp, shortcut: nil, identifier: finish.identifier
+            ) { perform(finish) }
+        ]
     }
 }
 

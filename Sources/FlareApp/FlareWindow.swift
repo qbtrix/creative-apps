@@ -28,6 +28,8 @@ struct FlareWindow: View {
     @State var inspectorTab: FlareInspectorTab = .properties
     /// The new sheet, alerts and the recovery offer.
     @State var presented: FlarePresentation? = nil
+    /// The marquee under way, kept out of `model`'s State (FlareLiveMarquee).
+    @State var liveMarquee = FlareLiveMarquee()
     let launch = FlareLaunch(arguments: ProcessInfo.processInfo.arguments)
 
     #if DEBUG
@@ -53,7 +55,8 @@ struct FlareWindow: View {
         ) {
             FlareCanvas(
                 model: model, zoom: zoom, showsRulers: showsRulers, showsGuides: showsGuides, perform: perform,
-                help: { help(for: $0) }, tick: { model.tick(target: $0, ticker: &$1) }, onKey: toolKey)
+                help: { help(for: $0) }, tick: { model.tick(target: $0, ticker: &$1) }, onKey: toolKey,
+                live: liveMarquee)
         } inspector: {
             FlareInspector(
                 model: model, tab: inspectorTab, perform: perform,
@@ -118,13 +121,15 @@ struct FlareCanvas: View {
     var tick: @MainActor (Double, inout PlaybackTicker) -> Bool = { _, _ in false }
     /// The stage's keys it doesn't take itself (Return, Escape): the window's `toolKey`.
     var onKey: @MainActor (KeyPress) -> KeyPress.Result = { _ in .ignored }
+    /// The marquee under way, drawn from outside `model` (FlareLiveMarquee); nil in previews and snapshots.
+    var live: FlareLiveMarquee? = nil
 
     var body: some View {
         if model.document != nil {
             VStack(spacing: 0) {
                 FlareStage(
                     model: model, zoom: zoom, showsRulers: showsRulers, showsGuides: showsGuides, perform: perform,
-                    help: help, onKey: onKey)
+                    help: help, onKey: onKey, live: live)
                 FlareTimeline(model: model, zoom: zoom, perform: perform, tick: tick)
             }
             .overlay { FlareRecording(model: model) }
