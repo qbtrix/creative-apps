@@ -37,3 +37,4 @@ utc	stage	event	ref	note
 2026-10-16T16:04Z	3	heartbeat	#1428	SC-5b macOS build green (run 38927199663), waiting for lane sweep
 2026-10-16T16:15Z	3	pr-merged	#1428	SC-5b
 2026-10-16T16:18Z	3	stage-start	wave 9	SC-5c feature-done on 1f75673
+2026-10-16T16:24Z	3	pr-opened	#1448	SC-5c feature-done
