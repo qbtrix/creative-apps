@@ -16,7 +16,7 @@ its tasks, owned files, acceptance tests, quality tests and done check.
 | W1 | Key layers: inspector, drag and parent | `layer-keys.md` | #38, #207 | foundation #777 | #333 | #1036 | building |
 | W1 | Undo, redo, save and open | `history-files.md` | #208, #209 | foundation #777 | #333 | #1037 | built |
 | W1 | Layer housekeeping | `layer-panel.md` | #770 | foundation #777 | #333 | #1038 | building |
-| W2 | Ease keys | `easing.md` | #428 | layer-keys, history-files | #333; #771 and #63 not blocking (plain diamonds; keys picked from the EASING rows) | file when ready | planned |
+| W2 | Ease keys | `easing.md` | #428 | layer-keys, history-files | #333; #771 and #63 not blocking (plain diamonds; keys picked from the EASING rows) | #1333 | built |
 | W2 | Render a frame and render to files | `render-out.md` | #451, #429 | viewer-playback | #333 | file when ready | planned |
 | W2 | Text layers | `text-layers.md` | #430 | layer-keys, viewer-playback, history-files | #333 | file when ready | planned |
 | W3 | The core loop, live, measured | no packet yet | the H-J12 `XCTSkip` | every W1 and W2 feature | #333; #330 for H-P1 to H-P5 (report-only until then) | later | planned |
