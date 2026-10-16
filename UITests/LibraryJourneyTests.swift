@@ -93,6 +93,16 @@ final class LibraryJourneyTests: XCTestCase {
         XCTAssert(cell.waitForExistence(timeout: 5), "no grid cell for \(name) after Escape")
         XCTAssert(cell.isSelected, "the grid came back without \(name), the loupe's photo, selected")
         library.shot("loupe-back-to-grid")
+        // Someone who doesn't know Escape clicks the loupe's Grid button instead.
+        view.click()
+        view.menuItems["Loupe"].click()
+        XCTAssert(loupe.waitForExistence(timeout: 10), "View > Loupe didn't reopen the loupe")
+        let gridButton = library.element("library.loupe.grid")
+        XCTAssert(gridButton.waitForExistence(timeout: 5), "the loupe shows no Grid button (library.loupe.grid)")
+        gridButton.click()
+        XCTAssert(loupe.waitForNonExistence(timeout: 5), "the Grid button left it still in the loupe")
+        XCTAssert(gridCell(named: name, in: library).waitForExistence(timeout: 5), "no grid after the Grid button")
+        library.shot("loupe-grid-button")
     }
 
     /// Selecting a photo swaps the collection card for its metadata inspector;
