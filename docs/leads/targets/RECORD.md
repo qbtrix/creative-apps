@@ -4,7 +4,7 @@ Issue: #873 · Packet: docs/blueprints/suite/features/targets.md
 Run: act-1a1429c87d2-exzi (resumed; first act-1a13f70dda7-kche) · Session: claude/feature-lead-targets-r13t2d · Started: 2026-10-15T12:10Z, resumed 2026-10-16T02:50Z
 Stage: 4 round 1
 Base: 8fce5e2 (dev with BU-1b #1263)
-Next: wait on dev CI (791 red, not ours; 792 on 9230d80 pending); on the first green ci.yml run on dev whose head contains 8fce5e2, comment `Belt-Contact-Sheet: <run link>` on #873 with the size table and 'launcher has no journey shots until home'. Nothing of this feature's is red; no fix batch.
+Next: wait on dev CI (791, 792 red, not ours; next run pending); on the first green ci.yml run on dev whose head contains 8fce5e2, comment `Belt-Contact-Sheet: <run link>` on #873 with the size table and 'launcher has no journey shots until home'. Nothing of this feature's is red; no fix batch.
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -44,6 +44,7 @@ Executables total 31,308,416 bytes; app-builds.tar.gz 8,064,887 bytes. SuiteUI i
 - BU-S needs a Mac: not run by this lead (packet).
 
 ## Open
+- 2026-10-16T04:05Z: run 792 (9230d80) red: Linux green; macOS scripts/ci PASS; UI journeys red only in Halo (7), Library loupe, Photo paste/merge (3). PJ-1 keep-layers now passes. None ours; #763.
 - 2026-10-16T03:40Z: run 791 (e99643c) red: Linux PhotoEditBudgetTests; macOS scripts/ci PASS, UI journeys red only in Halo (overlap, unnamed, transport, layout, parent menu), Photo (paste, merge, keep-layers) and Library (loupe). None in AfterGlowApp/SuiteShell/SuiteModel; all on #763.
 - 2026-10-16T02:50Z: dev still red for others: run 791 (e99643c) Linux red on PhotoEditBudgetTests.editBudgets (Photo timing budget, #763); 792 (9230d80) queued. Waiting for a green dev run containing 8fce5e2.
 - Run 785 (f3b8987, has #1143+#1133): macOS scripts/ci, bundle-apps and Size report passed. Linux failed only on PhotoEditBudgetTests.editBudgets (copy/paste p50 7.2 s vs merge 3.8 s): Photo line, a timing budget, not this feature's files; belongs to the dev-red issue.
