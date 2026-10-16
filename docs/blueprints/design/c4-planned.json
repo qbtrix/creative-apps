@@ -83,7 +83,10 @@
                   "Sources/DesignModel/DesignWholePoints.swift",
                   "Sources/DesignModel/DesignCanvasHints.swift",
                   "Sources/DesignModel/DesignFrameLabel.swift",
-                  "Sources/DesignModel/DesignPageSize.swift"
+                  "Sources/DesignModel/DesignPageSize.swift",
+                  "Sources/DesignModel/DesignSnapping.swift",
+                  "Sources/DesignModel/DesignSnapLines.swift",
+                  "Sources/DesignModel/DesignSnapGaps.swift"
                 ],
                 "status": "existing",
                 "authored": true
@@ -209,7 +212,8 @@
                   "Sources/DesignApp/DesignCanvasFeedback.swift",
                   "Sources/DesignApp/DesignTextArtwork.swift",
                   "Sources/DesignApp/DesignTextFont.swift",
-                  "Sources/DesignApp/DesignPastEdge.swift"
+                  "Sources/DesignApp/DesignPastEdge.swift",
+                  "Sources/DesignApp/DesignSnapGuides.swift"
                 ],
                 "status": "existing",
                 "authored": true
