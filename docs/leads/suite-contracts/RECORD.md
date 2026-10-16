@@ -4,7 +4,7 @@ Issue: #1332 · Packet: docs/blueprints/suite/features/suite-contracts.md
 Run: act-1a1448a5fd9-0he1 · Session: claude/suite-contracts-lead-rv72k4 · Started: 2026-10-16T11:49Z
 Stage: 4 round 2
 Base: 268ba55b38575566eb01f8600c4af5a8236cb8d2
-Next: round-2 fix batch running (wf_3f6cb958-5d3) on #1485-#1490 (last fix round under the cap); then one review after it, relabel anything still open as gap, wait for a green full dev run and post Belt-Contact-Sheet on #1332
+Next: wait for round-2 fix PRs #1504 (#1485), #1518 (#1487 #1488), #1519 (#1490) to merge (#1492 merged); then the final review on the same panel, relabel any still-open finding as gap, wait for a green full dev run with all PRs, post Belt-Contact-Sheet on #1332
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -40,7 +40,7 @@ Waves (packet's Build waves, checked against dev at ebc68bf):
 | round | CI run | CI | audit vs baseline | lenses | confirmed | fixed by | clean |
 |---|---|---|---|---|---|---|---|
 | 1 | 38933216466 | red, not this feature: Linux green; macOS failed only HaloEasingSnapshots.segmentTitlesFitOneLine (halo, #1450); SuiteLiveServicesTests, all SuiteModelTests (2740 Model tests) and StoreBudgetTests passed; QB-SM6 median 5.5/5.7 ms (debug gate 50); journeys skipped after the test failure, so no audit | no screens touched | clarity, oracle, quality, packet conformance, robustness | 10 (4 major, 6 minor): #1457 #1459 #1460 #1461 #1462 #1463 #1464 #1465 #1466 #1468 | #1472 #1473 #1474 #1476 merged | no |
-| 2 | scoped: suite 38940652547 on 3fbd10f (all round-1 fixes) | scoped green; full 38938209193 still queued | no screens touched | same five lenses | 6 minor, 0 blocker/major (panel clean): #1485 #1486 #1487 #1488 #1489 #1490 | fix batch wf_3f6cb958-5d3 | panel clean |
+| 2 | scoped: suite 38940652547 on 3fbd10f (all round-1 fixes) | scoped green; full 38938209193 still queued | no screens touched | same five lenses | 6 minor, 0 blocker/major (panel clean): #1485 #1486 #1487 #1488 #1489 #1490 | #1492 merged, #1504 #1518 #1519 open | panel clean |
 
 Runs after round 1: scoped: suite 38938043443 on 91f1ba6 (has SC-5c and #1472) green; full run 38938209193 on 7d7256c pending; scoped: suite 38940652547 on 3fbd10f (all round-1 fixes) in progress.
 
@@ -60,5 +60,6 @@ Runs after round 1: scoped: suite 38938043443 on 91f1ba6 (has SC-5c and #1472) g
 - Corrections in the packet are listed 1-6, 8-10, 7 (no correction is missing); builders apply the ones naming their task.
 
 ## Open
+- #1491 (gap, p2): home.md, targets.md, switching.md packets still quote the old "Not connected yet (" sentence.
 - #1477 (needs-ui, line:suiteui): AppSwitcher hardcodes the old not-connected sentence that #1473 replaces.
 - #1463 (perf-suites.txt) needs the supervisor: protected file; commented on the issue. Becomes a gap after round 2 if still open.
