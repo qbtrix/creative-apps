@@ -1,0 +1,5 @@
+utc	stage	event	ref	note
+2026-10-16T11:45Z	0	stage-end	#1324	base 9e3c5f8; fresh lead branch
+2026-10-16T11:45Z	1	stage-end	#1326	filed gap: public DesignPage init
+2026-10-16T11:45Z	2	stage-end	-	6 waves; D0-4a unchained to wave 1
+2026-10-16T11:45Z	3	stage-start	wave 1	D0-0, D0-4a, F-1314

@@ -1,0 +1,49 @@
+# design-contracts lead record
+
+Issue: #1324 · Packet: docs/blueprints/design/features/design-contracts.md
+Run: act-1a14478b14e-i8ep · Session: session_01DKQiisBimhgRgEM46b1U5E · Started: 2026-10-16T11:29Z
+Stage: 3 wave 1
+Base: 9e3c5f8e23708b834bded120d35d9db5acf4a7f3
+Next: wait for wave 1 PRs (D0-0, D0-4a, F-1314) to merge, then start wave 2 (D0-1)
+
+## Slices
+| slice | behavior | tasks | journeys | waits on | rounds | state | run |
+|---|---|---|---|---|---|---|---|
+| CT-a | old files open with defaults; corner radius saves and reopens | D0-0, D0-2.1 (#1304), D0-1 | MJ1 | nothing | 0 | building | |
+| CT-b | fakes act; live says "isn't built yet." | D0-2.2 (#1307), D0-2.3, D0-2.4 (#1312), D0-2.5 | MJ2 | CT-a | 0 | building | |
+| CT-c | help law on every fake and stub; four fixtures | D0-2.6, D0-2b, D0-4a | MJ3 | CT-b; CT-a | 0 | building | |
+| CT-d | each command one named step; one-layer edits keep today's methods | D0-3a, D0-3b | MJ4 | CT-b | 0 | building | |
+
+## Tasks
+| id | slice | wave | behavior | files | test | PR | state |
+|---|---|---|---|---|---|---|---|
+| D0-2.1 | CT-a | pilot | edit contracts, style types | Contracts/EditContracts.swift, Contracts/StyleTypes.swift | DesignIDMintTests, DesignRefusalHelpTests | #1304 | merged |
+| D0-2.2 | CT-b | pilot | use-case protocols, DesignDocument | Contracts/UseCases.swift | DesignDocumentTests | #1307 | merged |
+| D0-2.4 | CT-b | pilot | fake helpers, select fakes | Fakes/FakeSupport.swift, Fakes/DesignSelectFakes.swift | DesignSelectFakesTests | #1312 | merged |
+| D0-0 | CT-a | 1 | corner radius (Model half of #753) | DesignNode.swift, DesignCorners.swift, DesignFile.swift, DesignCornerRadiusTests.swift | DesignCornerRadiusTests | | building |
+| D0-4a | CT-c | 1 | four fixtures, budget helper | DesignFixtures.swift, DesignFixturesTests.swift, DesignBudget.swift, DesignBudgetHelperTests.swift | DesignFixturesTests, DesignBudgetHelperTests | | building |
+| F-1314 | CT-b | 1 | DesignDocumentTests header fix (#1314) | Tests/DesignModelTests/DesignDocumentTests.swift | DesignDocumentTests | | building |
+| D0-1 | CT-a | 2 | style schema, public DesignPage init, marquee, selection ends run; MJ1 | DesignNode.swift, DesignWorkspace.swift, DesignSelection.swift, DesignFile.swift, DesignStyleSchemaTests.swift, DesignSelectionRunTests.swift | DesignStyleSchemaTests, DesignSelectionRunTests | | waits D0-0 |
+| D0-2.3 | CT-b | 3 | NotBuilt, DesignServices .live, services/useServices | NotBuilt.swift, DesignServices.swift, DesignWorkspace.swift, DesignNotBuiltTests.swift | DesignNotBuiltTests | | waits D0-1 |
+| D0-2.5 | CT-b | 4 | arrange fakes, .fake; MJ2 | Fakes/DesignArrangeFakes.swift, DesignServices.swift, DesignArrangeFakesTests.swift | DesignArrangeFakesTests | | waits D0-2.3 |
+| D0-2.6 | CT-c | 5 | contract law | DesignContractLawTests.swift | DesignContractLawTests | | waits D0-2.5 |
+| D0-3a | CT-d | 5 | DesignCommand, help, run, apply, mint | DesignActions.swift, DesignActionsTests.swift | DesignActionsTests | | waits D0-2.5 |
+| D0-2b | CT-c | 6 | Live stubs, .live names them, LiveFiling; MJ3 | Live/*.swift, DesignServices.swift, DesignLiveStubTests.swift | DesignLiveStubTests | | waits D0-2.6, D0-4a |
+| D0-3b | CT-d | 6 | clipboard, moveLayer, setStyle; MJ4 | DesignActions+Edit.swift, DesignActionsEditTests.swift | DesignActionsEditTests | | waits D0-3a |
+
+Waves: 1 = D0-0, D0-4a, F-1314 (all independent). 2 = D0-1 (waits D0-0: same DesignNode/DesignFile). 3 = D0-2.3 (waits D0-1: DesignWorkspace.swift). 4 = D0-2.5 (waits D0-2.3: DesignServices.swift). 5 = D0-2.6, D0-3a (both wait D0-2.5's .fake; independent of each other). 6 = D0-2b (waits D0-2.6, D0-4a), D0-3b (waits D0-3a); later of the two carries feature-done.
+
+## Reviews
+| slice | run | commit | lenses | filed | after round |
+|---|---|---|---|---|---|
+
+## Decisions
+- D0-2.1, D0-2.2, D0-2.4 already merged in the mini-pilot (#1304, #1307, #1312), per #1324; not rebuilt.
+- D0-4a unchained from D0-1 and moved to wave 1: the blueprint 4 fixtures use only existing fields and DesignModel's internal inits, so it needs nothing from D0-1.
+- All four slices are Linux-only Model walks: no critic panel runs (lead.md stage 3, Reviews: a Linux-only slice gets no panel).
+- PRs target dev (CLAUDE.md, lead contract rule 4); the brief's "main" equals dev's SHA at start and the lane retargets main to dev.
+- #1314 (a design-seams finding on DesignDocumentTests, a file this packet now owns) is fixed in wave 1 as F-1314.
+- Filed gap #1326 (public DesignPage init); D0-1 closes it.
+
+## Open
+- gap #1326: closes with D0-1.
