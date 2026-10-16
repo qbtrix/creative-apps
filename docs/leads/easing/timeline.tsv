@@ -4,3 +4,7 @@ utc	stage	event	ref	note
 2026-10-16T11:52Z	1	stage-end	packet	no Slices table: v2 loop with rules 10/11
 2026-10-16T11:52Z	2	stage-end	plan	4 waves as packet: EZ-1 EZ-2 EZ-7 | EZ-3 EZ-5 | EZ-4 EZ-6 | EZ-8
 2026-10-16T11:52Z	3	stage-start	wave 1	EZ-1 EZ-2 EZ-7
+2026-10-16T12:10Z	3	pr-merged	#1339	EZ-1 live key easing
+2026-10-16T12:12Z	3	pr-merged	#1341	EZ-2 key selection
+2026-10-16T12:17Z	3	pr-merged	#1343	EZ-7 timeline lane keys + menu
+2026-10-16T12:22Z	3	stage-start	wave 2	EZ-3 EZ-5 on 8ecd8b9

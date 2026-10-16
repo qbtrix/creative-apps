@@ -2,18 +2,18 @@
 
 Issue: #1333 · Packet: docs/blueprints/halo/features/easing.md
 Run: act-1a1448a5fbe-p22s · Session: session_01Fpq7bUwf2TjhThXdtGKn4r · Started: 2026-10-16T11:48Z
-Stage: 3 wave 1
-Base: ebc68bff2c46f99ac266d69fda013cc2625008da
-Next: read the wave 1 PRs (EZ-1, EZ-2, EZ-7) and wait for the lane to merge them; then wave 2 (EZ-3, EZ-5) from the new origin/dev
+Stage: 3 wave 2
+Base: 8ecd8b9b7f6bed18afe784640d467d369194c0d6
+Next: read the wave 2 PRs (EZ-3, EZ-5) and wait for the lane to merge them; then wave 3 (EZ-4, EZ-6)
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
 |---|---|---|---|---|---|---|
-| EZ-1 | 1 | `LiveKeyEasing` over FlareCore `Easing` through shared `HaloEasingRules` (finite check, handle x clamped 0...1); `FakeKeyEasing` thin wrapper; contract suite over `[fake, live]` | Sources/HaloModel/Live/HaloEasingRules.swift, Sources/HaloModel/Live/LiveKeyEasing.swift, Sources/HaloModel/Fakes/FakeKeyEasing.swift, Tests/HaloModelTests/KeyEasingContractTests.swift | KeyEasingContractTests | | building |
-| EZ-2 | 1 | `HaloKeySegment`, `HaloEasingHandle`, `keySegments`, `pickedSegment`, `pickedPreset`, `selectKey`, `selectLaneKeys`, `clearKeySelection`; none records a step | Sources/HaloModel/HaloKeySelection.swift, Tests/HaloModelTests/HaloKeySelectionTests.swift | HaloKeySelectionTests | | building |
-| EZ-7 | 1 | `HaloTimelineView` slot: diamond click sends `.selectLaneKeys`, context menu of the five presets for the picked keys, disabled with help | Sources/HaloApp/HaloTimelineView.swift | macOS build; H-J7 step 7 (EZ-8) | | building |
-| EZ-3 | 2 | `setEasing` one "Keyframe Easing" step; `setCustomEasing`, `moveEasingHandle`, `easingHandles`, `easingCurve`; HF-4; Model journey | Sources/HaloModel/HaloKeySelection.swift, Tests/HaloModelTests/HaloEasingTests.swift | HaloEasingTests | | planned |
-| EZ-5 | 2 | `HaloAvailability+Easing.swift` turns the five Keyframe Easing commands on when a key is picked | Sources/HaloModel/Availability/HaloAvailability+Easing.swift, Tests/HaloModelTests/HaloEasingAvailabilityTests.swift | HaloEasingAvailabilityTests | | planned |
+| EZ-1 | 1 | `LiveKeyEasing` over FlareCore `Easing` through shared `HaloEasingRules` (finite check, handle x clamped 0...1); `FakeKeyEasing` thin wrapper; contract suite over `[fake, live]` | Sources/HaloModel/Live/HaloEasingRules.swift, Sources/HaloModel/Live/LiveKeyEasing.swift, Sources/HaloModel/Fakes/FakeKeyEasing.swift, Tests/HaloModelTests/KeyEasingContractTests.swift | KeyEasingContractTests | #1339 | merged |
+| EZ-2 | 1 | `HaloKeySegment`, `HaloEasingHandle`, `keySegments`, `pickedSegment`, `pickedPreset`, `selectKey`, `selectLaneKeys`, `clearKeySelection`; none records a step | Sources/HaloModel/HaloKeySelection.swift, Tests/HaloModelTests/HaloKeySelectionTests.swift | HaloKeySelectionTests | #1341 | merged |
+| EZ-7 | 1 | `HaloTimelineView` slot: diamond click sends `.selectLaneKeys`, context menu of the five presets for the picked keys, disabled with help | Sources/HaloApp/HaloTimelineView.swift | macOS build; H-J7 step 7 (EZ-8) | #1343 | merged |
+| EZ-3 | 2 | `setEasing` one "Keyframe Easing" step; `setCustomEasing`, `moveEasingHandle`, `easingHandles`, `easingCurve`; HF-4; Model journey | Sources/HaloModel/HaloKeySelection.swift, Tests/HaloModelTests/HaloEasingTests.swift | HaloEasingTests | | building |
+| EZ-5 | 2 | `HaloAvailability+Easing.swift` turns the five Keyframe Easing commands on when a key is picked | Sources/HaloModel/Availability/HaloAvailability+Easing.swift, Tests/HaloModelTests/HaloEasingAvailabilityTests.swift | HaloEasingAvailabilityTests | | building |
 | EZ-4 | 3 | HB-7 budget | Tests/HaloModelTests/HaloEasingBudgetTests.swift | HaloEasingBudgetTests.easingStep | | planned |
 | EZ-6 | 3 | `HaloEasingInspector` EASING group + `HaloWindow+Easing` routes | Sources/HaloApp/HaloEasingInspector.swift, Sources/HaloApp/HaloWindow+Easing.swift, Tests/AppSnapshotTests/HaloEasingSnapshots.swift | HaloEasingSnapshots (6 PNGs) | | planned |
 | EZ-8 | 4 | H-J7 `testEaseKeys` steps 1 to 8 on `-HaloSample keyed`; `feature-done` | UITests/HaloJourneyTests+Easing.swift | H-J7 on dev CI | | planned |
@@ -32,6 +32,7 @@ Wave 4: EZ-8 waits on EZ-6 and EZ-7 (drives what they put on screen); #333 close
 - PRs target `dev`, not `main`: CLAUDE.md and lead.md say never target main, and the lane retargets fast-lane PRs on main to dev anyway. Brief's main HEAD 9e3c5f8 verified; dev = main + #1327.
 - Builder branches are `lead/easing-<id>`: `lead/easing/<id>` can't coexist with the `lead/easing` ref.
 - Container had no Swift; installed the pinned toolchain with `scripts/cloud-setup.sh` before wave 1.
+- The PR API appends a Claude Code footer to bodies; the lane strips it from the squash commit (#1339 to #1343 merged clean), so builders don't fight it.
 - Rules 13 and 14 (check first, mutations) don't apply: v2 packet.
 
 ## Open
