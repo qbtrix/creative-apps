@@ -18,6 +18,7 @@ import CoreRaster
 public struct PhotoBlendSummary: Hashable, Sendable {
     public let text: String
     public let help: String
+    public init(text: String, help: String) { self.text = text; self.help = help }
 }
 
 extension PhotoLayerKind {
