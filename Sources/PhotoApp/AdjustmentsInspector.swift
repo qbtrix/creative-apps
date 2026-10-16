@@ -1,4 +1,4 @@
-// AdjustmentsInspector.swift: the Adjust tab's adjustment sections (Exposure,
+// AdjustmentsInspector.swift: the inspector's adjustment sections (Exposure,
 // Levels, Hue/Saturation, Blur), each with an enable checkbox, bar sliders
 // (Gamma on its log track) and a Reset icon that shows while the section
 // differs from its defaults.
@@ -10,7 +10,7 @@
 // Curves (CurvesEditor) sits between Levels and Hue/Saturation, over
 // `histogram`. The end of every gesture, a curve drag or a bar slider's drag,
 // key step or typed value, goes out as onEditEnd, so each is one undo step.
-// `sections` picks which sections show, in the order above (the Adjust tab
+// `sections` picks which sections show, in the order above (the inspector
 // passes adjustSections), and `showsEnable` false drops the enable checkboxes, for
 // an adjustment layer, whose row's eye turns it off. The defaults are the
 // whole image's inspector, unchanged.

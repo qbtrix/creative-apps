@@ -134,7 +134,7 @@ extension PhotoJourneyTests {
         let message = photo.element("photo.status.message")
         XCTAssert(message.waitForExistence(timeout: 5), "a brush drag on Curves 1 showed no status message")
         XCTAssert(
-            message.label.contains("Select an image layer in the Layers tab to paint on."),
+            message.label.contains("Select an image layer in the sidebar to paint on."),
             "the status line reads \(message.label), not the paint refusal")
         XCTAssert(photo.app.buttons["Undo Reorder Layers"].exists, "the refused brush drag made an undo step")
         adjExpectCanvas(like: before, photo, "the refused brush drag changed the canvas")
@@ -170,7 +170,7 @@ extension PhotoJourneyTests {
         XCTAssert(reads, "the Adjust header reads \(read), not \(title) over \(info)")
     }
 
-    /// Waits for the button titled `title`, such as the top bar's "Undo Curves".
+    /// Waits for the button titled `title`, such as the window toolbar's "Undo Curves".
     @MainActor func adjExpect(_ title: String, _ photo: Journey, _ message: String) {
         XCTAssert(photo.app.buttons[title].waitForExistence(timeout: 5), "\(message) (no \(title) button)")
     }

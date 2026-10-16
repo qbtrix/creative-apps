@@ -90,12 +90,12 @@ struct PhotoStroke: Sendable, Equatable {
 extension PhotoWorkspace {
     /// Where brush, eraser, clone and heal write: the selected layer's
     /// pixels; nil with no layer selected, or on an adjustment layer, with
-    /// `statusMessage` "Select an image layer in the Layers tab to paint on."
+    /// `statusMessage` "Select an image layer in the sidebar to paint on."
     /// set in this call.
     public mutating func paintTarget() -> PaintTarget? {
         guard let layer = selectedLayer else { return nil }
         if case .adjustment = layer.kind {
-            statusMessage = "Select an image layer in the Layers tab to paint on."
+            statusMessage = "Select an image layer in the sidebar to paint on."
             return nil
         }
         return .pixels(layer.id)
@@ -108,7 +108,7 @@ extension PhotoWorkspace {
         return "Drag over the image to move the selected layer."
     }
 
-    static let moveRefusal = "Select an image layer in the Layers tab to move it."
+    static let moveRefusal = "Select an image layer in the sidebar to move it."
 
     /// The pixel layer `paintTarget()` gives, if any.
     mutating func paintLayerID() -> PhotoLayer.ID? {

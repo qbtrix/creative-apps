@@ -11,8 +11,8 @@ final class FlareJourneyTests: XCTestCase {
     /// The toolbar's eight actions: intent identifier, title, and the reason
     /// its area gives while no document is open (nil: enabled).
     static let toolbar: [(id: String, title: String, reason: String?)] = [
-        ("flare.file.new", "New", nil), ("flare.file.open", "Open", "Not built yet (F17a)."),
-        ("flare.file.save", "Save", "Not built yet (F17a)."), ("flare.edit.undo", "Undo", "Nothing to undo."),
+        ("flare.file.new", "New", nil), ("flare.file.open", "Open", nil),
+        ("flare.file.save", "Save", "Open or create an animation first."), ("flare.edit.undo", "Undo", "Nothing to undo."),
         ("flare.edit.redo", "Redo", "Nothing to redo."),
         ("flare.timeline.toggleAutoKey", "Auto-key", "Open an animation to key it."),
         ("flare.assist.showPopover", "Animate…", "Not built yet (F16a)."),

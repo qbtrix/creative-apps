@@ -1,6 +1,6 @@
 // PhotoWindow+AdjustmentLayer.swift: the adjustment layer area of a Photo
 // window (photo-adjustment-layers, PV-6): its intents, its route and its hook
-// on the window. Layer > New Adjustment Layer sends `add`; the Adjust tab
+// on the window. Layer > New Adjustment Layer sends `add`; the inspector
 // sends `adjust` for each change to the selected adjustment layer and
 // `endAdjust` when its slider or curve gesture ends, so a gesture is one undo
 // step. PhotoAdjustmentLayerArea is the identity until the area needs it.

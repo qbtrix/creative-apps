@@ -83,11 +83,11 @@ func photoToolActsOrHasHelpOnLiveServices(_ tool: PhotoTool) throws {
     #expect(workspace.moveHint == "Drag over the image to move the selected layer.")
     let curves = try #require(workspace.layers.first { $0.name == "Curves 1" })
     workspace.selectLayer(curves.id)
-    #expect(workspace.moveHint == "Select an image layer in the Layers tab to move it.")
+    #expect(workspace.moveHint == "Select an image layer in the sidebar to move it.")
     let steps = workspace.historySteps.count
     stroke(&workspace, from: Mask.Point(x: 100, y: 100), to: Mask.Point(x: 150, y: 150))
     let after = try #require(workspace.layers.first { $0.id == curves.id })
     #expect([after.offsetX, after.offsetY] == [curves.offsetX, curves.offsetY])
     #expect(workspace.historySteps.count == steps)
-    #expect(workspace.statusMessage == "Select an image layer in the Layers tab to move it.")
+    #expect(workspace.statusMessage == "Select an image layer in the sidebar to move it.")
 }

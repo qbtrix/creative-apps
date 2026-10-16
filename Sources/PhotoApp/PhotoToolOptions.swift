@@ -1,4 +1,4 @@
-// PhotoToolOptions.swift: the Tool Options section of the Adjust tab, which
+// PhotoToolOptions.swift: the Tool Options section of the inspector, which
 // shows the active tool's options. The brush, eraser, clone and heal sliders
 // and the marquee's actions live here; the crop's, selection's, transform's
 // and eyedropper's own options each live in their file (CropOptions,

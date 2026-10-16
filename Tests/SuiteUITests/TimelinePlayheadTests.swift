@@ -2,7 +2,9 @@
 // row TL-8). A press inside half the 16 pt band beside the line, down in a
 // lane, grabs it and one 9 pt off doesn't; the pill grabs too. A drag that
 // stays on one frame sends one onScrub, and none at the playhead's own frame.
-// The pill reads the playhead in the host's unit. macOS only.
+// The pill reads the playhead in the host's unit. Lanes outside the work
+// area dim from the inset to its first tick and from its last tick to the
+// end; no work area, or one over every frame, dims nothing. macOS only.
 import Foundation
 @testable import SuiteUI
 import SwiftUI
@@ -56,5 +58,31 @@ import Testing
         let lane = Double(SuiteSize.timelineLane)
         #expect(TimelinePlayhead.rows(showing: lane * 2...lane * 5, count: 300) == 2..<5)
         #expect(TimelinePlayhead.rows(showing: nil, count: 3) == 0..<3)
+    }
+
+    @Test func lanesOutsideTheWorkAreaDimFromTheInsetAndToTheEnd() {
+        let width: CGFloat = 600
+        let dims = TimelinePlayheadGrab.dims(mapping: Self.mapping, workArea: 10...40, scrollX: 0, width: width)
+        let lastTick = tickX(Self.mapping, Self.mapping.duration)
+        let expected: [ClosedRange<CGFloat>] = [timelineInset...tickX(Self.mapping, 10), tickX(Self.mapping, 40)...lastTick]
+        #expect(dims == expected)
+        let first = dims.first?.upperBound ?? 0
+        let lower: CGFloat = 108
+        #expect(first == lower)
+        #expect(TimelinePlayheadGrab.dims(mapping: Self.mapping, workArea: nil, scrollX: 0, width: width).isEmpty)
+        let full = 0...Self.mapping.duration
+        #expect(TimelinePlayheadGrab.dims(mapping: Self.mapping, workArea: full, scrollX: 0, width: width).isEmpty)
+    }
+
+    @Test func theDimsFollowTheScrollAndStayInTheLayer() {
+        let scrolled = TimelinePlayheadGrab.dims(mapping: Self.mapping, workArea: 10...40, scrollX: 300, width: 150)
+        let expected: [ClosedRange<CGFloat>] = [tickX(Self.mapping, 40) - 300...150]
+        #expect(scrolled == expected)
+        let playhead = TimelinePlayhead(
+            mapping: Self.mapping, playhead: 30, unit: .frames, fps: 24, scroll: .zero, keys: [], onScrub: { _ in })
+        let worked = TimelinePlayhead(
+            mapping: Self.mapping, playhead: 30, unit: .frames, fps: 24, scroll: .zero, keys: [], workArea: 10...40,
+            onScrub: { _ in })
+        #expect(playhead != worked)
     }
 }

@@ -104,18 +104,18 @@ final class PhotoPerfJourneyTests: XCTestCase {
     @MainActor private func launchLarge() -> Journey {
         let arguments = photoArguments(fixture: "large", windowSize: "1800x820") + ["-SuitePerfProbe"]
         let photo = Journey("Photo", self, arguments: arguments)
-        XCTAssert(photo.element("suite.tools").waitForExistence(timeout: 60), "no tool rail (suite.tools)")
+        XCTAssert(photo.element("suite.tools").waitForExistence(timeout: 60), "no tool palette (suite.tools)")
         let header = photo.app.descendants(matching: .any)
             .matching(NSPredicate(format: "label CONTAINS %@", "4000 × 3000 px")).firstMatch
         XCTAssert(header.waitForExistence(timeout: 60), "-PhotoFixture large didn't open the 4000 × 3000 px image")
         return photo
     }
 
-    /// Waits for the rail to show `tool` picked.
+    /// Waits for the tool palette to show `tool` picked.
     @MainActor private func expectPicked(_ tool: String, _ photo: Journey) {
         let picked = photo.element("suite.tools").buttons
             .matching(NSPredicate(format: "label == %@ AND selected == true", tool)).firstMatch
-        XCTAssert(picked.waitForExistence(timeout: 5), "the rail doesn't show \(tool) picked")
+        XCTAssert(picked.waitForExistence(timeout: 5), "the tool palette doesn't show \(tool) picked")
     }
 
     /// Drags 600 pt (or 80% of the visible canvas, if narrower) left to right
@@ -124,7 +124,7 @@ final class PhotoPerfJourneyTests: XCTestCase {
     @MainActor private func canvasDrag(_ name: String, _ photo: Journey, step: String) -> Series {
         let frame = photo.element("suite.canvas").frame
         var area = frame.intersection(photo.app.windows.firstMatch.frame)
-        // Zoomed in, the canvas runs under the tool rail and the inspector: keep between them.
+        // Zoomed in, the canvas runs under the floating tool palette and the inspector: keep between them.
         let rail = photo.element("suite.tools").frame, inspector = photo.element("suite.inspector").frame
         if rail.maxX > area.minX, rail.maxX < area.maxX {
             area = area.divided(atDistance: rail.maxX - area.minX, from: .minXEdge).remainder

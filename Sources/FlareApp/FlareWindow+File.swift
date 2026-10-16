@@ -8,6 +8,9 @@
 // saved to, else where the save panel says; Save As always asks. A write that
 // fails says why in `saveError`. The panels, the alerts and the dirty dot are
 // FlareFilePanels' (FlareFilePanels.swift). Close asks to save a dirty document.
+// Open Sample opens the named fixture document (FlareFixtures, as `-FlareSample`
+// does) through `finishOpen`, clean and with no undo history; Keyed Ball is
+// FlareWindow's menu door.
 import AppKit
 import FlareCore
 import FlareModel
@@ -23,7 +26,8 @@ extension FlareWindow {
         case .save: Task { await save(asking: false) }
         case .saveAs: Task { await save(asking: true) }
         case .close: Task { await close() }
-        case .create, .openSample: break
+        case .openSample(let name): openSample(name)
+        case .create: break
         }
     }
 
@@ -33,8 +37,15 @@ extension FlareWindow {
         case .new, .open, .openRecent, .close: nil
         case .clearRecent: model.recent.isEmpty ? "No recent animations." : nil
         case .save, .saveAs: model.document == nil ? "Open or create an animation first." : nil
-        case .create, .openSample: "Not built yet (F17a)."
+        case .openSample(let name): FlareFixtures.named(name) == nil ? "No sample called \(name)." : nil
+        case .create: "Not built yet (F17a)."
         }
+    }
+
+    /// Opens the fixture called `name` under its menu title; an unknown name does nothing.
+    func openSample(_ name: String) {
+        guard let document = FlareFixtures.named(name) else { return }
+        model.finishOpen(.success(document), named: name.prefix(1).uppercased() + name.dropFirst())
     }
 
     /// Reads, decodes and opens `url`; a failure keeps the open document.

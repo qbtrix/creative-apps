@@ -7,8 +7,11 @@
 // redraws for it either. The pill and a 16 pt band down the line grab it
 // (TimelinePlayheadGrab); a drag scrubs through TimelineScrubSender, which
 // the ruler's drag uses too and which calls onScrub only when the frame
-// changes (#1297). Equatable without its closure, so the strip skips it
-// unless the playhead, the scroll or the keyed rows change.
+// changes (#1297). With a work area, the lanes before its first tick and
+// after its last are dimmed to 60 % here (laneBed at 40 % over them,
+// TimelinePlayheadGrab.dims), so no lane redraws when it moves. Equatable
+// without its closure, so the strip skips it unless the playhead, the
+// scroll, the keyed rows or the work area change.
 import SwiftUI
 
 struct TimelinePlayhead: View {
@@ -20,6 +23,8 @@ struct TimelinePlayhead: View {
     let scroll: CGPoint
     /// The keys at the playhead on the rows in view.
     let keys: [TimelinePlayheadKey]
+    /// The host's work area; the lanes outside it dim. Nil dims nothing.
+    var workArea: ClosedRange<Int>? = nil
     let onScrub: @MainActor (Int) -> Void
     @State private var sender = TimelineScrubSender()
 
@@ -44,6 +49,7 @@ struct TimelinePlayhead: View {
                     .font(SuiteFont.pill)
                     .foregroundStyle(.white)
                     .frame(width: pill.width, height: pill.height)
+                    // A view background, not a color one, so it keeps to the safe area (#1034).
                     .background(alignment: .center) { Capsule().fill(SuiteColor.accentFill) }
                     .offset(x: pill.minX, y: pill.minY)
             }
@@ -55,16 +61,20 @@ struct TimelinePlayhead: View {
         }
     }
 
-    /// The knock-out, the line, then the keyed keys clipped below the ruler.
+    /// The work area's dims, the knock-out, the line, then the keyed keys, the dims and keys clipped below the ruler.
     private func draw(lineX: CGFloat, pill: CGRect, size: CGSize, in context: inout GraphicsContext) {
+        var lanes = context
+        let ruler = SuiteSize.timelineRuler
+        lanes.clip(to: Path(CGRect(x: 0, y: ruler, width: size.width, height: max(size.height - ruler, 0))))
+        for dim in TimelinePlayheadGrab.dims(mapping: mapping, workArea: workArea, scrollX: scroll.x, width: size.width) {
+            let rect = CGRect(x: dim.lowerBound, y: ruler, width: dim.upperBound - dim.lowerBound, height: max(size.height - ruler, 0))
+            lanes.fill(Path(rect), with: .color(SuiteColor.laneBed.opacity(TimelinePlayheadGrab.dimOpacity)))
+        }
         let out = TimelinePlayheadGrab.knockOut
         let ground = pill.insetBy(dx: -out, dy: -out)
         context.fill(Path(roundedRect: ground, cornerRadius: ground.height / 2), with: .color(SuiteColor.ground))
         let line = TimelinePlayheadGrab.line
         context.fill(Path(CGRect(x: lineX - line / 2, y: 0, width: line, height: size.height)), with: .color(SuiteColor.accent))
-        var lanes = context
-        let ruler = SuiteSize.timelineRuler
-        lanes.clip(to: Path(CGRect(x: 0, y: ruler, width: size.width, height: max(size.height - ruler, 0))))
         for key in keys {
             let y = ruler + SuiteSize.timelineLane * (CGFloat(key.row) + 0.5) - scroll.y
             let shape = TimelineLaneGeometry.keyShape(key.glyph, center: CGPoint(x: lineX, y: y), size: SuiteSize.timelineKeyframe)
@@ -99,7 +109,7 @@ extension TimelinePlayhead: Equatable {
     /// Compares what the layer draws; the closure is left out.
     nonisolated static func == (lhs: Self, rhs: Self) -> Bool {
         lhs.mapping == rhs.mapping && lhs.playhead == rhs.playhead && lhs.unit == rhs.unit && lhs.fps == rhs.fps
-            && lhs.scroll == rhs.scroll && lhs.keys == rhs.keys
+            && lhs.scroll == rhs.scroll && lhs.keys == rhs.keys && lhs.workArea == rhs.workArea
     }
 }
 
@@ -120,6 +130,24 @@ enum TimelinePlayheadGrab {
     static let knockOut = SuiteSpacing.xxs
     /// The divider between the names column and the lanes, which the layer starts after.
     static let divider: CGFloat = 1
+    /// How much laneBed covers the lanes outside the work area: they read at 60 %.
+    static let dimOpacity = 0.4
+
+    /// The layer x ranges the work area dims in a layer `width` wide scrolled
+    /// to content x `scrollX`: from the inset to the work area's first tick,
+    /// and from its last tick to the last frame's. Empty ranges are dropped.
+    static func dims(mapping: FrameMapping, workArea: ClosedRange<Int>?, scrollX: CGFloat, width: CGFloat) -> [ClosedRange<CGFloat>] {
+        guard let workArea else { return [] }
+        let spans = [
+            (timelineInset, tickX(mapping, workArea.lowerBound)),
+            (tickX(mapping, workArea.upperBound), tickX(mapping, mapping.duration)),
+        ]
+        return spans.compactMap { span in
+            let from = max(span.0 - scrollX, 0)
+            let to = min(span.1 - scrollX, max(width, 0))
+            return from < to ? from...to : nil
+        }
+    }
 
     /// The pill for `label` on the ruler of a layer `width` wide, centred on `lineX`.
     static func pill(lineX: CGFloat, label: String, width: CGFloat) -> CGRect {

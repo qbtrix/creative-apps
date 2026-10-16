@@ -17,9 +17,11 @@
 // the ticks and labels inside the scrolled-to stretch, so a long duration
 // costs no more than a short one. Snapshots offer the lanes and ruler the
 // strip's width (#219). Moving keyframes by drag is not here yet. The track
-// data is in TimelineTrack.swift. The unit, fps, work area and the pick, move,
-// trim, unit and work-area closures are taken and stored; later timeline
-// slices act on them. The strip owns its zoom (TL-17), a factor over the
+// data is in TimelineTrack.swift. The unit and fps reach the ruler and the
+// toolbar's unit chips; the work area reaches the toolbar's Work Area chip and
+// the bar on the ruler (TimelineWorkAreaBar, over the playhead), which call
+// onUnit and onWorkArea (TL-18). The move and trim closures are taken and
+// stored; later timeline slices act on them. The strip owns its zoom (TL-17), a factor over the
 // host's frameWidth kept in TimelineZoom's range (1 = fit): Command-plus,
 // Command-minus and Command-0 while it has focus (anchored on the playhead),
 // a pinch on the lanes (anchored under the pointer) and the toolbar row
@@ -114,14 +116,16 @@ public struct TimelineStrip<ID: Hashable & Sendable>: View {
         let layout = TimelineStripLayout(trackCount: tracks.count, toolbar: toolbar)
         VStack(alignment: .leading, spacing: 0) {
             if toolbar {
-                TimelineToolbar(zoom: zoom, controls: TimelineToolbarControls(frameWidth: fitMapping.frameWidth)) {
-                    setZoom($0, anchorX: nil)
-                }
+                TimelineToolbar(
+                    zoom: zoom,
+                    controls: TimelineToolbarControls(frameWidth: fitMapping.frameWidth, duration: fitMapping.duration, fps: fps),
+                    unit: unit, workArea: workArea, onZoom: { setZoom($0, anchorX: nil) }, onUnit: onUnit,
+                    onWorkArea: onWorkArea)
             }
             HStack(spacing: 0) {
                 Color.clear.frame(width: SuiteSize.timelineLabelColumn, height: SuiteSize.timelineRuler)
                 Divider()
-                TimelineRuler(mapping: mapping, visibleX: visibleX, playhead: playhead, onScrub: onScrub)
+                TimelineRuler(mapping: mapping, visibleX: visibleX, playhead: playhead, unit: unit, fps: fps, onScrub: onScrub)
             }
             .frame(height: SuiteSize.timelineRuler)
             // ImageRenderer can't draw a ScrollView, so snapshots show the
@@ -171,6 +175,8 @@ public struct TimelineStrip<ID: Hashable & Sendable>: View {
             }
         }
         .overlay(alignment: .topLeading) { playheadLayer(layout) }
+        // Over the playhead, so a work-area handle takes the press before the pill and the scrub.
+        .overlay(alignment: .topLeading) { workAreaLayer(layout) }
         // A host inside its own vertical ScrollView proposes no height and gets the ideal one.
         .frame(
             minHeight: layout.toolbarHeight + SuiteSize.timelineRuler, idealHeight: layout.idealHeight,
@@ -248,8 +254,17 @@ public struct TimelineStrip<ID: Hashable & Sendable>: View {
         return TimelinePlayhead(
             mapping: mapping, playhead: playhead, unit: unit, fps: fps,
             scroll: CGPoint(x: scrollX, y: snapshot ? 0 : visibleY?.lowerBound ?? 0),
-            keys: TimelinePlayhead.keys(at: mapping.clamp(playhead), in: tracks, rows: rows), onScrub: onScrub
+            keys: TimelinePlayhead.keys(at: mapping.clamp(playhead), in: tracks, rows: rows), workArea: workArea,
+            onScrub: onScrub
         ).equatable()
+            .padding(.top, layout.toolbarHeight)
+            .padding(.leading, SuiteSize.timelineLabelColumn + TimelinePlayheadGrab.divider)
+    }
+
+    /// The work area's bar and handles on the ruler (TL-18).
+    private func workAreaLayer(_ layout: TimelineStripLayout) -> some View {
+        let scrollX = snapshot ? 0 : (visibleX?.lowerBound).map { $0 + Double(timelineInset) } ?? 0
+        return TimelineWorkAreaBar(mapping: mapping, workArea: workArea, scrollX: scrollX, onWorkArea: onWorkArea)
             .padding(.top, layout.toolbarHeight)
             .padding(.leading, SuiteSize.timelineLabelColumn + TimelinePlayheadGrab.divider)
     }
