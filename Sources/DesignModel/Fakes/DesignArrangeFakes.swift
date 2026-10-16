@@ -12,9 +12,7 @@ import Foundation
 
 public struct FakeDuplicating: LayerDuplicating {
     public init() {}
-
     public func duplicateHelp(_ ids: [String], on page: DesignPage) -> String? { fakeSelectedHelp(ids, page) }
-
     /// Each copy right above its original in the same parent, moved by `offset`, unlocked.
     public func duplicate(_ ids: [String], offset: DesignPoint, on page: DesignPage,
                           mint: inout DesignIDMint) throws(DesignRefusal) -> DesignEdit {
@@ -35,7 +33,6 @@ public struct FakeDuplicating: LayerDuplicating {
         }
         return DesignEdit(name: "Duplicate", nodes: nodes, selection: copies)
     }
-
     public func copySubtree(_ node: DesignNode, mint: inout DesignIDMint) -> DesignNode {
         var copy = node
         copy.children = node.children.map { copySubtree($0, mint: &mint) }
@@ -45,14 +42,12 @@ public struct FakeDuplicating: LayerDuplicating {
 
 public struct FakeGrouping: LayerGrouping {
     public init() {}
-
     public func groupHelp(_ ids: [String], on page: DesignPage) -> String? {
         fakeHelp { () throws(DesignRefusal) in
             var mint = DesignIDMint(taken: [], after: 0)
             return try group(ids, on: page, mint: &mint)
         }
     }
-
     /// The group's frame is the union; it takes the topmost member's place; nothing moves.
     public func group(_ ids: [String], on page: DesignPage, mint: inout DesignIDMint) throws(DesignRefusal) -> DesignEdit {
         guard let box = fakeUnion(fakeFind(ids, page).map(\.frame)) else { throw .nothingSelected }
@@ -66,11 +61,9 @@ public struct FakeGrouping: LayerGrouping {
         }
         return DesignEdit(name: "Group", nodes: nodes, selection: [made.id])
     }
-
     public func ungroupHelp(_ ids: [String], on page: DesignPage) -> String? {
         fakeFind(ids, page).contains { $0.kind == .group } ? nil : DesignRefusal.notAGroup(ids.last ?? "The selection").help
     }
-
     public func ungroup(_ ids: [String], on page: DesignPage) throws(DesignRefusal) -> DesignEdit {
         let groups = fakeFind(ids, page).filter { $0.kind == .group }
         guard !groups.isEmpty else { throw .notAGroup(ids.last ?? "The selection") }
@@ -91,25 +84,19 @@ public struct FakeClipboard: LayerClipboard {
         var parentID: String?
         var nodes: [DesignNode]
     }
-
     public init() {}
-
     public var pasteboardType: String { "org.creativesuite.design.layers" }
-
     public func copyHelp(_ ids: [String], on page: DesignPage) -> String? { fakeSelectedHelp(ids, page) }
-
     public func encode(_ ids: [String], on page: DesignPage) throws(DesignRefusal) -> Data {
         let nodes = fakeFind(ids, page)
         guard let first = nodes.first else { throw .nothingSelected }
         let payload = Payload(parentID: page.nodes.ancestors(of: first.id)?.last, nodes: nodes)
         do { return try JSONEncoder().encode(payload) } catch { throw .unreadable }
     }
-
     public func pasteHelp(_ data: Data?) -> String? {
         guard let data, Self.payload(data) != nil else { return DesignRefusal.unreadable.help }
         return nil
     }
-
     /// Fresh ids, offset by (10, 10); into `parentID`, else the parent the copies came from when it is
     /// on `page`, else the top level.
     public func paste(_ data: Data, into parentID: String?, on page: DesignPage,
@@ -125,7 +112,6 @@ public struct FakeClipboard: LayerClipboard {
         let tree = fakeSiblings(target, page.nodes) { $0 += pasted }
         return DesignEdit(name: "Paste", nodes: tree, selection: pasted.map(\.id))
     }
-
     private static func payload(_ data: Data) -> Payload? {
         guard let payload = try? JSONDecoder().decode(Payload.self, from: data), !payload.nodes.isEmpty else { return nil }
         return payload
@@ -134,11 +120,9 @@ public struct FakeClipboard: LayerClipboard {
 
 public struct FakeOrdering: LayerOrdering {
     public init() {}
-
     public func moveHelp(_ id: String, into parentID: String?, at index: Int, on page: DesignPage) -> String? {
         fakeHelp { () throws(DesignRefusal) in try move(id, into: parentID, at: index, on: page) }
     }
-
     public func move(_ id: String, into parentID: String?, at index: Int,
                      on page: DesignPage) throws(DesignRefusal) -> DesignEdit {
         var nodes = page.nodes
@@ -151,11 +135,9 @@ public struct FakeOrdering: LayerOrdering {
         guard nodes != page.nodes else { throw .unchanged }
         return DesignEdit(name: "Move Layer", nodes: nodes, selection: [id])
     }
-
     public func arrangeHelp(_ step: DesignArrangeStep, _ ids: [String], on page: DesignPage) -> String? {
         fakeSelectedHelp(ids, page)
     }
-
     /// The primary layer, within its own parent.
     public func arrange(_ step: DesignArrangeStep, _ ids: [String], on page: DesignPage) throws(DesignRefusal) -> DesignEdit {
         guard let id = ids.last(where: { page.nodes.node($0) != nil }) else { throw .nothingSelected }
@@ -176,11 +158,9 @@ public struct FakeOrdering: LayerOrdering {
 
 public struct FakeStyling: StyleEditing {
     public init() {}
-
     public func styleHelp(_ property: DesignStyleProperty, _ ids: [String], on page: DesignPage) -> String? {
         fakeSelectedHelp(ids, page)
     }
-
     public func setFrame(_ field: DesignFrameField, to value: Double, _ ids: [String],
                          on page: DesignPage) throws(DesignRefusal) -> DesignEdit {
         try fakeChange(ids, page, "Change Frame", key: "frame") { node in
@@ -193,25 +173,20 @@ public struct FakeStyling: StyleEditing {
             }
         }
     }
-
     public func setFill(_ color: DesignColor, _ ids: [String], on page: DesignPage) throws(DesignRefusal) -> DesignEdit {
         try fakeChange(ids, page, "Change Fill", key: "fill") { $0.fill = color }
     }
-
     public func setCornerRadius(_ radius: Double, _ ids: [String], on page: DesignPage) throws(DesignRefusal) -> DesignEdit {
         try fakeChange(ids, page, "Change Corner Radius", key: "radius") {
             $0.cornerRadius = Swift.min(Swift.max(radius, 0), Swift.min($0.frame.width, $0.frame.height) / 2)
         }
     }
-
     public func setOpacity(_ opacity: Double, _ ids: [String], on page: DesignPage) throws(DesignRefusal) -> DesignEdit {
         try fakeChange(ids, page, "Change Opacity", key: "opacity") { $0.opacity = Swift.min(Swift.max(opacity, 0), 1) }
     }
-
     public func setStroke(_ stroke: DesignStroke?, _ ids: [String], on page: DesignPage) throws(DesignRefusal) -> DesignEdit {
         try fakeChange(ids, page, "Change Stroke", key: "stroke") { $0.stroke = stroke }
     }
-
     public func setTextStyle(_ style: DesignTextStyle, _ ids: [String], on page: DesignPage) throws(DesignRefusal) -> DesignEdit {
         try fakeChange(ids, page, "Change Text Style", key: "text-style") { $0.textStyle = style }
     }
@@ -220,11 +195,9 @@ public struct FakeStyling: StyleEditing {
 /// Keeps documents in memory as JSON; refuses bytes that don't decode.
 public struct FakeFiling: DocumentFiling {
     public init() {}
-
     public func encode(_ document: DesignDocument) throws(DesignFileError) -> Data {
         do { return try JSONEncoder().encode(document.pages) } catch { throw .unreadable }
     }
-
     public func decode(_ data: Data) throws(DesignFileError) -> DesignDocument {
         guard let pages = try? JSONDecoder().decode([DesignPage].self, from: data) else { throw .unreadable }
         guard !pages.isEmpty else { throw .noPages }

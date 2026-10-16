@@ -1,7 +1,5 @@
-// DesignArrangeFakesTests.swift: the arrange-area fakes (duplicate, group, the
-// clipboard, ordering, styling) on DesignFixtures.cards, every layer inside the
-// Desktop frame, and MJ2: the same walk on `.fake` acts and on `.live` says what
-// isn't built. Runs on Linux and macOS.
+// DesignArrangeFakesTests.swift: the arrange-area fakes on DesignFixtures.cards (every layer
+// inside Desktop), and MJ2 on `.fake` and `.live`. Runs on Linux and macOS.
 @testable import DesignModel
 import Testing
 
@@ -16,13 +14,9 @@ import Foundation
 private let (desktop, a, b, c, title, pair, e1, e2) =
     ("node-1", "node-2", "node-3", "node-4", "node-5", "node-6", "node-7", "node-8")
 
-private func cardsPage() -> DesignPage {
-    DesignFixtures.cards.selectedPage ?? DesignPage(id: "none", name: "", frameWidth: 1, frameHeight: 1)
-}
+private func cardsPage() -> DesignPage { DesignFixtures.cards.selectedPage ?? DesignPage(id: "", name: "", frameWidth: 1, frameHeight: 1) }
 
-private func freshMint() -> DesignIDMint {
-    DesignIDMint(taken: Set((1...10).map { "node-\($0)" }), after: 10)
-}
+private func freshMint() -> DesignIDMint { DesignIDMint(taken: Set((1...10).map { "node-\($0)" }), after: 10) }
 
 private func children(_ id: String, _ nodes: [DesignNode]) -> [DesignNode] { nodes.node(id)?.children ?? [] }
 
@@ -30,7 +24,6 @@ private func allIDs(_ nodes: [DesignNode]) -> [String] { nodes.flatMap { [$0.id]
 
 @Suite struct DesignArrangeFakesTests {
     let page = cardsPage()
-
     @Test func duplicateSitsRightAboveItsOriginalUnlockedWithFreshIDs() throws {
         var locked = page
         _ = locked.nodes.update(a) { $0.isLocked = true }
@@ -46,28 +39,23 @@ private func allIDs(_ nodes: [DesignNode]) -> [String] { nodes.flatMap { [$0.id]
         #expect(Set(allIDs([pairCopy])).isDisjoint(with: allIDs(page.nodes)))
         #expect(pairCopy.children.map(\.frame) == children(pair, page.nodes).map(\.frame))
     }
-
     @Test func groupKeepsEveryLeafFrameAndRefusesMixedParents() throws {
         var mint = freshMint()
         let edit = try FakeGrouping().group([a, b], on: page, mint: &mint)
-        #expect(edit.name == "Group")
+        #expect(edit.name == "Group" && edit.selection == ["node-11"])
         let group = try #require(edit.nodes.node("node-11"))
         #expect(group.name == "Group" && group.kind == .group && group.frame == rc(100, 100, 400, 120))
         #expect(group.children.map(\.id) == [a, b])
-        #expect(edit.nodes.node(a)?.frame == rc(100, 100, 100, 80))
-        #expect(edit.nodes.node(b)?.frame == rc(300, 140, 200, 80))
-        #expect(edit.selection == ["node-11"])
+        #expect(group.children.map(\.frame) == [rc(100, 100, 100, 80), rc(300, 140, 200, 80)])
         #expect(throws: DesignRefusal.notSameParent) { try FakeGrouping().group([a, e1], on: page, mint: &mint) }
         #expect(FakeGrouping().groupHelp([a, e1], on: page) == "Select layers that share a parent.")
     }
-
     @Test func ungroupPutsTheChildrenInTheGroupsPlace() throws {
         let edit = try FakeGrouping().ungroup([pair], on: page)
         #expect(edit.name == "Ungroup" && edit.selection == [e1, e2])
         #expect(children(desktop, edit.nodes).map(\.id) == [a, b, c, title, e1, e2, "node-9", "node-10"])
         #expect(throws: DesignRefusal.notAGroup(a)) { try FakeGrouping().ungroup([a], on: page) }
     }
-
     @Test func pasteLandsInTheParentItCameFromOffsetWithFreshIDs() throws {
         let clipboard = FakeClipboard()
         let data = try clipboard.encode([pair], on: page)
@@ -83,7 +71,6 @@ private func allIDs(_ nodes: [DesignNode]) -> [String] { nodes.flatMap { [$0.id]
         #expect(clipboard.pasteHelp(Data("hello".utf8)) == "The pasteboard holds no Design layers.")
         #expect(clipboard.pasteHelp(nil) == "The pasteboard holds no Design layers.")
     }
-
     @Test func orderingMovesIntoAGroupAndSendsToBack() throws {
         let moved = try FakeOrdering().move(title, into: pair, at: 2, on: page)
         #expect(moved.name == "Move Layer")
@@ -94,21 +81,18 @@ private func allIDs(_ nodes: [DesignNode]) -> [String] { nodes.flatMap { [$0.id]
         #expect(back.name == "Send to Back")
         #expect(children(desktop, back.nodes).map(\.id).prefix(2) == [b, a])
     }
-
     @Test func setFrameSetsEachSelectedLayer() throws {
         let edit = try FakeStyling().setFrame(.x, to: 300, [a, b], on: page)
         #expect(edit.name == "Change Frame" && edit.coalescingKey == DesignEdit.runKey("frame", [a, b]))
         #expect(edit.nodes.node(a)?.frame == rc(300, 100, 100, 80))
         #expect(edit.nodes.node(b)?.frame == rc(300, 140, 200, 80))
     }
-
     @Test func fakeFilingRoundTripsThePages() throws {
         let filing = FakeFiling()
         let document = DesignDocument(pages: [page])
         #expect(try filing.decode(filing.encode(document)) == document)
         #expect(throws: DesignFileError.unreadable) { try filing.decode(Data("hello".utf8)) }
     }
-
     /// MJ2: marquee, Align Top, duplicate, group, copy and paste on `.fake`, each a named edit; on `.live` each says what isn't built.
     @Test func testFakesWalk() throws {
         let fake = DesignServices.fake
@@ -128,7 +112,6 @@ private func allIDs(_ nodes: [DesignNode]) -> [String] { nodes.flatMap { [$0.id]
         current.nodes = grouped.nodes
         let pasted = try fake.clipboard.paste(fake.clipboard.encode([pair], on: current), into: nil, on: current, mint: &mint)
         #expect(pasted.name == "Paste" && children(desktop, pasted.nodes).last?.children.count == 2)
-
         let live = DesignServices.live
         #expect(live.marquee.layers(touching: marquee, in: desktop, on: page).isEmpty)
         #expect(throws: DesignRefusal.notBuilt("Aligning several layers")) { try live.aligning.align(.top, [a, b, c], on: page) }

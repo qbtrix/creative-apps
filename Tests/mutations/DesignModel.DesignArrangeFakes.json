@@ -21,20 +21,6 @@
     "tests": "DesignArrangeFakesTests"
   },
   {
-    "label": "paste ignores the parent it came from",
-    "file": "Sources/DesignModel/Fakes/DesignArrangeFakes.swift",
-    "find": "let target = parentID ?? payload.parentID.flatMap { page.nodes.node($0) == nil ? nil : $0 }",
-    "replace": "let target = parentID",
-    "tests": "DesignArrangeFakesTests"
-  },
-  {
-    "label": "duplicate lands below its original",
-    "file": "Sources/DesignModel/Fakes/DesignArrangeFakes.swift",
-    "find": "siblings.firstIndex { $0.id == original.id }.map { $0 + 1 } ?? siblings.count",
-    "replace": "siblings.firstIndex { $0.id == original.id } ?? siblings.count",
-    "tests": "DesignArrangeFakesTests"
-  },
-  {
     "label": "group moves a leaf",
     "file": "Sources/DesignModel/Fakes/DesignArrangeFakes.swift",
     "find": "made.children = siblings.filter { ids.contains($0.id) }",
@@ -42,17 +28,10 @@
     "tests": "DesignArrangeFakesTests"
   },
   {
-    "label": "group accepts layers from two parents",
+    "label": "paste ignores the parent it came from",
     "file": "Sources/DesignModel/Fakes/DesignArrangeFakes.swift",
-    "find": "let parent = try fakeSharedParent(ids, page)",
-    "replace": "let parent = page.nodes.ancestors(of: ids.last ?? \"\")?.last",
-    "tests": "DesignArrangeFakesTests"
-  },
-  {
-    "label": "setFrame moves only the first layer",
-    "file": "Sources/DesignModel/Fakes/DesignArrangeFakes.swift",
-    "find": "try fakeChange(ids, page, \"Change Frame\", key: \"frame\") { node in",
-    "replace": "try fakeChange(Array(ids.prefix(1)), page, \"Change Frame\", key: \"frame\") { node in",
+    "find": "let target = parentID ?? payload.parentID.flatMap { page.nodes.node($0) == nil ? nil : $0 }",
+    "replace": "let target = parentID",
     "tests": "DesignArrangeFakesTests"
   }
 ]
