@@ -41,7 +41,7 @@ they are split here into 15 tasks.
 2. **Hand-off ids are UUIDs.** `HandOff.newID() -> String` is
    `UUID().uuidString.lowercased()`; the file is `handoffs/<id>.aghandoff`.
    `HandOffCodec.decode` refuses an id with anything but `a-z`, `0-9` and
-   `-` (`SuiteError.damaged("hand-off id")`), so a hand-off file can never
+   `-` (`SuiteError.damaged("the message from another app")`), so a hand-off file can never
    name a nested path. Callers that built ids from a file id or a
    one-second clock (`"open-<fileID>"`, `"new-<preset>-<seconds>"`) take an
    injected `makeID: @Sendable () -> String = HandOff.newID` instead (home's
@@ -72,7 +72,9 @@ they are split here into 15 tasks.
    them.** `SuiteServices.slotFeatures: [String: String]` (each of the 15
    members, `sending` and `receiving` included, to the feature that
    connects it) and `SuiteIdentity.notConnected(_:)` (BU-1a) make every
-   reason "Not connected yet (<feature>).". Throwing members that are not
+   reason "<What> isn't available yet.", where <What> is the feature's plain
+   phrase from `SuiteIdentity.featurePhrases` (a slug never reaches the UI;
+   an unknown feature reads "This isn't available yet."). Throwing members that are not
    live yet hold their fake with `unavailable:`, so they throw that
    sentence. Pure members (`creating`, `routing`, `pasteboard`, `linking`,
    `onboarding`, `home`) have no throwing call, so their slot returns the
@@ -119,7 +121,7 @@ No screen. The states every later screen reads from here:
 | State | Where it comes from |
 |---|---|
 | Empty | `RecentsList()`, `AssetIndex()`, `SuitePreferences()` defaults; `FakeHome`'s "No recent work yet. Start something new above, or open a file." |
-| Error | `SuiteError.message`, the one sentence each failure shows (16 cases, blueprint 5.4); a slot not connected yet throws `.notAvailable("Not connected yet (<feature>).")` |
+| Error | `SuiteError.message`, the one sentence each failure shows (17 cases, blueprint 5.4, with `readFailed`); a failed hand-off encode is `.ioFailed("the message from another app")`; a slot not connected yet throws `.notAvailable("<What> isn't available yet.")` with <What> from `SuiteIdentity.featurePhrases` |
 | Loading | none in the Model; the views show progress from probe marks (home, switching) |
 
 ## Contract slice
@@ -128,11 +130,11 @@ The whole of blueprint section 5, as moved. File by file:
 
 ```
 Sources/SuiteModel/
-  Values/SuiteIdentity.swift   prefix, launcherBundleID, notConnected            (BU-1a; SC-1a keeps it)
+  Values/SuiteIdentity.swift   prefix, launcherBundleID, featurePhrases, notConnected (BU-1a; SC-1a keeps it)
   Values/SuiteApp.swift        SuiteApp: displayName, bundleID, bundlePath, switchDigit; SettingsPane
   Values/SuiteTypes.swift      SuiteTypeID, SuiteDocumentType, SuiteTypeRegistry (+ declaredOnly)
   Values/SuiteDocumentRef.swift  fileID(forPath:), fileKey(_:)                     (correction 1)
-  Values/SuiteError.swift      the 16 cases and their messages
+  Values/SuiteError.swift      the 17 cases (readFailed included) and their messages
   Values/Recents.swift         RecentEvent, RecentItem
   Values/NewDocumentPreset.swift
   Values/Switching.swift       AppRunState, SwitchReason, SwitchReceipt
@@ -184,7 +186,7 @@ public actor StoreRecents: RecentWork {                                         
 }
 extension SuiteServices {                                                                  // SC-4b
     public static let slotFeatures: [String: String]       // 15 members -> feature
-    public var pending: [String: String]                   // member -> "Not connected yet (<feature>)."; empty for .fake
+    public var pending: [String: String]                   // member -> "<What> isn't available yet." (featurePhrases); empty for .fake
 }
 public struct SlotContext: Sendable { store: FileStore, support: String, app: SuiteApp, arguments: [String] }  // SC-5b, SuiteShell
 public enum FixtureSeeder { public static func seed(_ name: String, into store: FileStore,
@@ -300,7 +302,7 @@ slots take SC-5b's `SlotContext` and edit its `SuiteServices+Live.swift`.
 | id | test | fails when |
 |---|---|---|
 | SC-1a | `ValuesIdentityTests`: bundle ids and `bundlePath` per app (`Contents/Helpers/Flare.app` and so on, written out in the test; recents-open-in RO-1 later checks them against bundle's `BundleLayout`); `defaultApp` for each registry type; `fileID(forPath: "/a/./b/../Logo.design")` == `"path:/a/Logo.design"`; `fileKey` is 16 hex digits, stable for a pinned input (`fileKey("path:/a/Logo.design")` equals the value written in the test), and differs for 200 distinct ids generated in the test (`path:/tmp/Doc <i>.flare`); `declaredOnly` has the four ids and none is in `standard`; every `SuiteError.message` equals blueprint 5.4's sentence | a sentence, an id, the identity rule or the key drifts, or two ids collide |
-| SC-1b | `ValuesRecentsTests` (main.swift's recents checks): dedupe, newest first, cap 200, filter and search, `merging` keeps the newest per file; `ValuesHandOffTests`: encode → decode → encode is byte-equal; format 2 is refused with the "newer AfterGlow" sentence; an id with `/` is `damaged("hand-off id")`; `newID()` is 36 lowercase characters and two calls differ; `isExpired` at 7 days + 1 s | the cap or order breaks, a nested id decodes, or a newer format is accepted |
+| SC-1b | `ValuesRecentsTests` (main.swift's recents checks): dedupe, newest first, cap 200, filter and search, `merging` keeps the newest per file; `ValuesHandOffTests`: encode → decode → encode is byte-equal; format 2 is refused with the "newer AfterGlow" sentence; an id with `/` is `damaged("the message from another app")`; a failed encode is `ioFailed("the message from another app")`; `newID()` is 36 lowercase characters and two calls differ; `isExpired` at 7 days + 1 s | the cap or order breaks, a nested id decodes, or a newer format is accepted |
 | SC-1c | `ValuesExchangeTests`: `SuiteColorValue` hex for sRGB and Display P3 keeps its space; `AssetIndex` add/update bumps the revision; `AssetEnvelope` JSON round trip | a colour converts space, or a revision doesn't move |
 | SC-1d | `ValuesSettingsTests`: `autosaveSeconds` clamps to 10…600; `SuiteVersion("1.2")` == 1.2.0 and "1.x" is nil; `UpdateFeed` parses the feed fixture (inline); `ValuesHomeLayoutTests`: the 7.3 table exactly at 880, 1000, 1280, 1728, and the sweep 880…2560 (columns ≥ 1, card 168–240 and a multiple of 4, the row fits) | a width row differs, a card leaves the grid, or a clamp fails |
 | SC-2a, SC-2b | `ContractShapeTests`, `ContractShapeMoreTests`: one minimal in-test conformer per protocol calls every requirement once inside `do throws(SuiteError)` and checks the `changes()` streams of `RecentWork`, `AppSwitching`, `AssetLibrary`, `PreferencesStoring` yield | a requirement's signature drifts from blueprint 5.2 (the test stops compiling), or a stream never yields |
@@ -311,7 +313,7 @@ slots take SC-5b's `SlotContext` and edit its `SuiteServices+Live.swift`.
 | SC-4b | `SuiteServicesTests`: `.fake` has `isPreview` true; `with(animations:updates:)` swaps only those two; `slotFeatures` names a feature for each of the 15 members; `.fake`'s `pending` is empty. `Budget+Store` (QB-SM6): the test binary relaunched twice with `Process`, each noting 500 recents into one temp store, ends with recents.json at revision 1,000 holding the 200 newest of the 1,000 distinct notes, and a median write ≤ 50 ms (debug gate). `StoreRoundTripTests` (QB-SV8): recents, assets, preferences and a hand-off encode → decode → encode byte-equal. `SuiteContractsJourneyTests`: steps 1–5 above | an entry is lost across processes, a store file doesn't round trip, or a journey step differs |
 | SC-4c | `FixtureSeederTests`: seeding `weekOfWork` from a temp source folder writes the three store files, copies 8 documents and their thumbnails to `thumbnails/<fileKey>.png`; `missing` skips `Cards.design`; with `Intro.halo` absent from the source the seed still succeeds and writes 7 documents; an unknown name throws "No fixture named …" | a thumbnail lands under a file name, `missing` copies the card, or an absent source fails the seed |
 | SC-5a | `StoreRecentsTests`: note, remove, clear app go to `recents.json` with a new revision each; two `StoreRecents` on one folder see each other's writes after `externalChange()`; `onWrite` is called with `recents.json` once per write; `changes()` yields | a write is lost, or another instance's write is never seen |
-| SC-5b | `SuiteLiveServicesTests` (macOS, AppSnapshotTests): `SuiteServices.live(support: <tmp>, app: .launcher, arguments: [])` has `isPreview` false; `recents` notes and lists through the temp folder and is absent from `pending`; every other member is in `pending` with "Not connected yet (<its feature>)."; each throwing one (switching, sending, receiving, thumbnails and the SC-5c ones) throws `notAvailable` with that sentence; the macOS job builds `SuiteShell` | a slot is live too early, a reason is wrong, or recents isn't live |
+| SC-5b | `SuiteLiveServicesTests` (macOS, AppSnapshotTests): `SuiteServices.live(support: <tmp>, app: .launcher, arguments: [])` has `isPreview` false; `recents` notes and lists through the temp folder and is absent from `pending`; every other member is in `pending` with "<What> isn't available yet." (its feature's `SuiteIdentity.featurePhrases` phrase); each throwing one (switching, sending, receiving, thumbnails and the SC-5c ones) throws `notAvailable` with that sentence; the macOS job builds `SuiteShell` | a slot is live too early, a reason is wrong, or recents isn't live |
 | SC-5c | `SuiteLiveServicesTests` extended to all 15 members (14 slot files); `animations` and `updates` are the fakes until `with(animations:updates:)` is called | a member is missing or a reason is wrong |
 
 ## Quality tests
