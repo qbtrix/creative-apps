@@ -4,7 +4,7 @@ Issue: #1333 · Packet: docs/blueprints/halo/features/easing.md
 Run: act-1a1448a5fbe-p22s · Session: session_01Fpq7bUwf2TjhThXdtGKn4r · Started: 2026-10-16T11:48Z
 Stage: 4 round 1
 Base: e464ecab9b0e11b9cfc27851181beafdb8fee424
-Next: fix round 1 (fix-batch wf_fd7513ff-722) on findings #1411 to #1424; when its PRs merge, round 2 review on the next scoped halo run that contains them
+Next: wait for the lane to merge fix PR #1429 (round 1); then review round 2 on the next scoped halo run containing it; fix round 2 takes the deferred minors #1416 #1417 #1422 #1423 #1424 plus round 2 findings
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -26,7 +26,7 @@ Wave 4: EZ-8 waits on EZ-6 and EZ-7 (drives what they put on screen); #333 close
 ## Rounds
 | round | CI run | CI | audit vs baseline | lenses | confirmed | fixed by | clean |
 |---|---|---|---|---|---|---|---|
-| 1 | 38917497685 (scoped halo, fb72b7e) | red: H-J7 step 3 (#1411); testLayerHousekeeping contrast 3 > 2 (#1412); testDragLayerToKeyPosition and testEveryControlActsOrSaysWhy are full-run quarantined (#1283, #1035), not easing | contrast 3 vs 2 | clarity, journey, design, layout, controls, audit | #1411 to #1424 (14: 1 blocker, 7 major, 6 minor; 1 refuted) | fix round 1 | no |
+| 1 | 38917497685 (scoped halo, fb72b7e) | red: H-J7 step 3 (#1411); testLayerHousekeeping contrast 3 > 2 (#1412); testDragLayerToKeyPosition and testEveryControlActsOrSaysWhy are full-run quarantined (#1283, #1035), not easing | contrast 3 vs 2 | clarity, journey, design, layout, controls, audit | #1411 to #1424 (14: 1 blocker, 7 major, 6 minor; 1 refuted) | #1429 (r-b1: #1411-#1415, #1418-#1421) | no |
 
 ## Decisions
 - Packet has no `## Slices` table: v2 loop. Started after #1302 merged (2026-10-16T04:20Z), so findings queue (rule 10) and round cap of 2 (rule 11) apply.
@@ -42,4 +42,6 @@ Wave 4: EZ-8 waits on EZ-6 and EZ-7 (drives what they put on screen); #333 close
 - Ask the supervisor to add HaloModelTests.HaloEasingBudgetTests to Tests/perf-suites.txt (#1363 body).
 - Full run 38915938965 red only on LibraryImportBudgetTests (Linux) and LibraryImportSnapshots.progressRowShowsAfterItsDelay (macOS): not easing, tracked by dev-red #1393. Its macOS job stopped before journeys.
 - Round 1 fix batch r-b1 takes #1411-#1415, #1418-#1421; the minors #1416, #1417, #1422, #1423, #1424 wait for the next fix wave (round 2).
+- #1426 (needs-ui, line:suiteui): ChoiceChips column count and wrapping, and a non-lazy preset grid; Halo uses three PresetGrids meanwhile (#1429).
+- #1429 makes EASING start collapsed on a layer with no segments (#1412) and updates the packet's Screens and states and EZ-6 rows to match.
 - #771 (key shapes, selected-keys set) not blocking: plain diamonds.
