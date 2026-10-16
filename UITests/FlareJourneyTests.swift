@@ -1,7 +1,7 @@
 // FlareJourneyTests.swift: Flare driven like a person would, with a
 // whole-window screenshot after every step (see Journey.swift). Each test is
-// one journey; grow them as Flare's features land, and replace the skipped
-// test with the real journey when its issue is built. The easing journey
+// one journey; grow them as Flare's features land. The whole draw, key, play
+// and save loop on live services is J26 (FlareJourneyTests+Loop.swift). The easing journey
 // (docs/blueprints/flare-easing-editor.md) starts from File > Open Sample >
 // Keyed Ball (FlareJourneyTests+Menus.swift, with J1) and checks every step by the active preset chip and by where the
 // curve well draws handle 1.
@@ -72,10 +72,6 @@ final class FlareJourneyTests: XCTestCase {
         let flare = Journey("Flare", self)
         flare.click("New Animation", step: "new-animation")
         flare.clickEachTool()
-    }
-
-    @MainActor func testDrawKeyAndSave() throws {
-        throw XCTSkip("journey arrives with #203 (draw), #204 (key) and #205 (save)")
     }
 
     @MainActor func testEditEasingOfAKeyframeSegment() {

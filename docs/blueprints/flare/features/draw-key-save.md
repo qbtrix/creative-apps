@@ -1,5 +1,9 @@
 # Feature packet: draw-key-save
 
+**Status:** built (2026-10-16), feature issue #1365. PRs: #1524 #1525
+#1543 #1544 #1580 #1581 #1597 #1608 #1627 #1644 #1649 #1658 #1673 #1676
+#1690 #1691 #1695, and DK-15's journey J26.
+
 **Feature:** a person opens Flare, draws a rectangle, keys its position on
 the timeline by dragging it with auto-key on, plays it, and saves it as a
 `.flare` file they can open again. The window is `SuiteWindow` (glass
