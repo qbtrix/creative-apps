@@ -102,3 +102,4 @@ utc	stage	event	ref	note
 2026-10-16T02:29Z	5	stage-start	finish	feature-done PR building
 2026-10-16T02:37Z	5	pr-opened	#1278	feature-done: PJ-1 title check, wave.json built, docs
 2026-10-16T02:55Z	5	heartbeat	-	waiting for the feature-done CI run
+2026-10-16T03:14Z	5	heartbeat	-	waiting for the feature-done CI run
