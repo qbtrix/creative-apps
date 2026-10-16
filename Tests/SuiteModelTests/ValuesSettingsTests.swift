@@ -79,9 +79,16 @@ import Testing
     }
 
     @Test func damagedFeedThrows() {
-        #expect(throws: SuiteError.damaged("update feed")) {
+        #expect(throws: SuiteError.damaged(UpdateFeed.subject)) {
             try UpdateFeed.newest(in: Data("{\"not\": \"a list\"}".utf8), above: SuiteVersion(1, 0, 0))
         }
+    }
+
+    @Test func damagedFeedSaysUpdatesInPlainWords() {
+        var message = ""
+        do { _ = try UpdateFeed.newest(in: Data("not json".utf8), above: SuiteVersion(1, 0, 0)) } catch { message = error.message }
+        #expect(message.contains("the list of available updates"))
+        #expect(!message.lowercased().contains("feed"))
     }
 
     @Test func onboardingAndAnimationValues() throws {
