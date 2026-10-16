@@ -4,7 +4,7 @@ Issue: #1334 · Packet: docs/blueprints/library/features/import.md
 Run: act-1a1448a5fa3-a8rg · Session: claude/library-import-feature-c0rl9g · Started: 2026-10-16T11:49Z
 Stage: 4 round 2
 Base: 8243ce4435006760f7ec9a87147fef094f6be4ed
-Next: wait for scoped library run 38923057966 on 7662a828 (contains #1405); if green, round 2 critic panel on its screens; then finish (contact sheet, gaps)
+Next: round 2 critic panel on run 38923057966 (green, 7662a828); after it, findings past round 2 become gaps; then the contact sheet on #1334
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
