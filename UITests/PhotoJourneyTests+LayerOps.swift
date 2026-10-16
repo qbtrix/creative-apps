@@ -34,11 +34,10 @@ final class PhotoLayerOpsJourneyTests: XCTestCase {
         try writeTestPhoto(to: file)
         let photo = Journey("Photo", self, arguments: photoArguments(open: file))
         XCTAssert(photo.app.windows["tools.png"].waitForExistence(timeout: 30), "tools.png didn't open")
-        let tab = photo.app.radioButtons["Layers"]
-        XCTAssert(tab.waitForExistence(timeout: 5), "no Layers tab")
-        tab.click()
+        let layers = photo.element("suite.sidebar").descendants(matching: .any)["photo.layers"]
+        XCTAssert(layers.waitForExistence(timeout: 5), "the sidebar has no layer list (photo.layers)")
         let background = photo.app.staticTexts["Background"], copy = photo.app.staticTexts["Background copy"]
-        XCTAssert(background.waitForExistence(timeout: 5), "the Layers tab doesn't list Background")
+        XCTAssert(background.waitForExistence(timeout: 5), "the layer list doesn't list Background")
         photo.shot("layerops-opened")
 
         // 1. Command-J: "Background copy" above Background, "Undo Duplicate Layer".
@@ -54,7 +53,7 @@ final class PhotoLayerOpsJourneyTests: XCTestCase {
         XCTAssert(modes.contains("Screen"), "the Blend Mode menu lists \(modes), no Screen")
         chooseOpenItem("Screen", photo)
         expect("Undo Blend Mode", photo, "choosing Screen made no Blend Mode step")
-        typeValue("60", into: "Opacity", photo)
+        typeValue("60", into: "photo.layer.opacity", photo)
         let meta = photo.app.staticTexts["Screen 60%"]
         XCTAssert(meta.waitForExistence(timeout: 5), "Screen and 60 didn't show as Screen 60% on a row")
         XCTAssert(
@@ -107,9 +106,8 @@ final class PhotoLayerOpsJourneyTests: XCTestCase {
         photo.app.terminate()
         let layered = Journey("Photo", self, arguments: photoArguments(fixture: "layered"))
         XCTAssert(layered.element("photo.status.preview").waitForExistence(timeout: 30), "-PhotoFixture layered shows no Preview data pill")
-        let layeredTab = layered.app.radioButtons["Layers"]
-        XCTAssert(layeredTab.waitForExistence(timeout: 5), "no Layers tab on the layered fixture")
-        layeredTab.click()
+        let layeredList = layered.element("suite.sidebar").descendants(matching: .any)["photo.layers"]
+        XCTAssert(layeredList.waitForExistence(timeout: 5), "the sidebar has no layer list on the layered fixture")
         let paint = layered.app.staticTexts["Paint"], curves = layered.app.staticTexts["Curves 1"]
         XCTAssert(paint.waitForExistence(timeout: 5), "the layered fixture lists no Paint")
         XCTAssert(curves.exists, "the layered fixture lists no Curves 1")
@@ -243,7 +241,7 @@ final class PhotoLayerOpsJourneyTests: XCTestCase {
         return lines.joined(separator: " ")
     }
 
-    /// Clicks the Layers tab's Blend Mode picker open and returns its menu's item titles.
+    /// Clicks the inspector's Blend Mode picker open and returns its menu's item titles.
     @MainActor private func openBlendMenu(_ photo: Journey) -> [String] {
         let types = [XCUIElement.ElementType.menuButton, .popUpButton, .button].map { NSNumber(value: $0.rawValue) }
         let picker = photo.element("suite.inspector").descendants(matching: .any).matching(
@@ -267,14 +265,18 @@ final class PhotoLayerOpsJourneyTests: XCTestCase {
         _ = photo.app.menus.firstMatch.waitForNonExistence(timeout: 2)
     }
 
-    /// Types `value` into the panel number labelled `label` (the last element so
-    /// labelled, after the section header and slider): click it, type, Return.
+    /// Types `value` into the panel number labelled `label`, or identified by it
+    /// (the last element so labelled, after the section header and slider):
+    /// click it, type, Return.
     @MainActor private func typeValue(_ value: String, into label: String, _ photo: Journey) {
         let panel = photo.element("suite.inspector")
-        let matches = panel.descendants(matching: .any).matching(NSPredicate(format: "label == %@", label))
+        let matches = panel.descendants(matching: .any)
+            .matching(NSPredicate(format: "label == %@ OR identifier == %@", label, label))
         XCTAssert(matches.firstMatch.waitForExistence(timeout: 5), "no \(label) in the panel")
-        matches.element(boundBy: matches.count - 1).click()
-        let named = panel.textFields[label]
+        let target = matches.element(boundBy: matches.count - 1)
+        let name = target.label.isEmpty ? label : target.label
+        target.click()
+        let named = panel.textFields[name]
         let field = named.waitForExistence(timeout: 3) ? named : panel.textFields.firstMatch
         XCTAssert(field.waitForExistence(timeout: 5), "clicking \(label)'s number opened no field to type in")
         // Clear without Command-A (Photo's Select > All has it).

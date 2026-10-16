@@ -1,4 +1,4 @@
-// PhotoAdjustmentLayerSnapshots.swift: the Layers tab on the `layered`
+// PhotoAdjustmentLayerSnapshots.swift: the sidebar's layer list on the `layered`
 // fixture (Paint, Curves 1, Background; AL-6 of photo-adjustment-layers):
 // "Curves 1" shows the adjustment symbol (slider.horizontal.3) and the pixel
 // layers the photo symbol, every row's eye and kind symbol carry
@@ -22,7 +22,7 @@ import Testing
         #expect(model.layers.map(\.name) == ["Paint", "Curves 1", "Background"])
         for scheme in [ColorScheme.light, .dark] {
             try snapshot(
-                PhotoPanel(model: model, tab: .layers)
+                PhotoLayerList(model: model, perform: { _ in })
                     .frame(width: SuiteSize.inspectorWidth.ideal, height: 900, alignment: .topLeading)
                     .background(SuiteColor.panel)
                     .padding(SuiteSpacing.xxl),
@@ -62,7 +62,7 @@ import Testing
         #expect(model.layerInfo(curves.id) == "Nothing below to adjust.")
         for scheme in [ColorScheme.light, .dark] {
             try snapshot(
-                PhotoPanel(model: model, tab: .layers)
+                PhotoLayerList(model: model, perform: { _ in })
                     .frame(width: SuiteSize.inspectorWidth.ideal, height: 900, alignment: .topLeading)
                     .background(SuiteColor.panel)
                     .padding(SuiteSpacing.xxl),

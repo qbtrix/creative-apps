@@ -58,12 +58,16 @@ final class PhotoJourneyTests: XCTestCase {
         XCTAssert(staticText("No Image Open", unknown).waitForExistence(timeout: 5),"-PhotoFixture nope doesn't show the No Image Open empty state")
     }
 
-    /// On `.live` the Eyedropper is disabled.
+    /// The window's five regions once an image is open (the palette shows only
+    /// over one); on `.live` the Eyedropper is disabled.
     @MainActor func testLaunchShowsWindowShell() {
         let photo = Journey("Photo", self, arguments: photoArguments())
-        photo.expectEditorShell()
+        XCTAssert(photo.app.windows.firstMatch.waitForExistence(timeout: 30), "no window opened")
+        photo.app.typeKey("n", modifierFlags: .command)
+        XCTAssert(photo.element("suite.tools").waitForExistence(timeout: 10), "New Image showed no tool palette (suite.tools)")
+        photo.expectEditorWindow()
         let eyedropper = photo.element("suite.tools").buttons["Eyedropper"]
-        XCTAssert(eyedropper.waitForExistence(timeout: 5), "the rail has no Eyedropper")
+        XCTAssert(eyedropper.waitForExistence(timeout: 5), "the palette has no Eyedropper")
         XCTAssertFalse(eyedropper.isEnabled, "the Eyedropper is enabled on .live, where sampling isn't built")
         // Its help text is proven by AppSnapshotTests' PhotoEditorSnapshots.railEyedropperHelp (PhotoRailTool
         // reports "Not built yet (PV-9)." on .live), since XCUITest doesn't read SwiftUI .help reliably.
@@ -403,10 +407,9 @@ final class PhotoJourneyTests: XCTestCase {
 
     @MainActor func testTier1Layers() throws {
         let photo = try openTestPhoto(step: "layers-opened")
-        let tab = photo.app.radioButtons["Layers"]
-        XCTAssert(tab.waitForExistence(timeout: 5), "no Layers tab")
-        tab.click()
-        XCTAssert(photo.app.staticTexts["Background"].waitForExistence(timeout: 5), "the Layers tab doesn't list Background")
+        let layers = photo.element("suite.sidebar").descendants(matching: .any)["photo.layers"]
+        XCTAssert(layers.waitForExistence(timeout: 5), "the sidebar has no layer list (photo.layers)")
+        XCTAssert(photo.app.staticTexts["Background"].waitForExistence(timeout: 5), "the layer list doesn't list Background")
         for identifier in ["photo.layer.new", "photo.layer.delete", "photo.layer.rename"] {
             XCTAssert(photo.element(identifier).waitForExistence(timeout: 5), "the layer list has no \(identifier)")
         }
@@ -444,10 +447,10 @@ final class PhotoJourneyTests: XCTestCase {
         expect("Undo Show Layer", photo, "Layer > Show Layer didn't show Sky")
         photo.shot("layer-shown")
 
-        drag("Opacity", by: -0.25, photo)
+        drag("photo.layer.opacity", by: -0.25, photo)
         expect("Undo Layer Opacity", photo, "dragging Opacity made no Layer Opacity step")
         photo.shot("layer-opacity")
-        typeValue("25", into: "Opacity", photo)
+        typeValue("25", into: "photo.layer.opacity", photo)
         XCTAssert(photo.app.staticTexts["Normal 25%"].waitForExistence(timeout: 5), "typing 25 didn't set Sky's opacity to 25%")
         photo.shot("layer-opacity-typed")
 
@@ -639,16 +642,19 @@ final class PhotoJourneyTests: XCTestCase {
             .press(forDuration: 0.1, thenDragTo: slider.coordinate(withNormalizedOffset: CGVector(dx: 0.5 + fraction, dy: 0.5)))
     }
 
-    /// Types `value` into the panel number labelled `label` (the last element so
-    /// labelled, after the section header and slider): click it, type, Return.
+    /// Types `value` into the panel number labelled `label`, or identified by it
+    /// (the last element so labelled, after the section header and slider):
+    /// click it, type, Return.
     @MainActor private func typeValue(_ value: String, into label: String, _ photo: Journey) {
         let matches = photo.element("suite.inspector").descendants(matching: .any)
-            .matching(NSPredicate(format: "label == %@", label))
+            .matching(NSPredicate(format: "label == %@ OR identifier == %@", label, label))
         XCTAssert(matches.firstMatch.waitForExistence(timeout: 5), "no \(label) in the panel")
-        matches.element(boundBy: matches.count - 1).click()
+        let target = matches.element(boundBy: matches.count - 1)
+        let name = target.label.isEmpty ? label : target.label
+        target.click()
         // The open number's field carries the label (the brush's hex field may sit above it);
         // click it, as it may open without the keyboard.
-        let panel = photo.element("suite.inspector"), named = panel.textFields[label]
+        let panel = photo.element("suite.inspector"), named = panel.textFields[name]
         let field = named.waitForExistence(timeout: 3) ? named : panel.textFields.firstMatch
         XCTAssert(field.waitForExistence(timeout: 5), "clicking \(label)'s number opened no field to type in")
         replaceText(in: field, with: value, photo)
