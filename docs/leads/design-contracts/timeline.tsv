@@ -17,3 +17,6 @@ utc	stage	event	ref	note
 2026-10-16T14:31Z	3	pr-merged	#1383	D0-2b.1 live stubs
 2026-10-16T14:31Z	3	pr-merged	#1388	D0-2.5 arrange fakes; CT-b merged
 2026-10-16T14:31Z	3	heartbeat	wave 4	D0-2.6, D0-3a rebasing onto dev to open PRs
+2026-10-16T14:40Z	3	pr-opened	#1394	D0-2.6 contract law
+2026-10-16T14:40Z	3	pr-opened	#1395	D0-3a workspace commands (Mutate 6/6)
+2026-10-16T14:40Z	3	stage-start	wave 5	D0-2b.2 on #1394, D0-3b on #1395
