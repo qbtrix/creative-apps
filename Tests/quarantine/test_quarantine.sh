@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
 # Tests/quarantine/test_quarantine.sh: fixture tests for scripts/quarantine,
 # the journey quarantine's check (scope included: all, or full for full runs
-# only) and its live list for scripts/ui-test. Each case writes a quarantine.json into a scratch UITests/ with a few journey
-# files, fixes TODAY, and runs the script with a stub `gh` that reports the
-# owner issue's state (OPEN, CLOSED, missing, or no access). No network; needs
-# bash and jq. bash 3.2 compatible.
+# only) and its live list for scripts/ui-test. Each case writes a
+# quarantine.json into a scratch UITests/ with a few journey files, fixes
+# TODAY, and runs the script with a stub `gh` that reports the owner issue's
+# state (OPEN, CLOSED, missing, or no access). No network; needs bash and jq.
+# bash 3.2 compatible.
 #
 # Run: bash Tests/quarantine/test_quarantine.sh   (exit 0 = all pass)
 set -uo pipefail
