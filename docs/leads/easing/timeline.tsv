@@ -48,3 +48,7 @@ utc	stage	event	ref	note
 2026-10-16T17:04Z	4	ci-run	38936726137	scoped halo containing #1470, in progress
 2026-10-16T17:19Z	4	heartbeat	38936726137	scoped build and tests green (snapshots incl. segmentTitlesFitOneLine); journeys running
 2026-10-16T17:28Z	4	heartbeat	38936726137	journeys still running
+2026-10-16T17:41Z	4	ci-run	38936726137	scoped halo red: H-J7 step 7, identifier 5>0
+2026-10-16T17:45Z	4	finding-filed	#1483 #1484	filed as gap (cap reached); #1423 #1424 relabelled gap
+2026-10-16T17:46Z	5	stage-end	#1333	Belt-Contact-Sheet posted: done with gaps, not green
+2026-10-16T17:46Z	5	stopped	#1333	lead finished

@@ -2,9 +2,9 @@
 
 Issue: #1333 · Packet: docs/blueprints/halo/features/easing.md
 Run: act-1a1448a5fbe-p22s · Session: session_01Fpq7bUwf2TjhThXdtGKn4r · Started: 2026-10-16T11:48Z
-Stage: 4 final review
+Stage: done
 Base: e464ecab9b0e11b9cfc27851181beafdb8fee424
-Next: final review on scoped halo run 38936726137 (head 162b470, contains #1470), in progress; then relabel open findings gap and post the contact sheet on #1333
+Next: nothing; easing finished with gaps (#1483 #1484 #1423 #1424), contact sheet https://github.com/qbtrix/creative-apps/issues/1333#issuecomment-6221283442
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -28,6 +28,7 @@ Wave 4: EZ-8 waits on EZ-6 and EZ-7 (drives what they put on screen); #333 close
 |---|---|---|---|---|---|---|---|
 | 1 | 38917497685 (scoped halo, fb72b7e) | red: H-J7 step 3 (#1411); testLayerHousekeeping contrast 3 > 2 (#1412); testDragLayerToKeyPosition and testEveryControlActsOrSaysWhy are full-run quarantined (#1283, #1035), not easing | contrast 3 vs 2 | clarity, journey, design, layout, controls, audit | #1411 to #1424 (14: 1 blocker, 7 major, 6 minor; 1 refuted) | #1429 (r-b1: #1411-#1415, #1418-#1421) | no |
 | 2 | 38930143233 (scoped halo, 4fb505e) | red: HaloEasingSnapshots.segmentTitlesFitOneLine 126 > 124 pt (#1450); ui-test skipped, so no journey screens | n/a (journeys skipped) | same 6 | #1450, #1453-#1455 (4 new: 1 blocker, 1 major, 2 minor; 1 refuted) + #1416 #1417 #1422 #1423 #1424 | #1470 merged (#1450 #1453 #1454 #1416 #1417 #1422); #1455 already fixed, closed; #1423 #1424 deferred (outside easing files) | no |
+| final | 38936726137 (scoped halo, 162b470) | red: H-J7 steps 1-6 pass, step 7 no Hold in timeline context menu (#1483); identifier audit 5 > 0 (#1484); #1283 and #1035 not easing | contrast 2 = 2; identifier 5 vs 0 | none (cap reached) | - | gaps #1483 #1484 #1423 #1424 | no |
 
 ## Decisions
 - Packet has no `## Slices` table: v2 loop. Started after #1302 merged (2026-10-16T04:20Z), so findings queue (rule 10) and round cap of 2 (rule 11) apply.
@@ -41,6 +42,7 @@ Wave 4: EZ-8 waits on EZ-6 and EZ-7 (drives what they put on screen); #333 close
 - Rules 13 and 14 (check first, mutations) don't apply: v2 packet.
 
 ## Open
+- Gaps (rule 11): #1483, #1484, #1423, #1424. The feature is not green: H-J7 fails at step 7.
 - Ask the supervisor to add HaloModelTests.HaloEasingBudgetTests to Tests/perf-suites.txt (#1363 body).
 - Full run 38915938965 red only on LibraryImportBudgetTests (Linux) and LibraryImportSnapshots.progressRowShowsAfterItsDelay (macOS): not easing, tracked by dev-red #1393. Its macOS job stopped before journeys.
 - Round 1 fix batch r-b1 takes #1411-#1415, #1418-#1421; the minors #1416, #1417, #1422, #1423, #1424 wait for the next fix wave (round 2).
