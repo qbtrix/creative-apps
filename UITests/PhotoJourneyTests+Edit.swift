@@ -17,10 +17,16 @@
 // "Pasted at 84%.".
 // The sun is found by its yellow in the canvas pixels, so the marquee and the
 // checks don't depend on where the fitted image sits. `suite.canvas` is the
-// artboard, so a fraction of the canvas is that fraction of the image. Layer
-// bounds aren't on any label (no accessibility identifier gives them), so the
-// pasted layer's size and place are read from the canvas pixels. One shot per
-// step, "edit-".
+// whole viewport (682 x 582 pt on the runner), not the artboard: the fitted
+// image sits inside it with a margin, so PJ-6 finds the image's rect by its
+// colored pixels and measures the pasted layer against that. Layer bounds
+// aren't on any label (no accessibility identifier gives them), so the pasted
+// layer's size and place are read from the canvas pixels. XCUITest shows a
+// disabled menu item's help tag but not its text, so Paste's "Nothing to
+// paste." is proven by AppSnapshotTests' PhotoEditMenuTests
+// (pasteIsDisabledWithItsReasonWithAnEmptyPasteboard); here Paste is disabled
+// with the runner's pasteboard empty and shows a help tag. One shot per step,
+// "edit-".
 import AppKit
 import CoreGraphics
 import ImageIO
@@ -37,9 +43,12 @@ final class PhotoEditJourneyTests: XCTestCase {
 
         // No selection: Cut and Copy act on the whole layer; nothing on the pasteboard: Paste is off.
         _ = NSPasteboard.general.clearContents()
+        XCTAssert(
+            (NSPasteboard.general.pasteboardItems ?? []).isEmpty,
+            "the runner's pasteboard isn't empty, so Paste's reason wouldn't be Nothing to paste.")
         expectEnabled("Cut", photo)
         expectEnabled("Copy", photo)
-        expectDisabled("Paste", help: "Nothing to paste.", photo)
+        expectDisabledWithHelp("Paste", photo)
 
         // Marquee the sun, Command-C: the image goes on the pasteboard and Paste turns on.
         photo.element("suite.tools").buttons["Marquee"].click()
@@ -133,15 +142,21 @@ final class PhotoEditJourneyTests: XCTestCase {
         // On beach.png: a 200 x 100 layer, centered on the image at Fit.
         var photo = try openBeach()
         openLayersTab(photo)
+        // The fitted image's rect in the viewport: every sky and sun pixel is colored, the margin isn't.
+        // `self.`: the local `box` below would shadow the method.
+        let image = try XCTUnwrap(self.box(of: Self.colored, photo), "beach.png shows no picture on the canvas")
         choose("Paste", photo)
         expect("Undo Paste", photo, "Edit > Paste made no Paste step")
         XCTAssert(photo.app.staticTexts["Pasted Layer"].waitForExistence(timeout: 5), "the Layers tab lists no Pasted Layer")
         expectHeader("2 layers", photo, "the header doesn't count two layers after the paste")
         var box: CGRect?
         XCTAssert(waitFor { box = self.magentaBox(photo); return box != nil }, "the pasted image isn't on the canvas")
-        // 200 x 100 at (300, 250) on the 800 x 600 image, within 4 image pixels.
-        let placed = CGRect(x: 300.0 / 800, y: 250.0 / 600, width: 200.0 / 800, height: 100.0 / 600)
-        if let box { expectBox(box, near: placed, within: 4.0 / 800, "the pasted 200 x 100 layer") }
+        // 200 x 100 at (300, 250) on the 800 x 600 image, within 4 image pixels, mapped into the
+        // image's rect in the viewport.
+        let placed = CGRect(
+            x: image.minX + image.width * 300 / 800, y: image.minY + image.height * 250 / 600,
+            width: image.width * 200 / 800, height: image.height * 100 / 600)
+        if let box { expectBox(box, near: placed, within: image.width * 4 / 800, "the pasted 200 x 100 layer") }
         photo.shot("edit-pasted-from-app")
         photo.app.terminate()
 
@@ -228,8 +243,12 @@ final class PhotoEditJourneyTests: XCTestCase {
         if close { closeMenu(photo) }
     }
 
-    /// Edit > `item` is disabled and its help tag holds `help` (the item's help is "<item>: <help>").
-    @MainActor private func expectDisabled(_ item: String, help: String, _ photo: Journey) {
+    /// Edit > `item` is disabled and hovering it shows a help tag. The tag's
+    /// text isn't read: XCUITest exposes the help tag of a SwiftUI menu item
+    /// with no label, title or value (dev run 38835566584 found the tag, 138 x
+    /// 18 pt beside Paste, but no text), so the text is proven by
+    /// PhotoEditMenuTests and the screen shot shows it to the reviewer.
+    @MainActor private func expectDisabledWithHelp(_ item: String, _ photo: Journey) {
         var entry = editItem(item, photo)
         for _ in 0..<5 where entry.isEnabled {
             photo.press(.escape)
@@ -238,9 +257,7 @@ final class PhotoEditJourneyTests: XCTestCase {
         }
         XCTAssertFalse(entry.isEnabled, "Edit > \(item) is enabled")
         entry.hover()
-        let tag = photo.app.helpTags.matching(
-            NSPredicate(format: "label CONTAINS %@ OR title CONTAINS %@ OR value CONTAINS %@", help, help, help))
-        XCTAssert(tag.firstMatch.waitForExistence(timeout: 5), "Edit > \(item) doesn't say \(help)")
+        XCTAssert(photo.app.helpTags.firstMatch.waitForExistence(timeout: 5), "Edit > \(item) shows no help tag")
         photo.shot("edit-\(photo.slug(item))-disabled", screen: true)
         closeMenu(photo)
     }
