@@ -9,7 +9,10 @@ import Foundation
 public enum UpdateFeed {
     /// The feed is a JSON array of offers; the newest above `current` wins.
     public static func newest(in data: Data, above current: SuiteVersion) throws(SuiteError) -> UpdateOffer? {
-        guard let offers = try? JSONDecoder().decode([UpdateOffer].self, from: data) else { throw .damaged("update feed") }
+        guard let offers = try? JSONDecoder().decode([UpdateOffer].self, from: data) else { throw .damaged(subject) }
         return offers.filter { $0.version > current }.max { $0.version < $1.version }
     }
+
+    /// What a damaged feed is called in the one sentence the UI shows.
+    public static let subject = "the list of available updates"
 }
