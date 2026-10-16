@@ -4,7 +4,7 @@ Issue: #1345 · Packet: docs/blueprints/library/features/cull.md
 Run: act-1a145e74beb-obp4 · Session: cse_01BkDrX316MPq32KYU5agHQr · Started: 2026-10-16T18:10Z
 Stage: 4 round 1
 Base: 7ab292cdb1022222c00314a2b52c44c087811c46
-Next: #1692 (r-b7) failed the macOS build (shadowed frame local); fixer pushing; once it merges, round 2 on the scoped library run that contains every round-1 fix (#1677 #1678 #1683 #1684 #1687 #1688 merged)
+Next: wait for the scoped library run that contains #1692 (5dbf4f0, the last round-1 fix); then round 2: J4 screens, critic panel (same lenses), at most one more fix round
 
 Loop: v2 (no `## Slices` table in the packet), with the findings queue and
 the 2-round cap (started after #1302 merged at 2026-10-16T04:20Z).
@@ -31,7 +31,7 @@ CU-5's keys and menu.
 | round | CI run | CI | audit vs baseline | lenses | confirmed | fixed by | clean |
 |---|---|---|---|---|---|---|---|
 | 1 | 38965923292 (full, 1910bff) | macOS job red: SuiteUI TimelineStripLayoutTests (not cull); snapshots and journeys never ran; cullOneWithinBudget 12.97 ms > 10 hidden as known issue (#1587) | not measured | pending (scoped run) | #1587 | #1645 (r1-b1, merged) | no |
-| 1 | 38967059607 (scoped library, 5c1742f) | J4 red at step 1 (#1654: test reads a menu check mark XCUITest can't see; screen shows ✓ Auto Advance); testRateASelectedPhoto and testLoupeStepsAndReturnsToTheGrid green | identifier 2 / 12, unnamed 0 / 1 (under) | clarity, journey, design, layout, controls, quality | #1654, #1661, #1663-#1669 (12 confirmed, 8 refuted) | #1677 #1678 #1683 #1684 #1687 #1688 #1692 | no |
+| 1 | 38967059607 (scoped library, 5c1742f) | J4 red at step 1 (#1654: test reads a menu check mark XCUITest can't see; screen shows ✓ Auto Advance); testRateASelectedPhoto and testLoupeStepsAndReturnsToTheGrid green | identifier 2 / 12, unnamed 0 / 1 (under) | clarity, journey, design, layout, controls, quality | #1654, #1661, #1663-#1669 (12 confirmed, 8 refuted) | #1677 #1678 #1683 #1684 #1687 #1688 #1692 (all merged) | no |
 
 ## Decisions
 - Base and PR target are `dev`, not `main` as the Belt brief says: CLAUDE.md
