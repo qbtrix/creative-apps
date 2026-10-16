@@ -13,17 +13,40 @@ D2-4.)
 (export, components, variables) and the Pen tool's gap issue with F7. #288
 (part: the new controls' ids).
 
-**Depends on:** all five wave-1 feature issues closed (select-several,
-copy-group, style-rows, layers-panel, files-history): this feature edits
-files each of them owns (`DesignCanvasMarks.swift`, `DesignCanvas.swift`,
-`DesignInspectorContent.swift`, `DesignCorners.swift`, `DesignFile.swift`,
-`DesignHistory.swift`, `DesignWorkspace.swift`, `DesignCommands.swift`,
-`DesignWindow.swift`, `DesignEditor.swift`, `DesignActions.swift`,
-`DesignCanvasEditing.swift`). Its `Depends on:` line names files-history,
-the last of them to touch the window, and its body lists the other four.
+**Depends on:** the design-contracts feature issue, plus only the slices
+whose files it reopens (it calls no wave-1 code):
+
+| what it waits on | why | tasks |
+|---|---|---|
+| style-rows SR-a | `DesignInspectorContent.swift` (ST-2) | D2-1a |
+| style-rows SR-b | `DesignCanvasMarks.swift` (ST-5) | D2-1a, D2-4a |
+| files-history FH-a | `DesignFile.swift`, `DesignHistory.swift`, `Live/LiveFiling.swift`, `DesignFilingTests.swift` (FH-1, FH-2) | D2-1b |
+| layers-panel LP-b | `DesignWorkspace.swift` (L-3) | D2-1b, D2-3a |
+| design-seams | `DesignCanvasEditing.swift` (D0-3c) | D2-3b |
+| select-several SS-b | `DesignCanvasEditing.swift` (S-5) | D2-3b |
+| all of design-window | `DesignCanvas.swift`, `DesignIntent.swift`, `DesignWindow.swift`, `DesignEditor.swift`, `DesignObjectMenu.swift`, `DesignWindowOptions.swift`, `UITests/DesignJourneyTests.swift`, the live drag box | D2-4a, D2-4b |
+| files-history FH-b | `DesignCommands.swift` (FH-3) | D2-4b |
+
+copy-group and select-several's SS-a are not waited on. The feature issue
+is filed once S2-a's waits are done; its body lists the table above.
 The Export item's primary style in the top bar is editor-chrome EC-4
 (#339): until it merges, Export… is a plain `EditorBarItem`. No
 creative-core issue (F7's path geometry is wave 3's).
+
+## Slices
+
+A slice is the unit of done: its tasks have merged and its journeys pass
+(MJ6 on the Linux gate; J1 and MJ7 on the Design-scoped macOS run and the
+Linux gate).
+
+| slice | behavior (one sentence) | tasks | journeys | waits on |
+|---|---|---|---|---|
+| S2-a | A file with a path, a component and a bound variable saves as version 2 and reopens, version 1 still opens, a newer version is refused, and undo restores the library. | D2-1a, D2-1b, D2-2 | MJ6 | design-contracts (the feature); style-rows SR-a, SR-b (D2-1a); files-history FH-a, layers-panel LP-b (D2-1b) |
+| S2-b | Export, Create Component, Variables and Light or Dark preview sit in the menus, each saying it isn't built yet, while the Model drafts pen paths, components and variables on the fakes. | D2-3a, D2-3b, D2-4a, D2-4b | J1, MJ7 | S2-a (D2-3a, D2-4a); layers-panel LP-b (D2-3a); design-seams, select-several SS-b (D2-3b); design-window (D2-4a, D2-4b); style-rows SR-b (D2-4a); files-history FH-b (D2-4b) |
+
+A pen drag's samples go to design-window's live drag box, and the draft
+overlay reads it, so the editor body doesn't run per sample; D2-4a checks
+it on the fakes (the Pen tool stays off until F7).
 
 Blueprint sections: 5.1 (D2-1's schema), 5.4 tier 2, 5.6, 5.7's
 `DesignTierTwoFakes.swift`, 6 (menu bar, wave-3 rows), 8.2 (wave 2).
@@ -51,7 +74,7 @@ Blueprint sections: 5.1 (D2-1's schema), 5.4 tier 2, 5.6, 5.7's
 2. **J2** `testNewFileAndEveryTool` (exists, unchanged): Pen stays disabled
    with its existing reason, "Drawing paths isn't built yet."
    (`DesignTool.pen.unavailableHelp`); F7 clears it.
-3. **Model walk** `DesignSeams2JourneyTests` (D2-3b, Linux) on `.fake`:
+3. **MJ7** `DesignSeams2JourneyTests` (D2-3b, Linux) on `.fake`:
    press, drag and finish a three-anchor pen path ("Add Path"); create a
    component from Desktop and insert it at the canvas center ("Create
    Component", "Insert Desktop"); add a color variable, bind A's fill,
@@ -59,6 +82,10 @@ Blueprint sections: 5.1 (D2-1's schema), 5.4 tier 2, 5.6, 5.7's
    export of every top-level frame at 2x.
 4. **J15** (design-window) still passes: the new controls are disabled with
    reasons.
+
+MJ6 is `DesignTierTwoSchemaTests.testLibraryWalk` (D2-1b, Linux): a
+version-2 file with a three-anchor path, a component and a fill bound to a
+variable saves, reopens and undoes a library edit.
 
 ## Screens and states
 
@@ -147,13 +174,13 @@ carries `feature-done`. Paths drop `Sources/DesignModel/` and
 
 | id | issue | what | owned files | depends on | size |
 |---|---|---|---|---|---|
-| D2-1a | – | `case path` with every switch over the kind (a placeholder in the artwork); `path` on the node | `DesignNode.swift`, `DesignInspectorContent.swift`, `DesignCorners.swift`, `DesignCanvasMarks.swift`; tests `DesignPathKindTests.swift` | – | ~150, 5 |
-| D2-1b | – | `componentID`, `fillVariableID`; file `components` and `variables`; version 2 with version 1 still opening; snapshots carry the library | `DesignNode.swift`, `DesignFile.swift`, `Live/LiveFiling.swift`, `DesignHistory.swift`, `DesignWorkspace.swift`; tests `DesignTierTwoSchemaTests.swift`, and the existing version-1 byte checks it moves to version 2: `DesignFilingTests.swift`, `DesignFileTests.swift`, `DesignFixturesTests.swift` | D2-1a | ~360, 9 |
+| D2-1a | – | `case path` with every switch over the kind (a placeholder in the artwork); `path` on the node | `DesignNode.swift`, `DesignInspectorContent.swift`, `DesignCorners.swift`, `DesignCanvasMarks.swift`; tests `DesignPathKindTests.swift` | style-rows SR-a, SR-b | ~150, 5 |
+| D2-1b | – | `componentID`, `fillVariableID`; file `components` and `variables`; version 2 with version 1 still opening; snapshots carry the library; walk MJ6 | `DesignNode.swift`, `DesignFile.swift`, `Live/LiveFiling.swift`, `DesignHistory.swift`, `DesignWorkspace.swift`; tests `DesignTierTwoSchemaTests.swift`, and the existing version-1 byte checks it moves to version 2: `DesignFilingTests.swift`, `DesignFileTests.swift`, `DesignFixturesTests.swift` | D2-1a; files-history FH-a; layers-panel LP-b | ~380, 9 |
 | D2-2 | – | Tier-2 fakes and live stubs; `.fake` and `.live` name them; the law over them | `Fakes/DesignTierTwoFakes.swift`, `Live/LiveExport.swift`, `Live/LivePen.swift`, `Live/LiveComponents.swift`, `Live/LiveVariables.swift`, `DesignServices.swift`; tests `DesignContractLawTierTwoTests.swift` | D2-1b | ~380, 7 |
-| D2-3a | – | Export, component and variable actions, `previewMode`, `displayFill`, `resolvedChildren` | `DesignActions+TierTwo.swift`, `DesignWorkspace.swift` (the stored `previewMode`); tests `DesignActionsTierTwoTests.swift` | D2-2 | ~360, 3 |
-| D2-3b | – | Pen press, drag, finish and cancel routes; the Linux model walk | `DesignCanvasEditing.swift`, `DesignActions+TierTwo.swift`, `DesignWorkspace.swift` (the stored `penDraft`); tests `DesignPenRouteTests.swift`, `DesignSeams2JourneyTests.swift` | D2-3a | ~300, 5 |
-| D2-4a | – | The canvas draws paths, resolved instances and bound fills; the pen draft overlay slot | `DesignCanvasMarks.swift`, `DesignCanvas.swift`; snapshots `DesignTierTwoCanvasSnapshots.swift` | D2-3b | ~250, 3 |
-| D2-4b | #288 (part) | Export…, Create Component, Variables… and Light / Dark in the menus and top bar; the window presents the two placeholder sheets and keeps the visible canvas center for Insert; J1's tier-2 items | `DesignIntent.swift`, `DesignWindow.swift`, `DesignCommands.swift`, `DesignObjectMenu.swift`, `DesignEditor.swift`, `DesignExportSheet.swift`, `DesignVariablesSheet.swift`; snapshots `DesignTierTwoMenuSnapshots.swift`; `UITests/DesignJourneyTests.swift` | D2-3a | ~330, 9; `feature-done` |
+| D2-3a | – | Export, component and variable actions, `previewMode`, `displayFill`, `resolvedChildren` | `DesignActions+TierTwo.swift`, `DesignWorkspace.swift` (the stored `previewMode`); tests `DesignActionsTierTwoTests.swift` | D2-2; layers-panel LP-b | ~360, 3 |
+| D2-3b | – | Pen press, drag, finish and cancel routes; walk MJ7 | `DesignCanvasEditing.swift`, `DesignActions+TierTwo.swift`, `DesignWorkspace.swift` (the stored `penDraft`); tests `DesignPenRouteTests.swift`, `DesignSeams2JourneyTests.swift` | D2-3a; design-seams; select-several SS-b | ~300, 5 |
+| D2-4a | – | The canvas draws paths, resolved instances and bound fills; the pen draft overlay slot, reading the live drag box; the pen drag check | `DesignCanvasMarks.swift`, `DesignCanvas.swift`; snapshots `DesignTierTwoCanvasSnapshots.swift`; `Tests/AppSnapshotTests/DesignPenDragTests.swift` | D2-3b; design-window; style-rows SR-b | ~320, 4 |
+| D2-4b | #288 (part) | Export…, Create Component, Variables… and Light / Dark in the menus and toolbar, with their ids in `DesignControlID`; the window presents the two placeholder sheets and keeps the visible canvas center for Insert; J1's tier-2 items | `DesignIntent.swift`, `DesignWindow.swift`, `DesignCommands.swift`, `DesignObjectMenu.swift`, `DesignEditor.swift`, `DesignExportSheet.swift`, `DesignVariablesSheet.swift`, `Sources/DesignModel/DesignWindowOptions.swift`; snapshots `DesignTierTwoMenuSnapshots.swift`; `UITests/DesignJourneyTests.swift` | D2-3a; design-window; files-history FH-b | ~350, 10; `feature-done` |
 
 Each link is merged code the task needs. `DesignNode.swift` passes D2-1a →
 D2-1b (both add stored fields and coding keys to `DesignNode`, which an
@@ -202,7 +229,7 @@ D2-2's `DesignServices` slots (→ D2-3a), the pen routes extend
 | D2-2 | `DesignContractLawTierTwoTests`: on `.fake` and `.live`, every tier-2 help and write under the law on `cards`; `.live`'s tier-2 helps read "Export isn't built yet.", "The Pen tool isn't built yet.", "Components isn't built yet.", "Variables isn't built yet."; FakePen closes within tolerance; FakeComponents refuses a non-frame with "<name> isn't a frame." | a slot is unnamed, a stub acts, or a fake breaks the law |
 | D2-3a | `DesignActionsTierTwoTests` on `.fake`: create a component from Desktop is one step "Create Component" and undo restores Desktop's children; insert is "Insert Desktop" centered on the given point; add, rename, remove, set and bind variables are one step each and a refusal records none; `setPreviewMode` records nothing; `displayFill(of: A)` follows the bound variable in each mode and A's own fill when unbound; `resolvedChildren` of an instance of a missing component is nil | a library edit is not undoable, preview mode records a step, or a bound fill ignores the mode |
 | D2-3b | `DesignPenRouteTests` on `.fake`: three presses and Return add one "Add Path" step; a press within tolerance of the first anchor closes and commits; Escape leaves no node and no step; the draft never survives a tool change; `DesignSeams2JourneyTests` walks step 3 | a draft records steps, Escape leaves a node, or a close is missed |
-| D2-4a | `DesignTierTwoCanvasSnapshots`: `design-canvas-path` (a three-anchor fake path), `design-canvas-instance` (an instance of Desktop drawn from the component), `design-canvas-bound-fill-dark` (A bound to a variable in dark preview); today's canvas PNGs unchanged | an existing PNG changes, or an instance draws nothing |
+| D2-4a | `DesignTierTwoCanvasSnapshots`: `design-canvas-path` (a three-anchor fake path), `design-canvas-instance` (an instance of Desktop drawn from the component), `design-canvas-bound-fill-dark` (A bound to a variable in dark preview); today's canvas PNGs unchanged. `DesignPenDragTests` (design-window D0-8b's `dragSamples`, `.fake`, the pen picked through the internal hook): a 120-sample pen drag runs `DesignEditor`'s body 3 times or fewer | an existing PNG changes, an instance draws nothing, or the editor body runs per pen sample |
 | D2-4b | `DesignTierTwoMenuSnapshots`: File with Export…, Object with Create Component, View with Light / Dark and Variables…, each disabled on `.live`; J1 lists the tier-2 items with their reasons | a tier-2 item is missing or enabled with no action |
 
 ## Quality tests
@@ -213,8 +240,13 @@ D2-2's `DesignServices` slots (→ D2-3a), the pen routes extend
 | QD-S9 any document edit | ≤ 1 ms / ≤ 10 ms, now with the library in the snapshot | `DesignBudgetTests.applyStep` (design-seams) |
 | QB-F1 no dead controls | every tier-2 control disabled with a reason | J1, J15 |
 | help law | every tier-2 conformance | `DesignContractLawTierTwoTests` |
+| the editor body doesn't run per sample | ≤ 3 `DesignEditor` body runs over a 120-sample pen drag | `DesignPenDragTests` (D2-4a) |
 
 ## Done check
+
+Per slice: S2-a is done when MJ6 passes on the Linux gate; S2-b when J1
+(extended) passes on the Design-scoped run after D2-4b and MJ7 on the
+Linux gate. The feature is done when both are:
 
 - **Journeys green:** the macOS run on `dev` after the `feature-done` PR is
   green: J1 extended; J0 to J16 from waves 0 and 1 still pass.
