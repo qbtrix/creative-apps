@@ -28,3 +28,7 @@ utc	stage	event	ref	note
 2026-10-16T14:51Z	4	ci-run	38915938965	full dev run red: Library only (dev-red #1393); journeys not reached
 2026-10-16T14:51Z	4	ci-run	38917497685	scoped halo, contains #1389, in progress
 2026-10-16T15:08Z	4	heartbeat	38917497685	scoped halo macOS job still running
+2026-10-16T15:23Z	4	ci-run	38917497685	scoped halo red: H-J7 step 3, halo contrast 3>2
+2026-10-16T15:30Z	4	finding-filed	#1411	H-J7 lazy chip grid below fold
+2026-10-16T15:30Z	4	finding-filed	#1412	contrast over baseline on halo-layers-4
+2026-10-16T15:31Z	4	review	round 1	critic panel started

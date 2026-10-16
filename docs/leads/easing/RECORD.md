@@ -4,7 +4,7 @@ Issue: #1333 · Packet: docs/blueprints/halo/features/easing.md
 Run: act-1a1448a5fbe-p22s · Session: session_01Fpq7bUwf2TjhThXdtGKn4r · Started: 2026-10-16T11:48Z
 Stage: 4 round 1
 Base: e464ecab9b0e11b9cfc27851181beafdb8fee424
-Next: wait for scoped halo run 38917497685 (head fb72b7e, contains #1389); then Anatomy round 1 on it (full runs 38914550143 cancelled, 38915938965 red on Library only, dev-red #1393)
+Next: critic panel round 1 (workflow wf_3a38e3ad-fa3) on run 38917497685; then fix-batch.js with every open easing finding (#1411, #1412 and the panel's)
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -26,6 +26,7 @@ Wave 4: EZ-8 waits on EZ-6 and EZ-7 (drives what they put on screen); #333 close
 ## Rounds
 | round | CI run | CI | audit vs baseline | lenses | confirmed | fixed by | clean |
 |---|---|---|---|---|---|---|---|
+| 1 | 38917497685 (scoped halo, fb72b7e) | red: H-J7 step 3 (#1411); testLayerHousekeeping contrast 3 > 2 (#1412); testDragLayerToKeyPosition and testEveryControlActsOrSaysWhy are full-run quarantined (#1283, #1035), not easing | contrast 3 vs 2 | clarity, journey, design, layout, controls, audit | #1411, #1412 + panel | | no |
 
 ## Decisions
 - Packet has no `## Slices` table: v2 loop. Started after #1302 merged (2026-10-16T04:20Z), so findings queue (rule 10) and round cap of 2 (rule 11) apply.
@@ -34,6 +35,7 @@ Wave 4: EZ-8 waits on EZ-6 and EZ-7 (drives what they put on screen); #333 close
 - Container had no Swift; installed the pinned toolchain with `scripts/cloud-setup.sh` before wave 1.
 - The PR API appends a Claude Code footer to bodies; the lane strips it from the squash commit (#1339 to #1343 merged clean), so builders don't fight it.
 - #1352 (EZ-5) also edits Tests/HaloModelTests/HaloTimelineHelpTests.swift: it asserted the W0 easing stub help, which EZ-5 replaces.
+- The issue and PR APIs append a Claude Code footer to every body and re-add it on edit; it can't be removed from here.
 - Rules 13 and 14 (check first, mutations) don't apply: v2 packet.
 
 ## Open
