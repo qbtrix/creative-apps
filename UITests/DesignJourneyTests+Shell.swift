@@ -52,8 +52,9 @@ final class DesignShellJourneyTests: XCTestCase {
         openFile(design, shot: "shell-open")
         XCTAssertEqual(window.title, "Untitled", "the open file's title")
         let status = design.element("suite.status")
-        let zoom = status.descendants(matching: .any).matching(NSPredicate(format: "label BEGINSWITH 'Zoom '")).firstMatch
-        XCTAssert(zoom.exists, "the status line shows no zoom")
+        // The zoom pill's "Zoom 25%" label doesn't reach XCUITest on macOS (#1452): its Text reads "25%" as its value.
+        let texts = status.staticTexts.allElementsBoundByIndex.flatMap { [$0.label, $0.value as? String ?? ""] }
+        XCTAssert(texts.contains { Self.isZoom($0) }, "the status line shows no zoom (its texts: \(texts.filter { !$0.isEmpty }))")
         let size = status.staticTexts.matching(NSPredicate(format: "label CONTAINS ' × ' OR value CONTAINS ' × '")).firstMatch
         XCTAssert(size.exists, "the status line shows no page size")
         XCTAssertEqual(text(design.element("design.status.tool")), "Move", "the status line's tool")
@@ -154,6 +155,12 @@ final class DesignShellJourneyTests: XCTestCase {
     /// What a text reads: its label, or its value where macOS puts a plain Text's words.
     @MainActor private func text(_ element: XCUIElement) -> String {
         element.label.isEmpty ? (element.value as? String ?? "") : element.label
+    }
+
+    /// A zoom as ViewerStatusBar shows it: "Zoom 25%" as its label, or "25%" as a plain Text's words.
+    private static func isZoom(_ text: String) -> Bool {
+        let percent = text.hasPrefix("Zoom ") ? String(text.dropFirst(5)) : text
+        return percent.hasSuffix("%") && Int(percent.dropLast()).map { $0 > 0 } == true
     }
 
     private func rect(_ frame: CGRect) -> AppAudit.Rect {
