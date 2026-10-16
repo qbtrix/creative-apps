@@ -1,14 +1,16 @@
 // CanvasRenderer.swift: keeps the canvas picture up to date without blocking
 // the window. Each change to the workspace asks for the tiles that changed
 // since the picture shown (PhotoRenderer.update), rendered off the main actor;
-// a new image or a new size asks for all of them. While a render runs, newer
+// a new image or a new size asks for all of them; asking again for the
+// revision shown does nothing. While a render runs, newer
 // requests wait and only the latest is drawn, so a fast brush stroke never
 // queues up stale frames. The tiles go straight to the tile layers
 // (CanvasTiles), not through SwiftUI, so no whole-canvas buffer or picture
 // exists per event. `revision` says what is shown; the render time reaches the
-// status line at most four times a second, so the readout doesn't redraw the
-// window every frame. A failed render keeps the last good picture and its
-// message. Presentation state only: it never changes the workspace.
+// status line at most four times a second, and not from a live stroke's
+// renders (`quietly`), since each readout re-runs the window's views. A failed
+// render keeps the last good picture and its message. Presentation state only:
+// it never changes the workspace.
 import CoreGraphics
 import Foundation
 import Observation
@@ -26,29 +28,39 @@ final class CanvasRenderer {
     @ObservationIgnored private(set) var lastMilliseconds: Double?
     @ObservationIgnored private var timed = ContinuousClock.now - timing
     private static let timing = Duration.milliseconds(250)
+    /// The latest ask was a live stroke's (`quietly`): its render time waits.
+    @ObservationIgnored private var quiet = false
     private var isRendering = false
     private var waiting: PhotoWorkspace?
+    /// Called with each picture's revision as its tiles reach the view (the brush ink test times this).
+    @ObservationIgnored var onPicture: ((Int) -> Void)?
 
     /// Draws `workspace` once the render in flight, if any, is done.
-    func show(_ workspace: PhotoWorkspace) {
+    /// `quietly` leaves the status line's render time as it is.
+    func show(_ workspace: PhotoWorkspace, quietly: Bool = false) {
+        quiet = quietly
         guard let canvas = workspace.canvas else {
             tiles.clear()
             (revision, milliseconds, waiting) = (nil, nil, nil)
             return
         }
+        let sameSize = canvas.width == tiles.width && canvas.height == tiles.height
+        // A drag's revision is shown by the pacer's apply, then asked for again by
+        // the window's revision change: the second ask has nothing to draw.
+        if sameSize, workspace.revision == revision, failure == nil { return }
         guard !isRendering else {
             waiting = workspace
             return
         }
         isRendering = true
-        let sameSize = canvas.width == tiles.width && canvas.height == tiles.height
         let since = sameSize ? revision : nil
         Task {
             do {
                 let update = try await PhotoRenderer.update(workspace, since: since)
                 tiles.apply(update)
+                onPicture?(update.revision)
                 lastMilliseconds = update.milliseconds
-                if ContinuousClock.now - timed >= Self.timing {
+                if !quiet, ContinuousClock.now - timed >= Self.timing {
                     (milliseconds, timed) = (update.milliseconds, .now)
                 }
                 failure = nil
@@ -59,7 +71,7 @@ final class CanvasRenderer {
             isRendering = false
             if let latest = waiting {
                 waiting = nil
-                show(latest)
+                show(latest, quietly: quiet)
             }
         }
     }

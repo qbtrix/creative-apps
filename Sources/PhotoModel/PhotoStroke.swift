@@ -46,7 +46,9 @@
 // layer's pixels, or on an adjustment layer nothing, with the refusal in
 // `statusMessage` from the press that tried. Every dab is weighted by the
 // selection's coverage (PhotoSelectionMask.swift); with no selection the
-// weight is skipped, so paint costs what it did.
+// weight is skipped, so paint costs what it did. Those four change only
+// pixels (`dragPaintsOnly`), so the window draws their strokes on a copy of
+// the workspace and takes it back once (`adoptLiveStroke(_:)`).
 //
 // ponytail: capsules write through PixelBuffer.pixel/setPixel one pixel at a
 // time, with source-over and the eraser's scaling inline, and visit each
@@ -172,6 +174,22 @@ extension PhotoWorkspace {
             drag(from: event.from, to: event.to, pressure: event.pressure, modifiers: event.modifiers, zoom: zoom)
         }
         foldRevisions(since: start)
+    }
+
+    /// Whether a drag now changes only the picture's pixels: brush, eraser,
+    /// clone or heal with no Free Transform under way. The window draws such a
+    /// stroke on a copy and takes it back with `adoptLiveStroke(_:)`, so the
+    /// stroke's samples don't re-run every panel.
+    public var dragPaintsOnly: Bool {
+        transformDraft == nil && [.brush, .eraser, .clone, .heal].contains(tool)
+    }
+
+    /// Becomes `live`: a copy of this workspace a stroke drew on
+    /// (`dragPaintsOnly`). Ignored when `live` is another image (another
+    /// canvas or layer stack), so a stroke never overwrites a newer document.
+    public mutating func adoptLiveStroke(_ live: PhotoWorkspace) {
+        guard live.canvas == canvas, live.layers.map(\.id) == layers.map(\.id) else { return }
+        self = live
     }
 
     /// `drags(_:zoom:)` with Option for `sampling`, at zoom 1.

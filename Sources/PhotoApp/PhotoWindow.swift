@@ -7,7 +7,10 @@
 // it appears. Canvas drags carry the pen's pressure (PointerPressure), the
 // keys held (DragModifiers) and the zoom, and, while they last, AppKit's mouse
 // event coalescing is off so every pointer sample arrives; StrokePacer hands
-// them to the workspace once per display frame. Its workspace runs on
+// them to the workspace as they come, at most twice a display frame, and each
+// apply starts the picture's render at once. A brush, eraser, clone or heal
+// stroke draws on LiveStroke's copy and comes back once, at its end or before
+// any other intent, so drawing never re-runs the panels. Its workspace runs on
 // `fileServices(.live)`, or under `-PhotoFixture` on the fixture's fakes
 // (`launchOptions`, read once from the process; S-12), whose picture it
 // renders and keeps fitted while the window settles, until the user zooms. Open, Save, Save As and their
@@ -28,9 +31,10 @@ import SuiteUI
 import SwiftUI
 
 struct PhotoWindow: View {
-    @State var model = PhotoWindow.launchWorkspace()
+    @State var model: PhotoWorkspace
     @State var renderer = CanvasRenderer()
     @State var pacer = StrokePacer()
+    @State var liveStroke = LiveStroke()
     @State var zoom = 1.0
     @State var viewport = CGSize.zero
     /// A new image waits to be fitted until the canvas has a size.
@@ -78,6 +82,11 @@ struct PhotoWindow: View {
         PhotoWorkspace.launch(launchOptions) ?? PhotoWorkspace(services: fileServices(.live))
     }
 
+    /// A window on `model`: the launch workspace in the app, a test's own in tests.
+    init(model: PhotoWorkspace = PhotoWindow.launchWorkspace()) {
+        _model = State(initialValue: model)
+    }
+
     var body: some View {
         PhotoEditor(
             model: model, tiles: renderer.tiles, renderMilliseconds: renderer.milliseconds,
@@ -95,6 +104,7 @@ struct PhotoWindow: View {
             .task(id: model.statusMessage) {
                 guard model.statusMessage != nil else { return }
                 do { try await Task.sleep(for: .seconds(4)) } catch { return }
+                takeStroke()
                 model.clearStatus()
             }
             .sheet(isPresented: $isExporting) {
@@ -149,8 +159,11 @@ struct PhotoWindow: View {
     }
 
     func perform(_ intent: PhotoIntent) {
-        // Drag samples still waiting for the display frame land first.
-        if case .drag = intent {} else { pacer.flush() }
+        // Drag samples still waiting for the display frame land first, then a live stroke goes back.
+        if case .drag = intent {} else {
+            pacer.flush()
+            takeStroke()
+        }
         switch intent {
         case .newImage:
             // 1920 x 1080 is a size CoreRaster always accepts, so this never throws.
@@ -173,7 +186,17 @@ struct PhotoWindow: View {
             let move = (
                 Mask.Point(x: from.x, y: from.y), Mask.Point(x: to.x, y: to.y), PointerPressure.current,
                 DragModifiers(flags: NSEvent.modifierFlags))
-            pacer.add(move) { model.drags($0, zoom: zoom) }
+            // The picture starts at once, not after SwiftUI's next pass reaches `.onChange`. A paint
+            // stroke draws on LiveStroke's copy, so its samples don't re-run the panels.
+            pacer.add(move) { moves in
+                guard let painted = liveStroke.drags(moves, on: model, zoom: zoom) else {
+                    model.drags(moves, zoom: zoom)
+                    return renderer.show(model)
+                }
+                renderer.show(painted, quietly: true)
+                // A refusal ("Select an image layer…") shows at the press, not at the release.
+                if painted.statusMessage != model.statusMessage { takeStroke() }
+            }
         case .endDrag:
             NSEvent.isMouseCoalescingEnabled = true
             pacer.stop()
@@ -216,6 +239,11 @@ struct PhotoWindow: View {
         case .dismiss:
             if dismissTransform() {} else if model.pendingCrop != nil { model.cancelCrop() } else { model.deselect() }
         }
+    }
+
+    /// A live paint stroke's copy back into the workspace: one SwiftUI pass for the stroke.
+    private func takeStroke() {
+        if let painted = liveStroke.take() { model.adoptLiveStroke(painted) }
     }
 
     // MARK: Zoom

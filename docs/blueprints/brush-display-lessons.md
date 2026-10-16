@@ -43,10 +43,32 @@ p95 517 ms; allocated p50 102 MB per event; 48 MB picture per event; 119 of
   turns its own container layer instead.
 - **Mouse input stays in CanvasViewport.** Taking clicks in the tile view would
   bypass SuiteUI's focus and Space-pan handling, and SuiteUI is another
-  line's target. The view's `hitTest` returns nil. StrokePacer already
-  applies input once per display frame.
+  line's target. The view's `hitTest` returns nil. StrokePacer applies a
+  sample as it arrives, at most twice a display frame.
+- **Waiting for the display link costs a frame.** Holding every sample for
+  the next display link, then starting the render from SwiftUI's
+  `.onChange`, put input to ink at p50 10.8 ms, p95 18.9 ms in release
+  with a 2.4 ms render. Applying at once and starting the render in the
+  same apply gives p50 5.7, p95 12.5 (PhotoBrushInkLatencyTests, BRUSH-INK).
+- **State holding a struct re-runs every view per write.** The window's
+  workspace is a value in `@State`, so each brush sample written to it re-ran
+  and laid out the whole editor and redrew the 874 x 655 pt checkerboard on
+  the CPU (`CanvasViewport.checkerTile` builds a new Image per body run):
+  47% of the main thread in Core Animation's commit, 1.5% idle. A paint
+  stroke now draws on LiveStroke's copy and comes back once at the end: 85%
+  idle (PhotoWindowStrokeTests, WINDOW-STROKE, drives the real window).
+- **A locked screen stops the display link.** With the display asleep a
+  CADisplayLink never fires, so a link-paced queue never drains; the ink
+  test skips its time budget then, and a UI journey can't launch the app.
 - **Clone's Option press.** #713 added `sampling:` to `drag`. A batched drag
   (`drags`) must carry it per sample, or an Option-press in a batch is lost.
+
+## Tooling on a Mac
+
+- **Release tests need `-Xswiftc -enable-testing`** with Swift 6.4:
+  `swift test -c release -Xswiftc -enable-testing --filter Latency`. Without
+  it the `@testable import` test targets fail to build ("unable to resolve
+  Swift module dependency").
 
 ## Tooling in a cloud session
 
