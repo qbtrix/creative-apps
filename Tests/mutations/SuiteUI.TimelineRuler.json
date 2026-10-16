@@ -1,0 +1,4 @@
+[
+{"label":"labels ignore the unit, so timecode reads frame numbers","file":"Sources/SuiteUI/TimelineRuler.swift","find":"TimelineTime.label(frame: frame, fps: fps, unit: unit)","replace":"TimelineTime.label(frame: frame, fps: fps, unit: .frames)","tests":"TimelineRulerUnitTests"},
+{"label":"the widest label is dropped from the step, so labels overlap","file":"Sources/SuiteUI/TimelineRuler.swift","find":"minimumSpacing: max(Double(SuiteSize.timelineLabelSpacing), labelWidth)","replace":"minimumSpacing: 1","tests":"TimelineRulerUnitTests"}
+]
