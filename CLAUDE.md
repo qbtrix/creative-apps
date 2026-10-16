@@ -150,7 +150,7 @@ something. One that can't act yet is disabled and says why:
 ## Rules
 
 - **One behavior per PR.** Ideally under 200 changed lines, hard cap 400, at
-  most 15 files.
+  most 15 files. A PR that only changes `docs/` has no cap (Fast lane).
 - **Check current docs, not memory.** Before using any platform or library
   API (SwiftUI, AppKit, macOS 26 APIs, GRDB, Swift stdlib), check current docs
   with the docs MCP tools; don't rely on memory. If the tools are unavailable,
@@ -280,6 +280,12 @@ Crew PRs merge into `dev` at once; `main` moves only when full CI passes on
   path touched (the files above), mergeable, no red or running check on the
   head, and proof the head passed the gate: the `Fast-Check: pass` /
   `Head: <sha>` lines for the current head, or a passing CI check on it.
+- A PR whose every changed path is under `docs/` (packets, blueprints and
+  their `.wave.json` feature data, `docs/c4/parts/`, any `.md` there) takes
+  the lane at any size. It needs the same proof, and that proof is
+  `scripts/ci` on its head, which renders the waves and assembles the C4
+  parts with the ownership check. Protected paths under `docs/` stay refused,
+  and one file outside `docs/`, a rename included, brings the size cap back.
 - A PR that changes or renames a shared shell file (`MAC_GATED` in
   scripts/fast-lane.sh: SuiteWindow, EditorShell, ToolbarGroup and Tokens in
   Sources/SuiteUI) also needs a completed CI run on its current head whose
@@ -319,8 +325,9 @@ Crew PRs merge into `dev` at once; `main` moves only when full CI passes on
   commits the measured counts to `UITests/audit-baseline.json` ("test(audit):
   lower baselines to the measured counts") straight onto `dev`. It only ever
   lowers; a count over its baseline fails instead.
-- A PR that breaks a hard rule (author, size, protected path, a looser app
-  audit) loses the label with a comment saying why and waits for review.
+- A PR that breaks a hard rule (author, size outside the docs tier, protected
+  path, a looser app audit) loses the label with a comment saying why and
+  waits for review.
 - Full CI (`Linux`, `macOS` with snapshots and the UI journeys) runs on `dev`
   once a feature is built, not per merge: when the supervisor or Belt
   dispatches it, when the lane merges a PR labelled `feature-done` or one

@@ -86,6 +86,31 @@ check "a model with only the worker's marker is eligible" "eligible|150|2|Fast-C
   $'Sources/PhotoModel/PhotoWorkspace.swift\nTests/PhotoModelTests/PhotoWorkspaceTests.swift' '[]'
 check "too big (lines)" "not-eligible|too big: 401 lines" '.additions = 401 | .deletions = 0' "$BASE_FILES" .
 check "too big (files)" "not-eligible|too big: 150 lines, 16 files" '.changedFiles = 16' "$BASE_FILES" .
+
+# The docs tier: every changed path under docs/ (packets, .wave.json feature
+# data, C4 parts, any .md there) takes the lane at any size, on the same proof.
+DOCS=$'docs/blueprints/design/packets/v3-select.md\ndocs/blueprints/design/features/select.wave.json\ndocs/c4/parts/creative-apps/design-model/design-model-sources.json'
+BIG='.additions = 1200 | .changedFiles = 3'
+many_docs() { local i; for (( i = 1; i <= $1; i++ )); do echo "docs/blueprints/design/packets/p$i.md"; done; }
+check "docs only: any size on a green check" "eligible|1230|3|5 checks green, docs only: any size" "$BIG" "$DOCS" .
+check "docs only: 40 files on the worker's marker" "eligible|1230|40|Fast-Check marker, docs only: any size" \
+  "$(printf '.body = "Closes #1\\n\\nFast-Check: pass\\nHead: %s" | .additions = 1200 | .changedFiles = 40' "$HEAD_SHA")" \
+  "$(many_docs 40)" '[]'
+check "docs only under the cap: no tier note" "eligible|150|3|5 checks green" '.changedFiles = 3' "$DOCS" .
+check "docs only still needs proof" "pending|no passing CI check and no Fast-Check: pass marker" "$BIG" "$DOCS" '[]'
+check "docs only still waits on a red check" "red|Linux" "$BIG" "$DOCS" \
+  'map(if .name == "Linux" then .conclusion = "FAILURE" else . end)'
+check "docs only still refuses a protected docs path, size aside" \
+  "not-eligible|touches protected paths: docs/c4/model.json, docs/blueprints/halo/features/waves.md, docs/AGENTS.md" \
+  "$BIG" $'docs/c4/model.json\ndocs/blueprints/halo/features/waves.md\ndocs/AGENTS.md' .
+check "docs plus one Swift file keeps the cap" "not-eligible|too big: 1230 lines, 3 files" \
+  "$BIG" $'docs/blueprints/design/packets/v3-select.md\nSources/DesignModel/DesignSelection.swift\ndocs/c4/parts/creative-apps/design-model/design-model-sources.json' .
+check "a rename from code into docs keeps the cap" "not-eligible|too big: 1230 lines" \
+  "$BIG" $'docs/notes/old-selection.md\nSources/DesignModel/OldSelection.swift' .
+check "a docs folder outside the root isn't docs" "not-eligible|too big: 1230 lines" \
+  "$BIG" $'README.md\nSources/FlareModel/docs/notes.md\ntools/docs/x.md' .
+check "a file list shorter than the PR's file count gets no tier" "not-eligible|too big: 1230 lines, 3000 files" \
+  '.additions = 1200 | .changedFiles = 3000' "$DOCS" .
 check "non-allowlisted author" "not-eligible|author someone is not on the fast-lane allowlist" \
   '.author.login = "someone"' "$BASE_FILES" .
 check "all hard rules listed" "not-eligible|author someone is not on the fast-lane allowlist;too big" \
