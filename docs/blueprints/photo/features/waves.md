@@ -18,7 +18,7 @@ file's waves, not this one's.
 |---|---|---|---|---|---|---|---|---|---|
 | 0 | The seams: contracts, fakes, services, state, routing, file splits | PV-0 | `photo-seams.md` | – | p1 (by dependency) | nothing | nothing | #812 | built |
 | 0 | Shared journey helpers | PV-0 (journey part) | `photo-journey-kit.md` | – | p1 (by dependency) | #333 (QH-4; suite-harness #778 closes it with task SH-7) | nothing | #1073 | building |
-| 1 | Save and reopen with layers, Open Recent, unsaved state, recovery | PV-1 | `photo-documents.md` | – | p1 | photo-seams (journey tasks only: photo-journey-kit) | nothing | #1074 | building |
+| 1 | Save and reopen with layers, Open Recent, unsaved state, recovery | PV-1 | `photo-documents.md` | – | p1 | photo-seams (journey tasks only: photo-journey-kit) | nothing | #1074 | built |
 | 1 | Cut, Copy, Paste, Duplicate, Merge Down, Flatten | PV-2 | `photo-edit.md` | – | p1 | photo-seams (journey tasks only: photo-journey-kit) | nothing | #1075 | building |
 | 1 | Typed crop size and aspect lock; the perf journeys | PV-3 | `photo-crop.md` | #544 | p1 | photo-seams (journey tasks only: photo-journey-kit) | nothing | #1076 | built |
 | 2 | Adjustment layers | PV-6 | `photo-adjustment-layers.md` | #580 | p1 | photo-edit (hands over `PhotoCommands+Layer.swift`) | nothing (CR-5 optional) | file when ready | planned |
