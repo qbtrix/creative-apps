@@ -15,8 +15,8 @@ import Testing
 
 @MainActor
 @Suite struct LibraryMetadataHitTests {
-    static let ids = (1...5).map(MetadataInspectorID.star)
-        + ([nil] + PhotoLabel.allCases.map { $0 }).map(MetadataInspectorID.label)
+    static let ids: [String] = (1...5).map(MetadataInspectorID.star)
+        + ([nil as PhotoLabel?] + PhotoLabel.allCases.map { $0 }).map(MetadataInspectorID.label)
 
     @Test(arguments: [false, true], [SuiteSize.inspectorWidth.ideal, SuiteSize.inspectorWidth.min])
     func everyStarAndDotHasAFullSizeHit(mixed: Bool, width: CGFloat) throws {
@@ -27,11 +27,11 @@ import Testing
         let bounds = CGRect(origin: .zero, size: size)
         var frames: [(String, CGRect)] = []
         for id in Self.ids {
-            let frame = try #require(frame(of: id, in: window), "no \(id)")
-            #expect(frame.width >= SuiteSize.iconButtonHit - 0.5, "\(id) is \(frame.width) pt wide")
-            #expect(frame.height >= SuiteSize.iconButtonHit - 0.5, "\(id) is \(frame.height) pt tall")
-            #expect(bounds.insetBy(dx: -0.5, dy: -0.5).contains(frame), "\(id) at \(frame) leaves the inspector")
-            frames.append((id, frame))
+            let hit = try #require(frame(of: id, in: window), "no \(id)")
+            #expect(hit.width >= SuiteSize.iconButtonHit - 0.5, "\(id) is \(hit.width) pt wide")
+            #expect(hit.height >= SuiteSize.iconButtonHit - 0.5, "\(id) is \(hit.height) pt tall")
+            #expect(bounds.insetBy(dx: -0.5, dy: -0.5).contains(hit), "\(id) at \(hit) leaves the inspector")
+            frames.append((id, hit))
         }
         for (i, a) in frames.enumerated() {
             for b in frames.dropFirst(i + 1) {
