@@ -1,4 +1,4 @@
-// DesignLayersSnapshots.swift: Design's panel on the Layers tab at the editor's
+// DesignLayersSnapshots.swift: Design's sidebar (DesignLayersPanel) at the editor's
 // panel width: a Desktop frame holding a group of two shapes (one hidden, one
 // locked and selected), each row with its eye and lock toggles (#45), the group
 // collapsed, the group itself hidden and locked (its shapes' rows dim and show
@@ -99,7 +99,7 @@ import Testing
 private struct PanelSample: View {
     let model: DesignWorkspace
     var body: some View {
-        DesignPanel(model: model, tab: .layers)
+        DesignLayersPanel(model: model, perform: { _ in })
             .frame(width: SuiteSize.editorPanelWidth)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             .padding(SuiteSpacing.xxl)
