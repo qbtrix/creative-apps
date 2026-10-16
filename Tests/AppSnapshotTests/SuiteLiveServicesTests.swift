@@ -1,7 +1,7 @@
 // SuiteLiveServicesTests.swift: SuiteServices.live over a temp support
 // folder (suite-contracts SC-5b, SC-5c). It is not a preview; recents is
 // live and writes recents.json there; each of the other 14 slotted members
-// (14 slot files) is pending with its "Not connected yet (<feature>)."
+// (14 slot files) is pending with its "<What> isn't available yet."
 // sentence, and each throwing one throws notAvailable with that sentence.
 // `animations` and `updates` are the fakes until `with(animations:updates:)`
 // swaps them. macOS only (SuiteShell).
@@ -51,16 +51,16 @@ import Testing
         expected["recents"] = nil
         #expect(pending == expected)
         #expect(pending.count == 14)
-        #expect(pending["sending"] == "Not connected yet (switching).")
-        #expect(pending["thumbnails"] == "Not connected yet (recents-open-in).")
-        #expect(pending["home"] == "Not connected yet (home).")
-        #expect(pending["onboarding"] == "Not connected yet (onboarding).")
-        #expect(pending["roundTrips"] == "Not connected yet (photo-round-trip).")
-        #expect(pending["pasteboard"] == "Not connected yet (clipboard-drag).")
-        #expect(pending["assets"] == "Not connected yet (shared-assets).")
-        #expect(pending["linking"] == "Not connected yet (linked-assets).")
-        #expect(pending["preferences"] == "Not connected yet (settings).")
-        #expect(pending["settings"] == "Not connected yet (settings).")
+        #expect(pending["sending"] == "Switching between apps isn't available yet.")
+        #expect(pending["thumbnails"] == "Opening recent work isn't available yet.")
+        #expect(pending["home"] == "The Home window isn't available yet.")
+        #expect(pending["onboarding"] == "The welcome tour isn't available yet.")
+        #expect(pending["roundTrips"] == "Editing in Photo and back isn't available yet.")
+        #expect(pending["pasteboard"] == "Copy and paste between apps isn't available yet.")
+        #expect(pending["assets"] == "The shared asset library isn't available yet.")
+        #expect(pending["linking"] == "Linking assets between apps isn't available yet.")
+        #expect(pending["preferences"] == "The Settings window isn't available yet.")
+        #expect(pending["settings"] == "The Settings window isn't available yet.")
     }
 
     @Test func everySlottedMemberIsLiveOrPending() {

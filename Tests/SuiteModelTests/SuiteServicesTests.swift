@@ -51,7 +51,25 @@ import Testing
             #expect(!feature.isEmpty && feature == feature.lowercased(), "\(member)")
         }
         #expect(SuiteServices.slotFeatures["sending"] == "switching")
-        #expect(SuiteServices.notConnected("pasteboard") == "Not connected yet (clipboard-drag).")
+        #expect(SuiteServices.notConnected("pasteboard") == "Copy and paste between apps isn't available yet.")
         #expect(SuiteServices.notConnected("updates") == nil)
+    }
+
+    /// #1457: a not-connected reason is a plain sentence; no feature slug,
+    /// hyphen or camelCase member name reaches the UI.
+    @Test func notConnectedReasonsReadAsPlainSentences() {
+        let features = Set(SuiteServices.slotFeatures.values).union(["updater", "unknown-feature"])
+        var reasons = Self.slotted.map { (slug: SuiteServices.slotFeatures[$0] ?? $0, text: SuiteServices.notConnected($0)) }
+        reasons += features.map { (slug: $0, text: SuiteIdentity.notConnected($0)) }
+        for (slug, text) in reasons {
+            let reason = text ?? ""
+            #expect(!reason.contains(slug) && !reason.contains("-") && !reason.contains("("), "\(reason)")
+            #expect(reason.first?.isUppercase == true && reason.hasSuffix(" isn't available yet."), "\(reason)")
+            let camel = reason.split(separator: " ").contains { word in
+                zip(word, word.dropFirst()).contains { $0.isLowercase && $1.isUppercase }
+            }
+            #expect(!camel, "\(reason)")
+        }
+        #expect(SuiteServices.notConnected("roundTrips") == "Editing in Photo and back isn't available yet.")
     }
 }
