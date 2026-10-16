@@ -188,10 +188,13 @@ public struct ThumbnailGrid<ID: Hashable>: View {
 /// to it, and the caption under it. Selection is an accent ring and a light
 /// accent fill, and a `stateSelected` hairline just outside the ring, so the
 /// selection still reads on a blue or teal photo where the ring blends in.
+/// Hover on an unselected cell takes the row-hover fill and a primary caption
+/// (two signals, so it never reads by fill alone).
 private struct ThumbnailCell<ID: Hashable>: View {
     let item: ThumbnailItem<ID>
     let size: CGSize
     let isSelected: Bool
+    @State private var hovering = false
 
     var body: some View {
         VStack(spacing: SuiteSpacing.xs) {
@@ -207,13 +210,17 @@ private struct ThumbnailCell<ID: Hashable>: View {
                 .overlay { if isSelected { selectionHairline } }
             Text(item.caption)
                 .font(SuiteFont.caption)
-                .foregroundStyle(isSelected ? Color.primary : SuiteColor.secondaryText)
+                .foregroundStyle(isSelected || hovering ? Color.primary : SuiteColor.secondaryText)
                 .lineLimit(1)
                 .truncationMode(.middle)
                 .frame(width: size.width)
         }
         .padding(SuiteSpacing.xs)
-        .background(isSelected ? SuiteColor.accent.opacity(0.15) : .clear, in: RoundedRectangle(cornerRadius: SuiteRadius.medium))
+        .background(
+            isSelected ? SuiteColor.accent.opacity(0.15) : hovering ? SuiteColor.rowHover : .clear,
+            in: RoundedRectangle(cornerRadius: SuiteRadius.medium)
+        )
+        .onHover { hovering = $0 }
         .accessibilityElement(children: .combine)
         // After the combine, so a cell with badges reads its help once, not once per element.
         .help(item.help ?? item.caption)
