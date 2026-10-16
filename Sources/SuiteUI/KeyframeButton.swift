@@ -6,7 +6,11 @@
 // diamond, so the row never changes width while the timeline scrubs: empty
 // while not animated, a hollow diamond to add a key at the playhead, a filled
 // one to remove it. Hover fills the circle; disabled draws at 40%. KeyState
-// carries the symbol, color and VoiceOver value of each state. Owns
+// carries the symbol, color and VoiceOver value of each state. Given an `id`,
+// the stopwatch reads it as its accessibility identifier and the diamond reads
+// `diamondID(id)`. Set the id here, never on the KeyframeButton from outside:
+// an identifier on the pair lands on both buttons, and once the diamond
+// appears the stopwatch reads 56 pt wide, over the diamond (#1282). Owns
 // presentation state only: hover.
 import SwiftUI
 
@@ -37,6 +41,7 @@ public enum KeyState: Sendable, CaseIterable {
 
 public struct KeyframeButton: View {
     private let property: String
+    private let id: String?
     private let state: KeyState
     private let onToggle: @MainActor () -> Void
     private let onKey: @MainActor () -> Void
@@ -45,12 +50,14 @@ public struct KeyframeButton: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     /// `onToggle` turns animation on or off for `property`; `onKey` adds or
-    /// removes the key at the playhead.
+    /// removes the key at the playhead. `id` identifies the stopwatch, and
+    /// `diamondID(id)` the diamond.
     public init(
-        _ property: String, state: KeyState, onToggle: @escaping @MainActor () -> Void,
+        _ property: String, id: String? = nil, state: KeyState, onToggle: @escaping @MainActor () -> Void,
         onKey: @escaping @MainActor () -> Void
     ) {
         self.property = property
+        self.id = id
         self.state = state
         self.onToggle = onToggle
         self.onKey = onKey
@@ -73,6 +80,7 @@ public struct KeyframeButton: View {
             .help(state == .idle ? "Animate \(property)" : "Stop Animating \(property)")
             .accessibilityLabel("Animate \(property)")
             .accessibilityValue(state.voiceOverValue)
+            .accessibilityIdentifier(id ?? state.symbol)
             ZStack {
                 if let diamond = state.diamond {
                     Button(action: onKey) {
@@ -85,6 +93,7 @@ public struct KeyframeButton: View {
                     .buttonStyle(.plain)
                     .help("\(diamond.action) for \(property)")
                     .accessibilityLabel("\(diamond.action), \(property)")
+                    .accessibilityIdentifier(id.map(Self.diamondID) ?? diamond.symbol)
                 }
             }
             .frame(width: SuiteSize.keyframeButton, height: SuiteSize.keyframeButton)
@@ -93,4 +102,7 @@ public struct KeyframeButton: View {
         .animation(SuiteMotion.state(reduceMotion: reduceMotion), value: hovering)
         .animation(SuiteMotion.state(reduceMotion: reduceMotion), value: state)
     }
+
+    /// The diamond's identifier beside the stopwatch identified `id`.
+    public static func diamondID(_ id: String) -> String { "\(id).diamond" }
 }

@@ -1,6 +1,8 @@
 // KeyframeButtonTests.swift: each KeyState's symbol, color, VoiceOver value
-// and key-here diamond, and that the button keeps its width in every state.
-// macOS only.
+// and key-here diamond, that the button keeps its width in every state, and
+// that its two buttons read as two 28 pt elements with their own identifiers
+// after the diamond appears (#1282; read from the window's accessibility
+// tree, which SwiftUI builds once the app is asked for it). macOS only.
 import AppKit
 import SuiteUI
 import SwiftUI
@@ -26,4 +28,53 @@ import Testing
         NSHostingView(rootView: KeyframeButton("Rotation", state: state, onToggle: {}, onKey: {})).fittingSize
     }
     #expect(sizes.allSatisfy { $0 == CGSize(width: 2 * SuiteSize.keyframeButton, height: SuiteSize.keyframeButton) })
+}
+
+/// Once the diamond appears, the stopwatch still reads 28 pt wide with its own
+/// id, and the diamond has its own (#1282: both read the stopwatch's id and
+/// the stopwatch 56 pt, over the diamond).
+@MainActor @Test func eachPartReadsItsOwnIdAndFrameAfterTheDiamondAppears() {
+    let app = NSApplication.shared
+    for attribute in ["AXManualAccessibility", "AXEnhancedUserInterface"] {
+        app.accessibilitySetValue(true, forAttribute: NSAccessibility.Attribute(rawValue: attribute))
+    }
+    let holder = KeyStateHolder()
+    let host = NSHostingView(rootView: KeyframeButtonHost(holder: holder))
+    let window = NSWindow(
+        contentRect: CGRect(x: 0, y: 0, width: 200, height: 100), styleMask: [.titled], backing: .buffered, defer: false)
+    window.contentView = host
+    window.orderFrontRegardless()
+    defer { window.orderOut(nil) }
+    // Read the tree in each state: the 56 pt stopwatch only showed once its
+    // element existed before the diamond did, as in the app.
+    var buttons = [(id: String, frame: CGRect)]()
+    for state in [KeyState.idle, .animated, .keyedHere] {
+        holder.state = state
+        RunLoop.main.run(until: Date().addingTimeInterval(0.3))
+        buttons = axButtons(in: window)
+    }
+    #expect(buttons.map(\.id) == ["k", "k.diamond"])
+    #expect(buttons.allSatisfy { $0.frame.size == CGSize(width: SuiteSize.keyframeButton, height: SuiteSize.keyframeButton) })
+}
+
+@MainActor @Observable private final class KeyStateHolder {
+    var state = KeyState.idle
+}
+
+private struct KeyframeButtonHost: View {
+    let holder: KeyStateHolder
+    var body: some View {
+        KeyframeButton("Opacity", id: "k", state: holder.state, onToggle: {}, onKey: {}).padding(20)
+    }
+}
+
+/// Every button under `element` in the accessibility tree, in tree order.
+@MainActor private func axButtons(in element: Any) -> [(id: String, frame: CGRect)] {
+    let node = element as AnyObject
+    var found = [(id: String, frame: CGRect)]()
+    if node.accessibilityRole?() == .button {
+        found.append(((node.accessibilityIdentifier?() ?? nil) ?? "", node.accessibilityFrame?() ?? .zero))
+    }
+    for child in (node.accessibilityChildren?() ?? nil) ?? [] { found += axButtons(in: child) }
+    return found
 }

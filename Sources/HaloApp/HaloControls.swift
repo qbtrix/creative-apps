@@ -25,11 +25,13 @@ struct HaloControlsKey: PreferenceKey {
 
 extension View {
     /// Identifies this control as `id` and lists it in `halo.controls`. A
-    /// disabled control says why in `help`.
-    func haloControl(id: String, enabled: Bool, help: String?) -> some View {
-        let entry = ControlEntry(id: id, enabled: enabled, reason: enabled ? nil : help)
-        return suiteControl(id: id, enabled: enabled, reason: entry.reason)
-            .transformPreference(HaloControlsKey.self) { $0.append(entry) }
+    /// disabled control says why in `help`. A nil `id` lists nothing; with
+    /// `identifies` false the view is listed but its parts keep their own
+    /// identifiers (see SuiteUI's `suiteControl`).
+    func haloControl(id: String?, enabled: Bool, help: String?, identifies: Bool = true) -> some View {
+        let entry = id.map { ControlEntry(id: $0, enabled: enabled, reason: enabled ? nil : help) }
+        return suiteControl(id: id, enabled: enabled, reason: entry?.reason, identifies: identifies)
+            .transformPreference(HaloControlsKey.self) { entries in entry.map { entries.append($0) } }
     }
 
     /// Publishes the `halo.controls` element over this view when `requested`.

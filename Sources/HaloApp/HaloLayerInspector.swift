@@ -8,9 +8,10 @@
 // stopwatch sends .toggleAnimation, the diamond .toggleKey. A scrub sends
 // .setProperty with the stored value and .endPropertyScrub once it ends.
 // Each row is `halo.inspector.row.<raw>` and reads its value as text
-// (XCUITest reads values empty otherwise, #262); its button is
+// (XCUITest reads values empty otherwise, #262); its stopwatch is
 // `halo.inspector.key.<raw>`, labelled "Animate <title>" with the key state
-// as its value. A refusal naming a row or its button shows under that row;
+// as its value, and its diamond `halo.inspector.key.<raw>.diamond`. A
+// refusal naming a row or its stopwatch shows under that row;
 // any other inspector refusal shows under the group. LAYER has two
 // InspectorPickerRows: Parent (`halo.inspector.parent`, None then
 // `model.parentChoices`) sends .setParent, and Blend (`halo.inspector.blend`,
@@ -122,16 +123,22 @@ private struct HaloPropertyRowView: View {
             .haloControl(id: "halo.inspector.row.\(p.rawValue)", enabled: rowHelp == nil, help: rowHelp)
     }
 
-    /// The property's stopwatch and key diamond.
+    /// The property's stopwatch and key diamond. KeyframeButton sets both
+    /// identifiers itself; here they are only listed, the diamond while shown.
     private var key: some View {
         let p = row.property
+        let id = "halo.inspector.key.\(p.rawValue)"
         let keyHelp = model.unavailableHelp(for: .toggleAnimation(p))
+        let state = Self.keyState(row.keyState)
         return KeyframeButton(
-            p.title, state: Self.keyState(row.keyState),
+            p.title, id: id, state: state,
             onToggle: { perform(.toggleAnimation(p)) },
             onKey: { perform(.toggleKey(p)) })
             .disabled(keyHelp != nil)
-            .haloControl(id: "halo.inspector.key.\(p.rawValue)", enabled: keyHelp == nil, help: keyHelp)
+            .haloControl(id: id, enabled: keyHelp == nil, help: keyHelp, identifies: false)
+            .haloControl(
+                id: state.diamond == nil ? nil : KeyframeButton.diamondID(id), enabled: keyHelp == nil, help: keyHelp,
+                identifies: false)
     }
 
     /// The bar's room, never drawn (the bar itself has no ideal width): the
