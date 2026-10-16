@@ -46,8 +46,8 @@ final class PhotoPerfDocumentsJourneyTests: XCTestCase {
 
         // Save: Keep layers?, Save as Photo Document writes beach.ora into -PhotoSaveTo's folder.
         photo.press(character: "s", .command)
-        // In a window, not the dialog's Touch Bar copy of its default button.
-        let keep = photo.app.windows.buttons["Save as Photo Document"].firstMatch
+        // On the window's Keep layers? sheet, not its Touch Bar copy of the default button.
+        let keep = photo.app.sheets.buttons["photo.file.keep-layers.document"].firstMatch
         XCTAssert(keep.waitForExistence(timeout: 10), "Save on a layered PNG didn't ask Keep layers?")
         photo.shot("perf-documents-keep-layers", screen: true)
         keep.click()

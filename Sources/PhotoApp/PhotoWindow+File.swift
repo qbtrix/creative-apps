@@ -7,11 +7,14 @@
 // (PhotoPackageIO, the snapshot taken off the main actor), a flat image over
 // its file, a flat file whose image has layers asks "Keep layers?" (Save as
 // Photo Document writes `<name>.ora` beside it, or in `-PhotoSaveTo`'s
-// folder, and makes that the file; Flatten writes the flat file), and a new
+// folder, and makes that the file; Flatten writes the flat file; an NSAlert
+// sheet whose buttons carry `photo.file.keep-layers.*`, its words from
+// PhotoKeepLayers), and a new
 // or read-only image is Save As (the panel offers .ora, PNG and JPEG;
 // `-PhotoSaveTo <folder>` writes `<name>.ora` there when the image needs a
 // document, else `<name>.png`). A failed save shows "The image couldn't be
 // saved: <reason>." and sets `files.saveFailed` until the image is clean.
+// A save leaves no note (the top bar says "Saved"); an export notes "Exported <name>".
 // Open reads an `.ora` and decodes its PNGs off the main actor, then opens
 // the snapshot; a bad document shows its ArchiveError message and the window
 // keeps what it had. Flat files open through `openImage`, so Save knows
@@ -316,7 +319,7 @@ extension PhotoWindow {
         files.saveFailed = false
         files.working = nil
         files.noteRecent(url)
-        note = "Saved \(url.lastPathComponent)"
+        note = nil  // the top bar's `photo.bar.saved` says "Saved"
     }
 
     private func didFailSave(_ error: Error) {
@@ -351,20 +354,16 @@ struct PhotoFileArea: ViewModifier {
             .background { PhotoWindowEdited(model: model, files: files, perform: perform) }
             .overlay { PhotoFileWorkNote(work: files.working) }
             .focusedSceneValue(\.photoRecentFiles, files.recentFiles)
-            .confirmationDialog(
-                "Keep layers?",
-                isPresented: Binding(get: { files.keepLayers != nil }, set: { if !$0 { files.keepLayers = nil } }),
-                titleVisibility: .visible, presenting: files.keepLayers
-            ) { format in
-                Button("Save as Photo Document") { perform(.file(.saveDocument)) }
-                    .keyboardShortcut(.defaultAction)
-                    .accessibilityIdentifier("photo.file.keep-layers.document")
-                Button("Flatten into \(format.title)") { perform(.file(.flatten(format))) }
-                    .accessibilityIdentifier("photo.file.keep-layers.flatten")
-                Button("Cancel", role: .cancel) {}
-                    .accessibilityIdentifier("photo.file.keep-layers.cancel")
-            } message: { format in
-                Text("A \(format.title) file keeps one flat layer. A Photo Document keeps every layer, mask and adjustment.")
+            // Keep layers? as a sheet on the window; Cancel (or no window) just closes it.
+            .task(id: files.keepLayers) {
+                guard let format = files.keepLayers else { return }
+                guard let hook = await PhotoWindowEditedView.hook(for: files),
+                      let choice = await hook.askToKeepLayers(format, message: model.keepLayersMessage(format: format))
+                else {
+                    files.keepLayers = nil
+                    return
+                }
+                perform(.file(choice))
             }
             // A clean image has nothing left unsaved, so "Not saved" goes.
             .onChange(of: model.isDirty) {
@@ -505,6 +504,26 @@ final class PhotoWindowEditedView: NSView, PhotoUnsavedWindow {
         case .alertFirstButtonReturn: return .restore(offer)
         case .alertSecondButtonReturn: return .discardRecovery
         default: return nil
+        }
+    }
+
+    /// "Keep layers?" as a sheet: Save as Photo Document (Return), Flatten
+    /// into `format`, or nil for Cancel (Escape). An NSAlert, as the restore
+    /// offer, so each button keeps its `photo.file.keep-layers.*` identifier.
+    func askToKeepLayers(_ format: ImageFormat, message: String) async -> FileIntent? {
+        guard let window else { return nil }
+        let alert = NSAlert()
+        alert.messageText = PhotoKeepLayers.title
+        alert.informativeText = message
+        for choice in PhotoKeepLayers.choices(format: format) {
+            alert.addButton(withTitle: choice.title).setAccessibilityIdentifier(choice.identifier)
+        }
+        let response = await alert.beginSheetModal(for: window)
+        let index = response.rawValue - NSApplication.ModalResponse.alertFirstButtonReturn.rawValue
+        switch PhotoKeepLayers.answer(forButton: index, format: format) {
+        case .saveDocument: return .saveDocument
+        case .flatten(let flat): return .flatten(flat)
+        case .cancel: return nil
         }
     }
 
