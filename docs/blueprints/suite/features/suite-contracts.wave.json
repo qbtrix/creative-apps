@@ -2,8 +2,8 @@
   "title": "Shared values, contracts, fakes, store and live slots",
   "wave": 1,
   "order": 20,
-  "status": "planned",
-  "feature_issue": "file when ready",
+  "status": "built",
+  "feature_issue": "#1332",
   "covers": "#820–#834",
   "waits_on": "targets",
   "owned": [

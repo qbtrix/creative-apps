@@ -1,8 +1,10 @@
 // SuiteLiveServicesTests.swift: SuiteServices.live over a temp support
-// folder (suite-contracts SC-5b). It is not a preview; recents is live and
-// writes recents.json there; every other slotted member is pending with its
-// "Not connected yet (<feature>)." sentence, and each throwing one throws
-// notAvailable with that sentence. macOS only (SuiteShell).
+// folder (suite-contracts SC-5b, SC-5c). It is not a preview; recents is
+// live and writes recents.json there; each of the other 14 slotted members
+// (14 slot files) is pending with its "Not connected yet (<feature>)."
+// sentence, and each throwing one throws notAvailable with that sentence.
+// `animations` and `updates` are the fakes until `with(animations:updates:)`
+// swaps them. macOS only (SuiteShell).
 import Foundation
 import SuiteModel
 import SuiteShell
@@ -53,6 +55,21 @@ import Testing
         #expect(pending["thumbnails"] == "Not connected yet (recents-open-in).")
         #expect(pending["home"] == "Not connected yet (home).")
         #expect(pending["onboarding"] == "Not connected yet (onboarding).")
+        #expect(pending["roundTrips"] == "Not connected yet (photo-round-trip).")
+        #expect(pending["pasteboard"] == "Not connected yet (clipboard-drag).")
+        #expect(pending["assets"] == "Not connected yet (shared-assets).")
+        #expect(pending["linking"] == "Not connected yet (linked-assets).")
+        #expect(pending["preferences"] == "Not connected yet (settings).")
+        #expect(pending["settings"] == "Not connected yet (settings).")
+    }
+
+    @Test func everySlottedMemberIsLiveOrPending() {
+        let pending = makeLive().services.pending
+        let members: Set<String> = ["switching", "recents", "creating", "routing", "sending", "receiving",
+                                    "roundTrips", "pasteboard", "assets", "linking", "preferences", "settings",
+                                    "onboarding", "thumbnails", "home"]
+        #expect(Set(SuiteServices.slotFeatures.keys) == members)
+        #expect(Set(pending.keys).union(["recents"]) == members)
     }
 
     @Test func throwingMembersNotLiveThrowTheirReason() async throws {
@@ -76,5 +93,27 @@ import Testing
         #expect(try s.routing.route(fileName: "Logo.design") == .design)
         #expect(s.creating.tiles(missing: []).allSatisfy { $0.disabledReason == nil })
         #expect(s.onboarding.pages.count == 3)
+        #expect(s.pasteboard is FakePasteboard)
+        #expect(s.linking is FakeLinking)
+        #expect(s.onboarding is FakeOnboarding)
+    }
+
+    @Test func animationsAndUpdatesAreFakesUntilSwapped() async throws {
+        let s = makeLive().services
+        #expect(s.animations is FakeAnimationSource)
+        #expect(s.updates is FakeUpdates)
+        #expect(s.pending["animations"] == nil)
+        #expect(s.pending["updates"] == nil)
+        #expect(try await s.updates.check(current: SuiteVersion(1, 0, 0)) == nil)
+        let swapped = s.with(animations: FakeAnimationSource(unavailable: "Swapped animations."),
+                             updates: FakeUpdates(unavailable: "Swapped updates."))
+        let logo = ref("Logo.design")
+        await #expect(throws: SuiteError.notAvailable("Swapped animations.")) {
+            _ = try await swapped.animations.summary(of: logo)
+        }
+        await #expect(throws: SuiteError.notAvailable("Swapped updates.")) {
+            _ = try await swapped.updates.check(current: SuiteVersion(1, 0, 0))
+        }
+        #expect(swapped.pending == s.pending)
     }
 }
