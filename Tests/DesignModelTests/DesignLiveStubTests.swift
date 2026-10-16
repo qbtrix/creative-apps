@@ -4,7 +4,8 @@
 // their 5.6 name, on DesignFixtures' `cards` with A selected and with A and B.
 // LiveFiling is today's codec: it saves `cards` to the bytes DesignFile writes,
 // opens them back to the same pages, and refuses what DesignFile refuses with
-// the same reason. Runs on Linux and macOS.
+// the same reason. `.live` holds the ten Live types, obeys the help law, and
+// MJ3 walks every slot of it on `cards`. Runs on Linux and macOS.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -151,5 +152,69 @@ import Testing
         let empty: DesignFileError?
         do { _ = try LiveFiling().decode(Data(#"{"pages":[],"version":1}"#.utf8)); empty = nil } catch { empty = error }
         #expect(empty == .noPages)
+    }
+
+    @Test func liveSlotsAreTheLiveTypes() {
+        let live = DesignServices.live
+        #expect(live.marquee is LiveMarquee && live.transforming is LiveTransforming)
+        #expect(live.aligning is LiveAligning && live.framing is LiveFraming)
+        #expect(live.duplicating is LiveDuplicating && live.grouping is LiveGrouping)
+        #expect(live.clipboard is LiveClipboard && live.ordering is LiveOrdering)
+        #expect(live.styling is LiveStyling && live.filing is LiveFiling)
+        let tier2: [(Any, String)] = [(live.export, "Export"), (live.pen, "The Pen tool"),
+                                      (live.components, "Components"), (live.variables, "Variables")]
+        for (slot, name) in tier2 { #expect((slot as? NotBuilt)?.feature == name) }
+    }
+
+    @Test func helpLawHoldsOnLive() {
+        let law = DesignContractLaw.check(.live, on: page)
+        #expect(law.checks == 66 * DesignContractLaw.selections.count)
+        #expect(law.violations.isEmpty, "\(law.violations)")
+    }
+
+    /// MJ3: open `cards`; every `.live` slot answers its NotBuilt help and refusal, except the four
+    /// with live paths (their Live types, obeying the law) and filing, which saves and reopens `cards`.
+    @Test func testLiveStubsWalk() throws {
+        var opened = DesignWorkspace()
+        try opened.open(DesignFixtures.cards.fileData())
+        let page = try #require(opened.selectedPage)
+        let live = DesignServices.live
+        let ids = ["node-2", "node-3"]
+        var mint = DesignIDMint(taken: [], after: 10)
+        let helps: [(String?, String)] = [
+            (live.duplicating.duplicateHelp(ids, on: page), "Duplicate"), (live.grouping.groupHelp(ids, on: page), "Group"),
+            (live.clipboard.copyHelp(ids, on: page), "Copy and paste"),
+            (live.ordering.arrangeHelp(.bringToFront, ids, on: page), "Reordering layers"),
+            (live.styling.styleHelp(.fill, ids, on: page), "Style editing"), (live.export.exportHelp(ids, on: page), "Export"),
+            (live.components.createHelp(ids, on: page), "Components"),
+        ]
+        for (help, name) in helps { #expect(help == "\(name) isn't built yet.") }
+        let path = DesignPath(anchors: [DesignAnchor(point: pt(0, 0)), DesignAnchor(point: pt(10, 10))], isClosed: false)
+        let writes: [(DesignRefusal?, String)] = [
+            (refusal { _ = try live.duplicating.duplicate(ids, offset: pt(10, 10), on: page, mint: &mint) }, "Duplicate"),
+            (refusal { _ = try live.grouping.group(ids, on: page, mint: &mint) }, "Group"),
+            (refusal { _ = try live.clipboard.encode(ids, on: page) }, "Copy and paste"),
+            (refusal { _ = try live.ordering.arrange(.sendToBack, ids, on: page) }, "Reordering layers"),
+            (refusal { _ = try live.styling.setOpacity(0.5, ids, on: page) }, "Style editing"),
+            (refusal { _ = try live.export.svg(for: "node-2", on: page) }, "Export"),
+            (refusal { _ = try live.pen.commit(path, into: nil, on: page, mint: &mint) }, "The Pen tool"),
+            (refusal { _ = try live.components.create(from: "node-1", on: page, library: [], mint: &mint) }, "Components"),
+            (refusal { _ = try live.variables.remove("v", from: []) }, "Variables"),
+        ]
+        for (thrown, name) in writes { #expect(thrown == .notBuilt(name)) }
+        #expect(mint.minted.isEmpty)
+        // The four live paths: their own types, acting as their features define, within the law.
+        #expect(live.marquee is LiveMarquee && live.transforming is LiveTransforming)
+        #expect(live.aligning is LiveAligning && live.framing is LiveFraming)
+        #expect(live.transforming.transformHelp(ids, on: page) == nil)
+        #expect(live.framing.rectToShow(ids, on: page) != nil)
+        let law = DesignContractLaw.check(live, on: page)
+        #expect(law.violations.isEmpty, "\(law.violations)")
+        // Filing saves `cards` to today's bytes and reopens it to the same pages.
+        let today = try opened.fileData()
+        let saved = try live.filing.encode(DesignDocument(pages: opened.pages))
+        #expect(saved == today)
+        #expect(try live.filing.decode(saved) == DesignDocument(pages: opened.pages))
+        #expect(throws: DesignFileError.unreadable) { try live.filing.decode(Data("not json".utf8)) }
     }
 }

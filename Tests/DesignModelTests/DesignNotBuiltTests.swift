@@ -1,5 +1,5 @@
-// DesignNotBuiltTests.swift: DesignServices.live before any feature lands. Every
-// slot is NotBuilt with blueprint 5.6's feature name; each help says "<Feature>
+// DesignNotBuiltTests.swift: a service set before any feature lands (`.live`
+// until D0-2b, now `notBuilt` here). Every slot is NotBuilt with blueprint 5.6's feature name; each help says "<Feature>
 // isn't built yet." and each write throws `.notBuilt(feature)`, on DesignFixtures'
 // `cards` with A selected. Also the workspace's services: useServices keeps the
 // document, and a workspace's equality sees which services it runs on. Runs on
@@ -15,7 +15,14 @@ import Testing
 @Suite struct DesignNotBuiltTests {
     let page = DesignFixtures.cards.selectedPage ?? DesignPage(id: "none", name: "None", frameWidth: 1, frameHeight: 1)
     let ids = ["node-2"]  // A
-    let live = DesignServices.live
+    /// Every slot NotBuilt with 5.6's name, as `.live` was before the Live stubs.
+    static let notBuilt = DesignServices(
+        name: "notBuilt", marquee: NotBuilt("Marquee selection"), transforming: NotBuilt("Editing several layers"),
+        aligning: NotBuilt("Aligning several layers"), duplicating: NotBuilt("Duplicate"), grouping: NotBuilt("Group"),
+        clipboard: NotBuilt("Copy and paste"), ordering: NotBuilt("Reordering layers"), styling: NotBuilt("Style editing"),
+        framing: NotBuilt("Zoom to Selection"), filing: NotBuilt("Saving"), export: NotBuilt("Export"),
+        pen: NotBuilt("The Pen tool"), components: NotBuilt("Components"), variables: NotBuilt("Variables"))
+    let live = DesignNotBuiltTests.notBuilt
 
     /// The feature a slot's NotBuilt names; nil when the slot is something else.
     private func feature(_ slot: Any) -> String? { (slot as? NotBuilt)?.feature }
@@ -35,7 +42,7 @@ import Testing
             (live.pen, "The Pen tool"), (live.components, "Components"), (live.variables, "Variables"),
         ]
         for (slot, name) in slots { #expect(feature(slot) == name) }
-        #expect(live.name == "live")
+        #expect(live.name == "notBuilt")
     }
 
     @Test func everyHelpSaysItIsNotBuilt() {
@@ -126,12 +133,7 @@ import Testing
     }
 
     @Test func servicesTakePartInWorkspaceEquality() {
-        let built = DesignServices(
-            name: "test", marquee: NotBuilt("Marquee selection"), transforming: NotBuilt("Editing several layers"),
-            aligning: NotBuilt("Aligning several layers"), duplicating: NotBuilt("Duplicate"), grouping: NotBuilt("Group"),
-            clipboard: NotBuilt("Copy and paste"), ordering: NotBuilt("Reordering layers"), styling: NotBuilt("Style editing"),
-            framing: NotBuilt("Zoom to Selection"), filing: NotBuilt("Saving"), export: NotBuilt("Export"),
-            pen: NotBuilt("The Pen tool"), components: NotBuilt("Components"), variables: NotBuilt("Variables"))
+        let built = DesignNotBuiltTests.notBuilt
         let onLive = DesignFixtures.cards
         var onTest = onLive
         onTest.useServices(built)

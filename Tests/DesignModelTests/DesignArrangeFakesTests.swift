@@ -93,7 +93,7 @@ private func allIDs(_ nodes: [DesignNode]) -> [String] { nodes.flatMap { [$0.id]
         #expect(try filing.decode(filing.encode(document)) == document)
         #expect(throws: DesignFileError.unreadable) { try filing.decode(Data("hello".utf8)) }
     }
-    /// MJ2: marquee, Align Top, duplicate, group, copy and paste on `.fake`, each a named edit; on `.live` each says what isn't built.
+    /// MJ2: marquee, Align Top, duplicate, group, copy and paste on `.fake`, each a named edit; on `.live` the stubs say what isn't built.
     @Test func testFakesWalk() throws {
         let fake = DesignServices.fake
         let marquee = DesignRect(from: pt(80, 80), to: pt(520, 240))
@@ -113,8 +113,7 @@ private func allIDs(_ nodes: [DesignNode]) -> [String] { nodes.flatMap { [$0.id]
         let pasted = try fake.clipboard.paste(fake.clipboard.encode([pair], on: current), into: nil, on: current, mint: &mint)
         #expect(pasted.name == "Paste" && children(desktop, pasted.nodes).last?.children.count == 2)
         let live = DesignServices.live
-        #expect(live.marquee.layers(touching: marquee, in: desktop, on: page).isEmpty)
-        #expect(throws: DesignRefusal.notBuilt("Aligning several layers")) { try live.aligning.align(.top, [a, b, c], on: page) }
+        #expect(live.marquee is LiveMarquee && live.aligning is LiveAligning)
         #expect(throws: DesignRefusal.notBuilt("Duplicate")) {
             try live.duplicating.duplicate([a], offset: pt(10, 10), on: page, mint: &mint)
         }
