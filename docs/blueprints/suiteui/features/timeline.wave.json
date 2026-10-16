@@ -9,7 +9,7 @@
   "depends": [
     "suite-harness"
   ],
-  "longest_chain": "8 (TL-1 → TL-3 → TL-5 → TL-6 → TL-11 → TL-14 → TL-15 → TL-19)",
+  "longest_chain": "9 (TL-1 → TL-3 → TL-5 → TL-6 → TL-11 → TL-14 → TL-15 → TL-22 → TL-23)",
   "owned": [
     "Sources/SuiteUI/Contracts/TimelineMapping.swift",
     "Sources/SuiteUI/Contracts/KeyEditing.swift",
@@ -68,7 +68,18 @@
     "Tests/SuiteUITests/TimelineToolbarTests.swift",
     "Tests/mutations/SuiteUI.TimelineToolbar.json",
     "Tests/SuiteUITests/TimelineRulerUnitTests.swift",
-    "Tests/mutations/SuiteUI.TimelineRuler.json"
+    "Tests/mutations/SuiteUI.TimelineRuler.json",
+    "Sources/SuiteUI/TimelineLaneLayers.swift",
+    "Tests/SuiteUITests/TimelineLaneLayersTests.swift",
+    "Tests/mutations/SuiteUI.TimelineLaneLayers.json",
+    "UITests/SuiteJourneyTests+TimelineLanes.swift",
+    "Tests/AppSnapshotTests/SuiteTimelineLanesWindowTests.swift",
+    "Sources/SuiteUI/TimelineLanesView.swift",
+    "Tests/SuiteUITests/TimelineLanesViewTests.swift",
+    "Tests/SuiteUITests/TimelineLanesInputTests.swift",
+    "Sources/SuiteUI/TimelineLanesView+Access.swift",
+    "Tests/SuiteUITests/TimelineLanesAccessTests.swift",
+    "Tests/AppSnapshotTests/Golden/timeline-lanes/"
   ],
   "journeys": [
     "SuiteJourneyTests.testGalleryOpensEveryPage",
@@ -77,7 +88,8 @@
     "SuiteJourneyTests.testTimelineLooksAndScrubs",
     "SuiteJourneyTests.testTimelinePicksKeys",
     "SuiteJourneyTests.testTimelineScrubLatency",
-    "SuiteJourneyTests.testTimelineZoomsScrollsAndSetsTheWorkArea"
+    "SuiteJourneyTests.testTimelineZoomsScrollsAndSetsTheWorkArea",
+    "SuiteJourneyTests.testTimelineLanesDragWithoutBodies"
   ],
   "slices": [
     {
@@ -270,6 +282,50 @@
         ],
         "TL-d": [
           "TL-19"
+        ]
+      },
+      "ui": true
+    },
+    {
+      "id": "TL-f",
+      "behavior": "Lane beds, clips, keys, tweens and the playhead band draw in one AppKit view with a CALayer per lane, and pick, key drag and trim run on that view, so a 120-sample drag runs 0 window bodies while SwiftUI keeps the toolbar, ruler layout, focus and VoiceOver tree.",
+      "tasks": [
+        "TL-20",
+        "TL-21",
+        "TL-22",
+        "TL-23"
+      ],
+      "journeys": [
+        "SJ19e"
+      ],
+      "owned": [
+        "Sources/SuiteUI/TimelineLaneLayers.swift",
+        "Tests/SuiteUITests/TimelineLaneLayersTests.swift",
+        "Tests/mutations/SuiteUI.TimelineLaneLayers.json",
+        "UITests/SuiteJourneyTests+TimelineLanes.swift",
+        "Tests/AppSnapshotTests/SuiteTimelineLanesWindowTests.swift",
+        "Sources/SuiteUI/TimelineLanesView.swift",
+        "Tests/SuiteUITests/TimelineLanesViewTests.swift",
+        "Tests/SuiteUITests/TimelineLanesInputTests.swift",
+        "Sources/SuiteUI/TimelineLanesView+Access.swift",
+        "Tests/SuiteUITests/TimelineLanesAccessTests.swift",
+        "Tests/AppSnapshotTests/Golden/timeline-lanes/",
+        "Sources/SuiteUI/TimelineLane.swift",
+        "Tests/AppSnapshotTests/SuiteTimelineSnapshots.swift",
+        "Tests/mutations/SuiteUI.TimelineLane.json",
+        "Sources/SuiteUI/TimelineLaneInput.swift",
+        "Tests/mutations/SuiteUI.TimelineLaneInput.json"
+      ],
+      "waits": {
+        "TL-b": [
+          "TL-20",
+          "TL-21"
+        ],
+        "TL-c": [
+          "TL-23"
+        ],
+        "TL-d": [
+          "TL-22"
         ]
       },
       "ui": true
