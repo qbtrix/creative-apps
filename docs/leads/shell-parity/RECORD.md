@@ -2,29 +2,29 @@
 
 Issue: #1325 · Packet: docs/blueprints/design/features/shell-parity.md
 Run: act-1a14478b134-5to5 · Session: claude/design-shell-parity-2jr7z3 · Started: 2026-10-16T12:00Z
-Stage: 3 wave 2
-Base: 7773dc3175d53ffff7e379c14f0db1427beff8c4
-Next: read DP-a's critic panel (wf_5bbf65c1-1e6); clean -> post Belt-Slice-Done DP-a 38906785154; DS-3 builder opens its PR
+Stage: 3 wave 3
+Base: 11b1fd691dcd79cce6c2ea7473ecf9532e10fe92
+Next: wave 3 = DP-a fix round 1 (fixers sp/r1-1385, sp/r1-1386, sp/r1-1387); then DP-b review on the scoped run app=design containing #1391; DS-5 (feature-done) after DP-b's review
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | rounds | state | run |
 |---|---|---|---|---|---|---|---|
-| DP-a | The toolbar's eight commands each act or say why, and Add Page and Delete Page sit in a row under the pages. | DS-1, DS-2 | J3 | editor-in-window APIs (on dev) | 0 | merged (in review) | 38906785154 green, contains #1329 |
-| DP-b | Design opens in the suite window with pages and layers in the sidebar, Properties in the inspector and the floating tool box over the canvas, in light and dark. | DS-3, DS-4 | J0, DS-J1..DS-J5 | DP-a (DS-3) | 0 | building | – |
+| DP-a | The toolbar's eight commands each act or say why, and Add Page and Delete Page sit in a row under the pages. | DS-1, DS-2 | J3 | editor-in-window APIs (on dev) | 1 | merged (fix round 1) | 38906785154 green, contains #1329 |
+| DP-b | Design opens in the suite window with pages and layers in the sidebar, Properties in the inspector and the floating tool box over the canvas, in light and dark. | DS-3, DS-4 | J0, DS-J1..DS-J5 | DP-a (DS-3) | 0 | merged | wait scoped run app=design containing #1391 |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
 |---|---|---|---|---|---|---|---|
 | DS-1 | DP-a | 1 | DesignToolbarItem: eight commands, titles, symbols, identifiers, reasons | Sources/DesignModel/DesignToolbarItems.swift, Tests/DesignModelTests/DesignToolbarItemsTests.swift, Tests/mutations/DesignModel.DesignToolbarItems.json | DesignToolbarItemsTests + Mutate 6/6 | #1335 | merged |
 | DS-2 | DP-a | 1 | Page actions under Pages become a SidebarActionRow | Sources/DesignApp/DesignLayersPanel.swift, Tests/AppSnapshotTests/DesignLayersSnapshots.swift, UITests/DesignJourneyTests.swift | core journey asserts design.page.add/delete; DesignLayersSnapshots | #1329 | merged |
-| DS-3 | DP-b | 2 | DesignEditor on SuiteWindow + EditorDetail, floating palette; DesignTopBar/DesignPanel tabs go | DesignEditor, DesignPanel, DesignIntent, DesignWindow, DesignApp, DesignJourneyTests, 3 snapshot files | every Design journey on the scoped run | – | building |
+| DS-3 | DP-b | 2 | DesignEditor on SuiteWindow + EditorDetail, floating palette; DesignTopBar/DesignPanel tabs go | DesignEditor, DesignPanel, DesignIntent, DesignWindow, DesignApp, DesignJourneyTests, 3 snapshot files | every Design journey on the scoped run | #1391 | merged |
 | DS-4 | DP-b | 1 | Shell journey steps 1-5 with geometry, merged skipped ("waits on DS-3") | UITests/DesignJourneyTests+Shell.swift | DesignJourneyTests+Shell on the scoped run, once DS-3 enables it | #1330 | merged |
 | DS-5 | DP-b | 3 | feature-done: wave.json status built + feature issue | docs/blueprints/design/features/shell-parity.wave.json | scripts/ci renders waves | – | waits DS-3 |
 
 ## Reviews
 | slice | run | commit | lenses | filed | after round |
 |---|---|---|---|---|---|
-| DP-a | 38906785154 | b2e5453c | clarity, journey, design, layout, controls, oracle | running (wf_5bbf65c1-1e6) | 0 |
+| DP-a | 38906785154 | b2e5453c | clarity, journey, design, layout, controls, oracle | #1385 (major), #1386, #1387 | 0 |
 
 ## Decisions
 - Wave 1: DS-1 and DS-2 independent (disjoint files). Wave 2: DS-3 waits on DS-1 (uses DesignToolbarItem) and DS-2 (same UITests/DesignJourneyTests.swift and DesignLayersSnapshots.swift). DS-4 moved to wave 1 under contract rule 13 (acceptance journey before code): it merges with `throw XCTSkip("waits on DS-3")` and DS-3 removes the skips (DS-3 also owns UITests/DesignJourneyTests+Shell.swift for that). The feature-done label moves to a small DS-5 (wave.json status) after DS-3.
@@ -32,7 +32,10 @@ Next: read DP-a's critic panel (wf_5bbf65c1-1e6); clean -> post Belt-Slice-Done 
 - Wave 1 has 2 tasks: one worktree subagent each, started together (lead.md stage 3).
 - PRs target dev (CLAUDE.md; main = dev at the base and the lane retargets main to dev).
 - Builder branches are sp/<task> (git can't hold lead/shell-parity/<task> beside lead/shell-parity).
+- Fixers are briefed directly (Agent per finding), not via fix-batch.js: its branch names lead/<feature>/<id> collide with lead/shell-parity and gh is unauthenticated here.
+- DS-5 (feature-done) waits for DP-b's first review so the full run it triggers shows the reviewed shell.
 - DS-4 carries feature-done and sets the wave.json status to built.
 
 ## Open
+- Finding issues #1385, #1386, #1387 (DP-a), fix round 1 in wave 3.
 - #1079 editor-in-window still open (needs-human); not blocking code.

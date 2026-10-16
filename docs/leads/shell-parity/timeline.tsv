@@ -10,3 +10,7 @@ utc	stage	event	ref	note
 2026-10-16T13:40Z	3	stage-start	wave 2	DS-3 base 7773dc3
 2026-10-16T13:50Z	3	ci-run	38906785154	scoped design green, contains #1329 (DP-a); audit design identifier 16 = baseline
 2026-10-16T13:52Z	3	review	DP-a	critic panel started
+2026-10-16T14:00Z	3	review	DP-a	clarity/journey/design/layout/controls/oracle: 3 confirmed
+2026-10-16T14:00Z	3	finding-filed	#1385 #1386 #1387	DP-a
+2026-10-16T14:16Z	3	pr-merged	#1391	DS-3 suite window move; DP-b merged
+2026-10-16T14:30Z	3	fix-round	DP-a	round 1: #1385 #1386 #1387
