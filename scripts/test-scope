@@ -104,7 +104,8 @@ def regexes(units, linux=False):
     if None in snaps:
         second = r"^AppSnapshotTests\."
     elif snaps:
-        second = r"^AppSnapshotTests\.(%s)" % "|".join(dict.fromkeys(snaps))
+        # BodyCountSuites/ is the serialized parent the body-counter suites nest in.
+        second = r"^AppSnapshotTests\.(BodyCountSuites/)?(%s)" % "|".join(dict.fromkeys(snaps))
     else:
         second = ""
     return first + "\n" + second
@@ -118,8 +119,8 @@ def perf_entries():
             fields = line.split("#", 1)[0].split()
             if not fields:
                 continue
-            if len(fields) != 2 or fields[0] not in SCOPES or not re.fullmatch(r"\w+\.\w+(/\w+)?", fields[1]):
-                sys.exit(f"test-scope: {PERF_LIST}:{n}: want '<app> <Target>.<Suite>[/<test>]' or '<app> <Target>.<freeTest>', got {line.strip()!r}")
+            if len(fields) != 2 or fields[0] not in SCOPES or not re.fullmatch(r"\w+\.\w+(/\w+){0,2}", fields[1]):
+                sys.exit(f"test-scope: {PERF_LIST}:{n}: want '<app> <Target>.<Suite>[/<test>]' (a nested suite: <Target>.<Parent>/<Suite>[/<test>]) or '<app> <Target>.<freeTest>', got {line.strip()!r}")
             entries.append((fields[0], fields[1]))
     return entries
 
