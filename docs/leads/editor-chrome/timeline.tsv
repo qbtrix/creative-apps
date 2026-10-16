@@ -1,0 +1,3 @@
+utc	stage	event	ref	note
+2026-10-16T18:10Z	0	stage-start	#1344	base 132d910484b48c7d79bc92a43c2de55cc12c1dc1
+2026-10-16T18:10Z	0	stopped	#1344	packet superseded by 2026-10-15 one-shell decision; needs rescope after editor-shell-removal
