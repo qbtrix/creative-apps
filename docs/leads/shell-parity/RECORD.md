@@ -2,15 +2,15 @@
 
 Issue: #1325 · Packet: docs/blueprints/design/features/shell-parity.md
 Run: act-1a14478b134-5to5 · Session: claude/design-shell-parity-2jr7z3 · Started: 2026-10-16T12:00Z
-Stage: 3 wave 3
-Base: 11b1fd691dcd79cce6c2ea7473ecf9532e10fe92
-Next: wait for fixers (#1385/#1386/#1387) and the diagnosis of dev-red #1393 (full run 38915938965 red, range includes #1391); then DP-b review on scoped run app=design 38917492060 (head fb72b7e5, contains #1391)
+Stage: 3 wave 4
+Base: 4c178c9a0a0405bd43275d3a66ba7dbfafba1a72
+Next: wave 4 = #1404 build fix (DP-a round 1), DP-b round 1 fixers sp/r1-1443, sp/r1-1444; then the scoped run app=design containing them, DP-a review round 2 and the DP-b critic panel; DS-5 feature-done after
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | rounds | state | run |
 |---|---|---|---|---|---|---|---|
-| DP-a | The toolbar's eight commands each act or say why, and Add Page and Delete Page sit in a row under the pages. | DS-1, DS-2 | J3 | editor-in-window APIs (on dev) | 1 | merged (fix round 1) | 38906785154 green, contains #1329 |
-| DP-b | Design opens in the suite window with pages and layers in the sidebar, Properties in the inspector and the floating tool box over the canvas, in light and dark. | DS-3, DS-4 | J0, DS-J1..DS-J5 | DP-a (DS-3) | 0 | merged | wait scoped run app=design containing #1391 |
+| DP-a | The toolbar's eight commands each act or say why, and Add Page and Delete Page sit in a row under the pages. | DS-1, DS-2 | J3 | editor-in-window APIs (on dev) | 1 | merged (fix round 1: #1403, #1408 merged; #1404 fixing build) | 38906785154 green, contains #1329 |
+| DP-b | Design opens in the suite window with pages and layers in the sidebar, Properties in the inspector and the floating tool box over the canvas, in light and dark. | DS-3, DS-4 | J0, DS-J1..DS-J5 | DP-a (DS-3) | 1 | merged (fix round 1) | 38917492060 red: J3 #1443, shell journeys #1444 (switcher waits on #1337) |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
@@ -25,6 +25,7 @@ Next: wait for fixers (#1385/#1386/#1387) and the diagnosis of dev-red #1393 (fu
 | slice | run | commit | lenses | filed | after round |
 |---|---|---|---|---|---|
 | DP-a | 38906785154 | b2e5453c | clarity, journey, design, layout, controls, oracle | #1385 (major), #1386, #1387 | 0 |
+| DP-b | 38917492060 (CI lens: failed journeys) | fb72b7e5 | journey (CI) | #1443 (blocker), #1444 | 0 |
 
 ## Decisions
 - Wave 1: DS-1 and DS-2 independent (disjoint files). Wave 2: DS-3 waits on DS-1 (uses DesignToolbarItem) and DS-2 (same UITests/DesignJourneyTests.swift and DesignLayersSnapshots.swift). DS-4 moved to wave 1 under contract rule 13 (acceptance journey before code): it merges with `throw XCTSkip("waits on DS-3")` and DS-3 removes the skips (DS-3 also owns UITests/DesignJourneyTests+Shell.swift for that). The feature-done label moves to a small DS-5 (wave.json status) after DS-3.
@@ -37,7 +38,8 @@ Next: wait for fixers (#1385/#1386/#1387) and the diagnosis of dev-red #1393 (fu
 - DS-4 carries feature-done and sets the wave.json status to built.
 
 ## Open
-- dev-red #1393: full run 38915938965 red (Linux + macOS) in a range with #1391 and #1329; diagnosing whether any failure is Design's.
+- dev-red #1393: full run 38915938965 red on Library tests only (LibraryImportBudgetTests timing, LibraryImportSnapshots.progressRowShowsAfterItsDelay from #1382); not Design's.
+- Findings #1443, #1444 (DP-b, from scoped run 38917492060), fix round 1 in wave 4. DP-b's shell journeys also wait on #1337 (EW-8, the app switcher in SuiteWindow).
 - DS-3 note: the shell journey asserts suite.switcher, which SuiteWindow shows only after editor-in-window EW-8 (#1079 open); DP-b's journeys may stay red until EW-8 lands.
 - Finding issues #1385, #1386, #1387 (DP-a), fix round 1 in wave 3.
 - #1079 editor-in-window still open (needs-human); not blocking code.
