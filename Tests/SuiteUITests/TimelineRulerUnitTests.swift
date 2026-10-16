@@ -55,8 +55,10 @@ import Testing
         let mapping = FrameMapping(duration: 100, frameWidth: 10)
         var drag = TimelineWorkAreaDrag(start: 20...60, edge: .end)
         #expect(drag.move(toX: 50, mapping: mapping) && drag.span == 20...21)   // one frame kept
-        #expect(!drag.move(toX: 52, mapping: mapping))
-        #expect(drag.move(toX: 5_000, mapping: mapping))
+        let sameFrame = drag.move(toX: 52, mapping: mapping)   // a mutating call can't sit alone in #expect
+        #expect(!sameFrame)
+        let clamped = drag.move(toX: 5_000, mapping: mapping)
+        #expect(clamped)
         #expect(drag.span == SuiteTimelineEditing().trimmed(20...60, edge: .end, to: 500, lastFrame: 100))
         #expect(drag.released() == 20...100)
         var start = TimelineWorkAreaDrag(start: 20...60, edge: .start)
