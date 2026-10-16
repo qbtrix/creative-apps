@@ -17,7 +17,10 @@
 // width, and unscrolled they stood taller than a 640 pt window, which pushed
 // the sidebar's rows above the window and the status bar, timeline and layer
 // rows below it. Snapshots draw it unscrolled (ImageRenderer can't draw a
-// ScrollView), as HaloTimelineView does.
+// ScrollView), as HaloTimelineView does. Its indicators are `.never`, as in
+// Photo's inspector tabs: with legacy scrollers the vertical one was an
+// unlabelled button to the app audit's Unnamed check. The column still
+// scrolls by wheel and trackpad.
 import HaloModel
 import SuiteUI
 import SwiftUI
@@ -32,6 +35,7 @@ struct HaloCompositionInspector: View {
             content
         } else {
             ScrollView(.vertical) { content }
+                .scrollIndicators(.never)
         }
     }
 
