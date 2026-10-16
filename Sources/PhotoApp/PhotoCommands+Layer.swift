@@ -1,4 +1,6 @@
-// PhotoCommands+Layer.swift: Photo's Layer menu: New, Delete; Duplicate Layer
+// PhotoCommands+Layer.swift: Photo's Layer menu: New, New Adjustment Layer
+// (a submenu of the kinds the workspace offers, each disabled with its reason
+// as its help when it can't run; Blur is never one), Delete; Duplicate Layer
 // (Command-J), Merge Down (Command-E) and Flatten Image (no shortcut), each
 // disabled with the workspace's reason as its help when it can't run;
 // Rename…, Show/Hide, Bring Forward, Send Backward, Select Layer Above and
@@ -24,6 +26,7 @@ struct PhotoLayerMenu: View {
         Button("New Layer", systemImage: "plus") { menu.perform(.addLayer) }
             .keyboardShortcut("n", modifiers: [.command, .shift])
             .disabled(!menu.hasImage)
+        adjustmentLayerMenu
         Button("Delete Layer", systemImage: "trash") { menu.perform(.deleteLayer) }
             .disabled(!menu.canDeleteLayer)
         Divider()
@@ -72,6 +75,20 @@ struct PhotoLayerMenu: View {
         case .copy: PhotoEditItem.copy.systemImage
         case .paste: PhotoEditItem.paste.systemImage
         }
+    }
+
+    /// New Adjustment Layer: one item per kind, disabled with its reason as its help.
+    private var adjustmentLayerMenu: some View {
+        let help = menu.addAdjustmentLayerHelp
+        return Menu("New Adjustment Layer", systemImage: "slider.horizontal.3") {
+            ForEach(menu.adjustmentLayerKinds, id: \.self) { kind in
+                Button(kind.title) { menu.perform(.adjustmentLayer(.add(kind))) }
+                    .disabled(help != nil)
+                    .help(help.map { "\(kind.title): \($0)" } ?? kind.title)
+            }
+        }
+        .disabled(menu.adjustmentLayerKinds.isEmpty)
+        .help(help ?? "New Adjustment Layer")
     }
 
     /// A layer command, disabled with its reason as its help when it can't run.
