@@ -14,7 +14,15 @@ extension LibraryCatalog {
         guard importState == .idle, catalogState != .loading else { return nil }
         importState = .running(ImportProgress(done: 0, total: 0))
         importNotice = nil
-        return Set(items.map(\.id))
+        return knownIDs()
+    }
+
+    /// The catalog's ids, the set sized once up front (QB-L9: no intermediate
+    /// array, no rehash while it grows).
+    private func knownIDs() -> Set<String> {
+        var known = Set<String>(minimumCapacity: items.count)
+        for item in items { known.insert(item.id) }
+        return known
     }
 
     /// Shows the importer's progress; ignored when no import is running.
@@ -25,7 +33,7 @@ extension LibraryCatalog {
 
     /// A batch from `added`: photos whose id is already in the catalog are ignored.
     public mutating func appendImported(_ photos: [PhotoItem]) {
-        var known = Set(items.map(\.id))
+        var known = knownIDs()
         let fresh = photos.filter { known.insert($0.id).inserted }
         guard !fresh.isEmpty else { return }
         items += fresh
