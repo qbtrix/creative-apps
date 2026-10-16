@@ -119,6 +119,7 @@ private func run(_ scan: FolderScan, known: Set<String>, step: Duration) async t
     let (result, recorder) = try await run(FolderScan(candidates: [], failures: failures), known: [], step: .zero)
     #expect(result == ImportResult(added: [], alreadyKnown: 0, failures: failures))
     #expect(recorder.batches.isEmpty)
+    #expect(recorder.progresses.map(\.1) == [ImportProgress(done: 0, total: 0)])
 }
 
 @Test func scanErrorsPassThrough() async {

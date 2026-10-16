@@ -63,7 +63,7 @@ public struct LiveImporter: PhotoImporting {
             if Task.isCancelled { break }
         }
         if !batch.isEmpty { added(batch) }
-        if reported != all.count || total == 0 { progress(ImportProgress(done: all.count, total: total)) }
+        if reported != all.count { progress(ImportProgress(done: all.count, total: total)) }
         return ImportResult(added: all, alreadyKnown: scan.candidates.count - total, failures: scan.failures)
     }
 
