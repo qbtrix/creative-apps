@@ -55,7 +55,8 @@ struct HomeWindow: View {
     }
 }
 
-/// The Home page on HomeLayout's 24 pt margin.
+/// The Home page on HomeLayout's 24 pt margin: the New row pinned at the
+/// top, the running strip at the bottom, the recents in the height between.
 struct HomeContent: View {
     let model: HomeModel
     let services: SuiteServices
@@ -68,6 +69,7 @@ struct HomeContent: View {
                      open: Self.open(services, identifier: "afterglow.home.empty.open"))
                 .homeLayoutAnchor("recents")
             HomeRunningStrip(model: model)
+                .homeLayoutAnchor("running")
         }
         .padding(SuiteSpacing.xl)
     }

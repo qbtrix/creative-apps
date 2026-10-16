@@ -53,8 +53,11 @@ private struct HomeTile: View {
                 if let first = tile.presets.first { create(first) }
             } label: {
                 VStack(spacing: SuiteSpacing.xs) {
+                    // A fixed glyph box and two reserved lines: every tile is one height.
                     Image(systemName: HomeSidebarRows.symbol(tile.app)).font(SuiteFont.title)
-                    Text(tile.title).font(SuiteFont.caption).lineLimit(2).multilineTextAlignment(.center)
+                        .frame(height: SuiteSize.switcherIcon)
+                    Text(tile.title).font(SuiteFont.caption).lineLimit(2, reservesSpace: true)
+                        .multilineTextAlignment(.center)
                 }
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, SuiteSpacing.s)
@@ -89,6 +92,8 @@ private struct HomeTile: View {
                     Button(preset.title) { create(preset) }
                 }
             }
+            .font(SuiteFont.pill)
+            .controlSize(.small)
             .disabled(!enabled)
             .help(reason ?? "Start from a preset")
             .suiteControl(id: id + ".presets", enabled: enabled, reason: reason)
@@ -98,7 +103,7 @@ private struct HomeTile: View {
 }
 
 /// The home's frames by name ("tiles", "tile.<app>", "chips.<app>",
-/// "menu.<app>", "recents"), read by AfterGlowHomeLayoutTests.
+/// "menu.<app>", "recents", "empty", "running"), read by AfterGlowHomeLayoutTests.
 struct HomeLayoutAnchors: PreferenceKey {
     static var defaultValue: [String: Anchor<CGRect>] { [:] }
 
