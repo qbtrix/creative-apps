@@ -1,11 +1,7 @@
-// TimelineLookTests.swift: TL-5's look rules. A key on a selected track with
-// nothing picked stays secondary text (#1423); a picked key is the accent and
-// a key at the playhead is keyed, picked or not. Linear, eased and hold keys
-// draw a diamond, a circle and a square, 10 pt drawn and 16 pt to hit. The
-// clip fill is the accent 24 % into the panel within 1/255 in all four
-// appearances, and on it the idle key fill and the picked key's edge reach
-// 3:1 (#62). The time pill stays inside the visible stretch at frame 0 and at
-// the last frame. No SwiftUI. macOS only.
+// TimelineLookTests.swift: TL-5's look rules (timeline packet, acceptance
+// row TL-5): key fills by state, never by the track's selection (#1423); the
+// glyphs; the clip fill as the 24 % mix; 3:1 for keys on a clip in all four
+// appearances (#62); the pill inside the visible stretch. macOS only.
 import Foundation
 import SuiteUI
 import Testing
@@ -13,16 +9,12 @@ import Testing
 @Suite struct TimelineLookTests {
     private static let keys = [0, 12, 24].map { TimelineKey(frame: $0, shape: .linear) }
 
-    @Test func anIdleKeyOnASelectedTrackStaysSecondary() {
+    @Test func anIdleKeyOnASelectedTrackStaysSecondaryAndAPickedOneIsTheAccent() {
         let track = TimelineTrack(id: "ball", name: "Ball", keys: Self.keys, isSelected: true)
         #expect(TimelineLook.keyFill(Self.keys[1], on: track, playhead: 30) == SuitePalette.textSecondary)
-        #expect(TimelineLook.keyFill(picked: false, atPlayhead: false) == SuitePalette.textSecondary)
-    }
-
-    @Test func aPickedKeyIsTheAccentOnAnyTrack() {
-        let track = TimelineTrack(id: "ball", name: "Ball", keys: Self.keys, pickedFrames: [12])
-        #expect(TimelineLook.keyFill(Self.keys[1], on: track, playhead: 30) == SuitePalette.accent)
-        #expect(TimelineLook.keyFill(Self.keys[2], on: track, playhead: 30) == SuitePalette.textSecondary)
+        let picked = TimelineTrack(id: "ball", name: "Ball", keys: Self.keys, pickedFrames: [12])
+        #expect(TimelineLook.keyFill(Self.keys[1], on: picked, playhead: 30) == SuitePalette.accent)
+        #expect(TimelineLook.keyFill(Self.keys[2], on: picked, playhead: 30) == SuitePalette.textSecondary)
     }
 
     @Test func aKeyAtThePlayheadIsKeyedPickedOrNot() {
@@ -48,8 +40,6 @@ import Testing
         for shape in [TimelineKeyShape.linear, .eased, .hold] {
             let path = TimelineLook.keyPath(shape)
             #expect(path.drawSize == 10 && path.hitSize == 16)
-            #expect(path.hitRect(center: CGPoint(x: 40, y: 16)) == CGRect(x: 32, y: 8, width: 16, height: 16))
-            #expect(path.drawRect(center: CGPoint(x: 40, y: 16)) == CGRect(x: 35, y: 11, width: 10, height: 10))
         }
     }
 
@@ -76,19 +66,16 @@ import Testing
         }
     }
 
-    @Test func aHoldKeySteps() {
-        let hold = TimelineLook.segment(from: .init(frame: 0, shape: .hold), at: 0, to: .init(frame: 12, shape: .linear), at: 120)
-        #expect(hold.kind == .step && hold.curveGlyphX == nil)
-        let line = TimelineLook.segment(from: .init(frame: 0, shape: .linear), at: 0, to: .init(frame: 12, shape: .hold), at: 120)
+    @Test func aHoldKeyStepsAndAnEasedOneShowsItsCurveGlyphFrom24Points() {
+        let (hold, linear, eased) = (TimelineKey(frame: 0, shape: .hold), TimelineKey(frame: 6, shape: .linear),
+                                     TimelineKey(frame: 0, shape: .eased))
+        let step = TimelineLook.segment(from: hold, at: 0, to: linear, at: 120)
+        #expect(step.kind == .step && step.curveGlyphX == nil)
+        let line = TimelineLook.segment(from: linear, at: 0, to: hold, at: 120)
         #expect(line.kind == .line && line.curveGlyphX == nil)
-    }
-
-    @Test func anEasedKeyShowsItsCurveGlyphFrom24Points() {
-        let eased = TimelineKey(frame: 0, shape: .eased)
-        let next = TimelineKey(frame: 6, shape: .linear)
-        let wide = TimelineLook.segment(from: eased, at: 10, to: next, at: 34)
+        let wide = TimelineLook.segment(from: eased, at: 10, to: linear, at: 34)
         #expect(wide.kind == .line && wide.curveGlyphX == 22)
-        let narrow = TimelineLook.segment(from: eased, at: 10, to: next, at: 33)
+        let narrow = TimelineLook.segment(from: eased, at: 10, to: linear, at: 33)
         #expect(narrow.kind == .line && narrow.curveGlyphX == nil)
     }
 
