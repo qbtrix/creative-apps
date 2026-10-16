@@ -5,7 +5,7 @@
   "status": "built",
   "feature_issue": "#800",
   "covers": "#362",
-  "waits_on": "nothing",
+  "waits_on": "creative-core #217, #219 (on core `main` 98be31a)",
   "owned": [
     "Sources/FlareModel/Live/LiveScenes.swift",
     "Tests/FlareModelTests/LiveScenesTests.swift",

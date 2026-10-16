@@ -84,16 +84,35 @@ order): wave 1 `mac-platform` (#370, #373, #739), which waits on nothing;
 wave 2, as their engine issues land, `live-stage` (#357, #740), `live-keys`
 (#13, #358) and `live-scenes` (#362).
 
-**Later features (UI and integrate, not in a packet yet).** The Flare UI on
-fakes: F1a #346, F1b #347, F3c #375, F5 #391, F6b #348, F6c #349, F7b #376,
-F8 #377, F9 #378, F11a #350, F11b #351, F17b #392, F17c #393, F18 #384, and
-the older issues that now carry F tasks (#11, #12, #15, #186, #203, #204,
-#205). The p1 integrate tasks IN-1 #397, IN-2 #385, IN-4 #398 and IN-9 #399
-wait on that UI and on gate G2.
+**Later features (UI and integrate), as packets (2026-10-15).** Wave 3
+`draw-key-save` (#346, #347, #12, #203, #15, #11, #205, part of #204, #376
+and #391): the window on `SuiteWindow`, the router, stage, timeline,
+transport, menus and files, so a person can draw, key, play and save on
+live services. Wave 4, side by side: `stage-edit` (#204, #375, #384, IN-1
+#397), `inspector-timeline` (#186, #348, #349, #376, #377, #378, IN-2 #385)
+and `layers-files` (#350, #351, #392, #393, IN-4 #398). The tier 2 and 3
+screens follow; `flare/features/waves.md` lists them.
 
 ---
 
 ## 1. Scope
+
+### Usage map (2026-10-15)
+
+Which of the v1 features below people use most, from `docs/priorities.md`
+(Flare) and this section's scope, so feature packets go most-used first.
+**Tier 1, nearly every session:** draw rectangles and ellipses, select and
+move on the stage, and the layers list; key position, scale, rotation and
+opacity on the timeline, then retime and delete keys; scrub, play and loop
+with Space; easing presets; fill and stroke; open, save, undo,
+copy/paste/duplicate and zoom/pan. Pen and anchor editing are tier 1 but
+thin (*inferred*). **Tier 2, weekly:** export (SVG, Lottie, PNG sequence),
+symbols and instances with swatches, onion skin and the motion path, and the
+custom easing curve. **Tier 3, occasional:** interactive state machines,
+Assist, guides beyond the basics, and the perf budgets. The UI packets in
+`flare/features/waves.md` follow this order: draw, key, play and save first,
+then stage editing, the inspector and timeline, and layers and files; the
+tier 2 and 3 screens come after.
 
 ### MVP (v1)
 
