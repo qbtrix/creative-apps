@@ -39,7 +39,7 @@ Next: wave 4 = #1404 build fix (DP-a round 1), DP-b round 1 fixers sp/r1-1443, s
 
 ## Open
 - dev-red #1393: full run 38915938965 red on Library tests only (LibraryImportBudgetTests timing, LibraryImportSnapshots.progressRowShowsAfterItsDelay from #1382); not Design's.
-- Findings #1443, #1444 (DP-b, from scoped run 38917492060), fix round 1 in wave 4: #1443 -> PR #1446 (root cause: design.properties sat on the scroll view that SuiteWindow turns into suite.inspector). DP-b's shell journeys also wait on #1337 (EW-8, the app switcher in SuiteWindow).
+- Findings #1443, #1444 (DP-b, from scoped run 38917492060), fix round 1 in wave 4: #1444 -> PR #1447 (switcher checks moved last; status-line text read as label or value); #1443 -> PR #1446 (root cause: design.properties sat on the scroll view that SuiteWindow turns into suite.inspector). DP-b's shell journeys also wait on #1337 (EW-8, the app switcher in SuiteWindow).
 - DS-3 note: the shell journey asserts suite.switcher, which SuiteWindow shows only after editor-in-window EW-8 (#1079 open); DP-b's journeys may stay red until EW-8 lands.
 - Finding issues #1385, #1386, #1387 (DP-a), fix round 1 in wave 3.
 - #1079 editor-in-window still open (needs-human); not blocking code.
