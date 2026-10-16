@@ -28,7 +28,7 @@
 # head and reads the job names "Linux", "macOS" and "macOS build" and the
 # run title "macOS build", so keep them stable.
 name: CI
-# A build-only run (the fast lane's compile check for app code) gets its own
+# A build-only run (the fast lane's compile check for code PRs) gets its own
 # title, so the lane tells it from a full run; " " keeps the default title.
 run-name: "${{ inputs.build_only && 'macOS build' || ' ' }}"
 
@@ -38,7 +38,7 @@ on:
   workflow_dispatch:
     inputs:
       build_only:
-        description: Only build the app targets on macOS (the fast lane's compile check for app PRs)
+        description: Only build every target on macOS (the fast lane's compile check for code PRs)
         type: boolean
         default: false
   schedule:
@@ -74,9 +74,9 @@ jobs:
       - run: scripts/ci
       - run: bash Tests/fast_lane/test_fast_lane.sh
 
-  # The fast lane's compile check for a PR that touches code only macOS
-  # compiles (MAC_ONLY in scripts/fast-lane.sh: the apps, SuiteUI, their test
-  # targets and the UI journeys). It compiles everything and runs nothing:
+  # The fast lane's compile check for a PR that changes code (BUILD_RE in
+  # scripts/fast-lane.sh: Swift under Sources/, Tests/ and UITests/,
+  # project.yml, Package.swift). It compiles everything and runs nothing:
   # every SwiftPM target with its tests, then the journey bundles from
   # project.yml. Only on workflow_dispatch with build_only.
   mac-build:

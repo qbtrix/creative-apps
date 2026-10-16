@@ -20,7 +20,7 @@ Hand this to every session (the lead and each agent it starts) verbatim.
 1. **Feature issue.** One GitHub issue per feature, labels `feature-lead` and `line:<app>`. Body links the packet `docs/blueprints/<app>/features/<feature>.md` and has one `Depends on:` line.
 2. **Run.** Belt runs one cloud session per feature issue (a lead), from the trusted launch folder, with the repo's Auto settings (creative-apps#733, creative-core#263). A lead holds one in-flight slot however many PRs it opens.
 3. **Status channel.** The lead pushes `docs/leads/<feature>/RECORD.md` and `timeline.tsv` to branch `lead/<feature>` after every stage. Belt reads the branch's last commit time; nothing else is polled besides PRs and issue comments.
-4. **Swarm PRs.** Base `dev`, label `fast-lane`, at most 400 lines and 15 files. Body lines: `Belt-Lead: <run id>`, `Feature: <feature>`, then `Fast-Check: pass` and `Head: <full sha>` after `scripts/ci` passes. The lane merges them. Nobody merges into dev by hand or by an agent.
+4. **Swarm PRs.** Base `dev`, label `fast-lane`, at most 400 lines and 15 files. Body lines: `Belt-Lead: <run id>`, `Feature: <feature>`, then `Fast-Check: pass` and `Head: <full sha>` after `scripts/ci` passes. Point at the feature issue with `Refs`; the lane turns a closing keyword before a `feature-lead` issue into `Refs` anyway and never closes it. Findings and gaps a PR fixes take a closing keyword and close on merge. The lane merges them. Nobody merges into dev by hand or by an agent.
 5. **Review policy (decision for the captain).** `Belt-Lead:` PRs do not need the `belt/review` status. The lead's own critic panel is the review. Only `Belt-Run:` and `Belt-Test:` PRs keep it.
 6. **Done.** All three: a `Belt-Lead:` PR labelled `feature-done` has merged; the CI run it triggered on dev is green; the lead commented on the feature issue with a line starting `Belt-Contact-Sheet:` and the run link.
 7. **Stall.** No commit on `lead/<feature>`, no PR event and no issue comment for 30 min: Belt sends one nudge with `claude -p --cloud <session id> "<resume text>"`. A second stall: relaunch with a resume brief that says "read RECORD.md, continue from the last stage". A third: label the issue `needs-human` and stop.
@@ -46,12 +46,12 @@ Hand this to every session (the lead and each agent it starts) verbatim.
   head, comments the run URL, and merges on a later sweep when it passes. A
   new failure is refused by test name and waits for your next push. A
   `Mac-Check: <run url>` line the supervisor adds counts too.
-- **macOS-only code must compile on macOS.** A PR changing Swift that Linux
-  never compiles (the apps, SuiteUI, `Tests/SuiteUITests`,
-  `Tests/AppSnapshotTests`, `UITests`, or `project.yml`) merges only once a
-  build-only macOS run compiled its head (lesson 114; #1097). The lane
-  dispatches it, comments the URL, and merges when it builds; a failed build
-  waits for your next push.
+- **Code must compile on macOS.** A PR changing any `.swift` file under
+  `Sources/`, `Tests/` or `UITests/`, or `project.yml`, Models included,
+  merges only once a build-only macOS run compiled its head (lesson 114;
+  #1097; #1210 broke the macOS build from PhotoModel, which Linux compiled).
+  The lane dispatches it, comments the URL, and merges when it builds; a
+  failed build waits for your next push.
 - **You can read runs.** `gh run list --workflow ci.yml --branch dev`, then
   `gh run download <id> -n ui-screens` (whole-window PNGs, `contact-sheet.html`,
   `audit-*.json`) and `-n snapshots`; or the GitHub MCP `actions_*` and

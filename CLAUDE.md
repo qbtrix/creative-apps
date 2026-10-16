@@ -227,7 +227,14 @@ A session started from a `feature-lead` issue is a lead: it follows
 its workflow templates in `docs/factory/workflows/`. Every PR a lead or its
 agents open carries `Belt-Lead: <run id>` and `Feature: <feature>` lines
 above the `Fast-Check:` / `Head:` lines. `Belt-Lead:` PRs don't wait for
-`belt/review`; the lead's critic panel is their review.
+`belt/review`; the lead's critic panel is their review. A PR with a
+`Feature:` line never closes a `feature-lead` issue: before the squash the
+fast lane reads the labels of each issue its closing keywords point at
+(close, fixes, `Resolved:` and the rest, any case) and turns the keyword
+before a `feature-lead` issue into `Refs`. Its other closing references,
+such as the critic findings and gaps it fixes, stay and close on merge. An
+issue whose labels the lane can't read keeps its keyword, isn't closed, and
+gets one comment on the PR.
 
 ## Fast lane
 
@@ -249,15 +256,17 @@ Crew PRs merge into `dev` at once; `main` moves only when full CI passes on
   later sweep when that run passes. A run with a new failure is refused by
   test name and waits for your next push. A `Mac-Check: <run url>` line a
   supervisor adds counts too.
-- Any other PR changing Swift that Linux `scripts/ci` doesn't compile
-  (`MAC_ONLY` in scripts/fast-lane.sh: `Sources/*App`, `Sources/SuiteUI`, `Sources/SuiteShell`,
-  `Tests/SuiteUITests`, `Tests/AppSnapshotTests`, `UITests`, and
-  `project.yml`; its tests derive the list from the manifests) merges only
-  once its head compiles on macOS: the lane dispatches a build-only CI run
-  (`ci.yml` with `build_only`: every target with its tests, then the journey
-  bundles; nothing runs) once per head, comments its URL, and merges when it
-  succeeds. A failed build waits for your next push.
-- Otherwise UI code takes the lane on the Linux check alone. A human reviews
+- Any other PR that changes code (`BUILD_RE` in scripts/fast-lane.sh: a
+  `.swift` file under `Sources/`, `Tests/` or `UITests/`, `project.yml`, or
+  `Package.swift`), a Model included, merges only once its head compiles on
+  macOS. Linux `scripts/ci` never builds the apps, and it misses macOS-only
+  breaks in the targets it does build (#1210: an `ObjCBool` error in
+  PhotoModel). The lane dispatches a build-only CI run (`ci.yml` with
+  `build_only`: every target with its tests, then the journey bundles;
+  nothing runs) once per head, comments its URL, and merges when it
+  succeeds. A failed build waits for your next push. A PR with no code
+  (docs, data, packets) takes the lane on the Linux check alone.
+- Outside `MAC_GATED`, no test runs on macOS before a merge. A human reviews
   the snapshots after the next feature CI and files fixes as new issues.
 - Each lane run merges every eligible PR, oldest first. A PR that conflicts
   after an earlier merge gets one comment and waits for a rebase. A fast-lane

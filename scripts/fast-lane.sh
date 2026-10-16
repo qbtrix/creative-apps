@@ -25,34 +25,38 @@
 # run on its head whose macOS job passed or failed only where dev fails
 # (mac_gate): the run a body line
 # `Mac-Check: <run url>` names, or else the latest CI run on the head, which
-# the lane dispatches itself when there is none. Any other PR that touches
-# MAC_ONLY (code only macOS compiles) needs a passing build-only CI run on its head
-# (build_gate), also dispatched by the lane. A Belt PR
+# the lane dispatches itself when there is none. Any other PR that changes
+# code (BUILD_RE: Swift under Sources/, Tests/ or UITests/, project.yml,
+# Package.swift) needs a passing build-only CI run on its head (build_gate),
+# also dispatched by the lane. A Belt PR
 # (a body line starting `Belt-Run:` or `Belt-Test:`) also needs Belt's
 # `belt/review` commit status at success on its head while REQUIRE_BELT_REVIEW=1.
 # A fast-lane PR based on main is retargeted to BASE_BRANCH. A PR that conflicts
 # with the base gets one comment per head and keeps its label for Belt's fixer.
 #
 # Every run sweeps all open fast-lane PRs, oldest first, and merges each
-# eligible one. After its merges the lane dispatches CI on BASE_BRANCH at most
-# once per run (dispatch_reason), when it merged a PR labelled FEATURE_LABEL,
+# eligible one. A lead's PR (a `Feature:` body line) never closes a
+# `feature-lead` issue: before the squash the lane turns the closing keyword
+# before one into `Refs` (lead_refs); its other closing references stay.
+# After its merges the lane dispatches CI on BASE_BRANCH at most once per run
+# (dispatch_reason), when it merged a PR labelled FEATURE_LABEL,
 # merged a PR touching UI_RE (app shells, SuiteUI, snapshot tests, UI journeys),
 # or BASE_BRANCH holds DISPATCH_EVERY merged PRs since the last CI run's head.
 # Leads can't dispatch CI themselves (403), so the lane does it for them.
-# Trade-off: SwiftUI can't compile on Linux, so UI breakage (the macOS build,
-# snapshots, UI journeys) sits on dev until that run, and the dev-red range can
-# span PRs.
+# Trade-off: the lane builds each code PR on macOS (build_gate) but runs
+# nothing there, so snapshot and UI journey breakage sits on dev until that
+# run, and the dev-red range can span PRs.
 #
 # `decide` is the pure decision function (no network). It reads a PR JSON file,
 # a file-list file (one path per line), a check-rollup JSON file and, when the
 # PR touches the app audit, two audit_snapshot directories (merge base, head),
 # and, when it touches MAC_GATED, the `gh run view` JSON of its Mac-Check run
-# and of the latest CI run on its head, and when it touches MAC_ONLY, its
+# and of the latest CI run on its head, and when it touches BUILD_RE, its
 # latest build-only run.
 # It logs each rule to stderr and prints one line to stdout:
 #   skip|<why>  retarget|<from base>  not-eligible|<reasons>  red|<checks>
 #   conflict|<head sha>  pending|<why>  mac-dispatch|<gated files>|<head branch>
-#   build-dispatch|<app folders>|<head branch>
+#   build-dispatch|<code paths>|<head branch>
 #   mac-gate|<what to do>  eligible|<lines>|<files>|<proof>
 # Tests/fast_lane/test_fast_lane.sh sources this file and feeds `decide` fixtures.
 #
@@ -131,25 +135,18 @@ MAC_GATED=(Sources/SuiteUI/SuiteWindow.swift Sources/SuiteUI/EditorShell.swift
   Sources/SuiteUI/ToolbarGroup.swift Sources/SuiteUI/Tokens.swift)
 MAC_CHECK_LINE="Mac-Check:"
 MAC_JOB="macOS"
-# Code only macOS compiles: Linux scripts/ci never builds it. A PR touching
-# it that isn't MAC_GATED merges only once a build-only CI run (ci.yml's
+# What a compiler reads: Swift under Sources/, Tests/ and UITests/, plus
+# project.yml and Package.swift (protected anyway). A PR changing any of it
+# that isn't MAC_GATED merges only once a build-only CI run (ci.yml's
 # `build_only` input: every SwiftPM target with its tests, then the journey
 # bundles; nothing runs) compiled its head; the lane dispatches it, once per
-# head. Lesson 114: app PRs merged on the Linux gate and dev stopped compiling
-# on macOS (run 38727890123); then a snapshot test did (run 38732179619, #1097).
-# MAC_ONLY is the source folder of every target in Package.swift's
-# `#if os(macOS)` block, every project.yml source no Linux target compiles,
-# and project.yml itself; Tests/fast_lane derives that list from the two
-# manifests (`swift package dump-package` with the block switched on) and
-# checks it matches. A `*` stands for part of one name; each entry is a
-# folder or a file. Only Swift files and project.yml count (build_apps).
-MAC_ONLY=(Sources/SuiteUI Sources/SuiteShell 'Sources/*App' Tests/SuiteUITests Tests/AppSnapshotTests UITests project.yml)
-mac_only_re() {
-  local p re=""
-  for p in "${MAC_ONLY[@]}"; do p="${p//./\\.}"; re+="${re:+|}${p//\*/[A-Za-z0-9_]+}"; done
-  echo "^($re)(/|\$)"
-}
-MAC_ONLY_RE=$(mac_only_re)
+# head. Linux scripts/ci never builds the app targets (lesson 114: dev stopped
+# compiling on macOS, run 38727890123; then a snapshot test, run 38732179619,
+# #1097), and it can't see a macOS-only break in a target it does build:
+# #1210 put an ObjCBool error in Sources/PhotoModel that Linux compiles fine.
+# Tests/fast_lane checks every target in Package.swift and every project.yml
+# source falls under it. Data files (UITests/audit-baseline.json) don't count.
+BUILD_RE='^((Sources|Tests|UITests)/.*\.swift|project\.yml|Package\.swift)$'
 BUILD_JOB="macOS build"    # the build-only job's name in ci.yml
 BUILD_TITLE="macOS build"  # ci.yml's run-name for a build-only run
 # After dispatching, look this many times, 5s apart, for the new run's URL to comment.
@@ -176,6 +173,65 @@ UNKNOWN_RETRIES="${FAST_LANE_UNKNOWN_RETRIES:-8}"
 # Drops AI attribution lines (co-author trailers, session links, "Generated with" footers).
 strip_attribution() {
   grep -v -i -E '^[[:space:]]*(co-authored-by:.*(claude|anthropic)|claude-session:|_?generated (with|by) \[?claude)' || true
+}
+
+# A lead's PR has this line (CLAUDE.md, "Feature leads"): one slice of a
+# feature, whose issue carries FEATURE_ISSUE_LABEL. Merging a slice must never
+# close that issue (three were closed while their leads said not done), but
+# the finding and gap issues the slice fixes still close.
+LEAD_RE='^[[:space:]]*Feature:'
+FEATURE_ISSUE_LABEL="feature-lead"
+# A closing keyword (close, closes, closed, fix, fixes, fixed, resolve,
+# resolves, resolved; any case, a colon or not) and the issue it closes: #n,
+# owner/repo#n or an issue URL. jq (Oniguruma) syntax, matched with "i".
+CLOSE_RE='(?<![A-Za-z0-9_])(?<kw>close[sd]?|fix(?:e[sd])?|resolve[sd]?)(?<sep>:?[ \t]*)(?<ref>#[0-9]+|[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+#[0-9]+|https://github\.com/[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+/issues/[0-9]+)'
+# jq: a reference as owner/repo#n (#n is in REPO).
+# shellcheck disable=SC2016 # jq code, not shell
+REF_KEY_JQ='def key: if startswith("#") then $repo + . elif startswith("https://") then
+  (capture("github\\.com/(?<r>[^/]+/[^/]+)/issues/(?<n>[0-9]+)") | "\(.r)#\(.n)") else . end;'
+
+# closing_refs: the issues the closing keywords in the body on stdin point
+# at, as owner/repo#n, one per line.
+closing_refs() {
+  jq -Rr --arg re "$CLOSE_RE" --arg repo "$REPO" "$REF_KEY_JQ"'match($re; "gi") | .captures[] | select(.name == "ref") | .string | key' | sort -u
+}
+
+# lead_refs <owner/repo#n lines>: the body on stdin with the closing keyword
+# before each of those issues turned into `Refs`; every other line and
+# keyword unchanged. Idempotent: `Refs` is no keyword.
+lead_refs() {
+  jq -Rr --arg re "$CLOSE_RE" --arg repo "$REPO" --arg f "$1" "$REF_KEY_JQ"'($f | split("\n")) as $f
+    | gsub($re; (.ref | key) as $k | if any($f[]; . == $k) then "Refs \(.ref)" else "\(.kw)\(.sep // "")\(.ref)" end; "i")'
+}
+
+# issue_is_feature <owner/repo#n>: sets FEATURE to y when the issue carries
+# FEATURE_ISSUE_LABEL, n when not; returns 1 when its labels can't be read.
+# One gh call per issue per lane run: answers are cached in FEATURE_SEEN
+# (" key=y key=n"; bash 3.2 has no associative arrays). Failures aren't.
+FEATURE_SEEN="" FEATURE=""
+issue_is_feature() {
+  local k="$1" got
+  case "$FEATURE_SEEN" in *" $k="*) got="${FEATURE_SEEN##*" $k="}"; FEATURE="${got%% *}"; return 0 ;; esac
+  got=$(gh api "repos/${k%#*}/issues/${k##*#}" \
+    --jq "if [.labels[]?.name] | index(\"$FEATURE_ISSUE_LABEL\") then \"y\" else \"n\" end" 2>/dev/null) || return 1
+  case "$got" in y|n) ;; *) return 1 ;; esac
+  FEATURE_SEEN+=" $k=$got" FEATURE="$got"
+}
+
+# lead_issues <body>: sorts the issues the body's closing keywords point at
+# into LEAD_FEATURES (feature-lead issues, one per line) and LEAD_UNREAD
+# (labels unreadable, joined by ", "). Runs in the caller's shell, so the
+# cache outlives it.
+LEAD_FEATURES="" LEAD_UNREAD=""
+lead_issues() {
+  local k
+  LEAD_FEATURES="" LEAD_UNREAD=""
+  while IFS= read -r k; do
+    [[ -n "$k" ]] || continue
+    if ! issue_is_feature "$k"; then LEAD_UNREAD+="${LEAD_UNREAD:+, }$k"
+    elif [[ "$FEATURE" == y ]]; then LEAD_FEATURES+="$k"$'\n'
+    fi
+  done < <(closing_refs <<<"$1")
 }
 
 log() { printf '  %s\n' "$*" >&2; }
@@ -347,21 +403,20 @@ mac_add_failures() {
     "$1" >"$1.x" && mv "$1.x" "$1"
 }
 
-# build_apps <files.txt>: the MAC_ONLY folders among <files.txt>, joined by
-# ", ". Only what a compiler reads counts: Swift files, and project.yml
-# (a data file such as UITests/audit-baseline.json is read at run time).
-build_apps() {
-  grep -E "$MAC_ONLY_RE" "$1" | grep -E '(\.swift|^project\.yml)$' | grep -oE "$MAC_ONLY_RE" | sed 's:/$::' | sort -u | paste -sd, - | sed 's/,/, /g' || true
+# build_paths <files.txt>: the BUILD_RE files among <files.txt> by target
+# folder (Sources/X, Tests/X, UITests) or manifest, joined by ", ".
+build_paths() {
+  grep -E "$BUILD_RE" "$1" | sed -E 's:^((Sources|Tests)/[^/]+|UITests)/.*:\1:' | sort -u | paste -sd, - | sed 's/,/, /g' || true
 }
 
 # build_gate <pr.json> <files.txt> <mac-check run.json> <build run.json>:
-# nothing when the PR touches no MAC_ONLY code, else a line like mac_gate's. A green
+# nothing when the PR touches no BUILD_RE code, else a line like mac_gate's. A green
 # Mac-Check run on the head (it builds every app) counts; otherwise the latest
 # build-only run on the head ({} when none: dispatch one).
 build_gate() {
-  local pr="$1" apps head branch url run='{}' st
-  apps=$(build_apps "$2")
-  [[ -n "$apps" ]] || return 0
+  local pr="$1" paths head branch url run='{}' st
+  paths=$(build_paths "$2")
+  [[ -n "$paths" ]] || return 0
   head=$(jq -r '.headRefOid' "$pr")
   branch=$(jq -r '.headRefName // ""' "$pr")
   url=$(mac_check_url "$pr")
@@ -371,12 +426,12 @@ build_gate() {
   [[ -z "${4:-}" || ! -s "$4" ]] || run=$(cat "$4")
   url=$(jq -r '.url // ""' <<<"$run" 2>/dev/null || true)
   if [[ -z "$url" || "$(jq -r '.headSha // ""' <<<"$run")" != "$head" ]]; then
-    echo "dispatch|$apps|$branch"; return
+    echo "dispatch|$paths|$branch"; return
   fi
   st=$(jq -r '(.status // "" | ascii_downcase) + " " + (.conclusion // "" | ascii_downcase)' <<<"$run")
   case "$st" in
     "completed success") echo "ok|$BUILD_JOB $url" ;;
-    completed*) echo "refuse|changes code only macOS compiles ($apps), and its head $head doesn't build on macOS: $url (${st#completed }). Fix it and push; the lane builds the new head on macOS again" ;;
+    completed*) echo "refuse|changes code ($paths), and its head $head doesn't build on macOS: $url (${st#completed }). Fix it and push; the lane builds the new head on macOS again" ;;
     *) echo "wait|$url" ;;
   esac
 }
@@ -567,7 +622,7 @@ decide() {
   fi
 
   # A gated PR's macOS check is mac_gate's to judge (it may fail only where dev
-  # fails), and an app PR's macOS build check is build_gate's, so each leaves
+  # fails), and a code PR's macOS build check is build_gate's, so each leaves
   # the red and running lists below. A MAC_GATED PR needs only mac_gate: its
   # full run builds every app too.
   local mac macdrop="" gate=mac
@@ -723,8 +778,8 @@ evaluate() {
     fi
     (( ${#audit[@]} )) || audit=("" "")
     mac=("$tmp/mac.json" "$tmp/lane.json")
-  elif [[ -n "$(build_apps "$tmp/files.txt")" ]]; then
-    # App code: the Mac-Check line's run, if any, and the latest build-only run on the head.
+  elif [[ -n "$(build_paths "$tmp/files.txt")" ]]; then
+    # Code: the Mac-Check line's run, if any, and the latest build-only run on the head.
     echo '{}' >"$tmp/mac.json"
     id=$(mac_run_id "$(mac_check_url "$tmp/pr.json")")
     if [[ -n "$id" ]]; then
@@ -778,7 +833,7 @@ evaluate() {
       if [[ "$kind" == mac-dispatch ]]; then
         comment_once "$n" "Fast lane: this PR changes $what, shared by every app's window, so it needs a green macOS run on its head $head. The lane dispatched CI on $branch: $url. A later sweep merges this PR once that run's macOS job passes on this head; a new push gets a new run."
       else
-        comment_once "$n" "Fast lane: this PR changes code only macOS compiles ($what), so its head $head must build there first. The lane dispatched a macOS build on $branch: $url. A later sweep merges this PR once it compiles; a new push gets a new build."
+        comment_once "$n" "Fast lane: this PR changes code ($what), so its head $head must build on macOS first. The lane dispatched a macOS build on $branch: $url. A later sweep merges this PR once it compiles; a new push gets a new build."
       fi
       ;;
     mac-gate)
@@ -803,6 +858,15 @@ evaluate() {
       local title body
       title=$(gh pr view "$n" -R "$REPO" --json title --jq .title)
       body=$(gh pr view "$n" -R "$REPO" --json body --jq .body | strip_attribution)
+      # A lead's closing keyword before a feature-lead issue becomes Refs, in the body and so
+      # in the squash message. An issue whose labels can't be read keeps its keyword.
+      local lead=0
+      if grep -qE "$LEAD_RE" <<<"$body"; then
+        lead=1
+        lead_issues "$body"
+        body=$(lead_refs "$LEAD_FEATURES" <<<"$body")
+        [[ -z "$LEAD_UNREAD" ]] || comment_once "$n" "Fast lane: could not read the labels of $LEAD_UNREAD, so the closing keyword before it stays and the lane closes none of them. A PR must never close a $FEATURE_ISSUE_LABEL issue: if one is, reopen it after the merge."
+      fi
       # Cloud sessions append a "Generated by Claude Code" footer to the PR body; drop it there too.
       write gh pr edit "$n" -R "$REPO" --body "$body" || log "could not strip attribution from the PR body"
       # A failed merge (head moved, or the base changed under it) is left for the next sweep.
@@ -818,8 +882,13 @@ evaluate() {
       fi
       if grep -qE "$UI_RE" "$tmp/files.txt"; then DISPATCH_UI=1; fi
       # GitHub does not auto-close linked issues when GITHUB_TOKEN merges, so close them here.
+      # For a lead's PR only issues known not to be feature-lead: GitHub may still list one
+      # whose keyword lead_refs just rewrote, or one linked by hand.
       local issue
       for issue in $(gh pr view "$n" -R "$REPO" --json closingIssuesReferences --jq '.closingIssuesReferences[].number'); do
+        if (( lead )) && ! { issue_is_feature "$REPO#$issue" && [[ "$FEATURE" == n ]]; }; then
+          log "not closing #$issue: a $FEATURE_ISSUE_LABEL issue, or its labels can't be read"; continue
+        fi
         write gh issue close "$issue" -R "$REPO" --reason completed --comment "Done in #$n (fast lane)." || log "could not close #$issue"
         write gh issue edit "$issue" -R "$REPO" --remove-label in-progress || true
       done
