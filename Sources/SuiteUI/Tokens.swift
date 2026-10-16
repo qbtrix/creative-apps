@@ -193,6 +193,13 @@ public enum SuiteSize {
     public static let arrowStroke: CGFloat = 1.5
     /// The accent line that shows where a dragged row will land.
     public static let insertionLine: CGFloat = 2
+    /// The app switcher (AppSwitcher): an item's glyph, the ideal distance
+    /// between item centers, what it shrinks to before a toolbar item would
+    /// overflow, and the glass capsule behind the current item.
+    public static let switcherIcon: CGFloat = 22
+    public static let switcherSpacing: CGFloat = 80
+    public static let switcherSpacingMinimum: CGFloat = 40
+    public static let switcherCapsule = CGSize(width: 90, height: 48)
 }
 
 /// Text styles. macOS has no Dynamic Type; these are the system text styles,
