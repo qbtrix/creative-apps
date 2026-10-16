@@ -42,7 +42,7 @@ Next: wait for (1) the fixer's PR for gap #1561 (sp/gap-1561: shell journey chec
 - DS-4 carries feature-done and sets the wave.json status to built.
 
 ## Open
-- gap #1561 (from the editor-in-window lead): expectSwitcher asserts window-centred midX, which the macOS toolbar never gives; fixer on sp/gap-1561.
+- gap #1561 (from the editor-in-window lead): expectSwitcher asserts window-centred midX, which the macOS toolbar never gives; PR #1655 (sp/gap-1561, head 93fca44e). Photo's PhotoJourneyTests+Shell.swift expectSwitcher has the same window-centre check (line:photo, not ours).
 - gap #1452 (DP-b, round cap): geometry is SuiteUI #1456; switcher waits on #1337. Status posted on #1325; replied to the supervisor's 16:43 note: merge #1337 first, and #1456 is SuiteUI's (offered a supervisor quarantine of the two shell journeys, owner #1456).
 - needs-ui #1456 (filed by the #1452 fixer): EditorDetail regions bleed under the floating sidebar/inspector, suite.inspector lands inside SuiteWindow's padding (280 vs 304), -SuiteWindowSize gives a 677 pt window (3 pt past the visible frame). DP-b's geometry assertions stay until it lands.
 - dev-red #1393: full run 38915938965 red on Library tests only (LibraryImportBudgetTests timing, LibraryImportSnapshots.progressRowShowsAfterItsDelay from #1382); not Design's.

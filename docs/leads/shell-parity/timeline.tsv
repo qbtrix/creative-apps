@@ -51,3 +51,4 @@ utc	stage	event	ref	note
 2026-10-16T20:53Z	4	heartbeat	38960992806	scoped design at 58ac7ac9 (has #1337, not #1610): DesignJourneyTests green, shell journeys red only on #1456 geometry; waiting for a successful run containing #1610
 2026-10-16T21:25Z	4	ci-run	38965923292	full run successful, contains #1610, but macOS scripts/ci failed so journeys were skipped; not usable for DP-b
 2026-10-16T21:26Z	4	fix-round	#1561	gap from editor-in-window: switcher check relaxed to title..trailing (fixer started)
+2026-10-16T21:35Z	4	pr-opened	#1655	Fixes gap #1561: switcher between title and trailing buttons
