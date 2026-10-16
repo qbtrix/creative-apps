@@ -20,8 +20,8 @@
 // data is in TimelineTrack.swift. The unit and fps reach the ruler and the
 // toolbar's unit chips; the work area reaches the toolbar's Work Area chip and
 // the bar on the ruler (TimelineWorkAreaBar, over the playhead), which call
-// onUnit and onWorkArea (TL-18). The move and trim closures are taken and
-// stored; later timeline slices act on them. The strip owns its zoom (TL-17), a factor over the
+// onUnit and onWorkArea (TL-18). Each lane's input (TimelineLaneInput) calls
+// the move closures for a key drag and the trim closures for a clip end. The strip owns its zoom (TL-17), a factor over the
 // host's frameWidth kept in TimelineZoom's range (1 = fit): Command-plus,
 // Command-minus and Command-0 while it has focus (anchored on the playhead),
 // a pinch on the lanes (anchored under the pointer) and the toolbar row
@@ -297,7 +297,7 @@ public struct TimelineStrip<ID: Hashable & Sendable>: View {
                 // The strip owns the tap so no closure sits in what `.equatable()` compares.
                 TimelineLane(track: track, mapping: mapping).equatable()
                     .contentShape(Rectangle())
-                    .modifier(TimelineLaneInput(track: track, mapping: mapping, playhead: playhead, actions: TimelineLaneActions(onSelectKeyframe: onSelectKeyframe, onSelectTrack: onSelectTrack, onPickKeyframe: onPickKeyframe, onMoveKeyframes: onMoveKeyframes, onEndKeyDrag: onEndKeyDrag)))
+                    .modifier(TimelineLaneInput(track: track, mapping: mapping, playhead: playhead, actions: TimelineLaneActions(onSelectKeyframe: onSelectKeyframe, onSelectTrack: onSelectTrack, onPickKeyframe: onPickKeyframe, onMoveKeyframes: onMoveKeyframes, onEndKeyDrag: onEndKeyDrag, onTrim: onTrim, onEndTrim: onEndTrim)))
             }
         }
         .frame(width: width, alignment: .leading)

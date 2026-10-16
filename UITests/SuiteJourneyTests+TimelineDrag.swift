@@ -5,7 +5,9 @@
 // a key 6 pt short of the playhead snaps onto it, and Badge's clip ends trim
 // (`trim badge end 40`, `trim badge start 25`, `trim end`). SP8 drags a key
 // 600 pt at speed on `timeline-long` and reports `key-drag` (QB-S5,
-// report-only). TL-13 lands both skipped, TL-15 turns them on. Lanes and keys
+// report-only). TL-13 landed both skipped; TL-15 turned them on. A key wins a
+// press over a clip end (hit priority), and Badge has keys on both its ends, so
+// the trim step first drags those keys 5 frames off the ends. Lanes and keys
 // are found by label as in +TimelineKeys; a frame's x comes from a key's tick.
 import AppKit
 import XCTest
@@ -13,13 +15,11 @@ import XCTest
 extension SuiteJourneyTests {
     /// SJ19c: picked keys drag as a group with snapping, and a clip's ends trim.
     @MainActor func testTimelineDragsKeysAndTrimsClips() throws {
-        throw XCTSkip("waits on TL-15")
         try walkTimelineDrags()
     }
 
     /// SP8: a velocity drag of a picked key across 600 pt reports `key-drag` (QB-S5, report-only).
     @MainActor func testKeyDragLatency() throws {
-        throw XCTSkip("waits on TL-15")
         try measureKeyDrag()
     }
 
@@ -61,7 +61,12 @@ extension SuiteJourneyTests {
         XCTAssert(dragKeyExists(30, lane: "Shadow", gallery), "Shadow's key didn't snap to the playhead at 30")
         gallery.shot("timeline-dragged")
 
-        // 5. Badge's clip 20–50: hover its right end (resize cursor), trim it 100 pt left, then its left end 50 pt right.
+        // 5. Badge's clip 20–50: its keys at 50 and 20 move off the ends (a key wins the press),
+        // then hover its right end (resize cursor), trim it 100 pt left, then its left end 50 pt right.
+        dragKey(50, lane: "Badge", by: 5 * Self.dragFrameWidth, gallery)
+        expectDragLog(["move +5", "move end"], log)
+        dragKey(20, lane: "Badge", by: -5 * Self.dragFrameWidth, gallery)
+        expectDragLog(["move -5", "move end"], log)
         let end = dragFramePoint(50, lane: "Badge", gallery)
         end.hover()
         gallery.shot("timeline-trim-hover")

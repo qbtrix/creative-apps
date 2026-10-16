@@ -15,6 +15,11 @@
 // above the grabbed key shows its frame while it moves, and each step reports
 // a `step` mark in series `key-drag`. The drag's bookkeeping sits in a box
 // SwiftUI doesn't watch; only the pill's frame is state, written per step.
+// A press within 6 pt of a clip's start or end tick, and not on a key, trims
+// that end (TL-15; TimelineTrimDrag): the edge follows the pointer, snapped to
+// the playhead and kept by the trim rule, onTrim only when the edge's frame
+// changes, onEndTrim once on release; the same pill shows the edge's frame,
+// and the pointer over a clip end is the column-resize pointer.
 // It owns the lane's hover, presentation state: which lane the pointer is
 // over and the key under it. A hover sample writes only when that changes,
 // and the change fades with SuiteMotion.state (at once under Reduce Motion),
@@ -36,6 +41,8 @@ struct TimelineLaneInput<ID: Hashable & Sendable>: ViewModifier {
     @State private var pillFrame: Int?
     /// Right presses seen while the pointer was over this lane.
     @State private var rightPresses = 0
+    /// The pointer is over a clip end, so it shows the resize pointer.
+    @State private var overClipEnd = false
     @State private var monitor: Any?
     @Environment(\.suiteReduceMotion) private var reduceMotion
     @Environment(\.timelineFadeMark) private var fadeMark
@@ -44,6 +51,7 @@ struct TimelineLaneInput<ID: Hashable & Sendable>: ViewModifier {
         content
             .environment(\.timelineLaneHover, hover)
             .overlay(alignment: .topLeading) { pill }
+            .pointerStyle(overClipEnd ? .columnResize : nil)
             .gesture(
                 DragGesture(minimumDistance: 0)
                     .onChanged { value in dragChanged(value) }
@@ -61,14 +69,18 @@ struct TimelineLaneInput<ID: Hashable & Sendable>: ViewModifier {
             .onContinuousHover { phase in
                 switch phase {
                 case .active(let location):
-                    setHover(TimelineLaneHover(key: TimelineLaneHit.key(atX: location.x, on: track, mapping: mapping)))
+                    let key = TimelineLaneHit.key(atX: location.x, on: track, mapping: mapping)
+                    setHover(TimelineLaneHover(key: key))
+                    let onEnd = key == nil && TimelineLaneHit.clipEnd(atX: location.x, on: track, mapping: mapping) != nil
+                    if onEnd != overClipEnd { overClipEnd = onEnd }
                 case .ended:
                     setHover(nil)
+                    if overClipEnd { overClipEnd = false }
                 }
             }
     }
 
-    /// The time pill over the grabbed key while it moves.
+    /// The time pill over the grabbed key or clip end while it moves.
     @ViewBuilder private var pill: some View {
         if let pillFrame {
             Text(TimelineTime.label(frame: pillFrame, fps: 0, unit: .frames))
@@ -83,8 +95,8 @@ struct TimelineLaneInput<ID: Hashable & Sendable>: ViewModifier {
         }
     }
 
-    /// The first sample classifies the press (key, else bed) and may start a
-    /// key drag; later samples move it.
+    /// The first sample classifies the press (key, clip end, else bed) and may
+    /// start a key drag or a trim; later samples move it.
     private func dragChanged(_ value: DragGesture.Value) {
         if !press.active {
             press.active = true
@@ -94,6 +106,13 @@ struct TimelineLaneInput<ID: Hashable & Sendable>: ViewModifier {
                 press.target, modifiers: press.modifiers, on: track, playhead: playhead, mapping: mapping,
                 actions: actions)
             if press.drag != nil { watchEscape() }
+            press.trim = TimelineLanePress.beginTrim(press.target, playhead: playhead, mapping: mapping)
+            return
+        }
+        if var trim = press.trim {
+            let stepped = trim.move(dx: Double(value.translation.width), id: track.id, actions: actions)
+            press.trim = trim
+            if stepped, pillFrame != trim.frame { pillFrame = trim.frame }
             return
         }
         guard var drag = press.drag else { return }
@@ -113,6 +132,10 @@ struct TimelineLaneInput<ID: Hashable & Sendable>: ViewModifier {
         if var drag = press.drag {
             click = drag.release(actions: actions)
             press.drag = drag
+        }
+        if var trim = press.trim {
+            click = trim.release(actions: actions)
+            press.trim = trim
         }
         if click { TimelineLanePress.press(press.target, modifiers: press.modifiers, on: track, actions: actions) }
     }
@@ -181,6 +204,27 @@ struct TimelineLaneInput<ID: Hashable & Sendable>: ViewModifier {
 
 /// The key a press or the pointer at lane x `x` lands on, with no view.
 enum TimelineLaneHit {
+    /// How near a clip's start or end tick a press must land to trim it.
+    static let clipEndReach: Double = 6
+
+    /// The clip end within 6 pt of `x` (the nearest, when two are), or nil.
+    /// Keys come first: the caller asks only when no key is hit.
+    static func clipEnd<ID>(atX x: CGFloat, on track: TimelineTrack<ID>, mapping: FrameMapping) -> TimelineClipEnd? {
+        let local = Double(x) - Double(timelineInset)
+        var best: (end: TimelineClipEnd, distance: Double)?
+        for span in track.spans {
+            let lo = mapping.x(forFrame: span.lowerBound)
+            let toStart = abs(local - lo)
+            let toEnd = abs(local - mapping.x(forFrame: span.upperBound))
+            // A tie (a one-tick clip, or its middle) goes to the end on or right of the start.
+            let edge: SpanEdge = toEnd < toStart || (toEnd == toStart && local >= lo) ? .end : .start
+            let distance = min(toStart, toEnd)
+            guard distance <= clipEndReach, best.map({ distance < $0.distance }) ?? true else { continue }
+            best = (TimelineClipEnd(span: span, edge: edge), distance)
+        }
+        return best?.end
+    }
+
     /// The nearest key within half the 16 pt token of `x`, or nil.
     static func key<ID>(atX x: CGFloat, on track: TimelineTrack<ID>, mapping: FrameMapping) -> Int? {
         let local = Double(x - timelineInset)
@@ -195,6 +239,14 @@ struct TimelineLaneActions<ID: Hashable & Sendable> {
     let onPickKeyframe: @MainActor (ID, Int?, PickMode) -> Void
     var onMoveKeyframes: @MainActor (Int) -> Void = { _ in }
     var onEndKeyDrag: @MainActor () -> Void = {}
+    var onTrim: @MainActor (ID, SpanEdge, Int) -> Void = { _, _, _ in }
+    var onEndTrim: @MainActor () -> Void = {}
+}
+
+/// One end of one of a lane's clips.
+struct TimelineClipEnd: Equatable, Sendable {
+    let span: ClosedRange<Int>
+    let edge: SpanEdge
 }
 
 /// A lane's press in progress, kept where SwiftUI doesn't watch it.
@@ -205,6 +257,7 @@ struct TimelineLaneActions<ID: Hashable & Sendable> {
     var target: TimelineLanePress.Target = .bed
     var modifiers: KeyModifiers = []
     var drag: TimelineKeyDrag?
+    var trim: TimelineTrimDrag?
     var escapeMonitor: Any?
     /// Escape's cancel for the drag under way; true when it cancelled one.
     var cancel: (@MainActor () -> Bool)?
@@ -212,6 +265,7 @@ struct TimelineLaneActions<ID: Hashable & Sendable> {
     func reset() {
         active = false
         drag = nil
+        trim = nil
         stopWatchingEscape()
     }
 
@@ -293,21 +347,79 @@ struct TimelineKeyDrag: Equatable, Sendable {
     }
 }
 
+/// A clip-end trim on one lane, with no view (TL-15): the grabbed edge follows
+/// the pointer, snapped to the playhead (TL-13) and kept by the trim rule
+/// (inside 0...lastFrame, at least a frame long, the other edge fixed). The
+/// host hears the edge's frame only when it changes, and one end.
+struct TimelineTrimDrag: Equatable, Sendable {
+    let end: TimelineClipEnd
+    let playhead: Int
+    let mapping: FrameMapping
+    /// The grabbed edge's frame now (what the host was last sent).
+    private(set) var frame: Int
+    /// A trim went to the host, so the release ends a trim, not a click.
+    private(set) var moved = false
+    /// Released: nothing more is sent.
+    private(set) var ended = false
+
+    init(_ end: TimelineClipEnd, playhead: Int, mapping: FrameMapping) {
+        self.end = end
+        self.playhead = playhead
+        self.mapping = mapping
+        frame = end.edge == .start ? end.span.lowerBound : end.span.upperBound
+    }
+
+    /// The edge's frame for a pointer `dx` points from the press:
+    /// trimmed(span, edge, snapped(frame(atX: edge x + dx))).
+    func edgeFrame(dx: Double) -> Int {
+        let grabbed = end.edge == .start ? end.span.lowerBound : end.span.upperBound
+        let raw = mapping.frame(atX: mapping.x(forFrame: grabbed) + dx)
+        let scale = TimelineScale(lastFrame: mapping.duration, frameWidth: mapping.frameWidth)
+        let edits = SuiteTimelineEditing()
+        let target = edits.snapped(raw, playhead: playhead, radius: Double(SuiteSize.timelineKeyframeHit / 2), scale: scale)
+        let span = edits.trimmed(end.span, edge: end.edge, to: target, lastFrame: mapping.duration)
+        return end.edge == .start ? span.lowerBound : span.upperBound
+    }
+
+    /// Sends the edge's frame when it changed; true when it sent one.
+    @MainActor mutating func move<ID>(dx: Double, id: ID, actions: TimelineLaneActions<ID>) -> Bool {
+        let new = edgeFrame(dx: dx)
+        guard !ended, new != frame else { return false }
+        frame = new
+        moved = true
+        actions.onTrim(id, end.edge, new)
+        return true
+    }
+
+    /// The release: ends a trim that moved, once. True when nothing moved, so it acts as a click.
+    @MainActor mutating func release<ID>(actions: TimelineLaneActions<ID>) -> Bool {
+        guard !ended else { return false }
+        ended = true
+        guard moved else { return true }
+        actions.onEndTrim()
+        return false
+    }
+}
+
 /// What a press on a lane does, with no view (TL-11; B5, B6).
 @MainActor enum TimelineLanePress {
-    /// Where a press lands: on a key's frame, or on the bed.
+    /// Where a press lands: on a key's frame, a clip's end, or the bed.
     enum Target: Equatable, Sendable {
         case key(Int)
+        case clipEnd(TimelineClipEnd)
         case bed
     }
 
-    /// The key within half the 16 pt token of lane x `x`, else the bed.
+    /// The key within half the 16 pt token of lane x `x`, else a clip end
+    /// within 6 pt (TL-15), else the bed.
     static func target<ID>(atX x: CGFloat, on track: TimelineTrack<ID>, mapping: FrameMapping) -> Target {
-        TimelineLaneHit.key(atX: x, on: track, mapping: mapping).map { .key($0) } ?? .bed
+        if let key = TimelineLaneHit.key(atX: x, on: track, mapping: mapping) { return .key(key) }
+        return TimelineLaneHit.clipEnd(atX: x, on: track, mapping: mapping).map { .clipEnd($0) } ?? .bed
     }
 
     /// A left press: a key is picked by the pick rule (a plain press also
-    /// selects it); the bed selects the track and clears the pick (B5).
+    /// selects it); the bed, or a clip end that didn't move, selects the
+    /// track and clears the pick (B5).
     static func press<ID>(
         _ target: Target, modifiers: KeyModifiers, on track: TimelineTrack<ID>, actions: TimelineLaneActions<ID>
     ) {
@@ -315,7 +427,7 @@ struct TimelineKeyDrag: Equatable, Sendable {
         case .key(let frame):
             actions.onPickKeyframe(track.id, frame, TimelinePick.mode(pressWith: modifiers))
             if modifiers.isEmpty { actions.onSelectKeyframe(track.id, frame) }
-        case .bed:
+        case .bed, .clipEnd:
             actions.onSelectTrack(track.id)
             actions.onPickKeyframe(track.id, nil, .replace)
         }
@@ -335,6 +447,12 @@ struct TimelineKeyDrag: Equatable, Sendable {
         let replacing = !picked && TimelinePick.mode(pressWith: held) == .replace
         return TimelineKeyDrag(
             grabbing: frame, picked: track.pickedFrames, replacing: replacing, playhead: playhead, mapping: mapping)
+    }
+
+    /// A press on a clip end starts a trim; anything else starts none.
+    static func beginTrim(_ target: Target, playhead: Int, mapping: FrameMapping) -> TimelineTrimDrag? {
+        guard case .clipEnd(let end) = target else { return nil }
+        return TimelineTrimDrag(end, playhead: playhead, mapping: mapping)
     }
 
     /// A right press: an unpicked key replaces the pick; a picked key or the bed changes nothing (B6).
