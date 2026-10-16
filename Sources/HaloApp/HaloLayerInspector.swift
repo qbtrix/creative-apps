@@ -5,8 +5,13 @@
 // a key sits at the playhead) with a KeyframeButton beside it, or under it
 // when the full titles and widest typical values (`widestTypicalText`) don't
 // fit beside it, as at the inspector's minimum width: the
-// stopwatch sends .toggleAnimation, the diamond .toggleKey. A scrub sends
-// .setProperty with the stored value and .endPropertyScrub once it ends.
+// stopwatch sends .toggleAnimation, the diamond .toggleKey. A scrub shows
+// its value in the bar and puts the window's project with it set
+// (`setProperty` on a copy) in the window's HaloLiveEdit, so only the bar and
+// the viewer's layers re-run per sample; once it ends (a drag, a key, a typed
+// value) the row sends .setProperty with the stored value and
+// .endPropertyScrub, one step. Hosted without a HaloLiveEdit, each value is
+// sent as it comes.
 // Each row is `halo.inspector.row.<raw>` and reads its value as text
 // (XCUITest reads values empty otherwise, #262); its stopwatch is
 // `halo.inspector.key.<raw>`, labelled "Animate <title>" with the key state
@@ -85,6 +90,9 @@ private struct HaloPropertyRowView: View {
     let refusal: HaloRefusal?
     let stacked: Bool
     let perform: @MainActor (HaloCommand) -> Void
+    /// The bar's shown value while a scrub lasts; nil otherwise.
+    @State private var scrubbed: Double?
+    @Environment(\.haloLiveEdit) private var live
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -113,14 +121,30 @@ private struct HaloPropertyRowView: View {
         let p = row.property
         let rowHelp = model.unavailableHelp(for: .setProperty(p, row.value))
         return InspectorSliderRow(
-            p.title, value: row.shown, in: row.shownRange, step: row.shownStep, unit: p.unit,
+            p.title, value: scrubbed ?? row.shown, in: row.shownRange, step: row.shownStep, unit: p.unit,
             decimals: p.decimals, keyed: row.keyState == .keyedHere,
-            onChange: { perform(.setProperty(p, p.stored(fromShown: $0))) },
-            onEnd: { perform(.endPropertyScrub) })
+            onChange: { scrub(to: $0) },
+            onEnd: {
+                if live != nil, let scrubbed { perform(.setProperty(p, p.stored(fromShown: scrubbed))) }
+                perform(.endPropertyScrub)
+                scrubbed = nil
+                live?.project = nil
+            })
             .disabled(rowHelp != nil)
             .help(rowHelp ?? p.title)
             .accessibilityValue(Text(verbatim: row.text))
             .haloControl(id: "halo.inspector.row.\(p.rawValue)", enabled: rowHelp == nil, help: rowHelp)
+    }
+
+    /// One scrub value: the bar shows it and the viewer draws the window's
+    /// project with it set; the window gets it at the scrub's end.
+    private func scrub(to shown: Double) {
+        let p = row.property
+        scrubbed = shown
+        guard let live else { return perform(.setProperty(p, p.stored(fromShown: shown))) }
+        var project = model
+        project.setProperty(p, to: p.stored(fromShown: shown))
+        live.project = project
     }
 
     /// The property's stopwatch and key diamond. KeyframeButton sets both
