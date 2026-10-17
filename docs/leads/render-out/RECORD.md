@@ -2,9 +2,9 @@
 
 Issue: #1505 · Packet: docs/blueprints/halo/features/render-out.md
 Run: act-1a149b53ef6-67v7 (line lead for #1035, #1509, #1505; earlier runs act-1a1487bf880-qmey, act-1a1429c87eb-3ecm) · Session: claude/feature-lead-playbook-l4ybf6 · Started: 2026-10-17T06:05Z
-Stage: 3 wave 5 (RO-10) building
+Stage: 4 Anatomy round 1 (waiting on full dev CI 39056193379, e17b68f9)
 Base: 8e868417eeaf2fd17229c21bc1087ef7eecb3d8f (origin/dev at 2026-10-17T13:53Z)
-Next: RO-10 #2211 (head cbe5c25c, feature-done) waits on its macOS build and the lane; then the feature-done dev CI and Anatomy round 1
+Next: when full CI 39056193379 (e17b68f9, holds RO-10 #2211) finishes its macOS job, run Anatomy round 1 (H-J20/H-J21 screens, render snapshots, audit)
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
