@@ -4,6 +4,7 @@
 // Photo and Library read the three image types as Alternate, and every app
 // opens the hand-off type as Viewer. Reads the XML with PropertyListSerialization.
 import Foundation
+import SuiteModel
 import Testing
 
 @Suite struct PlistShapeAppsTests {
@@ -90,5 +91,12 @@ import Testing
         if let own = row.owns { expected.insert(own) }
         if row.imageRole != nil { expected.formUnion(Self.images) }
         #expect(types == expected)
+    }
+
+    /// #2051: the plist names the executable BundleLayout puts in Contents/MacOS.
+    @Test(arguments: BundleLayout.apps) func executableMatchesTheLayout(_ name: String) throws {
+        let path = BundleLayout.executablePath(ofApp: name)
+        let expected = try #require(path.split(separator: "/").last.map(String.init))
+        #expect(try Self.plist(name)["CFBundleExecutable"] as? String == expected)
     }
 }
