@@ -39,3 +39,8 @@ utc	stage	event	ref	note
 2026-10-17T21:34:31Z	critics	DW-b panel on scoped 39068267491: 11 confirmed, 5 refuted; filed #2399 (major) #2400 (minor) #2401 (major) #2402 (minor) #2403 (major) #2404 (major) #2405 (minor)
 2026-10-17T21:35:02Z	wave	DW-b fix round 1 launched (wd9hy2yx2) on #2399-#2405, base dev 27c93eea, avoiding files of open PRs #2372 #2373 #2374 #2389 #2397
 2026-10-17T21:41:41Z	fix	DW-b round 1: PR #2407 (ca570c4b) fixes #2403 with tests; #2400 already fixed on dev by #2272, closed; #2404 conflicts with #268, lead chose option 2 (comment 6241603343); #2399 #2401 #2402 #2405 deferred (busy files)
+2026-10-17T21:55:02Z	merge	#2372 merged 3ee9246f (DW-a round 1)
+2026-10-17T21:55:02Z	merge	#2374 merged d2249aad (D0-7a)
+2026-10-17T21:55:02Z	merge	#2397 merged 23c6d9bf
+2026-10-17T21:55:02Z	merge	#2407 merged 2b08e8fd (DW-b round 1, fixes #2403)
+2026-10-17T21:55:02Z	wave	wave 6 fix round 2 started, workflow wn5bcz05k, busy: #2371 #2349 files
