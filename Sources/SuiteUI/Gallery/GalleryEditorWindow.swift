@@ -3,7 +3,8 @@
 // so the page never recurses): the save state as subtitle, Pages with a SidebarActionRow and Layers in the sidebar,
 // New and Open beside the title, Save, Undo, Redo and the zooms trailing, an EditorDetail with a 1600 x 1000 artboard
 // fitted by EditorDetailLayout, and a 304 pt inspector. Add and Delete Page are the edits Undo and Redo step through;
-// a tool's key picks it. Every control acts or says why, with a `suite.gallery.*` id, so the `suiteui` audit stays 0.
+// a tool's key picks it. Opened from the index, the page sizes its window to the editor's launch size (the
+// index's window is narrower than the page's minimum). Every control acts or says why, with a `suite.gallery.*` id, so the `suiteui` audit stays 0.
 import SwiftUI
 
 enum GalleryEditorWindow {
@@ -40,10 +41,28 @@ private struct GalleryEditorWindowPage: View {
 
     private var zoom: Double { chosenZoom ?? fitZoom }
 
+    /// The size the page asks of its window when it opens from the index: the editor window's launch size (the
+    /// sidebar ideal, the content ideal and the 304 pt inspector, at the launch height) plus the gallery's back row
+    /// above it. The index opens the window at its own, smaller launch size, and a window doesn't grow when a page's
+    /// minimum does: at that size the window clipped the sidebar, the status line and a toolbar action.
+    /// SuiteWindowSizer fits it to the screen's visible frame. Under -SuiteWindowSize the window already has its size.
+    private static let windowSize = CGSize(
+        width: SuiteSize.sidebarWidth.ideal + SuiteSize.contentIdealWidth + inspectorWidth,
+        height: SuiteSize.windowLaunch.height + SuiteSize.toolButton + 2 * SuiteSpacing.s)
+    private static let inspectorWidth = SuiteSize.editorPanelWidth + 2 * SuiteSpacing.m
+    private static let sizesWindow = SuiteWindowSize.parse(ProcessInfo.processInfo.arguments) == nil
+
     var body: some View {
+        window
+            .background {
+                if Self.sizesWindow { SuiteWindowSizer(size: Self.windowSize) }
+            }
+    }
+
+    private var window: some View {
         SuiteWindow(
             title: title, subtitle: edited ? "Edited" : "", documentActions: documentActions, actions: actions,
-            inspectorWidth: SuiteSize.editorPanelWidth + 2 * SuiteSpacing.m
+            inspectorWidth: Self.inspectorWidth
         ) {
             sidebar
         } content: {

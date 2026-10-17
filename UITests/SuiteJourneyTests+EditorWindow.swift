@@ -17,6 +17,8 @@ final class SuiteEditorWindowJourneys: XCTestCase {
     static let tools = ["select", "rectangle", "ellipse", "pen", "text"]
     /// The switcher's items in order; each one's title is its id capitalized.
     static let switcher = ["home", "flare", "design", "photo", "library", "halo"]
+    /// How the system joins a window's title and subtitle in the title it reports.
+    static let subtitleSeparator = " \u{2013} "
     static let notConnected = "Not connected yet (switching)."  // AppSwitcherState.notConnected
 
     /// Steps 1 to 4 and 6, in Light.
@@ -55,7 +57,10 @@ final class SuiteEditorWindowJourneys: XCTestCase {
 
     /// Step 5 and the dark switcher crop.
     @MainActor func testEditorWindowDark() {
-        let dark = Self.launch + ["-AppleInterfaceStyle", "Dark"]
+        // The appearance pair goes first. After the value-less -SuitePerfProbe, "-AppleInterfaceStyle" was
+        // read as the probe's value and the stray "Dark" opened as a file, so Library started with no
+        // window at all (run 38981651490).
+        let dark = ["-AppleInterfaceStyle", "Dark"] + Self.launch
         let gallery = Journey("Library", self, name: "suiteui", arguments: dark)
         XCTAssert(gallery.element("suite.viewport").waitForExistence(timeout: 30), "no viewport (suite.viewport)")
         XCTAssert(gallery.element("suite.tools").waitForExistence(timeout: 10), "no tool palette (suite.tools)")
@@ -66,8 +71,10 @@ final class SuiteEditorWindowJourneys: XCTestCase {
 
     /// Step 1: title, subtitle, the sidebar's own list, the toolbar, artboard, palette, 304 pt inspector.
     @MainActor private func expectSlots(_ gallery: Journey) {
+        // macOS reports the title with the subtitle joined on ("Poster – Edited"), so read both parts.
         let window = gallery.app.windows.firstMatch
-        XCTAssert(waitFor { window.title == "Poster" }, "the window title is \(window.title), not Poster")
+        let parts = { window.title.components(separatedBy: Self.subtitleSeparator) }
+        XCTAssert(waitFor { parts() == ["Poster", "Edited"] }, "the window title is \(window.title), not Poster – Edited")
         XCTAssert(reads("Edited", in: window), "no subtitle Edited")
 
         let sidebar = gallery.element("suite.sidebar")

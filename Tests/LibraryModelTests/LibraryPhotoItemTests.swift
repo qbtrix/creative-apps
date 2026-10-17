@@ -61,7 +61,7 @@ private let epoch = Date(timeIntervalSince1970: 0)
     #expect(PhotoItem(name: "a", captureDate: epoch, color: Color3(0, 0, 0), rating: 3, flag: .reject).cullSummary
         == "3 stars, Rejected")
     #expect(PhotoItem(name: "a", captureDate: epoch, color: Color3(0, 0, 0), rating: 3, isFlagged: true, label: .red)
-        .cullSummary == "3 stars, Picked, Red")
+        .cullSummary == "3 stars, Picked, Red label")
 }
 
 @Test func availabilityHelpSaysWhyAFileCantBeRead() {

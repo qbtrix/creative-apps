@@ -9,8 +9,6 @@ import FlareModel
 extension FlareWindow {
     /// Acts on `intent` through its area's `perform<Area>`.
     func perform(_ intent: FlareIntent) {
-        // Any intent but the stage's own ends a marquee drag still under way, so it lands on the model first.
-        if case .stage = intent {} else if liveMarquee.marquee != nil { endGesture() }
         switch intent {
         case .file(let intent): performFile(intent)
         case .edit(let intent): performEdit(intent)

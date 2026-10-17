@@ -2,7 +2,8 @@
 // (AL-7 of photo-adjustment-layers, PV-6): on the `layered` fixture with
 // "Curves 1" selected, the header reads "Curves 1" over "Adjusts the layers
 // below" and the tab shows only that layer's Curves section, with no enable
-// switch (the row's eye turns the layer off). With Background selected the
+// switch (the row's eye turns the layer off), under the Layer section with
+// its Blend Mode and Opacity, as the inspector shows it (#1713). With Background selected the
 // target is the whole image, under "Image", with all five sections. Writes
 // photo-adjust-target-light.png and photo-adjust-target-dark.png. macOS only.
 import PhotoModel
@@ -34,6 +35,8 @@ import Testing
         #expect(model.adjustHeader.info == "Adjusts the layers below")
         #expect(model.adjustSections == [.curves])
         #expect(AdjustmentsPanel.showsEnable(for: model.adjustTarget) == false)
+        #expect(model.selectedLayer?.name == "Curves 1", "the Layer section shows Curves 1's blend and opacity")
+        #expect(AdjustTabSample(model: model).showsLayerSettings, "the sample draws the Layer section, as PhotoPanel does")
         for scheme in [ColorScheme.light, .dark] {
             try snapshot(
                 AdjustTabSample(model: model), name: "photo-adjust-target-\(scheme == .dark ? "dark" : "light")",
@@ -53,12 +56,14 @@ import Testing
     }
 }
 
-/// The Adjust tab at the inspector's ideal width, in a panel.
+/// The Adjust tab at the inspector's ideal width, in a panel, with the
+/// Layer section above the target's header, as PhotoPanel draws it.
 private struct AdjustTabSample: View {
     let model: PhotoWorkspace
+    let showsLayerSettings = true
     var body: some View {
-        PhotoAdjustTab(model: model, perform: { _ in })
-            .frame(width: SuiteSize.inspectorWidth.ideal, height: 560, alignment: .topLeading)
+        PhotoAdjustTab(model: model, perform: { _ in }, showsLayerSettings: showsLayerSettings)
+            .frame(width: SuiteSize.inspectorWidth.ideal, height: 720, alignment: .topLeading)
             .background(SuiteColor.panel)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             .padding(SuiteSpacing.xxl)

@@ -67,8 +67,9 @@ public struct FakeCulling: PhotoCulling {
             return copy
         }
     }
-    /// The `.fail` message: what couldn't change, then why in plain words
-    /// ("Couldn't set the flag: this window shows built-in sample data, ...").
+    /// The `.fail` message: what couldn't change, why in plain words, then
+    /// how to fix it ("Couldn't set the flag: this window shows built-in
+    /// sample data, ... Import a folder to rate your own photos.").
     static func refusal(_ change: CullChange) -> String {
         let what: String
         switch change {
@@ -77,7 +78,8 @@ public struct FakeCulling: PhotoCulling {
         case .flag: what = "set the flag"
         case .label: what = "set the label"
         }
-        return "Couldn't \(what): this window shows built-in sample data, not photos on disk."
+        return "Couldn't \(what): this window shows built-in sample data, not photos on disk. "
+            + LibraryNoticeContent.importHint
     }
     public func advance(from id: String, before: [String], after: [String]) -> String? {
         guard let index = before.firstIndex(of: id) else { return after.first }

@@ -28,18 +28,19 @@ struct FlareWindow: View {
     @State var inspectorTab: FlareInspectorTab = .properties
     /// The new sheet, alerts and the recovery offer.
     @State var presented: FlarePresentation? = nil
-    /// The marquee under way, kept out of `model`'s State (FlareLiveMarquee).
-    @State var liveMarquee = FlareLiveMarquee()
     let launch = FlareLaunch(arguments: ProcessInfo.processInfo.arguments)
 
     #if DEBUG
     /// How many times a window's body ran; RenderBudgetFlareTests counts an interaction's.
     static var bodyRuns = 0
+    /// The model the last body ran on, for the hosted-window tests to read back.
+    static var shownModel: FlareWorkspace?
     #endif
 
     var body: some View {
         #if DEBUG
         let _ = Self.bodyRuns += 1
+        let _ = Self.shownModel = model
         #endif
         SuiteWindow(
             title: model.document == nil ? "Flare" : model.title,
@@ -55,8 +56,7 @@ struct FlareWindow: View {
         ) {
             FlareCanvas(
                 model: model, zoom: zoom, showsRulers: showsRulers, showsGuides: showsGuides, perform: perform,
-                help: { help(for: $0) }, tick: { model.tick(target: $0, ticker: &$1) }, onKey: toolKey,
-                live: liveMarquee)
+                help: { help(for: $0) }, tick: { model.tick(target: $0, ticker: &$1) }, onKey: toolKey)
         } inspector: {
             FlareInspector(
                 model: model, tab: inspectorTab, perform: perform,
@@ -121,15 +121,13 @@ struct FlareCanvas: View {
     var tick: @MainActor (Double, inout PlaybackTicker) -> Bool = { _, _ in false }
     /// The stage's keys it doesn't take itself (Return, Escape): the window's `toolKey`.
     var onKey: @MainActor (KeyPress) -> KeyPress.Result = { _ in .ignored }
-    /// The marquee under way, drawn from outside `model` (FlareLiveMarquee); nil in previews and snapshots.
-    var live: FlareLiveMarquee? = nil
 
     var body: some View {
         if model.document != nil {
             VStack(spacing: 0) {
                 FlareStage(
                     model: model, zoom: zoom, showsRulers: showsRulers, showsGuides: showsGuides, perform: perform,
-                    help: help, onKey: onKey, live: live)
+                    help: help, onKey: onKey)
                 FlareTimeline(model: model, zoom: zoom, perform: perform, tick: tick)
             }
             .overlay { FlareRecording(model: model) }

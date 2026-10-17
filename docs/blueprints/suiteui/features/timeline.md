@@ -536,3 +536,17 @@ issue when an app asks.
   else claims them. In Halo and Flare the canvas's Zoom In may take the
   shortcut first; each host's adoption follow-up checks it in its own
   journey and routes the menu item to the timeline while it has focus.
+
+## Status
+
+Built (#1480). The lead's deviations from the plan above, one line each:
+
+- TL-4b added: `suiteui-timeline-long`'s outer `ScrollView` removed after TL-7.
+- TL-8b added: work-area dimming.
+- TL-19 split into TL-19a and TL-19b, because nothing asserted `suiteui-timeline-toolbar`.
+- The ruler's journey id is `suite.timeline.ruler` (a SuiteUI id).
+- Lanes, keys and names get ids only with the `timelineIdentifierPrefix` environment value (the gallery sets `suite.timeline`; Halo and Flare are unchanged).
+- SJ19b reads Badge's lane value from a hidden readout, `suite.gallery.timeline.value.badge`, because XCUITest reads SwiftUI values as empty (#262).
+- The lane's spoken key list is capped at 10, and only visible keys get accessibility children.
+- Gap issues #1735-#1744 were filed from TL-b's review past its round cap.
+- `suiteui-timeline-long` isn't asserted as a golden.

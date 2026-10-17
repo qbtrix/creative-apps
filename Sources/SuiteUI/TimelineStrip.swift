@@ -20,8 +20,8 @@
 // data is in TimelineTrack.swift. The unit and fps reach the ruler and the
 // toolbar's unit chips; the work area reaches the toolbar's Work Area chip and
 // the bar on the ruler (TimelineWorkAreaBar, over the playhead), which call
-// onUnit and onWorkArea (TL-18). The move and trim closures are taken and
-// stored; later timeline slices act on them. The strip owns its zoom (TL-17), a factor over the
+// onUnit and onWorkArea (TL-18). Each lane's input (TimelineLaneInput) calls
+// the move closures for a key drag and the trim closures for a clip end. The strip owns its zoom (TL-17), a factor over the
 // host's frameWidth kept in TimelineZoom's range (1 = fit): Command-plus,
 // Command-minus and Command-0 while it has focus (anchored on the playhead),
 // a pinch on the lanes (anchored under the pointer) and the toolbar row
@@ -49,6 +49,8 @@ public struct TimelineStrip<ID: Hashable & Sendable>: View {
     private let onUnit: @MainActor (TimeUnit) -> Void
     private let onWorkArea: @MainActor (ClosedRange<Int>?) -> Void
     @Environment(\.suiteSnapshotRendering) private var snapshot
+    /// The host's prefix for the name buttons' identifiers; nil puts none.
+    @Environment(\.timelineIdentifierPrefix) private var idPrefix
     /// The stretch of the lanes the scroll view shows, in mapping x; nil until
     /// it first reports.
     @State private var visibleX: ClosedRange<Double>?
@@ -272,6 +274,7 @@ public struct TimelineStrip<ID: Hashable & Sendable>: View {
     private var names: some View {
         LazyVStack(alignment: .leading, spacing: 0) {
             ForEach(tracks) { track in
+                let nameID = TimelineLaneSpeech.identifier(idPrefix, "name", track.id)
                 Button { onSelectTrack(track.id) } label: {
                     Text(track.name)
                         .font(track.isSelected ? SuiteFont.headline : SuiteFont.body)
@@ -286,6 +289,7 @@ public struct TimelineStrip<ID: Hashable & Sendable>: View {
                 // so under a floating sidebar the selected row reached 208 pt left of the strip (#1034).
                 .background(track.isSelected ? SuiteColor.accent.opacity(0.15) : Color.clear, ignoresSafeAreaEdges: [])
                 .accessibilityAddTraits(track.isSelected ? .isSelected : [])
+                .accessibilityIdentifier(nameID ?? "", isEnabled: nameID != nil)
             }
         }
         .frame(width: SuiteSize.timelineLabelColumn)
@@ -297,10 +301,12 @@ public struct TimelineStrip<ID: Hashable & Sendable>: View {
                 // The strip owns the tap so no closure sits in what `.equatable()` compares.
                 TimelineLane(track: track, mapping: mapping).equatable()
                     .contentShape(Rectangle())
-                    .modifier(TimelineLaneInput(track: track, mapping: mapping, actions: TimelineLaneActions(onSelectKeyframe: onSelectKeyframe, onSelectTrack: onSelectTrack, onPickKeyframe: onPickKeyframe)))
+                    .modifier(TimelineLaneInput(track: track, mapping: mapping, playhead: playhead, actions: TimelineLaneActions(onSelectKeyframe: onSelectKeyframe, onSelectTrack: onSelectTrack, onPickKeyframe: onPickKeyframe, onMoveKeyframes: onMoveKeyframes, onEndKeyDrag: onEndKeyDrag, onTrim: onTrim, onEndTrim: onEndTrim)))
             }
         }
         .frame(width: width, alignment: .leading)
+        // Only the lanes' access modifiers read it, so a scroll re-runs those, never a lane's Canvas.
+        .environment(\.timelineVisibleX, snapshot ? nil : visibleX)
         .simultaneousGesture(pinchGesture, isEnabled: !snapshot)
     }
 }

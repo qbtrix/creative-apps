@@ -3,9 +3,10 @@
 // (RenderBudgetHarness.swift). On New Sample Animation with Ball's first
 // easing segment selected, it steps the easing inspector's X1 scrub row 60
 // times through its slider (the way VoiceOver and XCUI adjust it: the row's
-// drag ignores the test's window-activation clicks), then drags 120 samples
-// across empty canvas with the select tool: a marquee, which draws on the
-// stage overlay and commits once at mouse-up. `bodies` gates the window-body counts; `timing`
+// drag ignores the test's window-activation clicks), then with Rectangle
+// chosen drags 120 samples across the canvas, which draws a rectangle: the
+// samples run on the stage's FlareLiveDrag, so the window's body runs only for
+// the commit at mouse-up (#1792). `bodies` gates the window-body counts; `timing`
 // (Tests/perf-suites.txt, report-only) judges the step times. Nested in
 // BodyCountSuites, as every suite that reads a body counter is. macOS only.
 #if canImport(AppKit)
@@ -22,25 +23,26 @@ extension BodyCountSuites {
             let (scrub, canvas) = try await Self.run()
             // Each step is one easing edit: one body. Target: 60.
             expectBodies(scrub, atMost: 60, target: 60)  // dev: 60
-            // The canvas drag is a marquee on empty stage (select tool). Its 120 samples draw on the
-            // overlay alone (FlareLiveMarquee): the press writes the model once, mouse-up commits once, so the
-            // count is 2 whatever the sample count. Budget 0 predates PR #1649, which routed the stage's drags
-            // to the Model and made every sample a window body.
-            expectBodies(canvas, atMost: 2, target: 2)  // dev: 122 per sample (#1649); fixed: 2 per drag
+            // A Rectangle drag draws on the stage's live copy; the window runs for its start, its end and the
+            // commit at most, never per sample. Target: 3.
+            expectBodies(canvas, atMost: 3, target: 3)  // dev: 122 before #1792
         }
 
         @Test(.timeLimit(.minutes(2))) func timing() async throws {
             let (scrub, canvas) = try await Self.run()
             // Target: a step fits one 120 Hz frame.
             expectP95(scrub, atMost: 20, target: 8.3)  // dev: 13.0 ms
-            expectP95(canvas, atMost: 1, target: 8.3)  // dev: 0.08 ms
+            expectP95(canvas, atMost: 20, target: 8.3)  // dev: 54.1 ms before #1792; not re-measured yet
         }
 
         static func run() async throws -> (scrub: RenderStep, canvas: RenderStep) {
-            var model = FlareWorkspace()
+            // The real services, as the app launches on: `FlareWorkspace()` is `.live`, whose stage and shapes are
+            // NotBuilt, so its stage list is always empty and a Rectangle drag draws nothing (#1792).
+            var model = FlareWorkspace(services: .built)
             model.newSampleAnimation()
             let segment = try #require(model.easingSegments.first, "the sample has no easing segment")
             model.selectEasingSegment(segment)
+            model.selectTool(.rectangle)
             let w = RenderBudgetWindow(FlareWindow(model: model))
             defer { w.close() }
             try await w.settle(500)
@@ -56,9 +58,17 @@ extension BodyCountSuites {
                 found = try await w.adjust("flare.easing.row.x1", steps: 60)
             }
             #expect(found && (scrub.bodies ?? 1) >= 1, "the X1 row didn't step: \(scrub)")
-            let canvas = try await w.measure("flare canvas drag", bodies: bodies) {
+            #if DEBUG
+            let before = FlareWindow.shownModel?.stageList?.items.count ?? 0
+            #endif
+            let canvas = try await w.measure("flare canvas rectangle drag", bodies: bodies) {
                 try await w.drag(from: CGPoint(x: 600, y: 420), by: CGVector(dx: 200, dy: 80))
             }
+            try await w.settle(100)
+            #if DEBUG
+            let after = FlareWindow.shownModel?.stageList?.items.count ?? 0
+            #expect(after == before + 1, "the canvas drag drew no rectangle: \(canvas)")
+            #endif
             return (scrub, canvas)
         }
     }

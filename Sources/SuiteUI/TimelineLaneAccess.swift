@@ -6,26 +6,38 @@
 // strip's TimelineKeyPicker. The children are built in the lane body, which a
 // scrub never runs (lesson 153); the picker and the mapping reach it through
 // the environment, set by TimelineStripKeys and equal across a scrub. The
-// strings and the children are TimelineLaneSpeech, with no view.
+// strings and the children are TimelineLaneSpeech, with no view. Only keys
+// in the strip's visible x (timelineVisibleX), plus one key past each edge,
+// get a child, and the value speaks the first 10 keys, so a 20,000 pt lane of
+// 400 keys doesn't flood the tree (#1800). Identifiers are opt-in: with a
+// timelineIdentifierPrefix P the lane is `P.lane.<id>` and each key child
+// `P.key.<id>.<frame>`; with none (Halo, Flare) nothing inside gets one.
 import SwiftUI
 
 struct TimelineLaneAccess<ID: Hashable & Sendable>: ViewModifier {
     let track: TimelineTrack<ID>
     @Environment(\.timelineKeyPicker) private var picker
     @Environment(\.timelineLaneMapping) private var mapping
+    @Environment(\.timelineVisibleX) private var visibleX
+    @Environment(\.timelineIdentifierPrefix) private var prefix
 
     func body(content: Content) -> some View {
         let track = track
         let picker = picker
         let mapping = mapping
+        let prefix = prefix
+        let children = TimelineLaneSpeech.children(of: track, visibleX: visibleX, mapping: mapping)
+        let laneID = TimelineLaneSpeech.identifier(prefix, "lane", track.id)
         let size = SuiteSize.timelineKeyframeHit
         return content
             .accessibilityElement()
             .accessibilityLabel(track.name)
             .accessibilityValue(TimelineLaneSpeech.value(of: track))
+            .accessibilityIdentifier(laneID ?? "", isEnabled: laneID != nil)
             .accessibilityChildren {
                 ZStack(alignment: .topLeading) {
-                    ForEach(TimelineLaneSpeech.children(of: track), id: \.frame) { child in
+                    ForEach(children, id: \.frame) { child in
+                        let keyID = TimelineLaneSpeech.identifier(prefix, "key", track.id, frame: child.frame)
                         Rectangle()
                             .frame(width: size, height: size)
                             .position(
@@ -34,6 +46,7 @@ struct TimelineLaneAccess<ID: Hashable & Sendable>: ViewModifier {
                             .accessibilityElement()
                             .accessibilityLabel(child.label)
                             .accessibilityAddTraits(child.picked ? .isSelected : [])
+                            .accessibilityIdentifier(keyID ?? "", isEnabled: keyID != nil)
                             .accessibilityAction { TimelineLaneSpeech.activate(child.frame, on: track, picker: picker) }
                     }
                 }
@@ -51,14 +64,19 @@ struct TimelineKeyChild: Equatable, Sendable {
 
 /// What a lane and its keys say, with no view (TimelineAccessTests).
 enum TimelineLaneSpeech {
-    /// The lane's value: each span, then the keys in frame order.
+    /// How many keys a lane's value names before "and N more".
+    static let spokenKeys = 10
+
+    /// The lane's value: each span, then the first `spokenKeys` keys in frame order.
     static func value<ID>(of track: TimelineTrack<ID>) -> String {
         let frames = track.keyframes.sorted()
+        let spoken = frames.prefix(spokenKeys).map(String.init).joined(separator: ", ")
+        let more = frames.count > spokenKeys ? ", and \(frames.count - spokenKeys) more" : ""
         let keys: String
         switch frames.count {
         case 0: keys = "No keyframes"
-        case 1: keys = "1 keyframe at \(frames.map(String.init).joined())"
-        default: keys = "\(frames.count) keyframes at \(frames.map(String.init).joined(separator: ", "))"
+        case 1: keys = "1 keyframe at \(spoken)"
+        default: keys = "\(frames.count) keyframes at \(spoken)\(more)"
         }
         let spans = track.spans.map { "Frames \($0.lowerBound)–\($0.upperBound)" }
         return (spans + [keys]).joined(separator: ", ")
@@ -69,15 +87,34 @@ enum TimelineLaneSpeech {
         "Key at frame \(frame), \(shape.rawValue)"
     }
 
-    /// The track's key children in frame order, one per frame.
-    static func children<ID>(of track: TimelineTrack<ID>) -> [TimelineKeyChild] {
+    /// The track's key children in frame order, one per frame: with a
+    /// visible x range (mapping x) and a mapping, only those inside it plus
+    /// one key past each edge; with either nil, every key.
+    static func children<ID>(
+        of track: TimelineTrack<ID>, visibleX: ClosedRange<Double>? = nil, mapping: FrameMapping? = nil
+    ) -> [TimelineKeyChild] {
         var seen = Set<Int>()
-        return track.keys.sorted { $0.frame < $1.frame }.compactMap { key in
+        let all = track.keys.sorted { $0.frame < $1.frame }.compactMap { key -> TimelineKeyChild? in
             guard seen.insert(key.frame).inserted else { return nil }
             return TimelineKeyChild(
                 frame: key.frame, label: keyLabel(frame: key.frame, shape: key.shape),
                 picked: track.pickedFrames.contains(key.frame))
         }
+        guard let visibleX, let mapping else { return all }
+        let xs = all.map { mapping.x(forFrame: $0.frame) }
+        let first = (xs.firstIndex { $0 >= visibleX.lowerBound } ?? xs.count) - 1
+        let last = (xs.lastIndex { $0 <= visibleX.upperBound } ?? -1) + 1
+        let low = max(first, 0)
+        let high = min(last, all.count - 1)
+        guard low <= high else { return [] }
+        return Array(all[low...high])
+    }
+
+    /// A strip part's identifier under `prefix` (`P.lane.<id>`, `P.key.<id>.<frame>`,
+    /// `P.name.<id>`); nil with no prefix, so a host's own identifier stands alone.
+    static func identifier<ID>(_ prefix: String?, _ part: String, _ id: ID, frame: Int? = nil) -> String? {
+        guard let prefix else { return nil }
+        return "\(prefix).\(part).\(id)" + (frame.map { ".\($0)" } ?? "")
     }
 
     /// A key child's default action: it alone is picked.
@@ -112,6 +149,19 @@ extension EnvironmentValues {
         get { self[TimelineLaneMappingKey.self] }
         set { self[TimelineLaneMappingKey.self] = newValue }
     }
+
+    /// The stretch of lanes the strip shows, in mapping x; nil in a snapshot
+    /// or before the scroll view reports, when every key gets a child.
+    var timelineVisibleX: ClosedRange<Double>? {
+        get { self[TimelineVisibleXKey.self] }
+        set { self[TimelineVisibleXKey.self] = newValue }
+    }
+
+    /// The prefix a host sets for the strip's inner identifiers; nil puts none.
+    var timelineIdentifierPrefix: String? {
+        get { self[TimelineIdentifierPrefixKey.self] }
+        set { self[TimelineIdentifierPrefixKey.self] = newValue }
+    }
 }
 
 private struct TimelineKeyPickerKey: EnvironmentKey {
@@ -120,4 +170,12 @@ private struct TimelineKeyPickerKey: EnvironmentKey {
 
 private struct TimelineLaneMappingKey: EnvironmentKey {
     static let defaultValue: FrameMapping? = nil
+}
+
+private struct TimelineVisibleXKey: EnvironmentKey {
+    static let defaultValue: ClosedRange<Double>? = nil
+}
+
+private struct TimelineIdentifierPrefixKey: EnvironmentKey {
+    static let defaultValue: String? = nil
 }

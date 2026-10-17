@@ -234,7 +234,7 @@ final class LibraryJourneyTests: XCTestCase {
     }
 
     /// The grid's first sample photo. A cell's label leads with its badges
-    /// ("2 stars, Purple, IMG_0034"), so match the file name anywhere in a
+    /// ("2 stars, Purple label, IMG_0034"), so match the file name anywhere in a
     /// grid button's label.
     @MainActor private func samplePhoto(in library: Journey) -> XCUIElement {
         library.app.splitGroups.descendants(matching: .button)

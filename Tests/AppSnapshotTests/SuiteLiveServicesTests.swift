@@ -48,9 +48,9 @@ import Testing
     @Test func everyOtherSlottedMemberIsPendingWithItsFeature() {
         let pending = makeLive().services.pending
         var expected = SuiteServices.slotFeatures.mapValues(SuiteIdentity.notConnected)
-        for live in ["recents", "creating", "home"] { expected[live] = nil }
+        for live in ["recents", "creating", "home", "switching"] { expected[live] = nil }
         #expect(pending == expected)
-        #expect(pending.count == 12)
+        #expect(pending.count == 11)
         #expect(pending["sending"] == "Switching between apps isn't available yet.")
         #expect(pending["thumbnails"] == "Opening recent work isn't available yet.")
         #expect(pending["home"] == nil)
@@ -70,7 +70,7 @@ import Testing
                                     "roundTrips", "pasteboard", "assets", "linking", "preferences", "settings",
                                     "onboarding", "thumbnails", "home"]
         #expect(Set(SuiteServices.slotFeatures.keys) == members)
-        #expect(Set(pending.keys).union(["recents", "creating", "home"]) == members)
+        #expect(Set(pending.keys).union(["recents", "creating", "home", "switching"]) == members)
     }
 
     @Test func throwingMembersNotLiveThrowTheirReason() async throws {
@@ -78,7 +78,6 @@ import Testing
         let preset = NewDocumentPreset(id: "design.blank", app: .design, title: "Blank", detail: "One page")
         let handOff = s.creating.handOff(for: preset, id: "h1", at: now)
         let logo = ref("Logo.design")
-        await #expect(throws: reason("switching")) { _ = try await s.switching.switchTo(.design, reason: .menu) }
         await #expect(throws: reason("sending")) { _ = try await s.sending.send(handOff) }
         await #expect(throws: reason("receiving")) { _ = try await s.receiving.receive(Data(), now: now) }
         await #expect(throws: reason("receiving")) { try await s.receiving.settle(id: "h1", as: .accepted) }

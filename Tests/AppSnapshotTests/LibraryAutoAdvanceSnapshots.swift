@@ -2,8 +2,9 @@
 // CU-5), in Light and Dark: the loupe on the next photo after a 3-star rating
 // with Auto Advance on (under the name sort, IMG_0001 rated, the loupe on
 // IMG_0002, beside IMG_0001's MetadataInspector showing its 3 stars and the
-// loupe's value), and the refused-change notice (the fakes in fail
-// mode) with its close button over the grid. Built only through the
+// loupe's value; that inspector is read from a copy back on the grid), and
+// the refused-change notice (the fakes in fail mode) with its close button
+// over the grid. Built only through the
 // catalog's public methods. Writes library-auto-advance-{light,dark}.png and
 // library-cull-refused-{light,dark}.png. macOS only.
 import LibraryModel
@@ -27,7 +28,10 @@ import Testing
         catalog.cull(.rating(3))
         #expect(catalog.items.first { $0.id == order[0] }?.rating == 3)
         #expect(catalog.focusedItemID == order[1], "Auto Advance left the loupe on \(catalog.focusedItemID ?? "nothing")")
+        // In the loupe `selectedMetadata` shows the loupe's photo (#1661), so
+        // the rated photo's inspector is read back on the grid.
         var rated = catalog
+        rated.showGrid()
         rated.select([order[0]])
         let ratedMetadata = try #require(rated.selectedMetadata)
         #expect(ratedMetadata.title.contains("IMG_0001"), "the inspector shows \(ratedMetadata.title)")
@@ -67,9 +71,10 @@ import Testing
         try #require(!order.isEmpty)
         catalog.select([order[0]])
         catalog.cull(.rating(3))
-        #expect(catalog.cullError == "Couldn't set the rating: this window shows built-in sample data, not photos on disk.")
+        #expect(catalog.cullError == "Couldn't set the rating: this window shows built-in sample data, not photos on disk. Import a folder to rate your own photos.")
         let notice = try #require(catalog.notice)
         #expect(notice.source == .cull && notice.isError)
+        #expect(notice.action == .importFolder)
         let row = LibraryNoticeRow(notice: notice, onClose: {})
         #expect(row.onClose != nil)
         var dismissed = catalog
@@ -83,6 +88,7 @@ import Testing
         }
     }
 
-    /// The window's cull actions: the notice's close enabled.
-    private static let cullMenu = LibraryMenu(cull: LibraryMenu.Cull(dismissCullError: {}))
+    /// The window's cull actions: the notice's close and Import Folder… enabled.
+    private static let cullMenu = LibraryMenu(
+        file: LibraryMenu.File(importFolder: {}), cull: LibraryMenu.Cull(dismissCullError: {}))
 }

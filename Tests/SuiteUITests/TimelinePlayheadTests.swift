@@ -4,7 +4,8 @@
 // stays on one frame sends one onScrub, and none at the playhead's own frame.
 // The pill reads the playhead in the host's unit. Lanes outside the work
 // area dim from the inset to its first tick and from its last tick to the
-// end; no work area, or one over every frame, dims nothing. macOS only.
+// end; no work area, or one over every frame, dims nothing. A row partly in
+// view, at either edge, counts as shown. macOS only.
 import Foundation
 @testable import SuiteUI
 import SwiftUI
@@ -58,6 +59,14 @@ import Testing
         let lane = Double(SuiteSize.timelineLane)
         #expect(TimelinePlayhead.rows(showing: lane * 2...lane * 5, count: 300) == 2..<5)
         #expect(TimelinePlayhead.rows(showing: nil, count: 3) == 0..<3)
+    }
+
+    /// A row half under the ruler or half off the bottom is still in view, so its key draws keyed (#1745).
+    @Test func aRowPartlyInViewStillDrawsItsKeyKeyed() {
+        let lane = Double(SuiteSize.timelineLane)
+        #expect(TimelinePlayhead.rows(showing: lane * 2.5...lane * 4.5, count: 300) == 2..<5)
+        #expect(TimelinePlayhead.rows(showing: lane * 2.5...lane * 5, count: 300) == 2..<5)
+        #expect(TimelinePlayhead.rows(showing: lane * 2...lane * 4.5, count: 300) == 2..<5)
     }
 
     @Test func lanesOutsideTheWorkAreaDimFromTheInsetAndToTheEnd() {

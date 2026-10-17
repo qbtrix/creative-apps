@@ -9,8 +9,10 @@
 // element "Key at frame 36, eased" on Shadow's lane picks it by its default
 // action, and Badge's lane reads "Frames 20–50, 3 keyframes at 20, 30, 50".
 // Written before its code (lead.md, contract rule 13): TL-10 landed it
-// skipped, TL-12 turned it on. A lane is found by its track name as label and
-// a value that counts keyframes; a key by "Key at frame <n>" inside it.
+// skipped, TL-12 turned it on. Lanes and keys are found by the identifiers the
+// gallery opts into (`suite.timeline.lane.<id>`, `suite.timeline.key.<id>.<frame>`),
+// and Badge's value by the hidden `suite.gallery.timeline.value.badge`'s label,
+// since XCUITest reads SwiftUI values as "" (#262, #1800).
 import XCTest
 
 extension SuiteJourneyTests {
@@ -26,21 +28,21 @@ extension SuiteJourneyTests {
         XCTAssert(log.waitForExistence(timeout: 10), "no suite.gallery.log on the timeline page")
 
         // 1. Click Ball's key at 12: it replaces the pick and reads selected.
-        let ball12 = timelineKey(12, lane: "Ball", gallery)
+        let ball12 = timelineKey(12, lane: "ball", gallery)
         ball12.click()
         expectTimelineLog("pick ball 12 replace", log)
         XCTAssert(timelineWait { ball12.isSelected }, "Ball's key at 12 isn't selected after its click")
         gallery.shot("timeline-picked")
 
         // 2. Shift-click Ball's key at 24, then ⌘-click 12.
-        let ball24 = timelineKey(24, lane: "Ball", gallery)
+        let ball24 = timelineKey(24, lane: "ball", gallery)
         XCUIElement.perform(withKeyModifiers: .shift) { ball24.click() }
         expectTimelineLog("pick ball 24 extend", log)
         XCUIElement.perform(withKeyModifiers: .command) { ball12.click() }
         expectTimelineLog("pick ball 12 toggle", log)
 
         // 3. Right-click Shadow's key at 36: it is picked and the menu offers Ease In.
-        timelineKey(36, lane: "Shadow", gallery).rightClick()
+        timelineKey(36, lane: "shadow", gallery).rightClick()
         expectTimelineLog("pick shadow 36 replace", log)
         XCTAssert(gallery.app.menuItems["Ease In"].waitForExistence(timeout: 5), "the key's context menu has no Ease In")
         gallery.shot("timeline-key-menu")
@@ -48,9 +50,9 @@ extension SuiteJourneyTests {
         XCTAssert(timelineWait { !gallery.app.menuItems["Ease In"].exists }, "the context menu stayed open after Escape")
 
         // 4. Click Ball's empty bed, halfway between its keys at 0 and 12: the pick clears.
-        let ball0 = timelineKey(0, lane: "Ball", gallery)
+        let ball0 = timelineKey(0, lane: "ball", gallery)
         let bedX = (ball0.frame.midX + ball12.frame.midX) / 2
-        let lane = timelineLane("Ball", gallery)
+        let lane = timelineLane("ball", gallery)
         lane.coordinate(withNormalizedOffset: .zero)
             .withOffset(CGVector(dx: bedX - lane.frame.minX, dy: lane.frame.height / 2)).click()
         expectTimelineLog("pick ball none", log)
@@ -69,29 +71,28 @@ extension SuiteJourneyTests {
         XCTAssertEqual(timelineText(log), before, "← at Ball's first key changed the log")
 
         // 6. VoiceOver: Shadow's key at 36 by label and its default action; Badge's lane value.
-        let shadow36 = timelineLane("Shadow", gallery).descendants(matching: .any)
+        let shadow36 = timelineLane("shadow", gallery).descendants(matching: .any)
             .matching(NSPredicate(format: "label == %@", "Key at frame 36, eased")).firstMatch
         XCTAssert(shadow36.waitForExistence(timeout: 5), "no element \"Key at frame 36, eased\" on Shadow's lane")
         shadow36.click()
         expectTimelineLog("pick shadow 36 replace", log)
-        let badge = timelineLane("Badge", gallery)
-        XCTAssertEqual(badge.value as? String, "Frames 20–50, 3 keyframes at 20, 30, 50", "Badge's lane value")
+        let badge = gallery.element("suite.gallery.timeline.value.badge")
+        XCTAssert(badge.waitForExistence(timeout: 5), "no suite.gallery.timeline.value.badge")
+        XCTAssertEqual(badge.label, "Frames 20–50, 3 keyframes at 20, 30, 50", "Badge's lane value")
         gallery.shot("timeline-keys-access")
     }
 
-    /// The lane of track `name`: its label is the name and its value counts keyframes.
-    @MainActor private func timelineLane(_ name: String, _ gallery: Journey) -> XCUIElement {
-        let lane = gallery.app.descendants(matching: .any).matching(
-            NSPredicate(format: "label == %@ AND value CONTAINS 'keyframe'", name)).firstMatch
-        XCTAssert(lane.waitForExistence(timeout: 5), "no lane for \(name)")
+    /// The lane of track `id`, `suite.timeline.lane.<id>`.
+    @MainActor private func timelineLane(_ id: String, _ gallery: Journey) -> XCUIElement {
+        let lane = gallery.element("suite.timeline.lane.\(id)")
+        XCTAssert(lane.waitForExistence(timeout: 5), "no lane suite.timeline.lane.\(id)")
         return lane
     }
 
-    /// The key at `frame` on `name`'s lane ("Key at frame <n>, <shape>").
-    @MainActor private func timelineKey(_ frame: Int, lane name: String, _ gallery: Journey) -> XCUIElement {
-        let key = timelineLane(name, gallery).descendants(matching: .any).matching(
-            NSPredicate(format: "label BEGINSWITH %@", "Key at frame \(frame),")).firstMatch
-        XCTAssert(key.waitForExistence(timeout: 5), "no key at \(frame) on \(name)'s lane")
+    /// The key at `frame` on track `id`'s lane, `suite.timeline.key.<id>.<frame>`.
+    @MainActor private func timelineKey(_ frame: Int, lane id: String, _ gallery: Journey) -> XCUIElement {
+        let key = gallery.element("suite.timeline.key.\(id).\(frame)")
+        XCTAssert(key.waitForExistence(timeout: 5), "no key suite.timeline.key.\(id).\(frame)")
         return key
     }
 

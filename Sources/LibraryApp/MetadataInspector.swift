@@ -5,6 +5,9 @@
 // out; LibraryCatalog applies each edit to every selected photo. Each control
 // carries its MetadataInspectorID. Each star and dot gets a 20 pt square hit
 // frame (SuiteSize.iconButtonHit, docs/design.md's floor), edge to edge.
+// "Mixed" stays one unbroken line: beside the marks when the row fits it,
+// else above them (ViewThatFits), never squeezed mid-word (#1719). No Label
+// draws circle.slash, since xmark is the grid's Rejected badge (#1721).
 import LibraryModel
 import SuiteUI
 import SwiftUI
@@ -31,8 +34,7 @@ struct MetadataInspector: View {
 
     /// Five stars; clicking the current rating's star clears it (the Model decides).
     private var stars: some View {
-        HStack(spacing: 0) {
-            if metadata.rating == .mixed { mixed }
+        mixedRow(metadata.rating == .mixed, id: Self.mixedID("rating")) {
             ForEach(1...5, id: \.self) { star in
                 let title = star == 1 ? "1 Star" : "\(star) Stars"
                 Button { onStar(star) } label: {
@@ -49,8 +51,7 @@ struct MetadataInspector: View {
 
     /// No label, then a dot per color; the current one carries a check.
     private var labelDots: some View {
-        HStack(spacing: 0) {
-            if metadata.label == .mixed { mixed }
+        mixedRow(metadata.label == .mixed, id: Self.mixedID("label")) {
             ForEach(Self.labelChoices, id: \.self) { label in
                 let isOn = metadata.label == .value(label)
                 Button { onLabel(label) } label: {
@@ -58,7 +59,8 @@ struct MetadataInspector: View {
                         if let label {
                             Image(systemName: isOn ? "checkmark.circle.fill" : "circle.fill").foregroundStyle(label.color)
                         } else {
-                            Image(systemName: isOn ? "xmark.circle.fill" : "xmark.circle")
+                            Image(systemName: Self.noLabelSymbol)
+                                .symbolVariant(isOn ? .fill : .none)
                                 .foregroundStyle(SuiteColor.textSecondary)
                         }
                     }
@@ -75,9 +77,35 @@ struct MetadataInspector: View {
 
     private static let labelChoices: [PhotoLabel?] = [nil] + PhotoLabel.allCases.map { $0 }
 
-    private var mixed: some View {
+    /// The No Label mark: a slashed circle, so it never reads as the Rejected xmark.
+    static let noLabelSymbol = "circle.slash"
+
+    /// The accessibility identifier of a row's "Mixed" text ("rating" or "label").
+    static func mixedID(_ row: String) -> String { "library.metadata.mixed.\(row)" }
+
+    /// The marks in a row; while the photos differ, "Mixed" on one line before
+    /// them when it fits (the first mark's hit frame pads it), else above them.
+    private func mixedRow<Marks: View>(
+        _ isMixed: Bool, id: String, @ViewBuilder marks: () -> Marks
+    ) -> some View {
+        let row = HStack(spacing: 0) { marks() }
+        return Group {
+            if isMixed {
+                ViewThatFits(in: .horizontal) {
+                    HStack(spacing: 0) { mixed(id: id); row }
+                    VStack(alignment: .trailing, spacing: 0) { mixed(id: id); row }
+                }
+            } else {
+                row
+            }
+        }
+    }
+
+    private func mixed(id: String) -> some View {
         Text(PhotoMetadata.mixedText).font(SuiteFont.inspectorValue).foregroundStyle(SuiteColor.textSecondary)
-            .padding(.trailing, SuiteSpacing.xs)
+            .lineLimit(1)
+            .fixedSize()
+            .accessibilityIdentifier(id)
     }
 
     /// The flags, plus a Mixed entry only while the photos differ, so the menu shows it.

@@ -78,4 +78,19 @@ import Testing
         #expect(home.emptyMessage == FakeHome().home(recents: RecentsList(), running: [], query: "", filter: nil, order: order,
                                                      missingApps: [], missingFiles: [], now: Self.now).emptyMessage)
     }
+
+    /// #1754: while Open… waits, the empty sentence drops "or open a file" and gives the reason.
+    @Test func emptySentenceSaysWhyOpenWaits() {
+        let reason = HomeMenu.openWaits
+        let waiting = HomeBuilder.emptyMessage(HomeBuilder.noRecents, openReason: reason)
+        #expect(waiting == "No recent work yet. Start something new above.\n" + reason)
+        #expect(waiting?.contains("open a file") == false)
+        #expect(HomeBuilder.emptyMessage(HomeBuilder.noRecents, openReason: nil) == HomeBuilder.noRecents)
+        let noMatch = "Nothing matches \u{201C}x\u{201D}."
+        #expect(HomeBuilder.emptyMessage(noMatch, openReason: reason) == noMatch)
+        #expect(HomeBuilder.emptyMessage(nil, openReason: reason) == nil)
+        let empty = Self.builder("en_US").home(recents: RecentsList(), running: [], query: "", filter: nil,
+                                               order: SuiteApp.apps, missingApps: [], missingFiles: [], now: Self.now)
+        #expect(empty.emptyMessage == HomeBuilder.noRecents)
+    }
 }

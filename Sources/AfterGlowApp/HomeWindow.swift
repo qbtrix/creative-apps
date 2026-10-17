@@ -55,7 +55,8 @@ struct HomeWindow: View {
     }
 }
 
-/// The Home page on HomeLayout's 24 pt margin.
+/// The Home page on HomeLayout's 24 pt margin: the New row pinned at the
+/// top, the running strip at the bottom, the recents in the height between.
 struct HomeContent: View {
     let model: HomeModel
     let services: SuiteServices
@@ -68,6 +69,7 @@ struct HomeContent: View {
                      open: Self.open(services, identifier: "afterglow.home.empty.open"))
                 .homeLayoutAnchor("recents")
             HomeRunningStrip(model: model)
+                .homeLayoutAnchor("running")
         }
         .padding(SuiteSpacing.xl)
     }
@@ -75,9 +77,9 @@ struct HomeContent: View {
     /// The "Preview data" pill shows only on the fakes, never on a live store.
     static func showsPreview(_ services: SuiteServices) -> Bool { services.isPreview }
 
-    /// Open…: disabled with the routing or sending slot's reason until a chosen file can be routed.
+    /// Open…: disabled with HomeMenu's reason, as File > Open…, until a chosen file can be routed.
     static func open(_ services: SuiteServices, identifier: String) -> ToolbarAction {
-        let reason = services.pending["routing"] ?? services.pending["sending"] ?? SuiteServices.notConnected("routing")
-        return ToolbarAction("Open…", systemImage: "folder", unavailableHelp: reason, identifier: identifier)
+        ToolbarAction("Open…", systemImage: "folder", unavailableHelp: HomeMenu.openReason(pending: services.pending),
+                      identifier: identifier)
     }
 }

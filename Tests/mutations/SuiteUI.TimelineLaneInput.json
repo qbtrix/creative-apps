@@ -2,5 +2,9 @@
 {"label":"the hit is the 10 pt draw size, not half the 16 pt token (B11)","file":"Sources/SuiteUI/TimelineLaneInput.swift","find":"tolerance: Double(SuiteSize.timelineKeyframeHit / 2)","replace":"tolerance: Double(SuiteSize.timelineKeyframe)","tests":"TimelineLaneTests"},
 {"label":"the strip's inset is dropped, so every press lands 8 pt late","file":"Sources/SuiteUI/TimelineLaneInput.swift","find":"Double(x - timelineInset)","replace":"Double(x)","tests":"TimelineLaneTests"},
 {"label":"a bed press skips the clear (B5)","file":"Sources/SuiteUI/TimelineLaneInput.swift","find":"actions.onPickKeyframe(track.id, nil, .replace)","replace":"","tests":"TimelineLanePickTests"},
-{"label":"a plain press sends .extend","file":"Sources/SuiteUI/TimelineLaneInput.swift","find":"TimelinePick.mode(pressWith: modifiers)","replace":".extend","tests":"TimelineLanePickTests"}
+{"label":"a plain press sends .extend","file":"Sources/SuiteUI/TimelineLaneInput.swift","find":"TimelinePick.mode(pressWith: modifiers)","replace":".extend","tests":"TimelineLanePickTests"},
+{"label":"the pick-on-press dropped, so a drag moves the old pick","file":"Sources/SuiteUI/TimelineLaneInput.swift","find":"if !picked { press(target, modifiers: held, on: track, actions: actions) }","replace":"","tests":"TimelineKeyDragTests"},
+{"label":"Escape skips the reverse step, so a cancel leaves keys moved","file":"Sources/SuiteUI/TimelineLaneInput.swift","find":"if let back = steps.step(toTotal: 0) { actions.onMoveKeyframes(back) }","replace":"","tests":"TimelineKeyDragTests"},
+{"label":"start and end zones swapped, so a press on a clip's right end trims its start","file":"Sources/SuiteUI/TimelineLaneInput.swift","find":"(toEnd == toStart && local >= lo) ? .end : .start","replace":"(toEnd == toStart && local >= lo) ? .start : .end","tests":"TimelineTrimTests"},
+{"label":"the snap skipped, so a trimmed end lands beside the playhead","file":"Sources/SuiteUI/TimelineLaneInput.swift","find":"let target = edits.snapped(raw, playhead: playhead, radius: Double(SuiteSize.timelineKeyframeHit / 2), scale: scale)","replace":"let target = raw","tests":"TimelineTrimTests"}
 ]

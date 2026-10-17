@@ -10,7 +10,7 @@ struct HomeRunningStrip: View {
 
     var body: some View {
         HStack(spacing: SuiteSpacing.s) {
-            Text("RUNNING").font(SuiteFont.sectionCaps)
+            Text("Running").font(SuiteFont.sectionCaps).textCase(.uppercase).tracking(SuiteSize.capsTracking)
             if model.launching != nil { ProgressView().controlSize(.small) }
             Text(model.launching.map { "Opening \($0.displayName)…" }
                  ?? (model.state.running.isEmpty ? "No apps running"

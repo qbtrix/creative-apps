@@ -74,8 +74,21 @@ import Testing
     }
 
     @Test func openWaitsForRouting() {
-        #expect(menu().open == HomeMenu.Item("Open…", reason: SuiteServices.notConnected("routing")))
+        #expect(menu().open == HomeMenu.Item("Open…", reason: HomeMenu.openWaits))
         #expect(menu(window: false).open == HomeMenu.Item("Open…"))
+    }
+
+    /// #1754: Open…'s reason names opening a file, never "Opening recent work".
+    @Test func openReasonNamesOpeningAFile() {
+        let live = ["routing": SuiteIdentity.notConnected("recents-open-in"),
+                    "sending": SuiteIdentity.notConnected("switching")]
+        for pending in [[:], live, ["sending": SuiteIdentity.notConnected("switching")]] {
+            #expect(HomeMenu.openReason(pending: pending) == "Opening files from AfterGlow isn't available yet.")
+            #expect(HomeMenu.openReason(pending: pending) != SuiteIdentity.notConnected("recents-open-in"))
+        }
+        let open = HomeMenu.make(recents: RecentsList(), selection: nil, thumbnailStep: 1, page: .home,
+                                 hasWindow: true, pending: live).open
+        #expect(open.reason == HomeMenu.openWaits)
     }
 
     @Test func noWindowDisablesAllButNewAndOpen() throws {

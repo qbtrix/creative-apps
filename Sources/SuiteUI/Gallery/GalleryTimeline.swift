@@ -14,7 +14,12 @@
 // carries an easing context menu for the picked keys, as a host adds one.
 // The page offers the strip the height left between the switches and the log,
 // with no vertical ScrollView of its own, so `timeline-long`'s 300 lanes
-// scroll under the strip's pinned ruler.
+// scroll under the strip's pinned ruler. The page sets the strip's identifier
+// prefix `suite.timeline` (lanes `suite.timeline.lane.<id>`, keys
+// `suite.timeline.key.<id>.<frame>`, names `suite.timeline.name.<id>`), and
+// publishes Badge's lane value as the label of a hidden 1 x 1 pt element,
+// `suite.gallery.timeline.value.badge`, since XCUITest reads SwiftUI values
+// as "" (#262; the HaloReadout pattern).
 import SwiftUI
 
 enum GalleryTimeline {
@@ -138,6 +143,12 @@ private struct GalleryTimelinePage: View {
         }
         .padding(SuiteSpacing.m)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .overlay(alignment: .topLeading) {
+            if let badge = tracks.first(where: { $0.id == "badge" }) {
+                GalleryTimelineReadout(
+                    identifier: "suite.gallery.timeline.value.badge", text: TimelineLaneSpeech.value(of: badge))
+            }
+        }
     }
 
     private var strip: some View {
@@ -167,6 +178,7 @@ private struct GalleryTimelinePage: View {
                 write(range.map { "work \($0.lowerBound)…\($0.upperBound)" } ?? "work off")
             })
             .contextMenu { easingItems }
+            .environment(\.timelineIdentifierPrefix, "suite.timeline")
     }
 
     /// One page switch: a ChipRow of one chip, so its identifier lands on that chip alone.
@@ -259,6 +271,24 @@ private struct GalleryTimelinePage: View {
             }
         }
         write("ease \(ease.rawValue.lowercased())")
+    }
+}
+
+/// A value a journey reads, as the label of a hidden element: 1 x 1 pt, no
+/// hits, drawing nothing, so the app audit finds no control or text in it.
+private struct GalleryTimelineReadout: View {
+    /// Its side: not a design size, since it draws nothing.
+    private static let side: CGFloat = 1
+    let identifier: String
+    let text: String
+
+    var body: some View {
+        Color.clear
+            .frame(width: Self.side, height: Self.side)
+            .allowsHitTesting(false)
+            .accessibilityElement()
+            .accessibilityLabel(Text(verbatim: text))
+            .accessibilityIdentifier(identifier)
     }
 }
 
