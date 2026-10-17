@@ -1,0 +1,13 @@
+[
+{"label":"a rating rule that never applies keeps every photo","file":"Sources/LibraryModel/LibraryFilter.swift","find":"if !rating.admits(photo.rating) { return false }","replace":"","tests":"LibraryFilterTests"},
+{"label":"at least N admits N minus one stars","file":"Sources/LibraryModel/LibraryFilter.swift","find":"stars >= minimum","replace":"stars > minimum","tests":"LibraryFilterTests"},
+{"label":"exactly N admits any count at or above N","file":"Sources/LibraryModel/LibraryFilter.swift","find":"stars == count","replace":"stars >= count","tests":"LibraryFilterTests"},
+{"label":"the any-rating rule admits nothing","file":"Sources/LibraryModel/LibraryFilter.swift","find":"case .any: true","replace":"case .any: false","tests":"LibraryFilterTests"},
+{"label":"hide rejected hides picks instead of rejects","file":"Sources/LibraryModel/LibraryFilter.swift","find":"if hidesRejected, photo.flag == .reject { return false }","replace":"if hidesRejected, photo.flag == .pick { return false }","tests":"LibraryFilterTests"},
+{"label":"an empty flag set filters every photo out","file":"Sources/LibraryModel/LibraryFilter.swift","find":"if !flags.isEmpty, !flags.contains(photo.flag) { return false }","replace":"if !flags.contains(photo.flag) { return false }","tests":"LibraryFilterTests"},
+{"label":"a label rule admits any labelled photo","file":"Sources/LibraryModel/LibraryFilter.swift","find":"labels.contains(label) else { return false }","replace":"!labels.isEmpty else { return false }","tests":"LibraryFilterTests"},
+{"label":"the all filter reads as active by its flags only","file":"Sources/LibraryModel/LibraryFilter.swift","find":"public var isActive: Bool { self != .all }","replace":"public var isActive: Bool { !flags.isEmpty }","tests":"LibraryFilterTests"},
+{"label":"the summary drops the all-photos sentence","file":"Sources/LibraryModel/LibraryFilter.swift","find":"guard isActive else { return \"All photos\" }","replace":"","tests":"LibraryFilterTests"},
+{"label":"the summary names hidden rejects as hidden","file":"Sources/LibraryModel/LibraryFilter.swift","find":"if hidesRejected { parts.append(\"Rejects hidden\") }","replace":"if hidesRejected { parts.append(\"Hidden\") }","tests":"LibraryFilterTests"},
+{"label":"an or list joins its last two names with and","file":"Sources/LibraryModel/LibraryFilter.swift","find":"+ \" or \" +","replace":"+ \" and \" +","tests":"LibraryFilterTests"}
+]
