@@ -34,6 +34,9 @@ public struct HomeMenu: Equatable, Sendable {
     public static let nothingToUndo = "Nothing to undo yet."
     public static let largest = "Thumbnails are at their largest."
     public static let smallest = "Thumbnails are at their smallest."
+    /// Open…'s reason while a chosen file can't be routed and sent: it names
+    /// opening a file, not "Opening recent work" (#1754).
+    public static let openWaits = "Opening files from AfterGlow isn't available yet."
     /// Open Recent shows this many of the newest recents.
     public static let recentCount = 20
 
@@ -59,8 +62,7 @@ public struct HomeMenu: Equatable, Sendable {
             let reason = tile.disabledReason ?? (tile.presets.isEmpty ? SuiteIdentity.notConnected("home") : nil)
             return New(app: tile.app, preset: tile.presets.first, item: Item(tile.title, reason: hasWindow ? reason : nil))
         }
-        // As the window's Open…: no open panel until a chosen file can be routed.
-        let openReason = pending["routing"] ?? pending["sending"] ?? SuiteServices.notConnected("routing")
+        let openReason = openReason(pending: pending)
         let recent = recents.items.prefix(recentCount).map {
             Recent(fileID: $0.ref.fileID, item: Item($0.ref.displayName, reason: blocked ?? pending["sending"]))
         }
@@ -79,5 +81,13 @@ public struct HomeMenu: Equatable, Sendable {
             showInspector: Item("Show Inspector", reason: blocked ?? SuiteIdentity.notConnected("home")),
             larger: Item("Larger Thumbnails", reason: blocked ?? (thumbnailStep >= 3 ? largest : nil)),
             smaller: Item("Smaller Thumbnails", reason: blocked ?? (thumbnailStep <= 0 ? smallest : nil)))
+    }
+
+    /// Why Open… (menu, toolbar and empty state) can't act: `openWaits` while
+    /// routing or sending is pending, and until recents-open-in gives Open… a
+    /// file to route (#1763) while the routing slot is still a fake.
+    public static func openReason(pending: [String: String]) -> String? {
+        let waits = pending["routing"] != nil || pending["sending"] != nil || SuiteServices.notConnected("routing") != nil
+        return waits ? openWaits : nil
     }
 }

@@ -92,8 +92,13 @@ SJ1 `testHomeFindsAndOpensRecentWork` (`+Home`) on `weekOfWork`, `missing`,
 5. Relaunch on `missing`: `Cards.design` shows "Missing"; Return on it → in
    place "Cards.design was moved or deleted." with Locate… and Remove from
    Recents; Remove → 7 cards; Edit > Undo → 8.
-6. Relaunch on `empty`: "No recent work yet. Start something new above, or
-   open a file." with Open… as the one prominent button.
+6. Relaunch on `empty`: Open… is the one prominent button. While it can't
+   route a chosen file (until recents-open-in, #1763) it is disabled and the
+   sentence reads "No recent work yet. Start something new above." with
+   `HomeMenu.openWaits` ("Opening files from AfterGlow isn't available yet.")
+   on its second line, the same reason as Open…'s tooltip and File > Open…;
+   once Open… acts, "No recent work yet. Start something new above, or open a
+   file." (#1754).
 
 `testHomeAtEveryWidth` (`+Layout`): the home at 880 and 1000 pt; the
 audit's `offscreen` and `overlap` stay 0. SJ19 `testEveryControlActsOrSaysWhy`
@@ -104,15 +109,18 @@ placeholder and the Settings placeholder. SP3, SP4 (`+PerfHome`).
 
 | Screen | Empty | Error | Loading |
 |---|---|---|---|
-| Recents grid | `FakeHome`'s sentence with Open… prominent (`EmptyStateView`); "Nothing matches “<query>”." when a search or filter hides everything | a missing file: the card's Missing badge and, on open, the sentence in place (`InlineNotice` #780, placeholder until then) with Locate… and Remove from Recents; a store read failure: `SuiteError.message` in the same place | a card whose thumbnail hasn't loaded shows its app's symbol on the `panel` fill (`afterglow-home-loading`) |
+| Recents grid | `FakeHome`'s sentence with Open… prominent (`EmptyStateView`); while Open… waits, `HomeBuilder.emptyMessage` drops "or open a file" and adds `HomeMenu.openWaits` as the second line (#1754); "Nothing matches “<query>”." when a search or filter hides everything | a missing file: the card's Missing badge and, on open, the sentence in place (`InlineNotice` #780, placeholder until then) with Locate… and Remove from Recents; a store read failure: `SuiteError.message` in the same place | a card whose thumbnail hasn't loaded shows its app's symbol on the `panel` fill (`afterglow-home-loading`) |
 | New row | – | a missing app's tile disabled with "<App> is missing from AfterGlow. Reinstall AfterGlow to get it back." (`-SuiteHideApp`); until switching lands every tile is disabled with "Not connected yet (switching)." (`HomeModel` reads `services.pending["sending"]`; `SuiteCreating` itself has no reason) | a tile shows a progress ring 100 ms after its click (`AppTile` #803; switching's SW-4a times it) |
 | Running strip | "No apps running" in `textSecondary` | – | while `launching` is set for more than 100 ms, a `ProgressRow` (#781; a plain `ProgressView` placeholder until it merges) reads "Opening <App>…" (probe mark `switch-cold`, timed by switching's SW-4c) |
 | Inspector | no selection: "Select a recent item to see its details." | – | – |
 
 Snapshots (`AfterGlowHomeSnapshots`, Light, Dark and both with Increase
 Contrast): `afterglow-home-week`, `afterglow-home-empty`,
-`afterglow-home-missing`, `afterglow-home-loading`, `afterglow-home-search`;
-`AfterGlowHomeLayoutTests`: `afterglow-home-880`, `-1000`, `-1280`, `-1728`.
+`afterglow-home-missing`, `afterglow-home-loading`, `afterglow-home-search`,
+`afterglow-home-filter` (SJ1 step 2: the Design chip, 1 card),
+`afterglow-home-removed` (SJ1 step 5: 7 cards after Remove);
+`AfterGlowHomeLayoutTests` (the window's sidebar list beside the content):
+`afterglow-home-880`, `-1000`, `-1280`, `-1728`, `afterglow-home-search-1280`.
 
 ## Contract slice
 

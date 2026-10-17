@@ -37,9 +37,20 @@ public struct HomeBuilder: HomeBuilding {
         }
         let empty: String?
         if !cards.isEmpty { empty = nil }
-        else if recents.items.isEmpty { empty = "No recent work yet. Start something new above, or open a file." }
+        else if recents.items.isEmpty { empty = Self.noRecents }
         else { empty = "Nothing matches \u{201C}\(query)\u{201D}." }
         return HomeState(tiles: ordered, cards: cards, running: running.filter { $0 != .launcher }, emptyMessage: empty)
+    }
+
+    /// The no-recents sentence, as FakeHome says it.
+    public static let noRecents = "No recent work yet. Start something new above, or open a file."
+
+    /// The empty state's text (#1754): while Open… can't act the no-recents
+    /// sentence drops "or open a file" and says why on its second line; any
+    /// other message as is.
+    public static func emptyMessage(_ message: String?, openReason: String?) -> String? {
+        guard message == noRecents, let openReason else { return message }
+        return "No recent work yet. Start something new above.\n\(openReason)"
     }
 
     /// Calendar days from `date` to `now`: 0 (or a future date) "Today", 1 "Yesterday",
