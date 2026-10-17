@@ -38,7 +38,7 @@ Next: the supervisor decides the integration branch (see Open 1); then start wav
 - Waves are the packet's Build waves (1 to 6). Wave 2 and wave 3 tasks are independent of each other within their wave; CH-2 and CH-6/CH-8 can share wave 2 only after CH-1 merges.
 - Slice CH-a's wait on the canvas-marks feature is recorded but CH-1 has no task-level wait and only creates new files, so it starts first. CH-2 and CH-6 wait on CH-1 by task.
 - Lead does not write feature code. Builders take each task.
-- Git identity set per contract rule 9 (Prakash Dalai, 86671543+prakashUXtech@users.noreply.github.com) before the first commit.
+- Git identity: the repo-local identity per contract rule 9 (Prakash Dalai, 86671543+prakashUXtech@users.noreply.github.com) is set from stage 2 on. The first commit (lead record, stages 0-2) was made with the default `Claude` identity before this was set.
 
 ## Open
 1. **Integration branch conflict.** The Belt brief says base `main` and check out main. CLAUDE.md says branch from `dev` and never target `main`, and the fast lane merges only into `dev`. This run has not opened any PR. Needs the supervisor's call; the default here is `dev`.
