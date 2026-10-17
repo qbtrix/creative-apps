@@ -1,5 +1,7 @@
 // FlareInspector.swift: Flare's inspector, a SegmentedTabs switch between
-// Properties and Library. Properties shows the selected scene's card and,
+// Properties and Library. Properties shows the selected scene's InspectorHeader
+// (never a SurfaceCard, docs/design.md; its Size and Frame rate come from the
+// Model, in the stage's px) and,
 // while a layer is selected, the easing editor the window hands in as
 // `easing` (FlareEasingInspector, until inspector-timeline retires it); with
 // no scene it says what to do. Library is FlareLibraryPanel. A tab click goes
@@ -62,10 +64,15 @@ struct FlareInspector<Easing: View>: View {
                 .foregroundStyle(SuiteColor.secondaryText)
         }
         if let scene = model.selectedScene {
-            SurfaceCard(title: scene.name, detail: "\(Int(scene.width)) × \(Int(scene.height)) pt · \(scene.fps) fps")
+            InspectorHeader(scene.name, facts: [
+                InspectorFact("Size", model.sceneSizeText ?? ""),
+                InspectorFact("Frame rate", model.sceneRateText ?? ""),
+            ])
+            .accessibilityIdentifier("flare.inspector.header")
             if model.selectedLayerID != nil { easing }
         } else {
-            EmptyStateView("No Selection", systemImage: "film", message: "Select a scene to see its properties.")
+            let empty = model.inspectorEmptyText
+            EmptyStateView(empty.title, systemImage: "film", message: empty.message)
         }
     }
 }
