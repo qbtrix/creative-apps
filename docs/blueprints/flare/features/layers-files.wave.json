@@ -2,8 +2,8 @@
   "title": "Scenes and layers, new from a preset, files that never fail silently",
   "wave": 4,
   "order": 30,
-  "status": "planned",
-  "feature_issue": "file when ready",
+  "status": "built",
+  "feature_issue": "#1516",
   "covers": "#350, #351, #392, #393; IN-4 #398 (files half)",
   "waits_on": "`draw-key-save`; tasks LF-1 on #146, LF-2 on #73",
   "depends": [
