@@ -40,3 +40,6 @@ utc	stage	event	ref	note
 2026-10-17T01:42Z	4	heartbeat	38990423996	still blocked on SuiteUI #1295 (+ #1733 test); hand-off in Next
 2026-10-17T01:44Z	4	ci-run	38990423996	adjustTabEndIsReachable passes; only #1674 (SuiteUI #1295) gates the photo journeys
 2026-10-17T02:05Z	4	stopped	#1502	8 h wall clock; built, blocked on SuiteUI #1295 (#1674 gates the photo journeys); hand-off in RECORD Next and on #1502
+2026-10-17T06:40Z	4	stage-start	round 2	relaunch act-1a148875943-9arx: #1716 merged, #1910 (window title with subtitle) is ours
+2026-10-17T06:55Z	4	ci-run	38993910840	journeys ran: 25 window-wait failures (#1910 siblings), testFixtureLaunch viewport measure, testShell1Empty switcher centring
+2026-10-17T07:05Z	4	fix-round	2	F-1910 (journey window lookup, viewport measure) and PS-7 (feature-done) started as worktree builders
