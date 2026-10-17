@@ -1,10 +1,10 @@
 # layers-panel lead record
 
 Issue: #1498 · Packet: docs/blueprints/design/features/layers-panel.md
-Run: act-1a1487bf8e3-hwdj · Session: claude/design-shell-parity-lead-0l668u · Started: 2026-10-17T06:08Z
+Run: act-1a149c0c306-8ckd (before: act-1a1487bf8e3-hwdj) · Session: claude/design-shell-parity-lead-678eue · Started: 2026-10-17T06:08Z
 Stage: 3 wave 1
-Base: fe0f5f176a95336c77a1d0cff7162e584db1d24c
-Next: wave 1 (L-3, L-7 beside style-rows ST-1, ST-2, ST-3, ST-6b) is building; when its PRs merge, run the check. L-1 and L-2 start once editor-kernel EK-tree (#1933) has merged; L-4 and L-5 also need design-window DW-a and DW-b (#1494)
+Base: 042423165693f2f1d65d2ece90eb0d5bcb910554
+Next: wave 1 resumed 12:10Z (L-3, L-7 building; the first run opened no PR for them); when they merge run the check. LP-a still waits on editor-kernel EK-tree (#1933: kernel at wave 2, EK-1 #1992 open) and design-window DW-a/DW-b (#1494)
 
 Line lead (rule 19) over #1325 shell-parity (done), #1498 layers-panel and #1497 style-rows. One wave plan across the three.
 
@@ -17,8 +17,8 @@ Line lead (rule 19) over #1325 shell-parity (done), #1498 layers-panel and #1497
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
 |---|---|---|---|---|---|---|---|
-| L-3 | LP-b | 1 | A lock commits an open text edit first (#613); `renameNode` / `renamePage` trim the name, a same-name rename records nothing | Sources/DesignModel/DesignWorkspace.swift, Tests/DesignModelTests/DesignLockTextEditTests.swift, Tests/DesignModelTests/DesignRenameTests.swift, Tests/mutations/DesignModel.DesignWorkspace.json | DesignLockTextEditTests, DesignRenameTests + Mutate 2+/n | – | building |
-| L-7 | LP-b | 1 | QD-S10 model budget (`layerRows`, 2,000 expanded rows on `crowd` ≤ 50 ms); P3 written skipped ("waits on design-window D0-5a") | Tests/DesignModelTests/DesignLayersBudgetTests.swift, UITests/DesignJourneyTests+PerfLayers.swift | DesignLayersBudgetTests.layerRows | – | building |
+| L-3 | LP-b | 1 | A lock commits an open text edit first (#613); `renameNode` / `renamePage` trim the name, a same-name rename records nothing | Sources/DesignModel/DesignWorkspace.swift, Tests/DesignModelTests/DesignLockTextEditTests.swift, Tests/DesignModelTests/DesignRenameTests.swift, Tests/mutations/DesignModel.DesignWorkspace.json | DesignLockTextEditTests, DesignRenameTests + Mutate 2+/n | – | building (relaunch) |
+| L-7 | LP-b | 1 | QD-S10 model budget (`layerRows`, 2,000 expanded rows on `crowd` ≤ 50 ms); P3 written skipped ("waits on design-window D0-5a") | Tests/DesignModelTests/DesignLayersBudgetTests.swift, UITests/DesignJourneyTests+PerfLayers.swift | DesignLayersBudgetTests.layerRows | – | building (relaunch) |
 | L-1 | LP-a | – | `LiveOrdering` over the kernel tree: move with its refusals; arrange | Sources/DesignModel/Live/LiveOrdering.swift, Tests/DesignModelTests/DesignOrderingTests.swift, Tests/mutations/DesignModel.LiveOrdering.json | DesignOrderingTests | – | waits on EK-tree (#1933) |
 | L-2 | LP-a | – | `layerDrop` and `DesignDropPosition` | Sources/DesignModel/DesignLayerToggles.swift, Tests/DesignModelTests/DesignLayerDropTests.swift | DesignLayerDropTests | – | waits on L-1 |
 | L-4 | LP-a | – | Layers rows: rename, drag to reorder and nest, the empty page state, row ids, the drag check | Sources/DesignApp/DesignLayersPanel.swift, Tests/AppSnapshotTests/DesignLayersSnapshots.swift, Tests/AppSnapshotTests/DesignLayersDragTests.swift | DesignLayersSnapshots, DesignLayersDragTests | – | waits on L-1, L-2, DW-a, DW-b |
@@ -30,6 +30,7 @@ Line lead (rule 19) over #1325 shell-parity (done), #1498 layers-panel and #1497
 |---|---|---|---|---|---|
 
 ## Decisions
+- 2026-10-17 12:10Z relaunch (run act-1a149c0c306-8ckd, base 0424231 = dev = main): L-3 and L-7 had no PRs; rebuilt on branches wave/layers-panel-L-3, -L-7. EK-tree has not started (editor-kernel's EK-a is in its wave 2), DW-a not merged, so LP-a stays blocked.
 - PRs target `dev` (the lane's base; it retargets `main`); builder branches are `wave/<feature>-<task>`.
 - Rule 20 and the relaunch note on #1498: the layer tree and parenting are kernel concepts, so L-1 (`LiveOrdering` move and arrange) and L-2 (`layerDrop`) build on SuiteKernel's tree module (editor-kernel EK-tree, #1933) and wait for it. No Design copy. The SuiteKernel target doesn't exist on dev yet (EK-a is the kernel's first slice), so LP-a is blocked today.
 - L-3 and L-7 start now: a lock that commits a text edit, name trimming and the row-build budget are Design's own, and `layerRows` and the `crowd` fixture exist. L-7's P3 journey is written skipped by name (`-DesignFixture` arrives with design-window D0-5a, rule 13).
