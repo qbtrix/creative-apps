@@ -4,7 +4,7 @@ Issue: #1494 · Packet: docs/blueprints/design/features/design-window.md
 Run: act-1a14a88d756-rnok · Session: claude/design-feature-lead-7saqm8 · Started: 2026-10-17T15:46Z
 Stage: 3 wave 2
 Base: dd7ec767cc0afab91b35ff4f208351dd866028d8
-Next: wave 2 (D0-5c, D0-5d, D0-6) building from ec0e979b; then wave 3 D0-8a, D0-9c
+Next: #2213 (D0-6) waits for the lane after the dev merge; once merged: wave 3 (D0-8a, D0-9c) and the DW-a slice check (scoped ci.yml app=design, critic panel)
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -21,9 +21,9 @@ Next: wave 2 (D0-5c, D0-5d, D0-6) building from ec0e979b; then wave 3 D0-8a, D0-
 | D0-9b | DW-d | 0 | DesignCanvasHints model | Sources/DesignModel/DesignCanvasHints.swift; Tests/DesignModelTests/DesignCanvasHintsTests.swift; Tests/mutations/DesignModel.DesignCanvasHints.json | DesignCanvasHintsTests | #1980 | merged |
 | D0-5a | DW-a | 1 | DesignWindowOptions, openFixture, DesignControlID, new intents and perform, launch args | Sources/DesignModel/DesignWindowOptions.swift; Sources/DesignApp/DesignIntent.swift, DesignWindow.swift, DesignEditor.swift, DesignSaveStatus.swift; Tests/DesignModelTests/DesignWindowOptionsTests.swift; Tests/AppSnapshotTests/DesignStatusSnapshots.swift; Tests/mutations/DesignModel.DesignWindowOptions.json | DesignWindowOptionsTests, design-status-two-layers | #2168 | merged ac6fac76 |
 | D0-5b | DW-a | 1 | canvas slots: marquee mark, selection marks, DesignFrameLabels, DesignTextArtwork, empty DesignCanvasFeedback | Sources/DesignApp/DesignCanvas.swift; Sources/DesignApp/DesignCanvasMarks.swift; Sources/DesignApp/DesignSelectionMarks.swift; Sources/DesignApp/DesignFrameLabels.swift; Sources/DesignApp/DesignTextArtwork.swift; Sources/DesignApp/DesignCanvasFeedback.swift; Tests/AppSnapshotTests/DesignCanvasSeamSnapshots.swift | DesignCanvasSeamSnapshots | #2163 | merged 53e3127e |
-| D0-5c | DW-a | 2 | several-layer inspector shell, Mixed rows, ids | per packet | DesignSeveralInspectorSnapshots | #2217 | open, contract ok |
-| D0-5d | DW-a | 2 | DesignPasteboardBridge, copy/cut/paste hooks, rename state, DesignClosePrompt | per packet | DesignPasteboardBridgeTests | #2214 | open, contract ok |
-| D0-6 | DW-a | 2 | menus: Duplicate, Rename Page, Group, Ungroup, Arrange, Distribute, Zoom to Selection | DesignCommands.swift, DesignEditMenu.swift, DesignObjectMenu.swift; snapshots; J1 | DesignEditMenuSnapshots, J1 | #2213 | fix round 1 pushed f4e1c75a (openFixture bound before #expect), awaiting macOS build |
+| D0-5c | DW-a | 2 | several-layer inspector shell, Mixed rows, ids | per packet | DesignSeveralInspectorSnapshots | #2217 | merged 18:15Z |
+| D0-5d | DW-a | 2 | DesignPasteboardBridge, copy/cut/paste hooks, rename state, DesignClosePrompt | per packet | DesignPasteboardBridgeTests | #2214 | merged 18:26Z |
+| D0-6 | DW-a | 2 | menus: Duplicate, Rename Page, Group, Ungroup, Arrange, Distribute, Zoom to Selection | DesignCommands.swift, DesignEditMenu.swift, DesignObjectMenu.swift; snapshots; J1 | DesignEditMenuSnapshots, J1 | #2213 | needs-rebase (C4 part conflict with #2214/#2217): dev merged in, head 5196d0f6, CI --changed PASS, Head moved; awaiting lane |
 | D0-8a | DW-b | 3 | DesignLiveDrag box | DesignLiveDrag.swift, DesignCanvas.swift, DesignWindow.swift; DesignLiveDragTests | DesignLiveDragTests | – | waits DW-a |
 | D0-9c | DW-d | 3 | hover outline and pointers in DesignCanvasFeedback | DesignCanvasFeedback.swift; snapshots; DesignCanvasHoverTests | DesignCanvasFeedbackSnapshots | – | waits D0-5b |
 | D0-8b | DW-b | 4 | editor bodyRuns counter, 120-sample drag check | DesignEditor.swift; DesignWindowDragTests | DesignWindowDragTests | – | waits D0-8a |
