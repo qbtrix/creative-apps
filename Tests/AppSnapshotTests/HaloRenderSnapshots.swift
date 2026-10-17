@@ -3,10 +3,12 @@
 // `renderCurrentFrame()`: the rendered frame (Ball over Floor) fills the
 // artboard with no note. After a scrub to 13 the same frame shows with
 // "Rendered frame is out of date." under the artboard, on the canvas
-// surround, not over the artwork (#2345). HaloFrameImage turns
+// surround, not over the artwork (#2345): every drawn row of the note below
+// the image's last row. HaloFrameImage turns
 // the frame into an sRGB, straight-alpha image of the frame's size. Light and
 // Dark. Writes halo-rendered-frame-*.png and halo-rendered-frame-stale-*.png.
 // macOS only.
+import AppKit
 import CoreGraphics
 import HaloModel
 import SwiftUI
@@ -50,5 +52,28 @@ import Testing
         #expect(project.renderedFrameNote == "Rendered frame is out of date.")
         try snapshot(HaloViewer(model: project), name: "halo-rendered-frame-stale-light", scheme: .light)
         try snapshot(HaloViewer(model: project), name: "halo-rendered-frame-stale-dark", scheme: .dark)
+    }
+
+    /// The note sits under the artboard, not over its bottom edge: every pixel
+    /// the note adds lies below the image's last row, in light and dark.
+    @Test func staleNoteSitsUnderTheArtboard() throws {
+        let frame = try #require(try rendered().shownRenderedFrame)
+        let artboard = CGSize(width: 1920, height: 1080)
+        for scheme in [ColorScheme.light, .dark] {
+            let bare = try #require(render(
+                HaloRenderedImage(frame: frame, artboard: artboard, summary: "", note: nil), scheme: scheme))
+            let noted = try #require(render(
+                HaloRenderedImage(frame: frame, artboard: artboard, summary: "", note: "Rendered frame is out of date."),
+                scheme: scheme))
+            let background = bare.colorAt(x: 0, y: 0)
+            let mid = bare.pixelsWide / 2
+            let imageBottom = try #require(
+                (0..<bare.pixelsHigh).last { bare.colorAt(x: mid, y: $0) != background }, "no image drawn")
+            let changed = (0..<bare.pixelsHigh).filter { y in
+                stride(from: 0, to: bare.pixelsWide, by: 2).contains { bare.colorAt(x: $0, y: y) != noted.colorAt(x: $0, y: y) }
+            }
+            let top = try #require(changed.first, "the note drew nothing (\(scheme.name))")
+            #expect(top > imageBottom, "the note starts at row \(top), over the image ending at \(imageBottom) (\(scheme.name))")
+        }
     }
 }

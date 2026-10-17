@@ -4,5 +4,10 @@
 {"label":"a one-layer refusal runs today's method instead of throwing","file":"Sources/DesignModel/DesignActions.swift","find":"if oneLayerHelp(command) != nil, let node = selectedNode {","replace":"if false, let node = selectedNode {","tests":"DesignActionsTests"},
 {"label":"the mint ignores the ids the file holds","file":"Sources/DesignModel/DesignActions.swift","find":"DesignIDMint(taken: held.ids, after: nodeCount)","replace":"DesignIDMint(taken: [], after: nodeCount)","tests":"DesignActionsTests"},
 {"label":"apply never takes the mint's counter","file":"Sources/DesignModel/DesignActions.swift","find":"if let mint { nodeCount = Swift.max(nodeCount, mint.counter) }","replace":"","tests":"DesignActionsTests"},
-{"label":"apply drops the coalescing key","file":"Sources/DesignModel/DesignActions.swift","find":"coalescing: edit.coalescingKey)","replace":"coalescing: nil)","tests":"DesignActionsTests"}
+{"label":"apply drops the coalescing key","file":"Sources/DesignModel/DesignActions.swift","find":"coalescing: edit.coalescingKey)","replace":"coalescing: nil)","tests":"DesignActionsTests"},
+{"label":"apply never rebuilds the held ids","file":"Sources/DesignModel/DesignActions.swift","find":"if !Self.sameIDs(pages[index].nodes, edit.nodes) {","replace":"if false {","tests":"DesignApplyHeldIDsTests"},
+{"label":"sameIDs ignores a changed layer count","file":"Sources/DesignModel/DesignActions.swift","find":"guard old.count == new.count else { return false }","replace":"guard old.count <= new.count else { return false }","tests":"DesignApplyHeldIDsTests"},
+{"label":"sameIDs calls distinct storage the same","file":"Sources/DesignModel/DesignActions.swift","find":"if shared { return true }","replace":"if !shared { return true }","tests":"DesignApplyHeldIDsTests"},
+{"label":"sameIDs skips the nested ids","file":"Sources/DesignModel/DesignActions.swift","find":"old[index].id != new[index].id || !sameIDs(old[index].children, new[index].children)","replace":"old[index].id != new[index].id","tests":"DesignApplyHeldIDsTests"},
+{"label":"sameIDs skips the top-level ids","file":"Sources/DesignModel/DesignActions.swift","find":"where old[index].id != new[index].id ||","replace":"where","tests":"DesignApplyHeldIDsTests"}
 ]

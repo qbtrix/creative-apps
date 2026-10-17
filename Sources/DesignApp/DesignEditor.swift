@@ -13,7 +13,8 @@
 // why, and every toolbar command is also in the menu bar (DesignCommands).
 // Undo and Redo carry `design.bar.undo` / `design.bar.redo`: their titles name
 // the edit, so the identifier is what stays put for the UI journeys and the
-// app audit.
+// app audit. In debug builds `bodyRuns` counts its body's runs, so
+// DesignWindowDragTests can prove a canvas drag leaves the editor still.
 import DesignModel
 import SuiteUI
 import SwiftUI
@@ -31,7 +32,15 @@ struct DesignEditor: View {
     private static let documentItems: [DesignToolbarItem] = [.newFile, .open, .save]
     private static let trailingItems: [DesignToolbarItem] = [.undo, .redo, .zoomOut, .fit, .zoomIn]
 
+    #if DEBUG
+    /// How many times an editor's body ran; DesignWindowDragTests counts a drag's.
+    static var bodyRuns = 0
+    #endif
+
     var body: some View {
+        #if DEBUG
+        let _ = Self.bodyRuns += 1
+        #endif
         SuiteWindow(
             title: documentName ?? (model.isOpen ? "Untitled" : "Design"),
             // The save state's place; it reads nothing until Design has an unsaved state (#270).

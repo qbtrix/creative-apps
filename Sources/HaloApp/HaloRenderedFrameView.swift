@@ -31,7 +31,7 @@ struct HaloRenderedFrameView: View {
 }
 
 /// The rendered frame over the artboard's fitted frame, and its note under it.
-private struct HaloRenderedImage: View, Equatable {
+struct HaloRenderedImage: View, Equatable {
     let frame: HaloRenderedFrame
     let artboard: CGSize
     let summary: String
@@ -49,9 +49,9 @@ private struct HaloRenderedImage: View, Equatable {
                 .accessibilityIdentifier("halo.viewer.rendered")
                 .aspectRatio(artboard, contentMode: .fit)
                 // Under the artboard, in the canvas inset, on the window's
-                // surround (#2345): a zero-height frame sits on the image's
-                // bottom edge and the note hangs below it from its top, a
-                // small gap down, so no glyph lands on the artwork.
+                // surround (#2345): a zero-height frame on the image's bottom
+                // edge that the note hangs from, a small gap below it, so no
+                // glyph lands on the artwork and the image doesn't move.
                 .overlay(alignment: .bottom) {
                     if let note {
                         HaloRenderedNote(text: note)
