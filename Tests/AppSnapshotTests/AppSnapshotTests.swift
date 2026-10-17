@@ -1,7 +1,7 @@
 // AppSnapshotTests.swift: the eye-bridge. Renders each app's main content view
 // (empty and with a new document open, Light and Dark) and a gallery of
 // SuiteUI's components to PNGs in .build/snapshots/, so agents that cannot run
-// a Mac can still see what they built. CI uploads that folder as the
+// a Mac can still see what they built (the gallery shows every app mark too). CI uploads that folder as the
 // `snapshots` artifact on every run. macOS only.
 //
 // Each view is hosted in an NSHostingView inside an offscreen borderless
@@ -11,6 +11,7 @@
 // draws as SuiteUI's flat bordered stand-in (`suiteSnapshotRendering`), since
 // an offscreen window has no backdrop for it; judge real glass on a Mac.
 import AppKit
+import SuiteModel
 import SuiteUI
 import SwiftUI
 import Testing
@@ -104,6 +105,12 @@ private struct Gallery: View {
                     }
                     .padding(SuiteSpacing.m)
                     .background(SuiteColor.surface, in: RoundedRectangle(cornerRadius: SuiteRadius.medium))
+                }
+                HStack(spacing: SuiteSpacing.l) {
+                    ForEach(SuiteApp.allCases, id: \.self) { app in
+                        AppMark(app: app, style: .icon).frame(width: 64, height: 64)
+                        AppMark(app: app, style: .line).frame(width: SuiteSize.switcherIcon, height: SuiteSize.switcherIcon)
+                    }
                 }
                 HStack(alignment: .bottom, spacing: SuiteSpacing.s) {
                     ForEach(SuiteSpacing.scale, id: \.self) { step in

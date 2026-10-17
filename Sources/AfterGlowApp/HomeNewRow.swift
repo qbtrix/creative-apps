@@ -38,7 +38,7 @@ struct HomeNewRow: View {
     }
 }
 
-/// One New tile: the app's symbol and title as the button, its presets under it.
+/// One New tile: the app's mark and title as the button, its presets under it.
 private struct HomeTile: View {
     let tile: NewTile
     let showsChips: Bool
@@ -56,7 +56,7 @@ private struct HomeTile: View {
             } label: {
                 VStack(spacing: SuiteSpacing.xs) {
                     // A fixed glyph box and two reserved lines: every tile is one height.
-                    Image(systemName: HomeSidebarRows.symbol(tile.app)).font(SuiteFont.title)
+                    AppMark(app: tile.app, style: .line).symbolSized().font(SuiteFont.title)
                         .frame(height: SuiteSize.switcherIcon)
                     Text(tile.title).font(SuiteFont.caption).lineLimit(2, reservesSpace: true)
                         .multilineTextAlignment(.center)
