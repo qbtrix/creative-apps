@@ -85,11 +85,12 @@ import Testing
     }
 
     @Test func aLabelledItemTakesItsTitlesWidth() {
-        #expect(AppSwitcher.toolbarRoom(SwitcherToolbarItem("Fit")) == 36)
-        #expect(AppSwitcher.toolbarRoom(SwitcherToolbarItem("New Sample Animation")) == 36)
+        let button = SuiteSize.toolButton + SuiteSpacing.xs
+        #expect(Self.same(AppSwitcher.toolbarRoom(SwitcherToolbarItem("Fit")), button))
+        #expect(Self.same(AppSwitcher.toolbarRoom(SwitcherToolbarItem("New Sample Animation")), 36))
         // 20 characters at 7 pt beside the icon.
-        #expect(AppSwitcher.toolbarRoom(SwitcherToolbarItem("New Sample Animation", showsTitle: true)) == 180)
-        #expect(AppSwitcher.toolbarRoom(SwitcherToolbarItem("", showsTitle: true)) == 40)
+        #expect(Self.same(AppSwitcher.toolbarRoom(SwitcherToolbarItem("New Sample Animation", showsTitle: true)), 180))
+        #expect(Self.same(AppSwitcher.toolbarRoom(SwitcherToolbarItem("", showsTitle: true)), 40))
         // Flare at 1024 pt keeps the compact row with icon-only buttons, but one labelled button gives it away.
         #expect(fit("flare", 1024) == SwitcherToolbarFit(spacing: 32, showsEveryItem: true))
         let labelled = (Self.toolbars["flare"]?.actions ?? []).map { SwitcherToolbarItem($0) }
@@ -103,12 +104,15 @@ import Testing
         // The row started at 423 to 424 pt after one leading button (Flare, Halo, Library), at 475 pt
         // after the editor gallery's three (run 38981651490) and at 538 pt after Design's four.
         let items = { (titles: [String]) in titles.map { SwitcherToolbarItem($0) } }
-        #expect(AppSwitcher.toolbarLeading(documentActions: []) == 432)
-        #expect(AppSwitcher.toolbarLeading(documentActions: items(["New", "Open"])) == 504)
-        #expect(AppSwitcher.toolbarLeading(documentActions: items(["New", "Open", "Save"])) == 540)
+        #expect(Self.same(AppSwitcher.toolbarLeading(documentActions: []), 432))
+        #expect(Self.same(AppSwitcher.toolbarLeading(documentActions: items(["New", "Open"])), 504))
+        #expect(Self.same(AppSwitcher.toolbarLeading(documentActions: items(["New", "Open", "Save"])), 540))
         // The window's own controls sit inside the sidebar column; the safety margin is on top.
         #expect(AppSwitcher.windowControlsRoom < SuiteSize.sidebarWidth.ideal)
-        #expect(AppSwitcher.toolbarTrailing(actions: []) == 36 + 48 + 8)
+        // The inspector toggle's button, the clearance and the safety margin: 36 + 48 + 8 = 92 pt.
+        let trailing = SuiteSize.toolButton + SuiteSpacing.xs + 2 * SuiteSpacing.xl + SuiteSpacing.s
+        #expect(Self.same(AppSwitcher.toolbarTrailing(actions: []), trailing))
+        #expect(Self.same(trailing, 92))
         // Overflowed: Halo at 1000 pt with 80 (run 38897404951), Design at 1024 pt with 40 (run 38938835086),
         // and the editor gallery at 900 pt with the compact row (run 38981651490: Fit, Zoom In and the
         // inspector toggle went into the overflow).
@@ -197,8 +201,13 @@ import Testing
     }
 
     @Test func theCapsuleNeverReachesANeighboursIcon() {
-        #expect(AppSwitcher.spacingSteps.map { AppSwitcher.capsuleWidth(spacing: $0) } == [90, 90, 66, 50])
-        #expect(AppSwitcher.capsuleWidth(spacing: AppSwitcher.compactSpacing) == 34)
+        let widths = AppSwitcher.spacingSteps.map { AppSwitcher.capsuleWidth(spacing: $0) }
+        let expected: [CGFloat] = [90, 90, 66, 50]
+        let matches = widths.count == expected.count && zip(widths, expected).allSatisfy { pair in
+            Self.same(pair.0, pair.1)
+        }
+        #expect(matches, "\(widths)")
+        #expect(Self.same(AppSwitcher.capsuleWidth(spacing: AppSwitcher.compactSpacing), 34))
         #expect(AppSwitcher.capsuleHeight(spacing: AppSwitcher.compactSpacing) == SuiteSize.toolButton)
         #expect(AppSwitcher.spacingSteps.allSatisfy { AppSwitcher.capsuleHeight(spacing: $0) == 48 })
         for spacing in AppSwitcher.spacingSteps + [AppSwitcher.compactSpacing] {
@@ -208,6 +217,13 @@ import Testing
             #expect(capsule >= AppSwitcher.capsuleHeight(spacing: spacing), "\(spacing)")
             #expect(capsule <= SuiteSize.switcherCapsule.width, "\(spacing)")
         }
+    }
+
+    /// Whether two toolbar widths match, within a rounding. Both sides are CGFloat, so an
+    /// arithmetic expected value (`36 + 48 + 8`) can't be inferred as Int by `#expect`, which
+    /// captures each side of `==` on its own (run 38989698445: `92.0 == 92` failed).
+    static func same(_ a: CGFloat, _ b: CGFloat) -> Bool {
+        abs(a - b) < 0.001
     }
 
     @MainActor
