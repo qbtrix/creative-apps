@@ -1,7 +1,7 @@
 {
   "id": "suite-onboarding",
   "name": "Onboarding",
-  "description": "Onboarding pages, the person's choices, and when to show them.",
+  "description": "SuiteOnboarding (the live OnboardingFlowing: pages, show-once-per-version, focus to home order), OnboardingLaunch (the first-launch rule and the -SuiteSkipOnboarding flag), SampleCatalog (one sample per app, its folder, copy destination and ref), OnboardingStarter and the control ids, and OnboardingModel (the welcome window's view-model).",
   "technology": "Swift 6, Foundation (FoundationEssentials), Linux and macOS",
   "paths": [
     "Sources/SuiteModel/Onboarding/"
