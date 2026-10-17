@@ -4,7 +4,7 @@ Issue: #1331 · Packet: docs/blueprints/suite/features/bundle.md
 Run: act-1a149c6a2a3-yna2 (line lead for suite-contracts, bundle, home; was act-1a14881ad5e-axoa, act-1a144bb7df0-dpn3) · Session: session_01WeQwKxFmpontDYTdMSub85 (claude/suite-feature-lead-run-iqt0yq) · Started: 2026-10-16T12:43Z · Resumed: 2026-10-17T06:17Z, 2026-10-17T12:13Z
 Stage: 4 round 1
 Base: 4a86f5fcff2f2cc18748a93e39f1491c6ae5c745 (dev at scoped run 39008864548, which holds #1966)
-Next: fix round 1 running from dev f301f664: fixer A (#2050 #2051 plists, lead/bundle-fix-A), fixer B (#2052 SizeGate test + mutation plan, lead/bundle-fix-B); #2053 #2054 are protected scripts/, owner supervisor (become gaps after the cap). Then round-2 review, then Belt-Contact-Sheet on #1331 with the size table and otool -L lines
+Next: fix round 1 PRs #2072 (#2052) and #2073 (#2050 #2051) wait on the lane's macOS build; once merged, round-2 review; #2053 #2054 owner supervisor. Then Belt-Contact-Sheet on #1331 with the size table and otool -L lines
 
 Loop: v2 (the packet has no Slices table), with the findings queue and the 2-round cap (started after #1302 merged, 2026-10-16T04:20Z).
 Depends on: none open (#809 BU-0, #810 BU-1a, #333 SH-7 all closed).
