@@ -80,3 +80,5 @@ Waves 1 to 9 as the earlier record (packet waves checked against dev). Wave 10 (
 - Gaps (TL-b, past its cap): #1735 #1736 #1737 #1739 #1740 #1741 #1742 #1743 #1744 #1782 #1784.
 - needs-ui on the strip from other lines: #1842 (key child identifiers, adjacent keys overlap, unlabelled button), #1789 (track names and lanes lost the caller's identifier); the unlabelled button is the same scroller as #1781.
 - `suiteui-timeline-long` isn't asserted as a golden.
+
+- 2026-10-17T13:44Z heartbeat: dev moved to d2c4fa2 (GalleryAppMarks.swift conflict, resolved to dev's side; dev dropped that scroll view). #2048 merged dev, gate CI: PASS, pushed head 3c7b9713, Head line moved. Scoped suiteui 39034310918 on 45a27f3 (pre-#2048): the timeline journeys still red as expected; findings updated. Open suiteui findings: 7 (6 close with #2048, leaving #2014). Next: #2048 waits on the lane's macOS build; TL-21 starts once it merges.
