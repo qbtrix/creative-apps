@@ -12,3 +12,4 @@ utc	stage	event	ref	note
 2026-10-17T16:30:33Z	check	#2163 macOS build green (39048246275), awaits lane sweep; #2168 build 39048879204 running; wave 2 waits #2168 on dev; findings 0
 2026-10-17T16:48Z	heartbeat	heartbeat: #2168 build 39048879204 success, #2163 build success; both awaiting lane merge sweep; wave 2 holds until #2168 on dev; dev head 1a4e5e89
 2026-10-17T17:03Z	heartbeat	heartbeat: #2163/#2168 not merged; lane bisecting batch 20261017163800, #2163 probe run 39051918154 in progress; wave 2 still holds
+2026-10-17T17:16Z	heartbeat	merged: #2163 D0-5b as 53e3127e. #2168 still queued in lane (build green, no needs-fix); wave 2 holds for #2168
