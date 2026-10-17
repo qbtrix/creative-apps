@@ -77,6 +77,7 @@ final class FlareJourneyTests: XCTestCase {
     @MainActor func testNewAnimationAndEveryTool() {
         let flare = Journey("Flare", self)
         flare.click("New Animation", step: "new-animation")
+        flare.click("Create", in: .sheet)  // the New Animation sheet's default preset
         flare.clickEachTool()
     }
 
