@@ -45,7 +45,7 @@ extension BodyCountSuites {
                 return nil
                 #endif
             }
-            let board = try #require(await w.element("suite.canvas"), "no canvas")
+            let board = try #require(await w.element("suite.canvas.artboard"), "no artboard")
             let page = CGSize(width: 1440, height: 1024)
             // Rectangle 1 of Frame 1 sits at (12, 12, 16, 16) on the page.
             let move = try await w.measure("design drag a shape", bodies: bodies) {

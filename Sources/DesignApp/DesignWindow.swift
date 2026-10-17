@@ -4,9 +4,10 @@
 // workspace), turns every DesignIntent into a workspace method or a file panel, and
 // publishes a DesignMenu to the menu bar. Only this file calls the workspace's
 // methods. The zoom keeps the handle tolerance a constant size on screen, and
-// the page is fitted whenever the selected page changes or a file opens,
-// through EditorDetailLayout so the fitted page and its handles stay clear of
-// the floating palette. The window's title is SuiteWindow's (DesignEditor).
+// the page is fitted whenever the selected page changes or a file opens, and
+// refitted as the canvas resizes until the user zooms, through
+// EditorDetailLayout so the fitted page and its handles stay clear of the
+// floating palette. The window's title is SuiteWindow's (DesignEditor).
 //
 // Files: Open and Save As use AppKit's panels. Open fills this window only while
 // it holds no file (DesignWorkspace.takesOpenedFile); otherwise the chosen file
@@ -49,8 +50,9 @@ struct DesignWindow: View {
     private let seeded: Bool
     @State private var zoom = 1.0
     @State private var viewport = CGSize.zero
-    /// A new page waits to be fitted until the canvas has a size.
-    @State private var fitPending = false
+    /// The page follows the canvas's size: fitted now and again whenever the canvas resizes, as
+    /// the split view lays it out a few times on the way up. The user's own zoom ends it.
+    @State private var fitting = false
     /// The status line's message ("Saved sample.design"); it goes at the next edit.
     @State private var note: String?
     @State private var problem: String?
@@ -91,11 +93,11 @@ struct DesignWindow: View {
         #endif
         DesignEditor(
             model: model, documentName: model.documentURL?.lastPathComponent, note: note, zoom: zoom,
-            onViewport: viewportChanged, onZoom: setZoom, perform: perform
+            onViewport: viewportChanged, onZoom: userZoom, perform: perform
         )
         .focusedSceneValue(\.designMenu, DesignMenu(model: model, perform: perform))
         .onChange(of: model.selectedPageID) {
-            fitPending = true
+            fitting = true
             fit()
         }
         .onChange(of: model.pages) { note = nil }
@@ -149,9 +151,11 @@ struct DesignWindow: View {
         case .textDraft(let text): model.setTextDraft(text)
         case .commitText: model.commitTextEdit()
         case .cancelText: model.cancelTextEdit()
-        case .zoomIn: setZoom(ViewerZoom.zoomedIn(from: zoom))
-        case .zoomOut: setZoom(ViewerZoom.zoomedOut(from: zoom))
-        case .fit: fit()
+        case .zoomIn: userZoom(ViewerZoom.zoomedIn(from: zoom))
+        case .zoomOut: userZoom(ViewerZoom.zoomedOut(from: zoom))
+        case .fit:
+            fitting = true
+            fit()
         case .command(let command):
             do { try model.run(command) } catch { note = error.help }
         // The Model makes and reads the bytes; the bridge carries them. A refusal goes to the status line.
@@ -200,11 +204,16 @@ struct DesignWindow: View {
         model.setHandleTolerance(Double(SuiteSpacing.s) / zoom)
     }
 
+    /// A zoom the user chose (Zoom In, Zoom Out, a pinch): the page stops following the canvas's size.
+    private func userZoom(_ scale: Double) {
+        fitting = false
+        setZoom(scale)
+    }
+
     /// Zooms to show the whole selected page clear of the floating palette, once the canvas has been
     /// laid out. The palette shows every tool while a page is open.
     private func fit() {
         guard let page = model.selectedPage, viewport != .zero else { return }
-        fitPending = false
         let size = CGSize(width: page.frameWidth, height: page.frameHeight)
         let layout = EditorDetailLayout(viewport: viewport, toolCount: DesignTool.allCases.count)
         let scale = layout.fitScale(artboard: size)
@@ -220,13 +229,13 @@ struct DesignWindow: View {
         }
         let layout = EditorDetailLayout(viewport: viewport, toolCount: DesignTool.allCases.count)
         let scale = layout.fitScale(artboard: CGSize(width: rect.width, height: rect.height))
-        setZoom(scale > 0 ? scale : 1)
+        userZoom(scale > 0 ? scale : 1)
         show = rect
     }
 
     private func viewportChanged(_ size: CGSize) {
         viewport = size
-        if fitPending { fit() }
+        if fitting { fit() }
     }
 
     // MARK: Files
@@ -237,7 +246,7 @@ struct DesignWindow: View {
         guard !started else { return }
         started = true
         if seeded {
-            fitPending = true
+            fitting = true
             return fit()
         }
         let options = DesignWindowOptions(arguments: ProcessInfo.processInfo.arguments)
@@ -259,7 +268,7 @@ struct DesignWindow: View {
         Self.launchOptionsApplied = true
         if let name = options.fixture {
             if model.openFixture(name) {
-                fitPending = true
+                fitting = true
                 fit()
             } else {
                 note = "No fixture named \(name)."
@@ -297,7 +306,7 @@ struct DesignWindow: View {
     private func open(_ url: URL) {
         do {
             try model.open(Data(contentsOf: url), at: url)
-            fitPending = true
+            fitting = true
             fit()
         } catch {
             problem = "\(url.lastPathComponent) can't be opened. \(Self.reason(error))"
