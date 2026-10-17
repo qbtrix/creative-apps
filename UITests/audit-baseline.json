@@ -1,4 +1,5 @@
 {
+  "afterglow": { "contrast": 0, "disabled-dim": 0, "identifier": 0, "offscreen": 0, "overlap": 0, "unnamed": 0 },
   "design": { "identifier": 16 },
   "flare": { "identifier": 12 },
   "halo": { "contrast": 2 },
