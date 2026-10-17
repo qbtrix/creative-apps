@@ -6,3 +6,4 @@ utc	stage	event	ref	note
 2026-10-17T15:50Z	3	stage-start	#1494	wave 1
 2026-10-17T15:50Z	1	issues	#2148	ScrubField mixed needs-ui
 2026-10-17T15:50Z	3	wave-start	W1	D0-5a, D0-5b (workflow wf_1f7cd7fe-f9c)
+2026-10-17T16:12:12Z	pr	D0-5a #2168 and D0-5b #2163 open, contract ok after footer strip; gap #2171 filed (WxH parse to SuiteModel)
