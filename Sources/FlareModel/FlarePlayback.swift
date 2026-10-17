@@ -16,18 +16,47 @@ extension FlareWorkspace {
     /// Whether play can start: an open timeline with at least one frame and a positive rate.
     public var canPlay: Bool { timelineFrames > 0 && playbackFPS > 0 }
 
-    /// The frame readout under the stage, "12 / 48"; nil with no timeline.
-    public var frameReadout: String? { canPlay ? "\(currentFrame) / \(timelineFrames)" : nil }
+    /// The frame readout under the stage, "12 / 48"; nil with no timeline. Journeys read the frame from its start.
+    public var frameReadout: String? { frameReadoutParts.map { $0.current + $0.total } }
+
+    /// The frame readout split for drawing: the current frame ("12") in primary text, the total (" / 48") in
+    /// secondary (docs/design.md, Status pills and transport; #1859).
+    public var frameReadoutParts: (current: String, total: String)? {
+        canPlay ? ("\(currentFrame)", " / \(timelineFrames)") : nil
+    }
+
+    /// The frame readout's tooltip: frames count from 0, so the last of 48 is 47 (#1844).
+    public var frameReadoutHelp: String? {
+        guard canPlay else { return nil }
+        return "Frame \(currentFrame) of \(timelineFrames). Frames count from 0, so the last frame is "
+            + "\(timelineFrames - 1)."
+    }
 
     /// The timecode under the stage, "00:12 / 02:00" (seconds and frames); nil with no timeline.
-    public var timecode: String? {
+    public var timecode: String? { timecodeParts.map { $0.current + $0.total } }
+
+    /// The timecode split for drawing: the current value ("00:12") in primary text, the total (" / 02:00") in
+    /// secondary (#1859).
+    public var timecodeParts: (current: String, total: String)? {
         let fps = playbackFPS
         guard canPlay else { return nil }
         func code(_ frame: Int) -> String {
             let (seconds, frames) = frame.quotientAndRemainder(dividingBy: fps)
             return "\(seconds < 10 ? "0" : "")\(seconds):\(frames < 10 ? "0" : "")\(frames)"
         }
-        return "\(code(currentFrame)) / \(code(timelineFrames))"
+        return (code(currentFrame), " / \(code(timelineFrames))")
+    }
+
+    /// The timecode's tooltip: it is seconds:frames, not minutes:seconds, at the scene's rate (#1844). At frame 47 of
+    /// 48 at 24 fps: "Seconds:frames at 24 fps: 1 second and 23 frames of 2 seconds and 0 frames."
+    public var timecodeHelp: String? {
+        let fps = playbackFPS
+        guard canPlay else { return nil }
+        func spoken(_ frame: Int) -> String {
+            let (seconds, frames) = frame.quotientAndRemainder(dividingBy: fps)
+            return "\(seconds) second\(seconds == 1 ? "" : "s") and \(frames) frame\(frames == 1 ? "" : "s")"
+        }
+        return "Seconds:frames at \(fps) fps: \(spoken(currentFrame)) of \(spoken(timelineFrames))."
     }
 
     /// Moves a playhead past the timeline's end to its last frame (frame 0 with no frames), keeping a running play's
