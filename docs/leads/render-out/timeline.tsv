@@ -63,3 +63,4 @@ utc	stage	event	ref	note
 2026-10-17T20:27Z	5	fix PR opened	#2348	Fixes #2345, last round
 2026-10-17T20:38Z	5	heartbeat	#2348	open, mergeable clean, waiting on lane macOS build
 2026-10-17T21:02Z	5	needs-rebase	#2348	fixer spawned to merge dev and move Head
+2026-10-17T21:02Z	-	blocked	#2303	dev-red: Linux DesignStyleBudgetTests/scrubStep (Design, bisected to #2268); full CI cannot go green until fixed; not Halo
