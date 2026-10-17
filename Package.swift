@@ -14,6 +14,14 @@
 //   SuiteModel  the suite's shared Linux-safe values (identity, the app list;
 //             docs/blueprints/suite.md), Foundation only, linked by every
 //             <X>Model. With SuiteModelTests, on Linux and macOS.
+//   SuiteKernel  the editor kernel: one Linux-safe library, one module per
+//             editor concept the apps used to build five times (history,
+//             selection, layer tree, keys and easing, snap, transform, export,
+//             session, stroke), Foundation and FlareCore only (it imports
+//             FlareCore's Point, Rect, Matrix, Keyframe and Easing as they
+//             are), linked by every <X>Model and by SuiteUI
+//             (docs/blueprints/suiteui/features/editor-kernel.md). With
+//             SuiteKernelTests, on Linux and macOS.
 //   SuiteShell  macOS glue every app process links: the shared menu commands
 //             (Window > Switch To) and, later, the live suite services.
 //             macOS only.
@@ -27,8 +35,8 @@
 //
 // The macOS-only targets are appended under `#if os(macOS)`. The manifest is
 // evaluated on the host, so on Linux they do not exist at all: `swift build`
-// and `swift test` there cover exactly the Model targets (SuiteModel among
-// them) and their tests.
+// and `swift test` there cover exactly the Model targets (SuiteModel and
+// SuiteKernel among them) and their tests.
 import PackageDescription
 
 // The engines, pinned to one creative-core commit (`revision:` below; core has
@@ -42,7 +50,7 @@ func model(_ name: String, _ engines: [String]) -> [Target] {
     [
         .target(
             name: "\(name)Model",
-            dependencies: ["SuiteModel"] + engines.map { .product(name: $0, package: core) }
+            dependencies: ["SuiteModel", "SuiteKernel"] + engines.map { .product(name: $0, package: core) }
         ),
         .testTarget(name: "\(name)ModelTests", dependencies: [.target(name: "\(name)Model")]),
     ]
@@ -60,13 +68,15 @@ var targets: [Target] =
     + [
         .target(name: "SuiteModel"),
         .testTarget(name: "SuiteModelTests", dependencies: ["SuiteModel"]),
+        .target(name: "SuiteKernel", dependencies: [.product(name: "FlareCore", package: core)]),
+        .testTarget(name: "SuiteKernelTests", dependencies: ["SuiteKernel"]),
         .testTarget(name: "AppAuditTests"),
     ]
 
 #if os(macOS)
 products += (apps + ["AfterGlow"]).map { .executable(name: "\($0)App", targets: ["\($0)App"]) }
 targets += [
-    .target(name: "SuiteUI", dependencies: ["SuiteModel"]),
+    .target(name: "SuiteUI", dependencies: ["SuiteModel", "SuiteKernel"]),
     .target(name: "SuiteShell", dependencies: ["SuiteUI", "SuiteModel"]),
     .executableTarget(name: "AfterGlowApp", dependencies: ["SuiteUI", "SuiteShell", "SuiteModel"]),
     .testTarget(name: "SuiteUITests", dependencies: ["SuiteUI", "SuiteModel"]),

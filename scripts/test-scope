@@ -13,9 +13,12 @@
 # time). An empty line means none. changed prints `all` instead when a path
 # can change any test (Package.swift, Package.resolved, a new Sources/ dir).
 # A Model maps to its Model tests, an App to its snapshot suites, SuiteUI to
-# SuiteUITests and its snapshot suites, SuiteModel to every Model's tests;
-# docs, scripts, UITests and the like map to none. --linux drops SuiteUITests
-# and AppSnapshotTests, which Linux doesn't build.
+# SuiteUITests and its snapshot suites, SuiteModel to every Model's tests,
+# SuiteKernel (the editor kernel every Model and SuiteUI link) to
+# SuiteKernelTests plus every Model's tests; docs, scripts, UITests and the
+# like map to none. The suite and suiteui scopes include SuiteKernelTests.
+# --linux drops SuiteUITests and AppSnapshotTests, which Linux doesn't build;
+# SuiteKernelTests is Linux-safe and stays.
 #
 # perf prints one regex, empty when there is none. Tests/perf-suites.txt lists
 # the perf and timing tests: the gate and scoped runs skip them, and CI's Perf
@@ -57,10 +60,10 @@ def app_units(app):
     """(target, suite regex or None for the whole target) for a scope."""
     if app in APPS:
         return [(APPS[app] + "ModelTests", None), (SNAP, SNAPSHOTS[app])]
-    if app == "suite":  # SuiteModel and AfterGlow: no snapshots yet
-        return [("SuiteModelTests", None)]
-    if app == "suiteui":
-        return [("SuiteUITests", None), ("AppAuditTests", None), (SNAP, SNAPSHOTS["suiteui"])]
+    if app == "suite":  # SuiteModel, SuiteKernel and AfterGlow: no snapshots yet
+        return [("SuiteModelTests", None), ("SuiteKernelTests", None)]
+    if app == "suiteui":  # SuiteUI links the kernel, so its scoped run tests it too
+        return [("SuiteUITests", None), ("AppAuditTests", None), ("SuiteKernelTests", None), (SNAP, SNAPSHOTS["suiteui"])]
     sys.exit(f"test-scope: unknown app {app!r}; one of {', '.join(SCOPES)}")
 
 
@@ -74,6 +77,8 @@ def path_units(path):
     if root == "Sources":
         if top == "SuiteModel":  # every Model links it
             return [("SuiteModelTests", None)] + [(x + "ModelTests", None) for x in APPS.values()]
+        if top == "SuiteKernel":  # every Model links it too
+            return [("SuiteKernelTests", None)] + [(x + "ModelTests", None) for x in APPS.values()]
         if top in ("AfterGlowApp", "SuiteShell"):
             return app_units("suite")
         if top == "SuiteUI":
@@ -89,7 +94,7 @@ def path_units(path):
             name = parts[2].removeprefix("RenderBudget")
             app = next((a for a, x in APPS.items() if name.startswith(x)), None)
             return [(SNAP, SNAPSHOTS[app] if app else None)]
-        if top.endswith("ModelTests") or top in ("SuiteUITests", "AppAuditTests"):
+        if top.endswith("ModelTests") or top in ("SuiteUITests", "AppAuditTests", "SuiteKernelTests"):
             return [(top, None)]
     return []
 

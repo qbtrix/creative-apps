@@ -1,0 +1,11 @@
+{
+  "id": "kernel-geometry",
+  "name": "Geometry and header",
+  "description": "SuiteKernel.swift, the kernel's header doc and KernelShape.version, and Geometry.swift: Point, Rect and Matrix as FlareCore's types under kernel names, EditorHandle (eight resize handles, inside, rotate; isCorner), Pick (replace, toggle, extend), Direction and EditModifiers (shift, option, command). The modules under Sources/SuiteKernel/<Module>/ are their own parts.",
+  "technology": "Swift 6, Foundation (FoundationEssentials) and FlareCore, Linux and macOS",
+  "paths": [
+    "Sources/SuiteKernel/Geometry.swift",
+    "Sources/SuiteKernel/SuiteKernel.swift"
+  ],
+  "order": 10
+}
