@@ -45,3 +45,6 @@ utc	stage	event	ref	note
 2026-10-17T17:05Z	3 build	build-green	#2182	macOS build 39049616762 success; waits for lane
 2026-10-17T17:10Z	3 build	fix-pushed	#2184	head 8802a32a (startRender outside #require); waits on lane macOS build
 2026-10-17T17:23Z	3 build	build-green	#2184	macOS build 39052649454 success on 8802a32a; waits for lane
+2026-10-17T17:43Z	3 build	merged	#2182	RO-9 squash-merged 17:35:34Z
+2026-10-17T17:43Z	3 build	merged	#2184	RO-8 squash-merged 17:35:54Z
+2026-10-17T17:43Z	3 wave 5	spawned	RO-10	builder for H-J21, branch halo/ro10-render-journey

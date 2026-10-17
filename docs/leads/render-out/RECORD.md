@@ -2,9 +2,9 @@
 
 Issue: #1505 · Packet: docs/blueprints/halo/features/render-out.md
 Run: act-1a149b53ef6-67v7 (line lead for #1035, #1509, #1505; earlier runs act-1a1487bf880-qmey, act-1a1429c87eb-3ecm) · Session: claude/feature-lead-playbook-l4ybf6 · Started: 2026-10-17T06:05Z
-Stage: 3 wave 3 (RO-9) + wave 4 (RO-8) building
+Stage: 3 wave 5 (RO-10) building
 Base: 8e868417eeaf2fd17229c21bc1087ef7eecb3d8f (origin/dev at 2026-10-17T13:53Z)
-Next: RO-8 #2184 (build 39052649454 green) and RO-9 #2182 (build 39049616762 green) wait on lane batches; wave 5 RO-10 (H-J21, wave.json status built, feature-done, Closes #429) when both merge
+Next: RO-10 builder (H-J21, wave.json built, feature-done, Closes #429) opens its PR; then the full dev CI with RO-10 and Anatomy round 1
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -16,9 +16,9 @@ Next: RO-8 #2184 (build 39052649454 green) and RO-9 #2182 (build 39049616762 gre
 | RO-5 | 2 | App: `HaloFrameImage` (CGImage from `rgba8(colorSpace:)`); `HaloRenderedFrameView` replaces the stub (`halo.viewer.rendered`, note `halo.viewer.renderedNote`); Render Frame's route calls `renderCurrentFrame()`; snapshots | Sources/HaloApp/HaloFrameImage.swift, Sources/HaloApp/HaloRenderedFrameView.swift, Sources/HaloApp/HaloWindow+Render.swift, Tests/AppSnapshotTests/HaloRenderSnapshots.swift | halo-rendered-frame-*.png, halo-rendered-frame-stale-*.png | #2108 | merged (cc35df21) |
 | RO-6 | 3 | `HaloPNGWriter` (folder, one PNG per frame via CGImageDestination; HF-7) | Sources/HaloApp/HaloPNGWriter.swift, Tests/AppSnapshotTests/HaloPNGWriterTests.swift | HaloPNGWriterTests (macOS) | #2135 | merged (d6187654) |
 | RO-7 | 3 | `HaloMovieWriter` (H.264 .mp4 at the plan's size and fps; cancel removes the file; HF-8); its frame-0 oracle is `LiveFrameRendering().render` of frame 0 as `rgba8` through `HaloFrameImage`, not RO-6's PNG | Sources/HaloApp/HaloMovieWriter.swift, Tests/AppSnapshotTests/HaloMovieWriterTests.swift | HaloMovieWriterTests (macOS) | #2143 | merged (0b50c70f) |
-| RO-9 | 3 | Journey H-J20 on `-HaloSample parented`; `Closes #451` | UITests/HaloJourneyTests+RenderFrame.swift | H-J20 on dev CI | #2182 | in lane |
-| RO-8 | 4 | `HaloRenderSheet` (Form, segmented pickers, destination, summary, Render; progress with Cancel; result; Close); Render…'s route opens it; the detached run with a progress sink in `HaloWindow+Render.swift`; presented from `renderScene(_:)` while `renderJob != nil`; snapshots | Sources/HaloApp/HaloRenderSheet.swift, Sources/HaloApp/HaloWindow+Render.swift, Tests/AppSnapshotTests/HaloRenderSheetSnapshots.swift | halo-render-sheet-*.png (4 states) | #2184 | in lane |
-| RO-10 | 5 | Journey H-J21; render-out.wave.json `status: built`; `feature-done`, `Closes #429` | UITests/HaloJourneyTests+Render.swift, docs/blueprints/halo/features/render-out.wave.json | H-J21 on dev CI | – | planned |
+| RO-9 | 3 | Journey H-J20 on `-HaloSample parented`; `Closes #451` | UITests/HaloJourneyTests+RenderFrame.swift | H-J20 on dev CI | #2182 | merged (17:35Z) |
+| RO-8 | 4 | `HaloRenderSheet` (Form, segmented pickers, destination, summary, Render; progress with Cancel; result; Close); Render…'s route opens it; the detached run with a progress sink in `HaloWindow+Render.swift`; presented from `renderScene(_:)` while `renderJob != nil`; snapshots | Sources/HaloApp/HaloRenderSheet.swift, Sources/HaloApp/HaloWindow+Render.swift, Tests/AppSnapshotTests/HaloRenderSheetSnapshots.swift | halo-render-sheet-*.png (4 states) | #2184 | merged (17:35Z) |
+| RO-10 | 5 | Journey H-J21; render-out.wave.json `status: built`; `feature-done`, `Closes #429` | UITests/HaloJourneyTests+Render.swift, docs/blueprints/halo/features/render-out.wave.json | H-J21 on dev CI | – | building |
 
 Waves (combined with text-layers, contract rule 19; checked against dev b8dfb4f0): W1 RO-1, RO-2, RO-3 (independent, with TX-1 to TX-4); W2 RO-4 (waits RO-1, RO-3), RO-5 (waits RO-2) (independent of each other, with TX-5, TX-6); W3 RO-6 (waits RO-1, RO-5), RO-7 (waits RO-1, RO-5), RO-9 (waits RO-4, RO-5) (independent, with TX-7); W4 RO-8 (waits RO-3, RO-5, RO-6, RO-7); W5 RO-10 (waits RO-4, RO-8; feature-done).
 
