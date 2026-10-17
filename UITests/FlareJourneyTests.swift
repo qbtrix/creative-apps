@@ -47,14 +47,16 @@ final class FlareJourneyTests: XCTestCase {
         }
 
         // The sidebar goes through `.layers` intents: Scene 1 drops the layer
-        // selection (the easing editor hides), and Ball brings it back.
+        // selection (the easing editor hides), and Ball brings it back. Each
+        // row is clicked on its blank space: a click on the title doesn't
+        // select (#1838, needs-ui #1867).
         flare.openSample("Keyed Ball")
         let hint = flare.app.staticTexts["Pick a keyframe above."]
         XCTAssert(hint.waitForExistence(timeout: 10), "the sample didn't open with Ball selected")
         let sidebar = flare.element("suite.sidebar")
-        sidebar.staticTexts["Scene 1"].click()
+        clickBlank(of: "Scene 1", in: sidebar)
         XCTAssert(hint.waitForNonExistence(timeout: 5), "selecting Scene 1 kept Ball selected")
-        sidebar.staticTexts["Ball"].click()
+        clickBlank(of: "Ball", in: sidebar)
         XCTAssert(hint.waitForExistence(timeout: 5), "selecting Ball in the sidebar didn't select it")
         flare.shot("sidebar-ball")
 
@@ -135,6 +137,19 @@ final class FlareJourneyTests: XCTestCase {
         flare.shot("easing-undo")
         XCTAssertEqual(activePreset(flare), "Ease In", "six undos didn't bring back Ease In")
         expectHandle(1, at: CGPoint(x: 0.42, y: 0), flare, "six undos didn't put handle 1 back")
+    }
+
+    /// Clicks the sidebar row titled `title` 12 pt past its title, in the
+    /// row's blank space (the Spacer before a layer row's toggles). The
+    /// title label holds SidebarRow's double-click rename, so a click on it
+    /// doesn't select the row (needs-ui #1867).
+    @MainActor private func clickBlank(of title: String, in sidebar: XCUIElement) {
+        let label = sidebar.staticTexts[title]
+        XCTAssert(label.waitForExistence(timeout: 5), "no \(title) row in the sidebar")
+        let point = CGPoint(x: label.frame.maxX + 12, y: label.frame.midY)
+        XCTAssert(sidebar.frame.contains(point), "\(point) past \(title) is outside the sidebar \(sidebar.frame)")
+        sidebar.coordinate(withNormalizedOffset: .zero)
+            .withOffset(CGVector(dx: point.x - sidebar.frame.minX, dy: point.y - sidebar.frame.minY)).click()
     }
 
     /// The preset chip shown as active, or nil when none is. Exact, unlike a
