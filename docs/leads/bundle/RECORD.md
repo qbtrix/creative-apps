@@ -4,7 +4,7 @@ Issue: #1331 · Packet: docs/blueprints/suite/features/bundle.md
 Run: act-1a149c6a2a3-yna2 (line lead for suite-contracts, bundle, home; was act-1a14881ad5e-axoa, act-1a144bb7df0-dpn3) · Session: session_01WeQwKxFmpontDYTdMSub85 (claude/suite-feature-lead-run-iqt0yq) · Started: 2026-10-16T12:43Z · Resumed: 2026-10-17T06:17Z, 2026-10-17T12:13Z
 Stage: 4 round 1
 Base: 4a86f5fcff2f2cc18748a93e39f1491c6ae5c745 (dev at scoped run 39008864548, which holds #1966)
-Next: round-2 critic panel on dev 8e868417 (scoped: suite 39038456229 green, holds #2072 #2073); then fix round 2 or close; then Belt-Contact-Sheet on #1331
+Next: fix round 2 PR #2111 (Fixes #2104 #2105) waits on the lane macOS build; round cap reached, so after it merges relabel any open finding gap (#2053 #2054 supervisor) and post Belt-Contact-Sheet on #1331
 
 Loop: v2 (the packet has no Slices table), with the findings queue and the 2-round cap (started after #1302 merged, 2026-10-16T04:20Z).
 Depends on: none open (#809 BU-0, #810 BU-1a, #333 SH-7 all closed).
@@ -29,6 +29,7 @@ Wave 3: BU-4 waits on BU-3 (the release graph it builds) and BU-5a/b/c (the plis
 | round | CI run | CI | audit vs baseline | lenses | confirmed | fixed by | clean |
 |---|---|---|---|---|---|---|---|
 | 1 | 39008864548 (4a86f5fc, scoped: suite) | bundle-apps, otool -L, codesign green | no bundle screens | clarity, oracle, quality, packet conformance, robustness | 5 minor: #2050 #2051 #2052 #2053 #2054 | fix round 1: #2072 (#2052), #2073 (#2050 #2051); #2053 #2054 supervisor | no |
+| 2 | 39038456229 (8e868417, scoped: suite) | green | no bundle screens | clarity, oracle, quality, packet conformance, robustness | #2050-#2052 fixes hold (tests fail on each regression); 2 minor: #2104 #2105 | fix round 2: #2111 | no; cap reached after round 2 |
 
 ## Decisions
 - Done check reading (line lead, 2026-10-17): #1966 (feature-done) triggered full run 39000814995 on e251c5c5: Linux green, Promote moved main; its macOS job failed `scripts/ci` on `scripts/ci-findings`' stub-gh tests (scripts/, not this feature) and skipped bundle-apps. The bundle's own proof is the scoped: suite run 39008864548 on 4a86f5fc (holds #1966): `scripts/bundle-apps` passed its otool -L and codesign checks, `size-report` wrote the table (AfterGlow.app 26,236,555 bytes; executables sum 12,484,544). Full run 39007643232 on 0e3c08ea (main) is the first with #1932's fix that runs the journeys after a red scripts/ci.

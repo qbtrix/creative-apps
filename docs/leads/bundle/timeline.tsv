@@ -63,3 +63,5 @@ utc	stage	event	ref	note
 2026-10-17T13:42Z	heartbeat	wait	#2072 and #2073 macOS builds green (39036738534, 39036751440); waiting on the lane merge
 2026-10-17T14:04Z	4	pr-merged	#2072 #2073	fix round 1 merged 13:47Z (batch Linux 39037438601)
 2026-10-17T14:04Z	4	agent-start	round 2	critic panel (5 lenses) on dev 8e868417
+2026-10-17T14:16Z	4	round-findings	#2104 #2105	round 2: round-1 fixes hold; 2 minor findings filed
+2026-10-17T14:16Z	4	pr-opened	#2111	fix round 2 (last): helper plist version keys + Photo OpenRaster MIME tag (Fixes #2104 #2105), head 5f6c61dc
