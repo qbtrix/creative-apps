@@ -11,6 +11,15 @@
 // main screen's height. The window has to fit the visible frame (about
 // 1024 × 737 on the 1024 × 768 runner, under its menu bar); nothing here
 // assumes an exact 768.
+//
+// A column's own element doesn't give its column's frame (run 38991868071's
+// tree): a List that is the sidebar's only element takes `suite.sidebar`
+// itself; `suite.inspector` reads the union of its children (one 69 pt
+// header); and `suite.viewport` and `suite.status` span the whole split view,
+// since macOS 26 lays the detail out under the side columns. The split view's
+// dividers (AX splitters) are where the columns really meet, so a column's
+// width is the span between the dividers either side of it, and its height
+// its element's. `regionFrame(_:)` gives that frame to journeys.
 import AppKit
 import XCTest
 
@@ -54,9 +63,12 @@ extension Journey {
             minimums: [:], apart: [], clear: [], container: "display's visible frame")
 
         var regions: [String: AppAudit.Rect] = [:]
+        let tree = try? window.snapshot()
         for identifier in Self.editorRegions {
             let region = element(identifier)
-            if region.exists { regions[identifier] = rect(region.frame) }
+            guard region.exists else { continue }
+            let column = Self.editorColumns.contains(identifier) ? tree.flatMap { Self.columnFrame(identifier, in: $0) } : nil
+            regions[identifier] = rect(column ?? region.frame)
         }
         let toolbar = app.toolbars.firstMatch
         if toolbar.exists { regions["toolbar"] = rect(toolbar.frame) }
@@ -70,6 +82,50 @@ extension Journey {
         found += ShellGeometry.violations(
             window: frame, regions: regions, minimums: required.merging(minimums) { $1 }, apart: apart, clear: clear)
         XCTAssert(found.isEmpty, "shell geometry of \(name):\n" + found.joined(separator: "\n"))
+    }
+
+    /// The frame of the region `identifier` as the window lays it out: for a
+    /// column (sidebar, viewport, status line, inspector), the span between
+    /// the split view's dividers either side of it, at its element's height;
+    /// otherwise its element's frame. Nil when no element carries it.
+    func regionFrame(_ identifier: String) -> CGRect? {
+        let region = element(identifier)
+        guard region.exists else { return nil }
+        guard Self.editorColumns.contains(identifier), let tree = try? app.windows.firstMatch.snapshot() else {
+            return region.frame
+        }
+        return Self.columnFrame(identifier, in: tree) ?? region.frame
+    }
+
+    /// The first element `identifier` under `root` (in tree order, as
+    /// `element(_:)` finds it), its width narrowed to the span between the
+    /// vertical splitters either side of it in each split group above it;
+    /// nil when no element carries it or no split group holds it.
+    static func columnFrame(_ identifier: String, in root: XCUIElementSnapshot) -> CGRect? {
+        guard let path = path(to: identifier, from: root, index: 0), let target = path.last?.node else { return nil }
+        var low = -CGFloat.infinity, high = CGFloat.infinity
+        for (parent, step) in zip(path, path.dropFirst()) where parent.node.elementType == .splitGroup {
+            let siblings = parent.node.children
+            let dividers = siblings.indices.filter {
+                siblings[$0].elementType == .splitter && siblings[$0].frame.width <= siblings[$0].frame.height
+            }
+            low = max(low, dividers.last { $0 < step.index }.map { siblings[$0].frame.maxX } ?? parent.node.frame.minX)
+            high = min(high, dividers.first { $0 > step.index }.map { siblings[$0].frame.minX } ?? parent.node.frame.maxX)
+        }
+        guard low.isFinite, high.isFinite, high > low else { return nil }
+        return CGRect(x: low, y: target.frame.minY, width: high - low, height: target.frame.height)
+    }
+
+    /// The snapshots from `node` down to the first one carrying `identifier`,
+    /// each with its index among its parent's children.
+    private static func path(
+        to identifier: String, from node: XCUIElementSnapshot, index: Int
+    ) -> [(node: XCUIElementSnapshot, index: Int)]? {
+        if node.identifier == identifier { return [(node: node, index: index)] }
+        for (offset, child) in node.children.enumerated() {
+            if let rest = path(to: identifier, from: child, index: offset) { return [(node: node, index: index)] + rest }
+        }
+        return nil
     }
 
     /// The visible frame of the screen the window's center is on (the main

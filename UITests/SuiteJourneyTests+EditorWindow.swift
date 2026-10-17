@@ -2,7 +2,8 @@
 // (EW-5) on the gallery's `editor-window` page in Library. Shots under `suiteui`: Light "launch", the tools, the
 // geometry, "inspector-hidden", "switcher"; Dark "launch-dark", the geometry, "switcher-dark". Numbers are SuiteUI tokens
 // (this bundle doesn't link SuiteUI). `.principal` sits after the title, not centred: step 6 bounds the switcher by Open
-// and the trailing actions (#1561: Design too).
+// and the trailing actions (#1561: Design too). Column frames come from `regionFrame(_:)` (Journey+Geometry.swift): a
+// column's own element doesn't span its column.
 import XCTest
 
 final class SuiteEditorWindowJourneys: XCTestCase {
@@ -37,13 +38,13 @@ final class SuiteEditorWindowJourneys: XCTestCase {
         expectGeometry(gallery)
 
         // Step 4: Option-Command-I hides the inspector; the detail grows and the palette stays put.
-        let viewport = gallery.element("suite.viewport")
         let palette = gallery.element("suite.tools")
-        let before = (viewport: viewport.frame, palette: palette.frame)
+        let width = { Double(gallery.regionFrame("suite.viewport")?.width ?? 0) }
+        let before = (viewport: width(), palette: palette.frame)
         gallery.app.typeKey("i", modifierFlags: [.command, .option])
         let inspector = gallery.element("suite.inspector")
         XCTAssert(inspector.waitForNonExistence(timeout: 5), "Option-Command-I left the inspector up")
-        let grown = waitFor { viewport.frame.width > before.viewport.width + Self.inspectorWidth / 2 }
+        let grown = waitFor { width() > before.viewport + Self.inspectorWidth / 2 }
         XCTAssert(grown, "the detail didn't grow")
         XCTAssertEqual(palette.frame.minX, before.palette.minX, accuracy: 1, "the palette moved when the inspector hid")
         gallery.shot("inspector-hidden")
@@ -79,8 +80,9 @@ final class SuiteEditorWindowJourneys: XCTestCase {
 
         let sidebar = gallery.element("suite.sidebar")
         XCTAssert(sidebar.waitForExistence(timeout: 5), "no sidebar (suite.sidebar)")
-        let list = sidebar.descendants(matching: .any)["suite.gallery.editor-window.list"].firstMatch
-        XCTAssert(list.exists, "the page's own list isn't inside suite.sidebar")
+        // The page's List is the sidebar's only element, so SwiftUI gives it `suite.sidebar` itself (an Outline).
+        let list = sidebar.elementType == .outline ? sidebar : sidebar.outlines.firstMatch
+        XCTAssert(list.exists, "suite.sidebar holds no list (outline)")
         for section in ["Pages", "Layers"] { XCTAssert(reads(section, in: sidebar), "no \(section) section") }
         let add = sidebar.descendants(matching: .any)["suite.gallery.page.add"].firstMatch
         let delete = sidebar.descendants(matching: .any)["suite.gallery.page.delete"].firstMatch
@@ -106,9 +108,9 @@ final class SuiteEditorWindowJourneys: XCTestCase {
         XCTAssert(artboard.waitForExistence(timeout: 5), "no artboard (suite.canvas)")
         let ratio = Double(artboard.frame.width / max(artboard.frame.height, 1))
         XCTAssertEqual(ratio, 1.6, accuracy: 0.02, "not a 1600 × 1000 artboard")
-        let viewport = gallery.element("suite.viewport").frame, palette = gallery.element("suite.tools").frame
+        let viewport = gallery.regionFrame("suite.viewport") ?? .zero, palette = gallery.element("suite.tools").frame
         XCTAssert(palette.maxX < viewport.midX, "the palette isn't at the leading edge")
-        let inspector = Double(gallery.element("suite.inspector").frame.width)
+        let inspector = Double(gallery.regionFrame("suite.inspector")?.width ?? 0)
         XCTAssertEqual(inspector, Self.inspectorWidth, accuracy: 1, "the inspector isn't 304 pt")
     }
 
@@ -133,7 +135,7 @@ final class SuiteEditorWindowJourneys: XCTestCase {
         gallery.expectShellGeometry(minimums: minimums, regions: regions)
 
         let window = rect(gallery.app.windows.firstMatch.frame)
-        let viewport = rect(gallery.element("suite.viewport").frame)
+        let viewport = rect(gallery.regionFrame("suite.viewport") ?? .zero)
         let artboard = rect(gallery.element("suite.canvas").frame)
         let grow = Self.anchorHit / 2
         let bands = [
