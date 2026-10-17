@@ -7,7 +7,7 @@
 # finding is filed with its line label; a passing test with an open finding is
 # commented on and closed; a test that did not run in the log stays open; a
 # test that failed and passed (a retry) stays open; an unreadable body is
-# never overwritten. Needs bash and jq.
+# never overwritten; a passing test on a branch run (not dev) stays open. Needs bash and jq.
 #
 # Run: bash Tests/ci_findings/test_ci_findings.sh   (exit 0 = all pass)
 set -uo pipefail
@@ -77,5 +77,12 @@ check "a test that did not run stays open" '[[ "$calls" != *"13"* ]]'
 check "a test that failed and passed stays open" '[[ "$calls" != *"close 14"* && "$calls" != *"comment 14"* ]]'
 check "a failing test is not closed" '[[ "$calls" != *"close 11"* ]]'
 check "an unrelated issue is untouched" '[[ "$calls" != *"99"* ]]'
+
+# A branch run (a proof on a fix branch) still files and updates, never closes.
+rm "$FX/calls"
+GITHUB_REF_NAME=fix/proof "$root/scripts/ci-findings" "$tmp/ui.log" >/dev/null 2>&1
+calls=$(cat "$FX/calls")
+check "a passing test on a branch run stays open" '[[ "$calls" != *"close 12"* && "$calls" != *"comment 12"* ]]'
+check "a branch run still updates and files" '[[ "$calls" == *"edit 11"* && "$calls" == *"create issue create"* ]]'
 
 exit $fail
