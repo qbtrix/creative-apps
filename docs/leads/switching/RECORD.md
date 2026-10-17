@@ -2,9 +2,9 @@
 
 Issue: #1507 · Packet: docs/blueprints/suite/features/switching.md
 Run: act-1a146f2912a-581f · Session: claude/switching-feature-lead-jm0d5f · Started: 2026-10-16T23:00Z
-Stage: 3 wave 1 (SW-5 in review)
-Base: origin/dev 687438e9 (after #1747 merged as b267d006)
-Next: SW-5 PR in review; then SW-3a (AppLauncher, StoreWatcher; macOS-only code, lane build-only run decides it), then SW-3b and SW-3c once bundle merges
+Stage: 3 wave 2 (SW-3a in review)
+Base: origin/dev 7dd54a00 (after #1816 merged)
+Next: SW-3a PR in review and its macOS build-only lane run decides it; then SW-3b (HandOffTransport, SuiteAppDelegate) and SW-3c, which wait on bundle's stubs that already sit on dev
 
 Brief deviations (decided here, see Decisions): base is `dev`, not `main`; the status channel is this branch, not `lead/switching`.
 
@@ -16,8 +16,8 @@ This packet has no `## Slices` table: the v2 loop applies. The feature is one un
 |---|---|---|---|---|---|---|---|
 | SW-1 | feature | 1 | SwitchPlanner, SwitchMenu (six Switch To items), LaunchArguments | Sources/SuiteModel/Switching/{SwitchPlanner,SwitchMenu,LaunchArguments}.swift; Tests/SuiteModelTests/Switch{RunState,Menu,LaunchArguments}Tests.swift | SwitchRunStateTests, SwitchMenuTests, SwitchLaunchArgumentsTests | #1747 (merged b267d006) | merged |
 | SW-2 | feature | 1 | StoreHandOffs: send, receive, settle, expire, sweep | Sources/SuiteModel/HandOff/StoreHandOffs.swift; Tests/SuiteModelTests/HandOffStoreTests.swift; Budget+HandOff.swift | HandOffStoreTests, Budget+HandOff | #1791 (merged c512a7e8) | merged |
-| SW-5 | feature | 1 | QB-S and QB-SM rows of blueprint 7.1 into docs/review-rubric.md section 6 | docs/review-rubric.md | review (rows present once, "report only") | this PR (docs/review-rubric.md) | building |
-| SW-3a | feature | 2 | AppLauncher, StoreWatcher, live switching slot, recents watcher | Sources/SuiteShell/{AppLauncher,StoreWatcher}.swift; Live/{SwitchingSlot,RecentsSlot}.swift | SuiteShellSwitchingTests (macOS) | – | waits on SW-1 |
+| SW-5 | feature | 1 | QB-S and QB-SM rows of blueprint 7.1 into docs/review-rubric.md section 6 | docs/review-rubric.md | review (rows present once, "report only") | #1816 (merged 7dd54a00) | merged |
+| SW-3a | feature | 2 | AppLauncher, StoreWatcher, live switching slot, recents watcher | Sources/SuiteShell/{AppLauncher,StoreWatcher}.swift; Live/{SwitchingSlot,RecentsSlot}.swift | SuiteShellSwitchingTests (macOS) | this PR (macOS, unverified here) | in review |
 | SW-3b | feature | 2 | HandOffTransport, SuiteAppDelegate, hand-off slot, LauncherRouter | Sources/SuiteShell/{HandOffTransport,SuiteAppDelegate}.swift; Live/HandOffSlot.swift; Sources/AfterGlowApp/LauncherRouter.swift | SuiteShellHandOffTests (macOS) | – | waits on SW-1, SW-2; bundle's BU-1b stub not built |
 | SW-3c | feature | 3 | SuiteCommands Switch To, .suiteApp, SettingsRoute and OpenInMenu stubs, shortcut clash test | Sources/SuiteShell/{SuiteCommands,SuiteAppModifier,SettingsRoute,OpenInMenu}.swift; Tests/SuiteModelTests/SuiteCommandsTests.swift | SuiteCommandsTests | – | waits on SW-3a, SW-3b; bundle's BU-1a stub not built |
 | SW-3d | feature | 4 | SwitcherEntries and the switcher bridge | Sources/SuiteModel/Switching/SwitcherEntries.swift; Tests/SuiteModelTests/SwitcherEntriesTests.swift; Sources/SuiteShell/SuiteSwitcherBridge.swift | SwitcherEntriesTests | – | waits on SW-3c, editor-in-window |
@@ -53,3 +53,10 @@ No review has run: no PR has merged and no scoped run exists for this feature ye
 - Editor-in-window's AppSwitcherState is needed for SW-3d.
 - Home's HM-2b (#845) gates SW-4a.
 - The adoption issues A-FL-1 through A-HA-1 belong to their app lines, not to this lead.
+
+## Decisions (wave 2)
+- SW-3a is macOS-only Swift that this machine cannot compile. The Linux gate proves the lints and C4 ownership only; the lane's build-only macOS run is the compile check, and a failure comes back to this branch.
+- `AppLauncher.runState` reports `.running(windows: 1)` for a running app. The probe that counts real windows is not wired, so "Show <App> Window" can't yet see an app with no window. Known gap for a later task.
+- `StoreWatcher` is an enum with static `post` and `observe`, not the instance `observe` the packet sketched: an observer lives as long as its process, so there is nothing for an instance to own.
+- `switchingIsLive` flips to true. `SuiteLiveServicesTests` now expects 11 pending members, not 12, and no longer expects a switch to throw "not connected".
+- Bundle's stubs (`LauncherRouter.swift`, `SuiteCommands.swift`) are on `dev` already, though bundle's wave file still says "planned". SW-3b and SW-3c are unblocked on that basis. Asked of the supervisor in the PR-side note, not assumed silently.
