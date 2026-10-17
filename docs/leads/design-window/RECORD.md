@@ -4,7 +4,7 @@ Issue: #1494 · Packet: docs/blueprints/design/features/design-window.md
 Run: act-1a14a88d756-rnok · Session: claude/design-feature-lead-7saqm8 · Started: 2026-10-17T15:46Z
 Stage: 3 wave 1
 Base: dd7ec767cc0afab91b35ff4f208351dd866028d8
-Next: wave 1 builds D0-5a and D0-5b (with copy-group C-2); then wave 2 D0-5c, D0-5d, D0-6 once D0-5a merges
+Next: wave 2 (D0-5c, D0-5d, D0-6) starts once #2168 (D0-5a) is on dev
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -19,8 +19,8 @@ Next: wave 1 builds D0-5a and D0-5b (with copy-group C-2); then wave 2 D0-5c, D0
 |---|---|---|---|---|---|---|---|
 | D0-9a | DW-d | 0 | testCanvasFeedback, XCTSkip("waits on D0-9d") | UITests/DesignJourneyTests+Feedback.swift | journey compiles, skips | #1979 | merged |
 | D0-9b | DW-d | 0 | DesignCanvasHints model | Sources/DesignModel/DesignCanvasHints.swift; Tests/DesignModelTests/DesignCanvasHintsTests.swift; Tests/mutations/DesignModel.DesignCanvasHints.json | DesignCanvasHintsTests | #1980 | merged |
-| D0-5a | DW-a | 1 | DesignWindowOptions, openFixture, DesignControlID, new intents and perform, launch args | Sources/DesignModel/DesignWindowOptions.swift; Sources/DesignApp/DesignIntent.swift, DesignWindow.swift, DesignEditor.swift, DesignSaveStatus.swift; Tests/DesignModelTests/DesignWindowOptionsTests.swift; Tests/AppSnapshotTests/DesignStatusSnapshots.swift; Tests/mutations/DesignModel.DesignWindowOptions.json | DesignWindowOptionsTests, design-status-two-layers | – | building |
-| D0-5b | DW-a | 1 | canvas slots: marquee mark, selection marks, DesignFrameLabels, DesignTextArtwork, empty DesignCanvasFeedback | Sources/DesignApp/DesignCanvas.swift; Sources/DesignApp/DesignCanvasMarks.swift; Sources/DesignApp/DesignSelectionMarks.swift; Sources/DesignApp/DesignFrameLabels.swift; Sources/DesignApp/DesignTextArtwork.swift; Sources/DesignApp/DesignCanvasFeedback.swift; Tests/AppSnapshotTests/DesignCanvasSeamSnapshots.swift | DesignCanvasSeamSnapshots | – | building |
+| D0-5a | DW-a | 1 | DesignWindowOptions, openFixture, DesignControlID, new intents and perform, launch args | Sources/DesignModel/DesignWindowOptions.swift; Sources/DesignApp/DesignIntent.swift, DesignWindow.swift, DesignEditor.swift, DesignSaveStatus.swift; Tests/DesignModelTests/DesignWindowOptionsTests.swift; Tests/AppSnapshotTests/DesignStatusSnapshots.swift; Tests/mutations/DesignModel.DesignWindowOptions.json | DesignWindowOptionsTests, design-status-two-layers | #2168 | open, contract ok (Mutate 7/7) |
+| D0-5b | DW-a | 1 | canvas slots: marquee mark, selection marks, DesignFrameLabels, DesignTextArtwork, empty DesignCanvasFeedback | Sources/DesignApp/DesignCanvas.swift; Sources/DesignApp/DesignCanvasMarks.swift; Sources/DesignApp/DesignSelectionMarks.swift; Sources/DesignApp/DesignFrameLabels.swift; Sources/DesignApp/DesignTextArtwork.swift; Sources/DesignApp/DesignCanvasFeedback.swift; Tests/AppSnapshotTests/DesignCanvasSeamSnapshots.swift | DesignCanvasSeamSnapshots | #2163 | open, contract ok |
 | D0-5c | DW-a | 2 | several-layer inspector shell, Mixed rows, ids | per packet | DesignSeveralInspectorSnapshots | – | waits D0-5a |
 | D0-5d | DW-a | 2 | DesignPasteboardBridge, copy/cut/paste hooks, rename state, DesignClosePrompt | per packet | DesignPasteboardBridgeTests | – | waits D0-5a |
 | D0-6 | DW-a | 2 | menus: Duplicate, Rename Page, Group, Ungroup, Arrange, Distribute, Zoom to Selection | DesignCommands.swift, DesignEditMenu.swift, DesignObjectMenu.swift; snapshots; J1 | DesignEditMenuSnapshots, J1 | – | waits D0-5a |
@@ -42,6 +42,9 @@ Wave 1: D0-5a and D0-5b are independent (disjoint files; neither calls the other
 - D0-9a (#1979) and D0-9b (#1980) already merged; DW-d continues at D0-9c.
 - Builder branches are lead/design-window-<task>: a lead/design-window/<task> ref can't sit beside the lead/design-window branch.
 - gh CLI has no valid token in this container; agents use the GitHub MCP tools for issues and PRs.
+- Rule 20, #2168: DesignWindowOptions.size(_:) repeats SuiteUI's six-line WxH parse. Accepted: it is not a kernel concept, the packet requires the test to run on Linux, and SuiteUI is macOS-only. Gap #2171 (line:suiteui) moves the parse into SuiteModel so every app shares one copy.
+- Rule 20, #2163: DesignSelectionMarks.swift (view marks only, a filename the packet names) goes through lead.md's exception path, with an Allow-Dup line and a canonical-baseline entry. Accepted. Its C4 part description edit is needed for the ownership rule.
+- The PR tool appends an attribution footer. The lead stripped it from #2166, #2168 and #2163, and build-wave builders now strip it themselves.
 
 ## Open
 - D0-9d (so DW-d, and D0-7b, so DW-c) waits on canvas-basics CB-a, which waits on design-seams D0-3c. design-seams (#1493) has not built wave 1; its RECORD stalls on a missing Swift toolchain.
