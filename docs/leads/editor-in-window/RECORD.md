@@ -1,10 +1,10 @@
 # editor-in-window lead record
 
 Issue: #1079 · Packet: docs/blueprints/suiteui/features/editor-in-window.md
-Run: act-1a1487bf89a-zfq8 (line lead with #1480, #1941; earlier runs act-1a1429c882d-53nh, act-1a14489d6c1-i1fs) · Session: claude/suiteui-feature-lead-t357v5 · Started: 2026-10-16T02:45Z (this run 2026-10-17T06:10Z)
-Stage: 4 round 3
+Run: act-1a149babb21-udz7 (line lead with #1079, #1480, #1596; earlier act-1a1487bf89a-zfq8) · Session: claude/suiteui-feature-lead-t357v5 · Started: 2026-10-16T02:45Z (this run 2026-10-17T06:10Z)
+Stage: 4 round 3 (fix)
 Base: fe0f5f176a95336c77a1d0cff7162e584db1d24c
-Next: read the round-3 fixer's PR (fix-batch r3-b1 in the wave-10 workflow: #1777 artboard element, #1778 window inside the visible frame); then round 4 on the first scoped suiteui run holding it; round 4 is the last (budget 4), then gap issues for anything left and the contact sheet
+Next: #2003 (round-3 fix: #1777 #1778) failed the lane's macOS build (run 39010720353); wave-11 fixer ew-2003 fixes the build and moves Head; then round 4 (last) on the first scoped suiteui run holding it, gaps, contact sheet
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
