@@ -30,7 +30,9 @@
 # merge commit to the PR branch with a lease on the head it read, and the
 # re-sweep, seeing a head whose last commit is that merge (LANE_MERGE_SUBJECT)
 # with no check on it, dispatches a Linux-only CI run (linux-dispatch; ci.yml's
-# `linux_only`) and merges on its pass like any CI-proven head. A conflict the
+# `linux_only`) and merges on its pass like any CI-proven head. Any other
+# unproven head with no check at all gets the same run, once per head (its
+# comment is the record), unless the PR comes from a fork. A conflict the
 # drivers can't resolve gets one comment naming the files and the
 # NEEDS_REBASE_LABEL label for a fixer; the label goes when a later head
 # integrates or merges.
@@ -626,6 +628,8 @@ decide() {
   if has_marker "$pr" "$head"; then marker=1; fi
   # The lane's own merge commit as the head (integrate): no marker can name it,
   # so its proof is a Linux run, which the lane starts when none exists yet.
+  # So does any other head with no check at all (per-PR CI doesn't run on dev
+  # PRs), unless it comes from a fork; the sweep starts it once per head.
   local lane_head=0
   if [[ "$(jq -r --arg h "$head" '.commits // [] | last // {} | select(.oid == $h) | .messageHeadline // ""' "$pr")" == "$LANE_MERGE_SUBJECT" ]]; then
     lane_head=1
@@ -645,7 +649,9 @@ decide() {
   if [[ -n "$pending" ]]; then echo "pending|$pending"; return; fi
   if (( npending )); then echo "pending|$npending checks still running"; return; fi
   if (( nci == 0 && marker == 0 )); then
-    if (( lane_head )); then echo "linux-dispatch|$(jq -r '.headRefName // ""' "$pr")"; return; fi
+    if (( lane_head || ngreen == 0 )) && [[ "$(jq -r '.isCrossRepository // false' "$pr")" != true ]]; then
+      echo "linux-dispatch|$(jq -r '.headRefName // ""' "$pr")"; return
+    fi
     echo "pending|no passing CI check and no $MARKER_LINE marker for head $head"; return
   fi
   if (( belt )) && [[ "$review" != "SUCCESS" ]]; then echo "pending|waiting for review"; return; fi
@@ -1058,7 +1064,7 @@ evaluate() {
   tmp=$(mktemp -d)
   local tries=0
   while :; do
-    gh pr view "$n" -R "$REPO" --json number,state,isDraft,baseRefName,labels,author,body,additions,deletions,changedFiles,mergeable,mergeStateStatus,headRefOid,headRefName,statusCheckRollup,commits >"$tmp/pr.json"
+    gh pr view "$n" -R "$REPO" --json number,state,isDraft,baseRefName,labels,author,body,additions,deletions,changedFiles,mergeable,mergeStateStatus,headRefOid,headRefName,isCrossRepository,statusCheckRollup,commits >"$tmp/pr.json"
     [[ "$(jq -r '.mergeable' "$tmp/pr.json")" == "UNKNOWN" ]] || break
     (( tries++ < UNKNOWN_RETRIES )) || break
     sleep 5
@@ -1184,6 +1190,17 @@ evaluate() {
       local what="" branch url="" i flags=(-f build_only=true) title="$BUILD_TITLE"
       if [[ "$kind" == linux-dispatch ]]; then branch="$rest"; flags=(-f linux_only=true); title="$LINUX_TITLE"
       else IFS='|' read -r what branch <<<"$rest"; fi
+      # A Linux check is started once per head: its comment is the record, read
+      # fail-closed so an API hiccup never starts a second run.
+      if [[ "$kind" == linux-dispatch ]]; then
+        local seen
+        if ! seen=$(gh api "repos/$REPO/issues/$n/comments" --paginate --jq '.[].body'); then
+          log "PR #$n: could not read its comments; the next sweep looks again"; rm -rf "$tmp"; return
+        fi
+        if grep -qF -- "started a Linux check on head $head" <<<"$seen"; then
+          log "PR #$n: Linux check on head $head already started; waiting for it"; rm -rf "$tmp"; return
+        fi
+      fi
       if ! write gh workflow run "$CI_FILE" -R "$REPO" "${flags[@]}" --ref "$branch"; then
         log "could not dispatch CI on $branch; the next sweep tries again"; rm -rf "$tmp"; return
       fi
@@ -1195,7 +1212,7 @@ evaluate() {
       done
       [[ -n "$url" ]] || url="https://github.com/$REPO/actions/workflows/$CI_FILE?query=branch%3A$branch"
       if [[ "$kind" == linux-dispatch ]]; then
-        comment_once "$n" "Fast lane: the head $head is the lane's merge of $BASE_BRANCH into $branch, so its proof is a Linux check, started now: $url. A later sweep merges this PR once it passes (a code PR gets its macOS build on this head first)."
+        comment_once "$n" "Fast lane: nothing on head $head proves it yet (no CI check, no Fast-Check marker for it), so the lane started a Linux check on head $head: $url. A later sweep merges this PR once it passes (a code PR gets its macOS build on this head first)."
       else
         comment_once "$n" "Fast lane: this PR changes code ($what), so its head $head must build on macOS first. The lane dispatched a macOS build on $branch: $url. A later sweep merges this PR once it compiles; a new push gets a new build."
       fi

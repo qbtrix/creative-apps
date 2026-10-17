@@ -103,7 +103,7 @@ check "docs only: 40 files on the worker's marker" "eligible|1230|40|Fast-Check 
   "$(printf '.body = "Closes #1\\n\\nFast-Check: pass\\nHead: %s" | .additions = 1200 | .changedFiles = 40' "$HEAD_SHA")" \
   "$(many_docs 40)" '[]'
 check "docs only under the cap: no tier note" "eligible|150|3|4 checks green" '.changedFiles = 3' "$DOCS" .
-check "docs only still needs proof" "pending|no passing CI check and no Fast-Check: pass marker" "$BIG" "$DOCS" '[]'
+check "docs only still needs proof (a Linux check)" "linux-dispatch|feat/x" "$BIG" "$DOCS" '[]'
 check "docs only still waits on a red check" "red|Linux" "$BIG" "$DOCS" \
   'map(if .name == "Linux" then .conclusion = "FAILURE" else . end)'
 check "docs only still refuses a protected docs path, size aside" \
@@ -121,10 +121,12 @@ check "non-allowlisted author" "not-eligible|author someone is not on the fast-l
   '.author.login = "someone"' "$BASE_FILES" .
 check "all hard rules listed" "not-eligible|author someone is not on the fast-lane allowlist;too big" \
   '.author.login = "someone" | .additions = 999' "$BASE_FILES" .
-check "no checks and no marker fails closed" "pending|no passing CI check and no Fast-Check: pass marker for head $HEAD_SHA" \
+check "no checks and no marker: the lane starts a Linux check" "linux-dispatch|feat/x" \
   . "$BASE_FILES" '[]'
 check "only non-CI checks fails closed" "pending|no passing CI check" . "$BASE_FILES" \
   '[.[] | select(.__typename == "StatusContext")]'
+check "a fork's PR with no checks waits, no Linux check" "pending|no passing CI check and no Fast-Check: pass marker for head $HEAD_SHA" \
+  '.isCrossRepository = true' "$BASE_FILES" '[]'
 check "one red check" "red|Linux" . "$BASE_FILES" \
   'map(if .name == "Linux" then .conclusion = "FAILURE" else . end)'
 check "red status context" "red|ci/external" . "$BASE_FILES" \
@@ -174,15 +176,15 @@ check "marker with stray spaces still counts" "eligible|150|2|Fast-Check marker"
   "$(mark "  Fast-Check: pass " "Head: $HEAD_SHA  ")" "$BASE_FILES" '[]'
 check "marker with CRLF line ends still counts" "eligible|150|2|Fast-Check marker" \
   '.body = "Closes #1\r\nFast-Check: pass\r\nHead: '"$HEAD_SHA"'\r\n"' "$BASE_FILES" '[]'
-check "marker for an older head waits" "pending|no passing CI check and no Fast-Check: pass marker" \
+check "marker for an older head waits" "linux-dispatch|feat/x" \
   "$(mark "Fast-Check: pass" "Head: ffffffffffffffffffffffffffffffffffffffff")" "$BASE_FILES" '[]'
-check "short sha in the marker waits" "pending|no passing CI check" \
+check "short sha in the marker waits" "linux-dispatch|feat/x" \
   "$(mark "Fast-Check: pass" "Head: ${HEAD_SHA:0:7}")" "$BASE_FILES" '[]'
-check "Fast-Check: fail waits" "pending|no passing CI check" \
+check "Fast-Check: fail waits" "linux-dispatch|feat/x" \
   "$(mark "Fast-Check: fail" "Head: $HEAD_SHA")" "$BASE_FILES" '[]'
-check "Head line apart from the Fast-Check line waits" "pending|no passing CI check" \
+check "Head line apart from the Fast-Check line waits" "linux-dispatch|feat/x" \
   "$(mark "Fast-Check: pass" "x\nHead: $HEAD_SHA")" "$BASE_FILES" '[]'
-check "Head line alone waits" "pending|no passing CI check" \
+check "Head line alone waits" "linux-dispatch|feat/x" \
   '.body = "Head: '"$HEAD_SHA"'"' "$BASE_FILES" '[]'
 check "marker does not outrank a red check" "red|Linux" "$MARKED" "$BASE_FILES" \
   'map(if .name == "Linux" then .conclusion = "FAILURE" else . end)'
@@ -203,7 +205,7 @@ check "a running macOS check doesn't block" "eligible|150|2|4 checks green" . "$
   'map(if .name == "macOS" then .status = "IN_PROGRESS" | .conclusion = null else . end)'
 check "a red scoped macOS check doesn't block" "eligible|150|2|Fast-Check marker" "$MARKED" "$BASE_FILES" \
   '[{"__typename":"CheckRun","name":"macOS (halo)","workflowName":"","status":"COMPLETED","conclusion":"FAILURE"}]'
-check "a green macOS check alone is no proof" "pending|no passing CI check and no Fast-Check: pass marker" . "$BASE_FILES" \
+check "a green macOS check alone is no proof (a Linux check)" "linux-dispatch|feat/x" . "$BASE_FILES" \
   '[{"__typename":"CheckRun","name":"macOS","workflowName":"","status":"COMPLETED","conclusion":"SUCCESS"}]'
 check "a green Linux check alone is proof" "eligible|150|2|1 checks green" . "$BASE_FILES" \
   '[{"__typename":"CheckRun","name":"Linux","workflowName":"","status":"COMPLETED","conclusion":"SUCCESS"}]'
@@ -304,7 +306,7 @@ printf '%s\n' Package.swift project.yml UITests/A.swift Sources/X.swift >"$tmp/f
 got=$(build_paths "$tmp/files.txt")
 if [[ "$got" == "Package.swift, Sources/X.swift, UITests, project.yml" ]]; then echo "ok   build: build_paths names the manifests and folders"
 else echo "FAIL build: build_paths: got '$got'"; fail=1; fi
-build "the build gate does not outrank the marker" "pending|no passing CI check" ".body = \"x\"" "$APP" .
+build "the build gate does not outrank the proof: a Linux check first" "linux-dispatch|feat/x" ".body = \"x\"" "$APP" .
 build "a supervisor's green Mac-Check run covers the build" "eligible|150|2|Fast-Check marker, Mac-Check: $RUN_URL" "$MAC_PR" "$APP" - '[]' .
 # Every source the manifests compile falls under BUILD_RE: each Package.swift
 # target with its `#if os(macOS)` block switched on (swift package
@@ -714,7 +716,7 @@ expect "integrate: its parents are the old head and dev" "$(git -C "$sw/origin.g
 expect "integrate: the JSON driver merged both keys" "$(git -C "$sw/origin.git" show feat/json:a.json | jq -c .)" '{"a":1,"b":2,"c":3}'
 expect "integrate: one comment says the lane merged dev in" "$(grep -c "^pr comment 6 .*merged origin/dev into feat/json itself ($MERGE_TIP)" "$sw/calls")" 1
 expect "integrate: the re-sweep starts a Linux-only check on the new head" "$(grep -c '^workflow run ci.yml .*-f linux_only=true --ref feat/json' "$sw/calls")" 1
-expect "integrate: and says so once" "$(grep -c "^pr comment 6 .*head $MERGE_TIP is the lane's merge of dev into feat/json" "$sw/calls")" 1
+expect "integrate: and says so once" "$(grep -c "^pr comment 6 .*started a Linux check on head $MERGE_TIP" "$sw/calls")" 1
 expect "integrate: not merged before the check" "$(grep -c '^pr merge 6' "$sw/calls")" 0
 expect "integrate: a real conflict leaves the branch alone" "$(git -C "$sw/origin.git" rev-parse feat/text)" "$TEXT_HEAD"
 expect "integrate: and labels it needs-rebase" "$(grep -c '^label create needs-rebase' "$sw/calls"),$(grep -c '^pr edit 8 .*--add-label needs-rebase' "$sw/calls")" "1,1"
@@ -739,8 +741,27 @@ check "lane head with a green Linux check is eligible" "eligible|150|2|1 checks 
   '[{"__typename":"CheckRun","name":"Linux","workflowName":"","status":"COMPLETED","conclusion":"SUCCESS"}]'
 check "lane head with a red Linux check is red" "red|Linux" "$LANE_HEAD_PR" "$BASE_FILES" \
   '[{"__typename":"CheckRun","name":"Linux","workflowName":"","status":"COMPLETED","conclusion":"FAILURE"}]'
-check "the lane's subject on an older commit is no lane head" "pending|no passing CI check" \
+check "the lane's subject on an older commit: a Linux check all the same" "linux-dispatch|feat/x" \
   '.commits = [{oid: "'"$OLD_HEAD"'", messageHeadline: "'"$LANE_MERGE_SUBJECT"'"}, {oid: "'"$HEAD_SHA"'", messageHeadline: "feat"}]' "$BASE_FILES" '[]'
+
+# A labelled PR with no proof and no check at all on its head (per-PR CI
+# doesn't run on dev PRs): the lane starts one Linux check per head, and a red
+# check gets none.
+rm -rf "$sw"; mkdir -p "$sw"; : >"$sw/calls"
+jq '.number = 20' <<<"$BASE_PR" >"$sw/20.json"
+printf '%s\n' '[{"filename": "docs/x.md", "status": "modified"}]' >"$sw/files.20.json"
+lane_sweep
+expect "no check: one Linux check on the head" "$(grep -c '^workflow run ci.yml .*-f linux_only=true --ref feat/x$' "$sw/calls")" 1
+expect "no check: and one comment naming the head" "$(grep -c "^pr comment 20 .*started a Linux check on head $HEAD_SHA" "$sw/calls")" 1
+lane_sweep
+expect "no check, same head next sweep: no second dispatch or comment" \
+  "$(grep -c '^workflow run' "$sw/calls"),$(grep -c '^pr comment 20 ' "$sw/calls"),$(grep -c '^pr merge 20' "$sw/calls")" "1,1,0"
+rm -rf "$sw"; mkdir -p "$sw"; : >"$sw/calls"
+jq '.number = 20' <<<"$BASE_PR" >"$sw/20.json"
+printf '%s\n' '[{"filename": "docs/x.md", "status": "modified"}]' >"$sw/files.20.json"
+verdict "$HEAD_SHA" failure
+lane_sweep
+expect "a red check: no Linux check dispatched" "$(grep -c '^workflow run' "$sw/calls")" 0
 
 # dispatch_reason: feature-done, then a UI change, then the 10-merge count.
 reason() {  # reason <name> <want> <feature> <ui> <since>
