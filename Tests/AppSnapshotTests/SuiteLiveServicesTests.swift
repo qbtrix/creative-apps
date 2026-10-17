@@ -48,10 +48,9 @@ import Testing
     @Test func everyOtherSlottedMemberIsPendingWithItsFeature() {
         let pending = makeLive().services.pending
         var expected = SuiteServices.slotFeatures.mapValues(SuiteIdentity.notConnected)
-        for live in ["recents", "creating", "home", "switching"] { expected[live] = nil }
+        for live in ["recents", "creating", "home", "switching", "sending", "receiving"] { expected[live] = nil }
         #expect(pending == expected)
-        #expect(pending.count == 11)
-        #expect(pending["sending"] == "Switching between apps isn't available yet.")
+        #expect(pending.count == 9)
         #expect(pending["thumbnails"] == "Opening recent work isn't available yet.")
         #expect(pending["home"] == nil)
         #expect(pending["creating"] == nil)
@@ -70,17 +69,12 @@ import Testing
                                     "roundTrips", "pasteboard", "assets", "linking", "preferences", "settings",
                                     "onboarding", "thumbnails", "home"]
         #expect(Set(SuiteServices.slotFeatures.keys) == members)
-        #expect(Set(pending.keys).union(["recents", "creating", "home", "switching"]) == members)
+        #expect(Set(pending.keys).union(["recents", "creating", "home", "switching", "sending", "receiving"]) == members)
     }
 
     @Test func throwingMembersNotLiveThrowTheirReason() async throws {
         let s = makeLive().services
-        let preset = NewDocumentPreset(id: "design.blank", app: .design, title: "Blank", detail: "One page")
-        let handOff = s.creating.handOff(for: preset, id: "h1", at: now)
         let logo = ref("Logo.design")
-        await #expect(throws: reason("sending")) { _ = try await s.sending.send(handOff) }
-        await #expect(throws: reason("receiving")) { _ = try await s.receiving.receive(Data(), now: now) }
-        await #expect(throws: reason("receiving")) { try await s.receiving.settle(id: "h1", as: .accepted) }
         await #expect(throws: reason("thumbnails")) { _ = try await s.thumbnails.publish(png: Data(), for: logo) }
         await #expect(throws: reason("roundTrips")) { try await s.roundTrips.cancel(session: "r1") }
         await #expect(throws: reason("assets")) { _ = try await s.assets.index() }

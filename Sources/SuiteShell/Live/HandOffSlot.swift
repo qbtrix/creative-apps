@@ -1,12 +1,11 @@
 // HandOffSlot.swift: the `sending` and `receiving` members of
-// SuiteServices.live, one object for both. Not live until the switching
-// feature swaps in its transport; until then every call throws
-// "Not connected yet (switching).".
+// SuiteServices.live, one object for both. Live: StoreHandOffs over the
+// support folder's handoffs/, delivering through HandOffTransport.
 import SuiteModel
 
 /// Whether this slot holds the live conformance; `live` builds `pending` from it.
-let handOffIsLive = false
+let handOffIsLive = true
 
 func handOffSlot(_ c: SlotContext) -> any HandOffSending & HandOffReceiving {
-    FakeHandOffs(unavailable: SuiteServices.notConnected("sending"))
+    StoreHandOffs(store: c.store, from: c.app, deliver: HandOffTransport.deliver)
 }
