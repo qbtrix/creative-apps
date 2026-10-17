@@ -16,3 +16,4 @@ utc	stage	event	ref	note
 2026-10-17T10:45Z	3	pr-merged	#1997	DE-2 merged into dev as 4f2988a (07:05Z, lane batch of 6)
 2026-10-17T10:45Z	3	stopped	session	usage limit 06:55Z to 10:40Z; DE-8 builder resumed
 2026-10-17T10:45Z	3	stage-start	wave 3	DE-3 and DE-5 builders started on 453198a; DE-1 dropped into them; DE-8 resumed
+2026-10-17T10:46Z	3	slice-done	DE-a	Belt-Slice-Done posted: full run 39018046761 on 453198a contains #1987 and #1997
