@@ -28,7 +28,13 @@ public actor AppLauncher: AppSwitching {
     }
 
     public func runState(of app: SuiteApp) -> AppRunState {
-        guard !hidden.contains(app), FileManager.default.fileExists(atPath: path(of: app)) else { return .missing }
+        Self.state(of: app, bundle: bundle, hidden: hidden)
+    }
+
+    /// The run state of `app` in the AfterGlow bundle at `bundle`. Static so the
+    /// Switch To menu can read it while it builds, without awaiting the actor.
+    static func state(of app: SuiteApp, bundle: String, hidden: Set<SuiteApp>) -> AppRunState {
+        guard !hidden.contains(app), FileManager.default.fileExists(atPath: path(of: app, bundle: bundle)) else { return .missing }
         return NSRunningApplication.runningApplications(withBundleIdentifier: app.bundleID).isEmpty ? .notRunning : .running(windows: 1)
     }
 
@@ -59,7 +65,7 @@ public actor AppLauncher: AppSwitching {
         configuration.arguments = LaunchArguments.forward(arguments, to: app)
         configuration.activates = true
         do {
-            _ = try await NSWorkspace.shared.openApplication(at: URL(fileURLWithPath: path(of: app)), configuration: configuration)
+            _ = try await NSWorkspace.shared.openApplication(at: URL(fileURLWithPath: path(of: app, bundle: bundle)), configuration: configuration)
         } catch {
             throw .notAvailable("\(app.displayName) didn't open. Try again.")
         }
@@ -70,7 +76,7 @@ public actor AppLauncher: AppSwitching {
         for continuation in continuations { continuation.yield(counter) }
     }
 
-    private func path(of app: SuiteApp) -> String {
+    static func path(of app: SuiteApp, bundle: String) -> String {
         app == .launcher ? bundle : bundle + "/" + app.bundlePath
     }
 
