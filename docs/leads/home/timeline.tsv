@@ -67,3 +67,4 @@ utc	stage	event	ref	note
 2026-10-17T14:50Z	HM-3z	heartbeat	full CI 39040191625 still queued behind 39036875578 (in progress)
 2026-10-17T15:13Z	HM-3z	heartbeat	39040191625 cancelled (superseded); full CI 39043153763 on 2c5003b5: Linux green, macOS running
 2026-10-17T15:40Z	HM-3z	heartbeat	full CI 39043153763: Linux green, macOS running; watch AppSnapshotTests AfterGlowHomeSnapshots (#1931)
+2026-10-17T15:52Z	heartbeat	full CI 39043153763: Linux green; macOS scripts/ci step failed, ui-test still running; logs readable once job ends
