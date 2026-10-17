@@ -58,3 +58,6 @@ utc	stage	event	ref	note
 2026-10-17T23:13Z	wave	w8 r-b2 #2302 SuiteUI #2263; r-b3 #2455 fixed by #2444; deferred 2406 2352 2075
 2026-10-17T23:28Z	ci	scoped design 39077269207 on 59c435a6: still fails 2406 2302 2455 2411 2352 2075 (+2456 2457 other features); #2444 did not fix #2455
 2026-10-17T23:28Z	wave	w9 fix-batch launched wj1dcag7a
+2026-10-17T23:41Z	pr	#2468 r-b1 head 721e6802: inspector ScrollView .scrollIndicators(.never), unlabeled legacy scroller tripped the unnamed audit; fixes #2455 #2406 #2352 (footer stripped)
+2026-10-17T23:41Z	pr	#2464 r-b2 head 007b2fb7: DS-J4 targets design.layer.node-2; fixes #2075
+2026-10-17T23:41Z	wave	w9 done wj1dcag7a, nothing deferred
