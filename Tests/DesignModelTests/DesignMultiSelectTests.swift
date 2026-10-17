@@ -113,18 +113,14 @@ private func threeRectangles() -> DesignWorkspace {
     #expect(workspace.selectionBounds == rc(100, 100, 800, 200))
 }
 
-@Test func severalSelectedLayersShowNoHandlesAndRefuseSingleLayerEdits() {
+/// Nudge and Delete act on several layers (#2463, DesignCanvasTests); Align to the page stays one layer's.
+@Test func severalSelectedLayersShowNoHandlesAndRefuseSingleLayerAlign() {
     var workspace = threeRectangles()
     workspace.toggleSelection("node-2")
     workspace.toggleSelection("node-3")
     #expect(workspace.handle(at: pt(600, 300)) == nil)
     #expect(workspace.multipleSelectionHelp != nil)
     #expect(workspace.alignHelp(.left) == workspace.multipleSelectionHelp)
-    workspace.nudge(.right, shift: false)
-    workspace.deleteSelection()
-    #expect(workspace.frame("node-3") == rc(400, 100, 200, 200))
-    #expect(workspace.treeNode("node-2") != nil)
-    #expect(workspace.undoActionName == "Undo Add Rectangle")
 }
 
 @Test func undoRestoresTheWholeSelectionAnEditHad() throws {
