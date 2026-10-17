@@ -2,8 +2,8 @@
   "title": "The AfterGlow home",
   "wave": 2,
   "order": 10,
-  "status": "planned",
-  "feature_issue": "file when ready",
+  "status": "built",
+  "feature_issue": "#1503",
   "covers": "#841–#848, #870; app lines #836–#840 (follow-up #849)",
   "waits_on": "suite-contracts, bundle, #778; #782 for the follow-up",
   "owned": [
