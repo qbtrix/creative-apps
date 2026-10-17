@@ -1,0 +1,104 @@
+{
+  "title": "Flare's, Photo's and Library's export state runs on SuiteKernel's ExportRun; the two app state machines and Photo's Bool are deleted",
+  "wave": "XK2",
+  "order": 60,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "covers": "editor-kernel design (2026-10-17), inventory row 'export'; captain's canonical-first call on #1552",
+  "waits_on": "editor-kernel:EK-run only (every slice); cross-line hand-offs in the packet's Hand-offs list",
+  "ui_slice": "none",
+  "ui_slice_reason": "behaviour-preserving migration: no new screen; the apps' existing journeys and snapshots verify it",
+  "owned": [
+    "Sources/FlareModel/FlareExport.swift",
+    "Sources/FlareModel/FlareWorkspaceState.swift",
+    "Tests/FlareModelTests/ExportScanTests.swift",
+    "Tests/mutations/FlareModel.KernelExportAdapter.json",
+    "Tests/mutations/FlareModel.FlareExport.json",
+    "Sources/PhotoModel/PhotoWorkspace.swift",
+    "Sources/PhotoModel/Contracts/OutputContracts.swift",
+    "Tests/PhotoModelTests/PhotoExportTests.swift",
+    "Tests/mutations/PhotoModel.KernelExportAdapter.json",
+    "Tests/mutations/PhotoModel.OutputContracts.json",
+    "Sources/LibraryModel/LibraryCatalog.swift",
+    "Tests/LibraryModelTests/LibraryServicesTests.swift",
+    "Tests/LibraryModelTests/LibraryFakeRenderingTests.swift",
+    "Tests/mutations/LibraryModel.KernelExportAdapter.json",
+    "Tests/mutations/LibraryModel.LibraryCatalog.json"
+  ],
+  "journeys": [],
+  "journeys_none": "Model-only migration proven by each app's existing journeys, which other packets own; no new XCUITest",
+  "slices": [
+    {
+      "id": "AX-flare",
+      "behavior": "Flare runs its export on `ExportRun<Options>` behind its existing API, its tests and journeys green, and its copy is deleted.",
+      "tasks": [
+        "AX-f1",
+        "AX-f2"
+      ],
+      "journeys": [
+        "FlareModelTests"
+      ],
+      "owned": [
+        "Sources/FlareModel/FlareExport.swift",
+        "Sources/FlareModel/FlareWorkspaceState.swift",
+        "Tests/FlareModelTests/ExportScanTests.swift",
+        "Tests/mutations/FlareModel.KernelExportAdapter.json",
+        "Tests/mutations/FlareModel.FlareExport.json"
+      ],
+      "waits": {
+        "editor-kernel:EK-run": [
+          "AX-f1"
+        ]
+      },
+      "ui": false
+    },
+    {
+      "id": "AX-photo",
+      "behavior": "Photo runs its export on `ExportRun<Options>` behind its existing API, its tests and journeys green, and its copy is deleted.",
+      "tasks": [
+        "AX-p1",
+        "AX-p2"
+      ],
+      "journeys": [
+        "PhotoModelTests"
+      ],
+      "owned": [
+        "Sources/PhotoModel/PhotoWorkspace.swift",
+        "Sources/PhotoModel/Contracts/OutputContracts.swift",
+        "Tests/PhotoModelTests/PhotoExportTests.swift",
+        "Tests/mutations/PhotoModel.KernelExportAdapter.json",
+        "Tests/mutations/PhotoModel.OutputContracts.json"
+      ],
+      "waits": {
+        "editor-kernel:EK-run": [
+          "AX-p1"
+        ]
+      },
+      "ui": false
+    },
+    {
+      "id": "AX-library",
+      "behavior": "Library runs its export on `ExportRun<Options>` behind its existing API, its tests and journeys green, and its copy is deleted.",
+      "tasks": [
+        "AX-l1",
+        "AX-l2"
+      ],
+      "journeys": [
+        "LibraryModelTests"
+      ],
+      "owned": [
+        "Sources/LibraryModel/LibraryCatalog.swift",
+        "Tests/LibraryModelTests/LibraryServicesTests.swift",
+        "Tests/LibraryModelTests/LibraryFakeRenderingTests.swift",
+        "Tests/mutations/LibraryModel.KernelExportAdapter.json",
+        "Tests/mutations/LibraryModel.LibraryCatalog.json"
+      ],
+      "waits": {
+        "editor-kernel:EK-run": [
+          "AX-l1"
+        ]
+      },
+      "ui": false
+    }
+  ]
+}

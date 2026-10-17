@@ -1,0 +1,109 @@
+{
+  "title": "Flare's and Halo's keyframe and easing rules run on SuiteKernel's Keys; the two copies of the handle math and the key rules are deleted",
+  "wave": "XK2",
+  "order": 40,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "covers": "editor-kernel design (2026-10-17), inventory row 'easing'; captain's canonical-first call on #1552",
+  "waits_on": "editor-kernel:EK-keys only (every slice); cross-line hand-offs in the packet's Hand-offs list",
+  "ui_slice": "none",
+  "ui_slice_reason": "behaviour-preserving migration: no new screen; the apps' existing journeys and snapshots verify it",
+  "owned": [
+    "Sources/FlareModel/EasingEditing.swift",
+    "Sources/FlareModel/Live/LiveEasing.swift",
+    "Sources/FlareModel/Fakes/FakeEasing.swift",
+    "Sources/FlareModel/Live/LiveKeyframes+Edit.swift",
+    "Sources/FlareModel/Live/LiveKeyframes+Frames.swift",
+    "Sources/FlareModel/Fakes/FakeKeyframes.swift",
+    "Tests/FlareModelTests/EasingEditingContractTests.swift",
+    "Tests/FlareModelTests/FlareEasingTests.swift",
+    "Tests/FlareModelTests/LiveEasingTests.swift",
+    "Tests/FlareModelTests/LiveKeyframesEditTests.swift",
+    "Tests/FlareModelTests/LiveKeyframesFramesTests.swift",
+    "Tests/FlareModelTests/MoveKeysPastEndTests.swift",
+    "Tests/mutations/FlareModel.KernelEasingAdapter.json",
+    "Tests/mutations/FlareModel.LiveEasing.json",
+    "Tests/mutations/FlareModel.LiveKeyframes+Edit.json",
+    "Sources/HaloModel/HaloKeySelection.swift",
+    "Sources/HaloModel/Live/HaloKeyRules.swift",
+    "Sources/HaloModel/Live/HaloEasingRules.swift",
+    "Sources/HaloModel/Contracts/HaloValues.swift",
+    "Tests/HaloModelTests/KeyEasingContractTests.swift",
+    "Tests/HaloModelTests/HaloEasingTests.swift",
+    "Tests/HaloModelTests/HaloKeySelectionTests.swift",
+    "Tests/HaloModelTests/PropertyKeyingContractTests.swift",
+    "Tests/HaloModelTests/HaloKeyToggleTests.swift",
+    "Tests/mutations/HaloModel.KernelEasingAdapter.json",
+    "Tests/mutations/HaloModel.HaloKeySelection.json",
+    "Tests/mutations/HaloModel.HaloKeyRules.json"
+  ],
+  "journeys": [],
+  "journeys_none": "Model-only migration proven by each app's existing journeys, which other packets own; no new XCUITest",
+  "slices": [
+    {
+      "id": "AE-flare",
+      "behavior": "Flare runs its easing on `KeyRef`, `Segment`, `KeyState`, `EasePreset`, `EaseCurve` and `KeyRules` behind its existing API, its tests and journeys green, and its copy is deleted.",
+      "tasks": [
+        "AE-f1",
+        "AE-f2"
+      ],
+      "journeys": [
+        "FlareModelTests"
+      ],
+      "owned": [
+        "Sources/FlareModel/EasingEditing.swift",
+        "Sources/FlareModel/Live/LiveEasing.swift",
+        "Sources/FlareModel/Fakes/FakeEasing.swift",
+        "Sources/FlareModel/Live/LiveKeyframes+Edit.swift",
+        "Sources/FlareModel/Live/LiveKeyframes+Frames.swift",
+        "Sources/FlareModel/Fakes/FakeKeyframes.swift",
+        "Tests/FlareModelTests/EasingEditingContractTests.swift",
+        "Tests/FlareModelTests/FlareEasingTests.swift",
+        "Tests/FlareModelTests/LiveEasingTests.swift",
+        "Tests/FlareModelTests/LiveKeyframesEditTests.swift",
+        "Tests/FlareModelTests/LiveKeyframesFramesTests.swift",
+        "Tests/FlareModelTests/MoveKeysPastEndTests.swift",
+        "Tests/mutations/FlareModel.KernelEasingAdapter.json",
+        "Tests/mutations/FlareModel.LiveEasing.json",
+        "Tests/mutations/FlareModel.LiveKeyframes+Edit.json"
+      ],
+      "waits": {
+        "editor-kernel:EK-keys": [
+          "AE-f1"
+        ]
+      },
+      "ui": false
+    },
+    {
+      "id": "AE-halo",
+      "behavior": "Halo runs its easing on `KeyRef`, `Segment`, `KeyState`, `EasePreset`, `EaseCurve` and `KeyRules` behind its existing API, its tests and journeys green, and its copy is deleted.",
+      "tasks": [
+        "AE-h1",
+        "AE-h2"
+      ],
+      "journeys": [
+        "HaloModelTests"
+      ],
+      "owned": [
+        "Sources/HaloModel/HaloKeySelection.swift",
+        "Sources/HaloModel/Live/HaloKeyRules.swift",
+        "Sources/HaloModel/Live/HaloEasingRules.swift",
+        "Sources/HaloModel/Contracts/HaloValues.swift",
+        "Tests/HaloModelTests/KeyEasingContractTests.swift",
+        "Tests/HaloModelTests/HaloEasingTests.swift",
+        "Tests/HaloModelTests/HaloKeySelectionTests.swift",
+        "Tests/HaloModelTests/PropertyKeyingContractTests.swift",
+        "Tests/HaloModelTests/HaloKeyToggleTests.swift",
+        "Tests/mutations/HaloModel.KernelEasingAdapter.json",
+        "Tests/mutations/HaloModel.HaloKeySelection.json",
+        "Tests/mutations/HaloModel.HaloKeyRules.json"
+      ],
+      "waits": {
+        "editor-kernel:EK-keys": [
+          "AE-h1"
+        ]
+      },
+      "ui": false
+    }
+  ]
+}

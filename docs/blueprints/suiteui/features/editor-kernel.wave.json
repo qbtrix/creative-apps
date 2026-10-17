@@ -1,0 +1,422 @@
+{
+  "title": "SuiteKernel: one Linux-safe library for history, selection, the layer tree with parenting, keys and easing, snap, transform, export and session, plus its SuiteUI halves",
+  "wave": "XK1",
+  "order": 10,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "covers": "editor-kernel design (2026-10-17) and its inventory; captain's canonical-first call on #1552; the smart-guide needs-ui from snapping",
+  "waits_on": "nothing open: suite-harness (#778) and editor-in-window (#1079) are built and own SuiteGallery.swift and project.yml; EK-26 waits on canvas-host CH-d for suiteui.md; the seven adopt-kernel-* features and snapping wait on slices here",
+  "depends": [
+    "suite-harness",
+    "editor-in-window"
+  ],
+  "longest_chain": "6 (EK-1 → EK-2 → EK-4 → EK-5 → EK-6 → EK-26)",
+  "owned": [
+    "openKey",
+    "undo",
+    "HistoryTests.undoEndsRun",
+    "limit",
+    "<=",
+    ".limitRollsIntoBase",
+    "currentStepID",
+    ".idsNeverRepeat",
+    "isDirty",
+    ".dirtyExactAfterUndoToSaved",
+    ".extend",
+    "SelectionTests.extendAppendsOnAStage",
+    "anchor..<id",
+    ".extendRangeIsClosed",
+    "canAdd",
+    ".toggleRefusesLocked",
+    "Nudge.delta",
+    "NudgeMarqueeTests.largeIsTen",
+    "Marquee.union",
+    ".unionDedupes",
+    "intoItself",
+    "LayerTreeTests.refusesIntoOwnDescendant",
+    "isHidden",
+    ".hiddenCascades",
+    "arrange(.bringForward)",
+    ".bringForwardAtTopStays",
+    "ungroup",
+    ".ungroupKeepsOrder",
+    "LayerFollowTests.refusesCycleTwoDeep",
+    "worldPlacement",
+    ".worldComposesParentFirst",
+    "setFollow",
+    "keepingPlace",
+    ".keepsScreenPlace",
+    "samples(count: 1)",
+    "EaseCurveTests.oneSampleIsOnePoint",
+    ".capAt4096",
+    "moving",
+    ".movingHandleZero",
+    "moveKeys",
+    "KeyRulesTests.moveRefusesPastEnd",
+    "removeKeys(.propertyGoesStatic)",
+    ".staticWhenOneLeft",
+    "insertFrames",
+    ">=",
+    ">",
+    ".insertKeepsKeyAtFrame",
+    "state",
+    ".animated",
+    ".oneKeyIsNotAnimated",
+    "SnapCandidateTests.skipsHidden",
+    ".keepsLocked",
+    ".listsParentFrame",
+    "offset",
+    ".linesBeforeGaps",
+    "BoxMathTests.minimumOnePoint",
+    ".shift",
+    ".shiftKeepsAspect",
+    ".option",
+    ".optionResizesFromCentre",
+    "HandleHit",
+    "HandleHitTests.chebyshev",
+    ".cornersWinTies",
+    "tolerance",
+    ".toleranceDividesByZoom",
+    "progressed",
+    "done",
+    "ExportRunTests.progressNeverBack",
+    "done > total",
+    ".clampsToTotal",
+    ".failed",
+    ".cancelReturnsToIdle",
+    "begin",
+    ".beginRefusedWhileRunning",
+    "DocumentSessionTests.cleanAfterUndoToSaved",
+    "autosaveDue",
+    "lastAutosave",
+    ".dueMeasuresFromLastEdit",
+    "probe",
+    "VersionedJSONTests.refusesNewer",
+    "words",
+    ".wordsNameThePath"
+  ],
+  "journeys": [
+    "SuiteJourneyTests.testEditorKernelGallery"
+  ],
+  "slices": [
+    {
+      "id": "EK-a",
+      "behavior": "The SuiteKernel target exists and builds on Linux and macOS with every public type and signature declared as a documented stub, fakes and fixtures, so the UI slice, the logic slices, the adopt features and the snapping lead all build against it at once.",
+      "tasks": [
+        "EK-1",
+        "EK-2",
+        "EK-3"
+      ],
+      "journeys": [
+        "KJ0"
+      ],
+      "owned": [],
+      "waits": {},
+      "ui": false
+    },
+    {
+      "id": "EK-u",
+      "behavior": "The gallery's editor-kernel page shows a 200-row layer tree you can drag into a parent, the selection handles and a smart guide with a distance label, on the kernel fakes, within the render budget.",
+      "tasks": [
+        "EK-4",
+        "EK-5",
+        "EK-6"
+      ],
+      "journeys": [
+        "testEditorKernelGallery"
+      ],
+      "owned": [],
+      "waits": {
+        "EK-a": [
+          "EK-4"
+        ]
+      },
+      "ui": true
+    },
+    {
+      "id": "EK-undo",
+      "behavior": "History<Payload> records named steps, folds a run under one key, ends the run on undo, redo and endRun, keeps ids that never repeat, reads dirty as saved-vs-current and jumps to a step.",
+      "tasks": [
+        "EK-7",
+        "EK-8"
+      ],
+      "journeys": [
+        "KJ1"
+      ],
+      "owned": [
+        "openKey",
+        "undo",
+        "HistoryTests.undoEndsRun",
+        "limit",
+        "<=",
+        ".limitRollsIntoBase",
+        "currentStepID",
+        ".idsNeverRepeat",
+        "isDirty",
+        ".dirtyExactAfterUndoToSaved"
+      ],
+      "waits": {
+        "EK-a": [
+          "EK-7"
+        ]
+      },
+      "ui": false
+    },
+    {
+      "id": "EK-sel",
+      "behavior": "Selection<ID> picks with replace, toggle and extend (range from the anchor when an order is given), keeps a primary, refuses what canAdd refuses, prunes dead ids and moves by arrow in a grid; Nudge and Marquee give the one delta rule, run key and union rule.",
+      "tasks": [
+        "EK-9",
+        "EK-10"
+      ],
+      "journeys": [
+        "KJ2"
+      ],
+      "owned": [
+        ".extend",
+        "SelectionTests.extendAppendsOnAStage",
+        "anchor..<id",
+        ".extendRangeIsClosed",
+        "canAdd",
+        ".toggleRefusesLocked",
+        "Nudge.delta",
+        "NudgeMarqueeTests.largeIsTen",
+        "Marquee.union",
+        ".unionDedupes"
+      ],
+      "waits": {
+        "EK-a": [
+          "EK-9"
+        ]
+      },
+      "ui": false
+    },
+    {
+      "id": "EK-tree",
+      "behavior": "LayerTree<Payload> nests, orders, cascades hide and lock, moves into a parent at an index, arranges, groups, ungroups and duplicates with refusals, and composes transforms along followsID without cycles, keeping a layer's place when its parent changes.",
+      "tasks": [
+        "EK-11",
+        "EK-12",
+        "EK-13"
+      ],
+      "journeys": [
+        "KJ3"
+      ],
+      "owned": [
+        "intoItself",
+        "LayerTreeTests.refusesIntoOwnDescendant",
+        "isHidden",
+        ".hiddenCascades",
+        "arrange(.bringForward)",
+        ".bringForwardAtTopStays",
+        "ungroup",
+        ".ungroupKeepsOrder",
+        "LayerFollowTests.refusesCycleTwoDeep",
+        "worldPlacement",
+        ".worldComposesParentFirst",
+        "setFollow",
+        "keepingPlace",
+        ".keepsScreenPlace"
+      ],
+      "waits": {
+        "EK-a": [
+          "EK-11"
+        ]
+      },
+      "ui": false
+    },
+    {
+      "id": "EK-keys",
+      "behavior": "KeyRules toggles, moves (clamped, all or nothing), removes and shifts keys on a sorted track and names the key state; EasePreset and EaseCurve give one preset set and one handle math.",
+      "tasks": [
+        "EK-14",
+        "EK-15",
+        "EK-16"
+      ],
+      "journeys": [
+        "KJ4"
+      ],
+      "owned": [
+        "samples(count: 1)",
+        "EaseCurveTests.oneSampleIsOnePoint",
+        ".capAt4096",
+        "moving",
+        ".movingHandleZero",
+        "moveKeys",
+        "KeyRulesTests.moveRefusesPastEnd",
+        "removeKeys(.propertyGoesStatic)",
+        ".staticWhenOneLeft",
+        "insertFrames",
+        ">=",
+        ">",
+        ".insertKeepsKeyAtFrame",
+        "state",
+        ".animated",
+        ".oneKeyIsNotAnimated"
+      ],
+      "waits": {
+        "EK-a": [
+          "EK-14"
+        ]
+      },
+      "ui": false
+    },
+    {
+      "id": "EK-snap",
+      "behavior": "Given a tree and the moving ids, the snap module names the candidates (siblings, parent frames, the page; hidden skipped, locked kept) and orders the offsets lines, gaps, then whole points; the engines are the snapping lead's SN-2 and SN-3.",
+      "tasks": [
+        "EK-17",
+        "EK-18"
+      ],
+      "journeys": [
+        "KJ5"
+      ],
+      "owned": [
+        "SnapCandidateTests.skipsHidden",
+        ".keepsLocked",
+        ".listsParentFrame",
+        "offset",
+        ".linesBeforeGaps"
+      ],
+      "waits": {
+        "EK-a": [
+          "EK-17"
+        ],
+        "EK-tree": [
+          "EK-18"
+        ]
+      },
+      "ui": false
+    },
+    {
+      "id": "EK-box",
+      "behavior": "BoxMath resizes by a handle with Shift and Option, never flips, scales several as one box, and HandleHit finds the handle under a point at a screen tolerance divided by zoom.",
+      "tasks": [
+        "EK-19",
+        "EK-20"
+      ],
+      "journeys": [
+        "KJ6"
+      ],
+      "owned": [
+        "BoxMathTests.minimumOnePoint",
+        ".shift",
+        ".shiftKeepsAspect",
+        ".option",
+        ".optionResizesFromCentre",
+        "HandleHit",
+        "HandleHitTests.chebyshev",
+        ".cornersWinTies",
+        "tolerance",
+        ".toleranceDividesByZoom"
+      ],
+      "waits": {
+        "EK-a": [
+          "EK-19"
+        ]
+      },
+      "ui": false
+    },
+    {
+      "id": "EK-run",
+      "behavior": "ExportRun<Options> moves idle, editing, running(done, total), finished or failed, never reports progress going back, and returns to idle on cancel.",
+      "tasks": [
+        "EK-21",
+        "EK-22"
+      ],
+      "journeys": [
+        "KJ7"
+      ],
+      "owned": [
+        "progressed",
+        "done",
+        "ExportRunTests.progressNeverBack",
+        "done > total",
+        ".clampsToTotal",
+        ".failed",
+        ".cancelReturnsToIdle",
+        "begin",
+        ".beginRefusedWhileRunning"
+      ],
+      "waits": {
+        "EK-a": [
+          "EK-21"
+        ]
+      },
+      "ui": false
+    },
+    {
+      "id": "EK-doc",
+      "behavior": "DocumentSession reads dirty from the saved and current tokens, names the save status, says when autosave is due and what recovery to offer, and VersionedJSON probes a file's version before decoding it.",
+      "tasks": [
+        "EK-23",
+        "EK-24"
+      ],
+      "journeys": [
+        "KJ8"
+      ],
+      "owned": [
+        "isDirty",
+        "DocumentSessionTests.cleanAfterUndoToSaved",
+        "autosaveDue",
+        "lastAutosave",
+        ".dueMeasuresFromLastEdit",
+        "probe",
+        "VersionedJSONTests.refusesNewer",
+        "words",
+        ".wordsNameThePath"
+      ],
+      "waits": {
+        "EK-a": [
+          "EK-23"
+        ]
+      },
+      "ui": false
+    },
+    {
+      "id": "EK-z",
+      "behavior": "The full Linux walk runs every module together on the fakes, the blueprints and docs/engineering.md name the kernel tier, and the feature is built.",
+      "tasks": [
+        "EK-25",
+        "EK-26"
+      ],
+      "journeys": [
+        "KJ9"
+      ],
+      "owned": [],
+      "waits": {
+        "EK-u": [
+          "EK-25"
+        ],
+        "EK-undo": [
+          "EK-25"
+        ],
+        "EK-sel": [
+          "EK-25"
+        ],
+        "EK-tree": [
+          "EK-25"
+        ],
+        "EK-keys": [
+          "EK-25"
+        ],
+        "EK-snap": [
+          "EK-25"
+        ],
+        "EK-box": [
+          "EK-25"
+        ],
+        "EK-run": [
+          "EK-25"
+        ],
+        "EK-doc": [
+          "EK-25"
+        ],
+        "canvas-host:CH-d": [
+          "EK-26"
+        ]
+      },
+      "ui": false
+    }
+  ]
+}

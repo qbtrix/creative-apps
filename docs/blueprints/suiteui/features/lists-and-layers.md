@@ -33,6 +33,19 @@ and its composition context menu (the follow-up of closed #35, after LL-8a),
 Design's Layers group toggles and expansion (follow-ups of closed #50 and
 PR #549, after LL-9).
 
+**Kernel fold (2026-10-17, editor-kernel design).** The one layers panel
+every app adopts is `LayerTreeList` (`Sources/SuiteUI/LayerTreeList.swift`),
+built by editor-kernel's EK-4 and EK-5 over the kernel's `LayerRow`: nested
+rows, drag into a parent, eye and lock with cascade dimming, multi-select,
+thumbnails, hover, pressed and selected states, and row context menus. LL-5
+and LL-8b (the flat `LayerList`) are withdrawn so the panel is not built
+twice; #146 and #73's layer-row half close with EK-4 and EK-5. The row
+primitives stay here (LL-4 dimming, LL-6 refusable rename, LL-7 keyboard
+rename, LL-8a menus, LL-9 expansion): `LayerTreeList` composes `SidebarRow`
+and takes each as it lands. LL-13's `layers` pages show `LayerTreeList`, and
+LL-16's layer-list baseline is `LayerTreeList`'s. The apps' panels migrate in
+`adopt-kernel-layers` (docs/blueprints/suiteui/features/adopt-kernel-layers.md).
+
 **Not this line's:** #589's second acceptance bullet (Design's journey
 hides a group from its row's eye) and #284's Design half (`Section("Pages")`
 in Design's Layers panel) are Design code. LL-9 and LL-11 each file a
@@ -172,11 +185,11 @@ interval series. No task edits `docs/c4/model.json`, `docs/design.md`,
 | LL-2 | – | `SuiteListEditing`: rename outcomes, reorder, drop index (QB-S14) | `Sources/SuiteUI/ListEditing.swift`, `Tests/SuiteUITests/ListEditingTests.swift`, `Tests/SuiteUITests/ListBudgetTests.swift` | LL-1 |
 | LL-3 | – | `SuiteGridSelecting` over `GridSelection`; the 40-sequence reference (QB-S28) and QB-S12 | `Sources/SuiteUI/GridSelection.swift`, `Tests/SuiteUITests/GridSelectionReferenceTests.swift`, `Tests/SuiteUITests/ListBudgetTests.swift` | LL-2 |
 | LL-4 | #146 (part) | `SidebarItem.isDimmed`; `SidebarRow` dims title and symbol | `Sources/SuiteUI/SidebarRow.swift`, `Tests/SuiteUITests/SidebarTests.swift`, `Tests/AppSnapshotTests/SuiteSidebarSnapshots.swift` | – |
-| LL-5 | #146 (closes) | `LayerList`: flat rows, eye and lock column, rename through LL-6's refusable `String?` form (SJ17 refuses `Taken` on it), drag to reorder with the insertion line, `layers-scroll` | `Sources/SuiteUI/LayerList.swift`, `Tests/SuiteUITests/LayerListTests.swift`, `Tests/AppSnapshotTests/SuiteLayerListSnapshots.swift` | LL-2, LL-6 |
+| LL-5 | #146 (closes with editor-kernel EK-4) | Withdrawn: the layer panel is `LayerTreeList` (editor-kernel EK-4, EK-5) | – | – |
 | LL-6 | #577 | A rename the app can refuse: the draft stays, the message shows inline; threaded through `SidebarSection` and `SuiteWindow` | `Sources/SuiteUI/SidebarRow.swift`, `Sources/SuiteUI/SidebarSection.swift`, `Sources/SuiteUI/SuiteWindow.swift`, `Tests/SuiteUITests/SidebarRenameRefusalTests.swift`, `Tests/AppSnapshotTests/SuiteSidebarSnapshots.swift` | LL-2, LL-4 |
 | LL-7 | #108 | Rename from Return on the focused row and from a "Rename" accessibility action | `Sources/SuiteUI/SidebarRow.swift`, `Tests/SuiteUITests/SidebarKeyboardRenameTests.swift` | LL-6 |
 | LL-8a | #73 (part) | Row context menus from `ToolbarAction`s, disabled with help, on `SuiteWindow`'s sidebar rows | `Sources/SuiteUI/SidebarSection.swift`, `Sources/SuiteUI/SuiteWindow.swift`, `Tests/SuiteUITests/SidebarContextMenuTests.swift` | LL-6 |
-| LL-8b | #73 | The same row context menus on `LayerList` rows (`contextActions:`) | `Sources/SuiteUI/LayerList.swift`, `Tests/SuiteUITests/SidebarContextMenuTests.swift` | LL-5, LL-8a |
+| LL-8b | #73 (closes with editor-kernel EK-5) | Withdrawn: row context menus land on `LayerTreeList` in editor-kernel EK-5 | – | – |
 | LL-9 | #589, #111 (closes both) | App-owned expansion; a parent row's toggles are their own elements; files the `line:design` follow-up for #589's Design journey | `Sources/SuiteUI/SidebarSection.swift`, `Sources/SuiteUI/SuiteWindow.swift`, `Tests/SuiteUITests/SidebarNestingTests.swift` | LL-8a |
 | LL-10 | #249 | The nesting snapshot draws through `SidebarNode` in a sidebar `List`, expanded through LL-9's seam, so reverting the two-level cap changes the PNG | `Tests/AppSnapshotTests/SuiteSidebarNestingSnapshots.swift` | LL-9 |
 | LL-11 | #284 | The section header's text stays `SuiteColor.textSecondary` (from #599, `SidebarSection.swift:31`; not `secondaryText`, the system grey #284 measured) and a test pins it; files the `line:design` issue for Design's `Section("Pages")` | `Sources/SuiteUI/SidebarSection.swift`, `Tests/SuiteUITests/SidebarEdgeTests.swift` | LL-9 |

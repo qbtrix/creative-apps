@@ -53,6 +53,24 @@ and the routes (`lead.md` rule 18).
 
 No creative-core issue.
 
+**Kernel amendment (2026-10-17, editor-kernel design).** The snap engine is
+a kernel module, not a Design one: `SnapLine`, `SnapGap`, `SnapGuides`,
+`SnapCandidate`, `SnapLines` and `SnapGaps` are declared as stubs by
+editor-kernel's contract slice EK-a (`Sources/SuiteKernel/Snap/`, packet
+`docs/blueprints/suiteui/features/editor-kernel.md`), and SN-2 and SN-3
+build the engines there, at the kernel paths, with their tests in
+`Tests/SuiteKernelTests/` and plans `Tests/mutations/SuiteKernel.SnapLines.json`
+and `SuiteKernel.SnapGaps.json`. SN-1 keeps the Design-side contract
+(`.noSnap`, the defaults key, `snapGuides`, `snapCandidates`) and SN-12
+(new, in SN-a) adds the bridge: `DesignSnapLine`, `DesignSnapGap`,
+`DesignSnapGuides` and `DesignSnapCandidate` are typealiases of the kernel
+types, `snapCandidates` returns `[SnapCandidate]` through
+`Snapping.candidates` over the page tree once adopt-kernel-layers' Design
+slice lands (until then over `[DesignNode]`), and `DesignSnapLines`/`DesignSnapGaps`
+are gone. SN-1 and SN-12 wait on editor-kernel's `Belt-Slice-Done: EK-a`
+(a cross-line wait, so it is text here, not in `waits`). Slice ids and the
+other tasks are unchanged; Flare and Halo snap through the same module.
+
 Blueprint sections: 1 (the v1 line), 3 (the usage map), 5.5 (the gesture
 routes), 6 (canvas rules, the View menu), 7.1 (speed budgets; QD-S13 and
 QD-S14 below are new rows), 8.2.
@@ -348,8 +366,8 @@ for a task with mutations its `Mutate:` score line. SN-11 also carries
 | id | issue | what | owned files | depends on | size |
 |---|---|---|---|---|---|
 | SN-1 | – | The contract: the guide types, `summary`, `.noSnap` and its init, the defaults key, `snapGuides` (nil), `snapCandidates`; `DesignSnapLines` and `DesignSnapGaps` with their signatures and stub bodies; MJ10 written first, disabled; MJ12 written | `DesignSnapping.swift`, `DesignSnapLines.swift`, `DesignSnapGaps.swift`; `Tests/DesignModelTests/DesignSnapCandidateTests.swift`, `Tests/DesignModelTests/DesignSnapEngineTests.swift`; `Tests/mutations/DesignModel.DesignSnapping.json` | – | ~300, 6 |
-| SN-2 | – | Edges and centres: the bucketed lines, `offset` and `lines(on:)` | `DesignSnapLines.swift`; `Tests/DesignModelTests/DesignSnapLineTests.swift`; `Tests/mutations/DesignModel.DesignSnapLines.json` | SN-1 | ~250, 3 |
-| SN-3 | SN-e's gap issue (closes) | Distances and equal spacing: the grid, `gaps(around:)` and `spacingOffset`; turns on MJ10 | `DesignSnapGaps.swift`; `Tests/DesignModelTests/DesignSnapGapTests.swift`, `Tests/DesignModelTests/DesignSnapEngineTests.swift`; `Tests/mutations/DesignModel.DesignSnapGaps.json` | SN-1, SN-2 | ~300, 4 |
+| SN-2 | – | Edges and centres: the bucketed lines, `offset` and `lines(on:)` | `Sources/SuiteKernel/Snap/SnapLines.swift`; `Tests/SuiteKernelTests/SnapLineTests.swift`; `Tests/mutations/SuiteKernel.SnapLines.json` | SN-1, SN-12 | ~250, 3 |
+| SN-3 | SN-e's gap issue (closes) | Distances and equal spacing: the grid, `gaps(around:)` and `spacingOffset`; turns on MJ10 | `Sources/SuiteKernel/Snap/SnapGaps.swift`; `Tests/SuiteKernelTests/SnapGapTests.swift`, `Tests/DesignModelTests/DesignSnapEngineTests.swift`; `Tests/mutations/SuiteKernel.SnapGaps.json` | SN-1, SN-2 | ~300, 4 |
 | SN-4 | – | The gesture builds the engine once at the press; a move, a several move and an Option-drag copy snap before whole points; `.noSnap` snaps nothing; `snapGuides` reads the gesture, replacing SN-9's fake; MJ11 written first, disabled | `DesignCanvasEditing.swift`, `DesignSnapping.swift`; `Tests/DesignModelTests/DesignSnapMoveTests.swift`, `Tests/DesignModelTests/DesignSnapWalkTests.swift`, `Tests/DesignModelTests/DesignSnapBudgetTests.swift`; `Tests/mutations/DesignModel.DesignCanvasEditing.json`, `Tests/mutations/DesignModel.DesignSnapping.json` | SN-2, SN-3, SN-9; design-seams; canvas-basics CB-a; select-several SS-b | ~350, 7 |
 | SN-5 | SN-b's gap issue (closes) | A resize (one or several, Shift, Option) snaps its dragged edges; a draw and a Text click-drag snap their start and end; turns on MJ11 | `DesignCanvasEditing.swift`; `Tests/DesignModelTests/DesignSnapResizeDrawTests.swift`, `Tests/DesignModelTests/DesignSnapWalkTests.swift`, `Tests/DesignModelTests/DesignSnapBudgetTests.swift`; `Tests/mutations/DesignModel.DesignCanvasEditing.json` | SN-4 | ~320, 5 |
 | SN-6 | – | SN-c's journey written first, `XCTSkip("waits on SN-7")`, its drag and guide steps behind `snapIsLive` | `UITests/DesignJourneyTests+Snap.swift` | – | ~170, 1 |
@@ -358,6 +376,7 @@ for a task with mutations its `Mutate:` score line. SN-11 also carries
 | SN-9 | SN-a's gap issue (closes) | The stubs the screen calls: `DesignSnapGuides.init`, `.empty` and `.fake`, `snapGuides` returning `.fake` while a drag runs and nil otherwise; MJ12 extended and green | `DesignSnapping.swift`; `Tests/DesignModelTests/DesignSnapCandidateTests.swift`; `Tests/mutations/DesignModel.DesignSnapping.json` | SN-1 | ~120, 3 |
 | SN-10 | – | The integrate step: sets `snapIsLive`, so the journey's snapped drags and guide reads run on the live routes (steps 2 to 9); fixes whatever the live guides show the overlay got wrong | `UITests/DesignJourneyTests+Snap.swift` | SN-5, SN-7 | ~60, 1 |
 | SN-11 | SN-f's gap issue (closes) | The render budget on the live guides: a 120-sample move, resize and draw read the live copy's summary; `feature-done` | `Tests/AppSnapshotTests/RenderBudgetDesignSnapTests.swift` | SN-10 | ~120, 1; `feature-done` |
+| SN-12 | SN-a's gap issue (part) | The kernel bridge: `DesignSnapLine`, `DesignSnapGap`, `DesignSnapGuides`, `DesignSnapCandidate` as typealiases of `SuiteKernel`'s; `snapCandidates` through `Snapping.candidates`; `DesignSnapLines.swift` and `DesignSnapGaps.swift` removed; MJ12 green on the kernel types | `DesignSnapping.swift`; `Tests/DesignModelTests/DesignSnapCandidateTests.swift`; `Tests/mutations/DesignModel.DesignSnapping.json` | SN-1; editor-kernel EK-a | ~120, 3 |
 
 SN-2 and SN-3 each fill the stub file SN-1 adds, so they share no file.
 SN-3 waits on SN-2 only because MJ10, which it turns on, walks the lines
@@ -380,7 +399,8 @@ the complaints above move into the blueprint at its next revision.
 ## Build waves
 
 - Wave 1: SN-1, SN-6. Independent in this wave: both.
-- Wave 2: SN-2, SN-9, SN-8 (design-window DW-a, canvas-basics CB-c and files-history FH-b merged). Independent in this wave: all three.
+- Wave 2: SN-12 (editor-kernel EK-a merged), SN-9, SN-8 (design-window DW-a, canvas-basics CB-c and files-history FH-b merged). Independent in this wave: all three.
+- Wave 2b: SN-2 (after SN-12). Independent in this wave: SN-2 alone.
 - Wave 3: SN-3, SN-7 (design-window DW-d merged). Independent in this wave: both.
 - Wave 4: SN-4 (design-seams, canvas-basics CB-a and select-several SS-b merged). Independent in this wave: SN-4 alone.
 - Wave 5: SN-5. Independent in this wave: SN-5 alone.
@@ -421,6 +441,7 @@ files (`scripts/mutate --plan DesignModel.<File>`).
 | SN-9 | `DesignSnapCandidateTests` (MJ12): `snapGuides` is nil with no drag and `DesignSnapGuides.fake` while a drag runs, with `summary` "x 300, gap x 100, spacing x 100"; `.empty.summary` is "none"; the init defaults to no lines and no gaps | the screen gets nothing to draw before the routes exist, or a stale fake outlives the drag | `snapGuides`: the no-gesture nil check dropped, so the fake shows with no drag; the stub returns `.empty` instead of `.fake` |
 | SN-10 | The journey passes on the macOS run with `snapIsLive` set: steps 2 to 9, each drag's Undo title and X, W, H or guides value as listed | a step still passes only on the stubs (step 7's "none" under the fake) or a live drag shows no guides | – (journey) |
 | SN-11 | `RenderBudgetDesignSnapTests.snappedDrag` on `crowd` with live guides: a 120-sample move, resize and draw each run `DesignEditor`'s body 3 times or fewer, and after 60 samples of each `design.canvas.guides` reads the live copy's summary while the model's layer is unmoved | a snapped step runs the editor body, or the overlay reads the model mid-drag | – (view code) |
+| SN-12 | `DesignSnapCandidateTests` on the kernel types (same numbers as SN-1's row); `swift build` finds no `DesignSnapLines`/`DesignSnapGaps` type | a typealias drifts from the kernel type; the old engine files still compile | the bridge skips `Hidden` → `.skipsHidden`; drops `Locked` → `.keepsLocked` |
 
 ## Quality tests
 
