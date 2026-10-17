@@ -9,7 +9,8 @@
 //   .glyph  the coloured glyph alone, filling the frame
 //   .line   the monoline form in the foreground style: the switcher, sidebar
 //           rows, New tiles and chips (`symbolSized()` lays it out like an
-//           SF Symbol in the current font)
+//           SF Symbol in the current font); its stroke never drops under
+//           1 pt, so a chip-sized mark doesn't turn to a hairline
 //
 // At an icon size of 32 pt and under, .icon and .glyph draw the SVG's -small
 // groups (a heavier rim, a simpler, lighter glyph) so each mark keeps its own
@@ -70,6 +71,17 @@ public struct AppMark: View {
         }
     }
 
+    /// The thinnest .line stroke, in points: the art's 1.6 of 24 units is
+    /// 0.6 pt in a 10 pt chip, a hairline beside its label.
+    nonisolated static let minLineWidth: CGFloat = 1
+
+    /// The stroke width, in grid units, an element of art width `width` draws
+    /// with in `style` at `side` points: .line holds `minLineWidth`.
+    nonisolated static func lineWidth(_ width: Double, _ style: Style, side: CGFloat) -> Double {
+        guard style == .line, side > 0 else { return width }
+        return max(width, Double(minLineWidth * box(style).width / side))
+    }
+
     static func draw(_ art: AppMarkArt, _ style: Style, in context: GraphicsContext, size: CGSize) {
         let side = min(size.width, size.height)
         guard side > 0 else { return }
@@ -79,7 +91,7 @@ public struct AppMark: View {
         context.scaleBy(x: side / box.width, y: side / box.height)
         context.translateBy(x: -box.minX, y: -box.minY)
         for element in elements(art, style, side: side) {
-            element.draw(in: context, monochrome: style == .line)
+            element.draw(in: context, monochrome: style == .line, width: lineWidth(element.width, style, side: side))
         }
     }
 }
@@ -142,8 +154,8 @@ extension AppMarkArt.Element {
         return path
     }
 
-    /// Fills, then strokes; `monochrome` paints in the foreground style instead of the art's colours.
-    func draw(in context: GraphicsContext, monochrome: Bool) {
+    /// Fills, then strokes `width` wide; `monochrome` paints in the foreground style instead of the art's colours.
+    func draw(in context: GraphicsContext, monochrome: Bool, width: Double) {
         var context = context
         context.opacity *= opacity
         let path = path
