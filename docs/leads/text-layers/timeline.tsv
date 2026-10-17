@@ -34,3 +34,5 @@ utc	stage	event	ref	note
 2026-10-17T15:59:06Z	4	check	39045670179	scoped halo run on dd7ec767 still in progress
 2026-10-17T16:18Z	4	ci	scoped halo 39045670179	success at dd7ec767
 2026-10-17T16:18Z	4	spawned	critic panel round 1	clarity journey design layout controls audit
+2026-10-17T16:22Z	4	anatomy	round 1	not clean: #2175 #2176 major; #2177-#2181 minor
+2026-10-17T16:22Z	4	spawned	fix round 1	A halo/text-inspector-fixes; B halo/text-model-fixes
