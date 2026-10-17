@@ -56,3 +56,4 @@ utc	stage	event	ref	note
 2026-10-17T06:17Z	3	stage-start	wave 5	line lead act-1a14881ad5e-axoa resumed on dev fe0f5f17; HM-3a and HM-3b start together, feature-done unchained into HM-3z
 2026-10-17T12:13Z	3	pr-merged	#2007	HM-3b merged as 3a9a784
 2026-10-17T12:13Z	3	stage-start	wave 5	line lead act-1a149c6a2a3-yna2 resumed on dev 04242316; HM-3a never opened, rebuilding it
+2026-10-17T12:17Z	3	agent-start	HM-3a	builder on lead/home-HM-3a from 04242316
