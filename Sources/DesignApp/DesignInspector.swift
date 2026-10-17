@@ -3,7 +3,7 @@
 // layer shows its header (name, then kind unless the name says it, then size),
 // then Align (DesignAlignBar), then Layer (Hidden and Locked checkboxes), Frame (X, Y, W and H as scrub
 // fields) and Fill (the color well; a text layer's is its text color, a group
-// has none), then for a text layer its Text section (DesignInspectorText). A
+// has none), then Text (DesignInspectorText, disabled on a layer that isn't text). A
 // locked layer, or one inside a locked group, can't be edited, so Frame and
 // Fill are disabled and a line says why. With only a page selected it shows
 // DesignInspectorPage. With several layers selected (D0-5c) it shows "<n> Layers",
@@ -31,7 +31,8 @@ struct DesignInspector: View {
                     DesignNodeProperties(
                         node: node, lockHelp: model.lockHelp(node.id), alignHelp: model.alignHelps, perform: perform
                     ).id(node.id)
-                    if node.kind == .text { DesignInspectorText(model: model, perform: perform).id(node.id) }
+                    // Every layer shows the Text rows; on one that isn't text they are disabled and say why.
+                    DesignInspectorText(model: model, perform: perform).id(node.id)
                 } else if let page = model.selectedPage {
                     DesignPageProperties(page: page).id(page.id)
                 }

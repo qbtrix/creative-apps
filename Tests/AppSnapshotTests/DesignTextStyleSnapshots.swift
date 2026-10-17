@@ -1,8 +1,9 @@
 // DesignTextStyleSnapshots.swift: Design's Text rows (style-rows, SR-t) on
 // the `cards` fixture on `.live`. Title (node-5) set to 32 pt, Bold, Center
 // writes design-inspector-text-style-{light,dark}.png through the whole
-// inspector; A (node-2) alone shows the rows disabled with "A isn't a text
-// layer."; Title and A together set Title only; the Size field's Return
+// inspector; A (node-2) alone shows the rows after its Fill, disabled with
+// "A isn't a text layer." (-text-style-a-{light,dark}.png); Title and A
+// together read Title's style and set Title only; the Size field's Return
 // commits once, as one "Change Text Style" step, and a drag commits only at
 // its end. The intents the view sends are applied as DesignWindow applies
 // them. The inventory stands in for the tooltips. macOS only.
@@ -88,15 +89,25 @@ private let textIDs = [
         let model = cards(["node-2"])
         let help = "A isn't a text layer."
         #expect(model.styleHelp(.textStyle) == help)
-        let controls = try textControls(DesignInspectorText(model: model, perform: { _ in }))
+        // Through the whole inspector, as J11 finds them, after A's Fill.
+        let controls = try textControls(TextPanel(model: model))
         #expect(controls == textIDs.map { ControlEntry(id: $0, enabled: false, reason: help) })
+        for scheme in [ColorScheme.light, .dark] {
+            try snapshot(
+                TextPanel(model: model),
+                name: "design-inspector-text-style-a-\(scheme == .dark ? "dark" : "light")", scheme: scheme)
+        }
     }
 
     @Test func titleAndASetTitleOnly() throws {
         let recorder = Recorder(cards(["node-5", "node-2"]))
+        recorder.view.sizeChanged(32, in: TextSizeScrub())
+        // A has no text, so the rows read Title's style, not "Mixed".
+        #expect(recorder.view.style?.size == 32)
         let before = node(recorder.model, "node-2")?.textStyle
         recorder.view.commit { $0.weight = 700 }
-        #expect(node(recorder.model, "node-5")?.textStyle.weight == 700)
+        #expect(node(recorder.model, "node-5")?.textStyle == DesignTextStyle(
+            family: "System", size: 32, weight: 700, alignment: .leading))
         #expect(node(recorder.model, "node-2")?.textStyle == before)
         #expect(recorder.model.undoActionName == "Undo Change Text Style")
     }

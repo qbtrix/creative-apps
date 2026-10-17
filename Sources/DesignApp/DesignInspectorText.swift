@@ -1,8 +1,8 @@
 // DesignInspectorText.swift: the Text section of Design's inspector, shown
-// after Fill when a text layer is selected (style-rows, SR-t). Family is a
+// after Fill for every selected layer (style-rows, SR-t). Family is a
 // picker over the system's font families, Size a scrub field (1...1000 pt),
-// Weight and Alignment chips. Every row reads the style the selected layers
-// share (`sharedValue(\.textStyle)`), or "Mixed" when they differ, and each
+// Weight and Alignment chips. Every row reads the style the selected text
+// layers share (`sharedTextStyle`), or "Mixed" when they differ, and each
 // change is one `.setStyle(.textStyle(...))`, one "Change Text Style" step
 // that sets only the text layers. Size commits on Return, on focus loss, on
 // an arrow key and at the end of a drag, never per drag sample (rule 1;
@@ -40,8 +40,11 @@ struct DesignInspectorText: View {
     /// "System" first, then the families installed on this Mac.
     private static let families: [String] = ["System"] + NSFontManager.shared.availableFontFamilies
 
-    /// The style every selected layer shares, or nil ("Mixed").
-    var style: DesignTextStyle? { model.sharedValue(\.textStyle) }
+    /// The style every selected text layer shares, or nil ("Mixed") when they differ. With no text
+    /// layer selected the rows show the default style, disabled with the reason.
+    var style: DesignTextStyle? {
+        model.selectedNodes.contains { $0.kind == .text } ? model.sharedTextStyle : .default
+    }
 
     /// Why the rows can't edit the selection, or nil when they can.
     var help: String? { model.styleHelp(.textStyle) }
