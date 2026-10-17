@@ -4,7 +4,7 @@ Issue: #1512 · Packet: docs/blueprints/suiteui/features/canvas-marks.md
 Run: act-1a146cb0013-zu3h · Session: (this session) · Started: 2026-10-16T22:48Z
 Stage: 2 plan
 Base: 1f55a91db97af4921e3e46c7d66e3dcf91401097
-Next: wave 1 (builders, contract rule 18 applies). Waiting on the supervisor's go-ahead to open the wave-1 PRs.
+Next: wave 1 blocked. Needs a Swift toolchain (macOS) and a working GitHub connection to open PRs and comment. See Open.
 
 ## Slices
 Not a v3 packet (no `## Slices` table). v2 loop, contract rule 18 applies.
@@ -41,6 +41,8 @@ Not a v3 packet (no `## Slices` table). v2 loop, contract rule 18 applies.
 - Status channel: RECORD.md and timeline.tsv pushed to lead/canvas-marks at each stage, as the user asked. No PRs opened yet.
 
 ## Open
+- needs-human: no Swift toolchain in the cloud container (scripts/ci --changed fails at swift build), so Fast-Check cannot be proven and SuiteUI cannot compile here.
+- needs-human: gh token is invalid and the GitHub MCP server is disconnected, so no PR or issue comment can be posted from this session.
 - Waiting on the supervisor: open the wave-1 PRs (builders, fast-lane label).
 - Golden baselines (the last CM/LL/IC baseline tasks) need actuals from a dev CI run. They can't be done in one session.
 - No macOS here: SwiftUI tasks are checked by the lane's build-only run and dev CI only.
