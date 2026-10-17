@@ -55,3 +55,4 @@ utc	stage	event	ref	note
 19:01Z	4	anatomy	39056662077	round 1 started; macOS (halo) done 18:50Z, snapshots+build green, ui-test red
 2026-10-17T19:08Z	4	anatomy-r1	39056662077	#2261 filed; #2262 suiteui
 2026-10-17T19:08Z	5	fix-r1	#2261	fixer spawned
+2026-10-17T19:16Z	5	fix-r1-pr	#2271	321217e6; per-option accessibilityIdentifier (RenderingMenu pattern); macOS audit is the proof
