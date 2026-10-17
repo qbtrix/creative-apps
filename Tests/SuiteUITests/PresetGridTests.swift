@@ -1,5 +1,7 @@
 // PresetGridTests.swift: how arrow keys move focus in a PresetGrid, and that
-// a toggle chip reports On and Off. macOS only.
+// a toggle chip reports On and Off, and that each option's identifier lands
+// on its own button (#1148). macOS only.
+import AppKit
 import SuiteUI
 import SwiftUI
 import Testing
@@ -22,4 +24,25 @@ import Testing
 @Test func aToggleChipReportsOnAndOff() {
     #expect(ChipItem(id: 1, title: "Onion Skin", isOn: true).stateText == "On")
     #expect(ChipItem(id: 1, title: "Onion Skin", isOn: false).stateText == "Off")
+}
+
+/// Each identified option's button carries its own id; one without stays unidentified (#1148: an id on the grid
+/// reached no button, so journeys could only find presets by title).
+@MainActor @Test func eachOptionsIdentifierLandsOnItsOwnButton() {
+    let app = NSApplication.shared
+    for attribute in ["AXManualAccessibility", "AXEnhancedUserInterface"] {
+        app.accessibilitySetValue(true, forAttribute: NSAccessibility.Attribute(rawValue: attribute))
+    }
+    let options = [
+        InspectorOption(id: 1, title: "Square", identifier: "p.Square"),
+        InspectorOption(id: 2, title: "Wide", identifier: "p.Wide"),
+        InspectorOption(id: 3, title: "Custom"),
+    ]
+    let window = NSWindow(
+        contentRect: CGRect(x: 0, y: 0, width: 300, height: 100), styleMask: [.titled], backing: .buffered, defer: false)
+    window.contentView = NSHostingView(rootView: PresetGrid(options: options, selected: 1, columns: 3) { _ in }.padding(20))
+    window.orderFrontRegardless()
+    defer { window.orderOut(nil) }
+    RunLoop.main.run(until: Date().addingTimeInterval(0.3))
+    #expect(axButtons(in: window).map(\.id) == ["p.Square", "p.Wide", ""])
 }

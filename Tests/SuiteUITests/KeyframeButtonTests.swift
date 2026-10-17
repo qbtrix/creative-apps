@@ -84,7 +84,7 @@ private struct KeyframeButtonHost: View {
 }
 
 /// Every button under `element` in the accessibility tree, in tree order.
-@MainActor private func axButtons(in element: Any) -> [(id: String, frame: CGRect)] {
+@MainActor func axButtons(in element: Any) -> [(id: String, frame: CGRect)] {
     let node = element as AnyObject
     var found = [(id: String, frame: CGRect)]()
     if node.accessibilityRole?() == .button {

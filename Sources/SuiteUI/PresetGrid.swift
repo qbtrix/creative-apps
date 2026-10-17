@@ -1,6 +1,6 @@
 // PresetGrid.swift: a grid of preset buttons where one may be on (two equal
 // columns by default, 4 pt apart), drawn as Flare's easing presets
-// (SuiteChipStyle).
+// (SuiteChipStyle). An option's `identifier` lands on its own button.
 // `selected` may be nil (no preset matches, as after a handle drag). Arrow
 // keys move focus within the grid (`neighbor`), Space presses the focused
 // preset. Owns presentation state only: which preset has focus.
@@ -47,6 +47,7 @@ public struct PresetGrid<ID: Hashable & Sendable>: View {
                     .buttonStyle(SuiteChipStyle(kind: .preset, isOn: option.id == selected))
                     .focused($focused, equals: option.id)
                     .accessibilityAddTraits(option.id == selected ? .isSelected : [])
+                    .accessibilityIdentifier(option.identifier ?? "")
             }
         }
         .onKeyPress(keys: [.leftArrow, .rightArrow, .upArrow, .downArrow]) { press in
