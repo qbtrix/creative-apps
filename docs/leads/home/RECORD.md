@@ -1,10 +1,10 @@
 # home lead record
 
 Issue: #1503 · Packet: docs/blueprints/suite/features/home.md
-Run: act-1a14881ad5e-axoa (line lead for suite-contracts, bundle, home; was act-1a145e74c4e-1rah) · Session: session_01WeQwKxFmpontDYTdMSub85 (claude/suite-feature-lead-run-iqt0yq) · Started: 2026-10-16T18:11Z · Resumed: 2026-10-17T06:17Z
+Run: act-1a149c6a2a3-yna2 (line lead for suite-contracts, bundle, home; was act-1a14881ad5e-axoa, act-1a145e74c4e-1rah) · Session: session_01WeQwKxFmpontDYTdMSub85 (claude/suite-feature-lead-run-iqt0yq) · Started: 2026-10-16T18:11Z · Resumed: 2026-10-17T06:17Z, 2026-10-17T12:13Z
 Stage: 3 wave 5 (HM-3a, HM-3b journeys)
-Base: fe0f5f176a95336c77a1d0cff7162e584db1d24c
-Next: wait for the lane to merge the wave-5 PRs (HM-3a SJ0+SJ1, HM-3b layout+SJ19); then HM-3z (home.wave.json built, feature-done) once a run shows them, and Belt-Contact-Sheet on #1503
+Base: 042423165693f2f1d65d2ece90eb0d5bcb910554
+Next: HM-3a (SJ0, SJ1 journeys) has no PR yet: build it on dev 04242316; then HM-3z (home.wave.json built, feature-done) and Belt-Contact-Sheet on #1503
 
 Loop: v2 (the packet has no Slices table), with the findings queue and the 2-round cap (started after #1302 merged).
 Depends on: none (issue line). Packet waits: suite-contracts (all tasks merged), bundle BU-3 #814 and BU-4 #818 (open, supervisor merges; HM-0 waits), #778/#775 (`.suiteControl`, `.suiteProbes` on dev), A-DE-0 #836 (open, Design line; HM-3a waits).
@@ -12,7 +12,7 @@ Depends on: none (issue line). Packet waits: suite-contracts (all tasks merged),
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
 |---|---|---|---|---|---|---|
-| HM-1a | 1 | `HomeBuilder` (locale ages) and the live home slot; QB-SM2 (#842) | Sources/SuiteModel/Home/HomeBuilder.swift, Sources/SuiteShell/Live/HomeSlot.swift, Tests/SuiteModelTests/HomeBuilderTests.swift, Tests/SuiteModelTests/Budget+Home.swift | HomeBuilderTests, Budget+Home | | building |
+| HM-1a | 1 | `HomeBuilder` (locale ages) and the live home slot; QB-SM2 (#842) | Sources/SuiteModel/Home/HomeBuilder.swift, Sources/SuiteShell/Live/HomeSlot.swift, Tests/SuiteModelTests/HomeBuilderTests.swift, Tests/SuiteModelTests/Budget+Home.swift | HomeBuilderTests, Budget+Home | #1534 | merged |
 | HM-1b | 1 | `HomeModel`, `SuiteCreating`, live creating slot (#843) | Sources/SuiteModel/Home/{HomeModel,SuiteCreating}.swift, Sources/SuiteShell/Live/CreatingSlot.swift, Tests/SuiteModelTests/HomeModelTests.swift | HomeModelTests | #1542 | merged |
 | HM-0 | 4 | AfterGlow journey harness, smoke test, `afterglow` audit key (#841) | UITests/AfterGlowJourneyTests+{Harness,Smoke}.swift, UITests/audit-baseline.json | AfterGlowSmokeJourneys | #1967 | merged 04:03Z (bd11faf7) |
 | HM-2a | 2 | Home window, services wiring, updater stub, snapshots (#844) | Sources/AfterGlowApp/{HomeWindow,HomeSidebar,HomeGrid,HomeRunningStrip,LauncherRouter+Services,UpdateService}.swift, Tests/AppSnapshotTests/AfterGlowHomeSnapshots.swift, Sources/SuiteShell/Live/{HomeSlot,CreatingSlot}.swift, Tests/AppSnapshotTests/SuiteLiveServicesTests.swift | AfterGlowHomeSnapshots, SuiteLiveServicesTests | #1584 | merged |
@@ -20,7 +20,7 @@ Depends on: none (issue line). Packet waits: suite-contracts (all tasks merged),
 | HM-2c | 3 | Launcher File, Edit, View menus over `HomeMenu` (#846) | Sources/AfterGlowApp/LauncherCommands+Home.swift, Sources/SuiteModel/Home/HomeMenu.swift, Tests/SuiteModelTests/{HomeMenuTests,LauncherMenuStubTests}.swift | HomeMenuTests | #1616 | merged |
 | HM-4 | 4 | Home golden baselines (#870) | Tests/AppSnapshotTests/Golden/afterglow/ | dev run compare | #1953 #1954 #1956 #1959 #1960 | merged |
 | HM-3a | 5 | Journeys SJ0, SJ1 steps 1, 2, 5, 6 (#847); the assertions that need the Design fixture files skip with `XCTSkip("waits on #836")` until `UITests/Fixtures/suite/Cards.design` exists | UITests/AfterGlowJourneyTests.swift, UITests/AfterGlowJourneyTests+Home.swift | SJ0, SJ1 | | building |
-| HM-3b | 5 | testHomeAtEveryWidth, SJ19 (#848) | UITests/AfterGlowJourneyTests+{Layout,EveryControl}.swift | those journeys | | building |
+| HM-3b | 5 | testHomeAtEveryWidth, SJ19 (#848) | UITests/AfterGlowJourneyTests+{Layout,EveryControl}.swift | those journeys | #2007 | merged 07:15Z (3a9a784) |
 | HM-3z | 6 | home.wave.json status built + feature issue; `feature-done` | docs/blueprints/suite/features/home.wave.json | scripts/ci | | waits HM-3a, HM-3b |
 | HM-3c | – | Perf journeys SP3, SP4 (#849; follow-up, outside done check) | UITests/AfterGlowJourneyTests+{PerfHome,BudgetsHome}.swift, HomeGrid.swift | SP3, SP4 | | waits #782 |
 
