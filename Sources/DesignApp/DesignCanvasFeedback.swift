@@ -107,10 +107,10 @@ enum DesignCanvasPointer: Equatable {
 
     var style: PointerStyle {
         switch self {
-        case .tool(let tool): tool.pointer
-        case .resize(let position): .frameResize(position: position)
-        case .move: .grabIdle
-        case .text: .horizontalText
+        case .tool(let tool): return tool.pointer
+        case .resize(let position): return .frameResize(position: position)
+        case .move: return .grabIdle
+        case .text: return .horizontalText
         case .copy:
             // The system's drag-copy pointer; its hot spot as a unit point of its image.
             let cursor = NSCursor.dragCopy
