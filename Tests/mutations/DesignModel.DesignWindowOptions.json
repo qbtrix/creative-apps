@@ -5,5 +5,8 @@
   {"label": "fixture keeps the file location", "file": "Sources/DesignModel/DesignWindowOptions.swift", "find": "        documentURL = nil\n        return true", "replace": "        return true", "tests": "DesignWindowOptionsTests.swift"},
   {"label": "fixture keeps the history", "file": "Sources/DesignModel/DesignWindowOptions.swift", "find": "        load(fixture.pages)\n", "replace": "        pages = fixture.pages\n", "tests": "DesignWindowOptionsTests.swift"},
   {"label": "one layer reads as plural", "file": "Sources/DesignModel/DesignWindowOptions.swift", "find": "case 1: \"1 Layer\"", "replace": "case 1: \"1 Layers\"", "tests": "DesignWindowOptionsTests.swift"},
-  {"label": "no selection shows a count", "file": "Sources/DesignModel/DesignWindowOptions.swift", "find": "case 0: nil", "replace": "case 0: \"0 Layers\"", "tests": "DesignWindowOptionsTests.swift"}
+  {"label": "no selection shows a count", "file": "Sources/DesignModel/DesignWindowOptions.swift", "find": "case 0: nil", "replace": "case 0: \"0 Layers\"", "tests": "DesignWindowOptionsTests.swift"},
+  {"label": "size accepts an infinite height", "file": "Sources/DesignModel/DesignWindowOptions.swift", "find": "width.isFinite, height.isFinite,", "replace": "width.isFinite,", "tests": "DesignWindowOptionsTests.swift"},
+  {"label": "size skips empty parts", "file": "Sources/DesignModel/DesignWindowOptions.swift", "find": "omittingEmptySubsequences: false", "replace": "omittingEmptySubsequences: true", "tests": "DesignWindowOptionsTests.swift"},
+  {"label": "size chip drops the Page label", "file": "Sources/DesignModel/DesignWindowOptions.swift", "find": "selectedPage.map { \"Page \\($0.sizeText)\" }", "replace": "selectedPage.map { $0.sizeText }", "tests": "DesignWindowOptionsTests.swift"}
 ]
