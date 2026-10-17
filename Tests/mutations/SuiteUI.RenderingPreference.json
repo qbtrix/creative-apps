@@ -1,0 +1,4 @@
+[
+  {"label":"an unknown raw value decodes as .cpu","file":"Sources/SuiteUI/RenderingPreference.swift","find":"return RenderingChoice(rawValue: raw)","replace":"return RenderingChoice(rawValue: raw) ?? .cpu","tests":"RenderingPreferenceTests"},
+  {"label":"set ignores a repeat choice","file":"Sources/SuiteUI/RenderingPreference.swift","find":"writes.append(choice); store.set(choice)","replace":"guard choice != store.choice else { return }; writes.append(choice); store.set(choice)","tests":"RenderingPreferenceTests"}
+]
