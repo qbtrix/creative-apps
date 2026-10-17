@@ -1,0 +1,3 @@
+utc	stage	event	ref	note
+2026-10-17T06:04Z	0	stage-start	#1934	setup: line lead for #1936 #1935 #1934; base origin/dev 4a86f5f; brief main fdaabbf verified as ancestor
+2026-10-17T06:10Z	0	stopped	#1934	blocked: every slice waits on editor-kernel:EK-undo (#1933 not started, no kernel types on dev)
