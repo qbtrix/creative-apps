@@ -15,7 +15,7 @@ No `## Slices` table: v2 packet, v2 loop applies.
 | IT-0 | 1 | FlareInspectorRead, FlarePaint, FlareTimelineEdit (Model, stubs), FlareWorkspace.swift + Tests | rule 18 stubs: every IT-1..IT-3 signature, fake value or NotBuilt; stored state cleared in load | #2100 | merged |
 | IT-9a | 1 | FlareStatusRead + Tests, PlaybackDriver(+Tests), ViewerStatusBar pills in FlareWindow, +Playback | StatusPills, measuredFPS, J10 | #2101 | merged |
 | IT-1 | 2 | FlareInspectorRead + Tests | inspectorSummary for real | #2128 | merged |
-| IT-2 | 2 | FlarePaint + Tests | paint readout and setters for real (no FlareWorkspace edit, IT-0 owns it) | #2130 | needs-rebase (StubsTests conflict), fixer |
+| IT-2 | 2 | FlarePaint + Tests | paint readout and setters for real (no FlareWorkspace edit, IT-0 owns it) | #2130 | open, lane (fixer merged dev, CI: PASS on 96de97a) |
 | IT-3 | 2 | FlareTimelineEdit + Tests | key select, retime, delete, insert/remove frames, labels for real | #2113 | merged |
 | IT-4 | 2 | FlareInspector, Transform/Fill/Scene/Timing sections, +Inspector | Properties tab on the stubs, J7 | #2129 | merged |
 | IT-5 | 3 | FlareInspectorFill, FlareFillSnapshots, +FillStroke | J8 | | building |
@@ -42,6 +42,8 @@ None.
 - Wave 2 contract check: IT-2 and IT-3 also update Tests/FlareModelTests/FlareStubsTests.swift (the IT-0 stub expectations they replace); accepted as their tests. IT-4 names its TRANSFORM section file FlareInspectorGeometry.swift instead of FlareInspectorTransform.swift because scripts/check-dup-logic flags app files named *Transform*; accepted, wave 3 tasks use the new name. IT-3's key selection lives in FlareTimelineEdit.swift as the thin selectedKeys set this record's rule-20 decision allows; adopt-kernel-selection (#1935) moves it.
 
 - Wave 3 starts while #2130 (IT-2) is still in the lane: IT-5 builds on the unchanged paint signatures; #63 closed, so IT-7 runs.
+
+- The GitHub MCP update_pull_request tool writes a PR body without the platform footer (gh api PATCH re-adds it); fixers and the lead use it to clear the footer from wave PR bodies.
 
 ## Open
 - #340 (TransportCapsule) open: IT-9b waits; becomes a gap if still open at wave 4.
