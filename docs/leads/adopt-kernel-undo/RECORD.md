@@ -46,4 +46,5 @@ retargets a fast-lane PR opened against `main` to `dev`).
 - Planned wave 1 once unblocked: AU-p1 and AU-h1 can start as soon as EK-undo merges; AU-d1, AU-l1 and AU-f1 after their line's packets. Wave 2: each app's delete task. This feature's AU-photo and AU-library gate adopt-kernel-layers:AL-photo and adopt-kernel-selection:AS-library, so they go first when the kernel lands.
 
 ## Open
+- 2026-10-17T06:38Z heartbeat: editor-kernel's lead (run act-1a1483c0771-g24c, `lead/editor-kernel`) started wave 1 on 2026-10-17T06:36Z: PR #1992 (EK-1, slice EK-a). EK-undo waits on EK-a, so it is at least two editor-kernel waves away; still blocked, nothing to start.
 - Blocked on #1933 editor-kernel: EK-undo (every slice).
