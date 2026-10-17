@@ -1,5 +1,11 @@
 # Feature packet: layers-files
 
+**Status:** built (2026-10-17), feature issue #1516. PRs: #2110 (LF-1),
+#2102 (LF-3), #2103 (LF-4), #2106 (LF-5) and LF-6's J26 extension. LF-1d
+and LF-2 are deferred to gap issues #2186 and #2187: they wait on SuiteUI
+#146 (the dimmed sidebar row) and #73 (context menus on sidebar rows), both
+still open.
+
 **Feature:** manage scenes and layers in the sidebar, start a document from
 a preset, and handle files without ever losing work or failing silently:
 the New Animation sheet, open progress and open errors, a failed save that

@@ -14,7 +14,9 @@
 // End moves the playhead off 0, then File > Open Recent lists Untitled.flare
 // and opening it lands at frame 0 with keys at 0 and 24 on the lane and the
 // title "Untitled", not edited. Lanes, scene points and the ruler are read as
-// FlareAnimateJourneys reads them. One shot per step, `flare-loop-<step>`.
+// FlareAnimateJourneys reads them. Then (LF-6) ⌘N, the sheet's Square and
+// Create make an empty 1080 × 1080 document, and Open Recent brings the saved
+// file back with its keys. One shot per step, `flare-loop-<step>`.
 import XCTest
 
 final class FlareLoopJourneys: XCTestCase {
@@ -110,6 +112,36 @@ final class FlareLoopJourneys: XCTestCase {
         expectKeys([0, 24], flare, "after reopening")
         expectSaved(flare)
         flare.shot("loop-8-reopened")
+
+        // 9. ⌘N, the sheet's Square preset and Create: a 1080 × 1080 document.
+        flare.press(character: "n", .command)
+        let sheet = flare.app.sheets.firstMatch
+        XCTAssert(sheet.waitForExistence(timeout: 10), "⌘N showed no sheet")
+        flare.click("Square", in: .sheet)
+        for side in ["flare.new.width", "flare.new.height"] {
+            let field = sheet.descendants(matching: .any)[side]
+            XCTAssert(waitFor { field.value as? String == "1080" }, "Square left \(side) at \(String(describing: field.value))")
+        }
+        flare.shot("loop-9-new-square")
+        flare.click("Create", in: .sheet)
+        XCTAssert(sheet.waitForNonExistence(timeout: 5), "Create left the sheet open")
+        let artboard = flare.element("suite.canvas.artboard")
+        XCTAssert(artboard.waitForExistence(timeout: 10), "Create showed no artboard (suite.canvas.artboard)")
+        let ratio = artboard.frame.width > 0 ? artboard.frame.height / artboard.frame.width : 0
+        XCTAssertEqual(ratio, 1, accuracy: 0.01, "the artboard isn't 1080 × 1080")
+        XCTAssert(waitFor { keys(Self.lane, flare).isEmpty }, "the new document still has \(Self.lane)")
+        flare.shot("loop-9-square")
+
+        // 10. File > Open Recent > Untitled.flare again: the saved keys at 0 and 24 are still there.
+        flare.app.menuBars.menuBarItems["File"].click()
+        XCTAssert(recent.waitForExistence(timeout: 5), "File has no Open Recent")
+        recent.hover()
+        XCTAssert(item.waitForExistence(timeout: 5), "File > Open Recent doesn't list Untitled.flare")
+        item.click()
+        XCTAssert(waitFor { keys(Self.lane, flare).contains(24) }, "the reopened lane reads \(keys(Self.lane, flare).sorted())")
+        expectKeys([0, 24], flare, "after reopening past the sheet")
+        expectSaved(flare)
+        flare.shot("loop-10-reopened")
     }
 
     /// The lane's keys are exactly `want`.
