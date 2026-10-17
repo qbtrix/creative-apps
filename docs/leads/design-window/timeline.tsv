@@ -54,3 +54,5 @@ utc	stage	event	ref	note
 2026-10-17T22:40Z	ci	full CI 39072812111 cancelled (superseded); 39074726717 pending on e3c5da79; scoped design 39073888864 on 2b08e8fd: macOS journeys failed, Findings step updated CI finding issues
 2026-10-17T23:03Z	merged	#2418 #2417 #2444 #2349 on dev 59c435a6
 2026-10-17T23:03Z	wave	w8 fix-batch launched: 2411 2406 2352 2302 2075 2455
+2026-10-17T23:13Z	pr	#2462 r-b1 fixes #2411 (journey on cards fixture)
+2026-10-17T23:13Z	wave	w8 r-b2 #2302 SuiteUI #2263; r-b3 #2455 fixed by #2444; deferred 2406 2352 2075
