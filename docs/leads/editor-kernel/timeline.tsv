@@ -7,3 +7,5 @@ utc	stage	event	ref	note
 2026-10-17T06:26Z	3	pr-opened	#1992	EK-1 SuiteKernel target, Fast-Check pass on 45c1453, supervisor merge requested on #1933
 2026-10-17T06:36Z	3	stage-start	wave 2	EK-2 EK-3 EK-29 stacked on lead-editor-kernel/EK-1
 2026-10-17T06:37Z	3	heartbeat	wave 2	Workflow wf_2a77d1fc-422 running 3 builders
+2026-10-17T06:52Z	3	stopped	wave 2	builders hit the session limit (resets 10:40Z); nothing pushed
+2026-10-17T10:46Z	3	stage-start	wave 2	relaunched EK-2 EK-3 EK-29 stacked on lead-editor-kernel/EK-1; #1992 still awaiting the supervisor
