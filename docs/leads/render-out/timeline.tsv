@@ -66,3 +66,4 @@ utc	stage	event	ref	note
 2026-10-17T21:02Z	-	blocked	#2303	dev-red: Linux DesignStyleBudgetTests/scrubStep (Design, bisected to #2268); full CI cannot go green until fixed; not Halo
 2026-10-17T21:09Z	5	rebased	#2348	head 3e0dd092; #2307 on dev already moved the note; body updated (no PNG change)
 2026-10-17T21:24Z	5	heartbeat	#2348	lane macOS build 39069788906 on 3e0dd092 running
+2026-10-17T21:46:47Z	fix-round-2	merged	#2348	fc53a29e; #2233 #2256 -> gap
