@@ -93,3 +93,4 @@ utc	stage	event	ref	note
 2026-10-17T15:18:39Z	heartbeat	#2048 eligible, awaiting lane batch
 2026-10-17T15:40:42Z	wave	wave 12 started
 2026-10-17T16:02:51Z	check	TL-d/TL-e round 2 started; 2 gaps
+2026-10-17T16:14:53Z	wave12 TL-21 PR #2172 open; fix-batch round2 running
