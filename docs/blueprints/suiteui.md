@@ -271,6 +271,8 @@ asserts it), and every relationship names ids that exist.
 | Editor shell | existing + planned | `EditorShell`, the top bar family, `SegmentedTabs`; planned: timeline slot, `.primary`, save status, capsule tabs, `ShellLayout` | `EditorShell.swift`, `EditorTopBar.swift`, `SegmentedTabs.swift`, `ShellLayout.swift` (planned) | hosts Tools, Canvas, Viewer chrome, Timeline; conforms to `ShellLayingOut` |
 | Tool palette | existing | `ToolbarAction`, `PaletteTool`, `ToolbarGroup` (floating, rail) | `ToolbarGroup.swift` | hosted by both shells; conforms to `ToolPicking` |
 | Canvas | existing | `CanvasSurface`, `CanvasViewport`, `Ruler`, `ZoomMath` | `CanvasSurface.swift`, `CanvasViewport.swift`, `Ruler.swift`, `ZoomMath.swift` | draws Canvas marks; reports to Probes; conforms to `CanvasNavigating` |
+| Canvas host | existing (canvas-host, #1596) | The AppKit canvas surface: `CanvasHostView` (an `NSView` with `CALayer` tile layers fed by `CanvasTileSet`, premultiplied sRGB, dirty-tile replace; an overlay `CAShapeLayer` that draws a live drag with no SwiftUI body per sample; mouse, scroll, magnify, key and tracking-area input sent to a `CanvasInputDelegate`; `CanvasHitMap` with a 4 pt slop, top mark first) and `CanvasHost`, its SwiftUI wrapper. `CanvasHostView+Metal` swaps the tiles for a `CAMetalLayer` (sRGB `colorspace`) handed to a `MetalPresenting` value under `RenderingChoice.gpu` with a device; CPU, Automatic (beta) or a nil device keep the tiles. `CanvasViewport+Host` gives `CanvasViewport` a `CanvasHost` as its content, same ids | `CanvasHostView.swift`, `CanvasHostView+Metal.swift`, `CanvasHost.swift`, `CanvasTileSet.swift`, `CanvasHitMap.swift`, `CanvasViewport+Host.swift` | hosted by Canvas; conforms to `CanvasHosting`; follows Rendering |
+| Rendering | existing (canvas-host, #1596) | The suite's **View > Rendering** submenu: `RenderingCommands` (`CommandGroup(after: .toolbar)`) holding `RenderingMenu`, an inline picker over Automatic, GPU (Metal) and CPU with a checkmark on the current one and a disabled status line under them ("Drawing on CPU", or the note "Drawing on CPU: Metal stopped"); `RenderingPullDown` shows the same menu on the gallery's `settings-rendering` page. `RenderingPreference` is the one suite-wide key, `suite.rendering`, in the suite's shared defaults domain: read live, kept across relaunch, and posted to the suite's other processes | `RenderingCommands.swift`, `RenderingPreference.swift` | read by Canvas host; added to a scene's commands |
 | Canvas marks | existing + planned | `SelectionOutline`, `CropShade`; planned: `SelectionHandles`, `PathMarks`, `MotionPathMarks`, `GhostLayer`, guide marks, `CanvasPointMark`, `CanvasGrid`, `HandleGeometry` | `CanvasMarks.swift`, `CanvasMarks+Vector.swift`, `CanvasMarks+Points.swift`, `HandleGeometry.swift` (last three planned) | drawn by Canvas; conforms to `HandleGeometryProviding` |
 | Inspector rows | existing | Header, section, rows, the color row, action, keyframe button | `InspectorHeader.swift`, `InspectorRows.swift`, `ColorWell.swift`, `InspectorAction.swift`, `KeyframeButton.swift` | uses Number entry and Presets; conforms to `HexColorEditing`, `KeyframeFacing` |
 | Number entry | existing | `ScrubField` and the bar slider, `ScrubValue`, `NumericInput`, `StudioScrubRow` | `ScrubField.swift`, `ScrubValue.swift`, `NumericInput.swift`, `StudioScrubRow.swift` | reports to Probes; conforms to `ValueScrubbing` |
@@ -619,6 +621,30 @@ journeys (SJ3's save status, SJ7, SJ8) and goldens prove them directly, and
 their inputs are already plain values (`ToolbarAction`, `InspectorFact`).
 Inventing a protocol for them would be a wrapper with one caller and no
 decision in it (`docs/engineering.md`, Reading cost).
+
+**Canvas host and rendering (canvas-host, #1596, built).** Added after this
+table was frozen, in `Contracts/CanvasHosting.swift`: unlike 5.3 it uses
+CoreGraphics types (`CGImage`, `CGPoint`, `CGSize`), so it never compiled
+under Q1's Linux rule. `CanvasContentProviding` (a `documentSize` and
+`tiles(dirtyOnly:)` as `CanvasTile`s, premultiplied sRGB) is what an app
+hands `CanvasHost`; `CanvasInputDelegate` (`drag`, `endDrag`, `hover`,
+`key`) is what the host calls; `RenderingPreferenceReading` (`choice`,
+`status`, `set`, `observe`) over `RenderingChoice` (`automatic`, `gpu`,
+`cpu`) and `RenderingStatus` is what the Rendering menu and the host read.
+Fakes: `FakeCanvasContent` (20 tiles over 4096 x 2160) and
+`FakeRenderingPreference` (in memory, `loseDevice()`). Live: `CanvasHostView`
+and `CanvasHost`, `CanvasTileSet`, `CanvasHitMap`, and `RenderingPreference`
+(one key, `suite.rendering`, in `UserDefaults(suiteName:)` for the suite's
+shared domain, a distributed notification to the other processes, one
+observer call per change). `MetalPresenting` (in `CanvasHostView+Metal.swift`,
+with `ClearingMetalPresenter` as its fake) is the seam where creative-core's
+display op will draw. Control ids: `suite.canvas`, `suite.canvas.overlay`,
+`suite.menu.rendering`, `suite.settings.rendering.automatic|gpu|cpu`,
+`suite.settings.rendering.status`. Journeys SJ27 (drag without bodies), SJ28
+(the menu switches the choice and keeps it across a relaunch) and SP11
+(`canvas-drag`). Follow-ups: the host following the preference outside
+tests (#2414), Automatic's status reading CPU (#2415) and SP11's probe
+series (#2416).
 
 ### 5.3 The code (`docs/blueprints/suiteui/contracts/Contracts.swift`)
 
@@ -1626,6 +1652,8 @@ needs at least 60 samples or the test fails as invalid.
 | QB-S8 | Chip, preset, tab, tool and transport press: press to the selected state drawn | p95 ≤ 1 frame late | placeholder 2 | SP9, series `press` |
 | QB-S9 | State fades (hover, on, disabled) | 0.14 s ± 1 refresh; 0 under Reduce Motion | report-only first, like every perf row; then 0.14 s ± 1 refresh and 0 | the `fade-start`/`fade-end` mark pairs in SJ15, with the switch off and on (QB-F5) |
 | QB-S10 | Timeline slot divider drag | p95 ≤ 2 | placeholder 3 | SP10, series `slot-drag` |
+| QB-S34 | Canvas drag on the AppKit canvas host (`CanvasHost`, CALayer tiles): 120 samples drawn on the overlay layer | ≤ 1 window body per drag (the mouse-up commit); sample-to-present p95 ≤ 8 ms | bodies gated (`RenderBudgetCanvasHostTests.dragRunsNoBodies`); p95 report-only | SJ27; SP11, series `canvas-drag` (reports delegate samples until #2416) |
+| QB-S35 | View > Rendering switch (Automatic, GPU (Metal), CPU) | ≤ 2 window bodies; the host repaints once | report-only (`switchRepaintsOnce` disabled until #2416) | SJ28 |
 
 **Rule budgets** (wall time, median and p95 of 100 runs; the debug gate is
 ten times the device target, as for Model budgets). Each budget lives in the
