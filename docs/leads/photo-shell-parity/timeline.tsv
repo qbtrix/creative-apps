@@ -43,3 +43,5 @@ utc	stage	event	ref	note
 2026-10-17T06:40Z	4	stage-start	round 2	relaunch act-1a148875943-9arx: #1716 merged, #1910 (window title with subtitle) is ours
 2026-10-17T06:55Z	4	ci-run	38993910840	journeys ran: 25 window-wait failures (#1910 siblings), testFixtureLaunch viewport measure, testShell1Empty switcher centring
 2026-10-17T07:05Z	4	fix-round	2	F-1910 (journey window lookup, viewport measure) and PS-7 (feature-done) started as worktree builders
+2026-10-17T13:50Z	4	stage-start	round 3	relaunch act-1a14a193a7a-rmz6: PS-7 #2006 + F-1910 #2008 merged, main = dev = d2c4fa2
+2026-10-17T13:50Z	4	ci-run	39032323316	Linux green; 10 Photo journeys red (was 27): inspector below the fold, opacity typing, 1 pt window height, switcher (SuiteUI)
