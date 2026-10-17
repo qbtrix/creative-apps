@@ -22,12 +22,13 @@ public enum HaloLayerKind: String, CaseIterable, Codable, Sendable {
         }
     }
 
-    /// The color a new layer of this kind starts with.
+    /// The color a new layer of this kind starts with. Text starts near-black
+    /// so new words read on the white artboard (#2176).
     public var defaultColor: HaloLayerColor {
         switch self {
         case .solid: HaloLayerColor(red: 0.85, green: 0.33, blue: 0.25)
         case .shape: HaloLayerColor(red: 0.25, green: 0.55, blue: 0.9)
-        case .text: HaloLayerColor(red: 1, green: 1, blue: 1)
+        case .text: HaloLayerColor(red: 0.1, green: 0.1, blue: 0.1)
         case .null: HaloLayerColor(red: 0.6, green: 0.6, blue: 0.6)
         }
     }

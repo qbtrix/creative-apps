@@ -120,8 +120,9 @@ extension HaloDocumentState {
     }
 
     /// The selected composition's and layer's indexes; `.noComposition` or
-    /// `.noLayerSelected` without them.
-    fileprivate func selectedLayerIndices() throws -> (composition: Int, layer: Int) {
+    /// `.noLayerSelected` without them. The one selection lookup every layer
+    /// edit uses (text and color included).
+    func selectedLayerIndices() throws -> (composition: Int, layer: Int) {
         let c = try selectedCompositionIndex()
         guard let l = compositions[c].layers.firstIndex(where: { $0.id == selectedLayerID }) else {
             throw HaloEditError.noLayerSelected

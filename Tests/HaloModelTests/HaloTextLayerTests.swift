@@ -199,6 +199,7 @@ func blankTextIsRefusedAndRecordsNothing(_ blank: String) throws {
     let list = project.services.drawing.drawList(comp, at: 0)
     let frame = try LiveFrameRendering().render(list, width: 1920, height: 1080, text: FakeTextRasterizer())
     let inside = try frame.pixels.pixel(x: 960, y: 540)
-    #expect(inside.r == 1 && inside.g == 1 && inside.b == 1 && inside.a == 1)
+    let ink = try #require(project.selectedLayerColor)  // FakeTextRasterizer fills with the raw components
+    #expect(inside == RGBA(r: Float(ink.red), g: Float(ink.green), b: Float(ink.blue), a: 1))
     #expect(try frame.pixels.pixel(x: 810, y: 540).a == 0)
 }

@@ -47,12 +47,7 @@ extension HaloProject {
         guard let clamped = color.clampedToUnit else { return }
         let key = selectedLayerID.map { "\($0).color" }
         edit("Change Color", control: Self.layerColorControl, coalesceKey: key) { doc in
-            guard let c = doc.compositions.firstIndex(where: { $0.id == doc.selectedCompositionID }) else {
-                throw HaloEditError.noComposition
-            }
-            guard let l = doc.compositions[c].layers.firstIndex(where: { $0.id == doc.selectedLayerID }) else {
-                throw HaloEditError.noLayerSelected
-            }
+            let (c, l) = try doc.selectedLayerIndices()
             guard doc.compositions[c].layers[l].kind != .null else { return }
             doc.compositions[c].layers[l].color = clamped
         }
