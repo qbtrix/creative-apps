@@ -510,6 +510,25 @@ audit_decide "decide: #292-style, new check baselines pass, the script doesn't" 
 audit_decide "decide: the same without the script is eligible" "eligible|150|2|4 checks green, macOS build $BUILD_URL" \
   "$(printf '%s\n' "$AUDIT_BASELINE" "$AD/AuditCore.swift" "$AD/Checks/Focus.swift")"
 
+# Canonical first (lead.md rule 20): decide's 9th argument lists the PR's
+# added files; an added concept file needs an Allow-Dup line for its concept.
+dup_decide() {  # dup_decide <name> <want prefix> <body> <added files>
+  local got
+  jq --arg b "$3" '.body = $b' <<<"$BASE_PR" >"$tmp/pr.json"
+  printf '%s\n' "$4" >"$tmp/files.txt"; printf '%s\n' "$4" >"$tmp/added.txt"
+  got=$(decide "$tmp/pr.json" "$tmp/files.txt" "$here/checks-green.json" "" "" "" "" "$tmp/gbuild.json" "$tmp/added.txt" 2>/dev/null)
+  if [[ "$got" == "$2"* ]]; then echo "ok   $1 -> $got"; else echo "FAIL $1: want '$2*', got '$got'"; fail=1; fi
+}
+dup_decide "canonical: a new app-local undo stack is not eligible" \
+  "not-eligible|$DUP_REASON: Sources/HaloModel/HaloUndoStack.swift (Undo)" "Closes #1" 'Sources/HaloModel/HaloUndoStack.swift'
+dup_decide "canonical: Allow-Dup with a reason lets it through" "eligible|150|2|4 checks green" \
+  $'Closes #1\nAllow-Dup: Undo the kernel lands in #2000' 'Sources/HaloModel/HaloUndoStack.swift'
+dup_decide "canonical: an adapter onto the kernel is eligible" "eligible|150|2|4 checks green" "Closes #1" 'Sources/HaloModel/HaloHistory+Kernel.swift'
+dup_decide "canonical: SuiteModel is the home, so it is eligible" "eligible|150|2|4 checks green" "Closes #1" 'Sources/SuiteModel/History/UndoStack.swift'
+dup_decide "canonical: Snapshot is not Snap" "eligible|150|2|4 checks green" "Closes #1" 'Sources/PhotoApp/PhotoSnapshotGrid.swift'
+HERE="$tmp/no-scripts" dup_decide "canonical: a lane that can't run the check waits" \
+  "pending|scripts/check-dup-logic could not run" "Closes #1" 'Sources/PhotoModel/PhotoDocument.swift'
+
 # A whole sweep against a stub `gh` that answers from per-PR fixtures and logs
 # every write: #4 and #7 are eligible, #5 is based on main, #6 conflicts.
 # sweep <PRs labelled feature-done> runs main() and leaves the writes in $sw/calls.
@@ -844,4 +863,20 @@ expect "refs: an unreadable label gets one comment, and its issue isn't closed" 
 expect "refs: one label lookup per issue in the sweep" "$(grep -c '^labels 12$' "$sw/lookups"),$(grep -c '^labels 13$' "$sw/lookups")" "1,1"
 expect "refs: another PR keeps its keyword, needs no lookup, and gets its issue closed" \
   "$(grep -c '^Closes #15$' "$sw/41.squash"),$(grep -c '^labels 15$' "$sw/lookups"),$(grep -c '^issue close 15 ' "$sw/calls")" "1,0,1"
+
+# Canonical first through a sweep: evaluate turns the files API's statuses into
+# added.txt. #60 adds HaloKeyframeEasing.swift, #61 renames a file to
+# PhotoCropper.swift with an Allow-Dup line, #62 only modifies a grandfathered
+# copy. Each head already compiled on macOS.
+rm -rf "$sw"; mkdir -p "$sw"; : >"$sw/calls"
+pr_at 60 h60 '[{"filename": "Sources/HaloModel/HaloKeyframeEasing.swift", "status": "added"}]'
+pr_at 61 h61 '[{"filename": "Sources/PhotoModel/PhotoCropper.swift", "previous_filename": "Sources/PhotoModel/PhotoTrim.swift", "status": "renamed"}]'
+jq '.body = "Closes #1\nAllow-Dup: Crop moves to the kernel in #2001\n\nFast-Check: pass\nHead: h61"' "$sw/61.json" >"$sw/x" && mv "$sw/x" "$sw/61.json"
+pr_at 62 h62 '[{"filename": "Sources/PhotoModel/PhotoHistory.swift", "status": "modified"}]'
+for n in 60 61 62; do jq -c --arg h "h$n" '[.headSha = $h]' <<<"$GREEN_BUILD" >"$sw/runs.h$n.json"; done
+lane_sweep
+expect "canonical: merges the allowed rename and the edit, not the new copy" \
+  "$(grep -oE '^pr merge [0-9]+' "$sw/calls" | paste -sd, -)" "pr merge 61,pr merge 62"
+expect "canonical: one comment naming the new copy" \
+  "$(grep -c '^pr comment 60 .*adds app-local logic for a canonical concept.*Sources/HaloModel/HaloKeyframeEasing.swift (Easing)' "$sw/calls")" 1
 exit "$fail"
