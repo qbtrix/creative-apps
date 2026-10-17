@@ -11,6 +11,14 @@
 // label ("f / 48"). The two step buttons share one intent, so they carry
 // `flare.timeline.step.back` and `.forward`. One shot per step,
 // `flare-playback-<step>`.
+//
+// J10 in full (inspector-timeline IT-9), `testPlayLoopAndStep` on `-FlareSample
+// bounce` (live): scrub to 30, click Play; after 1 s Play reads Playing and the
+// actual-fps pill (`flare.status.actualFPS`) shows beside the fps pill. Space
+// pauses (its own shortcut step): f ≠ 30 holds. Next Frame twice gives
+// (f + 2) mod 48. Loop off, Go to End, Previous Frame (46), Play: playback
+// stops on 47 and Play no longer reads selected. Shots `flare-j10-<step>`.
+// The TransportCapsule half of IT-9 waits on SuiteUI #340.
 import XCTest
 
 final class FlarePlaybackJourneys: XCTestCase {
@@ -66,6 +74,66 @@ final class FlarePlaybackJourneys: XCTestCase {
         flare.element("flare.timeline.goToStart").click()
         XCTAssert(waitFor { frame(flare) == 0 }, "Go to Start gave \(String(describing: frame(flare)))")
         flare.shot("playback-5-go-to-start")
+    }
+
+    /// J10: play with the actual-fps pill, pause with Space, step, then play to the end with Loop off.
+    @MainActor func testPlayLoopAndStep() {
+        let flare = Journey("Flare", self, arguments: ["-FlareSample", "bounce"])
+        XCTAssert(flare.app.windows.firstMatch.waitForExistence(timeout: 30), "no window opened")
+        let play = flare.element("flare.timeline.togglePlay")
+        XCTAssert(play.waitForExistence(timeout: 10), "no Play button (flare.timeline.togglePlay)")
+        XCTAssert(flare.element("flare.status.fps").waitForExistence(timeout: 5), "no fps pill (flare.status.fps)")
+        XCTAssertFalse(flare.element("flare.status.actualFPS").exists, "the actual-fps pill shows while paused")
+        scrub(flare, to: 30)
+        flare.shot("j10-0-frame-30")
+
+        play.click()
+        Thread.sleep(forTimeInterval: 1)
+        XCTAssert(waitFor { frame(flare) != 30 }, "the frame stayed 30 after Play")
+        XCTAssert(waitFor { isPlaying(play) }, "Play doesn't read Playing while playing")
+        XCTAssert(flare.element("flare.status.actualFPS").waitForExistence(timeout: 5), "no actual-fps pill while playing")
+        flare.shot("j10-1-playing")
+
+        flare.app.typeKey(" ", modifierFlags: [])
+        XCTAssert(waitFor { !isPlaying(play) }, "Space didn't pause")
+        let paused = frame(flare) ?? -1
+        Thread.sleep(forTimeInterval: 0.5)
+        XCTAssertEqual(frame(flare), paused, "the playhead moved after the pause")
+        XCTAssertNotEqual(paused, 30, "the pause landed back on 30")
+        flare.shot("j10-2-paused")
+
+        let forward = flare.element("flare.timeline.step.forward")
+        forward.click()
+        forward.click()
+        let stepped = (paused + 2) % Self.frames
+        XCTAssert(waitFor { frame(flare) == stepped }, "Next Frame twice from \(paused) gave \(String(describing: frame(flare)))")
+        flare.shot("j10-3-stepped")
+
+        flare.element("flare.timeline.setLoops").click()
+        flare.element("flare.timeline.goToEnd").click()
+        XCTAssert(waitFor { frame(flare) == Self.frames - 1 }, "Go to End gave \(String(describing: frame(flare)))")
+        flare.element("flare.timeline.step.back").click()
+        XCTAssert(waitFor { frame(flare) == Self.frames - 2 }, "Previous Frame from the end gave \(String(describing: frame(flare)))")
+        play.click()
+        XCTAssert(waitFor { frame(flare) == Self.frames - 1 && !isPlaying(play) }, "Loop off didn't stop on the last frame")
+        Thread.sleep(forTimeInterval: 0.5)
+        XCTAssertEqual(frame(flare), Self.frames - 1, "the playhead left the last frame with Loop off")
+        flare.shot("j10-4-stopped-at-end")
+    }
+
+    /// Whether Play reads Playing; an empty value (#262) falls back to its selected state.
+    @MainActor private func isPlaying(_ play: XCUIElement) -> Bool {
+        let value = play.value as? String ?? ""
+        return value.isEmpty ? play.isSelected : value == "Playing"
+    }
+
+    /// Drags the playhead from frame 0 to `target` on the Frame Ruler.
+    @MainActor private func scrub(_ flare: Journey, to target: Int) {
+        let ruler = flare.app.descendants(matching: .any).matching(NSPredicate(format: "label == 'Frame Ruler'")).firstMatch
+        XCTAssert(ruler.waitForExistence(timeout: 5), "no Frame Ruler in the timeline")
+        let origin = ruler.coordinate(withNormalizedOffset: .zero)
+        origin.withOffset(x(frame: 0, ruler)).press(forDuration: 0.1, thenDragTo: origin.withOffset(x(frame: target, ruler)))
+        XCTAssert(waitFor { frame(flare) == target }, "the frame is \(String(describing: frame(flare))) after the scrub")
     }
 
     /// The frame the readout names ("30 / 48" is 30); nil when it names none.

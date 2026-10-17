@@ -6,6 +6,11 @@
 // flare-transport-paused.png and flare-transport-playing.png. The flat row
 // (#1858) shows Play on accentFill and the whole Loop toggle; two checks pin
 // the controls' kinds and that the row asks for room for every control.
+// The status pills (inspector-timeline IT-9) under the stage, from
+// `statusPills(measuredFPS:)` on `bounce` playing: at a measured 60 the
+// actual-fps pill reads 24 fps plain, at 18 it reads 18 fps in the warning
+// color; on `showcase` the "Text not shown (1)" warning. Writes
+// flare-status-playing.png, flare-status-dropping.png and flare-status-text.png.
 // macOS only.
 import AppKit
 import FlareModel
@@ -60,6 +65,37 @@ import Testing
         let least = 5 * SuiteSize.transportButton + SuiteSize.playButton
         #expect(taken.width >= least - 0.5, "the transport is \(taken.width) pt wide, under \(least)")
         #expect(taken.height >= SuiteSize.playButton - 0.5, "the transport is \(taken.height) pt tall")
+    }
+
+    @Test func statusPlaying() throws {
+        let pills = playing("bounce").statusPills(measuredFPS: 60)
+        #expect(pills.actualFPS == "24 fps" && !pills.isDropping)
+        try snapshot(status(pills), name: "flare-status-playing", scheme: .light)
+    }
+
+    @Test func statusDropping() throws {
+        let pills = playing("bounce").statusPills(measuredFPS: 18)
+        #expect(pills.actualFPS == "18 fps" && pills.isDropping)
+        try snapshot(status(pills), name: "flare-status-dropping", scheme: .dark)
+    }
+
+    @Test func statusHiddenText() throws {
+        let pills = FlareWorkspace(launch: FlareLaunch(arguments: ["-FlareFixture", "showcase"])).statusPills(measuredFPS: nil)
+        #expect(pills.textWarning == "Text not shown (1)" && pills.actualFPS == nil)
+        try snapshot(status(pills), name: "flare-status-text", scheme: .light)
+    }
+
+    private func playing(_ fixture: String) -> FlareWorkspace {
+        var model = FlareWorkspace(launch: FlareLaunch(arguments: ["-FlareFixture", fixture]))
+        model.setCurrentFrame(30)
+        model.play()
+        return model
+    }
+
+    private func status(_ pills: StatusPills) -> some View {
+        FlareTransport.StatusBar(zoom: 1, pills: pills)
+            .padding(SuiteSpacing.m)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
     private func transport(_ model: FlareWorkspace) -> some View {

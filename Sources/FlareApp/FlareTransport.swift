@@ -14,6 +14,10 @@
 // suffix and `suite.controls` holds no duplicate. It owns a PlaybackDriver:
 // started when `model.isPlaying` turns true, ticking the model through
 // `tick`, and stopped when it turns false or the transport leaves the screen.
+// After the controls, a ViewerStatusBar (inspector-timeline IT-9) shows the
+// zoom, then `model.statusPills` from the driver's `measuredFPS`: the scene's
+// size ("1080p"), aspect and rate, the rate actually shown while playing (a
+// warning pill while frames drop) and "Text not shown (n)" as a warning.
 // It only reads `model`; TransportCapsule (#340) replaces the row.
 import FlareModel
 import SuiteUI
@@ -87,6 +91,7 @@ struct FlareTransport: View {
                     .accessibilityLabel(item.title)
                     .suiteControl(id: item.id, enabled: item.help == nil, reason: item.help)
             }
+            StatusBar(zoom: zoom ?? 0, pills: model.statusPills(measuredFPS: driver?.measuredFPS))
         }
         .accessibilityElement(children: .contain)
         .onChange(of: model.isPlaying, initial: true) { _, playing in follow(playing: playing) }
@@ -121,6 +126,33 @@ struct FlareTransport: View {
             .buttonStyle(.borderless)
             // Its own ink, tertiary while disabled, so a disabled step can't read as live.
             .foregroundStyle(item.help == nil ? SuiteColor.textSecondary : SuiteColor.textTertiary)
+        }
+    }
+
+    /// The status pills (IT-9): the size in ViewerStatusBar's size slot, then aspect, rate, the rate shown while
+    /// playing and the hidden-text warning.
+    struct StatusBar: View {
+        let zoom: Double
+        let pills: StatusPills
+
+        /// The actual-rate pill's tooltip.
+        static let actualHelp = "The rate playback is showing now. Under the scene's rate, frames are being dropped."
+
+        var body: some View {
+            ViewerStatusBar(zoom: zoom, size: pills.size) {
+                Text(pills.aspect).accessibilityIdentifier("flare.status.aspect")
+                Text(pills.fps).accessibilityIdentifier("flare.status.fps")
+                if let actual = pills.actualFPS {
+                    Text(actual)
+                        .accessibilityIdentifier("flare.status.actualFPS")
+                        .accessibilityLabel("Showing \(actual)")
+                        .help(Self.actualHelp)
+                        .statusPill(pills.isDropping ? .warning : .plain)
+                }
+                if let warning = pills.textWarning {
+                    Text(warning).accessibilityIdentifier("flare.status.text").statusPill(.warning)
+                }
+            }
         }
     }
 
