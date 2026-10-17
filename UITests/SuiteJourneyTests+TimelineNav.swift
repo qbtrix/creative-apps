@@ -4,7 +4,7 @@
 // `-SuiteGallery timeline-long` with the toolbar it drags the "Zoom" bar
 // right (the ruler redraws, the bar's value grows), clicks Fit (the value is
 // back), clicks a lane and presses ⌘+ twice and ⌘− once (a step of its own;
-// the value follows), scrolls sideways with the wheel (the ruler redraws, the
+// the value follows; the host's own ⌘+ menu item must not take them, #2142), scrolls sideways with the wheel (the ruler redraws, the
 // names column stays put), clicks "Timecode" (log `unit timecode`, the pill
 // reads 00:05:00 style), clicks "Frames" back, clicks "Work Area" (log
 // `work 0…9999`), drags the work area's left handle 120 pt right and its
@@ -50,6 +50,7 @@ extension SuiteJourneyTests {
         gallery.app.typeKey("+", modifierFlags: .command)
         XCTAssert(navWait { self.navNumber(zoom) > fitZoom }, "⌘+ twice didn't zoom in")
         let twice = navNumber(zoom)
+        gallery.shot("timeline-nav-keys")
         gallery.app.typeKey("-", modifierFlags: .command)
         XCTAssert(navWait { self.navNumber(zoom) < twice && self.navNumber(zoom) > fitZoom }, "⌘− didn't step back one stop")
 
