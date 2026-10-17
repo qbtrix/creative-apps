@@ -106,7 +106,8 @@ import Testing
         #expect(log.calls == ["move 3", "move 2", "end"])
         #expect(drag.frame == 45)
         var still = try #require(begin(40, log: log))
-        #expect(still.release(atDX: 0, actions: log.actions), "a still press on a picked key is a click")
+        let stillClick = still.release(atDX: 0, actions: log.actions)
+        #expect(stillClick, "a still press on a picked key is a click")
     }
 
     @Test func aClickOnAPickedKeyPicksItOnRelease() throws {
