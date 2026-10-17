@@ -6,7 +6,9 @@
 # (`app-builds`, a tarball so the executables keep their +x bit), runs the UI
 # journeys with the app audit (`ui-screens`, contact-sheet.html inside) and
 # the perf tests, and writes its summary. It has continue-on-error, so a red
-# macOS job never turns the run red, opens `dev-red` or holds `promote`.
+# macOS job never turns the run red, opens `dev-red` or holds `promote`. A red
+# scripts/ci (a macOS-only test the Linux gate can't see) skips the bundles
+# and the size report but not the journeys: they still run and report.
 # Instead its `Findings` step files or updates one `finding` issue (labels
 # `finding`, `line:<app>`) per failing journey, audit violations included,
 # keyed by test name, so the owning lead sees it without anyone waiting.
@@ -278,17 +280,21 @@ jobs:
       # The human-like UI tests: scripts/ui-test launches the bundles above,
       # clicks through each app (UITests/) and exports a whole-window PNG per
       # step, uploaded as `ui-screens`. A failed journey fails this job (not
-      # the run), and the log goes to Findings.
+      # the run), and the log goes to Findings. These steps run after a red
+      # scripts/ci or scoped test step too (`!cancelled()`): the journeys
+      # report on their own, and ui-test builds its bundles itself.
       # XcodeGen is a pinned release, checked against its sha256 (Homebrew
       # can't pin a version). automationmodetool lets the test runner drive
       # the UI without a password prompt.
       - name: Install XcodeGen 2.46.0
+        if: ${{ !cancelled() }}
         run: |
           curl -fsSL -o "$RUNNER_TEMP/xcodegen.zip" https://github.com/yonaskolb/XcodeGen/releases/download/2.46.0/xcodegen.zip
           echo "4d9e34b62172d645eed6457cac13fc222569974098ef4ee9c3368bedf0196806  $RUNNER_TEMP/xcodegen.zip" | shasum -a 256 -c -
           unzip -q "$RUNNER_TEMP/xcodegen.zip" -d "$RUNNER_TEMP"
           echo "$RUNNER_TEMP/xcodegen/bin" >> "$GITHUB_PATH"
-      - run: sudo automationmodetool enable-automationmode-without-authentication
+      - if: ${{ !cancelled() }}
+        run: sudo automationmodetool enable-automationmode-without-authentication
       # A scoped run builds every journey bundle first, so a shared change
       # that breaks another app's journeys still fails it, then runs only
       # APP's bundle (suite has none yet). scripts/ui-test passes
@@ -296,13 +302,13 @@ jobs:
       # scoped run: it still skips quarantined journeys of scope `all`, and
       # runs the `full` ones, which only full runs skip.
       - name: Build every journey bundle
-        if: inputs.app
+        if: ${{ !cancelled() && inputs.app }}
         run: |
           xcodegen generate --quiet
           xcodebuild build-for-testing -project CreativeApps.xcodeproj -scheme Journeys -destination platform=macOS
       - name: Run scripts/ui-test  # the lane compares failed step names with dev's
         id: ui
-        if: ${{ !inputs.app || steps.scope.outputs.journeys != '' }}
+        if: ${{ !cancelled() && (!inputs.app || steps.scope.outputs.journeys != '') }}
         env:
           JOURNEYS: ${{ steps.scope.outputs.journeys }}
         run: |
@@ -315,9 +321,9 @@ jobs:
       # `Feature:`, `Slice:` and `Owner:` lines a triage added), so a test red
       # across runs keeps one routed issue. A test that ran and passed closes
       # its finding with "Passes on run <url>". scripts/ci-findings does the
-      # work. Not on hotfix PRs to main.
+      # work. Only on dev: never for a branch run or a hotfix PR to main.
       - name: Findings
-        if: always() && (steps.ui.outcome == 'failure' || steps.ui.outcome == 'success') && github.event_name != 'pull_request'
+        if: always() && (steps.ui.outcome == 'failure' || steps.ui.outcome == 'success') && github.ref_name == 'dev'
         env:
           GH_TOKEN: ${{ github.token }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
