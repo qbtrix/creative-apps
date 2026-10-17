@@ -84,6 +84,13 @@ public struct LibraryCatalog: Sendable, Equatable {
     public internal(set) var saveError: String?
     public internal(set) var showsTestValues = false  // -LibraryTestValues
     public internal(set) var cullError: String?  // a refused cull change
+    /// The filter bar's rules outside a smart collection (LibraryFilter.swift).
+    public internal(set) var filter = LibraryFilter.all
+    /// The collections you made and the smart ones, in sidebar order.
+    public internal(set) var userCollections: [UserCollection] = []
+    public internal(set) var collectionsRevision = 0  // bumps on every collections or filter change
+    public internal(set) var collectionsSavedRevision = 0
+    public internal(set) var collectionsNotice: String?  // the damaged-file notice
 
     public init(services: LibraryServices = .fake()) {
         self.services = services
@@ -96,6 +103,7 @@ public struct LibraryCatalog: Sendable, Equatable {
             && lhs.items == rhs.items && lhs.sort == rhs.sort && lhs.cellSize == rhs.cellSize
             && lhs.selection == rhs.selection && lhs.mode == rhs.mode && lhs.focusedItemID == rhs.focusedItemID
             && lhs.history == rhs.history && lhs.order == rhs.order
+            && lhs.filter == rhs.filter && lhs.userCollections == rhs.userCollections
         let work = lhs.importState == rhs.importState && lhs.importNotice == rhs.importNotice
             && lhs.thumbnails == rhs.thumbnails && lhs.thumbnailLongSide == rhs.thumbnailLongSide
             && lhs.pendingThumbnails == rhs.pendingThumbnails && lhs.autoAdvance == rhs.autoAdvance
@@ -106,6 +114,9 @@ public struct LibraryCatalog: Sendable, Equatable {
         let file = lhs.catalogState == rhs.catalogState && lhs.saveRevision == rhs.saveRevision
             && lhs.savedRevision == rhs.savedRevision && lhs.saveError == rhs.saveError
             && lhs.showsTestValues == rhs.showsTestValues
+            && lhs.collectionsRevision == rhs.collectionsRevision
+            && lhs.collectionsSavedRevision == rhs.collectionsSavedRevision
+            && lhs.collectionsNotice == rhs.collectionsNotice
         return browse && work && loupe && file
     }
 

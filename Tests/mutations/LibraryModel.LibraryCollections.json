@@ -1,0 +1,7 @@
+[
+{"label":"refreshShown keeps selected photos that are no longer shown","file":"Sources/LibraryModel/LibraryCollections.swift","find":"selection.formIntersection(order)","replace":"","tests":"LibraryRefreshShownTests"},
+{"label":"refreshShown skips the order rebuild","file":"Sources/LibraryModel/LibraryCollections.swift","find":"        rebuildOrder()\n","replace":"","tests":"LibraryRefreshShownTests"},
+{"label":"refreshShown leaves the loupe on a hidden photo","file":"Sources/LibraryModel/LibraryCollections.swift","find":"if mode == .loupe, !(focusedItemID.map(order.contains) ?? false) {","replace":"if false {","tests":"LibraryRefreshShownTests"},
+{"label":"a smart-prefixed id is not a user id","file":"Sources/LibraryModel/LibraryCollections.swift","find":"id.hasPrefix(\"user-\") || id.hasPrefix(\"smart-\")","replace":"id.hasPrefix(\"user-\")","tests":"LibraryRefreshShownTests"},
+{"label":"a rules collection reads as a set of photos","file":"Sources/LibraryModel/LibraryCollections.swift","find":"if case .rules = contents { true } else { false }","replace":"false","tests":"LibraryRefreshShownTests"}
+]
