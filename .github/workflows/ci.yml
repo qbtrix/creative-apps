@@ -311,43 +311,17 @@ jobs:
       # One `finding` issue per failing journey (an audit violation fails its
       # journey too), titled "CI finding: <Target/Class/test>", the form
       # UITests/quarantine.json takes, labelled `finding` and `line:<app>`.
-      # An open one with that title gets its body updated instead, so a test
-      # red across runs keeps one issue. Not on hotfix PRs to main.
+      # An open one with that title gets its body updated instead (keeping the
+      # `Feature:`, `Slice:` and `Owner:` lines a triage added), so a test red
+      # across runs keeps one routed issue. A test that ran and passed closes
+      # its finding with "Passes on run <url>". scripts/ci-findings does the
+      # work. Not on hotfix PRs to main.
       - name: Findings
-        if: always() && steps.ui.outcome == 'failure' && github.event_name != 'pull_request'
+        if: always() && (steps.ui.outcome == 'failure' || steps.ui.outcome == 'success') && github.event_name != 'pull_request'
         env:
           GH_TOKEN: ${{ github.token }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-        run: |
-          log="$RUNNER_TEMP/ui-test.log"
-          open=$(gh issue list --label finding --state open --limit 500 --json number,title)
-          sed -n "s/.*Test Case '-\[\([^]]*\)\]' failed.*/\1/p" "$log" | sort -u | while read -r mod cls_test; do
-            id="$mod ${cls_test}"  # "Module.Class test"
-            cls=${mod#*.} mod=${mod%%.*} test=$cls_test
-            name="$mod/$cls/$test" title="CI finding: $mod/$cls/$test"
-            err=$(grep -F -m1 "error: -[$id] : " "$log" | sed 's/^.*error: -\[[^]]*\] : //' | cut -c1-300 || true)
-            app=$(sed -E 's/JourneyTests$//' <<<"$mod" | tr '[:upper:]' '[:lower:]')
-            [[ "$app" != suite ]] || app=suiteui
-            {
-              echo "The \`$name\` journey failed in CI. The macOS job is report-only until beta, so this issue is how the red reaches its line; nobody's merge waited on it."
-              echo
-              echo "Test: \`$name\`"
-              echo "Error: ${err:-none printed; see the run log}"
-              echo "Run: $RUN_URL"
-              echo "Branch: $GITHUB_REF_NAME"
-              echo "Commit: $GITHUB_SHA"
-            } >"$RUNNER_TEMP/finding.md"
-            n=$(jq -r --arg t "$title" '[.[] | select(.title == $t)][0].number // empty' <<<"$open")
-            if [[ -n "$n" ]]; then
-              gh issue edit "$n" --body-file "$RUNNER_TEMP/finding.md" >/dev/null && echo "updated #$n: $name" \
-                || echo "::warning::could not update #$n for $name"
-            else
-              labels=finding
-              case "$app" in flare|design|photo|library|halo|suiteui) labels+=",line:$app" ;; esac
-              gh issue create --title "$title" --label "$labels" --body-file "$RUNNER_TEMP/finding.md" \
-                || echo "::warning::could not file a finding for $name"
-            fi
-          done
+        run: scripts/ci-findings "$RUNNER_TEMP/ui-test.log"
       # The page to review: every journey step with its audit, each app's
       # audit counts against the baseline and the perf reports, written into
       # ui-screens, plus a short table in the job summary. Runs when a journey
