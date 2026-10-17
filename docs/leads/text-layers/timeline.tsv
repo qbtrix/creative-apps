@@ -7,3 +7,6 @@ utc	stage	event	ref	note
 2026-10-17T02:02Z	2	heartbeat	#1509	still waiting on toolchain; dev 1e42526b
 2026-10-17T02:35Z	2	heartbeat	#1509	still waiting on toolchain; dev bc04c7d4
 2026-10-17T03:12Z	2	heartbeat	#1509	still waiting on toolchain; dev 82ac5055, no new halo run
+2026-10-17T06:17Z	0	stage-start	#1509	line lead act-1a1487bf880-qmey resumed; lead/text-layers rebuilt on main; swift 6.3.3 installed
+2026-10-17T06:17Z	2	stage-end	#1509	combined plan with render-out: 7 tasks, 3 waves; base b8dfb4f0
+2026-10-17T06:17Z	3	stage-start	#1509	wave 1: TX-1 TX-2 TX-3 TX-4 beside RO-1 RO-2 RO-3

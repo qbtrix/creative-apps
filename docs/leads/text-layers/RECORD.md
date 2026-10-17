@@ -1,21 +1,23 @@
 # text-layers lead record
 
 Issue: #1509 · Packet: docs/blueprints/halo/features/text-layers.md
-Run: act-1a1429c87eb-3ecm · Session: claude/feature-lead-halo-run-ugkm44 · Started: 2026-10-17T00:05Z
-Stage: 2 plan (waits met 2026-10-17: #1035 done, #1036 closed 2026-10-15, #1037 built)
-Base: 2be6a100 (origin/dev at 2026-10-17T00:05Z)
-Next: stage 3 wave 1 (TX-1, TX-2, TX-3, TX-4 in parallel), once a Swift toolchain can run HaloModelTests here or the supervisor accepts a Linux-only gate for the Model tasks
+Run: act-1a1487bf880-qmey (line lead for #1035, #1509, #1505; earlier run act-1a1429c87eb-3ecm planned) · Session: claude/halo-feature-lead-run-j7dyv1 · Started: 2026-10-17T06:05Z
+Stage: 3 wave 1
+Base: b8dfb4f0ed86c0db148446c4b4e95557c2f440d0 (origin/dev at 2026-10-17T06:15Z)
+Next: wave 1 running (TX-1, TX-2, TX-3, TX-4 beside render-out's RO-1, RO-2, RO-3); when the lane has merged them, run the check and start wave 2 (TX-5, TX-6 beside RO-4, RO-5)
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
 |---|---|---|---|---|---|---|
-| TX-1 | 1 | `setText`, `setFontSize`, `endTextSizeScrub`, `sizeText`; edits store the measured box; scrubs coalesced | Sources/HaloModel/HaloTextEdits.swift, Tests/HaloModelTests | TX-1 tests | – | planned |
-| TX-2 | 1 | `setLayerColor` ("Change Color") for text, solid and shape; `HaloLayerColor(bytes:)` | Sources/HaloModel/HaloTextEdits+Color.swift, Tests/HaloModelTests/HaloTextColorTests.swift | HaloTextColorTests | – | planned |
-| TX-3 | 1 | `HaloAvailability+Text.swift` replaced whole: state-only help | Sources/HaloModel/Availability/HaloAvailability+Text.swift, Tests/HaloModelTests | HaloTextAvailabilityTests | – | planned |
-| TX-4 | 1 | `HaloTextRasterizer` on CoreText: `measure` and `rasterize` | Sources/HaloApp/HaloTextRasterizer.swift, Tests/AppSnapshotTests/HaloTextRasterizerTests.swift | HaloTextRasterizerTests | – | planned |
-| TX-5 | 2 | HF-10 macOS half: ink inside the stored box; viewer matches `render` | Tests (HF-10 files) | HF-10 tests | – | planned |
-| TX-6 | 2 | App: `HaloTextInspector` (TEXT header, TextField, size slider, color row); `HaloWindow+Text.swift` | Sources/HaloApp/HaloTextInspector.swift, HaloWindow+Text.swift | snapshots | – | planned |
-| TX-7 | 3 | Journey H-J22 on `-HaloSample empty`; shared-doc edits (C4 part, wave.json); `feature-done`, `Closes #430` | UITests/HaloJourneyTests+Text.swift, docs/c4/parts, text-layers.wave.json | H-J22 on dev CI | – | planned |
+| TX-1 | 1 | `setText`, `setFontSize`, `endTextSizeScrub`, `selectedText`, `fontSizeRange`, `sizeText`; edits store the measured box from `services.text.measure` (estimate when nil); one named step per commit, scrubs coalesced | Sources/HaloModel/HaloTextEdits.swift, Tests/HaloModelTests/HaloTextLayerTests.swift | HaloTextLayerTests | – | building |
+| TX-2 | 1 | `setLayerColor` ("Change Color") for text, solid and shape; `selectedLayerColor`; `HaloLayerColor(bytes:)` and `bytes` | Sources/HaloModel/HaloTextEdits+Color.swift, Tests/HaloModelTests/HaloTextColorTests.swift | HaloTextColorTests | – | building |
+| TX-3 | 1 | `HaloAvailability+Text.swift` replaced whole: the text commands answer state only | Sources/HaloModel/Availability/HaloAvailability+Text.swift, Tests/HaloModelTests/HaloTextAvailabilityTests.swift | HaloTextAvailabilityTests | – | building |
+| TX-4 | 1 | `HaloTextRasterizer` on CoreText replaces W0's stub: `measure` and `rasterize` | Sources/HaloApp/HaloTextRasterizer.swift, Tests/AppSnapshotTests/HaloTextRasterizerTests.swift | HaloTextRasterizerTests (macOS) | – | building |
+| TX-5 | 2 | HF-10 macOS half: ink inside the stored box; viewer matches `render` | Tests/AppSnapshotTests/HaloTextFidelityTests.swift | HaloTextFidelityTests (macOS) | – | planned |
+| TX-6 | 2 | App: `HaloTextInspector` (TEXT header, TextField with view-local draft, InspectorSliderRow size, InspectorColorRow, refusal caption) through `perform`; `HaloWindow+Text` routes the cases; snapshots | Sources/HaloApp/HaloTextInspector.swift, Sources/HaloApp/HaloWindow+Text.swift, Tests/AppSnapshotTests/HaloTextLayerSnapshots.swift | halo-text-layer-*.png, halo-text-refused-*.png | – | planned |
+| TX-7 | 3 | Journey H-J22 on `-HaloSample empty`; shared-doc edits (c4-planned.json, text-layers.wave.json `owned` and `status: built`); `feature-done`, `Closes #430` | UITests/HaloJourneyTests+Text.swift, docs/blueprints/halo/c4-planned.json, docs/blueprints/halo/features/text-layers.wave.json | H-J22 on dev CI | – | planned |
+
+Waves (combined with render-out, contract rule 19; checked against dev b8dfb4f0): W1 TX-1, TX-2, TX-3, TX-4 (all independent, with RO-1, RO-2, RO-3); W2 TX-5 (waits TX-1, TX-4), TX-6 (waits TX-1, TX-2, TX-3, TX-4) (independent of each other, with RO-4, RO-5); W3 TX-7 (waits TX-5, TX-6; feature-done) with RO-6, RO-7, RO-9.
 
 ## Rounds
 | round | CI run | CI | audit vs baseline | lenses | confirmed | fixed by | clean |
@@ -23,9 +25,12 @@ Next: stage 3 wave 1 (TX-1, TX-2, TX-3, TX-4 in parallel), once a Swift toolchai
 | – | – | – | – | – | – | – | – |
 
 ## Decisions
-- Stage 2 (2026-10-17): plan copied from the packet (7 tasks, 3 waves). Dependencies: #1036 closed 2026-10-15 and #1035 done, so the wait is met; dev's `layer-keys.wave.json` still says "building" and waves.md with it, a stale generated status.
-- Stage 0 checked the dependency chain in docs/blueprints/halo/features/waves.md: no task of this packet can start yet, so the lead stops here (contract rule 9 / v2 stage 0.4).
+- 2026-10-17T06:05Z: line lead for #1035 (done, supervisor decision 06:06Z), #1509 and #1505 in one run. Waits met: #1036 closed, #1037 built, #1035 done, #333 closed (#877 merged). The brief named `main` as the integration branch; the fast lane merges into `dev` and retargets a PR based on `main`, so PRs base `dev` as CLAUDE.md says.
+- No Swift on this box at launch; installed swift 6.3.3 (CI's image version) under /opt/swift so `scripts/ci` can run the Model tests.
+- Rule 18 for this v2 packet: wave 1's Model tasks TX-1 to TX-3 are themselves the signatures the UI calls (small, full bodies), so no separate stub task; TX-6 starts in wave 2 the moment they merge, beside TX-5. The packet's waves stand.
+- Canonical first (rule 20): text edits, size and color are Halo-specific (no SuiteModel or other-app copy); undo goes through W0's `edit` and `services.history`, which is the grandfathered Halo history. No kernel concept is added.
+- Work started after #1302: the critic panel files findings as `finding` issues (`issue`, `commit`, `open`), the fix batch takes issue numbers, round cap 2.
+- lead/text-layers was 967 commits off main with no shared history; rebuilt as one records-only commit on origin/main (as Belt did for viewer-playback).
 
 ## Open
-- No Swift toolchain on this box: TX-1 to TX-4 are Model or Model-adjacent tasks; wave 1 needs a toolchain or a supervisor decision.
-- Blocked on layer-keys (#1036, building), viewer-playback (#1035, not done: its feature-done PR #1685 merged, its halo CI not green yet), history-files (#1037, built); #333 (SuiteUI journey files).
+- none
