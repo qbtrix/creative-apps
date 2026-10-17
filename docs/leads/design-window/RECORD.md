@@ -17,7 +17,7 @@ Next: wave 1 PRs (D0-5a, D0-5b, D0-9a, D0-9b) to merge through the lane, then wa
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
 |---|---|---|---|---|---|---|---|
-| D0-5a | DW-a | 1 | DesignWindowOptions, openFixture, DesignControlID, intents, launch args, zoom to selection, selection count, DesignSaveStatus slot | Sources/DesignModel/DesignWindowOptions.swift, Sources/DesignApp/{DesignIntent,DesignWindow,DesignEditor,DesignSaveStatus}.swift | Tests/DesignModelTests/DesignWindowOptionsTests.swift | – | ready |
+| D0-5a | DW-a | 1 | DesignWindowOptions, openFixture, DesignControlID, intents, launch args, zoom to selection, selection count, DesignSaveStatus slot | Sources/DesignModel/DesignWindowOptions.swift, Sources/DesignApp/{DesignIntent,DesignWindow,DesignEditor,DesignSaveStatus}.swift | Tests/DesignModelTests/DesignWindowOptionsTests.swift | – | branch ac62a6b6 pushed, no PR: no Swift toolchain, Mutate unscored |
 | D0-5b | DW-a | 1 | canvas marks, selection marks, frame-label and text slots, feedback slot, show param | Sources/DesignApp/{DesignCanvas,DesignCanvasMarks,DesignSelectionMarks,DesignFrameLabels,DesignTextArtwork,DesignCanvasFeedback}.swift | Tests/AppSnapshotTests/DesignCanvasSeamSnapshots.swift | – | ready |
 | D0-9a | DW-d | 1 | testCanvasFeedback written, XCTSkip until D0-9d | UITests/DesignJourneyTests+Feedback.swift | the journey (skipped) | #1979 (head a373c162) | open, no Fast-Check line: no Swift toolchain here, lane build-only run pending |
 | D0-9b | DW-d | 1 | DesignCanvasHints: pointer, hover, badge text | Sources/DesignModel/DesignCanvasHints.swift | Tests/DesignModelTests/DesignCanvasHintsTests.swift | – | ready |
