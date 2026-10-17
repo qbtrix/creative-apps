@@ -2,8 +2,8 @@
 // in a real 1280 x 400 window (timeline packet, the TL-f quality row, line
 // 487): SuiteTimelineKeyDragWindowTests' host, 300 lanes, 10,000 frames, keys
 // every 12, 4 pt a frame, lane 5's key at 120 picked and dragged by 120 events
-// over 600 pt. Spec: at most 0 lane bodies and at most 1 window body (the
-// host's, on the commit), one move call per frame step summing to 150, one
+// over 600 pt. Spec (TL-22): at most 1 lane body (the moved lane's) and 1 window
+// body (the host's, on the commit), one move of 150 sent on release, one
 // onEndKeyDrag; the step p95 the harness prints is the lane redraw time,
 // reported and not judged. TL-20 writes it disabled; TL-22 enables it. The
 // press is a window-activation click the host opts in to (#1746). Nested in
@@ -16,7 +16,7 @@ import Testing
 
 extension BodyCountSuites {
     @MainActor @Suite struct SuiteTimelineLanesWindowTests {
-        @Test(.disabled("waits on TL-22"), .timeLimit(.minutes(2))) func aLaneDragRunsNoLaneBodies() async throws {
+        @Test(.timeLimit(.minutes(2))) func aLaneDragRunsNoLaneBodies() async throws {
             let sent = LanesDragSent()
             let size = CGSize(width: 1280, height: 400)
             let w = RenderBudgetWindow(LanesDragHost(sent: sent).frame(width: size.width, height: size.height, alignment: .top), size: size)
@@ -32,14 +32,11 @@ extension BodyCountSuites {
             let step = try await w.measure("timeline lanes key drag, 120 samples", bodies: { LanesDragHost.bodyRuns }) {
                 try await w.drag(from: CGPoint(x: x, y: y), by: CGVector(dx: 600, dy: 0))
             }
-            let steps = sent.moves.count
-            #expect(steps > 0 && steps <= 150, "\(steps) move calls for a 150-frame drag: \(step)")
-            #expect(sent.moves.reduce(0, +) == 150, "the moves \(sent.moves) don't sum to 150")
-            #expect(!sent.moves.contains(0), "a move call sent no frames: \(sent.moves)")
+            #expect(sent.moves == [150], "the drag sent \(sent.moves), not one move of 150 on release")
             #expect(sent.ends == 1, "onEndKeyDrag ran \(sent.ends) times")
             #expect((step.bodies ?? 0) <= 1, "the window ran \(step.bodies ?? 0) bodies for the drag: \(step)")
             if let before = lanesBefore, let after = laneBodies() {
-                #expect(after - before <= 0, "lanes ran \(after - before) bodies for \(steps) steps: \(step)")
+                #expect(after - before <= 1, "lanes ran \(after - before) bodies, more than the moved lane's: \(step)")
             }
         }
 

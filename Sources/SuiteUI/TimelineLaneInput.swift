@@ -10,16 +10,16 @@
 // on its hovered key. The press and its drag are one gesture (TL-14): a press
 // on an unpicked key picks it at once, a picked key's pick waits for a release
 // that didn't move, and a drag moves the picked keys (TimelineKeyDrag: snapped
-// to the playhead, the group clamped, onMoveKeyframes only on a frame step,
-// onEndKeyDrag once, after the release's own sample has moved them; Escape
-// sends the steps back and ends it). A time pill
+// to the playhead, the group clamped; TL-22: TimelineLanesView takes the mouse,
+// draws each step on its layer and sends one onMoveKeyframes and onEndKeyDrag
+// on release; Escape drops it and sends nothing). A time pill
 // above the grabbed key shows its frame while it moves, and each step reports
-// a `step` mark in series `key-drag`. The drag's bookkeeping sits in a box
+// a `step` mark in series `key-drag`. The press sits in TimelineLanePointer,
 // SwiftUI doesn't watch; only the pill's frame is state, written per step.
 // A press within 6 pt of a clip's start or end tick, and not on a key, trims
 // that end (TL-15; TimelineTrimDrag): the edge follows the pointer, snapped to
-// the playhead and kept by the trim rule, onTrim only when the edge's frame
-// changes, onEndTrim once on release; the same pill shows the edge's frame,
+// the playhead and kept by the trim rule, one onTrim with its last frame and
+// onEndTrim on release; the same pill shows the edge's frame,
 // and the pointer over a clip end is the column-resize pointer.
 // A press first takes the strip's focus (TimelineFocusClaim, #1813).
 // It owns the lane's hover, presentation state: which lane the pointer is
@@ -38,7 +38,7 @@ struct TimelineLaneInput<ID: Hashable & Sendable>: ViewModifier {
     let actions: TimelineLaneActions<ID>
     @State private var hover: TimelineLaneHover?
     /// The press in progress; not observed, so a pointer sample writes no state.
-    @State private var press = TimelineLanePressBox()
+    @State private var pointer = TimelineLanePointer<ID>()
     /// The grabbed key's frame while it moves; the pill shows it.
     @State private var pillFrame: Int?
     /// Right presses seen while the pointer was over this lane.
@@ -51,14 +51,14 @@ struct TimelineLaneInput<ID: Hashable & Sendable>: ViewModifier {
     @Environment(\.timelineFocusClaim) private var focusClaim
 
     func body(content: Content) -> some View {
-        content
+        pointer.configure(
+            track: track, mapping: mapping, playhead: playhead, actions: actions,
+            extras: TimelineLanePointerExtras(focus: focusClaim, pill: $pillFrame, mark: fadeMark))
+        return content
             .environment(\.timelineLaneHover, hover)
+            .environment(\.timelineLanePointer, pointer)
             .overlay(alignment: .topLeading) { pill }
             .pointerStyle(overClipEnd ? .columnResize : nil)
-            .gesture(
-                DragGesture(minimumDistance: 0)
-                    .onChanged { value in dragChanged(value) }
-                    .onEnded { value in dragEnded(value) })
             .onChange(of: rightPresses) {
                 let target: TimelineLanePress.Target = hover?.key.map { .key($0) } ?? .bed
                 TimelineLanePress.rightPress(target, on: track, actions: actions)
@@ -67,7 +67,7 @@ struct TimelineLaneInput<ID: Hashable & Sendable>: ViewModifier {
             .onDisappear {
                 if let monitor { NSEvent.removeMonitor(monitor) }
                 monitor = nil
-                press.stopWatchingEscape()
+                pointer.cancel()
             }
             .onContinuousHover { phase in
                 switch phase {
@@ -98,78 +98,6 @@ struct TimelineLaneInput<ID: Hashable & Sendable>: ViewModifier {
         }
     }
 
-    /// The first sample classifies the press (key, clip end, else bed) and may
-    /// start a key drag or a trim; later samples move it.
-    private func dragChanged(_ value: DragGesture.Value) {
-        if !press.active {
-            focusClaim?.claim()
-            press.active = true
-            press.modifiers = Self.modifiers(NSEvent.modifierFlags)
-            press.target = TimelineLanePress.target(atX: value.startLocation.x, on: track, mapping: mapping)
-            press.drag = TimelineLanePress.begin(
-                press.target, modifiers: press.modifiers, on: track, playhead: playhead, mapping: mapping,
-                actions: actions)
-            if press.drag != nil { watchEscape() }
-            press.trim = TimelineLanePress.beginTrim(press.target, playhead: playhead, mapping: mapping)
-            return
-        }
-        if var trim = press.trim {
-            let stepped = trim.move(dx: Double(value.translation.width), id: track.id, actions: actions)
-            press.trim = trim
-            if stepped, pillFrame != trim.frame { pillFrame = trim.frame }
-            return
-        }
-        guard var drag = press.drag else { return }
-        let stepped = drag.move(dx: Double(value.translation.width), actions: actions)
-        press.drag = drag
-        if stepped { showStep(drag) }
-    }
-
-    /// The release: takes the last sample's move (#1796), then ends a drag once, or acts as a click.
-    private func dragEnded(_ value: DragGesture.Value) {
-        defer {
-            press.reset()
-            pillFrame = nil
-        }
-        guard press.active else { return }
-        var click = true
-        if var drag = press.drag {
-            click = drag.release(atDX: Double(value.translation.width), actions: actions)
-            press.drag = drag
-        }
-        if var trim = press.trim {
-            click = trim.release(atDX: Double(value.translation.width), id: track.id, actions: actions)
-            press.trim = trim
-        }
-        if click { TimelineLanePress.press(press.target, modifiers: press.modifiers, on: track, actions: actions) }
-    }
-
-    /// Writes the pill's frame and reports the step.
-    private func showStep(_ drag: TimelineKeyDrag) {
-        if pillFrame != drag.frame { pillFrame = drag.frame }
-        fadeMark?.record(ProbeMark(name: "step", series: "key-drag", time: ProcessInfo.processInfo.systemUptime))
-    }
-
-    /// Escape while the drag runs sends its steps back and ends it; the event stops here.
-    private func watchEscape() {
-        let box = press
-        let actions = actions
-        let pill = $pillFrame
-        box.stopWatchingEscape()
-        box.cancel = {
-            guard var drag = box.drag, !drag.ended else { return false }
-            drag.cancel(actions: actions)
-            box.drag = drag
-            pill.wrappedValue = nil
-            return true
-        }
-        box.escapeMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { event in
-            guard event.keyCode == TimelineLanePressBox.escapeKeyCode else { return event }
-            let handled = MainActor.assumeIsolated { box.cancel?() ?? false }
-            return handled ? nil : event
-        }
-    }
-
     /// Counts a right button press while the pointer is over this lane; the
     /// event goes on, so the host's context menu still opens.
     private func watchRightPresses() {
@@ -185,7 +113,7 @@ struct TimelineLaneInput<ID: Hashable & Sendable>: ViewModifier {
     }
 
     /// The pick rule's modifiers from AppKit's.
-    private static func modifiers(_ flags: NSEvent.ModifierFlags) -> KeyModifiers {
+    static func modifiers(_ flags: NSEvent.ModifierFlags) -> KeyModifiers {
         var modifiers: KeyModifiers = []
         if flags.contains(.shift) { modifiers.insert(.shift) }
         if flags.contains(.option) { modifiers.insert(.option) }
@@ -253,30 +181,135 @@ struct TimelineClipEnd: Equatable, Sendable {
     let edge: SpanEdge
 }
 
-/// A lane's press in progress, kept where SwiftUI doesn't watch it.
-@MainActor final class TimelineLanePressBox {
+/// What TimelineLanesView's mouse events drive; `showLive` draws a step on the view's layer.
+@MainActor protocol TimelineLanePointing: AnyObject {
+    var showLive: (@MainActor (TimelineLaneDrawing?) -> Void)? { get set }
+    func route(_ point: CGPoint) -> TimelineLaneLayers.Press?
+    func down(at point: CGPoint, flags: NSEvent.ModifierFlags)
+    func dragged(dx: Double)
+    func up(dx: Double)
+    @discardableResult func cancel() -> Bool
+}
+
+/// What a lane's pointer reaches besides the host: focus, the pill and the step marks.
+struct TimelineLanePointerExtras {
+    let focus: TimelineFocusClaim?
+    let pill: Binding<Int?>
+    let mark: TimelineFadeMark?
+}
+
+/// A lane's press in progress, kept where SwiftUI doesn't watch it (TL-22):
+/// each step is drawn through `showLive`; the host hears one move or trim on release.
+@MainActor final class TimelineLanePointer<ID: Hashable & Sendable>: TimelineLanePointing {
     /// AppKit's key code for Escape.
-    nonisolated static let escapeKeyCode: UInt16 = 53
+    nonisolated static var escapeKeyCode: UInt16 { 53 }
+    var showLive: (@MainActor (TimelineLaneDrawing?) -> Void)?
+    private var lane: (track: TimelineTrack<ID>, mapping: FrameMapping, playhead: Int, actions: TimelineLaneActions<ID>)?
+    private var extras: TimelineLanePointerExtras?
     var active = false
     var target: TimelineLanePress.Target = .bed
     var modifiers: KeyModifiers = []
     var drag: TimelineKeyDrag?
     var trim: TimelineTrimDrag?
     var escapeMonitor: Any?
-    /// Escape's cancel for the drag under way; true when it cancelled one.
-    var cancel: (@MainActor () -> Bool)?
+    private var liveDelta = 0
+    private var liveTrim: Int?
 
-    func reset() {
-        active = false
-        drag = nil
-        trim = nil
-        stopWatchingEscape()
+    func configure(track: TimelineTrack<ID>, mapping: FrameMapping, playhead: Int, actions: TimelineLaneActions<ID>,
+                   extras: TimelineLanePointerExtras) { (lane, self.extras) = ((track, mapping, playhead, actions), extras) }
+
+    func route(_ point: CGPoint) -> TimelineLaneLayers.Press? {
+        guard let lane else { return nil }
+        return TimelineLaneLayers.route(press: point, in: [lane.track], mapping: lane.mapping, playhead: lane.playhead)?.press
     }
 
-    func stopWatchingEscape() {
+    func down(at point: CGPoint, flags: NSEvent.ModifierFlags) {
+        guard let lane else { return }
+        reset()
+        extras?.focus?.claim()
+        let held = TimelineLaneInput<ID>.modifiers(flags)
+        (active, modifiers, liveDelta, liveTrim) = (true, held, 0, nil)
+        target = TimelineLanePress.target(atX: point.x, on: lane.track, mapping: lane.mapping)
+        drag = TimelineLanePress.begin(
+            target, modifiers: held, on: lane.track, playhead: lane.playhead, mapping: lane.mapping, actions: lane.actions)
+        trim = TimelineLanePress.beginTrim(target, playhead: lane.playhead, mapping: lane.mapping)
+        if drag != nil || trim != nil { watchEscape() }
+    }
+
+    func dragged(dx: Double) {
+        guard active, let lane else { return }
+        if var trim, trim.move(dx: dx, id: lane.track.id, actions: live) { self.trim = trim; show(trim.frame) }
+        else if var drag, drag.move(dx: dx, actions: live) { self.drag = drag; show(drag.frame) }
+    }
+
+    func up(dx: Double) {
+        guard active, let lane else { return reset() }
+        var click = true
+        if var drag { click = drag.release(atDX: dx, actions: live) }
+        if var trim { click = trim.release(atDX: dx, id: lane.track.id, actions: live) }
+        if click { TimelineLanePress.press(target, modifiers: modifiers, on: lane.track, actions: lane.actions) }
+        reset()
+    }
+
+    /// Escape: drops the drag or trim under way, sending nothing; true when there was one.
+    @discardableResult func cancel() -> Bool {
+        guard active, drag != nil || trim != nil else { return false }
+        reset()
+        return true
+    }
+
+    /// Where the steps go instead of the host: the delta adds up, the trim keeps its last frame.
+    private var live: TimelineLaneActions<ID> {
+        var live = TimelineLaneActions<ID>(onSelectKeyframe: { _, _ in }, onSelectTrack: { _ in }, onPickKeyframe: { _, _, _ in })
+        live.onMoveKeyframes = { [weak self] delta in self?.liveDelta += delta }
+        live.onEndKeyDrag = { [weak self] in self?.commit() }
+        live.onTrim = { [weak self] _, _, frame in self?.liveTrim = frame }
+        live.onEndTrim = { [weak self] in self?.commit() }
+        return live
+    }
+
+    /// The release: the whole move, or the trim's last frame, then its end, once.
+    private func commit() {
+        guard let lane else { return }
+        if let trim, let liveTrim { lane.actions.onTrim(lane.track.id, trim.end.edge, liveTrim); lane.actions.onEndTrim() }
+        else if drag != nil, liveDelta != 0 { lane.actions.onMoveKeyframes(liveDelta); lane.actions.onEndKeyDrag() }
+    }
+
+    /// Draws the lane as the step leaves it, moves the pill and reports the step.
+    private func show(_ frame: Int) {
+        guard let track = lane?.track, let mapping = lane?.mapping else { return }
+        var (keys, spans, picked) = (track.keys, track.spans, track.pickedFrames)
+        if let drag {
+            let delta = liveDelta
+            keys = keys.map { drag.group.contains($0.frame) ? TimelineKey(frame: $0.frame + delta, shape: $0.shape) : $0 }
+            picked = Set(drag.group.map { $0 + delta })
+        } else if let trim, let new = liveTrim {
+            let old = trim.end.span
+            let span = trim.end.edge == .start ? min(new, old.upperBound)...old.upperBound : old.lowerBound...max(new, old.lowerBound)
+            spans = spans.map { $0 == old ? span : $0 }
+        }
+        let shown = TimelineTrack(
+            id: track.id, name: track.name, keys: keys, spans: spans, pickedFrames: picked, isSelected: track.isSelected)
+        showLive?(TimelineLaneDrawing(shown, mapping: mapping))
+        if extras?.pill.wrappedValue != frame { extras?.pill.wrappedValue = frame }
+        extras?.mark?.record(ProbeMark(name: "step", series: "key-drag", time: ProcessInfo.processInfo.systemUptime))
+    }
+
+    func reset() {
+        (active, drag, trim) = (false, nil, nil)
         if let escapeMonitor { NSEvent.removeMonitor(escapeMonitor) }
         escapeMonitor = nil
-        cancel = nil
+        if extras?.pill.wrappedValue != nil { extras?.pill.wrappedValue = nil }
+        showLive?(nil)
+    }
+
+    /// Escape while a drag or trim runs cancels it; the event stops here.
+    private func watchEscape() {
+        escapeMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
+            guard event.keyCode == Self.escapeKeyCode else { return event }
+            let handled = MainActor.assumeIsolated { self?.cancel() ?? false }
+            return handled ? nil : event
+        }
     }
 }
 
@@ -503,6 +536,16 @@ extension EnvironmentValues {
         get { self[TimelineFadeMarkKey.self] }
         set { self[TimelineFadeMarkKey.self] = newValue }
     }
+
+    /// The press of the lane this sits in, which its TimelineLanesView drives; nil takes no mouse.
+    var timelineLanePointer: (any TimelineLanePointing)? {
+        get { self[TimelineLanePointerKey.self] }
+        set { self[TimelineLanePointerKey.self] = newValue }
+    }
+}
+
+private struct TimelineLanePointerKey: EnvironmentKey {
+    static var defaultValue: (any TimelineLanePointing)? { nil }
 }
 
 private struct TimelineLaneHoverKey: EnvironmentKey {

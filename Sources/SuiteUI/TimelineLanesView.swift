@@ -142,6 +142,18 @@ final class TimelineLanesView: NSView {
     private(set) var laneLayers: [TimelineLaneLayer] = []
     private(set) var draws = 0  // lane redraws asked of the layers
     private var palette: TimelineLanePalette?
+    /// The lanes the host gave; `live` stands in for the first while a press draws its steps.
+    private var hostLanes: [TimelineLaneDrawing] = []
+    private var live: TimelineLaneDrawing?
+    private var liveCount = 0  // a later step keeps a queued revert from clearing it
+    private var pressX: CGFloat = 0
+    /// The lane's press (TL-22); nil leaves every mouse event to the views under it.
+    var pointer: (any TimelineLanePointing)? {
+        didSet {
+            guard pointer !== oldValue else { return }
+            pointer?.showLive = { [weak self] in self?.setLive($0) }
+        }
+    }
 
     override init(frame: NSRect) {
         super.init(frame: frame)
@@ -154,10 +166,40 @@ final class TimelineLanesView: NSView {
     override var isFlipped: Bool { true }
     override var wantsUpdateLayer: Bool { true }
     override func updateLayer() {}
-    override func hitTest(_ point: NSPoint) -> NSView? { nil }
+    override func hitTest(_ point: NSPoint) -> NSView? { takesPress(at: convert(point, from: superview)) ? self : nil }
+
+    /// A press at `local` is the lane's: on its key, clip end or bed, not the playhead band.
+    func takesPress(at local: CGPoint) -> Bool {
+        guard let pointer, bounds.contains(local), let press = pointer.route(local) else { return false }
+        return press != .playheadBand
+    }
+
+    override func acceptsFirstMouse(for event: NSEvent?) -> Bool { pointer != nil }
+    override func mouseDown(with event: NSEvent) { press(at: convert(event.locationInWindow, from: nil), flags: event.modifierFlags) }
+    override func mouseDragged(with event: NSEvent) { drag(to: convert(event.locationInWindow, from: nil)) }
+    override func mouseUp(with event: NSEvent) { release(at: convert(event.locationInWindow, from: nil)) }
+    func press(at local: CGPoint, flags: NSEvent.ModifierFlags) { pressX = local.x; pointer?.down(at: local, flags: flags) }
+    func drag(to local: CGPoint) { pointer?.dragged(dx: Double(local.x - pressX)) }
+    func release(at local: CGPoint) { pointer?.up(dx: Double(local.x - pressX)) }
+
+    /// Draws a press's step in place of the host's lane; nil goes back to the
+    /// host's after this turn, so a commit's update lands first and nothing flickers.
+    func setLive(_ drawing: TimelineLaneDrawing?) {
+        liveCount &+= 1
+        if let drawing { live = drawing; return update(hostLanes) }
+        let count = liveCount
+        Task { @MainActor [weak self] in
+            guard let self, self.liveCount == count, self.live != nil else { return }
+            self.live = nil
+            self.update(self.hostLanes)
+        }
+    }
 
     /// Shows `new`, redrawing the lanes that differ from those shown, or all on a new palette.
     func update(_ new: [TimelineLaneDrawing]) {
+        hostLanes = new
+        var new = new
+        if let live, !new.isEmpty { new[0] = live }  // a press's step over the first lane
         let resolved = TimelineLanePalette(effectiveAppearance)
         var dirty = TimelineLaneLayers.dirty(old: lanes, new: new)
         if resolved != palette { (palette, dirty) = (resolved, Set(new.indices)) }
@@ -194,7 +236,7 @@ final class TimelineLanesView: NSView {
 
     override func viewDidChangeEffectiveAppearance() {
         super.viewDidChangeEffectiveAppearance()
-        update(lanes)
+        update(hostLanes)
     }
 
     override func viewDidChangeBackingProperties() {
@@ -223,5 +265,8 @@ struct TimelineLanes: NSViewRepresentable {
 
     func makeNSView(context: Context) -> TimelineLanesView { TimelineLanesView(frame: .zero) }
 
-    func updateNSView(_ view: TimelineLanesView, context: Context) { view.update(lanes) }
+    func updateNSView(_ view: TimelineLanesView, context: Context) {
+        view.pointer = context.environment.timelineLanePointer
+        view.update(lanes)
+    }
 }
