@@ -110,8 +110,11 @@ struct FlareWindow: View {
 
 /// The window's content: the stage over the timeline while a document is
 /// open, else the empty state whose one action is New Animation (Open is the
-/// toolbar's).
+/// toolbar's). New Animation is `.file(.new)` like the toolbar's New, so it
+/// takes `emptyNewIdentifier` to keep `suite.controls` free of duplicates.
 struct FlareCanvas: View {
+    /// The empty state's New Animation: `.file(.new)`'s identifier, set apart from the toolbar's New.
+    static let emptyNewIdentifier = FlareIntent.file(.new).identifier + ".empty"
     let model: FlareWorkspace
     var zoom: Double? = nil
     var showsRulers = true
@@ -135,7 +138,9 @@ struct FlareCanvas: View {
             EmptyStateView(
                 "No Animation Open", systemImage: "film.stack",
                 message: "Create an animation to start drawing scenes and keyframes.",
-                action: ToolbarAction("New Animation", systemImage: "plus") { perform(.file(.new)) })
+                action: ToolbarAction("New Animation", systemImage: "plus", identifier: Self.emptyNewIdentifier) {
+                    perform(.file(.new))
+                })
         }
     }
 }

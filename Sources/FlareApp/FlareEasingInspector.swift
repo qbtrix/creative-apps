@@ -10,6 +10,9 @@
 // It brings no side gutter of its own; the inspector it sits in supplies one.
 // When the editor gives an `easingUnavailableReason` (inside a symbol, on a
 // locked layer), the EASING controls show disabled under that reason (#668).
+// Each KEYFRAMES row carries `rowIdentifier`, flare.easing.segment.<property>.
+// <start>-<end>, the same whichever row is selected (the app audit, #262).
+// The preset chips get theirs once ChoiceChips takes one per option (#1148).
 import FlareCore
 import FlareModel
 import SuiteUI
@@ -44,6 +47,11 @@ struct FlareEasingInspector<Editor: EasingEditing>: View {
             .padding(.bottom, SuiteSpacing.xs)
     }
 
+    /// A KEYFRAMES row's accessibility identifier, stable while the row lasts.
+    static func rowIdentifier(_ segment: EasingSegment) -> String {
+        "flare.easing.segment.\(segment.property).\(segment.startFrame)-\(segment.endFrame)"
+    }
+
     private func segmentRow(_ segment: EasingSegment) -> some View {
         let selected = segment == editor.selectedEasingSegment
         let title = "\(segment.property) \(segment.startFrame) → \(segment.endFrame)"
@@ -76,6 +84,7 @@ struct FlareEasingInspector<Editor: EasingEditing>: View {
         .buttonStyle(.plain)
         .onHover { hovered = $0 ? segment : (hovered == segment ? nil : hovered) }
         .accessibilityLabel(title)
+        .accessibilityIdentifier(Self.rowIdentifier(segment))
         .accessibilityAddTraits(selected ? .isSelected : [])
     }
 
