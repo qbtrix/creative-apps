@@ -29,3 +29,4 @@ utc	stage	event	ref	note
 2026-10-17T15:37:19Z	3	needs-fix	#2112	RO-4: its debug render budget suite starved DesignStyleBudgetTests in the batch run; fixer spawned
 2026-10-17T15:37:19Z	3	wave-start	RO-6,RO-7	builders spawned; RO-9 waits on RO-4
 2026-10-17T15:41:29Z	3	fix-pushed	#2112	RO-4 d34cb7f6: debug budget suite 1 preview of keyed, 1 frame of empty; 37 s -> 1.2 s; CI: PASS
+2026-10-17T15:44:18Z	3	pr-opened	#2135	RO-6 HaloPNGWriter, head 700ca96f
