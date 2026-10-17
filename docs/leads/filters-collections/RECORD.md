@@ -2,9 +2,9 @@
 
 Issue: #1563 · Packet: docs/blueprints/library/features/filters-collections.md
 Run: act-1a147b718fd-n1ee · Session: unknown · Started: 2026-10-17T02:30Z
-Stage: 2 plan
+Stage: 3 wave 1 (waiting on supervisor)
 Base: 06371387 (origin/dev at setup; the brief's main 37d99630 is an ancestor, CLAUDE.md says dev)
-Next: FC-2 (contract slice): declare the stored state, catalog methods and stubs in LibraryCatalog.swift, LibraryOrder.swift and LibraryCollections.swift on Linux, then the UI wiring tasks (FC-4, FC-5) on macOS CI
+Next: wait for the supervisor's answers to Q1 to Q3 under Open; then FC-2 (contract slice) on LibraryCatalog.swift, LibraryOrder.swift and LibraryCollections.swift
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -40,4 +40,5 @@ Next: FC-2 (contract slice): declare the stored state, catalog methods and stubs
 ## Open
 - S-L9 and S-L10 (SuiteUI issues from the packet) are not filed. FC-10 waits on S-L9.
 - Feature issue #1563: not read or commented on; GitHub GraphQL returned 403 from the CLI.
-- Questions for the supervisor: (1) open FC-1 as a fast-lane PR now, or wait for FC-2? (2) may builders and critics run as Workflow fan-outs, given the opt-in rule? (3) file the S-L9/S-L10 issues on this repo?
+- FC-2 is the shared spine: it adds stored state and stubs to LibraryCatalog.swift, which every later task reads. The packet's MJ1 seam test needs `shownItems` and `recount` changed, which is FC-7 behavior, so FC-2 can't finish its own test without a decision. Asked below.
+- Questions for the supervisor: (1) open FC-1 as a fast-lane PR now, or wait for FC-2? (2) may builders and critics run as Workflow fan-outs, given the opt-in rule? (3) file the S-L9/S-L10 issues on this repo? (4) for FC-2: may the MJ1 seam test go in as a disabled `@Test(.disabled("waits on FC-7"))` until FC-7 lands, as contract rule 13 allows?
