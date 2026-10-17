@@ -55,6 +55,10 @@ import Testing
             ControlEntry(id: "halo.render.size", enabled: true),
             ControlEntry(id: "halo.render.start", enabled: true),
         ])
+        let formats = HaloRenderSettings.Format.allCases.map { HaloRenderSheet.segmentID($0) }
+        #expect(formats == ["halo.render.format.png", "halo.render.format.movie"])
+        let sizes = HaloRenderSize.allCases.map { HaloRenderSheet.segmentID($0) }
+        #expect(sizes == ["halo.render.size.full", "halo.render.size.half"])
         try shoot(sheet, "")
         let none = HaloRenderSheet(model: project, destination: nil, initial: half)
         let start = try controls(none).first { $0.id == "halo.render.start" }

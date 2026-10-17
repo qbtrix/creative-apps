@@ -5,7 +5,8 @@
 // N", a progress bar, Cancel. Ended: the outcome and Close, with Reveal in
 // Finder after a finished render; a failure in stateError. The sheet holds
 // its draft and its run; commands go to the window, and a job cancelled by
-// any route cancels the run. Controls carry `halo.render.*` ids.
+// any route cancels the run. Controls carry `halo.render.*` ids, and each
+// Format and Size segment its own (`halo.render.format.png`, ...).
 import AppKit
 import HaloModel
 import SuiteUI
@@ -82,12 +83,16 @@ struct HaloRenderSheet: View {
         VStack(alignment: .leading, spacing: SuiteSpacing.m) {
             Form {
                 Picker("Format", selection: $format) {
-                    ForEach(HaloRenderSettings.Format.allCases, id: \.self) { Text(Self.title($0)).tag($0) }
+                    ForEach(HaloRenderSettings.Format.allCases, id: \.self) {
+                        Text(Self.title($0)).tag($0).accessibilityIdentifier(Self.segmentID($0))
+                    }
                 }
                 .pickerStyle(.segmented)
                 .haloControl(id: "halo.render.format", enabled: true, help: nil)
                 Picker("Size", selection: $size) {
-                    ForEach(HaloRenderSize.allCases, id: \.self) { Text($0.rawValue).tag($0) }
+                    ForEach(HaloRenderSize.allCases, id: \.self) {
+                        Text($0.rawValue).tag($0).accessibilityIdentifier(Self.segmentID($0))
+                    }
                 }
                 .pickerStyle(.segmented)
                 .haloControl(id: "halo.render.size", enabled: true, help: nil)
@@ -172,6 +177,23 @@ struct HaloRenderSheet: View {
         switch format {
         case .pngSequence: "PNG Sequence"
         case .movie: "Movie"
+        }
+    }
+
+    /// Each Format segment's id: a segmented Picker shows every option as its
+    /// own radio button, so the Picker's id alone leaves them unidentified.
+    static func segmentID(_ format: HaloRenderSettings.Format) -> String {
+        switch format {
+        case .pngSequence: "halo.render.format.png"
+        case .movie: "halo.render.format.movie"
+        }
+    }
+
+    /// Each Size segment's id, as for Format.
+    static func segmentID(_ size: HaloRenderSize) -> String {
+        switch size {
+        case .full: "halo.render.size.full"
+        case .half: "halo.render.size.half"
         }
     }
 }
