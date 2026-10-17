@@ -48,3 +48,4 @@ utc	stage	event	ref	note
 2026-10-17T17:43Z	3 build	merged	#2182	RO-9 squash-merged 17:35:34Z
 2026-10-17T17:43Z	3 build	merged	#2184	RO-8 squash-merged 17:35:54Z
 2026-10-17T17:43Z	3 wave 5	spawned	RO-10	builder for H-J21, branch halo/ro10-render-journey
+2026-10-17T17:50Z	3 wave 5	pr-opened	#2211	RO-10 head cbe5c25c, fast-lane + feature-done, footer stripped
