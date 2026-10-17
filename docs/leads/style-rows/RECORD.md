@@ -4,7 +4,7 @@ Issue: #1497 · Packet: docs/blueprints/design/features/style-rows.md
 Run: act-1a149c0c306-8ckd (before: act-1a1487bf8e3-hwdj) · Session: claude/design-shell-parity-lead-678eue · Started: 2026-10-17T06:08Z
 Stage: 3 wave 2
 Base: 9ba6658425c543613715ebbf34d677a380ef8cc3
-Next: wave 2 = ST-7 (building, wave/style-rows-ST-7); then poll every 10 min: ST-4b, ST-5f, ST-5, ST-4 start when design-window DW-a (#1494) merges
+Next: wave 2 ST-7 is PR #2071 (open, lane build-only run pending); poll every 10 min: ST-4b, ST-5f, ST-5, ST-4 start when design-window DW-a (#1494) merges; SR-a waits on that too
 
 Line lead (rule 19) over #1325 shell-parity (done), #1498 layers-panel and #1497 style-rows. One wave plan across the three.
 
@@ -23,7 +23,7 @@ Line lead (rule 19) over #1325 shell-parity (done), #1498 layers-panel and #1497
 | ST-2 | SR-m | 1 | `sharedValue`, `opacityPercentText`, the locked hint's text per row | Sources/DesignModel/DesignInspectorContent.swift, Tests/DesignModelTests/DesignInspectorSharedValueTests.swift, Tests/mutations/DesignModel.DesignInspectorContent.json | DesignInspectorSharedValueTests + Mutate 2+/n | #2001 | merged |
 | ST-3 | SR-m | 1 | `textEditScale` follows the zoom (no floor at 1) | Sources/DesignModel/DesignText.swift, Tests/DesignModelTests/DesignTextScaleModelTests.swift, Tests/DesignModelTests/DesignCompactSelectionTests.swift, Tests/mutations/DesignModel.DesignText.json | DesignTextScaleModelTests + Mutate 2+/n | #2005 | merged |
 | ST-6b | SR-t | 1 | J11 written from the packet, `XCTSkip("waits on ST-5t")` | UITests/DesignJourneyTests+Text.swift | compiles on the lane's macOS build; skips by name | #2046 | merged |
-| ST-7 | SR-a | 2 | QD-S6, QD-S7 model budgets | Tests/DesignModelTests/DesignStyleBudgetTests.swift | DesignStyleBudgetTests under the Linux gates | – | building |
+| ST-7 | SR-a | 2 | QD-S6, QD-S7 model budgets | Tests/DesignModelTests/DesignStyleBudgetTests.swift | DesignStyleBudgetTests under the Linux gates | #2071 | open |
 | ST-4b | SR-t | 2 | Text rows in DW-a's Text section slot | Sources/DesignApp/DesignInspectorText.swift, Tests/AppSnapshotTests/DesignTextStyleSnapshots.swift | DesignTextStyleSnapshots | – | waits on ST-1, ST-2, DW-a |
 | ST-5f | SR-t | 2 | Top-level frame names above their frames in the unclipped overlay | Sources/DesignApp/DesignFrameLabels.swift, Sources/DesignModel/DesignFrameLabel.swift, Tests/DesignModelTests/DesignFrameLabelTests.swift, Tests/mutations/DesignModel.DesignFrameLabel.json, Tests/AppSnapshotTests/DesignFrameLabelSnapshots.swift | DesignFrameLabelTests + snapshots | – | waits on DW-a |
 | ST-5 | SR-b | 2 | Artwork draws radius, stroke and opacity | Sources/DesignApp/DesignCanvasMarks.swift, Tests/AppSnapshotTests/DesignArtworkPathTests.swift | DesignArtworkPathTests | – | waits on DW-a |

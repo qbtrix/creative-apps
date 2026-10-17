@@ -9,3 +9,5 @@ utc	stage	event	ref	note
 2026-10-17T13:14Z	3	ci-run	39033633296	scoped design green on 93c2103
 2026-10-17T13:14Z	3	slice-done	SR-m	run 39033633296
 2026-10-17T13:14Z	3	stage-start	wave 2	ST-7; base 9ba6658
+2026-10-17T13:30Z	3	pr-opened	#2071	ST-7 style scrub and text draft model budgets
+2026-10-17T13:30Z	3	heartbeat	cd0282c	resumed after restart; DW-a not merged; 0 open findings
