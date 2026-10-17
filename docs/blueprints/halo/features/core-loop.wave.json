@@ -1,14 +1,15 @@
 {
-  "title": "The core loop, live, measured",
+  "title": "The core loop, live, measured: comp, layers, keys, ease, play, text, render to files, save and reopen",
   "wave": "W3",
   "order": 10,
   "status": "planned",
-  "feature_issue": "later",
-  "covers": "the H-J12 `XCTSkip`",
-  "waits_on": "every W1 and W2 feature; #333; #330 for H-P1 to H-P5 (report-only until then)",
+  "feature_issue": "file when ready",
+  "beta": true,
+  "covers": "the H-J12 `XCTSkip`; H-P1 to H-P5; layout L3 to L5; Halo's kernel-export adoption (lead.md rule 20: Render… runs on SuiteKernel's `ExportRun` and SuiteUI's `ExportSheet`)",
+  "waits_on": "every W1 and W2 feature (depends); editor-kernel:EK-a (CL-1, CL-2 compile against the `ExportRun` stub), editor-kernel:EK-run (CL-6), editor-kernel:EK-chrome (CL-4, `ExportSheet`); the SuiteUI probe-recorder needs-ui (CL-8); switching A-HA-1 before CL-12 (it edits `UITests/HaloJourneyTests.swift`). Cross-line, so prose only: the data file can't name another app's slice",
   "cells": {
     "waits on (features)": "every W1 and W2 feature",
-    "waits on (SuiteUI, creative-core)": "#333; #330 for H-P1 to H-P5 (report-only until then)"
+    "waits on (SuiteUI, creative-core)": "editor-kernel EK-a, EK-run, EK-chrome (cross-line, prose waits); the probe-recorder needs-ui for H-P1 to H-P5's latency half (report-only from HaloViewerLatencyTests until then); switching A-HA-1 before CL-12"
   },
   "depends": [
     "viewer-playback",
@@ -19,31 +20,226 @@
     "render-out",
     "text-layers"
   ],
+  "longest_chain": "5 (CL-2 → CL-6 → CL-7 → CL-13 → CL-14)",
   "owned": [
-    "UITests/HaloJourneyTests.swift",
+    "Tests/HaloModelTests/HaloCoreLoopTests.swift",
+    "Tests/HaloModelTests/HaloRenderRunTests.swift",
+    "Sources/HaloModel/HaloRenderJob+Kernel.swift",
     "UITests/HaloJourneyTests+Perf.swift",
-    "UITests/HaloJourneyTests+Files.swift",
-    "UITests/HaloJourneyTests+FileErrors.swift",
-    "Tests/AppSnapshotTests/HaloViewerLatencyTests.swift",
     "Tests/AppSnapshotTests/HaloLayoutTests.swift",
-    "UITests/HaloJourneyTests+Viewer.swift",
-    "UITests/HaloJourneyTests+Playback.swift",
+    "Tests/AppSnapshotTests/HaloViewerLatencyTests.swift",
+    "Sources/HaloApp/HaloWindow+Render.swift",
+    "Sources/HaloApp/HaloRenderSheet.swift",
+    "Tests/AppSnapshotTests/HaloRenderSheetSnapshots.swift",
+    "UITests/HaloJourneyTests+Render.swift",
+    "Tests/AppSnapshotTests/RenderBudgetHaloRenderTests.swift",
+    "Sources/HaloModel/HaloRenderJob.swift",
+    "Tests/HaloModelTests/HaloRenderJobTests.swift",
+    "Tests/mutations/HaloModel.HaloRenderJob+Kernel.json",
+    "Sources/HaloModel/Availability/HaloAvailability+Render.swift",
+    "Tests/HaloModelTests/HaloRenderAvailabilityTests.swift",
+    "Tests/mutations/HaloModel.HaloAvailability+Render.json",
+    "Sources/HaloApp/HaloProbe.swift",
+    "Sources/HaloApp/HaloViewerGestures.swift",
+    "Sources/HaloApp/HaloPlaybackDriver.swift",
+    "Sources/HaloApp/HaloTimelineView.swift",
+    "Sources/HaloApp/HaloLayerList.swift",
+    "Sources/HaloApp/HaloLayerInspector.swift",
+    "Tests/AppSnapshotTests/RenderBudgetHaloProbeTests.swift",
+    "UITests/HaloJourneyTests.swift",
     "UITests/HaloJourneyTests+Drag.swift",
     "UITests/HaloJourneyTests+Inspector.swift",
     "UITests/HaloJourneyTests+Parent.swift",
-    "UITests/HaloJourneyTests+History.swift",
     "UITests/HaloJourneyTests+Layers.swift",
-    "UITests/HaloJourneyTests+Easing.swift",
-    "UITests/HaloJourneyTests+Text.swift",
-    "UITests/HaloJourneyTests+RenderFrame.swift",
-    "UITests/HaloJourneyTests+Render.swift"
+    "docs/blueprints/halo/features/core-loop.wave.json",
+    "docs/blueprints/halo/waves.in.md",
+    "docs/blueprints/halo.md"
   ],
   "core": "none",
-  "waits_ui": [
-    "#333",
-    "#330 FrameProbe for H-P1 to H-P5 (report-only until then)"
+  "note": "H-J12 live end to end (replaces the XCTSkip); H-P1 to H-P5 on the frame probe; L3 to L5; flips the five journeys still on `-HaloFixture` to `-HaloSample`; Render… becomes SuiteUI's ExportSheet over SuiteKernel's ExportRun through the `HaloRenderJob+Kernel` adapter, and render-out's app-local state machine and sheet are deleted. Filed once every W1 and W2 feature is done, because it edits their journey files.",
+  "journeys": [
+    "HaloJourneyTests.testKeyLayerAndSave",
+    "HaloJourneyTests.testRenderPNGSequence",
+    "HaloPerfJourneyTests.testViewerDragLatency",
+    "HaloPerfJourneyTests.testInspectorScrubLatency",
+    "HaloPerfJourneyTests.testPlayheadScrubLatency",
+    "HaloPerfJourneyTests.testPlaybackHoldsRate",
+    "HaloPerfJourneyTests.testTimelineAndLayerListScroll"
   ],
-  "note": "H-J12 live; H-P1 to H-P5; layout L3 to L5; flips every fixture journey still on `-HaloFixture` to `-HaloSample`. Its feature issue is filed only once every W1 and W2 feature is done, because it edits their journey files.",
-  "journeys": [],
-  "journeys_none": "no packet yet: waves data names the H-J12 XCTSkip in HaloJourneyTests.swift and H-P1 to H-P5, but no XCUITest method"
+  "slices": [
+    {
+      "id": "CL-a",
+      "behavior": "The loop's checks exist before its code: the Linux walk of the whole loop on live services, the kernel-run tests, the five perf journeys and the L3 to L5 layout tests (disabled until their tasks), plus the `HaloRenderJob+Kernel` stubs the sheet compiles against.",
+      "tasks": [
+        "CL-1",
+        "CL-2",
+        "CL-3"
+      ],
+      "journeys": [
+        "MJ-CL1"
+      ],
+      "owned": [
+        "Tests/HaloModelTests/HaloCoreLoopTests.swift",
+        "Tests/HaloModelTests/HaloRenderRunTests.swift",
+        "Sources/HaloModel/HaloRenderJob+Kernel.swift",
+        "UITests/HaloJourneyTests+Perf.swift",
+        "Tests/AppSnapshotTests/HaloLayoutTests.swift",
+        "Tests/AppSnapshotTests/HaloViewerLatencyTests.swift",
+        "Tests/AppSnapshotTests/RenderBudgetHaloRenderTests.swift",
+        "Tests/AppSnapshotTests/RenderBudgetHaloProbeTests.swift"
+      ],
+      "waits": {},
+      "ui": false
+    },
+    {
+      "id": "CL-ui",
+      "behavior": "File > Render… (⇧⌘R) opens SuiteUI's ExportSheet over the kernel run's readouts on the stubs, with Halo's format and size rows, the destination and Reveal in Finder, and progress, done and failed states; render-out's HaloRenderSheet is gone and H-J21 drives the new sheet.",
+      "tasks": [
+        "CL-4",
+        "CL-5"
+      ],
+      "journeys": [
+        "H-J21"
+      ],
+      "owned": [
+        "Sources/HaloApp/HaloWindow+Render.swift",
+        "Sources/HaloApp/HaloRenderSheet.swift",
+        "Tests/AppSnapshotTests/HaloRenderSheetSnapshots.swift",
+        "UITests/HaloJourneyTests+Render.swift",
+        "Tests/AppSnapshotTests/RenderBudgetHaloRenderTests.swift"
+      ],
+      "waits": {
+        "CL-a": [
+          "CL-4",
+          "CL-5"
+        ]
+      },
+      "ui": true
+    },
+    {
+      "id": "CL-run",
+      "behavior": "Halo's render job runs on `ExportRun<HaloRenderSettings>`: every transition goes through the kernel (progress never back, clamped to the plan, cancel to idle), availability reads the run, and render-out's app-local state machine and its tests are deleted.",
+      "tasks": [
+        "CL-6",
+        "CL-7"
+      ],
+      "journeys": [
+        "MJ-CL2"
+      ],
+      "owned": [
+        "Sources/HaloModel/HaloRenderJob+Kernel.swift",
+        "Sources/HaloModel/HaloRenderJob.swift",
+        "Tests/HaloModelTests/HaloRenderJobTests.swift",
+        "Tests/HaloModelTests/HaloRenderRunTests.swift",
+        "Tests/mutations/HaloModel.HaloRenderJob+Kernel.json",
+        "Sources/HaloModel/Availability/HaloAvailability+Render.swift",
+        "Tests/HaloModelTests/HaloRenderAvailabilityTests.swift",
+        "Tests/mutations/HaloModel.HaloAvailability+Render.json"
+      ],
+      "waits": {
+        "CL-a": [
+          "CL-6",
+          "CL-7"
+        ]
+      },
+      "ui": false
+    },
+    {
+      "id": "CL-probe",
+      "behavior": "Under `-SuitePerfProbe` the viewer drag, inspector bar scrub, playhead drag, playback ticks and the lane and layer-list scroll record their input samples and drawn frames into the window's probe, so `suite.perf` carries HB-U1 to HB-U5's series, and recording adds no window body.",
+      "tasks": [
+        "CL-8",
+        "CL-9"
+      ],
+      "journeys": [
+        "H-P1",
+        "H-P4"
+      ],
+      "owned": [
+        "Sources/HaloApp/HaloProbe.swift",
+        "Sources/HaloApp/HaloViewerGestures.swift",
+        "Sources/HaloApp/HaloPlaybackDriver.swift",
+        "Sources/HaloApp/HaloTimelineView.swift",
+        "Sources/HaloApp/HaloLayerList.swift",
+        "Sources/HaloApp/HaloLayerInspector.swift",
+        "Tests/AppSnapshotTests/RenderBudgetHaloProbeTests.swift"
+      ],
+      "waits": {
+        "CL-a": [
+          "CL-8",
+          "CL-9"
+        ]
+      },
+      "ui": true
+    },
+    {
+      "id": "CL-measure",
+      "behavior": "H-P1 to H-P5 run on `reference` and `crowd` with the probe and attach their series against HB-U1 to HB-U5, L3 to L5 hold in the hosted views, HaloViewerLatencyTests writes its HALO-LATENCY line, and every Halo journey launches on live services.",
+      "tasks": [
+        "CL-10",
+        "CL-11",
+        "CL-12"
+      ],
+      "journeys": [
+        "H-P1",
+        "H-P2",
+        "H-P3",
+        "H-P4",
+        "H-P5"
+      ],
+      "owned": [
+        "UITests/HaloJourneyTests+Perf.swift",
+        "Tests/AppSnapshotTests/HaloLayoutTests.swift",
+        "Tests/AppSnapshotTests/HaloViewerLatencyTests.swift",
+        "UITests/HaloJourneyTests.swift",
+        "UITests/HaloJourneyTests+Drag.swift",
+        "UITests/HaloJourneyTests+Inspector.swift",
+        "UITests/HaloJourneyTests+Parent.swift",
+        "UITests/HaloJourneyTests+Layers.swift"
+      ],
+      "waits": {
+        "CL-a": [
+          "CL-10",
+          "CL-11",
+          "CL-12"
+        ],
+        "CL-probe": [
+          "CL-10"
+        ]
+      },
+      "ui": false
+    },
+    {
+      "id": "CL-z",
+      "behavior": "H-J12 walks the whole loop live with the mouse, from New Composition… through layers, keys, ease, play, text, undo, Render… to PNG files, save and relaunch, and the feature is built.",
+      "tasks": [
+        "CL-13",
+        "CL-14"
+      ],
+      "journeys": [
+        "H-J12"
+      ],
+      "owned": [
+        "UITests/HaloJourneyTests.swift",
+        "docs/blueprints/halo/features/core-loop.wave.json",
+        "docs/blueprints/halo/waves.in.md",
+        "docs/blueprints/halo.md"
+      ],
+      "waits": {
+        "CL-ui": [
+          "CL-13"
+        ],
+        "CL-run": [
+          "CL-13"
+        ],
+        "CL-probe": [
+          "CL-13"
+        ],
+        "CL-measure": [
+          "CL-13"
+        ]
+      },
+      "ui": false
+    }
+  ]
 }

@@ -310,9 +310,10 @@
               {
                 "id": "halo-render-out",
                 "name": "Render to files",
-                "description": "The Render… job: settings, the plan, progress ('Frame 48 of 240'), cancel and the outcome, driving CompositionRendering into a RenderSink the app supplies.",
+                "description": "The Render… job: settings, the plan, progress ('Frame 48 of 240'), cancel and the outcome, driving CompositionRendering into a RenderSink the app supplies. HaloRenderJob+Kernel.swift is the adapter onto SuiteKernel's ExportRun (core-loop): every render-job transition goes through the kernel.",
                 "paths": [
-                  "Sources/HaloModel/HaloRenderJob.swift"
+                  "Sources/HaloModel/HaloRenderJob.swift",
+                  "Sources/HaloModel/HaloRenderJob+Kernel.swift"
                 ],
                 "status": "planned",
                 "authored": true,
@@ -435,14 +436,15 @@
               {
                 "id": "halo-viewer",
                 "name": "Viewer",
-                "description": "The viewer (HaloViewer, today inside HaloApp.swift; W0 moves it to HaloViewer.swift): the artboard (CanvasSurface) with the draw list painted in a SwiftUI Canvas, the selection outline, the drag gesture, the rendered-frame image (HaloRenderedFrameView), the status bar and the transport; the display-link playback driver.",
+                "description": "The viewer (HaloViewer, today inside HaloApp.swift; W0 moves it to HaloViewer.swift): the artboard (CanvasSurface) with the draw list painted in a SwiftUI Canvas, the selection outline, the drag gesture, the rendered-frame image (HaloRenderedFrameView), the status bar and the transport; the display-link playback driver. HaloProbe.swift records the viewer drag, playhead, playback and scroll series into the window's frame probe under -SuitePerfProbe (core-loop).",
                 "paths": [
                   "Sources/HaloApp/HaloViewer.swift",
                   "Sources/HaloApp/HaloViewerCanvas.swift",
                   "Sources/HaloApp/HaloViewerGestures.swift",
                   "Sources/HaloApp/HaloRenderedFrameView.swift",
                   "Sources/HaloApp/HaloTransport.swift",
-                  "Sources/HaloApp/HaloPlaybackDriver.swift"
+                  "Sources/HaloApp/HaloPlaybackDriver.swift",
+                  "Sources/HaloApp/HaloProbe.swift"
                 ],
                 "status": "planned",
                 "authored": true,
