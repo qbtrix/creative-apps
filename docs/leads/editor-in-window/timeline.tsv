@@ -61,3 +61,4 @@ utc	stage	event	ref	note
 2026-10-17T03:26Z	4	pr-merged	#1900	round 2 fix merged; round 3 on 38997835882
 2026-10-17T03:53Z	4	round-findings	38997835882	round 3: window 677>674, artboard read; fixer started
 2026-10-17T06:23Z	4	stage-start	round 3	lead relaunched as line lead act-1a1487bf89a-zfq8; branch rebuilt on main; round-3 fixer started (fix-batch r3-b1: #1777, #1778) on dev fe0f5f17
+2026-10-17T10:47Z	3	heartbeat	-	lead resumed after a container restart and a session limit (reset 10:40Z); wave-10 results read
