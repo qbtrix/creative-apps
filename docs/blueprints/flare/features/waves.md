@@ -18,8 +18,8 @@ lists its tasks, owned files and acceptance tests.
 | 2 | Scenes and guides on real documents | `live-scenes.md` | #362 | creative-core #217, #219 (on core `main` 98be31a) | #800 | built |
 | 3 | Draw a rectangle, key it, play it and save it | `draw-key-save.md` | #346, #347, #12, #203, #15, #11, #205; part of #204, #376, #391 | #793 (closed); task DK-3 only on #798, #799, #800 | #1365 | built |
 | 4 | Select, transform, zoom and edit on the stage | `stage-edit.md` | #204, #375, #384; IN-1 #397 (stage half) | `draw-key-save`; tasks SE-1, SE-2 on #273 and #995 | file when ready | planned |
-| 4 | Key in the inspector, ease and edit the timeline | `inspector-timeline.md` | #186, #348, #349 (SCENE), #376, #377, #378; IN-2 #385; IN-1 #397 (inspector half) | `draw-key-save`; tasks IT-7 on #63, IT-9 on #340 | file when ready | planned |
-| 4 | Scenes and layers, new from a preset, files that never fail silently | `layers-files.md` | #350, #351, #392, #393; IN-4 #398 (files half) | `draw-key-save`; tasks LF-1 on #146, LF-2 on #73 | file when ready | planned |
+| 4 | Key in the inspector, ease and edit the timeline | `inspector-timeline.md` | #186, #348, #349 (SCENE), #376, #377, #378; IN-2 #385; IN-1 #397 (inspector half) | `draw-key-save`; tasks IT-7 on #63, IT-9 on #340 | #1515 | built |
+| 4 | Scenes and layers, new from a preset, files that never fail silently | `layers-files.md` | #350, #351, #392, #393; IN-4 #398 (files half) | `draw-key-save`; tasks LF-1 on #146, LF-2 on #73 | #1516 | built |
 | 5 | Export an SVG frame, a Lottie or a PNG sequence on the kernel's export run, never overwriting, with an exact round trip | `flare-export.md` | #354, #355, #374; LA-1 (StageRasterizer); #366 (the SVG Design's import reads) | `draw-key-save`; cross-line: FX-2 on editor-kernel:EK-a, FX-4 on editor-kernel:EK-run, FX-3 on editor-kernel:EK-chrome (in `waits_cross_line`); in the app, FX-5 on `inspector-timeline` | file when ready | planned |
 
 Longest chain per feature: mac-platform 3, live-stage 4, live-keys 4,
