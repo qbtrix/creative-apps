@@ -20,3 +20,4 @@ utc	stage	event	ref	note
 2026-10-17T14:14Z	3	pr-opened	#2108	RO-5 head 7cd354f
 2026-10-17T14:18:46Z	3 wave 2	heartbeat	#2108	RO-5 lane macOS build run 39040041419 dispatched
 2026-10-17T14:18:46Z	3 wave 2	heartbeat	RO-4	builder running its gate
+2026-10-17T14:20:06Z	3 wave 2	pr-opened	#2112	RO-4 render availability, CI: PASS, head 9821878f
