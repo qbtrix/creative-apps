@@ -34,7 +34,7 @@ public struct NewDocumentSpec: Sendable, Equatable {
 
     /// Why Create can't make a document from this spec; nil when it can.
     public var problem: String? {
-        let sides = 1...Self.maxSide, side = "1 to \(Int(Self.maxSide)) pt."
+        let sides = 1...Self.maxSide, side = "1 to \(Int(Self.maxSide)) px."
         if !sides.contains(width) { return "Width must be \(side)" }
         if !sides.contains(height) { return "Height must be \(side)" }
         if !Self.fpsRange.contains(fps) {
