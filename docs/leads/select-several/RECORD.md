@@ -4,7 +4,7 @@ Issue: #1495 · Packet: docs/blueprints/design/features/select-several.md
 Run: act-1a14a88d756-rnok · Session: claude/design-feature-lead-7saqm8 · Started: 2026-10-17T15:46Z
 Stage: 3 wave 1
 Base: dd7ec767cc0afab91b35ff4f208351dd866028d8
-Next: S-6 starts once design-window DW-a (wave 2 building) and DW-b (D0-8a, D0-8b) merge; S-5 waits only on canvas-basics CB-a now (design-seams merged)
+Next: DW-a merged (b2942150); S-6 waits only on DW-b (D0-8a building in design-window wave 3, then D0-8b); S-5 waits on canvas-basics CB-a (no new merges as of 2026-10-17T19:16:17Z)
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -20,7 +20,7 @@ Next: S-6 starts once design-window DW-a (wave 2 building) and DW-b (D0-8a, D0-8
 | S-3 | SS-a | 0 | LiveAligning distribute | Sources/DesignModel/Live/LiveAligning.swift; Tests/DesignModelTests/DesignDistributeTests.swift | DesignDistributeTests | (before this run) | merged |
 | S-4 | SS-b | 0 | LiveFraming | Sources/DesignModel/Live/LiveFraming.swift; Tests/DesignModelTests/DesignFramingTests.swift | DesignFramingTests | (before this run) | merged |
 | S-5 | SS-b | – | no edit or step while a gesture is live; no nudge of a hidden-in-tree layer | DesignCanvasEditing.swift, DesignActions.swift, DesignActions+Edit.swift; tests | DesignMidDragEditTests, DesignHiddenNudgeTests | – | waits design-seams, CB-a |
-| S-6 | SS-a | – | views: several-layer handles, Distribute buttons, marquee from the Model; snapshots | DesignSelectionMarks.swift, DesignAlignBar.swift; snapshots | DesignMarqueeSnapshots, DesignAlignSnapshots, DesignMultiSelectSnapshots | – | waits DW-a, DW-b |
+| S-6 | SS-a | – | views: several-layer handles, Distribute buttons, marquee from the Model; snapshots | DesignSelectionMarks.swift, DesignAlignBar.swift; snapshots | DesignMarqueeSnapshots, DesignAlignSnapshots, DesignMultiSelectSnapshots | – | waits DW-b |
 | S-7 | SS-a | – | J5, J6 | UITests/DesignJourneyTests+Select.swift | J5, J6 | – | waits S-6, design-seams |
 | S-7b | SS-b | – | J4 | UITests/DesignJourneyTests+Select.swift | J4 | – | waits S-4, S-7 |
 | S-8 | SS-b | – | QD-S1..S4 budgets, P1; feature-done | Tests/DesignModelTests/DesignSelectBudgetTests.swift; UITests/DesignJourneyTests+PerfCanvas.swift | DesignSelectBudgetTests, P1 | – | waits S-7b, design-seams |

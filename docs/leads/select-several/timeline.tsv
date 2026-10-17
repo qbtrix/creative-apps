@@ -15,3 +15,4 @@ utc	stage	event	ref	note
 2026-10-17T18:10Z	heartbeat	waiting: DW-a in flight (#2213 fix round 1, #2214, #2217); CB-a not merged
 2026-10-17T18:37:38Z	check	heartbeat: S-6 waits DW-a (#2213) and DW-b; S-5 waits CB-a
 2026-10-17T18:56:51Z	check	heartbeat: CB-a no new merges (S-5 waits); S-6 waits DW-a (#2213) and DW-b
+2026-10-17T19:16:17Z	status	DW-a merged; S-6 waits only on DW-b; CB-a unchanged
