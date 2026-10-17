@@ -17,6 +17,10 @@
 // always writes the file that document belongs to (#436). Two launch arguments let the UI journeys skip the panels:
 // `-DesignOpenFile <file path>` opens that file once, in the first window, and
 // `-DesignSaveTo <file path>` makes Save and Save As write exactly that path.
+// DesignWindowOptions reads three more: `-DesignServices fake` (every window),
+// `-DesignFixture <name>` (a fixture opened unsaved in the first window; an
+// unknown name leaves it empty and says so on the status line) and
+// `-DesignWindowSize WxH` (the first window's content size).
 import AppKit
 import DesignModel
 import SuiteUI
@@ -36,10 +40,14 @@ struct DesignWindow: View {
     @State private var note: String?
     @State private var problem: String?
     @State private var started = false
+    /// The rect Zoom to Selection asked to show; the canvas takes it once it has that input (D0-5b).
+    @State private var show: DesignRect?
     @Environment(\.openWindow) private var openWindow
 
     /// The launch file opens in the first window only.
     @MainActor private static var launchFileOpened = false
+    /// The fixture and window size apply to the first window only.
+    @MainActor private static var launchOptionsApplied = false
 
     /// The `.design` extension, as the system types a file on disk. Not one that conforms to JSON: the
     /// type a real `.design` file gets doesn't conform to that, so the open panel would grey it out.
@@ -106,6 +114,22 @@ struct DesignWindow: View {
         case .zoomIn: setZoom(ViewerZoom.zoomedIn(from: zoom))
         case .zoomOut: setZoom(ViewerZoom.zoomedOut(from: zoom))
         case .fit: fit()
+        case .command(let command):
+            do { try model.run(command) } catch { note = error.help }
+        // The pasteboard bridge for these three is D0-5d's; until it lands they do nothing.
+        case .copy, .cut, .paste: break
+        case .selectAll: model.selectAll()
+        case .zoomToSelection: zoomToSelection()
+        case .moveLayer(let id, let parent, let index):
+            do { try model.moveLayer(id, into: parent, at: index) } catch { note = error.help }
+        case .setStyle(let change):
+            do { try model.setStyle(change) } catch { note = error.help }
+        case .renamePage(let id, let name):
+            do { try model.renamePage(id, to: name) } catch {
+                // The page ids come from the model's own rows; only the name can be refused.
+                if error == .emptyName { note = DesignRefusal.emptyName.help }
+                if case .alreadyExists = error { note = DesignRefusal.nameTaken(name).help }
+            }
         }
     }
 
@@ -129,6 +153,19 @@ struct DesignWindow: View {
         setZoom(scale > 0 ? scale : 1)
     }
 
+    /// Zooms to fit the selection clear of the palette and keeps its rect for the canvas to
+    /// scroll to; a refusal (nothing selected, or not built yet) goes to the status line.
+    private func zoomToSelection() {
+        guard let rect = model.zoomToSelectionRect, viewport != .zero else {
+            note = model.zoomToSelectionHelp
+            return
+        }
+        let layout = EditorDetailLayout(viewport: viewport, toolCount: DesignTool.allCases.count)
+        let scale = layout.fitScale(artboard: CGSize(width: rect.width, height: rect.height))
+        setZoom(scale > 0 ? scale : 1)
+        show = rect
+    }
+
     private func viewportChanged(_ size: CGSize) {
         viewport = size
         if fitPending { fit() }
@@ -141,12 +178,37 @@ struct DesignWindow: View {
     private func start() {
         guard !started else { return }
         started = true
+        let options = DesignWindowOptions(arguments: ProcessInfo.processInfo.arguments)
+        model.useServices(options.services)
         if let file = launch?.file {
             open(file)
         } else if launch?.startsNewFile == true {
             perform(.newFile)
         } else {
             openLaunchFile()
+            applyLaunchOptions(options)
+        }
+    }
+
+    /// The first window opens `-DesignFixture` and takes `-DesignWindowSize`, floored at the
+    /// suite's minimum window size.
+    private func applyLaunchOptions(_ options: DesignWindowOptions) {
+        guard !Self.launchOptionsApplied else { return }
+        Self.launchOptionsApplied = true
+        if let name = options.fixture {
+            if model.openFixture(name) {
+                fitPending = true
+                fit()
+            } else {
+                note = "No fixture named \(name)."
+            }
+        }
+        if let width = options.windowWidth, let height = options.windowHeight {
+            let size = CGSize(
+                width: Swift.max(width, SuiteSize.windowMinimum.width),
+                height: Swift.max(height, SuiteSize.windowMinimum.height))
+            // On the next main-actor turn, once the window is on screen.
+            Task { @MainActor in (NSApp.keyWindow ?? NSApp.windows.first)?.setContentSize(size) }
         }
     }
 
