@@ -1,0 +1,126 @@
+utc	stage	event	ref	note
+2026-10-15T09:05Z	0	stage-start	#1035	base 2fc9b59, deps #777 #333 closed
+2026-10-15T09:20Z	1	stage-end	packet	tasks VP-1..VP-12 copied
+2026-10-15T09:20Z	2	stage-end	plan	five waves as packet
+2026-10-15T09:20Z	3	stage-start	wave1	VP-1 VP-2 VP-4a
+2026-10-15T10:00Z	3	pr-merged	#1069	VP-4a outlines
+2026-10-15T10:00Z	3	pr-merged	#1072	VP-2 live clock
+2026-10-15T10:00Z	3	heartbeat	VP-1	resumed after restart; VP-1 gate fix
+2026-10-15T10:05Z	3	stage-start	wave2	VP-1 finish + VP-3 VP-7 building; VP-4b VP-8 wait VP-1
+2026-10-15T10:40Z	3	pr-opened	#1087	VP-3 playback methods
+2026-10-15T10:40Z	3	pr-merged	#1085	VP-7 playback availability
+2026-10-15T11:00Z	3	pr-merged	#1087	VP-3
+2026-10-15T11:00Z	3	pr-opened	#1090	VP-1 live drawing
+2026-10-15T11:05Z	3	stage-start	VP-10	building on 910dafa
+2026-10-15T10:40Z	3	pr-merged	#1090	VP-1
+2026-10-15T10:40Z	3	stage-start	wave2b	VP-4b VP-8 VP-6 on c7e5c17
+2026-10-15T11:00Z	3	pr-opened	#1097	VP-10 transport and driver
+2026-10-15T10:55Z	3	pr-merged	#1097	VP-10
+2026-10-15T10:56Z	3	stage-start	VP-11	building on 51a5b9d
+2026-10-15T11:03Z	3	pr-merged	#1098	VP-4b closes #457
+2026-10-15T11:03Z	3	pr-merged	#1099	VP-8 canvas
+2026-10-15T11:03Z	3	pr-merged	#1101	VP-6 budgets
+2026-10-15T11:04Z	3	stage-start	VP-5	building on 35fd3e6
+2026-10-15T11:06Z	3	pr-opened	#1102	VP-11 H-J3
+2026-10-15T11:05Z	3	pr-merged	#1102	VP-11 H-J3
+2026-10-15T11:12Z	3	ci-run	38721434364	red; ours: transport.end dead before VP-10, fixed by #1097
+2026-10-15T11:19Z	3	heartbeat	VP-5	building
+2026-10-15T11:22Z	3	pr-opened	#1111	VP-5 text pixels
+2026-10-15T11:22Z	3	pr-merged	#1111	VP-5
+2026-10-15T11:42Z	3	stage-start	wave4	VP-9 on fb4c57d
+2026-10-15T11:44Z	3	stage-start	VP-12	building, unlabelled until VP-9 merges
+2026-10-15T12:00Z	3	pr-opened	#1124	VP-12 journeys, unlabelled; relaunch at 1280x800 requested
+2026-10-15T12:05Z	3	pr-merged	#1125	VP-9 HF-1
+2026-10-15T12:25Z	3	stage-end	wave5	#1124 labelled feature-done
+2026-10-15T11:59Z	3	pr-merged	#1124	VP-12 feature-done
+2026-10-15T11:59Z	4	stage-start	round1	waiting on dev CI
+2026-10-15T12:04Z	4	ci-run	38731305776	dispatched by #1124 on 7f61259, in progress
+2026-10-15T12:35Z	4	pr-opened	#1136	macOS build fix for HaloPlaybackDriverTests circular reference
+2026-10-15T12:45Z	4	pr-merged	#1136	macOS build fix
+2026-10-15T12:46Z	4	pr-opened	#1137	packet status, feature-done to dispatch CI
+2026-10-15T12:26Z	4	pr-merged	#1137	packet status, feature-done
+2026-10-15T12:26Z	4	ci-run	38734211999	in progress on 35a875b
+2026-10-15T13:05Z	4	pr-opened	#1145	driver on injected link, fake link in tests; feature-done
+2026-10-15T12:52Z	4	pr-merged	#1145	link fix, feature-done
+2026-10-15T12:58Z	4	ci-run	38737961079	on 79bd068, in progress (38738075349 queued behind)
+2026-10-15T13:40Z	4	pr-merged	#1157	disable 5 driver tests (supervisor)
+2026-10-15T13:45Z	4	pr-opened	#1160	fidelity off main actor, driver tests back; closes #1155
+2026-10-15T13:46Z	4	round-findings	#1161	keyedFrame6 opacity mismatch, fixer running
+2026-10-15T13:30Z	4	pr-merged	#1160	fidelity off main actor, closes #1155
+2026-10-15T13:45Z	4	pr-opened	#1163	Canvas colorMode .linear for opacity (#1161)
+2026-10-15T13:39Z	4	pr-merged	#1163	Canvas colorMode .linear (closes #1161)
+2026-10-15T14:10Z	4	ci-run	38743186679	red: driver tests queue 185 s on the main actor; keyedFrame6 pre-#1163
+2026-10-15T14:12Z	4	pr-opened	#1171	driver suite limit 10 min, feature-done
+2026-10-15T14:06Z	4	pr-merged	#1171	driver suite limit 10 min, feature-done
+2026-10-15T14:38Z	4	ci-run	38748468768	red: LibraryApp compile break (Library line), fixed by #1175; no Halo signal
+2026-10-15T15:05Z	4	pr-opened	#1180	packet status, feature-done to dispatch CI after #1175
+2026-10-15T15:04Z	4	pr-merged	#1180	packet status, feature-done
+2026-10-15T15:35Z	4	ci-run	38757068610	red: only keyedFrame6; driver tests pass
+2026-10-15T15:40Z	4	pr-opened	#1189	HF-1 failure prints both RGBA values; feature-done
+2026-10-15T15:35Z	4	pr-merged	#1189	HF-1 diff pixels, feature-done
+2026-10-15T16:08Z	4	ci-run	38762922782	red: keyedFrame6 only, canvas sRGB mix 124 vs render 160
+2026-10-15T16:10Z	4	pr-opened	#1194	ImageRenderer colorMode extendedLinear, closes #1161
+2026-10-15T16:14Z	4	pr-merged	#1194	fidelity renderer linear, feature-done
+2026-10-15T16:41Z	4	ci-run	38767265986	macOS scripts/ci green (keyedFrame6 + driver tests pass); ui-test running
+2026-10-15T17:05Z	4	round-findings	38767265986	H-J2/3/4 read empty values (#262); overflow #1178; fixer launched
+2026-10-15T17:20Z	4	pr-opened	#1211	viewer summaries readable by label; journeys read labels
+2026-10-15T17:09Z	4	pr-merged	#1211	summaries by label, feature-done
+2026-10-15T17:46Z	4	ci-run	38777072611	red: PhotoModel compile error (Photo line); runs 38774988270/38776323445 too; no Halo signal
+2026-10-15T18:16Z	4	heartbeat	38782884668	run on f9846c9 (Photo build fix #1226) in scripts/ci; round 2 reads it
+2026-10-15T18:48Z	4	ci-run	38782884668	red: PhotoCompositeCostTests timing (Photo line); ui-test skipped; no Halo journey signal
+2026-10-15T19:20Z	4	heartbeat	38792928305	new run on c93a7f8 started 19:19Z; round 2 reads it
+2026-10-15T19:57Z	4	heartbeat	38792928305	macOS scripts/ci green; ui-test running
+2026-10-15T20:14Z	4	ci-run	38792928305	cancelled mid ui-test (superseded by 38799320916 on 3dc283e) before our journeys
+2026-10-15T20:46Z	4	heartbeat	38799320916	macOS scripts/ci green; ui-test running
+2026-10-15T21:05Z	4	round-findings	38799320916	H-J3 pass; H-J2 solid name; H-J4 Space after lane click; fixer launched
+2026-10-15T21:20Z	4	pr-opened	#1246	H-J4 proves play-once by its stop; H-J2 expects Solid 2
+2026-10-15T21:21Z	4	round-findings	loop	Loop button shows no state (every-control); fixer launched
+2026-10-15T21:35Z	4	pr-opened	#1247	Loop button shows its state (Toggle .button)
+2026-10-15T21:21Z	4	pr-merged	#1246	H-J4 timing, H-J2 Solid 2 (feature-done)
+2026-10-15T21:21Z	4	pr-merged	#1247	Loop shows its state
+2026-10-15T22:04Z	4	heartbeat	38808325928	round 3 run (75492b1, has #1246, not #1247) in scripts/ci
+2026-10-15T22:30Z	4	heartbeat	38808325928	scripts/ci green; ui-test running
+2026-10-15T22:55Z	4	round	38808325928	round 3: all 3 journeys pass; critic panel running
+2026-10-15T23:00Z	4	panel	wf_7a832d7d-692	round 3: 9 confirmed; fix batch running; filed #1257
+2026-10-15T23:30Z	4	pr-merged	#1258 #1259 #1260	round 3 fixes merged
+2026-10-15T23:32Z	4	pr-opened	#1261	feature-done status PR for round 4
+2026-10-15T23:45Z	4	heartbeat	38823367271	round 4 run (f3b8987, #1261 feature-done) in progress
+2026-10-16T00:30Z	4	round	38823367271	round 4: H-J4/History fail on status bar overflow from #1258+#1260; fix #1264 opened (feature-done)
+2026-10-16T00:51Z	4	heartbeat	38829075229	#1264 merged; its run (a42b3cf) queued behind 38823898596
+2026-10-16T01:35Z	4	round	38829075229	macOS red on HaloTransportFitTests (gap bound vs #1264); fix #1268 opened (feature-done)
+2026-10-16T02:02Z	4	heartbeat	38835566584	#1268 merged; macOS scripts/ci PASS (AppSnapshotTests green), ui-test running; Linux red on #851 only
+2026-10-16T02:45Z	4	round	38835566584	H-J2/H-J4/History pass; H-J3 audit-only fail (inspector scroller, #1178 comment); every-control stale-state fix #1277
+2026-10-16T02:50Z	4	heartbeat	38841265840	resumed (run act-1a1429c87eb-3ecm); #1277 merged as e99643c; its run in progress
+2026-10-16T03:00Z	4	round-findings	#1178	H-J3 audit unnamed scroller: fixer launched; Linux on 38841265840 red on #851 only
+2026-10-16T03:08Z	4	heartbeat	38841265840	waiting on round 4 run (in_progress) and scroller fixer
+2026-10-16T03:26Z	4	heartbeat	38841265840	waiting on round 4 run (in_progress) and scroller fixer
+2026-10-16T03:44Z	4	heartbeat	38841265840	waiting on round 4 run (completed) and scroller fixer
+2026-10-16T04:02Z	4	heartbeat	38841265840	waiting on round 4 run (completed) and scroller fixer
+2026-10-16T04:20Z	4	heartbeat	38841265840	waiting on round 4 run (completed) and scroller fixer
+2026-10-16T04:39Z	4	heartbeat	38841265840	waiting on round 4 run (completed) and scroller fixer
+2026-10-16T19:45Z	4	heartbeat	#1280	resumed after container restart; #1280 merged 03:34Z; lead branch rebuilt on main
+2026-10-16T19:50Z	4	round-findings	H-J13	Play after End+Loop: play-once pass ends before XCUITest idles; fixer launched (reset to frame 0, unquarantine)
+2026-10-16T20:05Z	4	pr-opened	#1590	H-J13 judges each control from frame 0; unquarantine (fast-lane)
+2026-10-16T20:00Z	4	heartbeat	H-J13	waiting on H-J13 fixer PR, lane and scoped halo run
+2026-10-16T20:30Z	4	round-clean	38952256967	scoped halo on 1e91d349: H-J2 H-J3 H-J4 H-J13 pass; only easing's testEaseKeys red (not ours)
+2026-10-16T20:18Z	4	heartbeat	H-J13	waiting on H-J13 fixer PR, lane and scoped halo run
+2026-10-16T20:36Z	4	heartbeat	H-J13	waiting on H-J13 fixer PR, lane and scoped halo run
+2026-10-16T20:54Z	4	heartbeat	H-J13	waiting on H-J13 fixer PR, lane and scoped halo run
+2026-10-16T21:13Z	4	heartbeat	H-J13	waiting on H-J13 fixer PR, lane and scoped halo run
+2026-10-16T21:31Z	4	heartbeat	H-J13	waiting on H-J13 fixer PR, lane and scoped halo run
+2026-10-16T22:20Z	4	heartbeat	#1590	lane refused (protected quarantine.json); reverted that file, head 04ba091, fast-lane again; supervisor asked to drop entry
+2026-10-16T22:00Z	4	pr-merged	#1590	H-J13 from frame 0 (1f55a91)
+2026-10-16T22:05Z	5	pr-opened	#1685	feature-done: wave.json built, packet status round 4
+2026-10-16T22:15Z	5	heartbeat	#1685	#1685 merged 2b064544; runs: ;
+2026-10-16T22:35Z	5	heartbeat	#1685	#1685 merged 2b064544; runs: ;
+2026-10-16T22:55Z	5	heartbeat	#1685	#1685 merged 2b064544; runs: ;
+2026-10-16T23:15Z	5	heartbeat	#1685	#1685 merged 2b064544; runs: ;
+2026-10-16T23:36Z	5	heartbeat	#1685	#1685 merged 2b064544; runs: ;
+2026-10-16T23:58Z	5	heartbeat	#1035	scoped halo 38972763400 (contains #1590, not #1685) red: H-J2/H-J3/H-J4 lose timeline lanes (SuiteUI #1569-#1657); H-J13 pass; comment on #1035
+2026-10-16T21:57Z	5	pr-merged	#1685	feature-done (2b06454)
+2026-10-17T00:05Z	5	ci-run	38972763400	scoped halo 18d068c6: success; H-J13 pass; H-J2/H-J3/H-J4 red from SuiteUI timeline rework, filed #1789
+2026-10-17T00:10Z	5	stage-end	#1035	Belt-Contact-Sheet posted on run 38952256967
+2026-10-17T00:10Z	done	stopped	#1035	feature done
+2026-10-17T02:02Z	5	heartbeat	#1035	scoped halo run 38993220062 queued on dev 1e42526b; no new halo result yet
+2026-10-17T02:35Z	5	ci-run	38993220062	success at run level, macOS (halo) failed: H-J2, H-J3, H-J4 still lose timeline lanes; #1789 open; comment on #1035
+2026-10-17T03:13Z	5	heartbeat	#1035	no new halo run on dev 82ac5055; #1789 open; done claim still open for supervisor
