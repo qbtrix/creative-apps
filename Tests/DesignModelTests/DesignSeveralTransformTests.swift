@@ -47,6 +47,36 @@ import Testing
         #expect(edit.coalescingKey == DesignEdit.runKey("resize", ["A", "B"]))
     }
 
+    @Test func aGroupsChildrenScaleWithTheBox() throws {
+        // The box is (100, 100)–(1200, 500); its width 1100 grows to 1120.
+        let edit = try live.resize(["A", "Pair"], handle: .bottomRight, by: pt(20, 0), modifiers: [], on: cards)
+        let scale = 1120.0 / 1100.0
+        let e1 = try #require(frame("E1", edit))
+        let e2 = try #require(frame("E2", edit))
+        let pair = try #require(frame("Pair", edit))
+        #expect(abs(e1.x - (100 + 800 * scale)) <= 1e-9)
+        #expect(abs(e1.width - 100 * scale) <= 1e-9)
+        #expect(abs(e2.x - (100 + 1000 * scale)) <= 1e-9)
+        #expect(abs(e2.width - 100 * scale) <= 1e-9)
+        for child in [e1, e2] {
+            #expect(child.x >= pair.x - 1e-9 && child.maxX <= pair.maxX + 1e-9)
+            #expect(child.y >= pair.y - 1e-9 && child.maxY <= pair.maxY + 1e-9)
+        }
+    }
+
+    @Test func theSelectionBoundsAreOneSharedUnion() throws {
+        #expect(DesignRect.union([]) == nil)
+        let box = try #require(DesignRect.union([rc(100, 100, 100, 80), rc(300, 140, 200, 80)]))
+        #expect(box == rc(100, 100, 400, 120))
+        // Align and Resize both measure the selection with that union.
+        let top = try LiveAligning().align(.top, ["A", "B"], on: cards)
+        #expect(frame("B", top)?.y == box.y)
+        let resized = try live.resize(["A", "B"], handle: .bottomRight, by: pt(20, 20), modifiers: [], on: cards)
+        #expect(frame("A", resized)?.x == box.x)
+        #expect(frame("A", resized)?.y == box.y)
+        #expect(frame("B", resized)?.maxX == box.maxX + 20)
+    }
+
     @Test func shiftKeepsTheBoxRatio() throws {
         let edit = try live.resize(["A", "B"], handle: .bottomRight, by: pt(20, 0), modifiers: .shift, on: cards)
         let a = try #require(frame("A", edit))

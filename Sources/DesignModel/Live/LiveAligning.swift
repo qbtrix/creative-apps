@@ -28,7 +28,7 @@ public struct LiveAligning: LayerAligning {
         let selected = try layers(ids, on: page)
         let movable = selected.filter { !isLocked($0.id, on: page) }
         if movable.isEmpty, let locked = selected.first { throw .locked(locked.name) }
-        let box = selected.count == 1 ? selected.first.flatMap { page.alignBounds($0.id) } : union(selected.map(\.frame))
+        let box = selected.count == 1 ? selected.first.flatMap { page.alignBounds($0.id) } : DesignRect.union(selected.map(\.frame))
         guard let box else { throw .nothingSelected }
         var nodes = page.nodes
         // Outer layers first, so a selected layer inside another lands on its own target.
@@ -88,13 +88,6 @@ public struct LiveAligning: LayerAligning {
     }
 
     private func depth(_ id: String, on page: DesignPage) -> Int { page.nodes.ancestors(of: id)?.count ?? 0 }
-
-    private func union(_ frames: [DesignRect]) -> DesignRect? {
-        guard let minX = frames.map(\.x).min(), let minY = frames.map(\.y).min(),
-            let maxX = frames.map(\.maxX).max(), let maxY = frames.map(\.maxY).max()
-        else { return nil }
-        return DesignRect(x: minX, y: minY, width: maxX - minX, height: maxY - minY)
-    }
 
     /// The help law: nil when `write` succeeds, `already` when it finds nothing to change, else the refusal's help.
     private func help(already: String? = nil, _ write: () throws(DesignRefusal) -> DesignEdit) -> String? {

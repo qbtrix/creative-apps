@@ -28,13 +28,9 @@ func fakeSiblings(_ parentID: String?, _ nodes: [DesignNode], _ body: (inout [De
     return tree
 }
 
-/// The smallest rectangle holding every frame; nil for none.
+/// The smallest rectangle holding every frame; nil for none (the shared `DesignRect.union`).
 func fakeUnion(_ frames: [DesignRect]) -> DesignRect? {
-    guard let first = frames.first else { return nil }
-    return frames.dropFirst().reduce(first) { box, f in
-        let (x, y) = (Swift.min(box.x, f.x), Swift.min(box.y, f.y))
-        return DesignRect(x: x, y: y, width: Swift.max(box.maxX, f.maxX) - x, height: Swift.max(box.maxY, f.maxY) - y)
-    }
+    DesignRect.union(frames)
 }
 
 /// Changes the named layers anywhere in the tree as one edit. Nothing named: `.nothingSelected`;

@@ -33,5 +33,26 @@
     "find": "seen.insert(node.id).inserted && !(page.nodes.ancestors(of: node.id) ?? []).contains(where: selected.contains)",
     "replace": "!(page.nodes.ancestors(of: node.id) ?? []).contains(where: selected.contains)",
     "tests": "DesignSeveralTransformTests"
+  },
+  {
+    "label": "a group's children stay put on resize",
+    "file": "Sources/DesignModel/Live/LiveTransforming.swift",
+    "find": "node.children = node.children.map { scaled($0, from: box, to: new) }",
+    "replace": "",
+    "tests": "DesignSeveralTransformTests"
+  },
+  {
+    "label": "the selection union starts at the rightmost left edge",
+    "file": "Sources/DesignModel/Live/LiveTransforming.swift",
+    "find": "guard let minX = frames.map(\\.x).min()",
+    "replace": "guard let minX = frames.map(\\.x).max()",
+    "tests": "DesignSeveralTransformTests"
+  },
+  {
+    "label": "the selection union ends at the nearest bottom edge",
+    "file": "Sources/DesignModel/Live/LiveTransforming.swift",
+    "find": "let maxY = frames.map(\\.maxY).max()",
+    "replace": "let maxY = frames.map(\\.maxY).min()",
+    "tests": "DesignSeveralTransformTests"
   }
 ]
