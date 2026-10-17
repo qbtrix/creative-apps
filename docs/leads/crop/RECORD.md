@@ -4,7 +4,7 @@ Issue: #1553 · Packet: docs/blueprints/library/features/crop.md
 Run: act-1a147b718b0-qox5 · Session: resumed after worker restart · Started: 2026-10-17T03:07Z
 Stage: 2 plan
 Base: 82ac50553324ea359ca4b75c5d495fc812445cde (origin/dev)
-Next: resolve the base-branch question (brief says main, CLAUDE.md says never branch from main; this lead uses dev), then build the contract slice | CR-a | contract: crop catalog methods, CropLeveling slot, FakeCrop | CR-1, CR-2 | MJ6 | develop (the feature, planned) | no | 0 | planned | - | - |
+Next: supervisor answers base (dev vs main); then plan waves against the current origin/dev and build the contract slice
 | CR-b | real pixels crop and straighten | CR-3, CR-4 | MJ6L | CR-a | no | 0 | planned | - | - |
 | CR-c | Photo > Crop UI | CR-5, CR-6 | J6 | CR-a; spine follow-up; develop inspector follow-up | yes | 0 | planned | - | - |
 | CR-d | integrate on live services | CR-7, CR-8 | J6, P5 | CR-b; CR-c; #782 | no | 0 | planned | - | - |
