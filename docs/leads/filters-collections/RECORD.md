@@ -2,9 +2,9 @@
 
 Issue: #1563 · Packet: docs/blueprints/library/features/filters-collections.md
 Run: act-1a147b718fd-n1ee · Session: unknown · Started: 2026-10-17T02:30Z
-Stage: 3 wave 1 (waiting on supervisor)
+Stage: 3 wave 1 (FC-1 in review, FC-2 next)
 Base: 06371387 (origin/dev at setup; the brief's main 37d99630 is an ancestor, CLAUDE.md says dev)
-Next: wait for the supervisor's answers to Q1 to Q4 under Open; then FC-2 (contract slice) on LibraryCatalog.swift, LibraryOrder.swift and LibraryCollections.swift
+Next: FC-2 (contract slice) on LibraryCatalog.swift, LibraryOrder.swift and LibraryCollections.swift, with MJ1 disabled until FC-7 (rule 13)
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -18,7 +18,7 @@ Next: wait for the supervisor's answers to Q1 to Q4 under Open; then FC-2 (contr
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
 |---|---|---|---|---|---|---|---|
-| FC-1 | FC-a | 1 | RatingRule and LibraryFilter value types: admits, title, matches, summary | Sources/LibraryModel/LibraryFilter.swift, Tests/LibraryModelTests/LibraryFilterTests.swift, Tests/mutations/LibraryModel.LibraryFilter.json | LibraryFilterTests (12 tests) | none opened | committed 711d58b4 on this branch; mutate 11/11 caught on the main base |
+| FC-1 | FC-a | 1 | RatingRule and LibraryFilter value types: admits, title, matches, summary | Sources/LibraryModel/LibraryFilter.swift, Tests/LibraryModelTests/LibraryFilterTests.swift, Tests/mutations/LibraryModel.LibraryFilter.json | LibraryFilterTests (12 tests) | #1976 | PR open, fast-lane; mutate 11/11; scripts/ci --changed PASS on 01ce599b |
 | FC-2 | FC-a | 2 | stored filter and collection state, catalog methods with stub bodies, refreshShown | LibraryCatalog.swift, LibraryOrder.swift, LibraryCollections.swift | LibraryCollectionsSeamTests (MJ1) | - | planned |
 | FC-3 | FC-a | 2 | undo steps for collection edits (CatalogHistory) | CatalogHistory.swift | LibraryCollectionsHistoryTests | - | planned |
 | FC-4 | FC-a | 3 | menu, bar and area hooks, CollectionsStore stub (UI, macOS) | LibraryWindow+Filters.swift, Platform/CollectionsStore.swift | compiles on macOS only | - | planned |
