@@ -1044,6 +1044,14 @@ expect "bisect dev: and on the open feature-lead issue the PR's Feature: line na
 expect "bisect dev: the probes are gone" "$(git -C "$sw/origin.git" for-each-ref 'refs/heads/ci/bisect-*' | wc -l | tr -d ' ')" 0
 lane_sweep
 expect "bisect dev: a red with its verdict posted is not redone (two runs, two comments, nothing more)" "$(grep -c '^issue comment\|^workflow run' "$sw/calls")" 4
+# dev stays red and ci.yml moves the issue's range to the newer red run (c4):
+# the issue already has its verdict, so nothing is bisected again.
+echo c4 >"$w/c4.md"; git -C "$w" add -A; git -C "$w" commit -qm "docs: four (#104)"; git -C "$w" push -q "$sw/origin.git" dev
+C4=$(git -C "$w" rev-parse dev); verdict "$C4" failure
+jq --arg b "$(printf 'CI on dev is red.\n\n- Run: https://github.com/qbtrix/creative-apps/actions/runs/9002\n- Failing jobs: linux\n- Culprit range: `main..%s`\n' "$C4")" '.[0].body = $b' "$sw/red.json" >"$sw/x" && mv "$sw/x" "$sw/red.json"
+lane_sweep
+expect "bisect dev: a newer red run on the same issue starts no second bisect" \
+  "$(grep -c '^issue comment\|^workflow run' "$sw/calls"),$(git -C "$sw/origin.git" for-each-ref 'refs/heads/ci/bisect-*' | wc -l | tr -d ' ')" "4,0"
 
 # The same chain by hand (--bisect), no guess: the midpoint first. With the
 # run cap at 1 the second sweep stops and says where the culprit sits.
