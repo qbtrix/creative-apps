@@ -4,7 +4,7 @@ Issue: #1554 · Packet: docs/blueprints/library/features/export.md
 Run: act-1a147b718b0-qox5 · Session: resumed after worker restart · Started: 2026-10-17T03:07Z
 Stage: 2 plan
 Base: 82ac50553324ea359ca4b75c5d495fc812445cde (origin/dev)
-Next: resolve the base-branch question (brief says main, CLAUDE.md says never branch from main; this lead uses dev), then build the contract slice | EX-a | contract: export plan, fake services, slots | EX-1..EX-3 | MX1 | nothing | no | 0 | planned | - | - |
+Next: supervisor answers base (dev vs main); then plan waves against the current origin/dev and build the contract slice
 | EX-b | File > Export sheet, real JPEG | EX-4..EX-6 | J7 | EX-a | yes | 0 | planned | - | - |
 | EX-c | PNG/TIFF/HEIC formats | EX-7..EX-8 | J7F | EX-a; EX-b | yes | 0 | planned | - | - |
 | EX-d | name templates, presets | EX-9..EX-11 | J7N | EX-a; EX-b | yes | 0 | planned | - | - |
