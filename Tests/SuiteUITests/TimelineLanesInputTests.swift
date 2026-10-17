@@ -16,6 +16,7 @@ import Testing
         var calls: [String] = []
         var actions: TimelineLaneActions<String> {
             TimelineLaneActions(
+                onSelectKeyframe: { _, _ in }, onSelectTrack: { _ in }, onPickKeyframe: { _, _, _ in },
                 onMoveKeyframes: { self.calls.append("move \($0)") }, onEndKeyDrag: { self.calls.append("end") },
                 onTrim: { self.calls.append("trim \($0) \($1.rawValue) \($2)") }, onEndTrim: { self.calls.append("endTrim") })
         }
