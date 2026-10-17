@@ -45,4 +45,4 @@ Wave 1: D0-5a and D0-5b are independent (disjoint files; neither calls the other
 
 ## Open
 - D0-9d (so DW-d, and D0-7b, so DW-c) waits on canvas-basics CB-a, which waits on design-seams D0-3c. design-seams (#1493) has not built wave 1; its RECORD stalls on a missing Swift toolchain.
-- needs-ui: SuiteUI ScrubField mixed state (to file with D0-5c).
+- needs-ui #2148: SuiteUI ScrubField mixed state; D0-5c uses plain "Mixed" text meanwhile.
