@@ -62,3 +62,4 @@ utc	stage	event	ref	note
 2026-10-17T13:20Z	3	pr-updated	#2056	macOS build 39033113702 failed (main-actor hasFixture); fixed, head 26fc2878
 2026-10-17T13:42Z	HM-3a	merged	#2056 merged 13:29Z (macOS build 39036229995)
 2026-10-17T13:42Z	HM-3z	pr	#2082 opened, feature-done, head c94f8617
+2026-10-17T14:04Z	HM-3z	merged	#2082 merged 13:48Z as 8e868417; full CI 39038160863 pending; scoped: suite 39038456229 green
