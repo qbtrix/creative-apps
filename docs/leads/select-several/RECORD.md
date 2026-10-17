@@ -4,7 +4,7 @@ Issue: #1495 · Packet: docs/blueprints/design/features/select-several.md
 Run: act-1a14a88d756-rnok · Session: claude/design-feature-lead-7saqm8 · Started: 2026-10-17T15:46Z
 Stage: 3 wave 1
 Base: dd7ec767cc0afab91b35ff4f208351dd866028d8
-Next: DW-b: D0-8a merged (8f0fa099), D0-8b building; S-6 starts when D0-8b merges. S-5 waits on canvas-basics CB-a (no merges as of 2026-10-17T20:03Z)
+Next: D0-8b PR #2309 build green, lane merges next sweep; S-6 launches in wave 5 then. S-5 waits on canvas-basics CB-a (only #1535 merged).
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
