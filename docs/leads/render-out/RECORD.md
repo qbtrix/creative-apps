@@ -1,24 +1,26 @@
 # render-out lead record
 
 Issue: #1505 · Packet: docs/blueprints/halo/features/render-out.md
-Run: act-1a1429c87eb-3ecm · Session: claude/feature-lead-halo-run-ugkm44 · Started: 2026-10-17T00:05Z
-Stage: 2 plan (viewer-playback done; #333 status checked below)
-Base: 2be6a100 (origin/dev at 2026-10-17T00:05Z)
-Next: stage 3 wave 1 (RO-1, RO-2, RO-3 in parallel), once a Swift toolchain can run HaloModelTests here or the supervisor accepts a Linux-only gate for the Model tasks
+Run: act-1a1487bf880-qmey (line lead for #1035, #1509, #1505; earlier run act-1a1429c87eb-3ecm planned) · Session: claude/halo-feature-lead-run-j7dyv1 · Started: 2026-10-17T06:05Z
+Stage: 3 wave 1
+Base: b8dfb4f0ed86c0db148446c4b4e95557c2f440d0 (origin/dev at 2026-10-17T06:15Z)
+Next: wave 1 running (RO-1, RO-2, RO-3 beside text-layers' TX-1 to TX-4); when the lane has merged them, run the check and start wave 2 (RO-4, RO-5 beside TX-5, TX-6)
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
 |---|---|---|---|---|---|---|
-| RO-1 | 1 | `HaloRenderRules` (plan, frame loop with cancel and sink errors); `LiveCompositionRendering` | Live/HaloRenderRules.swift, Live/LiveCompositionRendering.swift, HaloRenderPlanTests | HaloRenderPlanTests | – | planned |
-| RO-2 | 1 | `renderCurrentFrame`, `renderedFrameStale`, `renderedFrameSummary` | HaloRenderFrame.swift, HaloRenderFrameTests | HaloRenderFrameTests | – | planned |
-| RO-3 | 1 | Render job: sheet open/close, `startRender`, progress, cancel, finish | HaloRenderJob.swift, HaloRenderJobTests | HaloRenderJobTests | – | planned |
-| RO-4 | 2 | `HaloAvailability+Render.swift` (both commands turn on); HB-12, HB-13 report-only | HaloAvailability+Render.swift, HaloRenderAvailabilityTests, HaloRenderBudgetTests | HaloRenderAvailabilityTests | – | planned |
-| RO-5 | 2 | App: `HaloFrameImage`, `HaloRenderedFrameView` replaces the W0 stub; snapshots | Sources/HaloApp/HaloFrameImage.swift, HaloRenderedFrameView.swift, HaloWindow+Render.swift | halo-rendered-frame-*.png | – | planned |
-| RO-6 | 3 | `HaloPNGWriter` (PNG sequence, HF-7) | Sources/HaloApp/HaloPNGWriter.swift, HaloPNGWriterTests | HaloPNGWriterTests | – | planned |
-| RO-9 | 3 | Journey H-J20 on parented | UITests/HaloJourneyTests+RenderFrame.swift | H-J20 on dev CI | – | planned |
-| RO-7 | 4 | `HaloMovieWriter` (H.264 .mp4, HF-8) | Sources/HaloApp/HaloMovieWriter.swift, HaloMovieWriterTests | HaloMovieWriterTests | – | planned |
-| RO-8 | 5 | `HaloRenderSheet` (Render… ⇧⌘R) | Sources/HaloApp/HaloRenderSheet.swift, HaloWindow+Render.swift | halo-render-sheet-*.png | – | planned |
-| RO-10 | 6 | Journey H-J21; `feature-done` | UITests/HaloJourneyTests+RenderFrame.swift | H-J21 on dev CI | – | planned |
+| RO-1 | 1 | `HaloRenderRules` (plan: half size even and ≥ 2, movie even at full size, names sanitized; the frame loop with cancel and sink errors); `LiveCompositionRendering` runs it on the live drawing and rendering with `unavailableHelp == nil`; `FakeCompositionRendering` a thin wrapper over the rules; contract suite over [fake, live] | Sources/HaloModel/Live/HaloRenderRules.swift, Sources/HaloModel/Live/LiveCompositionRendering.swift, Sources/HaloModel/Fakes/FakeCompositionRendering.swift, Tests/HaloModelTests/CompositionRenderingContractTests.swift, Tests/HaloModelTests/HaloRenderPlanTests.swift | HaloRenderPlanTests, CompositionRenderingContractTests | – | building |
+| RO-2 | 1 | `renderCurrentFrame`, computed `renderedFrameStale`, `shownRenderedFrame`, `renderedFrameNote`, `renderedFrameSummary` | Sources/HaloModel/HaloRenderFrame.swift, Tests/HaloModelTests/HaloRenderFrameTests.swift | HaloRenderFrameTests | – | building |
+| RO-3 | 1 | The render job: `openRenderSheet`, `closeRenderSheet`, `renderSummary`, `renderOutputName`, `startRender`, `renderProgress`, `cancelRender`, `finishRender`, `renderProgressText`, `renderOutcomeText` | Sources/HaloModel/HaloRenderJob.swift, Tests/HaloModelTests/HaloRenderJobTests.swift | HaloRenderJobTests | – | building |
+| RO-4 | 2 | `HaloAvailability+Render.swift` answers state (no composition; a render running) then the service's help, so both commands turn on; HB-12, HB-13 report-only | Sources/HaloModel/Availability/HaloAvailability+Render.swift, Tests/HaloModelTests/HaloRenderAvailabilityTests.swift, Tests/HaloModelTests/HaloRenderBudgetTests.swift | HaloRenderAvailabilityTests | – | planned |
+| RO-5 | 2 | App: `HaloFrameImage` (CGImage from `rgba8(colorSpace:)`); `HaloRenderedFrameView` replaces the stub (`halo.viewer.rendered`, note `halo.viewer.renderedNote`); Render Frame's route calls `renderCurrentFrame()`; snapshots | Sources/HaloApp/HaloFrameImage.swift, Sources/HaloApp/HaloRenderedFrameView.swift, Sources/HaloApp/HaloWindow+Render.swift, Tests/AppSnapshotTests/HaloRenderSnapshots.swift | halo-rendered-frame-*.png, halo-rendered-frame-stale-*.png | – | planned |
+| RO-6 | 3 | `HaloPNGWriter` (folder, one PNG per frame via CGImageDestination; HF-7) | Sources/HaloApp/HaloPNGWriter.swift, Tests/AppSnapshotTests/HaloPNGWriterTests.swift | HaloPNGWriterTests (macOS) | – | planned |
+| RO-7 | 3 | `HaloMovieWriter` (H.264 .mp4 at the plan's size and fps; cancel removes the file; HF-8); its frame-0 oracle is `LiveFrameRendering().render` of frame 0 as `rgba8` through `HaloFrameImage`, not RO-6's PNG | Sources/HaloApp/HaloMovieWriter.swift, Tests/AppSnapshotTests/HaloMovieWriterTests.swift | HaloMovieWriterTests (macOS) | – | planned |
+| RO-9 | 3 | Journey H-J20 on `-HaloSample parented`; `Closes #451` | UITests/HaloJourneyTests+RenderFrame.swift | H-J20 on dev CI | – | planned |
+| RO-8 | 4 | `HaloRenderSheet` (Form, segmented pickers, destination, summary, Render; progress with Cancel; result; Close); Render…'s route opens it; the detached run with a progress sink in `HaloWindow+Render.swift`; presented from `renderScene(_:)` while `renderJob != nil`; snapshots | Sources/HaloApp/HaloRenderSheet.swift, Sources/HaloApp/HaloWindow+Render.swift, Tests/AppSnapshotTests/HaloRenderSheetSnapshots.swift | halo-render-sheet-*.png (4 states) | – | planned |
+| RO-10 | 5 | Journey H-J21; render-out.wave.json `status: built`; `feature-done`, `Closes #429` | UITests/HaloJourneyTests+Render.swift, docs/blueprints/halo/features/render-out.wave.json | H-J21 on dev CI | – | planned |
+
+Waves (combined with text-layers, contract rule 19; checked against dev b8dfb4f0): W1 RO-1, RO-2, RO-3 (independent, with TX-1 to TX-4); W2 RO-4 (waits RO-1, RO-3), RO-5 (waits RO-2) (independent of each other, with TX-5, TX-6); W3 RO-6 (waits RO-1, RO-5), RO-7 (waits RO-1, RO-5), RO-9 (waits RO-4, RO-5) (independent, with TX-7); W4 RO-8 (waits RO-3, RO-5, RO-6, RO-7); W5 RO-10 (waits RO-4, RO-8; feature-done).
 
 ## Rounds
 | round | CI run | CI | audit vs baseline | lenses | confirmed | fixed by | clean |
@@ -26,9 +28,13 @@ Next: stage 3 wave 1 (RO-1, RO-2, RO-3 in parallel), once a Swift toolchain can 
 | – | – | – | – | – | – | – | – |
 
 ## Decisions
-- Stage 2 (2026-10-17): viewer-playback is built on dev (#1035 done), so render-out is unblocked. Packet is v2 (no Slices table): 10 tasks in 6 waves, copied from its Build waves section.
-- Stage 0 checked the dependency chain in docs/blueprints/halo/features/waves.md: no task of this packet can start yet, so the lead stops here (contract rule 9 / v2 stage 0.4).
+- 2026-10-17T06:05Z: line lead for #1035 (done, supervisor decision 06:06Z), #1509 and #1505 in one run. Waits met: #1035 done, #333 closed (#877 merged). PRs base `dev` (the lane merges into dev and retargets `main`).
+- No Swift on this box at launch; installed swift 6.3.3 under /opt/swift so `scripts/ci` can run the Model tests.
+- Unchained RO-7 from RO-6 (packets.md rule (b)): RO-7's code needs only RO-1 and RO-5; its test compares frame 0 against the same bytes RO-6 writes (`render` → `rgba8`), so both writers build in wave 3 and the chain drops from 6 to 5.
+- Rule 18 for this v2 packet: RO-2 and RO-3 are the Model signatures the UI calls and are small, so wave 1 builds them whole; RO-5 (the rendered frame on the artboard, reachable from Render Frame ⌘R) starts in wave 2 as soon as RO-2 merges. The sheet (RO-8) needs the writers to run, so it stays after wave 3.
+- Canonical first (rule 20): export is a kernel concept, but SuiteModel has no export module yet; Flare's `FlareExport` (grandfathered in the baseline) is the only other copy, with fraction progress and `Result` outcomes that don't fit a frame plan with a sink. The packet's `HaloRenderJob` stays Halo-local, as the packet designs it; when the kernel's export module lands, Halo adapts onto it (`HaloRenderJob+Kernel.swift`). Posted on #1505.
+- Work started after #1302: the critic panel files findings as `finding` issues, the fix batch takes issue numbers, round cap 2.
+- lead/render-out was 967 commits off main with no shared history; rebuilt as one records-only commit on origin/main.
 
 ## Open
-- No Swift toolchain on this box (`which swift` empty): RO-1 to RO-4 are Model tasks that the Linux gate would test, so wave 1 needs a toolchain or a supervisor decision.
-- Blocked on viewer-playback (#1035, not done); #333.
+- none
