@@ -17,3 +17,4 @@ utc	stage	event	ref	note
 2026-10-17T17:48Z	heartbeat	builders still running (no wave-2 or C-1 PR yet); findings 0 open for this lead; canvas-basics CB-a no new merges, S-5 stays blocked
 2026-10-17T17:51Z	wave	wave 2 PRs open: D0-5c #2217 (c1f3bef7), D0-5d #2214 (0b5f4e52), D0-6 #2213 (7156b1da); contract checks ok
 2026-10-17T18:10Z	check	#2213 (D0-6) macOS build failed (run 39055492723); fixer sent to its branch (round 1). #2214, #2217 waiting on macOS build
+2026-10-17T18:15Z	fix	#2213 round 1: one error, mutating openFixture inside #expect in DesignEditMenuSnapshots.swift:51; fixed, head f4e1c75a, scripts/ci --changed PASS; lane rebuilds on macOS
