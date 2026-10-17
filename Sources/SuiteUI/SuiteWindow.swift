@@ -33,10 +33,11 @@
 // (AppSwitcher.swift) with no shared toolbar glass behind it: the environment's
 // `suiteSwitcher`, or AppSwitcherState.placeholder for this process's name.
 // The window measures its width (onGeometryChange) and gives the row
-// AppSwitcher.toolbarSpacing for it, so the row leaves the sidebar toggle,
-// document actions, title, actions and inspector toggle their room and none
-// of them goes into the toolbar's overflow; in a crowded toolbar (Design's
-// eight commands) the row narrows to its compact step instead.
+// AppSwitcher.toolbarFit for it and its actions' titles (drawn icon only), so
+// the row leaves the sidebar toggle, document actions, title, actions and
+// inspector toggle their room and none of them goes into the toolbar's
+// overflow; in a crowded toolbar the row narrows to its compact step, and
+// when even that doesn't fit it shows the current app's item alone.
 import SwiftUI
 
 public struct SuiteWindow<Sidebar: View, Content: View, Inspector: View>: View {
@@ -225,12 +226,15 @@ extension SuiteWindow {
             }
             ToolbarItem(placement: .principal) {
                 let state = switcher ?? AppSwitcherState.placeholder(processName: ProcessInfo.processInfo.processName)
-                // The sidebar toggle leads; the inspector toggle trails. Below every step
-                // the row takes AppSwitcher.compactSpacing rather than crowd the actions out.
-                let spacing = AppSwitcher.toolbarSpacing(
+                // The model adds the window's own sidebar and inspector toggles. Below every
+                // step the row takes AppSwitcher.compactSpacing, and when even that crowds
+                // the actions, the current app's item alone.
+                let fit = AppSwitcher.toolbarFit(
                     windowWidth: windowWidth, itemCount: state.items.count,
-                    leadingButtons: 1 + documentActions.count, trailingButtons: actions.count + 1)
-                AppSwitcher(items: state.items, current: state.current, spacing: spacing, onSelect: state.onSelect)
+                    documentActions: documentActions.map { toolbarItem($0) }, actions: actions.map { toolbarItem($0) })
+                AppSwitcher(
+                    items: state.shownItems(everyItem: fit.showsEveryItem), current: state.current,
+                    spacing: fit.spacing, onSelect: state.onSelect)
             }
             // The switcher row draws its own capsule; no toolbar glass sits behind it.
             .sharedBackgroundVisibility(.hidden)
@@ -251,12 +255,19 @@ extension SuiteWindow {
     }
 
     /// One toolbar action: disabled, with its reason as the tooltip, while it can't act.
+    /// Icon only, as `toolbarItem` tells the switcher; the title stays its accessibility label.
     private func actionButton(_ action: ToolbarAction) -> some View {
         Button(action: action.perform) {
             Label(action.title, systemImage: action.systemImage)
         }
+        .labelStyle(.iconOnly)
         .disabled(!action.isEnabled)
         .help(action.help)
         .suiteControl(action)
+    }
+
+    /// What `action` takes in the toolbar, as `actionButton` draws it (icon only).
+    private func toolbarItem(_ action: ToolbarAction) -> SwitcherToolbarItem {
+        SwitcherToolbarItem(action.title, showsTitle: false)
     }
 }

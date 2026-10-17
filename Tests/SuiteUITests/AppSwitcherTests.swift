@@ -3,12 +3,14 @@
 // with their shortcuts, every item disabled with its reason; the current item
 // follows the running executable; the tooltip names the app and its shortcut
 // and then the reason; the identifiers are unique; the spacing steps run from
-// the ideal down to the minimum, then the compact step; the room model matches
-// the toolbar positions measured in runs 38897404951 and 38938835086; the
-// toolbar spacing leaves Flare's, Halo's, Library's, Design's and the editor
-// gallery's toolbar buttons their room at their journey sizes, and gives way
-// (the compact step) when no step fits; the capsule never reaches a
-// neighbour's icon. macOS only.
+// the ideal down to the minimum, then the compact step; a labelled toolbar item
+// counts its title's width; the room model matches the toolbar positions
+// measured in runs 38897404951, 38938835086 and 38981651490; the toolbar fit
+// leaves Flare's, Halo's, Library's, Design's and the editor gallery's toolbar
+// buttons their room at every width, takes the compact step when no step fits,
+// and shows the current item alone when even that doesn't (the editor gallery
+// at 900 pt, Flare at 1000 pt); the capsule never reaches a neighbour's icon.
+// macOS only.
 import SuiteUI
 import SwiftUI
 import Testing
@@ -65,96 +67,132 @@ import Testing
         #expect(!AppSwitcher.spacingSteps.contains(AppSwitcher.compactSpacing))
     }
 
-    @Test func theRoomModelMatchesTheMeasuredToolbars() {
-        // The row started at 423 to 424 pt after one leading button (Flare, Halo, Library, the
-        // gallery's window page) and at 538 pt after Design's four; the model never says earlier.
-        #expect(AppSwitcher.toolbarLeading(leadingButtons: 1) == 432)
-        #expect(AppSwitcher.toolbarLeading(leadingButtons: 4) == 540)
-        #expect(AppSwitcher.toolbarLeading(leadingButtons: 1) >= 424)
-        #expect(AppSwitcher.toolbarLeading(leadingButtons: 4) >= 538)
-        // Overflowed: Halo at 1000 pt with 80 (run 38897404951), Design at 1024 pt with 40 (run 38938835086).
-        #expect(!fits(width: 1000, spacing: 80, leading: 1, trailing: 2))
-        #expect(!fits(width: 1024, spacing: 40, leading: 4, trailing: 6))
-        // Kept every button: Flare at 1000 pt and Halo at 880 pt with 48, Library at 900 pt with 40.
-        #expect(fits(width: 1000, spacing: 48, leading: 1, trailing: 4))
-        #expect(fits(width: 880, spacing: 48, leading: 1, trailing: 2))
-        #expect(fits(width: 900, spacing: 40, leading: 1, trailing: 1))
+    /// Each toolbar the switcher shares, as SuiteWindow passes it (titles, drawn icon only):
+    /// (document actions, actions). SuiteWindow's sidebar and inspector toggles come on top.
+    static let toolbars: [String: (docs: [String], actions: [String])] = [
+        "flare": ([], ["New", "Open", "Save", "Undo", "Redo", "Auto-key", "Animate…", "Export…"]),
+        "halo": ([], ["New Composition…"]),
+        "library": ([], []),
+        "design": (["New", "Open", "Save"], ["Undo", "Redo", "Zoom Out", "Fit", "Zoom In"]),
+        "editor": (["New", "Open"], ["Save", "Undo", "Redo", "Zoom Out", "Fit", "Zoom In"]),
+    ]
+
+    private func fit(_ name: String, _ width: CGFloat) -> SwitcherToolbarFit {
+        let toolbar = Self.toolbars[name] ?? (docs: [], actions: [])
+        return AppSwitcher.toolbarFit(
+            windowWidth: width, itemCount: 6, documentActions: toolbar.docs.map { SwitcherToolbarItem($0) },
+            actions: toolbar.actions.map { SwitcherToolbarItem($0) })
     }
 
-    @Test func theToolbarSpacingFitsEachAppsWindow() {
-        // Flare: the sidebar toggle; New Animation, New Sample Animation, Delete Layer and the inspector toggle.
-        #expect(AppSwitcher.toolbarSpacing(windowWidth: 1000, itemCount: 6, leadingButtons: 1, trailingButtons: 4) == 48)
-        // Halo: New Composition… and the inspector toggle, at its launch width, its layout sizes and the minimum.
-        #expect(AppSwitcher.toolbarSpacing(windowWidth: 1000, itemCount: 6, leadingButtons: 1, trailingButtons: 2) == 64)
-        #expect(AppSwitcher.toolbarSpacing(windowWidth: 1024, itemCount: 6, leadingButtons: 1, trailingButtons: 2) == 64)
-        #expect(AppSwitcher.toolbarSpacing(windowWidth: 880, itemCount: 6, leadingButtons: 1, trailingButtons: 2) == 48)
-        // Library (and the gallery's window page): the inspector toggle only.
-        #expect(AppSwitcher.toolbarSpacing(windowWidth: 1000, itemCount: 6, leadingButtons: 1, trailingButtons: 1) == 80)
-        #expect(AppSwitcher.toolbarSpacing(windowWidth: 900, itemCount: 6, leadingButtons: 1, trailingButtons: 1) == 64)
+    @Test func aLabelledItemTakesItsTitlesWidth() {
+        #expect(AppSwitcher.toolbarRoom(SwitcherToolbarItem("Fit")) == 36)
+        #expect(AppSwitcher.toolbarRoom(SwitcherToolbarItem("New Sample Animation")) == 36)
+        // 20 characters at 7 pt beside the icon.
+        #expect(AppSwitcher.toolbarRoom(SwitcherToolbarItem("New Sample Animation", showsTitle: true)) == 180)
+        #expect(AppSwitcher.toolbarRoom(SwitcherToolbarItem("", showsTitle: true)) == 40)
+        // Flare at 1024 pt keeps the compact row with icon-only buttons, but one labelled button gives it away.
+        #expect(fit("flare", 1024) == SwitcherToolbarFit(spacing: 32, showsEveryItem: true))
+        let labelled = (Self.toolbars["flare"]?.actions ?? []).map { SwitcherToolbarItem($0) }
+            + [SwitcherToolbarItem("New Sample Animation", showsTitle: true)]
         #expect(
-            AppSwitcher.toolbarSpacing(
-                windowWidth: SuiteSize.windowMinimum.width, itemCount: 6, leadingButtons: 1, trailingButtons: 1) == 48)
-        // Design: New, Open and Save beside the title; Undo, Redo, Zoom Out, Fit, Zoom In and the
-        // inspector toggle trailing. Its journeys run at 1000 pt and (the shell) 1024 × 768.
-        #expect(AppSwitcher.toolbarSpacing(windowWidth: 1024, itemCount: 6, leadingButtons: 4, trailingButtons: 6) == 32)
-        #expect(AppSwitcher.toolbarSpacing(windowWidth: 1000, itemCount: 6, leadingButtons: 4, trailingButtons: 6) == 32)
-        // The editor gallery at 1024 × 737: two document actions, six actions and the inspector toggle.
-        #expect(AppSwitcher.toolbarSpacing(windowWidth: 1024, itemCount: 6, leadingButtons: 3, trailingButtons: 7) == 32)
+            AppSwitcher.toolbarFit(windowWidth: 1024, itemCount: 6, documentActions: [], actions: labelled)
+                == SwitcherToolbarFit(spacing: 32, showsEveryItem: false))
+    }
+
+    @Test func theRoomModelMatchesTheMeasuredToolbars() {
+        // The row started at 423 to 424 pt after one leading button (Flare, Halo, Library), at 475 pt
+        // after the editor gallery's three (run 38981651490) and at 538 pt after Design's four.
+        let items = { (titles: [String]) in titles.map { SwitcherToolbarItem($0) } }
+        #expect(AppSwitcher.toolbarLeading(documentActions: []) == 432)
+        #expect(AppSwitcher.toolbarLeading(documentActions: items(["New", "Open"])) == 504)
+        #expect(AppSwitcher.toolbarLeading(documentActions: items(["New", "Open", "Save"])) == 540)
+        // The window's own controls sit inside the sidebar column; the safety margin is on top.
+        #expect(AppSwitcher.windowControlsRoom < SuiteSize.sidebarWidth.ideal)
+        #expect(AppSwitcher.toolbarTrailing(actions: []) == 36 + 48 + 8)
+        // Overflowed: Halo at 1000 pt with 80 (run 38897404951), Design at 1024 pt with 40 (run 38938835086),
+        // and the editor gallery at 900 pt with the compact row (run 38981651490: Fit, Zoom In and the
+        // inspector toggle went into the overflow).
+        #expect(!fits("halo", width: 1000, spacing: 80))
+        #expect(!fits("design", width: 1024, spacing: 40))
+        #expect(!fits("editor", width: 900, spacing: 32))
+        // Kept every button: Halo at 880 pt with 48, Library at 900 pt with 40.
+        #expect(fits("halo", width: 880, spacing: 48))
+        #expect(fits("library", width: 900, spacing: 40))
+    }
+
+    @Test func theToolbarFitGivesEachAppsWindowItsStep() {
+        let every = { (spacing: CGFloat) in SwitcherToolbarFit(spacing: spacing, showsEveryItem: true) }
+        let alone = SwitcherToolbarFit(spacing: 32, showsEveryItem: false)
+        // The editor gallery: at 900 pt (run 38981651490) the current item alone; at 1024 pt the compact row.
+        #expect(fit("editor", 900) == alone)
+        #expect(fit("editor", 1024) == every(32))
+        // Flare's eight actions: the current item alone at 1000 pt, the compact row at 1024 pt.
+        #expect(fit("flare", 1000) == alone)
+        #expect(fit("flare", 1024) == every(32))
+        // Design's toolbar: the same.
+        #expect(fit("design", 1000) == alone)
+        #expect(fit("design", 1024) == every(32))
+        // Halo at its launch width, its layout sizes and the minimum.
+        #expect(fit("halo", 1000) == every(64))
+        #expect(fit("halo", 1024) == every(64))
+        #expect(fit("halo", 880) == every(48))
+        // Library: the inspector toggle only.
+        #expect(fit("library", 1000) == every(64))
+        #expect(fit("library", 900) == every(48))
+        #expect(fit("library", SuiteSize.windowMinimum.width) == every(48))
         // Wide windows get the wider steps.
-        #expect(AppSwitcher.toolbarSpacing(windowWidth: 1100, itemCount: 6, leadingButtons: 1, trailingButtons: 4) == 64)
-        #expect(AppSwitcher.toolbarSpacing(windowWidth: 1600, itemCount: 6, leadingButtons: 1, trailingButtons: 4) == 80)
-        #expect(AppSwitcher.toolbarSpacing(windowWidth: 1600, itemCount: 6, leadingButtons: 4, trailingButtons: 6) == 80)
+        #expect(fit("flare", 1100) == every(48))
+        #expect(fit("flare", 1600) == every(80))
+        #expect(fit("design", 1600) == every(80))
     }
 
-    @Test func everyJourneyWindowKeepsItsToolbarButtons() {
-        // (width, leading, trailing) for each app's journey windows: nothing goes into the overflow.
-        let journeys: [(CGFloat, Int, Int)] = [
-            (1000, 1, 4), (1000, 1, 2), (880, 1, 2), (1024, 1, 2), (1000, 1, 1), (900, 1, 1),
-            (1000, 4, 6), (1024, 4, 6), (1024, 3, 7),
-        ]
-        for (width, leading, trailing) in journeys {
-            let spacing = AppSwitcher.toolbarSpacing(
-                windowWidth: width, itemCount: 6, leadingButtons: leading, trailingButtons: trailing)
-            #expect(fits(width: width, spacing: spacing, leading: leading, trailing: trailing), "\(width) pt, \(leading)/\(trailing)")
-        }
+    @Test func beforeTheWindowIsMeasuredOnlyTheCurrentItemShows() {
+        #expect(fit("library", 0) == SwitcherToolbarFit(spacing: 32, showsEveryItem: false))
+        #expect(
+            AppSwitcher.toolbarFit(windowWidth: -1, itemCount: 0, documentActions: [], actions: [])
+                == SwitcherToolbarFit(spacing: 32, showsEveryItem: false))
     }
 
-    @Test func theToolbarSpacingIsCompactBeforeTheWindowIsMeasured() {
-        #expect(AppSwitcher.toolbarSpacing(windowWidth: 0, itemCount: 6, leadingButtons: 1, trailingButtons: 1) == 32)
-        #expect(AppSwitcher.toolbarSpacing(windowWidth: -1, itemCount: 0, leadingButtons: -1, trailingButtons: -1) == 32)
+    @Test func givingWayKeepsTheCurrentItem() {
+        let state = AppSwitcherState.placeholder(processName: "LibraryApp")
+        #expect(state.shownItems(everyItem: true).map(\.id) == ["home", "flare", "design", "photo", "library", "halo"])
+        #expect(state.shownItems(everyItem: false).map(\.id) == ["library"])
+        // With no current app, the first item keeps the row (and `suite.switcher`) on screen.
+        #expect(AppSwitcherState.placeholder(processName: "xctest").shownItems(everyItem: false).map(\.id) == ["home"])
+        let empty = AppSwitcherState(items: [], current: nil, onSelect: { _ in })
+        #expect(empty.shownItems(everyItem: false).isEmpty)
     }
 
     @Test func theRowLeavesBothToolbarEndsTheirRoom() {
-        // Every window from the minimum to 1600 pt, with Flare's, Halo's, Library's, the gallery's and Design's buttons.
-        let toolbars = [(1, 4), (1, 2), (1, 1), (3, 7), (4, 6)]
-        for (leading, trailing) in toolbars {
+        // Every window from the minimum to 1600 pt, with each toolbar: nothing goes into the overflow.
+        for name in Self.toolbars.keys.sorted() {
             for width in stride(from: SuiteSize.windowMinimum.width, through: 1600, by: SuiteSpacing.s) {
-                let spacing = AppSwitcher.toolbarSpacing(
-                    windowWidth: width, itemCount: 6, leadingButtons: leading, trailingButtons: trailing)
-                let label = "\(width) pt, \(leading)/\(trailing)"
-                if AppSwitcher.spacingSteps.contains(spacing) {
-                    // A step: its row fits, and the next wider step's doesn't.
-                    #expect(fits(width: width, spacing: spacing, leading: leading, trailing: trailing), "\(label)")
-                    if let wider = AppSwitcher.spacingSteps.last(where: { $0 > spacing }) {
-                        #expect(!fits(width: width, spacing: wider, leading: leading, trailing: trailing), "\(label)")
-                    }
-                } else {
-                    // No step fits, so the switcher gives way: the compact step.
-                    #expect(spacing == AppSwitcher.compactSpacing, "\(label)")
-                    #expect(!fits(width: width, spacing: SuiteSize.switcherSpacingMinimum, leading: leading, trailing: trailing), "\(label)")
+                let chosen = fit(name, width)
+                let label = "\(name) at \(width) pt"
+                let shown = chosen.showsEveryItem ? 6 : 1
+                #expect(fits(name, width: width, spacing: chosen.spacing, items: shown), "\(label)")
+                if chosen.showsEveryItem, let wider = AppSwitcher.spacingSteps.last(where: { $0 > chosen.spacing }) {
+                    // The widest step that fits.
+                    #expect(!fits(name, width: width, spacing: wider), "\(label)")
+                } else if !chosen.showsEveryItem {
+                    // It gives way only when even the compact row doesn't fit.
+                    #expect(!fits(name, width: width, spacing: AppSwitcher.compactSpacing), "\(label)")
                 }
             }
         }
     }
 
-    /// The measured toolbar, worked out here rather than with AppSwitcher.rowEnd: the row is
-    /// centered in the window unless that overlaps the leading end, then starts there, and it must
-    /// end before the trailing buttons and their clearance.
-    private func fits(width: CGFloat, spacing: CGFloat, leading: Int, trailing: Int) -> Bool {
+    /// The measured toolbar, worked out here rather than with AppSwitcher.rowEnd: icon-only
+    /// buttons 36 pt each, the sidebar toggle and inspector toggle on top of `name`'s actions; the
+    /// row is centered in the window unless that overlaps the leading end, then starts there, and it
+    /// must end before the trailing buttons, their clearance and the safety margin.
+    private func fits(_ name: String, width: CGFloat, spacing: CGFloat, items: Int = 6) -> Bool {
+        let toolbar = Self.toolbars[name] ?? (docs: [], actions: [])
         let room = AppSwitcher.toolbarButtonRoom
-        let leadingEnd = SuiteSize.sidebarWidth.ideal + CGFloat(leading) * room + AppSwitcher.titleRoom
-        let trailingStart = width - CGFloat(trailing) * room - AppSwitcher.trailingClearance
-        let row = 6 * spacing
+        let leadingEnd = SuiteSize.sidebarWidth.ideal + CGFloat(1 + toolbar.docs.count) * room + AppSwitcher.titleRoom
+        let trailingStart = width - CGFloat(toolbar.actions.count + 1) * room - AppSwitcher.trailingClearance
+            - AppSwitcher.safetyMargin
+        let row = CGFloat(items) * spacing
         return max(width / 2 - row / 2, leadingEnd) + row <= trailingStart
     }
 
