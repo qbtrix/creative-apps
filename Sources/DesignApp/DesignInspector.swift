@@ -3,7 +3,8 @@
 // layer shows its header (name, then kind unless the name says it, then size),
 // then Align (DesignAlignBar), then Layer (Hidden and Locked checkboxes), Frame (X, Y, W and H as scrub
 // fields) and Fill (the color well; a text layer's is its text color, a group
-// has none), then for a text layer its Text section (DesignInspectorText). A
+// has none), then for a text layer its Text section (DesignInspectorText, blank until
+// style-rows gives it rows). A
 // locked layer, or one inside a locked group, can't be edited, so Frame and
 // Fill are disabled and a line says why. With only a page selected it shows
 // DesignInspectorPage. With several layers selected (D0-5c) it shows "<n> Layers",
