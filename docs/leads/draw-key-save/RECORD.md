@@ -1,10 +1,10 @@
 # draw-key-save lead record
 
 Issue: #1365 · Packet: docs/blueprints/flare/features/draw-key-save.md
-Run: act-1a1487603d9-vrd4 (line lead with flare-export; earlier run act-1a145e74c0e-upy8) · Session: session_014CL56cxiN842wt8RaQGsi6 · Started: 2026-10-16T18:10Z (resumed 2026-10-17T06:05Z)
+Run: act-1a14a13ca4f-74rv (line lead for draw-key-save, layers-files, inspector-timeline; earlier runs act-1a1487603d9-vrd4, act-1a145e74c0e-upy8) · Session: session_01NXMovyJtKvANXKD2WWypB3 · Started: 2026-10-16T18:10Z (resumed 2026-10-17T06:05Z)
 Stage: 4 round 2
 Base: 4a86f5fcff2f2cc18748a93e39f1491c6ae5c745
-Next: round-2 critic panel running on scoped flare run 39001036689 (e251c5c5, contains #1965 and #1893); then relabel the open findings gap (round cap, rule 11) and post Belt-Contact-Sheet on #1365
+Next: round-2 critic panel running on full dev run 39032323316 (d14e765b, green Linux, promoted main; contains every round-2 fix); then relabel the open findings gap (round cap, rule 11) and post Belt-Contact-Sheet on #1365
 
 Loop: v2 (the packet has no `## Slices` table), started after #1302 merged
 (2026-10-16T04:20Z), so the findings queue and the 2-round cap apply.

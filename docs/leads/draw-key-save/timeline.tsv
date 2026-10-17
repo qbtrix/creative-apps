@@ -71,3 +71,4 @@ utc	stage	event	ref	note
 2026-10-17T06:05Z	4	stage-start	round 2 review	resumed by line lead act-1a1487603d9-vrd4; lead branch recreated on dev 4a86f5f
 2026-10-17T06:12Z	4	ci-run	39001036689	scoped flare e251c5c5 holds #1965 and #1893; macOS (flare) red (11 journeys); audit contrast 5/0 identifier 18/12; round-2 panel started
 2026-10-17T10:45Z	4	heartbeat	39013292801	container restarted 06:45-10:43; round-2 panel never ran (template parse error), rerunning on scoped flare 453198ac
+2026-10-17T13:39Z	heartbeat	39032323316	#1365	new lead session; round-2 panel started on full run 39032323316 (d14e765b) instead of scoped 39013292801: newer, green Linux, promoted main
