@@ -1,6 +1,6 @@
 [
-{"label":"labelled keeps nested frames (the top-level filter dropped)","file":"Sources/DesignModel/DesignFrameLabel.swift","find":"page.nodes.filter {","replace":"page.nodes.flatMap { [$0] + $0.children }.filter {","tests":"DesignFrameLabelTests"},
-{"label":"labelled keeps hidden frames","file":"Sources/DesignModel/DesignFrameLabel.swift","find":"$0.kind == .frame && !$0.isHidden","replace":"$0.kind == .frame","tests":"DesignFrameLabelTests"},
-{"label":"labelled keeps every top-level layer","file":"Sources/DesignModel/DesignFrameLabel.swift","find":"$0.kind == .frame && !$0.isHidden","replace":"!$0.isHidden","tests":"DesignFrameLabelTests"},
-{"label":"bottom adds the gap instead of taking it away","file":"Sources/DesignModel/DesignFrameLabel.swift","find":"frameTop - gap","replace":"frameTop + gap","tests":"DesignFrameLabelTests"}
+{"label":"room ignores the artboard's offset","file":"Sources/DesignModel/DesignFrameLabel.swift","find":"let room = frameTop - artboardTop","replace":"let room = frameTop","tests":"DesignFrameLabelTests.swift"},
+{"label":"room counts the name but not the gap","file":"Sources/DesignModel/DesignFrameLabel.swift","find":"room >= labelHeight + gap {","replace":"room >= labelHeight {","tests":"DesignFrameLabelTests.swift"},
+{"label":"the boundary is strict","file":"Sources/DesignModel/DesignFrameLabel.swift","find":"room >= labelHeight + gap {","replace":"room > labelHeight + gap {","tests":"DesignFrameLabelTests.swift"},
+{"label":"an inside name follows a frame above the artboard","file":"Sources/DesignModel/DesignFrameLabel.swift","find":"return .inside(top: Swift.max(frameTop, artboardTop) + inset)","replace":"return .inside(top: frameTop + inset)","tests":"DesignFrameLabelTests.swift"}
 ]

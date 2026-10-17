@@ -3,18 +3,18 @@
 // Lane 13's key at 12 on the AppKit lanes view and drags it 600 pt at speed
 // (120 or more samples at 120 Hz, which `key-drag` proves); on `timeline` it
 // moves Badge's key off the clip's end and trims that end (`trim badge end
-// 40`, `trim end`). Bodies come from the perf probe: TL-23's lanes view
-// records a `body` mark in series `timeline-lane` per lane body, the gallery
-// page one in `timeline-window` per window body. Spec (packet line 487): 0
-// lane bodies and at most 1 window body per gesture. TL-20 lands it skipped;
-// TL-23 turns it on. Shaped after +TimelineDrag.
+// 40`, `trim end`). Bodies come from the perf probe's `body` marks, series
+// `timeline-lane` per lane body and `timeline-window` per window body. Spec
+// (packet line 487): 0 lane bodies and at most 1 window body per gesture.
+// TL-20 landed it skipped; TL-23 turns it on, once the AppKit lanes view has
+// its own key children (TimelineLanesView+Access). The keys it finds by
+// identifier are TL-12's. Shaped after +TimelineDrag.
 import AppKit
 import XCTest
 
 extension SuiteJourneyTests {
     /// SJ19e: a key drag and a trim on the AppKit lanes run no lane body and at most one window body.
     @MainActor func testTimelineLanesDragWithoutBodies() throws {
-        throw XCTSkip("waits on TL-23")
         try walkTimelineLanes()
     }
 

@@ -4,11 +4,12 @@
 // reads the bytes; this file only carries them. A write replaces what the
 // pasteboard held; a read never changes it; another type reads as nil.
 //
-// `designPasteboardCommands` hooks the system's Cut, Copy and Paste (the stock
-// Edit items and their shortcuts) on a focused view, the canvas and the Layers
-// list, to `.cut`, `.copy` and `.paste`, which DesignWindow runs through the
-// bridge. Copy and Cut are off while the Model gives a reason (nothing
-// selected, a text edit under way), so a text field keeps its own. A hook
+// `designPasteboardCommands` hooks the system's Cut, Copy, Paste and Delete (the
+// stock Edit items and their shortcuts) on a focused view, the canvas and the
+// Layers list, to `.cut`, `.copy`, `.paste` and `.deleteSelection`, which
+// DesignWindow runs (the first three through the bridge). Copy and Cut are off
+// while the Model gives a reason (nothing selected, a text edit under way), and
+// Delete while DesignMenu can't delete a layer, so a text field keeps its own. A hook
 // hands the system the bytes the window just wrote, so whatever the system
 // then writes holds the same bytes under the same type. macOS only.
 import AppKit
@@ -45,10 +46,12 @@ struct DesignPasteboardBridge {
 }
 
 extension View {
-    /// The system's Cut, Copy and Paste on this view, sent to the window as `.cut`, `.copy` and `.paste`.
+    /// The system's Cut, Copy, Paste and Delete on this view, sent to the window as `.cut`, `.copy`,
+    /// `.paste` and `.deleteSelection`.
     func designPasteboardCommands(_ model: DesignWorkspace, _ perform: @escaping DesignPerform) -> some View {
         let type = model.pasteboardType
         let canCopy = model.copyHelp() == nil
+        let canDelete = DesignMenu.deletesLayer(model)
         // Each runs the intent, then reads back what the window wrote, on the main actor.
         let copied: @MainActor () -> Data? = { perform(.copy); return DesignPasteboardBridge().read(type: type) }
         let cut: @MainActor () -> Data? = { perform(.cut); return DesignPasteboardBridge().read(type: type) }
@@ -57,5 +60,6 @@ extension View {
             .onCopyCommand(perform: canCopy ? { bridge.providers(MainActor.assumeIsolated(copied), type: type) } : nil)
             .onCutCommand(perform: canCopy ? { bridge.providers(MainActor.assumeIsolated(cut), type: type) } : nil)
             .onPasteCommand(of: [UTType(importedAs: type)]) { _ in MainActor.assumeIsolated { perform(.paste) } }
+            .onDeleteCommand(perform: canDelete ? { MainActor.assumeIsolated { perform(.deleteSelection) } } : nil)
     }
 }

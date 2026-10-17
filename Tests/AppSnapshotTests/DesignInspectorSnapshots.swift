@@ -1,9 +1,12 @@
 // DesignInspectorSnapshots.swift: Design's inspector (Properties) at the
 // editor's panel width: a page with no layer selected, a rectangle selected
-// (Layer, Frame and Fill), a locked rectangle (Frame and Fill disabled,
-// with the line saying why), and a rectangle inside a locked group (disabled
-// the same way). Writes design-inspector-page-, -node-, -locked- and
-// -locked-group-{light,dark}.png. macOS only.
+// (Layer, Frame, Corners, Stroke and Fill), a locked rectangle (its rows
+// disabled, with the hint saying why in the value column, whose x is checked
+// against the X field's on the hosted view), a rectangle inside a locked group
+// (disabled the same way), and A on `cards` styled: radius 12, opacity 50% and
+// a 4 pt stroke. Writes design-inspector-page-, -node-, -locked-,
+// -locked-group- and -style-{light,dark}.png. macOS only.
+import AppKit
 import DesignModel
 import SuiteUI
 import SwiftUI
@@ -41,6 +44,36 @@ import Testing
         try model.setNodeLocked(group, true)
         model.selectItem(rectangle)
         try shoot("locked-group", model)
+    }
+
+    @Test func styledLayer() throws {
+        var model = DesignFixtures.cards
+        model.useServices(.live)
+        model.selectItem("node-2")
+        try model.setStyle(.cornerRadius(12))
+        try model.setStyle(.opacity(0.5))
+        try model.setStyle(.stroke(DesignStroke(color: .black, width: 4)))
+        let a = try #require(model.selectedNode)
+        #expect(a.cornerRadius == 12)
+        #expect(a.opacity == 0.5)
+        #expect(a.stroke == DesignStroke(color: .black, width: 4))
+        #expect(model.opacityPercentText == "50%")
+        try shoot("style", model)
+    }
+
+    /// The hint starts where the X field does, not at the gutter (#276).
+    @Test(.timeLimit(.minutes(1))) func lockedHintSitsInTheValueColumn() async throws {
+        var model = DesignFixtures.cards
+        model.useServices(.live)
+        model.selectItem("node-2")
+        try model.setNodeLocked("node-2", true)
+        #expect(model.styleHint(.opacity) == "Unlock A to change it.")
+        let w = RenderBudgetWindow(PanelSample(model: model))
+        defer { w.close() }
+        try await w.settle(500)
+        let x = try #require(await w.element(DesignControlID.frameField(.x)), "no X field")
+        let hint = try #require(await w.element("design.inspector.hint"), "no hint")
+        #expect(abs(hint.minX - x.minX) < 1, "the hint starts at \(hint.minX), the X field at \(x.minX)")
     }
 }
 

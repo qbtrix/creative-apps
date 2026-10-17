@@ -4,9 +4,10 @@
 // Go to End and Loop, each from its FlareIntent: the intent's title,
 // `perform` on a click, and `help(for:in:)`'s reason while it can't act: no
 // timeline can play, or the playhead already stands where a start, end or
-// step would put it (#1839). The steps and ends are borderless
+// step would put it (#1839). The steps and ends are
 // SuiteSize.transportButton squares in secondary ink (tertiary while
-// disabled); Play is the larger
+// disabled) on HoverButtonStyle, which fills and outlines them under the
+// pointer and while pressed; Play is the larger
 // round SuiteSize.playButton button, bordered prominent in accentFill with a
 // white glyph, showing pause and reading "Playing" (and selected) while
 // playing; Loop is a button-style Toggle, so the system draws its whole on
@@ -91,7 +92,7 @@ struct FlareTransport: View {
         .accessibilityElement(children: .contain)
     }
 
-    /// Play is the round accentFill button, Loop a button-style Toggle, the rest borderless squares.
+    /// Play is the round accentFill button, Loop a button-style Toggle, the rest hover-styled squares.
     @ViewBuilder private func control(_ item: Item) -> some View {
         let label = Label(item.title, systemImage: item.systemImage).labelStyle(.iconOnly)
         switch item.kind {
@@ -116,7 +117,8 @@ struct FlareTransport: View {
                 label.frame(width: SuiteSize.transportButton, height: SuiteSize.transportButton)
                     .contentShape(.rect)
             }
-            .buttonStyle(.borderless)
+            // HoverButtonStyle: a borderless button shows no hover or press on macOS (swiftui-rules.md, rule 10).
+            .buttonStyle(HoverButtonStyle())
             // Its own ink, tertiary while disabled, so a disabled step can't read as live.
             .foregroundStyle(item.help == nil ? SuiteColor.textSecondary : SuiteColor.textTertiary)
         }

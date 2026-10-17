@@ -14,11 +14,15 @@
 // draws at full size, and once committed, with a small box's corner handles
 // outside it), undoes and redoes, saves with -DesignSaveTo (no panel), then
 // relaunches with -DesignOpenFile and checks the saved file reopens. The menu
-// journey checks each menu really opens, finds each Design item in it (Edit keeps
-// the system's Cut, Copy, Paste and Select All above Duplicate) on, or off with
-// nothing selected (their tooltips, which XCUITest can't read on a menu item, are
-// proven in DesignEditMenuSnapshots and DesignPageMenuSnapshots), and adds a page
-// from the Page menu.
+// journey launches on `-DesignFixture empty`, clicks the top bar's New File
+// (`design.bar.new`, one "New File" undo step), checks each menu really opens,
+// finds each Design item in it (Edit keeps the system's Cut, Copy, Paste, Delete
+// and Select All above Duplicate, and holds one Delete) on, or off with nothing
+// selected, the Arrange and Align submenus included (their tooltips, which
+// XCUITest can't read on a menu item, are proven in DesignEditMenuSnapshots and
+// DesignPageMenuSnapshots), and adds a page from the Page menu. The delete
+// journey selects Desktop's row on `cards`, deletes it with Edit > Delete and
+// brings it back with ⌘Z.
 // The align journey draws a rectangle, centers it from the inspector's Align
 // row and moves it to the top from Object > Align, one undo step each.
 import XCTest
@@ -39,17 +43,24 @@ final class DesignJourneyTests: XCTestCase {
     }
 
     @MainActor func testEveryMenuOpens() {
-        let design = Journey("Design", self)
-        design.app.typeKey("n", modifierFlags: .command)
+        let design = Journey("Design", self, arguments: ["-DesignFixture", "empty"])
+        XCTAssert(design.element("suite.canvas").waitForExistence(timeout: 30), "-DesignFixture empty showed no canvas")
+        // The top bar's New File, clicked: a new document replaces the open one as one undo step.
+        let newFile = design.element("design.bar.new")
+        XCTAssert(newFile.waitForExistence(timeout: 5) && newFile.isEnabled, "no enabled New File in the top bar (design.bar.new)")
+        newFile.click()
+        XCTAssert(Self.waitForLabel(design.element("design.bar.undo"), "Undo New File"), "the top bar's New File made no document")
+        XCTAssert(design.element("suite.canvas").waitForExistence(timeout: 5), "New File showed no canvas")
+        design.shot("menus-new-file")
         design.openEachMenu(expecting: ["Page": "Add Page"])
         let items = [
-            "Edit": ["Cut", "Copy", "Paste", "Select All", "Duplicate", "Delete Layer"],
+            "Edit": ["Cut", "Copy", "Paste", "Delete", "Select All", "Duplicate"],
             "Page": ["Add Page", "Rename Page…", "Delete Page"],
             "Object": ["Group", "Ungroup", "Arrange", "Align", "Distribute Horizontally", "Distribute Vertically"],
             "View": ["Zoom to Selection"],
         ]
         // With nothing selected these are off; each says why in its tooltip.
-        let off: Set = ["Duplicate", "Delete Layer", "Rename Page…", "Delete Page", "Group", "Ungroup",
+        let off: Set = ["Duplicate", "Delete", "Rename Page…", "Delete Page", "Group", "Ungroup", "Arrange", "Align",
                         "Distribute Horizontally", "Distribute Vertically", "Zoom to Selection"]
         for (title, names) in items.sorted(by: { $0.key < $1.key }) {
             let menu = design.app.menuBars.firstMatch.menuBarItems[title]
@@ -59,6 +70,7 @@ final class DesignJourneyTests: XCTestCase {
                 XCTAssert(item.waitForExistence(timeout: 3), "the \(title) menu shows no \(name)")
                 if off.contains(name) { XCTAssertFalse(item.isEnabled, "\(title) > \(name) is on with nothing selected") }
             }
+            if title == "Edit" { XCTAssertEqual(Self.deleteItems(menu).count, 1, "Edit holds more than one Delete") }
             design.shot("menu-items-\(title.lowercased())", screen: true)
             design.app.typeKey(.escape, modifierFlags: [])
         }
@@ -66,6 +78,28 @@ final class DesignJourneyTests: XCTestCase {
         design.app.menuItems["Add Page"].click()
         XCTAssert(design.app.buttons["Undo Add Page"].waitForExistence(timeout: 5), "Page > Add Page added no page")
         design.shot("added-page")
+    }
+
+    @MainActor func testEditDeleteRemovesTheSelectedLayer() {
+        let design = Journey("Design", self, arguments: ["-DesignFixture", "cards"])
+        let desktop = design.element("design.layer.node-1")
+        XCTAssert(desktop.waitForExistence(timeout: 30), "cards showed no Desktop row (design.layer.node-1)")
+        desktop.click()
+        let edit = design.app.menuBars.firstMatch.menuBarItems["Edit"]
+        edit.click()
+        let deletes = Self.deleteItems(edit)
+        XCTAssertEqual(deletes.count, 1, "Edit holds more than one Delete")
+        let delete = edit.menuItems["Delete"]
+        XCTAssert(delete.waitForExistence(timeout: 3) && delete.isEnabled, "Edit > Delete is off with Desktop selected")
+        design.shot("menu-edit-delete", screen: true)
+        delete.click()
+        let undo = design.element("design.bar.undo")
+        XCTAssert(Self.waitForLabel(undo, "Undo Delete Frame"), "Edit > Delete made no Delete Frame step (Undo reads \(undo.label))")
+        XCTAssert(Self.waitForGone(desktop), "Edit > Delete left Desktop in the Layers list")
+        design.shot("deleted-layer")
+        design.app.typeKey("z", modifierFlags: .command)
+        XCTAssert(desktop.waitForExistence(timeout: 5), "⌘Z didn't bring Desktop back")
+        design.shot("delete-undone")
     }
 
     @MainActor func testAlignALayer() {
@@ -210,6 +244,11 @@ final class DesignJourneyTests: XCTestCase {
         }
         XCTAssert(move.isSelected, "the palette doesn't show Move picked after \(action)")
         XCTAssert(picked, "the status line shows \(status.label) \(String(describing: status.value)), not Move, after \(action)")
+    }
+
+    /// The items of `menu` whose title starts with "Delete".
+    @MainActor private static func deleteItems(_ menu: XCUIElement) -> [XCUIElement] {
+        menu.menuItems.matching(NSPredicate(format: "title BEGINSWITH %@", "Delete")).allElementsBoundByIndex
     }
 
     /// Whether `element`'s label reads `label` within `timeout` seconds.
