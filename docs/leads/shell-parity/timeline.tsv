@@ -71,3 +71,4 @@ utc	stage	event	ref	note
 2026-10-17T15:26Z	shell-parity	check	dev@f50448c4	blocked on DW-a/EK-tree/LL-9
 2026-10-17T15:43Z	shell-parity	check	dev@dd7ec767	blocked on DW-a/EK-tree/LL-9
 2026-10-17T16:00Z	shell-parity	check	dev@d6187654	blocked on DW-a/EK-tree/LL-9
+2026-10-17T16:18Z	shell-parity	check	dev@0b50c70f	DW-a PRs #2168 #2163 open; EK-tree, LL-9 none
