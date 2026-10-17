@@ -126,3 +126,4 @@ utc	stage	event	ref	note
 2026-10-17T03:13Z	5	heartbeat	#1035	no new halo run on dev 82ac5055; #1789 open; done claim still open for supervisor
 2026-10-17T06:17Z	done	heartbeat	#1035	line lead act-1a1487bf880-qmey: supervisor decision 06:06Z done stands; nothing left here
 2026-10-17T11:58Z	3	heartbeat	act-1a149b53ef6-67v7	line lead resumed: wave 1 of the previous run opened no PRs; restarting it on dev 0424231
+2026-10-17T13:53Z	done	heartbeat	#1035	done; line lead running text-layers and render-out wave 2
