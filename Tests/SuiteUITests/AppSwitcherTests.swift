@@ -108,7 +108,9 @@ import Testing
         #expect(AppSwitcher.toolbarLeading(documentActions: items(["New", "Open", "Save"])) == 540)
         // The window's own controls sit inside the sidebar column; the safety margin is on top.
         #expect(AppSwitcher.windowControlsRoom < SuiteSize.sidebarWidth.ideal)
-        #expect(AppSwitcher.toolbarTrailing(actions: []) == 36 + 48 + 8)
+        // Typed as CGFloat: a bare literal sum inside #expect is inferred as Int and never equals 92.0 (#1832).
+        let trailingWithNoActions: CGFloat = 36 + 48 + 8
+        #expect(AppSwitcher.toolbarTrailing(actions: []) == trailingWithNoActions)
         // Overflowed: Halo at 1000 pt with 80 (run 38897404951), Design at 1024 pt with 40 (run 38938835086),
         // and the editor gallery at 900 pt with the compact row (run 38981651490: Fit, Zoom In and the
         // inspector toggle went into the overflow).
