@@ -48,7 +48,8 @@ extension DesignEditMenuSnapshots {
         none.newFile()
         var one = DesignWorkspace()
         one.useServices(.fake)
-        #expect(one.openFixture("cards"))
+        let opened = one.openFixture("cards")
+        #expect(opened)
         one.selectItem(one.selectedPage?.nodes.last?.id ?? "")
         let menus = [none, one].map { DesignMenu(model: $0, perform: { _ in }) }
         #expect(menus[0].help(.duplicate) == "Select a layer first.")
