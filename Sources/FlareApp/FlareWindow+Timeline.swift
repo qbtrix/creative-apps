@@ -1,14 +1,8 @@
-// FlareWindow+Timeline.swift: the router's timeline area
-// (FlareWindow+Router.swift). Scrubbing, the transport's start, step, end,
-// play/pause and loop move the playhead through the Model's playback calls
-// while a timeline can play; Auto-key toggles recording while a document is
-// open. Start, end and the steps say why while the playhead already stands
-// where they'd put it (FlareTransport.help, #1839). Key navigation and the
-// key edits have no Model call yet, so they wait for F7a and say so.
+// FlareWindow+Timeline.swift: the window's `.timeline` intents: transport, and the key, frame and label edits of
+// IT-7. `timelineHelp(_:in:)` says why one can't run, for the menus and FlareTimelineEdit's context menu.
 import FlareModel
 
 extension FlareWindow {
-    /// Acts on a timeline intent.
     func performTimeline(_ intent: FlareIntent.Timeline) {
         switch intent {
         case .scrub(let frame): model.setCurrentFrame(frame)
@@ -18,21 +12,35 @@ extension FlareWindow {
         case .togglePlay: model.togglePlay()
         case .setLoops(let on): model.setLoops(on)
         case .toggleAutoKey: model.toggleAutoKey()
-        case .nextKeyframe, .previousKeyframe, .selectKey, .moveKeys, .endKeyDrag, .removeKeys, .addKey, .removeKey,
-            .insertFrames, .removeFrames, .setLabel:
+        case .selectKey(let layerID, let property, let frame, let extending):
+            model.selectKey(KeyRef(layerID: layerID, property: property, frame: frame), extending: extending)
+        case .moveKeys(let frames, let dragStart): model.moveSelectedKeys(by: frames, dragStart: dragStart)
+        case .endKeyDrag: model.endKeyDrag()
+        case .removeKeys: model.removeSelectedKeys()
+        case .insertFrames(let count): model.insertFrames(count)
+        case .removeFrames(let count): model.removeFrames(count)
+        case .setLabel(let name): model.setLabel(name)
+        case .nextKeyframe, .previousKeyframe, .addKey, .removeKey:
             break
         }
     }
 
-    /// Why a timeline intent can't act now; nil when it can.
-    func timelineHelp(_ intent: FlareIntent.Timeline) -> String? {
+    func timelineHelp(_ intent: FlareIntent.Timeline) -> String? { Self.timelineHelp(intent, in: model) }
+
+    /// Why `intent` can't run on `model`; nil when it can.
+    static func timelineHelp(_ intent: FlareIntent.Timeline, in model: FlareWorkspace) -> String? {
+        let noDocument = model.document == nil ? "Open an animation to edit its timeline." : nil
         switch intent {
-        case .scrub, .togglePlay, .setLoops: model.canPlay ? nil : FlareTransport.cannotPlay
-        case .goToStart, .goToEnd, .step: FlareTransport.help(for: intent, in: model)
-        case .toggleAutoKey: model.document == nil ? "Open an animation to key it." : nil
-        case .nextKeyframe, .previousKeyframe, .selectKey, .moveKeys, .endKeyDrag, .removeKeys, .addKey, .removeKey,
-            .insertFrames, .removeFrames, .setLabel:
-            "Not built yet (F7a)."
+        case .scrub, .togglePlay, .setLoops: return model.canPlay ? nil : FlareTransport.cannotPlay
+        case .goToStart, .goToEnd, .step: return FlareTransport.help(for: intent, in: model)
+        case .toggleAutoKey: return model.document == nil ? "Open an animation to key it." : nil
+        case .selectKey, .insertFrames, .removeFrames: return noDocument
+        case .moveKeys, .removeKeys: return noDocument ?? (model.selectedKeys.isEmpty ? FlareWorkspace.selectKeyFirst : nil)
+        case .endKeyDrag: return nil
+        case .setLabel(let name?): return noDocument ?? (name.isEmpty ? "Name the label first." : nil)
+        // The Animate menu's Add Label sends no name, so it points at the context menu, which asks for one.
+        case .setLabel(nil): return noDocument ?? "Name a label from the timeline's context menu (Add Label…)."
+        case .nextKeyframe, .previousKeyframe, .addKey, .removeKey: return "Not built yet (F7a)."
         }
     }
 }

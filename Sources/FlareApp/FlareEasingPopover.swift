@@ -1,43 +1,42 @@
-// FlareEasingInspector.swift: the easing editor in Flare's inspector, under
-// two Studio caps headers. KEYFRAMES lists the selected layer's segments (an
-// amber diamond, the property, "frames 0 → 24", and the selected row's
-// preset); its header shows only over rows, so a layer with no keys shows
-// EASING and its hint alone (#1861);
+// FlareEasingPopover.swift: the easing popover TIMING's Easing button opens
+// (FlareInspectorTiming.swift; IT-8, #378), under a Studio caps header and
+// the selected span's title.
 // EASING shapes the selected segment with SuiteUI's CurveEditor, ChoiceChips
 // and four StudioScrubRows (x1, y1, x2, y2), each with a tooltip naming its
 // handle, axis and range (#1847). Generic over the EasingEditing
 // contract, so it runs on FakeEasingEditing in snapshots and on FlareWorkspace
 // in the window. It only reads the editor and calls the closures; it never
 // mutates the editor. Every drag, nudge or typed value ends in `onEndDrag`,
-// so each is one undo step. Owns presentation state only: the hovered row.
-// It brings no side gutter of its own; the inspector it sits in supplies one.
+// so each is one undo step. It owns no state.
 // When the editor gives an `easingUnavailableReason` (inside a symbol, on a
 // locked layer), the EASING controls show disabled under that reason (#668).
-// Each KEYFRAMES row carries `rowIdentifier`, flare.easing.segment.<property>.
-// <start>-<end>, the same whichever row is selected (the app audit, #262).
 // The preset chips get theirs once ChoiceChips takes one per option (#1148).
 import FlareCore
 import FlareModel
 import SuiteUI
 import SwiftUI
 
-struct FlareEasingInspector<Editor: EasingEditing>: View {
+struct FlareEasingPopover<Editor: EasingEditing>: View {
     let editor: Editor
-    let onSelect: @MainActor (EasingSegment) -> Void
     let onPreset: @MainActor (EasingPreset) -> Void
     let onMoveHandle: @MainActor (EasingHandle, Point) -> Void
     let onEndDrag: @MainActor () -> Void
     /// Starts with this handle ringed, as after a click (snapshots).
     var focusedHandle: EasingHandleIndex?
-    @State private var hovered: EasingSegment?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            if editor.showsKeyframesHeader { header("Keyframes") }
-            ForEach(editor.easingSegments) { segmentRow($0) }
             header("Easing")
+            if let segment = editor.selectedEasingSegment {
+                Text(segment.title)
+                    .font(SuiteFont.inspectorMeta)
+                    .foregroundStyle(SuiteColor.secondaryText)
+                    .padding(.bottom, SuiteSpacing.xs)
+            }
             easing
         }
+        .padding([.horizontal, .bottom], SuiteSpacing.m)
+        .frame(width: SuiteSize.editorPanelWidth)
     }
 
     private func header(_ title: String) -> some View {
@@ -48,46 +47,6 @@ struct FlareEasingInspector<Editor: EasingEditing>: View {
             .foregroundStyle(SuiteColor.secondaryText)
             .padding(.top, SuiteSpacing.m)
             .padding(.bottom, SuiteSpacing.xs)
-    }
-
-    /// A KEYFRAMES row's accessibility identifier, stable while the row lasts.
-    static func rowIdentifier(_ segment: EasingSegment) -> String {
-        "flare.easing.segment.\(segment.property).\(segment.startFrame)-\(segment.endFrame)"
-    }
-
-    private func segmentRow(_ segment: EasingSegment) -> some View {
-        let selected = segment == editor.selectedEasingSegment
-        return Button { onSelect(segment) } label: {
-            HStack(spacing: SuiteSpacing.s) {
-                Image(systemName: "diamond.fill")
-                    .font(SuiteFont.rulerLabel)
-                    .imageScale(.small)
-                    .foregroundStyle(SuiteColor.keyframed)
-                Text(segment.property)
-                    .font(SuiteFont.inspectorLabel)
-                    .foregroundStyle(selected ? SuiteColor.accentText : Color.primary)
-                Text(segment.frameSpan)
-                    .font(SuiteFont.inspectorValue)
-                    .foregroundStyle(SuiteColor.secondaryText)
-                Spacer(minLength: SuiteSpacing.s)
-                if selected {
-                    Text(editor.currentEasingPreset?.title ?? "Custom")
-                        .font(SuiteFont.inspectorMeta)
-                        .foregroundStyle(SuiteColor.secondaryText)
-                }
-            }
-            .padding(.horizontal, SuiteSpacing.s)
-            .frame(maxWidth: .infinity, minHeight: SuiteSize.chip, maxHeight: SuiteSize.chip, alignment: .leading)
-            .background(
-                selected ? SuiteColor.selectedWell : segment == hovered ? SuiteColor.panelRaised : Color.clear,
-                in: RoundedRectangle(cornerRadius: SuiteRadius.small))
-            .contentShape(RoundedRectangle(cornerRadius: SuiteRadius.small))
-        }
-        .buttonStyle(.plain)
-        .onHover { hovered = $0 ? segment : (hovered == segment ? nil : hovered) }
-        .accessibilityLabel(segment.title)
-        .accessibilityIdentifier(Self.rowIdentifier(segment))
-        .accessibilityAddTraits(selected ? .isSelected : [])
     }
 
     @ViewBuilder private var easing: some View {
@@ -121,7 +80,7 @@ struct FlareEasingInspector<Editor: EasingEditing>: View {
             }
             .disabled(reason != nil)
         } else {
-            Text(editor.easingSegments.isEmpty ? "Key a property to shape its easing." : "Pick a keyframe above.")
+            Text("Pick a keyframe span to shape its easing.")
                 .font(SuiteFont.inspectorMeta)
                 .foregroundStyle(SuiteColor.secondaryText)
         }

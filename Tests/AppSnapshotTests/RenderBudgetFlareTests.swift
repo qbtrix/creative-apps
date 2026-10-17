@@ -1,8 +1,7 @@
 // RenderBudgetFlareTests.swift: Flare's render budget
 // (Tests/render-budgets.md) on the real window, through the harness
-// (RenderBudgetHarness.swift). On New Sample Animation with Ball's first
-// easing segment selected, it steps the easing inspector's X1 scrub row 60
-// times through its slider (the way VoiceOver and XCUI adjust it: the row's
+// (RenderBudgetHarness.swift). On New Sample Animation with Ball selected,
+// it steps TRANSFORM's X row 60 times through its slider (the way VoiceOver and XCUI adjust it: the row's
 // drag ignores the test's window-activation clicks), then with Ellipse
 // chosen drags 120 samples across the canvas, which draws an ellipse (Rectangle
 // is "Not connected yet (IN-1)" on the live services, so it draws nothing): the
@@ -55,10 +54,10 @@ extension BodyCountSuites {
                 #endif
             }
             var found = false
-            let scrub = try await w.measure("flare scrub row X1, 60 steps", bodies: bodies) {
-                found = try await w.adjust("flare.easing.row.x1", steps: 60)
+            let scrub = try await w.measure("flare scrub row X, 60 steps", bodies: bodies) {
+                found = try await w.adjust("flare.inspector.x", steps: 60)
             }
-            #expect(found && (scrub.bodies ?? 1) >= 1, "the X1 row didn't step: \(scrub)")
+            #expect(found && (scrub.bodies ?? 1) >= 1, "the X row didn't step: \(scrub)")
             #if DEBUG
             // The layer count, not the stage's items: the sample's Ball draws no stage item at frame 0.
             let before = FlareWindow.shownModel?.selectedScene?.layers.count ?? 0

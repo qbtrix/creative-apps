@@ -69,7 +69,7 @@ struct FlareWindow: View {
         } inspector: {
             FlareInspector(
                 model: model, tab: inspectorTab, perform: perform,
-                easing: FlareEasingInspector(
+                easing: FlareTimingRow(
                     editor: model, onSelect: { model.selectEasingSegment($0) },
                     onPreset: { model.setEasingPreset($0) }, onMoveHandle: { model.moveEasingHandle($0, to: $1) },
                     onEndDrag: { model.endEasingHandleDrag() }))
