@@ -32,3 +32,5 @@ utc	stage	event	ref	note
 2026-10-17T15:37:19Z	3	heartbeat	#2132	TX-7 macOS build run 39043788656 dispatched 15:09; waiting on the lane
 2026-10-17T15:49:46Z	4	pr-merged	#2132	TX-7 feature-done merged dd7ec767; full CI 39045632781 + scoped halo 39045670179 dispatched
 2026-10-17T15:59:06Z	4	check	39045670179	scoped halo run on dd7ec767 still in progress
+2026-10-17T16:18Z	4	ci	scoped halo 39045670179	success at dd7ec767
+2026-10-17T16:18Z	4	spawned	critic panel round 1	clarity journey design layout controls audit

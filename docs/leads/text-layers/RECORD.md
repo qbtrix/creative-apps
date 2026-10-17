@@ -2,9 +2,9 @@
 
 Issue: #1509 · Packet: docs/blueprints/halo/features/text-layers.md
 Run: act-1a149b53ef6-67v7 (line lead for #1035, #1509, #1505; earlier runs act-1a1487bf880-qmey, act-1a1429c87eb-3ecm) · Session: claude/feature-lead-playbook-l4ybf6 · Started: 2026-10-17T06:05Z
-Stage: 4 Anatomy (waiting on dev CI 39045632781 and scoped halo 39045670179 at dd7ec767)
+Stage: 4 Anatomy round 1 (critic panel on scoped halo 39045670179 at dd7ec767, success)
 Base: 8e868417eeaf2fd17229c21bc1087ef7eecb3d8f (origin/dev at 2026-10-17T13:53Z)
-Next: when scoped halo run 39045670179 completes, run the critic panel (clarity lens) on its ui-screens; file findings; fix rounds ≤2; contact sheet on #1509 after green CI
+Next: critic panel (clarity, journey, design, layout, controls, audit) files findings; fix round 1 by disjoint batches; ≤2 rounds; contact sheet on #1509 after green CI
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
