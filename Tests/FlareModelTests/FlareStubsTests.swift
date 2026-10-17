@@ -1,6 +1,7 @@
 // FlareStubsTests.swift: the inspector-timeline contract stubs (IT-0, lead.md rule 18). Every Model signature the
-// packet gives IT-1, IT-2 and IT-3 compiles and is callable on `.fake()`; each setter leaves the document and its
-// undo history unchanged and says why in its error; `load(_:)` clears the new state.
+// packet gives IT-1, IT-2 and IT-3 compiles and is callable on `.fake()`; each timeline setter leaves the document
+// and its undo history unchanged and says why in its error (paint is built: FlarePaintTests); `load(_:)` clears the
+// new state.
 import FlareCore
 @testable import FlareModel
 import Testing
@@ -32,18 +33,15 @@ private func ballAt12() -> FlareWorkspace {
     #expect(ballAt12().paint != nil)
 }
 
-@Test func paintSettersChangeNothingAndSetPaintError() {
+@Test func paintSettersEditTheFakesWithoutATimelineError() {
     let setters: [(inout FlareWorkspace) -> Void] = [
         { $0.setFill(hex: "FF3B30") }, { $0.setStrokeWidth(4) }, { $0.setStrokeCap(.round) },
         { $0.setStrokeJoin(.bevel) }, { $0.setStrokeColor(hex: "00FF00") },
     ]
     for set in setters {
         var w = ballAt12()
-        let before = w.document
         set(&w)
-        #expect(w.document == before && !w.canUndo)
-        #expect(w.paintError == FlareWorkspace.paintNotBuilt)
-        #expect(w.timelineError == nil)
+        #expect(w.canUndo && w.paintError == nil && w.timelineError == nil)
     }
 }
 
@@ -78,7 +76,7 @@ private func ballAt12() -> FlareWorkspace {
 
 @Test func loadClearsPaintErrorSelectedKeysAndTimelineError() {
     var w = ballAt12()
-    w.setFill(hex: "FF3B30")
+    w.setFill(hex: "FF3B3")
     w.insertFrames(1)
     w.selectedKeys = [KeyRef(layerID: "ball", property: nil, frame: 12)]
     #expect(w.paintError != nil && w.timelineError != nil && !w.selectedKeys.isEmpty)
