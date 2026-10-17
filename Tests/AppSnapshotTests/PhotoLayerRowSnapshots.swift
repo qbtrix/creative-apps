@@ -63,6 +63,17 @@ import Testing
         }
     }
 
+    /// The light snapshot is light: `LayerRows` once forced a dark scheme, so
+    /// photo-layer-row-focused-light.png was a dark list and light was never judged.
+    @Test func focusedSelectedRowLightIsLight() throws {
+        let (selected, hidden) = try layers()
+        let image = try #require(render(LayerRows(selected: selected, hidden: hidden), scheme: .light))
+        // The 280 pt panel sits centred on the 1440 × 900 canvas, x 580 to 860; x 583 is its
+        // left margin, clear of the rows, so the pixel is panel fill.
+        let fill = try #require(image.colorAt(x: 583, y: 450)?.usingColorSpace(.sRGB))
+        #expect(fill.redComponent > 0.5, "the light focused list draws a dark panel (\(fill))")
+    }
+
     /// The brightest pixel of the focused row's name, eye and blend label
     /// against its fill: at least 4.5:1 (WCAG AA for small text).
     @Test func focusedRowContrast() throws {
@@ -122,6 +133,5 @@ private struct LayerRows: View {
         .padding(SuiteSpacing.m)
         .frame(width: 280, alignment: .leading)
         .background(SuiteColor.panel)
-        .environment(\.colorScheme, .dark)
     }
 }

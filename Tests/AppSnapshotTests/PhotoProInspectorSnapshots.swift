@@ -70,7 +70,8 @@ import Testing
         let fitting = NSHostingView(rootView: Self.panel(model)).fittingSize
         #expect(
             fitting.width <= Self.canvas.width && fitting.height <= Self.canvas.height + 0.5, "panel is \(fitting)")
-        let x = Int(SuiteSpacing.xxl + SuiteSize.inspectorWidth.ideal / 2)
+        // The panel is centred on the canvas, so its column is the canvas's middle.
+        let x = Int(Self.canvas.width / 2)
         for scheme in [ColorScheme.light, .dark] {
             let image = try #require(render(Self.panel(model), scheme: scheme))
             let backdrop = try #require(image.colorAt(x: Int(Self.canvas.width) - 1, y: 0))
@@ -90,7 +91,8 @@ import Testing
         #expect(fitting.height <= Self.canvas.height + 0.5, "scrolled panel is \(fitting)")
         let top = try #require(render(Self.panel(model), scheme: .light))
         let end = try #require(render(Self.panelAtEnd(model), scheme: .light))
-        let left = Int(SuiteSpacing.xxl), right = Int(SuiteSpacing.xxl + SuiteSize.inspectorWidth.ideal)
+        let width = SuiteSize.inspectorWidth.ideal
+        let left = Int((Self.canvas.width - width) / 2), right = Int((Self.canvas.width + width) / 2)
         let bottom = Int(Self.canvas.height - SuiteSpacing.xxl) - 1
         let middle = Int(Self.canvas.height / 2)
         var changed = 0
