@@ -39,3 +39,5 @@ utc	stage	event	ref	note
 2026-10-17T16:18Z	4	spawned	RO-8 builder	halo/ro8-render-sheet
 2026-10-17T16:23Z	3	pr	RO-9 #2182	in lane, head 2bd7273b
 2026-10-17T16:34Z	4	pr	RO-8 #2184	in lane, head 44a76477
+2026-10-17T16:39Z	4	ci	macOS build RO-9 #2182	39049616762
+2026-10-17T16:39Z	4	ci	macOS build RO-8 #2184	39050244212
