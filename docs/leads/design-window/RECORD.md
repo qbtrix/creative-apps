@@ -4,7 +4,7 @@ Issue: #1494 · Packet: docs/blueprints/design/features/design-window.md
 Run: act-1a14a88d756-rnok · Session: claude/design-feature-lead-7saqm8 · Started: 2026-10-17T15:46Z
 Stage: 3 wave 3
 Base: 6ad373ab37fb612a8e7b185f902c263211f1197b
-Next: wave 3 building (D0-8a, D0-9c; workflow wf_f99448a4-d13). DW-a slice check waits on full CI https://github.com/qbtrix/creative-apps/actions/runs/39061216116 (6ad373ab, contains b2942150): Linux green -> Belt-Slice-Done + Mac-Finish-Wanted; ui-screens -> critic panel
+Next: wave 3 PRs #2282 (D0-8a) and #2280 (D0-9c) wait on the lane; D0-8b after #2282 merges. DW-a slice check waits on full CI https://github.com/qbtrix/creative-apps/actions/runs/39061216116 (6ad373ab, contains b2942150): Linux green -> Belt-Slice-Done + Mac-Finish-Wanted; ui-screens -> critic panel
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -24,8 +24,8 @@ Next: wave 3 building (D0-8a, D0-9c; workflow wf_f99448a4-d13). DW-a slice check
 | D0-5c | DW-a | 2 | several-layer inspector shell, Mixed rows, ids | per packet | DesignSeveralInspectorSnapshots | #2217 | merged 18:15Z |
 | D0-5d | DW-a | 2 | DesignPasteboardBridge, copy/cut/paste hooks, rename state, DesignClosePrompt | per packet | DesignPasteboardBridgeTests | #2214 | merged 18:26Z |
 | D0-6 | DW-a | 2 | menus: Duplicate, Rename Page, Group, Ungroup, Arrange, Distribute, Zoom to Selection | DesignCommands.swift, DesignEditMenu.swift, DesignObjectMenu.swift; snapshots; J1 | DesignEditMenuSnapshots, J1 | #2213 | merged 18:59Z (b2942150) |
-| D0-8a | DW-b | 3 | DesignLiveDrag box | DesignLiveDrag.swift, DesignCanvas.swift, DesignWindow.swift; DesignLiveDragTests | DesignLiveDragTests | – | building (wave 3) |
-| D0-9c | DW-d | 3 | hover outline and pointers in DesignCanvasFeedback | DesignCanvasFeedback.swift; snapshots; DesignCanvasHoverTests | DesignCanvasFeedbackSnapshots | – | building (wave 3) |
+| D0-8a | DW-b | 3 | DesignLiveDrag box | DesignLiveDrag.swift, DesignCanvas.swift, DesignWindow.swift; DesignLiveDragTests | DesignLiveDragTests | #2282 | open (head 7a79105b), waits on the lane |
+| D0-9c | DW-d | 3 | hover outline and pointers in DesignCanvasFeedback | DesignCanvasFeedback.swift; snapshots; DesignCanvasHoverTests | DesignCanvasFeedbackSnapshots | #2280 | open, contract ok (head 2c06ccf6), waits on the lane |
 | D0-8b | DW-b | 4 | editor bodyRuns counter, 120-sample drag check | DesignEditor.swift; DesignWindowDragTests | DesignWindowDragTests | – | waits D0-8a |
 | D0-7a | DW-c | 5 | suiteProbes and ids on window controls | DesignWindow.swift, DesignEditor.swift, DesignCanvas.swift, DesignControlID.swift; DesignControlIDTests | DesignControlIDTests | – | waits DW-b |
 | D0-9d | DW-d | 5 | size badge from the live box, text preview; testCanvasFeedback on | DesignCanvasFeedback.swift; snapshots; DesignCanvasBadgeTests; +Feedback journey | DesignCanvasBadgeTests | – | waits D0-8b, D0-9c, canvas-basics CB-a |
