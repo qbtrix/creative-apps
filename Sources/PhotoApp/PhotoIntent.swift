@@ -6,7 +6,7 @@
 // enum, declared in its PhotoWindow+<Area>.swift and routed to that file's
 // perform, so a feature adds intents without editing this file; the v1 cases
 // stay flat. `confirm` (Return) and `dismiss` (Escape) route by mode.
-// PhotoTool's rail look (title, symbol, one-key shortcut) lives here too.
+// PhotoTool's palette look (title, symbol, one-key shortcut) lives here too.
 import CoreRaster
 import PhotoModel
 import SuiteUI

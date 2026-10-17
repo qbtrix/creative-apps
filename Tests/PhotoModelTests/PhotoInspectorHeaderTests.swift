@@ -1,4 +1,4 @@
-// PhotoInspectorHeaderTests.swift: the text Photo's panel header and viewer
+// PhotoInspectorHeaderTests.swift: the text Photo's image header and viewer
 // status bar show, built in PhotoModel so the views only read it. Runs on
 // Linux and macOS.
 import PhotoModel

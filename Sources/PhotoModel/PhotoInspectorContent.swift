@@ -30,11 +30,11 @@ extension PhotoInspectorContent {
 }
 
 extension PhotoWorkspace {
-    /// The Adjust | Layers panel header's title: the document's name, or
+    /// The inspector's image header title: the document's name, or
     /// "Untitled" for an image that hasn't been saved or opened from a file.
     public var inspectorHeaderTitle: String { documentName ?? "Untitled" }
 
-    /// The panel header's fact lines under the title: the canvas size, then
+    /// The image header's fact lines under the title: the canvas size, then
     /// the color space and the layer count. None with no canvas or no
     /// selected layer. A selected pixel layer whose bounds differ from the
     /// canvas (a paste) adds its size and origin, e.g.

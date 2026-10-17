@@ -1,4 +1,4 @@
-// PhotoInspectorHeaderEdgeTests.swift: edge cases for the panel header and
+// PhotoInspectorHeaderEdgeTests.swift: edge cases for the image header and
 // viewer status text (#182): they follow undo, redo, crop, a reopen and a
 // cleared selection, so the header never shows a stale size or layer count.
 // Runs on Linux and macOS.
