@@ -69,3 +69,4 @@ Next: wave 2 (CH-2, CH-6, CH-8) once suiteui open findings are 5 or fewer (after
 - 19:27 heartbeat: CH-9 PR #2281 open (fast-lane, 293 lines/5 files), footer stripped; awaiting lane macOS build; CH-11 follows its merge
 - 19:38 heartbeat: CH-9 #2281 macOS build 39062548003 queued; scoped suiteui 39062549254 on 0c8e4a71 (has CH-5) in progress, will read SJ27/SJ28/SP11; open suiteui findings 0
 - 20:07 heartbeat: Scoped suiteui 39062549254 (0c8e4a71): SJ28 passed, SJ27+SP11 failed with empty log (journey reads Text label; macOS exposes value). Fix round 1 for CH-b launched (wf_d5a5618e-f22, Fixes #2305 #2306). CH-9 #2281 macOS build green, awaiting lane. No Slice-Done yet
+- 20:14 heartbeat: CH-b fix round 1 opened: PR #2343 (Fixes #2306 #2305; journeys read the log Text's value on macOS; ui-screens show 'endDrag after 70 samples', so the drag reached the host). Body footer stripped. Waiting on the lane.
