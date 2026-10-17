@@ -2,9 +2,9 @@
 
 Issue: #1505 · Packet: docs/blueprints/halo/features/render-out.md
 Run: act-1a149b53ef6-67v7 (line lead for #1035, #1509, #1505; earlier runs act-1a1487bf880-qmey, act-1a1429c87eb-3ecm) · Session: claude/feature-lead-playbook-l4ybf6 · Started: 2026-10-17T06:05Z
-Stage: 4 Anatomy round 1 running (scoped halo 39056662077, e17b68f9; macOS job done 18:50Z, ui-test red)
+Stage: 5 Fix round 1 running: #2261 (render picker segment ids, major); fixer on HaloRenderSheet.swift
 Base: 8e868417eeaf2fd17229c21bc1087ef7eecb3d8f (origin/dev at 2026-10-17T13:53Z)
-Next: Anatomy round 1 on scoped halo 39056662077 (e17b68f9, holds RO-10) once ui-screens + snapshots upload; full CI 39056193379 was cancelled, so the done check needs the next green full dev run
+Next: fixer PR for #2261 merges, then Anatomy round 2 on a scoped halo run holding it, then the done check on a green full dev run. H-J21 passes every functional step; it is red only on the audit (4 ids from #2261; the rest is #1789 and #2262 scroller on line:suiteui)
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -51,3 +51,5 @@ Waves (combined with text-layers, contract rule 19; checked against dev b8dfb4f0
 - 2026-10-17T16:23Z RO-9 #2182 (head 2bd7273b): class HaloRenderFrameJourneyTests.testRenderFrame; if XCUITest reads the rendered image's value empty (#262) the journey falls back to the summary label and the absent note, and the 480 × 270 size rests on HaloRenderFrameTests. Rig: an extra 0.5 s check that no note appears after each ⌘R.
 - 2026-10-17T16:34Z RO-8 #2184 (head 44a76477, 391+/5-): progress and outcome over an AsyncStream to a main-actor task (renderProgress/finishRender); every Cancel goes through model.cancelRender() and the sheet cancels its task when the job turns cancelled; .startRender from a menu is a no-op (only the sheet knows the folder); folder picker NSOpenPanel; Reveal in Finder only after a finished render. Unverified: AsyncStream.makeStream, URL.appending(path:directoryHint:), NSOpenPanel.canCreateDirectories, Form .columns control inventory under the offscreen render helper. Critic panel: check .startRender's menu no-op is not a dead control.
 - 2026-10-17T17:50Z RO-10 #2211: class HaloRenderJourneyTests; the sheet has no identifier on its summary, progress row and outcome text, so the journey finds them by visible text (critic panel: consider identifiers); PNG progress row optional (48 half frames can finish first), movie progress row required; waits up to 15 s for the cancelled .mp4 to go.
+
+- Round 1 (2026-10-17T19:08Z, scoped 39056662077, e17b68f9): #2261 major, the Format/Size segments have no ids (audit Audit.swift:99). Filed on line:suiteui: #2262, the unnamed timeline scroller. Refuted: progress bar lag, temp destination, window title, failed-sheet Close only. Open question (not filed): "Frame 0 of 300" counts frames written. Perf RenderBudgetHaloTests over budget (report-only).
