@@ -5,7 +5,10 @@
 // Distribute Horizontally and Vertically, and every button runs its DesignCommand. Each
 // shows its symbol, its tooltip is its title, one that can't run is disabled
 // with the reason from the Model (alignHelps, help(_:)), and each carries its
-// DesignControlID and lists itself in `suite.controls`. Values in, intents out.
+// DesignControlID and lists itself in `suite.controls`. A disabled Distribute
+// row also shows its reason as a secondary caption below it
+// (`design.distribute.reason`), so it reads without hovering (#2438). Values in,
+// intents out.
 import DesignModel
 import SuiteUI
 import SwiftUI
@@ -34,9 +37,29 @@ struct DesignAlignBar: View {
                     ForEach(DesignDistributeAxis.allCases, id: \.self) { axis in
                         GridRow { distribute(axis, distributeHelp[axis]).gridCellColumns(2) }
                     }
+                    if let caption = Self.distributeCaption(distributeHelp) {
+                        GridRow {
+                            Text(caption)
+                                .font(SuiteFont.caption)
+                                .foregroundStyle(SuiteColor.secondaryText)
+                                .fixedSize(horizontal: false, vertical: true)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .accessibilityIdentifier("design.distribute.reason")
+                                .gridCellColumns(2)
+                        }
+                    }
                 }
             }
         }
+    }
+
+    /// The Model's reasons the Distribute rows can't run, each once, in axis order; nil when both can.
+    static func distributeCaption(_ help: [DesignDistributeAxis: String]?) -> String? {
+        var reasons: [String] = []
+        for axis in DesignDistributeAxis.allCases {
+            if let reason = help?[axis], !reasons.contains(reason) { reasons.append(reason) }
+        }
+        return reasons.isEmpty ? nil : reasons.joined(separator: "\n")
     }
 
     private func action(_ edge: DesignAlignEdge) -> some View {
