@@ -46,12 +46,13 @@ private func node(_ kind: DesignNodeKind = .rectangle, _ frame: DesignRect) -> D
     #expect(node(.frame, rc(0, 0, 1e300, -1e300)).inspectorDetails == ["Frame", "1000000000 × -1000000000 pt"])
 }
 
-@Test func aPagesHeaderLineIsItsFrameSize() throws {
+@Test func aPagesHeaderLineIsItsSizeWithoutTheWordFrame() throws {
     let workspace = openDesign()
-    #expect(workspace.selectedPage?.inspectorDetails == ["Frame 1440 × 1024 pt"])
+    #expect(workspace.selectedPage?.inspectorDetails == ["1440 × 1024 pt"])
+    #expect(workspace.selectedPage?.inspectorDetails.first?.hasPrefix("Frame") == false)
     let json = #"{"id":"p","name":"P","frameWidth":375.4,"frameHeight":811.6,"nodes":[]}"#
     let page = try JSONDecoder().decode(DesignPage.self, from: Data(json.utf8))
-    #expect(page.inspectorDetails == ["Frame 375 × 812 pt"])
+    #expect(page.inspectorDetails == ["375 × 812 pt"])
 }
 
 @Test func theHeaderFollowsTheSelectedNodeThroughAFrameEdit() throws {
