@@ -84,3 +84,4 @@ utc	stage	event	ref	note
 2026-10-17T10:47Z	3	heartbeat	-	lead resumed after a container restart and a session limit (reset 10:40Z); wave-10 results read
 2026-10-17T12:02Z	3	wave-start	11	act-1a149babb21-udz7 resumed; wave-10 fix batch never opened a PR; wave 11 fixes only: #2012 #2014 (TL-20), #1781 #1783 #1795 #1796 #1813 (+#1782 #1784)
 2026-10-17T13:18Z	3	pr-merged	#2049	fix-2002 merged 45a27f3 (Fixes #2012, Refs #2014); #2048 fix-w11 opened, conflicted with #2049, lead merging dev
+2026-10-17T13:18Z	3	heartbeat	-	wave 11 done; #2048 dev-merged, gate running; scoped suiteui 39034310918 running; new tasks held on findings > 5
