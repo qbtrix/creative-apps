@@ -14,3 +14,4 @@ utc	stage	event	ref	note
 2026-10-17T17:48Z	heartbeat	builders still running (no wave-2 or C-1 PR yet); findings 0 open for this lead; canvas-basics CB-a no new merges, S-5 stays blocked
 2026-10-17T18:10Z	heartbeat	waiting: DW-a in flight (#2213 fix round 1, #2214, #2217); CB-a not merged
 2026-10-17T18:37:38Z	check	heartbeat: S-6 waits DW-a (#2213) and DW-b; S-5 waits CB-a
+2026-10-17T18:56:51Z	check	heartbeat: CB-a no new merges (S-5 waits); S-6 waits DW-a (#2213) and DW-b
