@@ -4,7 +4,7 @@ Issue: #1515 · Packet: docs/blueprints/flare/features/inspector-timeline.md
 Run: act-1a14a13ca4f-74rv (line lead for draw-key-save, layers-files, inspector-timeline; earlier run act-1a146828a2d-9sza) · Session: session_01NXMovyJtKvANXKD2WWypB3 · Started: 2026-10-16T18:20Z (resumed 2026-10-17)
 Stage: 3 build (wave 3)
 Base: dd7ec767cc0afab91b35ff4f208351dd866028d8 (origin/dev, wave 3)
-Next: wave 3 PRs #2136, #2149, #2150 through the lane (macOS builds); IT-6 #2161 and IT-4f #2160 in lane; then wave 4 IT-10 feature-done
+Next: wave 4 IT-10 (feature-done) building on 1a4e5e8; then Anatomy and the contact sheet
 
 ## Slices
 No `## Slices` table: v2 packet, v2 loop applies.
@@ -19,11 +19,11 @@ No `## Slices` table: v2 packet, v2 loop applies.
 | IT-3 | 2 | FlareTimelineEdit + Tests | key select, retime, delete, insert/remove frames, labels for real | #2113 | merged |
 | IT-4 | 2 | FlareInspector, Transform/Fill/Scene/Timing sections, +Inspector | Properties tab on the stubs, J7 | #2129 | merged |
 | IT-5 | 3 | FlareInspectorFill, FlareFillSnapshots, +FillStroke | J8 | #2136 | merged |
-| IT-6 | 3 | FlareInspectorScene, FlareSceneSnapshots, +SceneInspector, one line of FlareInspector | testSceneSection | #2161 | open, lane |
-| IT-7 | 3 | FlareTimelineEdit (App), FlareTimeline, FlareWindow+Timeline, +TimelineEdit | J11 | #2150 | open, lane |
-| IT-8 | 3 | FlareInspectorTiming, FlareEasingPopover, delete FlareEasingInspector, +Easing | J12 | #2149 | open, lane |
-| IT-4f | 3 | UITests/FlareJourneyTests+Inspector.swift | J7 step 5 finds the Rotation field, not the inspector's first text field | #2160 | open, lane |
-| IT-9b | 3 | TransportCapsule | waits #340; gap if still open at wave 4 | | waiting |
+| IT-6 | 3 | FlareInspectorScene, FlareSceneSnapshots, +SceneInspector, one line of FlareInspector | testSceneSection | #2161 | merged #2161 |
+| IT-7 | 3 | FlareTimelineEdit (App), FlareTimeline, FlareWindow+Timeline, +TimelineEdit | J11 | #2150 | merged #2150 |
+| IT-8 | 3 | FlareInspectorTiming, FlareEasingPopover, delete FlareEasingInspector, +Easing | J12 | #2149 | merged #2149 |
+| IT-4f | 3 | UITests/FlareJourneyTests+Inspector.swift | J7 step 5 finds the Rotation field, not the inspector's first text field | #2160 | merged #2160 |
+| IT-9b | 3 | TransportCapsule | waits #340; gap if still open at wave 4 | | gap #2185 |
 | IT-10 | 4 | +Timeline, +Animate, packet, wave.json | feature-done, J9/J6 on -FlareSample | | |
 
 ## Reviews
@@ -53,3 +53,4 @@ None.
 
 ## Open
 - #340 (TransportCapsule) open: IT-9b waits; becomes a gap if still open at wave 4.
+- Wave 4: #340 still open at wave 4, so IT-9b became gap #2185 (p2); IT-10 ships feature-done without it.

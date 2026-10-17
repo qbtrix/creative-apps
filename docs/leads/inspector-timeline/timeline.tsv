@@ -27,3 +27,4 @@
 2026-10-17T16:02:15Z	fix	IT-4f #2160 opened (J7 Rotation field query), body cleaned; lane
 2026-10-17T16:03:21Z	pr	IT-6 #2161 opened (SCENE section, one-line FlareInspector change), body cleaned; lane
 2026-10-17T16:19:30Z	heartbeat	#2136 merged (lane batch); #2149 #2150 #2160 #2161 macOS builds green, waiting lane sweep; #146 #73 #340 open
+2026-10-17T16:37:12Z	heartbeat	wave 3 all merged (#2149 #2150 #2160 #2161); IT-9b -> gap #2185; wave 4 IT-10 launched on 1a4e5e8
