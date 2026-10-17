@@ -141,4 +141,34 @@ import Testing
         }
         #expect(seen.count == 11)   // seven document types plus the four declared-only ids
     }
+
+    /// Every exported and imported declaration, by UTI: (conforms-to, tags).
+    static func declarations(_ plist: [String: Any]) -> [String: (conforms: [String], tags: [String: [String]])] {
+        var result: [String: (conforms: [String], tags: [String: [String]])] = [:]
+        for key in ["UTExportedTypeDeclarations", "UTImportedTypeDeclarations"] {
+            for entry in plist[key] as? [[String: Any]] ?? [] {
+                let uti = entry["UTTypeIdentifier"] as? String ?? ""
+                result[uti] = (entry["UTTypeConformsTo"] as? [String] ?? [],
+                               entry["UTTypeTagSpecification"] as? [String: [String]] ?? [:])
+            }
+        }
+        return result
+    }
+
+    /// #2104: a helper that declares a UTI the launcher also declares gives it
+    /// the same conforms-to and tags, so lookup by extension or MIME type never
+    /// depends on which bundle Launch Services indexed first.
+    @Test func everyHelperDeclarationOfAUTIEqualsTheLaunchers() throws {
+        let launcher = Self.declarations(try Self.plist(named: "AfterGlow"))
+        var compared = 0
+        for app in BundleLayout.apps {
+            for (uti, declared) in Self.declarations(try Self.plist(named: app)) {
+                guard let expected = launcher[uti] else { continue }
+                compared += 1
+                #expect(declared.conforms == expected.conforms, "\(app): \(uti) conforms to \(declared.conforms)")
+                #expect(declared.tags == expected.tags, "\(app): \(uti) tags \(declared.tags)")
+            }
+        }
+        #expect(compared >= 9)   // four owned formats plus the hand-off in all five apps
+    }
 }
