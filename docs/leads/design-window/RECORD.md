@@ -4,7 +4,7 @@ Issue: #1494 · Packet: docs/blueprints/design/features/design-window.md
 Run: act-1a14a88d756-rnok · Session: claude/design-feature-lead-7saqm8 · Started: 2026-10-17T15:46Z
 Stage: 3 wave 3
 Base: 6ad373ab37fb612a8e7b185f902c263211f1197b
-Next: DW-b fix round 1 (#2399 #2400 #2401 #2402 #2403 #2404 #2405); DW-a round 2: #2353 #2363 after #2374, #2362 #2365 after #2373; lane on #2372 #2374 #2397
+Next: DW-b fix round 1 running (wd9hy2yx2, #2399-#2405, base 27c93eea); DW-a round 2: #2353 #2363 after #2374, #2362 #2365 after #2373; lane on #2372 #2374 #2397
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |

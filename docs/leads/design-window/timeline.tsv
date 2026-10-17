@@ -37,3 +37,4 @@ utc	stage	event	ref	note
 2026-10-17T21:21:12Z	fix	round 1: #2397 (8262cb9a) fixes #2354; #2372 (823c2858) fixes #2355 #2357 #2358 #2361 #2364; deferred #2353 #2356 #2359 #2360 #2362 #2363 #2365; follow-up: DesignEditMenuSnapshots header still says Delete Layer
 2026-10-17T21:29:59Z	check	Belt-Slice-Done + Mac-Finish-Wanted posted for DW-a and DW-b on #1494 (full CI 39069913922, c55fad78, Linux green; main promoted). #2370 merged (fixes #1974). DW-b critic panel wz3d3sx7m launched
 2026-10-17T21:34:31Z	critics	DW-b panel on scoped 39068267491: 11 confirmed, 5 refuted; filed #2399 (major) #2400 (minor) #2401 (major) #2402 (minor) #2403 (major) #2404 (major) #2405 (minor)
+2026-10-17T21:35:02Z	wave	DW-b fix round 1 launched (wd9hy2yx2) on #2399-#2405, base dev 27c93eea, avoiding files of open PRs #2372 #2373 #2374 #2389 #2397
