@@ -27,3 +27,4 @@ utc	stage	event	ref	note
 2026-10-17T14:57:33Z	3 wave 2	pr-merged	#2107	TX-5 squash c79dd97e
 2026-10-17T14:57:33Z	3 wave 2	pr-merged	#2109	TX-6 squash 2c5003b5
 2026-10-17T14:58:11Z	3 wave 3	wave-start	TX-7	builder started on base 2c5003b5
+2026-10-17T15:05:44Z	3 wave 3	pr-opened	#2132	TX-7 feature-done, CI: PASS, waves OK, head 9aba9554
