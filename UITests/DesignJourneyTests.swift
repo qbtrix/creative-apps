@@ -2,7 +2,8 @@
 // whole-window screenshot after every step (see Journey.swift). Design is a
 // SuiteWindow holding an editor: pages and layers in the sidebar, Properties in
 // the inspector, and the floating tool palette, which shows once a file is
-// open, so the launch check and the tool journey start with New File. The core journey draws a frame (crossing the page's top
+// open, so the launch check and the tool journey start with New File. The core journey
+// clicks the top bar's New (`design.bar.new`), draws a frame (crossing the page's top
 // edge, so its handles show past it), a rectangle and an ellipse, moves and
 // resizes the ellipse, checks the palette and the status line's tool are back
 // on Move after each draw and after the text placement (#278), so the move and
@@ -12,7 +13,7 @@
 // page, clicks Add Page (two pages, Delete Page enabled) and undoes it, hides a layer from its row's eye and undoes that, finds Properties in the inspector,
 // places and types text (shot while typing, when the editor
 // draws at full size, and once committed, with a small box's corner handles
-// outside it), undoes and redoes, saves with -DesignSaveTo (no panel), then
+// outside it), undoes and redoes, saves from the top bar's Save with -DesignSaveTo (no panel), then
 // relaunches with -DesignOpenFile and checks the saved file reopens. The menu
 // journey launches on `-DesignFixture empty`, clicks the top bar's New File
 // (`design.bar.new`, one "New File" undo step), checks each menu really opens,
@@ -126,8 +127,11 @@ final class DesignJourneyTests: XCTestCase {
         try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
         let file = folder.appending(path: "journey.design")
         let design = Journey("Design", self, arguments: ["-DesignSaveTo", file.path])
-        design.app.typeKey("n", modifierFlags: .command)
-        XCTAssert(design.element("suite.canvas").waitForExistence(timeout: 10), "New File showed no canvas")
+        // Created and saved by the mouse, from the top bar's New and Save (#2405): a dead button fails the step.
+        let newFile = design.element("design.bar.new")
+        XCTAssert(newFile.waitForExistence(timeout: 30) && newFile.isEnabled, "no enabled New in the top bar (design.bar.new)")
+        newFile.click()
+        XCTAssert(design.element("suite.canvas").waitForExistence(timeout: 10), "the top bar's New showed no canvas")
         design.shot("drawing-new-file")
         let tools = design.element("suite.tools").buttons
 
@@ -216,8 +220,10 @@ final class DesignJourneyTests: XCTestCase {
         XCTAssert(design.app.buttons["Redo Add Text"].waitForExistence(timeout: 5), "Undo didn't undo the text")
         design.click("Redo Add Text", in: .window, step: "redone")
 
-        design.app.typeKey("s", modifierFlags: .command)
-        XCTAssert(Self.waitForFile(file), "Save wrote no file")
+        let save = design.element("design.bar.save")
+        XCTAssert(save.waitForExistence(timeout: 5) && save.isEnabled, "no enabled Save in the top bar (design.bar.save)")
+        save.click()
+        XCTAssert(Self.waitForFile(file), "the top bar's Save wrote no file")
         let data = try Data(contentsOf: file)
         let json = try JSONSerialization.jsonObject(with: data) as? [String: Any]
         XCTAssertEqual(json?["version"] as? Int, 1, "the saved file has no version 1")
