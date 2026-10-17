@@ -69,3 +69,4 @@ utc	stage	event	ref	note
 2026-10-17T15:40Z	HM-3z	heartbeat	full CI 39043153763: Linux green, macOS running; watch AppSnapshotTests AfterGlowHomeSnapshots (#1931)
 2026-10-17T15:52Z	heartbeat	full CI 39043153763: Linux green; macOS scripts/ci step failed, ui-test still running; logs readable once job ends
 2026-10-17T16:06Z	heartbeat	full CI 39043153763 macOS ui-test still running (since 15:15Z); scripts/ci step red, logs pending; 39045632781 cancelled, 39047162437 (d6187654) queued next
+2026-10-17T16:23Z	heartbeat	full CI 39043153763 macOS still in ui-test (67 min); snapshots artifact holds only perf .txt reports, no PNGs, so scripts/ci failed before AppSnapshotTests wrote; logs pending
