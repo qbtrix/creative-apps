@@ -24,3 +24,4 @@ utc	stage	event	ref	note
 2026-10-17T14:40:18Z	3 wave 2	mac-build-green	#2108	run 39040041419 success; awaiting lane sweep
 2026-10-17T14:40:18Z	3 wave 2	mac-build-green	#2112	run 39040308945 success; awaiting lane sweep
 2026-10-17T14:57:33Z	3 wave 2	heartbeat	#2108,#2112	builds green, mergeable clean, awaiting next lane batch
+2026-10-17T15:16:01Z	3	heartbeat	lane	RO-4 #2112 and RO-5 #2108 built green; lane batch-20261017145213 bisecting (probes -2..-4); #2131 (6dcb79e5) likely fixes #2099
