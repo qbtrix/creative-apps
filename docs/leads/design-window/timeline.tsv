@@ -64,3 +64,4 @@ utc	stage	event	ref	note
 2026-10-17T23:50Z	merge	#2462 merged (fixes #2411)
 2026-10-17T23:50Z	merge	#2464 merged (fixes #2075)
 2026-10-17T23:50Z	ci	full CI 39080371690 on dev a6150139 queued
+2026-10-17T23:50Z	hold	D0-7b: finding cap clear, still waits on D0-9d (CB-a)
