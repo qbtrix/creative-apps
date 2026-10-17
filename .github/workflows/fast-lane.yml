@@ -8,7 +8,11 @@
 # scripts from main (green, promoted code) and talks to the GitHub API. For a
 # PR that conflicts with dev it clones the repo into a scratch folder, merges
 # dev into the PR head with git and main's merge drivers, and pushes the result
-# to the PR branch (contents: write); nothing from that tree is executed. workflow_run and schedule fire from the copy of this file on the default
+# to the PR branch (contents: write); nothing from that tree is executed. Two
+# or more ready PRs are merged the same way onto a scratch `lane/batch-<id>`
+# branch that gets one Linux-only CI run before they land (and `-<i>` probes
+# of its prefixes when it is red). The sweep waits up to 7 minutes for that
+# run, so the job's timeout leaves room for it. workflow_run and schedule fire from the copy of this file on the default
 # branch, so those triggers follow whatever branch is the default (dev).
 name: Fast Lane
 
@@ -54,7 +58,7 @@ jobs:
       (github.event.action == 'labeled' && github.event.label.name == 'fast-lane') ||
       (github.event.action != 'labeled' && contains(github.event.pull_request.labels.*.name, 'fast-lane'))
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
         with:

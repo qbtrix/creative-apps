@@ -2,9 +2,10 @@
 # Tests/fast_lane/test_fast_lane.sh: fixture tests for the pure `decide`
 # function in scripts/fast-lane.sh, its PROTECTED list against CLAUDE.md's
 # "Never edit" bullet, the app audit guard (audit_loosens on before/after
-# trees), whole sweeps against a stub `gh`, and the lane's integration of a
-# conflicting PR (integrate) against a local bare repo. No network, needs bash,
-# git and jq.
+# trees), whole sweeps against a stub `gh`, and, against a local bare repo, the
+# lane's integration of a conflicting PR (integrate) and its batches (two or
+# more ready PRs get one Linux check together before they land; a red batch is
+# bisected by prefix). No network, needs bash, git and jq.
 #
 # checks-green.json is a check rollup shaped like a green flare-core PR: the CI
 # workflow's Linux and macOS jobs plus one SKIPPED CI job, a non-CI workflow
@@ -18,6 +19,7 @@
 set -euo pipefail
 
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+FAST_LANE_BATCH_WAIT=0  # a sweep never sleeps for a batch's verdict here
 # shellcheck source=../../scripts/fast-lane.sh
 source "$here/../../scripts/fast-lane.sh"
 
@@ -517,6 +519,37 @@ audit_decide "decide: the same without the script is eligible" "eligible|150|2|4
 # the merge base is `mb` (`bad` for a head whose compare fails), and the trees
 # and contents for a commit are the files under $sw/refs/<sha>.
 sw="$tmp/sweep"
+# real_pr <n>: gives fixture PR <n> a real branch feat/<n> at the test's bare
+# remote $sw/origin.git (one docs file on top of dev), so the lane can batch
+# it: headRefName, headRefOid and the body's Head: line move to that commit,
+# and an audit tree or build run keyed by the old head follows it.
+real_pr() {
+  local n="$1" f old sha w="$sw/work"
+  f="$sw/$n.json"
+  if [[ ! -d "$sw/origin.git" ]]; then
+    git init -q --bare "$sw/origin.git"; git -C "$sw/origin.git" config uploadpack.allowFilter true
+    git init -q -b dev "$w"; git -C "$w" config user.name t; git -C "$w" config user.email t@t; git -C "$w" config commit.gpgsign false
+    cp "$here/../../.gitattributes" "$w/"; echo base >"$w/base.md"
+    git -C "$w" add -A; git -C "$w" commit -qm base; git -C "$w" push -q "$sw/origin.git" dev
+  fi
+  git -C "$w" switch -qc "feat/$n" dev; echo "pr $n" >"$w/pr$n.md"; git -C "$w" add -A; git -C "$w" commit -qm "pr $n"
+  git -C "$w" push -q "$sw/origin.git" "feat/$n"; git -C "$w" switch -q dev
+  sha=$(git -C "$w" rev-parse "feat/$n"); old=$(jq -r .headRefOid "$f")
+  jq --arg b "feat/$n" --arg h "$sha" '.headRefName = $b | .headRefOid = $h | .body |= sub("Head: [^\n]*"; "Head: \($h)")' "$f" >"$sw/x" && mv "$sw/x" "$f"
+  [[ ! -d "$sw/refs/$old" ]] || mv "$sw/refs/$old" "$sw/refs/$sha"
+  [[ ! -e "$sw/runs.$old.json" ]] || jq --arg h "$sha" 'map(.headSha = $h)' "$sw/runs.$old.json" >"$sw/runs.$sha.json"
+}
+# The batch at the bare remote: its tip, a probe's sha, and a Linux verdict on a sha.
+batch_tip() { git -C "$sw/origin.git" for-each-ref 'refs/heads/lane/batch-*' --format='%(objectname) %(refname:short)' 2>/dev/null | awk '$2 ~ /^lane\/batch-[0-9]+$/ { print $1 }'; }
+probe_sha() { git -C "$sw/origin.git" for-each-ref "refs/heads/lane/batch-*-$1" --format='%(objectname)' 2>/dev/null; }
+verdict() {  # verdict <sha> <success|failure|in_progress>
+  local st=completed c="\"$2\""
+  [[ "$2" != in_progress ]] || { st=in_progress; c=null; }
+  jq -n --arg s "$st" --argjson c "$c" '[{name: "Linux", status: $s, conclusion: $c, started_at: "2026-01-01T00:00:00Z",
+    details_url: "https://github.com/qbtrix/creative-apps/actions/runs/777"}]' >"$sw/checks.$1.json"
+}
+batch_green() { verdict "$(batch_tip)" success; }
+REMOTE="$sw/origin.git"
 gh() {
   local a="$*" n u
   case "$a" in
@@ -578,6 +611,10 @@ gh() {
     "pr edit "*"--base "*) echo "$a" >>"$sw/calls"; jq '.baseRefName = "dev"' "$sw/$3.json" >"$sw/x" && mv "$sw/x" "$sw/$3.json" ;;
     "pr edit "*"--remove-label fast-lane"*) echo "$a" >>"$sw/calls"
       jq '.labels |= map(select(.name != "fast-lane"))' "$sw/$3.json" >"$sw/x" && mv "$sw/x" "$sw/$3.json" ;;
+    "pr edit "*"--add-label needs-fix"*) echo "$a" >>"$sw/calls"
+      jq '.labels += [{"name": "needs-fix"}]' "$sw/$3.json" >"$sw/x" && mv "$sw/x" "$sw/$3.json" ;;
+    "pr edit "*"--remove-label needs-fix"*) echo "$a" >>"$sw/calls"
+      jq '.labels |= map(select(.name != "needs-fix"))' "$sw/$3.json" >"$sw/x" && mv "$sw/x" "$sw/$3.json" ;;
     *) echo "$a" >>"$sw/calls" ;;
   esac
 }
@@ -586,7 +623,7 @@ gh() {
 # mergeable again, and the lane's merge as the last commit).
 live_pr() {
   local f="$sw/$1.json" br tip
-  br=$(jq -r .headRefName "$f"); tip=$(git -C "$sw/origin.git" rev-parse "refs/heads/$br" 2>/dev/null || true)
+  br=$(jq -r .headRefName "$f"); tip=$(git -C "$sw/origin.git" rev-parse --verify -q "refs/heads/$br" 2>/dev/null || true)
   if [[ -n "$tip" && "$tip" != "$(jq -r .headRefOid "$f")" ]]; then
     jq --arg t "$tip" --arg s "$(git -C "$sw/origin.git" log -1 --format=%s "$tip")" \
       '.headRefOid = $t | .mergeable = "MERGEABLE" | .mergeStateStatus = "CLEAN" | .commits = [{oid: $t, messageHeadline: $s}]' "$f"
@@ -604,6 +641,11 @@ sweep() {
   jq '.baseRefName = "main"' "$sw/5.json" >"$sw/x" && mv "$sw/x" "$sw/5.json"
   jq '.mergeable = "CONFLICTING" | .mergeStateStatus = "DIRTY"' "$sw/6.json" >"$sw/x" && mv "$sw/x" "$sw/6.json"
   for n in "$@"; do jq '.labels += [{"name":"feature-done"}]' "$sw/$n.json" >"$sw/x" && mv "$sw/x" "$sw/$n.json"; done
+  # #4 and #7 are ready together, so the first run batches them and the
+  # second lands the green batch.
+  real_pr 4; real_pr 7
+  ( main ) >/dev/null 2>&1 || { echo "FAIL sweep: main exited non-zero"; fail=1; }
+  batch_green
   ( main ) >/dev/null 2>&1 || { echo "FAIL sweep: main exited non-zero"; fail=1; }
 }
 expect() {  # expect <name> <actual> <wanted>
@@ -613,10 +655,10 @@ sweep
 expect "merges every eligible PR, oldest first, and the retargeted one on the re-sweep" \
   "$(grep -oE '^pr merge [0-9]+' "$sw/calls" | paste -sd, -)" "pr merge 4,pr merge 7,pr merge 5"
 expect "retargets the main-based PR once" "$(grep -c '^pr edit 5 .*--base dev' "$sw/calls")" 1
-expect "a conflicting PR the lane can't reach (no remote) gets no comment yet" "$(grep -c '^pr comment 6 ' "$sw/calls")" 0
+expect "a conflicting PR the lane can't reach (its branch isn't at the remote) gets no comment yet" "$(grep -c '^pr comment 6 ' "$sw/calls")" 0
 expect "never merges the conflicting PR" "$(grep -c '^pr merge 6' "$sw/calls")" 0
 
-expect "routine merges start no CI" "$(grep -c '^workflow run' "$sw/calls")" 0
+expect "routine merges start no CI on dev" "$(grep -c -- '--ref dev' "$sw/calls")" 0
 sweep 4 7
 expect "feature-done merges dispatch CI on dev once" "$(grep -c '^workflow run ci.yml .*--ref dev' "$sw/calls")" 1
 
@@ -700,13 +742,13 @@ UI_FILES='[{"filename": "Sources/SuiteUI/GlassPanel.swift", "status": "modified"
 SWEEP_FILES="$UI_FILES" sweep
 expect "UI merges dispatch CI on dev once" "$(grep -c '^workflow run ci.yml .*--ref dev' "$sw/calls")" 1
 SWEEP_AHEAD=9 sweep
-expect "9 merged PRs since the last CI run start no CI" "$(grep -c '^workflow run' "$sw/calls")" 0
+expect "9 merged PRs since the last CI run start no CI on dev" "$(grep -c -- '--ref dev' "$sw/calls")" 0
 SWEEP_AHEAD=10 sweep
 expect "the 10th merged PR since the last CI run dispatches once" "$(grep -c '^workflow run ci.yml .*--ref dev' "$sw/calls")" 1
 SWEEP_CI_HEAD="" sweep
 expect "a base with no CI run yet dispatches once" "$(grep -c '^workflow run ci.yml .*--ref dev' "$sw/calls")" 1
 SWEEP_AHEAD=10 SWEEP_FILES="$UI_FILES" sweep 4
-expect "every rule at once still dispatches once" "$(grep -c '^workflow run' "$sw/calls")" 1
+expect "every rule at once still dispatches once" "$(grep -c -- '--ref dev' "$sw/calls")" 1
 
 # The audit through a sweep: #8 raises a count, #9 lowers one, #10 renames
 # scripts/ci away, #11's merge base can't be read, #12 drops Overlap() and
@@ -730,6 +772,9 @@ mkdir -p "$sw/refs/h12/$AD/Old"; cp "$sw/refs/mb/$AD/AuditCore.swift" "$sw/refs/
 pr_at 13 h13 '[{"filename": "Tests/PhotoModelTests/AppAudit/Checks/Focus.swift", "status": "added"}]'
 audit_tree "$sw/refs/h13" "$FOCUS_BL" "$REG, Focus()" "${CHECKS[@]}" Focus=focus
 jq -c '[.headSha = "h13"]' <<<"$GREEN_BUILD" >"$sw/runs.h13.json"
+real_pr 9; real_pr 13  # ready together: one batch, landed on its green check
+( main ) >/dev/null 2>&1 || { echo "FAIL sweep: main exited non-zero"; fail=1; }
+batch_green
 ( main ) >/dev/null 2>&1 || { echo "FAIL sweep: main exited non-zero"; fail=1; }
 expect "audit: merges only the PRs that lower a count or add a check with its counts" \
   "$(grep -oE '^pr merge [0-9]+' "$sw/calls" | paste -sd, -)" "pr merge 9,pr merge 13"
@@ -830,7 +875,8 @@ jq '.body = "Closes #15\n\nFast-Check: pass\nHead: h41"' "$sw/41.json" >"$sw/x" 
 jq '.body = "Fixes #12, closes #14\nFeature: halo-keyframes\nFast-Check: pass\nHead: h42"' "$sw/42.json" >"$sw/x" && mv "$sw/x" "$sw/42.json"
 printf '%s\n' 12 13 >"$sw/40.closes"; echo 15 >"$sw/41.closes"; printf '%s\n' 12 14 >"$sw/42.closes"
 echo '["feature-lead", "line:halo"]' >"$sw/labels.12"; echo '["critic-finding", "line:halo"]' >"$sw/labels.13"; touch "$sw/labels.14.fail"
-lane_sweep
+for n in 40 41 42; do real_pr "$n"; done  # ready together: one batch
+lane_sweep; batch_green; lane_sweep
 expect "refs: all three merge" "$(grep -oE '^pr merge [0-9]+' "$sw/calls" | paste -sd, -)" "pr merge 40,pr merge 41,pr merge 42"
 expect "refs: the lead's body is edited before the squash, the feature's keyword only" \
   "$(grep -nE '^pr (edit 40 --body|merge 40)' "$sw/calls" | cut -d' ' -f2 | paste -sd, -),$(grep -c '^Refs #12, fixes #13$' "$sw/40.edited")" "edit,merge,1"
@@ -844,4 +890,82 @@ expect "refs: an unreadable label gets one comment, and its issue isn't closed" 
 expect "refs: one label lookup per issue in the sweep" "$(grep -c '^labels 12$' "$sw/lookups"),$(grep -c '^labels 13$' "$sw/lookups")" "1,1"
 expect "refs: another PR keeps its keyword, needs no lookup, and gets its issue closed" \
   "$(grep -c '^Closes #15$' "$sw/41.squash"),$(grep -c '^labels 15$' "$sw/lookups"),$(grep -c '^issue close 15 ' "$sw/calls")" "1,0,1"
+
+# Batches (rung 2b of the agentic VCS layer): two or more ready PRs get one
+# Linux check together on lane/batch-<id> before any of them lands. #50 and
+# #51 are ready; #52 arrives while the batch runs.
+DOCS='[{"filename": "docs/blueprints/photo/features/a.md", "status": "modified"}]'
+rm -rf "$sw"; mkdir -p "$sw"; : >"$sw/calls"
+for n in 50 51; do pr_at "$n" "h$n" "$DOCS"; real_pr "$n"; done
+H50=$(jq -r .headRefOid "$sw/50.json"); H51=$(jq -r .headRefOid "$sw/51.json")
+lane_sweep
+TIP=$(batch_tip)
+expect "batch: two ready PRs merge nothing yet" "$(grep -c '^pr merge' "$sw/calls")" 0
+expect "batch: one scratch branch holds dev plus both PRs, oldest first" \
+  "$(git -C "$sw/origin.git" log --first-parent --reverse --format=%s "dev..$TIP" | paste -sd'~' -)" \
+  "fast lane batch: PR #50 at $H50~fast lane batch: PR #51 at $H51"
+expect "batch: its base is dev" "$(git -C "$sw/origin.git" rev-parse "$TIP~2")" "$(git -C "$sw/origin.git" rev-parse dev)"
+expect "batch: one Linux-only check on it, nothing on the PR branches" \
+  "$(grep -c '^workflow run ci.yml .*-f linux_only=true --ref lane/batch-[0-9]*$' "$sw/calls"),$(grep -c -- '--ref feat/' "$sw/calls")" "1,0"
+pr_at 52 h52 "$DOCS"; real_pr 52
+verdict "$TIP" in_progress
+lane_sweep
+expect "batch: while it runs nothing lands, nothing more starts, the late PR waits" \
+  "$(grep -c '^pr merge' "$sw/calls"),$(grep -c '^workflow run' "$sw/calls")" "0,1"
+verdict "$TIP" success
+lane_sweep
+expect "batch: green: both land in order, then the late PR alone" \
+  "$(grep -oE '^pr merge [0-9]+' "$sw/calls" | paste -sd, -)" "pr merge 50,pr merge 51,pr merge 52"
+expect "batch: each merge matches the head the batch checked" \
+  "$(grep -c "^pr merge 50 .*--match-head-commit $H50 " "$sw/calls"),$(grep -c "^pr merge 51 .*--match-head-commit $H51 " "$sw/calls")" "1,1"
+expect "batch: the merge comment names the batch and its run" \
+  "$(grep -c '^pr comment 50 .*merged into dev (.*batch of 2 PRs checked together on Linux: https://github.com/qbtrix/creative-apps/actions/runs/777)' "$sw/calls")" 1
+expect "batch: the late PR lands on its own proof" "$(grep -c '^pr comment 52 .*merged into dev (.*Fast-Check marker)' "$sw/calls")" 1
+expect "batch: the scratch branch is gone" "$(batch_tip)" ""
+
+# A red batch is bisected by prefix: #60 good, #61 bad, #62 good. The tip is
+# red; the chain after 1 PR is green; after 2 red: #61 is the culprit. #60
+# lands, #61 gets needs-fix and one comment, #62 lands alone on the re-sweep.
+rm -rf "$sw"; mkdir -p "$sw"; : >"$sw/calls"
+for n in 60 61 62; do pr_at "$n" "h$n" "$DOCS"; real_pr "$n"; done
+H60=$(jq -r .headRefOid "$sw/60.json"); H61=$(jq -r .headRefOid "$sw/61.json")
+lane_sweep
+TIP=$(batch_tip); BR=$(git -C "$sw/origin.git" for-each-ref 'refs/heads/lane/batch-*' --format='%(refname:short)')
+verdict "$TIP" failure
+lane_sweep
+expect "bisect: a red batch of 3 probes the chain after 1 PR" "$(probe_sha 1)" "$(git -C "$sw/origin.git" rev-parse "$TIP~2")"
+expect "bisect: with one Linux check on the probe" "$(grep -c -- "-f linux_only=true --ref $BR-1\$" "$sw/calls")" 1
+expect "bisect: nothing lands yet" "$(grep -c '^pr merge' "$sw/calls")" 0
+verdict "$(probe_sha 1)" success
+lane_sweep
+expect "bisect: a green prefix moves the probe to the chain after 2 PRs" "$(probe_sha 2)" "$(git -C "$sw/origin.git" rev-parse "$TIP~1")"
+verdict "$(probe_sha 2)" failure
+lane_sweep
+expect "bisect: the first red prefix names the culprit; the PRs before it land, the one after lands alone" \
+  "$(grep -oE '^pr merge [0-9]+' "$sw/calls" | paste -sd, -)" "pr merge 60,pr merge 62"
+expect "bisect: the culprit gets needs-fix and one comment naming its head, the run and what it landed after" \
+  "$(grep -c '^label create needs-fix' "$sw/calls"),$(grep -c '^pr edit 61 .*--add-label needs-fix' "$sw/calls"),$(grep -c "^pr comment 61 .*head $H61 fails the Linux check once it lands on dev after #60: https://github.com/qbtrix/creative-apps/actions/runs/777\. Those PRs merged; " "$sw/calls")" "1,1,1"
+expect "bisect: the landed PR's comment says what it was checked with" "$(grep -c '^pr comment 60 .*batch of 1 PRs checked together on Linux before #61 broke the chain' "$sw/calls")" 1
+expect "bisect: every batch branch is gone" "$(git -C "$sw/origin.git" for-each-ref 'refs/heads/lane/batch-*' | wc -l | tr -d ' ')" 0
+lane_sweep
+expect "needs-fix: the culprit waits at that head, no writes" "$(grep -c '^pr [a-z]* 61 ' "$sw/calls")" 2
+git -C "$sw/work" switch -q feat/61; echo fix >>"$sw/work/pr61.md"; git -C "$sw/work" commit -qam fix; git -C "$sw/work" push -q "$sw/origin.git" feat/61; git -C "$sw/work" switch -q dev
+lane_sweep
+expect "needs-fix: a new head drops the label" "$(grep -c '^pr edit 61 .*--remove-label needs-fix' "$sw/calls")" 1
+
+# A red batch whose first PR alone is red asks about the base: a red base means
+# dev itself is red, and the batch lands on the PRs' own proof.
+rm -rf "$sw"; mkdir -p "$sw"; : >"$sw/calls"
+for n in 70 71; do pr_at "$n" "h$n" "$DOCS"; real_pr "$n"; done
+lane_sweep
+TIP=$(batch_tip)
+verdict "$TIP" failure; lane_sweep
+verdict "$(probe_sha 1)" failure; lane_sweep
+expect "dev red: a red first PR probes the base alone" "$(probe_sha 0)" "$(git -C "$sw/origin.git" rev-parse dev)"
+verdict "$(probe_sha 0)" failure; lane_sweep
+expect "dev red: a red base lands the batch on each PR's own proof" "$(grep -oE '^pr merge [0-9]+' "$sw/calls" | paste -sd, -)" "pr merge 70,pr merge 71"
+expect "dev red: and says so" "$(grep -c '^pr comment 71 .*dev was red on its own (https://github.com/qbtrix/creative-apps/actions/runs/777), so this batch landed on each PR.s own proof' "$sw/calls")" 1
+expect "dev red: no needs-fix" "$(grep -c -- '--add-label needs-fix' "$sw/calls")" 0
+expect "dev red: the branches are gone" "$(git -C "$sw/origin.git" for-each-ref 'refs/heads/lane/batch-*' | wc -l | tr -d ' ')" 0
+
 exit "$fail"

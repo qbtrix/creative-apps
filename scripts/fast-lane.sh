@@ -34,11 +34,29 @@
 # NEEDS_REBASE_LABEL label for a fixer; the label goes when a later head
 # integrates or merges.
 #
-# Every run sweeps all open fast-lane PRs, oldest first. A lead's PR (a
-# `Feature:` body line) never closes a `feature-lead` issue (lead_refs). After
-# its merges the lane dispatches CI on BASE_BRANCH at most once per run
-# (dispatch_reason): a FEATURE_LABEL PR, a UI_RE change, or DISPATCH_EVERY
-# merged PRs since the last CI run. Promotion of main is ci.yml's job.
+# Every run sweeps all open fast-lane PRs, oldest first. Eligible PRs don't
+# merge one by one: with one ready PR the lane squash-merges it (land); with two
+# or more it builds a batch (batch_start): BASE_BRANCH plus every ready PR
+# merged in order on a scratch branch `lane/batch-<id>` (BATCH_PREFIX, merge
+# drivers on, one merge commit per PR whose subject names the PR and its head),
+# runs ONE Linux-only CI run on it and, when green, lands every PR in that
+# order (squash, head matched). A red batch is bisected by prefix on the same
+# branch (batch_resume): `lane/batch-<id>-<i>` points at the chain after i PRs
+# and gets its own Linux run, until PR hi is the first that turns the chain
+# red: PRs before it land, PR hi gets NEEDS_FIX_LABEL and one comment naming
+# the run, and the PRs after it wait for the next batch. The branch is the
+# whole state, so a later sweep resumes a batch a run left behind; while one is
+# in flight nothing else merges (one batch at a time, arrivals wait). A PR
+# whose head moved or that conflicts with an earlier PR in the batch waits for
+# the next sweep. A red base (the chain before any PR) means BASE_BRANCH itself
+# is red: the batch lands on the PRs' own proof, as before batches, so a fix
+# can get through.
+#
+# A lead's PR (a `Feature:` body line) never closes a `feature-lead` issue
+# (lead_refs). After its merges the lane dispatches CI on BASE_BRANCH at most
+# once per run (dispatch_reason): a FEATURE_LABEL PR, a UI_RE change, or
+# DISPATCH_EVERY merged PRs since the last CI run. Promotion of main is
+# ci.yml's job.
 #
 # `decide` is the pure decision function (no network): it reads a PR JSON
 # file, a file-list file, a check-rollup JSON file, optional audit_snapshot
@@ -148,6 +166,20 @@ LINUX_TITLE="Linux check"  # ci.yml's run-name for a linux_only run (the lane's 
 # decide can tell such a head and ask for its Linux check (linux-dispatch).
 LANE_MERGE_SUBJECT="fast lane: merge dev into the PR head"
 NEEDS_REBASE_LABEL="needs-rebase"
+# Batches (the header's second paragraph). The scratch branch and its probes
+# live at REMOTE; each merge commit's subject names the PR and the head merged.
+BATCH_PREFIX="lane/batch-"
+BATCH_SUBJECT_RE='^fast lane batch: PR #([0-9]+) at ([0-9a-f]{40})$'
+MAX_BATCH=8          # PRs per batch; a bisect then needs at most 4 probes
+NEEDS_FIX_LABEL="needs-fix"
+# After starting a Linux run on a batch, wait this long (seconds, polling
+# every BATCH_POLL) for its verdict in the same run before leaving the rest to
+# the next sweep. Tests set it to 0.
+BATCH_WAIT="${FAST_LANE_BATCH_WAIT:-420}"
+BATCH_POLL="${FAST_LANE_BATCH_POLL:-60}"
+READY=()   # eligible PRs this pass, n|head|branch|proof (settle_ready lands or batches them)
+HOLD=0     # a batch is in flight: eligible PRs wait for the next sweep
+SCRATCH="" # the run's scratch clone of REMOTE (scratch)
 # Where integrate fetches and pushes; tests point it at a local bare repo.
 REMOTE="${FAST_LANE_REMOTE:-https://github.com/${GH_REPO:-qbtrix/creative-apps}.git}"
 HERE=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
@@ -619,6 +651,219 @@ integrate() {
   echo "integrated|$new"
 }
 
+# scratch <ref>...: fetches <ref>s from REMOTE into the run's one scratch clone
+# (blob:none where the remote allows it) so origin/<ref> is current. Non-zero
+# when the fetch fails.
+scratch() {
+  if [[ -z "$SCRATCH" ]]; then
+    SCRATCH=$(mktemp -d)
+    if ! git init -q "$SCRATCH" || ! git -C "$SCRATCH" remote add origin "$REMOTE"; then rm -rf "$SCRATCH"; SCRATCH=""; return 1; fi
+  fi
+  git -C "$SCRATCH" fetch -q --filter=blob:none origin "$@" 2>/dev/null || git -C "$SCRATCH" fetch -q origin "$@" 2>/dev/null
+}
+
+# batch_branches: every batch branch at REMOTE, `<sha> <name>` per line.
+batch_branches() {
+  git ls-remote --heads "$REMOTE" "refs/heads/${BATCH_PREFIX}*" 2>/dev/null | sed 's:[[:space:]]*refs/heads/: :' | sort -k2
+}
+
+# check_verdict <sha>: the newest Linux check run on <sha>:
+#   none   running   green|<url>   red|<url>
+check_verdict() {
+  local runs
+  runs=$(gh api "repos/$REPO/commits/$1/check-runs?per_page=100" --jq '.check_runs' 2>/dev/null) || { echo none; return; }
+  jq -r --arg name "${CI_CHECKS[0]}" '
+    ([ .[] | select(.name == $name and .conclusion != "action_required") ] | sort_by(.started_at // "") | last) as $r
+    | if $r == null then "none"
+      elif ($r.status | ascii_downcase) != "completed" then "running"
+      elif (($r.conclusion // "") | ascii_downcase) == "success" then "green|\($r.details_url // $r.html_url // "")"
+      else "red|\($r.details_url // $r.html_url // "")" end' <<<"$runs" 2>/dev/null || echo none
+}
+
+# dispatch_linux <branch>: ci.yml's Linux job alone on <branch>, once per
+# batch_resume call (DISPATCHED): a run takes seconds to show up, and a second
+# dispatch on the same ref would cancel the first (ci.yml's concurrency).
+DISPATCHED=""
+dispatch_linux() {
+  case "$DISPATCHED" in *" $1 "*) log "Linux check on $1 just started; waiting for it to show up"; return 0 ;; esac
+  DISPATCHED+=" $1 "
+  write gh workflow run "$CI_FILE" -R "$REPO" -f linux_only=true --ref "$1" || log "could not dispatch the Linux check on $1"
+}
+
+# settle_ready: what the pass found eligible (READY: n|head|branch|proof). One
+# PR lands as before; two or more become a batch; while a batch is in flight
+# they all wait.
+settle_ready() {
+  local items=("${READY[@]+"${READY[@]}"}") n head branch proof
+  READY=()
+  (( ${#items[@]} )) || return 0
+  if (( HOLD )); then log "a batch is in flight: ${#items[@]} ready PR(s) wait for the next sweep"; return 0; fi
+  if (( ${#items[@]} == 1 )); then
+    IFS='|' read -r n head branch proof <<<"${items[0]}"
+    land "$n" "$head" "$proof" || true
+    return 0
+  fi
+  batch_start "${items[@]}"
+}
+
+# batch_start <n|head|branch|proof>...: BASE_BRANCH plus the ready
+# PRs in order on a scratch branch, pushed as lane/batch-<id> with one Linux run
+# started, then batch_resume on it. A PR whose branch can't be fetched or moved
+# past its head, or that conflicts with an earlier PR in the batch, waits for
+# the next sweep. Fewer than two PRs left makes no batch: one lands as before.
+batch_start() {
+  local items=("$@") it n head branch merged=() d id br
+  if (( DRY_RUN )); then log "dry-run, would batch ${#items[@]} PRs: $(printf '#%s ' "${items[@]%%|*}")"; return 0; fi
+  if ! scratch "$BASE_BRANCH"; then log "batch: could not fetch $BASE_BRANCH from $REMOTE; the ready PRs wait for the next sweep"; return 0; fi
+  d="$SCRATCH"
+  if ! git -C "$d" checkout -q -B batch "origin/$BASE_BRANCH" 2>/dev/null || ! bash "$HERE/install-merge-drivers" "$d" >/dev/null 2>&1; then
+    log "batch: could not check out $BASE_BRANCH with the merge drivers; the ready PRs wait"; return 0
+  fi
+  for it in "${items[@]}"; do
+    (( ${#merged[@]} < MAX_BATCH )) || { log "batch: full at $MAX_BATCH PRs; the rest wait"; break; }
+    IFS='|' read -r n head branch _ <<<"$it"
+    if ! scratch "$branch"; then log "batch: #$n: could not fetch $branch; it waits"; continue; fi
+    if [[ "$(git -C "$d" rev-parse "origin/$branch" 2>/dev/null)" != "$head" ]]; then log "batch: #$n: $branch moved past $head; it waits"; continue; fi
+    if git -C "$d" -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
+        merge -q --no-ff --no-edit -m "fast lane batch: PR #$n at $head" "$head" >/dev/null 2>&1; then
+      merged+=("$it")
+    else
+      git -C "$d" merge --abort >/dev/null 2>&1 || true
+      log "batch: #$n conflicts with an earlier PR in the batch; it waits for the next one"
+    fi
+  done
+  if (( ${#merged[@]} < 2 )); then
+    log "batch: ${#merged[@]} PR(s) could join; no batch"
+    (( ${#merged[@]} == 0 )) || { READY=("${merged[0]}"); settle_ready; }
+    return 0
+  fi
+  id=$(date -u +%Y%m%d%H%M%S); br="${BATCH_PREFIX}$id"
+  if ! git -C "$d" push -q origin "HEAD:refs/heads/$br" 2>/dev/null; then log "batch: could not push $br; the ready PRs wait"; return 0; fi
+  log "batch $br: ${#merged[@]} PRs ($(printf '#%s ' "${merged[@]%%|*}")), one Linux check"
+  batch_resume "$br"
+  [[ "$BATCH_STATE" != waiting ]] || HOLD=1
+}
+
+# batch_resume <branch>: reads the batch chain (BASE_BRANCH, then one merge
+# commit per PR) and the Linux verdicts on its tip and probes, acts, and sets
+# BATCH_STATE to done (the branch is gone) or waiting (a run is still going;
+# nothing else merges meanwhile). Red tip: a prefix bisect with lo = the
+# longest green prefix, hi = the shortest red one; the probe is their midpoint;
+# hi = lo + 1 names the culprit. Probe 0 is the base alone and is only asked
+# for when PR 1 is the suspect: a red base means BASE_BRANCH is red, and the
+# batch lands on the PRs' own proof so a fix can get through.
+BATCH_STATE=""
+batch_resume() {
+  local br="$1" d k i sha v lo hi mid url waited=0 line probes
+  local chain=() verd=()
+  DISPATCHED=""; BATCH_STATE=waiting
+  if ! scratch "$BASE_BRANCH" "$br"; then log "batch $br: could not fetch it; the next sweep tries again"; return; fi
+  d="$SCRATCH"
+  while read -r sha line; do
+    [[ "$line" =~ $BATCH_SUBJECT_RE ]] || continue
+    chain+=("$sha|${BASH_REMATCH[1]}|${BASH_REMATCH[2]}")
+  done < <(git -C "$d" log --first-parent --reverse --format='%H %s' "origin/$BASE_BRANCH..origin/$br" 2>/dev/null)
+  k=${#chain[@]}
+  if (( k == 0 )); then log "batch $br: nothing left to land; dropping it"; batch_drop "$br"; BATCH_STATE=done; return; fi
+  chain=("$(git -C "$d" rev-parse "origin/$br~$k")||" "${chain[@]}")  # [0] = the base
+  while :; do
+    for (( i = 0; i <= k; i++ )); do verd[i]=""; done
+    verd[k]=$(check_verdict "${chain[k]%%|*}")
+    probes=$(batch_branches | grep -E " ${br//./\\.}-[0-9]+\$" || true)
+    while read -r sha line; do
+      [[ -n "$line" ]] || continue
+      i="${line##*-}"
+      (( i >= 0 && i < k )) && [[ "${chain[i]%%|*}" == "$sha" ]] || continue
+      verd[i]=$(check_verdict "$sha")
+    done <<<"$probes"
+    v="${verd[k]}"
+    if (( DRY_RUN )); then log "dry-run: batch $br ($k PRs) tip is $v; probes: $(printf '%s ' "${verd[@]}")"; return; fi
+    case "$v" in
+      none) log "batch $br: no Linux run on its tip; starting one"; dispatch_linux "$br" ;;
+      running) log "batch $br: Linux check running" ;;
+      green*)
+        batch_land "$br" "$k" "batch of $k PRs checked together on Linux: ${v#green|}" "${chain[@]}"
+        BATCH_STATE=done; return ;;
+      red*)
+        lo=-1; hi=$k
+        case "${verd[0]}" in
+          red*)
+            log "batch $br: $BASE_BRANCH itself is red (${verd[0]#red|}); landing on the PRs' own proof"
+            batch_land "$br" "$k" "$BASE_BRANCH was red on its own (${verd[0]#red|}), so this batch landed on each PR's own proof" "${chain[@]}"
+            BATCH_STATE=done; return ;;
+          green*) lo=0 ;;
+        esac
+        for (( i = 1; i < k; i++ )); do
+          case "${verd[i]}" in green*) lo=$i ;; red*) (( i < hi )) && hi=$i ;; esac
+        done
+        if (( lo >= 0 && hi == lo + 1 )); then
+          batch_culprit "$br" "$lo" "$hi" "${verd[hi]#red|}" "${chain[@]}"
+          BATCH_STATE=done; return
+        elif (( lo == -1 && hi == 1 )); then
+          batch_probe "$br" 0 "${chain[0]%%|*}" "${verd[0]}"
+        else
+          mid=$(( ( (lo < 0 ? 0 : lo) + hi ) / 2 ))
+          batch_probe "$br" "$mid" "${chain[mid]%%|*}" "${verd[mid]}"
+        fi ;;
+    esac
+    if (( waited >= BATCH_WAIT )); then return; fi
+    sleep "$BATCH_POLL"; waited=$(( waited + BATCH_POLL ))
+  done
+}
+
+# batch_probe <branch> <i> <sha> <verdict>: makes sure the chain after i PRs
+# has a Linux run: pushes lane/batch-<id>-<i> at <sha> and dispatches when
+# there is none; says so when one is running.
+batch_probe() {
+  local br="$1" i="$2" sha="$3" v="$4"
+  case "$v" in
+    running) log "batch $br: probe $i running" ;;
+    "")
+      if (( $(batch_branches | grep -cE " ${br//./\\.}-[0-9]+\$" || true) >= MAX_BATCH )); then
+        log "batch $br: too many probes; dropping the batch, its PRs wait"; batch_drop "$br"; return
+      fi
+      if git -C "$SCRATCH" push -q origin "$sha:refs/heads/$br-$i" 2>/dev/null; then
+        log "batch $br: probing the chain after $i PR(s)"; dispatch_linux "$br-$i"
+      else log "batch $br: could not push probe $i; the next sweep tries again"; fi ;;
+    *) log "batch $br: probe $i has no run yet"; dispatch_linux "$br-$i" ;;
+  esac
+}
+
+# batch_land <branch> <upto> <proof> <chain...>: lands PRs 1..upto in order,
+# stopping at the first that won't (its head moved: the rest were proven on
+# top of it and wait), then drops the branch.
+batch_land() {
+  local br="$1" upto="$2" proof="$3"; shift 3
+  local chain=("$@") i n head
+  for (( i = 1; i <= upto; i++ )); do
+    IFS='|' read -r _ n head <<<"${chain[i]}"
+    if ! land "$n" "$head" "$proof"; then log "batch $br: #$n did not land; the PRs after it wait for the next batch"; break; fi
+  done
+  batch_drop "$br"
+}
+
+# batch_culprit <branch> <lo> <hi> <run url> <chain...>: PRs 1..lo land, PR hi
+# gets NEEDS_FIX_LABEL and one comment, the rest wait for the next batch.
+batch_culprit() {
+  local br="$1" lo="$2" hi="$3" url="$4"; shift 4
+  local chain=("$@") n head after="" i pn
+  IFS='|' read -r _ n head <<<"${chain[hi]}"
+  for (( i = 1; i <= lo; i++ )); do IFS='|' read -r _ pn _ <<<"${chain[i]}"; after+="${after:+, }#$pn"; done
+  log "batch $br: PR #$n at $head is the culprit ($url)"
+  write gh label create "$NEEDS_FIX_LABEL" -R "$REPO" --color d93f0b --force \
+    --description "The lane's Linux check fails with this PR on dev; push a fix" >/dev/null 2>&1 || true
+  write gh pr edit "$n" -R "$REPO" --add-label "$NEEDS_FIX_LABEL" || log "could not add $NEEDS_FIX_LABEL"
+  comment_once "$n" "Fast lane: head $head fails the Linux check once it lands on $BASE_BRANCH${after:+ after $after}: $url. ${after:+Those PRs merged; }This one has the $NEEDS_FIX_LABEL label and waits. Fix it, rerun scripts/ci --changed, push, and move the Head: line; the lane drops the label on the new head and checks it again."
+  batch_land "$br" "$lo" "batch of $lo PRs checked together on Linux before #$n broke the chain" "${chain[@]}"
+}
+
+# batch_drop <branch>: deletes the batch branch and its probes at REMOTE.
+batch_drop() {
+  local br="$1" names
+  names=$(batch_branches | awk -v b="$br" '$2 == b || index($2, b "-") == 1 { print $2 }' | paste -sd' ' -)
+  [[ -z "$names" ]] || git -C "$SCRATCH" push -q origin --delete $names 2>/dev/null || log "batch $br: could not delete $names"
+}
+
 # has_comment <pr> <text>: a comment on the PR contains <text>.
 has_comment() {
   gh api "repos/$REPO/issues/$1/comments" --paginate --jq '.[].body' 2>/dev/null | grep -qF -- "$2"
@@ -655,6 +900,14 @@ evaluate() {
   # parks as action_required for bot pushes.
   local head
   head=$(jq -r '.headRefOid' "$tmp/pr.json")
+  # A batch's culprit (NEEDS_FIX_LABEL) waits at the head the lane named; a new
+  # head gets the label dropped and a fresh look.
+  if jq -e --arg l "$NEEDS_FIX_LABEL" '[.labels[]?.name] | index($l) != null' "$tmp/pr.json" >/dev/null; then
+    if has_comment "$n" "Fast lane: head $head fails the Linux check"; then
+      log "PR #$n: $NEEDS_FIX_LABEL at head $head; waiting for a fix"; rm -rf "$tmp"; return
+    fi
+    write gh pr edit "$n" -R "$REPO" --remove-label "$NEEDS_FIX_LABEL" || log "could not remove $NEEDS_FIX_LABEL"
+  fi
   if gh api "repos/$REPO/commits/$head/check-runs?per_page=100" --jq '.check_runs' >"$tmp/runs.json" 2>/dev/null; then
     jq '[ group_by(.name)[] | sort_by(.started_at // "") | last
           | select(.conclusion != "action_required")
@@ -789,53 +1042,70 @@ evaluate() {
       fi
       ;;
     eligible)
-      local lines files proof
-      IFS='|' read -r lines files proof <<<"$rest"
-      # Squash message = PR title + body, minus any AI attribution lines.
-      local title body
-      title=$(gh pr view "$n" -R "$REPO" --json title --jq .title)
-      body=$(gh pr view "$n" -R "$REPO" --json body --jq .body | strip_attribution)
-      # A lead's closing keyword before a feature-lead issue becomes Refs, in the body and so
-      # in the squash message. An issue whose labels can't be read keeps its keyword.
-      local lead=0
-      if grep -qE "$LEAD_RE" <<<"$body"; then
-        lead=1
-        lead_issues "$body"
-        body=$(lead_refs "$LEAD_FEATURES" <<<"$body")
-        [[ -z "$LEAD_UNREAD" ]] || comment_once "$n" "Fast lane: could not read the labels of $LEAD_UNREAD, so the closing keyword before it stays and the lane closes none of them. A PR must never close a $FEATURE_ISSUE_LABEL issue: if one is, reopen it after the merge."
-      fi
-      # Cloud sessions append a "Generated by Claude Code" footer to the PR body; drop it there too.
-      write gh pr edit "$n" -R "$REPO" --body "$body" || log "could not strip attribution from the PR body"
-      # A failed merge (head moved, or the base changed under it) is left for the next sweep.
-      if ! write gh pr merge "$n" -R "$REPO" --squash --delete-branch=false --match-head-commit "$head" \
-          --subject "$title (#$n)" --body "$body"; then
-        log "merge failed; the next sweep looks again"; rm -rf "$tmp"; return
-      fi
-      MERGED_ANY=1
-      MERGED_RUN=$((MERGED_RUN + 1))
-      # GITHUB_TOKEN merges fire no workflows; a finished feature or a UI change gets a CI run.
-      if jq -e --arg l "$FEATURE_LABEL" '[.labels[]?.name] | index($l) != null' "$tmp/pr.json" >/dev/null; then
-        DISPATCH_FEATURE=1
-      fi
-      if grep -qE "$UI_RE" "$tmp/files.txt"; then DISPATCH_UI=1; fi
-      # GitHub does not auto-close linked issues when GITHUB_TOKEN merges, so close them here.
-      # For a lead's PR only issues known not to be feature-lead: GitHub may still list one
-      # whose keyword lead_refs just rewrote, or one linked by hand.
-      local issue
-      for issue in $(gh pr view "$n" -R "$REPO" --json closingIssuesReferences --jq '.closingIssuesReferences[].number'); do
-        if (( lead )) && ! { issue_is_feature "$REPO#$issue" && [[ "$FEATURE" == n ]]; }; then
-          log "not closing #$issue: a $FEATURE_ISSUE_LABEL issue, or its labels can't be read"; continue
-        fi
-        write gh issue close "$issue" -R "$REPO" --reason completed --comment "Done in #$n (fast lane)." || log "could not close #$issue"
-        write gh issue edit "$issue" -R "$REPO" --remove-label in-progress || true
-      done
-      write gh pr edit "$n" -R "$REPO" --add-label "$MERGED_LABEL" || log "could not add $MERGED_LABEL label"
-      if jq -e --arg l "$NEEDS_REBASE_LABEL" '[.labels[]?.name] | index($l) != null' "$tmp/pr.json" >/dev/null; then
-        write gh pr edit "$n" -R "$REPO" --remove-label "$NEEDS_REBASE_LABEL" || true
-      fi
-      comment_once "$n" "Fast lane: merged into $BASE_BRANCH ($lines lines, $files files, $proof)."
+      # settle_ready lands it, or batches it with the pass's other eligible PRs.
+      READY+=("$n|$head|$(jq -r '.headRefName // ""' "$tmp/pr.json")|${rest#*|*|}")
       ;;
   esac
+  rm -rf "$tmp"
+}
+
+# land <n> <head> <proof>: squash-merges PR <n> at <head> into BASE_BRANCH with
+# the bookkeeping: attribution stripped from the squash message, a lead's
+# closing keywords before feature-lead issues turned into Refs, linked issues
+# closed, labels, one comment. Non-zero when it did not merge (the head moved,
+# or the base changed under it): the next sweep looks again.
+land() {
+  local n="$1" head="$2" proof="$3" tmp lines files
+  tmp=$(mktemp -d)
+  if ! gh pr view "$n" -R "$REPO" --json labels,additions,deletions,changedFiles >"$tmp/pr.json" 2>/dev/null \
+      || ! gh api "repos/$REPO/pulls/$n/files" --paginate --jq '.[] | .filename' >"$tmp/files.txt" 2>/dev/null; then
+    log "PR #$n: could not read it before the merge; the next sweep looks again"; rm -rf "$tmp"; return 1
+  fi
+  lines=$(jq -r '(.additions // 0) + (.deletions // 0)' "$tmp/pr.json")
+  files=$(jq -r '.changedFiles // 0' "$tmp/pr.json")
+  # Squash message = PR title + body, minus any AI attribution lines.
+  local title body
+  title=$(gh pr view "$n" -R "$REPO" --json title --jq .title)
+  body=$(gh pr view "$n" -R "$REPO" --json body --jq .body | strip_attribution)
+  # A lead's closing keyword before a feature-lead issue becomes Refs, in the body and so
+  # in the squash message. An issue whose labels can't be read keeps its keyword.
+  local lead=0
+  if grep -qE "$LEAD_RE" <<<"$body"; then
+    lead=1
+    lead_issues "$body"
+    body=$(lead_refs "$LEAD_FEATURES" <<<"$body")
+    [[ -z "$LEAD_UNREAD" ]] || comment_once "$n" "Fast lane: could not read the labels of $LEAD_UNREAD, so the closing keyword before it stays and the lane closes none of them. A PR must never close a $FEATURE_ISSUE_LABEL issue: if one is, reopen it after the merge."
+  fi
+  # Cloud sessions append a "Generated by Claude Code" footer to the PR body; drop it there too.
+  write gh pr edit "$n" -R "$REPO" --body "$body" || log "could not strip attribution from the PR body"
+  # A failed merge (head moved, or the base changed under it) is left for the next sweep.
+  if ! write gh pr merge "$n" -R "$REPO" --squash --delete-branch=false --match-head-commit "$head" \
+      --subject "$title (#$n)" --body "$body"; then
+    log "merge failed; the next sweep looks again"; rm -rf "$tmp"; return 1
+  fi
+  MERGED_ANY=1
+  MERGED_RUN=$((MERGED_RUN + 1))
+  # GITHUB_TOKEN merges fire no workflows; a finished feature or a UI change gets a CI run.
+  if jq -e --arg l "$FEATURE_LABEL" '[.labels[]?.name] | index($l) != null' "$tmp/pr.json" >/dev/null; then
+    DISPATCH_FEATURE=1
+  fi
+  if grep -qE "$UI_RE" "$tmp/files.txt"; then DISPATCH_UI=1; fi
+  # GitHub does not auto-close linked issues when GITHUB_TOKEN merges, so close them here.
+  # For a lead's PR only issues known not to be feature-lead: GitHub may still list one
+  # whose keyword lead_refs just rewrote, or one linked by hand.
+  local issue
+  for issue in $(gh pr view "$n" -R "$REPO" --json closingIssuesReferences --jq '.closingIssuesReferences[].number'); do
+    if (( lead )) && ! { issue_is_feature "$REPO#$issue" && [[ "$FEATURE" == n ]]; }; then
+      log "not closing #$issue: a $FEATURE_ISSUE_LABEL issue, or its labels can't be read"; continue
+    fi
+    write gh issue close "$issue" -R "$REPO" --reason completed --comment "Done in #$n (fast lane)." || log "could not close #$issue"
+    write gh issue edit "$issue" -R "$REPO" --remove-label in-progress || true
+  done
+  write gh pr edit "$n" -R "$REPO" --add-label "$MERGED_LABEL" || log "could not add $MERGED_LABEL label"
+  if jq -e --arg l "$NEEDS_REBASE_LABEL" '[.labels[]?.name] | index($l) != null' "$tmp/pr.json" >/dev/null; then
+    write gh pr edit "$n" -R "$REPO" --remove-label "$NEEDS_REBASE_LABEL" || true
+  fi
+  comment_once "$n" "Fast lane: merged into $BASE_BRANCH ($lines lines, $files files, $proof)."
   rm -rf "$tmp"
 }
 
@@ -874,12 +1144,24 @@ main() {
     esac
     shift
   done
-  if (( ${#prs[@]} == 0 )); then
+  (( DRY_RUN )) || gh auth setup-git >/dev/null 2>&1 || true
+  # A batch a run left behind comes first: its verdict lands or bisects it, and
+  # while it is still running nothing else merges (settle_ready holds). The
+  # open PRs are listed after it, so what it landed isn't looked at again.
+  local br
+  while read -r _ br; do
+    [[ "$br" =~ ^${BATCH_PREFIX}[0-9]+$ ]] || continue  # probes (<batch>-<i>) belong to their batch
+    batch_resume "$br"
+    [[ "$BATCH_STATE" != waiting ]] || HOLD=1
+  done < <(batch_branches)
+  local explicit=${#prs[@]}
+  if (( explicit == 0 )); then
     while read -r n; do [[ -n "$n" ]] && prs+=("$n"); done < <(open_prs)
   fi
-  (( ${#prs[@]} )) || { echo "fast-lane: no open $LABEL PRs" >&2; return 0; }
+  (( ${#prs[@]} )) || { (( HOLD || MERGED_RUN )) || echo "fast-lane: no open $LABEL PRs" >&2; return 0; }
   local n pass
   for n in "${prs[@]}"; do evaluate "$n"; done
+  settle_ready
   # A merge changes every other PR's mergeable state, and GitHub reports
   # UNKNOWN until it recomputes. Sweep again after any merge (or a lane
   # integration, whose new head needs its Linux check), until a pass changes
@@ -887,6 +1169,7 @@ main() {
   for (( pass = 0; MERGED_ANY && pass < 5; pass++ )); do
     MERGED_ANY=0
     while read -r n; do [[ -n "$n" ]] && evaluate "$n"; done < <(open_prs)
+    settle_ready
   done
   # At most one dispatch per run, and only after a run that merged something.
   (( MERGED_RUN )) || return 0

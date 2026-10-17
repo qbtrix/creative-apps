@@ -316,7 +316,18 @@ Crew PRs merge into `dev` at once; `main` moves only when full CI passes on
   (docs, data, packets) takes the lane on the Linux check alone.
 - Outside `MAC_GATED`, no test runs on macOS before a merge. A human reviews
   the snapshots after the next feature CI and files fixes as new issues.
-- Each lane run merges every eligible PR, oldest first. A PR that is behind
+- Each lane run merges every eligible PR, oldest first. One ready PR
+  squash-merges at once. Two or more are checked together first: the lane
+  merges `dev` plus each PR, in order, onto a scratch `lane/batch-<id>` branch
+  (merge drivers on), runs one Linux-only CI run on it, and on green
+  squash-merges every PR in that order. On red it bisects the batch by prefix
+  (`lane/batch-<id>-<i>` probes, one Linux run each) until it finds the first
+  PR that turns the chain red: the PRs before it merge, that PR gets one
+  comment naming the run and the `needs-fix` label, and the PRs after it wait
+  for the next batch. Fix it, rerun `scripts/ci --changed`, push, and move the
+  `Head:` line; the lane drops the label on the new head. One batch runs at a
+  time; a PR that becomes ready while one is in flight waits for the next
+  sweep (a few minutes). A PR that is behind
   `dev` merges as it is. A PR that conflicts is integrated by the lane: in a
   scratch clone it merges `origin/dev` into the PR branch with the repo's
   merge drivers (`.gitattributes`, from main, which is why that file is
