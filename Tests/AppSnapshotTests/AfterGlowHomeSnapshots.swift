@@ -146,9 +146,10 @@ import Testing
         services.pending["sending"] = "Switching between apps isn't available yet."
         let fake = await model(services)
         #expect(fake.state.tiles.allSatisfy { $0.disabledReason == "Switching between apps isn't available yet." })
+        // The hand-off slot is live (#1883), so no live tile waits on sending.
         let live = liveServices()
-        #expect(live.pending["sending"] == SuiteServices.notConnected("sending"))
+        #expect(live.pending["sending"] == nil)
         let onLive = await model(live)
-        #expect(onLive.state.tiles.allSatisfy { $0.disabledReason == live.pending["sending"] })
+        #expect(onLive.state.tiles.allSatisfy { $0.disabledReason != SuiteServices.notConnected("sending") })
     }
 }
