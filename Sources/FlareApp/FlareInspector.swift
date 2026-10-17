@@ -72,7 +72,7 @@ struct FlareInspector<Easing: View>: View {
             ])
             .accessibilityIdentifier("flare.inspector.header")
             if summary.showsScene {
-                FlareInspectorScene(size: model.sceneSizeText ?? "", rate: model.sceneRateText ?? "")
+                FlareInspectorScene(model: model, perform: perform)
             } else {
                 FlareInspectorGeometry(
                     rows: model.animatedProperties,
