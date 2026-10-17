@@ -72,6 +72,7 @@ Next: wave 2 (EK-2, EK-3, EK-29) is building stacked on branch lead-editor-kerne
 |---|---|---|---|---|---|
 
 ## Decisions
+- Wave 2 runs as Workflow run wf_2a77d1fc-422 (script: scratchpad wf/build-wave.js, a copy of docs/factory/workflows/build-wave.js with `baseBranch`, `noLabel`, `extra` args and REST `gh api` notes); a relaunched lead resumes it with resumeFromRunId or reads the three PRs by head branch `lead-editor-kernel/EK-2|EK-3|EK-29`.
 - PRs base `dev`, as CLAUDE.md and lead.md say; the brief's "base main" is read as the integration branch Belt reads (`main` only takes `dev` SHAs that passed CI, and the lane retargets a `main` PR to `dev`). Belt's base SHA fdaabbfb is an ancestor of both.
 - Line lead for #1933, #1529 and #1942. The captain commented on #1529 and #1942 (2026-10-17 03:08 UTC): "Out of the beta cut; resumes after beta. Finish the slice in flight, then stop." Neither has a slice in flight, so both are parked (their RECORD.md say so) and this run builds editor-kernel only.
 - `gh`'s GraphQL commands (`gh pr create`, `gh issue view`, `gh pr list`, `gh label`) are blocked in this environment (403, "use the REST API"); builders open PRs, add labels and comment with `gh api` REST calls. Documented in every builder prompt.
