@@ -43,6 +43,7 @@ retargets a fast-lane PR opened against `main` to `dev`).
 - Planned wave 1 once unblocked: AS-h1 can start as soon as EK-sel merges (no cross-line wait); AS-f1, AS-d1 and AS-l1 after their line's packets. Wave 2: each app's delete task.
 
 ## Open
+- 2026-10-17T10:44Z heartbeat: editor-kernel is at stage 3 wave 2, stacked on PR #1992 (EK-1, not merged: it edits Package.swift, so the supervisor merges it). EK-sel is still `planned` in its RECORD and dev 453198a has no kernel type. Still blocked.
 - 2026-10-17T06:38Z heartbeat: editor-kernel's lead (run act-1a1483c0771-g24c, `lead/editor-kernel`) started wave 1 on 2026-10-17T06:36Z: PR #1992 (EK-1, slice EK-a). EK-sel waits on EK-a, so it is at least two editor-kernel waves away; still blocked, nothing to start.
 - Blocked on #1933 editor-kernel: EK-sel (every slice).
 - AS-library also waits on adopt-kernel-undo:AU-library (this lead's own feature, same block).

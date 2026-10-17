@@ -2,3 +2,4 @@ utc	stage	event	ref	note
 2026-10-17T06:04Z	0	stage-start	#1935	setup: line lead for #1936 #1935 #1934; base origin/dev 4a86f5f; brief main fdaabbf verified as ancestor
 2026-10-17T06:10Z	0	stopped	#1935	blocked: every slice waits on editor-kernel:EK-sel (#1933 not started, no kernel types on dev)
 2026-10-17T06:38Z	0	heartbeat	#1935	still blocked: editor-kernel lead started wave 1 (EK-a, PR #1992); EK-sel waits on EK-a
+2026-10-17T10:44Z	0	heartbeat	#1935	still blocked: #1992 (EK-1) unmerged, editor-kernel wave 2 stacked on it; EK-sel still planned
