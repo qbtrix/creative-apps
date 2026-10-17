@@ -1,0 +1,4 @@
+[
+{"label":"a nil device still installs the Metal layer","file":"Sources/SuiteUI/CanvasHostView+Metal.swift","find":"guard choice == .gpu, device != nil else { return false }","replace":"guard choice == .gpu else { return false }","tests":"CanvasHostMetalTests"},
+{"label":"the Metal layer's colour space is left nil","file":"Sources/SuiteUI/CanvasHostView+Metal.swift","find":"metal.colorspace = CGColorSpace(name: CGColorSpace.sRGB)","replace":"metal.colorspace = nil","tests":"CanvasHostMetalTests"}
+]
