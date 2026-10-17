@@ -7,10 +7,10 @@
     "tests": "DesignGestureRouteTests"
   },
   {
-    "label": "an Option-drag mints new ids on every step",
+    "label": "an Option-drag moves the copy on the page without it",
     "file": "Sources/DesignModel/DesignCanvasEditing.swift",
-    "find": "var mint = start",
-    "replace": "var mint = self.mint()",
+    "find": "by: delta, on: copies)",
+    "replace": "by: delta, on: page)",
     "tests": "DesignOptionDragTests"
   },
   {
