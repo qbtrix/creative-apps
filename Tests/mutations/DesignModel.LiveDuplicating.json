@@ -1,0 +1,37 @@
+[
+  {
+    "label": "the copy lands below its original",
+    "file": "Sources/DesignModel/Live/LiveDuplicating.swift",
+    "find": "siblings.insert(placed, at: at + 1)",
+    "replace": "siblings.insert(placed, at: at)",
+    "tests": "DesignDuplicateTests"
+  },
+  {
+    "label": "a copied child keeps its original id",
+    "file": "Sources/DesignModel/Live/LiveDuplicating.swift",
+    "find": "copy.children = node.children.map { copySubtree($0, mint: &mint) }",
+    "replace": "copy.children = node.children",
+    "tests": "DesignDuplicateTests"
+  },
+  {
+    "label": "the copy keeps the lock",
+    "file": "Sources/DesignModel/Live/LiveDuplicating.swift",
+    "find": "copy.isLocked = false",
+    "replace": "copy.isLocked = original.isLocked",
+    "tests": "DesignDuplicateTests"
+  },
+  {
+    "label": "the offset is ignored",
+    "file": "Sources/DesignModel/Live/LiveDuplicating.swift",
+    "find": "copy.translate(by: offset)",
+    "replace": "copy.translate(by: DesignPoint(x: 0, y: 0))",
+    "tests": "DesignDuplicateTests"
+  },
+  {
+    "label": "a selected child is copied twice",
+    "file": "Sources/DesignModel/Live/LiveDuplicating.swift",
+    "find": "guard !path.contains(where: wanted.contains) else { continue }",
+    "replace": "",
+    "tests": "DesignDuplicateTests"
+  }
+]

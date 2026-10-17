@@ -1,0 +1,4 @@
+[
+{"label":"a click with no move skips endDrag, so the delegate never commits it","file":"Sources/SuiteUI/CanvasHostView.swift","find":"delegate?.endDrag()","replace":"if !live.isEmpty { delegate?.endDrag() }","tests":"CanvasHostTests"},
+{"label":"the overlay keeps its points after mouse-up","file":"Sources/SuiteUI/CanvasHostView.swift","find":"live.removeAll(keepingCapacity: true)","replace":"_ = live","tests":"CanvasHostTests"}
+]

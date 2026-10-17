@@ -93,7 +93,7 @@ private func allIDs(_ nodes: [DesignNode]) -> [String] { nodes.flatMap { [$0.id]
         #expect(try filing.decode(filing.encode(document)) == document)
         #expect(throws: DesignFileError.unreadable) { try filing.decode(Data("hello".utf8)) }
     }
-    /// MJ2: marquee, Align Top, duplicate, group, copy and paste on `.fake`, each a named edit; on `.live` the stubs say what isn't built.
+    /// MJ2: marquee, Align Top, duplicate, group, copy and paste on `.fake`, each a named edit; on `.live` the stubs left say what isn't built.
     @Test func testFakesWalk() throws {
         let fake = DesignServices.fake
         let marquee = DesignRect(from: pt(80, 80), to: pt(520, 240))
@@ -114,9 +114,7 @@ private func allIDs(_ nodes: [DesignNode]) -> [String] { nodes.flatMap { [$0.id]
         #expect(pasted.name == "Paste" && children(desktop, pasted.nodes).last?.children.count == 2)
         let live = DesignServices.live
         #expect(live.marquee is LiveMarquee && live.aligning is LiveAligning)
-        #expect(throws: DesignRefusal.notBuilt("Duplicate")) {
-            try live.duplicating.duplicate([a], offset: pt(10, 10), on: page, mint: &mint)
-        }
+        #expect(try live.duplicating.duplicate([a], offset: pt(10, 10), on: page, mint: &mint).name == "Duplicate")  // live since C-1
         #expect(try live.grouping.group([a, b], on: page, mint: &mint).name == "Group")  // live since copy-group C-2
         #expect(throws: DesignRefusal.notBuilt("Copy and paste")) { try live.clipboard.encode([pair], on: page) }
         #expect(throws: DesignRefusal.notBuilt("Copy and paste")) {

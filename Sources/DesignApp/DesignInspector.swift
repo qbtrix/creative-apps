@@ -3,13 +3,16 @@
 // layer shows its header (name, then kind unless the name says it, then size),
 // then Align (DesignAlignBar), then Layer (Hidden and Locked checkboxes), Frame (X, Y, W and H as scrub
 // fields) and Fill (the color well; a text layer's is its text color, a group
-// has none). A locked layer, or one inside a locked group, can't be edited, so
-// Frame and Fill are disabled and a line says why. With only a page selected it shows the page's size,
-// read only. With several layers selected it shows "Multiple layers selected"
-// where Frame and Fill's values go, with the reason as the rows' tooltip and a
-// hint below, since editing several layers at once comes later (#413). The rows
-// hold no control, so they aren't disabled: a disabled row dims its label
-// under 4.5:1. Values in, intents out; the model clamps and refuses what it must.
+// has none), then for a text layer its Text section (DesignInspectorText). A
+// locked layer, or one inside a locked group, can't be edited, so Frame and
+// Fill are disabled and a line says why. With only a page selected it shows
+// DesignInspectorPage. With several layers selected (D0-5c) it shows "<n> Layers",
+// Align with Distribute, then Frame and Fill: a row whose value every selected
+// layer shares edits it on all of them (`.setStyle`), and one whose values differ
+// reads "Mixed" as plain text (a mixed scrub field is needs-ui #2148). Every
+// control's help comes from the Model, and each carries its DesignControlID and
+// lists itself in `suite.controls`. Values in, intents out; the model clamps and
+// refuses what it must.
 import DesignModel
 import SuiteUI
 import SwiftUI
@@ -21,8 +24,8 @@ struct DesignInspector: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 0) {
-                if let help = model.multipleSelectionHelp {
-                    DesignMultipleProperties(count: model.selectedNodeIDs.count, help: help)
+                if model.hasMultipleSelection {
+                    DesignSeveralProperties(model: model, perform: perform)
                 } else if let node = model.selectedNode {
                     DesignNodeProperties(
                         node: node, lockHelp: model.lockHelp(node.id), alignHelp: model.alignHelps, perform: perform
@@ -40,6 +43,51 @@ struct DesignInspector: View {
     }
 }
 
+/// One of X, Y, W and H: its row label, its field's spoken name, its frame field and its range.
+private struct FrameRow: Identifiable {
+    let label: String
+    let name: String
+    let field: DesignFrameField
+    let range: ClosedRange<Double>
+    var id: DesignFrameField { field }
+
+    /// How far X and Y can be set, and the most W and H can be, in points.
+    private static let positionRange = -100_000.0...100_000.0
+    private static let sizeRange = 1.0...100_000.0
+
+    static let all = [
+        FrameRow(label: "X", name: "X position", field: .x, range: positionRange),
+        FrameRow(label: "Y", name: "Y position", field: .y, range: positionRange),
+        FrameRow(label: "W", name: "Width", field: .width, range: sizeRange),
+        FrameRow(label: "H", name: "Height", field: .height, range: sizeRange),
+    ]
+
+    /// This row's value in `frame`.
+    func value(in frame: DesignRect) -> Double {
+        switch field {
+        case .x: frame.x
+        case .y: frame.y
+        case .width: frame.width
+        case .height: frame.height
+        }
+    }
+
+    /// A scrub field for this row. The end of a drag or a Return ends the edit run, so the next
+    /// one is its own undo step (#536); ScrubField's own onEnd replaces this once it is public
+    /// (#745). Disabled with `help` as its tooltip when it can't edit.
+    @MainActor func scrubField(
+        _ value: Double, help: String?, perform: @escaping DesignPerform,
+        onChange: @escaping @MainActor (Double) -> Void
+    ) -> some View {
+        ScrubField(name, value: value, in: range, step: 1, unit: "pt", decimals: 1, onChange: onChange)
+            .simultaneousGesture(DragGesture(minimumDistance: 0).onEnded { _ in perform(.endEditRun) })
+            .onSubmit { perform(.endEditRun) }
+            .disabled(help != nil)
+            .help(help ?? "")
+            .suiteControl(id: DesignControlID.frameField(field), enabled: help == nil, reason: help)
+    }
+}
+
 /// The selected layer's header and sections.
 private struct DesignNodeProperties: View {
     let node: DesignNode
@@ -48,10 +96,6 @@ private struct DesignNodeProperties: View {
     /// Why each Align command can't run, keyed by edge.
     let alignHelp: [DesignAlignEdge: String]
     let perform: DesignPerform
-
-    /// How far X and Y can be set, and the most W and H can be, in points.
-    private static let positionRange = -100_000.0...100_000.0
-    private static let sizeRange = 1.0...100_000.0
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -70,13 +114,21 @@ private struct DesignNodeProperties: View {
             }
             InspectorSection("Frame") {
                 VStack(alignment: .leading, spacing: SuiteSpacing.xs) {
-                    frameRow("X", "X position", \.x, Self.positionRange)
-                    frameRow("Y", "Y position", \.y, Self.positionRange)
-                    frameRow("W", "Width", \.width, Self.sizeRange)
-                    frameRow("H", "Height", \.height, Self.sizeRange)
+                    ForEach(FrameRow.all) { row in
+                        InspectorRow(row.label) {
+                            row.scrubField(row.value(in: node.frame), help: lockHelp, perform: perform) { new in
+                                var frame = node.frame
+                                switch row.field {
+                                case .x: frame.x = new
+                                case .y: frame.y = new
+                                case .width: frame.width = new
+                                case .height: frame.height = new
+                                }
+                                perform(.setFrame(node.id, x: frame.x, y: frame.y, width: frame.width, height: frame.height))
+                            }
+                        }
+                    }
                 }
-                .disabled(lockHelp != nil)
-                .help(lockHelp ?? "")
             }
             if let label = node.kind.fillLabel {
                 InspectorSection("Fill") {
@@ -86,69 +138,78 @@ private struct DesignNodeProperties: View {
                     .accessibilityIdentifier("design.fill")
                     .disabled(lockHelp != nil)
                     .help(lockHelp ?? "")
+                    .suiteControl(
+                        id: DesignControlID.inspectorFill, enabled: lockHelp == nil, reason: lockHelp, identifies: false)
                 }
             }
-        }
-    }
-
-    /// One of X, Y, W and H: a scrub field that sends the whole frame with `field` changed. The end
-    /// of a drag or a Return ends the edit run, so the next one is its own undo step (#536);
-    /// ScrubField's own onEnd replaces this once it is public (#745).
-    private func frameRow(
-        _ label: String, _ name: String, _ field: WritableKeyPath<DesignRect, Double>, _ range: ClosedRange<Double>
-    ) -> some View {
-        InspectorRow(label) {
-            ScrubField(name, value: node.frame[keyPath: field], in: range, step: 1, unit: "pt", decimals: 1) { value in
-                var frame = node.frame
-                frame[keyPath: field] = value
-                perform(.setFrame(node.id, x: frame.x, y: frame.y, width: frame.width, height: frame.height))
-            }
-            .simultaneousGesture(DragGesture(minimumDistance: 0).onEnded { _ in perform(.endEditRun) })
-            .onSubmit { perform(.endEditRun) }
+            if node.kind == .text { DesignInspectorText() }
         }
     }
 }
 
-/// Several selected layers: how many, and Frame and Fill disabled with why.
-private struct DesignMultipleProperties: View {
-    let count: Int
-    /// Why the fields don't edit (DesignWorkspace.multipleSelectionHelp).
-    let help: String
+/// Several selected layers: "<n> Layers", Align with Distribute, then Frame and Fill over them all.
+private struct DesignSeveralProperties: View {
+    let model: DesignWorkspace
+    let perform: DesignPerform
 
     var body: some View {
+        let frameHelp = model.styleHelp(.frame)
         VStack(alignment: .leading, spacing: 0) {
-            InspectorHeader("\(count) Layers")
-            ForEach(["Frame", "Fill"], id: \.self) { title in
-                InspectorSection(title) {
-                    InspectorRow(title) {
-                        Text("Multiple layers selected").foregroundStyle(SuiteColor.textSecondary)
-                    }
-                    .help(help)
-                }
-            }
-            DesignPanelHint(help)
-        }
-    }
-}
-
-/// A page with no layer selected: its name, size and a pointer to the layers.
-private struct DesignPageProperties: View {
-    let page: DesignPage
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            InspectorHeader(page.name, details: page.inspectorDetails)
+            InspectorHeader(model.selectionCountText ?? "")
+            DesignAlignBar(help: alignHelp, distributeHelp: distributeHelp, perform: perform)
             InspectorSection("Frame") {
-                InspectorRow("W") { size(page.frameWidth) }
-                InspectorRow("H") { size(page.frameHeight) }
-                DesignPanelHint("Select a layer to edit its properties.")
+                VStack(alignment: .leading, spacing: SuiteSpacing.xs) {
+                    ForEach(FrameRow.all) { row in
+                        InspectorRow(row.label) {
+                            if let shared = model.sharedValue({ row.value(in: $0.frame) }) {
+                                row.scrubField(shared, help: frameHelp, perform: perform) {
+                                    perform(.setStyle(.frame(row.field, $0)))
+                                }
+                            } else {
+                                mixed(frameHelp)
+                            }
+                        }
+                    }
+                }
+            }
+            // A group has no fill, so the row shows only when every selected layer has one.
+            if model.selectedNodes.allSatisfy({ $0.kind.fillLabel != nil }) {
+                let fillHelp = model.styleHelp(.fill)
+                InspectorSection("Fill") {
+                    if let fill = model.sharedValue(\.fill) {
+                        InspectorColorWellRow("Fill", color: HexColor(fill.red, fill.green, fill.blue)) {
+                            perform(.setStyle(.fill(DesignColor($0.red, $0.green, $0.blue))))
+                        }
+                        .accessibilityIdentifier("design.fill")
+                        .disabled(fillHelp != nil)
+                        .help(fillHelp ?? "")
+                        .suiteControl(
+                            id: DesignControlID.inspectorFill, enabled: fillHelp == nil, reason: fillHelp, identifies: false)
+                    } else {
+                        InspectorRow("Fill") { mixed(fillHelp) }
+                    }
+                }
             }
         }
     }
 
-    private func size(_ points: Double) -> some View {
-        Text("\(NumericInput.format(points, decimals: 0)) pt")
+    private var alignHelp: [DesignAlignEdge: String] {
+        Dictionary(uniqueKeysWithValues: DesignAlignEdge.allCases.compactMap { edge in
+            model.help(.align(edge)).map { (edge, $0) }
+        })
+    }
+
+    private var distributeHelp: [DesignDistributeAxis: String] {
+        Dictionary(uniqueKeysWithValues: DesignDistributeAxis.allCases.compactMap { axis in
+            model.help(.distribute(axis)).map { (axis, $0) }
+        })
+    }
+
+    /// A row whose values differ: plain text, not a control, with the row's help as its tooltip.
+    private func mixed(_ help: String?) -> some View {
+        Text("Mixed")
             .font(SuiteFont.inspectorValue)
             .foregroundStyle(SuiteColor.secondaryText)
+            .help(help ?? "")
     }
 }

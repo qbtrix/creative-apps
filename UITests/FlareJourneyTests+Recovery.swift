@@ -92,7 +92,7 @@ final class FlareRecoveryJourneys: XCTestCase {
         XCTAssert(pick.waitForExistence(timeout: 5), "no Select in the palette")
         pick.click()
         let ball = flare.element("flare.timeline").buttons.matching(
-            NSPredicate(format: "identifier == 'flare.timeline.track' AND label == 'Ball'")).firstMatch
+            NSPredicate(format: "label == 'Ball'")).firstMatch
         XCTAssert(ball.waitForExistence(timeout: 5), "no Ball track in the timeline")
         point(80, 100, on: stage).click()
         XCTAssert(waitFor { !ball.isSelected }, "a click where Ball was still hits Ball after Restore")

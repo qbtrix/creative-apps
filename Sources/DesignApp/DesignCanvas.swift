@@ -12,7 +12,9 @@
 // for, kept until CanvasViewport can scroll to a rect. Keys reach the
 // canvas while it has focus. During an inline text edit the canvas passes no key
 // handler, so CanvasViewport stops being focusable: a focusable view around the
-// text field would keep the field from taking the keyboard.
+// text field would keep the field from taking the keyboard. While the canvas has
+// focus, Edit > Cut, Copy and Paste send `.cut`, `.copy` and `.paste`
+// (designPasteboardCommands).
 // Content, not chrome: flat, no glass.
 import DesignModel
 import SuiteUI
@@ -56,6 +58,7 @@ struct DesignCanvas: View {
             DesignTextOverlay(model: model, zoom: zoom, perform: perform)
             feedback
         }
+        .designPasteboardCommands(model, perform)
     }
 
     /// Arrows nudge the selection (Shift: ten points), Delete removes it, Escape deselects, Return

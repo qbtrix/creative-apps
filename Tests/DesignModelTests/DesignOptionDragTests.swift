@@ -70,6 +70,9 @@ import Testing
 
     @Test func withoutABuiltDuplicateOptionDragStillMoves() {
         var workspace = DesignFixtures.cards
+        var services = DesignServices.live
+        services.duplicating = NotBuilt("Duplicate")
+        workspace.useServices(services)
         workspace.selectItem("node-2")
         workspace.gesture(.move, pt(150, 140), pt(150, 240), .option)
         #expect(workspace.frame("node-2") == rc(100, 200, 100, 80))

@@ -21,6 +21,12 @@
 // `-DesignFixture <name>` (a fixture opened unsaved in the first window; an
 // unknown name leaves it empty and says so on the status line) and
 // `-DesignWindowSize WxH` (the first window's content size).
+//
+// Cut, Copy and Paste: the Model makes and reads the bytes and the window moves
+// them through DesignPasteboardBridge under the Model's `pasteboardType`; a
+// refusal (nothing selected, nothing of Design's to paste) goes to the status
+// line. DesignClosePrompt sits on the root, letting every close through until
+// files-history asks about unsaved changes.
 import AppKit
 import DesignModel
 import SuiteUI
@@ -43,6 +49,8 @@ struct DesignWindow: View {
     /// The rect Zoom to Selection asked to show; the canvas takes it once it has that input (D0-5b).
     @State private var show: DesignRect?
     @Environment(\.openWindow) private var openWindow
+    /// Cut, Copy and Paste carry Design's bytes on the general pasteboard.
+    private let bridge = DesignPasteboardBridge()
 
     /// The launch file opens in the first window only.
     @MainActor private static var launchFileOpened = false
@@ -76,6 +84,7 @@ struct DesignWindow: View {
             Button("OK", role: .cancel) {}
         }
         .task { start() }
+        .modifier(DesignClosePrompt(model: model))
     }
 
     private func perform(_ intent: DesignIntent) {
@@ -116,8 +125,12 @@ struct DesignWindow: View {
         case .fit: fit()
         case .command(let command):
             do { try model.run(command) } catch { note = error.help }
-        // The pasteboard bridge for these three is D0-5d's; until it lands they do nothing.
-        case .copy, .cut, .paste: break
+        // The Model makes and reads the bytes; the bridge carries them. A refusal goes to the status line.
+        case .copy:
+            do { bridge.write(try model.copySelection(), type: model.pasteboardType) } catch { note = error.help }
+        case .cut:
+            do { bridge.write(try model.cutSelection(), type: model.pasteboardType) } catch { note = error.help }
+        case .paste: paste()
         case .selectAll: model.selectAll()
         case .zoomToSelection: zoomToSelection()
         case .moveLayer(let id, let parent, let index):
@@ -130,6 +143,16 @@ struct DesignWindow: View {
                 if error == .emptyName { note = DesignRefusal.emptyName.help }
                 if case .alreadyExists = error { note = DesignRefusal.nameTaken(name).help }
             }
+        }
+    }
+
+    /// Pastes Design's bytes from the pasteboard; with none (or another type), the Model's reason.
+    private func paste() {
+        let data = bridge.read(type: model.pasteboardType)
+        if let help = model.pasteHelp(data) {
+            note = help
+        } else if let data {
+            do { try model.paste(data) } catch { note = error.help }
         }
     }
 

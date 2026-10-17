@@ -7,10 +7,15 @@
 // the last frame, and its frames are fitted to the width it is offered less
 // the name column, the divider and the trailing room, so every frame shows and
 // the lanes never scroll sideways. With no rows it shows `timelineEmptyText`.
-// The strip's track buttons come from SuiteUI with no identifier of their own,
-// so the strip passes `flare.timeline.track` down to them, as Halo's does.
-// XCUITest reads a Text's value as "" (#262), so each readout also carries its
-// text as its accessibility label, which journeys and VoiceOver read, and its
+// The strip's track name buttons come from SuiteUI with no identifier of their
+// own (`flare.timeline.track` on the strip doesn't reach them), so journeys
+// find a track by its name inside `flare.timeline`.
+// The row never asks for more than the narrowest content column: the transport
+// is only its controls (fixed size) and each readout stays on one line, so a
+// squeezed readout can't wrap and push the window past the display (#2101).
+// On macOS XCUITest drops a Text's own accessibility label (#1452), so each
+// readout is its own element with its text as label and value, which journeys
+// and VoiceOver read, and its
 // Model tooltip (`timecodeHelp`, `frameReadoutHelp`: seconds:frames, frames
 // from 0; #1844). The current value draws in primary text and the total in
 // secondary (docs/design.md; #1859) inside one Text, so most of its ink stays
@@ -24,14 +29,12 @@ import SwiftUI
 
 struct FlareTimeline: View {
     let model: FlareWorkspace
-    let zoom: Double?
     let perform: @MainActor (FlareIntent) -> Void
-    let tick: @MainActor (Double, inout PlaybackTicker) -> Bool
 
     var body: some View {
         VStack(alignment: .leading, spacing: SuiteSpacing.xs) {
             HStack(spacing: SuiteSpacing.m) {
-                FlareTransport(model: model, zoom: zoom, perform: perform, tick: tick)
+                FlareTransport(model: model, perform: perform)
                 Spacer(minLength: 0)
                 readout(
                     model.timecodeParts, label: model.timecode, help: model.timecodeHelp,
@@ -82,8 +85,12 @@ struct FlareTimeline: View {
         let total = Text(parts?.total ?? "").foregroundStyle(SuiteColor.secondaryText)
         return Text("\(lead)\(current)\(total)")
             .font(SuiteFont.timecode)
+            .lineLimit(1)
+            .fixedSize()
             .help(help ?? "")
+            .accessibilityElement(children: .ignore)
             .accessibilityLabel(label ?? "")
+            .accessibilityValue(label ?? "")
             .accessibilityIdentifier(identifier)
     }
 }
