@@ -1,0 +1,37 @@
+[
+  {
+    "label": "sharedValue returns the first layer's value without comparing the others",
+    "file": "Sources/DesignModel/DesignInspectorContent.swift",
+    "find": "return values.dropFirst().allSatisfy { $0 == first } ? first : nil",
+    "replace": "return first",
+    "tests": "DesignInspectorSharedValueTests"
+  },
+  {
+    "label": "sharedValue compares only the second layer, so a third that differs still reads as shared",
+    "file": "Sources/DesignModel/DesignInspectorContent.swift",
+    "find": "values.dropFirst().allSatisfy { $0 == first }",
+    "replace": "values.dropFirst().prefix(1).allSatisfy { $0 == first }",
+    "tests": "DesignInspectorSharedValueTests"
+  },
+  {
+    "label": "opacityPercentText truncates instead of rounding (49.6% reads 49%)",
+    "file": "Sources/DesignModel/DesignInspectorContent.swift",
+    "find": "Swift.max(Swift.min(fraction * 100, 100), 0).rounded()",
+    "replace": "Swift.max(Swift.min(fraction * 100, 100), 0)",
+    "tests": "DesignInspectorSharedValueTests"
+  },
+  {
+    "label": "the hint skips the lock check, so a locked layer's row falls through to the style help",
+    "file": "Sources/DesignModel/DesignInspectorContent.swift",
+    "find": "if let locked = nodes.first(where: { isLockedInTree($0.id) }) { return DesignRefusal.locked(locked.name).help }\n",
+    "replace": "",
+    "tests": "DesignInspectorSharedValueTests"
+  },
+  {
+    "label": "the hint checks the layer's own hidden flag, not the group around it",
+    "file": "Sources/DesignModel/DesignInspectorContent.swift",
+    "find": "nodes.first(where: { isHiddenInTree($0.id) })",
+    "replace": "nodes.first(where: { $0.isHidden })",
+    "tests": "DesignInspectorSharedValueTests"
+  }
+]
