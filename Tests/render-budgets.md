@@ -40,8 +40,8 @@ has to end up.
 | Library | scroll the grid, 120 steps of 12 pt (`samples`) | 0 / 0 / 0 | 6.6 / 10 / 8.3 ms | none in flight |
 | Library | select, 10 clicks on grid cells | 10 / 10 / 10 | 80 / 120 / 33 ms | none in flight |
 | Library | loupe step | not driven | not driven | the loupe's arrow keys need a key window, which a test process can't have |
-| Flare | step the easing X1 scrub row 60 times | 60 / 60 / 60 | 13.0 / 20 / 8.3 ms | #1471 removed the per-step ticks; not re-measured on a quiet machine yet, so the time budget is unchanged |
-| Flare | draw a rectangle on the canvas, 120 samples | not re-measured (122 before #1792) / 3 / 3 | not re-measured (54.1 before #1792) / 20 / 8.3 ms | #1792 runs the samples on the stage's FlareLiveDrag; the window runs once, at mouse-up |
+| Flare | step the easing X1 scrub row 60 times | 60 / 60 / 60 | 11–13 ms p95 release, 12 ms debug / 20 / 8.3 ms | #1471 removed the per-step ticks; measured on the finisher's Mac (busy, not quiet), over the 8.3 ms target and under the 20 ms report bound |
+| Flare | draw an ellipse on the canvas, 120 samples (Rectangle is not connected yet, IN-1) | 1 / 3 / 3 (debug; 122 before #1792) | p95 2.3–2.5 ms release, 2.3–2.5 debug / 20 / 8.3 ms | #1792 runs the samples on the stage's FlareLiveDrag; the window runs once, at mouse-up |
 | Photo | brush stroke, 120 samples (`large`), `PhotoWindowStrokeTests` | 0 / 1 / 1 | 7.1 / 11 / 8.3 ms | none in flight; the body bound is the stroke's existing one (`PhotoWindowStrokeTests`, measured 0) |
 
 Bodies for Flare's scrub row and Library's selection count one per edit: each
