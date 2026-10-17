@@ -29,6 +29,11 @@
 // playhead that leaves the view moves it a page (TimelineZoom.followed).
 // Neither scroll view shows indicators (#2012): an always-shown AppKit scroller
 // reads as an unnamed 11 pt button and sits over the lanes' right edge.
+// While the strip (or a control in it) has focus, the zoom keys are also
+// hidden shortcuts (TimelineZoomShortcuts): SwiftUI looks for a shortcut in the
+// key window before the menu bar, so a host's Zoom In ⌘+ item, enabled or not,
+// no longer takes the key first (#2142). The key press handler stays for a
+// host with no such item.
 import SwiftUI
 
 public struct TimelineStrip<ID: Hashable & Sendable>: View {
@@ -65,6 +70,8 @@ public struct TimelineStrip<ID: Hashable & Sendable>: View {
     @State private var position = ScrollPosition()
     /// The content x a zoom scrolls to once the lanes take their new width.
     @State private var pendingScrollX: Double?
+    /// The strip or a control in it has focus: the zoom shortcuts are live.
+    @FocusState private var focused: Bool
 
     #if DEBUG
     /// How many times a strip's body ran, over every ID type; the real-window
@@ -190,6 +197,14 @@ public struct TimelineStrip<ID: Hashable & Sendable>: View {
         )
         .focusable(!snapshot, interactions: .edit)
         .modifier(TimelineStripKeys(tracks: tracks, mapping: mapping, onPickKeyframe: onPickKeyframe))
+        .focused($focused)
+        .background {
+            if focused && !snapshot {
+                TimelineZoomShortcuts { key in
+                    setZoom(key.zoom(from: zoom, frameWidth: fitMapping.frameWidth), anchorX: nil)
+                }
+            }
+        }
         .onKeyPress(phases: [.down, .repeat]) { press in zoomKey(press) }
         .onChange(of: playhead) { _, frame in follow(frame) }
     }
@@ -326,6 +341,18 @@ enum TimelineZoomKey: Equatable, Sendable {
         }
     }
 
+    /// Every character that is a zoom key, each one shortcut.
+    static let characters: [Character] = ["=", "+", "-", "0"]
+
+    /// What the key does, as a menu would name it.
+    var title: String {
+        switch self {
+        case .zoomIn: "Zoom In"
+        case .zoomOut: "Zoom Out"
+        case .fit: "Zoom to Fit"
+        }
+    }
+
     /// The zoom this key asks for from `zoom`, within range.
     func zoom(from zoom: Double, frameWidth: Double) -> Double {
         switch self {
@@ -333,6 +360,28 @@ enum TimelineZoomKey: Equatable, Sendable {
         case .zoomOut: return TimelineZoom.zoomedOut(from: zoom, frameWidth: frameWidth)
         case .fit: return TimelineToolbarControls.fitZoom
         }
+    }
+}
+
+/// The zoom keys as shortcuts, mounted only while the strip has focus:
+/// invisible, out of hit testing, focus and accessibility (the toolbar row's
+/// bar and Fit are the visible controls).
+private struct TimelineZoomShortcuts: View {
+    let onKey: @MainActor (TimelineZoomKey) -> Void
+
+    var body: some View {
+        ZStack {
+            ForEach(TimelineZoomKey.characters, id: \.self) { character in
+                if let key = TimelineZoomKey(character) {
+                    Button(key.title) { onKey(key) }
+                        .keyboardShortcut(KeyEquivalent(character), modifiers: .command)
+                }
+            }
+        }
+        .opacity(0)
+        .allowsHitTesting(false)
+        .focusable(false)
+        .accessibilityHidden(true)
     }
 }
 
