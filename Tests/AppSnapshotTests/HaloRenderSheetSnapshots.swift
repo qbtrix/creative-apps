@@ -25,7 +25,8 @@ import Testing
 
     private func running() throws -> HaloProject {
         var project = try opened()
-        _ = try #require(project.startRender(half))
+        let started = project.startRender(half)
+        _ = try #require(started)
         project.renderProgress(frame: 12)
         return project
     }
