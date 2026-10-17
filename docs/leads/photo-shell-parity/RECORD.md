@@ -2,9 +2,9 @@
 
 Issue: #1502 · Packet: docs/blueprints/photo/features/shell-parity.md
 Run: act-1a14a193a7a-rmz6 (relaunch 2; before: act-1a148875943-9arx, act-1a145e74c6c-9utm) · Session: claude/shell-parity-adjustment-layers-g6jfld (first claude/photo-shell-parity-p2mo9n) · Started: 2026-10-16T18:20Z
-Stage: 4 round 3 review (read-only: rounds spent)
+Stage: done
 Base: d2c4fa212a4b4ea55bc551b783fc1c48520e5fbf (origin/main = origin/dev at relaunch 2, 2026-10-17T13:0xZ)
-Next: critic panel on run 39032323316's photo ui-screens (round 3, review only); relabel the open line:photo findings to gap (both fix rounds spent: round 1 had no Photo fix wave, F-1910 was round 2 per the relaunch brief); post Belt-Contact-Sheet on #1502 from 39032323316.
+Next: nothing for this lead. Belt-Contact-Sheet posted on #1502 (issuecomment-6234662304) from full run 39032323316 (d14e765, success; PS-7 #2006 and F-1910 #2008 in it) with this run's session link. All open line:photo findings are now gaps.
 
 Loop: v2 (no `## Slices` table in the packet or its wave.json). Started after #1302, so the findings queue (rule 10) and 2 fix rounds (rule 11) apply.
 
@@ -31,7 +31,7 @@ Wave 1: PS-1 and PS-2 independent (disjoint files). Wave 2: PS-3 waits on PS-1 (
 | 1b | scoped photo 38971693968 (4347bc74) | red: snapshot step; only gating failure is PhotoWindowStrokeTests (#1674 -> SuiteUI #1295); #1603 passes | not read | CI | – | waits on #1295 | no |
 | 2 | scoped photo 38993910840 (124b118; first run past the snapshot step, after #1716) | journeys ran: 27 Photo journeys red, 25 at the window wait (#1910 + #1902-#1930: the subtitle changes the window's AX title), testFixtureLaunch's viewport measure (#1914), testShell1Empty's switcher centring (#1925, SuiteUI) | photo identifier 14 (baseline 22), no other key | CI (journeys) | #1910 and siblings | F-1910 (this wave) | no |
 
-| 3 | full 39032323316 (d14e765; first full runs with PS-7 #2006 + F-1910 #2008: 39013069150 at 453198a, green overall) | Linux green; macOS report-only red: 10 Photo journeys (was 27) | photo identifier 17 (baseline 22) | CI (journeys), screens | #2015 #2016 #2019 #2021 #2023 #2024 #2025 #2076 (inspector below the fold / slider typing), #1927 #1930 (window 1 pt past the visible frame), #1925 (switcher, SuiteUI) | none: fix rounds spent -> gap | no |
+| 3 | full 39032323316 (d14e765; first full runs with PS-7 #2006 + F-1910 #2008: 39013069150 at 453198a, green overall) | Linux green; macOS report-only red: 10 Photo journeys (was 27) | photo identifier 17 (baseline 22) | CI (journeys), screens | #2015 #2016 #2019 #2021 #2023 #2024 #2025 #2076 (inspector below the fold / slider typing), #1927 #1930 (window 1 pt past the visible frame), #1925 (switcher, SuiteUI) | none: fix rounds spent -> gap; critic panel (clarity, journey, design, layout, controls, audit) filed gaps #2096 #2097 #2098 and added notes to #2021 and #1930 | no |
 
 ## Decisions
 - Relaunch 2 (act-1a14a193a7a-rmz6, 2026-10-17T13:0xZ): main = dev = d2c4fa2 verified; lead branches rebased onto origin/main. PS-7 #2006 and F-1910 #2008 merged 07:15Z; full CI 39013069150 on 453198a is green (Linux), the macOS job is report-only. Fix rounds: round 2 (F-1910) was this feature's last, as the first relaunch brief said ("take #1910 into your remaining round"), so round 3 is review only and every open finding becomes a gap. Screens of 39032323316 show why the rest are red: the tabless inspector puts Curves/Hue below the 680 pt window (photo-curves-dragged.png), and typing into the opacity slider leaves 38% (photo-layer-opacity.png), which also fails PJ-9's "Normal 0%".
