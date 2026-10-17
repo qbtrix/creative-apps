@@ -1,0 +1,2 @@
+utc	stage	event	ref	note
+2026-10-17T06:23Z	0	stage-start	#1941	base fe0f5f17; waits editor-kernel:EK-stroke and EK-chrome unmet (#1933 has no slice done); commented
