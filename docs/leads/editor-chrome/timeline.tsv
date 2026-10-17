@@ -1,0 +1,18 @@
+utc	stage	event	ref	note
+2026-10-16T18:10Z	0	stage-start	#1344	base 132d910484b48c7d79bc92a43c2de55cc12c1dc1
+2026-10-16T18:10Z	0	stopped	#1344	packet superseded by 2026-10-15 one-shell decision; needs rescope after editor-shell-removal
+2026-10-16T18:44Z	0	heartbeat	#1344	resumed on stall nudge; packet still superseded; waiting for re-sliced wave.json
+2026-10-16T19:15Z	0	heartbeat	#1344	second stall nudge; #1536 re-sliced timeline only; editor-chrome still unrescoped
+2026-10-16T19:46Z	0	stopped	#1344	third stall nudge; no rescope on dev; needs-human per contract rule 7
+2026-10-16T20:17Z	0	stopped	#1344	fourth nudge after the rule-7 stop; dev 1d68b228 (#1585 canvas-host and timeline only); editor-chrome still unrescoped, no reply on #1344
+2026-10-16T20:48Z	0	stopped	#1344	fifth nudge; dev 7acb6e81; editor-chrome packet, shell-parity-waves and editor-shell-removal unchanged; no reply on #1344
+2026-10-16T21:19Z	0	stopped	#1344	sixth nudge; dev fb6f9837; packet, shell-parity-waves, editor-shell-removal unchanged; no reply on #1344
+2026-10-16T21:50Z	0	stopped	#1344	seventh nudge; dev 1cbf2d7b; packet, shell-parity-waves, editor-shell-removal unchanged; no reply on #1344
+2026-10-16T22:21Z	0	stopped	#1344	eighth nudge; dev bfb8ce4f; packet, shell-parity-waves, editor-shell-removal unchanged; no reply on #1344
+2026-10-16T22:52Z	0	stopped	#1344	ninth nudge; dev 3bc75afd; packet, shell-parity-waves, editor-shell-removal unchanged; no reply on #1344
+2026-10-16T23:23Z	0	stopped	#1344	tenth nudge; dev 407301e5; packet, shell-parity-waves, editor-shell-removal unchanged; no reply on #1344
+2026-10-16T23:55Z	0	stopped	#1344	eleventh nudge; dev 2be6a100; packet, shell-parity-waves, editor-shell-removal unchanged; no reply on #1344
+2026-10-17T00:26Z	0	stopped	#1344	twelfth nudge; dev 7a090878; packet, shell-parity-waves, editor-shell-removal unchanged; no reply on #1344
+2026-10-17T00:57Z	0	stopped	#1344	thirteenth nudge; dev db0495c4; packet, shell-parity-waves, editor-shell-removal unchanged; no reply on #1344
+2026-10-17T01:29Z	0	stopped	#1344	fourteenth nudge; dev 7d022431; packet, shell-parity-waves, editor-shell-removal unchanged; no reply on #1344
+2026-10-17T02:00Z	0	stopped	#1344	fifteenth nudge; dev 1e42526b; packet, shell-parity-waves, editor-shell-removal unchanged; no reply on #1344
