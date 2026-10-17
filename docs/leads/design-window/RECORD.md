@@ -4,7 +4,7 @@ Issue: #1494 · Packet: docs/blueprints/design/features/design-window.md
 Run: act-1a14a88d756-rnok · Session: claude/design-feature-lead-7saqm8 · Started: 2026-10-17T15:46Z
 Stage: 3 wave 3
 Base: 6ad373ab37fb612a8e7b185f902c263211f1197b
-Next: wave 5 building (#1974 fix + hover editor-body assertion, D0-7a); DW-a critic panel on scoped 39066131869; Belt-Slice-Done DW-a/DW-b wait on a green full Linux job containing #2309 (full 39066112359 on df60ad73 pending)
+Next: DW-a fix round 1 running (fix-batch w49logh4v over #2353-#2365, busy files deferred); #2362/#2365 after S-6, #2353/#2363 after D0-7a; #2356/#2359/#2360 wait on needs-ui #2368/#2366/#2367; wave 5 building; Belt-Slice-Done DW-a/DW-b wait on a green full Linux job
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
