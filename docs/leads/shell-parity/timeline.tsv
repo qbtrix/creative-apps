@@ -1,0 +1,61 @@
+utc	stage	event	ref	note
+2026-10-16T12:00Z	0	stage-start	#1325	base 9e3c5f8
+2026-10-16T12:05Z	2	stage-end	#1325	waves: DS-1+DS-2, DS-3, DS-4
+2026-10-16T12:05Z	3	stage-start	wave 1	DS-1, DS-2
+2026-10-16T12:10Z	3	stage-start	wave 1	DS-4 journey-first added to wave 1 (rule 13)
+2026-10-16T11:56Z	3	pr-merged	#1335	DS-1 DesignToolbarItem
+2026-10-16T11:56Z	3	pr-merged	#1330	DS-4 shell journey, skipped
+2026-10-16T13:20Z	3	fix-round	#1329	DS-2 macOS build fix (not a finding round)
+2026-10-16T13:13Z	3	pr-merged	#1329	DS-2 sidebar action row; DP-a merged
+2026-10-16T13:40Z	3	stage-start	wave 2	DS-3 base 7773dc3
+2026-10-16T13:50Z	3	ci-run	38906785154	scoped design green, contains #1329 (DP-a); audit design identifier 16 = baseline
+2026-10-16T13:52Z	3	review	DP-a	critic panel started
+2026-10-16T14:00Z	3	review	DP-a	clarity/journey/design/layout/controls/oracle: 3 confirmed
+2026-10-16T14:00Z	3	finding-filed	#1385 #1386 #1387	DP-a
+2026-10-16T14:16Z	3	pr-merged	#1391	DS-3 suite window move; DP-b merged
+2026-10-16T14:30Z	3	fix-round	DP-a	round 1: #1385 #1386 #1387
+2026-10-16T14:50Z	3	ci-run	38915938965	full run red (dev-red #1393), diagnosing
+2026-10-16T15:13Z	3	pr-merged	#1403	fix #1385
+2026-10-16T15:23Z	3	pr-merged	#1408	fix #1387
+2026-10-16T15:55Z	3	ci-run	38917492060	scoped design red: 3 journeys from #1391
+2026-10-16T15:58Z	3	finding-filed	#1443 #1444	DP-b
+2026-10-16T16:00Z	3	fix-round	DP-b	round 1: #1443 #1444; #1404 build fix
+2026-10-16T16:20Z	3	pr-opened	#1446	fix #1443 design.properties inside suite.inspector
+2026-10-16T16:30Z	3	pr-opened	#1447	fix #1444 switcher checks last
+2026-10-16T16:45Z	3	pr-opened	#1404	new head c8360c7, build fix
+2026-10-16T16:45Z	3	heartbeat	-	polling: lane merges of #1404 #1446 #1447, then scoped run app=design
+2026-10-16T16:24Z	3	pr-merged	#1404	fix #1386
+2026-10-16T16:17Z	3	pr-merged	#1446 #1447	fix #1443 #1444
+2026-10-16T16:45Z	3	ci-run	38931490731	scoped design red: J3 page count, shell status zoom, shell geometry
+2026-10-16T16:50Z	3	finding-filed	#1451 #1452	DP-a, DP-b
+2026-10-16T16:52Z	3	fix-round	DP-a DP-b	round 2 (last): #1451 #1452
+2026-10-16T17:05Z	3	pr-opened	#1467	fix #1451 page rows get design.page.row.<id>
+2026-10-16T17:15Z	3	pr-opened	#1469	Refs #1452: status zoom read; geometry filed as needs-ui #1456
+2026-10-16T17:15Z	3	heartbeat	-	polling: lane merges of #1467 #1469, then scoped run app=design
+2026-10-16T16:56Z	3	pr-merged	#1467 #1469	round 2 fixes
+2026-10-16T17:20Z	3	heartbeat	38936731510	scoped design run in progress, contains round 2
+2026-10-16T17:40Z	3	ci-run	38936731510	DP-a journeys green; DP-b shell journeys red on SuiteUI geometry #1456
+2026-10-16T17:42Z	3	stopped	#1452	round cap: finding -> gap
+2026-10-16T17:43Z	3	heartbeat	#1325	status posted; waiting on #1456 and #1337
+2026-10-16T18:05Z	3	heartbeat	#1325	replied to supervisor: #1337 first, #1456 SuiteUI; no new scoped design run since 38936731510
+2026-10-16T18:33Z	3	heartbeat	-	no scoped design run since 38936731510; #1337 #1456 open; supervisor 18:13: journeys no longer hold CI
+2026-10-16T19:00Z	3	heartbeat	38949684833	scoped design run queued, contains #1467; #1337 #1456 open
+2026-10-16T19:26Z	3	heartbeat	38949684833	scoped design running: build+Model+snapshot tests green, journeys pending
+2026-10-16T19:48Z	3	ci-run	38949684833	same as 38936731510: DesignJourneyTests green, DesignShellJourneyTests red on #1456 geometry; run failed
+2026-10-16T19:49Z	3	heartbeat	-	lead wall clock near 8 h; RECORD Next written for a resume
+2026-10-16T20:20Z	4	ci-run	38956034097	successful scoped design, contains #1467; DP-a green; shell journeys red (#1456)
+2026-10-16T20:21Z	4	slice-done	DP-a	38956034097
+2026-10-16T20:22Z	4	stopped	#1572 #1573	CI findings -> gap (round cap)
+2026-10-16T20:24Z	4	pr-opened	#1610	DS-5 feature-done
+2026-10-16T20:26Z	4	pr-merged	#1610	DS-5 feature-done
+2026-10-16T20:53Z	4	heartbeat	38960992806	scoped design at 58ac7ac9 (has #1337, not #1610): DesignJourneyTests green, shell journeys red only on #1456 geometry; waiting for a successful run containing #1610
+2026-10-16T21:25Z	4	ci-run	38965923292	full run successful, contains #1610, but macOS scripts/ci failed so journeys were skipped; not usable for DP-b
+2026-10-16T21:26Z	4	fix-round	#1561	gap from editor-in-window: switcher check relaxed to title..trailing (fixer started)
+2026-10-16T21:35Z	4	pr-opened	#1655	Fixes gap #1561: switcher between title and trailing buttons
+2026-10-16T22:02Z	4	pr-merged	#1655	Fixes gap #1561
+2026-10-16T22:03Z	4	heartbeat	#1325	no scoped design run with #1610; asked supervisor to dispatch app=design
+2026-10-16T22:35Z	4	ci-run	38971702274	scoped design successful, contains #1610 #1655; DesignJourneyTests green; shell journeys red only on #1456 (5 lines)
+2026-10-16T22:36Z	4	slice-done	DP-b	38971702274 gaps #1452 #1572 #1573 #1617 #1618
+2026-10-16T22:37Z	4	stage-end	#1325	Belt-Contact-Sheet posted
+2026-10-16T22:37Z	done	stopped	#1325	feature done
+2026-10-17T06:17Z	done	stopped	#1877 #1878	CI findings relabelled gap (round cap; SuiteUI #1456); branch recut onto main 0e3c08e for Belt
