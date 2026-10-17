@@ -68,3 +68,4 @@ utc	stage	event	ref	note
 2026-10-17T21:24Z	5	heartbeat	#2348	lane macOS build 39069788906 on 3e0dd092 running
 2026-10-17T21:46:47Z	fix-round-2	merged	#2348	fc53a29e; #2233 #2256 -> gap
 2026-10-17T22:08:29Z	done-check	poll	39072812111	pending; scoped halo 39072520640 running
+2026-10-17T22:30Z	done-check	scoped halo 39072520640 green incl. #2345 note journey; full CI 39072812111 cancelled; watching 39074726717	39074726717	heartbeat
