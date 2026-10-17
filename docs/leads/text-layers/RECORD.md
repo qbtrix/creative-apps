@@ -1,9 +1,9 @@
 # text-layers lead record
 
 Issue: #1509 · Packet: docs/blueprints/halo/features/text-layers.md
-Run: act-1a1487bf880-qmey (line lead for #1035, #1509, #1505; earlier run act-1a1429c87eb-3ecm planned) · Session: claude/halo-feature-lead-run-j7dyv1 · Started: 2026-10-17T06:05Z
+Run: act-1a149b53ef6-67v7 (line lead for #1035, #1509, #1505; earlier runs act-1a1487bf880-qmey, act-1a1429c87eb-3ecm) · Session: claude/feature-lead-playbook-l4ybf6 · Started: 2026-10-17T06:05Z
 Stage: 3 wave 1
-Base: b8dfb4f0ed86c0db148446c4b4e95557c2f440d0 (origin/dev at 2026-10-17T06:15Z)
+Base: 042423165693f2f1d65d2ece90eb0d5bcb910554 (origin/dev at 2026-10-17T11:56Z)
 Next: wave 1 running (TX-1, TX-2, TX-3, TX-4 beside render-out's RO-1, RO-2, RO-3); when the lane has merged them, run the check and start wave 2 (TX-5, TX-6 beside RO-4, RO-5)
 
 ## Tasks
