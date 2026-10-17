@@ -54,3 +54,4 @@ Next: wave 2 (CH-2, CH-6, CH-8) once suiteui open findings are 5 or fewer (after
 - 2026-10-17T14:29Z heartbeat: wave 2 still held; #2048 is building on macOS (39040114342).
 
 - 2026-10-17T14:55Z heartbeat: wave 2 held; #2048 is green and waiting for the lane's next sweep.
+- 15:18 heartbeat: wave 2 (CH-2, CH-6, CH-8) is held on timeline #2048, which the lane marks eligible but has not merged (the findings gate: 7 open suiteui findings).
