@@ -42,6 +42,34 @@ import Testing
         #expect(children.filter(\.picked).map(\.frame) == [12])
     }
 
+    @Test func aLaneValueNamesTheFirstTenKeysThenCountsTheRest() {
+        let many = Self.track("a", keys: Array(0..<12))
+        #expect(TimelineLaneSpeech.value(of: many) == "12 keyframes at 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, and 2 more")
+        let ten = Self.track("a", keys: Array(0..<10))
+        #expect(TimelineLaneSpeech.value(of: ten) == "10 keyframes at 0, 1, 2, 3, 4, 5, 6, 7, 8, 9")
+    }
+
+    @Test func onlyKeysInTheVisibleXPlusOnePastEachEdgeGetChildren() {
+        // A key every 10 frames over 0...200 at 2 pt a frame; the view shows x 100...200 (frames 50...100).
+        let long = Self.track("a", keys: Array(stride(from: 0, through: 200, by: 10)))
+        let mapping = FrameMapping(duration: 200, frameWidth: 2)
+        let shown = TimelineLaneSpeech.children(of: long, visibleX: 100...200, mapping: mapping)
+        #expect(shown.map(\.frame) == Array(stride(from: 40, through: 110, by: 10)))
+        #expect(TimelineLaneSpeech.children(of: long, visibleX: nil, mapping: mapping).count == 21)
+        // A view between two keys keeps both neighbours.
+        let sparse = Self.track("b", keys: [0, 100])
+        let between = TimelineLaneSpeech.children(
+            of: sparse, visibleX: 30...60, mapping: FrameMapping(duration: 100, frameWidth: 1))
+        #expect(between.map(\.frame) == [0, 100])
+    }
+
+    @Test func identifiersAppearOnlyUnderAPrefix() {
+        #expect(TimelineLaneSpeech.identifier(nil, "lane", "ball") == nil)
+        #expect(TimelineLaneSpeech.identifier("suite.timeline", "lane", "ball") == "suite.timeline.lane.ball")
+        #expect(TimelineLaneSpeech.identifier("suite.timeline", "key", "ball", frame: 12) == "suite.timeline.key.ball.12")
+        #expect(TimelineLaneSpeech.identifier("suite.timeline", "name", "ball") == "suite.timeline.name.ball")
+    }
+
     @Test func aKeyChildsDefaultActionPicksItAlone() {
         var calls: [String] = []
         let picker = TimelineKeyPicker()
