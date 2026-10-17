@@ -64,17 +64,21 @@ final class DesignShellJourneyTests: XCTestCase {
         drawOnEdge(design, shot: "shell-handles")
         expectGeometry(design)
 
-        // DS-J4: pick it in Layers, then undo it from the toolbar.
-        let rows = sidebar.descendants(matching: .any).matching(NSPredicate(format: "identifier BEGINSWITH 'design.layer.'"))
-        XCTAssert(rows.firstMatch.waitForExistence(timeout: 5), "no Layers row for the rectangle")
-        rows.firstMatch.coordinate(withNormalizedOffset: CGVector(dx: 0.3, dy: 0.5)).click()
+        // DS-J4: pick it in Layers, then undo it from the toolbar. New File seeds the
+        // Desktop frame (node-1), so the rectangle drawn in it is node-2, and Undo
+        // leaves Desktop's row: the check is on the rectangle's own row (#2075).
+        let layers = sidebar.descendants(matching: .any)
+        let rectangle = layers["design.layer.node-2"]
+        XCTAssert(rectangle.waitForExistence(timeout: 5), "no Layers row for the rectangle (design.layer.node-2)")
+        rectangle.coordinate(withNormalizedOffset: CGVector(dx: 0.3, dy: 0.5)).click()
         let inspector = design.element("suite.inspector")
         XCTAssert(inspector.descendants(matching: .any)["design.properties"].waitForExistence(timeout: 5), "no Properties in the inspector")
         XCTAssert(inspector.descendants(matching: .any)["design.fill"].exists, "the inspector shows no rectangle's Fill")
         let undo = design.element("design.bar.undo")
         XCTAssertEqual(undo.label, "Undo Add Rectangle", "the toolbar's Undo")
         undo.click()
-        XCTAssertFalse(rows.firstMatch.waitForExistence(timeout: 2), "Undo left the rectangle in Layers")
+        XCTAssert(rectangle.waitForNonExistence(timeout: 5), "Undo left the rectangle in Layers")
+        XCTAssert(layers["design.layer.node-1"].exists, "Undo took the Desktop frame out of Layers too")
         design.shot("shell-undone")
         expectSwitcher(design)
     }
