@@ -2,7 +2,8 @@
 // sheet: per mark (the suite's, then the five apps'), the .icon at each size the
 // Dock and Finder use (16 and 32 draw the small-size art), the .glyph, the .line
 // at the switcher's size and the .line in a sidebar-style Label. Nothing on it
-// is a control.
+// is a control, so the page draws no scrollers either: a legacy scroller
+// reads as an unnamed button (#1781; as ThumbnailGrid, #1368).
 import SuiteModel
 import SwiftUI
 
@@ -36,5 +37,6 @@ private struct GalleryAppMarksPage: View {
             .padding(SuiteSpacing.m)
             .frame(maxWidth: .infinity, alignment: .leading)
         }
+        .scrollIndicators(.never)
     }
 }

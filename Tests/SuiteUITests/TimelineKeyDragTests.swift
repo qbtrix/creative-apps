@@ -96,6 +96,19 @@ import Testing
         #expect(log.calls == ["move 3", "move -3", "end"])
     }
 
+    /// #1796: the release's sample can sit past the last change; its step is sent before the end.
+    @Test func theReleaseSampleMovesBeforeTheEnd() throws {
+        let log = Log()
+        var drag = try #require(begin(40, log: log))
+        _ = drag.move(dx: 30, actions: log.actions)
+        let click = drag.release(atDX: 50, actions: log.actions)
+        #expect(!click)
+        #expect(log.calls == ["move 3", "move 2", "end"])
+        #expect(drag.frame == 45)
+        var still = try #require(begin(40, log: log))
+        #expect(still.release(atDX: 0, actions: log.actions), "a still press on a picked key is a click")
+    }
+
     @Test func aClickOnAPickedKeyPicksItOnRelease() throws {
         let log = Log()
         var drag = try #require(begin(40, log: log))
