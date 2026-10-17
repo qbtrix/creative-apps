@@ -1,0 +1,7 @@
+utc	stage	event	ref	note
+2026-10-16T21:27Z	2	stage-start		plan written from packet and origin/dev
+2026-10-16T21:27Z	2	stage-end		waiting on Swift toolchain for scripts/ci
+2026-10-16T21:53Z	2	heartbeat		resumed from Belt nudge; no swift toolchain yet, wave 1 blocked
+2026-10-16T22:56Z	2	heartbeat		still no swift toolchain; wave 1 blocked; awaiting supervisor
+2026-10-16T23:26Z	2	heartbeat		no swift toolchain yet; wave 1 blocked; awaiting supervisor
+2026-10-16T23:57Z	2	heartbeat		no swift toolchain yet; wave 1 blocked; awaiting supervisor
