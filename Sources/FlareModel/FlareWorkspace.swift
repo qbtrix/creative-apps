@@ -7,7 +7,8 @@
 // saying why (FlareToolsTests checks this). The easing editor's segment
 // selection and drag serial live here too (FlareEasing.swift uses them); a
 // change of layer selection drops the segment. Stored state is `internal(set)`
-// so each area's extension file (docs/blueprints/flare.md, section 2) can set it.
+// so each area's extension file (docs/blueprints/flare.md, section 2) can set it; that includes the paint and
+// timeline-edit state (inspector-timeline), cleared on load like the rest of the per-document state.
 import FlareCore
 
 /// The drawing tools on Flare's tool palette.
@@ -90,6 +91,13 @@ public struct FlareWorkspace: Sendable, Equatable {
     var propertyScrubSerial = 0
     /// Part of a guide drag's coalesce key; bumped to end the drag.
     var guideDragSerial = 0
+    /// Why the last fill or stroke edit was refused (FlarePaint.swift).
+    public internal(set) var paintError: String?
+    /// The timeline's selected keys, why the last timeline edit was refused, and the key drag's coalesce serial,
+    /// bumped to end the drag (FlareTimelineEdit.swift).
+    public internal(set) var selectedKeys: [KeyRef] = []
+    public internal(set) var timelineError: String?
+    public internal(set) var keyDragSerial = 0
 
     public init(services: FlareServices = .live) {
         self.services = services
@@ -126,6 +134,7 @@ public struct FlareWorkspace: Sendable, Equatable {
         selectedLayerID = nil
         easingSelection = nil
         layerError = nil
+        (paintError, selectedKeys, timelineError, keyDragSerial) = (nil, [], nil, 0)
         cancelDrag(); selection = []; currentFrame = 0
         (isPlaying, playClock, editingSymbolID, symbolReturnFrame) = (false, 0, nil, 0)
         (machineID, machinePreview, machineError) = (nil, nil, nil)
@@ -255,6 +264,8 @@ public struct FlareWorkspace: Sendable, Equatable {
             && lhs.editingSymbolID == rhs.editingSymbolID && lhs.symbolReturnFrame == rhs.symbolReturnFrame
         let panels = lhs.machineID == rhs.machineID && lhs.machinePreview == rhs.machinePreview
             && lhs.machineError == rhs.machineError && lhs.exportState == rhs.exportState && lhs.assist == rhs.assist
+            && lhs.paintError == rhs.paintError && lhs.selectedKeys == rhs.selectedKeys
+            && lhs.timelineError == rhs.timelineError
         let files = lhs.fileName == rhs.fileName && lhs.isDirty == rhs.isDirty && lhs.saveError == rhs.saveError
             && lhs.loadState == rhs.loadState && lhs.recent == rhs.recent
         return editing && animating && panels && files
