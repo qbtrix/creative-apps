@@ -3,7 +3,8 @@
 // geometry, "inspector-hidden", "switcher"; Dark "launch-dark", the geometry, "switcher-dark". Numbers are SuiteUI tokens
 // (this bundle doesn't link SuiteUI). `.principal` sits after the title, not centred: step 6 bounds the switcher by Open
 // and the trailing actions (#1561: Design too). Column frames come from `regionFrame(_:)` (Journey+Geometry.swift): a
-// column's own element doesn't span its column.
+// column's own element doesn't span its column. The artboard is `suite.canvas.artboard`, the document's rectangle at
+// the current zoom; `suite.canvas` is the scrollable area around it (#1777: it read 0.92, the viewport's ratio).
 import XCTest
 
 final class SuiteEditorWindowJourneys: XCTestCase {
@@ -104,8 +105,8 @@ final class SuiteEditorWindowJourneys: XCTestCase {
             controls.first { $0.id == "suite.gallery.page.delete" }?.reason, "A document keeps at least one page.",
             "Delete Page's tooltip")
 
-        let artboard = gallery.element("suite.canvas")
-        XCTAssert(artboard.waitForExistence(timeout: 5), "no artboard (suite.canvas)")
+        let artboard = gallery.element("suite.canvas.artboard")
+        XCTAssert(artboard.waitForExistence(timeout: 5), "no artboard (suite.canvas.artboard)")
         let ratio = Double(artboard.frame.width / max(artboard.frame.height, 1))
         XCTAssertEqual(ratio, 1.6, accuracy: 0.02, "not a 1600 × 1000 artboard")
         let viewport = gallery.regionFrame("suite.viewport") ?? .zero, palette = gallery.element("suite.tools").frame
@@ -136,7 +137,7 @@ final class SuiteEditorWindowJourneys: XCTestCase {
 
         let window = rect(gallery.app.windows.firstMatch.frame)
         let viewport = rect(gallery.regionFrame("suite.viewport") ?? .zero)
-        let artboard = rect(gallery.element("suite.canvas").frame)
+        let artboard = rect(gallery.element("suite.canvas.artboard").frame)
         let grow = Self.anchorHit / 2
         let bands = [
             "palette": rect(gallery.element("suite.tools").frame),
