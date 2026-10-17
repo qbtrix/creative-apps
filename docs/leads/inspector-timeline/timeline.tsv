@@ -14,3 +14,4 @@
 2026-10-17T04:07Z	heartbeat	-	#1515	stage 0: waiting on supervisor ruling for #1365; dev bd11faf7
 2026-10-17T13:39Z	stage	-	#1515	dependency met (draw-key-save built, #1738 merged); stage 1 orient; dev d2c4fa2
 2026-10-17T13:42:44Z	stage	2 plan written; wave 1 IT-0, IT-9a
+2026-10-17T14:07:43Z	heartbeat	wave 1 building: #2100 (IT-0), #2101 (IT-9a) open
