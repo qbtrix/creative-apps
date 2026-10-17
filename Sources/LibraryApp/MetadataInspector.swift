@@ -4,7 +4,8 @@
 // label dots. A field the photos differ in shows "Mixed". Values in, closures
 // out; LibraryCatalog applies each edit to every selected photo. Each control
 // carries its MetadataInspectorID. Each star and dot gets a 20 pt square hit
-// frame (SuiteSize.iconButtonHit, docs/design.md's floor), edge to edge.
+// frame (SuiteSize.iconButtonHit, docs/design.md's floor), edge to edge, and
+// SuiteMarkStyle's hover and press fill behind it.
 // "Mixed" stays one unbroken line: beside the marks when the row fits it,
 // else above them (ViewThatFits), never squeezed mid-word (#1719). No Label
 // draws circle.slash, since xmark is the grid's Rejected badge (#1721).
@@ -41,7 +42,7 @@ struct MetadataInspector: View {
                     Image(systemName: star <= (metadata.rating.shared ?? 0) ? "star.fill" : "star")
                         .modifier(MarkHit())
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(SuiteMarkStyle())
                 .help("Rate \(title); click the current rating to clear it")
                 .accessibilityLabel(title)
                 .accessibilityIdentifier(MetadataInspectorID.star(star))
@@ -66,7 +67,7 @@ struct MetadataInspector: View {
                     }
                     .modifier(MarkHit())
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(SuiteMarkStyle())
                 .help(label.map { "Label \($0.rawValue)" } ?? "No Label")
                 .accessibilityLabel(label?.rawValue ?? "No Label")
                 .accessibilityIdentifier(MetadataInspectorID.label(label))

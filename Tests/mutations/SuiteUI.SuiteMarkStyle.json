@@ -1,0 +1,4 @@
+[
+  {"label":"a pressed mark stays dark, so a click gives no feedback","file":"Sources/SuiteUI/SuiteMarkStyle.swift","find":"enabled && (hovering || pressed)","replace":"enabled && hovering","tests":"SuiteMarkStyleTests"},
+  {"label":"a disabled mark still lights on hover","file":"Sources/SuiteUI/SuiteMarkStyle.swift","find":"enabled && (hovering || pressed)","replace":"hovering || pressed","tests":"SuiteMarkStyleTests"}
+]
