@@ -31,3 +31,4 @@ utc	stage	event	ref	note
 2026-10-17T15:16:01Z	3	heartbeat	lane	TX-7 #2132 waiting on its lane macOS build; #2131 (6dcb79e5) likely fixes #2099 (H-J22 launch crash)
 2026-10-17T15:37:19Z	3	heartbeat	#2132	TX-7 macOS build run 39043788656 dispatched 15:09; waiting on the lane
 2026-10-17T15:49:46Z	4	pr-merged	#2132	TX-7 feature-done merged dd7ec767; full CI 39045632781 + scoped halo 39045670179 dispatched
+2026-10-17T15:59:06Z	4	check	39045670179	scoped halo run on dd7ec767 still in progress
