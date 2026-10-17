@@ -33,3 +33,7 @@ utc	stage	event	ref	note
 2026-10-17T15:48:45Z	3	pr-opened	#2143	RO-7 HaloMovieWriter, head 4e27ea0a
 2026-10-17T15:50:00Z	3	check	#2112	Linux check 39046120913 ok on d34cb7f6; macOS build 39046677063 dispatched
 2026-10-17T15:59:02Z	3	pr-merged	#2135	RO-6 PNG writer merged d6187654
+2026-10-17T16:18Z	3	merged	RO-4 #2112	5e9650d4
+2026-10-17T16:18Z	3	merged	RO-7 #2143	0b50c70f
+2026-10-17T16:18Z	3	spawned	RO-9 builder	halo/ro9-render-frame-journey
+2026-10-17T16:18Z	4	spawned	RO-8 builder	halo/ro8-render-sheet
