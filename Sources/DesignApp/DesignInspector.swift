@@ -3,13 +3,14 @@
 // layer shows its header (name, then kind unless the name says it, then size),
 // then Align (DesignAlignBar), then Layer (Hidden and Locked checkboxes), Frame (X, Y, W and H as scrub
 // fields) and Fill (the color well; a text layer's is its text color, a group
-// has none), then for a text layer its Text section (DesignInspectorText). A
+// has none), then Text (DesignInspectorText, disabled on a layer that isn't text). A
 // locked layer, or one inside a locked group, can't be edited, so Frame and
 // Fill are disabled and a line says why. With only a page selected it shows
 // DesignInspectorPage. With several layers selected (D0-5c) it shows "<n> Layers",
 // Align with Distribute, then Frame and Fill: a row whose value every selected
 // layer shares edits it on all of them (`.setStyle`), and one whose values differ
-// reads "Mixed" as plain text (a mixed scrub field is needs-ui #2148). Every
+// reads "Mixed" as plain text (a mixed scrub field is needs-ui #2148), then the
+// Text section when any of them is a text layer. Every
 // control's help comes from the Model, and each carries its DesignControlID and
 // lists itself in `suite.controls`. Values in, intents out; the model clamps and
 // refuses what it must. Opacity, Corners and Stroke, the hint and the frame
@@ -32,6 +33,8 @@ struct DesignInspector: View {
                         model: model, node: node, lockHelp: model.lockHelp(node.id), alignHelp: model.alignHelps,
                         perform: perform
                     ).id(node.id)
+                    // Every layer shows the Text rows; on one that isn't text they are disabled and say why.
+                    DesignInspectorText(model: model, perform: perform).id(node.id)
                 } else if let page = model.selectedPage {
                     DesignPageProperties(page: page).id(page.id)
                 }
@@ -138,7 +141,6 @@ private struct DesignNodeProperties: View {
                         id: DesignControlID.inspectorFill, enabled: lockHelp == nil, reason: lockHelp, identifies: false)
                 }
             }
-            if node.kind == .text { DesignInspectorText() }
         }
         .coordinateSpace(.named(DesignStyleHint.space))
     }
@@ -184,6 +186,9 @@ private struct DesignSeveralProperties: View {
                         InspectorRow("Fill") { mixed(fillHelp) }
                     }
                 }
+            }
+            if model.selectedNodes.contains(where: { $0.kind == .text }) {
+                DesignInspectorText(model: model, perform: perform)
             }
         }
     }
