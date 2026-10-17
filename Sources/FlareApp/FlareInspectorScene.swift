@@ -46,7 +46,9 @@ struct FlareInspectorScene: View {
                     help: timingHelp
                 ) { perform(.inspector(.setSceneTiming(fps: scene.fps, durationFrames: Int($0.rounded())))) }
                 PresetGrid(
-                    options: CanvasPreset.all.map { InspectorOption(id: $0.name, title: $0.name) },
+                    options: CanvasPreset.all.map {
+                        InspectorOption(id: $0.name, title: $0.name, identifier: "flare.inspector.scene.preset.\($0.name)")
+                    },
                     selected: CanvasPreset.all.first { $0.width == scene.width && $0.height == scene.height }?.name,
                     columns: 2
                 ) { name in

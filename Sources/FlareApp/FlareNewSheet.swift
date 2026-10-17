@@ -53,8 +53,9 @@ struct FlareNewAnimationSheet: View {
         VStack(alignment: .leading, spacing: SuiteSpacing.l) {
             Text("New Animation").font(SuiteFont.title)
             PresetGrid(
-                options: CanvasPreset.all.map { InspectorOption(id: $0.name, title: $0.name) }
-                    + [InspectorOption(id: Self.custom, title: Self.custom)],
+                options: (CanvasPreset.all.map(\.name) + [Self.custom]).map {
+                    InspectorOption(id: $0, title: $0, identifier: "flare.new.preset.\($0)")
+                },
                 selected: spec.preset?.name ?? Self.custom, columns: 3, onSelect: pick)
             Form {
                 TextField("Width", text: Binding(get: { widthText }, set: { setWidth($0) }))

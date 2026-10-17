@@ -202,14 +202,17 @@ public struct InspectorStepperRow: View {
     public var body: some View { row }
 }
 
-/// One choice in an InspectorPickerRow.
+/// One choice in an InspectorPickerRow or a PresetGrid. `identifier` is the
+/// accessibility identifier a PresetGrid gives this option's button (#1148).
 public struct InspectorOption<ID: Hashable & Sendable>: Identifiable, Hashable, Sendable {
     public let id: ID
     public let title: String
+    public let identifier: String?
 
-    public init(id: ID, title: String) {
+    public init(id: ID, title: String, identifier: String? = nil) {
         self.id = id
         self.title = title
+        self.identifier = identifier
     }
 }
 
