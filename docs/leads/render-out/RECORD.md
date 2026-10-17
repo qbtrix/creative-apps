@@ -28,6 +28,7 @@ Waves (combined with text-layers, contract rule 19; checked against dev b8dfb4f0
 | – | – | – | – | – | – | – | – |
 
 ## Decisions
+- 2026-10-17T13:55Z Between-wave check: the open Halo `CI finding:` issues (#1574, #1696-#1705, #2077-#2081) are all a launch crash, SuiteKernel.framework missing from AfterGlow.app (scripts/bundle-apps, from #1992). Filed #2099 for the supervisor. They are not findings of this feature (no Feature: line, not in its files), so the 5-open pause does not apply.
 - 2026-10-17T13:53Z RO-3 (#2066) plans through services.compositionRendering.plan, not HaloRenderRules, so it stayed independent of RO-1; it adds internal `renderRunning` for RO-4.
 - 2026-10-17T11:56Z rule 20: HaloModel links SuiteModel (Package.swift gives every <X>Model the SuiteModel dependency), so RO-3's renderOutputName and RO-1's file-name sanitizing call SuiteModel's UniqueFileNames.name(_:extension:among:) (#1987) instead of a Halo copy. The PNG sequence's `_0001` frame suffix stays Halo-local.
 - 2026-10-17T06:05Z: line lead for #1035 (done, supervisor decision 06:06Z), #1509 and #1505 in one run. Waits met: #1035 done, #333 closed (#877 merged). PRs base `dev` (the lane merges into dev and retargets `main`).
