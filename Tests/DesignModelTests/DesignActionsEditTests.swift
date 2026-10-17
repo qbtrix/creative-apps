@@ -1,9 +1,8 @@
 // DesignActionsEditTests.swift: the clipboard, Move Layer and style actions of
 // DesignActions+Edit.swift on DesignFixtures.cards. Each is one named step and a refusal records
 // none; Paste lands in the selected frame (#415); on `.live` one-layer frame, fill and corner
-// radius rows keep today's methods while several layers are refused with "Style editing isn't
-// built yet."; a run of one row is one step. Ends with walk MJ4. The `.live` expectations hold
-// whether its slots are NotBuilt or the Live stubs that forward to it. Runs on Linux and macOS.
+// radius rows keep today's methods while several layers go through LiveStyling (DesignStyleTests);
+// a run of one row is one step. Ends with walk MJ4. Runs on Linux and macOS.
 @testable import DesignModel
 import Testing
 
@@ -93,7 +92,7 @@ private func stepNames(_ workspace: DesignWorkspace) -> [String] { workspace.his
         for property in [DesignStyleProperty.frame, .fill, .cornerRadius] {
             #expect(workspace.styleHelp(property) == nil, "\(property)")
         }
-        #expect(workspace.styleHelp(.opacity) == "Style editing isn't built yet.")
+        #expect(workspace.styleHelp(.opacity) == nil)
         try workspace.setStyle(.frame(.x, 300))
         try workspace.setStyle(.fill(.black))
         try workspace.setStyle(.cornerRadius(12))
@@ -116,10 +115,10 @@ private func stepNames(_ workspace: DesignWorkspace) -> [String] { workspace.his
         #expect(stepNames(fake) == ["Change Frame"])
 
         var live = open(.live, selecting: [ID.a, ID.b])
-        let before = live
-        #expect(live.styleHelp(.frame) == "Style editing isn't built yet.")
-        #expect(throws: DesignRefusal.notBuilt("Style editing")) { try live.setStyle(.frame(.x, 300)) }
-        #expect(live == before)
+        #expect(live.styleHelp(.frame) == nil)
+        try live.setStyle(.frame(.x, 300))
+        #expect(node(live, ID.a)?.frame.x == 300 && node(live, ID.b)?.frame.x == 300)
+        #expect(stepNames(live) == ["Change Frame"])
     }
 
     @Test func aRunOfOpacityChangesIsOneStep() throws {

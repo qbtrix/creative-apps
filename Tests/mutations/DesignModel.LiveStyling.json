@@ -1,23 +1,30 @@
 [
   {
-    "label": "the stub names the wrong feature",
+    "label": "the text size clamp's floor is dropped, so size 0 stays 0",
     "file": "Sources/DesignModel/Live/LiveStyling.swift",
-    "find": "let base = NotBuilt(\"Style editing\")",
-    "replace": "let base = NotBuilt(\"Styling\")",
-    "tests": "DesignLiveStubTests"
+    "find": "clamped.size = Swift.max(1, Swift.min(style.size, 1000))",
+    "replace": "clamped.size = Swift.min(style.size, 1000)",
+    "tests": "DesignStyleTests"
   },
   {
-    "label": "a style help answers nil, so the row looks enabled",
+    "label": "the text-kind filter is dropped, so A takes a text style",
     "file": "Sources/DesignModel/Live/LiveStyling.swift",
-    "find": "base.styleHelp(property, ids, on: page)",
-    "replace": "nil",
-    "tests": "DesignLiveStubTests"
+    "find": "case .text: kind == .text",
+    "replace": "case .text: true",
+    "tests": "DesignStyleTests"
   },
   {
-    "label": "setStroke acts instead of refusing",
+    "label": "the locked check is skipped, so a locked layer is styled",
     "file": "Sources/DesignModel/Live/LiveStyling.swift",
-    "find": "try base.setStroke(stroke, ids, on: page)",
-    "replace": "DesignEdit(name: \"Stroke\", nodes: page.nodes, selection: ids)",
-    "tests": "DesignLiveStubTests"
+    "find": "if let node = selected.first(where: { inTree($0.id, on: page, \\.isLocked) }) { throw .locked(node.name) }",
+    "replace": "",
+    "tests": "DesignStyleTests"
+  },
+  {
+    "label": "the run key is built per call, so a run of five values is five steps",
+    "file": "Sources/DesignModel/Live/LiveStyling.swift",
+    "find": "coalescingKey: DesignEdit.runKey(base, ids))",
+    "replace": "coalescingKey: DesignEdit.runKey(\"\\(base)\\(nodes.hashValue)\", ids))",
+    "tests": "DesignStyleTests"
   }
 ]
