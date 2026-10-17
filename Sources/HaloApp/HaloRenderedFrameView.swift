@@ -55,7 +55,7 @@ struct HaloRenderedImage: View, Equatable {
                     if let note {
                         HaloRenderedNote(text: note)
                             .padding(.top, SuiteSpacing.xs)
-                            .frame(height: 0, alignment: .top)
+                            .frame(height: .zero, alignment: .top)
                     }
                 }
                 .frame(maxWidth: artboard.width, maxHeight: artboard.height)
