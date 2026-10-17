@@ -78,5 +78,5 @@ utc	stage	event	ref	note
 2026-10-16T23:56Z	5	heartbeat	ci	full run 1215 cancelled by newer merge; waiting
 2026-10-17T00:22Z	5	heartbeat	ci	full run 1236 pending; earlier full runs cancelled by merges. home and switching features already build on SuiteModel
 2026-10-17T00:48Z	5	heartbeat	ci	full run 1249 cancelled by newer merge; waiting
-2026-10-17T01:18:43Z	ci-run	full 38988895145 on 7ac0a317 success; Belt-Contact-Sheet posted on #1332
-2026-10-17T01:18:43Z	stopped	Stage done
+2026-10-17T01:18Z	5	ci-run	ci	full run 38988895145 (#1256) on 7ac0a317 success, main promoted; Belt-Contact-Sheet posted on #1332
+2026-10-17T01:18Z	done	stopped	done	feature finished
