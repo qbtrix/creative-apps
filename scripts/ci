@@ -60,7 +60,7 @@
 # waves.md without writing it (the generated files are written only on dev),
 # and Tests/generated tests scripts/c4-assemble and scripts/waves on fixtures.
 #
-# The fixture tests: Tests/contact_sheet, audit_lower, test_died, jetsam,
+# The fixture tests: Tests/contact_sheet, audit_lower, test_died, ci_findings, jetsam,
 # test_scope and bump_core test the scripts of the same names (some need jq).
 #
 # The journey quarantine check runs Tests/quarantine, then scripts/quarantine
@@ -314,6 +314,8 @@ echo "== audit lower (Tests/audit_lower)"
 bash Tests/audit_lower/test_audit_lower.sh || fail "audit lower: scripts/audit-lower broke its decision tests"
 echo "== test died (Tests/test_died)"
 bash Tests/test_died/test_test_died.sh || fail "test died: scripts/test-died broke its fixture test"
+echo "== ci findings (Tests/ci_findings)"
+bash Tests/ci_findings/test_ci_findings.sh || fail "ci findings: scripts/ci-findings broke its stub-gh tests"
 echo "== jetsam summary (Tests/jetsam)"
 bash Tests/jetsam/test_jetsam_summary.sh || fail "jetsam summary: scripts/jetsam-summary broke its fixture test"
 echo "== test scope (Tests/test_scope)"
