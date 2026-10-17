@@ -1,11 +1,12 @@
 // RenderBudgetCanvasHostTests.swift: what the canvas host costs in a real
 // 1280 x 820 window (canvas-host packet, Quality tests). A 120-sample drag
 // across the `canvas-host` page runs at most 1 window body (the mouse-up
-// commit); one switch on the `settings-rendering` page runs at most 2 (the
-// menu's host and the status bar). CH-2 writes both disabled over the
-// placeholder pages; CH-5 enables them once CH-3's host and CH-4's menu are
-// on the pages. Nested in BodyCountSuites: it reads a global body counter.
-// macOS only.
+// commit), reaches the page's delegate as 120 samples and commits once; one
+// switch on the `settings-rendering` page runs at most 2 (the menu's host and
+// the status bar). CH-5 enables the drag on CH-3's host. The switch stays
+// disabled: its items exist only while the pull-down's menu is open, so the
+// harness finds no element to press (SJ28 drives it). Nested in
+// BodyCountSuites: it reads a global body counter. macOS only.
 import AppKit
 import SwiftUI
 import Testing
@@ -14,19 +15,35 @@ import Testing
 
 extension BodyCountSuites {
     @MainActor @Suite struct RenderBudgetCanvasHostTests {
-        @Test(.disabled("waits on CH-5"), .timeLimit(.minutes(2))) func dragRunsNoBodies() async throws {
-            let w = RenderBudgetWindow(CanvasHostBudgetHost { CanvasHostPage() })
+        @Test(.timeLimit(.minutes(2))) func dragRunsNoBodies() async throws {
+            let log = CanvasHostLog()
+            let w = RenderBudgetWindow(CanvasHostBudgetHost { CanvasHostPage(log: log) })
             defer { w.close() }
             try await w.settle(600)
-            let box = w.host.convert(w.host.bounds, to: nil)
-            let start = CGPoint(x: box.midX - 300, y: box.midY)
-            let step = try await w.measure("canvas host drag, 120 samples", bodies: { CanvasHostBudgetHost<CanvasHostPage>.bodyRuns }) {
+            // The host's frame when its accessibility element is found, else the window's: either way its middle
+            // is on the centred artboard.
+            let canvas = await w.element(RenderingControlID.canvas) ?? w.host.convert(w.host.bounds, to: nil)
+            let start = CGPoint(x: canvas.midX - 300, y: canvas.midY)
+            let bodies = { () -> Int? in
+                #if DEBUG
+                return CanvasHostBudgetHost<CanvasHostPage>.bodyRuns + CanvasHostPage.bodyRuns
+                #else
+                return nil
+                #endif
+            }
+            let step = try await w.measure("canvas host drag, 120 samples", bodies: bodies) {
                 try await w.drag(from: start, by: CGVector(dx: 600, dy: 0))
             }
-            #expect((step.bodies ?? 0) <= 1, "the window ran \(step.bodies ?? 0) bodies for the drag: \(step)")
+            // The mouse-up commit logs one line: one body. Target: 1.
+            expectBodies(step, atMost: 1, target: 1)
+            #expect(log.drags == 120, "the delegate heard \(log.drags) of 120 drag samples")
+            #expect(log.endDrags == 1, "the drag committed \(log.endDrags) times")
         }
 
-        @Test(.disabled("waits on CH-5"), .timeLimit(.minutes(2))) func switchRepaintsOnce() async throws {
+        @Test(
+            .disabled("the pull-down's items exist only while its menu is open; SJ28 drives the switch"),
+            .timeLimit(.minutes(2))
+        ) func switchRepaintsOnce() async throws {
             let w = RenderBudgetWindow(CanvasHostBudgetHost { RenderingPanePage() })
             defer { w.close() }
             try await w.settle(600)

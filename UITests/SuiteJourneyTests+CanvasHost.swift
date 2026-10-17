@@ -1,46 +1,89 @@
 // SuiteJourneyTests+CanvasHost.swift: SJ27, SJ28 and SP11 (canvas-host
-// packet, journey steps 1 to 6). SJ27 drags 120 samples across the
-// `canvas-host` page's fake document: the log shows one `endDrag` and the
-// window body count grows by at most 1. SJ28 opens the `settings-rendering`
-// page's Rendering menu and picks GPU (Metal), then CPU: the status line
-// follows each pick. SP11 reports the `canvas-drag` series on the host. CH-2
-// writes all three skipped over the placeholder pages; CH-5 turns them on.
+// packet, journey steps 1 to 6), on the gallery's fakes. SJ27 drags across
+// the `canvas-host` page's fake document: the drag reaches the page's
+// delegate, whose log shows exactly one `endDrag` (the mouse-up commit). The
+// window body count is the render budget's
+// (RenderBudgetCanvasHostTests.dragRunsNoBodies), which a UI test can't read.
+// SJ28 opens the `settings-rendering` page's Rendering pull-down, picks GPU
+// (Metal), then CPU, and reopens it after each pick: the status line under the
+// three choices reads the backend picked. SP11 drags 600 pt at 300 pt a
+// second and reports the `canvas-drag` series: the `suite.perf` samples when
+// the host records them, else the samples the delegate counted, report-only.
 import AppKit
 import XCTest
 
 extension SuiteJourneyTests {
-    /// SJ27: a drag on the canvas host reaches the delegate and runs at most one window body.
+    /// SJ27: a drag on the canvas host reaches the delegate and commits once on mouse-up.
     @MainActor func testCanvasHostDragsWithoutBodies() throws {
-        throw XCTSkip("waits on CH-5")
         let gallery = openCanvasHostPage(CanvasHostPages.canvasHost)
         let canvas = gallery.element(CanvasHostIDs.canvas)
         XCTAssert(canvas.waitForExistence(timeout: 10), "no \(CanvasHostIDs.canvas) on the canvas-host page")
-        let from = canvas.coordinate(withNormalizedOffset: CGVector(dx: 0.3, dy: 0.5))
-        from.press(forDuration: 0.05, thenDragTo: from.withOffset(CGVector(dx: 300, dy: 0)))
-        gallery.shot("canvas-host-dragged")
+        gallery.shot("canvas-host")
+        gallery.velocityDrag(
+            on: CanvasHostIDs.canvas, from: CGVector(dx: 0.3, dy: 0.5), to: CGVector(dx: 0.7, dy: 0.5),
+            step: "canvas-host-dragged")
+        let log = gallery.element(CanvasHostIDs.log)
+        XCTAssert(log.waitForExistence(timeout: 5), "no \(CanvasHostIDs.log) under the canvas")
+        let ends = endDragSamples(in: log.label)
+        XCTAssertEqual(ends.count, 1, "the drag should end once, the log reads: \(log.label)")
+        XCTAssertGreaterThan(ends.first ?? 0, 0, "the drag never reached the delegate, the log reads: \(log.label)")
     }
 
-    /// SJ28: the Rendering menu moves its checkmark and status line with each pick.
+    /// SJ28: each pick in the Rendering pull-down moves its status line to the backend picked.
     @MainActor func testRenderingPaneSwitchesBackend() throws {
-        throw XCTSkip("waits on CH-5")
         let gallery = openCanvasHostPage(CanvasHostPages.settingsRendering)
-        let status = gallery.element(CanvasHostIDs.status)
-        for choice in ["gpu", "cpu"] {
-            gallery.element("suite.settings.rendering.\(choice)").click()
-            XCTAssert(status.waitForExistence(timeout: 5), "no status line after picking \(choice)")
+        let menu = gallery.element(CanvasHostIDs.menu)
+        XCTAssert(menu.waitForExistence(timeout: 10), "no \(CanvasHostIDs.menu) on the settings-rendering page")
+        for (title, backend) in [("GPU (Metal)", "GPU"), ("CPU", "CPU")] {
+            menu.click()
+            let item = gallery.app.menuItems[title].firstMatch
+            XCTAssert(item.waitForExistence(timeout: 5), "the Rendering menu shows no \(title)")
+            item.click()
+            menu.click()
+            let status = statusLine(gallery)
+            XCTAssert(status.waitForExistence(timeout: 5), "the Rendering menu shows no status line after \(title)")
+            XCTAssertEqual(status.title, "Drawing on \(backend)", "the status line after picking \(title)")
+            gallery.shot("rendering-menu-\(gallery.slug(backend))", screen: true)
+            gallery.app.typeKey(.escape, modifierFlags: [])
         }
-        gallery.shot("rendering-menu-picked")
     }
 
-    /// SP11: `canvas-drag` sample-to-present on the host, reported.
+    /// SP11: `canvas-drag` on the host, 600 pt at 300 pt a second, reported.
     @MainActor func testCanvasHostDragLatency() throws {
-        throw XCTSkip("waits on CH-5")
         let gallery = openCanvasHostPage(CanvasHostPages.canvasHost)
         let canvas = gallery.element(CanvasHostIDs.canvas)
         XCTAssert(canvas.waitForExistence(timeout: 10), "no \(CanvasHostIDs.canvas) on the canvas-host page")
-        let from = canvas.coordinate(withNormalizedOffset: CGVector(dx: 0.2, dy: 0.5))
-        from.press(forDuration: 0.05, thenDragTo: from.withOffset(CGVector(dx: 400, dy: 0)))
-        if let document = gallery.perf() { gallery.expectValid(document, series: "canvas-drag") }
+        let reach = min(600, canvas.frame.width * 0.8) / max(canvas.frame.width, 1)
+        let velocity = XCUIGestureVelocity(300 * (NSScreen.main?.backingScaleFactor ?? 1))
+        gallery.velocityDrag(
+            on: CanvasHostIDs.canvas, from: CGVector(dx: 0.5 - reach / 2, dy: 0.5),
+            to: CGVector(dx: 0.5 + reach / 2, dy: 0.5), velocity: velocity, step: "canvas-host-drag-perf")
+        let log = gallery.element(CanvasHostIDs.log)
+        let delegated = endDragSamples(in: log.label).last ?? 0
+        let probed = gallery.perf()?.latency["canvas-drag"]
+        let line = probed.map { "SP11 canvas-drag: samples=\($0.count) frames-late-p95=\($0.p95FramesLate) report-only (suite.perf)" }
+            ?? "SP11 canvas-drag: samples=\(delegated) frames-late-p95=n/a report-only (delegate samples; the host records no suite.perf series)"
+        print(line)
+        let attachment = XCTAttachment(string: line)
+        attachment.name = "perf-report-canvas-drag"
+        attachment.lifetime = .keepAlways
+        add(attachment)
+        XCTAssertGreaterThan(probed?.count ?? delegated, 0, "the canvas-drag series is empty, the log reads: \(log.label)")
+    }
+
+    /// The sample count of each `endDrag after N samples` line in the page's log, oldest first.
+    private func endDragSamples(in log: String) -> [Int] {
+        log.split(separator: "\n").compactMap { line in
+            guard line.hasPrefix("endDrag after ") else { return nil }
+            return Int(line.dropFirst("endDrag after ".count).prefix { $0.isNumber })
+        }
+    }
+
+    /// The open Rendering menu's disabled status line, "Drawing on <backend>" or a note.
+    @MainActor private func statusLine(_ gallery: Journey) -> XCUIElement {
+        let byID = gallery.app.menuItems[CanvasHostIDs.status].firstMatch
+        if byID.waitForExistence(timeout: 2) { return byID }
+        return gallery.app.menuItems.matching(NSPredicate(format: "title BEGINSWITH 'Drawing on'")).firstMatch
     }
 
     /// The pages, and the ids `RenderingControlID` names in SuiteUI (this target doesn't link SuiteUI).
@@ -51,6 +94,8 @@ extension SuiteJourneyTests {
 
     private enum CanvasHostIDs {
         static let canvas = "suite.canvas"
+        static let log = "suite.gallery.canvas-host.log"
+        static let menu = "suite.menu.rendering"
         static let status = "suite.settings.rendering.status"
     }
 
