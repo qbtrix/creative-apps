@@ -95,3 +95,4 @@ utc	stage	event	ref	note
 2026-10-17T16:02:51Z	check	TL-d/TL-e round 2 started; 2 gaps
 2026-10-17T16:14:53Z	wave12 TL-21 PR #2172 open; fix-batch round2 running
 2026-10-17T16:22:23Z	fix round2: PRs #2173 #2174; #2139 -> gap
+2026-10-17T16:24:55Z	lane builds pending; comment footers stripped
