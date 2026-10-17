@@ -7,14 +7,14 @@
 // another family in the Family menu; select A and Title again and each reads
 // back; click A's row: the Text rows are disabled with "A isn't a text layer.";
 // click the top bar's zoom-out until the status line reads 50%; double-click
-// Title on the canvas, type, press Return: the committed text's frame (the
-// inspector's X, Y, W and H, scaled to the canvas) equals the editor's within
-// 1 pt, and Undo reads "Undo Edit Text". The canvas half (size 32 draws about
-// twice as tall as 16) is DesignTextDrawTests (ST-5t): the artwork is one
-// accessibility-hidden Canvas, so this journey only attaches the canvas shot at
-// size 32 for the contact sheet. Written before its code (lead.md, contract
-// rule 13): ST-6b writes it skipped, and ST-5t turns it on once ST-4b's rows
-// and its own drawing have merged. The rows' ids follow the
+// Title on the canvas, type, press Return: the committed text's left, top and
+// width (the inspector's X, Y and W, scaled to the canvas) equal the editor's
+// within 1 pt, and Undo reads "Undo Edit Text". The canvas half (size 32 draws
+// about twice as tall as 16) is DesignTextDrawTests and the full frame at each
+// zoom DesignTextScaleTests (ST-5t): the artwork is one accessibility-hidden
+// Canvas, so this journey only attaches the canvas shot at size 32 for the
+// contact sheet. ST-6b wrote it skipped; ST-5t turned it on with the text
+// drawn in its style. The rows' ids follow the
 // `design.inspector.<name>` rule; each is also found by its label when the id
 // differs. Frame fields are ScrubFields, read by their labels ("X position")
 // and spoken values ("100 points"); chips are buttons titled by their choice,
@@ -37,11 +37,10 @@ final class DesignTextJourneyTests: XCTestCase {
 
     /// J11: the Text rows set Title's style, read back, refuse A, and the inline edit doesn't jump at 50%.
     @MainActor func testTextFontAndSize() throws {
-        throw XCTSkip("waits on ST-5t")
         walkTextStyle()
     }
 
-    /// The journey itself, which ST-5t runs once it drops the skip above.
+    /// The journey itself.
     @MainActor private func walkTextStyle() {
         let design = Journey("Design", self, arguments: Self.arguments)
         XCTAssert(design.app.windows.firstMatch.waitForExistence(timeout: 30), "no window opened")
@@ -127,9 +126,11 @@ final class DesignTextJourneyTests: XCTestCase {
         XCTAssert(Self.waitUntil { !editor.exists }, "Return left the text editor open")
         XCTAssert(Self.waitForLabel(undo, "Undo Edit Text"), "the edit made no Edit Text step (Undo reads \(undo.label))")
         let committed = committedFrame(design)
+        // The field's box is the node's box; its accessibility frame can be the field's line
+        // height instead, so height is DesignTextScaleTests' check, not this one.
         for (name, editorEdge, committedEdge) in [
             ("left", editing.minX, committed.minX), ("top", editing.minY, committed.minY),
-            ("width", editing.width, committed.width), ("height", editing.height, committed.height),
+            ("width", editing.width, committed.width),
         ] {
             XCTAssertEqual(Double(committedEdge), Double(editorEdge), accuracy: 1,
                            "the committed text's \(name) jumped from the editor's at 50% (\(committed) vs \(editing))")

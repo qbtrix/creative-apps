@@ -5,9 +5,10 @@
 // The box has no fill, only an accent hairline: the text keeps the colour it will have on
 // the page (black text on a field well is unreadable in the shell's dark scheme).
 //
-// The field sits at the node's top-left at the canvas zoom, but its size (frame x scale) and
-// font (the body text style's size x scale) use DesignWorkspace.textEditScale, the zoom but
-// never under 1, so the text being typed reads even on a zoomed-out page. Sized, not a
+// The field sits over the node's frame at the canvas zoom (`box`), in the node's own font
+// (DesignTextFont, the one the canvas artwork draws with) at its size x
+// DesignWorkspace.textEditScale, which is the zoom itself, and with its alignment, so the
+// text being typed is the text that commits and nothing jumps on Return (#268). Sized, not a
 // scaled view: AppKit's text field and its field editor do not hit-test or edit correctly
 // under a scale transform. The draft goes out as `.textDraft`; Return and
 // losing focus send `.commitText`, Escape sends `.cancelText`. It asks for keyboard focus as
@@ -27,9 +28,7 @@ struct DesignTextOverlay: View {
     var body: some View {
         ZStack(alignment: .topLeading) {
             if let node = editing {
-                DesignTextField(
-                    node: node, draft: model.textDraft, zoom: zoom, scale: DesignWorkspace.textEditScale(zoom: zoom),
-                    perform: perform)
+                DesignTextField(node: node, draft: model.textDraft, zoom: zoom, perform: perform)
                     .id(node.id)
             }
         }
@@ -43,44 +42,51 @@ struct DesignTextOverlay: View {
         guard let id = model.editingTextID, let node = model.selectedNode, node.id == id else { return nil }
         return node
     }
+
+    /// The editor's box over `node` at `zoom`, in view points: the node's frame at the zoom, the
+    /// rect the artwork draws the committed text in.
+    static func box(for node: DesignNode, zoom: Double) -> CGRect {
+        let scale = DesignWorkspace.textEditScale(zoom: zoom)
+        return node.frame.cgRect.applying(CGAffineTransform(scaleX: scale, y: scale))
+    }
+
+    /// The editor's point size for `node` at `zoom`: the style's size times the zoom.
+    static func fontSize(for node: DesignNode, zoom: Double) -> Double {
+        DesignTextFont.pointSize(node.textStyle, scale: DesignWorkspace.textEditScale(zoom: zoom))
+    }
 }
 
-/// The text field over one node, at `zoom` and drawn at `scale`. A new node gets a new field
-/// (`.id`), which takes focus.
+/// The text field over one node at `zoom`. A new node gets a new field (`.id`), which takes focus.
 private struct DesignTextField: View {
     let node: DesignNode
     let draft: String
     let zoom: Double
-    let scale: Double
     let perform: DesignPerform
     @FocusState private var focused: Bool
 
-    private static let bodyPoints = NSFont.preferredFont(forTextStyle: .body).pointSize
-
     var body: some View {
+        let style = node.textStyle
+        let box = DesignTextOverlay.box(for: node, zoom: zoom)
         TextField("Text", text: Binding(get: { draft }, set: { perform(.textDraft($0)) }))
             .textFieldStyle(.plain)
             .labelsHidden()
-            .font(.system(size: Self.bodyPoints * scale))
+            .font(DesignTextFont.font(style, scale: DesignWorkspace.textEditScale(zoom: zoom)))
+            .multilineTextAlignment(DesignTextFont.textAlignment(style))
             .foregroundStyle(node.fill.color)
             .focused($focused)
             .task { await takeFocus() }
             .onSubmit { perform(.commitText) }
             .onExitCommand { perform(.cancelText) }
             .onChange(of: focused) { _, isFocused in if !isFocused { perform(.commitText) } }
-            .padding(.horizontal, SuiteSpacing.xxs)
-            .frame(width: node.frame.width * scale, height: node.frame.height * scale, alignment: .topLeading)
+            .frame(width: box.width, height: box.height, alignment: DesignTextFont.frameAlignment(style))
             .border(SuiteColor.accent)
             // A press on the box beside the text must not reach the canvas drag beneath, which
             // would place another text node. The field itself takes its own clicks.
             .contentShape(.rect)
             .gesture(DragGesture(minimumDistance: 0))
-            .offset(x: node.frame.x * origin, y: node.frame.y * origin)
+            .offset(x: box.minX, y: box.minY)
             .accessibilityIdentifier("design.text")
     }
-
-    /// Screen points per document point for the field's position, as CanvasLayout reads the zoom.
-    private var origin: Double { zoom.isFinite && zoom > 0 ? zoom : 1 }
 
     /// Asks for the keyboard until the field has it. A request made as the field appears is
     /// refused (the journey's typing went nowhere until it clicked the box), so it asks again.
