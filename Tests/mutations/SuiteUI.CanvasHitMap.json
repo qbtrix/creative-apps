@@ -1,0 +1,4 @@
+[
+{"label":"the slop edge turns exclusive, so a point exactly 4 pt off a path misses","file":"Sources/SuiteUI/CanvasHitMap.swift","find":"distance <= slop","replace":"distance < slop","tests":"CanvasHitMapTests"},
+{"label":"marks are walked bottom first, so the bottom of two overlapping marks wins","file":"Sources/SuiteUI/CanvasHitMap.swift","find":"for mark in marks.reversed()","replace":"for mark in marks","tests":"CanvasHitMapTests"}
+]

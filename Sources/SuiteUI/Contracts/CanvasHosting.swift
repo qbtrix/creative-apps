@@ -43,10 +43,7 @@ public protocol CanvasInputDelegate: AnyObject {
     func key(_ press: KeyPress) -> KeyPress.Result
 }
 
-/// Which marks sit under a point. CH-6 fills it with rects and paths and a hit slop.
-public struct CanvasHitMap: Equatable, Sendable {
-    public init() {}
-}
+// `CanvasHitMap` (which marks sit under a point) lives in CanvasHitMap.swift (CH-6).
 
 /// The suite's Settings > Rendering choice. Automatic falls back to CPU when Metal stops.
 public enum RenderingChoice: String, CaseIterable, Codable, Sendable {
