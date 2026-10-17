@@ -1,0 +1,6 @@
+[
+{"label":"every lane marked dirty: a clean lane redraws","file":"Sources/SuiteUI/TimelineLaneLayers.swift","find":"where index >= old.count || old[index] != lane","replace":"where true","tests":"TimelineLaneLayersTests"},
+{"label":"`<=` for `<` on the token edge: 8 pt beside the playhead line is the band","file":"Sources/SuiteUI/TimelineLaneLayers.swift","find":"return abs(x - lineX) < TimelinePlayheadGrab.band / 2","replace":"return abs(x - lineX) <= TimelinePlayheadGrab.band / 2","tests":"TimelineLaneLayersTests"},
+{"label":"the spacing dropped from the pitch: spaced layers overlap","file":"Sources/SuiteUI/TimelineLaneLayers.swift","find":"let wide = finite(width)\n        return (0..<max(count, 0)).map { CGRect(x: 0, y: CGFloat($0) * pitch, width: wide, height: height) }","replace":"let wide = finite(width)\n        return (0..<max(count, 0)).map { CGRect(x: 0, y: CGFloat($0) * height, width: wide, height: height) }","tests":"TimelineLaneLayersTests"},
+{"label":"the band skips the lane's classification: a key under the pointer is the bed","file":"Sources/SuiteUI/TimelineLaneLayers.swift","find":"return Route(lane: index, press: Press(target))","replace":"return Route(lane: index, press: .bed)","tests":"TimelineLaneLayersTests"}
+]
