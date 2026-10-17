@@ -54,7 +54,7 @@ import Testing
     func theKeyPixelsAreTimelineLooksFill(name: NSAppearance.Name, column: Int) throws {
         let pixels = try SuiteHex.$increasedContrast.withValue(column >= 2) { () throws -> [Int: UInt32] in
             let view = makeView()
-            view.appearance = try #require(NSAppearance(named: name))
+            view.appearance = NSAppearance(named: name)
             view.update(Self.lanes)
             return try Self.render(try #require(view.laneLayers.first))
         }
@@ -69,9 +69,10 @@ import Testing
     /// `layer` drawn at 1× into an sRGB bitmap, as 0xRRGGBB at each key's centre.
     private static func render(_ layer: TimelineLaneLayer) throws -> [Int: UInt32] {
         let (width, height) = (Int(layer.bounds.width), Int(layer.bounds.height))
+        let space = try #require(CGColorSpace(name: CGColorSpace.sRGB))
         let context = try #require(CGContext(
             data: nil, width: width, height: height, bitsPerComponent: 8, bytesPerRow: 0,
-            space: try #require(CGColorSpace(name: CGColorSpace.sRGB)), bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue))
+            space: space, bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue))
         layer.draw(in: context)
         let bytes = try #require(context.data).assumingMemoryBound(to: UInt8.self)
         let row = height / 2  // the bed is centred, so its middle row is the same flipped or not
