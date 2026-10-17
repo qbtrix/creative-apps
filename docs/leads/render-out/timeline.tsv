@@ -1,0 +1,9 @@
+utc	stage	event	ref	note
+2026-10-17T00:05Z	0	stage-start	#1505	setup; blocked on viewer-playback and layer-keys
+2026-10-17T00:05Z	0	stage-end	#1505	no task can start; comment on the issue
+2026-10-17T00:20Z	2	stage-end	#1505	viewer-playback built; plan from packet, 10 tasks, 6 waves
+2026-10-17T01:00Z	2	heartbeat	#1505	wave 1 waits on a Swift toolchain (none on this box) or supervisor decision
+2026-10-17T01:31Z	2	heartbeat	#1505	still waiting: no toolchain on this box, no newer halo run; dev 28469c63
+2026-10-17T02:02Z	2	heartbeat	#1505	still waiting on toolchain; dev 1e42526b
+2026-10-17T02:35Z	2	heartbeat	#1505	still waiting on toolchain; dev bc04c7d4
+2026-10-17T03:12Z	2	heartbeat	#1505	still waiting on toolchain; dev 82ac5055, no new halo run
