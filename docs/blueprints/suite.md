@@ -2912,12 +2912,19 @@ and keeps going (CLAUDE.md).
 
 ### 6.4 Additions to `docs/design.md` (a new "AfterGlow" section)
 
-1. **One family, one mark per app.** In UI each app is its SF Symbol and
-   name: Flare `scribble.variable`, Design `square.on.circle`, Photo
-   `paintbrush.pointed`, Library `photo.on.rectangle.angled`, Halo
-   `film.stack`, AfterGlow `square.grid.3x3.square`. SF Symbols are never
-   used as Dock icons (their license reserves them for UI); Dock icons come
-   from `Bundle/Icons/` (art: Q4).
+1. **One family, one mark per app.** Each app has one mark, drawn
+   everywhere from one source, `Bundle/Marks/<App>.svg` (the afterglow sky
+   set: AfterGlow a sun past the horizon, Flare a spark and its arc, Design
+   a pen nib under its bezier handle, Photo framed hills and a sun, Library
+   a starred card on a stack, Halo a ringed world and a moon). In UI it is
+   SuiteUI's `AppMark(app:style:)`: `.line`, monochrome in the foreground
+   style, in the switcher, sidebar rows, New tiles and chips; `.icon` where
+   a window shows the app icon. The Dock, Finder and About panel take
+   `Bundle/Icons/`, which `scripts/render-marks` renders from the same SVGs.
+   No app is an SF Symbol anywhere, and SF Symbols are never Dock icons
+   (their license reserves them for UI); `scripts/check-app-marks` holds
+   both. Amended for Q4: this replaces the per-app SF Symbols listed here
+   before.
 2. **The home is a content window.** It follows the system appearance; the
    editors stay dark (Editor shell). Cards and tiles are flat content, no
    glass; the sidebar and toolbar are the system's.
@@ -3396,9 +3403,10 @@ Open questions:
 3. **Q3 Signing and distribution.** v1 stays ad-hoc signed and not
    sandboxed. A Developer ID with notarization (hardened runtime) brings a
    team id, and with it an app group container for the store. When?
-4. **Q4 App icons.** Six Dock icons need art; until then BU-5 ships plain
-   placeholders (a coloured rounded square with the app's initial, drawn by
-   a script). Who draws them?
+4. **Q4 App icons.** Answered: the afterglow sky set (logo direction A)
+   replaced BU-5's placeholder initials. `Bundle/Marks/` holds the six SVGs,
+   `scripts/render-marks` renders every icon size and the `AppMark` path
+   data from them, and 6.4 rule 1 says where each style shows.
 5. **Q5 Prewarm.** Should AfterGlow launch the last-used app hidden at its
    own launch, so the first switch is an activation too? Costs memory for
    an app the person may not open. Default in this blueprint: no.

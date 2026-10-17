@@ -1,6 +1,6 @@
 // AppSwitcherTests.swift: the app switcher's items and placeholder
 // (AppSwitcher.swift). The placeholder lists Home and the five apps in order
-// with their shortcuts, every item disabled with its reason; the current item
+// with their shortcuts and marks (Home the suite mark), every item disabled with its reason; the current item
 // follows the running executable; the tooltip names the app and its shortcut
 // and then the reason; the identifiers are unique; the spacing steps run from
 // the ideal down to the minimum, then the compact step; a labelled toolbar item
@@ -11,6 +11,7 @@
 // and shows the current item alone when even that doesn't (the editor gallery
 // at 900 pt, Flare at 1000 pt); the capsule never reaches a neighbour's icon.
 // macOS only.
+import SuiteModel
 import SuiteUI
 import SwiftUI
 import Testing
@@ -21,7 +22,7 @@ import Testing
         #expect(items.map(\.id) == ["home", "flare", "design", "photo", "library", "halo"])
         #expect(items.map(\.title) == ["Home", "Flare", "Design", "Photo", "Library", "Halo"])
         #expect(items.map(\.shortcut) == ["⌃⌘0", "⌃⌘1", "⌃⌘2", "⌃⌘3", "⌃⌘4", "⌃⌘5"])
-        #expect(items.allSatisfy { !$0.systemImage.isEmpty })
+        #expect(items.map(\.app) == [nil, .flare, .design, .photo, .library, .halo])
     }
 
     @Test func everyPlaceholderItemIsDisabledAndSaysWhy() {
@@ -39,10 +40,10 @@ import Testing
     }
 
     @Test func theTooltipNamesTheAppAndShortcutThenTheReason() {
-        let ready = AppSwitcherItem(id: "design", title: "Design", systemImage: "pencil.and.outline", shortcut: "⌃⌘2")
+        let ready = AppSwitcherItem(id: "design", title: "Design", app: .design, shortcut: "⌃⌘2")
         #expect(ready.help == "Design (⌃⌘2)")
         let waiting = AppSwitcherItem(
-            id: "design", title: "Design", systemImage: "pencil.and.outline", shortcut: "⌃⌘2",
+            id: "design", title: "Design", app: .design, shortcut: "⌃⌘2",
             unavailableHelp: "Not connected yet (switching).")
         #expect(waiting.help == "Design (⌃⌘2)\nNot connected yet (switching).")
     }
