@@ -150,7 +150,7 @@ public enum SwitchMenu { public static func items(current: SuiteApp, states: [Su
 public enum LaunchArguments { public static func forward(_ args: [String], to app: SuiteApp) -> [String] }
 
 // Sources/SuiteModel/Switching/SwitcherEntries.swift (SW-3d): the switcher's rows, from the menu's
-public struct SwitcherEntry: Equatable, Sendable { app, title, systemImage, shortcut /* "⌃⌘2" */, reason /* nil: enabled */ }
+public struct SwitcherEntry: Equatable, Sendable { app, title, shortcut /* "⌃⌘2" */, reason /* nil: enabled */ }   // the switcher draws app's AppMark
 public enum SwitcherEntries { public static func entries(current: SuiteApp, states: [SuiteApp: AppRunState]) -> [SwitcherEntry] }
     // built from SwitchMenu.items, so the two surfaces can't disagree
 
@@ -187,7 +187,7 @@ SwitchMenu.items(current, states):                                  # SW-1
 
 SwitcherEntries.entries(current, states):                           # SW-3d
   SwitchMenu.items(current, states).map { item in
-    SwitcherEntry(app: item.app, title: item.app.displayName, systemImage: item.app.glyph,
+    SwitcherEntry(app: item.app, title: item.app.displayName,
                   shortcut: "⌃⌘\(item.digit)", reason: item.enabled ? nil : item.reason) }
 
 LaunchArguments.forward(args, to app):                              # SW-1, blueprint 2.6

@@ -43,6 +43,6 @@ import Testing
     @Test func homeIsTitledHomeAndTheAppsByTheirNames() {
         let rows = SwitcherEntries.entries(current: .launcher, states: [:])
         #expect(rows.map(\.title) == ["Home", "Flare", "Design", "Photo", "Library", "Halo"])
-        #expect(rows.first?.systemImage == "house")
+        #expect(rows.map(\.app) == [.launcher] + SuiteApp.apps)
     }
 }
