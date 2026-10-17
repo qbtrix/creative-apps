@@ -1,10 +1,11 @@
 // CompositionRenderingContractTests.swift: what every CompositionRendering
-// promises (#429), run over each conforming type in `compositionRenderings`;
-// the live type joins by adding itself there. Runs on Linux and macOS.
+// promises (#429), run over each conforming type in `compositionRenderings`:
+// the fake and the live type, which share HaloRenderRules. Runs on Linux and
+// macOS.
 import HaloModel
 import Testing
 
-let compositionRenderings: [any CompositionRendering] = [FakeCompositionRendering()]
+let compositionRenderings: [any CompositionRendering] = [FakeCompositionRendering(), LiveCompositionRendering()]
 
 /// A sink that keeps what it was sent, in order.
 struct RecordingSink: RenderSink {
