@@ -52,3 +52,4 @@ utc	stage	event	ref	note
 18:04Z	3	merged	#2211	RO-10 feature-done merged 17:59Z (build 39055407004)
 18:04Z	4	ci	39056193379	full dev CI on e17b68f9 pending; 39054585645 cancelled
 18:30Z	4	ci	39056662077	full 39056193379 cancelled; Anatomy input = scoped halo on e17b68f9 (macOS job running since 18:18)
+19:01Z	4	anatomy	39056662077	round 1 started; macOS (halo) done 18:50Z, snapshots+build green, ui-test red
