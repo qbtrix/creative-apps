@@ -63,3 +63,4 @@ utc	stage	event	ref	note
 2026-10-17T06:23Z	4	stage-start	round 3	lead relaunched as line lead act-1a1487bf89a-zfq8; branch rebuilt on main; round-3 fixer started (fix-batch r3-b1: #1777, #1778) on dev fe0f5f17
 2026-10-17T10:47Z	3	heartbeat	-	lead resumed after a container restart and a session limit (reset 10:40Z); wave-10 results read
 2026-10-17T12:02Z	4	fix-round	r3	act-1a149babb21-udz7 resumed; #2003 macOS build failed (39010720353); fixer ew-2003 started
+2026-10-17T13:19Z	4	pr-merged	#2003	round-3 fix merged d14e765; round 4 reads scoped suiteui 39034310918

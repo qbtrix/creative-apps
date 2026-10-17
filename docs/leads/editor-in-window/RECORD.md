@@ -2,9 +2,9 @@
 
 Issue: #1079 · Packet: docs/blueprints/suiteui/features/editor-in-window.md
 Run: act-1a149babb21-udz7 (line lead with #1079, #1480, #1596; earlier act-1a1487bf89a-zfq8) · Session: claude/suiteui-feature-lead-t357v5 · Started: 2026-10-16T02:45Z (this run 2026-10-17T06:10Z)
-Stage: 4 round 3 (fix)
-Base: fe0f5f176a95336c77a1d0cff7162e584db1d24c
-Next: #2003 (round-3 fix: #1777 #1778) failed the lane's macOS build (run 39010720353); wave-11 fixer ew-2003 fixes the build and moves Head; then round 4 (last) on the first scoped suiteui run holding it, gaps, contact sheet
+Stage: 4 round 4 (waiting on its run)
+Base: 9ba6658425c543613715ebbf34d677a380ef8cc3
+Next: #2003 merged d14e765 (macOS build fixed: CGFloat.infinity in SuiteWindowSizeTests; main promoted to it). Round 4 (last) reads scoped suiteui 39034310918 (45a27f35, holds #2003) when it finishes; then gaps for what stays red, and Belt-Contact-Sheet
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -22,7 +22,8 @@ Next: #2003 (round-3 fix: #1777 #1778) failed the lane's macOS build (run 390107
 ## Rounds
 | round | CI run | CI | audit vs baseline | lenses | confirmed | fixed by | clean |
 |---|---|---|---|---|---|---|---|
-| 3 | 38997835882, then 39001038692 (scoped suiteui, e251c5c5, the newest run reaching the journeys) | red (ours: 2: #1777, #1778) | suiteui 0 on every editor-window screen; parity and hit-size pass | journeys + audit | window 677 on a 674 visible frame (Dock wait didn't help); `suite.canvas` reads the viewport (0.918), not the artboard (1.6) | fix-batch r3-b1 (wave 10 of this run; the earlier ew/fix-r3 never opened a PR) | no |
+| 4 (last) | 39034310918 (scoped suiteui, 45a27f35) | running | – | journeys + audit | – | – (last round: what stays red becomes gap) | – |
+| 3 | 38997835882, then 39001038692 (scoped suiteui, e251c5c5, the newest run reaching the journeys) | red (ours: 2: #1777, #1778) | suiteui 0 on every editor-window screen; parity and hit-size pass | journeys + audit | window 677 on a 674 visible frame (Dock wait didn't help); `suite.canvas` reads the viewport (0.918), not the artboard (1.6) | #2003 (merged d14e765) | no |
 | 2 | 38991868071 (scoped suiteui, 124b118a-era, holds #1801 #1802 #1809 #1835) | red (ours: 2) | suiteui 0 on every key for our pages | journeys + audit | parity + hit-size now pass; testEditorWindow 'list not inside suite.sidebar'; dark geometry: window 3 pt over visible frame, region frames read from child elements | #1900 | no |
 | 1 | 38981651490 (scoped suiteui, b267d006) | red | suiteui offscreen/contrast/identifier over 0 on editor-window-open | journeys + audit | editor-window title read, dark no viewport, gallery page clips sidebar/status at ~900 pt, toolbar overflow (Fit) on page and Flare at 1024 (parity), timeline 'no lane for Ball' (cause TBD) | #1801 (page), #1802 (switcher), #1809 (parity) | no |
 | pre (wave 1) | 38887139934 (9e3c5f8, full) | green | at baseline; suiteui 0 on every key | – | – | – | – |
