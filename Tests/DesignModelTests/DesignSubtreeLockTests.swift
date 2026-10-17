@@ -36,11 +36,12 @@ private func lockedGroup() throws -> DesignWorkspace {
         try workspace.resizeNode("node-3", handle: .bottomRight, by: DesignPoint(x: 10, y: 10), shift: false, option: false)
     }
     #expect(workspace.frame("node-3") == rc(120, 130, 50, 40))
-    // The press where the handle was is no resize: it picks the unlocked Desktop under it.
+    // The press where the handle was is no resize: on the unselected Desktop's background it is
+    // a marquee, which picks nothing inside the locked group.
     workspace.drag(from: DesignPoint(x: 170, y: 170), to: DesignPoint(x: 200, y: 200))
     workspace.endDrag()
-    #expect(workspace.selectedNodeID == "node-1")
-    #expect(workspace.frame("node-3") == rc(150, 160, 50, 40))
+    #expect(workspace.selectedNodeIDs.isEmpty)
+    #expect(workspace.frame("node-3") == rc(120, 130, 50, 40))
 }
 
 @Test func unlockingTheGroupLetsTheLayerBeDeleted() throws {
