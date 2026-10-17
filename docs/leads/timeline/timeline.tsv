@@ -91,3 +91,4 @@ utc	stage	event	ref	note
 2026-10-17T14:29Z	heartbeat	#2048 macOS build 39040114342 running	findings 7
 2026-10-17T14:55Z	heartbeat	#2048 green (linux + macOS build), awaiting lane sweep	findings 7
 2026-10-17T15:18:39Z	heartbeat	#2048 eligible, awaiting lane batch
+2026-10-17T15:40:42Z	wave	wave 12 started
