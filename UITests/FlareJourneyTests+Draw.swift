@@ -4,7 +4,8 @@
 // points and presses Return (Path 2, open), then R and presses Escape in the middle of a drag (no layer), and clicks
 // Edit > Undo: Path 2 goes and the menu reads "Redo Add Path". V selects Select again. Each tool letter must select
 // its palette button. Escape mid-drag needs the button held while the key goes down, which XCUITest's drags can't
-// do, so that drag is posted as CGEvents. One shot per step, `flare-draw-<step>`.
+// do, so that drag is posted as CGEvents. One shot per step, `flare-draw-<step>`. Before the first shot it checks the
+// stage's chrome: the palette clear of the vertical ruler and the status bar's zoom, size and Preview data pills.
 import CoreGraphics
 import XCTest
 
@@ -17,6 +18,7 @@ final class FlareDrawJourneys: XCTestCase {
         XCTAssert(stage.waitForExistence(timeout: 10), "no stage (suite.canvas)")
         // A click with Select on the empty stage only gives it the keyboard.
         point(0.95, 0.95, on: stage).click()
+        expectStageChrome(flare)
         flare.shot("draw-0-open")
 
         // 1. R, drag a rectangle.
@@ -73,6 +75,29 @@ final class FlareDrawJourneys: XCTestCase {
         choose("v", "Select", flare)
         flare.shot("draw-7-select")
     }
+
+    /// The stage's chrome on the 550 × 400 fixture: the palette starts right of the vertical ruler (#1857), and a
+    /// status bar under the stage shows the zoom percent, "550 × 400 pt" and "Preview data", all in the window (#1854).
+    @MainActor private func expectStageChrome(_ flare: Journey) {
+        let pane = flare.element("flare.stagePane")
+        XCTAssert(pane.waitForExistence(timeout: 5), "no stage pane (flare.stagePane)")
+        let palette = flare.element("suite.tools")
+        XCTAssert(palette.waitForExistence(timeout: 5), "no palette (suite.tools)")
+        let rulerMaxX = pane.frame.minX + 20  // SuiteSize.ruler
+        XCTAssertGreaterThanOrEqual(
+            palette.frame.minX, rulerMaxX, "the palette \(palette.frame) covers the vertical ruler (ends at \(rulerMaxX))")
+        let window = flare.app.windows.firstMatch.frame
+        let zoom = pane.staticTexts.matching(NSPredicate(format: "label MATCHES 'Zoom [0-9]+%'")).firstMatch
+        let size = pane.staticTexts["550 × 400 pt"]
+        let preview = flare.element("flare.status.preview")
+        for (pill, name) in [(zoom, "zoom percent"), (size, "550 × 400 pt"), (preview, "Preview data")] {
+            XCTAssert(pill.waitForExistence(timeout: 5), "the stage's status bar shows no \(name) pill")
+            XCTAssert(window.contains(pill.frame), "the \(name) pill \(pill.frame) is outside the window \(window)")
+            XCTAssertGreaterThanOrEqual(pill.frame.minY, stage(flare).frame.maxY, "the \(name) pill isn't under the stage")
+        }
+    }
+
+    @MainActor private func stage(_ flare: Journey) -> XCUIElement { flare.element("suite.canvas") }
 
     /// The point at (`x`, `y`), fractions of `element`'s size.
     @MainActor private func point(_ x: Double, _ y: Double, on element: XCUIElement) -> XCUICoordinate {
