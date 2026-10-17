@@ -33,3 +33,5 @@ utc	stage	event	ref	note
 2026-10-17T22:41Z	finding	#2442 closed not_planned: blueprint D0-3/Q8 make a background drag on a selected frame move it; DesignGestureRouteTests pins it
 2026-10-17T22:41Z	gap	#2439 -> gap #2446 (line:suiteui, SuiteKernel geometry helpers); #2439 closed
 2026-10-17T22:46Z	wave	wxkvtvg5f done: PR #2454 fixes #2443 (marquee hides handles; Fast-Check pass at 0a2e5792, mutate 5/5; PNGs design-marquee-light/dark)
+2026-10-17T23:03Z	pr	#2445 (2440+2441) #2454 (2443) open fast-lane
+2026-10-17T23:03Z	wave	w9 fix-batch launched: 2438
