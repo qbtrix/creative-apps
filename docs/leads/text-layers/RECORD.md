@@ -2,9 +2,9 @@
 
 Issue: #1509 · Packet: docs/blueprints/halo/features/text-layers.md
 Run: act-1a149b53ef6-67v7 (line lead for #1035, #1509, #1505; earlier runs act-1a1487bf880-qmey, act-1a1429c87eb-3ecm) · Session: claude/feature-lead-playbook-l4ybf6 · Started: 2026-10-17T06:05Z
-Stage: 3 wave 2
+Stage: 3 wave 3
 Base: 8e868417eeaf2fd17229c21bc1087ef7eecb3d8f (origin/dev at 2026-10-17T13:53Z)
-Next: TX-5, TX-6 merged; wave 3 (TX-7 feature-done) starts once render-out's RO-4 (#2112) and RO-5 (#2108) are on dev and the between-wave check passes
+Next: TX-7 (feature-done, Closes #430) building on halo/tx7-text-journey; when it merges and its dev CI runs, Anatomy (critic panel with clarity lens; feed TX-6 suspects and TX-1 duplicate helper)
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
@@ -15,7 +15,7 @@ Next: TX-5, TX-6 merged; wave 3 (TX-7 feature-done) starts once render-out's RO-
 | TX-4 | 1 | `HaloTextRasterizer` on CoreText replaces W0's stub: `measure` and `rasterize` | Sources/HaloApp/HaloTextRasterizer.swift, Tests/AppSnapshotTests/HaloTextRasterizerTests.swift | HaloTextRasterizerTests (macOS) | #2064 | merged |
 | TX-5 | 2 | HF-10 macOS half: ink inside the stored box; viewer matches `render` | Tests/AppSnapshotTests/HaloTextFidelityTests.swift | HaloTextFidelityTests (macOS) | #2107 | merged |
 | TX-6 | 2 | App: `HaloTextInspector` (TEXT header, TextField with view-local draft, InspectorSliderRow size, InspectorColorRow, refusal caption) through `perform`; `HaloWindow+Text` routes the cases; snapshots | Sources/HaloApp/HaloTextInspector.swift, Sources/HaloApp/HaloWindow+Text.swift, Tests/AppSnapshotTests/HaloTextLayerSnapshots.swift | halo-text-layer-*.png, halo-text-refused-*.png | #2109 | merged |
-| TX-7 | 3 | Journey H-J22 on `-HaloSample empty`; shared-doc edits (c4-planned.json, text-layers.wave.json `owned` and `status: built`); `feature-done`, `Closes #430` | UITests/HaloJourneyTests+Text.swift, docs/blueprints/halo/c4-planned.json, docs/blueprints/halo/features/text-layers.wave.json | H-J22 on dev CI | – | planned |
+| TX-7 | 3 | Journey H-J22 on `-HaloSample empty`; shared-doc edits (c4-planned.json, text-layers.wave.json `owned` and `status: built`); `feature-done`, `Closes #430` | UITests/HaloJourneyTests+Text.swift, docs/blueprints/halo/c4-planned.json, docs/blueprints/halo/features/text-layers.wave.json | H-J22 on dev CI | – | building |
 
 Waves (combined with render-out, contract rule 19; checked against dev b8dfb4f0): W1 TX-1, TX-2, TX-3, TX-4 (all independent, with RO-1, RO-2, RO-3); W2 TX-5 (waits TX-1, TX-4), TX-6 (waits TX-1, TX-2, TX-3, TX-4) (independent of each other, with RO-4, RO-5); W3 TX-7 (waits TX-5, TX-6; feature-done) with RO-6, RO-7, RO-9.
 
@@ -37,3 +37,4 @@ Waves (combined with render-out, contract rule 19; checked against dev b8dfb4f0)
 
 ## Open
 - none
+- 2026-10-17T14:58Z TX-7 starts before render-out's RO-4/RO-5 merge: it depends only on TX-5, TX-6 (merged) and #333 (closed via #877) and shares no file with render-out.
