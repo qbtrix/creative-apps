@@ -33,3 +33,4 @@ utc	stage	event	ref	note
 2026-10-17T20:43:47Z	wave	#2309 D0-8b merged 20:41 (0c29554e); DW-b built. wave 5 launched on 2fc0629d: f1974, d0-7a. critic panel DW-a running
 2026-10-17T20:47:24Z	critic	DW-a panel on scoped 39066131869: 16 confirmed, 2 refuted, filed #2353-#2365. needs-ui #2366 #2367 #2368 filed. Fix round 1 (DW-a) launched; no new feature task while >5 findings open
 2026-10-17T21:07:05Z	check	full runs 39066112359 and 39068392590 cancelled; 39068664974 (abb4e96a, has DW-a and DW-b) pending; dev-red #2303 still open
+2026-10-17T21:08:23Z	pr	wave 5: f1974 #2370 head c3d6cf0c; D0-7a #2374 head ae7f86f0; contract checks ok

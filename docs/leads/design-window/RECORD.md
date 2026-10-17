@@ -4,7 +4,7 @@ Issue: #1494 · Packet: docs/blueprints/design/features/design-window.md
 Run: act-1a14a88d756-rnok · Session: claude/design-feature-lead-7saqm8 · Started: 2026-10-17T15:46Z
 Stage: 3 wave 3
 Base: 6ad373ab37fb612a8e7b185f902c263211f1197b
-Next: full CI 39068664974 (abb4e96a) Linux green -> Belt-Slice-Done DW-a + DW-b; wave 5 (wu2wyivvc) and fix round 1 (w49logh4v) PRs; DW-b critic panel on scoped 39068267491
+Next: #2370 (f1974, c3d6cf0c) and #2374 (D0-7a, ae7f86f0) through the lane; full CI 39068664974 Linux -> Belt-Slice-Done DW-a + DW-b; fix round 1 (w49logh4v); round 2 for #2353/#2363 after #2374 merges
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
