@@ -52,3 +52,5 @@ utc	stage	event	ref	note
 2026-10-17T22:25Z	wave	wave 7 deferred #2411, #2406, #2352, #2302, #2075 (files busy with open PRs); next wave
 2026-10-17T22:40Z	lane	#2418 merged 22:20Z (closed #2353, #2363); #2417 merged 22:35Z
 2026-10-17T22:40Z	ci	full CI 39072812111 cancelled (superseded); 39074726717 pending on e3c5da79; scoped design 39073888864 on 2b08e8fd: macOS journeys failed, Findings step updated CI finding issues
+2026-10-17T23:03Z	merged	#2418 #2417 #2444 #2349 on dev 59c435a6
+2026-10-17T23:03Z	wave	w8 fix-batch launched: 2411 2406 2352 2302 2075 2455
