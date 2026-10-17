@@ -3,3 +3,4 @@ utc	stage	event	ref	note
 2026-10-17T06:20Z	1	stage-end	#1933	packet read; 13 slices, 31 tasks copied
 2026-10-17T06:25Z	2	stage-end	#1933	7 waves planned; wave 2 stacks on EK-1 while the supervisor merges it
 2026-10-17T06:25Z	3	stage-start	EK-1	wave 1: EK-1 builder started
+2026-10-17T06:15Z	3	heartbeat	EK-1	builder running; wave 2 and 3 briefs prepared
