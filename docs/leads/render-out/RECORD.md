@@ -4,7 +4,7 @@ Issue: #1505 · Packet: docs/blueprints/halo/features/render-out.md
 Run: act-1a149b53ef6-67v7 (line lead for #1035, #1509, #1505; earlier runs act-1a1487bf880-qmey, act-1a1429c87eb-3ecm) · Session: claude/feature-lead-playbook-l4ybf6 · Started: 2026-10-17T06:05Z
 Stage: 3 wave 3 (RO-9) + wave 4 (RO-8) building
 Base: 8e868417eeaf2fd17229c21bc1087ef7eecb3d8f (origin/dev at 2026-10-17T13:53Z)
-Next: RO-8 #2184 and RO-9 #2182 in lane (macOS build-only runs); wave 5 RO-10 (H-J21, wave.json status built, feature-done, Closes #429) when both merge
+Next: RO-9 #2182 build 39049616762 green, waits on lane sweep; RO-8 #2184 build 39050244212 failed (mutating startRender inside #require in HaloRenderSheetSnapshots:28) → fixer on halo/ro8-render-sheet; wave 5 RO-10 (H-J21, wave.json status built, feature-done, Closes #429) when both merge
 
 ## Tasks
 | id | wave | behavior | files | test | PR | state |
