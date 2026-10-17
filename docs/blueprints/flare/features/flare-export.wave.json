@@ -1,0 +1,224 @@
+{
+  "title": "Export an SVG frame, a Lottie or a PNG sequence on the kernel's export run, never overwriting, with an exact round trip",
+  "wave": 5,
+  "order": 10,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "beta": true,
+  "covers": "#354, #355, #374; LA-1 (StageRasterizer); #366 (the SVG Design's import reads)",
+  "waits_on": "`draw-key-save`; cross-line: FX-2 on editor-kernel:EK-a, FX-4 on editor-kernel:EK-run, FX-3 on editor-kernel:EK-chrome (in `waits_cross_line`); in the app, FX-5 on `inspector-timeline`",
+  "depends": [
+    "draw-key-save"
+  ],
+  "waits_cross_line": {
+    "editor-kernel:EK-a": [
+      "FX-2"
+    ],
+    "editor-kernel:EK-run": [
+      "FX-4"
+    ],
+    "editor-kernel:EK-chrome": [
+      "FX-3"
+    ]
+  },
+  "suiteui": "editor-kernel EK-30 ExportSheet: an options slot for app rows and a control-id prefix (needs-ui to file); SuiteKernel: the shared never-overwrite name rule extracted from Library's LiveExporter (issue to file); adopt-kernel-export AX-flare is done here (issue to file on that packet)",
+  "notes": "Contract-first (v3): FX-a declares the intents, ExportState = ExportRun<ExportOptions> and every Model signature the sheet calls, as stubs; FX-u (ui) builds the sheet on the fakes beside FX-run and FX-live; FX-z integrates. The checker resolves waits inside one app, so the editor-kernel waits are data in waits_cross_line and prose in waits_on.",
+  "owned": [
+    "Sources/FlareModel/FlareIntent.swift",
+    "Sources/FlareModel/FlareIntent+Titles.swift",
+    "Tests/FlareModelTests/FlareIntentTests.swift",
+    "Tests/FlareModelTests/FlareIntentTitleTests.swift",
+    "Tests/mutations/FlareModel.FlareIntent.json",
+    "Sources/FlareModel/FlareWorkspaceState.swift",
+    "Sources/FlareModel/FlareExport.swift",
+    "Tests/FlareModelTests/FlareExportTests.swift",
+    "Tests/FlareModelTests/FlareExportRoundTripTests.swift",
+    "Tests/FlareModelTests/ExportScanTests.swift",
+    "Sources/FlareApp/FlareExportSheetAdapter.swift",
+    "Sources/FlareApp/FlareWindow+Export.swift",
+    "Sources/FlareApp/FlareWindow.swift",
+    "Sources/FlareApp/FlareFilePanels.swift",
+    "UITests/FlareJourneyTests+Export.swift",
+    "UITests/FlareJourneyTests+ExportErrors.swift",
+    "Tests/AppSnapshotTests/FlareExportSnapshots.swift",
+    "Tests/AppSnapshotTests/RenderBudgetFlareExportTests.swift",
+    "UITests/FlareJourneyTests.swift",
+    "Sources/FlareApp/StageRasterizer.swift",
+    "Tests/AppSnapshotTests/RasterizerTests.swift",
+    "docs/c4/parts/creative-apps/flare-app/flare-app-sources.json",
+    "Tests/mutations/FlareModel.FlareExport.json",
+    "Sources/FlareModel/Live/LiveExportAdapter.swift",
+    "Tests/FlareModelTests/LiveExportTests.swift",
+    "Tests/mutations/FlareModel.LiveExportAdapter.json",
+    "docs/c4/parts/creative-apps/flare-model/flare-model-sources.json",
+    "Sources/FlareModel/Fakes/FakeExport.swift",
+    "Sources/FlareModel/FlareServicesBuilt.swift",
+    "docs/blueprints/flare.md",
+    "docs/blueprints/flare/waves.in.md",
+    "docs/blueprints/flare/features/flare-export.wave.json",
+    "docs/blueprints/flare/features/flare-export.md",
+    "Sources/FlareModel/FlareExport+Kernel.swift",
+    "Tests/FlareModelTests/FlareExportOptionsTests.swift",
+    "Tests/mutations/FlareModel.FlareExport+Kernel.json",
+    "Tests/FlareModelTests/FlareServicesBuiltTests.swift"
+  ],
+  "journeys": [
+    "FlareExportJourneys.testExportSVGLottieAndPNGSequence",
+    "FlareExportErrorJourneys.testExportNeverOverwritesCancelAndFailure"
+  ],
+  "slices": [
+    {
+      "id": "FX-a",
+      "behavior": "The export intents exist with titles and identifiers, ExportState is the kernel's ExportRun<ExportOptions>, and every Model signature the sheet calls is declared as a stub, with the Model tests and the round-trip test written and disabled, so the UI and the logic slices build at once.",
+      "tasks": [
+        "FX-1",
+        "FX-2"
+      ],
+      "journeys": [
+        "MJ-FX0"
+      ],
+      "owned": [
+        "Sources/FlareModel/FlareIntent.swift",
+        "Sources/FlareModel/FlareIntent+Titles.swift",
+        "Tests/FlareModelTests/FlareIntentTests.swift",
+        "Tests/FlareModelTests/FlareIntentTitleTests.swift",
+        "Tests/mutations/FlareModel.FlareIntent.json",
+        "Sources/FlareModel/FlareWorkspaceState.swift",
+        "Sources/FlareModel/FlareExport.swift",
+        "Tests/FlareModelTests/FlareExportTests.swift",
+        "Tests/FlareModelTests/FlareExportRoundTripTests.swift",
+        "Tests/FlareModelTests/ExportScanTests.swift",
+        "Sources/FlareModel/FlareExport+Kernel.swift",
+        "Tests/FlareModelTests/FlareExportOptionsTests.swift"
+      ],
+      "waits": {},
+      "ui": false
+    },
+    {
+      "id": "FX-u",
+      "behavior": "Export… on the toolbar and in the File menu opens SuiteUI's ExportSheet with Flare's rows on the fakes, Export writes the files into -FlareExportTo's folder or one the person picks, never over an existing file, with progress, Cancel, Reveal in Finder and Try Again, and StageRasterizer draws real pixels.",
+      "tasks": [
+        "FX-3",
+        "FX-5",
+        "FX-7"
+      ],
+      "journeys": [
+        "J22",
+        "J23"
+      ],
+      "owned": [
+        "Sources/FlareApp/FlareExportSheetAdapter.swift",
+        "Sources/FlareApp/FlareWindow+Export.swift",
+        "Sources/FlareApp/FlareWindow.swift",
+        "Sources/FlareApp/FlareFilePanels.swift",
+        "UITests/FlareJourneyTests+Export.swift",
+        "UITests/FlareJourneyTests+ExportErrors.swift",
+        "Tests/AppSnapshotTests/FlareExportSnapshots.swift",
+        "Tests/AppSnapshotTests/RenderBudgetFlareExportTests.swift",
+        "UITests/FlareJourneyTests.swift",
+        "Sources/FlareApp/StageRasterizer.swift",
+        "Tests/AppSnapshotTests/RasterizerTests.swift",
+        "docs/c4/parts/creative-apps/flare-app/flare-app-sources.json"
+      ],
+      "waits": {
+        "FX-a": [
+          "FX-3",
+          "FX-5"
+        ],
+        "inspector-timeline": [
+          "FX-5"
+        ]
+      },
+      "ui": true
+    },
+    {
+      "id": "FX-run",
+      "behavior": "The Model's export run is the kernel's: open, edit the options with their refusals, start with the plan's file count, progress that never goes back, finished with the written names, idle on cancel, failed with a sentence, Try Again back to editing.",
+      "tasks": [
+        "FX-4",
+        "FX-11"
+      ],
+      "journeys": [
+        "MJ-FX1"
+      ],
+      "owned": [
+        "Sources/FlareModel/FlareExport+Kernel.swift",
+        "Tests/mutations/FlareModel.FlareExport+Kernel.json",
+        "Tests/FlareModelTests/FlareExportTests.swift",
+        "Tests/FlareModelTests/ExportScanTests.swift",
+        "Sources/FlareModel/FlareExport.swift",
+        "Tests/mutations/FlareModel.FlareExport.json",
+        "Tests/FlareModelTests/FlareExportOptionsTests.swift"
+      ],
+      "waits": {
+        "FX-a": [
+          "FX-4",
+          "FX-11"
+        ]
+      },
+      "ui": false
+    },
+    {
+      "id": "FX-live",
+      "behavior": "LiveExportAdapter runs FlareCore's exporters over the live stage with cancellation, FakeExport is that adapter over FakeStage, and the SVG and Lottie round trip is byte-identical on both.",
+      "tasks": [
+        "FX-6",
+        "FX-8"
+      ],
+      "journeys": [
+        "MJ-FX2"
+      ],
+      "owned": [
+        "Sources/FlareModel/Live/LiveExportAdapter.swift",
+        "Tests/FlareModelTests/LiveExportTests.swift",
+        "Tests/mutations/FlareModel.LiveExportAdapter.json",
+        "docs/c4/parts/creative-apps/flare-model/flare-model-sources.json",
+        "Sources/FlareModel/Fakes/FakeExport.swift",
+        "Tests/FlareModelTests/FlareExportRoundTripTests.swift"
+      ],
+      "waits": {
+        "FX-a": [
+          "FX-8"
+        ]
+      },
+      "ui": false
+    },
+    {
+      "id": "FX-z",
+      "behavior": ".built exports through LiveExportAdapter, J22 and J23 pass live through StageRasterizer, the blueprint rows and the waves prose are current, and the feature is built.",
+      "tasks": [
+        "FX-9",
+        "FX-10"
+      ],
+      "journeys": [
+        "J22",
+        "J23"
+      ],
+      "owned": [
+        "Sources/FlareModel/FlareServicesBuilt.swift",
+        "Tests/FlareModelTests/FlareServicesBuiltTests.swift",
+        "UITests/FlareJourneyTests+Export.swift",
+        "UITests/FlareJourneyTests+ExportErrors.swift",
+        "docs/blueprints/flare.md",
+        "docs/blueprints/flare/waves.in.md",
+        "docs/blueprints/flare/features/flare-export.wave.json",
+        "docs/blueprints/flare/features/flare-export.md"
+      ],
+      "waits": {
+        "FX-u": [
+          "FX-9",
+          "FX-10"
+        ],
+        "FX-run": [
+          "FX-9",
+          "FX-10"
+        ],
+        "FX-live": [
+          "FX-9",
+          "FX-10"
+        ]
+      },
+      "ui": false
+    }
+  ]
+}

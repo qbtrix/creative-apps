@@ -1,0 +1,217 @@
+{
+  "title": "Export: PNG at 1x, 2x, 3x, SVG and PDF of the selection, the frame or the page, from File > Export… on SuiteUI's ExportSheet over SuiteKernel's ExportRun, never writing over a file",
+  "wave": 2,
+  "order": 5,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "covers": "#418 (Design: export PNG, SVG, PDF); the beta cut 2026-10-17 (IN; takes over design-seams-2's export half)",
+  "waits_on": "design-contracts; editor-kernel EK-a (DE-2, SuiteKernel stubs), EK-chrome (DE-6, ExportSheet) and EK-run (DE-10), cross-line; DE-6's window files: design-window DW-c, files-history FH-b, snapping SN-c, canvas-basics CB-c; DE-11's blueprint rows: files-history FH-b",
+  "beta": true,
+  "depends": [
+    "design-contracts"
+  ],
+  "owned": [
+    "Tests/DesignModelTests/DesignExportPlanTests.swift",
+    "Tests/DesignModelTests/DesignSVGTests.swift",
+    "Tests/DesignModelTests/DesignExportBudgetTests.swift",
+    "Tests/DesignModelTests/DesignExportWalkTests.swift",
+    "Tests/DesignModelTests/DesignSVGWalkTests.swift",
+    "Tests/SuiteModelTests/UniqueFileNamesTests.swift",
+    "Sources/SuiteModel/Values/UniqueFileNames.swift",
+    "Tests/mutations/SuiteModel.UniqueFileNames.json",
+    "docs/c4/parts/creative-apps/suite-model/suite-identity.json",
+    "Sources/DesignModel/DesignExport+Kernel.swift",
+    "Sources/DesignModel/Live/DesignSVG.swift",
+    "Sources/DesignModel/DesignServices.swift",
+    "Tests/DesignModelTests/DesignLiveStubTests.swift",
+    "Tests/DesignModelTests/DesignNotBuiltTests.swift",
+    "Tests/DesignModelTests/DesignArrangeFakesTests.swift",
+    "Tests/mutations/DesignModel.DesignServices.json",
+    "Tests/mutations/DesignModel.DesignExport+Kernel.json",
+    "Tests/mutations/DesignModel.DesignSVG.json",
+    "docs/c4/parts/creative-apps/design-model/design-model-sources.json",
+    "Sources/DesignApp/DesignIntent.swift",
+    "Sources/DesignApp/DesignCommands.swift",
+    "Sources/DesignApp/DesignWindow.swift",
+    "Sources/DesignModel/DesignWindowOptions.swift",
+    "Sources/DesignApp/DesignExport+Kernel.swift",
+    "UITests/DesignJourneyTests+Export.swift",
+    "Tests/AppSnapshotTests/DesignExportSnapshots.swift",
+    "Tests/AppSnapshotTests/DesignFileMenuSnapshots.swift",
+    "Tests/AppSnapshotTests/RenderBudgetDesignExportTests.swift",
+    "Sources/DesignApp/DesignRasterizer.swift",
+    "Tests/AppSnapshotTests/DesignRasterizerTests.swift",
+    "Tests/AppSnapshotTests/RenderBudgetDesignRasterTests.swift",
+    "docs/blueprints/design.md",
+    "docs/c4/parts/creative-apps/design-app/design-app-sources.json"
+  ],
+  "journeys": [
+    "DesignExportJourneyTests.testExportSheetOnFakes",
+    "DesignExportJourneyTests.testExportPNGSVGPDF",
+    "DesignExportJourneyTests.testExportNeverOverwritesAndCancels"
+  ],
+  "slices": [
+    {
+      "id": "DE-a",
+      "behavior": "The export options, scope and run type exist with every signature the sheet calls, the live and fake export slots plan a frame's files the way the fake did, and a name made unique against a folder is one SuiteModel rule.",
+      "tasks": [
+        "DE-1",
+        "DE-0",
+        "DE-2"
+      ],
+      "journeys": [
+        "MJ13"
+      ],
+      "owned": [
+        "Tests/DesignModelTests/DesignExportPlanTests.swift",
+        "Tests/DesignModelTests/DesignSVGTests.swift",
+        "Tests/DesignModelTests/DesignExportBudgetTests.swift",
+        "Tests/DesignModelTests/DesignExportWalkTests.swift",
+        "Tests/DesignModelTests/DesignSVGWalkTests.swift",
+        "Tests/SuiteModelTests/UniqueFileNamesTests.swift",
+        "Sources/SuiteModel/Values/UniqueFileNames.swift",
+        "Tests/mutations/SuiteModel.UniqueFileNames.json",
+        "docs/c4/parts/creative-apps/suite-model/suite-identity.json",
+        "Sources/DesignModel/DesignExport+Kernel.swift",
+        "Sources/DesignModel/Live/DesignSVG.swift",
+        "Sources/DesignModel/DesignServices.swift",
+        "Tests/DesignModelTests/DesignLiveStubTests.swift",
+        "Tests/DesignModelTests/DesignNotBuiltTests.swift",
+        "Tests/DesignModelTests/DesignArrangeFakesTests.swift",
+        "Tests/mutations/DesignModel.DesignServices.json",
+        "Tests/mutations/DesignModel.DesignExport+Kernel.json",
+        "docs/c4/parts/creative-apps/design-model/design-model-sources.json"
+      ],
+      "waits": {},
+      "ui": false
+    },
+    {
+      "id": "DE-u",
+      "behavior": "File > Export… ⇧⌘E opens SuiteUI's ExportSheet on the fakes with format, scale and scope rows and the files it will write, Export runs the fake steps to a finished list, Cancel and Escape close it, and a failed step names its file.",
+      "tasks": [
+        "DE-6",
+        "DE-7"
+      ],
+      "journeys": [
+        "J19"
+      ],
+      "owned": [
+        "Sources/DesignApp/DesignIntent.swift",
+        "Sources/DesignApp/DesignCommands.swift",
+        "Sources/DesignApp/DesignWindow.swift",
+        "Sources/DesignModel/DesignWindowOptions.swift",
+        "Sources/DesignApp/DesignExport+Kernel.swift",
+        "UITests/DesignJourneyTests+Export.swift",
+        "Tests/AppSnapshotTests/DesignExportSnapshots.swift",
+        "Tests/AppSnapshotTests/DesignFileMenuSnapshots.swift",
+        "Tests/AppSnapshotTests/RenderBudgetDesignExportTests.swift",
+        "docs/c4/parts/creative-apps/design-app/design-app-sources.json"
+      ],
+      "waits": {
+        "DE-a": [
+          "DE-6",
+          "DE-7"
+        ],
+        "design-window": [
+          "DE-6"
+        ],
+        "files-history:FH-b": [
+          "DE-6"
+        ],
+        "snapping:SN-c": [
+          "DE-6"
+        ],
+        "canvas-basics:CB-c": [
+          "DE-6"
+        ]
+      },
+      "ui": true
+    },
+    {
+      "id": "DE-s",
+      "behavior": "The plan picks the right layers for each scope, names them uniquely, sizes them for the scale, refuses with the right reason, and the SVG of a layer or a page equals the reference document.",
+      "tasks": [
+        "DE-3",
+        "DE-5"
+      ],
+      "journeys": [
+        "MJ13",
+        "MJ14"
+      ],
+      "owned": [
+        "Sources/DesignModel/DesignExport+Kernel.swift",
+        "Tests/mutations/DesignModel.DesignExport+Kernel.json",
+        "Tests/DesignModelTests/DesignExportPlanTests.swift",
+        "Tests/DesignModelTests/DesignExportWalkTests.swift",
+        "Sources/DesignModel/Live/DesignSVG.swift",
+        "Tests/mutations/DesignModel.DesignSVG.json",
+        "Tests/DesignModelTests/DesignSVGTests.swift",
+        "Tests/DesignModelTests/DesignExportBudgetTests.swift",
+        "Tests/DesignModelTests/DesignSVGWalkTests.swift"
+      ],
+      "waits": {
+        "DE-a": [
+          "DE-3",
+          "DE-5"
+        ]
+      },
+      "ui": false
+    },
+    {
+      "id": "DE-w",
+      "behavior": "A frame, a selection or the page renders to a PNG with the right pixel size at 1x, 2x and 3x, and to a one-page PDF, from the same artwork the canvas draws, off the window.",
+      "tasks": [
+        "DE-8",
+        "DE-9"
+      ],
+      "journeys": [
+        "DesignRasterizerTests"
+      ],
+      "owned": [
+        "Sources/DesignApp/DesignRasterizer.swift",
+        "Tests/AppSnapshotTests/DesignRasterizerTests.swift",
+        "Tests/AppSnapshotTests/RenderBudgetDesignRasterTests.swift"
+      ],
+      "waits": {
+        "DE-a": [
+          "DE-8"
+        ]
+      },
+      "ui": true
+    },
+    {
+      "id": "DE-z",
+      "behavior": "Export writes real files into the chosen folder without overwriting, shows progress and the written names, reports a file that could not be written, and the journeys pass on the live services.",
+      "tasks": [
+        "DE-10",
+        "DE-11"
+      ],
+      "journeys": [
+        "J17",
+        "J18"
+      ],
+      "owned": [
+        "Sources/DesignApp/DesignExport+Kernel.swift",
+        "UITests/DesignJourneyTests+Export.swift",
+        "Tests/AppSnapshotTests/RenderBudgetDesignExportTests.swift",
+        "docs/blueprints/design.md"
+      ],
+      "waits": {
+        "DE-u": [
+          "DE-10",
+          "DE-11"
+        ],
+        "DE-s": [
+          "DE-10"
+        ],
+        "DE-w": [
+          "DE-10"
+        ],
+        "files-history:FH-b": [
+          "DE-11"
+        ]
+      },
+      "ui": true
+    }
+  ]
+}

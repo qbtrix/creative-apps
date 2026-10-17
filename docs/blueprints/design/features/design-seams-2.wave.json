@@ -99,6 +99,9 @@
         ],
         "style-rows:SR-m": [
           "D2-1a"
+        ],
+        "design-export:DE-a": [
+          "D2-2"
         ]
       }
     },
@@ -170,6 +173,9 @@
           "D2-3b"
         ],
         "snapping:SN-c": [
+          "D2-4b"
+        ],
+        "design-export:DE-u": [
           "D2-4b"
         ]
       },

@@ -19,7 +19,7 @@ its tasks, owned files, acceptance tests, quality tests and done check.
 | W2 | Ease keys | `easing.md` | #428 | layer-keys, history-files | #333; #771 and #63 not blocking (plain diamonds; keys picked from the EASING rows) | #1333 | built |
 | W2 | Render a frame and render to files | `render-out.md` | #451, #429 | viewer-playback | #333 | file when ready | planned |
 | W2 | Text layers | `text-layers.md` | #430 | layer-keys, viewer-playback, history-files | #333 | file when ready | planned |
-| W3 | The core loop, live, measured | no packet yet | the H-J12 `XCTSkip` | every W1 and W2 feature | #333; #330 for H-P1 to H-P5 (report-only until then) | later | planned |
+| W3 | The core loop, live, measured: comp, layers, keys, ease, play, text, render to files, save and reopen | `core-loop.md` | the H-J12 `XCTSkip`; H-P1 to H-P5; layout L3 to L5; Halo's kernel-export adoption (lead.md rule 20: Render… runs on SuiteKernel's `ExportRun` and SuiteUI's `ExportSheet`) | every W1 and W2 feature | editor-kernel EK-a, EK-run, EK-chrome (cross-line, prose waits); the probe-recorder needs-ui for H-P1 to H-P5's latency half (report-only from HaloViewerLatencyTests until then); switching A-HA-1 before CL-12 | file when ready | planned |
 
 No creative-core issue blocks any v1 feature. creative-core#182 (path
 builders) closed on 2026-10-14 via creative-core#281, but `Path.ellipse(in:)`
