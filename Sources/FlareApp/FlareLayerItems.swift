@@ -1,8 +1,11 @@
-// FlareLayerItems.swift: sidebar items for Flare's Scenes and Layers sections.
+// FlareLayerItems.swift: sidebar items for Flare's SCENES and LAYERS sections
+// (layers-files LF-1). Each section's add button sends its `.layers` intent
+// (New Scene, New Layer) through `perform`, and is absent while it can't act.
 // A layer row carries an eye and a lock toggle whose ids are FlareLayerFlag
 // raw values, so FlareWindow routes a click straight to toggleLayerFlag. A
-// locked layer's name should draw dimmed; SidebarItem has no dimmed state yet
-// (needs-ui #146), so for now the lock toggle alone shows it.
+// hidden or locked layer's row should draw dimmed (the Model's
+// layerRowIsDimmed); SidebarItem has no dimmed state yet (needs-ui #146), so
+// for now the eye and lock toggles alone show it.
 import FlareCore
 import FlareModel
 import SuiteUI
@@ -27,14 +30,18 @@ extension SidebarItem {
 }
 
 extension SidebarSection {
-    /// The Scenes and Layers sections; the Layers section's add button calls `onAddLayer`.
-    static func flare(_ model: FlareWorkspace, onAddLayer: @escaping @MainActor () -> Void) -> [SidebarSection] {
+    /// The SCENES and LAYERS sections. New Scene shows while an animation is open, New Layer while a scene is
+    /// selected; each sends its intent through `perform`.
+    static func flare(_ model: FlareWorkspace, perform: @escaping @MainActor (FlareIntent.Layers) -> Void) -> [SidebarSection] {
         [
-            SidebarSection(id: "scenes", title: "Scenes", items: model.scenes.map { SidebarItem(scene: $0) }),
+            SidebarSection(
+                id: "scenes", title: "Scenes", items: model.scenes.map { SidebarItem(scene: $0) },
+                addAction: model.document == nil
+                    ? nil : ToolbarAction("New Scene", systemImage: "plus") { perform(.addScene) }),
             SidebarSection(
                 id: "layers", title: "Layers", items: model.layers.map { SidebarItem(layer: $0) },
                 addAction: model.selectedScene == nil
-                    ? nil : ToolbarAction("New Layer", systemImage: "plus", perform: onAddLayer)),
+                    ? nil : ToolbarAction("New Layer", systemImage: "plus") { perform(.addLayer) }),
         ]
     }
 }

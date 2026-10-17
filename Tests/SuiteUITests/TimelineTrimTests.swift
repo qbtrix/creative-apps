@@ -66,6 +66,16 @@ import Testing
         #expect(log.calls == ["trim a end 40", "trim end"])
     }
 
+    /// #1796: a release whose sample moved past the last change trims to it, then ends.
+    @Test func theReleaseSampleTrimsBeforeTheEnd() throws {
+        let log = Log()
+        var trim = try #require(
+            TimelineLanePress.beginTrim(target(500), playhead: 0, mapping: Self.mapping))
+        let click = trim.release(atDX: -100, id: "a", actions: log.actions)
+        #expect(!click)
+        #expect(log.calls == ["trim a end 40", "trim end"])
+    }
+
     @Test func theStartTrimsTooAndStopsAFrameShortOfTheEnd() throws {
         let log = Log()
         var trim = try #require(

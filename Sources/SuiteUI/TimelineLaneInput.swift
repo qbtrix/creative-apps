@@ -11,7 +11,8 @@
 // on an unpicked key picks it at once, a picked key's pick waits for a release
 // that didn't move, and a drag moves the picked keys (TimelineKeyDrag: snapped
 // to the playhead, the group clamped, onMoveKeyframes only on a frame step,
-// onEndKeyDrag once; Escape sends the steps back and ends it). A time pill
+// onEndKeyDrag once, after the release's own sample has moved them; Escape
+// sends the steps back and ends it). A time pill
 // above the grabbed key shows its frame while it moves, and each step reports
 // a `step` mark in series `key-drag`. The drag's bookkeeping sits in a box
 // SwiftUI doesn't watch; only the pill's frame is state, written per step.
@@ -20,6 +21,7 @@
 // the playhead and kept by the trim rule, onTrim only when the edge's frame
 // changes, onEndTrim once on release; the same pill shows the edge's frame,
 // and the pointer over a clip end is the column-resize pointer.
+// A press first takes the strip's focus (TimelineFocusClaim, #1813).
 // It owns the lane's hover, presentation state: which lane the pointer is
 // over and the key under it. A hover sample writes only when that changes,
 // and the change fades with SuiteMotion.state (at once under Reduce Motion),
@@ -46,6 +48,7 @@ struct TimelineLaneInput<ID: Hashable & Sendable>: ViewModifier {
     @State private var monitor: Any?
     @Environment(\.suiteReduceMotion) private var reduceMotion
     @Environment(\.timelineFadeMark) private var fadeMark
+    @Environment(\.timelineFocusClaim) private var focusClaim
 
     func body(content: Content) -> some View {
         content
@@ -55,7 +58,7 @@ struct TimelineLaneInput<ID: Hashable & Sendable>: ViewModifier {
             .gesture(
                 DragGesture(minimumDistance: 0)
                     .onChanged { value in dragChanged(value) }
-                    .onEnded { _ in dragEnded() })
+                    .onEnded { value in dragEnded(value) })
             .onChange(of: rightPresses) {
                 let target: TimelineLanePress.Target = hover?.key.map { .key($0) } ?? .bed
                 TimelineLanePress.rightPress(target, on: track, actions: actions)
@@ -99,6 +102,7 @@ struct TimelineLaneInput<ID: Hashable & Sendable>: ViewModifier {
     /// start a key drag or a trim; later samples move it.
     private func dragChanged(_ value: DragGesture.Value) {
         if !press.active {
+            focusClaim?.claim()
             press.active = true
             press.modifiers = Self.modifiers(NSEvent.modifierFlags)
             press.target = TimelineLanePress.target(atX: value.startLocation.x, on: track, mapping: mapping)
@@ -121,8 +125,8 @@ struct TimelineLaneInput<ID: Hashable & Sendable>: ViewModifier {
         if stepped { showStep(drag) }
     }
 
-    /// The release: ends a drag once, or acts as a click.
-    private func dragEnded() {
+    /// The release: takes the last sample's move (#1796), then ends a drag once, or acts as a click.
+    private func dragEnded(_ value: DragGesture.Value) {
         defer {
             press.reset()
             pillFrame = nil
@@ -130,11 +134,11 @@ struct TimelineLaneInput<ID: Hashable & Sendable>: ViewModifier {
         guard press.active else { return }
         var click = true
         if var drag = press.drag {
-            click = drag.release(actions: actions)
+            click = drag.release(atDX: Double(value.translation.width), actions: actions)
             press.drag = drag
         }
         if var trim = press.trim {
-            click = trim.release(actions: actions)
+            click = trim.release(atDX: Double(value.translation.width), id: track.id, actions: actions)
             press.trim = trim
         }
         if click { TimelineLanePress.press(press.target, modifiers: press.modifiers, on: track, actions: actions) }
@@ -345,6 +349,13 @@ struct TimelineKeyDrag: Equatable, Sendable {
         actions.onEndKeyDrag()
         return false
     }
+
+    /// The release at pointer `dx`: the release's own sample can move further
+    /// than the last change did, so that step goes first, then the release (#1796).
+    @MainActor mutating func release<ID>(atDX dx: Double, actions: TimelineLaneActions<ID>) -> Bool {
+        _ = move(dx: dx, actions: actions)
+        return release(actions: actions)
+    }
 }
 
 /// A clip-end trim on one lane, with no view (TL-15): the grabbed edge follows
@@ -398,6 +409,12 @@ struct TimelineTrimDrag: Equatable, Sendable {
         guard moved else { return true }
         actions.onEndTrim()
         return false
+    }
+
+    /// The release at pointer `dx`: the edge takes the release's sample first, then the trim ends (#1796).
+    @MainActor mutating func release<ID>(atDX dx: Double, id: ID, actions: TimelineLaneActions<ID>) -> Bool {
+        _ = move(dx: dx, id: id, actions: actions)
+        return release(actions: actions)
     }
 }
 

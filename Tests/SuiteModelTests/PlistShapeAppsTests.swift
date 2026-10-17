@@ -58,6 +58,18 @@ import Testing
         #expect(p["CFBundlePackageType"] as? String == "APPL")
     }
 
+    /// #2105: every helper carries the launcher's version, so About and Get Info show one.
+    @Test(arguments: rows) func versionMatchesTheLauncher(_ row: Row) throws {
+        let p = try Self.plist(row.name)
+        let launcher = try Self.plist("AfterGlow")
+        for key in ["CFBundleShortVersionString", "CFBundleVersion"] {
+            let version = try #require(launcher[key] as? String)
+            #expect(p[key] as? String == version, "\(row.name) \(key)")
+        }
+        #expect(p["CFBundleInfoDictionaryVersion"] as? String == "6.0")
+        #expect(p["CFBundleDevelopmentRegion"] as? String == "en")
+    }
+
     @Test(arguments: rows) func ownerOfItsOwnFormatOnly(_ row: Row) throws {
         let types = Self.documentTypes(try Self.plist(row.name))
         let owners = types.filter { $0.rank == "Owner" }
