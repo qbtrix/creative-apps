@@ -32,6 +32,10 @@ enum DesignIntent {
     case editText(String)
     case textDraft(String), commitText, cancelText
     case zoomIn, zoomOut, fit
+    /// Cut, Copy and Paste: declared here, performed once the pasteboard bridge lands (D0-5d).
+    case copy, cut, paste
+    case zoomToSelection
+    case renamePage(String, String)
 }
 
 /// Where a view sends its intents.

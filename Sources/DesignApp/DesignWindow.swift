@@ -36,6 +36,10 @@ struct DesignWindow: View {
     @State private var note: String?
     @State private var problem: String?
     @State private var started = false
+    /// The rect Zoom to Selection last fitted; the canvas takes it once its `show` input lands (D0-5b).
+    @State private var show: DesignRect?
+    /// The launch arguments (`-DesignServices`, `-DesignFixture`, `-DesignWindowSize`), parsed once.
+    private let options = DesignWindowOptions(arguments: ProcessInfo.processInfo.arguments)
     @Environment(\.openWindow) private var openWindow
 
     /// The launch file opens in the first window only.
@@ -59,6 +63,8 @@ struct DesignWindow: View {
             onViewport: viewportChanged, onZoom: setZoom, perform: perform
         )
         .focusedSceneValue(\.designMenu, DesignMenu(model: model, perform: perform))
+        // The launch size is the window's ideal size, floored at the minimum the app allows.
+        .frame(idealWidth: launchSize?.width, idealHeight: launchSize?.height)
         .onChange(of: model.selectedPageID) {
             fitPending = true
             fit()
@@ -106,7 +112,30 @@ struct DesignWindow: View {
         case .zoomIn: setZoom(ViewerZoom.zoomedIn(from: zoom))
         case .zoomOut: setZoom(ViewerZoom.zoomedOut(from: zoom))
         case .fit: fit()
+        // Cut, Copy and Paste: the pasteboard bridge (D0-5d) performs these; until then they do nothing.
+        case .copy, .cut, .paste: break
+        case .zoomToSelection:
+            guard let rect = model.zoomToSelectionRect else { return }
+            show = rect
+            zoomToFit(rect)
+        case .renamePage(let id, let name): try? model.renamePage(id, to: name)
         }
+    }
+
+    /// The window size the launch arguments ask for, floored at SuiteSize.windowMinimum; nil without them.
+    private var launchSize: CGSize? {
+        guard let width = options.windowWidth, let height = options.windowHeight else { return nil }
+        return CGSize(
+            width: Swift.max(CGFloat(width), SuiteSize.windowMinimum.width),
+            height: Swift.max(CGFloat(height), SuiteSize.windowMinimum.height))
+    }
+
+    /// Zooms to fit `rect` in the viewport clear of the floating palette, as Fit Page does for a page.
+    private func zoomToFit(_ rect: DesignRect) {
+        guard viewport != .zero else { return }
+        let layout = EditorDetailLayout(viewport: viewport, toolCount: DesignTool.allCases.count)
+        let scale = layout.fitScale(artboard: rect.cgRect.size)
+        setZoom(scale > 0 ? scale : 1)
     }
 
     // MARK: Zoom
@@ -141,6 +170,7 @@ struct DesignWindow: View {
     private func start() {
         guard !started else { return }
         started = true
+        model.useServices(options.services)
         if let file = launch?.file {
             open(file)
         } else if launch?.startsNewFile == true {
@@ -148,6 +178,7 @@ struct DesignWindow: View {
         } else {
             openLaunchFile()
         }
+        if let name = options.fixture, !model.openFixture(name) { note = "No fixture named \(name)." }
     }
 
     private func openLaunchFile() {

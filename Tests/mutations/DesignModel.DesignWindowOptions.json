@@ -1,0 +1,44 @@
+[
+  {
+    "label": "-DesignServices fake selects the live set",
+    "file": "Sources/DesignModel/DesignWindowOptions.swift",
+    "find": "== \"fake\"",
+    "replace": "== \"live\"",
+    "tests": "DesignWindowOptionsTests"
+  },
+  {
+    "label": "a zero width window size is accepted",
+    "file": "Sources/DesignModel/DesignWindowOptions.swift",
+    "find": "width > 0, height > 0",
+    "replace": "width >= 0, height > 0",
+    "tests": "DesignWindowOptionsTests"
+  },
+  {
+    "label": "one selected layer reads as plural",
+    "file": "Sources/DesignModel/DesignWindowOptions.swift",
+    "find": "? \"1 Layer\" :",
+    "replace": "? \"1 Layers\" :",
+    "tests": "DesignWindowOptionsTests"
+  },
+  {
+    "label": "openFixture drops the services",
+    "file": "Sources/DesignModel/DesignWindowOptions.swift",
+    "find": "fixture.services = services",
+    "replace": "fixture.services = .live",
+    "tests": "DesignWindowOptionsTests"
+  },
+  {
+    "label": "an unknown fixture reports success",
+    "file": "Sources/DesignModel/DesignWindowOptions.swift",
+    "find": "else { return false }",
+    "replace": "else { return true }",
+    "tests": "DesignWindowOptionsTests"
+  },
+  {
+    "label": "Zoom to Selection reason reworded",
+    "file": "Sources/DesignModel/DesignWindowOptions.swift",
+    "find": "\"Select a layer first.\"",
+    "replace": "\"Select a layer.\"",
+    "tests": "DesignWindowOptionsTests"
+  }
+]

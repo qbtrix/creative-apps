@@ -33,8 +33,8 @@ struct DesignEditor: View {
     var body: some View {
         SuiteWindow(
             title: documentName ?? (model.isOpen ? "Untitled" : "Design"),
-            // The save state's place; it reads nothing until Design has an unsaved state (#270).
-            subtitle: nil,
+            // The save state's place (DesignSaveStatus); empty until files-history fills it (#270).
+            subtitle: DesignSaveStatus.subtitle(model),
             documentActions: Self.documentItems.map { action($0) },
             actions: Self.trailingItems.map { action($0) },
             inspectorWidth: SuiteSize.editorPanelWidth + 2 * SuiteSpacing.m
@@ -50,8 +50,13 @@ struct DesignEditor: View {
             } status: {
                 ViewerStatusBar(zoom: model.isOpen ? zoom : 0, size: model.selectedPage?.sizeText ?? "No file open") {
                     if let note { Text(note) }
+                    if let count = model.selectionCountText {
+                        Text(count).accessibilityIdentifier(DesignControlID.statusSelection)
+                    }
+                    Text(DesignSaveStatus.label(model))
+                        .accessibilityIdentifier(DesignControlID.statusSave)
                     Text(model.tool.title)
-                        .accessibilityIdentifier("design.status.tool")
+                        .accessibilityIdentifier(DesignControlID.statusTool)
                 }
             }
         } inspector: {
