@@ -113,7 +113,6 @@ private struct GalleryEditorWindowPage: View {
             }
         }
         .listStyle(.sidebar)
-        .accessibilityIdentifier("suite.gallery.editor-window.list")
     }
 
     private var pageActions: [ToolbarAction] {
