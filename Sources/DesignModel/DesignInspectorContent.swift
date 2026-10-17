@@ -1,7 +1,8 @@
 // DesignInspectorContent.swift: the words Design's inspector shows about the
 // selection: the header lines for a node and for a page, whether a kind has a
 // fill row to edit, the value a row shows over one or several selected layers
-// (the value they all share, or nil, which the view draws as "Mixed"), the
+// (the value they all share, or nil, which the view draws as "Mixed"; for the
+// Text rows, the style the selected text layers share), the
 // Opacity row's percent text, and the hint the value column shows when the
 // selection can't be edited ("Unlock A to change it.", #276). Sizes are whole
 // points, rounded the way DesignPage.sizeText rounds them, and a non-finite or
@@ -16,8 +17,9 @@ extension DesignNode {
 }
 
 extension DesignPage {
-    /// The header line under the name: "Frame 1440 × 1024 pt".
-    public var inspectorDetails: [String] { ["Frame \(sizeText)"] }
+    /// The header line under the name: the page size, "1440 × 1024 pt". No "Frame" prefix:
+    /// that word names a layer kind, so it read as the size of a frame layer on the page.
+    public var inspectorDetails: [String] { [sizeText] }
 }
 
 extension DesignNodeKind {
@@ -39,6 +41,14 @@ extension DesignWorkspace {
         let values = selectedNodes.map(read)
         guard let first = values.first else { return nil }
         return values.dropFirst().allSatisfy { $0 == first } ? first : nil
+    }
+
+    /// The Text rows' value: the style every selected text layer shares, other kinds left out (they
+    /// have no text to style), or nil ("Mixed") when they differ or none is a text layer.
+    public var sharedTextStyle: DesignTextStyle? {
+        let styles = selectedNodes.filter { $0.kind == .text }.map(\.textStyle)
+        guard let style = styles.first else { return nil }
+        return styles.allSatisfy { $0 == style } ? style : nil
     }
 
     /// The Opacity row's text, the shared opacity as a whole percent ("50%"); nil when mixed.

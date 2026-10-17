@@ -7,7 +7,8 @@
 // labelled "Rendered frame" whose value is the Model's renderedFrameSummary
 // ("Rendered frame 12 at 480 × 270"); its note is `halo.viewer.renderedNote`,
 // labelled with renderedFrameNote ("Rendered frame is out of date." when
-// stale, else the frame's undrawn-text note). After each ⌘R there is no
+// stale, else the frame's undrawn-text note), laid out below the image's
+// bottom edge (#2345). After each ⌘R there is no
 // note: Rig is a null and is never counted as a skipped layer (#457). A
 // value XCUITest reads empty (#262) can't be compared, so then the frame is
 // read from the label of the artboard's `halo.viewer.summary` ("Frame 12:
@@ -77,13 +78,19 @@ final class HaloRenderFrameJourneyTests: XCTestCase {
         XCTAssert(value().isEmpty, "the rendered frame reads \(value()), not \(want)")
     }
 
-    /// `halo.viewer.renderedNote` reads `text` within three seconds.
+    /// `halo.viewer.renderedNote` reads `text` within three seconds and sits
+    /// below the rendered frame's bottom edge.
     @MainActor private func expectNote(reads text: String, _ halo: Journey) {
         let note = halo.element(Self.noteID)
         XCTAssert(note.waitForExistence(timeout: 5), "the rendered frame shows no note (\(Self.noteID))")
         XCTAssert(
             waitFor { note.label == text || (note.value as? String) == text },
             "the rendered frame's note reads \(note.label), not \(text)")
+        // Under the artboard on the surround, never over the artwork (#2345).
+        let rendered = halo.element(Self.renderedID)
+        XCTAssertGreaterThanOrEqual(
+            note.frame.minY, rendered.frame.maxY,
+            "the note (\(note.frame)) overlaps the rendered frame (\(rendered.frame))")
     }
 
     /// No `halo.viewer.renderedNote` shows within three seconds; `when` names the step.

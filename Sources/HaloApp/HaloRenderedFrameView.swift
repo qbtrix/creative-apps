@@ -6,8 +6,8 @@
 // layers, so its pixels sit on theirs; it is `halo.viewer.rendered` with
 // `renderedFrameSummary` ("Rendered frame 12 at 480 × 270") as its value.
 // `renderedFrameNote` ("Rendered frame is out of date." when stale, else the
-// frame's undrawn-text note) is captioned just under the artboard as
-// `halo.viewer.renderedNote`, with the warning triangle. The image and its
+// frame's undrawn-text note) is captioned just under the artboard, on the
+// canvas surround, as `halo.viewer.renderedNote`, with the warning triangle. The image and its
 // note are one Equatable view, so a body pass that changes neither skips
 // making the image again. Reads its model and never acts.
 import HaloModel
@@ -31,7 +31,7 @@ struct HaloRenderedFrameView: View {
 }
 
 /// The rendered frame over the artboard's fitted frame, and its note under it.
-private struct HaloRenderedImage: View, Equatable {
+struct HaloRenderedImage: View, Equatable {
     let frame: HaloRenderedFrame
     let artboard: CGSize
     let summary: String
@@ -48,12 +48,15 @@ private struct HaloRenderedImage: View, Equatable {
                 .accessibilityValue(summary)
                 .accessibilityIdentifier("halo.viewer.rendered")
                 .aspectRatio(artboard, contentMode: .fit)
-                // Under the artboard, in the canvas inset: the note's top
-                // sits a small gap below the image's bottom edge.
+                // Under the artboard, in the canvas inset, on the window's
+                // surround (#2345): a zero-height frame on the image's bottom
+                // edge that the note hangs from, a small gap below it, so no
+                // glyph lands on the artwork and the image doesn't move.
                 .overlay(alignment: .bottom) {
                     if let note {
                         HaloRenderedNote(text: note)
-                            .alignmentGuide(.bottom) { $0[.top] - SuiteSpacing.xs }
+                            .padding(.top, SuiteSpacing.xs)
+                            .frame(height: .zero, alignment: .top)
                     }
                 }
                 .frame(maxWidth: artboard.width, maxHeight: artboard.height)

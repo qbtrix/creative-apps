@@ -5,7 +5,9 @@
 // playhead. Beside it a 28 pt slot always holds room for the key-here
 // diamond, so the row never changes width while the timeline scrubs: empty
 // while not animated, a hollow diamond to add a key at the playhead, a filled
-// one to remove it. Hover fills the circle; disabled draws at 40%. KeyState
+// one to remove it. Hover fills the circle; disabled draws at 40%, and with
+// `unavailableHelp` both buttons show that reason as their tooltip, so a
+// mouse user learns why the pair does nothing (`help(_:state:unavailable:)`). KeyState
 // carries the symbol, color and VoiceOver value of each state. Given an `id`,
 // the stopwatch reads it as its accessibility identifier and the diamond reads
 // `diamondID(id)`. Set the id here, never on the KeyframeButton from outside:
@@ -43,6 +45,7 @@ public struct KeyframeButton: View {
     private let property: String
     private let id: String?
     private let state: KeyState
+    private let unavailableHelp: String?
     private let onToggle: @MainActor () -> Void
     private let onKey: @MainActor () -> Void
     @State private var hovering = false
@@ -51,20 +54,31 @@ public struct KeyframeButton: View {
 
     /// `onToggle` turns animation on or off for `property`; `onKey` adds or
     /// removes the key at the playhead. `id` identifies the stopwatch, and
-    /// `diamondID(id)` the diamond.
+    /// `diamondID(id)` the diamond. `unavailableHelp` is why the pair can't act
+    /// while the host disables it; both buttons show it as their tooltip.
     public init(
-        _ property: String, id: String? = nil, state: KeyState, onToggle: @escaping @MainActor () -> Void,
-        onKey: @escaping @MainActor () -> Void
+        _ property: String, id: String? = nil, state: KeyState, unavailableHelp: String? = nil,
+        onToggle: @escaping @MainActor () -> Void, onKey: @escaping @MainActor () -> Void
     ) {
         self.property = property
         self.id = id
         self.state = state
+        self.unavailableHelp = unavailableHelp
         self.onToggle = onToggle
         self.onKey = onKey
     }
 
+    /// The stopwatch's and the diamond's tooltips: each one's action, or `unavailable` on both while it can't act.
+    nonisolated public static func help(
+        _ property: String, state: KeyState, unavailable: String? = nil
+    ) -> (stopwatch: String, diamond: String?) {
+        let diamond = state.diamond.map { unavailable ?? "\($0.action) for \(property)" }
+        return (unavailable ?? (state == .idle ? "Animate \(property)" : "Stop Animating \(property)"), diamond)
+    }
+
     public var body: some View {
-        HStack(spacing: 0) {
+        let help = Self.help(property, state: state, unavailable: unavailableHelp)
+        return HStack(spacing: 0) {
             Button(action: onToggle) {
                 Image(systemName: state.symbol)
                     .imageScale(.small)
@@ -77,7 +91,7 @@ public struct KeyframeButton: View {
             }
             .buttonStyle(.plain)
             .onHover { hovering = $0 }
-            .help(state == .idle ? "Animate \(property)" : "Stop Animating \(property)")
+            .help(help.stopwatch)
             .accessibilityLabel("Animate \(property)")
             .accessibilityValue(state.voiceOverValue)
             .accessibilityIdentifier(id ?? state.symbol)
@@ -91,7 +105,7 @@ public struct KeyframeButton: View {
                             .contentShape(.rect)
                     }
                     .buttonStyle(.plain)
-                    .help("\(diamond.action) for \(property)")
+                    .help(help.diamond ?? "")
                     .accessibilityLabel("\(diamond.action), \(property)")
                     .accessibilityIdentifier(id.map(Self.diamondID) ?? diamond.symbol)
                 }

@@ -3,17 +3,18 @@
 // layer shows its header (name, then kind unless the name says it, then size),
 // then Align (DesignAlignBar), then Layer (Hidden and Locked checkboxes), Frame (X, Y, W and H as scrub
 // fields) and Fill (the color well; a text layer's is its text color, a group
-// has none), then for a text layer its Text section (DesignInspectorText, blank until
-// style-rows gives it rows). A
+// has none), then Text (DesignInspectorText, disabled on a layer that isn't text). A
 // locked layer, or one inside a locked group, can't be edited, so Frame and
 // Fill are disabled and a line says why. With only a page selected it shows
 // DesignInspectorPage. With several layers selected (D0-5c) it shows "<n> Layers",
 // Align with Distribute, then Frame and Fill: a row whose value every selected
 // layer shares edits it on all of them (`.setStyle`), and one whose values differ
-// reads "Mixed" as plain text (a mixed scrub field is needs-ui #2148). Every
+// reads "Mixed" as plain text (a mixed scrub field is needs-ui #2148), then the
+// Text section when any of them is a text layer. Every
 // control's help comes from the Model, and each carries its DesignControlID and
 // lists itself in `suite.controls`. Values in, intents out; the model clamps and
-// refuses what it must.
+// refuses what it must. Opacity, Corners and Stroke, the hint and the frame
+// fields' live scrub are DesignInspectorStyle.
 import DesignModel
 import SuiteUI
 import SwiftUI
@@ -29,8 +30,11 @@ struct DesignInspector: View {
                     DesignSeveralProperties(model: model, perform: perform)
                 } else if let node = model.selectedNode {
                     DesignNodeProperties(
-                        node: node, lockHelp: model.lockHelp(node.id), alignHelp: model.alignHelps, perform: perform
+                        model: model, node: node, lockHelp: model.lockHelp(node.id), alignHelp: model.alignHelps,
+                        perform: perform
                     ).id(node.id)
+                    // Every layer shows the Text rows; on one that isn't text they are disabled and say why.
+                    DesignInspectorText(model: model, perform: perform).id(node.id)
                 } else if let page = model.selectedPage {
                     DesignPageProperties(page: page).id(page.id)
                 }
@@ -73,32 +77,30 @@ private struct FrameRow: Identifiable {
         }
     }
 
-    /// A scrub field for this row. The end of a drag or a Return ends the edit run, so the next
-    /// one is its own undo step (#536); ScrubField's own onEnd replaces this once it is public
-    /// (#745). Disabled with `help` as its tooltip when it can't edit.
-    @MainActor func scrubField(
-        _ value: Double, help: String?, perform: @escaping DesignPerform,
-        onChange: @escaping @MainActor (Double) -> Void
-    ) -> some View {
-        ScrubField(name, value: value, in: range, step: 1, unit: "pt", decimals: 1, onChange: onChange)
-            .simultaneousGesture(DragGesture(minimumDistance: 0).onEnded { _ in perform(.endEditRun) })
-            .onSubmit { perform(.endEditRun) }
-            .disabled(help != nil)
-            .help(help ?? "")
-            .suiteControl(id: DesignControlID.frameField(field), enabled: help == nil, reason: help)
+    /// This row's scrub field over the selection (DesignFrameScrub): a drag previews on the live box
+    /// and lands as one step (#536). Disabled with `help` as its tooltip when it can't edit.
+    @MainActor func scrubField(_ model: DesignWorkspace, help: String?, perform: @escaping DesignPerform) -> some View {
+        DesignFrameScrub(
+            model: model, name: name, field: field, range: range, read: { value(in: $0.frame) }, help: help,
+            perform: perform)
     }
 }
 
 /// The selected layer's header and sections.
 private struct DesignNodeProperties: View {
+    let model: DesignWorkspace
     let node: DesignNode
     /// Why the layer can't be edited (it or a group around it is locked), or nil.
     let lockHelp: String?
     /// Why each Align command can't run, keyed by edge.
     let alignHelp: [DesignAlignEdge: String]
     let perform: DesignPerform
+    /// The X field's leading x, where the hint starts.
+    @State private var valueColumn: CGFloat = 0
 
     var body: some View {
+        // Why the rows are off, named for the layer ("Unlock A to change it."), or nil.
+        let hint = model.styleHelp(.opacity) == nil ? nil : model.styleHint(.opacity)
         VStack(alignment: .leading, spacing: 0) {
             InspectorHeader(node.name, details: node.inspectorDetails)
             DesignAlignBar(help: alignHelp, perform: perform)
@@ -111,26 +113,22 @@ private struct DesignNodeProperties: View {
                     Toggle("Locked", isOn: Binding(get: { node.isLocked }, set: { perform(.setLocked(node.id, $0)) }))
                         .toggleStyle(.checkbox)
                 }
-                if let lockHelp { DesignPanelHint(lockHelp) }
+                DesignOpacityRow(model: model, perform: perform)
+                if let hint { DesignStyleHint(text: hint, column: valueColumn) }
             }
             InspectorSection("Frame") {
                 VStack(alignment: .leading, spacing: SuiteSpacing.xs) {
                     ForEach(FrameRow.all) { row in
                         InspectorRow(row.label) {
-                            row.scrubField(row.value(in: node.frame), help: lockHelp, perform: perform) { new in
-                                var frame = node.frame
-                                switch row.field {
-                                case .x: frame.x = new
-                                case .y: frame.y = new
-                                case .width: frame.width = new
-                                case .height: frame.height = new
-                                }
-                                perform(.setFrame(node.id, x: frame.x, y: frame.y, width: frame.width, height: frame.height))
-                            }
+                            row.scrubField(model, help: lockHelp, perform: perform)
+                                .onGeometryChange(for: CGFloat.self) {
+                                    $0.frame(in: .named(DesignStyleHint.space)).minX
+                                } action: { if row.field == .x { valueColumn = $0 } }
                         }
                     }
                 }
             }
+            DesignInspectorStyle(model: model, perform: perform)
             if let label = node.kind.fillLabel {
                 InspectorSection("Fill") {
                     InspectorColorWellRow(label, color: HexColor(node.fill.red, node.fill.green, node.fill.blue)) {
@@ -143,8 +141,8 @@ private struct DesignNodeProperties: View {
                         id: DesignControlID.inspectorFill, enabled: lockHelp == nil, reason: lockHelp, identifies: false)
                 }
             }
-            if node.kind == .text { DesignInspectorText() }
         }
+        .coordinateSpace(.named(DesignStyleHint.space))
     }
 }
 
@@ -162,10 +160,8 @@ private struct DesignSeveralProperties: View {
                 VStack(alignment: .leading, spacing: SuiteSpacing.xs) {
                     ForEach(FrameRow.all) { row in
                         InspectorRow(row.label) {
-                            if let shared = model.sharedValue({ row.value(in: $0.frame) }) {
-                                row.scrubField(shared, help: frameHelp, perform: perform) {
-                                    perform(.setStyle(.frame(row.field, $0)))
-                                }
+                            if model.sharedValue({ row.value(in: $0.frame) }) != nil {
+                                row.scrubField(model, help: frameHelp, perform: perform)
                             } else {
                                 mixed(frameHelp)
                             }
@@ -190,6 +186,9 @@ private struct DesignSeveralProperties: View {
                         InspectorRow("Fill") { mixed(fillHelp) }
                     }
                 }
+            }
+            if model.selectedNodes.contains(where: { $0.kind == .text }) {
+                DesignInspectorText(model: model, perform: perform)
             }
         }
     }

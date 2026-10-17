@@ -1,7 +1,8 @@
 // DesignInspectorSharedValueTests.swift: the inspector's value over several
 // layers: the value they all share, or nil ("Mixed") when they differ; the
-// opacity row's percent text; and the hint the value column shows when the
-// selection can't be edited (#276). On `cards`. Runs on Linux and macOS.
+// opacity row's percent text; the Text rows' style over the selected text
+// layers only (sharedTextStyle); and the hint the value column shows when the
+// selection can't be edited (#276), a hidden group's included. On `cards`. Runs on Linux and macOS.
 import DesignModel
 import Testing
 
@@ -123,6 +124,19 @@ extension DesignWorkspace {
     #expect(workspace.styleHint(.opacity) == "Show E1 to change it.")
 }
 
+@Test func aLayerInsideAHiddenGroupGetsTheHiddenHintOnRowsWhoseHelpIsSilent() throws {
+    var workspace = DesignFixtures.cards
+    workspace.selectItem("node-7")
+    try workspace.setNodeHidden("node-6", true)
+    #expect(workspace.selectedNode?.isHidden == false)
+    // Frame, Fill and Corner Radius have their own help, which doesn't know the group is hidden.
+    #expect(workspace.styleHelp(.frame) == nil)
+    #expect(workspace.styleHelp(.fill) == nil)
+    for property in DesignStyleProperty.allCases {
+        #expect(workspace.styleHint(property) == "Show E1 to change it.", "\(property)")
+    }
+}
+
 @Test func aLockedLayerAmongSeveralSelectedNamesItAndLockedWinsOverHidden() throws {
     var workspace = cardsWithAAndB()
     #expect(workspace.styleHint(.opacity) == nil)
@@ -137,4 +151,36 @@ extension DesignWorkspace {
     let workspace = DesignFixtures.cards
     #expect(workspace.styleHint(.opacity) == "Select a layer first.")
     #expect(workspace.styleHint(.opacity) == workspace.styleHelp(.opacity))
+}
+
+/// Title at 32 pt, Bold, Center: the style Title is given on `.live`.
+private let boldTitle = DesignTextStyle(family: "System", size: 32, weight: 700, alignment: .center)
+
+/// `cards` on `.live` with Title (node-5) set to `boldTitle`.
+private func cardsWithBoldTitle() throws -> DesignWorkspace {
+    var workspace = DesignFixtures.cards
+    workspace.useServices(.live)
+    workspace.selectItem("node-5")
+    try workspace.setStyle(.textStyle(boldTitle))
+    return workspace
+}
+
+@Test func theTextStyleLeavesOutLayersThatAreNotText() throws {
+    var workspace = try cardsWithBoldTitle()
+    workspace.toggleSelection("node-2")
+    #expect(workspace.selectedNodeIDs == ["node-5", "node-2"])
+    #expect(workspace.sharedValue(\.textStyle) == nil)
+    #expect(workspace.sharedTextStyle == boldTitle)
+}
+
+@Test func twoTextLayersThatDifferReadMixedAndNoTextLayerReadsNothing() throws {
+    var workspace = try cardsWithBoldTitle()
+    let added = try workspace.addNode(.text, frame: DesignRect(x: 400, y: 40, width: 120, height: 24))
+    #expect(workspace.sharedTextStyle == .default)
+    workspace.selectItem("node-5")
+    workspace.toggleSelection(added)
+    #expect(workspace.sharedTextStyle == nil)
+    workspace.selectItem("node-2")
+    workspace.toggleSelection("node-3")
+    #expect(workspace.sharedTextStyle == nil)
 }

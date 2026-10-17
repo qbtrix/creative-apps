@@ -13,7 +13,12 @@
 // why, and every toolbar command is also in the menu bar (DesignCommands).
 // Undo and Redo carry `design.bar.undo` / `design.bar.redo`: their titles name
 // the edit, so the identifier is what stays put for the UI journeys and the
-// app audit.
+// app audit. Every toolbar item (through ToolbarAction.identifier), each tool
+// in the floating tool box (`design.tool.*`) and the status line's note,
+// selection count and tool carry their DesignControlID and list themselves in
+// `suite.controls` (.suiteControl), which DesignWindow's `.suiteProbes()`
+// publishes. In debug builds `bodyRuns` counts its body's runs, so
+// DesignWindowDragTests can prove a canvas drag leaves the editor still.
 import DesignModel
 import SuiteUI
 import SwiftUI
@@ -31,7 +36,15 @@ struct DesignEditor: View {
     private static let documentItems: [DesignToolbarItem] = [.newFile, .open, .save]
     private static let trailingItems: [DesignToolbarItem] = [.undo, .redo, .zoomOut, .fit, .zoomIn]
 
+    #if DEBUG
+    /// How many times an editor's body ran; DesignWindowDragTests counts a drag's.
+    static var bodyRuns = 0
+    #endif
+
     var body: some View {
+        #if DEBUG
+        let _ = Self.bodyRuns += 1
+        #endif
         SuiteWindow(
             title: documentName ?? (model.isOpen ? "Untitled" : "Design"),
             // The save state's place; it reads nothing until Design has an unsaved state (#270).
@@ -46,18 +59,21 @@ struct DesignEditor: View {
                 DesignCanvas(model: model, zoom: zoom, onViewport: onViewport, onZoom: onZoom, perform: perform)
             } palette: {
                 if model.isOpen {
-                    ToolbarGroup(tools: DesignTool.allCases, selected: model.tool) { perform(.tool($0)) }
+                    ToolbarGroup(palette, axis: .vertical, style: .floating)
                 }
             } status: {
                 ViewerStatusBar(zoom: model.isOpen ? zoom : 0, size: model.selectedPage?.sizeText ?? "No file open") {
-                    if let note { Text(note) }
+                    if let note {
+                        Text(note)
+                            .suiteControl(id: DesignControlID.statusNote, enabled: true, reason: nil)
+                    }
                     if let count = model.selectionCountText {
                         Text(count)
-                            .accessibilityIdentifier(DesignControlID.statusSelection)
+                            .suiteControl(id: DesignControlID.statusSelection, enabled: true, reason: nil)
                     }
                     DesignSaveStatus(model: model)
                     Text(model.tool.title)
-                        .accessibilityIdentifier(DesignControlID.statusTool)
+                        .suiteControl(id: DesignControlID.statusTool, enabled: true, reason: nil)
                 }
             }
         } inspector: {
@@ -66,6 +82,17 @@ struct DesignEditor: View {
             } else {
                 EmptyStateView("No Selection", systemImage: "square.dashed", message: "Create a file to start designing.")
             }
+        }
+    }
+
+    /// The floating tool box: one button per tool, each with its `design.tool.*` id, so it is
+    /// identified and listed in `suite.controls` (ToolbarGroup registers an action's identifier).
+    private var palette: [ToolbarAction] {
+        DesignTool.allCases.map { tool in
+            ToolbarAction(
+                tool.title, systemImage: tool.systemImage, isSelected: tool == model.tool,
+                unavailableHelp: tool.unavailableHelp, shortcut: tool.shortcut, identifier: DesignControlID.tool(tool)
+            ) { perform(.tool(tool)) }
         }
     }
 

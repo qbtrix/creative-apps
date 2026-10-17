@@ -33,6 +33,9 @@
 // then each later sample goes to DesignLiveDrag's copy, which only DesignCanvas
 // draws, so the window doesn't run per sample. Mouse-up, or the scrub's end
 // run, replays the last one into the workspace as one step (`live.end(into:)`).
+//
+// `.suiteProbes()` sits on the root (D0-7a), so the window's `suite.controls`
+// lists every control the editor registers with its DesignControlID.
 import AppKit
 import DesignModel
 import SuiteUI
@@ -107,6 +110,9 @@ struct DesignWindow: View {
         .task { start() }
         .modifier(DesignClosePrompt(model: model))
         .environment(\.designLiveDrag, live)
+        // The outermost call publishes `suite.perf` and `suite.controls` under -SuitePerfProbe;
+        // SuiteWindow's inner one then adds nothing, so the menus' and alert's hosts share one inventory.
+        .suiteProbes()
     }
 
     private func perform(_ intent: DesignIntent) {

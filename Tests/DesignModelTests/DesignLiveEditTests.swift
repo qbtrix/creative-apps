@@ -100,3 +100,28 @@ private func sample(_ i: Int) -> DesignPoint { pt(150 + Double(i), 140 + Double(
     #expect(model == cards())
     #expect(live.workspace == nil)
 }
+
+/// The i-th of 120 samples off A's bottom-right handle, 2 pt right and half a point down each.
+private func corner(_ i: Int) -> DesignPoint { pt(200 + 2 * Double(i), 180 + Double(i) / 2) }
+
+@Test func aShiftResizeLandsWithItsModifiers() throws {
+    var model = cards()
+    model.selectItem("node-2")
+    var live = DesignLiveEdit()
+    model.drag(from: corner(0), to: corner(0), modifiers: [.shift])
+    live.begin(from: model)
+    for i in 1...120 { live.sample(from: corner(0), to: corner(i), modifiers: [.shift]) }
+    let shown = try #require(live.workspace?.selectedNode?.frame)
+    #expect(shown.width != 100 && abs(shown.width * 80 - shown.height * 100) < 1e-9)
+    #expect(model.selectedNode?.frame == rc(100, 100, 100, 80))
+
+    live.end(into: &model)
+    var direct = cards()
+    direct.selectItem("node-2")
+    for i in 0...120 { direct.drag(from: corner(0), to: corner(i), modifiers: [.shift]) }
+    direct.endDrag()
+    #expect(model == direct)
+    #expect(model.selectedNode?.frame == shown)
+    #expect(model.undoActionName == "Undo Resize")
+    #expect(live.workspace == nil)
+}

@@ -6,7 +6,10 @@
 // SuiteWindowSize.parse, which is macOS-only, so the Model holds its own copy.
 // Also here: `openFixture(_:)`, the status line's selection count text, and
 // DesignControlID, every tier-1 `design.*` accessibility identifier declared up
-// front so the views and journeys share one list. Linux-safe.
+// front so the views and journeys share one list: each is `design.<area>.<name>`,
+// lowercase and dot-separated, and appears once (DesignControlIDTests). The
+// window registers its own controls under these ids with `.suiteControl`: the
+// toolbar items, each palette tool, the canvas and the status line. Linux-safe.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -70,6 +73,8 @@ extension DesignWorkspace {
 /// Every tier-1 `design.*` control id, declared up front so the wave-1 views use it without
 /// editing this file; a missing id goes through the design-window feature's lane.
 public enum DesignControlID {
+    /// The canvas itself; it keeps SuiteUI's `suite.canvas` identifier and is listed under this id.
+    public static let canvas = "design.canvas.page"
     public static let canvasSelection = "design.canvas.selection"
     public static let canvasHover = "design.canvas.hover"
     public static let canvasBadge = "design.canvas.badge"
@@ -79,6 +84,8 @@ public enum DesignControlID {
     public static let statusSave = "design.status.save"
     public static let statusSelection = "design.status.selection"
     public static let statusNote = "design.status.note"
+    /// The Layers panel's container identifier, which journeys query; a region, not a control,
+    /// so it is left out of `all`.
     public static let layers = "design.layers"
     public static let pageAdd = "design.page.add"
     public static let pageDelete = "design.page.delete"
@@ -106,8 +113,8 @@ public enum DesignControlID {
 
     /// Every fixed id: the named ones, the toolbar's, and one per tool, frame field, edge and axis.
     public static let all: [String] = [
-        canvasSelection, canvasHover, canvasBadge, canvasGuides, canvasMarquee,
-        statusTool, statusSave, statusSelection, statusNote, layers, pageAdd, pageDelete,
+        canvas, canvasSelection, canvasHover, canvasBadge, canvasGuides, canvasMarquee,
+        statusTool, statusSave, statusSelection, statusNote, pageAdd, pageDelete,
         inspectorHeader, inspectorFill, inspectorCornerRadius, inspectorOpacity,
         inspectorStrokeColor, inspectorStrokeWidth, inspectorTextFamily, inspectorTextSize,
         inspectorTextWeight, inspectorTextAlignment, inspectorPageWidth, inspectorPageHeight,

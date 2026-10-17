@@ -3,8 +3,9 @@
 // handle's frame-resize pointer, a layer to move, the same with Option to drag-copy, the Text tool
 // to the I-beam, anything else to the tool's own. `samples` opens `cards` in the real window and
 // sends 120 pointer samples inside A through the canvas's own pointer handler, the call its
-// continuous hover makes: the window body never runs again and the canvas body at most once, since
-// the answer changes only on the first sample. Nested in BodyCountSuites, as every suite that reads
+// continuous hover makes: the window and editor bodies never run again and the canvas body at most
+// once, since the answer changes only on the first sample. The window settles until both bodies stop
+// running before the samples start (#1974). Nested in BodyCountSuites, as every suite that reads
 // a body counter is. macOS only.
 #if canImport(AppKit)
 import AppKit
@@ -82,6 +83,13 @@ extension BodyCountSuites {
             defer { w.close() }
             try await w.settle(800)
             _ = try #require(await w.element("suite.canvas"), "no canvas")
+            try await w.settle(untilStable: {
+                #if DEBUG
+                return DesignWindow.bodyRuns + DesignEditor.bodyRuns
+                #else
+                return nil
+                #endif
+            })
             // The same document and page the window shows, so the shared store's answer is its canvas's.
             var model = DesignWorkspace()
             try model.open(data, at: file)
@@ -90,6 +98,7 @@ extension BodyCountSuites {
             let handler = try #require(DesignCanvasFeedback(model: model, zoom: 1).onPointer)
             #if DEBUG
             let windowBefore = DesignWindow.bodyRuns
+            let editorBefore = DesignEditor.bodyRuns
             shared.canvasReads = 0
             #endif
             // 120 samples inside A (100, 100, 100 × 80), one per 1/120 s.
@@ -101,7 +110,9 @@ extension BodyCountSuites {
             #if DEBUG
             #expect(DesignWindow.bodyRuns - windowBefore == 0, "the window body ran on hover")
             #expect(shared.canvasReads <= 1, "the canvas body ran \(shared.canvasReads) times over 120 hover samples")
-            // TODO(D0-8b): expect DesignEditor.bodyRuns to stay 0 over these samples once D0-8b adds that counter.
+            #expect(
+                DesignEditor.bodyRuns - editorBefore == 0,
+                "the editor body ran \(DesignEditor.bodyRuns - editorBefore) times over 120 hover samples")
             #endif
         }
     }

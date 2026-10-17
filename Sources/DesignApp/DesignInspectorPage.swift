@@ -1,5 +1,6 @@
 // DesignInspectorPage.swift: Design's inspector with only a page selected: the
-// page's name and size in the header, then its W and H, read only, and a hint
+// page's name and size in the header, then a Page Size section with its W and
+// H, read only (not "Frame", which names a layer kind, #2354), and a hint
 // pointing at the layers. Moved unchanged out of DesignInspector (D0-5c), so
 // the page-size rows (canvas-basics CB-9) land in a file of their own.
 import DesignModel
@@ -13,7 +14,7 @@ struct DesignPageProperties: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             InspectorHeader(page.name, details: page.inspectorDetails)
-            InspectorSection("Frame") {
+            InspectorSection("Page Size") {
                 InspectorRow("W") { size(page.frameWidth) }
                 InspectorRow("H") { size(page.frameHeight) }
                 DesignPanelHint("Select a layer to edit its properties.")

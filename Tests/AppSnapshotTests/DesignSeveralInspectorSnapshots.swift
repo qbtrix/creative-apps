@@ -2,8 +2,7 @@
 // panel width with A and B of the `cards` fixture selected (D0-5c): "2 Layers",
 // the Align row with Distribute, X, Y and W reading "Mixed" (A is 100, 100,
 // 100 × 80 and B 300, 140, 200 × 80) and H reading 80. On `.fake` and on
-// `.live`; then Title, a text layer, whose Text section draws nothing until it
-// has rows.
+// `.live`; then Title, a text layer, with its empty Text section after Fill.
 // Writes design-inspector-several-fake-, -several-live- and
 // -text-{light,dark}.png. Every control the inspector and its Align row show
 // lists itself in `suite.controls` with its DesignControlID, enabled exactly
@@ -11,7 +10,6 @@
 // "Mixed" row is text, not a control, so it lists nothing. SwiftUI builds a
 // hosting view's accessibility tree only for an assistive client, so the
 // inventory stands in for the tooltips. macOS only.
-import AppKit
 import DesignModel
 import SuiteUI
 import SwiftUI
@@ -100,13 +98,6 @@ import Testing
         #expect(controls.contains { $0.id == DesignControlID.inspectorFill })
         #expect(controls.contains { $0.id == DesignControlID.frameField(.x) })
         try shoot("text", model)
-    }
-
-    /// Until style-rows gives it rows, a text layer's Text section takes no room: no bare "TEXT" header.
-    @Test func anEmptyTextSectionDrawsNothing() {
-        // A 1 pt line above it, as a hosting view sizes an empty root at 10 pt.
-        let host = NSHostingView(rootView: VStack(spacing: 0) { Color.clear.frame(height: 1); DesignInspectorText() })
-        #expect(host.fittingSize.height == 1)
     }
 }
 

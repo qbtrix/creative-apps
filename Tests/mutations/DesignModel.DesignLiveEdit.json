@@ -4,5 +4,7 @@
   {"label": "a sample before begin is replayed at the end", "file": "Sources/DesignModel/DesignLiveEdit.swift", "find": "        guard workspace != nil else { return }\n", "replace": "", "tests": "DesignLiveEditTests.swift"},
   {"label": "the scrub's step stays open", "file": "Sources/DesignModel/DesignLiveEdit.swift", "find": "            defer { model.endEditRun() }\n", "replace": "", "tests": "DesignLiveEditTests.swift"},
   {"label": "the copy outlives the end", "file": "Sources/DesignModel/DesignLiveEdit.swift", "find": "        defer { (workspace, base, last) = (nil, nil, nil) }\n", "replace": "", "tests": "DesignLiveEditTests.swift"},
-  {"label": "a scrub preview shows no change", "file": "Sources/DesignModel/DesignLiveEdit.swift", "find": "        try? shown.setStyle(change)\n", "replace": "", "tests": "DesignLiveEditTests.swift"}
+  {"label": "a scrub preview shows no change", "file": "Sources/DesignModel/DesignLiveEdit.swift", "find": "        try? shown.setStyle(change)\n", "replace": "", "tests": "DesignLiveEditTests.swift"},
+  {"label": "the end replays without modifiers", "file": "Sources/DesignModel/DesignLiveEdit.swift", "find": "            model.drag(from: start, to: end, modifiers: modifiers)\n", "replace": "            model.drag(from: start, to: end)\n", "tests": "DesignLiveEditTests.swift"},
+  {"label": "a sample drops its modifiers", "file": "Sources/DesignModel/DesignLiveEdit.swift", "find": "        workspace?.drag(from: start, to: end, modifiers: modifiers)\n", "replace": "        workspace?.drag(from: start, to: end)\n", "tests": "DesignLiveEditTests.swift"}
 ]
