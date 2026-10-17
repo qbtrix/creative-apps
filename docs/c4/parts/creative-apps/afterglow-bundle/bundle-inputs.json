@@ -1,7 +1,7 @@
 {
   "id": "bundle-inputs",
   "name": "Bundle inputs",
-  "description": "Info.plists per bundle, icons, entitlements, and Bundle/Engines/CreativeEngines.swift (re-exports FlareCore, CoreRaster, CoreColor for the one shared engine framework).",
+  "description": "Info.plists per bundle; the app marks (Bundle/Marks/<App>.svg, the only hand-edited form) and the icon PNGs scripts/render-marks renders from them into Bundle/Icons; entitlements; and Bundle/Engines/CreativeEngines.swift (re-exports FlareCore, CoreRaster, CoreColor for the one shared engine framework).",
   "technology": "plist, Swift",
   "paths": [
     "Bundle/"

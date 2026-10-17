@@ -11,7 +11,8 @@
 #   .build/apps/AfterGlow.app/Contents/Frameworks/<F>.framework   SuiteUI,
 #       SuiteModel, SuiteShell, CreativeEngines (linked once, shared)
 #   .build/apps/AfterGlow.app/Contents/Resources/Samples          Bundle/Samples/, if present
-#   <bundle>/Contents/Resources/<name>.icns                       from Bundle/Icons/<name>.png
+#   <bundle>/Contents/Resources/<name>.icns                       from Bundle/Icons/<name>.png and
+#       <name>-<px>.png, the renders scripts/render-marks makes of Bundle/Marks/<name>.svg
 #   .build/apps/<X>App.app -> AfterGlow.app/Contents/Helpers/<X>.app
 #   .build/app-builds.tar.gz                                      all of the above
 #
@@ -60,14 +61,23 @@ xcodegen_bin() {
   echo "$dir/xcodegen/bin/xcodegen"
 }
 
+# icon_slot PNG SET PX FILE: the iconset's FILE at PX pixels: the render
+# render-marks committed beside PNG (<name>-<px>.png; at 32 px and under its
+# small-size art), else PNG scaled by sips.
+icon_slot() {
+  local src="${1%.png}-$3.png"
+  [[ $3 == 1024 ]] && src=$1
+  if [[ -f "$src" ]]; then cp "$src" "$2/$4"; else sips -z "$3" "$3" "$1" --out "$2/$4" >/dev/null; fi
+}
+
 # PNG -> .icns with every size an iconset holds, into <app>/Contents/Resources.
 make_icns() {
   local png=$1 dest=$2 set
   set="$(mktemp -d)/$(basename "$png" .png).iconset"
   mkdir -p "$set"
   for s in 16 32 128 256 512; do
-    sips -z "$s" "$s" "$png" --out "$set/icon_${s}x${s}.png" >/dev/null
-    sips -z $((s * 2)) $((s * 2)) "$png" --out "$set/icon_${s}x${s}@2x.png" >/dev/null
+    icon_slot "$png" "$set" "$s" "icon_${s}x${s}.png"
+    icon_slot "$png" "$set" $((s * 2)) "icon_${s}x${s}@2x.png"
   done
   iconutil -c icns "$set" -o "$dest"
   rm -rf "$(dirname "$set")"
