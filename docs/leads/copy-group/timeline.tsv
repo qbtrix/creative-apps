@@ -6,3 +6,4 @@ utc	stage	event	ref	note
 2026-10-17T15:48Z	3	stage-start	#1496	wave 1
 2026-10-17T15:50Z	3	wave-start	W1	C-2 (workflow wf_a9a4c50c-d7b)
 2026-10-17T16:08Z	3	pr	#2166	C-2 open, head 1c39a81, Mutate 5/5; attribution footer stripped from body
+2026-10-17T16:12:53Z	check	C-2 #2166: lane dispatched macOS build run 39048294825; findings 0
