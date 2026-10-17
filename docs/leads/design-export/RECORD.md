@@ -2,9 +2,9 @@
 
 Issue: #1970 · Packet: docs/blueprints/design/features/design-export.md
 Run: act-1a14852c11d-65cg · Session: (cloud) · Started: 2026-10-17T05:59Z
-Stage: 3 wave 2
-Base: 0d7a3dbd3e1ac4d87363e8318f47deedf90fbde1
-Next: DE-8 builder running on dev 0d7a3db; when #1997 (DE-2) merges, start DE-1; then wave 3 (DE-3, DE-5, DE-9)
+Stage: 3 wave 3
+Base: 453198ac93bd637e13a6aea5f20273bd7ee728f4
+Next: DE-3, DE-5 and DE-8 builders running; when their PRs merge, run the check, post Belt-Slice-Done for DE-a (needs a green Linux job containing #1997) and start DE-9
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -19,12 +19,12 @@ Next: DE-8 builder running on dev 0d7a3db; when #1997 (DE-2) merges, start DE-1;
 | id | slice | wave | behavior | files | test | PR | state |
 |---|---|---|---|---|---|---|---|
 | DE-0 | DE-a | 1 | UniqueFileNames.name in SuiteModel, its plan, C4 sentence, its test | Sources/SuiteModel/Values/UniqueFileNames.swift, Tests/SuiteModelTests/UniqueFileNamesTests.swift, Tests/mutations/SuiteModel.UniqueFileNames.json, docs/c4/parts/creative-apps/suite-model/suite-identity.json | UniqueFileNamesTests (3 mutations) | #1987 | merged 0d7a3db |
-| DE-2 | DE-a | 1 | DesignExportScope, DesignExportOptions, LiveExport (fake plan, stub svg), DesignSVG stub, workspace readouts, both slots LiveExport, NotBuilt tests updated, plans, C4 sentence, shape half of DesignExportPlanTests | Sources/DesignModel/DesignExport+Kernel.swift, Sources/DesignModel/Live/DesignSVG.swift, Sources/DesignModel/DesignServices.swift, Sources/DesignModel/DesignWorkspace.swift (one stored field), Tests/DesignModelTests/{DesignLiveStubTests,DesignNotBuiltTests,DesignArrangeFakesTests,DesignExportPlanTests}.swift, Tests/mutations/DesignModel.{DesignServices,DesignExport+Kernel}.json, docs/c4/parts/creative-apps/design-model/design-model-sources.json | DesignExportPlanTests shape half (3 mutations + the repointed DesignServices entry) | #1997 | open, Fast-Check pass on d072516, Mutate 3/3 + 10/10 |
+| DE-2 | DE-a | 1 | DesignExportScope, DesignExportOptions, LiveExport (fake plan, stub svg), DesignSVG stub, workspace readouts, both slots LiveExport, NotBuilt tests updated, plans, C4 sentence, shape half of DesignExportPlanTests | Sources/DesignModel/DesignExport+Kernel.swift, Sources/DesignModel/Live/DesignSVG.swift, Sources/DesignModel/DesignServices.swift, Sources/DesignModel/DesignWorkspace.swift (one stored field), Tests/DesignModelTests/{DesignLiveStubTests,DesignNotBuiltTests,DesignArrangeFakesTests,DesignExportPlanTests}.swift, Tests/mutations/DesignModel.{DesignServices,DesignExport+Kernel}.json, docs/c4/parts/creative-apps/design-model/design-model-sources.json | DesignExportPlanTests shape half (3 mutations + the repointed DesignServices entry) | #1997 | merged 4f2988a (07:05Z) |
 | DE-2b | DE-a | later | `public typealias DesignExportRun = ExportRun<DesignExportOptions>` once SuiteKernel is linkable from DesignModel | Sources/DesignModel/DesignExport+Kernel.swift | DesignExportPlanTests shape | – | waits on editor-kernel EK-a and a Package.swift dependency (supervisor) |
-| DE-1 | DE-a | 2 | the remaining packet tests, disabled by name: DesignExportPlanTests rules half, DesignSVGTests, DesignExportBudgetTests, DesignExportWalkTests (MJ13), DesignSVGWalkTests (MJ14) | Tests/DesignModelTests/{DesignExportPlanTests,DesignSVGTests,DesignExportBudgetTests,DesignExportWalkTests,DesignSVGWalkTests}.swift | every suite compiles and skips | – | planned |
+| DE-1 | DE-a | – | dropped: each Model task carries its own check (rule 13 "with"); the shape half shipped with DE-2, the rules half and MJ13 go with DE-3, the SVG suites and MJ14 with DE-5 | – | – | – | dropped |
 | DE-8 | DE-w | 2 | DesignRasterizer.png over DesignArtwork, DesignRasterizerTests, RenderBudgetDesignRasterTests | Sources/DesignApp/DesignRasterizer.swift, Tests/AppSnapshotTests/{DesignRasterizerTests,RenderBudgetDesignRasterTests}.swift | DesignRasterizerTests.pixelSize (macOS) | – | building |
-| DE-3 | DE-s | 3 | the plan: scopes, hidden dropped, UniqueFileNames against existing, pixel sizes, refusals; turns on the rules half and MJ13 | Sources/DesignModel/DesignExport+Kernel.swift, Tests/mutations/DesignModel.DesignExport+Kernel.json, Tests/DesignModelTests/{DesignExportPlanTests,DesignExportWalkTests}.swift | DesignExportPlanTests, MJ13 (7 mutations) | – | planned |
-| DE-5 | DE-s | 3 | DesignSVG.document per the pseudocode (QD-V8); turns on DesignSVGTests, svgExport budget, MJ14 | Sources/DesignModel/Live/DesignSVG.swift, Tests/mutations/DesignModel.DesignSVG.json, Tests/DesignModelTests/{DesignSVGTests,DesignExportBudgetTests,DesignSVGWalkTests}.swift | DesignSVGTests, MJ14 (7 mutations) | – | planned |
+| DE-3 | DE-s | 3 | the plan: scopes, hidden dropped, UniqueFileNames against existing, pixel sizes, refusals; turns on the rules half and MJ13 | Sources/DesignModel/DesignExport+Kernel.swift, Tests/mutations/DesignModel.DesignExport+Kernel.json, Tests/DesignModelTests/{DesignExportPlanTests,DesignExportWalkTests}.swift | DesignExportPlanTests, MJ13 (7 mutations) | – | building |
+| DE-5 | DE-s | 3 | DesignSVG.document per the pseudocode (QD-V8); turns on DesignSVGTests, svgExport budget, MJ14 | Sources/DesignModel/Live/DesignSVG.swift, Tests/mutations/DesignModel.DesignSVG.json, Tests/DesignModelTests/{DesignSVGTests,DesignExportBudgetTests,DesignSVGWalkTests}.swift | DesignSVGTests, MJ14 (7 mutations) | – | building |
 | DE-9 | DE-w | 3 | DesignRasterizer.pdf, pdfOnePage test | Sources/DesignApp/DesignRasterizer.swift, Tests/AppSnapshotTests/DesignRasterizerTests.swift | pdfOnePage (macOS) | – | planned |
 | DE-6 | DE-u | 4 | File > Export… ⇧⌘E, DesignExportArea hosting SuiteUI ExportSheet on the fakes, ids, launch args, J19 skipped, snapshots, render budget test | per packet | DesignExportSnapshots, J19 | – | waits on DE-2b, editor-kernel EK-chrome, design-window DW-c, files-history FH-b, snapping SN-c, canvas-basics CB-c |
 | DE-7 | DE-u | 5 | the run on the fakes, Cancel/Escape/Return, -DesignExportFail, J19 on, J17/J18 skipped | per packet | J19 | – | waits on DE-6 |
@@ -36,6 +36,7 @@ Next: DE-8 builder running on dev 0d7a3db; when #1997 (DE-2) merges, start DE-1;
 |---|---|---|---|---|---|
 
 ## Decisions
+- DE-1 dropped (10:45Z): after the session lost 06:55 to 10:40Z to a usage limit, a test-only wave ahead of DE-3 and DE-5 costs a serial lane round for nothing rule 13 needs; each Model task merges with its own tests, as DE-2 and DE-0 did. DE-3 owns DesignExportPlanTests and DesignExportWalkTests, DE-5 owns DesignSVGTests, DesignExportBudgetTests and DesignSVGWalkTests, so their files stay disjoint.
 - DE-2 as built: `exportPlan` throws `.nothingSelected` itself for an empty selection scope (the slot reads empty ids as every top-level frame); the `defaultsNotAStep` mutation appends to `history.undo` directly because `record` no-ops on an unchanged document; pixel sizes guard non-finite sides (`whole()`), so DE-3 keeps that helper.
 - The brief's base fdaabbfb had moved by the time the lead started; the base is origin/dev at start (0e3c08ea52648f6654e583a64ddf07ccb5aa328c), which main also points at.
 - PRs target dev per CLAUDE.md (the lane retargets a main-based PR to dev anyway); main moves when full CI on dev is green.
@@ -46,6 +47,7 @@ Next: DE-8 builder running on dev 0d7a3db; when #1997 (DE-2) merges, start DE-1;
 - editor-kernel EK-1 makes every Model depend on SuiteKernel in Package.swift, so DE-2b needs nothing from the supervisor: it waits on EK-a's Belt-Slice-Done line alone.
 
 ## Open
+- The lead session was rate-limited from about 06:55Z to 10:40Z (the DE-8 builder died at its first step and was resumed); Belt nudged in that window. Nothing was lost on dev.
 - dev was red on the app-marks check from #1977 until #1985 merged (06:28Z); #1987 merged dev past it and carries Fast-Check: pass. Commented on #1970.
 - editor-kernel has a lead now: EK-1 (the SuiteKernel target) is PR #1992; DE-2b waits on EK-a's Belt-Slice-Done line.
 - Follow-ups filed (the packet's list): #1981 SuiteUI ExportSheet scope and scale rows (needs-ui); #1982 SuiteUI one image file writer (needs-ui); #1983 Library LiveExporter uses UniqueFileNames (line:library); #1984 Design Export… in the top bar (line:design, depends on #339).

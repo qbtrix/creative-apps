@@ -13,3 +13,6 @@ utc	stage	event	ref	note
 2026-10-17T06:51Z	3	pr-merged	#1987	DE-0 merged into dev as 0d7a3db by the lane (macOS build green)
 2026-10-17T06:51Z	3	stage-start	wave 2	DE-8 builder started on 0d7a3db; DE-1 waits on #1997
 2026-10-17T06:51Z	3	heartbeat	wave 2	#1997 in a lane batch (Linux check running)
+2026-10-17T10:45Z	3	pr-merged	#1997	DE-2 merged into dev as 4f2988a (07:05Z, lane batch of 6)
+2026-10-17T10:45Z	3	stopped	session	usage limit 06:55Z to 10:40Z; DE-8 builder resumed
+2026-10-17T10:45Z	3	stage-start	wave 3	DE-3 and DE-5 builders started on 453198a; DE-1 dropped into them; DE-8 resumed
