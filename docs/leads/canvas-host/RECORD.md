@@ -2,9 +2,9 @@
 
 Issue: #1596 · Packet: docs/blueprints/suiteui/features/canvas-host.md
 Run: act-1a149babb21-udz7 (line lead with #1079, #1480; earlier act-1a147c4ddc0-fouq on claude/canvas-host-lead-quy2t1) · Started: 2026-10-17T02:51Z (this run 2026-10-17T12:03Z)
-Stage: 3 wave 1 (CH-1 #1978: gate proof being added, wave 11 fixer ch1-1978)
-Base: dev 042423165693f2f1d65d2ece90eb0d5bcb910554 (= main)
-Next: #1978 gets Fast-Check and a macOS build-only run from the lane; once merged, wave 2 (CH-2, CH-6, CH-8), held while suiteui findings are over 5; CH-4 follows the packet's View > Rendering menu (#1955), not a Settings pane
+Stage: 3 wave 1 done (CH-1 #1978 merged b806fe6); wave 2 next
+Base: dev 9ba6658425c543613715ebbf34d677a380ef8cc3
+Next: wave 2 (CH-2, CH-6, CH-8) once suiteui open findings are 5 or fewer (after #2048 merges); CH-4 follows the packet's View > Rendering menu (#1955), not a Settings pane
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -17,10 +17,10 @@ Next: #1978 gets Fast-Check and a macOS build-only run from the lane; once merge
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
 |---|---|---|---|---|---|---|---|
-| CH-1 | CH-a | 1 | CanvasHosting contracts, FakeCanvasContent, FakeRenderingPreference | Sources/SuiteUI/Contracts/CanvasHosting.swift, Tests/SuiteUITests/CanvasHostFakeTests.swift | CanvasHostFakeTests | #1978 | open, swift build unverified here |
-| CH-2 | CH-a | 2 | RenderingPreference stub, control ids, placeholder pages, first-check skips | Sources/SuiteUI/RenderingPreference.swift, Tests/SuiteUITests/RenderingPreferenceTests.swift, Tests/mutations/SuiteUI.RenderingPreference.json, Sources/SuiteUI/Gallery/GalleryCanvasHost.swift, Sources/SuiteUI/Gallery/GalleryRenderingPane.swift, UITests/SuiteJourneyTests+CanvasHost.swift, Tests/AppSnapshotTests/RenderBudgetCanvasHostTests.swift | RenderingPreferenceTests | – | waits CH-1 |
-| CH-6 | CH-c | 2 | CanvasHitMap | Sources/SuiteUI/CanvasHitMap.swift, Tests/SuiteUITests/CanvasHitMapTests.swift, Tests/mutations/SuiteUI.CanvasHitMap.json | CanvasHitMapTests | – | waits CH-1 |
-| CH-8 | CH-c | 2 | CanvasTileSet | Sources/SuiteUI/CanvasTileSet.swift, Tests/SuiteUITests/CanvasTileSetTests.swift, Tests/mutations/SuiteUI.CanvasTileSet.json | CanvasTileSetTests | – | waits CH-1 |
+| CH-1 | CH-a | 1 | CanvasHosting contracts, FakeCanvasContent, FakeRenderingPreference | Sources/SuiteUI/Contracts/CanvasHosting.swift, Tests/SuiteUITests/CanvasHostFakeTests.swift | CanvasHostFakeTests | #1978 | merged b806fe6 (gate pass on d9efde6; macOS build green via the lane) |
+| CH-2 | CH-a | 2 | RenderingPreference stub, control ids, placeholder pages, first-check skips | Sources/SuiteUI/RenderingPreference.swift, Tests/SuiteUITests/RenderingPreferenceTests.swift, Tests/mutations/SuiteUI.RenderingPreference.json, Sources/SuiteUI/Gallery/GalleryCanvasHost.swift, Sources/SuiteUI/Gallery/GalleryRenderingPane.swift, UITests/SuiteJourneyTests+CanvasHost.swift, Tests/AppSnapshotTests/RenderBudgetCanvasHostTests.swift | RenderingPreferenceTests | – | ready (CH-1 merged) |
+| CH-6 | CH-c | 2 | CanvasHitMap | Sources/SuiteUI/CanvasHitMap.swift, Tests/SuiteUITests/CanvasHitMapTests.swift, Tests/mutations/SuiteUI.CanvasHitMap.json | CanvasHitMapTests | – | ready (CH-1 merged) |
+| CH-8 | CH-c | 2 | CanvasTileSet | Sources/SuiteUI/CanvasTileSet.swift, Tests/SuiteUITests/CanvasTileSetTests.swift, Tests/mutations/SuiteUI.CanvasTileSet.json | CanvasTileSetTests | – | ready (CH-1 merged) |
 | CH-3 | CH-b | 3 | CanvasHostView and CanvasHost; canvas-host page on fakes | Sources/SuiteUI/CanvasHostView.swift, Sources/SuiteUI/CanvasHost.swift, Sources/SuiteUI/Gallery/GalleryCanvasHost.swift, Tests/SuiteUITests/CanvasHostTests.swift, Tests/AppSnapshotTests/SuiteCanvasHostSnapshots.swift | CanvasHostTests | – | waits CH-2 |
 | CH-4 | CH-b | 3 | RenderingSettingsPane on the fake preference | Sources/SuiteUI/RenderingSettingsPane.swift, Sources/SuiteUI/Gallery/GalleryRenderingPane.swift, Tests/SuiteUITests/RenderingSettingsPaneTests.swift, Tests/AppSnapshotTests/SuiteRenderingPaneSnapshots.swift | RenderingSettingsPaneTests | – | waits CH-2 |
 | CH-7 | CH-c | 3 | Live preference store, device-loss note | Sources/SuiteUI/RenderingPreference.swift, Tests/SuiteUITests/RenderingPreferenceLiveTests.swift, Tests/mutations/SuiteUI.RenderingPreference.json | RenderingPreferenceLiveTests | – | waits CH-2 |

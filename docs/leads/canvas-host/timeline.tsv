@@ -5,3 +5,4 @@ utc	stage	event	ref	note
 2026-10-17T03:05Z	2	heartbeat	#1596	lead/canvas-host absent on origin; status kept on claude/canvas-host-lead-quy2t1; waiting on supervisor (Open 1-2)
 2026-10-17T03:40Z	3	pr-opened	#1978	task CH-1 contracts and fakes, base dev
 2026-10-17T12:03Z	3	heartbeat	#1978	act-1a149babb21-udz7 resumed; status moves to lead/canvas-host; #1978 had no Fast-Check (no Swift then): fixer ch1-1978 runs the gate and fixes the body
+2026-10-17T13:19Z	3	pr-merged	#1978	CH-1 merged b806fe6; CH-2, CH-6, CH-8 ready, held on the suiteui findings count
