@@ -4,7 +4,9 @@
 // decoded with Foundation's PropertyListSerialization, so this runs on Linux.
 // The expected values are a literal table (docs/blueprints/suite.md 2.6), not
 // the registry, so a registry edit can't silently move the plist with it.
+// Type names are the exception: they must equal SuiteTypeRegistry's (#2050).
 import Foundation
+import SuiteModel
 import Testing
 
 @Suite struct PlistShapeTests {
@@ -95,5 +97,48 @@ import Testing
         }
         #expect(found == Self.exportedTypes)
         #expect(try Self.plist()["UTImportedTypeDeclarations"] == nil)
+    }
+
+    /// Every (UTI, type name) pair in a plist: exported and imported
+    /// UTTypeDescription and each document type's CFBundleTypeName.
+    static func typeNames(_ plist: [String: Any]) -> [(uti: String, name: String)] {
+        var pairs: [(uti: String, name: String)] = []
+        for key in ["UTExportedTypeDeclarations", "UTImportedTypeDeclarations"] {
+            for entry in plist[key] as? [[String: Any]] ?? [] {
+                pairs.append((entry["UTTypeIdentifier"] as? String ?? "", entry["UTTypeDescription"] as? String ?? ""))
+            }
+        }
+        for entry in plist["CFBundleDocumentTypes"] as? [[String: Any]] ?? [] {
+            let name = entry["CFBundleTypeName"] as? String ?? ""
+            for uti in entry["LSItemContentTypes"] as? [String] ?? [] { pairs.append((uti, name)) }
+        }
+        return pairs
+    }
+
+    static func plist(named name: String) throws -> [String: Any] {
+        let url = URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent()
+            .deletingLastPathComponent().appendingPathComponent("Bundle/Info/\(name).plist")
+        let value = try PropertyListSerialization.propertyList(from: try Data(contentsOf: url), format: nil)
+        return try #require(value as? [String: Any])
+    }
+
+    /// #2050: a UTI has one name across all six plists, and it is the
+    /// registry's name wherever SuiteTypeRegistry lists that UTI.
+    @Test func typeNamesMatchTheRegistryInEveryPlist() throws {
+        var seen: [String: String] = [:]
+        for file in ["AfterGlow"] + BundleLayout.apps {
+            for pair in Self.typeNames(try Self.plist(named: file)) {
+                #expect(!pair.name.isEmpty, "\(file): \(pair.uti) has no name")
+                if let registered = SuiteTypeRegistry.standard.type(SuiteTypeID(rawValue: pair.uti)) {
+                    #expect(pair.name == registered.name, "\(file): \(pair.uti) is \(pair.name)")
+                }
+                if let first = seen[pair.uti] {
+                    #expect(pair.name == first, "\(file): \(pair.uti) is \(pair.name), elsewhere \(first)")
+                } else {
+                    seen[pair.uti] = pair.name
+                }
+            }
+        }
+        #expect(seen.count == 11)   // seven document types plus the four declared-only ids
     }
 }

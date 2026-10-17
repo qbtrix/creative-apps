@@ -2,7 +2,7 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-  <key>CFBundleExecutable</key><string>HaloApp</string>
+  <key>CFBundleExecutable</key><string>Halo</string>
   <key>CFBundleIconFile</key><string>Halo</string>
   <key>CFBundleIdentifier</key><string>org.creativesuite.halo</string>
   <key>CFBundleName</key><string>Halo</string>

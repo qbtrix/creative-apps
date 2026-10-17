@@ -208,7 +208,7 @@
 			<key>UTTypeIdentifier</key>
 			<string>org.creativesuite.photo.openraster</string>
 			<key>UTTypeDescription</key>
-			<string>OpenRaster Image</string>
+			<string>Photo Document</string>
 			<key>UTTypeConformsTo</key>
 			<array>
 				<string>public.image</string>
@@ -230,7 +230,7 @@
 			<key>UTTypeIdentifier</key>
 			<string>org.creativesuite.suite.handoff</string>
 			<key>UTTypeDescription</key>
-			<string>Suite Hand-off</string>
+			<string>Suite Hand-Off</string>
 			<key>UTTypeConformsTo</key>
 			<array>
 				<string>public.data</string>
