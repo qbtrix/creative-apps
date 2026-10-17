@@ -4,7 +4,7 @@ Issue: #1516 · Packet: docs/blueprints/flare/features/layers-files.md
 Run: act-1a14a13ca4f-74rv (line lead for draw-key-save, layers-files, inspector-timeline; earlier run act-1a146828a2d-9sza) · Session: session_01NXMovyJtKvANXKD2WWypB3 · Started: 2026-10-16T18:20Z (resumed 2026-10-17)
 Stage: 3 build (wave 1)
 Base: d2c4fa212a4b4ea55bc551b783fc1c48520e5fbf (origin/dev)
-Next: wave 1 PRs (#2110, #2102, #2103, #2106) through the lane; then LF-1d/LF-2 if #146/#73 close, LF-6 feature-done in wave 4
+Next: wave 1 merged; LF-1d/LF-2 if #146/#73 close, LF-6 feature-done in wave 4
 
 ## Slices
 No `## Slices` table: v2 packet, v2 loop applies.
