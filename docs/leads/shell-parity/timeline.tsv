@@ -62,3 +62,4 @@ utc	stage	event	ref	note
 2026-10-17T12:15Z	done	heartbeat	#1325	relaunch act-1a149c0c306-8ckd: feature already done (both Belt-Slice-Done lines and the contact sheet on #1325); nothing to build
 2026-10-17T13:14Z	done	heartbeat	#1325	still done; line lead busy on layers-panel and style-rows
 2026-10-17T13:30Z	done	finding-filed	#1993 #1994	relabelled gap (round cap, same cause as #1456)
+2026-10-17T13:46Z	done	heartbeat	d2c4fa21	feature done; branch recut onto main at 13:43 kept
