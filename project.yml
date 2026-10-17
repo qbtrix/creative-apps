@@ -1,9 +1,20 @@
-# project.yml: the XcodeGen spec for the human-like UI tests, and nothing else.
-# SwiftPM cannot host UI test bundles, so this generates CreativeApps.xcodeproj
-# (gitignored; never commit or hand-edit it) with one UI test bundle per app
-# and the Journeys scheme that runs them all. The apps are not Xcode targets:
-# scripts/bundle-apps builds them from the SwiftPM targets in Package.swift,
-# and each journey launches .build/apps/<X>App.app by path. scripts/ui-test
+# project.yml: the XcodeGen spec for the human-like UI tests and the Release
+# build graph. SwiftPM cannot host UI test bundles, so this generates
+# CreativeApps.xcodeproj (gitignored; never commit or hand-edit it) with one UI
+# test bundle per app and the Journeys scheme that runs them all; each journey
+# launches .build/apps/<X>App.app by path, which scripts/bundle-apps builds.
+#
+# The Release scheme (route R1, docs/blueprints/suite.md 2.5) builds the
+# targets of AfterGlow.app from the same folders as Package.swift: four
+# frameworks (SuiteUI, SuiteModel, SuiteShell, and CreativeEngines, which
+# compiles only Bundle/Engines/CreativeEngines.swift and is the only target
+# linking the creative-core products), each <X>Model as a static library, each
+# <X>App as an application with the helper run path, and the AfterGlowApp
+# launcher. Frameworks are not embedded here: bundle-apps assembles them into
+# AfterGlow.app/Contents/Frameworks. Every non-test target of Package.swift
+# must be a target here; Tests/SuiteModelTests/BuildGraphTests fails when one
+# is missing (it reads the names at two-space indent under `targets:`).
+# creative-core's revision must match Package.swift's. scripts/ui-test
 # runs the whole thing. To add an app, add a <X>JourneyTests target below and
 # list it in the scheme. Every bundle also compiles the app audit
 # (UITests/Audit.swift, and the engine and checks in Tests/AppAuditTests, the
@@ -27,7 +38,30 @@ settings:
     GENERATE_INFOPLIST_FILE: YES
     CODE_SIGN_STYLE: Manual
     CODE_SIGN_IDENTITY: "-"
+packages:
+  creative-core:
+    url: https://github.com/qbtrix/creative-core
+    revision: c608d4b72c0c69a1f7b1609642f23059cf8533a7
 targetTemplates:
+  # Release graph: <X>Model compiles Sources/<X>Model and links SuiteModel and
+  # the engines through CreativeEngines.
+  Model:
+    type: library.static
+    platform: macOS
+    sources: ["Sources/${target_name}"]
+    dependencies: [{ target: SuiteModel }, { target: CreativeEngines }]
+  # A helper app inside AfterGlow.app/Contents/Helpers/<X>.app finds the
+  # frameworks four levels up from its executable.
+  App:
+    type: application
+    platform: macOS
+    sources: ["Sources/${target_name}"]
+    settings:
+      base:
+        LD_RUNPATH_SEARCH_PATHS: "@executable_path/../../../../Frameworks"
+    dependencies:
+      [{ target: SuiteUI, embed: false }, { target: SuiteShell, embed: false }, { target: SuiteModel, embed: false },
+       { target: CreativeEngines, embed: false }]
   Journey:
     type: bundle.ui-testing
     platform: macOS
@@ -40,6 +74,59 @@ targetTemplates:
       - Sources/SuiteUI/Contracts/FrameProbeRecording.swift
       - Sources/SuiteUI/Contracts/ControlInventorying.swift
 targets:
+  CreativeEngines:
+    type: framework
+    platform: macOS
+    sources: [Bundle/Engines]
+    dependencies:
+      [{ package: creative-core, product: FlareCore }, { package: creative-core, product: CoreRaster },
+       { package: creative-core, product: CoreColor }]
+  SuiteModel: { type: framework, platform: macOS, sources: [Sources/SuiteModel] }
+  SuiteUI: { type: framework, platform: macOS, sources: [Sources/SuiteUI] }
+  SuiteShell:
+    type: framework
+    platform: macOS
+    sources: [Sources/SuiteShell]
+    dependencies: [{ target: SuiteUI }, { target: SuiteModel }]
+  FlareModel: { templates: [Model] }
+  DesignModel: { templates: [Model] }
+  PhotoModel: { templates: [Model] }
+  LibraryModel: { templates: [Model] }
+  HaloModel: { templates: [Model] }
+  # Each app adds its own Model, linked statically, to the template's
+  # frameworks (target lists are appended to the template's).
+  FlareApp:
+    templates: [App]
+    settings: { base: { PRODUCT_NAME: Flare, PRODUCT_MODULE_NAME: FlareApp } }
+    dependencies: [{ target: FlareModel }]
+  DesignApp:
+    templates: [App]
+    settings: { base: { PRODUCT_NAME: Design, PRODUCT_MODULE_NAME: DesignApp } }
+    dependencies: [{ target: DesignModel }]
+  PhotoApp:
+    templates: [App]
+    settings: { base: { PRODUCT_NAME: Photo, PRODUCT_MODULE_NAME: PhotoApp } }
+    dependencies: [{ target: PhotoModel }]
+  LibraryApp:
+    templates: [App]
+    settings: { base: { PRODUCT_NAME: Library, PRODUCT_MODULE_NAME: LibraryApp } }
+    dependencies: [{ target: LibraryModel }]
+  HaloApp:
+    templates: [App]
+    settings: { base: { PRODUCT_NAME: Halo, PRODUCT_MODULE_NAME: HaloApp } }
+    dependencies: [{ target: HaloModel }]
+  # The launcher is AfterGlow.app's own executable: its frameworks sit one
+  # level up, in Contents/Frameworks.
+  AfterGlowApp:
+    type: application
+    platform: macOS
+    sources: [Sources/AfterGlowApp]
+    settings:
+      base:
+        PRODUCT_NAME: AfterGlow
+        PRODUCT_MODULE_NAME: AfterGlowApp
+        LD_RUNPATH_SEARCH_PATHS: "@executable_path/../Frameworks"
+    dependencies: [{ target: SuiteUI, embed: false }, { target: SuiteShell, embed: false }, { target: SuiteModel, embed: false }]
   FlareJourneyTests: { templates: [Journey] }
   DesignJourneyTests: { templates: [Journey] }
   PhotoJourneyTests: { templates: [Journey] }
@@ -50,6 +137,12 @@ targets:
     templates: [Journey]
     sources:
       - Sources/SuiteUI/ControlInventory.swift
+  # The launcher's journeys (UITests/AfterGlowJourneyTests*.swift, home's
+  # feature) decode the suite's shared values.
+  AfterGlowJourneyTests:
+    templates: [Journey]
+    sources:
+      - Sources/SuiteModel/Values/
 schemes:
   Journeys:
     build:
@@ -60,6 +153,23 @@ schemes:
         LibraryJourneyTests: [test]
         HaloJourneyTests: [test]
         SuiteJourneyTests: [test]
+        AfterGlowJourneyTests: [test]
     test:
       targets:
-        [FlareJourneyTests, DesignJourneyTests, PhotoJourneyTests, LibraryJourneyTests, HaloJourneyTests, SuiteJourneyTests]
+        [FlareJourneyTests, DesignJourneyTests, PhotoJourneyTests, LibraryJourneyTests, HaloJourneyTests, SuiteJourneyTests,
+         AfterGlowJourneyTests]
+  # scripts/bundle-apps: xcodebuild -scheme Release build. Builds the launcher,
+  # the five apps and everything they link, in the Release configuration.
+  Release:
+    build:
+      targets:
+        AfterGlowApp: all
+        FlareApp: all
+        DesignApp: all
+        PhotoApp: all
+        LibraryApp: all
+        HaloApp: all
+    run:
+      config: Release
+    archive:
+      config: Release
