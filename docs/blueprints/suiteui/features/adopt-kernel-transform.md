@@ -29,14 +29,15 @@ section the deleted file served (unchanged behaviour).
 
 | slice | behavior (one sentence) | tasks | journeys | waits on |
 |---|---|---|---|---|
-| AT-design | Design runs its transform on `EditorHandle`, `BoxMath`, `HandleHit` and `LayerTransform` behind its existing API, its tests and journeys green, and its copy is deleted. | AT-d1, AT-d2 | DesignModelTests | editor-kernel:EK-box |
+| AT-design | Design runs its transform on `EditorHandle`, `BoxMath`, `HandleHit` and `LayerTransform` behind its existing API, its tests and journeys green, and its copy is deleted. | AT-d1, AT-d2 | DesignModelTests | editor-kernel:EK-box, adopt-kernel-selection:AS-design, adopt-kernel-layers:AL-design |
 | AT-photo | Photo runs its transform on `EditorHandle`, `BoxMath`, `HandleHit` and `LayerTransform` behind its existing API, its tests and journeys green, and its copy is deleted. | AT-p1, AT-p2 | PhotoModelTests | editor-kernel:EK-box |
 | AT-flare | Flare runs its transform on `EditorHandle`, `BoxMath`, `HandleHit` and `LayerTransform` behind its existing API, its tests and journeys green, and its copy is deleted. | AT-f1, AT-f2 | FlareModelTests | editor-kernel:EK-box |
 
-There is no new screen: every slice is Model-only (`"ui_slice": "none"`),
-and a slice that touches `Sources/*App/` or `Sources/SuiteUI/` to keep an
-existing view compiling is marked `"ui": true` with the view's existing
-render budget as its row. The acceptance tests are the app's existing Model
+There is no new screen (`"ui_slice": "none"`); a slice that touches
+`Sources/*App/` (a layers panel becoming `LayerTreeList`, an autosave file) is
+marked `"ui": true` with the view's existing render budget as its row, and
+waits on editor-kernel's EK-u for the SuiteUI half. A slice that edits a file
+another adopt slice also edits waits on that slice (the `waits` data). The acceptance tests are the app's existing Model
 tests and journeys, which merged long before this feature (rule 13 holds by
 construction), plus a mutation plan on each adapter (rule 14).
 

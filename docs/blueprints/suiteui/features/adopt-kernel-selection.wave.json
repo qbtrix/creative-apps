@@ -30,11 +30,9 @@
     "Tests/mutations/HaloModel.KernelSelectionAdapter.json",
     "Tests/mutations/HaloModel.HaloKeySelection.json",
     "Sources/LibraryModel/LibraryCatalog.swift",
-    "Sources/SuiteUI/GridSelection.swift",
-    "Sources/SuiteUI/ThumbnailGrid.swift",
+    "Sources/LibraryModel/LibraryCulling.swift",
     "Tests/LibraryModelTests/LibraryGridTests.swift",
     "Tests/LibraryModelTests/LibraryGridEdgeTests.swift",
-    "Tests/SuiteUITests/GridSelectionTests.swift",
     "Tests/mutations/LibraryModel.KernelSelectionAdapter.json",
     "Tests/mutations/LibraryModel.LibraryCatalog.json"
   ],
@@ -130,20 +128,21 @@
       ],
       "owned": [
         "Sources/LibraryModel/LibraryCatalog.swift",
-        "Sources/SuiteUI/GridSelection.swift",
-        "Sources/SuiteUI/ThumbnailGrid.swift",
+        "Sources/LibraryModel/LibraryCulling.swift",
         "Tests/LibraryModelTests/LibraryGridTests.swift",
         "Tests/LibraryModelTests/LibraryGridEdgeTests.swift",
-        "Tests/SuiteUITests/GridSelectionTests.swift",
         "Tests/mutations/LibraryModel.KernelSelectionAdapter.json",
         "Tests/mutations/LibraryModel.LibraryCatalog.json"
       ],
       "waits": {
         "editor-kernel:EK-sel": [
           "AS-l1"
+        ],
+        "adopt-kernel-undo:AU-library": [
+          "AS-l1"
         ]
       },
-      "ui": true
+      "ui": false
     }
   ]
 }

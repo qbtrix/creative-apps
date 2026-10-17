@@ -72,6 +72,9 @@
       "waits": {
         "editor-kernel:EK-run": [
           "AX-p1"
+        ],
+        "adopt-kernel-layers:AL-photo": [
+          "AX-p1"
         ]
       },
       "ui": false
@@ -95,6 +98,9 @@
       ],
       "waits": {
         "editor-kernel:EK-run": [
+          "AX-l1"
+        ],
+        "adopt-kernel-selection:AS-library": [
           "AX-l1"
         ]
       },

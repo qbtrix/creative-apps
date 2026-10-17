@@ -1,0 +1,75 @@
+{
+  "title": "Photo's brush runs on SuiteKernel's stroke model and SuiteUI's pacer, pressure capture and cursor mark; Flare's pencil and Design's pen are built on the same module later, never as copies",
+  "wave": "XK2",
+  "order": 80,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "covers": "editor-kernel design (2026-10-17), inventory row 'brush'; captain's canonical-first call on #1552",
+  "waits_on": "editor-kernel:EK-stroke only (every slice); cross-line hand-offs in the packet's Hand-offs list",
+  "ui_slice": "none",
+  "ui_slice_reason": "behaviour-preserving migration: no new screen; the apps' existing journeys and snapshots verify it (its UI slices swap an app view for the SuiteUI component the kernel's EK-chrome page already shows)",
+  "owned": [
+    "Sources/PhotoModel/PhotoStroke.swift",
+    "Sources/PhotoModel/PhotoRetouch.swift",
+    "Sources/PhotoModel/ToolOptions.swift",
+    "Sources/PhotoApp/LiveStroke.swift",
+    "Sources/PhotoApp/StrokePacer.swift",
+    "Sources/PhotoApp/PointerPressure.swift",
+    "Sources/PhotoApp/BrushCursorOverlay.swift",
+    "Sources/PhotoApp/PhotoToolOptions.swift",
+    "Sources/PhotoApp/PhotoWindow.swift",
+    "Tests/PhotoModelTests/PhotoBrushTests.swift",
+    "Tests/PhotoModelTests/PhotoLiveStrokeTests.swift",
+    "Tests/PhotoModelTests/PhotoDragBatchTests.swift",
+    "Tests/PhotoModelTests/PhotoBrushArcTests.swift",
+    "Tests/PhotoModelTests/PhotoRetouchDabTests.swift",
+    "Tests/AppSnapshotTests/PhotoStrokePacerTests.swift",
+    "Tests/AppSnapshotTests/PhotoWindowStrokeTests.swift",
+    "Tests/mutations/PhotoModel.KernelBrushAdapter.json",
+    "Tests/mutations/PhotoModel.PhotoStroke.json"
+  ],
+  "journeys": [],
+  "journeys_none": "Model-only migration proven by each app's existing journeys, which other packets own; no new XCUITest",
+  "slices": [
+    {
+      "id": "AB-photo",
+      "behavior": "Photo's brush, eraser, clone and heal sample through `StrokeSmoother` and `DabSpacer`, keep their options in `BrushSettings`, draw on `LiveCopy<PhotoWorkspace>` through SuiteUI's `StrokePacer`, `PointerPressure` and `BrushCursorMark`, and the Photo copies are deleted; the per-pixel capsule stays until creative-core's stamp op lands.",
+      "tasks": [
+        "AB-p1",
+        "AB-p2"
+      ],
+      "journeys": [
+        "PhotoModelTests"
+      ],
+      "owned": [
+        "Sources/PhotoModel/PhotoStroke.swift",
+        "Sources/PhotoModel/PhotoRetouch.swift",
+        "Sources/PhotoModel/ToolOptions.swift",
+        "Sources/PhotoApp/LiveStroke.swift",
+        "Sources/PhotoApp/StrokePacer.swift",
+        "Sources/PhotoApp/PointerPressure.swift",
+        "Sources/PhotoApp/BrushCursorOverlay.swift",
+        "Sources/PhotoApp/PhotoToolOptions.swift",
+        "Sources/PhotoApp/PhotoWindow.swift",
+        "Tests/PhotoModelTests/PhotoBrushTests.swift",
+        "Tests/PhotoModelTests/PhotoLiveStrokeTests.swift",
+        "Tests/PhotoModelTests/PhotoDragBatchTests.swift",
+        "Tests/PhotoModelTests/PhotoBrushArcTests.swift",
+        "Tests/PhotoModelTests/PhotoRetouchDabTests.swift",
+        "Tests/AppSnapshotTests/PhotoStrokePacerTests.swift",
+        "Tests/AppSnapshotTests/PhotoWindowStrokeTests.swift",
+        "Tests/mutations/PhotoModel.KernelBrushAdapter.json",
+        "Tests/mutations/PhotoModel.PhotoStroke.json"
+      ],
+      "waits": {
+        "editor-kernel:EK-stroke": [
+          "AB-p1"
+        ],
+        "editor-kernel:EK-chrome": [
+          "AB-p2"
+        ]
+      },
+      "ui": true
+    }
+  ]
+}

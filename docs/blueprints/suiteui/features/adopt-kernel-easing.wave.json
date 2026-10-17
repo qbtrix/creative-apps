@@ -101,6 +101,9 @@
       "waits": {
         "editor-kernel:EK-keys": [
           "AE-h1"
+        ],
+        "adopt-kernel-selection:AS-halo": [
+          "AE-h1"
         ]
       },
       "ui": false

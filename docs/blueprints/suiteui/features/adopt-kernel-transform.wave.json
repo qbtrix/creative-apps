@@ -60,6 +60,12 @@
       "waits": {
         "editor-kernel:EK-box": [
           "AT-d1"
+        ],
+        "adopt-kernel-selection:AS-design": [
+          "AT-d1"
+        ],
+        "adopt-kernel-layers:AL-design": [
+          "AT-d1"
         ]
       },
       "ui": false

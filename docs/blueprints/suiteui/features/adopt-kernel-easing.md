@@ -29,12 +29,13 @@ section the deleted file served (unchanged behaviour).
 | slice | behavior (one sentence) | tasks | journeys | waits on |
 |---|---|---|---|---|
 | AE-flare | Flare runs its easing on `KeyRef`, `Segment`, `KeyState`, `EasePreset`, `EaseCurve` and `KeyRules` behind its existing API, its tests and journeys green, and its copy is deleted. | AE-f1, AE-f2 | FlareModelTests | editor-kernel:EK-keys |
-| AE-halo | Halo runs its easing on `KeyRef`, `Segment`, `KeyState`, `EasePreset`, `EaseCurve` and `KeyRules` behind its existing API, its tests and journeys green, and its copy is deleted. | AE-h1, AE-h2 | HaloModelTests | editor-kernel:EK-keys |
+| AE-halo | Halo runs its easing on `KeyRef`, `Segment`, `KeyState`, `EasePreset`, `EaseCurve` and `KeyRules` behind its existing API, its tests and journeys green, and its copy is deleted. | AE-h1, AE-h2 | HaloModelTests | editor-kernel:EK-keys, adopt-kernel-selection:AS-halo |
 
-There is no new screen: every slice is Model-only (`"ui_slice": "none"`),
-and a slice that touches `Sources/*App/` or `Sources/SuiteUI/` to keep an
-existing view compiling is marked `"ui": true` with the view's existing
-render budget as its row. The acceptance tests are the app's existing Model
+There is no new screen (`"ui_slice": "none"`); a slice that touches
+`Sources/*App/` (a layers panel becoming `LayerTreeList`, an autosave file) is
+marked `"ui": true` with the view's existing render budget as its row, and
+waits on editor-kernel's EK-u for the SuiteUI half. A slice that edits a file
+another adopt slice also edits waits on that slice (the `waits` data). The acceptance tests are the app's existing Model
 tests and journeys, which merged long before this feature (rule 13 holds by
 construction), plus a mutation plan on each adapter (rule 14).
 

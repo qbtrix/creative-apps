@@ -7,7 +7,7 @@
   "covers": "editor-kernel design (2026-10-17), inventory row 'session'; captain's canonical-first call on #1552",
   "waits_on": "editor-kernel:EK-doc only (every slice); cross-line hand-offs in the packet's Hand-offs list",
   "ui_slice": "none",
-  "ui_slice_reason": "behaviour-preserving migration: no new screen; the apps' existing journeys and snapshots verify it",
+  "ui_slice_reason": "behaviour-preserving migration: no new screen; the apps' existing journeys and snapshots verify it (its UI slices swap an app view for the SuiteUI component the kernel's EK-chrome page already shows)",
   "owned": [
     "Sources/FlareModel/FlareFiles.swift",
     "Sources/FlareApp/FlareAutosave.swift",
@@ -175,6 +175,9 @@
       ],
       "waits": {
         "editor-kernel:EK-doc": [
+          "AD-l1"
+        ],
+        "adopt-kernel-undo:AU-library": [
           "AD-l1"
         ]
       },
