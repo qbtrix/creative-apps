@@ -1,0 +1,4 @@
+[
+  {"label":"note shown with nil","file":"Sources/SuiteUI/RenderingCommands.swift","find":"guard let note = status.note else { return \"Drawing on \\(status.active)\" }","replace":"let note = status.note ?? \"Drawing on \\(status.active): Metal stopped\"","tests":"RenderingCommandsTests"},
+  {"label":"item sets the wrong case","file":"Sources/SuiteUI/RenderingCommands.swift","find":"preference.set(picked)","replace":"preference.set(picked == .cpu ? .gpu : picked)","tests":"RenderingCommandsTests"}
+]
