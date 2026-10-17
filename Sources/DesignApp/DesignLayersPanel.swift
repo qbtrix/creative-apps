@@ -24,7 +24,10 @@
 // is what names it. A page row is a container identified `design.page.row.<id>`
 // with its checkmark inside: a page name's words sit in its text's value, not
 // its label, so journeys count pages by identifier (#1451). The section headers use SuiteColor.textSecondary; the
-// sidebar style's own header gray is under 4.5:1. Values in, intents out.
+// sidebar style's own header gray is under 4.5:1. While the list has focus, Edit >
+// Cut, Copy and Paste send `.cut`, `.copy` and `.paste` (designPasteboardCommands).
+// The rename state (DesignRenameState: the row in rename, the draft, the refusal
+// shown as `design.layers.rename-refusal`) is the panel's own. Values in, intents out.
 import DesignModel
 import SuiteUI
 import SwiftUI
@@ -32,6 +35,8 @@ import SwiftUI
 struct DesignLayersPanel: View {
     let model: DesignWorkspace
     let perform: DesignPerform
+    /// The layer row being renamed, its draft and the last refusal; the panel's own state.
+    @State private var rename = DesignRenameState()
 
     var body: some View {
         List(selection: selection) {
@@ -53,6 +58,9 @@ struct DesignLayersPanel: View {
                 } else {
                     DesignPanelHint(model.isOpen ? "Nothing on this page yet." : "No file open.")
                 }
+                if let refusal = rename.refusal {
+                    DesignPanelHint(refusal).accessibilityIdentifier(DesignRenameState.refusalID)
+                }
             } header: {
                 header("Layers")
             }
@@ -63,6 +71,7 @@ struct DesignLayersPanel: View {
         .scrollContentBackground(.hidden)
         .font(SuiteFont.inspectorLabel)
         .accessibilityIdentifier("design.layers")
+        .designPasteboardCommands(model, perform)
     }
 
     private func header(_ title: String) -> some View {
@@ -105,6 +114,20 @@ struct DesignLayersPanel: View {
             ) { perform(.deletePage) },
         ]
     }
+}
+
+/// The Layers rename's presentation state: the row in rename (nil: none), the name being typed,
+/// and the reason the last rename was refused, shown under the layers until the next one. The
+/// panel owns it; the rename itself goes to the Model as an intent once rows rename (layers-panel L-4).
+struct DesignRenameState: Equatable {
+    /// The identifier of the row's name field while it is in rename.
+    static let fieldID = "design.layer.rename"
+    /// The identifier of the refusal's hint.
+    static let refusalID = "design.layers.rename-refusal"
+
+    var rowID: String?
+    var draft = ""
+    var refusal: String?
 }
 
 /// One page: its symbol and name, with a checkmark on the current page.
