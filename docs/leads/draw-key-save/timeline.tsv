@@ -1,0 +1,76 @@
+utc	stage	event	ref	note
+2026-10-16T18:10Z	0	stage-start	#1365	base 132d910 on dev
+2026-10-16T18:12Z	2	stage-end	#1365	7 waves planned, v2 loop
+2026-10-16T18:12Z	3	stage-start	wave 1	DK-1 DK-2a DK-4 DK-5
+2026-10-16T19:30Z	3	pr-merged	#1525 #1524 #1543 #1544	wave 1 merged (DK-1 DK-2a DK-4 DK-5)
+2026-10-16T19:30Z	3	stage-start	wave 2	DK-2b DK-3 DK-6 on ef9dfc2
+2026-10-16T19:52Z	3	pr-opened	#1580 #1581	DK-2b DK-3
+2026-10-16T19:52Z	3	heartbeat	DK-6	over cap, split into DK-6a and DK-6b; filed #1589
+2026-10-16T19:58Z	3	pr-opened	#1597	DK-6a stubs
+2026-10-16T20:14Z	3	pr-merged	#1581 #1597	DK-3 DK-6a
+2026-10-16T20:14Z	3	heartbeat	DK-6b	builder started
+2026-10-16T20:22Z	3	pr-opened	#1608	DK-6b window split
+2026-10-16T20:35Z	3	heartbeat	#1608	macOS build 38961463348 running
+2026-10-16T20:53Z	3	pr-merged	#1608	DK-6b; wave 2 merged
+2026-10-16T20:53Z	3	stage-start	wave 3	DK-7 on 9a4279d
+2026-10-16T21:05Z	3	pr-opened	#1627	DK-7 router, 395 lines
+2026-10-16T21:16Z	3	pr-merged	#1627	DK-7; wave 3 merged
+2026-10-16T21:16Z	3	stage-start	wave 4	DK-8 DK-10 DK-12 DK-13 on 8e0a526
+2026-10-16T21:37Z	3	pr-merged	#1644	DK-10
+2026-10-16T21:37Z	3	pr-opened	#1649 #1658	DK-8 DK-12
+2026-10-16T21:37Z	3	heartbeat	DK-11	builder started
+2026-10-16T21:45Z	3	pr-opened	#1673	DK-13 menus
+2026-10-16T21:50Z	3	pr-opened	#1676	DK-11 transport
+2026-10-16T21:52Z	3	pr-merged	#1649	DK-8 stage
+2026-10-16T21:52Z	3	heartbeat	DK-9	builder started
+2026-10-16T21:59Z	3	pr-merged	#1658 #1673 #1676	DK-12 DK-13 DK-11; wave 4 merged
+2026-10-16T21:59Z	3	stage-start	wave 5	DK-9 DK-13f
+2026-10-16T22:06Z	3	pr-opened	#1690	DK-13f
+2026-10-16T22:15Z	3	pr-opened	#1691	DK-9 finishPath, Mutate 3/3
+2026-10-16T22:20Z	3	heartbeat	DK-14	builder started; #1690 #1691 in lane
+2026-10-16T22:35Z	3	pr-opened	#1695	DK-14 recording ring
+2026-10-16T22:43Z	3	pr-merged	#1690	DK-13f
+2026-10-16T22:43Z	3	ci-run	38973620217	#1691 macOS build failed: XCUIElement.perform; fixer started
+2026-10-16T22:50Z	3	heartbeat	#1691	fixed head e85beb7, waits on macOS build
+2026-10-16T23:04Z	3	pr-merged	#1691 #1695	DK-9 DK-14; waves 5-6 merged
+2026-10-16T23:04Z	3	stage-start	wave 7	DK-15 feature-done on caa3c66
+2026-10-16T23:22Z	3	pr-opened	#1738	DK-15 feature-done
+2026-10-16T23:22Z	4	finding-filed	#1731	new shape has no key on .built; fixer started
+2026-10-16T23:32Z	4	pr-opened	#1748	fixes #1731, Mutate 4/4
+2026-10-16T23:40Z	3	pr-merged	#1738 #1748	DK-15 feature-done; fix #1731
+2026-10-16T23:40Z	4	ci-run	38981654285	scoped flare on b267d00 (has #1738) success
+2026-10-16T23:40Z	4	stage-start	round 1	wait for full CI 38982479981 on 96bd5d9
+2026-10-16T23:50Z	4	pr-opened	#1776	F1731b: J26 expects keys 0 and 24 strictly
+2026-10-16T23:51Z	4	ci-run	38982479981	cancelled by newer dispatch; waiting on 38982952832 and scoped 38982544063
+2026-10-17T00:08Z	4	ci-run	38982544063	scoped flare red: render budget canvas drag 122 bodies; journeys skipped
+2026-10-17T00:08Z	4	finding-filed	#1792	window body per drag sample
+2026-10-17T00:08Z	4	fix-round	round 1	F1792 fixer started
+2026-10-17T00:20Z	4	pr-opened	#1799	fixes #1792 (FlareLiveDrag), Mutate 4/4
+2026-10-17T00:25Z	4	ci-run	38984777554	full CI 24201bb (has #1738 #1748): macOS red; Flare fails only RenderBudgetFlareTests (#1792); Photo, Home, Design, Library failures are other lines
+2026-10-17T00:25Z	4	ci-run	38984215474	scoped flare b4b063d (has #1776): same budget failure, journeys skipped
+2026-10-17T00:47Z	4	ci-run	38986622323	scoped flare 0e6f7c9 (has #1799): bodies 1, but the drag drew no rectangle; #1792 reopened
+2026-10-17T00:47Z	4	fix-round	round 1	F1792b fixer started
+2026-10-17T00:55Z	4	pr-opened	#1819	RenderBudgetFlareTests on .built; app drawing was not broken
+2026-10-17T01:09Z	4	pr-merged	#1819	fixes #1792
+2026-10-17T01:09Z	4	ci-run	38988895145	full CI 7ac0a31: Flare render budget bodies now pass (1 body); macOS red on AppSwitcherTests (suiteui, not ours); Flare scrub p95 35 ms report-only
+2026-10-17T01:30Z	4	ci-run	38988929676	scoped flare 7ac0a31: journeys ran; 10 of 11 Flare journeys red; audit over baseline
+2026-10-17T01:30Z	4	finding-filed	#1836-#1841	six findings from the journeys and audit
+2026-10-17T01:30Z	4	fix-round	round 1	fix-batch and critic panel started
+2026-10-17T01:42Z	4	review	round 1	panel: 19 confirmed, 5 refuted; filed #1844-#1863
+2026-10-17T01:55Z	4	pr-merged	#1843	round 1: #1836 #1837
+2026-10-17T01:55Z	4	pr-opened	#1864 #1875 #1876	round 1 fixes
+2026-10-17T02:08Z	4	pr-merged	#1864 #1875	round 1 fixes
+2026-10-17T02:08Z	4	fix-round	round 2	fix-batch on 20 findings (last round)
+2026-10-17T02:50Z	4	pr-opened	#1885 #1886 #1889 #1890 #1892 #1893 #1896 #1897	round 2 fixes (8 PRs)
+2026-10-17T03:07Z	4	pr-merged	#1885 #1886 #1889 #1890 #1892 #1896 #1897	round 2 fixes
+2026-10-17T03:07Z	4	heartbeat	#1893	conflict in UITests/FlareJourneyTests+Draw.swift; rebase fixer started
+2026-10-17T03:15Z	4	heartbeat	#1893	rebased to 31c505b, gate pass, Mutate 2/2
+2026-10-17T03:36Z	4	ci-run	38997180116	scoped flare 0637138: FlareWindowSnapshots.bounce fails (blank capture from #1896); journeys not run; #1856 reopened, revert started
+2026-10-17T03:42Z	4	pr-opened	#1965	revert #1896 (blank window capture)
+2026-10-17T03:55Z	4	pr-merged	#1893	round 2: #1862 #1863 #1850 part
+2026-10-17T06:05Z	4	stage-start	round 2 review	resumed by line lead act-1a1487603d9-vrd4; lead branch recreated on dev 4a86f5f
+2026-10-17T06:12Z	4	ci-run	39001036689	scoped flare e251c5c5 holds #1965 and #1893; macOS (flare) red (11 journeys); audit contrast 5/0 identifier 18/12; round-2 panel started
+2026-10-17T10:45Z	4	heartbeat	39013292801	container restarted 06:45-10:43; round-2 panel never ran (template parse error), rerunning on scoped flare 453198ac
+2026-10-17T13:39Z	heartbeat	39032323316	#1365	new lead session; round-2 panel started on full run 39032323316 (d14e765b) instead of scoped 39013292801: newer, green Linux, promoted main
+2026-10-17T13:45:46Z	stage	done: round 2 not clean (8 filed), cap reached, findings to gap, contact sheet posted
+2026-10-17T23:48Z	rebase	lead branch rebuilt on origin/main 59c435a6; stage stays done
