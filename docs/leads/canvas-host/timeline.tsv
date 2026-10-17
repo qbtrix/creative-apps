@@ -18,3 +18,4 @@ utc	stage	event	ref	note
 2026-10-17T16:24:55Z	lane builds pending; comment footers stripped
 2026-10-17T16:49:40Z	wave2 builds green
 2026-10-17T17:11Z	heartbeat	lane-check	builds green; waiting on batch merge
+2026-10-17T17:33Z	wave	start	wave 3 started
