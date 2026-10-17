@@ -15,8 +15,9 @@
 // draws at full size, and once committed, with a small box's corner handles
 // outside it), undoes and redoes, saves from the top bar's Save with -DesignSaveTo (no panel), then
 // relaunches with -DesignOpenFile and checks the saved file reopens. The menu
-// journey launches on `-DesignFixture empty`, clicks the top bar's New File
-// (`design.bar.new`, one "New File" undo step), checks each menu really opens,
+// journey launches on `-DesignFixture cards`, clicks the top bar's New File
+// (`design.bar.new`, one "New File" undo step; over `empty`, which is already a new
+// file, it changes nothing and records no step, #2411), checks each menu really opens,
 // finds each Design item in it (Edit keeps the system's Cut, Copy, Paste, Delete
 // and Select All above Duplicate, and holds one Delete) on, or off with nothing
 // selected, the Arrange and Align submenus included (their tooltips, which
@@ -44,8 +45,9 @@ final class DesignJourneyTests: XCTestCase {
     }
 
     @MainActor func testEveryMenuOpens() {
-        let design = Journey("Design", self, arguments: ["-DesignFixture", "empty"])
-        XCTAssert(design.element("suite.canvas").waitForExistence(timeout: 30), "-DesignFixture empty showed no canvas")
+        // On `cards`: New File over `empty` would change nothing, so it records no step (#2411).
+        let design = Journey("Design", self, arguments: ["-DesignFixture", "cards"])
+        XCTAssert(design.element("suite.canvas").waitForExistence(timeout: 30), "-DesignFixture cards showed no canvas")
         // The top bar's New File, clicked: a new document replaces the open one as one undo step.
         let newFile = design.element("design.bar.new")
         XCTAssert(newFile.waitForExistence(timeout: 5) && newFile.isEnabled, "no enabled New File in the top bar (design.bar.new)")
