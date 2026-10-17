@@ -2,8 +2,8 @@
   "title": "An AppKit canvas host (CALayer tiles or a CAMetalLayer) with live input, and the View > Rendering choice",
   "wave": 3,
   "order": 10,
-  "status": "planned",
-  "feature_issue": "file when ready",
+  "status": "built",
+  "feature_issue": "#1596",
   "covers": "dual-renderer design (2026-10-17) sections 2 and 3; #1458 (SuiteUI half)",
   "waits_on": "canvas-marks (owns CanvasViewport.swift in wave 2; CH-9 adds an extension file, never edits it); no creative-core issue",
   "depends": [
