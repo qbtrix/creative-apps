@@ -1,7 +1,7 @@
 // AppMarkTests.swift: AppMark (AppMark.swift) draws every SuiteApp, nil
 // included, in every style at 16 and 1024 pt, inside its frame and never
 // empty; the -small groups take over at 32 pt and under for .icon and .glyph,
-// never for .line; and what AppMark draws is what Bundle/Icons holds: its .icon
+// never for .line, whose stroke has a one-point floor; and what AppMark draws is what Bundle/Icons holds: its .icon
 // at 128 and at 32 matches <App>-128.png and <App>-32.png, the rsvg renders of
 // the same SVG, within antialiasing. So AppMarkArt.swift and the PNGs can't
 // drift apart. macOS only.
@@ -94,6 +94,19 @@ import Testing
         let art = AppMarkArt.all["flare"]
         #expect(art.map { AppMark.elements($0, .icon, side: 16).count } == art.map { $0.tile.count + $0.tileSmall.count + $0.glyphSmall.count })
         #expect(art.map { AppMark.elements($0, .line, side: 16).count } == art.map { $0.line.count })
+    }
+
+    /// A .line stroke is never thinner than `AppMark.minLineWidth` points, so a
+    /// chip-sized mark (about 10 pt) holds up beside its label; at the
+    /// switcher's 22 pt the art's own width (1.6 of 24 units, 1.47 pt) stands.
+    @Test func aLineStrokeHasAFloorOfOnePoint() throws {
+        let box = AppMark.box(.line).width
+        let art = 37.33, side: CGFloat = 10
+        #expect(AppMark.lineWidth(art, .line, side: side) * side / box >= AppMark.minLineWidth - 0.001)
+        #expect(AppMark.lineWidth(art, .line, side: SuiteSize.switcherIcon) == art)
+        // The coloured forms keep the art's widths at every size.
+        #expect(AppMark.lineWidth(art, .glyph, side: side) == art)
+        #expect(AppMark.lineWidth(art, .icon, side: side) == art)
     }
 
     /// Mean absolute difference per channel, 0 to 255, between AppMark's .icon and the rsvg PNG.

@@ -47,8 +47,9 @@ public struct ChipRow<ID: Hashable & Sendable>: View {
             ForEach(chips) { chip in
                 Button { onToggle(chip.id) } label: {
                     if let app = chip.app {
+                        // A mark's 24-unit art fills less of its box than a symbol, so it takes the
+                        // regular scale to read at a small symbol's size.
                         Label { Text(chip.title) } icon: { AppMark(app: app, style: .line).symbolSized() }
-                            .imageScale(.small)
                     } else if let symbol = chip.systemImage {
                         Label(chip.title, systemImage: symbol).imageScale(.small)
                     } else {
