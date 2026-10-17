@@ -8,7 +8,11 @@
 // (`library.loupe.position`) reads "<name>  ·  <n> of 24  ·  <cull summary>"
 // (#1678); a photo's cull state is that summary ("3 stars, Picked"), else
 // the loupe photo's value, which ends in it, or a grid cell's label, which
-// names its badges ("2 stars", "Flagged").
+// names its badges ("2 stars", "Flagged"). The photo element
+// (`library.loupe.photo`) is drawn only when its pixels decode, so the journey
+// clicks the loupe (`library.loupe`) when it is missing and reads the cull
+// summary from the readout. In the loupe Escape goes back to the grid, so a
+// menu is closed with Escape only while it is on screen (`closeMenu`).
 import XCTest
 
 extension LibraryJourneyTests {
@@ -50,7 +54,11 @@ extension LibraryJourneyTests {
         // can't read a menu Toggle's check mark (#1654): step 2 proves it's on.
         openInLoupe("IMG_0001", library)
         _ = autoAdvanceItem(library)
-        library.press(.escape)
+        closeMenu("Metadata", library)
+        XCTAssert(
+            loupe(library).waitForExistence(timeout: 5),
+            "closing the Metadata menu left the loupe (library.loupe); an Escape reached it"
+        )
 
         // Step 2: 3 rates IMG_0001 and moves on to IMG_0002.
         focusLoupe(library)
@@ -109,7 +117,7 @@ extension LibraryJourneyTests {
         let edit = library.app.menuBars.firstMatch.menuBarItems["Edit"]
         edit.click()
         XCTAssertEqual(undoItem(in: edit).title, "Undo Clear Flag", "Edit's Undo after U")
-        library.press(.escape)
+        closeMenu("Edit", library)
         library.app.terminate()
     }
 
@@ -135,11 +143,38 @@ extension LibraryJourneyTests {
         expectPosition(name, "1 of 24", library)
     }
 
-    /// Clicks the loupe photo so its keys reach it after a menu.
+    /// The loupe group (`library.loupe`), there whether or not its photo decoded.
+    @MainActor private func loupe(_ library: Journey) -> XCUIElement {
+        library.app.descendants(matching: .any)["library.loupe"]
+    }
+
+    /// Clicks the loupe photo so its keys reach it after a menu, or the loupe
+    /// itself when the photo element isn't drawn.
     @MainActor private func focusLoupe(_ library: Journey) {
         let photo = library.element("library.loupe.photo")
-        XCTAssert(photo.waitForExistence(timeout: 5), "no loupe photo (library.loupe.photo)")
-        photo.click()
+        if photo.waitForExistence(timeout: 3) {
+            photo.click()
+            return
+        }
+        let group = loupe(library)
+        XCTAssert(group.waitForExistence(timeout: 5), "no loupe (library.loupe) to focus")
+        group.click()
+    }
+
+    /// Whether the menu bar item `title` has its menu on screen: its first
+    /// item exists and is hittable, as a closed menu's items aren't.
+    @MainActor private func menuShown(_ title: String, _ library: Journey) -> Bool {
+        let item = library.app.menuBars.firstMatch.menuBarItems[title].menuItems.firstMatch
+        return item.exists && item.isHittable
+    }
+
+    /// Closes the menu `title` if it is still on screen. Escape goes only to
+    /// an open menu: in the loupe a stray Escape goes back to the grid.
+    @MainActor private func closeMenu(_ title: String, _ library: Journey) {
+        guard menuShown(title, library) else { return }
+        library.press(.escape)
+        for _ in 0..<15 where menuShown(title, library) { Thread.sleep(forTimeInterval: 0.2) }
+        XCTAssertFalse(menuShown(title, library), "the \(title) menu stayed open after Escape")
     }
 
     /// The loupe's readout, "<name>  ·  <n> of 24  ·  <cull summary>", and its trimmed parts.
@@ -165,13 +200,14 @@ extension LibraryJourneyTests {
 
     /// The loupe photo's cull summary: the readout's last part, else the
     /// photo's value (its render state, then the summary), which XCUITest
-    /// may read empty (#262).
+    /// may read empty (#262), else the readout as read. Never requires the
+    /// photo element, which isn't drawn when its pixels don't decode.
     @MainActor private func cullValue(_ library: Journey) -> String {
         let read = readoutParts(library)
         if read.parts.count >= 3, let summary = read.parts.last, !summary.isEmpty { return summary }
         let photo = library.element("library.loupe.photo")
-        XCTAssert(photo.waitForExistence(timeout: 5), "no loupe photo (library.loupe.photo)")
-        return (photo.value as? String) ?? ""
+        if photo.exists, let value = photo.value as? String, !value.isEmpty { return value }
+        return read.parts.last ?? read.text
     }
 
     /// The loupe photo's cull summary ends `suffix` within five seconds.
