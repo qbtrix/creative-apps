@@ -2,7 +2,8 @@
 // #451). HaloViewer on `keyed` with the fake services at frame 12, after
 // `renderCurrentFrame()`: the rendered frame (Ball over Floor) fills the
 // artboard with no note. After a scrub to 13 the same frame shows with
-// "Rendered frame is out of date." under the artboard. HaloFrameImage turns
+// "Rendered frame is out of date." under the artboard, on the canvas
+// surround, not over the artwork (#2345). HaloFrameImage turns
 // the frame into an sRGB, straight-alpha image of the frame's size. Light and
 // Dark. Writes halo-rendered-frame-*.png and halo-rendered-frame-stale-*.png.
 // macOS only.
