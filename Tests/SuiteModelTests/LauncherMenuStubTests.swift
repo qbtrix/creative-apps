@@ -31,19 +31,11 @@ private func assets(_ title: String, _ shortcut: String? = nil) -> Item {
     Item(title: title, file: "LauncherCommands+Assets.swift", feature: "shared-assets", shortcut: shortcut)
 }
 
-private func switching(_ title: String, _ digit: Int) -> Item {
-    Item(
-        title: title, file: "SuiteCommands.swift", feature: "switching",
-        shortcut: ".keyboardShortcut(\"\(digit)\", modifiers: [.control, .command])")
-}
-
 private let items: [Item] = [
     assets("Cut", ".keyboardShortcut(\"x\")"), assets("Copy", ".keyboardShortcut(\"c\")"),
     assets("Add from Clipboard", ".keyboardShortcut(\"v\")"), assets("Select All", ".keyboardShortcut(\"a\")"),
     assets("Assets", ".keyboardShortcut(\"a\", modifiers: [.option, .command])"),
     Item(title: "Check for Updates…", file: "LauncherCommands+Update.swift", feature: "updater"),
-    switching("Home", 0), switching("Flare", 1), switching("Design", 2), switching("Photo", 3),
-    switching("Library", 4), switching("Halo", 5),
 ]
 
 private let homeFile = "Sources/AfterGlowApp/LauncherCommands+Home.swift"
@@ -145,7 +137,7 @@ private func occurrences(of needle: String, in text: String) -> Int {
     }
 
     @Test func noItemEnabledWithoutAReason() throws {
-        for file in commandFiles where file != homeFile {
+        for file in commandFiles where file != homeFile && !file.hasSuffix("SuiteCommands.swift") {
             for statement in try buttons(source(file)) {
                 #expect(statement.contains(".disabled(true)") && statement.contains("notConnected(\""), "\(file): \(statement)")
             }

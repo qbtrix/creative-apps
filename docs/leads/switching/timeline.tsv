@@ -11,3 +11,7 @@ utc	stage	event	ref	note
 2026-10-17T03:40Z	3	pr-opened	SW-3a	AppLauncher, StoreWatcher, live switching and recents slots; macOS-only, Linux gate PASS, build-only lane run decides
 2026-10-17T04:00Z	3	pr-merged	#1833	SW-3a merged as 7d022431
 2026-10-17T04:30Z	3	pr-opened	SW-3b	HandOffTransport, SuiteAppDelegate, live hand-off slot, launcher router; macOS-only, Linux gate PASS
+2026-10-17T05:00Z	3	pr-merged	#1883	SW-3b merged as 7d068e10
+2026-10-17T05:40Z	3	pr-opened	SW-3c	SuiteCommands Switch To live, .suiteApp modifier, clash scan; Linux gate PASS
+2026-10-17T06:30Z	3	pr-merged	#1943	SW-3c merged as 98e5d50f
+2026-10-17T07:00Z	3	pr-opened	SW-3d	SwitcherEntries (Linux, tests) and SuiteSwitcherBridge (macOS); Linux gate PASS

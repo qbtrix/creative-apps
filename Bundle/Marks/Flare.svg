@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Bundle/Marks/Flare.svg: the Flare app mark, the only hand-edited form of it.
+     scripts/render-marks turns it into Bundle/Icons/Flare*.png and SuiteUI's AppMarkArt.swift.
+     Groups: flare-tile (1024 grid, 824 tile inset 100), flare-tile-small (the rim drawn at 32 px and under),
+     flare-glyph (44-unit grid), flare-glyph-small (32 px and under), flare-line (24-unit monoline, currentColor). -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024" role="img" aria-label="Flare: one spark and its arc">
+  <defs>
+    <radialGradient id="flare-tile-fill" cx="0.28" cy="0" r="1.1" fx="0.28" fy="0"><stop offset="0" stop-color="#3b3b41"/><stop offset="0.46" stop-color="#1d1d20"/><stop offset="1" stop-color="#0a0a0b"/></radialGradient>
+    <linearGradient id="flare-sheen" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity="0.11"/><stop offset="0.4" stop-color="#fff" stop-opacity="0"/></linearGradient>
+    <linearGradient id="flare-paint" gradientUnits="userSpaceOnUse" x1="0" y1="3" x2="0" y2="40"><stop offset="0" stop-color="#ffd84d"/><stop offset="0.5" stop-color="#ff8a1f"/><stop offset="1" stop-color="#ff375f"/></linearGradient>
+    <linearGradient id="flare-paint-small" gradientUnits="userSpaceOnUse" x1="0" y1="3" x2="0" y2="40"><stop offset="0" stop-color="#ffd84d"/><stop offset="1" stop-color="#ff8a1f"/></linearGradient>
+  </defs>
+  <g id="flare-tile">
+    <rect x="100" y="100" width="824" height="824" rx="185" ry="185" fill="url(#flare-tile-fill)"/>
+    <rect x="100" y="100" width="824" height="824" rx="185" ry="185" fill="url(#flare-sheen)"/>
+    <rect x="104" y="104" width="816" height="816" rx="181" ry="181" fill="none" stroke="#fff" stroke-opacity="0.16" stroke-width="8"/>
+  </g>
+  <g id="flare-tile-small" display="none">
+    <rect x="122" y="122" width="780" height="780" rx="163" ry="163" fill="none" stroke="#fff" stroke-opacity="0.3" stroke-width="44"/>
+  </g>
+  <g id="flare-glyph" transform="translate(232 232) scale(12.7273)">
+    <path d="M4 40 C8 31 13 25.5 19 22.5" fill="none" stroke="url(#flare-paint)" stroke-width="3.4" stroke-linecap="round" opacity="0.6"/>
+    <path d="M26.5 5.5 C27.76 11.39 31.44 14.08 39.5 15 C31.44 15.92 27.76 18.61 26.5 24.5 C25.24 18.61 21.56 15.92 13.5 15 C21.56 14.08 25.24 11.39 26.5 5.5 Z" fill="url(#flare-paint)"/>
+  </g>
+  <g id="flare-glyph-small" display="none" transform="translate(180 180) scale(15.0909)">
+    <path d="M4 40.5 C7.5 32.5 12 27 18 23.5" fill="none" stroke="url(#flare-paint-small)" stroke-width="5" stroke-linecap="round" opacity="0.7"/>
+    <path d="M27 5 C28.41 11.51 32.51 14.48 41.5 15.5 C32.51 16.52 28.41 19.49 27 26 C25.59 19.49 21.49 16.52 12.5 15.5 C21.49 14.48 25.59 11.51 27 5 Z" fill="url(#flare-paint-small)"/>
+  </g>
+  <g id="flare-line" display="none" transform="translate(232 232) scale(23.3333)" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 4.3 C15.64 7.15 17.51 8.45 21.6 8.9 C17.51 9.35 15.64 10.65 15 13.5 C14.36 10.65 12.49 9.35 8.4 8.9 C12.49 8.45 14.36 7.15 15 4.3 Z"/><path d="M3.5 20.5c1.8-4.4 4.2-6.9 7.2-8.3" opacity="0.7"/></g>
+</svg>

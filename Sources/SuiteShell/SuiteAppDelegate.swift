@@ -6,6 +6,13 @@
 import AppKit
 import SuiteModel
 
+/// The process's suite delegate, set when it is created, so the `.suiteApp(_:host:)`
+/// scene modifier can reach it from a scene.
+@MainActor
+public enum SuiteAppRegistry {
+    public static var delegate: SuiteAppDelegate?
+}
+
 @MainActor
 open class SuiteAppDelegate: NSObject, NSApplicationDelegate {
     /// The app's document host; nil until the app adopts `.suiteApp(_:host:)`.
@@ -14,6 +21,11 @@ open class SuiteAppDelegate: NSObject, NSApplicationDelegate {
     public var receiver: (any HandOffReceiving)?
     /// The app this delegate belongs to; a document URL is addressed to it.
     public var app: SuiteApp = .launcher
+
+    public override init() {
+        super.init()
+        SuiteAppRegistry.delegate = self
+    }
 
     open func application(_ application: NSApplication, open urls: [URL]) {
         for url in urls {

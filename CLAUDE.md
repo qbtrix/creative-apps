@@ -365,7 +365,11 @@ Crew PRs merge into `dev` at once; `main` moves only when full CI passes on
   "dev is red" (label `dev-red`) names the failing jobs and the culprit range
   `main..<sha>`. SwiftUI breakage can sit on `dev` until that run, so the range
   can span several PRs. The lane keeps merging while the issue is open; the
-  next green run moves `main` and closes it.
+  next green run moves `main` and closes it. While it is open the lane also
+  bisects the range for the first red commit: `ci/bisect-<sha>-<i>` branches
+  each get a Linux-only run (red-triage's confident guess first, at most 8
+  runs per red), and the verdict lands as a comment on the `dev-red` issue
+  and on the owning feature-lead issue (the PR body's `Feature:` line).
 - A scoped run proves one app: `gh workflow run ci.yml --ref dev -f
   app=<flare|design|photo|library|halo|suite|suiteui>`. It still builds every
   target, app bundle and journey bundle, then runs only that app's Model

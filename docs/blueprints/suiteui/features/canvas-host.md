@@ -4,8 +4,12 @@
 `NSView` wrapped for SwiftUI with a `CALayer` tile path (CPU) and a
 `CAMetalLayer` path (GPU), which takes pointer, scroll, pinch and key input,
 hit-tests marks and draws a live drag on an overlay layer without a SwiftUI
-body per sample; plus the suite's **Settings > Rendering** choice (Automatic,
-GPU, CPU) as a SuiteUI pane and the preference every app process reads live.
+body per sample; plus the suite's **View > Rendering** submenu (Automatic,
+GPU (Metal), CPU, a checkmark on the current one) as SuiteUI's
+`RenderingCommands`, and the one suite-wide preference every app process reads
+live and keeps across relaunch. For the beta, Automatic draws on CPU. The
+Settings > Rendering pane is not in the beta (captain, 2026-10-17; see Not in
+this packet).
 **Line:** `line:suiteui` · **Wave:** 3 (`waves.md`) · **Lead branch:** `lead/canvas-host`
 
 **Covers:** the dual-renderer design
@@ -33,9 +37,9 @@ Blueprint sections: 2.2 (components), 4.4 (perf journeys), 5 (contracts),
 | slice | behavior (one sentence) | tasks | journeys | waits on |
 |---|---|---|---|---|
 | CH-a | Hosts and tests can code against `CanvasHosting` (content tiles, the input delegate, the hit map), the `RenderingPreference` type and its stubbed store, with fakes and the two gallery pages declared as placeholders. | CH-1, CH-2 | SJ0 | canvas-marks (feature `depends`) |
-| CH-b | The gallery's `canvas-host` page shows a document on the AppKit host, drags draw on the overlay and reach the fake delegate with 0 window bodies per sample, and the `settings-rendering` page switches Automatic, GPU and CPU on the fake preference with the status note. | CH-3, CH-4, CH-5 | SJ27, SJ28, SP11 | CH-a (CH-3, CH-4) |
-| CH-c | The hit map, the tile set (premultiplied sRGB tiles, dirty-tile replace) and the live preference store (shared suite defaults, observed across the suite's processes) behave as the fakes promised. | CH-6, CH-7, CH-8 | SJ27 | CH-a (CH-6, CH-7, CH-8) |
-| CH-d | The pages run on the live store and tiles, `CanvasViewport` hosts its content on the host, the Metal layer path exists behind the preference, and the journeys pass on live. | CH-9, CH-10, CH-11 | SJ27, SJ28, SP11 | CH-b (CH-9, CH-10); CH-c (CH-9) |
+| CH-b | The gallery's `canvas-host` page shows a document on the AppKit host, drags draw on the overlay and reach the fake delegate with 0 window bodies per sample, and the `settings-rendering` page's Rendering menu (Automatic, GPU (Metal), CPU, a checkmark on the current one, the status line under them) switches the fake preference and shows the status note. | CH-3, CH-4, CH-5 | SJ27, SJ28, SP11 | CH-a (CH-3, CH-4) |
+| CH-c | The hit map, the tile set (premultiplied sRGB tiles, dirty-tile replace) and the live preference store (one suite-wide key, kept across relaunch, observed across the suite's processes) behave as the fakes promised. | CH-6, CH-7, CH-8 | SJ27 | CH-a (CH-6, CH-7, CH-8) |
+| CH-d | The pages run on the live store and tiles, `CanvasViewport` hosts its content on the host, the Metal layer path exists behind the preference, the menu's choice survives a relaunch, and the journeys pass on live. | CH-9, CH-10, CH-11 | SJ27, SJ28, SP11 | CH-b (CH-9, CH-10); CH-c (CH-9) |
 
 CH-b is the UI slice (rule 18): it waits only on CH-a and runs beside CH-c.
 
@@ -47,17 +51,23 @@ CH-b is the UI slice (rule 18): it waits only on CH-a and runs beside CH-c.
    follows the pointer on the overlay layer; the page's log shows one
    `endDrag` and the window body count stays at 1 (the mouse-up commit).
 3. Hover a mark: the hit map names it in the status line (CH-6, SJ27).
-4. Open the `settings-rendering` page, pick GPU, then CPU (CH-4, SJ28): the
-   pane's status reads the backend name; the host's layer path switches live.
-5. Pick Automatic on a fake that reports device loss (SJ28): the note
-   "Drawing on CPU: Metal stopped" shows, no dialog.
+4. Open the `settings-rendering` page and its Rendering menu (CH-4, SJ28):
+   Automatic, GPU (Metal) and CPU, the checkmark on Automatic, and a disabled
+   status line under them ("Drawing on CPU"). Pick GPU (Metal), then CPU: the
+   checkmark moves each time, the status line reads the backend name and the
+   host's layer path switches live.
+5. Pick Automatic on a fake that reports device loss (SJ28): the status line
+   reads "Drawing on CPU: Metal stopped", no dialog.
 6. SP11 `canvas-drag` (CH-5): sample-to-present p95 on the host, reported.
+7. On live (CH-7, CH-9, SJ28): pick CPU, quit and relaunch the gallery: the
+   checkmark is still on CPU, and a second suite process reads CPU too.
 
 ## Screens and states
 
 `suiteui-canvas-host` (document on the host, light and dark),
-`suiteui-canvas-host-drag` (overlay mid-drag), `suiteui-rendering-pane`
-(three choices, GPU picked), `suiteui-rendering-pane-fallback` (the note).
+`suiteui-canvas-host-drag` (overlay mid-drag), `suiteui-rendering-menu`
+(the menu open, GPU (Metal) checked), `suiteui-rendering-menu-fallback` (the
+status line with the note).
 
 ## Contract slice
 
@@ -90,8 +100,9 @@ public final class FakeRenderingPreference: RenderingPreferenceReading { … }  
 `RenderingPreference` (CH-2) is the live type; its store methods return the
 fake's values until CH-7 fills them (`NotBuilt` never shows here: a stubbed
 `set` just records). Control ids: `suite.canvas` (the host, as today),
-`suite.canvas.overlay`, `suite.settings.rendering.automatic|gpu|cpu`,
-`suite.settings.rendering.status`, `suite.settings.rendering.test`.
+`suite.canvas.overlay`, `suite.settings.rendering.automatic|gpu|cpu` (the
+three menu items, ids kept from the pane design), `suite.settings.rendering.status`
+(the status line), `suite.menu.rendering` (the submenu).
 
 ## Pseudocode
 
@@ -117,7 +128,7 @@ fake's values until CH-7 fills them (`NotBuilt` never shows here: a stubbed
 | CH-1 | – | `CanvasHosting` contracts, `FakeCanvasContent`, `FakeRenderingPreference`, their fake tests | `Sources/SuiteUI/Contracts/CanvasHosting.swift`, `Tests/SuiteUITests/CanvasHostFakeTests.swift` | – | ~260, 2 |
 | CH-2 | – | `RenderingPreference` type with stubbed store; control ids; the two gallery pages as placeholders calling `CanvasHostPage` and `RenderingPanePage` stubs; checks first: SJ27, SJ28 and SP11 skipped, the render budget disabled | `Sources/SuiteUI/RenderingPreference.swift`, `Tests/SuiteUITests/RenderingPreferenceTests.swift`, `Tests/mutations/SuiteUI.RenderingPreference.json`, `Sources/SuiteUI/Gallery/GalleryCanvasHost.swift`, `Sources/SuiteUI/Gallery/GalleryRenderingPane.swift`, `UITests/SuiteJourneyTests+CanvasHost.swift`, `Tests/AppSnapshotTests/RenderBudgetCanvasHostTests.swift` | CH-1 | ~320, 7 |
 | CH-3 | #1458 (SuiteUI half) | `CanvasHostView` (NSView: tile layers, overlay layer, mouse, scroll, magnify, key, tracking area) and `CanvasHost` (representable); the `canvas-host` page on the fakes with its log | `Sources/SuiteUI/CanvasHostView.swift`, `Sources/SuiteUI/CanvasHost.swift`, `Sources/SuiteUI/Gallery/GalleryCanvasHost.swift`, `Tests/SuiteUITests/CanvasHostTests.swift`, `Tests/AppSnapshotTests/SuiteCanvasHostSnapshots.swift` | CH-2 | ~380, 5 |
-| CH-4 | – | `RenderingSettingsPane` (ChoiceChips for the three, status text, Test now) on the fake preference; the `settings-rendering` page | `Sources/SuiteUI/RenderingSettingsPane.swift`, `Sources/SuiteUI/Gallery/GalleryRenderingPane.swift`, `Tests/SuiteUITests/RenderingSettingsPaneTests.swift`, `Tests/AppSnapshotTests/SuiteRenderingPaneSnapshots.swift` | CH-2 | ~260, 4 |
+| CH-4 | – | `RenderingMenu` (an inline `Picker` over the three choices, so the current one carries the checkmark, with a disabled status line under it) and `RenderingCommands` (a `Commands` value: `CommandGroup(after: .toolbar)` puts `Menu("Rendering") { RenderingMenu }` in the View menu); both on the fake preference; the `settings-rendering` page shows the same `RenderingMenu` as a pull-down | `Sources/SuiteUI/RenderingCommands.swift`, `Sources/SuiteUI/Gallery/GalleryRenderingPane.swift`, `Tests/SuiteUITests/RenderingCommandsTests.swift`, `Tests/AppSnapshotTests/SuiteRenderingMenuSnapshots.swift` | CH-2 | ~260, 4 |
 | CH-5 | – | Enables SJ27, SJ28, SP11 and the render budget on the fakes; `canvas-drag` series; baselines | `UITests/SuiteJourneyTests+CanvasHost.swift`, `Tests/AppSnapshotTests/RenderBudgetCanvasHostTests.swift`, `Tests/AppSnapshotTests/Golden/canvas-host/` | CH-3, CH-4 | ~200, 3 + PNGs |
 | CH-6 | – | `CanvasHitMap`: rects and paths with a hit slop, nearest mark, order (top first) | `Sources/SuiteUI/CanvasHitMap.swift`, `Tests/SuiteUITests/CanvasHitMapTests.swift`, `Tests/mutations/SuiteUI.CanvasHitMap.json` | CH-1 | ~220, 3 |
 | CH-7 | – | The live store: shared suite defaults, `observe` across processes, device-loss note; fills CH-2's stubs, same signatures | `Sources/SuiteUI/RenderingPreference.swift`, `Tests/SuiteUITests/RenderingPreferenceLiveTests.swift`, `Tests/mutations/SuiteUI.RenderingPreference.json` | CH-2 | ~200, 3 |
@@ -151,24 +162,24 @@ CH-8) or with the code. A test ahead of its code is
 | CH-1 | `CanvasHostFakeTests`: `FakeCanvasContent` gives 20 tiles covering 4096 x 2160 with no overlap; `FakeRenderingPreference.set` then `choice` round-trips, `loseDevice()` makes `status.note` non-nil under `.automatic` only | a fake stops proving the live gap | none: fakes only |
 | CH-2 | `RenderingPreferenceTests`: `RenderingChoice` decodes "automatic", "gpu", "cpu" and rejects "metal"; the stubbed store returns the fake's values; SJ0 sees both pages | a stub returns a real value early, or a page is missing | `SuiteUI.RenderingPreference`: unknown raw value decodes as `.cpu` → `RenderingPreferenceTests`; `set` ignores a repeat choice → `RenderingPreferenceTests` |
 | CH-3 | `CanvasHostTests`: 120 synthetic drags call `delegate.drag` 120 times and `endDrag` once, `bodyRuns` grows by at most 1; the overlay path has 120 points; `hitTest` returns the host for the artboard and nil outside; the element is `suite.canvas` | a sample reaches the window, or input is lost | `SuiteUI.CanvasHostView`: `endDrag` skipped when no move → `CanvasHostTests`; overlay keeps points after mouse-up → `CanvasHostTests` |
-| CH-4 | `RenderingSettingsPaneTests`: three chips with their ids, the picked one matches `choice`, the status text is the fake's `active`, the note appears only when set; snapshots in four appearances | a chip is dead or the note is always shown | `SuiteUI.RenderingSettingsPane`: note shown with nil → `RenderingSettingsPaneTests`; chip picks the wrong case → `RenderingSettingsPaneTests` |
+| CH-4 | `RenderingCommandsTests`: three items titled Automatic, GPU (Metal) and CPU in that order with their ids; exactly one is checked and it matches `choice`; picking an item calls `set` once with its case; the status line is the fake's `active` and shows the note only when set; snapshots of the page's open menu in four appearances | the checkmark is on the wrong item, an item is dead, or the note is always shown | `SuiteUI.RenderingCommands`: note shown with nil → `RenderingCommandsTests`; item sets the wrong case → `RenderingCommandsTests` |
 | CH-5 | SJ27 and SJ28 pass on the fakes; `RenderBudgetCanvasHostTests.dragRunsNoBodies` passes; SP11 reports | a journey is skipped or the body count exceeds 1 | none: enables tests |
 | CH-6 | `CanvasHitMapTests`: a point on a 1 pt path hits with 4 pt slop and misses at 5; overlapping marks return the topmost; an empty map returns nil | slop is off by one, or order flips | `SuiteUI.CanvasHitMap`: `<=` for `<` on the slop edge → `CanvasHitMapTests`; bottom mark wins → `CanvasHitMapTests` |
-| CH-7 | `RenderingPreferenceLiveTests`: a write to the suite domain is read back by a second instance; `observe` fires once per change and not on a repeat; device loss under `.automatic` sets the note and `.gpu` keeps "GPU" with the note | a change is lost or fires twice | `SuiteUI.RenderingPreference`: observer fires on a repeat → `RenderingPreferenceLiveTests`; device loss ignored under `.automatic` → `RenderingPreferenceLiveTests` |
+| CH-7 | `RenderingPreferenceLiveTests`: a write to the suite domain is read back by a second instance and by a new instance after the first is gone (relaunch); `observe` fires once per change and not on a repeat; device loss under `.automatic` sets the note and `.gpu` keeps "GPU" with the note | a change is lost or fires twice | `SuiteUI.RenderingPreference`: observer fires on a repeat → `RenderingPreferenceLiveTests`; device loss ignored under `.automatic` → `RenderingPreferenceLiveTests` |
 | CH-8 | `CanvasTileSetTests`: an update of 3 dirty tiles replaces 3 layers; a size change restarts; `handedBytes` equals the tiles' byte count; images are premultiplied sRGB | a clean tile is redrawn or a stale tile survives a resize | `SuiteUI.CanvasTileSet`: restart skipped on resize → `CanvasTileSetTests`; `handedBytes` counts clean tiles → `CanvasTileSetTests` |
 | CH-9 | `CanvasHostIntegrationTests`: the pages read the live store and hit map; every existing `CanvasViewport` test and snapshot passes unchanged; Photo's and Design's journeys stay green on the same run | a viewport behaviour changes or a fake survives | none: integrate (existing tests guard it) |
 | CH-10 | `CanvasHostMetalTests`: `.gpu` with a device installs a `CAMetalLayer` with a non-nil `colorspace`; `.cpu` or nil device keeps the tile layers; switching back and forth keeps the overlay | the colour space is default, or the overlay is lost | `SuiteUI.CanvasHostView+Metal`: nil device still installs the layer → `CanvasHostMetalTests`; `colorspace` left nil → `CanvasHostMetalTests` |
-| CH-11 | `scripts/waves check` passes; the blueprint names the host and the pane | data out of step | none |
+| CH-11 | `scripts/waves check` passes; the blueprint names the host and View > Rendering | data out of step | none |
 
 ## Quality tests
 
 | quality row | budget | test |
 |---|---|---|
 | render: canvas drag on the host | 120-sample drag ≤ 1 window body; sample-to-present p95 ≤ 8 ms (CPU tiles), reported | `RenderBudgetCanvasHostTests.dragRunsNoBodies`, SP11 `canvas-drag` |
-| render: rendering switch | one switch ≤ 2 window bodies (pane and status bar); the host repaints once | `RenderBudgetCanvasHostTests.switchRepaintsOnce` |
-| QB-S20 hit sizes | hit slop 4 pt on paths; chips 28 pt | `CanvasHitMapTests`, `RenderingSettingsPaneTests` |
-| No dead controls | every chip and the Test button registered with a reason | SJ0, `RenderingSettingsPaneTests` |
-| Keyboard and VoiceOver parity | chips focusable; the host keeps `suite.canvas` with the artboard's value | SJ28, `CanvasHostTests` |
+| render: rendering switch | one switch ≤ 2 window bodies (the menu's host and the status bar); the host repaints once | `RenderBudgetCanvasHostTests.switchRepaintsOnce` |
+| QB-S20 hit sizes | hit slop 4 pt on paths; menu items are system menu items | `CanvasHitMapTests` |
+| No dead controls | every menu item acts, none disabled but the status line | SJ0, `RenderingCommandsTests` |
+| Keyboard and VoiceOver parity | the menu works from the keyboard (menu bar navigation) and VoiceOver reads the checked item; the host keeps `suite.canvas` with the artboard's value | SJ28, `CanvasHostTests` |
 | Reduce Motion | the overlay's fade on mouse-up is 0 s | `CanvasHostTests` |
 
 ## Done check
@@ -178,12 +189,14 @@ last PR, every app built, no open `finding`, mutations scored on the Mac
 (timeline's Q10 applies to SuiteUI). CH-a: SJ0. CH-b: SJ27, SJ28, SP11 and
 the render budget (feel gate, `Mac-Finish:`). CH-c: `CanvasHitMapTests`,
 `RenderingPreferenceLiveTests`, `CanvasTileSetTests` on the Mac. CH-d: SJ27
-and SJ28 on live, Photo and Design journeys unchanged on the same run. Then
-`Belt-Contact-Sheet:` with `suiteui-canvas-host-*` and `suiteui-rendering-pane-*`.
+and SJ28 on live (step 7's relaunch included), Photo and Design journeys
+unchanged on the same run. Then `Belt-Contact-Sheet:` with
+`suiteui-canvas-host-*` and `suiteui-rendering-menu-*`.
 
-**Follow-ups filed** (stage 4, one issue each): `line:suite` "Host
-`RenderingSettingsPane` in the launcher's `SettingsView`" (one line, suite.md
-row 158); `line:photo` "`TileCanvas` on `CanvasHost`, `LiveStroke` as its
+**Follow-ups filed** (stage 4, one issue each): `line:suite` "View > Rendering
+in every suite process: `SuiteCommands` includes `RenderingCommands`, and the
+launcher and every app's scene install `SuiteCommands`" (labels `beta` and
+`p1`: without it the menu exists only on the gallery page); `line:photo` "`TileCanvas` on `CanvasHost`, `LiveStroke` as its
 delegate"; `line:halo` "viewer on `CanvasHost`, `HaloLiveEdit` as its
 delegate" (closes #1458); `line:design` "canvas marks on the overlay layer";
 `line:flare` "stage on `CanvasHost`" (after `live-stage`); `line:library`
@@ -193,8 +206,10 @@ dispatcher's display op as `MetalPresenting`".
 ## Not in this packet
 
 The engine (`RenderBackend`, Metal ops): creative-core. App canvases moving
-onto the host: their lines. Per-document rendering overrides. A GPU
-"Test now" that renders the parity set: lands with the core bump.
+onto the host: their lines. Per-document rendering overrides. The Settings >
+Rendering pane (choice chips, status, a GPU "Test now" that renders the parity
+set) and hosting it in the launcher's `SettingsView` (suite.md row 158): after
+the beta, with the suite `settings` feature, on the same `RenderingPreference`.
 
 ## Open
 

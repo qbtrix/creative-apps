@@ -1,0 +1,175 @@
+{
+  "title": "First-launch onboarding: three pages once, starters and samples, reopened from Help",
+  "wave": 4,
+  "order": 10,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "beta": true,
+  "covers": "F10 (OB-1, OB-2), UC-13, SJ18, UC-11's live store; the beta cut's \"onboarding (three pages, once)\"",
+  "waits_on": "targets, suite-contracts, bundle (BU-4 copies Bundle/Samples/: OB-11), home (the harness and the class: OB-6), switching (OB-13); cross-line #836–#839 (the sample files), needs-ui SuiteSize.onboardingWindow and #803 AppTile; no settings wait (settings is out of the beta, OB-9 makes the preferences slot live); no editor-kernel wait (nothing here exports)",
+  "depends": [
+    "targets",
+    "suite-contracts",
+    "bundle",
+    "home",
+    "switching"
+  ],
+  "longest_chain": "5 (OB-1 → OB-3 → OB-4 → OB-5 → OB-13)",
+  "owned": [
+    "Sources/SuiteModel/Onboarding/OnboardingStarter.swift",
+    "Sources/SuiteModel/Onboarding/SuiteOnboarding.swift",
+    "Sources/SuiteModel/Onboarding/OnboardingLaunch.swift",
+    "Sources/SuiteModel/Onboarding/SampleCatalog.swift",
+    "Sources/SuiteModel/Onboarding/OnboardingModel.swift",
+    "Sources/SuiteModel/Preferences/StorePreferences.swift",
+    "Tests/SuiteModelTests/OnboardingStubTests.swift",
+    "Tests/SuiteModelTests/SuiteOnboardingTests.swift",
+    "Tests/SuiteModelTests/OnboardingLaunchTests.swift",
+    "Tests/SuiteModelTests/OnboardingModelTests.swift",
+    "Tests/SuiteModelTests/StorePreferencesTests.swift",
+    "Tests/SuiteModelTests/SampleCatalogTests.swift",
+    "Sources/AfterGlowApp/AfterGlowApp.swift",
+    "Sources/AfterGlowApp/LauncherCommands+Onboarding.swift",
+    "Sources/AfterGlowApp/OnboardingWindow.swift",
+    "Sources/AfterGlowApp/OnboardingPages.swift",
+    "Sources/AfterGlowApp/OnboardingStartPage.swift",
+    "Tests/SuiteModelTests/OnboardingLauncherTests.swift",
+    "Tests/AppSnapshotTests/AfterGlowOnboardingSnapshots.swift",
+    "Tests/AppSnapshotTests/RenderBudgetAfterGlowOnboardingTests.swift",
+    "Tests/AppSnapshotTests/Golden/afterglow-onboarding/",
+    "UITests/AfterGlowJourneyTests+Onboarding.swift",
+    "Tests/mutations/SuiteModel.SuiteOnboarding.json",
+    "Tests/mutations/SuiteModel.OnboardingLaunch.json",
+    "Tests/mutations/SuiteModel.OnboardingModel.json",
+    "Tests/mutations/SuiteModel.StorePreferences.json",
+    "Tests/mutations/SuiteModel.SampleCatalog.json",
+    "Sources/SuiteShell/Live/PreferencesSlot.swift",
+    "Tests/AppSnapshotTests/SuiteLiveServicesTests.swift",
+    "Bundle/Samples/",
+    "Tests/SuiteModelTests/SampleFilesTests.swift",
+    "Sources/SuiteShell/Live/OnboardingSlot.swift",
+    "Sources/AfterGlowApp/LauncherRouter+Onboarding.swift",
+    "UITests/AfterGlowJourneyTests+OnboardingStart.swift",
+    "docs/blueprints/suite.md",
+    "docs/blueprints/suite/features/onboarding.wave.json"
+  ],
+  "journeys": [
+    "AfterGlowJourneyTests.testFirstLaunchShowsAndSkips",
+    "AfterGlowJourneyTests.testFocusOrdersStarters",
+    "AfterGlowJourneyTests.testOpenSampleOpensFlareAndOrdersHome",
+    "AfterGlowJourneyTests.testNewDesignFromOnboarding"
+  ],
+  "slices": [
+    {
+      "id": "OB-a",
+      "behavior": "Sources/SuiteModel/Onboarding/ exists with every type and signature the window calls declared as stubs returning the fake's values, its Linux tests written and disabled.",
+      "tasks": ["OB-1", "OB-2"],
+      "journeys": ["MJ-OB0"],
+      "owned": [
+        "Sources/SuiteModel/Onboarding/OnboardingStarter.swift",
+        "Sources/SuiteModel/Onboarding/SuiteOnboarding.swift",
+        "Sources/SuiteModel/Onboarding/OnboardingLaunch.swift",
+        "Sources/SuiteModel/Onboarding/SampleCatalog.swift",
+        "Sources/SuiteModel/Onboarding/OnboardingModel.swift",
+        "Sources/SuiteModel/Preferences/StorePreferences.swift",
+        "Tests/SuiteModelTests/OnboardingStubTests.swift",
+        "Tests/SuiteModelTests/SuiteOnboardingTests.swift",
+        "Tests/SuiteModelTests/OnboardingLaunchTests.swift",
+        "Tests/SuiteModelTests/OnboardingModelTests.swift",
+        "Tests/SuiteModelTests/StorePreferencesTests.swift",
+        "Tests/SuiteModelTests/SampleCatalogTests.swift"
+      ],
+      "waits": {},
+      "ui": false
+    },
+    {
+      "id": "OB-u",
+      "behavior": "Help > Welcome to AfterGlow and the first launch open the window on the fakes: three pages, Continue, Back, Skip, focus chips, the starter row, every control identified and the render budget met.",
+      "tasks": ["OB-3", "OB-4", "OB-5", "OB-6"],
+      "journeys": ["OJ1", "OJ2"],
+      "owned": [
+        "Sources/AfterGlowApp/AfterGlowApp.swift",
+        "Sources/AfterGlowApp/LauncherCommands+Onboarding.swift",
+        "Sources/AfterGlowApp/OnboardingWindow.swift",
+        "Sources/AfterGlowApp/OnboardingPages.swift",
+        "Sources/AfterGlowApp/OnboardingStartPage.swift",
+        "Tests/SuiteModelTests/OnboardingLauncherTests.swift",
+        "Tests/AppSnapshotTests/AfterGlowOnboardingSnapshots.swift",
+        "Tests/AppSnapshotTests/RenderBudgetAfterGlowOnboardingTests.swift",
+        "Tests/AppSnapshotTests/Golden/afterglow-onboarding/",
+        "UITests/AfterGlowJourneyTests+Onboarding.swift"
+      ],
+      "waits": {
+        "OB-a": ["OB-3"],
+        "home": ["OB-6"]
+      },
+      "ui": true
+    },
+    {
+      "id": "OB-m",
+      "behavior": "SuiteOnboarding, OnboardingLaunch and OnboardingModel do the work (show once per version, honour the skip flag, step pages, order starters by focus, finish into saved preferences with one stale retry, send the New and Open hand-offs), and StorePreferences over FileStore makes the preferences slot live.",
+      "tasks": ["OB-7", "OB-8", "OB-9"],
+      "journeys": ["MJ-OB1", "MJ-OB2", "MJ-OB4"],
+      "owned": [
+        "Sources/SuiteModel/Onboarding/SuiteOnboarding.swift",
+        "Sources/SuiteModel/Onboarding/OnboardingLaunch.swift",
+        "Sources/SuiteModel/Onboarding/OnboardingModel.swift",
+        "Sources/SuiteModel/Preferences/StorePreferences.swift",
+        "Tests/SuiteModelTests/SuiteOnboardingTests.swift",
+        "Tests/SuiteModelTests/OnboardingLaunchTests.swift",
+        "Tests/SuiteModelTests/OnboardingModelTests.swift",
+        "Tests/SuiteModelTests/StorePreferencesTests.swift",
+        "Tests/mutations/SuiteModel.SuiteOnboarding.json",
+        "Tests/mutations/SuiteModel.OnboardingLaunch.json",
+        "Tests/mutations/SuiteModel.OnboardingModel.json",
+        "Tests/mutations/SuiteModel.StorePreferences.json",
+        "Sources/SuiteShell/Live/PreferencesSlot.swift",
+        "Tests/AppSnapshotTests/SuiteLiveServicesTests.swift"
+      ],
+      "waits": {
+        "OB-a": ["OB-7", "OB-8", "OB-9"]
+      },
+      "ui": false
+    },
+    {
+      "id": "OB-s",
+      "behavior": "SampleCatalog names one sample per app, finds it under the bundle's Resources, copies it into Documents without overwriting, and Bundle/Samples/ holds the files.",
+      "tasks": ["OB-10", "OB-11"],
+      "journeys": ["MJ-OB3"],
+      "owned": [
+        "Sources/SuiteModel/Onboarding/SampleCatalog.swift",
+        "Tests/SuiteModelTests/SampleCatalogTests.swift",
+        "Tests/mutations/SuiteModel.SampleCatalog.json",
+        "Bundle/Samples/",
+        "Tests/SuiteModelTests/SampleFilesTests.swift"
+      ],
+      "waits": {
+        "OB-a": ["OB-10", "OB-11"],
+        "bundle": ["OB-11"]
+      },
+      "ui": false
+    },
+    {
+      "id": "OB-z",
+      "behavior": "The slot is live, the window reads the bundle's samples, and the journeys run on live: shown once across a relaunch, a sample opens its app, a preset opens a new document, the home follows the focus.",
+      "tasks": ["OB-12", "OB-13"],
+      "journeys": ["OJ3", "OJ4"],
+      "owned": [
+        "Sources/SuiteShell/Live/OnboardingSlot.swift",
+        "Tests/AppSnapshotTests/SuiteLiveServicesTests.swift",
+        "Sources/AfterGlowApp/LauncherRouter+Onboarding.swift",
+        "Sources/AfterGlowApp/OnboardingWindow.swift",
+        "UITests/AfterGlowJourneyTests+OnboardingStart.swift",
+        "docs/blueprints/suite.md",
+        "docs/blueprints/suite/features/onboarding.wave.json"
+      ],
+      "waits": {
+        "OB-u": ["OB-12"],
+        "OB-m": ["OB-12"],
+        "OB-s": ["OB-12"],
+        "switching": ["OB-13"]
+      },
+      "ui": false
+    }
+  ]
+}

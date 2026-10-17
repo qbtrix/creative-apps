@@ -173,7 +173,10 @@ public struct FlareWorkspace: Sendable, Equatable {
         }
     }
 
+    /// Chooses `tool`. An open pen path Finish Path can commit is committed first, so leaving the Pen with the mouse
+    /// keeps the path (#1862); any other draft or drag is dropped.
     public mutating func selectTool(_ tool: FlareTool) {
+        if finishPathHelp == nil { finishPath() }
         self.tool = tool
         cancelDrag()
     }

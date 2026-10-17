@@ -1,6 +1,11 @@
 // IconFilesTests.swift: every CFBundleIconFile named in the six plists in
 // Bundle/Info/ has Bundle/Icons/<name>.png, 1024 x 1024 read from the PNG
-// header (bundle packet BU-5c). Files are read by path from #filePath.
+// header (bundle packet BU-5c), and <name>-<px>.png for each smaller .icns
+// size. Each PNG is the render of its source, Bundle/Marks/<name>.svg:
+// Bundle/Icons/marks.json, which scripts/render-marks writes, records an
+// FNV-1a 64 digest of the SVG and of every PNG, so an SVG edited without a
+// rerender, or a PNG edited by hand, fails here. Files are read by path from
+// #filePath.
 import Foundation
 import Testing
 
@@ -44,6 +49,50 @@ import Testing
         let size = try #require(Self.pngSize(bytes), "Bundle/Icons/\(file) is not a PNG")
         #expect(size.width == 1024)
         #expect(size.height == 1024)
+    }
+
+    /// The .icns sizes below 1024, each rendered to Bundle/Icons/<app>-<px>.png.
+    static let smallerSizes = [16, 32, 64, 128, 256, 512]
+
+    /// FNV-1a 64 as 16 lowercase hex digits, the digest scripts/render-marks records.
+    static func fnv(_ bytes: [UInt8]) -> String {
+        var hash: UInt64 = 0xCBF2_9CE4_8422_2325
+        for byte in bytes {
+            hash = (hash ^ UInt64(byte)) &* 0x0000_0100_0000_01B3
+        }
+        let hex = String(hash, radix: 16)
+        return String(repeating: "0", count: 16 - hex.count) + hex
+    }
+
+    static func bytes(_ path: String) throws -> [UInt8] {
+        [UInt8](try Data(contentsOf: root.appendingPathComponent(path)))
+    }
+
+    /// marks.json's entry for `app`: its SVG's digest and its PNGs' digests by size.
+    static func recorded(_ app: String) throws -> (svg: String, png: [String: String]) {
+        let json = try JSONSerialization.jsonObject(with: Data(contentsOf: root.appendingPathComponent("Bundle/Icons/marks.json")))
+        let icons = try #require((json as? [String: Any])?["icons"] as? [String: Any])
+        let entry = try #require(icons[app] as? [String: Any], "marks.json has no \(app)")
+        return (try #require(entry["svg"] as? String), try #require(entry["png"] as? [String: String]))
+    }
+
+    @Test(arguments: apps) func everySizeIsTheRenderOfItsSVG(_ app: String) throws {
+        let recorded = try Self.recorded(app)
+        #expect(Self.fnv(try Self.bytes("Bundle/Marks/\(app).svg")) == recorded.svg,
+                "Bundle/Marks/\(app).svg changed since its PNGs were rendered: run scripts/render-marks")
+        for size in Self.smallerSizes + [1024] {
+            let file = size == 1024 ? "\(app).png" : "\(app)-\(size).png"
+            let bytes = try Self.bytes("Bundle/Icons/\(file)")
+            #expect(Self.fnv(bytes) == recorded.png[String(size)], "Bundle/Icons/\(file) is not the render marks.json records")
+            let found = try #require(Self.pngSize(bytes), "Bundle/Icons/\(file) is not a PNG")
+            #expect(found.width == size && found.height == size, "Bundle/Icons/\(file) is \(found.width) x \(found.height)")
+        }
+    }
+
+    @Test func theDigestIsFNV1a64() {
+        #expect(Self.fnv([]) == "cbf29ce484222325")
+        #expect(Self.fnv(Array("a".utf8)) == "af63dc4c8601ec8c")
+        #expect(Self.fnv(Array("foobar".utf8)) == "85944171f73967e8")
     }
 
     @Test func headerReaderRejectsWrongSizeAndNonPNG() {

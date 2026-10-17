@@ -2,9 +2,9 @@
 
 Issue: #1507 · Packet: docs/blueprints/suite/features/switching.md
 Run: act-1a146f2912a-581f · Session: claude/switching-feature-lead-jm0d5f · Started: 2026-10-16T23:00Z
-Stage: 3 wave 2 (SW-3b in review)
-Base: origin/dev 9bb1faf8 (after #1833 merged as 7d022431)
-Next: SW-3b PR in review; then SW-3c (SuiteCommands Switch To, .suiteApp modifier, settings and open-in stubs), once SW-3b merges
+Stage: 3 wave 3 (SW-3d in review)
+Base: origin/dev 0e3c08ea (after #1943 merged as 98e5d50f)
+Next: SW-3d PR in review; then SW-4a (the journey SJ3, feature-done) once the adoption issues land, and SW-4b and SW-4c as follow-ups
 
 Brief deviations (decided here, see Decisions): base is `dev`, not `main`; the status channel is this branch, not `lead/switching`.
 
@@ -18,9 +18,9 @@ This packet has no `## Slices` table: the v2 loop applies. The feature is one un
 | SW-2 | feature | 1 | StoreHandOffs: send, receive, settle, expire, sweep | Sources/SuiteModel/HandOff/StoreHandOffs.swift; Tests/SuiteModelTests/HandOffStoreTests.swift; Budget+HandOff.swift | HandOffStoreTests, Budget+HandOff | #1791 (merged c512a7e8) | merged |
 | SW-5 | feature | 1 | QB-S and QB-SM rows of blueprint 7.1 into docs/review-rubric.md section 6 | docs/review-rubric.md | review (rows present once, "report only") | #1816 (merged 7dd54a00) | merged |
 | SW-3a | feature | 2 | AppLauncher, StoreWatcher, live switching slot, recents watcher | Sources/SuiteShell/{AppLauncher,StoreWatcher}.swift; Live/{SwitchingSlot,RecentsSlot}.swift | SuiteShellSwitchingTests (macOS) | #1833 (merged 7d022431) | merged |
-| SW-3b | feature | 2 | HandOffTransport, SuiteAppDelegate, live hand-off slot, the launcher router | Sources/SuiteShell/{HandOffTransport,SuiteAppDelegate}.swift; Live/HandOffSlot.swift; Sources/AfterGlowApp/LauncherRouter.swift | SuiteShellHandOffTests (macOS) | this PR (macOS, unverified here) | in review |
-| SW-3c | feature | 3 | SuiteCommands Switch To, .suiteApp, SettingsRoute and OpenInMenu stubs, shortcut clash test | Sources/SuiteShell/{SuiteCommands,SuiteAppModifier,SettingsRoute,OpenInMenu}.swift; Tests/SuiteModelTests/SuiteCommandsTests.swift | SuiteCommandsTests | – | waits on SW-3a, SW-3b; bundle's BU-1a stub not built |
-| SW-3d | feature | 4 | SwitcherEntries and the switcher bridge | Sources/SuiteModel/Switching/SwitcherEntries.swift; Tests/SuiteModelTests/SwitcherEntriesTests.swift; Sources/SuiteShell/SuiteSwitcherBridge.swift | SwitcherEntriesTests | – | waits on SW-3c, editor-in-window |
+| SW-3b | feature | 2 | HandOffTransport, SuiteAppDelegate, live hand-off slot, the launcher router | Sources/SuiteShell/{HandOffTransport,SuiteAppDelegate}.swift; Live/HandOffSlot.swift; Sources/AfterGlowApp/LauncherRouter.swift | SuiteShellHandOffTests (macOS) | #1883 (merged 7d068e10) | merged |
+| SW-3c | feature | 3 | SuiteCommands Switch To from SwitchMenu, .suiteApp(_:host:) | Sources/SuiteShell/{SuiteCommands,SuiteAppModifier}.swift; SuiteAppDelegate.swift (registry); AppLauncher.swift (static run state) | SuiteCommandsTests (Linux), LauncherMenuStubTests | #1943 (merged 98e5d50f) | merged |
+| SW-3d | feature | 4 | SwitcherEntries (model), SuiteSwitcherBridge (the switcher a window shows) | Sources/SuiteModel/Switching/SwitcherEntries.swift; Sources/SuiteShell/SuiteSwitcherBridge.swift; SuiteAppModifier.swift | SwitcherEntriesTests (Linux) | this PR | in review |
 | SW-4a | feature | 5 | Journeys SJ3, testOpenRecentBringsAppForward, testCrashIsolation (feature-done) | UITests/AfterGlowJourneyTests+Switch.swift | dev macOS run | – | waits on SW-3c, SW-3d, home HM-2b #845 and the adoptions |
 | SW-4b | feature | 5 | Journey SJ2 (follow-up #858) | UITests/AfterGlowJourneyTests+New.swift | dev macOS run | – | follow-up, outside the done check |
 | SW-4c | feature | 5 | SP1, SP2 and budget constants (follow-up #859) | UITests/AfterGlowJourneyTests+PerfSwitch.swift, +BudgetsSwitch.swift | perf JSON | – | follow-up, waits on #782 |
@@ -68,3 +68,21 @@ No review has run: no PR has merged and no scoped run exists for this feature ye
 - `SuiteAppDelegate.handle(_:)` is public so the macOS tests can run it without Launch Services.
 - The launcher sends a document URL to its app as an open hand-off and opens no window; a hand-off addressed to the launcher has no verb yet and is left alone.
 - `SuiteLiveServicesTests` now expects 9 pending members: switching, sending and receiving are live.
+
+## Decisions (wave 2, SW-3c)
+- SW-3c is macOS-only Swift for SuiteShell, unverified on this machine; the Linux gate covers the menu wiring as text and the shortcut-clash scan.
+- The Switch To items come from `SwitchMenu.items` with a synchronous run-state read (`AppLauncher.state(of:bundle:hidden:)`), since the menu builds without awaiting the actor. Menus rebuild when SwiftUI rebuilds them, so a app that launches while a menu is open shows its new state on the next build.
+- `.suiteApp(_:host:)` reaches the delegate through `SuiteAppRegistry.delegate`, which `SuiteAppDelegate.init` sets; the receiver is a `StoreHandOffs` over the support folder.
+- Not done here: the `SettingsRoute` and `OpenInMenu` stubs. Settings and Open In aren't in this menu yet, and the settings and recents-open-in features own those stubs from wave 3, so creating them now would add unused code.
+- `LauncherMenuStubTests` no longer requires Switch To buttons to be disabled stubs; `SuiteCommandsTests` checks the live wiring instead.
+
+## Decisions (SW-3c fix)
+- The lane's macOS build failed on #1943: `AppLauncher.open` called the static `path(of:bundle:)` without `Self.`, after the static run-state refactor. The Linux gate can't compile SuiteShell, so only the macOS build caught it. Fixed on the same branch; the fix is a fast-forward, not a force-push.
+- Lesson for the rest of wave 3: before a macOS-only edit, check every call site of a helper that changed from instance to static, by grep, since the Linux gate won't.
+
+## Decisions (SW-3d)
+- SW-3d's model half (SwitcherEntries) and tests are Linux. The bridge is macOS-only and was checked against the Linux gate's lints and C4 ownership only; the lane's build-only run is the compile check.
+- The bridge sets `\.suiteSwitcher` through `Scene.environment(_:_:)`, which Apple's docs confirm. Its rows are read when the scene is built and are not refreshed while the window is open (the packet asked for a refresh on `<app>.windows`; that needs a view-level observable and is a known gap).
+- The bridge's rows use the switcher's ids (`home` for the launcher), and a click switches through AppLauncher.
+- C4: the bridge is added to the shell-apps component.
+- Belt-Slice-Done lines don't apply: this packet is v2 (no slices table), so there's no slice to mark.

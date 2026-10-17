@@ -53,6 +53,15 @@
 # is red: the batch lands on the PRs' own proof, as before batches, so a fix
 # can get through.
 #
+# A red BASE_BRANCH gets its culprit found the same way (red_sweep): while a
+# `dev-red` issue for a red Linux job is open, each sweep bisects main..<red sha>
+# by first-parent commit with `ci/bisect-<red7>-<i>` probe branches and
+# Linux-only runs (at most MAX_BISECT per red), testing red-triage's confident
+# guess (a `Likely cause: #N ... (Clef p)` comment, p >= CLEF_MIN) first, and
+# posts the first red commit on the dev-red issue and on the owning
+# feature-lead issue (the PR's `Feature:` line), then deletes its probes.
+# `--bisect <good>..<bad> <issue> [<branch>]` runs one such bisect by hand.
+#
 # A lead's PR (a `Feature:` body line) never closes a `feature-lead` issue
 # (lead_refs). After its merges the lane dispatches CI on BASE_BRANCH at most
 # once per run (dispatch_reason): a FEATURE_LABEL PR, a UI_RE change, or
@@ -70,6 +79,7 @@
 # Tests/fast_lane/test_fast_lane.sh sources this file and feeds it fixtures.
 #
 # Usage: scripts/fast-lane.sh [--dry-run] [PR ...]   (no PR: every open fast-lane PR)
+#        scripts/fast-lane.sh --bisect <good sha>..<bad sha> <issue> [<branch holding bad>]
 # --dry-run prints the decision and makes no API writes. Needs gh and jq.
 set -euo pipefail
 
@@ -188,6 +198,12 @@ BATCH_POLL="${FAST_LANE_BATCH_POLL:-60}"
 READY=()   # eligible PRs this pass, n|head|branch|proof (settle_ready lands or batches them)
 HOLD=0     # a batch is in flight: eligible PRs wait for the next sweep
 SCRATCH="" # the run's scratch clone of REMOTE (scratch)
+# Culprit by bisect on a red BASE_BRANCH (red_sweep, red_bisect).
+RED_LABEL="dev-red"
+BISECT_PREFIX="ci/bisect-"  # ci/bisect-<red7>-<i>: the i-th first-parent commit past the good one
+MAX_BISECT="${FAST_LANE_MAX_BISECT:-8}"  # Linux runs per red, probes counted
+CLEF_MIN="0.80"             # a red-triage culprit guess at or above this is probed first
+BISECT_MARK="<!-- lane-bisect"  # the culprit comment's marker: "<!-- lane-bisect <red7> -->"
 # Where integrate fetches and pushes; tests point it at a local bare repo.
 REMOTE="${FAST_LANE_REMOTE:-https://github.com/${GH_REPO:-qbtrix/creative-apps}.git}"
 HERE=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
@@ -692,7 +708,7 @@ scratch() {
 
 # batch_branches: every batch branch at REMOTE, `<sha> <name>` per line.
 batch_branches() {
-  git ls-remote --heads "$REMOTE" "refs/heads/${BATCH_PREFIX}*" 2>/dev/null | sed 's:[[:space:]]*refs/heads/: :' | sort -k2
+  git ls-remote --heads "$REMOTE" "refs/heads/${BATCH_PREFIX}*" 2>/dev/null | sed 's:[[:space:]]*refs/heads/: :' | sort -k2 || true
 }
 
 # check_verdict <sha>: the newest Linux check run on <sha>:
@@ -890,6 +906,130 @@ batch_drop() {
   local br="$1" names
   names=$(batch_branches | awk -v b="$br" '$2 == b || index($2, b "-") == 1 { print $2 }' | paste -sd' ' -)
   [[ -z "$names" ]] || git -C "$SCRATCH" push -q origin --delete $names 2>/dev/null || log "batch $br: could not delete $names"
+}
+
+# red_sweep: when a dev-red issue for a red Linux job is open, bisects its
+# culprit range. Probes an earlier sweep left pin the red they bisect, since
+# ci.yml rewrites the issue body for every newer red run.
+red_sweep() {
+  local issue body bad pin
+  { read -r issue || true; body=$(cat); } < <(gh api "repos/$REPO/issues?labels=$RED_LABEL&state=open&per_page=5" \
+      --jq 'first(.[] | select(.pull_request == null)) | .number, (.body // "")' 2>/dev/null || true)
+  [[ -n "${issue:-}" ]] || return 0
+  grep -qiE '^- Failing jobs:.*linux' <<<"$body" || { log "dev-red #$issue: not a Linux red; nothing to bisect"; return 0; }
+  bad=$(grep -oE '^- Culprit range: `main\.\.[0-9a-f]{40}`' <<<"$body" | grep -oE '[0-9a-f]{40}' | head -1 || true)
+  pin=$(git ls-remote --heads "$REMOTE" "refs/heads/${BISECT_PREFIX}*" 2>/dev/null | sed -E 's:.*refs/heads/'"$BISECT_PREFIX"'([0-9a-f]+)-[0-9]+$:\1:' | sort -u | head -1 || true)
+  [[ -z "$pin" ]] || bad="$pin"
+  [[ -n "$bad" ]] || { log "dev-red #$issue: no culprit range in the body"; return 0; }
+  red_bisect "$issue" main "$bad" "$BASE_BRANCH"
+}
+
+# red_bisect <issue> <good> <bad> <branch>: finds the first commit in the
+# first-parent chain <good>..<bad> (on <branch> at REMOTE) whose Linux job is
+# red, with at most MAX_BISECT probes ci/bisect-<bad7>-<i> (each pushed at the
+# chain's i-th commit and given a Linux-only run), waiting up to BATCH_WAIT
+# for a running probe. lo is the longest green prefix (the good commit counts
+# as 0), hi the shortest red one; a red-triage guess on <issue> is probed
+# first (its parent, then itself); hi = lo + 1 names the culprit, which is
+# posted on <issue> (with BISECT_MARK, so an issue with a verdict is never
+# bisected again, whichever red sha its range names now) and on
+# the owning feature-lead issue, and the probes are deleted.
+red_bisect() {
+  local issue="$1" good="$2" bad="$3" branch="$4" d k i sha v lo hi mid red7 hint=0 waited=0 line probes n p
+  local chain=() verd=()
+  DISPATCHED=""
+  if ! scratch "$branch" "$good"; then log "bisect: could not fetch $branch and $good from $REMOTE"; return; fi
+  d="$SCRATCH"
+  bad=$(git -C "$d" rev-parse --verify -q "$bad^{commit}" 2>/dev/null) || { log "bisect: $3 is not a commit at $REMOTE"; return; }
+  good=$(git -C "$d" rev-parse --verify -q "origin/$good^{commit}" 2>/dev/null || git -C "$d" rev-parse --verify -q "$good^{commit}" 2>/dev/null) \
+    || { log "bisect: $2 is not a commit at $REMOTE"; return; }
+  red7=${bad:0:7}
+  # One verdict per issue, whatever the red sha: ci.yml moves the issue's range
+  # to each newer red run, and the culprit found once is the culprit.
+  if has_comment "$issue" "$BISECT_MARK "; then log "bisect: #$issue already has its verdict; not bisecting $red7"; return; fi
+  while read -r sha; do chain+=("$sha"); done < <(git -C "$d" rev-list --first-parent --reverse "$good..$bad" 2>/dev/null)
+  k=${#chain[@]}
+  (( k )) || { log "bisect: $good..$bad holds no first-parent commits"; return; }
+  chain=("$good" "${chain[@]}")
+  # red-triage's confident guess: the chain index of the PR it names.
+  line=$(gh api "repos/$REPO/issues/$issue/comments" --paginate --jq '.[].body' 2>/dev/null \
+    | grep -oE 'Likely cause: #[0-9]+ .*\(Clef [0-9.]+\)' | tail -1 || true)
+  if [[ -n "$line" ]]; then
+    n=$(grep -oE '#[0-9]+' <<<"$line" | head -1 | tr -d '#'); p=$(grep -oE '\(Clef [0-9.]+' <<<"$line" | grep -oE '[0-9.]+$')
+    if awk -v p="$p" -v m="$CLEF_MIN" 'BEGIN { exit !(p + 0 >= m + 0) }'; then
+      for (( i = 1; i <= k; i++ )); do
+        [[ "$(git -C "$d" log -1 --format=%s "${chain[i]}")" == *"(#$n)" ]] && hint=$i
+      done
+      (( hint )) && log "bisect: red-triage names #$n (Clef $p), commit $hint of $k; probing around it first"
+    fi
+  fi
+  while :; do
+    for (( i = 0; i <= k; i++ )); do verd[i]=""; done
+    verd[k]=$(check_verdict "$bad")
+    probes=$(git ls-remote --heads "$REMOTE" "refs/heads/${BISECT_PREFIX}${red7}-*" 2>/dev/null | sed 's:[[:space:]]*refs/heads/: :' || true)
+    while read -r sha line; do
+      [[ -n "$line" ]] || continue
+      i="${line##*-}"
+      (( i >= 1 && i < k )) && [[ "${chain[i]}" == "$sha" ]] || continue
+      verd[i]=$(check_verdict "$sha")
+    done <<<"$probes"
+    case "${verd[k]}" in
+      green*) log "bisect: $red7 is green now (${verd[k]#green|}); nothing to find"; bisect_drop "$red7"; return ;;
+    esac
+    lo=0; hi=$k
+    for (( i = 1; i < k; i++ )); do
+      case "${verd[i]}" in green*) lo=$i ;; red*) (( i < hi )) && hi=$i ;; esac
+    done
+    if (( hi == lo + 1 )); then
+      bisect_post "$issue" "$red7" "$lo" "$hi" "$(grep -c . <<<"$probes" || true)" "${verd[lo]}" "${verd[hi]}" "${chain[@]}"
+      bisect_drop "$red7"; return
+    fi
+    if (( DRY_RUN )); then log "dry-run: bisect $red7 on #$issue: $k commits, green prefix $lo, red from $hi"; return; fi
+    if (( $(grep -c . <<<"$probes" || true) >= MAX_BISECT )); then
+      log "bisect: $red7 used $MAX_BISECT runs; stopping between $lo and $hi"
+      write gh issue comment "$issue" -R "$REPO" --body "Bisect on $BASE_BRANCH stopped after $MAX_BISECT Linux runs: the Linux job is green at ${chain[lo]:0:7} and red at ${chain[hi]:0:7}; the culprit is one of the $((hi - lo)) commits between them (git log --first-parent ${chain[lo]:0:7}..${chain[hi]:0:7}). $BISECT_MARK $red7 -->"
+      bisect_drop "$red7"; return
+    fi
+    if (( hint > lo && hint <= hi )) && (( hint - 1 > lo )) && [[ -z "${verd[hint - 1]}" ]]; then mid=$((hint - 1))
+    elif (( hint > lo && hint < hi )) && [[ -z "${verd[hint]}" ]]; then mid=$hint
+    else mid=$(( (lo + hi) / 2 )); fi
+    case "${verd[mid]}" in
+      running) log "bisect: $red7 probe $mid running" ;;
+      "")
+        if git -C "$d" push -q origin "${chain[mid]}:refs/heads/${BISECT_PREFIX}${red7}-$mid" 2>/dev/null; then
+          log "bisect: $red7 probing commit $mid of $k (${chain[mid]:0:7})"; dispatch_linux "${BISECT_PREFIX}${red7}-$mid"
+        else log "bisect: could not push probe $mid; the next sweep tries again"; fi ;;
+      *) dispatch_linux "${BISECT_PREFIX}${red7}-$mid" ;;
+    esac
+    if (( waited >= BATCH_WAIT )); then return; fi
+    sleep "$BATCH_POLL"; waited=$(( waited + BATCH_POLL ))
+  done
+}
+
+# bisect_post <issue> <red7> <lo> <hi> <runs> <green verdict> <red verdict> <chain...>:
+# the culprit on the dev-red issue and on the owning feature-lead issue.
+bisect_post() {
+  local issue="$1" red7="$2" lo="$3" hi="$4" runs="$5" gv="$6" rv="$7"; shift 7
+  local chain=("$@") c subj n body fid lead
+  c="${chain[hi]}"; subj=$(git -C "$SCRATCH" log -1 --format=%s "$c")
+  n=$(grep -oE '\(#[0-9]+\)$' <<<"$subj" | tr -dc 0-9 || true)
+  log "bisect: culprit ${c:0:7} $subj (green at ${chain[lo]:0:7}, $runs probes)"
+  write gh issue comment "$issue" -R "$REPO" --body "Bisect: ${c:0:7} $subj is the first commit on $BASE_BRANCH whose Linux job fails. Green at ${chain[lo]:0:7} (${gv#green|}), red at ${c:0:7} (${rv#red|}); $runs Linux run(s) on ci/bisect branches, now deleted. $BISECT_MARK $red7 -->"
+  [[ -n "$n" ]] || return 0
+  body=$(gh api "repos/$REPO/pulls/$n" --jq '.body // ""' 2>/dev/null) || return 0
+  fid=$(grep -E '^[[:space:]]*\**Feature:' <<<"$body" | head -1 | sed -E 's/^[[:space:]]*\**Feature:\**[[:space:]]*`?#?//; s/`.*//; s/[[:space:]].*//' || true)
+  [[ -n "$fid" ]] || return 0
+  lead=$(gh api "search/issues?q=repo:$REPO+label:$FEATURE_ISSUE_LABEL+state:open+in:title+%22Feature:+$fid%22" \
+    --jq "[.items[] | select(.title == \"Feature: $fid\" or (.title | endswith(\"($fid)\")))] | first // empty | .number" 2>/dev/null) || return 0
+  [[ -n "$lead" ]] || { log "bisect: no open $FEATURE_ISSUE_LABEL issue for $fid"; return 0; }
+  write gh issue comment "$lead" -R "$REPO" --body "Bisect on dev-red #$issue: your PR #$n ($subj) is the first commit that turns $BASE_BRANCH's Linux job red: ${rv#red|}. $BISECT_MARK $red7 -->"
+}
+
+# bisect_drop <red7>: deletes that red's probe branches at REMOTE.
+bisect_drop() {
+  local names
+  names=$(git ls-remote --heads "$REMOTE" "refs/heads/${BISECT_PREFIX}$1-*" 2>/dev/null | sed 's:.*refs/heads/::' | paste -sd' ' -)
+  [[ -z "$names" ]] || git -C "$SCRATCH" push -q origin --delete $names 2>/dev/null || log "bisect: could not delete $names"
 }
 
 # has_comment <pr> <text>: a comment on the PR contains <text>.
@@ -1169,16 +1309,23 @@ open_prs() {
 }
 
 main() {
-  local prs=()
+  local prs=() bisect="" bisect_issue="" bisect_branch="$BASE_BRANCH"
   while (( $# )); do
     case "$1" in
       --dry-run) DRY_RUN=1 ;;
+      --bisect) bisect="${2:-}"; bisect_issue="${3:-}"; [[ -z "${4:-}" || "${4:-}" == --* ]] || { bisect_branch="$4"; shift; }; shift 2 ;;
       -h|--help) sed -n '2,60p' "$0"; return 0 ;;
       *) prs+=("$1") ;;
     esac
     shift
   done
   (( DRY_RUN )) || gh auth setup-git >/dev/null 2>&1 || true
+  if [[ -n "$bisect" ]]; then
+    [[ "$bisect" == *..* && "$bisect_issue" =~ ^[0-9]+$ ]] || { echo "fast-lane: --bisect <good>..<bad> <issue> [<branch>]" >&2; return 1; }
+    red_bisect "$bisect_issue" "${bisect%%..*}" "${bisect##*..}" "$bisect_branch"; return 0
+  fi
+  # A red BASE_BRANCH gets its culprit found while the lane keeps merging.
+  red_sweep
   # A batch a run left behind comes first: its verdict lands or bisects it, and
   # while it is still running nothing else merges (settle_ready holds). The
   # open PRs are listed after it, so what it landed isn't looked at again.

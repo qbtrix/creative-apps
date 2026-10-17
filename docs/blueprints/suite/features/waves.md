@@ -15,10 +15,11 @@ acceptance tests.
 | wave | feature | packet | covers | waits on | feature issue | status |
 |---|---|---|---|---|---|---|
 | 0 | The suite's targets exist, today's size is measured | `targets.md` | #807, #808, #809, #810, #811 | nothing | #873 | built |
-| 1 | One AfterGlow.app with shared frameworks and document types | `bundle.md` | #813, #814, #815, #816, #817, #818 (and #819, after ten runs) | targets; #333 for BU-3 | file when ready | planned |
+| 1 | One AfterGlow.app with shared frameworks and document types | `bundle.md` | #813, #814, #815, #816, #817, #818 (and #819, after ten runs) | targets; #333 for BU-3 | #1331 | built |
 | 1 | Shared values, contracts, fakes, store and live slots | `suite-contracts.md` | #820–#834 | targets | #1332 | built |
 | 2 | The AfterGlow home | `home.md` | #841–#848, #870; app lines #836–#840 (follow-up #849) | suite-contracts, bundle, #778; #782 for the follow-up | file when ready | planned |
 | 2 | Switch between apps, hand-offs | `switching.md` | #852–#857, #860; app lines #861–#865 (follow-ups #858, #859) | suite-contracts, bundle, #778; #845 (home HM-2b) for SW-4a; #782 for SW-4c | file when ready | planned |
+| 4 | First-launch onboarding: three pages once, starters and samples, reopened from Help | `onboarding.md` | F10 (OB-1, OB-2), UC-13, SJ18, UC-11's live store; the beta cut's "onboarding (three pages, once)" | targets, suite-contracts, bundle (BU-4 copies Bundle/Samples/: OB-11), home (the harness and the class: OB-6), switching (OB-13); cross-line #836–#839 (the sample files), needs-ui SuiteSize.onboardingWindow and #803 AppTile; no settings wait (settings is out of the beta, OB-9 makes the preferences slot live); no editor-kernel wait (nothing here exports) | file when ready | planned |
 
 #763 (dev is red) is lane-wide, not a dependency: the lane keeps merging
 while it is open, and no feature names it on its `Depends on:` line.

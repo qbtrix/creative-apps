@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Bundle/Marks/Design.svg: the Design app mark, the only hand-edited form of it.
+     scripts/render-marks turns it into Bundle/Icons/Design*.png and SuiteUI's AppMarkArt.swift.
+     Groups: design-tile (1024 grid, 824 tile inset 100), design-tile-small (the rim drawn at 32 px and under),
+     design-glyph (44-unit grid), design-glyph-small (32 px and under), design-line (24-unit monoline, currentColor). -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024" role="img" aria-label="Design: a pen nib under its bezier handle">
+  <defs>
+    <radialGradient id="design-tile-fill" cx="0.28" cy="0" r="1.1" fx="0.28" fy="0"><stop offset="0" stop-color="#3b3b41"/><stop offset="0.46" stop-color="#1d1d20"/><stop offset="1" stop-color="#0a0a0b"/></radialGradient>
+    <linearGradient id="design-sheen" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity="0.11"/><stop offset="0.4" stop-color="#fff" stop-opacity="0"/></linearGradient>
+    <linearGradient id="design-paint" gradientUnits="userSpaceOnUse" x1="0" y1="4" x2="0" y2="40"><stop offset="0" stop-color="#b8e4ff"/><stop offset="0.5" stop-color="#4fa3ff"/><stop offset="1" stop-color="#1877F2"/></linearGradient>
+    <linearGradient id="design-paint-small" gradientUnits="userSpaceOnUse" x1="0" y1="4" x2="0" y2="40"><stop offset="0" stop-color="#b8e4ff"/><stop offset="1" stop-color="#4fa3ff"/></linearGradient>
+  </defs>
+  <g id="design-tile">
+    <rect x="100" y="100" width="824" height="824" rx="185" ry="185" fill="url(#design-tile-fill)"/>
+    <rect x="100" y="100" width="824" height="824" rx="185" ry="185" fill="url(#design-sheen)"/>
+    <rect x="104" y="104" width="816" height="816" rx="181" ry="181" fill="none" stroke="#fff" stroke-opacity="0.16" stroke-width="8"/>
+  </g>
+  <g id="design-tile-small" display="none">
+    <rect x="122" y="122" width="780" height="780" rx="163" ry="163" fill="none" stroke="#fff" stroke-opacity="0.3" stroke-width="44"/>
+  </g>
+  <g id="design-glyph" transform="translate(232 232) scale(12.7273)">
+    <path d="M6 11 H38" stroke="#b8e4ff" stroke-width="3.4" stroke-linecap="round" opacity="0.75"/>
+    <rect x="2.5" y="7.5" width="7" height="7" rx="1.8" fill="#b8e4ff"/>
+    <rect x="34.5" y="7.5" width="7" height="7" rx="1.8" fill="#b8e4ff"/>
+    <path d="M22 13 L32.5 25 Q30 32 26.5 36 H17.5 Q14 32 11.5 25 Z" fill="url(#design-paint)"/>
+    <path d="M22 18.5 V26.5" stroke="#0b1d3a" stroke-width="2.6" stroke-linecap="round"/>
+    <circle cx="22" cy="28.5" r="2.8" fill="#0b1d3a"/>
+    <rect x="16.5" y="38" width="11" height="4" rx="1.8" fill="#4fa3ff"/>
+  </g>
+  <g id="design-glyph-small" display="none" transform="translate(180 180) scale(15.0909)">
+    <path d="M8 9 H36" stroke="#b8e4ff" stroke-width="4.6" stroke-linecap="round" opacity="0.85"/>
+    <rect x="1.5" y="4" width="10" height="10" rx="2.4" fill="#b8e4ff"/>
+    <rect x="32.5" y="4" width="10" height="10" rx="2.4" fill="#b8e4ff"/>
+    <path d="M22 14 L35 28 Q32 35 28 40 H16 Q12 35 9 28 Z" fill="url(#design-paint-small)"/>
+    <path d="M22 20.5 V30.5" stroke="#0b1d3a" stroke-width="4" stroke-linecap="round"/>
+  </g>
+  <g id="design-line" display="none" transform="translate(232 232) scale(23.3333)" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 6.2h14"/><rect x="2.2" y="4.8" width="2.8" height="2.8" rx="0.8"/><rect x="19" y="4.8" width="2.8" height="2.8" rx="0.8"/><path d="M12 7.6l5 6c-.8 2.5-1.9 4.4-3.3 6.2h-3.4C8.9 18 7.8 16.1 7 13.6z"/><circle cx="12" cy="14.2" r="1.2"/><path d="M12 10v3"/></g>
+</svg>

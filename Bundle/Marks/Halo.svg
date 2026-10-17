@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Bundle/Marks/Halo.svg: the Halo app mark, the only hand-edited form of it.
+     scripts/render-marks turns it into Bundle/Icons/Halo*.png and SuiteUI's AppMarkArt.swift.
+     Groups: halo-tile (1024 grid, 824 tile inset 100), halo-tile-small (the rim drawn at 32 px and under),
+     halo-glyph (44-unit grid), halo-glyph-small (32 px and under), halo-line (24-unit monoline, currentColor). -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024" role="img" aria-label="Halo: a ringed world and one moon">
+  <defs>
+    <radialGradient id="halo-tile-fill" cx="0.28" cy="0" r="1.1" fx="0.28" fy="0"><stop offset="0" stop-color="#3b3b41"/><stop offset="0.46" stop-color="#1d1d20"/><stop offset="1" stop-color="#0a0a0b"/></radialGradient>
+    <linearGradient id="halo-sheen" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity="0.11"/><stop offset="0.4" stop-color="#fff" stop-opacity="0"/></linearGradient>
+    <linearGradient id="halo-paint" gradientUnits="userSpaceOnUse" x1="0" y1="6" x2="0" y2="38"><stop offset="0" stop-color="#ebc2ff"/><stop offset="0.5" stop-color="#bf5af2"/><stop offset="1" stop-color="#7a3cff"/></linearGradient>
+    <linearGradient id="halo-paint-small" gradientUnits="userSpaceOnUse" x1="0" y1="6" x2="0" y2="38"><stop offset="0" stop-color="#ebc2ff"/><stop offset="1" stop-color="#bf5af2"/></linearGradient>
+  </defs>
+  <g id="halo-tile">
+    <rect x="100" y="100" width="824" height="824" rx="185" ry="185" fill="url(#halo-tile-fill)"/>
+    <rect x="100" y="100" width="824" height="824" rx="185" ry="185" fill="url(#halo-sheen)"/>
+    <rect x="104" y="104" width="816" height="816" rx="181" ry="181" fill="none" stroke="#fff" stroke-opacity="0.16" stroke-width="8"/>
+  </g>
+  <g id="halo-tile-small" display="none">
+    <rect x="122" y="122" width="780" height="780" rx="163" ry="163" fill="none" stroke="#fff" stroke-opacity="0.3" stroke-width="44"/>
+  </g>
+  <g id="halo-glyph" transform="translate(232 232) scale(12.7273)">
+    <ellipse cx="22" cy="22" rx="17" ry="7.5" fill="none" stroke="url(#halo-paint)" stroke-width="3.4" transform="rotate(-22 22 22)"/>
+    <circle cx="22" cy="22" r="7" fill="url(#halo-paint)"/>
+    <circle cx="37" cy="14.5" r="3.4" fill="#ebc2ff"/>
+  </g>
+  <g id="halo-glyph-small" display="none" transform="translate(180 180) scale(15.0909)">
+    <ellipse cx="22" cy="22" rx="19" ry="8" fill="none" stroke="url(#halo-paint-small)" stroke-width="4.6" transform="rotate(-22 22 22)"/>
+    <circle cx="22" cy="22" r="8.5" fill="url(#halo-paint-small)"/>
+  </g>
+  <g id="halo-line" display="none" transform="translate(232 232) scale(23.3333)" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="12" rx="9.6" ry="4.1" transform="rotate(-22 12 12)"/><circle cx="12" cy="12" r="3.5"/><circle cx="20.2" cy="7.6" r="1.3" fill="#fff" stroke="none"/></g>
+</svg>

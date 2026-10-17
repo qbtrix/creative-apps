@@ -1,0 +1,3 @@
+# Tests/app-marks-baseline.txt: Swift files that drew app marks before AppMark
+# existed, grandfathered. Written by scripts/check-app-marks --update-baseline,
+# never by hand. It only shrinks: switch the file to AppMark and drop its line.

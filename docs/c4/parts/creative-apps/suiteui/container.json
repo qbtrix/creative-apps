@@ -1,11 +1,19 @@
 {
   "id": "suiteui",
   "name": "SuiteUI",
-  "description": "The shared design system (Sources/SuiteUI): tokens, Liquid Glass primitives, the SuiteWindow shell, toolbar palette, sidebar rows and sections, content-layer surfaces, pro inspector rows and scrub fields, a thumbnail grid and a timeline strip. macOS only; knows no Model or engine.",
+  "description": "The shared design system (Sources/SuiteUI): tokens, Liquid Glass primitives, the SuiteWindow shell, toolbar palette, sidebar rows and sections, content-layer surfaces, pro inspector rows and scrub fields, a thumbnail grid, a timeline strip and AppMark, the app marks. macOS only; knows no app Model or engine, only SuiteModel's app list.",
   "technology": "Swift 6, SwiftUI, macOS 26",
   "tags": [
     "internal",
     "macos-only"
   ],
-  "order": 10
+  "order": 10,
+  "relationships": [
+    {
+      "source": "suiteui",
+      "target": "suite-model",
+      "description": "names the apps (SuiteApp) whose marks AppMark draws",
+      "style": "sync"
+    }
+  ]
 }

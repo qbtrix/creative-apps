@@ -587,6 +587,9 @@ gh() {
       n="${2#*/pulls/}"; n="${n%%/*}"
       if [[ -e "$sw/files.$n.json" ]]; then jq -r "${!#}" "$sw/files.$n.json"
       else jq -rn '[{filename: "Sources/FlareModel/FlareWorkspace.swift", status: "modified"}]' | jq -r "${!#}"; fi ;;
+    "api "*"/pulls/"*) n="${2##*/}"; jq -r "${!#}" "$sw/pull.$n.json" 2>/dev/null || true ;;  # a PR's body (bisect_post)
+    "api repos/"*"/issues?labels=dev-red"*) jq -r "${!#}" "$sw/red.json" 2>/dev/null || true ;;  # the open dev-red issue
+    "api search/issues"*) jq -r "${!#}" "$sw/search.json" 2>/dev/null || true ;;
     "run view "*) cat "$sw/run.$3.json" 2>/dev/null || return 1 ;;
     "run list "*"--commit "*)
       u="${a#*--commit }"; u="${u%% *}"
@@ -624,7 +627,7 @@ gh() {
       n="${2##*/}"; echo "labels $n" >>"$sw/lookups"
       [[ ! -e "$sw/labels.$n.fail" ]] || return 1
       jq -c '{labels: map({name: .})}' <<<"$(cat "$sw/labels.$n" 2>/dev/null || echo '[]')" | jq -r "${!#}" ;;
-    "pr comment "*) echo "$a" >>"$sw/calls"; printf '%s\n' "${!#}" >>"$sw/$3.comments" ;;
+    "pr comment "*|"issue comment "*) echo "$a" >>"$sw/calls"; printf '%s\n' "${!#}" >>"$sw/$3.comments" ;;
     "pr merge "*) echo "$a" >>"$sw/calls"; touch "$sw/$3.merged"; printf '%s\n' "${!#}" >"$sw/$3.squash" ;;
     "pr edit "*"--body "*) echo "pr edit $3 --body" >>"$sw/calls"; printf '%s\n' "${!#}" >"$sw/$3.edited" ;;
     "pr edit "*"--base "*) echo "$a" >>"$sw/calls"; jq '.baseRefName = "dev"' "$sw/$3.json" >"$sw/x" && mv "$sw/x" "$sw/$3.json" ;;
@@ -1003,5 +1006,62 @@ expect "dev red: a red base lands the batch on each PR's own proof" "$(grep -oE 
 expect "dev red: and says so" "$(grep -c '^pr comment 71 .*dev was red on its own (https://github.com/qbtrix/creative-apps/actions/runs/777), so this batch landed on each PR.s own proof' "$sw/calls")" 1
 expect "dev red: no needs-fix" "$(grep -c -- '--add-label needs-fix' "$sw/calls")" 0
 expect "dev red: the branches are gone" "$(git -C "$sw/origin.git" for-each-ref 'refs/heads/lane/batch-*' | wc -l | tr -d ' ')" 0
+
+# Culprit by bisect on a red dev (rung 2c): main at the base, dev three
+# first-parent commits past it (#101 good, #102 bad, #103 good), the dev-red
+# issue #500 naming main..<dev tip> with a Linux red, and red-triage's comment
+# blaming #102 at 0.93. The lane probes #102's parent, then #102: two Linux
+# runs, then the verdict on #500 and on #102's feature-lead issue (#78, by
+# the PR body's Feature: line), and the probes go.
+rm -rf "$sw"; mkdir -p "$sw"; : >"$sw/calls"
+w="$sw/work"
+git init -q --bare "$sw/origin.git"; git -C "$sw/origin.git" config uploadpack.allowFilter true
+git init -q -b main "$w"; git -C "$w" config user.name t; git -C "$w" config user.email t@t; git -C "$w" config commit.gpgsign false
+echo base >"$w/base.md"; git -C "$w" add -A; git -C "$w" commit -qm base
+git -C "$w" switch -qc dev
+for spec in "c1 fix(a): one (#101)" "c2 feat(b): two (#102)" "c3 docs: three (#103)"; do
+  echo "${spec%% *}" >"$w/${spec%% *}.md"; git -C "$w" add -A; git -C "$w" commit -qm "${spec#* }"
+done
+git -C "$w" push -q "$sw/origin.git" main dev
+M=$(git -C "$w" rev-parse main); C1=$(git -C "$w" rev-parse dev~2); C2=$(git -C "$w" rev-parse dev~1); C3=$(git -C "$w" rev-parse dev)
+R7=${C3:0:7}
+jq -n --arg b "$(printf 'CI on dev is red.\n\n- Run: https://github.com/qbtrix/creative-apps/actions/runs/9001\n- Failing jobs: linux\n- Culprit range: `main..%s`\n' "$C3")" '[{number: 500, body: $b, pull_request: null}]' >"$sw/red.json"
+printf '%s\n' "Likely cause: #102 feat(b): two (Clef 0.93). Flaky: 0.10." >"$sw/500.comments"
+jq -n '{body: "Adds two.\n\nFeature: easing\nFast-Check: pass"}' >"$sw/pull.102.json"
+jq -n '{items: [{number: 70, title: "Feature: easing (old)"}, {number: 78, title: "Feature: easing"}]}' >"$sw/search.json"
+verdict "$M" success; verdict "$C3" failure
+lane_sweep
+bprobe() { git -C "$sw/origin.git" rev-parse --verify -q "refs/heads/ci/bisect-$R7-$1" 2>/dev/null || true; }
+expect "bisect dev: red-triage's confident guess gets its parent probed first" "$(bprobe 1)" "$C1"
+expect "bisect dev: with one Linux run on the probe" "$(grep -c -- "-f linux_only=true --ref ci/bisect-$R7-1\$" "$sw/calls")" 1
+verdict "$C1" success; lane_sweep
+expect "bisect dev: a green parent probes the guess itself" "$(bprobe 2)" "$C2"
+verdict "$C2" failure; lane_sweep
+expect "bisect dev: the first red commit is posted on the dev-red issue" \
+  "$(grep -c "^issue comment 500 .*Bisect: ${C2:0:7} feat(b): two (#102) is the first commit on dev whose Linux job fails. Green at ${C1:0:7} (https://github.com/qbtrix/creative-apps/actions/runs/777), red at ${C2:0:7} (.*); 2 Linux run(s)" "$sw/calls")" 1
+expect "bisect dev: and on the open feature-lead issue the PR's Feature: line names" \
+  "$(grep -c "^issue comment 78 .*your PR #102 (feat(b): two (#102)) is the first commit that turns dev's Linux job red" "$sw/calls")" 1
+expect "bisect dev: the probes are gone" "$(git -C "$sw/origin.git" for-each-ref 'refs/heads/ci/bisect-*' | wc -l | tr -d ' ')" 0
+lane_sweep
+expect "bisect dev: a red with its verdict posted is not redone (two runs, two comments, nothing more)" "$(grep -c '^issue comment\|^workflow run' "$sw/calls")" 4
+# dev stays red and ci.yml moves the issue's range to the newer red run (c4):
+# the issue already has its verdict, so nothing is bisected again.
+echo c4 >"$w/c4.md"; git -C "$w" add -A; git -C "$w" commit -qm "docs: four (#104)"; git -C "$w" push -q "$sw/origin.git" dev
+C4=$(git -C "$w" rev-parse dev); verdict "$C4" failure
+jq --arg b "$(printf 'CI on dev is red.\n\n- Run: https://github.com/qbtrix/creative-apps/actions/runs/9002\n- Failing jobs: linux\n- Culprit range: `main..%s`\n' "$C4")" '.[0].body = $b' "$sw/red.json" >"$sw/x" && mv "$sw/x" "$sw/red.json"
+lane_sweep
+expect "bisect dev: a newer red run on the same issue starts no second bisect" \
+  "$(grep -c '^issue comment\|^workflow run' "$sw/calls"),$(git -C "$sw/origin.git" for-each-ref 'refs/heads/ci/bisect-*' | wc -l | tr -d ' ')" "4,0"
+
+# The same chain by hand (--bisect), no guess: the midpoint first. With the
+# run cap at 1 the second sweep stops and says where the culprit sits.
+rm -f "$sw/500.comments" "$sw/checks.$C1.json"; : >"$sw/calls"
+( FAST_LANE_RUN_LOOKUP_RETRIES=0 main --bisect "$M..$C3" 500 dev ) >/dev/null 2>&1 || { echo "FAIL sweep: main --bisect exited non-zero"; fail=1; }
+expect "bisect by hand: probes the midpoint" "$(bprobe 1)" "$C1"
+verdict "$C1" success
+( MAX_BISECT=1 FAST_LANE_RUN_LOOKUP_RETRIES=0 main --bisect "$M..$C3" 500 dev ) >/dev/null 2>&1 || { echo "FAIL sweep: main --bisect exited non-zero"; fail=1; }
+expect "bisect by hand: at the run cap it stops and names the range left" \
+  "$(grep -c "^issue comment 500 .*stopped after 1 Linux runs: the Linux job is green at ${C1:0:7} and red at ${C3:0:7}; the culprit is one of the 2 commits between them" "$sw/calls")" 1
+expect "bisect by hand: and drops its probes" "$(git -C "$sw/origin.git" for-each-ref 'refs/heads/ci/bisect-*' | wc -l | tr -d ' ')" 0
 
 exit "$fail"

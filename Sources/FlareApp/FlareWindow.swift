@@ -145,7 +145,7 @@ struct FlareCanvas: View {
             .overlay { FlareRecording(model: model) }
         } else {
             EmptyStateView(
-                "No Animation Open", systemImage: "film.stack",
+                "No Animation Open", systemImage: "square.stack.3d.forward.dottedline",
                 message: "Create an animation to start drawing scenes and keyframes.",
                 action: ToolbarAction("New Animation", systemImage: "plus", identifier: Self.emptyNewIdentifier) {
                     perform(.file(.new))

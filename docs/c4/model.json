@@ -18,7 +18,7 @@
           {
             "id": "suiteui",
             "name": "SuiteUI",
-            "description": "The shared design system (Sources/SuiteUI): tokens, Liquid Glass primitives, the SuiteWindow shell, toolbar palette, sidebar rows and sections, content-layer surfaces, pro inspector rows and scrub fields, a thumbnail grid and a timeline strip. macOS only; knows no Model or engine.",
+            "description": "The shared design system (Sources/SuiteUI): tokens, Liquid Glass primitives, the SuiteWindow shell, toolbar palette, sidebar rows and sections, content-layer surfaces, pro inspector rows and scrub fields, a thumbnail grid, a timeline strip and AppMark, the app marks. macOS only; knows no app Model or engine, only SuiteModel's app list.",
             "technology": "Swift 6, SwiftUI, macOS 26",
             "tags": [
               "internal",
@@ -28,7 +28,7 @@
               {
                 "id": "suiteui-sources",
                 "name": "SuiteUI sources",
-                "description": "The shared design system (Sources/SuiteUI): spacing, radius, size, type and color tokens; Liquid Glass applied in one snapshot-aware place (Glass) and GlassPanel; the SuiteWindow shell (sidebar, content, inspector) with SidebarSection and SidebarRow; ToolbarGroup palette actions; the content layer (CanvasSurface, SurfaceCard, EmptyStateView, ViewerStatusBar); the editor shell after the Ripple editor (EditorShell, EditorTopBar and its bar items, the docked ToolbarGroup rail, CanvasViewport with its Ruler, optional checkerboard, ZoomMath clamped zoom and fit, and CanvasMarks, SegmentedTabs and the ColorWell hex row); pro inspector parts (InspectorHeader, InspectorRows, ScrubField and NumericInput number entry); the Studio easing parts (CurveEditor, StudioScrubRow, ChoiceChips); ThumbnailGrid with its selection math; and TimelineStrip with its frame mapping, shared by Flare and Halo.",
+                "description": "The shared design system (Sources/SuiteUI, linking SuiteModel for SuiteApp): spacing, radius, size, type and color tokens; Liquid Glass applied in one snapshot-aware place (Glass) and GlassPanel; the SuiteWindow shell (sidebar, content, inspector) with SidebarSection and SidebarRow; ToolbarGroup palette actions; the content layer (CanvasSurface, SurfaceCard, EmptyStateView, ViewerStatusBar); the editor shell after the Ripple editor (EditorShell, EditorTopBar and its bar items, the docked ToolbarGroup rail, CanvasViewport with its Ruler, optional checkerboard, ZoomMath clamped zoom and fit, and CanvasMarks, SegmentedTabs and the ColorWell hex row); pro inspector parts (InspectorHeader, InspectorRows, ScrubField and NumericInput number entry); the Studio easing parts (CurveEditor, StudioScrubRow, ChoiceChips); AppMark, the one view that draws an app's mark (icon, glyph or line style) from AppMarkArt, path data scripts/render-marks generates from Bundle/Marks; ThumbnailGrid with its selection math; and TimelineStrip with its frame mapping, shared by Flare and Halo.",
                 "technology": "Swift 6, SwiftUI, macOS 26",
                 "paths": [
                   "Sources/SuiteUI/"
@@ -446,11 +446,12 @@
               {
                 "id": "shell-apps",
                 "name": "App launching and Switch To",
-                "description": "Open or activate an embedded app (NSWorkspace.openApplication, NSRunningApplication.activate), run states, the Switch To commands.",
+                "description": "Open or activate an embedded app (NSWorkspace.openApplication, NSRunningApplication.activate), run states, the Switch To commands, and the app switcher a window shows, built from the same items.",
                 "technology": "Swift 6, SwiftUI and AppKit, macOS 26",
                 "paths": [
                   "Sources/SuiteShell/AppLauncher.swift",
-                  "Sources/SuiteShell/SuiteCommands.swift"
+                  "Sources/SuiteShell/SuiteCommands.swift",
+                  "Sources/SuiteShell/SuiteSwitcherBridge.swift"
                 ]
               },
               {
@@ -587,7 +588,7 @@
               {
                 "id": "bundle-inputs",
                 "name": "Bundle inputs",
-                "description": "Info.plists per bundle, icons, entitlements, and Bundle/Engines/CreativeEngines.swift (re-exports FlareCore, CoreRaster, CoreColor for the one shared engine framework).",
+                "description": "Info.plists per bundle; the app marks (Bundle/Marks/<App>.svg, the only hand-edited form) and the icon PNGs scripts/render-marks renders from them into Bundle/Icons; entitlements; and Bundle/Engines/CreativeEngines.swift (re-exports FlareCore, CoreRaster, CoreColor for the one shared engine framework).",
                 "technology": "plist, Swift",
                 "paths": [
                   "Bundle/"
@@ -681,6 +682,12 @@
       }
     ],
     "relationships": [
+      {
+        "source": "suiteui",
+        "target": "suite-model",
+        "description": "names the apps (SuiteApp) whose marks AppMark draws",
+        "style": "sync"
+      },
       {
         "source": "flare-app",
         "target": "suiteui",
