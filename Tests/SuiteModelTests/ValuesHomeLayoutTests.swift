@@ -15,7 +15,7 @@ import Testing
     static let table: [Row] = [
         Row(width: 880, columns: 3, card: 200, tile: 112, chips: false),
         Row(width: 1000, columns: 4, card: 176, tile: 136, chips: false),
-        Row(width: 1280, columns: 5, card: 192, tile: 192, chips: true),
+        Row(width: 1280, columns: 5, card: 192, tile: 192, chips: false),
         Row(width: 1728, columns: 8, card: 168, tile: 240, chips: true),
     ]
 
@@ -33,7 +33,7 @@ import Testing
         #expect(HomeLayout.cardMin == 168)
         #expect(HomeLayout.cardMax == 240)
         #expect(HomeLayout.tileMax == 240)
-        #expect(HomeLayout.tileChipsMin == 160)
+        #expect(HomeLayout.tileChipsMin == 3 * HomeLayout.chipLabelMin + 2 * HomeLayout.chipSpacing)
     }
 
     @Test func sweepEveryWidthFits() {
@@ -49,6 +49,50 @@ import Testing
             #expect(tile.truncatingRemainder(dividingBy: 4) == 0 && tile <= 240, "tile at \(w)")
             #expect(5 * tile + 4 * HomeLayout.gap <= content, "tile row fits at \(w)")
         }
+    }
+
+    /// #1753: a chip shows only where every title fits untruncated; a third of a
+    /// 192 pt tile is under the shortest label's width, so 1280 gets the menu.
+    @Test func chipsOnlyWhereTheyFit() {
+        let third = (HomeLayout.tileWidth(windowWidth: 1280) - 2 * HomeLayout.chipSpacing) / 3
+        #expect(third < HomeLayout.chipLabelMin)
+        #expect(!HomeLayout.tileShowsChips(windowWidth: 1280))
+        for w in stride(from: 880.0, through: 2560, by: 8) {
+            let chip = HomeLayout.chipWidth(windowWidth: w)
+            #expect(HomeLayout.tileShowsChips(windowWidth: w) == (chip >= HomeLayout.chipLabelMin), "at \(w)")
+        }
+        let flare = SuiteCreating.presets[.flare] ?? []
+        #expect(flare.count == 3)
+        // "Vertical 9:16" needs more than a third of the widest tile.
+        #expect(!HomeLayout.tileShowsChips(windowWidth: 1728, presets: flare))
+        #expect(!HomeLayout.tileShowsChips(windowWidth: 2560, presets: flare))
+        let short = [NewDocumentPreset(id: "a", app: .flare, title: "Square", detail: "1080 × 1080"),
+                     NewDocumentPreset(id: "b", app: .flare, title: "HD", detail: "1920 × 1080")]
+        #expect(HomeLayout.tileShowsChips(windowWidth: 1728, presets: short))
+        #expect(!HomeLayout.tileShowsChips(windowWidth: 1280, presets: short))
+        #expect(!HomeLayout.tileShowsChips(windowWidth: 1728, presets: Array(short.prefix(1))))
+        #expect(HomeLayout.chipLabelWidth("Vertical 9:16") > HomeLayout.chipWidth(windowWidth: 1728))
+        #expect(HomeLayout.chipLabelWidth("Square") <= HomeLayout.chipLabelMin)
+    }
+
+    /// #1753: a single preset is the tile's own click, so no preset row repeats it.
+    @Test func singlePresetRowHides() {
+        for tile in SuiteCreating().tiles(missing: []) {
+            #expect(HomeLayout.showsPresets(tile) == (tile.presets.count > 1), "\(tile.app)")
+        }
+        #expect(HomeLayout.showsPresets(NewTile(app: .flare, title: "New Animation", presets: SuiteCreating.presets[.flare] ?? [])))
+        #expect(!HomeLayout.showsPresets(NewTile(app: .design, title: "New Design", presets: SuiteCreating.presets[.design] ?? [])))
+        #expect(!HomeLayout.showsPresets(NewTile(app: .photo, title: "New Image", presets: [])))
+    }
+
+    /// #1753: every preset control carries the preset's detail.
+    @Test func presetHelpCarriesDetail() {
+        for preset in SuiteCreating.presets.values.flatMap({ $0 }) {
+            #expect(HomeLayout.presetHelp(preset) == "\(preset.title): \(preset.detail)")
+        }
+        let flare = SuiteCreating.presets[.flare] ?? []
+        let joined = HomeLayout.presetsHelp(flare)
+        for preset in flare { #expect(joined.contains(preset.detail) && joined.contains(preset.title)) }
     }
 
     @Test func homeValuesHoldTheirParts() {

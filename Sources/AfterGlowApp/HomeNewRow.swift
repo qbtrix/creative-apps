@@ -1,7 +1,9 @@
 // HomeNewRow.swift: the home's New row (blueprint suite.md 6.1, 7.3; HM-2b):
 // one tile per NewTile, HomeLayout.tileWidth wide for the measured content
-// width; its presets as ChoiceChips (at most 3) when HomeLayout.tileShowsChips,
-// else a Menu. A click sends the tile's first preset through
+// width; its presets (only when it has more than one, HomeLayout.showsPresets)
+// as ChoiceChips (at most 3) when every title fits a chip
+// (HomeLayout.tileShowsChips), else a Menu whose items carry each preset's
+// detail as a subtitle. A click sends the tile's first preset through
 // `model.newDocument`. A disabled tile says why (tooltip and suite.controls).
 // While `model.launching` is the tile's app a small ProgressView shows (the
 // AppTile #803 placeholder). HomeLayoutAnchors carries the frames
@@ -20,10 +22,10 @@ struct HomeNewRow: View {
 
     var body: some View {
         let tileWidth = CGFloat(HomeLayout.tileWidth(windowWidth: windowWidth))
-        let chips = HomeLayout.tileShowsChips(windowWidth: windowWidth)
         HStack(alignment: .top, spacing: CGFloat(HomeLayout.gap)) {
             ForEach(model.state.tiles, id: \.app) { tile in
-                HomeTile(tile: tile, showsChips: chips, isLaunching: model.launching == tile.app) { preset in
+                HomeTile(tile: tile, showsChips: HomeLayout.tileShowsChips(windowWidth: windowWidth, presets: tile.presets),
+                         isLaunching: model.launching == tile.app) { preset in
                     Task { await model.newDocument(preset, now: Date()) }
                 }
                 .frame(width: tileWidth, alignment: .topLeading)
@@ -64,7 +66,7 @@ private struct HomeTile: View {
             }
             .buttonStyle(.bordered)
             .disabled(!enabled)
-            .help(reason ?? tile.title)
+            .help(reason ?? tile.presets.first.map(HomeLayout.presetHelp) ?? tile.title)
             .suiteControl(id: id, enabled: enabled, reason: reason)
             .overlay(alignment: .topTrailing) {
                 if isLaunching {
@@ -72,7 +74,12 @@ private struct HomeTile: View {
                         .accessibilityLabel("Opening \(tile.app.displayName)")
                 }
             }
-            presets
+            if HomeLayout.showsPresets(tile) {
+                presets
+            } else {
+                // Holds the preset row's height so every tile is one height (#1755); never drawn or hit.
+                Menu("Presets") {}.font(SuiteFont.pill).controlSize(.small).hidden().accessibilityHidden(true)
+            }
         }
     }
 
@@ -83,19 +90,24 @@ private struct HomeTile: View {
                 if let preset = tile.presets.first(where: { $0.id == picked }) { create(preset) }
             }
             .disabled(!enabled)
-            .help(reason ?? "Start from a preset")
+            .help(reason ?? HomeLayout.presetsHelp(Array(tile.presets.prefix(3))))
             .suiteControl(id: id + ".presets", enabled: enabled, reason: reason, identifies: false)
             .homeLayoutAnchor("chips.\(tile.app.rawValue)")
         } else {
             Menu("Presets") {
                 ForEach(tile.presets, id: \.id) { preset in
-                    Button(preset.title) { create(preset) }
+                    // A second Text is the menu item's subtitle: the preset's size or formats.
+                    Button { create(preset) } label: {
+                        Text(preset.title)
+                        Text(preset.detail)
+                    }
+                    .help(HomeLayout.presetHelp(preset))
                 }
             }
             .font(SuiteFont.pill)
             .controlSize(.small)
             .disabled(!enabled)
-            .help(reason ?? "Start from a preset")
+            .help(reason ?? HomeLayout.presetsHelp(tile.presets))
             .suiteControl(id: id + ".presets", enabled: enabled, reason: reason)
             .homeLayoutAnchor("menu.\(tile.app.rawValue)")
         }
