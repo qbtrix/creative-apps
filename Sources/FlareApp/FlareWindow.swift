@@ -54,7 +54,7 @@ struct FlareWindow: View {
             inspectorWidth: Self.inspectorWidth
         ) {
             SuiteSidebarList(
-                sections: SidebarSection.flare(model, onAddLayer: { perform(.layers(.addLayer)) }),
+                sections: SidebarSection.flare(model, perform: { perform(.layers($0)) }),
                 selection: model.selectedLayerID ?? model.selectedSceneID,
                 onSelect: { perform(.layers(.select(id: $0))) },
                 onToggle: { perform(.layers(.toggle(id: $0, flag: $1))) },
