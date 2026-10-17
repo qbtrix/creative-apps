@@ -20,3 +20,4 @@
 2026-10-17T14:51:48Z	heartbeat	wave 2 running; IT-3 PR #2113 open
 2026-10-17T14:58:17Z	wave2-built	IT-1 #2128, IT-2 #2130, IT-3 #2113, IT-4 #2129 open in the lane (contract: footer only, plus accepted scope notes)
 2026-10-17T15:13:03Z	heartbeat	wave 2 macOS builds green (#2113, #2128, #2129, #2130); lane batch run 39043553076 in progress
+2026-10-17T15:35:38Z	wave3-start	IT-1 #2128, IT-3 #2113, IT-4 #2129 merged; #2130 needs-rebase, fixer sent; wave 3 IT-5..IT-8 launched on dd7ec76
