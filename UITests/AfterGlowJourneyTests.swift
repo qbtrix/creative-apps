@@ -98,7 +98,7 @@ final class AfterGlowJourneyTests: XCTestCase {
     // MARK: - Helpers shared with +Home
 
     /// Whether `name` is in UITests/Fixtures/suite.
-    static func hasFixture(_ name: String) -> Bool {
+    @MainActor static func hasFixture(_ name: String) -> Bool {
         FileManager.default.fileExists(atPath: SuiteHarness.fixtureDocuments.appending(path: name).path)
     }
 
