@@ -34,7 +34,10 @@ const LENSES = {
   clarity: 'First-use clarity: what does each number and label mean to someone new? Flag any value without a unit or context, any jargon, any icon without a label or tooltip, and any state a first-time user cannot read.',
   journey: `The ${args.slice ? 'slice' : 'packet'}'s journeys: walk each one through the screens in order. Flag a step that is missing, out of order, or ends somewhere the packet does not say.`,
   design: 'docs/design.md: spacing, alignment, type, color tokens, glass, component order, light and dark. Flag anything that breaks a rule, naming the rule. ' +
-    'Also flag an app-local view that copies a SuiteUI component or a pattern another app already has (SuiteUI first, lead.md rule 16); the fix moves it to SuiteUI.',
+    'Also flag an app-local view that copies a SuiteUI component or a pattern another app already has (SuiteUI first, lead.md rule 16); the fix moves it to SuiteUI. ' +
+    `And read the Swift files the ${args.slice ? 'slice' : 'feature'}'s merged PRs added under Sources/*Model/ and Sources/*App/: flag logic for a concept SuiteModel, creative-core or another app's Model already has, ` +
+    'or app-local undo, history, selection, layer tree, parenting, transform, marquee, snap, keyframe, easing, export or crop logic, the editor-kernel concepts (canonical first, lead.md rule 20; ' +
+    'an <X>+Kernel.swift or <X>Adapter.swift adapter onto SuiteModel is fine). Use "-" for the screen; the fix uses the SuiteModel module or extracts the concept into it.',
   mouse: 'Mouse-only first-time user (the feel gate, lead.md rule 15): you know no shortcuts and only click what you see. Flag every new screen or mode you cannot enter or leave ' +
     'with a visible control (a blocker), any control with no hover or pressed state, and anything reachable only by a key or a menu shortcut. ' +
     'Check the journey steps too: a mode change proven only by a key press is a finding.',

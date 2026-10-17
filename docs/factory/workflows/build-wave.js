@@ -23,6 +23,14 @@ export const meta = {
 // Returns [{ id, pr, head, ok, problems }] per task (null for a builder that died), as in v2.
 // With alongside: { tasks: <that list>, alongside: [result per workflow, null if it died] }; tasks may then be empty.
 
+// The same rule the Mac finisher follows (lead.md rules 17 and 20); critic-panel.js's design lens checks it.
+const CANON = `Canonical first (docs/factory/lead.md, contract rule 20): before writing logic, search SuiteModel, SuiteUI, creative-core
+and every other app's Model (Sources/*Model/) for the same concept. If one has it, use that module and write no copy. If only another
+app has it, don't copy it: stop and say so in notes, and the lead adds a contract task that extracts it into SuiteModel first.
+Undo and history, selection, the layer tree and parenting, transform with marquee and snapping, keyframes and easing, export and crop
+are editor-kernel concepts, never app-local: build into the SuiteModel module or wait on it. An adapter onto it is named
+<X>+Kernel.swift or <X>Adapter.swift. scripts/check-dup-logic (in scripts/ci) fails on a new concept file in an app.`
+
 const IDENTITY = 'git config user.name "Prakash Dalai" && git config user.email "86671543+prakashUXtech@users.noreply.github.com"'
 
 const BUILT = {
@@ -71,7 +79,9 @@ Files you may touch: ${(t.files || []).join(', ')}
 Test that proves it: ${t.test}
 ${t.visible ? `What the user sees: ${t.visible}. Add or extend the snapshot in AppSnapshotTests or the step in UITests/<X>JourneyTests.swift that shows it.` : ''}
 
-Read the packet section for this task and the code it touches. Write the Swift Testing test first.
+Read the packet section for this task and the code it touches.
+${CANON}
+Write the Swift Testing test first.
 ${(t.files || []).some(f => /^Sources\/(\w*App|SuiteUI)\//.test(f)) ? 'This task changes SwiftUI: read docs/engineering/swiftui-rules.md first and keep to it. On Linux, list each new or unfamiliar macOS 27 / Swift 6.4 API call under "Unverified API:" in the PR body.' : ''}
 Keep to line:${a.app}. Run scripts/ci --changed (every lint and build, your touched targets' tests) until it prints CI: PASS. Then
 git fetch origin && git rebase origin/dev, rerun scripts/ci --changed (CI: PASS again), push, and open ONE PR.
@@ -85,7 +95,9 @@ function checkPrompt(t, b) {
   return `Read PR #${b.pr} (task ${t.id} of ${a.feature}) and check it against the contract. Do not edit, push or merge.
 ${contract(t)}
 Also check: it touches only ${(t.files || []).join(', ')} plus their tests; the Head: line equals the PR's current head;
-it adds a test; a visible change lists its snapshot PNGs. Report every miss.`
+it adds a test; a visible change lists its snapshot PNGs; it adds no app-local copy of a concept SuiteModel, creative-core or another
+app's Model already has, and no app-local undo, history, selection, layer tree, parenting, transform, marquee, snap, keyframe,
+easing, export or crop logic outside an <X>+Kernel.swift or <X>Adapter.swift adapter (lead.md rule 20). Report every miss.`
 }
 
 phase('Build')

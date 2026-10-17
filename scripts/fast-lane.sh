@@ -19,7 +19,8 @@
 # BASE_BRANCH, author in FAST_LANE_AUTHORS, size within MAX_LINES/MAX_FILES
 # (unless every path is under DOCS_RE), no changed or renamed-away path under
 # PROTECTED (CLAUDE.md's "Never edit" list), no looser app audit
-# (audit_loosens), MERGEABLE, no red or running check on the head, the proof
+# (audit_loosens), no added app-local copy of a canonical concept without an
+# `Allow-Dup:` line (dup_logic), MERGEABLE, no red or running check on the head, the proof
 # above, and for a Belt PR (`Belt-Run:` or `Belt-Test:` line) Belt's
 # `belt/review` status while REQUIRE_BELT_REVIEW=1. A PR based on main is
 # retargeted. A PR that is behind the base merges as it is. One that conflicts
@@ -43,7 +44,7 @@
 # `decide` is the pure decision function (no network): it reads a PR JSON
 # file, a file-list file, a check-rollup JSON file, optional audit_snapshot
 # dirs (merge base, head), the Mac-Check run and the latest build-only run on
-# the head, logs each rule to stderr and prints one line to stdout:
+# the head, and the PR's added files, logs each rule to stderr and prints one line to stdout:
 #   skip|<why>  retarget|<from base>  not-eligible|<reasons>  red|<checks>
 #   conflict|<head sha>  pending|<why>  build-dispatch|<code paths>|<head branch>
 #   linux-dispatch|<head branch>
@@ -124,6 +125,13 @@ AUDIT_DIRS='(Tests/PhotoModelTests/AppAudit|Tests/AppAuditTests)'
 AUDIT_RE="^(UITests/audit-baseline\\.json\$|$AUDIT_DIRS/)"
 AUDIT_REGISTRY_RE="^$AUDIT_DIRS/AuditCore\\.swift\$"
 AUDIT_REASON="loosens the app audit: needs the captain's review"
+# Canonical first (docs/factory/lead.md rule 20): a PR that adds a Swift file
+# under Sources/<X>Model or Sources/<X>App named for a canonical concept
+# (Tests/canonical-concepts.txt) needs an `Allow-Dup: <concept> <reason>` body
+# line. The lane runs main's scripts/check-dup-logic --paths on the PR's added
+# and renamed-to files: names only, since it never reads PR code; the primary
+# type rule and the grandfathered baseline are scripts/ci's (the head's proof).
+DUP_REASON="adds app-local logic for a canonical concept (use the SuiteModel module, or add \`Allow-Dup: <concept> <reason>\` to the body)"
 
 # A supervisor's `Mac-Check: <run url>` line names a CI run whose green
 # macOS job built every app, which also proves a code PR builds (build_gate).
@@ -431,10 +439,20 @@ audit_loosens() {
   (( lists <= 1 )) || echo "AppAudit.checks is declared $lists times"
 }
 
+# dup_logic <pr.json> <added.txt>: one line per added concept file the body has
+# no Allow-Dup line for, or `error: <why>` when the check can't run (the PR
+# then waits, like an unreadable audit: never merged unchecked).
+dup_logic() {
+  local out rc=0
+  out=$(python3 "$HERE/check-dup-logic" --paths "$2" --body <(jq -r '.body // ""' "$1") 2>/dev/null) || rc=$?
+  if (( rc > 1 )); then echo "error: scripts/check-dup-logic could not run (exit $rc)"; else printf '%s' "$out"; fi
+}
+
 # decide <pr.json> <files.txt> <checks.json> [<audit before dir> <audit after dir>
-#   [<mac-check run.json> <unused> [<build run.json>]]]
+#   [<mac-check run.json> <unused> [<build run.json> [<added.txt>]]]]
 # (pass "" "" for the audit dirs when the PR doesn't touch the audit; the
-# seventh argument is ignored, a slot kept so callers didn't shift)
+# seventh argument is ignored, a slot kept so callers didn't shift; added.txt
+# lists the PR's added and renamed-to paths, "" or missing skips dup_logic)
 decide() {
   local pr="$1" files="$2" checks="$3"
   local state draft base has_label author adds dels nfiles lines mergeable mstate head
@@ -490,6 +508,16 @@ decide() {
     else
       log "audit: FAIL ($loose)"; reasons+=("$AUDIT_REASON (${loose//,/, })")
     fi
+  fi
+
+  if [[ -n "${9:-}" && -s "${9:-}" ]]; then
+    local dups
+    dups=$(dup_logic "$pr" "$9" | paste -sd, -)
+    case "$dups" in
+      "") log "canonical first: ok" ;;
+      error:*) log "canonical first: ${dups#error: }"; pending="${dups#error: }" ;;
+      *) log "canonical first: FAIL ($dups)"; reasons+=("$DUP_REASON: ${dups//,/, }") ;;
+    esac
   fi
 
   local conflict=0
@@ -670,7 +698,11 @@ evaluate() {
     jq '.statusCheckRollup // []' "$tmp/pr.json" >"$tmp/checks.json"
   fi
   # A rename counts under both names, so moving a protected file away is caught.
-  gh api "repos/$REPO/pulls/$n/files" --paginate --jq '.[] | .filename, (.previous_filename // empty)' >"$tmp/files.txt"
+  # added.txt: the paths the PR adds, a rename's new name included (dup_logic).
+  gh api "repos/$REPO/pulls/$n/files" --paginate \
+    --jq '.[] | [.status, .filename, (.previous_filename // "")] | @tsv' >"$tmp/files.tsv"
+  cut -f2,3 "$tmp/files.tsv" | tr '\t' '\n' | grep -v '^$' >"$tmp/files.txt" || true
+  awk -F'\t' '$1 == "added" || $1 == "renamed" || $1 == "copied" { print $2 }' "$tmp/files.tsv" >"$tmp/added.txt"
   # The app audit is judged on its files at the merge base and the head (the
   # PR's own diff: a count dev lowered meanwhile isn't this PR's raise). An
   # API failure skips the PR this sweep rather than judging it blind.
@@ -705,7 +737,9 @@ evaluate() {
 
   echo "PR #$n:" >&2
   local decision kind rest
-  decision=$(decide "$tmp/pr.json" "$tmp/files.txt" "$tmp/checks.json" ${audit[@]+"${audit[@]}"} ${mac[@]+"${mac[@]}"})
+  (( ${#audit[@]} )) || audit=("" "")
+  (( ${#mac[@]} )) || mac=("" "" "")
+  decision=$(decide "$tmp/pr.json" "$tmp/files.txt" "$tmp/checks.json" "${audit[@]}" "${mac[@]}" "$tmp/added.txt")
   echo "decision: $decision"
   kind="${decision%%|*}"; rest="${decision#*|}"
 
