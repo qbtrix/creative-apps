@@ -15,6 +15,8 @@
 // - Move, Resize and Nudge coalesce on `runKey(base, ids)`; Delete is one step.
 //   A write that changes nothing throws `.unchanged`.
 // - A box of no width or height never divides: that axis maps onto the new box.
+// - `DesignRect.union` is the one selection-bounds union: Align, Group and the
+//   fakes measure a selection with it too.
 // Linux-safe.
 
 public struct LiveTransforming: SelectionTransforming {
@@ -42,7 +44,7 @@ public struct LiveTransforming: SelectionTransforming {
     public func resize(_ ids: [String], handle: DesignHandle, by delta: DesignPoint, modifiers: DesignModifiers,
                        on page: DesignPage) throws(DesignRefusal) -> DesignEdit {
         let roots = try targets(ids, on: page)
-        guard let box = fakeUnion(ids.compactMap { page.nodes.node($0)?.frame }) else { throw .nothingSelected }
+        guard let box = DesignRect.union(ids.compactMap { page.nodes.node($0)?.frame }) else { throw .nothingSelected }
         let new = box.resized(handle, by: delta, keepAspect: modifiers.contains(.shift), fromCenter: modifiers.contains(.option))
         var nodes = page.nodes
         for root in roots { _ = nodes.update(root.id) { $0 = scaled($0, from: box, to: new) } }
@@ -111,5 +113,15 @@ public struct LiveTransforming: SelectionTransforming {
             width: size(frame.width, box.width, new.width), height: size(frame.height, box.height, new.height))
         node.children = node.children.map { scaled($0, from: box, to: new) }
         return node
+    }
+}
+
+extension DesignRect {
+    /// The smallest rectangle holding every frame; nil for none. The one selection-bounds union.
+    static func union(_ frames: [DesignRect]) -> DesignRect? {
+        guard let minX = frames.map(\.x).min(), let minY = frames.map(\.y).min(),
+            let maxX = frames.map(\.maxX).max(), let maxY = frames.map(\.maxY).max()
+        else { return nil }
+        return DesignRect(x: minX, y: minY, width: maxX - minX, height: maxY - minY)
     }
 }
