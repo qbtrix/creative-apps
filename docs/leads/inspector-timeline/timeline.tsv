@@ -1,0 +1,52 @@
+2026-10-16T20:59Z	heartbeat	-	#1515	stage 0 stopped: waiting on draw-key-save #1365
+2026-10-16T21:30Z	heartbeat	-	#1515	stage 0: #1365 still open; status pushed to lead/inspector-timeline
+2026-10-16T22:01Z	heartbeat	-	#1515	stage 0: #1365 still open (dev 13225ee2); waiting
+2026-10-16T22:32Z	heartbeat	-	#1515	stage 0: #1365 still open (dev 6baabdb4); waiting
+2026-10-16T23:03Z	heartbeat	-	#1515	stage 0: #1365 still open (dev caa3c666); waiting
+2026-10-16T23:35Z	heartbeat	-	#1515	stage 0: #1365 still open; draw-key-save.wave.json now built on dev (dbe98d9e), waves.md still planned; asked supervisor
+2026-10-17T00:06Z	heartbeat	-	#1515	stage 0: waiting on supervisor ruling for #1365; dev 24201bb0
+2026-10-17T00:37Z	heartbeat	-	#1515	stage 0: waiting on supervisor ruling for #1365; dev 403ea29e
+2026-10-17T01:08Z	heartbeat	-	#1515	stage 0: waiting on supervisor ruling for #1365; dev 7ac0a317
+2026-10-17T01:40Z	heartbeat	-	#1515	stage 0: waiting on supervisor ruling for #1365; dev a18bd1c4
+2026-10-17T02:34Z	heartbeat	-	#1515	stage 0: waiting on supervisor ruling for #1365; dev 010f57e9
+2026-10-17T03:04Z	heartbeat	-	#1515	stage 0: waiting on supervisor ruling for #1365; dev 06371387
+2026-10-17T03:36Z	heartbeat	-	#1515	stage 0: waiting on supervisor ruling for #1365; dev 1a8eea2a
+2026-10-17T04:07Z	heartbeat	-	#1515	stage 0: waiting on supervisor ruling for #1365; dev bd11faf7
+2026-10-17T13:39Z	stage	-	#1515	dependency met (draw-key-save built, #1738 merged); stage 1 orient; dev d2c4fa2
+2026-10-17T13:42:44Z	stage	2 plan written; wave 1 IT-0, IT-9a
+2026-10-17T14:07:43Z	heartbeat	wave 1 building: #2100 (IT-0), #2101 (IT-9a) open
+2026-10-17T14:13:11Z	wave	1 done: #2100 IT-0, #2101 IT-9a open in the lane
+2026-10-17T14:30:40Z	heartbeat	wave 1 merged (#2100, #2101); wave 2 IT-1..IT-4 launched on 8c05d00
+2026-10-17T14:51:48Z	heartbeat	wave 2 running; IT-3 PR #2113 open
+2026-10-17T14:58:17Z	wave2-built	IT-1 #2128, IT-2 #2130, IT-3 #2113, IT-4 #2129 open in the lane (contract: footer only, plus accepted scope notes)
+2026-10-17T15:13:03Z	heartbeat	wave 2 macOS builds green (#2113, #2128, #2129, #2130); lane batch run 39043553076 in progress
+2026-10-17T15:35:38Z	wave3-start	IT-1 #2128, IT-3 #2113, IT-4 #2129 merged; #2130 needs-rebase, fixer sent; wave 3 IT-5..IT-8 launched on dd7ec76
+2026-10-17T15:40:56Z	fix	#2130 merged dev into its branch (StubsTests conflict resolved), CI: PASS, head 96de97a
+2026-10-17T15:54:45Z	wave3-prs	#2130 merged; IT-5 #2136, IT-7 #2150, IT-8 #2149 opened (lane, macOS builds); IT-6 blocked on FlareInspector line 75, rerun wdj56smrx on a575d03
+2026-10-17T15:57:04Z	heartbeat	#2130 merged; #2136 #2149 #2150 in lane (macOS builds); IT-6 rerun and IT-4f building; #146 #73 #340 open
+2026-10-17T16:02:15Z	fix	IT-4f #2160 opened (J7 Rotation field query), body cleaned; lane
+2026-10-17T16:03:21Z	pr	IT-6 #2161 opened (SCENE section, one-line FlareInspector change), body cleaned; lane
+2026-10-17T16:19:30Z	heartbeat	#2136 merged (lane batch); #2149 #2150 #2160 #2161 macOS builds green, waiting lane sweep; #146 #73 #340 open
+2026-10-17T16:37:12Z	heartbeat	wave 3 all merged (#2149 #2150 #2160 #2161); IT-9b -> gap #2185; wave 4 IT-10 launched on 1a4e5e8
+2026-10-17T16:46:15Z	built	IT-10 #2196 opened; body fixed, feature-done label added
+2026-10-17T16:58:57Z	heartbeat	IT-10 #2196 in lane (fast-lane run in progress); no needs-fix
+2026-10-17T17:23:53Z	anatomy	scoped flare run 39050823584: 19/20 flare journeys fail (findings #2114-#2197); triage names #2161; window overflows 1024x674 display; fix round 1 fixer dispatched (lead/inspector-timeline-fix1); #2196 awaiting lane
+2026-10-17T17:41:29Z	fix	#2196 merged; fix round 1 PR #2202 open (lane, macOS build pending)
+2026-10-17T17:46:13Z	heartbeat	#2202 (fix round 1) macOS build 39055137438 queued; dev CI c3dbf73c pending
+2026-10-17T18:08:36Z	heartbeat	#2202 merged 57486e5e (17:53); full CI 39056193379 on e17b68f9 pending; awaiting flare journeys on a post-fix head
+2026-10-17T18:35:04Z	heartbeat	post-fix scoped flare run 39057393672 on 9f205637 in progress; full CI 39058107366 pending
+2026-10-17T19:00:01Z	heartbeat	scoped flare 39057393672: 6 pass / 15 fail (was 1/20); fix round 2 wf_70c1964e-cdc (r2-b1 audit/layout, r2-b2 behaviour); SuiteUI-owned #2117 #2134 #2158 #2119 #2193 -> gap; filed #2259
+2026-10-17T19:17:16Z	heartbeat	round 2 PRs #2264 (r2-b1) #2270 (r2-b2) open, awaiting lane macOS build; needs-ui filed #2260 #2266 #2267
+2026-10-17T19:22:10Z	heartbeat	#2264 merged (macOS build 39061431486); #2270 macOS build 39061741501 in progress; full CI 39058107366 cancelled, 39062126716 on 19206653 pending
+2026-10-17T19:44Z	heartbeat: #2270 merged as 0c8e4a71 (macOS build 39061741501 green); scoped flare 39062551736 on 0c8e4a71 in progress; full CI 39062516417 queued
+2026-10-17T20:08Z	scoped flare 39062551736 on 0c8e4a71: journeys 7 passed / 14 failed (was 6/15); audit flare contrast 9, identifier 40 (baseline 12), overlap 3. Regression from #2264: flare.new.preset sits on the PresetGrid container so testNewAnimationFromPreset fails; lead reverting it. Critic panels (round-2 review) wf_f7ac1913-ca5 (IT), wf_e36bc25e-7cf (LF) running. Full CI 39062516417: Linux red on DesignStyleBudgetTests.scrubStep (perf, not ours)
+2026-10-17T20:16Z	review after round 2: critic panels IT wf_f7ac1913-ca5 15 confirmed (#2310-#2323), LF wf_e36bc25e-7cf 19 confirmed (#2324-#2340,#2342). Fix rounds spent: all open findings relabelled gap (CI #2234 #2238-#2241 #2194 #2284-#2288 #2292 #2294; critic #2310-#2342). Regression revert PR #2341 (Closes #2289) waits on lane macOS build. Waiting on green full dev CI (dev-red #2303: Linux DesignStyleBudgetTests.scrubStep, not ours) for the contact sheet
+2026-10-17T20:40Z	heartbeat: #2341 macOS build 39066070041 green, waits on lane sweep. dev df60ad73 Linux check 39066080898 red on DesignStyleBudgetTests.scrubStep again (Design perf, 5.55ms vs 5ms gate, not ours; dev-red #2303 open). Full CI 39062516417 macOS still running; 39066112359 queued. Contact sheet waits on a green full run
+2026-10-17T21:05Z	heartbeat: #2341 merged as 2fc0629d (Closes #2289). Scoped flare 39068270591 on 2fc0629d in progress. Full CI 39062516417 macOS still running (Linux red, Design perf); full CI 39068664974 on abb4e96a pending; dev-red #2303 open
+2026-10-17T21:35Z	heartbeat: scoped flare 39068270591 on 2fc0629d: journeys 8 passed / 13 failed (testNewAnimationFromPreset passes again after #2341); audit flare contrast 9, identifier 40, overlap 3. Dev-red #2303 closed: full CI 39069913922 on c55fad78 Linux green, main promoted; its macOS job still running. Contact sheet goes on #1515/#1516 from that run once macOS completes
+2026-10-17T22:00Z	heartbeat: full CI 39069913922 macOS job still running (snapshots uploaded); journey->gap map ready for the contact sheet
+2026-10-17T22:27Z	heartbeat	full CI 39069913922 macOS job still running (snapshots uploaded); contact sheet waits
+2026-10-17T22:55Z	heartbeat	full CI 39069913922 macOS: scripts/ci step failed; ui-test still running; contact sheet waits
+2026-10-17T23:21Z	heartbeat	full CI 39069913922 cancelled (superseded) with no ui-screens; contact sheet moves to next completed full dev run (39076534514 on 59c435a6 running, 39078267798 on e26c99f8 queued)
+2026-10-17T23:47Z	heartbeat	full CI 39076534514 (59c435a6) macOS running since 22:58; 39078267798 cancelled; 39079435388 (56cd8160) queued; contact sheet waits
+2026-10-17T23:48Z	stage	done: contact sheet posted https://github.com/qbtrix/creative-apps/issues/1515#issuecomment-6243314672; findings relabelled gap; branch rebuilt on main 59c435a6
