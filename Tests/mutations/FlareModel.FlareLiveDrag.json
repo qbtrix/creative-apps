@@ -1,0 +1,30 @@
+[
+  {
+    "label": "the live drag forgets its last sample",
+    "file": "Sources/FlareModel/FlareLiveDrag.swift",
+    "find": "        last = sample\n",
+    "replace": "",
+    "tests": "FlareLiveDragTests"
+  },
+  {
+    "label": "a sample never reaches the copy",
+    "file": "Sources/FlareModel/FlareLiveDrag.swift",
+    "find": "        shown.dragChanged(from: sample.start, to: sample.end, modifiers: sample.modifiers, stageScale: sample.stageScale)\n",
+    "replace": "",
+    "tests": "FlareLiveDragTests"
+  },
+  {
+    "label": "the copy shows no move preview",
+    "file": "Sources/FlareModel/FlareLiveDrag.swift",
+    "find": "public var movePreview: StageDrawList? { shown.dragPreview }",
+    "replace": "public var movePreview: StageDrawList? { nil }",
+    "tests": "FlareLiveDragTests"
+  },
+  {
+    "label": "the copy shows no marks",
+    "file": "Sources/FlareModel/FlareLiveDrag.swift",
+    "find": "public var stageMarks: StageMarks { shown.stageMarks }",
+    "replace": "public var stageMarks: StageMarks { StageMarks() }",
+    "tests": "FlareLiveDragTests"
+  }
+]
