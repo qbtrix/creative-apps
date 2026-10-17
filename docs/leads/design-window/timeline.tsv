@@ -25,3 +25,5 @@ utc	stage	event	ref	note
 2026-10-17T19:16:03Z	wave	wave 3 launched: D0-8a (DW-b), D0-9c (DW-d) on 6ad373ab
 2026-10-17T19:16:03Z	check	DW-a check waits on full CI 39061216116
 2026-10-17T19:29:58Z	pr	wave 3 opened: #2282 D0-8a (DesignLiveEdit in Model accepted), #2280 D0-9c
+2026-10-17T19:40:27Z	fix	#2280 macOS build 39062505918 failed: DesignCanvasPointer.style implicit returns; lead pushed c76da704 (DW-d round 1)
+2026-10-17T19:40:27Z	ci	full run 39061216116 cancelled; DW-a check moves to 39062516417 (0c8e4a71)
