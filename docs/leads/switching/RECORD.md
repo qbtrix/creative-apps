@@ -4,7 +4,7 @@ Issue: #1507 · Packet: docs/blueprints/suite/features/switching.md
 Run: act-1a146f2912a-581f · Session: claude/switching-feature-lead-jm0d5f · Started: 2026-10-16T23:00Z
 Stage: 3 wave 1
 Base: origin/dev 687438e9 (after #1747 merged as b267d006)
-Next: SW-2 PR is gated and pushed; when #1747-era CI is green, open SW-2 and then SW-5, one PR each on this branch
+Next: when #1791 merges, reset this branch to origin/dev and open SW-5 (rubric rows), then the SW-3 wave once bundle merges
 
 Brief deviations (decided here, see Decisions): base is `dev`, not `main`; the status channel is this branch, not `lead/switching`.
 
@@ -15,7 +15,7 @@ This packet has no `## Slices` table: the v2 loop applies. The feature is one un
 | id | slice | wave | behavior | files | test | PR | state |
 |---|---|---|---|---|---|---|---|
 | SW-1 | feature | 1 | SwitchPlanner, SwitchMenu (six Switch To items), LaunchArguments | Sources/SuiteModel/Switching/{SwitchPlanner,SwitchMenu,LaunchArguments}.swift; Tests/SuiteModelTests/Switch{RunState,Menu,LaunchArguments}Tests.swift | SwitchRunStateTests, SwitchMenuTests, SwitchLaunchArgumentsTests | #1747 (merged b267d006) | merged |
-| SW-2 | feature | 1 | StoreHandOffs: send, receive, settle, expire, sweep | Sources/SuiteModel/HandOff/StoreHandOffs.swift; Tests/SuiteModelTests/HandOffStoreTests.swift; Budget+HandOff.swift | HandOffStoreTests, Budget+HandOff | – | building |
+| SW-2 | feature | 1 | StoreHandOffs: send, receive, settle, expire, sweep | Sources/SuiteModel/HandOff/StoreHandOffs.swift; Tests/SuiteModelTests/HandOffStoreTests.swift; Budget+HandOff.swift | HandOffStoreTests, Budget+HandOff | #1791 (fast-lane) | in review |
 | SW-5 | feature | 1 | QB-S and QB-SM rows of blueprint 7.1 into docs/review-rubric.md section 6 | docs/review-rubric.md | review (rows present once, "report only") | – | not started |
 | SW-3a | feature | 2 | AppLauncher, StoreWatcher, live switching slot, recents watcher | Sources/SuiteShell/{AppLauncher,StoreWatcher}.swift; Live/{SwitchingSlot,RecentsSlot}.swift | SuiteShellSwitchingTests (macOS) | – | waits on SW-1 |
 | SW-3b | feature | 2 | HandOffTransport, SuiteAppDelegate, hand-off slot, LauncherRouter | Sources/SuiteShell/{HandOffTransport,SuiteAppDelegate}.swift; Live/HandOffSlot.swift; Sources/AfterGlowApp/LauncherRouter.swift | SuiteShellHandOffTests (macOS) | – | waits on SW-1, SW-2; bundle's BU-1b stub not built |

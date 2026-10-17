@@ -4,3 +4,4 @@ utc	stage	event	ref	note
 2026-10-16T23:05Z	3	stage-start	#1507	wave 1: SW-1 first (one branch, one PR at a time)
 2026-10-17T00:30Z	3	pr-merged	#1747	SW-1 merged as b267d006
 2026-10-17T00:45Z	3	pr-opened	SW-2	StoreHandOffs + HandOffStoreTests + Budget+HandOff; scripts/ci --changed CI: PASS
+2026-10-17T01:00Z	3	pr-opened	#1791	SW-2 PR opened with fast-lane; head c6863082
