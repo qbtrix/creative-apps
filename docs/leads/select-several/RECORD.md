@@ -4,7 +4,7 @@ Issue: #1495 · Packet: docs/blueprints/design/features/select-several.md
 Run: act-1a14a88d756-rnok · Session: claude/design-feature-lead-7saqm8 · Started: 2026-10-17T15:46Z
 Stage: 3 wave 1
 Base: dd7ec767cc0afab91b35ff4f208351dd866028d8
-Next: S-6 #2373 through the lane; then S-7; S-5 waits on CB-a
+Next: S-6 #2373 merged c2a70dd8; SS-a: critic panel on scoped design 39072517901 (499d955e, contains it) once it completes; slice line once full CI 39072812111 has a green Linux job; then S-7; S-5 waits on CB-a
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
