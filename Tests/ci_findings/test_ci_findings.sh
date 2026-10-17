@@ -64,6 +64,8 @@ LOG
 
 out=$("$root/scripts/ci-findings" "$tmp/ui.log" 2>&1); status=$?
 calls=$(cat "$FX/calls")
+# Untouched-issue checks match whole call lines: the log holds temp paths
+# (macOS /var/folders/...) whose digits a substring match would hit.
 check "exits 0" '[[ $status -eq 0 ]]'
 check "an update keeps Feature:" 'grep -qx "Feature: flare-export" "$FX/edited.11"'
 check "an update keeps Slice: and Owner:" 'grep -qx "Slice: s2" "$FX/edited.11" && grep -qx "Owner: @lead-flare" "$FX/edited.11"'
@@ -73,10 +75,10 @@ check "a new red test is filed with its line label" '[[ "$calls" == *"create iss
 check "an unreadable body is never overwritten" '[[ "$calls" != *"edit 15"* && "$out" == *"left its body alone"* ]]'
 check "a passing test closes its finding with a comment" \
   '[[ "$calls" == *"comment 12 issue comment 12 --body Passes on run https://example.test/runs/9"* && "$calls" == *"close 12"* ]]'
-check "a test that did not run stays open" '[[ "$calls" != *"13"* ]]'
+check "a test that did not run stays open" '! grep -Eq "^(edit|comment|close) 13( |\$)" "$FX/calls"'
 check "a test that failed and passed stays open" '[[ "$calls" != *"close 14"* && "$calls" != *"comment 14"* ]]'
 check "a failing test is not closed" '[[ "$calls" != *"close 11"* ]]'
-check "an unrelated issue is untouched" '[[ "$calls" != *"99"* ]]'
+check "an unrelated issue is untouched" '! grep -Eq "^(edit|comment|close) 99( |\$)" "$FX/calls"'
 
 # A branch run (a proof on a fix branch) still files and updates, never closes.
 rm "$FX/calls"
