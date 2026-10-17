@@ -1,6 +1,6 @@
 // DesignLiveStubTests.swift: the tier-1 live stubs before their features fill
-// them (D0-2b). LiveDuplicating, LiveGrouping, LiveClipboard and LiveOrdering
-// (LiveStyling left with style-rows ST-1) answer every help and every refusal
+// them (D0-2b). LiveDuplicating, LiveClipboard and LiveOrdering (LiveStyling
+// left with style-rows ST-1, LiveGrouping with copy-group C-2) answer every help and every refusal
 // exactly as NotBuilt with their 5.6 name, on `cards` with A, and with A and B.
 // LiveFiling is today's codec: it saves `cards` to the bytes DesignFile writes,
 // opens them back to the same pages, and refuses what DesignFile refuses with
@@ -26,7 +26,7 @@ import Testing
         return nil
     }
 
-    /// Each help and each write of the four forwarding stubs, as the stub answers and as NotBuilt
+    /// Each help and each write of the three forwarding stubs, as the stub answers and as NotBuilt
     /// with `name` answers, so a pair differs exactly when the stub stops forwarding.
     private func answers(_ ids: [String]) -> [(stub: String, notBuilt: String, name: String)] {
         let delta = pt(10, 10)
@@ -38,16 +38,12 @@ import Testing
             ("\(String(describing: refusal(stub)))", "\(String(describing: refusal(base)))", name)
         }
         var mint = DesignIDMint(taken: [], after: 10)
-        let (dup, group, clip, order) = (LiveDuplicating(), LiveGrouping(), LiveClipboard(), LiveOrdering())
-        let (nd, ng, nc, no) = (NotBuilt("Duplicate"), NotBuilt("Group"), NotBuilt("Copy and paste"), NotBuilt("Reordering layers"))
+        let (dup, clip, order) = (LiveDuplicating(), LiveClipboard(), LiveOrdering())
+        let (nd, nc, no) = (NotBuilt("Duplicate"), NotBuilt("Copy and paste"), NotBuilt("Reordering layers"))
         var rows = [
             help("Duplicate", dup.duplicateHelp(ids, on: page), nd.duplicateHelp(ids, on: page)),
             write("Duplicate", { _ = try dup.duplicate(ids, offset: delta, on: page, mint: &mint) },
                   { _ = try nd.duplicate(ids, offset: delta, on: page, mint: &mint) }),
-            help("Group", group.groupHelp(ids, on: page), ng.groupHelp(ids, on: page)),
-            help("Group", group.ungroupHelp(ids, on: page), ng.ungroupHelp(ids, on: page)),
-            write("Group", { _ = try group.group(ids, on: page, mint: &mint) }, { _ = try ng.group(ids, on: page, mint: &mint) }),
-            write("Group", { _ = try group.ungroup(ids, on: page) }, { _ = try ng.ungroup(ids, on: page) }),
             help("Copy and paste", clip.copyHelp(ids, on: page), nc.copyHelp(ids, on: page)),
             help("Copy and paste", clip.pasteHelp(nil), nc.pasteHelp(nil)),
             help("Copy and paste", clip.pasteHelp(bytes), nc.pasteHelp(bytes)),
@@ -73,7 +69,7 @@ import Testing
     @Test(arguments: selections) func stubsAnswerAsNotBuilt(_ ids: [String]) {
         #expect(page.nodes.node("node-2")?.name == "A")
         let rows = answers(ids)
-        #expect(rows.count >= 18)
+        #expect(rows.count >= 14)
         for row in rows { #expect(row.stub == row.notBuilt, "\(row.name)") }
     }
 
@@ -81,13 +77,12 @@ import Testing
         var mint = DesignIDMint(taken: [], after: 10)
         let refusals: [(DesignRefusal?, String)] = [
             (refusal { _ = try LiveDuplicating().duplicate(ids, offset: pt(10, 10), on: page, mint: &mint) }, "Duplicate"),
-            (refusal { _ = try LiveGrouping().group(ids, on: page, mint: &mint) }, "Group"),
             (refusal { _ = try LiveClipboard().encode(ids, on: page) }, "Copy and paste"),
             (refusal { _ = try LiveOrdering().arrange(.bringForward, ids, on: page) }, "Reordering layers"),
         ]
         for (thrown, name) in refusals { #expect(thrown == .notBuilt(name)) }
         let helps: [(String?, String)] = [
-            (LiveDuplicating().duplicateHelp(ids, on: page), "Duplicate"), (LiveGrouping().ungroupHelp(ids, on: page), "Group"),
+            (LiveDuplicating().duplicateHelp(ids, on: page), "Duplicate"),
             (LiveClipboard().copyHelp(ids, on: page), "Copy and paste"),
             (LiveOrdering().arrangeHelp(.sendBackward, ids, on: page), "Reordering layers"),
         ]
@@ -157,7 +152,7 @@ import Testing
         #expect(law.violations.isEmpty, "\(law.violations)")
     }
 
-    /// MJ3: open `cards`; every `.live` slot answers its NotBuilt help and refusal, except the five
+    /// MJ3: open `cards`; every `.live` slot answers its NotBuilt help and refusal, except the six
     /// with live paths (their Live types, obeying the law), filing, which saves and reopens `cards`,
     /// and export, which plans A and B as PNGs and gives an SVG document.
     @Test func testLiveStubsWalk() throws {
@@ -168,7 +163,7 @@ import Testing
         let ids = ["node-2", "node-3"]
         var mint = DesignIDMint(taken: [], after: 10)
         let helps: [(String?, String)] = [
-            (live.duplicating.duplicateHelp(ids, on: page), "Duplicate"), (live.grouping.groupHelp(ids, on: page), "Group"),
+            (live.duplicating.duplicateHelp(ids, on: page), "Duplicate"),
             (live.clipboard.copyHelp(ids, on: page), "Copy and paste"),
             (live.ordering.arrangeHelp(.bringToFront, ids, on: page), "Reordering layers"),
             (live.components.createHelp(ids, on: page), "Components"),
@@ -177,7 +172,6 @@ import Testing
         let path = DesignPath(anchors: [DesignAnchor(point: pt(0, 0)), DesignAnchor(point: pt(10, 10))], isClosed: false)
         let writes: [(DesignRefusal?, String)] = [
             (refusal { _ = try live.duplicating.duplicate(ids, offset: pt(10, 10), on: page, mint: &mint) }, "Duplicate"),
-            (refusal { _ = try live.grouping.group(ids, on: page, mint: &mint) }, "Group"),
             (refusal { _ = try live.clipboard.encode(ids, on: page) }, "Copy and paste"),
             (refusal { _ = try live.ordering.arrange(.sendToBack, ids, on: page) }, "Reordering layers"),
             (refusal { _ = try live.pen.commit(path, into: nil, on: page, mint: &mint) }, "The Pen tool"),
@@ -186,12 +180,13 @@ import Testing
         ]
         for (thrown, name) in writes { #expect(thrown == .notBuilt(name)) }
         #expect(mint.minted.isEmpty)
-        // The five live paths: their own types, acting as their features define, within the law.
+        // The six live paths (grouping since C-2): their own types, acting as their features define, within the law.
         #expect(live.marquee is LiveMarquee && live.transforming is LiveTransforming)
         #expect(live.aligning is LiveAligning && live.framing is LiveFraming && live.styling is LiveStyling)
         #expect(live.transforming.transformHelp(ids, on: page) == nil)
         #expect(live.framing.rectToShow(ids, on: page) != nil)
         #expect(live.styling.styleHelp(.opacity, ids, on: page) == nil)
+        #expect(live.grouping is LiveGrouping && live.grouping.groupHelp(ids, on: page) == nil)
         let law = DesignContractLaw.check(live, on: page)
         #expect(law.violations.isEmpty, "\(law.violations)")
         // Export plans the named layers and gives an SVG document; its help is nil exactly when the plan succeeds.
