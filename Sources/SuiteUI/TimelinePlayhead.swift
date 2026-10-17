@@ -2,7 +2,9 @@
 // ruler and lanes (timeline packet, TL-8). A 2 pt accent line at the current
 // frame's tick; the time pill (TimelineTime.label in accentFill, white
 // SuiteFont.pill text) placed by TimelineLook.pillRect on the ruler, over a
-// 2 pt ground knock-out so the ruler never draws for the playhead (#1257);
+// 2 pt ground knock-out so the ruler never draws for the playhead (#1257),
+// widened over the text of any ruler label the pill touches so none shows in
+// part (TimelinePlayheadGrab.grounds);
 // the keys at the playhead on the visible rows in stateKeyed, so no lane
 // redraws for it either. The pill and a 16 pt band down the line grab it
 // (TimelinePlayheadGrab); a drag scrubs through TimelineScrubSender, which
@@ -70,9 +72,13 @@ struct TimelinePlayhead: View {
             let rect = CGRect(x: dim.lowerBound, y: ruler, width: dim.upperBound - dim.lowerBound, height: max(size.height - ruler, 0))
             lanes.fill(Path(rect), with: .color(SuiteColor.laneBed.opacity(TimelinePlayheadGrab.dimOpacity)))
         }
-        let out = TimelinePlayheadGrab.knockOut
-        let ground = pill.insetBy(dx: -out, dy: -out)
-        context.fill(Path(roundedRect: ground, cornerRadius: ground.height / 2), with: .color(SuiteColor.ground))
+        let rules = TimelineRulerLabels(mapping: mapping, unit: unit, fps: fps)
+        let grounds = TimelinePlayheadGrab.grounds(pill: pill, rules: rules, scrollX: scroll.x)
+        for (index, ground) in grounds.enumerated() {
+            // The pill's ground is its capsule grown 2 pt; a label's is its text band.
+            let path = index == 0 ? Path(roundedRect: ground, cornerRadius: ground.height / 2) : Path(ground)
+            context.fill(path, with: .color(SuiteColor.ground))
+        }
         let line = TimelinePlayheadGrab.line
         context.fill(Path(CGRect(x: lineX - line / 2, y: 0, width: line, height: size.height)), with: .color(SuiteColor.accent))
         for key in keys {
@@ -155,6 +161,26 @@ enum TimelinePlayheadGrab {
             playheadX: Double(lineX), labelWidth: Double(label.count) * Double(SuiteSize.timelineLabelDigit),
             height: Double(SuiteSize.pill), visible: 0...Double(max(width, 0)))
         return rect.offsetBy(dx: 0, dy: (SuiteSize.timelineRuler - SuiteSize.pill) / 2)
+    }
+
+    /// The top of the ruler's minor ticks (TimelineRulerMarks draws them from 70 %
+    /// down): a label's knock-out stops there, so the ticks under it stay.
+    static let labelBand = SuiteSize.timelineRuler * 0.7
+
+    /// The ground the playhead clears on the ruler of a layer scrolled to
+    /// content x `scrollX`: the pill with `knockOut` round it first, then the
+    /// text band of each ruler label the pill touches, whole, so no label shows
+    /// in part beside the pill (a timecode label runs past it). Only the
+    /// labels near the pill are placed, so a scrub stays O(1).
+    static func grounds(pill: CGRect, rules: TimelineRulerLabels, scrollX: CGFloat) -> [CGRect] {
+        let offset = timelineInset - scrollX
+        let near = Double(pill.minX - offset) - rules.labelWidth...Double(pill.maxX - offset) + rules.labelWidth
+        let labels = rules.placed(rules.frames(visibleX: near)).compactMap { label -> CGRect? in
+            let minX = CGFloat(label.minX) + offset, maxX = CGFloat(label.maxX) + offset
+            guard minX < pill.maxX, maxX > pill.minX else { return nil }
+            return CGRect(x: minX - knockOut, y: 0, width: maxX - minX + knockOut * 2, height: labelBand)
+        }
+        return [pill.insetBy(dx: -knockOut, dy: -knockOut)] + labels
     }
 
     /// What grabs the playhead: the pill and the band, `height` tall.
