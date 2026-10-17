@@ -86,12 +86,7 @@ extension HaloDocumentState {
     /// text layer; nil for another kind. `.noComposition` or `.noLayerSelected`
     /// without them.
     fileprivate func selectedTextLayerIndices() throws -> (composition: Int, layer: Int)? {
-        guard let c = compositions.firstIndex(where: { $0.id == selectedCompositionID }) else {
-            throw HaloEditError.noComposition
-        }
-        guard let l = compositions[c].layers.firstIndex(where: { $0.id == selectedLayerID }) else {
-            throw HaloEditError.noLayerSelected
-        }
-        return compositions[c].layers[l].kind == .text ? (c, l) : nil
+        let at = try selectedLayerIndices()
+        return compositions[at.composition].layers[at.layer].kind == .text ? at : nil
     }
 }

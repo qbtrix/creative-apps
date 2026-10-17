@@ -33,6 +33,6 @@
   ],
   "note": "H-J22; HF-10. Waits on layer-keys (inspector), viewer-playback (the renderer's text hook) and history-files (Undo name).",
   "journeys": [
-    "HaloJourneyTests.testTextLayer"
+    "HaloTextJourneyTests.testTextLayer"
   ]
 }
