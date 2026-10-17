@@ -36,4 +36,4 @@ Next: S-6 starts once design-window DW-a (D0-5a..D0-6) and DW-b (D0-8a, D0-8b) m
 
 ## Open
 - S-5, S-7, S-8 wait on design-seams (#1493), which has not built wave 1 (D0-3c); S-5 also waits on canvas-basics CB-a.
-- Stage-1 issues: three gap issues and the CanvasViewport needs-ui issue (filed in this stage).
+- Stage-1 issues filed: gaps #2144 (marquee), #2145 (several layers), #2146 (Zoom to Selection); needs-ui #2147 (CanvasViewport scroll to a rect).
