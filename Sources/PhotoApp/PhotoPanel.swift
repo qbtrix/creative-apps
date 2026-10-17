@@ -5,8 +5,7 @@
 // (PhotoLayerList), and PhotoHistoryTab is not shown yet. With no image open
 // it says how to start. Values in, intents out. Every control carries a
 // `photo.tool.*` or `photo.layer.*` accessibility identifier for the UI
-// journeys and the app audit. `scrollAnchor` passes through to
-// PhotoAdjustTab's scroll view (nil: the top).
+// journeys and the app audit.
 import PhotoModel
 import SuiteUI
 import SwiftUI
@@ -14,13 +13,12 @@ import SwiftUI
 struct PhotoPanel: View {
     let model: PhotoWorkspace
     var perform: PhotoPerform = { _ in }
-    var scrollAnchor: UnitPoint?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             if model.canvas != nil {
                 InspectorHeader(model.inspectorHeaderTitle, details: model.inspectorHeaderDetails)
-                PhotoAdjustTab(model: model, perform: perform, showsLayerSettings: true, scrollAnchor: scrollAnchor)
+                PhotoAdjustTab(model: model, perform: perform, showsLayerSettings: true)
             } else {
                 EmptyStateView(
                     PhotoInspectorContent.noImageTitle, systemImage: PhotoInspectorContent.noImageSymbol,

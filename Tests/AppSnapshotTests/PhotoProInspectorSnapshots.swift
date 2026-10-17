@@ -4,10 +4,13 @@
 // lines, the Layer section, Tool Options, then the flush, hairline-separated adjustment sections
 // with Gamma as a ScrubField. Light and Dark. Writes
 // photo-inspector-layer-light.png and photo-inspector-layer-dark.png, then
-// the same panel scrolled to its end, so the last section (Blur, with its
-// Radius) shows: photo-inspector-layer-end-light.png and
-// photo-inspector-layer-end-dark.png. The padded panel fits the 1440 × 900
-// canvas, so neither end is cropped (#1714). macOS only.
+// the same panel as tall as its whole content, so the Adjust tab is drawn
+// down to its last section (Blur, with its Radius) without scrolling:
+// photo-inspector-layer-end-light.png and photo-inspector-layer-end-dark.png
+// (2×, through SnapshotHost, framed to the content's fitting size). The
+// padded panel fits the 1440 × 900 canvas, so neither end is cropped (#1714).
+// An offscreen render never applied a default scroll anchor (#1733, #1811),
+// so nothing here scrolls. macOS only.
 import AppKit
 import PhotoModel
 import SuiteUI
@@ -28,10 +31,9 @@ import Testing
         return model
     }
 
-    /// The panel at the inspector's width, as tall as the canvas less its
-    /// padding, its scroll view started at `anchor` (nil: the top).
-    private static func panel(_ model: PhotoWorkspace, anchor: UnitPoint? = nil) -> some View {
-        PhotoPanel(model: model, scrollAnchor: anchor)
+    /// The panel at the inspector's width, as tall as the canvas less its padding.
+    private static func panel(_ model: PhotoWorkspace) -> some View {
+        PhotoPanel(model: model)
             .frame(
                 width: SuiteSize.inspectorWidth.ideal, height: canvas.height - 2 * SuiteSpacing.xxl,
                 alignment: .topLeading)
@@ -39,11 +41,19 @@ import Testing
             .padding(SuiteSpacing.xxl)
     }
 
-    /// The panel with PhotoAdjustTab's own scroll view started at the bottom
-    /// of its content. An anchor set on an ancestor doesn't reach that scroll
-    /// view: the render matched the unscrolled one.
-    private static func panelAtEnd(_ model: PhotoWorkspace) -> some View {
-        panel(model, anchor: .bottom)
+    /// The panel at its ideal height: PhotoAdjustTab's scroll view takes the
+    /// height of all its content, so the whole tab is laid out and nothing clips.
+    private static func fullPanel(_ model: PhotoWorkspace) -> some View {
+        PhotoPanel(model: model)
+            .frame(width: SuiteSize.inspectorWidth.ideal, alignment: .topLeading)
+            .fixedSize(horizontal: false, vertical: true)
+            .background(SuiteColor.panel)
+            .padding(SuiteSpacing.xxl)
+    }
+
+    /// The padded full panel's fitting size: the frame the end snapshot draws at.
+    private static func fullSize(_ model: PhotoWorkspace) -> CGSize {
+        NSHostingView(rootView: fullPanel(model)).fittingSize
     }
 
     @Test func layerInspector() throws {
@@ -55,13 +65,16 @@ import Testing
         }
     }
 
-    /// #1714: the Adjust tab scrolled to its end shows the last section.
+    /// #1714: the whole Adjust tab, down to its last section, drawn unclipped.
     @Test func layerInspectorEnd() throws {
         let model = try Self.workspace()
-        for scheme in [ColorScheme.light, .dark] {
-            try snapshot(
-                Self.panelAtEnd(model),
-                name: "photo-inspector-layer-end-\(scheme == .dark ? "dark" : "light")", scheme: scheme)
+        let size = Self.fullSize(model)
+        let folder = try packageRoot().appending(path: ".build/snapshots")
+        try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        for appearance in [SnapshotAppearance.light, .dark] {
+            let image = try #require(SnapshotHost(appearance: appearance).render(Self.fullPanel(model), size: size))
+            let png = try #require(image.representation(using: .png, properties: [:]))
+            try png.write(to: folder.appending(path: "photo-inspector-layer-end-\(appearance.rawValue).png"))
         }
     }
 
@@ -84,24 +97,66 @@ import Testing
         }
     }
 
-    /// #1714: the Adjust tab's content is taller than the panel and its end is
-    /// reachable: scrolled to the bottom, the panel's column draws differently
-    /// from the top, and the panel still fits the canvas.
+    /// #1714: the Adjust tab's content has a finite height, taller than the
+    /// panel the canvas gives it, and framed to that height the whole tab is
+    /// drawn: the last section's checkbox ("Blur Enabled") lies inside the
+    /// frame, the band above the panel's bottom edge holds drawn rows (Blur's
+    /// Radius) rather than plain fill, and the padding below it is backdrop.
     @Test func adjustTabEndIsReachable() throws {
         let model = try Self.workspace()
-        let fitting = NSHostingView(rootView: Self.panelAtEnd(model)).fittingSize
-        #expect(fitting.height <= Self.canvas.height + 0.5, "scrolled panel is \(fitting)")
-        let top = try #require(render(Self.panel(model), scheme: .light))
-        let end = try #require(render(Self.panelAtEnd(model), scheme: .light))
-        let left = Int(SuiteSpacing.xxl), right = Int(SuiteSpacing.xxl + SuiteSize.inspectorWidth.ideal)
-        let bottom = Int(Self.canvas.height - SuiteSpacing.xxl) - 1
-        let middle = Int(Self.canvas.height / 2)
-        var changed = 0
-        for y in stride(from: middle, to: bottom, by: 2) {
-            for x in stride(from: left, to: right, by: 2) where top.colorAt(x: x, y: y) != end.colorAt(x: x, y: y) {
-                changed += 1
+        let size = Self.fullSize(model)
+        let pad = SuiteSpacing.xxl
+        let content = size.height - 2 * pad
+        #expect(content.isFinite && content < 20_000, "content height is \(content)")
+        #expect(content > Self.canvas.height - 2 * pad, "content (\(content) pt) fits the panel: nothing below to reach")
+
+        let window = Self.host(Self.fullPanel(model), size: size)
+        defer { window.close() }
+        let blur = try #require(Self.frame(ofLabel: "Blur Enabled", in: window), "no Blur Enabled checkbox")
+        let panelRect = CGRect(origin: .zero, size: size).insetBy(dx: pad, dy: pad)
+        #expect(panelRect.contains(blur), "Blur's checkbox at \(blur) is outside the panel \(panelRect)")
+
+        let image = try #require(SnapshotHost(appearance: .light).render(Self.fullPanel(model), size: size))
+        let scale = SnapshotHost.scale
+        let left = Int(pad * scale), right = Int((pad + SuiteSize.inspectorWidth.ideal) * scale)
+        let panelBottom = Int((size.height - pad) * scale)
+        var colors = Set<NSColor>()
+        for y in stride(from: panelBottom - Int(48 * scale), to: panelBottom, by: 2) {
+            for x in stride(from: left, to: right, by: 2) {
+                if let color = image.colorAt(x: x, y: y) { colors.insert(color) }
             }
         }
-        #expect(changed > 0, "the bottom half of the panel is the same scrolled to its end: nothing below to reach")
+        #expect(colors.count >= 3, "the panel's bottom band is plain fill (\(colors.count) colors): its end isn't drawn")
+        let backdrop = try #require(image.colorAt(x: image.pixelsWide - 1, y: 0))
+        let below = try #require(image.colorAt(x: (left + right) / 2, y: image.pixelsHigh - 1))
+        #expect(below == backdrop, "the bottom row is \(below), not the backdrop \(backdrop): the panel overruns")
+    }
+
+    /// `view` at `size` in an offscreen window ordered in, with AppKit
+    /// accessibility on, so its nodes report frames.
+    private static func host(_ view: some View, size: CGSize) -> NSWindow {
+        NSApplication.shared.accessibilitySetValue(
+            true, forAttribute: NSAccessibility.Attribute(rawValue: "AXManualAccessibility"))
+        let window = NSWindow(
+            contentRect: CGRect(origin: .zero, size: size), styleMask: [.borderless], backing: .buffered, defer: false)
+        window.isReleasedWhenClosed = false
+        window.contentView = NSHostingView(rootView: view.frame(width: size.width, height: size.height))
+        window.setFrameOrigin(NSPoint(x: -20_000, y: -20_000))
+        window.orderFrontRegardless()
+        RunLoop.main.run(until: Date().addingTimeInterval(0.3))
+        return window
+    }
+
+    /// The window-space frame of the first accessibility node labelled `label`, breadth first.
+    private static func frame(ofLabel label: String, in window: NSWindow) -> CGRect? {
+        var queue: [AnyObject] = window.contentView.map { [$0] } ?? []
+        while !queue.isEmpty {
+            let node = queue.removeFirst()
+            if (node.accessibilityLabel?() ?? nil) == label, let screen = node.accessibilityFrame?() {
+                return window.convertFromScreen(screen)
+            }
+            queue += ((node.accessibilityChildren?() ?? nil) ?? []).map { $0 as AnyObject }
+        }
+        return nil
     }
 }
