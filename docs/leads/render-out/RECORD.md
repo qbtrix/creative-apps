@@ -2,7 +2,7 @@
 
 Issue: #1505 · Packet: docs/blueprints/halo/features/render-out.md
 Run: act-1a149b53ef6-67v7 (line lead for #1035, #1509, #1505; earlier runs act-1a1487bf880-qmey, act-1a1429c87eb-3ecm) · Session: claude/feature-lead-playbook-l4ybf6 · Started: 2026-10-17T06:05Z
-Stage: 6 Done check: #2348 merged fc53a29e (#2345 closed); round cap reached, #2233 and #2256 relabelled gap. Waiting on a green full dev CI holding fc53a29e
+Stage: 6 Done check: full CI 39072812111 on 2b08e8fd (holds fc53a29e) pending; scoped halo 39072520640 on 499d955e (holds fc53a29e) in progress for #2345 journey check
 Base: 8e868417eeaf2fd17229c21bc1087ef7eecb3d8f (origin/dev at 2026-10-17T13:53Z)
 Next: fixer PR for #2261 merges, then Anatomy round 2 on a scoped halo run holding it, then the done check on a green full dev run. H-J21 passes every functional step; it is red only on the audit (4 ids from #2261; the rest is #1789 and #2262 scroller on line:suiteui)
 
