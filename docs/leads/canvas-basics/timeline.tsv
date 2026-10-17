@@ -1,0 +1,30 @@
+utc	stage	event	ref	note
+2026-10-16T18:15Z	0	stage-start	#1500	base b01e722; design-contracts built
+2026-10-16T18:16Z	1	stage-end	#1521 #1522 #1523	gap issues filed, one per slice
+2026-10-16T18:18Z	2	stage-end	-	six waves from the packet; wave 1 CB-1 CB-4 CB-7 CB-8
+2026-10-16T18:18Z	3	stage-start	wave 1	CB-1 CB-4 CB-7 CB-8
+2026-10-16T18:22Z	3	heartbeat	wave 1	build-wave workflow wf_0a9b2cf5-8dd running CB-1 CB-4 CB-7 CB-8
+2026-10-16T18:39Z	3	pr-merged	#1535	CB-1 whole-points journey (skipped)
+2026-10-16T18:44Z	3	pr-opened	#1539 #1547 #1549	CB-8, CB-4, CB-7; footers stripped; lane macOS builds queued
+2026-10-16T18:45Z	3	heartbeat	-	polling; wave 2 waits on design-seams
+2026-10-16T19:30Z	3	pr-merged	#1539 #1547 #1549	CB-8, CB-4, CB-7; wave 1 done
+2026-10-16T19:31Z	3	stage-end	wave 1	next tasks wait on design-seams, style-rows, design-window (none started)
+2026-10-16T19:51Z	3	heartbeat	-	dev 56831b7; design-seams, style-rows, design-window not started; slices unchanged
+2026-10-16T20:13Z	3	heartbeat	-	dev 864a766; design-seams, style-rows, design-window not started; slices unchanged
+2026-10-16T20:35Z	3	heartbeat	-	dev ecd7137; design-seams, style-rows, design-window not started; slices unchanged
+2026-10-16T20:56Z	3	heartbeat	#1493	design-seams lead started 20:49Z, D0-3c in its wave 1; style-rows, design-window not started
+2026-10-16T21:17Z	3	heartbeat	#1493	design-seams still at stage 2 plan (no PR); style-rows, design-window not started
+2026-10-16T21:37Z	3	heartbeat	#1493	design-seams still stage 2 plan since 20:49Z (no PR); style-rows, design-window not started
+2026-10-16T21:59Z	3	heartbeat	#1493	design-seams blocked on Swift toolchain; pointed it at scripts/cloud-setup.sh on #1493
+2026-10-16T22:21Z	3	heartbeat	#1493	design-seams quiet since 21:50Z, still stage 2 (no Swift); style-rows, design-window not started
+2026-10-16T22:42Z	3	heartbeat	#1493	design-seams still blocked at stage 2 (last push 22:29Z); style-rows, design-window not started
+2026-10-16T23:04Z	3	heartbeat	#1493	design-seams still blocked at stage 2 (last push 22:29Z); style-rows, design-window not started
+2026-10-16T23:25Z	3	heartbeat	#1493	design-seams silent since 22:29Z, stage 2; style-rows, design-window not started
+2026-10-16T23:46Z	3	heartbeat	#1493	design-seams silent since 22:29Z, stage 2; style-rows, design-window not started
+2026-10-17T00:08Z	3	heartbeat	#1493	design-seams silent since 22:29Z, stage 2; style-rows, design-window not started
+2026-10-17T00:30Z	3	heartbeat	#1493	design-seams silent since 22:29Z, stage 2; style-rows, design-window not started
+2026-10-17T00:51Z	3	heartbeat	#1493	design-seams silent since 22:29Z, stage 2; style-rows, design-window not started
+2026-10-17T00:54Z	3	heartbeat	-	Belt nudge; nothing to start (design-seams stage 2 since 20:49Z); RECORD.md refreshed
+2026-10-17T01:13Z	3	heartbeat	#1493	design-seams silent since 22:29Z, stage 2; style-rows, design-window not started
+2026-10-17T01:35Z	3	heartbeat	#1493	design-seams silent since 22:29Z, stage 2; style-rows, design-window not started
+2026-10-17T01:46Z	3	stopped	-	8 h wall clock; wave 1 merged, waves 2-6 wait on design-seams D0-3c, style-rows, design-window; resume brief in RECORD.md
