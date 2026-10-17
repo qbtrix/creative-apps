@@ -67,3 +67,4 @@ utc	stage	event	ref	note
 2026-10-17T14:16Z	4	pr-opened	#2111	fix round 2 (last): helper plist version keys + Photo OpenRaster MIME tag (Fixes #2104 #2105), head 5f6c61dc
 2026-10-17T14:27Z	4	heartbeat	#2111	lane macOS build 39040181491 in progress
 2026-10-17T14:50Z	4	heartbeat	#2111	lane macOS build 39040181491 green; waiting on the lane sweep to merge
+2026-10-17T15:13Z	4	heartbeat	#2111	clean and build-green; queued behind lane batch-20261017145213 bisect (8 ready PRs wait)
