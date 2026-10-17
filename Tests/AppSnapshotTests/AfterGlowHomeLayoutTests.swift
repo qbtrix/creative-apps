@@ -9,7 +9,9 @@
 // ThumbnailGridCellTests reads them. Also records afterglow-home-<width> in
 // the four appearances (no baseline yet). homeFitsTheWindow keeps the New
 // row, the recents and the running strip inside the window (#1752), and
-// emptyStateFillsTheRecents centers the empty state (#1757). macOS only.
+// emptyStateFillsTheRecents centers the empty state (#1757), and
+// runningMatchesTheRecentHeader sizes the running value like the "Matching"
+// text beside RECENT (#1872). macOS only.
 import AppKit
 import SuiteModel
 import SuiteUI
@@ -48,7 +50,7 @@ import Testing
     @Test(arguments: AfterGlowHomeLayoutTests.widths) func homeFollowsTheLayoutSpec(width: CGFloat) async {
         let (model, services) = await model()
         #expect(model.state.cards.count == 8)
-        let (frames, cards, sidebarTitles) = measure(home(model, services, width: width),
+        let (frames, cards, sidebarTitles, _) = measure(home(model, services, width: width),
                                                      size: CGSize(width: width, height: Self.height))
         guard let sidebar = frames["sidebar"], let content = frames["content"], let tiles = frames["tiles"],
               let recents = frames["recents"] else {
@@ -122,7 +124,7 @@ import Testing
           + [CGSize(width: 800, height: 640)])
     func homeFitsTheWindow(size: CGSize) async {
         let (model, services) = await model()
-        let (frames, _, _) = measure(home(model, services, width: size.width, height: size.height), size: size)
+        let (frames, _, _, _) = measure(home(model, services, width: size.width, height: size.height), size: size)
         guard let sidebar = frames["sidebar"], let content = frames["content"], let tiles = frames["tiles"],
               let recents = frames["recents"], let running = frames["running"] else {
             Issue.record("missing frames at \(size): \(frames.keys.sorted())")
@@ -143,13 +145,34 @@ import Testing
     @Test func emptyStateFillsTheRecents() async {
         let (model, services) = await model(empty: true)
         let size = CGSize(width: 800, height: 640)
-        let (frames, _, _) = measure(home(model, services, width: size.width, height: size.height), size: size)
+        let (frames, _, _, _) = measure(home(model, services, width: size.width, height: size.height), size: size)
         guard let empty = frames["empty"], let recents = frames["recents"] else {
             Issue.record("missing frames: \(frames.keys.sorted())")
             return
         }
         #expect(abs(empty.midX - recents.midX) <= 1, "empty at \(empty.midX), recents at \(recents.midX)")
         #expect(empty.width >= recents.width - 1, "empty \(empty.width) wide in \(recents.width)")
+    }
+
+    /// #1872: the running value and the "Matching" text beside RECENT are one
+    /// type size, so RUNNING and RECENT pair their caps label with the same style.
+    @Test func runningMatchesTheRecentHeader() async {
+        let (model, services) = await model()
+        model.search("logo", now: now)
+        let size = CGSize(width: 1280, height: Self.height)
+        let (frames, _, _, identified) = measure(home(model, services, width: size.width), size: size)
+        // The "Matching" text is read from the accessibility tree; where this host leaves it out, a
+        // caption Text with the same string stands in for it, measured the same way as the strip.
+        let reference = Text(HomeGrid.matching(query: "logo", count: 2) ?? "").font(SuiteFont.caption)
+            .fixedSize().homeLayoutAnchor("reference")
+        var matching = identified["afterglow.home.matching"]
+        if matching == nil { matching = measure(reference, size: CGSize(width: 400, height: 100)).0["reference"] }
+        guard let running = frames["running.value"], let matching else {
+            Issue.record("missing frames: \(frames.keys.sorted()), \(identified.keys.sorted())")
+            return
+        }
+        #expect(abs(running.height - matching.height) <= 0.5,
+                "running value \(running.height) pt tall, Matching \(matching.height) pt")
     }
 
     @Test func homeAtEachWidth() async {
@@ -169,9 +192,11 @@ import Testing
         }
     }
 
-    /// The named frames, the cards' frames (in the view's own top-left space)
-    /// and every accessibility label, title or text value inside the sidebar column.
-    private func measure(_ view: some View, size: CGSize) -> ([String: CGRect], [CGRect], Set<String>) {
+    /// The named frames, the cards' frames (in the view's own top-left space),
+    /// every accessibility label, title or text value inside the sidebar column,
+    /// and the frame of each accessibility node by its identifier.
+    private func measure(_ view: some View, size: CGSize)
+        -> ([String: CGRect], [CGRect], Set<String>, [String: CGRect]) {
         let seen = MeasuredHome()
         let measured = view
             .environment(\.suiteSnapshotRendering, true)
@@ -204,16 +229,18 @@ import Testing
             return host.convert(window.convertFromScreen(screen), from: nil)
         }
         var sidebarTitles = Set<String>()
+        var identified: [String: CGRect] = [:]
         for node in nodes {
             guard let screen = node.accessibilityFrame?() else { continue }
             let frame = host.convert(window.convertFromScreen(screen), from: nil)
+            if let id = (node.accessibilityIdentifier?() ?? nil), !id.isEmpty { identified[id] = frame }
             guard frame.width > 0, frame.maxX <= CGFloat(HomeLayout.sidebar) + 0.5 else { continue }
             let value: Any?? = node.accessibilityValue?()
             for text in [node.accessibilityLabel?() ?? nil, node.accessibilityTitle?() ?? nil, (value ?? nil) as? String] {
                 if let text, !text.isEmpty { sidebarTitles.insert(text) }
             }
         }
-        return (seen.frames, cards, sidebarTitles)
+        return (seen.frames, cards, sidebarTitles, identified)
     }
 }
 
