@@ -4,3 +4,7 @@ utc	stage	event	ref	note
 2026-10-17T06:17Z	2	stage-end	#1498	waves: L-3+L-7 now; L-1 L-2 wait on EK-tree #1933; L-4 L-5 on DW-a/DW-b; L-6 on LL-9
 2026-10-17T06:20Z	3	stage-start	wave 1	L-3 L-7 base fe0f5f1
 2026-10-17T12:15Z	3	stage-start	wave 1 (resume)	L-3 L-7 rebuilt; base 0424231
+2026-10-17T13:14Z	3	pr-merged	#2047	L-7 layers budget
+2026-10-17T13:14Z	3	pr-merged	#2055	L-3 lock commits text edit, rename trim
+2026-10-17T13:14Z	3	ci-run	39033633296	scoped design green on 93c2103
+2026-10-17T13:14Z	3	heartbeat	polling	waits on EK-tree #1933, DW-a #1494, LL-9
