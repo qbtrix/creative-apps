@@ -4,7 +4,7 @@ Issue: #1515 · Packet: docs/blueprints/flare/features/inspector-timeline.md
 Run: act-1a14a13ca4f-74rv (line lead for draw-key-save, layers-files, inspector-timeline; earlier run act-1a146828a2d-9sza) · Session: session_01NXMovyJtKvANXKD2WWypB3 · Started: 2026-10-16T18:20Z (resumed 2026-10-17)
 Stage: 3 build (wave 3)
 Base: dd7ec767cc0afab91b35ff4f208351dd866028d8 (origin/dev, wave 3)
-Next: wave 3 PRs #2136, #2149, #2150 through the lane (macOS builds); IT-6 rerun (workflow wdj56smrx); then wave 4: J7 fix (IT-4f) and IT-10 feature-done
+Next: wave 3 PRs #2136, #2149, #2150 through the lane (macOS builds); IT-6 rerun (workflow wdj56smrx) and IT-4f J7 fix (workflow w053v84gf) building; then wave 4 IT-10 feature-done
 
 ## Slices
 No `## Slices` table: v2 packet, v2 loop applies.
