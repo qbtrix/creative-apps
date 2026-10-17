@@ -50,3 +50,5 @@ Next: wave 2 (CH-2, CH-6, CH-8) once suiteui open findings are 5 or fewer (after
 - 2026-10-17T13:44Z heartbeat: wave 2 (CH-2, CH-6, CH-8) still held. Open suiteui findings are 7; #2048 closes 6 of them. Next: start wave 2 once #2048 merges.
 
 - 2026-10-17T14:08Z heartbeat: wave 2 still held. Open suiteui findings: 7; #2048 (head ff00c03f, rebuilding on macOS) closes 6 of them.
+
+- 2026-10-17T14:29Z heartbeat: wave 2 still held; #2048 is building on macOS (39040114342).
