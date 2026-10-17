@@ -1,9 +1,10 @@
 // DesignEditMenuSnapshots.swift: Design's Edit menu items (Undo and Redo named
-// for the edit, Delete Layer) in four columns, since the menu bar does not
+// for the edit, and Delete, a stand-in for the system's one Edit > Delete that
+// removes the selected layer) in four columns, since the menu bar does not
 // render here: a new file (nothing to undo or delete), after adding a
-// rectangle ("Undo Add Rectangle", Delete Layer on), after that Undo ("Redo
+// rectangle ("Undo Add Rectangle", Delete on), after that Undo ("Redo
 // Add Rectangle"), and while a text layer is being typed into (Undo, Redo and
-// Delete Layer off, the model ignores them then). Writes design-edit-menu-light.png and
+// Delete off, the model ignores them then). Writes design-edit-menu-light.png and
 // design-edit-menu-dark.png. A second shot shows Duplicate after the system's Cut, Copy,
 // Paste and Select All (drawn here as plain stand-ins, since the system adds them): off
 // with nothing selected, its tooltip "Select a layer first.", and on with a layer selected

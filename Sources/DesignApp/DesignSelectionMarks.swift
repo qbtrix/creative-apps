@@ -2,9 +2,10 @@
 // clipped to the page, so marks past its edge still show). One layer: an accent
 // outline and, unless a lock stops it, its resize handles where DesignRect.handles
 // puts them (a small selection shows only its corners, outside the box). Several
-// layers: SuiteUI's dashed SelectionOutline on each and one around them all, and
-// the box's 8 handles (no solid edge over its dashes) while the Model's
-// `transformHelp` is nil; a lock or hidden layer in the selection leaves none.
+// layers: the same accent outline on each and a solid accent box around them all,
+// with the box's handles while the Model's `transformHelp` is nil; a lock or hidden
+// layer in the selection leaves none. Dashes are the live marquee's alone
+// (DesignMarqueeMark), so a committed selection never reads as one in progress.
 // The text node being edited shows its editor's box instead. The box carries the
 // one accessibility element, `design.canvas.selection` ("Selection"): a clear
 // rectangle at the box's frame, an image, never a control. Takes no clicks; the
@@ -23,11 +24,10 @@ struct DesignSelectionMarks: View {
         if model.hasMultipleSelection {
             let ids = Set(model.selectedNodeIDs)
             ForEach(painted.map(\.node).filter { ids.contains($0.id) }) { node in
-                SelectionOutline(rect: node.frame.cgRect, zoom: zoom)
+                DesignSelectionBox(rect: node.frame, zoom: zoom, handles: false)
             }
             if let bounds = model.selectionBounds {
-                SelectionOutline(rect: bounds.cgRect, zoom: zoom)
-                DesignSelectionBox(rect: bounds, zoom: zoom, handles: model.transformHelp == nil, edge: false)
+                DesignSelectionBox(rect: bounds, zoom: zoom, handles: model.transformHelp == nil)
                 DesignSelectionElement(rect: bounds, zoom: zoom)
             }
         } else if let selected = painted.first(where: { $0.node.id == model.selectedNodeID })?.node,
@@ -38,15 +38,14 @@ struct DesignSelectionMarks: View {
     }
 }
 
-/// One selected layer: an accent outline around `rect` (left out without `edge`, under the
-/// several-layer box's dashes), and with `handles` its resize handles, white squares with an
+/// One selected layer, or the box around several: an accent outline around `rect`, and with
+/// `handles` its resize handles, white squares with an
 /// accent edge. Shapes, not a Canvas, so marks past the page's edge still draw: CanvasViewport
 /// doesn't clip its overlay. Frames and handles stay one size at any zoom.
 struct DesignSelectionBox: View {
     let rect: DesignRect
     let zoom: Double
     var handles = true
-    var edge = true
 
     var body: some View {
         let scale = usable(zoom)
@@ -59,7 +58,7 @@ struct DesignSelectionBox: View {
             }
         }
         ZStack(alignment: .topLeading) {
-            if edge { Path(box).stroke(SuiteColor.accent, lineWidth: 1) }
+            Path(box).stroke(SuiteColor.accent, lineWidth: 1)
             squares.fill(SuiteColor.overlayPaper)
             squares.stroke(SuiteColor.accent, lineWidth: 1)
         }
