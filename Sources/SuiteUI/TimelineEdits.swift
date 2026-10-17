@@ -1,7 +1,8 @@
 // TimelineEdits.swift: the timeline's drag rules, pure and Foundation only.
 // SuiteTimelineEditing is the live TimelineEditing (Contracts/
 // TimelineEditing.swift): a frame snaps to the playhead when their ticks are
-// within the radius in points (a tie goes to the playhead), and a trim keeps
+// within the radius in points (a tie goes to the playhead), or, for a key
+// drag, when the pointer itself is within it (#2140), and a trim keeps
 // its span inside 0...lastFrame, never shorter than one frame, the other edge
 // fixed (the Fake never snaps and lets a span collapse to one tick). The work
 // area's handles trim by the same rule. TimelineDragSteps is the key-drag step
@@ -41,6 +42,21 @@ public struct SuiteTimelineEditing: TimelineEditing {
             let end = max(min(max(frame, least), last), lo)
             return lo...end
         }
+    }
+}
+
+extension SuiteTimelineEditing {
+    /// `frame` by `snapped`, or `playhead` when the pointer, `pointer` points
+    /// right of frame 0's tick, is within `radius` of the playhead's tick. With
+    /// frames wider than the radius (10 pt and 8 pt) no neighbouring tick ever
+    /// reaches the playhead, so only the pointer can (#2140).
+    public func snapped(_ frame: Int, pointer: Double, playhead: Int, radius: Double, scale: TimelineScale) -> Int {
+        let width = scale.frameWidth
+        if width > 0, width.isFinite, radius.isFinite, pointer.isFinite,
+           abs(pointer - Double(playhead) * width) <= radius {
+            return playhead
+        }
+        return snapped(frame, playhead: playhead, radius: radius, scale: scale)
     }
 }
 
