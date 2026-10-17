@@ -133,6 +133,17 @@ private func occurrences(of needle: String, in text: String) -> Int {
                            "Larger Thumbnails", "Smaller Thumbnails"])
     }
 
+    /// #1873: Edit > Delete is built for the page the window shows, never a literal Home page.
+    @Test func deleteFollowsTheShownPage() throws {
+        let text = try source(homeFile)
+        #expect(!text.contains("page: .home"), "LauncherCommandsHome passes a literal page: .home")
+        #expect(text.contains("@FocusedValue(\\.homePage)") && text.contains("page: page ?? .home"))
+        let window = try source("Sources/AfterGlowApp/HomeWindow.swift")
+        #expect(window.contains(".focusedSceneValue(\\.homePage, showsAssets ? .assets : .home)"))
+        let delete = HomeMenu.make(recents: RecentsList(), selection: "a", thumbnailStep: 1, page: .assets, hasWindow: true).delete
+        #expect(delete.title == "Remove Asset" && !delete.isEnabled && delete.reason != nil)
+    }
+
     @Test func noItemEnabledWithoutAReason() throws {
         for file in commandFiles where file != homeFile {
             for statement in try buttons(source(file)) {
