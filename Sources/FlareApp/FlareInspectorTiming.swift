@@ -1,7 +1,8 @@
 // FlareInspectorTiming.swift: the inspector's TIMING section (IT-8, #378).
 // FlareTimingRow is a Span picker over the layer's keyframe spans and an
 // Easing button (`flare.inspector.easing`) reading the span's preset name, or
-// "Custom", which opens FlareEasingPopover. It only reads the editor and
+// "Custom", drawn like the Span picker's value with a chevron, which opens
+// FlareEasingPopover. It only reads the editor and
 // calls the window's Model easing closures: every edit is one undo step.
 import FlareCore
 import FlareModel
@@ -33,15 +34,24 @@ struct FlareTimingRow<Editor: EasingEditing>: View {
                 onChange: { if let segment = $0 { onSelect(segment) } })
                 .accessibilityIdentifier("flare.inspector.span")
             InspectorRow("Easing") {
-                Button(easingName) { showsPopover = true }
-                    .buttonStyle(.borderless)
-                    .accessibilityIdentifier("flare.inspector.easing")
-                    .disabled(editor.selectedEasingSegment == nil)
-                    .help(editor.selectedEasingSegment == nil ? "Select a keyframe span to ease it." : "Edit the easing curve")
-                    .popover(isPresented: $showsPopover, arrowEdge: .leading) {
-                        FlareEasingPopover(
-                            editor: editor, onPreset: onPreset, onMoveHandle: onMoveHandle, onEndDrag: onEndDrag)
+                Button { showsPopover = true } label: {
+                    // Drawn like the Span picker's value above it, so it reads as a control.
+                    HStack(spacing: SuiteSpacing.xs) {
+                        Text(easingName).font(SuiteFont.inspectorValue)
+                        Image(systemName: "chevron.right").imageScale(.small).foregroundStyle(SuiteColor.textSecondary)
+                            .accessibilityHidden(true)
                     }
+                    .contentShape(.rect)
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel(easingName)  // the easing journey reads the preset name as the label
+                .accessibilityIdentifier("flare.inspector.easing")
+                .disabled(editor.selectedEasingSegment == nil)
+                .help(editor.selectedEasingSegment == nil ? "Select a keyframe span to ease it." : "Edit the easing curve")
+                .popover(isPresented: $showsPopover, arrowEdge: .leading) {
+                    FlareEasingPopover(
+                        editor: editor, onPreset: onPreset, onMoveHandle: onMoveHandle, onEndDrag: onEndDrag)
+                }
             }
         }
     }
