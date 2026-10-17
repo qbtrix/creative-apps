@@ -1,0 +1,55 @@
+utc	stage	event	ref	note
+2026-10-16T12:43Z	0	stage-start	#1331	lead set up on dev b102413
+2026-10-16T12:43Z	2	stage-end	#1331	planned 4 waves from the packet
+2026-10-16T12:43Z	3	stage-start	wave 1	BU-2 BU-3 BU-5a BU-5b
+2026-10-16T13:56Z	3	pr-merged	#1357	BU-2
+2026-10-16T13:56Z	3	pr-merged	#1360	BU-5a
+2026-10-16T13:56Z	3	pr-merged	#1361	BU-5b
+2026-10-16T13:56Z	3	pr-opened	#1358	BU-3 supervisor merges
+2026-10-16T13:56Z	3	stage-start	wave 2	BU-5c on dev e464eca
+2026-10-16T14:04Z	3	pr-opened	#1392	BU-5c placeholder icons, no feature-done
+2026-10-16T14:19Z	3	heartbeat	#1392	BU-5c waits on lane macOS build run 38912960821; BU-3 #1358 waits on supervisor
+2026-10-16T14:41Z	3	pr-merged	#1392	BU-5c
+2026-10-16T14:41Z	3	stage-start	wave 3	BU-4 waits on supervisor merge of BU-3 #1358
+2026-10-16T15:03Z	3	heartbeat	#1358	BU-3 still waits on the supervisor; BU-4 not started
+2026-10-16T15:25Z	3	heartbeat	#1358	BU-3 still waits on the supervisor; BU-4 not started
+2026-10-16T15:48Z	3	stage-start	wave 3	BU-4 on dev f52ec33, merges after #1358
+2026-10-16T15:57Z	3	pr-opened	#1445	BU-4 bundle-apps and size-report, supervisor merges after #1358
+2026-10-16T16:11Z	3	heartbeat	#1358	BU-3 #1358 and BU-4 #1445 wait on the supervisor
+2026-10-16T16:19Z	3	heartbeat	#1358	BU-3 #1358 and BU-4 #1445 wait on the supervisor
+2026-10-16T16:41Z	3	heartbeat	#1358	BU-3 #1358 and BU-4 #1445 wait on the supervisor
+2026-10-16T17:03Z	3	heartbeat	#1358	BU-3 #1358 and BU-4 #1445 wait on the supervisor
+2026-10-16T17:25Z	3	heartbeat	#1358	BU-3 #1358 and BU-4 #1445 wait on the supervisor
+2026-10-16T17:47Z	3	heartbeat	#1358	BU-3 #1358 and BU-4 #1445 wait on the supervisor
+2026-10-16T18:09Z	3	heartbeat	#1358	BU-3 #1358 and BU-4 #1445 wait on the supervisor
+2026-10-16T18:31Z	3	heartbeat	#1358	BU-3 #1358 and BU-4 #1445 wait on the supervisor
+2026-10-16T18:52Z	3	heartbeat	#1358	BU-3 #1358 and BU-4 #1445 wait on the supervisor
+2026-10-16T19:15Z	3	heartbeat	#1358	BU-3 #1358 and BU-4 #1445 wait on the supervisor
+2026-10-16T19:37Z	3	heartbeat	#1358	BU-3 #1358 and BU-4 #1445 wait on the supervisor
+2026-10-16T19:58Z	3	stopped	#1358	8 h wall clock: BU-3 #1358 and BU-4 #1445 still wait on the supervisor; RECORD Next: holds the resume brief
+2026-10-16T20:29Z	3	heartbeat	#1358	resumed on Belt nudge; #1358 and #1445 open, both merge clean onto dev; still wait on the supervisor
+2026-10-16T20:51Z	3	heartbeat	#1358	BU-3 #1358 and BU-4 #1445 wait on the supervisor; wave.json not re-sliced
+2026-10-16T21:12Z	3	heartbeat	#1358	BU-3 #1358 and BU-4 #1445 wait on the supervisor; wave.json not re-sliced
+2026-10-16T21:34Z	3	heartbeat	#1358	BU-3 #1358 and BU-4 #1445 wait on the supervisor; wave.json not re-sliced
+2026-10-16T21:55Z	3	heartbeat	#1358	BU-3 #1358 and BU-4 #1445 wait on the supervisor; wave.json not re-sliced
+2026-10-16T22:17Z	3	heartbeat	#1358	BU-3 #1358 and BU-4 #1445 wait on the supervisor; wave.json not re-sliced
+2026-10-16T22:39Z	3	heartbeat	#1358	BU-3 #1358 and BU-4 #1445 wait on the supervisor; wave.json not re-sliced
+2026-10-16T23:01Z	3	heartbeat	#1358	BU-3 #1358 and BU-4 #1445 wait on the supervisor; wave.json not re-sliced
+2026-10-16T23:22Z	3	heartbeat	#1358	BU-3 #1358 and BU-4 #1445 wait on the supervisor; wave.json not re-sliced
+2026-10-16T23:44Z	3	heartbeat	#1358	BU-3 #1358 and BU-4 #1445 wait on the supervisor; wave.json not re-sliced
+2026-10-17T00:06Z	3	heartbeat	#1358	BU-3 #1358 and BU-4 #1445 wait on the supervisor; wave.json not re-sliced
+2026-10-17T00:28Z	3	heartbeat	#1358	BU-3 #1358 and BU-4 #1445 wait on the supervisor; wave.json not re-sliced
+2026-10-17T00:50Z	3	heartbeat	#1358	BU-3 #1358 and BU-4 #1445 wait on the supervisor; wave.json not re-sliced
+2026-10-17T01:11Z	3	heartbeat	#1358	BU-3 #1358 and BU-4 #1445 wait on the supervisor; wave.json not re-sliced
+2026-10-17T01:32Z	3	heartbeat	#1358	BU-3 #1358 and BU-4 #1445 wait on the supervisor; wave.json not re-sliced
+2026-10-17T01:55Z	3	heartbeat	#1358	BU-3 #1358 and BU-4 #1445 wait on the supervisor; wave.json not re-sliced
+2026-10-17T02:16Z	3	heartbeat	#1358	BU-3 #1358 and BU-4 #1445 wait on the supervisor; wave.json not re-sliced
+2026-10-17T02:39Z	3	heartbeat	#1358	BU-3 #1358 and BU-4 #1445 wait on the supervisor; wave.json not re-sliced
+2026-10-17T03:00Z	3	heartbeat	#1358	BU-3 #1358 and BU-4 #1445 wait on the supervisor; wave.json not re-sliced
+2026-10-17T03:21Z	3	heartbeat	#1358	BU-3 #1358 and BU-4 #1445 wait on the supervisor; wave.json not re-sliced
+2026-10-17T03:21Z	3	pr-merged	#1358	BU-3 merged by the supervisor as e3a6807; BU-4 #1445 merges clean on it
+2026-10-17T03:51Z	3	pr-merged	#1445	BU-4 merged by the supervisor
+2026-10-17T03:51Z	5	stage-start	finish	all six tasks merged
+2026-10-17T03:51Z	5	pr-opened	#1966	feature-done: bundle.wave.json built; scripts/ci PASS on 0db5a2d
+2026-10-17T03:58Z	5	pr-merged	#1966	feature-done merged as e251c5c5; full run 39000814995 Linux green, main promoted
+2026-10-17T06:17Z	4	stage-start	round 1	line lead act-1a14881ad5e-axoa resumed; bundle proof read from scoped run 39008864548 (4a86f5fc)
