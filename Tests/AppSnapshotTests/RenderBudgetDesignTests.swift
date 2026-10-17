@@ -5,7 +5,9 @@
 // draws a 120-sample marquee from an empty corner of the page. `bodies` gates
 // design-window DW-b's bound (the window body runs at most 3 times over a
 // 120-sample drag); `timing` (Tests/perf-suites.txt, report-only) judges the
-// step times. Nested in BodyCountSuites, as every suite that reads a body
+// step times. Before each drag the window settles until its body count stops
+// moving (BodyCountSuites' `settle(untilStable:)`), so the bodies counted are
+// the drag's alone, not the open's late layouts on a slow runner (#1974). Nested in BodyCountSuites, as every suite that reads a body
 // counter is. macOS only.
 #if canImport(AppKit)
 import AppKit
@@ -48,10 +50,12 @@ extension BodyCountSuites {
             let board = try #require(await w.element("suite.canvas"), "no canvas")
             let page = CGSize(width: 1440, height: 1024)
             // Rectangle 1 of Frame 1 sits at (12, 12, 16, 16) on the page.
+            try await w.settle(untilStable: bodies)
             let move = try await w.measure("design drag a shape", bodies: bodies) {
                 try await w.drag(from: w.point(CGPoint(x: 20, y: 20), on: page, in: board), by: CGVector(dx: 160, dy: -90))
             }
             // The page's bottom right corner holds no frame.
+            try await w.settle(untilStable: bodies)
             let marquee = try await w.measure("design marquee select", bodies: bodies) {
                 try await w.drag(
                     from: w.point(CGPoint(x: 1420, y: 1010), on: page, in: board), by: CGVector(dx: -300, dy: 240))
