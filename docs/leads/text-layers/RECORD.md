@@ -25,6 +25,7 @@ Waves (combined with render-out, contract rule 19; checked against dev b8dfb4f0)
 | – | – | – | – | – | – | – | – |
 
 ## Decisions
+- 2026-10-17T13:55Z Between-wave check: the open Halo `CI finding:` issues (#1574, #1696-#1705, #2077-#2081) are all a launch crash, SuiteKernel.framework missing from AfterGlow.app (scripts/bundle-apps, from #1992). Filed #2099 for the supervisor. They are not findings of this feature (no Feature: line, not in its files), so the 5-open pause does not apply.
 - 2026-10-17T13:53Z TX-1 (#2060) keeps a private copy of the selected text layer lookup because the one in HaloLayerEdits.swift is file-private (not its file); a later cleanup can share it. TX-3 (#2065) covers all four text commands (the packet said three).
 - 2026-10-17T06:05Z: line lead for #1035 (done, supervisor decision 06:06Z), #1509 and #1505 in one run. Waits met: #1036 closed, #1037 built, #1035 done, #333 closed (#877 merged). The brief named `main` as the integration branch; the fast lane merges into `dev` and retargets a PR based on `main`, so PRs base `dev` as CLAUDE.md says.
 - No Swift on this box at launch; installed swift 6.3.3 (CI's image version) under /opt/swift so `scripts/ci` can run the Model tests.

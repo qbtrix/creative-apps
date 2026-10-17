@@ -17,3 +17,4 @@ utc	stage	event	ref	note
 2026-10-17T13:53Z	3	pr-merged	#2065	TX-3
 2026-10-17T13:53Z	3	pr-merged	#2064	TX-4
 2026-10-17T13:53Z	3	stage-start	#1509	wave 2: TX-5 TX-6 beside RO-4 RO-5 on 8e86841
+2026-10-17T13:55Z	3	check	#2099	CI findings are a bundle launch crash outside the feature; filed #2099
