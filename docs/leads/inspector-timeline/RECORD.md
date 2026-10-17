@@ -4,7 +4,7 @@ Issue: #1515 · Packet: docs/blueprints/flare/features/inspector-timeline.md
 Run: act-1a14a13ca4f-74rv (line lead for draw-key-save, layers-files, inspector-timeline; earlier run act-1a146828a2d-9sza) · Session: session_01NXMovyJtKvANXKD2WWypB3 · Started: 2026-10-16T18:20Z (resumed 2026-10-17)
 Stage: 3 build (wave 3)
 Base: dd7ec767cc0afab91b35ff4f208351dd866028d8 (origin/dev, wave 3)
-Next: #2130 fixer (needs-rebase) and wave 3 (IT-5..IT-8, workflow wfk1s4unj) PRs through the lane; then wave 4 IT-10 feature-done
+Next: wave 3 PRs #2136, #2149, #2150 through the lane (macOS builds); IT-6 rerun (workflow wdj56smrx); then wave 4: J7 fix (IT-4f) and IT-10 feature-done
 
 ## Slices
 No `## Slices` table: v2 packet, v2 loop applies.
@@ -15,13 +15,13 @@ No `## Slices` table: v2 packet, v2 loop applies.
 | IT-0 | 1 | FlareInspectorRead, FlarePaint, FlareTimelineEdit (Model, stubs), FlareWorkspace.swift + Tests | rule 18 stubs: every IT-1..IT-3 signature, fake value or NotBuilt; stored state cleared in load | #2100 | merged |
 | IT-9a | 1 | FlareStatusRead + Tests, PlaybackDriver(+Tests), ViewerStatusBar pills in FlareWindow, +Playback | StatusPills, measuredFPS, J10 | #2101 | merged |
 | IT-1 | 2 | FlareInspectorRead + Tests | inspectorSummary for real | #2128 | merged |
-| IT-2 | 2 | FlarePaint + Tests | paint readout and setters for real (no FlareWorkspace edit, IT-0 owns it) | #2130 | open, lane (fixer merged dev, CI: PASS on 96de97a) |
+| IT-2 | 2 | FlarePaint + Tests | paint readout and setters for real (no FlareWorkspace edit, IT-0 owns it) | #2130 | merged |
 | IT-3 | 2 | FlareTimelineEdit + Tests | key select, retime, delete, insert/remove frames, labels for real | #2113 | merged |
 | IT-4 | 2 | FlareInspector, Transform/Fill/Scene/Timing sections, +Inspector | Properties tab on the stubs, J7 | #2129 | merged |
-| IT-5 | 3 | FlareInspectorFill, FlareFillSnapshots, +FillStroke | J8 | | building |
-| IT-6 | 3 | FlareInspectorScene, FlareSceneSnapshots, +SceneInspector | | | building |
-| IT-7 | 3 | FlareTimelineEdit (App), FlareTimeline, FlareWindow+Timeline, +TimelineEdit | J11 | | building |
-| IT-8 | 3 | FlareInspectorTiming, FlareEasingPopover, delete FlareEasingInspector, +Easing | J12 | | building |
+| IT-5 | 3 | FlareInspectorFill, FlareFillSnapshots, +FillStroke | J8 | #2136 | open, lane |
+| IT-6 | 3 | FlareInspectorScene, FlareSceneSnapshots, +SceneInspector, one line of FlareInspector | | | rerun (first run blocked) |
+| IT-7 | 3 | FlareTimelineEdit (App), FlareTimeline, FlareWindow+Timeline, +TimelineEdit | J11 | #2150 | open, lane |
+| IT-8 | 3 | FlareInspectorTiming, FlareEasingPopover, delete FlareEasingInspector, +Easing | J12 | #2149 | open, lane |
 | IT-9b | 3 | TransportCapsule | waits #340; gap if still open at wave 4 | | waiting |
 | IT-10 | 4 | +Timeline, +Animate, packet, wave.json | feature-done, J9/J6 on -FlareSample | | |
 
@@ -44,6 +44,9 @@ None.
 - Wave 3 starts while #2130 (IT-2) is still in the lane: IT-5 builds on the unchanged paint signatures; #63 closed, so IT-7 runs.
 
 - The GitHub MCP update_pull_request tool writes a PR body without the platform footer (gh api PATCH re-adds it); fixers and the lead use it to clear the footer from wave PR bodies.
+- Wave 3 contract check: IT-6's first run opened no PR. FlareInspector.swift (IT-4's file) builds FlareInspectorScene(size:rate:) with no model or perform, so its controls could not act. It was rerun with that one call (line 75) added to its files. IT-5 sends its intents through @FocusedValue(\.flareMenu) instead of editing FlareInspector, which is accepted. Its copy of the gradient reason string ("Gradients can't be edited yet.") is accepted for now and left for the Anatomy round, since the Model doesn't expose it. IT-8's extra files follow from its rename and are accepted: FlareWindow.swift (one line), the C4 part description, and the canonical-baseline line, which is swapped, not raised. RenderBudgetFlareTests now scrubs TRANSFORM X with the same bounds.
+- J7 conflict reported by IT-5: J7 (IT-4's +Inspector) waits for suite.inspector's first text field to disappear, but the FILL/STROKE hex fields now stay. Wave 4 adds IT-4f, which matches the Rotation field by label (UITests/FlareJourneyTests+Inspector.swift only).
+- Wave PR bodies are cleaned of the session footer with the GitHub MCP update_pull_request tool (done for #2136, #2149, #2150).
 
 ## Open
 - #340 (TransportCapsule) open: IT-9b waits; becomes a gap if still open at wave 4.
