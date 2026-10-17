@@ -29,3 +29,6 @@ utc	stage	event	ref	note
 2026-10-17T22:22Z	finding	#2437 closed: J5/J6 are task S-7, held until open findings <=5
 2026-10-17T22:22Z	wave	SS-a fix round 1 launched (wb9v4rpri, base 178e59db): #2442, #2441, #2440, #2439; deferred #2443 (busy #2417), #2438 (busy #2349)
 2026-10-17T22:40Z	wave	SS-a round 1 batch 2 (wxkvtvg5f, base e3c5da79): #2443, file freed by #2417 merge
+2026-10-17T22:41Z	wave	wb9v4rpri done: PR #2445 fixes #2440 + #2441 (Fast-Check pass at 23f92492, mutate 8/8)
+2026-10-17T22:41Z	finding	#2442 closed not_planned: blueprint D0-3/Q8 make a background drag on a selected frame move it; DesignGestureRouteTests pins it
+2026-10-17T22:41Z	gap	#2439 -> gap #2446 (line:suiteui, SuiteKernel geometry helpers); #2439 closed
