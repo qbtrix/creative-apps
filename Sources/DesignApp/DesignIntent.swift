@@ -32,6 +32,17 @@ enum DesignIntent {
     case editText(String)
     case textDraft(String), commitText, cancelText
     case zoomIn, zoomOut, fit
+    /// A selection command (DesignCommand): duplicate, group, ungroup, delete, nudge, align,
+    /// distribute or arrange; a refusal's help goes to the status line.
+    case command(DesignCommand)
+    case copy, cut, paste, selectAll
+    /// View > Zoom to Selection: the zoom that fits the selection, and the rect to show.
+    case zoomToSelection
+    /// A Layers panel drag: the layer, its new parent (nil: the page's top level) and index.
+    case moveLayer(String, parent: String?, index: Int)
+    /// One inspector row on every selected layer.
+    case setStyle(DesignStyleChange)
+    case renamePage(String, String)
 }
 
 /// Where a view sends its intents.
