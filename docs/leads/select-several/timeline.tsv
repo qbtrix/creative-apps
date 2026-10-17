@@ -17,3 +17,4 @@ utc	stage	event	ref	note
 2026-10-17T18:56:51Z	check	heartbeat: CB-a no new merges (S-5 waits); S-6 waits DW-a (#2213) and DW-b
 2026-10-17T19:16:17Z	status	DW-a merged; S-6 waits only on DW-b; CB-a unchanged
 2026-10-17T19:40:27Z	check	S-6 waits on DW-b (#2282 building); CB-a no merges
+2026-10-17T20:03Z	check	D0-8a merged; S-6 waits on D0-8b; CB-a still unmerged
