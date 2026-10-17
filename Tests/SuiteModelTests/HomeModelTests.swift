@@ -107,10 +107,27 @@ actor GateSending: HandOffSending {
         await m.removeSelection(now: now)
         let stored = try await s.recents.list().items.count
         #expect(m.state.cards.count == 7 && stored == 7)
+        // #1865: the removal says so in place until Undo puts the card back.
+        #expect(m.removedNotice == "Logo.design removed from Recents.")
         await m.undoRemove(now: now)
+        #expect(m.removedNotice == nil)
         #expect(m.state.cards.count == 8)
         let after = try #require(m.state.cards.first { $0.item.ref.fileID == logoID })
         #expect(after.item == before.item && after.item.thumbnail != nil)
+    }
+
+    /// #1866: the search line names its unit, singular or plural, and counts the filtered cards.
+    @Test func matchingNamesItsUnit() async throws {
+        #expect(HomeModel.matching(query: "logo", count: 1) == "1 item matching \u{201C}logo\u{201D}")
+        #expect(HomeModel.matching(query: "logo", count: 2) == "2 items matching \u{201C}logo\u{201D}")
+        #expect(HomeModel.matching(query: "logo", count: 0) == "0 items matching \u{201C}logo\u{201D}")
+        #expect(HomeModel.matching(query: "", count: 8) == nil)
+        let (m, _) = try await model()
+        #expect(m.matching == nil)
+        m.search("logo", now: now)
+        #expect(m.matching == "2 items matching \u{201C}logo\u{201D}")
+        m.filter(.design, now: now)
+        #expect(m.matching == "1 item matching \u{201C}logo\u{201D}")
     }
 
     @Test func locateRePointsTheMissingCard() async throws {
