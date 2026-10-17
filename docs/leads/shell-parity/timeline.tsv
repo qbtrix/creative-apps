@@ -60,3 +60,4 @@ utc	stage	event	ref	note
 2026-10-16T22:37Z	done	stopped	#1325	feature done
 2026-10-17T06:17Z	done	stopped	#1877 #1878	CI findings relabelled gap (round cap; SuiteUI #1456); branch recut onto main 0e3c08e for Belt
 2026-10-17T12:15Z	done	heartbeat	#1325	relaunch act-1a149c0c306-8ckd: feature already done (both Belt-Slice-Done lines and the contact sheet on #1325); nothing to build
+2026-10-17T13:14Z	done	heartbeat	#1325	still done; line lead busy on layers-panel and style-rows
