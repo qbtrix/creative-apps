@@ -37,7 +37,8 @@ extension SuiteJourneyTests {
         gallery.shot("timeline-idle")
         // 1. Hover Ball's key at 12: the shot shows the hover ring.
         let ball12 = lookKey(12, lane: "ball", gallery)
-        ball12.hover()
+        // At the key's centre: through the element, XCUITest finds no hit point for the synthetic child (#1782).
+        ball12.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).hover()
         gallery.shot("timeline-hover")
         // 2. Click Shadow's name: the track is selected.
         gallery.element("suite.timeline.name.shadow").click()

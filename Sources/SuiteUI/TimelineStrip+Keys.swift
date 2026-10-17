@@ -7,7 +7,9 @@
 // first going left) -> onPickKeyframe(.replace); with no pick, the first key
 // of the selected track; nothing past either end. It also hands the lanes the
 // key picker and mapping their accessibility children use (TimelineLaneAccess).
-// Zoom keys (⌘+, ⌘−, ⌘0) are not here; TL-17 has its own handler.
+// A press on a lane takes the strip's focus (TimelineFocusClaim, which the
+// lanes' input calls), as a canvas press does, so ⌘+ works right after a
+// click (#1813). Zoom keys (⌘+, ⌘−, ⌘0) are not here; TL-17 has its own handler.
 import SwiftUI
 
 struct TimelineStripKeys<ID: Hashable & Sendable>: ViewModifier {
@@ -15,10 +17,13 @@ struct TimelineStripKeys<ID: Hashable & Sendable>: ViewModifier {
     let mapping: FrameMapping
     let onPickKeyframe: @MainActor (ID, Int?, PickMode) -> Void
     @State private var picker = TimelineKeyPicker()
+    @State private var focusClaim = TimelineFocusClaim()
     @FocusState private var isFocused: Bool
 
     func body(content: Content) -> some View {
         picker.update(onPickKeyframe)
+        let focus = $isFocused
+        focusClaim.claim = { if !focus.wrappedValue { focus.wrappedValue = true } }
         return content
             .focused($isFocused)
             .focusEffectDisabled()
@@ -42,8 +47,27 @@ struct TimelineStripKeys<ID: Hashable & Sendable>: ViewModifier {
                 }
             }
             .environment(\.timelineKeyPicker, picker)
+            .environment(\.timelineFocusClaim, focusClaim)
             .environment(\.timelineLaneMapping, mapping)
     }
+}
+
+/// Gives the strip focus from a lane press. One object in the strip's @State,
+/// its closure refreshed, so the environment value lanes read never changes.
+@MainActor final class TimelineFocusClaim {
+    var claim: @MainActor () -> Void = {}
+}
+
+extension EnvironmentValues {
+    /// The strip's focus claim; nil outside a strip. A plain key, as TimelineLaneAccess's.
+    var timelineFocusClaim: TimelineFocusClaim? {
+        get { self[TimelineFocusClaimKey.self] }
+        set { self[TimelineFocusClaimKey.self] = newValue }
+    }
+}
+
+private struct TimelineFocusClaimKey: EnvironmentKey {
+    static let defaultValue: TimelineFocusClaim? = nil
 }
 
 /// What ← and → do to the pick, with no view (TimelineAccessTests).

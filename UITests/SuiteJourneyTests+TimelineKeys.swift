@@ -12,7 +12,8 @@
 // skipped, TL-12 turned it on. Lanes and keys are found by the identifiers the
 // gallery opts into (`suite.timeline.lane.<id>`, `suite.timeline.key.<id>.<frame>`),
 // and Badge's value by the hidden `suite.gallery.timeline.value.badge`'s label,
-// since XCUITest reads SwiftUI values as "" (#262, #1800).
+// since XCUITest reads SwiftUI values as "" (#262, #1800). Keys are clicked
+// at their element's centre, not through the element (#1783).
 import XCTest
 
 extension SuiteJourneyTests {
@@ -29,20 +30,20 @@ extension SuiteJourneyTests {
 
         // 1. Click Ball's key at 12: it replaces the pick and reads selected.
         let ball12 = timelineKey(12, lane: "ball", gallery)
-        ball12.click()
+        timelineSpot(ball12).click()
         expectTimelineLog("pick ball 12 replace", log)
         XCTAssert(timelineWait { ball12.isSelected }, "Ball's key at 12 isn't selected after its click")
         gallery.shot("timeline-picked")
 
         // 2. Shift-click Ball's key at 24, then ⌘-click 12.
         let ball24 = timelineKey(24, lane: "ball", gallery)
-        XCUIElement.perform(withKeyModifiers: .shift) { ball24.click() }
+        XCUIElement.perform(withKeyModifiers: .shift) { self.timelineSpot(ball24).click() }
         expectTimelineLog("pick ball 24 extend", log)
-        XCUIElement.perform(withKeyModifiers: .command) { ball12.click() }
+        XCUIElement.perform(withKeyModifiers: .command) { self.timelineSpot(ball12).click() }
         expectTimelineLog("pick ball 12 toggle", log)
 
         // 3. Right-click Shadow's key at 36: it is picked and the menu offers Ease In.
-        timelineKey(36, lane: "shadow", gallery).rightClick()
+        timelineSpot(timelineKey(36, lane: "shadow", gallery)).rightClick()
         expectTimelineLog("pick shadow 36 replace", log)
         XCTAssert(gallery.app.menuItems["Ease In"].waitForExistence(timeout: 5), "the key's context menu has no Ease In")
         gallery.shot("timeline-key-menu")
@@ -58,12 +59,12 @@ extension SuiteJourneyTests {
         expectTimelineLog("pick ball none", log)
 
         // 5. Keyboard: Ball's key at 0, → twice picks 24; ← at the first key changes nothing.
-        ball0.click()
+        timelineSpot(ball0).click()
         expectTimelineLog("pick ball 0 replace", log)
         gallery.press(.rightArrow)
         gallery.press(.rightArrow)
         expectTimelineLog("pick ball 24 replace", log)
-        ball0.click()
+        timelineSpot(ball0).click()
         expectTimelineLog("pick ball 0 replace", log)
         let before = timelineText(log)
         gallery.press(.leftArrow)
@@ -74,7 +75,7 @@ extension SuiteJourneyTests {
         let shadow36 = timelineLane("shadow", gallery).descendants(matching: .any)
             .matching(NSPredicate(format: "label == %@", "Key at frame 36, eased")).firstMatch
         XCTAssert(shadow36.waitForExistence(timeout: 5), "no element \"Key at frame 36, eased\" on Shadow's lane")
-        shadow36.click()
+        timelineSpot(shadow36).click()
         expectTimelineLog("pick shadow 36 replace", log)
         let badge = gallery.element("suite.gallery.timeline.value.badge")
         XCTAssert(badge.waitForExistence(timeout: 5), "no suite.gallery.timeline.value.badge")
@@ -94,6 +95,13 @@ extension SuiteJourneyTests {
         let key = gallery.element("suite.timeline.key.\(id).\(frame)")
         XCTAssert(key.waitForExistence(timeout: 5), "no key suite.timeline.key.\(id).\(frame)")
         return key
+    }
+
+    /// The middle of a key's element. A key is a synthetic child, which
+    /// XCUITest finds no hit point for and tries to scroll into view (it is
+    /// in view already), so the pointer goes to its centre instead (#1783).
+    @MainActor private func timelineSpot(_ key: XCUIElement) -> XCUICoordinate {
+        key.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
     }
 
     /// The log's last line reads `line` within about three seconds.
