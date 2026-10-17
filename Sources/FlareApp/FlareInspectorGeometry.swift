@@ -4,8 +4,8 @@
 // (`flare.inspector.<property>`, "Mixed" when the layers differ, stepping by
 // its last shown place; opacity shown in %) and a KeyframeButton
 // (`flare.inspector.<property>.key`). A scrub sends `.scrub` with its start
-// value, then `.endScrub`: one undo step. Keys are disabled with the router's
-// reason unless exactly one layer is selected.
+// value, then `.endScrub`: one undo step. Keys are disabled, with the router's
+// reason as their tooltip, unless exactly one layer is selected.
 import FlareModel
 import SuiteUI
 import SwiftUI
@@ -58,11 +58,12 @@ struct FlareGeometryRow: View {
                 .disabled(rowHelp != nil)
                 .help(rowHelp ?? row.title)
             // No modifier that wraps the pair (`.help`, an identifier): it would make the stopwatch read 56 pt, over
-            // its own diamond (#1282). Each button carries its tooltip; the reason goes to `suite.controls`.
+            // its own diamond (#1282). Each button carries its tooltip, the reason while it can't act; the reason
+            // also goes to `suite.controls`.
             let id = "flare.inspector.\(row.name).key"
             let state = Self.keyState(row.keyState)
             KeyframeButton(
-                row.title, id: id, state: state,
+                row.title, id: id, state: state, unavailableHelp: keyHelp,
                 onToggle: { perform(.inspector(.toggleAnimated(row.name))) },
                 onKey: { perform(.inspector(.toggleKey(row.name))) })
                 .disabled(keyHelp != nil)
