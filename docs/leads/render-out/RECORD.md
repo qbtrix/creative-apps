@@ -2,7 +2,7 @@
 
 Issue: #1505 · Packet: docs/blueprints/halo/features/render-out.md
 Run: act-1a149b53ef6-67v7 (line lead for #1035, #1509, #1505; earlier runs act-1a1487bf880-qmey, act-1a1429c87eb-3ecm) · Session: claude/feature-lead-playbook-l4ybf6 · Started: 2026-10-17T06:05Z
-Stage: 6 Done check: full CI 39069913922 (c55fad78) red outside Halo: macOS scripts/ci step failed, ui-test fails PhotoShellJourneyTests.testShell3Selection (window 1 pt outside visible frame); 39074726717 cancelled; watching full CI 39076534514 on 59c435a6 (holds both fixes), pending at 2026-10-17T22:52Z
+Stage: 6 Done check: 39069913922 cancelled (macOS red before that, Photo journey geometry, not Halo); full CI 39076534514 on 59c435a6 (holds both fixes) in progress at 2026-10-17T23:14Z; 39077736900 on 4da80979 queued
 Base: 8e868417eeaf2fd17229c21bc1087ef7eecb3d8f (origin/dev at 2026-10-17T13:53Z)
 Next: fixer PR for #2261 merges, then Anatomy round 2 on a scoped halo run holding it, then the done check on a green full dev run. H-J21 passes every functional step; it is red only on the audit (4 ids from #2261; the rest is #1789 and #2262 scroller on line:suiteui)
 

@@ -70,3 +70,4 @@ utc	stage	event	ref	note
 2026-10-17T22:08:29Z	done-check	poll	39072812111	pending; scoped halo 39072520640 running
 2026-10-17T22:30Z	done-check	scoped halo 39072520640 green incl. #2345 note journey; full CI 39072812111 cancelled; watching 39074726717	39074726717	heartbeat
 2026-10-17T22:52Z	6	full-ci-check	39069913922	red outside Halo (Photo journey geometry); watching 39076534514 on 59c435a6
+2026-10-17T23:14Z	6	full-ci-check	39076534514	in progress; 39069913922 cancelled; 39077736900 queued
