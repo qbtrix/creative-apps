@@ -125,8 +125,12 @@ struct HomeLayoutAnchors: PreferenceKey {
 }
 
 extension View {
-    /// Publishes this view's bounds under `name` in HomeLayoutAnchors.
+    /// Publishes this view's bounds under `name` in HomeLayoutAnchors. The anchor
+    /// rides on a clear background leaf: an `anchorPreference` on the view itself
+    /// replaces every anchor under it (a tile's "chips.<app>", the recents' "empty").
     func homeLayoutAnchor(_ name: String) -> some View {
-        anchorPreference(key: HomeLayoutAnchors.self, value: .bounds) { [name: $0] }
+        background {
+            Color.clear.anchorPreference(key: HomeLayoutAnchors.self, value: .bounds) { [name: $0] }
+        }
     }
 }
