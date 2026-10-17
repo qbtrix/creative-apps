@@ -5,3 +5,5 @@ utc	stage	event	ref	note
 2026-10-17T00:30Z	3	pr-merged	#1747	SW-1 merged as b267d006
 2026-10-17T00:45Z	3	pr-opened	SW-2	StoreHandOffs + HandOffStoreTests + Budget+HandOff; scripts/ci --changed CI: PASS
 2026-10-17T01:00Z	3	pr-opened	#1791	SW-2 PR opened with fast-lane; head c6863082
+2026-10-17T02:00Z	3	pr-merged	#1791	SW-2 merged as c512a7e8
+2026-10-17T02:20Z	3	pr-opened	SW-5	rubric AfterGlow subsection; every QB-S/QB-SM row once, report only; gate CI: PASS

@@ -174,3 +174,34 @@ The CI gates below marked "set from CI" are placeholders until then.
 | QB-F4 | Keyboard parity: arrows step, Shift coarse, Option fine, Return types, Escape cancels; every tool has a one-key shortcut | journey steps on one bar slider and on the tool rail |
 | QB-F5 | Reduce Motion: state changes do not animate; Increase Contrast: outlines appear | probe mark: measured animation duration is 0 under Reduce Motion; goldens for Increase Contrast |
 | QB-F6 | Geometry holds: row, button, radius and type sizes match the tokens, so a slide back to framework defaults fails | `TokensTests.geometry` plus the component goldens |
+
+### AfterGlow
+
+Rows from `docs/blueprints/suite.md` 7.1 for switching, the hand-off store and
+the suite store. Every row is **report only**: a switch or a budget that
+doesn't pass is printed, never a red gate, until ten CI runs have set its
+number (the blueprint's "report-only, then set from CI"). QB-S4's blueprint
+row is a placeholder, so it is report-only here too. A row whose test isn't
+written yet names the file it will live in and says so.
+
+| id | Check | Budget | Test | Mode |
+|---|---|---|---|---|
+| QB-S1 | Switch to a running app (⌃⌘<n>, Switch To menu): key event → first frame of the target's key window | p95 ≤ 6 refreshes | SP1 `testSwitchToRunningAppLatency` in `UITests/AfterGlowJourneyTests+PerfSwitch.swift` (SW-4c; not written yet) | report only |
+| QB-S2 | First open of an app per session: click → first frame of its window | ≤ 700 ms median, ≤ 1 s p95 | SP2 `testColdOpenEachApp` in `UITests/AfterGlowJourneyTests+PerfSwitch.swift` (SW-4c; not written yet) | report only |
+| QB-S3 | AfterGlow cold launch → home first frame; first frame → recents shown | ≤ 500 ms; ≤ 100 ms | SP3 `testHomeFirstFrameAndRecents` (home feature; not written yet) | report only |
+| QB-S4 | Type in recents search → filtered grid drawn | p95 ≤ 2 frames late | SP4 `testRecentsSearchKeystrokes` (home feature; not written yet) | report only (placeholder 3 in the blueprint) |
+| QB-S5 | Paste across apps → pasted item drawn | ≤ 100 ms; ≤ 300 ms with progress by 100 ms | SP5 `testPasteAcrossApps` (not written yet) | report only |
+| QB-S6 | Routed open (Finder or Open In) → document window's first frame | ≤ 300 ms running / ≤ 1 s cold | SP6 `testRoutedOpen` (not written yet) | report only |
+| QB-S7 | Edit in Photo → image shown; Photo Save → Library's thumbnail updated | ≤ 1 s; ≤ 1 s | SP7 `testRoundTripLatency` (not written yet) | report only |
+| QB-S8 | A setting changed → applied in every running app | ≤ 500 ms | SP8 `testPreferencePropagation` (not written yet) | report only |
+| QB-S9 | Drag a card or file onto another app: the drop target highlights | ≤ 1 frame after the drag enters, by the target's probe | SJ14 with the probe (not written yet) | report only |
+| QB-SM1 | `RecentsList.note` into 200 items; `merging` two lists of 200 | ≤ 0.2 ms; ≤ 2 ms debug | `Tests/SuiteModelTests/ValuesRecentsTests.swift` | report only |
+| QB-SM2 | `HomeBuilding.home` over 200 recents with a query | ≤ 2 ms | `Tests/SuiteModelTests/Budget+Home.swift` | report only |
+| QB-SM3 | `AssetIndex.search` over 5,000 assets | ≤ 5 ms | not written yet (assets feature) | report only |
+| QB-SM4 | `HandOffCodec` encode + decode | ≤ 0.2 ms; debug ≤ 2 ms | `Tests/SuiteModelTests/Budget+HandOff.swift` | report only |
+| QB-SM5 | `PasteboardCoding.bestItem` over 6 representations | ≤ 0.1 ms; debug ≤ 1 ms | not written yet (pasteboard feature) | report only |
+| QB-SM6 | `FileStore` under the lock: two processes each note 500 recents into one store | no entry lost (1,000 present); each write ≤ 5 ms median | `Tests/SuiteModelTests/Budget+Store.swift` | report only |
+
+QB-L9 is the row in the Latency table above. For AfterGlow's waits (cold open,
+switch, round trip, routed open) it is report only, measured by the
+`switch-cold` and `tile-progress` marks (`docs/blueprints/suite/features/switching.md`).
