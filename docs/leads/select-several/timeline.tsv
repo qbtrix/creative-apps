@@ -43,3 +43,4 @@ utc	stage	event	ref	note
 2026-10-17T23:43Z	wave	11 fix-batch launched for #2463
 2026-10-17T23:50Z	merge	#2461 merged (fixes #2438)
 2026-10-17T23:50Z	wave	11 fixer stopped on full disk; lead cleared build caches and runs the gate on 860e93a6
+2026-10-17T23:56Z	pr	#2481 opened (fixes #2463, mutate 7/7)

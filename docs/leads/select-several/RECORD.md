@@ -4,7 +4,7 @@ Issue: #1495 · Packet: docs/blueprints/design/features/select-several.md
 Run: act-1a14a88d756-rnok · Session: claude/design-feature-lead-7saqm8 · Started: 2026-10-17T15:46Z
 Stage: 3 wave 1
 Base: dd7ec767cc0afab91b35ff4f208351dd866028d8
-Next: #2461 (#2438) merged; S-7 #2469 in lane; #2463 fix (wave 11, fixer hit full disk) finishing by lead: gate running; SS-a line after #2469 + #2463 fix merge and a full CI contains them
+Next: S-7 #2469 and #2463 fix #2481 in lane; then a follow-up turns J5's #2463 skip into real steps; SS-a line once both are in a full CI with green Linux; plan SS-b S-4/S-8 next
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
