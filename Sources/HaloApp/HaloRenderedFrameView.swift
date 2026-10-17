@@ -6,8 +6,8 @@
 // layers, so its pixels sit on theirs; it is `halo.viewer.rendered` with
 // `renderedFrameSummary` ("Rendered frame 12 at 480 × 270") as its value.
 // `renderedFrameNote` ("Rendered frame is out of date." when stale, else the
-// frame's undrawn-text note) is captioned just under the artboard as
-// `halo.viewer.renderedNote`, with the warning triangle. The image and its
+// frame's undrawn-text note) is captioned just under the artboard, on the
+// canvas surround, as `halo.viewer.renderedNote`, with the warning triangle. The image and its
 // note are one Equatable view, so a body pass that changes neither skips
 // making the image again. Reads its model and never acts.
 import HaloModel
@@ -48,9 +48,10 @@ struct HaloRenderedImage: View, Equatable {
                 .accessibilityValue(summary)
                 .accessibilityIdentifier("halo.viewer.rendered")
                 .aspectRatio(artboard, contentMode: .fit)
-                // Under the artboard, in the canvas inset: a zero-height
-                // frame on the image's bottom edge that the note hangs from,
-                // a small gap below it, without moving the image.
+                // Under the artboard, in the canvas inset, on the window's
+                // surround (#2345): a zero-height frame on the image's bottom
+                // edge that the note hangs from, a small gap below it, so no
+                // glyph lands on the artwork and the image doesn't move.
                 .overlay(alignment: .bottom) {
                     if let note {
                         HaloRenderedNote(text: note)
