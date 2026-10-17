@@ -4,7 +4,7 @@ Issue: #1494 · Packet: docs/blueprints/design/features/design-window.md
 Run: act-1a14a88d756-rnok · Session: claude/design-feature-lead-7saqm8 · Started: 2026-10-17T15:46Z
 Stage: 3 wave 3
 Base: 6ad373ab37fb612a8e7b185f902c263211f1197b
-Next: D0-8a merged (#2282, 8f0fa099); wave 4 D0-8b PR #2309 open (head 4e31285c, contract check ok; lane macOS build next). #2280 (D0-9c) build 39063972956 green on c76da704, lane merges next sweep. DW-a slice check: run 39062516417 Linux red on DesignStyleBudgetTests.scrubStep (ST-7, not ours; dev-red #2303 owned by style-rows), so DW-a waits on the next full run with a green Linux job (39064216590 on 8f0fa099 pending). Finding #1974 (body-count flake, Feature: design-window) goes first in wave 5 with D0-7a.
+Next: D0-9c merged (#2280, df60ad73). D0-8b PR #2309 macOS build 39066057878 green on 4e31285c, lane merges next sweep; then wave 5: finding #1974 first, D0-7a, plus the TODO(D0-8b) assertion in DesignCanvasHoverTests. DW-a check: Linux check 39066080898 on df60ad73 red again only on ST-7 scrubStep (dev-red #2303, not ours); waits on full run 39066112359 (df60ad73) Linux job.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |

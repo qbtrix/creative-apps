@@ -29,3 +29,4 @@ utc	stage	event	ref	note
 2026-10-17T19:40:27Z	ci	full run 39061216116 cancelled; DW-a check moves to 39062516417 (0c8e4a71)
 2026-10-17T20:03Z	check	D0-8a merged; D0-8b launched; #2280 build green; run 39062516417 Linux red (ST-7 timing test, dev-red #2303, not ours); #1974 queued for wave 5
 2026-10-17T20:10Z	pr	D0-8b opened #2309 (4e31285c), contract check ok
+2026-10-17T20:26Z	check	#2280 merged df60ad73; #2309 build green; full run 39066112359 pending; Linux red is ST-7 only
