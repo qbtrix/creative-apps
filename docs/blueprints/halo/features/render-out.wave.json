@@ -2,8 +2,8 @@
   "title": "Render a frame and render to files",
   "wave": "W2",
   "order": 20,
-  "status": "planned",
-  "feature_issue": "file when ready",
+  "status": "built",
+  "feature_issue": "#1505",
   "covers": "#451, #429",
   "waits_on": "viewer-playback; #333",
   "cells": {
