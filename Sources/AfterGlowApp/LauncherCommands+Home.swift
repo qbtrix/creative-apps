@@ -11,12 +11,13 @@ import SwiftUI
 
 struct LauncherCommandsHome: Commands {
     @FocusedValue(\.homeModel) private var model
+    @FocusedValue(\.homePage) private var page
     @Environment(\.openWindow) private var openWindow
 
     private var menu: HomeMenu {
         HomeMenu.make(
             recents: RecentsList(items: model?.state.cards.map(\.item) ?? []), selection: model?.selection,
-            thumbnailStep: model?.thumbnailStep ?? 1, page: .home, hasWindow: model != nil,
+            thumbnailStep: model?.thumbnailStep ?? 1, page: page ?? .home, hasWindow: model != nil,
             canUndoRemove: model?.canUndoRemove ?? false, tiles: model?.state.tiles ?? [],
             pending: LauncherServices.shared.pending)
     }

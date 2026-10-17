@@ -2,7 +2,8 @@
 // HM-2a): SuiteWindow (which applies `.suiteProbes()` once) over a HomeModel
 // on LauncherServices.shared, reloaded then observed in a `.task`, with
 // search, Open… (disabled, saying why, until a chosen file can be routed)
-// and the model published as the `homeModel` focused value for the menus.
+// and the model published as the `homeModel` focused value for the menus,
+// with the page it shows as `homePage`, so Edit > Delete is titled for it.
 // HM-2b: the New row (HomeNewRow) and the inspector (HomeInspector).
 import AppKit
 import SuiteModel
@@ -11,10 +12,13 @@ import SwiftUI
 
 /// A plain key rather than `@Entry`, as DesignMenuKey.
 private struct HomeModelKey: FocusedValueKey { typealias Value = HomeModel }
+private struct HomePageKey: FocusedValueKey { typealias Value = HomePage }
 
 extension FocusedValues {
     /// The focused home window's model; nil with no home window focused.
     var homeModel: HomeModel? { get { self[HomeModelKey.self] } set { self[HomeModelKey.self] = newValue } }
+    /// The page the focused home window shows; nil with no home window focused.
+    var homePage: HomePage? { get { self[HomePageKey.self] } set { self[HomePageKey.self] = newValue } }
 }
 
 struct HomeWindow: View {
@@ -47,6 +51,7 @@ struct HomeWindow: View {
             }
         }
         .focusedSceneValue(\.homeModel, model)
+        .focusedSceneValue(\.homePage, showsAssets ? .assets : .home)
     }
 
     private func select(_ id: SidebarItem.ID) {
