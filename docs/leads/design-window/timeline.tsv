@@ -4,3 +4,5 @@ utc	stage	event	ref	note
 2026-10-17T15:50Z	1	stage-end	#1494	packet read
 2026-10-17T15:50Z	2	stage-end	#1494	plan: W1 D0-5a, D0-5b
 2026-10-17T15:50Z	3	stage-start	#1494	wave 1
+2026-10-17T15:50Z	1	issues	#2148	ScrubField mixed needs-ui
+2026-10-17T15:50Z	3	wave-start	W1	D0-5a, D0-5b (workflow wf_1f7cd7fe-f9c)
