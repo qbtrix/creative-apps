@@ -12,3 +12,8 @@ utc	stage	event	ref	note
 2026-10-17T06:17Z	3	stage-start	#1509	wave 1: TX-1 TX-2 TX-3 TX-4 beside RO-1 RO-2 RO-3
 2026-10-17T11:58Z	3	heartbeat	act-1a149b53ef6-67v7	line lead resumed: wave 1 of the previous run opened no PRs; restarting it on dev 0424231
 2026-10-17T11:56Z	3	stage-start	#1509	wave 1 relaunched on 0424231 (run act-1a149b53ef6-67v7)
+2026-10-17T13:53Z	3	pr-merged	#2060	TX-1
+2026-10-17T13:53Z	3	pr-merged	#2063	TX-2
+2026-10-17T13:53Z	3	pr-merged	#2065	TX-3
+2026-10-17T13:53Z	3	pr-merged	#2064	TX-4
+2026-10-17T13:53Z	3	stage-start	#1509	wave 2: TX-5 TX-6 beside RO-4 RO-5 on 8e86841
