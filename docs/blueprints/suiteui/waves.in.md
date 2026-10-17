@@ -14,6 +14,14 @@ cross-app plan whose order and shared files are in
 `docs/blueprints/suite/features/shell-parity-waves.md`; they follow that
 file's waves, not this one's.
 
+Rows whose wave reads `XK1` or `XK2` belong to the kernel track: `SuiteKernel`
+(editor-kernel, XK1), the Linux-safe library every app Model and SuiteUI's
+kernel-facing views import, and the `adopt-kernel-*` migrations (XK2), one
+per concept with one slice per app, each waiting only on its concept's
+kernel slice. The prefix sorts after `SP` so the track may depend on the
+built shell-parity features whose files it edits (`SuiteGallery.swift`).
+Design: `paw-workspace/docs/design/drafts/2026-10-17-editor-kernel.md`.
+
 <!-- waves-table: wave | feature | packet | covers | waits on | feature issue | status -->
 
 ## File when ready

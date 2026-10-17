@@ -1,0 +1,503 @@
+{
+  "title": "SuiteKernel: one Linux-safe library for history, selection, the layer tree with parenting, keys and easing, snap, transform, stroke, export and session, plus its SuiteUI halves (layers panel, handles, guides, export sheet)",
+  "wave": "XK1",
+  "order": 10,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "covers": "editor-kernel design (2026-10-17) and its inventory; captain's canonical-first call on #1552; the smart-guide needs-ui from snapping; lists-and-layers LL-5 and LL-8b (the one layers panel)",
+  "waits_on": "nothing open: suite-harness (#778) and editor-in-window (#1079) are built and own SuiteGallery.swift and project.yml; EK-26 waits on canvas-host CH-d for suiteui.md; the adopt-kernel-* features and snapping wait on slices here",
+  "depends": [
+    "suite-harness",
+    "editor-in-window"
+  ],
+  "longest_chain": "6 (EK-1 → EK-2 → EK-4 → EK-5 → EK-6 → EK-26)",
+  "owned": [
+    "Package.swift",
+    "project.yml",
+    "scripts/test-scope",
+    "Sources/SuiteKernel/SuiteKernel.swift",
+    "Sources/SuiteKernel/Geometry.swift",
+    "Tests/SuiteKernelTests/KernelShapeTests.swift",
+    "docs/c4/parts/creative-apps/suite-kernel/container.json",
+    "docs/c4/parts/creative-apps/suite-kernel/kernel-geometry.json",
+    "Sources/SuiteKernel/History/History.swift",
+    "Sources/SuiteKernel/Selection/Selection.swift",
+    "Sources/SuiteKernel/Layers/LayerTree.swift",
+    "Sources/SuiteKernel/Fakes/KernelFixtures.swift",
+    "docs/c4/parts/creative-apps/suite-kernel/kernel-history.json",
+    "docs/c4/parts/creative-apps/suite-kernel/kernel-selection.json",
+    "docs/c4/parts/creative-apps/suite-kernel/kernel-layers.json",
+    "Sources/SuiteKernel/Keys/Keys.swift",
+    "Sources/SuiteKernel/Keys/KeyRules.swift",
+    "Sources/SuiteKernel/Transform/BoxMath.swift",
+    "Sources/SuiteKernel/Transform/HandleHit.swift",
+    "Sources/SuiteKernel/Export/ExportRun.swift",
+    "Sources/SuiteKernel/Session/DocumentSession.swift",
+    "Sources/SuiteKernel/Session/VersionedJSON.swift",
+    "Tests/SuiteKernelTests/KernelShapeMoreTests.swift",
+    "docs/c4/parts/creative-apps/suite-kernel/kernel-keys.json",
+    "docs/c4/parts/creative-apps/suite-kernel/kernel-transform.json",
+    "docs/c4/parts/creative-apps/suite-kernel/kernel-export-session.json",
+    "Sources/SuiteUI/SuiteGallery.swift",
+    "Sources/SuiteUI/Gallery/GalleryEditorKernel.swift",
+    "Sources/SuiteUI/LayerTreeList.swift",
+    "Tests/SuiteUITests/LayerTreeListTests.swift",
+    "UITests/SuiteJourneyTests+EditorKernel.swift",
+    "Sources/SuiteUI/SelectionHandles.swift",
+    "Sources/SuiteUI/SnapGuideMarks.swift",
+    "Tests/AppSnapshotTests/SuiteEditorKernelSnapshots.swift",
+    "Tests/AppSnapshotTests/RenderBudgetEditorKernelTests.swift",
+    "Tests/SuiteKernelTests/HistoryTests.swift",
+    "Tests/mutations/SuiteKernel.History.json",
+    "Tests/SuiteKernelTests/SelectionTests.swift",
+    "Tests/SuiteKernelTests/NudgeMarqueeTests.swift",
+    "Sources/SuiteKernel/Selection/Nudge.swift",
+    "Sources/SuiteKernel/Selection/Marquee.swift",
+    "Tests/mutations/SuiteKernel.Selection.json",
+    "Tests/mutations/SuiteKernel.Nudge.json",
+    "Tests/SuiteKernelTests/LayerTreeTests.swift",
+    "Tests/SuiteKernelTests/LayerFollowTests.swift",
+    "Tests/mutations/SuiteKernel.LayerTree.json",
+    "Sources/SuiteKernel/Layers/LayerFollow.swift",
+    "Tests/mutations/SuiteKernel.LayerFollow.json",
+    "Tests/SuiteKernelTests/KeyRulesTests.swift",
+    "Tests/SuiteKernelTests/EaseCurveTests.swift",
+    "Tests/mutations/SuiteKernel.Keys.json",
+    "Tests/mutations/SuiteKernel.KeyRules.json",
+    "Tests/SuiteKernelTests/SnapCandidateTests.swift",
+    "Sources/SuiteKernel/Snap/Snapping.swift",
+    "Tests/mutations/SuiteKernel.Snapping.json",
+    "Tests/SuiteKernelTests/BoxMathTests.swift",
+    "Tests/SuiteKernelTests/HandleHitTests.swift",
+    "Tests/mutations/SuiteKernel.BoxMath.json",
+    "Tests/mutations/SuiteKernel.HandleHit.json",
+    "Tests/SuiteKernelTests/ExportRunTests.swift",
+    "Tests/mutations/SuiteKernel.ExportRun.json",
+    "Tests/SuiteKernelTests/DocumentSessionTests.swift",
+    "Tests/SuiteKernelTests/VersionedJSONTests.swift",
+    "Tests/mutations/SuiteKernel.DocumentSession.json",
+    "Tests/mutations/SuiteKernel.VersionedJSON.json",
+    "Tests/SuiteKernelTests/KernelWalkTests.swift",
+    "docs/blueprints/suite.md",
+    "docs/blueprints/suiteui.md",
+    "docs/engineering.md",
+    "docs/blueprints/suiteui/features/editor-kernel.wave.json",
+    "Tests/SuiteKernelTests/StrokeTests.swift",
+    "Sources/SuiteKernel/Stroke/Stroke.swift",
+    "Sources/SuiteKernel/Stroke/BrushSettings.swift",
+    "Sources/SuiteKernel/Stroke/LiveCopy.swift",
+    "Tests/mutations/SuiteKernel.Stroke.json",
+    "Tests/mutations/SuiteKernel.BrushSettings.json",
+    "Sources/SuiteKernel/Snap/SnapLines.swift",
+    "Sources/SuiteKernel/Snap/SnapGaps.swift",
+    "Tests/SuiteKernelTests/KernelShapeStrokeTests.swift",
+    "docs/c4/parts/creative-apps/suite-kernel/kernel-stroke.json",
+    "docs/c4/parts/creative-apps/suite-kernel/kernel-snap.json",
+    "Sources/SuiteUI/ExportSheet.swift",
+    "Sources/SuiteUI/StrokePacer.swift",
+    "Sources/SuiteUI/PointerPressure.swift",
+    "Sources/SuiteUI/BrushCursorMark.swift",
+    "Sources/SuiteUI/Gallery/GalleryEditorKernelChrome.swift",
+    "Tests/SuiteUITests/ExportSheetTests.swift",
+    "Tests/SuiteUITests/StrokePacerTests.swift",
+    "Tests/AppSnapshotTests/SuiteEditorKernelChromeSnapshots.swift",
+    "Sources/SuiteUI/ToolKeys.swift",
+    "Tests/SuiteUITests/ToolKeysTests.swift",
+    "Tests/AppSnapshotTests/RenderBudgetEditorKernelStrokeTests.swift"
+  ],
+  "journeys": [
+    "SuiteJourneyTests.testEditorKernelGallery"
+  ],
+  "slices": [
+    {
+      "id": "EK-a",
+      "behavior": "The SuiteKernel target exists and builds on Linux and macOS with every public type and signature declared as a documented stub, fakes and fixtures, so the UI slices, the logic slices, the adopt features and the snapping lead all build against it at once.",
+      "tasks": [
+        "EK-1",
+        "EK-2",
+        "EK-3",
+        "EK-29"
+      ],
+      "journeys": [
+        "KJ0"
+      ],
+      "owned": [
+        "Package.swift",
+        "project.yml",
+        "scripts/test-scope",
+        "Sources/SuiteKernel/SuiteKernel.swift",
+        "Sources/SuiteKernel/Geometry.swift",
+        "Tests/SuiteKernelTests/KernelShapeTests.swift",
+        "docs/c4/parts/creative-apps/suite-kernel/container.json",
+        "docs/c4/parts/creative-apps/suite-kernel/kernel-geometry.json",
+        "Sources/SuiteKernel/History/History.swift",
+        "Sources/SuiteKernel/Selection/Selection.swift",
+        "Sources/SuiteKernel/Layers/LayerTree.swift",
+        "Sources/SuiteKernel/Fakes/KernelFixtures.swift",
+        "docs/c4/parts/creative-apps/suite-kernel/kernel-history.json",
+        "docs/c4/parts/creative-apps/suite-kernel/kernel-selection.json",
+        "docs/c4/parts/creative-apps/suite-kernel/kernel-layers.json",
+        "Sources/SuiteKernel/Keys/Keys.swift",
+        "Sources/SuiteKernel/Keys/KeyRules.swift",
+        "Sources/SuiteKernel/Transform/BoxMath.swift",
+        "Sources/SuiteKernel/Transform/HandleHit.swift",
+        "Sources/SuiteKernel/Export/ExportRun.swift",
+        "Sources/SuiteKernel/Session/DocumentSession.swift",
+        "Sources/SuiteKernel/Session/VersionedJSON.swift",
+        "Tests/SuiteKernelTests/KernelShapeMoreTests.swift",
+        "docs/c4/parts/creative-apps/suite-kernel/kernel-keys.json",
+        "docs/c4/parts/creative-apps/suite-kernel/kernel-transform.json",
+        "docs/c4/parts/creative-apps/suite-kernel/kernel-export-session.json",
+        "Sources/SuiteKernel/Stroke/Stroke.swift",
+        "Sources/SuiteKernel/Stroke/BrushSettings.swift",
+        "Sources/SuiteKernel/Stroke/LiveCopy.swift",
+        "Sources/SuiteKernel/Snap/Snapping.swift",
+        "Sources/SuiteKernel/Snap/SnapLines.swift",
+        "Sources/SuiteKernel/Snap/SnapGaps.swift",
+        "Tests/SuiteKernelTests/KernelShapeStrokeTests.swift",
+        "docs/c4/parts/creative-apps/suite-kernel/kernel-stroke.json",
+        "docs/c4/parts/creative-apps/suite-kernel/kernel-snap.json"
+      ],
+      "waits": {},
+      "ui": false
+    },
+    {
+      "id": "EK-u",
+      "behavior": "The gallery's editor-kernel page shows a 200-row layer tree you can drag into a parent, the selection handles and a smart guide with a distance label, on the kernel fakes, within the render budget.",
+      "tasks": [
+        "EK-4",
+        "EK-5",
+        "EK-6"
+      ],
+      "journeys": [
+        "testEditorKernelGallery"
+      ],
+      "owned": [
+        "Sources/SuiteUI/SuiteGallery.swift",
+        "Sources/SuiteUI/Gallery/GalleryEditorKernel.swift",
+        "Sources/SuiteUI/LayerTreeList.swift",
+        "Tests/SuiteUITests/LayerTreeListTests.swift",
+        "UITests/SuiteJourneyTests+EditorKernel.swift",
+        "Sources/SuiteUI/SelectionHandles.swift",
+        "Sources/SuiteUI/SnapGuideMarks.swift",
+        "Tests/AppSnapshotTests/SuiteEditorKernelSnapshots.swift",
+        "Tests/AppSnapshotTests/RenderBudgetEditorKernelTests.swift"
+      ],
+      "waits": {
+        "EK-a": [
+          "EK-4"
+        ]
+      },
+      "ui": true
+    },
+    {
+      "id": "EK-undo",
+      "behavior": "History<Payload> records named steps, folds a run under one key, ends the run on undo, redo and endRun, keeps ids that never repeat, reads dirty as saved-vs-current and jumps to a step.",
+      "tasks": [
+        "EK-7",
+        "EK-8"
+      ],
+      "journeys": [
+        "KJ1"
+      ],
+      "owned": [
+        "Tests/SuiteKernelTests/HistoryTests.swift",
+        "Sources/SuiteKernel/History/History.swift",
+        "Tests/mutations/SuiteKernel.History.json"
+      ],
+      "waits": {
+        "EK-a": [
+          "EK-7"
+        ]
+      },
+      "ui": false
+    },
+    {
+      "id": "EK-sel",
+      "behavior": "Selection<ID> picks with replace, toggle and extend (range from the anchor when an order is given), keeps a primary, refuses what canAdd refuses, prunes dead ids and moves by arrow in a grid; Nudge and Marquee give the one delta rule, run key and union rule.",
+      "tasks": [
+        "EK-9",
+        "EK-10"
+      ],
+      "journeys": [
+        "KJ2"
+      ],
+      "owned": [
+        "Tests/SuiteKernelTests/SelectionTests.swift",
+        "Tests/SuiteKernelTests/NudgeMarqueeTests.swift",
+        "Sources/SuiteKernel/Selection/Selection.swift",
+        "Sources/SuiteKernel/Selection/Nudge.swift",
+        "Sources/SuiteKernel/Selection/Marquee.swift",
+        "Tests/mutations/SuiteKernel.Selection.json",
+        "Tests/mutations/SuiteKernel.Nudge.json"
+      ],
+      "waits": {
+        "EK-a": [
+          "EK-9"
+        ]
+      },
+      "ui": false
+    },
+    {
+      "id": "EK-tree",
+      "behavior": "LayerTree<Payload> nests, orders, cascades hide and lock, moves into a parent at an index, arranges, groups, ungroups and duplicates with refusals, and composes transforms along followsID without cycles, keeping a layer's place when its parent changes.",
+      "tasks": [
+        "EK-11",
+        "EK-12",
+        "EK-13"
+      ],
+      "journeys": [
+        "KJ3"
+      ],
+      "owned": [
+        "Tests/SuiteKernelTests/LayerTreeTests.swift",
+        "Tests/SuiteKernelTests/LayerFollowTests.swift",
+        "Sources/SuiteKernel/Layers/LayerTree.swift",
+        "Tests/mutations/SuiteKernel.LayerTree.json",
+        "Sources/SuiteKernel/Layers/LayerFollow.swift",
+        "Tests/mutations/SuiteKernel.LayerFollow.json"
+      ],
+      "waits": {
+        "EK-a": [
+          "EK-11"
+        ]
+      },
+      "ui": false
+    },
+    {
+      "id": "EK-keys",
+      "behavior": "KeyRules toggles, moves (clamped, all or nothing), removes and shifts keys on a sorted track and names the key state; EasePreset and EaseCurve give one preset set and one handle math.",
+      "tasks": [
+        "EK-14",
+        "EK-15",
+        "EK-16"
+      ],
+      "journeys": [
+        "KJ4"
+      ],
+      "owned": [
+        "Tests/SuiteKernelTests/KeyRulesTests.swift",
+        "Tests/SuiteKernelTests/EaseCurveTests.swift",
+        "Sources/SuiteKernel/Keys/Keys.swift",
+        "Tests/mutations/SuiteKernel.Keys.json",
+        "Sources/SuiteKernel/Keys/KeyRules.swift",
+        "Tests/mutations/SuiteKernel.KeyRules.json"
+      ],
+      "waits": {
+        "EK-a": [
+          "EK-14"
+        ]
+      },
+      "ui": false
+    },
+    {
+      "id": "EK-snap",
+      "behavior": "Given a tree and the moving ids, the snap module names the candidates (siblings, parent frames, the page; hidden skipped, locked kept) and orders the offsets lines, gaps, then whole points; the engines are the snapping lead's SN-2 and SN-3.",
+      "tasks": [
+        "EK-17",
+        "EK-18"
+      ],
+      "journeys": [
+        "KJ5"
+      ],
+      "owned": [
+        "Tests/SuiteKernelTests/SnapCandidateTests.swift",
+        "Sources/SuiteKernel/Snap/Snapping.swift",
+        "Tests/mutations/SuiteKernel.Snapping.json"
+      ],
+      "waits": {
+        "EK-a": [
+          "EK-17"
+        ],
+        "EK-tree": [
+          "EK-18"
+        ]
+      },
+      "ui": false
+    },
+    {
+      "id": "EK-box",
+      "behavior": "BoxMath resizes by a handle with Shift and Option, never flips, scales several as one box, and HandleHit finds the handle under a point at a screen tolerance divided by zoom.",
+      "tasks": [
+        "EK-19",
+        "EK-20"
+      ],
+      "journeys": [
+        "KJ6"
+      ],
+      "owned": [
+        "Tests/SuiteKernelTests/BoxMathTests.swift",
+        "Tests/SuiteKernelTests/HandleHitTests.swift",
+        "Sources/SuiteKernel/Transform/BoxMath.swift",
+        "Sources/SuiteKernel/Transform/HandleHit.swift",
+        "Tests/mutations/SuiteKernel.BoxMath.json",
+        "Tests/mutations/SuiteKernel.HandleHit.json"
+      ],
+      "waits": {
+        "EK-a": [
+          "EK-19"
+        ]
+      },
+      "ui": false
+    },
+    {
+      "id": "EK-run",
+      "behavior": "ExportRun<Options> moves idle, editing, running(done, total), finished or failed, never reports progress going back, and returns to idle on cancel.",
+      "tasks": [
+        "EK-21",
+        "EK-22"
+      ],
+      "journeys": [
+        "KJ7"
+      ],
+      "owned": [
+        "Tests/SuiteKernelTests/ExportRunTests.swift",
+        "Sources/SuiteKernel/Export/ExportRun.swift",
+        "Tests/mutations/SuiteKernel.ExportRun.json"
+      ],
+      "waits": {
+        "EK-a": [
+          "EK-21"
+        ]
+      },
+      "ui": false
+    },
+    {
+      "id": "EK-doc",
+      "behavior": "DocumentSession reads dirty from the saved and current tokens, names the save status, says when autosave is due and what recovery to offer, and VersionedJSON probes a file's version before decoding it.",
+      "tasks": [
+        "EK-23",
+        "EK-24"
+      ],
+      "journeys": [
+        "KJ8"
+      ],
+      "owned": [
+        "Tests/SuiteKernelTests/DocumentSessionTests.swift",
+        "Tests/SuiteKernelTests/VersionedJSONTests.swift",
+        "Sources/SuiteKernel/Session/DocumentSession.swift",
+        "Sources/SuiteKernel/Session/VersionedJSON.swift",
+        "Tests/mutations/SuiteKernel.DocumentSession.json",
+        "Tests/mutations/SuiteKernel.VersionedJSON.json"
+      ],
+      "waits": {
+        "EK-a": [
+          "EK-23"
+        ]
+      },
+      "ui": false
+    },
+    {
+      "id": "EK-stroke",
+      "behavior": "StrokeSmoother turns pressure samples into cubic segments with a pressure range (centripetal Catmull-Rom, one segment late, mirrored ends), DabSpacer spaces dabs, BrushSettings clamps size, hardness, opacity, flow and spacing and round-trips presets, and LiveCopy<Model> holds the copy a drag draws on until take().",
+      "tasks": [
+        "EK-27",
+        "EK-28"
+      ],
+      "journeys": [
+        "KJ10"
+      ],
+      "owned": [
+        "Tests/SuiteKernelTests/StrokeTests.swift",
+        "Sources/SuiteKernel/Stroke/Stroke.swift",
+        "Sources/SuiteKernel/Stroke/BrushSettings.swift",
+        "Sources/SuiteKernel/Stroke/LiveCopy.swift",
+        "Tests/mutations/SuiteKernel.Stroke.json",
+        "Tests/mutations/SuiteKernel.BrushSettings.json"
+      ],
+      "waits": {
+        "EK-a": [
+          "EK-27"
+        ]
+      },
+      "ui": false
+    },
+    {
+      "id": "EK-chrome",
+      "behavior": "ExportSheet (format, size, quality rows and a progress bar over ExportRun readouts), StrokePacer, PointerPressure and BrushCursorMark (#953), and ToolKeys (one tool-letter lookup and one KeyModifiers(nsEvent:)) exist in SuiteUI on the gallery page, on the fakes.",
+      "tasks": [
+        "EK-30",
+        "EK-31"
+      ],
+      "journeys": [
+        "testEditorKernelGallery"
+      ],
+      "owned": [
+        "Sources/SuiteUI/ExportSheet.swift",
+        "Sources/SuiteUI/StrokePacer.swift",
+        "Sources/SuiteUI/PointerPressure.swift",
+        "Sources/SuiteUI/BrushCursorMark.swift",
+        "Sources/SuiteUI/Gallery/GalleryEditorKernelChrome.swift",
+        "Tests/SuiteUITests/ExportSheetTests.swift",
+        "Tests/SuiteUITests/StrokePacerTests.swift",
+        "Tests/AppSnapshotTests/SuiteEditorKernelChromeSnapshots.swift",
+        "Sources/SuiteUI/ToolKeys.swift",
+        "Tests/SuiteUITests/ToolKeysTests.swift",
+        "Tests/AppSnapshotTests/RenderBudgetEditorKernelStrokeTests.swift"
+      ],
+      "waits": {
+        "EK-a": [
+          "EK-30"
+        ]
+      },
+      "ui": true
+    },
+    {
+      "id": "EK-z",
+      "behavior": "The full Linux walk runs every module together on the fakes, the blueprints and docs/engineering.md name the kernel tier, and the feature is built.",
+      "tasks": [
+        "EK-25",
+        "EK-26"
+      ],
+      "journeys": [
+        "KJ9"
+      ],
+      "owned": [
+        "Tests/SuiteKernelTests/KernelWalkTests.swift",
+        "docs/blueprints/suite.md",
+        "docs/blueprints/suiteui.md",
+        "docs/engineering.md",
+        "docs/blueprints/suiteui/features/editor-kernel.wave.json"
+      ],
+      "waits": {
+        "EK-u": [
+          "EK-25"
+        ],
+        "EK-undo": [
+          "EK-25"
+        ],
+        "EK-sel": [
+          "EK-25"
+        ],
+        "EK-tree": [
+          "EK-25"
+        ],
+        "EK-keys": [
+          "EK-25"
+        ],
+        "EK-snap": [
+          "EK-25"
+        ],
+        "EK-box": [
+          "EK-25"
+        ],
+        "EK-run": [
+          "EK-25"
+        ],
+        "EK-doc": [
+          "EK-25"
+        ],
+        "EK-stroke": [
+          "EK-25"
+        ],
+        "EK-chrome": [
+          "EK-25"
+        ],
+        "canvas-host:CH-d": [
+          "EK-26"
+        ]
+      },
+      "ui": false
+    }
+  ]
+}

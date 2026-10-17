@@ -1,0 +1,215 @@
+{
+  "title": "The apps' zoom clamps, colour types, tool-letter and modifier lookups, guide views and export sheets move onto the SuiteUI component each already has or editor-kernel adds; the app copies are deleted",
+  "wave": "XK2",
+  "order": 90,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "covers": "editor-kernel design (2026-10-17), inventory row 'chrome'; captain's canonical-first call on #1552",
+  "waits_on": "editor-kernel:EK-a only (every slice); cross-line hand-offs in the packet's Hand-offs list",
+  "ui_slice": "none",
+  "ui_slice_reason": "behaviour-preserving migration: no new screen; the apps' existing journeys and snapshots verify it (its UI slices swap an app view for the SuiteUI component the kernel's EK-chrome page already shows)",
+  "owned": [
+    "Sources/DesignApp/DesignWindow.swift",
+    "Sources/PhotoApp/PhotoWindow.swift",
+    "Sources/HaloApp/HaloViewerCanvas.swift",
+    "Sources/HaloModel/HaloViewerDrag.swift",
+    "Tests/AppSnapshotTests/DesignWindowZoomTests.swift",
+    "Tests/AppSnapshotTests/PhotoWindowZoomTests.swift",
+    "Tests/HaloModelTests/HaloKeyByDragTests.swift",
+    "Tests/HaloModelTests/ViewerDraggingContractTests.swift",
+    "Tests/mutations/HaloModel.KernelZoomAdapter.json",
+    "Tests/mutations/HaloModel.HaloViewerDrag.json",
+    "Sources/DesignApp/DesignIntent.swift",
+    "Sources/DesignApp/DesignCanvasMarks.swift",
+    "Sources/PhotoApp/PhotoToolOptions.swift",
+    "Sources/FlareApp/StagePath.swift",
+    "Tests/SuiteUITests/HexColorParserTests.swift",
+    "Tests/DesignModelTests/DesignStyleTests.swift",
+    "Tests/AppSnapshotTests/DesignInspectorSnapshots.swift",
+    "Tests/mutations/SuiteUI.HexColor.json",
+    "Tests/mutations/SuiteUI.ColorWell.json",
+    "Sources/FlareApp/FlareStage.swift",
+    "Sources/DesignApp/DesignCanvas.swift",
+    "Sources/PhotoApp/PhotoEditor.swift",
+    "Tests/AppSnapshotTests/FlareToolsKeyTests.swift",
+    "Tests/AppSnapshotTests/DesignToolsKeyTests.swift",
+    "Tests/AppSnapshotTests/PhotoToolsKeyTests.swift",
+    "Tests/mutations/SuiteUI.ToolKeys.json",
+    "Sources/FlareApp/FlareStageGuides.swift",
+    "Sources/SuiteUI/GuideLineMark.swift",
+    "Tests/AppSnapshotTests/FlareStageGuideSnapshots.swift",
+    "Tests/SuiteUITests/GuideLineMarkTests.swift",
+    "Tests/mutations/SuiteUI.GuideLineMark.json",
+    "Sources/PhotoApp/ExportSheet.swift",
+    "Sources/PhotoApp/PhotoWindow+Export.swift",
+    "Sources/LibraryApp/LibraryExportSheet.swift",
+    "Sources/LibraryApp/LibraryWindow+Export.swift",
+    "Sources/FlareApp/FlareWindow+Export.swift",
+    "Tests/AppSnapshotTests/PhotoExportSheetSnapshots.swift",
+    "Tests/AppSnapshotTests/LibraryExportSnapshots.swift",
+    "Tests/AppSnapshotTests/FlareExportSnapshots.swift",
+    "Tests/mutations/SuiteUI.ExportSheet.json"
+  ],
+  "journeys": [],
+  "journeys_none": "Model-only migration proven by each app's existing journeys, which other packets own; no new XCUITest",
+  "slices": [
+    {
+      "id": "AC-zoom",
+      "behavior": "Design's and Photo's `setZoom` clamps and Halo's second document-to-screen mapping go; every app clamps through `ZoomMath.clamped`, fits through one fit, and maps through `CanvasLayout`.",
+      "tasks": [
+        "AC-z1",
+        "AC-z2"
+      ],
+      "journeys": [
+        "MJ-AC-zoom"
+      ],
+      "owned": [
+        "Sources/DesignApp/DesignWindow.swift",
+        "Sources/PhotoApp/PhotoWindow.swift",
+        "Sources/HaloApp/HaloViewerCanvas.swift",
+        "Sources/HaloModel/HaloViewerDrag.swift",
+        "Tests/AppSnapshotTests/DesignWindowZoomTests.swift",
+        "Tests/AppSnapshotTests/PhotoWindowZoomTests.swift",
+        "Tests/HaloModelTests/HaloKeyByDragTests.swift",
+        "Tests/HaloModelTests/ViewerDraggingContractTests.swift",
+        "Tests/mutations/HaloModel.KernelZoomAdapter.json",
+        "Tests/mutations/HaloModel.HaloViewerDrag.json"
+      ],
+      "waits": {
+        "editor-kernel:EK-a": [
+          "AC-z1"
+        ],
+        "adopt-kernel-brush:AB-photo": [
+          "AC-z1"
+        ]
+      },
+      "ui": true
+    },
+    {
+      "id": "AC-colour",
+      "behavior": "Design, Photo, Flare and Halo keep their file-format colour types but parse, format and pick through `HexColor` and `ColorWell`; the hex parser gets its tests.",
+      "tasks": [
+        "AC-c1",
+        "AC-c2"
+      ],
+      "journeys": [
+        "MJ-AC-colour"
+      ],
+      "owned": [
+        "Sources/DesignApp/DesignIntent.swift",
+        "Sources/DesignApp/DesignCanvasMarks.swift",
+        "Sources/PhotoApp/PhotoToolOptions.swift",
+        "Sources/FlareApp/StagePath.swift",
+        "Sources/HaloApp/HaloViewerCanvas.swift",
+        "Tests/SuiteUITests/HexColorParserTests.swift",
+        "Tests/DesignModelTests/DesignStyleTests.swift",
+        "Tests/AppSnapshotTests/DesignInspectorSnapshots.swift",
+        "Tests/mutations/SuiteUI.HexColor.json",
+        "Tests/mutations/SuiteUI.ColorWell.json"
+      ],
+      "waits": {
+        "editor-kernel:EK-a": [
+          "AC-c1"
+        ],
+        "adopt-kernel-brush:AB-photo": [
+          "AC-c1"
+        ],
+        "adopt-suiteui-chrome:AC-zoom": [
+          "AC-c1"
+        ]
+      },
+      "ui": true
+    },
+    {
+      "id": "AC-tools",
+      "behavior": "Flare, Design and Photo pick a tool from a key and read modifiers through SuiteUI's `ToolKeys`; the three letter lookups and three `NSEvent.modifierFlags` conversions are deleted.",
+      "tasks": [
+        "AC-t1",
+        "AC-t2"
+      ],
+      "journeys": [
+        "MJ-AC-tools"
+      ],
+      "owned": [
+        "Sources/FlareApp/FlareStage.swift",
+        "Sources/DesignApp/DesignCanvas.swift",
+        "Sources/DesignApp/DesignIntent.swift",
+        "Sources/PhotoApp/PhotoEditor.swift",
+        "Tests/AppSnapshotTests/FlareToolsKeyTests.swift",
+        "Tests/AppSnapshotTests/DesignToolsKeyTests.swift",
+        "Tests/AppSnapshotTests/PhotoToolsKeyTests.swift",
+        "Tests/mutations/SuiteUI.ToolKeys.json"
+      ],
+      "waits": {
+        "editor-kernel:EK-chrome": [
+          "AC-t1"
+        ],
+        "adopt-suiteui-chrome:AC-colour": [
+          "AC-t1"
+        ]
+      },
+      "ui": true
+    },
+    {
+      "id": "AC-guides",
+      "behavior": "Flare's rulers and guides toggles do something: guides draw through `CanvasMarks` and the stub view is deleted; the rulers flag is filed on canvas-marks.",
+      "tasks": [
+        "AC-g1",
+        "AC-g2"
+      ],
+      "journeys": [
+        "MJ-AC-guides"
+      ],
+      "owned": [
+        "Sources/FlareApp/FlareStageGuides.swift",
+        "Sources/SuiteUI/GuideLineMark.swift",
+        "Tests/AppSnapshotTests/FlareStageGuideSnapshots.swift",
+        "Tests/SuiteUITests/GuideLineMarkTests.swift",
+        "Tests/mutations/SuiteUI.GuideLineMark.json"
+      ],
+      "waits": {
+        "editor-kernel:EK-a": [
+          "AC-g1"
+        ]
+      },
+      "ui": true
+    },
+    {
+      "id": "AC-export-sheet",
+      "behavior": "Photo's, Library's and Flare's export sheets are SuiteUI's `ExportSheet` over each app's `ExportRun`, and the three app sheets are deleted.",
+      "tasks": [
+        "AC-e1",
+        "AC-e2"
+      ],
+      "journeys": [
+        "MJ-AC-export-sheet"
+      ],
+      "owned": [
+        "Sources/PhotoApp/ExportSheet.swift",
+        "Sources/PhotoApp/PhotoWindow+Export.swift",
+        "Sources/LibraryApp/LibraryExportSheet.swift",
+        "Sources/LibraryApp/LibraryWindow+Export.swift",
+        "Sources/FlareApp/FlareWindow+Export.swift",
+        "Tests/AppSnapshotTests/PhotoExportSheetSnapshots.swift",
+        "Tests/AppSnapshotTests/LibraryExportSnapshots.swift",
+        "Tests/AppSnapshotTests/FlareExportSnapshots.swift",
+        "Tests/mutations/SuiteUI.ExportSheet.json"
+      ],
+      "waits": {
+        "editor-kernel:EK-chrome": [
+          "AC-e1"
+        ],
+        "adopt-kernel-export:AX-photo": [
+          "AC-e1"
+        ],
+        "adopt-kernel-export:AX-library": [
+          "AC-e1"
+        ],
+        "adopt-kernel-export:AX-flare": [
+          "AC-e1"
+        ]
+      },
+      "ui": true
+    }
+  ]
+}

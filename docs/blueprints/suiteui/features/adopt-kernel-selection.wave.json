@@ -1,0 +1,148 @@
+{
+  "title": "Every app's selection set, marquee rule and nudge run on SuiteKernel's Selection; the app copies are deleted",
+  "wave": "XK2",
+  "order": 20,
+  "status": "planned",
+  "feature_issue": "file when ready",
+  "covers": "editor-kernel design (2026-10-17), inventory row 'selection'; captain's canonical-first call on #1552",
+  "waits_on": "editor-kernel:EK-sel only (every slice); cross-line hand-offs in the packet's Hand-offs list",
+  "ui_slice": "none",
+  "ui_slice_reason": "behaviour-preserving migration: no new screen; the apps' existing journeys and snapshots verify it",
+  "owned": [
+    "Sources/FlareModel/FlareSelection.swift",
+    "Tests/FlareModelTests/WorkspaceWiringTests.swift",
+    "Tests/FlareModelTests/SymbolEditSelectionTests.swift",
+    "Tests/FlareModelTests/J5MarqueeAdversarialTests.swift",
+    "Tests/mutations/FlareModel.KernelSelectionAdapter.json",
+    "Tests/mutations/FlareModel.FlareSelection.json",
+    "Sources/DesignModel/DesignSelection.swift",
+    "Sources/DesignModel/DesignCanvasEditing.swift",
+    "Sources/DesignModel/DesignActions.swift",
+    "Tests/DesignModelTests/DesignMultiSelectTests.swift",
+    "Tests/DesignModelTests/DesignSelectionRunTests.swift",
+    "Tests/DesignModelTests/DesignMarqueeTests.swift",
+    "Tests/DesignModelTests/DesignActionsTests.swift",
+    "Tests/mutations/DesignModel.KernelSelectionAdapter.json",
+    "Tests/mutations/DesignModel.DesignSelection.json",
+    "Tests/mutations/DesignModel.DesignActions.json",
+    "Sources/HaloModel/HaloKeySelection.swift",
+    "Tests/HaloModelTests/HaloKeySelectionTests.swift",
+    "Tests/mutations/HaloModel.KernelSelectionAdapter.json",
+    "Tests/mutations/HaloModel.HaloKeySelection.json",
+    "Sources/LibraryModel/LibraryCatalog.swift",
+    "Sources/LibraryModel/LibraryCulling.swift",
+    "Tests/LibraryModelTests/LibraryGridTests.swift",
+    "Tests/LibraryModelTests/LibraryGridEdgeTests.swift",
+    "Tests/mutations/LibraryModel.KernelSelectionAdapter.json",
+    "Tests/mutations/LibraryModel.LibraryCatalog.json"
+  ],
+  "journeys": [],
+  "journeys_none": "Model-only migration proven by each app's existing journeys, which other packets own; no new XCUITest",
+  "slices": [
+    {
+      "id": "AS-flare",
+      "behavior": "Flare runs its selection on `Selection<ID>`, `Pick`, `Nudge` and `Marquee` behind its existing API, its tests and journeys green, and its copy is deleted.",
+      "tasks": [
+        "AS-f1",
+        "AS-f2"
+      ],
+      "journeys": [
+        "MJ-AS-flare"
+      ],
+      "owned": [
+        "Sources/FlareModel/FlareSelection.swift",
+        "Tests/FlareModelTests/WorkspaceWiringTests.swift",
+        "Tests/FlareModelTests/SymbolEditSelectionTests.swift",
+        "Tests/FlareModelTests/J5MarqueeAdversarialTests.swift",
+        "Tests/mutations/FlareModel.KernelSelectionAdapter.json",
+        "Tests/mutations/FlareModel.FlareSelection.json"
+      ],
+      "waits": {
+        "editor-kernel:EK-sel": [
+          "AS-f1"
+        ]
+      },
+      "ui": false
+    },
+    {
+      "id": "AS-design",
+      "behavior": "Design runs its selection on `Selection<ID>`, `Pick`, `Nudge` and `Marquee` behind its existing API, its tests and journeys green, and its copy is deleted.",
+      "tasks": [
+        "AS-d1",
+        "AS-d2"
+      ],
+      "journeys": [
+        "MJ-AS-design"
+      ],
+      "owned": [
+        "Sources/DesignModel/DesignSelection.swift",
+        "Sources/DesignModel/DesignCanvasEditing.swift",
+        "Sources/DesignModel/DesignActions.swift",
+        "Tests/DesignModelTests/DesignMultiSelectTests.swift",
+        "Tests/DesignModelTests/DesignSelectionRunTests.swift",
+        "Tests/DesignModelTests/DesignMarqueeTests.swift",
+        "Tests/DesignModelTests/DesignActionsTests.swift",
+        "Tests/mutations/DesignModel.KernelSelectionAdapter.json",
+        "Tests/mutations/DesignModel.DesignSelection.json",
+        "Tests/mutations/DesignModel.DesignActions.json"
+      ],
+      "waits": {
+        "editor-kernel:EK-sel": [
+          "AS-d1"
+        ]
+      },
+      "ui": false
+    },
+    {
+      "id": "AS-halo",
+      "behavior": "Halo runs its selection on `Selection<ID>`, `Pick`, `Nudge` and `Marquee` behind its existing API, its tests and journeys green, and its copy is deleted.",
+      "tasks": [
+        "AS-h1",
+        "AS-h2"
+      ],
+      "journeys": [
+        "MJ-AS-halo"
+      ],
+      "owned": [
+        "Sources/HaloModel/HaloKeySelection.swift",
+        "Tests/HaloModelTests/HaloKeySelectionTests.swift",
+        "Tests/mutations/HaloModel.KernelSelectionAdapter.json",
+        "Tests/mutations/HaloModel.HaloKeySelection.json"
+      ],
+      "waits": {
+        "editor-kernel:EK-sel": [
+          "AS-h1"
+        ]
+      },
+      "ui": false
+    },
+    {
+      "id": "AS-library",
+      "behavior": "Library runs its selection on `Selection<ID>`, `Pick`, `Nudge` and `Marquee` behind its existing API, its tests and journeys green, and its copy is deleted.",
+      "tasks": [
+        "AS-l1",
+        "AS-l2"
+      ],
+      "journeys": [
+        "MJ-AS-library"
+      ],
+      "owned": [
+        "Sources/LibraryModel/LibraryCatalog.swift",
+        "Sources/LibraryModel/LibraryCulling.swift",
+        "Tests/LibraryModelTests/LibraryGridTests.swift",
+        "Tests/LibraryModelTests/LibraryGridEdgeTests.swift",
+        "Tests/mutations/LibraryModel.KernelSelectionAdapter.json",
+        "Tests/mutations/LibraryModel.LibraryCatalog.json"
+      ],
+      "waits": {
+        "editor-kernel:EK-sel": [
+          "AS-l1"
+        ],
+        "adopt-kernel-undo:AU-library": [
+          "AS-l1"
+        ]
+      },
+      "ui": false
+    }
+  ]
+}
