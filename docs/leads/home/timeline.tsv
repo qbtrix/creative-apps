@@ -64,3 +64,4 @@ utc	stage	event	ref	note
 2026-10-17T13:42Z	HM-3z	pr	#2082 opened, feature-done, head c94f8617
 2026-10-17T14:04Z	HM-3z	merged	#2082 merged 13:48Z as 8e868417; full CI 39038160863 pending; scoped: suite 39038456229 green
 2026-10-17T14:27Z	HM-3z	heartbeat	39038160863 cancelled (superseded); waiting on full CI 39040191625 on 8c05d002, which contains 8e868417
+2026-10-17T14:50Z	HM-3z	heartbeat	full CI 39040191625 still queued behind 39036875578 (in progress)
