@@ -1,5 +1,6 @@
 // DesignMultiSelectSnapshots.swift: two of three rectangles selected with a click and a Shift-click
-// (#413): an outline on each selected rectangle, the dashed box around both, and no handles.
+// (#413): an outline on each selected rectangle, the dashed box around both, and the box's 8
+// handles, which the canvas gesture routes to the several-layer resize (select-several S-6).
 // Writes design-multi-select-light.png and -dark.png.
 import DesignModel
 import SwiftUI
@@ -21,6 +22,7 @@ import Testing
         model.endDrag()
         #expect(model.selectedNodeIDs == [ids[0], ids[2]])
         #expect(model.selectionBounds == DesignRect(x: 160, y: 200, width: 1120, height: 320))
+        #expect(model.transformHelp == nil)
         try shootCanvas(model, "design-multi-select")
     }
 }
