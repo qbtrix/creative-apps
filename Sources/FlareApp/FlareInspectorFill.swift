@@ -8,10 +8,11 @@
 // scrubbing and sends `.setStrokeWidth` once on release, one undo step), and
 // the Cap and Join menus (`flare.inspector.cap`, `.join`, each reading its
 // choice as its value). A nil field reads Mixed. A refusal (`paintError`)
-// shows above the header with the others (FlareInspector). FlareInspector
-// builds this view with the readout alone, so its intents go out through the
-// focused window's `perform` (`FlareMenu`, the menu bar's door); each control
-// is disabled with the router's reason while it can't act. It only reads.
+// shows above the header with the others (FlareInspector). Its intents go out
+// through the window's own `perform`, and each control is disabled with the
+// router's reason (`reasonFor`) while it can't act. Not through the focused scene
+// value: that one is nil whenever the window isn't key, and the rows would
+// then look enabled and do nothing. It only reads.
 import FlareCore
 import FlareModel
 import SuiteUI
@@ -19,7 +20,9 @@ import SwiftUI
 
 struct FlareInspectorFill: View {
     let paint: PaintReadout
-    @FocusedValue(\.flareMenu) private var window
+    /// Why an intent can't act now; nil while it can (`FlareWindow.inspectorHelp`).
+    let reasonFor: @MainActor (FlareIntent.Inspector) -> String?
+    let perform: @MainActor (FlareIntent) -> Void
     /// The width shown while the bar is dragged; nil between drags.
     @State private var draftWidth: Double?
 
@@ -48,7 +51,7 @@ struct FlareInspectorFill: View {
 
     @ViewBuilder private var stroke: some View {
         color("Stroke", hex: paint.strokeHex, id: "flare.inspector.stroke") { .setStrokeColor(hex: $0) }
-        let widthHelp = help(.setStrokeWidth(0))
+        let widthHelp = reasonFor(.setStrokeWidth(0))
         InspectorSliderRow(
             "Width", value: draftWidth ?? paint.strokeWidth ?? 0, in: 0...100, step: 0.5, unit: "pt", decimals: 1,
             mixed: draftWidth == nil && paint.strokeWidth == nil,
@@ -71,7 +74,7 @@ struct FlareInspectorFill: View {
         _ label: String, hex: String?, id: String, intent: @escaping (String) -> FlareIntent.Inspector
     ) -> some View {
         if let hex, let shown = HexColor(hex) {
-            let reason = help(intent(hex))
+            let reason = reasonFor(intent(hex))
             InspectorColorWellRow(label, color: shown) { send(intent(String($0.text.dropFirst()))) }
                 .disabled(reason != nil)
                 .help(reason ?? label)
@@ -91,7 +94,7 @@ struct FlareInspectorFill: View {
     ) -> some View {
         let mixed = "mixed", current = selection ?? mixed
         let options = (selection == nil ? [mixed] : []) + choices
-        let reason = help(intent(current == mixed ? choices.first ?? "" : current))
+        let reason = reasonFor(intent(current == mixed ? choices.first ?? "" : current))
         return InspectorPickerRow(
             label, options: options.map { InspectorOption(id: $0, title: $0.capitalized) }, selection: current
         ) { picked in if picked != mixed { send(intent(picked)) } }
@@ -101,8 +104,5 @@ struct FlareInspectorFill: View {
             .accessibilityIdentifier(id)
     }
 
-    /// Why `intent` can't act now; nil when it can, or when no window is focused (a snapshot).
-    private func help(_ intent: FlareIntent.Inspector) -> String? { window?.help(.inspector(intent)) }
-
-    private func send(_ intent: FlareIntent.Inspector) { window?.perform(.inspector(intent)) }
+    private func send(_ intent: FlareIntent.Inspector) { perform(.inspector(intent)) }
 }

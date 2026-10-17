@@ -78,7 +78,10 @@ struct FlareInspector<Easing: View>: View {
                     rows: model.animatedProperties,
                     rowHelp: FlareWindow.inspectorHelp(.scrub(property: "", value: 0, dragStart: 0), in: model),
                     keyHelp: FlareWindow.inspectorHelp(.toggleKey(""), in: model), perform: perform)
-                if let paint = model.paint { FlareInspectorFill(paint: paint) }
+                if let paint = model.paint {
+                    FlareInspectorFill(
+                        paint: paint, reasonFor: { FlareWindow.inspectorHelp($0, in: model) }, perform: perform)
+                }
                 FlareInspectorTiming(easing: easing)
             }
         } else {
