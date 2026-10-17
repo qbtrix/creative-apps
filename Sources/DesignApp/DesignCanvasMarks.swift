@@ -1,18 +1,17 @@
-// DesignCanvasMarks.swift: what DesignCanvas paints, in two flat layers over the
-// page. DesignArtwork is the page's nodes in paint order (frames, rectangles,
-// ellipses and text, at the canvas zoom) plus each frame's name, in one SwiftUI
-// Canvas; DesignSelectionMarks is the selected node's outline and its resize
-// handles, in screen points, drawn as shapes so they show past the page's edge.
-// Neither takes clicks: the canvas gesture does, and the model decides what a
-// press hits (hitTest, handle(at:)), with the same handles the marks draw.
+// DesignCanvasMarks.swift: what DesignCanvas paints over the page. DesignArtwork is
+// the page's nodes in paint order (frames, rectangles, ellipses, and text through
+// DesignTextArtwork), at the canvas zoom, in one SwiftUI Canvas. DesignMarqueeMark
+// is the rectangle a marquee drag covers, from the Model's `marquee`, drawn as a
+// shape in the overlay. Frame names (DesignFrameLabels) and the selection
+// (DesignSelectionMarks) have their own files. None takes clicks: the canvas
+// gesture does, and the model decides what a press hits (hitTest, handle(at:)).
 //
 // Invariants:
 // - Frames are absolute page points; multiplying by the zoom is the only mapping.
 // - Paint order is DesignPage.painted: a node, then its children, siblings back to
 //   front; a hidden node takes its whole subtree with it, label and handles too.
-// - Frame names and handles stay one size on screen at any zoom. Text nodes scale
-//   with the zoom, like the artwork they sit in. A selection under three handles
-//   across shows only its corners, pushed outside it (DesignRect.handles).
+// - Text nodes scale with the zoom, like the artwork they sit in; marks keep one
+//   line width on screen at any zoom.
 // - Colors come from SuiteColor, except the document's own fills (DesignColor).
 import DesignModel
 import SuiteUI
@@ -41,20 +40,8 @@ extension DesignPage {
 }
 
 /// `zoom` as a usable scale: a value that is not a positive finite number counts as 1.
-private func usable(_ zoom: Double) -> Double {
+func usable(_ zoom: Double) -> Double {
     zoom.isFinite && zoom > 0 ? zoom : 1
-}
-
-private extension DesignColor {
-    /// Whether dark ink reads on this color (Rec. 601 luma above the midpoint).
-    var isLight: Bool { 0.299 * Double(red) + 0.587 * Double(green) + 0.114 * Double(blue) > 127.5 }
-}
-
-/// The color of a frame's name over `backdrop`: ink on a light fill, paper on a dark one, and
-/// the secondary label color on the bare page, where the checkerboard sits behind it.
-private func labelColor(over backdrop: DesignColor?) -> Color {
-    guard let backdrop else { return SuiteColor.secondaryText }
-    return backdrop.isLight ? SuiteColor.overlayInk.opacity(0.55) : SuiteColor.overlayPaper.opacity(0.7)
 }
 
 /// The page's nodes at `zoom`. The text node being edited is left out: the inline field sits there.
@@ -84,16 +71,10 @@ struct DesignArtwork: View {
                 case .ellipse:
                     context.fill(Path(ellipseIn: box), with: .color(node.fill.color))
                 case .text where node.id != editing:
-                    var clipped = scaled
-                    clipped.clip(to: Path(node.frame.cgRect))
-                    let text = Text(node.text).font(SuiteFont.body).foregroundStyle(node.fill.color)
-                    clipped.draw(text, in: node.frame.cgRect)
+                    DesignTextArtwork.draw(node, in: scaled)
                 case .text, .group:
                     break
                 }
-            }
-            for item in painted where item.node.kind == .frame {
-                drawName(of: item, in: context, scaledBy: fit)
             }
         }
         .allowsHitTesting(false)
@@ -101,49 +82,18 @@ struct DesignArtwork: View {
     }
 }
 
-/// Draws a frame's name above its top-left corner, or just inside it when the artboard has no room
-/// for the name above the frame (DesignFrameLabel decides). The Canvas is laid out on the artboard,
-/// so the artboard's top is 0 here, and the name's own measured height sets the room it needs.
-private func drawName(of item: DesignPainted, in context: GraphicsContext, scaledBy fit: CGAffineTransform) {
-    let box = item.node.frame.cgRect.applying(fit)
-    let text = Text(item.node.name).font(SuiteFont.caption)
-    let height = context.resolve(text).measure(in: CGSize(width: CGFloat.infinity, height: .infinity)).height
-    let label = DesignFrameLabel.place(
-        frameTop: Double(box.minY), artboardTop: 0, labelHeight: Double(height),
-        gap: Double(SuiteSpacing.xxs), inset: Double(SuiteSpacing.xs))
-    let color = labelColor(over: label.isInside ? item.node.fill : item.backdrop)
-    let name = context.resolve(text.foregroundStyle(color))
-    switch label {
-    case .inside(let top):
-        context.draw(name, at: CGPoint(x: box.minX + SuiteSpacing.xs, y: top), anchor: .topLeading)
-    case .above(let bottom):
-        context.draw(name, at: CGPoint(x: box.minX, y: bottom), anchor: .bottomLeading)
-    }
-}
-
-/// The selection: an accent outline around `rect`, and with `handles` its resize handles, white
-/// squares with an accent edge where DesignRect.handles puts them (a small selection shows only its
-/// corners, outside the box). Shapes, not a Canvas, so marks past the page's edge still draw:
-/// CanvasViewport doesn't clip its overlay.
-struct DesignSelectionMarks: View {
+/// The marquee under way: `rect` (page points) at `zoom`, a 1 pt accent edge over a 10 % accent
+/// fill. A shape, not a Canvas, so a marquee dragged past the page's edge still shows.
+struct DesignMarqueeMark: View {
     let rect: DesignRect
     let zoom: Double
-    var handles = true
 
     var body: some View {
         let scale = usable(zoom)
-        let side = SuiteSpacing.s
-        let box = rect.cgRect.applying(CGAffineTransform(scaleX: scale, y: scale))
-        let centers = handles ? Array(rect.handles(size: Double(side) / scale).values) : []
-        let squares = Path { path in
-            for at in centers {
-                path.addRect(CGRect(x: at.x * scale - side / 2, y: at.y * scale - side / 2, width: side, height: side))
-            }
-        }
+        let box = Path(rect.cgRect.applying(CGAffineTransform(scaleX: scale, y: scale)))
         ZStack(alignment: .topLeading) {
-            Path(box).stroke(SuiteColor.accent, lineWidth: 1)
-            squares.fill(SuiteColor.overlayPaper)
-            squares.stroke(SuiteColor.accent, lineWidth: 1)
+            box.fill(SuiteColor.accent.opacity(0.1))
+            box.stroke(SuiteColor.accent, lineWidth: 1)
         }
         .allowsHitTesting(false)
         .accessibilityHidden(true)
