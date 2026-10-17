@@ -5,3 +5,4 @@ utc	stage	event	ref	note
 2026-10-17T06:40Z	3	heartbeat	wf_b541828b-076	wave 1 running; filed #1989 #1990; commented #1939 #1973
 2026-10-17T07:06Z	3	pr-merged	#1995 #1996 #2004	wave 1: FX-1 FX-6 FX-7 merged; full CI 39018046761 at 453198ac Linux green
 2026-10-17T10:45Z	3	heartbeat	wave 2	container restarted 06:45-10:43; planning wave 2
+2026-10-17T10:55Z	3	stage-start	wave 2	build-wave FX-2a FX-8 (wf_25d336fa-c23) alongside draw-key-save round-2 panel on 39013292801
