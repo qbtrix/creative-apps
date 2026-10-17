@@ -9,6 +9,10 @@
 // the lanes never scroll sideways. With no rows it shows `timelineEmptyText`.
 // The strip's track buttons come from SuiteUI with no identifier of their own,
 // so the strip passes `flare.timeline.track` down to them, as Halo's does.
+// XCUITest reads a Text's value as "" (#262), so each readout also carries its
+// text as its accessibility label, which journeys and VoiceOver read. It draws
+// in primary text: the small monospaced caption in secondary text measured
+// 4.20:1 on the panel (#1836).
 // It only reads `model`.
 import FlareModel
 import SuiteUI
@@ -44,11 +48,12 @@ struct FlareTimeline: View {
         .accessibilityIdentifier("flare.timeline")
     }
 
-    /// One readout; empty with no timeline.
+    /// One readout, its text also its label; empty with no timeline.
     private func readout(_ text: String?, identifier: String) -> some View {
         Text(text ?? "")
             .font(SuiteFont.timecode)
-            .foregroundStyle(SuiteColor.secondaryText)
+            .foregroundStyle(SuiteColor.textPrimary)
+            .accessibilityLabel(text ?? "")
             .accessibilityIdentifier(identifier)
     }
 

@@ -1,7 +1,7 @@
 // FlareJourneyTests+Files.swift: step 7 of draw-key-save (DK-12;
 // docs/blueprints/flare/features/draw-key-save.md), save and reopen. On
 // `-FlareFixture bounce` with `-FlareSaveTo <tmp>`, the toolbar's Save writes
-// <tmp>/Untitled.flare with no panel (JSON: its bytes start `{"`), and the
+// <tmp>/Untitled.flare with no panel (a JSON object, pretty-printed), and the
 // window reads "Untitled", not edited. A relaunch with `-FlareOpenFile` on
 // that file brings back Ball, Shadow and Background in the sidebar's LAYERS
 // under the title "Untitled". Last, an edit (New Layer) then Save into a
@@ -27,7 +27,8 @@ final class FlareFileJourneys: XCTestCase {
         save(flare)
         XCTAssert(waitFor { FileManager.default.fileExists(atPath: file.path) }, "Save wrote no \(file.path)")
         let bytes = try Data(contentsOf: file)
-        XCTAssertEqual(String(decoding: bytes.prefix(2), as: UTF8.self), "{\"", "the saved file isn't JSON")
+        let object = try? JSONSerialization.jsonObject(with: bytes) as? [String: Any]
+        XCTAssertNotNil(object, "the saved file isn't a JSON object")
         expectTitle("Untitled", flare)
         expectStatus("Saved", flare)
         flare.shot("files-1-saved")
