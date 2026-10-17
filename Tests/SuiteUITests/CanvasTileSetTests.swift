@@ -28,7 +28,7 @@ import Testing
     /// The fake content's twenty rects, each with its own image.
     private static func fullTiles() -> [CanvasTile] {
         FakeCanvasContent().tiles(dirtyOnly: false).enumerated().map { index, tile in
-            CanvasTile(rect: tile.rect, image: image(CGFloat(index) / 20))
+            CanvasTile(rect: tile.rect, image: Self.image(CGFloat(index) / 20))
         }
     }
 
@@ -112,7 +112,7 @@ import Testing
         for rect in rects.prefix(3) {
             let shown = try #require(set.image(at: rect))
             #expect(CanvasTileSet.isPremultipliedSRGB(shown))
-            #expect([.premultipliedLast, .premultipliedFirst].contains(shown.alphaInfo))
+            #expect([CGImageAlphaInfo.premultipliedLast, .premultipliedFirst].contains(shown.alphaInfo))
             #expect(shown.colorSpace?.name.map { $0 as String } == (CGColorSpace.sRGB as String))
         }
     }
