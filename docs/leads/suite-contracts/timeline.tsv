@@ -1,0 +1,83 @@
+utc	stage	event	ref	note
+2026-10-16T11:49Z	0	stage-start	#1332	base ebc68bf (dev); main 9e3c5f8 verified
+2026-10-16T11:52Z	2	stage-end	#1332	9 waves, 15 tasks, v2 loop
+2026-10-16T11:52Z	3	stage-start	wave 1	SC-1a
+2026-10-16T12:05Z	3	heartbeat	SC-1a	builder started in worktree
+2026-10-16T12:03Z	3	pr-opened	#1340	SC-1a values
+2026-10-16T12:11Z	3	pr-merged	#1340	SC-1a
+2026-10-16T12:25Z	3	stage-start	wave 2	SC-1b SC-1c SC-4a on 8ecd8b9
+2026-10-16T12:34Z	3	pr-opened	#1349	SC-1c
+2026-10-16T12:34Z	3	pr-opened	#1350	SC-1b
+2026-10-16T12:41Z	3	pr-opened	#1353	SC-4a
+2026-10-16T12:50Z	3	pr-merged	#1349 #1350 #1353	wave 2 merged
+2026-10-16T12:57Z	3	stage-start	wave 3	SC-1d on fcdb85d
+2026-10-16T13:06Z	3	pr-opened	#1359	SC-1d
+2026-10-16T13:15Z	3	pr-merged	#1359	SC-1d
+2026-10-16T13:22Z	3	stage-start	wave 4	SC-2a SC-2b on a7db8da
+2026-10-16T13:35Z	3	pr-opened	#1371	SC-2a
+2026-10-16T13:35Z	3	pr-opened	#1370	SC-2b
+2026-10-16T13:43Z	3	pr-merged	#1370	SC-2b
+2026-10-16T13:43Z	3	heartbeat	#1371	SC-2a macOS build running
+2026-10-16T13:45Z	3	pr-merged	#1371	SC-2a
+2026-10-16T13:46Z	3	stage-start	wave 5	SC-3a on e464eca
+2026-10-16T13:56Z	3	pr-opened	#1390	SC-3a
+2026-10-16T14:10Z	3	heartbeat	#1390	SC-3a macOS build green, waiting for lane sweep
+2026-10-16T14:15Z	3	pr-merged	#1390	SC-3a
+2026-10-16T14:21Z	3	stage-start	wave 6	SC-3b SC-3c SC-5a on e0abe75
+2026-10-16T14:41Z	3	heartbeat	wave 6	#1396 SC-3b, #1397 SC-3c open; SC-5a building
+2026-10-16T14:45Z	3	pr-opened	#1396 #1397 #1399	SC-3b SC-3c SC-5a
+2026-10-16T15:00Z	3	pr-merged	#1396 #1397 #1399	wave 6 merged
+2026-10-16T15:02Z	3	stage-start	wave 7	SC-4b SC-4c on 77c504c
+2026-10-16T15:18Z	3	pr-opened	#1409 #1407	SC-4b SC-4c
+2026-10-16T15:30Z	3	pr-merged	#1407	SC-4c
+2026-10-16T15:32Z	3	heartbeat	#1409	SC-4b macOS build pending
+2026-10-16T15:40Z	3	pr-merged	#1409	SC-4b
+2026-10-16T15:42Z	3	stage-start	wave 8	SC-5b on f52ec33
+2026-10-16T15:51Z	3	pr-opened	#1428	SC-5b
+2026-10-16T16:04Z	3	heartbeat	#1428	SC-5b macOS build green (run 38927199663), waiting for lane sweep
+2026-10-16T16:15Z	3	pr-merged	#1428	SC-5b
+2026-10-16T16:18Z	3	stage-start	wave 9	SC-5c feature-done on 1f75673
+2026-10-16T16:24Z	3	pr-opened	#1448	SC-5c feature-done
+2026-10-16T16:35Z	3	pr-merged	#1448	SC-5c feature-done; all 15 tasks merged
+2026-10-16T16:40Z	3	stage-end	wave 9	build waves done
+2026-10-16T16:40Z	4	ci-run	38933216466	full dev run on c9e4656 pending
+2026-10-16T16:42Z	4	stage-start	round 1	critic panel on c9e4656
+2026-10-16T16:50Z	4	round-findings	round 1	10 confirmed (4 major), filed #1457-#1468
+2026-10-16T16:52Z	4	fix-round	round 1	fix batch on 9 findings; #1463 left to supervisor
+2026-10-16T17:00Z	4	heartbeat	38933216466	dev CI in progress; round 1 fix batch running
+2026-10-16T17:05Z	4	pr-opened	#1472 #1473 #1474 #1476	round 1 fixes
+2026-10-16T17:06Z	4	finding-filed	#1477	needs-ui AppSwitcher sentence
+2026-10-16T17:25Z	4	ci-run	38933216466	red only on HaloEasingSnapshots (#1450, halo); suite tests green on macOS, QB-SM6 5.5 ms
+2026-10-16T17:25Z	4	pr-merged	#1472 #1473 #1474	round 1 fixes
+2026-10-16T17:37Z	4	pr-merged	#1476	round 1 fixes all merged
+2026-10-16T17:37Z	4	stage-start	round 2	critic panel on 268ba55
+2026-10-16T17:38Z	4	ci-run	38938043443	scoped: suite on 91f1ba6 green
+2026-10-16T17:46Z	4	round-clean	round 2	panel clean (6 minor, 0 major) #1485-#1490
+2026-10-16T17:47Z	4	fix-round	round 2	fix batch on 6 minors
+2026-10-16T17:58Z	4	ci-run	38940652547	scoped: suite on 3fbd10f green (all round-1 fixes)
+2026-10-16T18:20Z	4	pr-opened	#1492 #1504 #1518 #1519	round 2 fixes; #1492 merged
+2026-10-16T18:19Z	4	pr-merged	#1504	round 2 fix; full run 38938209193 in progress
+2026-10-16T18:32Z	4	pr-merged	#1518 #1519	round 2 fixes all merged
+2026-10-16T18:32Z	4	stage-start	round 3	final review on 68cabe6
+2026-10-16T18:33Z	4	ci-run	38945792388	scoped: suite on b01e722 green; full 38938209193 (7d7256c) in progress
+2026-10-16T18:40Z	4	round-findings	round 3	5 confirmed (3 major) #1556-#1560
+2026-10-16T18:41Z	5	stage-start	finish	round cap reached; 6 findings relabelled gap
+2026-10-16T18:55Z	5	ci-run	38938209193	red on design shell + halo easing journeys (not suite-contracts); suite tests and SuiteJourneyTests green
+2026-10-16T19:15Z	5	heartbeat	38949843618	full dev run (all suite-contracts PRs) still queued
+2026-10-16T19:37Z	5	heartbeat	38949843618	still queued (macOS runners busy)
+2026-10-16T19:40Z	5	ci-run	38949843618	full dev run started (in progress)
+2026-10-16T19:58Z	5	heartbeat	38949843618	full dev run in progress
+2026-10-16T20:20Z	5	heartbeat	38949843618	full dev run in progress
+2026-10-16T20:42Z	5	heartbeat	38949843618	full dev run in progress
+2026-10-16T20:55Z	5	ci-run	38949843618	cancelled; macOS scripts/ci failed at journey quarantine (owner #1075 closed), not this feature; noted on #1332
+2026-10-16T21:23Z	5	heartbeat	ci	full dev runs keep being cancelled by newer merges; quarantine #1075 entry still on dev
+2026-10-16T21:54Z	5	heartbeat	ci	full dev runs still cancelled by newer merges (1125, 1132, 1139); waiting
+2026-10-16T22:26Z	5	heartbeat	ci	full dev runs still cancelled by newer merges (1160); 1166 queued
+2026-10-16T22:58Z	5	heartbeat	ci	full run 1181 in progress; earlier runs cancelled by merges
+2026-10-16T23:30Z	5	heartbeat	ci	full runs 1199/1202/1205 cancelled by newer merges; waiting
+2026-10-16T23:56Z	5	heartbeat	ci	full run 1215 cancelled by newer merge; waiting
+2026-10-17T00:22Z	5	heartbeat	ci	full run 1236 pending; earlier full runs cancelled by merges. home and switching features already build on SuiteModel
+2026-10-17T00:48Z	5	heartbeat	ci	full run 1249 cancelled by newer merge; waiting
+2026-10-17T01:18Z	5	ci-run	ci	full run 38988895145 (#1256) on 7ac0a317 success, main promoted; Belt-Contact-Sheet posted on #1332
+2026-10-17T01:18Z	done	stopped	done	feature finished
+2026-10-17T06:30Z	done	heartbeat	lead	line lead act-1a14881ad5e-axoa resumed; feature already done; branch rebuilt on main 0e3c08ea, records only
