@@ -56,3 +56,5 @@ utc	stage	event	ref	note
 2026-10-17T23:03Z	wave	w8 fix-batch launched: 2411 2406 2352 2302 2075 2455
 2026-10-17T23:13Z	pr	#2462 r-b1 fixes #2411 (journey on cards fixture)
 2026-10-17T23:13Z	wave	w8 r-b2 #2302 SuiteUI #2263; r-b3 #2455 fixed by #2444; deferred 2406 2352 2075
+2026-10-17T23:28Z	ci	scoped design 39077269207 on 59c435a6: still fails 2406 2302 2455 2411 2352 2075 (+2456 2457 other features); #2444 did not fix #2455
+2026-10-17T23:28Z	wave	w9 fix-batch launched wj1dcag7a

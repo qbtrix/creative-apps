@@ -4,7 +4,7 @@ Issue: #1494 · Packet: docs/blueprints/design/features/design-window.md
 Run: act-1a14a88d756-rnok · Session: claude/design-feature-lead-7saqm8 · Started: 2026-10-17T15:46Z
 Stage: 3 wave 3
 Base: 6ad373ab37fb612a8e7b185f902c263211f1197b
-Next: w8 done: PR #2462 (#2411); #2302 waits on SuiteUI #2263; #2455 fixed by #2444 (close on green scoped); 2406 2352 2075 deferred, re-check vs scoped 39077269207
+Next: w9 fix-batch wj1dcag7a on #2455 #2406 #2352 #2075; #2462 (#2411) in lane; #2302 waits SuiteUI #2263; D0-7b held (>5 findings)
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
