@@ -23,17 +23,17 @@ import Testing
         var spec = NewDocumentSpec(preset: .web)
         spec.setSize(width: 0, height: 400)
         #expect(spec.preset == nil)
-        #expect(spec.problem == "Width must be 1 to 16384 pt.")
+        #expect(spec.problem == "Width must be 1 to 16384 px.")
         var workspace = FlareWorkspace(services: .built)
         workspace.newDocument(spec)
         #expect(workspace.document == nil)
-        #expect(workspace.layerError == .refused("Width must be 1 to 16384 pt."))
+        #expect(workspace.layerError == .refused("Width must be 1 to 16384 px."))
         workspace.newDocument(NewDocumentSpec(preset: .square))
         let before = workspace.document
         spec.setSize(width: 1080, height: 20_000)
         workspace.newDocument(spec)
         #expect(workspace.document == before)
-        #expect(workspace.layerError == .refused("Height must be 1 to 16384 pt."))
+        #expect(workspace.layerError == .refused("Height must be 1 to 16384 px."))
     }
 
     @Test(arguments: [

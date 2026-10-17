@@ -90,7 +90,7 @@ public struct NewDocumentSpec: Sendable, Equatable {
     public var preset: CanvasPreset?          // nil = Custom
     public var width: Double, height: Double, fps: Int, durationFrames: Int, background: FlareColor
     public init(preset: CanvasPreset)
-    public var problem: String?               // "Width must be 1 to 16384 pt." ... nil when it can be made
+    public var problem: String?               // "Width must be 1 to 16384 px." ... nil when it can be made
 }
 extension FlareWorkspace {
     public mutating func newDocument(_ spec: NewDocumentSpec)   // through services.scenes.newDocument; no undo history
