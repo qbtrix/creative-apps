@@ -44,7 +44,8 @@ import Testing
     @Test func committedAtHalfSize() throws {
         var model = DesignWorkspace()
         model.useServices(.fake)
-        #expect(model.openFixture("cards"))
+        let opened = model.openFixture("cards")
+        #expect(opened)
         model.selectItem("node-5")
         var style = try #require(model.selectedNode).textStyle
         style.size = 32
