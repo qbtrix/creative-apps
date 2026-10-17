@@ -4,7 +4,7 @@ Issue: #1494 · Packet: docs/blueprints/design/features/design-window.md
 Run: act-1a14a88d756-rnok · Session: claude/design-feature-lead-7saqm8 · Started: 2026-10-17T15:46Z
 Stage: 3 wave 3
 Base: 6ad373ab37fb612a8e7b185f902c263211f1197b
-Next: D0-9c merged (#2280, df60ad73). D0-8b PR #2309 macOS build 39066057878 green on 4e31285c, lane merges next sweep; then wave 5: finding #1974 first, D0-7a, plus the TODO(D0-8b) assertion in DesignCanvasHoverTests. DW-a check: Linux check 39066080898 on df60ad73 red again only on ST-7 scrubStep (dev-red #2303, not ours); waits on full run 39066112359 (df60ad73) Linux job.
+Next: wave 5 building (#1974 fix + hover editor-body assertion, D0-7a); DW-a critic panel on scoped 39066131869; Belt-Slice-Done DW-a/DW-b wait on a green full Linux job containing #2309 (full 39066112359 on df60ad73 pending)
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
