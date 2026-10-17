@@ -11,3 +11,5 @@ utc	stage	event	ref	note
 2026-10-17T13:14Z	3	stage-start	wave 2	ST-7; base 9ba6658
 2026-10-17T13:30Z	3	pr-opened	#2071	ST-7 style scrub and text draft model budgets
 2026-10-17T13:30Z	3	heartbeat	cd0282c	resumed after restart; DW-a not merged; 0 open findings
+2026-10-17T13:45Z	3	pr-merged	#2071	ST-7 at d2c4fa21
+2026-10-17T13:45Z	3	ci-run	39036875578	full CI on d2c4fa21 in progress
