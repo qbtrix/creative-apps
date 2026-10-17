@@ -60,3 +60,4 @@ utc	stage	event	ref	note
 2026-10-17T19:53Z	5	fix-r1-merged	#2271	65ddb45e; round 2 input: scoped halo 39062554279 and full 39062516417 (both 0c8e4a71)
 2026-10-17T20:15Z	5	anatomy r2 started	39062554279	scoped halo done (ui-test red, #1789)
 2026-10-17T20:20Z	5	anatomy r2 done	#2345	fix round 2 spawned
+2026-10-17T20:27Z	5	fix PR opened	#2348	Fixes #2345, last round
