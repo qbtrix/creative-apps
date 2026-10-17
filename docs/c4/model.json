@@ -424,6 +424,27 @@
             ]
           },
           {
+            "id": "suite-kernel",
+            "name": "SuiteKernel",
+            "description": "The editor kernel: one Linux-safe library every app Model and SuiteUI link, one module per editor concept the apps used to build five times (history, selection, layer tree, keys and easing, snap, transform, export, session, stroke) over FlareCore's geometry. No app copies a kernel concept. Imports no app Model, no SuiteUI and no SuiteModel.",
+            "technology": "Swift 6, Foundation (FoundationEssentials) and FlareCore, Linux and macOS",
+            "tags": [
+              "internal"
+            ],
+            "components": [
+              {
+                "id": "kernel-geometry",
+                "name": "Geometry and header",
+                "description": "SuiteKernel.swift, the kernel's header doc and KernelShape.version, and Geometry.swift: Point, Rect and Matrix as FlareCore's types under kernel names, EditorHandle (eight resize handles, inside, rotate; isCorner), Pick (replace, toggle, extend), Direction and EditModifiers (shift, option, command). The modules under Sources/SuiteKernel/<Module>/ are their own parts.",
+                "technology": "Swift 6, Foundation (FoundationEssentials) and FlareCore, Linux and macOS",
+                "paths": [
+                  "Sources/SuiteKernel/Geometry.swift",
+                  "Sources/SuiteKernel/SuiteKernel.swift"
+                ]
+              }
+            ]
+          },
+          {
             "id": "suite-shell",
             "name": "SuiteShell",
             "description": "macOS glue every app process links: live conformances needing AppKit or Launch Services, shared menu commands, the adoption modifier.",
@@ -884,6 +905,12 @@
         "source": "halo-model",
         "target": "suite-model",
         "description": "declares document kinds and pasteboard representations; reads preferences",
+        "style": "sync"
+      },
+      {
+        "source": "suite-kernel",
+        "target": "flarecore",
+        "description": "uses FlareCore's Point, Rect, Matrix, Keyframe and Easing as they are",
         "style": "sync"
       },
       {
